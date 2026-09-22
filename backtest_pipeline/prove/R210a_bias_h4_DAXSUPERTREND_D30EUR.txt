@@ -1,6 +1,6 @@
 # =====================================================================
 #  R210a -- IL BIAS H4 SI PAGA IN FREQUENZA: QUANTO COSTA E CHE COSA COMPRA
-#  EA: DAX_M3_Supertrend   (D30EUR, TF H1 -- NON M3)
+#  EA: DAX_M3_Supertrend   (D30EUR, TF M30 -- NON M3, NON H1)
 #
 #  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
 #     -Deposito 100000 -Modello 4
@@ -8,6 +8,14 @@
 #  Richiesta di Claudio (22/09, testuale):
 #     "DAX_M3_Supertrend.mq5 AVEVAMO FATTO QUESTO EA E POI CHIUSO.
 #      RIPROVIAMO A RIANALIZZARLO"
+#
+#  >>> VERSIONE 2, RISCRITTA DOPO IL CANCELLO STRATO 2 DEL 22/09.
+#      La v1 e' stata BOCCIATA con quattro difetti bloccanti: finestra
+#      oltre il muro dei dati misurato (classe 590), frontiera del costo
+#      contata sulle barre sbagliate (classe 591), attesa calibrata su
+#      una popolazione che nessuna cella produce (classe 592), cancello
+#      di promozione irraggiungibile per costruzione (classe 205).
+#      Ogni numero qui sotto e' stato RIMISURATO in quel controllo.
 # =====================================================================
 #
 #  1. PERCHE' QUESTO MOTORE NON E' MORTO, ED E' UN FATTO NON UN'OPINIONE
@@ -21,7 +29,7 @@
 #    --------------------------+---------------------------------------
 #    sempre a mercato          |  PUO' STARE FERMO (bias NEUTRO)
 #    nessun filtro di regime   |  bias H4: Supertrend H4 + EMA200 H4
-#                              |  + ADX(14) H4 >= 25   (r.302-320)
+#                              |  + ADX(14) H4 >= 25   (r.296-315)
 #    nessuno stop              |  SL sulla LINEA Supertrend
 #    nessun target             |  TP = RR * stopDist
 #    h24                       |  sessione + chiusura a fine seduta
@@ -39,79 +47,137 @@
 #  find e col grep su prove/, risultati_prove/, risultati_archivio/ e
 #  coda/CODA.txt il 22/09.
 #
-#  2. PERCHE' H1 E NON M3, E NEMMENO H4 -- DUE VINCOLI CHE SI CHIUDONO
+#  2. LA FINESTRA -- E' IL MURO DEI DATI, NON UNA SCELTA
 #  --------------------------------------------------------------------
-#  (a) IL COSTO. Frontiera di casa: stop >= 40 x spread. Spread D30EUR
-#      MISURATO 1,7676 pt (mediana pesata su 20.975.948 tick, ore 08-17,
-#      risultati_archivio/spread_flotta/spread_orario_D30EUR.csv).
-#      Distanza MEDIANA prezzo->linea Supertrend, MISURATA sul DAX
-#      2013-2018 col Factor 3,5 DELL'EA (non col 2,0 della sonda):
-#         M15   43,83 pt = 24,8x   SFONDATA
-#         M30   62,41 pt = 35,3x   SFONDATA
-#         H1    91,79 pt = 51,9x   PASSA
-#         H4   160,55 pt = 90,8x   passa
-#      >>> M3 e M15 sono esclusi PER COSTO, col numero accanto.
-#  (b) L'ARCHITETTURA. Il bias e' su H4 (r.302). Se il grafico e' H4,
-#      bias e trigger diventano LA STESSA LINEA e il filtro non filtra
-#      piu' niente: il disegno collassa. H4 e' escluso PER COSTRUZIONE.
-#      >>> H1 e' l'UNICO TF che soddisfa tutti e due i vincoli.
+#  @DAQUANDO 2024.09.26 e' MISURATO, non assunto, e il file che lo dice
+#  sta in casa da due settimane:
+#     backtest_pipeline/risultati_archivio/misura_tick/
+#     REFERTO_MISURA_TICK_D30EUR.txt   (corsa vera del 07/09/2026)
+#        "I TICK REALI DI D30EUR PARTONO DAL 2024.09.26 (35408137 tick)"
+#        "MURO DELLE BARRE M1, colonna PrimaDataServer: 2024.09.26"
+#        "D30EUR M1 barre=642270 ... -> IL BROKER NON HA PIU' STORICO"
+#  >>> La v1 di questo file scriveva @DAQUANDO 2021.01.04. A -Modello 4
+#      il 64% di quella finestra (3 anni e 8 mesi su 5,7) NON HA NE'
+#      TICK NE' BARRE M1 sul nostro feed: il referto sarebbe uscito
+#      intitolato a 5,7 anni di DAX e avrebbe contenuto 2,0 anni veri
+#      piu' del nulla. E' la stessa classe del "DD 42,9% fantasma".
+#      Tutti e 30 gli altri file prova D30EUR in archivio scrivono
+#      2024.09.26. Questo adesso lo scrive anche lui.
+#  Finestra effettiva: 2024.09.26 -> oggi = 1,99 anni.
+#  @FRAZIONEIS 0.40 e' DICHIARATO qui sotto e non lasciato al default,
+#  perche' tutte le proiezioni di n di questo file dipendono da lui.
 #
-#  3. IL DIFETTO CHE AVVELENEREBBE LA PRIMA CORSA, ED E' PINNATO QUI
+#  3. PERCHE' M30, E PERCHE' NON M15 NE' H1 NE' H4
 #  --------------------------------------------------------------------
-#  r.59  input int ServerToCET = 0;   // Offset: ore_server - ore_CET
-#  r.326 int off = ServerToCET * 60;
-#  Con 0 la sessione gira 09:30-17:30 ORA SERVER. Ma il server BCM e'
-#  un'ora INDIETRO sull'italiana (regola di casa del fuso), quindi
-#  sarebbe 10:30-18:30 italiane: si perde tutta la prima ora e mezza del
-#  DAX (che apre alle 09:00 IT = 08:00 server).
-#  >>> Qui e' pinnato a -1. Con -1: 08:30-16:30 server = 09:30-17:30 IT.
+#  (a) IL COSTO, MISURATO SULLE BARRE GIUSTE. L'EA chiama Open() SOLO
+#      dentro il ramo del flip (r.485-486) e passa cur.line come SL
+#      (r.365-373): lo stop e' la distanza prezzo->linea Supertrend
+#      SULLA BARRA DI FLIP, non su una barra qualunque. La v1 aveva
+#      misurato la mediana su TUTTE le barre, che e' una popolazione
+#      diversa e, misurato, quasi META'.
+#      Spread D30EUR MISURATO 1,7676 pt (mediana pesata su 20.975.948
+#      tick, ore 08-17, backtest_pipeline/risultati_archivio/
+#      spread_flotta/spread_orario_D30EUR.csv). Frontiera 40x = 70,70 pt.
+#      GRXEUR 2013-2018, Factor 3,5, ATR 10, in sessione, SOLO barre di
+#      flip:
+#                mediana     x spread   quota di ingressi SOTTO 70,70 pt
+#         M15     74,87        42,4x              45,6%   <- ESCLUSO
+#         M30    104,79        59,3x              18,6%   <- SCELTO
+#         H1     155,82        88,2x               1,7%
+#      >>> M15 NON e' "sfondato alla mediana": e' escluso perche' QUASI
+#          META' degli ingressi paga uno stop sotto la frontiera. Questo
+#          e' il numero che lo giudica, e non e' quello della v1 (che
+#          diceva 24,8x, misurato sulla popolazione sbagliata).
+#      >>> M30 costa il 18,6%: e' un COSTO DICHIARATO, non un muro.
+#          Si paga perche' e' l'unico TF che lascia un campione leggibile
+#          (punto 4). H1 e' piu' pulito sul costo (1,7%) e INUTILIZZABILE
+#          sul campione: 8 operazioni totali sulla cella piena.
+#  (b) L'ARCHITETTURA, E H4. Il bias sta su H4 (r.297). Su grafico H4
+#      _Period == PERIOD_H4, hAtrCur e hAtrH4 sono lo stesso iATR, e
+#      Supertrend(PERIOD_H4) == Supertrend(_Period): h4.dir == cur.dir
+#      SEMPRE, quindi "bias==1 && flipL" si riduce a "flipL" e il pezzo
+#      Supertrend del bias diventa una TAUTOLOGIA. Idem l'EMA: r.303 e
+#      r.481 diventano la stessa condizione valutata due volte.
+#      >>> Precisazione onesta, che la v1 non faceva: l'ADX H4 CONTINUA
+#          a filtrare anche su H4. Il collasso e' di 2 pezzi su 3, non
+#          di 3 su 3. La conclusione (escludere H4) regge lo stesso,
+#          perche' un bias di regime che coincide col trigger non e' piu'
+#          un bias -- ma la motivazione qui e' scritta esatta.
+#  (c) E IL RITARDO D'APERTURA, che dipende dal TF ed e' un altro motivo
+#      per stare in basso: l'EA agisce sull'APERTURA della barra nuova
+#      leggendo la barra CHIUSA. Con la sessione pinnata qui sotto il
+#      primo segnale utile e' la barra che apre alle 08:30 server, e
+#      l'ingresso avviene alla sua chiusura: 09:00 server = 10:00 IT su
+#      M30, 09:30 server = 10:30 IT su H1, 08:45 server = 09:45 IT su M15.
 #
 #  4. L'ASSE -- E PERCHE' NON E' QUELLO CHE AVEVO PROPOSTO
 #  --------------------------------------------------------------------
 #  Avevo proposto l'asse sulla GESTIONE DELL'USCITA (ExitMode x RR).
-#  >>> QUELL'ASSE NON E' MISURABILE, e l'ho misurato prima di scriverlo.
-#  Frequenza del motore, contata sui dati esterni GRXEUR 2013-2018
-#  (M1 -> H1, Factor 3,5, ATR 10, sessione, bias H4 Supertrend+EMA200):
-#      flip H1 in sessione, SENZA bias : 294 in 6 anni =  49,0/anno
-#      flip H1 in sessione, CON bias   :  48 in 6 anni =   8,0/anno
-#  (il secondo e' una SOPRASTIMA: ho saltato ADX>=25, che taglia ancora.)
-#  A 8,0/anno servono ~19 ANNI per 150 operazioni. Non e' misurabile, e
-#  8,0/anno = 0,03 op/giorno contro il pavimento di famiglia di 1,00:
-#  e' 33 volte sotto.
+#  >>> QUELL'ASSE NON E' MISURABILE, e il motivo e' la frequenza.
+#  Frequenza MISURATA sui dati esterni GRXEUR 2013-2018 (M1 -> M30 e H1,
+#  Factor 3,5, ATR 10, sessione, mappa H1/M30 -> ULTIMA H4 CHIUSA, cioe'
+#  senza look-ahead: la stessa regola che usa l'EA con CopyHigh(...,1,n)):
 #
-#  >>> QUINDI LA DOMANDA VERA E' UN'ALTRA, ed e' questa:
-#      IL BIAS H4 VALE SEI VOLTE LA FREQUENZA CHE COSTA?
-#  L'asse e' il BIAS, non l'uscita. Due manopole, quattro celle:
-#      UseEMA  = filtro EMA200 (H4 e TF corrente)   [0=spento 1=acceso]
-#      UseADX  = filtro ADX(14) H4 >= 25            [0=spento 1=acceso]
-#  I bool si scrivono 0/1 e non true/false: il cancello pretende un
-#  asse NUMERICO (controlla_prova.py), e MT5 legge 0/1 per i bool.
-#  E' un asse di MECCANISMO (filtro acceso/spento), non una griglia sui
-#  parametri di un motore dichiarato senza edge: la regola del 19/08 lo
-#  permette, e anzi e' esattamente cio' che chiede.
+#     flip in sessione, M30            619   103,2/anno
+#     flip in sessione, H1             294    49,0/anno
+#
+#  >>> E IL PUNTO CHE LA v1 AVEVA SBAGLIATO, ED E' IL PIU' IMPORTANTE:
+#      Bias() (r.296-315) ricava +1/-1 dal SUPERTREND H4, che NON HA
+#      INTERRUTTORE. UseEMA e UseADX spengono solo EMA e ADX.
+#      >>> LA CELLA (false,false) NON E' "SENZA BIAS". Ha gia' addosso
+#          il vincolo "flip concorde col Supertrend H4".
+#  Le QUATTRO celle vere della 2x2, contate (GRXEUR 2013-2018, M30):
+#
+#     (UseEMA, UseADX)      flip      /anno    proiezione su 1,99 anni
+#     (false, false)         251      41,8     83 totali   ~50 in OOS
+#     (false, true)           99      16,5     33 totali   ~20 in OOS
+#     (true,  false)         160      26,7     53 totali   ~32 in OOS
+#     (true,  true)           81      13,5     27 totali   ~16 in OOS
+#
+#  Rapporto VERO (false,false)/(true,true) = 3,10x su M30 (3,62x su H1,
+#  2,95x su M15). NON 6x: il 6x era il rapporto fra "nessun filtro" e
+#  "bias completo", e "nessun filtro" NON E' UNA CELLA DI QUESTO ROUND.
 #
 #  5. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
 #  --------------------------------------------------------------------
-#  (A) FREQUENZA: la cella (false,false) deve fare CIRCA 6 volte le
-#      operazioni della cella (true,true). Se non le fa, i filtri non
-#      stanno filtrando quello che credo e il round va riletto prima di
-#      giudicarlo.
-#  (B) MERITO: promossa solo una cella con PF OOS >= 1,10 SU TUTTI E DUE
-#      I LATI (regola del 25/08) E n >= 150 nella gamba OOS.
-#  (C) RISCHIO: DD OOS <= 10,0% (muro FTMO, classe 562: Equity DD % e'
-#      un limite superiore, e sotto la soglia DIMOSTRA).
+#  (A) FREQUENZA -- E' LA DOMANDA PRINCIPALE DEL ROUND.
+#      La cella (false,false) deve fare fra 2,0x e 4,5x le operazioni
+#      della cella (true,true). Banda centrata sul 3,10x MISURATO sopra,
+#      larga abbastanza da reggere un'epoca diversa (2024-2026 contro
+#      2013-2018) e un feed diverso (BCM contro HistData).
+#      >>> FUORI da quella banda il round va RILETTO prima di giudicarlo,
+#          non interpretato.
+#  (B) MERITO -- E QUI LA COSA VA DETTA PRIMA, NON DOPO.
+#      La soglia di casa e' n >= 150 nella gamba OOS. Con la finestra
+#      VERA nessuna cella ci arriva: il massimo proiettato e' ~50 (cella
+#      larga). >>> QUINDI QUESTO ROUND NON PROMUOVE NESSUNO, E NON E'
+#      UN FALLIMENTO: e' un round di FREQUENZA con un PRIMO segno di PF
+#      in omaggio. Chi leggera' il referto NON deve scrivere "0/4
+#      promosse" come se fosse un verdetto di merito: sarebbe un
+#      certificato di morte senza misura (regola del 09/09).
+#      Il PF si stampa e si legge come SEGNO, su tutti e due i lati
+#      (regola del 25/08), e nessun numero di questo round chiude il
+#      motore.
+#  (C) RISCHIO -- QUESTO SI', A QUALUNQUE n (regola del 18/08: il
+#      campione sottile sospende il MERITO, mai il RISCHIO).
+#      DD OOS <= 10,0% a RiskPct 1,0. Sopra, il motore e' fuori dal muro
+#      FTMO e il round si ferma li'.
 #
 #  6. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
 #  --------------------------------------------------------------------
-#  Se le QUATTRO celle escono con Trades IDENTICO, i filtri sono INERTI
-#  (non arrivano all'EA, o la loro soglia non morde mai) e NESSUN PF di
-#  questo round si puo' leggere. Criterio a macchina: si contano i
-#  valori DISTINTI della colonna Trades. Meno di 2 valori distinti =
-#  "filtri inerti", che NON e' "i filtri non servono".
-#  E il verso pericoloso e' dichiarato: le celle con MENO filtri avranno
-#  PIU' operazioni, e il PF di un campione piccolo e' piu' rumoroso --
-#  quindi un PF alto sulla cella (true,true) con n<150 NON e' una
-#  conferma, e' il criterio (B) che lo esclude apposta.
+#  Ipotesi alternativa n.1 -- I FILTRI SONO INERTI. Se le quattro celle
+#  escono con Trades IDENTICO, gli input non arrivano all'EA (o la soglia
+#  non morde mai) e NESSUN PF di questo round si puo' leggere. A macchina:
+#  valori DISTINTI della colonna Trades < 2 => "filtri inerti", che NON
+#  e' "i filtri non servono".
+#  Ipotesi alternativa n.2 -- E' QUELLA CHE HA FATTO CADERE LA v1.
+#  Un rapporto vicino a 3x NON dice "i filtri filtrano meno del previsto":
+#  dice che filtrano ESATTAMENTE quanto misurato al punto 4. La banda di
+#  (A) e' costruita contro QUESTA alternativa, non contro il nulla.
+#  Ipotesi alternativa n.3 -- IL PF ALTO CHE NON E' UN PF. Le celle con
+#  meno filtri avranno piu' operazioni; un PF alto sulla cella (true,true)
+#  con n ~ 16 e' rumore, ed e' (B) che lo esclude apposta, dichiarato
+#  PRIMA di vederlo.
 #
 #  7. QUELLO CHE QUESTO ROUND NON FA, dichiarato
 #  --------------------------------------------------------------------
@@ -120,33 +186,67 @@
 #  - NON ha ANCORA DI REGRESSIONE: questo EA non ha mai girato, quindi
 #    non esiste nessun numero da riprodurre. E' un buco, non lo nascondo
 #    e non me ne invento una.
-#  - NON e' una prova di regime: finestra contigua.
+#  - NON e' una prova di regime: finestra contigua, e per giunta di soli
+#    1,99 anni -- che e' UN regime solo, e va detto.
 #  - Il .ex5 sul banco corrisponde al .mq5 letto qui: [NON MISURATO].
+#  - LE MISURE DI FREQUENZA E DI COSTO DEL PUNTO 3 E DEL PUNTO 4 VENGONO
+#    DA UN ALTRO FEED E DA UN'ALTRA EPOCA (HistData GRXEUR 2013-2018),
+#    che NON si sovrappone alla finestra della corsa (BCM 2024-2026).
+#    Sono una PREVISIONE, non una misura della finestra che gireremo:
+#    e' per questo che l'attesa (A) e' una BANDA e non un numero.
+#  - ServerToCET e' un offset FISSO su una finestra che contiene quattro
+#    cambi d'ora. Se BCM e Italia non cambiano ora lo stesso giorno, per
+#    ~3 settimane l'anno la sessione slitta di un'ora: [NON MISURATO],
+#    effetto stimato piccolo, ma dichiarato.
+#  - IL PAVIMENTO DI FREQUENZA: la cella piu' larga fa 41,8/anno =
+#    0,17 op/giorno su UN simbolo, contro il pavimento di FAMIGLIA di
+#    1,00. Anche nel caso migliore questa famiglia ha bisogno di ~6
+#    simboli per arrivare al pavimento. Non e' un cancello di questo
+#    round, ma e' il conto che decide se vale la pena continuare.
 #
-#  8. TAGLIA E DEPOSITO
+#  8. IL FUSO -- IL DIFETTO CHE AVVELENEREBBE LA PRIMA CORSA
+#  --------------------------------------------------------------------
+#  r.59  input int ServerToCET = 0;   // Offset: ore_server - ore_CET
+#  r.326 int off = ServerToCET * 60;  (usato in InSession, r.327-328)
+#  Con 0 la finestra 09:30-17:30 verrebbe applicata in ORA SERVER, cioe'
+#  10:30-18:30 italiane: si perderebbe tutta la prima ora e mezza del DAX
+#  (che apre alle 09:00 IT = 08:00 server).
+#  >>> Pinnato a -1. Verificato il VERSO: a = Wrap(9*60+30 + (-60)) = 510
+#      = 08:30 SERVER, b = Wrap(17*60+30 - 60) = 990 = 16:30 SERVER,
+#      e MinOfDay legge tClosed, che nel tester e' ORA SERVER.
+#      08:30-16:30 server = 09:30-17:30 IT. Il segno e' giusto.
+#
+#  9. TAGLIA, DEPOSITO, MAGIC
 #  --------------------------------------------------------------------
 #  RiskPct = 1,0 e deposito 100000. NON e' la taglia in campo di nessuna
 #  sedia FTMO (2,00%, firma del 20/09): qui e' il dial di MISURA, e ogni
 #  DD va letto RADDOPPIATO per confrontarlo col muro.
-#  MagicNumber = 787441: cercato col grep -ril su tutto il repo il
-#  22/09, ZERO occorrenze.
-#  9. PERCHE' I FILE SONO DUE, ED E' UN VINCOLO DEL CANCELLO
+#  MagicNumber = 787441: cercato col grep -rn su tutto il repo il 22/09
+#  e ricontrollato dal cancello strato 2 lo stesso giorno, ZERO occorrenze
+#  fuori da questi due file prova.
+#
+#  10. PERCHE' I FILE SONO DUE, ED E' UN VINCOLO DEL CANCELLO
 #  --------------------------------------------------------------------
 #  La 2x2 UseEMA x UseADX e' UNA misura sola, ma controlla_prova.py
 #  r.172-174 rifiuta due assi Y in un file solo (classe 569), anche se
 #  il driver li reggerebbe. Quindi la tabella e' spezzata in due file
 #  che si leggono INSIEME, come gia' fatto per R207a/R207b:
-#     R210a = meta' con EMA200 ACCESA  (UseEMA=true),  asse UseADX
-#     R210b = meta' con EMA200 SPENTA  (UseEMA=false), asse UseADX
+#     R210a = meta' con EMA200 ACCESA  (UseEMA=1),  asse UseADX
+#     R210b = meta' con EMA200 SPENTA  (UseEMA=0),  asse UseADX
 #  Le quattro celle della 2x2 sono: (true,true) (true,false) da R210a,
 #  (false,true) (false,false) da R210b. Costo macchina IDENTICO: 2 file
 #  x 2 celle x 2 gambe = 8 passate, come un file solo da 4 celle.
 #  >>> R210b DA SOLO NON RISPONDE: senza R210a non c'e' il confronto.
+#  I bool si scrivono 0/1 e non true/false perche' controlla_prova.py
+#  pretende un asse NUMERICO. Precedente d'archivio che ha PRODOTTO
+#  risultati con questa forma su input bool: R129c, R130a, R130b,
+#  R131a-R131g, tutti su D30EUR.
 # ---------------------------------------------------------------------
 
 @SIMBOLO  D30EUR
-@PERIODO  H1
-@DAQUANDO 2021.01.04
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FRAZIONEIS 0.40
 
 Factor=3.5||3.5||0||3.5||N
 AtrPeriod=10||10||0||10||N

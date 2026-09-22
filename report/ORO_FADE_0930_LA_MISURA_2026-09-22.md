@@ -235,3 +235,42 @@ python3 backtest_pipeline/sonda_fade_oro.py --dati backtest_pipeline/risultati_p
 python3 backtest_pipeline/sonda_fade_oro.py --dati <cartella oro 2006-2020> \
     --etichetta 2006-2020 --random-walk --fuori backtest_pipeline/risultati_prove/SONDA_FADE_ORO_2006_2020.txt
 ```
+
+
+---
+
+# 🧮 APPENDICE — **«non si fa una media?»** (domanda di Claudio, 22/09 sera)
+
+🟢 **Si puo', e va fatta bene.** Ma il PF **non si media come un voto**:
+`PF` e' un **rapporto**, e la media di due rapporti non e' il rapporto dei due campioni
+uniti. Per unirli si **sommano i lordi**, non i PF.
+
+| orizz | PF 2021-26 | PF 2006-20 | media aritmetica | 🎯 **PF del MONTE UNICO** | n | netto |
+|---|---:|---:|---:|---:|---:|---:|
+| +15m | 1,014 | 0,970 | 0,992 | **0,983** | 159 | −12,02 $ |
+| +30m | 0,866 | 0,839 | 0,853 | **0,848** | 159 | −158,67 $ |
+| **+60m** | **1,477** | **0,920** | ~~1,199~~ | 🔴 **1,064** | **159** | +78,27 $ |
+
+🔴 **La media aritmetica dava 1,199 — un soffio sotto la soglia. Il conto giusto da' 1,064.**
+Il campione vecchio pesa **piu' del doppio** (110 contro 49) e i suoi lordi sono piu' grandi:
+la media semplice gli toglieva peso.
+*(Lordi ricavati da PF e netto: `L = netto/(PF-1)`, `G = PF*L`. Aritmetica, non una misura
+nuova.)*
+
+## 🔴 Ma la ragione vera per cui NON si media e' un'altra
+**Emendamento della Finestra, regola C**: *«sedici anni di fila DILUISCONO: sei anni brutti +
+dieci buoni fanno una media che non descrive nessun mercato»*.
+
+I due campioni sono **feed diversi, epoche diverse**. Metterli nello stesso monte **assume che
+vengano dallo stesso processo** — che e' **esattamente la cosa che si sta testando**.
+👉 **Il punto dei due campioni non e' avere piu' dati: e' vedere se il risultato SI
+RIPRODUCE.** Una media decente **nasconde** l'informazione che conta.
+
+## 📌 La regola pratica che ne esce
+- campioni che **CONCORDANO** -> si uniscono **sui lordi**, e si guadagna precisione;
+- campioni che **DISCORDANO** -> unirli e' **cancellare il risultato dell'esperimento**.
+
+🧪 E qui il colpo di grazia e' **indipendente da ogni media**: il `PF` 1,477 cade **dentro**
+la banda di puro rumore (0,47-1,82) e il caso lo batte **12,8 volte su 100**. Mediare due
+numeri di cui uno non e' un segnale non produce mezzo segnale: produce rumore con piu'
+decimali.
