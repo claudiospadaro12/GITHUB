@@ -1,0 +1,277 @@
+# =====================================================================
+#  R205a -- IL LATO CORTO DEL DAX, CON LA STESSA FILOSOFIA DEL RETEST
+#  EA: ABTG_DAX_Apertura_EU   (sedia DAX 770101, simbolo D30EUR)
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#  Si lancia con: -Deposito 80000 -Modello 4
+# =====================================================================
+#
+#  PERCHE' ESISTE -- domanda di Claudio, 22/09 mattina
+#  ---------------------------------------------------
+#  "Ma perche' non riusciamo con la stessa filosofia del retest a fare
+#  anche la parte short del DAX?"
+#
+#  1. NON E' UN PROBLEMA DI CODICE: LA MACCHINA C'E' GIA'.
+#  ABTG_DAX_Apertura_EU.mq5 r.1966: MonitorRetest() ha il ramo SELL,
+#  specularmente identico al BUY:
+#      if(InpAllowShort && shortOK && !gBrokeLow && bid <= sellTrig)
+#  cioe' rottura SOTTO il minimo del range -> SELL LIMIT sul ritorno al
+#  livello. E' una manopola del preset, non una funzione da scrivere.
+#
+#  2. E QUELLO CHE "AVEVA UCCISO LO SHORT" MISURAVA UN ALTRO MECCANISMO.
+#  In repo lo short dell'apertura risulta bocciato, ma dal DIARIO.md:
+#     R42 (13/08)  il FADE del falso breakout (RANGE_FADE) -> 48/48
+#     R43 (13/08)  il RIMBALZO su ORL/ORH, 4 lati -> 2 verdi su 64,
+#                  entrambe solo-IS e ribaltate
+#  Il FADE e il RIMBALZO si giocano SENZA rottura: sono il rifiuto del
+#  livello. Il RETEST si gioca DOPO una rottura confermata, sul ritorno.
+#  Sono due mestieri diversi, e noi abbiamo bocciato il primo.
+#  ==> Il retest-short sul DAX e' un "NON ANCORA MISURATO" che si
+#      nascondeva dietro un "gia' bocciato". E' esattamente la cosa che
+#      il certificato di morte del 09/09 esiste per impedire.
+#  [DA VERIFICARE, e lo dichiaro invece di darlo per fatto: non ho
+#   aperto i FILE PROVA di R42 e R43 per confermare che usassero
+#   InpEntryMode=3 (FADE) e non 2 (RETEST). Se uno dei due avesse gia'
+#   misurato il retest-short, questo round e' una RIPETIZIONE e va
+#   dichiarata come tale nel referto, non spacciata per prima volta.]
+#
+#  3. L'INDIZIO A FAVORE, ed e' di casa.
+#  risultati_archivio/studio_apertura/Studio_D30EUR_RIEPILOGO.csv,
+#  440 breakout veri sul DAX:
+#      Solo LONG   225 trade  win 36,0%  aspettativa 0,007 R  totale +1,6
+#      Solo SHORT  215 trade  win 37,2%  aspettativa 0,045 R  totale +9,6
+#  Sul DAX lo short ha un'aspettativa SEI VOLTE il long.
+#  ATTENZIONE: quello studio gira a range 15', buffer 200, TP 2,0R e a
+#  BREAKOUT CIECO, non a retest. E' un INDIZIO, non una promessa -- e la
+#  geometria diversa e' la stessa riserva della classe 551.
+#
+#  4. IL COSTO IN DD CHE L'ARCHIVIO DICHIARA... SU UN ALTRO EA.
+#  CENSIMENTO_CONTRATTI_v2.md r.381: "il lato corto da solo vale +3,8873
+#  punti (10,5984 con, 6,7111 senza, stessa finestra e stesso deposito a
+#  1,0%)". MA il "con" viene da r83_csv/ABTG_Apertura_3Ingressi_...,
+#  magic 777120/777121: NON e' questo EA e non e' questa geometria.
+#  ==> Nemmeno il COSTO e' misurato sulla nostra configurazione. E'
+#      un'altra ragione per girare il round invece di discuterlo.
+#
+#  LA TRAPPOLA DA SAPERE PRIMA: LO SLOT
+#  -------------------------------------
+#  CENSIMENTO_LATO_SHORT_2026-09-09.md r.595, misurato DUE volte:
+#      n(long) + n(short) != n(entrambi)
+#  perche' il primo lato che spara CONSUMA IL POSTO della giornata.
+#  Sulle aperture: 256 + 243 = 316, non 499.
+#  IL PUNTATORE DEL CENSIMENTO E' SBAGLIATO, e lo correggo invece di
+#  copiarlo: r.257 e' un enum (ABTG_SPACE_*), non ha niente a che
+#  fare con lo slot -- aperta con sed. Il meccanismo VERO sta nella
+#  macchina a stati, r.887-899 (grep "case PH_PLACED"): appena il
+#  primo LIMIT viene piazzato si passa a PH_PLACED e MonitorRetest()
+#  NON viene piu' chiamato, quindi il lato opposto e' abbandonato
+#  per la giornata -- sia se il LIMIT si riempie, sia se scade
+#  inevaso. E' scritto anche nel commento dell'EA sopra
+#  MonitorReverse (grep "il lato opposto e'").
+#  >>> E QUI C'E' UNA COSA CHE CAMBIA LA LETTURA DEL ROUND: R51 ha
+#      aggiunto InpAllowReverse APPOSTA per chiudere questo buco (il
+#      secondo ciclo sul lato opposto), e da noi e' SPENTO.
+#      Quindi lo slot morde per intero. Se questo round dicesse
+#      "lo short non aggiunge", la domanda successiva NON sarebbe
+#      "lo short non vale": sarebbe "lo short non ha avuto il posto",
+#      e il round dopo sarebbe InpAllowReverse. Va scritto adesso,
+#      non dopo aver visto i numeri.
+#  ==> Accendere lo short NON AGGIUNGE operazioni: in parte le RUBA al
+#      long. Chi legge i due numeri separati e li somma si illude.
+#      Questo round misura LA SEDIA INTERA, non il lato corto da solo,
+#      ed e' l'unico modo onesto di leggerlo.
+#
+#  L'ASSE E' ISOLATO -- verificato, non assunto
+#  ---------------------------------------------
+#  Il censimento avverte che "spegnere lo short spegne anche il REVERSE"
+#  (il secondo ciclo sul lato opposto, R51). Qui NON morde:
+#  InpAllowReverse e' false nel preset in campo E pinnato false in
+#  questo file, quindi accendere lo short NON accende il reverse. E
+#  l'EA lo dice da solo in OnInit (r.586): con un solo lato consentito
+#  il secondo ciclo non parte.
+#  ==> Un asse solo: InpAllowShort. Tutto il resto inchiodato alla
+#      geometria viva.
+#  NOTA DI SINTASSI: l'asse e' scritto 0||0||1||1||Y e non
+#  false||false||1||true||Y. E' la convenzione di casa per i
+#  booleani (gia' usata da InpAllowLong, InpAllowReverse e
+#  InpAllowShort in altri file prova), ed e' anche l'unica che il
+#  cancello accetta: controlla_prova.py r.205 rifiuta un asse non
+#  numerico. MT5 scrive e rilegge i bool come 0/1 nell'ini, e i
+#  nostri CSV lo confermano (InpBreakevenAtTP1 esce come 1).
+#
+#  E IL COSTO NON SI MUOVE SU QUEST'ASSE (classe 555)
+#  ---------------------------------------------------
+#  Lo stop del lato corto e' simmetrico a quello del lato lungo: il
+#  bordo OPPOSTO dello stesso range (r.1974: sl = buyPx con
+#  InpSLMode=0; aperta con sed e verificata). Stessa ampiezza di range -> stessa distanza di stop ->
+#  stesso rapporto stop/spread. La frontiera dei 40x e il pavimento
+#  duro di 13,3x valgono IDENTICI sulle due celle: l'asse non li tocca.
+#  Non si scrive "il costo migliora" ne' "peggiora": NON SI MUOVE.
+#
+#  L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+#  =====================================
+#  (a) RIPRODUZIONE: la cella false deve riprodurre R202B Pass 3 e
+#      R201A:
+#        IS  n175 PF 1.12733 Equity DD % 5.4089 profit 3050.56
+#        OOS n270 PF 1.39520 Equity DD % 7.2506 profit 14355.32
+#      TOLLERANZA: un centesimo sul Profit, uguaglianza su n, PF e DD
+#      alla quinta cifra (tolleranza G1,
+#      report/MANOPOLE_INERTI_2026-09-09.md r.40). Oltre quella il round
+#      NON e' confrontabile e si cerca il pin che balla.
+#  (b) n SALE accendendo lo short -- ed e' la verifica che il ramo SELL
+#      si sia acceso davvero. MA SALE MENO DELLA SOMMA, per lo slot. Se
+#      n NON sale, il ramo non ha mai sparato e il round non ha
+#      misurato niente.
+#  (c) IL CANCELLO DI PROMOZIONE, e serve TUTTO INSIEME:
+#      c1  PF OOS della cella true >= PF OOS della cella false
+#          (1,39520). Non "vicino": >=.
+#      c2  DD OOS a DENOMINATORE FISSO non peggiora di piu' del 10%.
+#          DD_fisso% = (Profit / Recovery Factor) / 80000 x 100, perche'
+#          "Equity DD %" divide per il PICCO, che cambia da cella a
+#          cella (classe 550: su R202B la distorsione vale +22,8%, piu'
+#          del margine di un cancello, e fra due celle l'ordine si
+#          RIBALTA).
+#          DUE BASI, UNA PER GAMBA (classe 557), da R202B cella 1.00:
+#            IS   DD_fisso 5,8468  -> allarme sopra 6,4315
+#            OOS  DD_fisso 8,9033  -> allarme sopra 9,7936
+#          Se il Recovery Factor e' 0 (passata a ZERO TRADE, Profit=0)
+#          la formula e' 0/0: si scrive [NON CALCOLABILE DAL CSV].
+#      c3  IS e OOS CONCORDI di segno su PF e su DD_fisso. Discordi ->
+#          nessuna promozione.
+#  (d) IL PROFITTO, che e' il giudice pulito: e' immune alla distorsione
+#      del conteggio sulle uscite (la somma dei deal di una posizione e'
+#      il P/L della posizione). Cella false OOS: 14355,32.
+#      Si riporta SEMPRE accanto al PF.
+#
+#  QUESTA VOLTA UNA CELLA PUO' ESSERE PROMOSSA -- ed e' la differenza
+#  col Dow: le POSIZIONI del DAX in OOS stanno, DIMOSTRATO, fra 170 e
+#  270 (da n = P + f, 0 <= f <= P, sugli n di R202B), quindi SOPRA il
+#  pavimento di 150 della regola A CON CERTEZZA. In IS stanno fra 112 e
+#  175: INDETERMINATO, e va dichiarato.
+#  ==> Il MERITO si giudica in OOS. In IS si giudica il RISCHIO (regola
+#      B del 16/08), che vale a qualunque n.
+#
+#  LA CONTRO-IPOTESI, FALSIFICABILE
+#  ---------------------------------
+#  H0: il lato corto non aggiunge edge e peggiora il rischio.
+#  H0 e' FALSIFICATA se la cella true passa c1 E c2 E c3 insieme.
+#  H0 e' CONFERMATA se il PF OOS scende sotto 1,39520 OPPURE il
+#  DD_fisso OOS supera 9,7936.
+#  Se il PF sale ma il DD pure, oltre l'allarme: "COMPRA RENDIMENTO CON
+#  RISCHIO", e la decisione e' di Claudio perche' e' un parametro di
+#  rischio, non una misura.
+#
+#  QUELLO CHE QUESTO ROUND NON MISURA
+#  ----------------------------------
+#  - Il lato corto DA SOLO: per lo slot, non e' separabile girando la
+#    sedia. Servirebbe un round con InpAllowLong=false, ed e' un'altra
+#    domanda.
+#  - Il muro FTMO del 10% (classe 515): "Equity DD %" e' dal PICCO, il
+#    Max Loss e' STATICO dal saldo iniziale, quindi il DD del tester e'
+#    un LIMITE SUPERIORE e non dimostra niente in nessuna direzione. Il
+#    limite superiore si riporta: DDass/deposito.
+#  - Le POSIZIONI vere: ogni n e' [uscite]. Si contano sui position_id.
+#
+#  TAGLIA DEL BANCO: 1,0% -- NON e' la taglia in campo (2,00%, firma del
+#  20/09). Pinnata a 1,0 per riprodurre R202B. Ogni DD va RADDOPPIATO
+#  prima di leggerlo a taglia vera, e il raddoppio e' un LIMITE
+#  SUPERIORE, non un'identita' (CalcLotByRisk usa ACCOUNT_BALANCE).
+#  Classe 547.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=0||0||1||1||Y
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=789521||789521||0||789521||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
