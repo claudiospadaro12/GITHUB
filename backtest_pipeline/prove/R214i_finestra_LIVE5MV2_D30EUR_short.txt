@@ -1,0 +1,450 @@
+# ======================================================================
+#  EA: ABTG_DAX_Live5m_v2
+#  R214i -- LA LARGHEZZA DELLA FINESTRA D'INGRESSO, *** SUL LATO
+#  CHE NON E' MAI STATO MISURATO: LO SHORT. *** D30EUR.
+#  Gemello di R214h (long). Regola dei due lati del 25/08: su Nasdaq,
+#  DAX e Dow ogni analisi misura SEMPRE tutti e due i lati.
+#  Asse unico: InpPrevWindowMin (15 . 30 . 45 . 60 minuti).
+#  Supertrend ON (la meta' vincente), finestra PULITA con split IS/OOS.
+#  Scritto il 22/09/2026. Attesa e soglie congelate PRIMA dei numeri.
+#  Dossier: report/RIESAME_MORTI_BREAKOUT_M5_2026-09-22.md par. 2.3 e
+#  la classifica ("1 -- asse LARGHEZZA DELLA FINESTRA").
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#     -Deposito 10000 -Modello 4
+#     10.000 NON e' una scelta mia: e' il deposito della corsa
+#     d'archivio con cui questo file si confronta, scritto nel suo
+#     .ini -- backtest_pipeline/ini/valid_DAX_Live5m_v2.ini r.11
+#     "Deposit=10000" (e r.10 "Model=4", r.4 "Period=M5").
+# ======================================================================
+#
+#  1. IL GRADIENTE, LETTO NEL CSV GREZZO -- gli 8 esiti veri
+#  --------------------------------------------------------------------
+#  backtest_pipeline/risultati_archivio/Live5m/
+#  valid_DAX_Live5m_v2_D30EUR_realtick.csv -- 32 passate, ma
+#  *** OTTO esiti distinti: *** InpMinStopPts e InpSkipIfTight sono
+#  totalmente INERTI (16 gruppi ciascuna). Finestra UNICA, rischio
+#  1,00%, LONG-ONLY (InpAllowShort=0 in tutte e 32).
+#
+#   finestra | ST  | buffer |   PF    |  DD %  | n (uscite) | Profit
+#     15'    | ON  |  700   | 1.04296 |  9.0970|   239      |  +192.33
+#     15'    | ON  |  500   | 1.04062 | 11.9200|   249      |  +210.83
+#     15'    | OFF |  500   | 0.96493 | 14.7900|   463      |  -331.61
+#      5'    | ON  |  500   | 0.95138 | 17.5500|   264      |  -351.77
+#     15'    | OFF |  700   | 0.92241 | 16.8200|   445      |  -658.02
+#      5'    | ON  |  700   | 0.90663 | 16.1100|   258      |  -613.24
+#      5'    | OFF |  500   | 0.87966 | 26.0500|   501      | -1518.26
+#      5'    | OFF |  700   | 0.84571 | 26.0800|   492      | -1818.62
+#
+#  LE QUATTRO COPPIE, a parita' di TUTTO il resto, 5' -> 15':
+#    (OFF, 500)  PF +0,085   DD -11,26 punti
+#    (OFF, 700)  PF +0,077   DD  -9,26
+#    (ON,  500)  PF +0,089   DD  -5,63
+#    (ON,  700)  PF +0,136   DD  -7,01
+#  *** QUATTRO COPPIE SU QUATTRO. PF SEMPRE SU, DD SEMPRE GIU'.
+#  NESSUNA ECCEZIONE. *** Non e' il "picco isolato" che la regola di
+#  casa vieta di inseguire: e' un gradiente MONOTONO su due rami
+#  indipendenti (Supertrend acceso e spento) replicato su due buffer.
+#  *** E 30 E 60 MINUTI NON SONO MAI STATI PROVATI. ***
+#
+#  1-bis. E IL COSTO SPIEGA PERCHE', senza bisogno di una storia
+#  --------------------------------------------------------------------
+#  Lo stop di questo motore e' 'range + 2 x buffer + slippage'.
+#  Allargare la finestra allarga il RANGE, quindi allarga lo STOP,
+#  quindi migliora il rapporto stop/spread:
+#    buffer 500 + slippage 100 -> stop MINIMO strutturale 11 punti
+#      indice = 6,5x lo spread mediano 1,70 (4,1x al P95 2,70)
+#    buffer 700 + slippage 100 -> 15 punti indice = 8,8x (5,6x al P95)
+#    frontiera di lavoro di casa: 68 punti indice = 40x
+#  *** IL MOTORE STA FRA 4 E 6 VOLTE SOTTO LA FRONTIERA DEL COSTO, e
+#  allargare la finestra e' l'UNICA leva che lo muove nel verso
+#  giusto. *** Questo round e' quindi anche una misura di COSTO, non
+#  solo di PF: si guarda quanto cresce lo stop medio, non solo il PF.
+#
+#  2. PERCHE' NON VIOLA IL VERDETTO DEL 26/07 -- va affrontato, non
+#     aggirato
+#  --------------------------------------------------------------------
+#  backtest_pipeline/REGISTRO_TEST.md r.41: "VERDETTO DEFINITIVO --
+#  capitolo BREAKOUT M5 CHIUSO (26.07.26). Provati e morti in
+#  real-tick: Live5m nativo, *** Live5m_v2 ***, DAX_M3, aperture
+#  Nasdaq, ORB_Fibo, Londra_ORB."
+#  *** Live5m_v2 E' NELLA LISTA PER NOME. Non si puo' fare finta di
+#  niente, e non lo faccio. *** Quello che cambia, e la clausola della
+#  SECONDA CACCIA (19/08) chiede esattamente questo -- un MECCANISMO
+#  diverso, mai "altri parametri dello stesso motore morto":
+#    (a) *** IL MOTORE MORTO E' UN ALTRO MOTORE. *** Il breakout M5
+#        puro -- PrevWin 5, Supertrend OFF -- fa 0,846-0,880 con DD
+#        26,05-26,08% a rischio 1% (= 50,9-51,9% al 2%). QUELLO e'
+#        morto, e col numero. Ma la cella migliore del CSV ha
+#        PrevWin=15 e Supertrend=1: *** non e' "Live 5 minuti", e' un
+#        canale di 15 minuti con un filtro di trend sopra. *** Due
+#        cose diverse con lo stesso nome.
+#    (b) A 60 MINUTI il motore diventa geometricamente un'ALTRA COSA
+#        ancora: una finestra di 60 minuti prima dell'apertura e'
+#        quasi la stessa geometria di InpRangeMode=PREVBAR con
+#        InpLevelTF=H1, cioe' "il livello H1 e non il breakout M5" --
+#        che e' la geometria di una sedia che in casa FUNZIONA.
+#        *** E QUESTO E' ANCHE IL CONTRO-ESEMPIO PIU' SGRADEVOLE:
+#        vedi il punto 5 (iii). ***
+#    (c) LA FINESTRA E' DIVERSA. La corsa del 26/07 e' UNA finestra
+#        sola, senza IS/OOS. Qui c'e' lo split.
+#  >>> E resta vero che il precedente e' NEGATIVO e misurato: se
+#      questo round esce brutto, NON e' una sorpresa ed e' gia'
+#      scritto qui.
+#
+#  3. *** L'ANCORA: NON CE N'E' UNA ESATTA, E DICO PERCHE' E COSA
+#     METTO AL SUO POSTO ***
+#  --------------------------------------------------------------------
+#  Non c'e' perche' la corsa d'archivio e' una FINESTRA UNICA e questo
+#  file ha lo SPLIT IS/OOS: due corse separate, ciascuna col proprio
+#  riscaldamento, non riproducono i numeri di una corsa sola. E' un
+#  buco DICHIARATO.
+#  *** MA C'E' UN CONTROLLO NUMERICO CHE VALE QUASI QUANTO, ed e'
+#  costruito come un contro-esempio con DUE numeri diversi: ***
+#    *** AVVERTENZA PER QUESTO FILE: il conto qui sotto vale per il
+#    GEMELLO LONG (R214h). Sul lato SHORT non esiste nessuna corsa
+#    d'archivio, quindi il controllo non si puo' fare e il numero
+#    239 NON E' UN'ATTESA PER QUESTO FILE. Lo lascio scritto perche'
+#    e' il metodo, e perche' se R214h conferma l'ipotesi A allora la
+#    finestra vera e' quella anche qui. ***
+#    LA CORSA D'ARCHIVIO DICE 239 USCITE alla cella (15', ST ON, buf
+#    700) SUL LATO LONG, su una finestra ETICHETTATA
+#    2024.01.01 -> 2026.06.30 = 912
+#    giorni. *** MA sugli INDICI BCM le barre M1 partono dal
+#    2024.09.26 (misurato: REFERTO_SONDA_STORICO_17-08.md, stato
+#    "COMPLETO" -- il broker non ce l'ha piu' vecchio), quindi il
+#    tester NON PUO' aver fabbricato niente prima: ha cominciato dove
+#    cominciano i dati. ***
+#    IPOTESI A (la mia): la finestra VERA era 642 giorni. Allora la
+#      cadenza e' 239/642 = 0,372 uscite/giorno solare, e questo round
+#      -- che gira esattamente su quei 642 giorni -- deve dare
+#      *** n_IS + n_OOS = 239 circa ***, con n_IS ~ 95 (256 gg) e
+#      n_OOS ~ 144 (386 gg).
+#    IPOTESI B (l'alternativa): la finestra VERA erano 912 giorni e i
+#      primi 270 hanno prodotto operazioni. Allora la cadenza e'
+#      239/912 = 0,262/giorno e questo round deve dare
+#      *** n_IS + n_OOS = 168 circa. ***
+#  >>> DUE IPOTESI, DUE NUMERI DIVERSI DEL 42%: il test e' reale e non
+#      e' un confronto contro il nulla. E' lo stesso conto che ha
+#      gia' funzionato sul Dow (RIESAME_MORTI_APERTURE par. 5.1: atteso
+#      149,4 contro 141 reali, scarto 5,6%).
+#  >>> SE ESCE 239 +/- 10%: la finestra dell'archivio era pulita, il
+#      gradiente e' misurato su tick VERI e vale. SE ESCE 168 +/- 10%:
+#      la corsa del 26/07 aveva dentro tick fabbricati e il gradiente
+#      va riletto con sospetto. SE ESCE FUORI DA TUTTE E DUE: si e'
+#      mosso qualcos'altro e il round non si legge.
+#
+#  4. ATTESA DICHIARATA, PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  (A) *** ATTESA DICHIARATA SULLO SHORT, E NON E' LA STESSA DEL
+#      LONG. *** Sul DAX la dottrina di casa dice "funziona solo
+#      long", ma quella dottrina nasce dall'EA delle aperture; e la
+#      FASE A (studio_apertura, OHLC, 3.302 rotture) misura il
+#      CONTRARIO: sul DAX lo SHORT batte il LONG (+0,045 contro
+#      +0,007 R/operazione). *** DUE MISURE DISCORDANTI, e la
+#      differenza e' la GESTIONE. Quindi qui NON ho una direzione da
+#      dichiarare, e non me ne invento una: dichiaro che il mio
+#      atteso e' un PF INTORNO A 1,00 con incertezza alta, e che
+#      sarei sorpreso sia da un 1,20 sia da uno 0,80. ***
+#      Quello che dichiaro col segno e' il GRADIENTE: se la larghezza
+#      della finestra e' una leva di COSTO (punto 1-bis), deve
+#      funzionare su tutti e due i lati. *** SE IL PF SALE DA 15' A
+#      60' SUL LONG MA NON SULLO SHORT, la leva non e' il costo: e'
+#      un effetto di direzione, cioe' regime. E' il contro-esempio
+#      piu' utile che questa coppia di file puo' produrre. ***
+#  (B) *** LA FREQUENZA SCENDE, e lo scrivo prima: *** da 239 uscite
+#      (15') verso ~150-200 a 30' e ~100-150 a 60' [STIMA, NON
+#      MISURATA: la finestra piu' larga alza il range, quindi il
+#      prezzo rompe meno spesso il livello]. Sotto il pavimento PER
+#      SEDIA, ma dal 07/09 il pavimento e' PER FAMIGLIA.
+#  (C) *** SOGLIA DI SCARTO CONGELATA: se su tutte e quattro le celle
+#      il PF short resta sotto 1,00, si scrive "long-only, e
+#      MISURATO" nel preset -- che chiude un buco del certificato ed
+#      e' un risultato, non un fallimento. *** Non si cerca un altro asse: si scrive
+#      "morto" e si liberano le ore prima del 1 ottobre.
+#  (D) CATENA ROTTA: zero passate; meno di 4 valori distinti di
+#      InpPrevWindowMin nel CSV; Trades = 0; deposito diverso da
+#      10.000 o modello diverso da 4.
+#
+#  5. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  (i) *** LA CELLA MIGLIORE NON E' SCHIERABILE, E VA DETTO SUBITO:
+#      DD 9,097% a rischio 1,00% = 17,8-18,1% alla taglia FTMO del
+#      2,00% (fattore misurato 1,956-1,990). SFONDA IL MURO DEL 10%.
+#      *** Quindi anche un successo pieno di questo round NON produce
+#      una sedia al 2,00%: produrrebbe un candidato da schierare a
+#      taglia ridotta, e la taglia e' FIRMA DI CLAUDIO. E allargare la
+#      finestra allarga lo stop, quindi *** puo' allargare anche il DD
+#      in punti ***: la direzione (A) sul DD non e' garantita dalla
+#      fisica, e' solo quello che il gradiente misurato suggerisce.
+#  (ii) IL GRADIENTE E' MISURATO SU UNA FINESTRA UNICA, senza IS/OOS.
+#      Quattro coppie coerenti su una corsa sola restano UNA corsa
+#      sola. Questo round e' proprio il rimedio, ed e' per questo che
+#      NON si riusa la finestra del 26/07.
+#  (iii) *** IL CONTRO-ESEMPIO CHE FA PIU' MALE: A 60 MINUTI IL
+#      MOTORE POTREBBE CONVERGERE SU UNA SEDIA CHE C'E' GIA'. *** Una
+#      finestra di 60 minuti pre-apertura e', in pratica, il livello
+#      dell'ultima ora -- cioe' la geometria delle aperture DAX, dove
+#      770101 e' gia' viva. QUALE NUMERO LO SMASCHERA? La
+#      SOVRAPPOSIZIONE DEI GIORNI OPERATIVI: se la cella a 60' opera
+#      negli STESSI giorni di 770101, non e' una sedia nuova, e'
+#      una seconda copia -- e aggiungerla PEGGIORA la correlazione
+#      (il tetto per cluster C2 e' firmato ma NON attivo).
+#      *** Si legge nei per-trade con gli strumenti di casa
+#      (sovrapposizione_sedie.py), a ZERO passate di tester, e va
+#      fatto PRIMA di chiamare "candidato" la cella a 60'. ***
+#  (iv) MANOPOLA INERTE. Se le 4 celle escono con Trades IDENTICO
+#      **e** Profit IDENTICO, l'asse non e' arrivato all'EA -- e su
+#      questo motore la trappola e' GIA' SCATTATA una volta (32
+#      passate, 8 esiti: InpMinStopPts e InpSkipIfTight non
+#      mordevano). Criterio a macchina: meno di 3 valori DISTINTI di
+#      Profit su 4 celle = "asse inerte", e allora si guarda PRIMA il
+#      pin InpRangeMode (se non fosse 1, InpPrevWindowMin non viene
+#      nemmeno letto: sorgente r.599-602).
+#
+#  6. *** CLASSE 594 -- CHI ALTRO DIPENDE DALLA VARIABILE D'ASSE ***
+#  --------------------------------------------------------------------
+#  Cercato nel sorgente, e la risposta NON e' "nessuno":
+#  (a) *** InpMinStopPts E InpSkipIfTight VIVONO DENTRO UN 'if' CHE LA
+#      VARIABILE D'ASSE PUO' RENDERE IRRAGGIUNGIBILE. ***
+#      ABTG_DAX_Live5m_v2.mq5 r.678 (long) e r.702 (short):
+#        if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+#           { if(InpSkipIfTight) skip=true; else sl = ...floor...; }
+#      Allargando la finestra il range cresce, quindi 'dist' cresce,
+#      quindi quel blocco diventa sempre MENO raggiungibile. E' lo
+#      stesso schema che e' costato la classe 594 su R211a
+#      (InpBreakeven dentro ManageTP1()).
+#      >>> *** MA QUI COSTA ZERO, ED E' MISURATO, NON ASSUNTO: *** nel
+#          CSV d'archivio le QUATTRO combinazioni di InpMinStopPts
+#          {200, 400} x InpSkipIfTight {0, 1} danno risultati
+#          IDENTICI AL CENTESIMO su OGNI cella (32 passate -> 8
+#          esiti). Il pavimento NON MORDEVA GIA' a 5 minuti, dove il
+#          range e' il piu' stretto possibile. A 15-60 minuti lo stop
+#          puo' solo essere PIU' LARGO, quindi il blocco resta
+#          irraggiungibile A FORTIORI. *** L'asse muove UNA COSA
+#          SOLA, ed e' dimostrato con un numero invece che con un
+#          ragionamento. ***
+#          (I pin scelti -- 200 e false -- sono quindi indifferenti:
+#           uno vale l'altro, e li scrivo per fedelta' al CSV.)
+#  (b) InpRangeMinutes (15) vive SOLO dentro ABTG_RANGE_OPENING
+#      (r.599-600). Qui InpRangeMode=1 = ABTG_RANGE_PREV -> INERTE a
+#      tutti e quattro i valori dell'asse. Pinnato per fedelta'.
+#  (c) InpLevelTF (H1) vive SOLO dentro ABTG_RANGE_PREVBAR (r.589-593).
+#      INERTE qui. *** Ed e' esattamente la manopola che renderebbe la
+#      cella a 60' indistinguibile da un motore "livello H1": vedi il
+#      contro-esempio (iii). ***
+#  (d) InpMinRangePts / InpMaxRangePts sono pinnati a 0 = filtro
+#      d'ampiezza SPENTO, come in tutte e 32 le passate d'archivio.
+#      *** ATTENZIONE: se fossero accesi, l'asse li muoverebbe
+#      indirettamente (una finestra piu' larga produce range piu'
+#      ampi, che un tetto scarterebbe). Sono spenti apposta. ***
+#
+#  7. SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  F1  CANCELLO IN GRANDEZZE INVARIANTI ALLA TAGLIA: Recovery Factor,
+#      Equity DD %, Profit. *** MAI Expected Payoff *** (classe 550:
+#      con InpTP1_ClosePct=50 la colonna Trades conta USCITE). E MAI
+#      "DD contro DD" da solo.
+#  F2  *** SI PROMUOVE UNA CELLA A "CANDIDATO" solo se, in OOS:
+#      PF >= 1,10 *** e *** Equity DD % <= 9,0 *** e *** Recovery
+#      Factor > 0,50. Tre su tre. *** Il PF 1,04296 dell'archivio non
+#      basta e non e' la soglia: era una finestra unica senza fuori
+#      campione, e un cancello tarato sullo status quo non e' un
+#      cancello.
+#  F3  *** CENTRO DELL'ALTOPIANO, MAI IL PICCO. *** Con 4 celle, si
+#      guarda se TRE consecutive stanno sopra la soglia F2. Se solo
+#      UNA sporge e le vicine no, il verdetto e' "non c'e' una
+#      configurazione robusta" e si scrive cosi'.
+#  F4  RISCHIO, a qualunque n: Equity DD % > 15,0 in una qualunque
+#      cella = il motore e' fuori discussione su quella cella, anche
+#      con PF alto. A rischio 1% il 15% diventa 29-30% al 2%.
+#  F5  IL ROUND NON PROMUOVE E NON TOCCA NIENTE: nessun preset,
+#      nessuna sedia, nessun forward, nessun conto reale 10105439.
+#      Taglie e accensioni: FIRMA DI CLAUDIO.
+#
+#  8. COSTO -- tetto dichiarato
+#  --------------------------------------------------------------------
+#  4 celle x 2 finestre = 8 PASSATE.
+#  Base MISURATA il 21/09 sul PC di backtest (DESKTOP-H4D7CAJ),
+#  modello 4, 8 passate M5 su indice: caso stretto 2 min 41 s
+#  (20,1 s/passata), caso largo 11 min 57 s (89,6 s/passata).
+#  *** Questa corsa e' esattamente 8 passate a M5 su indice a modello
+#  4: la calibrazione si applica DIRETTAMENTE, senza estrapolare. ***
+#  >>> COSTO DICHIARATO: fra 2 min 41 s e 11 min 57 s.
+#      Tetto usato nel referto: 11,9 MINUTI.
+#  E @PERIODO resta M5 su tutte e quattro le celle: il TF del grafico
+#  non e' l'asse (punto 6) e il costo non scende salendo.
+#
+#  9. BUCHI DICHIARATI DI QUESTO ROUND
+#  --------------------------------------------------------------------
+#  - NESSUNA ANCORA ESATTA (punto 3). Al suo posto c'e' un controllo
+#    numerico a due ipotesi, che e' meno.
+#  - NON misura il LATO LONG: e' il file gemello R214h, e i due vanno
+#    letti insieme.
+#  - *** E QUESTO FILE NON HA NEMMENO IL CONTROLLO NUMERICO DEL PUNTO
+#    3: le 239 uscite d'archivio sono LONG-ONLY. Sul lato short non
+#    c'e' NIENTE con cui confrontare un numero -- ne' un'ancora, ne'
+#    un'ipotesi alternativa con un numero accanto. E' il buco piu'
+#    grosso dei due file, ed e' il prezzo di misurare una casella
+#    davvero vuota. *** Quello che resta e' il confronto INTERNO fra
+#    le quattro celle e il confronto col gemello long.
+#  - NON mette ad asse InpBufferPoints (500/700), che nel CSV
+#    d'archivio interagisce con la finestra. Pinnato a 700, il valore
+#    della cella migliore. Un asse alla volta.
+#  - NON mette ad asse InpUseSupertrend: e' PINNATO A 1 apposta,
+#    perche' e' la meta' vincente su tutte e quattro le coppie. Il
+#    ramo OFF resta un buco dichiarato (e in archivio e' negativo:
+#    0,846-0,965).
+#  - NON mette ad asse InpStMultiplier ne' InpStAtrPeriod ne' InpStTF:
+#    su tutta la famiglia valgono 2,5 / 10 / H1 in OGNI CSV. Sono
+#    caselle chiuse a chiave, non caselle provate.
+#  - LA SOVRAPPOSIZIONE COI GIORNI DI 770101 (D30EUR, stessa
+#    apertura): [NON MISURATA]. Costa ZERO passate e va fatta prima di
+#    chiamare "candidato" la cella a 60' (punto 5-iii).
+#  - PROVA DI REGIME: assente e NON colmabile su D30EUR (storico BCM
+#    dal 2024.09.26, un regime e mezzo). *** Lo storico esterno non la
+#    apre: il DAX non risulta importato, e i due indici importati sono
+#    IN FRIGO (diff 0,0756% e 0,0608% contro la soglia 0,05%). Mappa:
+#    report/LO_STORICO_ESTERNO_MAPPA_2026-09-23.md. ***
+#  - IL .ex5 SUL BANCO CORRISPONDE AL .mq5: [NON MISURATO]. E qui
+#    conta piu' del solito: il CSV d'archivio e' del 26/07 e NON ha le
+#    colonne InpUsaGuardian, InpBEatR, InpTrailStartR, che il sorgente
+#    di oggi ha. *** L'EA E' CAMBIATO DOPO QUELLA CORSA: i tre input
+#    nuovi sono pinnati qui ai loro default (true / 0 / 0) e vanno
+#    verificati NO-OP, non dati per NO-OP. ***
+#
+#  10. GLI ORARI, LA FINESTRA, IL MAGIC
+#  --------------------------------------------------------------------
+#  *** ORA SERVER BCM (= ora italiana - 1): InpSessionHour=8 = 09:00
+#  italiane = apertura del DAX. Un 9 in quella colonna sarebbe un file
+#  da cestinare. *** Chiusura 17:30 server = 18:30 italiane. Sono i
+#  valori del CSV d'archivio.
+#  @DAQUANDO 2024.09.26 e' MISURATO, non scelto (classe 590):
+#  risultati_archivio/misura_tick/REFERTO_MISURA_TICK_D30EUR.txt.
+#  *** NON e' il 2024.01.01 dell'.ini d'archivio: quella etichetta e'
+#  falsa e il punto 3 spiega come si verifica. ***
+#  @FINOA 2026.06.30 + @FRAZIONEIS 0.40 -> 642 giorni,
+#  floor(642 x 0,40) = 256: IS 2024.09.26-2025.06.09,
+#  OOS 2025.06.10-2026.06.30.
+#  MAGIC 788413: grep -ril su tutto il repo il 22/09 (.git e .claude
+#  esclusi) + controllo dei file NON COMMITTATI (git status), ZERO
+#  occorrenze. UN SOLO AGENTE locale nello Strategy Tester (classe 129).
+# ======================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+# --- Guardian: input aggiunto DOPO la corsa d'archivio. Pinnato al
+#     default. Nel tester le GlobalVariable non esistono e la guardia
+#     e' fail-open: e' una PROMESSA da verificare, non una misura.
+InpUsaGuardian=true
+
+# --- SESSIONE (ORA SERVER BCM).
+InpSessionHour=8
+InpSessionMin=0
+# InpRangeMinutes: INERTE con InpRangeMode=1 (vive solo dentro
+#   ABTG_RANGE_OPENING, r.599-600). Pinnato per fedelta' al CSV.
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+
+# --- INGRESSO. RangeMode=1 = ABTG_RANGE_PREV: *** e' il pin che tiene
+#     VIVO l'asse *** (r.601-602). Con 0 o 2, InpPrevWindowMin non
+#     viene nemmeno letto e le 4 celle sarebbero identiche.
+InpEntryMode=0
+InpRangeMode=1
+# InpLevelTF: INERTE qui (vive solo dentro ABTG_RANGE_PREVBAR).
+InpLevelTF=16385
+InpBufferPoints=700.0
+InpPendingExpiryMin=120
+InpAllowLong=false
+InpAllowShort=true
+# Filtro d'ampiezza SPENTO, come in tutte e 32 le passate d'archivio.
+# Se fosse acceso, l'asse lo muoverebbe INDIRETTAMENTE (punto 6d).
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+
+# --- FILTRI. Supertrend ON: e' la meta' vincente su 4 coppie su 4.
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=true
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+
+# --- RISCHIO E GESTIONE, copiati dal CSV d'archivio.
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+# InpBEatR e InpTrailStartR: input aggiunti DOPO la corsa d'archivio.
+# Pinnati ai default. A 0 spengono il BE indipendente e armano subito
+# il trailing, che e' il comportamento che il CSV d'archivio descrive.
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=1
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato: default compilato = stringa vuota, e
+#   un pin di stringa VUOTA viene IGNORATO da MT5 (controllo 3 del
+#   cancello).
+InpNewsFlatten=true
+
+# --- SLIPPAGE E PAVIMENTO DELLO STOP.
+#     InpMinStopPts e InpSkipIfTight sono MISURATI INERTI (punto 6a):
+#     32 passate, 4 combinazioni, risultati identici al centesimo.
+InpSlippagePts=100.0
+InpMinStopPts=200.0
+InpSkipIfTight=false
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpMagic=788413
+InpMaxSpread=0
+InpVerbose=true
+
+# --- L'UNICO ASSE: LA LARGHEZZA DELLA FINESTRA PRE-APERTURA.
+#     15 . 30 . 45 . 60 minuti = 4 celle x 2 finestre = 8 passate.
+#     *** Il dossier chiedeva {15, 30, 60}: il 45 viene in regalo dal
+#     passo uniforme e COSTA 2 PASSATE. Lo tengo apposta, perche' con
+#     tre punti un gradiente e un picco si distinguono male e con
+#     quattro si distinguono meglio (regola di casa: centro
+#     dell'altopiano, mai il picco). ***
+#     15 e' il bordo BASSO ed e' la cella migliore d'archivio;
+#     60 e' il bordo ALTO ed e' la geometria che rischia di
+#     ricalcare una sedia esistente (contro-esempio 5-iii).
+#     Tutti interi: nessun arrotondamento possibile.
+InpPrevWindowMin=15||15||15||60||Y
+# ======================================================================

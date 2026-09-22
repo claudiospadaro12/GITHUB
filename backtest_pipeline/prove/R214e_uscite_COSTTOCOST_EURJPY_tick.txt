@@ -256,7 +256,7 @@
 #    il file gemello R214f esiste apposta per coprirlo.
 #  - MERITO SOSPESO: ~47 e ~74 operazioni contro il pavimento di 150.
 #  - NON misura USDCHF ne' CHFJPY, che nello scan sono gli altri due
-#    "exit 0 long" sotto il muro (PF 1,2617 DD 8,611 n 186 · PF 1,1474
+#    "exit 0 long" sotto il muro (PF 1,2617 DD 8,611 n 186 . PF 1,1474
 #    DD 7,095 n 190). Un simbolo per file: sono altri due file e altre
 #    12 passate.
 #  - NON misura il LATO SHORT. E' escluso PER MISURA (punto 1), non
