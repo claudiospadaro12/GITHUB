@@ -29708,3 +29708,50 @@ si impicca.
    misurato** della corsa, non su un numero tondo.
 3. 🔎 **Quando la precondizione non e' riverificabile al momento dell'uso, si dichiara
    che non lo e'** -- nel documento di consegna, non solo nel codice.
+
+---
+
+## CLASSE 583 -- 📏🎭 LA BASE DI COSTO CHE DIMENSIONA IL TETTO E' ATTRIBUITA A «QUESTA FAMIGLIA», MA IL REFERTO DA CUI VIENE E' DI UN ALTRO EA, UN ALTRO SIMBOLO E UN ALTRO TIMEFRAME (22/09/2026, figlia della 582 e della regola del contro-esempio del 10/09)
+
+> ⚠️ **Numero preso col `grep` al momento di scrivere** (`582` era il massimo). Girano altri
+> agenti in parallelo: se qualcuno ha preso `583` nello stesso turno, vale la **classe 194**
+> e questa si rinumera, non si cancella.
+
+**Caso reale.** Preparando le righe di `R208B` e `R206A` mi e' stato passato, come base per
+dimensionare il tetto di tempo, *«il costo misurato di **questa famiglia**: ~23 secondi a
+passata»*, con il puntatore a `risultati_archivio/R112_CORSA_20260826/REFERTO_R112.txt`.
+
+🔴 **Aprendo quel referto, r.1-2: `ABTG_EMA200 / U30USD H1`.** Non e' `ABTG_DAX_Apertura_EU`,
+non e' `D30EUR`, **e non e' M5**: e' un altro EA, un altro simbolo e un timeframe **dodici
+volte piu' grosso**. La frase era *plausibile* e il numero era *vero*: quello che non era vero
+e' **a che cosa appartiene**.
+
+🟢 **Perche' qui non ha fatto danno, e perche' lo dico lo stesso.** La base ben appaiata
+esiste, e l'ho cercata: `R172D` e `R201A` sono girati **il 21/09 sulla stessa macchina**, stesso
+driver, stessa finestra, **M5 tick reali**, e i CSV hanno **7 righe per gamba = 14 passate
+ciascuno** (contate nei file, non ricordate); i referti portano avvio `21:01:33` e `21:05:24`,
+cioe' **3 min 51 s** -> **<= 16,5 s/passata**. 👉 I 23 s sono quindi un **inviluppo superiore**,
+e il tetto che ne esce e' conservativo. **Ma questo si sa DOPO aver aperto i file: prima era una
+coincidenza fortunata, non un metodo.** Con il verso opposto (base presa da un TF piu' veloce)
+lo stesso errore produce un tetto **troppo stretto**, che ammazza un round sano e lascia un
+referto PARZIALE.
+
+🔴 **E la 582 alza la posta**: il tetto non e' pazienza, e' **l'ampiezza della finestra di
+rischio** di uno `Stop-Process` differito su una macchina che ospita un conto demo vivo. Una
+base sbagliata non sposta una stima: sposta **un numero di sicurezza**.
+
+### La regola
+1. 📐 **Una base di costo si cita con la sua CARTA D'IDENTITA' COMPLETA -- EA, simbolo,
+   timeframe, modello, deposito, finestra -- e la si prende aprendo il referto, non
+   dall'etichetta del round.** «~23 s/passata» non e' un dato: `ABTG_EMA200 / U30USD / H1 /
+   modello 4 / 16 passate / 0,1 ore` lo e'.
+2. 🔎 **Quando la base e' TRASFERITA da un contesto diverso, si dichiara che lo e' e si alza
+   il moltiplicatore.** Regola pratica di casa: base **ben appaiata** (stesso EA, stesso
+   simbolo, stesso TF) -> **x10**; base **trasferita** -> **x15-20**. Il moltiplicatore e' il
+   prezzo dell'ignoranza, e si paga in chiaro.
+3. 🧪 **E si cerca SEMPRE la base meglio appaiata prima di accontentarsi di quella che si ha
+   in mano**: qui stava in due referti della stessa macchina, di ventiquattro ore prima, con il
+   numero delle passate **contabile aprendo i CSV**. Costa cinque minuti e cambia un numero di
+   sicurezza.
+4. 🚫 **Il tetto non si arrotonda a un numero tondo.** `10 x 23 s x 15 = 57,5` -> **58 minuti**,
+   non «un'ora». Un numero tondo nasconde da dove viene; un numero storto costringe a scriverlo.
