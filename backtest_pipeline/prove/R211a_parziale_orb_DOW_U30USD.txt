@@ -1,0 +1,142 @@
+# =====================================================================
+#  R211a -- LA PARZIALE SULL'ORB: abbassa il DD sotto il muro FTMO?
+#  EA: ABTG_ORB_Ottimizzato   (U30USD M5)   sedia ORB del DOW, FERMA in archivio
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#     -Deposito 10000 -Modello 4
+#
+#  Richiesta di Claudio (22/09): "PAOLO LAVORENTI STA PARLANDO DELL'ORB
+#  CHE DICE CHE VA QUASI SEMPRE IN PROFITTO... E DICE CHE LA STRATEGIA
+#  ORB SI PUO' FARE SU TUTTI GLI INDICI" -> "SI, TIRALO FUORI E
+#  PREPARAMI IL ROUND SULL'ORB"
+# =====================================================================
+#
+#  1. IL FATTO DA CUI PARTE TUTTO: L'ORB SUL DOW FUNZIONA, ED E' FERMO
+#  --------------------------------------------------------------------
+#  Round r44a (ABTG_ORB_Ottimizzato, U30USD M5, asse InpTPRangeMult),
+#  letto nei CSV grezzi risultati_prove/ABTG_ORB_Ottimizzato/r44/:
+#      TPRangeMult | IS: PF / DD / n    | OOS: PF / DD / n
+#      1.5         | 1.22314 / 8.6252 / 71 | 1.65693 /  9.9181 / 119
+#      2.0         | 1.35877 / 8.6293 / 71 | 1.73605 / 11.0412 / 119
+#      2.5         | 1.28599 / 9.1323 / 71 | 1.82848 / 10.7609 / 119
+#      3.0         | 1.34218 / 8.7214 / 71 | 1.95461 / 10.8867 / 119
+#  >>> L'OOS BATTE L'IS SU TUTTE E QUATTRO LE CELLE. Non e' il profilo
+#      di un sovradattamento: e' il contrario.
+#  >>> E nessun ORB e' in campo su FTMO: verificato, i preset in
+#      mql5/Presets/FTMO/ sono aperture, MaxMin, PostNews, SuperWave,
+#      EMA200 e due logger. ZERO ORB.
+#
+#  2. E IL TAPPO NON E' IL PF: E' IL DRAWDOWN
+#  --------------------------------------------------------------------
+#  Il muro FTMO e' il 10% (classe 562: Equity DD % e' un limite
+#  SUPERIORE, e sotto la soglia DIMOSTRA la sicurezza).
+#      1.5 -> 9.9181%  SOTTO il muro, di 8 centesimi
+#      2.0 -> 11.0412%  SOPRA
+#      2.5 -> 10.7609%  SOPRA
+#      3.0 -> 10.8867%  SOPRA
+#  >>> Tre celle su quattro sfondano. La cella 1.5 e' l'unica dentro, ed
+#      e' anche quella col PF piu' basso: il classico scambio.
+#  >>> QUINDI LA DOMANDA E': si abbassa il DD senza pagare il PF?
+#
+#  3. L'ASSE, E PERCHE' PROPRIO QUESTO -- due fonti che SI CONTRADDICONO
+#  --------------------------------------------------------------------
+#  InpTP1Pct (chiusura parziale al primo obiettivo) in r44a e' pinnato a
+#  ZERO: la parziale era SPENTA. E' una manopola MAI messa ad asse su
+#  questo motore.
+#
+#  (a) IN CASA, su un motore FRATELLO, la stessa manopola ha fatto
+#      esattamente quello che serve qui. Round R199B, sedia Nasdaq
+#      770260, asse InpTP1_ClosePct (referto risultati_prove/R199B/):
+#          ClosePct  0 -> IS DD 12.3568  OOS DD 9.1244   PF OOS 1.14894
+#          ClosePct 50 -> IS DD  7.3069  OOS DD 7.8576   PF OOS 1.21546
+#      DD IS -40,9%, DD OOS -13,9%, E IL PF SALE. Accesa in campo da
+#      Claudio il 21/09 alle 20:22 (commit 496408a9).
+#
+#  (b) FUORI CASA, la caccia del 22/09 dice il CONTRARIO. Dossier
+#      caccia_strategie/DOSSIER_CONFIG_PF_2026-09-22.md: 28 preset
+#      ufficiali di vendor su indici (DAX, NAS100, US30, US500),
+#      decodificati riga per riga -- Opening Range Breakout EA V2 (11),
+#      The ORB Master (7), Range Breakout Daytrader (8), US30 Market
+#      Maker (2). >>> ZERO usano un parziale: in tre famiglie su quattro
+#      il parametro NON ESISTE NEMMENO.
+#
+#  >>> DUE FONTI, DUE RISPOSTE OPPOSTE, SULLA STESSA MANOPOLA. Non si
+#      sceglie quella comoda: si misura. E' esattamente il caso in cui
+#      il tempo macchina vale.
+#
+#  4. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  (A) ANCORA. La cella InpTP1Pct = 0 DEVE riprodurre r44a alla cella
+#      InpTPRangeMult = 1.5, che e' pinnata qui:
+#          IS   PF 1.22314  Equity DD % 8.6252   Trades  71
+#          OOS  PF 1.65693  Equity DD % 9.9181   Trades 119
+#      (letti nei CSV, non in un referto). Se non torna, il round si
+#      BUTTA: non stiamo guardando lo stesso motore.
+#  (B) MERITO. Promossa una cella solo se INSIEME: PF OOS >= 1.30
+#      (r44a fa gia' 1.65693: chiedere meno sarebbe abbassare l'asticella)
+#      E Equity DD % OOS <= 9.0% (cioe' un margine vero sotto il muro,
+#      non gli 8 centesimi di adesso) E n OOS invariato.
+#  (C) RISCHIO. Il DD si legge a QUALUNQUE n (regola del 18/08: il
+#      campione sottile sospende il merito, mai il rischio).
+#
+#  5. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  Se le quattro celle escono con Trades IDENTICO **e** Profit IDENTICO,
+#  la manopola e' INERTE (non arriva all'EA, o il primo obiettivo non
+#  viene mai toccato) e NESSUN PF di questo round si puo' leggere.
+#  Criterio a macchina: si contano i valori DISTINTI di Profit. Meno di
+#  2 = "manopola inerte", che NON e' "la parziale non serve".
+#  >>> E il verso pericoloso e' dichiarato: con la parziale accesa il
+#      conteggio Trades del CSV conta USCITE, non posizioni (classe 550),
+#      quindi il PF NON e' confrontabile fra celle con parziale diversa.
+#      Per questo il cancello (B) chiede anche il DD e l'n, e per questo
+#      il confronto che vale e' DD contro DD.
+#
+#  6. QUELLO CHE QUESTO ROUND NON FA, dichiarato
+#  --------------------------------------------------------------------
+#  - NON mette ad asse InpTP_R, InpTPMode, InpBreakeven, InpUseTrailEMA,
+#    InpSLMode: restano buchi del certificato.
+#  - NON cambia TF: M5, come r44a.
+#  - NON e' una prova di regime: finestra contigua.
+#  - Il .ex5 sul banco corrisponde al .mq5: [NON MISURATO].
+#
+#  7. LA FINESTRA E IL DEPOSITO
+#  --------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26 e' MISURATO, non scelto (classe 590, pagata
+#  stanotte su R210): risultati_archivio/misura_tick/
+#  REFERTO_MISURA_TICK_U30USD.txt dice "I TICK REALI DI U30USD
+#  PARTONO DAL 2024.09.26". Prima di quella data, a -Modello 4, MT5 non
+#  si ferma: fabbrica i tick dalle barre M1, che pero' non ci sono.
+#  Deposito 10000 e InpRiskPercent invariato da r44a: e' il dial di
+#  MISURA, NON la taglia in campo (2,00% su FTMO, firma del 20/09).
+#  Ogni DD va riletto alla taglia vera prima di confrontarlo col muro.
+#  MAGIC 786501: grep -ril su tutto il repo il 22/09, ZERO occorrenze.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FRAZIONEIS 0.40
+
+InpMagic=786501||786501||0||786501||N
+InpRangeStartHour=14||14||0||14||N
+InpRangeStartMin=30||30||0||30||N
+InpRangeEndHour=14||14||0||14||N
+InpRangeEndMin=45||45||0||45||N
+InpEndHour=21||21||0||21||N
+InpEndMin=0||0||0||0||N
+InpUseCloseConfirm=0||0||0||0||N
+InpEntryPoints=10||10||0||10||N
+InpAllowShort=0||0||0||0||N
+InpSLMode=3||3||0||3||N
+InpTPMode=1||1||0||1||N
+InpTPRangeMult=1.5||1.5||0||1.5||N
+InpMaxRangePct=0.8||0.8||0||0.8||N
+InpUseEma200Filter=1||1||0||1||N
+InpUseEmaFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpTP_R=1.0||1.0||0||1.0||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailEMA=1||1||0||1||N
+InpExitOnEmaClose=0||0||0||0||N
+InpTP1Pct=0||0||25||75||Y
