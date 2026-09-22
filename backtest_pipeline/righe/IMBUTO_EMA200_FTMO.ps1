@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_IMBUTO_EMA200_FTMO_v2
+#  MARCATORE_IMBUTO_EMA200_FTMO_v3
 #  RUNNER_SOLA_LETTURA
 #  (v2, 22/09/2026, dal cancello di giudizio: classe 563 -- il campione di
 #   righe grezze era preso dal fondo di un testo concatenato AL CONTRARIO e
@@ -99,7 +99,8 @@ param(
   [string]$ContoAtteso = '541452707',
   [int]   $Giorni      = 10,
   [int]   $Magic       = 771531,
-  [string]$Simbolo     = 'US30.cash'
+  [string]$Simbolo     = 'US30.cash',
+  [string]$TagLog      = '[EMA200-IMBUTO]'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -208,6 +209,7 @@ Dillo '=====================================================================' $n
 Dillo ('lanciata il : ' + (Get-Date -Format 'yyyy-MM-dd HH:mm:ss') + '   (ORA LOCALE del PC)') $null
 Dillo ('macchina    : ' + $env:COMPUTERNAME + '   utente: ' + $env:USERNAME) $null
 Dillo ('bersaglio   : conto ' + $ContoAtteso + ' (FTMO), magic ' + $Magic.ToString($INV) + ', simbolo ' + $Simbolo) $null
+Dillo ('tag nel log : ' + $TagLog + '   (passo 3: le righe che la sedia scrive di suo pugno)') $null
 Dillo ('finestra    : ultimi ' + $Giorni.ToString($INV) + ' file di log') $null
 Dillo '' $null
 Dillo 'NON VIENE TOCCATO NIENTE: ne il REALE 10105439, ne il piccolo 50503392,' $null
@@ -298,11 +300,26 @@ Dillo ('      cartella dati FTMO: ' + $FT.Path) 'Green'
 # PASSO 3 -- L'IMBUTO (scheda Esperti: <dati>\MQL5\Logs). PER-EA.
 # ---------------------------------------------------------------------
 Dillo '' $null
-Dillo '[3/5] IMBUTO EMA200 -- dalla scheda Esperti (<dati>\MQL5\Logs). Questa fonte e PER-EA.' $null
-Dillo '      ATTENZIONE (L1): la riga di un giorno la scrive il PRIMO tick del giorno DOPO.' 'Yellow'
-Dillo '      Quindi il giorno completo piu recente e IERI. Di oggi c e al massimo un "parziale".' 'Yellow'
-Dillo '      ATTENZIONE (L2): il prefisso della riga e ORA LOCALE DEL PC; il campo "giorno" dentro' 'Yellow'
-Dillo '      la riga e ORA SERVER (FTMO = italiana +1). Sono due orologi diversi.' 'Yellow'
+$eImbuto = ($TagLog -like '*IMBUTO*')
+Dillo ('[3/5] LA VOCE DELLA SEDIA -- scheda Esperti (<dati>\MQL5\Logs), righe che contengono ' + $TagLog) $null
+Dillo '      Questa fonte e PER-EA: e l unica separabile per sedia.' $null
+if($eImbuto){
+  Dillo '      ATTENZIONE (L1): la riga di un giorno la scrive il PRIMO tick del giorno DOPO.' 'Yellow'
+  Dillo '      Quindi il giorno completo piu recente e IERI. Di oggi c e al massimo un "parziale".' 'Yellow'
+} else {
+  Dillo '      NOTA: con questo tag NON ci sono contatori di imbuto (li ha solo ABTG_EMA200).' 'Yellow'
+  Dillo '      Qui le righe si leggono GREZZE, una per una. Per la sedia 770101 quella che' 'Yellow'
+  Dillo '      risponde e "BUY LIMIT (retest) @ <prezzo> SL <prezzo> lot <n>" (sorgente r.1958):' 'Yellow'
+  Dillo '      dice A QUALE PREZZO il limite e stato piazzato, che e il numero da confrontare' 'Yellow'
+  Dillo '      col riempimento sull altro broker. L1 non si applica: queste righe sono immediate.' 'Yellow'
+}
+Dillo '      ATTENZIONE (L2): il PREFISSO di ogni riga di log e ORA LOCALE DEL PC (sul VPS:' 'Yellow'
+Dillo '      ora italiana). FTMO come server sta a italiana +1, quindi un prezzo letto qui va' 'Yellow'
+Dillo '      confrontato con il grafico spostando di un ora. Sono due orologi diversi.' 'Yellow'
+if($eImbuto){
+  Dillo '      E dentro le righe di imbuto il campo "giorno AAAA.MM.GG" viene da TimeCurrent(),' 'Yellow'
+  Dillo '      cioe ORA SERVER: nella stessa riga convivono i due orologi.' 'Yellow'
+}
 Dillo '' $null
 
 $dirExp = Join-Path $FT.Path 'MQL5\Logs'
@@ -316,8 +333,8 @@ if(-not (Test-Path -LiteralPath $dirExp)){
   foreach($f in ($fe | Sort-Object Name)){
     $txt = Leggi-Testo $f.FullName
     if($txt -eq ''){ Dillo ('      ' + $f.Name + '  [NON LEGGIBILE]') 'Yellow'; continue }
-    $hit = @($txt -split "`r?`n" | Where-Object { $_ -match '\[EMA200-IMBUTO\]' })
-    Dillo ('      --- file ' + $f.Name + '  (nome file = data in ORA LOCALE) -- righe imbuto: ' + $hit.Count.ToString($INV)) 'Cyan'
+    $hit = @($txt -split "`r?`n" | Where-Object { $_ -like ('*' + $TagLog + '*') })
+    Dillo ('      --- file ' + $f.Name + '  (nome file = data in ORA LOCALE) -- righe trovate: ' + $hit.Count.ToString($INV)) 'Cyan'
     foreach($h in $hit){
       $nImb++
       Dillo ('          ' + $h.Trim()) $null
@@ -333,12 +350,20 @@ if(-not (Test-Path -LiteralPath $dirExp)){
 }
 Dillo '' $null
 if($nImb -eq 0){
-  Dillo '      ZERO righe imbuto trovate. Le cause possibili, in ordine:' 'Yellow'
-  Dillo '      1. InpLogImbuto e false nel preset in campo (nel .set di repo e true);' 'Yellow'
+  Dillo ('      ZERO righe con il tag ' + $TagLog + '. Le cause possibili, in ordine:') 'Yellow'
+  Dillo '      1. InpVerbose e false nel preset in campo -> l EA e MUTO per scelta;' 'Yellow'
+  if($eImbuto){ Dillo '      1-bis. InpLogImbuto e false (nel .set di repo e true);' 'Yellow' }
   Dillo '      2. la sedia non e attaccata, o e attaccata ma muta (Algo Trading spento);' 'Yellow'
-  Dillo '      3. il giorno non e ancora cambiato da quando e stata attaccata (L1);' 'Yellow'
-  Dillo '      4. il binario in campo e piu vecchio del sorgente e non ha l imbuto.' 'Yellow'
-  Dillo '      NESSUNA di queste e "non ci schiva mai": zero righe NON e un numero.' 'Red'
+  Dillo '      3. il tag e SCRITTO MALE: il filtro e una sottostringa, e distingue le maiuscole' 'Yellow'
+  Dillo '         nel senso che deve comparire uguale nella riga di log;' 'Yellow'
+  if($eImbuto){ Dillo '      4. il giorno non e ancora cambiato da quando e stata attaccata (L1);' 'Yellow' }
+  Dillo '      5. il binario in campo e piu vecchio del sorgente e non scrive quella riga;' 'Yellow'
+  Dillo '      6. la finestra -Giorni non arriva fino al giorno che ti interessa.' 'Yellow'
+  Dillo '      NESSUNA di queste vuol dire "non e successo niente": zero righe NON e un numero.' 'Red'
+} elseif(($armateTot + $tentatiTot + $piazzatiTot) -eq 0) {
+  Dillo ('      ' + $nImb.ToString($INV) + ' righe lette e stampate GREZZE qui sopra.') 'Green'
+  Dillo '      Nessun contatore di imbuto in queste righe: non c e nessun totale da sommare,' $null
+  Dillo '      e non ne invento uno. I numeri si leggono dalle righe, una per una.' $null
 } else {
   Dillo ('      TOTALE sulla finestra letta:  ARMATE ' + $armateTot.ToString($INV) +
          '   ORDINI tentati ' + $tentatiTot.ToString($INV) +
@@ -356,10 +381,27 @@ if($nImb -eq 0){
 # ---------------------------------------------------------------------
 Dillo '' $null
 Dillo '[4/5] DESTINO DEI PENDENTI -- dal giornale (<dati>\logs).' $null
-Dillo ('      AVVISO (L3): il giornale NON porta il magic. Su ' + $Simbolo + ' operano TRE sedie') 'Yellow'
-Dillo '      (770202 Dow Apertura, 770511 SuperWave, 771531 EMA200) e TUTTE usano pendenti.' 'Yellow'
-Dillo '      Quindi questi conteggi NON sono separabili per sedia: si leggono come totale di' 'Yellow'
-Dillo '      simbolo. Il numero per-sedia e quello del PASSO 3.' 'Yellow'
+# LE SEDIE DEL SIMBOLO NON SI SCRIVONO A MANO (difetto trovato in collaudo il
+# 22/09: con -Simbolo GER40.cash la frase elencava le sedie del DOW, ed era FALSA).
+# Si scelgono qui, e se il simbolo non e' in elenco lo si DICHIARA invece di
+# nominare sedie a caso.
+$sedie = ''
+if($Simbolo -like 'US30*' -or $Simbolo -like 'U30*'){
+  $sedie = '770202 Dow Apertura, 770511 SuperWave, 771531 EMA200'
+} elseif($Simbolo -like 'GER40*' -or $Simbolo -like 'D30*' -or $Simbolo -like 'DAX*'){
+  $sedie = '770101 DAX Apertura (retest, solo BUY), 770411 MaxMinNotte DAX Short (solo SELL)'
+} elseif($Simbolo -like 'NAS*' -or $Simbolo -like 'US100*'){
+  $sedie = '770260 Nasdaq Apertura RETEST'
+}
+Dillo '      AVVISO (L3): il giornale NON porta il magic, quindi questi conteggi NON sono' 'Yellow'
+Dillo '      separabili per sedia: si leggono come totale DEL SIMBOLO. Il numero per-sedia' 'Yellow'
+Dillo '      e quello del PASSO 3.' 'Yellow'
+if($sedie -ne ''){
+  Dillo ('      Su ' + $Simbolo + ' risultano queste sedie in campo: ' + $sedie) 'Yellow'
+} else {
+  Dillo ('      Su ' + $Simbolo + ' NON SO quali sedie operino: non e un simbolo che questa sonda') 'Yellow'
+  Dillo '      conosce. Non ne nomino a caso: leggi le righe grezze e attribuiscile tu.' 'Yellow'
+}
 Dillo '' $null
 $g = $FT.Giornale
 $righeSim = @($g -split "`r?`n" | Where-Object { $_ -match [regex]::Escape($Simbolo) })
