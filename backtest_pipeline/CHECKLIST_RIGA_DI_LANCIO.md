@@ -29674,3 +29674,37 @@ fisso (07:30) al **rango 267**, con mediane **1,060 contro 0,342** = **3,1x**.
    una serie da 96 minuti vuol dire "il primo", su una da 1380 vuol dire "i primi 14":
    la stessa riga di codice e' due criteri diversi. Si mette un pavimento assoluto
    (qui `max(3, ceil(0.01*n))`) e lo si dichiara.
+
+
+---
+
+## CLASSE 582 -- ⏱️🔪 LA PRECONDIZIONE CHE AUTORIZZA UN `Stop-Process` E' VERIFICATA A t=0, MA L'UCCISIONE AVVIENE A t=TETTO: in mezzo c'e' una finestra di ORE in cui un umano puo' riaprire il bersaglio (22/09/2026, figlia della 457 e della regola dei terminali multipli)
+
+**Caso reale.** La riga del round `R209A` fa `throw` se un `terminal64` sotto
+`C:\Program Files\BCM Markets MT5 Terminal` e' gia' vivo all'AVVIO -- ed e' quella verifica che rende legittimo, **240 minuti
+dopo**, il ramo di timeout `Get-Process metatester64,terminal64 | ... | Stop-Process -Force`.
+
+🔴 **Nel mezzo, su `DESKTOP-H4D7CAJ`, quel percorso e' il terminale del demo `50503392` -- la macchina
+da cui il 14/08/2026 sono partiti ORDINI VERI.** Se Claudio lo riaprisse a mano in quelle
+quattro ore, il ramo di timeout glielo chiuderebbe.
+
+🟢 Cosa **non** e': non e' un difetto del filtro, che e' una **costante** e per prefisso
+non raggiunge nemmeno il `... MT5 Terminal -V3` del 100k (dopo `Terminal` c'e' uno **spazio**, non un `\`).
+E non chiude nessuna posizione: stop e take profit vivono sul server del broker.
+
+🟢 **Cosa si e' fatto, ed e' la parte che conta**: il tetto e' stato portato da **240 a
+60 minuti**, perche' il costo MISURATO della corsa e' **~3-6 minuti per 10 passate**
+(due ancoraggi: R112 a ~23 s/passata; due referti R202 avviati a 3 min 51 s di distanza).
+👉 **60 minuti restano 10-20x il costo misurato e dimezzano due volte l'esposizione**:
+la finestra in cui un umano puo' riaprire il bersaglio, e l'attesa di Claudio se il round
+si impicca.
+
+### La regola
+1. ⏱️ **Una precondizione che viene CONSUMATA piu' tardi si dichiara col suo RITARDO,
+   non solo col suo contenuto.** *"Ho controllato che fosse chiuso"* e' vero a t=0 e puo'
+   essere falso a t=T.
+2. 📐 **Il tetto di tempo non e' solo un limite di pazienza: e' l'AMPIEZZA DELLA
+   FINESTRA DI RISCHIO** di ogni `Stop-Process` differito. Si dimensiona sul **costo
+   misurato** della corsa, non su un numero tondo.
+3. 🔎 **Quando la precondizione non e' riverificabile al momento dell'uso, si dichiara
+   che non lo e'** -- nel documento di consegna, non solo nel codice.
