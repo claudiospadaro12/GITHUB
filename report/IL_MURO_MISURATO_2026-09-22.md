@@ -389,3 +389,24 @@ Siamo partiti da *«non possiamo dire né che sfondano né che sono al sicuro»*
 Una su sei non è una vittoria grossa. 🪑 **Ma è la prima sedia della challenge di cui possiamo
 dire una cosa DIMOSTRATA invece che sperata** — e le altre cinque adesso hanno un prezzo scritto
 accanto, non un punto interrogativo.
+
+
+---
+
+## ✏️ CHIUSO IL PUNTO 7 — **22/09/2026, e la notizia è buona**
+
+Il punto 7 diceva: *«la cella in campo di `770260` potrebbe non essere più quella di R199A — non ho verificato campo per campo»*. 🟢 **Verificato adesso: NON lo è.**
+
+Commit `496408a9` del **21/09 20:22** — *«Nasdaq 770260: ACCESA la parziale al 50% (firma di Claudio)»*. Il preset in campo `mql5/Presets/FTMO/ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set` porta r.354 `InpTP1_ClosePct=50.0` e r.355 `InpBreakevenAtTP1=true`. 👉 La cella viva è la **Pass 2 di `R199B`**, non la Pass 0 di `R199A`.
+
+| | riga 234-235 di questo referto (cella R199A) | 🟢 cella VERA in campo (R199B `50`) |
+|---|---|---|
+| `Equity DD %` IS | 🔴 **12,3568%** | 🟢 **7,3069%** |
+| `Equity DD %` OOS | 🟠 **9,1244%** | 🟢 **7,8576%** |
+
+> ### 🟢 **Per la classe 562 (limite superiore SOTTO la soglia = sicurezza DIMOSTRATA), la `770260` è sotto il muro del 10% su TUTTE E DUE le finestre.**
+> Le righe 234-235 e 268 di questo referto descrivono una cella che **non vola più**.
+
+⚠️ Resta aperto: che il **terminale** FTMO `541452707` (`C:\FTMO`) abbia davvero caricato quel `.set` è **[NON VERIFICATO]** — lo dice la riga dei binari (§3 di `report/BINARI_IN_CAMPO_FTMO_2026-09-21.md`), non ancora eseguita.
+
+Misura completa: `report/DD_NASDAQ_IL_ROUND_GIA_FATTO_2026-09-22.md`.
