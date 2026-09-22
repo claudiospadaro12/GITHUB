@@ -1,0 +1,385 @@
+# ======================================================================
+#  EA: ABTG_Dow_Apertura_US
+#  R214a -- IL TF DEL GRAFICO DELLA SEDIA 770202, MAI CAMBIATO IN
+#  VENTUNO MESI -- E LA SEDIA STA OPERANDO SU FTMO DA IERI.
+#  U30USD @PERIODO M15 (la cella viva gira a M5), LONG, cella INVARIATA.
+#  Asse: InpMagic (ASSE TECNICO, cancello G1 di determinismo).
+#  Scritto il 22/09/2026. Attesa e soglie congelate PRIMA dei numeri.
+#  Dossier: report/RIESAME_MORTI_APERTURE_2026-09-22.md par. 3.5 riga 3.
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#     -Deposito 80000 -Modello 4
+#     NON 100000 (che e' il deposito di R47/R140c sul DAX) e NON 10000
+#     (che e' quello di R211a/b sull'ORB): 80.000 e' il deposito con cui
+#     l'ANCORA di QUESTO file, R202A, e' stata girata -- referto
+#     risultati_prove/R202A/REFERTO_ROUND_R202A.txt riga "deposito".
+#     Con un altro deposito il confronto DECADE e il file va rilanciato,
+#     non "letto con prudenza".
+# ======================================================================
+#
+#  1. IL BUCO, E NON E' UN BUCO MIO
+#  --------------------------------------------------------------------
+#  report/RIESAME_MORTI_APERTURE_2026-09-22.md par. 3.1 e tabella madre
+#  riga A: su 221 CSV della famiglia aperture, ABTG_Dow_Apertura_US su
+#  U30USD e' girata SOLO ED ESCLUSIVAMENTE SU M5. Per la direttiva di
+#  Claudio del 22/09 ("da provare in + TF mi raccomando, ogni strategia")
+#  e per il CERTIFICATO DI MORTE del 09/09 (punto 5: "il TF cambiato
+#  almeno una volta"), il verdetto di questa sedia e' NON ANCORA
+#  MISURATO sul punto 5 -- e lo e' MENTRE OPERA sul terminale FTMO
+#  541452707 come magic 770202.
+#  >>> Schierare con una casella aperta e' lo stesso difetto che
+#      archiviare con una casella aperta, solo al contrario. Costa 4
+#      passate e si chiude.
+#
+#  2. *** QUESTO ROUND E' UN CANCELLO DI VERIFICA, NON UNA MISURA ***
+#  --------------------------------------------------------------------
+#  E lo dichiaro PRIMA, perche' e' la differenza piu' importante del
+#  file. Letto nel sorgente riga per riga, non dedotto:
+#
+#  (a) IL RANGE E LO STOP NON DIPENDONO DAL TF DEL GRAFICO.
+#      mql5/Experts/ABTG_Dow_Apertura_US.mq5
+#        r.844-845  iBarShift(_Symbol, PERIOD_M1, tStart/tEnd, false)
+#        r.852-853  iHighest/iLowest(_Symbol, PERIOD_M1, ...)
+#        r.856-857  hi = iHigh(_Symbol, PERIOD_M1, hIdx)
+#                   lo = iLow (_Symbol, PERIOD_M1, lIdx)
+#      Il massimo e il minimo della finestra d'apertura si leggono su
+#      PERIOD_M1 CABLATO. Con InpSLMode=0 (SL_RANGE) lo stop e'
+#      l'estremo opposto del range: stessa geometria a M5, M15, M30.
+#
+#  (b) LE TRE DIPENDENZE DA PERIOD_CURRENT CHE ESISTONO SONO INERTI CON
+#      I PIN DELLA CELLA VIVA. Le elenco PER NOME (classe 180), non
+#      "tutto il resto":
+#      r.1207  octf = (InpOCTimeframe==PERIOD_CURRENT) ? Period() : ...
+#              -> vive SOLO nel ramo OPENCONFIRM (InpEntryMode=5).
+#              QUI InpEntryMode=2 (RETEST) -> MORTO.
+#      r.2091  VolumeOK(){ return VolumeOKtf(PERIOD_CURRENT); }
+#              -> r.2074-2076: 'if(!InpUseVolumeFilter) return(true);'
+#              QUI InpUseVolumeFilter=0 -> ritorna true PRIMA di
+#              toccare il TF. E' chiamata anche DIRETTAMENTE dal ramo
+#              RETEST (r.1315 e r.1348), non solo via ConfirmOK: l'ho
+#              verificato perche' era la via piu' probabile per rompere
+#              l'invarianza, e la guardia la copre lo stesso.
+#      r.396   gAtrH = iATR(_Symbol, PERIOD_CURRENT, InpAtrPeriodMgmt)
+#              -> letto da AtrValue() (r.1612). Entra in:
+#                 - lo stop, solo se InpSLMode != 0 -> QUI 0, OFF;
+#                 - il trailing ATR (r.1838/1851), solo se
+#                   InpTrailMode = ABTG_TRAIL_ATR -> QUI 1 = FIXED, OFF;
+#                 - il filtro ATR (ConfirmOK r.2042-2044), solo se
+#                   InpUseAtrFilter -> QUI false, e con anche i volumi
+#                   spenti ConfirmOK ritorna true alla prima riga;
+#                 - il ramo FADE (r.976) -> InpEntryMode=3, OFF;
+#                 - InitialSL() (r.1859-1864) QUANDO LA PARZIALE E' GIA'
+#                   FATTA. *** QUESTA E' L'UNICA VIA CHE RESTA VIVA, e
+#                   InpTP1_ClosePct=50 la apre davvero. *** L'ho seguita
+#                   fino in fondo: il riskDist che ne esce (r.1727)
+#                   alimenta SOLO
+#                     . beTarget (r.1779), dentro 'if(InpBEatR > 0 ...)'
+#                       -> QUI InpBEatR=0 -> mai eseguito;
+#                     . profR (r.1808), letto solo da
+#                       'trailArmato = (InpTrailStartR <= 0) || ...'
+#                       -> QUI InpTrailStartR=0 -> trailArmato e' SEMPRE
+#                       vero e profR NON viene mai guardato.
+#                   L'obiettivo della PARZIALE (r.1739) usa il riskDist
+#                   calcolato con partialDone=false, cioe' curSL, lo
+#                   stop VERO del range: NON passa dall'ATR.
+#      >>> CONCLUSIONE DELLA LETTURA: con i pin della CELLA VIVA il TF
+#          del grafico e' INERTE. La previsione non e' "piu' o meno
+#          uguale": e' IDENTICO ALLA CIFRA.
+#
+#  3. L'ANCORA -- sei numeri, letti nel CSV GREZZO
+#  --------------------------------------------------------------------
+#  R202A, passata 3 (InpTP1_R = 1.00, che e' la cella VIVA di 770202:
+#  confrontata riga per riga con mql5/Presets/FTMO/
+#  ABTG_Dow_Apertura_US_770202_FTMO.set -- coincide su tutti i pin di
+#  merito; differiscono solo gli OROLOGI, rimappati +2 per il server
+#  FTMO, il rischio 2,00 di campo contro 1,0 di misura, InpCorrSymbol
+#  "US500.cash" contro "SPXUSD" che e' INERTE perche'
+#  InpUseCorrelation=false, e il magic).
+#  File: backtest_pipeline/risultati_prove/R202A/
+#        ABTG_Dow_Apertura_US_U30USD_IS_R202A.csv   riga Pass 3
+#        ABTG_Dow_Apertura_US_U30USD_OOS_R202A.csv  riga Pass 3
+#
+#      IS    Profit 2241.62  PF 1.22173  RF 0.48667  DD 5.6726  n  74
+#            Expected Payoff 30.29216  Peggior Giornata % -1.0062
+#      OOS   Profit 5395.25  PF 1.27175  RF 1.51555  DD 4.3944  n 130
+#            Expected Payoff 41.50192  Peggior Giornata % -1.0197
+#
+#  Cifre ESATTAMENTE come nel CSV (classe 451 e 385): cinque decimali su
+#  PF e RF, quattro sul DD. NON sono i numeri del referto md, che per il
+#  PF IS scrive 1,22247: quello e' un arrotondamento di seconda mano, il
+#  CSV dice 1.22173 e VINCE IL CSV.
+#  Finestra: @DAQUANDO 2024.09.26 + @FINOA 2026.06.30 + @FRAZIONEIS 0.40
+#  -> 642 giorni; floor(642 x 0,40) = 256
+#     IS  2024.09.26 - 2025.06.09     OOS 2025.06.10 - 2026.06.30
+#  Sono le STESSE finestre di R202A (che non scriveva @FINOA ne'
+#  @FRAZIONEIS e prendeva gli stessi due default dal driver).
+#
+#  4. ATTESA DICHIARATA, PRIMA DEI NUMERI -- CON TRE USCITE
+#  --------------------------------------------------------------------
+#  (a) IL NUMERO ATTESO E' L'IDENTITA'. Tutti e sei i numeri sopra,
+#      riprodotti alla quinta cifra significativa, su tutte e due le
+#      celle gemelle. VERDETTO: "il TF del grafico di 770202 e' INERTE,
+#      ed e' MISURATO oltre che letto nel codice" -> casella 5 del
+#      certificato CHIUSA su una sedia che opera.
+#      REGALO CHE CONTA: se il TF e' inerte, le corse future su questa
+#      sedia possono girare a M15/M30 e leggere finestre PIU' LUNGHE a
+#      parita' del tetto delle ~100.000 barre (a M5 la finestra piena
+#      sta dentro solo perche' il walk-forward la spezza in due).
+#  (b) IL NUMERO BRUTTO: i numeri DIFFERISCONO. Vuol dire che esiste una
+#      dipendenza dal TF del grafico che la mia lettura del sorgente NON
+#      ha trovato, dentro una sedia CHE OPERA SU CONTO CHALLENGE. E'
+#      un rilievo che va in CIMA al referto e DAVANTI a tutto il resto.
+#      Diagnosi immediata: se cambia solo il DD, e' la gestione; se
+#      cambia Trades, e' l'ingresso o la macchina a fasi.
+#      >>> QUESTA USCITA E' PIU' IMPORTANTE DELL'ALTRA, ed e' il motivo
+#          per cui il round vale 4 passate anche se mi aspetto (a).
+#  (c) CATENA ROTTA, CHE NON E' UNA RISPOSTA: zero passate; le due celle
+#      gemelle DIVERSE FRA LORO; Trades = 0; oppure la corsa girata con
+#      deposito diverso da 80.000 o modello diverso da 4. In quel caso
+#      il confronto con R202A DECADE e il file va RILANCIATO.
+#
+#  5. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  *** L'IPOTESI ALTERNATIVA, e non e' "il nulla": e' che @PERIODO non
+#  sia arrivato al tester e la corsa sia girata DUE VOLTE A M5. ***
+#  Quale numero produce quella spiegazione? ESATTAMENTE LO STESSO CSV
+#  dell'ipotesi buona: sei numeri identici a R202A. Le due spiegazioni
+#  sono INDISTINGUIBILI dai numeri, quindi il CSV da solo NON decide.
+#  >>> COME SI SEPARANO, e serve PRIMA di leggere i numeri: si apre il
+#      .ini generato dal driver (riga 'Period=') e/o l'intestazione del
+#      Giornale della passata, dove il TF del simbolo e' scritto. Se
+#      dice M5, QUESTO ROUND NON HA MISURATO NIENTE e va rifatto.
+#      *** LA VERIFICA E' OBBLIGATORIA, NON FACOLTATIVA: e' l'unico
+#      controllo che separa una misura da un'identita' per costruzione.
+#      Chi consegnasse "identico, quindi inerte" senza averla fatta
+#      avrebbe controllato la coerenza della propria risposta invece di
+#      provare a romperla (regola del 10/09). ***
+#  Secondo contro-esempio, sul campione: "n=74 in IS sta sotto il
+#  pavimento dei 150, quindi il round non vale". NO: questo round non
+#  misura il MERITO (punto 6-A2), misura un'IDENTITA'. Un'identita' si
+#  legge a qualunque n, come il rischio.
+#
+#  5-bis. *** IL CONTROLLO INCROCIATO COL NASDAQ -- vale quanto il .ini
+#  e non costa una passata in piu' ***
+#  --------------------------------------------------------------------
+#  R214c/R214d girano lo STESSO esperimento su NASUSD, dove il TF del
+#  grafico MORDE DAVVERO (InpUseVolumeFilter=TRUE e VolumeOK() legge la
+#  barra del grafico, ABTG_Nasdaq_Apertura_US.mq5 r.2530). Le quattro
+#  corse insieme decidono:
+#    Dow IDENTICO + Nasdaq DIVERSO  -> @PERIODO ARRIVA davvero al
+#      tester (lo prova il Nasdaq), e allora l'identita' del Dow e' una
+#      MISURA e non un artefatto. E' il risultato che mi aspetto.
+#    Dow IDENTICO + Nasdaq IDENTICO -> NON si conclude niente finche'
+#      non si apre il .ini: le due spiegazioni restano indistinguibili.
+#    Dow DIVERSO                    -> c'e' una dipendenza dal TF non
+#      dichiarata su 770202, e viene PRIMA di tutto il resto.
+#  >>> Questo NON sostituisce la lettura del .ini (l'implicazione vale
+#      in un verso solo), ma la conferma o la contraddice a costo zero.
+#
+#  6. SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  A1  IDENTITA'. Si dichiara "TF INERTE" solo se TUTTI E SEI i numeri
+#      (Profit, PF, RF, DD, Trades in IS e in OOS) coincidono con R202A
+#      entro la quinta cifra significativa. UNO SOLO che diverge basta
+#      per scrivere "dipendenza dal TF PRESENTE su 770202", e allora si
+#      dice QUALE numero e' cambiato e DI QUANTO.
+#  A2  IL ROUND NON MISURA IL MERITO. Non c'e' nessuna manopola di
+#      motore ad asse: PF, RF e DD servono come IMPRONTA da confrontare.
+#      Nessuna cella si porta avanti, nessun altopiano da cercare,
+#      nessun centro da scegliere. La regola di selezione e' "nessuna
+#      selezione: e' un confronto d'identita'", e la scrivo accanto al
+#      numero perche' senza la regola il numero non vuol dire niente.
+#  A3  RISCHIO. Il DD si legge a QUALUNQUE n. Un Equity DD % sopra
+#      6,0% in una qualunque delle due finestre e' una NOTIZIA: il
+#      contratto in essere di questa sedia e' 5,6726% (IS) e 4,3944%
+#      (OOS) a rischio 1,00%. *** E VA LETTO ALLA TAGLIA VERA: in campo
+#      su FTMO questa sedia gira al 2,00%, e il fattore misurato in
+#      casa e' 1,956-1,990 -> 8,60-8,74% (OOS) e 11,10-11,29% (IS).
+#      L'IS SFONDA GIA' IL MURO DEL 10% ALLA TAGLIA DI CAMPO, ed e' un
+#      fatto gia' agli atti, non una scoperta di questo round. ***
+#      Le grandezze del cancello sono INVARIANTI ALLA TAGLIA (Recovery
+#      Factor, DD %, Profit): non si confronta mai un Expected Payoff.
+#  A4  IL ROUND NON PROMUOVE E NON TOCCA NIENTE. Non cambia un preset,
+#      non accende ne' spegne una sedia, non tocca il forward, non
+#      nomina il conto reale 10105439. Taglie, rischio e accensioni
+#      sono FIRMA DI CLAUDIO.
+#
+#  7. CLASSE 594 -- CHI ALTRO DIPENDE DALLA VARIABILE D'ASSE?
+#  --------------------------------------------------------------------
+#  La variabile vera di questo round e' @PERIODO, che NON e' un input
+#  dell'EA: e' il TF del grafico, e lo mette la riga di lancio. Non puo'
+#  quindi "spegnere un blocco" nel senso della classe 594. Le cose che
+#  dipendono da lui sono le TRE del punto 2b, e sono tutte e tre
+#  DICHIARATE SPENTE dai pin. L'asse dentro il file e' il magic, che nel
+#  tester non tocca un numero (un solo EA sul simbolo).
+#  >>> E il contrario e' altrettanto vero e va detto: se un domani si
+#      accendesse InpUseVolumeFilter su questa sedia, questo round
+#      SCADREBBE, perche' la catena (b) si riaprirebbe.
+#
+#  8. COSTO -- tetto dichiarato, non stima centrale
+#  --------------------------------------------------------------------
+#  2 celle x 2 finestre = 4 PASSATE.
+#  Base MISURATA il 21/09 sul PC di backtest (DESKTOP-H4D7CAJ), stesso
+#  EA, stesso simbolo, modello 4, 8 passate M5: caso stretto 2 min 41 s
+#  (= 20,1 s/passata, R202A), caso largo 11 min 57 s (= 89,6 s/passata).
+#  >>> COSTO DICHIARATO COL TETTO: 4 x 89,6 s = 6,0 MINUTI.
+#      Caso stretto: 1,3 minuti.
+#  *** E salendo di TF il costo SCENDE, ma NON IN PROPORZIONE: a
+#  modello 4 il tester rigioca lo STESSO flusso di tick reali, cambia
+#  solo quante barre ci costruisce sopra. Non dividere per tre. ***
+#
+#  9. BUCHI DICHIARATI DI QUESTO ROUND
+#  --------------------------------------------------------------------
+#  - NON misura M30: e' il file gemello R214b. Un gradino alla volta
+#    (una variabile per file). Se M15 NON e' identico, M30 non si
+#    misura affatto finche' non si e' capito perche'.
+#  - NON misura il LATO SHORT. La sedia viva e' long-only
+#    (InpAllowShort=false). La REGOLA DEI DUE LATI del 25/08 e'
+#    soddisfatta ALTROVE sullo stesso simbolo e sullo stesso motore
+#    (Dow_Apertura/dow_walkforward_{IS,OOS}.csv girano con
+#    InpAllowLong=1 E InpAllowShort=1). Qui si misura la SEDIA, non il
+#    motore.
+#  - NON mette ad asse InpFilterTF (H1/H2/H3/H4), che sul Dow e' la
+#    manopola che vale circa +0,21 di PF e non e' MAI stata girata
+#    (221 CSV, varia in ZERO). E' un round a parte e resta un buco
+#    del certificato.
+#  - NON mette ad asse InpLevelTF: con InpRangeMode=0 quella manopola
+#    e' INERTE PER COSTRUZIONE su questa cella, e girarla misurerebbe
+#    il nulla.
+#  - PROVA DI REGIME: assente e NON colmabile su U30USD. Lo storico BCM
+#    degli indici parte dal 2024.09.26 (misurato:
+#    risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt) e
+#    contiene un regime e mezzo. *** E nemmeno lo storico esterno la
+#    apre: NASUSD_EXT e SPXUSD_EXT sono IN FRIGO (diff 0,0756% e
+#    0,0608% contro la soglia 0,05% del cancello ZERO), e Dow e DAX non
+#    risultano importati affatto. Mappa:
+#    report/LO_STORICO_ESTERNO_MAPPA_2026-09-23.md. ***
+#  - IL .ex5 SUL BANCO CORRISPONDE AL .mq5: [NON MISURATO]. La corsa va
+#    pinnata a un COMMIT e il commit va scritto nel referto.
+#  - "Max barre nel grafico" sul terminale di backtest: [NON MISURATO].
+#    Costa zero passate leggerlo. R202A gira con MaxBars=100000000
+#    (scritto nel suo referto): se il banco di oggi ha lo stesso
+#    valore, il tetto non morde ne' a M5 ne' a M15.
+#  - GUARDIAN: InpUsaGuardian=true come in campo. Nel tester le
+#    GlobalVariable non esistono e la guardia e' fail-open, come in
+#    R202A.
+#
+#  10. LA FINESTRA, IL DEPOSITO, IL MAGIC
+#  --------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26 e' MISURATO, non scelto (classe 590):
+#  backtest_pipeline/risultati_archivio/misura_tick/
+#  REFERTO_MISURA_TICK_U30USD.txt -- "I TICK REALI DI U30USD PARTONO
+#  DAL 2024.09.26". Prima di quella data, a modello 4, MT5 non si ferma:
+#  fabbrica i tick dalle barre M1, che sugli indici NON CI SONO.
+#  Deposito 80000 e InpRiskPercent 1.0: sono i valori di R202A. Il
+#  rischio di MISURA non e' la taglia di CAMPO (2,00%, firma del 20/09).
+#  ORA SERVER: InpSessionHour=14, InpSessionMin=30 = 15:30 italiane =
+#  apertura del cash USA (il server BCM e' un'ora indietro). Un 15 in
+#  quella colonna e' un file da cestinare.
+#  MAGIC 788111 / 788161: grep -ril su tutto il repo il 22/09
+#  (.git e .claude esclusi), ZERO occorrenze per entrambi.
+#  UN SOLO AGENTE locale nello Strategy Tester (classe 129), altrimenti
+#  il cancello G1 non e' leggibile.
+# ======================================================================
+
+@SIMBOLO    U30USD
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+# --- LA CELLA VIVA, copiata campo per campo dalla riga Pass 3 dei CSV
+#     grezzi di R202A (non da un referto). Gli orari sono quelli BCM
+#     di R202A, non quelli rimappati del preset FTMO.
+InpUsaGuardian=true
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=1000.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=400.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato: il default compilato e' gia' la stringa
+#   vuota, e un pin di stringa VUOTA viene IGNORATO da MT5 (controllo 3
+#   di controlla_prova.py). Nel CSV di R202A la colonna e' vuota.
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=500.0
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMaxSpread=0
+InpVerbose=true
+
+# --- L'UNICO ASSE: TECNICO (2 celle x 2 finestre = 4 passate).
+#     La variabile vera di questo round e' @PERIODO, che non e' un
+#     input dell'EA. L'asse dentro il file e' il magic, e serve SOLO al
+#     cancello G1 di determinismo: le due celle differiscono
+#     ESCLUSIVAMENTE per InpMagic e DEVONO tornare identiche alla cifra.
+#     Se differiscono, il banco non e' deterministico e nessun numero
+#     di questo round si legge.
+InpMagic=788111||788111||50||788161||Y
+# ======================================================================

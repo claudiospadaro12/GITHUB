@@ -9,6 +9,78 @@ _Documento vivo: aggiornato ad ogni nuovo backtest. Pensato anche per condivider
 - **Criterio ottimizzazione:** Recovery Factor.
 - **Regola:** gli `_Ottimizzato` girano in parallelo agli originali (magic diversi). NIENTE hedging/martingala.
 
+🔴 **CORRETTO IL 22-23/09/2026 — LA RIGA «2,5 ANNI» QUI SOPRA E' FALSA SUGLI INDICI.**
+Lo storico BCM degli indici **parte dal 2024.09.26**, non dal 2024.01.01: la finestra vera
+e' di **21 mesi**, non 30. Misura: `risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt`.
+👉 Ogni riga di questo registro etichettata «2024.01» su un indice va letta come
+**2024.09.26 → 2026.06.30**. Non e' un dettaglio di forma: l'etichetta sbagliata ha
+prodotto la frase *«IS di 18 mesi»* per finestre che di mesi ne hanno **9,15**.
+
+---
+
+## 0) 📏 COME SI LEGGE QUESTO REGISTRO — le tre colonne che mancavano a tutti (aggiunto il 22-23/09/2026)
+
+**Nasce da un difetto di metodo misurato il 22/09**: la classifica dei candidati mescolava
+numeri OHLC e numeri a tick, e separandoli il censimento del 09/09 **perde 3 dei suoi primi
+12 posti**. Da qui in avanti nessun numero di questo registro sta da solo.
+
+### 📊 (1) IL **MODELLO** VA ACCANTO AL PF, SEMPRE
+- `Modello 1` / `OHLC 1-min` = **screening**. `Modello 4` / `tick reali` = **verdetto**.
+- 🔴 **Il fattore misurato in casa e' 1,71-1,85 IN ECCESSO**, e sono due misure indipendenti
+  sulla stessa famiglia: `ABTG_DAX_Live5m` D30EUR OOS **1,46853 OHLC → 0,85701 tick**
+  (fattore **1,714**) e `ABTG_DAX_Live5m_v2` D30EUR OOS **1,71088 → 0,92490** (fattore
+  **1,850**, cella cancello `1500/4000`, `risultati_prove/ABTG_DAX_Live5m_v2/ABTG_DAX_Live5m_v2_D30EUR_OOS{,_ohlc}.csv`). Fonti: `risultati_prove/ABTG_DAX_Live5m/ABTG_DAX_Live5m_D30EUR_OOS{,_ohlc}.csv`.
+  Sul Nasdaq lo scarto arriva a **2,25** (`ABTG_Nasdaq_Live5m_NASUSD_OOS{,_ohlc}.csv`:
+  2,16249 → 0,96265).
+- ➡️ **Un PF OHLC non boccia e non promuove.** L'unica eccezione gia' agli atti (r.2543): uno
+  **zero** OHLC su un campione largo vale come chiusura, perche' l'errore e' ottimista e un
+  modello ottimista che non trova niente non sta nascondendo un edge.
+
+### ⚖️ (2) OGNI **DD** PORTA ACCANTO IL SUO `InpRiskPercent`
+- **Il campo FTMO gira al 2,00%.** Il fattore misurato in casa fra 1% e 2% e' **1,956-1,990**.
+- 🔴 Un DD scritto senza il rischio **non e' confrontabile col muro del 10%**. Esempio vivo:
+  `dow_walkforward_OOS.csv` fa **8,70% @ 1,00%** = **17,0-17,3% alla taglia di campo**, cioe'
+  **sopra il muro** — lo stesso numero, letto giusto, cambia verdetto.
+
+### ✅ (3) IL **CERTIFICATO DI MORTE** (regola del 09/09) IN CINQUE CASELLE
+Un candidato **non si archivia come MORTO** se manca anche una di queste:
+**①** un **PF** misurato · **②** un **n** e un **DD** · **③** la **gestione dell'uscita**
+messa ad asse almeno una volta · **④** i **simboli gemelli** provati · **⑤** il **TF**
+cambiato almeno una volta.
+- 🔴 **Il punto ⑤ pesa come gli altri quattro insieme** (direttiva di Claudio del 22/09:
+  *«DA PROVARE IN + TF MI RACCOMANDO, OGNI STRATEGIA»*). Se manca, il verdetto e'
+  **⚪ NON ANCORA MISURATO** con scritto **COSA MANCA** — mai 🔴 morto.
+- 📌 **Il punto ⑤ si scrive ELENCANDO I TF PER NOME** (*«solo M5»*, *«M5 e M15»*), mai un
+  si/no. E **il TF che conta e' quello che entra nei numeri**, non sempre quello del grafico:
+  su parecchi motori la manopola che morde e' `InpLevelTF`, `InpTriggerTF`, `InpTrailTF`,
+  `InpMgmtTF`, `InpExecTF` o la larghezza della finestra d'ingresso.
+- 🟢 **E dove una manopola di TF NON ESISTE nel codice** (timeframe cablati), il punto ⑤ e'
+  **NON APPLICABILE, con le righe del sorgente citate** — non «mancante».
+
+### 🌍 (4) LO STORICO ESTERNO — *«ABBIAMO SCARICATO LO STORICO DA ALTRI SITI SIA SU ORO CHE SU INDICI»* (Claudio, 23/09/2026)
+🔴 **Ovunque questo registro scriva «prova di regime non possibile / storico troppo corto»,
+quella frase e' VERA sugli INDICI BCM e FALSA su FOREX e ORO.** Vanno distinte, altrimenti
+il registro dichiara impossibile una misura che si puo' fare domani.
+Mappa completa (non duplicata qui): `report/LO_STORICO_ESTERNO_MAPPA_2026-09-23.md`.
+
+| famiglia | storico esterno | cancello ZERO (soglia **0,05%** di differenza media) | fonte |
+|---|---|---|---|
+| **FOREX** `EURUSD_EXT` `GBPUSD_EXT` `USDJPY_EXT` `EURJPY_EXT` `AUDJPY_EXT` `CHFJPY_EXT` `GBPCAD_EXT` | 🟢 **SI — promossi dal 14-15/08/2026** | **0,0041-0,0090%** · copertura **99,5-99,6%** · shift **+5h** su 8 su 8 | `risultati_archivio/REFERTO_IMPORT_6_SIMBOLI.md` |
+| **ORO** `XAUUSD_EXT` | 🟢 **SI — promosso il 15/08/2026** | **0,0110%** (cinque volte sotto la soglia) · copertura **99,2%** | id. |
+| **ORO su disco** (M1) | 🟢 **SI** — **4.884.366 barre M1**, **2006-03-19 → 2020-05-14**, 0 righe scartate, 0 OHLC incoerenti; piu' gli zip 2021→2026 | — | `risultati_prove/SONDA_FADE_ORO_2006_2020.txt` r.27 · `report/ORO_FADE_0930_LA_MISURA_2026-09-22.md` |
+| **INDICI** `NASUSD_EXT` | 🟠 **IN FRIGO** — **5.233.590 barre M1 dal 2010.11.14** (~16 anni) ma diff media **0,0756% > 0,05%** | 🔴 `DIFFERENZE FEED APPREZZABILI` | `risultati_archivio/STORICO_INDICI_20260826_2334/ABTG_ImportEsterno_referto.csv` |
+| **INDICI** `SPXUSD_EXT` | 🟠 **IN FRIGO** — **4.598.932 barre M1 dal 2010.11.14**, diff media **0,0608% > 0,05%** | 🔴 id. | id. |
+| **INDICI** `D30EUR` (DAX) · `U30USD` (Dow) | 🔴 **NON IMPORTATI** — nessuna riga nel referto d'import | — | id. (il file contiene solo NASUSD e SPXUSD) |
+
+🔴 **E IL VINCOLO CHE VA SCRITTO OGNI VOLTA CHE SI CITA UN `_EXT`: quel feed e' fatto di
+BARRE M1, NON DI TICK.** Una corsa su `_EXT` **non e' modello 4**, e per il punto (1) qui
+sopra il fattore OHLC→tick misurato in casa e' **1,71-1,85 in eccesso**.
+👉 **Un numero `_EXT` non si confronta direttamente con un numero a tick**: apre una prova di
+REGIME (Emendamento C del 16/08), **non** un verdetto di merito.
+🟢 Conseguenza operativa: sui motori **forex e oro** la frase *«la prova di regime non e'
+possibile»* va cancellata e sostituita con il costo della corsa. Sugli **indici** resta vera,
+e la ragione e' il banco (storico BCM dal **2024.09.26** = **un regime e mezzo**), non il motore.
+
 ---
 
 ## 1) APERTURE (breakout apertura mercato)
@@ -18,7 +90,7 @@ _Documento vivo: aggiornato ad ogni nuovo backtest. Pensato anche per condivider
 | A1 | DAX_Apertura_EU | D30EUR | range 15 min, ora 8 | **entrambe + Supertrend ON**, buffer 200-600, floor 200 | real tick | 3% combo pos, best PF 1.03 | 🔴 morto (config sbagliata) |
 | A2 | DAX_Apertura_EU | D30EUR | range 15 min, ora 8 | **SOLO LONG, ST OFF**, buffer 600, floor 200 | real tick | **PF 1.49 (avg 1.25), DD 3.8%, 314 tr**, cluster 100% pos | 🟢 **KEEPER** |
 | A3 | DAX_Apertura_EU | D30EUR | range 15 min, ora 8 | **SOLO SHORT**, ST OFF, buffer 200-600 | real tick | — | ⏳ in coda |
-| A4 | Nasdaq_Apertura_US | NASUSD | candela H1 prec, ora 14:30 | **SOLO LONG**, floor 0-400, buffer 50-350 | real tick | 0% combo pos, best PF 0.91 | 🔴 morto |
+| A4 | Nasdaq_Apertura_US `770260` | NASUSD | candela H1 prec, ora 14:30 | **la griglia del 26/07**: SOLO LONG, floor 0-400, buffer 50-350 | real tick | 0% combo pos, best PF 0.91 | 🟢 **VIVA — E OPERA IN CHALLENGE.** ✏️ **RISCRITTO IL 22-23/09/2026.** Il *«🔴 morto»* del 26/07 **resta vero per la sua griglia** (breakout cieco LONG-only), ma **non e' il verdetto del motore**: la cella che sta operando su FTMO `541452707` e' un'**ALTRA configurazione** — `InpEntryMode=2` (**RETEST**), `InpRangeMinutes=35`, `InpBufferPoints=200`, **due lati**, `InpRetestOffsetPts=0`, `InpTP1_R=0,5`, **`InpTP1_ClosePct=50`**, `InpBEatR=0`, `InpTrailMode=1`, `InpTrailTF=M5`, `InpUseVolumeFilter=true`, **`InpRiskPercent=2,00`** (preset `mql5/Presets/FTMO/ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set`). 📊 **Numeri di QUELLA cella, a tick reali, banco 80.000, taglia 2,00% = la taglia di campo** (`risultati_prove/R199B/ABTG_Nasdaq_Apertura_US_NASUSD_{IS,OOS}_R199B.csv`, Pass 2): **IS PF 1,22116 · n 135 `[uscite]` · DD 7,3069%** · **OOS PF 1,21546 · n 172 `[uscite]` = 102 posizioni · DD 7,8576%**. 🟢 **Il DD e' SOTTO il muro del 10% ALLA TAGLIA VERA**, senza raddoppiare niente. 🔴 **Ma il MERITO resta SOSPESO**: 102 posizioni < 150 (Emendamento A). ⚪ **Certificato:** ① ✅ · ② ✅ · ③ ✅ (8 manopole d'uscita ad asse il 20-21/09: R199A/B, R200A/C/E) · ④ 🟡 **PARZIALE, e la prima stesura di questa riga sbagliava**: `ABTG_Nasdaq_Apertura_US` ha CSV **solo su NASUSD** (verificato su tutta la storia di git). I gemelli esistono per il **MECCANISMO** (`ABTG_DAX_Apertura_EU` su D30EUR/100GBP/F40EUR, `ABTG_Dow_Apertura_US` su U30USD), **non per questo binario** · ⑤ 🟡 **PARZIALE — TF provati per nome: grafico solo M5; `InpTrailTF` M1·M2·M3·M4·M5·M6·M10·M12·M15 (R200A, e M5 vince); `InpLevelTF` MAI mosso (H1 in tutti i CSV); `InpSessionHour` MAI ad asse**. 👉 Verdetto d'insieme: **VIVA IN CAMPO, merito sospeso per campione, ⑤ da isolare.** |
 | A5 | DAX + Nasdaq "stile Monza" | D30EUR/NASUSD | candela 5-min pre-apertura | **direzione ADATTIVA Supertrend D1** + filtro 17-40 pt + floor | real tick | — | ⏳ in coda |
 | A16 | `Nasdaq_PreOpen_Breakout_EA.mq5` (**ESTERNO**, caricato da Claudio il 12/09/2026, magic 20260617) | NASUSD | M5, candela 15:25-15:30 **Roma** = 14:25-14:30 **server** | buffer 7 idx, MinRange 17 idx, **nessun tetto di ampiezza**, stop al bordo opposto, target **FISSO** +50 pt + 50% a +20 pt, EMA50 pesa 70/30, nessun filtro spread, nessuna news, **nessun Guardian** | **non girato** | — | 🔴 **NON SI SCHIERA** — e il motivo che basta da solo **non e' il PF**: **(1)** `InpLocalUtcOffsetHours=2` **CABLATO** + ancoraggio a **Roma** anziche' alla borsa → dal **1 nov 2026 al 14 mar 2027** (~95 sedute) arma sulla candela delle 14:25, **un'ora prima, IN SILENZIO** — cioe' **dentro la fase funded**; **(2)** COSTO: stop minimo **13,33x** lo spread misurato (pavimento duro 13,3x), **12,63x** al P95. ⚠️ L'ingresso e' **la stessa FAMIGLIA** di `ABTG_Nasdaq_Live5m` `770203` — **non "identico"**: casa include la barra M1 dell'apertura (r.600-625) e l'esterno tratta un **sovrainsieme** di giornate (nessun tetto a 40) → vedi **L2**, che e' ⚪ NON ANCORA MISURATO. 12/09/2026 · `report/AUDIT_NASDAQ_PREOPEN_2026-09-12.md` · `report/PREOPEN_NASDAQ_VALE_UN_POSTO_2026-09-12.md` · `report/PREOPEN_NASDAQ_IL_VERDETTO_2026-09-12.md` |
 
@@ -32,13 +104,32 @@ _Documento vivo: aggiornato ad ogni nuovo backtest. Pensato anche per condivider
 
 | # | EA | Sym | Config | Modello | Risultato | Verdetto |
 |---|---|---|---|---|---|---|
-| L1 | DAX_Live5m (orig.) | D30EUR | buffer 700, entrambe | real tick | 27/27 combo NEGATIVE | 🔴 morto |
+| L1 | DAX_Live5m (orig.) | D30EUR | buffer 700, entrambe | real tick | **27/27 combo NEGATIVE — 🔴 e di quelle 27 passate NON ESISTE NESSUN CSV**, in tutta la storia di git. 📊 **L'unica cella con un CSV** (`risultati_prove/ABTG_DAX_Live5m/ABTG_DAX_Live5m_D30EUR_{IS,OOS}.csv`, `PrevWin=5`, ST OFF, due lati, cancello d'ampiezza SPENTO): **tick · IS PF 0,93488 · n 225 · DD 26,07%** · **OOS PF 0,85701 · n 342 deal · DD 39,74%** — tutti **@ rischio 2,00%**. Gli stessi pin in **OHLC**: IS 1,27364 / OOS **1,46853** (fattore **1,714**) | ⚪ **NON ANCORA MISURATO** (22-23/09/2026) — ✏️ sostituisce il 🔴 morto del 26.07.26. 🔴 **MA la cella che il CSV ce l'ha e' BOCCIATA SUL RISCHIO, e questo resta**: DD OOS **39,74% alla taglia di campo**, quasi quattro volte il muro del 10%. ⚪ **Certificato:** ① ✅ · ② ✅ · ③ 🔴 **NO** · ④ 🔴 **NO** (solo D30EUR) · ⑤ 🔴 **NO — TF provati per nome: solo M5 di grafico, finestra d'ingresso solo 5 minuti** (`InpLevelTF` H1 · `InpFilterTF` H1 · `InpStTF` H1 · `InpCorrTF` H1 · `InpTrailTF` M1: **nessuno mai mosso**). 👉 Il numero brutto vale, il **verdetto di morte no**: manca meta' del certificato |
 | L2 | Nasdaq_Live5m (orig.) `770203` | NASUSD | buffer 700, MinRange 1700, MaxRange 4000, entrambe, TP1 1R + 50% + trailing M1 | real tick | 27/27 combo NEGATIVE · cella mediana: **PF IS 1,01621** (n 116, DD 11,52%, +98,96) · **PF OOS 0,96265** (n 175 deal = **88-175 posizioni**, DD 19,40%, −326,54) — tutti **@ rischio 2%** · OHLC stessa cella: OOS 2,16249 / +8.943,56 (fattore 2,25 = perche' OHLC non e' un verdetto) | ⚪ **NON ANCORA MISURATO** (12/09/2026, secondo strato del cancello — sostituisce il 🔴 morto del 26.07.26). 🔴 Bocciato su INGRESSO e COSTO (stop minimo 24 idx / spread misurato 1,80 = **13,33x** = il pavimento DURO al decimale; **12,63x** al P95 1,90 = **sotto**). 🕳️ **Manca:** (a) **asse USCITA mai girato su `RangeMode=1`/`PrevWin=5`** — gli assi F/I girarono tutti su `RangeMode=0`; (b) **voce 5 non chiusa, e la ragione e' stata CORRETTA il 13/09**: il TF del grafico **non entra nei numeri** (unica occorrenza di `PERIOD_CURRENT` a r.296, ramo morto con `InpTrailStartR=0`) → cambiarlo darebbe **gli stessi numeri**, non zero trade. ✍️ Si chiude solo toccando il TF dell'**INGRESSO** (`InpPrevWindowMin`/`InpLevelTF`) = **firma di Claudio**. _(La prima stesura citava `InpTimeframe != M5`: e' un input dell'EA **ESTERNO**, non di questo.)_; (c) gemelli **parziali, e la ragione e' stata CORRETTA il 13/09**: il D30EUR a cancello **SPENTO** (`MinRange=MaxRange=0`) non e' lo stesso meccanismo, ✅ **ma una corsa col cancello ACCESO esiste gia'** (`ABTG_DAX_Live5m_v2`, `1500/4000`): **IS PF 1,00564 n 80 DD 4,70% · OOS PF 0,92490 n 202 DD 14,16% @ rischio 1%**, contro **OOS 0,857 n 342 DD 39,74%** a cancello spento → **il cancello morde nel verso giusto**. Confondimenti: rischio 1% vs 2%, slippage 100 pt, CloseHour 17:30. U30USD/SPXUSD mai provati; (d) larghezza finestra **mai misurata ad asse controllato** (classe 296). 👉 **Torna in coda all'imbuto, MAI in campo in automatico.** Costo per chiudere il certificato: **3,99 min** (44 passate) — vedi `report/PREOPEN_NASDAQ_IL_VERDETTO_2026-09-12.md` §8 |
-| L3 | DAX_Live5m_v2 | D30EUR | +floor +slippage +range filter (32 combo) | real tick | best PF **1.04** DD ~10% (solo con Supertrend ON + PrevWin15); resto negativo, DD 15-26% | 🔴 morto |
+| L3 | DAX_Live5m_v2 | D30EUR | 32 passate. ✏️ **DESCRIZIONE CORRETTA IL 22-23/09/2026 dal CSV**: il *«range filter»* **NON C'ERA** (`InpMinRangePts=0` e `InpMaxRangePts=0` in tutte e 32), la griglia era **LONG-ONLY** (`InpAllowShort=0` in tutte e 32) e **2 manopole su 5 erano INERTI** (`InpMinStopPts` 200/400 e `InpSkipIfTight` 0/1 danno risultati **identici alla quinta cifra**: 32 passate = **4 celle distinte x 2 finestre d'ingresso x 4 ripetizioni**) | real tick **@ rischio 1,00%** | best PF **1,04296** DD **9,097%** n 239 (Supertrend ON + PrevWin **15**); resto **0,84571-1,04062**, DD **9,10-26,08%** — **a rischio 1%: raddoppiati valgono 18,2-52,2%**. 🔥 **E QUI C'E' L'UNICO GRADIENTE DI TF DELL'INTERA FAMIGLIA**: allargando la finestra d'ingresso da **5' a 15'** a parita' di tutto il resto, **4 coppie distinte su 4** fanno **PF +0,077 / +0,085 / +0,089 / +0,136** e **DD −5,64 / −7,01 / −9,26 / −11,26 punti**. Fonte: `risultati_archivio/Live5m/valid_DAX_Live5m_v2_D30EUR_realtick.csv` | ⚪ **NON ANCORA MISURATO** (22-23/09/2026) — ✏️ sostituisce il 🔴 morto. ⚪ **Certificato:** ① ✅ · ② ✅ · ③ 🔴 **NO** · ④ 🔴 **NO** · ⑤ 🟡 **PARZIALE — TF per nome: grafico solo M5; finestra d'ingresso 5' e 15' (le uniche due mai provate). 30' e 60' MAI PROVATI.** 🔴 **E manca lo split IS/OOS**: finestra unica, quindi il «best di 32» e' **selezione, non altopiano** |
 
 _Nota: in OHLC i Live5m davano numeri finti enormi (+129k DAX, +30k Nasdaq). In real tick: morti. Lezione: M5/breakout → OHLC inganna._
+🟢 ✏️ **CONFERMATA E QUANTIFICATA IL 22-23/09/2026, e il numero adesso c'e'**: il fattore OHLC→tick sul PF OOS vale **1,714** su `L1` (1,46853 → 0,85701), **1,850** su `L3` con cancello acceso (1,71088 → 0,92490) e **2,246** su `L2` (2,16249 → 0,96265). 👉 **Su questa famiglia l'OHLC gonfia il PF fra il 71% e il 125%**: e' la riga di questo registro che ha retto meglio alla riverifica.
 
-> **VERDETTO DEFINITIVO — capitolo BREAKOUT M5 CHIUSO (26.07.26).** Provati e morti in real-tick: Live5m nativo, Live5m_v2 (ricetta migliorata), DAX_M3, aperture Nasdaq, ORB_Fibo, Londra_ORB. Il breakout in apertura su M5 NON ha edge sul tick vero. **Non costruire altri v2 M5.** L'edge sta su H1/H4 (SupRev) e sull'apertura DAX LONG (che è M5 ma su livello H1, non breakout M5).
+> **⚠️ VERDETTO DEL 26/07/2026 — RISCRITTO IL 22-23/09/2026** (fonti: `report/RIESAME_MORTI_BREAKOUT_M5_2026-09-22.md` §3, e **ogni numero riverificato sul CSV**).
+>
+> 🟢 **COSA RESTA VERO, E SI CHIUDE DAVVERO.** La **rottura secca della candela pre-apertura da 5 minuti**, a **due lati insieme**, **senza filtro di trend** e **senza cancello d'ampiezza**, **non paga a tick veri sugli indici BCM** — e muore **prima sul RISCHIO che sul PF**:
+> `ABTG_DAX_Live5m` D30EUR OOS **PF 0,85701 · n 342 deal · DD 39,74% @ rischio 2,00%** (`risultati_prove/ABTG_DAX_Live5m/..._OOS.csv`);
+> `ABTG_Nasdaq_Live5m` NASUSD OOS **PF 0,96265 · n 175 deal · DD 19,40% @ 2,00%** (`risultati_prove/ABTG_Nasdaq_Live5m/..._OOS.csv`);
+> `ABTG_DAX_Live5m_v2` D30EUR ramo `PrevWin=5` / ST OFF **PF 0,846-0,951 · DD 16,1-26,1% @ 1,00%** = **31,5-51,9% alla taglia FTMO** (`risultati_archivio/Live5m/valid_DAX_Live5m_v2_D30EUR_realtick.csv`).
+> 🔴 **E il COSTO lo spiega da solo**: lo stop minimo strutturale di quelle corse vale **1,2x – 8,8x lo spread D30EUR misurato**, contro i **40x** della regola di casa. **Su M5 quel motore paga il pedaggio, non il mercato.**
+>
+> 🔴 **COSA INVECE NON E' MAI STATO MISURATO, e la frase vecchia dava per morto:**
+> **(1)** `ABTG_DAX_M3` e `ABTG_Londra_ORB` **non hanno MAI avuto un CSV** — **riverificato il 22-23/09 con `git log --all --pretty=format: --name-only`: sull'intera storia del repo i soli file che portano quei nomi sono `.mq5`, `.set`, `.ini`, `.pine` e `.md`. Zero risultati.** E i loro `.ini` del 26/07 dichiarano **`Model=1` = OHLC**. 👉 Sono **⚪ NON ANCORA MISURATI**, non morti.
+> **(2)** Anche le corse a tick citate dalla frase (**27+27 passate** su `L1` e `L2`) **non hanno CSV agli atti**; girarono dal **2024.01.01** contro un pavimento tick misurato al **2024.09.26** (**29,5% della finestra su tick fabbricati**), coi **due lati pinnati insieme** e con il **Supertrend pinnato a ZERO**.
+> **(3)** **NESSUNO dei sei e' mai stato girato su un TF diverso dal suo**: `L1`/`L2`/`L3`/`O2`/`O4` **solo M5**, `O3` **solo M3**. E nell'unica volta in cui il TF effettivo e' stato alzato — finestra d'ingresso **5' → 15'**, `valid_DAX_Live5m_v2_D30EUR_realtick.csv` — il **PF e' salito in 4 coppie distinte su 4 (+0,077 / +0,085 / +0,089 / +0,136)** e il **DD e' sceso di 5,64-11,26 punti**. 🔴 **30 e 60 minuti non sono MAI stati provati.**
+> **(4)** **Due dei sei non sono breakout d'apertura, ed e' un errore di categoria**: `ABTG_DAX_M3` e' Supertrend **H4 bias / M3 trigger** con EMA200 e ADX (la famiglia **VIVA** su H1/H4), e `ABTG_ORB_Fibo` entra con un **LIMIT nella Golden Zone 50-61,8%** = un **RETEST**, cioe' la geometria che in casa **paga**.
+> **(5)** `ABTG_Londra_ORB` costruisce il canale **06:00-07:00 server** ed entra alle **07:00**, mentre il 03/09 e' stato **misurato** che **Londra apre alle 08:00 ora server**: ha misurato la **pre-apertura**. Le tre ore non sono **mai** state su un asse. _(Lo stesso vale per **R45**, `prove/R45c` r.20: `InpRangeStartHour=7`.)_
+>
+> ## 👉 CONCLUSIONE
+> 🟢 **«NON COSTRUIRE ALTRI v2 M5» RESTA IN PIEDI.**
+> 🔴 **«Il breakout in apertura non ha edge» NON e' dimostrato: e' dimostrato che NON PAGA SU M5**, che e' il TF dove il pedaggio se lo mangia.
+> Il capitolo si riapre **solo** su **TF piu' alti**, **meccanismi** (cancello d'ampiezza, filtro di trend, retest), **simboli** e **gestione dell'uscita** — **mai** su una griglia piu' fitta degli stessi parametri su M5.
 
 ---
 
@@ -74,7 +165,7 @@ vuoto lo trova **prima** di svegliare MT5.
 
 | # | EA | Sym | Risultato in archivio | Verdetto |
 |---|---|---|---|---|
-| P1 | ABTG_PostNews | EURUSD / EURJPY, IS+OOS | **Profit 0.00, Trades 0** in tutti e 4 i CSV | 🔴 letto come "nessun edge" il 07/08 — ⚠️ **RITIRATO** |
+| P1 | ABTG_PostNews | EURUSD / EURJPY, IS+OOS | **Profit 0.00, PF 0.00000, Trades 0** su **ogni riga dei 4 CSV** — riverificato il 22-23/09/2026 su `risultati_prove/ABTG_PostNews/*.csv` (2 righe ciascuno, 8 righe in tutto, tutte a zero) | ⚪ **NESSUNA MISURA** (22-23/09/2026) — ✏️ sostituisce il 🔴 del 07/08, che era **RITIRATO** ma ancora scritto in rosso. 🔴 **PF 0,00000 su 0 operazioni NON e' «nessun edge»: e' NESSUNA MISURA.** Certificato: ① 🔴 · ② 🔴 · ③ 🔴 · ④ 🔴 · ⑤ 🔴 — **zero punti su cinque**. Il motore non e' mai partito (cause (a) dato e (b) canale, qui sotto) |
 
 🔴 **Non e' un verdetto ribaltato: e' un verdetto INESISTENTE.** Quattro file di
 risultato con `Trades 0` non misurano una strategia debole, non misurano niente.
@@ -131,9 +222,9 @@ misurare, **mai** un risultato da citare.
 | # | EA | Sym | Miglior config | Risultato | Verdetto |
 |---|---|---|---|---|---|
 | O1 | ORB | NASUSD | EntryPoints 20, TP_R 2.5, entrambe | real tick: 50% pos, best PF 1.15, DD 16%, 625 tr | 🟡 marginale |
-| O2 | ORB_Fibo | NASUSD | — | **PF IS 0,835 · PF OOS 0,968** · **DD IS 3,02% · DD OOS 3,10%** · **n IS 91 · n OOS 75** (censimento 09/09, `ABTG_ORB_Fibo`, modello **OHLC**, **1 sola passata utile**) | 🟠 **NON ANCORA MISURATO** (10/09, quinto giro di cancello, classe 211) — era scritto "morto" **senza certificato**. Manca: **(a)** `n` OOS **75 < 95** (`R125-G4`) e **< 150** (Emendamento A) → **merito SOSPESO**, non bocciato; **(b)** mai girato a **tick**; **(c)** **nessun simbolo gemello** (solo NASUSD); **(d)** **TF mai cambiato**; **(e)** **gestione dell'uscita mai messa ad asse**. 🔴 Il DD (3,10%) **non boccia**: e' il piu' basso della tabella. 👉 Rientra in coda all'imbuto, **mai in campo in automatico** |
-| O3 | DAX_M3 | D30EUR | — | OHLC 33% pos, short 0% | 🔴 morto |
-| O4 | Londra_ORB | GBPUSD | — | OHLC 11% pos, DD 23% | 🔴 morto |
+| O2 | ORB_Fibo | NASUSD | — | **PF IS 0,83507 · PF OOS 0,96816** · **DD IS 3,02% · DD OOS 3,10%** · **n IS 91 · n OOS 75** — 🔴 **modello OHLC**, `InpRiskPercent` nominale **1** (vedi la nota sul rischio realizzato), **1 sola passata utile per finestra** (riverificato il 22-23/09/2026 su `risultati_prove/ABTG_ORB_Fibo/ABTG_ORB_Fibo_NASUSD_{IS,OOS}_ohlc.csv`: 2 righe ciascuno, **stesso esito, asse = `InpMagic` 770602/770603 = un asse TECNICO, non una griglia**). 🔴 **Su questo motore NON esiste UNA SOLA passata a tick reali** | 🟠 **NON ANCORA MISURATO** (10/09, quinto giro di cancello, classe 211) — era scritto "morto" **senza certificato**. Manca: **(a)** `n` OOS **75 < 95** (`R125-G4`) e **< 150** (Emendamento A) → **merito SOSPESO**, non bocciato; **(b)** mai girato a **tick**; **(c)** **nessun simbolo gemello** (solo NASUSD); **(d)** ⑤ **TF mai cambiato — e adesso e' scritto PER NOME (22-23/09/2026, riverificato sui due CSV): `InpExecTF` vale `PERIOD_M5` in TUTTE le passate e `InpORMinutes` vale 30 in TUTTE. Sono due `ENUM/int` VERI e modificabili, mai mossi**; **(e)** **gestione dell'uscita mai messa ad asse** (`InpExitOnEmaClose`, `InpUseTrailEMA`, `InpTP1Pct`; e `prove/R15_ORB_gestione_DD.txt` scrive *«e' il candidato del giro successivo»* — **quel giro non c'e' mai stato**). 🔴 **E il DD (3,10%) non e' confrontabile, contro quanto scritto finora**: `InpRiskPercent` dice **1** ma `LotByRisk` (mq5 r.414-419) quantizza il lotto (`MathFloor(lot/step)*step`, poi `MathMax(volume_min,...)`), quindi su un indice con passo 0,10 il **rischio realizzato e' [NON MISURATO]**. Il PF non ne risente, **il DD si'**. 🔵 **E non e' un breakout**: `ABTG_ORB_Fibo.mq5` r.219-220 — la rottura fissa solo la DIREZIONE, l'ingresso e' un **LIMIT nella Golden Zone 50-61,8%** con stop oltre il 78,6% = un **RETEST**, la geometria che in casa **paga**. 👉 Rientra in coda all'imbuto, **mai in campo in automatico** |
+| O3 | DAX_M3 | D30EUR | — | 🔴 **«OHLC 33% pos, short 0%» NON E' VERIFICABILE: `ABTG_DAX_M3` non ha MAI avuto un CSV**, in tutta la storia di git (riverificato il 22-23/09/2026 con `git log --all --pretty=format: --name-only`: solo `.mq5`, `.set`, `.ini`, `.pine`, `.md`). L'unico atto e' `ini/ABTG_DAX_M3.ini` del 26/07, che dichiara **`Model=1` = OHLC 1-min**. Niente colonna MODELLO accanto al PF **perche' non c'e' la colonna PF** | ⚪ **NON ANCORA MISURATO — ZERO PUNTI SU CINQUE** (22-23/09/2026). ① 🔴 · ② 🔴 · ③ 🔴 (`InpTrailOnST` e `InpExitOnFlip` sono le righe 8 e 15 della Tabella B dell'`AUDIT_USCITE_2026-09-09.md`: **zero occorrenze come asse in tutto il repo**) · ④ 🔴 · ⑤ 🔴 **TF per nome: solo M3 di trigger + solo H4 di bias. `InpTriggerTF` e `InpBiasTF` sono `ENUM_TIMEFRAMES` VERI e non sono MAI stati mossi** — e M3 e' il TF piu' caro della scala. 🔴 **E NON E' UN BREAKOUT M5**: e' Supertrend **H4 bias / M3 trigger** con EMA200 + ADX>=25, cioe' la famiglia **VIVA** su H1/H4. Metterlo nella frase «il breakout M5 non ha edge» e' un **errore di categoria**. ⚠️ Nell'`.ini` `InpSLFixedPts` e' spazzolato su 6 valori mentre `InpSLMode` resta su SUPERTREND: **manopola INERTE per costruzione** (mq5 r.270-271), sei passate identiche ogni volta |
+| O4 | Londra_ORB | GBPUSD | — | 🔴 **«OHLC 11% pos, DD 23%» NON E' VERIFICABILE: `ABTG_Londra_ORB` non ha MAI avuto un CSV**, in tutta la storia di git (riverificato il 22-23/09/2026, stesso metodo di O3: solo `.mq5`, `.set`, `.ini`). `ini/ABTG_Londra_ORB.ini` dichiara **`Model=1` = OHLC**, e `InpRiskPercent` **non compare**: quel **DD e' a rischio IGNOTO** → non confrontabile con nessun muro | ⚪ **NON ANCORA MISURATO — ZERO PUNTI SU CINQUE** (22-23/09/2026). 🔴 **E il difetto strutturale vale piu' del numero mancante: ha misurato L'ORA SBAGLIATA.** `InpRangeStartHour=6` · `InpRangeEndHour=7` · `InpPlaceHour=7` = canale **06:00-07:00 server**, ingresso alle **07:00 server**; ma il 03/09 e' stato **MISURATO** (`risultati_archivio/allinealondra/REFERTO_PASSO0_2026-09-03_1651.txt`) che **Londra apre alle 08:00 ora server**. 👉 **Ha costruito il canale e piazzato gli ordini un'ora PRIMA dell'apertura.** ③ 🔴 (`InpUsePartial`/`InpBreakeven`/`InpUseTrailing` **tutti false per default e mai ad asse**) · ④ 🔴 · ⑤ 🔴 **solo M5, canale solo 06:00-07:00: le tre ore non sono MAI state su un asse** (l'`.ini` spazzola solo `InpBufferPips` x8, `InpTPRangeMult` x7 e i due lati = 224 passate, **nemmeno una tocca l'orologio**). 🟢 **Unica buona notizia: su GBPUSD lo spread misurato e' 0,2 pip** → il 40x chiede 8,0 pip e **il pedaggio NON e' la spiegazione**, al contrario degli indici |
 
 > ⚠️ **04/09/2026 — la FINESTRA del range ORB e' contesa** (voce dei docenti
 > 14:30-14:45 server vs indicatore e nostre sedie 14:25-14:30). Tutta la
@@ -376,7 +467,96 @@ _Idea di Marco: Russell/Dow/UK100 in apertura > Nasdaq. Testato col motore apert
 | 100GBP | FTSE 100 | buffer 800 LONG | -302 | 0.90 | 9.6% | 🔴 morto |
 | U30USD | Dow Jones | buffer 200 LONG | -9 | 0.997 (pari) | 8.6% | 🔴 morto (a malapena in pari) |
 
-> **CONCLUSIONE APERTURA (definitiva).** Il breakout M5 in apertura funziona SOLO sul DAX, SOLO LONG. Su Nasdaq/FTSE/Dow → morto. Non è un motore generalizzabile: è un'anomalia del DAX. L'idea di Marco (Dow>Nasdaq) NON regge in versione automatica. **Fine dell'espansione della famiglia aperture.** Il vero motore generalizzabile resta il **SupertrendReversal** (DAX+Nasdaq+oro, H1/H4).
+✅ **I DUE NUMERI QUI SOPRA SONO STATI RIVERIFICATI SUL CSV IL 22-23/09/2026 E REGGONO AL
+CENTESIMO** (`risultati_archivio/Apertura_nuovi_indici/valid_Apertura_{U30USD_Dow,100GBP_FTSE}.csv`,
+96 passate ciascuno, **modello 4 = tick reali**, **`InpRiskPercent=1`**):
+`U30USD` best **PF 0,99721 · Profit −9,00 · DD 8,5752% · n 360` · `100GBP` best **PF 0,90423 ·
+Profit −302,12 · DD 9,5820% · n 283`. **0 celle su 96 sopra 1,00 su tutti e due.**
+🔴 **MA misurano `InpEntryMode = 0` — il BREAKOUT CIECO** — su **una finestra sola, senza split
+IS/OOS**, con asse su `InpBufferPoints` (200/500/800), i due lati e `InpTrailFixedPts`.
+👉 **Quel verdetto vale per il breakout cieco, e SOLO per lui.**
+
+---
+
+> ## ✏️ **CONCLUSIONE APERTURA — RISCRITTA IL 22-23/09/2026, e la vecchia era smentita dai nostri stessi numeri**
+>
+> **Il testo del 26/07 diceva:** *«Il breakout M5 in apertura funziona SOLO sul DAX, SOLO LONG.
+> Su Nasdaq/FTSE/Dow → morto. … L'idea di Marco (Dow>Nasdaq) NON regge in versione automatica.
+> Fine dell'espansione della famiglia aperture.»*
+>
+> 🟢 **COSA RESTA VERO:** il **breakout CIECO** in apertura non paga sul Dow ne' sul FTSE —
+> 0/96 celle su tutti e due, e i numeri sono quelli riverificati qui sopra. **Chi vuole il
+> breakout cieco su quei due indici deve portare una misura nuova.**
+>
+> 🔴 **COSA E' FALSO, e lo dicono tre misure indipendenti:**
+>
+> **(1) «Fine dell'espansione della famiglia aperture»: la famiglia e' META' DELLA CHALLENGE.**
+> Tre delle sei sedie che operano su FTMO `541452707` dal 21/09 sono aperture: **`770101`**
+> `ABTG_DAX_Apertura_EU` D30EUR M5 · **`770202`** `ABTG_Dow_Apertura_US` U30USD M5 ·
+> **`770260`** `ABTG_Nasdaq_Apertura_US` NASUSD M5 (`report/PACCHETTO_SCHIERAMENTO_PROP_2026-09-21.md`
+> rr.199-205, e i tre `.set` in `mql5/Presets/FTMO/`).
+>
+> **(2) IL MOTORE CHE OPERA SUL DOW NON E' IL BREAKOUT: E' IL RETEST, ed e' misurato a tick.**
+> `R197A` (21/09, banco 80.000, tick reali, `RILIEVI: 0`) mette `InpEntryMode` **0 / 1 / 2** sullo
+> stesso asse su `U30USD`, e il RETEST vince **in tutte e due le finestre**:
+>
+> | `InpEntryMode` | IS: PF · n · DD | OOS: PF · n · DD |
+> |---|---|---|
+> | **0 BREAKOUT** | 🔴 0,96503 · 87 · 11,99% | 1,18772 · 162 · 8,86% |
+> | **2 RETEST** | 🟢 **1,21214** · 74 · 11,09% | 🟢 **1,25384** · 130 · 8,75% |
+>
+> _(`risultati_prove/R197A/ABTG_Dow_Apertura_US_U30USD_{IS,OOS}_R197A.csv`, `InpRiskPercent=2`.)_
+> E `R202A` porta la cella viva del Dow a **OOS PF 1,27175 · n 130 · DD 4,3944% @ rischio 1%**.
+> 👉 **«Su Dow → morto» era un verdetto sul BREAKOUT, spacciato per verdetto sul MOTORE.**
+>
+> **(3) «L'idea di Marco (Dow>Nasdaq) NON regge»: REGGE, e su due misure.**
+> 🟢 **Prima misura — lo studio FASE A su 8 indici** (`risultati_archivio/studio_apertura/Studio_<SIM>_RIEPILOGO.csv`,
+> 8 file dal 03/08/2026, **3.302 rotture** — non «~3.500»). 🔴 **Modello 1 = OHLC: e' uno
+> SCREENING, e la cosa utilizzabile e' la CLASSIFICA, non il livello**, perche' gli otto indici
+> sono misurati **nello stesso modo, con la stessa geometria** (buffer 200 pt, slippage 100,
+> TP 2,0R, stop all'estremo opposto):
+>
+> | # | simbolo | strumento | cieco (n) | solo LONG (n) | solo SHORT (n) | con filtro H4 (n) |
+> |---|---|---|---:|---:|---:|---:|
+> | **1** | **`U30USD`** | **Dow** | 🟢 **+0,074** (446) | 🟢 **+0,095** (231) | 🟢 +0,052 (215) | 🟢 **+0,126** (212) |
+> | 2 | `D30EUR` | DAX | 🟢 +0,026 (440) | +0,007 (225) | 🟢 **+0,045** (215) | −0,017 (203) |
+> | **3** | **`NASUSD`** | **Nasdaq** | **+0,001** (447) | −0,005 (226) | +0,007 (221) | 🟢 +0,055 (234) |
+> | 4 | `SPXUSD` | S&P 500 | −0,017 (444) | −0,022 (227) | −0,013 (217) | −0,002 (227) |
+> | 5= | `E50EUR` | Stoxx 50 | −0,048 (440) | −0,055 (245) | −0,040 (195) | −0,068 (211) |
+> | 5= | `E35EUR` | IBEX 35 | −0,048 (211) | −0,032 (106) | −0,065 (105) | −0,129 (104) |
+> | 7 | `F40EUR` | CAC 40 | −0,056 (443) | −0,054 (235) | −0,058 (208) | −0,109 (202) |
+> | 8 | `100GBP` | FTSE 100 | 🔴 **−0,138** (431) | −0,072 (216) | 🔴 −0,205 (215) | −0,137 (213) |
+>
+> ⚠️ **Errata su un referto di stanotte**: `report/RIESAME_MORTI_APERTURE_2026-09-22.md` scrive
+> due volte *«il Nasdaq e' quinto»*. **Il CSV dice TERZO** (+0,001, dietro Dow +0,074 e DAX
+> +0,026) — e la sua stessa tabella §2.4 lo mette al 3° posto. **Vale il CSV.** La conclusione
+> «Dow primo» non cambia.
+> 🟢 **Seconda misura — a tick reali, 20-21/09**: Dow OOS **1,27175** (`R202A`) contro Nasdaq OOS
+> **1,21546** (`R199B`). Stesso verso.
+> 🔴 **E terza, la piu' scomoda: la frase contraddice la tabella che le sta SOPRA, nel registro
+> stesso.** Il 26/07 il Dow fa best **0,997** e il Nasdaq (riga A4) best **0,91**: **anche nel
+> corpus che ha prodotto quella frase, il Dow batteva il Nasdaq.**
+> _(⚠️ Il **0,91** di A4 e' **dichiarato nel registro, NON verificabile contro un CSV**: nessun
+> file di quella griglia e' in repo. Lo scrivo come dichiarazione, non come misura — e quindi
+> questo terzo argomento **vale meno degli altri due**, che sono su CSV.)_
+>
+> ### 🧪 IL CONTRO-ESEMPIO, costruito CONTRO questa riscrittura (regola del 10/09)
+> **L'argomento che difenderebbe il verdetto vecchio:** *«La FASE A e' OHLC. Un modello ottimista
+> non puo' ribaltare una misura a TICK su 96 celle. E il fattore OHLC→tick misurato in casa e'
+> 1,71-1,85: portando il Dow FASE A a tick, il +0,074 sparisce.»*
+> ✅ **Il primo pezzo e' giusto, e infatti NON uso la FASE A per promuovere niente: la uso per
+> ORDINARE otto indici misurati nello stesso identico modo. Il fattore OHLC→tick colpisce tutti
+> e otto, quindi cancella il LIVELLO e lascia in piedi la CLASSIFICA.**
+> 🔴 **Il secondo pezzo cade da solo, perche' la classifica non e' l'unica prova**: `R197A`,
+> `R197B`, `R172D` e `R202A` sono **modello 4, tick reali**, banco 80.000, `RILIEVI: 0`, con
+> **split IS/OOS pulito**, e danno il Dow **positivo in tutte e due le finestre**. **Non e'
+> l'OHLC a ribaltare il tick: e' un tick nuovo a ribaltare un tick vecchio su un'ALTRA
+> configurazione.**
+> 👉 **Il verdetto vecchio non regge. Quello che regge di lui — «il breakout cieco non paga su
+> Dow e FTSE» — e' stato tenuto, per intero, qui sopra.**
+>
+> 🟢 **E resta vero anche questo, che non e' in discussione:** il **SupertrendReversal** su H1/H4
+> e' il motore piu' generalizzabile della casa.
 
 ---
 
@@ -455,10 +635,26 @@ _Box 23:00-04:59 server, piazza 07:59, cutoff 08:30. Sweep direzione x buffer, S
 
 | Indice | Migliore config | PF | DD% | Trade | Verdetto |
 |---|---|---|---|---|---|
-| DAX (D30EUR) | **SHORT only, buffer 1000, TP2 3.0** | **1.19** | 7.3% | 107 | 🟡 unica viva (edge modesto) |
-| FTSE (100GBP) | — | max 0.67 | — | — | 🔴 morto |
-| CAC (F40EUR) | — | max ~1.0 | — | — | 🔴 morto |
-| Stoxx50 (E50EUR) | — | max 0.59 | — | — | 🔴 morto |
+| DAX (D30EUR) | **SHORT only, buffer 1000, TP2 3.0** | **1.18742** | 7.2851% | 107 | 🟡 unica viva (edge modesto) |
+| FTSE (100GBP) | SHORT only, buffer 1500, TP2 1.5 | max **0.67170** | 16.0281% | 82 | 🔴 morto |
+| CAC (F40EUR) | **LONG** only, buffer 500, TP2 2.5 | max **0.99852** | 10.1232% | 112 | 🔴 morto |
+| Stoxx50 (E50EUR) | **LONG** only, buffer 500, TP2 2.5 | max **0.83979** | 13.9046% | 80 | 🔴 morto |
+
+🔴 ✏️ **RIGA STOXX50 CORRETTA IL 22-23/09/2026 — due righe di questo registro si contraddicevano,
+e vince il CSV.** Qui c'era scritto *«max 0.59»*, mentre r.2527 e la sezione «TRE MORTI COL
+CERTIFICATO COMPLETO» scrivevano **0,8398** per lo stesso simbolo e lo stesso file.
+**Riaperto il CSV** (`risultati_archivio/MaxMinNotte/8eefb007-valid_MaxMin_E50EUR.csv`, 72 passate,
+modello tick, `InpRiskPercent=1`): il massimo del file e' **0,83979** (LONG only). **Lo 0,59 e'
+il massimo del SOLO LATO SHORT** (0,58966, buffer 1500, TP2 1.5, n 71, DD 12,80%).
+👉 Il verdetto **non cambia** (0 celle su 72 sopra 1,00), ma **il numero era di un sottoinsieme
+spacciato per il totale**, ed e' la classe di errore che il 16/08 ha costretto a scrivere la
+regola *«un PF va sempre scritto con l'aggettivo davanti»*.
+🟢 **Gli altri tre reggono alla riverifica** — D30EUR 1,18742 / 7,2851% / 107 ✅ · 100GBP 0,67170
+(che e' insieme il massimo short e il massimo assoluto) ✅ · F40EUR 0,99852 ✅ — **ma in due casi
+su quattro il «migliore» e' il lato LONG, non lo short**, e la colonna «migliore config» era vuota.
+📏 **MODELLO e RISCHIO, che mancavano a tutta la tabella**: tick reali, **`InpRiskPercent=1` in
+tutte e 288 le passate dei quattro file**. Alla taglia FTMO del 2,00% quei DD vanno **quasi
+raddoppiati** (fattore 1,956-1,990): E50EUR **27,2-27,7%**, 100GBP **31,4-31,9%**.
 
 > **Night-box: solo DAX SHORT ha edge (PF 1.19)** — la rottura al RIBASSO del range notturno (opposto dell'aperture che e' LONG). Complementare all'aperture. In raffinamento (`valid_MaxMin_DAX_short_refine`: buffer x SL-ATR x filtro ampiezza box x correlazione S&P). Nota: un AGENTE non puo' ottimizzare (non ha MT5); l'ottimizzazione gira sul PC di backtest.
 
@@ -2462,13 +2658,28 @@ Unita' del campione: **POSIZIONI** (`position_id` distinti), non deal (classe 22
   **09:00 IT = 08:00 ORA SERVER**, quindi `InpSessionHour=8` resta corretto senza toccarlo.
 - 📄 File prova scritto oggi e passato da **tutti e due** i cancelli:
   `backtest_pipeline/prove/R138a_gemello_F40EUR_770101.txt` — **4 passate = 0,91 min**.
-- 🔴 **BUCO DICHIARATO, NON COLMATO**: esiste in casa uno **"studio aperture FASE A" su 8 INDICI e ~3.500
-  trade a tick reali**, citato da **quattro** referti (`APERTURE_TRAILING_DAX_NASDAQ.md` r.40 ·
-  `REFERTO_HISTDATA_FATTIBILITA.md` r.1132 · `ANALISI_CANCELLO_ZERO_EXT_2026-08-25.md` r.79 ·
-  `Dow_Apertura/DOW_MOTORE.md`). **La sua tabella per simbolo non l'ho trovata nel repo.** Se `F40EUR` ha
-  gia' un numero negativo li' dentro, R138a e' un **RITEST di un caduto** e serve una tesi nuova — e la
-  tesi nuova ci sarebbe (la cella viva non e' la rottura cieca: e' un **RETEST** con offset 200 pt, che la
-  FASE A non misurava). **Va cercata PRIMA di lanciare**, ed e' scritto dentro il file prova.
+- 🟢 ✏️ **BUCO CHIUSO IL 22-23/09/2026 — LA TABELLA E' IN REPO, E IL SUO PERCORSO E' QUESTO:**
+  **`backtest_pipeline/risultati_archivio/studio_apertura/Studio_<SIMBOLO>_RIEPILOGO.csv`** — **otto
+  file**, uno per indice (`U30USD` `D30EUR` `NASUSD` `SPXUSD` `E50EUR` `E35EUR` `F40EUR` `100GBP`),
+  piu' gli otto CSV per-trade, committati il **03/08/2026**. Qui c'era scritto *«la sua tabella per
+  simbolo non l'ho trovata nel repo»*, e lo stesso testo sta in
+  `backtest_pipeline/prove/R138a_gemello_F40EUR_770101.txt` rr.56-60: **va corretto anche li'.**
+  ✏️ **E due dettagli della vecchia riga erano sbagliati**: le rotture sono **3.302**, non «~3.500»
+  (somma della riga *«TUTTI i breakout»* degli otto file); e il modello **NON e' a tick reali, e'
+  `Modello 1` = OHLC M1** (`studio_apertura.ps1` r.93) — quindi e' **screening**, e la cosa
+  utilizzabile e' la **classifica**, non il livello.
+- 🔴 **E LA RISPOSTA ALLA DOMANDA CHE IL BUCO PONEVA E' «SI»: `F40EUR` HA GIA' UN NUMERO, ED E'
+  NEGATIVO** — **−0,056 R/trade** sul cieco (n 443), **−0,054** solo LONG, **−0,109** col filtro H4.
+  👉 **Quindi `R138a` E' un ritest di un caduto, e serve la tesi nuova.** 🟢 **La tesi c'e', ed e'
+  quella gia' scritta qui sopra**: la cella viva non e' la **rottura cieca** che la FASE A misura, e'
+  un **RETEST con offset**, geometria che la FASE A non contempla — e che su `U30USD` a tick reali
+  vale **+0,25 di PF contro il breakout** (R197A, vedi la CONCLUSIONE APERTURA riscritta). **La
+  condizione «va cercata PRIMA di lanciare» e' soddisfatta: cercata, trovata, letta.**
+- 🔴 **E LA STESSA LETTURA CHIUDE UN'ALTRA RIGA DI QUESTA SEZIONE**: il titolo qui sopra dice
+  *«`E50EUR` / `E35EUR`: non esclusi, MAI PROVATI. Casella LIBERA»*. **Non e' una casella libera.**
+  La FASE A li da' **tutti e tre negativi** — `F40EUR` **−0,056** · `E50EUR` **−0,048** ·
+  `E35EUR` **−0,048** — e `SPXUSD` **−0,017**. **Provati in OHLC e negativi**: per la regola della
+  seconda caccia (19/08) rifarli chiede una **tesi nuova**, che e' la stessa del RETEST.
 - ⚠️ **E un secondo condizionale, scritto prima della corsa**: `D30EUR` e `F40EUR` **aprono allo stesso
   minuto**. Se la famiglia arrivasse a 1,44 pos/g sommando due sedie che fanno **la stessa operazione nello
   stesso momento**, la frequenza sarebbe doppia e la **diversificazione ZERO**. Il verdetto di R138a e'
@@ -3769,11 +3980,46 @@ Sei file per-trade in `risultati_prove/trades_portafoglio/`, mai aperti da nessu
 non il lettore). Chiude in parte il `[NON MISURATO]` dichiarato da
 `report/QUANTI_SIMBOLI_PASSANO_2026-09-19.md`.
 
-### 🪦 TRE MORTI COL CERTIFICATO COMPLETO — `MaxMinNotte` sui gemelli europei
-`F40EUR` · `E50EUR` · `100GBP`: **72 passate ciascuno**, asse su buffer × lati × TP2_R,
-**ZERO celle con PF ≥ 1,10** su tutti e tre, PF massimo **0,999 / 0,840 / 0,672**, DD fino a
-**40,7% / 35,2% / 48,3%**. Fonti: `risultati_archivio/MaxMinNotte/{4528c79b,8eefb007,efe054b5}-valid_MaxMin_*.csv`.
-👉 **Il MaxMinNotte non si allarga sugli indici europei: è misurato, non supposto.**
+### ⚪ TRE **NON ANCORA MISURATI**, NON TRE MORTI — `MaxMinNotte` sui gemelli europei
+✏️ **RICLASSIFICATO IL 22-23/09/2026: il titolo diceva «TRE MORTI COL CERTIFICATO COMPLETO», e
+il certificato NON era completo — manca il punto ⑤.**
+
+🟢 **I numeri reggono tutti alla riverifica sul CSV, e restano scritti**: `F40EUR` · `E50EUR` ·
+`100GBP`, **72 passate ciascuno**, modello **tick**, **`InpRiskPercent=1`**, asse su
+`InpBufferPoints` (500/1000/1500) × lati × `InpTP2_R` (1,5-4,0), **ZERO celle con PF ≥ 1,10 su
+tutti e tre** (e zero sopra **1,00**), PF massimo **0,99852 / 0,83979 / 0,67170**, DD fino a
+**40,67% / 35,25% / 48,26%** — che alla taglia FTMO del 2,00% valgono **~80% / ~69% / ~94%**.
+Fonti: `risultati_archivio/MaxMinNotte/{4528c79b,8eefb007,efe054b5}-valid_MaxMin_*.csv`.
+
+🔴 **MA IL PUNTO ⑤ E' VUOTO, ED E' MISURATO: `InpMgmtTF` vale `15` in 216 passate su 216.**
+(Le tre griglie, aperte una per una il 22-23/09: nessuna delle 72+72+72 righe porta un valore
+diverso.) 👉 **`InpMgmtTF` e' la manopola di TF che su questo motore entra nei numeri**, ed e'
+rimasta inchiodata a **M15** in ogni corsa mai fatta sui gemelli europei. Per il certificato
+del 09/09 e per la direttiva del 22/09 il verdetto e' quindi:
+
+| simbolo | ① PF | ② n e DD | ③ uscita ad asse | ④ gemelli | ⑤ TF **per nome** | **verdetto** |
+|---|:-:|:-:|:-:|:-:|---|---|
+| `F40EUR` | ✅ 0,99852 (tick) | ✅ 112 · 10,12% @1% | 🟡 solo `InpTP2_R` | ✅ | 🔴 **solo `InpMgmtTF`=M15** | ⚪ **NON ANCORA MISURATO** |
+| `E50EUR` | ✅ 0,83979 (tick) | ✅ 80 · 13,90% @1% | 🟡 solo `InpTP2_R` | ✅ | 🔴 **solo `InpMgmtTF`=M15** | ⚪ **NON ANCORA MISURATO** |
+| `100GBP` | ✅ 0,67170 (tick) | ✅ 82 · 16,03% @1% | 🟡 solo `InpTP2_R` | ✅ | 🔴 **solo `InpMgmtTF`=M15** | ⚪ **NON ANCORA MISURATO** |
+
+### 🧪 IL CONTRO-ESEMPIO, costruito CONTRO questa riclassificazione
+**L'argomento che difenderebbe il «morto»:** *«0 celle su 216 sopra 1,00, con DD che alla taglia
+di campo arrivano al 94%. Nessun cambio di TF di gestione recupera 30 punti di PF: e'
+accanimento, e la regola del 19/08 vieta di allargare la griglia su un motore senza edge.»*
+✅ **E' l'argomento piu' forte del lotto, e in gran parte TIENE. Infatti NON sto riaprendo una
+griglia**: la regola del 19/08 vieta *«altri parametri dello stesso motore morto»*, e
+`InpMgmtTF` **non e' un parametro della griglia gia' girata — e' l'asse che quella griglia non
+ha mai toccato**, cioe' esattamente cio' che il certificato chiede al punto ⑤.
+🔴 **E il pezzo che NON tiene e' il DD**: e' l'unico numero che qui boccia da solo, ed e' un
+**fatto accaduto** (Emendamento B del 16/08). 👉 **Quindi il verdetto onesto non e' «morto» e
+non e' «riaprilo»: e' «⚪ NON ANCORA MISURATO sul MERITO, 🔴 BOCCIATO SUL RISCHIO»** — e il
+secondo dei due basta a tenerli fuori dal campo **oggi**, senza bisogno di chiamarli morti.
+📌 **Cosa serve per chiudere il certificato, se e quando varra' la pena**: una corsa con
+`InpMgmtTF` ad asse. **Costo e priorita' sono di Claudio** — e la priorita' onesta e' BASSA,
+perche' nessuno di questi tre diventa una sedia per il 1° ottobre.
+👉 **Il MaxMinNotte non si allarga sugli indici europei: e' misurato sul RISCHIO, non supposto.
+Sul MERITO, il certificato resta aperto di una casella.**
 
 ### 🔴 DUE VIE DI ALLARGAMENTO GIÀ PERCORSE E NEGATIVE — e una tocca un round già scritto
 1. **TF più basso su `SuperWave_DOW_H1_Ottimizzato` U30USD**: la discesa H1→M30 **è già in
@@ -3829,3 +4075,71 @@ due sedie Nasdaq il 19/09. 🔴 **Non si accende niente finché la chiusura non 
 accensione proposta, niente sul conto reale `10105439`.** Bersaglio dei due file: banco
 `C:\MT5_Backtest`, demo `50504400`. ⏳ Secondo strato del cancello (`controllo-preventivo`) **non
 lanciato da me**: finché non torna, niente va verso il VPS.
+
+---
+
+# 🗃️ I TREDICI ROUND DEL 20-21/09/2026 — ARCHIVIATI IL 22-23/09/2026
+
+🔴 **Perche' questa sezione esiste.** Fino al 22/09 `grep` su questo registro non trovava
+**nessuna** occorrenza di `R172`, `R196`, `R197`, `R198`, `R199`, `R200`, `R201`, `R202`:
+**l'intera campagna del 20-21/09 sulla famiglia APERTURE — 13 round, tutti `ROUND GIRATO` /
+`RILIEVI: 0` — non era archiviata.** Ed e' la campagna che ha deciso le manopole di **tre sedie
+che stanno operando in challenge**. E' esattamente il difetto che Claudio ha chiamato
+*«NON E' ACCETTABILE»* il 09/09: il numero esiste, ma chi cerca dove si cerca non lo trova.
+
+### 📐 Contesto comune ai 13, letto dai referti e dai file prova (non dedotto)
+- **Macchina**: `DESKTOP-H4D7CAJ` (PC di backtest), terminale `C:\Program Files\BCM Markets MT5 Terminal`, conto **50503392**.
+- **Modello 4 = TICK REALI** · **deposito 80.000** · **`@PERIODO M5`** su tutti e 13.
+- **Finestra**: `@DAQUANDO 2024.09.26` → `2026.06.30`, **taglio `FrazioneIS 0.40`** ⇒ **IS
+  2024.09.26 → ~2025.06.09** · **OOS ~2025.06.10 → 2026.06.30**. _(Il taglio e' dichiarato
+  nel file prova in 4 round su 13; negli altri 9 e' il default del driver, **che e' lo stesso
+  0.40** — `walkforward_generico.ps1` r.189.)_
+- ⚠️ **Classe 550**: dove `InpTP1_ClosePct > 0` la colonna `Trades` conta **USCITE**, non posizioni.
+- ⚠️ **Classe 547**: il rischio sta accanto a ogni DD, ed e' **diverso fra i round** (vedi colonna).
+- **Tutti e 13: `ESITO: ROUND GIRATO` · `RILIEVI: 0`.**
+
+### 📊 LA TABELLA — un round per riga
+
+| round | EA (magic) | sym | TF | modello | rischio | **ASSE** (letto dal CSV) | **PF IS** (min-max) | **PF OOS** (min-max) | **n** IS/OOS | **DD** IS/OOS | **VERDETTO** |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **R172D** | `ABTG_Dow_Apertura_US` (789540) | `U30USD` | M5 | tick | **1,00%** | `InpBEatR` 0,00→0,90 (7) | 0,88635 – **1,28819** | 0,88927 – **1,27175** | 68-75 / 115-130 `[uscite]` | 2,86-5,67% / 4,39-5,06% | 🔴 **LASCIA COM'E'** — lo stop a pari **non si accende sul Dow**: la cella viva (`BEatR=0`) fa OOS **1,27175** e **nessuna alternativa la batte**. Round scritto il 16/09 e girato il 21/09 |
+| **R196A** | `ABTG_Nasdaq_Apertura_US` (770260) | `NASUSD` | M5 | tick | **2,00%** | `InpMinRangePts` 0 vs **7200** | 1,11621 / **1,44176** | **1,14894** / 1,09953 | 82→55 / 102→75 | 12,36→6,90% / 9,12→6,94% | 🔴 **LASCIA COM'E' (`0`)** — il pavimento d'ampiezza **migliora l'IS e peggiora l'OOS**, e costa il **26% delle operazioni**. Segno che si inverte fra le finestre = selezione, non edge |
+| **R197A** | `ABTG_Dow_Apertura_US` (770202) | `U30USD` | M5 | tick | **2,00%** | `InpEntryMode` **0 / 1 / 2** | 0,96503 / *[n=2]* / **1,21214** | 1,18772 / *[n=2]* / **1,25384** | 87·2·74 / 162·2·130 | 11,99·0,80·11,09% / 8,86·4,70·8,75% | 🟢 **IL RETEST VINCE, IN TUTTE E DUE LE FINESTRE** — e col BREAKOUT l'IS del Dow va in **perdita** (0,965). ⚠️ `EntryMode=1` produce **2 sole operazioni**: cella **degenere**, `PF 0` = nessuna misura, non uno zero |
+| **R197B** | `ABTG_Dow_Apertura_US` (770202) | `U30USD` | M5 | tick | **2,00%** | `InpRetestOffsetPts` 0/200/**400**/600 | 0,97281 / 1,07130 / **1,21214** / 1,10983 | 1,12516 / **1,27968** / 1,25384 / 1,25920 | 72-74 / 130-133 | 10,84-12,88% / 8,75-9,44% | 🔵 **OFFSET 400 CONFERMATO SUL DOW** — centro dell'altopiano (3 celle su 4 sopra 1,25 in OOS) e **miglior DD OOS**. 🔴 Lo `0` e' la **peggiore** delle quattro |
+| **R198** | `ABTG_Nasdaq_Apertura_US` (770260) | `NASUSD` | M5 | tick | **2,00%** | `InpRetestOffsetPts` **0**/200/400/600 | 1,11621 / 1,28278 / 1,28578 / **1,29988** | **1,14894** / 0,95514 / 0,83796 / 0,83807 | 78-82 / 96-102 | 9,09-12,36% / 9,12-**26,11%** | 🔴 **NO, E FORTE: SUL NASDAQ LO `0` IN CAMPO E' IL MIGLIORE.** Il segno **si inverte fra IS e OOS su 3 celle su 3**, e il DD OOS arriva al **26,11% @ 2,00%** = oltre il doppio del muro. 👉 **La cella che vince sul Dow (400) NON e' trasferibile al Nasdaq**: misurato, non supposto |
+| **R199A** | `ABTG_Nasdaq_Apertura_US` (770260) | `NASUSD` | M5 | tick | **2,00%** | `InpBEatR` 0 / **0,5** / 1,0 / 1,5 | 1,11621 / **1,27601** / 1,13553 / 1,11621 | 1,14894 / **1,23262** / 1,18903 / 1,14894 | **82 / 102, invariati su tutte** | 12,36→**8,72%** / 9,12→**8,65%** | 🟠 **MISURA VINCENTE, PROPOSTA POI RITIRATA.** `0,5 R` **domina** la cella viva su PF (+14,3% IS, +7,3% OOS), DD (−29,4% / −5,2%) e profitto (+94% / +22%), **a operazioni invariate**. 🔴 **Ritirata perche' Dow (`R172D`) e DAX (`R201A`) la rifiutano**: una manopola che vince su un simbolo solo non si generalizza. 🔎 `1,5 R` riproduce `0` **perche' il bersaglio sta a `InpTP1_R x 3 = 1,5 R`**: non ha strada davanti (geometria, non guasto) |
+| **R199B** | `ABTG_Nasdaq_Apertura_US` (770260) | `NASUSD` | M5 | tick | **2,00%** | `InpTP1_ClosePct` **0**/25/**50**/75 | 1,11621 / **1,24954** / **1,22116** / 1,19253 | 1,14894 / **1,22396** / **1,21546** / 1,20435 | 82→135 / 102→**172** `[uscite]` | 12,36→**7,31%** / 9,12→**7,86%** | 🟢🟢 **L'UNICA PROMOZIONE DEI TREDICI, ED E' IN CAMPO.** `ClosePct 0 → 50` migliora **PF, DD E profitto in tutte e due le finestre**. Firma di Claudio (*«ACCENDILA AL 50%»*) e accensione il **21/09 alle 20:22**, commit `496408a9`. 🟢 **E porta la sedia SOTTO il muro FTMO del 10% alla taglia vera: DD IS 7,31% · OOS 7,86% @ 2,00%** (IS −40,9%). 🔴 **Il merito resta sospeso**: 172 uscite = **102 posizioni** < 150 |
+| **R200A** | `ABTG_Nasdaq_Apertura_US` (770260) | `NASUSD` | M5 | tick | **2,00%** | 🟢 **`InpTrailTF` su NOVE TF: M1·M2·M3·M4·M5·M6·M10·M12·M15** | 0,91982 – **1,13354** | 0,89257 – **1,17495** | 82 / 102 (invariati) | 7,73-17,69% / 9,12-16,22% | 🔴 **M5 RESTA — ed e' l'unico TF positivo in TUTTE E DUE le finestre con DD sotto il 10% OOS** (IS 1,11621 · OOS 1,14894 · DD OOS 9,1244%). 🔎 **M1 e' PRIMO in IS (1,13354) e ULTIMO in OOS (0,89257)**: segno invertito = selezione. M6 fa il miglior OOS (1,17495) ma solo 1,03 in IS e DD OOS 10,87%. 📌 **Questo e' l'UNICO asse di TIMEFRAME mai girato in tutta la famiglia APERTURE**, e chiude una casella del punto ⑤ per `770260` |
+| **R200C** | `ABTG_Nasdaq_Apertura_US` (770260) | `NASUSD` | M5 | tick | **2,00%** | `InpTrailMode` 0 / **1** / 2 | 1,11685 / **1,11621** / 0,65823 | 1,01777 / **1,14894** / 0,80365 | 82 / 102 | **16,19** / 12,36 / 8,04% · 12,72 / **9,12** / 5,32% | 🔴 **PREVBAR (`1`) E' GIA' IL MIGLIORE** — miglior PF in tutte e due le finestre. ⚠️ Il modo `2` **dimezza il DD** (OOS 5,32%) ma **uccide il PF** (0,80): e' una leva sul rischio, non sul merito, e va ricordata se un giorno servisse comprare DD con profitto |
+| **R200E** | `ABTG_Nasdaq_Apertura_US` (770260) | `NASUSD` | M5 | tick | **2,00%** | `InpTrailFixedPts` 410 → 18410 (10 valori) | 0,65823 – **1,14559** | 0,80365 – **1,06050** | 82 / 102 | 8,04-**20,07%** / 5,32-**20,05%** | 🔴 **NESSUNA FINESTRA UTILE** — il PF OOS non arriva mai a 1,07 e il DD sale fino al **20% @ 2,00%**, cioe' il doppio del muro. Il trailing a punti fissi **non compete** col PREVBAR |
+| **R201A** | `ABTG_DAX_Apertura_EU` (789521) | `D30EUR` | M5 | tick | **1,00%** | `InpBEatR` 0,00→0,90 (7) | 1,03942 – **1,14812** | **1,25071 – 1,51555** | 158-177 / 248-271 `[uscite]` | 3,40-5,90% / 3,94-7,39% | 🔴 **LASCIA COM'E'** — 🟢 **ma e' la riga piu' bella dei tredici**: il DAX fa **7 celle su 7 sopra 1,25 in OOS**, con la cella viva (`BEatR=0`) a **1,39520 · n 270 · DD 7,2506% @ 1,00%**. Nessuna alternativa domina: lo stop a pari **non serve** |
+| **R202A** | `ABTG_Dow_Apertura_US` (789540) | `U30USD` | M5 | tick | **1,00%** | `InpTP1_R` 0,25/0,50/0,75/**1,00** | **1,39731** / 1,05804 / 1,37909 / 1,22173 | 0,93207 / 1,10328 / 1,13744 / 🟢 **1,27175** | 74-96 / 130-161 `[uscite]` | 2,55-5,67% / 4,39-4,57% | 🔴 **RESTA `InpTP1_R = 1,00`** — e **per misura, non per abitudine**: le tre alternative falliscono **tutti e quattro** i cancelli congelati prima del round. ⚠️ `0,25` va in **perdita** in OOS (0,93207, −864,82). 🔎 La manopola **non muove solo il parziale**: il bersaglio finale e' `InpTP1_R x 3`, quindi scendere **rinuncia a meta' della coda** |
+| **R202B** | `ABTG_DAX_Apertura_EU` (789521) | `D30EUR` | M5 | tick | **1,00%** | `InpTP1_R` 0,25/0,50/0,75/**1,00** | 1,05870 – **1,12733** | 1,24194 – 🟢 **1,39520** | 175-223 / 270-339 `[uscite]` | 4,05-6,06% / 4,85-7,76% | 🔴 **RESTA `InpTP1_R = 1,00`** — miglior PF OOS **e** miglior profitto. 🟠 **L'unica alternativa non liquidata**: `0,25` ha **DD OOS 4,8467% (−33,2%)** a fronte di **PF −2,23%** → cancello (b) **NON RISOLTO**, chiuso da un **veto strutturale** sull'altopiano. E' l'unica porta ancora socchiusa dei tredici |
+
+### 🟢 IL CONTROLLO DI RIPRODUZIONE, che vale quanto i numeri
+- `R199A` cella `BEatR = 0` **riproduce `R196A`/`R198` al centesimo su tutte e due le finestre**
+  (IS `82 · 1,11621 · 12,3568` · OOS `102 · 1,14894 · 9,1244`).
+- `R202A` cella `1.00` contro `R172D` Pass 0: **91 colonne confrontate, due differenze, entrambe
+  di sola formattazione** (`0` vs `0.00`). `R202B` contro `R201A`: **101 colonne, le stesse due.**
+  Coincidono anche `Expected Payoff`, `Recovery Factor`, `Sharpe Ratio`, `Peggior Giornata %` e
+  `Serie Perdente Peggiore`. 👉 **La catena pin → driver → file prova ha tenuto alla colonna.**
+  Verbale: `report/VERDETTO_R202_2026-09-21.md`.
+
+### 📌 COSA LASCIANO IN EREDITA' I TREDICI
+1. 🟢 **Una promozione sola su tredici round** (`R199B`), misurata, firmata e in campo in **sei ore**.
+2. 🔴 **Una manopola che vinceva ed e' stata ritirata** (`R199A`) perche' **non si generalizzava**:
+   e' il metodo che funziona, non un'occasione persa.
+3. 🔴 **La prova che una cella NON si trasferisce fra simboli gemelli**: `InpRetestOffsetPts`
+   **400 sul Dow, 0 sul Nasdaq**, misurato lo stesso giorno sugli stessi assi (`R197B` vs `R198`).
+4. 🟢 **Il primo e unico asse di TIMEFRAME della famiglia** (`R200A`, nove TF di trailing).
+5. ⚪ **E il buco che resta**: `InpLevelTF` (H1 in **tutti** i CSV) e `InpSessionHour` (asse in
+   **0** CSV su 2.376) **non sono mai stati mossi da nessuno dei tredici.** Il punto ⑤ delle tre
+   sedie d'apertura resta **aperto sull'INGRESSO**, e la loro chiusura e' **una firma di Claudio**,
+   non un lavoro d'agente.
+
+_🛑 Nessun round e' stato lanciato per scrivere questa sezione: i tredici erano gia' girati il
+20-21/09. Fonti primarie: `backtest_pipeline/risultati_prove/{R172D,R196A,R197A,R197B,R198,R199A,R199B,R200A,R200C,R200E,R201A,R202A,R202B}/` —
+per ogni round il `REFERTO_ROUND_*.txt` e i due CSV `_IS_`/`_OOS_`, **aperti e letti colonna per
+colonna il 22-23/09/2026**. Referti di lettura: `report/DD_NASDAQ_R199_2026-09-21.md` ·
+`report/DD_NASDAQ_IL_ROUND_GIA_FATTO_2026-09-22.md` · `report/PROFONDITA_RETEST_2026-09-21.md` ·
+`report/VERDETTO_R202_2026-09-21.md`._

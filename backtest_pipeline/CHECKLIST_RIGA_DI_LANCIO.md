@@ -30464,3 +30464,59 @@ stesso URL rifatto il giorno dopo: **200**. Un `404` da CDN non si distingue da 
    avanza. Piu' il pin e' vecchio, piu' la punta e' lontana -- e piu' spesso questa guardia parla
    con la rete. Il ritentativo e' la **toppa**; la cura e' il **post-controllo sui byte che hanno
    compilato**.
+
+
+---
+
+## CLASSE 598 -- 📏💥 UNA SOGLIA SCRITTA IN UN'UNITA' CHE **CAMBIA COL SIMBOLO** (`Pips` / `Points` / `Pts` nel nome), portata su un simbolo con `Digits` diversi: il filtro non morde piu' o blocca tutto, e il CSV esce a `Trades = 0` che qualcuno legge come *"nessun edge"* (trovata il 22/09/2026 sui 113 CSV a zero)
+
+**Il caso reale, verificato riga per riga nel sorgente.**
+`mql5/Experts/ABTG_Nightly.mq5` r.72: `input double InpMaxNightVolPips = 45;` -- il commento
+dice *"escludi se la media candele H1 notte >= N pip"*. A r.201 il confronto usa
+`a[0]/PipSize()`, e `PipSize()` (r.109-113) e':
+
+```
+double PipSize(){ int d=(int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS);
+                  return (d==3 || d==5) ? _Point*10.0 : _Point; }
+```
+
+🔴 Su un simbolo con **`Digits = 2`** (D30EUR, U30USD) `PipSize()` **vale `_Point`**: la
+soglia "45 pip" diventa **0,45 punti indice**, contro un range d'apertura a 15 minuti
+**misurato di 123,80** su U30USD (n=446). **275 volte sotto -> il filtro blocca ogni notte**,
+e il CSV esce tutto a zero.
+
+🧪 **E il discriminante che lo DIMOSTRA invece di suggerirlo**: `XAGUSD` ha **`Digits = 3`**
+-> `PipSize = _Point*10` -> lo stesso numero nominale ci sta **sotto** -> **4 operazioni in OOS**.
+**Due metalli, stessa soglia nominale, esiti opposti, esattamente come predice l'aritmetica
+dei `Digits`.** Non e' un'ipotesi: e' un esperimento gia' fatto dentro i nostri dati.
+
+**Stessa classe, altro EA**: `ABTG_MaxMinNotte` r.140 `input double InpBufferPoints = 1000;`
+col commento *"DAX BCM: 1000 = 10 punti indice"*, usato a r.727 come `*_Point`. Su **EURUSD**
+(`Digits=5`) vale **100 PIP** di buffer oltre il box notturno. 🟢 Controprova: su XAUUSD
+gira con **250** (scalato) e fa 59/92 operazioni.
+
+### Perche' nessuno dei due strati lo prende
+- 🤖 `controlla_prova.py` legge la **sintassi** del file prova: un `1000` e' un numero valido.
+  Ha ragione, e non puo' avere ragione: l'unita' sta nel `.mq5` e nel `Digits` del simbolo.
+- 🧪 E il contro-esempio tipico del file prova (*"se le celle escono identiche la manopola
+  e' inerte"*) **non lo prende**: qui le celle escono **tutte a zero**, che e' un caso
+  degenere diverso, e viene letto come un verdetto sul motore.
+
+### La regola
+1. 🔎 **Prima di portare un EA su un simbolo nuovo, si elencano gli input il cui NOME o il
+   cui COMMENTO dichiara un'unita'** (`Pip`, `Pips`, `Point`, `Points`, `Pts`, `Idx`, `Punti`)
+   **e si guarda come vengono USATI**, riga per riga: moltiplicati per `_Point`? divisi per
+   una `PipSize()`? confrontati con un ATR? con un prezzo?
+2. 📐 **Si converte il valore nell'unita' VERA di QUEL simbolo**, usando i `Digits`
+   **misurati** (sonde `ABTG_InfoBroker`, `STOP_VS_SPREAD_FTMO` §2), **mai assunti**, e lo si
+   confronta con una grandezza vera dello stesso simbolo (spread misurato, ATR, range).
+3. 🛑 **`Trades = 0` NON E' UN VERDETTO SUL MOTORE: e' una misura che non e' avvenuta.**
+   Un CSV a zero si archivia solo con la CAUSA scritta, con file e riga. *"PF 0,00000 su 0
+   operazioni"* non e' *"nessun edge"*: e' **nessuna misura**.
+4. 🧪 **Il contro-esempio giusto per questa classe e' il GEMELLO CON `Digits` DIVERSI**:
+   se lo stesso EA, con la stessa soglia, opera su un simbolo e non sull'altro, **l'aritmetica
+   dei `Digits` deve prevedere quale dei due**. Se non la prevede, la causa e' un'altra.
+5. 🔴 **E il verso pericoloso e' l'altro**: qui la soglia bloccava tutto e il danno e' stato
+   un CSV vuoto. La stessa classe, su un input di **STOP** o di **BUFFER**, produce uno stop
+   **cento volte piu' largo** di quello che il backtest aveva misurato -- e quella non si vede
+   in un CSV a zero: si vede in un conto vero. **Sui preset in CAMPO va guardata per prima.**
