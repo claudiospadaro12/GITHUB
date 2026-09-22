@@ -81,9 +81,105 @@ esattamente il DD). Dove lo scrivo, lo scrivo come stima e lo dichiaro.
 
 ---
 
-# 🔬 §2 · I TRE CANDIDATI VIVI, uno per uno — **col contro-esempio costruito da me**
+# 🔬 §2 · I QUATTRO CANDIDATI VIVI, uno per uno — **col contro-esempio costruito da me**
 
-## 🥇 §2.1 · `ABTG_ORB_Ottimizzato` U30USD M5 LONG — *già in lavorazione, qui aggiungo il pezzo che mancava*
+## 🥇 §2.1 · IL DOW D'APERTURA IN VERSIONE **BREAKOUT A DUE LATI** — il candidato numero uno
+
+🔴 **Prima di tutto, che cos'è e che cosa NON è.** **Non** è la sedia `770202` che vola, e
+**non** è una sua cella migliore. È **un'altra configurazione dello stesso sorgente**: il
+`REGISTRO_TEST.md` (12/09) ha già fatto il diff manopola per manopola e conta **DODICI input
+diversi** — `InpEntryMode` **0 (BREAKOUT)** contro **2 (RETEST)** · `InpRangeMinutes` **15**
+contro **35** · `InpBufferPoints` **200** contro **1000** · `InpAllowShort` **1** contro
+**false** · `InpTP1_ClosePct` **0** contro **50** · magic **770201** contro **770202**.
+👉 **È un'altra sedia** — ed è esattamente per questo che qui è un **candidato**, non un
+doppione (classe 224, disinnescata: lì si diceva *«non usare questo numero PER `770202`»*, e
+resta vero; qui il numero si usa **per sé stesso**).
+
+**Fonte:** `backtest_pipeline/risultati_archivio/Dow_Apertura/dow_walkforward_{IS,OOS}.csv`
+(40 celle vive per finestra, **tick reali**, deposito 10.000, rischio 1%,
+`InpSessionHour=14` ✅ ora server BCM). Griglia **vera a due assi**: `InpEmaSlow` 20…200 ×
+`InpTP1_R` 0,33/0,50/0,67/0,84.
+**Finestre dichiarate nello script:** IS `2024.01.01→2025.06.30` · OOS `2025.07.01→2026.06.30`.
+
+| | celle in utile | celle ≥ 1,10 | PF (banda) | PF mediano | DD massimo | n mediano |
+|---|--:|--:|---|--:|--:|--:|
+| **IS** | 39 / 40 | **38 / 40** | 0,988 → 1,546 | **1,27610** | 12,4677% | **140** |
+| **OOS** | 🟢 **40 / 40** | 🟢 **40 / 40** | **1,267 → 1,560** | **1,37264** | 🟢 **8,6965%** | **188** |
+
+🟢 **Perché è in cima**: è **l'unica riga non schierata**, in tutto l'archivio, che passa
+**tutti e quattro i cancelli sull'OOS insieme** — PF 1,37 ≥ 1,10 · n **188 ≥ 150** ·
+DD 4,41% (e **massimo 8,70% su quaranta celle**) < 10% · e **tutti e due i lati accesi**
+(`InpAllowLong=1` **e** `InpAllowShort=1`), quindi la regola del 25/08 è soddisfatta **per
+costruzione**, non per deroga.
+🟢 **E i 188 sono POSIZIONI, non deal**: `InpTP1_ClosePct=0` ⇒ nessuna chiusura parziale ⇒
+un ingresso = un'uscita. 👉 **La classe 550 qui non morde, ed è verificato nel CSV**, non
+assunto.
+
+### 🧪 IL CONTRO-ESEMPIO — **ne ho costruiti cinque. Quattro mordono, e il primo è mio.**
+
+1. 🔴 **«La finestra è di 30 mesi.» ❌ NO: metà dell'IS non ha i tick, e LA PROVA È
+   NELL'ANOMALIA CHE IL DOCUMENTO DI CASA AVEVA LASCIATO APERTA.**
+   `DOW_MOTORE.md` r.406-416 segnala: *«IS 146 trade in 18 mesi = **8,1/mese**; OOS 197 in 12
+   = **16,4/mese**. Il doppio. O il filtro EMA ha bloccato di più nel 2024, oppure lo storico
+   di U30USD non copre davvero l'inizio del 2024. **Va verificato.**»*
+   🟢 **L'ho verificato, e la seconda spiegazione torna al 2,3%.** I tick BCM sugli indici
+   partono dal **2024.09.26** (classe 590). Da lì al 30/06/2025 ci sono **9,1 mesi**, non 18:
+
+   | | trade | mesi **dichiarati** | trade/mese | mesi **con tick veri** | trade/mese **veri** |
+   |---|--:|--:|--:|--:|--:|
+   | IS | 146 | 18 | 8,11 | **9,1** | **16,04** |
+   | OOS | 197 | 12 | **16,42** | 12 | 16,42 |
+
+   👉 **16,04 contro 16,42: lo scarto crolla da 2,03× a 1,02×.** Il filtro EMA è **assolto**,
+   e l'IS **è vero ma è lungo la metà di quanto dichiarato**. 🔴 **Conseguenza pratica: l'IS
+   va rigirato da `2024.09.26`**, altrimenti il tester ha lavorato su ~9 mesi di tick
+   **generati dalle M1**, che è screening, non verdetto.
+2. 🔴 **«Il 40/40 dimostra un altopiano.» ⚠️ Dimostra il contrario di quello che sembra, e lo
+   dice il file stesso: la correlazione di rango IS→OOS è −0,357, NEGATIVA.** Le cinque celle
+   migliori in IS si piazzano **31ª, 23ª, 21ª, 35ª, 24ª su 40** in OOS.
+   👉 **Su questi due assi NON si ottimizza**: la classifica dentro la griglia è rumore.
+   🟢 **Ma è una buona notizia travestita**: se *tutte* e 40 passano e la posizione esatta non
+   conta, **l'edge sta nel MOTORE e non nella taratura** — che è l'opposto del sovradattamento.
+   🔴 E va detta la conseguenza scomoda: **la cella da schierare va scelta al CENTRO
+   dichiarato, mai col picco**, e `InpEmaSlow=50` (quello che l'EA usa) **non era nella
+   griglia** (andava di 20 in 20): sta fra 40 (PF OOS 1,340) e 60 (1,358), **ed è quindi un
+   valore mai misurato**.
+3. 🔴 **«Il DD è sotto il muro.» ⚠️ A rischio 1%.** Alla taglia FTMO del 2,00%: mediana
+   ≈ **8,8%**, massimo di griglia ≈ **17,4%** *(stima, non misura)*. 👉 **La mediana resta
+   dentro il muro, il peggio della griglia no.** Classe 562: sotto soglia **dimostra**, sopra
+   **non conclude** — quindi la riga onesta è *«la cella centrale è dimostrabilmente sicura
+   solo dopo una passata alla taglia vera»*.
+4. 🔴 **«È diversificazione.» ❌ NO: è lo STESSO indice e la STESSA apertura della sedia
+   `770202` già in campo.** Due sedie sull'apertura del Dow alle 14:30 server sono **due
+   scommesse sullo stesso evento**, anche se una compra la rottura e l'altra il ritest.
+   👉 Va misurata la **sovrapposizione dei giorni operativi** prima di qualunque firma —
+   strumenti già in casa: `sovrapposizione_sedie.py`, `chi_va_con_chi.py`. **Non l'ho fatta.**
+   ⚠️ E tocca il **cluster `AZIONARIO`**: con `770101`, `770202`, `770260`, `770511` e questa,
+   si arriva alla **quinta sedia sullo stesso cluster** — che è esattamente il punto in cui
+   `CLAUDE.md` dice che il tetto C2 *«diventa una rete»*.
+5. 🟢 **«È una passata sola?» ❌ No, e qui il candidato regge bene**: sono **40 celle × 2
+   finestre = 80 passate**, e `DOW_MOTORE.md` dichiara **186 passate a tick reali** in tutto
+   sul motore (fase motore + robustezza + distanze + trailing + walk-forward).
+
+### ⚠️ E UNA COSA DA VERIFICARE PRIMA DI TOCCARE QUALSIASI COSA
+`DOW_MOTORE.md` r.3 dichiara che il motore girato è **`ABTG_Nasdaq_Apertura_US` applicato a
+U30USD**, non `ABTG_Dow_Apertura_US`. 🔴 **Quale sorgente compilare non è quindi ovvio**, e
+sbagliarlo vorrebbe dire schierare un motore diverso da quello misurato (è l'errore che la
+classe 224 ha già costato una volta). **Il diff dei due sorgenti non l'ho fatto: `[NON
+VERIFICATO]`.** È la prima cosa da chiudere, e costa una lettura, non una corsa.
+
+### ➡️ La via più corta al numero, e quanto costa
+**Un round solo, la stessa griglia, con l'IS onesto**: `@DAQUANDO 2024.09.26` +
+`@FRAZIONEIS 0.40`, 40 celle × 2 finestre = **80 passate** ⇒ `T = 0,6 + 0,077 × 80` =
+**6,76 minuti**. 🟢 **Ed è un round che si autoverifica**: la cella `EmaSlow=40 · TP1_R=0,50`
+**deve** riprodurre `PF OOS 1,340 · DD 5,28% · n 188`. Se non riproduce, il verdetto è **sul
+binario**, non sul motore.
+🚫 **File prova NON scritto** — è il passo dopo, e passa dai due cancelli.
+🖥️ **Gira sul PC di backtest, non sul VPS** (firma del 21/09).
+
+---
+
+## 🥈 §2.2 · `ABTG_ORB_Ottimizzato` U30USD M5 LONG — *già in lavorazione, qui aggiungo il pezzo che mancava*
 
 **Fonte (CSV grezzi):** `backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/r44/ABTG_ORB_Ottimizzato_U30USD_{IS,OOS}_r44a.csv`, 4 righe ciascuno.
 **Igiene letta nel file:** `InpRiskPercent=1` · `InpAllowShort=0` · `InpTP1Pct=0` (🟢 **niente parziale ⇒ i 119 `Trades` SONO 119 posizioni**, la classe 550 qui non morde) · `InpOneTradePerDay=1` · finestra `@DAQUANDO 2024.09.26` (🟢 **classe 590 rispettata**: è il pavimento misurato dei tick BCM sugli indici).
@@ -136,7 +232,7 @@ esattamente il DD). Dove lo scrivo, lo scrivo come stima e lo dichiaro.
 
 ---
 
-## 🔥 §2.2 · `ABTG_EMA200` H4 sul forex A DUE LATI — **la rilettura che cambia il numero**
+## 🔥 §2.3 · `ABTG_EMA200` H4 sul forex A DUE LATI — **la rilettura che cambia il numero**
 
 **Fonte:** `backtest_pipeline/risultati_archivio/EMA200/realtick_H4/valid_ABTG_EMA200_H4_realtick_*.csv` (8 simboli).
 **Igiene letta nello script che le ha prodotte** (`backtest_pipeline/valida_realtick.ps1` r.180-186): `Model=4` **TICK REALI** · `FromDate=2024.01.01` `ToDate=2026.06.30` · `Deposit=10000` · rischio **1%** · 🔴 **`Optimization=2` = GENETICO**.
@@ -219,7 +315,7 @@ genetica.** Metro di casa `T = 0,6 + 0,077 × passate`:
 
 ---
 
-## 🟡 §2.3 · `ABTG_HVAncora` U30USD — il DD più basso della lista, e un tappo che sta nel meccanismo
+## 🟡 §2.4 · `ABTG_HVAncora` U30USD — il DD più basso della lista, e un tappo che sta nel meccanismo
 
 **Fonte:** `backtest_pipeline/risultati_prove/dal_vps/ABTG_HVAncora/` (2 CSV, 8 passate) ·
 verdetto già scritto in `report/LETTURA_BACKLOG_COMPLETA_2026-09-21.md` riga 6.
@@ -328,23 +424,36 @@ non riaprirla. *(La sedia viva `770411` è la cella `short_refine`: PF med 1,187
 Dal censimento fresco, **miglior cella mediana** di ogni motore non schierato, su corse con
 `n ≥ 150` (cioè dove il merito **è** giudicabile):
 
-| motore | simbolo | PF | n | DD |
-|---|---|--:|--:|--:|
-| `ABTG_FiboH4_Multi` | GBPUSD H4 | **0,950** | 737 | 17,21% |
-| `ABTG_LVNArbitro` | U30USD | **1,052** | 618 | 11,76% |
-| `ABTG_AtrExhaustVol` | NASUSD | **0,952** | 224 | 13,45% |
-| `ABTG_AltaVelocita` | U30USD | **0,814** | 150 | 10,74% |
-| `ABTG_MeanRevert` | GBPUSD H1 | **0,853** | 344 | 25,77% |
-| `ABTG_TurnaroundTuesday` | GBPUSD H1 | **0,783** | 497 | 34,06% |
-| `ABTG_BreakoutCorso` | GBPJPY M15 | **0,980** | 1467 | 46,63% |
-| `ABTG_SupRev_CAC_H4_Ott.` | F40EUR H4 | **0,760** | 442 | 22,47% |
-| `ABTG_IBRetest` | D30EUR | **0,965** | 107 | 5,25% |
-| `ABTG_Nightly` | EURCHF | **0,814** | 85 | 15,39% |
-| `ABTG_OpeningReversalB` | U30USD | **[NON MISURABILE]** | **0** | — |
+| motore | simbolo | PF | n | DD | modello |
+|---|---|--:|--:|--:|---|
+| `ABTG_FiboH4_Multi` | GBPUSD H4 | **0,950** | 737 | 17,21% | OHLC |
+| `ABTG_LVNArbitro` | U30USD | **1,052** | 618 | 11,76% | 🟢 tick |
+| `ABTG_AtrExhaustVol` | NASUSD | **0,952** | 224 | 13,45% | 🟢 tick |
+| `ABTG_AltaVelocita` | U30USD | **0,814** | 150 | 10,74% | OHLC |
+| `ABTG_MeanRevert` | GBPUSD H1 | **0,853** | 344 | 25,77% | OHLC |
+| `ABTG_TurnaroundTuesday` | GBPUSD H1 | **0,783** | 497 | 34,06% | OHLC |
+| `ABTG_BreakoutCorso` | GBPJPY M15 | **0,980** | 1467 | 46,63% | OHLC |
+| `ABTG_SupRev_CAC_H4_Ott.` | F40EUR H4 | **0,760** | 442 | 22,47% | OHLC |
+| `ABTG_IBRetest` | D30EUR | **0,965** | 107 | 5,25% | 🟢 tick |
+| `ABTG_Nightly` | EURCHF | **0,814** | 85 | 15,39% | 🟢 tick |
+| `ABTG_OpeningReversalB` | U30USD | **[NON MISURABILE]** | **0** | — | 🟢 tick |
+
+🧪 **E il contro-esempio che mi sarei potuto fare da solo**: *«sei righe su undici sono OHLC,
+e l'OHLC non dà mai un verdetto — quindi non puoi bocciarle».*
+🟢 **Qui invece il verso dell'errore SALVA il verdetto, e va detto perché**: l'OHLC **non
+attraversa lo spread dentro la barra**, quindi è **ottimista sul PF** e **pessimista sul DD
+solo per difetto di dettaglio**. 👉 Un PF **sotto 1,00 in OHLC** a tick può soltanto
+**peggiorare**. **Il rifiuto regge a fortiori** — ed è lo stesso ragionamento che
+`LETTURA_BACKLOG_COMPLETA_2026-09-21.md` applica al `CostToCost`.
+⚠️ **L'unica riga dove questo NON basta è `ABTG_LVNArbitro` (1,052, tick reali)**: è **sopra
+1,00 e sotto 1,10**, cioè il rifiuto poggia su **5 centesimi**. Lì il verdetto giusto non è
+*«morto»*, è *«sotto soglia col numero, riapribile solo con una tesi nuova»* — e il DD di
+11,76% (più 18,0-19,4% in IS) è il motivo per cui **non la riapro io**.
 
 🔴 **`ABTG_OpeningReversalB` merita una riga a parte**: **0 operazioni fuori campione su 11
 passate su 11**. Non è un PF basso, è un **campione vuoto** — e un campione vuoto è un
-**difetto del round**, non un verdetto sul motore.
+**difetto del round**, non un verdetto sul motore. 🔴 **Il suo certificato di morte è
+INCOMPILABILE**: senza operazioni non esistono né PF, né n, né DD.
 
 ---
 
@@ -411,10 +520,11 @@ passate su 11**. Non è un PF basso, è un **campione vuoto** — e un campione 
    Dove non esiste, c'è scritto `[NON MISURATO]` e basta. Nessun numero proviene da un
    referto `.md`.
 5. 🧪 **Contro-esempio obbligatorio per ogni candidato in cima**, costruito *prima* di
-   scriverne bene: §2.1 (quattro, tre mordono) · §2.2 (sei, cinque mordono) · §3 (il diff
+   scriverne bene: §2.1 (cinque, quattro mordono) · §2.2 (quattro, tre mordono) · §2.3 (sei, cinque mordono) · §3 (il diff
    input-per-input sui 65 `Inp*`).
 
 ## 📚 Fonti primarie (CSV, non referti)
+`risultati_archivio/Dow_Apertura/dow_walkforward_{IS,OOS}.csv` + `DOW_MOTORE.md` ·
 `risultati_prove/ABTG_ORB_Ottimizzato/r44/` · `risultati_archivio/csv_r54/` ·
 `risultati_archivio/EMA200/realtick_H4/` (8 file) · `risultati_prove/ABTG_EMA200/*_EURUSD_r29a*` ·
 `risultati_prove/ABTG_Nasdaq_Live5m/` + `dal_vps/ABTG_Nasdaq_Live5m/` ·
