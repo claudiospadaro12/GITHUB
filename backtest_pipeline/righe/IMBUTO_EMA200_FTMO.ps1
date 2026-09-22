@@ -23,7 +23,17 @@
 #  NON SCRIVE NIENTE DENTRO NESSUNA CARTELLA DATI. Legge e stampa.
 #  L'unica scrittura e' il referto sul Desktop, fuori dai terminali.
 #  Non attacca EA, non tocca preset, non manda ordini, non chiude
-#  processi: non c'e' una sola Stop-Process in tutto il file.
+#  processi.
+#
+#  >>> E QUESTO COMMENTO NON NOMINA IL VERBO CHE CHIUDE I PROCESSI, DI
+#      PROPOSITO (classe 563, 22/09/2026). La riga di lancio ha un bollo
+#      che RIFIUTA di eseguire questo file se ci trova dentro quel nome,
+#      con Select-String -SimpleMatch: e un confronto di TESTO, non di
+#      codice, e non sa distinguere un commento da una chiamata. Nella v1
+#      qui c'era scritto "non c'e' una sola <quel nome> in tutto il file":
+#      la frase che GIURAVA l'innocenza faceva scattare il bollo e la riga
+#      si rifiutava di eseguire il proprio script. Misurato eseguendo la
+#      riga intera, non lo script da solo.
 #
 #  >>> SI LEGGE IN CONDIVISIONE (classe 163). I log del giorno corrente
 #      sono APERTI dal terminale vivo: Get-Content e ReadAllBytes
