@@ -106,9 +106,14 @@
 #  (c) E IL RITARDO D'APERTURA, che dipende dal TF ed e' un altro motivo
 #      per stare in basso: l'EA agisce sull'APERTURA della barra nuova
 #      leggendo la barra CHIUSA. Con la sessione pinnata qui sotto il
-#      primo segnale utile e' la barra che apre alle 08:30 server, e
-#      l'ingresso avviene alla sua chiusura: 09:00 server = 10:00 IT su
-#      M30, 09:30 server = 10:30 IT su H1, 08:45 server = 09:45 IT su M15.
+#      primo segnale utile e' la prima barra che APRE dentro la finestra,
+#      e l'ingresso avviene alla sua CHIUSURA. Contato barra per barra:
+#         M15  apre 08:30 -> entra 08:45 server = 09:45 IT
+#         M30  apre 08:30 -> entra 09:00 server = 10:00 IT
+#         H1   le barre aprono a :00, quella delle 08:00 ha tClosed=08:00
+#              che e' FUORI (480 < 510): la prima utile apre alle 09:00
+#              -> entra 10:00 server = 11:00 IT, cioe' DUE ORE dopo
+#              l'apertura del DAX. E' un altro motivo per stare in basso.
 #
 #  4. L'ASSE -- E PERCHE' NON E' QUELLO CHE AVEVO PROPOSTO
 #  --------------------------------------------------------------------

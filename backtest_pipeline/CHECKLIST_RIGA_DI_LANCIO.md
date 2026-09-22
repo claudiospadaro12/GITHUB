@@ -30082,3 +30082,170 @@ stesso gesto che ha trovato la classe 586.
 3. 🧩 **Ogni riga porta il suo soggetto nel TESTO**, non solo nella posizione. E' la stessa
    disciplina della regola del PDF (18/09): *l'informazione sta nel testo, mai solo
    nella decorazione* -- qui la "decorazione" e' l'indentazione.
+
+---
+
+## CLASSE 590 -- 🧱📅 LA `@DAQUANDO` SCRITTA **OLTRE IL MURO DEI DATI GIA' MISURATO E GIA' SCRITTO IN CASA**: a `-Modello 4` il referto esce intitolato a 5,7 anni di DAX e ne contiene 2,0 (22/09/2026, figlia della regola del contro-esempio del 10/09 -- *"prima si cerca il file che ha gia' la risposta"* -- e cugina della 282)
+
+**Caso reale.** I due file prova `R210a/R210b_bias_h4_DAXSUPERTREND_D30EUR.txt`, scritti per
+un EA che **non ha mai girato**, dichiaravano `@SIMBOLO D30EUR` · `@DAQUANDO 2021.01.04` ·
+`-Modello 4`, con la motivazione scritta nel file: *"e' piu' lunga dello standard di casa
+(2024.09.26), e l'ho scelta per avere abbastanza operazioni"*.
+
+🔴 **Il file che aveva gia' la risposta stava nel repo da due settimane**, con dentro una
+corsa vera del 07/09/2026:
+`backtest_pipeline/risultati_archivio/misura_tick/REFERTO_MISURA_TICK_D30EUR.txt`
+> *"I TICK REALI DI D30EUR PARTONO DAL 2024.09.26 (35408137 tick)"*
+> *"MURO DELLE BARRE M1, colonna PrimaDataServer: 2024.09.26"*
+> *"D30EUR M1 barre=642270 locale=2024.09.26 server=2024.09.26 -> IL BROKER NON HA PIU' STORICO"*
+
+Cioe': **il 64% della finestra dichiarata (3 anni e 8 mesi su 5,7) non ha ne' tick ne' barre
+M1 sul nostro feed.** E lo stesso referto spiega perche' e' pericoloso proprio a `-Modello 4`:
+*"A Modello 4 MT5 non si ferma se i tick mancano: se li fabbrica dalle barre M1, e la colonna
+'Spread Mediano Ingresso' -- META' del cancello I1 -- smette di essere lo spread del feed."*
+Qui mancano anche le barre M1, quindi la corsa **si tronca in silenzio** oppure fabbrica da
+quello che trova: in tutti e due i casi il referto avrebbe portato in titolo una finestra che
+i numeri sotto non descrivono. **E' la stessa famiglia del "DD 42,9% fantasma".**
+
+🟢 **E la prova che il difetto era evitabile con un `grep`, non con un ragionamento:** i
+**30** file prova `D30EUR` in archivio scrivono **tutti** `@DAQUANDO 2024.09.26`, e almeno
+sei portano accanto la nota *"MISURATO, non assunto: e' l'inizio dello storico"*. I due file
+nuovi erano **gli unici due** a deviare, e deviavano **senza una riga** sui dati.
+
+### La regola
+1. 🧱 **La `@DAQUANDO` non e' una preferenza: e' un dato misurato del broker.** Prima di
+   scriverne una diversa da quella di casa si apre `risultati_archivio/misura_tick/` e si
+   legge il referto del simbolo. Se non c'e', la finestra e' **`[NON MISURATO]`** e il round
+   **non parte con una data inventata**: parte con la sonda.
+2. 🔎 **Il controllo che costa dieci secondi**:
+   `grep -h '@DAQUANDO' backtest_pipeline/prove/*<SIMBOLO>*.txt | sort | uniq -c`
+   Se il file nuovo e' l'unico a deviare dai suoi trenta fratelli, la deviazione va
+   **giustificata con una misura**, non con una preferenza.
+3. 📐 **E "mi serve piu' campione" non e' una giustificazione, e' il sintomo.** Quando la
+   finestra viene allungata per raggiungere un n, il problema vero e' la **frequenza del
+   motore**, e si risolve sul TF o sui simboli -- non riscrivendo una data che il broker non
+   puo' onorare.
+
+---
+
+## CLASSE 591 -- 📏🎯 IL PROXY DEL COSTO MISURATO SU **TUTTE LE BARRE** QUANDO L'EA ENTRA **SOLO SULLE BARRE DI FLIP**: la mediana giusta e' il **doppio**, e la frontiera dei 40x boccia due TF che non andavano bocciati (22/09/2026, cugina della 180 -- *l'insieme si elenca per nome*)
+
+**Caso reale.** `R210a/R210b` escludevano M15 e M30 **per costo**, col numero accanto (regola
+di casa: *"si dichiara escluso PER COSTO, con il numero accanto"*), sulla base della distanza
+**mediana prezzo -> linea Supertrend** misurata su **tutte le barre** del DAX 2013-2018:
+
+| TF | mediana v1 (TUTTE le barre) | x spread | verdetto v1 |
+|---|---:|---:|---|
+| M15 | 43,83 pt | 24,8x | SFONDATA |
+| M30 | 62,41 pt | 35,3x | SFONDATA |
+| H1 | 91,79 pt | 51,9x | passa |
+
+🔴 **Ma `DAX_M3_Supertrend.mq5` chiama `Open()` SOLO dentro il ramo del flip** (r.485-486) e
+gli passa `cur.line` come SL (r.365-373). **La popolazione degli stop veri e' quella delle
+barre di FLIP, non quella di tutte le barre** -- e su una barra di flip la linea si e' appena
+ribaltata dall'altra parte del prezzo, quindi la distanza e' **sistematicamente piu' larga**.
+Rimisurato sulla popolazione giusta, stessi dati, stesso `Factor 3,5` / `ATR 10`:
+
+| TF | mediana sui FLIP | x spread | quota di ingressi **SOTTO** i 40x (70,70 pt) |
+|---|---:|---:|---:|
+| M15 | 74,87 pt | **42,4x** | **45,6%** |
+| M30 | 104,79 pt | **59,3x** | **18,6%** |
+| H1 | 155,82 pt | **88,2x** | **1,7%** |
+
+👉 **M30 non era "sfondato": passava di venti punti di margine.** Ed era l'unico TF che, sulla
+finestra vera (2 anni, classe 590), lasciava un campione leggibile: **83 operazioni contro le
+29 di H1** sulla cella larga. Il proxy sbagliato aveva chiuso **l'unica porta** che teneva in
+vita il round.
+
+🟢 **La contro-verifica che dice che l'errore era nel proxy e non nel conto:** rifatto il
+calcolo del file su *tutte* le barre si riottengono i suoi numeri (M15 46,73 · M30 64,20 ·
+H1 92,39, contro 43,83 · 62,41 · 91,79 -- differenze da sola definizione di sessione).
+**L'aritmetica era giusta. Era sbagliata la domanda.**
+
+### La regola
+1. 🎯 **Un proxy di costo si misura sulla popolazione degli eventi in cui l'EA AGISCE, e
+   quella popolazione si trova nel SORGENTE, non nell'intuizione.** Si apre il file, si cerca
+   la chiamata che apre la posizione, e si guarda **dentro quale `if`** sta. Quello e'
+   l'insieme.
+2. 📐 **E la MEDIANA da sola non basta a dire "passa la frontiera".** La frontiera
+   `stop >= 40 x spread` e' un vincolo **per ingresso**: se la mediana e' 42,4x, meta' degli
+   ingressi sta sotto. **Accanto alla mediana si stampa SEMPRE la quota sotto soglia**, ed e'
+   quella che decide.
+3. 🔁 **Vale anche al contrario**: lo stesso proxy applicato a tutte le barre puo' **assolvere**
+   un TF che sui suoi eventi veri sfonda. La direzione dell'errore non e' garantita; il metodo
+   sbagliato lo e'.
+
+---
+
+## CLASSE 592 -- 🧮🚦 L'ATTESA DICHIARATA PRIMA DEI NUMERI, MA **CALIBRATA SU UNA POPOLAZIONE CHE NESSUNA CELLA DEL ROUND PRODUCE**: la corsa sana fa scattare l'allarme, e l'allarme suona per costruzione (22/09/2026, figlia della 178 -- *l'ipotesi alternativa*)
+
+**Caso reale.** `R210a/R210b` mettevano ad asse due filtri (`UseEMA`, `UseADX`) e dichiaravano,
+**prima dei numeri** e quindi nella forma giusta:
+
+> *"(A) FREQUENZA: la cella (false,false) deve fare CIRCA 6 volte le operazioni della cella
+> (true,true). Se non le fa, i filtri non stanno filtrando quello che credo e il round va
+> riletto prima di giudicarlo."*
+
+Il 6x veniva da una misura **vera e riprodotta alla unita'** (294 flip senza bias contro 48
+col bias, DAX 2013-2018, H1 in sessione).
+
+🔴 **Ma "senza bias" NON E' UNA CELLA DI QUEL ROUND.** `Bias()` (r.296-315) ricava `+1/-1` dal
+**Supertrend H4**, e quel pezzo **non ha interruttore**: `UseEMA` e `UseADX` spengono soltanto
+l'EMA e l'ADX. Quindi la cella `(false,false)` porta **gia' addosso** il vincolo *"il flip deve
+essere concorde col Supertrend H4"*. Contato sugli stessi dati:
+
+| popolazione | flip in sessione (6 anni, H1) | e' una cella del round? |
+|---|---:|---|
+| nessun filtro | 294 | ❌ **NO** |
+| `(false,false)` = solo Supertrend H4 | **87** | ✅ si |
+| `(true,true)` = ST + EMA + ADX | **24** | ✅ si |
+
+**Il rapporto che il round misurera' e' 3,62x, non 6x.** Con l'attesa scritta com'era, una
+corsa **perfettamente sana** a 3,6x avrebbe fatto scattare *"i filtri non stanno filtrando
+quello che credo"*: **un falso allarme dichiarato in anticipo e garantito dall'aritmetica.**
+
+### La regola
+1. 🧮 **L'attesa si calibra sulle CELLE, non sul meccanismo.** Prima di scrivere una banda si
+   elenca **per nome** (classe 180) ogni cella che il round produrra', e si controlla che la
+   popolazione da cui viene il numero atteso **sia una di quelle**.
+2. 🔌 **Un asse di "filtro acceso/spento" si legge nel SORGENTE per sapere QUANTO spegne.**
+   La domanda e': *"con tutti gli interruttori a 0, che cosa resta ACCESO che non ha
+   interruttore?"* Qui restava il pezzo **principale** del bias.
+3. ⚖️ **Un'attesa che boccia la corsa sana e' peggio di nessuna attesa**, perche' porta la
+   firma della disciplina giusta: e' dichiarata prima dei numeri, e quindi nessuno la
+   ridiscute dopo.
+
+---
+
+## CLASSE 593 -- 📌🔢 IL PIN IN FORMA COMPLETA CON IL **VALORE DIVERSO DA START/STOP**: `787442||787441||0||787441||N`, e l'intestazione del file dichiara il numero che la riga non porta (22/09/2026, gemella della regola *"i pin si scrivono `v||v||0||v||N`"*)
+
+**Caso reale.** `R210b` portava in intestazione *"MagicNumber = 787442: cercato col grep, ZERO
+occorrenze"* e sulla riga:
+
+```
+MagicNumber=787442||787441||0||787441||N
+```
+
+cioe' **valore 787442, start/stop 787441** -- che e' il magic dell'**altro** file della stessa
+coppia (`R210a`). La riga passa i cancelli: `controlla_prova.py` guarda start/step/stop **solo**
+sugli assi `||Y`, e il driver la ricopia **verbatim** in `[TesterInputs]` (r.848-850) perche'
+ha gia' i suoi cinque campi.
+
+🟠 **Sul banco il danno e' piccolo** (ogni passata ha il suo conto: due round non si mescolano
+per via del magic). 🔴 **Ma il file DICHIARA un numero che la riga non porta in tre campi su
+quattro**, e la convenzione di casa esiste apposta: il driver blinda **lui** i pin secchi in
+`v||v||0||v||N` (r.843 e r.856). Una riga scritta a mano che **rompe la forma** senza
+dichiararlo e' un pin che "sembra applicato": e' la stessa famiglia del `InpSymbols=` vuoto da
+cui e' nato `controlla_prova.py`.
+
+### La regola
+1. 📌 **In un pin i quattro campi numerici sono LO STESSO NUMERO.** `v||v||0||v||N`, sempre.
+   Se non lo sono, o e' un refuso o e' un asse travestito da pin: in tutti e due i casi si
+   corregge prima di lanciare.
+2. 🔎 **Il controllo, e si fa a macchina:** per ogni riga che finisce in `||N`, i campi 1, 2 e
+   4 devono coincidere. Oggi **nessuno dei due strati lo guarda** -- `controlla_prova.py`
+   valida start/step/stop solo sull'asse `||Y`. 👉 **Finche' non c'e', lo fa l'occhio, e
+   questa riga e' il promemoria.**
+3. 🧾 **E il magic si confronta con l'INTESTAZIONE del proprio file**, non solo col `grep` sul
+   repo: qui il `grep` era verde (787442 non esisteva davvero da nessuna parte) e la riga era
+   sbagliata lo stesso.
