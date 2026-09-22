@@ -4,9 +4,11 @@
 File prova: `backtest_pipeline/prove/R206a_moltiplicatore_stop_MAXMINDAX_D30EUR.txt` (**45 pin, 6 celle**)
 EA: `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` · `D30EUR` **M15** · sedia `770411`
 
-> 🔴 **BOZZA. NON È ANCORA PASSATA DAL CANCELLO DI GIUDIZIO (strato 2).**
-> Lo strato 1 è verde (esiti in fondo). **Non mandare niente a Claudio** finché
-> l'agente `controllo-preventivo` non ha risposto.
+> ✅ **PASSATA DAL CANCELLO DI GIUDIZIO (strato 2) il 22/09/2026.** Verdetto:
+> **FAIL sulla bozza → PASS su questa versione**, con **tre difetti corretti dentro il
+> documento** (classe **585** nuova sul ramo del tetto · classe **166/584** sul sorgente
+> che NON scende dal pin · classe **584 gesto 3** sulla disambiguazione da stampare).
+> Dettaglio in coda, sezione ⑨. **Questa è la versione da mandare.**
 
 ---
 
@@ -55,7 +57,7 @@ EA: `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` · `D30EUR` **M15** · sedia `77041
 ## ② 🚀 LA RIGA
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $pin='52af6583c948e7de4d20db8ae3c380976be1ce96'; if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ('VIETATO: questa riga gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama ' + $env:COMPUTERNAME + '. Sul VPS operano le sei sedie della challenge FTMO e un backtest a tick reali lo inchioda: firma di Claudio del 21/09.') }; $w="$env:USERPROFILE\abtg_round"; $p="$w\RIGA_ROUND_VPS.ps1"; $dsk=[Environment]::GetFolderPath('Desktop'); $tmo=84; New-Item -ItemType Directory -Force -Path $w | Out-Null; Remove-Item $p -Force -ErrorAction SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ROUND_VPS.ps1?cb=$([guid]::NewGuid().ToString('N'))" -OutFile $p -ErrorAction Stop; if(-not (Test-Path $p)){ throw 'DOWNLOAD FALLITO' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ROUND_VPS_v2' -Quiet)){ throw 'SCRIPT VECCHIO: manca MARCATORE_RIGA_ROUND_VPS_v2' }; Write-Host 'BERSAGLIO: il solo MT5 di questo PC, C:\Program Files\BCM Markets MT5 Terminal, demo 50503392. Tutto il resto (challenge FTMO 541452707, 100k 50504263, REALE 10105439, Pepperstone, Tickmill, banco 50504400) sta su una macchina diversa e questa riga non la raggiunge.' -ForegroundColor Cyan; $mt=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,MainWindowTitle,Path); Write-Host '--- MT5 APERTI SU QUESTA MACCHINA (PID / titolo / cartella) ---'; $mt | Format-Table -AutoSize; if(@($mt | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') }).Count -gt 0){ throw 'MT5 E APERTO: chiudilo A MANO (il PID sta nella tabella qui sopra), dopo aver guardato che non abbia EA attaccati, poi reincolla la riga. Non lo chiudo io: quel terminale e loggato sul demo 50503392 e da questa macchina il 14/08 sono partiti ordini veri.' }; Write-Host '=== ROUND r206a   EA ABTG_MaxMinNotte_DAX_Short_Ottimizzato   D30EUR M15   tick reali   deposito 100000   6 celle x 2 gambe ===' -ForegroundColor Cyan; $a=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$p+'"'),'-Expert','ABTG_MaxMinNotte_DAX_Short_Ottimizzato','-Prova','R206a_moltiplicatore_stop_MAXMINDAX_D30EUR.txt','-Etichetta','r206a','-Pin',$pin,'-TerminaleBacktest','"C:\Program Files\BCM Markets MT5 Terminal"','-Modello','4','-Deposito','100000'); $pr=Start-Process powershell -ArgumentList $a -NoNewWindow -PassThru; if(-not $pr.WaitForExit($tmo*60*1000)){ Write-Host ('TETTO DI ' + $tmo + ' MINUTI SFONDATO: fermo il round. E UN RISULTATO, NON UN GUASTO: il referto che resta e PARZIALE.') -ForegroundColor Red; Stop-Process -Id $pr.Id -Force -ErrorAction SilentlyContinue; Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') } | Stop-Process -Force -ErrorAction SilentlyContinue; try{ $pr.WaitForExit() }catch{}; Start-Sleep -Seconds 10 }; $rc=$pr.ExitCode; if($null -eq $rc){ $rc='NON LEGGIBILE' }; Write-Host ('   esito r206a: codice ' + $rc + '   (0=GIRATO  2=NON MISURATO  3=GIRATO CON RILIEVI  1=non e partito)') -ForegroundColor Yellow; $d="$dsk\ROUND_r206a"; if(-not (Test-Path $d)){ Write-Host 'MANCA la cartella ROUND_r206a sul Desktop: il round NON ha prodotto raccolta.' -ForegroundColor Red } else { Compress-Archive -Path "$d\*" -DestinationPath "$dsk\ROUND_r206a.zip" -Force; Write-Host 'ZIP PRONTO DA MANDARE: Desktop\ROUND_r206a.zip' -ForegroundColor Green }; Write-Host 'FILE ATTESI NELLO ZIP (4):' -ForegroundColor Gray; Write-Host '   REFERTO_ROUND_r206a.txt' -ForegroundColor Gray; Write-Host '   ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_IS_r206a.csv' -ForegroundColor Gray; Write-Host '   ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_OOS_r206a.csv' -ForegroundColor Gray; Write-Host '   R206a_moltiplicatore_stop_MAXMINDAX_D30EUR.txt' -ForegroundColor Gray; Write-Host 'NEL REFERTO LEGGI LA RIGA  data:  -- DEVE ESSERE DI OGGI, altrimenti stai guardando un file vecchio.' -ForegroundColor Yellow; Write-Host 'ANCORA DI REGRESSIONE (numeri letti dai CSV di r81a in risultati_archivio/r81_csv/, NON da un referto) -- cella InpAtrSLmult=2.5, la cella VIVA:  IS  n=20  PF=1.87803  RF=1.52059  EqDD%=3.0977  Profit=4766.96   |   OOS  n=21  PF=2.15985  RF=3.02118  EqDD%=1.9213  Profit=6143.38.  SE NON TORNA il binario di oggi non e quello di r81a e le altre cinque celle non si leggono.' -ForegroundColor Magenta; if(Test-Path $d){ Get-ChildItem $d -Recurse -File | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize } }
+& { $ErrorActionPreference='Stop'; $pin='52af6583c948e7de4d20db8ae3c380976be1ce96'; if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ('VIETATO: questa riga gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama ' + $env:COMPUTERNAME + '. Sul VPS operano le sei sedie della challenge FTMO e un backtest a tick reali lo inchioda: firma di Claudio del 21/09.') }; $w="$env:USERPROFILE\abtg_round"; $p="$w\RIGA_ROUND_VPS.ps1"; $dsk=[Environment]::GetFolderPath('Desktop'); $tmo=84; New-Item -ItemType Directory -Force -Path $w | Out-Null; Remove-Item $p -Force -ErrorAction SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ROUND_VPS.ps1?cb=$([guid]::NewGuid().ToString('N'))" -OutFile $p -ErrorAction Stop; if(-not (Test-Path $p)){ throw 'DOWNLOAD FALLITO' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ROUND_VPS_v2' -Quiet)){ throw 'SCRIPT VECCHIO: manca MARCATORE_RIGA_ROUND_VPS_v2' }; Write-Host 'BERSAGLIO: il solo MT5 di questo PC, C:\Program Files\BCM Markets MT5 Terminal, demo 50503392. Tutto il resto (challenge FTMO 541452707, 100k 50504263, REALE 10105439, Pepperstone, Tickmill, banco 50504400) sta su una macchina diversa e questa riga non la raggiunge.' -ForegroundColor Cyan; $mt=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,MainWindowTitle,Path); Write-Host '--- MT5 APERTI SU QUESTA MACCHINA (PID / titolo / cartella) ---'; $mt | Format-Table -AutoSize; if(@($mt | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') }).Count -gt 0){ throw 'MT5 E APERTO: chiudilo A MANO (il PID sta nella tabella qui sopra), dopo aver guardato che non abbia EA attaccati, poi reincolla la riga. Non lo chiudo io: quel terminale e loggato sul demo 50503392 e da questa macchina il 14/08 sono partiti ordini veri.' }; Write-Host '=== ROUND r206a   EA ABTG_MaxMinNotte_DAX_Short_Ottimizzato   D30EUR M15   tick reali   deposito 100000   6 celle x 2 gambe ===' -ForegroundColor Cyan; $a=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$p+'"'),'-Expert','ABTG_MaxMinNotte_DAX_Short_Ottimizzato','-Prova','R206a_moltiplicatore_stop_MAXMINDAX_D30EUR.txt','-Etichetta','r206a','-Pin',$pin,'-TerminaleBacktest','"C:\Program Files\BCM Markets MT5 Terminal"','-Modello','4','-Deposito','100000'); $pr=Start-Process powershell -ArgumentList $a -NoNewWindow -PassThru; if(-not $pr.WaitForExit($tmo*60*1000)){ Write-Host ('TETTO DI ' + $tmo + ' MINUTI SFONDATO: fermo il round. E UN RISULTATO, NON UN GUASTO: il referto che resta e PARZIALE.') -ForegroundColor Red; Stop-Process -Id $pr.Id -Force -ErrorAction SilentlyContinue; Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -and ($_.CommandLine -like '*walkforward_generico.ps1*') } | ForEach-Object { Write-Host ('   fermo anche il NIPOTE che esegue il driver: PID ' + $_.ProcessId) -ForegroundColor Red; Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; Start-Sleep -Seconds 5; Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') } | Stop-Process -Force -ErrorAction SilentlyContinue; try{ $pr.WaitForExit() }catch{}; Start-Sleep -Seconds 10; Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') } | Stop-Process -Force -ErrorAction SilentlyContinue }; $rc=$pr.ExitCode; if($null -eq $rc){ $rc='NON LEGGIBILE' }; Write-Host ('   esito r206a: codice ' + $rc + '   (0=GIRATO  2=NON MISURATO  3=GIRATO CON RILIEVI  1=non e partito)') -ForegroundColor Yellow; $d="$dsk\ROUND_r206a"; if(-not (Test-Path $d)){ Write-Host 'MANCA la cartella ROUND_r206a sul Desktop: il round NON ha prodotto raccolta.' -ForegroundColor Red } else { Compress-Archive -Path "$d\*" -DestinationPath "$dsk\ROUND_r206a.zip" -Force; Write-Host 'ZIP PRONTO DA MANDARE: Desktop\ROUND_r206a.zip' -ForegroundColor Green }; Write-Host 'FILE ATTESI NELLO ZIP (4):' -ForegroundColor Gray; Write-Host '   REFERTO_ROUND_r206a.txt' -ForegroundColor Gray; Write-Host '   ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_IS_r206a.csv' -ForegroundColor Gray; Write-Host '   ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_OOS_r206a.csv' -ForegroundColor Gray; Write-Host '   R206a_moltiplicatore_stop_MAXMINDAX_D30EUR.txt' -ForegroundColor Gray; Write-Host 'NEL REFERTO LEGGI LA RIGA  data:  -- DEVE ESSERE DI OGGI, altrimenti stai guardando un file vecchio.' -ForegroundColor Yellow; Write-Host 'ANCORA DI REGRESSIONE (numeri letti dai CSV di r81a in risultati_archivio/r81_csv/, NON da un referto) -- cella InpAtrSLmult=2.5, la cella VIVA:  IS  n=20  PF=1.87803  RF=1.52059  EqDD%=3.0977  Profit=4766.96   |   OOS  n=21  PF=2.15985  RF=3.02118  EqDD%=1.9213  Profit=6143.38.  SE NON TORNA il binario di oggi non e quello di r81a e le altre cinque celle non si leggono.' -ForegroundColor Magenta; Write-Host 'MERITO SOSPESO PER COSTRUZIONE, e va letto PRIMA dei numeri: n=20 (IS) e n=21 (OOS), lontanissimi dal pavimento dei 150 (Emendamento della Finestra, regole A e B del 16/08). Di questo round si leggono il RISCHIO (il DD, che vale a qualunque n) e la DIREZIONE DELL ASSE. NESSUNA cella puo essere promossa sul merito: un PF 2,x su 21 operazioni NON e una conferma. E le celle 1,5 e 2,0 sono GIA ESCLUSE PER COSTO a priori (22,7-30,9x e 30,2-41,2x contro la frontiera dei 40x): girano solo per dare FORMA all asse, NON sono candidate nemmeno se escono belle.' -ForegroundColor Magenta; if(Test-Path $d){ Get-ChildItem $d -Recurse -File | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize } }
 ```
 
 🔴 **ATTENZIONE ALL'ETICHETTA, ed è la CLASSE 576 applicata alla lettera.** L'etichetta
@@ -113,6 +115,21 @@ differire. È il motivo per cui il moltiplicatore resta ×10 e non ×5.
 
 ⚠️ **Se il tetto scatta NON è un successo** (checklist p.19): la riga lo dice in rosso e il
 referto che resta è **PARZIALE**.
+🔴 **IL RAMO DEL TETTO È STATO CORRETTO DAL CANCELLO — CLASSE NUOVA 585.** Com'era scritto,
+`Stop-Process -Id $pr.Id` uccideva **il figlio** (`RIGA_ROUND_VPS.ps1`) ma **non il NIPOTE**:
+il wrapper lancia il driver con `Start-Process powershell ... -Wait` (r.1090), Windows **non
+crea nessun job object**, e quel `powershell.exe` che esegue `walkforward_generico.ps1`
+**sopravvive**. E il driver **non muore** se il CSV manca (r.2069: stampa un avviso e
+**passa alla gamba dopo**), quindi **rilanciava `terminal64` DOPO la spazzata**: il round
+proseguiva invisibile, e la frase *«fermo il round»* stampata a Claudio era **falsa**.
+👉 Ora la riga, nell'ordine: ① uccide `$pr`; ② uccide i `powershell.exe` il cui
+`CommandLine` contiene la **costante** `walkforward_generico.ps1`, **stampandone il PID**;
+③ aspetta 5 s; ④ spazza `metatester64`/`terminal64` sotto il percorso bersaglio; ⑤ dopo i
+10 s **rispazza**, così un terminale che fosse partito nell'ultimo istante non resta acceso.
+⚠️ **Il secondo filtro NON è sul percorso del terminale ma sul nome del nostro driver**: se
+Claudio avesse un ALTRO round in corso su questa macchina, verrebbe fermato anche quello.
+Sul PC di backtest non ce ne sono altri, e lo dichiaro invece di nasconderlo.
+
 🔴 **La chiusura d'emergenza è chirurgica e su una COSTANTE**: `Stop-Process` colpisce solo
 `metatester64`/`terminal64` il cui `Path` sta sotto `C:\Program Files\BCM Markets MT5 Terminal\`
 — **stringa letterale dentro la riga, in tutte e due i punti (pre-volo e uccisione), nessuna
@@ -167,8 +184,18 @@ sta **fra 1.000 e 200.000**, e su questa macchina `R201A` ha riportato `MaxBars=
 - 🟠 **Del refine si prende la DIREZIONE, non i numeri**: gira su una finestra diversa
   (`2024.01.01→2026.06.30` **tutta in campione**) e a **deposito 10.000** contro i nostri
   100.000. I suoi PF/DD **non sono soglie qui**, e il file prova lo dichiara.
-- 🟠 Che il `.ex5` sul PC di backtest corrisponda al `.mq5` letto qui: il driver ricompila dal
-  pin, ma **non l'ho misurato**.
+- 🔴 **IL SORGENTE DELL'EA NON SCENDE DAL PIN — CORRETTO DAL CANCELLO (classe 166/584).**
+  Qui c'era scritto *«il driver ricompila dal pin»*: **è falso**.
+  `backtest_pipeline/walkforward_generico.ps1` **r.264** ha `$EABranch="lavoro"` **cablato**
+  e `RIGA_ROUND_VPS.ps1` **non gli passa nessun pin**: il pin `52af6583` copre **la riga, il
+  driver e il file prova**, mentre `.mq5` e include scendono dal **RAMO `lavoro`, al momento
+  in cui la riga viene incollata**.
+  🟢 **Oggi non fa danno, ed è misurato**: `git diff 52af6583 HEAD --
+  mql5/Experts/ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5` è **vuoto**. 🔴 Ma se qualcuno
+  pusha su `lavoro` prima che la riga parta, il motore cambia in silenzio. Il discriminante
+  è l'ancora: **se la cella 2,5 riproduce `r81a`, il binario è sano**; se non riproduce, la
+  causa può essere **il motore ballato**, non solo il moltiplicatore.
+- 🟠 Che il `.ex5` sul PC di backtest corrisponda al `.mq5` di `lavoro`: **non misurato**.
 - 🟠 **Che il feed `D30EUR M15` di questa macchina copra la finestra a tick reali**:
   `R201A`/`R172D` hanno girato **M5** su `D30EUR`/`U30USD` da questa macchina il 21/09, ma
   **`M15` su questo EA da `DESKTOP-H4D7CAJ` non l'ho trovato in repo**. Se il feed non copre,
@@ -198,4 +225,26 @@ sta **fra 1.000 e 200.000**, e su questa macchina `R201A` ha riportato `MaxBars=
 **costante** `'C:\Program Files\BCM Markets MT5 Terminal\*'` in **tutte e due** le occorrenze.
 **Nessuna variabile che arrivi da fuori.**
 
-🔴 **STRATO 2 (agente `controllo-preventivo`): NON ANCORA FATTO.** Questa è una bozza.
+## ⑨ 🚦 IL CANCELLO — STRATO 2 (giudizio, agente `controllo-preventivo`) — **FATTO**
+
+**22/09/2026.** Verdetto: **FAIL sulla bozza → PASS sulla versione corretta qui sopra.**
+I difetti trovati e **già corretti dentro questo documento** (non "ops, ecco la correzione"):
+1. **classe NUOVA 585** — il ramo del tetto uccideva il figlio ma non il nipote: la riga è
+   stata riscritta (sezione ④) e ripassa lo strato 1 con **8 passati / 0 difetti meccanici**
+   e **parser `pwsh` 0 errori**;
+2. **classe 166/584** — *«il driver ricompila dal pin»* era **falso** (`walkforward_generico.ps1`
+   r.264 `$EABranch="lavoro"` cablato): riscritto in sezione ⑦, con la misura che oggi pin e
+   `HEAD` coincidono sul `.mq5`;
+3. **classe 584 gesto 3** — la disambiguazione che decide come si legge il round non era
+   **stampata dove verrà letta**: ora esce in console, in magenta, accanto all'ancora;
+4. **classe NUOVA 586, e l'ho introdotta IO correggendo la 585**: la prima stesura della
+   riga corretta aveva perso un `;` fra i due `Write-Host`. 🔴 **`Parser::ParseInput` diceva
+   0 errori lo stesso** — non è un errore di sintassi, è di **binding**, e sarebbe esploso
+   **a round già girato**. Trovato stampando la riga e rileggendola, riparato, e ora
+   **ogni comando della riga passa `StaticParameterBinder::BindCommand`: 0 binding rotti su
+   47 comandi**, con il contro-esempio che dimostra che quel controllo boccia davvero la
+   versione rotta.
+
+**Riverificato dal cancello, non ricopiato**: ancore lette nei **CSV grezzi**, deposito
+**100.000** confermato per via **indipendente** (da `RF` e `Equity DD %`), etichetta libera,
+pin = commit vero con i file identici al working tree, e il `.mq5` letto riga per riga.
