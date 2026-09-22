@@ -29,21 +29,35 @@
 #  ==> Il retest-short sul DAX e' un "NON ANCORA MISURATO" che si
 #      nascondeva dietro un "gia' bocciato". E' esattamente la cosa che
 #      il certificato di morte del 09/09 esiste per impedire.
-#  [DA VERIFICARE, e lo dichiaro invece di darlo per fatto: non ho
-#   aperto i FILE PROVA di R42 e R43 per confermare che usassero
-#   InpEntryMode=3 (FADE) e non 2 (RETEST). Se uno dei due avesse gia'
-#   misurato il retest-short, questo round e' una RIPETIZIONE e va
-#   dichiarata come tale nel referto, non spacciata per prima volta.]
+#  [MISURATO, non dichiarato come da verificare: ho aperto tutti e sei
+#   i file prova di R42/R43 in backtest_pipeline/prove/ --
+#   R42a_fade_NASUSD, R42b_fade_DAX, R43a/R43b_orl_NASUSD_long/short,
+#   R43c/R43d_orl_DAX_long/short. TUTTI E SEI pinnano
+#   InpEntryMode=3||3||0||3||N = ABTG_RANGE_FADE. NESSUNO e' 2 =
+#   ABTG_RETEST. R42 muove InpFadeOffsetPts 0->400 (il fade con
+#   scostamento), R43 lo pinna a 0 (il rimbalzo SUL livello).
+#   ==> QUESTO ROUND NON E' UNA RIPETIZIONE: il retest-short sul DAX
+#       non e' mai stato girato.]
 #
 #  3. L'INDIZIO A FAVORE, ed e' di casa.
-#  risultati_archivio/studio_apertura/Studio_D30EUR_RIEPILOGO.csv,
-#  440 breakout veri sul DAX:
+#  backtest_pipeline/risultati_archivio/studio_apertura/
+#      Studio_D30EUR_RIEPILOGO.csv, 440 breakout veri sul DAX:
 #      Solo LONG   225 trade  win 36,0%  aspettativa 0,007 R  totale +1,6
 #      Solo SHORT  215 trade  win 37,2%  aspettativa 0,045 R  totale +9,6
-#  Sul DAX lo short ha un'aspettativa SEI VOLTE il long.
-#  ATTENZIONE: quello studio gira a range 15', buffer 200, TP 2,0R e a
-#  BREAKOUT CIECO, non a retest. E' un INDIZIO, non una promessa -- e la
-#  geometria diversa e' la stessa riserva della classe 551.
+#  SEMBRA un'aspettativa SEI VOLTE il long. E INVECE IL RAPPORTO E' FRA
+#  DUE NUMERI ENTRAMBI INDISTINGUIBILI DA ZERO -- misurato sul dettaglio
+#  Studio_D30EUR.csv, 440 righe risultato_R:
+#      LONG   media +0,0071 R  sd 1,356  SE 0,0904  t 0,08
+#      SHORT  media +0,0448 R  sd 1,347  SE 0,0919  t 0,49
+#      differenza short-long  +0,0377 R  SE 0,1289  t 0,29
+#  Il win% lo diceva in chiaro: 37,2% contro 36,0% nel riepilogo (36,7%
+#  contro 36,0% ricontati a R>0 sul dettaglio). Il "sei volte" e'
+#  0,045/0,007, e il denominatore e' piccolo PROPRIO PERCHE' e' rumore.
+#  ==> QUESTO ROUND NON PARTE DA UN INDIZIO, PARTE DA UN BUCO: R42/R43
+#      misuravano il FADE, il retest-short non e' mai stato girato.
+#      Quello e' il motivo, e regge da solo.
+#  In piu' quello studio gira a range 15', buffer 200, TP 2,0R e a
+#  BREAKOUT CIECO, non a retest: riserva della classe 551.
 #
 #  4. IL COSTO IN DD CHE L'ARCHIVIO DICHIARA... SU UN ALTRO EA.
 #  CENSIMENTO_CONTRATTI_v2.md r.381: "il lato corto da solo vale +3,8873
@@ -86,10 +100,17 @@
 #  Il censimento avverte che "spegnere lo short spegne anche il REVERSE"
 #  (il secondo ciclo sul lato opposto, R51). Qui NON morde:
 #  InpAllowReverse e' false nel preset in campo E pinnato false in
-#  questo file, quindi accendere lo short NON accende il reverse. E
-#  l'EA lo dice da solo in OnInit (r.586): con un solo lato consentito
-#  il secondo ciclo non parte.
-#  ==> Un asse solo: InpAllowShort. Tutto il resto inchiodato alla
+#  questo file, quindi accendere lo short NON accende il reverse. E il
+#  cancello e' DURO, non un avvertimento: MonitorReverse() (r.1026)
+#  comincia con "if(!InpAllowReverse) return;" (r.1028), e il tetto dei
+#  cicli a r.782 vale 1 quando il reverse e' spento.
+#  (La r.586 e' solo un ABTGLog di OnInit, e con InpAllowReverse=false
+#  non si stampa nemmeno: non e' una prova, e' una cortesia. La prima
+#  stesura la citava come prova -- corretto prima della partenza.)
+#  ==> Un asse solo: InpAllowShort. Le 8 occorrenze nell'EA sono: 284
+#      dichiarazione, 545 e 586 log, 1219/1284/1424/1524/2044 in rami
+#      esclusi dal dispatch di InpEntryMode (r.847-885), e 1966 l'unica
+#      viva con InpEntryMode=2. Tutto il resto inchiodato alla
 #      geometria viva.
 #  NOTA DI SINTASSI: l'asse e' scritto 0||0||1||1||Y e non
 #  false||false||1||true||Y. E' la convenzione di casa per i
@@ -101,12 +122,28 @@
 #
 #  E IL COSTO NON SI MUOVE SU QUEST'ASSE (classe 555)
 #  ---------------------------------------------------
-#  Lo stop del lato corto e' simmetrico a quello del lato lungo: il
-#  bordo OPPOSTO dello stesso range (r.1974: sl = buyPx con
-#  InpSLMode=0; aperta con sed e verificata). Stessa ampiezza di range -> stessa distanza di stop ->
-#  stesso rapporto stop/spread. La frontiera dei 40x e il pavimento
-#  duro di 13,3x valgono IDENTICI sulle due celle: l'asse non li tocca.
-#  Non si scrive "il costo migliora" ne' "peggiora": NON SI MUOVE.
+#  La FORMULA dello stop e' IDENTICA sui due rami, e non "simmetrica":
+#      long  (r.1930-1933)  dist = (gRangeHigh - offset) - (gRangeLow - buffer)
+#      short (r.1973-1976)  dist = (gRangeHigh + buffer) - (gRangeLow + offset)
+#  cioe' dist = range + buffer - offset in tutti e due i casi
+#  (InpSLMode=0 = ABTG_SL_RANGE, enum r.236; aperte con sed).
+#  ==> La frontiera dei 40x e il pavimento duro di 13,3x NON si muovono
+#      lungo quest'asse: la formula non cambia.
+#  MA IL NUMERO STAMPATO SI', E VA DETTO (classe 559). La cella false
+#  sta a 32,3x (54,90/1,70, [MIS n=3] misurato sulle sole operazioni
+#  LONG in forward). Sulla cella true il numero e' [NON MISURATO]:
+#  l'asse non cambia la formula, cambia LE GIORNATE su cui la mediana si
+#  misura. Il nostro stesso studio le misura diverse: ampiezza_pt media
+#  LONG 5921 contro SHORT 6603 (+11,5%; mediana 5250 contro 5980,
+#  +13,9% -- stesso verso). Se il verso regge anche nella nostra
+#  geometria, lo stop del true e' PIU' LARGO -> stop/spread PIU' ALTO ->
+#  PIU' LONTANO dal pavimento di 13,3x e ANCORA SOTTO i 40x.
+#  RISERVA SULLA RISERVA: quel +11,5% viene dallo studio a range 15' e
+#  buffer 200, NON dalla nostra geometria. E' il VERSO che e' un
+#  avvertimento, il numero non si trasferisce.
+#  ==> Non si scrive "il costo migliora" ne' "peggiora". Si scrive: la
+#      formula non si muove, il 32,3x vale per la cella FALSE, e sulla
+#      cella TRUE si misura dopo, sui suoi trade.
 #
 #  L'ATTESA, DICHIARATA PRIMA DEI NUMERI
 #  =====================================
@@ -122,9 +159,29 @@
 #      si sia acceso davvero. MA SALE MENO DELLA SOMMA, per lo slot. Se
 #      n NON sale, il ramo non ha mai sparato e il round non ha
 #      misurato niente.
+#      VERIFICA GRATUITA, PRIMA DEGLI n: l'ABTGLog di OnInit (r.545)
+#      passa da "SOLO LONG" a "long+short". Se nel log della cella 2
+#      non compare long+short, il preset non e' arrivato, e si sa
+#      PRIMA di leggere qualunque numero.
 #  (c) IL CANCELLO DI PROMOZIONE, e serve TUTTO INSIEME:
 #      c1  PF OOS della cella true >= PF OOS della cella false
 #          (1,39520). Non "vicino": >=.
+#      c1-bis  Recovery Factor OOS della cella true >= quello della
+#          cella false (2,01544). Serve perche' c1 e' un rapporto sui
+#          DEAL e questo round cambia la POPOLAZIONE delle operazioni,
+#          non la loro gestione: con InpTP1_ClosePct=50 e
+#          InpBreakevenAtTP1=true pinnati, una posizione grattata a pari
+#          mette la meta' vincente al numeratore e quasi nulla al
+#          denominatore, quindi il PF dipende da QUANTE posizioni
+#          toccano TP1 -- un mix che lo short sposta. RF = profitto
+#          netto / drawdown massimo e' fatto di DUE QUANTITA' IN
+#          DENARO: e' immune al conteggio delle uscite ed e' profitto
+#          per unita' di rischio, la valuta della challenge. Ed e' lo
+#          STESSO RF che alimenta c2.
+#          SE c1 FALLISCE MA c1-bis E c2 PASSANO: NON SI PROMUOVE. Si
+#          scrive "PF diluito, rendimento per unita' di rischio
+#          migliorato" e decide Claudio -- stessa corsia del "COMPRA
+#          RENDIMENTO CON RISCHIO".
 #      c2  DD OOS a DENOMINATORE FISSO non peggiora di piu' del 10%.
 #          DD_fisso% = (Profit / Recovery Factor) / 80000 x 100, perche'
 #          "Equity DD %" divide per il PICCO, che cambia da cella a
@@ -133,7 +190,7 @@
 #          RIBALTA).
 #          DUE BASI, UNA PER GAMBA (classe 557), da R202B cella 1.00:
 #            IS   DD_fisso 5,8468  -> allarme sopra 6,4315
-#            OOS  DD_fisso 8,9033  -> allarme sopra 9,7936
+#            OOS  DD_fisso 8,9033  -> allarme sopra 9,7937
 #          Se il Recovery Factor e' 0 (passata a ZERO TRADE, Profit=0)
 #          la formula e' 0/0: si scrive [NON CALCOLABILE DAL CSV].
 #      c3  IS e OOS CONCORDI di segno su PF e su DD_fisso. Discordi ->
@@ -154,9 +211,10 @@
 #  LA CONTRO-IPOTESI, FALSIFICABILE
 #  ---------------------------------
 #  H0: il lato corto non aggiunge edge e peggiora il rischio.
-#  H0 e' FALSIFICATA se la cella true passa c1 E c2 E c3 insieme.
-#  H0 e' CONFERMATA se il PF OOS scende sotto 1,39520 OPPURE il
-#  DD_fisso OOS supera 9,7936.
+#  H0 e' FALSIFICATA se la cella true passa c1 E c1-bis E c2 E c3
+#  insieme.
+#  H0 e' CONFERMATA se il PF OOS scende sotto 1,39520 E il RF OOS sotto
+#  2,01544, OPPURE se il DD_fisso OOS supera 9,7937.
 #  Se il PF sale ma il DD pure, oltre l'allarme: "COMPRA RENDIMENTO CON
 #  RISCHIO", e la decisione e' di Claudio perche' e' un parametro di
 #  rischio, non una misura.

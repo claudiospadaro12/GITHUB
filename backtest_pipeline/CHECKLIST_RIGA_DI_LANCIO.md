@@ -28770,3 +28770,62 @@ come si legge a schermo.
 (la mappa + il bersaglio). **Una sola occorrenza = ancora morta.**
 📌 E quando si sceglie l'ancora, si preferisce un **titolo di paragrafo**: sta su una riga sola,
 non si spezza a capo, e non invecchia.
+
+---
+
+## CLASSE 559 -- L'INVARIANZA DIMOSTRATA SULLA FORMULA, ED ESTESA DI NASCOSTO ALLA MEDIANA, MENTRE L'ASSE CAMBIA LA POPOLAZIONE SU CUI LA MEDIANA E' STATA MISURATA (figlia della 555)
+
+**Caso reale (22/09/2026, R205A, sedia DAX `770101`).** L'asse accende `InpAllowShort`. Il
+documento dimostra — **correttamente** — che la formula dello stop è identica sui due rami
+(`dist = range + buffer − offset`, `ABTG_DAX_Apertura_EU.mq5` r.1930-1933 e r.1973-1976) e da lì
+conclude, **in grassetto**: *«le due celle stanno ENTRAMBE a 32,3×»*. Tre righe sotto lo stesso
+documento ammette che `54,90` è `[MIS n=3]` misurato **sulle sole operazioni long** e che il lato
+corto è `[NON MISURATO]`.
+
+🔴 **Le due affermazioni non possono essere vere insieme, e il lettore tiene la prima.**
+La **classe 555** chiede *«l'asse tocca la GRANDEZZA della soglia?»* — e qui la risposta è **no**,
+giustamente. Ma resta una **seconda** domanda che la 555 non pone:
+**«l'asse cambia l'INSIEME DI EVENTI su cui quella grandezza è stata misurata?»**
+Qui sì, ed è **il cuore del round**: accendere un lato non gestisce diversamente le stesse
+giornate, **ne aggiunge di altre**. Il nostro stesso studio le misura diverse — `ampiezza_pt`
+media LONG **5921** contro SHORT **6603**, **+11,5%** (mediana 5250 contro 5980, +13,9%).
+
+### La regola
+1. **Invarianza della FORMULA e invarianza del NUMERO sono due affermazioni distinte.** La prima
+   si dimostra aprendo il ramo nel sorgente; la seconda vale **solo se la popolazione non cambia**.
+2. Se l'asse **aggiunge o toglie EVENTI**, ogni mediana misurata prima dell'asse vale **per la
+   cella di partenza** e si etichetta così. Sull'altra cella si scrive **`[NON MISURATO]`**, e si
+   misura **dopo**, sui suoi trade.
+3. 🔴 **Un documento che afferma il numero in grassetto e lo smentisce nel caveat HA CONSEGNATO
+   L'AFFERMAZIONE**: vale la riga in grassetto, ed è **lì** che va riscritta. Un caveat non
+   annulla un titolo.
+
+---
+
+## CLASSE 560 -- IL RAPPORTO FRA DUE GRANDEZZE ENTRAMBE INDISTINGUIBILI DA ZERO, CONSEGNATO COME UN FATTORE ("sei volte")
+
+**Caso reale (22/09/2026, R205A).** L'indizio a favore del round, preso da
+`backtest_pipeline/risultati_archivio/studio_apertura/Studio_D30EUR_RIEPILOGO.csv`:
+*«Solo LONG aspettativa 0,007 R · Solo SHORT 0,045 R → sul DAX lo short ha un'aspettativa **SEI
+VOLTE** il long»*. Misurato sul dettaglio (`Studio_D30EUR.csv`, 440 righe `risultato_R`):
+
+| lato | n | media | sd | SE | **t** |
+|---|---:|---:|---:|---:|---:|
+| LONG | 225 | +0,0071 R | 1,356 | 0,0904 | **0,08** |
+| SHORT | 215 | +0,0448 R | 1,347 | 0,0919 | **0,49** |
+| **differenza** | | **+0,0377 R** | | 0,1289 | **0,29** |
+
+🔴 **Il «6×» è `0,045 / 0,007`, e il denominatore è piccolo PROPRIO PERCHÉ è rumore**: quel
+rapporto **cresce** man mano che il denominatore diventa meno significativo. È il modo più
+efficace di trasformare l'**assenza** di segnale in un **titolo**. Il `win%` lo diceva in chiaro
+e non è stato guardato: **37,2% contro 36,0%** su ~220 osservazioni per lato.
+
+### La regola
+1. **Prima del rapporto si scrive l'errore standard dei due termini.** Se anche **uno solo** dei
+   due non è distinguibile da zero, **il rapporto non si scrive affatto**: si scrivono le due
+   medie col loro SE.
+2. Un divario fra due gruppi si giudica sul **SE della differenza**, mai confrontando due totali
+   (`+9,6 R` contro `+1,6 R` su ~220 trade per lato è `t = 0,29`).
+3. 🟢 **E NON è un motivo per non girare il round.** Un buco si chiude perché è un buco. Si cambia
+   il **motivo dichiarato** — da *«c'è un indizio»* a *«non è mai stato misurato»* — che è più
+   solido e **non promette niente**.
