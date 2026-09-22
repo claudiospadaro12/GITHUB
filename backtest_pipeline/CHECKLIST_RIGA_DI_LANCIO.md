@@ -28863,3 +28863,42 @@ round si porta a casa **il commit sbagliato**, quello che contiene la versione c
 3. 📌 **E la forma generale, che e' la stessa della 558 e vale oltre i pin**: prima di scrivere
    «zero occorrenze», ci si chiede **in quanti modi diversi si scrive la cosa che sto cercando**.
    Se la risposta e' «piu' di uno», il controllo va rifatto sul piu' corto.
+
+---
+
+## CLASSE 562 -- IL LIMITE SUPERIORE DICHIARATO "NON DIMOSTRA NIENTE", E POI SCELTO FRA DUE PRENDENDO IL PIU' LARGO
+
+**Caso reale (21-22/09/2026, muro FTMO del 10%).** Due errori con la stessa radice, a un giorno
+di distanza, e tutti e due **costano sedie**.
+
+**(a) «Non dimostra niente in nessuna direzione» — FALSO, ed e' il piu' caro.**
+`Equity DD %` del tester e' un **limite superiore** della perdita statica che FTMO misura. Da li'
+avevo concluso che *«non dimostra niente in nessuna direzione»*. 🔴 **Un limite superiore SOTTO la
+soglia DIMOSTRA la sicurezza.** E' solo **sopra** la soglia che non conclude niente. Scrivendo
+quella frase ho messo in **[NON MISURATA]** anche una sedia che i numeri gia' in casa
+**assolvevano**.
+
+**(b) Fra due limiti superiori validi, avevo adottato il PIU' LARGO.**
+Il 21/09 ho detto a Claudio che *«a denominatore fisso la cella e' 10,75%, non 9,69%: il "sotto
+il muro" era un artefatto»*. Ma la catena vera e'
+
+```
+perdita statica  <=  Equity DD %  <=  DDass/deposito
+```
+
+dimostrata (`DD_k/P_k <= DD_k/I` per ogni picco `P_k >= I`) e **misurata su 8 celle di R202B con
+ZERO eccezioni**. Quindi `DDass/deposito` e' il limite **PIU' LARGO**: usarlo al posto di
+`Equity DD %` **butta via margine** e fa sembrare non dimostrabile cio' che e' dimostrato.
+🟢 E la colonna piu' stretta **ce l'abbiamo gia' in ogni CSV**: non serviva misurare niente.
+
+### La regola
+1. **Un limite superiore si dichiara sempre con il VERSO in cui conclude**: `bound < soglia` =>
+   **sicuro, dimostrato**; `bound >= soglia` => **non deciso**. Non si scrive mai che "non
+   dimostra niente" senza dire da che parte.
+2. **Quando i limiti superiori validi sono piu' d'uno, si adotta il PIU' STRETTO**, e si scrive
+   perche' e' piu' stretto. Prima di adottarne uno si controlla se ce n'e' uno migliore **gia'
+   nei file**.
+3. 🔴 **Un numero puo' servire a due cose diverse, e la scelta giusta cambia con l'uso.** Il
+   denominatore FISSO serve a confrontare CELLE fra loro (il picco cambia da cella a cella,
+   classe 550); il denominatore del PICCO da' il limite piu' stretto sul MURO. Usare l'uno al
+   posto dell'altro non e' un dettaglio: **si dichiara l'uso prima del numero.**

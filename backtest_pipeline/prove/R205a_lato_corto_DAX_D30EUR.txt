@@ -226,8 +226,23 @@
 #    domanda.
 #  - Il muro FTMO del 10% (classe 515): "Equity DD %" e' dal PICCO, il
 #    Max Loss e' STATICO dal saldo iniziale, quindi il DD del tester e'
-#    un LIMITE SUPERIORE e non dimostra niente in nessuna direzione. Il
-#    limite superiore si riporta: DDass/deposito.
+#    un LIMITE SUPERIORE della perdita statica.
+#    CORRETTO IL 22/09, e la correzione cambia cosa si puo' concludere
+#    (classe 562). La prima stesura diceva "non dimostra niente in
+#    nessuna direzione": FALSO. Un limite superiore SOTTO la soglia
+#    DIMOSTRA la sicurezza; e' sopra la soglia che non dimostra niente.
+#    E la catena giusta, misurata su 8 celle di R202B con ZERO
+#    eccezioni, e':
+#        perdita statica  <=  Equity DD %  <=  DDass/deposito
+#    cioe' "Equity DD %" -- la colonna che abbiamo GIA' in ogni CSV --
+#    e' il limite PIU' STRETTO, e DDass/deposito e' il PIU' LARGO.
+#    Quindi qui si riporta "Equity DD %" riportato alla taglia in
+#    campo, non DDass/deposito, che sprecherebbe margine.
+#    Misura: report/IL_MURO_MISURATO_2026-09-22.md.
+#    >>> E NON TOCCA c2: la' il denominatore fisso serve a rendere le
+#        CELLE confrontabili fra loro (il picco cambia da cella a
+#        cella, classe 550), non a misurare il muro. Sono due usi
+#        diversi dello stesso numero.
 #  - Le POSIZIONI vere: ogni n e' [uscite]. Si contano sui position_id.
 #
 #  TAGLIA DEL BANCO: 1,0% -- NON e' la taglia in campo (2,00%, firma del
