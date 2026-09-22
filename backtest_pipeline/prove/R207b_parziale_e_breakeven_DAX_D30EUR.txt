@@ -1,0 +1,181 @@
+# =====================================================================
+#  R207b -- LA META' ALTA DELLA 2x2: IL BREAKEVEN INDIPENDENTE ACCESO
+#  EA: ABTG_DAX_Apertura_EU   (sedia 770101, simbolo D30EUR)
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#  Si lancia con: -Deposito 80000 -Modello 4
+#
+#  QUESTO FILE NON SI LEGGE DA SOLO.
+#  E' la meta' alta della tabella 2x2 aperta da
+#  R207a_parziale_e_breakeven_DAX_D30EUR.txt, che contiene TUTTO il
+#  ragionamento: la verifica al sorgente delle tre affermazioni, il
+#  perche' i file sono due, la scelta di InpBEatR=1,0, il cancello di
+#  promozione coi numeri, l'avvertenza sul PF e il conto del rumore.
+#  QUI si scrive solo cio' che CAMBIA. Chi legge questo senza R207a
+#  legge meta' misura.
+# =====================================================================
+#
+#  L'UNICA DIFFERENZA: InpBEatR e' pinnato a 1,0 invece che a 0,0.
+#  (e il magic, 789630 invece di 789620, inerte sui risultati -- la
+#   dimostrazione sta in R207a, sezione 6A.)
+#
+#  LE DUE CELLE DI QUESTO FILE
+#  ---------------------------------------------------------------
+#   ( 0 , 1,0)  ClosePct=0   BEatR=1,0  >>> LA PROPOSTA VERA <<<
+#       Nessun parziale, ma lo stop va a pari a +1R -- ESATTAMENTE lo
+#       stesso prezzo a cui ci va il breakeven di TP1 in campo, perche'
+#       InpTP1_R e' pinnato a 1,0 e le due formule sono la stessa
+#       (EA r.2368 e r.2408, stesso riskDist). Cioe': questa cella
+#       differisce dalla cella VIVA in UNA COSA SOLA, se meta'
+#       posizione viene chiusa oppure no.
+#       E' la configurazione che i 28 preset dei vendor usano, ed e'
+#       quella su cui R46/R47 avevano misurato in casa +84% di
+#       expectancy sul DAX.
+#
+#   (50 , 1,0)  ClosePct=50  BEatR=1,0  >>> CELLA DI CONTROLLO <<<
+#       DEVE uscire IDENTICA alla cella (50 , 0) di R207a, su ogni
+#       colonna. I due breakeven puntano allo stesso prezzo e
+#       condividono la guardia !TkDone(ticket, gBETk) (r.2391 e
+#       r.2405): il blocco di TP1 gira prima nella stessa chiamata di
+#       ManageOneTicket, timbra, e il blocco 2b trova la guardia gia'
+#       consumata.
+#       >>> SE NON ESCE IDENTICA, LA LETTURA DEL CODICE E' SBAGLIATA E
+#           NESSUN ALTRO CONFRONTO DI R207a/R207b VALE. Si ferma il
+#           round e si torna al sorgente. E' il contro-esempio che mi
+#           farebbe sbagliare, messo DENTRO la misura invece che in
+#           una nota a pie' di pagina.
+#  ---------------------------------------------------------------
+#
+#  COSA SI LEGGE INCROCIANDO I DUE FILE
+#  ------------------------------------
+#   (0 , 1,0) contro (50 , 0)   = LA PROPOSTA contro il campo.
+#                                 E' il confronto che decide.
+#   (0 , 1,0) contro (0 , 0)    = IL PREZZO DEL BREAKEVEN, in euro.
+#                                 Se e' positivo, il breakeven vale, e
+#                                 sappiamo DI QUANTO -- numero che al
+#                                 22/09/2026 in repo non esiste.
+#   (0 , 0)   contro (50 , 0)   = QUANTO COSTA IL DIFETTO, cioe' cosa
+#                                 succederebbe a chi togliesse il
+#                                 parziale senza sapere che sta
+#                                 togliendo anche il breakeven.
+#   (50 , 1,0) contro (50 , 0)  = il controllo di sopra. Zero.
+#
+#  ATTESA SPECIFICA DI QUESTO FILE, PRIMA DEI NUMERI
+#  -------------------------------------------------
+#   - Trades(0 , 1,0) deve essere UGUALE a Trades(0 , 0) di R207a: le
+#     due celle aprono le STESSE posizioni (R207a sez.5, dimostrato al
+#     sorgente) e con ClosePct=0 vale 1 deal = 1 posizione, quindi
+#     Trades = P in tutte e due. Se i due numeri differiscono, il
+#     ragionamento sul denominatore comune e' rotto e le expectancy
+#     per posizione NON si calcolano: si dichiara e ci si ferma.
+#     ATTENZIONE: e' l'UNICA colonna che deve coincidere. Profit, PF,
+#     RF e DD devono DIFFERIRE -- e' esattamente il breakeven che
+#     lavora. Se coincidessero anche quelli, InpBEatR non e' arrivato
+#     all'EA.
+#   - Il log di questa cella deve contenere la riga "BE indipendente
+#     @ ... R=1.00: stop a pari" (EA r.2418). Su (50 , 1,0) NON deve
+#     comparire mai: la guardia gBETk e' gia' consumata dal BE di TP1.
+#     E' una verifica GRATUITA e si fa PRIMA di leggere i numeri.
+#
+#  IL CANCELLO, LE TAGLIE, IL DEPOSITO, IL RUMORE, IL DD E QUELLO CHE
+#  IL ROUND NON MISURA: tutto in R207a, sezioni 6-11. Non si duplicano
+#  qui, perche' due copie di un cancello sono due cancelli che un
+#  giorno divergono.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_ClosePct=50.0||0.0||50.0||50.0||Y
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=789630||789630||0||789630||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpBEatR=1.0||1.0||0||1.0||N
+InpTP1_R=1.0||1.0||0||1.0||N

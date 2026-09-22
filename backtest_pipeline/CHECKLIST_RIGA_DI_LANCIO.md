@@ -29150,3 +29150,95 @@ v3 (-like con tag default)   ->  8 righe   (TUTTE, compresa la stringa 'ab')
    maiuscole»*. **Sono due affermazioni e sono entrambe false**: non e' una sottostringa (e' un
    wildcard) e `-like` **non** distingue le maiuscole. Una diagnosi sbagliata stampata in un
    referto manda Claudio a cercare nel posto sbagliato, e costa piu' del difetto.
+
+---
+
+## CLASSE 568 -- 💬🔀 IL COMMENTO NEL SORGENTE E' VERO DI UN **RAMO INTERNO** E LO SI LEGGE COME VERO DEL **BLOCCO ESTERNO**: la conclusione esce ROVESCIATA, e il commento non mente (22/09/2026)
+
+**Caso reale**, preparando `prove/R207a_parziale_e_breakeven_DAX_D30EUR.txt`. In
+`mql5/Experts/ABTG_DAX_Apertura_EU.mq5` il breakeven del primo obiettivo (r.2391) porta sopra
+di se' un commento scritto in stampatello, r.2385-2390:
+
+```
+//--- 2) BREAKEVEN al primo obiettivo -- FUORI dal ramo della parziale.
+//  07/08/2026: stava DENTRO "se la parziale e' riuscita". Al lotto minimo il
+//  50% arrotonda sotto il minimo del broker, NormalizeVolume torna 0, la
+//  parziale non parte -- e cosi' il breakeven non veniva NEMMENO PROVATO
+```
+
+Chi lo legge conclude: *«il breakeven e' indipendente dal parziale, quindi posso mettere
+`InpTP1_ClosePct=0` e il breakeven resta»*. 🔴 **E' l'esatto contrario del vero.**
+
+Il commento e' **letteralmente corretto** — il 07/08 il BE e' stato portato fuori da
+`if(gTrade.PositionClosePartial(...))` (r.2377) — ma il blocco che conta sta **due graffe piu'
+in su**, a r.2359:
+
+```
+if(!partialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)   // r.2359
+```
+
+Con `InpTP1_ClosePct=0` la congiunzione e' falsa al primo test e **la r.2391 non viene mai
+valutata**. `InpBreakevenAtTP1=true` resta acceso dietro una porta chiusa. Il breakeven
+sopravvive solo perche' esiste un **secondo** meccanismo altrove (r.2405, `InpBEatR`), che nei
+tre preset FTMO delle aperture e' **a 0, cioe' spento**.
+
+**Costo se non lo si prende**: si spegne una manopola credendo di spegnerne una, e si spengono
+**due protezioni**. La posizione resta a rischio pieno fino allo stop o al target, e nel CSV non
+si vede: si vede solo un drawdown piu' alto che si attribuisce al mercato.
+
+### 🔴 LA REGOLA
+1. **Un commento dice a che cosa e' relativo "dentro" e "fuori" SOLO per il ramo che aveva in
+   mente chi lo ha scritto.** Prima di fidarsi, si **contano le graffe** dalla riga del
+   commento fino alla riga del `return`/fine funzione, e si scrive nel referto **il numero di
+   riga della condizione ESTERNA**, non quello del commento.
+2. **La prova che vale e' negativa, non positiva**: non «il codice c'e'», ma *«con questo
+   valore, quale condizione diventa falsa e quali righe smettono di essere valutate?»*. E'
+   il contro-esempio del 10/09 applicato a un sorgente invece che a una misura.
+3. 📌 **Cugina della classe 550 e della 335 in un punto solo**: il difetto non e' nel codice,
+   e' nella **lettura**. Il codice fa quello che deve; e' la frase in italiano sopra di lui che
+   porta il lettore fuori strada. Un commento che spiega **una modifica passata** non e' la
+   documentazione della **condizione presente**, e va letto come storia, non come contratto.
+
+---
+
+## CLASSE 569 -- 🚪↔️ IL DRIVER E' **PIU' PERMISSIVO** DEL CANCELLO (due assi Y): la domanda 2x2 si SPACCA IN DUE FILE A COSTO MACCHINA ZERO, non si allarga il cancello (22/09/2026, gemella rovesciata della **340**)
+
+**Caso reale**, stesso round. Il mandato chiedeva **una tabella 2x2** (`InpTP1_ClosePct` x
+`InpBEatR`) in un file prova solo. Le due macchine non sono d'accordo, e vanno nella direzione
+opposta a quella della classe 340:
+
+| strato | due assi Y in un file? | dove si legge |
+|---|---|---|
+| `walkforward_generico.ps1` (driver, PC di backtest) | ✅ **li sa fare** | r.856-857 moltiplica le celle di **tutti** gli assi; r.878-882 tratta apposta il caso di due assi incrociati (`InpAllowLong` x `InpAllowShort`) |
+| `controlla_prova.py` (strato 1, gira qui) | ❌ **li boccia** | r.172-174: *«un file prova misura UNA variabile alla volta»* |
+
+🔴 **Le due tentazioni sono tutte e due sbagliate**: (a) allargare `controlla_prova.py` per far
+passare il proprio round — si indebolisce il cancello per tutti, e la regola del 09/09 dice che
+il primo strato che fallisce BLOCCA; (b) concludere *«la 2x2 non si puo' fare»* e ripiegare su
+una domanda piu' povera — e allora il round non separa piu' le quattro spiegazioni.
+
+### ✅ LA FORMA DI CASA
+**Si spacca la 2x2 in N file mono-asse, uno per ogni valore della seconda manopola**, e si
+dichiara in testa a ciascuno che **non si legge da solo**:
+
+```
+R207a   InpBEatR pinnato a 0,0   asse InpTP1_ClosePct {0 ; 50}
+R207b   InpBEatR pinnato a 1,0   asse InpTP1_ClosePct {0 ; 50}
+```
+
+🟢 **E IL COSTO MACCHINA E' IDENTICO, il che toglie ogni scusa**: 2 file x 2 celle x 2 finestre
+= **8 passate a tick**, esattamente quante ne farebbe un file solo a 4 celle. Zero minuti di
+penale, cancello verde, e in piu' due intestazioni che dicono **quale meta' della domanda** ogni
+file risponde.
+
+### 🔴 LA REGOLA
+1. **Quando un round ha bisogno di una griglia a piu' dimensioni, la si scompone in file
+   mono-asse.** Il cancello non si tocca.
+2. **Ogni file spezzato porta in testa il nome del gemello e la frase "non si legge da solo"**,
+   piu' la tabella completa delle celle con l'indicazione di **quale file** contiene ciascuna.
+   Senza quella riga, fra sei mesi qualcuno legge R207a da solo e conclude che il parziale e'
+   stato misurato contro niente.
+3. 📌 **E prima di spaccare si VERIFICA da che parte sta l'asimmetria**, perche' la classe 340
+   e' l'opposto (li' era il DRIVER ad avere la deroga che lo strato 1 non conosce). *«I due
+   strati hanno regole diverse»* non dice quale dei due e' piu' largo: si va a leggere, non si
+   deduce per analogia.

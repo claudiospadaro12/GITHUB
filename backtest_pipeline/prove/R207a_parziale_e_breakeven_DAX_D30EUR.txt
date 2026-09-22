@@ -1,0 +1,493 @@
+# =====================================================================
+#  R207a -- IL PARZIALE E IL BREAKEVEN SONO UNA COPPIA, NON DUE MANOPOLE
+#  EA: ABTG_DAX_Apertura_EU   (sedia 770101, simbolo D30EUR)
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#  Si lancia con: -Deposito 80000 -Modello 4
+#
+#  QUESTO FILE E' LA META' BASSA DI UNA TABELLA 2x2.
+#  L'altra meta' e' R207b_parziale_e_breakeven_DAX_D30EUR.txt.
+#  Le due si leggono INSIEME: da sole non rispondono alla domanda.
+# =====================================================================
+#
+#  PERCHE' ESISTE -- Claudio, 22/09: "dobbiamo alzare i profit factor"
+#  --------------------------------------------------------------------
+#  DOSSIER_CONFIG_PF_2026-09-22.md, proposta 1: 28 preset ufficiali su
+#  28, di quattro vendor indipendenti su DAX/US30/NAS100/US500, NON
+#  prendono nessun parziale. Le nostre sei sedie lo prendono tutte, al
+#  50%. E in casa era gia' misurato:
+#      R46 (DAX, stesso ingresso, sola uscita diversa, fuori campione)
+#          senza parziale  PF 1,49  DD 6,27
+#          con parziale    PF 1,40  DD 7,23
+#      R47 (per-trade) expectancy DAX +67 -> +123 (+84%)
+#                                 DOW +52 ->  +77 (+48%)
+#  RISERVA SU R46, e va detta subito perche' cambia cosa ci si aspetta:
+#  quel confronto girava a TRAILING PREVBAR. Noi qui siamo pinnati a
+#  InpTrailMode=1 (ABTG_TRAIL_FIXED, 410 punti). Quindi il 1,49/6,27
+#  NON e' una previsione per questa geometria: e' la ragione per cui
+#  vale la pena girare, non il numero atteso.
+#
+# =====================================================================
+#  1. LA TRAPPOLA, VERIFICATA AL SORGENTE RIGA PER RIGA
+# =====================================================================
+#  Tre affermazioni, tutte e tre CONTROLLATE aprendo il file, non
+#  ricordate. Se una fosse falsa il round cambierebbe forma.
+#
+#  (a) CON InpTP1_ClosePct=0 IL BREAKEVEN DI TP1 E' IRRAGGIUNGIBILE.
+#      VERO. r.2359 apre il blocco cosi':
+#         if(!partialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
+#      e il breakeven di TP1 sta a r.2391, DENTRO quel blocco:
+#         if(InpBreakevenAtTP1 && !TkDone(ticket, gBETk))
+#      Con ClosePct=0 la congiunzione a r.2359 e' falsa al primo test e
+#      la r.2391 non viene mai valutata. InpBreakevenAtTP1=true non
+#      serve a niente: e' una manopola accesa dietro una porta chiusa.
+#      ATTENZIONE AL COMMENTO CHE INGANNA, ed e' il motivo per cui
+#      questa verifica andava fatta e non copiata: il commento a
+#      r.2384-2390 dice "BREAKEVEN al primo obiettivo -- FUORI dal ramo
+#      della parziale". E' VERO ma di un altro ramo: il 07/08 il BE e'
+#      stato portato fuori da "se la PositionClosePartial e' riuscita"
+#      (r.2377), NON fuori dal blocco di r.2359. Chi legge il commento
+#      senza contare le graffe conclude il contrario del vero.
+#
+#  (b) InpBEatR > 0 ACCENDE UN BE CHE FA LO STESSO LAVORO SENZA
+#      CHIUDERE NIENTE. VERO. r.2405-2419, blocco "2b", fuori da
+#      qualunque condizione sul parziale:
+#         r.2405  if(InpBEatR > 0 && !TkDone(ticket, gBETk))
+#         r.2408  beTarget = openP + dirSignBE*riskDist*InpBEatR
+#         r.2416  gTrade.PositionModify(ticket, be, tp)  con be = openP (r.2412)
+#      Nessuna PositionClosePartial: in tutto l'EA ce n'e' UNA SOLA, a
+#      r.2377, dentro il blocco di r.2359 (grep "PositionClosePartial"
+#      -> una occorrenza). Sposta lo stop a pari e basta. Ed e' la
+#      STESSA guardia gBETk del BE di TP1, quindi i due non si sommano
+#      mai: chi arriva primo timbra, l'altro non fa niente.
+#
+#  (c) CON ClosePct=0 IL CONTEGGIO DEI DEAL CAMBIA: 1 DEAL = 1 POSIZIONE.
+#      VERO, e qui e' la parte che rende il round leggibile.
+#      La colonna "Trades" del CSV e' TesterStatistics(STAT_TRADES)
+#      (r.2796), cioe' i deal di USCITA. Verificato aritmeticamente su
+#      numeri gia' scritti da altri, non su una definizione a memoria:
+#      R202B OOS Pass 3 ha Profit 14355,32 e Trades 270, e la colonna
+#      Expected Payoff vale 53,16785 = 14355,32/270 esatto. Il
+#      denominatore di MT5 e' quello.
+#      Con il parziale acceso una posizione produce DUE deal di uscita
+#      (la parziale + il resto), quindi  n = P + f  con 0 <= f <= P.
+#      Con ClosePct=0 la parziale non esiste:  n = P.
+#
+#  ==> NESSUNA DELLE TRE E' FALSA. Il round parte com'e' disegnato.
+#
+# =====================================================================
+#  2. PERCHE' DUE FILE E NON UNO -- e non e' una comodita'
+# =====================================================================
+#  La domanda e' una tabella 2x2 (ClosePct x BEatR). Il DRIVER la
+#  saprebbe fare: walkforward_generico.ps1 r.856-857 moltiplica le celle
+#  di tutti gli assi Y, e a r.878-882 tratta apposta il caso di DUE assi
+#  incrociati (AllowLong x AllowShort). Non e' un limite della macchina.
+#  E' il CANCELLO di casa a dire no: controlla_prova.py r.172-174
+#  boccia qualunque file con piu' di un asse Y -- "un file prova misura
+#  UNA variabile alla volta".
+#  Si obbedisce al cancello invece di allargarlo, e non si perde niente:
+#      R207a  BEatR pinnato a 0,0   asse ClosePct {0 ; 50}
+#      R207b  BEatR pinnato a 1,0   asse ClosePct {0 ; 50}
+#  sono le stesse quattro celle, sulla stessa finestra, con lo stesso
+#  deposito e lo stesso modello. COSTO MACCHINA IDENTICO: 2 file x 2
+#  celle x 2 finestre = 8 passate a tick, esattamente quante ne farebbe
+#  un file solo a 4 celle. Zero minuti di penale.
+#
+#  LA TABELLA, per nome:
+#  ---------------------------------------------------------------
+#   cella         ClosePct  BEatR   file     che cosa e'
+#  ---------------------------------------------------------------
+#   (50 , 0  )      50,0     0,0    R207a    LA CELLA VIVA, in campo
+#                                            al 22/09/2026. Ancora di
+#                                            riproduzione.
+#   ( 0 , 0  )       0,0     0,0    R207a    IL CASO INGENUO: parziale
+#                                            spento E breakeven spento.
+#                                            NON E' LA PROPOSTA.
+#   ( 0 , 1,0)       0,0     1,0    R207b    LA PROPOSTA VERA.
+#   (50 , 1,0)      50,0     1,0    R207b    CELLA DI CONTROLLO: deve
+#                                            uscire IDENTICA a (50,0).
+#  ---------------------------------------------------------------
+#
+#  >>> (0,0) STA NELL'ASSE APPOSTA, E VA DICHIARATO: non e' una
+#      proposta, e' la MISURA DI QUANTO COSTA IL DIFETTO. E' la
+#      configurazione che uscirebbe da sola dalle mani di chi legge
+#      "togliete il parziale" e tocca una manopola sola. Il delta
+#      (0,1,0) meno (0,0) e' il PREZZO DEL BREAKEVEN, in euro, e al
+#      22/09/2026 in repo non esiste da nessuna parte.
+#
+# =====================================================================
+#  3. PERCHE' InpBEatR = 1,0 E NON UN ALTRO NUMERO
+# =====================================================================
+#  Non e' un'ipotesi: e' l'unico valore che rende la cella (0,BEatR)
+#  confrontabile con la cella viva.
+#  r.2408:  beTarget = openP + dirSign*riskDist*InpBEatR
+#  r.2368:  target   = openP + dirSign*riskDist*InpTP1_R
+#  Stesso riskDist (una sola variabile, calcolata a r.2355 e usata da
+#  tutti e due i blocchi), stessa forma. E InpTP1_R e' PINNATO a 1,0 in
+#  questo file (e' la cella vincitrice di R202B). Quindi:
+#      InpBEatR = InpTP1_R = 1,0  ==>  beTarget == target, allo stesso
+#      prezzo, sulla stessa tick.
+#  ==> La cella (0 , 1,0) differisce dalla cella viva (50 , 0) in UNA
+#      COSA SOLA: se meta' posizione viene chiusa oppure no. Lo stop va
+#      a pari allo STESSO identico livello. Isolamento pulito.
+#  Con 0,5 o 1,5 si muoverebbero DUE cose insieme (il taglio del
+#  parziale E il momento in cui il rischio va a zero) e il round non
+#  saprebbe dire quale delle due ha prodotto il numero. Quello sarebbe
+#  un round sprecato, non un round piu' ricco.
+#  riskDist e' in unita' di RISCHIO INIZIALE, non in punti: r.2355
+#  riskDist = openP - InitialSL(...) e InitialSL (r.2488-2494) torna lo
+#  stop corrente quando c'e' e non c'e' stata parziale. Con ClosePct=0
+#  partialDone e' sempre false, quindi riskDist e' la distanza VERA
+#  ingresso->SL: 1,0 vuol dire esattamente "a +1R".
+#  RISERVA GIA' GUARDATA: dopo il BE lo stop sta a openP, quindi
+#  riskDist diventa 0 e scatta il ripiego sull'ATR (r.2356). NON MORDE
+#  QUI: l'unico consumatore a valle e' profR (r.2437-2439), che serve solo a
+#  confrontarsi con InpTrailStartR -- pinnato a 0,0, e r.2440 dice
+#  trailArmato = (InpTrailStartR <= 0) || ... , quindi sempre vero. E il
+#  trailing pinnato e' FIXED a 410 punti (r.2465-2466), che riskDist non lo
+#  guarda. Verificato, non assunto.
+#
+# =====================================================================
+#  4. LA CELLA DI CONTROLLO (50 , 1,0) -- IL CONTRO-ESEMPIO INCORPORATO
+# =====================================================================
+#  Per costruzione la cella (50 , 1,0) di R207b deve uscire IDENTICA
+#  alla cella (50 , 0) di questo file, su OGNI colonna. Ragione, letta
+#  al sorgente: i due breakeven puntano allo stesso prezzo (vedi 3) e
+#  condividono la guardia !TkDone(ticket, gBETk) (r.2391 e r.2405). Il
+#  blocco di TP1 gira PRIMA nella stessa chiamata di ManageOneTicket,
+#  timbra gBETk, e il blocco 2b trova la guardia gia' consumata.
+#  >>> SE (50 , 1,0) NON ESCE IDENTICA A (50 , 0), LA MIA LETTURA DEL
+#      CODICE E' SBAGLIATA e NESSUNO degli altri confronti vale. Si
+#      ferma il round e si torna al sorgente. E' il contro-esempio che
+#      mi farebbe sbagliare, ed e' dentro il round invece che in una
+#      nota.
+#  Costo di tenerla: 2 passate a tick. Si pagano volentieri.
+#
+# =====================================================================
+#  5. LA COSA CHE RENDE QUESTO ROUND MISURABILE: P E' LO STESSO IN
+#     TUTTE E QUATTRO LE CELLE
+# =====================================================================
+#  Normalmente "quante posizioni" non si sa dal CSV. Qui si sa, e va
+#  dimostrato perche' e' il perno di tutti i confronti.
+#  NESSUNA delle due manopole tocca gli INGRESSI:
+#   - InpTP1_ClosePct e InpBEatR compaiono SOLO in ManageOneTicket
+#     (r.2359/2374 e r.2405-2418): gestione di una posizione gia' viva;
+#   - il cancello della giornata e' InpOneTradePerDay (r.766-799) e
+#     conta i cicli con CicliOggi(), che salta esplicitamente i deal di
+#     uscita: "if(HistoryDealGetInteger(tk, DEAL_ENTRY) !=
+#     DEAL_ENTRY_IN) continue;" col commento "Le parziali sono
+#     ENTRY_OUT e NON contano come ciclo". Quindi la parziale NON
+#     consuma la giornata e non sposta il giorno dopo;
+#   - nessuna posizione si trascina al giorno dopo: InpCloseAtEnd=true
+#     e la chiusura di fine sessione (r.2566-2568) porta a PH_DONE;
+#   - InpMaxPosSimbolo=0 = nessun tetto (r.833: il ramo scatta solo se
+#     > 0), quindi nemmeno l'esposizione puo' bloccare un ingresso.
+#  ==> LE QUATTRO CELLE APRONO LE STESSE POSIZIONI, GLI STESSI GIORNI,
+#      AGLI STESSI PREZZI. Cambia solo come si esce.
+#  ==> E allora P si LEGGE: P = Trades della cella (0 , *), dove
+#      1 deal = 1 posizione. Quello stesso P vale per le celle (50 , *).
+#  VERIFICA DI COERENZA, GRATUITA E OBBLIGATORIA:
+#      Trades(0,0) deve essere UGUALE a Trades(0 , 1,0)   [stesso P]
+#      P <= Trades(50,0) <= 2P                            [n = P + f]
+#  Se una delle due non torna, il ragionamento qui sopra e' rotto e le
+#  expectancy per posizione NON si calcolano. Si dichiara e ci si ferma.
+#
+# =====================================================================
+#  6. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+# =====================================================================
+#  (A) RIPRODUZIONE. La cella (50 , 0) deve riprodurre R202B Pass 3 /
+#      R201A al centesimo:
+#        IS   n 175  PF 1.12733  RF 0.65219  Equity DD % 5.4089
+#             Profit 3050.56   Expected Payoff 17.43177
+#        OOS  n 270  PF 1.39520  RF 2.01544  Equity DD % 7.2506
+#             Profit 14355.32  Expected Payoff 53.16785
+#      (Letti direttamente da
+#       risultati_prove/R202B/..._IS_R202B.csv riga Pass 3 e
+#       risultati_prove/R202B/..._OOS_R202B.csv riga Pass 3, non
+#       ricopiati da un referto.)
+#      TOLLERANZA: un centesimo sul Profit, uguaglianza su n, PF, RF e
+#      DD alla quinta cifra (tolleranza G1,
+#      report/MANOPOLE_INERTI_2026-09-09.md r.40). Oltre quella il round
+#      NON e' confrontabile e si cerca il pin che balla.
+#      NOTA SUL MAGIC, perche' e' l'unico pin che cambia rispetto
+#      all'ancora (789521 -> 789620): e' INERTE sui risultati, e si
+#      dimostra invece di prometterlo. Le nove occorrenze di InpMagic
+#      nell'EA sono r.406 dichiarazione, r.506 SetExpertMagicNumber, poi
+#      r.738/963/993/2300/2335/2582/2628 che sono tutti filtri sui
+#      PROPRI trade (gia' marchiati con lo stesso numero a r.506: il
+#      filtro e' una tautologia quando gira un EA solo nel tester), e
+#      r.2762 che e' solo il nome del file di export per-trade. Nessuna
+#      decisione operativa dipende dal valore.
+#
+#  (B) SE LA CELLA (0 , 0) NON HA UN n DIVERSO DA (50 , 0), IL ROUND
+#      NON HA MISURATO NIENTE. Con ClosePct=0 il parziale sparisce e i
+#      deal di uscita devono CALARE (n passa da P+f a P). Se n resta
+#      270 in OOS, il pin non e' arrivato all'EA e si ferma tutto prima
+#      di leggere qualunque altra colonna. E' la verifica gratuita, e si
+#      fa per PRIMA.
+#
+#  (C) IL CANCELLO DI PROMOZIONE -- e serve TUTTO INSIEME.
+#      Il candidato alla promozione e' la cella (0 , 1,0) di R207b. Si
+#      giudica contro la cella VIVA (50 , 0) di questo file.
+#
+#      c1    PF OOS di (0 , 1,0) >= 1.39520.
+#            >>> ED E' IL CANCELLO PIU' DEBOLE DEI QUATTRO, per una
+#                ragione strutturale e non per prudenza: vedi il sez.7.
+#                c1 da solo NON promuove niente.
+#      c1-bis  Recovery Factor OOS di (0 , 1,0) >= 2.01544.
+#            RF = profitto netto / drawdown massimo: DUE quantita' in
+#            DENARO, immuni a come si contano le uscite. E' il numero
+#            che regge davvero il confronto fra ClosePct=50 e
+#            ClosePct=0, ed e' lo stesso RF che alimenta c2.
+#      c1-ter  EXPECTANCY PER POSIZIONE OOS di (0 , 1,0) >= quella di
+#            (50 , 0), calcolate tutte e due su P (vedi sez.5):
+#              E_pos(0 , 1,0) = Profit(0 , 1,0) / P
+#              E_pos(50 , 0)  = 14355.32 / P
+#            cioe', con lo STESSO denominatore, il confronto si riduce
+#            a Profit(0 , 1,0) >= 14355.32. Si scrive comunque in forma
+#            di expectancy perche' e' la grandezza su cui R47 ha
+#            misurato il +84%, ed e' quella che va confrontata con
+#            quel numero.
+#            [Se la verifica di coerenza del sez.5 fallisce, questo
+#             cancello diventa NON CALCOLABILE e si dichiara.]
+#      c2    DD OOS a DENOMINATORE FISSO non peggiora di piu' del 10%.
+#            DD_fisso% = (Profit / Recovery Factor) / 80000 x 100,
+#            perche' "Equity DD %" divide per il PICCO, che cambia da
+#            cella a cella (classe 550: su R202B la distorsione vale
+#            +22,8%, piu' del margine di un cancello, e fra due celle
+#            l'ordine si RIBALTA).
+#            DUE BASI, UNA PER GAMBA (classe 557), dalla cella viva:
+#              IS   DD_fisso 5.8468  -> allarme sopra 6.4315
+#              OOS  DD_fisso 8.9033  -> allarme sopra 9.7937
+#            Se il Recovery Factor e' 0 (passata a zero trade,
+#            Profit=0) la formula e' 0/0: si scrive
+#            [NON CALCOLABILE DAL CSV].
+#      c3    IS e OOS CONCORDI di segno su PF, su RF e su DD_fisso.
+#            Discordi -> nessuna promozione.
+#
+#      SE c1 FALLISCE MA c1-bis, c1-ter E c2 PASSANO: NON SI PROMUOVE
+#      IN AUTOMATICO. Si scrive "PF diluito dal cambio di conteggio,
+#      rendimento per unita' di rischio migliorato" e decide Claudio.
+#      E' la stessa corsia del "COMPRA RENDIMENTO CON RISCHIO".
+#
+#  (D) IL PROFITTO, che e' il giudice pulito: e' immune al conteggio
+#      delle uscite (la somma dei deal di una posizione e' il P/L della
+#      posizione). Cella viva: IS 3050.56, OOS 14355.32. Si riporta
+#      SEMPRE accanto al PF.
+#
+# =====================================================================
+#  7. SUL PF: QUI NON E' CONFRONTABILE, ED E' UN CANCELLO NON UNA NOTA
+# =====================================================================
+#  Il Profit Factor del tester e' somma dei guadagni / somma delle
+#  perdite SUI DEAL. Questo round cambia PROPRIO QUANTI DEAL produce una
+#  posizione (sez.1c). E il cambio non e' neutro, e' ORIENTATO:
+#  con ClosePct=50 una posizione che tocca +1R mette meta' vincita al
+#  NUMERATORE e poi, con lo stop gia' a pari, mette quasi nulla al
+#  denominatore. Cioe' il parziale GONFIA il PF senza aggiungere un
+#  euro. Togliendolo, il PF puo' SCENDERE mentre il conto guadagna di
+#  piu'.
+#  ==> FRA LE CELLE (50 , *) E LE CELLE (0 , *) IL PF NON SI CONFRONTA
+#      DIRETTAMENTE. Si confronta su Recovery Factor (c1-bis), su
+#      Profitto (D) e su expectancy PER POSIZIONE (c1-ter).
+#      Il PF si riporta lo stesso, sempre col profitto accanto, perche'
+#      serve a c3 (concordanza IS/OOS) -- dove il conteggio e' lo
+#      stesso da tutte e due le parti e quindi il confronto e' lecito.
+#  >>> FRA (50,0) E (50 , 1,0) INVECE IL PF E' CONFRONTABILE ED E' UN
+#      CONTROLLO: devono essere uguali (sez.4).
+#
+# =====================================================================
+#  8. IL CONTRO-ESEMPIO CHE MI FAREBBE SBAGLIARE -- IL RUMORE
+# =====================================================================
+#  Se questo round tornasse con "PF OOS da 1,3952 a 1,48" sarei tentato
+#  di chiamarlo un successo. SAREBBE UN ERRORE, e il numero che lo dice
+#  e' del 22/09/2026:
+#    - il guadagno che R46/R47 hanno misurato vale +84% (DAX) e +48%
+#      (DOW) SULL'EXPECTANCY, ma sul SOLO PF vale +6,4%
+#      (DOSSIER_CONFIG_PF_2026-09-22.md r.213);
+#    - e report/PRIMO_STOP_FTMO_2026-09-22.md misura che il costo di
+#      esecuzione VERO supera il modello del +10,5% (perdita promessa
+#      1.590,37 EUR, reale 1.757,68 EUR sul primo stop della
+#      challenge), di cui +156,68 EUR di solo slippaggio.
+#  ==> UN GUADAGNO DI SOLO PF DEL 6% STA DENTRO IL RUMORE
+#      D'ESECUZIONE. Non e' un risultato: e' una cifra piu' piccola
+#      dell'errore con cui la misuriamo.
+#  LA GRANDEZZA CHE REGGE DAVVERO, in ordine:
+#      1. EXPECTANCY PER POSIZIONE (c1-ter): e' quella su cui R47 ha
+#         misurato +84%, cioe' OTTO VOLTE il rumore del 10,5%;
+#      2. RECOVERY FACTOR (c1-bis): profitto per unita' di rischio, in
+#         denaro, immune al conteggio;
+#      3. PROFITTO in euro (D).
+#  Il PF viene DOPO tutti e tre, e da solo non promuove.
+#  >>> E VALE ANCHE AL CONTRARIO: se il PF SCENDE ma expectancy per
+#      posizione, RF e profitto SALGONO, il verdetto giusto e'
+#      "promosso", non "bocciato". Scritto il 22/09/2026, prima dei numeri,
+#      proprio perche' dopo sarebbe comodo cambiarlo.
+#
+# =====================================================================
+#  9. IL DD, NELLA FORMA DELLA CLASSE 562
+# =====================================================================
+#  report/IL_MURO_MISURATO_2026-09-22.md, dimostrato su 12 celle con
+#  zero eccezioni:
+#      perdita statica  <=  Equity DD %  <=  DDass/deposito
+#  "Equity DD %" -- la colonna che abbiamo GIA' nel CSV -- e' il limite
+#  PIU' STRETTO. Quindi si riporta QUELLA, riportata alla taglia in
+#  campo, e non DDass/deposito, che sprecherebbe margine.
+#  >>> E NON TOCCA c2: la' il denominatore fisso serve a rendere le
+#      CELLE confrontabili fra loro (il picco cambia da cella a cella,
+#      classe 550), non a misurare il muro. Due usi diversi dello
+#      stesso numero.
+#  DOVE SIAMO AL 22/09/2026, e non e' comodo: la sedia 770101 e'
+#  [NON MISURATA] contro il muro FTMO del 10%. Alla taglia in campo
+#  la cella viva sta a Equity DD % 10,8178% (IS) e 14,5012% (OOS).
+#  >>> QUESTO ROUND NON CHIUDE QUELLA DOMANDA, e va detto prima: anche
+#      prendendo il miglioramento di DD piu' generoso mai misurato in
+#      casa (R46: 7,23 -> 6,27, cioe' -13,3%), l'OOS alla taglia in
+#      campo atterrerebbe a ~12,6%, ANCORA SOPRA IL 10%. Se il round
+#      riesce, la sedia diventa piu' sana, NON diventa dimostrata sotto
+#      il muro. Per quella serve Equity Drawdown Absolute, ed e'
+#      un'altra misura.
+#
+# =====================================================================
+#  10. TAGLIE, DEPOSITO, BERSAGLIO
+# =====================================================================
+#  TAGLIA DEL BANCO: InpRiskPercent = 1,0%. NON e' la taglia in campo
+#  (2,00%, firma del 20/09). E' pinnata a 1,0 per RIPRODURRE R202B: con
+#  un rischio diverso i lotti cambiano e non si riprodurrebbe piu'
+#  niente. Ogni DD va RADDOPPIATO prima di leggerlo a taglia vera, e il
+#  raddoppio e' un LIMITE SUPERIORE, non un'identita' (CalcLotByRisk
+#  usa ACCOUNT_BALANCE, e il fattore misurato e' 1,956 / 1,990, cioe'
+#  sotto 2). Classe 547.
+#  DEPOSITO 80000, e il perche' e' doppio: (1) e' il deposito
+#  dell'ancora R202B/R201A, e senza lo stesso deposito la riproduzione
+#  del sez.6A non e' nemmeno definita, perche' il lotto e' calcolato in
+#  percentuale del saldo; (2) e' la taglia VERA del conto FTMO della
+#  challenge (saldo 80.000,00 EUR,
+#  report/PRIMO_STOP_FTMO_2026-09-22.md r.22), quindi i DD_fisso% si
+#  leggono direttamente contro il muro senza riscalature inventate.
+#  MODELLO 4 = ogni tick su tick reali, come l'ancora.
+#  BERSAGLIO: PC DI BACKTEST. Non il VPS: firma di Claudio del 21/09,
+#  dopo che una corsa a tick sul terminale banco 50504400 ha inchiodato
+#  la macchina che ospitava le sei sedie della challenge.
+#
+# =====================================================================
+#  11. QUELLO CHE QUESTO ROUND NON MISURA
+# =====================================================================
+#  - LE ALTRE DUE APERTURE. 770202 (Dow) e 770260 (Nasdaq) hanno lo
+#    STESSO difetto e lo stesso preset con InpBEatR=0,0. Qui si misura
+#    solo il DAX. Se passa, sono altri due round gemelli, non una
+#    generalizzazione.
+#  - I VALORI INTERMEDI di ClosePct (25) e di BEatR (0,5). Il dossier
+#    li proponeva; qui si tengono fuori di proposito, perche' la
+#    domanda di questo round e' "la coppia funziona?" e non "dove sta
+#    l'ottimo". Se la coppia funziona, il round dopo cerca l'altopiano
+#    -- e vale la regola di casa: CENTRO dell'altopiano, MAI il picco.
+#  - LE POSIZIONI CONTATE UNA PER UNA. L'export per-trade dell'EA
+#    (ExportTrades, r.2759-2784) scriverebbe position_id, ma il suo
+#    stesso commento (r.2756-2757) avverte che "in ottimizzazione ogni
+#    pass sovrascrive il file del proprio magic". Con due celle per
+#    file sopravvive solo l'ultima. Quindi P si ricava come al sez.5, dal
+#    Trades delle celle (0 , *), e non dai position_id.
+#  - IL LATO CORTO. Qui InpAllowShort e' pinnato FALSE, come la cella
+#    viva. E' la domanda di R205a, che non e' ancora girato (in
+#    risultati_prove/ non c'e' nessun R205A): i due round non si
+#    incrociano, e se un giorno lo short venisse promosso QUESTE quattro
+#    celle andranno rifatte sopra quella base.
+#  - IL MURO FTMO DEL 10%: vedi sez.9.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_ClosePct=50.0||0.0||50.0||50.0||Y
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=789620||789620||0||789620||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
