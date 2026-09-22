@@ -1,0 +1,209 @@
+# =====================================================================
+#  R204a -- OLTRE L'UNO: il lato dell'asse che non abbiamo mai guardato
+#  EA: ABTG_Dow_Apertura_US   (sedia Dow 770202, simbolo U30USD)
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#  Si lancia con: -Deposito 80000 -Modello 4
+# =====================================================================
+#
+#  PERCHE' ESISTE, E CHE COSA PUO' E NON PUO' DIRE
+#  -----------------------------------------------
+#  R202A (21/09, ore 23:24) ha misurato InpTP1_R sotto l'uno: 0.25 /
+#  0.50 / 0.75 / 1.00. La superficie OOS e' risultata MONOTONA CRESCENTE
+#  e il massimo sta SUL BORDO dell'asse, cioe' sulla cella viva:
+#      0.25  PF 0.93207  profitto  -864.82
+#      0.50  PF 1.10328  profitto  1736.27
+#      0.75  PF 1.13744  profitto  2557.50
+#      1.00  PF 1.27175  profitto  5395.25   <- cella VIVA, e massimo
+#  Un massimo sul bordo non e' un ottimo: e' il punto in cui abbiamo
+#  smesso di guardare. L'ottimo puo' stare OLTRE 1.00, e non lo sappiamo.
+#  Questo round chiude un "NON ANCORA MISURATO", non promuove una sedia.
+#
+#  E VA DETTO SUBITO CHE COSA QUESTO ROUND NON PUO' FARE.
+#  Le POSIZIONI del Dow stanno, DIMOSTRATO, fra 48 e 74 in IS e fra 81 e
+#  130 in OOS (con n = P + f, 0 <= f <= P, vale max(n)/2 <= P <= min(n)).
+#  L'emendamento della finestra del 16/08, regola A, chiede IS >= 150
+#  OPERAZIONI: il Dow e' SOTTO CON CERTEZZA in tutte e due le finestre.
+#  ==> NESSUNA CELLA DI QUESTO ROUND PUO' ESSERE PROMOSSA IN CAMPO.
+#      Una cella che vince qui si guadagna UNA FINESTRA PIU' LUNGA, non
+#      una sedia. Il verdetto legittimo di questo round e' una
+#      DIREZIONE, non una scelta.
+#  Il RISCHIO invece si giudica lo stesso, a qualunque n (regola B del
+#  16/08): un DD accaduto e' un fatto.
+#
+#  LA COSA BELLA, ED E' L'OPPOSTO DI R203
+#  --------------------------------------
+#  Salendo, la frontiera del costo SI ALLONTANA invece di avvicinarsi.
+#  Stop mediano Dow 123,80 punti indice [MIS n=446]
+#  (report/STOP_VS_SPREAD_FTMO_2026-09-20.md r.276), spread mediano
+#  U30USD ora 14 = 2,00 (r.312). Primo obiettivo = InpTP1_R x stop:
+#      1.00  123,80 pt   61,9x lo spread   (bersaglio finale 3,00 R)
+#      1.25  154,75 pt   77,4x             (3,75 R)
+#      1.50  185,70 pt   92,9x             (4,50 R)
+#      1.75  216,65 pt  108,3x             (5,25 R)
+#  Tutte e quattro STRAVOLGONO la frontiera dei 40x e il pavimento duro
+#  di 13,3x. Su questo asse, in questa direzione, il costo non e' un
+#  vincolo: e' la prima volta che capita in questa serie di round.
+#
+#  IL MECCANISMO CHE CAMBIA, e va dichiarato prima
+#  ------------------------------------------------
+#  InpTP1_R non muove solo il parziale: il bersaglio finale e'
+#  InpTP1_R x 3 (ABTG_Dow_Apertura_US.mq5 r.1456, funzione TpTotalR).
+#  A 1.75 il bersaglio sta a 5,25 R, cioe' MOLTO lontano: e' plausibile
+#  che quasi nessuna posizione lo raggiunga e che la sedia diventi
+#  guidata dal TRAILING (InpUseTrailing=true, InpTrailStartR=0.0,
+#  InpTrailMode=1, InpTrailFixedPts=410) e dalla chiusura a fine
+#  sessione (InpCloseAtEnd=true). Non e' un difetto del round: e' cio'
+#  che il round misura. Ma chi legge il referto deve sapere che fra la
+#  cella 1.00 e la cella 1.75 non cambia una manopola: cambia CHI
+#  chiude le operazioni.
+#
+#  L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+#  =====================================
+#  (a) RIPRODUZIONE: la cella 1.00 deve riprodurre R202A Pass 3 e
+#      R172D Pass 0:
+#        IS  n74  PF 1.22173 DD 5.6726 profit 2241.62
+#        OOS n130 PF 1.27175 DD 4.3944 profit 5395.25
+#      TOLLERANZA: un centesimo sul Profit, e uguaglianza su n, PF e DD
+#      alla quinta cifra (tolleranza di casa del cancello G1,
+#      report/MANOPOLE_INERTI_2026-09-09.md r.40). Oltre quella (a)
+#      FALLISCE: il round non e' confrontabile e si cerca il pin che
+#      balla.
+#  (b) n SCENDE salendo. E' l'inverso di R202A, ed e' la verifica che
+#      l'asse si sia mosso: piu' lontano e' il primo obiettivo, meno
+#      spesso il parziale scatta, meno USCITE si contano. Se n non
+#      scende, il round non ha misurato quello che crede.
+#  (c) LA DOMANDA VERA, che e' una DIREZIONE:
+#        - la superficie OOS CONTINUA a salire sopra 1.00 -> l'ottimo e'
+#          ancora piu' in la', e il seguito e' allargare l'asse ANCORA,
+#          non promuovere;
+#        - la superficie GIRA (sale e poi scende) -> abbiamo trovato la
+#          cresta, e il seguito e' una finestra piu' lunga per misurarla
+#          con n sufficiente;
+#        - la superficie SCENDE subito -> 1.00 era davvero il massimo, e
+#          il "non ancora misurato" si chiude con un NO. E' il risultato
+#          piu' economico dei tre, ed e' comunque un risultato.
+#  (d) IS e OOS CONCORDI sulla direzione. Discordi -> si dichiara
+#      "non concordi" e non si trae nessuna direzione.
+#  (e) IL RISCHIO, che si giudica a qualunque n: nessuna cella deve
+#      alzare il DD. Misura a DENOMINATORE FISSO, non su "Equity DD %":
+#        DD_fisso% = (Profit / Recovery Factor) / 80000 x 100
+#      perche' "Equity DD %" divide per il PICCO, che cambia da cella a
+#      cella (classe 550: su R202B la distorsione vale +22,8%, PIU' del
+#      margine di un cancello a -20%, e fra due celle l'ordine si
+#      RIBALTA). Cella viva 1.00, OOS: DD_fisso = 4,4499.
+#      ==> allarme se una cella supera 4,89 (+10% sulla cella viva).
+#      E se il Recovery Factor e' 0 (passata a ZERO TRADE, Profit=0) la
+#      formula e' 0/0: si scrive DD_fisso [NON CALCOLABILE DAL CSV] e
+#      NON si inventa. Una cella a zero trade esce con DD 0,0000 e
+#      Peggior Giornata 0,0000, cioe' sembra LA MIGLIORE DELLA TABELLA:
+#      e' il tranello, ed e' assenza di informazione, non un merito.
+#      (Qui e' improbabile -- InpTP1_R non scarta nessun ingresso -- ma
+#      la regola resta scritta.)
+#
+#  QUELLO CHE QUESTO ROUND NON MISURA
+#  ----------------------------------
+#  - Un asse per round: si muove SOLO InpTP1_R. Il trailing, il
+#    pavimento dello stop e il filtro spread restano dove sono.
+#  - Le POSIZIONI vere: ogni n di questo referto e' [uscite]. Si
+#    contano dopo, sui position_id.
+#  - Il muro FTMO del 10%: "Equity DD %" e' dal PICCO, il Max Loss e'
+#    STATICO dal saldo iniziale, quindi il DD del tester e' un LIMITE
+#    SUPERIORE della perdita statica e NON dimostra niente in nessuna
+#    delle due direzioni (classe 515). Il limite superiore si riporta:
+#    DDass/deposito, cella viva 4,4499% al banco.
+#
+#  TAGLIA DEL BANCO: 1,0% -- NON e' la taglia in campo (2,00%, firma del
+#  20/09). Pinnata a 1,0 per RIPRODURRE R202A/R172D. Ogni DD va
+#  raddoppiato prima di leggerlo a taglia vera, e il raddoppio e' un
+#  LIMITE SUPERIORE, non un'identita' (CalcLotByRisk usa
+#  ACCOUNT_BALANCE: 5 SL di fila danno 9,608 contro 2 x 4,901 = 9,802).
+#  Classe 547.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=400.0||400.0||0||400.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=true||true||0||true||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=false||false||0||false||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMagic=789540||789540||0||789540||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpTP1_R=1.0||1.0||0.25||1.75||Y
