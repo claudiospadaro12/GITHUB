@@ -29959,3 +29959,126 @@ che dice come leggerlo**, che e' il danno della classe 584 per un'altra strada.
 🟢 **La parte che va detta**: il difetto e' stato trovato **prima** che la riga uscisse, dal
 gesto piu' stupido che c'e' -- stampare il risultato e leggerlo. Il metodo dello *Sviluppatore
 e Agente dei Controlli* (13/09) ha funzionato **sul controllore stesso**.
+
+
+---
+
+## CLASSE 587 -- 💰📏 L'INCARICO CITA UN NUMERO **MISURATO** E NE CAMBIA L'**UNITA'**: «0,2003 $ per LATO» contro «0,2003 $ a GIRO COMPLETO» scritto nel referto da cui viene -- **2x di differenza fra l'ordine e la fonte** (22/09/2026, figlia della regola del contro-esempio del 10/09, *"prima si cerca il file che ha gia' la risposta"*)
+
+**Caso reale.** L'incarico della sonda sul fade dell'oro diceva, testuale: *«Costo 0,2003
+$/oncia **PER LATO** (misurato, `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md` par. 2.4),
+quindi **2 costi per giro**»*. Il riferimento era **esatto** — il file c'e', il paragrafo
+c'e', il numero c'e'. 🔴 **Ma il paragrafo dice un'altra cosa:**
+
+> *"**Costo pieno di un GIRO COMPLETO** sull'oro: 0,16 $ (spread) + 0,0403 $ (commissione)
+> = **0,2003 $**"*
+
+e `backtest_pipeline/anatomia_esplosioni_oro.py` r.80 lo rilegge allo stesso modo
+(*"giro completo, MISURATO il 10/09/2026"*). **Lo spread si paga UNA volta per giro, non
+due: e' il costo dell'attraversamento.** 👉 L'ordine e la fonte differiscono di **2x**.
+
+🟢 **Come e' stato trovato**: non da un dubbio, ma dal **gesto della regola del 10/09** --
+aprire il file che ha gia' la risposta **prima** di fidarsi della citazione. Costava due
+minuti.
+
+### La regola
+1. 🔎 **Una citazione con tanto di file e paragrafo NON e' una verifica: e' un indirizzo.**
+   Si apre il paragrafo e si legge l'**unita'**, non solo la cifra. Il difetto qui non e'
+   nel numero (0,2003 e' giusto) ma nell'**unita'**, che e' la parte che nessuno rilegge.
+2. ⚖️ **Quando l'ordine e la fonte non coincidono, NON si sceglie: si misurano TUTTE E DUE,
+   e si mette come PRINCIPALE la piu' SEVERA.** Qui il principale e' 2 x 0,2003 = 0,4006
+   $/giro (l'ordine), la sensibilita' e' 0,2003 $/giro (la fonte). Se il candidato passa
+   col pedaggio severo, passa davvero; se il verdetto cambia fra le due, **il verdetto e'
+   "non misurabile finche' il costo non e' deciso"**, e si va a chiedere.
+3. 📌 **E la discrepanza si SCRIVE nell'intestazione dello strumento**, non solo nel
+   referto: chi rilancerà lo strumento fra sei mesi legge il codice, non la chat.
+4. 🚫 **Mai risolverla in silenzio "andando sul sicuro".** Anche prendere la piu' severa
+   *senza dirlo* e' un dato inventato: il lettore crede che quel costo venga da una misura,
+   e invece viene da una scelta.
+
+---
+
+## CLASSE 588 -- 🎲⚖️ IL CONTRO-ESEMPIO ALEATORIO **NON APPAIATO SUL NUMERO DI OPERAZIONI**: la permutazione distrugge anche quello che doveva restare, il null esce con **un terzo** delle operazioni del vero, e i due PF **non si confrontano** (22/09/2026, figlia della 178 -- *l'ipotesi alternativa* -- e cugina della 581)
+
+**Caso reale.** Nella sonda sul fade dell'oro il contro-esempio prescritto era *«la stessa
+catena su una passeggiata aleatoria a volatilita' appaiata»*. L'ho costruita permutando le
+**forme** delle barre (`h/o`, `l/o`, `c/o`) dentro **lo stesso minuto-del-giorno** fra
+giorni diversi: l'orologio della volatilita' resta identico, sparisce solo la sequenza.
+**Sembrava appaiata, e per la volatilita' MINUTO per minuto lo era.**
+
+🔴 **Non lo era per la cosa che conta.** L'esplosione e' definita su una finestra di **30
+minuti** (`|mov| >= 0,40 x ATR giornaliero`), e un movimento di 30 minuti dipende dal
+**RAGGRUPPAMENTO** della volatilita', che la permutazione **cancella**. Risultato misurato:
+
+| campione | esplosioni VERE sulla fascia | esplosioni nel NULL | rapporto |
+|---|---|---|---|
+| 2006-2020 | **111** | **61** | 0,55x |
+| 2021-2026 | **51** | **16** | **0,31x** |
+
+👉 **Un null con un terzo delle operazioni del vero non e' un contro-esempio appaiato: e'
+un altro esperimento.** Il suo PF ha una banda di rumore **piu' larga** di quella del vero,
+e confrontare i due numeri come se fossero la stessa misura e' un errore di attribuzione.
+La prova che mordeva: su 2006-2020 il null faceva **PF 1,136 a +15'** — cioe' **sopra la
+soglia di 1,05 dichiarata**, e **sopra il fade vero (0,970)**. Con n=61 e' rumore, ma
+**letto da solo avrebbe detto una cosa falsa in tutte e due le direzioni**.
+
+🟢 **La riparazione, e rende il controllo PIU' severo, non meno**: si e' aggiunto un
+secondo null — la **permutazione degli ESITI** — che tiene le esplosioni **esattamente
+quelle vere** (stesso n, stessa ancora, stesso verso del fade) e permuta **solo il
+SEGUITO**, attaccando a ogni esplosione il seguito di un altro giorno, **stessa fascia e
+stesso anno**, per **400 ripetizioni**. Ed e' lui che ha ucciso il candidato: **6 righe su
+6** battute dal caso piu' del 5% delle volte, e il PF 1,477 che "passava la soglia" **cade
+dentro una banda di puro rumore 0,47-1,82**.
+
+### La regola
+1. ⚖️ **Un null va appaiato sulla GRANDEZZA CHE DEFINISCE L'EVENTO, non su una grandezza
+   vicina.** Se l'evento e' definito su una finestra di 30 minuti, appaiare la volatilita'
+   del singolo minuto **non basta**. 🔴 **Il collaudo del null e' UN NUMERO: quante
+   operazioni produce?** Se non sono le stesse del vero (diciamo entro il ±10%), il null
+   **e' rotto** e si dichiara, oppure si cambia null.
+2. 🥇 **Il null migliore e' quello che permuta la COSA MENO POSSIBILE.** Non "generiamo un
+   mercato finto": **teniamo tutto il vero e rompiamo SOLO il legame che l'ipotesi
+   pretende**. Qui: tenere le esplosioni, rompere il seguito. E' piu' facile da scrivere,
+   e molto piu' difficile da imbrogliare.
+3. 📊 **Un null a ripetizioni regala GRATIS il numero che manca sempre a questo progetto:
+   la BANDA DI RUMORE a quell'n.** Con n=49 la banda va da PF 0,47 a PF 1,82: sapendolo,
+   *nessun* PF dentro quella banda va piu' discusso. 👉 **Da qui in avanti, un PF su n
+   piccolo si consegna con la sua banda accanto, o non si consegna.**
+4. 🔴 **E se il null scatta CONTRO di noi, si riporta lo stesso.** La soglia 1,05 l'avevo
+   scritta io prima di misurare, il null l'ha superata, ed e' nel referto. Una soglia che
+   si applica solo quando fa comodo non e' una soglia.
+
+---
+
+## CLASSE 589 -- 🧾↕️ LA RIGA DI **SENSIBILITA'** STAMPATA SOTTO IL BLOCCO SBAGLIATO: numero giusto, **attribuzione falsa** -- chi legge la assegna al CONTROLLO invece che alla MISURA (22/09/2026, cugina della 574)
+
+**Caso reale.** Nella prima stesura della sonda sul fade, il referto stampava per ogni
+orizzonte, in quest'ordine:
+
+```
+    FADE 09:30 ET          n= 49 | PF 1.014 | ...
+      sens. 1 costo/giro   n= 49 | PF 1.060 | ...
+    CONTROLLO appaiato     n= 49 | PF 0.932 | ...
+      sens. $ piatti       PF 0.742 | netto -38.79 $   <-- calcolata sul FADE
+```
+
+🔴 La riga `sens. $ piatti` era calcolata sul **FADE**, ma **stampata sotto il CONTROLLO**,
+e **rientrata come le sue sotto-righe**. Un lettore -- compreso me fra un mese -- legge
+*"il controllo appaiato a dollari piatti fa 0,742"*. **Il numero e' giusto e la frase e'
+falsa.**
+
+🟢 Trovato **rileggendo il referto stampato per intero** prima di consegnarlo, che e' lo
+stesso gesto che ha trovato la classe 586.
+
+### La regola
+1. 📐 **In un referto a blocchi, l'ORDINE E LA RIENTRANZA sono semantica, non estetica.**
+   Una riga rientrata sotto un blocco **dichiara** di appartenergli. Se non gli appartiene,
+   e' una riga falsa anche se il numero e' esatto.
+2. 🔎 **Il controllo, e costa un minuto: si legge il referto stampato dall'ALTO IN BASSO
+   come lo leggerebbe uno che non ha scritto il codice**, e per ogni riga ci si chiede *"di
+   che cosa parla questa riga?"*. Dove la risposta non e' immediata dal testo della riga
+   stessa, **l'etichetta va completata** -- qui e' diventata `PF ... (SUL FADE. Costo a
+   DOLLARI PIATTI: ...)`.
+3. 🧩 **Ogni riga porta il suo soggetto nel TESTO**, non solo nella posizione. E' la stessa
+   disciplina della regola del PDF (18/09): *l'informazione sta nel testo, mai solo
+   nella decorazione* -- qui la "decorazione" e' l'indentazione.
