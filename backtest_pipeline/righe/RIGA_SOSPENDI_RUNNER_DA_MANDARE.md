@@ -1,6 +1,6 @@
 # 🛑 DUE RIGHE — SPEGNERE LA CORSA NOTTURNA DELLE 03:30 SUL VPS
 
-> data: 2026-09-21 · pin `83664b6e` · marcatore `MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1`
+> data: 2026-09-21 · pin `77121d37` · marcatore `MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1`
 > referto: `report/IL_RUNNER_DELLE_0330_2026-09-21.md`
 > attività bersaglio: **`ABTG_Runner`** — registrata da `backtest_pipeline/runner_abtg.ps1`
 > r.653 (`schtasks /Create /TN ABTG_Runner /SC DAILY /ST 03:30`), azione
@@ -75,7 +75,7 @@ amministratore*): se l'attività è stata registrata da un altro utente, Windows
 rifiuta. In quel caso la riga **te lo dice e non lascia mezzo lavoro fatto**.
 
 ```powershell
-& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $pin='83664b6e8259bc2d3ea8ce8f11c3e2aca74fc6c0'; $p="$env:USERPROFILE\SOSPENDI_RUNNER_NOTTURNO.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/SOSPENDI_RUNNER_NOTTURNO.ps1" -OutFile $p; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1.' }; $ErrorActionPreference='Continue'; $global:LASTEXITCODE=0; & $p; if($LASTEXITCODE -eq 0){ Write-Host 'FATTO: la corsa notturna e SOSPESA, ed e stato verificato rileggendo l attivita. Manda lo zip dal Desktop.' -ForegroundColor Green } else { Write-Host ('NON RIUSCITO (uscita ' + $LASTEXITCODE + '): sopra ce scritto il perche. NON dare per spenta la corsa: rileggi il passo 1.') -ForegroundColor Red } }
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $pin='77121d37de7d1cd097a26c50c2fdae9decaa8770'; $p="$env:USERPROFILE\SOSPENDI_RUNNER_NOTTURNO.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/SOSPENDI_RUNNER_NOTTURNO.ps1" -OutFile $p; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1.' }; $ErrorActionPreference='Continue'; $global:LASTEXITCODE=0; & $p; if($LASTEXITCODE -eq 0){ Write-Host 'FATTO: la corsa notturna e SOSPESA, ed e stato verificato rileggendo l attivita. Manda lo zip dal Desktop.' -ForegroundColor Green } else { Write-Host ('NON RIUSCITO (uscita ' + $LASTEXITCODE + '): sopra ce scritto il perche. NON dare per spenta la corsa: rileggi il passo 1.') -ForegroundColor Red } }
 ```
 
 ### ✅ Come si sa che ha funzionato davvero
@@ -103,7 +103,7 @@ iscritto e non per memoria. Stesso bersaglio: **finestra PowerShell sul VPS**,
 nessun terminale toccato.
 
 ```powershell
-& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $pin='83664b6e8259bc2d3ea8ce8f11c3e2aca74fc6c0'; $p="$env:USERPROFILE\SOSPENDI_RUNNER_NOTTURNO.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/SOSPENDI_RUNNER_NOTTURNO.ps1" -OutFile $p; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1.' }; $ErrorActionPreference='Continue'; $global:LASTEXITCODE=0; & $p -Riaccendi; if($LASTEXITCODE -eq 0){ Write-Host 'FATTO: la corsa notturna e di nuovo ATTIVA. Manda lo zip dal Desktop.' -ForegroundColor Green } else { Write-Host ('NON RIUSCITO (uscita ' + $LASTEXITCODE + '): sopra ce scritto il perche.') -ForegroundColor Red } }
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $pin='77121d37de7d1cd097a26c50c2fdae9decaa8770'; $p="$env:USERPROFILE\SOSPENDI_RUNNER_NOTTURNO.ps1"; Remove-Item $p -EA SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/SOSPENDI_RUNNER_NOTTURNO.ps1" -OutFile $p; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore MARCATORE_SOSPENDI_RUNNER_NOTTURNO_v1.' }; $ErrorActionPreference='Continue'; $global:LASTEXITCODE=0; & $p -Riaccendi; if($LASTEXITCODE -eq 0){ Write-Host 'FATTO: la corsa notturna e di nuovo ATTIVA. Manda lo zip dal Desktop.' -ForegroundColor Green } else { Write-Host ('NON RIUSCITO (uscita ' + $LASTEXITCODE + '): sopra ce scritto il perche.') -ForegroundColor Red } }
 ```
 
 ---
@@ -128,3 +128,24 @@ nessun terminale toccato.
    da zero, ABILITATA**. Finché la challenge è viva, `-Installa` **non si lancia**.
    Verificato che è l'unico modo in cui la sospensione può tornare indietro da
    sola: il runner non si re-registra e non si ri-abilita quando gira.
+
+---
+
+## ✏️ RI-PINNATA IL 22/09 SERA — e la ragione conta
+
+Il pin originale `83664b6e` puntava a una versione dello script che stampava
+*«l'attivita' e' DISABILITATA e non ha piu' una prossima corsa»*. 🔴 **Quella frase era
+falsa**: Windows continua a mostrare un'ora di partenza **anche su un'attivita'
+disabilitata**, e chi la legge pensa che non sia servito a niente.
+
+🟢 La versione su `lavoro` lo dice giusto (*«quella e' memoria di Windows, non un
+impegno: il campo che comanda e' lo STATO»*), ma il pin vecchio **non la conteneva**:
+`git rev-parse` al pin dava un blob **diverso** da quello su disco. Ri-pinnata a
+`77121d37`, dove blob al pin == blob su disco.
+
+🔎 **E le due verifiche che contano, fatte prima di consegnare:**
+- `Unregister-ScheduledTask` e `schtasks` compaiono **solo nei COMMENTI** (r.14, 20, 21),
+  che dichiarano di NON usarli. L'unica azione e' **r.177 `Disable-ScheduledTask`**:
+  🟢 **reversibile**, la registrazione resta.
+- Cancello sulle due righe: **11 PASSATI**, `nessun difetto meccanico`, sintassi **0
+  errori**, **0 binding rotti**, raw al pin nuovo **200**.
