@@ -1,0 +1,358 @@
+# ======================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R143b -- LA MANOPOLA D'USCITA CHE NON E' MAI STATA GIRATA DI UN
+#           MILLIMETRO SU QUESTA SEDIA: InpTP1_R.
+#  D30EUR M5 FISSO, LONG. Asse: InpTP1_R, con il PARZIALE SPENTO.
+#  Scritto il 22/09/2026. Criteri congelati PRIMA dei numeri.
+# ======================================================================
+#
+#  PERCHE' QUESTA MANOPOLA -- ed e' un conteggio, non un'impressione
+#    Indicizzate oggi 62.367 righe di CSV di risultati di tutto
+#    backtest_pipeline/. Delle 1.052 righe che portano ESATTAMENTE la
+#    firma di colonne di questa sedia (80 input), il numero di valori
+#    distinti assunti da InpTP1_R e' UNO: 1,0. In tutte e 1.052.
+#    >>> InpTP1_R NON E' MAI STATO UN ASSE SU QUESTA SEDIA. E' una
+#        casella LIBERA, non una casella provata.
+#    (La FASE F del walk-forward aperture ha girato TP1_R 0,5/1,0, ma
+#     su una geometria DIVERSA: DAX_F_gestione_* e' gia' stato bocciato
+#     l'11/09 perche' cambia SEI manopole rispetto alla cella viva,
+#     fra cui InpAllowShort. Quei numeri non descrivono questa sedia, e
+#     il referto dei contratti del 20/09 lo dice per iscritto.)
+#
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
+#    mql5/Experts/ABTG_DAX_Apertura_EU.mq5:
+#      r.2081-2087  double TpTotalR()
+#                   { double r = InpTP1_R > 0 ? InpTP1_R*3.0 : 0.0;
+#                     return(r <= 0 ? 3.0 : r); }
+#      r.1208/1232/1445/1552/1951/1992
+#                   tp = entry +/- dist*TpTotalR()
+#      r.2359       if(!partialDone && InpTP1_ClosePct > 0 &&
+#                                      InpTP1_ClosePct < 100) { ... }
+#      r.2368         target = openP + dirSign*riskDist*InpTP1_R
+#    >>> QUINDI InpTP1_R FA DUE COSE DIVERSE, e con il parziale ACCESO
+#        sarebbero ACCOPPIATE (sposta insieme il punto del parziale e
+#        il bersaglio finale): un asse illeggibile.
+#    >>> CON IL PARZIALE SPENTO (InpTP1_ClosePct = 0) il blocco di
+#        r.2359 NON VIENE MAI ESEGUITO, quindi r.2368 e' morto e
+#        InpTP1_R resta UNA COSA SOLA: la distanza del BERSAGLIO
+#        FINALE, che vale 3 x InpTP1_R.
+#        L'asse 0,5 .. 1,5 sposta il TP da 1,5R a 4,5R. Una variabile,
+#        un significato. E' il motivo per cui questo file pinna il
+#        parziale a 0 invece di lasciarlo a 50.
+#    >>> E VA DETTO ANCHE L'EFFETTO COLLATERALE, perche' cambia cosa
+#        si sta misurando: con InpTP1_ClosePct = 0 anche
+#        InpBreakevenAtTP1 diventa INERTE (r.2391 sta DENTRO il blocco
+#        di r.2359) e InpBEatR e' gia' 0. Quindi in questo round
+#        NESSUNA posizione va in pari: la gestione e' SOLO trailing
+#        PREVBAR M5 + TP finale + flat delle 17:30. Dichiarato adesso.
+#
+#  PERCHE' IL PARZIALE A 0 E NON A 50 -- non e' una scelta di comodo
+#    La cella con InpTP1_ClosePct = 0 e' gia' misurata, riprodotta TRE
+#    volte, e batte quella che vola su PF e su DD in TUTTE E DUE le
+#    finestre, a parita' di posizioni:
+#      IS  n 132 pos | PF 1,12634 -> 1,18323 | DD 5,4362% -> 4,9576%
+#      OOS n 193 pos | PF 1,39709 -> 1,49140 | DD 7,2328% -> 6,2719%
+#      fonti: risultati_prove/aperture_r46/..._{IS,OOS}_r46a.csv
+#             risultati_prove/aperture_r47/..._{IS,OOS}_r47{a,b}.csv
+#             risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/
+#               ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r137c.csv
+#    E le ENTRATE sono le stesse: contate il 22/09 sui per-trade
+#    aperture_r47/abtg_trades_..._{772501,772503}.csv, le 193
+#    GIORNATE di operazione sono INSIEMI IDENTICI (193 su 193,
+#    differenza simmetrica vuota).
+#    >>> Quindi questo round parte dalla configurazione MIGLIORE GIA'
+#        MISURATA, non da quella che vola. Se Claudio non firmasse il
+#        passaggio a 0, questo round va rifatto con il parziale a 50 e
+#        con l'accoppiamento dichiarato. E' una dipendenza, ed e'
+#        scritta.
+#
+#  L'ASSE E IL PASSO -- 0,5 .. 1,5 con passo 0,25, CENTRATO sulla viva
+#    5 celle, DUE PER PARTE attorno al valore vivo (1,0). Regola di
+#    casa (R123c, R136a): centro esatto e celle simmetriche, cosi' un
+#    altopiano di 3 celle puo' esistere da tutte e due le parti.
+#    TP finale corrispondente: 1,5R / 2,25R / 3,0R / 3,75R / 4,5R.
+#    >>> CONTEGGIO CELLE: 0,5 + 4*0,25 = 1,5 -> CINQUE celle. In
+#        virgola mobile MT5 puo' fermarsi a QUATTRO: il referto conta i
+#        valori DISTINTI di InpTP1_R nel CSV, e se sono 4 dichiara
+#        quale manca.
+#
+#  >>> L'INVARIANTE CHE RENDE QUESTO ROUND LEGGIBILE, E CHE E' ANCHE
+#      LA SUA SENTINELLA PIU' DURA (S1b)
+#    Su questa sedia l'ingresso NON dipende dal bersaglio:
+#      - InpOneTradePerDay = true: una sola operazione al giorno;
+#      - InpCloseAtEnd = true alle 17:30 server: nessuna posizione
+#        sopravvive alla giornata, quindi nessuna posizione puo'
+#        "occupare" il giorno dopo;
+#      - il TP non compare in nessuna condizione d'ingresso.
+#    >>> QUINDI IL NUMERO DI POSIZIONI DEVE ESSERE 193 IN OOS E 132 IN
+#        IS IN TUTTE E CINQUE LE CELLE. E siccome il parziale e'
+#        spento, POSIZIONI = DEAL: la colonna Trades del CSV deve
+#        leggere 193 e 132, IDENTICA, cella per cella.
+#    >>> SE UNA CELLA HA UN n DIVERSO, il bersaglio sta rientrando
+#        negli ingressi per una via che non ho capito, e il round si
+#        FERMA PRIMA di leggere qualunque PF. Non si "legge con
+#        prudenza": si spiega.
+#    >>> Questa e' la ragione per cui questo asse e' molto piu' pulito
+#        di quelli di r136 su EMA200: li' n cala col bersaglio per il
+#        vincolo "una posizione alla volta", e quel calo e' un
+#        selezionatore. Qui n e' bloccato per costruzione. Non ci puo'
+#        essere ne' artefatto di sopravvivenza ne' artefatto di
+#        campione: tutte le celle guardano le STESSE 193 operazioni.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Il solo punto MISURATO su questa finestra, questo banco e questa
+#    configurazione e' InpTP1_R = 1,0 (TP 3R):
+#      IS  n 132 | PF 1,18323 | DD 4,9576% | profit +5.569,37
+#      OOS n 193 | PF 1,49140 | DD 6,2719% | profit +23.607,28
+#    Le altre quattro celle: [NON MISURATE]. Non invento una curva.
+#      n: 193 / 132 in TUTTE le celle (invariante sopra).
+#      PF OOS: attesa 1,25 - 1,55. Il trailing PREVBAR M5 e' molto
+#        stretto e nella configurazione senza parziale chiude gia' la
+#        maggior parte delle posizioni PRIMA del TP: mi aspetto che il
+#        TP morda poco, e che l'asse sia PIATTO.
+#      DD OOS: attesa 5,5% - 8,0%. Sopra il 9,00% la cella e'
+#        SCARTATA SECCA (G3): il contratto in essere e' 7,2328% e il
+#        muro prop e' 10%.
+#      IS: MERITO SOSPESO. 132 posizioni, sotto il pavimento dei 150.
+#        L'IS serve al SEGNO e al RISCHIO (Emendamento B), non al
+#        merito. Il merito lo porta l'OOS con 193 posizioni MISURATE.
+#    >>> LA PREVISIONE SCOMODA, SCRITTA PRIMA: MI ASPETTO CHE IL
+#        BERSAGLIO CONTI POCO E CHE L'ASSE SIA PIATTO, cioe' che la
+#        risposta sia "il default va bene". Ragione misurata: R46
+#        (risultati_archivio/REFERTO_ROUND46_GESTIONE.md) ha girato sei
+#        strutture d'uscita sullo STESSO ingresso e la riga "TP 3R
+#        secco, NESSUNA gestione" fa PF OOS 0,88 contro 1,49 della
+#        struttura con trailing. Su questa sedia il P&L lo fa il
+#        TRAILING, non il TP. Un parametro che decide dove sta un
+#        bersaglio che quasi nessuno tocca e' un parametro quasi
+#        INERTE -- e se esce inerte, SI SCRIVE CHE E' INERTE: e'
+#        un risultato, perche' chiude una casella oggi VUOTA del
+#        certificato (gestione dell'uscita messa ad asse) e toglie dal
+#        tavolo un "non l'abbiamo mai provato".
+#
+#  B4 -- IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
+#        la cella 1,5 (TP 4,5R) torna PF 1,62 e sembra una scoperta.
+#        Con n bloccato a 193 NON puo' essere un artefatto di campione
+#        ne' di sopravvivenza -- quei due sono esclusi dall'invariante.
+#        Resta UN SOLO modo di sbagliarsi, ed e' quello vero:
+#        LA CODA. Un bersaglio piu' lontano viene toccato POCHE VOLTE:
+#        bastano tre giornate su 193 per fare tutto il vantaggio.
+#        E' esattamente quello che e' stato MISURATO il 22/09 sulla
+#        cella InpTP1_ClosePct = 0 di questa stessa sedia: il vantaggio
+#        di +5.577,70 EUR e' portato dalle TRE giornate migliori
+#        (togliendole la differenza diventa -1,50 EUR).
+#    >>> COME LO DISTINGUO, e il test e' OBBLIGATORIO nel referto:
+#        1. ALTOPIANO, non picco: 3 celle CONTIGUE che passano (A1),
+#           con la cella viva DENTRO la terna.
+#        2. IL SEGNO DELL'IS. L'IS e' una sottoepoca diversa. Se il
+#           guadagno c'e' solo in OOS, e' regime, non bersaglio.
+#        3. LA CODA, col numero: sul per-trade della cella vincente si
+#           tolgono le 3 GIORNATE MIGLIORI e si rifanno PF e DD. Se il
+#           vantaggio sparisce, SI SCRIVE CHE SPARISCE. Il per-trade
+#           sopravvive solo per l'ULTIMA passata, quindi questo test
+#           costa UNA corsa in piu' a cella singola: costo dichiarato.
+#        4. Se passano tutti e tre, IL ROUND NON PROMUOVE NIENTE LO
+#           STESSO: manca la prova di regime.
+#
+#  S1 / S1b / S2 -- LE TRE SENTINELLE
+#    S1  RIPRODUZIONE. La cella InpTP1_R = 1,0 deve tornare:
+#          IS  n 132 | PF 1,18323 | DD 4,9576%
+#          OOS n 193 | PF 1,49140 | DD 6,2719%
+#        Tolleranza: ZERO su Trades, quarta cifra su PF e DD.
+#        >>> Se non torna, il verdetto NON e' "il bersaglio non
+#            serve": e' "IL BINARIO DI OGGI NON E' QUELLO DI R137c",
+#            va in cima al referto in grassetto, e le altre celle NON
+#            si leggono. (R137c ha gia' fatto passare questa
+#            riproduzione sul binario col Guardian: qui la si ripassa
+#            una seconda volta, ed e' un guadagno.)
+#    S1b INVARIANTE DEL CAMPIONE. Trades = 193 (OOS) e 132 (IS) in
+#        TUTTE e cinque le celle. E' la sentinella descritta sopra: se
+#        salta, il round si ferma.
+#    S2  CONTEGGIO CELLE. 5 valori distinti di InpTP1_R nel CSV.
+#
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    A1  ALTOPIANO (merito). Servono >= 3 CELLE CONTIGUE con CIASCUNA:
+#        PF OOS >= 1,49140 (il valore della configurazione MIGLIORE
+#        GIA' MISURATA, non 1,10: qui non si ammette un candidato, si
+#        cerca se il bersaglio BATTE una cella gia' misurata)
+#        E DD OOS <= 7,2328% (il contratto in essere: nessuna cella
+#        puo' peggiorare il contratto per comprarsi un PF)
+#        E la cella viva DENTRO la terna.
+#        n non entra in A1: e' bloccato a 193 dall'invariante.
+#    A3  ANTI-ALTOPIANO-FINTO. Due celle contigue con PF identico alla
+#        quarta cifra NON sono due celle: sono un tratto INERTE e non
+#        contano per A1. (Censimento 09/09: 874 CSV su 1.960 con
+#        passate a esito identico.)
+#    A4  PICCO. Se una cella passa A1 e ENTRAMBE le vicine immediate
+#        fanno PF OOS < 1,40, l'asse dichiara PICCO e il verdetto di
+#        altopiano e' annullato.
+#    A5  ASSE INERTE. Se tutte le celle cadono sotto A3 si scrive
+#        "manopola inerte, MISURATA". E' un risultato, non un
+#        fallimento: chiude la casella 3 del certificato.
+#    A6  VERDETTO. "C'e' una configurazione migliore del default" si
+#        scrive solo se A1 passa E il CENTRO dell'altopiano e' DIVERSO
+#        da 1,0 E il vantaggio supera A9. Altrimenti: "il default va
+#        bene" oppure "non c'e' una configurazione robusta su questo
+#        asse", e si scrive cosi'.
+#    A7  RISCHIO, a qualunque n (Emendamento B). Ogni cella con DD OOS
+#        o DD IS > 9,00% e' cella di rischio, non entra in un
+#        altopiano, e va segnalata anche col PF bello.
+#    A8  SELEZIONE: CENTRO del tratto contiguo, MAI IL PICCO. Se il
+#        centro coincide con 1,0, il valore vivo e' confermato.
+#    A9  BANDA DI RUMORE, fissata adesso, con un numero DI CAMPO.
+#        Il 22/09 il primo stop vero della challenge e' stato riempito
+#        7,83 punti oltre il livello e la perdita reale ha superato il
+#        modello del +10,5% (report/PRIMO_STOP_FTMO_2026-09-22.md).
+#        Un vantaggio di PF inferiore al 10,5% RELATIVO sulla cella di
+#        partenza (cioe' PF OOS < 1,648) e' DENTRO IL RUMORE
+#        DELL'ESECUZIONE e NON si dichiara vantaggio, nemmeno con
+#        l'altopiano. In quel caso: "altopiano confermato, vantaggio
+#        dentro il rumore: il default va bene".
+#   A10  IL ROUND NON PROMUOVE NIENTE. Non cambia un preset, non
+#        accende una sedia, non tocca il forward. Taglie, rischio,
+#        accensioni e il conto reale 10105439 sono [FIRMA DI CLAUDIO].
+#
+#  BANCO E FINESTRA -- col conto, non a memoria
+#    Modello 4 (TICK REALI). Deposito 100000. Rischio PINNATO 1,0 per
+#    essere confrontabile con R47/R137c. FrazioneIS 0.40.
+#      2024.09.26 -> 2026.06.30 = 642 giorni; floor(642*0,40) = 256
+#      IS  2024.09.26 - 2025.06.09
+#      OOS 2025.06.10 - 2026.06.30
+#    Sono le stesse finestre di R47 e di R137c. Se la riga di lancio
+#    cambia FrazioneIS, deposito, modello o @FINOA, S1 decade e questo
+#    file va RISCRITTO, non "letto con prudenza".
+#    DEPOSITO 100.000 E NON 10.000: R47a gira a 100.000 (verificato per
+#    aritmetica nel file R137c) e a 10.000 il MathFloor sullo step del
+#    lotto taglierebbe il rischio in modo diverso da cella a cella.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - PROVA DI REGIME: assente. Lo storico BCM di D30EUR parte dal
+#      2024.09.26 (misurato: risultati_archivio/sonda_storico_17-08/).
+#      21 mesi = UN SOLO REGIME. Emendamento della Finestra regola C
+#      NON soddisfatta, e non lo sara' alla fine di questo round.
+#    - LATO SHORT: non c'e', e non e' una dimenticanza. La sedia viva
+#      e' LONG-ONLY. La regola dei due lati del 25/08 e' soddisfatta
+#      altrove su questa famiglia (R83/R118/R51). Qui si misura la
+#      sedia, non il motore.
+#    - PEGGIOR GIORNATA PER CELLA: [NON MISURABILE] in ottimizzazione,
+#      l'export per-trade viene sovrascritto a ogni passata.
+#    - COSTO (R5): questo asse NON tocca lo stop, quindi il rapporto
+#      stop/spread e' lo stesso in tutte e cinque le celle (33,0x sulla
+#      geometria viva, sotto il pavimento di lavoro 40x, sopra il
+#      pavimento duro 13,3x -- report/CANCELLO_COSTO_FLOTTA_2026-09-10
+#      r.391). Il round NON ripara quel buco e non pretende di farlo.
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva e come in
+#      R137c. Nel tester le sue GlobalVariable non esistono e la
+#      guardia e' fail-open: i numeri restano confrontabili.
+#    - InpNewsCurrencies NON e' pinnato di proposito: il pin di una
+#      stringa VUOTA viene IGNORATO da MT5 (controllo 3 di
+#      controlla_prova.py) e il default compilato e' gia' la stringa
+#      vuota che serve.
+#    - InpTrailAtrMult e InpTrailFixedPts sono pinnati ai valori vivi
+#      ma sono INERTI: con InpTrailMode = 1 (PREVBAR) il sorgente non
+#      li legge (r.2459-2466, TrailStopBuy/TrailStopSell). Sono qui per
+#      fedelta' alla cella, non perche' facciano qualcosa.
+#    - InpBreakevenAtTP1 e' pinnato a true ma con il parziale a 0 e'
+#      INERTE (r.2391 dentro il blocco di r.2359). Stessa ragione.
+# ======================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: copiata campo per campo da R137c (che a sua volta e'
+#     copiata dal preset che vola e riverificata contro
+#     risultati_prove/aperture_r47/..._OOS_r47a.csv, 80 input su 80),
+#     con UNA sola differenza dichiarata: InpTP1_ClosePct = 0, cioe' la
+#     cella candidata di R137c invece di quella viva.
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+# InpTP1_R -> E' L'ASSE, in fondo al file.
+InpTP1_ClosePct=0.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+# MAGIC FISSO E VERGINE 786320 (verificato repo-wide il 22/09/2026,
+# .git e .claude esclusi: zero file).
+InpMagic=786320
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'UNICO ASSE (5 celle x 2 finestre = 10 passate)
+#     0,50 / 0,75 / 1,00 / 1,25 / 1,50 -- CENTRATO sul valore vivo 1,0,
+#     due celle per parte. TP finale = 3 x InpTP1_R:
+#     1,5R / 2,25R / 3,0R / 3,75R / 4,5R.
+InpTP1_R=1.0||0.5||0.25||1.5||Y
+# ======================================================================
