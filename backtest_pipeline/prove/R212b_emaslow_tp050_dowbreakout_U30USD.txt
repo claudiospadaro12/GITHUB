@@ -1,0 +1,297 @@
+# =====================================================================
+#  EA: ABTG_Dow_Apertura_US
+#  ROUND R212 -- "DOW BREAKOUT A DUE LATI": la griglia 40 celle RIGIRATA
+#  dall'IS PULITO, con il binario di OGGI e l'ancora di regressione.
+#  Scritto il 22/09/2026. Dossier:
+#  report/DOW_BREAKOUT_DUE_LATI_IL_BUCO_2026-09-22.md
+#  Criteri congelati PRIMA dei numeri. ASCII puro.
+# =====================================================================
+#
+#  DA DOVE VIENE QUESTO ROUND
+#    Fonte primaria, verificata riga per riga il 22/09:
+#      backtest_pipeline/risultati_archivio/Dow_Apertura/dow_walkforward_IS.csv
+#      backtest_pipeline/risultati_archivio/Dow_Apertura/dow_walkforward_OOS.csv
+#    40 celle per finestra: InpEmaSlow 20,40,...,200 (DIECI valori, non
+#    quattro) x InpTP1_R 0.33/0.50/0.67/0.84.
+#    OOS 2025.07.01-2026.06.30: 40 celle su 40 con PF >= 1.10, banda
+#    1.26748-1.55976, mediana 1.37420, n 186-198 POSIZIONI
+#    (InpTP1_ClosePct=0 -> nessuna chiusura parziale -> uscite = posizioni).
+#
+#  QUAL E' IL BINARIO CHE HA PRODOTTO QUEI NUMERI -- RISOLTO, non assunto
+#    E' ABTG_Nasdaq_Apertura_US.ex5, e lo dicono DUE prove indipendenti:
+#      1) backtest_pipeline/dow_apertura.ps1 r.36:
+#         $EA="ABTG_Nasdaq_Apertura_US"
+#      2) la colonna InpMagic dei CSV vale 770201 su tutte e 80 le righe, e
+#         770201 e' ABTG_DEF_MAGIC del sorgente NASDAQ (il DOW ha 770202).
+#         InpMagic NON e' fra i 38 input pinnati dallo script, quindi ha
+#         preso il default COMPILATO: e' una firma del binario.
+#    >>> E NON CAMBIA I NUMERI. Misurato al commit c5654989 (04/08/2026):
+#        i due sorgenti hanno ZERO differenze nel corpo del codice
+#        (1092 righe identiche, tolti commenti/#define/dichiarazioni input);
+#        i 15 input con default diverso fra i due sono 14 PINNATI dallo
+#        script e 1 solo non pinnato -- InpMagic, che non entra nel segnale.
+#    >>> Percio' qui si usa ABTG_Dow_Apertura_US (che a HEAD e' il piu'
+#        vicino all'originale: il Nasdaq ha preso R30 VolRegime/SRFilter e
+#        FASE 2 DRIVE, 318 differenze di corpo a HEAD) e SI PINNA TUTTO.
+#
+#  E L'IS NON E' FABBRICATO -- classe 590 NON si applica, ed e' misurato
+#    L'etichetta dello script diceva 2024.01.01, ma:
+#      misura_tick/REFERTO_MISURA_TICK_U30USD.txt:
+#        "I TICK REALI DI U30USD PARTONO DAL 2024.09.26"
+#        "MURO DELLE BARRE M1, colonna PrimaDataServer: 2024.09.26"
+#        "U30USD M1 barre=650255 ... -> IL BROKER NON HA PIU' STORICO"
+#      >>> Non ci sono barre M1 prima del muro: MT5 non ha NIENTE da cui
+#          fabbricare. Frazione di n IS venuta dalla parte fabbricata: 0,0%.
+#    Verifica aritmetica indipendente (fatta il 22/09, non copiata):
+#      cadenza OOS = 197 pos mediane / 261 giorni feriali = 0,7548 pos/g
+#      attesa IS sulla finestra ETICHETTA (391 feriali) = 295,1
+#        -> osservato 145,5 -> scarto -50,7%
+#      attesa IS sulla finestra REALE    (198 feriali) = 149,4
+#        -> osservato 145,5 -> scarto -2,6%
+#      >>> La finestra vera e' quella corta. Il difetto e' nell'ETICHETTA.
+#    E il muro non e' una finestra mobile: misurato il 20/08 (U30USD),
+#    30/08 (NASUSD) e 07/09 (D30EUR), sempre 2024.09.26. In 18 giorni non
+#    si e' spostato di un giorno: e' l'inizio dei dati del broker.
+#    Commit 2f4c95ae (05/08/2026) lo aveva gia' misurato con
+#    SERIES_SERVER_FIRSTDATE e aveva corretto la data NELLO SCRIPT.
+#
+#  COSA MISURA QUESTO FILE -- UNA VARIABILE SOLA
+#    Asse: InpEmaSlow, 20 -> 200 di 20 in 20 = DIECI celle.
+#    InpTP1_R PINNATO a 0.50. Il TP totale e' 3 x InpTP1_R = 1.50R:
+#    TpTotalR() dell'EA moltiplica per 3 (dow_apertura.ps1 r.50-54).
+#    Gli altri tre valori dell'asse TP1_R stanno nei file gemelli
+#    R212a/b/c/d: insieme rifanno la griglia 40 celle dell'archivio.
+#    Sono QUATTRO file e non uno perche' controlla_prova.py impone UN SOLO
+#    asse Y per file, ed e' la regola giusta: due assi in un file e non si
+#    sa piu' quale manopola ha mosso il numero.
+#
+#  LE FINESTRE -- IDENTICHE a quelle dell'archivio, e non per caso
+#    @DAQUANDO 2024.09.26 + @FINOA 2026.06.30 -> 642 giorni.
+#    walkforward_generico.ps1 r.934:
+#      Meta = Inizio.AddDays(floor((Fine-Inizio).TotalDays * FrazioneIS))
+#    0.4320 -> floor(642 x 0,4320) = floor(277,34) = 277 -> Meta 2025.06.30
+#      IS  2024.09.26 - 2025.06.30   (identica all'IS EFFETTIVO dell'archivio)
+#      OOS 2025.07.01 - 2026.06.30   (identica all'OOS dell'archivio)
+#    >>> E' per questo che l'ANCORA puo' essere un cancello: l'OOS non
+#        cambia di un giorno.
+#    Tetto delle 100.000 barre: U30USD M5 sull'intera finestra fa 130.126
+#    barre e SFONDEREBBE; il walk-forward la spezza in 43,1% / 56,9%
+#    = ~56k e ~74k barre. Sotto il tetto tutte e due. Dichiarato.
+#
+#  IL BANCO DEVE ESSERE QUELLO DELL'ARCHIVIO -- E LA RIGA DI LANCIO NON
+#  DEVE PASSARE -Deposito.
+#    L'archivio giro' con: Model=4, Optimization=1, OptimizationCriterion=6,
+#    Deposit=10000, Currency=EUR, Leverage=100, ExecutionMode=0, nessuna
+#    riga Spread (dow_apertura.ps1 r.261-282).
+#    walkforward_generico.ps1 ha ESATTAMENTE questi valori di default
+#    (r.200 Deposito=10000; r.1013-1022; r.957 nessuna riga Spread).
+#    >>> Quindi: -Modello 4 e NIENTE -Deposito, NIENTE -Spread, NIENTE
+#        -Ritardo. Se si passa -Deposito 80000 o 100000 i LOTTI cambiano e
+#        l'ancora non e' piu' confrontabile: il Profit scala e, per il
+#        pavimento del lotto minimo, puo' cambiare anche n.
+#    >>> E NIENTE -Fino, NIENTE -FrazioneIS. Il driver MUORE se la riga di
+#        lancio ne dice uno diverso da quello scritto qui (r.561-599 per
+#        @FINOA, r.723-742 per @FRAZIONEIS): e' una guardia, non un
+#        fastidio. Le due finestre le decide QUESTO file.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    1) OOS -- DEVE riprodurre l'archivio. La finestra e' identica, i tick
+#       sono tutti veri, il deposito e il modello sono identici. Se non
+#       riproduce, il binario di oggi NON e' quello di allora.
+#       Attesa per cella: Trades IDENTICO alla cifra; PF entro +-0.05;
+#       Equity DD % entro +-0.5 punti; Profit entro +-5%.
+#    2) IS -- deve riprodurre ANCHE l'IS, e questa e' la conferma che la
+#       finestra dell'archivio era gia' quella corta. Stesse tolleranze.
+#       Se l'IS NON riproduce mentre l'OOS si', allora l'etichetta
+#       2024.01.01 faceva davvero qualcosa e il conto del -2,6% va rifatto.
+#    3) Nessuna attesa di MIGLIORAMENTO. Questo round non cerca una cella
+#       nuova: rimisura una griglia gia' misurata con il binario di oggi.
+#       Chi si aspettasse numeri migliori si aspetterebbe un baco.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    T1  ANCORA DI REGRESSIONE, cella InpEmaSlow=20 / InpTP1_R=0.50.
+#        Numeri dell'archivio da riprodurre (sei per finestra):
+#          IS  : Profit +1420.97 | PF 1.33681 | RF 2.40537 | DD 5.6182% | Sharpe 12.77847 | n 138
+#          OOS : Profit +2339.52 | PF 1.45109 | RF 3.74287 | DD 5.3267% | Sharpe 17.29571 | n 186
+#        NON E' BLOCCANTE, ed e' una scelta: dal 05/08 il binario e'
+#        cambiato PER VOLONTA' NOSTRA almeno tre volte che possono mordere
+#        (3af47ed9 08/08 lotto da OrderCalcProfit; ef3be41f 06/08 breakeven
+#        fuori dal ramo della parziale; 9fca63d9 19/09 toppa per ticket).
+#        Se scarta: si SCRIVE di quanto e QUALE dei tre lo spiega. Il round
+#        si legge lo stesso. Se scarta di piu' del 20% sul Profit o di piu'
+#        di 3 posizioni su n, il round NON si usa per decidere niente
+#        finche' non si e' capito perche'.
+#    T2  DETERMINISMO (G1) -- QUESTA SI' E' BLOCCANTE. Le due celle gemelle
+#        sul magic del file R212e_ancora_g1_dowbreakout_U30USD.txt devono dare numeri IDENTICI ALLA CIFRA.
+#        Se due passate identiche danno numeri diversi, non e' il codice:
+#        e' il banco, e allora NIENTE di questo round vale.
+#        >>> Quel file costa 4 passate e va girato PER PRIMO.
+#    T3  RISCHIO, e vale a qualunque n (Emendamento B, 16/08).
+#        Si legge in grandezze INVARIANTI ALLA TAGLIA, non solo il PF:
+#          - Equity DD % (archivio: max 12.4677% IS, 8.6965% OOS a 1,00%)
+#          - Recovery Factor (archivio OOS: 1.779 - 4.834)
+#          - Profit in EUR a deposito 10.000
+#        Nessuna cella con Equity DD % OOS sopra 9.5% entra in una
+#        proposta. E il muro FTMO del 10% si legge SEMPRE alla taglia di
+#        campo, mai a 1,00%: fattore misurato in casa 1,956-1,990.
+#    T4  MERITO. Si legge solo sopra le 150 posizioni. In OOS ci siamo
+#        (186-198). IN IS NO: 138-154, e solo 12 celle su 40 arrivano a
+#        150. >>> Sull'IS il MERITO E' SOSPESO, il RISCHIO no.
+#    T5  QUESTO FILE NON PROMUOVE NIENTE E NON SCEGLIE NIENTE. La regola di
+#        scelta della cella e' scritta nel dossier ed e' DICHIARATA PRIMA
+#        (sezione "BUCO 3"). Qui si misura, basta.
+#
+#  IL CONTRO-ESEMPIO CHE FAREBBE SBAGLIARE QUESTO ROUND
+#    "L'OOS riproduce, quindi il binario e' giusto e il motore e' sano."
+#    FALSO in due modi, e li scrivo PRIMA:
+#    (a) l'OOS riproduce anche se il binario e' un ALTRO binario che sui
+#        filtri SPENTI si comporta uguale. La riproduzione prova che la
+#        configurazione e' la stessa, NON che l'EA e' lo stesso. Per questo
+#        il file dichiara il commit e i quattro input nuovi sono pinnati a
+#        zero: se qualcuno li lasciasse al default, InpUsaGuardian=true
+#        entrerebbe in gioco e la prova cambierebbe SENZA dirlo.
+#    (b) le 40 celle NON sono 40 misure indipendenti. In OOS l'escursione
+#        del numero di posizioni e' 12 su una mediana di 197 = 6,1%:
+#        le celle condividono oltre il 94% delle operazioni. "40 su 40
+#        sopra 1,20" e' UNA misura ripetuta 40 volte con perturbazioni
+#        piccole, NON 40 conferme. Va scritto cosi' ogni volta.
+#
+#  BUCHI DICHIARATI -- che restano aperti anche dopo questo round
+#    - UN SOLO REGIME. 2024.09.26-2026.06.30 sul Dow e' un toro solo.
+#      Emendamento della Finestra, regola C (prova di regime): NON
+#      soddisfatta, e su questi dati NON E' SODDISFACIBILE (il broker non
+#      ha storico prima del muro). Qualunque cosa esca da qui non e'
+#      promuovibile senza una prova di regime presa ALTROVE.
+#    - IL TF NON SI MUOVE QUI. Resta M5 in tutti e cinque i file: e' il TF
+#      dell'archivio e l'ancora esiste solo a M5. Il punto 5 del
+#      certificato di morte (TF cambiato almeno una volta) resta APERTO
+#      dopo questo round e va chiuso in un file SEPARATO (@PERIODO M15 /
+#      M30 a parita' di cella, 4+4 passate). Una variabile per file.
+#    - IL LATO SHORT E' GIA' ACCESO qui (InpAllowLong=1 E InpAllowShort=1,
+#      regola dei due lati del 25/08 soddisfatta per costruzione), ma
+#      NON E' MAI STATO MISURATO DA SOLO: quanto del PF venga dai long e
+#      quanto dagli short e' [NON MISURATO]. Altro file, altra variabile.
+#    - LA GRIGLIA H4 DEL FILTRO. Il filtro EMA su H4 e' cio' che porta
+#      questo motore da PF 1,03 a 1,24, e la griglia delle candele H4 e'
+#      ancorata alla mezzanotte del SERVER. Su FTMO (UTC+3) le H4 aprono
+#      due ore prima che su BCM (UTC+1): sono griglie DIVERSE. Questo round
+#      misura su BCM. Il numero su FTMO e' [NON MISURATO] -- e il rilievo
+#      non e' mio, sta gia' scritto in
+#      mql5/Presets/FTMO/ABTG_Dow_Apertura_US_770202_FTMO.set.
+#    - CORRELAZIONE CON LA SEDIA GIA' IN CAMPO. 770202 opera oggi su FTMO
+#      sullo STESSO simbolo, alla STESSA apertura, con lo STESSO filtro H4
+#      (e con dodici input diversi: RETEST invece di BREAKOUT, range 35
+#      invece di 15, buffer 1000 invece di 200, solo LONG, parziale 50%).
+#      La sovrapposizione delle operazioni fra le due configurazioni e'
+#      [NON MISURATA], e il tetto per cluster (C2, AZIONARIO) NON E'
+#      ATTIVO. Non e' un problema di questo round: e' un problema di
+#      SCHIERAMENTO, e va detto insieme al PF.
+#    - PEGGIOR GIORNATA: [NON MISURATA] e non producibile da un CSV di
+#      ottimizzazione MT5. Resta [NON MISURATA] anche dopo questa corsa.
+#
+#  COSTO DI QUESTO FILE
+#    10 celle x 2 finestre = 20 passate.
+#    Base MISURATA il 21/09 sul PC di backtest (R202A, ABTG_Dow_Apertura_US,
+#    U30USD, M5, modello 4, stessa finestra, 8 passate in 2 min 41 s
+#    = <= 20,1 s/passata; bordo alto della banda di casa 89,6 s/passata).
+#    >>> 20 passate = da 6,7 a 29,9 minuti. E' un TETTO, non una stima
+#        centrale: quella base fu presa a deposito 80.000.
+#
+#  I PIN. Sono 77 e vengono UNO A UNO dalle colonne dei CSV dell'archivio.
+#    NON sono pinnate tre stringhe (InpCorrSymbol, InpNewsFile,
+#    InpNewsCurrencies): i default compilati di ABTG_Dow_Apertura_US
+#    valgono gia' "SPXUSD", "abtg_news.csv" e "" -- verificato il 22/09 --
+#    e un pin di stringa vuota MT5 lo IGNORA in silenzio (e' la classe che
+#    ha generato controlla_prova.py).
+#    I quattro input NATI DOPO i CSV (InpUsaGuardian, InpMaxPosSimbolo,
+#    InpOCTimeframe, InpTrailStartR) sono pinnati a ZERO = il comportamento
+#    che avevano prima di esistere. InpUsaGuardian in particolare: il
+#    default a HEAD e' true e chiama ABTG_GuardiaIngresso in 8 punti.
+#    InpMagic: 770210, VERGINE -- zero occorrenze nel repo e zero in tutta
+#    la storia git (verificato il 22/09 con grep -rl e git log --all -S).
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.4320
+
+InpMagic=770210||770210||0||770210||N
+InpTP1_R=0.50||0.50||0||0.50||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=15||15||0||15||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpEntryMode=0||0||0||0||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=200||200||0||200||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1||1||0||1||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_ClosePct=0||0||0||0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2||2||0||2||N
+InpTrailFixedPts=12532||12532||0||12532||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100||100||0||100||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpUsaGuardian=0||0||0||0||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpOCTimeframe=0||0||0||0||N
+InpTrailStartR=0||0||0||0||N
+InpEmaSlow=20||20||20||200||Y
