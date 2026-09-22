@@ -1,7 +1,7 @@
 # =====================================================================
 #  MARCATORE_IMBUTO_EMA200_FTMO_v2
 #  RUNNER_SOLA_LETTURA
-#  (v2, 22/09/2026, dal cancello di giudizio: classe 562 -- il campione di
+#  (v2, 22/09/2026, dal cancello di giudizio: classe 563 -- il campione di
 #   righe grezze era preso dal fondo di un testo concatenato AL CONTRARIO e
 #   mostrava i giorni piu' VECCHI; piu' il filtro per SIMBOLO al passo 5, il
 #   ripiego del referto che ora si rifiuta di scrivere dentro un terminale,
@@ -26,7 +26,7 @@
 #  processi.
 #
 #  >>> E QUESTO COMMENTO NON NOMINA IL VERBO CHE CHIUDE I PROCESSI, DI
-#      PROPOSITO (classe 563, 22/09/2026). La riga di lancio ha un bollo
+#      PROPOSITO (classe 564, 22/09/2026). La riga di lancio ha un bollo
 #      che RIFIUTA di eseguire questo file se ci trova dentro quel nome,
 #      con Select-String -SimpleMatch: e un confronto di TESTO, non di
 #      codice, e non sa distinguere un commento da una chiamata. Nella v1
@@ -49,7 +49,7 @@
 #  ===================================================================
 #  I LIMITI, DICHIARATI PRIMA DEI NUMERI
 #  ===================================================================
-#  (L1) L'IMBUTO DI OGGI NON ESISTE ANCORA. ImbutoGiro() (r.239-248 di
+#  (L1) L'IMBUTO DI OGGI NON ESISTE ANCORA. ImbutoGiro() (r.240-249 di
 #       ABTG_EMA200.mq5) stampa la riga di un giorno SOLO quando il
 #       giorno CAMBIA. Quindi il giorno completo piu' recente e' IERI, e
 #       di oggi c'e' al massimo un "parziale" scritto da OnDeinit se
@@ -71,7 +71,7 @@
 #       sedia e' quello dell'IMBUTO, che e' per-EA.
 #
 #  (L4) IL CSV DEL TradeExporter CONTIENE SOLO LE POSIZIONI CHIUSE
-#       (ABTG_TradeExporter.mq5 r.182: salta chi non ha hasIn E hasOut).
+#       (ABTG_TradeExporter.mq5 r.183: salta chi non ha hasIn E hasOut).
 #       Una posizione ancora APERTA non c'e'. Quindi "piazzati meno
 #       aperti" SOVRASTIMA gli schivati finche' ci sono posizioni vive.
 #       Il CSV si riesporta ogni 30 minuti (InpExportMinutes=30): puo'
@@ -257,7 +257,7 @@ foreach($c in $candidate){
   $testo = ''; $nlog = 0
   if(Test-Path -LiteralPath $dirLog){
     # SI PRENDONO i $Giorni piu' RECENTI (Descending + First) MA SI CONCATENANO
-    # IN ORDINE CRESCENTE, e non e' un dettaglio di stile (classe 562).
+    # IN ORDINE CRESCENTE, e non e' un dettaglio di stile (classe 563).
     # Concatenando dal piu' nuovo al piu' vecchio, il "Select-Object -Last 40" del
     # PASSO 4 mostra le 40 righe piu' VECCHIE spacciandole per le ultime. MISURATO
     # su albero finto: con 65 righe "expired" su 10 giorni, il campione conteneva

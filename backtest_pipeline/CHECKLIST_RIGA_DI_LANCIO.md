@@ -28902,3 +28902,85 @@ ZERO eccezioni**. Quindi `DDass/deposito` e' il limite **PIU' LARGO**: usarlo al
    denominatore FISSO serve a confrontare CELLE fra loro (il picco cambia da cella a cella,
    classe 550); il denominatore del PICCO da' il limite piu' stretto sul MURO. Usare l'uno al
    posto dell'altro non e' un dettaglio: **si dichiara l'uso prima del numero.**
+
+---
+
+## CLASSE 563 -- IL CAMPIONE "LE ULTIME N" PRESO CON `-Last N` DA UN TESTO CONCATENATO AL CONTRARIO: MOSTRA LE PIU' VECCHIE (22/09/2026, figlia della 466, cugina della 546)
+
+**Il caso reale.** `backtest_pipeline/righe/IMBUTO_EMA200_FTMO.ps1` v1 (pin `a043415d`), la sonda
+scritta per rispondere alla domanda di Claudio del **22/09 ore 11:05** (*"mi ha schivato l'ordine
+pendente, come mai?"*). Il passo 4 stampava le righe grezze di scadenza dei pendenti con
+
+```powershell
+$grezze = @($righeSim | Where-Object { $_ -match '(?i)(expired|cancel)' } | Select-Object -Last 40)
+```
+
+sotto l'etichetta *"max 40, cosi le leggi tu e non ti fidi di me"*. Ma il testo del giornale era
+stato costruito cosi':
+
+```powershell
+$files = Get-ChildItem ... | Sort-Object LastWriteTime -Descending | Select-Object -First $Giorni
+foreach($f in $files){ $testo = $testo + (Leggi-Testo $f.FullName) }
+```
+
+cioe' **dal file PIU' NUOVO al piu' VECCHIO**. `Sort -Descending` serviva a **SCEGLIERE** i giorni
+giusti, e faceva bene; ma nessuno ha rimesso l'ordine prima di **LEGGERE**. Risultato: `-Last 40`
+pescava dal fondo, e il fondo era **il giorno piu' vecchio**.
+
+**MISURATO, non dedotto** (albero finto con 65 righe `expired` su 10 giorni): il campione conteneva
+solo il **13-17/09** e **saltava 18, 19, 20 e 21** -- cioe' **proprio i giorni della domanda**.
+Il conteggio (`65`) era giusto: era il **campione a vista** ad essere all'incontrario. E il campione
+a vista e' esattamente il pezzo che serve a NON fidarsi del conteggio.
+
+### La regola
+1. **`-First` / `-Last` si scrivono solo su una collezione di cui si e' appena dichiarato l'ordine.**
+   Se in mezzo c'e' una concatenazione, un `+=` o un `foreach`, l'ordine **si ristabilisce prima**:
+   `... | Sort-Object X -Descending | Select-Object -First N | Sort-Object X`.
+2. 🔴 **Il verso si prova con un caso in cui i due versi danno risultati DIVERSI**: piu' di N
+   elementi, su piu' giorni, con la data scritta dentro ogni riga. Con 3 righe su 2 giorni non si
+   vede niente e si consegna il difetto.
+3. Vale anche per il **taglio**: un `Select-Object -Last 40` che non trova mai piu' di 40 elementi
+   e' un difetto **dormiente**, che si sveglia da solo quando i dati crescono.
+4. Gemella pratica della **546** (l'evento cercato in coda con `-Tail N` quando viene stampato
+   all'avvio) e della **466** (la colonna "ULTIMA RIGA" che era di due giorni prima).
+
+---
+
+## CLASSE 564 -- IL BOLLO DI SICUREZZA CERCA UNA STRINGA PROIBITA E LA TROVA NEL **COMMENTO CHE DICHIARA DI NON USARLA**: LA RIGA SI RIFIUTA DI ESEGUIRE IL PROPRIO SCRIPT (22/09/2026)
+
+**Il caso reale, ed e' il difetto piu' caro dei sette trovati quel giorno: da solo AZZERAVA la misura.**
+La riga di lancio della sonda `IMBUTO_EMA200_FTMO` aveva, giustamente, tre bolli sullo script appena
+scaricato. Il terzo:
+
+```powershell
+if(Select-String -Path $p -SimpleMatch -Pattern 'Stop-Process' -Quiet){ throw 'LO SCRIPT CHIUDEREBBE PROCESSI: una sonda di sola lettura non lo fa. Non lo eseguo.' }
+```
+
+Nello script, r.21, c'era scritto:
+
+```
+#  processi: non c'e' una sola Stop-Process in tutto il file.
+```
+
+cioe' **la frase che GIURAVA l'innocenza conteneva la stringa proibita**. `Select-String -SimpleMatch`
+confronta **TESTO, non CODICE**: non sa distinguere un commento da una chiamata. Il bollo scattava
+**sempre**, e la riga moriva con *"LO SCRIPT CHIUDEREBBE PROCESSI ... Non lo eseguo"* -- **senza
+misurare niente**, su una challenge viva, nel giorno in cui Claudio aveva fatto la domanda.
+
+🔴 **E il modo in cui era sfuggito e' la parte che vale piu' del difetto**: il collaudo era stato
+fatto **lanciando lo `.ps1` a mano**, dove i bolli non esistono. Il cancello deterministico lo
+segnalava perfino come rilievo **457** (*"questa riga puo' TERMINARE un processo"*), ed era stato
+liquidato come falso positivo -- il che era **vero per la riga** e **falso per lo script**.
+
+### La regola
+1. 🔴 **Una riga di lancio si collauda ESEGUENDO LA RIGA INTERA**, non lo script che invoca.
+   Download, bolli, esecuzione, raccolta: il pezzo che la riga aggiunge e' il pezzo che nessun
+   collaudo dello script vedra' mai.
+2. **Un bollo che cerca una stringa proibita e' un cancello sul TESTO**: allora nel file
+   controllato quella stringa **non deve comparire in nessuna forma**, nemmeno in un commento,
+   nemmeno per negarla. Si riscrive la frase, e **si scrive nel file PERCHE'**, cosi' nessuno la
+   "risistema" domani rimettendo la parola.
+3. **Non si maschera la stringa nella RIGA** (li' serve leggibile: e' il controllo). Si toglie dal
+   **bersaglio**.
+4. Il rilievo del cancello che dice *"va letto a mano"* **va letto a mano DAVVERO, e da tutte e due
+   le parti**: se e' innocuo nella riga, resta da chiedersi che cosa significhi **nel file**.
