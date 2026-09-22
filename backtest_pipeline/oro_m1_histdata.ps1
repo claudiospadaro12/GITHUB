@@ -48,9 +48,11 @@
 #   Quindi qualunque cosa stia operando su questa macchina o altrove
 #   NON viene sfiorata da questa riga.
 #
-#  COME SI LANCIA (il repo NON e' clonato su quel PC)
-#   irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/oro_m1_histdata.ps1" -OutFile "$env:USERPROFILE\oro_m1_histdata.ps1"
-#   powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\oro_m1_histdata.ps1"
+#  COME SI LANCIA
+#  La riga vera sta in report\ORO_M1_2021_2026_PIANO_2026-09-22.md, par. 5,
+#  ed e' PINNATA A UN COMMIT (non al branch) e controlla il MARCATORE qui
+#  sopra prima di eseguire. Qui NON se ne scrive una copia: una copia in un
+#  commento invecchia, resta pinnata al branch e qualcuno la incolla.
 #
 #  VARIANTI
 #   -Da 2021 -A 2026      anni da prendere (default 2021-2026)
@@ -243,7 +245,6 @@ if ($mancanti.Count -gt 0) {
 #  mese sta sui 28.000-33.000. Numeri molto piu' bassi si vedono qui,
 #  non dopo il viaggio.
 # ---------------------------------------------------------------------
-Add-Type -AssemblyName System.IO.Compression.FileSystem | Out-Null
 $Estratti = Join-Path $Work "estratti"
 if (Test-Path $Estratti) { Remove-Item $Estratti -Recurse -Force -ErrorAction SilentlyContinue }
 New-Item -ItemType Directory -Force -Path $Estratti | Out-Null
@@ -266,8 +267,13 @@ foreach ($p in $pezzi) {
   $kb  = [int]((Get-Item $zipPath).Length / 1KB)
   $dirP = Join-Path $Estratti ($nome -replace '\.zip$','')
   New-Item -ItemType Directory -Force -Path $dirP | Out-Null
+  # Expand-Archive e non [ZipFile]::ExtractToDirectory: la seconda, sul
+  # .NET Framework che sta sotto PowerShell 5.1, SOLLEVA un'eccezione se
+  # la cartella di destinazione esiste gia' -- e qui la creiamo noi una
+  # riga sopra. Expand-Archive -Force e' anche quella gia' usata e gia'
+  # riuscita da questa macchina il 15/08 in importa_storico_esterno.ps1.
   try {
-    [System.IO.Compression.ZipFile]::ExtractToDirectory($zipPath, $dirP)
+    Expand-Archive -Path $zipPath -DestinationPath $dirP -Force
   } catch {
     [void]$rip.Add(("{0,-44} ZIP ILLEGGIBILE (riscaricalo)" -f $nome))
     Write-Host ("  " + $nome + " : ZIP ILLEGGIBILE") -ForegroundColor Red
