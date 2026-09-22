@@ -29907,3 +29907,55 @@ Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object
 scelta con un costo da dichiarare: se sulla stessa macchina girasse **un altro round**,
 verrebbe fermato anche quello. Sul PC di backtest non ce ne sono altri. Su una macchina che
 ne ospitasse due, il filtro va stretto sull'**etichetta** del round.
+
+---
+
+## CLASSE 586 -- 🧩🟢 IL `;` MANCANTE FRA DUE `Write-Host`: il **parser dice 0 errori**, perche' non e' un errore di SINTASSI ma di **BINDING** -- e muore a runtime, a round gia' lanciato (controllo-preventivo, 22/09/2026, su un difetto che ho introdotto IO correggendone un altro)
+
+**Caso reale, e l'ho fatto io.** Correggendo il ramo del tetto delle righe `R208B`/`R206A`
+(classe **585**) ho inserito un `Write-Host` in piu'. L'ancora della sostituzione ha
+**mangiato il `;`** che chiudeva lo statement precedente, e la riga e' diventata:
+
+```powershell
+Write-Host 'ANCORA ...' -ForegroundColor Magenta Write-Host 'COME SI DISTINGUE ...' -ForegroundColor Magenta;;
+```
+
+🔴 **E il controllo che uso di solito l'ha lasciata passare**: `Parser::ParseInput` ha detto
+**0 errori**, su tutte e due le righe. Non stava sbagliando: `Write-Host 'a' -ForegroundColor
+Magenta Write-Host 'b' -ForegroundColor Magenta` **e' sintatticamente un comando valido** --
+un comando con degli argomenti in piu'. Il guasto si manifesta **solo quando PowerShell prova
+a legare gli argomenti ai parametri**, cioe' **a runtime**:
+
+```
+Cannot bind parameter because parameter 'ForegroundColor' is specified more than once.
+```
+
+👉 Sul PC di backtest questo vuol dire: **la riga parte, il round GIRA per un'ora**, e poi la
+coda esplode proprio dove stanno **l'ancora di regressione e la disambiguazione** -- le due
+cose per cui quei `Write-Host` esistono. Il round non si perde, ma **si perde l'istruzione
+che dice come leggerlo**, che e' il danno della classe 584 per un'altra strada.
+
+### ✅ La regola, e costa dieci secondi
+1. 🔗 **`parser = 0 errori` NON vuol dire "la riga gira".** Il parser copre la SINTASSI. Sopra
+   c'e' un secondo strato -- il **binding dei parametri** -- e su una riga di lancio va
+   controllato **sempre**, perche' li' ogni statement e' incollato all'altro con un `;` e il
+   `;` e' l'unica cosa che li separa.
+2. 🤖 **Il controllo, offline, senza eseguire niente** (esiste in PS 5.1 e in 7):
+   ```powershell
+   $ast=[System.Management.Automation.Language.Parser]::ParseInput($riga,[ref]$null,[ref]$err)
+   foreach($c in $ast.FindAll({param($n) $n -is [System.Management.Automation.Language.CommandAst]},$true)){
+     $b=[System.Management.Automation.Language.StaticParameterBinder]::BindCommand($c)
+     if($b.BindingExceptions.Count -gt 0){ '   BINDING ROTTO: ' + $c.GetCommandName() }
+   }
+   ```
+   Verificato **contro il contro-esempio** (regola del 10/09): sulla riga rotta stampa
+   `BINDING ROTTO: Write-Host` su tutte e due le righe; su quella corretta **0 su 47 comandi**.
+   Un controllo che non boccia la versione rotta non e' un controllo.
+3. 🔎 **Dopo ogni modifica automatica a una riga di lancio si cercano `;;` e
+   `-ForegroundColor <Colore> <Comando>`**: sono la firma esatta di un separatore mangiato
+   dall'ancora di una `replace`. E **si rilegge la riga stampata per intero**, che e' il gesto
+   che ha trovato questo difetto.
+
+🟢 **La parte che va detta**: il difetto e' stato trovato **prima** che la riga uscisse, dal
+gesto piu' stupido che c'e' -- stampare il risultato e leggerlo. Il metodo dello *Sviluppatore
+e Agente dei Controlli* (13/09) ha funzionato **sul controllore stesso**.
