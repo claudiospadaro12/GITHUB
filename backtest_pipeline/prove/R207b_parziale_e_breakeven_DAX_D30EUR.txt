@@ -144,6 +144,10 @@ InpTrailStartR=0.0||0.0||0||0.0||N
 InpTrailMode=1||1||0||1||N
 InpTrailTF=5||5||0||5||N
 InpTrailAtrMult=2.0||2.0||0||2.0||N
+# NOTA (classe 541): InpTrailFixedPts e' INERTE con InpTrailMode=1, che
+# e' ABTG_TRAIL_PREVBAR (enum ABTG_DAX_Apertura_EU.mq5 r.242-244), non
+# FIXED. Pinnato solo per non muovere niente: nessun effetto da
+# attribuirgli leggendo il CSV.
 InpTrailFixedPts=410.0||410.0||0||410.0||N
 InpUseRoundLevels=false||false||0||false||N
 InpRoundStep=100.0||100.0||0||100.0||N
