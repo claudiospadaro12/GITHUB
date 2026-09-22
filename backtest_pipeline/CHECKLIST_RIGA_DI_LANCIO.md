@@ -29046,3 +29046,39 @@ celle **senza dire perche' proprio in quella direzione**.
 grep -rl "InpAtrSLmult" backtest_pipeline/ --include=*.csv
 # poi, sui candidati, il confronto colonna per colonna col preset vivo
 ```
+
+
+---
+
+## CLASSE 566 -- IL DOCUMENTO SCRITTO CON UN HERE-DOCUMENT DI SHELL NON QUOTATO: I BACKTICK DEL MARKDOWN VENGONO ESEGUITI, E IL CANCELLO PASSA LO STESSO
+
+**Caso reale (22/09/2026, `RIGA_IMBUTO_DAX_FTMO_DA_MANDARE.md`).** Il documento e' stato scritto
+con `cat > file <<MDEOF` -- delimitatore **non quotato**, apposta, per far espandere `$RIGA` con
+la riga di lancio. Ma in un here-document non quotato la shell espande **anche i backtick**, e il
+markdown ne e' pieno. Risultato misurato: la riga 18 diceva
+
+```
+**Differenza fra i due limiti: `7,64 punti`.**
+```
+
+ed e' finita nel file come **`**Differenza fra i due limiti: .**`** -- **il numero e' sparito**,
+sostituito dall'output vuoto di un comando inesistente. L'unica traccia era un
+`7,64: command not found` sullo stderr, in mezzo all'output del cancello.
+
+🔴 **E il cancello e' PASSATO.** `controlla_riga.py --oggetto md` ha dato *«nessun difetto
+meccanico»* su un documento **mutilato**, perche' controlla **la riga di lancio**, non la prosa.
+Quindi la rete che ci protegge dalle righe sbagliate **non protegge dai documenti sbagliati**.
+Un documento a cui manca il numero portante e' peggio di uno sbagliato: sembra giusto.
+
+### La regola
+1. **Un file che contiene backtick non si scrive MAI con un here-document non quotato.** Delle due
+   l'una: o il delimitatore e' **quotato** (`<<'EOF'`) e allora niente si espande, oppure il file
+   si **genera da uno script** (Python/Write) e la shell non lo tocca mai.
+2. Quando serve inserire un valore in un file quotato, si usa un **segnaposto** (`@@RIGA@@`) e lo
+   si sostituisce **dopo**, dallo script. Non si baratta l'integrita' del testo per la comodita'
+   di un'espansione.
+3. 📌 **E la lezione generale, che vale oltre la shell: il cancello deterministico certifica
+   l'OGGETTO che sa guardare, non il file intero.** Un PASS su `--oggetto md` dice *«la riga di
+   lancio e' sana»*, **non** *«il documento e' integro»*. Dopo ogni generazione automatica di un
+   documento si rilegge che i **numeri portanti** ci siano ancora -- con un `grep` sul numero, non
+   a occhio.
