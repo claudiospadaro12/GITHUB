@@ -14,7 +14,8 @@
 #  1. IL FATTO DA CUI PARTE TUTTO: L'ORB SUL DOW FUNZIONA, ED E' FERMO
 #  --------------------------------------------------------------------
 #  Round r44a (ABTG_ORB_Ottimizzato, U30USD M5, asse InpTPRangeMult),
-#  letto nei CSV grezzi risultati_prove/ABTG_ORB_Ottimizzato/r44/:
+#  letto nei CSV grezzi backtest_pipeline/risultati_prove/
+#  ABTG_ORB_Ottimizzato/r44/:
 #      TPRangeMult | IS: PF / DD / n    | OOS: PF / DD / n
 #      1.5         | 1.22314 / 8.6252 / 71 | 1.65693 /  9.9181 / 119
 #      2.0         | 1.35877 / 8.6293 / 71 | 1.73605 / 11.0412 / 119
@@ -70,40 +71,139 @@
 #      InpTPRangeMult = 1.5, che e' pinnata qui:
 #          IS   PF 1.22314  Equity DD % 8.6252   Trades  71
 #          OOS  PF 1.65693  Equity DD % 9.9181   Trades 119
-#      (letti nei CSV, non in un referto). Se non torna, il round si
-#      BUTTA: non stiamo guardando lo stesso motore.
-#  (B) MERITO. Promossa una cella solo se INSIEME: PF OOS >= 1.30
-#      (r44a fa gia' 1.65693: chiedere meno sarebbe abbassare l'asticella)
-#      E Equity DD % OOS <= 9.0% (cioe' un margine vero sotto il muro,
-#      non gli 8 centesimi di adesso) E n OOS invariato.
+#      Letti nei CSV backtest_pipeline/risultati_prove/
+#      ABTG_ORB_Ottimizzato/r44/ABTG_ORB_Ottimizzato_U30USD_{IS,OOS}_r44a.csv,
+#      non in un referto. VERIFICATO DAL CANCELLO IL 22/09: i 21 pin di
+#      merito coincidono TUTTI col valore VERO di r44a letto nel CSV;
+#      l'unico diverso e' InpMagic (786501 contro 770611), che nel tester
+#      non tocca un numero. E i 32 input NON pinnati prendono il default
+#      compilato: dei 28 gia' esistenti a r44a, 28 su 28 hanno oggi il
+#      default IDENTICO al valore vero di r44a.
+#      Finestra: @DAQUANDO 2024.09.26 + -Fino 2026.06.30 (default del
+#      driver, r.187) + @FRAZIONEIS 0.40 -> IS 2024.09.26-2025.06.09
+#      (256 gg), OOS 2025.06.10-2026.06.30 (386 gg). Stessa identita' di
+#      r44a, che non scriveva @FRAZIONEIS perche' il tag non esisteva:
+#      prendeva lo stesso 0.40 dal default.
+#
+#  (A-bis) SE L'ANCORA NON TORNA, IL PRIMO SOSPETTO NON E' "un altro
+#      motore": E' L'EA CHE E' CAMBIATO SOTTO. Fra r44a (13/08, commit
+#      e38cb80c) e HEAD ci sono QUATTRO commit sull'EA.
+#      Tre aggiungono input, e sono verificati NO-OP al default:
+#        4c424e2b 15/08 InpSlippagePts=0   -> guardia 'if(>0)'
+#        5fc0bc31 19/08 InpUsaGuardian=true-> la guardia fa
+#            'if(!ABTG_CanaleEsiste()) return(true)': nel tester le
+#            GlobalVariable del Guardian non esistono, fail-open totale;
+#            e l'ORB la chiama con DUE argomenti, quindi i rami P0/P1/S1
+#            e il cluster C2 non vengono nemmeno letti
+#        3125e343 19/08 InpSLBufferPts=0   -> 'SLBuffer()' ritorna 0.0
+#      Il quarto E' UN CAMBIO DI LOGICA: 19312c8b del 03/09, v1.04,
+#      selezione hedge-safe per simbolo+magic e chiusure per TICKET.
+#      L'EA dichiara in testa "NEL TESTER il comportamento deve restare
+#      IDENTICO al centesimo (l'EA e' solo sul simbolo: nessun vicino,
+#      il ticket piu' basso e' sempre il nostro)". Il ragionamento
+#      regge, ma e' UNA PROMESSA, NON UNA MISURA: se l'ancora manca,
+#      si misura QUELLA prima di buttare il round.
+#
+#  (B) MERITO. RISCRITTO DAL CANCELLO IL 22/09 (classe 594 + il difetto
+#      del cancello tarato sotto lo status quo). La prima stesura
+#      chiedeva "PF OOS >= 1.30 E DD OOS <= 9.0% E n OOS invariato", e
+#      aveva due difetti:
+#        - 1,30 e' SOTTO l'ancora, che fa gia' 1,65693. Cosi' scritto,
+#          il cancello promuoveva una cella che BRUCIA il 21% del PF.
+#          Un cancello tarato sotto lo status quo non e' un cancello.
+#        - "n OOS invariato" e' IMPOSSIBILE per costruzione: se la
+#          parziale scatta le USCITE aumentano (punto 5). Il cancello
+#          era soddisfacibile SOLO dalla cella che non cambia niente.
+#      La grandezza che decide e' il RECOVERY FACTOR (profitto netto /
+#      drawdown assoluto): e' SOLDI DIVISO SOLDI, quindi il conteggio
+#      delle uscite non lo tocca, ed e' esattamente la domanda del
+#      round ("quanti soldi per unita' di rischio").
+#      Ancora OOS: RF 3.39368 | Profit 4002.54 | DD 9.9181 | n 119.
+#      Si promuove una cella solo se TUTTE E QUATTRO:
+#        1. Equity DD % OOS <= 9.0        (margine vero sotto il muro)
+#        2. Recovery Factor OOS >= 3.39368 (non peggio dell'ancora)
+#        3. Profit OOS >= 3602.29          (>= 90% dei 4002.54)
+#        4. n OOS dentro [119, 238]        (punto 5: ogni posizione fa
+#           1 o 2 uscite, e InpOneTradePerDay tiene le posizioni a <= 1
+#           al giorno. Fuori da questa banda si e' mosso ALTRO e il
+#           round non si legge)
+#      PF OOS >= 1.30 RESTA, ma come PAVIMENTO DI SANITA', non come
+#      criterio: non e' lui che decide.
+#
 #  (C) RISCHIO. Il DD si legge a QUALUNQUE n (regola del 18/08: il
 #      campione sottile sospende il merito, mai il rischio).
 #
 #  5. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
 #  --------------------------------------------------------------------
-#  Se le quattro celle escono con Trades IDENTICO **e** Profit IDENTICO,
-#  la manopola e' INERTE (non arriva all'EA, o il primo obiettivo non
-#  viene mai toccato) e NESSUN PF di questo round si puo' leggere.
-#  Criterio a macchina: si contano i valori DISTINTI di Profit. Meno di
-#  2 = "manopola inerte", che NON e' "la parziale non serve".
-#  >>> E il verso pericoloso e' dichiarato: con la parziale accesa il
-#      conteggio Trades del CSV conta USCITE, non posizioni (classe 550),
-#      quindi il PF NON e' confrontabile fra celle con parziale diversa.
-#      Per questo il cancello (B) chiede anche il DD e l'n, e per questo
-#      il confronto che vale e' DD contro DD.
+#  (i) MANOPOLA INERTE. Se le quattro celle escono con Trades IDENTICO
+#      **e** Profit IDENTICO, la manopola non arriva all'EA (o il primo
+#      obiettivo non viene mai toccato) e NESSUN PF di questo round si
+#      puo' leggere. Criterio a macchina: valori DISTINTI di Profit < 2
+#      = "manopola inerte", che NON e' "la parziale non serve".
+#
+#  (ii) IL CONFONDIMENTO COL BREAKEVEN -- CORRETTO ALLA RADICE, NON
+#      DICHIARATO. Nell'EA il breakeven VIVE DENTRO ManageTP1() ed e'
+#      IRRAGGIUNGIBILE a parziale spenta (r.656-666: 'if(InpTP1Pct<=0)
+#      { ...; return; }', e l'EA lo stampa pure: "TP1/breakeven
+#      disattivati da InpTP1Pct=0 ... NESSUNO stop in pari, anche se
+#      InpBreakeven=true"). Con InpBreakeven=1 pinnato, l'asse avrebbe
+#      mosso DUE meccanismi insieme -- cella 0 = ne' parziale ne'
+#      breakeven, celle 25/50/75 = parziale E breakeven -- e un calo di
+#      DD non sarebbe stato attribuibile alla parziale. Il contro-
+#      esempio (i) NON lo prende: il confondimento produce Profit
+#      DIVERSI e passa.
+#      >>> RIMEDIO: InpBreakeven e' pinnato a 0. E COSTA ZERO
+#          SULL'ANCORA, perche' in r44a InpTP1Pct era 0 e quindi il
+#          breakeven era gia' irraggiungibile: i numeri di r44a sono
+#          identici con InpBreakeven 0 o 1. L'asse ora muove UNA cosa
+#          sola. Il pacchetto parziale+breakeven e' un ALTRO round
+#          (R211c), e si misura dopo, contro questo.
+#
+#  (iii) LA CLASSE 550, DETTA GIUSTA. Con la parziale accesa la colonna
+#      Trades conta USCITE, non posizioni. Questo rompe 'Expected
+#      Payoff' (= Profit/Trades) e rompe 'n'. NON rompe il PF, che e'
+#      utile lordo / perdita lorda, tutti e due in SOLDI, e non divide
+#      per n. E il confronto "DD contro DD" da solo NON basta e non si
+#      usa: una cella che opera di MENO ha un DD piu' basso per
+#      costruzione, quindi "DD contro DD" premierebbe il fare meno.
+#      Percio' decidono RF e Profit (punto 4B), con n dentro la banda.
 #
 #  6. QUELLO CHE QUESTO ROUND NON FA, dichiarato
 #  --------------------------------------------------------------------
-#  - NON mette ad asse InpTP_R, InpTPMode, InpBreakeven, InpUseTrailEMA,
-#    InpSLMode: restano buchi del certificato.
+#  - NON mette ad asse InpTP_R, InpTPMode, InpUseTrailEMA, InpSLMode:
+#    restano buchi del certificato.
+#  - NON mette ad asse InpBreakeven: qui e' PINNATO A 0 apposta, per
+#    isolare la parziale (punto 5-ii). Il pacchetto parziale+breakeven
+#    e' R211c, e non e' ancora girato.
 #  - NON cambia TF: M5, come r44a.
 #  - NON e' una prova di regime: finestra contigua.
-#  - Il .ex5 sul banco corrisponde al .mq5: [NON MISURATO].
+#  - Il .ex5 sul banco corrisponde al .mq5: [NON MISURATO]. E dato il
+#    punto 4A-bis (l'EA e' passato da v1.01 a v1.04 dopo r44a), la
+#    corsa va pinnata a un COMMIT e il commit va scritto nel referto.
+#  - NON MISURA IL LATO SHORT. InpAllowShort=0 e' l'identita' della
+#    cella di r44a, ma la REGOLA DEI DUE LATI del 25/08 dice che su
+#    Dow/DAX/Nasdaq lo short si RITESTA comunque. Qui non si puo'
+#    (un asse alla volta): e' un buco DICHIARATO, e il suo round e'
+#    R211d. Scritto qui perche' un buco taciuto e' un buco perso.
+#  - NON RISPONDE SULLA FREQUENZA, e il numero va detto ORA perche'
+#    pesa sul 1 ottobre: r44a fa 119 operazioni in 386 giorni solari
+#    OOS = ~276 giorni di borsa -> 0,43 op/giorno. Il pavimento di
+#    casa e' 1,00 PER FAMIGLIA (firma 07/09). Dow + DAX insieme, se il
+#    DAX reggesse, fanno ~0,86: SOTTO il pavimento. La famiglia ORB ha
+#    bisogno di un TERZO simbolo per essere schierabile, e questo
+#    round non lo cerca.
+#  - IL TETTO DELLE ~100.000 BARRE NON MORDE, ed e' contato: il
+#    referto misura_tick da' U30USD M5 = 130.126 barre dal 2024.09.26
+#    al 2026.08.20 (693 gg) = 187,8 barre/giorno solare. La corsa e'
+#    SPEZZATA in due tranche dal walk-forward: IS 256 gg ~ 48.100
+#    barre, OOS 386 gg ~ 72.500 barre. Tutte e due sotto il tetto.
+#    (La finestra INTERA sarebbe ~120.600: sopra. Non si gira mai
+#    intera, e questo e' il motivo per cui non la si deve girare.)
 #
 #  7. LA FINESTRA E IL DEPOSITO
 #  --------------------------------------------------------------------
 #  @DAQUANDO 2024.09.26 e' MISURATO, non scelto (classe 590, pagata
-#  stanotte su R210): risultati_archivio/misura_tick/
+#  stanotte su R210): backtest_pipeline/risultati_archivio/misura_tick/
 #  REFERTO_MISURA_TICK_U30USD.txt dice "I TICK REALI DI U30USD
 #  PARTONO DAL 2024.09.26". Prima di quella data, a -Modello 4, MT5 non
 #  si ferma: fabbrica i tick dalle barre M1, che pero' non ci sono.
@@ -136,7 +236,7 @@ InpUseEma200Filter=1||1||0||1||N
 InpUseEmaFilter=0||0||0||0||N
 InpUseVolumeFilter=0||0||0||0||N
 InpTP_R=1.0||1.0||0||1.0||N
-InpBreakeven=1||1||0||1||N
+InpBreakeven=0||0||0||0||N
 InpUseTrailEMA=1||1||0||1||N
 InpExitOnEmaClose=0||0||0||0||N
 InpTP1Pct=0||0||25||75||Y
