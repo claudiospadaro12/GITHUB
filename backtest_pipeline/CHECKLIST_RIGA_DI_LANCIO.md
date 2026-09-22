@@ -11112,6 +11112,37 @@ OGGI?"*: se il binario cambia a meta' round, la domanda non ha piu' risposta.
 > 📌 **E il rimedio vero, da fare con calma**: `-Pin` propagato al driver e
 > `$EABranch` alimentato da li'. Finche' non c'e', l'hash e' l'unica prova.
 
+### ✅ APPLICATA PER LA PRIMA VOLTA IL 22/09/2026 (righe `R207A`/`R207B`, pin `52af6583`)
+La regola qui sopra era scritta **da mesi e non era mai finita dentro una riga di lancio**:
+le righe pinnavano procedura e file prova, e il motore restava libero. Sul round `R207` non
+si poteva piu' lasciar correre, perche' il round **vive o muore su un'ancora di riproduzione
+al centesimo** (`R202B` Pass 3) e il file prova ordina di **buttare il round** se l'ancora non
+torna -- cioe' la classe 166, quando morde, fa buttare un round **sano**.
+
+Forma d'uso, gia' passata dal cancello (una riga, ASCII, PS 5.1, **zero rete in piu'**:
+l'atteso e' una costante calcolata offline):
+
+```powershell
+$att=@{}; $att["$w\src_prove\<EA>.mq5"]='<SHA256 DAL PIN>'; $att["$w\src_include\ABTG_PausaGuardian.mqh"]='<SHA256 DAL PIN>';
+$div=@(); foreach($k in @($att.Keys)){ if(-not (Test-Path -LiteralPath $k)){ $div += ((Split-Path -Leaf $k) + ' [il driver non lo ha lasciato su disco]') } elseif((Get-FileHash -LiteralPath $k -Algorithm SHA256).Hash -ne $att[$k]){ $div += ((Split-Path -Leaf $k) + ' [SHA256 DIVERSO da quello del pin]') } }
+```
+
+L'atteso si ricava con `git show <PIN>:mql5/Experts/<EA>.mq5 | sha256sum` (maiuscolo:
+`Get-FileHash` torna hex maiuscolo). 🟢 **Verificato che il confronto sia lecito**: nel repo non
+c'e' `.gitattributes`, `core.autocrlf` non e' impostato e i due file sono a **LF** anche nel blob
+-- quindi `raw.githubusercontent` serve gli **stessi byte** che `git show` stampa, e l'hash
+coincide senza nessuna normalizzazione. Senza questo controllo l'hash sarebbe un falso allarme
+garantito su ogni file con CRLF: **prima di confrontare hash fra Windows e git, si guarda la
+fine riga**.
+
+🔴 **E resta una cosa che l'hash NON fa**: si accorge del motore sbagliato **dopo** che il
+round e' girato, non prima. Non chiude la finestra -- la **rende leggibile**. Il rimedio vero
+(`-Pin` al driver) e' ancora da fare.
+
+⚠️ **Riferimenti di riga aggiornati al 22/09/2026**: `$EABranch="lavoro"` sta a r.**264**
+(non 220), l'EA si scarica a r.**317** (non 272), l'include a r.**355** (non 310). Il file e'
+cresciuto: si cerca per **stringa** (`cerca $EABranch=`), non per numero di riga.
+
 ## 167. 🐺 IL CANCELLO DETERMINISTICO **GRIDA AL LUPO** SUI `||` DEL NOSTRO FORMATO `.ini` QUANDO NON STANNO IN UNA HERE-STRING — 5 «bloccanti» su `walkforward_generico.ps1`, **tutti falsi**
 
 **Il fatto.** `controlla_riga.py` sa gia' che i nostri `Inp...=v||v||0||v||N`
@@ -29755,3 +29786,124 @@ base sbagliata non sposta una stima: sposta **un numero di sicurezza**.
    sicurezza.
 4. 🚫 **Il tetto non si arrotonda a un numero tondo.** `10 x 23 s x 15 = 57,5` -> **58 minuti**,
    non «un'ora». Un numero tondo nasconde da dove viene; un numero storto costringe a scriverlo.
+
+---
+
+## CLASSE 584 -- 🎛️❓ IL **CONTROLLO INCORPORATO** IL CUI FALLIMENTO HA **DUE** SPIEGAZIONI, E IL FILE NE NOMINA **UNA SOLA** -- il round che le distingue non e' dichiarato PREREQUISITO (controllo-preventivo, 22/09/2026, figlia della 178 e cugina della 578)
+
+**Caso reale.** `backtest_pipeline/prove/R207b_parziale_e_breakeven_DAX_D30EUR.txt` (pin
+`52af6583`) porta dentro di se' il proprio contro-esempio, ed e' **la cosa giusta da fare**:
+la cella `(50 , 1,0)` deve uscire **identica** alla cella `(50 , 0)` di `R207a`, perche' i due
+breakeven puntano allo stesso prezzo e condividono la guardia `!TkDone(ticket, gBETk)`
+(`ABTG_DAX_Apertura_EU.mq5` r.2391 e r.2405). Il file scrive, r.42-46:
+
+> *«SE NON ESCE IDENTICA, LA LETTURA DEL CODICE E' SBAGLIATA E NESSUN ALTRO CONFRONTO DI
+> R207a/R207b VALE. Si ferma il round e si torna al sorgente.»*
+
+🔴 **Ma le spiegazioni di quel fallimento sono DUE, non una.** La cella puo' uscire diversa
+(a) perche' la lettura del codice e' sbagliata -- l'unica nominata -- **oppure** (b) perche'
+il **motore non e' quello del pin**: `walkforward_generico.ps1` r.264 ha `$EABranch="lavoro"`
+**cablato** e `RIGA_ROUND_VPS.ps1` non gli passa nessun pin, quindi `.mq5` e include scendono
+dal **RAMO** (classe **166**), che si muove mentre la riga aspetta di essere incollata.
+Chi legge il file segue l'istruzione scritta e **torna al sorgente a cercare un errore che
+non c'e'**, mentre la causa vera e' un commit arrivato nel frattempo.
+
+🟢 **E il file aveva gia' in casa il discriminante, senza saperlo**: `R207a` ha un'**ancora di
+riproduzione** (la cella `(50 , 0)` deve rifare `R202B` Pass 3 al centesimo). Se l'ancora
+torna, l'ambiente e' sano e la colpa e' **per forza** della lettura del codice; se non torna,
+il motore e' ballato e **nessuna** delle due letture e' in discussione. Il round gemello non
+era "materiale di contesto": era il **prerequisito logico** del controllo.
+
+**Perche' costa.** Un controllo incorporato serve a **falsificare un meccanismo**. Se il suo
+fallimento e' ambiguo e il documento ne nomina una causa sola, il controllo smette di
+falsificare e comincia a **indirizzare**: manda a cercare nel posto sbagliato, con l'autorita'
+di una frase scritta prima dei numeri. E' la **178** applicata a una regressione invece che a
+una banda: *"se non c'e' niente esce un numero basso"* non e' un test, e *"se non esce identica
+ho letto male il codice"* non lo e' finche' l'altra spiegazione non e' esclusa.
+
+### ✅ La regola, tre gesti
+1. 🔀 **Per ogni controllo incorporato si elencano TUTTE le cause di fallimento**, non quella
+   che si ha in mente. Il minimo sindacale sono due: *il meccanismo non e' come l'ho letto* e
+   *l'input non e' quello che credo* (motore, pin, finestra, deposito, taglia).
+2. 🔗 **Se un altro round e' l'unico modo di distinguerle, quel round e' un PREREQUISITO e si
+   scrive come tale** -- con l'ordine di lancio, non come "si legge insieme a". *«Si legge solo
+   insieme a X»* e' un consiglio; *«nessun verdetto prima di aver letto l'ancora di X»* e' un
+   cancello.
+3. 🖨️ **La disambiguazione si stampa dove verra' letta**: nella riga di lancio, accanto
+   all'esito, non solo nell'intestazione del file prova. Chi legge lo zip la sera non riapre
+   il file prova.
+
+---
+
+## CLASSE 585 -- 🔪👶 LO `Stop-Process` A TETTO UCCIDE IL FIGLIO MA **NON IL NIPOTE**: il round continua invisibile, rilancia il terminale **dopo** la spazzata, e la riga stampa *«fermo il round»* mentendo (controllo-preventivo, 22/09/2026, figlia della 582)
+
+> ⚠️ **Numero preso col `grep` al momento di scrivere** (`584` era il massimo: la 583 era
+> committata, la 584 ancora in working tree). Girano altri agenti in parallelo: se qualcuno
+> ha preso `585` nello stesso turno vale la **classe 194** e questa si rinumera.
+
+**Caso reale.** Le righe di `R208B` e `R206A` (bozze del 22/09, commit `7f449dcc`) hanno il
+ramo di timeout della **classe 582**, scritto bene per quello che si vedeva:
+
+```powershell
+if(-not $pr.WaitForExit($tmo*60*1000)){ Write-Host 'TETTO SFONDATO: fermo il round.' -ForegroundColor Red;
+  Stop-Process -Id $pr.Id -Force -ErrorAction SilentlyContinue;
+  Get-Process metatester64,terminal64 | Where-Object { $_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*' } | Stop-Process -Force; ... }
+```
+
+🔴 **Ma `$pr` non e' il processo che lavora: e' il PADRE di quello che lavora.** La catena
+vera, letta nei file e non a memoria, e' **tre livelli**:
+
+| livello | processo | chi lo lancia |
+|---|---|---|
+| figlio | `powershell.exe -File RIGA_ROUND_VPS.ps1` | la riga (`$pr`) |
+| **nipote** | `powershell.exe -File walkforward_generico.ps1` | `RIGA_ROUND_VPS.ps1` **r.1090**, `Start-Process ... -Wait` |
+| pronipote | `terminal64.exe /config:...` | `walkforward_generico.ps1` **r.2035**, dentro `foreach($w in $WF)` |
+
+Su Windows `Start-Process` **non crea nessun job object**: uccidere `$pr` **non tocca i
+discendenti**. Il nipote sopravvive. E il driver **non muore** quando il CSV sparisce —
+`walkforward_generico.ps1` **r.2069** stampa *«(nessun CSV per ...: storico mancante? MT5
+gia' aperto?)»* e **passa alla gamba dopo**. 👉 Quindi la sequenza reale era:
+
+1. si uccide il figlio;
+2. si spazzano `metatester64`/`terminal64`;
+3. il **nipote**, vivo, vede la gamba IS finita male e **lancia `terminal64` per la gamba
+   OOS** — *dopo* la spazzata;
+4. un backtest a tick reali riparte **senza nessun tetto sopra**, sulla macchina che si
+   voleva liberare.
+
+🔴 **E il danno peggiore non e' il processo: e' la FRASE.** La riga stampa a Claudio
+*«TETTO SFONDATO: fermo il round»* — e il round **non e' fermo**. E' la stessa famiglia di
+difetti del **10/09** (*lo strumento certifica il falso*): una riga che **dichiara un fatto
+che non ha prodotto**. Chi legge chiude la finestra e se ne va.
+
+🟢 **Cosa NON era rotto**, e va detto perche' un elenco di soli difetti descrive male la
+realta': il filtro dei terminali era gia' una **COSTANTE** corretta (classe 457 rispettata),
+il pre-volo fail-closed c'era, e il tetto era gia' dimensionato sul costo misurato (582).
+Il difetto stava **un livello piu' in basso di dove tutti guardavano**.
+
+### ✅ La regola, in tre gesti
+1. 🌳 **Prima di scrivere un `Stop-Process` a tetto si disegna l'ALBERO dei processi**, non
+   si guarda l'handle che si ha in mano. La domanda e': *chi ho lanciato io, e chi ha
+   lanciato lui?* `Start-Process` in PowerShell **non propaga la morte**: ogni livello si
+   uccide per nome o per `CommandLine`, e i livelli si contano nel codice.
+2. 🔁 **Si spazza DUE volte, con un'attesa in mezzo.** Un livello intermedio vivo puo'
+   **rilanciare** il processo appena ucciso: una spazzata sola fotografa un istante. La
+   forma di casa e': uccidi i controllori → attendi → spazza → attendi → **rispazza**.
+3. 🗣️ **Una riga non dichiara MAI un esito che non ha verificato.** *«Fermo il round»* si
+   scrive solo se dopo la spazzata si e' **riguardato** che non sia rimasto niente;
+   altrimenti si scrive cosa si e' fatto (*«ho ucciso questi PID»*, stampandoli), che e'
+   vero sempre.
+
+### La forma corretta, quella entrata nelle righe `R208B`/`R206A` del 22/09
+```powershell
+Stop-Process -Id $pr.Id -Force -ErrorAction SilentlyContinue;
+Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -and ($_.CommandLine -like '*walkforward_generico.ps1*') } | ForEach-Object { Write-Host ('   fermo anche il NIPOTE che esegue il driver: PID ' + $_.ProcessId) -ForegroundColor Red; Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue };
+Start-Sleep -Seconds 5;
+Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') } | Stop-Process -Force -ErrorAction SilentlyContinue;
+try{ $pr.WaitForExit() }catch{}; Start-Sleep -Seconds 10;
+Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') } | Stop-Process -Force -ErrorAction SilentlyContinue
+```
+⚠️ **Il secondo filtro e' sul NOME DEL DRIVER, non sul percorso del terminale**, ed e' una
+scelta con un costo da dichiarare: se sulla stessa macchina girasse **un altro round**,
+verrebbe fermato anche quello. Sul PC di backtest non ce ne sono altri. Su una macchina che
+ne ospitasse due, il filtro va stretto sull'**etichetta** del round.
