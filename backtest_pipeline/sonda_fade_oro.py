@@ -528,7 +528,7 @@ def autotest(out):
         o["f"] = None
     righe = []
     r = quadro(finti, "LOTTERIA FINTA", righe.append)
-    prova("LOTTERIA: 5 migliori = 500 su 510 di lordo vincente -> quota 98,0%%",
+    prova("LOTTERIA: 5 migliori = 500 su 510 di lordo vincente -> quota 98,0%",
           abs(r["quota_top5"] - 500.0 / 510.0) < 1e-12,
           "(misurata %.1f%%)" % (100 * r["quota_top5"]))
 
@@ -742,7 +742,7 @@ def main():
             % (orizz, pv, mediana(fin_ok), quantile(fin_ok, 0.05),
                quantile(fin_ok, 0.95), 100 * batte, len(fin_ok)))
     out("")
-    out("  >>> COME SI LEGGE: se il finto batte il vero PIU' del 5%% delle volte,")
+    out("  >>> COME SI LEGGE: se il finto batte il vero PIU' del 5% delle volte,")
     out("      il seguito vero NON e' distinguibile da un seguito a caso, e il")
     out("      fade su quella fascia NON sta leggendo l'esplosione.")
 

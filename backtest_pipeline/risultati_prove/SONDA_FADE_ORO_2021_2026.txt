@@ -17,7 +17,7 @@ AUTOTEST -- gira PRIMA di qualunque misura vera. Se fallisce, ci si FERMA.
   [OK]      VERSO: lato_fade = -lato_esplosione su tutte le operazioni 
   [OK]      PF: [2,-1] -> 2,000 
   [OK]      PF: [1,-2] -> 0,500 
-  [OK]      LOTTERIA: 5 migliori = 500 su 510 di lordo vincente -> quota 98,0%% (misurata 98.0%)
+  [OK]      LOTTERIA: 5 migliori = 500 su 510 di lordo vincente -> quota 98,0% (misurata 98.0%)
 
   AUTOTEST: 11 PASSATI, 0 FALLITI
 
@@ -109,7 +109,7 @@ AUTOTEST -- gira PRIMA di qualunque misura vera. Se fallisce, ci si FERMA.
   +30 m |   0.866 |             0.930 | 0.487 - 1.722 |   58.0% su 400
   +60 m |   1.477 |             0.961 | 0.473 - 1.824 |   12.8% su 400
 
-  >>> COME SI LEGGE: se il finto batte il vero PIU' del 5%% delle volte,
+  >>> COME SI LEGGE: se il finto batte il vero PIU' del 5% delle volte,
       il seguito vero NON e' distinguibile da un seguito a caso, e il
       fade su quella fascia NON sta leggendo l'esplosione.
 

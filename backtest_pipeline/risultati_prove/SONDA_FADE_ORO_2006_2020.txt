@@ -1,0 +1,156 @@
+========================================================================
+SONDA_FADE_ORO_v1
+========================================================================
+CAMPIONE DICHIARATO: 2006-2020
+DATI: /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/oro_2006_2020
+
+========================================================================
+AUTOTEST -- gira PRIMA di qualunque misura vera. Se fallisce, ci si FERMA.
+========================================================================
+  [OK]      NIENTE LOOK-AHEAD: le 6 operazioni del campione troncato sono IDENTICHE nel campione intero (16 op)
+  [OK]        e il troncamento ha davvero tolto roba (6 < 16)
+  [OK]      COSTO = esattamente 2 x 0.004552% del prezzo su tutte le 16 operazioni 
+  [OK]        e la SENSIBILITA' a 1 costo toglie davvero la meta' 
+  [OK]        CONTRO-ESEMPIO: con 3 costi il controllo RIFIUTA 
+  [OK]      INGRESSO DOPO LA FINESTRA: il primo blocco d'uscita e' b+2, cioe' oltre gli 2 blocchi della finestra
+  [OK]        CONTRO-ESEMPIO: uscite a rendimento esattamente nullo = 0 su 16 (sarebbero il segno di un'uscita SULLA finestra)
+  [OK]      VERSO: lato_fade = -lato_esplosione su tutte le operazioni 
+  [OK]      PF: [2,-1] -> 2,000 
+  [OK]      PF: [1,-2] -> 0,500 
+  [OK]      LOTTERIA: 5 migliori = 500 su 510 di lordo vincente -> quota 98,0% (misurata 98.0%)
+
+  AUTOTEST: 11 PASSATI, 0 FALLITI
+
+========================================================================
+0. LETTURA E COSTRUZIONE
+========================================================================
+  barre M1 = 4884366 | scartate = 0 | OHLC incoerenti = 0 | file ignoti = 0
+  FINESTRA MISURATA (la fa il DATO, non il nome del file): 2006-03-19 -> 2020-05-14
+  blocchi 15' = 340480 | giornate = 4467 | ATR valido su 3641 | finestre 30' = 154787
+
+  ANCORA OBBLIGATORIA -- esplosioni sulla fascia 09:30 ET (minuto 570)
+    finestre sulla fascia = 3631 | esplosioni MISURATE = 111 | ATTESE = 111
+    PASSATA: la definizione coincide. I numeri sotto sono confrontabili.
+
+========================================================================
+1. IL FADE SULLA FASCIA 09:30 ET -- la misura principale
+========================================================================
+  Ingresso al close della finestra, CONTRO il verso. Uscita secca a
+  orologio. NESSUNO STOP, NESSUN TARGET (limite dichiarato).
+  Costo PRINCIPALE = 2 x 0.2003 $ = 0.4006 $/giro, applicato in RELATIVO
+  (= 0.004552% del prezzo per costo). Cifre in $ a oro 4330 $.
+  SOGLIA DICHIARATA PRIMA DEI NUMERI: PF netto >= 1.20
+
+  esplosioni = 111 | controlli appaiati (stessa fascia, stesso anno, NON esplosive) = 111
+
+  --- USCITA A +15 MINUTI
+    FADE 09:30 ET          n= 110 | PF  0.970 | netto    -14.95 $ | mediana  +1.1336 $ | a favore  53.6%
+                           CODA: peggiore   -95.89 $ | 5 peggiori   -226.44 $ | le 5 MIGLIORI valgono  30.9% del lordo vincente
+      sens. 1 costo/giro   n= 110 | PF  1.014 | netto     +6.73 $ | mediana  +1.3307 $ | a favore  55.5%
+                           CODA: peggiore   -95.69 $ | 5 peggiori   -225.45 $ | le 5 MIGLIORI valgono  30.9% del lordo vincente
+                           PF  0.970 (severo, 2 costi)  ->  PF  1.014 (documentato, 1 costo)
+      sens. $ piatti       PF  0.772 | netto    -31.40 $  (SUL FADE. Costo a DOLLARI
+                            PIATTI: su un campione a oro 600-2.000 $ e' un pedaggio FINTO, sta qui solo come limite)
+    CONTROLLO appaiato     n= 111 | PF  0.578 | netto   -177.36 $ | mediana  -0.7367 $ | a favore  45.0%
+                           CODA: peggiore   -37.64 $ | 5 peggiori   -117.09 $ | le 5 MIGLIORI valgono  33.9% del lordo vincente
+
+  --- USCITA A +30 MINUTI
+    FADE 09:30 ET          n= 110 | PF  0.839 | netto   -114.18 $ | mediana  -0.4902 $ | a favore  48.2%
+                           CODA: peggiore   -97.79 $ | 5 peggiori   -262.10 $ | le 5 MIGLIORI valgono  31.2% del lordo vincente
+      sens. 1 costo/giro   n= 110 | PF  0.868 | netto    -92.49 $ | mediana  -0.2930 $ | a favore  48.2%
+                           CODA: peggiore   -97.59 $ | 5 peggiori   -261.11 $ | le 5 MIGLIORI valgono  31.2% del lordo vincente
+                           PF  0.839 (severo, 2 costi)  ->  PF  0.868 (documentato, 1 costo)
+      sens. $ piatti       PF  0.674 | netto    -67.07 $  (SUL FADE. Costo a DOLLARI
+                            PIATTI: su un campione a oro 600-2.000 $ e' un pedaggio FINTO, sta qui solo come limite)
+    CONTROLLO appaiato     n= 111 | PF  0.494 | netto   -338.13 $ | mediana  -0.5362 $ | a favore  46.8%
+                           CODA: peggiore   -60.01 $ | 5 peggiori   -195.82 $ | le 5 MIGLIORI valgono  27.5% del lordo vincente
+
+  --- USCITA A +60 MINUTI
+    FADE 09:30 ET          n= 110 | PF  0.920 | netto    -72.35 $ | mediana  +0.5293 $ | a favore  52.7%
+                           CODA: peggiore  -161.05 $ | 5 peggiori   -376.75 $ | le 5 MIGLIORI valgono  31.4% del lordo vincente
+      sens. 1 costo/giro   n= 110 | PF  0.943 | netto    -50.66 $ | mediana  +0.7264 $ | a favore  52.7%
+                           CODA: peggiore  -160.85 $ | 5 peggiori   -375.76 $ | le 5 MIGLIORI valgono  31.4% del lordo vincente
+                           PF  0.920 (severo, 2 costi)  ->  PF  0.943 (documentato, 1 costo)
+      sens. $ piatti       PF  0.872 | netto    -30.69 $  (SUL FADE. Costo a DOLLARI
+                            PIATTI: su un campione a oro 600-2.000 $ e' un pedaggio FINTO, sta qui solo come limite)
+    CONTROLLO appaiato     n= 111 | PF  0.357 | netto   -637.47 $ | mediana  -0.6152 $ | a favore  45.0%
+                           CODA: peggiore   -71.92 $ | 5 peggiori   -298.92 $ | le 5 MIGLIORI valgono  29.2% del lordo vincente
+
+========================================================================
+2. CONTRO-ESEMPIO 3 -- e se guadagnasse su QUALUNQUE fascia?
+========================================================================
+  Se il fade rende uguale a tutte le ore, non e' l'ora delle 09:30:
+  e' il fade in generale, e il ritrovamento delle 09:30 non c'entra.
+
+  fascia ET | n esp | PF +15 | PF +30 | PF +60 | netto +30 ($) | a favore +30
+  ----------------------------------------------------------------------------------
+     08:00  |    81 |  0.941 |  1.101 |  1.016 |         44.12 |        46.9%
+     08:30  |   143 |  0.796 |  0.682 |  0.775 |       -245.13 |        47.6%
+     09:00  |    66 |  1.478 |  1.051 |  0.703 |         15.38 |        48.5%
+     09:30  |   111 |  0.970 |  0.839 |  0.920 |       -114.18 |        48.2%  <== 09:30 ET
+     10:00  |   119 |  0.586 |  0.648 |  0.489 |       -336.80 |        49.6%
+     10:30  |    77 |  0.533 |  0.690 |  0.695 |       -152.32 |        48.1%
+     11:00  |    63 |  1.116 |  1.070 |  1.219 |         25.98 |        60.3%
+     11:30  |    51 |  0.562 |  0.688 |  0.769 |        -81.74 |        44.0%
+     12:00  |    29 |  0.978 |  0.803 |  0.752 |        -30.34 |        51.7%
+     12:30  |    28 |  0.815 |  0.445 |  0.353 |       -160.78 |        48.1%
+     13:00  |    41 |  1.117 |  0.723 |  0.563 |        -74.49 |        55.3%
+     14:00  |    52 |  0.536 |  0.354 |  0.283 |       -285.26 |        32.7%
+     14:30  |    30 |  1.706 |  0.788 |  0.702 |        -26.92 |        55.2%
+  ----------------------------------------------------------------------------------
+   TUTTE le |  1036 |  0.854 |  0.790 |  0.708 |      -1341.53 |        51.0%  <== il MONTE UNICO
+   ALTRE    |       |        |        |        |               |
+
+  PF +30' della fascia 09:30 = 0.839 | MEDIANA delle altre 12 fasce = 0.706 | quante fasce la battono: 3
+
+========================================================================
+3. CONTRO-ESEMPIO 2/A -- PERMUTAZIONE DEGLI ESITI (n resta 111)
+========================================================================
+  Le esplosioni restano quelle vere, il verso del fade resta quello vero.
+  Si permuta SOLO il SEGUITO: a ogni esplosione si attacca il seguito di
+  un altro giorno, stessa fascia, stesso anno. 400 ripetizioni.
+  Domanda: il seguito VERO premia il fade piu' di un seguito a caso?
+
+  orizz | PF VERO | PF finto: mediana | P5 - P95      | quante volte il finto
+        |         |                   |               | BATTE il vero
+  ------------------------------------------------------------------------------
+  +15 m |   0.970 |             0.912 | 0.574 - 1.422 |   43.5% su 400
+  +30 m |   0.839 |             0.967 | 0.560 - 1.547 |   68.8% su 400
+  +60 m |   0.920 |             0.988 | 0.586 - 1.598 |   59.5% su 400
+
+  >>> COME SI LEGGE: se il finto batte il vero PIU' del 5% delle volte,
+      il seguito vero NON e' distinguibile da un seguito a caso, e il
+      fade su quella fascia NON sta leggendo l'esplosione.
+
+========================================================================
+3/B. CONTRO-ESEMPIO 2/B -- PASSEGGIATA ALEATORIA (per FORME di barra)
+========================================================================
+  Le FORME delle barre sono permutate dentro lo stesso minuto-del-
+  giorno, fra giorni diversi: l'orologio della volatilita' resta
+  identico, sparisce SOLO la sequenza. Se il fade fa PF >= 1.05 anche
+  qui, la misura SI BUTTA.
+
+  finestre = 154787 | fascia 09:30 = 3631 | esplosioni sulla fascia = 61 (vere: 111)
+
+  LIMITE DICHIARATO, e va letto PRIMA dei numeri qui sotto: permutando
+  le barre si distrugge anche il RAGGRUPPAMENTO della volatilita', e
+  le esplosioni crollano da 111 a 61. Questo null ha meno operazioni
+  del vero: NON e' appaiato sul campione, ed e' il motivo per cui il
+  contro-esempio che PESA e' il 2/A qui sopra, non questo.
+    PASSEGGIATA +15 m      n=  61 | PF  1.136 | netto    +26.20 $ | mediana  +1.1902 $ | a favore  52.5%
+                           CODA: peggiore   -20.37 $ | 5 peggiori    -82.23 $ | le 5 MIGLIORI valgono  35.7% del lordo vincente
+    PASSEGGIATA +30 m      n=  61 | PF  0.906 | netto    -26.56 $ | mediana  -1.7389 $ | a favore  47.5%
+                           CODA: peggiore   -28.65 $ | 5 peggiori   -103.56 $ | le 5 MIGLIORI valgono  44.4% del lordo vincente
+    PASSEGGIATA +60 m      n=  61 | PF  0.857 | netto    -53.50 $ | mediana  -1.3248 $ | a favore  47.5%
+                           CODA: peggiore   -30.44 $ | 5 peggiori   -128.03 $ | le 5 MIGLIORI valgono  42.6% del lordo vincente
+
+========================================================================
+4. IL VERDETTO CONTRO LA SOGLIA DICHIARATA
+========================================================================
+  Soglia: PF netto >= 1.20 (costo severo). Lotteria: 5 migliori > 50%
+  +15 m: BOCCIATO  PF 0.970 < soglia | 5 migliori = 30.9% del lordo (ok)
+  +30 m: BOCCIATO  PF 0.839 < soglia | 5 migliori = 31.2% del lordo (ok)
+  +60 m: BOCCIATO  PF 0.920 < soglia | 5 migliori = 31.4% del lordo (ok)
+
+  (il verdetto FINALE vale solo se PASSA su TUTTI E DUE i campioni:
+   questo referto ne misura UNO -- '2006-2020'.)
