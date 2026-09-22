@@ -675,9 +675,31 @@ def main():
     out("  soglia | finestre che passano | esplosioni catturate | P(espl.|filtro) | guadagno")
     base = len([f for f in f30 if f["vol_pre"] is not None and vmed_ora.get(f["ora"])])
     base_e = len([f for f in esp_l if f["vol_pre"] is not None and vmed_ora.get(f["ora"])])
-    p0 = base_e / base
-    out("  (nessuna) | %19d | %20d | %14.3f%% | %7.2fx" % (base, base_e, 100 * p0, 1.0))
-    for soglia in (1.0, 1.44, 2.0, 3.0, 5.0):
+    # -----------------------------------------------------------------
+    #  RIPARAZIONE DEL 22/09/2026 -- IL FEED SENZA VOLUME
+    #  Su un feed che scrive volume 0 su OGNI barra (HistData lo fa sul
+    #  forex, e va MISURATO simbolo per simbolo) tutte le mediane orarie
+    #  valgono 0, quindi vmed_ora.get(...) e' FALSO ovunque, base vale 0
+    #  e questa riga moriva con ZeroDivisionError -- portandosi dietro
+    #  i PASSI 7, 8, 9, 10 e 11, cioe' la sfruttabilita'. Misurato oggi
+    #  su un campione di collaudo: il referto si fermava a meta'.
+    #  La guardia NON cambia NESSUN numero quando il volume c'e' (base>0
+    #  prende lo stesso ramo di prima, riga per riga): dichiara che la
+    #  domanda NON E' MISURABILE su questo feed, invece di far credere
+    #  che il filtro a volume "non serva". Assente != inefficace.
+    # -----------------------------------------------------------------
+    if base == 0:
+        out("  NON MISURABILE SU QUESTO FEED: nessuna finestra ha un volume")
+        out("  utilizzabile (tutte le mediane orarie del tick volume valgono 0).")
+        out("  Questo NON vuol dire che un filtro a volume non serva: vuol dire")
+        out("  che il feed non porta il dato. Va scritto nel referto come buco,")
+        out("  e la sezione 9 qui sotto va letta con lo stesso avvertimento.")
+        p0 = None
+    else:
+        p0 = base_e / base
+        out("  (nessuna) | %19d | %20d | %14.3f%% | %7.2fx"
+            % (base, base_e, 100 * p0, 1.0))
+    for soglia in () if p0 is None else (1.0, 1.44, 2.0, 3.0, 5.0):
         pas = [f for f in f30 if f["vol_pre"] is not None and vmed_ora.get(f["ora"])
                and f["vol_pre"] / vmed_ora[f["ora"]] >= soglia]
         pe = [f for f in pas if abs(f["mov"]) >= K_PRINCIPALE * f["atr"]]

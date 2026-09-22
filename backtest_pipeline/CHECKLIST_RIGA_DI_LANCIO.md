@@ -29242,3 +29242,120 @@ file risponde.
    e' l'opposto (li' era il DRIVER ad avere la deroga che lo strato 1 non conosce). *«I due
    strati hanno regole diverse»* non dice quale dei due e' piu' largo: si va a leggere, non si
    deduce per analogia.
+
+---
+
+## CLASSE 570 -- 🔀📊 IL LETTORE ACCETTA IL CSV E LO **INTERPRETA MALE**: stessa intestazione, colonne in ORDINE DIVERSO -- e ogni controllo di coerenza OHLC e' SIMMETRICO in `open` e `close`, quindi non se ne accorge (22/09/2026)
+
+**Caso reale.** `backtest_pipeline/anatomia_esplosioni_oro.py` legge il formato Oanda, che e'
+```
+time,close,high,low,open,volume        <-- C,H,L,O   e NON O,H,L,C
+```
+(r.161-196: `c, h, l, o = float(p2[1]), float(p2[2]), float(p2[3]), float(p2[4])`).
+La fonte nuova (HistData ASCII M1) scrive invece `AAAAMMGG HHMMSS;O;H;L;C;V`, cioe'
+**l'ordine opposto sui due estremi**. Scambiare `open` e `close` in scrittura produce un file
+che il lettore **accetta senza una riga di scarto**.
+
+### 🔴 PERCHE' NESSUN CONTROLLO LO VEDE
+I controlli di sanita' OHLC sono `h >= max(o,c)`, `l <= min(o,c)`, `h >= l`, tutti **simmetrici
+scambiando `o` con `c`**. Il lettore vero li ha tutti (r.187-192) e **passano identici**. E la
+grandezza misurata e' `close(ultimo minuto) - open(primo minuto)`: con le due colonne
+scambiate resta un numero plausibile, **dello stesso ordine di grandezza e con lo stesso
+segno la meta' delle volte**. Non c'e' un `nan`, non c'e' un picco assurdo: c'e' una tabella
+pulita e falsa.
+
+### ✅ IL RIMEDIO, ed e' uno solo
+**Round-trip contro il LETTORE VERO, non contro la propria idea del formato.** Si scrive una
+riga con quattro valori **tutti diversi e riconoscibili**, la si da' in pasto alla funzione di
+lettura vera (importata, non riscritta) e si controlla che `open`, `high`, `low`, `close`
+tornino ai posti giusti. In `histdata_oro_verso_utc.py` e' l'autotest **1-bis**, che importa
+`anatomia_esplosioni_oro.leggi_tutto` e verifica i quattro numeri uno per uno.
+📌 **"Ho copiato l'intestazione dal file di esempio" non basta**: l'intestazione era giusta
+anche nel caso rotto. E' l'ORDINE dei valori sotto che cambia.
+
+---
+
+## CLASSE 571 -- 🕐🎯 IL COLLAUDO DELL'OROLOGIO MISURA LO **SPOSTAMENTO STAGIONALE** E NON LA **POSIZIONE ASSOLUTA**: un offset costante sbagliato di un'ora lo passa, e sballa OGNI etichetta oraria del referto (22/09/2026, cugina della **178**)
+
+**Caso reale.** Il collaudo di casa (`anatomia_esplosioni_oro.py`, `collauda_orologio`) chiede
+che il minuto del giorno piu' mosso si sposti di **-60 minuti** fra mesi invernali e mesi
+estivi, e **si ferma con `exit 2`** se non succede. E' un ottimo controllo: becca un calendario
+DST sbagliato. **Ma e' una DIFFERENZA**, e una differenza non vede una costante.
+
+### 🧪 IL CONTRO-ESEMPIO, MISURATO
+Si prende una serie giusta, la si sposta di **+1 ora in blocco** e si rimisura:
+
+| serie | spostamento estate-inverno | picco invernale | verdetto del collaudo |
+|---|---:|---:|---|
+| giusta | **-60 min** | **13:30 UTC** | PASSA |
+| spostata di +1h | **-60 min** (identico!) | **14:30 UTC** | **PASSA LO STESSO** |
+| spostata di -1h | **-60 min** (identico!) | **12:30 UTC** | **PASSA LO STESSO** |
+
+👉 Tutte e tre passano. E le ultime due producono un referto in cui **ogni fascia oraria e'
+etichettata con l'ora sbagliata** -- cioe' esattamente la conclusione che lo studio doveva
+dare (*"la fascia piu' esplosiva e' quella delle 09:30 di New York"*).
+
+### ✅ LA REGOLA
+**Un collaudo dell'orologio ha bisogno di DUE gambe, e la seconda e' un'ANCORA ASSOLUTA:**
+1. **la differenza** (lo spostamento stagionale): dice se il CALENDARIO e' giusto;
+2. **la posizione**: il picco deve cadere in una **banda dichiarata prima** -- qui
+   `13:00-13:59 UTC` d'inverno e `12:00-12:59 UTC` d'estate, perche' e' il dato USA delle
+   8:30 di New York. Dice se l'**OFFSET** e' giusto.
+📌 E l'ancora va scelta **prima** di guardare i numeri, e meglio se sono **due indipendenti**
+(qui: il dato macro delle 8:30 ET e il fixing LBMA delle 15:00 di Londra). Implementate in
+`histdata_oro_verso_utc.py`, `giudica_orologio`, controlli **(a)** e **(b)**.
+
+---
+
+## CLASSE 572 -- 🕳️💥 LO STRUMENTO **MUORE A META' REFERTO** SU UN FEED CHE SCRIVE `volume = 0`: la sezione che decide non viene mai stampata, e l'eccezione sembra un problema dei DATI (22/09/2026)
+
+**Caso reale, MISURATO oggi.** `anatomia_esplosioni_oro.py` r.678: `p0 = base_e / base`.
+Su un feed con `volume` a zero su ogni barra (HistData lo fa sul forex) **tutte** le mediane
+orarie del tick volume valgono `0`, quindi `vmed_ora.get(f["ora"])` e' **falso ovunque**,
+`base` vale **0** e la riga esplode con `ZeroDivisionError`.
+
+🔴 **E il punto non e' l'eccezione: e' DOVE cade.** Il referto si interrompe alla sezione
+**6-ter**, quindi **non vengono mai stampati i PASSI 7, 8, 9, 10 e 11** -- fra cui la
+**SFRUTTABILITA'**, che e' la sola sezione da cui puo' nascere una sedia. Chi legge la console
+vede un traceback e conclude *"i dati sono rotti"*: i dati sono perfetti, manca **una colonna**.
+
+### ✅ LA RIPARAZIONE, e come si dimostra che non sposta niente
+Si aggiunge la guardia `if base == 0:` che **dichiara la domanda NON MISURABILE** e salta il
+blocco. La prova che non cambia nessun numero gia' pubblicato **si fa, non si dichiara**:
+si rifa' girare la versione **prima** e la versione **dopo** sullo stesso campione **con il
+volume presente** e si confrontano le uscite -- qui **identiche byte per byte**.
+
+### 🔴 LA REGOLA
+1. **Una colonna assente non e' una colonna nulla.** `volume = 0` significa *"il feed non porta
+   il dato"*, non *"il volume non conta"*. Un referto che stampasse `0,00x` senza dirlo
+   farebbe concludere che **un filtro a volume non serve**, che e' una conclusione **non
+   misurata** spacciata per misurata.
+2. **Ogni divisione per un conteggio che puo' valere zero va guardata PRIMA di cambiare feed.**
+   Il grep costa trenta secondi; la sezione persa costa una corsa intera.
+3. 📌 **Chi porta un feed nuovo dentro uno strumento vecchio MISURA quali colonne arrivano
+   davvero** e lo scrive nel referto, prima dei risultati.
+
+---
+
+## CLASSE 573 -- ☠️🏷️ L'ARTEFATTO INTERMEDIO IN UN FUSO **NON** CONVERTITO, SCRITTO CON L'INTESTAZIONE **STANDARD**: il lettore se lo mangia in silenzio e nessuno sa che ha letto ore sbagliate (22/09/2026, gemella della **571**)
+
+**Caso costruito e DISINNESCATO**, non subito -- e vale come regola di progetto.
+Nel portare l'oro M1 2021-2026 da HistData serviva un passaggio intermedio: i file scaricati
+sono in **ora locale di New York**, il lettore vuole **UTC**. La tentazione e' scrivere subito
+i CSV nel formato buono e convertirli "dopo".
+
+🔴 **Se quei file intermedi portano l'intestazione standard `time,close,high,low,open,volume`,
+diventano indistinguibili da quelli buoni**, e `anatomia_esplosioni_oro.py --dati <cartella>`
+legge **tutti** i `.csv` della cartella che gli si passa: basta puntarlo alla cartella
+sbagliata e il referto esce **completo, pulito e spostato di cinque ore**.
+
+### ✅ LE DUE FORME DI CASA
+1. **L'artefatto non convertito NON porta mai l'intestazione del formato buono.** O non ha
+   intestazione affatto (qui: si conservano gli ZIP HistData originali, che il lettore non
+   puo' nemmeno aprire), oppure ne porta una **diversa apposta** -- una *intestazione-veleno*:
+   il lettore la conta come `file_formato_ignoto`, legge zero barre e si ferma con
+   `NON MISURABILE`. **Fallisce chiuso.**
+2. **La conversione avviene in UN solo punto, e quel punto COLLAUDA** (classe 571) prima di
+   scrivere. Se il collaudo non passa, i file **non si usano** e lo strumento esce con 2.
+📌 Corollario che vale sempre: **due finestre di feed diversi non stanno mai nella stessa
+cartella**, perche' `--dati <cartella>` le concatenerebbe in una serie sola senza dirlo.
