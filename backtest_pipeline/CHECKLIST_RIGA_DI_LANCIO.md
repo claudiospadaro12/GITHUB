@@ -30249,3 +30249,64 @@ cui e' nato `controlla_prova.py`.
 3. 🧾 **E il magic si confronta con l'INTESTAZIONE del proprio file**, non solo col `grep` sul
    repo: qui il `grep` era verde (787442 non esisteva davvero da nessuna parte) e la riga era
    sbagliata lo stesso.
+
+---
+
+## CLASSE 594 -- 🔗🎛️ **L'ASSE CHE MUOVE DUE MECCANISMI PERCHE' IL SECONDO E' INCATENATO AL PRIMO DENTRO L'EA**: il file dichiara "un asse solo", `controlla_prova.py` conferma "un asse solo", e la cella `0` spegne **anche una manopola pinnata a `1`** (22/09/2026, su `R211a`/`R211b` -- cugina della 178, *l'ipotesi alternativa*, e sorella del no-op di `InpBreakevenAtTP1` gia' a registro)
+
+### Il caso reale
+`R211a`/`R211b` mettono ad asse `InpTP1Pct = 0||0||25||75||Y` su `ABTG_ORB_Ottimizzato`
+per rispondere a **una** domanda: *la chiusura parziale abbassa il drawdown?*
+Il file pinnava `InpBreakeven=1||1||0||1||N`, cioe' "costante, non e' lei la variabile".
+
+🔴 **Ma nell'EA il breakeven non e' una manopola indipendente: vive DENTRO `ManageTP1()`,
+DOPO il parziale**, e la funzione esce prima se il parziale e' spento
+(`ABTG_ORB_Ottimizzato.mq5` r.656-666):
+
+```
+   if(InpTP1Pct<=0)
+     {
+      ... PrintFormat("ORB TP1: TP1/breakeven disattivati da InpTP1Pct=%.1f (<=0).
+                       Nessun parziale e NESSUNO stop in pari, anche se InpBreakeven=%s.",
+      return;
+     }
+```
+
+👉 Quindi l'asse produceva in realta' **due popolazioni**:
+- cella `0` = **ne' parziale ne' breakeven**
+- celle `25/50/75` = **parziale E breakeven**
+
+Un calo di DD sarebbe stato letto come *"la parziale funziona"*, mentre poteva essere
+**tutto dello stop in pari**. E il round e' nato apposta per scegliere fra due fonti che
+si contraddicono: sarebbe stato **il verdetto sbagliato sulla domanda giusta**.
+
+### Perche' NESSUNO dei due strati lo prende
+- 🤖 `controlla_prova.py` conta i campi `||Y`: ne vede **uno**, e dice OK. Ha ragione
+  sulla sintassi e non puo' avere ragione sulla semantica: la catena sta nel `.mq5`.
+- 🧪 **E il contro-esempio scritto nel file NON bastava**: era *"se `Profit` e' identico
+  su tutte le celle la manopola e' inerte"*. Il confondimento produce `Profit`
+  **DIVERSI** e passa il contro-esempio a bandiera spiegata. Un contro-esempio costruito
+  contro l'**inerzia** non dice niente sull'**attribuzione**.
+
+### La regola
+1. 🔎 **Prima di dichiarare "un asse solo", si cerca nel `.mq5` chi ALTRO dipende da
+   quell'input.** A macchina: `grep -n "<NomeInput>" EA.mq5` e si legge **ogni** riga —
+   non la dichiarazione, gli **usi**. Se un altro input compare dentro un blocco che la
+   variabile d'asse puo' saltare (`return`, `if(...<=0)`, `continue`), **l'asse ne muove
+   due**.
+2. ⚖️ **E allora si sceglie, e si SCRIVE quale delle due si e' scelta:**
+   - **isolare** — si pinna l'altra manopola al valore che la rende **inerte su tutte le
+     celle** (qui `InpBreakeven=0`), oppure
+   - **dichiarare il pacchetto** — il referto dira' *"la parziale+breakeven"*, mai
+     *"la parziale"*.
+   🟢 Nel caso reale isolare e' costato **zero sull'ancora**: in `r44a` `InpTP1Pct` era
+   gia' `0`, quindi il breakeven era gia' irraggiungibile e i numeri di `r44a` sono
+   **identici** con `InpBreakeven` a `0` o a `1`. **Vale sempre la pena di controllare
+   se la correzione e' gratis prima di rassegnarsi al pacchetto.**
+3. 🧪 **Il contro-esempio va scritto contro l'ATTRIBUZIONE, non solo contro l'inerzia:**
+   *"quale ALTRO meccanismo, mosso dalla stessa cella, spiegherebbe lo stesso numero?"*
+   Se la risposta non e' "nessuno", il round non risponde alla domanda che dichiara.
+4. 📌 **Il sintomo che la fa trovare in tre secondi**: un input pinnato a `1` che l'EA
+   stampa come *"disattivato"*. Se un EA ha un `Print` che dice *"X disattivato da Y"*,
+   quella riga **e' la mappa delle catene** — si legge prima di scrivere l'asse.
+

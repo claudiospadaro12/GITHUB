@@ -14,7 +14,8 @@
 #  1. IL FATTO DA CUI PARTE TUTTO: L'ORB SUL DOW FUNZIONA, ED E' FERMO
 #  --------------------------------------------------------------------
 #  Round r44a (ABTG_ORB_Ottimizzato, U30USD M5, asse InpTPRangeMult),
-#  letto nei CSV grezzi risultati_prove/ABTG_ORB_Ottimizzato/r44/:
+#  letto nei CSV grezzi backtest_pipeline/risultati_prove/
+#  ABTG_ORB_Ottimizzato/r44/:
 #      TPRangeMult | IS: PF / DD / n    | OOS: PF / DD / n
 #      1.5         | 1.22314 / 8.6252 / 71 | 1.65693 /  9.9181 / 119
 #      2.0         | 1.35877 / 8.6293 / 71 | 1.73605 / 11.0412 / 119
@@ -66,44 +67,170 @@
 #
 #  4. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
 #  --------------------------------------------------------------------
-#  (A) ANCORA. La cella InpTP1Pct = 0 DEVE riprodurre r44a alla cella
-#      InpTPRangeMult = 1.5, che e' pinnata qui:
-#          IS   PF 1.22314  Equity DD % 8.6252   Trades  71
-#          OOS  PF 1.65693  Equity DD % 9.9181   Trades 119
-#      (letti nei CSV, non in un referto). Se non torna, il round si
-#      BUTTA: non stiamo guardando lo stesso motore.
-#  (B) MERITO. Promossa una cella solo se INSIEME: PF OOS >= 1.30
-#      (r44a fa gia' 1.65693: chiedere meno sarebbe abbassare l'asticella)
-#      E Equity DD % OOS <= 9.0% (cioe' un margine vero sotto il muro,
-#      non gli 8 centesimi di adesso) E n OOS invariato.
+#  (A) QUI NON C'E' NESSUNA ANCORA, E NON SE NE INVENTA UNA.
+#      RISCRITTO DAL CANCELLO IL 22/09: la prima stesura di questo punto
+#      era COPIATA da R211a e prometteva "la cella InpTP1Pct = 0 DEVE
+#      riprodurre r44a: IS PF 1.22314 / Trades 71 ...". Quei numeri sono
+#      di U30USD. Su D30EUR questo motore NON HA MAI GIRATO: non c'e'
+#      niente da riprodurre, e chi avesse letto quel punto avrebbe
+#      aspettato 71 operazioni sul DAX. Il punto 8 lo diceva gia'
+#      giusto; i due punti si contraddicevano.
+#      >>> L'unica regressione possibile qui e' INTERNA: la cella
+#          InpTP1Pct = 0 e' la BASE di questo round, e tutte le altre
+#          si leggono CONTRO DI LEI. Non contro il Dow.
+#
+#  (A-bis) E L'EA E' CAMBIATO DOPO r44a, quindi vale anche qui come
+#      avvertenza: fra il 13/08 e HEAD ci sono QUATTRO commit sull'EA.
+#      Tre aggiungono input verificati NO-OP al default (InpSlippagePts
+#      =0 guardia 'if(>0)'; InpSLBufferPts=0, 'SLBuffer()' ritorna 0;
+#      InpUsaGuardian=true, ma la guardia fa
+#      'if(!ABTG_CanaleEsiste()) return(true)' e nel tester le
+#      GlobalVariable del Guardian non esistono -> fail-open totale, e
+#      l'ORB la chiama con DUE argomenti, quindi P0/P1/S1 e il cluster
+#      C2 non si leggono nemmeno). Il quarto, 19312c8b del 03/09
+#      (v1.04, selezione hedge-safe), E' UN CAMBIO DI LOGICA che l'EA
+#      dichiara identico nel tester "perche' non c'e' nessun vicino":
+#      e' un ragionamento che regge, ma e' una PROMESSA, non una
+#      misura. Il referto pinni il commit.
+#
+#  (B) MERITO. Qui il cancello e' ASSOLUTO, e proprio per questo
+#      PF OOS >= 1.30 E' ONESTO su questo file e NON lo era su R211a:
+#      sul Dow c'era gia' un 1,65693 da battere e chiedere 1,30 voleva
+#      dire chiedere meno di quello che c'e'; sul DAX non c'e' NIENTE,
+#      quindi 1,30 e' una soglia vera. Si promuove una cella solo se
+#      TUTTE E QUATTRO:
+#        1. Equity DD % OOS <= 9.0   (margine vero sotto il muro FTMO)
+#        2. PF OOS >= 1.30
+#        3. Recovery Factor OOS >= 2.0  (soldi/soldi: il conteggio
+#           delle uscite non lo tocca -- vedi punto 5-iii)
+#        4. n OOS >= 80 nella cella BASE (InpTP1Pct=0). Sotto, il DAX
+#           non ha campione e il MERITO si sospende: resta in piedi
+#           solo il giudizio di RISCHIO (punto C).
+#      E il confronto FRA celle si fa su RF e Profit, mai su
+#      Expected Payoff e mai su "DD contro DD" (punto 5-iii).
+#
 #  (C) RISCHIO. Il DD si legge a QUALUNQUE n (regola del 18/08: il
 #      campione sottile sospende il merito, mai il rischio).
 #
 #  5. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
 #  --------------------------------------------------------------------
-#  Se le quattro celle escono con Trades IDENTICO **e** Profit IDENTICO,
-#  la manopola e' INERTE (non arriva all'EA, o il primo obiettivo non
-#  viene mai toccato) e NESSUN PF di questo round si puo' leggere.
-#  Criterio a macchina: si contano i valori DISTINTI di Profit. Meno di
-#  2 = "manopola inerte", che NON e' "la parziale non serve".
-#  >>> E il verso pericoloso e' dichiarato: con la parziale accesa il
-#      conteggio Trades del CSV conta USCITE, non posizioni (classe 550),
-#      quindi il PF NON e' confrontabile fra celle con parziale diversa.
-#      Per questo il cancello (B) chiede anche il DD e l'n, e per questo
-#      il confronto che vale e' DD contro DD.
+#  (i) MANOPOLA INERTE. Se le quattro celle escono con Trades IDENTICO
+#      **e** Profit IDENTICO, la manopola non arriva all'EA (o il primo
+#      obiettivo non viene mai toccato) e NESSUN PF di questo round si
+#      puo' leggere. Criterio a macchina: valori DISTINTI di Profit < 2
+#      = "manopola inerte", che NON e' "la parziale non serve".
+#
+#  (i-bis) E QUI C'E' UN SECONDO MODO DI USCIRE VUOTI, tipico del
+#      simbolo nuovo: se la cella BASE fa pochissime operazioni, non e'
+#      la parziale a non servire, e' il RANGE 08:00-08:15 sul DAX che
+#      col tetto InpMaxRangePct=0.8 scarta le giornate. Si legge
+#      dall'n della cella base, non dal PF.
+#
+#  (ii) IL CONFONDIMENTO COL BREAKEVEN -- CORRETTO ALLA RADICE, NON
+#      DICHIARATO. Nell'EA il breakeven VIVE DENTRO ManageTP1() ed e'
+#      IRRAGGIUNGIBILE a parziale spenta (r.656-666: 'if(InpTP1Pct<=0)
+#      { ...; return; }', e l'EA lo stampa: "TP1/breakeven disattivati
+#      da InpTP1Pct=0 ... NESSUNO stop in pari, anche se
+#      InpBreakeven=true"). Con InpBreakeven=1 pinnato, l'asse avrebbe
+#      mosso DUE meccanismi insieme -- cella 0 = ne' parziale ne'
+#      breakeven, celle 25/50/75 = parziale E breakeven -- e un calo di
+#      DD non sarebbe stato attribuibile alla parziale. Il contro-
+#      esempio (i) NON lo prende: il confondimento produce Profit
+#      DIVERSI e passa.
+#      >>> RIMEDIO: InpBreakeven e' pinnato a 0, cosi' l'asse muove UNA
+#          cosa sola. Il pacchetto parziale+breakeven e' R211c.
+#
+#  (iii) LA CLASSE 550, DETTA GIUSTA. Con la parziale accesa la colonna
+#      Trades conta USCITE, non posizioni. Questo rompe 'Expected
+#      Payoff' (= Profit/Trades) e rompe 'n'. NON rompe il PF, che e'
+#      utile lordo / perdita lorda, tutti e due in SOLDI, e non divide
+#      per n. E il confronto "DD contro DD" da solo NON basta e non si
+#      usa: una cella che opera di MENO ha un DD piu' basso per
+#      costruzione, quindi premierebbe il fare meno. Banda di sanita'
+#      sull'n: ogni posizione fa 1 o 2 uscite e InpOneTradePerDay
+#      tiene le posizioni a <= 1 al giorno, quindi ogni cella deve
+#      stare dentro [n_base, 2 x n_base]. Fuori, si e' mosso ALTRO.
 #
 #  6. QUELLO CHE QUESTO ROUND NON FA, dichiarato
 #  --------------------------------------------------------------------
-#  - NON mette ad asse InpTP_R, InpTPMode, InpBreakeven, InpUseTrailEMA,
-#    InpSLMode: restano buchi del certificato.
+#  - NON mette ad asse InpTP_R, InpTPMode, InpUseTrailEMA, InpSLMode:
+#    restano buchi del certificato.
+#  - NON mette ad asse InpBreakeven: e' PINNATO A 0 apposta, per
+#    isolare la parziale (punto 5-ii). Il pacchetto parziale+breakeven
+#    e' R211c, e non e' ancora girato.
 #  - NON cambia TF: M5, come r44a.
 #  - NON e' una prova di regime: finestra contigua.
-#  - Il .ex5 sul banco corrisponde al .mq5: [NON MISURATO].
+#  - Il .ex5 sul banco corrisponde al .mq5: [NON MISURATO]. E dato il
+#    punto 4A-bis (l'EA e' passato da v1.01 a v1.04 dopo r44a), la
+#    corsa va pinnata a un COMMIT, scritto nel referto.
+#  - NON MISURA IL LATO SHORT, E QUI E' UN BUCO PIU' GRAVE CHE SU
+#    R211a. Sul Dow InpAllowShort=0 e' l'identita' della cella di
+#    r44a, quindi si eredita. Sul DAX NON C'E' NESSUNA CELLA DA
+#    EREDITARE: il long-only qui e' una COPIA, non una scelta
+#    misurata, e la REGOLA DEI DUE LATI del 25/08 ("su Nasdaq, DAX e
+#    Dow ogni analisi misura SEMPRE tutti e due i lati") lo vieta come
+#    verdetto finale. Non si puo' mettere ad asse (un asse alla
+#    volta): e' un buco DICHIARATO, il suo round e' R211d, e NESSUN
+#    verdetto su "l'ORB sul DAX" si scrive prima che R211d sia
+#    girato.
+#  - NON RISPONDE SULLA FREQUENZA, e il numero pesa sul 1 ottobre:
+#    sul Dow r44a fa 119 op in 386 gg solari OOS = ~276 gg di borsa
+#    -> 0,43 op/giorno. Il pavimento di casa e' 1,00 PER FAMIGLIA
+#    (firma 07/09). Dow + DAX insieme, se il DAX reggesse, fanno
+#    ~0,86: SOTTO il pavimento. La famiglia ORB ha bisogno di un
+#    TERZO simbolo per essere schierabile, e questo round non lo
+#    cerca.
+#  - IL TETTO DELLE ~100.000 BARRE NON MORDE, ed e' contato: il
+#    referto misura_tick da' D30EUR M5 = 129.666 barre dal 2024.09.26
+#    al 2026.08.20 (693 gg) = 187,1 barre/giorno solare. La corsa e'
+#    SPEZZATA in due tranche dal walk-forward: IS 2024.09.26-
+#    2025.06.09 (256 gg) ~ 47.900 barre, OOS 2025.06.10-2026.06.30
+#    (386 gg) ~ 72.200 barre. Tutte e due sotto il tetto. La finestra
+#    INTERA sarebbe ~120.200: sopra. Non si gira mai intera.
+#
+#  6-bis. E IL VERDETTO DEL 26/07 VA AFFRONTATO, NON AGGIRATO
+#  --------------------------------------------------------------------
+#  backtest_pipeline/REGISTRO_TEST.md r.41: "VERDETTO DEFINITIVO --
+#  capitolo BREAKOUT M5 CHIUSO (26.07.26). Provati e morti in real-tick:
+#  Live5m nativo, Live5m_v2, DAX_M3, aperture Nasdaq, ORB_Fibo,
+#  Londra_ORB. Il breakout in apertura su M5 NON ha edge sul tick vero."
+#
+#  Sul DOW l'argomento e' facile e regge: l'insieme e' elencato PER NOME
+#  (classe 180) e ABTG_ORB_Ottimizzato non c'e'; nessuno di quei sei e'
+#  stato misurato su U30USD; e r44a, che e' del 13/08 -- DOPO il
+#  verdetto -- da' OOS PF 1,657-1,955 a tick reali su n=119, cioe' il
+#  contrario di "non ha edge".
+#
+#  SUL DAX L'ARGOMENTO E' PIU' DEBOLE, E VA SCRITTO COSI'. Nella
+#  lista per nome c'e' DAX_M3, che E' un breakout d'apertura M5 sul
+#  DAX, e backtest_pipeline/risultati_archivio/
+#  CENSIMENTO_LATI_SHORT_2026-08-25.md r.38 lo inchioda proprio su
+#  D30EUR ("Rottura secca (STOP) M5 -- Live5m, DAX_M3, aperture v2 |
+#  D30EUR/NASUSD | morti"). Questo round RIAPRE una cella che ha un
+#  morto col nome e col numero. Si puo' fare, ma solo dichiarando che
+#  cosa e' DIVERSO -- ed e' la clausola della SECONDA CACCIA (19/08):
+#  si riapre su un MECCANISMO diverso, mai su "altri parametri dello
+#  stesso motore morto".
+#  Che cosa e' diverso da DAX_M3, per nome:
+#    - filtro EMA200 sul TF di esecuzione (InpUseEma200Filter=1):
+#      DAX_M3 entrava sulla rottura secca, senza filtro di tendenza;
+#    - tetto sull'ampiezza del range (InpMaxRangePct=0.8): scarta le
+#      aperture larghe, che sono quelle che uccidono il breakout;
+#    - stop all'estremo OPPOSTO del range (InpSLMode=3) invece che a
+#      distanza fissa;
+#    - un trade al giorno con cancellazione dei pendenti superstiti
+#      (InpOneTradePerDay, fix dell'08/08) -- il difetto "si gira e
+#      ristoppato" che DAX_M3 aveva;
+#    - target a multipli dell'ampiezza del range (InpTPMode=1).
+#  >>> Sono cinque differenze di MECCANISMO, non cinque parametri. Ma
+#      resta vero che il DAX e' terreno con un precedente NEGATIVO
+#      misurato, mentre il Dow ha un precedente POSITIVO misurato: se
+#      R211b esce brutto, NON e' una sorpresa ed e' gia' scritto qui.
 #
 #  7. LA FINESTRA E IL DEPOSITO
 #  --------------------------------------------------------------------
 #  @DAQUANDO 2024.09.26 e' MISURATO, non scelto (classe 590, pagata
-#  stanotte su R210): risultati_archivio/misura_tick/
+#  stanotte su R210): backtest_pipeline/risultati_archivio/misura_tick/
 #  REFERTO_MISURA_TICK_D30EUR.txt dice "I TICK REALI DI D30EUR
 #  PARTONO DAL 2024.09.26". Prima di quella data, a -Modello 4, MT5 non
 #  si ferma: fabbrica i tick dalle barre M1, che pero' non ci sono.
@@ -116,8 +243,8 @@
 #  --------------------------------------------------------------------
 #  "SI PUO' FARE SU TUTTI GLI INDICI". In casa l'ORB e' stato misurato
 #  su DUE simboli soli, e NON dicono la stessa cosa:
-#      U30USD  OOS PF 1.65693-1.95461   DD  9.92-11.04%%   (r44a)
-#      NASUSD  OOS PF 1.08062-1.15564   DD 12.26-20.63%%   (r44b)
+#      U30USD  OOS PF 1.65693-1.95461   DD  9,92-11,04%   (r44a)
+#      NASUSD  OOS PF 1.08062-1.15564   DD 12,26-20,63%   (r44b)
 #  >>> Il Dow funziona, il Nasdaq no. "Tutti gli indici" e' gia' smentito
 #      da due simboli su due, e il DAX NON E' MAI STATO PROVATO.
 #  Questo file lo prova. NON HA ANCORA DI REGRESSIONE -- su D30EUR questo
@@ -159,7 +286,7 @@ InpUseEma200Filter=1||1||0||1||N
 InpUseEmaFilter=0||0||0||0||N
 InpUseVolumeFilter=0||0||0||0||N
 InpTP_R=1.0||1.0||0||1.0||N
-InpBreakeven=1||1||0||1||N
+InpBreakeven=0||0||0||0||N
 InpUseTrailEMA=1||1||0||1||N
 InpExitOnEmaClose=0||0||0||0||N
 InpTP1Pct=0||0||25||75||Y
