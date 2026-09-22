@@ -29632,3 +29632,45 @@ del Desktop"*.
    che viene CANCELLATO non e' "toccato": e' distrutto e ricreato.
 4. 🔎 Controllo: `grep -nE "Remove-Item|Set-Content|Out-File|New-Item|-OutFile" <script>` e ogni percorso che esce dev'essere nominato nel paragrafo dei
    toccati.
+
+
+---
+
+## CLASSE 581 -- 🧪🎯 IL COLLAUDO E' PIU' FACILE DELLA REALTA' PROPRIO NELLA DIMENSIONE CHE CONTA: la serie finta ha UN SOLO picco, e cosi' l'ARGMAX non puo' sbagliare (22/09/2026, figlia della regola del contro-esempio del 10/09)
+
+**Caso reale.** `backtest_pipeline/histdata_oro_verso_utc.py` aveva **17 prove su 17 verdi**, fra cui due contro-esempi seri
+(file spostato di +1h e di -1h, tutti e due RIFIUTATI). Il 22/09, sui primi dati veri
+(1.981.357 barre M1 dell'oro 2021-2026), ha **bocciato una conversione GIUSTA**.
+
+**Il controllo giudicava sull'ARGMAX**: *"il minuto piu' violento e' quello che prevedo?"*.
+Sui dati veri il minuto piu' violento d'inverno sono le **10:00 di New York** (mediana
+0,940) e non le **8:30** (0,890): sono **DUE fasce macro vere**, distanti il **5,6%**,
+cioe' rumore su n=350. **Bocciava per cinque centesimi.**
+
+🔴 **E l'autotest non poteva vederlo**: la serie finta (`_serie_finta`) aveva **UN SOLO
+picco piantato**. **L'argmax non puo' sbagliare quando il massimo e' unico.** Il collaudo
+era piu' facile della realta' **esattamente nella dimensione che il controllo misura**.
+
+🟢 **Che l'orologio fosse giusto e' stato dimostrato PRIMA di toccare il controllo**,
+misurando in ora di FILE (senza passare dal convertitore) e contro l'IPOTESI ALTERNATIVA:
+in estate il minuto previsto (08:30) sta al **rango 1 su 1380**, l'alternativa dell'offset
+fisso (07:30) al **rango 267**, con mediane **1,060 contro 0,342** = **3,1x**.
+
+### La regola
+1. 🧪 **Un caso di collaudo deve contenere la CONFUSIONE che i dati veri contengono.**
+   Se il controllo sceglie un massimo, la serie finta deve avere **almeno due** candidati
+   vicini; se conta una soglia, deve avere casi **al bordo**. Un caso sintetico "pulito"
+   collauda l'implementazione, **non il criterio**.
+2. 🔴 **Quando un controllo boccia, la prima domanda e': sbaglia il DATO o sbaglia il
+   CONTROLLO?** Si risponde con una misura **INDIPENDENTE dal controllo** -- qui il rango
+   del minuto previsto letto sui file grezzi. Mai aggiustando il controllo e rilanciando
+   finche' passa: quello e' spostare l'asticella dopo aver visto i numeri.
+3. ✅ **Si ripara il controllo solo se la riparazione lo rende PIU' SEVERO, e lo si
+   dimostra**: qui i due contro-esempi (+1h e -1h) **continuano a essere rifiutati** dopo
+   la riparazione, e la serie finta e' diventata **piu' dura** (due fasce macro, la seconda
+   piu' alta della prima). Se dopo la riparazione i contro-esempi passano, la riparazione
+   e' una resa.
+4. 📐 **Le soglie a percentuale devono essere INDIPENDENTI DALLA GRIGLIA.** "L'1%" su
+   una serie da 96 minuti vuol dire "il primo", su una da 1380 vuol dire "i primi 14":
+   la stessa riga di codice e' due criteri diversi. Si mette un pavimento assoluto
+   (qui `max(3, ceil(0.01*n))`) e lo si dichiara.

@@ -84,6 +84,7 @@
 
 import argparse
 import io
+import math
 import os
 import re
 import sys
@@ -102,6 +103,11 @@ FRAZIONE_SCARTI_MAX = 0.001      # 0,1%
 
 # collaudo dell'orologio: stessi numeri di anatomia_esplosioni_oro.py
 MIN_OSSERVAZIONI_MINUTO = 200
+# soglia di STOP sui minuti contraddittori. Osservato sui dati veri
+# 2021-2026: 0,038%. La soglia e' un PAVIMENTO DI SANITA', non un
+# criterio calibrato: la protezione vera e' che i minuti
+# contraddittori vengono BUTTATI e CONTATI, non scelti.
+FRAZIONE_CONTRADDITTORIA_MAX = 0.005
 SPOSTAMENTO_ATTESO = -60
 SPOSTAMENTO_TOLLERANZA = 2
 # ancora ASSOLUTA: il dato USA delle 8:30 di New York
@@ -296,8 +302,39 @@ def converti(cartella_in, cartella_out, cont, anni_out=None):
             cont["barre"] += 1
             n_file += 1
         cont["per_file"].append((etichetta, n_file))
+    # -----------------------------------------------------------------
+    #  DEDUPLICA (aggiunta il 22/09/2026, sui dati veri 2021-2026)
+    #  I file HistData contengono minuti ripetuti, e sono DUE COSE DIVERSE:
+    #   A) 2021-2025: esattamente 60 minuti l'anno, l'ultima domenica di
+    #      ottobre 19:00-19:59, con le righe IDENTICHE byte per byte
+    #      (misurato: 60/60 identiche in tutti e cinque gli anni). E' una
+    #      duplicazione pura: togliere una copia NON perde niente.
+    #   B) 2026: 756 minuti con righe DIVERSE fra loro (misurato: 0%
+    #      identiche). Sono due serie sfalsate di un minuto, incollate.
+    #      Qui NON si sceglie una delle due misure contraddittorie: si
+    #      BUTTANO TUTTE E DUE e si conta. Scegliere in silenzio sarebbe
+    #      inventare un dato.
+    # -----------------------------------------------------------------
     for anno in per_anno:
         per_anno[anno].sort(key=lambda x: x[0])
+        visti = {}
+        for tt, riga in per_anno[anno]:
+            visti.setdefault(tt, []).append(riga)
+        pulito = []
+        for tt in sorted(visti):
+            v = visti[tt]
+            if len(v) == 1:
+                pulito.append((tt, v[0]))
+            elif len(set(v)) == 1:
+                cont["doppioni_identici"] += len(v) - 1
+                pulito.append((tt, v[0]))
+            else:
+                cont["minuti_contraddittori"] += 1
+                cont["righe_contraddittorie"] += len(v)
+                cont.setdefault("anni_contraddittori", {})
+                cont["anni_contraddittori"][anno] = \
+                    cont["anni_contraddittori"].get(anno, 0) + 1
+        per_anno[anno] = pulito
     if cartella_out:
         os.makedirs(cartella_out, exist_ok=True)
         for anno in sorted(per_anno):
@@ -344,44 +381,118 @@ def collauda_orologio(per_anno):
         v.sort(reverse=True)
         return v[:quanti]
 
+    def profilo(d):
+        return {m: mediana(x) for m, x in d.items()
+                if len(x) >= MIN_OSSERVAZIONI_MINUTO}
     ci, ce = cima(inv), cima(est)
-    return ci, ce
+    return ci, ce, profilo(inv), profilo(est)
 
 
-def giudica_orologio(ci, ce, out):
+def giudica_orologio(ci, ce, pi, pe, out):
+    """
+    RISCRITTO IL 22/09/2026, DOPO CHE QUESTO CONTROLLO HA BOCCIATO UNA
+    CONVERSIONE GIUSTA. E la riscrittura lo rende PIU' severo, non meno.
+
+    IL DIFETTO DELLA VERSIONE VECCHIA. Giudicava sull'ARGMAX: "il minuto
+    piu' violento e' quello che prevedo?". Sui dati veri 2021-2026 il
+    minuto piu' violento d'inverno e' le 10:00 di New York (mediana
+    0,940) e non le 8:30 (0,890): sono DUE fasce macro vere, distanti
+    il 5,6%, cioe' rumore su n=350. Il controllo bocciava per 5 centesimi.
+
+    PERCHE' L'AUTOTEST NON LO AVEVA VISTO: la serie finta aveva UN SOLO
+    picco piantato. L'argmax non puo' sbagliare quando il massimo e'
+    unico. Il collaudo era piu' FACILE della realta' proprio nella
+    dimensione che conta (classe 581).
+
+    IL CONTROLLO NUOVO, e perche' e' piu' forte:
+      (A) il minuto PREVISTO dev'essere nell'1% piu' violento della sua
+          stagione -- non il primo, ma in cima. Non chiede piu' che non
+          esista nessun'altra fascia macro.
+      (B) l'IPOTESI ALTERNATIVA dev'essere BATTUTA: se il calendario DST
+          fosse sbagliato (offset costante), il picco d'estate starebbe
+          a 13:30 UTC invece che a 12:30. Si pretende che il minuto
+          previsto valga almeno 1,5 volte l'alternativo in ALMENO una
+          stagione, e non meno in nessuna.
+    (B) e' la parte che discrimina davvero, e la vecchia (a)+(b) non la
+    faceva: confrontava l'attesa col NULLA invece che con l'altra
+    spiegazione (regola del contro-esempio, 10/09).
+    """
     out("  CONTROLLO 8 -- ANCORA DELL'OROLOGIO (mediana di |close-open|, n>=%d)"
         % MIN_OSSERVAZIONI_MINUTO)
-    if not ci or not ce:
+    if not ci or not ce or not pi or not pe:
         out("    NON MISURABILE: servono mesi invernali E estivi con n>=%d."
             % MIN_OSSERVAZIONI_MINUTO)
         return False
     for eti, c in (("inverno (12-1-2)", ci), ("estate  (6-7-8)", ce)):
         out("    %-17s %s" % (eti, "  ".join(
             "%02d:%02d (%.4f n=%d)" % (m // 60, m % 60, v, n) for v, m, n in c)))
-    spost = ce[0][1] - ci[0][1]
-    out("    (a) spostamento estate-inverno = %+d minuti (atteso %+d +/- %d)"
-        % (spost, SPOSTAMENTO_ATTESO, SPOSTAMENTO_TOLLERANZA))
-    ok_a = abs(spost - SPOSTAMENTO_ATTESO) <= SPOSTAMENTO_TOLLERANZA
-    ok_b1 = BANDA_INVERNO[0] <= ci[0][1] < BANDA_INVERNO[1]
-    ok_b2 = BANDA_ESTATE[0] <= ce[0][1] < BANDA_ESTATE[1]
-    out("    (b) picco inverno %02d:%02d UTC (banda %02d:00-%02d:59) -> %s"
-        % (ci[0][1] // 60, ci[0][1] % 60, BANDA_INVERNO[0] // 60,
-           BANDA_INVERNO[1] // 60 - 1, "OK" if ok_b1 else "FUORI"))
-    out("    (b) picco estate  %02d:%02d UTC (banda %02d:00-%02d:59) -> %s"
-        % (ce[0][1] // 60, ce[0][1] % 60, BANDA_ESTATE[0] // 60,
-           BANDA_ESTATE[1] // 60 - 1, "OK" if ok_b2 else "FUORI"))
+
+    # minuto PREVISTO (8:30 New York) e minuto ALTERNATIVO (calendario sbagliato)
+    PREV_INV, ALT_INV = 13 * 60 + 30, 12 * 60 + 30
+    PREV_EST, ALT_EST = 12 * 60 + 30, 13 * 60 + 30
+
+    def rango(prof, m):
+        if m not in prof:
+            return None, None, None
+        ord_ = sorted(prof.items(), key=lambda x: -x[1])
+        for k, (mm, v) in enumerate(ord_):
+            if mm == m:
+                return v, k + 1, len(ord_)
+        return None, None, None
+
+    esiti = []
+    for eti, prof, mp, ma in (("inverno", pi, PREV_INV, ALT_INV),
+                              ("estate ", pe, PREV_EST, ALT_EST)):
+        vp, rp, n = rango(prof, mp)
+        va, ra, _ = rango(prof, ma)
+        if vp is None:
+            out("    %s: il minuto previsto %02d:%02d UTC non ha abbastanza dati."
+                % (eti, mp // 60, mp % 60))
+            return False
+        pct = 100.0 * (1.0 - (rp - 1.0) / n)
+        # La soglia dev'essere INDIPENDENTE DALLA GRIGLIA: "l'1%" su una
+        # serie da 96 minuti vuol dire "il primo", su una da 1380 vuol
+        # dire "i primi 14". Con l'1% secco l'autotest a griglia larga
+        # bocciava il caso GIUSTO. Si tiene l'1%, con un pavimento di 3:
+        # le fasce macro vere in una giornata sono una manciata (8:30,
+        # 10:00, 14:00), non una sola.
+        # (A) resta un PAVIMENTO di sanita'; a discriminare e' (B).
+        soglia = max(3, int(math.ceil(0.01 * n)))
+        in_cima = rp <= soglia
+        out("    (A) %s  PREVISTO %02d:%02d UTC  mediana %.4f  rango %d/%d  "
+            "percentile %.2f -> %s"
+            % (eti, mp // 60, mp % 60, vp, rp, n, pct,
+               "IN CIMA (primi %d)" % soglia if in_cima
+               else "FUORI dai primi %d" % soglia))
+        if va is None:
+            out("    (B) %s  l'ALTERNATIVA %02d:%02d UTC non ha dati: non decide."
+                % (eti, ma // 60, ma % 60))
+            rapp = None
+        else:
+            rapp = vp / va if va > 0 else float("inf")
+            out("    (B) %s  ALTERNATIVA %02d:%02d UTC  mediana %.4f  rango %d/%d  "
+                "-> il previsto vale %.2fx l'alternativo"
+                % (eti, ma // 60, ma % 60, va, ra, n, rapp))
+        esiti.append((in_cima, rapp))
+
+    ok_a = all(e[0] for e in esiti)
+    rapporti = [e[1] for e in esiti if e[1] is not None]
+    ok_b = bool(rapporti) and max(rapporti) >= 1.5 and min(rapporti) >= 1.0
     if not ok_a:
-        out("    FALLITO (a): il calendario DST applicato e' SBAGLIATO.")
-    if not (ok_b1 and ok_b2):
-        out("    FALLITO (b): l'offset COSTANTE e' sbagliato di un'ora o piu'.")
-        out("        Il controllo (a) da solo NON lo vede: e' per questo che (b) esiste.")
-    return ok_a and ok_b1 and ok_b2
+        out("    FALLITO (A): il minuto previsto non e' fra i piu' violenti.")
+        out("        L'orologio applicato NON mette le 8:30 di New York dove devono stare.")
+    if not ok_b:
+        out("    FALLITO (B): l'IPOTESI ALTERNATIVA non e' battuta.")
+        out("        Il minuto previsto non si distingue da quello che darebbe")
+        out("        un calendario DST sbagliato: la conversione non e' dimostrata.")
+    return ok_a and ok_b
 
 
 # =====================================================================
 #  AUTOTEST -- I CONTRO-ESEMPI, COSTRUITI PER FAR SBAGLIARE QUESTO FILE
 # =====================================================================
-def _serie_finta(anni, offset_ore=None, minuto_picco=(8, 30)):
+def _serie_finta(anni, offset_ore=None, minuto_picco=(8, 30),
+                 minuto_secondo=(10, 0)):
     """Serie M1 finta in ora LOCALE DI NEW YORK, con un'esplosione
     piantata alle 8:30 di New York di ogni giorno feriale. Se
     offset_ore e' diverso da None, i timestamp vengono SPOSTATI di
@@ -400,8 +511,14 @@ def _serie_finta(anni, offset_ore=None, minuto_picco=(8, 30)):
                         t = datetime(anno, mese, giorno, ora, minuto)
                         if offset_ore:
                             t = t + timedelta(hours=offset_ore)
+                        # CLASSE 581: due fasce macro VERE, e la seconda
+                        # piu' violenta della prima. Sui dati 2021-2026
+                        # l'inverno ha 10:00 (0,940) sopra 8:30 (0,890):
+                        # una serie con UN SOLO picco rende l'autotest piu'
+                        # facile della realta' proprio dove conta.
                         grande = (ora, minuto) == minuto_picco
-                        d = 5.0 if grande else 0.1
+                        secondo = (ora, minuto) == minuto_secondo
+                        d = 5.0 if grande else (5.6 if secondo else 0.1)
                         o = prezzo
                         c = prezzo + d
                         h = max(o, c) + 0.2
@@ -426,7 +543,9 @@ def nuovo_contatore():
     return {"file": 0, "barre": 0, "scartate": 0, "forma_sbagliata": 0,
             "data_impossibile": 0, "ohlc_incoerenti": 0, "fuori_banda": 0,
             "ora_inesistente": 0, "ora_ambigua": 0, "volume_non_zero": 0,
-            "doppioni": 0, "fuori_ordine": 0, "per_file": [], "scritti": []}
+            "doppioni": 0, "fuori_ordine": 0, "per_file": [], "scritti": [],
+            "doppioni_identici": 0, "minuti_contraddittori": 0,
+            "righe_contraddittorie": 0, "anni_contraddittori": {}}
 
 
 def autotest():
@@ -545,9 +664,9 @@ def autotest():
     # --- 10. IL CONTRO-ESEMPIO CHE CONTA: la serie GIUSTA passa l'ancora
     cont = nuovo_contatore()
     pa4 = _converti_righe(_serie_finta([2021, 2022, 2023, 2024]), cont)
-    ci, ce = collauda_orologio(pa4)
+    ci, ce, pi, pe = collauda_orologio(pa4)
     righe_log = []
-    ok = giudica_orologio(ci, ce, lambda m: righe_log.append(m))
+    ok = giudica_orologio(ci, ce, pi, pe, lambda m: righe_log.append(m))
     prova("10. serie in ora di New York: l'ancora dell'orologio PASSA", ok,
           "inverno %02d:%02d UTC, estate %02d:%02d UTC"
           % (ci[0][1] // 60, ci[0][1] % 60, ce[0][1] // 60, ce[0][1] % 60)
@@ -558,26 +677,23 @@ def autotest():
     #  (lo spostamento stagionale resta -60) e sballerebbe OGNI ora.
     cont = nuovo_contatore()
     pa5 = _converti_righe(_serie_finta([2021, 2022, 2023, 2024], offset_ore=1), cont)
-    ci5, ce5 = collauda_orologio(pa5)
+    ci5, ce5, pi5, pe5 = collauda_orologio(pa5)
     spost5 = ce5[0][1] - ci5[0][1] if (ci5 and ce5) else None
     righe_log = []
-    ok5 = giudica_orologio(ci5, ce5, lambda m: righe_log.append(m))
-    prova("11. file spostato di +1h: (a) da solo NON lo vede",
+    ok5 = giudica_orologio(ci5, ce5, pi5, pe5, lambda m: righe_log.append(m))
+    prova("11. file spostato di +1h: lo SPOSTAMENTO STAGIONALE resta -60",
           spost5 == SPOSTAMENTO_ATTESO,
-          "spostamento stagionale = %s minuti (identico al caso giusto)" % spost5)
-    prova("11-bis. ma l'ancora ASSOLUTA (b) lo RIFIUTA", not ok5,
-          "picco inverno %02d:%02d UTC invece della banda 13:xx"
-          % (ci5[0][1] // 60, ci5[0][1] % 60) if ci5 else "")
+          "spostamento = %s minuti, IDENTICO al caso giusto: da solo non decide" % spost5)
+    prova("11-bis. ma il controllo nuovo lo RIFIUTA lo stesso", not ok5,
+          "il minuto previsto non e' in cima e non batte l'alternativa")
 
     # --- 12. e anche -1h viene rifiutato (l'altro verso)
     cont = nuovo_contatore()
     pa6 = _converti_righe(_serie_finta([2021, 2022, 2023, 2024], offset_ore=-1), cont)
-    ci6, ce6 = collauda_orologio(pa6)
+    ci6, ce6, pi6, pe6 = collauda_orologio(pa6)
     righe_log = []
-    ok6 = giudica_orologio(ci6, ce6, lambda m: righe_log.append(m))
-    prova("12. file spostato di -1h: RIFIUTATO dall'ancora assoluta", not ok6,
-          "picco inverno %02d:%02d UTC" % (ci6[0][1] // 60, ci6[0][1] % 60)
-          if ci6 else "")
+    ok6 = giudica_orologio(ci6, ce6, pi6, pe6, lambda m: righe_log.append(m))
+    prova("12. file spostato di -1h: RIFIUTATO (l'altro verso)", not ok6, "")
 
     # --- 13. il weekend: HistData non scrive barre, e NON se ne inventano
     cont = nuovo_contatore()
@@ -682,12 +798,32 @@ def main():
         log("      di New York. Allora il file NON e' in ora di New York, e la")
         log("      conversione applicata e' sbagliata per costruzione.")
         grave = True
-    if cont["fuori_ordine"] > 0:
-        log("STOP (CONTROLLO 3): %d righe fuori ordine." % cont["fuori_ordine"])
+    # CONTROLLO 3 -- RISCRITTO IL 22/09/2026, e la ragione e' che fermarsi
+    # sull'ORDINE GREZZO era la domanda sbagliata: l'uscita viene ORDINATA
+    # da questo stesso strumento, quindi un file d'ingresso disordinato non
+    # rende sbagliato niente. Cio' che puo' rendere sbagliato un dato e' un
+    # MINUTO CONTRADDITTORIO -- lo stesso timestamp con due barre diverse --
+    # e quelli adesso vengono BUTTATI, non scelti a caso.
+    log("  CONTROLLO 3 -- minuti ripetuti nei file d'ingresso")
+    log("    righe fuori ordine nell'INGRESSO   = %d  (l'uscita e' ordinata)"
+        % cont["fuori_ordine"])
+    log("    doppioni IDENTICI tolti            = %d  (duplicazione pura: nessuna perdita)"
+        % cont["doppioni_identici"])
+    log("    minuti CONTRADDITTORI buttati      = %d  (%d righe)"
+        % (cont["minuti_contraddittori"], cont["righe_contraddittorie"]))
+    if cont["anni_contraddittori"]:
+        log("      per anno: %s" % ", ".join(
+            "%d:%d" % (k, v) for k, v in sorted(cont["anni_contraddittori"].items())))
+    fraz = (cont["minuti_contraddittori"] / float(cont["barre"])) if cont["barre"] else 0.0
+    log("    frazione contraddittoria = %.4f%%  (soglia di STOP: %.2f%%)"
+        % (100.0 * fraz, 100.0 * FRAZIONE_CONTRADDITTORIA_MAX))
+    if fraz > FRAZIONE_CONTRADDITTORIA_MAX:
+        log("STOP (CONTROLLO 3): troppi minuti contraddittori: il feed non e'")
+        log("      una serie sola, e cucirne due e' inventare un dato.")
         grave = True
 
-    ci, ce = collauda_orologio(per_anno)
-    if not giudica_orologio(ci, ce, log):
+    ci, ce, pi, pe = collauda_orologio(per_anno)
+    if not giudica_orologio(ci, ce, pi, pe, log):
         grave = True
 
     log("")

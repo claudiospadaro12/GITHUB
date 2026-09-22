@@ -1033,14 +1033,32 @@ def main():
 
     out("")
     out("  >>> I DUE LATI, per epoca e per fascia 09:30 ET")
-    for eti, sel in (("TUTTO 2006-2020", f30),
-                     ("2006-2013", [f for f in f30 if f["anno"] <= 2013]),
-                     ("2014-2020", [f for f in f30 if f["anno"] >= 2014]),
+    # CLASSE 574, SECONDO RESIDUO (trovato dal cancello il 22/09/2026).
+    # Qui le etichette d'epoca erano CABLATE a "2006-2020"/"2006-2013"/
+    # "2014-2020" come nella sezione G/H gia' riparata. Su una finestra
+    # 2021-2026 stampavano tre righe FALSE, e le peggiori erano due:
+    # "TUTTO 2006-2020" e "2014-2020" uscivano con numeri IDENTICI, e chi
+    # legge conclude "l'epoca recente spiega tutto il campione" -- una
+    # conclusione letta da un'ETICHETTA, non misurata. E cadeva proprio
+    # nella sezione dei DUE LATI (regola del 25/08).
+    # Adesso gli anni si CALCOLANO dai dati e lo spartiacque e' il MEDIANO
+    # della finestra vera, non una data del 2013.
+    _anni = sorted(set(f["anno"] for f in f30))
+    if not _anni:
+        _anni = [0]
+    _a0, _a1 = _anni[0], _anni[-1]
+    _mid = _anni[len(_anni) // 2]
+    _e_tutto = "TUTTO %d-%d" % (_a0, _a1)
+    _e_pri = "%d-%d" % (_a0, _mid - 1) if _mid > _a0 else "(nessun anno prima)"
+    _e_sec = "%d-%d" % (_mid, _a1)
+    for eti, sel in ((_e_tutto, f30),
+                     (_e_pri, [f for f in f30 if f["anno"] < _mid]),
+                     (_e_sec, [f for f in f30 if f["anno"] >= _mid]),
                      ("fascia 09:30 ET, tutto", [f for f in f30 if f["fascia_ny"] == 570]),
-                     ("fascia 09:30 ET, 2006-2013",
-                      [f for f in f30 if f["fascia_ny"] == 570 and f["anno"] <= 2013]),
-                     ("fascia 09:30 ET, 2014-2020",
-                      [f for f in f30 if f["fascia_ny"] == 570 and f["anno"] >= 2014])):
+                     ("fascia 09:30 ET, " + _e_pri,
+                      [f for f in f30 if f["fascia_ny"] == 570 and f["anno"] < _mid]),
+                     ("fascia 09:30 ET, " + _e_sec,
+                      [f for f in f30 if f["fascia_ny"] == 570 and f["anno"] >= _mid])):
         su = sum(1 for f in sel if f["mov"] >= K_PRINCIPALE * f["atr"])
         giu = sum(1 for f in sel if f["mov"] <= -K_PRINCIPALE * f["atr"])
         n = su + giu
