@@ -47,3 +47,12 @@ report/.backup/
 # Alberi finti dei contro-esempi degli agenti (falsi %APPDATA% con terminali MT5
 # ricostruiti). Sono banchi di prova usa-e-getta: non vanno in repo. 20/09/2026.
 casi/
+
+# Oro M1 convertito in UTC (22/09/2026): 127 MB di CSV DERIVATI, che si
+# rifanno in un comando solo dai .zip grezzi qui accanto (che invece SONO
+# in repo, 24 MB, con lo SHA256 di ognuno nel RIEPILOGO.txt). Versionarli
+# sarebbe pagare 127 MB per sempre per una cosa che si rigenera con:
+#   python3 backtest_pipeline/histdata_oro_verso_utc.py \
+#       --dentro backtest_pipeline/risultati_prove/oro_m1_histdata_zip \
+#       --fuori  backtest_pipeline/risultati_prove/oro_m1_utc_2021_2026
+backtest_pipeline/risultati_prove/oro_m1_utc_2021_2026/
