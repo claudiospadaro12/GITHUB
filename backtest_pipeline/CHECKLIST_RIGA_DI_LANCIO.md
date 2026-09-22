@@ -30520,3 +30520,46 @@ gira con **250** (scalato) e fa 59/92 operazioni.
    un CSV vuoto. La stessa classe, su un input di **STOP** o di **BUFFER**, produce uno stop
    **cento volte piu' largo** di quello che il backtest aveva misurato -- e quella non si vede
    in un CSV a zero: si vede in un conto vero. **Sui preset in CAMPO va guardata per prima.**
+
+
+---
+
+## CLASSE 599 -- 🗃💥 IL COORDINATORE CHE COMMITTA I FILE **STAGED DA UN AGENTE ANCORA AL LAVORO**: il contenuto si salva, **il VERBALE si perde** -- e non serve `git add -A` per farlo (22/09/2026, secondo episodio della classe 194, e **l'ho fatto io**)
+
+**Il caso reale, raccontato giusto perche' la prima versione era sbagliata.**
+Nella notte del 22/09 giravano **cinque agenti in parallelo**. L'agente del Dow breakout
+aveva **gia' messo in staging** i suoi sei file col **proprio messaggio di commit** pronto.
+Io, per rispettare la **Regola #1** (*"cio' che non e' pushato e' perso"*), ho committato
+lo stato del working tree e me li sono portati dentro il commit **`534f49fa`**, che parlava
+della **classe 598** e di tutt'altro.
+
+🔴 **E la correzione che conta**: nel suo referto l'agente ha scritto che *"un altro agente
+ha committato con `git add -A`"*. **Non e' vero, e il fatto vero e' PEGGIORE.** Il commit
+`534f49fa` elenca i file **UNO PER UNO** (`git show --stat` lo mostra): la regola *"mai
+`git add -A`"* **era rispettata alla lettera**, e il danno e' successo lo stesso. 👉 Quindi
+la regola di casa, da sola, **non protegge**: aggiungere per nome il file di un altro **e'
+esattamente equivalente**.
+
+**Il danno non e' il contenuto -- e' il verbale.** `git diff HEAD` era vuoto: i byte c'erano
+tutti. Ma il **messaggio** che spiegava *cosa sono quei file, cosa misurano, che ancora
+hanno e quanto costano* non esisteva piu', e un file prova senza il suo verbale e' un file
+che fra un mese nessuno sapra' piu' perche' esiste. L'agente ha dovuto ricostruirlo con un
+commit `--allow-empty` (`9f74185b`).
+
+### La regola
+1. 🧭 **Prima di committare, `git status` si LEGGE, non si esegue e basta.** Un file che
+   non hai scritto tu, mentre girano altri agenti, **e' di qualcun altro**.
+2. 🛑 **Non si committano i file di un agente ancora vivo**, nemmeno per nome, nemmeno
+   "per sicurezza". La Regola #1 vale **sul proprio lavoro**: sul lavoro altrui la premura
+   diventa un furto di verbale.
+3. ⏳ **Se il file rischia davvero di andare perso** (l'agente sta per finire il contesto,
+   la sessione sta per chiudersi), lo si committa **da solo, in un commit dedicato**, col
+   messaggio che dice **"in corso d'opera di un altro agente, verbale suo in arrivo"** --
+   mai mescolato a un commit che parla d'altro.
+4. 🗣️ **E lo si DICE all'agente**, cosi' non scopre da solo che il suo staging e' sparito e
+   non ne deduce una causa sbagliata. 🔴 Qui non gliel'ho detto, e infatti nel suo referto
+   la causa e' scritta male: **un'informazione falsa messa agli atti costa piu' del
+   disturbo di un messaggio.**
+5. 📌 **E vale anche al contrario**: un agente che mette in staging e poi continua a
+   lavorare per mezz'ora **sta lasciando il suo lavoro in una zona condivisa**. Si committa
+   quando si consegna, non prima.
