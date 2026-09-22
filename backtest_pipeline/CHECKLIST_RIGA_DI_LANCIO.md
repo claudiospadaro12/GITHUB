@@ -29359,3 +29359,68 @@ sbagliata e il referto esce **completo, pulito e spostato di cinque ore**.
    scrivere. Se il collaudo non passa, i file **non si usano** e lo strumento esce con 2.
 📌 Corollario che vale sempre: **due finestre di feed diversi non stanno mai nella stessa
 cartella**, perche' `--dati <cartella>` le concatenerebbe in una serie sola senza dirlo.
+
+---
+
+## CLASSE 574 -- 🏷️📅 L'ETICHETTA DELLA FINESTRA CABLATA NEL TITOLO DELLA SEZIONE: SU UN CAMPIONE NUOVO LO STRUMENTO CHIAMA `IS` UN INSIEME VUOTO E `CASSAFORTE OOS` TUTTO IL CAMPIONE
+
+**Caso reale (22/09/2026, `anatomia_esplosioni_oro.py`).** Lo strumento e' stato scritto sulla
+finestra Oanda 2006-2020 e portava **tre etichette di anni CABLATE**, tutte e tre proprio nelle
+sezioni che portano la conclusione:
+- **r.620** `"tasso medio = %.3f%% (tutte, 2006-2020) ... (2010-2020, escluse le"` -- riga
+  **incondizionata**, stampata sopra la tabella da cui si legge il ritrovamento centrale;
+- **r.802/804** `">>> G. IS 2006-2015"` e `">>> H. CASSAFORTE OOS 2016-2020"`, con il filtro su
+  `ANNO_CASSAFORTE = 2016`.
+
+🔴 **Su una finestra 2021-202x** (la stessa misura, feed nuovo): **G** esce su un insieme
+**VUOTO** (`sfrutta` non muore: stampa `esplosioni = 0`), e **H** stampa **TUTTO il campione
+sotto il titolo «CASSAFORTE OOS 2016-2020»**. Cioe' **una conferma fuori campione che non e'
+fuori campione**, con un intervallo di anni che **nei dati non esiste**.
+🔴 E non serviva nessun dato mancante perche' accadesse: bastava girare lo strumento.
+🔴 **E nessuna riga stampava la finestra vera**: r.353-355 dava barre, blocchi e giornate, **mai
+una data**. Quindi il lettore non aveva modo di accorgersene.
+
+### La regola
+1. **Ogni intervallo di anni che compare in un'uscita si CALCOLA dai dati**, mai si scrive a mano
+   nel formato di stampa.
+2. **Un taglio IS/OOS che il campione non attraversa si DICHIARA non applicabile**, non si stampa
+   col suo titolo storico. *«Una cassaforte che contiene tutto il campione non e' una
+   cassaforte.»*
+3. 📌 **Il primo numero di ogni referto e' la FINESTRA MISURATA** (`primo giorno -> ultimo
+   giorno`), stampata dai dati. Senza quella riga, ogni altra etichetta e' invereficabile.
+4. 🧪 E si collauda **su tutti e due i rami**: un campione che attraversa il taglio (deve
+   stampare G e H) **e** uno che non lo attraversa (deve dichiararlo). Il 22/09 la riparazione
+   e' stata provata cosi': 2006-2020 -> `G. IS 2006-2015` + `H. CASSAFORTE OOS 2016-2020`;
+   2016-2020 -> `G/H. IS/OOS NON APPLICABILI`.
+
+---
+
+## CLASSE 575 -- 📏🕳️ IL `[NON MISURATO]` DICHIARATO SENZA AVER CERCATO LA MISURA INDIRETTA CHE E' GIA' IN CASA -- E DELLE DUE FONTI "IN DISACCORDO" UNA ERA SEMPLICEMENTE SBAGLIATA
+
+**Caso reale (22/09/2026, piano oro M1 2021-2026).** Il documento motivava la scelta della fonte
+scrivendo che l'offset **invernale** del server BCM *«non c'e'»*, perche' `CLAUDE.md` (misura
+**estiva**) e un commento di `importa_storico_esterno.ps1` (*«BCM e' GMT+2/+3»*) erano **in
+disaccordo**, e concludeva **`[NON MISURATO]`**.
+
+🔴 **Il numero era gia' in casa, per via indiretta**, e si ricavava dalla stessa calibrazione che
+il documento citava **a proprio favore**: da `BCM = HistData + shift`
+(`ABTG_ImportaStoricoEsterno_v2.mq5` r.670 e r.762) e da `shiftBase = +5` -- trovato **da solo**,
+**8 simboli su 8**, copertura **99,2-99,6%** su ~7 anni, quindi **su molti inverni** -- discende
+`BCM = UTC+0` d'inverno e `UTC+1` d'estate. Confermato da una **seconda fonte indipendente**
+(la regola DAX di `CLAUDE.md`).
+🔴 E la fonte "in disaccordo" **era semplicemente falsa**: se BCM fosse `GMT+2/+3`, lo
+`shiftBase` misurato sarebbe stato **+7**, non +5.
+
+**Perche' costa davvero, due volte:**
+1. **Si perde una misura che c'e'** -- e' il difetto del *certificato di morte* applicato a un
+   numero invece che a un candidato: qualcuno la rifara', o non la trovera' piu'.
+2. 🔴 **L'affermazione falsa resta in repo**, e `GMT+2/+3` e' **proprio la convenzione che ci si
+   aspetta da un broker MT5**: chi la legge sbaglia di **due ore** e non ha motivo di dubitarne.
+
+### La regola
+1. **Prima di scrivere `[NON MISURATO]` si cerca se il numero e' DERIVABILE** da una misura gia'
+   fatta. Una calibrazione di fuso **e'** una misura di offset: va letta come tale.
+2. 🔴 **Quando due fonti di casa si contraddicono, si DECIDE quale delle due e' falsa e la si
+   CORREGGE.** *«In disaccordo» non e' un verdetto: e' una verifica non fatta.*
+3. 📌 E si guarda **quale delle due e' piu' facile da credere**: quella che coincide con la
+   convenzione diffusa e' la piu' pericolosa, perche' nessuno la mette in dubbio.

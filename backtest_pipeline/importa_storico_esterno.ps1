@@ -29,7 +29,12 @@
 #   5. raccoglie il referto sul Desktop + zip pronto da mandare
 #
 #  LE DUE TRAPPOLE CHE DISINNESCA (le tre sono nel report):
-#   - FUSO E DST: HistData e' ora di New York, BCM e' GMT+2/+3. Lo
+#   - FUSO E DST: HistData e' ora di New York; BCM e' UTC+0 d'inverno e
+#     UTC+1 d'estate (= ora italiana -1 tutto l'anno), misurato per via
+#     indiretta dallo shiftBase +5 (22/09/2026, classe 575). La stesura
+#     precedente diceva "BCM e' GMT+2/+3": ERA SBAGLIATA di due ore, e
+#     GMT+2/+3 e' proprio la convenzione che ci si aspetta da un broker
+#     MT5, quindi era un errore che si legge come ovvio. Lo
 #     script MQL5 prova tutti gli shift da -6 a +6 e sceglie quello che
 #     minimizza la differenza fra le chiusure H1 importate e quelle
 #     native, stampando la tabella completa.

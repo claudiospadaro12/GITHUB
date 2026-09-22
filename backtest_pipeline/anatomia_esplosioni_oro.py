@@ -353,6 +353,14 @@ def main():
     out("LETTURA: barre M1 = %d | righe scartate = %d | OHLC incoerenti = %d"
         % (cont["barre"], cont["righe_scartate"], cont["ohlc_incoerenti"]))
     out("         blocchi base 15' = %d | giornate = %d" % (len(blocchi), len(giorni)))
+    # CLASSE 574: il primo numero di ogni referto e' la FINESTRA MISURATA.
+    # Finche' non c'era, tre etichette cablate raccontavano una finestra
+    # diversa da quella dei dati, e nessuna riga diceva quale fosse la vera.
+    _gg = sorted(giorni)
+    if _gg:
+        out("         FINESTRA MISURATA: %s -> %s" % (_gg[0], _gg[-1]))
+        out("         (l'etichetta la fa il DATO: mai il nome del file, mai il")
+        out("          titolo di una sezione)")
     out("")
     ok, spost, picchi = collauda_orologio(inv, est)
     out("  COLLAUDO OROLOGIO -- minuto piu' mosso, MEDIANA di |close-open|, n>=200")
@@ -617,8 +625,18 @@ def main():
     tm = sum(su_f.values()) + sum(giu_f.values())
     tm = tm / sum(n_f.values())
     tms = (sum(su_fs.values()) + sum(giu_fs.values())) / max(sum(n_fs.values()), 1)
-    out("  tasso medio = %.3f%% (tutte, 2006-2020)   %.3f%% (2010-2020, escluse le"
-        % (100 * tm, 100 * tms))
+    # CLASSE 574: gli anni si CALCOLANO dai dati. Queste due etichette
+    # erano cablate a "2006-2020" e "2010-2020" e sarebbero comparse
+    # identiche sopra una tabella calcolata su tutt'altra finestra.
+    _y = sorted(set(f["anno"] for f in f30))
+    _ys = sorted(set(f["anno"] for f in f30
+                     if anni_news and anni_news[0] <= f["anno"] <= anni_news[-1]))
+    out("  tasso medio = %.3f%% (tutte, %s)   %.3f%% (%s, escluse le"
+        % (100 * tm,
+           ("%d-%d" % (_y[0], _y[-1])) if _y else "NESSUN ANNO",
+           100 * tms,
+           ("%d-%d" % (_ys[0], _ys[-1])) if _ys
+           else "NESSUN ANNO COPERTO DAL CALENDARIO"))
     out("  finestre di notizia). Le due colonne x sono ciascuna rapportata al")
     out("  PROPRIO tasso medio, quindi sono confrontabili fra loro.")
     out("  fascia ET | finestre | RIALZO | RIBASSO |  tasso  | x medio | x medio SENZA news | che cosa c'e' li'")
@@ -799,10 +817,24 @@ def main():
                        mediana(mae_rel) * PREZZO_ORO_OGGI))
 
     sfrutta(f30, K_PRINCIPALE, ">>> F. TUTTO IL CAMPIONE, N=30', k=0,40")
-    sfrutta(f30, K_PRINCIPALE, ">>> G. IS 2006-2015",
-            filtro=lambda f: f["anno"] < ANNO_CASSAFORTE)
-    sfrutta(f30, K_PRINCIPALE, ">>> H. CASSAFORTE OOS 2016-2020",
-            filtro=lambda f: f["anno"] >= ANNO_CASSAFORTE)
+    # CLASSE 574, ed era il difetto piu' grave: con un campione che NON
+    # attraversa il taglio, G usciva su un insieme VUOTO e H stampava
+    # TUTTO il campione sotto il titolo "CASSAFORTE OOS 2016-2020".
+    # Cioe' una conferma fuori campione che non e' fuori campione.
+    _ya = sorted(set(f["anno"] for f in f30))
+    if _ya and _ya[0] < ANNO_CASSAFORTE <= _ya[-1]:
+        sfrutta(f30, K_PRINCIPALE,
+                ">>> G. IS %d-%d" % (_ya[0], ANNO_CASSAFORTE - 1),
+                filtro=lambda f: f["anno"] < ANNO_CASSAFORTE)
+        sfrutta(f30, K_PRINCIPALE,
+                ">>> H. CASSAFORTE OOS %d-%d" % (ANNO_CASSAFORTE, _ya[-1]),
+                filtro=lambda f: f["anno"] >= ANNO_CASSAFORTE)
+    else:
+        out("")
+        out(">>> G/H. IS/OOS NON APPLICABILI: il campione va dal %d al %d e NON"
+            % (_ya[0] if _ya else 0, _ya[-1] if _ya else 0))
+        out("    attraversa il taglio del %d. Una cassaforte che contiene TUTTO" % ANNO_CASSAFORTE)
+        out("    il campione non e' una cassaforte, e non va stampata come tale.")
     sfrutta(f30, K_PRINCIPALE,
             ">>> M. SOLO la fascia 09:30 ET (apertura cash USA) -- l'unica che\n"
             "       sopravvive al cancello delle notizie SENZA avere appuntamenti\n"
