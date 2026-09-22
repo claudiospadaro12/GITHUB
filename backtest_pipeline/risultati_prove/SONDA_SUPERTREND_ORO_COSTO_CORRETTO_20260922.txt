@@ -1,0 +1,52 @@
+=====================================================================
+ SONDA SUPERTREND -- CINQUE DEFINIZIONI DI SEGNALE, COL COSTO DENTRO
+ corsa del 2026-09-22   finestra 2013-2018   seme 20260922
+=====================================================================
+ DICHIARATO PRIMA DEI NUMERI:
+  - il verdetto e' sul PF NETTO, non sulla %% di falsi
+  - merita un round solo con PF netto >= 1,10 su >= 2 simboli E
+    su TUTTI E DUE i lati (regola di casa del 25/08)
+  - se il RUMORE fa PF netto >= 1,05, la misura si butta
+  - screening su OHLC M1 aggregate: NON e' un verdetto a tick
+
+autotest: PASSATO (10 controlli)
+
+---------------------------------------------------------------------
+ XAU_USD  TF 60 min  |  35,967 barre  |  2013-01-02 -> 2018-12-31
+ costo per OPERAZIONE (giro completo): 0.2003 unita' di prezzo  (MISURATO in casa)
+   (corretto il 22/09 sera: prima ne toglievo DUE, chiamando 'lato' quello che
+    le fonti chiamano GIRO. Un'operazione qui e' gia' un giro: aperta a un flip,
+    chiusa al flip dopo, lo spread si attraversa UNA volta.)
+
+  famiglia      |   n  | %falsi lordo | %falsi NETTO | PF lordo | PF NETTO | PF long | PF short | PF RUMORE
+  S1_FLIP       | 1448 |    63.81%    |    64.64%    |   1.085  |   1.031  |  0.959  |  1.104   |   0.950
+  S2_AMA_ZERO   |  776 |    68.43%    |    68.81%    |   1.049  |   1.009  |  0.899  |  1.119   |   0.958
+  S3_OSC_80     | 1446 |    63.97%    |    64.80%    |   1.079  |   1.025  |  0.953  |  1.099   |   0.949
+  S4_HIST_ZERO  |  837 |    60.57%    |    60.69%    |   1.064  |   1.024  |  0.926  |  1.133   |   1.004
+  S5_OSC_AMA    | 4788 |    70.49%    |    72.47%    |   0.950  |   0.857  |  0.819  |  0.896   |   0.959
+
+---------------------------------------------------------------------
+ XAU_USD  TF 240 min  |  9,590 barre  |  2013-01-02 -> 2018-12-31
+ costo per OPERAZIONE (giro completo): 0.2003 unita' di prezzo  (MISURATO in casa)
+   (corretto il 22/09 sera: prima ne toglievo DUE, chiamando 'lato' quello che
+    le fonti chiamano GIRO. Un'operazione qui e' gia' un giro: aperta a un flip,
+    chiusa al flip dopo, lo spread si attraversa UNA volta.)
+
+  famiglia      |   n  | %falsi lordo | %falsi NETTO | PF lordo | PF NETTO | PF long | PF short | PF RUMORE
+  S1_FLIP       |  410 |    62.20%    |    62.68%    |   1.042  |   1.015  |  0.882  |  1.151   |   1.003
+  S2_AMA_ZERO   |  206 |    66.99%    |    66.99%    |   1.227  |   1.203  |  0.973  |  1.426   |   0.891
+  S3_OSC_80     |  409 |    62.10%    |    62.59%    |   1.046  |   1.019  |  0.889  |  1.151   |   1.001
+  S4_HIST_ZERO  |  234 |    59.40%    |    59.83%    |   1.334  |   1.307  |  1.112  |  1.483   |   1.317
+  S5_OSC_AMA    | 1268 |    68.45%    |    69.01%    |   1.110  |   1.052  |  0.967  |  1.135   |   1.055
+
+=====================================================================
+ VERDETTO -- coi criteri dichiarati PRIMA dei numeri
+=====================================================================
+  S1_FLIP        ARCHIVIATA -- passa su 0 simboli (ne servono 2)
+  S2_AMA_ZERO    ARCHIVIATA -- passa su 0 simboli (ne servono 2)
+  S3_OSC_80      ARCHIVIATA -- passa su 0 simboli (ne servono 2)
+  S4_HIST_ZERO   MISURA DA BUTTARE: il rumore fa PF >= 1,05 in 1 celle
+  S5_OSC_AMA     MISURA DA BUTTARE: il rumore fa PF >= 1,05 in 1 celle
+
+ NOTA: questo e' uno SCREENING su OHLC M1 aggregate. Non sostituisce
+ un round a tick reali: dice solo se il round si merita la macchina.

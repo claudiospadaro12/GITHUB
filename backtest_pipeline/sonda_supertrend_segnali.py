@@ -50,7 +50,9 @@
 #   D30EUR 1,7676 pt  | NASUSD 1,7153 pt | U30USD 1,9224 pt
 #     = mediana pesata sui tick nelle ore di sessione,
 #       risultati_archivio/spread_flotta/spread_orario_<SYM>.csv
-#   XAUUSD 0,2003 $/oncia  (ORO_1530_CANCELLO_COSTO_2026-09-10.md 2.4)
+#   XAUUSD 0,2003 $/oncia = GIRO COMPLETO, non per lato: la fonte
+#     (ORO_1530_CANCELLO_COSTO_2026-09-10.md 2.4) scrive testuale
+#     "Costo pieno di un GIRO COMPLETO sull'oro". Classe 587.
 #   SPXUSD e JPXJPY: [NON MISURATO] sul nostro broker -> si usa il
 #     costo in PUNTI BASE del prezzo ricavato dai tre misurati, e si
 #     stampa la SENSIBILITA' a 0x / 1x / 2x. Mai un numero inventato
@@ -66,7 +68,7 @@ BASE = "https://raw.githubusercontent.com/FutureSharks/financial-data/master"
 ORO_PATH = BASE + "/pyfinancialdata/data/currencies/oanda/XAU_USD/%d/oanda-XAU_USD-%d-%d.csv"
 IDX_PATH = BASE + "/pyfinancialdata/data/stocks/histdata/%s/DAT_ASCII_%s_M1_%d.csv"
 
-# costo per LATO, in unita' di prezzo. 2 lati per ogni inversione.
+# costo per OPERAZIONE (giro completo), in unita' di prezzo.
 COSTO_MIS = {"XAU_USD": 0.2003, "GRXEUR": 1.7676}
 # per i due senza misura: punti base del prezzo, ricavati dai misurati
 COSTO_BP  = {"SPXUSD": None, "JPXJPY": None}
@@ -248,11 +250,23 @@ FAMIGLIE = ["S1_FLIP", "S2_AMA_ZERO", "S3_OSC_80", "S4_HIST_ZERO", "S5_OSC_AMA"]
 # ---------------------------------------------------------------------
 # 4. IL GIRO: sempre a mercato, ingresso all'APERTURA della barra dopo
 # ---------------------------------------------------------------------
-def gira(barre, dirs, costo_lato, primo):
+def gira(barre, dirs, costo_giro, primo):
     """
     Nessun look-ahead: la direzione decisa sulla barra chiusa i viene
-    eseguita all'APERTURA della barra i+1. Il costo e' pagato su OGNI
-    lato: chiudere e riaprire = 2 costi.
+    eseguita all'APERTURA della barra i+1.
+
+    CORRETTO IL 22/09/2026 SERA, ed e' un errore mio da 2x.
+    Prima toglievo `2*costo_lato` per ogni operazione, chiamando "lato"
+    quello che le fonti chiamano GIRO. Ma un'OPERAZIONE qui E' gia' un
+    giro completo: si apre a un flip e si chiude al flip dopo, quindi si
+    paga lo spread UNA volta, non due. E la fonte del costo dell'oro
+    (report/ORO_1530_CANCELLO_COSTO_2026-09-10.md par. 2.4) dice
+    testuale "Costo pieno di un GIRO COMPLETO ... = 0,2003 $" -- non per
+    lato. Stessa cosa per lo spread degli indici: attraversandolo si
+    paga una volta per giro.
+    >>> Il verso dell'errore era PESSIMISTA: toglievo il doppio del
+        dovuto, quindi i PF netti pubblicati erano piu' BASSI del vero.
+        Va ricontrollato se il verdetto regge, e non dato per scontato.
     """
     n = len(barre)
     ops = []            # (lato, prezzo_in, prezzo_out, lordo, netto)
@@ -264,7 +278,7 @@ def gira(barre, dirs, costo_lato, primo):
         px = barre[i+1][1]          # apertura della barra successiva
         if pos != 0:
             lordo = (px - pin) * pos
-            ops.append((pos, pin, px, lordo, lordo - 2*costo_lato))
+            ops.append((pos, pin, px, lordo, lordo - costo_giro))
         pos = want; pin = px
     return ops
 
@@ -382,8 +396,14 @@ def autotest():
     chk(len(ops0) == len(ops1), "T6a stesso numero di operazioni con e senza costo")
     if ops0:
         diff = sum(o[4] for o in ops0) - sum(o[4] for o in ops1)
-        chk(abs(diff - 2*0.5*len(ops0)) < 1e-6, "T6b il costo tolto e' 2 per operazione",
-            "(diff=%.4f atteso=%.4f)" % (diff, 2*0.5*len(ops0)))
+        # CORRETTO il 22/09 sera: UNA volta per operazione, non due.
+        # Un'operazione qui e' gia' un giro completo (aperta a un flip,
+        # chiusa al flip dopo): lo spread si attraversa una volta sola.
+        chk(abs(diff - 0.5*len(ops0)) < 1e-6, "T6b il costo tolto e' UNO per operazione",
+            "(diff=%.4f atteso=%.4f)" % (diff, 0.5*len(ops0)))
+        # CONTRO-ESEMPIO: il controllo vecchio (2 per operazione) DEVE fallire
+        chk(abs(diff - 2*0.5*len(ops0)) > 1e-6,
+            "T6c contro-esempio: il vecchio criterio (2 per op) ora NON torna")
 
     # T7 -- l'ingresso e' all'APERTURA DELLA BARRA DOPO, mai alla chiusura
     #       della barra del segnale. Si verifica che ogni prezzo usato
@@ -508,7 +528,10 @@ def main():
             out(" %s  TF %d min  |  %s barre  |  %s -> %s" %
                 (sym, minuti, format(len(barre), ","),
                  barre[0][0].date().isoformat(), barre[-1][0].date().isoformat()))
-            out(" costo per lato: %.4f unita' di prezzo  (%s)  -> 2 per inversione" % (costo, fonte))
+            out(" costo per OPERAZIONE (giro completo): %.4f unita' di prezzo  (%s)" % (costo, fonte))
+            out("   (corretto il 22/09 sera: prima ne toglievo DUE, chiamando 'lato' quello che")
+            out("    le fonti chiamano GIRO. Un'operazione qui e' gia' un giro: aperta a un flip,")
+            out("    chiusa al flip dopo, lo spread si attraversa UNA volta.)")
             out("")
             out("  famiglia      |   n  | %falsi lordo | %falsi NETTO | PF lordo | PF NETTO | PF long | PF short | PF RUMORE")
             for q in FAMIGLIE:

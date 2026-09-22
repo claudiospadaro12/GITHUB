@@ -217,3 +217,43 @@ in cui la regola del 09/09 chiede di escludere un TF.
 cancelli diversi, e vanno superati tutti e due.
 
 📌 Referto grezzo: `backtest_pipeline/risultati_prove/SONDA_SUPERTREND_TF_BASSI_20260922.txt`
+
+
+---
+
+# ✏️ CORREZIONE DEL 22/09 SERA — **il costo era sbagliato di 2x, ed era colpa mia**
+
+🔴 La sonda toglieva **due** costi per operazione, chiamando «per lato» quello che la
+fonte chiama **giro**. `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md` par. 2.4 scrive testuale:
+*«**Costo pieno di un GIRO COMPLETO** sull'oro: 0,16 (spread) + 0,0403 (commissione) =
+**0,2003 $**»*. E un'operazione in questa sonda **e' gia' un giro completo**: si apre a un
+flip e si chiude al flip dopo, quindi lo spread si attraversa **una volta**, non due.
+Lo stesso vale per lo spread degli indici.
+
+🟢 **Il verso dell'errore era PESSIMISTA**: toglievo il doppio del dovuto, quindi i PF netti
+pubblicati sopra erano **piu' bassi del vero**. 👉 **Percio' non l'ho dato per scontato: ho
+rifatto la misura.**
+
+## 📊 I numeri col costo giusto — **e il verdetto non cambia**
+
+| | PF netto **prima** (2x) | PF netto **corretto** | passa? |
+|---|---:|---:|---|
+| DAX H1 `S1_FLIP` | 0,905 | 0,939 | 🔴 no |
+| DAX H4 `S1_FLIP` | 1,089 | 1,113 | 🔴 no (short 1,013) |
+| DAX H1 `S2_AMA_ZERO` | 1,104 | 1,135 | 🔴 no (1 simbolo solo) |
+| oro H4 `S2_AMA_ZERO` | 1,179 | 1,203 | 🔴 no (**long 0,973**) |
+| oro H4 `S4_HIST_ZERO` | 1,281 | 1,307 | 🔴 **la misura si butta: il rumore fa 1,317** |
+
+> ### 🔴 **Zero famiglie passano il criterio anche col costo dimezzato.** Il certificato regge.
+
+🟢 E la cella che sembrava la migliore resta quella che il **rumore batte**: 1,307 contro
+**1,317** su una passeggiata aleatoria.
+
+## 🧪 E l'autotest e' stato corretto, non cancellato
+Il controllo `T6b` diceva *«il costo tolto e' 2 per operazione»*: **quel test codificava
+l'errore**, ed e' il motivo per cui l'errore e' sopravvissuto a 10 controlli verdi.
+Adesso dice **UNO**, e accanto c'e' il **contro-esempio `T6c`**: *«il vecchio criterio (2 per
+op) ora NON torna»*. 👉 **Un autotest che verifica il comportamento sbagliato non e' una rete:
+e' una conferma.** E' la stessa forma della classe 581.
+
+📌 Referti col costo corretto: `backtest_pipeline/risultati_prove/SONDA_SUPERTREND_COSTO_CORRETTO_20260922.txt` · `backtest_pipeline/risultati_prove/SONDA_SUPERTREND_ORO_COSTO_CORRETTO_20260922.txt`. Classe **587**.
