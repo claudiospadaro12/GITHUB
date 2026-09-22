@@ -30485,10 +30485,28 @@ soglia "45 pip" diventa **0,45 punti indice**, contro un range d'apertura a 15 m
 **misurato di 123,80** su U30USD (n=446). **275 volte sotto -> il filtro blocca ogni notte**,
 e il CSV esce tutto a zero.
 
-🧪 **E il discriminante che lo DIMOSTRA invece di suggerirlo**: `XAGUSD` ha **`Digits = 3`**
--> `PipSize = _Point*10` -> lo stesso numero nominale ci sta **sotto** -> **4 operazioni in OOS**.
-**Due metalli, stessa soglia nominale, esiti opposti, esattamente come predice l'aritmetica
-dei `Digits`.** Non e' un'ipotesi: e' un esperimento gia' fatto dentro i nostri dati.
+🔴 **CORRETTO IL 23/09/2026, E LA CORREZIONE E' PIU' ISTRUTTIVA DEL DIFETTO.** Qui avevo
+scritto che il discriminante e' l'aritmetica dei `Digits`: *"`XAGUSD` ha `Digits = 3`, quindi
+lo stesso numero nominale ci sta sotto, ed e' esattamente cio' che predice l'aritmetica"*.
+**E' FALSO, e si smonta in tre righe di conto:**
+
+```
+XAUUSD  Digits=2  Point=0,01   -> PipSize = Point      = 0,01  -> 45 pip = 0,45 USD
+XAGUSD  Digits=3  Point=0,001  -> PipSize = Point*10   = 0,01  -> 45 pip = 0,45 USD
+```
+
+**Fanno lo STESSO numero.** L'aritmetica dei `Digits` **non spiega** perche' l'oro esce a zero
+e l'argento fa 4 operazioni. Avevo costruito una spiegazione **coerente con l'attesa** invece
+di provare a **romperla** -- che e' precisamente il difetto della regola del 10/09, commesso
+mentre scrivevo la regola contro quel difetto.
+
+🟢 **LA SPIEGAZIONE VERA, misurata (23/09): la soglia e' in VALUTA ASSOLUTA, e i due metalli
+stanno su due ordini di grandezza diversi.** Ricostruite **5.905 barre H1** d'oro del 2025 dal
+M1 in repo: range medio **11,625 USD**, e **0 barre su 5.905** stanno sotto **0,45 USD**. Il
+filtro esclude il **100% delle notti**, ed e' **25,8 volte** troppo stretto. L'argento, che
+quota due ordini di grandezza piu' in basso, sotto quella soglia **ci sta**, e infatti opera.
+👉 **La conclusione della classe non cambia -- cambia la PROVA, e quella vecchia era una
+conferma travestita da misura.**
 
 **Stessa classe, altro EA**: `ABTG_MaxMinNotte` r.140 `input double InpBufferPoints = 1000;`
 col commento *"DAX BCM: 1000 = 10 punti indice"*, usato a r.727 come `*_Point`. Su **EURUSD**
@@ -30563,3 +30581,33 @@ commit `--allow-empty` (`9f74185b`).
 5. 📌 **E vale anche al contrario**: un agente che mette in staging e poi continua a
    lavorare per mezz'ora **sta lasciando il suo lavoro in una zona condivisa**. Si committa
    quando si consegna, non prima.
+
+
+---
+
+## CLASSE 600 -- ✅🙃 L'AUTOTEST **TAUTOLOGICO**: un controllo che ricalcola il valore atteso **con la stessa identica formula** di cio' che deve controllare, quindi non puo' fallire MAI -- la regola del 10/09 scritta **dentro un EA** (trovata il 23/09/2026 in `ABTG_PostNews.mq5`)
+
+**Il caso reale.** `mql5/Experts/ABTG_PostNews.mq5` r.183-188: l'autotest che dovrebbe
+segnalare un pip calcolato male costruisce `pipAtteso` con **la stessa identica formula** di
+`PipSize()` (r.137-141) e poi le confronta. 🔴 **`okPip` e' vero per costruzione**: stamperebbe
+`[ok ]` anche su `D30EUR`, cioe' **proprio nel caso che l'autotest esiste per segnalare**.
+
+⚪ **Impatto operativo oggi: zero** (l'EA non opera). 🔴 **Ma e' un allarme che non suonera'
+mai**, e un allarme muto e' peggio di nessun allarme, perche' chi lo legge ne deduce che il
+controllo e' stato fatto.
+
+### La regola
+1. 🧪 **Un autotest deve confrontare due strade INDIPENDENTI.** Se il valore atteso nasce
+   dalla stessa funzione del valore misurato, non e' un test: e' un `a == a`.
+   La forma giusta e' una **costante scritta a mano per QUEL simbolo** (*"su `D30EUR` mi aspetto
+   `PipSize = 0,01`"*), oppure un invariante che venga da un'altra grandezza.
+2. 🛑 **Ogni autotest si consegna col suo CONTRO-ESEMPIO ESEGUITO**: si rompe di proposito
+   la cosa che deve sorvegliare e **si fa vedere che il test diventa rosso**. Un autotest che
+   non e' mai stato visto fallire **non e' un autotest**.
+3. 🔎 **Il sintomo che la fa trovare in tre secondi**: il valore atteso e quello misurato
+   **si leggono uguali nel sorgente**. Se puoi cancellare una delle due espressioni e
+   sostituirla con l'altra senza cambiare niente, il test e' tautologico.
+4. 📌 **E vale per noi quanto per gli EA**: e' la stessa classe del **581** (un autotest piu'
+   facile della realta') e della regola del **10/09** (*"avevo controllato che la mia risposta
+   fosse COERENTE con quello che mi aspettavo, invece di provare a ROMPERLA"*). Qui la trovi
+   scritta in MQL5, ma il difetto e' di chi scrive il test, non del linguaggio.
