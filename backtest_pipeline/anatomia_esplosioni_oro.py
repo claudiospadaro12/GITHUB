@@ -113,6 +113,42 @@ NEWS_PRIMA, NEWS_DOPO = 5, 30
 EPOCA = datetime(2000, 1, 1)
 
 
+
+# ---------------------------------------------------------------------
+#  ORA DI NEW YORK -- le regole DST USA, copiate da
+#  backtest_pipeline/sonda_oro_apertura_m1.py (gia' collaudate il 10/09).
+#  Servono per la TAVOLA A FASCE DA 30' IN ORA DI NEW YORK, che e' la
+#  sola che separa gli appuntamenti fissi: 08:30 ET (dati macro), 09:30
+#  ET (apertura del cash azionario), 10:00 ET (ISM / fiducia), 14:00 ET
+#  (FOMC). In UTC quelle fasce si MESCOLANO fra estate e inverno, e una
+#  tavola UTC non puo' distinguerle. Il campione parte dal marzo 2006:
+#  la regola americana VECCHIA (fino al 2006) serve davvero.
+# ---------------------------------------------------------------------
+def domenica_n(anno, mese, n):
+    d = date(anno, mese, 1)
+    avanti = (6 - d.weekday()) % 7
+    return d + timedelta(days=avanti + 7 * (n - 1))
+
+
+def domenica_ultima(anno, mese):
+    if mese == 12:
+        d = date(anno + 1, 1, 1) - timedelta(days=1)
+    else:
+        d = date(anno, mese + 1, 1) - timedelta(days=1)
+    return d - timedelta(days=(d.weekday() + 1) % 7)
+
+
+def dst_usa(g):
+    if g.year >= 2007:
+        return domenica_n(g.year, 3, 2) <= g < domenica_n(g.year, 11, 1)
+    return domenica_n(g.year, 4, 1) <= g < domenica_ultima(g.year, 10)
+
+
+def ora_ny(t):
+    """datetime UTC -> datetime ora locale di New York (UTC-4 / UTC-5)."""
+    return t - timedelta(hours=(4 if dst_usa(t.date()) else 5))
+
+
 def log(m):
     print(m, flush=True)
 
@@ -380,9 +416,17 @@ def main():
             hi = max(p[1] for p in pezzi)
             lo = min(p[2] for p in pezzi)
             vol = sum(p[4] for p in pezzi)
+            tny = ora_ny(t0)
+            # volume della finestra PRECEDENTE (stessa lunghezza): serve a
+            # sapere se il volume ANTICIPA o se accompagna soltanto.
+            pre = [blocchi.get(b - passo + i) for i in range(passo)]
+            vol_pre = (sum(x[4] for x in pre)
+                       if all(x is not None and x[5] >= MIN_MINUTI_BLOCCO for x in pre)
+                       else None)
             fin.append({"b": b, "t": t0, "d": d, "o": o, "c": c, "h": hi, "l": lo,
-                        "vol": vol, "mov": c - o, "rng": hi - lo,
-                        "atr": atr[d], "ora": t0.hour, "anno": t0.year})
+                        "vol": vol, "vol_pre": vol_pre, "mov": c - o, "rng": hi - lo,
+                        "atr": atr[d], "ora": t0.hour, "anno": t0.year,
+                        "fascia_ny": tny.hour * 60 + (0 if tny.minute < 30 else 30)})
         return fin
 
     f30 = costruisci(30)
@@ -539,6 +583,113 @@ def main():
             out("   %02d | %16.2fx | %18.2fx"
                 % (o, r_con[o][3] / med_c, r_senza[o][3] / med_s))
 
+
+    # -----------------------------------------------------------------
+    # PASSO 6-bis -- LA TAVOLA IN ORA DI NEW YORK, fasce da 30 minuti.
+    # E' la sola che separa gli appuntamenti fissi. 08:30 ET = dati
+    # macro; 09:30 ET = apertura del cash azionario (NESSUN dato in
+    # calendario); 10:00 ET = ISM/fiducia; 14:00 ET = FOMC.
+    # -----------------------------------------------------------------
+    out("")
+    out("=" * 70)
+    out("6-bis. LA TAVOLA IN ORA DI NEW YORK -- fasce da 30', k=0,40")
+    out("       (in UTC le fasce si mescolano fra estate e inverno: questa no)")
+    out("=" * 70)
+    n_f, su_f, giu_f = {}, {}, {}
+    n_fs, su_fs, giu_fs = {}, {}, {}
+    for f in f30:
+        k = f["fascia_ny"]
+        n_f[k] = n_f.get(k, 0) + 1
+        s2 = 1 if f["mov"] >= K_PRINCIPALE * f["atr"] else (-1 if f["mov"] <= -K_PRINCIPALE * f["atr"] else 0)
+        if s2 > 0:
+            su_f[k] = su_f.get(k, 0) + 1
+        elif s2 < 0:
+            giu_f[k] = giu_f.get(k, 0) + 1
+        # la colonna SENZA NEWS vale solo dove il calendario esiste (2010+):
+        # negli anni scoperti "non c'e' notizia" vorrebbe dire solo "non la
+        # sappiamo", e sarebbe un numero falso.
+        if (not f["news"]) and anni_news and anni_news[0] <= f["anno"] <= anni_news[-1]:
+            n_fs[k] = n_fs.get(k, 0) + 1
+            if s2 > 0:
+                su_fs[k] = su_fs.get(k, 0) + 1
+            elif s2 < 0:
+                giu_fs[k] = giu_fs.get(k, 0) + 1
+    tm = sum(su_f.values()) + sum(giu_f.values())
+    tm = tm / sum(n_f.values())
+    tms = (sum(su_fs.values()) + sum(giu_fs.values())) / max(sum(n_fs.values()), 1)
+    out("  tasso medio = %.3f%% (tutte, 2006-2020)   %.3f%% (2010-2020, escluse le"
+        % (100 * tm, 100 * tms))
+    out("  finestre di notizia). Le due colonne x sono ciascuna rapportata al")
+    out("  PROPRIO tasso medio, quindi sono confrontabili fra loro.")
+    out("  fascia ET | finestre | RIALZO | RIBASSO |  tasso  | x medio | x medio SENZA news | che cosa c'e' li'")
+    out("  " + "-" * 110)
+    ETICHETTE = {510: "08:30 ET  DATI MACRO USA", 570: "09:30 ET  APERTURA CASH USA",
+                 600: "10:00 ET  ISM / FIDUCIA", 840: "14:00 ET  FOMC",
+                 480: "08:00 ET", 540: "09:00 ET", 630: "10:30 ET", 660: "11:00 ET",
+                 810: "13:30 ET", 870: "14:30 ET"}
+    for k in sorted(n_f):
+        n = n_f[k]
+        if n < 300:
+            continue
+        tt = su_f.get(k, 0) + giu_f.get(k, 0)
+        p = tt / n
+        ns = n_fs.get(k, 0)
+        ps = (su_fs.get(k, 0) + giu_fs.get(k, 0)) / ns if ns else float("nan")
+        out("     %02d:%02d  | %8d | %6d | %7d | %6.3f%% | %6.2fx | %17.2fx | %s"
+            % (k // 60, k % 60, n, su_f.get(k, 0), giu_f.get(k, 0), 100 * p,
+               p / tm, ps / tms if tms else 0, ETICHETTE.get(k, "")))
+    out("")
+    out("  >>> IL CONTRO-ESEMPIO CHE CONTA: il calendario di casa NON copre tutto")
+    out("      (mancano sussidi settimanali, PIL, PCE, Michigan, JOLTS...). Se la")
+    out("      fascia 08:30 ET resta alta anche SENZA news, puo' essere notizia non")
+    out("      elencata. La fascia 09:30 ET invece NON ha appuntamenti in nessun")
+    out("      calendario: quella e' la prova pulita dell'esistenza di un'ORA vera.")
+
+    # -----------------------------------------------------------------
+    # PASSO 6-ter -- IL VOLUME ANTICIPA O ACCOMPAGNA SOLTANTO?
+    # -----------------------------------------------------------------
+    out("")
+    out("=" * 70)
+    out("6-ter. IL TICK VOLUME ANTICIPA? (volume della finestra PRECEDENTE)")
+    out("=" * 70)
+    vmed_ora = {}
+    for f in f30:
+        vmed_ora.setdefault(f["ora"], []).append(f["vol"])
+    vmed_ora = {o: mediana(v) for o, v in vmed_ora.items()}
+    esp_l = [f for f in f30 if abs(f["mov"]) >= K_PRINCIPALE * f["atr"]]
+    def rap_pre(gruppo):
+        v = [f["vol_pre"] / vmed_ora[f["ora"]] for f in gruppo
+             if f["vol_pre"] is not None and vmed_ora.get(f["ora"])]
+        return mediana(v), quantile(v, 0.25), quantile(v, 0.75), len(v)
+    a1 = rap_pre(esp_l)
+    a2 = rap_pre(f30)
+    out("  rapporto (tick volume della finestra PRECEDENTE) / (mediana della SUA ORA)")
+    out("  gruppo                | n      | Q1     | MEDIANA | Q3")
+    out("  PRIMA di un'esplosione| %6d | %6.2f | %7.2f | %6.2f" % (a1[3], a1[1], a1[0], a1[2]))
+    out("  tutte le finestre     | %6d | %6.2f | %7.2f | %6.2f" % (a2[3], a2[1], a2[0], a2[2]))
+    out("  rapporto fra le due mediane: %.2fx" % (a1[0] / a2[0] if a2[0] else 0))
+    out("  >>> se e' vicino a 1,00 il volume NON anticipa: e' un TERMOMETRO che")
+    out("      sale INSIEME al prezzo, non una spia che si accende PRIMA.")
+    out("")
+    out("  >>> E LA DOMANDA CHE DECIDE: un FILTRO a volume servirebbe a qualcosa?")
+    out("  soglia | finestre che passano | esplosioni catturate | P(espl.|filtro) | guadagno")
+    base = len([f for f in f30 if f["vol_pre"] is not None and vmed_ora.get(f["ora"])])
+    base_e = len([f for f in esp_l if f["vol_pre"] is not None and vmed_ora.get(f["ora"])])
+    p0 = base_e / base
+    out("  (nessuna) | %19d | %20d | %14.3f%% | %7.2fx" % (base, base_e, 100 * p0, 1.0))
+    for soglia in (1.0, 1.44, 2.0, 3.0, 5.0):
+        pas = [f for f in f30 if f["vol_pre"] is not None and vmed_ora.get(f["ora"])
+               and f["vol_pre"] / vmed_ora[f["ora"]] >= soglia]
+        pe = [f for f in pas if abs(f["mov"]) >= K_PRINCIPALE * f["atr"]]
+        if not pas:
+            continue
+        p = len(pe) / len(pas)
+        out("  %6.2fx | %19d | %20d | %14.3f%% | %7.2fx"
+            % (soglia, len(pas), len(pe), 100 * p, p / p0 if p0 else 0))
+    out("  >>> un filtro utile deve alzare MOLTO la probabilita' E lasciar passare")
+    out("      poche finestre. Se il guadagno resta sotto ~2x, e' una manopola che")
+    out("      taglia occasioni senza comprare precisione.")
+
     # -----------------------------------------------------------------
     # PASSO 7 -- SFRUTTABILITA'
     # -----------------------------------------------------------------
@@ -630,6 +781,11 @@ def main():
             filtro=lambda f: f["anno"] < ANNO_CASSAFORTE)
     sfrutta(f30, K_PRINCIPALE, ">>> H. CASSAFORTE OOS 2016-2020",
             filtro=lambda f: f["anno"] >= ANNO_CASSAFORTE)
+    sfrutta(f30, K_PRINCIPALE,
+            ">>> M. SOLO la fascia 09:30 ET (apertura cash USA) -- l'unica che\n"
+            "       sopravvive al cancello delle notizie SENZA avere appuntamenti\n"
+            "       macro in calendario. Se un'ora vera esiste, e' questa.",
+            filtro=lambda f: f["fascia_ny"] == 570)
     if min_news:
         sfrutta(f30, K_PRINCIPALE, ">>> I. SOLO esplosioni SENZA notizia",
                 filtro=lambda f: not f["news"])
@@ -814,10 +970,33 @@ def main():
             d[1] += 1
         elif f["mov"] <= -K_PRINCIPALE * f["atr"]:
             d[2] += 1
+    out("  ATTENZIONE: lo SBILANCIO fra i due lati si legge per EPOCA, non in")
+    out("  totale. Una media su 15 anni puo' nascondere due epoche opposte.")
     out("  anno | finestre | RIALZO | RIBASSO | tasso")
     for y in sorted(per_anno):
         n, su, giu = per_anno[y]
         out("  %4d | %8d | %6d | %7d | %6.3f%%" % (y, n, su, giu, 100 * (su + giu) / n))
+
+    out("")
+    out("  >>> I DUE LATI, per epoca e per fascia 09:30 ET")
+    for eti, sel in (("TUTTO 2006-2020", f30),
+                     ("2006-2013", [f for f in f30 if f["anno"] <= 2013]),
+                     ("2014-2020", [f for f in f30 if f["anno"] >= 2014]),
+                     ("fascia 09:30 ET, tutto", [f for f in f30 if f["fascia_ny"] == 570]),
+                     ("fascia 09:30 ET, 2006-2013",
+                      [f for f in f30 if f["fascia_ny"] == 570 and f["anno"] <= 2013]),
+                     ("fascia 09:30 ET, 2014-2020",
+                      [f for f in f30 if f["fascia_ny"] == 570 and f["anno"] >= 2014])):
+        su = sum(1 for f in sel if f["mov"] >= K_PRINCIPALE * f["atr"])
+        giu = sum(1 for f in sel if f["mov"] <= -K_PRINCIPALE * f["atr"])
+        n = su + giu
+        if n == 0:
+            continue
+        q = giu / n
+        out("  %-28s n=%4d  RIALZO %4d  RIBASSO %4d  quota RIBASSO %.1f%% +/- %.1f pt"
+            % (eti, n, su, giu, 100 * q, 100 * se_binom(giu, n)))
+    out("  (+/- e' un errore standard binomiale: due errori standard da 50%% e lo")
+    out("   sbilancio e' un fatto, meno e' rumore.)")
 
     if uscita:
         uscita.close()
