@@ -1,0 +1,90 @@
+=====================================================================
+ SONDA SUPERTREND -- CINQUE DEFINIZIONI DI SEGNALE, COL COSTO DENTRO
+ corsa del 2026-09-22   finestra 2013-2018   seme 20260922
+=====================================================================
+ DICHIARATO PRIMA DEI NUMERI:
+  - il verdetto e' sul PF NETTO, non sulla %% di falsi
+  - merita un round solo con PF netto >= 1,10 su >= 2 simboli E
+    su TUTTI E DUE i lati (regola di casa del 25/08)
+  - se il RUMORE fa PF netto >= 1,05, la misura si butta
+  - screening su OHLC M1 aggregate: NON e' un verdetto a tick
+
+autotest: PASSATO (10 controlli)
+
+---------------------------------------------------------------------
+ GRXEUR  TF 5 min  |  254,461 barre  |  2013-01-02 -> 2018-12-28
+ costo per lato: 1.7676 unita' di prezzo  (MISURATO in casa)  -> 2 per inversione
+
+  famiglia      |   n  | %falsi lordo | %falsi NETTO | PF lordo | PF NETTO | PF long | PF short | PF RUMORE
+  S1_FLIP       | 11996 |    64.84%    |    69.26%    |   0.993  |   0.761  |  0.778  |  0.743   |   0.822
+  S2_AMA_ZERO   | 6061 |    69.51%    |    72.25%    |   1.057  |   0.863  |  0.890  |  0.836   |   0.902
+  S3_OSC_80     | 11781 |    64.77%    |    69.17%    |   0.994  |   0.762  |  0.778  |  0.745   |   0.821
+  S4_HIST_ZERO  | 6965 |    61.39%    |    65.25%    |   1.014  |   0.820  |  0.839  |  0.801   |   0.858
+  S5_OSC_AMA    | 36867 |    71.04%    |    77.39%    |   0.976  |   0.596  |  0.601  |  0.590   |   0.698
+
+---------------------------------------------------------------------
+ GRXEUR  TF 15 min  |  85,117 barre  |  2013-01-02 -> 2018-12-28
+ costo per lato: 1.7676 unita' di prezzo  (MISURATO in casa)  -> 2 per inversione
+
+  famiglia      |   n  | %falsi lordo | %falsi NETTO | PF lordo | PF NETTO | PF long | PF short | PF RUMORE
+  S1_FLIP       | 3873 |    64.52%    |    66.85%    |   1.075  |   0.928  |  0.957  |  0.898   |   0.839
+  S2_AMA_ZERO   | 1994 |    66.30%    |    67.65%    |   1.171  |   1.045  |  1.088  |  1.002   |   0.826
+  S3_OSC_80     | 3793 |    64.43%    |    66.83%    |   1.084  |   0.935  |  0.965  |  0.905   |   0.839
+  S4_HIST_ZERO  | 2208 |    60.69%    |    62.55%    |   1.072  |   0.955  |  0.995  |  0.914   |   0.898
+  S5_OSC_AMA    | 11990 |    70.20%    |    74.58%    |   0.998  |   0.751  |  0.766  |  0.736   |   0.761
+
+---------------------------------------------------------------------
+ GRXEUR  TF 30 min  |  42,778 barre  |  2013-01-02 -> 2018-12-28
+ costo per lato: 1.7676 unita' di prezzo  (MISURATO in casa)  -> 2 per inversione
+
+  famiglia      |   n  | %falsi lordo | %falsi NETTO | PF lordo | PF NETTO | PF long | PF short | PF RUMORE
+  S1_FLIP       | 2048 |    63.96%    |    65.09%    |   1.024  |   0.925  |  0.962  |  0.888   |   0.842
+  S2_AMA_ZERO   | 1042 |    66.31%    |    68.04%    |   1.140  |   1.052  |  1.109  |  0.993   |   0.814
+  S3_OSC_80     | 2017 |    63.86%    |    65.00%    |   1.042  |   0.941  |  0.979  |  0.902   |   0.841
+  S4_HIST_ZERO  | 1128 |    60.02%    |    61.17%    |   1.112  |   1.025  |  1.079  |  0.969   |   0.947
+  S5_OSC_AMA    | 5760 |    70.17%    |    72.85%    |   1.001  |   0.828  |  0.852  |  0.803   |   0.833
+
+---------------------------------------------------------------------
+ SPXUSD  TF 5 min  |  398,522 barre  |  2013-01-02 -> 2018-12-31
+ costo per lato: 0.3613 unita' di prezzo  ([NON MISURATO] -- 1.67 punti base dal DAX)  -> 2 per inversione
+
+  famiglia      |   n  | %falsi lordo | %falsi NETTO | PF lordo | PF NETTO | PF long | PF short | PF RUMORE
+  S1_FLIP       | 22266 |    66.37%    |    73.30%    |   0.959  |   0.572  |  0.593  |  0.551   |   0.636
+  S2_AMA_ZERO   | 11126 |    72.10%    |    76.40%    |   0.993  |   0.681  |  0.720  |  0.641   |   0.714
+  S3_OSC_80     | 22214 |    66.38%    |    73.32%    |   0.958  |   0.571  |  0.592  |  0.550   |   0.636
+  S4_HIST_ZERO  | 12305 |    63.36%    |    69.14%    |   1.007  |   0.680  |  0.706  |  0.657   |   0.708
+  S5_OSC_AMA    | 60037 |    68.65%    |    80.16%    |   0.981  |   0.425  |  0.431  |  0.420   |   0.496
+
+---------------------------------------------------------------------
+ SPXUSD  TF 15 min  |  140,099 barre  |  2013-01-02 -> 2018-12-31
+ costo per lato: 0.3613 unita' di prezzo  ([NON MISURATO] -- 1.67 punti base dal DAX)  -> 2 per inversione
+
+  famiglia      |   n  | %falsi lordo | %falsi NETTO | PF lordo | PF NETTO | PF long | PF short | PF RUMORE
+  S1_FLIP       | 7108 |    66.88%    |    70.10%    |   0.987  |   0.743  |  0.792  |  0.695   |   0.716
+  S2_AMA_ZERO   | 3579 |    70.77%    |    73.37%    |   0.938  |   0.765  |  0.842  |  0.685   |   0.776
+  S3_OSC_80     | 7094 |    66.93%    |    70.13%    |   0.979  |   0.738  |  0.787  |  0.691   |   0.716
+  S4_HIST_ZERO  | 3872 |    63.07%    |    66.50%    |   0.979  |   0.793  |  0.857  |  0.735   |   0.815
+  S5_OSC_AMA    | 20679 |    70.56%    |    77.47%    |   0.963  |   0.578  |  0.600  |  0.557   |   0.610
+
+---------------------------------------------------------------------
+ SPXUSD  TF 30 min  |  71,167 barre  |  2013-01-02 -> 2018-12-31
+ costo per lato: 0.3613 unita' di prezzo  ([NON MISURATO] -- 1.67 punti base dal DAX)  -> 2 per inversione
+
+  famiglia      |   n  | %falsi lordo | %falsi NETTO | PF lordo | PF NETTO | PF long | PF short | PF RUMORE
+  S1_FLIP       | 3485 |    65.71%    |    67.55%    |   1.004  |   0.829  |  0.899  |  0.762   |   0.771
+  S2_AMA_ZERO   | 1631 |    69.16%    |    70.88%    |   1.074  |   0.931  |  1.051  |  0.806   |   0.771
+  S3_OSC_80     | 3481 |    65.73%    |    67.57%    |   1.002  |   0.827  |  0.896  |  0.761   |   0.771
+  S4_HIST_ZERO  | 1884 |    59.50%    |    62.15%    |   1.081  |   0.932  |  1.044  |  0.835   |   0.839
+  S5_OSC_AMA    | 10302 |    69.90%    |    74.91%    |   0.992  |   0.688  |  0.724  |  0.653   |   0.682
+
+=====================================================================
+ VERDETTO -- coi criteri dichiarati PRIMA dei numeri
+=====================================================================
+  S1_FLIP        ARCHIVIATA -- passa su 0 simboli (ne servono 2)
+  S2_AMA_ZERO    ARCHIVIATA -- passa su 0 simboli (ne servono 2)
+  S3_OSC_80      ARCHIVIATA -- passa su 0 simboli (ne servono 2)
+  S4_HIST_ZERO   ARCHIVIATA -- passa su 0 simboli (ne servono 2)
+  S5_OSC_AMA     ARCHIVIATA -- passa su 0 simboli (ne servono 2)
+
+ NOTA: questo e' uno SCREENING su OHLC M1 aggregate. Non sostituisce
+ un round a tick reali: dice solo se il round si merita la macchina.
