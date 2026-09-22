@@ -178,6 +178,23 @@ Censimento mio, su tutti i CSV della famiglia che contengono la colonna:
 | `InpCorrTF` | TF della correlazione | 221 | 🔴 **0** | H1 |
 | `InpTrailTF` | TF della candela del trailing | 221 | 🟢 **14** | M1·M2·M3·M4·M5·M6·M10·M12·M15·M20 |
 
+### 3.1-bis 🔴 E lo stesso vale per il SUPERTREND, che è il cuore di due «morti»
+
+Stesso conto, stessi 221 CSV:
+
+| manopola | file che la contengono | **file in cui VARIA** | valori mai visti diversi da |
+|---|---:|---:|---|
+| `InpUseSupertrend` | 221 | 🔴 **0** | 0 e 1, ma **mai nello stesso round** |
+| `InpStMultiplier` | 221 | 🔴 **0** | **2,5** — un valore solo, in tutto l'archivio |
+| `InpStAtrPeriod` | 221 | 🔴 **0** | **10** — un valore solo |
+| `InpUseSupertrend3` | 212 | 🔴 **0** | 0 e 1, mai nello stesso round |
+
+👉 **A1** (*«entrambe + Supertrend ON»*, bocciata il 26/07) e **A5** (*«direzione adattiva
+Supertrend D1»*, mai girata) poggiano tutte e due su un meccanismo di cui **non è mai stato
+mosso nemmeno un parametro**, su **un solo TF** (H1) e con **un solo moltiplicatore** (2,5).
+🔴 **Non è «già provato»: è una casella chiusa a chiave**, come lo era `InpRangeMinutes` prima
+che si scoprisse che `InpRangeMode` la teneva ferma.
+
 🔴 **Controprova indipendente su TUTTO il repo**: `InpLevelTF` compare in **240** CSV (famiglia
 e non) e **varia in ZERO**. È lo stesso numero che `prove/R133a_livelliTF_NASUSD.txt` r.24-29
 dichiara di aver misurato il 12/09 su 2.083 file — **riprodotto oggi, da un conto mio**.
@@ -293,7 +310,7 @@ famiglia aperture da sola fa **≈1,46 pos/g** sommando le tre sedie.
 | **B** | `Dow_Apertura` **BREAKOUT 2 LATI + EMA H4 + trail candela M5** *(il «40/40»)* | `U30USD` | 🔴 **solo M5** | tick (4) | IS 2024.09.26-2025.06.30 (etichetta 2024.01) · **OOS 2025.07.01-2026.06.30 pulita** | 1% | 0,988-1,546 / **1,267-1,560** | 138-154 / **186-198 `[pos]`** | ≤12,47 / **≤8,70%** | ✅ | ✅ | ✅ | ✅ | 🔴 **NO** | ⚪ **NON ANCORA MISURATO** — 🏆 **il numero più forte dell'archivio aperture** |
 | **C** | `ABTG_Nasdaq_Apertura_US` `770260` RETEST+volumi+gap *(registro A4: «morto, best PF 0,91»)* | `NASUSD` | **M5** (R196-R209) · **M15** (R84a-i, 770250) — mai a parità | tick (4) | 2024.09.26→2026.06.30, taglio 0,40 | 🟢 **2,00%** | **1,22116 / 1,21546** | 135/172 `[uscite]` = **82/102 `[pos]`** | 7,31 / **7,86%** | ✅ | ✅ | ✅ | ✅ | 🟡 **parziale** | ⚪ **NON ANCORA MISURATO** (merito sospeso: 102 pos < 150) — **opera su FTMO** |
 | **D** | `ABTG_DAX_Apertura_EU` `770101` LONG RETEST | `D30EUR` | **M5** (R47/R137/R202B) · **M15** (R83v, R118b/c) — mai a parità | tick (4) | id. | 1% | **1,12733 / 1,39520** | 175/270 `[uscite]` = **132/193 `[pos]`** | 5,41 / **7,25%** | ✅ | ✅ | ✅ | ✅ | 🟡 **parziale** | 🟢 **VIVO** (prima classificata al 2° seggio) — ⑤ da isolare con `R140c` |
-| **E** | **A1** `DAX_Apertura` *«entrambe + Supertrend ON»* *(registro: «morto (config sbagliata)»)* | `D30EUR` | 🔴 **solo M5** | tick (4) | 2024.09.26→2026.06.30 (etichetta 2024.01) | 1% | — / — (finestra unica, best 1,03) | — | — | 🟡 | 🔴 | 🔴 | 🔴 | 🔴 | ⚪ **NON ANCORA MISURATO** — ma **la tesi è già morta altrove**: vedi §6.1 |
+| **E** | **A1** `DAX_Apertura` *«entrambe + Supertrend ON»* *(registro: «morto (config sbagliata)»)* | `D30EUR` | 🔴 **solo M5** | tick (4) | 2024.09.26→2026.06.30 (etichetta 2024.01) | 1% | — / — (finestra unica, best 1,03 — 🔴 **CSV non in repo**) | — | — | 🟡 | 🔴 | 🔴 | 🔴 | 🔴 | ⚪ **NON ANCORA MISURATO, e a metà è ANCORA APERTO** — il «due lati» **è misurato** (`DAX_M_direzione`) ed è **peggio del solo-LONG in tutte e due le finestre** — IS 0,975-0,998 vs 1,001-1,156 · OOS 1,039-1,237 vs 1,118-1,423; il **Supertrend NO**: `InpUseSupertrend` varia in **0 file su 221**, `InpStMultiplier` e `InpStAtrPeriod` **mai mossi** (§3.1-bis) |
 | **F** | **A3** `DAX_Apertura` **SOLO SHORT** *(registro: «⏳ in coda»)* | `D30EUR` | 🔴 **solo M5** | tick (4) | IS/OOS puliti (`Walkforward_Aperture/DAX_M_direzione`) | 1% | **0,84559 / 1,21230** (best) | 152 / 237 `[uscite]` | 10,54 / **9,02%** | ✅ | ✅ | ✅ | ✅ | 🔴 **NO** | ⚪ **NON ANCORA MISURATO** — 🔴 **segno che si INVERTE fra IS e OOS su 3 celle su 3** |
 | **G** | `ABTG_DAX_Apertura_EU` su **100GBP** (FTSE) *(registro: «morto»)* | `100GBP` | 🔴 **solo M5** | tick (4) | finestra unica, etichetta 2024.01 (reale ≈2024.09.26) | 1% | — / **0,90423** (best di 72) | — / 283 `[uscite]` | — / **9,58%** | ✅ | ✅ | 🟡 (solo `TrailFixedPts`, **inerte**) | ✅ | 🔴 **NO** | 🪦 **MORTO** sul merito (§7.1) · ⚪ non certificato su ③⑤ |
 | **H** | `ABTG_DAX_Apertura_EU` su **F40EUR** (CAC) — `R138a` | `F40EUR` | 🔴 **solo M5** | tick (4) | IS/OOS puliti | 1% | **1,44028 / 0,76965** | 130/195 `[uscite]` = **—/152 `[pos]`** | 7,36 / 🔴 **11,82%** | ✅ | ✅ | 🔴 **NO** (1 cella sola) | 🟡 | 🔴 **NO** | 🪦 **LA CELLA È MORTA PER RISCHIO** (F3, soglia congelata 10,0%) · ⚪ **il SIMBOLO no** |
@@ -305,7 +322,7 @@ famiglia aperture da sola fa **≈1,46 pos/g** sommando le tre sedie.
 | **N** | **DELAYED** (`EntryMode=4`) + volumi — round `Openconfirm` | `D30EUR`·`NASUSD` | 🔴 **solo M5** (grafico) | tick (4) | finestra unica, etichetta 2024.01 | 1% | — / **1,19714** DAX · **1,19981** NAS | — / 120 · 99 `[uscite]` | — / 8,12% · **4,78%** | ✅ | ✅ | 🟡 | ✅ | 🔴 **NO** | ⚪ **NON ANCORA MISURATO** — positivo su **due mercati**, ma **finestra unica** e campione sottile (§5.4) |
 | **O** | **OPENCONFIRM** (`EntryMode=5`) | `D30EUR`·`NASUSD` | **M5** (grafico) · `InpOCTimeframe` **M5 e M15** | tick (4) | finestra unica **+** IS/OOS (`B_motore`) | 1% | **1,81587 / 0,69553** (NAS, vol ON) | 108 / 108 `[uscite]` | 3,75 / 12,73% | ✅ | ✅ | ✅ | ✅ | 🟢 **SÌ** (l'unico TF mai confrontato nella famiglia) | 🪦 **MORTO CERTIFICATO** — **1 cella positiva su 8** e crollo IS→OOS (§7.5) |
 | **P** | **RANGE-FADE** (`EntryMode=3`) | `D30EUR`·`NASUSD` | **M5 e M15** | tick (4) | IS/OOS puliti | 1% | 0,68-0,84 / **0,70-0,93** | 113-181 / 51-245 | ≤19,1 / **≤17,3%** | ✅ | ✅ | ✅ | ✅ | 🟢 | 🪦 **MORTO CERTIFICATO** — negativo su 2 mercati × 2 finestre × 2 TF |
-| **Q** | **A5** «stile Monza» (direzione adattiva Supertrend D1) | `D30EUR`·`NASUSD` | 🔴 **nessuno** | 🔴 **mai girato** | — | — | **[NON MISURATO]** | — | — | 🔴 | 🔴 | 🔴 | 🔴 | 🔴 | ⚪ **NON ANCORA MISURATO** — ma `InpStTF` non è **mai** stato ad asse (§3.1): la tesi è viva |
+| **Q** | **A5** «stile Monza» (direzione adattiva Supertrend **D1**) | `D30EUR`·`NASUSD` | 🔴 **nessuno** | 🔴 **mai girato** | — | — | **[NON MISURATO]** | — | — | 🔴 | 🔴 | 🔴 | 🔴 | 🔴 | ⚪ **NON ANCORA MISURATO** — e 🟢 **la casella è DAVVERO libera**: `InpStTF` vale **H1 in tutti e 221 i CSV**, il **D1 che la tesi richiede non è mai stato usato** |
 | **R** | **A16** `Nasdaq_PreOpen_Breakout_EA` (ESTERNO) | `NASUSD` | 🔴 **nessuno** | 🔴 **mai girato** | — | — | **[NON MISURATO]** | — | — | 🔴 | 🔴 | 🔴 | 🔴 | 🔴 | 🔴 **NON SI SCHIERA** — e il motivo **non è il PF**: fuso cablato + costo 13,33x. Resta com'è |
 
 ---
