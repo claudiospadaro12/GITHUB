@@ -1,0 +1,539 @@
+# =====================================================================
+#  R206a -- IL MOLTIPLICATORE DELLO STOP DELLA SEDIA DELLA NOTTE
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato   (sedia 770411, simbolo D30EUR)
+#           Asse unico: InpAtrSLmult (il moltiplicatore ATR dello STOP).
+#           La cella 2.5 e' l'ANCORA: deve riprodurre r81a.
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#  Si lancia con: -Deposito 100000 -Modello 4
+#     MOTIVO (classe 453): e' il deposito con cui l'ANCORA e'
+#     confrontabile, controincrociato in DUE modi indipendenti in
+#     prove/R191a_orologio_ordine_MAXMINDAX_D30EUR.txt (cercare
+#     l'ancora di testo "100.000 CONFERMATO IN DUE MODI"). Non si
+#     duplica qui. >>> E NON E' 80.000 come R203a/R205a: quei due
+#     riproducono R202B sul DAX Apertura, che e' un'ALTRA sedia con
+#     un'ALTRA ancora. Cambiare deposito qui romperebbe r81a.
+# =====================================================================
+#  DOSSIER: report/SEDIA_770411_IL_RIENTRO_2026-09-20.md
+#  ANCORA:  prove/R81a_uscita_A_viva.txt  (etichetta r81a, 18/08/2026)
+#    backtest_pipeline/risultati_archivio/r81_csv/
+#      ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_IS_r81a.csv
+#        Profit 4766.96  PF 1.87803  RF 1.52059  DD 3.0977  Trades 20
+#      ..._D30EUR_OOS_r81a.csv
+#        Profit 6143.38  PF 2.15985  RF 3.02118  DD 1.9213  Trades 21
+#    Cifre ESATTAMENTE come nel CSV: cinque decimali su PF e RF,
+#    quattro sul DD (classe 451 e 385).
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' QUESTO FILE ESISTE -- e sono TRE buchi, non uno  ###
+# ---------------------------------------------------------------------
+#  (1) LO STOP DI QUESTA SEDIA E' DICHIARATO [NON MISURATO] DA DUE
+#      DOCUMENTI DIVERSI, ED E' L'UNICA DELLA ROSA FTMO COSI'.
+#      report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md r.412 e r.427:
+#        770411  D30EUR M15  "2,5 x ATR(14) M15"  stop 64,2-87,5 idx
+#        spread 1,70 -> 37,8-51,5x  ->  ARANCIONE "FRAGILE -- la soglia
+#        cade DENTRO la banda"
+#      e r.461: "770411 resta [NON MISURATO]. Senza quel pavimento la
+#      banda non ha piu' un estremo basso MISURATO".
+#      prove/R194a_correlazione_MAXMINDAX_D30EUR.txt, punto (3) del suo
+#      contro-esempio, lo scrive nero su bianco come buco che NON
+#      chiude: "Lo stop di questa sedia e' 2,5 x ATR(14) M15 ed e'
+#      [NON MISURATO] ... Questo round NON la misura, NON la usa e NON
+#      la migliora."
+#      >>> QUESTO ROUND E' ESATTAMENTE QUEL BUCO. Non e' una seconda
+#          griglia su una domanda gia' risposta: e' la domanda che il
+#          file precedente ha dichiarato di lasciare aperta.
+#
+#  (2) LA MANOPOLA NON E' MAI STATA MOSSA SU QUESTA SEDIA -- misurato
+#      su tutti i CSV del repo, non ricordato.
+#      Scansione del 22/09/2026 su backtest_pipeline/**/*.csv: la
+#      colonna InpAtrSLmult prende PIU' DI UN VALORE in UN SOLO file,
+#        backtest_pipeline/risultati_archivio/MaxMinNotte/
+#          valid_MaxMin_DAX_short_refine.csv   (InpMagic = 770401)
+#      e 770401 e' ABTG_MaxMinNotte, il motore PADRE, non questa sedia.
+#      Su TUTTI i CSV di ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+#      (r81_csv/*r81a-f, risultati_prove/.../_r2, _ohlc, _ptb) la
+#      colonna e' COSTANTE a 2.5. L'unico asse mai girato su questa
+#      sedia e' InpBufferPoints (INGRESSO, file _r2).
+#      E nei file prova: grep su backtest_pipeline/prove/ -> nessun
+#      file mette InpAtrSLmult ad asse. R81a-f variano SETTE manopole
+#      d'uscita (InpBreakeven, InpTP1Pct, InpTP2Pct, InpTPfinal_R,
+#      InpTrailAtrMult, InpUseEMA200Target, InpUseTrailing) e NON
+#      toccano ne' InpAtrSLmult ne' InpSLMode.
+#
+#  (3) IL MASSIMO STA SUL BORDO DELL'ASSE, E UN MASSIMO SUL BORDO NON
+#      E' UN OTTIMO: E' IL PUNTO IN CUI ABBIAMO SMESSO DI GUARDARE.
+#      Dal refine (corr ON, buffer 1000 = la cella VIVA):
+#        1.5 -> PF 1.13966  RF 0.30531  DD 6.7037  n 40  Profit  204.68
+#        2.0 -> PF 1.74583  RF 1.68225  DD 4.7425  n 41  Profit  890.03
+#        2.5 -> PF 2.05328  RF 3.58295  DD 3.0687  n 41  Profit 1112.22
+#      PF monotono CRESCENTE, DD monotono DECRESCENTE, e 2.5 e' il
+#      valore PIU' ALTO che quella griglia contenesse. Sopra 2.5 non
+#      esiste NESSUNA misura, su NESSUNA finestra.
+#      Stessa struttura di R204a sul Dow, e stessa conclusione: il
+#      round chiude un "NON ANCORA MISURATO", non promuove una sedia.
+#
+#      >>> QUANTO E' COMPARABILE QUEL REFINE, dichiarato per nome e
+#          non per esclusione (classe 180 e 551): ho aperto il CSV e
+#          confrontato TUTTE le sue colonne Inp* costanti con il
+#          preset vivo. Coincidono UNA PER UNA:
+#            box 23:00->4:59, InpPlaceHour/Min 7/59,
+#            InpEntryCutoffHour/Min 8/30, InpCloseHour/Min 17/30,
+#            InpCloseAtEnd 1, InpOneTradePerDay 1,
+#            InpPendingExpiryMin 90, InpAllowLong 0, InpAllowShort 1,
+#            InpSLMode 1, InpMgmtTF 15, InpAtrPeriod 14,
+#            InpTP1_R 1, InpTP1Pct 50, InpBreakeven 1, InpTP2_R 3,
+#            InpTP2Pct 50, InpUseEMA200Target 1, InpEMA200Period 200,
+#            InpTPfinal_R 4, InpUseTrailing 1, InpTrailAtrMult 2,
+#            InpCorrSymbol SPXUSD, InpCorrTF 16385, 14/100,
+#            InpRiskPercent 1, InpUseNewsFilter 0, InpMaxSpread 0.
+#          E' LA STESSA GEOMETRIA. Quello che NON coincide e' dichiarato:
+#            finestra   refine 2024.01.01->2026.06.30 TUTTA IN CAMPIONE
+#                       qui    2024.09.26->2026.06.30 con IS 40% / OOS 60%
+#            deposito   refine 10.000   qui 100.000
+#          >>> QUINDI DEL REFINE SI PRENDE LA DIREZIONE, NON I NUMERI.
+#              I suoi PF/DD non si trasferiscono e non sono soglie qui.
+#
+# ---------------------------------------------------------------------
+#  ###  LA MANOPOLA E' VIVA -- dimostrato nel codice, non assunto  ###
+# ---------------------------------------------------------------------
+#  mql5/Experts/ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5
+#    r.45   enum ENUM_MM_SL { MM_SL_OPPOSITE=0, MM_SL_ATR=1, MM_SL_FIXED=2 };
+#    r.75   input ENUM_MM_SL InpSLMode = MM_SL_ATR;
+#    r.78   input double InpAtrSLmult = 2.5;
+#    r.276-278  SLforLong:  if(SLMode==OPPOSITE) sl=oppLevel;
+#                           else if(SLMode==FIXED) sl=entry-InpSLFixedPts*_Point;
+#                           else sl=entry-atr*InpAtrSLmult;
+#    r.284-286  SLforShort: ramo speculare, sl=entry+atr*InpAtrSLmult;
+#  >>> IL RAMO CHE LA LEGGE E' L'ELSE, cioe' SLMode diverso da 0 e da 2.
+#      Il preset in campo porta InpSLMode=1:
+#        mql5/Presets/FTMO/ABTG_MaxMinNotte_DAX_Short_770411_FTMO.set
+#        mql5/Presets/ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_M15_770411_100K.set
+#      ==> VIVA. Ed e' l'unica delle tre manopole dello stop che lo sia:
+#          InpSLFixedPts e' INERTE per costruzione (la legge solo
+#          SLMode==2), e il censimento dell'11/09 lo elenca gia' fra le
+#          inerti di questa sedia.
+#
+#  E CI SONO DUE USI IN PIU', che vanno nominati perche' cambiano la
+#  lettura del round:
+#    r.307  ManagePos: if(risk<=0){ double a=AtrVal(); if(a>0)
+#           risk=a*InpAtrSLmult; }  -- ripiego del calcolo di R quando
+#           lo stop e' gia' stato spostato. VIVO a qualunque SLMode.
+#    r.428-431  LotByRisk(slDist): il LOTTO si ricava da
+#           balance*InpRiskPercent/100 diviso la perdita per lotto su
+#           slDist. ==> LO STESSO NUMERO CHE ALLARGA LO STOP RIMPICCIOLISCE
+#           IL LOTTO, e il denaro a rischio al primo stop resta COSTANTE
+#           in tutte le celle. Serve al contro-esempio (2) qui sotto.
+#
+#  >>> DOVE SAREBBE INERTE, cercato apposta: con InpSLMode=0
+#      (MM_SL_OPPOSITE, stop sull'estremo opposto del box) oppure =2
+#      (MM_SL_FIXED). In tutti e due i casi r.278/286 non esegue il
+#      ramo else e questo round misurerebbe SEI VOLTE LA STESSA COSA.
+#      VERIFICA GRATUITA PRIMA DI LEGGERE QUALUNQUE NUMERO: se le sei
+#      celle danno Profit IDENTICO al centesimo, il pin InpSLMode=1
+#      non e' arrivato. E' la trappola B del censimento dell'11/09, ed
+#      e' gia' morsa in casa (InpTrailFixedPts con InpTrailMode=1).
+#
+# ---------------------------------------------------------------------
+#  ###  L'ATTESA, DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  (a) RIPRODUZIONE. La cella 2.5 DEVE dare:
+#        IS  Profit 4766.96  PF 1.87803  RF 1.52059  DD 3.0977  n 20
+#        OOS Profit 6143.38  PF 2.15985  RF 3.02118  DD 1.9213  n 21
+#      TOLLERANZA, identica a quella di R194a e per la STESSA ragione
+#      dichiarata li': ZERO sui Trades, +-0,5% su PF e DD. Il delta
+#      noto e' il commit 5fc0bc31 (19/08/2026, il giorno DOPO R81) che
+#      ha aggiunto "input bool InpUsaGuardian=true"; nel Tester il
+#      Guardian e' fail-open, quindi l'ancora deve reggere lo stesso.
+#      >>> SE LA CELLA 2.5 NON RIPRODUCE, IL ROUND NON SI LEGGE: si
+#          legge solo l'ancora, e si apre la domanda del binario.
+#
+#  (b) IL VERSO ATTESO, e quale numero produrrebbe l'ALTRA spiegazione.
+#      H0 (mia): il massimo a 2.5 sta sul bordo perche' li' finiva
+#         l'asse. Allora sopra 2.5 il PF continua a salire, oppure si
+#         appiattisce formando un ALTOPIANO di cui 2.5 e' il fianco.
+#      H1 (l'alternativa, e va nominata): 2.5 e' gia' il CENTRO
+#         dell'altopiano, e la salita 1.5->2.5 del refine e' il fianco
+#         sinistro di una campana che scende subito dopo.
+#      >>> H1 PRODUCE UN NUMERO PRECISO: PF(3.0) <= PF(2.5) e in
+#          discesa anche a 3.5 e 4.0, con DD che RISALE. H0 produce
+#          PF(3.0) >= PF(2.5) oppure quattro celle piatte fra 2.5 e 4.0.
+#          Le due ipotesi sono separate dalle STESSE sei celle: nessuna
+#          delle due e' confermabile senza l'altra sul tavolo.
+#      >>> E LA REGOLA DI SELEZIONE SI DICHIARA ADESSO, non dopo:
+#          CENTRO DELL'ALTOPIANO, MAI IL PICCO (regola di casa, R70).
+#          Un PF alto su una cella sola circondata da celle peggiori
+#          si chiama rumore, non ottimo.
+#
+#  (c) n QUASI COSTANTE, e se non lo e' la prima ipotesi NON e' l'edge.
+#      L'ingresso e' un SELL STOP sul livello del box: l'asse non tocca
+#      il trigger, quindi il NUMERO DI POSIZIONI non deve muoversi.
+#      Il numero di DEAL (la colonna Trades) puo' muoversi lo stesso,
+#      perche' TP1 sta a 1,0 R e R cresce con lo stop: piu' lo stop e'
+#      largo, meno il primo parziale viene raggiunto -> MENO deal a
+#      parita' di posizioni. Nel refine il movimento era piccolo
+#      (40/41/41 su 1.5/2.0/2.5).
+#      >>> SE n CROLLA A ZERO in una cella larga, la prima ipotesi non
+#          e' "il motore smette di entrare": e' NormVol (r.459-466) che
+#          azzera il lotto. ED E' GIA' ESCLUSO ARITMETICAMENTE, e il
+#          conto NON dipende da quanto vale il lotto minimo (che NON ho
+#          misurato): chiamiamolo mn. Il refine ha prodotto 37-41 trade
+#          a m=1,5..2,5 con deposito 10.000 [deposito dichiarato da
+#          prove/R194a..., che cita la stessa corsa; nel CSV non c'e'],
+#          quindi il suo lotto grezzo era >= mn. A 100.000 il lotto
+#          grezzo e' 10 volte tanto (>= 10 mn) perche' LotByRisk e'
+#          lineare nel balance (r.431); a 4,0 x ATR lo stop e' 4,0/2,5
+#          = 1,6 volte piu' largo, quindi il lotto e' 1/1,6 = 0,625 di
+#          quello: >= 6,25 mn, cioe' SEI VOLTE il minimo, qualunque sia
+#          mn. NESSUNA CELLA PUO' AZZERARSI PER ARROTONDAMENTO.
+#          [DERIVATO dal refine, non misurato qui.]
+#
+#  (d) IL CANCELLO DI PROMOZIONE, coi numeri gia' scritti.
+#      >>> PRIMA UNA COSA CHE VA DETTA IN TESTA E NON IN FONDO:
+#          QUESTO ROUND NON PUO' PROMUOVERE NESSUNA CELLA IN CAMPO.
+#          r81a fa 20 deal in IS e 21 in OOS, e R191a ha gia' misurato
+#          che i deal non sono posizioni (le posizioni vere sono 14).
+#          L'emendamento della finestra del 16/08, regola A, chiede
+#          >= 150 OPERAZIONI: questa sedia e' sotto CON CERTEZZA in
+#          tutte e due le gambe. Il MERITO e' SOSPESO in partenza
+#          (valvola R59). Il RISCHIO si legge a qualunque n
+#          (regola B del 16/08), ed e' quello che questo round decide,
+#          insieme alla DIREZIONE e al COSTO.
+#          Il cancello qui sotto serve a dire quale cella MERITA una
+#          finestra piu' lunga, non quale cella va in campo.
+#
+#      c1   PF OOS della cella >= PF OOS della cella 2.5 (2.15985).
+#           Non "vicino": >=. E accanto al PF si riporta SEMPRE il
+#           PROFITTO, che e' il giudice pulito perche' immune alla
+#           distorsione del conteggio sulle uscite (la somma dei deal
+#           di una posizione e' il P/L della posizione).
+#           Cella 2.5 OOS: Profit 6143.38. IS: 4766.96.
+#      c1-bis  RECOVERY FACTOR OOS della cella >= quello della cella
+#           2.5 (3.02118). SERVE, e qui piu' che altrove: questo asse
+#           cambia la POPOLAZIONE DELLE USCITE (punto (c): TP1 a 1,0 R
+#           si allontana quando lo stop si allarga). Con InpTP1Pct=50 e
+#           InpBreakeven=true pinnati, una posizione grattata a pari
+#           mette meta' del vincente al numeratore e quasi nulla al
+#           denominatore: il PF dipende da QUANTE posizioni toccano
+#           TP1, ed e' proprio quello che l'asse sposta. RF = profitto
+#           netto / drawdown massimo e' fatto di DUE QUANTITA' IN
+#           DENARO: immune al conteggio delle uscite, ed e' profitto
+#           per unita' di rischio, la valuta della challenge.
+#           Base IS: 1.52059.
+#           >>> SE c1 FALLISCE MA c1-bis E c2 PASSANO: NON SI PROMUOVE.
+#               Si scrive "PF diluito, rendimento per unita' di rischio
+#               migliorato" e decide Claudio.
+#      c2   DD a DENOMINATORE FISSO non peggiora di piu' del 10%.
+#           DD_fisso% = (Profit / Recovery Factor) / 100000 x 100.
+#           SERVE PERCHE' "Equity DD %" divide per il PICCO, che cambia
+#           da cella a cella (classe 550): fra due celle l'ordine si
+#           puo' RIBALTARE. Qui il denominatore fisso serve SOLO a
+#           rendere le SEI CELLE confrontabili fra loro. NON e' il muro
+#           FTMO: quello e' il punto (e).
+#           DUE BASI, UNA PER GAMBA (classe 557), dalla cella 2.5:
+#             IS   DD_fisso 3,1349  -> allarme sopra 3,4484
+#             OOS  DD_fisso 2,0334  -> allarme sopra 2,2368
+#           Se il Recovery Factor e' 0 (passata a ZERO TRADE, Profit=0)
+#           la formula e' 0/0: si scrive [NON CALCOLABILE DAL CSV].
+#      c3   IS e OOS CONCORDI di segno su PF e su DD_fisso rispetto
+#           alla cella 2.5. Discordi -> nessuna raccomandazione.
+#
+#  (e) IL MURO FTMO, e si usa la forma CORRETTA (classe 562).
+#      La catena, misurata su 8 celle di R202B con ZERO eccezioni, e':
+#          perdita statica  <=  Equity DD %  <=  DDass/deposito
+#      cioe' "Equity DD %" -- la colonna che sta GIA' in ogni CSV -- e'
+#      il limite superiore PIU' STRETTO, e DDass/deposito e' il PIU'
+#      LARGO. Quindi il muro si misura con "Equity DD %", non col
+#      denominatore fisso, che sprecherebbe margine.
+#      Fonte: report/IL_MURO_MISURATO_2026-09-22.md.
+#      Un limite superiore SOTTO la soglia DIMOSTRA la sicurezza; e'
+#      sopra la soglia che non dimostra niente.
+#      TAGLIA DEL BANCO: InpRiskPercent = 1,00% -- NON e' la taglia in
+#      campo. La taglia FTMO firmata da Claudio il 20/09/2026 e' 2,00%
+#      (scritta dentro il preset FTMO di questa sedia). Il fattore e'
+#      x2,00 [APPROSSIMATO lineare, convenzione CONTRATTI_SEDIE.md
+#      punto 2; classe 547]. Il raddoppio e' un LIMITE SUPERIORE, non
+#      un'identita': LotByRisk usa ACCOUNT_BALANCE, che cresce coi
+#      profitti.
+#      CELLA 2.5, riportata a 2,00%:  IS 3,0977 x2 = 6,1954%
+#                                     OOS 1,9213 x2 = 3,8426%
+#      Tutte e due SOTTO il muro del 10,0%: la cella viva e' DIMOSTRATA
+#      compatibile.
+#      SOGLIA DI ESCLUSIONE, congelata adesso:
+#        "Equity DD %" di una cella > 5,00% in una qualunque delle due
+#        gambe  ==>  a 2,00% supererebbe il muro del 10%  ==>  quella
+#        cella e' INCOMPATIBILE con la challenge e si scarta, anche se
+#        passasse c1, c1-bis, c2 e c3. E' la stessa soglia gia' usata
+#        da R194a su questa sedia.
+#
+#  (f) IL COSTO, e questo asse LO MUOVE DAVVERO (non e' la classe 555).
+#      Su R205a la formula dello stop non cambiava lungo l'asse e
+#      quindi il costo non si muoveva. QUI E' IL CONTRARIO: lo stop e'
+#      m x ATR, quindi stop/spread e' LINEARE in m. Non e' una
+#      grandezza sostituita alla soglia: e' la stessa formula con m
+#      diverso.
+#      LA BANDA DI PARTENZA e' MISURATA DA ALTRI, non da me:
+#      report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md r.412 e r.427
+#      scrivono per m=2,5:  stop 64,2-87,5 idx ; /1,70 = 37,8-51,5x ;
+#      /2,70 (coda tick) = 23,8-32,4x.
+#      >>> CONTROLLO DELLA MIA ARITMETICA CONTRO I LORO NUMERI: da
+#          stop(m) = (64,2/2,5) x m = 25,68 x m  fino a  35,00 x m,
+#          a m=2,5 esce 64,20-87,50 e 64,20/1,70 = 37,8 ,
+#          87,50/1,70 = 51,5 , 64,20/2,70 = 23,8 , 87,50/2,70 = 32,4.
+#          RIPRODUCE TUTTE E QUATTRO LE CIFRE GIA' SCRITTE. La formula
+#          e' verificata contro il file che aveva gia' la risposta, non
+#          contro se stessa.
+#      LA TABELLA DEL COSTO, CELLA PER CELLA (spread mediano 1,70):
+#        m=1.5   stop  38,5- 52,5 idx   22,7-30,9x   NO (sotto 40x su
+#                tutta la banda) ; sulla coda 2,70: 14,3-19,4x, sopra
+#                il pavimento duro 13,3x ma di pochissimo
+#        m=2.0   stop  51,4- 70,0 idx   30,2-41,2x   FRAGILE, quasi tutta sotto
+#        m=2.5   stop  64,2- 87,5 idx   37,8-51,5x   FRAGILE (la cella VIVA)
+#        m=3.0   stop  77,0-105,0 idx   45,3-61,8x   PASSA su TUTTA la banda
+#        m=3.5   stop  89,9-122,5 idx   52,9-72,1x   PASSA
+#        m=4.0   stop 102,7-140,0 idx   60,4-82,4x   PASSA; e sulla coda
+#                2,70 fa 38,0-51,9x, la prima cella che sfiora i 40x
+#                anche sullo spread di coda
+#      >>> LA FRONTIERA DEI 40x SULL'ESTREMO BASSO DELLA BANDA CADE A
+#          m = 68,0/25,68 = 2,648. Cioe' FRA LA CELLA VIVA E LA PRIMA
+#          CELLA PIU' LARGA. Questo e' il fatto che rende il round
+#          utile anche se il merito resta sospeso: m>=3,0 e' la prima
+#          configurazione in cui questa sedia smette di essere
+#          ARANCIONE sul cancello di costo.
+#      >>> RISERVA, e va scritta: la banda 64,2-87,5 non e' una misura,
+#          e' l'intervallo fra DUE LEGGI (ATR(M15) fra 25,7 e 35,0),
+#          dichiarato tale a r.461-464 dello stesso referto, e r.464
+#          avverte che il 35,0 e' "quasi certamente un tetto, non una
+#          stima" perche' l'ATR alle 08:01-08:27 media barre di DAX
+#          fuori cassa. QUINDI IL COSTO QUI E' UN CONTO, NON UNA
+#          MISURA, e la misura vera resta da fare sui trade della cella
+#          scelta. NON si promuove una cella "perche' passa i 40x".
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO OBBLIGATORIO  ###
+# ---------------------------------------------------------------------
+#  (1) L'IPOTESI ALTERNATIVA CHE VA BATTUTA, e ha un numero.
+#      "Il DD scende quando lo stop si allarga perche' il LOTTO si
+#       rimpicciolisce. Allora la misura non dice niente sulla
+#       geometria: dice solo che stiamo rischiando meno."
+#      >>> FALSIFICATA NEL CODICE, non argomentata: LotByRisk r.428-431
+#          normalizza il denaro a rischio a balance x InpRiskPercent/100
+#          SULLA DISTANZA DELLO STOP. Uno stop pieno costa LO STESSO
+#          DENARO in tutte e sei le celle. Cio' che cambia non e'
+#          quanto costa lo stop: e' QUANTE VOLTE viene toccato.
+#      >>> IL NUMERO CHE SEPARA LE DUE SPIEGAZIONI: se fosse il lotto,
+#          il PROFITTO scenderebbe insieme al DD (meno rischio, meno
+#          rendimento). Nel refine il profitto SALE mentre il DD SCENDE
+#          (204,68 -> 890,03 -> 1112,22 contro 6,70 -> 4,74 -> 3,07).
+#          Le due grandezze vanno in VERSI OPPOSTI: e' incompatibile
+#          con la spiegazione del lotto.
+#
+#  (2) IL LIMITE VERO DI QUESTO ASSE, e non e' quello del punto (1).
+#      L'asse NON muove solo lo stop. Muove lo stop RELATIVAMENTE a un
+#      trailing che sta fermo:
+#        InpTP1_R / InpTP2_R / InpTPfinal_R sono in R -> SCALANO con lo
+#          stop (TP1 a 1,0 R si allontana in punti quando m cresce);
+#        InpTrailAtrMult = 2,0 e' in ATR ASSOLUTI -> NON scala;
+#        InpUseEMA200Target punta a un LIVELLO DI PREZZO -> non scala.
+#      >>> CONSEGUENZA DA SCRIVERE PRIMA: a m=4,0 il TP finale sta a
+#          4 x 102,7-140,0 = 411-560 punti indice dall'ingresso, cioe'
+#          fuori dalla portata di una giornata normale del DAX: in
+#          quelle celle l'uscita VERA diventa il trailing / l'EMA200 /
+#          il flat delle 17:30. NON E' SOLO "uno stop piu' largo": e'
+#          un REGIME D'USCITA DIVERSO.
+#          >>> Quindi una cella larga che vince NON dimostra che "lo
+#              stop largo e' meglio": dimostra che la COPPIA
+#              (stop largo + trailing relativamente piu' stretto) e'
+#              meglio. E' la coppia che la sedia esegue davvero, ed e'
+#              la coppia che questo round misura. Il round che separa
+#              i due e' InpTrailAtrMult, e NON e' questo.
+#
+#  (3) LA TRAPPOLA AL CONTRARIO, congelata adesso.
+#      Se la cella migliore uscisse la 1.5 (stop STRETTO), la
+#      tentazione sarebbe "stringiamo e ci compriamo margine sul muro".
+#      >>> NO. A 1,5 x ATR lo stop sta a 22,7-30,9x lo spread mediano e
+#          a 14,3-19,4x quello di coda: sotto i 40x su TUTTA la banda e
+#          a un soffio dal pavimento duro di 13,3x. Quella cella e'
+#          ESCLUSA PER COSTO A PRIORI, e sta nell'asse SOLO come fianco
+#          sinistro per leggere la forma dell'altopiano. Il numero e'
+#          scritto qui sopra, non si scopre dopo.
+#
+#  (4) E SE LE SEI CELLE FOSSERO IDENTICHE?
+#      Non sarebbe "l'asse non conta": sarebbe il pin InpSLMode che non
+#      e' arrivato (r.278/286 non esegue il ramo else). Si guarda quel
+#      pin PRIMA di scrivere qualunque verdetto.
+#
+# ---------------------------------------------------------------------
+#  ###  QUELLO CHE QUESTO ROUND NON MISURA  ###
+# ---------------------------------------------------------------------
+#  - Il MERITO della sedia: n e' sotto 150 con certezza (punto (d)).
+#  - InpSLMode: le altre due geometrie di stop (estremo opposto del
+#    box, punti fissi) restano [NON MISURATO]. Un asse solo per file.
+#  - InpTrailAtrMult: e' l'altra meta' della coppia del punto (2) del
+#    contro-esempio, e ha bisogno di un round suo.
+#  - Le POSIZIONI vere: ogni n e' un conteggio di DEAL. Si contano sui
+#    position_id, non si deducono.
+#  - Lo spread VERO sul broker FTMO: la tabella del costo usa lo spread
+#    BCM (1,70 mediano / 2,70 di coda). Su FTMO il simbolo si chiama
+#    GER40.cash e lo spread e' misurato altrove
+#    (report/STOP_VS_SPREAD_FTMO_2026-09-20.md r.552: 2,70 nell'ora
+#    7-8, 230 punti, 2,30). Il verso non cambia, il numero si':
+#    con 2,70 la colonna "/1,70" va riletta come "/2,70".
+#
+# ---------------------------------------------------------------------
+#  ###  IGIENE, VERIFICATA A MANO  ###
+# ---------------------------------------------------------------------
+#  COSTRUITO PER DIFFERENZA da
+#    prove/R194a_correlazione_MAXMINDAX_D30EUR.txt
+#  che e' il file prova PIU' RECENTE di questa sedia (20/09/2026) ed e'
+#  a sua volta il corpo di r81a. LE RIGHE CAMBIATE SONO TRE, e sono
+#  queste e nessun'altra:
+#    (1) InpUseCorrelation  da ASSE 0||0||1||1||Y  a PIN
+#        true||true||0||true||N  = il valore VIVO del preset, e il
+#        valore dell'ancora r81a. Senza questo la cella 2.5 non
+#        riprodurrebbe niente.
+#    (2) InpAtrSLmult  da PIN 2.5||2.5||0||2.5||N  ad ASSE
+#        2.5||1.5||0.5||4.0||Y.
+#    (3) InpMagic  da 787421 a 787431 (magic vergine, vedi sotto).
+#  Tutto il resto del corpo e' IDENTICO a R194a riga per riga.
+#  FINESTRA: identica a R81a, R191a e R194a. @DAQUANDO 2024.09.26
+#    (pavimento MISURATO dei tick reali BCM sugli indici),
+#    @FINOA 2026.06.30, @FRAZIONEIS 0.40.
+#  MODELLO: tick reali (-Modello 4), come l'ancora. -Modello 1
+#    romperebbe il confronto.
+#  TETTO DELLE BARRE: M15 su 21 mesi = ~34.900 barre [DERIVATO: 96
+#    barre/giorno x ~364 giorni di borsa]. Sotto il tetto delle
+#    ~100.000. Nessuna tranche.
+#  CELLE: 6 (1.5 / 2.0 / 2.5 / 3.0 / 3.5 / 4.0). Tutti e sei i valori
+#    sono esattamente rappresentabili in binario e il passo 0,5 pure:
+#    nessuna deriva di arrotondamento sull'asse.
+#  MAGIC: 787431 -- cercato il 22/09/2026 con grep -ril su tutto il
+#    repo (.git e .claude esclusi): ZERO occorrenze. VIETATI qui:
+#    770411/770412 (la sedia viva), 778110-778161 (le sei celle di
+#    R81), 787410 e 787420 (R191a/R191b), 787421 (R194a).
+#  ETICHETTA: r206a -- grep -ril "r206" su tutto il repo: ZERO.
+#  PIN DI STRINGA: uno solo, InpCorrSymbol=SPXUSD, NON vuoto. E' il
+#    difetto che controlla_prova.py cerca apposta (il pin vuoto non
+#    arriva all'EA e MT5 usa il default compilato).
+#  RISCHIO: InpRiskPercent = 1,00 = il dial di MISURA, identico a r81a,
+#    R191a e R194a. La taglia in campo (2,00% su FTMO) e' una firma di
+#    Claudio e NON si mette qui: la conversione sta nel punto (e).
+#  UN SOLO AGENTE locale nel Strategy Tester.
+#
+#  COSTO -- STIMA, base MISURATA SU QUESTO STESSO EA:
+#    6 celle x 2 gambe (IS+OOS) = 12 passate.
+#    BASE: 0,700 min/passata -- backtest_pipeline/risultati_archivio/
+#    R104_REFERTO_DRIVER_20260825_0738.txt r.15, stesso EA, stesso
+#    simbolo, stesso TF, tick reali, deposito 100000, finestra piu'
+#    LUNGA di due mesi. Lo stesso numero e' scritto una seconda volta
+#    in REGISTRO_TEST.md (sezione R187).
+#    >>> COSTO DICHIARATO: 12 x 0,700 = 8,4 MINUTI.
+#
+#  BERSAGLIO: PC DI BACKTEST. NON il VPS -- e la ragione non e' una
+#    preferenza, e' la firma di Claudio del 21/09/2026 dopo che lo
+#    Strategy Tester sul banco ha inchiodato il VPS mentre le sei sedie
+#    della challenge operavano. NON il piccolo 50503392, NON il 100k
+#    50504263, NON il reale 10105439, NON il terminale FTMO 541452707,
+#    NON il banco 50504400 sul VPS (che resta SPENTO).
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato dall'autore di
+#    questo file. Il SECONDO strato, l'agente controllo-preventivo, lo
+#    lancia il coordinatore. Finche' non torna, questa prova non esce.
+#    LA RIGA DI LANCIO NON STA QUI e non e' stata scritta: la genera il
+#    coordinatore e la fa passare dal suo cancello.
+# =====================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+# --- Guardian: acceso come in campo. Nel Tester e' fail-open. ---
+InpUsaGuardian=true||true||0||true||N
+
+# --- IL BOX NOTTURNO: identico alla sedia viva, non si tocca ---
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+# InpMinBoxPts: PIN. MISURATO INERTE su questo EA -- nel refine le 18
+# coppie 0-contro-1500 danno risultati IDENTICI al centesimo (36
+# passate, 18 esiti). Girarlo costerebbe passate e non misurerebbe
+# niente (trappola B del censimento dell'11/09).
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+
+# --- GLI OROLOGI: tutti pinnati sui valori vivi (ora server BCM) ---
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+# InpPendingExpiryMin: PIN al valore vivo. INERTE per costruzione con
+# questo cutoff (7:59 + 90 min = 9:29, l'EA cancella gia' alle 8:30).
+InpPendingExpiryMin=90||90||0||90||N
+
+# --- INGRESSO: pinnato per nome, nessun parametro di motore toccato ---
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+
+# --- LO STOP: QUI STA L'UNICO ASSE DEL FILE (in fondo) ---
+# InpSLMode: PIN a 1 = MM_SL_ATR (enum r.45: OPPOSITE=0, ATR=1,
+# FIXED=2). E' il pin che tiene VIVO l'asse: con 0 o con 2 il sorgente
+# non esegue il ramo else di r.278/286 e le sei celle sarebbero
+# identiche. Se lo diventano, si guarda QUESTA riga prima di tutto.
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+# InpSLFixedPts: PIN al valore del preset vivo. E' INERTE per
+# costruzione: il sorgente lo legge SOLO se InpSLMode==MM_SL_FIXED,
+# che vale 2. Qui SLMode=1. Sta nel file per fedelta' al preset, non
+# perche' faccia qualcosa.
+InpSLFixedPts=3000||3000||0||3000||N
+
+# --- LA SCALA D'USCITA VIVA: identica a r81a, tutta pinnata ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- IL FILTRO DI CORRELAZIONE: PIN al valore VIVO.
+#     In R194a questo era l'asse; qui torna al valore del preset e
+#     dell'ancora r81a. Se restasse ad asse, il file avrebbe DUE assi e
+#     il driver misurerebbe una griglia invece di una variabile.
+InpUseCorrelation=true||true||0||true||N
+InpCorrSymbol=SPXUSD||SPXUSD||0||SPXUSD||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+
+# --- Rischio e contorno ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFlatten=true||true||0||true||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=787431||787431||0||787431||N
+
+# --- L'UNICO ASSE: IL MOLTIPLICATORE ATR DELLO STOP.
+#     1.5 / 2.0 / 2.5 / 3.0 / 3.5 / 4.0 = 6 celle, 12 passate.
+#     2.5 e' la cella VIVA ed e' l'ANCORA: deve riprodurre r81a.
+#     1.5 e 2.0 sono il fianco sinistro (gia' misurate dal refine su
+#       un'ALTRA finestra), ed ESCLUSE PER COSTO a priori: 22,7-30,9x
+#       e 30,2-41,2x contro la frontiera dei 40x.
+#     3.0 / 3.5 / 4.0 sono il territorio MAI MISURATO, ed e' li' che
+#       la sedia passerebbe il cancello di costo su tutta la banda.
+#     L'asse e' numerico e il passo e' esatto in binario: nessuna
+#     deriva di arrotondamento.
+InpAtrSLmult=2.5||1.5||0.5||4.0||Y

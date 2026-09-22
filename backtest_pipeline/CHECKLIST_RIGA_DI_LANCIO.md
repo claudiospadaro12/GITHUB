@@ -28984,3 +28984,65 @@ liquidato come falso positivo -- il che era **vero per la riga** e **falso per l
    **bersaglio**.
 4. Il rilievo del cancello che dice *"va letto a mano"* **va letto a mano DAVVERO, e da tutte e due
    le parti**: se e' innocuo nella riga, resta da chiedersi che cosa significhi **nel file**.
+
+---
+
+## CLASSE 565 -- 🧬🔎 LA MANOPOLA "MAI MOSSA SU QUESTA SEDIA" CHE E' STATA MESSA AD ASSE DAL MOTORE **PADRE** SULLA **STESSA IDENTICA GEOMETRIA** -- e quella corsa e' proprio quella che ha **SCELTO** il valore vivo (22/09/2026, cugina della **462** e della **335**)
+
+**Il fatto.** Preparando `R206a` (sedia `770411` `ABTG_MaxMinNotte_DAX_Short_Ottimizzato`,
+asse `InpAtrSLmult`), il censimento dell'11/09 e la scansione di tutti i CSV del repo
+dicono la stessa cosa, ed e' **vera**: su quella sedia `InpAtrSLmult` non ha **mai** preso
+due valori. Fermandosi li', il file prova sarebbe uscito con scritto *"manopola mai
+misurata"*.
+
+🔴 **Ed era vero per EA e falso per GEOMETRIA.** Il valore vivo `2.5` **viene** da una
+griglia: `risultati_archivio/MaxMinNotte/valid_MaxMin_DAX_short_refine.csv`, che porta
+`InpMagic=770401` — cioe' `ABTG_MaxMinNotte`, il motore **PADRE**, non la variante
+`_Ottimizzato` in campo. L'attribuzione del censimento (per EA, e giustamente prudente)
+la assegna al padre e non alla sedia.
+
+**Perche' la differenza conta, e non e' un cavillo.** Aperto il CSV e confrontate **tutte**
+le colonne `Inp*` costanti col preset vivo, coincidono **una per una** (box, orologi,
+`InpSLMode=1`, `InpMgmtTF`, `InpAtrPeriod`, l'intera scala d'uscita `TP1_R/TP1Pct/
+Breakeven/TP2_R/TP2Pct/EMA200Target/TPfinal_R/UseTrailing/TrailAtrMult`, correlazione,
+`InpRiskPercent`, `InpMaxSpread`). **E' la stessa geometria, sullo stesso simbolo, sullo
+stesso TF, sullo stesso lato.** Cambiano solo **finestra** (tutta in campione) e
+**deposito**.
+
+👉 E dentro quella corsa c'era l'argomento che regge il round: sulla cella viva il PF sale
+**monotono** `1.13966 -> 1.74583 -> 2.05328` su `1.5 / 2.0 / 2.5` e il DD scende
+`6.7037 -> 4.7425 -> 3.0687`, **con il massimo SUL BORDO dell'asse** — perche' `2.5` era il
+valore piu' alto che quella griglia contenesse. **Un massimo sul bordo non e' un ottimo: e'
+il punto in cui si e' smesso di guardare.** Senza quel CSV il file avrebbe chiesto sei
+celle **senza dire perche' proprio in quella direzione**.
+
+### 🔴 Il verso del danno e' l'OPPOSTO di quello della 3-bis del censimento
+- La **3-bis** (11/09) descriveva *"mai provata"* dove era provata: costava **passate
+  sprecate** e una casella falsa nel certificato di morte.
+- La **565** costa **un ARGOMENTO PERSO**: le passate sono le stesse (l'asse va girato
+  comunque, perche' sopra `2.5` non esiste nessuna misura su nessuna finestra), ma il
+  round parte **cieco sulla direzione** e il referto scrive *"mai misurata"* dove il dato
+  giusto e' *"misurata IN CAMPIONE fino al bordo, e mai oltre"*. **Sono due verdetti
+  diversi, e solo il secondo e' vero.**
+
+### La regola
+1. **"Mai mossa su questa sedia" e "mai misurata" NON sono la stessa frase.** Prima di
+   scrivere la seconda, si cerca la manopola **anche sui CSV degli EA della stessa
+   FAMIGLIA** (padre, gemelli, `_Ottimizzato`), non solo su quelli attribuiti alla sedia.
+2. **Il criterio di confronto non e' il nome dell'EA: e' la GEOMETRIA.** Si apre il CSV
+   candidato e si confrontano **tutte** le colonne `Inp*` costanti col preset vivo, **una
+   per una**. Se coincidono, quella corsa parla della sedia — e va citata, con le sue
+   differenze (finestra, deposito, modello) dichiarate per nome.
+3. **Se il valore vivo viene da una griglia, si guarda DOVE cade nella griglia.** Valore
+   vivo **sul bordo** dell'asse storico ⟹ l'asse nuovo si apre **oltre il bordo**, e il
+   motivo si scrive prima dei numeri (stessa lettura di `R204a` sul Dow).
+4. ❌ **E non si ribalta nell'altro fosso**: quella corsa resta **in campione** e su
+   un'altra finestra. Se ne prende la **DIREZIONE**, mai i numeri: i suoi PF/DD non
+   diventano soglie.
+
+### Il `grep` che la trova in trenta secondi
+```
+# tutti i CSV in cui la manopola prende piu' di un valore, SENZA filtrare per EA
+grep -rl "InpAtrSLmult" backtest_pipeline/ --include=*.csv
+# poi, sui candidati, il confronto colonna per colonna col preset vivo
+```
