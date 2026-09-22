@@ -29568,3 +29568,67 @@ come tetto *"già misurato su una gemella"*, e **anche lì va letta come non dim
    la cella `0,5` passa da *"conferma di un fatto noto"* a **prima prova sperimentale del
    tetto**, con la sua previsione falsificabile già scritta prima dei numeri. Un buco
    dichiarato vale più di una citazione gonfiata.
+
+
+---
+
+## CLASSE 579 -- 📅🪤 L'ATTESA DICHIARATA INCLUDE IL PERIODO **IN CORSO**, CHE LA FONTE NON HA ANCORA PUBBLICATO: la corsa RIUSCITA si presenta come FALLITA (22/09/2026, cugina della 539)
+
+**Caso reale.** `report/ORO_M1_2021_2026_PIANO_2026-09-22.md` par. 5 prometteva in console
+`Dentro: RIEPILOGO.txt + 14 zip HistData.` e metteva `HISTDATA_COM_ASCII_XAUUSD_M1_202609.zip` nella tabella degli attesi. La riga girava il **22/09/2026**:
+HistData pubblica i mensili a mese CHIUSO, quindi `202609` quasi certamente non esiste ancora.
+
+Lo **script** si comporta benissimo: il pezzo manca, finisce nell'elenco "da prendere a
+mano", la corsa prosegue e lo zip si fa con 13 pezzi. E' il **DOCUMENTO** a mentire:
+Claudio legge `ATTENZIONE: 1 pezzi non scaricati` e conclude che e' andata male.
+
+🔴 **E il danno peggiore e' il secondo**: chi impara che quella riga di ATTENZIONE e'
+"normale" **smette di leggerla**, e non si accorgera' il giorno in cui mancano SEI pezzi.
+
+🔴 **Aggravante interna**: lo stesso documento, al par. 7 riga 1, dichiarava gia'
+`[NON MISURATO]` la disponibilita' del 2025-2026. **Due sezioni dello stesso piano in
+contraddizione** (classe 539).
+
+### La regola
+1. **Un'attesa che comprende il periodo IN CORSO si scrive come INTERVALLO**, mai come
+   numero secco: *"13 o 14 zip -- il mensile del mese in corso di norma NON c'e' ancora,
+   e se manca la corsa e' RIUSCITA lo stesso"*.
+2. **Quando l'attesa non e' verificabile da qui** (la fonte e' murata dal proxy), si
+   dichiara `[NON VERIFICATO: fonte non raggiungibile]` accanto al numero, invece di scrivere il numero e basta.
+3. 🔎 Controllo in tre secondi: *ogni numero atteso contiene un periodo che finisce OGGI
+   o DOPO? Allora e' un intervallo, non un numero.*
+
+---
+
+## CLASSE 580 -- 🏠🚫 L'ELENCO DEI "NON TOCCATI" GIUSTIFICA LA SICUREZZA CON LA **DISTANZA**, per un conto che sta ANCHE SULLA MACCHINA BERSAGLIO (22/09/2026, figlia della regola dei terminali multipli del 12/09)
+
+**Caso reale.** `report/ORO_M1_2021_2026_PIANO_2026-09-22.md` par. 5 elencava, sotto
+*"Il VPS non e' raggiungibile da li' e non c'entra"*, il REALE `10105439`, il 100k `50504263`,
+le sei sedie FTMO `541452707` **e il piccolo `50503392`**.
+
+🔴 Gli ultimi non sono sullo stesso piano: su `DESKTOP-H4D7CAJ` -- **la macchina bersaglio** -- c'e'
+un terminale BCM loggato proprio su **`50503392`** (`report/I_ROUND_SUL_PC_DI_BACKTEST_2026-09-21.md` r.47), ed e' la macchina che il
+**14/08 ha piazzato ordini VERI** (`report/DAX_14-08_DUE_MOTORI.md` r.401, -104,60 sul conto piccolo).
+
+La **conclusione** era giusta (lo script non nomina ne' avvia nessun eseguibile: grep = 0).
+La **ragione dichiarata** era falsa. E una ragione falsa e' peggio di nessuna ragione: quel
+paragrafo e' scritto per essere **ricopiato** nella prossima riga di lancio -- e la prossima
+potrebbe avviare qualcosa.
+
+🔴 **Secondo pezzo della stessa classe: l'elenco dei percorsi era incompleto.** Diceva
+*"si tocca solo Internet, `%USERPROFILE%\abtg_oro_m1\` e il Desktop"*, mentre la riga
+(a) scrive `%USERPROFILE%\oro_m1_histdata.ps1`, che **non** sta in quella cartella;
+(b) **CANCELLA RICORSIVAMENTE** `Desktop\ORO_M1_HISTDATA\` e `%USERPROFILE%\abtg_oro_m1\estratti`;
+(c) cancella `Desktop\oro_m1_histdata.zip`. *"Tocca il Desktop"* non e' *"cancella ricorsivamente una cartella
+del Desktop"*.
+
+### La regola
+1. 🏠 **Prima si elencano i terminali e i conti che stanno sulla MACCHINA BERSAGLIO**,
+   con numero e cartella, e POI quelli altrove. L'unico rischio vero e' quello locale.
+2. 🔑 **La ragione per cui una cosa e' salva si scrive, e dev'essere quella VERA**: qui
+   non e' *"e' lontano"*, e' *"lo script non nomina ne' avvia nessun eseguibile -- grep,
+   conteggio 0"*.
+3. 🗑️ **Ogni `Remove-Item -Recurse` dello script entra nell'elenco dei toccati, per nome.** Un percorso
+   che viene CANCELLATO non e' "toccato": e' distrutto e ricreato.
+4. 🔎 Controllo: `grep -nE "Remove-Item|Set-Content|Out-File|New-Item|-OutFile" <script>` e ogni percorso che esce dev'essere nominato nel paragrafo dei
+   toccati.
