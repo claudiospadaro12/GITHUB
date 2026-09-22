@@ -29424,3 +29424,43 @@ il documento citava **a proprio favore**: da `BCM = HistData + shift`
    CORREGGE.** *«In disaccordo» non e' un verdetto: e' una verifica non fatta.*
 3. 📌 E si guarda **quale delle due e' piu' facile da credere**: quella che coincide con la
    convenzione diffusa e' la piu' pericolosa, perche' nessuno la mette in dubbio.
+
+---
+
+## CLASSE 576 -- 🏷️🗄️ IL ROUND DICHIARATO "MAI GIRATO" PERCHE' I SUOI RISULTATI SONO ARCHIVIATI SOTTO L'`-Etichetta` CHE IL FILE PROVA DICHIARA AL SUO INTERNO, E QUELLA NON E' LA SUA SIGLA `R…` (22/09/2026)
+
+**Caso reale (22/09/2026, censimento dei file fermi).** Il censimento confrontava la sigla di ogni
+file prova (`R35a`, dal prefisso del nome) coi nomi dei file di risultato, e dichiarava "fermo"
+chi non trovava riscontro. Su 242 etichette cosi' dichiarate ferme, **41 (55 file prova) ERANO
+GIRATE**: i loro risultati esistono, ma sotto un nome diverso.
+
+🔴 **La causa e' scritta dentro il file prova, alla riga di lancio.**
+`prove/R35a_range_DAX.txt` r.3: `Si lancia con: -Prova prove\R35a_range_DAX.txt -Etichetta r35`.
+I CSV stanno in `risultati_prove/aperture_r35/` -- token **`r35`**, non **`R35a`**. Il file
+prova **dichiara da se'** con quale stringa verra' archiviato, e i round gemelli di una stessa
+famiglia (`R35a`, `R35b`) **condividono la stessa etichetta**.
+
+Casi misurati: `R34*`→`r34` · `R35*`→`r35` · `R37*`→`r37` · `R39*`→`r39` · `R40*` · `R41*` ·
+`R42*` · `R16a-d`→**`PTA`/`PTB`/`PTC`/`PTD`** (nessuna parentela col nome) ·
+`R86*`→`R86ADAX`+`R86AORO` (una etichetta per **simbolo**) · `R87*` · `R89*` · `R120b/e`.
+
+**Perche' costa davvero:**
+1. 🪦 **Produce falsi "mai misurato"** -- l'esatto contrario del *certificato di morte*: si
+   dichiara aperta una casella che e' gia' chiusa, e si spende tempo macchina per rifare un
+   numero che c'e'.
+2. 🔴 **E nella direzione opposta e' peggio**: chi cerca un risultato con la sigla e non lo
+   trova puo' concludere che il round vada **rilanciato**, e sovrascrivere un archivio.
+
+### La regola
+1. 🔴 **Per sapere se un round e' girato si legge la PRIMA `-Etichetta` del suo file prova**, non
+   la sigla nel nome. Quella e' la chiave d'archivio; la sigla e' solo il nome del documento.
+2. ⚠️ **Si prende la PRIMA occorrenza, non una qualsiasi**: un file prova cita spesso l'etichetta
+   di **altri** round come ancora di riproduzione (`R173a` r.244 cita `r136c`, `R191b` r.13 cita
+   `r120e11`). Una ricerca non ancorata attribuisce a un round i risultati di un altro.
+3. 📌 **E il confronto si fa senza distinzione di maiuscole e includendo i nomi di CARTELLA**:
+   in archivio convivono `aperture_r35`, `r81_csv`, `r116_londonfx`, `R172D`. Una regex
+   sensibile alle maiuscole sui soli nomi di **file** perde una parte dell'archivio.
+4. 🚫 **E un documento di casa non basta come fonte sullo stato di un round.** Lo stesso giorno
+   `REGISTRO_TEST.md` elencava sette round come *«gatati e non ancora girati»*: **tutti e sette
+   erano girati** fra le 21:05 e le 23:27 della sera prima. Il registro era stato scritto a
+   meta' giornata. **Lo stato si legge dall'archivio, non dal registro.**
