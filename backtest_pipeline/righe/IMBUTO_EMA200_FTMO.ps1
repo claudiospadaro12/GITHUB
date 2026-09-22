@@ -1,6 +1,11 @@
 # =====================================================================
-#  MARCATORE_IMBUTO_EMA200_FTMO_v1
+#  MARCATORE_IMBUTO_EMA200_FTMO_v2
 #  RUNNER_SOLA_LETTURA
+#  (v2, 22/09/2026, dal cancello di giudizio: classe 562 -- il campione di
+#   righe grezze era preso dal fondo di un testo concatenato AL CONTRARIO e
+#   mostrava i giorni piu' VECCHI; piu' il filtro per SIMBOLO al passo 5, il
+#   ripiego del referto che ora si rifiuta di scrivere dentro un terminale,
+#   e gli zeri del passo 4 che adesso hanno le loro cause scritte.)
 # ---------------------------------------------------------------------
 #  COSA FA: conta quante volte la sedia EMA200 Dow (magic 771531) ha
 #  PIAZZATO i suoi due ordini limite e quante volte quegli ordini sono
@@ -64,6 +69,20 @@
 #
 #  (L5) QUESTA RIGA NON DECIDE NIENTE. Non propone di cambiare
 #       InpOrder1Atr ne' nessun altro parametro. Misura e stampa.
+#
+#  (L6) IL CSV DI Common\Files NON E' CERTIFICABILE SUL CONTO. Common\Files
+#       e' CONDIVISA fra tutti gli MT5 della macchina e il file non porta
+#       il numero di conto: il giornale si certifica (conto + FTMO), questo
+#       no. E il magic 771531 esiste ANCHE sulla sedia BCM del piccolo
+#       50503392 (simbolo U30USD). Quindi al passo 5 si filtra ANCHE per
+#       SIMBOLO, che e' il solo discriminante che il file offre, e se
+#       compaiono altri simboli con lo stesso magic si dice a schermo.
+#
+#  (L7) LE FINESTRE DEI TRE PASSI NON COINCIDONO. Passo 3 e passo 4 leggono
+#       gli ultimi -Giorni file di log; il passo 5 legge TUTTO lo storico
+#       esportato nel CSV, senza ritaglio di date. "PIAZZATI meno posizioni"
+#       sottrae due periodi diversi se le date non si controllano: sono
+#       stampate, e vanno guardate.
 # =====================================================================
 
 param(
@@ -130,6 +149,24 @@ function Posa-Referto {
     if([string]::IsNullOrWhiteSpace($dsk) -or -not (Test-Path -LiteralPath $dsk)){
       $dsk = (Get-Location).Path
       Write-Host ('ATTENZIONE: Desktop non risolto. Il referto va in ' + $dsk) -ForegroundColor Yellow
+    }
+    # IL BOLLO "SOLA LETTURA" SI FA RISPETTARE, non si promette. Il ripiego qui sopra
+    # e' l'UNICO punto in cui la destinazione non e' una costante: se la cartella di
+    # lavoro fosse per caso dentro una cartella dati o dentro un terminale, la sonda
+    # scriverebbe dove ha giurato di non scrivere. Allora NON scrive e lo dice.
+    # Si NORMALIZZANO i separatori prima di confrontare: un percorso con '/' non
+    # deve far perdere la guardia (e' la stessa classe delle grafie di INDURIMENTO,
+    # dove 6 forme su 8 passavano un gate scritto sull'uguaglianza esatta).
+    $dskN = ($dsk -replace '/', '\')
+    $vietati = @('MetaQuotes\Terminal', 'BCM_Reale', 'BCM_RE~', 'MT5_Backtest', 'MT5_BA~',
+                 'MT5_MANUALE', 'BCM Markets MT5 Terminal', '\FTMO', 'Pepperstone', 'Tickmill')
+    foreach($v in $vietati){
+      if($dskN -like ('*' + $v + '*')){
+        Write-Host ('REFERTO NON SCRITTO: la destinazione "' + $dsk + '" e dentro "' + $v + '".') -ForegroundColor Red
+        Write-Host 'Questa sonda e di SOLA LETTURA e non scrive li. Il referto e tutto a schermo qui sopra:' -ForegroundColor Red
+        Write-Host 'copialo a mano, oppure rilancia da una cartella qualsiasi fuori dai terminali.' -ForegroundColor Red
+        return
+      }
     }
     $st  = Get-Date -Format 'yyyy-MM-dd_HHmmss'
     $car = Join-Path $dsk ('IMBUTO_EMA200_FTMO_' + $st)
@@ -209,10 +246,19 @@ foreach($c in $candidate){
   $dirLog = Join-Path $c.Path 'logs'
   $testo = ''; $nlog = 0
   if(Test-Path -LiteralPath $dirLog){
+    # SI PRENDONO i $Giorni piu' RECENTI (Descending + First) MA SI CONCATENANO
+    # IN ORDINE CRESCENTE, e non e' un dettaglio di stile (classe 562).
+    # Concatenando dal piu' nuovo al piu' vecchio, il "Select-Object -Last 40" del
+    # PASSO 4 mostra le 40 righe piu' VECCHIE spacciandole per le ultime. MISURATO
+    # su albero finto: con 65 righe "expired" su 10 giorni, il campione conteneva
+    # solo il 13-17/09 e SALTAVA il 18, 19, 20 e 21 -- cioe' proprio i giorni della
+    # domanda. Il "+ newline" chiude anche la giunzione fra due file quando il
+    # primo non finisce con a capo (altrimenti due righe diventano una sola).
     $files = @(Get-ChildItem -LiteralPath $dirLog -Filter *.log -ErrorAction SilentlyContinue |
-               Sort-Object LastWriteTime -Descending | Select-Object -First $Giorni)
+               Sort-Object LastWriteTime -Descending | Select-Object -First $Giorni |
+               Sort-Object LastWriteTime)
     $nlog = $files.Count
-    foreach($f in $files){ $testo = $testo + (Leggi-Testo $f.FullName) }
+    foreach($f in $files){ $t1 = Leggi-Testo $f.FullName; if($t1 -ne ''){ $testo = $testo + $t1 + "`r`n" } }
   }
   $haConto = ($testo -match ('(?<![0-9])' + [regex]::Escape($ContoAtteso) + '(?![0-9])'))
   $haFtmo  = (($testo -match '(?i)ftmo') -or ($c.Prog -match '(?i)ftmo'))
@@ -223,7 +269,16 @@ foreach($c in $candidate){
   if($haConto -and $haFtmo){ Dillo ($riga + '  -> CONFERMATA') 'Green'; $confermate += $c }
   else { Dillo ($riga + '  -> scartata') 'Yellow' }
 }
-if($confermate.Count -eq 0){ Muori ('nessuna cartella certificata per il conto ' + $ContoAtteso + '. Non leggo a caso.') }
+if($confermate.Count -eq 0){
+  Dillo '' $null
+  Dillo '      Le cause possibili, in ordine, PRIMA di concludere qualcosa:' 'Yellow'
+  Dillo ('      1. il terminale del conto ' + $ContoAtteso + ' non e installato per questo utente;') 'Yellow'
+  Dillo '      2. e PORTABLE: i dati stanno dentro la cartella del programma (es. C:\FTMO\logs),' 'Yellow'
+  Dillo '         NON sotto %APPDATA%\MetaQuotes\Terminal, e questa sonda guarda solo li;' 'Yellow'
+  Dillo '      3. sto girando come un utente diverso da quello che ha avviato MT5;' 'Yellow'
+  Dillo ('      4. i giornali piu recenti (' + $Giorni.ToString($INV) + ' file) non nominano il conto.') 'Yellow'
+  Muori ('nessuna cartella certificata per il conto ' + $ContoAtteso + '. Non leggo a caso.')
+}
 if($confermate.Count -gt 1){ Muori ('DUE cartelle certificate per lo stesso conto: non scelgo io. Elencate sopra.') }
 $FT = $confermate[0]
 Dillo '' $null
@@ -241,7 +296,7 @@ Dillo '      la riga e ORA SERVER (FTMO = italiana +1). Sono due orologi diversi
 Dillo '' $null
 
 $dirExp = Join-Path $FT.Path 'MQL5\Logs'
-$nImb = 0; $piazzatiTot = 0; $tentatiTot = 0; $armateTot = 0
+$nImb = 0; $piazzatiTot = 0; $tentatiTot = 0; $armateTot = 0; $nRotte = 0
 if(-not (Test-Path -LiteralPath $dirExp)){
   Dillo ('      MANCA ' + $dirExp + ': nessuna scheda Esperti.') 'Red'
 } else {
@@ -259,6 +314,10 @@ if(-not (Test-Path -LiteralPath $dirExp)){
       if($h -match '\|\s*PIAZZATI\s+(\d+)'){ $piazzatiTot += [int]$Matches[1] }
       if($h -match '\|\s*ORDINI tentati\s+(\d+)'){ $tentatiTot += [int]$Matches[1] }
       if($h -match '\|\s*ARMATE\s+(\d+)'){ $armateTot += [int]$Matches[1] }
+      # L'EA SI CONTROLLA DA SOLO e scrive l'esito nella riga: se la somma dei rami
+      # non torna al totale, stampa "quadratura ROTTA". Se lo ignorassi, sommerei
+      # numeri che l'EA stesso dichiara incoerenti e li consegnerei come misura.
+      if($h -match '(?i)quadratura ROTTA'){ $nRotte++ }
     }
   }
 }
@@ -274,6 +333,12 @@ if($nImb -eq 0){
   Dillo ('      TOTALE sulla finestra letta:  ARMATE ' + $armateTot.ToString($INV) +
          '   ORDINI tentati ' + $tentatiTot.ToString($INV) +
          '   PIAZZATI ' + $piazzatiTot.ToString($INV)) 'Green'
+  Dillo ('      righe imbuto lette: ' + $nImb.ToString($INV) + '   di cui con QUADRATURA ROTTA: ' + $nRotte.ToString($INV)) $null
+  if($nRotte -gt 0){
+    Dillo '      QUADRATURA ROTTA su almeno una riga: e l EA che dichiara che i suoi rami non' 'Red'
+    Dillo '      sommano al totale. Finche non e spiegata, questi totali sono [NON MISURATO],' 'Red'
+    Dillo '      non un numero piu basso o piu alto. Leggere le righe grezze qui sopra.' 'Red'
+  }
 }
 
 # ---------------------------------------------------------------------
@@ -298,7 +363,19 @@ Dillo ('        di cui "expired" : ' + $nExpired.ToString($INV) + '   <-- penden
 Dillo ('        di cui "cancel"  : ' + $nCancel.ToString($INV)) $null
 Dillo ('        di cui "deal #"  : ' + $nDeal.ToString($INV)) $null
 Dillo '' $null
-Dillo '      righe grezze di SCADENZA/CANCELLAZIONE (max 40, cosi le leggi tu e non ti fidi di me):' $null
+if($righeSim.Count -eq 0){
+  Dillo '      ZERO righe di giornale nominano il simbolo. NON vuol dire "non ha mai operato":' 'Red'
+  Dillo ('      su questo terminale il simbolo potrebbe chiamarsi diversamente da ' + $Simbolo) 'Red'
+  Dillo '      (su BCM la stessa sedia gira su U30USD). Controllare il nome prima di concludere.' 'Red'
+} elseif($nExpired -eq 0){
+  Dillo '      ZERO righe "expired". NON e "non ci schiva mai": puo anche voler dire che questo' 'Red'
+  Dillo '      giornale non registra la SCADENZA dei pendenti (e un evento del server, e la sua' 'Red'
+  Dillo '      riga non e garantita), oppure che nella finestra letta non e scaduto niente.' 'Red'
+  Dillo '      Il numero che risponde per davvero e PIAZZATI (passo 3) contro le posizioni (passo 5):' 'Red'
+  Dillo '      se qui c e zero e li i due numeri non tornano, il verdetto e [NON MISURATO].' 'Red'
+}
+Dillo '' $null
+Dillo '      righe grezze di SCADENZA/CANCELLAZIONE (le 40 piu RECENTI, cosi le leggi tu e non ti fidi di me):' $null
 $grezze = @($righeSim | Where-Object { $_ -match '(?i)(expired|cancel)' } | Select-Object -Last 40)
 if($grezze.Count -eq 0){ Dillo '          (nessuna)' $null }
 foreach($r in $grezze){ Dillo ('          ' + $r.Trim()) $null }
@@ -310,11 +387,30 @@ Dillo '' $null
 Dillo '[5/5] POSIZIONI VERE -- dal CSV del TradeExporter (Common\Files). Questa fonte e PER-MAGIC.' $null
 Dillo '      AVVISO (L4): il CSV contiene SOLO le posizioni CHIUSE e si riesporta ogni 30 minuti.' 'Yellow'
 Dillo '      Una posizione ancora APERTA non c e: "piazzati meno aperti" SOVRASTIMA gli schivati.' 'Yellow'
+Dillo '      AVVISO (L6): Common\Files e CONDIVISA FRA TUTTI GLI MT5 DELLA MACCHINA, e questo file' 'Yellow'
+Dillo ('      NON porta il numero di conto: non e certificabile come il giornale. Il magic ' + $Magic.ToString($INV)) 'Yellow'
+Dillo '      e lo STESSO anche sulla sedia BCM del piccolo 50503392 (U30USD). Per questo qui si' 'Yellow'
+Dillo ('      filtra ANCHE per simbolo (' + $Simbolo + '), che e il solo discriminante disponibile.') 'Yellow'
+Dillo '      AVVISO (L7): il CSV NON e ritagliato sulla finestra dei log. Il passo 3 legge gli ultimi' 'Yellow'
+Dillo ('      ' + $Giorni.ToString($INV) + ' file; qui c e TUTTO lo storico esportato. I due numeri si sottraggono solo se le') 'Yellow'
+Dillo '      date stampate qui sotto stanno dentro quella finestra: si guardano, non si assumono.' 'Yellow'
 Dillo '' $null
 $csv = Join-Path $env:APPDATA 'MetaQuotes\Terminal\Common\Files\ABTG_Trades_FTMO.csv'
 if(-not (Test-Path -LiteralPath $csv)){
   Dillo ('      MANCA ' + $csv) 'Yellow'
-  Dillo '      Il TradeExporter non e attaccato, oppure non ha ancora esportato.' 'Yellow'
+  Dillo '      Le cause, e sono TRE, non due:' 'Yellow'
+  Dillo '      1. il TradeExporter non e attaccato;' 'Yellow'
+  Dillo '      2. e attaccato ma non ha ancora esportato (primo giro a 30 minuti);' 'Yellow'
+  Dillo '      3. e attaccato SENZA il suo preset: InpFile torna al default ABTG_Trades.csv,' 'Yellow'
+  Dillo '         che su questa macchina e anche il file di BCM. Ecco cosa c e davvero:' 'Yellow'
+  $dirCom = Join-Path $env:APPDATA 'MetaQuotes\Terminal\Common\Files'
+  if(Test-Path -LiteralPath $dirCom){
+    $altriCsv = @(Get-ChildItem -LiteralPath $dirCom -Filter 'ABTG_*.csv' -ErrorAction SilentlyContinue)
+    if($altriCsv.Count -eq 0){ Dillo '         (nessun ABTG_*.csv in Common\Files)' 'Yellow' }
+    foreach($a in $altriCsv){ Dillo ('         ' + $a.Name + '   ' + $a.Length.ToString($INV) + ' byte   ' + $a.LastWriteTime.ToString('yyyy-MM-dd HH:mm', $INV)) $null }
+    Dillo '         NB: un ABTG_Trades.csv qui NON e certificabile come FTMO (nessun conto dentro):' 'Yellow'
+    Dillo '         non lo leggo al posto del file atteso. Sarebbe leggere a caso.' 'Yellow'
+  } else { Dillo ('         non esiste nemmeno ' + $dirCom) 'Yellow' }
 } else {
   $eta = [math]::Round(((Get-Date) - (Get-Item -LiteralPath $csv).LastWriteTime).TotalMinutes, 1)
   Dillo ('      file: ' + $csv) $null
@@ -326,9 +422,18 @@ if(-not (Test-Path -LiteralPath $csv)){
   # Join-Path esplode e il referto -- gia' pieno di numeri buoni -- si perde.
   try {
     $rows = @($testoCsv -split "`r?`n" | Where-Object { $_.Trim() -ne '' } | ConvertFrom-Csv -Delimiter ';')
-    $mie  = @($rows | Where-Object { $_.magic -eq $Magic.ToString($INV) })
+    $soloMagic = @($rows | Where-Object { $_.magic -eq $Magic.ToString($INV) })
+    $mie  = @($soloMagic | Where-Object { $_.symbol -eq $Simbolo })
     Dillo ('      posizioni CHIUSE nel CSV: totali ' + $rows.Count.ToString($INV) +
-           '   con magic ' + $Magic.ToString($INV) + ': ' + $mie.Count.ToString($INV)) 'Green'
+           '   con magic ' + $Magic.ToString($INV) + ': ' + $soloMagic.Count.ToString($INV) +
+           '   di cui su ' + $Simbolo + ': ' + $mie.Count.ToString($INV)) 'Green'
+    if($soloMagic.Count -ne $mie.Count){
+      $altri = @($soloMagic | Where-Object { $_.symbol -ne $Simbolo } | ForEach-Object { $_.symbol } | Sort-Object -Unique)
+      Dillo ('      ATTENZIONE: nello stesso file ci sono righe con magic ' + $Magic.ToString($INV) +
+             ' su altri simboli (' + ($altri -join ', ') + ').') 'Red'
+      Dillo '      Questo file NON e del solo terminale FTMO: e un CSV di Common\Files scritto da' 'Red'
+      Dillo '      piu MT5. Le righe di sopra sono scartate e NON entrano in nessun conto.' 'Red'
+    }
     if($mie.Count -gt 0){
       $pl = 0.0
       foreach($m in $mie){ $pl += [double]::Parse($m.profit, $INV) }
@@ -356,7 +461,14 @@ Dillo '' $null
 Dillo ' MA NON SI SOTTRAE A OCCHI CHIUSI:' $null
 Dillo '   - il passo 5 vede solo le posizioni CHIUSE (L4): una viva non c e;' $null
 Dillo '   - il passo 4 non separa le tre sedie del simbolo (L3);' $null
-Dillo '   - l imbuto di oggi non esiste ancora (L1).' $null
+Dillo '   - l imbuto di oggi non esiste ancora (L1);' $null
+Dillo '   - LE DUE FINESTRE NON SONO LA STESSA (L7): il passo 3 legge gli ultimi file di' $null
+Dillo '     log, il passo 5 tutto lo storico del CSV. Sottrarre due periodi diversi da' $null
+Dillo '     un numero che sembra una risposta e non lo e;' $null
+Dillo '   - il passo 5 non e certificato sul conto come il giornale (L6): lo e per simbolo.' $null
+Dillo '' $null
+Dillo ' E UNO ZERO NON E UN NUMERO, in nessuno dei tre passi: zero righe imbuto, zero' 'Red'
+Dillo ' expired e zero posizioni hanno OGNUNO le loro cause, elencate sopra dove capitano.' 'Red'
 Dillo ' Se le tre fonti non tornano, il verdetto e [NON MISURATO], non una media.' $null
 Dillo '' $null
 Dillo ' E QUESTA RIGA NON PROPONE NIENTE. Se il rapporto fosse brutto, la manopola' $null
