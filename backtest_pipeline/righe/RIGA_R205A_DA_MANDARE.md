@@ -324,11 +324,24 @@ dove quello è l'unico MT5 e che la riga ha **già verificato chiuso** prima di 
   Corretto in `0||0||1||1||Y`, la convenzione di casa — e la nota di sintassi è finita **dentro
   il file prova**, così non la si ripaga.
 
-**Strato 2 (giudizio, agente `controllo-preventivo`)** — ha risposto **FAIL** con **quattro
-difetti bloccanti**. **Tutti corretti PRIMA** che questo file arrivasse a Claudio (regola del
-13/09: lo Sviluppatore e l'Agente dei Controlli), e il blocco parametri **non è stato toccato**:
-il round misura **esattamente la stessa cosa**, `controlla_prova.py` resta `90 pin · 2 celle · 0
-problemi`. **Il file prova è cambiato → la riga è stata RIPINNATA** su `ae8ca5ac`.
+**Strato 2 (giudizio, agente `controllo-preventivo`)** — è passato **TRE volte**, e ha risposto
+**FAIL due volte**: la prima con **quattro difetti bloccanti** (tabella qui sotto), la seconda con
+**quattro difetti di contabilità introdotti dalla correzione stessa** — fra cui un conteggio
+sbagliato (`8` occorrenze invece di **9**) che **l'agente aveva introdotto nel proprio primo
+referto** e che la mia patch aveva copiato fedelmente, e un verbale che contava **sé stesso**
+(classe 558). 🟢 **È la prova che la seconda passata non è una formalità**: su R202B era successa
+la stessa identica cosa (E1-E3). **Tutto corretto PRIMA** che questo file arrivasse a Claudio
+(regola del 13/09: lo Sviluppatore e l'Agente dei Controlli), e il blocco parametri **non è stato
+toccato in nessuna delle due patch** — verificato con un `diff` che esclude i commenti contro la
+prima stesura: il round misura **esattamente la stessa cosa**, `controlla_prova.py` resta `90 pin ·
+2 celle · 0 problemi`. **Il file prova è cambiato due volte → la riga è stata ripinnata due volte,
+e il pin buono è `56fffbf8`.**
+
+🟠 **E la terza passata ha trovato un'altra cosa mia, che vale come lezione** (**classe nuova
+561**): avevo dichiarato *«zero residui del pin vecchio»* dopo aver cercato l'hash a **40
+caratteri** — ma il verbale scriveva il pin nella forma **corta a 8**, e il mio `grep` non poteva
+vederlo. **Stessa forma dell'errore del 21/09** (`[A-Za-z_]+=` che non vedeva `InpTP1_R`): un
+controllo che guarda dall'altra parte certifica il falso.
 
 | # | difetto trovato | dov'è la correzione |
 |---|---|---|

@@ -28829,3 +28829,31 @@ e non è stato guardato: **37,2% contro 36,0%** su ~220 osservazioni per lato.
 3. 🟢 **E NON è un motivo per non girare il round.** Un buco si chiude perché è un buco. Si cambia
    il **motivo dichiarato** — da *«c'è un indizio»* a *«non è mai stato misurato»* — che è più
    solido e **non promette niente**.
+
+---
+
+## CLASSE 561 -- IL CONTROLLO DEI RESIDUI CERCA LA FORMA LUNGA DELL'IDENTIFICATORE, MENTRE IL DOCUMENTO LO SCRIVE ANCHE IN FORMA CORTA (gemella della 558)
+
+**Caso reale (22/09/2026, R205A).** Dopo il repin ho sostituito il pin vecchio con `sed` sull'hash
+a **40 caratteri** e ho dichiarato *«2 occorrenze del pin nuovo, **0 residui del pin vecchio**»*.
+Il cancello ha poi trovato il pin vecchio **vivo** nel verbale, alla r.331: era scritto
+**`ae8ca5ac`**, la forma **corta a 8 caratteri**. La `sed` non l'aveva toccato e il `grep` di
+verifica non poteva vederlo.
+
+🔴 **Non è un refuso: è un controllo strutturalmente cieco che ha prodotto una dichiarazione
+falsa.** È la stessa forma dell'errore del 21/09 (`[A-Za-z_]+=` che non vedeva `InpTP1_R` perché il
+nome contiene una cifra) e della **558** (`grep -c` che contava la mappa invece del bersaglio).
+🟠 Qui non era operativamente pericoloso — la riga che Claudio incolla porta il pin giusto — ma è
+un difetto di **record**: fra sei settimane chi rilegge il verbale per ritrovare il commit del
+round si porta a casa **il commit sbagliato**, quello che contiene la versione con l'errore.
+
+### La regola
+1. **Un identificatore che ha una forma lunga e una corta si cerca con un pattern che le copre
+   tutte e due.** Per i commit git: il prefisso di **8** caratteri, mai i 40 —
+   `grep -n "ae8ca5ac"`, non `grep -n "ae8ca5ac8f04...205"`.
+2. **La sostituzione e la verifica non si fanno con lo stesso pattern.** La `sed` puo' essere
+   precisa; il `grep` che dichiara «zero residui» dev'essere **piu' largo** di lei, altrimenti sta
+   solo confermando cio' che la `sed` ha gia' fatto.
+3. 📌 **E la forma generale, che e' la stessa della 558 e vale oltre i pin**: prima di scrivere
+   «zero occorrenze», ci si chiede **in quanti modi diversi si scrive la cosa che sto cercando**.
+   Se la risposta e' «piu' di uno», il controllo va rifatto sul piu' corto.
