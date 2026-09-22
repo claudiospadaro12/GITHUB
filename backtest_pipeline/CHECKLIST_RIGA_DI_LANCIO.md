@@ -30310,3 +30310,97 @@ si contraddicono: sarebbe stato **il verdetto sbagliato sulla domanda giusta**.
    stampa come *"disattivato"*. Se un EA ha un `Print` che dice *"X disattivato da Y"*,
    quella riga **e' la mappa delle catene** — si legge prima di scrivere l'asse.
 
+
+---
+
+## CLASSE 595 -- 🔗⏳ LA GUARDIA DI CLASSE 166 SCRITTA COME **PRE-CONTROLLO SU UN PROXY** (pin contro punta del ramo) INVECE CHE COME **POST-CONTROLLO SUI BYTE CHE HANNO COMPILATO**: la garanzia scade al primo download del driver, e nello zip non ne resta traccia (controllo-preventivo, 22/09/2026, figlia della 166 e cugina della 582 -- *la precondizione consumata piu' tardi*)
+
+> ⚠️ **Numero preso col `grep` al momento di scrivere** (`594` era il massimo). Girano altri
+> agenti in parallelo: se qualcuno ha preso `595` nello stesso turno vale la **classe 194**
+> e questa si rinumera, non si cancella.
+
+**Caso reale.** La riga del round `R211A` (pin `5d2e9d0e`) affronta bene la classe 166 --
+`walkforward_generico.ps1` r.264 ha `$EABranch="lavoro"` **cablato**, quindi il `.mq5` e gli
+`#include` **non scendono dal pin, scendono dal RAMO** -- ma la affronta nella forma debole:
+risolve la punta di `lavoro` via `api.github.com`, scarica i due file **dal pin** e **dalla
+punta**, confronta gli `SHA256` e fa `throw` se differiscono. Tutto **prima** di lanciare il round.
+
+🔴 **Il controllo e' vero nell'istante in cui lo fa, e il driver scarica MINUTI DOPO.** Con un
+tetto di **48 minuti**, la finestra fra il confronto e la compilazione e' larga quanto il round.
+E in questa casa quella finestra non e' un caso raro: e' la **Regola #1** (*"ad OGNI passo
+significativo commit + push, SUBITO"*).
+
+🧪 **MISURATO LIVE, mentre scrivevo questo controllo**: all'inizio della revisione `lavoro` era
+a `5d2e9d0e`; venticinque minuti dopo era a `660892f4`, **cinque commit piu' avanti**
+(`def89c5b`, `f55b54d8`, `c255cf5b`, `df2ca1c6`, `660892f4`), e il round **non era nemmeno
+partito**. Stavolta il `.mq5` e l'`.mqh` erano identici (`git diff` vuoto sui due file): e'
+andata bene **per fortuna, non per metodo**.
+
+🔴 **E il secondo danno e' piu' silenzioso del primo: il verdetto non viaggia.** Il pre-controllo
+stampa a schermo e basta. Lo zip che Claudio rimanda contiene referto + 2 CSV + file prova, e
+**nessuna riga** che dica se il motore compilato era quello del pin. Fra un mese, rileggendo
+`ROUND_R211A.zip`, quell'informazione **non esiste piu'**.
+
+🟢 **La forma forte esisteva gia', ed era gia' passata dal cancello lo stesso giorno**: le righe
+`R207A`/`R207B` del 22/09 (`backtest_pipeline/righe/RIGA_R207A_DA_MANDARE.md`) hashano
+**`$w\src_prove\<EA>.mq5` e `$w\src_include\ABTG_PausaGuardian.mqh`** -- cioe' i byte che il
+driver ha davvero lasciato su disco e che `Copy-Item $srcFile -Destination $MqlExperts`
+(`walkforward_generico.ps1` r.1913) ha portato al compilatore -- contro le costanti `SHA256`
+del pin, **DOPO** la corsa, e **appendono il verdetto al referto** con `Add-Content`.
+
+### La regola
+1. 🎯 **Un controllo di riproducibilita' si fa sull'ARTEFATTO, non su un PROXY.** "La punta del
+   ramo oggi e' uguale al pin" e' una proposizione su GitHub; "i byte che hanno compilato sono
+   quelli del pin" e' una proposizione sul round. Solo la seconda e' quella che serve.
+2. ⏳ **Se il controllo precede l'uso, dichiara il RITARDO e mettine uno DOPO.** Il pre-controllo
+   si tiene -- vale il *fail fast*, evita di bruciare 48 minuti -- ma **non e' la garanzia**: la
+   garanzia e' il post-controllo. Si scrive anche a schermo: *"questa garanzia SCADE al primo
+   byte che il driver scarichera"*.
+3. 🧾 **Il verdetto deve finire NELLO ZIP**, non solo sulla console: `Add-Content` sul referto
+   **prima** di `Compress-Archive`. Una console si chiude, un referto resta.
+4. 🔍 **L'elenco dei file da hashare si ricava dagli `#include` VERI dell'EA, non dalla lista del
+   driver.** `ABTG_ORB_Ottimizzato.mq5` r.105-106 include esattamente `<Trade/Trade.mqh>` (di
+   SISTEMA: viene da MT5, non dal nostro repo, mai scaricato) e `<ABTG_PausaGuardian.mqh>`. Gli
+   altri due della lista `$NostriInclude` (`ABTG/ABTG_ApertureCore.mqh`, `OptFrame.mqh`) **vengono
+   scaricati dal ramo ma non sono inclusi da nessun EA**: non possono entrare nel binario, e
+   hasharli sarebbe rumore. 👉 **Si guarda il `.mq5`, non il `.ps1`.**
+
+---
+
+## CLASSE 596 -- 🧬🕳️ LA RIGA NUOVA DI UNA FAMIGLIA **SCRITTA DA ZERO INVECE CHE DIFFATA CONTRO L'ULTIMA SORELLA APPROVATA**: perde in silenzio le protezioni che la sorella aveva gia' pagato (controllo-preventivo, 22/09/2026, gemella rovesciata della 120)
+
+> ⚠️ **Numero preso col `grep` al momento di scrivere** (`595` l'ho appena presa io). Vale la
+> **classe 194** se qualcuno l'ha presa nello stesso turno.
+
+**Caso reale.** La riga `R211A` e le righe `R207A`/`R207B` sono **la stessa famiglia**: stesso
+wrapper (`RIGA_ROUND_VPS.ps1`), stesso driver, stessa macchina `DESKTOP-H4D7CAJ`, stesso
+bersaglio `C:\Program Files\BCM Markets MT5 Terminal`, stesso ramo di tetto di classe 585.
+`R207A`/`R207B` erano state approvate **lo stesso giorno, poche ore prima**.
+
+🔴 **`R211A` e' nata migliore in due punti e PEGGIORE in tre**, e le tre perdite erano tutte
+protezioni gia' in checklist:
+
+| pezzo | `R207A`/`R207B` | `R211A` | classe |
+|---|---|---|---|
+| avviso sul coltello differito | c'e' (`$tmo`=17) | **manca** (`$tmo`=48, finestra 3x piu' larga) | 582 |
+| derivazione del tetto stampata | c'e', con la base appaiata | **manca** | 583 |
+| classe 166 sui byte compilati + `Add-Content` sul referto | c'e' | **manca** (solo pre-controllo) | 595 |
+| `Format-Table \| Out-Host` sulla tabella dei PID | c'e' | **manca**, e la `throw` dice *"il PID sta nella tabella qui sopra"* | -- |
+| `50503392 del VPS` distinto dal bersaglio omonimo | assente dall'elenco | **c'e', ed e' meglio** | 580 |
+| finestra, ancora e cancello di merito nel testo | piu' scarni | **piu' completi** | -- |
+
+🟢 **Non e' una riga scritta male**: e' una riga scritta **da capo**. Chi la scrive pensa al
+round (la parziale, l'ancora di `r44a`, il cancello sul Recovery Factor) e ripaga da zero il
+prezzo delle protezioni di contorno -- che e' esattamente il prezzo che la checklist esiste per
+non far ripagare.
+
+### La regola
+1. 🧬 **Una riga di una famiglia gia' esistente si scrive DIFFANDO l'ultima sorella approvata**,
+   non riscrivendo. Il gesto e' letterale: si apre `righe/RIGA_<ultimo>_DA_MANDARE.md`, si mette
+   la riga nuova accanto, e **si giustifica OGNI pezzo che manca**.
+2. 📋 **Il diff si consegna insieme alla riga**, in forma di tabella come quella qui sopra: in
+   colonna *"c'e' / manca / e' meglio"*. Una riga nuova che non porta il suo diff con la sorella
+   e' **non verificata**, anche se passa tutti e due gli strati del cancello.
+3. 🔁 **Ed e' la gemella rovesciata della 120**: li' il difetto era **ereditare** dalla sorella un
+   gate ormai falso; qui e' **non ereditare** una protezione ancora vera. 👉 Il gesto giusto non e'
+   "copia" ne' "riscrivi": e' **diffa e giustifica riga per riga**.
