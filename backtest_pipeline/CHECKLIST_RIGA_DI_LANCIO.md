@@ -28633,3 +28633,46 @@ e' il disegno.
 3. **Niente contatori a mano nei documenti.** Al posto di *«terza stesura»* si scrive la
    **catena dei pin** (`89f222bf -> 4bc9aa97 -> 018c1d95 -> ...`): aggiungere un pin e' **lo
    stesso gesto** che fa la stesura nuova, quindi non puo' restare indietro in silenzio.
+
+---
+
+## CLASSE 555 -- IL MARGINE DI SICUREZZA INVARIANTE SULL'ASSE, PRESENTATO COME CRESCENTE PERCHE' AL NUMERO DELLA SOGLIA SI E' SOSTITUITA UNA GRANDEZZA CHE CRESCE
+
+**Caso reale (22/09/2026, R204a, sedia Dow `770202`).** Il round muove `InpTP1_R` da 1.00 a
+1.75. Il file prova metteva in colonna **`61,9x / 77,4x / 92,9x / 108,3x`** *«lo spread»* e
+concludeva *«tutte e quattro stravolgono la frontiera dei 40x»* e **«salendo, la frontiera del
+costo SI ALLONTANA»**. 🔴 **La frase e' finita anche in chat, a Claudio.**
+
+**Ma la frontiera dei 40x e il pavimento di 13,3x sono definiti sullo STOP**
+(`report/STOP_VS_SPREAD_FTMO_2026-09-20.md` r.270-276, colonna *«stop mediano»*), **e
+`InpTP1_R` non entra nel calcolo dello stop**: nel ramo attivo `sl` e `dist` si calcolano
+**prima** di `tp` (`ABTG_Dow_Apertura_US.mq5` r.1320-1322 — `sl = sellPx`, `dist = entry - sl`,
+e solo dopo `tp = dist*TpTotalR()`). **`stop/spread` resta 61,9x su TUTTE le celle.** I numeri
+77,4 / 92,9 / 108,3 sono **bersaglio/spread**: un'altra grandezza.
+
+**Perche' inganna meglio di un errore di conto**: la **prima riga** della colonna **coincide**
+col numero vero (a `TP1_R = 1` il bersaglio *e'* lo stop), quindi la tabella **aggancia** la
+soglia e le tre righe sotto **ereditano la sua autorita'**. Il lettore memorizza **+75% di
+margine di sicurezza che non esiste**.
+
+### La regola
+1. **Un rapporto si confronta con una soglia solo se ha lo STESSO numeratore.** Accanto a ogni
+   `Nx` si scrive **di che cosa** e' il rapporto (`stop/spread`, `bersaglio/spread`), e la
+   soglia porta la sua grandezza scritta a fianco.
+2. **Prima di dire che un margine MIGLIORA, si dimostra che l'asse lo TOCCA**: si apre il ramo
+   attivo e si fa vedere la riga in cui l'input entra nella grandezza della soglia. **Se non ci
+   entra, la frase giusta e' «NON SI MUOVE»** — che e' comunque una notizia buona, solo piu'
+   piccola.
+3. **Gemella della 541**: li' l'input non veniva **letto** dal ramo attivo; qui l'input non
+   entra nella **grandezza giudicata**. Stessa domanda, due oggetti: *«questa manopola tocca
+   davvero la cosa di cui sto parlando?»*
+
+### E infatti nello STESSO file c'era anche una RICADUTA DELLA CLASSE 541
+Il paragrafo che il file intitolava *«il meccanismo, va dichiarato prima»* descriveva il
+trailing come **`InpTrailFixedPts=410`**. Ma `InpTrailMode=1` e' **`ABTG_TRAIL_PREVBAR`**
+(enum r.209-214) e il ramo attivo e' `iLow(_Symbol, InpTrailTF, 1)` (r.1834-1835): il trailing
+e' il **minimo della candela M5 precedente**, e **`InpTrailFixedPts` e `InpTrailAtrMult` sono
+INERTI** — li leggono solo i rami `FIXED` (r.1836-1837) e `ATR` (r.1838-1839). La manopola che
+**vive**, `InpTrailTF=5`, non era nemmeno nominata.
+**Pinnare le manopole inerti va benissimo** (blocca i default): il difetto e' **citarne una
+inerte come descrizione del meccanismo**.

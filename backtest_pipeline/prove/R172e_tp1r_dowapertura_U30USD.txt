@@ -1709,6 +1709,168 @@
 #      resta lontano da tutte le sequenze vive della serata (7884xx di
 #      R171a-b, 7873xx di R170a-c, 7798xx di R169, 7886xx di R151a).
 # =====================================================================
+# =====================================================================
+#  ADDENDUM DEL 22/09/2026 -- QUELLO CHE ABBIAMO IMPARATO DOPO IL 16/09
+#  ---------------------------------------------------------------------
+#  Questo file e' stato scritto il 16/09 e i suoi criteri sono congelati
+#  li' sopra. NON li riscrivo: li EMENDO, e lo faccio PRIMA che questo
+#  round produca un solo numero, come vuole la regola di casa ("i
+#  criteri si cambiano prima dei numeri, non dopo").
+#  Dove questo addendum e la parte sopra dicono cose diverse, VALE
+#  QUESTO ADDENDUM, e i punti in conflitto sono nominati uno per uno.
+#
+#  0. PERCHE' QUESTO FILE ADESSO
+#  -----------------------------
+#  Scritto il 16/09, MAI GIRATO. Il 21/09 R202A ha misurato lo stesso
+#  asse ma solo SOTTO l'uno (0.25/0.50/0.75/1.00) e la superficie OOS e'
+#  uscita MONOTONA CRESCENTE col massimo SUL BORDO, cioe' sulla cella
+#  viva:  0.25 PF 0.93207 | 0.50 1.10328 | 0.75 1.13744 | 1.00 1.27175.
+#  Un massimo sul bordo non e' un ottimo: e' il punto in cui abbiamo
+#  smesso di guardare. Questo file guarda 0.50 -> 2.00 in sette celle,
+#  quindi CONTIENE l'asse di R202A e lo estende: tre celle danno tre
+#  ancore di riproduzione, e la cella 2.00 e' quella che decide se la
+#  salita continua o se c'e' una cresta -- senza bisogno di un terzo
+#  round.
+#  (E' stato preferito a un file nuovo, R204a, scritto il 22/09 con un
+#  asse piu' corto: 78 pin su 80 erano identici a questo, e questo
+#  copre di piu' allo stesso costo macchina. R204a resta in repo,
+#  SUPERATO.)
+#
+#  1. EMENDAMENTO A B0: IL DD SI LEGGE A DENOMINATORE FISSO
+#  --------------------------------------------------------
+#  B0 dice di leggere il rischio su `Equity DD %`. NON BASTA PIU', ed e'
+#  misurato: `Equity DD %` divide per il PICCO di equity, che CAMBIA DA
+#  CELLA A CELLA. Su R202B OOS la distorsione per la cella viva vale
+#  +22,8% (7,2506 dal picco contro 8,9033 sul deposito), cioe' PIU' del
+#  margine di un cancello a -20%; e fra due celle L'ORDINE SI RIBALTA
+#  (0.50 e 0.75: 7,7631 contro 7,5746 dal picco, 7127,62 contro 7144,81
+#  in euro). E' la classe 550.
+#  ==> Il referto porta `Equity DD %` COME B0 CHIEDE, e IN PIU' la
+#      colonna che decide:
+#          DD_fisso% = (Profit / Recovery Factor) / 80000 x 100
+#      Le due colonne sono gia' nel CSV: costo zero.
+#      Cella viva 1.00, da R202A OOS: DD_fisso = 4,4499.
+#      ALLARME se una cella supera 4,89 (+10% sulla viva).
+#  ==> Se Recovery Factor = 0 (passata a ZERO TRADE, Profit = 0) la
+#      formula e' 0/0: si scrive DD_fisso [NON CALCOLABILE DAL CSV] e
+#      NON si inventa. Una cella a zero trade esce con DD 0,0000 e
+#      Peggior Giornata 0,0000, cioe' SEMBRA LA MIGLIORE DELLA TABELLA:
+#      e' il tranello, ed e' ASSENZA di informazione, non un merito.
+#      Qui e' improbabile (InpTP1_R non scarta nessun ingresso), ma la
+#      regola resta scritta.
+#
+#  2. IL COSTO NON MIGLIORA E NON PEGGIORA: E' FUORI DA QUEST'ASSE
+#  ---------------------------------------------------------------
+#  InpTP1_R NON entra nel calcolo dello stop. Ramo attivo
+#  (InpEntryMode=2 RETEST, InpSLMode=0 SL_RANGE),
+#  ABTG_Dow_Apertura_US.mq5 r.1320-1322:
+#      sl   = sellPx          <- bordo opposto del range
+#      dist = entry - sl      <- calcolato PRIMA, e senza tp
+#      tp   = ... dist*TpTotalR()
+#  ==> LO STOP E' LO STESSO IN TUTTE E SETTE LE CELLE, e con lui il
+#      rapporto che la frontiera giudica:
+#        stop mediano Dow 123,80 punti indice [MIS n=446]
+#          (report/STOP_VS_SPREAD_FTMO_2026-09-20.md r.276; la fonte e'
+#           Studio_U30USD a range 15', dichiarata PRUDENTE nella riga
+#           stessa -- qui il range e' 35', quindi lo stop vero e' PIU'
+#           LARGO e il margine PIU' GRANDE, mai piu' piccolo)
+#        spread mediano U30USD ora 14 = 2,00 (r.312, colonna BCM)
+#        stop / spread = 61,9x   SU TUTTE E SETTE LE CELLE
+#      contro la frontiera 40x e il pavimento duro 13,3x: passa, con LO
+#      STESSO margine di oggi. Ne' meglio ne' peggio.
+#  ATTENZIONE, ED E' UN ERRORE GIA' FATTO IL 22/09 (classe 555): il
+#  BERSAGLIO si allontana salendo, e in unita' di spread fa numeri
+#  grandi (a 2.00 il primo obiettivo vale 123,8x lo spread). Quelli sono
+#  BERSAGLIO/spread, NON stop/spread: la frontiera dei 40x e il
+#  pavimento di 13,3x sono definiti sullo STOP (r.270-276 del report).
+#  Metterli in colonna sotto la frontiera fa leggere un margine di
+#  sicurezza in crescita CHE NON ESISTE.
+#  ==> La notizia buona, detta giusta: su quest'asse il costo NON E' UN
+#      VINCOLO e NON SI MUOVE.
+#
+#  3. IL PACCHETTO D'USCITA INTORNO AL BERSAGLIO -- e le manopole INERTI
+#  ---------------------------------------------------------------------
+#  InpTP1_R muove DUE cose: il PARZIALE (50% a InpTP1_R x riskDist,
+#  r.1739) e il BERSAGLIO FINALE (InpTP1_R x 3, r.1456 TpTotalR).
+#  Il resto dell'uscita NON cambia fra le celle, ed e' questo:
+#    - TRAILING armato dal primo tick: InpUseTrailing=true e
+#      InpTrailStartR=0.0 -> trailArmato sempre vero.
+#      InpTrailMode=1 = ABTG_TRAIL_PREVBAR (enum r.209-214), cioe' stop
+#      al MINIMO DELLA CANDELA PRECEDENTE su InpTrailTF=5 (M5):
+#      r.1834-1835, iLow(_Symbol, InpTrailTF, 1).
+#      INERTI IN QUESTO RAMO: InpTrailFixedPts=410 (lo legge solo
+#      ABTG_TRAIL_FIXED=2, r.1836-1837) e InpTrailAtrMult=2.0 (solo il
+#      ramo ATR, r.1838-1839). Sono pinnati per bloccare il default, NON
+#      descrivono il trailing di questo round. E' la classe 541, e il
+#      22/09 ci sono ricascato dentro descrivendo il meccanismo con
+#      InpTrailFixedPts.
+#    - CHIUSURA A FINE SESSIONE: InpCloseAtEnd=true, 17:30 server.
+#  E' PLAUSIBILE, NON MISURATO, che salendo il bersaglio il parziale
+#  scatti piu' di rado e il peso delle uscite si sposti su trailing e
+#  fine sessione. Quanto spesso il bersaglio venga raggiunto OGGI (a
+#  3,00 R) NON E' MISURATO: si legge dal calo di n, non si afferma.
+#
+#  4. CHE COSA QUESTO ROUND NON PUO' FARE -- e va letto prima dei numeri
+#  ---------------------------------------------------------------------
+#  Le POSIZIONI del Dow stanno, DIMOSTRATO, fra 48 e 74 in IS e fra 81 e
+#  130 in OOS (con n = P + f e 0 <= f <= P vale max(n)/2 <= P <= min(n),
+#  applicato agli n di R202A). L'emendamento del 16/08, regola A, chiede
+#  IS >= 150 OPERAZIONI.
+#  ==> IL DOW E' SOTTO CON CERTEZZA IN TUTTE E DUE LE FINESTRE, E SOTTO
+#      ENTRAMBE LE LETTURE DI "OPERAZIONE": anche contando le USCITE,
+#      che e' il numero piu' generoso, l'IS massimo misurato e' 96 e
+#      l'OOS 161. Non c'e' definizione che salvi il campione, quindi la
+#      conclusione NON dipende dal conteggio dei position_id (che resta
+#      da fare).
+#  ==> NESSUNA CELLA DI QUESTO ROUND PUO' ESSERE PROMOSSA IN CAMPO. Una
+#      cella che vince si guadagna UNA FINESTRA PIU' LUNGA, non una
+#      sedia. Il verdetto legittimo e' una DIREZIONE.
+#      Il RISCHIO invece si giudica lo stesso, a qualunque n (regola B
+#      del 16/08): un DD accaduto e' un fatto, non una stima.
+#  ==> E IL SEGUITO PROMESSO NON E' ANCORA VERIFICATO: nessuno ha
+#      misurato se lo storico BCM su U30USD M5 ARRIVI piu' indietro di
+#      2024.09.26. Il tetto delle 100k barre NON e' il limite (il
+#      referto R202A porta MaxBars=100000000): il limite sarebbe lo
+#      storico del broker. Va sondato PRIMA di promettere la finestra
+#      lunga.
+#
+#  5. ANCORA DI RIPRODUZIONE E TOLLERANZA
+#  --------------------------------------
+#  La cella 1.00 deve riprodurre R202A Pass 3 (e R172D Pass 0, che da'
+#  gli stessi numeri):
+#     IS   n74  PF 1.22173  Equity DD % 5.6726  profit 2241.62
+#     OOS  n130 PF 1.27175  Equity DD % 4.3944  profit 5395.25
+#  NOTA: in questo round la cella 1.00 NON sara' Pass 0 -- l'asse parte
+#  da 0.50, quindi 1.00 e' la TERZA cella. Si confronta per il valore di
+#  InpTP1_R nella colonna del CSV, mai per il numero di Pass.
+#  E le celle 0.50 e 0.75 danno DUE ancore in piu' contro R202A
+#  (PF OOS 1.10328 e 1.13744): tre riproduzioni invece di una.
+#  TOLLERANZA: un centesimo sul Profit, e uguaglianza su n, PF e DD alla
+#  quinta cifra. E' la tolleranza di casa del cancello G1
+#  (report/MANOPOLE_INERTI_2026-09-09.md r.40: 949/949 passate, con 4
+#  gruppi che differivano di 0,01 sul Profit avendo PF, Trades e DD
+#  identici). Oltre quella la riproduzione FALLISCE, il round non e'
+#  confrontabile e si cerca il pin che balla.
+#  IL MAGIC DI QUESTO FILE E' 789550, quello di R202A/R172D e' 789540.
+#  In un test a EA singolo e' INERTE (filtra solo posizioni e ordini
+#  propri, e non ce ne sono altri), ed e' proprio l'asse tecnico su cui
+#  il cancello G1 ha misurato quel rumore da un centesimo.
+#
+#  6. LA TAGLIA DEL BANCO (classe 547)
+#  -----------------------------------
+#  1,0% -- NON e' la taglia in campo, che e' 2,00% dal 20/09. Pinnata a
+#  1,0 per riprodurre R202A. Ogni DD va RADDOPPIATO prima di leggerlo a
+#  taglia vera, e il raddoppio e' un LIMITE SUPERIORE, non un'identita'
+#  (CalcLotByRisk usa ACCOUNT_BALANCE: 5 SL di fila danno 9,608 contro
+#  2 x 4,901 = 9,802).
+#  E IL MURO FTMO DEL 10% NON SI GIUDICA QUI (classe 515): `Equity DD %`
+#  e' dal PICCO, il Max Loss e' STATICO dal saldo iniziale, quindi il DD
+#  del tester e' un LIMITE SUPERIORE della perdita statica e non dimostra
+#  niente in nessuna delle due direzioni. Il limite superiore si
+#  riporta: DDass/deposito, cella viva 4,4499% al banco (<= 8,90% a
+#  taglia vera).
+# =====================================================================
+
 @SIMBOLO  U30USD
 @PERIODO  M5
 @DAQUANDO 2024.09.26

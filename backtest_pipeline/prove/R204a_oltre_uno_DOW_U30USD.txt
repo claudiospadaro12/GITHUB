@@ -1,4 +1,11 @@
 # =====================================================================
+#  SUPERATO DA R172E (22/09/2026): stesso EA, stesso simbolo, 78 pin
+#  su 80 identici, ma asse piu' CORTO (1.00-1.75 contro 0.50-2.00).
+#  R172e CONTIENE questo asse, da' TRE ancore di riproduzione invece
+#  di una, e la sua cella 2.00 chiude la domanda sulla direzione senza
+#  un terzo round -- allo stesso costo macchina.
+#  QUESTO FILE NON E' MAI GIRATO e non va lanciato.
+#
 #  R204a -- OLTRE L'UNO: il lato dell'asse che non abbiamo mai guardato
 #  EA: ABTG_Dow_Apertura_US   (sedia Dow 770202, simbolo U30USD)
 #
