@@ -1,5 +1,5 @@
 # =====================================================================
-#  R209a -- ALTOPIANO O PICCO? Il buco fine intorno a InpBEatR = 0,5
+#  R209a -- IL DOMINIO CHE NON E' MAI STATO MISURATO: InpBEatR fra 0 e 0,5
 #  EA: ABTG_Nasdaq_Apertura_US   (sedia 770260, simbolo NASUSD)
 #
 #  GIRA SUL PC DI BACKTEST, NON SUL VPS.   -Deposito 80000 -Modello 4
@@ -7,279 +7,277 @@
 #      mentre le sei sedie FTMO operavano. I round non girano sul VPS.)
 #
 #  Costruito PER DIFFERENZA da:
-#      backtest_pipeline/prove/R199a_breakeven_indipendente_NASDAQ_NASUSD.txt
-#  DELTA: UNO SOLO, la riga dell'asse.
-#      R199a:  InpBEatR=0||0||0.5||1.5||Y      (4 celle: 0 / 0,5 / 1,0 / 1,5)
-#      R209a:  InpBEatR=0||0||0.125||0.75||Y   (7 celle, passo 0,125)
-#  Tutti gli altri 26 pin sono COPIATI CARATTERE PER CARATTERE da R199a.
-#  Nessun'altra differenza: se ne comparisse una, questo round non
-#  misurerebbe piu' la stessa sedia e andrebbe cestinato.
+#      backtest_pipeline/prove/R199b_parziale_NASDAQ_NASUSD.txt
+#  e NON da R199a. La ragione sta nel primo paragrafo qui sotto, ed e'
+#  la cosa piu' importante di tutto il file.
+#  DELTA: DUE righe, e sono uno scambio di ruolo fra due parametri.
+#      R199b:  InpTP1_ClosePct=0||0||25||75||Y   (asse)
+#              InpBEatR=0.0||0.0||0||0.0||N      (pin)
+#      R209a:  InpTP1_ClosePct=50.0||50.0||0||50.0||N   (pin, = campo)
+#              InpBEatR=0||0||0.125||0.5||Y            (asse, 5 celle)
+#  Gli altri 24 pin sono COPIATI CARATTERE PER CARATTERE da R199b.
+#  Nessun pin aggiunto: InpUseTrailing, InpTrailStartR e InpTrailMode
+#  restano ai default compilati, che il CSV di R199B mostra essere
+#  1 / 0 / 1 -- gli stessi valori del preset FTMO in campo (r.357-359).
+#  Aggiungerli sarebbe un delta inutile in un round che vive di identita'.
 #
 # =====================================================================
-#  PERCHE' ESISTE -- e la domanda e' UNA SOLA
+#  [!] PRIMA DI TUTTO: LA CELLA VIVA E' CAMBIATA IERI SERA
 # ---------------------------------------------------------------------
-#  R199A (girato 21/09, pin 9fa84716, referto letto e registrato in
-#  REGISTRO_TEST.md r.17, referto report/DD_NASDAQ_R199_2026-09-21.md)
-#  ha misurato al banco vero 80.000 e alla taglia vera 2,00%:
+#  Commit 496408a9 del 21/09 20:22 -- "Nasdaq 770260: ACCESA la parziale
+#  al 50% (firma di Claudio)". Il preset IN CAMPO e'
+#      mql5/Presets/FTMO/ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set
+#      r.292 InpRiskPercent=2.00   r.296 InpTP1_R=0.5
+#      r.354 InpTP1_ClosePct=50.0  r.355 InpBreakevenAtTP1=true
+#      r.356 InpBEatR=0.0          r.359 InpTrailMode=1  r.360 InpTrailTF=5
+#  L'altro preset, mql5/Presets/ABTG_Nasdaq_Apertura_US_RETEST_770260.set,
+#  porta ClosePct=0.0 e BreakevenAtTP1=false: e' quello VECCHIO, ed e' la
+#  cella 0 di R199A. NON E' PIU' IL CAMPO.
 #
-#     InpBEatR | PF IS   DD IS    Profit IS | PF OOS  DD OOS   Profit OOS
-#        0,0   | 1,11621 12,3568   4549,93  | 1,14894  9,1244    7689,12
-#        0,5   | 1,27601  8,7186   8823,90  | 1,23262  8,6538    9353,04
-#        1,0   | 1,13553 12,3569   4905,33  | 1,18903  9,1244    9440,17
-#        1,5   | 1,11621 12,3569   4549,92  | 1,14894  9,1244    7689,12
-#
-#  La cella 0,5 DOMINA la cella viva su PF, DD e profitto, in TUTTE E DUE
-#  le finestre. Ma le celle misurate intorno a lei sono DUE, distanti 0,5
-#  e 1,0 R, e tutte e due ricadono sulla cella viva.
-#  ==> Con questa griglia NON SI PUO' DIRE se 0,5 e' il centro di un
-#      altopiano o un PICCO ISOLATO. La regola di casa del 19/08 dice
-#      "centro dell'altopiano, MAI il picco": senza i vicini, la regola
-#      non e' applicabile e la cella NON e' promuovibile, per forma.
-#  QUESTO ROUND ESISTE PER RISPONDERE A QUELLA DOMANDA, E BASTA.
-#  Non promuove niente: la gestione dell'uscita e' rischio, ed e' firma
-#  di Claudio.
+#  [!] CONSEGUENZA: le quattro celle di R199A (0 / 0,5 / 1,0 / 1,5) sono
+#      state misurate CON LA PARZIALE SPENTA E IL BE DI TP1 SPENTO. Quella
+#      configurazione non esiste piu'. Il "0,5 domina" del referto
+#      report/DD_NASDAQ_R199_2026-09-21.md e' un fatto vero su una sedia
+#      che non c'e' piu'. NON si trasporta, e questo round NON lo usa
+#      come baseline.
 #
 # =====================================================================
-#  IL MECCANISMO, NEL SORGENTE -- perche' la manopola non e' lineare
+#  IL MECCANISMO, NEL SORGENTE -- e adesso i due breakeven SI TOCCANO
 # ---------------------------------------------------------------------
 #  Verificato riga per riga su mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5
-#  a HEAD (2644 righe) e CONTRO LA RIGA VERA DEL CSV di R199A, non
-#  contro i default compilati.
+#  a HEAD (2644 righe), contro le colonne VERE dei CSV di R199A e R199B
+#  lette per nome, non contro i default compilati (che sono diversi:
+#  r.264 InpTP1_R=1.0, r.265 ClosePct=50, r.266 BreakevenAtTP1=true).
 #
-#  (0) SMENTITA DI UNA PREMESSA CHE GIRAVA: "il preset ha
-#      InpTP1_ClosePct=50 e InpBreakevenAtTP1=true, quindi c'e' gia' un
-#      breakeven a 0,5 R e i due si pestano i piedi".
-#      E' FALSO. Quelli sono i DEFAULT DEL SORGENTE (r.265 e r.266).
-#      La riga vera del CSV di R199A porta
-#          InpTP1_ClosePct = 0   e   InpBreakevenAtTP1 = 0
-#      (colonne lette PER NOME sul file
-#       risultati_prove/R199A/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_R199A.csv).
-#      Quindi in questa sedia NON ESISTE nessun secondo breakeven:
-#      il blocco r.2143 "if(!partialDone && InpTP1_ClosePct > 0 && < 100)"
-#      NON SI APRE MAI, e il BE del primo obiettivo (r.2195) sta DENTRO
-#      quel blocco. Il commento r.2177-2185 lo dice gia', e lo dice
-#      MISURATO: risultati_prove/gestione_20260909/, righe che
-#      differiscono SOLO per InpBreakevenAtTP1, a ClosePct=0 identiche
-#      36 su 36.
-#      ==> Non c'e' nessuna anomalia da spiegare su quel fronte.
-#          InpBEatR (r.2209) e' l'UNICO breakeven vivo su questa sedia.
+#  (1) I DUE BREAKEVEN NON SI SOMMANO: SI FANNO LA CORSA, E VINCE IL PRIMO.
+#      Dentro ManageOneTicket l'ordine e' FISSO e conta:
+#        r.2143  blocco 1: "if(!partialDone && InpTP1_ClosePct > 0 && < 100)"
+#        r.2195    dentro il blocco 1: "if(InpBreakevenAtTP1 && !TkDone(ticket,gBETk))"
+#        r.2201    ... poi TkMark(ticket, gBETk)
+#        r.2209  blocco 2b: "if(InpBEatR > 0 && !TkDone(ticket,gBETk))"
+#        r.2221    ... poi TkMark(ticket, gBETk)
+#      I due condividono la MEDESIMA marca gBETk, e il blocco 1 gira
+#      PRIMA del 2b nella stessa chiamata. Quindi:
+#        - InpBEatR < InpTP1_R : il BE indipendente raggiunge il suo
+#          prezzo PRIMA, marca gBETk, e quando piu' tardi si arriva a
+#          TP1 il BE di TP1 trova la marca e NON fa niente. La parziale
+#          invece parte lo stesso: e' guardata da gPartialTk (r.2136),
+#          che e' un array DIVERSO. ==> l'unico effetto della manopola
+#          e' ANTICIPARE lo stop a pari, non toccare la parziale.
+#        - InpBEatR = InpTP1_R = 0,5 : stesso prezzo, stessa chiamata.
+#          Il blocco 1 gira prima, marca gBETk, e il 2b trova la marca.
+#          ==> LA MANOPOLA E' INERTE A 0,5 ESATTI.
+#        - InpBEatR > 0,5 : il BE di TP1 e' gia' scattato e ha gia'
+#          marcato. ==> INERTE, per costruzione.
+#      [!] IL DOMINIO UTILE DELL'ASSE E' QUINDI  0 < InpBEatR < 0,5.
+#          R199A ha misurato 0 / 0,5 / 1,0 / 1,5: uno fuori a sinistra
+#          (spento), uno sul bordo, due ben oltre. IL DOMINIO CHE CONTA
+#          NON E' MAI STATO MISURATO. E' l'unica ragione di questo round.
 #
-#  (1) PERCHE' 1,5 RIPRODUCE 0,0 AL QUINTO DECIMALE -- e' geometria.
-#      TpTotalR() r.1694:   r = InpTP1_R * 3.0
-#      Il CSV porta InpTP1_R = 0,5 e InpRunnerTP_R = 0
-#      ==> il TP dell'ordine sta a 1,5 R ESATTI.
-#      Uno stop a pari armato a 1,5 R chiederebbe di scattare SUL
-#      BERSAGLIO STESSO: la posizione e' gia' chiusa dal TP.
-#      ==> Sopra 1,5 R la manopola e' INERTE PER COSTRUZIONE, e 1,5 e'
-#          la frontiera, non un valore qualsiasi.
-#      Conferma: la cella 1,5 riproduce la cella 0,0 su OGNI colonna del
-#      CSV (Profit, PF, Recovery, Sharpe, Equity DD %, peggior giornata,
-#      serie perdente). Se fosse rumore non lo farebbe.
-#      [!] CONSEGUENZA SULL'ASSE: InpBEatR NON e' un asse libero. Il suo
-#          dominio utile e' [0 ; 3*InpTP1_R). Va dichiarato insieme al
-#          numero, altrimenti il numero non vuol dire niente.
-#          Per questo la griglia di R209a si ferma a 0,75: meta' esatta
-#          della frontiera, tutta dentro il dominio utile.
+#  (2) LA STESSA COSA E' GIA' STATA MISURATA SUL DOW, e la conferma vale.
+#      R172D, referto sezione 8.2: "da 0,45 in su il DD OOS e'
+#      esattamente 4,3944, identico alla cella 0". Sul Dow
+#      InpBreakevenAtTP1 scatta a 1 R (InpTP1_R=1.0 in quel file prova,
+#      r.1382) e marca gBETk; sopra quella soglia InpBEatR non puo' piu'
+#      fare niente. ==> il "tetto di inerzia a InpTP1_R" NON e' una mia
+#      deduzione di oggi: e' gia' MISURATO su una sedia gemella, ed e'
+#      esattamente lo stesso meccanismo che qui mette il tetto a 0,5.
 #
-#  (2) PERCHE' 1,0 CAMBIA IL PROFITTO MA NON IL DRAWDOWN -- e' il
-#      TRAILING che gli toglie lavoro.
-#      Il CSV porta InpUseTrailing=1, InpTrailStartR=0, InpTrailMode=1
-#      (candela precedente), InpTrailTF=5 (M5).
-#      ManageOneTicket r.2249-2262: per un LONG il trailing sposta lo
-#      stop a iLow(M5,1) SOLO se "newSL > sl && newSL > openP", cioe'
-#      SOLO quando il minimo della candela M5 precedente e' gia' SOPRA
-#      l'ingresso. Finche' non lo e', il trailing NON TOCCA NIENTE e la
-#      posizione sta a RISCHIO PIENO.
-#      ==> Esiste una FINESTRA, fra l'ingresso e il momento in cui la
-#          candela precedente supera l'ingresso, in cui il BE
-#          indipendente e' L'UNICA COSA che puo' tagliare il rischio.
-#      Fuori da quella finestra il BE e' gia' battuto sul tempo: r.2216
-#      lo lascia agire solo "se migliora lo stop" (be > sl), e a quel
-#      punto sl e' gia' sopra l'ingresso. Marca il ticket (r.2221) e non
-#      muove niente.
-#      ==> Piu' si alza InpBEatR, piu' spesso il BE arriva DOPO il
-#          trailing e diventa un no-op. Lo si vede nei numeri: a 1,0 R il
-#          profitto cambia (IS +355, OOS +1751) ma l'Equity DD % e'
-#          identico alla cella viva in tutte e due le finestre
-#          (12,3569 contro 12,3568; 9,1244 contro 9,1244): il BE a 1,0 R
-#          pesca ancora qualche operazione, ma MAI quelle che formano il
-#          drawdown peggiore -- quelle non arrivano a 1 R a favore.
+#  (3) PERCHE' 1,5 ERA IDENTICO A 0 IN R199A -- e' un SECONDO tetto,
+#      indipendente dal primo, e va tenuto distinto.
+#      TpTotalR() r.1694: r = InpTP1_R * 3.0, e InpRunnerTP_R=0 nel CSV
+#      ==> il TP dell'ordine sta a 1,5 R esatti. Uno stop a pari armato
+#      a 1,5 R chiederebbe di scattare SUL BERSAGLIO: la posizione e'
+#      gia' chiusa. In R199A il BE di TP1 era SPENTO, quindi li' l'unico
+#      tetto era questo, a 1,5. Oggi il tetto che morde e' quello di
+#      gBETk, a 0,5. Due meccanismi diversi, due soglie diverse.
 #
-#  (3) LA DISTANZA DI RISCHIO E' LA STESSA NEI DUE RAMI? SI, nella
-#      finestra che conta. r.2139: riskDist = openP - InitialSL(...),
+#  (4) LA DISTANZA DI RISCHIO. r.2139 riskDist = openP - InitialSL(...),
 #      e InitialSL r.2292-2297 restituisce lo SL CORRENTE finche' non e'
-#      zero e la parziale non e' avvenuta. Con ClosePct=0 partialDone e'
-#      SEMPRE falso, e finche' il trailing non ha mosso lo stop, lo SL
-#      corrente E' quello iniziale. ==> dentro la finestra utile, R e'
-#      la distanza d'ingresso vera, non un ripiego ATR.
-#      (Quando il trailing porta lo stop sopra l'ingresso, riskDist
-#       diventa negativo e r.2140 ripiega su ATR*InpAtrSlMult: ma li' il
-#       BE e' gia' bloccato dal "be > sl", quindi il ripiego non cambia
-#       nessun esito.)
+#      zero E la parziale non e' avvenuta; DOPO la parziale ripiega su
+#      ATR*InpAtrSlMult. Nel dominio di questo round il BE indipendente
+#      scatta PRIMA di TP1, quindi PRIMA della parziale: partialDone e'
+#      ancora falso e R e' la distanza d'ingresso vera, non un ripiego
+#      ATR. Il ripiego esiste ma sta a valle e non tocca l'asse.
 #
-#  [ok] VERDETTO SUL MECCANISMO: C'E', ED E' DOCUMENTATO A RIGA.
-#       Non e' un artefatto. L'effetto e' concentrato in basso perche'
-#       in basso c'e' l'unica finestra in cui la manopola ha lavoro da
-#       fare. Questo NON dimostra che 0,5 sia il centro di un altopiano:
-#       dimostra solo che la forma "tanto in basso, niente in alto" e'
-#       ATTESA. La forma FINE in basso non e' stata misurata: e' l'unica
-#       cosa che questo round va a prendere.
+#  (5) IL TRAILING GLI TOGLIE LAVORO DALL'ALTO. r.2249-2262: per un LONG
+#      il trailing sposta lo stop a iLow(M5,1) SOLO se
+#      "newSL > sl && newSL > openP", cioe' solo quando il minimo della
+#      candela M5 precedente e' gia' SOPRA l'ingresso. Finche' non lo e',
+#      il trailing non tocca niente. ==> il BE indipendente lavora in una
+#      finestra stretta: sotto ha lo 0, sopra ha il BE di TP1 a 0,5, e in
+#      mezzo gli tolgono spazio sia il trailing sia il gap di prezzo.
 #
 # =====================================================================
-#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DEI NUMERI
+#  IL CONTRO-ESEMPIO, DICHIARATO PRIMA DEI NUMERI -- e' OBBLIGATORIO
 # ---------------------------------------------------------------------
-#  LETTURA A (finestra):  0,5 vince perche' cade dentro la finestra in
-#     cui il trailing e' ancora inerte. La finestra e' un intervallo
-#     CONTINUO, quindi celle vicine devono comportarsi in modo simile.
-#     PREVEDE: una banda contigua di celle migliori della viva fra 0,25
-#     e 0,75, con decadimento monotono verso l'alto.
+#  [!] SE TUTTE E CINQUE LE CELLE ESCONO IDENTICHE ALLA CELLA 0, IL
+#      VERDETTO NON E' "nessun effetto misurato": E' "MANOPOLA SPENTA
+#      PER COSTRUZIONE ANCHE SOTTO 0,5".
+#      Il meccanismo che lo produrrebbe e' gia' noto e va scritto adesso:
+#      il tester gira a tick reali (Modello 4), e su un movimento veloce
+#      il PRIMO tick utile dopo l'ingresso puo' trovarsi gia' OLTRE 0,5 R.
+#      In quella chiamata il blocco 1 (r.2143) gira per primo, marca
+#      gBETk, e il blocco 2b (r.2209) trova la marca: il BE indipendente
+#      non scatta MAI, qualunque sia il suo valore, perche' non c'e' un
+#      tick in cui il prezzo stia FRA InpBEatR*R e 0,5*R.
+#      ==> Sono due verdetti DIVERSI e portano a due round diversi:
+#          "nessun effetto"  -> la manopola e' misurata e non serve;
+#          "spenta per costruzione" -> la manopola non e' MAI stata
+#          messa alla prova, e l'asse giusto diventa InpTP1_R (alzare il
+#          primo obiettivo APRE il dominio di InpBEatR), non InpBEatR.
+#      COME SI DISTINGUONO, a macchina, senza interpretare: se anche UNA
+#      cella differisce dalla 0 su Trades o su Profit, la manopola scatta
+#      almeno qualche volta e il verdetto e' "misurata". Se le colonne
+#      sono identiche su tutte e cinque, e' "spenta per costruzione".
 #
-#  LETTURA B (coincidenza):  0,5 vince solo perche' e' UGUALE a
-#     InpTP1_R=0,5, cioe' il numero non dice niente su "dove mettere il
-#     breakeven" ma solo "quando coincide col parziale succede qualcosa".
-#     PREVEDE: uno scalino ESATTAMENTE a 0,5 e nient'altro -- 0,375 e
-#     0,625 tornano sulla cella viva.
-#
-#  [!] LA LETTURA B E' GIA' SMENTITA DAL CODICE, e va detto qui perche'
-#      chi legge il round non la ritiri fuori dopo:
-#      InpTP1_R agisce in DUE soli punti dell'EA.
-#        - r.2152, dentro il blocco della parziale: MORTO, il cancello
-#          esterno r.2143 chiede InpTP1_ClosePct > 0 e il CSV ha 0;
-#        - r.1694, TpTotalR(): VIVO, ma mette il TP a 3*InpTP1_R = 1,5 R.
-#      ==> A 0,5 R, in QUESTO preset, InpTP1_R non fa ASSOLUTAMENTE
-#          NULLA. La coincidenza 0,5 = InpTP1_R e' una coincidenza di
-#          ETICHETTA, non di meccanismo.
-#      L'accoppiamento vero fra i due esiste, ma sta in ALTO, non a 0,5:
-#      e' la frontiera di inerzia a 3*InpTP1_R. Per questo l'asse si
-#      DICHIARA come InpBEatR a InpTP1_R FISSO a 0,5, e la griglia resta
-#      tutta sotto la frontiera.
-#
-#  E LA GRIGLIA FINE DISTINGUE LO STESSO LE DUE LETTURE, a costo zero:
-#  0,375 e 0,625 sono i due vicini immediati di 0,5. Se tornano sulla
-#  cella viva mentre 0,5 sporge, la LETTURA B e' viva lo stesso per
-#  qualche ragione che non ho capito, e allora il verdetto e'
-#  "non promuovibile, meccanismo NON SPIEGATO". Se salgono con lei, e'
-#  la LETTURA A. Il round risponde in tutti e due i casi.
+#  [!] E LA PREVISIONE FALSIFICABILE CHE METTO ALLA PROVA DI ME STESSO:
+#      LA CELLA 0,5 DEVE USCIRE IDENTICA ALLA CELLA 0, al quinto decimale,
+#      su tutte e due le finestre. E' la conseguenza diretta del punto (1):
+#      stesso prezzo, stessa chiamata, blocco 1 prima. Se 0,5 NON
+#      riproduce 0, la mia lettura dell'ordine dentro ManageOneTicket e'
+#      SBAGLIATA e tutto il resto di questo file va riletto da capo.
+#      Non e' una cella sprecata: e' il collaudo del ragionamento.
 #
 # =====================================================================
 #  ATTESA DICHIARATA PRIMA DEI NUMERI -- e NON e' ottimista
 # ---------------------------------------------------------------------
-#  L'ipotesi nulla di questo round e' PICCO, non altopiano. Non per
-#  prudenza: perche' e' MISURATO sulle due sedie gemelle, sullo STESSO
-#  asse, a risoluzione fine (passo 0,15), e la superficie li' e'
-#  FRASTAGLIATA.
+#  L'ipotesi nulla e' "LASCIA COM'E'". Non per prudenza: perche' su
+#  questo ASSE, a risoluzione fine, le due sedie gemelle hanno gia'
+#  risposto NO, e le loro risposte sono misurate il 21/09.
 #
-#    R172D  Dow  770202  U30USD  IS   PF a 0,30 = 1,18134
-#                                     PF a 0,45 = 0,88635   <-- crollo
-#                                     PF a 0,60 = 1,20045
-#    R201A  DAX  770101  D30EUR  IS   PF a 0,30 = 1,09700
-#                                     PF a 0,45 = 1,03942   <-- avvallamento
-#                                     PF a 0,60 = 1,08046
+#    R172D  Dow 770202 U30USD -- la cella 0 (in campo) ha il PF OOS piu'
+#      alto di tutte e sette. Ogni valore di InpBEatR peggiora, e due lo
+#      mandano IN PERDITA (0,15 -> PF 0,889, -1.145; 0,30 -> 0,891).
+#    R201A  DAX 770101 D30EUR -- 0,15 e' concorde su due finestre ma e'
+#      un PICCO: PF OOS 0,00->1,395  0,15->1,516  0,30->1,251, tutti e
+#      due i vicini piu' bassi. Non promossa per la regola della forma.
 #
-#  Una cella che sprofonda fra due vicini sani e' l'immagine esatta
-#  della superficie che insegue il rumore. Se su Nasdaq esce lo stesso
-#  disegno, la cella 0,5 di R199A NON e' promuovibile e questo round
-#  avra' fatto il suo lavoro dicendo di NO.
+#  E su Nasdaq l'unico risultato favorevole (R199A, 0,5) e' oggi
+#  DOPPIAMENTE fuori gioco: misurato su una configurazione sostituita, e
+#  proprio sul valore che il punto (1) prevede INERTE.
 #
 #  ATTESO, in ordine di probabilita':
-#   1. superficie frastagliata: 0,5 sporge, 0,375 e 0,625 no
-#      ==> PICCO, verdetto "non promuovibile", si scrive perche';
-#   2. banda contigua 0,25-0,625 migliore della viva
-#      ==> ALTOPIANO, e si prende il CENTRO della banda, MAI il massimo;
-#   3. tutte le celle basse migliori della viva, monotone
-#      ==> non e' un altopiano, e' una PENDENZA: il centro non esiste e
-#      il round successivo deve scendere sotto 0,25, non promuovere.
+#   1. tutte le celle >= 0 indistinguibili dalla 0 entro il rumore
+#      ==> "lascia com'e'", ottava... nona manopola che dice no;
+#   2. una sola cella sporge, i vicini no
+#      ==> PICCO ISOLATO, NON PROMUOVIBILE, e si scrive perche';
+#   3. banda contigua 0,125-0,375 migliore della viva su tutti i cancelli
+#      ==> ALTOPIANO, e si prende il CENTRO della banda, MAI il massimo.
+#      E' l'esito meno probabile dei tre, ed e' l'unico che aprirebbe una
+#      proposta -- che resta comunque FIRMA DI CLAUDIO.
 #
 # =====================================================================
 #  IL CANCELLO DI PROMOZIONE, CONGELATO ADESSO
 # ---------------------------------------------------------------------
-#  Riferimento SEMPRE la cella viva InpBEatR = 0, misurata tre volte
-#  (R196a, R198, R199A) e sempre uguale.
+#  Riferimento: LA CELLA VIVA DI OGGI, cioe' la riga ClosePct=50 di
+#  R199B (risultati_prove/R199B/, referto ESITO ROUND GIRATO, RILIEVI 0).
 #
-#  c0  REGRESSIONE, E SI GUARDA PER PRIMA. Due celle, non una:
-#        InpBEatR = 0    deve dare  IS  n 82  PF 1,11621  DD 12,3568
-#                                        Profit 4549,93
-#                                   OOS n 102 PF 1,14894  DD  9,1244
-#                                        Profit 7689,12
-#        InpBEatR = 0,5  deve dare  IS  n 82  PF 1,27601  DD  8,7186
-#                                        Profit 8823,90
-#                                   OOS n 102 PF 1,23262  DD  8,6538
-#                                        Profit 9353,04
-#      Se anche UNA delle due non torna al quinto decimale, i pin sono
-#      sbagliati e TUTTO IL RESTO DEL ROUND NON VUOL DIRE NIENTE: ci si
-#      ferma li'. La seconda e' la piu' importante: e' la cella sotto
-#      processo, ri-misurata.
+#  c0  REGRESSIONE, E SI GUARDA PER PRIMA. Due ancore, e la seconda e'
+#      una previsione (vedi contro-esempio):
+#        InpBEatR = 0     deve dare
+#            IS   n 135  PF 1,22116  RF 1,14977  DD 7,3069  Profit 7014,20
+#            OOS  n 172  PF 1,21546  RF 1,29687  DD 7,8576  Profit 8496,74
+#        InpBEatR = 0,5   deve dare GLI STESSI NUMERI della cella 0.
+#      Se la prima non torna al quinto decimale, i pin sono sbagliati e
+#      TUTTO IL RESTO DEL ROUND NON VUOL DIRE NIENTE: ci si ferma li'.
+#      Se non torna la seconda, i pin sono giusti ma la lettura del
+#      codice e' sbagliata: il round si legge lo stesso, ma la sezione
+#      "meccanismo" di questo file va rifatta prima di qualunque verdetto.
 #
-#  c1  PF OOS della cella candidata >= 1,14894 (la viva), e il PROFITTO
-#      OOS accanto: >= 7689,12. Un PF che sale col profitto che scende
-#      non e' un miglioramento, e' una sedia piu' piccola.
-#  c1-bis  Recovery Factor OOS >= 1,01319 (la viva). E' la grandezza che
+#  c1  PF OOS della cella candidata >= 1,21546 (la viva), CON IL PROFITTO
+#      OOS ACCANTO: >= 8496,74. Un PF che sale mentre il profitto scende
+#      non e' un miglioramento: e' una sedia piu' piccola.
+#  c1-bis  Recovery Factor OOS >= 1,29687 (la viva). E' la grandezza che
 #      lega profitto e drawdown: un DD piu' basso pagato con meno
 #      profitto NON la muove, e per questo sta nel cancello.
 #  c2  DRAWDOWN, nella forma della classe 562:
-#        perdita statica  <=  Equity DD %  <=  DD assoluto / deposito
+#          perdita statica  <=  Equity DD %  <=  DD assoluto / deposito
 #      Equity DD % e' il limite SUPERIORE PIU' STRETTO ed e' gia' nel
-#      CSV: si usa quello. Il muro FTMO e' il 10% STATICO, quindi un
-#      Equity DD % SOTTO il 10% DIMOSTRA la sicurezza (classe 562a);
-#      sopra il 10% non conclude niente in nessuna direzione.
-#      Il denominatore fisso serve SOLO a confrontare le celle fra loro
-#      (classe 550), MAI a giudicare il muro.
-#      Richiesto: Equity DD % OOS <= 9,1244 e IS <= 12,3568.
-#  c3  CONCORDANZA IS/OOS: PF, DD e profitto devono muoversi nello
-#      STESSO VERSO nelle due finestre. Un verso solo = non misurato.
+#      CSV: si usa quello, e non si va a cercare il denominatore fisso
+#      per giudicare il muro (classe 562b: fra due limiti superiori
+#      validi si adotta il PIU' STRETTO, non il piu' largo).
+#      Il muro FTMO e' il 10% STATICO. La cella viva ha Equity DD % OOS
+#      7,8576 e IS 7,3069: TUTTI E DUE SOTTO IL 10%, quindi la sedia di
+#      oggi e' GIA' DIMOSTRATA SICURA su questo campione (classe 562a: un
+#      limite superiore sotto la soglia DIMOSTRA, non "non dice niente").
+#      [!] Questo cambia il senso del round rispetto a come era nato: il
+#      DD della 770260 NON e' piu' sopra il muro. Non si sta piu'
+#      spegnendo un incendio, si sta cercando un margine in piu'.
+#      Richiesto per promuovere: Equity DD % OOS <= 7,8576 e IS <= 7,3069.
+#  c3  CONCORDANZA IS/OOS: PF, Recovery Factor, DD e profitto devono
+#      muoversi nello STESSO VERSO nelle due finestre. Un verso solo =
+#      non misurato. (E' il cancello che ha bocciato R200A e R172D.)
 #  c4  ALTOPIANO -- ED E' IL CANCELLO PER CUI QUESTO ROUND ESISTE.
 #      La cella candidata E I SUOI DUE VICINI IMMEDIATI (+/- 0,125)
-#      devono passare TUTTI E TRE c1, c1-bis, c2 e c3.
+#      devono passare TUTTI E TRE c1, c1-bis, c2 e c3. Con 0 a sinistra e
+#      0,5 previsto inerte a destra, le celle interne sono 0,125 / 0,25 /
+#      0,375: un altopiano vero le deve prendere tutte e tre.
 #      Se passa UNA SOLA cella, il verdetto e' PICCO ISOLATO e la
 #      risposta e' NON PROMUOVIBILE, con scritto perche'.
 #      SELEZIONE: centro della banda che passa, MAI il massimo.
 #
+#  c5  IL PAVIMENTO DI RUMORE, e serve a non bocciare per niente
+#      (classe 550). Nessun cancello si dichiara passato NE' fallito con
+#      uno scarto INFERIORE A 1,0% sulla grandezza. Il numero non e'
+#      scelto a occhio: le ancore misurate il 21/09 su sedie gemelle
+#      hanno mostrato scarti di riproduzione fra 0,01% e 0,502%
+#      (R172D sez. 8.1, R201A sez. 9.1), e 1,0% e' il doppio del massimo
+#      osservato. Sotto quella soglia si scrive "indistinguibile".
+#
 #  [!] E QUALUNQUE COSA ESCA, NON SI TOCCA NIENTE IN CAMPO senza la
 #      firma di Claudio: la gestione dell'uscita e' gestione del
 #      rischio, ed e' sua. Questo file prepara una MISURA, non una
-#      modifica.
+#      modifica. La 770260 sta operando sulla challenge FTMO 541452707.
 #
 # =====================================================================
-#  DUE VANTAGGI DI QUESTO ROUND, dichiarati perche' sono rari
+#  DUE COSE DA SAPERE PRIMA DI LEGGERE LE COLONNE
 # ---------------------------------------------------------------------
-#  [ok] LA TAGLIA NON VA RISCALATA (classe 547 NON morde).
-#       R199A gira gia' a InpRiskPercent = 2,00 e deposito 80.000, cioe'
-#       ESATTAMENTE la taglia e il banco in campo su FTMO dal 20/09.
-#       R209a li copia. Quindi i DD di questo round sono i DD che
-#       volano, senza nessuna conversione. Le due gemelle R172D/R201A
-#       NON hanno questo vantaggio: girano a InpRiskPercent = 1,0.
+#  [ok] LA TAGLIA NON VA RISCALATA (classe 547 NON morde, ed e' raro).
+#       R199B gira gia' a InpRiskPercent = 2,00 e deposito 80.000, cioe'
+#       ESATTAMENTE la taglia e il banco in campo su FTMO dal 20/09
+#       (preset FTMO r.292). R209a li copia. Quindi i DD di questo round
+#       sono i DD CHE VOLANO, senza nessuna conversione e senza nessuna
+#       scala da dichiarare a parte. Le due gemelle R172D/R201A NON hanno
+#       questo vantaggio: girano a InpRiskPercent = 1,0.
 #
-#  [ok] IL CONTEGGIO DELLE OPERAZIONI E' PULITO (classe 550 NON morde).
-#       Con InpTP1_ClosePct = 0 non esistono chiusure parziali, quindi
-#       la colonna Trades conta POSIZIONI e non USCITE, e il PF non e'
-#       distorto dal numero di parziali. Infatti in R199A n resta 82/102
-#       su tutte e quattro le celle. Sulle gemelle, che hanno la
-#       parziale accesa, n si muove (Dow OOS: 130 a BEatR=0, 115 a 0,15)
-#       proprio perche' un BE che scatta prima del primo obiettivo
-#       cancella l'uscita parziale. Li' il confronto fra celle e'
-#       distorto; qui no.
+#  [!]  LA COLONNA Trades CONTA USCITE, NON POSIZIONI (classe 550 MORDE).
+#       Con InpTP1_ClosePct = 50 ogni posizione che arriva al primo
+#       obiettivo produce DUE uscite. Si vede nei numeri di R199B: la
+#       cella 0 (parziale spenta) fa n 82/102, le celle 25/50/75 fanno
+#       tutte n 135/172. Qui l'asse tocca proprio quel meccanismo: un BE
+#       che scatta PRIMA di 0,5 R puo' fermare la posizione prima del
+#       primo obiettivo e CANCELLARE la parziale, quindi n SCENDERA'
+#       nelle celle basse.
+#       [!] E LA DISTORSIONE SUL PF NON HA UN VERSO UNICO, quindi non la
+#       si "corregge" a mente: un'uscita a pari toglie una perdita piena
+#       dal denominatore (alza il PF) ma toglie anche la parziale
+#       vincente dal numeratore (lo abbassa). ==> il PF NON si legge da
+#       solo: si legge insieme a Profit, Recovery Factor e n, ed e' per
+#       questo che c1 chiede il profitto ACCANTO al PF e c5 mette un
+#       pavimento di rumore.
 #
 # =====================================================================
 #  SUL MAGIC -- grep fatto, e la scelta e' DELIBERATA
 # ---------------------------------------------------------------------
 #  grep -rhoE "77[0-9]{4}" sull'intero repo: 770260 e' la sedia viva,
-#  770261 NON e' occupato da nessuno.
-#  QUI SI PINNA LO STESSO 770260, come hanno fatto R196a, R198, R199a e
-#  R200a sulla stessa sedia. Ragione: la validita' INTERA di questo
-#  round poggia sul cancello c0, cioe' sul riprodurre DUE celle di R199A
-#  al quinto decimale. Un magic diverso e' un DELTA rispetto a R199A, e
-#  un round costruito PER DIFFERENZA non puo' avere delta che non siano
-#  l'asse. Il magic non entra nel calcolo del tester; la regola del
-#  magic vergine serve a non sporcare le statistiche FORWARD di una
-#  sedia viva, e qui non si opera: si misura, e si misura APPOSTA quella
-#  sedia.
+#  770261 NON risulta occupato da nessuno.
+#  QUI SI PINNA LO STESSO 770260, come hanno fatto R196a, R198, R199a,
+#  R199b e R200a sulla stessa sedia. Ragione: la validita' INTERA di
+#  questo round poggia sul cancello c0, cioe' sul riprodurre la cella
+#  ClosePct=50 di R199B al quinto decimale. Un magic diverso e' un DELTA
+#  rispetto a R199B, e un round costruito PER DIFFERENZA non puo' avere
+#  delta che non siano l'asse. Il magic non entra nel calcolo del tester;
+#  la regola del magic vergine serve a non sporcare le statistiche
+#  FORWARD di una sedia viva, e qui non si opera: si misura, e si misura
+#  APPOSTA quella sedia.
 #
 # =====================================================================
-#  I PIN -- copiati da R199a, nessuno tolto, nessuno aggiunto
+#  I PIN -- copiati da R199b, nessuno tolto, nessuno aggiunto
 #  Le tre conversioni FTMO->BCM (InpSessionHour 16->14, InpCloseHour
 #  19->17, InpCorrSymbol US500.cash->SPXUSD) sono le stesse di
-#  R196a/R198/R199a. Un CSV che torna con InpSessionHour diverso da 14
-#  si CESTINA.
+#  R196a/R198/R199a/R199b. Un CSV che torna con InpSessionHour diverso
+#  da 14 si CESTINA.
 # ---------------------------------------------------------------------
 
 @SIMBOLO  NASUSD
@@ -301,8 +299,6 @@ InpEmaSlow=50||50||0||50||N
 InpFilterTF=16388||16388||0||16388||N
 InpCorrSymbol=SPXUSD
 InpTP1_R=0.5||0.5||0||0.5||N
-InpTP1_ClosePct=0.0||0.0||0||0.0||N
-InpBreakevenAtTP1=0||0||0||0||N
 InpTrailTF=5||5||0||5||N
 InpMinStopPts=500.0||500.0||0||500.0||N
 InpSkipIfTight=0||0||0||0||N
@@ -311,21 +307,27 @@ InpConfirmMode=1||1||0||1||N
 InpMinRangePts=0.0||0.0||0||0.0||N
 InpMaxRangePts=0.0||0.0||0||0.0||N
 InpRetestOffsetPts=0.0||0.0||0||0.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=1||1||0||1||N
 
-# --- asse unico: IL BREAKEVEN INDIPENDENTE, a risoluzione FINE -------
-#   Passo 0,125. Sette celle:
-#     0      spento  <-- CELLA VIVA, regressione obbligatoria (c0)
-#     0.125  dentro la finestra in cui il trailing e' ancora inerte
-#     0.25   idem
-#     0.375  VICINO BASSO di 0,5  <-- una delle due celle che decidono c4
-#     0.5    LA CELLA SOTTO PROCESSO, ri-misurata (c0, seconda meta')
-#     0.625  VICINO ALTO di 0,5   <-- l'altra cella che decide c4
-#     0.75   meta' esatta della frontiera di inerzia (3*InpTP1_R = 1,5)
-#   Il dominio utile dell'asse e' [0 ; 1,5): sopra 1,5 la manopola e'
-#   inerte per costruzione (TpTotalR r.1694), e R199A lo ha gia'
-#   misurato. Qui non si rimisura: si riempie il buco in basso.
-#   Si guardano PF, Recovery Factor, DD e PROFITTO INSIEME. Un DD piu'
+# --- asse unico: IL BREAKEVEN INDIPENDENTE, DENTRO IL SUO DOMINIO ----
+#   Passo 0,125. Cinque celle:
+#     0      spento  <-- CELLA VIVA DI OGGI, ancora di regressione (c0)
+#                        deve riprodurre la riga ClosePct=50 di R199B
+#     0.125  stop a pari a un ottavo di R: molto presto
+#     0.25   meta' esatta del dominio utile -- candidata naturale al
+#            centro di un eventuale altopiano
+#     0.375  l'ultimo valore che precede il BE di TP1
+#     0.5    PREVISTO INERTE: stesso prezzo di TP1, e il blocco r.2195
+#            gira prima marcando gBETk. Deve uscire IDENTICA alla cella
+#            0: e' il collaudo della lettura del codice, non una cella
+#            sprecata.
+#   Il dominio utile dell'asse e' 0 < x < 0,5, e il tetto NON e' una
+#   scelta: e' InpTP1_R, tramite la marca condivisa gBETk (r.2201/2209).
+#   Sopra 0,5 la manopola e' spenta per costruzione, e R199A lo ha gia'
+#   misurato su 1,0 e 1,5. Qui non si rimisura: si riempie il buco.
+#   Si guardano PF, Recovery Factor, DD, PROFITTO e n INSIEME. Un DD piu'
 #   basso col profitto che crolla non e' un miglioramento: e' una sedia
 #   diversa e piu' piccola.
-InpBEatR=0||0||0.125||0.75||Y
-# 7 celle
+InpBEatR=0||0||0.125||0.5||Y
+# 5 celle

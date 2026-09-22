@@ -29464,3 +29464,56 @@ Casi misurati: `R34*`→`r34` · `R35*`→`r35` · `R37*`→`r37` · `R39*`→`r
    `REGISTRO_TEST.md` elencava sette round come *«gatati e non ancora girati»*: **tutti e sette
    erano girati** fra le 21:05 e le 23:27 della sera prima. Il registro era stato scritto a
    meta' giornata. **Lo stato si legge dall'archivio, non dal registro.**
+
+---
+
+## CLASSE 577 -- 🪑🔄 LA **CELLA VIVA E' CAMBIATA FRA IL ROUND E LA SUA LETTURA**: i numeri restano veri, il VERDETTO e' scaduto -- e il DOMINIO dell'asse si e' ristretto senza che nessuno lo riscrivesse (22/09/2026)
+
+**Caso reale.** Il 21/09 il round `R199A` misura `InpBEatR` sulla sedia `770260` (Nasdaq,
+in campo su FTMO) e trova che la cella `0,5` **domina** quella viva su PF, DD e profitto,
+in tutte e due le finestre. Il referto `report/DD_NASDAQ_R199_2026-09-21.md` e'
+scritto, letto e registrato **lo stesso giorno**: nessuno ha dimenticato niente.
+
+🔴 **Poi, alle 20:22 dello stesso giorno, il commit `496408a9` accende la parziale al 50%
+in campo** (*"Nasdaq 770260: ACCESA la parziale al 50% - firma di Claudio"*). Il preset
+FTMO passa a `InpTP1_ClosePct=50.0` e `InpBreakevenAtTP1=true`.
+
+Il giorno dopo la richiesta *"fai il round sul DD del Nasdaq"* e' stata istruita citando
+la tabella di R199A **come se fosse la sedia di oggi**. Non lo era piu'.
+
+### Perche' costa, e sono DUE danni distinti
+
+1. 🪑 **IL VERDETTO E' SCADUTO, non sbagliato.** I numeri di R199A restano veri: descrivono
+   una configurazione che il 21/09 sera **ha smesso di esistere**. Promuovere `0,5` in campo
+   sulla base di quella tabella avrebbe portato in produzione una cella **mai misurata sulla
+   sedia vera**.
+2. 🔴 **E IL DANNO PIU' SUBDOLO: IL DOMINIO DELL'ASSE SI E' RISTRETTO DA SOLO.**
+   `InpBEatR` (r.2209) e `InpBreakevenAtTP1` (r.2195) condividono la **stessa marca**
+   `gBETk`, e il secondo gira **prima** nella stessa chiamata di `ManageOneTicket`.
+   Accendere il BE del primo obiettivo mette quindi un **tetto di inerzia a `InpTP1_R`**:
+   - prima della firma il dominio utile era `[0 ; 3*InpTP1_R)` = `[0 ; 1,5)`;
+   - dopo la firma e' `(0 ; InpTP1_R)` = `(0 ; 0,5)`.
+   🔴 **Le quattro celle misurate da R199A (0 / 0,5 / 1,0 / 1,5) cadono TUTTE fuori dal nuovo
+   dominio o sul suo bordo. Il dominio che conta non e' mai stato misurato**, e il file prova
+   non poteva saperlo: e' stato scritto prima della firma.
+   📌 Lo stesso tetto era **gia' misurato su una gemella** e non era stato generalizzato:
+   `R172D` sez. 8.2, *"da 0,45 in su il DD OOS e' esattamente 4,3944, identico alla cella 0"*
+   -- sul Dow `InpTP1_R=1,0`, quindi tetto a 1,0.
+
+### La regola
+1. 🔴 **Prima di leggere il referto di un round su una sedia in campo, si rilegge il `.set`
+   in campo e si controlla la data dell'ultimo commit che lo tocca.** Se il preset e' stato
+   firmato DOPO il round, il round e' una misura d'archivio, **non una fotografia della sedia**.
+   La riga che lo dice in tre secondi:
+   `git log -1 --format=%h\ %ad\ %s -- mql5/Presets/FTMO/<file>.set`
+2. ⚠️ **Il confronto si fa sul PRESET IN CAMPO, non sul preset che porta il nome della sedia**:
+   sulla `770260` convivono `mql5/Presets/ABTG_..._770260.set` (vecchio) e
+   `mql5/Presets/FTMO/ABTG_..._770260_FTMO.set` (il campo). Hanno gestioni d'uscita **diverse**.
+3. 🧮 **Quando una firma accende una manopola, si ricalcola il DOMINIO di tutte le manopole che
+   condividono uno stato con lei** -- qui la marca `gBETk`. Un asse misurato fuori dal proprio
+   dominio produce celle "identiche alla viva" che sembrano *"nessun effetto"* e invece sono
+   *"manopola spenta per costruzione"*: sono due verdetti diversi e portano a due round diversi.
+4. 📌 **E i verdetti passati si riaprono per CLASSE, non in blocco**: una firma sull'USCITA
+   riapre i round sull'**uscita** (stesso codice, stesso stato condiviso), non quelli
+   sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non cambiano).
+   Riaprire tutto costa tempo macchina che non abbiamo; riaprire niente costa una sedia.
