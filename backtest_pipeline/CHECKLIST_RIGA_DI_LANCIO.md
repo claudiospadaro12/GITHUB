@@ -30404,3 +30404,63 @@ non far ripagare.
 3. 🔁 **Ed e' la gemella rovesciata della 120**: li' il difetto era **ereditare** dalla sorella un
    gate ormai falso; qui e' **non ereditare** una protezione ancora vera. 👉 Il gesto giusto non e'
    "copia" ne' "riscrivi": e' **diffa e giustifica riga per riga**.
+
+---
+
+## CLASSE 597 -- 🌐⏳ LA GUARDIA CHE **INTERROGA LA RETE** E' FAIL-CLOSED ANCHE SUL GUASTO **TRANSITORIO**: senza ritentativo un singhiozzo della CDN di GitHub trasforma una verifica in un round che non parte (controllo-preventivo, 22/09/2026, figlia della 595 e cugina della 166)
+
+> ⚠️ **Numero preso col `grep` al momento di scrivere** (`596` era l'ultima). Vale la
+> **classe 194** se qualcuno l'ha presa nello stesso turno.
+
+**Caso reale, misurato sul campo.** La riga `R211A` (pin `5d2e9d0e`) e' stata incollata su
+`DESKTOP-H4D7CAJ` alle **23:07**. E' arrivata fino alla guardia di **classe 166 (PRE)**, ha letto
+dall'API la punta del ramo e l'ha stampata correttamente --
+*"il ramo lavoro e oggi al commit `d3290448...`"* -- e poi:
+
+```
+irm : 404: Not Found
+```
+
+Il download **dal pin** era andato; quello **dalla punta del ramo** no. Il round **non e' partito**,
+e non ha lasciato niente su disco.
+
+🟢 **Non c'era nessuna divergenza da trovare.** Verificato il giorno dopo con `git`: a `d3290448`
+**tutti e due** i file confrontati esistevano, e il loro `SHA256` era **identico a quello del pin**
+(`c14d85dd...` e `3ec97115...`). Se il download fosse riuscito, la guardia avrebbe stampato verde.
+👉 **Il guasto e' costato una nottata di macchina per confermare una cosa che era gia' vera.**
+
+**La causa.** `d3290448` era stato pushato **pochi minuti prima** da un altro agente: la CDN di
+`raw.githubusercontent.com` **non serviva ancora** quel commit, e risponde **404**, non 503. Lo
+stesso URL rifatto il giorno dopo: **200**. Un `404` da CDN non si distingue da un `404` vero.
+
+### La regola
+1. 🔁 **Una guardia che dipende dalla RETE porta un RITENTATIVO, sempre.** Pochi tentativi
+   distanziati (in casa: `foreach($try in 1..4)` con `Start-Sleep -Seconds 20` fra i tentativi e
+   **non dopo l'ultimo**) e un `throw` solo alla fine. Un `-ErrorAction Stop` nudo su `irm`
+   e' una guardia che **boccia il meteo**, non il motore.
+2. 🔒 **E il ritentativo non deve aprire una falla**: il flag (`$ok`) si azzera **dentro** il ciclo
+   sul file, e il `throw` sta **PRIMA** del `Get-FileHash`. Altrimenti un `ramo_*.mq5` rimasto da
+   una corsa precedente verrebbe hashato al posto di quello mai scaricato -- fail-open travestito
+   da verifica (verificato a macchina: con il `throw` in posizione giusta il file stantio **non**
+   viene toccato, e `-OutFile` **tronca**, quindi un download a meta' non contamina il successivo).
+3. 🗣️ 🔴 **IL MESSAGGIO DI ERRORE NON PUO' ASSERIRE UNA CAUSA CHE NON HA ESCLUSO L'ALTRA.**
+   Questo e' il pezzo che costa. Un `404` sulla punta **mentre il pin funziona** ha almeno **due**
+   cause **indistinguibili dal sintomo**: la CDN in ritardo (transitoria: riprovare *serve*) e
+   **`$tip` non valido** -- nullo, vuoto, un nome di ramo -- che costruisce una URL storta
+   (permanente: riprovare **non servira' mai**). Misurato: con `$tip` vuoto la URL collassa in un
+   **307** e atterra su un **404 identico**. Un messaggio che dice *"quasi sempre e' la CDN,
+   riprova fra un minuto"* manda chi lo legge in un **ciclo di reincollate infinito**.
+   👉 **Allora si ESCLUDE l'alternativa a macchina, prima**, e una riga basta:
+   ```
+   if($tip -notmatch '^[0-9a-fA-F]{40}$'){ throw '...NON E UN COMMIT: riprovare non serve...' }
+   ```
+   Dopo quel cancello il messaggio sulla CDN e' **guadagnato**, non sperato. E' la regola del
+   **CONTRO-ESEMPIO del 10/09** applicata a un testo d'errore: *un verdetto vale solo se l'altra
+   spiegazione produce un numero diverso*.
+4. ⏱️ **Il costo del ritentativo si conta, e si dichiara dove cade.** Qui: **fino a 120 s** in tutto
+   (2 file x 3 attese da 20 s), e cadono **PRIMA** di `WaitForExit`, quindi **non** erodono il tetto
+   di 48 minuti. Se cadessero dentro, il ritentativo si mangerebbe il round che voleva salvare.
+5. 🧭 **E la causa a monte resta la 595**: fra la scrittura della riga e l'incollata il ramo `lavoro`
+   avanza. Piu' il pin e' vecchio, piu' la punta e' lontana -- e piu' spesso questa guardia parla
+   con la rete. Il ritentativo e' la **toppa**; la cura e' il **post-controllo sui byte che hanno
+   compilato**.
