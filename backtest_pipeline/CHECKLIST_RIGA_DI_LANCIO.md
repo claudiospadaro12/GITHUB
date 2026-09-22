@@ -28848,9 +28848,15 @@ un difetto di **record**: fra sei settimane chi rilegge il verbale per ritrovare
 round si porta a casa **il commit sbagliato**, quello che contiene la versione con l'errore.
 
 ### La regola
-1. **Un identificatore che ha una forma lunga e una corta si cerca con un pattern che le copre
-   tutte e due.** Per i commit git: il prefisso di **8** caratteri, mai i 40 —
-   `grep -n "ae8ca5ac"`, non `grep -n "ae8ca5ac8f04...205"`.
+1. **Un identificatore che ha piu' forme si cerca sulla forma PIU' CORTA che puo' comparire, non
+   su quella che ho appena scritto io.** Per i commit git l'abbreviazione **non ha una lunghezza
+   fissa** (7, 8, di piu'), quindi il modo robusto **non e' cercare una stringa nota**: e'
+   **elencare i candidati e guardarli** -- `grep -noE "\b[0-9a-f]{7,40}\b" FILE | sort -u`, che
+   restituisce ogni token esadecimale del documento e lascia all'occhio il confronto. Cosi' la
+   regola e' una cosa che si **esegue**, non un'intenzione.
+   🟠 Nota: la prima stesura di questa classe diceva *«il prefisso di 8 caratteri, mai i 40»* --
+   e conteneva **un mignolo del proprio difetto**, perche' un `grep` a 8 non vede un `ae8ca5a`
+   abbreviato a 7.
 2. **La sostituzione e la verifica non si fanno con lo stesso pattern.** La `sed` puo' essere
    precisa; il `grep` che dichiara «zero residui» dev'essere **piu' largo** di lei, altrimenti sta
    solo confermando cio' che la `sed` ha gia' fatto.
