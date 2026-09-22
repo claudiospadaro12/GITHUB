@@ -8,6 +8,13 @@ Richiesta di Claudio (22/09): _«VOGLIO RIGUARDARE ED RIANALIZZARE CON TUTTI GLI
 EA CHE ABBIAMO CONSIDERATI MORTI»_ · direttiva della stessa giornata: _«INTANTO: DA PROVARE IN +
 TF MI RACCOMANDO, OGNI STRATEGIA»_.
 
+✅ **DOCUMENTO CHIUSO.** Cancello deterministico passato
+(`python3 backtest_pipeline/controlla_riga.py --oggetto md` → **EXIT 0, nessun difetto
+meccanico**). Nessuna riga di lancio è contenuta qui dentro: il documento **non consegna
+comandi**, consegna numeri. 🔴 **Una correzione mia è rimasta scritta apposta al §5.4**: una
+prima stesura contestava il verdetto OPENCONFIRM del registro, il contro-esempio l'ha rotta, e
+la traccia resta agli atti invece di sparire.
+
 ---
 
 > ## 🎯 IN SETTE RIGHE
