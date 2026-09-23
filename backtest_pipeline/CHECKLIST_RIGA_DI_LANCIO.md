@@ -31652,3 +31652,95 @@ segnare vuota (o piena) per sbaglio.
 3. 🚩 **La contraddizione PATH-contro-MAGIC si segnala, non si risolve in silenzio.** Se il
    percorso dice `Dow` e il magic dice `Nasdaq`, la risposta giusta e' **«ambiguo, dichiarato»**
    e il file esce dalle statistiche per nome — non entra sotto uno dei due a caso.
+
+---
+
+## 🏦 CLASSE 623 — **IL CONTROLLO DI REGRESSIONE CHE CITA NUMERI DI UN ALTRO DEPOSITO: il round PASSA e il suo stesso file prova ordina di FERMARLO** (23/09/2026, R222)
+
+**Il numero, misurato e non dedotto** (`grep -oE 'CLASSE [0-9]+' backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md | grep -oE '[0-9]+' | sort -n | tail -3`, eseguito **nel momento in cui questa riga viene scritta**: le ultime erano **620 / 621 / 622**, e `CLASSE 623` non compariva da nessuna parte nel repo). ⚠️ Alla prima esecuzione, mezz'ora prima, le ultime erano **616/617/618**: due agenti in parallelo avevano gia' preso 619-622. **Il numero si rigrepa nell'istante in cui si scrive, non all'inizio del lavoro** (classe 194, vista dal vivo).
+
+**Il caso reale.** `backtest_pipeline/prove/R201a_breakeven_indipendente_DAX_D30EUR.txt` dichiara un
+controllo di regressione bloccante: la cella di controllo *«deve riprodurre i numeri d'archivio
+AL CENTESIMO — IS profitto 3.789,36 · OOS profitto 18.029,58»*, e aggiunge in chiaro
+*«Se la cella 0 non riproduce i sei numeri qui sopra, **IL ROUND SI FERMA LI'**»*.
+Il round e' girato il 21/09 alle 21:05 e la cella di controllo ha fatto **3.050,56** e
+**14.355,32**: **−19,5%** e **−20,4%**. Alla lettera, il round andava buttato.
+
+🟢 **Ma il round e' perfetto.** Lo stesso file prova, **sette righe piu' su**, dichiara
+`-Deposito 80000` (e il referto di round lo conferma: `deposito : 80000`). I sei CSV d'archivio
+da cui venivano i numeri attesi girano a **100.000**. Il rapporto e' **14.355,32 / 18.029,58 =
+0,7962 ≈ 0,80 = 80.000 / 100.000**, e le grandezze **invarianti alla taglia** tornano tutte:
+`PF` 1,39520 contro 1,39709, `Equity DD %` 7,2506 contro 7,2328, `n` **270 = 270** — accordo
+entro lo **0,3%**, che e' il residuo dell'arrotondamento del lotto.
+
+🔴 **Perche' e' una classe e non una disattenzione.** Il profitto e' **l'unica** delle quattro
+colonne citate che **scala col deposito**; `PF`, `DD %` e `n` no. Un controllo di regressione
+costruito su un paniere misto **si rompe esattamente e solo sulla colonna che non e'
+confrontabile**, e lo fa in modo **silenzioso e convincente**: due numeri su quattro tornano al
+quarto decimale, e questo fa sembrare il terzo un guasto vero. Qui il costo e' stato che
+**nessuno ha letto il round per due giorni**.
+
+### ✅ La regola
+1. 📏 **Un controllo di regressione elenca SOLO grandezze invarianti alla taglia** — `PF`,
+   `Equity DD %`, `n`, `Expected Payoff` in R — **oppure porta accanto a ogni numero il
+   deposito con cui e' stato prodotto.** Un profitto in euro senza il suo deposito **non e' un
+   numero di controllo**.
+2. 🧮 **Se il deposito del round differisce da quello della fonte, il criterio si scrive gia'
+   riscalato**: `atteso = archivio x (dep_round / dep_archivio)`, con la tolleranza allargata
+   per l'arrotondamento del lotto (misurata qui: **0,3%**; su banchi da 10.000 arriva
+   all'**8%**, buco **B5** dei contratti).
+3. 🚦 **E prima di dichiarare fallito un controllo di regressione si esegue QUESTA divisione.**
+   Se il rapporto fra misurato e atteso e' il rapporto dei depositi, **il round ha PASSATO**:
+   il difetto sta nel criterio, non nella corsa. Costa dieci secondi e qui valeva due giorni.
+4. 📌 **Sorella della 604** (due depositi non si confrontano) **vista dall'altro lato**: la 604
+   vieta di mettere in colonna numeri di depositi diversi; la 623 dice che **anche il
+   CRITERIO** e' un numero in colonna, e vale la stessa regola.
+
+---
+
+## 🚪 CLASSE 624 — **IL CANCELLO «`n` NON DEVE CALARE» SU UN MOTORE DOVE `n` SONO USCITE: la manopola fa calare `n` PER COSTRUZIONE e il cancello boccia un artefatto di conteggio** (23/09/2026, R222)
+
+**Il numero, misurato e non dedotto**: al momento di scrivere questa riga le ultime classi erano
+**621 / 622 / 623**, e `CLASSE 624` non compariva da nessuna parte nel repo.
+
+**Il caso reale.** `R201a_breakeven_indipendente_DAX_D30EUR.txt` congela quattro soglie di
+promozione, e la quarta e': *«(d) il numero di operazioni NON cala. **Un BE non puo' togliere
+ingressi: se n scende, il round ha un difetto, non un merito.**»*
+La cella `InpBEatR = 0,15` passa (a), (b) e (c) — DD OOS **−45,7%**, PF OOS **1,51555**, segni
+concordi fra IS e OOS — e **fallisce (d)**: `n` scende **270 → 248** in OOS e **175 → 158** in IS.
+
+🔴 **Ma la premessa di (d) e' falsa su questa geometria, e la falsita' e' strutturale.** La
+colonna `Trades` dell'OPTFRAME conta i **DEAL DI USCITA**, non le posizioni (classe 226). La
+sedia `770101` ha la **parziale al 50%** accesa: una posizione produce **due** deal se
+raggiunge il TP1, **uno** se no. E `InpBEatR` **arma il breakeven PRIMA del TP1**: manda in
+pari, e in un solo deal, posizioni che prima uscivano in due.
+👉 **La manopola fa calare `n` esattamente perche' funziona.** L'aritmetica torna: con `P`
+posizioni costanti e `n = P + f`, la cella viva fa `270 = 193 + 77` e la cella `0,15`
+`248 = 193 + 55`. E il codice lo conferma: `InpBEatR` compare **solo** nel blocco di gestione
+(`ABTG_DAX_Apertura_EU.mq5` **r.332** dichiarazione, **r.2404-2418** uso), **nessun ramo
+d'ingresso lo legge**.
+
+🔴 **E il difetto non e' isolato**: `VERDETTO_R202` §7 ha dovuto ricostruire lo stesso
+argomento a mano per `InpTP1_R`, e su `ABTG_EMA200` il conteggio deal e' **dimostrato
+fuorviante del 36%** (165 deal contro 257 posizioni contate, `CONTRATTI_DELLE_SEDIE_FTMO` §3.2).
+Ogni volta si riscopre la stessa cosa a valle del round.
+
+### ✅ La regola
+1. 🚫 **Un cancello su `n` NON si scrive su un motore con la parziale accesa**, se non
+   dichiarando **in quale unita'**: `n [uscite]` o `n [posizioni]`. Sono due grandezze diverse
+   e solo la seconda misura gli ingressi.
+2. 🔎 **Prima di scrivere un cancello «n non deve calare», si guarda se la manopola sta a monte
+   o a valle dell'ingresso.** Un `grep` del nome dell'input nel sorgente basta: se compare solo
+   nel blocco di gestione posizione, **non puo' togliere ingressi**, e il cancello sta misurando
+   il numero di uscite.
+3. 🧪 **Il cancello giusto, e costa zero**: `export per-trade ACCESO` nel round, e la soglia si
+   scrive su `position_id` distinti. Senza per-trade il verdetto onesto e'
+   **`n in posizioni = [NON MISURATO]`**, con la forbice `max(n)/2 <= P <= min(n)`.
+4. 🔴 **E la disciplina che non si tocca**: un cancello congelato prima dei numeri **NON si
+   ammorbidisce dopo averli visti**. Quando risulta mal specificato, il verdetto resta
+   **«misurato e NON promosso»** e il difetto si scrive qui — la soglia si riscrive nel round
+   **successivo**, non in quello in corso. Altrimenti «non ci arrendiamo» diventa «abbassiamo
+   l'asticella».
+5. 📌 **Figlia della 226** (deal contro posizioni) applicata ai **CANCELLI** invece che ai
+   referti: la 226 dice di non dividere per due; la 624 dice che **una soglia scritta
+   sull'unita' sbagliata boccia il candidato giusto**.
