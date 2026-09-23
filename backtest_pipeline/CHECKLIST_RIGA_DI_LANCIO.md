@@ -32299,3 +32299,77 @@ forward un EA puo' "vedere" come propria la posizione dell'altro.
 4. 🚫 **Non e' un difetto "da sistemare in compilazione".** Chi rimanda il grep
    al momento della compilazione ha gia' scritto la scheda, la riga e il file
    prova col magic sbagliato: la correzione costa tre file, non uno.
+
+---
+
+## 🔎🪦 CLASSE 640 — **CERCARE UNA BOCCIATURA *PER NOME DI ROUND* INVECE CHE *PER GEOMETRIA*: si "scopre" un NON MISURATO che era misurato da un mese** (23/09/2026, R230, figlia del certificato di morte del 09/09)
+
+**Il caso reale.** `backtest_pipeline/prove/R205a_lato_corto_DAX_D30EUR.txt` (scritto il 22/09,
+mai eseguito) dichiara, **marcandolo `[MISURATO]`**:
+> *«QUESTO ROUND NON E' UNA RIPETIZIONE: il retest-short sul DAX non e' mai stato girato.»*
+
+🔴 **E' FALSO.** `backtest_pipeline/prove/R107_DAX_01_short.txt` e' **esattamente** il
+retest-short sul DAX, con **esattamente** la geometria viva della sedia `770101`
+(`InpEntryMode=2` · `InpRangeMode=0` · `InpRangeMinutes=35` · `InpBufferPoints=500` ·
+`InpRetestOffsetPts=200` · `InpUseEmaFilter=0`), girato a **tick reali il 25/08/2026** — quasi un
+mese prima. Numeri: IS PF **0,965** su `n` 138 · OOS PF **0,957** su `n` **257**, DD 12,31%
+(`risultati_archivio/R107_REFERTO.md`). **Rosso in tutte e due le finestre, con `n` sopra il
+pavimento dei 150.**
+
+**Come e' successo, e non e' pigrizia.** L'autore ha cercato nel `DIARIO.md` **per nome di
+round**, ha trovato `R42` (il FADE) e `R43` (il RIMBALZO), **ha aperto tutti e sei i file prova**
+e ha verificato che pinnano `InpEntryMode=3` e non `2`. **Quella verifica e' impeccabile** — e la
+conclusione e' comunque sbagliata, perche' il round giusto si chiama `R107` e **nessuna stringa
+lo lega** a *«fade»*, a *«R42»* o a *«R205»*.
+
+### ✅ La regola
+1. 🔎 **Una bocciatura si cerca per GEOMETRIA, non per nome.** Si prendono i 5-8 campi che
+   definiscono il *mestiere* (`InpEntryMode`, `InpRangeMode`, `InpBufferPoints`,
+   `InpRetestOffsetPts`, `InpRangeMinutes`, il filtro direzionale) e si **scansionano tutti i
+   CSV e tutti i file prova** cercando quella combinazione. Sono venti righe di Python e chiudono
+   la domanda in modo **esaustivo**, non aneddotico.
+2. 🧪 **Il contro-esempio da costruire e' l'opposto della domanda facile.** Non
+   *«trovo un round che parla del mio tema?»* — a quella si puo' rispondere *no* per stanchezza —
+   ma **«esiste in repo una riga con la MIA geometria E un asse sul MIO input?»**. La seconda ha
+   una risposta meccanica.
+3. 🛑 **Vale in tutte e due le direzioni**: la stessa scansione impedisce di **riaprire** un
+   candidato gia' morto **e** di **archiviare** un candidato mai misurato. E' lo strumento che il
+   certificato di morte del 09/09 presuppone senza nominarlo.
+4. 📌 **E quando la scansione contraddice un file prova, si corregge il FILE PROVA**, non si
+   gira il round lo stesso: un file che mente nella motivazione e' **peggio** di un file assente,
+   perche' chi lo legge fra un mese si fida.
+
+---
+
+## 🔢⚖️ CLASSE 641 — **SU UN ASSE DI *LATO*, L'ADDITIVITA' DI `n` E' UNA DIAGNOSI, NON UN CONTROLLO DI SANITA': esatta, sotto-additiva e super-additiva vogliono dire tre cose diverse** (23/09/2026, R230)
+
+**Il caso reale.** Stesso motore d'apertura, stessa finestra, due simboli, e due comportamenti
+che sembrano incompatibili:
+- **Dow** (`risultati_archivio/csv_r54/ABTG_Dow_Apertura_US_U30USD_{IS,OOS}_r54a.csv`):
+  `74 + 73 = 147` e `130 + 73 = 203` — **additivita' ESATTA**.
+- **DAX** (`risultati_archivio/Walkforward_Aperture/DAX_M_direzione_OOS.csv`):
+  `256 + 243 = 499` ma la cella *entrambi* fa **316** — **sotto-additivo**.
+
+Sembra che uno dei due file sia storto. **Non lo e', ed e' il filtro**: sul Dow
+`InpUseEmaFilter=1` con `InpEmaFast=1` (= il prezzo), `InpEmaSlow=50` e `InpFilterTF=16388` (H4)
+e' **direzionale** e in una giornata data ammette **un lato solo**, quindi i due lati **non si
+contendono lo slot**; sul DAX il filtro e' **spento** e `InpOneTradePerDay=true` fa si' che **il
+primo lato che spara consuma il posto dell'altro**.
+
+👉 **Quindi sul Dow lo short AGGIUNGE 73 operazioni; sul DAX ne aggiunge 60 e ne RUBA 183 al
+lungo.** Sono due danni diversi e vanno raccontati diversi.
+
+### ✅ La regola — si legge `n` PRIMA dei PF, e si nomina il meccanismo
+- ✅ **`n` esattamente additivo** → c'e' un **filtro direzionale a monte**. Va **nominato prima**
+  di leggere qualunque PF: vuol dire che il lato aggiunge operazioni **senza toglierne**, e
+  quindi i due lati sono davvero separabili.
+- 🟠 **`n` sotto-additivo** → morde uno **slot** (`InpOneTradePerDay`, un `return` dopo il primo
+  lato, `case PH_PLACED`). Il lato in piu' **ruba** operazioni all'altro: **i numeri dei due lati
+  separati NON si sommano**, e chi li somma si illude. Si giudica **la sedia intera**.
+- 🔴 **`n` super-additivo** → **l'unico vero allarme**: accendere un lato ha cambiato
+  **qualcos'altro** (un tetto di posizioni, un reverse, un filtro). Il round **non ha misurato il
+  lato** e va rifatto.
+- 🔴 **E la regola madre resta**: **se `n` NON CAMBIA, la manopola non e' arrivata al motore.**
+  🎯 E' l'**esatto opposto** di un asse d'**uscita**, dove `n` identico e' il controllo di sanita'
+  che si *vuole* vedere. Confondere i due casi fa leggere *«asse inerte»* dove c'e' un motore che
+  funziona, e viceversa.

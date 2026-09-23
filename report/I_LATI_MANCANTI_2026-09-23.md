@@ -504,17 +504,18 @@ l'abbiamo gia' in casa e funziona — l'EMA200 sul Dow.
 
 ---
 
-# 9️⃣ 📌 DUE CLASSI NUOVE — **da riportare in `CHECKLIST_RIGA_DI_LANCIO.md`**
+# 9️⃣ 📌 DUE CLASSI NUOVE — **640 e 641**, scritte in `CHECKLIST_RIGA_DI_LANCIO.md`
 
-> 🔴 **Perche' NON le ho scritte io nel file**: al momento di consegnare,
-> `git status` mostra `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md` **modificato e non
-> committato da un altro agente** (33 righe aggiunte, nessuna intestazione `## CLASSE` nuova).
-> Scriverci dentro e committarlo significherebbe **portarmi via il lavoro di un collega ancora in
-> corso — che e' esattamente la classe 599.** Le lascio qui, pronte da incollare.
-> **Numeri grepati al momento della scrittura** (`^## CLASSE [0-9]+`, copia di lavoro): il
-> massimo e' **612**, quindi **613** e **614**.
+> 🔴 **E LA PRIMA STESURA DI QUESTO PARAGRAFO ERA SBAGLIATA — lo scrivo perche' e'
+> esattamente la classe che sto per proporre.** Avevo grepato `^## CLASSE [0-9]+` e concluso
+> *«il massimo e' 612, quindi le mie sono 613 e 614»*. **Falso**: in quel file le classi recenti
+> si scrivono `## <emoji> CLASSE NNN — ...`, con le emoji **prima** della parola, e il mio
+> pattern ancorato le saltava tutte. **Il massimo vero e' 639.** Il mandato diceva *«oggi siamo
+> oltre la 631»* e il mio grep diceva 612: **due numeri che non tornano sono un difetto, non una
+> sfumatura**, e la riconciliazione andava fatta subito invece di fidarsi del mio pattern.
+> 🟢 Corretto **prima** della consegna. Le mie sono **640** e **641**.
 
-### CLASSE 613 — 🔎🪦 CERCARE UNA BOCCIATURA **PER NOME DI ROUND** INVECE CHE **PER GEOMETRIA**: si "scopre" un NON MISURATO che era misurato da un mese (23/09/2026, figlia del certificato di morte del 09/09)
+### CLASSE 640 — 🔎🪦 CERCARE UNA BOCCIATURA **PER NOME DI ROUND** INVECE CHE **PER GEOMETRIA**: si "scopre" un NON MISURATO che era misurato da un mese (23/09/2026, figlia del certificato di morte del 09/09)
 **Il caso reale**: `prove/R205a_lato_corto_DAX_D30EUR.txt` (22/09) dichiara, marcandolo
 `[MISURATO]`, che *«il retest-short sul DAX non e' mai stato girato»*, dopo aver aperto e
 verificato i sei file prova di `R42`/`R43` e constatato che pinnano tutti
@@ -535,7 +536,7 @@ chiama `R107` e parla di DAX-short: nessuna stringa lo lega a *«fade»* o a *«
 3. 🛑 **Vale in tutte e due le direzioni**: la stessa scansione impedisce di **riaprire** un
    candidato gia' morto **e** di **archiviare** un candidato mai misurato.
 
-### CLASSE 614 — 🔢⚖️ SU UN ASSE DI **LATO**, L'ADDITIVITA' DI `n` E' UNA **DIAGNOSI**, NON UN CONTROLLO DI SANITA': esatta, sotto-additiva e super-additiva vogliono dire tre cose diverse (23/09/2026)
+### CLASSE 641 — 🔢⚖️ SU UN ASSE DI **LATO**, L'ADDITIVITA' DI `n` E' UNA **DIAGNOSI**, NON UN CONTROLLO DI SANITA': esatta, sotto-additiva e super-additiva vogliono dire tre cose diverse (23/09/2026)
 **Il caso reale**: stesso motore d'apertura, stessa finestra, due simboli.
 Dow (`csv_r54`): `74 + 73 = 147` e `130 + 73 = 203` — **additivita' esatta**.
 DAX (`DAX_M_direzione_*`): `256 + 243 = 499` ma *entrambi* fa **316** — **sotto-additivo**.
