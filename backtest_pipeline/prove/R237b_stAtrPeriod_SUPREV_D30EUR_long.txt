@@ -32,6 +32,24 @@
 #
 # --------------------------------------------------------------------------
 #  0. COSA QUESTO ROUND PUO' E NON PUO' DECIDERE
+#  (SOSPESO) >>> IL CANCELLO DEL COSTO (T7, il 40x contro 108,0) NASCE
+#       SOSPESO, E VA DETTO QUI E NON A META' FILE -- CLASSE 668.
+#       La FASE 1 (test singolo, Optimization=0) e' l'unica cosa che puo'
+#       misurare la base dello stop, e NESSUNO STRUMENTO GENERICO DEL
+#       REPO LA ESEGUE: walkforward_generico.ps1 scrive Optimization=1
+#       CABLATO a r.2013, dentro il foreach($w in $WF) di r.1978, e
+#       nessun parametro lo cambia (il driver lo dichiara a r.75).
+#       >>> QUINDI LA FASE 1 NON E' "la cosa piu' economica del
+#           pacchetto": costa una RIGA DI LANCIO NUOVA, sul modello di
+#           righe/RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1 (r.644) o
+#           righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1 (r.1372), che scrivono
+#           il loro .ini con Optimization=0. Quella riga passa dal
+#           cancello come tutte le altre.
+#       >>> SE QUELLA RIGA NON VIENE SCRITTA il round gira lo stesso e
+#           produce CSV, PF e DD come sempre: e' esattamente il modo in
+#           cui un cancello sospeso diventa un cancello passato. Allora
+#           il referto DEVE APRIRE con "CANCELLO DEL COSTO: NON
+#           PRONUNCIATO", e nessuna riga sul 40x si scrive.
 # --------------------------------------------------------------------------
 #  (SI) PUO' leggere il RISCHIO, a qualunque n (Emendamento B).
 #  (SI) PUO' fare da CONTROLLO al gemello corto: e' il lato che il regime
@@ -207,12 +225,19 @@
 # --------------------------------------------------------------------------
 #  SI EREDITANO IDENTICI da R237a (stesso banco, stessi pin, stesso asse):
 #    T1  inerzia: la colonna InpStAtrPeriod deve avere 6 valori distinti.
-#    T3  NESSUNA soglia di monotonia sull'n (classe 663). Si congela
+#    T3  Vale il limite di R237a: con una sola FASE 1 T3 e' NON ESEGUITO,
+#        non "non attribuito" (classe 674).
+#        NESSUNA soglia di monotonia sull'n (classe 663). Si congela
 #        QUALE CONTATORE si legge: cB_occupata, cF_stgirato, cF_lato,
 #        cF_confl, dalla FASE 1.
 #    T4  il cancello di MERITO non esiste: n per tranche 90/134 < 150.
 #    T5a anomalia: DD di tranche > 12,85% (massimo assoluto d'archivio).
 #    T5b muro prop: >= 5,0% fragile, >= 10,0% inschierabile a rischio 1%.
+#        >>> LIMITE ARITMETICO (classe 675): il DD di una SOTTO-finestra e'
+#            un MINORANTE del DD sulla finestra piena, quindi T5b PUO' SOLO
+#            CONDANNARE, MAI ASSOLVERE. Una tranche sotto il 5,0% non e' la
+#            prova che la cella ci stia: l'unico DD confrontabile col muro
+#            prop e' quello di finestra piena, che questo round NON produce.
 #    T6  cancello del lotto: DD fuori da +/-40% fra la cella con lo stop
 #        piu' largo e quella col piu' stretto -> DD illeggibili (buco B7).
 #    T7  la base dello stop si fissa con la FASE 1, e SOLO allora si
@@ -261,7 +286,11 @@
 #      lo stesso verso nei due file. 4 o 5 su 5 concordi = geometria;
 #      0 o 1 su 5 = regime; 2 o 3 = NON CONCLUSIVO, e si scrive cosi'.
 #      >>> E DICHIARO IL LIMITE PRIMA: cinque passi sono POCHI. Con una
-#          moneta, 4+ concordi su 5 esce il 18,75% delle volte. Quindi
+#          moneta, 4+ concordi su 5 esce il 18,75% -- E LO STESSO VALE
+#          PER 0-1 CONCORDI, che e' l'altra conclusione ammessa: la
+#          probabilita' di arrivare a UNA QUALUNQUE conclusione per solo
+#          rumore e' 6/32 + 6/32 = 37,5%, non 18,75%. Nel referto va
+#          scritto 37,5%. Quindi
 #          questa lettura e' un INDIZIO ORIENTATIVO, non una prova, e nel
 #          referto va scritta con quel 18,75% accanto. Non e' una
 #          debolezza nascosta: e' il motivo per cui il verdetto del
@@ -409,6 +438,12 @@ InpStAtrPeriod=14||11||1||16||Y
 #  IL CANCELLO SUL PRODOTTO -- si guarda il GIORNALE, non il CSV:
 #    (1) almeno una riga "[STREV-IMBUTO] ... quadratura OK" -> senza,
 #        i contatori di T3 non esistono: FASE 1 FALLITA, si ripete.
+#    ATTENZIONE AI NOMI: nel Giornale i contatori NON si chiamano
+#        cB_occupata / cF_stgirato / cF_lato / cF_confl. La riga
+#        [STREV-IMBUTO] (r.210-231) stampa etichette in italiano --
+#        "occupata", "supertrend girato", "lato spento", "confluenza EMA
+#        assente" -- ed e' un DELTA GIORNALIERO (ImbutoGiro), non un
+#        totale: i totali si ottengono SOMMANDO tutti i giorni.
 #    (2) una riga "[STReversal] LONG mercato ... @ <entry> SL <sl> TP
 #        <tp>" PER OGNI INGRESSO (r.422-423). Da ognuna si estrae
 #        |SL - entry|; se ne prende LA MEDIANA (base, T7) E si conta LA

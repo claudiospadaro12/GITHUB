@@ -27,6 +27,24 @@
 #
 # --------------------------------------------------------------------------
 #  0. COSA QUESTO ROUND PUO' E NON PUO' DECIDERE -- PRIMA DI TUTTO IL RESTO
+#  (SOSPESO) >>> IL CANCELLO DEL COSTO (T7, il 40x contro 108,0) NASCE
+#       SOSPESO, E VA DETTO QUI E NON A META' FILE -- CLASSE 668.
+#       La FASE 1 (test singolo, Optimization=0) e' l'unica cosa che puo'
+#       misurare la base dello stop, e NESSUNO STRUMENTO GENERICO DEL
+#       REPO LA ESEGUE: walkforward_generico.ps1 scrive Optimization=1
+#       CABLATO a r.2013, dentro il foreach($w in $WF) di r.1978, e
+#       nessun parametro lo cambia (il driver lo dichiara a r.75).
+#       >>> QUINDI LA FASE 1 NON E' "la cosa piu' economica del
+#           pacchetto": costa una RIGA DI LANCIO NUOVA, sul modello di
+#           righe/RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1 (r.644) o
+#           righe/RIGA_R103_CLASSIFICA_FLOTTA.ps1 (r.1372), che scrivono
+#           il loro .ini con Optimization=0. Quella riga passa dal
+#           cancello come tutte le altre.
+#       >>> SE QUELLA RIGA NON VIENE SCRITTA il round gira lo stesso e
+#           produce CSV, PF e DD come sempre: e' esattamente il modo in
+#           cui un cancello sospeso diventa un cancello passato. Allora
+#           il referto DEVE APRIRE con "CANCELLO DEL COSTO: NON
+#           PRONUNCIATO", e nessuna riga sul 40x si scrive.
 # --------------------------------------------------------------------------
 #  (SI) PUO' leggere il RISCHIO, a qualunque n (Emendamento B, 16/08/2026).
 #       Un drawdown e' un fatto accaduto. E c'e' un numero che va letto
@@ -348,6 +366,14 @@
 #      PUO' FALSIFICARE. E' raro in questa casa (R236a, lo stesso motore
 #      stamattina, aveva un effetto SOTTO la risoluzione: 0,15x e 0,24x) e
 #      va detto, perche' cambia cosa si potra' scrivere alla fine.
+#  >>> MA IL FATTORE SETTE VALE SUL SALTO GIA' NOTO (12 -> 14), CIOE' SU
+#      T2, NON SU T8. Le celle che DECIDONO il run (13, 15, 16) non hanno
+#      archivio: le due ipotesi predicono per loro ~0,80 contro ~1,37, e
+#      allora il fattore sette regge -- ma si TOCCANO alla soglia, e una
+#      cella che atterra li' dentro non e' letta. Non e' un fallimento:
+#      e' l'esito NON CONCLUSIVO di T8, previsto. La frase giusta e'
+#      "puo' confermare e falsificare SE le celle ignote atterrano vicino
+#      a una delle due ancore", non "puo' confermare e falsificare".
 #  >>> LA CONSEGUENZA OPERATIVA, congelata: una cella conta come POSITIVA
 #      solo se PF > 1,00 + risoluzione della sua tranche, cioe'
 #      > 1,086 in IS e > 1,057 in OOS. Fra 1,00 e quella soglia la cella
@@ -416,6 +442,17 @@
 #           Il SALDO di questi spiega il movimento dell'n. Senza di loro
 #           il movimento NON e' attribuibile, e si scrive "non
 #           attribuito" invece di raccontarselo.
+#       >>> E IL LIMITE VA DETTO PRIMA, NON DOPO: la FASE 1 gira su UNA
+#           SOLA cella (l'ancora, AtrP 14). Un MOVIMENTO dell'n lungo
+#           l'asse e' una DIFFERENZA, e una differenza non si calcola da
+#           un punto solo. >>> CON UNA SOLA FASE 1 IL SALDO DEI CONTATORI
+#           NON E' CALCOLABILE E T3 SI RISOLVE SEMPRE IN "NON ATTRIBUITO":
+#           non e' un cancello, e' una sola uscita (classe 674).
+#           Per attribuire davvero servono DUE FASE 1 per file, alla
+#           stessa coppia del cancello crociato -- AtrP 12 e AtrP 14 --
+#           e il tempo macchina sale da 26 a 28 corse.
+#           SE SI FA UNA SOLA FASE 1, T3 si dichiara NON ESEGUITO in
+#           TESTA al referto, non "non attribuito" in fondo.
 #
 #  (T4) IL CANCELLO DI MERITO NON ESISTE IN QUESTO ROUND: n per tranche
 #       atteso 58-101, sotto 150 su tutte le celle previste. Scritto qui
@@ -436,6 +473,18 @@
 #           OTTIMISTA. A tick il DD non migliora quasi mai. Quindi
 #           l'esito piu' probabile e' "PF interessante, DD fragile", e
 #           quello NON e' un promosso.
+#       >>> E IL LIMITE ARITMETICO DELLA SOGLIA, scritto ORA perche'
+#           altrimenti la si legge alla rovescia: il DD massimo su una
+#           SOTTO-finestra e' un MINORANTE del DD sulla finestra piena
+#           (il massimo su un sottoinsieme di intervalli non puo'
+#           superare quello sull'insieme). >>> QUINDI T5b PUO' SOLO
+#           CONDANNARE, MAI ASSOLVERE: una tranche a 4,6% NON e' la prova
+#           che la cella stia sotto il 5,0%. L'unico DD confrontabile col
+#           muro prop e' quello di FINESTRA PIENA, e QUESTO ROUND NON LO
+#           PRODUCE. Il solo DD di finestra piena che abbiamo sulla cella
+#           ancora e' il 5,6180% d'archivio, sul banco OTTIMISTA: gia'
+#           oltre la soglia. Nessuna lettura di tranche lo cancella
+#           (classe 675).
 #
 #  (T6) CANCELLO DEL LOTTO. A rischio fisso 1% il DD dovrebbe essere
 #       dello stesso ordine su tutte le celle. Se il DD della cella con
@@ -635,8 +684,8 @@
 # --------------------------------------------------------------------------
 #  6 celle x 2 tranche = 12 passate a TICK REALI su questo file.
 #  Col gemello R237b: 24 passate. Piu' 2 corse SINGOLE di FASE 1 (una per
-#  file), che sono la cosa piu' economica del pacchetto e la piu'
-#  informativa.  TOTALE: 26 corse.
+#  file), che NON sono gratis: richiedono una riga di lancio che ancora
+#  non esiste (classe 668, sezione 0).  TOTALE: 26 corse.
 #  [NON MISURATO] il minutaggio per passata di questo motore a tick reali
 #  su D30EUR H1. >>> Per ordine di grandezza: ~21 mesi di tick H1 sul DAX
 #  sono ~31 milioni di tick (spread_orario_D30EUR.csv, colonna
@@ -799,6 +848,12 @@ InpStAtrPeriod=14||11||1||16||Y
 #  stanno nel CSV, e non ci stanno per costruzione.
 #    (1) la DISTANZA DI STOP per ingresso -> cancello T7 e tutto il
 #        verdetto sul costo (108,0);
+#    (4) ATTENZIONE AI NOMI: nel Giornale i contatori NON si chiamano
+#        cB_occupata / cF_stgirato / cF_lato / cF_confl. La riga
+#        [STREV-IMBUTO] (r.210-231) stampa etichette in italiano --
+#        "occupata", "supertrend girato", "lato spento", "confluenza EMA
+#        assente" -- ed e' un DELTA GIORNALIERO (ImbutoGiro), non un
+#        totale: i totali si ottengono SOMMANDO tutti i giorni.
 #    (2) i CONTATORI DELL'IMBUTO (cB_occupata, cF_stgirato, cF_lato,
 #        cF_confl) -> attribuzione del movimento dell'n, cancello T3;
 #    (3) la QUADRATURA dell'imbuto -> prova che i contatori hanno girato.

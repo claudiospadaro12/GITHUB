@@ -33885,3 +33885,85 @@ contiene un referto vecchio.
    e' una difesa che funziona solo se qualcuno guarda.
 3. ♻️ Vale **ogni volta** che lo script chiamato puo' uscire **prima** del punto in cui pulisce
    da se'.
+
+---
+
+## 📏1️⃣ CLASSE 674 — **UN CANCELLO PRESCRIVE UN'ATTRIBUZIONE DIFFERENZIALE LUNGO L'ASSE, MA LA FASE DIAGNOSTICA GIRA SU UNA CELLA SOLA: la differenza non e' calcolabile e il cancello si auto-declassa a «non attribuito» senza che nessuno se ne accorga** (controllo-preventivo, 23/09/2026, su `R237a/R237b`)
+
+**Numero assegnato dal COORDINATORE** (classe 662); `grep -c "CLASSE 674"` -> **0** al momento di scrivere.
+
+### Il fatto
+`T3` prescriveva: *"il SALDO dei contatori spiega il MOVIMENTO dell'`n`"*. Ma la FASE 1 era
+definita su **una cella sola** (l'ancora), e il conto del tempo macchina diceva *"2 corse
+singole di FASE 1, una per file"*.
+🔴 **Un movimento e' una DIFFERENZA, e una differenza non si calcola da un punto solo.**
+Quindi `T3` aveva **una sola uscita possibile** -- *"non attribuito"* -- e un cancello con una
+sola uscita **non e' un cancello**.
+
+### La regola
+1. 🔢 **Se un cancello parla di un MOVIMENTO, di un SALDO o di una DIFFERENZA lungo l'asse, la
+   fase diagnostica deve girare su ALMENO DUE celle**, e le due vanno **nominate** (qui: la
+   stessa coppia del cancello crociato, AtrP 12 e AtrP 14).
+2. 💰 **E il costo si aggiorna insieme**: da 26 a 28 corse. Un cancello che non si paga il
+   proprio costo e' un cancello che non verra' eseguito.
+3. 🗣️ **Se si decide di farne una sola, il cancello si dichiara NON ESEGUITO in TESTA al
+   referto**, non *"non attribuito"* in fondo: le due frasi si leggono in modo opposto.
+
+---
+
+## 📉⚖️ CLASSE 675 — **UNA SOGLIA DI DD TARATA SUL MURO PROP APPLICATA AL DD DI TRANCHE: il DD di una sotto-finestra e' un MINORANTE di quello della finestra piena, quindi la soglia puo' solo CONDANNARE e mai ASSOLVERE -- ma si legge come un'assoluzione** (controllo-preventivo, 23/09/2026, su `R237a/R237b`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 675"` -> **0** al momento di scrivere.
+
+### Il fatto, ed e' aritmetica
+Il massimo su un **sottoinsieme** di intervalli non puo' superare quello sull'insieme:
+`DD(finestra piena) >= max(DD_IS, DD_OOS)`, **sempre**.
+🔴 Quindi una soglia tarata sul **muro prop** (che vive sulla finestra piena, anzi sulla vita
+della challenge) applicata a un **DD di tranche** puo' solo **condannare**. Una tranche a
+**4,6%** che "passa" la soglia del 5,0% **non e' la prova che la cella ci stia**: e' la prova
+che *quella meta'* ci sta.
+Caso reale: la cella d'ancoraggio di R237 sta **gia' a 5,6180%** di DD sulla **finestra
+piena** e sul **banco OTTIMISTA** (OHLC) -- cioe' gia' oltre la soglia -- e **il round non
+produce nessun DD di finestra piena**. Due tranche verdi avrebbero potuto far sembrare
+assolta una cella gia' condannata dal dato che avevamo prima di partire.
+
+### La regola
+1. ⚖️ **Una soglia di rischio si applica alla grandezza su cui e' stata tarata.** Muro prop ->
+   DD di **finestra piena** (o di forward). Mai a una tranche.
+2. 🚫 **Un DD di tranche sotto soglia NON assolve**: si scrive *"la tranche sta sotto, la
+   finestra piena non e' misurata da questo round"*.
+3. 🧾 **E se esiste gia' un DD di finestra piena, anche su banco ottimista, quello VINCE** e
+   va citato accanto al verdetto: nessuna lettura di tranche lo cancella.
+
+---
+
+## ➕🔀 CLASSE 676 — **QUANDO IL LATO E' DETTATO DALL'INDICATORE E NON DAL SEGNALE, `n(A)+n(B) = n(A+B)` E' ESATTA: si puo' PREDIRE l'`n` del lato mai misurato, e il rapporto degli `n` diventa un cancello** (controllo-preventivo, 23/09/2026, su `ABTG_SupertrendReversal`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 676"` -> **0** al momento di scrivere.
+🟢 **E' una classe UTILE, non un difetto**: la registro perche' vale come strumento.
+
+### Il fatto, misurato
+Su `ABTG_SupertrendReversal` il lato non e' scelto dal segnale, e' **dettato dalla direzione
+dell'indicatore** (`dir[1]`, r.333-335): lunghe e corte sono percio' **mutuamente esclusive
+nel tempo**. Con `InpExitOnFlip` acceso lo slot si libera alla girata, e al flip la posizione
+si chiude e la funzione **esce nella stessa barra** (r.316-320), mentre la candidata opposta
+pretende `d1==d2` (r.332) e deve aspettare almeno una barra: **spegnere un lato non libera
+tempo-slot all'altro**.
+👉 Risultato: **`n(corto) + n(lungo) = n(due lati)` con scarto ZERO su 4 terne su 4**
+(464/464 · 402/402 · 370/370 · 210/210), ricalcolate.
+🎯 **E se ne ricava una previsione verificabile**: `n(lungo, AtrP 14, TP 2,0) = 393 - 169 =
+224`. Il controllo su un dato **non usato per farla** (il lungo al TP adiacente 2,5) misura
+**227**: scarto **1,32%**.
+
+### Come si usa
+1. 🔮 **Si predice l'`n` del lato mai misurato** senza spendere una passata.
+2. 🔒 **Il rapporto fra gli `n` diventa un cancello** (qui `n(lungo)/n(corto) = 1,33 +-20%`):
+   se il round lo sfonda, non si sta misurando quello che si crede.
+
+### ⚠️ I DUE LIMITI, e vanno dichiarati ogni volta
+1. 🚫 **NON si importa da un EA all'altro.** Su `ABTG_SupRev_DAX_H4_Ottimizzato` (R110) vale
+   la conclusione **OPPOSTA**: i lati **non** sono additivi. La proprieta' e' del **codice**,
+   non della famiglia.
+2. 🕳️ **Residuo noto**: un pendente stantio (scadenza 3 barre) puo' bloccare il lato opposto
+   dopo un flip **senza posizione aperta** -- `CancelPendings()` sta solo nel ramo
+   `HasPosition()` (r.313 contro r.322). Non morde sulle 4 terne misurate, ma esiste.
