@@ -34675,3 +34675,69 @@ questa famiglia **misura il simulatore**.
 misurare** — per cella, non per file (è la 706 portata all'asse intero). Un asse inerte non dà un
 risultato brutto: dà **N copie dello stesso risultato**, e chi legge il referto crede di avere N
 misure.
+
+---
+
+# 🧱 QUATTRO CLASSI DAL CANCELLO SU R240 — **e la prima girava in tutta la casa da settembre**
+
+Numeri del COORDINATORE (classe 662).
+
+## ❌ CLASSE 714 — **il numero DERIVATO scambiato per la misura da cui deriva: la FRONTIERA `40 × spread` citata come se fosse lo SPREAD**
+
+### Il fatto
+Tre file e **un messaggio in chat a Claudio** dicevano:
+> *"Misurato su `spread_orario_U30USD.csv` (64,7 M tick): **76-80 punti** nelle ore 14-21 contro
+> **104-112** nelle altre"*
+
+🔴 **Falso.** Aperto il CSV: la colonna `mediana_idx` dà **2,0** alle ore 14 e 15, **2,6-2,8** alle
+ore 0/1/10. I 76-80 e 104-112 sono il **prodotto `40 × spread`**, e due referti di casa lo scrivono
+nell'**intestazione di colonna** (`DOSSIER_SCHIERAMENTO_EMA200_DOW` r.271-276 · `EMA200_I_DUE_REQUISITI`
+r.144-150).
+
+### 🔴 Perché è sopravvissuto tanto: **il rapporto si conserva**
+Entrambe le fasce sono moltiplicate per 40, quindi *"in sessione costa meno"* **resta vero** e il
+difetto **non si vede dal risultato**. È il difetto del 10/09 nella forma pura: un numero preso da un
+altro documento e riusato **col significato sbagliato**.
+
+### Quanto costa
+Chi copia la frase mette a verbale *"lo spread del Dow in sessione è 76-80 punti indice"*. Con quel
+numero il cancello di costo diventa `40 × 78 = 3.120 punti` di stop richiesto, e **ogni conto di costo
+futuro su U30USD nasce sbagliato di due ordini di grandezza**.
+
+### La regola
+📋 **Quando un numero di costo viene da un referto, si copia ANCHE L'INTESTAZIONE DELLA COLONNA.**
+E un numero che vale `40 ×` un altro **non può stare nella stessa frase senza il moltiplicatore**.
+*(Distinta da 591/650/666, che parlano di come si CALCOLA e si APPLICA il 40×; questa è il 40×
+**scambiato per lo spread**.)*
+
+## 🎟️ CLASSE 715 — **il ritmo di macchina a Modello 4 trasferito fra SIMBOLI: scala sui TICK, e la densità è GIÀ misurata in archivio**
+
+Avevo derivato *"45-60 minuti"* da R238 (44 min / 8 passate) elencando tutto ciò che restava uguale —
+stesso EA, stesso TF, stessa finestra, stesso numero di passate — **e tacendo l'unica cosa cambiata:
+il simbolo**.
+📐 `risultati_archivio/misura_tick/`: **NASUSD 166.509.474 tick** · **U30USD 67.618.571**, stessa data
+di partenza. 👉 **U30USD ha lo 0,41 dei tick: 2,46 volte meno.** A Modello 4 il tempo è dominato dai
+tick da masticare → la stima onesta è **20-30 minuti**, e 45-60 è un **tetto ereditato**.
+🔴 **E non è cosmesi**: con una stima gonfiata di 2,5×, una corsa che si **inchioda** per 70 minuti
+sembra *normale*. Il paracadute *"non fermarla prima di 75"* smetteva di essere un paracadute e
+diventava **un cuscino**.
+🔴 **La classe 712 qui AVREBBE PASSATO la riga**, perché chiude l'asse **motore**; questa chiude
+l'asse **simbolo**.
+**Regola**: a Modello 4 il tempo si scala sul **conteggio dei tick** (`REFERTO_MISURA_TICK_<SIM>.txt`)
+e la stima si scrive **col rapporto in chiaro**.
+
+## 📄 CLASSE 716 — **l'artefatto scritto IDENTICO in N cartelle gemelle mentre contiene regole valide per UNA sola**
+Lo stesso `NON_PROMUOVIBILE.txt` finiva in `ROUND_R240a` (corto) e `ROUND_R240b` (lungo), ma portava
+**l'ancora del corto** (`3,5/7`; il lungo gira `2,5/12`) e **i rami del corto** (*"ramo alto =
+informativo"*, mentre sul lungo un ramo alto è una **CREPA** — lo diceva il punto 6 **dello stesso
+foglio**, quattro paragrafi sotto).
+**Regola**: è la **690 spostata dal file prova all'artefatto di corsa**. O il foglio è
+**parametrizzato per etichetta**, o ogni regola che vale per un lato solo **porta il lato scritto
+accanto**, e l'intestazione dichiara che il foglio è condiviso.
+
+## 📏 CLASSE 717 — **il documento «da leggere per primo» più STRETTO del criterio congelato che dovrebbe riassumere**
+Il foglio iniettato diceva `>= 1,80`; il file prova congela `>= 1,20`. La banda **1,20-1,79** —
+che nel file prova è *"si replica RIDOTTO"* — **spariva**. E il foglio è quello che l'operatore legge
+**per primo**.
+**Regola**: un riassunto operativo **non ridefinisce le soglie**: le **cita**, col rimando al file che
+le ha congelate.
