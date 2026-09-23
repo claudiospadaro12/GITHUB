@@ -1524,6 +1524,23 @@ def esamina(tipo, percorso):
             passa("la riga di lancio e' ASCII puro")
         except UnicodeEncodeError:
             blocca("ASCII", "la riga di lancio contiene caratteri non-ASCII (emoji?): incollata in PowerShell 5.1 puo' rompersi")
+        # CLASSE 683 (23/09/2026) -- LE VIRGOLETTE DISPARI ACCECANO IL CANCELLO
+        # IN SILENZIO. senza_stringhe() va fuori sincrono e i controlli che
+        # lavorano sul testo NUDO smettono di trovare qualunque cosa: non
+        # dicono "non ce la faccio", semplicemente NON PARLANO.
+        # Misurato sulla riga vera (43.876 byte, 26 assegnazioni a proprieta'):
+        # con " pari il rilievo 519 elenca 19 proprieta'; aggiungendo UNA sola
+        # virgoletta il 519 SPARISCE del tutto. Un PASS con un controllo muto e'
+        # indistinguibile da un PASS vero.
+        nvirg = riga.count('"')
+        if nvirg % 2 == 1:
+            rileva("683", "la riga contiene un numero DISPARI di virgolette doppie ("
+                   + str(nvirg) + "): senza_stringhe() va fuori sincrono e i controlli sul"
+                   " testo nudo possono SPARIRE SENZA DIRLO (misurato: il rilievo 519 passa"
+                   " da 19 proprieta' a zero). Non e' per forza un difetto della riga -- una"
+                   " virgoletta dentro un literal a singole, tipo .Trim('\"'), basta -- ma"
+                   " FINCHE' RESTA DISPARI QUESTO CANCELLO NON E' AFFIDABILE."
+                   " Rimedio: usare [char]34 al posto della virgoletta letterale")
         controlla_riga_lancio(riga)
     elif tipo == "ps1":
         controlla_ascii(percorso, dati)
