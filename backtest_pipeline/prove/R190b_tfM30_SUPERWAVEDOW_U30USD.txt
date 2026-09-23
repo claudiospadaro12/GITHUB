@@ -4,6 +4,29 @@
 #           Asse unico: InpTF (ENUM, due soli membri: M30 e H1).
 #           La cella H1 e' l'ANCORA: deve riprodurre r120e11.
 # =====================================================================
+#  Si lancia con: -Deposito 100000 -Modello 4
+#  >>> RIPARAZIONE DEL 23/09/2026 (R227). QUESTA RIGA MANCAVA, ed e'
+#      PROPRIO IL FILE CHE HA GENERATO LA CLASSE 453 il 19/09
+#      (CHECKLIST_RIGA_DI_LANCIO.md r.25234-25236: la classe nomina
+#      R190b per nome). La classe e' stata SCRITTA e non APPLICATA al
+#      file che l'ha generata: qui si applica.
+#  MOTIVO, col numero e con la fonte:
+#      RIGA_ROUND_VPS.ps1 r.94 e walkforward_generico.ps1 r.200 hanno
+#      [int]$Deposito = 10000. Senza questa riga il round parte a
+#      10.000 e L'ANCORA H1 NON PUO' RIPRODURRE r120e11, perche' su
+#      QUESTA EA il numero di operazioni DIPENDE dal deposito.
+#      MISURATO, stessa cella (InpTrailOnST=1, InpExitOnFlip=1),
+#      stesso simbolo, stessa finestra, stesso modello, letto oggi nei
+#      CSV grezzi di risultati_prove/dal_vps/
+#      ABTG_SuperWave_DOW_H1_Ottimizzato/ :
+#         r120b11 @ 10.000   IS n= 72 PF 1,48166  OOS n=131 PF 1,24312
+#         r120e11 @ 100.000  IS n=106 PF 1,39744  OOS n=184 PF 1,22034
+#      cioe' +47% di operazioni in IS e +40% in OOS SOLO per il banco.
+#      Depositi riverificati con capitale=(Profit/RF)/(DD%/100):
+#      10.426..10.857 sulle celle b, 103.698..106.437 sulle celle e.
+#  >>> E il controllo incrociato della 453 torna: r120e11 OOS fa
+#      +3.454,83 su 100.000 (+3,5%); a 10.000 sarebbe stato ~+345.
+# =====================================================================
 #  DOSSIER: report/LA_VIA_PIU_CORTA_AI_150_2026-09-19.md
 #  ANTENATO: prove/R120e_U30USD_11_vivo_TAGLIA.txt (etichetta r120e11)
 #            CSV: backtest_pipeline/risultati_prove/dal_vps/

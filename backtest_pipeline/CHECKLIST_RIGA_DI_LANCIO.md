@@ -31838,3 +31838,78 @@ qualunque cancella tutti e 38 i round**, compresi i 37 che quel sorgente non lo 
    stato confrontato con i due hash scritti nella riga R221 del 23/09 e **combacia a 64 cifre su
    64 su tutti e due i file**. Un hash atteso calcolato con un metodo non verificato e' un
    cancello che certifica il falso (regola del 10/09).
+
+---
+
+## 🧩🔎 CLASSE 628 — **UN ASSE REALIZZATO COME FATTORIALE SU FILE PROVA SEPARATI e' INVISIBILE al rilevatore che cerca la variazione DENTRO un CSV: due dossier di fila hanno scritto «mai misurata» su una manopola misurata due volte** (R227, 23/09/2026)
+
+**Il caso reale.** `report/LE_MANOPOLE_INERTI_2026-09-23.md` §4.2 dichiara, sulla sedia `770511`
+(`ABTG_SuperWave_DOW_H1_Ottimizzato`, **che sta operando la challenge FTMO**):
+
+| manopola | causa dell'assenza | CSV in archivio | file prova |
+|---|---|---:|---:|
+| `InpTrailOnST` | **mai ad asse** | **0** | 0 |
+| `InpExitOnFlip` | **mai ad asse** | **0** | 0 |
+
+🔴 **Tutte e quattro le caselle sono false.** In repo, al momento di scrivere quel dossier,
+c'erano **sei file prova** su **quell'EA** (`prove/R120b_U30USD_{00_nuda,01_notrail,10_noflip,11_vivo}.txt`
+e `prove/R120e_U30USD_{00_nuda,11_vivo}_TAGLIA.txt`, tutti con `#  EA:
+ABTG_SuperWave_DOW_H1_Ottimizzato` a **r.3**) e **dodici CSV girati a tick reali** in
+`risultati_prove/dal_vps/ABTG_SuperWave_DOW_H1_Ottimizzato/`. E' un **fattoriale 2x2 completo**
+su IS **e** OOS, e da' una risposta netta: `InpTrailOnST` porta l'edge (PF IS 0,903 -> 1,489,
+RF -0,184 -> +1,208, DD 6,04% -> 3,80%), `InpExitOnFlip` col trailing acceso e' **inerte in senso
+stretto** (OOS identico cifra per cifra: `Profit 344,12 · PF 1,24312 · RF 0,77764 · DD 4,1675 ·
+n 131`, su due file con magic diversi).
+
+### Perche' il rilevatore non li vede, ed e' un difetto di FORMA del dato, non del codice
+`manopole_inerti_v2.py` (e prima di lui `censimento_uscite.py`) definisce l'unita' di confronto
+come il **gruppo *ceteris paribus* DENTRO UN CSV**: passate dello stesso file che differiscono
+solo per la manopola in esame. 🔴 **Qui la manopola non varia dentro nessun CSV**: ogni file prova
+la **PINNA** (`InpTrailOnST=false||false||0||false||N`) e l'asse esiste solo **passando da un file
+all'altro**. Per lo strumento quella colonna e' una **costante**, cioe' esattamente cio' che lui
+classifica come «mai ad asse».
+
+### 🔴 E LA PROVA CHE NON E' UNA SVISTA DI UN AGENTE SOLO: e' successo DUE VOLTE, con DUE STRUMENTI DIVERSI
+`report/CELLE_MIGLIORI_GIA_MISURATE_2026-09-21.md` r.325 aveva aperto **gli stessi sei CSV** due
+giorni prima e ne aveva scritto:
+> *«gli assi tecnici di `770511` (`r120b00/01/10/11`, `r120e00/11`) fanno **2 passate e 1 esito** —
+> che li' e' esattamente quello che deve succedere: sono i gemelli sul magic, e il cancello G1 di
+> determinismo e' PASSATO.»*
+
+🟢 **Quella frase e' VERA** (le due righe di ciascun CSV sono i gemelli sul magic). 🔴 **Ma e' la
+lettura DENTRO il file, e si ferma li'.** Nessuno dei due passaggi ha messo **i quattro file in
+colonna**, che e' l'unico posto dove la misura esiste. 👉 **Il 2x2 era visibile da giorni e
+nessuno l'ha letto, mentre due dossier scrivevano che la misura non c'era.**
+
+### Il costo, in cose concrete
+- Il dossier del 23/09 elencava la famiglia d'uscita di `770511` come **«la casella vuota piu'
+  preziosa del repo»** e apriva la domanda *«il Supertrend che segue lo stop sta aiutando o sta
+  tagliando i trade buoni? Oggi non lo sa nessuno»*. **Lo sapeva l'archivio, da giorni.**
+- Proponeva **10 passate** per rimisurare `InpTrailOnST` (4), `InpExitOnFlip` (4) e
+  `InpFirstFraction` (6, questa si' vuota). Otto di quelle passate sarebbero state **tempo macchina
+  speso per riottenere numeri gia' in repo** — sulla sedia che sta giocando la challenge.
+- 👉 E il danno peggiore non e' il tempo: e' che una **manopola INERTE** (`InpExitOnFlip`) stava per
+  essere riproposta come **asse da esplorare**, cioe' come se fosse una leva. Non lo e'.
+
+### La regola
+🔴 **«Mai ad asse» non si dichiara leggendo le colonne di UN CSV alla volta. Si dichiara dopo aver
+raggruppato i CSV PER EA + SIMBOLO + FINESTRA + MODELLO + DEPOSITO e aver guardato se il valore
+cambia FRA i gruppi.** Un fattoriale su file separati e' un asse a tutti gli effetti: e' il modo
+normale di mettere ad asse un **booleano** quando si vogliono i gemelli G1 dentro ogni cella.
+- 🧪 **Il controllo che costa dieci secondi e chiude il caso**: prima di scrivere «0 CSV» su una
+  manopola, `grep` del **nome della manopola** nelle **intestazioni** dei CSV di quell'EA e
+  `sort -u` dei **valori** di quella colonna su tutti i file della cartella. Se i valori distinti
+  sono >= 2, **la manopola e' ad asse**, comunque sia stato realizzato l'asse.
+- 📐 **E il raggruppamento va fatto con il DEPOSITO dentro la chiave** (classe 604): nel caso reale
+  i sei file stavano in **due banchi diversi** (`R120b` a 10.000, `R120e` a 100.000, riverificati
+  con `capitale=(Profit/RF)/(DD%/100)` -> 10.071-10.857 e 103.698-106.437). Metterli in una tabella
+  sola avrebbe prodotto un confronto falso: su quell'EA il banco cambia `n` del **+40/+47%**.
+- 🚫 **E vale anche al contrario, che e' il verso piu' pericoloso**: se un rilevatore dice
+  «inerte» perche' un CSV ha esiti ripetuti, prima di crederci si guarda **se quelle passate sono
+  i gemelli tecnici sul magic** — li' l'esito identico e' il **cancello G1 che PASSA**, non uno
+  spreco (e' la stessa distinzione che il dossier del 23/09 fa bene al §3.1, e che qui si applica
+  nell'altra direzione).
+- 📋 **Conseguenza per gli strumenti di casa**: finche' `manopole_inerti_v2.py` e
+  `censimento_uscite.py` ragionano per singolo CSV, **il loro «mai ad asse» e' un limite
+  superiore, non una misura** — e va citato con quelle parole, come il `247` della classe sul
+  censimento delle uscite.
