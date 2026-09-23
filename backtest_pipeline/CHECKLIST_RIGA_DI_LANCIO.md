@@ -33518,3 +33518,127 @@ perfetto.
 `CLASSE 661` (ex 657-A) porta la nota di rinumerazione; il blocco `657-660` di R236 e'
 rimasto com'era. Costo della collisione: **una modifica invece di quattro**, piu' questa
 classe.
+
+---
+
+## 🪑🔢 CLASSE 663 — **IL CANCELLO SULL'`n` E' DEDOTTO DA UN SOLO RAMO DI RIFIUTO, MENTRE L'EA TIENE UNA POSIZIONE ALLA VOLTA: allargare lo stop allarga il TP, allunga le gambe e fa CALARE `n` senza che nessuna lettura del codice sia sbagliata** (controllo-preventivo, 23/09/2026, su `R236a...f`)
+
+**Numero assegnato dal COORDINATORE** (classe 662): l'ultima classe a HEAD era la **662**;
+`grep -c "CLASSE 663"` -> **0** al momento di scrivere.
+
+### Il fatto
+`R236a/b` congelava in `T3` una soglia di **monotonia crescente** dell'`n` lungo l'asse del
+buffer, deducendola da UN solo ramo: `minDist = MathMax(buf, STOPS_LEVEL*_Point)` (r.394),
+che dalla seconda cella in poi azzera il rifiuto *"SL troppo vicino"* (`cO_sl`) e quindi fa
+**salire** `n`. 🔴 **Ma c'e' un secondo ramo, di segno opposto, e non era nominato**: r.314
+`if(HasPosition()){ ... return; }` -- **l'EA tiene UNA POSIZIONE ALLA VOLTA**. Allargare lo
+stop allarga anche il TP (r.396 `tp = entry +- risk*InpTP_RR`) **e** il TP1 (r.466
+`risk*InpTP1_R`): fra la prima e la quinta cella il bersaglio passa da **98,5 a 163,5
+punti**, le gambe **durano di piu'**, l'occupazione cresce e **`n` puo' CALARE**.
+🔴 E `R236c/d` scriveva la conclusione sbagliata per esteso: *"se l'n CALA di oltre 2, la mia
+lettura del codice e' sbagliata e il file va riletto"* -> si sarebbe buttato un round valido
+attribuendo il calo a un errore **che non c'e'**.
+
+### Il rovescio, nello stesso round
+`R236e/f` (asse = finestra oraria) aveva il **punto cieco speculare**: *"un rapporto SOPRA
+1,00 non puo' succedere -- un filtro puo' solo togliere candidate"*. 🔴 **Puo' succedere**:
+una gamba **notturna OCCUPA** il motore e gli impedisce di entrare nelle ore americane;
+spegnere la notte **LIBERA LO SLOT** e **crea** ingressi diurni che prima non esistevano. Il
+filtro **non produce un sottoinsieme**. E la soglia avrebbe mandato a cercare un errore
+inesistente.
+
+### La regola
+1. 🔢 **Prima di congelare una soglia di monotonia sull'`n`, si elencano TUTTI i rami che
+   possono rifiutare o CREARE un ingresso.** L'occupazione (`HasPosition()`) e' un ramo, e
+   risponde alla **DURATA** della gamba, non alla manopola.
+2. ⚖️ **Se due rami hanno segno opposto, NON si congela una soglia: si congela QUALE
+   CONTATORE si va a leggere.** Qui: `cO_sl -> 0` con `cB_occupata` in crescita = atteso, il
+   round si legge; `cO_sl` che NON va a zero = allora si', la lettura del codice e' sbagliata.
+3. 🚫 **E un filtro non produce mai automaticamente un sottoinsieme** quando l'EA ha uno
+   slot unico: il rapporto fra gli `n` e' un **SALDO** fra candidate tolte e slot liberati,
+   non un costo in campione.
+
+---
+
+## 📢🕳️ CLASSE 664 — **IL FILE DICHIARA `[NON MISURATO]` UNA GRANDEZZA CHE LA CORSA CHE STA PER LANCIARE STAMPA GIA', E PROPONE DI ASPETTARE MESI DI FORWARD PER AVERLA** (controllo-preventivo, 23/09/2026, su `R236a/b`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 664"` -> **0** al momento di scrivere.
+
+### Il fatto
+`R236a/b` poggia su una **base dello stop** che dichiara `[MIS ma INSTABILE]` con **tre
+letture** (27,07 / 39,37 / 51,62) e **tre verdetti diversi** sul cancello del costo (0, 1 o 3
+celle sopra il 40x). Il file chiudeva cosi': *"il referto dovra' riportare la riga giusta
+guardando il DD e il lotto reali"* — cioe' **si sceglie la colonna DOPO aver visto i numeri**,
+per quanto onesta sia l'intenzione. E come via per uscirne raccomandava di **contare i TP1 nel
+forward**, stimando **~20-25 gambe**, cioe' **mesi**.
+🟢 **Ma la misura era dentro il round**: r.422-423 l'EA stampa a OGNI ingresso
+`"... mercato %.2f lot @ <entry> SL <sl> TP <tp>"`, cioe' **la distanza di stop INIZIALE di
+ogni operazione**, e per giunta **sull'ancora di quel file**, non su quella importata dalla
+sedia viva. **24-37 letture per tranche, subito.**
+
+### La regola
+1. 🔎 **Prima di scrivere `[NON MISURATO]` accanto a una grandezza, si cerca se l'EA la
+   STAMPA GIA'** (`grep` dei `Print`/`FileWrite` del sorgente) **e se la corsa in preventivo
+   la produce.**
+2. 🔒 **Se la produce, la misura diventa un CANCELLO CONGELATO** (qui `T7`: la mediana di
+   `|SL - entry|` letta dal test singolo E' la base del file, e la tabella del costo si
+   ricompila su quella), **non una raccomandazione per il futuro**.
+3. 🚫 **E' VIETATO scegliere fra piu' colonne guardando i risultati a posteriori.** Tre
+   colonne con tre verdetti **non sono una misura con un'incertezza: sono un menu'.**
+4. ⚠️ **Se il canale e' `Print()`, vale la CLASSE 526**: in ottimizzazione non viene
+   eseguito, e serve la **FASE 1** a test singolo (`Optimization=0`) per leggerlo.
+
+---
+
+## ➕📉 CLASSE 665 — **«LA MANOPOLA COMPRIME LA DISPERSIONE» QUANDO LA MANOPOLA E' UNA TRASLAZIONE: `max/min` scende SEMPRE sommando una costante, e il beneficio viene attribuito alla grandezza sbagliata** (controllo-preventivo, 23/09/2026, su `R236a/b`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 665"` -> **0** al momento di scrivere.
+
+### Il fatto
+`R236a/b` presentava come **"effetto collaterale BUONO e mai notato prima"** il fatto che,
+aggiungendo 26,03 idx di buffer, la banda degli stop `9,70-151,90` diventa `35,73-177,93` e
+il rapporto `max/min` scende da **15,7 a 5,0**. 🟢 L'aritmetica e' giusta. 🔴 **Ma non e' una
+scoperta sul buffer**: sommare una **costante positiva** a una **distribuzione positiva**
+abbassa **SEMPRE** `max/min` verso 1 — qualunque costante, qualunque distribuzione, **anche
+una manopola inutile**. E' un'**identita' della traslazione**.
+🔴 **E il beneficio era attribuito alla grandezza sbagliata**: a rischio fisso 1%
+(`LotByRisk` r.543-546) il **rischio in EUR per operazione e' GIA' identico su ogni gamba**.
+Non c'era niente da rendere "piu' prevedibile": era costante per costruzione.
+🟢 **Cio' che si comprime davvero, e quello si': il PEDAGGIO in R** (`spread/stop`), da
+`2,40/9,70 = 0,247 R` a `2,40/35,73 = 0,067 R` sulla gamba peggiore.
+
+### La regola
+1. 📐 **Un indice di dispersione RELATIVO (`max/min`, CV) non e' invariante per
+   traslazione**: sommare una costante lo abbassa sempre. Citarlo come effetto di una
+   manopola additiva e' una **tautologia**.
+2. 🎯 **Prima di chiamare "beneficio" una compressione, si dice QUALE GRANDEZZA il conto
+   tiene gia' costante.** Qui il rischio in EUR era fissato dal dimensionamento.
+3. ✅ **E si nomina la grandezza che cambia davvero, col suo numero.**
+
+---
+
+## 📏👥 CLASSE 666 — **IL `40x` SI APPLICA A UNA MEDIANA, MA IL COSTO SI PAGA OPERAZIONE PER OPERAZIONE: «la cella passa il 40x» vuol dire «la gamba MEDIANA lo passa», MAI «tutte lo passano»** (controllo-preventivo, 23/09/2026, su `R236a/b`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 666"` -> **0** al momento di scrivere.
+🟢 **Confermata NUOVA**: `grep` di `"gamba mediana"`, `"tutte lo passano"`, `"per operazione"`
+-> **0 occorrenze**. Le classi **285/286** parlano di *mediana contro media* e di *mediana
+contro coda*, **non** di questo.
+
+### Il fatto
+Tutta la flotta compila la frontiera `stop >= 40 x spread` su **una statistica di sintesi**
+(la mediana degli stop, o la mediana degli spread). 🔴 **Ma il pedaggio non si paga sulla
+mediana: si paga su OGNI operazione.** Su `970913` NASUSD la banda degli stop misurati va da
+**9,70 a 151,90** (rapporto **15,7**): anche nella cella piu' larga dell'asse, **le gambe
+strette restano sotto la frontiera**.
+🔴 **E il dato di casa che lo conferma era gia' scritto**:
+`report/STOP_VS_SPREAD_FTMO_2026-09-20.md` r.249 misura `770260` US100 con **167 gambe su 447
+= 37,4% sotto la frontiera**, pur avendo una **mediana di 50,5x**. Una sedia "che passa" paga
+**oltre un terzo** delle sue operazioni sopra il pedaggio ammesso.
+
+### La regola
+1. 🧾 **Accanto a un verdetto `40x` si scrive SU QUALE STATISTICA e' calcolato** — mediana,
+   media, p25 — **e QUALE FRAZIONE della distribuzione resta sotto la frontiera.**
+2. 🗣️ **La frase corretta e' «la gamba mediana passa il 40x», mai «la cella passa il 40x»**,
+   che suona come "tutte".
+3. 📉 **Se la frazione sotto frontiera non e' calcolabile, si dichiara `[NON MISURATO]`** e
+   il verdetto resta una mediana, non una promessa.
