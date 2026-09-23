@@ -30849,3 +30849,43 @@ Rapporto dei profitti fra la corsa a 100k e quella a 10k, **a parita' di tutto i
    non **sbagliando meno**. Il merito lo decide il **RF**. Se un file toglie il pavimento sul Profit
    citando questo argomento (giusto) ma tiene il DD come *"cancello di merito"* (sbagliato), sta
    usando l'argomento **una volta sola, nella direzione che gli conviene**.
+
+
+---
+
+## CLASSE 605 -- 🔍🎭 LA RICERCA PER NOME CHE USA IL PREFISSO **VECCHIO**: sul terminale FTMO gli EA sono stati rinominati `ABTG_*` -> `CLAU12_*`, e una riga che cerca solo `ABTG_` li dichiara ASSENTI -- **col rimedio gia' scritto in repo e mai applicato** (23/09/2026)
+
+**Il caso reale.** La riga di sola lettura sui binari di `C:\FTMO` (eseguita da Claudio il
+23/09 alle 06:52) stampa, nella sezione dei `.chr`, **"nessun nome ABTG leggibile"** su nove
+file su ventuno, e negli altri elenca **solo indicatori** (`ABTG_LOOK_*`, `abtg_news`).
+🔴 **Nessuna delle sei sedie compare. E nemmeno il Guardian.**
+
+🟢 **Ma il Guardian STA GIRANDO**, e lo dimostra la sezione dei giornali della stessa riga:
+`[GUARDIAN] eq=78242.32` **ogni cinque minuti**, l'ultimo alle 06:50 di quel giorno. Le due
+sezioni si contraddicono, e ha ragione quella dei giornali.
+
+**La causa, in una riga**: il pattern e' `ABTG_[A-Za-z0-9_]+`, e in campo l'EA si chiama
+**`CLAU12_Guardian`**. `backtest_pipeline/righe/RINOMINA_CLAU12.ps1` (r.129-135) rinomina
+**tutti e sette** gli EA del terminale FTMO da `ABTG_*` a `CLAU12_*`.
+
+🔴 **E la parte che brucia**: lo stesso script, alla **riga 83**, lo scrive gia':
+*"VA CAMBIATA LA REGEX IN CODA_02 (ABTG_|CLAU12_) PRIMA DELLA..."*. **Il repo conosceva il
+rimedio, per un altro strumento, e nessuno l'ha portato sulla riga nuova.** E' la regola del
+10/09 (*"prima si cerca il file che ha gia' la risposta"*) mancata su un file che **nomina il
+problema nel suo stesso commento**.
+
+### La regola
+1. 🔎 **Un nome non e' un identificatore stabile.** Prima di cercare per prefisso, si
+   controlla se esiste una **rinomina** in repo (`grep -ril "Rename-Item\|Nuovo=\|prefisso"`).
+   Sul terminale FTMO il prefisso vero e' **`CLAU12_`**, e il pattern giusto e'
+   `(ABTG_|CLAU12_)[A-Za-z0-9_]+`.
+2. 🛑 **Un'assenza trovata cercando per nome non e' un'assenza**, finche' non si e'
+   dimostrato che il nome cercato e' quello in uso. Il testo stampato deve dire **quale
+   pattern** ha usato, cosi' chi legge puo' accorgersene.
+3. 🧪 **Il contro-esempio esiste dentro lo stesso output**: se una sezione dice "assente"
+   e un'altra dimostra che sta girando, **vince quella che ha visto il fatto**, e la prima e'
+   rotta. Una riga che stampa due sezioni in contraddizione **ha gia' il suo test**: basta
+   leggerle insieme.
+4. 📌 **E vale al contrario per chi scrive gli avvisi**: la riga diceva gia' che i `.chr`
+   sono *"i nomi SALVATI, non la verita' viva"* -- un avviso **giusto ma sulla causa
+   sbagliata**, che ha reso il difetto invisibile perche' l'assenza sembrava gia' spiegata.
