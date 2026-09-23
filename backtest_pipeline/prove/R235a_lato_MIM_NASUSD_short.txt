@@ -35,22 +35,58 @@
 #        e il cancello crociato -- NON "scopriamo i lati".
 #        Sui due file U30USD il guadagno e' tutto.
 #
-#  ONESTA' N.2 -- QUESTO MOTORE E' GIA' STATO BOCCIATO SU NASUSD
-#    R98, VERDETTO 0/6, BOCCIATO, cancello zero S0 dichiarato
-#    "matematicamente impossibile da superare": risultato medio per
-#    operazione -0,31 punti indice su 410 operazioni, GIA' al netto
-#    dello spread (R98_REFERTO.md, sezione "I gate, prima dei numeri").
-#    La regola del 19/08 vieta di allargare sui PARAMETRI di un motore
-#    dichiarato senza edge.
-#    >>> Perche' questo round e' ammesso lo stesso: il LATO non e' un
-#        parametro d'ingresso, e' la DECOMPOSIZIONE del motore. Non
-#        cerca una cella piu' verde: conta le operazioni delle due meta'
-#        e verifica un'identita' aritmetica. L'asse ha DUE celle e una
-#        delle due E' la cella gia' misurata.
-#    >>> E il cancello T5 lo mette per iscritto: da questo round NON
-#        esce nessuna promozione. R52 vieta di spegnere un lato
-#        guardando i risultati, e R98_REFERTO.md r.54 lo ripete su
-#        QUESTO stesso motore. Qui si DICHIARA, non si sceglie.
+#  ONESTA' N.2 -- I DUE ATTI D'ACCUSA CONTRO QUESTO ROUND, CITATI DA ME
+#    Li scrivo io adesso invece di lasciare che qualcuno li ritrovi fra
+#    sei mesi. Sono due, per nome e per riga.
+#      ACCUSA 1 -- R98 (23/08/2026), VERDETTO 0/6, BOCCIATO su NASUSD,
+#        cancello zero S0 dichiarato "matematicamente impossibile da
+#        superare": risultato medio per operazione -0,31 punti indice
+#        su 410 operazioni, GIA' al netto dello spread
+#        (R98_REFERTO.md, sezione "I gate, prima dei numeri").
+#      ACCUSA 2 -- report/SWEEP_MECCANISMI_2026-08-23.md r.421, voce S5,
+#        TESTUALE: "Spostare lo stesso motore sul Dow e' 'parametri
+#        diversi di un motore morto' con un simbolo al posto di un
+#        parametro. Se qualcuno lo vuole riaprire, deve prima portare
+#        una RAGIONE ECONOMICA per cui il Dow sia diverso -- e io non
+#        ce l'ho."
+#        >>> R235c e R235d SONO quel porting sul Dow. L'accusa colpisce
+#            questo file, non un file altrui.
+#
+#    E ORA LE TRE RISPOSTE, che non sono una definizione ma tre fatti.
+#      RISPOSTA A -- LA RAGIONE ECONOMICA CHE S5 CHIEDEVA ESISTE, ED E'
+#        GIA' SCRITTA IN CASA: prove/R141b_momentum_U30USD_gemello.txt
+#        r.22-28, testuale: "il paper e' su SPY (S&P 500). Il Dow e il
+#        Nasdaq sono i due indici USA che abbiamo, e sono DIVERSI fra
+#        loro (30 titoli industriali contro 100 tecnologici). Se il
+#        momentum di fine seduta e' un fatto della CAMPANELLA USA deve
+#        vedersi su entrambi; se si vede solo su uno, e' un fatto del
+#        sottostante e va scritto cosi'." Chi ha scritto S5 diceva "io
+#        non ce l'ho": tre settimane dopo qualcun altro ce l'aveva.
+#      RISPOSTA B -- FRA R98 E OGGI C'E' R141, E HA CAMBIATO LO STATO
+#        AGLI ATTI. REGISTRO_TEST.md r.3117 registra
+#        ABTG_IntradayMomentum come "NON ANCORA MISURATO", non come
+#        morto; r.3516-3517 registra r141a e r141b come "NON
+#        GIUDICABILE -- IS a 4 operazioni dal pavimento". Quindi R235
+#        CONTINUA R141 su un motore il cui stato ufficiale e' "non
+#        ancora misurato": NON riapre R98.
+#      RISPOSTA C -- E NON NASCONDO IL PUNTO DEBOLE: InpAllowLong e
+#        InpAllowShort SONO due "input bool" (r.143-144), e R98 quelle
+#        due celle pure le ha GIA' girate. Chiamare il lato "non un
+#        parametro ma una decomposizione" sarebbe una definizione
+#        comoda, e una definizione non e' un argomento. Percio' la
+#        sostituisco con una cosa che si puo' FALSIFICARE:
+#            n(long puro) + n(short puro) = n(L+S)
+#        e' un'IDENTITA' prevista dal codice (MIM_Direzione r.272-273:
+#        il flag azzera e non ribalta; piu' al massimo 1 trade al
+#        giorno), quindi il round o la verifica o la rompe. Sta come
+#        cancello T1bis qui sotto, NON come premessa di ammissibilita'.
+#    >>> COME VA REGISTRATO L'ESITO, deciso ora: lo stato dell'EA agli
+#        atti resta quello di oggi ("NON ANCORA MISURATO"). Questo round
+#        NON promuove e NON archivia: AGGIUNGE il n PER LATO, che oggi
+#        non esiste da nessuna parte. Nient'altro.
+#    >>> E il cancello T5 lo mette per iscritto. R52 vieta di spegnere
+#        un lato guardando i risultati, e R98_REFERTO.md r.54 lo ripete
+#        su QUESTO stesso motore. Qui si DICHIARA, non si sceglie.
 #
 #  CHE COSA HO RIVERIFICATO IO NEL SORGENTE (23/09/2026)
 #    A) UNA SOLA OPERAZIONE AL GIORNO, PER COSTRUZIONE. Confermato:
@@ -106,9 +142,19 @@
 #      U30USD_OOS_r141b). Asse di quel round: InpUseSecondSignal.
 #    CON QUALI VALORI DI LATO SONO GIRATE: InpAllowLong=1 e
 #      InpAllowShort=1 in TUTTE E OTTO. Contato colonna per colonna.
-#      >>> Il lato non ha mai mosso in archivio: 8 passate, 1 solo
+#      >>> Il lato non ha mai mosso NEI CSV IN REPO: 8 passate, 1 solo
 #          valore della coppia. E' una MANOPOLA INERTE nel senso del
-#          censimento del 09/09 -- casella LIBERA, non casella provata.
+#          censimento del 09/09.
+#      >>> [!] MA "INERTE NEI CSV" NON VUOL DIRE "MAI PROVATA", e la
+#          differenza cambia il simbolo:
+#            NASUSD -> casella PROVATA, non libera. R98 ha girato le due
+#              celle pure (R98diagNoLong / R98diagNoShort) e i P/L
+#              stanno nel referto. Cio' che manca e' il CONTEGGIO: il n
+#              per lato non e' stato riportato, e i CSV grezzi di R98
+#              non sono in repo. Il buco qui e' IL NUMERO DI
+#              OPERAZIONI, non la misura.
+#            U30USD -> casella LIBERA davvero. Zero passate, nessun
+#              P/L, nessun n.
 #    R141 (tick reali, deposito 100000, InpRiskPercent 0.65,
 #    @PERIODO M30, finestra 2024.09.26-2026.06.30, split 0.40):
 #      NASUSD cella nuda (r12 spento):
@@ -178,10 +224,46 @@
 #               dentro l'ora 20. La riporto lo stesso, perche' un numero
 #               che mi conviene tacere e' esattamente quello da scrivere.
 #
-#    >>> VERDETTO DEL COSTO: PASSA. E l'ho provato a ROMPERE, non a
-#        confermare. Quattro letture DIFENDIBILI (due ancore x mediana e
-#        p95 dell'ora 20): la PEGGIORE fa 50.3x contro i 40x richiesti
-#        (+26%). Nessuna delle quattro scende sotto la frontiera.
+#    >>> [!] LA QUINTA LETTURA, ED E' QUELLA CHE MORDE DAVVERO.
+#        Le quattro righe sopra variano l'ANCORA e il LIVELLO dello
+#        spread. NESSUNA varia la DISTRIBUZIONE dei range giornalieri --
+#        ed e' quella a mordere, perche' lo stop e' 2,0 x ATR(M30) e
+#        l'ATR CROLLA nelle giornate quiete mentre lo spread NO. Quattro
+#        letture che si muovono tutte sull'asse sbagliato sono una
+#        conferma travestita, non una prova di robustezza.
+#        I numeri esistono gia' in casa e non li avevo usati:
+#        prove/R141b_momentum_U30USD_gemello.txt r.44-58.
+#          GIORNATA AL p25 DEL RANGE (range giornaliero [MISURATO]):
+#            U30USD p25 172,0 idx -> ATR(M30) 24,8 -> stop 49,7
+#                   -> 49,7 / 1,90 = 26,1x   NON PASSA il 40x
+#                                            PASSA il duro 13,3x
+#            NASUSD p25 239,4 idx -> ATR(M30) 34,6 -> stop 69,1
+#                   -> 69,1 / 1,70 = 40,6x   sul pavimento esatto
+#          FRAZIONE DELLE OPERAZIONI SOTTO IL PAVIMENTO DI LAVORO 40x:
+#            [NON MISURATO] -- il p25 sta SOPRA il pavimento,
+#        quindi la frazione sotto 40x e' minore del 25%, ma quanto non lo so
+#          >>> E' L'UNICO NUMERO CHE SEPARA I DUE SIMBOLI, e va detto:
+#              su NASUSD anche il giorno quieto resta al pavimento, su
+#              U30USD scende a 26,1x. R141b lo scriveva gia' come
+#              motivo per cui NASUSD va primo e U30USD secondo.
+#    >>> VERDETTO DEL COSTO: PASSA -- e adesso si puo' dire perche'.
+#        Quattro letture DIFENDIBILI sul LIVELLO (due ancore x mediana e
+#        p95 dell'ora 20): la peggiore fa 50.3x contro i 40x richiesti
+#        (+26%), nessuna scende sotto la frontiera. La quinta
+#        lettura, sulla DISTRIBUZIONE, sfonda il 40x su U30USD nel
+#        quartile quieto ma NON sfonda il duro 13,3x, e per farlo
+#        servirebbe un range giornaliero sotto 102 idx contro un p25
+#        misurato di 172,0.
+#        Il 40x e' un pavimento di LAVORO misurato SULLA MEDIANA: una
+#        coda che lo buca non boccia il motore, il duro 13,3x non e' in
+#        discussione su nessuno dei due simboli. Percio' T2 resta PASSA.
+#        >>> [!] MA QUESTA RIGA VA RILETTA DAL REFERTO DI MERITO, e lo
+#            prescrivo ora: se una cella di questo round uscisse
+#            positiva, almeno un quarto delle sue operazioni su U30USD
+#            e' stata fatta sotto il pavimento di lavoro, e il suo
+#            risultato e' quindi PIU' FRAGILE allo slippage di quanto la
+#            riga della mediana lasci credere. Non e' una nota a pie' di
+#            pagina: e' una condizione di lettura.
 #    >>> DOVE SI ROMPE, detto col numero: sotto med24 E con l'ancora
 #        troncata insieme, il rapporto scende a 37.7x, cioe' SOTTO 40.
 #        Perche' non e' un verdetto di bocciatura: perche' pretende DUE
@@ -260,7 +342,8 @@
 #      TRIANGOLATO su NASUSD fra due corse indipendenti --
 #        R141 OOS DD 3,0300% a rischio 0,65 x (1/0,65) = 4,66%
 #        R98  OOS DD 4,7%     a rischio 1,00   MISURATO
-#        scarto 0,9%. E i PF: R141 0,60887/1,24334 contro R98 0,60/1,24.
+#        scarto 0,04 PUNTI di DD (0,9% in relativo). E i PF: R141
+#        0,60887/1,24334 contro R98 0,60/1,24.
 #      >>> Quindi l'attesa di DD per la cella L+S a rischio 1,00 e':
 #          NASUSD IS ~11.94% | OOS ~4.66%
 #      >>> [!] ATTESA DI SFORAMENTO DI T3, DICHIARATA PRIMA: la cella L+S
@@ -320,21 +403,45 @@
 #            n(short)/n(long) dovrebbe valere 987/7.688 = 0,128
 #        cioe' n(long) = 232 e n(short) = 29 su 261. Vorrebbe dire
 #        r1 > 0 in NOVE giornate su dieci.
+#    >>> PRIMA IL CAMBIO DI UNITA', perche' due unita' diverse per la
+#        stessa attesa sono il modo classico di lasciarsi una scappatoia.
+#        La mia attesa e' scritta sopra come RIPARTIZIONE: 52-60% long.
+#        Tradotta in rapporto R = n(short)/n(long) = (1-p)/p:
+#            p = 0,60 -> R = 0,667     p = 0,52 -> R = 0,923
+#        quindi la banda attesa e' R = 0,667-0,923, NON "0,75-0,95"
+#        come una stesura precedente di questo file scriveva. Fra 0,667
+#        e 0,750 c'era un buco che conteneva R = 0,70 (cioe' 58,8%
+#        long), un esito DENTRO la mia attesa dichiarata e FUORI dalla
+#        banda del test: esattamente il caso che dopo mi sarei
+#        raccontato come volevo. Chiuso.
 #    >>> ED ECCO IL TEST, che questo round esegue per la prima volta
-#        perche' per la prima volta MISURA il n per lato:
-#          - se esce n(short)/n(long) intorno a 0,12 -> LA DERIVA
-#            SPIEGA TUTTO, non c'e' nessun lato migliore, e la mia
-#            attesa di ripartizione 52-60% e' SBAGLIATA. Lo scrivo qui
-#            prima, cosi' non posso rinnegarlo dopo.
-#          - se esce intorno a 0,75-0,95 (cioe' la ripartizione che mi
-#            aspetto) -> LA DERIVA NON BASTA. Con n(long)=140 e
-#            n(short)=121, la deriva pura predirebbe per lo short
-#            -7.688 x (121/140) = -6.645, mentre il MISURATO e' -987:
-#            lo short perde SEI VOLTE E MEZZA MENO di quanto la deriva
-#            imponga. Tradotto: sarebbe LO SHORT ad avere il segnale
-#            per operazione migliore, non il long. Che e' l'ESATTO
-#            CONTRARIO della lettura comoda "gli short perdono ovunque,
-#            teniamo i long".
+#        perche' per la prima volta MISURA il n per lato. TRE rami, e
+#        coprono TUTTO l'intervallo di R senza buchi:
+#          RAMO 1 -- R intorno a 0,13 (banda 0,00-0,12):
+#            LA DERIVA SPIEGA TUTTO, non c'e' nessun lato migliore, e
+#            la mia attesa di ripartizione 52-60% e' SBAGLIATA. Lo
+#            scrivo qui prima, cosi' non posso rinnegarlo dopo.
+#          RAMO 2 -- R fra 0,13 e 0,666 (TERRA DI MEZZO, e va
+#            dichiarata perche' e' l'intervallo piu' largo dei tre):
+#            la deriva spiega una PARTE e non tutto. Il numero da
+#            scrivere nel referto NON e' "si" o "no" ma la FRAZIONE
+#            SPIEGATA = R / 0,128. Esempio: R = 0,40 -> la deriva
+#            spiega 3,1 volte piu' perdita di quella osservata, cioe'
+#            resta un residuo a favore dello short ma piu' piccolo di
+#            quello del ramo 3. Si riporta la frazione, non un verdetto.
+#          RAMO 3 -- R fra 0,667 e 0,923 (la ripartizione che mi
+#            aspetto): LA DERIVA NON BASTA. Con n(long)=140 e
+#            n(short)=121 (R = 0,864), la deriva pura predirebbe per lo
+#            short -7.688 x (121/140) = -6.645, mentre il MISURATO e'
+#            -987: lo short perde SEI VOLTE E MEZZA MENO di quanto la
+#            deriva imponga. Tradotto: sarebbe LO SHORT ad avere il
+#            segnale per operazione migliore, non il long. Che e'
+#            l'ESATTO CONTRARIO della lettura comoda "gli short perdono
+#            ovunque, teniamo i long".
+#          RAMO 4 -- R > 0,923: piu' short che long di quanto il regime
+#            rialzista consenta. Non me lo aspetto; se esce, e' la mia
+#            lettura del meccanismo B2 (il gap dentro r1) a essere
+#            sbagliata, e va riscritta.
 #    >>> PERCHE' QUESTO E' UN CONTRO-ESEMPIO E NON UN'ALTRA CONFERMA:
 #        perche' il round puo' uscire in tutti e due i modi, i due modi
 #        portano a conclusioni OPPOSTE, e sono scritti qui PRIMA. Se
@@ -365,6 +472,25 @@
 #            L+S deve dare n IS = 146 e n OOS = 261, gli stessi di
 #            R141 su questo simbolo. Il n NON dipende dal rischio,
 #            quindi il cambio 0,65 -> 1,00 non lo scusa.
+#        [!] E COSA SUCCEDE SE L'ANCORA ESTERNA NON TORNA MA T1
+#            CROCIATO E' PASSATO -- deciso ORA, per non deciderlo dopo
+#            guardando i numeri. NON e' un guasto e il round NON si
+#            annulla. T1 crociato PASSATO dice che il banco e'
+#            deterministico; se allora n(L+S) non fa 146/261, l'unica
+#            differenza rimasta contro R141 e' @PERIODO, e la
+#            conclusione e' che IL TF DEL GRAFICO SPOSTA IL n. Che e'
+#            la spiegazione gia' proposta per la discrepanza
+#            146/148/149: uscirebbe CONFERMATA, ed e' un RISULTATO del
+#            round, non un suo fallimento. Va scritto nel referto come
+#            misura, e chiude un buco dichiarato piu' sotto.
+#        >>> GLI UNICI DUE ESITI CHE ANNULLANO IL ROUND sono: T1
+#            crociato KO (le due L+S non coincidono) oppure additivita'
+#            SUPER-ADDITIVA. Nient'altro.
+#    T1bis ADDITIVITA', ed e' l'identita' su cui poggia l'ammissibilita'
+#        del round (ONESTA' N.2, risposta C): n(long puro) + n(short
+#        puro) = n(L+S), in tutte e due le gambe. Prevista dal codice,
+#        quindi verificabile e rompibile. Sub-additivo: si indaga.
+#        Super-additivo: il round e' nullo.
 #    T2  COSTO. Frontiera stop >= 40 x spread. Su questo simbolo la
 #        tabella sopra dice PASSA in tutti e quattro gli angoli
 #        (peggiore 50.3x). Se per qualunque ragione una cella uscisse
@@ -410,6 +536,10 @@
 #      rapporto n(short)/n(long) che oggi NON esiste come numero:
 #      questo round lo produce, e fino ad allora la mia attesa
 #      "52-60% long" e' un'INFERENZA dal regime, non una misura.
+#    - LA CODA QUIETA DEL COSTO: su U30USD almeno il 25% delle giornate
+#      sta sotto il pavimento di lavoro 40x (quinta lettura). Su NASUSD
+#      la frazione e' [NON MISURATO]. Nessuno dei due sfonda il duro
+#      13,3x.
 #    - ATR(M30) DI QUESTI DUE SIMBOLI: [DERIVATO], mai letto
 #      direttamente. Viene da ADR x sqrt(T/1440) con residuo -1%
 #      validato SU UN SOLO simbolo (U30USD, a H1). Il verso dell'errore
@@ -472,9 +602,13 @@
 #         l'unica cosa che rende possibile l'ancoraggio esterno del
 #         cancello T1 (n IS 146 / n OOS 261).
 #      4. ARITMETICA DELLE BARRE, che e' la ragione per cui NON scelgo
-#         M5: 642 giorni x 288 barre = ~184.900 barre M5, cioe' SOPRA
-#         il tetto delle ~100.000 barre del tester. A M30 sono
-#         642 x 48 = ~30.800 barre, comodamente sotto. R98 girava a M5
+#         M5: 459 giorni FERIALI x 288 barre = ~132.200 barre M5 (col
+#         calendario nudo, 642 giorni, farebbero ~184.900). In TUTTI E
+#         DUE i casi si e' SOPRA il tetto delle ~100.000 barre del
+#         tester -- e uso il conto sui feriali perche' e' quello onesto
+#         ed e' gia' contato in questo file. A M30 sono 459 x 48 =
+#         ~22.000 barre (col calendario 642 x 48 = ~30.800), sotto il
+#         tetto in tutti e due i conti. R98 girava a M5
 #         ed e' l'unica corsa con un n IS diverso: NON dico che sia la
 #         causa (sarebbe un'inferenza, e il verso non torna), ma e' una
 #         ragione sufficiente per non ripetere quella scelta.
