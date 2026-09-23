@@ -1,0 +1,323 @@
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+#  R236d -- L'ASSE E' LO SWING DELLO STOP. InpSLLookback, long puro,
+#           NASUSD H1, **BANCO OHLC**.
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+#  ASCII PURO: nessun byte > 127 (verificato prima della consegna).
+# ==========================================================================
+#
+#  Gemello: R236c (l'altro lato). Regola dei due lati sugli indici,
+#  firmata da Claudio il 25/08/2026.
+#
+# --------------------------------------------------------------------------
+#  1. A CHE DOMANDA RISPONDE -- UNA SOLA, ED E' DI GEOMETRIA
+# --------------------------------------------------------------------------
+#  Lo stop di questo EA e' il PIU' PROTETTIVO fra la linea Supertrend e
+#  l'estremo delle ultime N barre, piu' un buffer (r.386-389):
+#
+#    ext = isLong ? minimo(low, N barre) : massimo(high, N barre)
+#    buf = InpSLBufferPips * pip
+#    sl  = isLong ? MathMin(stLine, ext) - buf
+#                 : MathMax(stLine, ext) + buf
+#
+#  InpSLLookback agisce SOLO attraverso `ext`, cioe' DENTRO il MathMin /
+#  MathMax. `stLine` non dipende da N.
+#
+#  >>> LA DOMANDA: `ext(N)` batte mai `stLine`?
+#      Se la linea Supertrend vince quasi sempre il confronto, allora
+#      InpSLLookback e' una MANOPOLA INERTE su questo motore e questo
+#      simbolo, e va scritto -- perche' oggi in casa risulta "mai provata",
+#      che e' una cosa diversa da "non funziona".
+#      Verificato da me: su 137 CSV d'archivio che portano la colonna
+#      InpSLLookback il valore distinto e' UNO SOLO, 5. Mai messa ad asse.
+#
+# --------------------------------------------------------------------------
+#  2. PERCHE' IN OHLC, E PERCHE' NON E' UNA SCORCIATOIA
+# --------------------------------------------------------------------------
+#  Il collocamento dello stop si calcola da `iLow`/`iHigh` delle barre del
+#  TF operativo e dalla linea Supertrend, che a sua volta nasce da ATR su
+#  quelle stesse barre. >>> Sono tutti dati DI BARRA: NON dipendono dal
+#  modello di riempimento. Il prezzo a cui lo stop viene PIAZZATO e'
+#  identico a tick reali e in OHLC; cambia soltanto se e quando viene
+#  COLPITO.
+#  Quindi la domanda "le celle DIFFERISCONO fra loro?" ha la stessa
+#  risposta sui due banchi, e qui costa una frazione.
+#
+#  >>> E IL LIMITE, che e' la meta' che conta:
+#      DA QUESTO FILE NON SI LEGGE NESSUN PF, NESSUN DD, NESSUN VERDETTO.
+#      L'OHLC e' il banco ottimista, non paga lo spread vero, e in casa ha
+#      gia' mentito di brutto (il CAC a PF 7,37 OHLC e' crollato a PFmed
+#      0,96 a tick reali). Il driver stesso lo dice: walkforward_generico.ps1
+#      r.190, "1 = OHLC M1: SOLO screening, mai verdetti".
+#      >>> Di questo file si legge UNA COSA SOLA: quante delle 5 celle
+#          danno esiti DISTINTI. E' un contatore di differenze, non una
+#          misura di merito.
+#
+# --------------------------------------------------------------------------
+#  3. COSA NON PUO' DECIDERE
+# --------------------------------------------------------------------------
+#  (NO) NON puo' leggere il MERITO (n sotto 150, e per di piu' in OHLC).
+#  (NO) NON puo' leggere il RISCHIO: un DD di banco ottimista non e' un DD.
+#       >>> Qui l'Emendamento B NON si applica, e va detto: "il rischio si
+#           legge a qualunque n" vale per una misura VERA, non per un banco
+#           che non paga lo spread. Un DD OHLC non e' un fatto accaduto.
+#  (NO) NON promuove niente, non tocca forward, VPS, conto reale.
+#  (SI) PUO' dire se InpSLLookback muove qualcosa. Solo quello.
+#
+# --------------------------------------------------------------------------
+#  4. L'ANCORA (regola meccanica, identica sui quattro file del round)
+# --------------------------------------------------------------------------
+#    P1. Si considerano le FETTE 1-D: si fissano DUE coordinate fra
+#        {StMult, StAtrPeriod, TP_RR} e si fa variare la terza.
+#    P2. In ogni fetta si cerca il RUN CONTIGUO piu' lungo (fra i valori
+#        MISURATI, in ordine) in cui OGNI cella ha PF > 1,00.
+#    P3. Vince il run piu' LUNGO; a parita', quello a interi CONSECUTIVI
+#        (un run con buchi non e' un altopiano); a parita' ancora, AtrP.
+#    P4. Dentro il run si prende la cella piu' vicina al CENTRO
+#        dell'intervallo; fra le centrali, quella col PF piu' BASSO.
+#        IL PICCO E' ESCLUSO PER COSTRUZIONE.
+#
+#  ANCORA DI QUESTO FILE:
+#    InpStMult 2.5 | InpStAtrPeriod 12 | InpTP_RR 2.5
+#    riferimento OHLC d'archivio: PF 1.2790  n 104  DD 1.8306
+#  (dettaglio della mappa e della scelta: vedi il referto del round)
+#
+#  >>> L'ancora serve solo a mettere il motore in una zona VIVA: se
+#      ancorassimo in una zona che non opera, "le celle sono identiche"
+#      sarebbe vero e insignificante.
+#
+# --------------------------------------------------------------------------
+#  5. L'ATTESA, SCRITTA PRIMA DEI NUMERI
+# --------------------------------------------------------------------------
+#  n   : dell'ordine di 104 sulla finestra piena, quindi circa il 40% e il
+#        60% sulle due tranche. NON DECRESCENTE lungo l'asse (vedi T2).
+#  esiti distinti sulle 5 celle: e' LA misura del file. Non ho una base per
+#        predirlo, e NON lo invento: [NON MISURATO]. E' esattamente la
+#        ragione per cui il file esiste.
+#  PF / DD: NON SI LEGGONO (sezione 2). Vengono scritti nel CSV e restano
+#        li' come diagnostica, non come esito.
+#
+#  >>> LA MIA ASPETTATIVA QUALITATIVA, dichiarata perche' possa essere
+#      smentita: mi aspetto che la manopola MORDA POCO ma non per zero.
+#      Il motivo e' nel pattern d'ingresso: il documento del motore chiede
+#      che la candela TOCCHI la linea Supertrend e ci CHIUDA VICINO
+#      (InpNearAtr = 1,0 ATR). Se al momento dell'ingresso il prezzo e'
+#      per costruzione ADDOSSO alla linea, allora `stLine` e' vicinissima
+#      all'entry, mentre l'estremo di N barre e' piu' lontano: quindi
+#      `ext` dovrebbe vincere spesso il confronto, e N dovrebbe mordere.
+#      >>> Se invece le celle tornano identiche, vuol dire che ho letto
+#          male la geometria del pattern, ed e' un'informazione che vale
+#          il round.
+#
+# --------------------------------------------------------------------------
+#  6. LE SOGLIE CONGELATE ORA
+# --------------------------------------------------------------------------
+#  (T1) IL CANCELLO, E IN QUESTO FILE E' L'UNICO CHE CONTA.
+#       Si contano gli esiti DISTINTI delle 5 celle di una tranche,
+#       guardando la terna (PF, n, DD) insieme.
+#         5 esiti distinti      -> la manopola MORDE. InpSLLookback e' una
+#                                  casella VIVA, e allora vale la pena
+#                                  metterla a tick reali in un round suo.
+#         4 esiti               -> morde debolmente: si riporta il numero
+#                                  e si dichiara marginale.
+#         3 o meno esiti        -> INERTE su questo motore e questo simbolo.
+#                                  Si scrive cosi', e la casella si chiude
+#                                  CON UNA MISURA invece che con un "mai
+#                                  provata" che resta aperto per sempre.
+#       >>> Nessuno dei tre esiti e' un fallimento. Il fallimento sarebbe
+#           lasciare la domanda aperta un altro mese.
+#  (T2) MONOTONIA DELL'n -- previsione strutturale dal codice.
+#       r.394: minDist = MathMax(buf, STOPS_LEVEL * _Point); se
+#       risk < minDist l'ingresso viene SCARTATO (contatore cO_sl).
+#       Allargare N puo' solo allontanare `ext`, quindi puo' solo allargare
+#       (o lasciare uguale) lo stop, quindi puo' solo RIDURRE quei rifiuti.
+#       SOGLIA: n non decrescente lungo l'asse, tolleranza 2 operazioni.
+#       Se l'n CALA di oltre 2 da N=5 a N=17, la mia lettura del codice e'
+#       sbagliata e il file va riletto prima di usarlo.
+#       DIAGNOSTICA GRATIS: InpLogImbuto=true stampa cO_sl nel Giornale.
+#  (T3) CANCELLO CROCIATO. La cella N=5 e' la configurazione dell'ancora
+#       d'archivio, e questo file gira sullo STESSO BANCO dell'archivio
+#       (OHLC). >>> Quindi qui, a differenza dei round a tick reali, un
+#       cancello di UGUAGLIANZA e' quasi costruibile: l'unica differenza
+#       resta la finestra (archivio = piena, qui = spezzata da @FRAZIONEIS).
+#       SOGLIA: la cella N=5 deve produrre un n compatibile con 104
+#       ripartito fra le due tranche (somma entro +/- 10%). Se la somma
+#       degli n delle due tranche a N=5 si discosta di piu' del 10% da
+#       104, la finestra dell'archivio NON era quella che credo (buco B2)
+#       e il confronto va rifatto prima di usarlo.
+#
+# --------------------------------------------------------------------------
+#  7. IL CONTRO-ESEMPIO
+# --------------------------------------------------------------------------
+#  TESI: "InpSLLookback e' una casella libera e viva: mai provata, e se la
+#         provi si muove."
+#  ALTERNATIVA: "e' libera perche' non serve: `stLine` vince sempre e N non
+#         tocca niente."
+#  >>> I due esiti sono DISTINGUIBILI SENZA AMBIGUITA' e senza statistica:
+#      la tesi produce 5 righe diverse, l'alternativa ne produce 1 ripetuta
+#      5 volte. Non c'e' zona grigia da interpretare, non c'e' rumore da
+#      separare: e' un confronto di stringhe.
+#  >>> E' per questo che questa domanda va in OHLC e non a tick reali:
+#      quando la risposta e' un conteggio di differenze e non una misura di
+#      merito, pagare il banco caro non compra niente.
+#
+#  IL TERZO ESITO, da saper riconoscere: celle identiche A CAUSA DI UN PIN
+#  CHE NON E' ARRIVATO. Si controlla la colonna InpSLLookback nel CSV: deve
+#  portare 5 valori distinti (5, 8, 11, 14, 17). Se ne porta uno solo,
+#  l'esito non e' "inerte", e' "non misurato".
+#
+# --------------------------------------------------------------------------
+#  8. I BUCHI DICHIARATI, PER NOME
+# --------------------------------------------------------------------------
+#  (B1) RISCALDAMENTO (classe 653). Il vincolo non e' l'ATR del Supertrend
+#       ma la CONFLUENZA, accesa, che chiede una EMA a 200 periodi.
+#       NASUSD opera circa 23 barre H1 al giorno -- W = 1380 minuti, e W
+#       VA CITATO COL SUO TAG: CANCELLO_COSTO_FLOTTA r.970 dice testualmente
+#       che "W(U30USD) = W(NASUSD) = 1380 resta [INFERITO]... E' un
+#       argomento, non una misura".
+#         200 barre =  8,7 gg operativi = ~12 gg calendario =  4,7% dell'IS
+#         600 barre = 26,1 gg operativi = ~37 gg calendario = 14,2% dell'IS
+#       NON scorporato: @DAQUANDO resta al pavimento tick misurato. Scelta
+#       dichiarata, non svista.
+#  (B2) LA FINESTRA DELLO SCAN D'ARCHIVIO NON E' NEL CSV (nessuna colonna
+#       data). Assunta ~21 mesi per analogia con prove/R120a_NASUSD.
+#       [NON VERIFICATA] -- ed e' proprio quello che T3 va a controllare.
+#  (B3) QUESTO FILE NON DICE NIENTE SUL COSTO. Non tocca il rapporto
+#       stop/spread, non tocca la frontiera dei 40x. La domanda del costo
+#       su NASUSD H1 e' aperta e ha una tenaglia tutta sua (referto del
+#       round): l'escursione favorevole mediana misurata e' 65,00 idx
+#       (n=447) e la frontiera a 24 ore e' 96,0 idx. Questo file non
+#       c'entra e non va citato in quella discussione.
+#  (B4) IL BINARIO IN CAMPO NON E' QUESTO SORGENTE (sedia 970913: binario
+#       del 04/08 col difetto noto "lotto doppio"). Qui gira HEAD: descrive
+#       il MOTORE, non la sedia viva.
+#  (B5) UN SOLO REGIME (21 mesi, Nasdaq in larga parte rialzista). Per una
+#       domanda di GEOMETRIA conta meno che per una di merito, ma la
+#       frequenza con cui `ext` batte `stLine` dipende dalla volatilita',
+#       quindi un regime diverso potrebbe dare una risposta diversa.
+#       Dichiarato.
+#
+# --------------------------------------------------------------------------
+#  9. IL COSTO IN TEMPO MACCHINA
+# --------------------------------------------------------------------------
+#  5 celle x 2 tranche = 10 passate. Col gemello R236c: 20 passate, tutte
+#  in OHLC -- il banco piu' rapido. [NON MISURATO] il minutaggio per
+#  passata: non ho un cronometro d'archivio per questo motore e non lo
+#  invento.
+#
+# --------------------------------------------------------------------------
+# 10. VINCOLI DI BANCO -- e quello che il file NON puo' imporre
+# --------------------------------------------------------------------------
+#  >>> MODELLO OHLC. NON e' passabile dal file: e' il parametro -Modello
+#      della riga di lancio (walkforward_generico.ps1 r.190; default 4 =
+#      tick reali). >>> QUESTO FILE VA LANCIATO CON -Modello 1, ed e'
+#      l'unico round del gruppo R236 che lo vuole.
+#      Buona notizia gia' in casa: r.1973 del driver aggiunge il suffisso
+#      "_ohlc" ai risultati, "un OHLC non deve MAI sovrascrivere un tick
+#      reale". Quindi questi CSV non possono inquinare l'archivio a tick.
+#  >>> DEPOSITO 100000 -- classe 646. Il file NON puo' imporlo: non esiste
+#      direttiva @DEPOSITO. E' il parametro -Deposito (r.200, default
+#      10000). Qui pesa MENO che nei round a tick (non si legge il DD), ma
+#      va passato lo stesso, perche' il pavimento del lotto minimo puo'
+#      cambiare il NUMERO di operazioni, e il numero di operazioni QUI si
+#      legge (T2).
+#  @FRAZIONEIS 0.40 scritta QUI DENTRO (classe 647): senza la riga
+#  esplicita il driver applica il default in silenzio (classe 393).
+#  @DAQUANDO 2024.09.26 = pavimento dei tick reali MISURATO (classe 590).
+#      >>> Su un banco OHLC il pavimento dei TICK non sarebbe obbligatorio.
+#          Lo tengo lo stesso, e la ragione e' di confronto: cosi' questo
+#          file copre ESATTAMENTE la stessa finestra dei round a tick del
+#          gruppo, e i due si possono mettere fianco a fianco. Scelta
+#          dichiarata.
+#  @FINOA 2026.06.30 = bordo d'archivio della flotta.
+#  @PERIODO H1: a H4 questo simbolo fa n fra 5 e 14 (archivio, ricontato)
+#      ed e' crollato a PF 0,68 a tick reali. InpTF e' un ENUM: pinnato
+#      esplicito H1 = 16385 e MAI ad asse (su un enum il passo viene
+#      ignorato e il conto delle celle inganna -- classe 287).
+#  UN SOLO ASSE: InpSLLookback, int, il passo CONTA.
+#      5 || 5 || 3 || 17 || Y -> celle 5, 8, 11, 14, 17.
+#      Conto: |17 - 5| / 3 + 1 = 5. Verificato da controlla_prova.py.
+#  NIENTE griglia larga (regola del 19/08): StMult, StAtrPeriod e TP_RR
+#      restano PINNATI all'ancora.
+#  MAGIC 764223 -- verificato vergine il 23/09/2026: zero occorrenze in
+#      tutto il repository (esclusi .git e .claude).
+#  NON PINNO InpNewsCurrencies: il suo valore e' la stringa VUOTA, e un pin
+#      vuoto MT5 lo IGNORA usando il default compilato -- e' il difetto per
+#      cui esiste controlla_prova.py. Con InpUseNewsFilter=false e' inerte.
+#      Stesso motivo per InpNewsFile, lasciato al default.
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- il lato
+InpAllowLong=true
+InpAllowShort=false
+
+# --- timeframe operativo (ENUM, pinnato esplicito: H1 = 16385)
+InpTF=16385
+
+# --- ancora (regola P1-P4)
+InpStMult=2.5
+InpStAtrPeriod=12
+InpTP_RR=2.5
+
+# --- il buffer resta al DEFAULT d'archivio: qui l'asse e' lo swing
+InpSLBufferPips=3.0
+
+# --- pattern del rimbalzo (valori dell'archivio, verificati nel CSV)
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+
+# --- confluenza tecnica (accesa in archivio: e' lei che detta B1)
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+# --- ingresso frazionato
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- target e gestione dell'uscita
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+
+# --- rischio
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+# --- filtro orario: SPENTO, come in tutte e 118 le righe d'archivio
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+
+# --- filtro notizie: spento
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+# --- generali
+InpComment=STREV_R236d
+InpFridayClose=false
+InpFridayCloseHour=20
+InpUsaGuardian=false
+InpMagic=764223
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+
+# --- L'ASSE, unico: lo swing dello stop. 5 celle: 5, 8, 11, 14, 17
+InpSLLookback=5||5||3||17||Y
+# ==========================================================================
