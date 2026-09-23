@@ -158,6 +158,11 @@
 #        sono piu' confrontabili. Conto per esteso nella cella 00.
 # =====================================================================
 
+#  @DAQUANDO-DALLA-RIGA  omessa APPOSTA perche' walkforward_generico.ps1
+#    si FERMI (r.737-742) e obblighi a misurare lo storico M1 di XAUUSD con
+#    scarica_storico.ps1 prima di partire: la data si passa con -DaQuando
+#    MISURATO, mai a mano. Vedi la nota 'LA DATA DI INIZIO NON E' SCRITTA
+#    QUI APPOSTA' qui sopra.
 @SIMBOLO  XAUUSD
 @PERIODO  M5
 # ATTENZIONE, e' una DICHIARAZIONE, NON UN PIN: walkforward_generico.ps1

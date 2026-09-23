@@ -34193,12 +34193,64 @@ tre il driver li prenderebbe comunque con `Muori`, **CE1 no** -- quello **gira**
 4. 🔢 **`@FRAZIONEIS`**: decimale col **PUNTO**, `0 < f <= 1` (driver r.704 / r.710).
 5. 🚫 **E la presenza di `@DAQUANDO` non si cerca piu' nel TESTO del file.** Il controllo vecchio
    faceva `if "@DAQUANDO" not in testo` sull'**intero file, commenti compresi**: bastava
-   **nominarla in prosa** per soddisfarlo. 🔴 Misurato su 874 file prova: **9 lo superavano cosi'**
-   (8 `POSTNEWS_*`, che dichiarano in prosa di ometterla apposta, e `R200b_RITIRATO`, che ce l'ha
-   solo dentro un commento). Ora serve la **direttiva vera**. Un controllo soddisfatto da una
-   frase invece che da un fatto e' la classe 683 in un'altra veste.
+   **nominarla in prosa** per soddisfarlo. Ora serve la **direttiva vera**, oppure il marcatore
+   dichiarato al punto 6. Un controllo soddisfatto da una frase invece che da un fatto e' la
+   classe 683 in un'altra veste.
+6. 🪧 **Ma l'omissione di `@DAQUANDO` puo' essere OBBLIGATORIA, e allora si DICHIARA**: vedi la
+   correzione qui sotto. Marcatore, **in un commento**:
+   `#  @DAQUANDO-DALLA-RIGA <chi la misura e perche' non puo' stare qui>`.
 
-### Non-regressione, misurata
-Cancello su **tutti gli 874 file prova in archivio**, prima e dopo: celle totali **1581 = 1581**,
-passate **3162 = 3162**, e le **sole** differenze sono i **9 falsi verdi** del punto 5. I **15
-file dei round R234/R235/R236/R237 restano OK, problemi 0, rc 0**.
+### 🔴 CORREZIONE DEL CANCELLO, 23/09/2026 — **la prima stesura del punto 5 era un FALSO ALLARME, e di quelli che spingono a ROMPERE un altro cancello**
+_(scritta **al posto** della frase superata, non sotto: e' la classe 684.)_
+
+Qui c'era scritto che i 9 file erano *«falsi verdi»*, e degli 8 `POSTNEWS_*` che
+*«dichiarano in prosa di ometterla apposta»*, con la scelta di **non toccarli**.
+🔴 **Misurato che e' FALSO, e la ragione conta piu' del numero:**
+- 🚫 `POSTNEWS_NFP/1330/ISM_00_conta.txt` sono gattati da `RIGA_POSTNEWS_*.ps1`, la cui
+  `GateProva` (r.382 / r.511 / r.480) **TIRA UN'ECCEZIONE SE `@DAQUANDO` C'E'**: *«DEVE essere
+  assente»*, perche' la data la **MISURA la fase 8** sulle barre M1 vere e scriverla a mano
+  sarebbe *«una data indovinata che scavalca la misura»*. Lo stesso gate pretende **34 righe
+  VIVE esatte**: una riga viva in piu' e **il round non parte**.
+- ⏸️ I 5 `POSTNEWS_ORO_*` passano dal generico e omettono `@DAQUANDO` **apposta perche' il driver
+  si FERMI** (r.737-742) e obblighi a misurare lo storico M1 dell'oro prima di partire.
+
+👉 Cioe': *«aggiungi `@DAQUANDO` cosi' il cancello sta zitto»* avrebbe introdotto **esattamente
+il guasto che la classe 685 previene** — una data **INDOVINATA** al posto di una **MISURATA**.
+**Un cancello che chiede di rompere un altro cancello non e' severo: e' rotto.**
+
+✅ **La riparazione**: l'omissione resta lecita ma si **dichiara in modo leggibile a macchina**,
+non in prosa — la prosa e' proprio quello che faceva passare questi file per falso verde. Il
+marcatore sta in un **commento** apposta: il driver salta le righe `#` (r.510) e la `RigheVive`
+dei `RIGA_POSTNEWS` le esclude, quindi **non cambia ne' il comportamento del driver ne' il conto
+delle 34** (verificato: 34 -> 34 e 35 -> 35 su tutti e 8). **Non e' sintassi inventata**:
+`RIGA_NOTTE2_DUKA_R91.ps1` (r.498-500) legge gia' `# @FINESTRA / # @DA / # @A` dai commenti dei
+`R90a-d`. E il marcatore **non e' un timbro**: senza un motivo scritto (< 20 caratteri) il
+cancello lo **rifiuta**, e se il file porta **marcatore E direttiva insieme** e' **contraddizione
+bloccante**.
+
+📌 **La lezione, che e' piu' generale del caso**: prima di pretendere che un campo ci sia,
+si cerca **chi altro legge quel file** — qui i lettori erano **due**, e il secondo pretendeva
+**l'opposto**. Un elenco di nomi completo **per un lettore solo** non e' un elenco completo.
+
+### Non-regressione, misurata (dopo la correzione)
+Cancello su **tutti gli 874 file prova in archivio**, baseline `81f52b59` contro corretto:
+celle totali **1581 = 1581**, passate **3162 = 3162**, problemi **477 -> 478**.
+🟢 **Nessun file cambia verdetto**: l'unico `+1` e' `R200b_RITIRATO`, che era **gia' rosso**
+("nessun asse Y") e resta rosso — e' un file **ritirato**, con `@DAQUANDO` solo dentro un
+commento e **zero direttive vive**. Gli 8 `POSTNEWS_*` tornano **OK** col marcatore. I 4
+`R90a-d` restano rossi **come prima** (portano la finestra in `# @DA` / `# @A`, che
+`RIGA_NOTTE2_DUKA_R91.ps1` legge: 👉 **candidati naturali al marcatore**, non toccati qui
+perche' erano rossi **gia' prima** di questa classe). I **15 file dei round R234/R235/R236/R237
+restano OK, problemi 0, rc 0**.
+
+### 🧪 Contro-esempio della correzione, **eseguito** (21 casi, 21 come atteso)
+13 casi che **devono** essere presi (typo muto, virgola, fuori campo, doppia, `@DAQUANDO`
+mancante / nudo / rovesciata / data finta / corta, `@SIMBOLO` nudo, `@FRAZIONEIS 0`,
+**marcatore + direttiva insieme**, **marcatore senza motivo**) e **8 che devono restare VERDI**
+— ed e' questa meta' che prima mancava: `#@FRAZIONE 0.50` e `#  @DAQUANDO 1999.01.01` **dentro
+un commento**, `@daquando` minuscolo, separatore **TAB**, `@FRAZIONEIS 1.0`, `@FRAZIONEIS .5`,
+file senza `@FRAZIONEIS`, file senza `@FINOA`.
+🔬 **E la regex e' stata verificata ESEGUENDO, non leggendo**: il blocco `r.507-514` del driver
+girato in **PowerShell vero** e il mirror Python sugli **stessi 16 casi ostili** danno output
+**identico byte a byte** (tab iniziale, minuscole, `@` nudo, `#` prima della `@` in tre varianti,
+spazio dopo la `@`, nome numerico, coda di commento, trattino nel nome).

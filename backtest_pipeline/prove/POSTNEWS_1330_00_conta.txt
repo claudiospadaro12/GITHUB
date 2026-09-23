@@ -164,6 +164,10 @@
 #       -Fino 2023.12.31 -Modello 1 -Etichetta 1330OK00 -SoloControllo
 # =====================================================================
 
+#  @DAQUANDO-DALLA-RIGA  la MISURA la fase 8 di RIGA_POSTNEWS_1330.ps1 sulle barre M1
+#    vere e la passa con -DaQuando. NON si scrive qui: GateProva tira
+#    un'eccezione se '@DAQUANDO' e' presente (sarebbe una data indovinata
+#    che scavalca la misura) e conta 34 righe VIVE esatte.
 @SIMBOLO  USDJPY
 @PERIODO  M5
 

@@ -269,8 +269,55 @@ def controlla(prova: str, ea: str, tetto: int = 0) -> tuple[int, int]:
                 "Il driver tiene l'ULTIMA e non avvisa: la prima e' una dichiarazione falsa.")
         viste[k] = v
 
-    if "DAQUANDO" not in viste:
-        problemi.append("manca @DAQUANDO: la finestra va dichiarata nel file, non ricordata")
+    # 5-bis. LA FINESTRA CHE NON PUO' STARE NEL FILE -- 23/09/2026.
+    #    Il primo giro di questo blocco chiedeva '@DAQUANDO' a TUTTI. MISURATO
+    #    che su OTTO file prova era un FALSO ALLARME, e del tipo peggiore:
+    #    spingeva a rompere un ALTRO cancello per far tacere questo.
+    #      - POSTNEWS_NFP/1330/ISM_00_conta.txt sono gattati da
+    #        RIGA_POSTNEWS_*.ps1 (GateProva, r.382/511/480), che TIRA
+    #        UN'ECCEZIONE SE '@DAQUANDO' C'E': "DEVE essere assente", perche'
+    #        la data la MISURA la fase 8 sulle barre M1 vere e scriverla a
+    #        mano sarebbe "una data indovinata che scavalca la misura". Lo
+    #        stesso gate conta le righe VIVE ESATTE (34 = 2 direttive + 31
+    #        fissi + 1 asse): una riga viva in piu' e il round non parte.
+    #      - i 5 POSTNEWS_ORO_* passano dal generico e omettono '@DAQUANDO'
+    #        APPOSTA perche' il driver si FERMI (r.737-742) e obblighi a
+    #        misurare lo storico M1 dell'oro prima di partire.
+    #    Cioe': "aggiungi @DAQUANDO cosi' il cancello sta zitto" avrebbe
+    #    introdotto ESATTAMENTE il guasto che questo blocco esiste per
+    #    prevenire -- una data INDOVINATA al posto di una MISURATA.
+    #    Quindi l'omissione resta lecita, ma si DICHIARA, e si dichiara in
+    #    modo LEGGIBILE A MACCHINA: la prosa e' proprio quello che fino a
+    #    ieri faceva passare questi file per falso verde.
+    #    Il marcatore sta in un COMMENTO apposta: il driver salta le righe
+    #    '#' (r.510) e la RigheVive dei RIGA_POSTNEWS le esclude, quindi non
+    #    cambia ne' il comportamento del driver ne' il conto delle 34.
+    #    Non e' sintassi inventata: RIGA_NOTTE2_DUKA_R91.ps1 (r.498-500) legge
+    #    gia' '# @FINESTRA / # @DA / # @A' dai commenti dei R90a-d.
+    motivo_senza = ""
+    for l in open(prova, encoding="utf-8", errors="replace"):
+        m = re.match(r"^#\s*@DAQUANDO-DALLA-RIGA\s+(.+)$", l.strip())
+        if m:
+            motivo_senza = m.group(1).strip()
+            break
+
+    if "DAQUANDO" in viste and motivo_senza:
+        problemi.append(
+            "CONTRADDIZIONE: il file dichiara '@DAQUANDO-DALLA-RIGA' (la data arriva "
+            "dalla riga di lancio) e POI scrive anche '@DAQUANDO " + viste["DAQUANDO"]
+            + "'. Una delle due e' falsa, e chi legge non sa quale: scegline UNA.")
+    elif "DAQUANDO" not in viste and not motivo_senza:
+        problemi.append(
+            "manca @DAQUANDO: la finestra va dichiarata nel file, non ricordata. "
+            "Se la data arriva DAVVERO dalla riga di lancio perche' va MISURATA "
+            "(caso POSTNEWS), non aggiungere la direttiva -- un altro cancello la "
+            "rifiuta: dichiaralo in un COMMENTO, "
+            "'#  @DAQUANDO-DALLA-RIGA <chi la misura e perche' non puo' stare qui>'.")
+    elif motivo_senza and len(motivo_senza) < 20:
+        problemi.append(
+            "'@DAQUANDO-DALLA-RIGA' senza un motivo vero ('" + motivo_senza + "'): il "
+            "marcatore serve a DICHIARARE chi misura la data, non a zittire il cancello. "
+            "Scrivi CHI la passa e PERCHE' non puo' stare nel file.")
 
     for k in ("DAQUANDO", "FINOA"):
         if k in viste and not re.match(r"^[0-9]{4}\.[0-9]{2}\.[0-9]{2}$", viste[k]):
