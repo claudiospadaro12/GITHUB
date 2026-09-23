@@ -121,8 +121,36 @@ Please reply in writing; I will keep the reply for my records.
 ---
 
 ## Registro risposte
+
+> ### 🟢 23/09/2026 — **IL BLOCCO DEL 13/08 E' PARTITO**, dopo 41 giorni fermo
+> Claudio l'ha inviata a `support@ftmo.com`, adattata: la stesura originale diceva
+> *"before purchasing"*, la challenge invece e' **gia' in corso** (80k 2-Step, Swing,
+> conto **541452707**), quindi il testo inviato parla di *"currently running"*.
+>
+> 💰 **PERCHE' CONTA, col numero**: la **domanda 1** (gap trading / riapertura della
+> domenica) e' l'unica cosa che tiene ferma la variante col **PF piu' alto che abbiamo
+> a tick reali** -- `GAPFILL`, **IS 2,09-2,54 · OOS 1,54-2,87 · DD 2,9-6,0%**
+> (`report/ORB_NASDAQ_PERCHE_E_SPENTO_2026-09-23.md`). 🔴 **E' ferma per una REGOLA,
+> non per un numero**: e' l'unico candidato della flotta in questa condizione.
+> La **domanda 2** (ordini pendenti opposti con OCO) tocca le tre sedie d'apertura, che
+> operano cosi' tutti i giorni.
+>
+> ⏳ **COSA FARE QUANDO ARRIVA LA RISPOSTA**, deciso ORA per non improvvisare dopo:
+> 1. si incolla **verbatim** in questo registro, con la data;
+> 2. se la domanda 1 e' **SI'**, `GAPFILL` rientra nell'imbuto e va rimisurata **prima**
+>    di qualunque schieramento: il suo PF viene da un banco, non dal campo;
+> 3. se e' **NO**, si scrive il **certificato** (motivo: REGOLA, non merito) e non ci si
+>    torna piu' -- ed e' comunque un risultato, perche' oggi quel motore ci costa
+>    attenzione a ogni censimento;
+> 4. se la risposta e' **ambigua**, vale come **NO** fino a una conferma scritta. Su una
+>    Forbidden Trading Practice non si interpreta a favore.
+>
+> 📌 Nessun sollecito prima di **5 giorni lavorativi** (dal 30/09). Se al 30/09 non c'e'
+> risposta, si rimanda con la live chat chiedendo conferma via email, come dice la
+> testata di questo blocco.
+
 | Ditta | Inviata il | Risposta il | Esito | Allegato |
 |---|---|---|---|---|
-| FTMO (blocco 13/08) | — | — | — | — |
+| FTMO (blocco 13/08) | 🟢 **23/09/2026** (inviata da Claudio) | — | ⏳ **in attesa** | — |
 | FTMO (blocco 23/09, confine del giorno) | — | — | — | — |
 | The5ers | — | — | — | — |
