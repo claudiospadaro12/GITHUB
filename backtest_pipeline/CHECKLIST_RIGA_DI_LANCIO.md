@@ -34099,3 +34099,44 @@ e' stata fatta passare scrivendo *"walkforward generico"* senza estensione, cioe
    presenza: dentro una stringa da stampare non e' un'esecuzione.
 2. 🚨 **E ogni aggiramento si DICHIARA** (come qui), perche' un aggiramento non dichiarato e' un
    cancello che smette di esistere senza che nessuno lo decida.
+
+---
+
+## 📋✂️ CLASSE 684 — **LA CORREZIONE INCOLLATA SOPRA LA FRASE VECCHIA: il file finisce per contenere il numero giusto E quello superato, e quello OPERATIVO e' il superato** (controllo-preventivo, 23/09/2026, su `R237a`/`R237b` dopo il giro di correzioni del coordinatore)
+
+**Numero assegnato dal CONTROLLO PREVENTIVO** (l'ultima era la 683); `grep -c "CLASSE 684"` -> **0** al momento di scrivere.
+
+### Il fatto
+Sei correzioni chieste dal cancello sono state applicate dal coordinatore e **due sono rimaste a
+meta'**, tutte e due nello stesso modo: il testo nuovo e' stato **inserito sopra** quello vecchio,
+e il vecchio **non e' stato tolto**.
+1. 🔴 `R237b` r.288-297. Il nuovo dice *"la probabilita' di arrivare a UNA QUALUNQUE conclusione per
+   solo rumore e' 6/32 + 6/32 = 37,5%, non 18,75%. **Nel referto va scritto 37,5%**"*. Tre righe
+   sotto sopravviveva il vecchio: *"nel referto va scritta con quel **18,75%** accanto"*. 👉 Il file
+   dava **due istruzioni diverse per la stessa riga di referto**, e quella **operativa** (*"va
+   scritta con ... accanto"*) portava il numero **superato**: chi scrive il referto eseguendo il file
+   avrebbe dichiarato il rumore **la meta' di quello che e'**. Tell-tale dell'incollatura: un
+   *"Quindi"* orfano a fine riga (r.293).
+2. 🔴 `R237a` r.531-535. La condizione *"il fattore sette vale sul salto GIA' NOTO 12->14 (T2), non
+   su T8"* era stata scritta **solo in sezione 6**. La **sezione 8 -- il CONTRO-ESEMPIO**, cioe' la
+   sezione che giustifica la corsa ed e' quella che finisce citata -- chiudeva ancora con
+   *"SI RIESCE, e il margine e' un fattore sette"*, **senza condizione**, riferito al RUN (T8).
+
+### Perche' costa
+Un file prova e' una **procedura**: si esegue leggendola. Due frasi contraddittorie non si annullano,
+**vince quella imperativa** — e in tutti e due i casi era la vecchia. 🔴 E il difetto e' **invisibile
+al diff**: le righe nuove ci sono tutte, il cancello deterministico e' verde, `controlla_prova.py`
+dice OK. Solo la **rilettura del blocco intero** lo trova. 🔴 Peggio: nasce **proprio dal giro di
+correzioni**, cioe' dal momento in cui tutti pensano che il file sia migliorato.
+
+### La regola
+1. ✂️ **Chi applica una correzione rilegge il BLOCCO INTERO in cui l'ha messa, non la riga che ha
+   aggiunto.** La domanda e': *"la frase che stavo correggendo e' ancora qui?"*
+2. 🔁 **Una correzione si propaga a TUTTE le sezioni che fanno la stessa affermazione**, e per prima
+   alla sezione **CONTRO-ESEMPIO**: e' quella che viene citata nel referto. `grep` della frase
+   vecchia su tutto il file, sempre.
+3. 🔢 **Un numero che compare due volte con due valori diversi e' SEMPRE un bloccante**, anche se uno
+   dei due e' quello giusto. Nel referto ci va **un numero solo**, e il file deve dire **quale**.
+4. 🚦 **E il controllo non e' automatizzabile con quello che abbiamo**: ne' `controlla_riga.py` ne'
+   `controlla_prova.py` leggono la prosa. 👉 Dopo ogni giro di correzioni su un file prova, il
+   **rileggere e' obbligatorio**: le correzioni **tornano dal cancello**, non si danno per chiuse.

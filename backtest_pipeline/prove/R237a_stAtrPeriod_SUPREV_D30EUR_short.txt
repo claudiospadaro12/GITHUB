@@ -528,11 +528,21 @@
 #     ALTERNATIVA -> il 14 e' l'unica cella sopra soglia. 13 sotto o
 #                    indistinguibile, 15 e 16 sotto o indistinguibili.
 #                    Run = 1.
-#   >>> SONO DISTINGUIBILI? SI, e col numero: la differenza fra le due
-#       previsioni e' il SEGNO di celle il cui salto atteso (0,568 fra 12
-#       e 14) e' 6,6x-9,9x la risoluzione del banco. Non e' un lancio di
-#       moneta. La risposta alla domanda "se non riesci a distinguerle
-#       fermati" e': SI RIESCE, e il margine e' un fattore sette.
+#   >>> SONO DISTINGUIBILI? SI, MA A UNA CONDIZIONE -- e la condizione va
+#       scritta QUI, non solo in sezione 6, perche' questa e' la sezione
+#       che giustifica la corsa. Il margine "fattore sette" (salto 0,568
+#       fra 12 e 14 = 6,6x-9,9x la risoluzione del banco) e' MISURATO SUL
+#       SALTO GIA' NOTO 12 -> 14, cioe' su T2. Le celle che decidono il
+#       RUN -- 13, 15, 16 -- NON HANNO ARCHIVIO: su di loro le due
+#       ipotesi predicono ~0,80 contro ~1,37 e SI TOCCANO alla soglia di
+#       indistinguibilita' della sezione 6.
+#       >>> LA FRASE GIUSTA E': "si distinguono SE le celle ignote
+#           atterrano vicino a una delle due ancore". Una cella che
+#           atterra nella banda di mezzo NON e' letta, e quello e'
+#           l'esito NON CONCLUSIVO di T8 -- previsto, non un fallimento.
+#       >>> NON si scrive "SI RIESCE, il margine e' un fattore sette"
+#           senza la condizione: sarebbe applicare a T8 un margine
+#           misurato su T2.
 #
 #  >>> MA LA DISTINZIONE HA UNA CONDIZIONE, E VA DETTA: vale SOLO SE T2a
 #      e T2b passano. Se a tick il 12 esce positivo o il 14 negativo, il

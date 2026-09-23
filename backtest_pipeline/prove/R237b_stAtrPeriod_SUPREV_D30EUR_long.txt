@@ -287,13 +287,17 @@
 #      0 o 1 su 5 = regime; 2 o 3 = NON CONCLUSIVO, e si scrive cosi'.
 #      >>> E DICHIARO IL LIMITE PRIMA: cinque passi sono POCHI. Con una
 #          moneta, 4+ concordi su 5 esce il 18,75% -- E LO STESSO VALE
-#          PER 0-1 CONCORDI, che e' l'altra conclusione ammessa: la
-#          probabilita' di arrivare a UNA QUALUNQUE conclusione per solo
-#          rumore e' 6/32 + 6/32 = 37,5%, non 18,75%. Nel referto va
-#          scritto 37,5%. Quindi
-#          questa lettura e' un INDIZIO ORIENTATIVO, non una prova, e nel
-#          referto va scritta con quel 18,75% accanto. Non e' una
-#          debolezza nascosta: e' il motivo per cui il verdetto del
+#          PER 0-1 CONCORDI, che e' l'altra conclusione ammessa. I RAMI
+#          AMMESSI SONO DUE, quindi la probabilita' di arrivare a UNA
+#          QUALUNQUE conclusione per solo rumore e'
+#            6/32 (4+ concordi) + 6/32 (0-1 concordi) = 12/32 = 37,5%.
+#          >>> IL NUMERO CHE VA NEL REFERTO E' 37,5%, ED E' UNO SOLO. Il
+#              18,75% e' META' della coda e descrive UN RAMO: scritto da
+#              solo fa sembrare questa lettura il DOPPIO piu' solida di
+#              quello che e'. I due numeri non si scrivono insieme.
+#          >>> QUINDI questa lettura e' un INDIZIO ORIENTATIVO, non una
+#          prova, e nel referto va scritta con quel 37,5% accanto. Non e'
+#          una debolezza nascosta: e' il motivo per cui il verdetto del
 #          pacchetto resta T8 sul corto, e questa e' una lettura in piu'.
 #
 # --------------------------------------------------------------------------
