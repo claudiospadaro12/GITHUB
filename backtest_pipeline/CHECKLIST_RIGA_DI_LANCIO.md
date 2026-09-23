@@ -32675,3 +32675,57 @@ punto, quindi restano identici (classe 646, stessa cecita').
 4. 🔁 **Regola generale**: ogni direttiva che un file prova pretende dall'esterno (`-Deposito`,
    `-Modello`, `-Spread`, `-Ritardo`, `-FrazioneIS`) si verifica **due volte**: che lo script di
    lancio sappia passarla, e che la riga di lancio la passi **davvero**.
+
+---
+
+## 648 — «il LATO non e' mai stato un ASSE» non e' «il lato e' stato misurato» (23/09/2026, R233)
+
+**Estensione della classe 640 al lato dell'operazione.**
+
+Cercare il lato corto per **nome di file** (`*short*`, `*_S_*`) invece che per la **coppia**
+`(InpAllowLong, InpAllowShort)` **dentro** i CSV sbaglia in tutti e due i versi.
+
+### I due casi reali, dallo stesso archivio, lo stesso giorno
+- `backtest_pipeline/risultati_archivio/R113_CORSA_20260827/R113_F0_02_short.csv` si chiama
+  «short» ma **non nomina il simbolo**: il `NASUSD` sta solo nella colonna `InpComment`
+  (`"STREV NAS H1"`). Un `grep` sul nome del file lo perde.
+- `backtest_pipeline/risultati_archivio/SupertrendReversal/H1_OHLC/scan_ABTG_SupertrendReversal_H1_D30EUR.csv`
+  **non ha «short» nel nome** e contiene **37 passate short-only** — fra cui l'unica cella di
+  corto di DAX/Nasdaq con `n >= 150` di tutto il repo.
+
+### La regola
+1. 📌 **Il censimento di un lato si fa sulle COLONNE, mai sui nomi.** `(0,1)` = corto puro,
+   `(1,0)` = lungo puro, `(1,1)` = i due lati insieme, `(0,0)` = passata a vuoto (classe 649).
+2. 📌 **Esiste una TERZA categoria** fra «misurato» e «non gira», e va nominata:
+   **⚪ «il motore ha girato li', ma il LATO non e' mai stato un asse»**. Su `D30EUR` sono
+   **16 motori**, su `NASUSD` **14** — e fra questi ci sono **tutte** le validazioni a tick reali
+   del `SupRev` sugli indici (**184 passate, 184 con `(1,1)`**).
+3. 🚫 **«Il corto di quel motore e' gia' stato provato» e' una frase da grepare, non da
+   ricordare.** Referto: `report/IL_CORTO_DI_DAX_E_NASDAQ_2026-09-23.md` §1 e §2.2.
+
+---
+
+## 649 — il lato ad asse come DUE booleani fabbrica la passata a VUOTO (23/09/2026, R233)
+
+Mettere `InpAllowLong` e `InpAllowShort` come **due `Y` indipendenti** nell'ottimizzatore
+(`InpAllowLong=0||0||1||1||Y` + `InpAllowShort=0||0||1||1||Y`, come fa
+`backtest_pipeline/scan_market.ps1` per nove EA) genera anche la cella `(0,0)`: **nessun lato
+acceso, zero operazioni, zero informazione.**
+
+### Il numero, misurato su tutto l'archivio
+```
+righe di passata con (InpAllowLong, InpAllowShort) = (0,0) :  14.182  su 60.576  = 23,4%
+di queste, con Trades = 0                                  :  14.182  su 14.182  = 100%
+file coinvolti                                             :     368
+solo su D30EUR + NASUSD                                    :     554
+```
+
+### La regola
+1. 📌 **Il lato si mette ad asse come UNA manopola a 3 valori** (`LS` / `solo L` / `solo S`),
+   non come due booleani. Dove l'EA espone due input, il file prova deve **pinnare le coppie**,
+   non lasciare il prodotto cartesiano.
+2. 💰 **Costo del difetto: quasi un quarto del tempo macchina** speso in quelle scansioni e'
+   andato in passate che non potevano produrre un'operazione.
+3. 🧪 **E ha anche un uso buono, se dichiarato**: la cella `(0,0)` con `Trades = 0` e' la prova
+   che il filtro del lato **morde**. Usarla come **controllo negativo** e' legittimo — una cella,
+   non un quarto della griglia.
