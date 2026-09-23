@@ -1,0 +1,579 @@
+# ==========================================================================
+#  EA: ABTG_IntradayMomentum
+#  R235a -- L'ASSE E' IL LATO. Corto puro contro L+S su NASUSD.
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+#  ASCII PURO: nessun byte > 127 (verificato prima della consegna).
+# ==========================================================================
+#
+#  A CHE DOMANDA RISPONDE, ed e' UNA SOLA
+#    Questo motore decide il LATO dal SEGNO di r1 e non ha nessun filtro
+#    di trend. Se e' davvero simmetrico, spegnere un lato deve essere un
+#    FILTRO PURO: toglie giornate, non ne sposta nessuna. Il round mette
+#    il LATO ad asse e chiede DUE cose che nessun referto in casa ha mai
+#    scritto:
+#      (1) QUANTE operazioni fa ciascun lato. Il n PER LATO non e' MAI
+#          stato riportato, nemmeno da R98 che i due lati li aveva gia'
+#          misurati (vedi sotto). Senza il n, il PF per lato non si puo'
+#          nemmeno leggere (Emendamento A del 16/08).
+#      (2) Se l'asimmetria fra i due lati e' DERIVA DELL'INDICE oppure
+#          SEGNALE. Sono due spiegazioni diverse e producono due numeri
+#          diversi: il contro-esempio li scrive tutti e due PRIMA della
+#          corsa.
+#
+#  ONESTA' N.1 -- SU NASUSD QUESTO NON E' TERRENO VERGINE
+#    Il mandato ricevuto diceva "il lato non e' mai stato messo ad asse
+#    su questi simboli". Verificato: e' vero a meta', e la meta' falsa
+#    cambia quanto vale il round.
+#      - AD ASSE: mai, su nessuno dei due simboli. VERO.
+#      - MISURATO: su NASUSD SI', in R98 (23/08/2026), con due passate
+#        DIAGNOSTICHE pinnate -- prove/R98diagNoLong_NASUSD.txt e
+#        prove/R98diagNoShort_NASUSD.txt. Numeri in
+#        risultati_archivio/R98_REFERTO.md r.34-35, riportati sotto.
+#      - Su U30USD il lato non e' stato NE' messo ad asse NE' misurato.
+#        Li' il terreno e' vergine davvero.
+#    >>> Sui due file NASUSD il guadagno e' il n per lato, l'additivita'
+#        e il cancello crociato -- NON "scopriamo i lati".
+#        Sui due file U30USD il guadagno e' tutto.
+#
+#  ONESTA' N.2 -- QUESTO MOTORE E' GIA' STATO BOCCIATO SU NASUSD
+#    R98, VERDETTO 0/6, BOCCIATO, cancello zero S0 dichiarato
+#    "matematicamente impossibile da superare": risultato medio per
+#    operazione -0,31 punti indice su 410 operazioni, GIA' al netto
+#    dello spread (R98_REFERTO.md, sezione "I gate, prima dei numeri").
+#    La regola del 19/08 vieta di allargare sui PARAMETRI di un motore
+#    dichiarato senza edge.
+#    >>> Perche' questo round e' ammesso lo stesso: il LATO non e' un
+#        parametro d'ingresso, e' la DECOMPOSIZIONE del motore. Non
+#        cerca una cella piu' verde: conta le operazioni delle due meta'
+#        e verifica un'identita' aritmetica. L'asse ha DUE celle e una
+#        delle due E' la cella gia' misurata.
+#    >>> E il cancello T5 lo mette per iscritto: da questo round NON
+#        esce nessuna promozione. R52 vieta di spegnere un lato
+#        guardando i risultati, e R98_REFERTO.md r.54 lo ripete su
+#        QUESTO stesso motore. Qui si DICHIARA, non si sceglie.
+#
+#  CHE COSA HO RIVERIFICATO IO NEL SORGENTE (23/09/2026)
+#    A) UNA SOLA OPERAZIONE AL GIORNO, PER COSTRUZIONE. Confermato:
+#       OnTick r.441; r.444 azzera lo stato al cambio di day_of_year
+#       (ResetGiorno r.465); r.458 esce subito se gTradeFatto e' vero;
+#       TentaIngresso r.623 mette gTradeFatto=true anche solo trovando
+#       una posizione gia' aperta; la finestra d'ingresso dura
+#       InpEntryWindowMin=5 minuti (MIM_FinestraIngressoAperta r.341).
+#       NON esiste nessun ramo che apra due volte nello stesso giorno.
+#       >>> E il numero lo conferma: R141 misura n=146 (IS) e n=261
+#           (OOS) su TUTTI E DUE i simboli, IDENTICI. Se ci fosse anche
+#           un solo doppio ingresso, i due simboli non potrebbero
+#           coincidere al conteggio.
+#    B) SIMMETRIA. Cercato OGNI ramo che possa favorire un lato.
+#       Il verso lo decide MIM_Direzione r.267-274:
+#           if(r1>0.0) return(allowLong  ? +1 : 0);   // r.272
+#           if(r1<0.0) return(allowShort ? -1 : 0);   // r.273
+#       cioe' il flag puo' solo trasformare una decisione in ZERO, MAI
+#       ribaltarla. Non esiste nessun "se il long e' spento prova lo
+#       short". Verificato anche il resto:
+#         - LOTTO: LotByRisk r.703-725 calcola la perdita per lotto con
+#           OrderCalcProfit(ORDER_TYPE_BUY,...) r.715 SEMPRE, per tutti
+#           e due i lati -> taglia identica. SIMMETRICO.
+#         - STOP: slDist = InpSLatr*atr identico; sl = entry-slDist se
+#           long, entry+slDist se short (r.651). SIMMETRICO.
+#         - USCITA: ChiusuraCassa r.678, per ORARIO, nessun lato.
+#         - TAKE PROFIT: NON ESISTE (r.660, dichiarato nel codice).
+#       >>> ASIMMETRIE TROVATE: DUE, e tutte e due FUORI dal codice del
+#           lato.
+#         B1. r1 esattamente 0 -> NESSUN trade (r.274). Il paper
+#             regalava lo zero agli short, questo EA no. E' simmetrico,
+#             ma toglie giornate a tutti e due: entra nell'additivita'.
+#         B2. [!] InpUseOvernightInR1=true (default, e lo pinno): r1 e'
+#             misurato DALLA CHIUSURA DI IERI (MisuraSegnale r.530,
+#             ramo r.548), quindi CONTIENE IL GAP. Su un indice in
+#             tendenza rialzista i gap sono positivi piu' spesso ->
+#             r1>0 piu' spesso -> PIU' GIORNATE LONG CHE SHORT. E'
+#             un'asimmetria di FREQUENZA prodotta dal REGIME, non dal
+#             codice, ed e' esattamente cio' che il contro-esempio
+#             misura.
+#       Il codice resta simmetrico. Il MERCATO no. Distinguere le due
+#       cose e' il punto del round.
+#    C) IL TF DEL GRAFICO NON ENTRA NELLA LOGICA. Verificato con grep
+#       sul sorgente: _Period, PERIOD_CURRENT, iTime, iBars, "Bars("
+#       -> ZERO occorrenze. Il segnale si legge su PERIOD_M1
+#       (LeggiFinestraM1 r.487), l'ATR su InpAtrTF. Vedi @PERIODO.
+#
+#  CIO' CHE E' GIA' MISURATO SU QUESTO MOTORE SU QUESTI DUE SIMBOLI
+#  -- contato da me il 23/09/2026 sui CSV grezzi, riga per riga, in
+#  backtest_pipeline/risultati_prove/dal_vps/ABTG_IntradayMomentum/
+#    PASSATE TOTALI IN ARCHIVIO: 8 (quattro CSV da 2 righe ciascuno:
+#      NASUSD_IS_r141a, NASUSD_OOS_r141a, U30USD_IS_r141b,
+#      U30USD_OOS_r141b). Asse di quel round: InpUseSecondSignal.
+#    CON QUALI VALORI DI LATO SONO GIRATE: InpAllowLong=1 e
+#      InpAllowShort=1 in TUTTE E OTTO. Contato colonna per colonna.
+#      >>> Il lato non ha mai mosso in archivio: 8 passate, 1 solo
+#          valore della coppia. E' una MANOPOLA INERTE nel senso del
+#          censimento del 09/09 -- casella LIBERA, non casella provata.
+#    R141 (tick reali, deposito 100000, InpRiskPercent 0.65,
+#    @PERIODO M30, finestra 2024.09.26-2026.06.30, split 0.40):
+#      NASUSD cella nuda (r12 spento):
+#        IS  PF 0,60887 | DD 7,7625% | n 146 | Profit -6.446,05
+#        OOS PF 1,24334 | DD 3,0300% | n 261 | Profit +4.264,01
+#      NASUSD cella r12 acceso:
+#        IS  PF 0,46334 | DD 5,6549% | n  71 | OOS PF 1,48607 | n 133
+#      U30USD cella nuda (r12 spento):
+#        IS  PF 0,59938 | DD 6,4172% | n 146 | Profit -5.942,61
+#        OOS PF 1,03501 | DD 4,4138% | n 261 | Profit +660,66
+#      U30USD cella r12 acceso:
+#        IS  PF 0,46117 | DD 5,3624% | n  76 | OOS PF 1,25027 | n 130
+#    R98 (tick reali, deposito 100000, InpRiskPercent 1.0, @PERIODO M5,
+#    STESSA finestra e STESSO split -- R98_REFERTO.md):
+#      NASUSD cella nuda: IS PF 0,60 n 148 | OOS PF 1,24 DD 4,7% n 261
+#      NASUSD SOLO SHORT: IS -7.420 (PF 0,37) | OOS -987 (PF 0,92)
+#      NASUSD SOLO LONG : IS -3.316 (PF 0,78) | OOS +7.688 (PF 1,54,
+#                         DD 2,0%)
+#      [!] n PER LATO: NON RIPORTATO. E' il buco che questo round chiude.
+#      [!] DISCREPANZA APERTA, non nascosta: R98 scrive n IS = 149 nel
+#          paragrafo "I gate" e n IS = 148 nella tabella, per la STESSA
+#          cella nuda; R141 sulla stessa finestra misura 146. Tre numeri
+#          per la stessa cosa. Le differenze note fra le due corse sono
+#          @PERIODO (M5 contro M30) e InpRiskPercent (1.0 contro 0.65).
+#          Il rischio NON puo' cambiare il n (la decisione del lato non
+#          guarda il saldo), quindi resta @PERIODO. Vedi @PERIODO e il
+#          cancello T1: e' il gate che scioglie questa discrepanza.
+#    SU U30USD IL LATO NON HA NESSUN NUMERO. ZERO passate. [NON MISURATO]
+#
+#  LA TABELLA DEL COSTO, COMPILATA PRIMA DI LANCIARE
+#    Regola di casa: stop >= 40 x spread, altrimenti si dichiara ESCLUSO
+#    PER COSTO col numero accanto.
+#    [!] L'ORA CONTA, e qui cambia il verdetto rispetto ai conti che mi
+#        erano stati passati: questo EA entra alle 20:30 SERVER ed esce
+#        alle 20:59 SERVER. Tutta l'operazione sta dentro l'ORA 20.
+#        Quindi lo spread da usare e' la riga "ora_server=20", non la 15
+#        ne' la 17. Fonte [MISURATO]:
+#        risultati_archivio/spread_flotta/spread_orario_NASUSD.csv
+#          NASUSD ora 20: mediana 1.70 | p95 1.80 | media 1.5591 | max 6.10
+#    [!] E L'ANCORA ADR CONTA, e cambia il numero del 18-27%: il
+#        17/09 e' stato MISURATO che l'ancora ADR troncata sottostima
+#        (ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md r.110-115), e che
+#        l'ancora max-per-data chiude a -1% contro l'ATR(H1) misurato
+#        sul Dow. Ancore [MISURATO]:
+#        CANCELLO_COSTO_FLOTTA_2026-09-10.md r.940-942
+#          NASUSD ADR 384,60 idx, n=26 giornate
+#          U30USD ADR 379,50 idx, n=24 giornate
+#        Legge: ATR(T) = ADR x sqrt(T/1440), residuo verificato -1% su
+#        U30USD H1 (stesso referto, sezione 4).
+#
+#    STOP DI QUESTO MOTORE = InpSLatr 2,0 x ATR(InpAtrTF = M30),
+#    sorgente r.158-160. Non dipende dal TF del grafico.
+#
+#    | ancora ADR        | ATR(M30) [DER] | stop [DER] | /med20 | /p95_20 | /med24 |
+#    |-------------------|----------------|------------|--------|---------|--------|
+#    | 384.60 (max-per-data, MISURATO) |  55.51 idx | 111.02 idx |  65.3x |  61.7x |  46.3x |
+#    | 313.80 (troncata, la vecchia)   |  45.29 idx |  90.59 idx |  53.3x |  50.3x |  37.7x |
+#      med20  = mediana dell'ORA 20 = 1.70 idx  <-- l'ora in cui questo
+#               motore opera, ed e' l'UNICA in cui opera.
+#      p95_20 = p95 dell'ora 20 = 1.80 idx (la coda di quella stessa ora).
+#      med24  = MEDIANA DELLE 24 MEDIANE ORARIE = 2.40 idx. E' la
+#               convenzione che R234a adotta per l'EMA200, ed e' giusta LI'
+#               perche' quel motore non ha nessun filtro d'ora e valuta su
+#               ogni barra 24/24. QUI E' SBAGLIATA PER COSTRUZIONE, e non
+#               per comodita': InpEntryHour=20 + InpEntryWindowMin=5 e
+#               uscita alle 20:59 (r.133-142) confinano OGNI operazione
+#               dentro l'ora 20. La riporto lo stesso, perche' un numero
+#               che mi conviene tacere e' esattamente quello da scrivere.
+#
+#    >>> VERDETTO DEL COSTO: PASSA. E l'ho provato a ROMPERE, non a
+#        confermare. Quattro letture DIFENDIBILI (due ancore x mediana e
+#        p95 dell'ora 20): la PEGGIORE fa 50.3x contro i 40x richiesti
+#        (+26%). Nessuna delle quattro scende sotto la frontiera.
+#    >>> DOVE SI ROMPE, detto col numero: sotto med24 E con l'ancora
+#        troncata insieme, il rapporto scende a 37.7x, cioe' SOTTO 40.
+#        Perche' non e' un verdetto di bocciatura: perche' pretende DUE
+#        cose false nello stesso momento -- una convenzione d'ora che il
+#        codice smentisce (l'EA opera solo all'ora 20) E un'ancora ADR
+#        che il 17/09 e' stata MISURATA sbagliata del 18%
+#        (ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md r.110-115). Tenendo
+#        una sola delle due, il cancello passa lo stesso: 46.3x con
+#        l'ancora buona a med24, 50.3x con l'ancora vecchia a p95 dell'ora 20.
+#    >>> [!] E QUI DICHIARO CHE IL MIO NUMERO NON COINCIDE COL MANDATO.
+#        Mi erano stati passati ~50x (NASUSD) e ~62x (U30USD). I miei
+#        sono 65.3x e vengono da DUE correzioni, tutte e due
+#        documentate: (a) lo spread dell'ORA 20, non dell'ora 15/17,
+#        perche' e' li' che il motore entra; (b) l'ancora ADR max-per-data
+#        384.60, non quella troncata. Le due correzioni tirano in versi
+#        OPPOSTI sul Dow (l'ora 20 costa piu' dell'ora 17: 1,90 e' identico,
+#        ma l'ancora alza lo stop) e concordi sul Nasdaq. VINCE IL MIO,
+#        come richiesto, E il verdetto non cambia: PASSA in tutti e due.
+#    >>> RIPRODUZIONE DI UN NUMERO GIA' SCRITTO DA ALTRI (non da me):
+#        REGISTRO_TEST.md r.3117 dichiara "NASUSD 53,3x" e "U30USD
+#        47,8x". Con l'ancora TRONCATA e la mediana dell'ora 20 il mio
+#        conto da' NASUSD 53,3x e U30USD 47,8x: identici al decimale.
+#        Quindi ho ricostruito la loro catena, e la differenza col mio
+#        numero preferito (65.3x) e' SOLO l'ancora, non un errore.
+#    >>> LIMITE DICHIARATO: il max dell'ora 20 e' 6.10 idx. E' un
+#        tick singolo, non un regime, e non si usa come frontiera -- ma
+#        va scritto perche' una giornata di panico alle 20:30 esiste.
+#
+#  L'ATTESA DICHIARATA, PRIMA DEI NUMERI, con la sua base di calcolo
+#    FREQUENZA -- calcolata da me dai giorni di borsa VERI, non a memoria.
+#      Finestra 2024.09.26 -> 2026.06.30 = 642 giorni di calendario.
+#      Giorni feriali contati con Python: 459 in tutto.
+#      @FRAZIONEIS 0.40 -> IS = 256 giorni -> l'IS finisce il 2025.06.09
+#      e l'OOS parte il 2025.06.10.
+#      [!] CONTROPROVA: R98_REFERTO.md dichiara "IS 2024.09.26-2025.06.09
+#          - OOS 2025.06.10-2026.06.30". Il mio conto riproduce le loro
+#          date AL GIORNO, senza averle copiate. Lo split e' quello.
+#      Feriali IS 183 | feriali OOS 276.
+#      Massimo teorico = 1 operazione per giorno feriale.
+#      MISURATO: 146/183 = 79,8% in IS, 261/276 = 94,6% in OOS.
+#      >>> ATTESA per la cella L+S: n IS = 146, n OOS = 261, ESATTI.
+#          Non "circa": il n non dipende dal rischio ne' dal saldo, solo
+#          dal calendario e dai dati. Se escono numeri diversi, la
+#          differenza e' del BANCO e va indagata prima di leggere altro.
+#      >>> ATTESA per le celle PURE: vedi l'additivita' qui sotto.
+#    MERITO -- e qui c'e' la cosa che va detta PRIMA, perche' e' la piu'
+#      importante del file e contraddice la premessa del mandato.
+#      Mi era stato scritto: "questo dovrebbe garantire n >= 150 in
+#      tutte e due le gambe". VERIFICATO, ED E' FALSO IN DUE MODI:
+#        (1) gia' sulla cella L+S l'IS fa n = 146, cioe' QUATTRO
+#            operazioni SOTTO il pavimento dei 150. Misurato, non
+#            stimato (R141, tutti e due i simboli). REGISTRO_TEST.md
+#            r.3516-3517 lo scrive gia': "NON GIUDICABILE -- IS a 4
+#            operazioni dal pavimento".
+#        (2) e sulle celle PURE va molto peggio, per aritmetica: se
+#            261 operazioni OOS si spezzano in due lati, NESSUNO dei
+#            due puo' avere 261. Con una ripartizione plausibile
+#            52-60% long (vedi B2: i gap di un indice rialzista) escono
+#            long OOS 136-157 e short OOS 104-125.
+#      >>> ATTESA DICHIARATA: la cella SHORT PURO NON raggiungera' i
+#          150 in OOS (attesa 104-125) e sara' [NON MISURATO PER IL
+#          MERITO]. La cella LONG PURO e' a cavallo della soglia
+#          (attesa 136-157) e potrebbe non raggiungerli.
+#      >>> QUINDI QUESTO ROUND NON E' UN ROUND DI MERITO. E' un round
+#          di RISCHIO (leggibile a qualunque n, Emendamento B del
+#          16/08) e di DIAGNOSI (additivita', cancello crociato, n per
+#          lato). Scriverlo ora, prima dei numeri, e' l'unico modo di
+#          non raccontarselo dopo.
+#      PF atteso sulla cella L+S (deve riprodurre R141, perche' il PF e'
+#      risultato quasi invariante al rischio -- vedi sotto):
+#        NASUSD IS PF ~0.609 | OOS PF ~1.243
+#    RISCHIO -- e qui c'e' la seconda cosa da dire PRIMA.
+#      R141 ha girato a InpRiskPercent 0.65; questo file gira a 1.00
+#      (lo pretende T3, e lo usava anche R98). Il DD scala circa
+#      linearmente col rischio, e questo NON e' un'assunzione mia: e'
+#      TRIANGOLATO su NASUSD fra due corse indipendenti --
+#        R141 OOS DD 3,0300% a rischio 0,65 x (1/0,65) = 4,66%
+#        R98  OOS DD 4,7%     a rischio 1,00   MISURATO
+#        scarto 0,9%. E i PF: R141 0,60887/1,24334 contro R98 0,60/1,24.
+#      >>> Quindi l'attesa di DD per la cella L+S a rischio 1,00 e':
+#          NASUSD IS ~11.94% | OOS ~4.66%
+#      >>> [!] ATTESA DI SFORAMENTO DI T3, DICHIARATA PRIMA: la cella L+S
+#          di NASUSD in IS e' attesa a ~11.94%, cioe' SOPRA il tetto
+#          del 10,00%. Non e' una sorpresa da scoprire dopo: e' il
+#          DD gia' misurato da R141 (7.7625% a rischio 0,65)
+#          riportato a rischio 1,00. Se esce li', T3 e' violato
+#          SULLA CELLA GIA' BOCCIATA, e la domanda vera diventa:
+#          le celle PURE ci stanno sotto?
+#      >>> Le celle PURE hanno meta' delle operazioni: attesa DD fra il
+#          40% e il 90% di quello della L+S. Non piu' basso in modo
+#          garantito -- un lato solo puo' concatenare perdite -- ed e'
+#          proprio per questo che T3 si legge a QUALUNQUE n.
+#
+#  L'ADDITIVITA' DI n COME DIAGNOSI (classe 641)
+#    Su un asse di LATO l'identita' da controllare e':
+#        n(long puro) + n(short puro) = n(L+S)
+#    e i due addendi stanno in DUE FILE DIVERSI dello stesso simbolo
+#    (R235a e R235b), mentre n(L+S) esce da tutti e due.
+#    >>> COSA MI ASPETTO: ADDITIVITA' ESATTA, e non per speranza ma per
+#        lettura del codice. MIM_Direzione r.272-273 applica il flag
+#        DOPO che il segno di r1 ha gia' scelto il verso: il flag puo'
+#        solo azzerare, mai ribaltare. E si opera al massimo una volta
+#        al giorno (punto A). Quindi ogni giornata appartiene a UNA
+#        sola delle due meta', e le due meta' sono una PARTIZIONE.
+#    >>> SUB-ADDITIVO (somma < L+S) = c'e' uno slot che morde: una
+#        giornata rifiutata in un run e accettata nell'altro. L'unico
+#        meccanismo che puo' farlo e' il LOTTO: LotByRisk r.703 torna 0
+#        se il saldo e' crollato, e il saldo dipende dal lato. Con
+#        deposito 100.000 e stop ~111 idx il lotto atteso e' ~9.0,
+#        cioe' 1000 volte il minimo: non puo' arrivare a 0. Percio' un
+#        sub-additivo qui NON si spiega col lotto e va indagato.
+#    >>> SUPER-ADDITIVO (somma > L+S) = E' L'UNICO ALLARME VERO, ed e'
+#        IMPOSSIBILE per costruzione. Se esce, non e' un risultato del
+#        motore: e' un pin non applicato, un magic collidente o un CSV
+#        scambiato. In quel caso NESSUN numero dei quattro file si
+#        legge, e si va a cercare il guasto.
+#
+#  IL CONTRO-ESEMPIO, COSTRUITO DA ME PRIMA (regola del 10/09)
+#    LA TESI COMODA e': "il motore e' simmetrico, i due lati valgono
+#    uguale". Su NASUSD R98 sembra averla gia' demolita (short PF 0,92
+#    OOS contro long PF 1,54 OOS). MA QUELLA LETTURA E' UNA CONFERMA,
+#    NON UNA VERIFICA, e provo a romperla.
+#    >>> L'IPOTESI ALTERNATIVA, che spiegherebbe TUTTO senza nessun
+#        edge direzionale: "non c'e' nessun segnale, c'e' solo la
+#        DERIVA dell'indice in una finestra rialzista". Se fosse vera,
+#        ogni long incassa +D per operazione e ogni short paga -D, con
+#        LO STESSO |D| (l'EA tiene 29 minuti per tutti e due i lati, ha
+#        la stessa taglia r.715 e lo stesso stop r.651; e lo stop a
+#        111 idx su una mezz'ora quasi mai morde, quindi il P/L e'
+#        quasi il rendimento nudo dei 29 minuti).
+#    >>> E ALLORA L'ALTERNATIVA PRODUCE UN NUMERO PRECISO, che scrivo
+#        ora: sotto deriva pura, il rapporto fra i due P/L deve essere
+#        il rapporto fra i due n.
+#            |P/L short| / P/L long = n(short) / n(long)
+#        Sui numeri R98 OOS di NASUSD (long +7.688, short -987):
+#            n(short)/n(long) dovrebbe valere 987/7.688 = 0,128
+#        cioe' n(long) = 232 e n(short) = 29 su 261. Vorrebbe dire
+#        r1 > 0 in NOVE giornate su dieci.
+#    >>> ED ECCO IL TEST, che questo round esegue per la prima volta
+#        perche' per la prima volta MISURA il n per lato:
+#          - se esce n(short)/n(long) intorno a 0,12 -> LA DERIVA
+#            SPIEGA TUTTO, non c'e' nessun lato migliore, e la mia
+#            attesa di ripartizione 52-60% e' SBAGLIATA. Lo scrivo qui
+#            prima, cosi' non posso rinnegarlo dopo.
+#          - se esce intorno a 0,75-0,95 (cioe' la ripartizione che mi
+#            aspetto) -> LA DERIVA NON BASTA. Con n(long)=140 e
+#            n(short)=121, la deriva pura predirebbe per lo short
+#            -7.688 x (121/140) = -6.645, mentre il MISURATO e' -987:
+#            lo short perde SEI VOLTE E MEZZA MENO di quanto la deriva
+#            imponga. Tradotto: sarebbe LO SHORT ad avere il segnale
+#            per operazione migliore, non il long. Che e' l'ESATTO
+#            CONTRARIO della lettura comoda "gli short perdono ovunque,
+#            teniamo i long".
+#    >>> PERCHE' QUESTO E' UN CONTRO-ESEMPIO E NON UN'ALTRA CONFERMA:
+#        perche' il round puo' uscire in tutti e due i modi, i due modi
+#        portano a conclusioni OPPOSTE, e sono scritti qui PRIMA. Se
+#        avessi solo scritto "mi aspetto che il long vada meglio",
+#        qualunque numero me lo avrebbe confermato.
+#    >>> E UN TERZO ESITO FALSIFICA IL FILE INTERO: se n(long)+n(short)
+#        non fa n(L+S), nessuna delle due letture vale e il round e'
+#        una misura del banco, non del motore.
+#
+#  SOGLIE CONGELATE ORA, COL NUMERO ACCANTO
+#    T1  CANCELLO CROCIATO, e costa ZERO passate. La cella L+S
+#        (InpAllowLong=1 E InpAllowShort=1) esce in TUTTI E DUE i file
+#        di questo simbolo -- R235a e R235b -- da due corse
+#        separate e con DUE MAGIC DIVERSI. Deve uscire IDENTICA AL
+#        CENTESIMO su Profit, Profit Factor, Equity DD % e Trades, in
+#        tutte e due le gambe. Se non lo e', IL BANCO NON E'
+#        DETERMINISTICO e NESSUN numero dei QUATTRO file di R235 si
+#        legge -- compresi quelli dell'altro simbolo, che stanno sullo
+#        stesso banco.
+#        [!] Perche' questo cancello e' carico e non cerimoniale: su
+#            QUESTO motore esiste gia' una discrepanza aperta di 1-3
+#            operazioni sulla cella nuda IS (148 / 149 / 146 -- vedi
+#            sopra). T1 e' il gate che la scioglie, e il magic diverso
+#            fra i due file e' esattamente l'asse tecnico G1 che R98
+#            usava (prove/R98rif_nuda_NASUSD.txt r.183:
+#            InpMagic=772800||772800||1||772801||Y).
+#        [!] E un ancoraggio ESTERNO, piu' forte del solo T1: la cella
+#            L+S deve dare n IS = 146 e n OOS = 261, gli stessi di
+#            R141 su questo simbolo. Il n NON dipende dal rischio,
+#            quindi il cambio 0,65 -> 1,00 non lo scusa.
+#    T2  COSTO. Frontiera stop >= 40 x spread. Su questo simbolo la
+#        tabella sopra dice PASSA in tutti e quattro gli angoli
+#        (peggiore 50.3x). Se per qualunque ragione una cella uscisse
+#        sotto 40x, non potrebbe essere promossa qualunque PF faccia.
+#    T3  RISCHIO, e si legge a QUALUNQUE n (Emendamento B del 16/08).
+#        DD <= 10,00% a InpRiskPercent 1,0. Peggior Giornata: allarme a
+#        -3,00%. Sopra soglia: si scrive nel referto e la taglia si
+#        rifa' prima di qualunque discorso di schieramento.
+#        [!] ATTESO SFORAMENTO sulla cella L+S di NASUSD in IS (~11.94%).
+#            Dichiarato prima. La lettura utile e' se le celle
+#            PURE restano sotto il 10,00%.
+#    T4  MERITO. Si legge SOLO su celle con n >= 150 nella gamba OOS.
+#        Attesa dichiarata sopra: lo SHORT PURO non ci arrivera' e il
+#        LONG PURO e' a cavallo. Le celle sotto soglia si marcano
+#        [NON MISURATO PER IL MERITO], NON "brutte".
+#    T5  NIENTE PROMOZIONI DA QUESTO ROUND, per nessuna cella e per
+#        nessun motivo. Il round DICHIARA la decomposizione del motore.
+#        Spegnere un lato guardando questi numeri e' vietato da R52 e
+#        dal referto R98 di questo stesso motore. Una sedia pretende
+#        una finestra fuori campione sua, un contratto e la firma di
+#        Claudio.
+#
+#  I BUCHI DICHIARATI, PER NOME
+#    - UNA SOLA FINESTRA, e contiene UN SOLO REGIME LUNGO (toro
+#      2024-2026) piu' correzioni brevi. L'Emendamento C (prova di
+#      regime: toro / orso / laterale / crollo) NON e' soddisfatto e
+#      sugli indici BCM non e' soddisfacibile: i tick partono dal
+#      2024.09.26 (classe 590). Su un motore il cui lato e' deciso dal
+#      segno di un rendimento, un solo regime e' il buco PIU' GRAVE del
+#      file, e va ripetuto ogni volta che si cita un numero.
+#    - n IS = 146 < 150. Il merito in IS resta SOSPESO gia' sulla cella
+#      L+S, prima ancora di spezzare i lati.
+#    - IL BUCO DI DATI ALL'INIZIO DELLA FINESTRA. Feriali IS 183 contro
+#      n 146 = 37 giornate perse (79,8%); feriali OOS 276 contro n 261
+#      = 15 perse (94,6%). Le feste americane sono ~9 l'anno e non
+#      spiegano 37. Restano ~30 giornate IS perse per dati M1
+#      incompleti (l'EA salta la giornata sotto l'80% di barre,
+#      MIM_DatiCompleti r.313). [NON MISURATO] quali e perche': non lo
+#      invento. E' un difetto del FEED all'inizio della finestra, e
+#      pesa sull'IS molto piu' che sull'OOS.
+#    - n PER LATO IN ARCHIVIO: [NON MISURATO]. R98 ha i P/L dei due
+#      lati e non il n. Tutto il contro-esempio sopra poggia su un
+#      rapporto n(short)/n(long) che oggi NON esiste come numero:
+#      questo round lo produce, e fino ad allora la mia attesa
+#      "52-60% long" e' un'INFERENZA dal regime, non una misura.
+#    - ATR(M30) DI QUESTI DUE SIMBOLI: [DERIVATO], mai letto
+#      direttamente. Viene da ADR x sqrt(T/1440) con residuo -1%
+#      validato SU UN SOLO simbolo (U30USD, a H1). Il verso dell'errore
+#      e' noto e PRUDENTE: sul DAX l'ATR vero cresce PIU' LENTAMENTE
+#      della radice, quindi scendendo da H1 a M30 lo stop vero e' PIU'
+#      GRANDE del mio -> il mio giudizio sul costo e' il piu' severo,
+#      non il piu' comodo.
+#    - SLIPPAGE: InpSlippagePts=0. R98e ha misurato che questo motore
+#      scala POCO con lo slippage (IS -10.533 contro -10.476), ma il
+#      sorgente r.191-202 dichiara il limite: qui lo slippage si puo'
+#      modellare SOLO sullo stop, e l'uscita e' a mercato all'orario.
+#      Quindi il costo misurato e' un LIMITE INFERIORE del costo vero.
+#    - GUARDIAN: InpUsaGuardian=false, come R141. Nel tester le
+#      GlobalVariable del Guardian non esistono e la guardia lascia
+#      passare tutto comunque (fail-open, dichiarato a r.79-86 del
+#      sorgente). PROVA che e' inerte: R98 girava con InpUsaGuardian=1
+#      e R141 con false, e tutte e due danno n OOS = 261.
+#    - RISCHIO 1,0% qui, 0,65% in campo sulle sedie vive: ogni DD di
+#      questo file va moltiplicato per 0,65 per confrontarlo col
+#      forward.
+#    - IL SECONDO PREDITTORE r12 RESTA SPENTO (InpUseSecondSignal=false)
+#      in tutte e quattro le celle. E' la cella nuda del paper. La
+#      variante r12 ha gia' il suo asse in R141 e non si mischia con
+#      questo: una variabile per file.
+#
+#  COSTO IN TEMPO MACCHINA
+#    2 celle x 2 tranche (IS + OOS) = 4 PASSATE per file.
+#    R235 intero = 4 file x 4 = 16 PASSATE.
+#    Due stime, tutte e due da numeri gia' scritti da altri:
+#      - tasso MISURATO su QUESTO motore e QUESTA finestra: R98 ha
+#        fatto 32 passate in 0,3 ore (R98_REFERTO.md, intestazione) =
+#        0,56 min/passata -> 16 passate = ~9,0 minuti.
+#      - formula dichiarata da R141b (T = 0,6 + 0,077 x passate) ->
+#        0,91 min/file -> ~3,6 minuti in tutto.
+#    >>> Banda onesta: 4-9 MINUTI per il round intero. E' il round piu'
+#        economico in coda: il costo non e' un argomento contro.
+#
+#  BANCO E DIRETTIVE
+#    Modello 4 (TICK REALI). DEPOSITO 100000 -- lo stesso di R98 e di
+#    R141 (classe 646: depositi diversi non si confrontano, e a 10.000
+#    MathFloor taglia il lotto).
+#    @FRAZIONEIS 0.40 DICHIARATA QUI DENTRO e non dalla riga di lancio:
+#    RIGA_ROUND_VPS.ps1 non ha nessuna occorrenza di "Frazione" e non
+#    potrebbe inoltrarla (classe 647). Senza la direttiva il driver
+#    spezzerebbe in silenzio con un'altra frazione e il confronto con
+#    R141 e R98 salterebbe.
+#    @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick sugli indici
+#    (sonda del 17/08). Sotto non si scende (classe 590).
+#    @FINOA 2026.06.30.
+#    @PERIODO M30, E LA SCELTA VA MOTIVATA perche' questo EA lavora a
+#    OROLOGIO e non a barre:
+#      1. il TF del grafico NON PUO' entrare nella logica -- verificato
+#         con grep sul sorgente: zero occorrenze di _Period,
+#         PERIOD_CURRENT, iTime, iBars, "Bars(". Il segnale si legge su
+#         PERIOD_M1 (r.487) e l'ATR su InpAtrTF (r.158). A tick reali il
+#         TF del grafico non cambia nemmeno i tick consegnati.
+#      2. M30 e' lo STESSO TF di InpAtrTF: chart e ATR condividono
+#         l'orologio e il tester carica quella serie comunque.
+#      3. M30 e' cio' che usa R141 su TUTTI E DUE questi simboli, ed e'
+#         l'unica cosa che rende possibile l'ancoraggio esterno del
+#         cancello T1 (n IS 146 / n OOS 261).
+#      4. ARITMETICA DELLE BARRE, che e' la ragione per cui NON scelgo
+#         M5: 642 giorni x 288 barre = ~184.900 barre M5, cioe' SOPRA
+#         il tetto delle ~100.000 barre del tester. A M30 sono
+#         642 x 48 = ~30.800 barre, comodamente sotto. R98 girava a M5
+#         ed e' l'unica corsa con un n IS diverso: NON dico che sia la
+#         causa (sarebbe un'inferenza, e il verso non torna), ma e' una
+#         ragione sufficiente per non ripetere quella scelta.
+#      >>> E RESTA UN BUCO: [NON MISURATO] se @PERIODO M5 contro M30
+#          sposti davvero il n. Il round non lo misura e non deve.
+#    ORE: tutte in ORA SERVER e NON convertite. Verifica della coerenza
+#    con la sessione USA di NASUSD (regola BCM: ora italiana - 1):
+#      InpSignalStartHour 14 + InpSignalStartMin 30 = 14:30 server
+#        = 15:30 italiane = APERTURA cassa USA. CORRETTO.
+#      InpEntryHour 20 + InpEntryMin 30 = 20:30 server = 21:30 italiane
+#        = inizio dell'ULTIMA mezz'ora. CORRETTO.
+#      InpExitHour 21 + InpExitMin 0 = 21:00 server = 22:00 italiane
+#        = CHIUSURA cassa USA; meno InpExitSafetyMin 1 -> uscita reale
+#        alle 20:59 server. CORRETTO.
+#      NASUSD e' un indice USA e segue la stessa campanella: gli orari
+#      valgono identici sui quattro file del round.
+#    InpNewsCurrencies NON E' PINNATO, ed e' una scelta dichiarata:
+#      InpUseNewsFilter=false, quindi LoadNews() non viene nemmeno
+#      chiamato (OnInit r.417) e la stringa non viene mai letta. In
+#      piu' il default compilato e' "USD" (r.178), cioe' il valore
+#      giusto se mai servisse -- a differenza del caso della classe che
+#      ha generato il controllo 3 di controlla_prova.py, dove il
+#      default era vuoto. Non pinnati per lo stesso motivo InpComment e
+#      InpNewsFile.
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+#
+# --- I FISSI. Forma nuda Nome=valore. Copia di R141a salvo:
+#     InpRiskPercent (0.65 -> 1.00, lo pretende T3), InpMagic, e
+#     naturalmente l'asse.
+InpUsaGuardian=false
+# --- La campanella d'apertura: 14:30 server + 30 minuti. E' la
+#     campanella, non un parametro: NON si spazzola.
+InpSignalStartHour=14
+InpSignalStartMin=30
+InpSignalMinutes=30
+# --- r1 dalla chiusura di ieri = definizione DEL PAPER (r.113).
+#     Contiene il gap: vedi asimmetria B2 in testa al file.
+InpUseOvernightInR1=true
+InpMaxGiorniIndietro=5
+# --- Soglia 0 = si opera SEMPRE, come il paper. E' cio' che rende il
+#     motore 1 op/giorno e il campione leggibile.
+InpMinAbsR1Pct=0.0
+# --- Il secondo predittore r12 resta SPENTO: cella nuda del paper.
+#     Il suo asse e' gia' stato girato in R141 e non si mischia qui.
+InpUseSecondSignal=false
+# --- La campanella di chiusura: ingresso 20:30 server, uscita 21:00
+#     meno 1 minuto di margine = 20:59 server.
+InpEntryHour=20
+InpEntryMin=30
+InpEntryWindowMin=5
+InpExitHour=21
+InpExitMin=0
+InpExitSafetyMin=1
+# --- IL LATO. InpAllowShort e' PINNATO; l'asse e' in fondo al file.
+InpAllowShort=true
+# --- Guardrail di rischio. Lo stop NON e' del paper: e' nostro, ed e'
+#     largo apposta. 2,0 x ATR(M30) -- vedi la tabella del costo.
+InpUseStopLoss=true
+InpAtrTF=30
+InpAtrPeriod=14
+InpSLatr=2.0
+# --- Rischio 1,00%: lo pretende T3 ed e' quello di R98 (deposito
+#     100000). R141 girava a 0,65: i DD di R141 vanno moltiplicati per
+#     1,538 per confrontarli con questi.
+InpRiskPercent=1.0
+# --- Filtro notizie SPENTO. Con InpUseNewsFilter=false LoadNews() non
+#     viene chiamato: i quattro parametri sotto sono inerti e stanno
+#     qui solo perche' il file sia completo e verificabile.
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies, InpComment, InpNewsFile NON pinnati: vedi la nota
+# in testa al file (stringhe, filtro spento, default gia' corretti).
+# MAGIC FISSO E VERGINE 764210 -- verificato repo-wide il 23/09/2026:
+# grep -rl "764210" . --exclude-dir=.git --exclude-dir=.claude -> 0 file.
+# VIETATO 772800 (default compilato dell'EA) e 7841xx (usati da R141).
+InpMagic=764210
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+InpSlippagePts=0
+#
+# --- L'UNICO ASSE: IL LATO. 2 celle x 2 tranche = 4 PASSATE.
+#     PERCHE' DUE FILE E NON UN ASSE SOLO A QUATTRO CELLE: mettendo ad
+#     asse TUTTI E DUE i flag insieme nascerebbe la cella (0,0), e su
+#     quella l'EA torna INIT_FAILED (r.400: "entrambi i lati spenti").
+#     Il driver ha perfino una toppa per contarla come "cella muta"
+#     (walkforward_generico.ps1 r.870-880). Con due file da un asse
+#     ciascuno quella cella NON esiste, e in piu' la cella L+S nasce due
+#     volte: e' il cancello T1 preso gratis.
+#     cella 0 -> CORTO PURO (InpAllowLong=0, InpAllowShort=1)
+#     cella 1 -> L+S, la cella nuda gia' misurata da R141 (e' il
+#                cancello crociato T1 con R235b_lato_MIM_NASUSD_long.txt)
+InpAllowLong=1||0||1||1||Y
+# ==========================================================================
