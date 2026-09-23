@@ -31196,3 +31196,81 @@ gia' provato»* che voleva dire *«l'abbiamo girato senza che cambiasse niente»
 per cella e il sottoinsieme per nome -- **e con la stessa scala rifatta sul complemento.** Se
 le due non concordano, quello che si consegna e' *«la tendenza esiste SOLO a campione
 sottile»*, che e' un'altra frase e porta a un'altra decisione.
+
+---
+
+## CLASSE 612 -- 🧱🌍 IL **PAVIMENTO DI UN MERCATO APPLICATO A UN ALTRO** perche' e' l'unico che si era misurato: `@DAQUANDO 2024.09.26` (indici) messo su **quattro coppie FOREX** che il broker ha dal 1971-1993, e il candidato archiviato su 21 mesi (23/09/2026, su `ABTG_Nightly` -- **sorella maggiore della 590**, che copre la data scritta *oltre* il muro; questa copre la data scritta *dentro un muro che non e' il suo*)
+
+**Il numero della classe, grepato nel momento in cui questa riga viene scritta**
+(`grep -oE '^#+ *CLASSE +[0-9]+' backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md | grep -oE '[0-9]+' | sort -n | tail -3`):
+le ultime erano **609 / 610 / 611**, e `CLASSE 612` non compariva da nessuna parte nel repo.
+
+### 🔴 Il caso reale, ed e' costato un candidato intero
+`backtest_pipeline/prove/ABTG_Nightly_EURCHF_00_conta.txt` r.72-76 scriveva, **di suo pugno**:
+
+> *«`@DAQUANDO 2024.09.26` e' il pavimento che SAPPIAMO esistere su questo broker
+> (**misurato sugli indici** il 08/09). La profondita' tick VERA di EURCHF **NON E'
+> MISURATA**: se il campione uscisse sottile, la prima cosa da fare e' misurarla, non
+> cambiare i parametri.»*
+
+Il campione **e' uscito sottile** (n = 63 IS / 85 OOS, contro un pavimento di 150 per
+finestra), il candidato e' stato archiviato, e **la profondita' non e' mai stata guardata --
+benche' fosse misurata dal 17/08**, cioe' *tre settimane prima che il file venisse scritto*:
+`risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv`, blocco `[SIMBOLI]`,
+dice `EURCHF ... 1993.04.27` e `USDCHF ... 1971.01.03`.
+
+🔴 **E non era un file solo.** `prove/CODA.csv` r.5-7, scritta il **10/08**, cioe' **prima**
+che le corse partissero, porta gia' l'avvertimento a chiare lettere:
+
+> *«daquando: 2024.09.26 e' MISURATO solo sugli indici BCM. Su forex, metalli e Nikkei e'
+> un'IPOTESI: ogni referto DEVE controllare i trade/mese IS vs OOS.»*
+
+Sotto quell'intestazione sono partite **otto** righe `ABTG_Nightly;<simbolo>;M15;2024.09.26`.
+👉 **L'avvertimento c'era, era scritto, era giusto, ed e' stato scavalcato nove volte.**
+
+### 🧮 Quanto e' costato, col numero
+Frequenza misurata sui CSV grezzi (`risultati_prove/ABTG_Nightly/*.csv`, 642 giorni solari =
+**458 feriali**): EURCHF **0,323** · USDCHF **0,463** · GBPUSD **0,566** · EURUSD **0,590**
+operazioni per giorno feriale. Sulla finestra nativa **2019.01.01 -> 2026.06.30** (1.955
+feriali) le stesse frequenze danno **632 / 905 / 1.106 / 1.153** operazioni, cioe'
+**316 / 452 / 553 / 576 per finestra** con taglio 0,50. 👉 **Tutti e quattro sopra il
+pavimento dei 150 con un margine da 2 a 4 volte**, mentre sulla finestra sbagliata **nessuno
+dei quattro lo raggiungeva in IS.**
+
+### 🧊 E LE DUE PROFONDITA' SONO **DUE NUMERI DIVERSI**, che la classe 590 non separa
+Questo e' il cuore del difetto, e va scritto esplicito perche' e' la parte che si sbaglia:
+
+| | forex BCM | indici BCM | a che serve |
+|---|---|---|---|
+| 🧱 **muro dei TICK REALI** | **2024.07.05** | **2024.09.26** | e' il pavimento del **`-Modello 4`** |
+| 📊 **muro delle BARRE M1** | 1971.01.03 / 1993.xx | **2024.09.26** (`COMPLETO`: *il broker non ce l'ha*) | e' il pavimento del **`-Modello 1`** |
+| 🚶 **pavimento OPERATIVO** | **1999.01** (R102 par.4: nessuna operazione prima, su 3 motori indipendenti) | n/a | e' quello che **produce operazioni** |
+
+🔴 **Sugli indici i due muri COINCIDONO** (2024.09.26 e 2024.09.26) — e **per questo il
+difetto e' invisibile a chi viene dagli indici**: su quel mercato non c'e' niente da
+separare, e «il pavimento» sembra una cosa sola. 👉 **Sul forex sono a 25-53 anni di
+distanza**, e usarne uno al posto dell'altro butta via decenni.
+E la vecchia corsa EURCHF, che era `-Modello 4`, buttava via **83 giorni di tick VERI**
+(2024.07.05 -> 2024.09.26) per copiare la soglia di un mercato diverso.
+
+### ✅ La regola
+1. 🌍 **Una soglia misurata su un mercato NON e' una soglia su un altro mercato.** Vale per
+   il pavimento dello storico, per lo spread, per l'ADR e per il costo. Prima di riusarla si
+   scrive **su quale mercato e' stata misurata** — e se il mercato non e' lo stesso, la
+   soglia e' **`[NON MISURATO]` su quello nuovo**, non «la migliore che abbiamo».
+2. 🔀 **Si dichiara SEMPRE a quale MODELLO serve la data.** `-Modello 4` vuole il muro dei
+   **tick**; `-Modello 1` vuole il muro delle **barre M1**. Una `@DAQUANDO` senza il modello
+   accanto e' meta' informazione.
+3. 🔎 **Il controllo che costa dieci secondi**, e in questo caso avrebbe chiuso il caso:
+   `grep -E '^(EURCHF|USDCHF)' backtest_pipeline/risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv`
+4. 🧾 **Se un file prova scrive di suo pugno "se il campione esce sottile, la prima cosa e'
+   misurare la profondita'", quella frase e' un IMPEGNO, non una nota.** Quando il campione
+   esce sottile, **si esegue prima di archiviare**. Un candidato archiviato con un impegno
+   aperto dentro il suo stesso file **non ha un certificato di morte**: ha un compito non
+   fatto.
+5. 🧱 **E prima di scaricare qualunque cosa: il PREREQUISITO va verificato sul DISCO della
+   macchina che gira.** `ABTG_Nightly` legge il box da `PERIOD_M1` in modo esplicito
+   (`ABTG_Nightly.mq5` r.183-190): **senza barre M1 la passata fa ZERO operazioni, e zero
+   operazioni si legge identico a "non ha edge"**. Su EURCHF e USDCHF le M1 **non sono mai
+   state scaricate** (sonda 17/08: stato `da scaricare (parziale)`, solo 55.685 / 57.535
+   barre H1).

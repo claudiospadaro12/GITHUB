@@ -1,0 +1,382 @@
+# =====================================================================
+#  R220c -- NIGHTLY su GBPUSD: LA FINESTRA GIUSTA + LO STOP AD ASSE
+#           L'unico asse e' InpSLpips, la GESTIONE DELL'USCITA: il punto
+#           (3) del certificato di morte, VUOTO su 20 CSV su 20.
+#  EA: ABTG_Nightly   (GBPUSD M15)   candidato ARCHIVIATO
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#     -Deposito 10000 -Modello 1
+#
+#  NASCE DA UN DIFETTO MISURATO, NON DA UN'INTUIZIONE
+#  --------------------------------------------------------------------
+#  prove/ABTG_Nightly_EURCHF_00_conta.txt r.72-76 scriveva:
+#    "@DAQUANDO 2024.09.26 e' il pavimento che SAPPIAMO esistere su questo
+#     broker (MISURATO SUGLI INDICI il 08/09). La profondita' tick VERA di
+#     EURCHF NON E' MISURATA: se il campione uscisse sottile, la prima cosa
+#     da fare e' misurarla, non cambiare i parametri."
+#  E prove/CODA.csv r.5-7, scritta il 10/08 -- cioe' PRIMA delle corse --
+#  diceva gia' la stessa cosa per gli altri otto simboli:
+#    "daquando: 2024.09.26 e' MISURATO solo sugli indici BCM. Su forex,
+#     metalli e Nikkei e' un'IPOTESI".
+#  >>> Il campione E' uscito sottile (96/163) e la profondita' NON e'
+#      stata guardata, benche' fosse misurata dal 17/08. Questo file fa
+#      quello che quei due file avevano gia' scritto di fare.
+#  >>> E' CLASSE 612 in CHECKLIST_RIGA_DI_LANCIO.md (23/09/2026).
+#
+#  1. LE DUE PROFONDITA', CHE SONO DUE NUMERI DIVERSI E NON SI MESCOLANO
+#  --------------------------------------------------------------------
+#  (a) MURO DEI TICK REALI (serve al -Modello 4), forex BCM: 2024.07.05.
+#      Fonte: risultati_archivio/NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md,
+#      righe VERBATIM del Diario del tester (01/09/2026, conto 50503392):
+#        "GBPUSD: ticks data begins from 2024.07.05 00:00"
+#        "EURUSD: ticks data begins from 2024.07.05 00:00"
+#        "EURGBP: ticks data begins from 2024.07.05 00:00"
+#      >>> E SU GBPUSD QUEL NUMERO E' [MISURATO]: e' una delle tre righe qui sopra.
+#      >>> NON e' comunque 2024.09.26: quello e' il muro degli INDICI
+#          (R97/R109 e misura_tick/REFERTO_MISURA_TICK_D30EUR.txt).
+#          La vecchia corsa su questo simbolo era -Modello 1 dal 2024.09.26,
+#          quindi qui il muro dei tick non c'entrava: la data sbagliata
+#          le ha tolto DECENNI di BARRE, non 83 giorni di tick. Due danni
+#          diversi dalla stessa svista, e vanno detti diversi.
+#      >>> E il muro dei tick CHIUDE il -Modello 4 su questa domanda:
+#          2024.07.05 -> 2026.06.30 = 725 giorni solari = 518 feriali.
+#          Alla frequenza misurata (0.5655 op/giorno feriale) fa 293 operazioni
+#          TOTALI, cioe' 146/146 per finestra: SOTTO il pavimento dei 150, e nessuna finestra puo' salvarlo
+#          >>> Percio' questo round e' -Modello 1, e lo dichiara.
+#
+#  (b) MURO DELLE BARRE (serve al -Modello 1), GBPUSD nativo BCM:
+#      1993.05.11. Fonte PRIMARIA, letta riga per riga, NON un referto:
+#      risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv
+#      blocco [SIMBOLI], colonne PrimaDataTF / BarreTF / Stato:
+#        GBPUSD,...,H1,100008 (al tetto delle barre),1993.05.11,...,"da scaricare (parziale)"
+#      >>> E IL PAVIMENTO OPERATIVO E' UN TERZO NUMERO ANCORA: R102
+#          (24/08, risultati_archivio/R102_REFERTO_BLOCCO1.md par.4) ha
+#          misurato che su GBPUSD, EURUSD e AUDUSD NESSUNA operazione
+#          nasce prima del gennaio 1999, benche' le barre M1 ci siano dal
+#          1971/1993. "Storico lungo" su BCM vale ~27 anni dal 1999, non
+#          33 ne' 55. La finestra di questo round parte dal 2019: il
+#          pavimento del 1999 non morde, e lo scrivo perche' non venga
+#          riusato per sbaglio come se mordesse.
+#
+#  1-bis. IL PREREQUISITO CHE PUO' MANDARE A ZERO TUTTO IL ROUND
+#  --------------------------------------------------------------------
+#  L'EA legge il box da PERIOD_M1 in modo ESPLICITO (r.183-190:
+#  iBarShift/iHighest/iLowest su PERIOD_M1). Senza barre M1 sul disco
+#  della macchina che gira, ComputeBox torna false, l'EA scrive
+#  "box non calcolabile" e la passata fa ZERO operazioni -- che si legge
+#  identico a "non ha edge".
+#  >>> BARRE M1 DI GBPUSD SUL DISCO: SI -- 9.863.886 barre M1 dal 1993.05.11, stato COMPLETO (R102, 24/08)
+#  >>> CONTROLLO DA FARE PRIMA DI LANCIARE, non dopo: sul PC di backtest,
+#      Strumenti -> Archivio storico -> GBPUSD -> M1, prima data.
+#      Se non copre il 2019, si scarica PRIMA. Non e' un dettaglio del
+#      round: e' la condizione perche' il round esista.
+#
+#  2. L'ANCORA -- letta nei CSV GREZZI, mai in un referto
+#  --------------------------------------------------------------------
+#  risultati_prove/ABTG_Nightly/ABTG_Nightly_GBPUSD_IS_ohlc.csv
+#  risultati_prove/ABTG_Nightly/ABTG_Nightly_GBPUSD_OOS_ohlc.csv
+#  (corsa M15, -Modello 1 (OHLC su M1), -Deposito 10000, @DAQUANDO 2024.09.26,
+#   @FRAZIONEIS 0.40 di default, due passate gemelle sul magic 771701/771702
+#   IDENTICHE AL CENTESIMO)
+#
+#      finestra   n     PF         Equity DD %   Profit
+#      IS         96   0.58619    22.6211     -2115.01
+#      OOS       163   1.04013    11.2786     320.41
+#
+#  >>> QUESTO ROUND NON HA UN'ANCORA DI P/L, E IL MOTIVO VA DETTO SUBITO:
+#      cambia APPOSTA la finestra, quindi non puo' riprodurre quei numeri.
+#      Chi legge un file prova si aspetta l'ancora, e qui non c'e'. Al suo
+#      posto c'e' un'ANCORA DI FREQUENZA, che e' falsificabile allo stesso
+#      modo e misura proprio la cosa che la finestra lunga mette a rischio.
+#
+#  2-bis. L'ANCORA DI FREQUENZA (il sostituto, col suo numero)
+#  --------------------------------------------------------------------
+#  Dai CSV grezzi: 259 operazioni in 642 giorni solari = 458 FERIALI
+#  ==> 0.5655 operazioni per giorno feriale.
+#  >>> La finestra nuova 2019.01.01 -> 2026.06.30 fa 2.737 giorni solari =
+#      1.955 feriali. A frequenza invariata: 1106 operazioni totali,
+#      cioe' 553/553 con @FRAZIONEIS 0.50.
+#  >>> IL PAVIMENTO DEI 150 (Emendamento A, 16/08) SI RAGGIUNGE se la
+#      frequenza tiene almeno al 27.1% di quella di oggi.
+#  >>> E DA LEGGERE PER PRIMA, PRIMA DI QUALUNQUE PF:
+#      op/giorno-feriale della corsa nuova / 0.5655
+#        >= 0,80  -> la finestra e' VERA: si legge il round.
+#        << 0,80 con i giorni GIUSTI -> il filtro QB ha morso sull'epoca
+#           vecchia (e' un RISULTATO, si scrive).
+#        << 0,80 con i giorni SBAGLIATI -> la finestra si e' troncata in
+#           silenzio (classe 590): NON si legge niente, si va a guardare
+#           la prima data M1 sul disco.
+#
+#  3. L'ASSE: InpSLpips, e perche' PROPRIO LUI
+#  --------------------------------------------------------------------
+#  InpSLpips=0||0||4||24||Y  ==> 7 celle: 0, 4, 8, 12, 16, 20, 24 pip.
+#  >>> LA CELLA 0 E' IL DEFAULT: r.220 del sorgente fa
+#        slDist = InpSLpips>0 ? InpSLpips*pip : InpSLatrMult*(qb*pip)
+#      cioe' a 0 lo stop torna a essere ATR(14,H1) x InpSLatrMult.
+#      Il round CONTIENE il suo stesso controllo: non serve una cella in
+#      piu', e non si confronta con un round di un altro giorno.
+#  >>> PERCHE' E' LECITO su un motore dichiarato senza edge (regola del
+#      19/08): lo stop e' GESTIONE DELL'USCITA, che quella regola elenca
+#      fra le cose su cui SI PUO' allargare, non fra i parametri
+#      d'ingresso su cui non si puo'. Stessa lettura del dossier
+#      report/I_MORTI_E_IL_PEDAGGIO_2026-09-23.md par.0.4.
+#      E "ogni allargamento si paga con una prova fuori campione": pagata
+#      con @FRAZIONEIS 0.50 e un OOS da 553 operazioni attese.
+#  >>> PERCHE' NON E' "RIFARE LA GRIGLIA": in 20 CSV su 20 della famiglia
+#      InpSLpips vale 0 e InpSLatrMult vale 1.0. Contato oggi, colonna per
+#      colonna, su risultati_prove/ABTG_Nightly/*.csv. La manopola non e'
+#      "provata e non funziona": non e' MAI stata girata.
+#  >>> InpSLatrMult DIVENTA STRUTTURALMENTE INERTE nelle celle 4..24 (il
+#      ternario di r.220 non lo legge). E' pinnato a 1.0 e lo dichiaro:
+#      un input che entra in una cella e non sta nei pin e' un buco, e un
+#      input che sta nei pin ma non entra in sei celle su sette va detto,
+#      o qualcuno lo leggera' come se avesse agito.
+#
+#  4. IL CANCELLO DI COSTO, CELLA PER CELLA -- il motivo vero dell'asse
+#  --------------------------------------------------------------------
+#  Con InpSLpips>0 lo stop non e' piu' una funzione della volatilita': e'
+#  un NUMERO. Quindi il rapporto stop/spread si scrive PRIMA del round.
+#  Spread mediano di GBPUSD all'ora d'ingresso (h05 server): 0,30 pip
+#  Fonte: data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv, riga
+#  GBPUSD,5 -> mediana 3 punti = 0,30 pip, p95 1,00 pip, 3.600 campioni su 5
+#  giornate (04-11/09/2026, ABTG_SpreadLogger, demo BCM 50503392).
+#  LIMITE: e' lo spread di OGGI, non quello del 2019-2024.
+#
+#      InpSLpips    stop/spread        nota
+#      ---------    -----------        ----
+#          0        [LO MISURA IL ROUND: S* / 0,30]
+#          4         13.3x   <-- il PAVIMENTO DURO, esatto
+#          8         26.7x
+#         12         40.0x   <-- LA FRONTIERA DI LAVORO, esatta
+#         16         53.3x
+#         20         66.7x
+#         24         80.0x
+#
+#  >>> E LA CELLA 0 MISURA UNA COSA CHE NON ABBIAMO MAI AVUTO, GRATIS:
+#      la MEDIANA dell'ATR(14,H1) notturno in pip. Si ricava invertendo il
+#      CSV (vedi punto 6): la cella a stop fisso S* che riproduce l'R del
+#      vincente della cella 0 ha S* = ATR_H1 mediano. Il filtro QB
+#      (InpMaxNightVolPips=45) impone S* < 45 pip: se esce sopra, il
+#      modello e' rotto e il round non si legge.
+#
+#  5. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  (A) n IDENTICO SU TUTTE E SETTE LE CELLE. E' strutturale, non sperato:
+#      InpSLpips entra SOLO in slDist (r.220); slDist entra in sl e in
+#      LotByRisk, NON nel TP (tp = px -/+ range*InpTPfrac, r.231/242) e
+#      NON nei filtri QB (r.213-216) ne' nel box. Gli INGRESSI non lo
+#      leggono. Quindi le occasioni sono le stesse in tutte e 7 le celle.
+#  (B) IL PF DEVE AVERE UN MASSIMO INTERNO, e la curva del pareggio e'
+#      calcolata PRIMA, dai CSV grezzi (derivazione al punto 6):
+#        cella 0 misurata oggi:  hit IS 46.76%  /  OOS 51.02%
+#                                R del vincente  IS 0.667  /  OOS 0.999
+#                                hit di PAREGGIO IS 59.97%  /  OOS 50.03%
+#      Siccome il TP resta 0,5*range e lo stop diventa fisso, l'R del
+#      vincente scende quando lo stop cresce e l'hit di pareggio SALE.
+#      >>> Mi aspetto quindi che il PF NON cresca in modo monotono con lo
+#          stop: deve salire finche' l'hit rate corre piu' dell'hit di
+#          pareggio e poi scendere. Se invece esce MONOTONO CRESCENTE fino
+#          a 24 pip, la mia geometria e' sbagliata e il round va riletto
+#          prima di essere giudicato.
+#  (C) IL RISCHIO SI LEGGE A QUALUNQUE n (Emendamento B, 16/08).
+#
+#  6. COME SI LEGGE IL CSV -- l'inversione, e i suoi limiti
+#  --------------------------------------------------------------------
+#  Il CSV non ha le colonne "vincenti/perdenti" ne' il lotto. Ma i
+#  perdenti di questo EA sono TUTTI stop-out da 1,00 R esatti: non c'e'
+#  trailing, non c'e' parziale, InpCloseAtCutoff=false, e il cutoff
+#  CANCELLA i pendenti (r.150) senza chiudere le posizioni. Quindi:
+#      lordoPerse = Profit/(PF-1)   lordoVinte = PF*lordoPerse
+#      n_perdenti = lordoPerse/R    R = 1% del balance ~ 100 EUR
+#      hit = 1 - n_perdenti/n       R_vincente = (lordoVinte/R)/n_vinc
+#  >>> LIMITE DICHIARATO 1: R non e' costante (l'EA rischia l'1% del
+#      BALANCE, che scende mentre si perde). Su un calo del 15% la banda
+#      e' circa +/-6%. I numeri sopra vanno letti con quella banda.
+#  >>> LIMITE DICHIARATO 2: la controprova "il PF si ricostruisce" NON
+#      valida niente -- e' una tautologia algebrica. Lo scrivo perche' e'
+#      esattamente il tipo di conferma che la regola del 10/09 vieta.
+#  >>> IL CONTROLLO VERO, che invece e' indipendente: R_vincente implica
+#      range/ATR_H1 = 2*R_vincente, e la legge sqrt(T) per un box di 7 ore
+#      prevede sqrt(7) = 2,646. Misurato: EURCHF 2,618 (scarto -1,1%),
+#      USDCHF 2,20, EURUSD 1,63-1,69, GBPUSD 1,33-2,00.
+#      >>> TORNA SOLO SU EURCHF. Sugli altri lo scarto e' ordinato come il
+#          contrasto giorno/notte del simbolo, ed e' coerente con il fatto
+#          che ATR(14,H1) letto alle 05:00 guarda indietro 14 ore, cioe'
+#          DENTRO la seduta americana, e quindi sovrastima la volatilita'
+#          notturna. E' una SPIEGAZIONE PLAUSIBILE, NON MISURATA: non la
+#          uso per aggiustare nessun numero.
+#
+#  7. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  (i) "E SE ALLARGO LA FINESTRA E IL CAMPIONE RESTA SOTTILE LO STESSO?"
+#      Vorrebbe dire una di DUE cose, e si distinguono col punto 2-bis:
+#      giorni giusti + frequenza crollata = il filtro QB ha morso
+#      sull'epoca vecchia (RISULTATO, si scrive, e chiude il simbolo con
+#      un numero); giorni sbagliati = finestra troncata in silenzio
+#      (GUASTO, classe 590, non si legge niente).
+#  (ii) "E SE IL MOTORE SEMPLICEMENTE NON OPERA SU QUESTO SIMBOLO,
+#       INDIPENDENTEMENTE DALLA FINESTRA?" Quella spiegazione predice
+#       n ~ 0, ed e' GIA' FALSIFICATA alla fonte: GBPUSD fa 259 operazioni
+#       in 21 mesi. >>> Ma e' VERA, e misurata, su ALTRI simboli, che
+#       elenco per nome invece di dire "gli altri": AUDUSD 0/0 e USDJPY
+#       0/0 -- e la causa NON e' ignota come dice REGISTRO_TEST.md r.686:
+#       e' InpBlockNightActive=true piu' NightActiveSymbol() (r.133-136),
+#       che blocca qualunque simbolo il cui NOME contenga JPY, AUD o NZD,
+#       con un return secco a r.167. Sono zeri PER COSTRUZIONE. Su
+#       XAUUSD/XAGUSD/D30EUR/U30USD gli zeri sono invece il baco QB del
+#       23/08 (PipSize()=_Point).
+#  (iii) "E SE n CAMBIA FRA LE CELLE?" Due vie, cercate una per una:
+#       (a) MARGINE. Nella cella da 4 pip il lotto e' il piu' grosso del
+#           round: 8,629 EUR/pip/lotto, lotto = 100/(4*8,629) = 2,89,
+#           margine 1.160 EUR/lotto a Leverage=100 (walkforward_generico.ps1
+#           r.1022), DUE posizioni possibili nella stessa notte
+#           (InpAllowLong e InpAllowShort sono tutti e due veri)
+#           ==> circa 67% dell'equity. CHIUSA CON UN NUMERO, e la
+#           chiusura e' robusta: lotto e margine scalano col balance
+#           esattamente come il rischio, quindi quella percentuale NON
+#           cresce durante un drawdown.
+#       (b) SYMBOL_TRADE_STOPS_LEVEL: uno stop a 4 pip potrebbe essere
+#           rifiutato dal banco. [NON MISURATO] su BCM forex. Morderebbe
+#           SOLO la cella 4. >>> Se n scende SOLO li', si scarta quella
+#           cella e il resto del round si legge. Se n cambia ALTROVE, non
+#           si legge NIENTE.
+#       (c) IL PAVIMENTO DEL LOTTO non morde qui, e ha un numero: la cella
+#           piu' larga (24 pip) da' lotto = 100/(24*8,629) = 0,48, cioe'
+#           48 volte il minimo di 0,01. Il caso 225JPY del commento
+#           a r.268 del sorgente non si ripete.
+#
+#  8. LA FINESTRA E IL REGIME CHE CONTIENE (Emendamento A: si DICHIARA)
+#  --------------------------------------------------------------------
+#  @DAQUANDO 2019.01.01  @FINOA 2026.06.30  @FRAZIONEIS 0.50
+#  Taglio IS/OOS calcolato: 2022.09.30.
+#  >>> IS 2019.01.01 -> 2022.09.30 contiene TUTTE E QUATTRO le finestre
+#      canoniche di prove/PROVA_REGIME_CRITERI.md par.3:
+#        LATERALE 2019.01.01-2019.12.31   intera
+#        CROLLO   2020.02.01-2020.04.30   intera
+#        TORO     2021.01.01-2021.12.31   intera
+#        ORSO     2022.01.01-2022.10.31   al 91% (fino al 30/09)
+#  >>> OOS 2022.09.30 -> 2026.06.30: coda dell'ORSO, disinflazione
+#      2023-2024, e i 21 mesi su cui il candidato e' stato archiviato.
+#  >>> MA QUESTO ROUND NON E' UNA PROVA DI REGIME, e non si spaccia per
+#      tale: e' un walk-forward su finestra CONTIGUA. PROVA_REGIME_CRITERI
+#      par.1 vieta di cercare parametri nuovi sui dati vecchi; qui la
+#      cella si sceglie sull'IS e si giudica sull'OOS, che e' la
+#      protezione contro proprio quel rischio. E la regola di selezione e'
+#      quella di casa: CENTRO DELL'ALTOPIANO, MAI IL PICCO.
+#  >>> E L'ETICHETTA DI REGIME GIUSTA PER QUESTO MOTORE NON E' L'AZIONARIO:
+#      e' la VOLATILITA' NOTTURNA, perche' e' quella che il filtro QB
+#      legge. Previsione falsificabile: le operazioni devono CALARE nel
+#      2020 e nel 2022 (QB alto -> notti escluse) e SALIRE nel 2023-2024.
+#
+#  9. QUELLO CHE QUESTO ROUND NON FA, dichiarato
+#  --------------------------------------------------------------------
+#  - NON e' a tick reali. -Modello 1 e' SOLO SCREENING (regola di casa) e
+#    il fattore OHLC->tick misurato in casa e' 1,72x - 3,51x sul PF
+#    (I_MORTI_E_LO_STORICO_2026-09-23.md par.1). Nessuna promozione esce
+#    da qui. E il DD di una corsa OHLC e' un LIMITE INFERIORE (R102 par.1):
+#    il numero vero puo' solo essere PEGGIORE.
+#  - NON misura lo SPREAD vero: a -Modello 1 il tester applica lo spread
+#    CORRENTE su tutta la finestra (convenzione R100/R102/R103). Il
+#    rapporto stop/spread del punto 4 usa lo spread di OGGI, non quello
+#    del 2019.
+#  - NON mette ad asse le altre TRE manopole d'uscita, e sono tutte
+#    vuote nei 20 CSV: InpTPfrac (0,5), InpCloseAtCutoff (false: chiudere
+#    tutto alle 07:00 non e' mai stato provato) e InpEdgeOffsetPips (0).
+#    Sono tre round separati, uno per file.
+#  - NON separa i DUE LATI: InpAllowLong e InpAllowShort sono tutti e due
+#    a 1 in 20 CSV su 20. Il lato non e' mai stato misurato da solo.
+#  - NON cambia il TF, e il motivo NON e' pigrizia: ABTG_Nightly non ha
+#    un input di timeframe e il sorgente non legge MAI _Period. Il box
+#    viene da PERIOD_M1 (r.183-190) e l'ATR da PERIOD_H1 (r.120), e
+#    OnTick e' governato solo da TimeCurrent(). >>> Il TF del grafico e'
+#    una manopola STRUTTURALMENTE INERTE per questo motore: il punto (5)
+#    del certificato di morte ("il TF cambiato almeno una volta") su
+#    questo EA NON E' RIEMPIBILE, e va scritto cosi' invece di girare
+#    passate che non possono cambiare niente.
+#  - NON tocca InpRiskPercent: e' il dial di MISURA a 1,0, non la taglia
+#    in campo. Le taglie le firma Claudio.
+#  - Il .ex5 sul banco corrisponde al .mq5 a HEAD: [NON MISURATO].
+#  - MAGIC 787203: grep -ril su tutto il repo, ZERO occorrenze fuori da qui.
+#
+# 10. LE SOGLIE, CONGELATE PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  1. n diverso fra le celle (fuori dal caso 4 pip del punto 7-iii-b)
+#     -> ROUND NON LETTO. Si indaga quello, non i PF.
+#  2. op/giorno-feriale < 0,80 x 0.5655 -> si applica il punto 2-bis
+#     PRIMA di guardare qualunque PF.
+#  3. n_IS < 150 -> MERITO SOSPESO (Emendamento A). Il RISCHIO si legge
+#     lo stesso (Emendamento B): un drawdown e' un fatto accaduto.
+#  4. DD OOS > 10% su TUTTE le celle con InpSLpips >= 12 -> il verdetto
+#     "fuori per RISCHIO" e' CONFERMATO su finestra lunga e il simbolo si
+#     chiude CON IL NUMERO. (Oggi, a 21 mesi, il pavimento su 8 celle su
+#     8 della famiglia e' 10,7967% a deposito 10000 e rischio 1,0%.)
+#  5. PF OOS < 1,10 sulla cella centrale dell'altopiano con n >= 150
+#     -> scarto senza seconda griglia.
+#  6. Una cella promuovibile deve stare SOPRA la frontiera del costo.
+#     Su GBPUSD la frontiera 40x cade ESATTAMENTE su
+#     InpSLpips=12. Una cella sotto i 12 pip e' ESCLUSA PER COSTO per
+#     bella che sia; sotto i 4 pip e' sotto il pavimento duro 13,3x,
+#     cioe' paga piu' del 7,5% del rischio a operazione.
+#  7. Se nessun altopiano esiste -- una cella sporge e le due vicine no --
+#     il risultato e' "NON C'E' UNA CONFIGURAZIONE ROBUSTA", e si scrive
+#     cosi'. Il picco non si promuove mai.
+#  8. Se la cella migliore e' la 0 (il default) entro il rumore, la
+#     risposta onesta e' "IL DEFAULT VA BENE" -- ed e' un risultato.
+#
+# 11. IL DEPOSITO, e perche' i DD non si confrontano fra depositi
+#  --------------------------------------------------------------------
+#  -Deposito 10000, come i 20 CSV dell'archivio (scan_market.ps1 r.506 e
+#  il referto REFERTO_ROUND_P0_EURCHF.txt, "deposito: 10000"). R102 e R103
+#  girano a 100000: i loro DD NON sono una soglia per questi (classe 604).
+#  La grandezza invariante alla taglia e' il DD in R: oggi la famiglia sta
+#  fra 10,80 R e 22,62 R.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  GBPUSD
+@PERIODO  M15
+@DAQUANDO 2019.01.01
+@FINOA    2026.06.30
+@FRAZIONEIS 0.50
+
+# --- ASSE UNICO: la gestione dell'uscita. 7 celle: 0,4,8,12,16,20,24 pip
+InpSLpips=0||0||4||24||Y
+
+# --- tutti gli altri input FISSATI, uno per uno, col default del sorgente
+InpMagic=787203||787203||0||787203||N
+InpUsaGuardian=1||1||0||1||N
+InpBoxStartHour=22||22||0||22||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpPlaceHour=5||5||0||5||N
+InpPlaceMin=0||0||0||0||N
+InpCutoffHour=7||7||0||7||N
+InpCutoffMin=0||0||0||0||N
+InpCloseAtCutoff=0||0||0||0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpEdgeOffsetPips=0||0||0||0||N
+InpOneShotPerNight=1||1||0||1||N
+InpAtrPeriod=14||14||0||14||N
+InpSLatrMult=1.0||1.0||0||1.0||N
+InpTPfrac=0.5||0.5||0||0.5||N
+InpMaxNightVolPips=45||45||0||45||N
+InpMinRangePips=0||0||0||0||N
+InpMaxRangePips=0||0||0||0||N
+InpBlockNightActive=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=60||60||0||60||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+# I TRE INPUT DI TIPO STRINGA restano al DEFAULT COMPILATO, e non e' una
+# dimenticanza: un pin di stringa vuoto verrebbe IGNORATO da MT5 (e
+# controlla_prova.py lo blocca). Sono:
+#   InpNewsFile="abtg_news.csv"  InpNewsCurrencies=""  InpComment="NIGHTLY"
+# I primi due sono STRUTTURALMENTE INERTI qui, perche' InpUseNewsFilter=0
+# fa uscire InNewsBlackout prima di leggerli (r.168). Il terzo e' solo
+# l'etichetta dell'ordine. Totale input dell'EA: 34 -- 30 pinnati sopra,
+# 1 sull'asse, 3 dichiarati qui. Nessun buco.
