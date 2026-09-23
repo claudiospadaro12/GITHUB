@@ -34620,3 +34620,58 @@ round *"promette dodici celle"* e ne **compra meno**.
 🎁 **E un regalo, non un difetto**: `R241a` cella 2 e `R239a` cella 0 sono **la stessa configurazione**
 a meno del magic. **Devono coincidere al centesimo**, e quel cancello prova anche la cosa **nuova** di
 questo round — che il driver, con l'asse **ENUM**, riproduce una corsa a **valore pinnato**.
+
+---
+
+## ⏱️ CLASSE 712 — **il RITMO DI MACCHINA trasferito fra motori diversi: la classe 687 nella dimensione TEMPO, e mi ha fatto sbagliare di un fattore 65**
+
+**Numero del coordinatore** (classe 662). Trovata dall'agente della mappa del costo, **contro di me**.
+
+### Il fatto
+Claudio ha chiesto i sei modi su più TF, indici e metalli. Ho fatto il conto e gli ho scritto:
+**«240 celle = 480 passate = ~44 ORE»**, derivando **5,5 min/passata** da **R238**.
+🔴 **R238 è `ABTG_SupertrendReversal` su H1**: quattro EMA, confluenza, ordini pendenti. La famiglia
+**Apertura** è un altro motore. Trasferire il ritmo dell'uno all'altro è **esattamente la classe 687
+— solo che invece di un numero di costo ho trasferito un numero di TEMPO**.
+📐 **Il ritmo vero era già in archivio**, stessa famiglia, stesso simbolo, stesso TF, tick reali:
+`report/CHI_ALTRO_PUO_SCHIERARSI_2026-09-22.md` r.64 — *"40 celle × 2 finestre = **80 passate ≈ 6,8
+min**"* = **0,085 min/passata**. 👉 **65 volte più veloce.** Le 44 ore erano **41 minuti**.
+
+### Perché costa
+🔴 **Una stima di costo gonfiata non fa perdere tempo: fa CAMBIARE PIANO.** Ho proposto a Claudio uno
+screening a imbuto *"per risparmiare 33 ore"* che non c'erano. Se avesse detto di no allo screening,
+avrei rinunciato a misure che costavano dieci minuti.
+
+### La regola
+1. ⏱️ **Il ritmo di macchina è una proprietà del MOTORE, non del tester**, e cambia di ordini di
+   grandezza: si prende dall'archivio **della stessa famiglia**, o si dichiara `[NON MISURATO]`.
+2. 🔎 **Prima di mettere un numero di costo davanti a una decisione, si cerca il file che ce l'ha
+   già** (regola del 10/09). Qui c'era, con l'n e i minuti.
+3. 🟢 **E la ragione dello screening va riscritta quando il suo numero cade**: tagliare la matrice
+   resta giusto, ma **non per risparmiare ore** — per **non girare 182 celle che non possono essere
+   promosse in nessun caso**. Una cella inammissibile non costa tempo: **costa un picco di rumore
+   verde**, che è la cosa che brucia una challenge.
+
+## 🎛️ CLASSE 713 — **la MANOPOLA INERTE messa ad asse: quattro TF, quattro CSV IDENTICI**
+
+**Numero del coordinatore.** Stessa consegna.
+
+### Il fatto
+Stavo per mettere **il TF ad asse** su tutta la famiglia Apertura. 🔴 **Sui quattro modi basati sul
+range il TF non tocca niente**: `ComputeRangeWindow` legge **`PERIOD_M1` CABLATO** (DAX r.1145-1146,
+Dow r.844-857, Nasdaq r.941-954), e lo stop è il **range**, non la barra. I punti che leggono
+`PERIOD_CURRENT` sono tutti **spenti dai default di famiglia** (`SL_ATR` no: `InpSLMode=SL_RANGE`;
+`VolumeOK` no; `AtrOK` no; trailing su `InpTrailTF` esplicito).
+👉 **`BREAKOUT`, `GAPFILL`, `RETEST`, `DELAYED` a quattro TF = quattro CSV IDENTICI.** È il difetto dei
+874 CSV del censimento — **stavolta però lo sappiamo PRIMA di spendere la macchina.**
+🟢 Le due eccezioni sono vere e vanno tenute: **`RANGE_FADE`** (lo stop *è* `1,5 × ATR(TF)`) e
+**`OPENCONFIRM`** (il TF *è* il meccanismo, via `InpOCTimeframe`, che è un **input** — non serve
+cambiare grafico).
+⚠️ **E vale solo a Modello 4**: a **OHLC** il TF genera i tick finti, quindi un asse TF in OHLC su
+questa famiglia **misura il simulatore**.
+
+### La regola
+**Prima di mettere un parametro ad asse si dimostra che TOCCA il ramo di codice che si vuole
+misurare** — per cella, non per file (è la 706 portata all'asse intero). Un asse inerte non dà un
+risultato brutto: dà **N copie dello stesso risultato**, e chi legge il referto crede di avere N
+misure.

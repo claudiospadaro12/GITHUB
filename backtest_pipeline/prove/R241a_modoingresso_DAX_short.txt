@@ -1,3 +1,74 @@
+
+# ==========================================================================
+#  >>> AVVISO DEL 24/09, AGGIUNTO DOPO LA SCRITTURA: LA PREMESSA DI QUESTO
+#      FILE E' FALSA. NON LANCIARE QUESTO ROUND COSI' COM'E'. <<<
+# ==========================================================================
+#  Qui sopra c'e' scritto che "di CINQUE MODI SU SEI non sappiamo NIENTE".
+#  E' SBAGLIATO, e si rompe con tre file che erano gia' in archivio:
+#    - risultati_archivio/Openconfirm/MOTORI_INGRESSO.md (05/08/2026),
+#      titolo testuale "I sei motori d'ingresso, misurati -- DAX e Nasdaq",
+#      tick reali M5;
+#    - risultati_archivio/Walkforward_Aperture/REFERTO_FASE_B_C5.md
+#      (06/08/2026): walk-forward IS/OOS di TUTTI E SEI, range 35 (la
+#      geometria di oggi), 48 passate a tick reali;
+#    - risultati_archivio/REFERTO_ROUND42_FADE.md (13/08/2026): RANGE_FADE
+#      0 celle positive su 48, campioni 195-333.
+#  >>> PERCHE' ERANO GIA' MISURATI SENZA CHE NESSUNO L'AVESSE CHIESTO: MT5
+#      sugli input ENUM IGNORA start||step||stop e spazzola TUTTI i valori.
+#      Un round nato per due celle ne ha misurate sei. E' la stessa
+#      proprieta' che questo file usa come asse -- solo che li' era un
+#      effetto collaterale, e nessuno l'aveva letto come un risultato.
+#
+#  >>> I NUMERI GIA' IN CASA (DAX, volumi OFF, OOS):
+#      RETEST      +392,96  PF 1,065  n 244   <-- l'unico che passa il
+#                                                 filtro dei DUE mercati
+#      OPENCONFIRM +209,36  PF 1,035  n 250   <-- positivo sul DAX...
+#      BREAKOUT    -225,44  PF 0,966  n 243
+#      DELAYED     -379,23  PF 0,946  n 245
+#      RANGE_FADE  -1660,69 PF 0,772  n 245
+#      GAPFILL     n 7/9 (campione inesistente, come previsto dalla
+#                  classe 710: non e' mai stato un gap fill)
+#
+#  >>> E ATTENZIONE A OPENCONFIRM, perche' qui si sbaglia facile.
+#      Un agente me l'ha segnalato come "candidato vivo che nessuno ha
+#      raccolto". NON E' VERO: l'archivio lo ha gia' giudicato, e il
+#      verdetto sta nella tabella di REFERTO_FASE_B_C5 r.68 --
+#          OPENCONFIRM off | DAX +209,36 | NASDAQ -365,50 | BOCCIATO
+#      La regola di quel referto e' scritta sopra la tabella: "si guarda
+#      l'OOS, e deve funzionare su DUE mercati, non su uno". OPENCONFIRM
+#      funziona su uno. E' stato raccolto, misurato e scartato, col motivo.
+#      >>> Ripeterlo sarebbe stato riscoprire un no gia' scritto.
+#
+# ==========================================================================
+#  CHE COSA RESTA DA MISURARE DAVVERO, e non e' l'asse di questo file
+# ==========================================================================
+#  (a) IL TF. Tutte le misure d'archivio sono a M5. E' l'UNICA casella del
+#      certificato di morte (09/09) che manca a RANGE_FADE e agli altri, ed
+#      e' un allargamento LECITO su un motore 0/48 (regola del 19/08:
+#      meccanismo e TF, mai i parametri).
+#      >>> E l'inventario dice che salire di TF su questa famiglia NON e'
+#          un cambio di strategia: i livelli si calcolano sempre su M1, la
+#          macchina a stati e' guidata dall'orologio. Si svegliano due cose
+#          sole: l'ATR di gestione (iATR su PERIOD_CURRENT, r.510) e
+#          InpOCTimeframe, che e' pinnabile.
+#  (b) IL 40x per modo, che resta NON PRONUNCIATO su 0,1,3,5 finche' non
+#      esiste la FASE 1.
+#  (c)  E LA COSA CHE PUO' RIBALTARE IL CANCELLO A COSTO ZERO: la
+#      frontiera che conta e' quella di FTMO, dove si opera davvero.
+#      report/STOP_VS_SPREAD_FTMO_2026-09-20.md r.152: GER40.cash ->
+#      frontiera 57,2 (non 61,2). E le sei gambe misurate su quel conto
+#      sono 52,30  54,90  59,90  71,90  71,90  75,50.
+#      >>> Il RETEST misurato (54,90) NON passa. Ma TRE gambe di ROTTURA su
+#          quattro (59,90  71,90  71,90  75,50) SONO SOPRA 57,2.
+#      >>> Cioe': sul broker dove operiamo, la geometria del BREAKOUT
+#          potrebbe passare il costo dove il RETEST non passa -- e la sedia
+#          in campo gira RETEST.
+#       Campione minuscolo, date miste, e sono stop REALIZZATI con
+#          breakeven e trailing accesi, quindi LIMITI INFERIORI (classe
+#          688). NON e' un verdetto: e' la misura che vale la pena fare
+#          per prima, e costa zero macchina.
+# ==========================================================================
+
 # ==========================================================================
 #  R241a -- I SEI MODI D'INGRESSO DEL DAX, lato CORTO, a TICK REALI
 #  ABTG_DAX_Apertura_EU -- D30EUR M5 -- la sedia 770101 che opera sulla challenge
