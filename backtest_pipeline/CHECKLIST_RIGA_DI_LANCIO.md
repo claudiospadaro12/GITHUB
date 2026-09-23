@@ -34412,3 +34412,77 @@ completamente inutile**.
 **La regola**: è la **646 al contrario** — lì il deposito dichiarato era sbagliato, qui è
 **assente**, che è peggio, perché **non c'è niente da verificare**. Ogni file prova dichiara i
 **VINCOLI DI BANCO** che non può imporre da sé, e la riga di lancio li passa **esplicitamente**.
+
+---
+
+# 🧱 CINQUE CLASSI DAL CANCELLO SU R239 (23/09/2026 notte) — numeri del COORDINATORE (classe 662)
+
+🔴 **Il filo che le lega: quattro su cinque nascono dall'aver COPIATO un cancello che funzionava
+altrove, senza chiedersi se la MACCHINA A STATI sotto fosse la stessa.**
+
+## 🔢 CLASSE 693 — **il numero del cancello di costo preso dalla PRIMA riga di una tabella che, due righe sotto, lo SMENTISCE sulla geometria VIVA**
+
+`CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.396 ha **QUATTRO righe** per `770101`, e io ho letto la
+prima: `71,9 idx n=7 -> 42,3x` 🟢. Due righe sotto, con la freccia `↳`:
+> *"sotto-campione della **geometria VIVA** (dopo il cambio range 15→35, buffer 200→500, entrata
+> RETEST offset 200)"* — **56,1 idx [MIS] n=2 -> 33,0x** 🔴 **NO (82% della frontiera)**.
+
+🔴 **E i miei pin erano ESATTAMENTE quella geometria** (`InpRangeMinutes=35`,
+`InpBufferPoints=500`, `InpEntryMode=2`, `InpRetestOffsetPts=200`). Delle 7 gambe della prima
+riga, **cinque sono di una sedia che non è questa**.
+**La regola**: quando si cita una riga d'archivio, **si leggono le righe FIGLIE** (`↳`) prima di
+usarla. Non è la 687 (trasferimento da un'altra sedia) né la 688 (correzione applicata a metà da
+altri): qui la correzione è **sulla stessa sedia, nella stessa tabella**, e **ribalta il verdetto
+da PASSA a NO**.
+
+## ♟️ CLASSE 694 — **l'additività ereditata da un motore con un'altra MACCHINA A STATI**
+
+Avevo congelato `n(corto) + n(lungo) = n(long+short)`, copiata da R235 dove **l'indicatore
+sceglie il lato** e l'identità è esatta (4 terne su 4). 🔴 Ma con `InpEntryMode=2` (RETEST) il
+**primo lato che piazza il LIMIT chiude la giornata**: `gPhase = PH_PLACED`, e il codice lo dice
+da sé — *"un ciclo, giornata finita"* (DAX r.893).
+Sul **DAX** i cinque filtri sono spenti → `TrendBias()=0` → **tutti e due i lati validi** → nei
+giorni di **doppia rottura** le celle pure fanno 1 operazione a testa e la L+S ne fa **UNA**.
+👉 `nC + nL > n(L+S)` è il **comportamento NORMALE**: la mia soglia avrebbe **ucciso un round sano
+al primo whipsaw**.
+✅ Sostituita con l'invariante vero: `max(nC,nL) <= n(L+S) <= nC+nL`, e il residuo
+`nC + nL − n(L+S)` **non è uno scarto: è il numero di GIORNATE A DOPPIA ROTTURA**, cioè un
+risultato.
+🔴 **E la conseguenza di lettura che mancava del tutto: sul DAX accendere lo short non SOMMA
+operazioni, le SOSTITUISCE.** La cella L+S non è *"la sedia + il corto"*: è la sedia a cui il
+corto **ruba giornate**. Un PF che peggiora può voler dire *"il corto ha preso il posto di long
+che vincevano"* — conclusione opposta a quella comoda.
+
+## 👯 CLASSE 695 — **i due file gemelli meritano cancelli DIVERSI, perché i filtri delle due sedie sono diversi**
+
+La prima stesura dava **la stessa falsificazione a tutti e quattro**. Ma sul **Dow**
+`InpUseEmaFilter=true` su `InpFilterTF=H4` → `gBias = ±1` congelato per giornata → **un solo lato
+al giorno**, celle pure su giornate **disgiunte**, e l'additività **regge**. Sul DAX no.
+**La regola**: complemento della **690**. Lì il gemello ereditava i **NUMERI**, qui eredita il
+**CANCELLO**. E quando l'identità regge, si scrive **perché** regge: sul Dow regge **per il
+FILTRO, non per il motore** — se no si legge come una conferma che non è.
+
+## ⏳ CLASSE 696 — **il TF scelto in silenzio contro un vincolo che il round PRECEDENTE aveva misurato sulla finestra IDENTICA**
+
+`R235a` r.647-652, **stessa identica finestra**, aveva **rifiutato M5**: *"459 giorni feriali x
+288 barre = ~132.200 barre M5 [...] SOPRA il tetto delle ~100.000 barre del tester"*, e aveva
+scelto M30. **R239 riadotta M5 senza una riga.** `grep` su tutti e quattro i file: **zero**
+occorrenze di "MaxBars"/"tetto"/"barre".
+🟢 La conclusione era **salvabile e giusta** (`MaxBars=100000000` misurato sul PC di backtest,
+referto R202A del 21/09). 🔴 **Ma è un vincolo DELLA MACCHINA, non del file**:
+`walkforward_generico.ps1` **non scrive nessun `[Charts] MaxBars`**. Su una macchina col tetto
+basso **la finestra si accorcerebbe in silenzio**.
+**La regola**: quando si sceglie un TF che un round precedente ha **scartato sulla stessa
+finestra**, si cita quella decisione e si dice **cosa è cambiato**. E un vincolo che vive solo
+nella macchina si **dichiara nel file**, insieme a dove deve girare.
+
+## 🎁 CLASSE 697 — **la cella duplicata fra due file gemelli è un cancello di DETERMINISMO gratis, e nessuno lo raccoglie**
+
+Le celle `LONG+SHORT` di `R239a` e `R239b` sono **la stessa configurazione** — stessi 80 pin,
+cambia **solo il magic**. Due passate **indipendenti** che **devono coincidere al centesimo**.
+Idem `c`/`d`. Era **già pagata** (4 passate su 16) e **non veniva letta**.
+🟢 Lo stesso vale a posteriori per R238, dove le celle "spenta" hanno riprodotto R236a/b
+**8 numeri su 8 a 5 decimali**: quel controllo è nato per caso, questo si scrive **prima**.
+**La regola**: ogni volta che due file gemelli condividono una cella, quella cella è un
+**cancello di determinismo del banco a costo zero**, e va **dichiarato nel file** — non scoperto
+dopo.
