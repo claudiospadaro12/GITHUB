@@ -33967,3 +33967,135 @@ tempo-slot all'altro**.
 2. 🕳️ **Residuo noto**: un pendente stantio (scadenza 3 barre) puo' bloccare il lato opposto
    dopo un flip **senza posizione aperta** -- `CancelPendings()` sta solo nel ramo
    `HasPosition()` (r.313 contro r.322). Non morde sulle 4 terne misurate, ma esiste.
+
+---
+
+## 🟢🎭 CLASSE 677 — **IL PRE-VOLO CERTIFICA IN VERDE UN ARTEFATTO CHE LO STRUMENTO SUCCESSIVO CANCELLA E RIFA': una FALSA RASSICURAZIONE, che e' peggio di un falso allarme** (controllo-preventivo, 23/09/2026, su `RIGA_PREVOLO_BACKTEST.txt` v1, scritta dal coordinatore)
+
+**Numero assegnato dal COORDINATORE** (classe 662); `grep -c "CLASSE 677"` -> **0** al momento di scrivere.
+
+### Il fatto, verificato alla riga
+Il pre-volo stampava in **verde** `ex5 OK <motore> compilato il <data>`, con lo scopo dichiarato di
+intercettare un `#include` mancante *"che salta fuori solo a corsa avviata"*.
+🔴 **Ma `walkforward_generico.ps1` r.1927 fa `Remove-Item -LiteralPath $ex5Atteso -Force` e r.1929
+`& $MetaEditor "/compile:..."`** su un `.mq5` **riscaricato da GitHub** (r.317). L'`.ex5` che il
+pre-volo trovava viene **cancellato e rifatto** a ogni corsa: quel verde **non predice niente**, e
+proprio nello scenario che dichiarava di coprire (`.ex5` vecchio presente -> verde -> il `.mq5`
+fresco non compila lo stesso).
+📌 E' la **classe 270** gia' pagata (*"l'.ex5 stantio che passa per compilato"*, commento r.1913-1922
+del driver: *"l'.ex5 preesistente e' lo scenario NORMALE, non l'eccezione"*).
+
+### La regola
+1. 🔎 **Prima di certificare un artefatto, si guarda se lo strumento a valle lo RIGENERA.** Se lo
+   rigenera, il controllo e' **informativo**, mai un PASS.
+2. 🟡 **Un controllo informativo si stampa in GIALLO e dichiara perche' non e' un verdetto.**
+3. 🔴 **Una falsa rassicurazione e' peggio di un falso allarme**: il falso allarme fa perdere un
+   minuto, la falsa rassicurazione fa partire un'ora.
+
+---
+
+## 🗂️🔀 CLASSE 678 — **IL PRE-VOLO E LO STRUMENTO CHE PRECEDE RISOLVONO LA CARTELLA DATI CON REGOLE DIVERSE: falso PASS con piu' installazioni, falso negativo con l'installazione PORTABLE** (controllo-preventivo, 23/09/2026, su `RIGA_PREVOLO_BACKTEST.txt` v1)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 678"` -> **0** al momento di scrivere.
+
+### Il fatto
+`RIGA_ROUND_VPS.ps1` (r.973-985) risolve la cartella dati **leggendo `origin.txt`** e confrontandolo
+col percorso della tabella `$BERSAGLI_PER_MACCHINA`, **piu' un ramo PORTABLE esplicito**:
+`if(-not $DataFolder -and (Test-Path "$cartellaBT\config\common.ini")){ $DataFolder = $cartellaBT }`.
+🔴 Il pre-volo v1 **non leggeva `origin.txt`** e **non conosceva il ramo portable**. Due conseguenze
+**di segno opposto**:
+- con **due o piu'** cartelle dati le stampava **alla pari, senza dire quale conta** -> il verde
+  poteva venire da un'installazione che il round **non usa**: **falso PASS**;
+- con installazione **PORTABLE** `%APPDATA%` e' vuoto -> *"storico assente"* con i dati **presenti**:
+  **falso negativo**, e l'ora si butta lo stesso.
+
+### La regola
+🔑 **Un pre-volo deve usare LA STESSA IDENTICA REGOLA di risoluzione dello strumento che precede,
+copiata riga per riga, rami di fallback compresi.** Due regole diverse per lo stesso oggetto
+producono un pre-volo che certifica **un'altra cosa**. E cio' che e' conoscibile si **misura**: tacere
+per prudenza non e' onesta', e' un buco (il driver lo sa fare in cinque righe).
+
+---
+
+## 🌲🔍 CLASSE 679 — **SONDA CHE LEGGE UN SOLO LIVELLO DI UN ALBERO CHE IL REPO DOCUMENTA IN DUE LAYOUT: «cartella VUOTA» in rosso su dati presenti un livello sotto** (controllo-preventivo, 23/09/2026)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 679"` -> **0** al momento di scrivere.
+
+### Il fatto, verificato ESEGUENDO su alberi finti
+Il repo documenta **tutti e due** i layout di `bases\`:
+- `report/PREVOLO_FTMO_2026-09-20.md` r.208 -> `bases\<server>\history\<SIMBOLO>`
+- `report/DIAGNOSI_GBPUSD_LENTA_2026-09-02.md` r.131 -> `bases\<server>\<SIMBOLO>\history`
+Sul secondo, `Get-ChildItem -File` sulla cartella del simbolo torna **0** e la sonda stampava
+*"cartella VUOTA"* **in rosso**, su dati presenti **un livello sotto**.
+
+### La regola
+1. 🌳 **Prima di sondare un albero, si cercano nel repo TUTTI i layout gia' documentati**, e la sonda
+   li copre tutti (o dichiara quale copre).
+2. ⚠️ **E attenzione alla riparazione frettolosa**: unendo `history` e `ticks` in **una lista sola**,
+   l'ordinamento lessicografico si rompe (`"2024.hcc" < "202409.tkc"` perche' `.` = 46 < `0` = 48) e il
+   *"dal ... al ..."* diventa nonsenso. 👉 **Si raggruppa per cartella foglia e si stampano i nomi,
+   invece di dedurre un intervallo.**
+
+---
+
+## 🧊📦 CLASSE 680 — **«STORICO ASSENTE» DETTO DI UNA CACHE: il verso dell'errore e' l'OPPOSTO di quello annunciato** (controllo-preventivo, 23/09/2026)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 680"` -> **0** al momento di scrivere.
+
+### Il fatto
+Il pre-volo v1 leggeva i file `.tkc` per stabilire *"la profondita' dei tick"*, e dichiarava che se lo
+storico e' corto **i round escono con finestre accorciate senza dirlo** (classe 160/18).
+🔴 **Ma `.tkc` e' la CACHE TICK LOCALE, costruita su richiesta**: se manca, MT5 la **scarica durante
+la corsa**. Quindi l'assenza **non accorcia** la finestra: **allunga la corsa** -- ed e' proprio il
+sovraccarico che `RIGA_ROUND_PRONTI` dichiara `[NON MISURATO]` e per cui scrive *"l'80 e' il caso
+BUONO"*. La lettura resta utile, ma come **previsione di DURATA**, non di profondita'.
+
+### La regola
+1. 🧭 **Prima di dire cosa manca, si stabilisce se l'artefatto e' una FONTE o una CACHE.** La cache
+   che manca **si ricostruisce**: costa tempo, non dati.
+2. ↔️ **E si dichiara il VERSO dell'errore**: *"il round non si accorcia, si allunga"* e'
+   un'informazione diversa e opposta rispetto a *"i numeri sono su meno storico"*.
+3. ⚪ Se la natura dell'artefatto e' **conoscenza di prodotto e non misura di casa**, la sonda
+   **elenca e non pronuncia**.
+
+---
+
+## 🚧🎯 CLASSE 681 — **IL PRE-VOLO SALTA I DUE CANCELLI CHE FERMANO DAVVERO IL ROUND, e guarda quelli che non lo fermano** (controllo-preventivo, 23/09/2026)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 681"` -> **0** al momento di scrivere.
+
+### Il fatto
+Il round muore **rc 1, nei primi secondi**, su **due** cose leggibili da disco a costo zero, e il
+pre-volo v1 **non ne guardava nessuna**:
+1. 🔴 **`MaxBars` in `<cartella dati>\config\common.ini`** -- `RIGA_ROUND_VPS.ps1` r.987-990 fa
+   `Muori` se **1000 <= MaxBars < 200000**, col messaggio *"il round gira su MENO storico e nessuno lo
+   dice"*. 👉 **E' LETTERALMENTE la classe 160** che il pre-volo dichiarava di voler coprire -- solo
+   che vive in un `.ini`, **non nei tick**. E si ripara **solo a MT5 chiuso**: saperlo prima vale l'ora.
+2. 🔴 **`metaeditor64.exe`** nella cartella del terminale -- `Muori` secco.
+
+### La regola
+🔑 **Un pre-volo si costruisce PARTENDO DALL'ELENCO DEI `Muori`/`exit 1` dello strumento a valle**, non
+dall'intuizione su cosa potrebbe andare storto. `grep` dei punti di morte -> ognuno diventa una voce
+del pre-volo, e le voci si **ordinano per quanto il round muore presto**.
+
+---
+
+## 🧱📄 CLASSE 682 — **(difetto del CANCELLO) la stringa `.ps1` dentro un testo da STAMPARE riclassifica una riga di sola lettura come «esegue uno script»** (controllo-preventivo, 23/09/2026, su `controlla_riga.py`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 682"` -> **0** al momento di scrivere.
+
+### Il fatto
+`controlla_riga.py`, `esegue_uno_script()` r.1029: `if ".ps1" in riga.lower(): return True`.
+🔴 Una riga di **sola lettura** che cita `walkforward_generico.ps1 r.1927` **dentro un `Write-Host`**
+-- cioe' per spiegare a Claudio *perche'* un controllo e' solo informativo -- veniva riclassificata
+come riga che esegue uno script, e si prendeva **due bloccanti** (PIN e MARCATORE mancanti) pur non
+scaricando niente.
+🟢 **Fallisce chiuso**, quindi non e' pericoloso. 🔴 **Ma boccia una forma innocua e VIRTUOSA** (citare
+la fonte nel messaggio), e la **classe 235** dice che un cancello cosi' si impara a scavalcare: la v2
+e' stata fatta passare scrivendo *"walkforward generico"* senza estensione, cioe' **aggirandolo**.
+
+### La regola
+1. 🔤 **Un cancello che cerca un'estensione deve guardare il CONTESTO SINTATTICO**, non la pura
+   presenza: dentro una stringa da stampare non e' un'esecuzione.
+2. 🚨 **E ogni aggiramento si DICHIARA** (come qui), perche' un aggiramento non dichiarato e' un
+   cancello che smette di esistere senza che nessuno lo decida.
