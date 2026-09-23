@@ -31744,3 +31744,97 @@ Ogni volta si riscopre la stessa cosa a valle del round.
 5. 📌 **Figlia della 226** (deal contro posizioni) applicata ai **CANCELLI** invece che ai
    referti: la 226 dice di non dividere per due; la 624 dice che **una soglia scritta
    sull'unita' sbagliata boccia il candidato giusto**.
+
+---
+
+## 🪟📏 CLASSE 625 — **IL TETTO PER ROUND CALCOLATO SULLE SOLE CELLE, in una coda dove le FINESTRE non sono uguali: taglia CINQUE round SANI su 38** (23/09/2026, R225)
+
+**Il caso.** La riga R225 incatena **38 round / 171 celle / 342 passate**. La riga sorella R221
+(3 round, tutti a 725 giorni) calcolava il tetto del round *i* come
+`min(soffitto, max(pavimento, K x durata_misurata_del_primo))`: con tre round di finestra
+identica funzionava. Portata a 38 round la stessa regola, riscritta per scalare sulle **celle**
+(`K x celle x min_per_cella`), e' stata **misurata prima di consegnarla** contro l'attesa di
+ogni round, e **cinque round sani cadevano sotto il coltello**:
+
+| round | celle | finestra | giorni | attesa | tetto SOLO-CELLE | tetto CELLE x FINESTRA |
+|---|---|---|---|---|---|---|
+| `R214F` | 3 | 2020.01.01 | 2372 | 9,4 min | 🔴 **13** | 29 |
+| `R220A..D` | 7 | 2019.01.01 | 2737 | 22,0 min | 🔴 **31** | 50 |
+
+🔴 **La causa e' che il minuto-per-cella NON e' una costante del round: e' una costante della
+CELLA PER GIORNO DI FINESTRA.** Una cella su 2737 giorni costa **4,26 volte** una cella su 642.
+Un tetto tarato sui round corti uccide quelli lunghi **esattamente quando stanno lavorando**, e
+l'esito che ne esce (`SFONDATO IL TETTO`) si legge come un guasto del motore mentre e' un
+difetto della riga.
+
+### ✅ La regola
+1. 📐 **Il tetto di un round si scrive `K x (AVVIO + celle x mps x giorni/giorni_ancora)`**, con
+   `mps` in **min per cella per finestra-ancora**, mai in min per cella e basta.
+2. 🧾 **L'ancora si dichiara con la sua finestra**: qui `R202A` del 21/09 su `DESKTOP-H4D7CAJ`,
+   stesso driver, 8 passate in 2 min 41 s = **0,670 min/cella su 642 giorni**.
+3. 🔻 **E il verso BASSO va chiuso come quello ALTO.** La 616/617 dice che un primo round
+   anomalo non puo' **allargare** il coltello (per questo esiste il soffitto). Il gemello
+   mancante: un round che **fallisce in cinque secondi** non deve poterlo **stringere**. Quindi
+   `mps` e' un **MASSIMO CORRENTE** che parte dall'ancora misurata e **non scende mai sotto**.
+4. 🚫 Un round che sfonda il tetto si scrive **`NON MISURATO`**, mai «bocciato».
+
+---
+
+## 🧟⛓️ CLASSE 626 — **LA CODA CHE SI FERMA AL PRIMO ROUND CHE FALLISCE, e il TESTER ORFANO che il round ucciso lascia acceso sul round successivo** (23/09/2026, R225)
+
+**Il caso, due difetti che vivono insieme.** La riga sorella R221 usava `break`: al primo round
+che sfondava il tetto, gli altri **non partivano**. Con 3 round e' una scelta; **con 38 e' la
+perdita di 37 misure per un guasto singolo** — ed e' lo stesso difetto che il 09/09 ci e' costato
+sei candidati senza nessun PF misurato.
+
+🔴 **Ma `continue` da solo NON basta, e la seconda meta' e' peggiore della prima.** Il ramo
+d'emergenza uccide `metatester64`/`terminal64` sotto il percorso del bersaglio, **e poi passa
+subito al round dopo**. Se anche un solo `metatester64` sopravvive (chiusura asincrona, agente
+in scrittura), il round successivo gira su una macchina **che ha gia' le CPU occupate**: rallenta,
+sfonda il **suo** tetto, uccide, e il difetto **si propaga a cascata** — 37 round dichiarati
+`SFONDATO` da un guasto solo. E su `walkforward_generico.ps1` c'e' un secondo dente: r.1880
+rifiuta di partire se un `terminal64` e' vivo.
+
+### ✅ La regola
+1. ♻️ **In una coda, un round che fallisce si REGISTRA e si CONTINUA.** Si ferma tutto solo per
+   il **budget complessivo**, mai per un round.
+2. 🧹 **Fra un round e l'altro ci va una PULIZIA CON VERIFICA, non un `Stop-Process` e via**:
+   si **aspetta** che i processi sotto il percorso del bersaglio spariscano da soli (uscita
+   normale: `ShutdownTerminal=1` + `WaitForExit()`), e **solo se dopo la grazia sono ancora li'**
+   si uccide — e **lo si dichiara come rilievo**, perche' un orfano e' un fatto, non un dettaglio.
+3. 🔬 **La pulizia si fa SEMPRE, anche dopo un round andato bene**: e' un no-op sul percorso
+   felice e costa zero. Farla solo dopo un fallimento vuol dire non farla quando serve.
+4. 📋 **E il riepilogo finale deve distinguere TRE esiti**, altrimenti la coda mente:
+   `GIRATO` · `SFONDATO IL TETTO` · `NON LANCIATO (budget)`. Gli ultimi due sono
+   **NON MISURATI**, non bocciati.
+
+---
+
+## 🔗🧨 CLASSE 627 — **IL CANCELLO CLASSE 166 SCRITTO GLOBALE su una coda MULTI-EA: un sorgente cambiato sul ramo ferma anche i 37 round che non lo usano** (23/09/2026, R225)
+
+**Il caso.** `walkforward_generico.ps1` r.264 ha `$EABranch="lavoro"` **cablato**: l'EA e gli
+include arrivano dalla **punta del ramo**, non dal pin (e' la classe 166). La riga sorella R221
+girava **un EA solo** e percio' poteva permettersi un `throw` globale se pin e ramo divergevano.
+
+🔴 **R225 gira DODICI EA diversi** (`ABTG_DAX_Apertura_EU`, `ABTG_Dow_Apertura_US`,
+`ABTG_MaxMinNotte_DAX_Short_Ottimizzato`, `ABTG_EMA200`, `ABTG_Nasdaq_Apertura_US`,
+`DAX_M3_Supertrend`, `ABTG_ORB_Ottimizzato`, `ABTG_CostToCost`, `ABTG_DAX_Live5m_v2`,
+`ABTG_Londra_ORB`, `ABTG_MaxMinNotte`, `ABTG_Nightly`) **su un branch dove lavorano piu' agenti
+in parallelo**: la punta si muove durante la corsa. Col `throw` globale, **un commit su un EA
+qualunque cancella tutti e 38 i round**, compresi i 37 che quel sorgente non lo compilano nemmeno.
+
+### ✅ La regola
+1. 🎯 **Il cancello 166 si scrive PER SORGENTE, non per corsa.** Si costruisce una mappa
+   `EA -> pin uguale al ramo (si/no)`; un round il cui EA e' divergente si **SALTA** con la sua
+   ragione scritta, e gli altri girano.
+2. 🌐 **L'eccezione e' la DIPENDENZA CONDIVISA**: se diverge un `#include` che tutti portano
+   (`ABTG_PausaGuardian.mqh`, 69 EA), allora il `throw` globale **e' corretto** — li' l'insieme
+   colpito e' davvero tutto.
+3. 🔁 **E il POST non si fa una volta sola.** Il driver **riscrive** `src_prove\` e `src_include\`
+   a ogni round: un unico controllo SHA256 alla fine certifica **solo l'ultimo EA**. In una coda
+   il POST si fa **dopo OGNI round**, sull'EA di quel round, e finisce nel riepilogo riga per riga.
+4. 🧪 **Il metodo per calcolare gli SHA attesi si verifica su una riga GIA' APPROVATA prima di
+   usarlo**: qui `git cat-file -p <pin>:mql5/Experts/ABTG_EMA200.mq5 | sha256sum` e'
+   stato confrontato con i due hash scritti nella riga R221 del 23/09 e **combacia a 64 cifre su
+   64 su tutti e due i file**. Un hash atteso calcolato con un metodo non verificato e' un
+   cancello che certifica il falso (regola del 10/09).
