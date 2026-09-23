@@ -31913,3 +31913,103 @@ normale di mettere ad asse un **booleano** quando si vogliono i gemelli G1 dentr
   `censimento_uscite.py` ragionano per singolo CSV, **il loro «mai ad asse» e' un limite
   superiore, non una misura** — e va citato con quelle parole, come il `247` della classe sul
   censimento delle uscite.
+
+---
+
+## 📐🔀 CLASSE 629 — **UN COEFFICIENTE DI CORRELAZIONE CITATO SENZA DIRE SE E' PEARSON O SPEARMAN, e su QUALE colonna: due numeri diversi finiscono nella stessa frase e la conclusione cambia** (23/09/2026, R226)
+
+**Il caso reale.** Il mandato di R226 arrivava con questa riga, scritta come una misura sola:
+> *«correlazione IS→OOS sulle 7 celle **DD +0,813** · PF +0,613 · profitto +0,595 · **RF +0,094**»*,
+> e accanto, in un altro documento dello stesso giorno, *«Spearman IS→OOS `DD` = **+0,929**»*.
+
+Ricalcolati da me sui CSV grezzi di `R201A` (7 celle, `InpBEatR`), i numeri sono **tutti veri** — ma
+sono **cinque grandezze diverse spalmate su due coefficienti**:
+
+| | Pearson | Spearman |
+|---|--:|--:|
+| `DD fisso` | **+0,813** | +0,714 |
+| `Equity DD %` | +0,742 | **+0,929** |
+| profitto | +0,595 | **+0,857** |
+| `PF` | +0,613 | **+0,821** |
+| `RF` | +0,094 | +0,107 |
+
+🔴 **E la frase derivata cambiava senso.** Da «DD +0,813 / PF +0,613» era stato concluso *«l'ordinamento
+del drawdown regge fuori campione, quello del **merito** quasi per niente»*. **Sull'ordinamento —
+che e' Spearman — il merito regge benissimo: PF +0,821, profitto +0,857.** La grandezza che davvero
+non trasferisce e' **una sola, il `RF`** (+0,094 / +0,107), ed e' vero con tutti e due i coefficienti.
+👉 Una conclusione giusta (*«il RF non trasferisce»*) era stata generalizzata a *«il merito non
+trasferisce»* **solo perche' il coefficiente non era etichettato**.
+
+### ✅ La regola
+1. 🏷️ **Un coefficiente si scrive sempre con TRE etichette: quale coefficiente, quale colonna, quale n.**
+   `Spearman(Equity DD %, IS→OOS, n=7) = +0,929`. Senza le tre, il numero non e' citabile.
+2. 🧮 **Pearson e Spearman rispondono a due domande diverse e non si sostituiscono.** Pearson misura
+   se il VALORE si riproduce; Spearman se l'ORDINE si riproduce. **La selezione di una cella usa
+   l'ORDINE**, quindi la frase *«si puo' selezionare su questo asse»* si sostiene con Spearman, non
+   con Pearson.
+3. 🔬 **Con n piccolo si scrive l'n accanto, sempre.** Qui n = 7: un +0,82 e un +0,61 su sette punti
+   non sono distinguibili con sicurezza, e presentarli come due fatti diversi e' gia' un errore.
+4. 📋 **Chi eredita un coefficiente da un altro documento lo RICALCOLA prima di rimetterlo in un file
+   prova.** Qui il ricalcolo e' costato due minuti e ha cambiato una riga di conclusione.
+
+---
+
+## 📄🎯 CLASSE 630 — **IL PER-TRADE DI UNA GRIGLIA NON E' PERDUTO DEL TUTTO: ne sopravvive UNA cella, e la si IDENTIFICA con la somma di `net_profit`** (23/09/2026, R226 — estensione operativa della **455**)
+
+**Da dove nasce.** La classe **455** (19/09) stabilisce che in ottimizzazione il file
+`abtg_trades_<EA>_<simbolo>_<magic>.csv` **viene sovrascritto a ogni passata**, quindi *«o l'asse e'
+il magic, o il criterio non puo' usare quel file»*. Resta vero. 🟢 **Ma "sopravvive una serie sola" non
+vuol dire "non serve a niente": vuol dire che serve per UNA cella, se si riesce a dire QUALE.**
+
+**Il fatto che lo rende utilizzabile**, misurato su due round veri:
+- `REFERTO_ROUND_R201A.txt` (21/09, **PC di backtest**, un solo agente): le passate tornano **in ordine
+  d'asse**, `Pass 0..6` = `InpBEatR` 0,00 → 0,90.
+- I CSV di `r136b` (13/09, **VPS**, piu' agenti): l'ordine e' **0,75 / 0,00 / 0,25 / 1,00 / 0,50 / 1,25 /
+  1,50**, cioe' **nessun ordine**.
+👉 **Con UN SOLO AGENTE locale (classe 129) il file sopravvissuto e' quello dell'ULTIMA cella dell'asse,
+nella finestra girata per ultima (OOS).** Con piu' agenti non e' nemmeno prevedibile.
+
+### ✅ La regola — e la parte che la rende un fatto, non un'assunzione
+1. 🔢 **La cella NON si deduce dall'ordine: si IDENTIFICA.** La **somma della colonna `net_profit`** del
+   per-trade deve coincidere col `Profit` di **UNA SOLA** riga del CSV di quella finestra.
+   - coincide con una riga sola → **la cella e' identificata**, e le POSIZIONI si contano davvero
+     (`position_id` distinti);
+   - coincide con piu' righe, o con nessuna → **il file non si usa** e si scrive `[NON MISURATO]`.
+2. 🎯 **Percio' l'ordine delle celle in un file prova non e' neutro**: mettere all'ULTIMO posto una cella
+   che interessa porta a casa il suo conteggio in posizioni **a costo zero**. In `R226b` l'ultima cella
+   e' `0,50`, che e' una delle due del blocco: guadagno gratis. In `R226a` e' `0,20`, un vicino: guadagno
+   minore ma non nullo.
+3. 🚫 **Non basta per il cancello sul campione**: una cella su cinque non chiude il requisito dei 150 su
+   tutte le altre. La 455 resta in piedi, e la via completa resta **la corsa a cella congelata (2 passate)
+   o il magic-sweep**.
+4. 🔴 **E resta vietato chiamare `n` la colonna `Trades`** (classe 454): con una parziale accesa, o con
+   un EA che rifiuta il segnale mentre e' impegnato, quel numero **non sono le posizioni**.
+
+---
+
+## 🩹👻 CLASSE 631 — **UNA RIGA DI COMMENTO SCRITTA `//` DENTRO UN FILE PROVA: invisibile a tutti e due i cancelli e al driver — finche' non contiene un `=`, e allora diventa un parametro** (23/09/2026, R226)
+
+**Il caso reale, ed e' mio.** Scrivendo il cancello **C7** dentro
+`prove/R214e_uscite_COSTTOCOST_EURJPY_tick.txt` ho battuto `//` al posto di `#` su una riga di commento.
+**Nessuno dei tre strati l'ha vista:**
+- `controlla_riga.py --oggetto prova` → **PASS** (la riga e' ASCII, e non guarda i prefissi);
+- `controlla_prova.py` → **OK** (salta ogni riga senza `=`);
+- `walkforward_generico.ps1` r.507-516 → tiene **solo** le righe che contengono `=`; le altre le butta
+  **in silenzio**.
+
+🟢 Quindi in quel caso il danno era **zero**. 🔴 **Ma solo per fortuna, non per metodo**: il formato dei
+file prova riconosce **esclusivamente** `#` (commento), `@` (direttiva) e `Nome=valore`. Una riga `//` che
+per caso contenga un `=` — e nei nostri commenti ce ne sono a decine (`InpTP1_ATRmult=0`, `InpSpaceMode=0`,
+`sl==0`) — **verrebbe presa per un parametro**. A quel punto: o e' un nome che l'EA non ha (bloccante,
+si scopre), **oppure e' un nome vero e pinna un input di nascosto** (non bloccante, **non si scopre**).
+
+### ✅ La regola
+1. 🚫 **Nei file prova esiste UN SOLO prefisso di commento: `#`.** Non `//`, non `;`, non `--`. Chi scrive
+   in MQL5 e in PowerShell nello stesso pomeriggio sbaglia prefisso: e' successo.
+2. 🔎 **Il controllo costa una riga e si fa su ogni file prova toccato**:
+   `grep -nE "^[^#@]" <file> | grep -v "="` → deve stampare **niente**.
+3. 📌 **E vale anche al contrario**: una riga che *doveva* essere un parametro e che comincia per `#`
+   sparisce con la stessa identica silenziosita'. Il conto dei pin stampato da `controlla_prova.py`
+   (`pin=NN`) e' la sentinella: **se cambia dopo una modifica che doveva toccare solo i commenti,
+   qualcosa e' passato dall'altra parte.** Qui e' stato verificato: `R214e` **pin=18** e `R214f`
+   **pin=17** prima e dopo la riparazione del 23/09.

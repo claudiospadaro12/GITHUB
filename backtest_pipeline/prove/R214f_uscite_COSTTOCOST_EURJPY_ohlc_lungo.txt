@@ -168,6 +168,64 @@
 #  D6  IL ROUND NON TOCCA NIENTE: nessun preset, nessuna sedia, nessun
 #      forward, nessun conto reale 10105439. Taglie e accensioni:
 #      FIRMA DI CLAUDIO.
+#  D7  *** IL MURO GIORNALIERO -- AGGIUNTO IL 23/09/2026, ED E' L'UNICO
+#      CANCELLO DI QUESTO FILE CHE ARRIVA GIA' CON IL SUO NUMERO. ***
+#      SOGLIA: la colonna "Peggior Giornata %" deve restare
+#      > -5,00 in TUTTE E DUE le finestre, su ogni cella che si voglia
+#      chiamare schierabile.
+#      >>> PERCHE' ARRIVA ADESSO: le soglie D1-D5 di questo file erano
+#          scritte TUTTE su Equity DD %, cioe' sul muro TOTALE. Il
+#          23/09 e' stato misurato che su questo motore il tappo e'
+#          l'ALTRO: report/LA_GIORNATA_PEGGIORE_NON_E_QUELLA_2026-09-23.md
+#          -- 13 sedie su 20 sottostimano la peggior giornata, e
+#          "CostToCost EURJPY" sta a -8,01% contro un muro del 5%
+#          (fattore 5,1x fra la stima di tabella, -1,57%, e il numero
+#          vero letto nell'OPTFRAME dell'EA).
+#      >>> LA COLONNA C'E' GIA' E NON COSTA NIENTE: ABTG_CostToCost.mq5
+#          r.1170 scrive stats[7] = gWorstDayPct e r.1195 la mette
+#          nell'intestazione. *** Ed e' PRESENTE nei due CSV che sono
+#          gia' l'ancora di questo file *** -- verificato riga per
+#          riga il 23/09 su
+#          risultati_prove/dal_vps/ABTG_CostToCost/
+#          ABTG_CostToCost_EURJPY_{IS,OOS}_ohlc_r127c.csv.
+#          Nessuna passata in piu', nessun minuto di macchina in piu':
+#          si tratta solo di GUARDARLA.
+#      >>> ATTESA DICHIARATA PRIMA DEI NUMERI, E QUI NON E' UNA
+#          PREVISIONE: E' L'ANCORA. *** LA CELLA exit 2 E' ATTESA IN
+#          BOCCIATURA SU D7. *** Alla riga Pass 3 (InpMaxBarsHold=100,
+#          cioe' esattamente la cella pinnata qui) r127c da':
+#              IS   Peggior Giornata %  -4.2160   (sotto il muro: passa)
+#              OOS  Peggior Giornata %  -8.0159   (SFONDA il muro del 5%)
+#          Cifre copiate dal CSV grezzo (classe 451).
+#          >>> QUINDI D7 SU QUESTO FILE FA DUE MESTIERI INSIEME:
+#              (1) e' un CANCELLO, e exit 2 lo fallisce;
+#              (2) e' un pezzo in piu' dell'ANCORA D1 -- se la cella
+#                  exit 2 NON tornasse -4.2160 / -8.0159, il round e'
+#                  muto anche se PF, DD e n tornassero. *** Una
+#                  colonna che nessuno guardava diventa cosi' un
+#                  controllo di regressione gratis. ***
+#      >>> E QUELLO CHE D7 DICE SULLE ALTRE DUE CELLE E' [NON
+#          MISURATO]: exit 0 e exit 1 non hanno nessun numero di
+#          peggior giornata in archivio, ne' qui ne' nello scan H4
+#          (che la colonna ce l'ha ma su un'altra finestra e un altro
+#          insieme di pin). *** Se exit 0 passasse D7 mentre exit 2 lo
+#          fallisce, sarebbe il risultato piu' utile di tutto il
+#          gemellaggio R214e/f: vorrebbe dire che la scelta
+#          dell'uscita sposta il muro GIORNALIERO, che e' il muro che
+#          ci sta tappando. ***
+#      >>> IL LIMITE, e va detto perche' e' lo stesso di D5: *** questo
+#          file e' OHLC, e l'OHLC NON VEDE LE ESCURSIONI INTRA-BARRA.
+#          Quindi anche il -8,0159 e' un LIMITE INFERIORE: la giornata
+#          vera puo' solo essere PEGGIORE. *** Una cella che passa D7
+#          qui NON e' dimostrata dentro il muro; una che lo fallisce
+#          qui e' dimostrata FUORI. Asimmetria da scrivere nel
+#          referto, ed e' la stessa forma della classe 562.
+#      >>> LA TAGLIA, dichiarata: si gira a InpRiskPercent = 1,00, e a
+#          rischio 1,00 la colonna E' GIA' il numero di campo, quindi
+#          il -5,00 si legge cosi' com'e'. A 2,00 la soglia
+#          diventerebbe -2,50 sulla stessa colonna. *** Sul -8,0159
+#          gia' misurato il verdetto non cambia in nessuno dei due
+#          casi. ***
 #
 #  7. COSTO -- tetto dichiarato
 #  --------------------------------------------------------------------

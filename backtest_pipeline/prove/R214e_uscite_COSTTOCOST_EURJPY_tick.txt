@@ -235,6 +235,62 @@
 #      MISURA. Taglie, rischio, accensioni: FIRMA DI CLAUDIO.
 #  C6  IL ROUND NON TOCCA NIENTE: nessun preset, nessuna sedia, nessun
 #      forward, nessun conto reale 10105439.
+#  C7  *** IL MURO GIORNALIERO -- AGGIUNTO IL 23/09/2026, E CAMBIA
+#      QUELLO CHE QUESTO ROUND PUO' BOCCIARE. ***
+#      SOGLIA: la colonna "Peggior Giornata %" deve restare
+#      > -5,00 in TUTTE E DUE le finestre, su ogni cella che si voglia
+#      chiamare schierabile.
+#      >>> PERCHE' ARRIVA ADESSO: fino a stamattina le soglie di
+#          questo file erano scritte TUTTE su Equity DD %, cioe' sul
+#          muro TOTALE. Il 23/09 e' stato misurato che su questo
+#          motore il tappo e' l'ALTRO: referto
+#          report/LA_GIORNATA_PEGGIORE_NON_E_QUELLA_2026-09-23.md --
+#          13 sedie su 20 sottostimano la peggior giornata, e
+#          "CostToCost EURJPY" sta a -8,01% contro un muro del 5%,
+#          con un fattore 5,1x fra la stima di tabella (-1,57%) e il
+#          numero vero letto nell'OPTFRAME dell'EA.
+#          >>> Un file che boccia sul muro totale e non guarda quello
+#              giornaliero puo' promuovere una cella che la prop
+#              chiuderebbe in un giorno solo. Era esattamente questo
+#              il caso.
+#      >>> LA COLONNA C'E' GIA' E NON COSTA NIENTE: ABTG_CostToCost.mq5
+#          r.1170 scrive stats[7] = gWorstDayPct e r.1195 la mette
+#          nell'intestazione "...,Trades,Peggior Giornata %,...".
+#          Verificata presente nei CSV di questo motore
+#          (scan_h4/scan_ABTG_CostToCost_H4_EURJPY.csv e i due
+#          ..._ohlc_r127c.csv). *** Nessuna passata in piu', nessun
+#          minuto di macchina in piu': si tratta solo di GUARDARLA. ***
+#      >>> ATTESA DICHIARATA PRIMA DEI NUMERI, e non e' vaga:
+#          *** LA CELLA exit 2 E' ATTESA IN BOCCIATURA SU C7. ***
+#          Sul gemello R214f il numero e' gia' MISURATO e non e' una
+#          previsione: r127c, cella InpMaxBarsHold = 100 (che e' la
+#          cella exit 2 pinnata), da' Peggior Giornata %
+#          IS -4,2160 e OOS -8,0159. L'OOS sfonda il muro del 5%.
+#          >>> QUI, su questo file, e' invece una PREVISIONE VERA,
+#              perche' la finestra e' un'altra (2024.07.05 ->
+#              2026.06.30, dentro l'OOS di r127c) e il modello e' un
+#              altro (tick invece di OHLC). [NON MISURATO].
+#      >>> IL CONTRO-ESEMPIO CHE MI FAREBBE SBAGLIARE, e lo scrivo
+#          prima: se qui exit 2 tornasse con una peggior giornata
+#          PICCOLA (diciamo -2%), la lettura FACILE sarebbe "a tick
+#          va meglio". *** SAREBBE QUASI CERTAMENTE FALSA. *** La
+#          spiegazione alternativa e' che la giornata da -8% di r127c
+#          cada PRIMA del 2024.07.05 e questa finestra non la
+#          contenga: sarebbe un artefatto della finestra, non un
+#          merito del modello. E la direzione nota del bias va nel
+#          verso opposto (l'OHLC non vede le escursioni intra-barra e
+#          SOTTOSTIMA, quindi a tick ci si aspetta PEGGIO, non
+#          meglio). *** QUINDI: un C7 che passa su questo file NON
+#          DIMOSTRA NIENTE finche' non si sa in che data e' caduta la
+#          giornata peggiore di r127c -- e quel dato e' [NON
+#          MISURATO], si legge nel per-trade, non nel CSV di griglia.
+#          Un C7 che FALLISCE, invece, e' un fatto. ***
+#      >>> LA TAGLIA, dichiarata: questo round gira a
+#          InpRiskPercent = 1,00, e a rischio 1,00 la colonna E' GIA'
+#          il numero di campo, quindi il -5,00 si legge cosi' com'e'.
+#          Se qualcuno schierasse a 2,00 la soglia diventerebbe
+#          -2,50 sulla stessa colonna. *** Sul numero gia' misurato
+#          (-8,0159) il verdetto non cambia in nessuno dei due casi. ***
 #
 #  8. COSTO -- tetto dichiarato, non stima centrale
 #  --------------------------------------------------------------------
