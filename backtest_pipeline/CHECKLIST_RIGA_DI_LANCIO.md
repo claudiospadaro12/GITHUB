@@ -31447,3 +31447,43 @@ di quella misura. Verso il basso ce ne eravamo accorti (il pavimento c'era), ver
 3. ⚠️ **E la banda dell'attesa resta separata dal tetto**: in R221 l'attesa vera è
    **1,2-2,8 min** per round. Un tetto di 54 non è una previsione — è un coltello. Se le due
    cose non sono scritte vicine, un round da 30 minuti sembra normale e invece è **rotto**.
+
+---
+
+## 🧱 CLASSE 618 — **IL TAPPO DICHIARATO NON ERA IL TAPPO: IL MURO PROP E' DOPPIO E NE CLASSIFICHIAMO UNO** (23/09/2026, R224)
+
+**Il caso reale.** `ABTG_CostToCost` EURJPY (`772361`) e' la sedia meglio piazzata della
+lettura anno-per-anno di R219, e il suo blocco e' scritto ovunque come *«DD 12,26% contro
+9,33% promesso = 1,31x»*. R224 va a leggere le **stesse righe di CSV** e trova che il
+numero che sfonda un muro prop **non e' quello**: e' la **PEGGIOR GIORNATA**, **−8,02%**
+su BCM nativo a 100k (`..._EURJPY_OOS_ohlc_r127c.csv` Pass 3) e **−10,07%** nell'ORSO 2022
+(`regime_r59/COST_EURJPY_ORSO_r59.csv`), **contro il muro giornaliero del 5%**. Il muro
+**totale** e' sfondato di 1,23x; quello **giornaliero** di **1,60-2,01x**.
+
+🔴 **E il meccanismo del difetto e' peggiore dell'esito**, perche' non e' un dato mancante:
+R103 **stampa tutti e due i numeri** nel blocco F04 — `-1.57%` dai deal e, due righe sotto,
+*«SECONDA MISURA INDIPENDENTE (dall'OPTFRAME): −8.01%»*. Ma la **TABELLA 1**, quella che
+tutti i referti a valle copiano, ha **una sola colonna `PEGGGIOR`** e ci mette **la misura
+dai DEAL** (realizzato, saldo chiuso), cioe' **la piu' comoda delle due**, scartando quella
+**di equity** che e' la definizione prop. Fattore fra le due: **5,1x**. Da li' in poi la
+catena dei referti ha ereditato `-1,57%` e ha discusso solo il DD.
+
+### ✅ La regola
+1. 📏 **Il muro prop e' DOPPIO** (giornaliero **5%** + totale **10%**): quando si dichiara
+   il *tappo* di una sedia, si guardano **tutte e due le colonne di rischio del CSV**, non
+   solo `Equity DD %`. Un tappo annunciato su una sola delle due **non e' un tappo: e' meta'
+   diagnosi**, e manda a cercare la soluzione nel posto sbagliato.
+2. 🔴 **Fra due misure della stessa grandezza si porta in classifica la PIU' SEVERA**, e
+   l'altra le sta accanto **con l'etichetta del metodo**. Qui: `Peggior Giornata` di
+   **EQUITY** (OPTFRAME, `ABTG_CostToCost.mq5` r.486-495: minimo di equity del giorno contro
+   l'equity d'apertura, campionato a ogni tick) batte quella **dai DEAL** (chiusure
+   realizzate), che ignora il flottante ed e' **sempre** un limite inferiore.
+   👉 Vale identico per il DD: `DD sul saldo chiuso 8,44%` e `DD equity 12,26%` **non vanno
+   mai nella stessa colonna** — R103 lo scrive gia' per il DD e **non lo fa per la giornata**.
+3. 🧪 **Quando si mette una manopola ad asse, si guarda quale colonna di rischio CAMBIA.**
+   Su questo motore il DD si muove poco fra le tre uscite (9,1-12,0%) mentre la giornata si
+   muove di **6,1x** (−1,29 contro −7,87). **La manopola non morde dove stavamo guardando.**
+4. 📣 **E i cancelli dei file prova si scrivono sulla colonna che decide.** `R214e` ha le
+   soglie **C3/C4 su `Equity DD %`** e **nessuna soglia sulla giornata**, pur producendola
+   nel CSV: aggiungere il cancello costa **ZERO passate**, scoprirlo dopo il round costa il
+   round.
