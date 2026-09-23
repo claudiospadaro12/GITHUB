@@ -32013,3 +32013,77 @@ si scopre), **oppure e' un nome vero e pinna un input di nascosto** (non bloccan
    (`pin=NN`) e' la sentinella: **se cambia dopo una modifica che doveva toccare solo i commenti,
    qualcosa e' passato dall'altra parte.** Qui e' stato verificato: `R214e` **pin=18** e `R214f`
    **pin=17** prima e dopo la riparazione del 23/09.
+
+---
+
+## 🔢🎭 CLASSE 632 — **«E' ESATTAMENTE IL VALORE CHE GIRA SULL'ALTRA SEDIA»: lo stesso NUMERO su una manopola che ha DUE significati a seconda di un'ALTRA manopola — e le due sedie hanno quell'altra manopola messa in modo diverso** (23/09/2026, riga R205A+R208B)
+
+**Il caso reale.** Claudio nota che sul Nasdaq `770260` il primo bersaglio e' `InpTP1_R=0,5`
+e sul DAX `770101` e' `1,0`, e chiede: «si puo' testare?». La riga di lancio che ne nasce
+stampa a schermo: _«La cella 0,5 E ESATTAMENTE il valore che gira sul Nasdaq»_ e _«questo round
+risponde alla domanda letterale: il bersaglio vicino del Nasdaq funziona anche sul DAX?»_.
+
+🔴 **E' falso, e si dimostra nel sorgente** (`mql5/Experts/ABTG_DAX_Apertura_EU.mq5`, verificato
+al pin `0d14c050`):
+- `r.2081-2089 TpTotalR()` -> il TP finale vale **`3 x InpTP1_R`**;
+- `r.2359` -> il blocco della parziale gira **solo** se `InpTP1_ClosePct > 0 && < 100`;
+- `r.2368` (punto del parziale, `openP + dirSign*riskDist*InpTP1_R`) e **`r.2391`** (il breakeven)
+  stanno **DENTRO** quel blocco.
+
+👉 Quindi `InpTP1_R` **non e' una manopola: sono due**, e quale delle due sia dipende da
+`InpTP1_ClosePct`:
+| | `InpTP1_ClosePct` | che cosa fa `InpTP1_R = 0,5` |
+|---|---|---|
+| **Nasdaq `770260` (vivo)** | `50` | chiude **meta' posizione a 0,5R**, porta lo **stop a pari**, e mette il **TP a 1,5R** |
+| **cella 0,5 di `R208B`** | `0` | **solo** il TP a 1,5R. Niente parziale, niente breakeven |
+
+Lo stesso `0,5` descrive **due strutture d'uscita diverse**. Il round e' sano, il file prova lo
+dichiara per iscritto — **e' la RIGA che insegna a leggerlo male**, e la riga e' l'unica cosa che
+Claudio legge davvero.
+
+### ✅ La regola
+1. 🚫 **«E' lo stesso valore dell'altra sedia» non si scrive mai senza aver verificato che sia
+   anche lo STESSO SIGNIFICATO.** Si apre il sorgente e si cerca **da quali altre manopole
+   dipende** il ramo che quel parametro accende.
+2. 🔎 **Il grep che lo trova**: si prende il nome dell'input e si guarda **dentro quale `if`
+   vive ogni sua occorrenza**. Se anche una sola sta dentro un `if` guidato da un ALTRO input,
+   quel parametro e' **condizionato** e il confronto fra sedie va fatto **a coppia**
+   (`InpTP1_R` + `InpTP1_ClosePct`), mai sul numero da solo.
+3. 📌 **E allora la domanda si spacca in due, e si dichiarano tutte e due**: «il bersaglio conta
+   su questa sedia?» (quella che il round misura) e «il valore dell'altra sedia si trasferisce?»
+   (quella che resta **APERTA** e chiede un round col parziale alla pari).
+4. 🔴 **Vale anche al contrario**: se il round gira su una configurazione che **non e' quella in
+   campo** (qui `InpTP1_ClosePct=0` contro il `50` che vola), la riga deve dirlo in chiaro e
+   ricordare che l'adozione e' una **FIRMA DI CLAUDIO** non ancora data.
+
+---
+
+## 📉🚪 CLASSE 633 — **LA RIGA STAMPA UN CANCELLO PIU' MORBIDO di quello congelato nel file prova: l'ATTESA scambiata per la SOGLIA** (23/09/2026, riga R205A+R208B)
+
+**Il caso reale.** `prove/R208b_bersaglio_770101_D30EUR.txt` congela `A1`: servono **>= 3 celle
+contigue** con **ciascuna `PF OOS >= 1,49140` E `DD OOS <= 7,2328%`**, con la cella viva dentro la
+terna; piu' `A4` (picco), `A7` (rischio a 9,00%), `A9` (vantaggio sotto il **10,5% relativo**,
+cioe' `PF OOS < 1,648`, **dentro il rumore dell'esecuzione**).
+
+La riga di lancio, nel paragrafo «COME SI LEGGE R208B», scriveva invece:
+> _«Attese DICHIARATE PRIMA: PF OOS fra 1,25 e 1,55; DD OOS fra 5,5% e 8,0% ... Servono almeno
+> TRE CELLE CONTIGUE che passano»_
+
+🔴 **«Che passano» CHE COSA?** L'unico numero a schermo era la **banda dell'attesa**. Una cella
+con `PF OOS 1,30` e `DD 7,9%` **passa la riga e fallisce il file**. La riga aveva trasformato una
+**previsione** (dove mi aspetto che cadano i numeri) in un **cancello** (sotto cosa non si
+promuove) — e nella direzione che costa: **l'asticella abbassata**.
+
+### ✅ La regola
+1. 🔴 **ATTESA e SOGLIA sono due cose diverse e si stampano con due etichette diverse.**
+   L'attesa serve a sapere se il banco ha funzionato; la soglia serve a promuovere. Confonderle
+   e' il modo educato di ammorbidire un criterio senza accorgersene (motto del 09/09: _«insistere
+   vuol dire cercare una MISURA in piu', mai un criterio piu' morbido»_).
+2. 📋 **Se la riga cita un criterio, lo cita COL NUMERO del file prova**, non con una parafrasi.
+   «E il rischio deve reggere» non e' un cancello: `c2 DD_fisso OOS <= 9,7937` lo e'.
+3. 🔎 **Il controllo, ed e' meccanico**: si aprono le sezioni `A1..A10` / `c1..c3` del file prova
+   e si verifica che **ogni** soglia citata a schermo abbia lo **stesso numero**. Se la riga ne
+   omette una (qui mancava `c1-bis`, il **Recovery Factor OOS >= 2,01544**), l'omissione e' un
+   difetto: chi legge crede che il cancello sia quello stampato.
+4. 🚫 **Meglio non scrivere nessun criterio che scriverne uno piu' largo.** Se la riga tace, vale
+   il file. Se la riga parla, **diventa** il criterio.
