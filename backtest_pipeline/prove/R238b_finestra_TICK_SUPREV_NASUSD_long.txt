@@ -1,97 +1,208 @@
 # ==========================================================================
 #  R238b -- LA FINESTRA ORARIA A **TICK REALI**, lato LUNGO, NASUSD H1
-#  SupertrendReversal -- replica esatta di R236f col SOLO modello cambiato
+#  SupertrendReversal -- replica di R236f col MODELLO DI ESECUZIONE cambiato
 # ==========================================================================
 #  PERCHE' ESISTE (23/09/2026, dopo la lettura dei 13 round)
 #  R236e/f ha misurato una cosa grossa sul CORTO del Nasdaq:
 #      finestra SPENTA -> OOS PF 1,671  n 42  DD 1,039%
 #      finestra ACCESA -> OOS PF 3,729  n 24  DD 0,509%
-#  e sul LUNGO niente: 0,990 spenta, 0,990 accesa.
-#  Nello stesso giorno R235 ha misurato, per la prima volta, il n PER LATO:
-#  RAMO 3 su tutti e due i simboli (R = 0,851 NASUSD, 0,891 U30USD), cioe'
-#  "la deriva non basta a spiegare lo short". DUE misure indipendenti che
-#  puntano nello stesso posto.
+#  e sul LUNGO (R236f, questo lato) niente:
+#      finestra SPENTA -> IS PF 1,760 n 45  |  OOS PF 0,990 n 76
+#      finestra ACCESA -> IS PF 2,809 n 37  |  OOS PF 0,990 n 52
+#  (report/REFERTO_13_ROUND_2026-09-23.md, tabella R236e/f.)
+#  >>> QUESTO FILE E' IL LATO LUNGO. I numeri qui sopra del CORTO stanno
+#      solo per contesto: **tutti i cancelli di questo file si tarano sui
+#      numeri del LUNGO**. (La prima stesura aveva ereditato dal gemello i
+#      n del corto: corretto dal cancello, 23/09.)
 #
-#  >>> MA R236e E' GIRATO A MODELLO 1 (OHLC), e questo motore e' il caso
+#  >>> MA R236f E' GIRATO A MODELLO 1 (OHLC), e questo motore e' il caso
 #      peggiore possibile per l'OHLC:
 #        InpUsePending=true      -> l'ordine pendente si riempie DENTRO la barra
 #        InpTrailOnST=true       -> lo stop si muove DENTRO la barra
 #        InpBreakeven=true       -> il pareggio scatta DENTRO la barra
 #        InpTP1Pct=50 a TP1_R=1  -> la mezza uscita e' DENTRO la barra
 #      Con quattro meccanismi intrabarra su quattro, l'OHLC non ha
-#      l'informazione per risolverli: li indovina. **Un PF 3,729 letto in
-#      OHLC su questo motore non e' un risultato, e' un'ipotesi.**
-#  >>> QUESTO ROUND LA METTE ALLA PROVA NELL'UNICO MODO CHE CONTA: a TICK
-#      REALI, stessi pin, stessa finestra, stesso asse. **Cambia UNA cosa
-#      sola: il modello.** Se cambia anche altro, non e' un confronto.
+#      l'informazione per risolverli: li indovina.
+#  >>> E VALE ANCHE AL CONTRARIO, ed e' il motivo vero per cui il lungo si
+#      gira: **un 0,990 letto in OHLC non e' una condanna**, e' un'ipotesi
+#      come lo e' il 3,729 del corto. Regola del 25/08 sugli indici: i due
+#      lati si misurano tutti e due, anche quando uno e' dato per morto.
+#      E il lungo ha piu' campione del corto (76 e 52 in OOS contro 42 e
+#      24): se qualcosa cambia col tick, qui si vede meglio.
+#
+#  >>> E QUI SERVE UNA PRECISIONE CHE LA PRIMA STESURA NON AVEVA.
+#      NON e' vero che "cambia una cosa sola". Da Modello 1 a Modello 4
+#      cambia il MODELLO DI ESECUZIONE **INTERO**: il percorso dentro la
+#      barra E lo SPREAD (a tick reali lo spread e' quello storico vero,
+#      a OHLC no -- walkforward_generico.ps1 r.963 e la riga Spread
+#      dell'.ini). Quindi il delta si attribuisce **al modello di
+#      esecuzione**, non alle sole meccaniche intrabarra, e la riga di
+#      lancio deve passare lo STESSO -Spread usato da R236f. Se non lo
+#      passa, lo si dichiara: e' un'incognita in piu', non un dettaglio.
 #
 # ==========================================================================
-#  >>> IL CANCELLO DEL COSTO: **PRONUNCIATO, E NON PASSA.** <<<
+#  >>> IL CANCELLO DEL COSTO: **SOSPESO.** <<<
+#  (era scritto "PRONUNCIATO E NON PASSA": corretto dal cancello, 23/09)
 # ==========================================================================
-#  In R236a/b il verdetto sul 40x era SOSPESO perche' la FASE 1 non e'
-#  lanciabile. Qui NON e' sospeso: **l'archivio aveva gia' la risposta, e
-#  l'ho cercata prima di scrivere il file** (regola del 10/09).
-#    report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.412, sedia `970913`
-#    (SupRev_NAS_H1_Ottimizzato, NASUSD H1):
-#      geometria dello stop : "swing 5 barre H1 + 3 pip (0,03 idx)"
-#      stop MISURATO        : 51,65 idx n=4  -> CORRETTO 18/09 a 27,10 n=5
-#      dispersione          : min 9,70  max 151,90
-#      passa il 40x?        : NO -- 72% dei casi, poi NO (38%)
-#  >>> E LA GEOMETRIA E' LA STESSA DI QUESTO FILE: InpSLLookback=5 e
-#      InpSLBufferPips=3.0 sono esattamente "swing 5 barre + 3 pip".
-#      Non e' un motore diverso che somiglia: e' lo stesso stop.
-#  >>> LA FRONTIERA CHE CONTA E' QUELLA DI DOVE SI OPERA: FTMO US100.cash,
-#      spread 1,53 -> 40 x 1,53 = **61,20 idx**
-#      (report/STOP_VS_SPREAD_FTMO_2026-09-20.md).
-#      **27,10 e' il 44% di 61,20.** Non e' sul filo: e' meta'.
+#  L'archivio ha un numero VICINO, e va citato -- ma NON si puo'
+#  trasferire su questi pin. I quattro motivi, ognuno sufficiente da solo:
 #
-#  >>> CONSEGUENZA, SCRITTA QUI PRIMA DEI NUMERI E NON NEGOZIABILE:
-#      **QUESTO ROUND NON PUO' PROMUOVERE NIENTE, QUALUNQUE PF ESCA.**
-#      Non e' una formalita': e' la regola del 19/08 ("una cella sotto 40x
-#      non si promuove, qualunque PF faccia") applicata a se stessi quando
-#      il numero e' bello. Se esce PF 3 a tick reali, la riga da scrivere
-#      resta "stop 27,10 contro 61,20 richiesti: NON SCHIERABILE".
+#    IL NUMERO D'ARCHIVIO
+#      report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.412, sedia 970913
+#      (SupRev_NAS_H1_Ottimizzato, NASUSD H1):
+#        stop MISURATO : 51,65 idx n=4 -> CORRETTO 18/09 a 27,10 idx n=5
+#        dispersione   : min 9,70  max 151,90
+#        verdetto 40x  : NO (72%), poi NO (38%)
+#      Frontiera di dove si opera: FTMO US100.cash spread 1,53
+#      -> 40 x 1,53 = 61,20 idx (report/STOP_VS_SPREAD_FTMO_2026-09-20.md
+#      r.325 per lo spread, r.249 per il 61,2).
 #
-#  >>> ALLORA PERCHE' LO SI GIRA? Per una ragione sola e onesta:
-#      **per chiudere la porta a buon mercato.** 8 passate (2 file x 2
-#      celle x 2 gambe) contro le 94 di stamattina. Se il 3,729 e' un
-#      artefatto dell'OHLC -- ed e' l'ipotesi piu' probabile viste le
-#      quattro meccaniche intrabarra -- lo sappiamo stasera e non ci
-#      torniamo piu'. Se invece REGGE, allora la domanda giusta diventa
-#      un'altra e la si scrive: "si puo' portare lo stop sopra 61,20
-#      tenendo il PF?" -- ed e' l'asse del BUFFER (R236a), non le ore.
+#    (a) LA GEOMETRIA CITATA E' PIU' POVERA DEL CODICE. L'archivio scrive
+#        "swing 5 barre H1 + 3 pip". Il codice dice un'altra cosa:
+#        ABTG_SupertrendReversal.mq5 r.386-389
+#          ext = estremo a InpSLLookback barre
+#          sl  = isLong ? MathMin(stLine,ext)-buf : MathMax(stLine,ext)+buf
+#        cioe' **il PIU' PROTETTIVO fra la linea Supertrend e l'estremo**,
+#        piu' il buffer. Il buffer e' inerte (3 pip = 0,03 idx). Quindi lo
+#        stop DIPENDE da InpStMult e InpStAtrPeriod.
+#    (b) E QUEI DUE PARAMETRI SONO DIVERSI. Tre geometrie, non una:
+#          970913 : Supertrend(10 , 3,0)
+#            (mql5/Presets/sedie_piccolo/recupero2/
+#             sedia_ABTG_SupRev_NAS_H1_Ottimizzato_970913.set)
+#          R238a  : Supertrend( 7 , 3,5)
+#          R238b  : Supertrend(12 , 2,5)  <- questo file
+#        Il 27,10 appartiene a una terza parametrizzazione. Trasferirlo
+#        "perche' SLLookback e SLBufferPips coincidono" e' un errore: quei
+#        due non sono il termine che comanda. E questo file e' il piu'
+#        lontano dei due: moltiplicatore 2,5 contro 3,0.
+#    (c) IL 27,10 E' UN LIMITE INFERIORE, NON UNA DISTANZA D'INGRESSO.
+#        E' uno stop REALIZZATO su 5 gambe vere, e il preset di 970913 ha
+#        InpBreakeven=true E InpTrailOnST=true: pareggio e trailing possono
+#        solo STRINGERE lo stop realizzato. L'archivio fa esattamente
+#        questa correzione, nella STESSA tabella, per 770411 ("con
+#        breakeven e trailing accesi e' un limite INFERIORE, non la
+#        distanza d'ingresso") e non l'ha applicata a 970913.
+#    (d) L'n=5 E' UN POOL DEI DUE LATI. Il preset di 970913 ha
+#        InpAllowLong=true E InpAllowShort=true; questo file e' lungo puro
+#        e il gemello e' corto puro -- e i due lati hanno Supertrend
+#        diversi. Non c'e' un "27,10 del lungo".
+#    (+) E LA CODA STA NELLA STESSA RIGA D'ARCHIVIO: max 151,90 = **2,5
+#        volte** la frontiera 61,20. Stressare il cancello sull'ancora e
+#        non sulla distribuzione e' un difetto gia' schedato.
+#
+#  >>> E IL REPO DICHIARA QUESTO CANCELLO APERTO, non chiuso: R236e
+#      r.370-374 mette T7 (la distanza di stop PER INGRESSO) dentro una
+#      FASE 1 a corsa singola col Giornale acceso, che **non e' ancora
+#      stata scritta**; e report/COME_SI_LEGGONO_I_13_ROUND_2026-09-23.md
+#      scrive "Finche' non esiste, T7 e T3 restano sospesi SU OGNI CORSA
+#      FUTURA, non solo su questa". Questo round non ha il diritto di
+#      chiuderlo in silenzio.
+#
+#  >>> E IL VERSO DELL'ERRORE E' QUELLO CHE FA MALE: se la distanza vera
+#      ingresso->SL di QUESTA geometria stesse sopra 61,20, la prima
+#      stesura avrebbe congelato PRIMA DEI NUMERI una ragione **falsa**.
+#      Meglio un SOSPESO dichiarato che un NO comodo.
+#
+#  >>> E QUESTO ROUND NON PUO' CHIUDERLO DA SOLO: walkforward_generico.ps1
+#      scrive Optimization=1 (r.1015 e r.2013), che produce il riepilogo
+#      per passata e NON l'elenco delle gambe. Serve la FASE 1.
+#
+# ==========================================================================
+#  >>> COSA RESTA NON NEGOZIABILE: NESSUNA PROMOZIONE. <<<
+# ==========================================================================
+#  Il divieto NON poggia piu' sul cancello del costo (che e' sospeso).
+#  Poggia su una gamba indipendente e solida:
+#    n atteso sul LUNGO 45 IS / 76 OOS (spenta) e 37 IS / 52 OOS (accesa)
+#    -> **il massimo e' 76, meno di META' dei 150**. Emendamento A: sotto
+#    quella soglia il MERITO non si pronuncia. Quindi: nessuna promozione,
+#    nessuno spegnimento, nessuna sedia, qualunque PF esca.
+#  >>> E VALE ANCHE NELL'ALTRO VERSO, che e' la parte che si dimentica:
+#      **se il lungo resta a 0,990 anche a tick, NON e' un certificato di
+#      morte.** Mancano le caselle del 09/09 (gestione dell'uscita ad asse,
+#      simboli gemelli, TF cambiato) e n resta sotto 150. Il verdetto
+#      corretto sarebbe "NON ANCORA MISURATO", non "morto", e in
+#      REGISTRO_TEST.md va scritto cosa manca.
+#
+#  >>> ALLORA PERCHE' LO SI GIRA? Per due ragioni oneste:
+#      **per chiudere la porta a buon mercato** (8 passate in tutto per i
+#      due file, contro le 94 di stamattina) e perche' **il lungo ha piu'
+#      campione del corto**: se il modello di esecuzione sposta i numeri,
+#      qui il delta e' meno rumoroso ed e' la misura migliore che abbiamo
+#      di "quanto l'OHLC era ottimista su questo motore".
 #
 # ==========================================================================
 #  COSA PUO' DIRE QUESTO ROUND, e cosa NO
 # ==========================================================================
 #  PUO':
-#    (a) se il vantaggio della finestra SOPRAVVIVE al tick reale, e di
-#        quanto. E' il confronto fra le DUE celle dello stesso file, che
-#        non ha bisogno ne' della base dello stop ne' di n grandi;
+#    (a) se la finestra fa qualcosa sul LUNGO a tick reale. In OHLC non
+#        faceva niente in OOS (0,990 contro 0,990) mentre l'IS saliva
+#        (1,760 -> 2,809): **segni opposti fra IS e OOS = niente da
+#        promuovere**, ed e' il controllo che va rifatto a tick;
 #    (b) il RISCHIO (DD, a tick reali): Emendamento B, si legge a qualunque n;
-#    (c) quanto l'OHLC era ottimista su QUESTO motore -- numero che non
-#        esiste in archivio e che serve a leggere ogni futuro round OHLC.
+#    (c) quanto il MODELLO DI ESECUZIONE OHLC era ottimista su QUESTO
+#        motore -- **ed e' QUESTO file a darlo meglio**, perche' ha n piu'
+#        grande del gemello. **Si legge come un DELTA fra due banchi, mai
+#        mettendo i due PF nella stessa colonna di una classifica.**
 #  NON PUO':
-#    (d) il MERITO. n atteso 16 IS / 24 OOS sulla cella accesa: **sotto 150
-#        di un fattore dieci**. Nessuna promozione, nessuno spegnimento;
-#    (e) il 40x, che e' gia' pronunciato sopra e NON passa;
-#    (f) dire niente sul LUNGO oltre a "muore in OOS", che R236f ha gia'
-#        detto due volte (0,990 spenta, 0,990 accesa).
+#    (d) il MERITO (vedi sopra: n max 76);
+#    (e) il cancello del COSTO, che resta SOSPESO e che Optimization=1 non
+#        sa produrre;
+#    (f) dire niente sul CORTO, che e' il gemello R238a.
 #
 # ==========================================================================
 #  LA FALSIFICAZIONE, congelata ORA
+#  (riscritta dal cancello, 23/09: la prima versione era una trappola E
+#   citava i numeri del lato sbagliato)
 # ==========================================================================
-#  Gli INGRESSI di questo motore nascono da un flip del Supertrend piu' un
-#  ordine pendente a 20 pip: sono decisi su barre CHIUSE, quindi passare da
-#  OHLC a tick NON deve cambiarli molto.
-#  >>> SOGLIA: **se |delta n| supera il 20% su una qualunque delle due
-#      celle rispetto a R236f (OFF 25 IS / 42 OOS -- ON 16 IS / 24 OOS),
-#      il round ha misurato il BANCO e non il motore**, e nessuna delle due
-#      letture vale. Lo scrivo prima cosi' non posso adattarlo dopo.
-#  >>> E UN CONTROLLO GRATIS: la cella OFF di R236e e la cella
-#      InpSLLookback=5 di R236c sono lo stesso identico assetto, e infatti
-#      hanno dato lo STESSO numero (IS 0,96297 n 25  OOS 1,67093 n 42).
-#      L'archivio OHLC e' internamente coerente: il confronto e' pulito.
+#  >>> LA SOGLIA SBAGLIATA, e perche' era sbagliata -- scritto qui perche'
+#      non venga riproposta. Diceva: "se |delta n| supera il 20% rispetto
+#      a R236f (OFF 25 IS / 42 OOS -- ON 16 IS / 24 OOS), ho misurato il
+#      banco". **Due difetti in una riga.**
+#      1. Quei quattro numeri sono del CORTO (R236e). Il LUNGO e' 45/76 e
+#         37/52. Un cancello tarato sul lato sbagliato non scatta mai per
+#         il motivo giusto: sarebbe scattato SEMPRE, e per niente.
+#      2. La motivazione ("gli ingressi nascono da un flip su barre
+#         CHIUSE, quindi il tick non li cambia molto") **e' smentita dal
+#         codice**: ABTG_SupertrendReversal.mq5 r.313-320, con una
+#         posizione aperta la funzione ESCE e non cerca ingressi; r.321,
+#         con un pendente in attesa idem. **Una posizione alla volta.** Le
+#         quattro meccaniche intrabarra decidono QUANDO si libera lo slot,
+#         e lo slot decide QUANTI ingressi: a tick reali **n si muove, e
+#         si muove LEGITTIMAMENTE**. E' gia' scritto in casa
+#         (report/COME_SI_LEGGONO_I_13_ROUND_2026-09-23.md, sul lookback):
+#         "n puo' muoversi nei due versi senza che nessuna lettura sia
+#         sbagliata. Si guarda QUALE CONTATORE si e' mosso".
+#
+#  >>> LA SOGLIA GIUSTA E' UN INVARIANTE, ED E' GRATIS. InpLogImbuto=true
+#      e' gia' pinnato, e l'EA stampa i contatori (r.200-218). Ci sono due
+#      famiglie di contatori, e vogliono dire cose opposte:
+#        BARRA CHIUSA -- devono essere IDENTICI fra OHLC e tick, perche'
+#          dipendono solo dalle barre e dall'indicatore:
+#            "valutate"        (cV_valutate,  r.308)
+#            "supertrend n/d"  (cB_stnd,      r.310)
+#            "fuori orario"    (cB_orario,    r.326)
+#          >>> SE SI MUOVONO QUESTI, HO MISURATO IL BANCO: il confronto
+#              non vale e si va a cercare cosa e' cambiato (deposito?
+#              finestra dati? cache tick?).
+#        INTRABARRA -- possono muoversi, ed e' IL RISULTATO:
+#            "occupata"            (cB_occupata,  r.315)
+#            "pendente in attesa"  (cB_pendente,  r.321)
+#          >>> SE IL DELTA DI n E' SPIEGATO DA QUESTI DUE, ho misurato il
+#              MOTORE sotto tick, che e' esattamente quello che volevo.
+#      ATTENZIONE: i contatori stanno nel GIORNALE, non nel CSV. Se la
+#      corsa non li consegna, questo controllo **non e' stato fatto** e va
+#      scritto cosi', non dato per passato.
+#
+#  >>> E UN CONTROLLO CROCIATO GRATIS: la cella OFF di R236f e la cella
+#      InpSLLookback=5 di R236d sono lo stesso identico assetto (R236d ha
+#      InpUseTimeWindow=false; in R236f la cella 0 spegne la finestra e le
+#      ore diventano inerti) -- verificato pin per pin il 23/09: stesso
+#      lato, stesso Supertrend(12 , 2,5), stesso TP_RR 2,5. In OHLC il
+#      primo punto di R236d vale IS 1,760 / OOS 0,990, cioe' la cella OFF
+#      di R236f. L'archivio OHLC e' internamente coerente.
+#      Qui dentro lo stesso controllo si ripete: la cella 0 di questo file
+#      e' la cella 0 di R236f **a banco diverso**, quindi un numero
+#      diverso NON e' un difetto -- e' la misura (c).
 #
 # ==========================================================================
 #  IL LATO: LUNGO -- e i due lati si girano TUTTI E DUE
@@ -101,10 +212,44 @@
 #  R238b = lungo. Il lungo si gira per non dare per scontato il suo 0,990.
 #
 # ==========================================================================
-#  EA: ABTG_SupertrendReversal
-#  MODELLO: 4 (TICK REALI) -- e' il punto del round. A modello 1 non serve
-#           a niente: sarebbe R236f rifatto.
+#  VINCOLI DI BANCO -- quello che questo file NON PUO' IMPORRE
 # ==========================================================================
+#  >>> DEPOSITO 100000. Il file NON puo' imporlo (non esiste @DEPOSITO):
+#      e' il parametro -Deposito di walkforward_generico.ps1 (r.200),
+#      e **il default e' 10000**. R236e e R236f sono girati a 100000 e lo
+#      dichiarano. Se questo round gira a 10000, il confronto con R236f e'
+#      fra due banchi diversi, e soprattutto **n si muove da solo**:
+#      ABTG_SupertrendReversal.mq5 r.400 "if(totLot<=0){ cO_lotto++;
+#      ... return; }" -- a lotto nullo l'operazione viene SALTATA, e il
+#      pavimento/la troncatura del lotto dipendono dal deposito.
+#      >>> LA RIGA DI LANCIO DEVE PASSARE -Deposito 100000.
+#  >>> MODELLO 4 (TICK REALI). Anche questo NON e' passabile dal file: e'
+#      il parametro -Modello (r.190), default 4. E' il PUNTO del round:
+#      a Modello 1 questo file non serve a niente, sarebbe R236f rifatto.
+#      >>> LA RIGA DI LANCIO DEVE PASSARE -Modello 4 (o lasciare il
+#          default, ma allora lo si dichiara).
+#      A Modello 4 il driver NON aggiunge il suffisso "_ohlc" (r.1973):
+#      questi risultati vanno nell'archivio a tick, dove devono stare.
+#  >>> SPREAD: vedi sopra. Stesso -Spread di R236f, oppure dichiarato
+#      come incognita.
+#  >>> DOVE GIRA: **PC DI BACKTEST**, non il VPS (regola del 21/09: con
+#      una challenge viva il tester non gira sulla macchina delle sedie).
+#  @FRAZIONEIS 0.40 scritta QUI DENTRO: senza la riga il driver applica il
+#      default in silenzio.
+#  @DAQUANDO 2024.09.26 = pavimento dei tick reali MISURATO.
+#  @FINOA 2026.06.30 = bordo d'archivio della flotta.
+#  @PERIODO H1. InpTF e' un ENUM: pinnato esplicito 16385 e MAI ad asse.
+#  UN SOLO ASSE: InpUseTimeWindow, in forma NUMERICA (0/1). 2 celle.
+#  MAGIC 764241 -- verificato vergine il 23/09/2026: fuori da questi file
+#      zero occorrenze in tutto il repository (esclusi .git e .claude);
+#      i 7642xx gia' usati nei file prova arrivano a 764231.
+#  I 43 PIN sono copiati VERBATIM da R236f: cambiano solo InpMagic e
+#      InpComment. Verificato campo per campo.
+#
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+# ==========================================================================
+
 
 # ==========================================================================
 @SIMBOLO  NASUSD
