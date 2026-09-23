@@ -170,8 +170,14 @@
 #     regime. (Sul Nasdaq, infatti, il lungo stava sotto 1 lo stesso.);
 #   - E IL PEZZO CHE VA DETTO ANCHE SE FA COMODO TACERLO: la finestra non
 #     seleziona solo le ORE, seleziona anche il COSTO. Su U30USD lo spread
-#     orario misurato (spread_orario_U30USD.csv, 64,7 M tick) e' 76-80
-#     punti nelle ore 14-21 e 104-112 nelle altre. La cella SPENTA opera
+#     orario MEDIANO misurato (spread_orario_U30USD.csv, 64,7 M tick) e'
+#     1,8-2,0 punti indice nelle ore 14-21 contro 2,6-2,8 nelle ore 0-13
+#     e 23: la finestra costa circa il 30 per cento IN MENO. (L'ora 22 sta
+#     a 2,1 su 104.230 tick, lo 0,16 per cento del file: e' il bordo della
+#     finestra, non una fascia.) >>> ATTENZIONE AI NUMERI CHE GIRANO NEI
+#     REFERTI: 76-80 e 104-112 NON sono lo spread, sono la FRONTIERA
+#     40 x spread che se ne ricava. Chi li copia qui sbaglia di 40 volte.
+#     La cella SPENTA opera
 #     anche nelle ore care, la cella ACCESA solo in quelle economiche, e a
 #     tick reali lo spread e' quello vero. >>> Quindi una parte di
 #     qualunque differenza esca E' COSTO, non meccanismo, e questo round
@@ -248,9 +254,11 @@ InpMaxTradesPerDay=0
 # --- del Nasdaq (09:30 New York tutti e due). La finestra e' [14,22) --
 # --- r.326 usa `hour<Start || hour>=End` -- quindi copre le ore server
 # --- 14..21. CONTROPROVA SUL SIMBOLO, non sul ragionamento:
-# --- spread_orario_U30USD.csv (64,7 M tick) da' 76-80 punti nelle ore
-# --- 14-21 contro 104-112 nelle ore 0-13 e 23: le ore pinnate SONO la
-# --- sessione liquida di U30USD. Pinnate: l'asse e' l'interruttore.
+# --- spread_orario_U30USD.csv (64,7 M tick) da' una MEDIANA di 1,8-2,0
+# --- punti indice nelle ore 14-21 contro 2,6-2,8 nelle ore 0-13 e 23:
+# --- le ore pinnate SONO la sessione liquida di U30USD. (I 76-80 e i
+# --- 104-112 dei referti sono la FRONTIERA 40 x spread, non lo spread.)
+# --- Pinnate: l'asse e' l'interruttore.
 InpStartHour=14
 InpEndHour=22
 
