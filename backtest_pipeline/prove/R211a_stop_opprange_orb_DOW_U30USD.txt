@@ -28,7 +28,7 @@
 #        "Coefficiente: indici/oro=1.0; 225JPY=10; JPY=0.01;
 #         forex=0.0001; oil=0.01"
 #      La stessa tabella, nello stesso ordine. E il suo InpEntryPoints=10.0
-#      e' il nostro InpEntryPoints=10 (r.614: d = InpEntryPoints*InpK).
+#      e' il nostro InpEntryPoints=10 (r.613: d = InpEntryPoints*InpK).
 #      >>> Su U30USD con InpK=1 quei 10 sono DIECI PUNTI INDICE veri, come
 #          da lui: nessun difetto di unita' (la classe 598 qui non morde).
 #
@@ -44,9 +44,15 @@
 #  2. E IL NUMERO C'ERA GIA' IN CASA -- r88a, mai letto cosi'
 #  --------------------------------------------------------------------
 #  risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_{IS,OOS}_r88a.csv
-#  contiene gia' il confronto, ed e' CONTROLLATO: stesso simbolo, stessa
-#  finestra, stesso InpTPMode=1 con InpTPRangeMult=1.5, stesso
-#  InpSLBufferPts=0, stesso InpRiskPercent=1, e n IDENTICO.
+#  contiene gia' il confronto, ed e' CONTROLLATO -- verificato COLONNA PER
+#  COLONNA, non a occhio: fra la passata 8 (InpSLMode=0) e la passata 11
+#  (InpSLMode=3) dei CSV di r88a l'UNICA colonna Inp* che cambia e'
+#  InpSLMode. Tutto il resto coincide, n compreso.
+#  >>> MA GIRAVA A UN ALTRO DEPOSITO, E VA DETTO SUBITO PERCHE' CAMBIA COME
+#      SI LEGGONO QUESTI NUMERI: r88a e' stato lanciato con -Deposito 100000
+#      (sta scritto nel suo file prova), QUESTO round gira a -Deposito 10000
+#      come r44a. I DD in percentuale delle due tabelle NON sono lo stesso
+#      esperimento. Il perche' conta sta al punto 2-bis.
 #
 #      OOS      stop                    PF        DD%      n     RF
 #      ----     --------------------    -------   ------   ---   -------
@@ -60,14 +66,65 @@
 #      SLMode=3 HALFRANGE               1.24979   7.8885    71   1.14859
 #
 #  >>> LETTURA ONESTA, tutte e due le meta':
-#      OOS: PF PRATICAMENTE UGUALE (1.680 contro 1.674) ma il DRAWDOWN
-#           SI DIMEZZA, 4.30% contro 9.76%, e il Recovery Factor sale.
-#      IS:  HALFRANGE vince sul PF (1.250 contro 0.962: OPPRANGE perde).
-#           Ma anche li' il DD di OPPRANGE e' piu' basso (4.77 contro 7.89).
-#  >>> QUINDI: lo stop opposto NON e' "meglio" in assoluto. E' PIU' STRETTO
-#      SUL RISCHIO in tutte e due le finestre, e sul MERITO le due finestre
-#      si contraddicono. Il round serve a dire se quella proprieta' regge
-#      sulla cella ESATTA che schiereremmo.
+#      OOS: PF PRATICAMENTE UGUALE (1.680 contro 1.674). Il DD scende da
+#           9.76% a 4.30% -- ma MENO DELLA META' DI QUEL CALO E' BRAVURA:
+#           scende anche il PROFITTO, da 41.057 a 18.921, cioe' a 0,46.
+#           DD 0,44 e profitto 0,46 sono LO STESSO NUMERO: e' la POSIZIONE
+#           che e' piu' piccola, non il motore che sbaglia di meno.
+#           L'unica grandezza che sopravvive alla taglia e' il RECOVERY
+#           FACTOR (soldi diviso soldi): 4.053 contro 3.519, cioe' +15%.
+#           QUELLO e' il guadagno vero, ed e' molto piu' piccolo di quanto
+#           sembri guardando la colonna DD.
+#      IS:  HALFRANGE vince sul PF (1.250 contro 0.962: OPPRANGE perde, e
+#           perde in assoluto -- PF sotto 1, cioe' finestra IS in PERDITA).
+#           Il DD piu' basso di OPPRANGE (4.77 contro 7.89) e' di nuovo in
+#           buona parte taglia, non merito.
+#  >>> QUINDI, detto senza sconti: lo stop opposto NON e' "meglio". In OOS
+#      rende il 15% in piu' per unita' di rischio; in IS e' in PERDITA
+#      mentre HALFRANGE guadagna. Le due finestre si CONTRADDICONO sul
+#      merito. Il round serve a dire se quel +15% di RF regge sulla cella
+#      ESATTA che schiereremmo e al DEPOSITO a cui la schiereremmo -- non
+#      a confermare un dimezzamento del DD che e' in gran parte aritmetica.
+#
+#  2-bis. PERCHE' r44a E r88a NON DANNO GLI STESSI NUMERI: E' IL DEPOSITO
+#  --------------------------------------------------------------------
+#  Alla STESSA cella (InpSLMode=3, InpTPRangeMult=1.5) r44a fa IS
+#  1.22314 / 8.6252 e r88a fa 1.24979 / 7.8885. La prima stesura di questo
+#  file scriveva "non so perche'". Adesso si sa, ed e' MISURATO:
+#
+#  (a) GLI INPUT NON C'ENTRANO. Confronto colonna per colonna dei due CSV:
+#      le sole differenze sono InpTP_R (1 contro 1.5) e InpVerbose (1
+#      contro 0: scrive solo nel giornale, non tocca un ordine), piu' tre
+#      input NATI DOPO r44a (InpSLBufferPts=0, InpSlippagePts=0,
+#      InpUsaGuardian=1). Nessuno dei cinque puo' muovere un risultato:
+#        - InpTP_R: con InpTP1Pct=0 la funzione che lo legge esce prima
+#          (r.656). PROVA EMPIRICA: in r88a le passate a InpTP_R=1.5 e
+#          InpTP_R=2.0 danno risultati IDENTICI AL CENTESIMO.
+#        - InpSLBufferPts=0 e InpSlippagePts=0: no-op per costruzione.
+#        - InpUsaGuardian: nel tester la guardia esce a
+#          ABTG_PausaGuardian.mqh r.1719, "if(!ABTG_CanaleEsiste())
+#          return(true)" -- senza Guardian acceso non rifiuta niente.
+#      E infatti n e' IDENTICO fra i due round: 71 in IS, 119 in OOS.
+#
+#  (b) IL DEPOSITO C'ENTRA, ed e' RICOSTRUITO DAI NUMERI, non assunto.
+#      Il capitale di picco si ricava da (Profit/RF)/(DD%/100):
+#          r44a IS  ->  10.557      r88a IS  ->  104.953
+#          r44a OOS ->  11.891      r88a OOS ->  119.516
+#      r44a girava a 10000, r88a a 100000 (e il file prova di r88a lo
+#      scrive: "-Deposito 100000").
+#
+#  (c) IL MECCANISMO ha un nome ed e' nel sorgente: LotByRisk (r.1067)
+#      fa lot=MathFloor(lot/st)*st e poi MathMax(mn,...). A 10000 il lotto
+#      e' dieci volte piu' piccolo, quindi la TRONCATURA al passo pesa
+#      dieci volte di piu'. Firma aritmetica: il rapporto dei profitti
+#      100k/10k e' 10,96 (IS) e 10,26 (OOS), cioe' SOPRA 10 -- che e'
+#      esattamente il segno della troncatura. (Sotto 10 sarebbe stato il
+#      PAVIMENTO del lotto minimo, che e' un'altra cosa: vedi punto 7.)
+#
+#  >>> CONSEGUENZA OPERATIVA, ed e' il vero contenuto di questo round:
+#      r88a ha risposto A DEPOSITO 100000. L'ancora che vogliamo battere
+#      vive a 10000. Rifare la misura a 10000 NON e' una riconferma: e'
+#      l'unico modo di mettere OPPRANGE e l'ancora sullo stesso banco.
 #
 #  3. PERCHE' IL RISCHIO E' QUELLO CHE DECIDE, QUI
 #  --------------------------------------------------------------------
@@ -75,10 +132,20 @@
 #  r44a a InpTPRangeMult=1.5 fa OOS DD 9.9181% -- sotto il muro FTMO del
 #  10% per OTTO CENTESIMI, e il round gira a InpRiskPercent=1 mentre il
 #  campo gira al 2,00%. Col fattore di casa (1.956-1.990) quel 9.9181
-#  diventa 19.4-19.7%: il DOPPIO del muro.
-#  Con il DD di r88a: 4.2956 x 1.990 = 8.55%. SOTTO il muro.
-#  >>> E' questa la ragione del round. Se la proprieta' regge, l'ORB passa
-#      da "non schierabile per rischio" a "schierabile alla taglia vera".
+#  diventa 19.4-19.7%: il DOPPIO del muro. QUESTO numero e' a deposito
+#  10000.
+#  >>> E QUI IL CONTO CHE NON SI PUO' FARE, e prima lo facevo: il 4.2956 di
+#      OPPRANGE e' misurato a deposito 100000, il 9.9181 a 10000. Metterli
+#      in colonna e moltiplicare il primo per 1.990 per dire "8.55%, sotto
+#      il muro" e' un confronto fra DUE ESPERIMENTI DIVERSI travestito da
+#      conto. Non si fa, e infatti qui non si fa piu': quel numero lo deve
+#      produrre QUESTO round, a 10000, accanto all'ancora.
+#  >>> LA RAGIONE DEL ROUND, detta giusta: se a deposito 10000 la cella
+#      OPPRANGE tiene il RF dell'ancora e porta il DD sotto 9.0, l'ORB
+#      passa da "non schierabile per rischio" a "schierabile alla taglia
+#      vera". Se il DD scende ma il RF scende con lui, allora non abbiamo
+#      trovato uno stop migliore: abbiamo trovato un modo complicato di
+#      abbassare InpRiskPercent, e quello si fa con la manopola, gratis.
 #
 #  4. L'ASSE: QUATTRO CELLE, E LE DUE IN PIU' NON LE HO SCELTE IO
 #  --------------------------------------------------------------------
@@ -106,9 +173,38 @@
 #      confronto -- non si promuovono nemmeno se escono belle. E' la
 #      stessa clausola usata in R206a per le celle escluse per costo.
 #
-#  5. CLASSE 594 -- CHI ALTRO DIPENDE DA InpSLMode? VERIFICATO: NESSUNO
+#  5. CLASSE 594 -- CHI ALTRO DIPENDE DA InpSLMode? TRE, E VANNO NOMINATI
 #  --------------------------------------------------------------------
-#  Tutte le occorrenze nel sorgente:
+#  >>> CORREZIONE: qui c'era scritto "VERIFICATO: NESSUNO", e contraddiceva
+#      il punto 6 di questo stesso file, che parla del lotto. La risposta
+#      vera e' che dallo stop dipendono TRE cose, e solo una e' un pericolo.
+#
+#  (i) IL TARGET: NO, e per scelta. Vedi sotto: con InpTPMode=1 il TP e'
+#      funzione del RANGE. Questo e' il confondimento che la classe 594
+#      teme, ed e' chiuso.
+#  (ii) IL LOTTO: SI', ed E' IL MECCANISMO SOTTO MISURA, NON UN DIFETTO.
+#      LotByRisk(dist) e' chiamata a r.453, r.468 e r.590 con dist =
+#      distanza dello stop. A rischio fisso, stop piu' largo = lotto piu'
+#      piccolo. PRENDO POSIZIONE E LA SCRIVO: non e' un confondimento da
+#      eliminare, perche' "quanto rischio per trade a parita' di
+#      InpRiskPercent" E' PROPRIO la proprieta' dello stop che stiamo
+#      giudicando. Ma siccome muove la TAGLIA, tutte le grandezze in
+#      valuta e in % del capitale (Profit, DD%) diventano NON
+#      confrontabili fra le celle, e restano leggibili solo quelle
+#      invarianti alla taglia: PF e RF. E' da qui che nasce il punto 6.
+#  (iii) IL TRAILING: SI', e nessuno l'aveva notato. r.826-838:
+#      "if(isLong && newSL>sl && newSL<bid)" -- il trailing legge lo stop
+#      CORRENTE e lo migliora soltanto. Con lo stop OPPRANGE, che sta
+#      sotto il minimo del range, l'EMA9 lo supera quasi subito: il
+#      TRAILING PRENDE IL COMANDO PRIMA, e la perdita vera per trade e'
+#      molto piu' piccola dell'1% su cui il lotto e' stato dimensionato.
+#      >>> E' QUESTO che spiega i numeri di r88a (DD 4.30 contro 9.76 a
+#          PF quasi uguale), non "lo stop largo" da solo. Chi legge
+#          questo round come "abbiamo trovato uno stop migliore" sta
+#          raccontando il meccanismo sbagliato: quello che misuriamo e'
+#          la COPPIA stop-iniziale + trailing.
+#
+#  Tutte le occorrenze di InpSLMode nel sorgente:
 #    r.145  dichiarazione
 #    r.627-630  SLforLong  : OPPRANGE -> gRangeLow-SLBuffer()
 #                            FIXED    -> entry-InpSLFixedPts*_Point
@@ -136,12 +232,27 @@
 #          OOS  PF 1.65693  RF 3.39368  Equity DD % 9.9181  Trades 119
 #      Letti nei CSV grezzi risultati_prove/ABTG_ORB_Ottimizzato/r44/,
 #      non in un referto.
-#      >>> NOTA CHE VALE, e va detta prima: r88a alla stessa cella da'
-#          IS 1.24979 / 7.8885 e OOS 1.67419 / 9.7623, cioe' VICINI ma NON
-#          IDENTICI a r44a. Qualcosa di diverso fra i due round c'e', e
-#          questo file NON sa cosa. Percio' l'ancora e' r44a (la cella che
-#          vogliamo battere), e i numeri di r88a si usano solo per la
+#      >>> PERCHE' L'ANCORA E' r44a E NON r88a: r88a alla stessa cella da'
+#          IS 1.24979 / 7.8885 e OOS 1.67419 / 9.7623, vicini ma non
+#          identici. La causa e' MISURATA al punto 2-bis: r88a girava a
+#          deposito 100000, r44a a 10000, e a 10000 la troncatura del
+#          lotto morde di piu'. Questo round gira a 10000, quindi l'ancora
+#          giusta e' r44a. I numeri di r88a si usano solo per la
 #          DIREZIONE, mai come soglia.
+#      >>> E L'ANCORA E' RAGGIUNGIBILE, verificato e non sperato:
+#          - la finestra e' la stessa (walkforward_generico.ps1 ha -Fino
+#            con default FISSO 2026.06.30, non "oggi": 2024.09.26 ->
+#            2026.06.30 = 642 gg, e @FRAZIONEIS 0.40 e' anche il default,
+#            quindi IS 256 gg / OOS 386 gg come allora);
+#          - ogni input NON pinnato e' stato confrontato col DEFAULT
+#            COMPILATO e col CSV di r44a: InpCloseAtEnd, InpOneTradePerDay,
+#            InpPendingExpiryMin=600, InpAllowLong, InpExecTF=M5,
+#            InpAtrPeriod=14, InpEmaFast=9, InpEmaSlow=21,
+#            InpEma200Period=200, InpMinRangePct=0, InpVolMult=1.5,
+#            InpVolAvgBars=20, InpRiskPercent=1.0, InpMaxSpread=0,
+#            InpMinBodyPct=50, InpSlippagePts=0. TUTTI i default
+#            coincidono con r44a. Nessun buco.
+#          - l'unico pin DIVERSO da r44a e' InpBreakeven: vedi punto 8.
 #
 #  (B) MERITO, in grandezze invarianti alla taglia. Si promuove la cella
 #      InpSLMode=0 solo se TUTTE E QUATTRO:
@@ -155,8 +266,20 @@
 #          sizing a rischio fisso uno stop piu' LARGO da' un lotto piu'
 #          PICCOLO, quindi profitto e DD scendono INSIEME. Un pavimento
 #          sul profitto assoluto boccerebbe una cella piu' sicura solo
-#          perche' muove meno soldi. Decide il Recovery Factor, che e'
-#          soldi diviso soldi.
+#          perche' muove meno soldi.
+#      >>> MA ALLORA VALE ANCHE AL CONTRARIO, E VA SCRITTO O IL CANCELLO
+#          E' UN REGALO: se profitto e DD scendono insieme, allora ANCHE
+#          IL DD E' QUASI GRATIS per una cella con lo stop piu' largo.
+#          Il cancello 1 (DD <= 9.0) NON E' UN DISCRIMINANTE DI MERITO:
+#          e' un PAVIMENTO DI SICUREZZA, e una cella che lo passa non ha
+#          dimostrato niente. A 100000 OPPRANGE lo passava gia' con
+#          larghezza (4.2956), e non perche' fosse brava.
+#      >>> QUINDI L'UNICO DISCRIMINANTE DI MERITO E' IL RECOVERY FACTOR
+#          (soldi diviso soldi, invariante alla taglia), con il PF come
+#          secondo. Se la cella OPPRANGE passa il DD ma NON il RF, la
+#          lettura corretta NON e' "e' piu' sicura": e' "sta rischiando
+#          meno, e lo stesso risultato si ottiene abbassando
+#          InpRiskPercent su HALFRANGE, gratis e senza round".
 #
 #  (C) RISCHIO. Il DD si legge a QUALUNQUE n (regola del 18/08: il
 #      campione sottile sospende il merito, mai il rischio).
@@ -164,7 +287,7 @@
 #  7. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
 #  --------------------------------------------------------------------
 #  Gli INGRESSI non dipendono dallo stop: l'ingresso e' la rottura del
-#  range a EntryDistance() (r.612-617), che legge InpEntryPoints e InpK e
+#  range a EntryDistance() (r.611-616), che legge InpEntryPoints e InpK e
 #  NON legge InpSLMode. E con InpTP1Pct=0 non c'e' parziale, quindi la
 #  colonna Trades conta POSIZIONI (la classe 550 qui non morde).
 #  >>> QUINDI n DEVE USCIRE IDENTICO SU TUTTE E QUATTRO LE CELLE: 71 in
@@ -172,20 +295,70 @@
 #      dove n=71/119 su tutti e quattro i modi di stop.
 #  >>> SE n CAMBIA, non e' lo stop: si e' mosso ALTRO, e nessun numero di
 #      questo round si legge. E' il contro-esempio, ed e' gratis.
-#  >>> L'unica via nota per cui n potrebbe cambiare legittimamente: uno
-#      stop molto piu' largo da' un lotto piu' piccolo, e se il lotto
-#      finisse sotto il minimo del simbolo l'ordine verrebbe rifiutato.
-#      LotByRisk fa MathMax(volume_min, ...), quindi lo alza invece di
-#      rifiutare: la via e' chiusa. Se n cambia lo stesso, si indaga
-#      QUELLO prima di leggere i PF.
+#  >>> LE VIE PER CUI n POTREBBE CAMBIARE, cercate una per una:
+#      (a) LOTTO SOTTO IL MINIMO -> ordine rifiutato. CHIUSA per n:
+#          LotByRisk (r.1067) fa MathMax(volume_min,...), quindi ALZA il
+#          lotto invece di rifiutare. Ma vedi il punto 7-bis: e' chiusa
+#          per n e APERTA per il DD, che e' l'oggetto del round.
+#      (b) SECONDO INGRESSO DOPO UNO STOP-OUT. CHIUSA DUE VOLTE: i
+#          pendenti si piazzano una volta al giorno, e r.356
+#          ("else if(gHadPos && InpOneTradePerDay) CancelPendings()")
+#          cancella il residuo. InpOneTradePerDay non e' pinnato ma il
+#          default compilato e' true ed e' il valore di r44a.
+#      (c) SCADENZA DEI PENDENTI (InpPendingExpiryMin=600) e CloseAtEnd:
+#          nessuno dei due legge lo stop. CHIUSE.
+#      (d) dist<=0 -> trade saltato (r.451 "if(dist>0)", r.584). Con tutti
+#          e quattro i modi dist e' strutturalmente positiva. CHIUSA.
+#      (e) VIA CHE MANCAVA, e non e' banale: SYMBOL_TRADE_STOPS_LEVEL. Un
+#          ordine STOP con lo stop TROPPO VICINO all'entry puo' essere
+#          rifiutato dal broker -- e morderebbe su HALFRANGE (stop
+#          stretto), NON su OPPRANGE. Sarebbe un n piu' BASSO per la
+#          cella dell'ancora. CHIUSA EMPIRICAMENTE, non per ragionamento:
+#          in r88a n=71/119 su TUTTI E QUATTRO i modi di stop, stesso
+#          simbolo e stessa finestra.
+#  >>> Se n cambia lo stesso, si indaga QUELLO prima di leggere i PF.
+#
+#  7-bis. IL CONTRO-ESEMPIO CHE CONTA DAVVERO: IL PAVIMENTO DEL LOTTO
+#  --------------------------------------------------------------------
+#  La via (a) e' chiusa per n ma NON per il DRAWDOWN, e il drawdown e'
+#  tutto quello che questo round vuole misurare. Se il lotto calcolato
+#  finisce sotto il minimo del simbolo, MathMax(volume_min,...) lo ALZA:
+#  il trade parte lo stesso, n non cambia -- e il RISCHIO EFFETTIVO DI
+#  QUEL TRADE SALE SOPRA L'1%. Il vantaggio di DD di OPPRANGE sparirebbe
+#  senza che niente lo segnali.
+#  >>> E IL PERICOLO E' NUOVO A QUESTO DEPOSITO. Lo stop OPPRANGE e'
+#      (range + d), quello HALFRANGE e' 0,5*range: OPPRANGE e' circa 2,2
+#      volte piu' largo, quindi il suo lotto e' circa 2,2 volte piu'
+#      piccolo -- su un deposito DIECI VOLTE piu' piccolo di quello dove
+#      il 4,2956% e' stato misurato. A 100000 il pavimento era lontano.
+#      A 10000 non lo sappiamo, e il file NON finge di saperlo.
+#  >>> RILEVATORE, gratis e falsificabile, DA CONTROLLARE PRIMA DEI PF:
+#      a 100000 il rapporto dei profitti OOS e'
+#          OPPRANGE / HALFRANGE = 18921.52 / 41057.00 = 0,4609.
+#      Se a 10000 quel rapporto esce SENSIBILMENTE PIU' ALTO di 0,46, il
+#      lotto di OPPRANGE e' stato alzato dal pavimento: la cella ha
+#      rischiato piu' dell'1% e NESSUN DD di questo round si legge.
+#      (Controllo gemello gia' usato in casa: il commento di LotByRisk a
+#       r.1071 racconta proprio il caso 225JPY, dove "a deposito 100k
+#       profitti identici al 10k" era la firma del lotto sempre al
+#       minimo.)
 #
 #  8. QUELLO CHE QUESTO ROUND NON FA, dichiarato
 #  --------------------------------------------------------------------
 #  - NON misura la PARZIALE: InpTP1Pct e' PINNATO a 0, come in r44a.
 #    La parziale e' R211e e si fa DOPO, sulla cella vincente di qui.
-#  - NON mette ad asse InpBreakeven (pinnato 0; con InpTP1Pct=0 e'
-#    comunque irraggiungibile, classe 594 del 22/09), ne' InpTP_R,
-#    InpTPMode, InpUseTrailEMA.
+#  - NON mette ad asse InpBreakeven, ne' InpTP_R, InpTPMode,
+#    InpUseTrailEMA.
+#    >>> E QUI IL PIN E' DIVERSO DA r44a, quindi va giustificato invece
+#        che nascosto: r44a girava con InpBreakeven=1, questo file pinna
+#        0. NON rompe l'ancora, ed e' verificato nel sorgente: ManageTP1
+#        a r.656 fa "if(InpTP1Pct<=0) ... return", cioe' con la parziale
+#        a zero il breakeven non puo' scattare MAI. L'EA lo stampa da
+#        solo (r.662): "TP1/breakeven disattivati da InpTP1Pct=0 ...
+#        NESSUNO stop in pari, anche se InpBreakeven=true". Pinnare 0
+#        rende esplicito quello che a r44a era vero ma implicito.
+#        Stessa storia per InpTP_R (r.677, oltre il return): r44a=1,
+#        qui 1.0, e in r88a le passate a 1.5 e 2.0 escono IDENTICHE.
 #  - NON misura le altre TRE differenze da Paolo trovate nella live, e
 #    sono tutte round separati: il TARGET (lui 1:1 sul rischio, noi 1,5
 #    volte il range), la CONFERMA D'INGRESSO (lui "apre fuori e chiude

@@ -30782,3 +30782,70 @@ dinamico del provider; se **resta**, e' un difetto vero (parametro inesistente, 
    **0 eccezioni** (Write-Host si mangia gli argomenti in piu'), e a schermo e' uscito
    letteralmente `...cartella dati di  + C:\FTMO +  (541452707)`. L'ha trovato la lettura
    dell'output, non lo strumento.
+
+---
+
+## CLASSE 604 -- 💰🔀 UN NUMERO DI UN ROUND VECCHIO RIUSATO COME SOGLIA **SENZA CONTROLLARE IL DEPOSITO**: due esperimenti diversi messi in colonna e moltiplicati fra loro (controllo-preventivo, 23/09/2026, su `R211a_stop_opprange_orb_DOW_U30USD.txt`)
+
+**Il caso reale.** Il file prova R211a giustificava il round cosi':
+
+```
+la cella di r44a fa OOS DD 9.9181% -- sotto il muro FTMO del 10% per OTTO CENTESIMI
+... Con il DD di r88a: 4.2956 x 1.990 = 8.55%. SOTTO il muro.
+```
+
+Due righe, due numeri, un conto. **E i due numeri vengono da due depositi diversi**: r44a e'
+girato a `-Deposito 10000`, r88a a `-Deposito 100000`. Il DD **in percentuale** non e' invariante
+al deposito quando il lotto passa da `LotByRisk`, perche' `lot=MathFloor(lot/st)*st` e poi
+`MathMax(volume_min,...)`: **a deposito piccolo la troncatura del lotto pesa di piu' e il
+pavimento del lotto minimo e' piu' vicino**. Lo stesso file dichiarava, onestamente, di **non
+sapere** perche' r44a e r88a dessero numeri diversi alla stessa cella. La causa era il deposito.
+
+### 🔎 LA FIRMA ARITMETICA — si ricostruisce il deposito DAI NUMERI, in dieci secondi
+Il CSV del tester non ha la colonna "deposito", ma ce l'ha implicita. `RF = Profit / DD_soldi`, e
+`DD% = DD_soldi / capitale_di_picco`, quindi:
+
+```
+capitale_di_picco = (Profit / RF) / (DD% / 100)
+```
+
+Applicato al caso vero, e **torna al millesimo**:
+
+| riga | Profit | RF | DD% | capitale ricostruito |
+|---|---|---|---|---|
+| r44a IS | 867,42 | 0,95264 | 8,6252 | **10.557** |
+| r44a OOS | 4002,54 | 3,39368 | 9,9181 | **11.891** |
+| r88a IS | 9509,39 | 1,14859 | 7,8885 | **104.953** |
+| r88a OOS | 41057,00 | 3,51891 | 9,7623 | **119.516** |
+
+👉 r44a = 10.000, r88a = 100.000. **Non e' un'inferenza: e' un conto.**
+
+### 🧭 E IL SEGNO CHE DICE *QUALE* DEI DUE DIFETTI HAI
+Rapporto dei profitti fra la corsa a 100k e quella a 10k, **a parita' di tutto il resto**:
+- **> 10** -> e' la **TRONCATURA** al passo del lotto (a 10k il lotto e' piccolo e si perde di piu'
+  arrotondando in giu'). Nel caso vero: **10,96** in IS e **10,26** in OOS. Fastidioso, non letale.
+- **< 10** -> e' il **PAVIMENTO** del lotto minimo, ed e' **letale**: `MathMax(volume_min,...)` alza
+  il lotto, il trade parte lo stesso, **`n` non cambia** e **il rischio per trade sfonda
+  silenziosamente** l'`InpRiskPercent` dichiarato. E' lo stesso difetto gia' pagato su `225JPY`
+  (commento di `LotByRisk`, `ABTG_ORB_Ottimizzato.mq5` r.1071: *"a deposito 100k profitti identici
+  al 10k, DD 0,01%"*).
+
+### ✅ La regola
+1. 🔴 **Un DD% o un Profit ripescato da un round vecchio non si usa come soglia, come ancora o
+   dentro un conto finche' non e' stato verificato che il DEPOSITO e' lo stesso.** Se non e' lo
+   stesso, l'unico confronto lecito e' su grandezze **invarianti alla taglia**: **PF** e
+   **Recovery Factor** (soldi diviso soldi). `Profit` e `Equity DD %` **non lo sono**.
+2. 🧮 **Il deposito di un round vecchio si RICOSTRUISCE**, non si chiede: formula qui sopra. Vale
+   anche quando il file prova originale non lo dichiara.
+3. ⚠️ **Il pavimento del lotto minimo e' chiuso per `n` e APERTO per il DD.** `MathMax(volume_min,...)`
+   non rifiuta l'ordine: lo esegue piu' grosso. Chi scrive *"la via e' chiusa perche' MathMax alza
+   il lotto"* ha chiuso la domanda sbagliata. 👉 **Sempre un rilevatore esplicito**: il rapporto
+   dei profitti fra le celle deve restare quello misurato al deposito noto (in R211a: OPPRANGE /
+   HALFRANGE = **0,4609** in OOS); se sale, il lotto e' stato alzato dal pavimento e **nessun DD di
+   quel round si legge**.
+4. 📉 **E il corollario che smaschera il cancello comodo**: quando lo sizing e' a rischio fisso,
+   uno stop piu' largo abbassa **insieme** profitto e DD. Allora un cancello *"DD <= X"* non e' un
+   discriminante di merito, e' un **pavimento di sicurezza**: una cella lo passa **rischiando meno**,
+   non **sbagliando meno**. Il merito lo decide il **RF**. Se un file toglie il pavimento sul Profit
+   citando questo argomento (giusto) ma tiene il DD come *"cancello di merito"* (sbagliato), sta
+   usando l'argomento **una volta sola, nella direzione che gli conviene**.
