@@ -28,7 +28,7 @@
 #        "Coefficiente: indici/oro=1.0; 225JPY=10; JPY=0.01;
 #         forex=0.0001; oil=0.01"
 #      La stessa tabella, nello stesso ordine. E il suo InpEntryPoints=10.0
-#      e' il nostro InpEntryPoints=10 (r.613: d = InpEntryPoints*InpK).
+#      e' il nostro InpEntryPoints=10 (r.614: d = InpEntryPoints*InpK).
 #      >>> Su U30USD con InpK=1 quei 10 sono DIECI PUNTI INDICE veri, come
 #          da lui: nessun difetto di unita' (la classe 598 qui non morde).
 #
@@ -166,12 +166,29 @@
 #      tutti e due, ai valori veri di r44a (1.5 e 1000), letti nel CSV.
 #      Un input che entra in una cella e non sta nei pin e' un buco, e
 #      questo round non ne ha.
-#  >>> COME SI LEGGONO LE CELLE 1 E 2: NON sono candidate. r88a le ha gia'
-#      misurate e perdono tutte e due (ATR: PF piu' basso e DD piu' alto
-#      di OPPRANGE; FIXED: DD 17.90%, fuori dal muro anche a rischio 1%).
-#      Girano perche' l'ENUM le porta dentro, e servono a dare FORMA al
-#      confronto -- non si promuovono nemmeno se escono belle. E' la
-#      stessa clausola usata in R206a per le celle escluse per costo.
+#  >>> COME SI LEGGONO LE CELLE 1 E 2 -- CORRETTO IL 23/09, E LA PRIMA
+#      STESURA ERA LA CLASSE 604 AL CONTRARIO. Qui c'era scritto che non
+#      sono candidate e che "non si promuovono nemmeno se escono belle",
+#      e il motivo dato erano i DD di r88a (ATR piu' alto, FIXED 17.90%
+#      "fuori dal muro"). >>> MA quei DD sono misurati a DEPOSITO 100000,
+#      e QUESTO INTERO ROUND esiste per dire che un DD a 100000 non e'
+#      una soglia a 10000. Usare quel numero per ARCHIVIARE e' lo stesso
+#      errore che al punto 2-bis si vieta di usare per PROMUOVERE.
+#      E il precedente di R206a NON regge: li' l'esclusione era PER
+#      COSTO (stop >= 40 x spread), che e' invariante alla scala; qui e'
+#      una percentuale del capitale a un deposito dieci volte diverso.
+#      >>> DI r88a REGGE SOLO CIO' CHE E' INVARIANTE ALLA TAGLIA, ed e':
+#          ATR  perde su TUTTI E DUE  (PF 1.48518 contro 1.67419,
+#                                      RF 3.12670 contro 3.51891);
+#          FIXED VINCE sul PF (1.78015, IL PIU' ALTO DEI QUATTRO) e
+#                perde sul RF (2.57269, il piu' basso).
+#      >>> QUINDI: girano perche' l'ENUM le porta dentro, NON si
+#          promuovono di slancio da qui -- ma i loro numeri A 10000 si
+#          LEGGONO e si SCRIVONO, perche' sono l'unico numero valido mai
+#          prodotto per quelle due celle a questo deposito. Se una delle
+#          due passa TUTTI E QUATTRO i cancelli, si apre un round SUO e
+#          la riga va in REGISTRO_TEST.md: un morto senza certificato
+#          non e' un morto.
 #
 #  5. CLASSE 594 -- CHI ALTRO DIPENDE DA InpSLMode? TRE, E VANNO NOMINATI
 #  --------------------------------------------------------------------
@@ -287,7 +304,7 @@
 #  7. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
 #  --------------------------------------------------------------------
 #  Gli INGRESSI non dipendono dallo stop: l'ingresso e' la rottura del
-#  range a EntryDistance() (r.611-616), che legge InpEntryPoints e InpK e
+#  range a EntryDistance() (r.612-616), che legge InpEntryPoints e InpK e
 #  NON legge InpSLMode. E con InpTP1Pct=0 non c'e' parziale, quindi la
 #  colonna Trades conta POSIZIONI (la classe 550 qui non morde).
 #  >>> QUINDI n DEVE USCIRE IDENTICO SU TUTTE E QUATTRO LE CELLE: 71 in
@@ -307,7 +324,7 @@
 #          default compilato e' true ed e' il valore di r44a.
 #      (c) SCADENZA DEI PENDENTI (InpPendingExpiryMin=600) e CloseAtEnd:
 #          nessuno dei due legge lo stop. CHIUSE.
-#      (d) dist<=0 -> trade saltato (r.451 "if(dist>0)", r.584). Con tutti
+#      (d) dist<=0 -> trade saltato (r.449 "if(dist>0)", r.584). Con tutti
 #          e quattro i modi dist e' strutturalmente positiva. CHIUSA.
 #      (e) VIA CHE MANCAVA, e non e' banale: SYMBOL_TRADE_STOPS_LEVEL. Un
 #          ordine STOP con lo stop TROPPO VICINO all'entry puo' essere
