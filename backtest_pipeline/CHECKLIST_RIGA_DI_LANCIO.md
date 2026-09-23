@@ -32087,3 +32087,182 @@ promuove) — e nella direzione che costa: **l'asticella abbassata**.
    difetto: chi legge crede che il cancello sia quello stampato.
 4. 🚫 **Meglio non scrivere nessun criterio che scriverne uno piu' largo.** Se la riga tace, vale
    il file. Se la riga parla, **diventa** il criterio.
+
+---
+
+## 🔢💥 CLASSE 634 — **IL NUMERO MESSO PRIMA DELLA STRINGA: PowerShell casta la STRINGA a `Int`, esplode, e la riga stampa IL VERDETTO SENZA LA SUA PROVA** (controllo-preventivo, 23/09/2026, trovata ESEGUENDO la riga «sedie mute FTMO»)
+
+**Il numero, grepato nell'istante in cui questa riga viene scritta**
+(`grep -oE 'CLASSE [0-9]+' backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md | grep -oE '[0-9]+' | sort -n | tail -1`):
+l'ultima era **633**, e `CLASSE 634` non compariva da nessuna parte nel repo.
+
+**Il caso.** Nel blocco che stampa il verdetto sedia per sedia:
+```powershell
+$perche = $e.Fin + ' righe sue (' + $e.Oggi + ' oggi), ARMI ' + $e.Arm
+```
+`$e.Fin` e' un **Int32**. In PowerShell il tipo dell'operando **SINISTRO** decide l'operazione:
+`Int + String` prova a convertire `' righe sue ('` in `Int32`, fallisce, e lancia
+`InvalidArgument: Cannot convert value "righe sue (" to type "System.Int32"`.
+
+🔴 **E il danno non e' l'eccezione: e' quello che succede DOPO.** Con
+`$ErrorActionPreference='Continue'` l'assegnazione non avviene, `$perche` resta **vuota**, e la
+riga successiva **stampa il verdetto lo stesso**:
+```
+770101  DAX Apertura EU   ARMATA E DISCIPLINATA
+770411  MaxMin DAX Short  ARMATA E DISCIPLINATA
+```
+Colonna *"su cosa si regge"*: **VUOTA**. Cioe' esce **la sentenza senza le prove** — e la
+sentenza e' proprio quella che qualcuno leggera' per decidere se toccare un terminale che sta
+operando una challenge pagata. L'errore rosso scorre via in mezzo a 114 `Write-Host`, il
+verdetto resta a schermo.
+
+### ✅ La regola
+1. **In una concatenazione, il PRIMO operando e' sempre una STRINGA** — oppure il numero si
+   casta a mano: `[string]$e.Fin + ' righe sue'`. Non e' stile: e' la differenza fra una riga
+   che spiega e una che sentenzia.
+2. 🧪 **Questa classe NON si trova leggendo.** Il codice e' leggibile, sensato e passa il parser
+   (`ParseInput` -> **0 errori**) e il cancello deterministico (**nessun difetto meccanico**):
+   e' un errore di **runtime**, e si vede solo **eseguendo**. E' la regola del mandato
+   *«collauda i costrutti nuovi ESEGUENDOLI. Non ragionare: esegui»*, vista dal vivo.
+3. 🚨 **Regola di lettura, non solo di scrittura**: quando si collauda l'uscita di una riga, una
+   **colonna vuota accanto a un verdetto pieno** e' un sintomo, non un dettaglio grafico. Si
+   guarda subito se sopra e' passato un errore rosso.
+
+📌 Sorella della **519** per il posto dove nasce (PowerShell non si comporta come sembra), ma
+opposta per effetto: la 519 e' un **verde meccanico su una riga che scrive**; questa e' un
+**verdetto stampato senza la misura che lo regge**.
+
+---
+
+## 📏🤥 CLASSE 635 — **IL TETTO DI COSTO CHE DIVENTA UNA BUGIA: il file letto solo in CODA produce uno ZERO identico a quello di una sedia MUTA, e nessuna bandiera lo dichiara** (controllo-preventivo, 23/09/2026, stessa riga, trovata ESEGUENDO su un log finto da 10,5 MB)
+
+**Il caso.** La riga ha un tetto per file (`$MAXB = 4 MB`): oltre quello legge **la coda** del
+giornale invece di caricarlo tutto — protezione giusta su una macchina dove operano sei sedie.
+Il file per file lo **dichiarava** bene:
+```
+20260923.log  10.562.126  4.194.304  47650  UTF16-noBOM  PARZIALE: letta solo la CODA (4 MB su 10.1)
+```
+🔴 **Ma quella bandiera moriva li'.** Il verdetto finale, che legge altri contatori, stampava:
+```
+770260  Nasdaq RETEST   MUTA -- SOSPETTO GUASTO   ...ZERO righe a suo nome in 2 giornali letti bene, 0 illeggibili
+IMPIEGATI 0.8 secondi ... Lettura COMPLETA entro i tetti.
+```
+Cioe': **«sedia muta»** e **«lettura completa»** nella stessa schermata, su un file di cui erano
+stati letti **il 40%**. La sedia poteva aver parlato benissimo nei **6,4 MB non letti** — che
+sono per giunta la **PRIMA parte della giornata**, dove stanno gli `OnInit` e le aperture.
+
+### ✅ La regola
+1. **Ogni troncamento va PROPAGATO al verdetto, non solo stampato dove avviene.** Un contatore
+   `$PARZ` che conta i file letti a meta' e che **vieta la parola MUTA**: con `$PARZ > 0` lo
+   zero diventa `NON MISURABILE DA QUI`, e il totale non puo' piu' dire *"lettura completa"*.
+2. **Tre stati, non due**: `letto bene` / `ILLEGGIBILE` / `letto solo in CODA`. La classe 601 ha
+   separato i primi due; il terzo era ancora confuso col primo, ed e' **il piu' insidioso**
+   perche' il file **si e' aperto e si e' letto**: tutti gli indicatori di salute sono verdi.
+3. 🎯 **Il criterio generale**: un tetto di costo non e' mai gratis — **compra tempo macchina e
+   paga in certezza**. Il prezzo va scritto accanto al risultato, **nella riga che qualcuno
+   leggera'**, non in una riga di diagnostica dieci schermate sopra.
+
+📌 Cugina di **606/607** (i tetti e i perimetri che mentono) e figlia diretta della **601**
+(*zero letture e zero occorrenze devono uscire come due parole diverse*): qui le parole diventano
+**tre**.
+
+---
+
+## 🐺🧾 CLASSE 636 — **IL RILIEVO 519 GRIDA AL LUPO SU UN `[pscustomobject]` CREATO DALLA RIGA STESSA**: l'«oggetto vivo» e' un record in memoria, e il falso positivo e' **garantito** su ogni riga che produce una tabella (controllo-preventivo, 23/09/2026, figlia della 519 come la 603 lo e' della 586)
+
+**Il caso.** Sulla riga «sedie mute FTMO», di **sola lettura pura**, `controlla_riga.py` stampa:
+```
+~ [519] la riga NON e' di sola lettura: assegna a una PROPRIETA' (ArmEs, B, Chr, CsvUlt, E,
+  FailEs, Guard, MagicChr, NoGoEs, Nome, P, Per, Prof, Sym, T, Tot, Ult, UltF, Verb), cioe'
+  SCRIVE lo stato di un oggetto vivo.
+```
+🔴 **Le diciannove proprieta' sono TUTTE di `[pscustomobject]` costruiti dalla riga tre istruzioni
+prima**: `$r` (l'esito di una lettura: testo, byte, codifica) e `$e` (la scheda di una sedia).
+Non esistono fuori dal processo, non toccano nessun file, nessun processo, nessun terminale.
+La 519 vera — `$f = Get-Item ...; $f.IsReadOnly = $true` — **cambia un file sul disco**; questa
+cambia **un campo di una riga di tabella**.
+
+### ✅ La regola
+1. 🎯 **La 519 resta giusta, ma non distingue la PROVENIENZA dell'oggetto.** Un'assegnazione e'
+   pericolosa se l'oggetto viene da **fuori** (`Get-Item`, `Get-Process`, `Get-Service`,
+   `New-Object` su un tipo COM/IO); e' innocua se l'oggetto e' nato da un
+   `[pscustomobject]@{...}` **dentro la riga stessa**.
+2. 🧾 **Finche' il cancello non lo distingue, l'agente di giudizio deve NOMINARE la provenienza**
+   di ogni proprieta' segnalata — una per una, non «sono tutte mie». Senza quel passaggio il
+   rilievo diventa rumore, e un rilievo che diventa rumore **smette di fermare quello vero**:
+   e' esattamente il modo in cui la 603 ha logorato il controllo della 586.
+3. ⚠️ **E il falso positivo e' GARANTITO, non occasionale**: ogni riga che produce una tabella in
+   casa costruisce record con `[pscustomobject]` e li riempie. Vuol dire che **tutte** le righe
+   di misura future porteranno questo rilievo giallo.
+
+📌 Famiglia dei **falsi positivi del cancello**: **603** (`StaticParameterBinder` sui percorsi in
+variabile) e **602** (il «passato» che nomina un bersaglio che la riga non usa — e **si e'
+ripresentato anche qui**: il cancello ha stampato *«bersaglio dichiarato: `C:\MT5_Backtest`»* su
+una riga il cui unico bersaglio e' **`C:\FTMO`**, solo perche' quel percorso compare nell'elenco
+di cio' che la riga **NON** tocca).
+
+---
+
+## 📏🕳️ CLASSE 637 — **UNA COLONNA CHIAMATA `up60_pt` IN UNO STUDIO DI APERTURE MISURA DAL PREZZO D'APERTURA, NON DALLA ROTTURA — e il nome non lo dice** (23/09/2026, R229)
+
+**Il caso reale.** Il mandato di R229 descriveva le colonne `up5_pt · up15_pt · up30_pt ·
+up60_pt` di `ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv` come *«quanto si e' esteso il movimento
+a 5, 15, 30 e 60 minuti DALLA ROTTURA»* e come *«esattamente il quanti punti fa dopo che
+rompe»*. **Falso.** `backtest_pipeline/anatomia_aperture.py` rr.483-513 calcola
+`up_pt = hi − apertura` sul massimo dei **primi `w` minuti dall'apertura di seduta**.
+
+🔴 **Due danni, e il secondo e' peggiore del primo:**
+1. il numero e' **piu' grande del vero** (include il range di riferimento, non solo cio' che
+   viene dopo): `up60_pt` mediano del Nasdaq 2023-2026 vale **93,6** `[MISURATO n=456]` contro
+   i **47,2** veri oltre il livello rotto. **Un bersaglio tarato sul numero sbagliato sarebbe
+   1,98 volte troppo largo.**
+   🔴 **E questa riga e' essa stessa un caso della classe**: scrivendola avevo messo *«121,8 …
+   2,6 volte»* **a memoria, senza aprire il file**. Il numero vero e' **93,6 / 1,98**. Corretto
+   prima della consegna. 👉 **Un referto che denuncia un numero non misurato non puo' contenere
+   un numero non misurato.**
+2. 🔴 **`up5_pt` non ha proprio senso** per quella domanda: con `--finestra-classe 15` il range
+   si chiude al minuto 15, quindi **al minuto 5 non esiste ancora nessuna rottura.** Chi lo
+   mediasse insieme agli altri metterebbe in tabella una colonna che non misura niente.
+
+### ✅ La regola
+1. 🔎 **La semantica di una colonna si legge nel CODICE CHE LA SCRIVE, mai nel nome ne' in chi
+   te la passa.** Qui l'autore l'aveva persino scritta in chiaro nel commento (*«Tutto DAL
+   PREZZO DI APERTURA»*, r.486) e nel referto (r.109): **bastava aprirlo.**
+2. 🧮 **Quando il dato giusto non c'e' come colonna, si cerca l'IDENTITA' che lo ricostruisce,
+   e la si VERIFICA su tutte le righe.** Qui: `amp_rif_pt == up15_pt − dn15_pt` (perche'
+   `fin_classe=15`), quindi `MFE60_long = up60_pt − up15_pt`. 🟢 Verificato **3.899/3.899,
+   zero discordanti**. **Una ricostruzione non verificata e' un'assunzione con la matematica addosso.**
+3. 📌 **E il parametro che rende valida l'identita' va letto dal referto della corsa, non dal
+   default dello strumento**: qui `--finestra-classe 15` sta scritto a r.86 del referto. Se
+   quella corsa fosse girata a 30, `up15_pt` non sarebbe piu' `hi_rif` e l'identita' cadrebbe **in silenzio**.
+
+---
+
+## 💱🗓️ CLASSE 638 — **IL RAPPORTO DI PREZZO FRA DUE STRUMENTI E' UN FATTO CON UNA DATA: «il Nasdaq vale 4 volte il DAX» era vero, oggi vale 1,14** (23/09/2026, R229)
+
+**Il caso reale.** Il mandato di R229 istruiva, in buona fede, *«il confronto giusto fra due
+indici non e' in punti assoluti (**il Nasdaq vale ~4x il DAX in valore d'indice**)»*.
+🔴 **Misurato sugli ordini VERI di casa** (`data/statements/trades_auto.csv`, mediana di
+`open_price`, apr-set 2026): **`NASUSD` 29.089 · `D30EUR` 25.431 → 1,144.** Non 4.
+
+🟢 **La conclusione del mandato restava giusta** (confrontare in % o in ATR e' sempre meglio),
+**ma la ragione era sbagliata di un fattore 3,5** — e la ragione sbagliata porta altrove: chi
+avesse riscalato i punti del Nasdaq sul DAX *dividendo per 4* avrebbe sbagliato del **−71%**,
+e avrebbe dedotto che il DAX fa *«16 punti dove il Nasdaq ne fa 65»* invece dei **55,25** veri.
+
+### ✅ La regola
+1. 📅 **Un rapporto di prezzo fra strumenti NON e' una costante di natura: e' una misura con
+   una data.** Del Nasdaq la corsa lo dimostra in casa: `CENSIMENTO_FONTE.txt` legge la prima
+   barra a **2.135** (2010.11.14) e l'ultima a **28.272** (2026.07.31) — **×13,2 in sedici anni**.
+   🔴 **Per il DAX un'analoga serie storica in repo NON C'E'** (`[NON MISURATO]`, ed e' proprio
+   il buco di R229): so solo dove sta **oggi** (25.431, dagli ordini veri). 👉 Due strumenti che
+   corrono a velocita' diverse per quindici anni **non possono conservare il loro rapporto**.
+   Le frasi imparate quando si e' studiato il mercato **scadono**, e scadono **senza avvisare**.
+2. 🔎 **E il numero vero costa zero e sta gia' in casa**: `data/statements/trades_*.csv` ha
+   `open_price` su ogni ordine realmente eseguito. **Prima di citare a memoria un livello di
+   prezzo, si apre lo statement.**
+3. 🛑 **Vale per tutta la famiglia**: «l'oro vale X volte l'argento», «il Dow e' Y volte lo
+   S&P», «il Nikkei sta a Z». **Ognuna di queste e' `[NON MISURATO]` finche' non porta la
+   sua data.**
+
+---
