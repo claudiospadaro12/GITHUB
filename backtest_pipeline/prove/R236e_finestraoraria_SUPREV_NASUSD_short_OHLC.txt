@@ -1,0 +1,337 @@
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+#  R236e -- L'ASSE E' LA FINESTRA ORARIA. InpUseTimeWindow, short puro,
+#           NASUSD H1, BANCO OHLC.
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+#  ASCII PURO: nessun byte > 127 (verificato prima della consegna).
+# ==========================================================================
+#  Gemello: R236f (l'altro lato). Regola dei due lati sugli indici,
+#  firmata da Claudio il 25/08/2026.
+#
+# --------------------------------------------------------------------------
+#  1. A CHE DOMANDA RISPONDE, ED E' UNA SOLA
+# --------------------------------------------------------------------------
+#  >>> QUANTE OPERAZIONI COSTA accendere il filtro orario sulle sole ore
+#      americane?
+#  Due celle: finestra SPENTA (com'e' oggi) contro finestra ACCESA
+#  14:00-22:00 ora SERVER. Si legge il RAPPORTO fra i due n.
+#
+#  >>> E DICHIARO SUBITO CHE LA RAGIONE DI QUESTO ROUND E' CAMBIATA
+#      rispetto a come era nato, perche' cambiare la ragione di un round
+#      senza dirlo e' un difetto che abbiamo gia' pagato tre volte oggi.
+#      NATO PER: far passare il cancello del costo. Restringendo alle ore
+#      USA lo spread BCM scende da 2,40 a 1,700 e la frontiera dei 40x da
+#      96,0 a 68,0 punti indice.
+#      >>> OGGI NON SERVE PIU' A QUELLO. La frontiera che conta per lo
+#          schieramento e' quella del broker dove si opera: FTMO
+#          US100.cash, spread 1,53 -> frontiera 61,2 idx
+#          (report/STOP_VS_SPREAD_FTMO_2026-09-20.md, riga "770260 US100
+#          (61,2)"; verificato che 61,2 = 40 x 1,53). Quella e' piu' bassa
+#          di tutte e due le frontiere BCM, e si ottiene SENZA toccare le
+#          ore.
+#      >>> A COSA SERVE ADESSO, ed e' il motivo per cui il file resta:
+#          (a) a misurare QUANTO CAMPIONE costa la finestra -- numero che
+#              serve a qualunque discorso futuro sulle ore e che oggi e'
+#              [NON MISURATO];
+#          (b) a dire se la QUALITA' cambia (le inversioni fuori orario
+#              USA sono peggiori delle altre, o uguali?);
+#          (c) a chiudere una casella che risulta "mai provata" e che
+#              nessuno ha mai aperto.
+#
+#  >>> ED E' UNA CASELLA DAVVERO VERGINE, verificato da me sull'INTERO
+#      archivio: su 137 CSV che portano la colonna InpUseTimeWindow, le
+#      combinazioni distinte di (InpUseTimeWindow, InpStartHour,
+#      InpEndHour) sono UNA SOLA: (0, 0, 24).
+#      Mai variata. Da nessuno. Su nessun motore.
+#
+# --------------------------------------------------------------------------
+#  2. COSA NON PUO' DECIDERE
+# --------------------------------------------------------------------------
+#  (NO) NON puo' leggere il MERITO: n sotto 150, e per di piu' in OHLC.
+#  (NO) NON puo' leggere il RISCHIO: un DD di banco ottimista non e' un DD.
+#       >>> Qui l'Emendamento B NON si applica, e va detto: "il rischio si
+#           legge a qualunque n" vale per una misura VERA, non per un banco
+#           che non paga lo spread.
+#  (NO) NON promuove niente, non tocca forward, VPS, conto reale.
+#  (SI) PUO' contare le operazioni. E' un CONTATORE, ed e' tutto.
+#
+#  PERCHE' IN OHLC: la domanda e' "quante candidate d'ingresso nascono
+#  dentro la fascia oraria". Il momento in cui nasce un segnale dipende
+#  dalle BARRE (Supertrend, EMA, pattern di rimbalzo), non dal modello di
+#  riempimento. Il conteggio e' quindi lo stesso sui due banchi, e qui
+#  costa una frazione.
+#  >>> IL LIMITE, che e' la meta' che conta: il numero di operazioni CHIUSE
+#      puo' differire un po' fra i banchi (uno stop colpito dentro la barra
+#      in OHLC non si vede). Quindi il RAPPORTO fra le due celle e'
+#      affidabile; il VALORE ASSOLUTO di n non va riportato come se fosse
+#      quello di un round a tick reali.
+#
+# --------------------------------------------------------------------------
+#  3. LE ORE, E PERCHE' PROPRIO QUELLE
+# --------------------------------------------------------------------------
+#  InpStartHour = 14, InpEndHour = 22, in ORA SERVER BCM (il server e'
+#  un'ora indietro rispetto all'ora italiana). Il Nasdaq cash apre alle
+#  15:30 italiane = 14:30 server: la finestra 14-22 contiene l'apertura e
+#  tutta la sessione americana.
+#  E' anche la fascia a spread basso, misurata: le mediane orarie 14-21
+#  sono 1,8 / 1,8 / 1,7 / 1,7 / 1,7 / 1,6 / 1,7 / 1,7, mediana 1,700,
+#  contro 2,40 sulle 24 ore
+#  (risultati_archivio/spread_flotta/spread_orario_NASUSD.csv).
+#  >>> LA FASCIA NON E' AD ASSE, ed e' una scelta: un solo asse per file.
+#      Se il costo in operazioni risultasse accettabile, il passo dopo e'
+#      un round sulla LARGHEZZA della fascia (InpEndHour ad asse). Non
+#      questo.
+#
+# --------------------------------------------------------------------------
+#  4. L'ANCORA (regola meccanica P1-P4, identica sui sei file del round)
+# --------------------------------------------------------------------------
+#    P1. Fette 1-D: si fissano DUE coordinate fra {StMult, StAtrPeriod,
+#        TP_RR} e si fa variare la terza.
+#    P2. In ogni fetta, il RUN CONTIGUO piu' lungo (fra i valori MISURATI)
+#        in cui OGNI cella ha PF > 1,00.
+#    P3. Vince il run piu' LUNGO; a parita', interi CONSECUTIVI; poi AtrP.
+#    P4. Dentro il run, la cella piu' vicina al CENTRO; fra le centrali,
+#        quella col PF piu' BASSO. IL PICCO E' ESCLUSO PER COSTRUZIONE.
+#  ANCORA DI QUESTO FILE: StMult 3.5 | StAtrPeriod 7 | TP_RR 2.5
+#  >>> Serve solo a mettere il motore in una zona VIVA: se ancorassimo in
+#      una zona che non opera, "la finestra costa poco" sarebbe vero e
+#      insignificante.
+#  >>> E VALE ANCHE QUI L'AVVERTENZA DI R236a/b sezione 6-ter: la sedia
+#      viva 970913 gira StMult 3.0 / AtrP 10 / TP_RR 3.0 a DUE LATI
+#      accesi, e il valore 3.0 NON ESISTE nello scan d'archivio (i soli
+#      StMult misurati sono 2,5 / 3,5 / 4,5). Quindi anche questo file
+#      descrive il MOTORE, non la sedia in campo.
+#      >>> Per il COSTO ORARIO la cosa pesa MENO che altrove: quante
+#          candidate nascono fuori dalle ore USA dipende da quando il
+#          mercato si muove, non da quanto e' larga la banda Supertrend.
+#          Ma "pesa meno" non e' "non pesa": il rapporto misurato qui va
+#          considerato indicativo per la sedia viva, non esatto.
+#
+# --------------------------------------------------------------------------
+#  5. L'ATTESA, SCRITTA PRIMA DEI NUMERI
+# --------------------------------------------------------------------------
+#  n (cella 0, finestra spenta): dell'ordine di 61 sulla finestra piena,
+#      quindi circa il 40% e il 60% sulle due tranche.
+#  n (cella 1, finestra accesa): SCONOSCIUTO, ed e' la misura.
+#  >>> IL LIMITE INFERIORE, dichiarato come conto e non come previsione:
+#      se le candidate fossero distribuite UNIFORMEMENTE sulle ore
+#      operative, tenendo 8 ore su 23 (NASUSD opera circa 23 ore al giorno,
+#      W = 1380 minuti -- e W e' [INFERITO], CANCELLO_COSTO_FLOTTA r.970)
+#      si terrebbe il 34,8%. Sull'ancora sarebbe 61 -> circa 21.
+#      >>> Sarebbe FATALE per il campione, ed e' lo scenario peggiore.
+#  >>> IL LIMITE SUPERIORE: 100% (tutte le inversioni nascono nelle ore
+#      americane). Plausibile che si stia piu' vicini a questo che
+#      all'altro -- il pattern chiede volatilita' e confluenza di EMA, e
+#      il Nasdaq di notte e' fermo -- ma "plausibile" non e' un numero:
+#      la mia attesa e' 50-80% ed e' una STIMA, non una misura.
+#  PF e DD: NON SI LEGGONO (sezione 2). Restano nel CSV come diagnostica.
+#  >>> MA IL RAPPORTO fra i PF delle due celle si guarda LO STESSO, con le
+#      pinze: se la cella accesa avesse un PF molto piu' alto a n molto
+#      piu' basso, vorrebbe dire che le inversioni notturne sono peggiori
+#      -- ed e' un'informazione sul motore che vale il round anche se il
+#      numero assoluto non e' citabile.
+#
+# --------------------------------------------------------------------------
+#  6. LE SOGLIE CONGELATE ORA
+# --------------------------------------------------------------------------
+#  (T1) IL CANCELLO CROCIATO, GRATIS -- ed e' il motivo per cui l'asse
+#       parte dalla cella SPENTA invece di provare due fasce diverse.
+#       La cella 0 (InpUseTimeWindow = 0) riproduce ESATTAMENTE la
+#       configurazione d'archivio, sullo STESSO banco dell'archivio (OHLC).
+#       SOGLIA: la somma degli n delle due tranche della cella 0 deve stare
+#       entro +/- 10% di 61. Se non ci sta, la finestra dello scan
+#       d'archivio NON era quella che credo (buco B2) e NIENTE di questo
+#       round si legge finche' non si e' capito perche'.
+#       >>> Si applica a TUTTE E DUE le tranche sommate, non alla piu'
+#           comoda.
+#  (T2) LA MISURA. Si riporta il rapporto n(accesa)/n(spenta) per tranche
+#       E sulla somma. Non c'e' una soglia di PASS/FAIL: e' un numero che
+#       serve a decidere, non un cancello.
+#       >>> Ma UNA soglia di lettura la congelo lo stesso, perche' senza
+#           sarebbe un numero senza conseguenza:
+#           rapporto >= 0,70 -> la finestra e' PRATICABILE, e un round
+#                               sulla larghezza della fascia ha senso;
+#           rapporto 0,40-0,70 -> praticabile SOLO se la qualita' migliora
+#                               abbastanza da compensare (e n < 150 non
+#                               permette di dirlo: quindi in pratica,
+#                               SOSPESO);
+#           rapporto < 0,40  -> la finestra COSTA TROPPO campione su un
+#                               motore che ne ha gia' poco. Si chiude la
+#                               strada delle ore e si scrive cosi'.
+#  (T3) IL CANCELLO DI MERITO NON ESISTE. Nessuna soglia di PF promuove
+#       niente: n < 150 e banco OHLC. Scritto qui perche' nessuno possa
+#       aggiungerlo dopo aver visto i numeri.
+#  (T4) CONTROLLO DEL PIN. Nel CSV la colonna InpUseTimeWindow deve portare
+#       DUE valori distinti (0 e 1) e InpStartHour/InpEndHour devono
+#       portare 14 e 22 su tutte le righe. Se la colonna porta un valore
+#       solo, l'esito non e' "la finestra non costa niente": e' "il pin non
+#       e' arrivato", ed e' il difetto per cui esiste controlla_prova.py.
+#
+# --------------------------------------------------------------------------
+#  7. IL CONTRO-ESEMPIO
+# --------------------------------------------------------------------------
+#  TESI: "le inversioni del Nasdaq nascono soprattutto nelle ore americane,
+#         quindi la finestra costa poco campione."
+#  ALTERNATIVA: "il motore e' H1 e pesca su tutte le 24 ore; la finestra ne
+#         taglia via la maggior parte."
+#  >>> I DUE NUMERI, e sono distinguibili senza statistica perche' e' un
+#      CONTEGGIO, non una stima:
+#      TESI        -> rapporto n(accesa)/n(spenta) fra 0,70 e 1,00.
+#      ALTERNATIVA -> rapporto vicino a 0,35 (la quota uniforme 8/23).
+#      Fra 0,70 e 0,35 c'e' un fattore DUE: nessuna ambiguita' di lettura,
+#      nessun rumore da separare.
+#  >>> E' per questo che la domanda va in OHLC: quando la risposta e' un
+#      conteggio e non una misura di merito, pagare il banco caro non
+#      compra niente.
+#
+#  IL TERZO ESITO, da saper riconoscere: rapporto ESATTAMENTE 1,000 con PF
+#  e DD identici al centesimo. NON sarebbe "la finestra non costa niente":
+#  sarebbe il PIN NON ARRIVATO (T4). Si controlla la colonna prima di
+#  interpretare qualunque cosa.
+#
+#  >>> E UN ESITO CHE MI FAREBBE SOSPETTARE UN ERRORE MIO: un rapporto
+#      SOPRA 1,00 (piu' operazioni con la finestra ACCESA). Non puo'
+#      succedere -- un filtro puo' solo togliere candidate -- tranne per
+#      un effetto di coda: una posizione aperta a fine finestra che chiude
+#      in modo diverso. Se il rapporto uscisse sopra 1,02, andrei a
+#      cercare l'errore invece di raccontare il risultato.
+#
+# --------------------------------------------------------------------------
+#  8. I BUCHI DICHIARATI, PER NOME
+# --------------------------------------------------------------------------
+#  (B1) RISCALDAMENTO (classe 653): la CONFLUENZA e' accesa e chiede una
+#       EMA a 200 periodi. 200 barre = 4,7% della gamba IS, 600 barre =
+#       14,2% (a 23 barre H1 al giorno, W = 1380 [INFERITO],
+#       CANCELLO_COSTO_FLOTTA r.970). NON scorporato: scelta dichiarata.
+#  (B2) LA FINESTRA DELLO SCAN D'ARCHIVIO NON E' NEL CSV (nessuna colonna
+#       data). Assunta ~21 mesi per analogia con prove/R120a_NASUSD.
+#       [NON VERIFICATA] -- ed e' esattamente cio' che T1 controlla.
+#  (B3) L'ORA DEL SERVER E' UNA REGOLA DI CASA, NON UNA MISURA DI QUESTO
+#       ROUND: "il server BCM e' un'ora indietro rispetto all'ora
+#       italiana". Se quella regola fosse sbagliata di un'ora, la finestra
+#       14-22 sarebbe spostata e il conteggio cambierebbe. Non l'ho
+#       riverificata qui.
+#  (B4) QUESTO FILE NON DICE NIENTE SUL COSTO IN SPREAD ne' sullo stop.
+#       Non va citato nella discussione del cancello dei 40x: li' valgono
+#       R236a/R236b.
+#  (B5) UN SOLO REGIME (21 mesi, Nasdaq in larga parte rialzista). La
+#       distribuzione oraria delle inversioni potrebbe cambiare in un
+#       regime diverso.
+#  (B6) LA SEDIA VIVA GIRA UNA GEOMETRIA ASSENTE DALL'ARCHIVIO (StMult 3.0)
+#       E A DUE LATI ACCESI -- vedi sezione 4 e R236a/b sezione 6-ter.
+#
+# --------------------------------------------------------------------------
+#  9. IL COSTO IN TEMPO MACCHINA
+# --------------------------------------------------------------------------
+#  2 celle x 2 tranche = 4 passate su questo file. Col gemello R236f: 8
+#  passate, in OHLC. >>> E' il round piu' economico del gruppo, e risponde
+#  alla domanda che sblocca o chiude la strada delle ore.
+#  [NON MISURATO] il minutaggio per passata.
+#
+# --------------------------------------------------------------------------
+# 10. VINCOLI DI BANCO
+# --------------------------------------------------------------------------
+#  >>> MODELLO OHLC: NON passabile dal file, e' il parametro -Modello della
+#      riga di lancio (walkforward_generico.ps1 r.190, default 4 = tick
+#      reali). >>> QUESTO FILE VA LANCIATO CON -Modello 1.
+#      Il driver aggiunge il suffisso "_ohlc" ai risultati (r.1973, "un
+#      OHLC non deve MAI sovrascrivere un tick reale"): questi CSV non
+#      possono inquinare l'archivio a tick.
+#  >>> DEPOSITO 100000 -- classe 646, il file NON puo' imporlo (non esiste
+#      @DEPOSITO): e' il parametro -Deposito (r.200, default 10000). Qui
+#      pesa meno che nei round a tick (non si legge il DD), ma va passato
+#      lo stesso: il pavimento del lotto minimo puo' cambiare il NUMERO di
+#      operazioni, e il numero di operazioni QUI e' tutto.
+#  @FRAZIONEIS 0.40 scritta QUI DENTRO (classe 647): senza la riga il
+#      driver applica il default in silenzio (classe 393).
+#  @DAQUANDO 2024.09.26 = pavimento dei tick reali MISURATO (classe 590).
+#      Su OHLC non sarebbe obbligatorio: lo tengo per poter mettere questo
+#      file fianco a fianco coi round a tick del gruppo. Scelta dichiarata.
+#  @FINOA 2026.06.30 = bordo d'archivio della flotta.
+#  @PERIODO H1. InpTF e' un ENUM: pinnato esplicito 16385 e MAI ad asse
+#      (classe 287).
+#  UN SOLO ASSE: InpUseTimeWindow, scritto in forma NUMERICA (0/1) perche'
+#      un asse booleano scritto "false||...||true" non e' numerico e il
+#      cancello lo rifiuta. 2 celle: |1-0|/1 + 1 = 2.
+#  MAGIC 764224 -- verificato vergine il 23/09/2026: zero occorrenze in tutto
+#      il repository (esclusi .git e .claude).
+#  NON PINNO InpNewsCurrencies: valore VUOTO, e un pin vuoto MT5 lo IGNORA
+#      usando il default compilato. Con InpUseNewsFilter=false e' inerte.
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- il lato
+InpAllowLong=false
+InpAllowShort=true
+
+# --- timeframe operativo (ENUM, pinnato esplicito: H1 = 16385)
+InpTF=16385
+
+# --- ancora (regola P1-P4)
+InpStMult=3.5
+InpStAtrPeriod=7
+InpTP_RR=2.5
+
+# --- stop: tutto al default d'archivio. Qui l'asse sono le ORE.
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+# --- pattern del rimbalzo
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+
+# --- confluenza tecnica
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+# --- target e uscita
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+
+# --- ingresso frazionato
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- rischio
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+# --- LA FASCIA: ora SERVER BCM (= ora italiana - 1). Il Nasdaq cash apre
+# --- alle 15:30 italiane = 14:30 server. Pinnate: l'asse e' l'interruttore.
+InpStartHour=14
+InpEndHour=22
+
+# --- filtro notizie: spento
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+# --- generali
+InpComment=STREV_R236e
+InpFridayClose=false
+InpFridayCloseHour=20
+InpUsaGuardian=false
+InpMagic=764224
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+
+# --- L'ASSE, unico: l'interruttore della finestra oraria. 2 celle: 0 e 1.
+# --- La cella 0 riproduce l'archivio -> cancello crociato T1 gratis.
+InpUseTimeWindow=0||0||1||1||Y
+# ==========================================================================

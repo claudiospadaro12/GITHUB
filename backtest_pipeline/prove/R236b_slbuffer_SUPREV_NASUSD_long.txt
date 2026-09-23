@@ -1,0 +1,756 @@
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+#  R236b -- L'ASSE E' IL BUFFER DELLO STOP. InpSLBufferPips, long puro,
+#           NASUSD H1, TICK REALI.
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+#  ASCII PURO: nessun byte > 127 (verificato prima della consegna).
+# ==========================================================================
+#
+#  ORIGINE: richiesta di Claudio del 23/09/2026 su un grafico US100.cash M5
+#  ("Parte da un lato e poi va dall'altro... Ottimizzarlo. Inversione del
+#  Nasdaq"). Il motore di casa che fa l'inversione e' questo.
+#  Gemello obbligatorio: R236a (lato CORTO) -- regola dei due lati sugli
+#  indici, firmata da Claudio il 25/08/2026.
+#  Gemelli di geometria (OHLC, asse InpSLLookback): R236c / R236d.
+#  Gemelli della finestra oraria (OHLC): R236e / R236f.
+#
+# --------------------------------------------------------------------------
+#  0. DUE STESURE BOCCIATE PRIMA DI QUESTA -- e cosa le ha uccise
+# --------------------------------------------------------------------------
+#  v1, asse InpSLLookback a tick reali. BOCCIATA: r.386-389, il lookback
+#  agisce DENTRO MathMin/MathMax attraverso `ext`, e `stLine` non dipende
+#  da N. Quando la linea Supertrend vince il confronto, allargare N non
+#  sposta NIENTE. La legge "lo stop cresce come radice di N" non era un
+#  centro: era un TETTO.
+#  >>> La domanda di geometria non e' stata buttata: e' R236c / R236d,
+#      in OHLC, dove costa una frazione.
+#
+#  v2, asse InpSLBufferPips fino a +68 idx (stop 95,10). BOCCIATA DA
+#  CLAUDIO in quattro parole: "50 punti. Non 90". Il conto gli da' ragione:
+#  a stop 95,10 il parziale del 50% -- che scatta a 1R -- stava a 95,10
+#  punti, cioe' 1,46 volte l'escursione favorevole mediana MISURATA del
+#  Nasdaq (65,00 idx). Un parziale che per scattare chiede una volta e
+#  mezza il movimento tipico e' mal piazzato, e si vedeva PRIMA di correre.
+#
+#  >>> QUESTA e' la v3. Cambia il CANCELLO (sezione 5), cambia il TETTO
+#      (5-bis) e cambia la BASE (sezione 6): non e' una media delle prime
+#      due.
+#
+# --------------------------------------------------------------------------
+#  1. A CHE DOMANDA RISPONDE, ED E' UNA SOLA
+# --------------------------------------------------------------------------
+#  >>> IL MOTORE REGGE UNO STOP PORTATO FINO ALLA FRONTIERA DEL COSTO?
+#  E' un TEST DI SOPRAVVIVENZA. Non chiede "quanto guadagniamo di piu'":
+#  chiede se allargando lo stop fin dove il costo lo pretende il motore
+#  resta vivo.
+#
+#  >>> M1 -- IL NUMERO GIUSTO, e qui correggo una svista delle prime
+#      stesure: CANCELLO_COSTO_FLOTTA r.412 scrive "15,1x", ma e' calcolato
+#      sullo spread 1,80 (la mediana della sola ora 15). Contro la
+#      frontiera a 24 ore (96,0) il rapporto e' 27,10/2,40 = 11,3x, e il
+#      "3,5 volte troppo stretto" torna con 11,3x (40/11,3 = 3,54), NON con
+#      15,1x (40/15,1 = 2,65). Mettere 15,1x e 96,0 nella stessa frase vuol
+#      dire mescolare due spread diversi.
+#
+#  E LA MANOPOLA E' QUELLA GIUSTA, verificata sul codice:
+#    r.388  double buf = InpSLBufferPips * pip;
+#    r.389  double sl = isLong ? MathMin(stLine,ext) - buf
+#                              : MathMax(stLine,ext) + buf;
+#  >>> Il buffer entra ADDITIVO e FUORI dal MathMin/MathMax: sposta lo stop
+#      di una costante NOTA, sempre, qualunque cosa vinca il confronto.
+#  E la casa lo aveva gia' scritto l'11/09:
+#  CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md r.362, medaglia d'oro della
+#  classifica delle manopole d'uscita mai provate, su QUESTA sedia:
+#    "InpSLBufferPips -- 970913 SupRev_NAS_H1_Ott NASUSD H1 -- 72% del
+#     pavimento di costo. E' l'UNICA manopola di quell'EA che allarga lo
+#     stop (non ha InpSLBufferAtr). La soglia dei 40x cade DENTRO l'asse."
+#  Verificato: su 137 CSV d'archivio con quella colonna il valore distinto
+#  e' UNO SOLO, 3. Mai messa ad asse. Casella LIBERA.
+#
+# --------------------------------------------------------------------------
+#  2. COSA QUESTO ROUND NON PUO' DECIDERE
+# --------------------------------------------------------------------------
+#  (NO) NON puo' leggere il MERITO: n atteso 42 (IS) e 62 (OOS), sotto il
+#       muro delle 150 (Emendamento A del 16/08/2026).
+#  (NO) NON puo' CONFERMARE la tesi. E' un TEST A UN LATO: l'effetto atteso
+#       (+0,04 di PF dalla cella 1 alla cella 5) sta SOTTO la risoluzione
+#       del banco su TUTTE E DUE le tranche (0.28x e 0.42x). Vedi 6-bis.
+#  (NO) NON tocca VPS, forward, conto reale, nessuna sedia viva.
+#  (SI) PUO' FALSIFICARE (sezione 8).
+#  (SI) PUO' leggere il RISCHIO -- DD, a qualunque n (Emendamento B).
+#
+#  LA TENSIONE, dichiarata e NON risolta: allargare lo stop a rischio fisso
+#  RIMPICCIOLISCE il lotto (LotByRisk r.543-546). La frequenza -- l'altro
+#  problema del Nasdaq -- si curerebbe SCENDENDO di TF, cosa che PEGGIORA
+#  il costo. Il round MISURA la tensione, non la scioglie.
+#
+# --------------------------------------------------------------------------
+#  3. I NUMERI D'ARCHIVIO, RICONTATI DA ME IL 23/09/2026
+# --------------------------------------------------------------------------
+#  Fonte: risultati_archivio/SupertrendReversal/H1_OHLC/
+#         scan_ABTG_SupertrendReversal_H1_NASUSD.csv (118 righe di dati)
+#  >>> BANCO: OHLC = banco OTTIMISTA, non paga lo spread vero. Screening,
+#      mai verdetti. Qui si gira a TICK REALI: e' un RIFERIMENTO ALTO.
+#      Lezione gia' pagata: il CAC a PF 7,37 OHLC -> PFmed 0,96 a tick.
+#
+#  CORTO PURO: celle 29 | positive 10 | n>=150 ZERO | n max 93 | DD max 3,5712
+#  LUNGO PURO: celle 30 | positive 16 | n>=150 ZERO | n max 125 | DD max 3,5241
+#  DUE LATI  : celle 23 | positive 12 | n>=150: 12 | n max 210 | DD max 6,3206
+#              <- 6,3206 e' il massimo ASSOLUTO del file, e serve a T5a.
+#
+#  >>> IL BUCO PIU' GROSSO, CHIAMATO PER NOME: su DAX e Nasdaq il LATO
+#      CORTO non e' MAI stato misurato a TICK REALI. Zero volte, su 160
+#      passate di validazione SupRev: tutte a due lati accesi (1,1).
+#      Fonte: report/IL_CORTO_DI_DAX_E_NASDAQ_2026-09-23.md r.198 e r.205.
+#      Vale anche per il lungo PURO: se le 160 erano tutte (1,1), nemmeno
+#      il lungo isolato e' mai stato visto a tick reali su questo simbolo.
+#
+# --------------------------------------------------------------------------
+#  4. L'ANCORA E LA REGOLA, RESA MECCANICA IN QUATTRO PASSI
+# --------------------------------------------------------------------------
+#    P1. Fette 1-D: si fissano DUE coordinate fra {StMult, StAtrPeriod,
+#        TP_RR} e si fa variare la terza.
+#    P2. In ogni fetta, il RUN CONTIGUO piu' lungo (fra i valori MISURATI,
+#        in ordine) in cui OGNI cella ha PF > 1,00.
+#    P3. Vince il run piu' LUNGO; a parita', quello a interi CONSECUTIVI
+#        (un run con buchi non e' un altopiano); a parita' ancora, AtrP.
+#    P4. Dentro il run, la cella piu' vicina al CENTRO dell'intervallo; fra
+#        le centrali, quella col PF piu' BASSO (ancora conservativa).
+#        IL PICCO E' ESCLUSO PER COSTRUZIONE.
+#
+#  CORTO -- unico run >= 3 celle del sottoinsieme:
+#    fetta (StMult 3,5 ; AtrP 7), asse TP_RR, QUATTRO celle, tutte > 1:
+#      TP 1,5 -> 1,070 | TP 2,0 -> 1,302 | TP 2,5 -> 1,237 | TP 3,0 -> 1,275
+#      (stesso n=61; DD 1,225/1,216/1,219/1,217, identici al centesimo)
+#    P4: centro 2,25; centrali 2,0 (1,302) e 2,5 (1,237) -> vince il PF piu'
+#        basso -> TP_RR 2,5.  ANCORA: StMult 3,5 | AtrP 7 | TP 2,5
+#        -> PF 1,2366  n 61  DD 1,2186
+#    >>> Il caso che la vecchia regola non sapeva gestire e' risolto: sul
+#        corto, cercando lungo AtrP, il centro cadeva in un BUCO della
+#        griglia. Con P3 l'asse AtrP non viene nemmeno scelto (i run lungo
+#        AtrP non superano le 2 celle).
+#
+#  LUNGO -- run contiguo {11, 12, 13} lungo AtrP a (StMult 2,5 ; TP 2,5):
+#      AtrP 11 -> 1,428 | AtrP 12 -> 1,279 | AtrP 13 -> 1,789
+#      (si rompe ad AtrP 7: 0,805)
+#    P4: centro di [11 ... 13] = 12.  ANCORA: StMult 2,5 | AtrP 12 | TP 2,5
+#        -> PF 1,2790  n 104  DD 1,8306
+#    >>> DIVERGENZA DICHIARATA: una lettura PROIETTATA (collassando su
+#        tutti i TP) dava un blocco AtrP 8-14 di dieci celle, centro 11,
+#        ancora PF 1,428 n 112. Quel conteggio e' GIUSTO (verificato:
+#        dieci celle, tutte > 1, rottura ad AtrP 7). Ma un blocco che
+#        mescola TP diversi non e' un INTORNO: due celle "adiacenti" li'
+#        dentro (AtrP 8/TP 2,0 e AtrP 10/TP 3,0) non sono vicine in nessun
+#        senso utile. Si usa la lettura STRETTA -> AtrP 12. La scelta non
+#        cambia nessuna conclusione: 11 e 12 stanno nello stesso run, e qui
+#        si legge il SEGNO, non il livello.
+#
+#  ANCORA DI QUESTO FILE: StMult 2.5 | StAtrPeriod 12 | TP_RR 2.5
+#                         riferimento OHLC: PF 1.2790  n 104  DD 1.8306
+#
+# --------------------------------------------------------------------------
+#  5. LA FRONTIERA DEL COSTO -- TRE, e vanno scritte TUTTE E TRE
+# --------------------------------------------------------------------------
+#  >>> REGOLA DI LETTURA, prima dei numeri: il cancello del costo decide se
+#      una cella e' SCHIERABILE, e si schiera su FTMO. Ma il backtest gira
+#      su tick BCM. Sono due spread diversi e vanno portati tutti e due,
+#      sempre: chi legge deve vedere QUALE cancello sta guardando.
+#
+#   A. BCM, 24 ore   spread 2,40 -> frontiera 40x = 96,0 idx
+#      = mediana delle 24 mediane orarie (spread_flotta/spread_orario_
+#        NASUSD.csv, colonna mediana_idx; ricalcolata da me: 2,40).
+#      >>> CLASSE 650, evitata apposta: lo stesso file ha una riga "TUTTO"
+#          a 1,80, che e' la mediana PESATA SUI TICK. I tick si accalcano
+#          nelle ore americane (95 milioni su 156 nelle ore 14-21, le ore a
+#          spread basso): descrive "il tick mediano", non "l'ora mediana".
+#          Con 1,80 la frontiera scenderebbe a 72,0: piu' facile DI FALSO.
+#   B. BCM, sole ore USA  spread 1,700 -> frontiera 68,0 idx
+#      = mediana delle 8 mediane orarie 14-21 server (1,8 1,8 1,7 1,7 1,7
+#        1,6 1,7 1,7). Robusta: 1,700 anche su 14-20 e su 15-21.
+#      >>> NON si applica a questo file (InpUseTimeWindow e' SPENTO qui,
+#          come in tutte e 118 le righe d'archivio): e' il termine di
+#          paragone, e l'oggetto di R236e / R236f.
+#   C. FTMO, US100.cash  spread 1,53 -> frontiera 40x = 61,2 idx
+#      Fonte: report/STOP_VS_SPREAD_FTMO_2026-09-20.md, tabella di
+#      calibrazione ("US100.cash / NASUSD | 1,53 | 1,70 | 0,90x") e riga
+#      "770260 US100 (61,2)". Verificato da me che 61,2 = 40 x 1,53 e che
+#      le due righe sorelle tornano con la stessa legge (GER40 57,2 =
+#      40 x 1,43, US30 105,2 = 40 x 2,63).
+#      >>> E' LA FRONTIERA CHE CONTA PER LO SCHIERAMENTO.
+#
+#  >>> L'ASIMMETRIA, ed e' dalla parte comoda per una ragione STRUTTURALE:
+#      il backtest paga lo spread BCM, lo schieramento pagherebbe 1,53. Con
+#      la finestra oraria SPENTA il backtest incontra tutte le 24 ore,
+#      quindi paga fra 1,70 e 2,40. Il banco e' PESSIMISTA rispetto a dove
+#      si opera, di un fattore fra 1,11x e 1,57x. Non e' una scelta di
+#      comodo: e' il verso in cui il banco sbaglia.
+#      Il fattore esatto e' [NON MISURATO]: dipende da come si
+#      distribuiscono le operazioni fra le ore, che e' proprio cio' che
+#      R236e / R236f andranno a contare.
+#
+#  >>> E IL BUCO DI QUESTA SEZIONE, grosso, da dire forte:
+#      LO SPREAD FTMO 1,53 E' MISURATO SU n=1 TICK. Lo dice il referto
+#      stesso ("FTMO (n=1 tick)"). Contro i 156 MILIONI di tick del dato
+#      BCM e' fragile. E non e' un timore astratto: nella stessa tabella il
+#      confronto sul Dow va DALLA PARTE OPPOSTA (US30.cash 2,63 contro BCM
+#      1,90 = 1,38x, cioe' FTMO PIU' CARO).
+#      >>> Per questo l'asse NON scommette su una sola frontiera.
+#
+# --------------------------------------------------------------------------
+#  5-bis. IL TETTO DELLO STOP -- il vincolo di Claudio, col suo numero
+# --------------------------------------------------------------------------
+#  >>> "50 punti. Non 90" (Claudio, 23/09/2026). Il numero che gli da'
+#      ragione: l'escursione favorevole MEDIANA del Nasdaq e' 65,00 punti
+#      indice [MISURATO n=447]. Fonte:
+#      report/IL_NASDAQ_IN_PUNTI_E_IL_DAX_2026-09-23.md r.227 (il DAX ne fa
+#      55,25 su n=440: il "50 punti" di Claudio, confermato).
+#  >>> REGOLA CONGELATA: lo stop non supera l'escursione favorevole mediana
+#      misurata, con tolleranza fino a 1,20x (= 78,0 idx). Oltre, la cella
+#      non si scrive.
+#  >>> E IL TETTO E' VERIFICATO SULLA MISURA PIU' ALTA DELLE TRE, non sulla
+#      piu' comoda: la cella 5 sta a 0,82x / 1,01x / 1,19x l'escursione
+#      sulle basi bassa / centrale / alta. Nessuna sfora (sezione 6).
+#
+#  PERCHE' 1,20x E NON 1,00x -- il contro-esempio, in casa nostra: la sedia
+#  d'apertura NASUSD (770260) gira con stop implicito 80,62 idx = 1,24
+#  volte l'escursione mediana, fa 44,8x ed e' data PASSATA dal referto
+#  (r.313). >>> "Stop maggiore della mediana" NON squalifica: lo fa gia'
+#  una sedia promossa. Squalifica "stop a 1,5x la mediana", cioe' la v2
+#  (95,10 = 1,46x). Il tetto 1,20x e' piu' severo del precedente accettato.
+#
+#  >>> E IL RIGHELLO NON E' QUELLO GIUSTO, dichiarato invece che nascosto.
+#      Il 65,00 viene da uno STUDIO DI BREAKOUT D'APERTURA di durata
+#      mediana 55 minuti, e il referto lo qualifica: "un breakout CIECO con
+#      aspettativa ~ 0 ... non e' un edge e non va letto come tale: e' un
+#      RIGHELLO" (limite 4), su "l'intero trade, non 60 minuti" (limite 3).
+#      Il nostro motore e' H1 col trailing sul Supertrend e l'uscita sul
+#      flip: puo' correre per giorni, non per 55 minuti.
+#      >>> L'MFE DI QUESTO MOTORE E' [NON MISURATO]. Il 65,00 e' il MIGLIOR
+#          righello che abbiamo e NON e' il righello giusto: probabilmente
+#          e' CONSERVATIVO per noi (piu' tempo = piu' escursione), ma
+#          "probabilmente" non e' un numero. Si chiude con "1 passata per
+#          simbolo" (TP_R alto o nullo nello Study EA), gia' in lista.
+#  >>> UNA COSA CHE HO VERIFICATO E CHE INDEBOLISCE ME, NON IL NUMERO DI
+#      CLAUDIO: stavo per scrivere che il 65,00 e' un limite inferiore
+#      perche' censurato al tetto 2R. E' FALSO. Il referto e' preciso: la
+#      censura tocca il 24,4% dei giorni Nasdaq, quindi "la mediana e'
+#      salva (meno del 50% e' censurato)". Sono q75 e q90 a non essere
+#      citabili. Il 65,00 e' una mediana valida.
+#
+# --------------------------------------------------------------------------
+#  6. LA BASE DELLO STOP -- TRE MISURE, e la scelta e' MOTIVATA
+# --------------------------------------------------------------------------
+#  >>> CLASSE 652: non si sceglie la misura piu' comoda. E qui la verita'
+#      e' peggio di "due misure discordanti": SONO LA STESSA MEDIANA su un
+#      campione che si e' mosso di UNA gamba. Verificato da me a mano:
+#        51,65 = mediana di {9,70 . 27,10 . 76,20 . 151,90}
+#                (le 4 gambe in stop disponibili al 10/09)
+#                -> (27,10 + 76,20) / 2 = 51,65
+#        27,10 = mediana di {9,70 . 12,80 . 27,10 . 76,20 . 151,90}
+#                (le stesse piu' la gamba dell'11/09) -> 27,10
+#      >>> UNA sola gamba in piu' ha spostato la mediana del 47,5%.
+#          Non e' un mistero d'archivio, non e' un errore di trascrizione,
+#          e NON esiste una "scelta giusta" fra i due numeri.
+#      >>> LA BASE E' [MISURATA ma INSTABILE]. Su questo non si costruisce
+#          un cancello di costo, e va scritto invece di essere aggirato.
+#
+#  LO STORICO COMPLETO DELLA SEDIA 970913, letto da me in
+#  data/statements/trades_auto.csv (8 gambe chiuse + quella di oggi):
+#    chiusura     lato   distanza     P/L     motivo
+#    2026.07.30   buy      755,70   +65,58   tp
+#    2026.08.03   buy        9,70    -0,84   sl
+#    2026.08.10   buy        0,00     0,00   sl  (stop gia' in pareggio)
+#    2026.08.17   buy       76,20    -6,58   sl
+#    2026.08.28   buy       27,10    -2,34   sl
+#    2026.09.04   buy      151,90   -13,07   sl
+#    2026.09.11   sell      12,80    -6,62   sl
+#    2026.09.15   sell     165,30   +16,75   tp
+#    2026.09.23   buy       39,40    +3,45   TP1 poi stop in pareggio
+#    netto +52,88 EUR su 8 gambe, +56,33 su 9.
+#  >>> E' CAMPIONE FORWARD, NON BACKTEST. NOVE GAMBE NON MISURANO NESSUN
+#      MERITO: quel +56,33 non dice niente sul valore del motore e non va
+#      citato come se lo facesse. La GEOMETRIA dello stop, invece, si legge
+#      a qualunque n (Emendamento B): una distanza e' un fatto accaduto.
+#  >>> E LE GAMBE UTILI SONO CINQUE, NON SEI: la gamba del 10/08 chiude a
+#      distanza 0,00 perche' lo stop era gia' stato portato in pareggio.
+#      Non porta nessuna informazione sullo stop INIZIALE, ed e' giusto che
+#      sia fuori dalle mediane qui sopra.
+#
+#  LE LETTURE DELLO STOP, tutte insieme:
+#    distanze in stop osservate: 9,70 . 12,80 . 27,10 . 76,20 . 151,90
+#    lettura pulita dal TP1 di oggi:                39,40
+#    mediana delle 5 in stop (valore d'archivio corrente):  27,10
+#    mediana includendo la lettura TP1 (6 valori):          33,25
+#  >>> IL RAPPORTO FRA LA GAMBA PIU' LARGA E LA PIU' STRETTA E' 15,7
+#      (151,90 / 9,70). Lo stop di questo motore NON e' un numero: e' una
+#      DISTRIBUZIONE larga piu' di un ordine di grandezza.
+#
+#  PERCHE' IL 39,40 E' LA LETTURA PIU' PULITA CHE ABBIAMO -- verificato sul
+#  codice, non dedotto: r.464-468,
+#      double risk = isLong ? (openP - sl) : (sl - openP);
+#      double tgt  = isLong ? openP + risk*InpTP1_R : openP - risk*InpTP1_R;
+#  Con InpTP1_R = 1,0 il bersaglio del parziale sta ESATTAMENTE a una
+#  distanza di stop dall'entrata. Quindi ogni gamba che TOCCA il TP1 rivela
+#  lo stop, e la rivela indipendentemente da dove sia poi avvenuta
+#  l'uscita. Gamba del 23/09: 30715,00 - 30675,60 = 39,40 idx.
+#  >>> MA ANCHE QUESTA E' UN LIMITE INFERIORE, e lo dico: "risk" e'
+#      calcolato sullo stop CORRENTE, e nello stesso ciclo gira il trailing
+#      sul Supertrend (r.487-491) che per un long puo' solo ALZARE lo stop,
+#      quindi solo RIDURRE "risk". Se fra le 14:00:00 e le 14:30:00 il
+#      trailing ha morso, lo stop INIZIALE era piu' largo di 39,40.
+#
+#  >>> NESSUNA DELLE LETTURE ARRIVA AL CANCELLO, ed e' il punto:
+#        27,10 -> 15,9x (BCM 1,70) . 17,7x (FTMO 1,53)
+#        33,25 -> 19,6x            . 21,7x
+#        39,40 -> 23,2x            . 25,8x
+#        51,65 -> 30,4x            . 33,8x
+#      Il buco di costo e' confermato da QUATTRO strade indipendenti, non
+#      da una scelta comoda. E' questo che giustifica il round.
+#
+#  SCELTA, MOTIVATA: il round NON sceglie una base. La tabella del costo e'
+#  compilata su TRE valori (27,07 / 39,37 / 51,62 di parte nuda) e il tetto
+#  di Claudio e' verificato sulla PIU' ALTA. La ragione e' aritmetica: il
+#  buffer aggiunge una COSTANTE NOTA, quindi l'INCREMENTO e' esatto e
+#  indipendente dalla base; e' solo il PUNTO DI PARTENZA a essere incerto.
+#  >>> Cioe': di questo round e' ESATTO cio' che misura (l'effetto di
+#      aggiungere +6,50 / +13,00 / +19,50 / +26,00 punti indice allo stop)
+#      ed e' INCERTO da dove parte. Sono due cose diverse e vanno dette
+#      separate.
+#
+#  >>> CONSEGUENZE STRUTTURALI DELLA DISPERSIONE, che valgono piu' della
+#      scelta della base:
+#      (a) il buffer TRASLA la distribuzione, non la fissa. Effetto
+#          collaterale BUONO e mai notato prima: comprime la dispersione
+#          RELATIVA. Con buffer 2603 (26,03 idx) la banda 9,70-151,90
+#          diventa 35,73-177,93, e il rapporto max/min scende da 15,7 a
+#          5,0. Uno stop piu' UNIFORME e' un rischio piu' prevedibile, che
+#          e' cio' che una prop vuole;
+#      (b) il cancello dei 40x si applica a una MEDIANA, ma il costo si
+#          paga OPERAZIONE PER OPERAZIONE. Anche alla cella 5 le gambe piu'
+#          strette restano sotto la frontiera. "La cella passa il 40x" vuol
+#          dire "la gamba mediana lo passa", MAI "tutte lo passano".
+#          Non l'ho trovato scritto da nessuna parte in casa: lo scrivo qui.
+#
+#  >>> RACCOMANDAZIONE A COSTO ZERO, e non richiede nessuna passata:
+#      poiche' OGNI TP1 raggiunto rivela lo stop iniziale, il modo piu'
+#      economico di misurare davvero lo stop di questo motore e' CONTARE I
+#      TP1 NEL FORWARD, non derivarlo da mediane su code selvagge.
+#      Quante gambe servono? Con un rapporto max/min di 15,7 la
+#      distribuzione e' molto asimmetrica; per una mediana che non si
+#      sposti piu' del 10% quando arriva una gamba nuova servono almeno
+#      ~20-25 letture (oggi ne abbiamo SEI, e la sesta ha spostato la
+#      mediana da 27,10 a 33,25, cioe' del 22,7%).
+#      >>> Il numero esatto di gambe per una data stabilita' e'
+#          [NON MISURATO]: dipende dalla forma della distribuzione, che con
+#          sei punti non e' stimabile. Il ~20-25 e' un ordine di grandezza
+#          dichiarato come tale, non un calcolo.
+#      Costo: ZERO macchina. Basta leggere trades_auto.csv ogni settimana.
+#
+# --------------------------------------------------------------------------
+#  6-ter. IL DIFETTO PIU' GRAVE CHE HO TROVATO OGGI -- e riguarda TUTTE le
+#         ancore di questo round, comprese quelle dei gemelli
+# --------------------------------------------------------------------------
+#  >>> LA SEDIA VIVA 970913 GIRA UNA GEOMETRIA CHE NON ESISTE NELL'ARCHIVIO.
+#  Verificato da me sul preset, non riferito:
+#    mql5/Presets/sedie_piccolo/recupero2/
+#    sedia_ABTG_SupRev_NAS_H1_Ottimizzato_970913.set
+#      InpMagic = 970913  (e' davvero questa sedia)
+#      InpStMult = 3.0 | InpStAtrPeriod = 10 | InpTP_RR = 3.0
+#      InpAllowLong = true | InpAllowShort = true  (DUE LATI accesi)
+#      InpSLLookback = 5 | InpSLBufferPips = 3.0 | InpTP1_R = 1.0
+#      InpTF = 16385 | InpUseTimeWindow = false
+#  E nello scan d'archivio NASUSD H1 i valori di InpStMult sono TRE:
+#      2,5 . 3,5 . 4,5      >>> IL 3,0 NON C'E'. Mai misurato.
+#
+#  >>> COSA VUOL DIRE, detto senza ammorbidirlo:
+#      (1) TUTTE le ancore scelte col metodo P1-P4 (StMult 3,5/AtrP 7 sul
+#          corto, 2,5/AtrP 12 sul lungo) descrivono una configurazione
+#          DIVERSA da quella che opera in campo;
+#      (2) la sedia viva gira a DUE LATI ACCESI, mentre R236a e R236b sono
+#          lati PURI;
+#      (3) e quindi LE TRE LETTURE DELLO STOP (27,10 / 33,25 / 39,40) sono
+#          misurate su StMult 3,0 / AtrP 10, NON sulla configurazione
+#          pinnata in questo file. La larghezza della banda Supertrend
+#          dipende da StMult x ATR(AtrP), e da lei dipende quale fra
+#          stLine ed ext vince il MathMin/MathMax.
+#      >>> QUINDI: la BASE della tabella del costo e' IMPORTATA da un'altra
+#          configurazione. L'INCREMENTO resta esatto (il buffer e' una
+#          costante), il PUNTO DI PARTENZA e' [NON MISURATO] per l'ancora
+#          di questo file.
+#
+#  >>> PERCHE' IL ROUND SI PUO' LEGGERE LO STESSO, e cosa risponde davvero:
+#      questo file risponde a "IL MOTORE, in una zona di parametri
+#      sostenuta dai dati, regge uno stop piu' largo?" -- NON a "la sedia
+#      970913 regge uno stop piu' largo?". Sono due domande diverse e la
+#      seconda NON e' risposta qui.
+#  >>> LA VIA PER LA SECONDA, dichiarata perche' qualcuno la prenda:
+#      un file gemello pinnato sul preset vivo (StMult 3.0, AtrP 10,
+#      TP_RR 3.0, due lati accesi) con lo stesso asse del buffer. NON l'ho
+#      scritto perche' cambierebbe DUE cose insieme rispetto a questo
+#      round (geometria E lato) e perche' per quella configurazione non
+#      esiste NESSUN riferimento d'archivio, quindi niente cancello
+#      crociato T2. Va deciso, non deciso di nascosto.
+#
+#  L'UNITA' DEL BUFFER, verificata e non assunta:
+#    PipSize() r.247-251:  return (d==3 || d==5) ? _Point*10.0 : _Point;
+#    Su NASUSD digits = 2 -- fonte INDIPENDENTE dalla catena dei file
+#    prova: CANCELLO_COSTO_FLOTTA r.295, tabella dell'InfoBroker
+#    (sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv, blocco [SIMBOLI]):
+#    "D30EUR - U30USD - NASUSD: Digits 2, Point 0,01, 1 punto indice = 100
+#     punti MT5".  >>> pip = _Point = 0,01 idx.
+#    Quindi il default "3 pip" = 0,03 idx: il buffer non e' inerte perche'
+#    la manopola non morda, ma perche' e' tarata in millesimi di punto.
+#
+#  L'ASSE:  InpSLBufferPips = 3 || 3 || 650 || 2603 || Y
+#           celle: 3, 653, 1303, 1953, 2603   ((2603-3)/650 + 1 = 5)
+#           incremento di stop: +0,00 / +6,50 / +13,00 / +19,50 / +26,00 idx
+#
+#  LA TABELLA DEL COSTO, SU TUTTE E TRE LE BASI (stop in punti indice):
+#
+#   cella | buf  | base 27,07        | base 39,37        | base 51,62
+#         |      | stop  xFTMO TP1/e | stop  xFTMO TP1/e | stop  xFTMO TP1/e
+#     1   |    3 | 27,10  17,7  0,42 | 39,40  25,8  0,61 | 51,65  33,8  0,79
+#     2   |  653 | 33,60  22,0  0,52 | 45,90  30,0  0,71 | 58,15  38,0  0,89
+#     3   | 1303 | 40,10  26,2  0,62 | 52,40  34,2  0,81 | 64,65  42,3  0,99
+#     4   | 1953 | 46,60  30,5  0,72 | 58,90  38,5  0,91 | 71,15  46,5  1,09
+#     5   | 2603 | 53,10  34,7  0,82 | 65,40  42,7  1,01 | 77,65  50,8  1,19
+#   (xFTMO = stop / 1,53 ; TP1/e = TP1 in multipli dell'escursione 65,00)
+#
+#  >>> COSA DICE QUESTA TABELLA, ed e' il risultato piu' onesto del round
+#      scritto PRIMA di correre:
+#      SE la base vera e' 51,62 -> le celle 3, 4, 5 passano il 40x FTMO.
+#      SE e' 39,37              -> passa solo la cella 5 (42,7x).
+#      SE e' 27,07              -> NON PASSA NESSUNA (massimo 34,7x).
+#      >>> Cioe': con questa dispersione, se il cancello del costo e'
+#          passato DIPENDE DA QUALE MISURA DELLO STOP E' QUELLA GIUSTA.
+#          Il round non lo puo' nascondere e non deve: il referto dovra'
+#          riportare la riga giusta guardando il DD e il lotto reali, non
+#          scegliendo la base che fa comodo.
+#  >>> E IL TETTO DI CLAUDIO REGGE SU TUTTE E TRE: 0,82x / 1,01x / 1,19x.
+#      Nessuna cella chiede al mercato piu' di 1,20 volte il suo movimento
+#      tipico. Era il difetto della v2 (1,46x) e qui non c'e'.
+#
+# --------------------------------------------------------------------------
+#  6-bis. LA RISOLUZIONE DEL BANCO -- si legge PRIMA del contro-esempio
+# --------------------------------------------------------------------------
+#  Con n piccolo il PF si muove A SCATTI. Se UNA sola operazione cambia
+#  esito, con w = PF/(PF+2,5) e TP_RR 2,5:
+#       n = 42  ->  il PF si muove di 0.141
+#       n = 62  ->  il PF si muove di 0.094
+#  L'effetto ATTESO (cella 1 -> cella 5, solo costo, base centrale, spread
+#  2,40) e' 1.176 -> 1.216, cioe' +0,04.
+#       vs risoluzione: 0.28x e 0.42x -> SOTTO su tutte e due le tranche.
+#
+#  >>> QUESTO ROUND E' UN TEST A UN LATO. NON PUO' CONFERMARE la tesi: un
+#      miglioramento di 0,04 e' meno di mezza operazione, indistinguibile
+#      dalla granularita'. PUO' FALSIFICARLA (sezione 8).
+#      >>> Se alla fine il PF sale di 0,04 e qualcuno scrive "il buffer
+#          migliora il motore", sta leggendo rumore: c'e' scritto QUI,
+#          prima della corsa, che quel numero non e' leggibile.
+#
+# --------------------------------------------------------------------------
+#  7. LE SOGLIE CONGELATE ORA, COL NUMERO ACCANTO
+# --------------------------------------------------------------------------
+#  (T1) NON C'E' UN CANCELLO DI INERZIA: il buffer e' additivo FUORI dal
+#       MathMax (r.388-389), non PUO' essere inerte. Se le 5 celle
+#       tornassero identiche sarebbe il PIN CHE NON E' ARRIVATO: si
+#       controlla la colonna InpSLBufferPips nel CSV (5 valori distinti).
+#       >>> La domanda di inerzia riguarda InpSLLookback: sta in R236c/d.
+#  (T2) CANCELLO CROCIATO. La cella 1 (buffer 3) E' la configurazione
+#       dell'ancora d'archivio su tutti i parametri tranne il banco.
+#       SOGLIA: PF(tick, cella 1) <= 1.2790 x 1,05.
+#       Il tick paga lo spread, l'OHLC no: il tick NON PUO' essere
+#       sensibilmente MIGLIORE dell'OHLC sullo stesso motore.
+#       >>> SI APPLICA A TUTTE E DUE LE TRANCHE, e basta che UNA superi la
+#           soglia per NON leggere il round. (Applicato alla sola tranche
+#           piu' bassa non potrebbe fallire: sarebbe un cancello finto.)
+#       >>> ONESTA': e' un cancello di DIREZIONE, non di uguaglianza.
+#           L'archivio e' OHLC su finestra piena, qui e' tick reale
+#           spezzato IS/OOS: una riproduzione esatta NON e' costruibile a
+#           costo zero, e lo dichiaro invece di fingere che lo sia.
+#  (T3) MONOTONIA DELL'n -- previsione strutturale, dal codice.
+#       r.394: minDist = MathMax(buf, STOPS_LEVEL * _Point); se
+#              risk < minDist l'ingresso e' SCARTATO (contatore cO_sl).
+#       Ma risk = (distanza dal piu' protettivo) + buf >= buf = minDist non
+#       appena buf domina STOPS_LEVEL. >>> Dalla cella 2 in poi il rifiuto
+#       "SL troppo vicino" deve ANDARE A ZERO.
+#       SOGLIA: n non decrescente lungo l'asse, tolleranza 2 operazioni.
+#       DIAGNOSTICA GRATIS: InpLogImbuto=true stampa cO_sl nel Giornale.
+#  (T4) IL CANCELLO DI MERITO NON ESISTE IN QUESTO ROUND: n < 150 su tutte
+#       le celle previste. Scritto qui perche' nessuno possa aggiungerlo
+#       dopo aver visto i numeri.
+#  (T5a) ANOMALIA (derivato d'archivio). DD di tranche > 7,0% -> rosso.
+#       >>> MARGINE VERO, dichiarato: il massimo DD gia' osservato su
+#           questo motore e questo simbolo e' 6,3206% (sottoinsieme a due
+#           lati accesi, ricontato da me). Quindi 7,0% e' 1,11x il gia'
+#           visto, NON 2x. Una stesura precedente scriveva "il doppio del
+#           massimo" guardando solo il proprio lato (3.5241): vero sul
+#           sottoinsieme, falso sul motore.
+#  (T5b) MURO PROP (assoluto). DD di tranche >= 5,0% -> meta' del muro
+#       totale FTMO, cella fragile. >= 10,0% -> cella INSCHIERABILE a
+#       rischio 1,0%, a prescindere dal PF. Serve perche' T5a e' tarato
+#       sull'archivio, e l'archivio non sa niente del muro della challenge.
+#  (T6) CANCELLO DEL LOTTO -- nasce dal buco B7.
+#       SOGLIA: se il DD della cella 5 NON e' entro +/- 30% di quello della
+#       cella 1, si sospetta il pavimento del lotto minimo (r.412) e i DD
+#       del round si dichiarano ILLEGGIBILI finche' non si e' verificato il
+#       contract size. A rischio fisso 1% il DD dovrebbe essere PIATTO
+#       lungo l'asse: e' la previsione, e questo e' il suo cancello.
+#
+# --------------------------------------------------------------------------
+#  8. IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA
+# --------------------------------------------------------------------------
+#  TESI: "il motore regge uno stop portato alla frontiera del costo."
+#  ALTERNATIVA, col meccanismo nel codice: "lo stop stretto E' il motore".
+#    r.396: tp = entry +/- risk * InpTP_RR -- il bersaglio e' ANCORATO al
+#    rischio. Dalla cella 1 alla 5 lo stop si moltiplica per 1,66 (base
+#    centrale), e con lui la distanza del bersaglio: da 98,5 a 163,5 punti.
+#    Un rimbalzo sul Supertrend si esaurisce, e il trailing (acceso) chiude
+#    prima. Il win rate CALA.
+#
+#  >>> I DUE NUMERI, E HANNO SEGNO OPPOSTO:
+#    TESI        -> PF CRESCENTE: 1.176 -> 1.216. Ma SOTTO la risoluzione:
+#                   NON confermabile.
+#    ALTERNATIVA -> PF DECRESCENTE, e sotto 1.
+#  >>> QUANTO GRANDE DEVE ESSERE IL CALO PER ESSERE VISIBILE -- calcolato:
+#        tranche IS  (n=42, risoluzione 0.141): calo di 3.6 punti di win rate
+#        tranche OOS (n=62, risoluzione 0.094): calo di 2.6 punti
+#      La FALSIFICAZIONE e' alla portata del banco, la CONFERMA no. Il
+#      round e' asimmetrico PER COSTRUZIONE.
+#
+#  >>> IL MODO DI MORIRE, E L'ABBIAMO VISTO OGGI -- non e' un'ipotesi, e'
+#      una gamba vera del 23/09/2026 (conto BCM in EUR, NON la challenge):
+#        14:00:00  buy  0.20 @ 30675,60   "STREV NAS H1 L 1/3"
+#        14:30:00  sell 0.10 @ 30715,00   +3,45 EUR   <- parziale TP1
+#        14:30:36  sell 0.10 @ 30675,60    0,00 EUR   <- stop a PAREGGIO
+#      Il parziale scatta, il breakeven si arma, e 36 secondi dopo la gamba
+#      muore in pari. >>> NON e' una perdita: e' un GUADAGNO AMPUTATO, e in
+#      questo motore e' il modo di morire TIPICO, perche' InpBreakeven e'
+#      acceso dentro lo stesso blocco del parziale (r.481).
+#      >>> E QUI STA IL COSTO NASCOSTO DELL'ASSE, che va messo nel
+#          contro-esempio: allargare lo stop SPOSTA ANCHE IL PARZIALE,
+#          perche' TP1 = 1R. Su questa gamba il prezzo ha raggiunto
+#          30715,00 (= entrata + 39,40). Alla cella 5 il parziale starebbe
+#          a entrata + 65,40 = 30741,00: NON SAREBBE SCATTATO, il
+#          breakeven non si sarebbe armato, e i +3,45 EUR non ci sarebbero.
+#          Cosa sarebbe successo dopo non lo so da una gamba sola -- la
+#          posizione sarebbe rimasta in corsa col suo stop originale -- ma
+#          i +3,45 sono certi e sarebbero spariti.
+#      >>> QUINDI L'ASSE NON E' GRATIS, e la tesi va letta al netto di
+#          questo: si compra costo (piu' x sullo spread) e si vende
+#          frequenza dei parziali. E' esattamente cio' che il round misura.
+#  >>> E LA RIGA CHE NON SI PUO' OMETTERE: IL CAMPIONE FORWARD DI QUESTO
+#      MOTORE SUL NASDAQ E' MINUSCOLO. Una gamba non e' una misura di
+#      merito: e' una misura di GEOMETRIA (la distanza dello stop, che a
+#      qualunque n e' un fatto). Il +3,45 EUR non conferma NIENTE sul
+#      valore del motore, e non va citato come se lo facesse.
+#      Taratura di quella gamba, per chi rilegge: 3,45 EUR / (0,10 lotti x
+#      39,40 punti) = 0,8756 EUR per punto per lotto.
+#      >>> Il saldo del conto NON e' deducibile senza ambiguita', e lo
+#          dichiaro: se 0,20 e' la frazione 1/3 (come dice il commento
+#          "L 1/3"), il lotto intero era 0,60, il rischio 20,70 EUR e il
+#          saldo a 1,00% circa 2.070 EUR; se 0,20 fosse tutta la posizione
+#          (pavimento del lotto minimo), il rischio era 6,90 EUR e il saldo
+#          circa 690. Non si puo' scegliere fra le due da questi dati.
+#          In tutti e due i casi NON e' la challenge FTMO, che opera su
+#          US100.cash e non su NASUSD.
+#
+#  L'ESITO PIU' INTERESSANTE, che non e' ne' l'uno ne' l'altro: PF PIATTO
+#  lungo tutto l'asse -- il motore INDIFFERENTE alla scala dello stop, col
+#  guadagno di costo che compensa la perdita di parziali. Sarebbe la
+#  risposta MIGLIORE (si prende la cella che passa il cancello senza pagare
+#  nulla), ma somiglia anche al rumore su n=42. >>> Per distinguerle serve
+#  il WIN RATE, non il PF: se il win rate CALA e il PF resta piatto, la
+#  compensazione e' REALE; se non cala nessuno dei due, il banco non sta
+#  misurando. Va guardato il win rate.
+#
+# --------------------------------------------------------------------------
+#  9. L'ADDITIVITA' DI n FRA I DUE LATI -- diagnosi (classe 641)
+# --------------------------------------------------------------------------
+#  Se il lato e' un FILTRO PURO: n(corto) + n(lungo) = n(due lati accesi).
+#  VERIFICATO SULL'ARCHIVIO, a costo zero, sulle sole due terne presenti in
+#  tutte e tre le varianti:
+#    StMult 2,5 - AtrP 7 - TP 1,5 :  73 + 125 = 198  contro  197   (+1)
+#    StMult 3,5 - AtrP 7 - TP 2,0 :  61 +  87 = 148  contro  148   (+0)
+#  >>> TIENE, al livello della singola operazione.
+#  >>> MA NON E' UN CANCELLO DI QUESTO ROUND: R236a e R236b hanno ANCORE
+#      DIVERSE (StMult 3,5/AtrP 7 contro 2,5/AtrP 12), perche' i due lati
+#      hanno altopiani in posti diversi. La somma dei loro n NON e'
+#      confrontabile con nessuna corsa a due lati. Resta diagnosi
+#      sull'ARCHIVIO. Se si rompesse: i due lati INTERFERISCONO, e sarebbe
+#      una scoperta sul motore, non un errore di conto.
+#
+# --------------------------------------------------------------------------
+# 10. I BUCHI DICHIARATI, PER NOME
+# --------------------------------------------------------------------------
+#  (B1) RISCALDAMENTO (classe 653). Il vincolo non e' l'ATR del Supertrend
+#       ma la CONFLUENZA, accesa, che chiede una EMA a 200 periodi. NASUSD
+#       opera circa 23 barre H1 al giorno -- W = 1380 minuti, e W VA CITATO
+#       COL SUO TAG (M4): CANCELLO_COSTO_FLOTTA r.970 dice che "W(U30USD) =
+#       W(NASUSD) = 1380 resta [INFERITO] ... E' un argomento, non una
+#       misura".
+#         200 barre =  8,7 gg operativi = ~12 gg calendario =  4,7% dell'IS
+#         600 barre = 26,1 gg operativi = ~37 gg calendario = 14,2% dell'IS
+#       NON scorporato: @DAQUANDO resta al pavimento tick misurato. SCELTA
+#       dichiarata, non svista.
+#  (B2) LA FINESTRA DELLO SCAN D'ARCHIVIO NON E' NEL CSV (nessuna colonna
+#       data). Assunta ~21 mesi per analogia con prove/R120a_NASUSD.
+#       [NON VERIFICATA].
+#  (B3) L'MFE DI QUESTO MOTORE E' [NON MISURATO] -- vedi 5-bis.
+#  (B4) L'ATR DI NASUSD NON E' MAI STATO MISURATO, SU NESSUN TF (ATR(14) H1
+#       = 80,2 e' [INFERITO]). Qui non serve, ma chi volesse convertire lo
+#       stop in ATR non ha il numero.
+#  (B5) LO SPREAD FTMO POGGIA SU n=1 TICK, e sul Dow lo stesso confronto va
+#       dalla parte opposta (+38%). Vedi sezione 5. Si chiude con una sonda
+#       di spread sul terminale FTMO 541452707 (C:\FTMO), sola lettura.
+#  (B6) UN SOLO REGIME. 21 mesi di Nasdaq in larga parte rialzisti. Il
+#       CORTO e' il lato che soffre, il LUNGO quello favorito: un PF basso
+#       sul corto non e' una condanna, un PF alto sul lungo non e' una
+#       promozione (Emendamento B). La prova di regime NON e' qui.
+#  (B7) IL LOTTO MINIMO A STOP LARGO -- puo' rendere ILLEGGIBILE il round,
+#       quindi e' il buco piu' pericoloso. Dalla cella 1 alla 5 lo stop si
+#       moltiplica per 1,66 (base centrale), quindi il lotto si DIVIDE per
+#       1,66. Se finisse sotto SYMBOL_VOLUME_MIN, r.412 lo rialza al minimo
+#       e IL RISCHIO VERO SALE sopra l'1% dichiarato: la cella 5
+#       misurerebbe un rischio diverso dalla cella 1 e tutti i DD
+#       diventerebbero incomparabili.
+#       >>> IL NUMERO CHE SERVIREBBE, e non ce l'ho: il CONTRACT SIZE /
+#           valore del punto di NASUSD sul banco [NON MISURATO]. Si legge
+#           dall'InfoBroker a costo zero. Con quello si calcola il lotto
+#           alla cella 5 (= 1000 EUR / (65,40 x valore_punto)) e lo si
+#           confronta con SYMBOL_VOLUME_MIN.
+#       >>> INDIZIO UTILE dalla gamba di oggi: 0,8756 EUR per punto per
+#           lotto su un conto in EUR. Se valesse anche sul banco, alla
+#           cella 5 con deposito 100000 e rischio 1% il lotto sarebbe
+#           1000 / (65,40 x 0,8756) = 17,5 lotti, cioe' MOLTO sopra
+#           qualunque minimo: il buco non morderebbe. Ma e' un conto su un
+#           cambio EUR/USD implicito di quella gamba, non una misura del
+#           banco: resta [NON MISURATO], e T6 e' la spia.
+#  (B8) NON HO GUARDATO FUORI CASA: nessun .set pubblico, nessun sorgente
+#       di terzi. La banda del buffer viene dal conto di casa, non da
+#       valori di riferimento esterni.
+#
+# --------------------------------------------------------------------------
+# 11. IL COSTO IN TEMPO MACCHINA
+# --------------------------------------------------------------------------
+#  5 celle x 2 tranche = 10 passate su questo file. Col gemello R236a: 20
+#  passate a TICK REALI. Piu' R236c/d (20 passate OHLC) e R236e/f (8
+#  passate OHLC). [NON MISURATO] il minutaggio per passata di questo
+#  motore a tick reali su H1.
+#
+# --------------------------------------------------------------------------
+# 12. VINCOLI DI BANCO -- e quello che il file NON puo' imporre
+# --------------------------------------------------------------------------
+#  MODELLO: TICK REALI (Modello 4). NON passabile dal file: e' il parametro
+#  -Modello della riga di lancio (walkforward_generico.ps1 r.190, default
+#  4; "1 = OHLC M1: SOLO screening, mai verdetti").
+#
+#  >>> DEPOSITO 100000 -- CLASSE 646, E IL FILE NON PUO' IMPORLO.
+#      Non esiste direttiva @DEPOSITO: e' il parametro -Deposito (r.200,
+#      default 10000, commento testuale "100000 = taglia prop: serve dove
+#      il lotto minimo schiaccia il rischio"). La riga di lancio DEVE
+#      portare -Deposito 100000. Su QUESTO round non e' formalismo:
+#      l'asse ALLARGA LO STOP e quindi RIMPICCIOLISCE IL LOTTO -- e' il
+#      caso del buco B7. Il commento del codice r.549-550 ricorda che su
+#      225JPY "a deposito 100k profitti identici al 10k, DD 0,01%": il
+#      dimensionamento di questo EA e' GIA' STATO falsato dal deposito.
+#
+#  @FRAZIONEIS 0.40 scritta QUI DENTRO (classe 647): senza la riga
+#  esplicita il driver applica il default in silenzio (classe 393).
+#  Taglio: IS 2024.09.26 -> circa 2025.06.10 (257 gg); OOS -> 2026.06.30.
+#  @DAQUANDO 2024.09.26 = pavimento dei tick reali MISURATO (classe 590).
+#  @FINOA 2026.06.30 = bordo d'archivio della flotta.
+#  @PERIODO H1, MOTIVATO: a H4 questo simbolo fa n fra 5 e 14 (archivio,
+#  ricontato) ed e' crollato a PF 0,68 a tick reali; sotto H1 il costo
+#  peggiora. InpTF e' un ENUM: pinnato esplicito H1 = 16385 e MAI ad asse
+#  (classe 287).
+#  UN SOLO ASSE: InpSLBufferPips, double, il passo CONTA.
+#  NIENTE griglia larga (regola del 19/08): StMult, StAtrPeriod, TP_RR e
+#  InpSLLookback restano PINNATI.
+#  MAGIC 764221 -- riverificato vergine il 23/09/2026: zero occorrenze in
+#  tutto il repository (esclusi .git e .claude). Gemelli 764221-764225,
+#  tutti verificati vergini.
+#  NON PINNO InpNewsCurrencies: il suo valore e' la stringa VUOTA, e un pin
+#  vuoto MT5 lo IGNORA usando il default compilato -- e' il difetto per cui
+#  esiste controlla_prova.py. Con InpUseNewsFilter=false e' inerte comunque.
+#  Stesso motivo per InpNewsFile, lasciato al default.
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- il lato
+InpAllowLong=true
+InpAllowShort=false
+
+# --- timeframe operativo (ENUM, pinnato esplicito: H1 = 16385)
+InpTF=16385
+
+# --- ancora (regola P1-P4, sezione 4)
+InpStMult=2.5
+InpStAtrPeriod=12
+InpTP_RR=2.5
+
+# --- lo swing resta al default: e' l'asse di R236c/d, non di qui
+InpSLLookback=5
+
+# --- pattern del rimbalzo (valori dell'archivio, verificati nel CSV)
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+
+# --- confluenza tecnica (accesa in archivio: e' lei che detta B1)
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+# --- target e uscita. ATTENZIONE: InpTP1_R=1.0 lega il PARZIALE allo
+# --- stop, quindi l'asse sposta anche TP1 (sezione 8, modo di morire).
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+
+# --- ingresso frazionato
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- rischio (fisso: e' cio' che rende il lotto l'inverso dello stop)
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+# --- filtro orario: SPENTO, come in tutte e 118 le righe d'archivio.
+# --- Il suo costo in operazioni e' l'oggetto di R236e/R236f.
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+
+# --- filtro notizie: spento
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+# --- generali
+InpComment=STREV_R236b
+InpFridayClose=false
+InpFridayCloseHour=20
+InpUsaGuardian=false
+InpMagic=764221
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+
+# --- L'ASSE, unico: il buffer dello stop, additivo FUORI dal MathMax.
+# --- 5 celle: 3, 653, 1303, 1953, 2603 pip = +0,00 / +6,50 / +13,00 /
+# --- +19,50 / +26,00 punti indice sopra la base misurata.
+InpSLBufferPips=3||3||650||2603||Y
+# ==========================================================================
