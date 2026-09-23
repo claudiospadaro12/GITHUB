@@ -249,13 +249,20 @@
 #              altrimenti starei facendo l'errore speculare a quello
 #              che questa quinta lettura mi contesta. I p25 qui sopra
 #              vengono dalla distribuzione dei range costruita con la
-#              convenzione TRONCATA (min-per-data), la stessa che il
+#              convenzione TRONCATA, quella della catena vecchia
+#              (ROUND_ORB_ATR_PS5 r.230-235: ancore 314,5 e 313,8 --
+#              su U30USD coincide col min-per-data, su NASUSD NO: il
+#              min-per-data vero e' 300,4, vedi
+#              ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md r.100). E' la
+#              stessa catena che il
 #              17/09 e' stata misurata sbagliata del 18%. Sotto la
 #              convenzione MAX-PER-DATA -- quella che uso nella riga di
 #              testa di questa tabella -- i p25 sono piu' alti e stanno
 #              in CANCELLO_COSTO_FLOTTA_2026-09-10.md r.940-941:
 #                NASUSD p25 255,5 -> stop 73,8 -> 43,4x   PASSA 40x
-#                U30USD p25 277,2 -> stop 80,0 -> 42,1x   PASSA 40x
+#                U30USD p25 277,2 -> stop 80,0 -> 42,1x ALLA MEDIANA
+#              DELL'ORA 20 (da non confondere col 42,1x della colonna
+#              med24 qui sopra: numeri uguali, grandezze diverse)   PASSA 40x
 #              >>> Quindi il quartile quieto sfonda il 40x SOLO se si
 #                  adotta anche l'ancora troncata: identica struttura
 #                  del caso med24 qui sopra, due cose false insieme.
@@ -461,11 +468,11 @@
 #            lettura del meccanismo B2 (il gap dentro r1) a essere
 #            sbagliata, e va riscritta.
 #    >>> PERCHE' QUESTO E' UN CONTRO-ESEMPIO E NON UN'ALTRA CONFERMA:
-#        perche' il round puo' uscire in tutti e due i modi, i due modi
+#        perche' il round puo' uscire in QUATTRO modi dichiarati, che
 #        portano a conclusioni OPPOSTE, e sono scritti qui PRIMA. Se
 #        avessi solo scritto "mi aspetto che il long vada meglio",
 #        qualunque numero me lo avrebbe confermato.
-#    >>> E UN TERZO ESITO FALSIFICA IL FILE INTERO: se n(long)+n(short)
+#    >>> E UN ESITO FUORI DAI QUATTRO RAMI FALSIFICA IL FILE INTERO: se n(long)+n(short)
 #        non fa n(L+S), nessuna delle due letture vale e il round e'
 #        una misura del banco, non del motore.
 #
@@ -509,10 +516,26 @@
 #        puro) = n(L+S), in tutte e due le gambe. Prevista dal codice,
 #        quindi verificabile e rompibile. Sub-additivo: si indaga.
 #        Super-additivo: il round e' nullo.
-#    T2  COSTO. Frontiera stop >= 40 x spread. Su questo simbolo la
-#        tabella sopra dice PASSA in tutti e quattro gli angoli
-#        (peggiore 45.4x). Se per qualunque ragione una cella uscisse
-#        sotto 40x, non potrebbe essere promossa qualunque PF faccia.
+#    T2  COSTO. Frontiera stop >= 40 x spread. CINQUE letture, non
+#        quattro, e le riporto TUTTE qui perche' questo e' il posto che
+#        un referto rilegge come soglia:
+#          - quattro sul LIVELLO (due ancore x mediana e p95 dell'ora
+#            20): PASSA, la peggiore 45,4x (+13%);
+#          - una sulla DISTRIBUZIONE (giornata al p25 del range):
+#            42,1x con la coda della convenzione di testa, ma 26,1x con
+#            la coda della catena vecchia -- SFONDA il 40x. ALMENO IL
+#            25% delle giornate [DERIVATO dal p25].
+#        >>> LA LETTURA SEVERA E' VINCOLANTE, e QUI DENTRO, non solo
+#            nella tabella: nessuna misura decide quale convenzione
+#            descriva il QUARTILE BASSO (il residuo -1% e' validato
+#            sulla MEDIANA a H1, non sulla coda quieta), quindi governa
+#            quella che puo' farmi male.
+#        >>> T2 = PASSA. Il pavimento DURO 13,3x non e' in discussione.
+#        >>> CONDIZIONE DI LETTURA, che viaggia col numero: qualunque
+#            cella positiva di questo round va riletta sapendo che
+#            almeno un quarto delle sue operazioni e' stato fatto sotto
+#            il pavimento di lavoro. Se una cella uscisse sotto 40x, non
+#            potrebbe essere promossa qualunque PF faccia.
 #    T3  RISCHIO, e si legge a QUALUNQUE n (Emendamento B del 16/08).
 #        DD <= 10,00% a InpRiskPercent 1,0. Peggior Giornata: allarme a
 #        -3,00%. Sopra soglia: si scrive nel referto e la taglia si

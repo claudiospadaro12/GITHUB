@@ -33185,10 +33185,18 @@ derivati dalla stessa legge ma da due ancore diverse, messi in colonna). Ho cita
 
 ---
 
-## 🎭🚪 CLASSE 657 — **UNA CONDIZIONE DICHIARATA «VINCOLANTE» NELLA PROSA NON ENTRA NEL CANCELLO CONGELATO, E IL CANCELLO CONTINUA A ENUMERARE UN INSIEME CHE LA PROSA HA GIA' SUPERATO: la prudenza esiste solo nel paragrafo che nessuno rileggera'** (controllo-preventivo, 23/09/2026 sera, su `R235a/b/c/d` dopo le correzioni — figlia della **656**)
+## 🎭🚪 CLASSE 661 — **UNA CONDIZIONE DICHIARATA «VINCOLANTE» NELLA PROSA NON ENTRA NEL CANCELLO CONGELATO, E IL CANCELLO CONTINUA A ENUMERARE UN INSIEME CHE LA PROSA HA GIA' SUPERATO: la prudenza esiste solo nel paragrafo che nessuno rileggera'** (controllo-preventivo, 23/09/2026 sera, su `R235a/b/c/d` dopo le correzioni — figlia della **656**)
 
 **Numero grepato al momento di scrivere**: `grep -rn "CLASSE 657" . --exclude-dir=.git
 --exclude-dir=.claude` -> **0 occorrenze**.
+
+> ✏️ **RINUMERATA DA 657 A 661 IL 23/09/2026 DAL COORDINATORE, e il perche' e' un difetto
+> nuovo (classe 662).** Il grep qui sopra era **vero**, e lo era anche quello dell'altro
+> agente: due cancelli giravano **in parallelo** su round diversi (R235 e R236), hanno
+> grepato `CLASSE 657` nello stesso momento, hanno trovato **0 entrambi** e hanno preso
+> **lo stesso numero**. Il blocco dell'altro (657, 658, 659, 660) e' contiguo e resta:
+> rinumerare questo costa **una** modifica invece di quattro. La classe **non cambia di
+> una virgola**, cambia solo l'etichetta.
 
 ### Il caso reale
 Il file, corretto, fa una cosa **giusta e difficile**: aggiunge una **quinta lettura** del
@@ -33463,3 +33471,50 @@ raggiungibile l'obiettivo**.
 >    resuscitare il numero che qualcuno aveva gia' bocciato — e capita **sempre** quando il
 >    numero resuscitato e' quello che conviene. Se serve davvero una banda, si prende la
 >    **dispersione dichiarata sulla stessa riga** (qui: `min 9,7 · max 151,9`).
+
+---
+
+## 🔢👥 CLASSE 662 — **DUE AGENTI IN PARALLELO GREPANO LO STESSO NUMERO DI CLASSE, LO TROVANO LIBERO TUTTI E DUE E LO PRENDONO TUTTI E DUE: la regola del «numero grepato al momento di scrivere» non protegge dalla CONCORRENZA** (coordinatore, 23/09/2026, su `CHECKLIST_RIGA_DI_LANCIO.md`)
+
+**Numeri grepati al momento di scrivere**: ultima classe nel file = **660**; `grep -rn "CLASSE 662" . --exclude-dir=.git --exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il fatto
+Il 23/09 due agenti `controllo-preventivo` giravano **in parallelo** su due round diversi
+(R235 e R236). Tutti e due hanno applicato correttamente la **classe 194** (*il numero si
+grepa al momento di scrivere, non si deduce*). Tutti e due hanno grepato `CLASSE 657`.
+Tutti e due hanno trovato **0 occorrenze** — perche' nessuno dei due aveva ancora scritto.
+Tutti e due hanno preso il **657**, per due difetti **completamente diversi**:
+- 657-A (da R235): *una condizione dichiarata «vincolante» nella prosa non entra nel
+  cancello congelato*;
+- 657-B (da R236): *il bordo dell'altopiano dichiarato con celle di un altro sottoinsieme
+  della griglia*.
+
+🔴 **Nessuno dei due ha sbagliato.** La regola 194 e' scritta per un mondo **sequenziale**,
+e il progetto lavora **in parallelo** per mandato esplicito (*"gli agenti si lanciano in
+parallelo"*). Un grep e' una **lettura**, e fra la lettura e la scrittura c'e' una finestra
+in cui un altro puo' scrivere: e' una **race condition**, non una disattenzione.
+
+### Perche' costa
+Due classi con lo stesso numero rompono **l'unica cosa che rende utile la checklist**: poter
+dire *"classe 657"* e sapere di cosa si parla. Un referto che cita la 657 diventa **ambiguo
+per sempre**, e l'ambiguita' non si accorge di se stessa — il file resta sintatticamente
+perfetto.
+
+### La regola
+1. 🔢 **Chi assegna il numero e' il COORDINATORE, non l'agente.** L'agente descrive il
+   difetto e lascia il numero **da assegnare**; il numero lo mette chi committa, che vede
+   l'HEAD vero.
+2. 🩹 **Se due numeri collidono lo stesso, si rinumera il blocco PIU' CORTO** (qui: uno
+   contro quattro contigui), **mai** si fondono due classi diverse sotto un numero solo, e
+   **mai** si lascia la collisione "tanto si capisce dal titolo".
+3. ✏️ **La rinumerazione si DICHIARA dentro la classe**, col grep originale lasciato
+   visibile: chi la rilegge deve poter vedere che il grep era **vero** e che il difetto e'
+   stato la concorrenza, non la sciatteria. Altrimenti fra sei mesi sembra un errore di
+   qualcuno.
+4. 🧾 **E i referti gia' consegnati che citano il numero vecchio non si riscrivono**: si
+   annota la rinumerazione qui, una volta, e si tira dritto.
+
+### Il caso reale
+`CLASSE 661` (ex 657-A) porta la nota di rinumerazione; il blocco `657-660` di R236 e'
+rimasto com'era. Costo della collisione: **una modifica invece di quattro**, piu' questa
+classe.
