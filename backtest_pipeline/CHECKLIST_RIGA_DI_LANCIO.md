@@ -31274,3 +31274,106 @@ E la vecchia corsa EURCHF, che era `-Modello 4`, buttava via **83 giorni di tick
    operazioni si legge identico a "non ha edge"**. Su EURCHF e USDCHF le M1 **non sono mai
    state scaricate** (sonda 17/08: stato `da scaricare (parziale)`, solo 55.685 / 57.535
    barre H1).
+
+---
+
+## 🔢 CLASSE 613 — **IL CANCELLO E IL DRIVER NON CONTANO LE CELLE ALLO STESSO MODO** (23/09/2026, R221)
+
+**Il caso reale.** Scrivendo `R221a_tprr_ema200_2lati_GBPUSD.txt` l'asse era
+`InpOrder1Atr=0.25||0.15||0.05||0.30||Y` — quattro celle volute (0.15 / 0.20 / 0.25 / 0.30).
+`controlla_prova.py` ha stampato **`celle= 3`**. Il disegno era giusto: è il **cancello** a
+contare male.
+
+**La misura, riga per riga:**
+
+| chi | formula | file | risultato con 0.15 → 0.30 passo 0.05 |
+|---|---|---|---|
+| **driver** | `Floor( \|stop-start\| / \|step\| + 1e-9 ) + 1` | `walkforward_generico.ps1` r.805 | **4** ✅ |
+| **cancello** | `int( \|stop-start\| / step ) + 1` — **senza epsilon** | `controlla_prova.py` r.203 | **3** 🔴 |
+
+La divisione in virgola mobile vale `2.9999999999999996`, perché `0.05` in binario è
+leggermente **sopra** 0.05. L'epsilon `1e-9` del driver la recupera, il cancello no.
+
+🔴 **Perché fa male davvero:** lo stesso file prova vale **4 celle o 3** a seconda di chi lo
+conta. Se l'attesa dichiarata dal round è «4 celle e 8 passate per file» e il cancello ne
+stampa 3, chi legge conclude **«il disegno è sbagliato»** e ridisegna un round che stava
+benissimo. Nel caso opposto — un file che dichiara 3 e ne gira 4 — si pagano **passate non
+preventivate** e la cella in più non ha un'attesa scritta.
+
+### ✅ La regola
+1. 🧮 **Su un asse a passo DECIMALE il numero stampato da `controlla_prova.py` non è un
+   fatto: va riconciliato col driver.** Il conto che decide è quello di
+   `walkforward_generico.ps1` r.805, perché è quello che genera le passate.
+2. 🩹 **L'idioma di casa, e c'è già: si scrive il fondo corsa APPENA OLTRE.**
+   `0.31` invece di `0.30`, `0.51` invece di `0.5`. La divisione smette di essere lossy
+   (3.2 e 3.1), **i due conteggi tornano uguali a 4**, e MT5 enumera esattamente gli stessi
+   valori — perché il primo valore escluso (0.35, 0.6) è comunque oltre il fondo.
+   👉 **Precedente a HEAD, sei file:** `R169a`…`R169f` scrivono
+   `InpSLBufferATR=...||0.0||0.05||0.31||Y` per ottenere 7 celle da 0.00 a 0.30.
+3. 🚫 **Non è «aggiustare il conto».** La corsa non cambia di una passata: cambia solo che il
+   numero stampato è quello vero. Aggiustare il conto sarebbe allargare l'asse.
+4. 🔧 **La riparazione vera** è aggiungere `+ 1e-9` dentro `int()` a `controlla_prova.py`
+   r.203, così i due contatori usano la stessa aritmetica. **NON fatta il 23/09**: toccare il
+   cancello mentre ci si passa dentro è la mossa sbagliata, e la classe qui serve a non
+   perdere il difetto.
+
+---
+
+## 🫥 CLASSE 614 — **UN INPUT NON DICHIARATO IN `[TesterInputs]` PUÒ ESSERE OTTIMIZZATO LO STESSO** (23/09/2026, R221)
+
+**Il caso reale, ed è grosso.** `backtest_pipeline/valida_realtick.ps1`, ramo
+`if($EA -eq "ABTG_EMA200")`, dichiara in `[TesterInputs]` **cinque** righe soltanto:
+`InpTF`, `InpRiskPercent`, `InpAllowLong`, `InpAllowShort`, `InpTP_RR`.
+🔴 **`InpOrder1Atr` e `InpOrder2Atr` NON ci sono.** Eppure nei CSV che quella corsa ha
+prodotto (`risultati_archivio/EMA200/realtick_H4/valid_*.csv`) `InpOrder1Atr` prende **sei**
+valori (0.05→0.30) e `InpOrder2Atr` ne prende **cinque** (0.2→0.6).
+
+**La prova che non è il default che scorre:** il default compilato di `InpOrder2Atr` è
+**0.35** (`ABTG_EMA200.mq5` r.69) e **0.35 non compare mai** fra i cinque valori osservati.
+
+👉 **Lettura:** quelle due griglie vengono dallo **stato persistente del tester di MT5**
+(l'ultimo set salvato per quell'expert), non dallo script. La corsa d'archivio ha
+**ottimizzato due assi che il suo stesso script non dichiara** — e per mesi il numero
+«24 celle su 24 con PF ≥ 1,10» è stato letto come se la griglia fosse quella scritta nel
+codice.
+
+### ✅ La regola
+1. 🔒 **Ogni input che entra in una cella si dichiara in `[TesterInputs]` col quinto campo
+   `||N` esplicito.** Il quinto campo **spegne il flag di ottimizzazione**: è l'unica cosa
+   che neutralizza lo stato salvato. Un input semplicemente *omesso* **non è pinnato**.
+2. 🧾 **Una griglia che non sta in nessuno script è `[INFERITA DAI VALORI OSSERVATI]`**, mai
+   «la griglia del round». In R221 la griglia 0.05–0.30 / 0.2–0.6 è dichiarata così, perché
+   **nessun file in repo la contiene**.
+3. 🔎 **Il controllo che costa un minuto:** contare i valori distinti di ogni colonna `Inp*`
+   del CSV e confrontarli con le righe `||Y` dello script che l'ha generato. Se una colonna
+   varia e non ha una riga `||Y`, hai trovato un asse fantasma.
+
+---
+
+## 🏔️ CLASSE 615 — **«CENTRO DELL'ALTOPIANO» DICHIARATO SENZA ORDINARE LE CELLE** (23/09/2026, R221)
+
+**Il caso reale.** `backtest_pipeline/prove/R139b_EMA200_GBPUSD_H4_LS.txt` scrive, testuale:
+*«Il CENTRO dell'altopiano — NON il picco — è O1=0,25 / O2=0,40»*, e cita la regola di casa
+accanto al numero. **Verificato ordinando le 24 celle a due lati per Profit Factor: quella
+cella (RR=3.0, PF 1.32826) è la SECONDA SU 24.** Non è il centro: è il secondo valore più
+alto. Stesso schema su `R139a` (AUDJPY): la cella pinnata è la **nona su 28**, sopra la
+mediana.
+
+🔴 **Perché conta:** R139b ha quindi misurato il **caso più favorevole**, non il caso
+mediano — e il risultato è stato brutto lo stesso (IS PF 0.803-0.838, in perdita). Ma se
+fosse uscito bello, sarebbe stato letto come «il centro regge» mentre era «il picco regge».
+
+### ✅ La regola
+1. 📐 **«Centro dell'altopiano» è un CALCOLO, non un'impressione.** Si ordinano le celle per
+   la grandezza scelta, si prende la **mediana**, e si scrive **il rango** accanto:
+   *«mediana, 15ª su 29»*. Senza il rango, la frase non è verificabile.
+2. ⚖️ **Con n PARI le centrali sono DUE e serve una regola di parità DICHIARATA PRIMA.**
+   In R221 è: **si prende la centrale più BASSA** — scelta conservativa, e verificabile
+   perché riproduce verbatim le ancore già pubblicate in
+   `report/CHI_ALTRO_PUO_SCHIERARSI_2026-09-22.md` §2.3 (GBPUSD PF 1,231 / DD 7,205 / n 362;
+   AUDJPY PF 1,514 / DD 6,261 / n 265). Senza la regola, due persone ottengono due celle
+   diverse dallo stesso CSV.
+3. 🎯 **E l'asse si sceglie con una regola dichiarata prima degli esiti.** In R221:
+   *«asse = quello su cui il valore della mediana è INTERNO alla griglia d'archivio»*, così
+   che un eventuale picco sia falsificabile **da tutte e due le parti**. Una finestra
+   ancorata al bordo della griglia non può falsificare niente su quel lato.

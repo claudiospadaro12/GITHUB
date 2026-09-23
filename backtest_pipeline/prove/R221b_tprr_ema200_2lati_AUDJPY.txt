@@ -1,0 +1,333 @@
+# =====================================================================
+#  EA: ABTG_EMA200        R221b -- AUDJPY H4, DUE LATI, A TICK REALI.
+#  L'ALTOPIANO IN (InpOrder1Atr, InpOrder2Atr): E' UN PIANORO O E' LA
+#  CONVERGENZA DEL GENETICO?
+#
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+#  GIRA SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma 21/09).
+#     -Deposito 10000  -Modello 4 (TICK REALI)
+#
+#  NASCE DA: report/I_MORTI_E_LO_STORICO_2026-09-23.md r.512 (voce 6) e
+#  report/CHI_ALTRO_PUO_SCHIERARSI_2026-09-22.md par. 2.3.
+#  Firma di Claudio: "FAI LE 24 PASSATE SUL FOREX DUE LATI".
+#  Gemello di R221a (GBPUSD) e R221c (XAUUSD). Il cappello generale sta
+#  in R221a e NON si ripete: qui c'e' quello che cambia col simbolo.
+#
+# =====================================================================
+#  0. LA DOMANDA E' GIA' STATA FATTA SU AUDJPY, E HA DETTO NO PIU'
+#     FORTE CHE SU GBPUSD
+#  ---------------------------------------------------------------------
+#  R139a (12/09/2026): stesso motore, AUDJPY, H4, DUE LATI, asse
+#  InpTP_RR, split IS/OOS. CSV grezzi:
+#     risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_AUDJPY_IS_ohlc_r139a.csv
+#     risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_AUDJPY_OOS_ohlc_r139a.csv
+#  Banco: Modello 1 (OHLC M1), 2010.01.01 -> 2026.06.30, deposito 10000,
+#  rischio 1%, cella O1=0.25 O2=0.5, magic 771560. Copiati dal CSV:
+#
+#    IS   RR=1.5 PF 0.78043 DD 16.9381 n 757 | RR=2.0 PF 0.80291 DD 15.5668 n 762
+#         RR=2.5 PF 0.80272 DD 15.6058 n 767 | RR=3.0 PF 0.80666 DD 15.3506 n 768
+#    OOS  RR=1.5 PF 1.00781 DD 16.8873 n 1322 | RR=2.0 PF 0.97064 DD 18.3414 n 1340
+#         RR=2.5 PF 0.94923 DD 20.4354 n 1344 | RR=3.0 PF 0.95627 DD 19.9977 n 1345
+#
+#  >>> ZERO LETTURE SU OTTO SOPRA 1,10. Anzi: ZERO SOPRA 1,01.
+#      L'IS e' in perdita netta (-1.528 / -1.362 EUR) e l'OOS pure in
+#      tre celle su quattro. E il campione NON e' l'alibi: 757-768 deal
+#      IS e 1322-1345 OOS, cioe' ~376 e ~668 posizioni al fattore
+#      2,0117 -- MOLTO sopra il pavimento dei 150 in entrambe.
+#  >>> IL RISCHIO: DD 15,35-16,94% IS e 16,89-20,44% OOS a rischio 1,0%.
+#      Alla taglia FTMO 2,00% (fattore misurato 1,956-1,990) sono
+#      ~30,0-33,7% e ~33,0-40,7%. IL MURO E' IL 10%. Tre e quattro volte.
+#  >>> CONFRONTO CHE FA MALE: in archivio a tick AUDJPY e' il simbolo
+#      PIU' BELLO dei tre (PF mediano 1,514, DD 6,261). Su 16,5 anni di
+#      OHLC e' il PIU' BRUTTO. >>> LA SPIEGAZIONE PIU' ECONOMICA NON E'
+#      "il tick e' piu' gentile": e' che 2024-2026 sull'AUD/JPY e' un
+#      REGIME (carry, poi svolta della BoJ), e la finestra d'archivio ne
+#      contiene uno solo. R139a e' la misura che lo dice.
+#  >>> Percio' R221b NON PROMUOVE NIENTE. Aggiunge una cosa sola, che
+#      pero' non esiste: il PRIMO OOS A TICK di questo motore a H4.
+#
+# =====================================================================
+#  1. L'ASSE NON E' InpTP_RR: SU AUDJPY E' "DEBOLMENTE VIVA", NON VIVA
+#  ---------------------------------------------------------------------
+#  Sui CSV d'archivio, celle a due lati raggruppate per (O1,O2),
+#  escursione del PF al variare di InpTP_RR:
+#    O1=0.10 O2=0.6 : RR 2.0/2.5/3.0 -> PF 1.397/1.419/1.426   -> 0.030
+#    O1=0.25 O2=0.5 : RR 1.5/2.0/3.0 -> PF 1.711/1.623/1.641   -> 0.088
+#    O1=0.30 O2=0.5 : RR 1.5/2.5     -> PF 1.696/1.611         -> 0.085
+#    O1=0.20 O2=0.4 : RR 1.5/2.5     -> PF 1.801/1.701         -> 0.100
+#  Su R139a, OHLC, 757-1345 deal: escursione 0.026 in IS e 0.059 in OOS.
+#  >>> Non e' ferma come su GBPUSD (0.001-0.007), ma resta sotto
+#      l'escursione dell'asse degli ordini (punto 2). E soprattutto il
+#      round dei tre file deve mettere ad asse LA STESSA COSA, altrimenti
+#      il conteggio "18 letture su 24" mescola misure diverse.
+#      La ragione meccanica (breakeven e trailing annidati dentro la
+#      parziale InpTP1Pct=50, ABTG_EMA200.mq5 r.410-436) e' scritta per
+#      esteso in R221a punto 1 e vale identica qui.
+#
+# =====================================================================
+#  2. L'ASSE VERO SU AUDJPY: InpOrder2Atr -- E MORDE FORTE, MISURATO
+#  ---------------------------------------------------------------------
+#  Stessi CSV, celle a due lati, gruppi a (InpOrder1Atr, InpTP_RR)
+#  fissi, variando InpOrder2Atr:
+#    O1=0.10 RR=2.0 : O2 0.2/0.6     -> PF 1.111/1.397         n 308/256
+#    O1=0.10 RR=2.5 : O2 0.3/0.5/0.6 -> PF 1.344/1.502/1.419   n 286/268/259
+#    O1=0.10 RR=3.0 : O2 0.4/0.6     -> PF 1.618/1.426         n 282/260
+#    O1=0.20 RR=3.0 : O2 0.3/0.5     -> PF 1.378/1.600         n 294/278
+#    O1=0.30 RR=1.5 : O2 0.4/0.5     -> PF 1.845/1.696         n 306/290
+#    O1=0.30 RR=2.5 : O2 0.3/0.5     -> PF 1.500/1.611         n 325/291
+#  >>> ESCURSIONE DEL PF: da 0.1105 a 0.2861 -- il MINIMO di questo asse
+#      e' piu' grande del MASSIMO di InpTP_RR (0.100). ESCURSIONE DI n:
+#      fino a 52. L'asse morde, e non di poco.
+#
+#  2-bis. PERCHE' InpOrder2Atr E NON InpOrder1Atr SU QUESTO SIMBOLO
+#  ---------------------------------------------------------------------
+#  REGOLA (identica nei tre file, dichiarata prima di guardare gli
+#  esiti): si mette ad asse l'asse della scala degli ordini sul quale il
+#  valore della CELLA MEDIANA e' INTERNO alla griglia d'archivio, cosi'
+#  che un eventuale picco sia falsificabile da tutte e due le parti. A
+#  parita' vince InpOrder1Atr.
+#  >>> Su AUDJPY la mediana ha O1=0.05, che e' IL MINIMO della griglia
+#      0.05..0.30: al bordo. E ha O2=0.4, INTERNO alla griglia 0.2..0.6.
+#      Percio' l'asse e' InpOrder2Atr.
+#  >>> Finestra 0.2 / 0.3 / 0.4 / 0.5: la mediana 0.4 e' la TERZA delle
+#      quattro -- due vicini sotto, uno sopra. STESSA FORMA di R221a e
+#      R221c, ed e' la condizione che rende sommabili le 24 letture.
+#  >>> E VA DETTO CHE L'ASSE HA UN NOME DIVERSO DA R221a: i tre file
+#      misurano la STESSA COSA (la forma locale della superficie attorno
+#      alla mediana nello spazio della scala degli ordini), su un asse
+#      scelto da una regola unica. Non e' un miscuglio: e' la stessa
+#      regola applicata a tre mediane diverse.
+#
+# =====================================================================
+#  3. LA CELLA MEDIANA, CALCOLATA DAL CSV GREZZO
+#  ---------------------------------------------------------------------
+#  Fonte: risultati_archivio/EMA200/realtick_H4/
+#         valid_ABTG_EMA200_H4_realtick_AUDJPY.csv (135 righe).
+#  Filtro InpAllowLong=1 E InpAllowShort=1 -> 28 celle. n PARI, due
+#  centrali per Profit Factor:
+#      PF 1.51365  O1=0.05 O2=0.4 RR=3.0  n 265  DD 6.2606  Profit 1181.78
+#      PF 1.51918  O1=0.20 O2=0.6 RR=2.0  n 265  DD 3.8353  Profit  963.45
+#  REGOLA DI PARITA' (la stessa dei tre file): SI PRENDE LA CENTRALE
+#  PIU' BASSA. Verifica contro numeri scritti da altri: il par. 2.3
+#  pubblica "AUDJPY ... PF med. 1,514 - DD % med. 6,261 - DD valuta 672
+#  - n 265", e 1181.78/1.75918 = 671,7 = 672. Torna sulla centrale
+#  BASSA, non sull'alta (che darebbe DD 3,835).
+#  >>> CELLA MEDIANA DI AUDJPY: O1=0.05  O2=0.4  InpTP_RR=3.0.
+#  >>> NOTA ONESTA: la mediana di AUDJPY ha O1 AL BORDO INFERIORE della
+#      griglia (0.05). Vuol dire che la superficie d'archivio, su questo
+#      simbolo, e' centrata su ordini MOLTO vicini alla EMA200. E' un
+#      fatto sul motore, non un difetto del round -- ma e' anche il
+#      motivo per cui InpOrder1Atr qui non si puo' mettere ad asse senza
+#      una finestra sbilanciata.
+#  >>> R139a pinnava O1=0.25 O2=0.5, chiamandola "centro dell'altopiano".
+#      Ordinando le 28 celle per PF, quella cella (RR=2.0, PF 1.62295)
+#      e' la NONA su 28: sopra la mediana, non al centro. Meno grave del
+#      caso GBPUSD (li' era la seconda su 24), ma va scritto.
+#
+# =====================================================================
+#  4. LA FINESTRA: @DAQUANDO AL PAVIMENTO TICK (classe 590 + 612)
+#  ---------------------------------------------------------------------
+#  @DAQUANDO 2024.07.05.
+#  >>> STATO DELLA FONTE, DETTO PRECISO: il pavimento 2024.07.05 e'
+#      MISURATO dal Diario MT5 su GBPUSD, EURUSD, EURGBP
+#      (risultati_archivio/NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md,
+#      righe verbatim). AUDJPY NON E' FRA I TRE.
+#      >>> Quindi su AUDJPY il pavimento e' [INFERITO], non misurato.
+#      report/DIAGNOSI_GBPUSD_LENTA_2026-09-02.md r.17 conclude "per
+#      TUTTI i simboli", ma e' una generalizzazione da tre coppie major,
+#      non una lettura su AUDJPY.
+#  >>> COME SI CHIUDE, A COSTO ZERO DI PASSATE: la riga del Diario del
+#      tester "AUDJPY: ticks data begins from ..." viene stampata dalla
+#      PRIMA passata di questo round. Va letta e ricopiata nel referto.
+#      Se e' PIU' TARDA del 2024.07.05, la finestra vera e' piu' corta
+#      di quella dichiarata e tutti i numeri vanno riletti.
+#  >>> CONSEGUENZA ARITMETICA, PRIMA DEI NUMERI: 2024.01.01->2026.06.30
+#      = 911 gg; 2024.07.05->2026.06.30 = 725 gg; rapporto 0,7958.
+#      AUDJPY faceva 265 deal alla cella mediana su 911 gg, quindi ci si
+#      attende ~211 deal su 725 gg. Con @FRAZIONEIS 0.40: ~84 deal IS e
+#      ~127 OOS, cioe' ~42 e ~63 POSIZIONI al fattore DERIVATO 2,0117.
+#      >>> MOLTO sotto 150 in entrambe. IL MERITO E' DICHIARATO SOSPESO.
+#          Il numero a campione pieno esiste gia' ed e' R139a (punto 0).
+#      >>> IL RISCHIO si legge A QUALUNQUE n (regola del 18/08).
+#
+# =====================================================================
+#  5. IL CONTRO-ESEMPIO, E LA SOGLIA CHE LO RENDE FALSIFICABILE
+#  ---------------------------------------------------------------------
+#  Da battere: "le quattro celle escono simili, quindi altopiano".
+#  Quattro celle simili sono compatibili con DUE mondi, e li distingue
+#  UN NUMERO, quello di n:
+#    ALTOPIANO = n cambia (spostare il secondo ordine limite cambia
+#                quali ritracciamenti vengono presi) E il PF tiene;
+#    INERTE    = n non cambia, e le quattro celle sono la stessa cella.
+#  >>> SOGLIA CONGELATA ORA: se fra le quattro celle Delta-n < 5 deal E
+#      Delta-PF < 0.010, l'asse InpOrder2Atr e' dichiarato INERTE su
+#      questa finestra e NESSUN PF di questo round si legge. Il taglio
+#      non e' inventato: l'escursione MISURATA in archivio su questo
+#      asse e' 0.1105-0.2861 di PF e fino a 52 deal, cioe' DA UNDICI A
+#      VENTINOVE VOLTE sopra il taglio.
+#  >>> SECONDO CONTRO-ESEMPIO: se UNA cella sta sopra 1,10 e le vicine
+#      sotto, e' un PICCO e il "28 su 28" d'archivio era selezione del
+#      genetico. Verdetto: "ERA SELEZIONE".
+#  >>> TERZO, e su AUDJPY e' il piu' serio: l'ipotesi alternativa non e'
+#      il rumore, e' IL REGIME. Il round gira su 725 giorni contigui:
+#      NON PUO' distinguere "edge" da "carry 2024-25". R139a, che ha
+#      16,5 anni, LO DISTINGUE GIA' e dice regime. Se R221b esce verde,
+#      la lettura corretta e' "il regime c'era anche a tick", non "il
+#      motore funziona". SCRITTO PRIMA.
+#
+# =====================================================================
+#  6. OTTIMIZZAZIONE COMPLETA, E IL DIFETTO D'ARCHIVIO
+#  ---------------------------------------------------------------------
+#  walkforward_generico.ps1 scrive Optimization=1 (algoritmo COMPLETO)
+#  in tutti e due i blocchi .ini (r.1015 e r.2013) e non espone nessun
+#  interruttore: NESSUN BUCO, e' gia' quello che serve. Le corse
+#  d'archivio giravano Optimization=2 (GENETICO, valida_realtick.ps1),
+#  che restituisce solo gli individui sopravvissuti: e' questo che rende
+#  il "28 su 28" una misura di SELEZIONE e non di altopiano.
+#  >>> E il difetto grosso (valida_realtick.ps1 NON dichiara
+#      InpOrder1Atr/InpOrder2Atr in [TesterInputs], eppure le corse le
+#      hanno spazzolate: vengono dallo stato salvato del tester) e'
+#      documentato per esteso in R221a punto 6-bis. E' il motivo per cui
+#      qui TUTTI e 42 gli input sono pinnati con il flag ||N esplicito.
+#
+# =====================================================================
+#  7. L'ATTESA E I CANCELLI, PRIMA DEI NUMERI
+#  ---------------------------------------------------------------------
+#  CANCELLI DEL ROUND (sui 3 file = 24 letture): PROMOSSO >= 18/24 con
+#  PF >= 1,10; BOCCIATO/selezione < 12/24; in mezzo NON CONCLUDENTE.
+#  MIA PREVISIONE, scritta prima e contro di me: su AUDJPY mi aspetto
+#  la gamba IS sopra 1,10 e la gamba OOS a cavallo o sotto -- cioe'
+#  l'OPPOSTO di GBPUSD -- perche' il carry AUD/JPY si rompe nel 2024
+#  con la svolta BoJ, che cade DENTRO questa finestra corta.
+#
+#  CANCELLO DI RISCHIO, l'unico che vale a questo n (18/08):
+#    SOGLIA PER AUDJPY: DD @1% <= 5,03% (5,03 x 1,990 = 10,01 al 2,00%
+#    di campo, fattore MISURATO 1,956-1,990). Sopra, la cella non sta
+#    sotto il muro del 10% alla taglia vera.
+#    ANCORA D'ARCHIVIO: mediana DD 6,261% @1% => ~12,2-12,5% @2%: SOPRA.
+#    R139a: 16,94% IS e 20,44% OOS @1% => ~33,1-33,7% e ~40,0-40,7%.
+#  >>> CLASSE 562: sotto soglia DIMOSTRA, sopra NON CONCLUDE. Ma qui il
+#      sopra-soglia arriva da DUE banchi e TRE finestre indipendenti.
+#
+#  CONFRONTO COL DEFAULT, obbligatorio: il default compilato di
+#  InpOrder2Atr e' 0.35 (ABTG_EMA200.mq5 r.69) e NON sta sulla griglia
+#  d'archivio (0.2/0.3/0.4/0.5/0.6), quindi NON e' fra le quattro celle.
+#  Va dichiarato nel referto: se la vincente batte la mediana di meno di
+#  0,05 di PF, la risposta onesta e' "va bene com'e'".
+#
+# =====================================================================
+#  8. QUELLO CHE QUESTO ROUND NON FA, per nome
+#  ---------------------------------------------------------------------
+#  - NON promuove niente: campione ~42/~63 posizioni, sotto 150.
+#  - NON misura InpTP_RR (pinnato a 3,0 = valore della mediana; il
+#    default compilato e' 2,0, r.76 -- differenza dichiarata).
+#  - NON misura InpOrder1Atr (pinnato a 0.05, valore della mediana, che
+#    e' il BORDO della griglia: resta una domanda aperta).
+#  - NON misura la gestione dell'uscita (InpTP1Pct=50, InpBreakeven=1,
+#    InpUseTrailing=1, valori d'archivio).
+#  - NON e' una prova di regime: 725 giorni contigui, UN regime.
+#  - NON cambia TF: H4 (InpTF=16388 = PERIOD_H4, ENUM_TIMEFRAMES; e' un
+#    PIN, non un asse).
+#  - NON ha una cella-ancora riproducibile: finestra e ottimizzatore
+#    sono diversi dall'archivio DI PROPOSITO. Unico controllo di
+#    continuita': n totale atteso ~211 deal, banda 170-260.
+#  - Il .ex5 sul banco corrisponde al .mq5 a HEAD: [NON MISURATO].
+#    L'ultimo commit su ABTG_EMA200.mq5 e' b45dd009 dell'11/09/2026,
+#    "IN CORSO D'OPERA -- NON COMPILARE". Se non compila, il driver si
+#    ferma e lo dice.
+#  - COSTO: SU AUDJPY LA FRONTIERA stop >= 40 x spread E'
+#    [NON CALCOLABILE], E NON VUOL DIRE "ESCLUSO PER COSTO".
+#    Alla sonda del 17/08 AUDJPY legge SpreadPt=0, che vuol dire NESSUN
+#    TICK campionato, non spread nullo. E il logger vivo
+#    data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv copre OTTO
+#    simboli -- 225JPY, D30EUR, EURUSD, GBPUSD, NASUSD, U30USD, USDJPY,
+#    XAUUSD -- e AUDJPY NON C'E' (verificato colonna 1, 23/09/2026).
+#    >>> E' una CASELLA BIANCA chiudibile con una sonda a ZERO passate
+#        di tester (spread logger sul simbolo), non un motivo di
+#        esclusione.
+#    >>> CONTRO-ARGOMENTO ONESTO, e regge a meta': il costo vero E' GIA'
+#        DENTRO i numeri a tick, perche' il Modello 4 paga lo spread
+#        reale del feed. Quello che NON sappiamo e' se quel feed a tick
+#        su AUDJPY sia completo.
+#  - CASELLA APERTA: le sedie gemelle 771511-771515, attaccate dal
+#    01/08, hanno ZERO operazioni nello statement 30/03->11/09. O la
+#    frequenza a H4 e' piu' bassa del calcolato, o sono RELITTI: la
+#    lettura che le distingue NON E' STATA FATTA.
+#  - E LA COSA BUONA: il pavimento di frequenza e' PER FAMIGLIA
+#    (firma 07/09) e la famiglia EMA200 lo tocca gia' con la sedia Dow
+#    771531 (1,000 pos/giorno feriale in forward). Questi gemelli NON
+#    sono piu' scartabili per SOLA frequenza.
+#
+#  9. COSTO E MAGIC
+#  ---------------------------------------------------------------------
+#  4 celle x 2 finestre = 8 passate. Round intero (3 file): 12 celle,
+#  24 passate, 3,6-8,4 minuti.
+#  MAGIC 771542: grep repo-wide il 23/09/2026, ZERO occorrenze. NON si
+#  riusa il 771501 d'archivio, ne' il 771560 di R139a, ne' il 771512
+#  della sedia in forward.
+# =====================================================================
+
+@SIMBOLO  AUDJPY
+@PERIODO  H4
+@DAQUANDO 2024.07.05
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=1||1||0||1||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpUseAdrFilter=0||0||0||0||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpUseOrder2=1||1||0||1||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpUseCutoff=0||0||0||0||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpLogImbuto=1||1||0||1||N
+InpComment=R221B
+InpMagic=771542||771542||0||771542||N
+InpTP_RR=3.0||3.0||0||3.0||N
+InpOrder1Atr=0.05||0.05||0||0.05||N
+# --- L'UNICO ASSE: 4 celle (0.2 / 0.3 / 0.4 / 0.5) x 2 finestre = 8 passate.
+#     La mediana 0.4 e' la TERZA delle quattro: due vicini sotto, uno sopra.
+#
+#     PERCHE' IL FONDO CORSA E' SCRITTO 0.51 E NON 0.5 -- NON E' UN
+#     REFUSO, E' L'IDIOMA DI CASA, e senza di lui il round perde una cella.
+#     MISURATO OGGI (23/09/2026): walkforward_generico.ps1 r.805 conta
+#     Floor(|stop-start|/|step| + 1e-9)+1, controlla_prova.py r.203 conta
+#     int(|stop-start|/step)+1 SENZA epsilon. Con start=0.2 step=0.1
+#     stop=0.5 la divisione vale 2.9999999999999996: il driver legge 4
+#     celle, il cancello 3. Scrivendo 0.51 la divisione fa 3.1 e i due
+#     tornano ENTRAMBI 4, mentre MT5 enumera esattamente 0.2/0.3/0.4/0.5
+#     (0.6 e' oltre 0.51): la corsa non cambia di una passata.
+#     PRECEDENTE IN REPO, sei file a HEAD: R169a..R169f scrivono
+#     InpSLBufferATR=...||0.0||0.05||0.31||Y per avere 7 celle 0.00-0.30.
+InpOrder2Atr=0.4||0.2||0.1||0.51||Y
+# =====================================================================

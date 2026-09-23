@@ -1,0 +1,406 @@
+# =====================================================================
+#  EA: ABTG_EMA200        R221a -- GBPUSD H4, DUE LATI, A TICK REALI.
+#  L'ALTOPIANO IN (InpOrder1Atr, InpOrder2Atr): E' UN PIANORO O E' LA
+#  CONVERGENZA DEL GENETICO?
+#
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+#  GIRA SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma 21/09).
+#     -Deposito 10000  -Modello 4 (TICK REALI)
+#
+#  NASCE DA: report/I_MORTI_E_LO_STORICO_2026-09-23.md r.512 (voce 6) e
+#  report/CHI_ALTRO_PUO_SCHIERARSI_2026-09-22.md par. 2.3.
+#  Firma di Claudio: "FAI LE 24 PASSATE SUL FOREX DUE LATI".
+#
+# =====================================================================
+#  0. LEGGERE QUESTO PRIMA DEI NUMERI -- LA DOMANDA E' GIA' STATA FATTA
+#     UNA VOLTA, SU UN CAMPIONE QUATTRO VOLTE PIU' GRANDE, E HA DETTO NO
+#  ---------------------------------------------------------------------
+#  R139b (12/09/2026) ha girato ESATTAMENTE questo motore, questo simbolo,
+#  questo TF, DUE LATI, asse InpTP_RR, split IS/OOS. I CSV esistono:
+#     risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_GBPUSD_IS_ohlc_r139b.csv
+#     risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_GBPUSD_OOS_ohlc_r139b.csv
+#  Banco: Modello 1 (OHLC M1), 2010.01.01 -> 2026.06.30, deposito 10000,
+#  rischio 1%, cella O1=0.25 O2=0.4, magic 771561. Copiati dai CSV grezzi:
+#
+#    IS   RR=1.5 PF 0.80318  DD 20.3244  n  856 | RR=2.0 PF 0.83412 DD 18.3847 n  870
+#         RR=2.5 PF 0.83704  DD 17.9773  n  874 | RR=3.0 PF 0.83825 DD 17.7260 n  875
+#    OOS  RR=1.5 PF 1.12701  DD 10.3857  n 1292 | RR=2.0 PF 1.13781 DD 10.0524 n 1316
+#         RR=2.5 PF 1.13222  DD 11.0476  n 1321 | RR=3.0 PF 1.13869 DD 10.8059 n 1321
+#
+#  >>> QUATTRO COSE, E VANNO TUTTE DETTE PRIMA:
+#  (a) IL CAMPIONE C'E' GIA', ed e' il pavimento che si diceva mancante:
+#      856-875 deal IS e 1292-1321 OOS. Al fattore misurato 2,0117 sono
+#      ~426 posizioni IS e ~656 OOS: SOPRA 150 IN ENTRAMBE LE FINESTRE.
+#      Il paragrafo 2.3 diceva "i 150 per finestra non si raggiungono":
+#      e' vero A TICK, NON su OHLC, dove il numero esiste gia'.
+#  (b) IL MERITO NON PASSA: le quattro celle IS stanno fra 0.803 e 0.838
+#      -- IN PERDITA. Le quattro OOS fra 1.127 e 1.139: sopra 1,10 ma
+#      di poco, e su una finestra che le IS contraddicono.
+#  (c) IL RISCHIO E' IL NUMERO CHE FA MALE, e si legge a qualunque n
+#      (Emendamento B del 16/08): DD 20,32% IS e 11,05% OOS a rischio
+#      1,0%. Alla taglia di campo FTMO (2,00%, fattore misurato
+#      1,956-1,990) sono ~39,7-40,4% e ~21,6-22,0%. IL MURO E' IL 10%.
+#  (d) InpTP_RR E' MISURATA QUASI INERTE, e non e' piu' un'ipotesi: in
+#      OOS su 1292-1321 deal l'escursione del PF fra RR=1.5 e RR=3.0 e'
+#      0.01168, e n si muove di 29 deal su ~1300 (2,2%).
+#
+#  >>> QUINDI R221a NON PUO' PROMUOVERE NIENTE, E NON FINGE DI POTERLO
+#      FARE. E' ammesso alla misura per UNA sola ragione, che e' la
+#      regola di casa: "un numero OHLC non e' mai un verdetto, e'
+#      screening". Il banco A TICK di questo motore a H4 non e' MAI
+#      stato spezzato in IS/OOS: tutte le 135 celle d'archivio vengono
+#      da UNA finestra sola. Questo round produce quel numero.
+#  >>> E LA DIREZIONE DELL'ERRORE E' DICHIARATA: OHLC NON PAGA LO SPREAD
+#      VERO, quindi e' il banco OTTIMISTA. Un R221a piu' bello di R139b
+#      non sarebbe una buona notizia: sarebbe una CONTRADDIZIONE da
+#      spiegare (regime 2024-26? selezione genetica? feed?), non una
+#      promozione.
+#
+# =====================================================================
+#  1. PERCHE' L'ASSE NON E' InpTP_RR -- E' UNA MANOPOLA INERTE, MISURATA
+#  ---------------------------------------------------------------------
+#  Il disegno di partenza metteva ad asse InpTP_RR. E' stato CAMBIATO
+#  dopo averlo misurato in DUE modi indipendenti, che concordano:
+#
+#  (i) SUI CSV D'ARCHIVIO A TICK. Tenendo solo le celle a due lati e
+#      raggruppandole per coppia (InpOrder1Atr, InpOrder2Atr), si guarda
+#      quanto si muove il PF fra i valori di InpTP_RR DENTRO ogni gruppo.
+#      Su GBPUSD i cinque gruppi con almeno due valori danno:
+#        O1=0.05 O2=0.3 : RR 2.5 PF 1.157 n 309 | RR 3.0 PF 1.158 n 309  -> 0.001
+#        O1=0.25 O2=0.2 : RR 2.0 PF 1.231 n 362 | RR 3.0 PF 1.238 n 363  -> 0.007
+#        O1=0.25 O2=0.3 : RR 2.0 PF 1.207 n 328 | RR 2.5 PF 1.208 n 328  -> 0.001
+#        O1=0.30 O2=0.4 : RR 2.0 PF 1.283 n 303 | RR 3.0 PF 1.290 n 304  -> 0.007
+#        O1=0.15 O2=0.5 : RR 1.5/2.0/2.5 PF 1.262/1.288/1.245           -> 0.043
+#      QUATTRO GRUPPI SU CINQUE sotto 0,007 di PF, con n che si muove di
+#      UN deal su ~350.
+#  (ii) SU R139b, OHLC, 1300 deal: escursione 0.01168 (punto 0d).
+#
+#  >>> DUE BANCHI DIVERSI, DUE FINESTRE DIVERSE, LO STESSO ESITO. Quattro
+#      celle di InpTP_RR uscirebbero quasi identiche, e quel risultato e'
+#      AMBIGUO fra "altopiano" e "manopola ferma": non distingue le due
+#      cose, quindi NON risponde alla domanda del round.
+#      Si scrive cosi': "InpTP_RR su ABTG_EMA200 H4 GBPUSD e' MANOPOLA
+#      INERTE, MISURATA" -- non "provato e non va".
+#  >>> IL MECCANISMO HA UN NOME, ed e' nel sorgente (classe 594 verificata
+#      riga per riga in mql5/Experts/ABTG_EMA200.mq5):
+#        r.410  if(!beDone && InpTP1Pct>0 && InpTP1Pct<100) { ...parziale... }
+#        r.429      if(InpBreakeven) gTrade.PositionModify(tk, openP, tp);
+#        r.436  if(InpUseTrailing && beDone && e14>0) { ...trailing... }
+#      Il BREAKEVEN e il TRAILING vivono DENTRO il blocco della parziale:
+#      con InpTP1Pct=50 (acceso in archivio) meta' posizione esce sulla
+#      EMA14 e il resto viene trascinato dal trailing. Il TP finale in R
+#      lo raggiunge una minoranza del residuo -- ecco perche' spostarlo
+#      da 1,5 a 3,0 quasi non sposta i soldi.
+#      >>> CONSEGUENZA: InpTP1Pct governa TRE cose (parziale, breakeven,
+#          trailing). Se un giorno lo si mette ad asse, l'asse ne muove
+#          tre, non una. E' scritto qui perche' non si ripeta.
+#
+# =====================================================================
+#  2. L'ASSE VERO: InpOrder1Atr -- E MORDE, MISURATO
+#  ---------------------------------------------------------------------
+#  Stessa lettura del punto 1(i), ma raggruppando per (InpOrder2Atr,
+#  InpTP_RR) e variando InpOrder1Atr. Su GBPUSD, cinque gruppi:
+#    O2=0.2 RR=3.0 : O1 0.05/0.20/0.25/0.30 -> PF 1.166/1.246/1.238/1.208  n 337/380/363/376
+#    O2=0.3 RR=2.0 : O1 0.10/0.20/0.25/0.30 -> PF 1.172/1.235/1.207/1.147  n 327/340/328/338
+#    O2=0.3 RR=2.5 : O1 0.05/0.15/0.25      -> PF 1.157/1.190/1.208        n 309/336/328
+#    O2=0.4 RR=3.0 : O1 0.25/0.30           -> PF 1.328/1.290              n 295/304
+#    O2=0.5 RR=2.0 : O1 0.15/0.30           -> PF 1.288/1.213              n 296/289
+#  >>> ESCURSIONE DEL PF: da 0.0387 a 0.0875. ESCURSIONE DI n: fino a 43.
+#      Contro lo 0.001-0.007 di InpTP_RR: l'asse degli ordini morde
+#      da QUATTRO A NOVE VOLTE di piu'. NON e' una manopola ferma.
+#
+#  2-bis. PERCHE' PROPRIO InpOrder1Atr E NON InpOrder2Atr SU QUESTO
+#  SIMBOLO -- REGOLA DICHIARATA PRIMA DI GUARDARE GLI ESITI
+#  ---------------------------------------------------------------------
+#  REGOLA: si mette ad asse l'asse della scala degli ordini sul quale il
+#  valore della CELLA MEDIANA e' INTERNO alla griglia d'archivio, cosi'
+#  che la finestra di 4 celle abbia vicini DA TUTTE E DUE LE PARTI e un
+#  eventuale picco sia FALSIFICABILE su tutti e due i lati. A parita',
+#  vince InpOrder1Atr.
+#  >>> Su GBPUSD: la mediana ha O1=0.25 (griglia 0.05..0.30: INTERNO) e
+#      O2=0.2 (griglia 0.2..0.6: E' IL MINIMO, quindi al bordo).
+#      Percio' l'asse e' InpOrder1Atr e O2 resta pinnato.
+#  >>> La finestra scelta e' 0.15 / 0.20 / 0.25 / 0.30: la mediana e' la
+#      TERZA delle quattro -- due vicini sotto, uno sopra. Identica forma
+#      nei tre file del round, cosi' le 24 letture si contano insieme.
+#
+# =====================================================================
+#  3. LA CELLA MEDIANA, CALCOLATA DAI CSV GREZZI (mai da un referto)
+#  ---------------------------------------------------------------------
+#  Fonte: risultati_archivio/EMA200/realtick_H4/
+#         valid_ABTG_EMA200_H4_realtick_GBPUSD.csv (134 righe).
+#  Filtro: InpAllowLong=1 E InpAllowShort=1  ->  24 celle. Ordinate per
+#  Profit Factor. n=24 e' PARI, quindi le centrali sono DUE:
+#      PF 1.23105  O1=0.25 O2=0.2 RR=2.0  n 362  DD 7.2048  Profit 728.66
+#      PF 1.23493  O1=0.20 O2=0.3 RR=2.0  n 340  DD 6.8311  Profit 713.91
+#  REGOLA DI PARITA', dichiarata e applicata uguale ai tre simboli:
+#  SI PRENDE LA CENTRALE PIU' BASSA. Due motivi, e il secondo e' una
+#  verifica contro numeri scritti da qualcun altro (regola del 10/09):
+#    - e' la scelta CONSERVATIVA (PF piu' basso);
+#    - riproduce VERBATIM l'ancora gia' pubblicata nel par. 2.3
+#      ("GBPUSD ... PF med. 1,231 - DD % med. 7,205 - n 362") e i numeri
+#      che la firma di Claudio cita ("GBPUSD faceva 362 deal").
+#      La centrale alta darebbe n=340 e DD 6,831: NON sono quei numeri.
+#  >>> CELLA MEDIANA DI GBPUSD: O1=0.25  O2=0.2  InpTP_RR=2.0.
+#
+#  3-bis. CORREZIONE A UN FILE GIA' IN REPO, e va detta
+#  ---------------------------------------------------------------------
+#  R139b_EMA200_GBPUSD_H4_LS.txt scrive "Il CENTRO dell'altopiano -- NON
+#  il picco -- e' O1=0,25 / O2=0,40" e pinna quella cella. VERIFICATO
+#  ORDINANDO LE 24 CELLE: quella cella (RR=3.0, PF 1.32826) e' la
+#  SECONDA SU 24. Non e' il centro: e' il secondo valore piu' alto.
+#  >>> Non invalida i numeri di R139b (sono quelli che sono, e sono
+#      brutti lo stesso), ma vuol dire che R139b ha misurato una cella
+#      SCELTA BENE, non una cella mediana -- cioe' il caso PIU'
+#      FAVOREVOLE. E anche cosi' l'IS e' in perdita.
+#
+# =====================================================================
+#  4. LA FINESTRA: @DAQUANDO AL PAVIMENTO TICK VERO (classe 590)
+#  ---------------------------------------------------------------------
+#  Le corse d'archivio girano FromDate=2024.01.01 (valida_realtick.ps1
+#  r.~180). I TICK REALI BCM sul forex partono dal 2024.07.05:
+#    risultati_archivio/NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md, riga
+#    verbatim del Diario MT5: "GBPUSD: ticks data begins from
+#    2024.07.05 00:00". MISURATO SU QUESTO STESSO SIMBOLO.
+#  Prima di quella data MT5 GENERA i tick dalle M1: e' circa il 20% della
+#  finestra d'archivio (186 giorni su 911).
+#  >>> @DAQUANDO 2024.07.05 e' MISURATO, non scelto.
+#  >>> CONSEGUENZA ARITMETICA, DICHIARATA PRIMA DEI NUMERI:
+#      2024.01.01->2026.06.30 = 911 gg ; 2024.07.05->2026.06.30 = 725 gg
+#      rapporto 0,7958. GBPUSD faceva 362 deal su 911 gg alla cella
+#      mediana, quindi ci si attende ~288 deal su 725 gg. Con
+#      @FRAZIONEIS 0.40: ~115 deal IS e ~173 deal OOS.
+#      In POSIZIONI (fattore DERIVATO 2,0117): ~57 IS e ~86 OOS.
+#      >>> SOTTO 150 IN ENTRAMBE LE FINESTRE, e di molto.
+#      >>> PERCIO' IL MERITO E' DICHIARATO SOSPESO SU QUESTO ROUND
+#          (valvola R59 + Emendamento B). Questo round chiude
+#          L'ALTOPIANO e produce il PRIMO OOS A TICK. NON chiude il
+#          pavimento dei 150 per finestra, e non deve fingere di farlo.
+#          Il numero a campione pieno esiste gia' ed e' R139b (punto 0).
+#      >>> IL RISCHIO invece si legge A QUALUNQUE n (regola del 18/08).
+#
+# =====================================================================
+#  5. IL CONTRO-ESEMPIO -- COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  ---------------------------------------------------------------------
+#  LA SPIEGAZIONE ALTERNATIVA DA BATTERE: "le quattro celle escono
+#  simili, quindi c'e' un altopiano".
+#  >>> FALSO SE L'ASSE NON HA MORSO. Quattro celle simili sono
+#      compatibili con DUE mondi diversi, e si distinguono con UN NUMERO:
+#      quello di n.
+#      - ALTOPIANO  : l'asse morde (n cambia, perche' spostare l'ordine
+#                     limite cambia quali ritracciamenti vengono presi)
+#                     E il PF resta alto lo stesso;
+#      - INERTE     : n NON cambia, e allora le celle sono la stessa
+#                     cella e il round non ha misurato niente.
+#  >>> SOGLIA CONGELATA ORA, col numero: se fra le quattro celle
+#      Delta-n < 5 deal E Delta-PF < 0.010, l'asse InpOrder1Atr e'
+#      dichiarato INERTE su questa finestra e NESSUN PF di questo round
+#      si legge. La soglia non e' inventata: l'escursione MISURATA in
+#      archivio e' 0.0387-0.0875 di PF e fino a 43 deal (punto 2), cioe'
+#      da quattro a nove volte sopra il taglio.
+#  >>> SECONDO CONTRO-ESEMPIO, sul verso opposto: se UNA cella sta
+#      sopra 1,10 e le vicine sotto, NON e' un altopiano: e' un PICCO, e
+#      il "24 su 24" d'archivio era esattamente quello che il genetico
+#      aveva selezionato. In quel caso il verdetto e' "ERA SELEZIONE" e
+#      si scrive cosi'.
+#  >>> TERZO, ed e' quello che ho provato a farmi sbagliare io: il
+#      genetico d'archivio potrebbe aver tenuto SOLO celle buone,
+#      rendendo il confronto viziato. CONTROLLATO: nei CSV d'archivio
+#      degli altri simboli compaiono PF fino a 0.722 (USDNOK) e celle a
+#      PF 0.000 (due lati spenti). Quindi il CSV NON contiene solo
+#      sopravvissuti buoni -- ma resta vero che NON e' un campione
+#      uniforme della griglia. Per questo il round gira a
+#      OTTIMIZZAZIONE COMPLETA.
+#
+# =====================================================================
+#  6. OTTIMIZZAZIONE COMPLETA: IL DRIVER LA FA GIA', VERIFICATO
+#  ---------------------------------------------------------------------
+#  backtest_pipeline/walkforward_generico.ps1 scrive Optimization=1 in
+#  TUTTI E DUE i blocchi .ini che genera (r.1015 anteprima, r.2013 corsa
+#  vera) e NON espone nessun parametro per cambiarlo. Optimization=1 =
+#  algoritmo COMPLETO (lento); Optimization=2 = genetico, ed e' quello
+#  che usa valida_realtick.ps1. >>> NESSUN BUCO: il valore che serve a
+#  questo round e' gia' quello di fabbrica del driver, e non si tocca.
+#
+#  6-bis. IL DIFETTO D'ARCHIVIO CHE HO TROVATO SCRIVENDO QUESTO FILE
+#  ---------------------------------------------------------------------
+#  >>> valida_realtick.ps1, ramo "if($EA -eq \"ABTG_EMA200\")", dichiara
+#      in [TesterInputs] SOLTANTO: InpTF, InpRiskPercent, InpAllowLong,
+#      InpAllowShort, InpTP_RR. InpOrder1Atr e InpOrder2Atr NON CI SONO.
+#      Eppure nei CSV prodotti InpOrder1Atr prende SEI valori e
+#      InpOrder2Atr ne prende CINQUE. Prova che non e' il default che
+#      scorre: il default compilato di InpOrder2Atr e' 0.35 (r.69) e
+#      0.35 NON COMPARE MAI fra i cinque valori osservati.
+#  >>> LETTURA: quelle due griglie vengono dallo STATO PERSISTENTE del
+#      tester di MT5 (l'ultimo set salvato per quell'EA), non dallo
+#      script. Cioe' la corsa d'archivio ha ottimizzato DUE assi che il
+#      suo stesso script non dichiara.
+#  >>> CONSEGUENZA OPERATIVA PER QUESTO ROUND, ed e' il motivo per cui
+#      qui sono PINNATI TUTTI E 42 GLI INPUT con il flag ||N esplicito:
+#      un input non elencato in [TesterInputs] puo' essere ripreso dallo
+#      stato salvato e spazzolato SENZA CHE NESSUNO LO CHIEDA. Il quinto
+#      campo N spegne il flag di ottimizzazione in modo esplicito.
+#  >>> E la griglia 0.05..0.30 passo 0.05 / 0.2..0.6 passo 0.1 usata qui
+#      e' [INFERITA DAI VALORI OSSERVATI NEL CSV], non letta in uno
+#      script: nessuno script in repo la contiene.
+#
+# =====================================================================
+#  7. L'ATTESA E I CANCELLI, DICHIARATI PRIMA DEI NUMERI
+#  ---------------------------------------------------------------------
+#  CANCELLI DI VERDETTO DEL ROUND (firmati da Claudio, sui 3 file = 24
+#  letture = 12 celle x 2 gambe):
+#    PROMOSSO             >= 18 letture su 24 con PF >= 1,10
+#    BOCCIATO/selezione   <  12 su 24
+#    in mezzo             NON CONCLUDENTE, e si dice.
+#
+#  LA MIA PREVISIONE, SCRITTA PRIMA E CONTRO DI ME: mi aspetto fra 8 e
+#  16 su 24, cioe' NON CONCLUDENTE. Il motivo e' misurato, non sentito:
+#  in archivio a tick queste celle fanno PF 1,15-1,35 su UNA finestra
+#  ottimizzata intera; su OHLC a campione pieno R139b fa 0,80-0,84 in IS
+#  e 1,13-1,14 in OOS. Spezzando il tick in due, mi aspetto la gamba OOS
+#  (piu' lunga, piu' recente) sopra 1,10 e la gamba IS sotto o a cavallo.
+#  Se esce 24 su 24 il primo sospetto NON e' una scoperta: e' che la
+#  finestra sia troppo corta per contenere un regime avverso.
+#
+#  CANCELLO DI RISCHIO -- L'UNICO CHE VALE A QUESTO n (18/08):
+#  il DD va riletto alla taglia di campo. Le corse girano a
+#  InpRiskPercent=1, FTMO gira al 2,00%: fattore MISURATO 1,956-1,990.
+#    SOGLIA PER GBPUSD: DD @1% <= 5,03% (perche' 5,03 x 1,990 = 10,01).
+#    Sopra 5,03% la cella NON sta sotto il muro del 10% alla taglia vera.
+#    ANCORA D'ARCHIVIO: la cella mediana fa DD 7,205% @1% su una
+#    finestra sola => ~14,1-14,3% @2%: GIA' SOPRA IL MURO.
+#    R139b fa 20,32% IS e 11,05% OOS @1% => ~39,7-40,4% e ~21,6-22,0%.
+#  >>> CLASSE 562, applicata: SOTTO SOGLIA DIMOSTRA, SOPRA NON CONCLUDE.
+#      Un DD sopra 5,03% qui non "uccide da solo" (campione corto), ma
+#      sommato a R139b -- che e' sopra su un campione pieno E su due
+#      finestre -- il verdetto di rischio diventa DOPPIAMENTE negativo.
+#
+#  CONFRONTO COL DEFAULT, OBBLIGATORIO: il default compilato di
+#  InpOrder1Atr e' 0.10 (ABTG_EMA200.mq5 r.68) e NON e' fra le quattro
+#  celle di questo asse (0.15-0.30). >>> Va dichiarato nel referto: se
+#  la cella vincente batte la mediana di meno di 0,05 di PF, la risposta
+#  onesta e' "va bene com'e'", ed e' un risultato.
+#
+# =====================================================================
+#  8. QUELLO CHE QUESTO ROUND NON FA, dichiarato per nome
+#  ---------------------------------------------------------------------
+#  - NON promuove niente e non puo': campione sotto 150 per finestra.
+#  - NON misura InpTP_RR (pinnato a 2,0 = valore della cella mediana,
+#    che e' anche il default compilato r.76). E' MISURATA inerte.
+#  - NON misura InpOrder2Atr (pinnato a 0.2). E' l'altro asse della
+#    scala e resta una domanda aperta su questo simbolo.
+#  - NON misura la gestione dell'uscita (InpTP1Pct, InpBreakeven,
+#    InpUseTrailing pinnati ai valori d'archivio 50/1/1). Sono ad asse
+#    in COLLAUDO_EMADOW_03 e 04, su U30USD, non su GBPUSD.
+#  - NON e' una prova di regime: finestra contigua di 725 giorni, UN
+#    solo regime dichiarato (post-2024, dollaro in discesa).
+#  - NON cambia TF: H4 (InpTF=16388 = PERIOD_H4, e' un ENUM_TIMEFRAMES;
+#    qui e' un PIN, non un asse).
+#  - NON e' riproducibile contro l'archivio: la finestra e' DIVERSA di
+#    proposito (punto 4) e l'ottimizzatore e' diverso (punto 6). Non
+#    esiste nessuna cella-ancora che debba tornare al centesimo, e il
+#    file NON finge che esista. L'unico controllo di continuita' e'
+#    quello su n del punto 4 (~288 deal totali attesi, banda 230-350).
+#  - Il .ex5 sul banco corrisponde al .mq5 a HEAD: [NON MISURATO].
+#    >>> E QUI C'E' UN AVVISO VERO: l'ultimo commit che tocca
+#        mql5/Experts/ABTG_EMA200.mq5 e' b45dd009 dell'11/09/2026,
+#        intitolato "IN CORSO D'OPERA -- NON COMPILARE". Il sorgente a
+#        HEAD porta InpLogImbuto, che NON compare fra le colonne dei CSV
+#        d'archivio: il binario d'archivio era PRECEDENTE. Se la
+#        compilazione fallisce, il driver lo dice e non si lancia.
+#  - NON risponde sulla FREQUENZA, e non serve che lo faccia: il
+#    pavimento e' PER FAMIGLIA (firma 07/09) e la famiglia EMA200 lo
+#    tocca gia' con la sedia Dow 771531 (1,000 pos/giorno feriale in
+#    forward). >>> Questi gemelli NON sono piu' scartabili per SOLA
+#    frequenza. E' la sola cosa buona della pratica, e va scritta.
+#  - CASELLA APERTA, non chiusa da qui: le cinque sedie gemelle
+#    771511-771515 sono attaccate dal 01/08 e hanno ZERO operazioni
+#    nello statement 30/03->11/09. O la frequenza a H4 e' piu' bassa del
+#    calcolato, o quelle sedie sono RELITTI. Le due cose si distinguono
+#    con una lettura del Giornale, e NESSUNO L'HA FATTA.
+#  - COSTO: su GBPUSD la frontiera stop >= 40 x spread NON morde, ed e'
+#    un conto: spread mediano misurato 0,7-1,0 pip
+#    (data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv, ore 7-20 srv:
+#    mediana 3 punti = 0,3 pip, p95 7-10 punti = 0,7-1,0 pip), mentre lo
+#    stop di questo motore e' 1,0 x ATR(14) su H4, cioe' molte decine di
+#    pip. Il valore esatto dell'ATR H4 e' [NON MISURATO] qui.
+#
+#  9. COSTO E MAGIC
+#  ---------------------------------------------------------------------
+#  4 celle x 2 finestre = 8 passate. Il round intero (3 file) e' 12
+#  celle / 24 passate / 3,6-8,4 minuti (metro di I_MORTI_E_LO_STORICO).
+#  MAGIC 771541: grep repo-wide il 23/09/2026, ZERO occorrenze. NON si
+#  riusa il 771501 d'archivio ne' il 771514 della sedia in forward: un
+#  CSV di questo round non deve poter essere riletto al posto di quelli.
+# =====================================================================
+
+@SIMBOLO  GBPUSD
+@PERIODO  H4
+@DAQUANDO 2024.07.05
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=1||1||0||1||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpUseAdrFilter=0||0||0||0||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpUseOrder2=1||1||0||1||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpUseCutoff=0||0||0||0||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpLogImbuto=1||1||0||1||N
+InpComment=R221A
+InpMagic=771541||771541||0||771541||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpOrder2Atr=0.2||0.2||0||0.2||N
+# --- L'UNICO ASSE: 4 celle (0.15 / 0.20 / 0.25 / 0.30) x 2 finestre = 8 passate.
+#     La mediana 0.25 e' la TERZA delle quattro: due vicini sotto, uno sopra.
+#
+#     PERCHE' IL FONDO CORSA E' SCRITTO 0.31 E NON 0.30 -- NON E' UN
+#     REFUSO, E' L'IDIOMA DI CASA, e senza di lui il round perde una cella.
+#     MISURATO OGGI (23/09/2026), e i due conteggi NON coincidono:
+#       walkforward_generico.ps1 r.805 conta
+#           Floor( |stop-start| / |step| + 1e-9 ) + 1
+#       controlla_prova.py r.203 conta
+#           int( |stop-start| / step ) + 1      <-- SENZA epsilon
+#     Con start=0.15 step=0.05 stop=0.30 la divisione in virgola mobile
+#     vale 2.9999999999999996: il driver (con 1e-9) legge 4 celle, il
+#     cancello legge 3. Lo stesso file prova vale 4 o 3 a seconda di chi
+#     lo conta -- ed e' il cancello a sbagliare, non il driver.
+#     Scrivendo 0.31 la divisione fa 3.2 e i due conteggi TORNANO
+#     ENTRAMBI 4, mentre MT5 enumera esattamente 0.15/0.20/0.25/0.30
+#     (0.35 e' oltre 0.31 e non entra): la corsa NON cambia di una
+#     passata, cambia solo che il numero stampato e' quello vero.
+#     PRECEDENTE IN REPO, sei file a HEAD: R169a..R169f scrivono
+#     InpSLBufferATR=...||0.0||0.05||0.31||Y per avere 7 celle 0.00-0.30.
+InpOrder1Atr=0.25||0.15||0.05||0.31||Y
+# =====================================================================

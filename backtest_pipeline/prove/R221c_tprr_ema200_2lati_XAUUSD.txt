@@ -1,0 +1,346 @@
+# =====================================================================
+#  EA: ABTG_EMA200        R221c -- XAUUSD H4, DUE LATI, A TICK REALI.
+#  L'ALTOPIANO IN (InpOrder1Atr, InpOrder2Atr): E' UN PIANORO O E' LA
+#  CONVERGENZA DEL GENETICO?
+#
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+#  GIRA SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma 21/09).
+#     -Deposito 10000  -Modello 4 (TICK REALI)
+#
+#  NASCE DA: report/I_MORTI_E_LO_STORICO_2026-09-23.md r.512 (voce 6) e
+#  report/CHI_ALTRO_PUO_SCHIERARSI_2026-09-22.md par. 2.3.
+#  Firma di Claudio: "FAI LE 24 PASSATE SUL FOREX DUE LATI".
+#  Gemello di R221a (GBPUSD) e R221b (AUDJPY). Il cappello generale sta
+#  in R221a e non si ripete.
+#
+# =====================================================================
+#  0. QUESTO E' L'UNICO DEI TRE FILE CHE CHIEDE UN NUMERO CHE NON
+#     ESISTE IN NESSUNA FORMA -- E VA DETTO COME PRIMA COSA
+#  ---------------------------------------------------------------------
+#  Su GBPUSD e AUDJPY la domanda e' gia' stata posta a campione pieno:
+#  R139b e R139a (12/09/2026, OHLC M1, 2010->2026, split 40/60, due
+#  lati) hanno prodotto 8 letture ciascuno, e sono BRUTTE:
+#     GBPUSD  IS PF 0.803-0.838 (in perdita) - OOS PF 1.127-1.139
+#             DD @1%: 17,7-20,3% IS e 10,1-11,0% OOS
+#     AUDJPY  IS PF 0.780-0.807 (in perdita) - OOS PF 0.949-1.008
+#             DD @1%: 15,4-16,9% IS e 16,9-20,4% OOS
+#  >>> SU XAUUSD QUEL ROUND NON ESISTE. Non c'e' un R139 dell'oro: i
+#      file scritti il 12/09 sono R139a (AUDJPY), R139b (GBPUSD),
+#      R139c (FiboH4) e R140a (EURUSD). L'oro non c'e'.
+#  >>> Quindi questo e' il file dove "non ancora misurato" e' vero nel
+#      senso pieno: nessuno split, su NESSUN banco, MAI.
+#  >>> E VA DETTO ANCHE IL CONTRARIO, perche' non si scrive solo quello
+#      che conviene: l'unico numero a tick che l'oro ha a H4 e' PEGGIO
+#      di come lo si racconta. In CENSIMENTO_PF_MISURATI_2026-09-09.md
+#      r.854 XAUUSD H4 compare come "UNICA finestra, 95 celle, PF
+#      1,30-2,20, n 214, DD 6,05". E in EMA200_DOW_COSA_MANCA_2026-09-12
+#      r.26 lo screening a tick di XAUUSD e' "0/30 IS". Le due letture
+#      non si contraddicono: la prima e' la finestra unica ottimizzata
+#      (selezione), la seconda e' uno split. >>> ZERO SU TRENTA IN IS.
+#      Questo round rifa' quella domanda su celle scelte con una regola
+#      e con ottimizzazione COMPLETA, e l'attesa e' dichiarata al punto 7.
+#
+# =====================================================================
+#  1. L'ASSE: PERCHE' NON InpTP_RR, ANCHE SE QUI SAREBBE VIVA
+#  ---------------------------------------------------------------------
+#  SU XAUUSD InpTP_RR MORDE DAVVERO, e va detto perche' e' l'unico dei
+#  tre simboli dove e' cosi'. Sui CSV d'archivio, celle a due lati
+#  raggruppate per (O1,O2), escursione del PF al variare di InpTP_RR:
+#    O1=0.15 O2=0.5 : RR 1.5/2.0/2.5/3.0 -> PF 1.205/1.270/1.392/1.656
+#                                            n  200/191/179/172   -> 0.450 MONOTONA
+#    O1=0.20 O2=0.6 : RR 1.5/2.0/2.5     -> PF 1.646/1.768/1.518  -> 0.250
+#    O1=0.25 O2=0.6 : RR 1.5/2.5/3.0     -> PF 1.706/1.549/1.768  -> 0.220
+#    O1=0.25 O2=0.4 : RR 2.5/3.0         -> PF 1.426/1.644        -> 0.218
+#    O1=0.15 O2=0.3 : RR 1.5/3.0         -> PF 1.130/1.235        -> 0.105
+#  Contro lo 0.001-0.007 di GBPUSD: qui la manopola e' VIVA, e nel primo
+#  gruppo e' perfino MONOTONA (PF sale, n scende: il TP piu' lontano
+#  viene raggiunto meno spesso ma vale di piu'). E' un'informazione sul
+#  MOTORE, non un dettaglio: sull'oro il TP finale conta, sul cable no.
+#  >>> E ALLORA PERCHE' NON METTERLA AD ASSE QUI? Per una ragione sola e
+#      dichiarata: il round conta "18 letture su 24" SOMMANDO i tre file.
+#      Se un file misurasse InpTP_RR e gli altri due la scala degli
+#      ordini, quella somma mescolerebbe misure diverse e il cancello
+#      firmato da Claudio non vorrebbe piu' dire niente.
+#  >>> PERCIO' RESTA UNA DOMANDA APERTA, SCRITTA QUI PER NON PERDERLA:
+#      "InpTP_RR su XAUUSD H4 a due lati, asse completo 1.5-3.0, split
+#      IS/OOS" e' un round a 4 celle / 8 passate che NON e' mai stato
+#      fatto e che vale la pena fare DOPO questo. Costa 1,2-2,8 minuti.
+#
+# =====================================================================
+#  2. L'ASSE VERO: InpOrder2Atr -- E' QUELLO CHE MORDE DI PIU' DEI TRE
+#  ---------------------------------------------------------------------
+#  Stessi CSV, gruppi a (InpOrder1Atr, InpTP_RR) fissi, variando O2:
+#    O1=0.15 RR=1.5 : O2 0.2/0.3/0.5/0.6 -> PF 1.092/1.130/1.205/1.662  n 250/237/200/179
+#    O1=0.20 RR=2.0 : O2 0.2/0.5/0.6     -> PF 1.155/1.289/1.768        n 241/172/152
+#    O1=0.15 RR=3.0 : O2 0.3/0.5         -> PF 1.235/1.656              n 209/172
+#    O1=0.25 RR=1.5 : O2 0.5/0.6         -> PF 1.288/1.706              n 195/172
+#    O1=0.30 RR=2.5 : O2 0.4/0.6         -> PF 1.381/1.683              n 187/130
+#  >>> ESCURSIONE DEL PF da 0.0326 a 0.6124. ESCURSIONE DI n fino a 89.
+#      E' l'asse piu' vivo di tutto il round. Non e' una manopola ferma.
+#  >>> E IL SEGNO E' COERENTE E VA DICHIARATO PRIMA: su XAUUSD, alzando
+#      InpOrder2Atr il PF SALE e n SCENDE, in tutti e cinque i gruppi.
+#      Meccanismo: il secondo ordine e' l'overshoot oltre la EMA200
+#      (ABTG_EMA200.mq5 r.357) e lo SL sta 1 ATR oltre di lui (r.358);
+#      piu' lontano = meno ingressi ma migliori, e stop piu' largo =
+#      lotto piu' piccolo. >>> ATTENZIONE ALLA LETTURA: un PF che sale
+#      mentre n scende NON e' automaticamente merito, e' anche
+#      selezione. Se la cella 0.5 vince con n=170 contro la 0.2 con
+#      n=250, sta guadagnando di piu' PER OPERAZIONE su MENO operazioni:
+#      va guardato il Recovery Factor (soldi/soldi), non il PF da solo.
+#
+#  2-bis. PERCHE' InpOrder2Atr E NON InpOrder1Atr
+#  ---------------------------------------------------------------------
+#  REGOLA (identica nei tre file, dichiarata prima degli esiti): asse =
+#  quello su cui il valore della CELLA MEDIANA e' INTERNO alla griglia
+#  d'archivio, cosi' che un picco sia falsificabile da tutte e due le
+#  parti; a parita' vince InpOrder1Atr.
+#  >>> Su XAUUSD la mediana ha O1=0.30, che e' IL MASSIMO della griglia
+#      0.05..0.30 (al bordo), e O2=0.4, INTERNO a 0.2..0.6.
+#      Percio': asse InpOrder2Atr, finestra 0.2 / 0.3 / 0.4 / 0.5, con
+#      la mediana 0.4 TERZA delle quattro -- due vicini sotto, uno
+#      sopra. Stessa forma di R221a e R221b.
+#
+# =====================================================================
+#  3. LA CELLA MEDIANA, CALCOLATA DAL CSV GREZZO -- E QUI E' UNIVOCA
+#  ---------------------------------------------------------------------
+#  Fonte: risultati_archivio/EMA200/realtick_H4/
+#         valid_ABTG_EMA200_H4_realtick_XAUUSD.csv (145 righe).
+#  Filtro InpAllowLong=1 E InpAllowShort=1 -> 29 celle. n DISPARI:
+#  nessuna regola di parita' serve, la mediana e' una sola.
+#      PF 1.38074  O1=0.30 O2=0.4 RR=2.5  n 187  DD 6.1446  Profit 991.09
+#  Verifica contro numeri scritti da altri (regola del 10/09): il
+#  par. 2.3 pubblica "XAUUSD ... PF med. 1,381 - DD % med. 6,145 -
+#  DD valuta 670 - n 187", e 991.09/1.47922 = 670,0. TORNA ESATTO.
+#  >>> CELLA MEDIANA DI XAUUSD: O1=0.30  O2=0.4  InpTP_RR=2.5.
+#  >>> BANDA DEL SIMBOLO: PF da 1.09207 a 1.88203 sulle 29 celle a due
+#      lati. E' la banda PIU' LARGA dei tre simboli (GBPUSD 1,147-1,348;
+#      AUDJPY 1,076-1,845). Una banda larga NON e' un altopiano: e'
+#      esattamente la superficie in cui un picco si nasconde meglio.
+#
+# =====================================================================
+#  4. LA FINESTRA -- E QUI IL PAVIMENTO DEI TICK E' UN BUCO DICHIARATO
+#     (classe 590 E classe 612)
+#  ---------------------------------------------------------------------
+#  @DAQUANDO 2024.07.05  ->  [INFERITO], NON MISURATO. E' il punto piu'
+#  debole di questo file e sta in testa apposta.
+#  >>> COSA C'E' DAVVERO ALLA FONTE:
+#      risultati_archivio/NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md porta
+#      le righe verbatim del Diario MT5 per GBPUSD, EURUSD, EURGBP
+#      ("ticks data begins from 2024.07.05 00:00") e poi dice, testuale:
+#      "XAUUSD non e' ancora stato misurato (la cella 05 lo dira')".
+#      E report/CACCIA_APERTURE_ORO_2026-09-08.md r.409 conferma che in
+#      risultati_archivio/misura_tick/ ci sono SOLO D30EUR, NASUSD e
+#      U30USD. report/ORO_1530_CANCELLO_COSTO_2026-09-10.md r.428:
+#      "profondita' a tick di XAUUSD: [NON MISURATO] -- blocca ogni
+#      verdetto di MERITO sull'oro".
+#  >>> report/LA_VIA_PIU_CORTA_AI_150_2026-09-19.md r.25 scrive "tick
+#      reali FOREX E METALLI: 2024.07.05" citando la diagnosi GBPUSD.
+#      >>> QUELLO E' UN TRASPORTO DI PAVIMENTO DA UN MERCATO A UN ALTRO,
+#          cioe' esattamente la CLASSE 612. L'oro e' un METALLO, con un
+#          feed e una storia di importazione suoi. Il numero NON si
+#          eredita dal cable.
+#  >>> COME SI CHIUDE, A ZERO PASSATE IN PIU': la riga del Diario del
+#      tester "XAUUSD: ticks data begins from ..." viene stampata dalla
+#      PRIMA passata di questo round. VA LETTA E RICOPIATA NEL REFERTO.
+#      - se e' <= 2024.07.05, la finestra dichiarata e' onesta;
+#      - se e' PIU' TARDA, una parte di questa finestra gira su tick
+#        GENERATI dalle M1 e i numeri vanno riletti su quella piu' corta;
+#      - se non compare, la copertura e' [NON VERIFICATA] e si dice.
+#  >>> CONSEGUENZA ARITMETICA, PRIMA DEI NUMERI, e su XAUUSD e' la
+#      peggiore dei tre: 911 gg -> 725 gg, rapporto 0,7958. La cella
+#      mediana faceva 187 deal su 911 gg, quindi ci si attende ~149 deal
+#      su 725 gg. Con @FRAZIONEIS 0.40: ~60 deal IS e ~89 OOS, cioe'
+#      ~30 e ~44 POSIZIONI al fattore DERIVATO 2,0117.
+#      >>> TRENTA POSIZIONI IN IS. E' UN QUINTO DEL PAVIMENTO.
+#      >>> IL MERITO E' DICHIARATO SOSPESO, e su questo file non e' una
+#          formula: con n=30 il PF e' quasi solo rumore, e un PF 1,8 in
+#          IS qui NON sarebbe una scoperta.
+#      >>> IL RISCHIO si legge A QUALUNQUE n (regola del 18/08), e resta
+#          l'unica lettura che questo file produce con pieno titolo.
+#
+# =====================================================================
+#  5. IL CONTRO-ESEMPIO, E LA SOGLIA CHE LO RENDE FALSIFICABILE
+#  ---------------------------------------------------------------------
+#  Da battere: "le quattro celle escono simili, quindi altopiano".
+#  Quattro celle simili sono compatibili con DUE mondi, e li distingue
+#  il numero di n:
+#    ALTOPIANO = n cambia (spostare l'overshoot cambia quali
+#                ritracciamenti vengono presi) E il PF tiene;
+#    INERTE    = n non cambia, e le quattro celle sono la stessa cella.
+#  >>> SOGLIA CONGELATA ORA: se fra le quattro celle Delta-n < 5 deal E
+#      Delta-PF < 0.010, l'asse e' dichiarato INERTE su questa finestra
+#      e NESSUN PF di questo round si legge. Il taglio non e' inventato:
+#      l'escursione MISURATA in archivio su questo asse e' 0.0326-0.6124
+#      di PF e fino a 89 deal.
+#  >>> SECONDO CONTRO-ESEMPIO, ed e' il piu' probabile QUI: la banda del
+#      simbolo e' larghissima (1,092-1,882). Se le quattro celle NON
+#      sono simili ma MONOTONE -- PF che sale mentre n scende, come in
+#      archivio -- allora NON e' un altopiano e NON e' un picco: e' una
+#      TENDENZA, e la cella "migliore" e' semplicemente quella che
+#      opera di meno. VERDETTO IN QUEL CASO: "nessuna configurazione
+#      robusta, l'asse e' un filtro di frequenza travestito da
+#      parametro". Il numero che lo dice e' il RECOVERY FACTOR: se sale
+#      insieme al PF e' merito, se resta piatto mentre il PF sale e'
+#      solo selezione delle operazioni.
+#  >>> TERZO: 725 giorni sull'oro contengono UN SOLO regime, e che
+#      regime -- il rialzo 2024-2026. Un motore a due lati in un
+#      mercato a senso unico prende la deriva con il lato lungo e la
+#      paga poco con quello corto. Questo round NON PUO' distinguere
+#      edge da deriva, e non finge di poterlo fare.
+#
+# =====================================================================
+#  6. OTTIMIZZAZIONE COMPLETA, E IL DIFETTO D'ARCHIVIO
+#  ---------------------------------------------------------------------
+#  walkforward_generico.ps1 scrive Optimization=1 (COMPLETO) in tutti e
+#  due i blocchi .ini (r.1015 e r.2013) e non espone interruttori:
+#  NESSUN BUCO. Le corse d'archivio giravano Optimization=2 (GENETICO),
+#  che restituisce solo gli individui sopravvissuti: e' per questo che
+#  il "25 su 29 con PF>=1,10" dell'archivio e' una misura di SELEZIONE.
+#  >>> Il difetto grosso (valida_realtick.ps1 NON dichiara
+#      InpOrder1Atr/InpOrder2Atr in [TesterInputs] eppure le corse le
+#      hanno spazzolate: vengono dallo stato salvato del tester di MT5)
+#      e' documentato per esteso in R221a punto 6-bis. E' il motivo per
+#      cui qui TUTTI e 42 gli input sono pinnati col flag ||N esplicito.
+#
+# =====================================================================
+#  7. L'ATTESA E I CANCELLI, PRIMA DEI NUMERI
+#  ---------------------------------------------------------------------
+#  CANCELLI DEL ROUND (sui 3 file = 24 letture): PROMOSSO >= 18/24 con
+#  PF >= 1,10; BOCCIATO/selezione < 12/24; in mezzo NON CONCLUDENTE.
+#  MIA PREVISIONE PER XAUUSD, scritta prima e contro di me: mi aspetto
+#  la gamba OOS sopra 1,10 su 3 o 4 celle (l'oro sale in quella
+#  finestra) e la gamba IS SOTTO, perche' l'IS cade nel 2024-25 e
+#  perche' lo screening a tick gia' fatto dice 0/30 IS. Cioe' ~4/8 da
+#  questo file. Se esce 8/8, il primo sospetto e' la deriva dell'oro,
+#  non il motore.
+#
+#  CANCELLO DI RISCHIO, l'unico che vale a n=30 (18/08):
+#    SOGLIA PER XAUUSD: DD @1% <= 5,03% (5,03 x 1,990 = 10,01 alla
+#    taglia di campo 2,00%, fattore MISURATO 1,956-1,990).
+#    ANCORA D'ARCHIVIO: la cella mediana fa DD 6,145% @1% su una
+#    finestra sola => ~12,0-12,2% @2%: GIA' SOPRA IL MURO DEL 10%.
+#  >>> CLASSE 562: sotto soglia DIMOSTRA, sopra NON CONCLUDE. Un DD
+#      sopra 5,03% a n=30 non uccide da solo -- ma nemmeno assolve, e
+#      per XAUUSD non c'e' nessun R139 a fare da secondo parere.
+#
+#  CONFRONTO COL DEFAULT, obbligatorio: il default compilato di
+#  InpOrder2Atr e' 0.35 (ABTG_EMA200.mq5 r.69), che NON sta sulla
+#  griglia d'archivio e quindi non e' fra le quattro celle. Va
+#  dichiarato nel referto: se la vincente batte la mediana di meno di
+#  0,05 di PF, la risposta onesta e' "va bene com'e'".
+#
+# =====================================================================
+#  8. QUELLO CHE QUESTO ROUND NON FA, per nome
+#  ---------------------------------------------------------------------
+#  - NON promuove niente: ~30 posizioni IS, un quinto del pavimento.
+#  - NON misura InpTP_RR (pinnato a 2,5 = valore della mediana; il
+#    default compilato e' 2,0, r.76 -- differenza dichiarata). Ed e'
+#    l'unico dei tre simboli dove quella manopola e' MISURATA VIVA:
+#    resta una domanda aperta e vale un round suo (punto 1).
+#  - NON misura InpOrder1Atr (pinnato a 0.30, valore della mediana, che
+#    e' il BORDO SUPERIORE della griglia d'archivio: nessuno ha mai
+#    provato 0.35 o oltre su questo simbolo).
+#  - NON misura la gestione dell'uscita (InpTP1Pct=50, InpBreakeven=1,
+#    InpUseTrailing=1, valori d'archivio). E su questo EA i tre sono
+#    ANNIDATI: breakeven e trailing vivono dentro il blocco della
+#    parziale (r.410-436), quindi InpTP1Pct da solo ne muove TRE.
+#    Classe 594, verificata nel sorgente, scritta in R221a punto 1.
+#  - NON e' una prova di regime: 725 giorni contigui, UN regime.
+#  - NON cambia TF: H4 (InpTF=16388 = PERIOD_H4, ENUM_TIMEFRAMES; PIN).
+#  - NON ha una cella-ancora riproducibile: finestra e ottimizzatore
+#    diversi dall'archivio DI PROPOSITO. Unico controllo di continuita':
+#    n totale atteso ~149 deal, banda 115-185.
+#  - Il .ex5 sul banco corrisponde al .mq5 a HEAD: [NON MISURATO].
+#    Ultimo commit su ABTG_EMA200.mq5: b45dd009 dell'11/09/2026, "IN
+#    CORSO D'OPERA -- NON COMPILARE". Se non compila il driver si ferma.
+#  - COSTO: su XAUUSD lo spread E' MISURATO, a differenza di AUDJPY.
+#    data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv: mediana 18-27
+#    punti e p95 22-29 punti, cioe' 0,18-0,29 USD (100 punti = 1 USD),
+#    con l'ora 22 server a n/d. La frontiera stop >= 40 x spread chiede
+#    quindi uno stop >= ~9,2-11,6 USD al p95.
+#    >>> LO STOP DI QUESTO MOTORE E' 1,0 x ATR(14) su H4 (r.358), e IL
+#        VALORE DELL'ATR H4 DELL'ORO E' [NON MISURATO] in questo file.
+#        Percio' il cancello di costo qui e' DICHIARATO NON CALCOLATO,
+#        non "passato". Si chiude leggendo l'ATR H4 medio del periodo:
+#        e' un dato di grafico, zero passate di tester.
+#  - CASELLA APERTA (vale per tutta la famiglia H4): le sedie gemelle
+#    771511-771515, attaccate dal 01/08, hanno ZERO operazioni nello
+#    statement 30/03->11/09. O la frequenza a H4 e' piu' bassa del
+#    calcolato, o sono RELITTI: la lettura che le distingue NON E'
+#    STATA FATTA.
+#  - E LA COSA BUONA: il pavimento di frequenza e' PER FAMIGLIA (firma
+#    07/09) e la famiglia EMA200 lo tocca gia' con la sedia Dow 771531
+#    (1,000 pos/giorno feriale in forward). Questi gemelli NON sono
+#    piu' scartabili per SOLA frequenza.
+#
+#  9. COSTO E MAGIC
+#  ---------------------------------------------------------------------
+#  4 celle x 2 finestre = 8 passate. Round intero (3 file): 12 celle,
+#  24 passate, 3,6-8,4 minuti.
+#  MAGIC 771543: grep repo-wide il 23/09/2026, ZERO occorrenze.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H4
+@DAQUANDO 2024.07.05
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=1||1||0||1||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpUseAdrFilter=0||0||0||0||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpUseOrder2=1||1||0||1||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpUseCutoff=0||0||0||0||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpLogImbuto=1||1||0||1||N
+InpComment=R221C
+InpMagic=771543||771543||0||771543||N
+InpTP_RR=2.5||2.5||0||2.5||N
+InpOrder1Atr=0.30||0.30||0||0.30||N
+# --- L'UNICO ASSE: 4 celle (0.2 / 0.3 / 0.4 / 0.5) x 2 finestre = 8 passate.
+#     La mediana 0.4 e' la TERZA delle quattro: due vicini sotto, uno sopra.
+#
+#     PERCHE' IL FONDO CORSA E' SCRITTO 0.51 E NON 0.5 -- NON E' UN
+#     REFUSO, E' L'IDIOMA DI CASA, e senza di lui il round perde una cella.
+#     MISURATO OGGI (23/09/2026): walkforward_generico.ps1 r.805 conta
+#     Floor(|stop-start|/|step| + 1e-9)+1, controlla_prova.py r.203 conta
+#     int(|stop-start|/step)+1 SENZA epsilon. Con start=0.2 step=0.1
+#     stop=0.5 la divisione vale 2.9999999999999996: il driver legge 4
+#     celle, il cancello 3. Scrivendo 0.51 la divisione fa 3.1 e i due
+#     tornano ENTRAMBI 4, mentre MT5 enumera esattamente 0.2/0.3/0.4/0.5
+#     (0.6 e' oltre 0.51): la corsa non cambia di una passata.
+#     PRECEDENTE IN REPO, sei file a HEAD: R169a..R169f scrivono
+#     InpSLBufferATR=...||0.0||0.05||0.31||Y per avere 7 celle 0.00-0.30.
+InpOrder2Atr=0.4||0.2||0.1||0.51||Y
+# =====================================================================
