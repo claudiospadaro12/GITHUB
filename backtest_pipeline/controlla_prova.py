@@ -34,6 +34,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime
 import glob
 import os
 import re
@@ -220,10 +221,85 @@ def controlla(prova: str, ea: str, tetto: int = 0) -> tuple[int, int]:
             f"in archivio e' 24. Se la griglia e' VOLUTA, rilancia con --tetto {celle} "
             f"e dichiaralo nel referto; se non lo e', l'asse e' scritto male.")
 
-    # 5. la finestra dichiarata
-    testo = open(prova, encoding="utf-8", errors="replace").read()
-    if "@DAQUANDO" not in testo:
+    # 5. LE DIRETTIVE '@'. Nato il 23/09/2026.
+    #    Il driver le legge a walkforward_generico.ps1 r.507-514: salta le
+    #    righe vuote, salta quelle che cominciano per '#' (quindi un '@'
+    #    dentro un commento e' INERTE, ed e' giusto cosi'), e delle altre
+    #    tiene solo quelle che matchano '^@(\w+)\s+(.+)$' -- nome
+    #    MAIUSCOLIZZATO, valore trimmato.
+    #    I nomi che poi qualcuno RILEGGE sono CINQUE: SIMBOLO (r.519),
+    #    PERIODO (r.520), DAQUANDO (r.521), FINOA (r.562), FRAZIONEIS
+    #    (r.702). Ogni altro nome entra in $Direttive e NON LO LEGGE NESSUNO.
+    #
+    #    >>> ED E' QUI IL DIFETTO CHE QUESTO BLOCCO ESISTE PER PRENDERE:
+    #        UNA DIRETTIVA SBAGLIATA NON FA RUMORE. <<<
+    #    '@FRAZIONE 0.50' (senza l'IS) viene memorizzata, mai riletta, e il
+    #    round gira sul DEFAULT DI FABBRICA -FrazioneIS 0.40 (r.189) senza
+    #    una riga di log che lo dica. Idem '@FINOA' storpiata: si torna alla
+    #    data di fabbrica. Il CSV esce lo stesso, il referto si scrive, e la
+    #    finestra MISURATA non e' quella DICHIARATA nel file.
+    #    E' la famiglia della classe 683: il cancello che fallisce MUTO.
+    #
+    #    Le altre tre (senza valore, formato, campo) il driver le prende gia'
+    #    lui con Muori, ma le prende SUL PC DI BACKTEST e a round gia' avviato:
+    #    la corsa in batch gira ogni file in un PROCESSO SEPARATO, quindi non
+    #    perde la catena -- perde QUEL round, e lo si scopre alla fine dalla
+    #    riga CATENA ROTTA. Prenderle qui costa zero.
+    DIRETTIVE_LETTE = ("SIMBOLO", "PERIODO", "DAQUANDO", "FINOA", "FRAZIONEIS")
+    viste = {}
+    for l in open(prova, encoding="utf-8", errors="replace"):
+        t = l.strip()
+        if not t or t.startswith("#") or not t.startswith("@"):
+            continue
+        m = re.match(r"^@(\w+)\s+(.+)$", t)
+        if not m:
+            problemi.append(
+                "direttiva SENZA VALORE (il driver non la vede proprio): " + t)
+            continue
+        k, v = m.group(1).upper(), m.group(2).strip()
+        if k not in DIRETTIVE_LETTE:
+            problemi.append(
+                "direttiva SCONOSCIUTA: @" + k + " -- il driver la memorizza e NON la "
+                "rilegge MAI, quindi il round girerebbe sui DEFAULT in SILENZIO. "
+                "Le sole lette: " + ", ".join("@" + x for x in DIRETTIVE_LETTE))
+            continue
+        if k in viste:
+            problemi.append(
+                "direttiva DOPPIA: @" + k + " ('" + viste[k] + "' poi '" + v + "'). "
+                "Il driver tiene l'ULTIMA e non avvisa: la prima e' una dichiarazione falsa.")
+        viste[k] = v
+
+    if "DAQUANDO" not in viste:
         problemi.append("manca @DAQUANDO: la finestra va dichiarata nel file, non ricordata")
+
+    for k in ("DAQUANDO", "FINOA"):
+        if k in viste and not re.match(r"^[0-9]{4}\.[0-9]{2}\.[0-9]{2}$", viste[k]):
+            problemi.append(
+                "@" + k + " '" + viste[k] + "' non e' una data aaaa.mm.gg: il driver muore "
+                "(r.563 per @FINOA, ParseExact r.931 per @DAQUANDO).")
+
+    if "DAQUANDO" in viste and "FINOA" in viste:
+        try:
+            d0 = datetime.datetime.strptime(viste["DAQUANDO"], "%Y.%m.%d")
+            d1 = datetime.datetime.strptime(viste["FINOA"], "%Y.%m.%d")
+            if d1 <= d0:
+                problemi.append(
+                    "finestra VUOTA o ROVESCIATA: @DAQUANDO " + viste["DAQUANDO"]
+                    + " non e' prima di @FINOA " + viste["FINOA"] + " (driver r.933).")
+        except ValueError:
+            problemi.append(
+                "@DAQUANDO/@FINOA hanno la forma giusta ma NON sono date vere: "
+                + viste["DAQUANDO"] + " / " + viste["FINOA"])
+
+    if "FRAZIONEIS" in viste:
+        f = viste["FRAZIONEIS"]
+        if not re.match(r"^[0-9]*\.?[0-9]+$", f):
+            problemi.append(
+                "@FRAZIONEIS '" + f + "' non e' un decimale col PUNTO: il driver muore "
+                "(r.704). Si scrive '0.40', mai '0,40'.")
+        elif not (0.0 < float(f) <= 1.0):
+            problemi.append(
+                "@FRAZIONEIS '" + f + "' fuori campo: ammesso 0 < f <= 1 (driver r.710).")
 
     nome = os.path.basename(prova)
     stato = "OK" if not problemi else "!! " + str(len(problemi)) + " PROBLEMI"

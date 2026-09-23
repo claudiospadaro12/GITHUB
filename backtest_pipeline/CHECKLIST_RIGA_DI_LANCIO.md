@@ -34140,3 +34140,65 @@ correzioni**, cioe' dal momento in cui tutti pensano che il file sia migliorato.
 4. 🚦 **E il controllo non e' automatizzabile con quello che abbiamo**: ne' `controlla_riga.py` ne'
    `controlla_prova.py` leggono la prosa. 👉 Dopo ogni giro di correzioni su un file prova, il
    **rileggere e' obbligatorio**: le correzioni **tornano dal cancello**, non si danno per chiuse.
+
+---
+
+## 🔇📄 CLASSE 685 — **LA DIRETTIVA STORPIATA NON FA RUMORE: `$Direttive` la memorizza, nessuno la rilegge, e il round gira sui DEFAULT DI FABBRICA in silenzio** (coordinatore, 23/09/2026, trovata aprendo `controlla_prova.py` per un difetto che NON c'era)
+
+**Numero assegnato dal COORDINATORE** (classe 662; l'ultima era la 684); `grep -c "CLASSE 685"` -> **0** al momento di scrivere.
+
+### 🟢 Prima la buona notizia, perche' e' una CORREZIONE A ME STESSO
+Ero partito per chiudere un difetto che mi ero appuntato: *«`controlla_prova.py` non legge
+`@FRAZIONEIS` e conta sempre `celle x 2`»*. 🔴 **Quel difetto NON ESISTE.** Misurato:
+`walkforward_generico.ps1` assegna `$WF` **una volta sola**, alla r.935, come array **letterale
+di due elementi** (`IS` e `OOS`), e non lo tocca piu' (le sole altre occorrenze sono r.947-948
+di log, r.1017-1018 dell'anteprima, r.1978 del ciclo). 👉 `@FRAZIONEIS` **sposta il taglio, non
+il numero di finestre**: le passate sono `celle x 2` **sempre**, e il conto stampato e' giusto.
+**Un difetto appuntato a memoria e mai verificato e' un difetto inventato**, e costa come gli altri.
+
+### Il fatto, cioe' quello che invece c'era davvero
+Aprendo il file per la verifica e' saltato fuori il buco vero, ed e' della famiglia della
+**classe 683 -- il cancello che fallisce MUTO**.
+Il driver legge le direttive a r.507-514: salta le righe vuote, salta quelle che cominciano per
+`#` (quindi una `@` dentro un commento e' **inerte**, ed e' giusto cosi'), e delle altre tiene
+quelle che matchano `^@(\w+)\s+(.+)$`, **maiuscolizzando il nome**. I nomi che poi qualcuno
+**RILEGGE** sono **CINQUE**: `SIMBOLO` (r.519) · `PERIODO` (r.520) · `DAQUANDO` (r.521) ·
+`FINOA` (r.562) · `FRAZIONEIS` (r.702).
+🔴 **Ogni altro nome entra in `$Direttive` e non lo legge NESSUNO.** Non un avviso, non una riga
+di log: `@FRAZIONE 0.50` (senza l'`IS`) viene memorizzata, mai riletta, e il round gira sul
+**default di fabbrica `-FrazioneIS 0.40`** (r.189). Il CSV esce, il referto si scrive, e la
+**finestra misurata non e' quella dichiarata nel file**. Stessa dinamica per `@FINOA` storpiata:
+si torna alla data di fabbrica.
+
+### 🧪 Il contro-esempio, eseguito
+Quattro file costruiti da `R237a` cambiando UNA riga, passati ai **due** cancelli:
+
+| file | riga cambiata | cancello VECCHIO | cancello NUOVO |
+|---|---|---|---|
+| CE1 | `@FRAZIONE 0.50` (typo) | 🟢 **OK** | 🔴 direttiva SCONOSCIUTA |
+| CE2 | `@FRAZIONEIS 0,40` (virgola) | 🟢 **OK** | 🔴 non e' un decimale col punto |
+| CE3 | `@FRAZIONEIS 1.5` | 🟢 **OK** | 🔴 fuori campo `0 < f <= 1` |
+| CE4 | `@FRAZIONEIS` due volte | 🟢 **OK** | 🔴 direttiva DOPPIA, vince l'ULTIMA |
+
+**4 verdi su 4** dal cancello che avevamo. 👉 E CE1 e' il piu' cattivo dei quattro: gli altri
+tre il driver li prenderebbe comunque con `Muori`, **CE1 no** -- quello **gira**, e gira sbagliato.
+
+### La regola, applicata in `controlla_prova.py` (punto 5)
+1. 🔤 **Il nome di una direttiva si controlla contro l'elenco dei CINQUE che il driver rilegge.**
+   Tutto il resto e' una dichiarazione che non arriva a destinazione.
+2. 🔁 **Direttiva doppia = bloccante.** Il driver tiene l'ultima e non avvisa: la prima riga
+   e' una dichiarazione **falsa** lasciata agli atti.
+3. 📅 **`@DAQUANDO`/`@FINOA`** devono essere `aaaa.mm.gg` **e date vere**, con `@DAQUANDO`
+   **prima** di `@FINOA` (il driver muore a r.563 / r.933, ma muore **sul PC di backtest**).
+4. 🔢 **`@FRAZIONEIS`**: decimale col **PUNTO**, `0 < f <= 1` (driver r.704 / r.710).
+5. 🚫 **E la presenza di `@DAQUANDO` non si cerca piu' nel TESTO del file.** Il controllo vecchio
+   faceva `if "@DAQUANDO" not in testo` sull'**intero file, commenti compresi**: bastava
+   **nominarla in prosa** per soddisfarlo. 🔴 Misurato su 874 file prova: **9 lo superavano cosi'**
+   (8 `POSTNEWS_*`, che dichiarano in prosa di ometterla apposta, e `R200b_RITIRATO`, che ce l'ha
+   solo dentro un commento). Ora serve la **direttiva vera**. Un controllo soddisfatto da una
+   frase invece che da un fatto e' la classe 683 in un'altra veste.
+
+### Non-regressione, misurata
+Cancello su **tutti gli 874 file prova in archivio**, prima e dopo: celle totali **1581 = 1581**,
+passate **3162 = 3162**, e le **sole** differenze sono i **9 falsi verdi** del punto 5. I **15
+file dei round R234/R235/R236/R237 restano OK, problemi 0, rc 0**.
