@@ -32729,3 +32729,258 @@ solo su D30EUR + NASUSD                                    :     554
 3. 🧪 **E ha anche un uso buono, se dichiarato**: la cella `(0,0)` con `Trades = 0` e' la prova
    che il filtro del lato **morde**. Usarla come **controllo negativo** e' legittimo — una cella,
    non un quarto della griglia.
+
+---
+
+## 💸🕐 CLASSE 650 — **IL CANCELLO DI COSTO COMPILATO SULLA FASCIA ORARIA PIU' ECONOMICA PER UN MOTORE CHE NON HA NESSUN FILTRO D'ORA: il 40x passa su tre simboli che, alla mediana onesta PER BARRA, lo sfondano** (controllo-preventivo, 23/09/2026, su `R234a/b/c_tf_EMA200SHORT_*.txt` — **specchio esatto della 591**)
+
+**Numeri grepati al momento di scrivere**: ultima classe in
+`backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md` = **647**; `CLASSE 648` e `CLASSE 649` gia'
+prese da `report/IL_CORTO_DI_DAX_E_NASDAQ_2026-09-23.md` (r.535 e r.544).
+`grep -rn "CLASSE 650" . --exclude-dir=.git --exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+Tre file prova del round R234 (asse `InpTF`, corto puro di `ABTG_EMA200` su `U30USD`/`D30EUR`/
+`NASUSD`) compilano il cancello `T2` — *"stop >= 40 x spread"* — con queste mediane:
+
+| file | spread usato | da dove |
+|---|---:|---|
+| `R234a` `U30USD` | **1,90** | `spread_orario_U30USD.csv`, **ora 17** |
+| `R234b` `D30EUR` | **1,70** | `spread_orario_D30EUR.csv`, **ore 08-16** |
+| `R234c` `NASUSD` | **1,80** | `spread_orario_NASUSD.csv`, **ora 14** |
+
+🔴 **Ma il motore non ha NESSUN filtro d'ora, ed e' verificato riga per riga sul sorgente**
+(`mql5/Experts/ABTG_EMA200.mq5`): l'unico `hour` nel percorso d'ingresso e' `InpCutoffHour`
+(r.452) dentro `CutoffCheck()`, che **cancella i pendenti** e non arma niente — e in tutti e tre
+i file `InpUseCutoff=false` e' **pinnato**; l'altro (r.281) e' la chiusura del venerdi', anche
+lei pinnata a `false`. 👉 **Il corto puro valuta una candidata su OGNI barra del TF, 24 ore su
+24, cinque giorni su cinque.** La fascia scelta e' l'unica in cui lo spread vale meta'.
+
+### 🧮 Il numero onesto, che si calcola in dieci secondi dagli stessi CSV
+Un motore che valuta **una volta per barra** pesa **tutte le ore allo stesso modo**: la statistica
+giusta e' la **mediana delle 24 mediane orarie**, non la mediana pesata sui tick (che e' dominata
+dalle ore americane, cioe' proprio da quelle economiche).
+
+| simbolo | spread nel file | mediana **su TUTTO** (pesata sui tick) | **mediana per BARRA** (24 ore equipesate) |
+|---|---:|---:|---:|
+| `U30USD` | 1,90 | 2,00 | 🔴 **2,60** |
+| `D30EUR` | 1,70 | 1,70 | 🔴 **2,70** |
+| `NASUSD` | 1,80 | 1,80 | 🔴 **2,40** |
+
+**E il verdetto di `T2` si capovolge su cinque celle su quindici:**
+
+| cella | `stop/spread` nel file | alla mediana **per barra** |
+|---|---:|---:|
+| `U30USD` **H1** (la cella dell'ANCORA) | 54,9x 🟢 *(+37%)* | **40,1x** 🟠 *sulla frontiera esatta* |
+| `U30USD` M30 | 38,8x 🔴 | 28,4x 🔴 |
+| `D30EUR` **H1** | 38,0-43,2x 🟠 | **23,9-27,2x** 🔴 |
+| `D30EUR` **H2** | 53,8-61,2x 🟢 | **33,9-38,5x** 🔴 |
+| `NASUSD` **H1** | 44,7x 🟢 | **33,5x** 🔴 |
+
+👉 **Il round esisteva per SCEGLIERE UN TF.** Col numero del file il costo indica **H1**; col
+numero onesto indica **H2/H3**. Il cancello non avrebbe protetto: avrebbe **puntato la macchina
+sul TF sbagliato**, e `T2` dice testualmente *"non puo' essere PROMOSSA, qualunque PF faccia"*.
+
+### 🪞 E LA PARTE CHE RENDE LA CLASSE NUOVA — **la sensibilita' che non era una sensibilita'**
+`R234a` si difende cosi': *"Con spread 2,00 invece di 1,90: M30 scende a 36,9x, H1 a 52,2x. La
+conclusione non dipende da quale spread si usa."* 🔴 **I due numeri non sono i due estremi
+dell'incertezza: sono due letture DELLA STESSA FACCIA.** `2,00` e' la mediana **pesata sui tick**,
+e su `U30USD` le ore 14-21 portano **il 68% dei tick** (44,0 milioni su 64,7): quella mediana
+*e'* la fascia americana. Un intervallo costruito fra due numeri che pendono dalla stessa parte
+**descrive la stabilita' del conto, non quella del mondo**, ed e' una **conferma travestita**
+esattamente nel senso della regola del 10/09.
+
+> ### 🔴 LA REGOLA
+> 1. 🕐 **Lo spread del cancello di costo si sceglie sull'insieme di ore in cui il motore PUO'
+>    ENTRARE, e quell'insieme si legge dal SORGENTE, non dal nome della sedia.** Grep secco:
+>    `hour`, `Hour`, `SessionHour`, `Cutoff`, `TimeToStruct` — e per ognuno si guarda se e' un
+>    **cancello d'ingresso** o solo una pulizia dei pendenti.
+> 2. 🧮 **Se il motore entra a qualunque ora, la statistica e' la mediana PER BARRA (ore
+>    equipesate), non quella pesata sui tick.** Le due differiscono del **30-60%** sugli indici
+>    BCM, e la differenza va **sempre** nel verso permissivo.
+> 3. 🎚️ **Un numero MISURATO su n=8 gambe vive (qui: «1,90, ora 17», `CANCELLO_COSTO_FLOTTA`
+>    r.406) descrive DOVE QUELLA SEDIA HA OPERATO, non dove il motore puo' operare.** Si tiene,
+>    ma come **bordo ottimista di una banda**, mai come il numero.
+> 4. 🪞 **Una prova di sensibilita' si fa contro l'ALTRA faccia, non contro un secondo valore
+>    della stessa.** Se i due numeri provati non stanno ai due lati della grandezza vera, la
+>    frase *"la conclusione non dipende da quale numero si usa"* e' falsa e va cancellata.
+> 5. 🧭 **Specchio della 591**: la' il proxy del costo era misurato su **tutte** le barre mentre
+>    l'EA entrava **solo sui flip** (errore RESTRITTIVO: bocciava due TF buoni); qui e' misurato
+>    su **una fascia** mentre l'EA entra **ovunque** (errore PERMISSIVO: promuove tre celle che
+>    non passano). **Le due si cercano con la stessa domanda: l'insieme dello spread e l'insieme
+>    degli ingressi sono LO STESSO insieme?**
+
+---
+
+## 🎲🔗 CLASSE 651 — **LA «VERIFICA INCROCIATA» CHE E' UNA COINCIDENZA DI CIFRE CON UN NUMERO DI UN ALTRO SIMBOLO, UN ALTRO EA E UN'ALTRA COLONNA: la frase «non e' una coincidenza fortunata» scritta senza aver aperto la fonte** (controllo-preventivo, 23/09/2026, su `R234c_tf_EMA200SHORT_NASUSD.txt`)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 651" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+`R234c` deriva, con una catena di quattro passaggi (ADR Nasdaq `313,8` -> ATR(14) H1 `64,1` ->
+rapporto stop/ATR `1,255` -> stop H1 `80,4` -> `/1,80` = **44,7x**), e poi scrive:
+
+> `[!] Il 44,7x di H1 combacia al decimo col numero gia' scritto in casa per questo simbolo: e'`
+> `    una verifica incrociata della catena, non una coincidenza fortunata.`
+
+🔴 **Il `44,7x` in casa esiste — e non ha NIENTE in comune con questa catena.** Unica occorrenza
+repo-wide (`grep -rn "44,7x"`, escluse le worktree): `report/ROUND_ORB_ATR_PS5_2026-09-10.md`
+**r.300**:
+
+```
+| OPPRANGE + 30 | ~134 | 67,0x | SI (+68%) | 44,7x |
+```
+
+| | quello che la frase promette | quello che r.300 e' davvero |
+|---|---|---|
+| simbolo | `NASUSD` | 🔴 **`U30USD`** (il titolo della tabella e' *«U30USD — range ~94»*) |
+| motore | `ABTG_EMA200` | 🔴 **ORB**, geometria `OPPRANGE + 30` |
+| stop | 80,4 idx | 🔴 **~134 idx** |
+| spread | 1,80 (mediana) | 🔴 **3,00**, la colonna **P95** |
+
+👉 Sono **due rapporti diversi fra quattro numeri diversi** che arrivano alla stessa cifra.
+**E' esattamente una coincidenza fortunata**, ed e' stata scritta con la frase che dice il
+contrario. Zero informazione, tre righe di falsa sicurezza dentro un file di **criteri
+congelati**, che verra' riletto fra mesi da qualcuno che non riaprira' r.300.
+
+### ☠️ Perche' costa
+Una catena a quattro anelli, **tutta `[DERIVATO]`**, non aveva nessuna verifica indipendente — e
+il file dichiarava di averne una. Nel round R234 quella catena decide `T2` su un simbolo intero:
+se il lettore crede alla convalida, la banda d'incertezza della catena **sparisce dal referto**.
+
+> ### 🔴 LA REGOLA
+> 1. 🔎 **«Combacia col numero gia' scritto in casa» e' una CITAZIONE: pretende file, riga e
+>    contesto**, e il contesto include **simbolo, motore, geometria e quale colonna**. Finche'
+>    non c'e' il `grep` incollato, non e' una verifica: e' un ricordo.
+> 2. 🎲 **Due numeri uguali non sono una convalida se non sono la STESSA GRANDEZZA.** Un
+>    rapporto `a/b` ha infinite coppie che lo producono: la coincidenza fra rapporti e' il tipo
+>    di coincidenza **piu' probabile che esista**, non il piu' raro.
+> 3. 🧪 **Il contro-esempio, qui, e' gratis e si fa PRIMA**: *«se questo numero venisse da
+>    un'altra sedia, me ne accorgerei?»*. Un `grep -rn` di trenta secondi risponde.
+> 4. 🚫 **E una catena TUTTA `[DERIVATO]` si consegna con la sua banda, mai con una convalida
+>    inventata.** Se non esiste un numero indipendente, la riga giusta e' *«questa catena non ha
+>    verifica incrociata»* — che e' un buco dichiarato, e vale piu' di un PASS gonfiato.
+
+---
+
+## ⚓🧬 CLASSE 652 — **DUE NUMERI DERIVATI DALLA STESSA LEGGE MA DA DUE ANCORE DIVERSE, MESSI IN COLONNA: il divario viene letto come una LEGGE FISICA («l'ATR cresce piu' lentamente della radice») — e una delle due ancore e' quella che la fonte citata DICHIARA TRONCATA E RESPINTA** (controllo-preventivo, 23/09/2026, su `R234b_tf_EMA200SHORT_D30EUR.txt`)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 652" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+`R234b` costruisce la tabella del costo sul DAX pescando **due** valori dallo **stesso** referto,
+`report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md`:
+
+- `ATR(14) D30EUR M30 = 36,4-41,4` (r.16) — ancorato a **`ADR = 252,2`**, che quel referto
+  presenta come **il numero buono** (r.18: *«[MISURATO] n=53 giornate»*);
+- `ATR(14) D30EUR H4 = 76,1` (r.53) — ancorato a **`ADR = 186,5`**, che **lo stesso referto**
+  demolisce nel suo §3, intitolato *«IL VERO DIFETTO CHE HO TROVATO SCAVANDO — **l'ancora ADR e'
+  TRONCATA**»* (r.78-83), e che compare a r.53 **solo per far cadere un `~170` sbagliato**, non
+  come valore di casa.
+
+🔴 **Poi il file legge il divario fra i due come una proprieta' del mercato**, e lo scrive nei
+BUCHI DICHIARATI:
+
+> `il DAX ha ATR(H4) 76,1 misurato contro i 103-117 che la radice predirebbe da M30, cioe' l'ATR`
+> `vero cresce PIU' LENTAMENTE della radice.`
+
+### 🧮 Il divario e' spiegato AL 100% dall'ancora, e il conto sta in una riga
+`76,1 / 36,4 = 2,091` · `sqrt(8) = 2,828` · `2,828 / 2,091 = 1,3524` ·
+**`252,2 / 186,5 = 1,3523`**.
+👉 **I due numeri usano LA STESSA legge `ADR x sqrt(T/1440)`.** Non c'e' **nessuna** evidenza di
+scaling sub-radice: c'e' un cambio di ancora, e basta. E i `103-117` che il file cita come
+"quello che la radice predirebbe" sono **esattamente** la riga H4 della catena corretta
+(`252,2 x sqrt(240/1440) = 103,0`, banda `x1,006..x1,138` -> `103,0-117,2`), cioe' **il numero
+giusto**, scartato in favore di quello sbagliato.
+
+**Tre errori in una frase sola**, e tutti e tre verificabili aprendo la fonte:
+1. 🏷️ **`76,1` non e' `misurato`**: il referto lo tagga `[DERIVATO]` e scrive a r.21-22
+   *«Nessuno ha ancora letto `iATR(14)` su barre M30 del DAX»*. Il file lo promuove a `misurato`
+   nella riga che lo usa (mentre nella tabella, dieci righe sopra, lo tagga `[DERIVATO]`:
+   **il file si contraddice da solo**).
+2. ⚓ **L'ancora e' quella respinta** dal referto citato.
+3. 🧬 **La conclusione fisica non esiste**: e' un artefatto aritmetico del punto 2.
+
+### ☠️ Perche' costa, ed e' il motivo per cui la classe esiste
+La frase serviva a **giustificare la prudenza** del giudizio su M30 (*«il mio giudizio su M30 e'
+il piu' severo possibile, non il piu' comodo»*). 🔴 **Tolta la legge inventata, la giustificazione
+sparisce**, e con essa il motivo per cui il file si sentiva autorizzato a NON misurare gli stop
+degli altri TF. In piu' la riga H4 della tabella nasce sbagliata del **36%** in difetto
+(`95,5` invece di `129,3-147,1` idx, cioe' `56,2x` invece di `76,1-86,5x`) — qui nel verso
+innocuo, ma per **caso**, non per costruzione.
+
+> ### 🔴 LA REGOLA
+> 1. ⚓ **Due numeri derivati si possono mettere in colonna SOLO se hanno la stessa ANCORA e la
+>    stessa LEGGE.** Prima di confrontarli si scrive, accanto a ciascuno, **da quale misura
+>    partono**: qui bastava scrivere `252,2` e `186,5` uno sotto l'altro.
+> 2. 🧮 **Se due derivati divergono, il PRIMO sospetto e' l'ancora, non la legge.** Il test costa
+>    una divisione: `rapporto osservato / rapporto previsto` — se viene **esattamente** il
+>    rapporto fra le due ancore, la legge e' innocente e il confronto non esisteva.
+> 3. 📖 **Quando si pesca un numero da un referto, si legge il RUOLO che ha li' dentro.** Un
+>    valore che compare dentro una **confutazione** (*«questo e' quello che darebbe l'ancora
+>    sbagliata»*) non e' un valore di casa: e' una prova a carico. Si controlla **il titolo del
+>    paragrafo** che lo contiene.
+> 4. 🏷️ **Un tag `[DERIVATO]` non si perde per strada.** Se lo stesso file scrive `[DERIVATO]`
+>    nella tabella e `misurato` nella prosa, e' gia' un difetto **anche senza aprire la fonte**:
+>    la contraddizione interna e' un `grep` su se stessi (parente della **609**).
+
+---
+
+## 🔥📉 CLASSE 653 — **UN ROUND IL CUI UNICO ASSE E' IL TIMEFRAME E CHE NON DICHIARA IL RISCALDAMENTO DELL'INDICATORE: la gamba IS perde il 2% a M30 e il 19% a H4, e il «crollo di n al TF alto» viene letto come una proprieta' del motore** (controllo-preventivo, 23/09/2026, su `R234a/b/c` — **cugina della 521**, che aveva gia' misurato lo stesso warm-up)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 653" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+R234 mette `InpTF` ad asse su **cinque** membri (`M30 H1 H2 H3 H4`) con
+`@DAQUANDO 2024.09.26`, che e' il **pavimento vero dei dati** (`REFERTO_SONDA_STORICO_17-08.md`
+§3: gli indici BCM sono `COMPLETO` da quella data — **prima non c'e' NIENTE**, non "non l'abbiamo
+scaricato"). L'EA legge `iMA(_Symbol,InpTF,200,...)`: finche' la EMA200 **del TF della cella** non
+esiste, `EmaVal()` torna `0` e l'ingresso esce a `if(ema<=0||atr<=0)` (r.328).
+
+🔴 **Quindi ogni cella parte in un momento DIVERSO, e la differenza e' l'asse stesso.** A ~115 ore
+di mercato a settimana su un indice:
+
+| cella | 200 barre = | inizio effettivo dopo il | **% della gamba IS (256 gg) persa** |
+|---|---:|---:|---:|
+| `M30` | 100 h | ~6 giorni | **2,3%** |
+| `H1` | 200 h | ~12 giorni | 4,7% |
+| `H2` | 400 h | ~24 giorni | 9,5% |
+| `H3` | 600 h | ~37 giorni | 14,3% |
+| `H4` | 800 h | ~49 giorni | 🔴 **19,1%** |
+
+*(la casa aveva gia' misurato lo stesso ordine di grandezza: **classe 521**, «l'EMA200 su H4 …
+ne servono ~200 barre H4 = **~33 giorni**»)*
+
+Il file, intanto, congela questa attesa:
+> `Il collasso di n a H4 e' gia' misurato ed e' brutale: 23 operazioni contro 300 a H1 … Se H2 e`
+> `H3 stanno sulla retta fra questi due punti, la frequenza e' il prezzo vero del TF alto.`
+
+👉 **Una parte di quel "prezzo del TF alto" e' impalcatura, non mercato**, e il file la attribuisce
+al motore. E' il difetto della **classe 521** (*«il verdetto sarebbe stato letto come un fatto sul
+mercato, ed era un fatto sul warm-up degli indicatori»*) trasportato dal **filtro** all'**asse**.
+
+### 🟢 Quello che invece NON e' colpito, e va detto insieme
+- 🟢 **La gamba OOS e' pulita**: parte dal `2025.06.10` e ha **otto mesi e mezzo** di storico
+  dietro, quindi tutte e cinque le celle entrano riscaldate. `T4` (merito, `n>=150` OOS) legge
+  numeri confrontabili. Il danno e' **tutto nell'IS**.
+- 🟢 **Il verso e' noto e monotono**: penalizza **sempre** il TF alto. Non falsifica un H4 che
+  esce buono; puo' seppellire un H3/H4 che esce mediocre.
+- 🟢 **Non c'e' nessun trade sbagliato**: il motore non opera, non opera *male*.
+
+> ### 🔴 LA REGOLA
+> 1. 🔥 **Su un asse di TIMEFRAME, il riscaldamento degli indicatori E' UNA VARIABILE
+>    CONFUSA e si dichiara con la tabella**, una riga per cella: `periodo piu' lungo x barre ->
+>    ore -> giorni -> % della gamba`. Si calcola prima di lanciare, costa una moltiplicazione.
+> 2. 🧱 **Morde solo quando `@DAQUANDO` e' il PAVIMENTO DEI DATI.** Se c'e' storico prima della
+>    finestra, MT5 riscalda da li' e il problema non esiste: **il primo controllo e' se la data
+>    di partenza e' un muro o una scelta** (parente della **590** e della **612**).
+> 3. 📉 **Un `n` piu' basso al TF alto non e' una misura di frequenza finche' non si e'
+>    sottratta la finestra morta.** Il numero onesto e' `n / (giorni VIVI della gamba)`, e i
+>    giorni vivi cambiano da cella a cella.
+> 4. 🧯 **La via corta alla misura vera, se si vuole chiudere il buco invece di dichiararlo**:
+>    un contatore sul ramo muto (`ema<=0||atr<=0`) stampato a fine corsa — **la riparazione gia'
+>    fatta nella classe 521** — dice la data del primo ingresso possibile, cella per cella,
+>    senza nessuna passata in piu'.
