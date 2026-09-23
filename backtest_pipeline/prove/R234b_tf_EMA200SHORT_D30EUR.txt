@@ -21,7 +21,9 @@
 #    >>> Qui l'asse e' il TF: dentro la regola, esplicitamente.
 #    >>> E NON si rifa' la griglia delle distanze (InpOrder1Atr /
 #        InpOrder2Atr / InpTP_RR) su DAX e Nasdaq: quella griglia e' gia'
-#        girata e ha dato 0 celle positive su 56 (vedi tabella). Rifarla
+#        girata e ha dato 1 cella positiva su 90 -- e quella sola (H4
+#        D30EUR, PF 1,00575 RF 0,01014) e' rumore; a H1 il conto e' 0 su
+#        56 (classe 180: l'insieme si elenca, non si sceglie). Rifarla
 #        piu' fitta cercherebbe solo picchi di rumore -- il difetto che
 #        la regola del 19/08 vieta per nome.
 #
@@ -37,7 +39,7 @@
 #      H4  D30EUR   1 / 34     <-- PF 1,00575, RF 0,01014: e' rumore
 #      H4  NASUSD  ASSENTE     <-- lo scan H4 del Nasdaq NON ESISTE
 #    [!] QUESTI SCAN SONO **OHLC**, non tick reali: e' il banco
-#        OTTIMISTA. Quindi lo 0/56 di DAX+Nasdaq e' un verdetto dato
+#        OTTIMISTA. Quindi lo 0/56 di DAX+Nasdaq A H1 e' un verdetto dato
 #        nella condizione piu' FAVOREVOLE ai due simboli, e questo lo
 #        rende piu' pesante, non meno.
 #    [!] E la finestra di quegli scan NON E' DICHIARATA nel file di
@@ -57,29 +59,40 @@
 #    e LO STESSO deposito. Vedi il cancello T1.
 #
 #  IL CANCELLO DEL COSTO, COMPILATO PRIMA DI LANCIARE
-#    Regola di casa: stop >= 40 x spread, altrimenti il TF si dichiara
-#    ESCLUSO PER COSTO col numero accanto.
-#    Spread D30EUR: mediana MISURATA 1,70 punti indice nelle ore di borsa
-#      08-16 (risultati_archivio/spread_flotta/spread_orario_D30EUR.csv,
-#      righe 8-16). Frontiera: 40 x 1,70 = 68,0 punti indice.
-#    ATR(14) del DAX: M30 = 36,4-41,4 idx [DERIVATO],
-#      report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md r.16; H4 = 76,1
-#      idx [DERIVATO] (r.53).
+#    Regola di casa: stop >= 40 x spread.
+#    [!] Il motore non ha filtro d'ora (vedi R234a): lo spread si pesa
+#      PER BARRA, non per tick (classe 650).
+#    Spread D30EUR, BANDA -- spread_orario_D30EUR.csv:
+#      1,70 = mediana delle ore di borsa 08-16 (bordo OTTIMISTA)
+#      2,70 = MEDIANA DELLE 24 MEDIANE ORARIE (di notte il DAX sta a
+#             3,5-4,0): e' QUESTO che decide T2.
+#    Frontiere: 40 x 1,70 = 68,0 idx  |  40 x 2,70 = 108,0 idx.
+#    ATR(14) del DAX, UNA SOLA ANCORA -- ADR D30EUR 252,2 idx [MISURATO]
+#      n=53, legge ATR(T) = ADR x radice(T/1440), residuo -1%, banda
+#      x1,006..x1,138 (report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md
+#      par. 4, r.123-136):
+#        M30 36,4-41,4  H1 51,5-58,6  H2 72,8-82,8  H3 89,2-101,4
+#        H4 103,0-117,2
+#      [!] Il '76,1' di r.53 NON SI USA: e' ancorato ad ADR 186,5, che
+#          lo STESSO referto dichiara TRONCATA al par. 3 e sostituisce
+#          con 252,2. Compare li' solo per far cadere un ~170 sbagliato.
 #    Rapporto stop/ATR di QUESTO motore: 104,3 / 83,1 = 1,255, dove
 #      104,3 e' lo stop MISURATO della sedia 771531 e 83,1 e' il centro
 #      dell'ATR(14) H1 del Dow MISURATO (78,0 n=5 e 88,2 n=33,
 #      CANCELLO_COSTO_FLOTTA r.410). E' un rapporto di GEOMETRIA del
-#      motore (SL = 1 ATR oltre il 2o ordine), quindi si trasporta da un
-#      simbolo all'altro meglio di quanto si trasporti un ATR.
-#    Frontiera compilata, tutto [DERIVATO] salvo dove detto:
-#      M30  45,7-52,0 idx ->  26,9-30,6x   ROSSO: molto SOTTO 40
-#      H1   64,6-73,5 idx ->  38,0-43,2x   ARANCIONE: 40 cade DENTRO
-#      H2   91,4-104,0 idx -> 53,8-61,2x   VERDE
-#      H3  119,6 idx (centro) -> 70,4x     VERDE
-#      H4   95,5 idx (da ATR 76,1) -> 56,2x VERDE
+#      motore (SL = 1 ATR oltre il 2o ordine), e con InpOrder2Atr 0,30
+#      invece di 0,35 vale ~1,232: il trasporto e' ottimista di ~2%.
+#    Frontiera compilata, tutto [DERIVATO]:
+#               stop          /1,70 (ottimista)  /2,70 (DECIDE T2)
+#      M30   45,7-52,0 idx     26,9-30,6x ROSSO   16,9-19,3x ROSSO
+#      H1    64,6-73,5 idx     38,0-43,2x arancio 23,9-27,2x ROSSO
+#      H2    91,4-104,0 idx    53,8-61,2x verde   33,9-38,5x ROSSO
+#      H3   111,9-127,3 idx    65,8-74,9x verde   41,4-47,1x VERDE
+#      H4   129,3-147,1 idx    76,1-86,5x verde   47,9-54,5x VERDE
 #    [!] Da leggere bene: sul DAX la direzione che AIUTA il costo e'
-#        SALIRE di TF, non scendere. M30 e' il TF che il costo boccia
-#        piu' nettamente di tutti, su tutti e tre gli indici.
+#        SALIRE di TF. Col numero onesto il DAX passa il 40x SOLO da H3
+#        in su -- M30, H1 e H2 sono ESCLUSI PER COSTO, e T2 dice che non
+#        possono essere promosse qualunque PF facciano.
 #
 #  IL CONTRO-ESEMPIO, COSTRUITO PRIMA (regola del 10/09)
 #    L'ipotesi comoda e' "il corto e' del Dow, punto". Se fosse vera,
@@ -96,6 +109,12 @@
 #        scritto qui prima: se una cella DAX o Nasdaq esce PF >= 1,10
 #        con n >= 150 E passa il cancello del costo, allora "il corto e'
 #        del Dow" e' FALSA e va cancellata dai referti dove l'ho scritta.
+#    >>> E VA DETTO QUANT'E' LARGA QUESTA PORTA: col cancello del costo
+#        onesto (mediana per barra), le celle che POSSONO falsificarmi
+#        sono H3/H4 sul DAX e H2/H3/H4 sul Nasdaq. Se nessuna di quelle
+#        arriva a n >= 150, il round NON ha falsificato niente: ha detto
+#        'NON ANCORA MISURATO' -- e va scritto cosi' nel referto, mai
+#        'confermato che il corto e' del Dow'.
 #
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI
 #    FREQUENZA. Misurata a H1 su U30USD (R110, corto puro): 125 op in 256
@@ -131,17 +150,27 @@
 #    T2  COSTO. Una cella il cui stop/spread e' SOTTO 40x non puo' essere
 #        PROMOSSA, qualunque PF faccia. Puo' essere LETTA (serve a dare
 #        la forma della curva) ma nel referto va marcata ESCLUSA PER
-#        COSTO col suo numero. Per M30 la tabella sopra dice gia' che
-#        questo succedera' su tutti e tre i simboli.
+#        COSTO col suo numero. La tabella sopra dice gia' chi cade: M30
+#        su tutti e tre, e col numero onesto anche H1 su DAX e Nasdaq,
+#        piu' H2 sul DAX. Sul Dow H1 resta ARANCIONE, sulla frontiera.
 #        [!] E va detto perche' il cancello esiste, se la corsa e' a tick
 #            REALI e lo spread lo paga gia' dentro: il 40x non serve a
 #            pagare lo spread (quello e' gia' pagato), serve a dire che
 #            uno stop cosi' sottile NON REGGE allo slippage e
 #            all'allargamento dello spread che il backtest non simula.
 #    T3  RISCHIO, a qualunque n. DD del corto puro <= 10,00% a rischio
-#        1,0%. Peggior Giornata (colonna del CSV): allarme a -3,00%.
-#        Sopra: si scrive nel referto e la taglia si rifa' prima di
-#        qualunque discorso di schieramento.
+#        1,0% -- colonna 'Equity DD %', che questo EA SCRIVE. Sopra: si
+#        scrive nel referto e la taglia si rifa' prima di qualunque
+#        discorso di schieramento.
+#        [!] LA PEGGIOR GIORNATA NON ESISTE PER QUESTO MOTORE, E NON E'
+#            UN GUASTO: ABTG_EMA200.mq5 r.646 dichiara 'double stats[7]'
+#            e r.676 scrive un header a OTTO colonne
+#            (Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,
+#             Sharpe Ratio,Equity DD %,Trades). Verificato anche sui CSV
+#            dell'ancora R110, che hanno esattamente quell'header. E' la
+#            classe 80, gia' pagata su R110 con QUESTO stesso EA. Quindi
+#            T3 NON la nomina: se la si vuole, si legge dai deal del
+#            report .htm e si dichiara come misura SEPARATA.
 #    T4  MERITO. Si legge SOLO sulle celle con n >= 150 nella gamba OOS
 #        (Emendamento A del 16/08). Sotto: la cella e' [NON MISURATO PER
 #        IL MERITO], non "brutta".
@@ -165,25 +194,50 @@
 #      a quella scala", non "il TF a parita' di tutto il resto". Non e'
 #      un difetto del file: e' cosa vuol dire cambiare TF in questo EA, e
 #      va scritto nel referto ogni volta che si cita un numero.
-#    - LO STOP DEGLI ALTRI TF E' [DERIVATO], non misurato. La scalatura
-#      con la radice del tempo e' PRUDENTE nella direzione che conta: il
-#      DAX ha ATR(H4) 76,1 misurato contro i 103-117 che la radice
-#      predirebbe da M30, cioe' l'ATR vero cresce PIU' LENTAMENTE della
-#      radice. Tradotto: scendendo a M30 lo stop vero e' PIU' GRANDE di
-#      quello che ho scritto, quindi il mio giudizio su M30 e' il piu'
-#      severo possibile, non il piu' comodo.
+#    - LO STOP DEGLI ALTRI TF E' [DERIVATO], non misurato, e la legge di
+#      scala e' UNA SOLA: ATR(T) = ADR x radice(T/1440), ancorata ad
+#      ADR D30EUR 252,2 idx [MISURATO] n=53, con residuo verificato -1%
+#      su U30USD H1 (ATR_DAX_M30_RICONCILIAZIONE par. 4).
+#      [!] NON esiste nessuna misura che dica che l'ATR cresce piu'
+#          lentamente della radice. Qui prima c'era scritto il contrario,
+#          e serviva a rivendicare una prudenza che non c'era. Il '76,1'
+#          sembrava dirlo, ma e' ancorato ad ADR 186,5 -- l'ancora che
+#          QUEL REFERTO dichiara TRONCATA al par. 3 -- e il divario e'
+#          spiegato AL 100% dall'ancora: 76,1/36,4 = 2,091 contro
+#          radice(8) = 2,828, e 2,828/2,091 = 1,3529 contro
+#          252,2/186,5 = 1,3523. Zero fisica, tutta aritmetica
+#          (classe 652). Quindi qui NON si rivendica nessuna prudenza
+#          extra: la banda dichiarata e' quella, e basta.
 #    - LA GEOMETRIA E' QUELLA DI R110, NON QUELLA DELLA SEDIA VIVA. La
 #      sedia 771531 in campo ha InpOrder2Atr 0,35; qui c'e' 0,30, perche'
 #      il cancello T1 pretende i pin di R110. La differenza sposta la
 #      distanza fra i due ordini di 0,05 ATR (~4 punti indice sul Dow) e
-#      NON sposta lo stop, che e' 1 ATR oltre il 2o ordine in tutti e due
-#      i casi. Dichiarato, non nascosto.
+#      sposta il RISCHIO DEL 1o ORDINE da 1,55 a 1,50 ATR (il 2o resta
+#      1,00 in tutti e due: PlaceOrders r.356-358). Quindi il 104,3
+#      trasportato e' ottimista di ~2%: dichiarato nella tabella del
+#      costo, non nascosto.
 #    - GUARDIAN. InpUsaGuardian=true e' il default, ma nel tester le
 #      GlobalVariable del Guardian non esistono e la guardia lascia
 #      passare tutto (fail-open). Identico a R110: i numeri restano
 #      confrontabili.
 #    - RISCHIO 1,0% qui, 0,65% in campo: ogni DD di questo file si
 #      moltiplica per 0,65 per confrontarlo col forward.
+#    - IL RISCALDAMENTO E' UNA VARIABILE DELL'ASSE, non una costante.
+#      @DAQUANDO 2024.09.26 e' il PAVIMENTO dei dati: prima non c'e'
+#      niente da cui riscaldare. La EMA200 del TF della cella non esiste
+#      per 200 barre e l'EA esce muto (r.328: if(ema<=0||atr<=0) return).
+#      A ~115 h di mercato a settimana: M30 ~6 gg (2,3% della gamba IS di
+#      256), H1 ~12 (4,7%), H2 ~24 (9,5%), H3 ~37 (14,3%), H4 ~49 (19,1%).
+#      >>> Quindi UNA PARTE del crollo di n al TF alto e' impalcatura,
+#          non motore, e ogni n della gamba IS si legge come
+#          n / (giorni VIVI di quella cella), non n / 256.
+#      >>> LA GAMBA OOS E' PULITA: parte dal 2025.06.10 con otto mesi e
+#          mezzo di storico dietro, quindi T4 (merito, n>=150 OOS) legge
+#          numeri confrontabili. Il danno e' tutto nell'IS.
+#      (classe 653, cugina della 521 che aveva gia' misurato ~33 giorni
+#       per la EMA200 H4; la stima ~115 h/settimana e' una convenzione,
+#       non un conteggio: la misura vera costa ZERO passate, un contatore
+#       sul ramo muto)
 #
 #  L'ASSE E' UN ENUM: il conto delle celle NON e' aritmetico (classe 287)
 #    InpTF e' ENUM_TIMEFRAMES. Su un input enum MT5 IGNORA IL PASSO e
@@ -200,13 +254,27 @@
 #  r.63, CENSIMENTO_CONTRATTI_v2.md r.378). A 10.000 MathFloor taglia il
 #  lotto, la sedia rischia ~0,87% invece di 1,00% e i DD non si
 #  confrontano piu' con niente (classe 646).
+#  [!] IL DEPOSITO NON SI PUO' DICHIARARE QUI: walkforward_generico.ps1
+#      non ha nessuna direttiva @DEPOSITO (r.505-521) e il suo default e'
+#      10000 (r.200), come quello di RIGA_ROUND_VPS.ps1 (r.152). LA RIGA
+#      DI LANCIO DEVE PASSARE -Deposito 100000 (classe 647 regola 4).
+#      Su R234a il cancello T1 lo intercetta (a 10.000 l'ancora non puo'
+#      uscire); su R234b/R234c NO, perche' la loro T1 e' la cella di un
+#      ALTRO file: li' il deposito e' protetto SOLO dal fatto che i tre
+#      file partono nella stessa riga.
 #  SPLIT: @FRAZIONEIS 0.40, DICHIARATA QUI SOTTO NEL FILE e non dalla
 #  riga di lancio -- RIGA_ROUND_VPS.ps1 non ha nessuna occorrenza di
 #  "Frazione" e non potrebbe inoltrarla (classe 647). 0.40 e' lo stesso
 #  split di R110, ed e' cio' che rende possibile il cancello T1.
 #  @PERIODO RESTA H1 IN TUTTE LE CELLE, ED E' VOLUTO: @PERIODO e' il TF
 #  del GRAFICO nel tester (walkforward_generico.ps1 r.188), InpTF e' il
-#  TF che LEGGE IL MOTORE (r.104-105, 126, 149, 191). Tenendo il grafico
+#  TF che LEGGE IL MOTORE (ABTG_EMA200.mq5: iMA r.258-259, iATR r.260,
+#  iTime r.294, iClose r.329, PeriodSeconds r.378 -- e in tutto il
+#  sorgente NON esiste nessun _Period ne' PERIOD_CURRENT).
+#  [!] Le righe citate prima (104-105, 126, 149, 191) erano quelle della
+#      COPIA in mql5/Experts/standalone/: file sbagliato, e reggevano la
+#      scelta tecnica piu' rischiosa del round (classe 377).
+#  Tenendo il grafico
 #  fermo, l'unica cosa che cambia fra le celle e' il motore. A tick reali
 #  il grafico non cambia i tick consegnati, quindi il banco resta identico.
 #  @DAQUANDO: 2024.09.26 = pavimento MISURATO dei tick sugli indici
