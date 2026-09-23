@@ -32373,3 +32373,64 @@ lungo.** Sono due danni diversi e vanno raccontati diversi.
   🎯 E' l'**esatto opposto** di un asse d'**uscita**, dove `n` identico e' il controllo di sanita'
   che si *vuole* vedere. Confondere i due casi fa leggere *«asse inerte»* dove c'e' un motore che
   funziona, e viceversa.
+
+---
+
+## 🪞🕳️ CLASSE 642 — **IL PRESET RIMAPPATO E IL SUO ORIGINALE DIVERGONO SU INPUT CHE CON L'OROLOGIO NON C'ENTRANO: la guardia sullo `sha1` protegge dalla deriva a MONTE, non da quella a VALLE** (23/09/2026, R231)
+
+**Numero grepato al momento di scrivere**: `CLASSE 6xx` repo-wide si fermava a **641**, e
+`CLASSE 642` non compariva da nessuna parte.
+
+### Il caso reale
+La sedia Nasdaq `770260` ha **due** preset in repo:
+- `mql5/Presets/ABTG_Nasdaq_Apertura_US_RETEST_770260.set` — l'**originale BCM**;
+- `mql5/Presets/FTMO/ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set` — la **copia rimappata**
+  che sta sul terminale FTMO `541452707`, cioe' **quella che opera**.
+
+Il secondo nasce dal primo per **sola rimappatura d'orologio** (`backtest_pipeline/rimappa_preset_ftmo.py`),
+e la sua intestazione porta la guardia scritta a mano:
+> `ORIGINALE ....: mql5/Presets/ABTG_Nasdaq_Apertura_US_RETEST_770260.set`
+> `sha1(12) 3d952a41a17f -- se cambia, questo file va rigenerato.`
+
+🔴 **Oggi i due file divergono su DUE input che con l'orologio non c'entrano niente** — misurato
+confrontando i due file campo per campo:
+
+| input | BCM (originale) | FTMO (in campo) |
+|---|---:|---:|
+| `InpTP1_ClosePct` | `0.0` | **`50.0`** |
+| `InpBreakevenAtTP1` | `false` | **`true`** |
+
+**Causa**: il commit `496408a9` del 21/09 (*"Nasdaq 770260: ACCESA la parziale al 50%"*) ha
+toccato **un solo file**, quello FTMO (`git show --stat`: 1 file changed). Lo `sha1` dell'originale
+**non e' cambiato** — e' tuttora `3d952a41a17f` — quindi **la guardia non e' scattata**, e non
+poteva: e' scritta per accorgersi che **l'originale** e' cambiato, non che la **copia** ha preso
+una strada sua.
+
+### Perche' costa, e non e' un problema estetico
+Il danno non e' sul terminale (li' gira il file giusto): e' su **chi cerca l'ANCORA di un round**.
+Scegliere il round d'archivio che riproduce la sedia viva si fa **confrontando i CSV col preset**.
+Confrontando `R199B` col preset **BCM** escono **due differenze** e il round sembra *"non la cella
+viva"*; confrontandolo con quello **FTMO** escono **zero** differenze non-orarie e il round **e'**
+la cella viva. 👉 Con il file sbagliato in mano si scarta l'ancora giusta e si ancora il round a una
+configurazione **che non opera** — e poi il "controllo di riproduzione" fallisce senza che nessuno
+capisca perche'.
+
+### La regola
+1. 🎯 **L'ancora di un round si confronta col preset CHE OPERA**, cioe' quello del terminale su cui
+   la sedia e' attaccata. Oggi, per le sedie della challenge, e' **sempre** la copia in
+   `mql5/Presets/FTMO/`. L'originale BCM e' una **sorgente**, non una fotografia del campo.
+2. 🔎 **Il controllo che costa dieci secondi**, e va fatto PRIMA di scegliere l'ancora:
+   diff dei due preset ignorando i campi d'orologio (`InpSessionHour`, `InpCloseHour`, i minuti) e
+   `InpCorrSymbol`. **Se resta anche UNA riga, uno dei due file e' vecchio** — e va detto nel file
+   prova, non risolto di nascosto.
+3. 🧾 **Una modifica firmata da Claudio si applica a TUTTI E DUE i file**, o la divergenza si
+   dichiara nell'intestazione con la data e il motivo. Un preset che diverge in silenzio e' un
+   secondo ramo di verita' che nessuno sa di avere.
+4. 🛡️ **E la guardia sullo `sha1` va letta per quello che e'**: dice *"l'originale e' cambiato,
+   rigenera"*. **Non dice niente** se e' cambiata la copia. Le due derive sono **due difetti
+   diversi** e servono **due controlli diversi**.
+
+🟢 **Cosa NON e' successo, e va detto**: il terminale FTMO ha sempre avuto il file giusto, la
+parziale al 50% e' accesa dove doveva, e nessuna sedia ha operato con la configurazione sbagliata.
+Il difetto e' **di tracciabilita'**, e si e' fatto vedere solo perche' qualcuno e' andato a cercare
+un'ancora.

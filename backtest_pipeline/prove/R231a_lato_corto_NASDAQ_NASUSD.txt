@@ -1,0 +1,490 @@
+# =====================================================================
+#  R231a -- IL LATO CORTO DEL NASDAQ: L'UNICO LATO ACCESO DELLA ROSA
+#           CHE NESSUNO HA MAI PESATO
+#  EA: ABTG_Nasdaq_Apertura_US   (sedia 770260, simbolo NASUSD, M5)
+#
+#  GIRA SUL PC DI BACKTEST DESKTOP-H4D7CAJ, NON SUL VPS
+#  (firma di Claudio del 21/09: mentre una challenge e' viva i round
+#   non girano sulla macchina che ospita le sedie).
+#  Si lancia con: -Deposito 80000 -Modello 4
+#  ATTESA DEL CANCELLO: 2 celle, 4 passate.
+# =====================================================================
+#
+#  0. LA DOMANDA, E PERCHE' E' CONTROINTUITIVA
+#  --------------------------------------------
+#  Su DAX 770101 e su Dow 770202 il lato corto e' SPENTO, e lo
+#  spegnimento e' MISURATO (R107 del 25/08 sul DAX con geometria
+#  identica, n OOS 257; csv_r54 + R6/ptc sul Dow, altopiano 3/3).
+#  Su Nasdaq 770260 il lato corto e' ACCESO -- e l'accensione NON e'
+#  mai stata misurata: e' l'eredita' del default del sorgente
+#  (r.220 "input bool InpAllowShort = true").
+#  ==> La sedia che opera su DUE lati e' quella che ha MENO
+#      giustificazione misurata per il lato che le abbiamo lasciato.
+#
+#  0-bis. LA RICERCA E' STATA FATTA PER GEOMETRIA, NON PER NOME
+#  -------------------------------------------------------------
+#  (classe 640, scritta oggi: cercare una bocciatura per NOME DI ROUND
+#   invece che per GEOMETRIA fa "scoprire" NON MISURATI gia' misurati.
+#   Il file gemello R205a_lato_corto_DAX_D30EUR.txt e' caduto proprio
+#   li': dichiara [MISURATO] che il retest-short del DAX non e' mai
+#   stato girato, e R107 lo aveva girato un mese prima.)
+#
+#  QUELLO CHE HO CERCATO, a macchina, su TUTTI i CSV del repo che
+#  portano la colonna InpAllowShort e il simbolo NASUSD/NASDAQ nel nome:
+#  le righe con la GEOMETRIA VIVA
+#      InpEntryMode=2 (ABTG_RETEST) . InpBufferPoints=200 .
+#      InpRetestOffsetPts=0 . InpRangeMinutes=35
+#  RISULTATO: 18 file CSV contengono righe su quella geometria --
+#      Walkforward_Aperture/NASDAQ_B_motore_{IS,OOS}.csv  (2+2 righe)
+#      Walkforward_Aperture/faseB_v1/NASDAQ_B_motore_{IS,OOS}.csv (2+2)
+#      risultati_prove/R196A/..._{IS,OOS}_R196A.csv        (2+2)
+#      risultati_prove/R198/..._{IS,OOS}_R198.csv          (1+1)
+#      risultati_prove/R199A/..._{IS,OOS}_R199A.csv        (4+4)
+#      risultati_prove/R199B/..._{IS,OOS}_R199B.csv        (4+4)
+#      risultati_prove/R200A/..._{IS,OOS}_R200A.csv        (9+9)
+#      risultati_prove/R200C/..._{IS,OOS}_R200C.csv        (3+3)
+#      risultati_prove/R200E/..._{IS,OOS}_R200E.csv        (10+10)
+#  e TUTTE, senza eccezioni, portano (InpAllowLong, InpAllowShort)=(1,1).
+#  ==> Sulla geometria che opera oggi sul conto della challenge il LATO
+#      non e' MAI stato un asse. Il contro-fattuale "solo long" NON
+#      ESISTE in archivio. [MISURATO a macchina, 23/09/2026]
+#
+#  1. L'ANCORA, E PERCHE' QUESTA E NON UN'ALTRA
+#  ---------------------------------------------
+#  ANCORA SCELTA: R199B, cella InpTP1_ClosePct=50.
+#     backtest_pipeline/risultati_prove/R199B/
+#       ABTG_Nasdaq_Apertura_US_NASUSD_{IS,OOS}_R199B.csv, riga Pass=2.
+#  DEPOSITO 80.000 . MODELLO 4 (tick reali) . NASUSD M5 .
+#  finestra 2024.09.26 -> 2026.06.30 . FRAZIONE IS 0.40.
+#
+#  PERCHE' E' LA PIU' VICINA AL PRESET VIVO -- confronto a macchina,
+#  campo per campo, contro mql5/Presets/FTMO/
+#  ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set (il file che sta sul
+#  terminale FTMO 541452707, cioe' QUELLO CHE OPERA):
+#    - i 98 input della riga Pass=2 coincidono con il preset FTMO su
+#      TUTTI i campi tranne TRE, e i tre sono conversioni FTMO->BCM
+#      gia' usate da R196a/R198/R199a/R200*:
+#         InpSessionHour  16 -> 14      (stesso momento di mercato)
+#         InpCloseHour    19 -> 17      (stesso momento di mercato)
+#         InpCorrSymbol   US500.cash -> SPXUSD  (INERTE:
+#                         InpUseCorrelation=0 su tutte e due)
+#    - in particolare coincidono le DUE righe accese il 21/09 che sono
+#      l'ultima modifica alla sedia: InpTP1_ClosePct=50 e
+#      InpBreakevenAtTP1=true. Nessun altro round sulla geometria viva
+#      le ha tutte e due nella configurazione in campo.
+#  ==> R199B cella 50 NON e' "un round vicino": e' LA SEDIA CHE OPERA.
+#
+#  1-bis. ATTENZIONE, UNA TRAPPOLA TROVATA MENTRE SCEGLIEVO L'ANCORA
+#  ------------------------------------------------------------------
+#  In repo ci sono DUE preset di questa sedia:
+#      mql5/Presets/ABTG_Nasdaq_Apertura_US_RETEST_770260.set      (BCM)
+#      mql5/Presets/FTMO/..._770260_FTMO.set                       (FTMO)
+#  Il secondo nasce dal primo per sola rimappatura d'orologio, e la sua
+#  intestazione lo dichiara ("ORIGINALE ... sha1(12) 3d952a41a17f").
+#  [!] I DUE FILE OGGI DIVERGONO SU DUE INPUT CHE CON L'OROLOGIO NON
+#  C'ENTRANO NIENTE -- verificato a macchina:
+#      InpTP1_ClosePct    BCM 0.0    FTMO 50.0
+#      InpBreakevenAtTP1  BCM false  FTMO true
+#  Causa: il commit 496408a9 del 21/09 ("ACCESA la parziale al 50%") ha
+#  toccato SOLO il file FTMO. Lo sha1 dell'originale non e' cambiato,
+#  quindi la guardia scritta nell'intestazione NON e' scattata: quella
+#  guardia protegge dalla deriva a MONTE, non da quella a VALLE.
+#  ==> Chi avesse preso l'ancora confrontandola col file BCM avrebbe
+#      concluso che R199B "non e' la cella viva" (due differenze) e
+#      avrebbe scelto un round PEGGIORE. Il file giusto e' quello FTMO.
+#      Classe nuova, scritta in CHECKLIST_RIGA_DI_LANCIO.md.
+#      E NON si tocca nessun preset in questo round: e' segnalazione.
+#
+#  1-ter. IL BINARIO: L'ANCORA E' RIPRODUCIBILE A HEAD -- VERIFICATO
+#  ------------------------------------------------------------------
+#  R199B e' girato col pin 9fa84716 (report/DD_NASDAQ_R199_2026-09-21.md).
+#  `git diff 9fa84716..HEAD -- mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5`
+#  contiene UN SOLO commit (58e3314b) e ZERO righe di codice: cambia
+#  solo un commento (r.2166). Quindi l'EA a HEAD riproduce R199B.
+#  [MISURATO, non assunto: il diff e' stato filtrato togliendo le righe
+#   di commento e non resta niente.]
+#
+#  1-quater. I NUMERI DELL'ANCORA (cella InpTP1_ClosePct=50, Pass=2)
+#  ------------------------------------------------------------------
+#    IS  (2024.09.26 -> ~2025.06.09, frazione 0.40)
+#        Profit 7014.20 . PF 1.22116 . RF 1.14977 .
+#        Equity DD% 7.3069 . Trades 135 . Peggior Giornata% -2.0395
+#    OOS (~2025.06.10 -> 2026.06.30)
+#        Profit 8496.74 . PF 1.21546 . RF 1.29687 .
+#        Equity DD% 7.8576 . Trades 172 . Peggior Giornata% -2.1327
+#  I 98 input della riga Pass=2 sono IDENTICI nelle due finestre
+#  (confronto automatico: 0 discordanze). Se non lo fossero, "la cella"
+#  non esisterebbe.
+#
+#  2. LA TAGLIA: QUI NON SI RADDOPPIA NIENTE (differenza da R205a)
+#  ----------------------------------------------------------------
+#  L'ancora gira a InpRiskPercent=2 ED E' ESATTAMENTE LA TAGLIA IN
+#  CAMPO (firma di Claudio del 20/09, preset FTMO: InpRiskPercent=2.00).
+#  Quindi i DD di questo round si leggono TALI E QUALI, senza il
+#  fattore 2 della classe 547. Il deposito del banco e' 80.000 contro i
+#  100.000 del conto FTMO: PF, RF e n sono invarianti alla scala,
+#  i DD in PERCENTUALE pure (CalcLotByRisk usa ACCOUNT_BALANCE).
+#
+#  3. [!] IL CAMPIONE, DETTO PRIMA: IL MERITO E' SOSPESO (classe 550)
+#  ------------------------------------------------------------------
+#  Su questa sedia la parziale e' ACCESA (InpTP1_ClosePct=50, verificato
+#  nel preset FTMO), quindi la colonna `Trades` conta USCITE, non
+#  posizioni: una posizione che tocca il primo obiettivo produce DUE
+#  righe. Il numero vero e' gia' misurato in R199B appaiando le celle:
+#      IS   ClosePct=0 -> 82 uscite = 82 POSIZIONI ; ClosePct=50 -> 135
+#           uscite  ==> 53 parziali su 82 posizioni (64,6%)
+#      OOS  ClosePct=0 -> 102 POSIZIONI ; ClosePct=50 -> 172 uscite
+#           ==> 70 parziali su 102 posizioni (68,6%)
+#  ==> LE POSIZIONI DELLA CELLA VIVA SONO 82 (IS) E 102 (OOS), cioe'
+#      SOTTO il pavimento di 150 dell'Emendamento A del 16/08, in
+#      TUTTE E DUE le finestre. E la cella short=0 ne avra' di MENO.
+#  [!] QUINDI QUESTO ROUND NON PUO' PRONUNCIARSI SUL MERITO. Il MERITO
+#      e' SOSPESO a questo n. Si legge il RISCHIO, che vale a qualunque
+#      n (regola B del 16/08), e si legge il VERSO sul merito come
+#      indicazione, mai come verdetto.
+#  [!] E il pavimento dei 150 NON si applica al numero `Trades`: sarebbe
+#      applicarlo a un conteggio di uscite. Si applica alle POSIZIONI,
+#      e quelle si ricavano appaiando, non leggendo.
+#
+#  4. [test] IL CONTRO-ESEMPIO: SE LE DUE CELLE USCISSERO IDENTICHE?
+#  -------------------------------------------------------------
+#  Due spiegazioni OPPOSTE: (A) "il corto non fa niente" (informativo,
+#  e sarebbe una notizia ottima) oppure (B) "la manopola non e'
+#  arrivata al motore" (il round non ha misurato niente). Vanno
+#  separate PRIMA, non dopo.
+#
+#  4.1 DOVE VIVE InpAllowShort, RAMO PER RAMO (grep sul sorgente a HEAD,
+#      16 occorrenze, mappate sui confini di funzione):
+#    r.220   dichiarazione (default true) -- l'origine dell'accensione
+#    r.507   ABTGLog di OnInit: stampa "long+short" / "SOLO LONG"  VIVO
+#    r.993/1018   dentro TryPlaceBreakout()   (r.963-1056)      MORTO
+#    r.1087/1104  dentro TryPlaceRangeFade()  (r.1057-1126)     MORTO
+#    r.1228/1229  dentro TryPlaceDelayed()    (r.1167-1288)     MORTO
+#    r.1331/1332  dentro MonitorOpenConfirm() (r.1314-1388)     MORTO
+#    r.1440/1441  dentro MonitorBreakoutStrength() (r.1420-1494) MORTO
+#    r.1541  MonitorRetest(), ramo LONG                          VIVO
+#    r.1575  MonitorRetest(), ramo SHORT  <== L'ASSE DI QUESTO ROUND
+#    r.1648/1664  dentro TryPlaceGapFill()  (r.1613-1686)       MORTO
+#  I "MORTI" lo sono per il dispatch di InpEntryMode a r.737-782: con
+#  InpEntryMode=2 (ABTG_RETEST, enum r.153) si entra SOLO nel ramo
+#  r.742-747 -> ArmRetest() -> gPhase=PH_ARMED -> r.789 MonitorRetest().
+#  [!] NOTA CHE SEMBRA UN ERRORE E NON LO E': il preset vivo ha
+#  InpUseGapFill=true, ma TryPlaceGapFill() e' chiamata SOLO a r.740,
+#  sotto "if(InpEntryMode == ABTG_GAPFILL)". Con InpEntryMode=2 quel
+#  flag e' INERTE (lo dice anche il commento del BUG 05/08 a r.733-736:
+#  "Ora comanda la modalita'; il flag resta solo storico").
+#
+#  4.2 L'ASSE NON E' MURATO DA NESSUN ALTRO INPUT -- verificato.
+#  Il ramo SHORT di r.1575 e' governato da: InpAllowShort && shortOK.
+#  shortOK = (gBias == 0 || gBias == -1), e gBias = TrendBias() (r.1745).
+#  TrendBias() puo' produrre un bias DIREZIONALE solo tramite
+#  InpUseEmaFilter, InpUseSupertrend, InpUseSupertrend3,
+#  InpUseCorrelation, InpUseVwapFilter: nel preset vivo sono TUTTI E
+#  CINQUE false. ==> TrendBias() ritorna 0 IDENTICAMENTE, shortOK e'
+#  sempre vero, e NESSUN input asimmetrico e' acceso su questa sedia.
+#  Gli altri cancelli dentro il ramo (VolumeOK r.2530, SRBlocked,
+#  InpMinStopPts+InpSkipIfTight) sono SIMMETRICI fra long e short,
+#  quindi non possono spegnere un lato solo.
+#  [!] E' la differenza col Dow 770202, dove InpUseEmaFilter=1 su H4 e'
+#  direzionale: per questo sul Dow gli n si sommano ESATTI e qui non
+#  devono sommarsi.
+#
+#  4.3 LA SOGLIA NUMERICA CHE SEPARA (A) DA (B), congelata qui:
+#  Il discriminante PIU' DURO non e' un numero, e' una colonna: i nostri
+#  CSV scrivono TUTTI e 98 gli input (OnTesterDeinit r.2629-2638),
+#  quindi la colonna InpAllowShort del CSV dice QUELLO CHE MT5 HA
+#  DAVVERO USATO.
+#    - se la colonna mostra 0 in una riga e 1 nell'altra -> il pin E'
+#      ARRIVATO, l'ipotesi (B) e' FALSIFICATA dal CSV stesso, e
+#      l'eventuale identita' dei numeri significa (A);
+#    - se la colonna mostra lo stesso valore nelle due righe -> (B), il
+#      round si butta e si cerca il pin che balla.
+#  VERIFICA GRATUITA E ANCORA PRIMA DEI NUMERI: il log di OnInit (r.507)
+#  deve passare da "long+short" a "SOLO LONG" fra le due celle.
+#  SOGLIA QUANTITATIVA, perche' ne serve una anche se il CSV e' pulito:
+#  n DEVE SCENDERE spegnendo il corto, e di MOLTO. Calibrazione
+#  MISURATA sullo stesso EA e sullo stesso simbolo (FASE M,
+#  risultati_archivio/Walkforward_Aperture/NASDAQ_M_direzione_{IS,OOS}.csv,
+#  riga InpRangeMinutes=35, tick reali; geometria DIVERSA -- buffer 500,
+#  offset 200, TP1_R 1, volumi OFF -- ma stessa meccanica dello slot e
+#  stessa parziale al 50%, quindi i rapporti fra uscite sono comparabili):
+#      IS   solo long 156 . solo short 142 . entrambi 220
+#           -> n(solo long)/n(entrambi) = 0,709
+#      OOS  solo long 196 . solo short 197 . entrambi 301
+#           -> n(solo long)/n(entrambi) = 0,651
+#  ==> PREVISIONE, scritta prima dei numeri:
+#        IS   n(short=0) atteso fra  88 e  96   (su 135 dell'ancora)
+#        OOS  n(short=0) atteso fra 112 e 122   (su 172 dell'ancora)
+#      SOGLIA DI ALLARME: se n(short=0) > 167 in OOS o > 131 in IS
+#      (cioe' un calo inferiore a 5 uscite, ~3%), il calo e'
+#      incompatibile con OGNI rapporto mai misurato su questa famiglia
+#      e si va a guardare la colonna InpAllowShort e il log PRIMA di
+#      leggere qualunque PF.
+#
+#  5. [n] LA DIAGNOSI DELL'ADDITIVITA' (classe 641, scritta oggi)
+#  --------------------------------------------------------------
+#  Su un asse di LATO l'additivita' di n NON e' un si/no: e' una
+#  diagnosi a tre esiti, e vanno scritte tutte e tre PRIMA.
+#  Qui pero' misuro DUE celle, non quattro: ho (short=1) e (short=0),
+#  NON ho il "solo short". Quindi la diagnosi che posso fare e' sul
+#  CONTRIBUTO del corto, non sulla somma. Le tre letture:
+#    (a) SOTTO-ADDITIVA -- n(short=0) resta una frazione GRANDE di
+#        n(short=1), nella banda 0,65-0,71 prevista: e' la firma dello
+#        SLOT. Su questa sedia InpOneTradePerDay=true e, appena un
+#        LIMIT viene piazzato, gPhase=PH_PLACED (r.1547+ e r.1581+) e
+#        MonitorRetest() non viene piu' chiamata (dispatch r.786-790):
+#        il primo lato che spara CONSUMA IL POSTO dell'altro. Questo EA
+#        NON HA InpAllowReverse (grep: zero occorrenze), quindi non
+#        esiste il secondo ciclo che sul DAX chiudeva il buco: lo slot
+#        morde per intero. ==> E' L'ESITO ATTESO.
+#    (b) ADDITIVITA' ESATTA -- sarebbe la firma di un filtro
+#        DIREZIONALE a monte, che qui NON ESISTE (par. 4.2). Se uscisse,
+#        la mia lettura del codice e' sbagliata e si rilegge.
+#    (c) [!] SUPER-ADDITIVA -- n(short=0) piu' ALTO o uguale a
+#        n(short=1): e' L'UNICO VERO ALLARME. Vorrebbe dire che
+#        spegnere un lato AUMENTA le operazioni, cioe' che qualcosa
+#        conta le uscite in modo diverso fra le due celle o che il
+#        parziale si comporta in modo diverso. Round da buttare finche'
+#        non si spiega.
+#
+#  6. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+#  =========================================
+#  (a) RIPRODUZIONE -- si guarda PER PRIMA. La cella InpAllowShort=1
+#      deve riprodurre R199B Pass=2 alla quinta cifra:
+#        IS  Profit 7014.20 . PF 1.22116 . RF 1.14977 . DD% 7.3069 .
+#            Trades 135 . Peggior Giornata% -2.0395
+#        OOS Profit 8496.74 . PF 1.21546 . RF 1.29687 . DD% 7.8576 .
+#            Trades 172 . Peggior Giornata% -2.1327
+#      TOLLERANZA: un centesimo sul Profit, uguaglianza esatta su
+#      Trades, quinta cifra su PF/RF/DD (tolleranza G1,
+#      report/MANOPOLE_INERTI_2026-09-09.md r.40). Fuori tolleranza:
+#      il round NON e' confrontabile e ci si ferma li'.
+#  (b) n SCENDE (par. 4.3 e 5).
+#  (c) IL MERITO E' SOSPESO (par. 3): niente promozione sul PF.
+#
+#  7. [gate] IL CANCELLO, SCRITTO DURO E PRIMA -- E VALE PER DUE DECISIONI
+#     OPPOSTE, PERCHE' QUESTO ROUND PUO' FINIRE IN TUTTI E DUE I MODI
+#  ===================================================================
+#  Il RF e' il discriminante, il PF e' secondo. Motivo: con
+#  InpTP1_ClosePct=50 il PF e' un rapporto su DEAL e questo round
+#  cambia la POPOLAZIONE delle operazioni, quindi il PF dipende da
+#  QUANTE posizioni toccano il primo obiettivo -- un mix che il lato
+#  sposta. Il RF = profitto netto / drawdown massimo e' fatto di DUE
+#  QUANTITA' IN DENARO: immune al conteggio delle uscite.
+#
+#  BASI DELL'ANCORA (cella short=1), congelate qui:
+#      RF   IS 1,14977   OOS 1,29687
+#      PF   IS 1,22116   OOS 1,21546
+#      Profit IS 7014,20  OOS 8496,74
+#      DD a DENOMINATORE FISSO = (Profit / RF) / 80000 x 100
+#         -- serve perche' "Equity DD %" divide per il PICCO, che
+#            cambia da cella a cella (classe 550). Distorsione
+#            misurata qui: +4,4% in IS e +4,2% in OOS.
+#         IS  DD_fisso 7,6257 %   OOS  DD_fisso 8,1897 %
+#      Se il RF e' 0 (passata a zero trade, Profit=0) la formula e'
+#      0/0: si scrive [NON CALCOLABILE DAL CSV].
+#
+#  T1 -- IL CORTO RESTA ACCESO (cioe': NON si propone niente) se,
+#        INSIEME:
+#        T1a  RF(short=1) >= RF(short=0) in OOS, e
+#        T1b  RF(short=1) >= RF(short=0) in IS  (segni CONCORDI), e
+#        T1c  Profit(short=1) > Profit(short=0) in OOS.
+#        In questo caso il verdetto e': "il corto acceso e'
+#        giustificato da una misura sua" -- ed e' la prima volta.
+#
+#  T2 -- [!] SI PROPONE DI SPEGNERLO (firma di Claudio, non mia) se,
+#        INSIEME:
+#        T2a  RF(short=0) >= RF(short=1) in OOS, e
+#        T2b  RF(short=0) >= RF(short=1) in IS  (segni CONCORDI), e
+#        T2c  DD_fisso(short=0) <= DD_fisso(short=1) in OOS, e
+#        T2d  il profitto NON crolla: Profit(short=0) >= 0,80 x
+#             Profit(short=1) in OOS (cioe' >= 6797,39).
+#        [!] T2d esiste perche' UN DD CHE SCENDE NON E' MERITO SE SCENDE
+#        ANCHE IL PROFITTO: con meta' delle operazioni il DD scende da
+#        solo. Senza T2d si promuoverebbe l'inattivita'.
+#
+#  T3 -- DISCORDI (IS dice una cosa, OOS l'altra): NESSUNA PROPOSTA.
+#        Si scrive "misurato, verso non stabile fra le due finestre".
+#        E' esattamente quello che fa la misura piu' vicina che
+#        abbiamo (FASE M): li' il solo-short e' POSITIVO in IS
+#        (PF 1,16526) e NEGATIVO in OOS (PF 0,82293), con il solo-long
+#        specularmente ribaltato. ==> T3 e' un esito PROBABILE, non
+#        teorico, e va accettato se esce.
+#
+#  T4 -- "COMPRA RENDIMENTO CON RISCHIO": RF su e DD_fisso su insieme
+#        (in una direzione o nell'altra) -> NESSUNA PROPOSTA
+#        AUTOMATICA. E' un parametro di rischio, e decide Claudio.
+#
+#  [nota] E IN OGNI CASO NON SI TOCCA NIENTE IN CAMPO. Accendere o spegnere
+#     un lato su una sedia che sta operando e' FIRMA DI CLAUDIO.
+#     Questo file non propone di ricaricare nessun preset.
+#
+#  8. [$] PERCHE' L'ESITO SCOMODO E' QUELLO CHE VALE DI PIU'
+#  ---------------------------------------------------------
+#  Se il corto NON aggiunge, la conseguenza non e' "pazienza": e' che
+#  si propone di spegnerlo, e spegnerlo LIBERA MARGINE sulla sedia --
+#  meno giornate occupate dallo slot dal lato sbagliato, e un lato in
+#  meno da sorvegliare mentre Claudio vuole accenderne altri altrove.
+#  E' l'unica mossa sui lati della rosa che puo' liberare invece di
+#  occupare. Per questo il round vale anche (soprattutto) se dice di no.
+#
+#  9. [dd] IL MURO GIORNALIERO (classe 618) -- E QUI SI LEGGE DAVVERO
+#  ------------------------------------------------------------------
+#  Questo EA SCRIVE la colonna "Peggior Giornata %" nell'OPTFRAME
+#  (r.2604 gWorstDayPct, intestazione r.2629): VERIFICATO nei CSV di
+#  R199B, che ce l'hanno. Quindi il muro FTMO del 5% giornaliero
+#  (docs/REGOLAMENTO_FTMO_2026-08.md par.2) si legge per tutte e due le
+#  celle, e NON e' un [NON MISURATO].
+#  [!] MA LA BASE NON E' LA STESSA: gWorstDayPct e' la caduta peggiore
+#  rispetto all'equity di APERTURA DI QUEL GIORNO (r.660-663), mentre
+#  FTMO misura 5% del CAPITALE INIZIALE. Con il conto in profitto la
+#  nostra colonna SOTTOSTIMA il rapporto che conta. Limite superiore
+#  calcolabile dal CSV: pct x (deposito + Profit) / deposito. Per
+#  l'ancora:  IS 2,218 %   OOS 2,359 %  -- sotto il muro del 5% in
+#  tutte e due le finestre, con margine. Sulla cella short=0 il numero
+#  e' [NON MISURATO] e si calcola con la stessa formula.
+#
+#  10. QUELLO CHE QUESTO ROUND NON MISURA -- elencato per nome
+#  ------------------------------------------------------------
+#  - Il lato corto DA SOLO (InpAllowLong=0, InpAllowShort=1): per lo
+#    slot non e' separabile girando la sedia, e sarebbe un'altra
+#    domanda con un altro file prova.
+#  - La cella (0,0) di controllo (zero trade): non c'e', perche'
+#    l'asse e' a 2 celle. Il controllo di sanita' qui lo fa la
+#    RIPRODUZIONE dell'ancora, che e' piu' severo.
+#  - Le POSIZIONI vere della cella short=0: si ricavano solo appaiando
+#    una corsa a InpTP1_ClosePct=0, che questo round non fa. Restano
+#    [NON MISURATO], e per questo il merito e' sospeso (par. 3).
+#  - Il comportamento su FTMO: la sedia opera su US100.cash con
+#    _Digits potenzialmente diverso da NASUSD. InpBufferPoints=200 e
+#    InpMinStopPts=500 sono in PUNTI. Questo round gira su BCM/NASUSD,
+#    come tutti gli altri della serie.
+#  - Il TF: si misura M5, quello del preset vivo. Il cambio di TF su
+#    questa sedia ha gia' i suoi file (R214c/R214d, M15 e M30) e non
+#    si mescola con un asse di lato.
+#
+# ---------------------------------------------------------------------
+#  I PIN: 96 su 98 input, presi UNO PER UNO dalla riga Pass=2 del CSV
+#  dell'ancora (cioe' da quello che MT5 HA DAVVERO USATO, non dai
+#  default compilati). Cosi' la riproduzione non dipende dal binario.
+#  NON PINNATO, e il motivo e' scritto: InpNewsCurrencies, che e' una
+#  stringa VUOTA -- pinnarla sarebbe un "PIN VUOTO" (MT5 lo ignora e il
+#  cancello lo boccia), e il suo default compilato e' gia' "" (r.296),
+#  quindi lasciarla fuori e' ESATTAMENTE equivalente. Il 98esimo e'
+#  l'asse.
+#  Un CSV che torna con InpSessionHour diverso da 14 si CESTINA.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpTP1_ClosePct=50||50||0||50||N
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=200||200||0||200||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=1||1||0||1||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=2||2||0||2||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=0.5||0.5||0||0.5||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2||2||0||2||N
+InpTrailFixedPts=410||410||0||410||N
+InpRunnerTP_R=0||0||0||0||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100||100||0||100||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpMinBreakoutRangeATR=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20||20||0||20||N
+InpVolHighPct=80||80||0||80||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+InpMagic=770260||770260||0||770260||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+# --- ASSE UNICO: IL LATO CORTO ---------------------------------------
+#   0 = SOLO LONG   <- LA CELLA CHE NON ESISTE IN ARCHIVIO. E' la
+#       domanda del round: cosa succede alla sedia senza il corto.
+#   1 = long+short  <- LA CELLA VIVA, controllo di riproduzione
+#       obbligatorio contro R199B Pass=2 (par. 6a).
+#   Sintassi 0||0||1||1||Y: convenzione di casa per i booleani, ed e'
+#   anche l'unica che il cancello accetta (controlla_prova.py rifiuta
+#   un asse non numerico). MT5 scrive e rilegge i bool come 0/1.
+InpAllowShort=0||0||1||1||Y
+# 2 celle -> 4 passate (2 celle x 2 finestre)
