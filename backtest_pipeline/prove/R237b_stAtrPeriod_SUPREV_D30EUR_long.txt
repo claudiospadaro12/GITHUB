@@ -1,0 +1,429 @@
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+#  R237b -- L'ASSE E' L'ATR DEL SUPERTREND. InpStAtrPeriod, LUNGO PURO,
+#           D30EUR (DAX) H1, TICK REALI.
+#  GEMELLO DI R237a. Scritto il 23/09/2026, criteri congelati PRIMA dei
+#  numeri. ASCII PURO: nessun byte > 127 (verificato prima della consegna).
+# ==========================================================================
+#
+#  ORIGINE: regola dei DUE LATI sugli indici, firmata da Claudio il
+#  25/08/2026: "ogni analisi misura SEMPRE tutti e due i lati (long E
+#  short) -- anche se un lato e' gia' vivo in forward, si RITESTA".
+#
+#  >>> DELTA RISPETTO A R237a: TRE COSE, SU QUATTRO RIGHE (il LATO e'
+#      una cosa sola scritta su due righe). PER NOME:
+#        InpAllowLong   false -> true
+#        InpAllowShort  true  -> false
+#        InpMagic       764230 -> 764231
+#        InpComment     STREV_R237a -> STREV_R237b
+#      NIENT'ALTRO. Ne' un TP, ne' un moltiplicatore, ne' un buffer, ne'
+#      un sotto-parametro di un filtro spento. Se un giorno qualcuno
+#      trovasse una QUARTA COSA diversa fra i due file, quella e' un
+#      DIFETTO. Verificato da me con un diff delle sole righe @/Inp:
+#      escono esattamente 4 righe, e sono queste.
+#      >>> E' un gate, non una frase: due file che differiscono in due
+#          cose non misurano il lato, misurano una miscela.
+#
+#  IL CORPO DEL RAGIONAMENTO STA IN R237a (sezioni 1-12) e NON SI
+#  RIPETE: archivio, frontiera del costo 108,0 (classe 650/666),
+#  risoluzione del banco (classe 659), cancelli T1/T3/T5/T6/T7, buchi
+#  B1-B10. Qui sotto c'e' SOLO cio' che sul LUNGO e' DIVERSO -- e non e'
+#  poco.
+#
+# --------------------------------------------------------------------------
+#  0. COSA QUESTO ROUND PUO' E NON PUO' DECIDERE
+# --------------------------------------------------------------------------
+#  (SI) PUO' leggere il RISCHIO, a qualunque n (Emendamento B).
+#  (SI) PUO' fare da CONTROLLO al gemello corto: e' il lato che il regime
+#       FAVORISCE (B6). Se il lungo crollasse dove il corto tiene,
+#       l'attribuzione "e' il regime" salta, e sarebbe una notizia.
+#  (SI) PUO' verificare una PREVISIONE NUMERICA fatta prima (sezione 3).
+#
+#  (NO) NON PUO' LEGGERE IL MERITO. Stesso conto di R237a, e sul lungo va
+#       anche meglio ma non abbastanza: n predetto sulla finestra piena
+#       224 -> IS ~90, OOS ~134. SOTTO 150 tutte e due. MERITO SOSPESO
+#       (Emendamento A). Scritto qui, prima dei numeri.
+#
+#  (NO) >>> NON PUO' DIRE SE IL LUNGO DEL DAX HA EDGE, E QUESTA E' LA RIGA
+#       PIU' IMPORTANTE DEL FILE. Il lungo viene girato sulle COORDINATE
+#       DEL CORTO, perche' la regola dei due lati pretende che cambi UNA
+#       cosa sola. Ma i due lati NON hanno l'altopiano nello stesso posto,
+#       ed e' MISURATO:
+#         LUNGO, StMult 2,5, AtrP  7: TP2,0 1,40399 n256 DD5,0300
+#                                      TP2,5 1,40463 n258 DD4,7920
+#                                      TP3,0 1,45972 n259 DD4,4826
+#                                      <- TRE SU TRE POSITIVE, n oltre 250
+#         LUNGO, StMult 2,5, AtrP 14: TP2,5 0,86858 n227 DD8,2100
+#                                      <- NEGATIVA
+#       >>> L'ALTOPIANO DEL LUNGO STA A AtrP 7, CIOE' FUORI DALL'ASSE DI
+#           QUESTO FILE (11-16). Il lungo viene misurato DOVE NON VIVE.
+#       >>> QUINDI: un esito negativo di R237b NON dimostra che il lungo
+#           del DAX sia morto. Dimostra che il lungo non funziona con
+#           l'ATR del CORTO -- che e' esattamente cio' che ci si aspetta
+#           se i due lati hanno geometrie diverse.
+#       >>> E LA VIA PER LA DOMANDA VERA, lasciata scritta perche'
+#           qualcuno la prenda e non si perda: un R238 con lo STESSO asse
+#           InpStAtrPeriod su una banda BASSA (es. 5-10) a StMult 2,5 e
+#           TP 2,0, lungo puro. Li' ci sarebbero DUE riproduzioni gratis
+#           (AtrP 7 PF 1,40399 n256 e AtrP 8 PF 1,09682 n198, tutte e due
+#           MISURATE a TP 2,0) e un campione sopra 250 sulla finestra
+#           piena. NON lo scrivo dentro questo file: sarebbe cambiare la
+#           banda dell'asse fra i due gemelli, cioe' rompere il gate dei
+#           tre delta. Va DECISO, non deciso di nascosto.
+#
+#  (NO) NON PUO' PROMUOVERE UNA SEDIA. NON tocca VPS, forward, conto
+#       reale, nessuna sedia viva, nessun preset.
+#
+#  (ATTENZIONE) SALTO DI BANCO: archivio OHLC (ottimista) -> qui TICK
+#       REALI. Un PF a tick PIU' ALTO dell'OHLC e' un'ANOMALIA da
+#       indagare, non una scoperta.
+#
+# --------------------------------------------------------------------------
+#  1. CHE COSA IL LUNGO AGGIUNGE, che il corto da solo non puo' dare
+# --------------------------------------------------------------------------
+#  (a) SEPARA IL REGIME DALLA GEOMETRIA. ~21 mesi di DAX in larga parte
+#      rialzisti (B6 di R237a). Se lungo e corto si muovessero INSIEME
+#      lungo l'asse dell'ATR, il risultato parlerebbe della GEOMETRIA
+#      (l'ATR seleziona rimbalzi migliori o peggiori, a prescindere dal
+#      verso). Se si muovessero AL CONTRARIO, parlerebbe del REGIME.
+#      >>> E' una distinzione che il corto DA SOLO non puo' fare, e il
+#          motivo per cui il gemello non e' un adempimento burocratico.
+#
+#  (b) MISURA IL COSTO DELLO STESSO MOTORE SULL'ALTRO VERSO. Lo spread si
+#      paga uguale nei due sensi, ma la distanza di stop no: su un LUNGO
+#      lo stop e' sotto (MathMin(stLine,ext) - buf, r.388-389), su un
+#      CORTO e' sopra (MathMax + buf). Le due distribuzioni possono
+#      essere diverse, e la FASE 1 di questo file le misura entrambe --
+#      cioe' il verdetto sul 40x del DAX esce con DUE campioni, non uno.
+#
+#  (c) DA' IL NUMERO CHE MANCA AL CONTO DEI DUE LATI (sezione 3).
+#
+# --------------------------------------------------------------------------
+#  2. L'ASSE, E PERCHE' E' LO STESSO DEL CORTO
+# --------------------------------------------------------------------------
+#  InpStAtrPeriod = 11 . 12 . 13 . 14 . 15 . 16   (sei celle, passo 1)
+#  IDENTICO a R237a, e deve esserlo: se i due gemelli girassero bande
+#  diverse, la differenza fra i loro risultati conterrebbe la differenza
+#  di banda oltre a quella di lato, e non sarebbe piu' una misura del
+#  lato.
+#
+#  COSA C'E' IN ARCHIVIO PER IL LUNGO DENTRO QUESTA BANDA, a StMult 2,5:
+#    AtrP 11 : TP2,5 1,33652 n226 DD 8,3303   <- positiva (ma non a TP2,0)
+#    AtrP 12 : NESSUNA CELLA                  <- buco
+#    AtrP 13 : TP1,5 1,21199 n224 DD 5,2994   <- positiva
+#              TP3,0 1,08502 n229 DD 5,7036   <- positiva
+#    AtrP 14 : TP2,5 0,86858 n227 DD 8,2100   <- NEGATIVA
+#    AtrP 15 : NESSUNA CELLA (l'archivio si ferma a 14)
+#    AtrP 16 : NESSUNA CELLA
+#  >>> A TP_RR 2,0 -- il TP di questo round -- DENTRO LA BANDA 11-16 IL
+#      LUNGO NON HA NEMMENO UNA CELLA D'ARCHIVIO. Contato da me: a
+#      StMult 2,5 e TP 2,0 il lungo esiste solo a AtrP 7 (1,40399) e
+#      AtrP 8 (1,09682).
+#  >>> CONSEGUENZA DICHIARATA E NON AGGIRATA: IL CANCELLO CROCIATO T2 DI
+#      R237a NON ESISTE SU QUESTO FILE. Il corto aveva due celle gratis a
+#      TP 2,0 (il 12 negativo e il 14 positivo); il lungo ne ha ZERO.
+#      Questo file NON PUO' verificare da solo che il banco riproduca
+#      l'archivio.
+#      >>> E SI RISOLVE SENZA COSTO AGGIUNTIVO: il cancello T2 si legge
+#          SUL GEMELLO R237a, che gira gli stessi pin e lo stesso banco.
+#          Se T2 passa li', il banco e' in ordine anche qui. Se fallisce
+#          li', NON si legge nemmeno questo file.
+#          >>> Cioe' R237b DIPENDE da R237a. Va detto, perche' vuol dire
+#              che i due non sono intercambiabili e non si lancia questo
+#              da solo.
+#
+#  ANCORE DI ORIENTAMENTO (non cancelli, solo termini di paragone, e a un
+#  TP DIVERSO da quello di questo round -- per questo non sono cancelli):
+#    AtrP 13 a TP1,5 -> 1,21199 n224   |   AtrP 14 a TP2,5 -> 0,86858 n227
+#  >>> LEGGERLI COME CANCELLI SAREBBE UN ERRORE E LO DICO ORA: il TP di
+#      questo round e' 2,0, e sul lungo la forbice fra TP diversi NON e'
+#      piccola come sul corto (a AtrP 13 va da 1,08502 a 1,21199, cioe'
+#      0,127, che e' oltre il DOPPIO della risoluzione OOS). Sul corto a
+#      AtrP 14 la stessa forbice era 0,0356, sotto la risoluzione: li' si
+#      poteva dire "i TP sono indistinguibili", qui NO.
+#
+# --------------------------------------------------------------------------
+#  3. LA PREVISIONE NUMERICA, FATTA PRIMA -- e come la si smentisce
+# --------------------------------------------------------------------------
+#  Sul motore ABTG_SupertrendReversal il LATO E' UN FILTRO PURO, e non e'
+#  un'opinione: MISURATO su archivio, quattro terne su quattro con scarto
+#  ZERO (dettaglio in R237a sezione 9), e spiegato dal sorgente --
+#  r.333-335, il lato e' dettato da dir[1], quindi lunghe e corte sono
+#  MUTUAMENTE ESCLUSIVE NEL TEMPO, e InpExitOnFlip (acceso) libera lo
+#  slot alla girata.
+#
+#  >>> DA LI' ESCE UNA PREVISIONE VERIFICABILE, sulla cella ancora
+#      (StMult 2,5 / AtrP 14 / TP 2,0), su banco OHLC e finestra piena:
+#        n(due lati) = 393  [archivio]
+#        n(corto)    = 169  [archivio]
+#        n(lungo)    = 393 - 169 = 224   <- PREDETTO, MAI MISURATO
+#      Prova indipendente che regge gia': il lungo MISURATO al TP
+#      adiacente 2,5 fa n=227. Scarto 1,3% su un dato che non e' entrato
+#      nel conto.
+#
+#  >>> COME SI USA IN QUESTO ROUND, senza barare: le tranche a tick non
+#      sono confrontabili con un n OHLC di finestra piena, quindi il 224
+#      NON e' un cancello sulle tranche. Si confronta la SOMMA IS+OOS del
+#      lungo a AtrP 14 con la SOMMA IS+OOS del corto a AtrP 14 dello
+#      STESSO round:
+#        PREVISIONE: n(lungo) / n(corto) = 224/169 = 1,33 circa.
+#        Tolleranza congelata ORA: +/- 20%, cioe' banda 1,06 - 1,59.
+#        Fuori banda -> il lato NON si comporta da filtro puro sul banco
+#        a tick, e allora l'additivita' misurata in OHLC non si trasporta
+#        -- che sarebbe una scoperta sul motore, non un errore di conto.
+#      >>> IL +/-20% E' DICHIARATO COME SCELTA, NON COME MISURA: non ho un
+#          campione di rapporti tick/tick da cui ricavarlo. E' largo
+#          apposta, perche' sbagliare in stretto qui farebbe buttare un
+#          round valido.
+#
+# --------------------------------------------------------------------------
+#  4. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+# --------------------------------------------------------------------------
+#  >>> MI ASPETTO CHE QUESTO FILE ESCA PEGGIO DEL GEMELLO CORTO, e lo
+#      scrivo prima per non poterlo raccontare dopo:
+#      dentro la banda 11-16 l'unica cella d'archivio del lungo vicina
+#      all'ancora (AtrP 14, TP 2,5) e' NEGATIVA (0,86858), mentre la
+#      stessa coordinata sul corto e' POSITIVA (1,33619). I due lati
+#      hanno SEGNO OPPOSTO li' dove il round li guarda.
+#  >>> n atteso: 90 IS / 134 OOS sulla cella ancora (dal 224 predetto).
+#  >>> DD atteso: dell'ordine di 5-8% (le celle lunghe d'archivio in
+#      questa banda stanno fra 5,2994 e 8,3303). >>> QUINDI IL CANCELLO
+#      T5b DI R237a MORDE ANCHE QUI, E PROBABILMENTE SUBITO: sopra 5,0%
+#      la cella e' FRAGILE, e tre celle lunghe su quattro in archivio ci
+#      stanno gia' sopra sul banco ottimista.
+#  >>> PF atteso: fra 0,85 e 1,25, cioe' A CAVALLO DI 1. Non ho un
+#      pronostico piu' stretto e non lo invento.
+#
+#  >>> E L'ESITO CHE MI SMENTIREBBE, che e' il piu' interessante di tutti:
+#      SE IL LUNGO USCISSE FORTE (run >= 3 celle sopra soglia) PROPRIO
+#      DOVE L'ARCHIVIO OHLC LO DA' NEGATIVO, allora il salto di banco
+#      starebbe MIGLIORANDO una cella -- e il tick paga lo spread, l'OHLC
+#      no. Sarebbe un'ANOMALIA del banco, non un edge trovato, e andrebbe
+#      indagata PRIMA di scriverne una riga buona. Stessa soglia del
+#      gemello: PF(tick) sopra PF(OHLC) x 1,05 e' rosso.
+#
+# --------------------------------------------------------------------------
+#  5. I CANCELLI, E QUALI SI EREDITANO
+# --------------------------------------------------------------------------
+#  SI EREDITANO IDENTICI da R237a (stesso banco, stessi pin, stesso asse):
+#    T1  inerzia: la colonna InpStAtrPeriod deve avere 6 valori distinti.
+#    T3  NESSUNA soglia di monotonia sull'n (classe 663). Si congela
+#        QUALE CONTATORE si legge: cB_occupata, cF_stgirato, cF_lato,
+#        cF_confl, dalla FASE 1.
+#    T4  il cancello di MERITO non esiste: n per tranche 90/134 < 150.
+#    T5a anomalia: DD di tranche > 12,85% (massimo assoluto d'archivio).
+#    T5b muro prop: >= 5,0% fragile, >= 10,0% inschierabile a rischio 1%.
+#    T6  cancello del lotto: DD fuori da +/-40% fra la cella con lo stop
+#        piu' largo e quella col piu' stretto -> DD illeggibili (buco B7).
+#    T7  la base dello stop si fissa con la FASE 1, e SOLO allora si
+#        scrive il verdetto sul 40x contro 108,0.
+#    T8  il verdetto e' la LUNGHEZZA DEL RUN contiguo: >= 3 in tutte e
+#        due le tranche = altopiano; 1 = isola; 2 = NON CONCLUSIVO.
+#        Soglia di indistinguibilita': PF > 1,086 in IS, > 1,057 in OOS
+#        (= 1,00 + risoluzione del banco, R237a sezione 6).
+#
+#  NON SI EREDITA, E VA SOSTITUITO:
+#    T2  CANCELLO CROCIATO -- NON ESISTE SU QUESTO FILE (sezione 2: zero
+#        celle d'archivio del lungo a StMult 2,5 + TP 2,0 dentro 11-16).
+#        >>> AL SUO POSTO, e sono DUE cancelli, non uno:
+#        T2' (a) si legge il T2 del GEMELLO R237a. Se fallisce li', questo
+#                file NON SI LEGGE. Il banco e' lo stesso.
+#            (b) VEROSIMIGLIANZA DI VERSO: PF(tick, lungo, AtrP 14) non
+#                deve superare 0,86858 x 1,05 = 0,9120 di piu' di quanto
+#                il cambio di TP giustifichi. >>> E DICHIARO SUBITO CHE
+#                (b) E' DEBOLE: confronta TP 2,0 con TP 2,5, e sul lungo
+#                la forbice fra TP e' sopra la risoluzione (sezione 2).
+#                E' una spia, non un cancello: se suona si indaga, non si
+#                butta il round. Chiamarla cancello sarebbe fingere una
+#                precisione che il dato non ha.
+#
+# --------------------------------------------------------------------------
+#  6. IL CONTRO-ESEMPIO DI QUESTO FILE
+# --------------------------------------------------------------------------
+#  TESI del pacchetto R237: "il corto del DAX a AtrP 14 ha un altopiano
+#  vero, ed e' una proprieta' del MOTORE".
+#  ALTERNATIVA che questo file puo' smentire o confermare: "e' una
+#  proprieta' del REGIME -- il DAX e' salito per 21 mesi, e qualunque
+#  cosa selezioni bene i rimbalzi nel verso giusto sembra brava".
+#
+#  >>> I NUMERI CHE LE SEPARANO, e hanno forme diverse:
+#    se e' GEOMETRIA  -> i due lati si muovono CONCORDI lungo l'asse: il
+#                        profilo PF(AtrP) del lungo ha la stessa forma di
+#                        quello del corto (stesso massimo, stesso minimo,
+#                        anche se a livelli diversi).
+#    se e' REGIME     -> i due lati si muovono DISCORDI: dove il corto sale
+#                        il lungo scende. E' quello che l'archivio OHLC
+#                        gia' suggerisce a AtrP 14 (corto 1,336 positivo,
+#                        lungo 0,869 negativo, stesso StMult, TP vicini).
+#  >>> LA GRANDEZZA DA GUARDARE E' LA CORRELAZIONE DI SEGNO FRA I DUE
+#      PROFILI SULLE SEI CELLE, non il livello del PF. E si conta a mano:
+#      su 5 passi (11->12, 12->13, 13->14, 14->15, 15->16) quanti hanno
+#      lo stesso verso nei due file. 4 o 5 su 5 concordi = geometria;
+#      0 o 1 su 5 = regime; 2 o 3 = NON CONCLUSIVO, e si scrive cosi'.
+#      >>> E DICHIARO IL LIMITE PRIMA: cinque passi sono POCHI. Con una
+#          moneta, 4+ concordi su 5 esce il 18,75% delle volte. Quindi
+#          questa lettura e' un INDIZIO ORIENTATIVO, non una prova, e nel
+#          referto va scritta con quel 18,75% accanto. Non e' una
+#          debolezza nascosta: e' il motivo per cui il verdetto del
+#          pacchetto resta T8 sul corto, e questa e' una lettura in piu'.
+#
+# --------------------------------------------------------------------------
+#  7. BUCHI PROPRI DI QUESTO FILE (gli altri sono B1-B10 in R237a)
+# --------------------------------------------------------------------------
+#  (C1) IL LUNGO E' MISURATO FUORI DAL SUO ALTOPIANO (sezione 0). E' il
+#       buco piu' grosso del file ed e' STRUTTURALE, non riparabile qui:
+#       ripararlo vorrebbe dire cambiare la banda dell'asse, cioe'
+#       rompere il gate dei tre delta col gemello.
+#  (C2) NESSUN CANCELLO CROCIATO PROPRIO (sezione 5, T2').
+#  (C3) L'ADDITIVITA' 4 SU 4 E' MISURATA SU BANCO **OHLC**. Che si
+#       trasporti al banco a tick e' PLAUSIBILE (il meccanismo e' nel
+#       codice, non nel banco) ma [NON VERIFICATO]. La banda +/-20% della
+#       sezione 3 esiste proprio per questo.
+#  (C4) LE QUATTRO TERNE dell'additivita' stanno a StMult 2,5 (tre) e 3,5
+#       (una), e NESSUNA a AtrP 14. L'identita' e' verificata sul motore,
+#       non sulla cella ancora. Dichiarato.
+#
+# --------------------------------------------------------------------------
+#  8. COSTO IN TEMPO MACCHINA, E DOVE GIRA
+# --------------------------------------------------------------------------
+#  6 celle x 2 tranche = 12 passate a TICK REALI, piu' 1 corsa SINGOLA di
+#  FASE 1. Col gemello R237a: 26 corse in tutto.
+#  >>> PC DI BACKTEST, NON VPS. Firma di Claudio del 21/09/2026: il 21/09
+#      un tester a tick reali sul VPS ha inchiodato la macchina mentre le
+#      sedie della challenge FTMO operavano.
+#  >>> DEPOSITO 100000 e MODELLO 4 sono compito della RIGA DI LANCIO
+#      (-Deposito 100000, -Modello 4): il file prova non li puo' imporre.
+#      Classe 646/604.
+#
+#  MAGIC 764231 -- riverificato vergine il 23/09/2026: zero occorrenze in
+#  tutto il repository, con e senza .git. Su D30EUR operano 770101 e
+#  770411 (challenge FTMO): nessuna collisione, altro EA e altro TF.
+#  Questo file non tocca nessun preset ne' nessun EA in campo.
+# ==========================================================================
+@SIMBOLO  D30EUR
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- IL LATO: lungo puro. E' IL DELTA, ed e' l'unico che conta.
+InpAllowLong=true
+InpAllowShort=false
+
+# --- timeframe operativo (ENUM, pinnato esplicito: H1 = 16385)
+InpTF=16385
+
+# --- ancora d'archivio, IDENTICA al gemello corto
+InpStMult=2.5
+InpTP_RR=2.0
+
+# --- pattern del rimbalzo (valori dell'archivio, un solo valore distinto
+# --- su 123 righe, verificato colonna per colonna)
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+
+# --- confluenza tecnica (accesa in archivio)
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+# --- geometria dello stop. Su un LUNGO lo stop e' MathMin(stLine,ext)-buf
+# --- (r.388-389): sotto l'entrata, specchio del corto.
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+# --- target e uscita
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+
+# --- ingresso frazionato
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- rischio
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+# --- filtro orario: SPENTO, come in tutte e 123 le righe d'archivio.
+# --- Frontiera del costo 40 x 2,70 = 108,0 idx (classe 650).
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+
+# --- filtro notizie: spento
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+# --- generali
+InpComment=STREV_R237b
+InpFridayClose=false
+InpFridayCloseHour=20
+InpUsaGuardian=false
+InpMagic=764231
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+
+# --- L'ASSE, unico: IDENTICO a R237a. Sei celle contigue, 11..16.
+# --- Il valore 14 (primo campo) e' l'ANCORA: cella della FASE 1.
+InpStAtrPeriod=14||11||1||16||Y
+# ==========================================================================
+
+# ==========================================================================
+#  FASE 1 -- TEST SINGOLO. OBBLIGATORIA, E VA PRIMA DELL'OTTIMIZZAZIONE.
+#  CLASSE 664 (la misura c'e' gia') + CLASSE 526 (si legge solo qui).
+# ==========================================================================
+#  PERCHE' SERVE ANCHE SUL LUNGO, e non basta quella del corto: LA
+#  DISTANZA DI STOP DEI DUE LATI NON E' LA STESSA GRANDEZZA. r.388-389:
+#      sl = isLong ? MathMin(stLine,ext) - buf : MathMax(stLine,ext) + buf
+#  Su un lungo vince il piu' BASSO fra banda ed estremo recente, su un
+#  corto il piu' ALTO. Le due distribuzioni possono differire, e il
+#  cancello del costo (108,0) si applica a ciascuna per conto suo.
+#  >>> Usare la mediana del corto per il lungo sarebbe importare una base
+#      da un'altra configurazione: il difetto che R236a ha pagato e
+#      dichiarato (sua sezione 6-ter).
+#
+#  COME SI LANCIA (scheda .ini; NON e' una riga di lancio, non esce da
+#  qui: la riga la scrive chi di dovere e passa dal cancello):
+#    Optimization     = 0        <- test SINGOLO
+#    ShutdownTerminal = 1
+#    Symbol / Period / FromDate / ToDate / Model / Deposit = IDENTICI a
+#      quelli dichiarati in questo file: D30EUR, H1, 2024.09.26 ->
+#      2026.06.30, TICK REALI, 100000. Se uno solo differisce, la FASE 1
+#      non vale.
+#    L'ASSE e' gia' fissato all'ancora: InpStAtrPeriod = 14 e' il primo
+#      campo della riga d'asse, ed e' quello che MT5 usa a Optimization=0.
+#      Nessuna riga da cambiare.
+#
+#  IL CANCELLO SUL PRODOTTO -- si guarda il GIORNALE, non il CSV:
+#    (1) almeno una riga "[STREV-IMBUTO] ... quadratura OK" -> senza,
+#        i contatori di T3 non esistono: FASE 1 FALLITA, si ripete.
+#    (2) una riga "[STReversal] LONG mercato ... @ <entry> SL <sl> TP
+#        <tp>" PER OGNI INGRESSO (r.422-423). Da ognuna si estrae
+#        |SL - entry|; se ne prende LA MEDIANA (base, T7) E si conta LA
+#        FRAZIONE sotto 108,0 (classe 666). SERVONO TUTTI E DUE.
+#    (3) CONTROLLO DI SANITA', costa zero e qui e' SPECCHIATO rispetto al
+#        gemello: su un LUNGO lo SL deve stare SOTTO l'entrata e il TP
+#        SOPRA. Se anche una sola riga viola questo, non e' una misura di
+#        stop: e' un bug, e il round si ferma.
+#        >>> E se le righe dicessero "SHORT" invece di "LONG", il pin del
+#            lato non e' arrivato: si butta tutto. E' il controllo piu'
+#            stupido del file ed e' quello che salva il round.
+#
+#  >>> SENZA LA FASE 1 questo file non pronuncia nessun verdetto sul 40x.
+#      Puo' ancora dare il profilo PF(AtrP) per il confronto di segno
+#      della sezione 6, che e' un confronto FRA celle.
+#  >>> Questo e' testo di commento: controlla_prova.py lo ignora, e la
+#      FASE 1 non aggiunge nessuna cella all'asse.
+# ==========================================================================

@@ -1,0 +1,846 @@
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+#  R237a -- L'ASSE E' L'ATR DEL SUPERTREND. InpStAtrPeriod, CORTO PURO,
+#           D30EUR (DAX) H1, TICK REALI.
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+#  ASCII PURO: nessun byte > 127 (verificato prima della consegna).
+# ==========================================================================
+#
+#  ORIGINE: censimento del 23/09/2026,
+#  report/IL_CORTO_DI_DAX_E_NASDAQ_2026-09-23.md.
+#  Il corto di ABTG_SupertrendReversal su D30EUR H1 e' L'UNICO corto di DAX
+#  e Nasdaq con n >= 150 in archivio. E il buco che lo accompagna e' il piu'
+#  grosso della flotta:
+#    >>> SU DAX E NASDAQ IL LATO CORTO NON E' MAI STATO MISURATO A TICK
+#        REALI. ZERO VOLTE, su 160 passate di validazione SupRev: tutte a
+#        due lati accesi (1,1).
+#        Fonte: IL_CORTO_DI_DAX_E_NASDAQ_2026-09-23.md, par. 2.2.
+#        VERIFICATO DA ME, non riferito: il file a tick reali che esiste,
+#        risultati_archivio/supertrend_indici_validazione/
+#        valid_SupRevRT_D30EUR_H1.csv, ha OTTO righe e in TUTTE E OTTO
+#        InpAllowLong=1 e InpAllowShort=1. Letto colonna per colonna.
+#  QUESTO ROUND E' LA PRIMA VOLTA.
+#
+#  Gemello obbligatorio: R237b (lato LUNGO), stessi pin, cambia SOLO il
+#  lato -- regola dei due lati sugli indici, firmata da Claudio il
+#  25/08/2026.
+#
+# --------------------------------------------------------------------------
+#  0. COSA QUESTO ROUND PUO' E NON PUO' DECIDERE -- PRIMA DI TUTTO IL RESTO
+# --------------------------------------------------------------------------
+#  (SI) PUO' leggere il RISCHIO, a qualunque n (Emendamento B, 16/08/2026).
+#       Un drawdown e' un fatto accaduto. E c'e' un numero che va letto
+#       subito: il DD d'archivio della cella ancora e' 5,6180% a rischio
+#       1,0%, cioe' GIA' OLTRE META' del muro prop totale del 10%.
+#       >>> La cella ancora e' FRAGILE PRIMA CHE IL ROUND PARTA.
+#
+#  (SI) PUO' leggere la FORMA DELLA SUPERFICIE lungo l'asse: altopiano
+#       contro isola. E' una lettura su SEI celle, non su una, e per questo
+#       non dipende dall'n di una singola cella (sezione 8).
+#
+#  (SI) PUO' riprodurre a tick due celle d'archivio (il cancello T2).
+#
+#  (NO) NON PUO' LEGGERE IL MERITO, E QUI CORREGGO LA RICHIESTA CHE HA
+#       GENERATO QUESTO FILE. La richiesta diceva "n atteso 150-180 per
+#       cella, SOPRA il muro". E' vero sulla FINESTRA PIENA e FALSO sulle
+#       TRANCHE, che sono cio' che il round produce davvero:
+#         @FRAZIONEIS 0.40 taglia la finestra a CALENDARIO in due CSV
+#         (walkforward_generico.ps1 r.189 e r.602-700).
+#         cella ancora AtrP 14: piena 169  ->  IS ~68   OOS ~101
+#         cella AtrP 12       : piena 154  ->  IS ~62   OOS ~ 92
+#       >>> NESSUNA TRANCHE ARRIVA A 150. Il MERITO resta SOSPESO
+#           (Emendamento A). Scritto QUI, prima dei numeri, perche' nessuno
+#           possa promuovere una cella a cose fatte.
+#       >>> E NON LO SALVA NESSUNA FRAZIONE: a 0.50 sarebbero ~85 e ~84.
+#           Il motore non fa 300 operazioni in questa finestra, punto.
+#           L'UNICO modo di superare il muro su una tranche sola e'
+#           @FRAZIONEIS 1.0 (una tranche, n ~169) -- ma allora NON esiste
+#           fuori campione, e il round varrebbe meno. La scelta 0.40 e'
+#           DICHIARATA come compromesso, non subita.
+#           >>> QUESTO E' UN BUCO CHE CLAUDIO PUO' CHIUDERE: se vuole il
+#               merito, serve una finestra PIU' LUNGA di 21 mesi, e sugli
+#               indici il pavimento dei tick reali e' 2024.09.26
+#               (classe 590). Cioe' non si puo' avere con questi dati.
+#
+#  (NO) NON PUO' PROMUOVERE UNA SEDIA: una finestra sola, un solo regime
+#       (B6), e il merito sospeso.
+#
+#  (NO) NON TOCCA VPS, forward, conto reale, nessuna sedia viva.
+#       Su D30EUR operano 770101 (DAX_Apertura_EU, M5) e 770411
+#       (MaxMinNotte_DAX_Short, M15) sulla challenge FTMO. Questo file
+#       gira il magic 764230, verificato vergine (sezione 12), su un altro
+#       EA e un altro TF: nessuna collisione possibile.
+#
+#  (ATTENZIONE) IL SALTO DI BANCO E' IL PUNTO DEL ROUND. L'archivio e'
+#       OHLC = banco OTTIMISTA, non paga lo spread vero. Qui si gira a
+#       TICK REALI. >>> SE IL PF A TICK ESCE PIU' ALTO DELL'OHLC E'
+#       UN'ANOMALIA DA INDAGARE, NON UNA SCOPERTA. E' il cancello T2.
+#
+# --------------------------------------------------------------------------
+#  1. A CHE DOMANDA RISPONDE, ED E' UNA SOLA
+# --------------------------------------------------------------------------
+#  >>> ATTORNO A AtrP 14 C'E' UN ALTOPIANO VERO, O UN'ISOLA DELLA GRIGLIA
+#      GENETICA?
+#  La griglia d'archivio era GENETICA (123 passate su 384 possibili): i
+#  buchi sono NON MISURATI, non vuoti. Questo round riempie i buchi attorno
+#  al 14 e guarda se la cella sta in mezzo a compagne o da sola.
+#
+#  E LA MANOPOLA MORDE DAVVERO, verificato sul codice e non assunto:
+#    r.333-335   bool up=(d1>0);  if(up && !InpAllowLong) return; ...
+#    r.383-389   ext = ...iHighest(...,InpSLLookback,1);
+#                sl  = MathMax(stLine,ext) + buf;
+#  InpStAtrPeriod entra nell'ATR del Supertrend, quindi determina stLine,
+#  quindi (a) DOVE passa la banda che il pattern deve toccare, (b) QUANDO
+#  la direzione gira, (c) DOVE finisce lo stop quando stLine vince il
+#  MathMax. Non e' una manopola inerte: e' la geometria del motore.
+#  >>> E si vede nei numeri: fra AtrP 12 e AtrP 14, a parita' di tutto il
+#      resto, il PF d'archivio passa da 0,80420 a 1,37172. Una manopola
+#      inerte non fa questo.
+#
+# --------------------------------------------------------------------------
+#  2. I NUMERI D'ARCHIVIO, RICONTATI DA ME IL 23/09/2026
+# --------------------------------------------------------------------------
+#  Fonte: risultati_archivio/SupertrendReversal/H1_OHLC/
+#         scan_ABTG_SupertrendReversal_H1_D30EUR.csv (123 righe di dati)
+#  BANCO: OHLC = OTTIMISTA. Screening, mai verdetti.
+#
+#  CORTO PURO (0,1): celle 37 | positive 26 | n>=150: 12 | positive fra
+#                    quelle: 6 | DD max 11,5536
+#  LUNGO PURO (1,0): celle 23 | positive 18 | n>=150: 10 | DD max  8,4311
+#  DUE LATI  (1,1) : celle 27 |                        | DD max 12,8482
+#                    <- 12,8482 e' il massimo ASSOLUTO del file (T5a).
+#
+#  IL VICINATO DEL CORTO A StMult 2,5, riga per riga:
+#    AtrP  7 : TP1,5 1,00555 n205 DD 8,4473 | TP2,5 0,84353 n205 DD10,3765
+#              TP3,0 0,76016 n205 DD11,5536
+#    AtrP  8 : TP3,0 0,99649 n202 DD10,2179
+#    AtrP 10 : TP3,0 1,08861 n142 DD 6,3477
+#    AtrP 11 : TP2,5 1,06511 n179 DD 8,5974
+#    AtrP 12 : TP2,0 0,80420 n154 DD10,4559 | TP2,5 0,72390 n154 DD 9,9428
+#              TP3,0 0,66885 n154 DD10,8879      <- TRE SU TRE NEGATIVE
+#    AtrP 13 : TP1,5 1,38222 n146 DD 4,5549      <- UNA SOLA, POSITIVA
+#    AtrP 14 : TP1,5 1,33609 n172 DD 5,7746 | TP2,0 1,37172 n169 DD 5,6180
+#              TP2,5 1,33619 n169 DD 5,4510 | TP3,0 1,35475 n169 DD 6,2230
+#                                            <- QUATTRO SU QUATTRO POSITIVE
+#    e a StMult 3,5 / AtrP 14: 0,88378 n100 | 0,81568 n101 | 0,88984 n98
+#                                            <- TRE SU TRE NEGATIVE
+#
+#  >>> ALTOPIANO SU UN ASSE (il target: 4 celle su 4 positive a AtrP 14),
+#      DIRUPO SULL'ALTRO (il moltiplicatore: 3 su 3 negative a StMult 3,5).
+#      E' questa asimmetria che il round deve spiegare.
+#
+#  >>> E LA COSA CHE NESSUNO HA SCRITTO FINORA, contata da me: a
+#      StMult 2,5 + TP_RR 2,0 + corto puro l'archivio contiene ESATTAMENTE
+#      DUE celle, AtrP 12 e AtrP 14. Nessun'altra. Sono le due che questo
+#      round riproduce a tick, ed e' per questo che il TP si pinna a 2,0:
+#      IL CANCELLO CROCIATO E' GRATIS SOLO A QUEL TP.
+#
+# --------------------------------------------------------------------------
+#  3. L'ASSE, E PERCHE' ESATTAMENTE 11-16
+# --------------------------------------------------------------------------
+#  InpStAtrPeriod = 11 . 12 . 13 . 14 . 15 . 16   (sei celle, passo 1)
+#
+#  Ogni valore ha la sua ragione, col numero accanto:
+#   11  SPALLA BASSA. In archivio esiste solo a TP2,5: PF 1,06511 n179,
+#       POSITIVA ma appena. Dice se la zona buona si estende sotto il 13.
+#   12  RIPRODUZIONE NEGATIVA. MISURATA a questo stesso TP2,0: PF 0,80420
+#       n154. E' meta' del cancello crociato T2: il tick DEVE ritrovare
+#       una cella sotto 1. Se esce positiva, il banco non sta riproducendo
+#       l'archivio e il round non si legge.
+#   13  LA CELLA CHE DECIDE, e a TP2,0 NON E' MAI STATA MISURATA (esiste
+#       solo a TP1,5: 1,38222 n146). E' il ponte fra il dirupo (12) e
+#       l'altopiano (14): se e' positiva, 12->14 e' una RAMPA e il 14 ha
+#       una compagna; se e' negativa, il 14 confina con due celle negative
+#       da una parte e resta candidato a ISOLA.
+#   14  RIPRODUZIONE POSITIVA, l'ancora. MISURATA a TP2,0: PF 1,37172
+#       n169 DD 5,6180. Altra meta' del cancello T2.
+#   15  MAI MISURATA, SU NESSUN ASSE. L'archivio si ferma a AtrP 14:
+#       verificato, i valori presenti sono 7,8,9,10,11,12,13,14.
+#   16  MAI MISURATA, SU NESSUN ASSE.
+#
+#  >>> PERCHE' 15 E 16 SONO LA PARTE PIU' IMPORTANTE DELL'ASSE, e non un
+#      riempitivo: oggi il 14 ha un dirupo NOTO sotto (il 12) e un lato
+#      SUPERIORE COMPLETAMENTE IGNOTO. Un'isola ha il dirupo DA TUTTE E
+#      DUE LE PARTI. Senza 15 e 16 l'ipotesi "isola" NON E' FALSIFICABILE,
+#      e il round sarebbe un test a un lato solo. Con 15 e 16 dentro,
+#      l'alternativa produce una previsione che si puo' smentire.
+#      >>> Il 14 sta sul BORDO della griglia d'archivio. Una cella al
+#          bordo che sembra un massimo e' il caso in cui "massimo" e
+#          "ultimo punto misurato" si confondono: e' esattamente il
+#          difetto che 15 e 16 rimuovono.
+#
+#  SEI CELLE E NON DI PIU': il tetto di controlla_prova.py e' 64, il
+#  massimo mai scritto in archivio e' 24. Sei sta larghissima dentro.
+#  Sotto AtrP 11 non si scende: AtrP 7-8 sono gia' MISURATE e negative o
+#  nulle (0,76-1,01 su n 202-205), quindi non sono buchi, sono risposte.
+#
+#  TP_RR PINNATO A 2,0 -- E NON E' UN PICCO, ED E' IL PUNTO:
+#    a AtrP 14 l'archivio misura TUTTI E QUATTRO i TP e sono TUTTI
+#    POSITIVI: 1,5 -> 1,33609 | 2,0 -> 1,37172 | 2,5 -> 1,33619 |
+#    3,0 -> 1,35475. La forbice fra il minimo e il massimo e' 0,0356,
+#    cioe' PIU' PICCOLA della risoluzione del banco sulla tranche OOS
+#    (0,0572, sezione 6). >>> LUNGO L'ASSE DEL TARGET LE QUATTRO CELLE
+#    SONO INDISTINGUIBILI FRA LORO. Scegliere il 2,0 NON e' scegliere un
+#    picco: e' scegliere l'unico valore che regala il cancello crociato.
+#    Se il 2,0 fosse stato un picco isolato, questa riga direbbe il
+#    contrario e il pin sarebbe un altro.
+#
+#  StMult PINNATO A 2,5: e' l'unico moltiplicatore dove il corto del DAX
+#  vive. A 3,5 le tre celle a AtrP 14 sono tutte negative, a 4,5 gli n
+#  crollano sotto 80. Non e' comodita': e' dove stanno i dati.
+#
+# --------------------------------------------------------------------------
+#  4. LA FRONTIERA DEL COSTO -- CLASSE 650 e CLASSE 666
+# --------------------------------------------------------------------------
+#  IL MOTORE NON HA FILTRO D'ORA. Verificato da me, non assunto: nel CSV
+#  d'archivio InpUseTimeWindow vale 0 in TUTTE E 123 le righe, InpStartHour
+#  0 e InpEndHour 24 in tutte e 123. Quindi il motore incontra le 24 ore e
+#  lo spread SI PESA PER BARRA, non per tick.
+#
+#   A. BCM, per BARRA (la frontiera di QUESTO round)
+#      spread 2,70 -> FRONTIERA 40x = 108,0 idx
+#      = mediana delle 24 mediane orarie di
+#        risultati_archivio/spread_flotta/spread_orario_D30EUR.csv,
+#        colonna mediana_idx. Ricalcolata da me: le 24 ordinate sono
+#        1,6 1,6 1,6 1,7 1,7 1,7 1,7 1,7 1,7 2,6 2,7 2,7 2,7 2,8 2,8 2,8
+#        3,5 3,5 3,6 3,7 3,7 3,8 3,9 4,0 -> mediana (12a+13a)/2 = 2,70.
+#      >>> CLASSE 650, EVITATA APPOSTA: lo stesso file ha una riga "TUTTO"
+#          a 1,70, che e' la mediana PESATA SUI TICK. I tick si accalcano
+#          nelle ore di borsa (ore 8-21 stanno a 1,6-1,7; le ore 22-06
+#          stanno a 3,5-4,0). Con 1,70 la frontiera scenderebbe a 68,0:
+#          PIU' FACILE DI FALSO, di un fattore 1,59x. Il motore opera
+#          ANCHE di notte, e di notte il DAX costa il doppio.
+#   B. BCM, sole ore di borsa (8-21): mediana 1,70 -> 68,0 idx.
+#      >>> NON SI APPLICA a questo file (finestra oraria SPENTA). Sta qui
+#          come termine di paragone e come misura di quanto varrebbe
+#          accendere il filtro d'ora: un round che non e' questo.
+#   C. FTMO GER40.cash: spread 1,43 -> frontiera 40x = 57,2 idx.
+#      Fonte: report/STOP_VS_SPREAD_FTMO_2026-09-20.md (riga "770101
+#      GER40 (57,2)" e tabella di calibrazione "GER40.cash / D30EUR |
+#      1,43 | 1,70 | 0,84x"). Verificato da me che 57,2 = 40 x 1,43.
+#      >>> E' LA FRONTIERA CHE CONTA PER SCHIERARE, non per il banco.
+#      >>> E POGGIA SU n=1 TICK (lo dice il referto stesso): e' fragile,
+#          ed e' il buco B5.
+#
+#  >>> IL BANCO E' PESSIMISTA RISPETTO A DOVE SI OPERA, di un fattore
+#      108,0 / 57,2 = 1,89x. E' il verso in cui il banco sbaglia dalla
+#      parte giusta: una cella che passa 108,0 passa 57,2 a maggior
+#      ragione. Il contrario non vale.
+#
+#  >>> CLASSE 666 -- SU QUALE STATISTICA, E QUALE FRAZIONE RESTA SOTTO.
+#      Il 40x si applica a UNA MEDIANA, ma il costo si paga OPERAZIONE PER
+#      OPERAZIONE. La frase che si potra' scrivere nel referto e'
+#      "LA GAMBA MEDIANA passa il 40x", MAI "la cella passa il 40x".
+#      >>> E QUI LA FRAZIONE SI PUO' DAVVERO CONTARE, non stimare: la
+#          FASE 1 (sezione 5) stampa OGNI singola gamba, quindi il referto
+#          DEVE riportare due numeri e non uno:
+#            (1) la MEDIANA di |SL - entry|, e il suo x contro 108,0;
+#            (2) la FRAZIONE di gambe sotto 108,0, contata sulle stesse
+#                righe di Giornale.
+#          Se il referto porta solo il (1), non ha applicato la 666.
+#
+# --------------------------------------------------------------------------
+#  5. LA BASE DELLO STOP -- [NON MISURATO], E LA FASE 1 LA MISURA
+# --------------------------------------------------------------------------
+#  >>> LO STOP DI QUESTO MOTORE SUL DAX E' [NON MISURATO]. Non "stimato
+#      male": mai letto. L'unica lettura di casa su questo EA e' quella
+#      del GEMELLO NASDAQ (27,10 idx su n=5 gambe forward), che oltretutto
+#      e' una mediana INSTABILE -- una sola gamba in piu' l'aveva spostata
+#      del 47,5% (R236a sezione 6). Non e' il DAX e non e' un numero.
+#
+#  >>> CLASSE 664 -- E NON SERVE ASPETTARE MESI, PERCHE' L'EA LO STAMPA
+#      GIA'. r.422-423, a OGNI ingresso:
+#        Log(StringFormat("%s mercato %.2f lot @ %s SL %s TP %s", ...))
+#      cioe' entrata, stop e target di ogni singola operazione. Con ~169
+#      operazioni sulla finestra piena sono ~169 letture, disponibili in
+#      UNA corsa. Contro le decine di gambe di forward, cioe' mesi.
+#
+#  >>> CLASSE 526 -- E SI LEGGONO SOLO DA UN TEST SINGOLO.
+#      r.128:  void Log(string m){ if(InpVerbose) Print("[STReversal] ", m); }
+#      Print() NON viene eseguito in OTTIMIZZAZIONE, e un file prova E'
+#      un'ottimizzazione. Verificato anche sulla testata del CSV
+#      d'archivio: non esiste nessuna colonna con la distanza di stop, ne'
+#      coi contatori dell'imbuto. Da nessuna parte, in nessun CSV di
+#      questo motore.
+#      >>> Per questo in fondo al file c'e' la scheda della FASE 1.
+#
+#  (T7) IL CANCELLO CHE FISSA LA BASE, e senza di lui il round NON
+#       PRONUNCIA NESSUN VERDETTO SUL 40x.
+#       PROCEDURA, in quest'ordine:
+#        1. si lancia la FASE 1 (scheda in fondo): test SINGOLO,
+#           Optimization=0, asse FISSATO alla cella ancora (AtrP 14),
+#           Giornale acceso;
+#        2. dal Giornale si prendono TUTTE le righe
+#           "[STReversal] SHORT mercato ... @ <entry> SL <sl> TP <tp>"
+#           e si calcola |SL - entry| per ognuna;
+#        3. la MEDIANA di quelle distanze E' LA BASE DEL FILE. Non si
+#           sottrae niente: il buffer qui e' pinnato al default 3 pip =
+#           0,03 idx (D30EUR ha Digits 2, _Point 0,01 -> PipSize()
+#           r.247-251 restituisce _Point; fonte indipendente:
+#           CANCELLO_COSTO_FLOTTA_2026-09-10.md r.295), cioe' un
+#           TRECENTESIMO di punto indice: sotto qualunque arrotondamento.
+#        4. si conta anche la FRAZIONE sotto 108,0 (classe 666);
+#        5. SOLO ALLORA si scrive il verdetto sul 40x.
+#       >>> SE LA FASE 1 NON VIENE LANCIATA: il round dice ancora se il
+#           14 e' un altopiano o un'isola (e' un confronto FRA celle, non
+#           ha bisogno della base), ma la riga sul costo resta
+#           [NON MISURATO] e NON si scrive lo stesso.
+#
+#  L'ORIZZONTE, DICHIARATO COME TALE E NON COME MISURA -- serve solo a far
+#  vedere che il verdetto NON e' gia' deciso, e va BUTTATO dopo la FASE 1:
+#    ATR(14) D30EUR H4 = 139,7 idx [MISURATO indiretto, n=3 eventi,
+#    margine dichiarato +/-7%] -- fonte CANCELLO_COSTO_FLOTTA_2026-09-10.md
+#    par. B1/B3. Scalato a H1 (un quarto del tempo):
+#      esponente 0,50 (radice del tempo) -> 69,8 idx
+#      esponente 0,55                    -> 65,2 idx
+#      esponente 0,60                    -> 60,8 idx
+#    >>> BANDA [INFERITA] 60,8 - 69,8 idx per ATR(14) H1.
+#    Il pattern chiede che la chiusura stia ENTRO 1 ATR dalla banda
+#    (r.350, InpNearAtr=1,0), e lo stop sta alla banda o all'estremo
+#    recente, quello piu' protettivo. Quindi lo stop e' plausibilmente
+#    dell'ordine di 0,3 - 1,5 ATR, cioe' 18 - 105 idx.
+#    >>> QUELLA BANDA CONTIENE SIA CELLE CHE PASSANO 57,2 SIA CELLE CHE
+#        NON PASSANO 108,0. Cioe': CON QUELLO CHE SO OGGI IL CANCELLO DEL
+#        COSTO NON E' DECIDIBILE, in nessuna direzione. E' esattamente
+#        perche' e' indeciso che la FASE 1 non e' opzionale.
+#    >>> E IL RIGHELLO NON E' NEMMENO IL MIO: la scalatura radice-del-
+#        tempo vale per una passeggiata aleatoria, e l'intraday ha una
+#        stagionalita' che la viola. Per questo e' [INFERITO] e non
+#        [MISURATO], e per questo si butta.
+#
+#  IL TETTO DI CLAUDIO, col suo numero: l'escursione favorevole MEDIANA
+#  del DAX e' 55,25 punti indice [MISURATO n=440 giornate] --
+#  report/IL_NASDAQ_IN_PUNTI_E_IL_DAX_2026-09-23.md par. 4.1. E' il
+#  "50 punti. Non 90" di Claudio, confermato dai nostri dati.
+#  >>> QUI IL TETTO NON E' UN CANCELLO, ED E' ONESTO DIRLO: questo round
+#      NON ALLARGA LO STOP DI PROPOSITO (l'asse e' l'ATR, non il buffer).
+#      Lo stop si muove come effetto collaterale della geometria, e in
+#      quale verso e' [NON MISURATO]. Il tetto serve a LEGGERE la FASE 1,
+#      non a scartare celle: se la mediana uscisse sopra ~66 idx (1,20x
+#      l'escursione, la stessa tolleranza congelata in R236a) il referto
+#      deve dirlo, perche' vorrebbe dire che il parziale a 1R chiede piu'
+#      del movimento tipico del DAX per scattare.
+#
+# --------------------------------------------------------------------------
+#  6. LA RISOLUZIONE DEL BANCO -- CLASSE 659, e per una volta la notizia
+#     e' BUONA
+# --------------------------------------------------------------------------
+#  Con n finito il PF si muove A SCATTI. Se UNA sola operazione cambia
+#  esito (perdita -> vincita), con w = PF/(PF+RR):
+#      PF' = (w*n + 1) * RR / ((1-w)*n - 1)
+#  Calcolato sulla cella ancora (PF 1,37172) a RR nominale 2,0:
+#      finestra piena  n=169  ->  il PF si muove di 0,0340
+#      tranche IS      n= 68  ->  il PF si muove di 0,0857
+#      tranche OOS     n=101  ->  il PF si muove di 0,0572
+#  >>> E LO CALCOLO ANCHE A RR EFFICACE 1,5, perche' il RR nominale QUI
+#      NON E' QUELLO VERO: InpTP1_R=1,0 con InpTP1Pct=50 chiude META'
+#      posizione a 1R, quindi una vincita piena rende 0,5*1 + 0,5*2 =
+#      1,5R, non 2R. A RR 1,5: 0,0329 / 0,0832 / 0,0555. Praticamente
+#      uguali: la conclusione non dipende da quale dei due si usa, e lo
+#      dichiaro invece di scegliere quello comodo.
+#
+#  L'EFFETTO ATTESO DELL'ASSE, dall'archivio e allo STESSO TP 2,0:
+#      AtrP 12 -> AtrP 14 :  0,80420 -> 1,37172  =  +0,56752
+#  >>> RAPPORTO EFFETTO / RISOLUZIONE: 6,6x sulla tranche IS, 9,9x sulla
+#      tranche OOS.
+#  >>> QUINDI QUESTO ROUND NON E' UN TEST A UN LATO. L'effetto che cerca
+#      e' SETTE-DIECI VOLTE la granularita' del banco: PUO' CONFERMARE E
+#      PUO' FALSIFICARE. E' raro in questa casa (R236a, lo stesso motore
+#      stamattina, aveva un effetto SOTTO la risoluzione: 0,15x e 0,24x) e
+#      va detto, perche' cambia cosa si potra' scrivere alla fine.
+#  >>> LA CONSEGUENZA OPERATIVA, congelata: una cella conta come POSITIVA
+#      solo se PF > 1,00 + risoluzione della sua tranche, cioe'
+#      > 1,086 in IS e > 1,057 in OOS. Fra 1,00 e quella soglia la cella
+#      si legge "INDISTINGUIBILE DA 1", non "positiva". Congelato ORA
+#      perche' e' la regola che decide la lunghezza del run in T8.
+#
+# --------------------------------------------------------------------------
+#  7. LE SOGLIE CONGELATE ORA, COL NUMERO ACCANTO
+# --------------------------------------------------------------------------
+#  (T1) CANCELLO DI INERZIA. Se le 6 celle tornassero con esito IDENTICO
+#       non sarebbe una manopola inerte -- il codice dice che non puo'
+#       esserlo -- sarebbe IL PIN CHE NON E' ARRIVATO. Si controlla la
+#       colonna InpStAtrPeriod nel CSV: DEVE avere 6 valori distinti
+#       (11..16). Se ne ha uno solo, si butta la corsa.
+#       >>> Questo cancello nasce dal censimento del 09/09: 874 CSV su
+#           1.960 avevano passate a esito identico. "L'abbiamo provato"
+#           a volte voleva dire "l'abbiamo girato senza che mordesse".
+#
+#  (T2) CANCELLO CROCIATO -- DUE CELLE, E SONO GRATIS.
+#       A StMult 2,5 + TP 2,0 + corto puro l'archivio ha esattamente le
+#       celle AtrP 12 e AtrP 14, e questo round le rifa' a tick.
+#       T2a SEGNO:  PF(tick, AtrP 12) deve restare SOTTO 1,00.
+#       T2b SEGNO:  PF(tick, AtrP 14) deve restare SOPRA 1,00.
+#       T2c LIVELLO: PF(tick, AtrP 14) <= 1,37172 x 1,05 = 1,4403.
+#            Il tick PAGA lo spread, l'OHLC no: il tick NON PUO' essere
+#            sensibilmente MIGLIORE dell'OHLC sullo stesso motore.
+#            Se sfora -> ANOMALIA, si indaga il banco, NON si esulta.
+#       >>> LA TARATURA DEL 1,05, e non e' inventata: il rapporto
+#           PF(tick)/PF(OHLC) MISURATO su questo stesso motore sta sempre
+#           SOTTO 1 -- Dow H4 0,79/1,26 = 0,63 | ASX H4 0,78/1,01 = 0,77 |
+#           Nikkei H4 1,05/1,17 = 0,90 | Oro H4 1,46/1,59 = 0,92 |
+#           Argento H4 1,37/1,39 = 0,99 | DAX H4 1,05/1,06 = 0,99.
+#           Fonte: risultati_archivio/SupertrendReversal/
+#           TICK_REALI_INDICI_H1vsH4.md, tabella dei 6 indici.
+#           >>> SEI CASI SU SEI SOTTO 1,00. Il 1,05 e' gia' generoso.
+#       >>> E IL BUCO DI QUESTO CANCELLO, dichiarato: il rapporto
+#           OHLC->tick su D30EUR *H1* e' [NON MISURATO]. L'ho cercato e
+#           NON ESISTE: ho incrociato le 8 righe di
+#           valid_SupRevRT_D30EUR_H1.csv con le 123 dello scan OHLC su
+#           (StMult, AtrP, TP, lato) e le coppie ESATTE sono ZERO -- il
+#           file a tick gira StMult 3,0 e 3,5 con AtrP 9 e 10, lo scan
+#           OHLC ha StMult 2,5/3,5/4,5 e a 3,5 quegli AtrP solo a TP 2,0.
+#           Il 0,99 citato sopra e' il DAX a H4, non a H1.
+#       >>> E' UN CANCELLO DI DIREZIONE, NON DI UGUAGLIANZA: l'archivio e'
+#           OHLC su finestra piena, qui e' tick reale spezzato IS/OOS. Una
+#           riproduzione esatta non e' costruibile a costo zero, e lo
+#           dichiaro invece di fingere che lo sia. T2a e T2b (i SEGNI)
+#           sono la parte che regge; T2c e' una guardia di verosimiglianza.
+#       >>> SI APPLICA A TUTTE E DUE LE TRANCHE. Basta che UNA violi T2a
+#           o T2b per NON leggere il round. (Applicato a una sola non
+#           potrebbe quasi fallire: sarebbe un cancello finto.)
+#
+#  (T3) L'n NON HA NESSUNA SOGLIA DI MONOTONIA -- CLASSE 663.
+#       L'EA tiene UNA POSIZIONE ALLA VOLTA: r.314 "if(HasPosition())" e
+#       r.320 "return; // con posizione aperta non cerco nuovi ingressi".
+#       Cambiare l'ATR del Supertrend cambia (a) quanto spesso la banda
+#       gira, (b) quanto durano le gambe, (c) quanto e' lontano il TP
+#       (ancorato al rischio, r.396). L'n PUO' MUOVERSI IN TUTTI E DUE I
+#       VERSI senza che nessuna lettura del codice sia sbagliata.
+#       >>> COSA SI CONGELA AL POSTO DELLA SOGLIA: QUALE CONTATORE SI
+#           LEGGE. Dalla FASE 1, nel Giornale, si leggono
+#             cB_occupata  (candidate rifiutate perche' lo slot era pieno)
+#             cF_stgirato  (Supertrend appena girato: d1 != d2)
+#             cF_lato      (candidate del lato SPENTO -- vedi sezione 9)
+#             cF_confl     (rifiutate dalla confluenza EMA)
+#           Il SALDO di questi spiega il movimento dell'n. Senza di loro
+#           il movimento NON e' attribuibile, e si scrive "non
+#           attribuito" invece di raccontarselo.
+#
+#  (T4) IL CANCELLO DI MERITO NON ESISTE IN QUESTO ROUND: n per tranche
+#       atteso 58-101, sotto 150 su tutte le celle previste. Scritto qui
+#       perche' nessuno possa aggiungerlo dopo aver visto i numeri.
+#
+#  (T5a) ANOMALIA (derivato d'archivio). DD di tranche > 12,85% -> rosso:
+#       sarebbe oltre il massimo ASSOLUTO gia' osservato in tutto il file
+#       d'archivio (12,8482, cella 4,5/14/3,0 a due lati, n135, ricontato
+#       da me). Non e' "il doppio di qualcosa": e' il peggio gia' visto.
+#
+#  (T5b) MURO PROP (assoluto, e questo vale a qualunque n -- Emendamento B).
+#       DD di tranche >= 5,0%  -> META' del muro totale FTMO: cella
+#                                 FRAGILE, si scrive accanto al PF.
+#       DD di tranche >= 10,0% -> cella INSCHIERABILE a rischio 1,0%, a
+#                                 prescindere dal PF.
+#       >>> E LA RIGA SCOMODA: la cella ancora sta GIA' a 5,6180% in
+#           archivio, cioe' GIA' oltre la prima soglia, sul banco
+#           OTTIMISTA. A tick il DD non migliora quasi mai. Quindi
+#           l'esito piu' probabile e' "PF interessante, DD fragile", e
+#           quello NON e' un promosso.
+#
+#  (T6) CANCELLO DEL LOTTO. A rischio fisso 1% il DD dovrebbe essere
+#       dello stesso ordine su tutte le celle. Se il DD della cella con
+#       lo stop piu' largo NON e' entro +/-40% di quello della cella con
+#       lo stop piu' stretto, si sospetta il pavimento del lotto minimo
+#       (r.412 rialza il lotto al minimo se scende sotto) e i DD del
+#       round si dichiarano ILLEGGIBILI finche' non si e' verificato il
+#       contract size di D30EUR sul banco -- [NON MISURATO], buco B7.
+#       >>> Il +/-40% e' piu' largo del +/-30% di R236a APPOSTA: li'
+#           l'asse muoveva SOLO lo stop, qui muove anche la selezione
+#           delle operazioni, quindi una parte della varianza del DD e'
+#           legittima. Dichiarato, non scelto dopo.
+#
+#  (T8) IL CANCELLO CHE DECIDE IL ROUND -- LA LUNGHEZZA DEL RUN.
+#       Si conta il RUN CONTIGUO piu' lungo di celle con PF sopra la
+#       soglia di indistinguibilita' della sezione 6, lungo AtrP, a TP
+#       fisso, SEPARATAMENTE nelle due tranche.
+#         run >= 3 celle contigue in TUTTE E DUE le tranche -> ALTOPIANO.
+#         run == 1 (solo il 14) in almeno una tranche       -> ISOLA.
+#         run == 2                                          -> NON
+#             CONCLUSIVO: si scrive cosi', e si propone di estendere
+#             l'asse dalla parte che sporge. Non si arrotonda.
+#       >>> E LA CELLA, SE MAI SE NE SCEGLIESSE UNA, E' IL CENTRO DEL
+#           RUN, MAI IL PICCO. Regola di casa, congelata qui insieme al
+#           numero perche' altrimenti il numero non vuol dire niente.
+#
+# --------------------------------------------------------------------------
+#  8. IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA
+# --------------------------------------------------------------------------
+#  TESI COMODA:  "AtrP 14 e' un altopiano vero e il corto del DAX ha edge."
+#  ALTERNATIVA:  "AtrP 14 e' un'ISOLA della griglia genetica, e il 12
+#                 negativo accanto lo dimostra gia'."
+#
+#  >>> LE DUE IPOTESI PRODUCONO NUMERI DIVERSI, E SONO QUESTI:
+#
+#   grandezza che le separa: IL RUN CONTIGUO lungo AtrP a TP 2,0 fisso
+#     TESI        -> il run include almeno {13,14,15} oppure {14,15,16}:
+#                    >= 3 celle sopra soglia, in tutte e due le tranche.
+#                    E il 12 resta sotto 1 (il dirupo e' REALE ma e' un
+#                    BORDO, non un accerchiamento).
+#     ALTERNATIVA -> il 14 e' l'unica cella sopra soglia. 13 sotto o
+#                    indistinguibile, 15 e 16 sotto o indistinguibili.
+#                    Run = 1.
+#   >>> SONO DISTINGUIBILI? SI, e col numero: la differenza fra le due
+#       previsioni e' il SEGNO di celle il cui salto atteso (0,568 fra 12
+#       e 14) e' 6,6x-9,9x la risoluzione del banco. Non e' un lancio di
+#       moneta. La risposta alla domanda "se non riesci a distinguerle
+#       fermati" e': SI RIESCE, e il margine e' un fattore sette.
+#
+#  >>> MA LA DISTINZIONE HA UNA CONDIZIONE, E VA DETTA: vale SOLO SE T2a
+#      e T2b passano. Se a tick il 12 esce positivo o il 14 negativo, il
+#      banco non sta riproducendo l'archivio e NESSUNA delle due ipotesi
+#      e' testata -- si sta misurando un terzo oggetto. In quel caso il
+#      verdetto e' "il tick non riproduce l'OHLC su questo motore", che e'
+#      esso stesso un risultato grosso, ma NON e' una risposta sul DAX.
+#
+#  >>> IL MECCANISMO CHE RENDE L'ALTERNATIVA PLAUSIBILE, e non e' un
+#      sospetto generico: la griglia era GENETICA. Un ottimizzatore
+#      genetico VISITA PIU' SPESSO LE ZONE CHE GLI RENDONO, quindi le
+#      celle positive dell'archivio sono un campione DISTORTO VERSO
+#      L'ALTO. Il 14 ha quattro celle su quattro positive anche perche'
+#      il genetico e' tornato li' quattro volte. Il 13 ne ha UNA SOLA e
+#      il 15/16 nessuna: non perche' siano brutte, ma perche' il genetico
+#      non ci e' passato. >>> Questo e' il motivo per cui il round si
+#      lancia a GRIGLIA PIENA su sei valori contigui, e non a genetico.
+#
+#  >>> E C'E' UN TERZO ESITO, che non e' ne' l'uno ne' l'altro e che va
+#      previsto ORA perche' e' il piu' probabile e il piu' scomodo:
+#      RUN LUNGO MA TUTTO FRAGILE -- celle sopra 1 con DD oltre il 5,0%.
+#      Sarebbe "l'altopiano c'e' ma non e' schierabile a rischio 1,0%", e
+#      allora la domanda diventa il RISCHIO, non l'edge. Va scritto cosi',
+#      non ammorbidito in "promettente".
+#
+#  >>> E L'ASIMMETRIA CHE FAREBBE CADERE TUTTO, la piu' onesta di tutte:
+#      lo stesso motore a StMult 3,5 e AtrP 14 fa TRE SU TRE NEGATIVE
+#      (0,884 / 0,816 / 0,890). Se AtrP 14 fosse una proprieta' vera del
+#      DAX, spostare il moltiplicatore del 40% non dovrebbe ribaltarne il
+#      segno. >>> IL DIRUPO SULL'ALTRO ASSE E' GIA' UN INDIZIO A FAVORE
+#      DELL'ALTERNATIVA, ed e' MISURATO. Questo round NON lo risolve --
+#      non mette StMult ad asse, un file prova misura una variabile sola.
+#      >>> Se il run esce >= 3, la domanda successiva e' ovvia e va
+#          lasciata scritta qui: un R238 con asse InpStMult a AtrP 14
+#          pinnato. NON lo propongo dentro questo file, perche' sarebbe
+#          un secondo asse.
+#
+# --------------------------------------------------------------------------
+#  9. L'ADDITIVITA' DEI DUE LATI -- MISURATA, ED E' ESATTA (classe 641)
+# --------------------------------------------------------------------------
+#  Se il lato e' un FILTRO PURO: n(corto) + n(lungo) = n(due lati accesi).
+#  VERIFICATO DA ME SULL'ARCHIVIO, sulle sole quattro terne presenti in
+#  tutte e tre le varianti:
+#    Mult 2,5 AtrP 13 TP 1,5 : 146 + 224 = 370  contro 370   (scarto 0)
+#    Mult 2,5 AtrP  7 TP 3,0 : 205 + 259 = 464  contro 464   (scarto 0)
+#    Mult 2,5 AtrP  8 TP 3,0 : 202 + 200 = 402  contro 402   (scarto 0)
+#    Mult 3,5 AtrP 13 TP 2,5 : 114 +  96 = 210  contro 210   (scarto 0)
+#  >>> QUATTRO SU QUATTRO, SCARTO ZERO. Non "circa": esatto.
+#
+#  >>> E IL MECCANISMO E' NEL CODICE, quindi non e' una coincidenza:
+#      r.333  bool up = (d1 > 0);
+#      r.334  if( up && !InpAllowLong ) { cF_lato++; return; }
+#      r.335  if(!up && !InpAllowShort) { cF_lato++; return; }
+#      IL LATO E' DETTATO DALLA DIREZIONE DEL SUPERTREND: su una data
+#      barra esiste UNA SOLA candidata, lunga o corta, mai tutte e due.
+#      Le due serie di segnali sono MUTUAMENTE ESCLUSIVE NEL TEMPO.
+#      E lo slot unico (r.314) non le fa interferire perche'
+#      InpExitOnFlip e' ACCESO (r.316-318, e vale 1 in tutte e 123 le
+#      righe d'archivio): quando la banda gira, la posizione viene chiusa
+#      PRIMA che l'altro lato possa avere una candidata -- che per
+#      d1!=d2 (r.332) deve comunque aspettare almeno una barra.
+#
+#  >>> E QUI SEGNALO UNA CONTRADDIZIONE APERTA CON UN ALTRO FILE DI CASA,
+#      invece di lasciarla sepolta: prove/R110_SUPDAX_02_short.txt scrive
+#      che "n(01_long) + n(02_short) NON deve fare n(00_metro)... con un
+#      lato spento lo SLOT resta libero". >>> QUELLA FRASE E' GIUSTA PER
+#      QUEL FILE E SBAGLIATA PER QUESTO: R110 gira un EA DIVERSO
+#      (ABTG_SupRev_DAX_H4_Ottimizzato.mq5), dove il lato non e' detto che
+#      sia dettato dalla direzione della banda. Per
+#      ABTG_SupertrendReversal.mq5 l'additivita' e' esatta, misurata 4 su
+#      4 e spiegata dal sorgente. Non si importa la conclusione dell'uno
+#      nell'altro.
+#
+#  >>> COSA CI GUADAGNA IL ROUND, ed e' una previsione vera che il gemello
+#      R237b potra' smentire: sulla cella ancora (2,5 / AtrP 14 / TP 2,0)
+#      l'archivio ha corto n=169 e due lati n=393, quindi
+#          n(lungo, AtrP 14, TP 2,0) = 393 - 169 = 224   [PREDETTO]
+#      e infatti il lungo MISURATO al TP adiacente 2,5 fa n=227, cioe'
+#      l'1,3% di scarto. La previsione regge gia' su un dato che non e'
+#      stato usato per farla.
+#
+# --------------------------------------------------------------------------
+# 10. I BUCHI DICHIARATI, PER NOME
+# --------------------------------------------------------------------------
+#  (B1) RISCALDAMENTO. Il vincolo non e' l'ATR del Supertrend (al massimo
+#       16 barre) ma la CONFLUENZA, ACCESA, che chiede una EMA a 200
+#       periodi (InpEma4=200). D30EUR opera ~14 barre H1 al giorno con la
+#       banda 8-21 (e fino a ~23 col fuori borsa): 200 barre = ~14 giorni
+#       operativi = ~20 giorni di calendario = ~7,9% dell'IS a
+#       FRAZIONEIS 0.40. NON scorporato: @DAQUANDO resta al pavimento tick
+#       misurato. SCELTA DICHIARATA, non svista.
+#       >>> E il numero di barre/giorno di D30EUR e' [INFERITO], non
+#           misurato: dipende da W (minuti attivi), che
+#           CANCELLO_COSTO_FLOTTA_2026-09-10.md par. B3 dichiara come
+#           BANDA [720 ... 840], con 780 che e' "una SCELTA dentro la
+#           banda, non una misura".
+#  (B2) LA FINESTRA DELLO SCAN D'ARCHIVIO NON E' NEL CSV: non esiste
+#       nessuna colonna data. Assunta ~21 mesi. [PARZIALMENTE VERIFICATA]
+#       e dico come: gli n del file a tick reali (223 a 3,5/10/TP3,0 e
+#       211 a 3,5/9/TP2,5, due lati) stanno a meno del 3% dagli n OHLC
+#       delle celle piu' vicine (228 a 3,5/10/TP2,0 e 217 a 3,5/9/TP2,0).
+#       Due finestre molto diverse non darebbero frequenze cosi' vicine.
+#       E' un ARGOMENTO, non una misura: la data resta ignota.
+#  (B3) LA DISTANZA DI STOP DI QUESTO MOTORE SUL DAX E' [NON MISURATO].
+#       E' il buco che la FASE 1 chiude, ed e' l'unico che blocca il
+#       verdetto sul costo.
+#  (B4) IL RAPPORTO OHLC->TICK SU D30EUR H1 E' [NON MISURATO]: zero coppie
+#       esatte fra i due file (sezione 7, T2). La taratura di T2c poggia
+#       su H4 e sugli altri indici.
+#  (B5) LO SPREAD FTMO 1,43 POGGIA SU n=1 TICK, lo dice il referto stesso.
+#       E sul Dow lo stesso confronto va dalla parte OPPOSTA (US30.cash
+#       2,63 contro BCM 1,90 = FTMO piu' CARO del 38%). La frontiera C e'
+#       fragile; la A (108,0) no, poggia su 31 milioni di tick.
+#  (B6) UN SOLO REGIME. ~21 mesi di DAX, in larga parte rialzisti. Il
+#       CORTO e' il lato che soffre in quel regime: un PF basso qui NON
+#       e' una condanna, e un PF alto NON e' una promozione. La PROVA DI
+#       REGIME (Emendamento C) NON E' IN QUESTO ROUND.
+#       >>> E per il corto e' il buco piu' pesante di tutti: se il corto
+#           del DAX facesse PF 1,3 in un mercato che sale, in un mercato
+#           che scende farebbe presumibilmente di piu' -- ma
+#           "presumibilmente" non e' un numero e non si scrive.
+#  (B7) IL CONTRACT SIZE / VALORE DEL PUNTO DI D30EUR SUL BANCO E'
+#       [NON MISURATO]. Serve a escludere il pavimento del lotto minimo
+#       (r.412). Si legge dall'InfoBroker a costo zero. T6 e' la spia.
+#  (B8) LA GEOMETRIA DI QUESTO ROUND NON E' QUELLA DI NESSUNA SEDIA VIVA,
+#       e lo dico perche' nessuno importi una conclusione:
+#         preset ABTG_SupertrendReversal_FW_DAX.set -> H4 (16388),
+#           StMult 3,5, AtrP 10, LONG ONLY, magic 770923
+#         preset sedia .../sedia_ABTG_SupRev_DAX_H4_Ottimizzato_970912.set
+#           -> H4 (16388), StMult 3,0, AtrP 9, DUE LATI, magic 970912
+#       Letti da me riga per riga. >>> Questo round gira H1, StMult 2,5,
+#       corto puro: TF diverso, moltiplicatore diverso, lato diverso.
+#       Risponde a "il motore, in una zona sostenuta dai dati, ha un corto
+#       sul DAX?", NON a "la sedia 970912 ha un corto?". Sono due domande.
+#  (B9) NON HO GUARDATO FUORI CASA: nessun .set pubblico, nessun sorgente
+#       di terzi, nessun valore di riferimento esterno. La banda 11-16
+#       viene dalla griglia di casa e dai suoi buchi.
+#  (B10) R110_SUPDAX_02_short.txt ESISTE gia' in prove/ (corto DAX H4 a
+#       tick reali, magic 763120, scritto il 25/08/2026) MA NON HA NESSUN
+#       CSV DI RISULTATI in repository: sotto prove/R110_CSV_EMADOW/ ci
+#       sono solo i sei CSV di ABTG_EMA200 su U30USD. >>> Quel file e'
+#       stato SCRITTO E MAI RACCOLTO. Non e' un morto: e' un non misurato,
+#       e coincide con la riga di REGISTRO_TEST.md r.302 "Mancano: A3,
+#       A5, S4/S5/S6, DAX short". Il corto del DAX e' un buco DICHIARATO
+#       DALLA CASA da quasi un mese.
+#
+# --------------------------------------------------------------------------
+# 11. IL COSTO IN TEMPO MACCHINA
+# --------------------------------------------------------------------------
+#  6 celle x 2 tranche = 12 passate a TICK REALI su questo file.
+#  Col gemello R237b: 24 passate. Piu' 2 corse SINGOLE di FASE 1 (una per
+#  file), che sono la cosa piu' economica del pacchetto e la piu'
+#  informativa.  TOTALE: 26 corse.
+#  [NON MISURATO] il minutaggio per passata di questo motore a tick reali
+#  su D30EUR H1. >>> Per ordine di grandezza: ~21 mesi di tick H1 sul DAX
+#  sono ~31 milioni di tick (spread_orario_D30EUR.csv, colonna
+#  tick_totali sommata: 30.974.789 sulla finestra di QUEL file, che NON
+#  e' dichiarata essere la stessa -- quindi nemmeno questo e' una misura
+#  del costo, e' un ordine di grandezza dichiarato come tale).
+#  >>> E VA SUL PC DI BACKTEST, NON SUL VPS: firma di Claudio del
+#      21/09/2026. Il 21/09 un tester a tick reali sul VPS ha inchiodato
+#      la macchina mentre le sei sedie della challenge FTMO operavano.
+#
+# --------------------------------------------------------------------------
+# 12. VINCOLI DI BANCO -- e quello che il file NON puo' imporre
+# --------------------------------------------------------------------------
+#  MODELLO: TICK REALI (Modello 4). NON passabile dal file: e' il
+#  parametro -Modello della riga di lancio (walkforward_generico.ps1
+#  r.190, default 4; "1 = OHLC M1: SOLO screening, mai verdetti").
+#  >>> QUI IL MODELLO 4 NON E' UN DEFAULT DA RISPETTARE: E' L'OGGETTO DEL
+#      ROUND. Se questa corsa girasse a Modello 1 non misurerebbe niente
+#      di nuovo, perche' l'archivio E' GIA' OHLC.
+#
+#  DEPOSITO 100000 -- CLASSE 646/604, E IL FILE NON PUO' IMPORLO.
+#  Non esiste direttiva @DEPOSITO: e' il parametro -Deposito della riga di
+#  lancio (r.200, default 10000). LA RIGA DI LANCIO DEVE PORTARE
+#  -Deposito 100000. Non e' formalismo: il commento del sorgente r.549-550
+#  ricorda che su 225JPY "a deposito 100k profitti identici al 10k, DD
+#  0,01%", cioe' il dimensionamento di QUESTO EA e' GIA' STATO falsato dal
+#  deposito una volta. E' anche il presidio del buco B7.
+#
+#  @FRAZIONEIS 0.40 scritta QUI DENTRO (classe 647/604): senza la riga
+#  esplicita il driver applica il default IN SILENZIO. Sulla corsia ROUND
+#  le direttive del file sono l'UNICO canale per l'identita' della
+#  finestra (r.612-617). Taglio: IS 2024.09.26 -> ~2025.06.10; OOS ->
+#  2026.06.30.
+#  @DAQUANDO 2024.09.26 = pavimento dei tick reali MISURATO sugli indici
+#  (classe 590). @FINOA 2026.06.30 = bordo d'archivio della flotta.
+#  @PERIODO H1, MOTIVATO COL NUMERO: a H4 questo simbolo a tick reali fa
+#  PFmed 1,05 su n=50 (TICK_REALI_INDICI_H1vsH4.md), cioe' campione meta'
+#  e merito nullo; e il corto con n>=150 sta su H1, non su H4 -- e' il
+#  motivo per cui il censimento ha indicato questa casella. Scendere
+#  sotto H1 peggiora il costo (la frontiera 108,0 non si sposta).
+#  InpTF e' un ENUM: pinnato ESPLICITO H1 = 16385 e MAI ad asse
+#  (classe 287).
+#
+#  UN SOLO ASSE: InpStAtrPeriod, int, il passo conta (6 celle).
+#  NIENTE GRIGLIA LARGA (regola del 19/08): StMult, TP_RR, InpSLLookback,
+#  InpSLBufferPips restano PINNATI. E la regola del 19/08 e' rispettata
+#  anche nel merito, non solo nella forma: questo NON e' "una griglia piu'
+#  fitta su un motore senza edge", perche' il motore su questo simbolo e
+#  questo TF NON e' mai stato dichiarato senza edge -- e' dichiarato
+#  NON MISURATO sul lato corto, che e' un'altra cosa.
+#
+#  MAGIC 764230 -- riverificato vergine il 23/09/2026: zero occorrenze in
+#  tutto il repository, con e senza .git (git grep e grep ricorsivo).
+#  Gemello 764231 (R237b) idem.
+#  >>> NESSUNA SEDIA VIVA TOCCATA: su D30EUR girano 770101
+#      (ABTG_DAX_Apertura_EU, M5) e 770411 (ABTG_MaxMinNotte_DAX_Short,
+#      M15) sulla challenge FTMO; su questo EA esistono 970911/970912
+#      (piccolo) e 770923 (preset FW). Nessuno di questi numeri e' 764230
+#      o 764231, e questo file non tocca nessun preset ne' nessun EA in
+#      campo: scrive solo se stesso.
+#
+#  NON PINNO InpNewsCurrencies ne' InpNewsFile: il primo ha per valore la
+#  STRINGA VUOTA, e un pin vuoto MT5 lo IGNORA usando il default compilato
+#  -- e' il difetto per cui esiste controlla_prova.py. Con
+#  InpUseNewsFilter=false sono inerti comunque.
+#  InpUsaGuardian=false: nel tester le GlobalVariable del Guardian non
+#  esistono e la guardia e' fail-open totale, quindi true e false danno lo
+#  stesso risultato; si pinna false per DETERMINISMO, non per effetto.
+# ==========================================================================
+@SIMBOLO  D30EUR
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- IL LATO: corto puro. E' la prima volta a tick reali sul DAX.
+InpAllowLong=false
+InpAllowShort=true
+
+# --- timeframe operativo (ENUM, pinnato esplicito: H1 = 16385)
+InpTF=16385
+
+# --- ancora d'archivio (sezione 2). StMult e TP_RR PINNATI: un asse solo.
+InpStMult=2.5
+InpTP_RR=2.0
+
+# --- pattern del rimbalzo (valori dell'archivio, verificati colonna per
+# --- colonna: nel CSV hanno UN SOLO valore distinto su 123 righe)
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+
+# --- confluenza tecnica (accesa in archivio: e' lei che detta B1)
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+# --- geometria dello stop: lookback e buffer al valore d'archivio.
+# --- InpSLBufferPips=3 pip = 0,03 idx su D30EUR (Digits 2): trascurabile,
+# --- e per questo la base della FASE 1 non ha bisogno di correzione.
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+# --- target e uscita. ATTENZIONE: InpTP1_R=1.0 lega il PARZIALE allo
+# --- stop, quindi muovere l'ATR muove anche il punto del parziale.
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+
+# --- ingresso frazionato
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- rischio
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+# --- filtro orario: SPENTO, come in tutte e 123 le righe d'archivio.
+# --- E' il motivo per cui la frontiera del costo e' 108,0 e non 68,0.
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+
+# --- filtro notizie: spento
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+# --- generali
+InpComment=STREV_R237a
+InpFridayClose=false
+InpFridayCloseHour=20
+InpUsaGuardian=false
+InpMagic=764230
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+
+# --- L'ASSE, unico: l'ATR del Supertrend. Sei celle contigue, 11..16.
+# --- Il valore 14 (primo campo) e' l'ANCORA: e' la cella su cui gira la
+# --- FASE 1 in test singolo, quando Optimization=0.
+# --- 11 spalla | 12 riproduzione NEGATIVA | 13 la cella che decide |
+# --- 14 riproduzione POSITIVA | 15 e 16 MAI misurate, su nessun asse.
+InpStAtrPeriod=14||11||1||16||Y
+# ==========================================================================
+
+# ==========================================================================
+#  FASE 1 -- TEST SINGOLO. OBBLIGATORIA, E VA PRIMA DELL'OTTIMIZZAZIONE.
+#  CLASSE 664 (la misura c'e' gia') + CLASSE 526 (si legge solo qui).
+# ==========================================================================
+#  PERCHE' NON E' OPZIONALE: le TRE cose che questo round deve leggere non
+#  stanno nel CSV, e non ci stanno per costruzione.
+#    (1) la DISTANZA DI STOP per ingresso -> cancello T7 e tutto il
+#        verdetto sul costo (108,0);
+#    (2) i CONTATORI DELL'IMBUTO (cB_occupata, cF_stgirato, cF_lato,
+#        cF_confl) -> attribuzione del movimento dell'n, cancello T3;
+#    (3) la QUADRATURA dell'imbuto -> prova che i contatori hanno girato.
+#  Tutte e tre escono da Print() (r.128 Log, r.200-232 ImbutoStampa), e
+#  Print() NON VIENE ESEGUITO IN OTTIMIZZAZIONE. Un file prova E'
+#  un'ottimizzazione. Verificato anche sulla testata del CSV d'archivio:
+#  quelle colonne NON ESISTONO, in nessun CSV di questo motore.
+#
+#  COME SI LANCIA (scheda .ini; NON e' una riga di lancio, non esce da
+#  qui: la riga la scrive chi di dovere e passa dal cancello):
+#    Optimization     = 0        <- test SINGOLO, non ottimizzazione
+#    ShutdownTerminal = 1
+#    Symbol / Period / FromDate / ToDate / Model / Deposit = IDENTICI a
+#      quelli dichiarati in questo file: D30EUR, H1, 2024.09.26 ->
+#      2026.06.30, TICK REALI, 100000. Se uno solo differisce, la base
+#      misurata NON e' la base di questo round e la FASE 1 non vale.
+#    L'ASSE va FISSATO ALL'ANCORA: InpStAtrPeriod = 14
+#      (ed e' gia' il primo campo dell'asse qui sopra: a Optimization=0
+#       MT5 usa proprio quello. Nessuna riga da cambiare.)
+#    tutti gli altri pin: identici a quelli in fondo a questo file.
+#
+#  IL CANCELLO SUL PRODOTTO -- si guarda il GIORNALE, non il CSV:
+#    (1) almeno una riga "[STREV-IMBUTO] ... quadratura OK"
+#        -> se manca, l'imbuto non ha girato e i contatori di T3 non
+#           esistono: FASE 1 FALLITA, si ripete.
+#    (2) una riga "[STReversal] SHORT mercato ... @ <entry> SL <sl> TP
+#        <tp>" PER OGNI INGRESSO -- r.422-423.
+#        -> se le righe sono ZERO ma il test singolo riporta operazioni,
+#           InpVerbose non e' arrivato: FASE 1 FALLITA.
+#        -> se ci sono, da ognuna si estrae |SL - entry|. Se ne prende
+#           LA MEDIANA (quella e' la base, T7) E si conta LA FRAZIONE
+#           sotto 108,0 (classe 666). SERVONO TUTTI E DUE i numeri.
+#    (3) CONTROLLO DI SANITA' sulle stesse righe, che costa zero: su un
+#        CORTO lo SL deve stare SOPRA l'entrata e il TP SOTTO. Se anche
+#        una sola riga viola questo, non e' una misura di stop: e' un
+#        bug, e il round si ferma.
+#
+#  >>> SENZA LA FASE 1 IL ROUND NON PRONUNCIA NESSUN VERDETTO SUL 40x e
+#      non attribuisce nessun movimento dell'n. Puo' ancora rispondere
+#      alla domanda della sezione 1 (altopiano o isola), che e' un
+#      confronto FRA celle. Quella riga sul costo resta [NON MISURATO] e
+#      non si scrive lo stesso.
+#  >>> Questo e' testo di commento: controlla_prova.py lo ignora, e la
+#      FASE 1 non aggiunge nessuna cella all'asse.
+# ==========================================================================
