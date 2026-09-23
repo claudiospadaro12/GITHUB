@@ -30611,3 +30611,174 @@ controllo e' stato fatto.
    facile della realta') e della regola del **10/09** (*"avevo controllato che la mia risposta
    fosse COERENTE con quello che mi aspettavo, invece di provare a ROMPERLA"*). Qui la trovi
    scritta in MQL5, ma il difetto e' di chi scrive il test, non del linguaggio.
+
+---
+
+## CLASSE 601 -- 🔤🕳️ IL GIORNALE DI MT5 LETTO **SENZA DICHIARARE LA CODIFICA** E **SU UN FILE SOLO**: la ricerca torna ZERO su un albero dove il Guardian **STA GIRANDO** (controllo-preventivo, 23/09/2026, terza faccia delle classi 545 e 546)
+
+**Il caso.** La riga `RIGA_BINARI_FTMO_DA_MANDARE.txt` (documento
+`report/BINARI_IN_CAMPO_FTMO_2026-09-21.md`) doveva rispondere a *"il Guardian gira su
+`C:\FTMO`, si o no?"* su una challenge **pagata e viva**. Leggeva i giornali cosi':
+
+```powershell
+$lf=@(Get-ChildItem -LiteralPath $lg -Filter '*.log' | Sort-Object LastWriteTime); $ul=$lf[-1];
+$tutte=@(Get-Content -LiteralPath $ul.FullName); $hit=@($tutte | Select-String -Pattern $pat)
+```
+
+🔴 **Misurato su un albero finto con il Guardian ACCESO** (due battiti `[GUARDIAN] eq=...` nel
+giornale di oggi, le righe di attacco `[GUARDIAN] avviato` + `filo verificato` in quello del
+19/09, `ABTG_Guardian.ex5` presente e nominato in un `.chr`): la riga ha stampato **due volte**
+
+```
+NESSUNA RIGA: su questo file il Guardian non ha scritto niente.
+```
+
+Cioe' **esattamente il segnale d'allarme che stava cercando**, con il Guardian vivo. Due cause
+indipendenti, e bastava una:
+
+1. **CODIFICA.** MT5 scrive i `.log` in **UTF-16**. `Get-Content` senza `-Encoding` li legge
+   come ANSI/UTF-8 se non c'e' il BOM: ogni carattere resta separato da un `NUL` e
+   `Select-String -Pattern 'guardian'` **non aggancia niente**. Nel collaudo si vede a occhio
+   nella coda stampata -- `[ G U A R D I A N ]   e q = 1 0 0 1 2 0 . 5 0` -- ma la frase
+   conclusiva sopra dice comunque *"non ha scritto niente"*, e quella e' la riga che si legge.
+2. **UN FILE SOLO.** `$lf[-1]` prende **il giornale piu' recente**. Ma il Guardian stampa
+   `[GUARDIAN] avviato` **quando viene attaccato** (`ABTG_Guardian.mq5` r.658-661, `OnInit`), e
+   l'attacco e' del **19-20/09**: quelle righe stanno in un **altro file**. Il battito che
+   invece esce ogni 5 minuti (r.884) c'e' **solo con `InpVerbose=true`** e **solo se il tempo
+   server avanza** (`OnTimer`, `TimeCurrent()`): a mercato fermo, o con un preset diverso, il
+   file di oggi e' **legittimamente vuoto di Guardian**.
+
+### 🤦 E la beffa: la risposta era gia' scritta in casa, nella stessa cartella
+`backtest_pipeline/log_ea.ps1` r.44, da mesi:
+
+```powershell
+# --- MT5 scrive i log in UTF-16: se si legge male non si trova niente ---
+function Leggi-Log($path) { foreach ($enc in @("Unicode","UTF8","Default")) { ...
+    if (($righe | Select-String -Pattern "\d{2}:\d{2}:\d{2}" -Quiet)) { return $righe } } }
+```
+
+👉 E' la **regola del 10/09** alla lettera (*"prima si cerca il file che ha gia' la risposta"*),
+non applicata.
+
+### ✅ La regola
+1. 🔤 **Un `.log` di MT5 non si legge mai senza un giro di codifiche**, e il giro va **chiuso da
+   una prova di sanita'**: se fra le prime righe non compare un orario `\d{2}:\d{2}:\d{2}`, la
+   codifica era sbagliata. Ordine di casa: `Unicode`, `UTF8`, `Oem`/`Default`.
+2. 🚨 **Se nessuna codifica regge, si stampa `ILLEGGIBILE`, MAI `nessuna riga`.** Un file che
+   non si e' riusciti a leggere -- codifica ignota, file vuoto, o **aperto in esclusiva dal
+   terminale vivo** -- produce zero occorrenze esattamente come un file innocente. **Zero
+   letture e zero occorrenze devono uscire come due parole diverse**, altrimenti la riga mente.
+3. 🗂️ **Il perimetro dei FILE si dimensiona sull'EVENTO che si cerca, non sul calendario.** Se
+   l'evento e' un `OnInit` di cinque giorni fa, il file di oggi non lo contiene: si leggono gli
+   **ultimi N giornali interi** (N=10 costa niente, `Select-String -LiteralPath` **scorre** il
+   file e non se lo carica in memoria: importante su una macchina che ospita una challenge viva).
+4. 🧾 **E l'esito si stampa come tre fatti separati, non come un totale**: `avviato` (attaccato,
+   e quando) / `filo verificato`-`FILO ROTTO` (gli EA leggono le stesse GlobalVariable) /
+   `eq=` battito **nel file piu' recente** (e' vivo ADESSO). Un conteggio unico non distingue
+   *"mai attaccato"* da *"attaccato e poi staccato"* da *"vivo ma silenzioso"*.
+
+🔴 **Perche' e' costosa questa classe e non e' un dettaglio di stile**: il falso allarme qui non
+finisce in un referto, finisce in un **intervento su un terminale che sta operando la
+challenge** (ricompilare, staccare, riattaccare). Una riga di sola lettura che risponde male e'
+piu' pericolosa di una riga che non gira.
+
+📌 Sorelle: **545** (il perimetro delle CARTELLE: Giornale contro scheda Esperti) e **546** (la
+finestra dentro il file: coda contro file intero). Con la 601 le facce sono **tre** -- cartelle,
+file, codifica -- e **una ricerca a zero non vale niente finche' non sono dichiarate tutte e tre**.
+
+
+---
+
+## CLASSE 602 -- 🟢🎭 IL CANCELLO STAMPA UN «PASSATO» CHE NOMINA **UN BERSAGLIO CHE LA RIGA NON USA**, mentre il bersaglio VERO non viene valutato da nessuna regola (controllo-preventivo, 23/09/2026, cugina della 180)
+
+**Il caso.** Su una riga di **sola lettura** che legge la cartella dati di **`C:\FTMO`**
+(challenge `541452707` viva), `controlla_riga.py` ha stampato, verde:
+
+```
+OK   macchina DICHIARATA e inchiodata dalla riga: VMI3047753 -> unico bersaglio ammesso
+     qui C:\MT5_Backtest (conto 50504400, il banco solo-tester del VPS)
+```
+
+🔴 **Il bersaglio nominato non c'entra con la riga.** Quel messaggio viene dalla tabella
+`BERSAGLI_PER_MACCHINA` (r.424), che elenca i terminali su cui si puo' **ESEGUIRE** un round.
+La riga non passa nessun `-Terminal...`, quindi `valori_bersaglio()` torna vuota e
+`motivo_rifiuto_bersaglio()` **non viene mai chiamata**: `C:\FTMO` -- che pure sta in
+`TERMINALI_VIETATI` r.459 con la nota *"sei sedie che stanno operando"* -- **non e' stato
+esaminato da nessuna regola**. Il cancello non ha sbagliato una valutazione: **non l'ha fatta**,
+e ha stampato un verde che sembra dire il contrario.
+
+### ☠️ I due modi in cui costa
+- **(a) La riparazione sbagliata.** Chi legge *"unico bersaglio ammesso qui `C:\MT5_Backtest`"*
+  puo' concludere che `C:\FTMO` sia l'errore e **correggerlo**: la riga andrebbe allora a
+  leggere il **banco 50504400** e risponderebbe perfettamente alla domanda sbagliata.
+- **(b) Il verde preso in prestito.** Chi legge la stessa riga al contrario conclude che il
+  cancello **ha approvato** la lettura di `C:\FTMO`. Non e' vero: non l'ha guardata.
+
+### ✅ La regola
+1. 🏷️ **Un `passa` nomina solo cio' che ha davvero valutato.** Se la regola riguarda i bersagli
+   di **esecuzione**, la frase deve dire **«per ESEGUIRE»**, e su una riga che non esegue niente
+   deve aggiungere **«questa riga non passa nessun bersaglio di esecuzione: i percorsi che LEGGE
+   non sono coperti da questa regola»**.
+2. 🔍 **La lista bianca di sola lettura (classe 173) e' un'esenzione sui CMDLET, non sui
+   PERCORSI.** Oggi una riga read-only puo' leggere qualunque cartella dati -- compresa quella
+   del **REALE 10105439** -- senza che nessuna regola lo dichiari. Leggere non e' toccare, e va
+   benissimo: **ma deve uscire scritto**, perche' il lettore non distingue *"ammesso"* da *"non
+   esaminato"* se il cancello non glielo dice.
+3. 📛 **Ed e' la 180 in un'altra veste**: il perimetro si dichiara **per nome**. Un verde che
+   nomina un bersaglio per DIFETTO (*"l'unico ammesso e' X"*) su una riga che usa Y e' un
+   perimetro definito per esclusione, e infatti si porta dietro lo stesso errore.
+
+
+---
+
+## CLASSE 603 -- 🐺🟡 `StaticParameterBinder` **GRIDA AL LUPO SUI PARAMETRI DINAMICI DEL PROVIDER** quando il percorso sta in una VARIABILE: falso positivo **garantito** del controllo di classe 586 (controllo-preventivo, 23/09/2026, figlia della 586)
+
+**Il caso.** Il controllo della **classe 586** (binding dei parametri, il `;` mangiato fra due
+`Write-Host`) ha segnalato **3 eccezioni** su una riga di sola lettura corretta:
+
+```
+Get-ChildItem -LiteralPath $root -Directory          -> "A parameter cannot be found that matches parameter name 'Directory'"
+Get-Content   -LiteralPath $o -Raw                   -> ... 'Raw'
+Get-Content   -LiteralPath $c.FullName -Raw -Encoding $enc -> ... 'Raw', 'Encoding'
+```
+
+🔴 **Sono falsi positivi, e non per caso: per costruzione.** `-Directory`, `-File`, `-Raw`,
+`-Encoding`, `-Tail`, `-Wait` **non appartengono al cmdlet**: sono **parametri dinamici del
+PROVIDER FileSystem**, e il provider si conosce solo quando si risolve il percorso. Con un
+percorso in una **variabile** il binder statico non puo' risolverlo, quindi non vede quei
+parametri e li dichiara inesistenti.
+
+### 🧪 Il contro-esempio che lo dimostra, ed e' il discrimine da usare
+```
+Get-ChildItem -LiteralPath "/tmp" -Directory              -> 0 eccezioni   (percorso COSTANTE)
+$r="/tmp"; Get-ChildItem -LiteralPath $r -Directory       -> 1 eccezione   (percorso in VARIABILE)
+Get-Content -LiteralPath "/tmp/x.txt" -Raw                -> 0 eccezioni
+$o="/tmp/x.txt"; Get-Content -LiteralPath $o -Raw         -> 1 eccezione
+Get-Content -LiteralPath "/tmp/x.txt" -ParametroCheNonEsiste        -> 1 eccezione  (VERO difetto)
+$o="/tmp/x"; Get-Content -LiteralPath $o -ParametroCheNonEsiste     -> 1 eccezione  (VERO difetto)
+```
+
+👉 **Il discrimine e' COSTANTE contro VARIABILE, non il costrutto che sta intorno**: rimetti lo
+stesso comando con un percorso **letterale** e, se l'eccezione sparisce, era un parametro
+dinamico del provider; se **resta**, e' un difetto vero (parametro inesistente, oppure
+`specified more than once` -- il caso della 586). Dieci secondi, offline, senza eseguire niente.
+⚠️ Il flag `BindCommand($c,$true)` **non cambia niente**: misurato, stessi 3 flag con e senza.
+
+### ✅ La regola
+1. 🟡 **Le eccezioni del binder sono un RILIEVO, non un bocciato.** Si guarda **il nome del
+   parametro**: se sta nella lista dei dinamici del FileSystem (`Raw`, `Encoding`, `Delimiter`,
+   `Wait`, `Directory`, `File`, `Attributes`, `Tail`, `AsByteStream`, `ItemType`, `Value`,
+   `Stream`) **e** il percorso e' una variabile, e' rumore.
+2. 🚫 **E soprattutto: non si "ripara" un codice corretto per far tacere un controllo.** Togliere
+   `-Raw` o `-Encoding` per avere zero flag **rompe la riga** -- e nel caso vero avrebbe tolto
+   proprio l'`-Encoding` che serviva a leggere un log UTF-16 (classe **601**). Un controllo che
+   spinge a peggiorare il codice costa piu' di quello che salva.
+3. 🔴 **Ma il controllo NON si spegne**, perche' sul suo caso funziona: verificato di nuovo oggi,
+   `Write-Host 'a' -ForegroundColor Magenta Write-Host 'b' -ForegroundColor Magenta` esce
+   **1 eccezione** (`ForegroundColor`) e la versione con il `;` esce **0**.
+4. 👀 **E resta il gesto che vale piu' del binder: stampare l'output e leggerlo.** Scrivendo la
+   riga corretta di questa stessa giornata mi e' scappato un
+   `Write-Host 'testo ' + $BERS + ' resto'` **senza parentesi**: parser **0 errori**, binder
+   **0 eccezioni** (Write-Host si mangia gli argomenti in piu'), e a schermo e' uscito
+   letteralmente `...cartella dati di  + C:\FTMO +  (541452707)`. L'ha trovato la lettura
+   dell'output, non lo strumento.
