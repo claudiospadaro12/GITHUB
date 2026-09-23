@@ -246,6 +246,27 @@
 #              su NASUSD anche il giorno quieto resta al pavimento, su
 #              U30USD scende a 26,1x. R141b lo scriveva gia' come
 #              motivo per cui NASUSD va primo e U30USD secondo.
+#          >>> [!] E ORA IL CONTRO-ESEMPIO DEL CONTRO-ESEMPIO, perche'
+#              altrimenti starei facendo l'errore speculare a quello
+#              che questa quinta lettura mi contesta. I p25 qui sopra
+#              vengono dalla distribuzione dei range costruita con la
+#              convenzione TRONCATA (min-per-data), la stessa che il
+#              17/09 e' stata misurata sbagliata del 18%. Sotto la
+#              convenzione MAX-PER-DATA -- quella che uso nella riga di
+#              testa di questa tabella -- i p25 sono piu' alti e stanno
+#              in CANCELLO_COSTO_FLOTTA_2026-09-10.md r.940-941:
+#                NASUSD p25 255,5 -> stop 73,8 -> 43,4x   PASSA 40x
+#                U30USD p25 277,2 -> stop 80,0 -> 42,1x   PASSA 40x
+#              >>> Quindi il quartile quieto sfonda il 40x SOLO se si
+#                  adotta anche l'ancora troncata: identica struttura
+#                  del caso med24 qui sopra, due cose false insieme.
+#              >>> MA TENGO LA LETTURA SEVERA COME VINCOLANTE, e lo
+#                  dichiaro: fra le due convenzioni non ho una misura
+#                  che decida quale descriva il quartile BASSO (il -1%
+#                  e' validato sulla MEDIANA a H1, non sulla coda
+#                  quieta). Con un'incertezza non risolta si sceglie il
+#                  ramo che puo' farmi male, non quello che mi conviene.
+#                  Il 26,1x resta la riga da rileggere nel referto.
 #    >>> VERDETTO DEL COSTO: PASSA -- e adesso si puo' dire perche'.
 #        Quattro letture DIFENDIBILI sul LIVELLO (due ancore x mediana e
 #        p95 dell'ora 20): la peggiore fa 50.3x contro i 40x richiesti
