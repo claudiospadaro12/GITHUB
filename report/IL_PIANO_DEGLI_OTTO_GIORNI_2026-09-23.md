@@ -260,7 +260,7 @@ del §2.1. Regole della simulazione, tutte prese dal regolamento e non inventate
 
 ---
 
-# 4️⃣ 🔴 LO SLIPPAGGIO — il fattore che, se fosse sistematico, costa 8 punti
+# 4️⃣ 🔴 LO SLIPPAGGIO — il fattore che decide in quale dei due mondi siamo
 
 Il 22/09 il primo stop vero della challenge è costato **−1.757,68 €** contro **−1.590,37 €**
 modellati: **+10,5%**, di cui **7,83 punti di slippaggio** sullo stop (3,3 × lo spread) e **+0,67%
