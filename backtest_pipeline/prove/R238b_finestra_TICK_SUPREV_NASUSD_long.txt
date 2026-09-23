@@ -1,0 +1,186 @@
+# ==========================================================================
+#  R238b -- LA FINESTRA ORARIA A **TICK REALI**, lato LUNGO, NASUSD H1
+#  SupertrendReversal -- replica esatta di R236f col SOLO modello cambiato
+# ==========================================================================
+#  PERCHE' ESISTE (23/09/2026, dopo la lettura dei 13 round)
+#  R236e/f ha misurato una cosa grossa sul CORTO del Nasdaq:
+#      finestra SPENTA -> OOS PF 1,671  n 42  DD 1,039%
+#      finestra ACCESA -> OOS PF 3,729  n 24  DD 0,509%
+#  e sul LUNGO niente: 0,990 spenta, 0,990 accesa.
+#  Nello stesso giorno R235 ha misurato, per la prima volta, il n PER LATO:
+#  RAMO 3 su tutti e due i simboli (R = 0,851 NASUSD, 0,891 U30USD), cioe'
+#  "la deriva non basta a spiegare lo short". DUE misure indipendenti che
+#  puntano nello stesso posto.
+#
+#  >>> MA R236e E' GIRATO A MODELLO 1 (OHLC), e questo motore e' il caso
+#      peggiore possibile per l'OHLC:
+#        InpUsePending=true      -> l'ordine pendente si riempie DENTRO la barra
+#        InpTrailOnST=true       -> lo stop si muove DENTRO la barra
+#        InpBreakeven=true       -> il pareggio scatta DENTRO la barra
+#        InpTP1Pct=50 a TP1_R=1  -> la mezza uscita e' DENTRO la barra
+#      Con quattro meccanismi intrabarra su quattro, l'OHLC non ha
+#      l'informazione per risolverli: li indovina. **Un PF 3,729 letto in
+#      OHLC su questo motore non e' un risultato, e' un'ipotesi.**
+#  >>> QUESTO ROUND LA METTE ALLA PROVA NELL'UNICO MODO CHE CONTA: a TICK
+#      REALI, stessi pin, stessa finestra, stesso asse. **Cambia UNA cosa
+#      sola: il modello.** Se cambia anche altro, non e' un confronto.
+#
+# ==========================================================================
+#  >>> IL CANCELLO DEL COSTO: **PRONUNCIATO, E NON PASSA.** <<<
+# ==========================================================================
+#  In R236a/b il verdetto sul 40x era SOSPESO perche' la FASE 1 non e'
+#  lanciabile. Qui NON e' sospeso: **l'archivio aveva gia' la risposta, e
+#  l'ho cercata prima di scrivere il file** (regola del 10/09).
+#    report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.412, sedia `970913`
+#    (SupRev_NAS_H1_Ottimizzato, NASUSD H1):
+#      geometria dello stop : "swing 5 barre H1 + 3 pip (0,03 idx)"
+#      stop MISURATO        : 51,65 idx n=4  -> CORRETTO 18/09 a 27,10 n=5
+#      dispersione          : min 9,70  max 151,90
+#      passa il 40x?        : NO -- 72% dei casi, poi NO (38%)
+#  >>> E LA GEOMETRIA E' LA STESSA DI QUESTO FILE: InpSLLookback=5 e
+#      InpSLBufferPips=3.0 sono esattamente "swing 5 barre + 3 pip".
+#      Non e' un motore diverso che somiglia: e' lo stesso stop.
+#  >>> LA FRONTIERA CHE CONTA E' QUELLA DI DOVE SI OPERA: FTMO US100.cash,
+#      spread 1,53 -> 40 x 1,53 = **61,20 idx**
+#      (report/STOP_VS_SPREAD_FTMO_2026-09-20.md).
+#      **27,10 e' il 44% di 61,20.** Non e' sul filo: e' meta'.
+#
+#  >>> CONSEGUENZA, SCRITTA QUI PRIMA DEI NUMERI E NON NEGOZIABILE:
+#      **QUESTO ROUND NON PUO' PROMUOVERE NIENTE, QUALUNQUE PF ESCA.**
+#      Non e' una formalita': e' la regola del 19/08 ("una cella sotto 40x
+#      non si promuove, qualunque PF faccia") applicata a se stessi quando
+#      il numero e' bello. Se esce PF 3 a tick reali, la riga da scrivere
+#      resta "stop 27,10 contro 61,20 richiesti: NON SCHIERABILE".
+#
+#  >>> ALLORA PERCHE' LO SI GIRA? Per una ragione sola e onesta:
+#      **per chiudere la porta a buon mercato.** 8 passate (2 file x 2
+#      celle x 2 gambe) contro le 94 di stamattina. Se il 3,729 e' un
+#      artefatto dell'OHLC -- ed e' l'ipotesi piu' probabile viste le
+#      quattro meccaniche intrabarra -- lo sappiamo stasera e non ci
+#      torniamo piu'. Se invece REGGE, allora la domanda giusta diventa
+#      un'altra e la si scrive: "si puo' portare lo stop sopra 61,20
+#      tenendo il PF?" -- ed e' l'asse del BUFFER (R236a), non le ore.
+#
+# ==========================================================================
+#  COSA PUO' DIRE QUESTO ROUND, e cosa NO
+# ==========================================================================
+#  PUO':
+#    (a) se il vantaggio della finestra SOPRAVVIVE al tick reale, e di
+#        quanto. E' il confronto fra le DUE celle dello stesso file, che
+#        non ha bisogno ne' della base dello stop ne' di n grandi;
+#    (b) il RISCHIO (DD, a tick reali): Emendamento B, si legge a qualunque n;
+#    (c) quanto l'OHLC era ottimista su QUESTO motore -- numero che non
+#        esiste in archivio e che serve a leggere ogni futuro round OHLC.
+#  NON PUO':
+#    (d) il MERITO. n atteso 16 IS / 24 OOS sulla cella accesa: **sotto 150
+#        di un fattore dieci**. Nessuna promozione, nessuno spegnimento;
+#    (e) il 40x, che e' gia' pronunciato sopra e NON passa;
+#    (f) dire niente sul LUNGO oltre a "muore in OOS", che R236f ha gia'
+#        detto due volte (0,990 spenta, 0,990 accesa).
+#
+# ==========================================================================
+#  LA FALSIFICAZIONE, congelata ORA
+# ==========================================================================
+#  Gli INGRESSI di questo motore nascono da un flip del Supertrend piu' un
+#  ordine pendente a 20 pip: sono decisi su barre CHIUSE, quindi passare da
+#  OHLC a tick NON deve cambiarli molto.
+#  >>> SOGLIA: **se |delta n| supera il 20% su una qualunque delle due
+#      celle rispetto a R236f (OFF 25 IS / 42 OOS -- ON 16 IS / 24 OOS),
+#      il round ha misurato il BANCO e non il motore**, e nessuna delle due
+#      letture vale. Lo scrivo prima cosi' non posso adattarlo dopo.
+#  >>> E UN CONTROLLO GRATIS: la cella OFF di R236e e la cella
+#      InpSLLookback=5 di R236c sono lo stesso identico assetto, e infatti
+#      hanno dato lo STESSO numero (IS 0,96297 n 25  OOS 1,67093 n 42).
+#      L'archivio OHLC e' internamente coerente: il confronto e' pulito.
+#
+# ==========================================================================
+#  IL LATO: LUNGO -- e i due lati si girano TUTTI E DUE
+# ==========================================================================
+#  Regola del 25/08 sugli indici: ogni analisi misura SEMPRE long E short,
+#  anche quando uno dei due e' gia' dato per morto. R238a = corto,
+#  R238b = lungo. Il lungo si gira per non dare per scontato il suo 0,990.
+#
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+#  MODELLO: 4 (TICK REALI) -- e' il punto del round. A modello 1 non serve
+#           a niente: sarebbe R236f rifatto.
+# ==========================================================================
+
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- il lato
+InpAllowLong=true
+InpAllowShort=false
+
+# --- timeframe operativo (ENUM, pinnato esplicito: H1 = 16385)
+InpTF=16385
+
+# --- ancora (regola P1-P4)
+InpStMult=2.5
+InpStAtrPeriod=12
+InpTP_RR=2.5
+
+# --- stop: tutto al default d'archivio. Qui l'asse sono le ORE.
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+# --- pattern del rimbalzo
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+
+# --- confluenza tecnica
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+# --- target e uscita
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+
+# --- ingresso frazionato
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- rischio
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+# --- LA FASCIA: ora SERVER BCM (= ora italiana - 1). Il Nasdaq cash apre
+# --- alle 15:30 italiane = 14:30 server. Pinnate: l'asse e' l'interruttore.
+InpStartHour=14
+InpEndHour=22
+
+# --- filtro notizie: spento
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+# --- generali
+InpComment=STREV_R238b
+InpFridayClose=false
+InpFridayCloseHour=20
+InpUsaGuardian=false
+InpMagic=764241
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+
+# --- L'ASSE, unico: l'interruttore della finestra oraria. 2 celle: 0 e 1.
+# --- La cella 0 riproduce l'archivio -> cancello crociato T1 gratis.
+InpUseTimeWindow=0||0||1||1||Y
+# ==========================================================================
