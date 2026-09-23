@@ -135,92 +135,21 @@ def trova_ea(prova: str) -> str | None:
     return None
 
 
-def controlla(prova: str, ea: str, tetto: int = 0) -> tuple[int, int]:
-    nomi_ok = inputs_ea(ea)
-    membri, tipi = enum_ea(ea)
-    problemi: list[str] = []
-    note: list[str] = []
-    righe = []
-    for l in open(prova, encoding="utf-8", errors="replace"):
-        s = l.strip()
-        if not s or s.startswith("#") or s.startswith("@") or "=" not in s:
-            continue
-        righe.append(s)
+def controlla_direttive(prova: str) -> list:
+    """Le direttive '@' del file prova. STA FUORI da controlla() APPOSTA.
 
-    nomi = [r.split("=")[0].strip() for r in righe]
-
-    # 1. nome che l'EA non ha: MT5 lo ignora IN SILENZIO e la passata
-    #    risponde a una domanda diversa da quella che credevi di fare.
-    for n in nomi:
-        if n not in nomi_ok:
-            problemi.append(f"input SCONOSCIUTO all'EA: {n}")
-
-    # 2. parametro doppio in [TesterInputs]: MT5 fa zero passate.
-    for n in sorted(set(nomi)):
-        if nomi.count(n) > 1:
-            problemi.append(f"parametro DOPPIO: {n}")
-
-    # 3. IL CONTROLLO CHE IL DRIVER NON FA: pin di stringa vuoto.
-    for r in righe:
-        if r.split("=", 1)[1].strip() == "":
-            problemi.append(f"PIN VUOTO (MT5 lo IGNORA e usa il default compilato): {r}")
-
-    # 4. esattamente UN asse Y, e non degenere.
-    assi = [r for r in righe if r.endswith("||Y")]
-    celle = 0
-    if len(assi) == 0:
-        problemi.append("nessun asse Y: sarebbe un backtest singolo, il driver rifiuta di lanciare")
-    elif len(assi) > 1:
-        problemi.append(f"{len(assi)} assi Y: un file prova misura UNA variabile alla volta "
-                        + "(" + ", ".join(a.split("=")[0] for a in assi) + ")")
-    else:
-        nome_asse = assi[0].split("=")[0].strip()
-        p = assi[0].split("=", 1)[1].split("||")
-        if len(p) != 5:
-            problemi.append(f"asse malformato (servono 5 campi v||start||step||stop||Y): {assi[0]}")
-        else:
-            try:
-                start, step, stop = float(p[1]), float(p[2]), float(p[3])
-                if start == stop or step == 0:
-                    problemi.append(f"SWEEP DEGENERE su {nome_asse}: start==stop oppure step==0")
-                else:
-                    tipo_asse = tipi.get(nome_asse)
-                    if tipo_asse in membri:
-                        # ENUM: il passo NON conta. Contano i MEMBRI fra
-                        # start e stop -- come fa il driver.
-                        lo, hi = min(start, stop), max(start, stop)
-                        celle = len([v for v in membri[tipo_asse] if lo <= v <= hi])
-                        aritm = int(abs(stop - start) / step) + 1
-                        nota_enum = f"asse ENUM ({tipo_asse}): il passo e' IGNORATO, celle = membri fra {lo:.0f} e {hi:.0f} = {celle}"
-                        if celle == 0:
-                            problemi.append(
-                                f"asse ENUM {nome_asse} ({tipo_asse}): NESSUN membro fra "
-                                f"{lo:.0f} e {hi:.0f}. Il driver non produce nemmeno una passata.")
-                        elif aritm != celle:
-                            # non e' un difetto: e' il numero che INGANNA chi legge.
-                            nota_enum += f"  [il conto aritmetico direbbe {aritm}: NON guardarlo]"
-                        note.append(nota_enum)
-                    else:
-                        celle = int(abs(stop - start) / step) + 1
-            except ValueError:
-                problemi.append(f"asse non numerico: {assi[0]}")
-
-    # 4-bis. IL TETTO. Nato il 12/09/2026 (classe 287): il numero di celle
-    #        veniva STAMPATO e non GUARDATO da nessuno.
-    #        Il tetto e' scelto sulla distribuzione VERA dei file prova in
-    #        archivio, contati con la regola del driver (enum compresi):
-    #        su 217 file mono-asse con EA risolvibile il MASSIMO di sempre
-    #        e' 24 celle (R129a/R129b), p99 = 10, p50 = 2. ZERO file sopra 24.
-    #        Default 64 = 2,67x il massimo mai scritto, 6,4x il p99:
-    #        MISURATO che non boccia nessuno dei 689 file in archivio.
-    #        Un falso FAIL costa quanto un falso PASS: se una griglia grossa
-    #        serve DAVVERO, si alza con --tetto e si dichiara nel referto.
-    if tetto > 0 and celle > tetto:
-        problemi.append(
-            f"TROPPE CELLE: {celle} sopra il tetto di {tetto}. Il massimo mai scritto "
-            f"in archivio e' 24. Se la griglia e' VOLUTA, rilancia con --tetto {celle} "
-            f"e dichiaralo nel referto; se non lo e', l'asse e' scritto male.")
-
+    CLASSE 686 (23/09/2026). Questi controlli non hanno bisogno dell'EA, ma
+    vivevano dentro controlla(), che main() chiama SOLO quando l'EA si
+    risolve. MISURATO sul corpus: 446 file su 874 escono prima su "EA NON
+    TROVATO", quindi la copertura vera era 428, non 874. E i CINQUE file con
+    "@DAQUANDO" NUDO che il driver stesso nomina (ABTG_BandFade,
+    ABTG_CanaleLento, ABTG_RangeBudget, ABTG_TurnaroundTuesday,
+    SESSIONREOPEN_ORO_BOZZA) stanno TUTTI fra quei 446: il controllo di punta
+    ("direttiva SENZA VALORE") aveva copertura viva ZERO.
+    Un cancello che non poggia e' peggio di nessun cancello, perche' fa
+    credere che qualcuno stia guardando.
+    """
+    problemi: list = []
     # 5. LE DIRETTIVE '@'. Nato il 23/09/2026.
     #    Il driver le legge a walkforward_generico.ps1 r.507-514: salta le
     #    righe vuote, salta quelle che cominciano per '#' (quindi un '@'
@@ -347,6 +276,99 @@ def controlla(prova: str, ea: str, tetto: int = 0) -> tuple[int, int]:
         elif not (0.0 < float(f) <= 1.0):
             problemi.append(
                 "@FRAZIONEIS '" + f + "' fuori campo: ammesso 0 < f <= 1 (driver r.710).")
+    return problemi
+
+
+def controlla(prova: str, ea: str, tetto: int = 0) -> tuple[int, int]:
+    nomi_ok = inputs_ea(ea)
+    membri, tipi = enum_ea(ea)
+    problemi: list[str] = []
+    note: list[str] = []
+    righe = []
+    for l in open(prova, encoding="utf-8", errors="replace"):
+        s = l.strip()
+        if not s or s.startswith("#") or s.startswith("@") or "=" not in s:
+            continue
+        righe.append(s)
+
+    nomi = [r.split("=")[0].strip() for r in righe]
+
+    # 1. nome che l'EA non ha: MT5 lo ignora IN SILENZIO e la passata
+    #    risponde a una domanda diversa da quella che credevi di fare.
+    for n in nomi:
+        if n not in nomi_ok:
+            problemi.append(f"input SCONOSCIUTO all'EA: {n}")
+
+    # 2. parametro doppio in [TesterInputs]: MT5 fa zero passate.
+    for n in sorted(set(nomi)):
+        if nomi.count(n) > 1:
+            problemi.append(f"parametro DOPPIO: {n}")
+
+    # 3. IL CONTROLLO CHE IL DRIVER NON FA: pin di stringa vuoto.
+    for r in righe:
+        if r.split("=", 1)[1].strip() == "":
+            problemi.append(f"PIN VUOTO (MT5 lo IGNORA e usa il default compilato): {r}")
+
+    # 4. esattamente UN asse Y, e non degenere.
+    assi = [r for r in righe if r.endswith("||Y")]
+    celle = 0
+    if len(assi) == 0:
+        problemi.append("nessun asse Y: sarebbe un backtest singolo, il driver rifiuta di lanciare")
+    elif len(assi) > 1:
+        problemi.append(f"{len(assi)} assi Y: un file prova misura UNA variabile alla volta "
+                        + "(" + ", ".join(a.split("=")[0] for a in assi) + ")")
+    else:
+        nome_asse = assi[0].split("=")[0].strip()
+        p = assi[0].split("=", 1)[1].split("||")
+        if len(p) != 5:
+            problemi.append(f"asse malformato (servono 5 campi v||start||step||stop||Y): {assi[0]}")
+        else:
+            try:
+                start, step, stop = float(p[1]), float(p[2]), float(p[3])
+                if start == stop or step == 0:
+                    problemi.append(f"SWEEP DEGENERE su {nome_asse}: start==stop oppure step==0")
+                else:
+                    tipo_asse = tipi.get(nome_asse)
+                    if tipo_asse in membri:
+                        # ENUM: il passo NON conta. Contano i MEMBRI fra
+                        # start e stop -- come fa il driver.
+                        lo, hi = min(start, stop), max(start, stop)
+                        celle = len([v for v in membri[tipo_asse] if lo <= v <= hi])
+                        aritm = int(abs(stop - start) / step) + 1
+                        nota_enum = f"asse ENUM ({tipo_asse}): il passo e' IGNORATO, celle = membri fra {lo:.0f} e {hi:.0f} = {celle}"
+                        if celle == 0:
+                            problemi.append(
+                                f"asse ENUM {nome_asse} ({tipo_asse}): NESSUN membro fra "
+                                f"{lo:.0f} e {hi:.0f}. Il driver non produce nemmeno una passata.")
+                        elif aritm != celle:
+                            # non e' un difetto: e' il numero che INGANNA chi legge.
+                            nota_enum += f"  [il conto aritmetico direbbe {aritm}: NON guardarlo]"
+                        note.append(nota_enum)
+                    else:
+                        celle = int(abs(stop - start) / step) + 1
+            except ValueError:
+                problemi.append(f"asse non numerico: {assi[0]}")
+
+    # 4-bis. IL TETTO. Nato il 12/09/2026 (classe 287): il numero di celle
+    #        veniva STAMPATO e non GUARDATO da nessuno.
+    #        Il tetto e' scelto sulla distribuzione VERA dei file prova in
+    #        archivio, contati con la regola del driver (enum compresi):
+    #        su 217 file mono-asse con EA risolvibile il MASSIMO di sempre
+    #        e' 24 celle (R129a/R129b), p99 = 10, p50 = 2. ZERO file sopra 24.
+    #        Default 64 = 2,67x il massimo mai scritto, 6,4x il p99:
+    #        MISURATO che non boccia nessuno dei 689 file in archivio.
+    #        Un falso FAIL costa quanto un falso PASS: se una griglia grossa
+    #        serve DAVVERO, si alza con --tetto e si dichiara nel referto.
+    if tetto > 0 and celle > tetto:
+        problemi.append(
+            f"TROPPE CELLE: {celle} sopra il tetto di {tetto}. Il massimo mai scritto "
+            f"in archivio e' 24. Se la griglia e' VOLUTA, rilancia con --tetto {celle} "
+            f"e dichiaralo nel referto; se non lo e', l'asse e' scritto male.")
+
+    # 5. LE DIRETTIVE '@'. Il blocco vive in controlla_direttive() (classe
+    #    686), cosi' main() lo puo' chiamare ANCHE sui file il cui EA non si
+    #    risolve: le direttive con l'EA non c'entrano niente.
+    problemi.extend(controlla_direttive(prova))
 
     nome = os.path.basename(prova)
     stato = "OK" if not problemi else "!! " + str(len(problemi)) + " PROBLEMI"
@@ -381,8 +403,15 @@ def main() -> int:
     for f in files:
         ea = a.ea or trova_ea(f)
         if not ea or not os.path.exists(ea):
-            print(f"  {os.path.basename(f):32s} EA NON TROVATO -> non misurabile")
-            tot_problemi += 1
+            # CLASSE 686: l'EA non si risolve, quindi i controlli 1-4 non si
+            # possono fare. Ma le DIRETTIVE con l'EA non c'entrano, e saltarle
+            # lasciava 446 file su 874 senza NESSUN controllo.
+            pd = controlla_direttive(f)
+            stato_d = "OK" if not pd else "!! " + str(len(pd)) + " PROBLEMI"
+            print(f"  {os.path.basename(f):32s} EA NON TROVATO -> controlli 1-4 non misurabili; direttive: {stato_d}")
+            tot_problemi += 1 + len(pd)
+            for x in pd:
+                print(f"      - {x}")
             continue
         n, c = controlla(f, ea, a.tetto)
         tot_problemi += n

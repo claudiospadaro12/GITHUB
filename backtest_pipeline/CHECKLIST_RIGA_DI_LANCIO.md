@@ -34254,3 +34254,65 @@ file senza `@FRAZIONEIS`, file senza `@FINOA`.
 girato in **PowerShell vero** e il mirror Python sugli **stessi 16 casi ostili** danno output
 **identico byte a byte** (tab iniziale, minuscole, `@` nudo, `#` prima della `@` in tre varianti,
 spazio dopo la `@`, nome numerico, coda di commento, trattino nel nome).
+
+---
+
+## 🏗️🕳️ CLASSE 686 — **IL CANCELLO CHE NON POGGIA: un controllo messo nel posto sbagliato aveva copertura viva ZERO proprio sul caso per cui era nato** (coordinatore, 23/09/2026, su segnalazione del `controllo-preventivo` che l'ha dichiarato e NON chiuso)
+
+**Numero assegnato dal COORDINATORE** (classe 662; l'ultima era la 685).
+
+### Il fatto
+Il blocco delle direttive `@` (classe 685) era stato scritto dentro `controlla()`. Ma `main()`
+chiama `controlla()` **solo quando l'EA si risolve**: chi non si risolve esce prima, su
+`EA NON TROVATO -> non misurabile`, e **non vede nessun controllo**.
+- 📐 **Misurato**: **446 file su 874** escono li'. La copertura vera del blocco nuovo era
+  **428, non 874**.
+- 🔴 **E il caso di punta stava tutto dall'altra parte.** I **CINQUE** file con `@DAQUANDO`
+  **NUDO** — `ABTG_BandFade`, `ABTG_CanaleLento`, `ABTG_RangeBudget`,
+  `ABTG_TurnaroundTuesday`, `SESSIONREOPEN_ORO_BOZZA` — sono **tutti** fra i 446. Il rilievo
+  *"direttiva SENZA VALORE"*, cioe' quello che giustificava il blocco, aveva **copertura viva
+  ZERO sul corpus**: non poteva scattare su nessun file esistente.
+
+### Perche' costa piu' di non averlo fatto
+Un cancello che non poggia **non e' neutro: e' peggio del niente**, perche' fa credere che
+qualcuno stia guardando. E il difetto e' **invisibile a ogni verifica di non-regressione**:
+i numeri tornano, i verdetti non cambiano, il codice e' giusto — **e' il PERIMETRO a essere
+vuoto**. Nessuna delle misure che avevo fatto (celle, passate, verdetti, contro-esempi) poteva
+accorgersene, perche' tutte guardavano i file che il controllo **vedeva**.
+
+### La regola
+1. 📏 **Un controllo nuovo si dichiara con la sua COPERTURA MISURATA, non con la sua
+   correttezza.** «Funziona» e «gira su N file su M» sono due affermazioni diverse, e la
+   seconda e' quella che dice se serve.
+2. 🎯 **E la copertura si misura sui CASI PER CUI IL CONTROLLO E' NATO**, non sul totale:
+   428/874 era gia' una mezza verita', ma il numero che contava era **0 su 5**.
+3. 🧩 **Un controllo che non ha bisogno di una dipendenza non deve stare dietro a quella
+   dipendenza.** Le direttive `@` con l'EA non c'entrano niente: stavano dietro alla
+   risoluzione dell'EA solo perche' quello era il posto comodo dove scriverle.
+4. 🔍 **Un contro-esempio COSTRUITO non basta a misurare la copertura.** I miei quattro CE
+   erano file che passavano dal controllo per forza (EA risolvibile). **Il contro-esempio prova
+   che il controllo FUNZIONA; solo il corpus prova che ARRIVA.**
+
+### La riparazione
+Blocco estratto in `controlla_direttive(prova)`, chiamata **due volte**: da `controlla()` per i
+428, e da `main()` **prima del `continue`** per i 446. Copertura **874 su 874**, e i 5 file con
+`@DAQUANDO` nudo ora vengono presi.
+
+### Non-regressione, misurata
+Corpus 874: celle **1581 = 1581**, passate **3162 = 3162**. I **428** file con EA risolto hanno
+output **IDENTICO byte a byte** (`diff` vuoto): nessun doppio conteggio. Problemi **478 -> 529**
+(+51 = **5** direttive nude + **46** finestre non dichiarate), **tutti su file GIA' ROSSI** per
+`EA NON TROVATO`: 🟢 **nessun file cambia verdetto.** I **15 file dei round R234/R235/R236/R237
+restano problemi 0, rc 0**.
+🔎 E prima di scrivere ho cercato **chi altro vieta `@DAQUANDO`** (la lezione della 685):
+`grep` su tutti gli script di `righe/` da' **solo** i tre `RIGA_POSTNEWS_*`, i cui tre file
+prova hanno l'EA risolvibile, stanno nei 428 e portano gia' il marcatore. **Nessuno dei 46 e'
+sotto un divieto.**
+
+### 🛠️ E un difetto di METODO pagato qui, che vale per tutti
+La **prima** stesura di questa riparazione e' andata in pezzi (`return` fuori da una funzione) e
+**io l'avevo dichiarata buona**, perche' l'avevo verificata con `ast.parse`. 🔴 **`ast.parse`
+PARSA e non COMPILA: `return` fuori da una funzione non e' un errore di sintassi, e passa.**
+👉 Da qui in avanti un `.py` toccato si verifica con **`python3 -m py_compile`**, mai con
+`ast.parse`. (Il difetto e' stato trovato e buttato in due minuti perche' subito dopo ho fatto
+girare il cancello sul corpus: **la verifica vera e' sempre FARLO GIRARE**.)
