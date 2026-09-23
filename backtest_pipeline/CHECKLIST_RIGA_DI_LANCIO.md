@@ -34550,3 +34550,73 @@ quelle economiche**, e a tick reali lo spread è quello vero. 👉 **Una parte d
 costo, e va **dichiarato prima**. 🟢 Corollario gratis: se il lato che si attende **piatto** resta
 piatto **pur avendo lo stesso sconto di spread**, il costo da solo **non basta** a muovere il rapporto —
 ed è una misura in più a favore dell'altro lato.
+
+---
+
+# 🧱 SETTE CLASSI DAL CANCELLO SU R241 (24/09/2026) — numeri del COORDINATORE (classe 662)
+
+🔴 **Il filo: un asse che cambia RAMO DI CODICE non è un asse che cambia un numero.** Sei celle
+sembravano sei meccaniche indipendenti con un costo ignoto. Erano **quattro "non passa" già
+derivabili**, **due varianti dello stesso ordine**, e **un pin spento**.
+
+## 🎭 CLASSE 705 — **«ogni cella entra a un prezzo diverso» usato per dichiarare il costo NON MISURATO, quando la DIFFERENZA fra le geometrie è ESATTA e il verdetto è DERIVABILE**
+Avevo scritto: *"celle 0,1,3,4,5 → costo NON MISURATO"*. 🔴 **Falso su quattro.** Il metodo è di casa
+(`CANCELLO_COSTO_FLOTTA` r.400: *"lo stop di `SL_RANGE` = range + 2×buffer"*). Letta la geometria al
+codice e ancorata alla misura d'archivio (`stop RETEST = 56,1 idx`, `buffer 5,0`, `offset 2,0` →
+`range ≈ 53,1`):
+
+| cella | stop | ×@1,70 | 40× |
+|---|---:|---:|:--|
+| 0 BREAKOUT · 1 GAPFILL | 63,1 [DER] | 37,1× | 🔴 NO |
+| 2 RETEST | 56,1 [MIS] | 33,0× | 🔴 NO |
+| 4 DELAYED | 53,1 [DER] | 31,2× | 🔴 NO |
+| 3 RANGE_FADE | ATR×mult | passa solo se `ATR(M5,14) ≥ 45,3` | 🔴 salvo misura |
+| 5 OPENCONFIRM | ≥63,1+overshoot | ≥37,1× | ⚪ **l'unica davvero non misurata** |
+
+🔴 **La cella 4 è airtight senza nessuna misura nuova**: a parità di giornata il suo stop è **più
+stretto** del RETEST di esattamente `buffer − offset = 3,0 idx` → `x(4) < x(2) = 33,0 < 40` **per
+costruzione**.
+**Regola**: quando l'asse è il **meccanismo d'ingresso**, la distanza ingresso→SL di ogni cella si
+**deriva al codice** dalla cella ancorata a una misura. Le celle con stop **strettamente più stretto**
+dell'ancora ereditano il suo **fallimento**, non la sua incertezza. Un "non misurato" che copre un
+"non passa" è **peggio** di un numero sbagliato: è un numero che non si va a cercare.
+
+## 🕳️ CLASSE 706 — **il pin che su UNA cella dell'asse è un NO-OP**
+`InpSLMode=0` e `InpBufferPoints=500` sono significativi su cinque celle e **inerti sulla sesta**:
+RANGE_FADE usa **sempre** `AtrValue()*InpAtrSlMult` (r.1277), il buffer solo come ripiego.
+**Regola**: con un asse che cambia **ramo di codice**, i no-op si elencano **PER CELLA**, non per file.
+
+## 🔌 CLASSE 707 — **il parametro proprio del modo, pinnato a un valore che lo ANNULLA**
+`InpDelayMinutes=30` con `InpRangeMinutes=35`: `decideMin = max(open+30, fineRange)` → **il ritardo è
+ZERO**, e l'EA **lo dice da solo** a `OnInit` (r.588-591). Non è *"mai tarato"*: è **SPENTO**.
+**Regola**: per ogni cella si verifica che i parametri **propri** di quel modo siano dentro il campo in
+cui il modo **esiste**. Un modo spento in una cella è una cella persa che sembra piena.
+
+## 🔤 CLASSE 708 — **il parametro riusato con un SIGNIFICATO DIVERSO a seconda della cella**
+`InpPendingExpiryMin`: **scadenza dell'ordine** su 0/1/2/3 · **finestra d'attesa della rottura** su 4 ·
+**no-op** su 5. Un pin solo, **tre semantiche** lungo lo stesso asse.
+**Regola**: lungo un asse di meccanismi, ogni pin condiviso va riletto **cella per cella**: può non
+voler dire la stessa cosa.
+
+## ⏰ CLASSE 709 — **la cella la cui FINESTRA TEMPORALE è diversa da tutte le altre**
+OPENCONFIRM **non ha scadenza**: resta in `PH_ARMED` fino alle **19:30** e può entrare alle 18:00. 🔴 È
+l'unica cella che **esce dall'"apertura"** che dà il nome all'EA — e invalida in silenzio sia la frase
+*"questo è un round sull'apertura"* sia i conti di frequenza fatti per le altre.
+**Regola**: si verifica **per cella** che la finestra temporale sia quella che il round dichiara.
+
+## 🏷️ CLASSE 710 — **il "gap" letto sul bar D1 di uno strumento quasi continuo**
+GAPFILL decide il lato dal segno di `iOpen(D1,0) − iClose(D1,1)` (r.2013-2017), con soglia 1,5 idx. 🔴
+Su un CFD quasi continuo **quello non è il gap delle 09:00 di cassa: è lo stacco di MEZZANOTTE**. Un PF
+brutto lì non dirà *"il gap fill non funziona sul DAX"*: dirà *"questo non è mai stato un gap fill"*.
+**Regola**: prima di mettere un modo ad asse, si verifica che la **grandezza che lo innesca** sia
+quella che il **nome** promette.
+
+## 🪞 CLASSE 711 — **l'asse che sembra N meccaniche indipendenti e ne contiene M < N**
+Tre delle sei celle sono varianti dello stesso breakout, e **0 e 1 piazzano un ordine IDENTICO** —
+stesso tipo, stesso prezzo, stesso SL (differiscono per TP, un cancello RR, e il lato).
+**Regola**: si dichiara **prima** quante meccaniche **davvero indipendenti** contiene l'asse, se no il
+round *"promette dodici celle"* e ne **compra meno**.
+
+🎁 **E un regalo, non un difetto**: `R241a` cella 2 e `R239a` cella 0 sono **la stessa configurazione**
+a meno del magic. **Devono coincidere al centesimo**, e quel cancello prova anche la cosa **nuova** di
+questo round — che il driver, con l'asse **ENUM**, riproduce una corsa a **valore pinnato**.

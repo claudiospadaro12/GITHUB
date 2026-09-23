@@ -6,7 +6,7 @@
 #    "NON E' POSSIBILE CHE NON TROVIAMO I PARAMETRI SUL DAX. A PARTE IL
 #     RETEST CHE ABBIAMO SOLO LONG, DOBBIAMO COMPLETARE GLI ALTRI LATI"
 #  Ed e' un fatto misurabile, non un'impressione: l'EA ha SEI modi
-#  d'ingresso (r.200-209) e in campo ne gira UNO.
+#  d'ingresso (r.201-209) e in campo ne gira UNO.
 #      0 BREAKOUT     rottura del range di apertura
 #      1 GAPFILL      chiusura del gap di apertura
 #      2 RETEST       <-- L'UNICO IN CAMPO, e solo long
@@ -25,28 +25,73 @@
 #      il round, non questo commento. ***
 #
 # ==========================================================================
-#  >>> IL CANCELLO DEL COSTO: NON PRONUNCIATO SU CINQUE CELLE SU SEI. <<<
+#  >>> IL CANCELLO DEL COSTO: PRONUNCIATO SU CINQUE CELLE SU SEI, E NON
+#      PASSA. UNA SOLA e' davvero NON MISURATA. <<<
 # ==========================================================================
-#  Poche ore fa, su R239, il cancello ha corretto un mio errore: sul DAX
-#  il 40x NON passa -- 33,0x, non 42,3x. Ma quel numero
-#  (report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.396, riga figlia
-#  "sotto-campione della geometria VIVA", 56,1 idx [MIS] n=2) e' misurato
-#  su gambe REALI entrate in RETEST con offset 200.
-#  >>> OGNI MODO ENTRA A UN PREZZO DIVERSO, quindi ha una distanza
-#      ingresso->SL DIVERSA, quindi un 40x DIVERSO. Estendere il 33,0x agli
-#      altri cinque modi sarebbe la CLASSE 687, pagata due volte oggi.
-#  >>> QUINDI, PER QUESTO ROUND:
-#        cella 2 (RETEST)      -> costo PRONUNCIATO, NON PASSA (33,0x)
-#        celle 0,1,3,4,5       -> costo NON MISURATO. Non "passa" e non
-#                                 "non passa": NON SI SA.
-#      E non lo misura nemmeno questo round: la distanza ingresso->SL si
-#      legge dal Giornale, e le passate girano in Optimization=1 dove le
-#      Print non si eseguono. Serve la FASE 1, che non esiste ancora come
-#      riga di lancio.
+#  CORRETTO DAL CANCELLO IL 23/09 (notte). La prima stesura di questo file
+#  scriveva "celle 0,1,3,4,5 -> costo NON MISURATO, non si sa". E' FALSO
+#  su quattro di quelle cinque, e nel verso che fa comodo: un "non passa"
+#  nascosto dietro un "non si sa". La geometria dello stop di ogni modo si
+#  LEGGE DAL CODICE, e il metodo e' gia' di casa -- lo stesso report, riga
+#  770202, deriva lo stop cosi': "lo stop di SL_RANGE = range + 2 x buffer".
+#
+#  I DUE NUMERI DI PARTENZA (report/CANCELLO_COSTO_FLOTTA_2026-09-10.md
+#  r.396, riga FIGLIA "sotto-campione della geometria VIVA"):
+#      stop RETEST misurato = 56,1 idx [MIS] n=2 ; spread ora 8 = 1,70
+#  E la geometria del RETEST, letta al codice (r.1931 long / r.1974 short):
+#      stop(RETEST) = range + buffer - offset = range + 5,0 - 2,0
+#  (InpBufferPoints=500 pt = 5,0 idx ; InpRetestOffsetPts=200 pt = 2,0 idx,
+#  conversione dichiarata dallo stesso report). Quindi, SU QUELLE DUE
+#  GAMBE, il range a 35 minuti vale ~53,1 idx.
+#
+#  LA TABELLA, cella per cella. Tutti i numeri marcati [DER] = DERIVATI da
+#  quel range n=2, non misurati sulla cella:
+#   cella 0 BREAKOUT    entry hi+5,0 / SL lo-5,0
+#                       stop = range+10,0 = 63,1 idx [DER] -> 37,1x
+#                       -> NON PASSA il 40x (93% della frontiera)
+#   cella 1 GAPFILL     entry hi+5,0 / SL lo-5,0: geometria IDENTICA alla
+#                       cella 0 (r.2044-2072). stop 63,1 idx [DER] -> 37,1x
+#                       -> NON PASSA
+#   cella 2 RETEST      entry hi-2,0 / SL lo-5,0
+#                       stop = range+3,0 = 56,1 idx [MIS n=2] -> 33,0x
+#                       -> NON PASSA (82%)
+#   cella 3 RANGE_FADE  entry sull'estremo (InpFadeOffsetPts=0)
+#                       SL = entry +/- 1,5 x ATR(M5,14): NON dipende dal
+#                       range, e NON passa da InpSLMode (r.1277).
+#                       -> passerebbe il 40x SOLO con ATR(M5,14) >= 45,3
+#                       idx, cioe' con una candela M5 media larga l'85,4%
+#                       dell'INTERO range di 35 minuti. NON PASSA, salvo
+#                       smentita misurata.
+#   cella 4 DELAYED     entry a mercato al break del bordo GREZZO, SL sul
+#                       bordo opposto GREZZO -> stop = range = 53,1 idx
+#                       [DER] -> 31,2x -> NON PASSA.
+#                       *** E QUESTA NON HA BISOGNO DI NESSUN NUMERO: a
+#                       parita' di giornata e di range lo stop del DELAYED
+#                       e' piu' STRETTO di quello del RETEST di esattamente
+#                       (buffer - offset) = 3,0 idx. Quindi x(4) < x(2) =
+#                       33,0 < 40, PER COSTRUZIONE. ***
+#   cella 5 OPENCONFIRM entry a mercato all'apertura della candela oltre
+#                       hi+5,0 / SL lo-5,0 -> stop = range+10,0+OVERSHOOT
+#                       -> >= 37,1x [DER, limite INFERIORE].
+#                       *** E' L'UNICA CELLA DAVVERO NON MISURATA: passa il
+#                       40x solo se l'apertura della candela supera il
+#                       livello di almeno 5,0 idx, e quell'overshoot non e'
+#                       misurato da niente. ***
+#  >>> INCERTEZZA DICHIARATA: il 53,1 idx di range viene da n=2 gambe. Le
+#      celle 0 e 1 passerebbero il 40x solo con un range mediano a 35' di
+#      almeno 58,0 idx. Le celle 2 e 4 NO in nessun caso, perche' il loro
+#      verdetto non poggia sul LIVELLO del range ma sulla DIFFERENZA fra le
+#      due geometrie, che e' esatta.
+#  >>> QUELLO CHE QUESTO ROUND NON MISURA LO STESSO: la distanza
+#      ingresso->SL effettiva si legge dal Giornale, e le passate girano in
+#      Optimization=1 dove le Print non si eseguono. Serve la FASE 1, che
+#      non esiste ancora come riga di lancio. Ma la FASE 1 servirebbe
+#      soltanto a spostare la cella 5 (l'overshoot) e la cella 3 (l'ATR):
+#      sulle celle 0, 1, 2 e 4 il cancello e' GIA' pronunciato.
 #  >>> CONSEGUENZA OPERATIVA, scritta prima dei numeri: NESSUNA CELLA DI
-#      QUESTO ROUND PUO' ESSERE PROMOSSA. Se una cella esce con un PF
-#      bello, la riga da scrivere e' "candidata alla FASE 1", mai
-#      "schierabile". Il costo e' un cancello, non una formalita'.
+#      QUESTO ROUND PUO' ESSERE PROMOSSA, e su quattro celle su sei non e'
+#      nemmeno "candidata alla FASE 1": e' NON PASSA. Il costo e' un
+#      cancello, non una formalita'.
 #
 # ==========================================================================
 #  PERCHE' ALLORA SI GIRA, ed e' una ragione sola e onesta
@@ -63,17 +108,96 @@
 #      sulla challenge FTMO 541452707, con un solo modo acceso.
 #
 # ==========================================================================
-#  LE CELLE CHE POSSONO USCIRE INERTI, dichiarate PRIMA
+#  SEI CELLE VIVE? SI. SEI MECCANICHE INDIPENDENTI? NO. Letto al codice,
+#  modo per modo, PRIMA dei numeri.
 # ==========================================================================
-#  I pin vengono dal .chr della sedia viva, che e' configurata per RETEST.
-#  Gli altri modi useranno i parametri che TROVANO, non parametri tarati:
-#    - DELAYED (4) usa InpDelayMinutes=30 e InpDelayDirMode=0, mai tarati;
-#    - GAPFILL (1): InpUseGapFill=false e' pinnato, ma il codice r.574 dice
-#      che col modo GAPFILL quel flag viene IGNORATO. La cella gira.
-#    - RANGE_FADE (3) e OPENCONFIRM (5) non hanno parametri propri pinnati.
+#  Nessuna coppia di celle produce lo stesso ordine allo stesso prezzo con
+#  lo stesso SL E lo stesso TP: NON ci sono due celle che escono identiche
+#  al centesimo, e nessuna e' inerte per costruzione. Ma TRE delle sei sono
+#  varianti dello STESSO breakout, e una e' quasi un doppione.
+#
+#    - cella 0 BREAKOUT: ordine STOP a hi+buffer, SL lo-buffer, TP 3R.
+#
+#    - cella 1 GAPFILL: MEDESIMO ordine STOP, MEDESIMO prezzo, MEDESIMO SL
+#      della cella 0. Cambiano solo (i) il TP, che e' la chiusura D1
+#      precedente invece di 3R; (ii) un cancello RR >= InpGapMinRR = 1,5;
+#      (iii) IL LATO, che NON lo sceglie il segnale ma il segno di
+#      gap = iOpen(D1,0) - iClose(D1,1) (r.2013-2017).
+#      *** E SU UN CFD QUASI CONTINUO QUELLO NON E' IL GAP DELLE 09:00 DI
+#      CASSA: e' lo STACCO DI MEZZANOTTE del bar D1, e la soglia
+#      InpGapMinPoints=150 pt vale 1,5 idx. ***
+#      In QUESTO file, col lato pinnato, la cella 1 puo' operare soltanto
+#      nelle giornate in cui quel segno le e' favorevole (l'altro file
+#      prende le complementari). E GAPFILL ignora InpRangeMode: la finestra
+#      se la calcola a mano sui primi InpRangeMinutes (r.2030).
+#      >>> Quindi un PF brutto sulla cella 1 NON dira' "il gap fill non
+#      funziona sul DAX": dira' "questo non e' mai stato un gap fill".
+#      (Resta vero, e resta dichiarato, che InpUseGapFill=false viene
+#      IGNORATO col modo GAPFILL: r.574.)
+#
+#    - cella 4 DELAYED: e' il breakout eseguito A MERCATO sul bordo GREZZO.
+#      E IL RITARDO NON C'E': con InpDelayMinutes=30 <= InpRangeMinutes=35
+#      e InpRangeMode=OPENING il codice alza la decisione alla chiusura del
+#      range (r.874-875), e l'EA lo scrive da solo a OnInit (r.588-591).
+#      InpDelayMinutes qui non e' "mai tarato": e' SPENTO.
+#      InpPendingExpiryMin=120 cambia significato e diventa la finestra di
+#      attesa della rottura (08:35 -> 10:35, r.1400-1402).
+#      E il lato: se la PRIMA rottura e' dalla parte NON pinnata la
+#      giornata si chiude senza operazione (r.1423-1424) -- il DELAYED non
+#      sorveglia il secondo bordo come fa il RETEST. Quindi la cella 4
+#      misura "le giornate la cui PRIMA rottura e' dalla parte pinnata",
+#      non "le giornate con una rottura dalla parte pinnata".
+#
+#    - cella 5 OPENCONFIRM: breakout a mercato con la conferma "la candela
+#      APRE gia' oltre". InpOCTimeframe=0 -> PERIOD_CURRENT -> M5 (r.1508).
+#      *** E NON HA SCADENZA: InpPendingExpiryMin e' un NO-OP per lei, la
+#      cella resta in PH_ARMED fino a InpCloseHour/Min = 19:30 e puo'
+#      entrare alle 18:00. E' l'unica cella che puo' uscire dalla
+#      "apertura" che da' il nome all'EA, e va letta cosi'. ***
+#
+#    - cella 3 RANGE_FADE: l'unica che non e' un breakout (LIMIT sugli
+#      estremi). InpFadeOffsetPts=0 -> entry esattamente sull'estremo.
+#      *** E il suo SL NON PASSA DA InpSLMode: r.1277 usa SEMPRE
+#      AtrValue()*InpAtrSlMult, con l'ATR creato su PERIOD_CURRENT (r.510),
+#      cioe' M5. Su questa cella InpSLMode=0 e InpBufferPoints=500 sono
+#      NO-OP (il buffer serve solo da ripiego se l'ATR esce <= 0). ***
+#      Rischio dichiarato: con ATR piccolo lo stop puo' finire piu' vicino
+#      del SYMBOL_TRADE_STOPS_LEVEL e l'ordine essere RIFIUTATO dal server.
+#      [NON MISURATO] quanto valga quel livello su D30EUR sul banco.
+#
+#    - cella 2 RETEST: e' il motore della sedia viva.
+#
+#  I NO-OP, in blocco, perche' un pin che non fa niente e non lo dice e' il
+#  difetto piu' vecchio di casa:
+#    InpSkipIfTight    -> no-op ovunque: InpMinStopPts=0, nessun pavimento
+#    InpMaxSpread=0    -> SpreadOK() sempre vero: NESSUNA cella rifiutera'
+#                         mai per spread (coerente con -Spread incognita,
+#                         ma va detto insieme)
+#    tutti i filtri a false -> TrendBias()=0 su tutte e sei le celle, quindi
+#                         InpConfirmMode, InpVolMult, InpVolAvgBars,
+#                         InpAtrFilterBars/Mult, InpEmaFast/Slow,
+#                         InpFilterTF, InpSt*, InpCorr*, InpVwapTF sono
+#                         tutti NO-OP
+#    InpAllowReverse   -> doppio no-op (false, ed esiste solo per il RETEST)
+#    InpMaxPosSimbolo=0, InpUseNewsFilter=false, InpUseRoundLevels=false
+#                      -> spenti
+#    InpUsaGuardian=true -> *** NO-OP NEL TESTER ***: ABTG_GuardiaIngresso
+#                         esce true alla riga "nessun guardiano su questo
+#                         conto" (ABTG_PausaGuardian.mqh r.1719 +
+#                         ABTG_CanaleEsiste r.699-705), perche' nel tester
+#                         le GlobalVariable del Guardian non esistono.
+#                         E' una buona notizia (il round non rischia di
+#                         uscire a zero operazioni), ma va scritto proprio
+#                         perche' la cella 2 fa da ancora: IN CAMPO il
+#                         Guardian puo' rifiutare ingressi, SUL BANCO no.
+#    i nove InpSpace* e InpNewsCurrencies NON sono pinnati: prendono il
+#    default compilato (filtro dello spazio OFF). Dichiarato. E comunque il
+#    filtro dello spazio e' agganciato al SOLO RETEST (r.1029 / r.571-573).
+#
 #  >>> QUINDI UN PF BRUTTO SU UNA DI QUESTE CELLE NON VUOL DIRE "IL MODO NON
 #      FUNZIONA": vuol dire "il modo non funziona CON I PARAMETRI DEL
-#      RETEST". E' uno SCREENING dei meccanismi, non un verdetto sui modi.
+#      RETEST, e con i SUOI propri parametri spenti dove sono spenti". E'
+#      uno SCREENING dei meccanismi, non un verdetto sui modi.
 #      Un modo si dichiara morto solo dopo che i SUOI parametri sono stati
 #      messi ad asse almeno una volta (certificato di morte, 09/09).
 #
@@ -83,18 +207,60 @@
 #  >>> Se una cella esce con n(OOS) < 20, di quella cella si scrive solo
 #      "non opera abbastanza per essere letta", e NIENTE ALTRO: niente PF,
 #      niente DD, niente confronto. Un PF su 8 operazioni non e' un numero.
-#  >>> E il RETEST (cella 2) e' l'ANCORA: deve somigliare a quello che la
-#      sedia fa in campo. Se la cella 2 esce assurda, non si legge nessuna
-#      delle altre cinque, perche' il banco non sta descrivendo la sedia.
+#  >>> E il RETEST (cella 2) e' l'ANCORA, e in QUESTO file lo e' davvero:
+#      il preset di campo porta InpAllowShort=false, quindi il RETEST LONG
+#      e' cio' che la sedia 770101 fa in campo. Doppia ancora: deve
+#      somigliare alla gemella BCM 770101 su D30EUR *e* riprodurre al
+#      centesimo R239b cella 0 (vedi il cancello di determinismo qui sotto).
+#      Se la cella 2 esce assurda, non si legge nessuna delle altre cinque,
+#      perche' il banco non sta descrivendo la sedia.
 #
+# ==========================================================================
+#  IL CANCELLO DI DETERMINISMO CHE COSTA ZERO (classe 697) -- e' CROCIATO
+#  SUL ROUND PRECEDENTE, non fra questi due file
+# ==========================================================================
+#  Questi due file NON condividono nessuna cella: i lati sono pinnati e
+#  opposti. Il cancello gratis c'e' lo stesso, ed e' verso R239:
+#      R241a cella 2 (InpEntryMode=2, CORTO puro) == R239a cella 0
+#      R241b cella 2 (InpEntryMode=2, LUNGO puro) == R239b cella 0
+#  Verificato col diff dei pin: le configurazioni differiscono per il SOLO
+#  InpMagic (764250/764251 -> 764270/764271), che in una corsa a EA singolo
+#  non tocca nessun risultato. Stessa finestra, stesso @FRAZIONEIS, stesso
+#  TF, stesso EA, stesso deposito, stesso modello.
+#  >>> DEVONO COINCIDERE AL CENTESIMO, in IS e in OOS.
+#  >>> E vale piu' di un cancello interno, perche' prova anche la cosa
+#      NUOVA di questo round: che il driver con l'asse ENUM riproduce una
+#      corsa a valore PINNATO. Se la cella 2 non riproduce R239, non si
+#      legge nessuna delle altre cinque: non e' il motore, e' il banco.
+
 # ==========================================================================
 #  COSA NON PUO' DIRE
 # ==========================================================================
-#   - il MERITO: InpOneTradePerDay=true mette un tetto di 1 operazione al
-#     giorno, e l'IS e' il 40% di ~455 giornate feriali = ~182 giornate col
-#     LIMIT che spesso scade inevaso. NESSUNA cella arrivera' a n>=150 in
-#     IS (Emendamento A). Nessuna promozione, nessuno spegnimento;
-#   - il 40x su cinque celle su sei (sopra);
+#   - il MERITO -- ma attenzione: NON e' una certezza, e' una SOGLIA, e la
+#     stesura precedente la spacciava per aritmetica.
+#     InpOneTradePerDay=true mette un tetto di 1 operazione al giorno. La
+#     finestra 2024.09.26-2026.06.30 ha 643 giorni solari e 459 FERIALI;
+#     l'IS al 40% del tempo (taglio 2025.06.10) ne contiene 183. Perche'
+#     una cella resti sotto n=150 in IS basta che manchi l'ingresso in piu'
+#     del 18,0% delle giornate; detto al contrario, una cella arriverebbe a
+#     150 solo con un tasso di riempimento SOPRA l'82,0%.
+#     >>> Per il RETEST (LIMIT che scade spesso inevaso) e' praticamente
+#     certo. Per la cella 5 (OPENCONFIRM) NO: quel modo non ha scadenza e
+#     resta armato fino alle 19:30, quindi entra in OGNI giornata in cui una
+#     qualunque candela M5 apre oltre il livello. Se la cella 5 uscisse
+#     sopra 150 in IS, l'Emendamento A sarebbe soddisfatto e il MERITO si
+#     leggerebbe PER QUELLA CELLA -- e allora conta il cancello del costo,
+#     che per lei e' un limite inferiore di 37,1x.
+#     >>> La frase "NESSUNA cella arrivera' a n>=150" veniva da R239, dove
+#     era tarata sul SOLO RETEST: ereditata su sei meccaniche diverse era
+#     la classe 690. Corretta qui.
+#     In ogni caso: nessuna promozione e nessuno spegnimento da questo
+#     round, e il motivo principale e' il COSTO, non l'n;
+#   - il 40x SOLO sulla cella 5 (OPENCONFIRM): li' l'overshoot non e'
+#     misurato e il numero resta un limite inferiore. Sulle celle 0, 1,
+#     2 e 4 il cancello del costo NON e' "non misurato": e' PRONUNCIATO
+#     e NON PASSA (sopra). Sulla cella 3 non passa salvo che l'ATR M5
+#     sia larga l'85% dell'intero range di 35 minuti;
 #   - il regime: 21 mesi di dati BCM sugli indici, UN SOLO regime, un toro.
 #
 # ==========================================================================
@@ -121,8 +287,12 @@
 #     (CODA_08_preset_dai_chr_20260923_033004.log), con le TRE modifiche
 #     dichiarate in testa: InpSessionHour/Min in ORA SERVER BCM, il magic, e
 #     IL LATO. Nessun input di commento: questi EA non ce l'hanno.
-#     L'asse e' InpAllowShort (cella 0 = lato puro, cella 1 = long+short);
-#     InpAllowLong resta pinnato true come in campo.
+#     L'ASSE DI QUESTO ROUND E' InpEntryMode (in fondo al file), NON il
+#     lato: il lato e' PINNATO, e i due file gemelli prendono i due lati
+#     opposti. (La riga che qui diceva "l'asse e' InpAllowShort" era di
+#     R239, incollata per copia: classe 684, corretta dal cancello il
+#     23/09.) Il blocco qui sotto ha 78 righe; con i due lati e l'asse i
+#     pin che conta controlla_prova.py sono 81.
 InpAllowReverse=false
 InpAtrFilterBars=20
 InpAtrFilterMult=1.0
