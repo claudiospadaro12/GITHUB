@@ -189,12 +189,24 @@
 #  sarebbe il PIN NON ARRIVATO (T4). Si controlla la colonna prima di
 #  interpretare qualunque cosa.
 #
-#  >>> E UN ESITO CHE MI FAREBBE SOSPETTARE UN ERRORE MIO: un rapporto
-#      SOPRA 1,00 (piu' operazioni con la finestra ACCESA). Non puo'
-#      succedere -- un filtro puo' solo togliere candidate -- tranne per
-#      un effetto di coda: una posizione aperta a fine finestra che chiude
-#      in modo diverso. Se il rapporto uscisse sopra 1,02, andrei a
-#      cercare l'errore invece di raccontare il risultato.
+#  >>> E UN ESITO CHE CREDEVO IMPOSSIBILE E NON LO E' -- CLASSE 663.
+#      Una stesura precedente scriveva: "un rapporto sopra 1,00 (piu'
+#      operazioni con la finestra ACCESA) non puo' succedere, un filtro
+#      puo' solo togliere candidate". >>> PUO' SUCCEDERE, e il motivo e'
+#      a r.314-320: if(HasPosition()) ... return -- L'EA TIENE UNA
+#      POSIZIONE ALLA VOLTA.
+#      Una gamba aperta di notte OCCUPA il motore anche di giorno.
+#      Spegnere la notte LIBERA LO SLOT e puo' CREARE ingressi diurni che
+#      con la finestra spenta non erano mai nati.
+#      >>> QUINDI IL FILTRO NON PRODUCE UN SOTTOINSIEME: il rapporto
+#          n(accesa)/n(spenta) e' un SALDO fra candidate tolte (fuori
+#          orario) e candidate create (slot liberato). Puo' stare sopra
+#          1,00 senza nessun errore.
+#      >>> E IL COSTO VERO NON E' QUEL RAPPORTO: e' cB_orario, il
+#          contatore delle candidate rifiutate DALL'ORARIO, che si legge
+#          dalla FASE 1 e non dal CSV. Le soglie di T2 vanno lette su
+#          cB_orario; il rapporto degli n resta come controllo di
+#          coerenza, non come misura del costo.
 #
 # --------------------------------------------------------------------------
 #  8. I BUCHI DICHIARATI, PER NOME
@@ -334,4 +346,59 @@ InpLogImbuto=true
 # --- L'ASSE, unico: l'interruttore della finestra oraria. 2 celle: 0 e 1.
 # --- La cella 0 riproduce l'archivio -> cancello crociato T1 gratis.
 InpUseTimeWindow=0||0||1||1||Y
+# ==========================================================================
+
+# ==========================================================================
+#  FASE 1 -- TEST SINGOLO. OBBLIGATORIA, E VA PRIMA DELL'OTTIMIZZAZIONE.
+#  CLASSE 526 (21/09/2026), e qui l'ho ripagata.
+# ==========================================================================
+#  IL DIFETTO CHE QUESTA SCHEDA RIPARA:
+#    tutte le stesure precedenti di questo file congelavano diagnostica
+#    che esce da ImbutoStampa() (r.200-232) e da Log() (r.128), e TUTTE E
+#    DUE finiscono in Print():
+#       void Log(string m){ if(InpVerbose) Print("[STReversal] ", m); }
+#    >>> E Print() NON VIENE ESEGUITO IN OTTIMIZZAZIONE. Un file prova E'
+#        un'ottimizzazione. Quindi la riga che scrivevo -- "DIAGNOSTICA
+#        GRATIS: InpLogImbuto=true stampa cO_sl nel Giornale" -- era
+#        FALSA.
+#    >>> E peggio del falso: InpLogImbuto=true e InpVerbose=true restano
+#        pinnati qui sotto e danno L'ARIA di coprire la diagnostica. Non
+#        la coprono. Verificato anche sulla testata del CSV d'archivio:
+#        cO_sl, cB_occupata e cB_orario NON SONO COLONNE. Non esistono da
+#        nessuna parte, in nessun CSV di questo motore.
+#
+#  QUINDI: le tre cose che questo round deve leggere e che NON stanno nel
+#  CSV -- (1) la distanza di stop per ingresso (T7), (2) i contatori
+#  dell'imbuto per attribuire il movimento dell'n (T3), (3) la quadratura
+#  dell'imbuto -- si ottengono SOLO da una corsa SINGOLA col Giornale
+#  acceso. Va lanciata PRIMA, una volta per file.
+#
+#  COME SI LANCIA (scheda .ini; NON e' una riga di lancio, non esce da
+#  qui: la riga la scrive chi di dovere e passa dal cancello):
+#    Optimization   = 0        <- test SINGOLO, non ottimizzazione
+#    ShutdownTerminal = 1
+#    Symbol/Period/FromDate/ToDate/Model/Deposit = IDENTICI a quelli
+#      dichiarati in questo file (NASUSD, H1, 2024.09.26 -> 2026.06.30,
+#      OHLC -Modello 1, 100000). Se uno solo differisce, la base misurata non
+#      e' la base di questo round e la FASE 1 non vale.
+#    l'ASSE va FISSATO alla CELLA 1 (vedi il pin in fondo al file)
+#    tutti gli altri pin: identici a quelli in fondo a questo file.
+#
+#  IL CANCELLO SUL PRODOTTO -- si guarda il GIORNALE, non il CSV:
+#    (1) almeno una riga "[STREV-IMBUTO] ... quadratura OK"
+#        -> se manca, l'imbuto non ha girato e i contatori di T3 non
+#           esistono: la FASE 1 e' FALLITA, si ripete.
+#    (2) una riga "[STReversal] LONG mercato ... SL ... TP ..." (oppure
+#        SHORT) PER OGNI INGRESSO -- r.422-423.
+#        -> se le righe sono ZERO ma il CSV dice che ci sono operazioni,
+#           allora InpVerbose non e' arrivato: la FASE 1 e' FALLITA.
+#        -> se le righe ci sono, da queste si estrae |SL - entry| per
+#           ogni ingresso, se ne prende la MEDIANA, le si sottrae 0,03 e
+#           QUELLA E' LA BASE DEL FILE (T7).
+#
+#  >>> SENZA LA FASE 1 IL ROUND NON PRONUNCIA NESSUN VERDETTO SUL 40x, e
+#      non attribuisce nessun movimento dell'n. Puo' ancora dire se il
+#      motore SOPRAVVIVE (confronto fra celle), e basta.
+#  >>> Questo e' testo di commento: controlla_prova.py lo ignora, e la
+#      FASE 1 non aggiunge nessuna cella all'asse.
 # ==========================================================================

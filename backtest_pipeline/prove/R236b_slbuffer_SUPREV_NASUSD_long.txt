@@ -299,37 +299,101 @@
 #      quindi solo RIDURRE "risk". Se fra le 14:00:00 e le 14:30:00 il
 #      trailing ha morso, lo stop INIZIALE era piu' largo di 39,40.
 #
-#  >>> NESSUNA DELLE LETTURE ARRIVA AL CANCELLO, ed e' il punto:
-#        27,10 -> 15,9x (BCM 1,70) . 17,7x (FTMO 1,53)
-#        33,25 -> 19,6x            . 21,7x
-#        39,40 -> 23,2x            . 25,8x
-#        51,65 -> 30,4x            . 33,8x
-#      Il buco di costo e' confermato da QUATTRO strade indipendenti, non
-#      da una scelta comoda. E' questo che giustifica il round.
+#  >>> NESSUNA DELLE LETTURE ARRIVA AL CANCELLO, ed e' il punto.
+#      >>> E QUI USO 2,40, NON 1,70 -- CLASSE 650, di ritorno.
+#          Una stesura precedente metteva in questa riga "BCM 1,70",
+#          mentre la sezione 5-B dichiara due pagine sopra che 1,70 vale
+#          SOLO con la finestra oraria ACCESA, e in questo file e' SPENTA.
+#          E' la stessa mescolanza che M1 corregge. Il feed che questo
+#          round PAGA e' quello delle 24 ore: 2,40.
+#        27,10 -> 11,3x (BCM 24h 2,40) . 17,7x (FTMO 1,53)
+#        33,25 -> 13,9x                . 21,7x
+#        39,40 -> 16,4x                . 25,8x
+#        51,65 -> 21,5x                . 33,8x
+#      Il buco di costo e' confermato da QUATTRO strade indipendenti.
 #
-#  SCELTA, MOTIVATA: il round NON sceglie una base. La tabella del costo e'
-#  compilata su TRE valori (27,07 / 39,37 / 51,62 di parte nuda) e il tetto
-#  di Claudio e' verificato sulla PIU' ALTA. La ragione e' aritmetica: il
-#  buffer aggiunge una COSTANTE NOTA, quindi l'INCREMENTO e' esatto e
-#  indipendente dalla base; e' solo il PUNTO DI PARTENZA a essere incerto.
-#  >>> Cioe': di questo round e' ESATTO cio' che misura (l'effetto di
-#      aggiungere +6,50 / +13,00 / +19,50 / +26,00 punti indice allo stop)
-#      ed e' INCERTO da dove parte. Sono due cose diverse e vanno dette
-#      separate.
+#  >>> E IL NUMERO CHE DECIDE, che mancava e che va detto per primo:
+#      CONTRO LA FRONTIERA BCM 24 ORE (96,0 idx) NESSUNA CELLA PASSA, SU
+#      NESSUNA BASE. Lo stop piu' largo che questo round produce e' 77,65
+#      (cella 5 sulla base piu' alta) = 32,4x, cioe' l'81% della frontiera.
+#      >>> QUINDI: il round NON PUO' produrre una cella che passi il
+#          cancello sul feed che sta pagando. Se una cella passera' il
+#          40x, sara' SOLO contro la frontiera FTMO (61,2 idx), cioe'
+#          contro il broker dove si opera -- e quella e' la frontiera
+#          giusta per decidere se schierare, ma NON e' quella del banco.
+#          Chi legge il referto deve vedere questa riga prima delle altre.
+#
+#  >>> NON SI SCEGLIE NESSUNA BASE, E NON SI SCEGLIE DOPO -- CLASSE 664.
+#      Una stesura precedente chiudeva con "il referto dovra' riportare la
+#      riga giusta guardando il DD e il lotto reali". E' SCEGLIERE LA
+#      COLONNA DOPO AVER VISTO I NUMERI, ed e' grave perche' le colonne
+#      danno TRE VERDETTI DIVERSI (0, 1 o 3 celle sopra il 40x FTMO).
+#      >>> Tre colonne con tre verdetti NON sono una misura con
+#          un'incertezza: sono un MENU'.
+#
+#  >>> E NON SERVE SCEGLIERE, perche' LA MISURA E' DENTRO QUESTO ROUND.
+#      r.422-423, a OGNI ingresso, stampa:
+#        "LONG/SHORT mercato <lot> lot @ <entry> SL <sl> TP <tp>"
+#      cioe' la DISTANZA DI STOP INIZIALE di ogni singola operazione,
+#      sull'ancora di QUESTO file e non su quella della sedia viva.
+#      Sono 24-37 letture per tranche, disponibili SUBITO.
+#      >>> Contro le ~20-25 gambe di forward (cioe' MESI) che una stesura
+#          precedente raccomandava di aspettare. La grandezza che il file
+#          dichiarava [NON MISURATO] e' proprio quella che la corsa che
+#          stiamo per lanciare stampa gia'.
+#
+#  (T7) IL CANCELLO CHE FISSA LA BASE -- e senza di lui il round NON
+#       PRONUNCIA NESSUN VERDETTO SUL 40x.
+#       PROCEDURA, in quest'ordine e non un altro:
+#        1. si lancia la FASE 1 (scheda in fondo al file): test SINGOLO,
+#           asse fissato alla cella 1, Giornale acceso;
+#        2. dal Giornale si estraggono tutte le righe "mercato ... @ ...
+#           SL ..." e si calcola la MEDIANA di |SL - entry|;
+#        3. a quella mediana si sottrae 0,03 (il buffer della cella 1):
+#           >>> QUELLA E' LA PARTE NUDA, e QUELLA E' LA BASE DEL FILE;
+#        4. la tabella del costo si RICOMPILA su quel singolo numero, e
+#           le tre (quattro) colonne provvisorie qui sotto SI BUTTANO.
+#       >>> Le colonne che seguono NON sono il risultato: sono un
+#           ORIZZONTE DI POSSIBILITA' scritto prima, per far vedere che
+#           il verdetto NON e' ancora determinato. Dopo la FASE 1 c'e' UNA
+#           colonna sola.
+#       >>> SE LA FASE 1 NON VIENE LANCIATA: il round puo' ancora dire se
+#           il motore SOPRAVVIVE all'allargamento (e' un confronto fra
+#           celle, non ha bisogno della base), ma NON puo' dire se una
+#           cella passa il cancello del costo. Quella riga resta
+#           [NON MISURATO] e non si scrive lo stesso.
 #
 #  >>> CONSEGUENZE STRUTTURALI DELLA DISPERSIONE, che valgono piu' della
 #      scelta della base:
-#      (a) il buffer TRASLA la distribuzione, non la fissa. Effetto
-#          collaterale BUONO e mai notato prima: comprime la dispersione
-#          RELATIVA. Con buffer 2603 (26,03 idx) la banda 9,70-151,90
-#          diventa 35,73-177,93, e il rapporto max/min scende da 15,7 a
-#          5,0. Uno stop piu' UNIFORME e' un rischio piu' prevedibile, che
-#          e' cio' che una prop vuole;
-#      (b) il cancello dei 40x si applica a una MEDIANA, ma il costo si
-#          paga OPERAZIONE PER OPERAZIONE. Anche alla cella 5 le gambe piu'
-#          strette restano sotto la frontiera. "La cella passa il 40x" vuol
-#          dire "la gamba mediana lo passa", MAI "tutte lo passano".
-#          Non l'ho trovato scritto da nessuna parte in casa: lo scrivo qui.
+#      (a) il buffer TRASLA la distribuzione, non la fissa.
+#          >>> E QUI TOLGO UN'AFFERMAZIONE MIA CHE ERA UNA TAUTOLOGIA --
+#              CLASSE 665. Una stesura precedente vantava che "il buffer
+#              comprime la dispersione: max/min scende da 15,7 a 5,0".
+#              E' VERO ma non dice NIENTE: sommare una costante positiva
+#              abbassa SEMPRE il rapporto max/min, anche per una manopola
+#              completamente inutile. Non e' una proprieta' di QUESTA
+#              manopola, e' aritmetica.
+#          >>> E il beneficio era attribuito alla grandezza sbagliata: a
+#              rischio fisso 1% il rischio in EUR e' GIA' identico su ogni
+#              gamba, larga o stretta (LotByRisk normalizza). Non c'e'
+#              niente da uniformare li'.
+#          >>> CIO' CHE SI COMPRIME DAVVERO, ed e' un beneficio vero, e'
+#              il PEDAGGIO DELLO SPREAD IN UNITA' DI R, che sulle gambe
+#              strette e' feroce:
+#                gamba da 9,70 idx : 2,40 / 9,70  = 0,247 R di pedaggio
+#                la stessa con buffer 26,03 (35,73): 2,40 / 35,73 = 0,067 R
+#                cioe' il pedaggio della gamba PEGGIORE scende del 72,9%.
+#              E' li' che il buffer lavora: non uniforma il rischio,
+#              abbassa il costo delle gambe che il costo lo pagavano tutto.
+#      (b) CLASSE 666 -- il cancello dei 40x si applica a una MEDIANA,
+#          ma il costo si paga OPERAZIONE PER OPERAZIONE. Anche alla
+#          cella 5 le gambe piu' strette restano sotto la frontiera:
+#          la gamba da 9,70 col buffer massimo arriva a 35,73 idx, che
+#          su FTMO fa 23,4x e su BCM-24h fa 14,9x -- molto sotto 40.
+#          >>> "La cella passa il 40x" vuol dire "LA GAMBA MEDIANA lo
+#              passa", MAI "tutte lo passano". Con una distribuzione
+#              larga 15,7 volte, meta' delle gambe sta sotto la mediana
+#              per definizione.
 #
 #  >>> RACCOMANDAZIONE A COSTO ZERO, e non richiede nessuna passata:
 #      poiche' OGNI TP1 raggiunto rivela lo stop iniziale, il modo piu'
@@ -416,6 +480,21 @@
 #     5   | 2603 | 53,10  34,7  0,82 | 65,40  42,7  1,01 | 77,65  50,8  1,19
 #   (xFTMO = stop / 1,53 ; TP1/e = TP1 in multipli dell'escursione 65,00)
 #
+#  LA QUARTA BASE, CHE MANCAVA -- e ometterla lasciava in tabella due
+#  scenari su tre che passano il cancello:
+#   base 33,22 nuda (= mediana dei SEI valori: 9,70 12,80 27,10 39,40
+#   76,20 151,90 -> 33,25, meno il buffer 0,03):
+#     cella 1  33,25 idx = 21,7x FTMO | 13,9x BCM-24h | 0,51x escursione
+#     cella 2  39,75 idx = 26,0x      | 16,6x         | 0,61x
+#     cella 3  46,25 idx = 30,2x      | 19,3x         | 0,71x
+#     cella 4  52,75 idx = 34,5x      | 22,0x         | 0,81x
+#     cella 5  59,25 idx = 38,7x      | 24,7x         | 0,91x
+#   >>> SU QUESTA BASE NESSUNA CELLA PASSA IL 40x, nemmeno su FTMO.
+#   >>> Quindi il quadro onesto e' DUE SCENARI SU QUATTRO che non passano
+#       affatto (27,07 e 33,22), uno che passa con la sola cella 5
+#       (39,37) e uno che passa con tre celle (51,62). Con tre colonne
+#       sembrava che "di solito passa". Non e' cosi'.
+#
 #  >>> COSA DICE QUESTA TABELLA, ed e' il risultato piu' onesto del round
 #      scritto PRIMA di correre:
 #      SE la base vera e' 51,62 -> le celle 3, 4, 5 passano il 40x FTMO.
@@ -426,9 +505,24 @@
 #          Il round non lo puo' nascondere e non deve: il referto dovra'
 #          riportare la riga giusta guardando il DD e il lotto reali, non
 #          scegliendo la base che fa comodo.
-#  >>> E IL TETTO DI CLAUDIO REGGE SU TUTTE E TRE: 0,82x / 1,01x / 1,19x.
-#      Nessuna cella chiede al mercato piu' di 1,20 volte il suo movimento
-#      tipico. Era il difetto della v2 (1,46x) e qui non c'e'.
+#  >>> E IL TETTO DI CLAUDIO TIENE SU TUTTE E QUATTRO LE BASI -- MA CON
+#      UN MARGINE DI 0,35 PUNTI INDICE, e va detto invece di dichiararlo
+#      chiuso. La cella 5 sulla base piu' alta fa 77,65 contro un tetto di
+#      78,00: il margine e' lo 0,45%.
+#      >>> QUALUNQUE BASE NUDA SOPRA 51,97 FA SFORARE. Non e' un margine
+#          di sicurezza: e' un pareggio.
+#  >>> E C'E' UNA RAGIONE STRUTTURALE PER CUI LA BASE VERA E' PIU' ALTA DI
+#      QUELLE CHE HO, ed e' la parte scomoda:
+#      TUTTE E CINQUE le distanze in stop lette da trades_auto.csv sono
+#      LIMITI INFERIORI, non solo il 39,40. In quel file si legge lo stop
+#      ALLA CHIUSURA, e il trailing (r.487-491) puo' solo STRINGERLO -- e'
+#      esattamente il motivo per cui la gamba del 10/08 chiude a 0,00 e la
+#      escludo. Quindi la distribuzione vera e' spostata VERSO L'ALTO.
+#      >>> Il che tira il cancello dei 40x dalla parte COMODA (piu' facile
+#          passarlo) e il tetto di Claudio dalla parte SCOMODA (piu'
+#          facile sforarlo). Le due cose vanno lette insieme, e la FASE 1
+#          (T7) le risolve tutte e due con una corsa sola, perche' li' lo
+#          stop si legge ALL'INGRESSO e non alla chiusura.
 #
 # --------------------------------------------------------------------------
 #  6-bis. LA RISOLUZIONE DEL BANCO -- si legge PRIMA del contro-esempio
@@ -468,14 +562,38 @@
 #           L'archivio e' OHLC su finestra piena, qui e' tick reale
 #           spezzato IS/OOS: una riproduzione esatta NON e' costruibile a
 #           costo zero, e lo dichiaro invece di fingere che lo sia.
-#  (T3) MONOTONIA DELL'n -- previsione strutturale, dal codice.
-#       r.394: minDist = MathMax(buf, STOPS_LEVEL * _Point); se
-#              risk < minDist l'ingresso e' SCARTATO (contatore cO_sl).
-#       Ma risk = (distanza dal piu' protettivo) + buf >= buf = minDist non
-#       appena buf domina STOPS_LEVEL. >>> Dalla cella 2 in poi il rifiuto
-#       "SL troppo vicino" deve ANDARE A ZERO.
-#       SOGLIA: n non decrescente lungo l'asse, tolleranza 2 operazioni.
-#       DIAGNOSTICA GRATIS: InpLogImbuto=true stampa cO_sl nel Giornale.
+#  (T3) L'n NON HA UNA SOGLIA DI MONOTONIA -- CLASSE 663, e qui correggo
+#       un cancello mio che avrebbe buttato un round valido.
+#       Una stesura precedente congelava "n non decrescente lungo l'asse,
+#       e se cala di oltre 2 la mia lettura del codice e' sbagliata". Era
+#       dedotta da UN SOLO ramo di rifiuto:
+#         r.394  minDist = MathMax(buf, STOPS_LEVEL * _Point)
+#                if(risk < minDist) -> scarta (cO_sl)
+#         e risk = (distanza dal piu' protettivo) + buf >= buf = minDist
+#         non appena buf domina: quindi dalla cella 2 in poi quel rifiuto
+#         va a ZERO, e questo ramo spinge l'n IN SU.
+#       >>> MA NE ESISTE UN SECONDO, DI SEGNO OPPOSTO, e l'avevo mancato:
+#         r.314-320  if(HasPosition()) { ... return; }
+#                    "con posizione aperta non cerco nuovi ingressi"
+#         >>> L'EA TIENE UNA POSIZIONE ALLA VOLTA. Allargare lo stop
+#             allarga il TP (r.396) E il TP1 (r.466): il bersaglio finale
+#             passa da 98,5 a 163,5 punti indice. Bersagli piu' lontani =
+#             gambe che durano di piu' = motore OCCUPATO piu' a lungo =
+#             candidate rifiutate da cB_occupata.
+#         >>> QUINDI L'n PUO' CALARE LUNGO L'ASSE SENZA CHE NESSUNA
+#             LETTURA DEL CODICE SIA SBAGLIATA. Un calo non e' un difetto
+#             del round: e' un RISULTATO, e per di piu' uno dei piu'
+#             interessanti (dice che allargare lo stop costa frequenza,
+#             che e' il vincolo numero uno di ottobre).
+#       >>> COSA SI CONGELA AL POSTO DELLA SOGLIA: non un limite sull'n,
+#           ma QUALE CONTATORE SI LEGGE per attribuire il cambiamento.
+#           Dalla FASE 1 (scheda in fondo) si leggono nel Giornale i due
+#           contatori dell'imbuto, e sono loro a separare le due cause:
+#             cO_sl      in CALO  -> il ramo del minDist (spinge l'n su)
+#             cB_occupata in CRESCITA -> il ramo dello slot unico
+#                                        (tira l'n giu')
+#           Il SALDO dei due e' il movimento dell'n, e senza i contatori
+#           NON e' attribuibile. Per questo la FASE 1 non e' opzionale.
 #  (T4) IL CANCELLO DI MERITO NON ESISTE IN QUESTO ROUND: n < 150 su tutte
 #       le celle previste. Scritto qui perche' nessuno possa aggiungerlo
 #       dopo aver visto i numeri.
@@ -512,12 +630,38 @@
 #    TESI        -> PF CRESCENTE: 1.176 -> 1.216. Ma SOTTO la risoluzione:
 #                   NON confermabile.
 #    ALTERNATIVA -> PF DECRESCENTE, e sotto 1.
-#  >>> QUANTO GRANDE DEVE ESSERE IL CALO PER ESSERE VISIBILE -- calcolato:
-#        tranche IS  (n=42, risoluzione 0.141): calo di 3.6 punti di win rate
-#        tranche OOS (n=62, risoluzione 0.094): calo di 2.6 punti
-#      La FALSIFICAZIONE e' alla portata del banco, la CONFERMA no. Il
-#      round e' asimmetrico PER COSTRUZIONE.
+#  >>> E NOMINO LA CLASSE 659, che e' stata scritta OGGI proprio su una
+#      stesura precedente di questo round: "l'effetto che il round prevede
+#      e' piu' piccolo dello spostamento di PF che produce una sola
+#      operazione che cambia esito". Il file dichiara esattamente quella
+#      situazione (6-bis), e tacerla mentre la si dichiara farebbe
+#      sembrare il round una violazione della sua stessa regola.
+#      >>> LA RISPOSTA E' QUELLA CHE LA 659 PRESCRIVE AL PUNTO 3: si
+#          cambia la GRANDEZZA che il round misura. Qui la grandezza vera
+#          NON e' piu' il PF: e' LA DISTANZA DI STOP, che l'EA stampa a
+#          ogni ingresso (r.422-423) e che si misura DIRETTAMENTE, senza
+#          statistica e senza risoluzione. Il PF resta come guardia di
+#          sopravvivenza (il crollo netto qui sotto), non come misura.
 #
+#  >>> QUANTO GRANDE DEVE ESSERE IL CALO PER ESSERE VISIBILE -- e qui
+#      correggo una frase mia che prometteva troppo.
+#      Una stesura precedente scriveva "la falsificazione e' alla portata
+#      del banco". NON E' VERO, ed e' un errore di che cos'e' una
+#      risoluzione: la risoluzione e' la GRANULARITA' con cui il PF si
+#      muove, NON una soglia di rilevabilita' statistica. Un calo grande
+#      quanto uno scatto non e' "rilevabile": e' semplicemente uno scatto.
+#        tranche IS  (n=42, granularita' 0,141): il calo che serve e' 3,51 punti
+#                    di win rate, cioe' 1,47 OPERAZIONI
+#        tranche OOS (n=62, granularita' 0,094): 2,57 punti = 1,59 OPERAZIONI
+#      >>> UNA-VIRGOLA-CINQUE OPERAZIONE. Sta dentro il rumore di
+#          qualunque campione di questa taglia. Quindi NON si legge il
+#          "segno della pendenza" del PF, che a questi n e' un lancio di
+#          moneta.
+#      >>> SI LEGGE SOLO UN CROLLO NETTO, e la soglia e' questa:
+#          PF SOTTO 1,00 sulla cella 5 su TUTTE E DUE le tranche E su
+#          TUTTI E DUE i lati (R236a e R236b insieme). Quattro numeri
+#          concordi non sono un lancio di moneta. Qualunque cosa meno di
+#          questo NON falsifica, e si scrive "non misurato".
 #  >>> IL MODO DI MORIRE, E L'ABBIAMO VISTO OGGI -- non e' un'ipotesi, e'
 #      una gamba vera del 23/09/2026 (conto BCM in EUR, NON la challenge):
 #        14:00:00  buy  0.20 @ 30675,60   "STREV NAS H1 L 1/3"
@@ -753,4 +897,59 @@ InpLogImbuto=true
 # --- 5 celle: 3, 653, 1303, 1953, 2603 pip = +0,00 / +6,50 / +13,00 /
 # --- +19,50 / +26,00 punti indice sopra la base misurata.
 InpSLBufferPips=3||3||650||2603||Y
+# ==========================================================================
+
+# ==========================================================================
+#  FASE 1 -- TEST SINGOLO. OBBLIGATORIA, E VA PRIMA DELL'OTTIMIZZAZIONE.
+#  CLASSE 526 (21/09/2026), e qui l'ho ripagata.
+# ==========================================================================
+#  IL DIFETTO CHE QUESTA SCHEDA RIPARA:
+#    tutte le stesure precedenti di questo file congelavano diagnostica
+#    che esce da ImbutoStampa() (r.200-232) e da Log() (r.128), e TUTTE E
+#    DUE finiscono in Print():
+#       void Log(string m){ if(InpVerbose) Print("[STReversal] ", m); }
+#    >>> E Print() NON VIENE ESEGUITO IN OTTIMIZZAZIONE. Un file prova E'
+#        un'ottimizzazione. Quindi la riga che scrivevo -- "DIAGNOSTICA
+#        GRATIS: InpLogImbuto=true stampa cO_sl nel Giornale" -- era
+#        FALSA.
+#    >>> E peggio del falso: InpLogImbuto=true e InpVerbose=true restano
+#        pinnati qui sotto e danno L'ARIA di coprire la diagnostica. Non
+#        la coprono. Verificato anche sulla testata del CSV d'archivio:
+#        cO_sl, cB_occupata e cB_orario NON SONO COLONNE. Non esistono da
+#        nessuna parte, in nessun CSV di questo motore.
+#
+#  QUINDI: le tre cose che questo round deve leggere e che NON stanno nel
+#  CSV -- (1) la distanza di stop per ingresso (T7), (2) i contatori
+#  dell'imbuto per attribuire il movimento dell'n (T3), (3) la quadratura
+#  dell'imbuto -- si ottengono SOLO da una corsa SINGOLA col Giornale
+#  acceso. Va lanciata PRIMA, una volta per file.
+#
+#  COME SI LANCIA (scheda .ini; NON e' una riga di lancio, non esce da
+#  qui: la riga la scrive chi di dovere e passa dal cancello):
+#    Optimization   = 0        <- test SINGOLO, non ottimizzazione
+#    ShutdownTerminal = 1
+#    Symbol/Period/FromDate/ToDate/Model/Deposit = IDENTICI a quelli
+#      dichiarati in questo file (NASUSD, H1, 2024.09.26 -> 2026.06.30,
+#      tick reali, 100000). Se uno solo differisce, la base misurata non
+#      e' la base di questo round e la FASE 1 non vale.
+#    l'ASSE va FISSATO alla CELLA 1: InpSLBufferPips = 3
+#    tutti gli altri pin: identici a quelli in fondo a questo file.
+#
+#  IL CANCELLO SUL PRODOTTO -- si guarda il GIORNALE, non il CSV:
+#    (1) almeno una riga "[STREV-IMBUTO] ... quadratura OK"
+#        -> se manca, l'imbuto non ha girato e i contatori di T3 non
+#           esistono: la FASE 1 e' FALLITA, si ripete.
+#    (2) una riga "[STReversal] LONG mercato ... SL ... TP ..." (oppure
+#        SHORT) PER OGNI INGRESSO -- r.422-423.
+#        -> se le righe sono ZERO ma il CSV dice che ci sono operazioni,
+#           allora InpVerbose non e' arrivato: la FASE 1 e' FALLITA.
+#        -> se le righe ci sono, da queste si estrae |SL - entry| per
+#           ogni ingresso, se ne prende la MEDIANA, le si sottrae 0,03 e
+#           QUELLA E' LA BASE DEL FILE (T7).
+#
+#  >>> SENZA LA FASE 1 IL ROUND NON PRONUNCIA NESSUN VERDETTO SUL 40x, e
+#      non attribuisce nessun movimento dell'n. Puo' ancora dire se il
+#      motore SOPRAVVIVE (confronto fra celle), e basta.
+#  >>> Questo e' testo di commento: controlla_prova.py lo ignora, e la
+#      FASE 1 non aggiunge nessuna cella all'asse.
 # ==========================================================================

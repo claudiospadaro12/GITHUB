@@ -126,15 +126,29 @@
 #                                  provata" che resta aperto per sempre.
 #       >>> Nessuno dei tre esiti e' un fallimento. Il fallimento sarebbe
 #           lasciare la domanda aperta un altro mese.
-#  (T2) MONOTONIA DELL'n -- previsione strutturale dal codice.
-#       r.394: minDist = MathMax(buf, STOPS_LEVEL * _Point); se
-#       risk < minDist l'ingresso viene SCARTATO (contatore cO_sl).
-#       Allargare N puo' solo allontanare `ext`, quindi puo' solo allargare
-#       (o lasciare uguale) lo stop, quindi puo' solo RIDURRE quei rifiuti.
-#       SOGLIA: n non decrescente lungo l'asse, tolleranza 2 operazioni.
-#       Se l'n CALA di oltre 2 da N=5 a N=17, la mia lettura del codice e'
-#       sbagliata e il file va riletto prima di usarlo.
-#       DIAGNOSTICA GRATIS: InpLogImbuto=true stampa cO_sl nel Giornale.
+#  (T2) L'n NON HA UNA SOGLIA DI MONOTONIA -- CLASSE 663, e qui correggo
+#       un cancello mio che avrebbe fatto buttare un round valido.
+#       Una stesura precedente scriveva: "se l'n cala di oltre 2 da N=5 a
+#       N=17, la mia lettura del codice e' sbagliata e il file va riletto".
+#       >>> ERA SBAGLIATO, e la conclusione era scritta per esteso: con
+#           quella regola si sarebbe buttato un risultato buono.
+#       La deduzione veniva da UN SOLO ramo di rifiuto (r.394, minDist:
+#       allargare lo stop riduce i rifiuti "SL troppo vicino" e spinge
+#       l'n IN SU). Ma ne esiste un SECONDO, di segno opposto:
+#         r.314-320  if(HasPosition()) { ... return; }
+#                    "con posizione aperta non cerco nuovi ingressi"
+#         >>> L'EA TIENE UNA POSIZIONE ALLA VOLTA. Uno stop piu' largo
+#             allarga il TP (r.396) e il TP1 (r.466), le gambe durano di
+#             piu', il motore resta OCCUPATO e le candidate vengono
+#             rifiutate da cB_occupata.
+#       >>> QUINDI L'n PUO' CALARE senza che nessuna lettura del codice
+#           sia sbagliata, ed e' un RISULTATO (allargare lo swing costa
+#           frequenza), non un difetto.
+#       COSA SI CONGELA: non un limite sull'n, ma QUALE CONTATORE si
+#       legge. Dalla FASE 1 (scheda in fondo): cO_sl in calo = ramo del
+#       minDist; cB_occupata in crescita = ramo dello slot unico. Il
+#       movimento dell'n e' il SALDO dei due, e senza i contatori NON e'
+#       attribuibile.
 #  (T3) CANCELLO CROCIATO. La cella N=5 e' la configurazione dell'ancora
 #       d'archivio, e questo file gira sullo STESSO BANCO dell'archivio
 #       (OHLC). >>> Quindi qui, a differenza dei round a tick reali, un
@@ -320,4 +334,59 @@ InpLogImbuto=true
 
 # --- L'ASSE, unico: lo swing dello stop. 5 celle: 5, 8, 11, 14, 17
 InpSLLookback=5||5||3||17||Y
+# ==========================================================================
+
+# ==========================================================================
+#  FASE 1 -- TEST SINGOLO. OBBLIGATORIA, E VA PRIMA DELL'OTTIMIZZAZIONE.
+#  CLASSE 526 (21/09/2026), e qui l'ho ripagata.
+# ==========================================================================
+#  IL DIFETTO CHE QUESTA SCHEDA RIPARA:
+#    tutte le stesure precedenti di questo file congelavano diagnostica
+#    che esce da ImbutoStampa() (r.200-232) e da Log() (r.128), e TUTTE E
+#    DUE finiscono in Print():
+#       void Log(string m){ if(InpVerbose) Print("[STReversal] ", m); }
+#    >>> E Print() NON VIENE ESEGUITO IN OTTIMIZZAZIONE. Un file prova E'
+#        un'ottimizzazione. Quindi la riga che scrivevo -- "DIAGNOSTICA
+#        GRATIS: InpLogImbuto=true stampa cO_sl nel Giornale" -- era
+#        FALSA.
+#    >>> E peggio del falso: InpLogImbuto=true e InpVerbose=true restano
+#        pinnati qui sotto e danno L'ARIA di coprire la diagnostica. Non
+#        la coprono. Verificato anche sulla testata del CSV d'archivio:
+#        cO_sl, cB_occupata e cB_orario NON SONO COLONNE. Non esistono da
+#        nessuna parte, in nessun CSV di questo motore.
+#
+#  QUINDI: le tre cose che questo round deve leggere e che NON stanno nel
+#  CSV -- (1) la distanza di stop per ingresso (T7), (2) i contatori
+#  dell'imbuto per attribuire il movimento dell'n (T3), (3) la quadratura
+#  dell'imbuto -- si ottengono SOLO da una corsa SINGOLA col Giornale
+#  acceso. Va lanciata PRIMA, una volta per file.
+#
+#  COME SI LANCIA (scheda .ini; NON e' una riga di lancio, non esce da
+#  qui: la riga la scrive chi di dovere e passa dal cancello):
+#    Optimization   = 0        <- test SINGOLO, non ottimizzazione
+#    ShutdownTerminal = 1
+#    Symbol/Period/FromDate/ToDate/Model/Deposit = IDENTICI a quelli
+#      dichiarati in questo file (NASUSD, H1, 2024.09.26 -> 2026.06.30,
+#      OHLC -Modello 1, 100000). Se uno solo differisce, la base misurata non
+#      e' la base di questo round e la FASE 1 non vale.
+#    l'ASSE va FISSATO alla CELLA 1 (vedi il pin in fondo al file)
+#    tutti gli altri pin: identici a quelli in fondo a questo file.
+#
+#  IL CANCELLO SUL PRODOTTO -- si guarda il GIORNALE, non il CSV:
+#    (1) almeno una riga "[STREV-IMBUTO] ... quadratura OK"
+#        -> se manca, l'imbuto non ha girato e i contatori di T3 non
+#           esistono: la FASE 1 e' FALLITA, si ripete.
+#    (2) una riga "[STReversal] LONG mercato ... SL ... TP ..." (oppure
+#        SHORT) PER OGNI INGRESSO -- r.422-423.
+#        -> se le righe sono ZERO ma il CSV dice che ci sono operazioni,
+#           allora InpVerbose non e' arrivato: la FASE 1 e' FALLITA.
+#        -> se le righe ci sono, da queste si estrae |SL - entry| per
+#           ogni ingresso, se ne prende la MEDIANA, le si sottrae 0,03 e
+#           QUELLA E' LA BASE DEL FILE (T7).
+#
+#  >>> SENZA LA FASE 1 IL ROUND NON PRONUNCIA NESSUN VERDETTO SUL 40x, e
+#      non attribuisce nessun movimento dell'n. Puo' ancora dire se il
+#      motore SOPRAVVIVE (confronto fra celle), e basta.
+#  >>> Questo e' testo di commento: controlla_prova.py lo ignora, e la
+#      FASE 1 non aggiunge nessuna cella all'asse.
 # ==========================================================================
