@@ -30972,3 +30972,59 @@ _(E `CreationTime` e' peggio: non cambia mai, e su una copia e' la data della co
    `'CommonDesktopDirectory'` (`C:\Users\Public\Desktop`). Le icone che l'utente vede sono
    l'**unione**. Un inventario che ne legge uno solo produce una riga di archiviazione che
    **lascia indietro roba che lui continua a vedere**, e sembra non aver funzionato.
+
+---
+
+## CLASSE 608 -- 🪦🎁 LE CELLE CHE IL ROUND MISURA **GRATIS**, DICHIARATE NON-CANDIDATE **PRIMA DI VEDERLE**, sulla base di un round girato a un **ALTRO DEPOSITO**: la macchina produce il numero alla scala giusta e la riga insegna a buttarlo (controllo-preventivo, 23/09/2026, su `riga_r211a_v3.txt` -- figlia della 604 e gemella del CERTIFICATO DI MORTE)
+
+**Il numero, misurato e non dedotto** (`grep -oE '^#+ *CLASSE +[0-9]+' backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md | grep -oE '[0-9]+' | sort -n | tail -3` eseguito **nel momento in cui questa riga viene scritta**: le ultime erano **605 / 606 / 607**, 174 classi nel file, e `CLASSE 608` non compariva da nessuna parte nel repo).
+
+### Il caso reale
+`R211a` mette ad asse `InpSLMode`, che e' un **ENUM**: il passo e' ignorato e le celle sono
+**tutti** i membri, cioe' **quattro** (`0 OPPRANGE`, `1 ATR`, `2 FIXED`, `3 HALFRANGE`). Due
+di quelle celle -- ATR e FIXED -- **girano comunque**, e il round le misura **al deposito
+giusto (10.000)**, senza un secondo di macchina in piu'.
+
+La riga di lancio stampava a schermo:
+
+> *«LE CELLE 1 E 2 NON SONO CANDIDATE e **non si promuovono nemmeno se escono belle**: r88a
+> le ha gia' misurate e perdono tutte e due (ATR PF piu' basso e DD piu' alto di OPPRANGE,
+> **FIXED DD 17.90% fuori dal muro** anche a rischio 1%)»*
+
+🔴 **E `r88a` girava a deposito 100.000.** Cioe' la riga usava **come soglia di esclusione**
+esattamente il numero che **lo stesso file** dichiara non usabile: *«il 4.2956 di OPPRANGE e'
+misurato a deposito 100000, il 9.9181 a 10000. Metterli in colonna ... e' un confronto fra DUE
+ESPERIMENTI DIVERSI travestito da conto. Non si fa.»* E' la **classe 604 applicata al
+contrario**: non per PROMUOVERE una cella, ma per **archiviarne due**.
+
+### ☠️ Perche' costa, e perche' e' diversa dalla 604
+La 604 fa sbagliare un **verdetto**. Questa fa **buttare una misura che esiste gia'**, ed e'
+peggio: il CSV conterra' il DD di ATR e di FIXED **a 10.000**, cioe' l'unico numero valido mai
+prodotto per quelle due celle -- e chi legge il referto e' stato **istruito in anticipo** a non
+guardarlo. E' il difetto del 09/09 (`6 candidati su 7 bocciati senza NESSUN PF misurato`) con
+una variante peggiore: qui il PF c'era, ed e' stato **prodotto e ignorato**.
+🔎 Il dettaglio che lo prova: `FIXED` a 100k ha il **PF piu' ALTO dei quattro modi** (1.78015
+contro 1.68012 di OPPRANGE e 1.67419 di HALFRANGE). La cella scartata *«nemmeno se esce bella»*
+e' quella che sulla grandezza **invariante alla taglia** vince.
+
+### 🧪 Il contro-esempio che separa le due situazioni
+Non tutte le esclusioni a priori sono sbagliate, e la differenza si misura in una riga:
+- ✅ **LEGITTIMA**: `R206a`, celle escluse **PER COSTO** (`stop >= 40 x spread`). Quel motivo e'
+  **strutturale e invariante alla scala**: nessun deposito lo cambia.
+- 🔴 **ILLEGITTIMA**: `R211a`, celle escluse per un **DD in percentuale** misurato a un deposito
+  **dieci volte diverso**. Il deposito lo cambia, ed e' **misurato che lo cambia**: alla stessa
+  cella `HALFRANGE` il DD IS vale **7.8885 a 100k** e **8.6252 a 10k**.
+👉 Analogia sbagliata dichiarata: la riga citava proprio `R206a` come precedente. Non lo e'.
+
+### ✅ La regola
+**Una cella che il round gira COMUNQUE non si dichiara morta prima del round.** Prima di
+scrivere *«non si promuove nemmeno se esce bella»* si risponde a due domande:
+1. Il motivo dell'esclusione e' **invariante alla scala** (costo, struttura, orario, simbolo)
+   oppure e' una **percentuale del capitale** (DD%, Profit, Expected Payoff)? Se e' il secondo
+   **e il deposito e' cambiato**, il motivo NON vale: si riscrive usando solo **PF e RF**, che
+   alla taglia non rispondono.
+2. Il numero che sto per buttare **esiste gia' altrove alla scala giusta**? Se no -- e qui era
+   no -- **quel round e' l'unica occasione di averlo**, e costa zero.
+🔴 E la formula corretta non e' *«non e' candidata»*: e' **«non si promuove DI SLANCIO da qui:
+se passa tutti i cancelli si apre un round SUO, e il numero va in `REGISTRO_TEST.md`»**.
+Un morto senza certificato non e' un morto.
