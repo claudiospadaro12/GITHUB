@@ -1,0 +1,248 @@
+# =====================================================================
+#  R211a -- LO STOP DELL'ORB: l'estremo OPPOSTO del range (OPPRANGE)
+#           contro la META' del range (HALFRANGE, quella che gira oggi).
+#  EA: ABTG_ORB_Ottimizzato   (U30USD M5)   sedia ORB del DOW, FERMA in archivio
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#     -Deposito 10000 -Modello 4
+#
+#  RICHIESTA DI CLAUDIO, 23/09: "CAMBIA L'ASSE DI R211A SULLO STOP OPPRANGE".
+#  La prima stesura di questo file metteva ad asse la PARZIALE (InpTP1Pct).
+#  Quella misura non e' persa: diventa R211e, e si fa DOPO, sulla cella
+#  che sara' uscita da qui. Il motivo del cambio sta al punto 1.
+# =====================================================================
+#
+#  1. DA DOVE VIENE IL CAMBIO D'ASSE -- la live di Paolo del 22/09
+#  --------------------------------------------------------------------
+#  Claudio ha caricato la trascrizione della live di Paolo Lavorenti del
+#  22/09 e due foto del pannello del suo indicatore ORB_Indicator_V17.
+#
+#  >>> PRIMA COSA, PROVATA: il NOSTRO EA E' LA TRASPOSIZIONE DEL SUO
+#      INDICATORE. Il pannello porta la tabella dei coefficienti K:
+#        InpK1=1.0   -> D30EUR,SPXUSD,U30USD,NASUSD,XAUUSD
+#        InpK2=10.0  -> 225JPY
+#        InpK3=0.01  -> cross yen
+#        InpK4=0.0001 e InpK5=0.0001 -> forex
+#        InpK6=0.01  -> USOIL,UKOIL
+#      e ABTG_ORB_Ottimizzato.mq5 r.140 dichiara, testualmente:
+#        "Coefficiente: indici/oro=1.0; 225JPY=10; JPY=0.01;
+#         forex=0.0001; oil=0.01"
+#      La stessa tabella, nello stesso ordine. E il suo InpEntryPoints=10.0
+#      e' il nostro InpEntryPoints=10 (r.614: d = InpEntryPoints*InpK).
+#      >>> Su U30USD con InpK=1 quei 10 sono DIECI PUNTI INDICE veri, come
+#          da lui: nessun difetto di unita' (la classe 598 qui non morde).
+#
+#  >>> SECONDA COSA: nella live Paolo dice piu' volte, parlando dell'ORB,
+#      "lo stop dalla parte opposta". Nel nostro enum (r.121)
+#        ENUM_ORB_SL { ORB_SL_OPPRANGE=0, ORB_SL_ATR=1,
+#                      ORB_SL_FIXED=2, ORB_SL_HALFRANGE=3 }
+#      quello e' ORB_SL_OPPRANGE=0. La cella che gira in archivio, e che
+#      R211a stava per rimisurare, ha InpSLMode=3 = HALFRANGE.
+#      >>> Usiamo un altro stop da quello della strategia che abbiamo
+#          copiato, e non l'aveva notato nessuno.
+#
+#  2. E IL NUMERO C'ERA GIA' IN CASA -- r88a, mai letto cosi'
+#  --------------------------------------------------------------------
+#  risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_{IS,OOS}_r88a.csv
+#  contiene gia' il confronto, ed e' CONTROLLATO: stesso simbolo, stessa
+#  finestra, stesso InpTPMode=1 con InpTPRangeMult=1.5, stesso
+#  InpSLBufferPts=0, stesso InpRiskPercent=1, e n IDENTICO.
+#
+#      OOS      stop                    PF        DD%      n     RF
+#      ----     --------------------    -------   ------   ---   -------
+#      SLMode=0 OPPRANGE (di Paolo)     1.68012   4.2956   119   4.05303
+#      SLMode=3 HALFRANGE (oggi)        1.67419   9.7623   119   3.51891
+#      SLMode=1 ATR                     1.48518   8.5060   119   3.12670
+#      SLMode=2 FIXED                   1.78015  17.9010   119   2.57269
+#
+#      IS       stop                    PF        DD%      n     RF
+#      SLMode=0 OPPRANGE                0.96232   4.7658    71  -0.15349
+#      SLMode=3 HALFRANGE               1.24979   7.8885    71   1.14859
+#
+#  >>> LETTURA ONESTA, tutte e due le meta':
+#      OOS: PF PRATICAMENTE UGUALE (1.680 contro 1.674) ma il DRAWDOWN
+#           SI DIMEZZA, 4.30% contro 9.76%, e il Recovery Factor sale.
+#      IS:  HALFRANGE vince sul PF (1.250 contro 0.962: OPPRANGE perde).
+#           Ma anche li' il DD di OPPRANGE e' piu' basso (4.77 contro 7.89).
+#  >>> QUINDI: lo stop opposto NON e' "meglio" in assoluto. E' PIU' STRETTO
+#      SUL RISCHIO in tutte e due le finestre, e sul MERITO le due finestre
+#      si contraddicono. Il round serve a dire se quella proprieta' regge
+#      sulla cella ESATTA che schiereremmo.
+#
+#  3. PERCHE' IL RISCHIO E' QUELLO CHE DECIDE, QUI
+#  --------------------------------------------------------------------
+#  Il tappo dell'ORB non e' mai stato il PF: e' il DRAWDOWN. La cella di
+#  r44a a InpTPRangeMult=1.5 fa OOS DD 9.9181% -- sotto il muro FTMO del
+#  10% per OTTO CENTESIMI, e il round gira a InpRiskPercent=1 mentre il
+#  campo gira al 2,00%. Col fattore di casa (1.956-1.990) quel 9.9181
+#  diventa 19.4-19.7%: il DOPPIO del muro.
+#  Con il DD di r88a: 4.2956 x 1.990 = 8.55%. SOTTO il muro.
+#  >>> E' questa la ragione del round. Se la proprieta' regge, l'ORB passa
+#      da "non schierabile per rischio" a "schierabile alla taglia vera".
+#
+#  4. L'ASSE: QUATTRO CELLE, E LE DUE IN PIU' NON LE HO SCELTE IO
+#  --------------------------------------------------------------------
+#  InpSLMode=3||0||3||3||Y.
+#  >>> CORREZIONE FATTA PRIMA DI CONSEGNARE, e va detta perche' cambia il
+#      costo del round. Avevo scritto "DUE celle, 4 passate", contando il
+#      passo come su un asse numerico. E' SBAGLIATO: su un ENUM il passo
+#      e' IGNORATO e le celle sono TUTTI I MEMBRI fra start e stop. Me lo
+#      ha detto controlla_prova.py con la sua nota di classe 287:
+#        "asse ENUM (ENUM_ORB_SL): il passo e' IGNORATO, celle = membri
+#         fra 0 e 3 = 4  [il conto aritmetico direbbe 2: NON guardarlo]"
+#      Quindi le celle sono QUATTRO -- 0 OPPRANGE, 1 ATR, 2 FIXED,
+#      3 HALFRANGE -- e le passate sono OTTO, non quattro.
+#  >>> E LA CONSEGUENZA CHE CONTA, non il conto: le celle 1 e 2 leggono
+#      DUE INPUT che l'asse non tocca -- ATR usa InpAtrSLmult, FIXED usa
+#      InpSLFixedPts. Lasciati fuori dai pin prenderebbero il default
+#      compilato, cioe' un valore che questo file non dichiara. PINNATI
+#      tutti e due, ai valori veri di r44a (1.5 e 1000), letti nel CSV.
+#      Un input che entra in una cella e non sta nei pin e' un buco, e
+#      questo round non ne ha.
+#  >>> COME SI LEGGONO LE CELLE 1 E 2: NON sono candidate. r88a le ha gia'
+#      misurate e perdono tutte e due (ATR: PF piu' basso e DD piu' alto
+#      di OPPRANGE; FIXED: DD 17.90%, fuori dal muro anche a rischio 1%).
+#      Girano perche' l'ENUM le porta dentro, e servono a dare FORMA al
+#      confronto -- non si promuovono nemmeno se escono belle. E' la
+#      stessa clausola usata in R206a per le celle escluse per costo.
+#
+#  5. CLASSE 594 -- CHI ALTRO DIPENDE DA InpSLMode? VERIFICATO: NESSUNO
+#  --------------------------------------------------------------------
+#  Tutte le occorrenze nel sorgente:
+#    r.145  dichiarazione
+#    r.627-630  SLforLong  : OPPRANGE -> gRangeLow-SLBuffer()
+#                            FIXED    -> entry-InpSLFixedPts*_Point
+#                            HALFRANGE-> entry-0.5*(rangeHigh-rangeLow)-SLBuffer()
+#                            altrimenti (ATR) -> entry-atr*InpAtrSLmult
+#    r.636-639  SLforShort : speculare
+#  >>> E IL TARGET NON DIPENDE DALLO STOP, che e' la cosa che rende
+#      l'asse ISOLATO: r.451/r.588 calcolano il TP come
+#        InpTPMode==ORB_TP_RANGE ? entry +/- (rangeHigh-rangeLow)*InpTPRangeMult
+#                                : entry +/- dist*InpTP_R
+#      Noi pinniamo InpTPMode=1 (ORB_TP_RANGE), quindi il target e' una
+#      funzione del RANGE e non dello stop. Con InpTPMode=0 lo stesso asse
+#      avrebbe mosso DUE cose insieme (stop e target) e il round non
+#      avrebbe risposto alla domanda. E' la classe 594, evitata prima.
+#  >>> InpSLBufferPts e' PINNATO a 0 apposta: entra solo nei modi OPPRANGE
+#      e HALFRANGE (r.622 SLBuffer()), cioe' proprio nelle due celle
+#      dell'asse, e a valore diverso da zero le sposterebbe tutte e due in
+#      modo diverso. A 0 e' un no-op esatto, dichiarato dall'EA a r.620.
+#
+#  6. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  (A) ANCORA. La cella InpSLMode=3 DEVE riprodurre r44a alla cella
+#      InpTPRangeMult=1.5, che e' pinnata qui:
+#          IS   PF 1.22314  RF 0.95264  Equity DD % 8.6252  Trades  71
+#          OOS  PF 1.65693  RF 3.39368  Equity DD % 9.9181  Trades 119
+#      Letti nei CSV grezzi risultati_prove/ABTG_ORB_Ottimizzato/r44/,
+#      non in un referto.
+#      >>> NOTA CHE VALE, e va detta prima: r88a alla stessa cella da'
+#          IS 1.24979 / 7.8885 e OOS 1.67419 / 9.7623, cioe' VICINI ma NON
+#          IDENTICI a r44a. Qualcosa di diverso fra i due round c'e', e
+#          questo file NON sa cosa. Percio' l'ancora e' r44a (la cella che
+#          vogliamo battere), e i numeri di r88a si usano solo per la
+#          DIREZIONE, mai come soglia.
+#
+#  (B) MERITO, in grandezze invarianti alla taglia. Si promuove la cella
+#      InpSLMode=0 solo se TUTTE E QUATTRO:
+#        1. Equity DD % OOS <= 9.0      (margine vero sotto il muro)
+#        2. Recovery Factor OOS >= 3.39368   (non peggio dell'ancora)
+#        3. PF OOS >= 1.60              (l'ancora fa 1.65693: un cancello
+#           sotto lo status quo non e' un cancello. 1.60 lascia il margine
+#           del rumore, non il margine di una resa)
+#        4. n OOS ESATTAMENTE 119       (vedi punto 7)
+#      >>> NON c'e' una soglia sul Profit assoluto, ed e' voluto: con lo
+#          sizing a rischio fisso uno stop piu' LARGO da' un lotto piu'
+#          PICCOLO, quindi profitto e DD scendono INSIEME. Un pavimento
+#          sul profitto assoluto boccerebbe una cella piu' sicura solo
+#          perche' muove meno soldi. Decide il Recovery Factor, che e'
+#          soldi diviso soldi.
+#
+#  (C) RISCHIO. Il DD si legge a QUALUNQUE n (regola del 18/08: il
+#      campione sottile sospende il merito, mai il rischio).
+#
+#  7. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  Gli INGRESSI non dipendono dallo stop: l'ingresso e' la rottura del
+#  range a EntryDistance() (r.612-617), che legge InpEntryPoints e InpK e
+#  NON legge InpSLMode. E con InpTP1Pct=0 non c'e' parziale, quindi la
+#  colonna Trades conta POSIZIONI (la classe 550 qui non morde).
+#  >>> QUINDI n DEVE USCIRE IDENTICO SU TUTTE E QUATTRO LE CELLE: 71 in
+#      IS e 119 in OOS. E' esattamente quello che si osserva in r88a,
+#      dove n=71/119 su tutti e quattro i modi di stop.
+#  >>> SE n CAMBIA, non e' lo stop: si e' mosso ALTRO, e nessun numero di
+#      questo round si legge. E' il contro-esempio, ed e' gratis.
+#  >>> L'unica via nota per cui n potrebbe cambiare legittimamente: uno
+#      stop molto piu' largo da' un lotto piu' piccolo, e se il lotto
+#      finisse sotto il minimo del simbolo l'ordine verrebbe rifiutato.
+#      LotByRisk fa MathMax(volume_min, ...), quindi lo alza invece di
+#      rifiutare: la via e' chiusa. Se n cambia lo stesso, si indaga
+#      QUELLO prima di leggere i PF.
+#
+#  8. QUELLO CHE QUESTO ROUND NON FA, dichiarato
+#  --------------------------------------------------------------------
+#  - NON misura la PARZIALE: InpTP1Pct e' PINNATO a 0, come in r44a.
+#    La parziale e' R211e e si fa DOPO, sulla cella vincente di qui.
+#  - NON mette ad asse InpBreakeven (pinnato 0; con InpTP1Pct=0 e'
+#    comunque irraggiungibile, classe 594 del 22/09), ne' InpTP_R,
+#    InpTPMode, InpUseTrailEMA.
+#  - NON misura le altre TRE differenze da Paolo trovate nella live, e
+#    sono tutte round separati: il TARGET (lui 1:1 sul rischio, noi 1,5
+#    volte il range), la CONFERMA D'INGRESSO (lui "apre fuori e chiude
+#    fuori", noi InpUseCloseConfirm=0), e i DUE LATI (lui long e short,
+#    noi InpAllowShort=0).
+#  - NON cambia TF: M5, come r44a.
+#  - NON e' una prova di regime: finestra contigua, un solo regime.
+#  - Il .ex5 sul banco corrisponde al .mq5: [NON MISURATO].
+#  - NON RISPONDE SULLA FREQUENZA: r44a fa 119 operazioni in 386 giorni
+#    solari OOS = ~276 di borsa = 0,43 op/giorno, contro un pavimento di
+#    1,00 PER FAMIGLIA (firma 07/09). Dow + DAX insieme fanno ~0,86:
+#    sotto. La famiglia ORB ha bisogno di un TERZO simbolo, e questo
+#    round non lo cerca.
+#
+#  9. LA FINESTRA, IL DEPOSITO E IL TETTO DELLE BARRE
+#  --------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26 e' MISURATO, non scelto (classe 590):
+#  risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt dice
+#  "I TICK REALI DI U30USD PARTONO DAL 2024.09.26".
+#  Deposito 10000 e InpRiskPercent invariato da r44a: e' il dial di
+#  MISURA, NON la taglia in campo (2,00% su FTMO). Ogni DD va riletto
+#  alla taglia vera prima di confrontarlo col muro (fattore 1.956-1.990).
+#  Tetto delle ~100.000 barre: U30USD M5 fa 187,8 barre/giorno solare, e
+#  il walk-forward spezza la finestra in due tranche (IS 256 gg ~48.100
+#  barre, OOS 386 gg ~72.500). Tutte e due sotto. La finestra INTERA
+#  sarebbe ~120.600, cioe' SOPRA: non si gira mai intera.
+#  MAGIC 786501: grep -ril su tutto il repo, ZERO occorrenze fuori da qui.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FRAZIONEIS 0.40
+
+InpMagic=786501||786501||0||786501||N
+InpRangeStartHour=14||14||0||14||N
+InpRangeStartMin=30||30||0||30||N
+InpRangeEndHour=14||14||0||14||N
+InpRangeEndMin=45||45||0||45||N
+InpEndHour=21||21||0||21||N
+InpEndMin=0||0||0||0||N
+InpUseCloseConfirm=0||0||0||0||N
+InpEntryPoints=10||10||0||10||N
+InpK=1.0||1.0||0||1.0||N
+InpAllowShort=0||0||0||0||N
+InpTPMode=1||1||0||1||N
+InpTPRangeMult=1.5||1.5||0||1.5||N
+InpMaxRangePct=0.8||0.8||0||0.8||N
+InpUseEma200Filter=1||1||0||1||N
+InpUseEmaFilter=0||0||0||0||N
+InpUseVolumeFilter=0||0||0||0||N
+InpTP_R=1.0||1.0||0||1.0||N
+InpBreakeven=0||0||0||0||N
+InpUseTrailEMA=1||1||0||1||N
+InpExitOnEmaClose=0||0||0||0||N
+InpTP1Pct=0||0||0||0||N
+InpSLBufferPts=0||0||0||0||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=1000||1000||0||1000||N
+InpSLMode=3||0||3||3||Y
