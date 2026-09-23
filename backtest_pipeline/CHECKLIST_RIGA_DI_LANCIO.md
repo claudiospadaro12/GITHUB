@@ -32392,13 +32392,25 @@ e la sua intestazione porta la guardia scritta a mano:
 > `ORIGINALE ....: mql5/Presets/ABTG_Nasdaq_Apertura_US_RETEST_770260.set`
 > `sha1(12) 3d952a41a17f -- se cambia, questo file va rigenerato.`
 
-🔴 **Oggi i due file divergono su DUE input che con l'orologio non c'entrano niente** — misurato
-confrontando i due file campo per campo:
+🔴 **Oggi i due file divergono su TRE input che con l'orologio non c'entrano niente** — misurato
+confrontando i due file campo per campo, tutti e 98:
 
-| input | BCM (originale) | FTMO (in campo) |
-|---|---:|---:|
-| `InpTP1_ClosePct` | `0.0` | **`50.0`** |
-| `InpBreakevenAtTP1` | `false` | **`true`** |
+| input | BCM (originale) | FTMO (in campo) | che cos'e' |
+|---|---:|---:|---|
+| `InpTP1_ClosePct` | `0.0` | **`50.0`** | la parziale accesa il 21/09 |
+| `InpBreakevenAtTP1` | `false` | **`true`** | idem |
+| `InpRiskPercent` | `1.0` | **`2.00`** | 🆕 **la TAGLIA** — firma di Claudio del 20/09 |
+
+✏️ **CORRETTO IL 23/09/2026 dal cancello di giudizio: la riga `InpRiskPercent` MANCAVA, e la
+tabella diceva "DUE".** Il confronto campo per campo dei 98 input ne trova **sei** diversi in
+tutto: tre sono le conversioni d'orologio dichiarate e inerti (`InpSessionHour` 14/16,
+`InpCloseHour` 17/19, `InpCorrSymbol` `SPXUSD`/`US500.cash`, quest'ultimo inerte perche'
+`InpUseCorrelation=0` in tutti e due), e **tre** non c'entrano con l'orologio. 🔴 **Una tabella
+di deriva che elenca due voci su tre e' peggio di nessuna tabella**: chi la usa per riallineare i
+due file si porta dietro la terza, e la terza qui e' la **taglia** — cioe' un parametro di
+rischio, che e' firma di Claudio. La regola qui sotto vale per la deriva; questa correzione
+aggiunge che **l'elenco della deriva si fa a macchina su TUTTI i campi, e si dichiara il
+conteggio** (classe 180: l'insieme si elenca per nome, mai "le differenze che ho notato").
 
 **Causa**: il commit `496408a9` del 21/09 (*"Nasdaq 770260: ACCESA la parziale al 50%"*) ha
 toccato **un solo file**, quello FTMO (`git show --stat`: 1 file changed). Lo `sha1` dell'originale
@@ -32551,3 +32563,115 @@ una **guardia sull'aggiunta**.
    del cap, il tetto vero e' risultato essere **il margine** — cioe' proprio il vincolo che la
    stessa giornata aveva appena declassato a ultimo della fila. **Le due letture vanno fatte
    insieme, o si passa da un errore all'errore opposto.**
+
+---
+
+## 🏦🪞 CLASSE 646 — **IL DEPOSITO DEL BANCO E' PARTE DELLA CELLA, NON UNA SCALA: un file prova che dichiara «deposito X (come ROUND)» va verificato contro il deposito VERO di quel round, e una sentinella CROCIATA e' cieca all'errore** (23/09/2026, LATI_A1/A2)
+
+**Numero grepato al momento di scrivere**: repo-wide `CLASSE 643/644/645` esistono (solo qui),
+`CLASSE 646` assente ovunque.
+
+### Il caso reale
+Quattro file prova (`LATI_A1_..._long/short`, `LATI_A2_..._long/short`, EA `ABTG_EMA200` su
+U30USD H1) dichiaravano in testa: *«BANCO: Modello 4 (TICK REALI). Deposito 10000 (come R110).»*
+E la riga di lancio ci costruiva sopra un banner rosso di classe 604: *«i quattro LATI a 10000,
+perche' cosi' li dichiarano i rispettivi file prova»*.
+
+🔴 **R110 non e' girato a 10.000: e' girato a 100.000.** Tre fonti indipendenti, tutte in repo:
+- `backtest_pipeline/righe/RIGA_R112_EMADOW_CONTRATTO.ps1` r.204 — `$Deposito = 100000  # taglia prop, come R110`
+- `backtest_pipeline/risultati_archivio/R112_CRITERI.md` r.63 — *«deposito 100.000 — le stesse di R110, dichiaratamente»*
+- `report/CENSIMENTO_CONTRATTI_v2.md` r.378 — *«7,8323% @ dep. 100.000 … R31 = R110 = R112»*
+
+🧮 **E si controlla anche senza fidarsi di nessun testo**, dai soli CSV: `Profit / RecoveryFactor`
+da' il drawdown **in denaro**, e diviso per `Equity DD %` da' il **picco di equity implicito**.
+Sui tre CSV IS di R110: **101.503**, **102.930**, **102.474**. A deposito 10.000 quei numeri sono
+impossibili. (Contro-prova su una cella dove il deposito e' noto da referto: R199B a 80.000 da'
+83.975. La formula si comporta.)
+
+### Perche' costa, e perche' non e' pignoleria
+Su **questo** EA e **questo** simbolo il repo aveva **gia' misurato** che il deposito cambia la
+cella, non la scala:
+- `report/PIANO_PROP.md` v21 — *«n **444** a 10k contro **517** a 100k, stessa cella, stesso giorno»*
+- `report/CENSIMENTO_CONTRATTI_v2.md` r.378 — a 10.000 *«**MathFloor taglia il lotto** e la sedia
+  rischia **~0,87%** invece di 1,00%»*
+
+Quindi a 10.000: **~14% di operazioni in meno** su una finestra che ne aspettava **32-62**, e le
+soglie del file — `T2` (DD ≤ 10,00%) e `T3` (peggior giornata −3,00%), scritte tutte e due
+**«a rischio 1.0%»** — lette su una corsa che rischia **0,87%**. 🔴 **L'errore va nel verso
+PERMISSIVO, e sull'unica grandezza che quel round era autorizzato a leggere** (il MERITO era
+sospeso per n sottile: restava il RISCHIO).
+
+### 🕳️ E LA PARTE NUOVA, che e' il motivo per cui questa classe esiste
+🔴 **La sentinella CROCIATA non puo' accorgersene, mai.** Quei round si controllano cosi': la
+cella `long+short` di un file deve uscire **identica** a quella del gemello. Ma i due gemelli
+girano **allo stesso deposito**: col deposito sbagliato restano identici lo stesso, e la
+sentinella dice **PASS**. 👉 **Una sentinella di simmetria non e' una sentinella di banco.**
+E' l'opposto dell'ancora di `R231A`, che confronta contro **numeri d'archivio** e quindi il banco
+lo controlla davvero.
+
+### La regola
+1. 🔎 **«come ROUND» non e' una fonte: e' un rinvio.** Prima di lanciare, si apre il round citato e
+   si legge il deposito **dove e' scritto per la macchina** (la riga `$Deposito` dello script, o il
+   `deposito :` del referto), non dove e' raccontato per l'uomo.
+2. 🧮 **Se il round citato non ha un referto, il deposito si RICAVA dai suoi CSV** con
+   `(Profit/RF) / (EquityDD%)` = picco di equity implicito. Costa dieci secondi e non si puo'
+   discutere.
+3. 🪞 **Se l'unico controllo di un round e' una sentinella di SIMMETRIA (crociata, gemelli,
+   ablazione), si dichiara che il BANCO e' NON CONTROLLATO** e si aggiunge almeno un numero
+   d'archivio da riprodurre. Altrimenti il round puo' essere interamente sbagliato e uscire verde.
+4. 📏 **E non si scrive mai «tanto i DD in percentuale sono invarianti alla scala».** E' vero solo
+   finche' il lotto non tocca il pavimento del broker. Dove lo tocca, `MathFloor` cambia **il
+   rischio effettivo** e **l'insieme dei trade**: misurato in casa, 444 contro 517.
+
+---
+
+## ✂️🤫 CLASSE 647 — **UN FILE PROVA CHE CHIEDE UNA COSA «DALLA RIGA DI LANCIO» CHE LA RIGA DI LANCIO NON SA PASSARE: il driver mette il suo default e SPEZZA la finestra in silenzio** (23/09/2026, LATI_A1/A2)
+
+**Numero grepato al momento di scrivere**: `CLASSE 647` assente repo-wide.
+
+### Il caso reale
+Gli stessi quattro file prova portavano in testa:
+> *«UNA TRANCHE: FrazioneIS 1.0 va passata dalla riga di lancio. La gamba OOS esce degenere ed e'
+> ATTESA vuota: NON si rilancia.»*
+
+🔴 **Non e' possibile.** Il lancio passa da `backtest_pipeline/righe/RIGA_ROUND_VPS.ps1`, e quello
+script di `Frazione` ha **ZERO occorrenze** (`grep -c`: 0): il suo `param` e'
+`Expert, Prova, Etichetta, Pin, TerminaleBacktest, Modello, Deposito, Work, ChiudiBacktest,
+SoloControllo`. **Non puo' inoltrare `-FrazioneIS`.** Quindi `walkforward_generico.ps1` usa il suo
+default (`[double]$FrazioneIS = 0.40`, r.189) e **taglia la finestra 40/60 senza che nessuno lo
+abbia chiesto**.
+
+Il driver stesso descrive il danno, a r.696, in un messaggio d'errore scritto per un caso vicino:
+> *«…fabbrica (0.40) senza dirlo a nessuno: il file crede di aver dichiarato una cosa, i CSV ne
+> raccontano un'altra.»*
+
+### Perche' costa
+Su `LATI_A1` la finestra e' **88 giorni** e il file la dichiara *«UN episodio, non un regime»*: la
+discesa del Dow del 2025. Con 0.40 il driver taglia a `2025.02.01 + floor(88*0.40) = 2025.03.08`
+— cioe' **prima del minimo dell'08/04**. 🔴 **La gamba IS non conterrebbe la discesa**, che e'
+l'unica cosa che quel file esiste per misurare, e le soglie `T2/T3/T4` sono scritte per la
+finestra **intera**. Il round tornerebbe con due mezzi-episodi e nessuna delle due meta' sarebbe
+la cella dichiarata.
+
+🔴 **E anche qui la sentinella crociata dice PASS**: i due gemelli vengono spezzati nello stesso
+punto, quindi restano identici (classe 646, stessa cecita').
+
+🔴 **E il cancello deterministico non lo vede**: `controlla_prova.py` conta le passate come
+`celle x 2 finestre` **fisso**, e **non legge `@FRAZIONEIS`**. Su questi file stampa *«20 passate,
+0 problemi»* qualunque sia la tranche. 👉 **Un conto di passate non e' un controllo di finestra.**
+
+### La regola
+1. 📌 **Quello che serve al DRIVER si scrive DOVE IL DRIVER LO LEGGE.** Il taglio IS/OOS ha la sua
+   direttiva nel file prova: `@FRAZIONEIS` (`walkforward_generico.ps1` v6, r.701-746), e `1.0` e'
+   ammesso e documentato li' come *«UNA SOLA TRANCHE (gamba OOS degenere, si dichiara)»*.
+2. 🚫 **Una frase come «va passata dalla riga di lancio» e' un DIFETTO finche' non si e' grepato lo
+   script di lancio per il nome del parametro.** Un file prova non puo' dare istruzioni a uno
+   script che non ha quel parametro: quelle istruzioni non le esegue nessuno, e il silenzio ha
+   l'aspetto del successo.
+3. 🧾 **Con `@FRAZIONEIS 1.0` l'esito del round e' «NON MISURATO — CSV mancanti o vuoti: OOS», ed
+   e' ATTESO**: la gamba OOS e' una finestra vuota. 🔴 **Va scritto nella riga di lancio PRIMA di
+   lanciare**, altrimenti qualcuno rilancia il round credendo che sia fallito — e la raccolta,
+   che si fa comunque, contiene gia' il numero buono (la gamba IS = finestra intera).
+4. 🔁 **Regola generale**: ogni direttiva che un file prova pretende dall'esterno (`-Deposito`,
+   `-Modello`, `-Spread`, `-Ritardo`, `-FrazioneIS`) si verifica **due volte**: che lo script di
+   lancio sappia passarla, e che la riga di lancio la passi **davvero**.

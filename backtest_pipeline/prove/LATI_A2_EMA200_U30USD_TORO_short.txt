@@ -59,12 +59,58 @@
 #      BCM a 2024.09.26 COMPLETO, NON E' ESEGUIBILE. Punto.
 #    - RISCHIO 1.0% qui, 0.65% in campo: DD x 0.65 per il confronto.
 #
-#  BANCO: Modello 4 (TICK REALI). Deposito 10000 (come R110).
-#  UNA TRANCHE: FrazioneIS 1.0 dalla riga di lancio.
+#  BANCO: Modello 4 (TICK REALI). Deposito 100000.
+#  [!] CORRETTO IL 23/09/2026 DAL CANCELLO DI GIUDIZIO (classe 646).
+#      Qui c'era scritto "Deposito 10000 (come R110)", ed era FALSO su
+#      tutte e due le meta': R110 NON e' girato a 10.000, e' girato a
+#      100.000. Tre fonti indipendenti in repo, tutte e tre lette:
+#        - backtest_pipeline/righe/RIGA_R112_EMADOW_CONTRATTO.ps1 r.204:
+#          "$Deposito = 100000   # taglia prop, come R110";
+#        - risultati_archivio/R112_CRITERI.md r.63: "deposito 100.000 --
+#          le stesse di R110, dichiaratamente";
+#        - report/CENSIMENTO_CONTRATTI_v2.md r.378: "7,8323% @ dep.
+#          100.000 ... R31 = R110 = R112".
+#      E l'aritmetica dei CSV di R110 lo conferma da sola, senza fidarsi
+#      di nessun testo: Profit/RecoveryFactor da il DD in denaro, e
+#      diviso per l'Equity DD % da il picco di equity implicito --
+#      IS metro 101.503, IS long 102.930, IS short 102.474. A deposito
+#      10.000 quei tre numeri sarebbero impossibili.
+#  [!] E NON E' UN DETTAGLIO DI CARTA: su QUESTO EA e QUESTO simbolo il
+#      deposito e' gia' stato MISURATO come parte della cella --
+#      report/PIANO_PROP.md v21: "n 444 a 10k contro 517 a 100k, stessa
+#      cella, stesso giorno"; CENSIMENTO_CONTRATTI_v2.md r.378: a 10.000
+#      "MathFloor taglia il lotto e la sedia rischia ~0,87% invece di
+#      1,00%". Girare a 10.000 avrebbe quindi tolto ~14% di operazioni a
+#      una finestra che ne aspetta 32-62, e avrebbe letto le soglie T2
+#      (DD <= 10.00%) e T3 (peggior giornata -3.00%), scritte tutte e due
+#      "a rischio 1.0%", su una corsa che rischia 0,87%. Errore nel verso
+#      PERMISSIVO, sull'unica cosa che questo round puo' leggere.
+#  [!] E LA SENTINELLA CROCIATA T1 NON SE NE SAREBBE MAI ACCORTA: i due
+#      gemelli girano allo stesso deposito, quindi restano identici anche
+#      col deposito sbagliato. Il controllo del banco e' cieco a questo.
+#  UNA TRANCHE: @FRAZIONEIS 1.0, DICHIARATA QUI SOTTO NEL FILE.
+#  [!] CORRETTO IL 23/09/2026 (classe 647). Qui c'era scritto "FrazioneIS
+#      1.0 va passata dalla riga di lancio": NON E' POSSIBILE. Il lancio
+#      passa da backtest_pipeline/righe/RIGA_ROUND_VPS.ps1, che di
+#      "Frazione" non ha NESSUNA occorrenza (grep: 0) e quindi non puo'
+#      inoltrare -FrazioneIS al driver. Senza la direttiva nel file, il
+#      driver usa il suo default 0.40 e SPEZZA la finestra 40/60 in
+#      silenzio -- che e' esattamente il difetto che walkforward_generico
+#      r.696 descrive: "il file crede di aver dichiarato una cosa, i CSV
+#      ne raccontano un'altra". La via che il driver SUPPORTA e'
+#      '@FRAZIONEIS' (v6, r.701-746), e 1.0 e' ammesso ed e' documentato
+#      li' come "UNA SOLA TRANCHE (gamba OOS degenere, si dichiara)".
+#  [!] CONSEGUENZA DA SAPERE PRIMA DI LEGGERE IL REFERTO: con
+#      @FRAZIONEIS 1.0 la gamba OOS e' una finestra VUOTA, il CSV _OOS
+#      non esce, e RIGA_ROUND_VPS.ps1 chiude il round con l'esito
+#      "NON MISURATO -- CSV mancanti o vuoti: OOS". E' ATTESO. Il numero
+#      che vale e' quello della gamba IS, che qui e' la finestra INTERA.
+#      NON SI RILANCIA.
 @SIMBOLO  U30USD
 @PERIODO  H1
 @DAQUANDO 2025.06.10
 @FINOA    2026.06.30
+@FRAZIONEIS 1.0
 #
 # --- I FISSI: copia dell'antenato R110_EMADOW_02_short.txt.
 InpUsaGuardian=true
