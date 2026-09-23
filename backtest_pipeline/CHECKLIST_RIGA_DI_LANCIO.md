@@ -33642,3 +33642,90 @@ strette restano sotto la frontiera**.
    che suona come "tutte".
 3. 📉 **Se la frazione sotto frontiera non e' calcolabile, si dichiara `[NON MISURATO]`** e
    il verdetto resta una mediana, non una promessa.
+
+---
+
+## 📦🔦 CLASSE 667 — **IL REFERTO PRESCRIVE «GUARDARE IL LOG» E LO ZIP CHE SPEDISCE NON CONTIENE NESSUN LOG: l'unica diagnosi possibile richiede un secondo giro sulla macchina** (verificatore-stringhe, 23/09/2026, su `RIGA_ROUND_VPS.ps1`)
+
+**Numero assegnato dal COORDINATORE** (classe 662); `grep -c "CLASSE 667"` -> **0** al momento di scrivere.
+
+### Il fatto, verificato riga per riga
+`backtest_pipeline/righe/RIGA_ROUND_VPS.ps1` **r.1231-1239**: la raccolta copia nello zip
+**solo** `$csvIS`, `$csvOOS`, il file prova e il referto. **Zero `.log`.**
+🔴 Ma **r.1273-1275**, quando l'esito e' **NON MISURATO**, stampa *"Il log del tester sta in
+`<cartella dati>\Tester\` ... guardare il log"*. 👉 **Lo zip che arriva a chi deve
+diagnosticare non contiene l'unico artefatto che la diagnosi richiede**, e chi lo riceve non
+e' davanti alla macchina. Costo: un secondo giro sul PC, ore dopo, quando i log possono gia'
+essere stati sovrascritti.
+
+### La regola
+1. 📎 **Un referto che PRESCRIVE una diagnosi deve SPEDIRE l'artefatto che la permette.**
+   Se il testo dice "guarda il log", il log sta nello zip.
+2. 🔍 **Il controllo si fa incrociando i due elenchi**: cosa il referto dice di guardare,
+   contro cosa la raccolta copia. Se il primo non e' contenuto nel secondo, e' questo
+   difetto.
+3. ⚠️ **E vale anche al contrario**: se un artefatto e' troppo pesante per lo zip, il
+   referto deve dire **dove trovarlo e per quanto tempo resta**, non limitarsi a nominarlo.
+
+### Stato
+🛠️ **Riparato NELLA RIGA del 23/09** (`RIGA_ROUND_PRONTI_2026-09-23.md`): un blocco finale
+copia in `LOG_TESTER\` tutti i `.log` sotto `%APPDATA%\MetaQuotes` scritti dopo l'avvio e li
+mette nello zip. 🔴 **La riparazione nello SCRIPT resta da fare.**
+
+---
+
+## 🚧🔧 CLASSE 668 — **UN FILE PROVA PRESCRIVE UNA FASE OBBLIGATORIA CHE NESSUNO STRUMENTO DEL REPO SA ESEGUIRE: il round parte lo stesso e il cancello resta sospeso senza che nessuno se ne accorga** (verificatore-stringhe, 23/09/2026, su `R236a/R236b`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 668"` -> **0** al momento di scrivere.
+
+### Il fatto
+`R236a`/`R236b` prescrivono una **FASE 1 -- TEST SINGOLO** con `Optimization=0`, da cui si
+ricava la base dello stop e quindi il verdetto del cancello **T7** sul `40x`.
+🔴 **Nessuno strumento del repo sa eseguirla**, e l'ho verificato io:
+- `backtest_pipeline/walkforward_generico.ps1` scrive **`Optimization=1` CABLATO** in
+  **entrambe** le schede `.ini` — **r.1015** (gamba IS) e **r.2013** (gamba OOS). Nessun
+  parametro lo cambia, e **il driver lo dichiara da solo a r.75**: *"questo driver scrive
+  SEMPRE Optimization=1"*.
+- `RIGA_ROUND_VPS.ps1` r.148-158 ha dieci parametri e **nessuna opzione di test singolo**.
+- 🔴 **E anche potendo, la diagnostica non uscirebbe**: le righe `mercato ... @ <entry> SL
+  <sl> TP <tp>` escono da `Print()`, che **non viene eseguito in ottimizzazione** (classe
+  **526**). Un file prova **E'** un'ottimizzazione.
+
+### Perche' costa
+Il file dichiara *"senza FASE 1 nessun verdetto sul 40x"*, il round **parte lo stesso**, e il
+cancello T7 resta **sospeso** — ma nel referto finale nessuno se ne accorge, perche' il round
+ha prodotto CSV, PF e DD come sempre. 👉 **Un cancello sospeso che non si vede e' un cancello
+passato.**
+
+### La regola
+1. 🔨 **Un file prova non puo' prescrivere una fase che nessuno strumento del repo sa
+   eseguire.** O si scrive lo strumento, o **il file dichiara il cancello come SOSPESO fin
+   da subito**, in testa, non in fondo.
+2. 🧾 **E la riga di lancio deve scriverlo nel riepilogo che viaggia con lo zip**, cosi' il
+   sospeso arriva insieme ai numeri e non si perde. *(Fatto nella riga del 23/09.)*
+3. 🔎 **Il controllo e' meccanico**: per ogni fase prescritta da un file prova, si cerca
+   **quale parametro di quale script la esegue**. Se non esiste, e' questo difetto.
+
+---
+
+## ☠️🔗 CLASSE 669 — **UNA CATENA DI N ROUND UCCISA DALL'`exit` DELLO SCRIPT CHIAMATO: il primo round esce, i dodici successivi non girano, e NON C'E' NESSUN ERRORE** (verificatore-stringhe, 23/09/2026, su `RIGA_ROUND_PRONTI_2026-09-23.md`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 669"` -> **0** al momento di scrivere.
+⚠️ **E' la faccia OPPOSTA del punto 13 della checklist** (la' un `exit 1` veniva *ignorato*;
+qui *ammazza tutto*). Registrata come classe a se' perche' il modo di fallire e' diverso:
+la 13 produce un falso verde, questa produce **un silenzio**.
+
+### Il fatto
+`RIGA_ROUND_VPS.ps1` finisce con `exit 0/2/3` (r.1267-1269) e muore con `exit 1` (`Muori`,
+r.170). 🔴 Chiamarlo con `& $script` oppure con il dot-source **dentro** un `& { ... }` farebbe
+uscire **l'intera finestra PowerShell al PRIMO round**: i dodici successivi non girerebbero,
+lo zip verrebbe costruito con un solo risultato, e **non comparirebbe nessun errore**.
+
+### La regola
+1. 🧵 **Uno script che termina con `exit` si chiama come PROCESSO FIGLIO**, sempre, quando sta
+   dentro una catena: `& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $S ...` e
+   poi si legge **`$LASTEXITCODE`**.
+2. 🚫 **Mai `& $script` ne' dot-source dentro un `& { ... }` che deve proseguire.**
+3. 🧮 **E il riepilogo finale deve contare i risultati attesi contro quelli trovati**: una
+   catena che doveva produrre 13 cartelle e ne produce 1 va **dichiarata rotta dal codice**,
+   non lasciata all'occhio di chi apre lo zip.
