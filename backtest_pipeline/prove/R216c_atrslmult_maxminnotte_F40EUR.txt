@@ -1,0 +1,316 @@
+# =====================================================================
+#  R216c -- QUANTO DEVE ESSERE LARGO LO STOP: InpAtrSLmult da 1,5 a 3,0
+#           sul box notturno del CAC. 1,5 e' l'UNICO valore mai girato
+#           su questo simbolo -- 72 passate su 72.
+#  EA: ABTG_MaxMinNotte   (F40EUR M15)   sedia MORTA sul CAC, 0 celle
+#                                        positive su 54.
+#
+#  GIRA SUL PC DI BACKTEST (DESKTOP-H4D7CAJ), NON SUL VPS: finche' la
+#  challenge opera il tester non tocca la macchina delle sedie (firma di
+#  Claudio del 21/09).
+#     -Deposito 10000 -Modello 4
+#     MOTIVO DEL DEPOSITO (classe 604): identico a R216b. Due fonti --
+#     ini/valid_MaxMin_F40EUR.ini r.11 ("Deposit=10000") e la
+#     ricostruzione dai numeri del CSV, (5,88/0,00540)/0,101232 =
+#     10.756 di capitale di picco.
+#
+#  Scritto il 23/09/2026. Attesa e soglie CONGELATE PRIMA DEI NUMERI.
+#  Dossier che lo propone: report/I_MORTI_E_IL_PEDAGGIO_2026-09-23.md
+#  (classifica dei riapribili, posto #2).
+#
+#  *** QUESTO FILE E' L'ALTRA META' DI R216b. *** Il dossier chiedeva
+#  "InpSLMode 0/1/2 PIU' InpAtrSLmult fino a 3,0": sono DUE assi, e un
+#  file prova ne misura UNO. R216b muove il MODO tenendo x1,5; questo
+#  muove il MOLTIPLICATORE tenendo il modo ATR. Insieme fanno SEI
+#  configurazioni distinte (3 + 4 - 1 in comune), che sono le sei del
+#  dossier. La cella condivisa e' il cancello G1 (punto 6).
+#  *** TUTTO CIO' CHE E' COMUNE AI DUE FILE -- la finestra, l'ancora non
+#  riproducibile, il rischio gia' fuori dal muro, la trappola del target
+#  figlio dello stop -- STA SCRITTO IN R216b AI PUNTI 2, 3 e 4, E VALE
+#  IDENTICO QUI. *** Qui si scrive solo cio' che e' di questo asse.
+# =====================================================================
+#
+#  1. IL BUCO, E PERCHE' QUESTO ASSE E' IL PIU' PROMETTENTE DEI DUE
+#  --------------------------------------------------------------------
+#  Nel CSV dell'archivio (4528c79b-valid_MaxMin_F40EUR.csv, 72 righe)
+#  InpAtrSLmult vale 1.5 in 72 righe su 72. *** Mai mosso. ***
+#  E le tre sedie notturne uccise (CAC, Stoxx, FTSE) sono girate TUTTE
+#  a 1,5: 216 passate, un solo valore di stop.
+#  >>> Sul GEMELLO DAX lo stesso valore e' MISURATO SOTTO LA FRONTIERA
+#      DEL COSTO: ATR M15 x 1,5 = 52,5 punti indice contro uno spread
+#      mediano di 1,70 = *** 30,9 volte ***, cioe' sotto i 40x della
+#      regola di casa; a x2,0 fa 41,2x e a x2,5 fa 51,5x, e PASSANO.
+#      *** E la sedia DAX VIVA (770411) gira proprio a 2,5. ***
+#      Cioe' le morte stavano sotto il cancello e la viva sopra.
+#  >>> SU F40EUR TUTTO QUESTO E' [NON CALCOLABILE] (spread e ATR del CAC
+#      mai misurati: vedi R216b punto 5). Il numero del DAX e' la
+#      RAGIONE del round, non una misura del CAC.
+#
+#  2. L'ASSE E' GIA' STATO MISURATO IN CASA -- E L'HO RILETTO IO, RIGA
+#     PER RIGA, INVECE DI FIDARMI DEL REFERTO
+#  --------------------------------------------------------------------
+#  risultati_archivio/MaxMinNotte/valid_MaxMin_DAX_short_refine.csv,
+#  36 righe, D30EUR lato SHORT (InpAllowLong=0, InpAllowShort=1),
+#  InpSLMode=1 fisso, assi: InpAtrSLmult (1,5/2,0/2,5) x InpBufferPoints
+#  (700/1000/1300) x InpUseCorrelation (0/1) x InpMinBoxPts (0/1500).
+#
+#  >>> QUELLO CHE IL DOSSIER CITA, ed e' VERO: il Recovery Factor medio
+#      sale monotono con il moltiplicatore --
+#          x1,5 -> 0,713      x2,0 -> 1,667      x2,5 -> 3,334
+#      Ricalcolato da me come media dei tre buffer: torna al terzo
+#      decimale. *** Ed e' il numero su cui si regge questo round. ***
+#
+#  >>> E QUELLO CHE IL DOSSIER NON DICE, CHE HO TROVATO GUARDANDO LE
+#      RIGHE, ED E' IL CONTRO-ESEMPIO DI QUESTO FILE:
+#      *** QUELLA SCALA MONOTONA ESISTE SOLO SULLE CELLE CON IL FILTRO
+#      DI CORRELAZIONE ACCESO (InpUseCorrelation=1), CHE HANNO n = 34-41
+#      -- UN TERZO DEL CAMPIONE. ***
+#      Sulle celle a campione pieno (InpUseCorrelation=0, n = 96-107) la
+#      stessa media fa:
+#          x1,5 -> 0,522      x2,0 -> 0,254      x2,5 -> 0,725
+#      cioe' *** SCENDE E POI RISALE: NON E' MONOTONA. ***
+#      >>> Le due letture si contraddicono, e la differenza non e' il
+#          moltiplicatore: e' il FILTRO. Su 36 passate le celle con n
+#          sopra 90 dicono "nessuna tendenza"; quelle con n sotto 41
+#          dicono "tendenza fortissima". *** La seconda e' anche quella
+#          con un terzo dei dati. ***
+#      >>> CONSEGUENZA, DICHIARATA PRIMA DEI NUMERI: se questo round su
+#          F40EUR *** NON *** trova una salita monotona, non e' una
+#          sorpresa e non e' un guasto -- e' quello che gia' dicono le
+#          celle a campione pieno del DAX. L'attesa sta al punto 5 ed e'
+#          tarata su QUESTO, non sull'entusiasmo del 3,334.
+#
+#  >>> E IL TRASFERIMENTO HA UN BUCO CHE VA NOMINATO: la scala monotona
+#      viene da celle con InpUseCorrelation=1 (filtro SPXUSD acceso),
+#      mentre questo round gira con InpUseCorrelation=0, che e' il
+#      valore dell'archivio F40EUR. *** La prova migliore che abbiamo e'
+#      su una configurazione DIVERSA da quella che giriamo. *** Non la
+#      allineo, perche' accendere il filtro sarebbe un SECONDO
+#      meccanismo mosso insieme al primo: il filtro di correlazione e'
+#      un asse suo, e su F40EUR non e' mai stato acceso.
+#
+#  >>> MANOPOLA INERTE TROVATA NELLO STESSO CSV, e vale la pena
+#      scriverla perche' e' esattamente il difetto che il censimento del
+#      09/09 ha contato su 874 CSV: *** InpMinBoxPts e' ad asse su 0 e
+#      1500 e le 36 righe danno solo 18 esiti distinti. *** Le coppie
+#      0/1500 sono IDENTICHE AL CENTESIMO su PF, RF, DD e n, su tutte e
+#      18 le combinazioni. Il box notturno del DAX e' sempre piu' largo
+#      di 15 punti indice, quindi quel filtro non ha mai morso: meta'
+#      di quel round e' stata spesa per niente. Qui InpMinBoxPts e'
+#      pinnato a 0 e non si tocca.
+#
+#  3. LA GEOMETRIA DELL'ASSE: 1,5 -> 3,0 CON PASSO 0,5, E IL BORDO
+#  --------------------------------------------------------------------
+#  Quattro celle: 1,5 . 2,0 . 2,5 . 3,0.
+#  >>> PERCHE' ARRIVO A 3,0 E NON MI FERMO A 2,5: nel CSV del DAX il
+#      massimo del gradiente sta *** SUL BORDO DELLA GRIGLIA *** (2,5 e'
+#      l'ultimo valore dell'asse). Una griglia il cui massimo sta al
+#      bordo non ha trovato un massimo: ha finito lo spazio. Il valore
+#      3,0 serve a dire se dopo il 2,5 la curva gira o continua.
+#  >>> E 3,0 E' ANCHE IL LIMITE CHE MI DO: oltre, lo stop diventa cosi'
+#      largo che il target di sicurezza (InpTPfinal_R = 4,0 volte lo
+#      stop, r.353) va a finire fuori dalla giornata e il motore non e'
+#      piu' un breakout dell'apertura -- e' un'altra cosa. E' lo stesso
+#      argomento con cui il dossier ha ABBASSATO la proposta su
+#      DAX_Live5m_v2 (da 6.800 a 4.000 punti): allargare lo stop finche'
+#      il cancello passa, sfondando la geometria, e' barare col metro.
+#
+#  4. CLASSE 594 -- CHI ALTRO LEGGE InpAtrSLmult? DUE, E VANNO DETTI
+#  --------------------------------------------------------------------
+#  (i) LO STOP: r.379 (long) e r.387 (short), sl = entry -/+ atr *
+#      InpAtrSLmult. E' il meccanismo sotto misura.
+#  (ii) *** I TRE TARGET, per via dello stop: e' la trappola di questo
+#      EA, scritta per esteso in R216b punto 4. *** dist entra in
+#      InpTPfinal_R (r.353/r.365) e risk entra in InpTP1_R (r.413) e
+#      InpTP2_R (r.439). Allargando lo stop si allargano TUTTI I TARGET
+#      in proporzione: l'asse muove la GEOMETRIA dell'operazione, non
+#      solo lo stop. *** Quindi n DEVE cambiare fra le celle, e "n
+#      identico" qui NON e' un cancello di sanita': sarebbe un sospetto.
+#      *** (Prova che morde, in casa: su XAUUSD il numero di uscite
+#      cambia col modo di stop, 353/365/372 a H1.)
+#  (iii) IL RIPIEGO r.408, "if(risk<=0) risk = ATR*InpAtrSLmult": legge
+#      lo stesso input, e su questo asse si muove insieme. Non e' un
+#      buco (e' lo stesso parametro), ma va nominato.
+#  (iv) IL TRAILING NO: r.464-465, e' ancorato al PREZZO
+#      (bid - ATR*InpTrailAtrMult), non allo stop. InpTrailAtrMult resta
+#      pinnato a 2,0.
+#  >>> E il LOTTO si', come sempre a rischio fisso: stop x2 = lotto /2.
+#      Quindi fra le celle si leggono solo PF e (con la riserva del
+#      punto 5) RF, mai Profit ed Equity DD % in valore assoluto.
+#
+#  5. L'ATTESA, DICHIARATA PRIMA DEI NUMERI -- E DICHIARATA BASSA
+#  --------------------------------------------------------------------
+#  (A) CAMPIONE: identico a R216b. n atteso ~79 sull'intera finestra,
+#      cioe' ~32 (IS) e ~47 (OOS), e MENO per il fix v1.11.
+#      *** MOLTO SOTTO 150 su tutte e due le gambe: il MERITO e'
+#      SOSPESO, il RISCHIO no. Nessuna cella si promuove da qui. ***
+#      E su questo asse il campione cala ancora, in modo prevedibile:
+#      uno stop piu' largo e target piu' lontani fanno durare di piu'
+#      ogni operazione, e il flat delle 17:30 ne chiude di piu' a mano.
+#
+#  (B) LA FORMA, che e' quello che questo round cerca davvero: *** PF e
+#      RF MONOTONI CRESCENTI con il moltiplicatore. *** Se il pedaggio
+#      e' la causa della morte del CAC, allargando lo stop il costo per
+#      operazione scende in modo monotono (costo_R = spread/stop) e il
+#      PF deve salire in modo monotono. Se il PF salta su e giu', il
+#      pedaggio NON era la causa e il candidato si chiude.
+#      >>> E SI SCEGLIE IL CENTRO DELL'ALTOPIANO, MAI IL PICCO. Con
+#          quattro celle un "altopiano" e' due celle adiacenti che
+#          stanno insieme sopra la soglia. Una cella sola che sporge fra
+#          due celle basse e' RUMORE, e si scrive "non c'e' una
+#          configurazione robusta".
+#
+#  (C) LE SOGLIE, in numeri:
+#      - si dichiara INTERESSANTE una cella con PF OOS >= 1,10 che abbia
+#        ALMENO UNA VICINA sull'asse sopra 1,05;
+#      - *** si dichiara CHIUSO il candidato CAC se nessuna delle SEI
+#        configurazioni di R216b + R216c supera PF 1,05 ***, e la riga
+#        va in REGISTRO_TEST.md con PF, n, DD e il cancello. A quel
+#        punto il punto 3 del certificato di morte (gestione dell'uscita
+#        messa ad asse) e' finalmente COMPILATO, ed e' l'unica cosa che
+#        oggi impedisce di scrivere "morto";
+#      - RISCHIO, a qualunque n: Equity DD % OOS <= 5,0 a deposito
+#        10000 e rischio 1%. L'archivio sta a 10,12: *** gia' due volte
+#        fuori dal muro FTMO alla taglia vera. ***
+#
+#  6. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  LA SPIEGAZIONE ALTERNATIVA HA UN NUMERO, ed e' il numero del dossier:
+#  passare da x1,5 a x2,5 vale *** +0,037 di PF *** per SOLO effetto del
+#  pedaggio, cioe' porta 0,99852 a *** 1,035 ***. (Stima trasferita dal
+#  rapporto stop/spread del DAX: su F40EUR lo spread e' [NON MISURATO].)
+#  >>> Quindi una cella che esce a PF 1,02-1,04 *** non e' una scoperta:
+#      e' esattamente il regalo aritmetico dello stop piu' largo, e non
+#      dice niente sul motore. *** Solo sopra 1,05 il numero eccede la
+#      spiegazione alternativa. E' per questo che la soglia di chiusura
+#      e' 1,05 e non 1,00.
+#  >>> IL SECONDO CONTRO-ESEMPIO, ED E' QUELLO CHE HO COSTRUITO IO AL
+#      PUNTO 2: la salita monotona del DAX vive solo sulle celle
+#      filtrate a n=34-41; a campione pieno la stessa scala fa
+#      0,522 -> 0,254 -> 0,725, cioe' NON sale. *** Se qui non sale, la
+#      spiegazione piu' semplice non e' "il CAC e' diverso dal DAX": e'
+#      "la salita del DAX era un effetto del campione sottile". ***
+#      Va scritto cosi' nel referto, non al contrario.
+#  >>> IL TERZO: il RF non si usa come RAPPORTO. Il RF dell'ancora vale
+#      -0,00540, un numero indistinguibile da zero, e un rapporto
+#      costruito su quel denominatore e' la classe 560. Qui il RF si
+#      legge per SEGNO e ORDINE DI GRANDEZZA; il discriminante e' il PF.
+#  >>> IL QUARTO, sulla taglia: se l'unico effetto dello stop largo
+#      fosse il lotto piu' piccolo, Profit e DD scenderebbero dello
+#      STESSO fattore. Si controlla PRIMA di leggere il PF:
+#      |Profit(x3,0)|/|Profit(x1,5)| contro DD(x3,0)/DD(x1,5). Se
+#      coincidono entro il 10%, il round ha misurato la taglia -- e la
+#      taglia si cambia con InpRiskPercent, gratis e senza round.
+#
+#  7. IL CANCELLO G1 (determinismo), GRATIS
+#  --------------------------------------------------------------------
+#  La cella InpAtrSLmult=1.5 di questo file e la cella InpSLMode=1 di
+#  R216b sono *** LA STESSA IDENTICA CONFIGURAZIONE ***: stesso simbolo,
+#  TF, finestra, deposito e tutti gli altri pin uguali. Devono uscire
+#  IDENTICHE AL CENTESIMO su PF, RF, DD e n. Se non lo sono, il banco
+#  non e' deterministico e *** nessuno dei due round si legge. ***
+#  E' l'unico controllo di regressione che questo candidato puo' avere,
+#  visto che l'ancora storica non e' riproducibile (R216b punto 2).
+#
+#  8. QUELLO CHE QUESTO ROUND NON FA, dichiarato
+#  --------------------------------------------------------------------
+#  - NON misura il MODO di stop: e' R216b.
+#  - NON accende il filtro di correlazione (InpUseCorrelation=0, come
+#    l'archivio F40EUR), *** pur essendo il filtro acceso la condizione
+#    in cui sul DAX la scala monotona esiste ***. E' un asse suo e va
+#    misurato a parte, non appiccicato qui.
+#  - NON tocca E50EUR (Stoxx) e 100GBP (FTSE), gli altri due morti
+#    notturni con lo stesso identico buco (216 passate a x1,5). Il
+#    dossier li mette sotto col numero: il pedaggio vale +0,032 e +0,028
+#    di PF contro un divario di 0,26 e 0,43.
+#  - NON misura l'ampiezza del box notturno del CAC, quindi lo stop in
+#    punti e il rapporto stop/spread restano [NON CALCOLABILI] anche
+#    dopo il round. Lo strumento esiste (mql5/Scripts/ABTG_Notte_Study.mq5)
+#    ed e' stato girato solo su XAUUSD.
+#  - NON cambia TF ne' InpMgmtTF (resta 15, come in archivio).
+#  - NON e' una prova di regime: finestra contigua, un solo regime.
+#  - NON promuove niente: n sotto 150 su tutte e due le gambe.
+#  - Il .ex5 sul banco corrisponde al .mq5 a HEAD: [NON MISURATO], e su
+#    questo EA la domanda MORDE (v1.10 contro v1.11: R216b punto 2b).
+#
+#  9. FINESTRA, TETTO DELLE BARRE, MAGIC
+#  --------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26: pavimento dei tick reali BCM sugli indici,
+#  misurato su D30EUR/U30USD/NASUSD e usato come ripiego conservativo
+#  perche' su F40EUR e' [NON MISURATO] (classe 590; la sonda che lo
+#  chiude e' il Diario del tester e costa ZERO passate).
+#  @FINOA 2026.06.30 . @FRAZIONEIS 0.40 -> IS 257 giorni solari (183
+#  feriali), OOS 386 (276).
+#  TETTO DELLE ~100.000 BARRE: F40EUR M15 con ~14 ore di quotazione fa
+#  ~56 barre per giorno feriale -> IS ~10.200, OOS ~15.500 barre. Tutte
+#  e due larghissimamente sotto. (Le ore di quotazione sono una STIMA:
+#  il calendario del simbolo non e' misurato in casa.)
+#  MAGIC 786603: cercato col grep su tutto il repo, ZERO occorrenze
+#  fuori da questo file.
+#  PIN FUORI DAL DEFAULT COMPILATO, tutti per nome: InpBufferPoints
+#  1000 -> 500 e InpAllowShort 1 -> 0 (sono la cella migliore
+#  d'archivio), InpRiskPercent 2.0 -> 1.0 (il rischio e' il DIAL DI
+#  MISURA; la taglia in campo la firma Claudio). Tutto il resto e' il
+#  default compilato E il valore letto nel CSV: coincidono.
+#  NON PINNATI, e va detto: InpNewsCurrencies (il default e' la stringa
+#  VUOTA, e un pin vuoto MT5 lo ignora -- innocuo, con
+#  InpUseNewsFilter=0 nessun input di news viene letto) e
+#  InpVerbose/InpAutoTest (toccano solo le Print in OnInit).
+# ---------------------------------------------------------------------
+
+@SIMBOLO    F40EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=1||1||0||1||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=500||500||0||500||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=1||1||0||1||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpComment=R216C ATRSLMULT
+InpMagic=786603||786603||0||786603||N
+InpMaxSpread=0||0||0||0||N
+InpAtrSLmult=1.5||1.5||0.5||3.0||Y

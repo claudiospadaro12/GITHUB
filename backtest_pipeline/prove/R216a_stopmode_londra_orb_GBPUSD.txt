@@ -1,0 +1,410 @@
+# =====================================================================
+#  R216a -- LO STOP DI LONDRA: il CENTRO del canale (MIDPOINT, quello
+#           che e' compilato di default) contro l'ESTREMO OPPOSTO
+#           (OPPOSITE, mai misurato in tutta la storia del repo).
+#  EA: ABTG_Londra_ORB   (GBPUSD M5)   candidato ARCHIVIATO, mai girato.
+#
+#  GIRA SUL PC DI BACKTEST (DESKTOP-H4D7CAJ), NON SUL VPS: finche' la
+#  challenge opera il tester non tocca la macchina delle sedie (firma di
+#  Claudio del 21/09).
+#     -Deposito 10000 -Modello 4
+#
+#  Scritto il 23/09/2026. Attesa e soglie CONGELATE PRIMA DEI NUMERI.
+#  Dossier che lo propone: report/I_MORTI_E_IL_PEDAGGIO_2026-09-23.md
+#  (classifica dei riapribili, posto #1).
+# =====================================================================
+#
+#  1. IL ROUND IN UNA RIGA
+#  --------------------------------------------------------------------
+#  Due modi di stop, ALL'ORA GIUSTA, su un motore che non ha nemmeno un
+#  CSV in archivio. Non e' una ri-misura: e' la PRIMA misura.
+#
+#  2. L'ORA ERA SBAGLIATA -- E L'HO VERIFICATA IO, IN TRE POSTI
+#  --------------------------------------------------------------------
+#  (a) SORGENTE, r.36-38 e r.44: InpRangeStartHour=6, InpRangeEndHour=7,
+#      InpPlaceHour=7, col commento "BCM: 7 = 08:00 CET".
+#  (b) PRESET mql5/Presets/ABTG_Londra_ORB_GBPUSD.set, r.2-3 (commento):
+#      "Range = ora prima dell'apertura Londra: 07:00-08:00 CET =
+#       06:00-07:00 SERVER ... Ordini OCO piazzati alle 08:00 CET".
+#  (c) INI backtest_pipeline/ini/ABTG_Londra_ORB.ini: NON pinna nessuna
+#      ora, quindi prendeva i default compilati, cioe' 06-07.
+#
+#  >>> TUTTI E TRE FANNO LO STESSO ERRORE, ed e' un errore di FUSO, non
+#      di strategia: trattano le 08:00 CET come l'apertura di Londra.
+#      Londra apre alle 08:00 ORA DI LONDRA, che sono le 09:00 CET.
+#  >>> IL NUMERO E' MISURATO IN CASA, non ragionato:
+#      risultati_archivio/allinealondra/REFERTO_PASSO0_2026-09-03_1651.txt
+#      r.240-243, testuale: "l'orologio del server BCM segna la STESSA
+#      ora di Londra tutto l'anno. Quindi 03:00-08:45 SERVER sono
+#      03:00-08:45 DI LONDRA, e Londra apre alle 08:00".
+#      Coerente con l'ancora di CLAUDE.md (DAX 09:00 IT = 08:00 server):
+#      Francoforte e Londra aprono tutte e due alle 08:00 server.
+#  >>> QUINDI l'ora del canale corretta e' 07:00-08:00 SERVER e gli
+#      ordini si piazzano alle 08:00 SERVER. Il motore girava UN'ORA
+#      PRIMA dell'apertura che dice di cavalcare.
+#
+#  2-bis. PERCHE' SPOSTO ANCHE IL CUTOFF, e non e' una liberta' in piu'
+#  --------------------------------------------------------------------
+#  Nei default compilati il cutoff (r.46, 11:00) e la scadenza del
+#  pendente (r.52, InpPendingExpiryMin=240 a partire dal piazzamento
+#  delle 07:00) cadono ESATTAMENTE NELLO STESSO MINUTO: 11:00. Non e'
+#  un caso, e' la geometria del documento (quattro ore di finestra, poi
+#  niente rincorsa). Se sposto il piazzamento a 08:00 e lascio il cutoff
+#  a 11:00, la finestra diventa di TRE ore e il cutoff morde prima della
+#  scadenza: cambierei DUE cose invece di una. Portando il cutoff a
+#  12:00 l'identita' cutoff == scadenza si conserva e l'unica cosa
+#  spostata resta l'OROLOGIO.
+#  >>> E' un PIN, non un asse: vale uguale per tutte e due le celle,
+#      quindi NON confonde la misura. Quello che NON posso fare e'
+#      attribuire alla nuova ora un merito: vedi il punto 9.
+#
+#  3. IL PRECEDENTE CHE AVREBBE ARCHIVIATO QUESTO MOTORE NON REGGE
+#  --------------------------------------------------------------------
+#  L'argomento contrario e' "R45 ha gia' misurato Londra a tick reali:
+#  0 celle positive su 48, e su GBPUSD il migliore fa PF 0,61".
+#  LETTO NEL FILE, non a memoria -- prove/R45c_londra_GBPUSD.txt:
+#    - e' un ALTRO EA: "ROUND 45c: ABTG_ORB_Ottimizzato";
+#    - r.20-22: InpRangeStartHour=7, InpRangeEndHour=7, InpRangeEndMin
+#      ad asse 15/30, InpEndHour=12.
+#  >>> Cioe' R45c misura un canale di 15-30 minuti che PARTE alle 07:00
+#      server e ordini piazzati alle 07:15/07:30: TUTTO PRIMA delle
+#      08:00. R45 falsifica "ORB un'ora prima di Londra", che e'
+#      esattamente cio' che falsifica anche il default di questo EA.
+#      DUE MISURE CHE SBAGLIANO LA STESSA ORA NON SI CONFERMANO A
+#      VICENDA.
+#  >>> E VA DETTO ANCHE IL CONTRARIO, o e' un alibi: R45 resta una
+#      prova PESANTE che il breakout su cable e' difficile. Questo
+#      round non la cancella; cambia solo l'ora, che e' l'unica cosa
+#      che nessuno aveva ancora provato.
+#
+#  4. L'ANCORA DI REGRESSIONE: *** NON ESISTE, E QUESTO E' IL PUNTO ***
+#  --------------------------------------------------------------------
+#  Cercato col grep su tutto il repo: di ABTG_Londra_ORB esistono il
+#  sorgente, una copia piu' vecchia in mql5/Experts/standalone/, un
+#  .set e un .ini. *** ZERO CSV. *** Nessuna colonna InpHalveOnOpposite
+#  in nessun CSV dell'archivio.
+#  >>> L'.ini che esiste (ini/ABTG_Londra_ORB.ini) racconta un lancio
+#      PREPARATO e mai arrivato a referto: Model=1 (OHLC, non tick),
+#      FromDate 2024.01.01, quattro assi (InpBufferPips 1-8,
+#      InpTPRangeMult 0.5-2.0, InpAllowLong, InpAllowShort) = 224
+#      passate, e *** InpSLMode NON COMPARE ***: avrebbe girato tutte e
+#      224 le passate col MIDPOINT compilato.
+#  >>> CONSEGUENZA, DICHIARATA: questo file NON PUO' AVERE UN'ANCORA
+#      NUMERICA. Non c'e' niente da riprodurre. Le due verifiche di
+#      sanita' che lo sostituiscono sono al punto 8 (il tetto di n) e al
+#      punto 9 (il rilevatore di taglia), e sono tutte e due
+#      FALSIFICABILI dal CSV di questo stesso round.
+#  >>> E il .ex5 sul banco corrisponde al .mq5 a HEAD? [NON MISURATO].
+#      Il round compila mql5/Experts/ABTG_Londra_ORB.mq5 (490 righe, con
+#      InpComment), NON la copia standalone/ che e' piu' vecchia (diff
+#      verificato: le manca InpComment e ha il breakeven vecchio).
+#
+#  5. CLASSE 594 -- CHI ALTRO DIPENDE DA InpSLMode? UNO SOLO, E VA
+#     SPENTO. Verificato NEL SORGENTE, non nella riga che me lo dice.
+#  --------------------------------------------------------------------
+#  Le quattro occorrenze di InpHalveOnOpposite in tutto il file:
+#    r.61   input bool InpHalveOnOpposite = true;   <-- DEFAULT TRUE
+#    r.208  bool halve=(InpSLMode==LDN_SL_OPPOSITE && InpHalveOnOpposite);
+#    r.219  double lot=LotByRisk(dist); if(halve) lot=NormVol(lot*0.5);
+#    r.234  (speculare sullo short)
+#  >>> Cioe': cambiando l'asse da MIDPOINT a OPPOSITE si accenderebbe DA
+#      SOLO un SECONDO meccanismo (size dimezzata), che nella cella
+#      MIDPOINT e' spento per costruzione. *** PINNATO A 0. ***
+#  >>> E il conto di cosa costerebbe lasciarlo a 1, perche' e' la
+#      trappola piu' elegante di questo EA: dimezzando il lotto su OGNI
+#      operazione l'equity si scala di 0,5 esatto, quindi Profit e
+#      Equity DD % si dimezzano TUTTI E DUE e il Recovery Factor resta
+#      IDENTICO. Il CSV mostrerebbe "DD dimezzato" e chi legge direbbe
+#      "stop piu' prudente": sarebbe invece aritmetica pura, la stessa
+#      che si ottiene scrivendo InpRiskPercent=0.5, gratis e senza
+#      round. (Esatto a meno della quantizzazione del lotto: NormVol
+#      arrotonda al passo 0.01 verso il basso.)
+#  >>> COROLLARIO CHE RISPARMIA UN ROUND: la "variante prudente" del
+#      documento (OPPOSITE + size dimezzata) NON ha bisogno di essere
+#      misurata separatamente. E' la cella OPPOSITE di questo round con
+#      tutte le grandezze in valuta moltiplicate per 0,5 e RF invariato:
+#      informazione nuova prodotta = ZERO.
+#  >>> E GLI ALTRI CONSUMATORI DELLO STOP, cercati uno per uno:
+#      - IL TARGET: NON dipende dallo stop. r.215 e r.230:
+#        tp = buyPx + width*InpTPRangeMult, con width = gHigh-gLow.
+#        E' funzione del CANALE, non di dist. *** Questo e' cio' che
+#        rende l'asse ISOLATO *** e la differenza piu' importante da
+#        ABTG_MaxMinNotte, dove invece il target e' figlio dello stop
+#        (vedi R216b/R216c).
+#      - LA GESTIONE (parziale, breakeven, trailing): r.251,
+#        "if(!InpUsePartial && !InpUseTrailing) return;". Tutti e due
+#        sono PINNATI a 0 (e sono i default), quindi ManagePos esce
+#        alla prima riga e nessun trailing tocca lo stop. Niente terzo
+#        consumatore.
+#      - IL LOTTO: SI', e non e' un difetto, e' il meccanismo sotto
+#        misura. LotByRisk(dist), r.219/r.234: a rischio fisso uno stop
+#        piu' largo da' un lotto piu' piccolo. Conseguenza operativa al
+#        punto 9: fra le due celle si leggono solo le grandezze
+#        INVARIANTI ALLA TAGLIA (PF e RF), mai Profit ed Equity DD %.
+#
+#  6. *** IL FATTORE NON E' 2, ED E' UN ERRORE CHE AVREI EREDITATO ***
+#  --------------------------------------------------------------------
+#  Il dossier scrive che OPPOSITE e' "ESATTAMENTE IL DOPPIO" di
+#  MIDPOINT. Con la formula vera non lo e', per colpa del BUFFER, che
+#  e' un termine ADDITIVO e non moltiplicativo. Letto nel sorgente
+#  (r.202-215, lato long; lo short e' speculare):
+#      entry = gHigh + buf         buf = InpBufferPips * pip = 3,0 pip
+#      MIDPOINT: sl = (gHigh+gLow)/2   ->  dist = W/2 + 3
+#      OPPOSITE: sl = gLow             ->  dist = W  + 3
+#  con W = ampiezza del canale in pip. Il fattore vero e'
+#  (W+3)/(W/2+3), che vale:
+#      W = 8 pip  -> 1,57      W = 20 pip -> 1,77
+#      W = 10 pip -> 1,62      W = 25 pip -> 1,81
+#      W = 15 pip -> 1,71      W = 30 pip -> 1,83
+#  *** Non arriva a 2 per nessun canale realistico. *** Conta perche'
+#  tutte le soglie di costo del punto 7 si spostano del 10-25%.
+#
+#  7. IL CANCELLO DI COSTO -- soglie CALCOLATE, rapporto NON LEGGIBILE
+#     DA QUESTO ROUND, e lo dico prima
+#  --------------------------------------------------------------------
+#  Spread GBPUSD MISURATO (logger vivo, 5 giornate 04-11/09/2026, ~3.600
+#  campioni/ora): data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv
+#      ora server 07 -> mediana 0,300 pip   p95 0,700   max 0,700
+#      ora server 08 -> mediana 0,300 pip   p95 0,700   max 1,000
+#  Frontiera di lavoro stop >= 40 x spread  ->  12,0 pip alla mediana
+#                                               28,0 pip al p95
+#  Pavimento duro    stop >= 13,3 x spread  ->   4,0 pip alla mediana
+#  Tradotto in ampiezza del canale (con buf = 3 pip):
+#      MIDPOINT passa il 40x se  W >= 18,0 pip  (al p95: W >= 50,0)
+#      OPPOSITE passa il 40x se  W >=  9,0 pip  (al p95: W >= 25,0)
+#      MIDPOINT passa il pavimento duro se W >= 2,0 pip (sempre)
+#  >>> *** E ADESSO LA PARTE CHE NON SI PUO' FARE: W E' [NON MISURATO]
+#      E QUESTO ROUND NON LO MISURA. *** La colonna dello stop non
+#      esiste nel CSV di OptFrame: il blocco in coda al sorgente (r.476)
+#      scrive Pass, Profit, Expected Payoff, PF, RF, Sharpe, Equity DD %,
+#      Trades e gli input, e nient'altro. Quindi
+#      il rapporto stop/spread resta *** [NON CALCOLABILE] ***, che NON
+#      vuol dire "escluso per costo": e' una casella bianca.
+#  >>> LA VIA PIU' CORTA AL NUMERO, e costa ZERO passate di round: un
+#      backtest SINGOLO (non un'ottimizzazione) con InpVerbose=1 stampa
+#      per ogni giornata "range %.1f pip" (r.221 e r.236). La mediana di
+#      quelle righe E' W. E' una sonda, va proposta a parte, e finche'
+#      non c'e' NESSUNA cella di questo round si promuove.
+#  >>> Ripiego [NON GARANTITO]: le stesse righe finiscono nei log degli
+#      agent anche durante l'ottimizzazione. Se ci sono, W si legge
+#      gratis; se gli agent non conservano i log, si fa la sonda.
+#
+#  8. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  (A) FREQUENZA -- e' l'unica cosa che posso predire con un conto
+#      chiuso, quindi e' la prima. Il motore piazza UNA coppia OCO al
+#      giorno (gPhase LP_WAIT -> LP_PLACED, e TryPlace parte solo da
+#      LP_WAIT); HandleOCO cancella il gemello appena una posizione
+#      esiste. Quindi n <= GIORNI FERIALI della finestra:
+#          IS  (2024.07.05 -> 2025.04.20, 290 gg solari) -> 206 feriali
+#          OOS (2025.04.21 -> 2026.06.30, 436 gg solari) -> 312 feriali
+#      Attesa: tasso di innesco 50-75% delle giornate (il breakout
+#      dell'apertura di Londra su cable con soli 3 pip di buffer e una
+#      finestra di 4 ore e' facile da innescare), quindi
+#          n IS atteso  103 - 155      n OOS atteso  156 - 234
+#      *** SE n SUPERA 206 (IS) o 312 (OOS) IL MOTORE HA APERTO PIU' DI
+#      UNA VOLTA AL GIORNO e nessun altro numero di questo round si
+#      legge. *** (Via residua nota: su conto HEDGING i due pendenti
+#      opposti potrebbero riempirsi tutti e due dentro lo stesso tick di
+#      gap; HandleOCO gira all'inizio di OnTick e non farebbe in tempo.)
+#      Colonna Trades = POSIZIONI e non deal in uscita, perche'
+#      InpUsePartial=0 (classe 454: senza parziale non raddoppia).
+#
+#  (B) MERITO -- si legge SOLO se n OOS >= 150 (Emendamento della
+#      finestra, regola A). Con l'attesa sopra, l'OOS ci arriva se il
+#      tasso di innesco e' almeno il 48%: e' probabile, NON e'
+#      garantito, e se non ci arriva il merito resta SOSPESO.
+#      Si promuove una cella solo se TUTTE E QUATTRO:
+#        1. PF OOS >= 1,10
+#        2. Recovery Factor OOS >= 0,80
+#        3. n OOS >= 150
+#        4. il cancello di costo del punto 7 PASSATO con W misurato
+#           dalla sonda (>= 18,0 pip per MIDPOINT, >= 9,0 per OPPOSITE)
+#      *** Le soglie 1 e 2 sono quelle scritte nel dossier PRIMA che
+#      esistesse un numero. Non si abbassano dopo aver visto il CSV. ***
+#
+#  (C) RISCHIO -- si legge a QUALUNQUE n (Emendamento B, 16/08).
+#      Equity DD % OOS <= 5,0 a deposito 10000 e InpRiskPercent=1.
+#      Il perche' del 5,0 e non del 10,0: in campo si gira al 2,00% e il
+#      fattore di casa misurato e' 1,956-1,990, quindi 5,0 al banco e'
+#      gia' ~9,9 alla taglia vera, cioe' il muro FTMO. Una cella sopra
+#      5,0 NON e' schierabile, per quanto bello sia il PF.
+#
+#  (D) COSA CHIUDE IL CANDIDATO, scritto prima: se NESSUNA delle due
+#      celle arriva a PF OOS 1,10, il verdetto va in REGISTRO_TEST.md
+#      con PF, n, DD e il cancello, e il punto 3 del CERTIFICATO DI
+#      MORTE (gestione dell'uscita messa ad asse) risulta finalmente
+#      COMPILATO -- oggi e' vuoto, ed e' l'unico motivo per cui questo
+#      motore non poteva essere dichiarato morto.
+#
+#  9. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  LA SPIEGAZIONE ALTERNATIVA, con il suo numero: "la cella OPPOSITE
+#  esce con un DD piu' basso e sembra migliore, ma lo stop e' 1,57-1,87
+#  volte piu' largo, quindi il lotto e' 1,57-1,87 volte piu' piccolo e
+#  l'INTERA equity si scala. Non e' un motore piu' bravo: e' una
+#  posizione piu' piccola."
+#  >>> QUALE NUMERO PRODUCE, ESATTAMENTE: se il modo di stop non
+#      cambiasse NIENTE oltre alla taglia, allora
+#          Profit_OPP / Profit_MID  ~  DD_OPP / DD_MID  ~  0,53 - 0,64
+#          RF_OPP / RF_MID          =  1,00 (identico)
+#          PF_OPP / PF_MID          =  1,00 (identico)
+#      *** Quindi il test e' questo, e si fa PRIMA di leggere il PF:
+#      se il rapporto dei profitti e quello dei DD cadono tutti e due
+#      in [0,53; 0,64] e RF e PF sono uguali a meno dell'1%, questo
+#      round ha misurato la TAGLIA e nient'altro, e la risposta onesta
+#      e' "il default va bene, e lo stesso effetto si ottiene con
+#      InpRiskPercent". ***
+#      La banda [0,53; 0,64] non e' scelta: e' 1/1,87 e 1/1,57, cioe'
+#      il reciproco del fattore del punto 6 sui canali fra 8 e 30 pip.
+#  >>> E la banda NON e' vuota di alternative: se RF_OPP/RF_MID esce
+#      SOPRA 1,15 o SOTTO 0,85, l'aritmetica della taglia non basta a
+#      spiegarlo e il modo di stop ha cambiato QUALI operazioni
+#      vincono. Quello e' il segnale che il round cerca.
+#
+#  IL SECONDO CONTRO-ESEMPIO, ED E' QUELLO CHE R211a AVEVA CHIUSO E QUI
+#  RESTA APERTO: n IDENTICO FRA LE DUE CELLE.
+#  L'ingresso (prezzo del pendente) non dipende da InpSLMode, quindi n
+#  DOVREBBE uscire identico. Ma r.217 e r.232 dicono "if(dist>minStop)"
+#  con minStop = SYMBOL_TRADE_STOPS_LEVEL: *** se il broker impone una
+#  distanza minima, la cella MIDPOINT (stop stretto) puo' vedersi
+#  RIFIUTARE le giornate a canale sottile, e la cella OPPOSITE no. ***
+#  Allora n_MIDPOINT < n_OPPOSITE e le due celle NON girano piu' sulle
+#  stesse giornate: il confronto diventa un confronto fra due insiemi
+#  di giorni diversi.
+#  >>> Su ABTG_ORB_Ottimizzato questa via era chiusa EMPIRICAMENTE
+#      (r88a: n=71/119 su tutti e quattro i modi). *** Qui non c'e'
+#      nessun CSV, quindi NON E' CHIUSA: e' una verifica che questo
+#      round deve fare su se stesso. *** Se n differisce fra le due
+#      celle, si dichiara la differenza e il confronto di merito NON si
+#      fa, perche' misurerebbe anche la selezione delle giornate.
+#      Il valore di SYMBOL_TRADE_STOPS_LEVEL su GBPUSD al broker BCM e'
+#      [NON MISURATO].
+#
+#  10. QUELLO CHE QUESTO ROUND NON FA, dichiarato
+#  --------------------------------------------------------------------
+#  - *** NON dice che le 08:00 sono meglio delle 07:00. *** Non esiste
+#    un CSV a 07:00 di questo EA con cui confrontarsi, e l'ora e' un
+#    PIN uguale per tutte e due le celle. Il confronto fra le due ore e'
+#    un round SUO (un asse su InpPlaceHour/InpRangeStart/EndHour), e
+#    finche' non si fa, "l'ora giusta" resta una CORREZIONE, non un
+#    merito misurato.
+#  - NON separa il LATO LONG dal LATO SHORT. Il motore e' OCO per
+#    costruzione (due pendenti, uno cancella l'altro): spegnere un lato
+#    cambia la strategia, non il parametro. I due lati girano tutti e
+#    due (regola dei due lati, 25/08) ma il CSV li somma. La
+#    separazione e' un altro round.
+#  - NON mette ad asse il BUFFER (3,0 pip), il TP (InpTPRangeMult=1,0),
+#    la parziale, il trailing, il filtro di ampiezza del canale
+#    (InpMinRangePips/InpMaxRangePips, tutti e due a 0 = spenti).
+#  - NON misura W (l'ampiezza del canale): vedi punto 7. Senza W il
+#    cancello di costo resta [NON CALCOLABILE].
+#  - NON cambia TF: M5, che e' il TF del .ini esistente. Il TF non e'
+#    la geometria di questo motore (il canale si legge su PERIOD_M1
+#    CABLATO, r.174-180: iBarShift/iHighest/iLowest su PERIOD_M1), quindi
+#    @PERIODO qui cambia solo il passo del tester.
+#  - NON e' una prova di regime: finestra contigua, un solo regime.
+#  - NON risponde sulla frequenza di FAMIGLIA: anche al tasso di innesco
+#    piu' alto sono ~0,50 operazioni per giorno feriale, contro un
+#    pavimento di 1,00 PER FAMIGLIA (firma 07/09). Da solo non basta.
+#  - Il .ex5 sul banco corrisponde al .mq5 a HEAD: [NON MISURATO].
+#
+#  11. FINESTRA, DEPOSITO, TETTO DELLE BARRE, MAGIC
+#  --------------------------------------------------------------------
+#  @DAQUANDO 2024.07.05 e' MISURATO, non scelto (classe 590): e' il
+#  pavimento dei tick reali BCM sul forex, letto dal Diario del tester
+#  ("GBPUSD: ticks data begins from 2024.07.05") e riportato in
+#  report/DIAGNOSI_GBPUSD_LENTA_2026-09-02.md F4. Prima di quella data
+#  i tick sono GENERATI dalle M1, e su un breakout sarebbero una bugia.
+#  *** Questo e' anche il motivo per cui NON uso la finestra del .ini
+#  esistente (FromDate 2024.01.01): quei sei mesi in piu' sono tick
+#  finti. ***
+#  @FINOA 2026.06.30 e' la data di fine di casa (67 file prova in
+#  archivio la dichiarano): finestra identica per tutti i round.
+#  @FRAZIONEIS 0.40 -> IS 290 gg solari / OOS 436.
+#  TETTO DELLE ~100.000 BARRE: GBPUSD M5 fa 288 barre per giorno
+#  feriale, quindi IS ~59.300 barre e OOS ~89.900: tutte e due SOTTO.
+#  La finestra INTERA sarebbe ~149.200, cioe' SOPRA: non si gira mai
+#  intera, e il walk-forward la spezza da solo.
+#  DEPOSITO 10000 e InpRiskPercent=1.0: e' il dial di MISURA, non la
+#  taglia in campo. Verificato che il PAVIMENTO DEL LOTTO non morde: con
+#  stop 12 pip e rischio 100 EUR il lotto vale ~0,83, cioe' 83 volte il
+#  minimo di 0,01. (Su un canale di 40 pip -> stop 43 pip -> lotto
+#  ~0,23, sempre 23 volte il minimo.) Quindi MathMax(volume_min, ...)
+#  dentro LotByRisk (r.364) NON puo' alzare di nascosto il rischio
+#  effettivo, che era la trappola di R211a a deposito basso.
+#  MAGIC 786601: cercato col grep su tutto il repo, ZERO occorrenze
+#  fuori da questo file.
+#
+#  12. I PIN CHE DIFFERISCONO DAL DEFAULT COMPILATO -- tutti, per nome
+#  --------------------------------------------------------------------
+#    InpRangeStartHour   6 -> 7     ora corretta (punto 2)
+#    InpRangeEndHour     7 -> 8     ora corretta (punto 2)
+#    InpPlaceHour        7 -> 8     ora corretta (punto 2)
+#    InpEntryCutoffHour 11 -> 12    conserva cutoff == scadenza (2-bis)
+#    InpHalveOnOpposite  1 -> 0     OBBLIGATORIO, classe 594 (punto 5)
+#  Tutti gli altri pin sono IL DEFAULT COMPILATO, riscritto qui per
+#  renderlo esplicito. NESSUN input dell'EA resta fuori dai pin tranne
+#  InpVerbose (default true, tocca solo le Print) e InpComment, che non
+#  entrano in nessuna decisione di trading.
+#
+#  13. UNA MANOPOLA INERTE TROVATA QUI DENTRO, e va scritta
+#  --------------------------------------------------------------------
+#  *** InpOneTradePerDay (r.51) e' DICHIARATO E MAI LETTO: e' l'unica
+#  occorrenza in tutte le 490 righe del file. *** Lo pinno a 1 perche'
+#  e' il default e perche' il CSV lo stampera' -- ma chi legge il CSV
+#  deve sapere che quella colonna NON governa niente.
+#  >>> Ed e' INNOCUO, verificato e non sperato: "un solo ciclo al
+#      giorno" e' gia' imposto dalla macchina a stati (TryPlace parte
+#      solo da LP_WAIT, che si resetta al cambio di giornata; HandleOCO
+#      cancella il pendente gemello). E' lo stesso difetto che su
+#      ABTG_MaxMinNotte e' stato trovato il 03/09 e riparato nella
+#      v1.11 -- li' pero' NON era innocuo.
+# ---------------------------------------------------------------------
+
+@SIMBOLO    GBPUSD
+@PERIODO    M5
+@DAQUANDO   2024.07.05
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpRangeStartHour=7||7||0||7||N
+InpRangeStartMin=0||0||0||0||N
+InpRangeEndHour=8||8||0||8||N
+InpRangeEndMin=0||0||0||0||N
+InpMinRangePips=0||0||0||0||N
+InpMaxRangePips=0||0||0||0||N
+InpPlaceHour=8||8||0||8||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=12||12||0||12||N
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=240||240||0||240||N
+InpBufferPips=3.0||3.0||0||3.0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpHalveOnOpposite=0||0||0||0||N
+InpTPRangeMult=1.0||1.0||0||1.0||N
+InpUsePartial=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=0||0||0||0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=60||60||0||60||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=GBP,USD
+InpComment=R216A LONDRA STOP
+InpMagic=786601||786601||0||786601||N
+InpMaxSpread=0||0||0||0||N
+InpSLMode=0||0||1||1||Y

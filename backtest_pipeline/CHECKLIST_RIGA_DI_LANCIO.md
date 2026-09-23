@@ -31088,3 +31088,111 @@ stampata**. La 84/85 dice *cosa fare quando si legge un elenco altrui*; la **609
 > pagelle serali, i censimenti di flotta, ogni `CUMULATO` di MQL5). E **peggiora sulle righe
 > speciali**: qui la sedia che non quadra e' proprio **l'unica con un percorso di calcolo
 > diverso dalle altre 24** -- cioe' esattamente quella che nessuna media avrebbe segnalato.
+
+---
+
+## CLASSE 610 -- ✖️➕ IL FATTORE DICHIARATO **«ESATTAMENTE IL DOPPIO»** QUANDO LA FORMULA HA UN **TERMINE ADDITIVO**: il moltiplicatore vero e' **1,57-1,87**, e la soglia di costo che ne discende sbaglia del 30-50% (23/09/2026, su `ABTG_Londra_ORB` -- cugina della 560, *il rapporto consegnato come un fattore*)
+
+**Il numero, misurato e non dedotto** (`grep -oE '^#+ *CLASSE +[0-9]+' backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md | grep -oE '[0-9]+' | sort -n | tail -3` eseguito **nel momento in cui questa riga viene scritta**: le ultime erano **607 / 608 / 609**, e `CLASSE 610` non compariva da nessuna parte nel repo).
+
+### Il caso reale
+Il dossier `report/I_MORTI_E_IL_PEDAGGIO_2026-09-23.md` (riga 27 e riga 133 della tabella
+madre) propone di mettere ad asse `InpSLMode` di `ABTG_Londra_ORB` e scrive, in grassetto:
+
+> *«`LDN_SL_OPPOSITE=1` = canale INTERO, **ESATTAMENTE IL DOPPIO**»*
+
+🔴 **Nel sorgente non lo e'**, e la ragione e' una riga sola. `ABTG_Londra_ORB.mq5` r.202-215:
+l'ingresso e' `buyPx = gHigh + buf` con `buf = InpBufferPips * pip` (3,0 pip di default),
+mentre lo stop e' `mid` oppure `gLow`. Quindi, con `W` = ampiezza del canale:
+
+| modo | distanza di stop | |
+|---|---|---|
+| `MIDPOINT` | `W/2 + 3` | |
+| `OPPOSITE` | `W + 3` | |
+| **fattore vero** | `(W+3) / (W/2+3)` | **1,57** a W=8 · **1,71** a W=15 · **1,83** a W=30 |
+
+**Il buffer e' additivo e NON si raddoppia**: il fattore tende a 2 solo per `W` che tende a
+infinito, e su un canale realistico (8-30 pip su cable) sta fra **1,57 e 1,87**.
+
+### ☠️ Quanto costa, in numeri
+Il fattore non e' cosmetico: e' il moltiplicatore con cui si traduce il **cancello di costo**
+(`stop >= 40 x spread`) in una soglia sul mercato. Con spread GBPUSD **0,30 pip mediano**
+(misurato, `data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv`, ore server 07-08) il 40x
+chiede **12,0 pip di stop**, e la soglia sul canale diventa:
+- con il fattore FINTO («il doppio»): *«se MIDPOINT non passa, OPPOSITE passa a meta' canale»*;
+- con il fattore VERO: **`MIDPOINT` passa se `W >= 18,0` pip · `OPPOSITE` passa se `W >= 9,0`**.
+👉 Sbagliare qui vuol dire **dichiarare "escluso per costo" un simbolo che non lo e'**, o il
+contrario -- e l'esclusione per costo e' uno dei pochi motivi di archiviazione che la casa
+accetta come definitivi (invariante alla scala, classe 608).
+
+### 🧪 Il contro-esempio, ed e' una divisione
+Prima di scrivere *«il doppio»*, *«la meta'»*, *«tre volte»* su una geometria letta in un
+sorgente: **si sostituiscono DUE valori concreti agli estremi della banda realistica e si
+divide**. Se il rapporto **cambia** fra i due (qui 1,57 contro 1,87), il fattore **non
+esiste**: esiste una FUNZIONE, e va scritta con la sua banda.
+🔎 Firma del difetto: la formula contiene una **somma** (buffer, offset, `SLBuffer()`,
+`InpSLBufferPts`, un `minStop`) fra due grandezze che si vogliono confrontare.
+
+### ✅ La regola
+**Un fattore fra due formule si calcola, non si legge dai nomi.** `OPPOSITE` sta al canale
+INTERO e `MIDPOINT` a META' canale: e' vero, ma **lo stop non e' il canale**, e' la distanza
+**dall'INGRESSO**, e l'ingresso e' fuori dal canale di un buffer.
+🔴 E dove il fattore serve a tradurre una soglia (costo, rischio, taglia), si scrive **la
+banda con i due estremi**, mai un numero solo.
+
+---
+
+## CLASSE 611 -- 📈🔬 LA SCALA MONOTONA CHE VIVE **SOLO SULLE CELLE FILTRATE** (n = un terzo), mentre le celle a **CAMPIONE PIENO** dello stesso CSV dicono il contrario -- e il referto cita solo la prima (23/09/2026, su `valid_MaxMin_DAX_short_refine.csv` -- figlia della 504, *la mediana citata senza dichiarare la base*)
+
+**Il numero, misurato e non dedotto**: al momento di scrivere questa riga le ultime classi
+erano **608 / 609 / 610**, e `CLASSE 611` non compariva da nessuna parte nel repo.
+
+### Il caso reale
+Il dossier del 23/09 giustifica il round sull'ampiezza dello stop notturno cosi':
+
+> *«sulle celle filtrate il **Recovery Factor sale monotono 0,71 -> 1,67 -> 3,34**, e 2,5 e' al
+> BORDO dell'asse»*
+
+✅ **Il numero e' giusto**: rifatto a mano su `valid_MaxMin_DAX_short_refine.csv` (36 righe),
+le medie sui tre buffer danno **0,713 / 1,667 / 3,334** per `InpAtrSLmult` 1,5 / 2,0 / 2,5.
+🔴 **Ma vive interamente sulle 12 righe con `InpUseCorrelation=1`, che hanno `n = 34-41`.**
+Le righe **a campione pieno** (`InpUseCorrelation=0`, `n = 96-107`) della **stessa griglia**,
+sullo **stesso asse**, danno:
+
+| `InpAtrSLmult` | RF medio, celle **filtrate** (n 34-41) | RF medio, celle **piene** (n 96-107) |
+|---|---:|---:|
+| 1,5 | 0,713 | 0,522 |
+| 2,0 | 1,667 | **0,254** |
+| 2,5 | **3,334** | 0,725 |
+
+👉 **Scende e poi risale: NON e' monotona.** Le due meta' dello stesso CSV si contraddicono, e
+la meta' con la tendenza forte e' anche quella con **un terzo dei dati**.
+
+### ☠️ Perche' costa
+La scala monotona era **l'unico argomento** per estendere l'asse fino a 3,0 e per riaprire tre
+candidati archiviati. Citata senza la base, diventa *«e' misurato che allargare lo stop
+migliora»* -- che su `n=38` e' una frase che il campione non sostiene. E' il difetto del 19/08
+(*la cella verde per caso*) travestito da gradiente: **un gradiente calcolato su un
+sottoinsieme non e' piu' robusto di una cella singola, e' solo scritto in fila.**
+
+### 🧪 Il contro-esempio, e costa tre righe di Python
+**Si rifa' la stessa media sull'ALTRA meta' del CSV** -- sulle celle dove il filtro e' spento,
+o su qualunque partizione che il round non stava guardando. Se la tendenza **si capovolge o
+sparisce**, la tendenza non e' dell'asse: e' del filtro.
+🔎 E si stampa **`n` accanto a ogni cella della scala**, sempre. Qui i due gruppi differivano
+di un fattore **2,6** nel numero di operazioni: era visibile a colpo d'occhio nella colonna
+`Trades`, e nessuno l'aveva guardata.
+
+### 🎁 E lo stesso CSV nascondeva una MANOPOLA INERTE, trovata con lo stesso sguardo
+`InpMinBoxPts` era ad asse su `0` e `1500`, ma le **36 righe danno solo 18 esiti distinti**:
+le coppie `0`/`1500` sono **identiche al centesimo** su PF, RF, DD e `n`, su tutte e 18 le
+combinazioni. Il box notturno del DAX e' sempre piu' largo di 15 punti indice, quindi quel
+filtro **non ha mai morso**: meta' di quel round e' stata spesa per non misurare niente.
+👉 E' il difetto che il censimento del 09/09 ha contato su **874 CSV su 1.960**: *«l'abbiamo
+gia' provato»* che voleva dire *«l'abbiamo girato senza che cambiasse niente»*.
+
+### ✅ La regola
+**Una scala, un gradiente o una monotonia si citano con la BASE su cui sono calcolati** -- `n`
+per cella e il sottoinsieme per nome -- **e con la stessa scala rifatta sul complemento.** Se
+le due non concordano, quello che si consegna e' *«la tendenza esiste SOLO a campione
+sottile»*, che e' un'altra frase e porta a un'altra decisione.
