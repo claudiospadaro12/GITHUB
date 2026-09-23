@@ -34316,3 +34316,99 @@ PARSA e non COMPILA: `return` fuori da una funzione non e' un errore di sintassi
 👉 Da qui in avanti un `.py` toccato si verifica con **`python3 -m py_compile`**, mai con
 `ast.parse`. (Il difetto e' stato trovato e buttato in due minuti perche' subito dopo ho fatto
 girare il cancello sul corpus: **la verifica vera e' sempre FARLO GIRARE**.)
+
+---
+
+# 🧱 SEI CLASSI DAL CANCELLO SU R238 (23/09/2026) — **numeri assegnati dal COORDINATORE** (classe 662)
+
+Tutte nate dallo stesso giro: il round che replica R236e/f a tick reali. L'agente le ha
+trovate e **non le ha numerate**, come vuole la 662. Verificato `grep -c` = 0 su 687-692 prima
+di scrivere. 🔴 **Il filo che le lega è uno solo: quattro su sei si vedevano SOLO aprendo il
+sorgente dell'EA**, e io avevo letto solo l'archivio.
+
+## 📉 CLASSE 687 — **il numero di un cancello di costo TRASFERITO da una sedia vicina, quando la geometria dello stop dipende da un parametro che le due NON condividono**
+
+Avevo dichiarato il cancello del costo **PRONUNCIATO E FALLITO** citando lo stop **27,10 idx**
+della sedia `970913`, perché l'archivio ne descrive la geometria come *"swing 5 barre H1 + 3
+pip"* — identica ai miei pin `InpSLLookback=5` / `InpSLBufferPips=3.0`.
+🔴 **Ma la descrizione d'archivio è PIÙ POVERA DEL CODICE.** `ABTG_SupertrendReversal.mq5`
+r.386-389:
+```
+double ext = isLong ? iLow(...iLowest(...InpSLLookback,1)) : iHigh(...iHighest(...InpSLLookback,1));
+double buf = InpSLBufferPips*pip;
+double sl  = isLong ? MathMin(stLine,ext)-buf : MathMax(stLine,ext)+buf;
+```
+Lo stop è **il PIÙ PROTETTIVO fra la linea Supertrend e l'estremo di swing**, e il buffer è
+**inerte** (3 pip = 0,03 idx). 👉 **Il termine che comanda è `stLine`, cioè `InpStMult` e
+`InpStAtrPeriod`** — che nella descrizione d'archivio **non compaiono**. E sono diversi:
+`970913` **(10 · 3,0)** · R238a **(7 · 3,5)** · R238b **(12 · 2,5)**. **Tre geometrie, non una.**
+**La regola**: prima di trasferire un numero di costo da una sedia all'altra, si apre il
+**sorgente** e si guarda **da quali parametri dipende davvero lo stop**. Se le due sedie non li
+condividono tutti, il trasferimento **non ha diritto di cittadinanza**. Una descrizione in
+archivio è un'etichetta, non una specifica.
+
+## 🔽 CLASSE 688 — **uno stop REALIZZATO usato come distanza d'ingresso su una sedia con breakeven e trailing accesi** — e l'archivio faceva già la correzione, due righe sotto
+
+Il 27,10 è uno stop **realizzato** su 5 gambe vere, e il preset di `970913` ha
+`InpBreakeven=true` **e** `InpTrailOnST=true`: pareggio e trailing possono solo **stringere**.
+👉 È un **LIMITE INFERIORE**, non la distanza ingresso→SL.
+🔴 **E la beffa**: la STESSA tabella d'archivio applica **esattamente questa correzione due
+righe sotto, per `770411`** (*"ma con breakeven e trailing accesi è un limite INFERIORE, non la
+distanza d'ingresso"*) — **e non l'ha applicata a `970913`**.
+**La regola**: il difetto qui non è l'ignoranza, è l'**APPLICAZIONE PARZIALE di una correzione
+già fatta**. Quando si legge una riga di una tabella, si guarda se le righe **vicine** portano
+una correzione che a questa manca. Una correzione applicata a metà è una trappola **firmata da
+noi**.
+📌 Corollario misurato: l'`n=5` di `970913` è per giunta un **pool dei DUE lati** (long e short
+entrambi accesi), e i due lati hanno Supertrend diversi: **non esiste un "27,10 del corto"**.
+
+## 🔫 CLASSE 689 — **la soglia di falsificazione onesta nella FORMA e SUICIDA nella SOSTANZA: scatta sul comportamento NORMALE del motore**
+
+Avevo congelato — **prima dei numeri, quindi formalmente ineccepibile** — *"se `|Δn|` supera il
+**20%** rispetto a R236e, ho misurato il banco e non il motore"*, sulla premessa *"gli ingressi
+nascono su barre chiuse, quindi OHLC→tick non li cambia molto"*.
+🔴 **La premessa è smentita dal codice.** r.313-320: `if(HasPosition()){ ... return; }` e
+`if(HasPending()){ cB_pendente++; return; }` → **UNA POSIZIONE ALLA VOLTA**. Le quattro
+meccaniche intrabarra che il file stesso elenca decidono **quando si libera lo slot**, e lo slot
+decide **quanti ingressi**. A tick reali `n` si muove — **e si muove legittimamente**.
+📏 E in assoluto: **il 20% di n=16 sono 3,2 operazioni.** Una soglia che uccide il round su
+quattro operazioni di scarto, quando la meccanica sopra le produce da sola.
+**La regola**: una soglia di falsificazione va verificata **contro il codice del motore**, non
+solo scritta prima. 🔴 *"L'ho scritta prima"* rende il cancello **onesto**, non **valido**.
+✅ Sostituita con l'invariante vero e **gratis** (`InpLogImbuto` è già pinnato): a **barra
+chiusa** devono restare identici `valutate` · `supertrend n/d` · `fuori orario`; **intrabarra**
+possono muoversi `occupata` · `pendente in attesa`, **ed è il risultato**.
+
+## 👯 CLASSE 690 — **il file gemello del lato opposto EREDITA i numeri di falsificazione del primo, e il cancello diventa inapplicabile in silenzio**
+
+`R238b` (il **LUNGO**) congelava la soglia sui numeri del **CORTO** (`OFF 25 IS / 42 OOS · ON 16
+IS / 24 OOS`), in **tre punti**. I numeri veri del lungo sono **45 IS / 76 OOS** e **37 IS / 52
+OOS**. E nello stesso file: *"(f) non può dire niente sul **LUNGO**"* — **nel file che misura il
+lungo** (classe 684 di nuovo).
+**La regola**: quando un file prova nasce per copia dal gemello del lato opposto, **ogni numero
+che descrive il lato va riverificato uno per uno**, non riletto. 🔴 Un cancello tarato sul lato
+sbagliato **non scatta mai per il motivo giusto: scatta sempre, e per niente.**
+
+## 🤫 CLASSE 691 — **un round chiude in silenzio un cancello che il predecessore aveva dichiarato SOSPESO e delegato a una FASE che non esiste ancora**
+
+`R236e` r.370-374 mette **T7** dentro una **FASE 1** (corsa singola, `Optimization=0`, Giornale
+acceso) **che non esiste come riga di lancio**, e `COME_SI_LEGGONO_I_13_ROUND` scrive:
+*"Finché non esiste, **T7 e T3 restano sospesi su OGNI corsa futura**, non solo su questa"*.
+🔴 **R238a/b lo chiudevano — senza dirlo, e nel verso che fa comodo.**
+**La regola**: quando un round eredita da un predecessore, si va a **leggere cosa il
+predecessore aveva dichiarato APERTO**, e un cancello sospeso **si riapre solo con la misura che
+lo sospendeva**, mai con un ragionamento. Un "sospeso" che si chiude da sé è una firma che
+nessuno ha messo.
+
+## 💶 CLASSE 692 — **il file prova non dichiara il DEPOSITO che il gemello da cui copia dichiarava, e il default del driver è un ordine di grandezza sotto**
+
+`R236e` r.252-256 dichiara **`DEPOSITO 100000`** e dichiara pure che **il file non può imporlo**
+(è `-Deposito`, default **`10000`**). `R238a/b` **non lo nominavano**.
+🔴 E non è formale: r.400 dell'EA fa `if(totLot<=0){ cO_lotto++; Log("lotto nullo."); return; }`
+— **a lotto nullo l'operazione viene SALTATA**, e pavimento/troncatura del lotto dipendono dal
+deposito. 👉 Lanciato al default, il round avrebbe **sfondato la soglia del 20% per il
+DEPOSITO**, e il verdetto *"ho misurato il banco"* sarebbe stato **tecnicamente vero e
+completamente inutile**.
+**La regola**: è la **646 al contrario** — lì il deposito dichiarato era sbagliato, qui è
+**assente**, che è peggio, perché **non c'è niente da verificare**. Ogni file prova dichiara i
+**VINCOLI DI BANCO** che non può imporre da sé, e la riga di lancio li passa **esplicitamente**.
