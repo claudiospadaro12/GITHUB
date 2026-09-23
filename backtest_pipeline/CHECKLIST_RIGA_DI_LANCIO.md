@@ -30889,3 +30889,86 @@ problema nel suo stesso commento**.
 4. 📌 **E vale al contrario per chi scrive gli avvisi**: la riga diceva gia' che i `.chr`
    sono *"i nomi SALVATI, non la verita' viva"* -- un avviso **giusto ma sulla causa
    sbagliata**, che ha reso il difetto invisibile perche' l'assenza sembrava gia' spiegata.
+
+
+---
+
+## CLASSE 606 -- 🔗🚪 LA RICORSIONE ESCE DAL PERIMETRO **DALLA RADICE**: `-Recurse` non segue i link trovati *per strada*, ma la radice che gli dai la percorre **SEMPRE** -- e sul Desktop ogni voce e' una radice (23/09/2026)
+
+**Il caso reale.** La prima stesura della riga d'inventario del Desktop del VPS faceva, per ogni
+voce di primo livello, `Get-ChildItem -LiteralPath $v.FullName -Recurse -File -Force`. Il
+paragrafo del bersaglio dichiarava *"non tocca nessuna cartella dati MT5"*.
+
+🔴 **Misurato su un Desktop finto**: una **giunzione** di nome `scorciatoia_FUORI` che punta
+**fuori dal Desktop** e' stata percorsa, e i suoi **5 file / 0,48 MB** sono stati stampati
+**come se fossero contenuto del Desktop**. Il perimetro dichiarato era gia' rotto.
+
+**La causa, ed e' contro-intuitiva.** La regola che tutti ricordano (*"`Get-ChildItem -Recurse`
+non segue i symlink"*, vera in PowerShell 6.2+, e in Windows PowerShell 5.1 nemmeno quella) parla
+dei link **incontrati durante** la discesa. 🔴 **La radice dell'enumerazione, invece, viene
+percorsa sempre, in ogni versione**: se dai il link *come percorso di partenza*, ci entri. E un
+inventario del Desktop passa una radice diversa **per ogni voce** -- quindi ogni giunzione di
+primo livello e' una radice, e viene seguita **per definizione**.
+
+**Perche' costa.** Sul VPS le cartelle programma dei terminali stanno fuori da Program Files
+(`C:\FTMO`, `C:\MT5_Backtest`, `C:\MT5_MANUALE`, e il REALE): una scorciatoia-giunzione a una
+di quelle sul Desktop fa leggere **gigabyte** di `bases\` e `history\` mentre le sedie della
+challenge operano -- lo stesso tipo di carico del blocco del 21/09 -- e, peggio, fa comparire
+quella roba **nell'inventario come se fosse Desktop archiviabile**.
+
+### La regola
+1. 🔗 **Un `-Recurse` la cui radice e' una voce elencata non e' protetto da nessuna regola sui
+   symlink.** Prima di scendere si controlla l'attributo:
+   `(($x.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq [IO.FileAttributes]::ReparsePoint)`
+   -- se e' vero **non si scende**, si stampa `GIUNZIONE/LINK: non percorsa` e si dichiara che
+   i suoi byte **non sono li'**.
+2. 🚫 **Un `.lnk` non e' un link del filesystem**: e' un file normale di poche centinaia di byte,
+   non viene seguito, e **archiviarlo non sposta il bersaglio**. Sono due cose diverse e vanno
+   scritte diverse nell'output, altrimenti chi legge archivia la scorciatoia credendo di aver
+   archiviato la cartella.
+3. 🧭 **La discesa si scrive a mano** (pila di cartelle + salto dei ReparsePoint): cosi' si
+   comporta **identica** su PowerShell 5.1 e 7, e si smette di dipendere da una differenza di
+   versione che nessuno puo' provare dal PC sbagliato.
+4. ⏱️ **E sulla macchina dove opera una challenge, la discesa ha un tetto**: file contati per
+   voce **e** secondi in tutto. Chi sfora esce marcato `TRONCO`, **mai con uno zero**: uno zero
+   finto e' peggio di un numero mancante, perche' sembra una cartella vuota da archiviare.
+
+---
+
+## CLASSE 607 -- 📅🧟 L'ETA' DI UNA CARTELLA **NON E'** L'ETA' DI CIO' CHE CONTIENE: il terminale VIVO e' il candidato piu' vecchio all'archivio (23/09/2026)
+
+**Il caso reale.** Stessa riga d'inventario. La colonna `GiorniFa` era
+`(Get-Date) - $v.LastWriteTime` **della voce di primo livello**, e la tabella era ordinata su
+quella, con l'intestazione *"i primi sono i candidati naturali all archivio"*.
+
+🔴 **Contro-esempio costruito e riprodotto**: una cartella `MT5_MANUALE` -- un terminale MT5 in
+modalita' **portable**, con `terminal64.exe` e `origin.txt` fermi a febbraio -- ma con
+`logs\20260923.log` **scritto stamattina**. La riga l'ha stampata **seconda dall'alto**:
+`224 giorni, 3 file, 0,00 MB`. **Il candidato all'archivio piu' invitante dell'elenco era un
+terminale che stava operando.** Stesso esito per una cartella con dentro un file di oggi.
+
+**La causa.** Su NTFS il `LastWriteTime` di una directory cambia **solo** quando si aggiunge,
+rinomina o toglie un figlio **diretto**. Scrivere dentro `logs\` aggiorna `logs\`, **non** la
+cartella sopra. Quindi una cartella scritta ogni minuto puo' mostrare mesi di eta'.
+_(E `CreationTime` e' peggio: non cambia mai, e su una copia e' la data della copia.)_
+
+### La regola
+1. 📅 **Chi decide cosa archiviare ordina sul contenuto, non sul contenitore.** Si stampano
+   **due** colonne: `giorni` = eta' della voce, `dentro` = eta' del **file piu' recente**
+   contenuto (gia' calcolato: si sta enumerando comunque). **Si ordina su `dentro`.**
+2. 🔁 **E vale anche al contrario**: contenuto vecchio + cartella toccata ieri = qualcuno ci ha
+   messo o tolto qualcosa. Si marca `TOCCATA`, non si archivia in silenzio.
+3. 🖥️ **Su una macchina con terminali, l'inventario CERCA i terminali invece di darli per
+   assenti.** Un MT5 **portable** tiene i dati nella cartella programma: dire *"le cartelle dati
+   stanno in AppData, non sul Desktop"* e' **falso**, ed e' una ragione falsa che giustifica una
+   sicurezza (classe 580). Si marca `MT5?` la voce che contiene `terminal64.exe`,
+   `metaeditor64.exe`, `origin.txt` o una `MQL5\`. 🔴 Il repo **aveva gia' la risposta**:
+   `report/BINARI_IN_CAMPO_FTMO_2026-09-21.md` controlla il caso portable riga per riga
+   (classe 194).
+4. 🏃 **Prova indipendente dai timestamp**: i processi vivi. `Get-Process` e il `.Path` che
+   comincia per la cartella radice dice *"qui dentro gira qualcosa"* **senza** passare da nessuna
+   data. Una cartella con un processo dentro non si archivia, e la data non c'entra.
+5. 🏠 **E i Desktop sono DUE**: `[Environment]::GetFolderPath('Desktop')` e
+   `'CommonDesktopDirectory'` (`C:\Users\Public\Desktop`). Le icone che l'utente vede sono
+   l'**unione**. Un inventario che ne legge uno solo produce una riga di archiviazione che
+   **lascia indietro roba che lui continua a vedere**, e sembra non aver funzionato.
