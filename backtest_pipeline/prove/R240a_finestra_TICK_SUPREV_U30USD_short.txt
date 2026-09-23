@@ -15,7 +15,10 @@
 #
 #  >>> MA PRIMA UNA PRECISAZIONE ONESTA SU COSA QUESTO ROUND ALZA E COSA NO.
 #      Mettere un secondo simbolo NON ingrandisce il campione di nessuna
-#      cella: la cella accesa restera' intorno a n=20-30 come sul Nasdaq.
+#      cella: l'n di ogni cella resta quello di UNA corsa su 21 mesi. E
+#      quanto valga sul Dow NON si sa -- sul Nasdaq il CORTO acceso faceva
+#      24 in OOS, ma con pin tarati altrove puo' essere molto meno (per
+#      questo c'e' il cancello di interpretabilita' qui sotto).
 #      **Quello che questo round alza e' la REPLICAZIONE, non l'n.** Cioe'
 #      risponde a "e' un MECCANISMO o e' un fatto di quel simbolo?", che e'
 #      una domanda diversa da "e' abbastanza campione?" e ha bisogno di una
@@ -23,20 +26,40 @@
 #      leggendo male, e lo scrivo qui perche' e' la scorciatoia comoda.
 #
 # ==========================================================================
-#  LA SCELTA DI DISEGNO, dichiarata: STESSO MOTORE, MERCATO DIVERSO
+#  LA SCELTA DI DISEGNO, dichiarata: STESSO MOTORE E STESSI PIN, SIMBOLO NUOVO
 # ==========================================================================
-#  In archivio esiste `A1_SUPREV_DOW_H1_*`, ma gira su
-#  `ABTG_SupRev_DOW_H1_Ottimizzato.mq5`, che e' un EA DIVERSO.
-#  >>> USARLO QUI SAREBBE LA CLASSE 687, pagata oggi stesso: trattare il
-#      risultato di due motori diversi come se fossero lo stesso. Quindi
-#      questo file tiene **ABTG_SupertrendReversal**, lo stesso EA e gli
-#      stessi identici pin di R238, e cambia SOLO il simbolo.
-#  >>> CONSEGUENZA DA METTERE IN CONTO PRIMA: i pin sono tarati sul NASDAQ.
-#      Sul Dow il PF ASSOLUTO puo' essere brutto, e **non vorrebbe dire
-#      niente sul meccanismo**. La misura di questo round NON e' il PF: e'
-#      il RAPPORTO fra le due celle DENTRO lo stesso simbolo e la stessa
-#      configurazione. Un rapporto e' immune al fatto che il motore sia
-#      tarato altrove; un PF assoluto no.
+#  In archivio esiste `A1_SUPREV_DOW_H1_*`, che gira su
+#  `ABTG_SupRev_DOW_H1_Ottimizzato.mq5`. I due sorgenti sono stati APERTI e
+#  messi a diff, e il fatto va scritto per come e', non per come conviene:
+#    - la LOGICA e' LA STESSA (segnale, ingresso frazionato 1/3+2/3, stop,
+#      TP1, breakeven, trailing, flip). Le uniche righe diverse sono i
+#      CONTATORI DELL'IMBUTO, che li' non esistono, e `InpFridayClose`,
+#      che li' non esiste;
+#    - a cambiare sono i DEFAULT: `InpStMult=3.5` `InpStAtrPeriod=9`
+#      `InpTP_RR=3.0` `InpMagic=970916` -- cioe' l'ANCORA TARATA SUL DOW.
+#  >>> QUINDI IL MOTIVO PER CUI NON SI USA QUI NON E' "e' un altro motore":
+#      e' che porta un'ALTRA TARATURA e non ha i contatori dell'imbuto.
+#      Usarlo cambierebbe DUE cose insieme (simbolo E taratura) e il round
+#      non saprebbe a quale delle due attribuire la differenza.
+#      (E NON e' la classe 687: quella parla del numero di un cancello di
+#      COSTO trasferito fra sedie che non condividono i parametri da cui
+#      dipende lo stop. Citarla qui sarebbe citarla male.)
+#  >>> CONSEGUENZA DA METTERE IN CONTO PRIMA, ED E' LA PIU' SCOMODA.
+#      I pin di questo file sono tarati sul NASDAQ. Il confronto fra le due
+#      celle e' INTERNO (stesso simbolo, stessi pin, stesso banco), quindi
+#      il rapporto e' immune a tutto cio' che MOLTIPLICA UGUALE le due
+#      celle: scala del simbolo, tick value, deposito, modello di banco.
+#      >>> MA NON E' IMMUNE ALLA TARATURA, e scrivere il contrario sarebbe
+#      la frase comoda. Le due celle NON girano sulle stesse operazioni:
+#      il codice tiene UNA POSIZIONE ALLA VOLTA (r.313-320,
+#      `if(HasPosition()) ... return` e `if(HasPending()) ... return`),
+#      quindi spegnere le ore del mattino LIBERA SLOT e cambia QUALI
+#      operazioni del pomeriggio vengono prese. La cella accesa non e' un
+#      sottoinsieme filtrato della spenta: e' un percorso diverso. Se su
+#      questo simbolo questa taratura produce operazioni di puro rumore,
+#      il rapporto misura il rumore, non il meccanismo.
+#      >>> Percio' il rapporto vale come SEGNO, non come grandezza, e la
+#          lettura dei rami e' ASIMMETRICA: vedi la sezione dei RAMI.
 #
 #  >>> E LA FINESTRA HA LO STESSO SIGNIFICATO, che e' il motivo per cui il
 #      Dow viene PRIMA del DAX: InpStartHour=14 / InpEndHour=22 in ora
@@ -47,32 +70,86 @@
 #      diverse e un file prova ne misura UNA. Il DAX percio' NON e' qui.
 #
 # ==========================================================================
-#  IL CANCELLO DI INTERPRETABILITA', congelato ORA
+#  IL CANCELLO DI INTERPRETABILITA', congelato ORA -- e guarda TUTTE E DUE
+#  le celle, perche' un rapporto ha DUE campioni, non uno
 # ==========================================================================
 #  Se il motore tarato sul Nasdaq quasi non opera sul Dow, il rapporto e'
 #  calcolato su niente e non vuol dire niente.
-#  >>> SOGLIA: se **n(OOS, finestra SPENTA) < 20**, il round e'
-#      NON INTERPRETABILE e non se ne scrive nessun rapporto. Si scrive solo
-#      "il motore del Nasdaq non opera sul Dow", che e' comunque un fatto.
-#  (Riferimento: sul Nasdaq la cella spenta fa n=42 in OOS.)
+#  >>> SOGLIA (1): se n(OOS, finestra SPENTA) < 20 -> NON INTERPRETABILE.
+#  >>> SOGLIA (2): se n(OOS, finestra ACCESA) < 15 -> NON INTERPRETABILE
+#      LO STESSO. Un n=42 sulla spenta non salva un rapporto il cui
+#      NUMERATORE sta su tre operazioni.
+#  In tutti e due i casi non si scrive nessun rapporto: si scrive
+#  "il motore tarato sul Nasdaq quasi non opera sul Dow (n=...)", che e'
+#  comunque un fatto.
+#  (Riferimenti del CORTO su NASUSD, R238: spenta n=42 OOS, accesa n=24 OOS.
+#   Le due soglie sono convenzioni scritte PRIMA dei numeri, non leggi.)
+#
+#  >>> E IL CANCELLO SUL PF ASSOLUTO, che R238 non aveva bisogno di avere e
+#      qui SERVE. Sul Nasdaq la cella spenta del corto faceva PF 1,59763:
+#      un motore che guadagnava gia' PRIMA del filtro. Sul Dow, con pin
+#      tarati altrove, questo non e' garantito -- e il caso non e' teorico:
+#      sul LUNGO del Nasdaq le due celle stavano TUTTE E DUE SOTTO 1
+#      (0,94755 spenta e 0,96073 accesa). Quindi, PRIMA dei numeri:
+#      (a) se PF(SPENTA) < 1,00 il rapporto si calcola e si scrive, ma NON
+#          si legge come "il meccanismo si replica": la frase esatta e'
+#          "su un motore che PERDE, il filtro cambia la perdita di un
+#          fattore X". Non promuove niente e non conferma niente;
+#      (b) se PF(SPENTA) < 0,50 il rapporto NON si scrive affatto: il
+#          denominatore e' troppo vicino a zero e il numero esplode;
+#      (c) se una delle due celle ha ZERO operazioni in perdita il PF e'
+#          degenere: si scrivono n, netto e DD, mai il rapporto.
+#  >>> E SI RIPORTA SEMPRE, qualunque sia il ramo: n, PF e DD di TUTTE E DUE
+#      le celle, piu' il rapporto dei DD. Il DD si legge a qualunque n
+#      (Emendamento B) ed e' stata la misura piu' solida di R238 (fattore
+#      0,498): un referto che porta solo il PF butta via meta' del dato.
 #
 # ==========================================================================
-#  I RAMI, gli stessi di R238 e con lo stesso riferimento
+#  I RAMI -- stesse SOGLIE di R238, ma la LETTURA e' piu' stretta
 # ==========================================================================
 #  R_tick = PF(ACCESA)/PF(SPENTA) del CORTO in OOS:
-#    >= 1,80   -> il meccanismo SI REPLICA sul Dow
-#    1,20-1,79 -> si replica RIDOTTO: si riporta la frazione, non un verdetto
-#    0,80-1,19 -> NON si replica: sul Nasdaq era un fatto di quel simbolo
-#    < 0,80    -> sul Dow la finestra PEGGIORA: il meccanismo e' invertito
+#    >= 1,80   -> si replica sul Dow CON L'ANCORA DEL NASDAQ
+#    1,20-1,79 -> si replica RIDOTTO: si riporta il rapporto e la quota
+#                 rispetto al NASDAQ (R_tick / 2,2059), non un verdetto.
+#                 ATTENZIONE: NON e' la "frazione conservata" di R238 --
+#                 quella era OHLC->tick sullo STESSO simbolo (2,2316 ->
+#                 2,2059). Qui il paragone e' fra DUE SIMBOLI, a parita' di
+#                 banco, e si chiama con un nome diverso apposta
+#    0,80-1,19 -> NON replicato con l'ancora del Nasdaq
+#    < 0,80    -> con l'ancora del Nasdaq, sul Dow la finestra PEGGIORA
 #  >>> E LA SOGLIA 1,80 E' LA STESSA CONVENZIONE DI R238, non una legge. A
 #      1,79 o 1,81 si scrive "sul confine". Non si arrotonda verso la
 #      conclusione comoda.
 #
+#  >>> LA LETTURA E' ASIMMETRICA, e si congela ORA perche' e' esattamente la
+#      frase che il referto rischia di scrivere gonfiata:
+#      - un ramo ALTO (>= 1,20) e' informativo COSI' COM'E'. Se la finestra
+#        aiuta perfino un motore tarato su un altro indice, la taratura non
+#        e' la spiegazione: e' una conferma, e vale di piu', non di meno;
+#      - un ramo BASSO (< 1,20) NON autorizza la frase "sul Nasdaq era un
+#        fatto di quel simbolo". Quel ramo e' CONFUSO con una seconda
+#        spiegazione che questo round non sa separare: "l'ancora 3,5/7 del
+#        Nasdaq non e' l'ancora del Dow". Il Dow non e' MAI stato girato
+#        con questi pin (verificato: le corse SupRev su U30USD in archivio
+#        -- R123b, R135a, R190c -- hanno DUE lati accesi, InpTP_RR=3.0 e
+#        StAtrPeriod 9/12/16).
+#        >>> Percio' in quel caso il verdetto e' "NON REPLICATO CON
+#            L'ANCORA DEL NASDAQ", mai "il meccanismo non c'e' sul Dow", e
+#            la prova che manca ha gia' un nome e si scrive qui:
+#            stesso EA `ABTG_SupertrendReversal`, stessa finestra ad asse,
+#            ANCORA D'ARCHIVIO DEL DOW (`InpStMult=3.5`,
+#            `InpStAtrPeriod=9`, `InpTP_RR=3.0`: i default di
+#            `ABTG_SupRev_DOW_H1_Ottimizzato`, riproducibili DENTRO questo
+#            EA senza cambiare binario). Costo: una corsa gemella.
+#            NON ESISTE OGGI -> nessun "morto" si scrive prima che esista
+#            (certificato di morte, regola di casa del 09/09).
+#
 # ==========================================================================
 #  COSA NON PUO' DIRE -- e non cambia rispetto a R238
 # ==========================================================================
-#   - il MERITO: n atteso 20-30 sulla cella accesa, sotto 150 di un fattore
-#     dieci. Nessuna promozione, nessuno spegnimento, qualunque PF esca;
+#   - il MERITO: l'n sul Dow e' IGNOTO (sul Nasdaq il corto acceso faceva
+#     24 in OOS). Qualunque venga fuori, resta lontanissimo dai 150.
+#     Nessuna promozione, nessuno spegnimento, qualunque PF esca;
 #   - il 40x: SOSPESO. La distanza ingresso->SL di questa geometria non e'
 #     misurata e serve la FASE 1 (Optimization=0, Giornale acceso), che oggi
 #     non esiste come riga di lancio;
@@ -81,7 +158,17 @@
 #     leggono (checklist 34 e 34-ter); OnTester esporta stats[7] senza
 #     nessun contatore in colonna;
 #   - il regime: i dati BCM sugli indici sono 21 mesi e UN SOLO REGIME, un
-#     toro. Uno short misurato qui parte svantaggiato per costruzione.
+#     toro. Uno short misurato qui parte svantaggiato per costruzione;
+#   - E IL PEZZO CHE VA DETTO ANCHE SE FA COMODO TACERLO: la finestra non
+#     seleziona solo le ORE, seleziona anche il COSTO. Su U30USD lo spread
+#     orario misurato (spread_orario_U30USD.csv, 64,7 M tick) e' 76-80
+#     punti nelle ore 14-21 e 104-112 nelle altre. La cella SPENTA opera
+#     anche nelle ore care, la cella ACCESA solo in quelle economiche, e a
+#     tick reali lo spread e' quello vero. >>> Quindi una parte di
+#     qualunque vantaggio esca E' COSTO, non meccanismo, e questo round NON
+#     la sa separare: servirebbe una terza cella a -Spread FISSO, che qui
+#     non c'e' (come in R238: stessa incognita, stesso verso, quindi il
+#     confronto FRA I DUE SIMBOLI resta coerente).
 #
 # ==========================================================================
 #  EA: ABTG_SupertrendReversal
@@ -144,8 +231,14 @@ InpPendingExpiryBars=3
 InpRiskPercent=1.0
 InpMaxTradesPerDay=0
 
-# --- LA FASCIA: ora SERVER BCM (= ora italiana - 1). Il Nasdaq cash apre
-# --- alle 15:30 italiane = 14:30 server. Pinnate: l'asse e' l'interruttore.
+# --- LA FASCIA: ora SERVER BCM (= ora italiana - 1). Il cash USA apre alle
+# --- 15:30 italiane = 14:30 server, e il DOW apre con lo stesso orologio
+# --- del Nasdaq (09:30 New York tutti e due). La finestra e' [14,22) --
+# --- r.326 usa `hour<Start || hour>=End` -- quindi copre le ore server
+# --- 14..21. CONTROPROVA SUL SIMBOLO, non sul ragionamento:
+# --- spread_orario_U30USD.csv (64,7 M tick) da' 76-80 punti nelle ore
+# --- 14-21 contro 104-112 nelle ore 0-13 e 23: le ore pinnate SONO la
+# --- sessione liquida di U30USD. Pinnate: l'asse e' l'interruttore.
 InpStartHour=14
 InpEndHour=22
 
@@ -167,6 +260,13 @@ InpVerbose=true
 InpLogImbuto=true
 
 # --- L'ASSE, unico: l'interruttore della finestra oraria. 2 celle: 0 e 1.
-# --- La cella 0 riproduce l'archivio -> cancello crociato T1 gratis.
+# --- ATTENZIONE, QUI IL CANCELLO CROCIATO T1 NON C'E', e va detto PRIMA
+# --- che qualcuno lo scriva nel referto. Su R238 la cella 0 coincideva con
+# --- la cella `buffer 3` di R236a/b (stesso simbolo, stessi pin) e il T1
+# --- veniva gratis, 8 numeri su 8. Su U30USD NON esiste nessuna corsa con
+# --- questi pin: le tre corse SupRev d'archivio sul simbolo (R123b, R135a,
+# --- R190c) hanno DUE lati accesi, InpTP_RR=3.0 e StAtrPeriod 9/12/16.
+# --- Quindi questo round NON ha riproduzione incrociata: un solo banco, un
+# --- solo passaggio, e nessun numero da confrontare con l'archivio.
 InpUseTimeWindow=0||0||1||1||Y
 # ==========================================================================

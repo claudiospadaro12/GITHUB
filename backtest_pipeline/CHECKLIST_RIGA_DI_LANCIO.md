@@ -34486,3 +34486,67 @@ Idem `c`/`d`. Era **già pagata** (4 passate su 16) e **non veniva letta**.
 **La regola**: ogni volta che due file gemelli condividono una cella, quella cella è un
 **cancello di determinismo del banco a costo zero**, e va **dichiarato nel file** — non scoperto
 dopo.
+
+---
+
+# 🧱 SETTE CLASSI DAL CANCELLO SU R240 (24/09/2026) — numeri del COORDINATORE (classe 662)
+
+🔴 **Il filo: R240 nasce per copia da R238 cambiando UN SOLO campo, il SIMBOLO. Cinque difetti su sette
+sono frasi VERE SUL SIMBOLO VECCHIO che hanno viaggiato intatte.**
+
+## 👻 CLASSE 698 — **il cancello crociato GRATIS ereditato quando cambia il SIMBOLO**
+*"la cella 0 riproduce l'archivio -> cancello crociato T1 gratis"* era **vero su NASUSD** (la cella
+spenta coincide con `buffer 3` di R236a/b: 8 numeri su 8 a 5 decimali). 🔴 **Falso su U30USD**: le tre
+corse SupRev d'archivio su quel simbolo (`R123b`, `R135a`, `R190c`) girano **due lati accesi**,
+`InpTP_RR=3.0`, `StAtrPeriod` 9/12/16. Chi scriveva il referto eseguendo il file avrebbe **dichiarato
+passato un T1 che non era disponibile**.
+**Regola**: un cancello crociato è **una coppia (file, corsa d'archivio)**. Cambiato il simbolo, la
+coppia **va ricercata**, e se non esiste si scrive **"qui la riproduzione incrociata NON c'è"**.
+
+## ⚖️ CLASSE 699 — **il cancello di campione messo su UN SOLO braccio di un RAPPORTO**
+`n(OOS, spenta) < 20` non protegge il **numeratore**: con spenta `n=42` e accesa `n=3` il round
+restava formalmente "interpretabile". **Regola**: un rapporto ha **due** campioni; la soglia si mette
+su **tutti e due**, e si tara su un numero **già noto** (accesa sul Nasdaq = 24 → soglia 15), mai su
+un numero visto oggi.
+
+## 🔀 CLASSE 700 — **"il rapporto è immune alla taratura" è FALSO quando il motore tiene UNA POSIZIONE ALLA VOLTA**
+L'immunità vale solo ai fattori che **moltiplicano uguale** le due celle (scala, tick value, deposito).
+🔴 Ma con `if(HasPosition()) ... return` (r.313-320) spegnere le ore **libera slot** e cambia **QUALI**
+operazioni vengono prese: la cella accesa **non è un sottoinsieme filtrato** della spenta, è un
+**percorso diverso**. Se la taratura produce rumore, **il rapporto misura il rumore**.
+**Regola**: il rapporto vale come **SEGNO, non come grandezza**, e la lettura è **ASIMMETRICA** — un
+ramo **alto** è informativo; un ramo **basso** è **confuso** fra *"il meccanismo non c'è"* e *"la
+taratura non è di questo mercato"*, e **non autorizza un morto**.
+
+## 🧭 CLASSE 701 — **690-bis: il gemello eredita non solo i NUMERI, ma la DIREZIONE ATTESA**
+Sul lungo del Nasdaq il riferimento era **PIATTO (1,0139)**: lì *"replicare"* vuol dire **restare
+piatti**. Il file del lungo portava invece la tabella del corto, dove `>= 1,80` = *"si replica"*. 🔴
+Così la parola **"si replica" finiva sul risultato che CONTRADDICE il round d'origine**.
+**Regola**: quando il riferimento di un lato è *"nessun effetto"*, la tabella dei rami va **ribaltata**,
+non copiata: `0,80-1,19` = replica; `>= 1,80` = **crepa nella lettura precedente**, da scrivere come
+tale e non da festeggiare.
+
+## 📚 CLASSE 702 — **il numero di classe citato A MEMORIA presta autorità a un ragionamento mai verificato**
+Avevo scartato `ABTG_SupRev_DOW_H1_Ottimizzato` dicendo *"sarebbe la classe 687"*. 🔴 La 687 parla di
+**numeri di costo trasferiti fra sedie che non condividono i parametri dello stop** — un'altra cosa. E
+il fatto sotto era **falso**: il diff dei due sorgenti dà **logica identica**; cambiano i **default**.
+🟢 La decisione restava giusta, per motivi **veri e diversi** (cambierebbe simbolo **e** taratura
+insieme; e quel binario **non ha i contatori dell'imbuto**).
+**Regola**: si **rilegge** la classe che si cita. Un numero di classe è una **prova citata**, non un
+timbro.
+
+## 📏 CLASSE 703 — **la metrica derivata riusata fuori dal suo asse**
+La *"frazione conservata"* di R238 era `R_tick / R_ohlc` — **OHLC→tick sullo stesso simbolo**. Riusarla
+fra **simboli diversi** misura un'altra cosa e **non ha lo stesso nome**.
+**Regola**: una metrica derivata porta con sé **l'asse su cui è nata**. Cambiato l'asse, o si ricalcola
+o si **rinomina** dichiarando che è un'altra grandezza.
+
+## 💸 CLASSE 704 — **il filtro ORARIO è anche un filtro di COSTO, e nessuno lo dichiarava**
+Misurato su `spread_orario_U30USD.csv` (**64,7 M tick**): **76-80 punti nelle ore 14-21** contro
+**104-112 nelle ore 0-13 e 23**. 🔴 La cella spenta opera **anche nelle ore care**, l'accesa **solo in
+quelle economiche**, e a tick reali lo spread è quello vero. 👉 **Una parte di qualunque vantaggio esca
+è PEDAGGIO, non meccanismo** — e il round non la sa separare (servirebbe una cella a `-Spread` fisso).
+**Regola**: qualunque finestra oraria su un simbolo con spread **non piatto** confonde meccanismo e
+costo, e va **dichiarato prima**. 🟢 Corollario gratis: se il lato che si attende **piatto** resta
+piatto **pur avendo lo stesso sconto di spread**, il costo da solo **non basta** a muovere il rapporto —
+ed è una misura in più a favore dell'altro lato.
