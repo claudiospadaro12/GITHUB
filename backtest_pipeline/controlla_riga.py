@@ -348,6 +348,55 @@ def controlla_cultura(path, testo):
 
 GUARDIA = r"(Muori|throw|exit\s+1|VIETATO|notlike|-ne\b|Write-Host|Red)"
 
+VERBI_CHE_SCRIVONO = (r"(Copy-Item|Move-Item|Rename-Item|Remove-Item|New-Item|"
+                      r"Set-Content|Add-Content|Out-File|Export-\w+|Set-ItemProperty|"
+                      r"Start-Process|Compress-Archive|\.CopyTo\(|\.MoveTo\(|"
+                      r"\[IO\.File\]::(Write|Append|Copy|Move|Delete|Create))")
+
+
+def scrive_dentro(testo, ago):
+    """CLASSE 670-b (23/09/2026) -- il percorso VIETATO finisce dentro un verbo
+    che SCRIVE? Allora non e' una menzione, e' un bersaglio, e si BLOCCA.
+
+    Il commento storico di questo file diceva che un cancello testuale non sa
+    distinguere un bersaglio da un'etichetta, e che "nel contro-esempio non ci
+    finisce nemmeno dentro un verbo". Il contro-esempio del 23/09 invece SI':
+        Copy-Item -Path '...' -Destination 'C:\\BCM_Reale\\MQL5\\Experts\\ABTG_X.ex5'
+    Un .ex5 copiato nella cartella Experts del CONTO REALE 10105439. Quel caso
+    si riconosce, e quindi si blocca invece di segnalarlo.
+    """
+    for pezzo in testo.split(";"):
+        if ago in pezzo and re.search(VERBI_CHE_SCRIVONO, pezzo, re.I):
+            return True
+    return False
+
+
+def guardia_vicina(nudo, ago):
+    """CLASSE 670 (23/09/2026) -- SU UNA RIGA FISICA SOLA, UNA GUARDIA COPRE
+    SOLO IL PEZZO DI RIGA IN CUI STA, NON TUTTA LA RIGA.
+
+    Il buco: `coperto = re.search(GUARDIA_STRETTA, nudo)` cercava il throw in
+    TUTTA la riga. Ogni riga di casa porta gia' due throw legittimi (guardia di
+    macchina + controllo del MARCATORE), quindi `coperto` era SEMPRE True e il
+    divieto sul REALE non poteva mai scattare.
+    Contro-esempio MISURATO il 23/09: una riga con
+        Copy-Item -Destination 'C:\\BCM_Reale\\MQL5\\Experts\\ABTG_X.ex5'
+    usciva "nessun difetto meccanico" con SETTE verdi.
+    E l'incentivo era ROVESCIATO: TOGLIERE la guardia di macchina rendeva la
+    riga piu' sicura agli occhi del cancello.
+
+    La regola: si spezza la riga sui ';' e si pretende una guardia NELLO STESSO
+    pezzo in cui compare il percorso vietato. Un throw a inizio riga non
+    assolve un Copy-Item dieci statement dopo.
+    """
+    if ago not in nudo:
+        return True
+    for pezzo in nudo.split(";"):
+        if ago in pezzo and not re.search(GUARDIA_STRETTA, pezzo, re.I):
+            return False
+    return True
+
+
 def in_una_guardia(righe, idx):
     """La guardia sta spesso su PIU' righe:
          if($x -like "*-V3*"){
@@ -753,20 +802,36 @@ def controlla_terminali(path, testo, dove, stretta=False, macchina=""):
         viva = cruda if taglio_c < 0 else cruda[:taglio_c]
         for v in VIETATI_PERCORSO:
             if stretta:
-                coperto = bool(re.search(GUARDIA_STRETTA, nudo, re.I))
+                # CLASSE 670: la guardia vale per lo STATEMENT, non per la riga.
+                # E si cerca nello STESSO testo in cui si cerca il percorso:
+                # 'nudo' per il codice nudo, 'viva' per il percorso DENTRO una
+                # stringa -- altrimenti il ramo del REALE resta muto, che e'
+                # esattamente il buco che questa classe chiude.
+                coperto = guardia_vicina(nudo, v)
+                coperto_v = guardia_vicina(viva, v)
             else:
                 coperto = in_una_guardia(righe, k)
+                coperto_v = coperto
             if v in nudo and not coperto:
                 blocca("TERMINALE", "r." + str(i) + ": nomina '" + v + "' senza una guardia che lo rifiuta nelle righe vicine. Il 100k 50504263, il REALE 10105439 e il piccolo " + CONTO_PICCOLO + " non si toccano", dove)
-            elif v in INTOCCABILI and v in viva and v not in nudo and not coperto:
+            elif (v in INTOCCABILI and v in viva and v not in nudo
+                  and not coperto_v and scrive_dentro(viva, v)):
+                blocca("TERMINALE", "r." + str(i) + ": il percorso '" + v + "' finisce dentro"
+                       " un VERBO CHE SCRIVE (Copy-Item / Set-Content / Start-Process ...)."
+                       " Non e' una menzione: e' un bersaglio. IL CONTO REALE " + "10105439"
+                       " NON SI TOCCA, MAI (classe 670)", dove)
+            elif v in INTOCCABILI and v in viva and v not in nudo and not coperto_v:
                 rileva("457", "r." + str(i) + ": nomina '" + v + "' DENTRO UNA STRINGA."
                               " Il cancello NON sa dire se e' un bersaglio, un'etichetta"
                               " o una lista di rifiuti: VA LETTO A MANO."
                               " Il REALE 10105439 non si tocca mai", dove)
         for c in CONTI_VIETATI:
-            if c in nudo and not in_una_guardia(righe, k):
+            # CLASSE 670: su una riga sola vale la guardia DELLO STATEMENT.
+            cop_c = guardia_vicina(nudo, c) if stretta else in_una_guardia(righe, k)
+            cop_cv = guardia_vicina(viva, c) if stretta else cop_c
+            if c in nudo and not cop_c:
                 blocca("CONTO", "r." + str(i) + ": nomina il conto " + c + " fuori da una guardia", dove)
-            elif c in viva and c not in nudo and not in_una_guardia(righe, k):
+            elif c in viva and c not in nudo and not cop_cv:
                 rileva("457", "r." + str(i) + ": nomina il conto " + c + " DENTRO UNA"
                               " STRINGA. VA LETTO A MANO: bersaglio o guardia?", dove)
         # CLASSE 457-b -- E IL CANCELLO NON CERCAVA NESSUN MODO DI AMMAZZARE UN
@@ -1188,8 +1253,21 @@ def controlla_riga_lancio(riga):
                    + TERMINALE_BUONO + ", e non dichiara nessuna macchina: verificare a mano"
                    + " che non sia un conto in forward")
     if not valori:
-        if TERMINALE_BUONO.lower() in riga.lower():
-            passa("bersaglio dichiarato: " + TERMINALE_BUONO)
+        # CLASSE 671 (23/09/2026): NON si deduce un bersaglio da una
+        # SOTTOSTRINGA cercata in tutto il testo. Il contro-esempio misurato:
+        # una riga che scriveva "NON tocca e NON legge i dati di: 50504400
+        # (C:\\MT5_Backtest)" -- cioe' una menzione di ESCLUSIONE, per giunta
+        # OBBLIGATORIA dalla regola del 12/09 -- usciva fra i PASSATI come
+        # "bersaglio dichiarato". Il cancello premiava chi rispettava la regola
+        # trasformando il suo elenco di esclusioni in una dichiarazione di
+        # bersaglio. Ora si pretende che il percorso compaia come VALORE.
+        if re.search(r"(-Terminal\w*|-Percorso\w*|\$\w*(BERS|TERM|TARGET)\w*\s*=)\s*['\"]?"
+                     + re.escape(TERMINALE_BUONO), riga, re.I):
+            passa("bersaglio dichiarato come VALORE: " + TERMINALE_BUONO)
+        elif TERMINALE_BUONO.lower() in riga.lower():
+            rileva("671", "il testo NOMINA '" + TERMINALE_BUONO + "' ma non come valore di un"
+                   " flag o di un'assegnazione: potrebbe essere una menzione di ESCLUSIONE."
+                   " NON lo conto come bersaglio dichiarato: va letto a mano")
         elif "-Terminal" in riga:
             rileva("TERMINALE", "la riga nomina un -Terminal... di cui non riesco a leggere il"
                    " valore: va letto a mano")

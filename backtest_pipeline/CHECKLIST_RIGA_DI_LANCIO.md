@@ -33667,6 +33667,14 @@ essere stati sovrascritti.
 3. ⚠️ **E vale anche al contrario**: se un artefatto e' troppo pesante per lo zip, il
    referto deve dire **dove trovarlo e per quanto tempo resta**, non limitarsi a nominarlo.
 
+### ✏️ EMENDAMENTO DELLA SERA DEL 23/09 -- DOVE va scritto il sospeso
+🔴 **Il sospeso va scritto DENTRO la cartella del round sospeso, non solo nel riepilogo
+generale.** Chi scrive il verdetto apre `REFERTO_ROUND_<et>.txt`, dove il driver ha
+stampato **`ESITO: ROUND GIRATO`** e non sa nulla della fase mancante.
+🔴 **E il sospeso va elencato PER INTERO**: per `R236a/b` non e' solo **T7** (il 40x), e'
+anche **T3** (l'attribuzione del movimento dell'`n`) -- il file prova lo dice a r.950-951,
+e il primo riepilogo nominava solo il 40x. **Meta' del sospeso non era dichiarata.**
+
 ### Stato
 🛠️ **Riparato NELLA RIGA del 23/09** (`RIGA_ROUND_PRONTI_2026-09-23.md`): un blocco finale
 copia in `LOG_TESTER\` tutti i `.log` sotto `%APPDATA%\MetaQuotes` scritti dopo l'avvio e li
@@ -33683,7 +33691,13 @@ mette nello zip. 🔴 **La riparazione nello SCRIPT resta da fare.**
 ricava la base dello stop e quindi il verdetto del cancello **T7** sul `40x`.
 🔴 **Nessuno strumento del repo sa eseguirla**, e l'ho verificato io:
 - `backtest_pipeline/walkforward_generico.ps1` scrive **`Optimization=1` CABLATO** in
-  **entrambe** le schede `.ini` — **r.1015** (gamba IS) e **r.2013** (gamba OOS). Nessun
+  la **SOLA** scheda `.ini` delle corse vere, **r.2013**, dentro il ciclo
+  `foreach($w in $WF)` di r.1978 che genera **tutte e due** le gambe (IS *e* OOS).
+  ✏️ **CORRETTO LA SERA DEL 23/09**: qui c'era scritto *"entrambe le schede, r.1015
+  (gamba IS) e r.2013 (gamba OOS)"*, ed era **falso**. La **r.1015 sta dentro
+  `if($SoloControllo){` (r.1002, chiuso da `exit 0` a r.1037)**: e' la scheda di
+  **ANTEPRIMA**, che una corsa vera non scrive mai. La conclusione reggeva, la prova
+  no — ed e' la **classe 672** qui sotto. Nessun
   parametro lo cambia, e **il driver lo dichiara da solo a r.75**: *"questo driver scrive
   SEMPRE Optimization=1"*.
 - `RIGA_ROUND_VPS.ps1` r.148-158 ha dieci parametri e **nessuna opzione di test singolo**.
@@ -33729,3 +33743,145 @@ lo zip verrebbe costruito con un solo risultato, e **non comparirebbe nessun err
 3. 🧮 **E il riepilogo finale deve contare i risultati attesi contro quelli trovati**: una
    catena che doveva produrre 13 cartelle e ne produce 1 va **dichiarata rotta dal codice**,
    non lasciata all'occhio di chi apre lo zip.
+
+---
+
+## 🔓🏦 CLASSE 670 — **IL `throw` LEGITTIMO ZITTISCE IL DIVIETO SUL CONTO REALE: una riga che copia un `.ex5` dentro `C:\BCM_Reale\MQL5\Experts` passa il cancello con SETTE VERDI** (controllo-preventivo + coordinatore, 23/09/2026, su `controlla_riga.py`)
+
+**Numero assegnato dal COORDINATORE** (classe 662); `grep -c "CLASSE 670"` -> **0** al momento di scrivere.
+🔴 **E' il difetto piu' grave trovato finora nel nostro stesso cancello**, perche' riguarda
+l'unica cosa che il mandato mette fuori discussione: **il conto reale 10105439 non si tocca**.
+
+### Il fatto, MISURATO e riprodotto da me
+`controlla_riga.py` r.755-757 calcolava
+`coperto = re.search(GUARDIA_STRETTA, nudo)` -- cioe' cercava un `throw`/`Muori`/`VIETATO`
+**in TUTTA la riga**. 🔴 Ma **ogni riga di casa ne porta gia' due legittimi e obbligatori**:
+la guardia di macchina (`if($env:COMPUTERNAME -ne ...){ throw }`) e il controllo del
+MARCATORE. Su una riga a **riga fisica singola** quei throw coprivano **tutto**, e ne' il
+blocco `[TERMINALE]` ne' il rilievo `[457]` potevano piu' scattare.
+
+**Contro-esempi eseguiti, non dedotti:**
+| riga | esito PRIMA |
+|---|---|
+| guardia di macchina + `Get-ChildItem 'C:\BCM_Reale\...' -Recurse` | ✅ **4 PASSATI, ZERO rilievi** |
+| **la stessa senza la guardia di macchina** | ❌ BLOCCANTE `[TERMINALE]` |
+| forma di casa completa + **`Copy-Item -Destination 'C:\BCM_Reale\MQL5\Experts\ABTG_X.ex5'`** | ✅ **"nessun difetto meccanico", SETTE PASSATI** |
+
+👉 **Un `.ex5` copiato nella cartella Experts del CONTO REALE usciva verde.** E l'incentivo
+era **ROVESCIATO**: *togliere* la guardia di macchina rendeva la riga **piu' sicura** agli
+occhi del cancello.
+📌 **E' il residuo della classe 223**: la correzione dell'11/09 era stata applicata **solo** a
+`bersagli_vietati()` (i valori di `-Terminal…/-Percorso…`), mentre il ciclo generico su
+`VIETATI_PERCORSO`/`CONTI_VIETATI` era rimasto subordinato a `coperto`. La checklist dava la
+223 per chiusa.
+
+### La riparazione, fatta il 23/09 e verificata
+1. 🧩 **`guardia_vicina(testo, ago)`**: la riga si spezza sui `;` e **si pretende una guardia
+   NELLO STESSO pezzo** in cui compare il percorso vietato. Un `throw` a inizio riga non
+   assolve un `Copy-Item` dieci statement dopo.
+2. 🔍 **La guardia si cerca nello STESSO testo in cui si cerca il percorso**: `nudo` per il
+   codice nudo, **`viva` per il percorso dentro una stringa**. Senza questa meta' il ramo del
+   REALE restava muto — ed e' stato il mio primo tentativo, sbagliato, corretto subito.
+3. 🛑 **`scrive_dentro(testo, ago)`**: se il percorso vietato finisce dentro un **VERBO CHE
+   SCRIVE** (`Copy-Item`, `Move-Item`, `Set-Content`, `Out-File`, `New-Item`, `Remove-Item`,
+   `Start-Process`, `[IO.File]::Write/Copy/Delete`…) **non e' una menzione: e' un bersaglio,
+   e si BLOCCA**. Una **lettura** (`Get-ChildItem`) resta un **rilievo 457** visibile.
+
+### La verifica della riparazione, che e' parte della classe
+- il contro-esempio col `Copy-Item` ora esce **`ESITO: FAIL`** con un bloccante che nomina il
+  conto reale;
+- la lettura ora produce **due rilievi 457** dove prima c'era il **silenzio**;
+- 🟢 **ZERO REGRESSIONI**: sweep su **122 righe di casa**, `78 OK / 44 FAIL` **identici**
+  prima e dopo la patch.
+
+### La regola
+**Una guardia vale per lo STATEMENT in cui sta, mai per la riga intera.** E quando un
+cancello testuale non sa distinguere un bersaglio da un'etichetta, il discrimine che sa
+riconoscere e' **il verbo**: scrivere blocca, leggere si segnala.
+
+---
+
+## 🏷️🎯 CLASSE 671 — **«BERSAGLIO DICHIARATO» DEDOTTO DA UNA SOTTOSTRINGA CERCATA IN TUTTO IL TESTO: una frase che dice «NON lo tocco» finisce fra i controlli PASSATI come bersaglio della riga** (controllo-preventivo + coordinatore, 23/09/2026, su `controlla_riga.py`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 671"` -> **0** al momento di scrivere.
+
+### Il fatto
+`controlla_riga.py` r.1189-1191 faceva:
+```python
+if not valori:
+    if TERMINALE_BUONO.lower() in riga.lower():
+        passa("bersaglio dichiarato: " + TERMINALE_BUONO)
+```
+🔴 Su `RIGA_SEDIE_MUTE_FTMO.txt` il percorso `C:\MT5_Backtest` compare **una volta sola**, ed
+e' dentro la frase *"NON tocca e NON legge i dati di: … 50504400 (C:\MT5_Backtest)"* — cioe'
+una **menzione di ESCLUSIONE**. Il cancello la trasformava in un **«bersaglio dichiarato»** e
+la stampava fra i PASSATI.
+🔴 **E premiava chi rispetta la regola del 12/09**, che *obbliga* a nominare per esteso i
+percorsi che NON si toccano: piu' uno scrive bene l'elenco delle esclusioni, piu' il cancello
+crede che quelli siano i suoi bersagli.
+
+### La riparazione (23/09)
+Il PASS si stampa **solo se il percorso compare come VALORE** di un flag (`-Terminal…`,
+`-Percorso…`) o di un'assegnazione (`$BERS=`, `$TERM=`, `$TARGET=`). Negli altri casi esce un
+**rilievo 671** che dice *"lo NOMINA ma non come valore: potrebbe essere una menzione di
+ESCLUSIONE, va letto a mano"*.
+
+### La regola
+🚫 **Non si deduce un bersaglio dalla PRESENZA di una stringa.** Un bersaglio e' un **valore**:
+o sta dopo un flag, o sta dopo un `=`. Tutto il resto e' prosa, e la prosa si legge a mano.
+
+---
+
+## 📍📚 CLASSE 672 — **LA CITAZIONE CHE PUNTA AL BLOCCO SBAGLIATO: conclusione giusta, prova falsa, e la prova falsa finisce in TRE artefatti duraturi** (controllo-preventivo, 23/09/2026, su `RIGA_ROUND_PRONTI_2026-09-23.md`)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 672"` -> **0** al momento di scrivere.
+
+### Il fatto
+E' stato dichiarato che `walkforward_generico.ps1` scrive `Optimization=1` cablato *"in tutte
+e due le schede `.ini` — **r.1015** (gamba IS) e **r.2013** (gamba OOS)"*. 🔴 **La r.1015 sta
+dentro `if($SoloControllo){` (r.1002), chiuso da `exit 0` a r.1037**: e' la scheda di
+**ANTEPRIMA**, che una corsa vera **non scrive mai**. L'unica scheda che conta e' **r.2013**,
+dentro `foreach($w in $WF)` (r.1978) che genera **tutte e due** le gambe.
+La conclusione (`Optimization=1` sempre, `Print()` non gira, niente FASE 1) **resta vera**;
+la prova **no**. E la citazione falsa era gia' finita in **tre** artefatti: il documento della
+riga, la **classe 668 di questa checklist**, e il testo che la riga scrive dentro
+`RIEPILOGO_ROUND_PRONTI.txt` — cioe' in un file che qualcun altro usera' per scrivere lo
+strumento della FASE 1, e ci andra' a sbattere.
+
+### 🟢 E il contro-esempio ha ASSOLTO un sospetto grave, che va detto
+Nell'anteprima c'e' **`Model=4` CABLATO** (r.1013); nella scheda vera c'e' **`Model=$Modello`**
+(r.2011). 👉 Se la r.1015 fosse *davvero* stata la gamba IS, allora `R236c/d/e/f` lanciati con
+`-Modello 1` avrebbero girato **IS a TICK REALI e OOS in OHLC**: due gambe incomparabili, col
+suffisso `_ohlc` bugiardo su tutte e due. **Non succede.** La riga era salva — ma **per il
+motivo opposto** a quello scritto.
+
+### La regola
+1. 📖 **Un numero di riga non si cita senza aver letto il BLOCCO che lo contiene**, dall'`if`
+   di apertura fino alla chiusura. Un `grep` che trova due occorrenze trova **due testi**, non
+   **due percorsi di esecuzione**.
+2. 🔎 **Quando due occorrenze della stessa chiave sembrano gemelle, si cerca COSA LE RENDE
+   DIVERSE.** Qui la differenza era `Model=4` contro `Model=$Modello`.
+3. 🧾 **Una citazione che entra in un artefatto che qualcun altro usera' per costruire uno
+   strumento va verificata come una MISURA**, non come una nota.
+
+---
+
+## 🗓️📦 CLASSE 673 — **IL ROUND CHE MUORE AL PRE-VOLO SPEDISCE LA CARTELLA DI IERI: `Muori` sta PRIMA della raccolta, e la catena la copia come fresca** (controllo-preventivo, 23/09/2026, su `RIGA_ROUND_VPS.ps1` + la catena dei 13)
+
+**Numero assegnato dal COORDINATORE**; `grep -c "CLASSE 673"` -> **0** al momento di scrivere.
+
+### Il fatto
+`Muori` (`exit 1`) e' a **r.170**; la sezione che **cancella e ricrea** `Desktop\ROUND_<et>`
+sta a **r.1188-1191**. 🔴 Un round fermato dal pre-volo (terminale ancora vivo, tetto
+`MaxBars`) lascia quindi intatta la cartella di una corsa **precedente**, e una catena che
+raccoglie con `if(Test-Path){ Copy-Item }` la mette nello zip **senza accorgersene**.
+Sommato all'assenza del conteggio (classe **669** punto 3), **lo zip SEMBRA completo** e
+contiene un referto vecchio.
+
+### La regola
+1. 🧹 **Una catena di N round PRE-PULISCE le N cartelle e gli N zip di destinazione PRIMA di
+   partire.** Il vuoto e' dichiarabile, il vecchio no.
+2. 🔴 **La freschezza si difende sul PRODUTTORE, non sul lettore**: *"guarda la riga data:"*
+   e' una difesa che funziona solo se qualcuno guarda.
+3. ♻️ Vale **ogni volta** che lo script chiamato puo' uscire **prima** del punto in cui pulisce
+   da se'.
