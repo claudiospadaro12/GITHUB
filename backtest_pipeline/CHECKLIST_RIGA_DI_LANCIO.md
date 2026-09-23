@@ -31487,3 +31487,168 @@ catena dei referti ha ereditato `-1,57%` e ha discusso solo il DD.
    soglie **C3/C4 su `Equity DD %`** e **nessuna soglia sulla giornata**, pur producendola
    nel CSV: aggiungere il cancello costa **ZERO passate**, scoprirlo dopo il round costa il
    round.
+
+---
+
+## 📉 CLASSE 619 — **LA METRICA D'INFLUENZA CHE IGNORA IL DRAWDOWN: una manopola che DIMEZZA il DD viene archiviata come «influenza debole»** (23/09/2026, R223)
+
+**Il caso reale.** Il censimento delle manopole inerti (12/09) classificava ogni confronto
+*ceteris paribus* in tre classi, e la classe «INFLUENZA DEBOLE = la manopola e' stata letta,
+effetto minimo, **conta come provata**» era definita cosi': `dTrades == 0` **e** `dPF <= 0,05`.
+Da `backtest_pipeline/risultati_archivio/Aperture_Trailing/DAX_trailing.csv`:
+
+```
+InpUseTrailing=0   profit -1031,93  PF 0,96145  n 440  DD 38,9586
+InpUseTrailing=1   profit  -589,23  PF 0,94686  n 440  DD 18,8542
+```
+
+`dTrades = 0`, `dPF = 0,0146` -> **«debole, gia' provata»**. 🔴 **E il drawdown si DIMEZZA:
+38,96% -> 18,85%.** Su una challenge con muro statico al 10% quella e' la differenza fra una
+sedia e un incidente, ed era archiviata come «niente da vedere».
+
+🔴 **La causa e' un'asimmetria fra la metrica e il criterio di casa**: l'**Emendamento B**
+(16/08) dice che *il campione sottile sospende il giudizio sul MERITO, mai sul RISCHIO* — cioe'
+il DD si legge **sempre**. Una metrica che guarda solo PF e Trades misura **solo il merito**,
+e poi pronuncia una frase («gia' provata») che vale anche per il rischio.
+
+**Ordine di grandezza, misurato**: aggiungendo `dDD <= 0,50 punti percentuali` alla
+definizione, sulle sei sedie della challenge **145 gruppi** escono da «debole» ed entrano in
+«morde». Sono 145 caselle che il censimento precedente dava per chiuse. Le prime:
+`InpTrailMode` **23,15 pp** · `InpUseTrailing` **20,82 pp** · `InpOrder2Atr` **4,69 pp**.
+
+### ✅ La regola
+1. 📉 **Ogni metrica che decide se una manopola «conta come provata» deve contenere il DD**,
+   non solo PF e Trades. La terna minima e' `(dTrades, dPF, dDD)`, e le tre soglie si
+   dichiarano **prima** dei numeri.
+2. 🎯 **Il controllo positivo si costruisce con la manopola di cui si sa gia' la risposta.**
+   Qui e' `InpRiskPercent`: raddoppiando la taglia il DD deve raddoppiare e il PF deve restare
+   fermo. Se la metrica **non** la mette in cima, la metrica e' rotta — e questo test va fatto
+   **prima** di leggere i risultati veri, altrimenti e' una conferma, non una verifica.
+3. 🔴 **«Gia' provata» non e' una frase sola: sono due.** *Provata per il MERITO* e *provata
+   per il RISCHIO* si concludono con misure diverse e si scrivono separate.
+
+---
+
+## 🔌 CLASSE 620 — **ACCENDERE UNA MANOPOLA INERTE RENDE PORTANTE UN NUMERO CHE NESSUNO HA MAI TARATO** (23/09/2026, R223)
+
+**Il caso reale.** Nei tre preset vivi delle aperture (`770101`, `770202`, `770260`) c'e'
+`InpTrailFixedPts=410` e `InpTrailAtrMult=2.0`. Tutti e due sono **inerti**, perche'
+`InpTrailMode=1` (PREVBAR) e il sorgente legge `InpTrailFixedPts` **solo** dentro
+`if(InpTrailMode == ABTG_TRAIL_FIXED)` (`ABTG_Dow_Apertura_US.mq5` r.1837 / r.1850). Il `410`
+e' per commento del sorgente *«piano DAX: 410 punti»*: **un numero del DAX copiato su Nasdaq e
+Dow e mai ritarato**, perche' tanto non lo legge nessuno.
+
+🔴 **E un round d'archivio mostrava una ragione apparentemente ottima per accenderlo**: nel
+round di gestione del 09/09 sul Nasdaq, `InpTrailMode=2` dava **DD 7,17%** contro **16,9%** del
+PREVBAR vivo, a PF quasi fermo. Accendere «perche' il DD scende» sembrava gratis.
+
+**Non e' gratis, ed e' misurato.** `risultati_prove/R200E/` (21/09), stessa sedia, cella viva:
+
+```
+InpTrailMode=2, InpTrailFixedPts=  410  <- IL VALORE DEL PRESET   PF IS 0,65823 / OOS 0,80365
+InpTrailMode=2, InpTrailFixedPts=10410                            PF IS 1,09440 / OOS 1,06050
+InpTrailMode=1 (PREVBAR, il valore VIVO)                          PF IS 1,22116 / OOS 1,21546
+```
+
+👉 Accendere l'interruttore avrebbe acceso **insieme** un secondo numero mai tarato, **25 volte
+fuori scala**, e il risultato sarebbe stato PF **0,66**.
+
+### ✅ La regola
+1. 🔌 **Una manopola inerte non si accende da sola: si accende insieme a TUTTI i parametri che
+   quell'interruttore rende leggibili.** Prima di proporre l'accensione si **elencano per
+   nome** e si dichiara, per ognuno, se il valore nel preset e' **tarato su quel simbolo** o
+   **ereditato**.
+2. 🏷️ **Un valore inerte nel preset va marcato come tale nel commento del `.set`**, altrimenti
+   sembra una scelta. Un numero morto che sembra vivo e' peggio di un numero assente.
+3. 📐 **E il round di accensione porta l'asse sul parametro reso leggibile**, non solo
+   sull'interruttore: un round a 2 celle (`off`/`on`) sull'interruttore misura la coppia
+   «interruttore + valore ereditato», e attribuisce all'interruttore il merito o la colpa
+   dell'altro.
+
+---
+
+## 🧬 CLASSE 621 — **UNA CLASSE RIPARATA IN UN FILE E NON NEI FRATELLI CHE HANNO LO STESSO SCHEMA** (23/09/2026, R223)
+
+**Il caso reale.** La **classe 378** (16/09) dice: *uno script che scrive un artefatto
+destinato al commit deve escludere `.claude/worktrees` dal proprio `os.walk`*. Fu riparata in
+`backtest_pipeline/censimento_uscite.py` (r.187). **Sette giorni dopo, i fratelli hanno ancora
+il difetto.** Rigirando `backtest_pipeline/manopole_inerti_v2.py` cosi' com'e', il 23/09:
+
+```
+cosi' com'e'                  -> csv letti  19660 | passate 560227 | CSV con esiti duplicati 8308
+escludendo .claude/worktrees  -> csv letti   2208 | passate  62367 | CSV con esiti duplicati  924
+```
+
+**8,9x.** 19.212 dei 21.648 CSV sul disco sono copie dentro gli 8 worktree degli agenti in volo.
+Verificato file per file, oggi:
+
+| script | esclude `.claude/worktrees`? |
+|---|---|
+| `censimento_uscite.py` r.187 | si (riparato il 16/09) |
+| `manopole_inerti_v2.py` r.129 | 🔴 no |
+| `manopole_inerti.py` | 🔴 no |
+| `censimento_pf.py` | 🔴 no |
+| `censimento_entrymode.py` | 🔴 no |
+
+🔴 **Il difetto NON e' la classe 378: e' che la riparazione non e' stata PROPAGATA.** Ed e'
+peggio di non averla mai scritta, perche' la classe esiste e da' l'impressione che il problema
+sia chiuso. Il primo che rigira uno dei quattro fratelli ottiene un numero **9 volte** piu'
+grande, plausibile a occhio e falso.
+
+### ✅ La regola
+1. 🧬 **Quando si ripara un difetto di SCHEMA, si cerca lo schema in tutto il repo nello stesso
+   momento** — qui: `grep -ln "os.walk" backtest_pipeline/*.py` — e si scrive **nella classe**
+   l'elenco dei fratelli trovati, riparati **o** dichiarati non riparati con il motivo.
+2. ⚖️ **Se non si ripara (per esempio perche' lo strumento e' condiviso e altri agenti stanno
+   lavorando), lo si DICHIARA per nome nel referto**, con il numero che lo strumento produce
+   rotto accanto a quello che produce riparato. Una riparazione silenziosamente parziale e'
+   una trappola con la firma della qualita' sopra.
+3. 🔢 **E il numero si controlla con una sonda indipendente prima di crederci**: qui
+   `find . -iname "*.csv" | grep -c "\.claude/worktrees/"` dice **19.212** in due secondi e
+   spiega l'intero scarto. Un ordine di grandezza inatteso e' sempre un difetto di perimetro
+   finche' non e' spiegato con un conto.
+
+---
+
+## 🪞 CLASSE 622 — **L'ATTRIBUZIONE VIA MAGIC CONTRO I MOTORI CLONI: lo stesso magic su due EA, e il registro di «cosa abbiamo gia' provato» finisce sul motore sbagliato** (23/09/2026, R223)
+
+**Il caso reale.** `ea_of()` di `censimento_uscite.py` attribuisce un CSV a un EA per tre vie,
+in ordine di forza: **PATH** (il nome dell'EA nel percorso), **MAGIC** (mappa magic -> EA),
+**FIRMA** (le colonne, se unica). La mappa dice `770201 -> ABTG_Nasdaq_Apertura_US`. Ma quel
+magic sta **anche** nei CSV del Dow, e il risultato e' questo:
+
+| CSV | passate | attribuito a | il percorso dice |
+|---|---:|---|---|
+| `risultati_archivio/Dow_Apertura/dow_distanze.csv` | 48 | Nasdaq | Dow |
+| `risultati_archivio/Dow_Apertura/dow_motore.csv` | 12 | Nasdaq | Dow |
+| `risultati_archivio/Dow_Apertura/dow_robustezza.csv` | 10 | Nasdaq | Dow |
+| `risultati_archivio/Dow_Apertura/dow_trailing.csv` | 30 | Nasdaq | Dow |
+| `risultati_archivio/Dow_Apertura/dow_trailing2.csv` | 6 | Nasdaq | Dow |
+| `risultati_archivio/Dow_Apertura/dow_walkforward_IS.csv` | 40 | Nasdaq | Dow |
+| `risultati_archivio/Dow_Apertura/dow_walkforward_OOS.csv` | 40 | Nasdaq | Dow |
+| `risultati_prove/apert_fade_realtick/apert_APERT_US_M5_fade_realtick_U30USD.csv` | 137 | Nasdaq | US generico |
+| **totale** | **323** | | |
+
+**Due cause che si sommano, e nessuna delle due e' un bug isolato:**
+- le tre aperture (`DAX` / `Dow` / `Nasdaq`) sono **CLONI**: firma di colonne sovrapposta, e la
+  VIA 3 non puo' separarle. Il veto sull'unicita' non scatta perche' la firma di un file piu'
+  povero e' **sottoinsieme** di tutti e tre;
+- la VIA 1 non scatta perche' la cartella si chiama `Dow_Apertura`, non `ABTG_Dow_Apertura_US`:
+  **la convenzione di nome delle cartelle non e' la stessa** di quella degli EA.
+
+🔴 **Il danno non e' estetico: e' il REGISTRO DI CIO' CHE ABBIAMO GIA' PROVATO.** Sul motore
+Dow le manopole risultanti «mai messe ad asse» erano **70 su 81**; rimettendogli i suoi file
+scendono a **63**. E' esattamente la casella del **CERTIFICATO DI MORTE** che si rischia di
+segnare vuota (o piena) per sbaglio.
+
+### ✅ La regola
+1. 🪞 **Un'attribuzione automatica va provata sui CLONI, non sui casi facili.** L'autotest deve
+   contenere almeno un caso per **ogni coppia di EA che condivide la firma**, e il verdetto
+   atteso puo' benissimo essere `None` («non si puo' sapere»): un `None` dichiarato vale piu'
+   di un nome indovinato.
+2. 🔢 **Un magic non e' una chiave primaria finche' non e' verificato unico.** Prima di usarlo
+   come via di attribuzione si controlla che **nessun magic compaia in CSV di percorsi
+   incompatibili** — un `grep` sui percorsi contro il simbolo e' sufficiente.
+3. 🚩 **La contraddizione PATH-contro-MAGIC si segnala, non si risolve in silenzio.** Se il
+   percorso dice `Dow` e il magic dice `Nasdaq`, la risposta giusta e' **«ambiguo, dichiarato»**
+   e il file esce dalle statistiche per nome — non entra sotto uno dei due a caso.
