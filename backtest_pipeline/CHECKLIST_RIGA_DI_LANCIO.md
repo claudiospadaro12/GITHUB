@@ -33149,3 +33149,317 @@ frontiera: e' **l'unico numero che separa i due simboli**, e sparisce anche quel
 > 3. 📌 **Il numero che boccia si scrive ANCHE quando non cambia il verdetto**, con la sua
 >    frazione di operazioni colpite. *«Almeno il 25% delle operazioni sotto il pavimento di
 >    lavoro»* e' un fatto che un referto di merito dovra' rileggere.
+
+### ✏️ EMENDAMENTO DEL 23/09/2026 (sera) — **LA REGOLA 1 COSI' COM'ERA SCRITTA PRODUCEVA UNA 652. L'HA TROVATO L'AUTORE APPLICANDOLA, NON IO SCRIVENDOLA.**
+
+🔴 **Il difetto era nella mia correzione, e va scritto qui perche' e' il posto dove si paga.**
+La regola 1 diceva *«si dichiara su DUE assi: l'ANCORA (quale mediana) e la CODA (il p25 del
+range giornaliero)»*, e la correzione che ho consegnato ordinava di **importare il p25 di
+`R141b` (U30USD 172,0 · NASUSD 239,4) dentro una tabella la cui riga di testa usa
+`max-per-data` (379,50 · 384,60)**.
+
+👉 **Quei p25 NON appartengono a quella convenzione**: vengono dalla catena vecchia
+(`ROUND_ORB_ATR_PS5_2026-09-10.md` r.230-235, ancore `314,5` e `313,8`). Sotto la convenzione
+della testata i p25 sono **piu' alti** e stanno in `CANCELLO_COSTO_FLOTTA_2026-09-10.md`
+r.940-942: **U30USD 277,2** e **NASUSD 255,5**. Rifatti da me:
+
+| simbolo | p25 catena vecchia | `stop/spread` | p25 `max-per-data` | `stop/spread` |
+|---|---:|---:|---:|---:|
+| `U30USD` | 172,0 | 🔴 **26,1x** | **277,2** | 🟢 **42,1x** |
+| `NASUSD` | 239,4 | 🟡 **40,6x** | **255,5** | 🟢 **43,4x** |
+
+🔴 **Cioe' la mia correzione rendeva il file SEVERO SULLA CODA e GENEROSO SUL LIVELLO: l'errore
+speculare a quello che stavo contestando, ed e' esattamente la struttura della 652** (due numeri
+derivati dalla stessa legge ma da due ancore diverse, messi in colonna). Ho citato la 652 come
+«non applicabile» nello stesso referto in cui ne stavo introducendo una.
+
+> ### 🔴 LA REGOLA 1, RISCRITTA
+> 1. 📉 **La CODA si prende nella STESSA convenzione dell'ANCORA che intesta la tabella.**
+>    Mescolare il centro di una catena con il quartile di un'altra non e' prudenza: e' un
+>    numero che non descrive nessuna distribuzione.
+> 1bis. ⚖️ **E si scrivono TUTTE E DUE le code, una per convenzione.** Se **nessuna misura
+>    decide quale convenzione descriva il QUARTILE BASSO** — e di norma non c'e', perche' i
+>    residui di scala si validano **sulla MEDIANA**, non sulla coda quieta — **governa la
+>    lettura severa**. 🔴 **Ma «governa» vuol dire UNA COSA SOLA: che sta scritta nel
+>    CANCELLO CONGELATO, non nella prosa della tabella** (vedi **classe 657**).
+
+---
+
+## 🎭🚪 CLASSE 657 — **UNA CONDIZIONE DICHIARATA «VINCOLANTE» NELLA PROSA NON ENTRA NEL CANCELLO CONGELATO, E IL CANCELLO CONTINUA A ENUMERARE UN INSIEME CHE LA PROSA HA GIA' SUPERATO: la prudenza esiste solo nel paragrafo che nessuno rileggera'** (controllo-preventivo, 23/09/2026 sera, su `R235a/b/c/d` dopo le correzioni — figlia della **656**)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 657" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+Il file, corretto, fa una cosa **giusta e difficile**: aggiunge una **quinta lettura** del
+cancello di costo (la coda quieta), trova che sotto la convenzione della propria testata
+**passa** (42,1x / 43,4x) e sotto quella vecchia **no** (26,1x), e **sceglie di tenere per
+vincolante quella che gli fa male**, motivandolo bene:
+
+> `MA TENGO LA LETTURA SEVERA COME VINCOLANTE … fra le due convenzioni non ho una misura che`
+> `decida quale descriva il quartile BASSO (il -1% e' validato sulla MEDIANA a H1, non sulla`
+> `coda quieta). Con un'incertezza non risolta si sceglie il ramo che puo' farmi male.`
+
+🔴 **Poi il cancello congelato, quaranta righe sotto, dice il contrario per omissione:**
+
+> `T2  COSTO. Frontiera stop >= 40 x spread. Su questo simbolo la tabella sopra dice PASSA in`
+> `     tutti e QUATTRO gli angoli (peggiore 45.4x).`
+
+👉 **Gli angoli sono CINQUE, da venti minuti.** `T2` e' l'unico posto che un referto di merito
+rilegge come soglia: chi lo legge non sapra' mai che esiste una coda che sfonda il 40x. La
+prudenza vive **solo** nel paragrafo che l'ha prodotta. 🔴 **E non e' nemmeno un'omissione
+neutra: e' una contraddizione interna** — la prosa dice *«la quinta lettura MORDE DAVVERO»*, il
+cancello dice *«tutti e quattro gli angoli»*.
+
+### 🟢 Quello che invece era gia' fatto bene, e va detto
+- 🟢 La quinta lettura e' **anche** nei `BUCHI DICHIARATI, PER NOME` (*«su U30USD almeno il 25%
+  delle giornate sta sotto il pavimento di lavoro 40x»*): **non e' nascosta**, e' solo nel posto
+  sbagliato rispetto al gate.
+- 🟢 La prescrizione al referto di merito **esiste** ed e' concreta (*«se una cella uscisse
+  positiva, almeno un quarto delle sue operazioni su U30USD e' stata fatta sotto il pavimento
+  di lavoro»*).
+
+> ### 🔴 LA REGOLA
+> 1. 🚪 **«Vincolante» e' una parola che vale solo dentro un cancello `T`.** Una condizione
+>    scritta nella tabella, nella prosa o nei buchi dichiarati e' una **dichiarazione**; se deve
+>    vincolare qualcuno, va **ripetuta nel cancello**, con la sua soglia e il suo verso.
+> 2. 🔢 **Quando si aggiunge una lettura a un'analisi, si rilegge il cancello che la conta.**
+>    `grep` dei numerali (`quattro`, `tre`, `due`) dentro le soglie congelate: un'enumerazione
+>    e' un numero che invecchia a ogni modifica.
+> 3. 🧾 **Il test che smaschera la prudenza teatrale, ed e' UNO:** *«se domani qualcuno legge
+>    SOLO i cancelli `T1..T5`, questa cautela lo raggiunge?»* Se la risposta e' no, non e' una
+>    cautela: e' un paragrafo.
+
+---
+
+## 🗺️🔀 CLASSE 657 — **IL BORDO DELL'ALTOPIANO E' DICHIARATO CON CELLE CHE APPARTENGONO A UN ALTRO SOTTOINSIEME DELLA GRIGLIA: sotto la REGOLA DICHIARATA DAL FILE STESSO l'ancora cambia, e con lei cambiano tutti i cancelli** (controllo-preventivo, 23/09/2026, su `R236b_sllookback_SUPREV_NASUSD_long.txt` — parente della **180**, che vieta gli insiemi definiti per differenza)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 657" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+`R236b` congela, **prima dei numeri**, una regola di scelta dell'ancora fatta apposta per
+non poter essere piegata:
+
+> `"Il pin e' il CENTRO GEOMETRICO del blocco CONTIGUO piu' ampio in cui OGNI cella`
+> `misurata sta sopra PF 1,00. Fra le celle centrali si prende quella col PF piu' BASSO."`
+
+E dichiara anche la convenzione giusta sui buchi: *"«Contiguo» qui vuol dire contiguo fra
+le celle MISURATE"*. ✅ Tutto corretto. 🔴 **Poi il bordo BASSO del blocco viene motivato
+cosi':**
+
+> `Verificato da me: la contiguita' si rompe ad AtrP 9 (0,894 e 0,913, sotto 1).`
+
+**Nel sottoinsieme LUNGO (`InpAllowLong=1, InpAllowShort=0`) di
+`scan_ABTG_SupertrendReversal_H1_NASUSD.csv` la riga `StMult 2,5 · AtrP 9` NON ESISTE.**
+`0,894` e `0,913` sono `StMult 2,5 · AtrP 9 · TP 2,5` e `TP 3,0` del sottoinsieme
+**CORTO** — cioe' del file gemello. Il bordo dell'altopiano di un lato e' stato chiuso con
+due celle dell'ALTRO lato.
+
+### 🔴 E non e' cosmetico: cambia l'ancora, e con lei tutto il round
+Sul lungo, a `StMult 2,5`, gli `AtrP` **misurati** sono `7 · 8 · 10 · 11 · 12 · 13 · 14`.
+`AtrP 8` fa **1,178** e **1,164** (tutte e due sopra 1). La contiguita' si rompe ad
+**`AtrP 7`** (0,792 · 0,820 · 0,805 · 0,747, tutte sotto 1). Quindi:
+
+| | blocco dichiarato | blocco vero sotto la stessa regola |
+|---|---|---|
+| estensione | `AtrP 10-14`, **8 celle** | `AtrP 8-14`, **10 celle** |
+| centro dell'intervallo | `(10+14)/2 = 12` | `(8+14)/2 = **11**` |
+| celle centrali | solo `TP 2,5` | `TP 1,5` (1,643) e `TP 2,5` (1,428) |
+| **ancora** | `AtrP 12 · TP 2,5` · **PF 1,279 · n 104** | `AtrP 11 · TP 2,5` · **PF 1,428 · n 112** |
+
+Il file scrive perfino *"e' il piu' ampio di tutta la griglia"*: **non lo e' nemmeno sotto
+la propria regola**. E l'ancora e' il perno di tutto: da lei escono il `w` implicito
+(0,338 -> 0,363), la banda di PF attesa, e la **soglia del cancello T2**
+(`1,279 x 1,05 = 1,343` -> `1,428 x 1,05 = 1,499`).
+
+> ### 🔴 LA REGOLA
+> 1. 🧾 **Ogni numero usato per chiudere un bordo si riporta con la CHIAVE INTERA della sua
+>    cella**, non col solo valore: `lato · StMult · AtrP · TP -> PF`. Un `0,894` nudo non
+>    dice a quale sottoinsieme appartiene, e su una griglia divisa per lato i sottoinsiemi
+>    hanno valori che si somigliano.
+> 2. 🔍 **Il bordo si verifica al contrario**: non *"dove si rompe?"* ma *"elenco per nome
+>    TUTTI i valori misurati dell'asse, e dico per ognuno se e' dentro o fuori"*. La cella
+>    che manca (`AtrP 9` sul lungo) si vede solo elencando, mai cercando.
+> 3. 📐 **Una regola di scelta «meccanica» non e' meccanica finche' non dichiara l'ASSE su
+>    cui si applica.** In `R236a` la stessa regola e' applicata lungo `TP_RR` (blocco di 4),
+>    in `R236b` lungo `AtrP` (blocco di 8): due assi diversi nello stesso round, e la scelta
+>    dell'asse resta **libera** — cioe' esattamente cio' che la regola prometteva di
+>    togliere. **L'asse si dichiara insieme alla regola.**
+
+---
+
+## 🔧🥇 CLASSE 658 — **IL ROUND METTE AD ASSE LA MANOPOLA DEBOLE E LA DICHIARA «L'UNICA», MENTRE SULLA RIGA DI CODICE ACCANTO C'E' QUELLA ADDITIVA CHE ARRIVA ALLA FRONTIERA — ed e' la stessa che un censimento di casa aveva gia' messa al PRIMO posto per quella sedia** (controllo-preventivo, 23/09/2026, su `R236a/b_sllookback_SUPREV_NASUSD_*.txt`)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 658" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+`R236a/b` spendono **20 passate a tick reali** su `InpSLLookback` per allargare lo stop
+della sedia `970913`, e lo giustificano cosi':
+
+> `>>> InpSLLookback e' l'UNICA manopola di questo EA che allarga lo stop.`
+
+**Falso.** `ABTG_SupertrendReversal.mq5` r.386-389:
+
+```
+double ext = isLong ? iLow(...iLowest(...,InpSLLookback,1)) : iHigh(...iHighest(...,InpSLLookback,1));
+double buf = InpSLBufferPips*pip;
+double sl  = isLong ? MathMin(stLine,ext)-buf : MathMax(stLine,ext)+buf;
+```
+
+`InpSLBufferPips` e' un **`double`** (r.77) e entra **ADDITIVO** sullo stop finale. Vale
+`3` = `0,03` punti indice: e' **trascurabile al valore attuale**, non **inerte per
+costruzione** — e le due cose non sono la stessa. Portarlo a `6800` ("pip" da 0,01 idx)
+sono **+68 punti indice esatti**, cioe' il buco intero (`27,10 -> 95,1 -> 39,6x`).
+
+🔴 **E il repository lo diceva gia', sulla stessa sedia, col primo posto assoluto:**
+`report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md` r.362 —
+
+> `🥇 InpSLBufferPips | 970913 SupRev_NAS_H1_Ott NASUSD H1 | 72% del pavimento di costo`
+> `(28,7x contro 40x). E' l'unica manopola di quell'EA che allarga lo stop … La soglia`
+> `dei 40x cade DENTRO l'asse`
+
+Verificato: su **137 CSV d'archivio** `InpSLBufferPips` ha **un solo valore, `3`** — e'
+libera **quanto** `InpSLLookback` (137 CSV, un solo valore, `5`). Non e' stata scelta la
+manopola disponibile: e' stata scelta **la peggiore delle due disponibili**.
+
+### 🔴 Il confronto, perche' la differenza e' di NATURA
+| | `InpSLLookback` (scelto) | `InpSLBufferPips` (scartato senza dirlo) |
+|---|---|---|
+| come entra | **dentro** `MathMax(stLine, ext(N))` | **additivo, fuori** dal `MathMax` |
+| arriva ai 40x? | 🔴 **no**, il file lo scrive da se' (20,8x a N=17) | 🟢 **si', per costruzione** |
+| serve un modello? | si', `sqrt(N/5)` **[ASSUNTO]** | 🟢 **no**: `stop = base + buf`, esatto |
+| lo stop e' misurabile dopo la corsa? | 🔴 no (buco B2 del file stesso) | 🟢 **si', per differenza**: e' il pin |
+| puo' essere inerte? | 🟢 si', ed e' il cancello T1 | 🟢 no: cambia **sempre** |
+
+> ### 🔴 LA REGOLA
+> 1. 🔎 **Prima di scrivere «e' l'UNICA manopola», si legge la RIGA DI CODICE che calcola
+>    la grandezza e si elencano TUTTI i simboli che ci compaiono.** Qui ne comparivano due,
+>    e stavano sulla stessa espressione.
+> 2. ⚖️ **«Trascurabile al valore di default» != «inerte».** Una manopola additiva a scala
+>    sbagliata **non e' morta: e' spenta**. La domanda giusta non e' *"quanto vale oggi"*
+>    ma *"che valore dovrebbe avere per chiudere il buco, ed e' un valore legale?"*.
+> 3. 🥇 **Prima di aprire un round su una sedia, si grepa la sedia nei CENSIMENTI.** La
+>    classifica delle manopole mai provate esiste (`CENSIMENTO_USCITE_MAI_PROVATE`): se il
+>    round non mette ad asse la manopola che sta al primo posto per quella sedia, **deve
+>    dire perche'**.
+> 4. 🧮 **A parita' di costo in passate, vince l'asse su cui la grandezza che motiva il
+>    round e' DERIVABILE ESATTAMENTE.** Un asse additivo si auto-misura; un asse dentro un
+>    `max()` no.
+
+---
+
+## 📉🎲 CLASSE 659 — **L'EFFETTO CHE IL ROUND PREVEDE E' PIU' PICCOLO DELLO SPOSTAMENTO DI PF CHE PRODUCE UNA SOLA OPERAZIONE CHE CAMBIA ESITO: il round non puo' rispondere alla propria domanda, e il «segno della pendenza» e' un lancio di moneta** (controllo-preventivo, 23/09/2026, su `R236a/b_sllookback_SUPREV_NASUSD_*.txt` — sorella della **655**, che copriva i BUCHI fra le bande; questa copre la RISOLUZIONE della banda)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 659" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+`R236a/b` costruiscono un contro-esempio **formalmente impeccabile** — tesi `PF` crescente
+(1,10 -> 1,16 corto; 1,13 -> 1,20 lungo), alternativa `PF` decrescente (0,91 / 0,95) — e
+dichiarano che *"si distinguono col SEGNO della pendenza"*. E dichiarano anche, con
+onesta', l'`n` atteso: **24 e 37 per tranche sul corto, 42 e 62 sul lungo**.
+
+🔴 **Ma con quegli `n` il segno non e' leggibile, e si dimostra con l'aritmetica del file
+stesso** (`w = 0,331`, `TP_RR 2,5`, quindi esiti `-1R` / `+2,5R`). **Quanto muove il PF UNA
+SOLA operazione che passa da perdita a vincita?**
+
+| tranche | n | PF di base | PF con UNA operazione ribaltata | **delta di 1 trade** | effetto PREVISTO da tutto l'asse | rapporto |
+|---|---:|---:|---:|---:|---:|---:|
+| corto IS | 24 | 1,250 | 1,500 | **0,250** | +0,058 | **4,3x** |
+| corto OOS | 37 | 1,234 | 1,391 | **0,157** | +0,058 | **2,7x** |
+| lungo IS | 42 | 1,279 | 1,418 | **0,139** | +0,064 | **2,2x** |
+| lungo OOS | 62 | 1,278 | 1,372 | **0,094** | +0,064 | **1,5x** |
+
+👉 **Su tutte e quattro le tranche, UNA operazione vale da 1,5 a 4,3 volte l'intero effetto
+che il round si aspetta di misurare.** E il dilemma e' chiuso, perche' non ha terza via:
+o la manopola **non cambia nessuna operazione** (e allora scatta il cancello `T1`,
+"inerte", e la domanda sul `PF` non si pone), **oppure ne cambia almeno una** — e allora il
+`PF` si sposta di **almeno 0,09-0,25 in direzione dettata da quella singola operazione**,
+seppellendo un segnale da 0,06.
+
+### 🟢 Il contro-argomento, e perche' non salva il round
+Le 5 celle girano sugli **STESSI dati**, quindi il confronto e' **appaiato**: le operazioni
+che non cambiano non portano rumore. ✅ Vero — **ma il rumore residuo vive esattamente
+dove vive il segnale**: nelle poche operazioni che cambiano, e ognuna di quelle pesa
+0,09-0,25 di PF. L'appaiamento **non riduce** la varianza del pezzo che conta.
+
+> ### 🔴 LA REGOLA
+> 1. 🎯 **Accanto all'effetto previsto si scrive sempre la RISOLUZIONE del banco**: di
+>    quanto muove il `PF` **una** operazione che cambia esito, a quell'`n` e a quel `TP_RR`.
+>    E' una divisione, si fa prima di lanciare. Se l'effetto previsto sta **sotto** la
+>    risoluzione, **il round non va lanciato in quella forma**.
+> 2. 🧮 **La formula, per non rifare il conto a mano**: con `v` vincite da `+RR` e `p`
+>    perdite da `-1R`, `PF = v·RR/p`; ribaltarne una da' `PF' = (v+1)·RR/(p-1)`. La
+>    differenza e' la **risoluzione** del banco.
+> 3. 🔁 **Non si abbassa l'asticella: si alza l'`n` o si cambia l'ASSE.** La via corta e'
+>    quasi sempre un asse la cui grandezza si misura **direttamente** (classe **658**)
+>    invece che attraverso il `PF`: li' la risoluzione non c'entra.
+> 4. 🚩 **Un contro-esempio ben scritto NON basta.** `R236a/b` hanno due ipotesi a segno
+>    opposto, un terzo esito dichiarato e il falsificatore scritto in una riga: tutto
+>    giusto, **e comunque il banco non le separa**. La regola del 10/09 chiede che
+>    l'alternativa produca un numero **diverso**; la 659 chiede che sia anche
+>    **MISURABILE**.
+
+---
+
+## 📏🧱 CLASSE 660 — **UNA LEGGE DI SCALA APPLICATA ALL'INTERA GRANDEZZA QUANDO SOLO UNA DELLE DUE COMPONENTI DEL `max()` DIPENDE DALL'ASSE: il numero e' un TETTO e viene speso come CENTRO — e il file lo contraddice da solo, nel cancello della pagina dopo** (controllo-preventivo, 23/09/2026, su `R236a/b_sllookback_SUPREV_NASUSD_*.txt`)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 660" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+La tabella del costo di `R236a/b` scala lo stop misurato con
+`stop(N) = stop(5) x sqrt(N/5)` e dichiara l'assunto (*"cammino aleatorio … modello di
+primo ordine"*). ✅ Aritmetica **riprodotta al centesimo su tutte e dieci le celle**
+(`27,10 x sqrt(3,4) = 49,97`; `/2,40 = 20,8x`; `49,97/96,0 = 52%` — tutto torna).
+
+🔴 **Ma lo stop non e' l'estremo: e' un `max`.** r.389:
+`sl = MathMax(stLine, ext(N)) + buf`. **`stLine` non dipende da `N`.** Quindi:
+
+`stop(N)/stop(5) = 1` ogni volta che la linea Supertrend vince il confronto, e
+`<= ext(N)/ext(5)` sempre. **La legge `sqrt` e' un TETTO, non un centro.**
+
+🔴 **E il file lo sa**, perche' una pagina dopo costruisce il cancello `T1` proprio su
+quella possibilita':
+
+> `Se la linea Supertrend vince quasi sempre il confronto, allora N NON TOCCA NIENTE e la`
+> `manopola e' inerte.`
+
+Quindi lo stesso file **assume crescita piena `sqrt`** nella tabella che decide se il round
+vale la pena, e **ammette crescita potenzialmente ZERO** nel cancello che lo apre. Le due
+cose non possono stare insieme: la banda vera a `N=17` non e' `20,8x`, e'
+**`[11,3x ... 20,8x]`**, e il tetto e' irraggiungibile per costruzione.
+
+🔴 **Seconda spinta nella stessa direzione, dal campionamento**: le operazioni non sono
+prese a caso, sono prese **subito dopo un rimbalzo sul Supertrend**, cioe' quando il
+prezzo ha appena fatto un estremo. Vicino a un estremo appena formato, `ext(N)` cresce con
+`N` **molto piu' lentamente** che su un punto qualunque della serie.
+
+### 🔴 E la base su cui la legge poggia era gia' stata CORRETTA, non affiancata
+Il file porta due basi "come banda": `(A) 27,10 n=5` e `(B) 51,65 n=4`, citando
+`CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.412. Quella riga pero' dice:
+
+> `51,65 idx [MIS] n=4  ✏️ 18/09 (sera) 🔴 → 27,10 [MIS] n=5 (gamba nuova 11/09)`
+
+La freccia e' una **CORREZIONE**, non un'alternativa. E si dimostra: se `(A)` fosse `(B)`
+con una gamba in piu', quella gamba dovrebbe valere `27,10x5 - 51,65x4 = **-71,1 idx**`,
+cioe' una distanza **negativa**. Impossibile: le due non sono due medie dello stesso
+campione, **una sostituisce l'altra**. 👉 E `(B)` e' l'unica base che produce il
+`39,7x = 99% della frontiera`, cioe' **l'unico numero del round che faccia sembrare
+raggiungibile l'obiettivo**.
+
+> ### 🔴 LA REGOLA
+> 1. 🧱 **Prima di scalare una grandezza, si guarda se e' una COMPOSIZIONE.** Se e'
+>    `max(fisso, variabile)` o `min(...)`, la legge di scala vale **solo sul ramo
+>    variabile** e il risultato e' un **limite superiore**: si scrive `<=`, e si scrive
+>    anche il **pavimento** (il valore quando il ramo fisso vince sempre).
+> 2. 🔁 **Coerenza fra la tabella che GIUSTIFICA il round e il cancello che lo APRE.** Se
+>    un cancello contempla "effetto zero", la tabella non puo' assumere "effetto pieno":
+>    o la tabella diventa una banda, o il cancello e' finto.
+> 3. ✏️ **Una riga d'archivio con una freccia di correzione (`✏️ ... →`) NON offre due
+>    misure: ne offre UNA, l'ultima.** Trasformare una correzione in una "banda" e'
+>    resuscitare il numero che qualcuno aveva gia' bocciato — e capita **sempre** quando il
+>    numero resuscitato e' quello che conviene. Se serve davvero una banda, si prende la
+>    **dispersione dichiarata sulla stessa riga** (qui: `min 9,7 · max 151,9`).
