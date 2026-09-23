@@ -1,0 +1,275 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  R234b -- L'ASSE E' IL TIMEFRAME. Corto puro su D30EUR, TICK REALI.
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+# ==========================================================================
+#
+#  A CHE DOMANDA RISPONDE, ed e' UNA SOLA
+#    Il corto dell'EMA200 e' VIVO sul Dow e MORTO su DAX e Nasdaq. Questo
+#    e' misurato (tabella sotto). Finora pero' e' stato misurato su DUE
+#    TF soli -- H1 e H4 -- e su nessuno dei tre indici qualcuno ha mai
+#    provato M30, H2, H3.
+#    >>> DOMANDA: il corto dell'EMA200 e' una proprieta' del SIMBOLO
+#        (il Dow) o del TIMEFRAME (l'ora)? Con due TF soli non si puo'
+#        rispondere: servono almeno tre punti per vedere una curva.
+#    Questo file produce la colonna D30EUR della curva TF x SIMBOLO.
+#
+#  PERCHE' E' AMMESSO ALLARGARE QUI, e va detto subito
+#    Regola di casa del 19/08: "si allarga su MOTORI, MECCANISMI,
+#    SIMBOLI, TF, GESTIONE DELL'USCITA; NON si allarga sui PARAMETRI di
+#    un motore gia' dichiarato senza edge."
+#    >>> Qui l'asse e' il TF: dentro la regola, esplicitamente.
+#    >>> E NON si rifa' la griglia delle distanze (InpOrder1Atr /
+#        InpOrder2Atr / InpTP_RR) su DAX e Nasdaq: quella griglia e' gia'
+#        girata e ha dato 0 celle positive su 56 (vedi tabella). Rifarla
+#        piu' fitta cercherebbe solo picchi di rumore -- il difetto che
+#        la regola del 19/08 vieta per nome.
+#
+#  CIO' CHE E' GIA' MISURATO -- contato da me il 23/09/2026 sui CSV
+#  grezzi in backtest_pipeline/risultati_archivio/EMA200/, riga per riga.
+#    Celle CORTO PURO (InpAllowLong=0, InpAllowShort=1) con PF > 1,00:
+#      H1  U30USD  32 / 32     <-- TUTTE positive. PF migliore 1,84201
+#                                   (RF 5,23534, DD 3,8050%, n 300)
+#      H1  NASUSD   0 / 30     <-- PF migliore 0,94958 (RF -0,20146)
+#      H1  D30EUR   0 / 26     <-- PF migliore 0,92752 (DD 10,8433%)
+#      H4  U30USD  19 / 27     <-- PF migliore 1,61080 MA RF 0,88157 e
+#                                   n 23: il merito NON si legge (n<150)
+#      H4  D30EUR   1 / 34     <-- PF 1,00575, RF 0,01014: e' rumore
+#      H4  NASUSD  ASSENTE     <-- lo scan H4 del Nasdaq NON ESISTE
+#    [!] QUESTI SCAN SONO **OHLC**, non tick reali: e' il banco
+#        OTTIMISTA. Quindi lo 0/56 di DAX+Nasdaq e' un verdetto dato
+#        nella condizione piu' FAVOREVOLE ai due simboli, e questo lo
+#        rende piu' pesante, non meno.
+#    [!] E la finestra di quegli scan NON E' DICHIARATA nel file di
+#        analisi (risultati_archivio/EMA200/ANALISI_EMA200.md). Non la
+#        invento: so solo che sugli indici il pavimento dei dati BCM e'
+#        2024.09.26 (sonda del 17/08), quindi non puo' coprire piu' di
+#        ~22 mesi. Per questo i numeri di QUESTO round non si confrontano
+#        con quelli dello scan: si confrontano FRA LORO, sullo stesso
+#        banco e sulla stessa finestra.
+#
+#  L'ANCORA A TICK REALI, che e' il vero metro di paragone
+#    R110 (tick reali, split 40/60 su 2024.09.26-2026.06.30, deposito
+#    100.000), CORTO PURO su U30USD H1, letto nei CSV grezzi:
+#      IS  2024.09.26 -> 2025.06.09 : PF 1,23153 | DD 4,5113% | n 125
+#      OOS 2025.06.10 -> 2026.06.30 : PF 1,89147 | DD 2,6628% | n 302
+#    Questo file usa LA STESSA finestra, LO STESSO split, GLI STESSI pin
+#    e LO STESSO deposito. Vedi il cancello T1.
+#
+#  IL CANCELLO DEL COSTO, COMPILATO PRIMA DI LANCIARE
+#    Regola di casa: stop >= 40 x spread, altrimenti il TF si dichiara
+#    ESCLUSO PER COSTO col numero accanto.
+#    Spread D30EUR: mediana MISURATA 1,70 punti indice nelle ore di borsa
+#      08-16 (risultati_archivio/spread_flotta/spread_orario_D30EUR.csv,
+#      righe 8-16). Frontiera: 40 x 1,70 = 68,0 punti indice.
+#    ATR(14) del DAX: M30 = 36,4-41,4 idx [DERIVATO],
+#      report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md r.16; H4 = 76,1
+#      idx [DERIVATO] (r.53).
+#    Rapporto stop/ATR di QUESTO motore: 104,3 / 83,1 = 1,255, dove
+#      104,3 e' lo stop MISURATO della sedia 771531 e 83,1 e' il centro
+#      dell'ATR(14) H1 del Dow MISURATO (78,0 n=5 e 88,2 n=33,
+#      CANCELLO_COSTO_FLOTTA r.410). E' un rapporto di GEOMETRIA del
+#      motore (SL = 1 ATR oltre il 2o ordine), quindi si trasporta da un
+#      simbolo all'altro meglio di quanto si trasporti un ATR.
+#    Frontiera compilata, tutto [DERIVATO] salvo dove detto:
+#      M30  45,7-52,0 idx ->  26,9-30,6x   ROSSO: molto SOTTO 40
+#      H1   64,6-73,5 idx ->  38,0-43,2x   ARANCIONE: 40 cade DENTRO
+#      H2   91,4-104,0 idx -> 53,8-61,2x   VERDE
+#      H3  119,6 idx (centro) -> 70,4x     VERDE
+#      H4   95,5 idx (da ATR 76,1) -> 56,2x VERDE
+#    [!] Da leggere bene: sul DAX la direzione che AIUTA il costo e'
+#        SALIRE di TF, non scendere. M30 e' il TF che il costo boccia
+#        piu' nettamente di tutti, su tutti e tre gli indici.
+#
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA (regola del 10/09)
+#    L'ipotesi comoda e' "il corto e' del Dow, punto". Se fosse vera,
+#    allora DEVONO valere tutte e due queste cose:
+#      (a) nessun TF deve rendere positivo il corto su DAX e Nasdaq;
+#      (b) il Dow deve restare il migliore dei tre A OGNI TF.
+#    >>> L'ipotesi ALTERNATIVA e' "il corto e' dell'ORA, non del
+#        simbolo": e quella predice un MASSIMO a un TF preciso su TUTTI
+#        e tre, con il Dow semplicemente piu' in alto.
+#    >>> Le due ipotesi si distinguono guardando la FORMA della curva,
+#        non il livello. Per questo il round gira sui tre simboli con lo
+#        stesso asse: una curva sola non distingue niente.
+#    >>> E c'e' un esito che falsifica la mia stessa aspettativa, ed e'
+#        scritto qui prima: se una cella DAX o Nasdaq esce PF >= 1,10
+#        con n >= 150 E passa il cancello del costo, allora "il corto e'
+#        del Dow" e' FALSA e va cancellata dai referti dove l'ho scritta.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    FREQUENZA. Misurata a H1 su U30USD (R110, corto puro): 125 op in 256
+#      giorni (IS) e 302 in 385 (OOS) = 0,49 e 0,78 op/giorno. Scendendo
+#      a M30 le barre raddoppiano: attesa n fra 1,3x e 2,2x quello di H1
+#      (non 2,0x esatto -- l'EMA200 su M30 e' una linea diversa, e la
+#      scadenza dei pendenti e' 6 BARRE, quindi si dimezza in ore).
+#      Salendo: H2 attesa 0,55-0,75x di H1, H4 attesa 0,20-0,35x.
+#      [!] Il collasso di n a H4 e' gia' misurato ed e' brutale: 23
+#          operazioni contro 300 a H1, cioe' 0,077x. Se H2 e H3 stanno
+#          sulla retta fra questi due punti, la frequenza e' il prezzo
+#          vero del TF alto, e va detto col numero.
+#    MERITO. Sul Dow mi aspetto il massimo a H1 o H2 e un calo a H3/H4.
+#      Su DAX e Nasdaq mi aspetto PF sotto 1,00 a ogni TF (e' l'ipotesi
+#      comoda: per questo c'e' il contro-esempio sopra).
+#    RISCHIO. DD del corto puro atteso 2-8% a rischio 1,0% su tutti e
+#      tre. Il DAX a H1 nello scan OHLC faceva 10,84%: se a tick reali
+#      quel numero si ripete o peggiora, e' un fatto che si legge a
+#      QUALUNQUE n (Emendamento B del 16/08) e va scritto.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    T1  CANCELLO CROCIATO, e costa ZERO passate in piu'. La cella H1 del
+#        file R234a (U30USD) deve uscire IDENTICA AL CENTESIMO all'ancora
+#        R110 corto puro: IS PF 1,23153 / DD 4,5113 / n 125 e OOS PF
+#        1,89147 / DD 2,6628 / n 302. Se non lo e', il banco non e'
+#        quello che crediamo e NESSUN numero dei TRE file si legge --
+#        compresi quelli di DAX e Nasdaq, che stanno sullo stesso banco.
+#        [!] Questo cancello e' il motivo per cui i pin di questo file
+#            sono la copia esatta di R110 e NON la cella migliore dello
+#            scan OHLC (che sarebbe InpOrder1Atr 0,15 / InpTP_RR 3,0):
+#            una cella piu' bella senza cancello crociato vale meno di
+#            una cella confrontabile.
+#    T2  COSTO. Una cella il cui stop/spread e' SOTTO 40x non puo' essere
+#        PROMOSSA, qualunque PF faccia. Puo' essere LETTA (serve a dare
+#        la forma della curva) ma nel referto va marcata ESCLUSA PER
+#        COSTO col suo numero. Per M30 la tabella sopra dice gia' che
+#        questo succedera' su tutti e tre i simboli.
+#        [!] E va detto perche' il cancello esiste, se la corsa e' a tick
+#            REALI e lo spread lo paga gia' dentro: il 40x non serve a
+#            pagare lo spread (quello e' gia' pagato), serve a dire che
+#            uno stop cosi' sottile NON REGGE allo slippage e
+#            all'allargamento dello spread che il backtest non simula.
+#    T3  RISCHIO, a qualunque n. DD del corto puro <= 10,00% a rischio
+#        1,0%. Peggior Giornata (colonna del CSV): allarme a -3,00%.
+#        Sopra: si scrive nel referto e la taglia si rifa' prima di
+#        qualunque discorso di schieramento.
+#    T4  MERITO. Si legge SOLO sulle celle con n >= 150 nella gamba OOS
+#        (Emendamento A del 16/08). Sotto: la cella e' [NON MISURATO PER
+#        IL MERITO], non "brutta".
+#    T5  ALTOPIANO, non picco. Con 5 celle sull'asse, una cella si puo'
+#        proporre solo se almeno UNA cella ADIACENTE sull'asse TF e'
+#        anche lei sopra i cancelli. Una cella sola fra due celle sotto
+#        1,00 e' rumore e si dichiara tale.
+#    T6  NIENTE PROMOZIONI DA QUESTO ROUND. Questo round SCEGLIE UN TF DA
+#        APPROFONDIRE, non una sedia. Una sedia nuova pretende poi la sua
+#        finestra fuori campione, il suo contratto e la firma di Claudio.
+#
+#  BUCHI DICHIARATI
+#    - UNA SOLA FINESTRA, e contiene UN solo regime lungo (toro) piu' una
+#      discesa di nove settimane. Emendamento C (prova di regime) NON
+#      soddisfatto: sugli indici BCM non e' soddisfabile, i dati partono
+#      dal 2024.09.26.
+#    - LA SCALA CAMBIA TUTTA INSIEME. Cambiare InpTF non muove UNA
+#      manopola: muove l'EMA200, l'EMA14, l'ATR, le distanze degli
+#      ordini, lo stop, il target E la scadenza dei pendenti (6 BARRE del
+#      TF: 3 ore su M30, 24 su H4). Quindi questo round misura "il motore
+#      a quella scala", non "il TF a parita' di tutto il resto". Non e'
+#      un difetto del file: e' cosa vuol dire cambiare TF in questo EA, e
+#      va scritto nel referto ogni volta che si cita un numero.
+#    - LO STOP DEGLI ALTRI TF E' [DERIVATO], non misurato. La scalatura
+#      con la radice del tempo e' PRUDENTE nella direzione che conta: il
+#      DAX ha ATR(H4) 76,1 misurato contro i 103-117 che la radice
+#      predirebbe da M30, cioe' l'ATR vero cresce PIU' LENTAMENTE della
+#      radice. Tradotto: scendendo a M30 lo stop vero e' PIU' GRANDE di
+#      quello che ho scritto, quindi il mio giudizio su M30 e' il piu'
+#      severo possibile, non il piu' comodo.
+#    - LA GEOMETRIA E' QUELLA DI R110, NON QUELLA DELLA SEDIA VIVA. La
+#      sedia 771531 in campo ha InpOrder2Atr 0,35; qui c'e' 0,30, perche'
+#      il cancello T1 pretende i pin di R110. La differenza sposta la
+#      distanza fra i due ordini di 0,05 ATR (~4 punti indice sul Dow) e
+#      NON sposta lo stop, che e' 1 ATR oltre il 2o ordine in tutti e due
+#      i casi. Dichiarato, non nascosto.
+#    - GUARDIAN. InpUsaGuardian=true e' il default, ma nel tester le
+#      GlobalVariable del Guardian non esistono e la guardia lascia
+#      passare tutto (fail-open). Identico a R110: i numeri restano
+#      confrontabili.
+#    - RISCHIO 1,0% qui, 0,65% in campo: ogni DD di questo file si
+#      moltiplica per 0,65 per confrontarlo col forward.
+#
+#  L'ASSE E' UN ENUM: il conto delle celle NON e' aritmetico (classe 287)
+#    InpTF e' ENUM_TIMEFRAMES. Su un input enum MT5 IGNORA IL PASSO e
+#    spazzola i MEMBRI compresi fra start e stop. Fra 30 e 16388 i membri
+#    sono CINQUE: 30 (M30), 16385 (H1), 16386 (H2), 16387 (H3), 16388
+#    (H4). Il conto aritmetico direbbe 16359 celle: NON si guarda.
+#    >>> H3 non serve a nessuno ed e' li' perche' su un asse enum non si
+#        puo' saltare un membro. Costa 2 passate e si legge insieme agli
+#        altri: e' un punto in piu' sulla curva, non uno spreco.
+#    >>> CELLE 5 x 2 TRANCHE = 10 PASSATE per file, 30 sul round intero.
+#
+#  BANCO: Modello 4 (TICK REALI). Deposito 100000 -- lo stesso di R110
+#  (verificato: RIGA_R112_EMADOW_CONTRATTO.ps1 r.204, R112_CRITERI.md
+#  r.63, CENSIMENTO_CONTRATTI_v2.md r.378). A 10.000 MathFloor taglia il
+#  lotto, la sedia rischia ~0,87% invece di 1,00% e i DD non si
+#  confrontano piu' con niente (classe 646).
+#  SPLIT: @FRAZIONEIS 0.40, DICHIARATA QUI SOTTO NEL FILE e non dalla
+#  riga di lancio -- RIGA_ROUND_VPS.ps1 non ha nessuna occorrenza di
+#  "Frazione" e non potrebbe inoltrarla (classe 647). 0.40 e' lo stesso
+#  split di R110, ed e' cio' che rende possibile il cancello T1.
+#  @PERIODO RESTA H1 IN TUTTE LE CELLE, ED E' VOLUTO: @PERIODO e' il TF
+#  del GRAFICO nel tester (walkforward_generico.ps1 r.188), InpTF e' il
+#  TF che LEGGE IL MOTORE (r.104-105, 126, 149, 191). Tenendo il grafico
+#  fermo, l'unica cosa che cambia fra le celle e' il motore. A tick reali
+#  il grafico non cambia i tick consegnati, quindi il banco resta identico.
+#  @DAQUANDO: 2024.09.26 = pavimento MISURATO dei tick sugli indici
+#  (sonda del 17/08, REFERTO_SONDA_STORICO_17-08.md r.46). Sotto non si
+#  scende (classe 590).
+@SIMBOLO  D30EUR
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+#
+# --- I FISSI: copia esatta di prove/R110_EMADOW_02_short.txt.
+InpUsaGuardian=true
+# InpTF -> E' L'ASSE, in fondo al file.
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+# CORTO PURO: il lungo e' SPENTO in tutte le celle. E' il punto del round.
+InpAllowLong=false
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito: pin di stringa vuota =
+# ignorato da MT5 (controlla_prova.py controllo 3). Default = "".
+InpComment=R234b EMADAX TF S
+# MAGIC FISSO E VERGINE 764201 -- verificato repo-wide il 23/09/2026:
+# grep -rl "764201" . --exclude-dir=.git --exclude-dir=.claude -> 0 file.
+# VIETATI: 771531 (sedia viva), 7633xx (R110), 7641xx (i file LATI).
+InpMagic=764201
+InpMaxSpread=0
+InpVerbose=true
+InpFridayClose=false
+InpFridayCloseHour=20
+#
+# --- L'UNICO ASSE (5 celle x 2 tranche = 10 passate)
+#     membri enum fra 30 e 16388: M30(30) H1(16385) H2(16386) H3(16387)
+#     H4(16388). Il PASSO 1 e' IGNORATO da MT5 sugli enum (classe 287).
+InpTF=16385||30||1||16388||Y
+# ==========================================================================
