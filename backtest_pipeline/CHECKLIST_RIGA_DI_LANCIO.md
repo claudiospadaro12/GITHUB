@@ -32984,3 +32984,168 @@ mercato, ed era un fatto sul warm-up degli indicatori»*) trasportato dal **filt
 >    un contatore sul ramo muto (`ema<=0||atr<=0`) stampato a fine corsa — **la riparazione gia'
 >    fatta nella classe 521** — dice la data del primo ingresso possibile, cella per cella,
 >    senza nessuna passata in piu'.
+
+---
+
+## ⚖️🪦 CLASSE 654 — **UN ROUND SU UN MOTORE GIA' BOCCIATO SI DIFENDE CON UNA DEFINIZIONE («il lato non e' un parametro») INVECE CHE CON L'IDENTITA' CHE LA RENDE VERIFICABILE — e il divieto che lo colpisce PER NOME non viene citato, insieme al precedente che lo avrebbe assolto** (controllo-preventivo, 23/09/2026, su `R235a/b/c/d_lato_MIM_*.txt` — figlia della regola del 19/08 e del certificato di morte del 09/09)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 654" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+`ABTG_IntradayMomentum` e' **BOCCIATO 0/6 su NASUSD** da R98 (23/08/2026) con un cancello
+zero S0 dichiarato *«matematicamente impossibile da superare»* (−0,31 punti indice per
+operazione su 410, **gia' al netto dello spread**). La regola del 19/08 vieta di allargare
+**sui parametri** di un motore dichiarato senza edge. R235 mette il **LATO** ad asse su
+NASUSD **e su U30USD**, e si dichiara ammesso con questa frase:
+
+> `il LATO non e' un parametro d'ingresso, e' la DECOMPOSIZIONE del motore`
+
+🔴 **Tre cose non tornano, e sono tre cose diverse.**
+
+1. **La frase e' falsa alla lettera.** `InpAllowLong` e `InpAllowShort` sono
+   `input bool` a r.143-144 del sorgente, e R98 **ha gia' girato esattamente queste due
+   celle** (`prove/R98diagNoLong_NASUSD.txt`, `prove/R98diagNoShort_NASUSD.txt`). Chiamarlo
+   "non un parametro" e' una **definizione**, e una definizione non si puo' falsificare:
+   con quella porta aperta, qualunque input si puo' ribattezzare "decomposizione".
+2. **L'argomento VERO e VERIFICABILE c'era, e il file lo dimostra venti righe piu' sotto
+   senza usarlo qui**: le due celle pure sono una **PARTIZIONE** della cella L+S, perche'
+   `MIM_Direzione` r.272-273 applica il flag **dopo** il segno di `r1` (azzera, non
+   ribalta) e si opera al massimo una volta al giorno. L'identita' `n(L)+n(S)=n(L+S)` e'
+   **il cancello stesso**: se non tiene, non era una decomposizione. 👉 **Questa e'
+   falsificabile; "non e' un parametro" no.**
+3. 🔴 **E il divieto che colpisce META' DEL ROUND per nome non e' citato.**
+   `report/SWEEP_MECCANISMI_2026-08-23.md` **r.421** (voce S5) dice testualmente, su
+   QUESTO motore: *«Spostare lo stesso motore sul Dow e' "parametri diversi di un motore
+   morto" con un simbolo al posto di un parametro. Se qualcuno lo vuole riaprire, deve
+   prima portare una ragione economica per cui il Dow sia diverso»*. `R235c`/`R235d`
+   **sono** quel porting, a livello di cella. Il file non lo nomina.
+
+### 🟢 Quello che invece assolve il round, ed e' anch'esso NON CITATO
+- 🟢 **La ragione economica chiesta da S5 e' gia' stata portata**, e da qualcun altro:
+  `prove/R141b_momentum_U30USD_gemello.txt` r.22-28 (*«il paper e' su SPY… Dow e Nasdaq
+  sono i due indici USA che abbiamo… se il momentum di fine seduta e' un fatto della
+  CAMPANELLA USA deve vedersi su entrambi»*), piu' la **casella 4 del certificato di
+  morte** (simboli gemelli).
+- 🟢 **Lo stato in registro OGGI non e' «MORTO»**: `REGISTRO_TEST.md` r.3516-3517 porta
+  `r141a`/`r141b` come ⏸️ **NON GIUDICABILE** (*«IS a 4 operazioni dal pavimento»*), e
+  r.3117 elenca l'EA come ⚪ **NON ANCORA MISURATO**. 👉 **R235 continua R141, non riapre
+  R98** — ed e' un fatto scritto, non un'opinione.
+- 🟢 **`T5` (nessuna promozione) e' congelato nel file** e R52 e' citato correttamente.
+
+> ### 🔴 LA REGOLA
+> 1. ⚖️ **Un round su un motore gia' bocciato non si ammette con una DEFINIZIONE. Si
+>    ammette con un'IDENTITA' che il round stesso puo' fallire.** Su un asse di lato
+>    l'identita' e' `n(L)+n(S)=n(L+S)` (classe **641**): scrivila come cancello, non come
+>    attesa.
+> 2. 🔎 **Prima di scrivere «e' ammesso lo stesso», si cerca il divieto PER GEOMETRIA e
+>    non per nome di round** (classe **640**): non basta `grep R98`, serve *«chi ha gia'
+>    scritto che questo motore non si sposta di simbolo?»*. Qui la riga stava in un
+>    **referto di caccia**, non in un referto di round.
+> 3. 📌 **E si cita anche la RISPOSTA al divieto, se esiste.** Un file che nomina solo
+>    l'accusa sembra non averla vista; un file che nomina solo l'assoluzione sembra
+>    reticente. **Si scrivono tutte e due, con file e riga.**
+> 4. 🪦 **Lo stato in `REGISTRO_TEST.md` si RILEGGE al momento di scrivere il file prova.**
+>    Fra la bocciatura e oggi possono esserci round che l'hanno gia' riaperta: qui fra R98
+>    (23/08, BOCCIATO) e R235 (23/09) c'e' R141 (12/09, NON GIUDICABILE), e cambia
+>    completamente che cosa il round deve giustificare.
+
+---
+
+## 🎯🕳️ CLASSE 655 — **IL CONTRO-ESEMPIO DICHIARA DUE BANDE DIVERSE PER LA STESSA ATTESA, E FRA LE DUE RESTA UN BUCO IN CUI IL RISULTATO PIU' PROBABILE PUO' ATTERRARE SENZA CHE NESSUN RAMO SIA STATO SCRITTO PRIMA** (controllo-preventivo, 23/09/2026, su `R235a/b/c/d_lato_MIM_*.txt` — figlia diretta della regola del contro-esempio del 10/09 e parente della **178**)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 655" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+Il file costruisce un contro-esempio **buono nella struttura**: l'ipotesi alternativa
+(*«non c'e' segnale, c'e' solo la DERIVA dell'indice»*) produce un numero preciso —
+sotto deriva pura `|P/L short|/P/L long = n(short)/n(long)`, e sui numeri OOS di R98
+(long +7.688, short −987) fa **0,128**. ✅ Aritmetica verificata: `987/7688 = 0,12838`,
+e a `n(L)+n(S)=261` da' **n(long) 232 / n(short) 29**. ✅ E il ramo "atteso" porta a una
+conclusione **opposta** a quella comoda (*sarebbe LO SHORT ad avere il segnale per
+operazione migliore*): e' il marchio di un contro-esempio vero, non di una conferma.
+
+🔴 **Ma le bande sono DUE, e non coincidono.**
+
+| dove | che cosa dichiara | ratio `n(S)/n(L)` implicato |
+|---|---|---:|
+| sezione MERITO | ripartizione attesa **52-60% long** | **0,667 - 0,923** |
+| sezione CONTRO-ESEMPIO | *«se esce intorno a **0,75-0,95** (cioe' la ripartizione che mi aspetto)»* | **0,750 - 0,950** |
+
+👉 **`0,667-0,750` non sta in NESSUNO dei due rami dichiarati** — e non e' un angolo
+esotico: `0,70` vuol dire **58,8% long**, cioe' **dentro** la ripartizione che il file si
+aspetta. Un risultato li' non e' ne' *«la deriva spiega tutto»* (0,12) ne' *«la deriva non
+basta»* (0,75-0,95): e' terra libera, e si racconta **dopo**. ⚠️ Specularmente
+`0,923-0,950` e' dichiarato come "atteso" pur stando **fuori** dall'attesa scritta.
+
+### 🟢 Quello che invece regge, e va detto insieme
+- 🟢 **Le due spiegazioni sono davvero distanti** (0,128 contro ~0,8 = un fattore 6): la
+  misura **discrimina**, non e' una banda che contiene tutto (non e' il difetto della **178**).
+- 🟢 **Il terzo esito falsificante e' scritto**: se `n(L)+n(S) != n(L+S)`, nessuna delle
+  due letture vale (classe **641**).
+
+> ### 🔴 LA REGOLA
+> 1. 🎯 **Una banda di accettazione si scrive UNA volta sola, e se compare due volte le due
+>    scritture si confrontano PRIMA di consegnare.** Il controllo costa una divisione:
+>    `n(S)/n(L)` ai due estremi della ripartizione dichiarata.
+> 2. 🕳️ **I rami dichiarati devono COPRIRE la retta**: se esistono `A` e `B`, deve essere
+>    scritto anche **che cosa vuol dire cadere fra A e B**. Un buco fra due rami e' il posto
+>    in cui la narrazione a posteriori entra senza forzare la porta.
+> 3. 🧮 **Quando l'attesa e' espressa in un'unita' (percentuale di long) e il test in
+>    un'altra (rapporto fra due `n`), si converte e si scrivono TUTTI E DUE i numeri.**
+>    Qui la conversione non era stata fatta, e il disallineamento e' nato li'.
+
+---
+
+## 💸📉 CLASSE 656 — **IL CANCELLO DI COSTO E' STRESSATO SULL'ANCORA (il centro) E NON SULLA DISTRIBUZIONE (la coda), MENTRE IL NUMERO DI CODA CHE LO BOCCIA STA GIA' IN REPO, SCRITTO DA UN ROUND PRECEDENTE SULLO STESSO MOTORE E SULLO STESSO SIMBOLO** (controllo-preventivo, 23/09/2026, su `R235c/d_lato_MIM_U30USD_*.txt` — cugina della **650** e della **652**)
+
+**Numero grepato al momento di scrivere**: `grep -rn "CLASSE 656" . --exclude-dir=.git
+--exclude-dir=.claude` -> **0 occorrenze**.
+
+### Il caso reale
+La tabella del costo di `R235c/d` e' **fatta bene** su tutto quello che tocca: ora giusta
+(l'EA opera **solo** nell'ora 20, verificato a r.133-142 del sorgente, quindi la **650**
+non si applica), due ancore ADR dichiarate con la fonte, e la troncata etichettata come
+tale (quindi la **652** non si applica). ✅ Aritmetica **riprodotta al decimale**:
+`379,50 x sqrt(30/1440) = 54,78` -> stop `109,55` -> `/1,90 = 57,7x`; ancora vecchia
+`314,50` -> `90,79` -> `/1,90 = 47,8x`, **identico** a `REGISTRO_TEST.md` r.3117.
+
+🔴 **Ma la frase con cui si chiude la tabella promette piu' di quanto la tabella misuri:**
+
+> `VERDETTO DEL COSTO: PASSA. E l'ho provato a ROMPERE, non a confermare. Quattro letture`
+> `DIFENDIBILI … Nessuna delle quattro scende sotto la frontiera.`
+
+Le "quattro letture" sono **due ancore x due spread**: variano **il centro** (quale mediana
+di range giornaliero si usa) e **il livello dello spread**. 🔴 **Nessuna varia la
+DISTRIBUZIONE dei range giornalieri** — che e' la variabile che morde di piu', perche' lo
+stop e' `2,0 x ATR(M30)` e l'ATR **collassa nelle giornate quiete mentre lo spread no**.
+
+E quel numero **esiste gia' in casa, sullo stesso motore e sullo stesso simbolo**:
+`prove/R141b_momentum_U30USD_gemello.txt` r.44-58 —
+
+> `giorno al p25 del range (172,0 idx MISURATO): ATR(M30) 24,8 -> stop 49,7 -> 26,1x.`
+> `NON PASSA il 40x` … `FRAZIONE DELLE OPERAZIONI SOTTO IL PAVIMENTO DI LAVORO 40x:`
+> `almeno il 25%, [DERIVATO dal p25 del range]`
+
+👉 **La lettura che rompe il cancello non e' una delle quattro: e' la quinta, era scritta,
+e il file che dichiara di aver "ricostruito la loro catena" non la riporta.** Su NASUSD
+il gemello dello stesso numero e' `p25 239,4 -> 40,6x`, cioe' **appena sopra** la
+frontiera: e' **l'unico numero che separa i due simboli**, e sparisce anche quello.
+
+### 🟢 Quello che NON cambia
+- 🟢 **Il verdetto alla mediana resta PASSA** su tutti e due i simboli, e il pavimento
+  **DURO 13,3x** non e' in discussione (servirebbe un giorno 1,7 volte piu' quieto del p25).
+- 🟢 Il difetto e' di **completezza della dichiarazione**, non di aritmetica: nessuno dei
+  numeri scritti e' sbagliato.
+
+> ### 🔴 LA REGOLA
+> 1. 📉 **Su un motore il cui stop e' un MULTIPLO DI ATR, il cancello di costo si dichiara
+>    su DUE assi: l'ANCORA (quale mediana) e la CODA (il p25 del range giornaliero).**
+>    Variare solo l'ancora e' stressare il centro contro se stesso.
+> 2. 🔎 **Prima di scrivere «l'ho provato a rompere», si cerca chi ha gia' provato a
+>    romperlo**: `grep` del simbolo + del motore nei file prova precedenti. Qui bastava
+>    aprire il file gemello che lo stesso paragrafo cita per altro.
+> 3. 📌 **Il numero che boccia si scrive ANCHE quando non cambia il verdetto**, con la sua
+>    frazione di operazioni colpite. *«Almeno il 25% delle operazioni sotto il pavimento di
+>    lavoro»* e' un fatto che un referto di merito dovra' rileggere.
