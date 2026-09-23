@@ -221,6 +221,9 @@ def main():
         if not os.path.isdir(full):
             BUCHI.append((d, 'cartella assente')); continue
         for dp, dn, fn in os.walk(full):
+            # CLASSE 621: senza questa potatura si leggono i CSV nei worktree degli agenti (8,9x)
+            dn[:] = [d for d in dn if d not in ('.git', '.claude', 'worktrees', 'node_modules')]
+            if '/.git' in dp or '/.claude/worktrees' in dp: continue
             for f in fn:
                 if f.lower().endswith('.csv'): files.append(os.path.join(dp, f))
     files.sort()

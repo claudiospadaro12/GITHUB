@@ -126,7 +126,10 @@ def analizza(path):
 def main():
     files = []
     for dp, dn, fn in os.walk(ROOT):
-        if '/.git' in dp: continue
+        # CLASSE 621: i worktree degli agenti contengono COPIE dei CSV. Senza questa
+        # potatura si leggono 21.648 file invece di 2.422 (8,9x), e ogni conteggio e' falso.
+        dn[:] = [d for d in dn if d not in ('.git', '.claude', 'worktrees', 'node_modules')]
+        if '/.git' in dp or '/.claude/worktrees' in dp: continue
         for f in sorted(fn):
             if f.lower().endswith('.csv'): files.append(os.path.join(dp, f))
     files.sort()

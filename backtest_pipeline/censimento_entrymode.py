@@ -33,7 +33,10 @@ TARGETS = sys.argv[1:] or ["U30USD","SPXUSD"]
 out = []
 nfiles=0; nwith=0
 for root in ROOTS:
-    for dp,_,fns in os.walk(root):
+    for dp,dnn,fns in os.walk(root):
+        # CLASSE 621: senza questa potatura si leggono i CSV nei worktree degli agenti (8,9x)
+        dnn[:] = [d for d in dnn if d not in ('.git', '.claude', 'worktrees', 'node_modules')]
+        if '/.git' in dp or '/.claude/worktrees' in dp: continue
         for fn in fns:
             if not fn.lower().endswith(".csv"): continue
             p=os.path.join(dp,fn); nfiles+=1
@@ -84,7 +87,10 @@ TARGETS = sys.argv[1:] or ["U30USD","SPXUSD"]
 out = []
 nfiles=0; nwith=0
 for root in ROOTS:
-    for dp,_,fns in os.walk(root):
+    for dp,dnn,fns in os.walk(root):
+        # CLASSE 621: senza questa potatura si leggono i CSV nei worktree degli agenti (8,9x)
+        dnn[:] = [d for d in dnn if d not in ('.git', '.claude', 'worktrees', 'node_modules')]
+        if '/.git' in dp or '/.claude/worktrees' in dp: continue
         for fn in fns:
             if not fn.lower().endswith(".csv"): continue
             p=os.path.join(dp,fn); nfiles+=1
