@@ -32434,3 +32434,120 @@ capisca perche'.
 parziale al 50% e' accesa dove doveva, e nessuna sedia ha operato con la configurazione sbagliata.
 Il difetto e' **di tracciabilita'**, e si e' fatto vedere solo perche' qualcuno e' andato a cercare
 un'ancora.
+
+---
+
+## 🧮🕰️ CLASSE 643 — **L'IPOTESI `[INFERITO]` VIENE CHIUSA DA UNA MISURA, E NESSUNO TORNA A RIAPRIRE I REFERTI CHE CI AVEVANO COSTRUITO SOPRA: tre giorni di decisioni su un margine sbagliato di 3,3 volte, mentre il numero vero stava in un CSV in repo** (23/09/2026, R232)
+
+**Numero grepato al momento di scrivere**: `CLASSE 6xx` repo-wide si fermava a **642**, e
+`CLASSE 643` non compariva da nessuna parte.
+
+### Il fatto
+Tre referti di schieramento calcolano il margine della flotta su una leva **1:15**, e ogni cella
+porta onestamente l'etichetta `[INFERITO]` con la frase *«non abbiamo mai letto una specifica di
+contratto FTMO»* e perfino il modo per chiuderla (*«si chiude con uno screenshot»*, elencato come
+passo 5 e come buco B1).
+
+🟢 **La misura è poi arrivata davvero**, il **20/09 alle 17:08**: un CSV di sola lettura prodotto
+sul conto della challenge contiene la colonna `Margine1Lotto`, che esce da `OrderCalcMargin()` —
+cioe' il conto lo fa il broker. Da quella colonna la leva si legge in una riga: **1:50**.
+
+🔴 **E per tre giorni nessuno e' tornato indietro.** I tre referti hanno continuato a dire che la
+flotta impegna il **140,6%**, il **357,6%** e il **121,9%** del conto, e su quei numeri si e'
+ragionato per **stringere la rosa**. Il numero vero era in repo, in una cartella che si apre con
+un `cat`.
+
+### Perche' costa
+Il danno non e' il numero sbagliato: e' che **l'etichetta `[INFERITO]` aveva funzionato**. Il buco
+era dichiarato, il modo per chiuderlo era scritto, la misura e' stata fatta. 🔴 **Si e' rotto
+l'ultimo anello: nessuno ha chiuso il giro.** E un buco che viene chiuso senza che i suoi
+dipendenti lo sappiano e' **peggio** di un buco aperto, perche' adesso in repo convivono due
+verita' e quella vecchia e' scritta in grassetto.
+
+### La regola
+1. 🔗 **Un buco dichiarato porta la LISTA dei file che dipendono da lui.** Chi scrive
+   `[INFERITO]` / `[NON MISURATO]` scrive anche, nella stessa riga, **quali referti cadono** se
+   l'ipotesi cade. Senza quella lista il buco non e' tracciabile: e' solo educato.
+2. 🔍 **Chi CHIUDE un buco grepa il repo per il nome dell'ipotesi, lo stesso giorno.** Il grep e'
+   di dieci secondi: si cerca il numero assunto (qui `1:15`), il nome dell'ipotesi (qui `H2`) e la
+   frase-tipo (qui *«si chiude con uno screenshot»*).
+3. 📌 **La nota di correzione si scrive ACCANTO al numero vecchio, mai al posto suo**, e porta:
+   numero vecchio · numero nuovo · fonte della falsificazione · chi l'ha misurata · 🔴 **l'elenco
+   PER NOME delle conclusioni che cadono**. Una tabella corretta sotto una conclusione rimasta
+   sbagliata e' peggio di niente.
+4. ⚠️ **E si controlla se anche le ALTRE ipotesi del referto sono invecchiate.** Nel caso reale, la
+   stessa tabella era falsificata **due volte in modo indipendente**: la leva (1:15 -> 1:50) **e**
+   la taglia (una flotta mista 0,65/1,00 che nel frattempo era diventata tutta a 2,00). Chi avesse
+   corretto solo la leva avrebbe prodotto un secondo referto sbagliato.
+
+---
+
+## ⚖️📏 CLASSE 644 — **MARGINE E RISCHIO SONO DUE UNITA' DIVERSE, E IL LORO RAPPORTO VARIA CINQUE VOLTE FRA LE SEDIE: la sedia "piu' cara" e' la piu' EFFICIENTE in rischio, non la piu' pericolosa** (23/09/2026, R232)
+
+**Numero grepato al momento di scrivere**: repo-wide fermo a **642**; `CLASSE 644` assente.
+
+### Il fatto, con l'algebra in chiaro
+- **rischio** di una posizione = `lotti x stop x valore_punto` -> lo decide lo **STOP**;
+- **margine** di una posizione = `lotti x Margine1Lotto` -> lo decide il **PREZZO**.
+
+Quindi, a parita' di rischio in euro, il margine vale
+`margine / rischio = Margine1Lotto / (stop x valore_punto)`.
+🔴 **Quel rapporto non e' una costante della flotta: misurato sulle sei sedie della challenge va da
+2,66 a 13,41 — cinque volte.** Due sedie che rischiano **gli stessi euro** immobilizzano
+**4.253** e **21.464** euro.
+
+### Perche' costa
+Una classifica *«chi si mangia il conto»* ordinata **per margine** ordina in realta' **per stop
+stretto** — cioe' premia al contrario: la sedia col money management migliore risulta la piu'
+pericolosa. Nel caso reale un referto ha messo in testa, in grassetto, *«questa sedia da sola
+prende il 92% del conto»*: era la sedia con lo **stop piu' stretto** della rosa, e in quel 92%
+non c'era **nessuna** informazione di rischio.
+
+### La regola
+1. 🔢 **Non si somma il margine per giudicare il rischio, e non si somma il rischio per prevedere
+   il margine.** Sono due colonne diverse e vanno **stampate tutte e due**, con il loro rapporto
+   accanto.
+2. 📐 **Il rapporto `margine / rischio` si dichiara sedia per sedia**: e' il numero che dice quanto
+   costa in *spazio* un punto di *pericolo*, e senza di lui non si puo' rispondere a *«quante
+   sedie ci stanno»*.
+3. 🎯 **E la domanda "quante sedie ci stanno" va posta DUE volte**, perche' ha due risposte
+   diverse: *quante ne reggono il margine* e *quante ne reggono i muri di rischio*. Nel caso reale
+   la prima risposta era **cinque** e la seconda **due**: chi avesse letto solo la prima avrebbe
+   schierato tre sedie di troppo.
+
+---
+
+## 🧨🎫 CLASSE 645 — **UN CAP SUL RISCHIO APERTO CHE CONTA `PositionsTotal()` NON E' UN TETTO, SU UNA FLOTTA CHE ENTRA CON ORDINI PENDENTI: il cancello passa cinque volte in cinque momenti diversi, e il rischio si somma dopo** (23/09/2026, R232)
+
+**Numero grepato al momento di scrivere**: repo-wide fermo a **642**; `CLASSE 645` assente.
+
+### Il fatto
+Il cap sul rischio aperto simultaneo somma, per ogni **posizione**, la perdita che si prenderebbe
+allo stop. Il giro e' scritto su `PositionsTotal()`: 🔴 **gli ordini PENDENTI non entrano nel
+conto.** L'include lato EA lo dichiara per iscritto (*«non e' un cap istantaneo sul rischio: un
+ordine pendente gia' piazzato quando il cap era libero scattera' lo stesso»*), e la guardia e'
+chiamata — **correttamente** — immediatamente prima di **piazzare** il pendente.
+
+🔴 **Su una flotta in cui TUTTE le sedie entrano con ordini pendenti, questo vuol dire che il
+cancello viene valutato in momenti diversi della giornata, e ogni volta contro il rischio gia'
+APERTO in quell'istante.** Ogni sedia passa perche' quando piazza il suo pendente le altre non sono
+ancora entrate. Poi i pendenti scattano tutti, e il rischio simultaneo arriva al totale pieno — nel
+caso reale **12,00%** con un cap dichiarato a **4,00%**.
+
+### Perche' non e' un difetto del cap, ed e' importante dirlo
+🟢 **Il cap fa esattamente quello che promette**, ed e' utile: impedisce di **aggiungere** rischio
+quando ce n'e' gia' tanto **aperto**. Il difetto e' **nel modo in cui lo citiamo**: ogni volta che
+in un referto si scrive *«il cap ci tiene sotto il 4%»* si sta promettendo un **tetto** dove c'e'
+una **guardia sull'aggiunta**.
+
+### La regola
+1. 🏷️ **Un cap si cita per quello che conta.** Se conta posizioni, si scrive *«cap
+   sull'AGGIUNTA, misurato sulle posizioni APERTE»*, mai *«tetto al rischio simultaneo»*.
+2. 🔎 **Prima di usare un cap come vincolo in un conto di portafoglio, si guarda COME ENTRANO le
+   sedie**: a mercato (e allora il cap morde) o per pendente (e allora il cap morde solo sul
+   piazzamento). Si grepa il sorgente per `BuyStop` / `SellStop` / `BuyLimit` / `SellLimit`: e' un
+   grep, non un'opinione.
+3. 🧱 **E allora si va a cercare qual e' il tetto DURO che resta.** Nel caso reale, tolta l'illusione
+   del cap, il tetto vero e' risultato essere **il margine** — cioe' proprio il vincolo che la
+   stessa giornata aveva appena declassato a ultimo della fila. **Le due letture vanno fatte
+   insieme, o si passa da un errore all'errore opposto.**

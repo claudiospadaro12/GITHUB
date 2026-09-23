@@ -49,6 +49,51 @@ Conto reale **10105439** non toccato in nessun modo. Nessun round lanciato.
 > ⚠️ Etichetta della fonte: **[LETTO-VIA-SEARCH, 13/08]**, non verificata a terminale.
 > **Si chiude in 10 secondi domenica sera**, appena fatto il login: orologio di Market Watch contro orologio di Windows (§④ passo 4).
 
+> # ✏️🔴 NOTA DI CORREZIONE AL §② — **23/09/2026, sessione `R232`** · *il riquadro qui sotto NON è stato riscritto*
+>
+> 🔴 **LA COLONNA GIUSTA DEL §② È `1:50`, NON `1:15`. La leva indici di questo conto è MISURATA, e
+> vale 1:50.** Il titolo *«A leva 1:15 le sette sedie non entrano»* parte da un'ipotesi
+> **falsificata**: a 1:50 **entrano tutte e sette** — **36,6%** del conto a 0,65% e **56,3%** a 1,00%
+> (la colonna in corsivo del §② era già quella giusta, ed era relegata a un *«se fosse»*).
+>
+> - **chi l'ha misurata**: `R229` (`report/LA_LEVA_E_1_50_2026-09-23.md`, commit `36b7e9e5`),
+>   riverificata e allargata a **cinque simboli** da `R232`
+>   (`report/QUANTE_SEDIE_CI_STANNO_2026-09-23.md` §1);
+> - **fonte**: `backtest_pipeline/risultati_prove/PREVOLO_FTMO_specifiche_2026-09-20.csv`, colonna
+>   **`Margine1Lotto`** = **`OrderCalcMargin()`** — **il conto lo fa il broker**;
+> - **la prova**: `GER40.cash` quota in EUR e paga margine in EUR → `25.312,17 / 506,24 =`
+>   **`50,000` esatto, senza cambio di mezzo**. `US30.cash`, `US100.cash` e `XAUUSD` danno **lo
+>   stesso identico rapporto `57,428` = 50 × 1,1486**, con contract size **1 · 1 · 100**. `USDJPY`
+>   dà **`114,855` = 100 × 1,1486**: il **forex è 1:50 × 2 = 1:100**, gli indici e l'oro 1:50.
+>
+> ## 🟢 E CADE ANCHE L'ETICHETTA `[INFERITO]` CHE PESAVA SU TUTTO IL §②
+> L'ipotesi **H2** (*«margine = nozionale / leva»*) è marcata `[INFERITO]` in ogni cella del §②,
+> con la nota *«non abbiamo mai letto una specifica di contratto FTMO»*. 🟢 **Adesso H2 è
+> MISURATA**: cinque simboli, tre contract size diverse (`1`, `100`, `100.000`), due valute di
+> quotazione, **un solo cambio implicito (1,1486)**. 👉 **Le celle del §② smettono di essere
+> `[INFERITO]` e diventano derivazioni da un margine misurato.**
+>
+> ## 🔴 LE CONCLUSIONI DEL PACCHETTO CHE CADONO — dette per nome
+> 1. 🔴 **CADE** il titolo del §② e la frase *«la scelta Standard-vs-Swing è la scelta che decide
+>    se la rosa esiste»*: la rosa esiste, e il margine non la decide.
+> 2. 🔴 **CADE, alle taglie di cui parla il pacchetto (0,65-1,00%)**, il §③ *«il 4°, 5°, 6° ordine
+>    viene RIFIUTATO per margine insufficiente… si crede di correre con sette sedie e si corre con
+>    tre»*. 🟠 **Non cade in assoluto**: alla taglia **2,00%** che i preset portano **oggi** —
+>    riletta da `R232` nei dieci `.set` di `mql5/Presets/FTMO/`, **sette a `2.00`** e tre PostNews a
+>    `1.30`, **nessuno a 0,65 e nessuno a 1,00** — il margine torna a mordere, ma al **sesto**
+>    ordine: sei sedie aperte insieme chiedono **105,07%** del conto.
+> 3. 🟢 **RESTA VERO** il §③ nella parte che conta davvero: **lo stop-out per margine è
+>    irraggiungibile** perché i muri prop brecciano prima. A maggior ragione a 1:50.
+> 4. 🔴 **E si ribalta l'ordine dei muri.** Il pacchetto mette il margine per **primo**. A 1:50 è
+>    **l'ultimo**: a 2,00% per sedia il muro **giornaliero del 5%** è toccato dalla **terza** sedia
+>    aperta insieme, lo **statico 10%** dalla **quinta**, il **margine** dalla **sesta**
+>    (`R232` §3).
+>
+> 🔴 **Da leggere prima di tutto il resto: una leva più alta vuol dire più SPAZIO, non meno
+> RISCHIO.** Nessuna taglia, nessuna sedia in più e nessun parametro di rischio sono autorizzati da
+> questa nota. Restano **firma di Claudio**.
+
+
 > ## ② 🔢 **A LEVA 1:15 LE SETTE SEDIE NON ENTRANO: SERVONO 121.894 $ DI MARGINE SU UN CONTO DA 100.000, E QUELLO È IL CASO *PIÙ ECONOMICO* (taglia 0,65%).**
 > A 1,00% servono **187.529 $**. A 1,30% **243.788 $**.
 > 🟢 A **1:50** (che è la leva indici del conto **Standard**) le sette entrano tutte a qualunque
@@ -235,6 +280,16 @@ portano scritta **oggi**; la colonna **FTMO** è quella che devono portare **dom
 ---
 
 # ② 🔢 IL MARGINE — tabella parametrica taglia × leva
+
+> ✏️🔴 **NOTA DI CORREZIONE — 23/09/2026, `R232`.** In tutta la tabella qui sotto **la colonna da
+> leggere è `1:50`** (quella in corsivo): la leva indici del conto è **misurata** e vale 1:50, non
+> 1:15. L'ipotesi **H2** non è più `[INFERITO]`: è **MISURATA** su cinque simboli. Motivo, fonte e
+> conclusioni che cadono: **nota estesa al §② in testa a questo file** e
+> `report/QUANTE_SEDIE_CI_STANNO_2026-09-23.md` §1-§2. 🔴 **La taglia della tabella è vecchia**: i
+> preset FTMO oggi portano **`InpRiskPercent=2.00`**, riga che qui **non esiste** — il totale a
+> 2,00% e 1:50 è **105,07%** del conto per sei sedie (ricalcolo in `R232` §3).
+
+
 
 ## 2.0 🧮 DA QUALI IPOTESI PARTE IL CALCOLO (leggere PRIMA dei numeri)
 

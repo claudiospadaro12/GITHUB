@@ -377,6 +377,48 @@ da 72-120 a 62-105 minuti.**
 
 ---
 
+---
+
+> # ✏️🔴 NOTA DI CORREZIONE — **23/09/2026, sessione `R232`** · *il §⑨ qui sotto NON è stato riscritto: il numero vecchio resta dov'è*
+>
+> **Che cosa è caduto**: la **leva** con cui il §⑨ calcola il margine. Qui è **1:15**.
+> 🔴 **La leva vera degli indici su questo conto è 1:50** — fuori di **3,33 volte**.
+>
+> | | |
+> |---|---|
+> | **chi l'ha misurata** | `R229` (`report/LA_LEVA_E_1_50_2026-09-23.md`, commit `36b7e9e5`), **riverificata e allargata da 3 a 5 simboli** da `R232` (`report/QUANTE_SEDIE_CI_STANNO_2026-09-23.md` §1) |
+> | **fonte** | `backtest_pipeline/risultati_prove/PREVOLO_FTMO_specifiche_2026-09-20.csv`, colonna **`Margine1Lotto`**, che esce da **`OrderCalcMargin()`**: il conto lo fa **il broker**, non noi. CSV prodotto il **20/09 alle 17:08** sul conto della challenge |
+> | **la prova che non è un caso** | `GER40.cash` quota **in EUR** e il margine è **in EUR**: `25.312,17 / 506,24 = ` **`50,000`** esatto, **senza nessun cambio di mezzo**. `US30.cash`, `US100.cash` e `XAUUSD` danno tutti e tre **lo stesso identico rapporto 57,428**, cioè `50 × 1,1486` = 50 volte il cambio EUR/USD. 🔴 **Se l'ipotesi fosse sbagliata, tre simboli con tre contract size diverse (1 · 1 · 100) non darebbero lo stesso numero a tre decimali** |
+>
+> ## 🔢 IL RICALCOLO — le stesse righe del §⑨, a **1:50**, **accanto** alle vecchie
+>
+> | | margine totale delle **sei** sedie | % del conto **a 1:15** *(numero vecchio)* | % del conto **a 1:50** *(numero nuovo)* |
+> |---|---:|---:|---:|
+> | se fossero tutte a **0,65%** | 116.210 → **34.863 $** | 116,2% | 🟢 **34,9%** |
+> | flotta **mista** 0,65/1,00 | 140.576 → **42.173 $** | 🔴 140,6% | 🟢 **42,2%** |
+> | **`770511` da sola** a 1,00% | 46.001 → **13.800 $** | 🔴 46,0% | 🟢 **13,8%** |
+>
+> ## 🔴 LE CONCLUSIONI DEL §⑨ CHE CADONO CON IL NUMERO — dette per nome
+>
+> 1. 🔴 **CADE** la frase *«o si accetta la flotta mista **sapendo** che costa 140,6% di margine a 1:15»*. A 1:50 la flotta mista costa **42,2%**: **il margine non chiede nessuna firma.**
+> 2. 🔴 **CADE** *«`770511` da sola mangia il 46% del conto»* → ne mangia **13,8%**.
+> 3. 🔴 **CADE** *«si crede di correre con sei sedie e si corre con tre»* **alle taglie 0,65/1,00 di cui parla il §⑨**. 🟠 **Non cade in assoluto**: alla taglia **2,00%** che i preset portano **oggi**, il margine torna a mordere — ma al **sesto** ordine, non al quarto (`R232` §3: **105,07%** del conto con sei sedie aperte insieme).
+> 4. 🟢 **RESTA IN PIEDI, e non c'entra la leva**: tutto quello che il §⑨ dice sul **rischio** e sulla **firma della taglia**. `InpRiskPercent` resta territorio di Claudio.
+>
+> ## 🔴 E C'È UNA SECONDA FALSIFICAZIONE, INDIPENDENTE DALLA LEVA
+> La tabella del §⑨ descrive una **flotta mista 0,65 / 1,00 / 1,30**. 🔴 **Quella flotta non esiste
+> più.** Riletti uno per uno i dieci `.set` in `mql5/Presets/FTMO/` il 23/09: **sette portano
+> `InpRiskPercent=2.00`** (`770101` `770202` `770260` `770411` `770402` `770511` `771531`) e le tre
+> PostNews **1,30**. 👉 **Nessun preset è a 0,65 e nessuno è a 1,00.** Il §⑨ va letto come
+> **cronaca del 20/09**, non come fotografia di oggi.
+>
+> 🔴 **E la cosa più importante, perché è quella che si può fraintendere: una leva più alta vuol
+> dire più SPAZIO, non meno RISCHIO.** Niente in questa nota autorizza ad alzare una taglia o ad
+> aggiungere una sedia. I muri (10% statico, **5% giornaliero**) e il cap sul rischio aperto **non
+> si muovono di un millimetro**: con la leva non c'entrano niente.
+
+---
+
 ## ⑨ 🔴 LE TAGLIE — **tre valori diversi, e il conto del margine non torna con nessuna riga del pacchetto**
 
 **Prima la cosa giusta, perché ho provato a smontare la mia stessa accusa e non ha retto in

@@ -332,6 +332,70 @@ Preset: `mql5/Presets/ABTG_Guardian_FTMO_2Step.set` (letto riga per riga).
 
 > ## 🔴 **NO: 100 $ NON bastano.** A 0,65% quel cuscino valeva 6-13 punti; a 2,00% vale **2-4 punti**, e sul Dow all'apertura US 2 punti sono uno spread normale. 👉 **Il cuscino del Guardian non è stato riscalato quando è stata riscalata la taglia.**
 
+---
+
+> # ✏️🔴 NOTA DI CORREZIONE — **23/09/2026, sessione `R232`** · *il §5.3 qui sotto NON è stato riscritto: i numeri vecchi restano dove sono*
+>
+> **Che cosa è caduto**: la colonna **1:15** con cui il §5.3 calcola il margine.
+> 🔴 **La leva vera degli indici su questo conto è 1:50** — fuori di **3,33 volte**.
+> **Chi l'ha misurata**: `R229` (`report/LA_LEVA_E_1_50_2026-09-23.md`, commit `36b7e9e5`),
+> riverificata e allargata a **cinque** simboli da `R232`
+> (`report/QUANTE_SEDIE_CI_STANNO_2026-09-23.md` §1).
+> **Fonte**: `backtest_pipeline/risultati_prove/PREVOLO_FTMO_specifiche_2026-09-20.csv`, colonna
+> **`Margine1Lotto`** = **`OrderCalcMargin()`**: il conto lo fa **il broker**. `GER40.cash` quota in
+> EUR e il margine è in EUR → `25.312,17 / 506,24 =` **`50,000` esatto, senza cambio di mezzo**.
+>
+> ## 🔢 LA TABELLA DEL §5.3 RIFATTA — **due ricalcoli**, uno conservativo e uno da capo
+>
+> **(a) la stessa tabella, solo con la leva giusta** (÷3,3333, conto 100.000 $ come l'originale):
+>
+> | sedia | margine **1:15** *(vecchio)* | **% vecchia** | margine **1:50** *(nuovo)* | **% nuova** |
+> |---|---:|---:|---:|---:|
+> | `770101` | 47.757 $ | 47,8% | **14.327 $** | 🟢 **14,3%** |
+> | `770411` | 45.271 $ | 45,3% | **13.581 $** | 🟢 **13,6%** |
+> | `770202` | 57.295 $ | 57,3% | **17.189 $** | 🟢 **17,2%** |
+> | `771531` | 68.009 $ | 68,0% | **20.403 $** | 🟢 **20,4%** |
+> | `770511` | 🔴 92.003 $ | 🔴 92,0% | **27.601 $** | 🟠 **27,6%** |
+> | `770260` | 47.234 $ | 47,2% | **14.170 $** | 🟢 **14,2%** |
+> | **TOTALE sei** | 🔴 **357.569 $** | 🔴 **357,6%** | **107.271 $** | 🟠 **107,3%** |
+>
+> **(b) rifatta DA CAPO da `R232`**, non riscalando ma partendo dai **margini misurati dal broker**
+> e dal conto **vero** (80.000 **EUR**, non 100.000 $), con gli stessi stop `H4` del pacchetto:
+>
+> | sedia | lotti @2,00% | **margine misurato** | **% del conto** |
+> |---|---:|---:|---:|
+> | `770101` | 22,253 | 11.265 EUR | 14,08% |
+> | `770411` | 21,094 | 10.679 EUR | 13,35% |
+> | `770202` | 14,838 | 13.367 EUR | 16,71% |
+> | `771531` | 17,612 | 15.866 EUR | 19,83% |
+> | `770511` | 23,826 | 21.464 EUR | 26,83% |
+> | `770260` | 22,079 | 11.414 EUR | 14,27% |
+> | **TOTALE sei** | | **84.055 EUR** | 🟠 **105,07%** |
+>
+> 🟢 **I due conti, fatti per strade diverse, danno 107,3% e 105,07%**: lo scarto del 2% è il cambio
+> EUR/USD e i prezzi usati (il §5.3 usa `H3` del 07-18/09, io i prezzi del CSV del 20/09).
+>
+> ## 🔴 LE CONCLUSIONI DEL §5.3 CHE CADONO — dette per nome
+>
+> 1. 🔴 **CADE** il titolo *«A 2,00% e 1:15, `770511` da sola prende il 92% del conto»*: ne prende
+>    **26,8%**.
+> 2. 🔴 **CADE, ed è quella che contava**, *«la SECONDA posizione viene rifiutata dal broker PRIMA
+>    che il C1 la veda»*. 🔴 **È il contrario**: a 1:50 il **C1 arriva primo di parecchio** — con
+>    `InpMaxOpenRiskPct=4.00` (valore letto in `mql5/Presets/ABTG_Guardian_FTMO_2Step.set`) il cap
+>    scatta alla **seconda** sedia aperta, mentre il broker rifiuta alla **sesta**.
+> 3. 🟢 **RESTA VERA, ed è stata CONFERMATA da una misura indipendente**: l'inciso
+>    *«ma anche a 1:50 si sfora il 100%»*. Sei sedie aperte **nello stesso istante** a 2,00%
+>    chiedono **105,07%** del conto: il **sesto** ordine viene **rifiutato per margine**.
+> 4. 🟢 **NON è toccato NIENTE** di quello che il §5.3 dice sul **drawdown**, sul cuscino da 100 $
+>    del Guardian e sulle correlazioni: quei numeri non contengono la leva.
+>
+> 🔴 **E va detto a voce alta, perché è il fraintendimento che costerebbe la challenge: una leva più
+> alta vuol dire più SPAZIO, non meno RISCHIO.** I muri (10% statico, **5% giornaliero**) e il cap
+> sul rischio aperto restano **esattamente dove sono**. Nessuna taglia e nessuna sedia in più sono
+> autorizzate da questa nota: quelle sono **firma di Claudio**.
+
+---
+
 ## 5.3 🔴 IL MURO CHE NESSUNO HA GUARDATO: **il MARGINE**
 
 Scalando la tabella verificata del pacchetto (fattore ×3,0769 da 0,65%):
