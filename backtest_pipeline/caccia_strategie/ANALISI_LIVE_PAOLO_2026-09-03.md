@@ -738,3 +738,30 @@ Ogni valore ha la sua citazione. Ogni incrocio col repo è verificato **nel
 sorgente o nel referto citato**, mai a memoria. Le verifiche di assenza
 (martingala, griglia, prop, leva) sono state fatte **per grep in `python3` sul
 testo intero**, non a impressione._
+
+---
+
+# 🔔 AGGIORNAMENTO 23/09/2026 — **LA DOMANDA Q1 DI QUESTO REFERTO HA RISPOSTA**
+
+La live di Paolo del **22/09/2026** (trascrizione + due screenshot del pannello
+`ORB_Indicator_V17 1.17`) **scioglie la "finestra contesa"** aperta qui e
+riportata in `backtest_pipeline/REGISTRO_TEST.md` r.779-800.
+
+> **Non era una contraddizione fra la voce (14:30-14:45) e lo strumento
+> (14:25-14:29:59): sono DUE STRATEGIE DIVERSE**, e Paolo le nomina e le separa
+> lui — *«l'orbe breakout, due strategie sull'orbe … Invece di fare il box i 15
+> minuti dopo, si fa il box i 5 minuti prima. Invece di fare 14.30, 14.44 …
+> 14.25, 14.29.»*
+
+🟢 **E le abbiamo implementate tutte e due**: `770611` U30USD = **ORB classico**
+(14:30-14:45, viva sul demo 100K) · `ABTG_ORB_US.set` `770601` NASUSD = **ORB
+breakout pre-apertura** (14:25-14:30, **spenta a inizio agosto**).
+
+🔴 **E ne esce una correzione al registro**: `REGISTRO_TEST.md` r.792 scrive che
+**entrambe** le sedie girano 14:25-14:30. **È falso per la `770611`** (i tre
+preset che la descrivono portano `InpRangeStartMin=30` / `InpRangeEndMin=45`) e
+la `770601` **non è viva**.
+
+📄 **Referto completo, con la tabella del confronto parametro per parametro, il
+cost-to-cost in compressione e le misure che ne discendono col costo:**
+**`report/LIVE_PAOLO_2026-09-22_SCHEDA.md`** — *non duplico niente qui.*
