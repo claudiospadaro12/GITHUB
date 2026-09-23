@@ -1,0 +1,505 @@
+# =====================================================================
+#  EA: ABTG_Dow_Apertura_US            (sedia 770202, IN CAMPO su FTMO)
+#  R215a -- IL TF DEL FILTRO DI TREND. Asse unico: InpFilterTF
+#           (H1 / H2 / H3 / H4). MAI MESSO AD ASSE, in nessun CSV.
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#  Si lancia con: -Deposito 80000 -Modello 4   (banco identico a R202A)
+#
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri, qui dentro
+#  (paragrafi CLASSE 594 / ANCORA / ATTESA / CONTRO-ESEMPIO / SENTINELLE
+#  / SOGLIE). Nessun numero di questo file e' stato scritto dopo aver
+#  visto un risultato: il round non e' ancora girato.
+# =====================================================================
+#
+#  SIGLA E MAGIC -- verificati oggi, non ricordati
+#  ----------------------------------------------
+#    sigla R215: grep -ril "R215" --exclude-dir=.git .   -> 0 file
+#                (compresi gli 8 worktree .claude/worktrees/agent-*,
+#                 dove stanotte lavorano altri agenti: classe 194).
+#    magic 721501: blocco 7215xx INTERO vergine
+#                grep -rhoE "\b7215[0-9][0-9]\b" --exclude-dir=.git .
+#                -> nessuna occorrenza. git status: pulito al momento
+#                della scrittura.
+#    VIETATI qui: 770202 (il magic VIVO in campo), 789540 (R172D/R202A),
+#                 790200 / 790210-790212 (R102).
+#
+# ---------------------------------------------------------------------
+#  1) PERCHE' ESISTE -- due numeri, tutti e due misurati
+# ---------------------------------------------------------------------
+#
+#  (a) SU QUESTA FAMIGLIA IL TF DEL FILTRO NON E' MAI STATO CAMBIATO.
+#      Misurato oggi sulla colonna InpFilterTF di OGNI csv del repo che
+#      ce l'ha: 240 file, 5264 righe. In NESSUN file la colonna cambia
+#      valore da una riga all'altra -- zero volte su 240.
+#      E i valori mai visti sono solo due in assoluto:
+#        16388 (H4) in 105 file . 16385 (H1) in 135 file
+#      e il 16385 sta sempre su corse con il filtro SPENTO
+#      (InpUseEmaFilter=0), tranne SEI file (24 righe in tutto) che NON
+#      sono di questa sedia: risultati_archivio/Marco_Emiliano/
+#      valid_Marco_{DAX,NAS}_emiliano.csv e i quattro r84_csv del Nasdaq.
+#      >>> Su U30USD con il filtro ACCESO l'unico TF mai girato e' H4.
+#      >>> Requisito 5 del CERTIFICATO DI MORTE (CLAUDE.md, 09/09):
+#          "il TF cambiato almeno una volta". Sul TF del FILTRO: NO.
+#
+#  (b) E' LA MANOPOLA CHE FA IL DOW.
+#      backtest_pipeline/risultati_archivio/Dow_Apertura/DOW_MOTORE.md
+#      (03/08, tick reali, 2024.01-2026.06, gestione nuda):
+#        filtro H4 SPENTO  -> PF 1,03 . DD 14,9% . 445 trade
+#        filtro H4 ACCESO  -> PF 1,24 . DD  6,9% . 329 trade
+#      Quasi tutto l'edge del motore passa da questo interruttore, e il
+#      TF su cui lavora non e' mai stato confrontato con un altro.
+#      [LIMITE, dichiarato: quei due numeri vengono da una CONFIGURAZIONE
+#       DIVERSA da quella viva (gestione nuda, finestra 2024.01-2026.06).
+#       Non sono l'ancora di questo round e non vanno confrontati con le
+#       sue celle. Servono solo a dire QUANTO pesa la manopola.]
+#
+# ---------------------------------------------------------------------
+#  2) CLASSE 594 -- CHI ALTRO DIPENDE DA InpFilterTF, E L'INPUT E' VIVO?
+#     (il controllo che stanotte ha impedito di misurare il nulla)
+# ---------------------------------------------------------------------
+#
+#  IL PRECEDENTE CHE OBBLIGA A FARLO: stanotte InpLevelTF e' risultato
+#  INERTE PER COSTRUZIONE sulla cella viva (vive solo dentro il ramo
+#  RANGE_PREVBAR, e la cella viva ha InpRangeMode=0 = RANGE_OPENING):
+#  due file da 28 passate avrebbero misurato il nulla. Stesso controllo,
+#  fatto qui riga per riga su mql5/Experts/ABTG_Dow_Apertura_US.mq5.
+#
+#  CHI USA InpFilterTF (grep sul sorgente, TUTTE le occorrenze):
+#    r.262  dichiarazione (ENUM_TIMEFRAMES InpFilterTF = PERIOD_H4)
+#    r.405  gEmaFastH = iMA(_Symbol, InpFilterTF, InpEmaFast, ...)
+#    r.406  gEmaSlowH = iMA(_Symbol, InpFilterTF, InpEmaSlow, ...)
+#  E BASTA. Tre righe, e le due operative sono gli handle delle due EMA.
+#  >>> NESSUN altro meccanismo dipende da questo input. Il Supertrend ha
+#      il suo InpStTF, la correlazione InpCorrTF, la VWAP InpVwapTF, il
+#      trailing InpTrailTF: quattro TF SEPARATI, tutti pinnati qui e
+#      tutti fermi. Il pacchetto NON c'e': l'asse e' isolato davvero.
+#
+#  E' VIVO NELLA CELLA VIVA? SI', e la catena e' questa:
+#    r.403  if(InpUseEmaFilter)  -> nella cella viva e' true, quindi i
+#           due handle VENGONO creati (se fallisce, INIT_FAILED: non c'e'
+#           il caso "handle nullo e l'EA tira dritto in silenzio").
+#    r.1495 dentro TrendBias(): if(InpUseEmaFilter) legge i due buffer
+#           allo shift 1 e produce bias +1 / -1.
+#    r.1281 gBias = TrendBias(), dentro ArmRetest().
+#    r.658  ArmRetest() e' il ramo chiamato quando InpEntryMode==RETEST
+#           (ABTG_RETEST = 2), che E' la cella viva.
+#    r.1308-1309  longOK = (gBias==0 || gBias==+1) -- e con
+#           InpAllowShort=false il bias -1 vuol dire NESSUN ORDINE
+#           quel giorno.
+#  >>> VERDETTO: InpFilterTF NON e' inerte sulla cella viva. Il file si
+#      scrive. (Se fosse stato inerte, qui ci sarebbe la spiegazione e
+#      nessun asse.)
+#
+#  QUANDO viene letto, al minuto: InpRangeMode=0 (OPENING) => r.653-658
+#  arma a nowMin >= rangeEndMin = InpSessionHour:InpSessionMin +
+#  InpRangeMinutes = 14:30 + 35 = *** 15:05 ORA SERVER BCM ***. Il bias
+#  si calcola UNA VOLTA li' e resta congelato in gBias per la giornata.
+#
+# ---------------------------------------------------------------------
+#  3) *** IL RILIEVO CHE CAMBIA COME SI LEGGE QUESTO ROUND ***
+#     LA GRIGLIA H4 DI FTMO NON E' LA GRIGLIA H4 DI BCM
+# ---------------------------------------------------------------------
+#
+#  Sta gia' scritto, non l'ho inventato io:
+#  mql5/Presets/FTMO/ABTG_Dow_Apertura_US_770202_FTMO.set, blocco
+#  "RILIEVO CHE L'ORA NON RISOLVE": la griglia delle candele H4 e'
+#  ancorata alla MEZZANOTTE DEL SERVER, e FTMO sta due ore avanti a BCM
+#  (docs/REGOLAMENTO_FTMO_2026-08.md r.130 + regola del fuso di CLAUDE.md).
+#
+#  L'ARITMETICA, all'istante in cui il bias viene letto (shift 1 = ultima
+#  candela CHIUSA), scritta in ORA BCM per poterla confrontare:
+#
+#    armamento: 15:05 BCM  ( = 17:05 FTMO = 16:05 ora italiana )
+#
+#    | cella di questo round | griglia (ora BCM) | barra letta   | stantia da |
+#    | H1 (16385)            | ogni ora          | [14:00,15:00) |   5 min    |
+#    | H2 (16386)            | 00,02,..,14,16    | [12:00,14:00) |  65 min    |
+#    | H3 (16387)            | 00,03,06,09,12,15 | [12:00,15:00) |   5 min    |
+#    | H4 (16388) = LA VIVA  | 00,04,08,12,16,20 | [08:00,12:00) | 185 min    |
+#
+#    | la stessa sedia su FTMO, H4 | griglia FTMO 00,04,08,12,16,20
+#    |                             |   = 22,02,06,10,14,18 in ora BCM
+#    |                             | barra letta [10:00,14:00) BCM
+#    |                             | stantia da 65 min
+#
+#  >>> QUINDI: in campo su FTMO questa sedia NON legge la barra che il
+#      backtest ha misurato. Legge una finestra di 4 ore SPOSTATA DI DUE,
+#      che si sovrappone alla misurata solo per meta' (10:00-12:00 BCM),
+#      e che e' fresca di 65 minuti invece che di 185.
+#      NON e' un input orario e il preset NON l'ha toccato: il rimappatore
+#      ha spostato InpSessionHour e InpCloseHour e si e' fermato li',
+#      correttamente.
+#
+#  >>> COSA MISURA ALLORA QUESTO ROUND, detto prima dei numeri:
+#      NON misura la griglia di FTMO -- da BCM non e' misurabile, e
+#      dichiararlo e' meta' del lavoro. Misura QUANTO IL MOTORE E'
+#      SENSIBILE AL TF DEL FILTRO. Se l'altopiano e' largo (H1..H4 danno
+#      numeri simili), allora il motore non guarda il dettaglio della
+#      griglia e il rischio del fuso e' PICCOLO. Se e' stretto -- se solo
+#      H4 tiene e gli altri tre cadono -- allora la sedia e' FRAGILE su
+#      questo asse, e su FTMO sta girando su una griglia che non e' quella
+#      misurata. *** E questo non lo sapevamo. ***
+#
+#  >>> H2 SI LEGGE A PARTE, e il motivo e' aritmetico, non una speranza:
+#      la H2 di BCM CHIUDE ALLO STESSO ISTANTE della H4 di FTMO (14:00
+#      BCM), quindi ha la STESSA STANTIA (65 min). E' l'unica cella che
+#      condivide qualcosa con la configurazione vera di FTMO.
+#      *** MA NON E' LA GRIGLIA DI FTMO, e non va raccontata come tale: ***
+#      copre 2 ore invece di 4, e l'EMA(50) su H2 guarda 100 ore invece
+#      di 200. Condivide l'ISTANTE, non la FINESTRA. E' un indizio, non
+#      una prova, ed e' scritto qui PRIMA di vedere il numero.
+#
+# ---------------------------------------------------------------------
+#  4) IL CONFONDIMENTO, dichiarato prima e non aggirato
+# ---------------------------------------------------------------------
+#  InpEmaSlow=50 resta pinnato. Quindi cambiando InpFilterTF cambiano
+#  DUE cose insieme:
+#    (i)  la stantia e la fase della barra di riferimento (tabella sopra);
+#    (ii) la LUNGHEZZA DI CALENDARIO della memoria dell'EMA:
+#         H1 -> 50 h . H2 -> 100 h . H3 -> 150 h . H4 -> 200 h.
+#  >>> Un altopiano largo NON dira' quale dei due non conta. Dira' solo
+#      che il motore non e' sensibile al TF del filtro -- che e' la
+#      domanda di rischio, ed e' quella che serve oggi.
+#  >>> Se invece esce un altopiano STRETTO, questo round NON potra' dire
+#      se la colpa e' della fase o della memoria. La misura che
+#      separerebbe le due e' un asse su InpEmaSlow A TF FISSO H1 e H2
+#      (la stessa cosa che DOW_MOTORE.md ha gia' fatto su H4: altopiano
+#      20-200, 10 valori su 10 sopra PF 1,20). E' un ALTRO file, e non si
+#      scrive oggi: un asse per volta.
+#
+# ---------------------------------------------------------------------
+#  5) ANCORA DI REGRESSIONE -- dai CSV GREZZI, non dai referti
+# ---------------------------------------------------------------------
+#  La cella H4 (16388) E' LA CELLA VIVA e deve riprodurre numeri gia'
+#  scritti da DUE round diversi sullo stesso banco (deposito 80000,
+#  Modello 4, rischio 1,0%, stessa finestra, stesso split):
+#
+#    fonte 1: risultati_prove/R172D/ABTG_Dow_Apertura_US_U30USD_IS_R172D.csv
+#             riga InpBEatR=0.00
+#    fonte 2: risultati_prove/R202A/ABTG_Dow_Apertura_US_U30USD_IS_R202A.csv
+#             riga InpTP1_R=1.00
+#    (e le due gemelle _OOS_). Le quattro righe grezze:
+#
+#      IS   Profit 2241.62  PF 1.22173  RF 0.48667  DD% 5.6726  n  74
+#      OOS  Profit 5395.25  PF 1.27175  RF 1.51555  DD% 4.3944  n 130
+#
+#    R172D e R202A danno questi numeri IDENTICI ALLA QUINTA CIFRA pur
+#    essendo due round diversi con due assi diversi: l'ancora non e' una
+#    lettura sola.
+#
+#  L'UNICO DELTA di questo file sull'antenato R202a_obiettivo_DOW_U30USD.txt:
+#    (1) InpTP1_R passa da ASSE a PIN 1.0 (il valore vivo);
+#    (2) InpFilterTF passa da PIN 16388 ad ASSE;
+#    (3) InpMagic 789540 -> 721501 (vergine).
+#  Tutti gli altri 77 pin sono copiati riga per riga. Il magic non tocca
+#  l'esecuzione (un solo EA nel tester): infatti R172D e R202A girano
+#  tutti e due con 789540 e riproducono l'un l'altro.
+#
+#  >>> SE LA CELLA 16388 NON RIPRODUCE QUEI QUATTRO NUMERI, IL ROUND E'
+#      NULLO E CI SI FERMA LI'. Non si leggono le altre tre celle: se i
+#      pin sono sbagliati, sono sbagliati anche per loro.
+#
+#  LA TAGLIA: il banco gira a InpRiskPercent=1.0, il CAMPO e' a 2.00%
+#  (firma di Claudio del 20/09, nel preset FTMO). Ogni DD di questo round
+#  va RADDOPPIATO prima di leggerlo contro il muro statico FTMO del 10%.
+#  Il fattore non e' stimato: l'ancora DAX a 1,0% vale DD OOS 7,2506 e il
+#  preset in campo dichiara 14,46 a 2,00% -- 7,2506 x 2 = 14,50, scarto
+#  0,3% (fattore misurato 1,956-1,990). I cancelli qui sotto sono
+#  RELATIVI e non ne risentono: cambia solo la lettura degli assoluti.
+#
+# ---------------------------------------------------------------------
+#  6) ATTESA DICHIARATA PRIMA DEI NUMERI -- e non e' ottimista
+# ---------------------------------------------------------------------
+#  A1. Le quattro celle DEVONO differire. La manopola cambia il verdetto
+#      di direzione giorno per giorno, e con InpAllowShort=false un bias
+#      -1 cancella l'operazione: quindi deve cambiare il CONTEGGIO, non
+#      solo il P/L. Ordine di grandezza atteso: il filtro H4 acceso taglia
+#      il 26% delle giornate (445 -> 329 in DOW_MOTORE.md); due TF diversi
+#      che discordano anche solo su una giornata su venti spostano il
+#      conteggio di parecchie unita'. Se le quattro celle fossero uguali
+#      alla quinta cifra, la manopola NON HA MORSO (vedi S2).
+#  A2. H1 (stantia 5 min, memoria 50 h) e' il piu' reattivo: atteso PIU'
+#      operazioni di H4 e PF non prevedibile nel segno.
+#  A3. H4 (stantia 185 min, memoria 200 h) e' il piu' lento: e' la cella
+#      viva, e il suo numero e' l'ancora, non un'attesa.
+#  A4. NON mi aspetto che H4 sia il massimo. Se lo fosse, e fosse l'unico
+#      sopra 1,10, sarebbe un PICCO su un asse mai provato -- che e' il
+#      difetto che in casa si chiama "verde per caso". La regola di
+#      selezione resta CENTRO DELL'ALTOPIANO, MAI IL PICCO.
+#  A5. NESSUNA CELLA VIENE PROMOSSA DA QUESTO ROUND, qualunque numero
+#      esca. Il perche' e' al paragrafo 8 (il campione). Questo file
+#      produce un VERDETTO DI FRAGILITA', non un candidato.
+#
+# ---------------------------------------------------------------------
+#  7) CONTRO-ESEMPIO -- costruito contro l'IPOTESI ALTERNATIVA,
+#     non contro il nulla
+# ---------------------------------------------------------------------
+#  LA MIA TESI: "se le quattro celle danno numeri simili, il motore non
+#  e' sensibile al TF del filtro, quindi il rischio della griglia FTMO
+#  e' piccolo".
+#
+#  L'IPOTESI ALTERNATIVA CHE PRODUCE LO STESSO RISULTATO:
+#  "le quattro celle danno numeri simili perche' in QUESTA
+#   configurazione il filtro EMA non porta nessuna informazione: e' la
+#   manopola a essere muta, non il motore a essere robusto."
+#  E' l'alternativa piu' pericolosa perche' e' FREQUENTE in casa: il
+#  censimento del 09/09 ha trovato 874 CSV su 1.960 con passate a esito
+#  identico, e stanotte r127c ha mostrato 8 valori e 3 esiti distinti.
+#
+#  IL NUMERO CHE LE SEPARA, e sta DENTRO questo round a costo zero:
+#  la colonna TRADES. Se il filtro portasse zero informazione sul TF, le
+#  quattro celle sarebbero identiche NON SOLO nel P/L ma anche nel
+#  CONTEGGIO -- perche' darebbero lo stesso bias negli stessi giorni.
+#  Se invece i conteggi si separano e i PF restano vicini, allora il
+#  filtro lavora davvero su tutti e quattro i TF e l'altopiano e' vero.
+#    > filtro robusto  : Trades DIVERSI fra le celle, PF vicini
+#    > manopola muta   : Trades UGUALI fra le celle, PF uguali
+#  Sono due firme distinguibili, e la distinzione e' scritta prima.
+#
+#  IL BUCO DEL CONTRO-ESEMPIO, dichiarato: mi manca la cella
+#  "filtro SPENTO" nella configurazione viva e in questa finestra. Ho
+#  cercato: nessun CSV del repo ha InpUseEmaFilter=0 con InpEntryMode=2
+#  su U30USD. L'unico filtro-spento che esiste e' DOW_MOTORE.md, ed e'
+#  un'altra gestione e un'altra finestra. Quindi se uscisse "Trades
+#  uguali", questo file NON potra' dire se la manopola e' muta o se e'
+#  il TF a non contare: servirebbe un asse su InpUseEmaFilter, che e' un
+#  ALTRO file (un asse per volta). E' un buco, ed e' scritto qui.
+#
+# ---------------------------------------------------------------------
+#  8) IL CAMPIONE -- perche' il MERITO qui e' SOSPESO
+# ---------------------------------------------------------------------
+#  La colonna Trades conta i DEAL D'USCITA, non le POSIZIONI. La parziale
+#  al 50% e' accesa in tutte le celle (InpTP1_ClosePct=50), quindi ogni
+#  posizione che tocca il primo obiettivo produce DUE deal.
+#  Tasso di tocco a InpTP1_R=1,0 su questa sedia: 28-35% delle posizioni
+#  (misurato su R46b, citato da R202a_obiettivo_DOW_U30USD.txt).
+#    => POSIZIONI OOS ~ 130 / (1 + 0,28..0,35) = *** 96 - 102 ***  [DERIVATO]
+#    => POSIZIONI IS  ~  74 / (1 + 0,28..0,35) = ***  55 -  58 ***  [DERIVATO]
+#  >>> TUTTE E DUE LE FINESTRE SONO SOTTO LE 150 OPERAZIONI.
+#      Emendamento della finestra, punto A (16/08): il merito si legge
+#      sopra le 150. Punto B: il RISCHIO si legge a qualunque n.
+#      Quindi da questo round si prende: il DD (rischio, valido), la
+#      DIREZIONE della sensibilita' (fragile / non fragile), e NIENTE
+#      ALTRO. Un PF su 100 posizioni non promuove niente.
+#  >>> E il PF va letto sapendo che, contato sui deal, un PF sopra 1 e'
+#      SOTTOSTIMATO: (W+x)/(L+x) < W/L quando W>L. Vale allo stesso modo
+#      in tutte e quattro le celle (la parziale e' accesa ovunque e
+#      InpTP1_R e' pinnato), quindi il CONFRONTO fra celle e' pulito;
+#      e' il valore assoluto che e' prudente.
+#
+# ---------------------------------------------------------------------
+#  9) LA FRONTIERA DEL COSTO -- questo asse NON la muove
+# ---------------------------------------------------------------------
+#  @PERIODO resta M5 in tutte e quattro le celle: InpFilterTF NON e' il
+#  TF operativo, e' solo quello delle due EMA. La REGOLA dello stop non
+#  cambia (InpSLMode=0 = estremo opposto del range d'apertura,
+#  InpMinStopPts=500 pinnato ovunque), quindi nessuna cella di questo
+#  round puo' essere "esclusa PER COSTO": sarebbe un'esclusione senza
+#  differenza da misurare.
+#  [PRECISAZIONE onesta: la DISTRIBUZIONE degli stop puo' cambiare,
+#   perche' cambia l'insieme dei giorni operati. Ma la frontiera
+#   stop >= 40 x spread e' una proprieta' della sedia, non di questo
+#   asse, e da questo round NON si ricalcola.]
+#  Lo spread BCM di U30USD e' MISURATO (risultati_archivio/spread_flotta/
+#  spread_orario_U30USD.csv, 03/09): non serve a questo round, ma e' il
+#  motivo per cui il cancello di costo di questa sedia e' compilabile
+#  mentre su F40EUR/E50EUR/100GBP non lo e'.
+#
+# ---------------------------------------------------------------------
+# 10) SENTINELLE -- cosa guardare PRIMA dei PF
+# ---------------------------------------------------------------------
+#  S0. La riga "data :" del REFERTO deve essere di OGGI (il 17/08 un
+#      referto stantio e' stato rimandato due volte in buona fede).
+#  S1. ANCORA: cella 16388 = IS 2241.62 / 1.22173 / 0.48667 / 5.6726 / 74
+#      e OOS 5395.25 / 1.27175 / 1.51555 / 4.3944 / 130. Se non torna,
+#      STOP: il round e' nullo.
+#  S2. MANOPOLA MUTA: se le quattro celle sono identiche alla quinta
+#      cifra in tutte e due le finestre, l'asse non ha morso. Si legge la
+#      riga dei parametri applicati stampata dal driver prima di partire
+#      e si dichiara "misura nulla" -- NON "TF indifferente".
+#  S3. RISCALDAMENTO: l'EMA(50) su H4 chiede 50 barre H4 (circa 8 giorni
+#      di borsa) prima dell'inizio finestra; su H1 ne chiede 2. Se la
+#      cella 16388 avesse MENO operazioni delle altre solo nei PRIMI
+#      giorni della finestra, e' riscaldamento, non segnale. Si guarda
+#      nel per-trade, non nel sommario.
+#  S4. CELLE DEGENERI: una cella con Trades < 20 in una finestra non e'
+#      una cella, e' un guasto. Si dichiara e non si confronta.
+#
+# ---------------------------------------------------------------------
+# 11) SOGLIE CONGELATE PRIMA DEI NUMERI
+#     (grandezze INVARIANTI ALLA TAGLIA: PF e Recovery Factor lo sono;
+#      il DD% va moltiplicato x1,956-1,990 per leggerlo a 2,00%)
+# ---------------------------------------------------------------------
+#  V1 -- "ALTOPIANO LARGO -> la sedia NON e' sensibile al TF del filtro"
+#        si dichiara SOLO se, INSIEME:
+#          (a) tutte e quattro le celle hanno PF OOS >= 1,10;
+#          (b) tutte e quattro hanno DD OOS <= 1,25 x quello della cella
+#              viva, cioe' <= 5,4930 (= 4,3944 x 1,25) a rischio 1,0%,
+#              che a 2,00% vuol dire <= 10,99 -- sopra il muro statico
+#              FTMO del 10%, e va detto;
+#          (c) IS e OOS CONCORDI DI SEGNO sulla direzione (se in OOS il
+#              PF sale da H4 a H1, in IS non deve crollare).
+#        Conseguenza: il rischio della griglia FTMO e' PICCOLO. Non ZERO:
+#        la griglia di FTMO non e' nessuna delle quattro celle.
+#
+#  V2 -- "SEDIA FRAGILE SUL TF DEL FILTRO" si dichiara se ANCHE SOLO UNA:
+#          (a) H4 e' l'unica cella con PF OOS >= 1,10; oppure
+#          (b) una qualunque fra H1/H2/H3 scende sotto PF OOS 1,00;
+#          (c) oppure il DD OOS di una cella supera 2x quello della viva
+#              (> 8,7888 a 1,0%, cioe' > 17,5% a 2,00%: muro sfondato).
+#        Conseguenza: la griglia FTMO diventa un RISCHIO DA PORTARE A
+#        CLAUDIO, non un dettaglio del preset. E la misura che serve
+#        dopo non e' un'altra griglia su BCM: e' leggere il bias vero
+#        sul terminale FTMO. Che NON e' nel perimetro di questo file.
+#
+#  V3 -- Se non si e' ne' in V1 ne' in V2 (per esempio due celle sopra
+#        1,10 e due sotto, senza ordine), il verdetto e'
+#        *** "NON C'E' UNA CONFIGURAZIONE ROBUSTA SU QUESTO ASSE" ***
+#        e si scrive cosi'. Una cella che sporge con le vicine che non la
+#        seguono NON e' un risultato: e' rumore.
+#
+#  V4 -- IN NESSUN CASO questo round cambia InpFilterTF alla sedia viva.
+#        Il TF del filtro e' parte della geometria del segnale della
+#        sedia che sta operando la challenge: si tocca con una firma di
+#        Claudio, non con un CSV. Questo file SCOPRE se H4 e' un
+#        altopiano o una fortuna. Punto.
+#
+# ---------------------------------------------------------------------
+# 12) QUANTO COSTA
+# ---------------------------------------------------------------------
+#  Asse ENUM: MT5 (e il driver, che lo imita apposta) IGNORA il passo e
+#  spazzola i MEMBRI di ENUM_TIMEFRAMES compresi fra start e stop.
+#  Fra 16385 e 16388 i membri sono QUATTRO: 16385=H1 16386=H2 16387=H3
+#  16388=H4.  4 celle x 2 gambe (IS + OOS) = *** 8 PASSATE ***.
+#  E' la stessa dimensione ESATTA di R202A (4 celle, 8 passate), che e'
+#  gia' girato su questa macchina con questa finestra.
+#  Tempo macchina: [NON MISURATO] come numero di minuti. L'unico dato
+#  vero in archivio: R172D e R201A, 21/09, stessa macchina, 14 passate
+#  ciascuno, referti avviati a 21:01:33 e 21:05:24 -- e che fossero in
+#  fila NON e' dimostrabile, quindi non lo uso come stima. Il pacchetto
+#  del 23/09 (report/PACCHETTO_DEL_MATTINO_2026-09-23.md r.302) mette a
+#  questa misura un tetto di 11,9 minuti: e' un TETTO, non una stima.
+#  Barre: M5 su 21 mesi, la stessa gia' girata da R172D/R197/R202 senza
+#  rilievi; il tetto barre del PC di backtest e' MaxBars=100000000
+#  (letto nel referto di R202A del 21/09), il pre-volo di classe 160
+#  muore solo fra 1.000 e 200.000.
+#
+# ---------------------------------------------------------------------
+# 13) COSA QUESTO FILE NON FA
+# ---------------------------------------------------------------------
+#  Non tocca il VPS. Non tocca il forward. Non tocca nessun preset. Non
+#  promuove niente. Non cambia la taglia. Il magic 721501 non esiste in
+#  campo e non ci arrivera' da qui.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=400.0||400.0||0||400.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+#  --- il filtro di trend: ACCESO, ed e' il presupposto dell'asse.
+#      Se questo fosse false, InpFilterTF sarebbe inerte e il round
+#      misurerebbe il nulla (il caso InpLevelTF di stanotte).
+InpUseEmaFilter=true||true||0||true||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+#  ---------------------------------------------------------------------
+#  TAGLIA DEL BANCO: 1,0% -- NON e' la taglia in campo (2,00%, firma del
+#  20/09). Pinnata a 1,0 per RIPRODURRE l'ancora R172D/R202A, che e'
+#  girata a 1,0. Ogni DD di questo round va raddoppiato prima di leggerlo
+#  contro il muro statico FTMO del 10% (fattore misurato 1,956-1,990).
+#  ---------------------------------------------------------------------
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+#  InpTP1_R: era l'ASSE di R202A, qui e' PINNATO al valore VIVO (1.0).
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+#  InpNewsCurrencies NON e' pinnato DI PROPOSITO: il pin di una stringa a
+#  valore vuoto MT5 lo IGNORA e usa il default compilato (controlla_prova
+#  controllo 3). Difetto ereditato dall'antenato
+#  R202a_obiettivo_DOW_U30USD.txt, che fa lo stesso. Default compilato = "".
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=false||false||0||false||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMagic=721501||721501||0||721501||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+
+# --- ASSE UNICO: IL TF DEL FILTRO DI TREND (ENUM: contano gli ESTREMI) -
+#   16385 = H1  -- barra [14:00,15:00) BCM, stantia 5 min,   EMA50 = 50 h
+#   16386 = H2  -- barra [12:00,14:00) BCM, stantia 65 min,  EMA50 = 100 h
+#                  (stesso ISTANTE DI CHIUSURA della H4 di FTMO: leggila
+#                   a parte, e NON chiamarla "la griglia FTMO")
+#   16387 = H3  -- barra [12:00,15:00) BCM, stantia 5 min,   EMA50 = 150 h
+#   16388 = H4  -- LA CELLA VIVA E L'ANCORA. barra [08:00,12:00) BCM,
+#                  stantia 185 min, EMA50 = 200 h
+InpFilterTF=16388||16385||1||16388||Y
+# 4 celle (membri ENUM_TIMEFRAMES fra 16385 e 16388) -> 8 passate
+# =====================================================================
