@@ -32266,3 +32266,36 @@ e avrebbe dedotto che il DAX fa *«16 punti dove il Nasdaq ne fa 65»* invece de
    sua data.**
 
 ---
+
+## 🎫💥 CLASSE 639 — **IL MAGIC DI DEFAULT DI UN EA ESTERNO CHE COLLIDE CON UN BLOCCO GIA' VIVO IN CASA: si grepa PRIMA di proporre il candidato, non alla compilazione** (23/09/2026, R228)
+
+**Il caso reale.** La caccia ai meccanismi del 23/09 promuove `RegimeRouter`
+(MQL5 Code Base **77535**, pubblicato il 20/09/2026). Il sorgente porta
+`input ulong InpMagicBase = 772000;` e assegna il magic come `base + regime id`
+(quindi **772001** per TREND e **772002** per RANGE).
+
+`grep -rhoE "7720[0-9][0-9]"` sul repo, fatto in fase di scheda:
+> **772001 · 772002 · 772003 · 772026 · 772060 — TUTTI GIA' IN USO in casa.**
+
+🔴 **Il difetto non si manifesta dove lo si cerca.** La compilazione passa
+benissimo: un magic e' solo un `ulong`. Il danno arriva **dopo, sui numeri** —
+il `TradeExporter` scrive il per-trade in
+`Common\Files\abtg_trades_<EA>_<Simbolo>_<magic>.csv`, cioe' **il magic e' il
+discriminante nel nome dell'artefatto** (stessa meccanica della classe sul
+magic condiviso fra le fasi di un round). Due sedie con lo stesso magic
+scrivono sullo stesso nome: **l'attribuzione delle operazioni e' persa**, e in
+forward un EA puo' "vedere" come propria la posizione dell'altro.
+
+### ✅ La regola
+1. 📋 **Ogni scheda di candidato esterno porta la riga**:
+   *«blocco magic proposto: `<blocco>` — grepato il `<data>`, zero occorrenze in
+   repo (`.git` escluso)»*. **Senza quella riga la scheda e' incompleta** e il
+   candidato non entra in coda.
+2. 🔎 **Il grep si fa sul BLOCCO, non sul singolo numero.** Un EA che compone il
+   magic (`base + id`, `base + simbolo`, `base + lato`) occupa **un intervallo**:
+   si verifica l'intervallo intero, non il default.
+3. 🎯 **Vale anche per il magic di un PRESET**, non solo del sorgente: un `.set`
+   che rimette il default vanifica la correzione fatta nel codice.
+4. 🚫 **Non e' un difetto "da sistemare in compilazione".** Chi rimanda il grep
+   al momento della compilazione ha gia' scritto la scheda, la riga e il file
+   prova col magic sbagliato: la correzione costa tre file, non uno.
