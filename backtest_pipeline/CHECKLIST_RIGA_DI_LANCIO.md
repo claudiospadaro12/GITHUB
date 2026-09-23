@@ -31377,3 +31377,73 @@ fosse uscito bello, sarebbe stato letto come «il centro regge» mentre era «il
    *«asse = quello su cui il valore della mediana è INTERNO alla griglia d'archivio»*, così
    che un eventuale picco sia falsificabile **da tutte e due le parti**. Una finestra
    ancorata al bordo della griglia non può falsificare niente su quel lato.
+
+---
+
+## ⚖️ CLASSE 616 — **IL NUMERO CONTESO STAMPATO A META** (23/09/2026, R221)
+
+**Il caso reale.** La riga di lancio di R221 stampava a Claudio, come fatto chiuso:
+*«la famiglia EMA200 il pavimento lo tocca GIA grazie alla sedia Dow `771531`, che in forward
+misura **1,000** posizioni per giorno feriale»*. In repo, sullo **stesso** numeratore (21
+posizioni), ci sono **tre** letture e **una** è contraria:
+- **1,312** op/gg feriale — `report/CONTRATTI_DELLE_SEDIE_FTMO_2026-09-20.md` r.317 (21 / **16** gg);
+- **1,000** op/gg feriale — `report/CHI_ALTRO_PUO_SCHIERARSI_2026-09-22.md` r.291 (21 / **21** gg);
+- 🔴 **0,931** op/g sul **PROMESSO** — `CONTRATTI…` r.324, che scrive testuale
+  **«famiglia EMA200: 0,931 contro pavimento 1,00 → sotto del 7%»**.
+
+La riga aveva scelto **l'unica delle tre che atterra esattamente sul pavimento**, e aveva
+taciuto il denominatore conteso (16 o 21) e il campione (**21 posizioni: non decide**).
+
+**Secondo caso, stessa riga, segno opposto.** L'«AVVISO SUL BINARIO» diceva che l'ultimo
+commit su `ABTG_EMA200.mq5` è `b45dd009` *«IN CORSO D'OPERA — NON COMPILARE»* e si fermava lì,
+concludendo *«se non compila, si torna indietro»*. 🟢 **Ma la prova che compila era in repo e
+costava un `head -1`:** i CSV `backtest_pipeline/risultati_prove/dal_vps/ABTG_EMA200/` dell'11/09
+(`r139a`, `r139b`) e del 13/09 (`r136a-d`, `cemad05`) hanno **`InpLogImbuto` nell'intestazione**,
+e quella colonna esiste **solo** se il binario compilato aveva quell'input. Il «NON COMPILARE»
+era un avviso di **consegna**, non di **compilazione**.
+
+🔴 **Perché conta:** nel primo caso la metà taciuta rendeva il round **più bello**, nel secondo
+**più brutto**. È lo stesso difetto — *si stampa la metà che conferma l'aspettativa* — ed è la
+causa unica già scritta il 10/09: **verificare che la risposta sia COERENTE invece di provare
+a ROMPERLA**.
+
+### ✅ La regola
+1. 🔎 **Prima di stampare un numero preso da un referto, si cerca in repo se esiste una
+   lettura DIVERSA dello stesso fatto** (`grep` del numero e del soggetto). Se esiste, si
+   stampano **tutte**, con la **fonte e la riga**.
+2. 🧮 **Un rapporto si stampa col DENOMINATORE**: «1,000 (21 posizioni / 21 giornate)», mai
+   «1,000». Due referti che dividono 21 per 16 e per 21 danno due verità diverse, ed è il
+   denominatore — non la misura — a essere in discussione.
+3. 🟢 **Vale anche per le BRUTTE notizie**: prima di stampare un allarme (*«potrebbe non
+   compilare»*) si cerca la prova **contraria** che il repo già contiene. Un allarme falso
+   costa un giro buttato, ed è un errore di misura come gli altri.
+4. 🚫 **Una firma di Claudio non si appoggia mai a un numero conteso non dichiarato.** Se il
+   numero decide se una famiglia è sopra o sotto un pavimento firmato, la frase corretta è
+   *«non più scartabile per SOLA frequenza»*, **non** *«il pavimento è dimostrato»*.
+
+---
+
+## ⏱️ CLASSE 617 — **IL TETTO DERIVATO SENZA SOFFITTO** (23/09/2026, R221)
+
+**Il caso reale.** R221 lancia **tre** round in fila. Il tetto del primo è una **stima
+trasferita** (54 min, classe 583); i due successivi lo prendono **misurato**:
+`$capMin = [math]::Max($tmoMin, [math]::Ceiling($primo * $tmoK))`, con `$tmoK=4` e pavimento
+`$tmoMin=10`. L'idea è buona — il primo round paga la stima, gli altri due la misura — **ma
+era monodirezionale**: il pavimento impediva al tetto di collassare a 0, e **niente gli
+impediva di esplodere**. Un primo round lento per caso (50 min, ancora dentro il suo tetto)
+regalava ai due successivi **200 minuti a testa**: coltello spuntato, e ~8 ore di macchina
+occupata senza che nessuno lo avesse dichiarato.
+
+🔴 **La dissimmetria è il difetto:** un tetto derivato da UNA misura eredita **l'anomalia**
+di quella misura. Verso il basso ce ne eravamo accorti (il pavimento c'era), verso l'alto no.
+
+### ✅ La regola
+1. 🧱 **Ogni tetto derivato da una misura si chiude da TUTTE E DUE le parti**: pavimento
+   **e** soffitto. In R221 il soffitto naturale è il **tetto trasferito del primo round**
+   (`[math]::Min($tmo, [math]::Max($tmoMin, …))`): nessun round può costare più del coltello
+   già dichiarato a Claudio nel messaggio di classe 582.
+2. 📣 **Il soffitto si STAMPA insieme al tetto**, altrimenti chi guarda la console non sa se
+   il numero che legge è la misura o il limite.
+3. ⚠️ **E la banda dell'attesa resta separata dal tetto**: in R221 l'attesa vera è
+   **1,2-2,8 min** per round. Un tetto di 54 non è una previsione — è un coltello. Se le due
+   cose non sono scritte vicine, un round da 30 minuti sembra normale e invece è **rotto**.
