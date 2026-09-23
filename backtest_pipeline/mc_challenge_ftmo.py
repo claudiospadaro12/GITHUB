@@ -161,8 +161,8 @@ def main():
         riga(nome, o, m)
 
     print("\n" + "=" * 96)
-    print("LIMITI: 4 sedie su 6 (le due mancanti sono CORRELATE => pavimento) · P/L realizzato, non equity ·")
-    print("        un solo regime (toro) · scala x2 MISURATA a x1,956-1,990, cioe' conservativa.")
+    print("LIMITI: 4 sedie su 6 (le due mancanti sono CORRELATE => pavimento) -- P/L realizzato, non equity")
+    print("        un solo regime (toro). Scala x2 MISURATA a x1,956-1,990, cioe' conservativa.")
     print("=" * 96)
 
 

@@ -42,7 +42,7 @@ alternative, non la decisione.
    CHALLENGE DI CIRCA ZERO**, e lo dico col numero: `R212` misura un **candidato** che alla taglia
    in campo **non si schiera** (3 celle su 40 in IS passano il muro, e 0,90 è quante ne prevede il
    puro caso — lo scrive il suo stesso dossier). **Un file scritto non è un file da lanciare.**
-   L'unica eccezione con un valore difendibile è `R214c/d`. §5.
+   Le eccezioni con un valore difendibile sono **due**, e valgono **16 passate in tutto**: `R214c/d` (il Nasdaq, dove il filtro volumi legge davvero la barra del grafico) e 🆕 **`R215a`**, consegnato stanotte da un agente in parallelo, che attacca **esattamente** il difetto del punto 5. §5 e §6.1.
 8. 🧭 **E IL PIANO ONESTO DEGLI OTTO GIORNI È CORTO**, perché il 1° ottobre **non è più una
    scadenza**: la challenge è **già partita** il 21/09 e **FTMO non ha limite di tempo**
    (`docs/REGOLAMENTO_FTMO_2026-08.md` §1, testuale: *«There is no time limit… the Trading Period
@@ -210,6 +210,10 @@ necessario, e la ragione è la stessa: `rischio_cluster ≤ rischio_totale` è u
 
 ## 3.1 Il metodo, dichiarato prima del risultato
 
+> 🧰 **Lo strumento è in repo e il numero si rifà**: `backtest_pipeline/mc_challenge_ftmo.py`
+> (`python3 backtest_pipeline/mc_challenge_ftmo.py`). Stampa anche le giornate del §2.1, così
+> le due misure escono dalla stessa corsa e non possono divergere.
+
 Monte Carlo **sull'ORDINE DEI GIORNI**, 20.000 sequenze, seme fisso, sulle 242 giornate aggregate
 del §2.1. Regole della simulazione, tutte prese dal regolamento e non inventate
 (`docs/REGOLAMENTO_FTMO_2026-08.md` §1-§2):
@@ -266,9 +270,9 @@ di deriva del cambio** EUR/USD fra ingresso e uscita.
 | ipotesi | PASS a 2,00% + Guardian |
 |---|---:|
 | lo slippaggio del 22/09 è stato un **caso** | **84,0%** |
-| lo slippaggio del 22/09 è **sistematico** (+10,5% su ogni perdita) | 🔴 **76,1%** |
+| lo slippaggio del 22/09 è **sistematico** (+10,5% su ogni perdita) | 🔴 **78,4%** |
 
-👉 **Sapere quale delle due è vera vale 7,9 punti percentuali di challenge.** E si misura
+👉 **Sapere quale delle due è vera vale 5,6 punti percentuali di challenge nello scenario ottimista — e 34,5 in quello pessimista (§7), perché è la misura che dice in quale dei due mondi siamo.** E si misura
 accumulando `n` — non con un round.
 
 ---
@@ -283,8 +287,8 @@ accumulando `n` — non con un round.
 | **M1** 🥇 | **Il Guardian gira davvero su `C:\FTMO`?** La riga di sola lettura **esiste già**, pin e doppio cancello passati il 21/09 (`BINARI_IN_CAMPO_FTMO_2026-09-21.md` §③). Stampa **anche** `.ex5` vs `.mq5`, date, sorgenti mai compilati, righe `GUARDIAN` nei due giornali, EA nei `.chr` | **0 passate · ~2 min** | 🔴 **+13,7 punti** (70,3 → 84,0) e **annulla** la modalità di morte principale | sappiamo di essere all'84% e il piano si semplifica | 🔴 **sappiamo che siamo al 70,3% e che la rete non c'è** — e si interviene lo stesso giorno | ✍️ **Claudio**: incolla in una **finestra PowerShell sul VPS `VMI3047753`**. 🛑 Non tocca nessun terminale |
 | **M2** 🥇 | **Gli `.ex5` in campo sono quelli che abbiamo letto?** 🟢 **È LA STESSA RIGA DI M1**: la sezione ① la stampa | **gratis dentro M1** | chiude il buco che il 12/09 trovò un binario di **486 righe contro 690**: un `.ex5` vecchio ignora **in silenzio** le chiavi del preset che non conosce | i sei preset descrivono i sei binari | 🔴 **i DD, i PF e i contratti di questo documento descrivono un'altra flotta** | idem M1 |
 | **M3** 🥈 | **Far arrivare `data/statements/trades_ftmo.csv` in repo** (esportatore attaccato + `pubblica_trades.ps1`). Oggi **ogni numero sulla challenge viene da una foto del telefono** | **0 passate** | 🔴 **rende APPLICABILE il criterio di uscita del 18/08** (*«DD forward > DD promesso → revisione»*), che oggi **non lo è**; e alimenta M4 | la pagella serale include la challenge, e i contratti del §1.2 diventano controllabili ogni giorno | si scopre che l'esportatore non è attaccato — e si attacca | ✍️ **Claudio** (gesto in MT5 sul terminale **FTMO `541452707`, `C:\FTMO`**) + riga sul VPS |
-| **M4** 🥈 | **Lo slippaggio: portare `n` da 1 a 10-20.** `ABTG_SpreadLogger_FTMO.set` è già in repo; `RIGA_SLIPPAGELOGGER` esiste | **0 passate** | 🔴 **±7,9 punti** (§4): discrimina fra lo scenario ottimista e quello pessimista del §7 | il +10,5% era un caso: restiamo all'84% | ogni DD promesso in questo repo va moltiplicato per un fattore — **e allora la taglia diventa una domanda vera** | ✍️ **Claudio** (riga di sola lettura sul VPS, passa dal cancello) |
-| **M5** 🥉 | **Il filtro H4 di `770202` sulla griglia FTMO** (§6.1). Round proxy: `InpFilterTF ∈ {H2, H4}` × `InpEmaSlow ∈ {25, 50, 100}`, tutto il resto pinnato da `R197A` | **12 passate · 4-18 min** | 🔴 la sedia vale **PF 1,24 / DD 6,92** col filtro e **PF 1,03 / DD 14,94** senza (**misurato**, §6.1). Il numero che gira su FTMO è **fra i due** e nessuno sa dove | il filtro è **insensibile alla fase**: il contratto `770202` regge | 🔴 il contratto di `770202` diventa **`[NON MISURATO]` su FTMO**, e sarebbe la prima volta che lo sappiamo | 🖥️ **PC di backtest** (`DESKTOP-H4D7CAJ`). 🔴 **Mai sul VPS** (regola 21/09) |
+| **M4** 🥈 | **Lo slippaggio: portare `n` da 1 a 10-20.** `ABTG_SpreadLogger_FTMO.set` è già in repo; `RIGA_SLIPPAGELOGGER` esiste | **0 passate** | 🔴 **−5,6 punti** diretti (§4) **e soprattutto**: è la misura che **discrimina** fra lo scenario ottimista (84,0%) e quello pessimista (67,8%) del §7 — cioè vale **16 punti di incertezza** | il +10,5% era un caso: restiamo all'84% | ogni DD promesso in questo repo va moltiplicato per un fattore — **e allora la taglia diventa una domanda vera** | ✍️ **Claudio** (riga di sola lettura sul VPS, passa dal cancello) |
+| **M5** 🥉 | **Il filtro H4 di `770202` sulla griglia FTMO** (§6.1). 🟢 **Il file prova ESISTE GIÀ e è verde al cancello**: `backtest_pipeline/prove/R215a_filtrotf_DOW_U30USD.txt` (asse `InpFilterTF` H1/H2/H3/H4, banco 80.000, modello 4) | **8 passate · 2,6-12 min** | 🔴 la sedia vale **PF 1,24 / DD 6,92** col filtro e **PF 1,03 / DD 14,94** senza (**misurato**, §6.1). Il numero che gira su FTMO è **fra i due** e nessuno sa dove | **altopiano largo H1-H4** → il motore non è sensibile al TF del filtro, il contratto di `770202` regge e il buco si chiude | 🔴 **altopiano stretto** → il contratto di `770202` è **`[NON MISURATO]` su FTMO**, e serve il seguito su `InpEmaSlow` a TF fisso H2 (8 passate) per separare **fase** da **memoria** | 🖥️ **PC di backtest** (`DESKTOP-H4D7CAJ`). 🔴 **Mai sul VPS** (regola 21/09) |
 | **M6** 🥉 | **`770511` al banco 80.000** — è il **B1** di `IL_MURO_MISURATO` §6. L'unica sedia il cui limite superiore sta **sotto** il 10% ma su banco **10.000** | **~4 passate · ~10 min** | chiude l'ultimo contratto misurato sul banco sbagliato **e** probabilmente promuove la sedia a «dimostrata sicura» | terza sedia su sei sotto il muro, dimostrata | il suo DD vero sfonda: allora è una sedia da guardare | 🖥️ PC di backtest |
 | **M7** 🥉 | **`770511`: il contratto CONTESO** (n 143/DD 3,9082 ↔ n 131/DD 4,1675, **41 input identici su 41**). 🟢 **Gratis dentro M6** se si accende l'export per-trade | **gratis in M6** | chiude un `[CONTESO]` **e** dà il quinto per-trade, che migliora il §2.1 | il binario di settembre riproduce | il delta è fuori dal `.set` e va isolato prima di fidarsi del suo DD | 🖥️ PC di backtest |
 | **M8** ⚪ | **`R214c` / `R214d`** — TF del grafico del Nasdaq `770260`, dove `InpUseVolumeFilter=TRUE` e `VolumeOK()` legge la barra del **grafico**: **misura vera, mai fatta, su una sedia in campo** | **8 passate · 2,6-12 min** | 🟠 può migliorare una sedia viva senza toccarne il meccanismo. **Non sposta la probabilità finché non è firmata** | c'è un TF migliore, e la sedia è già la più sicura delle tre aperture | `M5` resta il TF giusto: casella 5 del certificato chiusa | 🖥️ PC di backtest |
@@ -294,8 +298,7 @@ accumulando `n` — non con un round.
 | **M12** 🛑 | **`R214e/f`** (CostToCost EURJPY) e **`R214h/i`** (Live5m DAX) — 28 passate | 9-42 min | 🛑 **zero sulla challenge**: candidati forex/DAX non schierabili in otto giorni. `R214h` lo dichiara da solo: *«alla taglia FTMO del 2,00% la cella migliore fa già 17,8-18,1% di DD»* | valore di **biblioteca** (`R214f` è l'unico round con `n ≥ 150` in **tutte e due** le finestre) | — | 🖥️ PC di backtest, **dopo** M5-M7 |
 
 ### 🔴 La riga scomoda sul pacchetto del mattino
-**142 passate sono già scritte e verdi al cancello. Di quelle, quante spostano la probabilità di
-passare la challenge? 8 (M8), e solo dopo una firma.** Le altre 134 chiudono caselle di
+**150 passate sono già scritte e verdi al cancello** (`R212` 84 + `R214` 58 + 🆕 **`R215a` 8**). **Di quelle, quante spostano la probabilità di passare la challenge? SEDICI: le 8 di `R215a` (M5) e le 8 di `R214c/d` (M8).** Le altre 134 chiudono caselle di
 certificato o misurano candidati che non si schierano. 🟢 **Non è lavoro sprecato — è lavoro che
 va messo DOPO**, e il motto dice di non accontentarsi, non di lanciare tutto.
 
@@ -360,24 +363,39 @@ Dal CSV `risultati_archivio/Dow_Apertura/dow_motore.csv` (12 passate, asse `InpU
 robustezza a un cambio di smoothing **non dimostra** la robustezza a uno slittamento di 2 ore della
 griglia. Sono due assi diversi, e il secondo non è mai stato girato.
 
-### 🧪 La misura proxy, ed è ESATTA sul termine che conta (misura **M5**)
-Non si può cambiare la fase di una griglia H4 nel tester. **Ma si può cambiarne il TF**: la barra
-**H2** che chiude alle **14:00 BCM** ha **esattamente la stessa chiusura** della barra H4 che su
-FTMO chiude alle 16:00. 👉 Con `InpFilterTF=PERIOD_H2` e `InpEmaSlow=100` (= 200 ore di lisciatura,
-**la stessa span** di `EMA50` su H4) si riproduce **il termine veloce esatto** di FTMO e una
-lisciatura equivalente.
-**Griglia proposta**: `InpFilterTF ∈ {H2, H4}` × `InpEmaSlow ∈ {25, 50, 100}`, tutto il resto
-pinnato da `R197A` Pass 2, banco 80.000, `InpRiskPercent=2`, tick reali, IS+OOS = **12 passate**.
-- 🟢 **Ancora di regressione obbligatoria**: la cella `(H4, 50)` **deve** riprodurre `R197A` Pass 2
-  — IS `PF 1,21214 · DD 11,0936 · n 74` · OOS `PF 1,25384 · DD 8,7450 · n 130`. Se non riproduce,
-  **il round si butta**.
-- 🔬 **Contro-esempio dichiarato PRIMA**: se `(H2,100)` ≈ `(H4,50)` **e** `(H4,25)` ≈ `(H4,100)`,
-  allora il filtro è *«prezzo sopra una media lunga»* e **la fase non conta** ⇒ il contratto tiene.
-  🔴 **Ma se `(H2,100)` diverge mentre `(H4,25)` e `(H4,100)` restano vicine, non si può concludere
-  «è la fase»**: H2 campiona il doppio delle barre. 👉 Per questo le celle di controllo su H4 sono
-  **dentro** la griglia: senza di loro il round non distingue **fase** da **densità**, e
-  consegnerebbe una conclusione che non ha misurato.
-- 🛑 **Nessuna firma chiesta**: `770202` è viva. Qui si misura, non si propone di cambiare niente.
+### 🟢 E LA MISURA ESISTE GIÀ — scritta stanotte da un altro agente, **e converge con la mia** (misura **M5**)
+
+Mentre scrivevo questo documento, un agente in parallelo è arrivato **dalla parte opposta** alla
+stessa manopola: `035c1fc5` del 23/09 00:28 consegna
+**`backtest_pipeline/prove/R215a_filtrotf_DOW_U30USD.txt`** — asse unico `InpFilterTF`
+**{H1 · H2 · H3 · H4}**, 4 celle, **8 passate**, banco **80.000**, modello 4, `controlla_prova.py`
+**OK con 0 problemi**, magic vergine `721501`.
+🟢 **Due strade indipendenti sulla stessa domanda in una notte**: io ci sono arrivato dai preset
+FTMO (chi legge un TF alto?), lui dai CSV (*«`InpFilterTF` non varia in NESSUNO dei 240 CSV che
+hanno quella colonna, 5.264 righe»*). **Questo è il segnale che la domanda è quella giusta.**
+
+👉 **Quindi M5 non è un round da scrivere: è un round da LANCIARE.** E aggiungo solo la cosa che
+il mio pezzo di analisi porta in più, perché è utile e **il suo stesso file la dichiara già al §4
+come confondimento**:
+
+| | |
+|---|---|
+| 🟢 **quello che `R215a` misura benissimo** | *«il motore è sensibile al TF del filtro?»* — cioè **la domanda di RISCHIO**, che è quella che serve oggi |
+| 🔴 **quello che `R215a` NON può separare** (e lo scrive da sé) | con `InpEmaSlow=50` pinnato, cambiare TF cambia **due cose insieme**: la **fase** della barra di riferimento *e* la **memoria di calendario** dell'EMA (H1→50 h · H2→100 h · H3→150 h · H4→200 h) |
+| 🧮 **il pezzo che ci metto io** | la barra **H2** che chiude alle **14:00 BCM** ha **esattamente la stessa chiusura** della barra H4 che su FTMO chiude alle 16:00: 👉 **la cella `H2` riproduce il termine veloce ESATTO di FTMO.** E con `InpEmaSlow=100` su H2 si pareggia anche la memoria (200 ore = la stessa span di `EMA50` su H4) |
+
+> ## 🏁 La conseguenza operativa, in due righe
+> 1. 🟢 **Si lancia `R215a` com'è** (8 passate). Se l'altopiano H1-H4 è **largo**, il contratto di
+>    `770202` regge e la fase non conta: **il buco si chiude lì**.
+> 2. 🔴 **Solo se l'altopiano esce STRETTO** serve il seguito — un asse su `InpEmaSlow` **a TF
+>    fisso H2** (`{25 · 50 · 100 · 200}`, 8 passate), che è l'unico modo di separare **fase** da
+>    **memoria**. `R215a` §4 lo nomina già come *«un ALTRO file, e non si scrive oggi: un asse per
+>    volta»*, ed è la regola giusta. 🛑 **Non lo scrivo io e non lo propongo prima del risultato**:
+>    scriverlo adesso sarebbe misurare una cosa di cui non sappiamo ancora se serve.
+
+🛑 **Nessuna firma chiesta**: `770202` è viva, e `R215a` dichiara al suo §V4 che *«in nessun caso
+questo round cambia `InpFilterTF` alla sedia viva»*. **Qui si misura, non si propone di cambiare
+niente.**
 
 ## 6.2 🔎 Gli `.ex5` in campo — `[NON MISURATO]`, e la riga per chiuderlo esiste già
 
@@ -476,7 +494,7 @@ need to pass the Profit Target, the Trading Period is indefinite»*.
 |---|---|---|---|
 | **MER 23/09** *(oggi)* | 🥇 **M1+M2** — Claudio incolla la riga dei binari nella **finestra PowerShell del VPS `VMI3047753`**. La riga **esiste**, ha il pin e ha passato il doppio cancello il 21/09. 🛑 Non apre, non avvia, non chiude e non scrive **niente** su nessuno dei sette terminali | **2 min, zero macchina** | 🔀 **Guardian ATTIVO** → siamo all'84% e il piano resta com'è · 🔴 **Guardian ASSENTE o `.ex5` di agosto** → siamo al 70,3% (33,3% nello scenario pessimista) e **la giornata cambia**: si ricompila e si riattacca, ed è l'unica cosa che conta |
 | **MER 23/09** *(in parallelo, se M1 è verde)* | 🥈 **M3** — attaccare `ABTG_TradeExporter` su `C:\FTMO` col preset già in repo e far girare `pubblica_trades.ps1` | 5 min | 🔀 `trades_ftmo.csv` arriva → **il criterio del 18/08 diventa applicabile** e la pagella serale include la challenge · non arriva → si sa perché, e si ripara |
-| **GIO 24/09** | 🥉 **M5** sul **PC di backtest**: il round proxy sul filtro H4 di `770202` (12 passate, ancora di regressione obbligatoria, contro-esempio dichiarato). 🔴 **Il file prova va scritto e deve passare `controlla_prova.py` + `controllo-preventivo` prima di qualunque riga** | **12 passate · 4-18 min** di tester, ~1 h di stesura e cancello | 🔀 **fase irrilevante** → il contratto di `770202` regge e si chiude un `[NON MISURATO]` · 🔴 **fase rilevante** → `770202` è **la sedia che non conosciamo**, e la decisione su di lei diventa urgente (resta di Claudio) |
+| **GIO 24/09** | 🥉 **M5** sul **PC di backtest**: si lancia **`R215a`**, che è **già scritto e già verde** (8 passate, ancora di regressione dai CSV grezzi, contro-esempio e confondimento dichiarati dentro il file). 🔴 **Resta da scrivere e far passare dal cancello solo la RIGA DI LANCIO** | **8 passate · 2,6-12 min** di tester | 🔀 **fase irrilevante** → il contratto di `770202` regge e si chiude un `[NON MISURATO]` · 🔴 **fase rilevante** → `770202` è **la sedia che non conosciamo**, e la decisione su di lei diventa urgente (resta di Claudio) |
 | **VEN 25/09** | 🥉 **M6+M7** sul PC di backtest: `770511` al banco **80.000**, risk 2,00%, tick, IS+OOS, **con l'export per-trade acceso** — chiude il banco sbagliato, il contratto conteso e il quinto per-trade in una corsa sola | **~4 passate · ~10 min** | 🔀 DD sotto il 10% → **terza sedia dimostrata sicura**, e il §2.1 si rifà con **cinque** serie invece di quattro · sopra → sedia da guardare, e il §7 si sposta verso il pessimista |
 | **SAB 26 · DOM 27** | 🛑 **mercati chiusi. Non si fa niente sul campo.** Lavoro di scrivania: rifare il §2.1 e il Monte Carlo con le serie nuove, aggiornare `report/PIANO_PROP.md` (fermo alla **v22 del 13/09**, cioè **prima della challenge**: le sei sedie non ci sono) | 0 | 🔀 il Monte Carlo a 5-6 serie conferma l'84% oppure lo abbassa: nel secondo caso **la domanda sulla taglia diventa decidibile** |
 | **LUN 28/09** | 🥈 **M4** — prima lettura dello slippaggio accumulato. Con **una settimana di operatività** e ~2,7 op/giorno promesse dalla rosa, ci si aspettano **10-15 uscite**: abbastanza per dire se il +10,5% era un caso | 0 passate | 🔀 **slippaggio ~0** → siamo nello scenario ottimista, **84%**, e non si tocca niente · 🔴 **slippaggio confermato** → scenario pessimista, **67,8%**, e **allora** la taglia va portata a Claudio col numero |
@@ -538,8 +556,9 @@ Il mandato chiede di scriverlo se il piano onesto è corto. **Lo è**, e queste 
 3. 🔴 **Il forward FTMO**: **nessun dato in repo.** Il file che servirebbe è
    `data/statements/trades_ftmo.csv`. Tutto quello che sappiamo della challenge viene da
    **schermate del telefono di Claudio**.
-4. 🔴 **Il filtro H4 di `770202` sulla griglia FTMO**: `[NON MISURATO]`. La misura proxy è al §6.1
-   e **non è stata lanciata**.
+4. 🔴 **Il filtro H4 di `770202` sulla griglia FTMO**: `[NON MISURATO]`. 🟢 Il file prova (`R215a`)
+   **esiste ed è verde**, ma **non è stato lanciato**. E anche dopo, se l'altopiano esce stretto,
+   **fase** e **memoria dell'EMA** restano non separate finché non gira il seguito su `InpEmaSlow`.
 5. 🔴 **`770511`**: contratto **CONTESO** (3,91 ↔ 4,17), banco **10.000** invece di 80.000,
    **posizioni `[NON MISURATO]`** (forbice 62-143), **nessun per-trade in repo**.
 6. 🔴 **`770411` IS in posizioni**: `[NON MISURATO]`, forbice 9-20.
@@ -550,7 +569,7 @@ Il mandato chiede di scriverlo se il piano onesto è corto. **Lo è**, e queste 
    colonne.
 9. 🔴 **`Equity Drawdown Absolute` vero: `[NON MISURATO]` per tutte e sei.** Costa **una riga** in
    `OnTester()`, che è una modifica a binari che stanno volando: **non la propongo**.
-10. 🔴 **Lo slippaggio**: `n = 1`. **Nessuna conclusione**, e vale ±7,9 punti di challenge.
+10. 🔴 **Lo slippaggio**: `n = 1`. **Nessuna conclusione.** Vale −5,6 punti diretti e **16 punti di incertezza** fra i due scenari del §7.
 11. 🔴 **La deriva del cambio EUR/USD fra ingresso e uscita** (+0,67% misurato in due ore il
     22/09): non modellata da nessuna parte, e `US30.cash`/`US100.cash` sono quotati in USD su un
     conto in EUR.
