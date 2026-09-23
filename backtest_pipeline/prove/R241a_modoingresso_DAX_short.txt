@@ -1,0 +1,214 @@
+# ==========================================================================
+#  R241a -- I SEI MODI D'INGRESSO DEL DAX, lato CORTO, a TICK REALI
+#  ABTG_DAX_Apertura_EU -- D30EUR M5 -- la sedia 770101 che opera sulla challenge
+# ==========================================================================
+#  PERCHE' ESISTE (23/09/2026 notte). Richiesta diretta di Claudio:
+#    "NON E' POSSIBILE CHE NON TROVIAMO I PARAMETRI SUL DAX. A PARTE IL
+#     RETEST CHE ABBIAMO SOLO LONG, DOBBIAMO COMPLETARE GLI ALTRI LATI"
+#  Ed e' un fatto misurabile, non un'impressione: l'EA ha SEI modi
+#  d'ingresso (r.200-209) e in campo ne gira UNO.
+#      0 BREAKOUT     rottura del range di apertura
+#      1 GAPFILL      chiusura del gap di apertura
+#      2 RETEST       <-- L'UNICO IN CAMPO, e solo long
+#      3 RANGE_FADE   "fada gli estremi del range (mercati whipsaw, es. DAX)"
+#      4 DELAYED      entrata ritardata/confermata dopo N minuti
+#      5 OPENCONFIRM  la candela deve APRIRE oltre il livello
+#
+#  >>> E IL MODO 3 PORTA IL NOME DEL DAX NEL COMMENTO DEL SORGENTE, ed e'
+#      MAI PROVATO. Si incastra con quello che il cancello ha misurato su
+#      R239 poche ore fa: sul DAX i cinque filtri sono spenti, quindi
+#      TrendBias()=0 e TUTTI E DUE i lati sono validi -> esistono le
+#      GIORNATE A DOPPIA ROTTURA, cioe' il whipsaw. RANGE_FADE e' il modo
+#      scritto per quel mercato li'.
+#      *** Che si incastri NON e' una previsione sul risultato: e' la
+#      ragione per cui vale la pena spendere la macchina. La misura la fa
+#      il round, non questo commento. ***
+#
+# ==========================================================================
+#  >>> IL CANCELLO DEL COSTO: NON PRONUNCIATO SU CINQUE CELLE SU SEI. <<<
+# ==========================================================================
+#  Poche ore fa, su R239, il cancello ha corretto un mio errore: sul DAX
+#  il 40x NON passa -- 33,0x, non 42,3x. Ma quel numero
+#  (report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.396, riga figlia
+#  "sotto-campione della geometria VIVA", 56,1 idx [MIS] n=2) e' misurato
+#  su gambe REALI entrate in RETEST con offset 200.
+#  >>> OGNI MODO ENTRA A UN PREZZO DIVERSO, quindi ha una distanza
+#      ingresso->SL DIVERSA, quindi un 40x DIVERSO. Estendere il 33,0x agli
+#      altri cinque modi sarebbe la CLASSE 687, pagata due volte oggi.
+#  >>> QUINDI, PER QUESTO ROUND:
+#        cella 2 (RETEST)      -> costo PRONUNCIATO, NON PASSA (33,0x)
+#        celle 0,1,3,4,5       -> costo NON MISURATO. Non "passa" e non
+#                                 "non passa": NON SI SA.
+#      E non lo misura nemmeno questo round: la distanza ingresso->SL si
+#      legge dal Giornale, e le passate girano in Optimization=1 dove le
+#      Print non si eseguono. Serve la FASE 1, che non esiste ancora come
+#      riga di lancio.
+#  >>> CONSEGUENZA OPERATIVA, scritta prima dei numeri: NESSUNA CELLA DI
+#      QUESTO ROUND PUO' ESSERE PROMOSSA. Se una cella esce con un PF
+#      bello, la riga da scrivere e' "candidata alla FASE 1", mai
+#      "schierabile". Il costo e' un cancello, non una formalita'.
+#
+# ==========================================================================
+#  PERCHE' ALLORA SI GIRA, ed e' una ragione sola e onesta
+# ==========================================================================
+#  Perche' oggi di CINQUE MODI SU SEI non sappiamo NIENTE: ne' il PF, ne'
+#  l'n, ne' il DD, ne' se il motore opera affatto. Il certificato di morte
+#  del 09/09 chiede cinque caselle e su questi cinque modi ne abbiamo ZERO.
+#  Questo round ne riempie TRE (PF, n, DD) per ciascuno, e lascia scoperte
+#  le altre due (gestione dell'uscita ad asse, e il 40x).
+#  >>> E' un ALLARGAMENTO SUL MECCANISMO, non sui parametri di un motore
+#      dichiarato morto: e' esattamente cio' che la regola del 19/08
+#      PERMETTE, e il contrario di cio' che vieta. Il motore non e'
+#      dichiarato morto: e' la sedia 770101 che opera in questo momento
+#      sulla challenge FTMO 541452707, con un solo modo acceso.
+#
+# ==========================================================================
+#  LE CELLE CHE POSSONO USCIRE INERTI, dichiarate PRIMA
+# ==========================================================================
+#  I pin vengono dal .chr della sedia viva, che e' configurata per RETEST.
+#  Gli altri modi useranno i parametri che TROVANO, non parametri tarati:
+#    - DELAYED (4) usa InpDelayMinutes=30 e InpDelayDirMode=0, mai tarati;
+#    - GAPFILL (1): InpUseGapFill=false e' pinnato, ma il codice r.574 dice
+#      che col modo GAPFILL quel flag viene IGNORATO. La cella gira.
+#    - RANGE_FADE (3) e OPENCONFIRM (5) non hanno parametri propri pinnati.
+#  >>> QUINDI UN PF BRUTTO SU UNA DI QUESTE CELLE NON VUOL DIRE "IL MODO NON
+#      FUNZIONA": vuol dire "il modo non funziona CON I PARAMETRI DEL
+#      RETEST". E' uno SCREENING dei meccanismi, non un verdetto sui modi.
+#      Un modo si dichiara morto solo dopo che i SUOI parametri sono stati
+#      messi ad asse almeno una volta (certificato di morte, 09/09).
+#
+# ==========================================================================
+#  IL CANCELLO DI INTERPRETABILITA', congelato ORA
+# ==========================================================================
+#  >>> Se una cella esce con n(OOS) < 20, di quella cella si scrive solo
+#      "non opera abbastanza per essere letta", e NIENTE ALTRO: niente PF,
+#      niente DD, niente confronto. Un PF su 8 operazioni non e' un numero.
+#  >>> E il RETEST (cella 2) e' l'ANCORA: deve somigliare a quello che la
+#      sedia fa in campo. Se la cella 2 esce assurda, non si legge nessuna
+#      delle altre cinque, perche' il banco non sta descrivendo la sedia.
+#
+# ==========================================================================
+#  COSA NON PUO' DIRE
+# ==========================================================================
+#   - il MERITO: InpOneTradePerDay=true mette un tetto di 1 operazione al
+#     giorno, e l'IS e' il 40% di ~455 giornate feriali = ~182 giornate col
+#     LIMIT che spesso scade inevaso. NESSUNA cella arrivera' a n>=150 in
+#     IS (Emendamento A). Nessuna promozione, nessuno spegnimento;
+#   - il 40x su cinque celle su sei (sopra);
+#   - il regime: 21 mesi di dati BCM sugli indici, UN SOLO regime, un toro.
+#
+# ==========================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  MODELLO: 4 (TICK REALI) -- non imponibile dal file: e' -Modello.
+#  VINCOLI DI BANCO: la riga DEVE passare -Deposito 100000 (default del
+#  driver 10000, e a lotto nullo l'EA salta l'operazione: il deposito muove
+#  l'n). -Spread NON si passa: INCOGNITA DICHIARATA. E la riga deve girare
+#  sul PC DI BACKTEST (firma del 21/09), non sul VPS: il tetto barre
+#  MaxBars=100000000 e' una proprieta' di QUELLA macchina, e il driver non
+#  scrive nessun [Charts] MaxBars.
+#  COSTO IN TEMPO: [NON MISURATO]. 12 passate a M5 tick su 21 mesi. NON si
+#  trasferisce la banda di R238 (H1, altro motore): sarebbe classe 687.
+# ==========================================================================
+
+# ==========================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- i 80 pin: la configurazione VERA della sedia CLAU12_DAX_Apertura_EU presa dal suo .chr
+#     (CODA_08_preset_dai_chr_20260923_033004.log), con le TRE modifiche
+#     dichiarate in testa: InpSessionHour/Min in ORA SERVER BCM, il magic, e
+#     IL LATO. Nessun input di commento: questi EA non ce l'hanno.
+#     L'asse e' InpAllowShort (cella 0 = lato puro, cella 1 = long+short);
+#     InpAllowLong resta pinnato true come in campo.
+InpAllowReverse=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpAtrPeriodMgmt=14
+InpAtrSlMult=1.5
+InpBEatR=0.0
+InpBreakevenAtTP1=true
+InpBufferPoints=500.0
+InpCloseAtEnd=true
+InpCloseHour=19
+InpCloseMin=30
+InpConfirmMode=0
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpCorrSymbol=US500.cash
+InpCorrTF=16385
+InpDelayDirMode=0
+InpDelayMinutes=30
+InpEmaFast=14
+InpEmaSlow=200
+InpFadeOffsetPts=0.0
+InpFilterTF=16385
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpLevelTF=16385
+InpMagic=764270
+InpMaxPosSimbolo=0
+InpMaxRangePts=0.0
+InpMaxSpread=0
+InpMinRangePts=0.0
+InpMinStopPts=0.0
+InpNewsAfterMin=30
+InpNewsBeforeMin=30
+InpNewsFile=abtg_news.csv
+InpNewsFlatten=true
+InpNewsMinImpact=3
+InpNewsShiftMinutes=0
+InpOCTimeframe=0
+InpOneTradePerDay=true
+InpPendingExpiryMin=120
+InpPrevWindowMin=60
+InpRangeMinutes=35
+InpRangeMode=0
+InpRetestOffsetPts=200.0
+InpRiskPercent=2.0
+InpRoundMinDistPts=50.0
+InpRoundStep=100.0
+InpSLMode=0
+InpSessionHour=8
+InpSessionMin=0
+InpSkipIfTight=true
+InpSlippagePts=0.0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpTP1_ClosePct=50.0
+InpTP1_R=1.0
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpTrailMode=1
+InpTrailStartR=0.0
+InpTrailTF=5
+InpUsaGuardian=true
+InpUseAtrFilter=false
+InpUseCorrelation=false
+InpUseEmaFilter=false
+InpUseGapFill=false
+InpUseNewsFilter=false
+InpUseRoundLevels=false
+InpUseSupertrend=false
+InpUseSupertrend3=false
+InpUseTrailing=true
+InpUseVolumeFilter=false
+InpUseVwapFilter=false
+InpVerbose=true
+InpVolAvgBars=20
+InpVolMult=1.5
+InpVwapTF=15
+
+#
+
+# --- il LATO, PINNATO (non e' l'asse di questo round)
+InpAllowLong=false
+InpAllowShort=true
+
+# --- L'ASSE, unico: IL MODO D'INGRESSO. Sei celle, 0..5.
+#     0 BREAKOUT . 1 GAPFILL . 2 RETEST (ancora) . 3 RANGE_FADE . 4 DELAYED . 5 OPENCONFIRM
+InpEntryMode=2||0||1||5||Y
+# ==========================================================================
