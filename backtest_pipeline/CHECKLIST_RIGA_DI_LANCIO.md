@@ -31028,3 +31028,63 @@ scrivere *«non si promuove nemmeno se esce bella»* si risponde a due domande:
 🔴 E la formula corretta non e' *«non e' candidata»*: e' **«non si promuove DI SLANCIO da qui:
 se passa tutti i cancelli si apre un round SUO, e il numero va in `REGISTRO_TEST.md`»**.
 Un morto senza certificato non e' un morto.
+
+---
+
+## CLASSE 609 -- 🧾⚖️ IL REFERTO CHE **NON QUADRA CON SE STESSO**: l'intestazione dichiara `+75.436`, il suo stesso dettaglio si ferma a `+74.488`, e il controllo che lo scopre e' **UNA SOTTRAZIONE GRATIS CHE NESSUNO FA** (trovata il 23/09/2026 in `R103_REFERTO_DRIVER_FOREX_METALLI_20260824_1922.txt`, in repo dal 24/08 -- figlia della regola di riconciliazione della classe 84/85)
+
+**Il numero, misurato e non dedotto** (`grep -oE '^#+ *CLASSE +[0-9]+' backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md | grep -oE '[0-9]+' | sort -n | tail -3` eseguito **nel momento in cui questa riga viene scritta**: le ultime erano **606 / 607 / 608**, e `CLASSE 609` non compariva da nessuna parte nel repo).
+
+### Il fatto
+
+Il blocco **F25 `Gold_Ichimoku_TK_ATR_EA` XAUUSD** del referto R103 porta, a **venti righe di
+distanza dentro lo stesso blocco**, tre numeri che dovrebbero essere lo stesso numero:
+
+| dove, dentro lo stesso blocco | valore |
+|---|---:|
+| `PROFITTO alla TAGLIA VIVA (0.5%)` (intestazione) | **+75.436** |
+| `LA SECONDA MISURA (dai DEAL del report)` -> `netto` | **+75.436** |
+| **ultima riga della colonna `CUMULATO EUR`** della spina dorsale | 🔴 **+74.488** |
+| somma indipendente delle **7 righe annuali** | 🔴 **+74.486** |
+
+🔴 **Scarto: 950 EUR, l'1,26%.** E le altre **24 sedie su 25 chiudono entro 3 EUR** di
+arrotondamento: non e' una tolleranza di formato, e' **una sedia sola che non torna**.
+
+### Perche' non se ne e' accorto nessuno per un mese
+
+Perche' **il controllo costa una sottrazione e nessuno la fa**. La colonna `CUMULATO` e'
+costruita apposta perche' **l'ultima riga E' il totale**: il referto si porta gia' in casa
+il suo stesso controllo di quadratura, stampato, e **non lo confronta con la propria
+intestazione**. Chi legge guarda l'intestazione **oppure** la spina dorsale, mai le due
+insieme -- e ognuna delle due, da sola, e' perfettamente coerente.
+
+🔴 **E il difetto e' peggiore di un numero sbagliato**: non si sa **quale** dei due sia
+giusto. L'unico indizio e' che F25 e' **l'unica sedia senza OPTFRAME** (l'EA non ha
+`OnTesterDeinit`, lo dichiara il referto stesso), quindi i suoi numeri vengono dai **DEAL**
+invece che dallo strumento -- ma **e' un sospetto, non una diagnosi**.
+
+### Perche' e' una classe a se', e non la 84/85
+
+La **84/85** e' *«il totale e il dettaglio non vengono mai dalla stessa riga: si
+RICONCILIANO»*, ed e' nata su un **cap** (`[:40]`) che tronca un elenco letto **da un altro
+strumento**. Qui non c'e' nessun cap, nessun troncamento e nessun secondo strumento: e'
+**lo stesso file, lo stesso blocco, lo stesso generatore**, e la riga di controllo **e' gia'
+stampata**. La 84/85 dice *cosa fare quando si legge un elenco altrui*; la **609** dice che
+**un referto deve controllare SE STESSO prima di uscire**, e che il controllo e' gratis.
+
+> ✅ **REGOLA, in tre pezzi:**
+> 1. **Ogni referto che stampa un totale E un dettaglio chiude da solo la sottrazione
+>    `totale - somma(dettaglio)` e la STAMPA**, anche quando fa zero. Un controllo che non
+>    si vede non e' stato fatto: e' stato sperato.
+> 2. **Se il dettaglio ha gia' una colonna cumulata, l'ultima riga E' il totale**: il
+>    confronto costa zero e va messo **dentro il generatore**, non lasciato al lettore.
+>    E la soglia si dichiara (qui: **3 EUR di arrotondamento**, che 24 sedie su 25 rispettano).
+> 3. **Quando non quadra, il referto lo dice nella riga della sedia**, non in fondo, e
+>    **non sceglie quale dei due numeri sia giusto**: il rilievo resta **aperto** e va nella
+>    lista del codice d'uscita. 🔴 Il difetto non e' il numero: e' che **nessuno dei due
+>    numeri e' marcato come sospetto**, quindi il lettore ne crede uno a caso.
+>
+> 🧭 **Dove si annida**: ogni referto con intestazione + tabella (le 25 sedie di R103, le
+> pagelle serali, i censimenti di flotta, ogni `CUMULATO` di MQL5). E **peggiora sulle righe
+> speciali**: qui la sedia che non quadra e' proprio **l'unica con un percorso di calcolo
+> diverso dalle altre 24** -- cioe' esattamente quella che nessuna media avrebbe segnalato.
