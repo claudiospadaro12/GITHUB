@@ -1,0 +1,217 @@
+# ==========================================================================
+#  R239c -- IL LATO CORTO DELLA SEDIA 770202 CHE STA OPERANDO SULLA CHALLENGE
+#  ABTG_Dow_Apertura_US  --  U30USD M5
+# ==========================================================================
+#  PERCHE' ESISTE (23/09/2026 sera, e non e' una caccia: e' un controllo)
+#  Aperta la configurazione delle SEI sedie FTMO, due girano con META'
+#  MOTORE SPENTO:
+#      770101 DAX Apertura  -> InpAllowLong=true  InpAllowShort=FALSE
+#      770202 Dow Apertura  -> InpAllowLong=true  InpAllowShort=FALSE
+#  (le altre quattro hanno tutti e due i lati, o solo lo short.)
+#
+#  >>> E IL PUNTO CHE RIBALTA LA DOMANDA: NEL SORGENTE LO SHORT E' ACCESO.
+#      ABTG_Dow_Apertura_US.mq5 dichiara `input bool InpAllowShort = true`
+#      ed e' usato in SEI punti di decisione veri (breakout, retest,
+#      delayed, gap, direzione-da-chiusura). Il ramo NON e' un moncone:
+#      e' implementato e mantenuto. **E' il PRESET a spegnerlo.**
+#      Quindi la domanda non e' "si puo' costruire un lato short?" ma
+#      "quel lato e' mai stato MISURATO, o e' spento per eredita'?".
+#
+#  >>> E LA RAGIONE PER CUI VALE LA PENA GUARDARE, misurata OGGI: R235 ha
+#      dato RAMO 3 su tutti e due i simboli (R = 0,851 NASUSD, 0,891
+#      U30USD), cioe' "la deriva non basta a spiegare lo short".
+#      *** MA ATTENZIONE, E LO SCRIVO PRIMA: R235 misura
+#      ABTG_IntradayMomentum, NON questo motore. Trasferire quel risultato
+#      qui sarebbe la CLASSE 687, pagata oggi stesso. R235 e' il MOTIVO
+#      PER ANDARE A GUARDARE, non una previsione sul risultato. ***
+#
+# ==========================================================================
+#  >>> IL CANCELLO DEL COSTO: PRONUNCIATO, E PASSA. <<<
+# ==========================================================================
+#  Qui, a differenza di R238, il numero e' MISURATO SU QUESTA SEDIA e non
+#  trasferito da una vicina. report/CANCELLO_COSTO_FLOTTA_2026-09-10.md:
+#    770101 DAX  r.396: SL_RANGE (estremo opposto del range 35' + buffer
+#                5 idx) -> stop 71,9 idx [MIS] n=7, spread 1,70 (ora 8)
+#                -> 42,3x  = PASSA
+#    770202 Dow  r.400: SL_RANGE (range 15' + 2 x buffer, floor
+#                InpMinStopPts=500) -> stop 123,8 idx [MIS] n=446,
+#                spread 2,00 (ora 15) -> 61,9x = PASSA
+#  >>> PER QUESTA SEDIA: 61,9x.
+#   E la riserva va detta, non nascosta: 41,2x sulla coda dello spread (3,00).
+#  >>> E vale per il LUNGO misurato. Lo stop e' geometrico (SL_RANGE:
+#      estremo OPPOSTO del range), quindi sullo short e' lo stesso
+#      meccanismo specchiato -- ma la DISTANZA sullo short NON e' misurata.
+#      Questo round non la misura (serve il Giornale, cioe' la FASE 1).
+#      Si dichiara: costo PASSA sul lungo, NON MISURATO sullo short.
+#
+# ==========================================================================
+#  >>> LA TRAPPOLA DELL'ORARIO, ed e' la ragione per cui questo file
+#      NON copia il preset alla lettera. <<<
+# ==========================================================================
+#  Il preset della sedia in campo porta:
+#      770101 DAX -> InpSessionHour=10  InpSessionMin=0
+#      770202 Dow -> InpSessionHour=16  InpSessionMin=30
+#  Sono GIUSTI: il server FTMO e' ORA ITALIANA +1 (10:00 FTMO = 09:00 IT =
+#  apertura DAX; 16:30 FTMO = 15:30 IT = apertura USA).
+#  >>> MA IL NOSTRO BANCO E' BCM, che e' ORA ITALIANA -1. Le stesse due
+#      aperture, in ora server BCM, sono le 8:00 e le 14:30.
+#  >>> COPIARE IL PRESET ALLA LETTERA AVREBBE MISURATO DUE ORE SBAGLIATE
+#      DEL GIORNO, e il round sarebbe stato buono da buttare senza che
+#      nessun numero lo facesse vedere. CLAUDE.md lo dice da sempre:
+#      "colonna InpSessionHour deve essere 8 (DAX) / 14 (Nasdaq); se e'
+#      9/15 -> ora sbagliata, cestinare".
+#  >>> IN QUESTO FILE: InpSessionHour=14. Fra FTMO e BCM ballano DUE ore.
+#
+#  LE TRE SOLE MODIFICHE AL PRESET DI CAMPO, tutte dichiarate:
+#    1. InpSessionHour / InpSessionMin portate in ORA SERVER BCM (sopra);
+#    2. InpMagic nuovo (serie 7642xx, riservata ai round);
+#    3. (questi EA NON hanno un input di commento: il round si identifica
+#       dal solo magic. Verificato: nessun 'input string Inp*Comm*' nel
+#       sorgente. Il cancello ha bocciato la prima stesura che lo pinnava.)
+#  Tutto il resto e' il .chr della sedia viva, pin per pin.
+#
+# ==========================================================================
+#  IL CONFONDENTE, cercato e NEUTRALIZZATO
+# ==========================================================================
+#  ABTG_DAX_Apertura_EU.mq5 r.291 ha InpAllowReverse: col secondo lato
+#  acceso, quel meccanismo puo' far partire un SECONDO ciclo -- cioe'
+#  accendere lo short cambierebbe DUE cose insieme.
+#  >>> MISURATO: nel preset di campo del DAX InpAllowReverse=FALSE (pinnato,
+#      e ripinnato qui). E ABTG_Dow_Apertura_US.mq5 quel parametro NON CE
+#      L'HA proprio. Quindi in tutti e quattro i file il confondente e'
+#      spento: l'asse muove UNA cosa sola.
+#  (r.586 del DAX cita InpAllowReverse ma e' solo una ABTGLog: verificato.)
+#
+# ==========================================================================
+#  COSA PUO' DIRE, e cosa NO
+# ==========================================================================
+#  PUO':
+#   (a) il numero di operazioni PER LATO su questa sedia, che oggi NON
+#       ESISTE come numero;
+#   (b) il RISCHIO (DD) del lato acceso: Emendamento B, a qualunque n;
+#   (c) se accendere lo short AIUTA o PEGGIORA la sedia com'e' schierata.
+#  NON PUO':
+#   (d) promuovere o spegnere alcunche' da solo: la sedia e' VIVA su una
+#       challenge, e ogni cambio in campo e' di CLAUDIO. Questo e' un
+#       round di MISURA;
+#   (e) dire niente sul regime: i dati BCM sugli indici sono 21 mesi e
+#       UN SOLO REGIME, un toro (sonda del 17/08). Uno short misurato qui
+#       parte SVANTAGGIATO per costruzione, e va letto cosi';
+#   (f) la distanza ingresso->SL dello short (serve la FASE 1).
+#
+# ==========================================================================
+#  LA FALSIFICAZIONE, congelata ORA -- e' l'additivita' (classe 676)
+# ==========================================================================
+#  I due lati sono mutuamente esclusivi per costruzione, quindi:
+#      n(CORTO puro) + n(LUNGO puro) = n(LONG+SHORT)
+#  sulla STESSA gamba e sullo STESSO simbolo. In R235 questa identita' e'
+#  tornata ESATTA su 4 terne su 4.
+#  >>> SE NON TORNA, il file e' falsificato: ho misurato il banco, non il
+#      motore, e nessuna delle due letture vale.
+#  >>> E UN CANCELLO CROCIATO GRATIS: la cella LUNGO PURO e' ESATTAMENTE la
+#      sedia com'e' schierata oggi (long si, short no). Deve somigliare a
+#      quello che la sedia fa in campo; se non ci somiglia, il banco non
+#      sta descrivendo la sedia e si guarda PRIMA quello.
+#
+# ==========================================================================
+#  EA: ABTG_Dow_Apertura_US
+#  MODELLO: 4 (TICK REALI) -- non imponibile dal file: e' -Modello.
+#  VINCOLI DI BANCO: la riga di lancio DEVE passare -Deposito 100000
+#  (default del driver 10000). -Spread NON si passa, come in tutti i round
+#  di questa serie, e resta un'INCOGNITA DICHIARATA.
+# ==========================================================================
+
+# ==========================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- i 79 pin: la configurazione VERA della sedia CLAU12_Dow_Apertura_US presa dal suo .chr
+#     (CODA_08_preset_dai_chr_20260923_033004.log), con TRE sole modifiche
+#     dichiarate: InpSessionHour/Min portate in ORA SERVER BCM, il magic e il
+#     commento. Il lato e' l'ASSE, quindi non e' fra i pin.
+InpAllowShort=true
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpAtrPeriodMgmt=14
+InpAtrSlMult=1.5
+InpBEatR=0.0
+InpBreakevenAtTP1=true
+InpBufferPoints=1000.0
+InpCloseAtEnd=true
+InpCloseHour=19
+InpCloseMin=30
+InpConfirmMode=0
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpCorrSymbol=US500.cash
+InpCorrTF=16385
+InpDelayDirMode=0
+InpDelayMinutes=30
+InpEmaFast=1
+InpEmaSlow=50
+InpEntryMode=2
+InpFadeOffsetPts=0.0
+InpFilterTF=16388
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpLevelTF=16385
+InpMagic=764252
+InpMaxPosSimbolo=0
+InpMaxRangePts=0.0
+InpMaxSpread=0
+InpMinRangePts=0.0
+InpMinStopPts=500.0
+InpNewsAfterMin=30
+InpNewsBeforeMin=30
+InpNewsFile=abtg_news.csv
+InpNewsFlatten=true
+InpNewsMinImpact=3
+InpNewsShiftMinutes=0
+InpOCTimeframe=0
+InpOneTradePerDay=true
+InpPendingExpiryMin=120
+InpPrevWindowMin=60
+InpRangeMinutes=35
+InpRangeMode=0
+InpRetestOffsetPts=400.0
+InpRiskPercent=2.0
+InpRoundMinDistPts=50.0
+InpRoundStep=100.0
+InpSLMode=0
+InpSessionHour=14
+InpSessionMin=30
+InpSkipIfTight=false
+InpSlippagePts=0.0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpTP1_ClosePct=50.0
+InpTP1_R=1.0
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpTrailMode=1
+InpTrailStartR=0.0
+InpTrailTF=5
+InpUsaGuardian=true
+InpUseAtrFilter=false
+InpUseCorrelation=false
+InpUseEmaFilter=true
+InpUseGapFill=false
+InpUseNewsFilter=false
+InpUseRoundLevels=false
+InpUseSupertrend=false
+InpUseSupertrend3=false
+InpUseTrailing=true
+InpUseVolumeFilter=false
+InpUseVwapFilter=false
+InpVerbose=true
+InpVolAvgBars=20
+InpVolMult=1.5
+InpVwapTF=15
+
+# --- L'ASSE, unico: il LATO. Cella 0 = CORTO PURO. Cella 1 = LONG+SHORT.
+InpAllowLong=0||0||1||1||Y
+# ==========================================================================
