@@ -1,0 +1,620 @@
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+#  R236a -- L'ASSE E' LO STOP. InpSLLookback sul CORTO puro, NASUSD H1.
+#  Scritto il 23/09/2026. Criteri congelati PRIMA dei numeri.
+#  ASCII PURO: nessun byte > 127 (verificato prima della consegna).
+# ==========================================================================
+#
+#  ORIGINE: richiesta di Claudio del 23/09/2026 su un grafico US100.cash M5
+#  ("Parte da un lato e poi va dall'altro... Ottimizzarlo. Inversione del
+#  Nasdaq"). Il motore di casa che fa l'inversione e' questo.
+#  Gemello obbligatorio: R236b (lato LUNGO). Regola dei due lati sugli
+#  indici, firmata da Claudio il 25/08/2026: sul Nasdaq si misurano SEMPRE
+#  tutti e due i lati, anche quello che sembra gia' noto.
+#
+# --------------------------------------------------------------------------
+#  1. A CHE DOMANDA RISPONDE, ED E' UNA SOLA
+# --------------------------------------------------------------------------
+#  La sedia viva 970913 (SupRev_NAS_H1_Ott, NASUSD H1) ha uno stop
+#  MISURATO di 27,10 punti indice (n=5, gamba nuova dell'11/09) contro una
+#  frontiera di costo di 96,0. E' 15,1x dove ne servono 40x: lo stop e'
+#  3,5 volte troppo STRETTO. Fonte: report/CANCELLO_COSTO_FLOTTA_2026-09-10.md
+#  r.412 (riga corretta il 18/09) e r.660.
+#
+#  Lo stesso referto, r.660, nomina la via e dice che non e' mai stata
+#  provata: "InpSLLookback: 5 -> 8/10 allarga lo swing", e aggiunge che
+#  InpSLBufferPips e' INERTE sugli indici (3 "pip" = 0,03 punti indice).
+#  Verificato da me sul sorgente: questo EA NON ha InpSLBufferAtr.
+#  >>> InpSLLookback e' l'UNICA manopola di questo EA che allarga lo stop.
+#
+#  LA DOMANDA:
+#    allargando lo swing dello stop da 5 a 17 barre, il costo si avvicina
+#    alla frontiera dei 40x TENENDO il Profit Factor sopra 1?
+#
+# --------------------------------------------------------------------------
+#  2. COSA QUESTO ROUND NON PUO' DECIDERE -- in testa, non in fondo
+# --------------------------------------------------------------------------
+#  (NO) NON puo' leggere il MERITO. L'n atteso e' 40-100, cioe' SOTTO il
+#       muro delle 150 operazioni (Emendamento A del 16/08/2026). Nessuna
+#       promozione, nessuno spegnimento, nessuna sedia nuova esce da qui.
+#       Nello scan d'archivio il corto puro su NASUSD H1 ha ZERO celle su
+#       29 con n >= 150 (ricontato da me, vedi sezione 3).
+#  (NO) NON puo' promuovere niente in forward. Non tocca il VPS, non tocca
+#       il conto reale, non tocca nessuna sedia viva.
+#  (SI) PUO' leggere il RISCHIO -- DD, a qualunque n (Emendamento B del
+#       16/08). Un drawdown e' un fatto accaduto, non una stima.
+#  (SI) PUO' rispondere alla domanda del COSTO, che e' la ragione del round.
+#  (SI) PUO' dichiarare una manopola INERTE, ed e' un risultato pieno
+#       (vedi il cancello T1).
+#
+#  LA TENSIONE, dichiarata e NON risolta da questo round:
+#    - allargare lo stop a rischio fisso RIMPICCIOLISCE il lotto
+#      (LotByRisk, r.543-546: lotto proporzionale a 1/distanza_stop);
+#    - il vero problema del Nasdaq e' la FREQUENZA (n=50 in 21 mesi), e la
+#      frequenza si curerebbe SCENDENDO di timeframe, che pero' PEGGIORA
+#      il costo (su M5 lo stop starebbe ancora piu' sotto i 96,0).
+#    Le due cure tirano in direzioni opposte. Questo round NON scioglie la
+#    tensione: la MISURA su un asse solo, quello dello stop.
+#
+# --------------------------------------------------------------------------
+#  3. I NUMERI D'ARCHIVIO, RICONTATI DA ME IL 23/09/2026
+# --------------------------------------------------------------------------
+#  Fonte unica:
+#    backtest_pipeline/risultati_archivio/SupertrendReversal/H1_OHLC/
+#    scan_ABTG_SupertrendReversal_H1_NASUSD.csv   (118 righe di dati)
+#
+#  >>> BANCO DICHIARATO: OHLC = "Solo prezzi di apertura"/barre.
+#      E' il banco OTTIMISTA: NON paga lo spread vero. Un numero OHLC non
+#      e' MAI un verdetto, e' screening. Questo round gira a TICK REALI,
+#      quindi i numeri qui sotto sono un RIFERIMENTO ALTO, non un bersaglio.
+#      La casa ha gia' pagato questa lezione: il CAC a PF 7,37 OHLC e'
+#      crollato a PFmed 0,96 a tick reali
+#      (risultati_archivio/SupertrendReversal/TICK_REALI_INDICI_H1vsH4.md).
+#
+#  CORTO PURO (InpAllowLong=0, InpAllowShort=1):
+#    celle 29 | positive (Profit > 0) 10 | celle con n >= 150: ZERO
+#    n massimo su tutte e 29 le celle: 93
+#    migliore per PF: PF 1,96645 RF 2,76521 n 50 DD 0,7772
+#                     (StMult 3,5 - StAtrPeriod 14 - TP_RR 1,5)
+#  LUNGO PURO (per confronto, e' il gemello R236b):
+#    celle 30 | positive 16 | n >= 150: ZERO | n massimo 125
+#    migliore per PF: PF 2,70724 RF 4,17582 n 65 DD 0,8871
+#                     (StMult 4,5 - AtrP 13 - TP_RR 3,0)
+#  DUE LATI INSIEME (1,1): celle 23 | positive 12 | n >= 150: 12 | n max 210
+#    >>> Il campione sopra le 150 operazioni ESISTE, ma solo tenendo i due
+#        lati accesi. Da solo, nessuno dei due lati ci arriva. E' un fatto
+#        che vale per la strategia d'imbuto, non per questo round.
+#
+#  H4 su NASUSD: n fra 5 e 14 = inutilizzabile. Confermato: questo simbolo
+#  vuole H1 (a H4 il SupRev sul Nasdaq faceva PF 0,68 a tick reali).
+#
+#  >>> IL FATTO CHE APRE IL ROUND, verificato sull'INTERO archivio:
+#      su 137 file CSV che portano la colonna InpSLLookback, il valore
+#      distinto e' UNO SOLO: 5.
+#      InpSLLookback non e' mai stato messo ad asse. Mai. Da nessuno.
+#      Non e' "gia' provato": e' una casella LIBERA.
+#      (verificato con una scansione di tutti i CSV di risultati_archivio/)
+#
+#  >>> E IL BUCO PIU' GROSSO, CHIAMATO PER NOME:
+#      su DAX e Nasdaq il LATO CORTO non e' MAI stato misurato a TICK
+#      REALI. Zero volte, su 160 passate di validazione SupRev: erano
+#      tutte a due lati accesi (1,1).
+#      Fonte: report/IL_CORTO_DI_DAX_E_NASDAQ_2026-09-23.md r.198 e r.205.
+#      >>> QUESTO FILE E' LA PRIMA VOLTA. Tutto quello che sappiamo oggi
+#          sul corto del Nasdaq sta sul banco ottimista.
+#
+# --------------------------------------------------------------------------
+#  4. LA CELLA DI ANCORAGGIO E LA REGOLA CON CUI L'HO SCELTA
+# --------------------------------------------------------------------------
+#  REGOLA DICHIARATA PRIMA DEL NUMERO, e vale identica su R236a e R236b:
+#
+#    "Il pin e' il CENTRO GEOMETRICO del blocco CONTIGUO piu' ampio in cui
+#     OGNI cella misurata sta sopra PF 1,00. Fra le celle centrali si
+#     prende quella col PF piu' BASSO (ancora conservativa) e l'n piu'
+#     alto. IL PICCO E' ESCLUSO PER COSTRUZIONE."
+#
+#  E' la regola di casa -- centro dell'altopiano, MAI il picco -- resa
+#  meccanica perche' non possa essere piegata dopo aver visto i numeri.
+#
+#  PERCHE' NON USO IL PICCO PF 1,96645:
+#    quella cella (StMult 3,5 - AtrP 14 - TP_RR 1,5) ha n=50, il campione
+#    piu' sottile della sua riga, ed e' ISOLATA: sulla stessa StMult 3,5 le
+#    celle vicine in AtrP fanno 0,792 e 0,838 (AtrP 11) e 1,297 (AtrP 12).
+#    Una cella che sporge mentre le vicine no NON e' un altopiano: e' un
+#    picco, cioe' rumore. Usarlo come ancora avrebbe messo l'intero round
+#    sopra una singola coincidenza a n=50.
+#
+#  L'ALTOPIANO VERO DEL CORTO, letto dal CSV (StMult 3,5, StAtrPeriod 7):
+#    TP_RR 1,5 -> PF 1,070   n 61   DD 1,225
+#    TP_RR 2,0 -> PF 1,302   n 61   DD 1,216
+#    TP_RR 2,5 -> PF 1,237   n 61   DD 1,219
+#    TP_RR 3,0 -> PF 1,275   n 61   DD 1,217
+#    E' l'UNICO punto di tutta la griglia del corto dove tutti e quattro i
+#    valori di TP_RR sono stati misurati e TUTTI E QUATTRO stanno sopra
+#    1,00. Quattro celle contigue, stesso n, DD identico al centesimo.
+#    Quello e' un altopiano.
+#
+#  APPLICO LA REGOLA: centro dell'intervallo TP_RR [1,5 ... 3,0] = 2,25.
+#  Le due celle centrali sono TP_RR 2,0 (PF 1,302) e TP_RR 2,5 (PF 1,237).
+#  Prendo quella col PF piu' BASSO -> TP_RR = 2,5.
+#
+#  >>> CELLA DI ANCORAGGIO R236a (CORTO):
+#      InpStMult = 3.5 | InpStAtrPeriod = 7 | InpTP_RR = 2.5
+#      riferimento OHLC: PF 1,237  n 61  DD 1,219
+#      n=61 contro n=50 del picco: l'ancora ha anche il campione PIU' AMPIO.
+#
+#  NOTA DI ONESTA': la griglia d'archivio e' SPARSA (29 celle su una maglia
+#  3 x 8 x 4 potenziale = 96), non un fattoriale pieno. "Contiguo" qui vuol
+#  dire contiguo fra le celle MISURATE. Le celle mancanti sono buchi, non
+#  zeri: non so cosa ci sia dentro. Dichiarato.
+#
+# --------------------------------------------------------------------------
+#  5. LA TABELLA DEL COSTO, COMPILATA PRIMA DELLA CORSA
+# --------------------------------------------------------------------------
+#  LA FRONTIERA, e il conto per intero:
+#    spread NASUSD = 2,40 punti indice = MEDIANA DELLE 24 MEDIANE ORARIE
+#    (backtest_pipeline/risultati_archivio/spread_flotta/spread_orario_NASUSD.csv,
+#     colonna mediana_idx, 24 righe orarie; ricalcolata da me: 2,40).
+#    frontiera 40 x 2,40 = 96,0 punti indice.
+#
+#    >>> PERCHE' 2,40 E NON 1,80 -- CLASSE 650, evitata apposta.
+#        Lo stesso file porta una riga "TUTTO" con mediana 1,80: e' la
+#        mediana PESATA SUI TICK, e i tick si accalcano nelle ore
+#        americane (le ore 14-21 hanno da sole 95 milioni di tick sui 156
+#        totali, e sono le ore a spread basso). Quella riga descrive "il
+#        tick mediano", NON "l'ora mediana". Con 1,80 la frontiera
+#        scenderebbe a 72,0 e il cancello sarebbe piu' facile DI FALSO.
+#        Uso la mediana PER BARRA: 2,40 -> 96,0.
+#
+#    >>> E HO CONTROLLATO SE IL MOTORE HA UN FILTRO D'ORA, invece di
+#        assumerlo: InpUseTimeWindow esiste (r.90-92) ma e' SPENTO, e lo
+#        era anche in archivio -- nel CSV la colonna InpUseTimeWindow vale
+#        0 in tutte e 118 le righe, con InpStartHour 0 e InpEndHour 24.
+#        Il motore opera su TUTTE le 24 ore, quindi lo spread giusto e'
+#        quello delle 24 ore. Se un giorno accendessimo la finestra oraria,
+#        questo numero andrebbe rifatto sulle ore scelte.
+#
+#  LO STOP ATTESO A OGNI CELLA DELL'ASSE:
+#
+#    >>> AVVERTENZA CHE VIENE PRIMA DELLA TABELLA:
+#        LA DISTANZA DELLO STOP NON E' DERIVABILE DAI DATI CHE HO.
+#        Non sta nel CSV di ottimizzazione (nessuna colonna la porta) e
+#        NON la scrive nemmeno l'export per-trade dell'EA: ExportTrades()
+#        (r.720-746) scrive SOLO i deal di USCITA (DEAL_ENTRY_OUT), con
+#        prezzo di uscita e profitto netto -- niente prezzo di ingresso,
+#        niente prezzo di stop. E in ottimizzazione ogni passata
+#        SOVRASCRIVE il file del proprio magic (avvertenza del codice
+#        r.716-718), quindi sopravvive solo l'ultima cella.
+#        >>> I numeri qui sotto sono STIME, tag [DERIVATO], non misure.
+#
+#    LA LEGGE USATA, dichiarata: l'escursione di una serie su N barre
+#    cresce come radice di N (cammino aleatorio).
+#       stop(N) = stop(5) x radice(N/5)
+#    [ASSUNTO] Se il Nasdaq fosse a trend forte o a mean reversion marcata
+#    l'esponente non sarebbe 0,5 e questi numeri si spostano. E' un modello
+#    di primo ordine, non una misura.
+#
+#    LA BASE ha DUE valori, tutti e due [MISURATI] in campo sulla sedia
+#    970913, e NON concordano. Li porto tutti e due, come banda:
+#       (A) 27,10 idx  n=5  -- misura del 18/09 (gamba nuova dell'11/09)
+#       (B) 51,65 idx  n=4  -- misura del 10/09
+#    Entrambe da report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.412.
+#    NOTA: con InpBreakeven e InpTrailOnST accesi, uno stop misurato
+#    sulle gambe chiuse e' un LIMITE INFERIORE della distanza d'ingresso.
+#
+#    cella |  stop atteso (A)      |  stop atteso (B)      | quanto dei 96,0
+#    N=5   |  27,10 idx = 11,3x    |  51,65 idx = 21,5x    | 28% ... 54%
+#    N=8   |  34,28 idx = 14,3x    |  65,33 idx = 27,2x    | 36% ... 68%
+#    N=11  |  40,20 idx = 16,7x    |  76,61 idx = 31,9x    | 42% ... 80%
+#    N=14  |  45,35 idx = 18,9x    |  86,43 idx = 36,0x    | 47% ... 90%
+#    N=17  |  49,97 idx = 20,8x    |  95,24 idx = 39,7x    | 52% ... 99%
+#
+#  >>> IL RISULTATO PIU' IMPORTANTE DI QUESTA TABELLA, ED E' UNA CATTIVA
+#      NOTIZIA CHE SCRIVO PRIMA DI CORRERE, NON DOPO:
+#      NEMMENO LA CELLA PIU' LARGA DELL'ASSE (N=17) RAGGIUNGE I 40x SULLA
+#      BASE PESSIMISTICA (A): si ferma a 20,8x, cioe' meta' strada.
+#      Sulla base ottimistica (B) ci arriva appena (39,7x = 99%).
+#      Quindi l'esito onesto piu' probabile di questo round NON e'
+#      "il costo e' sistemato", ma "l'asse chiude fra il 52% e il 99% del
+#      buco, e da solo NON basta". Se domani qualcuno legge questo round
+#      come "il Nasdaq ha passato il cancello di costo", sta leggendo male:
+#      c'e' scritto qui che non puo' succedere sulla base (A).
+#      La cura completa, se questo asse mostra che il motore REGGE
+#      l'allargamento, sta FUORI da qui: un buffer in ATR (manopola che
+#      questo EA NON HA: andrebbe scritta) oppure un TF piu' alto.
+#
+#  COME SI MISURERA' DAVVERO LA DISTANZA DELLO STOP -- la via, dichiarata:
+#    1. VIA INDIRETTA, A COSTO ZERO, DENTRO QUESTO ROUND (e' quella che
+#       useremo): il lotto e' l'inverso dello stop. LotByRisk (r.543-546)
+#       calcola lotto = balance x InpRiskPercent / 100 / distanza_stop, e
+#       InpRiskPercent e' pinnato a 1.0 su tutte e cinque le celle. Quindi
+#       il RAPPORTO fra i volumi medi di due celle e' il RECIPROCO del
+#       rapporto fra i loro stop. Il volume sta in ExportTrades()
+#       (colonna "volume"), ma vale solo per l'ULTIMA passata (overwrite).
+#       >>> Percio' la misura pulita chiede UNA corsa singola per cella,
+#           NON la griglia. E' lavoro di un round successivo, con il suo
+#           costo dichiarato: 5 corse singole per lato.
+#    2. VIA DIRETTA: rilanciare la sola cella scelta come corsa SINGOLA e
+#       leggere la colonna S/L nella scheda "Ordini" del report del tester.
+#    3. VIA STRUTTURALE (la piu' pulita, ma e' una modifica all'EA e
+#       quindi FUORI da questo round): aggiungere a ExportTrades() il
+#       prezzo d'ingresso e il prezzo di stop. Finche' non c'e', la
+#       distanza dello stop di QUESTA famiglia resta [NON MISURATA] in
+#       backtest, e lo dico.
+#    >>> Dentro R236a la tabella del costo NON verra' confermata. Il round
+#        misura se il MOTORE regge l'allargamento, non di quanto si e'
+#        allargato. Sono due domande, e questa ne chiude una sola.
+#
+#  E IL SEGNALE INDIRETTO CHE INVECE ARRIVA GRATIS: l'imbuto.
+#    Il codice r.394 SCARTA l'ingresso se la distanza dello stop e' sotto
+#    il minimo consentito (contatore cO_sl, "SL troppo vicino"), e
+#    InpLogImbuto=true lo stampa nel Giornale. Allargare N puo' SOLO
+#    ridurre quei rifiuti. Quindi l'n e' MONOTONO NON DECRESCENTE lungo
+#    l'asse -- ed e' una previsione strutturale, non un'opinione: vedi T3.
+#
+# --------------------------------------------------------------------------
+#  6. L'ATTESA, SCRITTA PRIMA DEI NUMERI, CON LA BASE DI CALCOLO
+# --------------------------------------------------------------------------
+#  BASE DI CALCOLO -- modello di primo ordine, dichiarato come tale.
+#  Dall'ancora OHLC (PF 1,237, TP_RR 2,5) ricavo il tasso di vincita
+#  implicito: PF = w x 2,5 / (1 - w)  ->  w = 1,237 / 3,737 = 0,331.
+#  Poi aggiungo il costo dello spread in unita' di R: costo = 2,40 / stop.
+#    a N=5  (stop 27,10): costo 0,089 R -> PF atteso a tick = 1,10
+#    a N=17 (stop 49,97): costo 0,048 R -> PF atteso a tick = 1,16
+#  (conto: PF = w(2,5 - c) / ((1-w)(1 + c)) )
+#  >>> Il modello IGNORA il parziale del 50% a 1R, il breakeven, il
+#      trailing sul Supertrend e l'uscita sul flip -- che qui sono tutti
+#      ACCESI. Percio' l'attesa e' una BANDA, non un punto.
+#
+#  ATTESA DICHIARATA (corto puro, NASUSD H1, tick reali, 2 tranche):
+#    n        : 40-100 per tranche, e comunque SOTTO 150. L'ancora OHLC fa
+#               61 sulla finestra piena; spezzata in IS 0,40 / OOS 0,60
+#               mi aspetto circa 24 (IS) e 37 (OOS), con l'n che CRESCE
+#               lungo l'asse (T3). Tutto questo e' sotto il muro: il
+#               MERITO resta sospeso per costruzione.
+#    PF       : banda 1,00 - 1,30, con il centro atteso 1,10 a N=5 e 1,16
+#               a N=17. Mi aspetto il tick reale SOTTO l'OHLC 1,237 (T2).
+#    DD       : 0,65% - 3,57% (banda delle 29 celle d'archivio del corto,
+#               min 0,6465 max 3,5712, ricontata da me), e mi aspetto che
+#               il DD NON cresca lungo l'asse: il rischio
+#               per operazione e' fisso all'1% e il lotto si rimpicciolisce
+#               in proporzione allo stop. Se il DD cresce molto con N,
+#               qualcosa non torna (T5).
+#    guadagno atteso rispetto al DEFAULT (N=5): POCO. Il conto sopra dice
+#    +0,06 di PF, cioe. +5,7%. E' dentro il rumore di un campione da 60
+#    operazioni. >>> L'esito "il default va bene" e' un esito PREVISTO e
+#    LEGITTIMO di questo round, non un fallimento.
+#
+# --------------------------------------------------------------------------
+#  7. LE SOGLIE CONGELATE ORA, COL NUMERO ACCANTO
+# --------------------------------------------------------------------------
+#  (T1) CANCELLO DELLA MANOPOLA INERTE -- si legge PER PRIMO.
+#       Lo stop e' il PIU' PROTETTIVO fra la linea Supertrend e l'estremo
+#       delle N barre: r.386-389,
+#         sl = isLong ? MathMin(stLine, ext) - buf
+#                     : MathMax(stLine, ext) + buf
+#       Se la linea Supertrend vince quasi sempre il confronto, allora N
+#       NON TOCCA NIENTE e la manopola e' inerte.
+#       SOGLIA: se le 5 celle di una tranche danno 3 o meno esiti DISTINTI
+#       (su PF, n e DD insieme), InpSLLookback e' dichiarato INERTE su
+#       questo motore e questo simbolo, e si scrive cosi' nel referto.
+#       >>> NON e' un fallimento: e' la risposta alla domanda di r.660,
+#           ed e' esattamente il difetto che il censimento del 09/09 ha
+#           trovato su 874 CSV. Se e' inerte, la cura del costo su questa
+#           sedia NON passa da qui, e lo sapremo con 20 passate invece che
+#           con un round intero.
+#  (T2) CANCELLO CROCIATO, A COSTO ZERO -- il banco deve comportarsi da
+#       banco. La cella N=5 E' la configurazione dell'ancora d'archivio su
+#       tutti i parametri tranne il modello di esecuzione.
+#       SOGLIA: PF(tick, N=5) deve essere MINORE O UGUALE a 1,237 x 1,05.
+#       Il tick reale paga lo spread, l'OHLC no: il tick NON PUO' essere
+#       sensibilmente MIGLIORE dell'OHLC sullo stesso motore.
+#       Se esce PF(tick, N=5) sopra 1,30, NON si legge il round: si va a
+#       cercare cosa e' diverso (finestra, deposito, simbolo, binario).
+#       >>> ONESTA': questo NON e' una riproduzione esatta e non puo'
+#           esserlo -- l'archivio e' OHLC su finestra piena, qui e' tick
+#           reale spezzato in IS/OOS. E' un cancello di DIREZIONE
+#           (disuguaglianza), non di uguaglianza. Un cancello di
+#           uguaglianza su questa famiglia NON e' costruibile a costo
+#           zero, e lo dichiaro invece di fingere che lo sia.
+#  (T3) MONOTONIA DELL'n -- previsione strutturale, dal codice.
+#       r.394 scarta l'ingresso quando lo stop e' piu' stretto del minimo
+#       consentito. Allargare N puo' solo allargare lo stop (l'estremo su
+#       piu' barre e' debolmente piu' lontano), quindi puo' solo RIDURRE
+#       quei rifiuti.
+#       SOGLIA: n(N) deve essere NON DECRESCENTE lungo l'asse, con
+#       tolleranza di 2 operazioni per il trailing e le chiusure di coda.
+#       Se l'n CALA di oltre 2 passando da N=5 a N=17, la mia lettura del
+#       codice e' sbagliata e il round va riletto prima di usarlo.
+#  (T4) IL CANCELLO DI MERITO NON ESISTE IN QUESTO ROUND. Nessuna soglia
+#       di PF promuove niente: n < 150 su tutte e cinque le celle previste.
+#       Scritto qui perche' nessuno possa aggiungerlo dopo aver visto i
+#       numeri.
+#  (T5) CANCELLO DI RISCHIO -- questo SI, a qualunque n (Emendamento B).
+#       SOGLIA: qualunque cella con DD di tranche sopra il 7,0% e'
+#       segnalata in rosso nel referto a prescindere dal suo PF.
+#       REGOLA DELLA SOGLIA, dichiarata e identica sui due file: il doppio
+#       del massimo d'archivio di QUEL lato, arrotondato. Corto: massimo
+#       3,5712 -> 7,1 -> 7,0%. (Lungo: massimo 3,5241 -> 7,0%. I due lati
+#       cadono sullo stesso numero per caso, non per costruzione.)
+#       Se una cella lo supera, il comportamento e' cambiato di NATURA,
+#       non di grado, e va guardato prima del PF.
+#
+# --------------------------------------------------------------------------
+#  8. IL CONTRO-ESEMPIO, COSTRUITO DA ME PRIMA DELLA CORSA
+#     (regola del 10/09/2026: devo costruire io l'esito che mi farebbe
+#      sbagliare, e far vedere che lo riconoscerei)
+# --------------------------------------------------------------------------
+#  LA TESI DEL ROUND:
+#    "allargando lo stop il costo si aggiusta senza rompere il motore."
+#
+#  L'IPOTESI ALTERNATIVA, formulata per intero:
+#    "lo stop stretto E' il motore: allargarlo lo uccide."
+#    Non e' una frase vuota, ha un meccanismo PRECISO nel codice. Il
+#    bersaglio e' ancorato al rischio: r.396, tp = entry +/- risk x
+#    InpTP_RR. Quindi raddoppiare lo stop RADDOPPIA ANCHE LA DISTANZA DEL
+#    BERSAGLIO in punti indice. Con TP_RR 2,5 e stop 27,10 il bersaglio e'
+#    a 68 punti; con stop 49,97 e' a 125 punti. Un rimbalzo sul Supertrend
+#    si esaurisce: un bersaglio a 125 punti viene raggiunto MENO spesso di
+#    uno a 68, e il trailing sul Supertrend (acceso) chiude prima. Quindi
+#    il tasso di vincita CALA con N.
+#
+#  >>> I DUE NUMERI, E HANNO SEGNO OPPOSTO. E' questo che rende il round
+#      falsificabile invece che confermativo:
+#    TESI         -> PF CRESCENTE (o piatto) lungo l'asse: da circa 1,10 a
+#                    N=5 verso circa 1,16 a N=17. Il guadagno viene tutto
+#                    dal costo in R che scende da 0,089 a 0,048.
+#    ALTERNATIVA  -> PF DECRESCENTE lungo l'asse. Ordine di grandezza: se
+#                    il tasso di vincita cala dal 33,1% al 28% (cinque
+#                    punti, il costo tipico di raddoppiare la distanza del
+#                    bersaglio), il PF scende da 1,10 a circa 0,91, cioe'
+#                    SOTTO 1. La cella N=17 andrebbe in perdita.
+#    >>> Le due ipotesi NON producono lo stesso numero, non si
+#        sovrappongono, e si distinguono col SEGNO della pendenza. Se
+#        avessi trovato che tutte e due predicono "PF sopra 1", il round
+#        non avrebbe misurato niente e non andava lanciato.
+#
+#  E IL TERZO ESITO, che NON e' ne' l'uno ne' l'altro e che devo saper
+#  riconoscere: PF PIATTO e n PIATTO e DD PIATTO -> non e' "la tesi tiene",
+#  e' la MANOPOLA INERTE del cancello T1 (la linea Supertrend ha vinto il
+#  MathMax su quasi tutte le operazioni). Confonderlo con la tesi sarebbe
+#  l'errore da manuale: chiamare "robustezza" quello che e' "non ha morso".
+#
+#  QUALE ESITO FALSIFICA LA TESI, in una riga:
+#    un PF che scende in modo monotono lungo l'asse, con il tasso di
+#    vincita che scende con lui. Se esce quello, la risposta a Claudio e'
+#    "sul Nasdaq lo stop stretto E' il motore, e il costo NON si aggiusta
+#    da qui" -- e va scritta cosi', senza cercare la cella verde che
+#    sopravvive per caso.
+#
+#  CONTRO-ESEMPIO SULLA SCELTA DELL'ANCORA (la regola del 10/09 vale anche
+#  sulle mie scelte, non solo sui miei numeri): se avessi ancorato al picco
+#  PF 1,96645 (n=50) invece che a 1,237 (n=61), l'intero asse sarebbe
+#  partito da una cella isolata fra due vicine sotto 1 (0,792 e 0,838).
+#  Un calo di PF lungo l'asse sarebbe stato indistinguibile dal semplice
+#  RIENTRO del picco verso la media -- cioe' il round non avrebbe potuto
+#  separare le due ipotesi. L'ancora conservativa non e' prudenza
+#  stilistica: e' quello che rende leggibile il segno della pendenza.
+#
+# --------------------------------------------------------------------------
+#  9. L'ADDITIVITA' DI n FRA I DUE LATI -- diagnosi (classe 641)
+# --------------------------------------------------------------------------
+#  Se il lato e' un FILTRO PURO, spegnere il lungo toglie operazioni e non
+#  ne sposta nessuna, quindi:  n(corto) + n(lungo) = n(due lati accesi).
+#  L'HO GIA' VERIFICATO SULL'ARCHIVIO, a costo zero, sulle sole due terne
+#  di parametri che esistono in tutte e tre le varianti:
+#    StMult 2,5 - AtrP 7 - TP 1,5 :  73 + 125 = 198  contro  197   (+1)
+#    StMult 3,5 - AtrP 7 - TP 2,0 :  61 +  87 = 148  contro  148   (+0)
+#  >>> L'additivita' TIENE, al livello della singola operazione.
+#      (Il +1 e' compatibile con una posizione aperta a cavallo della fine
+#       finestra, che con l'altro lato acceso viene contata una volta sola.)
+#  PREVISIONE PER QUESTO ROUND, registrata prima:
+#    a parita' di cella dell'asse, n(R236a) + n(R236b) deve tornare entro
+#    +/- 3 operazioni rispetto a una corsa a due lati accesi sugli stessi
+#    parametri. Quella corsa NON e' in questo round (sarebbe un terzo file
+#    e un terzo asse): quindi la previsione resta APERTA e va chiusa
+#    altrove. Lo dichiaro invece di far finta che il round la verifichi.
+#  A COSA SERVE: se l'additivita' si rompesse, vorrebbe dire che i due lati
+#  INTERFERISCONO (una posizione lunga aperta impedisce l'ingresso corto,
+#  o il cap sul rischio aperto morde). Sarebbe una scoperta sul motore, non
+#  un errore di conto.
+#
+# --------------------------------------------------------------------------
+# 10. I BUCHI DICHIARATI, PER NOME
+# --------------------------------------------------------------------------
+#  (B1) RISCALDAMENTO DEL SUPERTREND E DELLE EMA (classe 653).
+#       Il vincolo che morde NON e' l'ATR del Supertrend (periodo 7 qui):
+#       e' la CONFLUENZA, che e' ACCESA (InpUseConfluence=true) e chiede
+#       una EMA a 200 periodi (InpEma4=200). Prima che la EMA200 su H1
+#       esista, l'ingresso non puo' essere validato.
+#       IL CONTO: NASUSD opera circa 23 ore al giorno (W=1380 minuti,
+#       CANCELLO_COSTO_FLOTTA sezione C) = circa 23 barre H1 al giorno,
+#       115 a settimana.
+#         200 barre  =  8,7 giorni operativi = circa 12 giorni di
+#                       calendario =  4,7% della gamba IS
+#         600 barre  = 26,1 giorni operativi = circa 37 giorni di
+#                       calendario = 14,2% della gamba IS
+#       (600 = tre volte il periodo, l'allowance di convergenza prudente
+#        per una media esponenziale; MT5 innesca la EMA con una media
+#        semplice, quindi il valore ESISTE gia' a 200 barre ma non e'
+#        ancora stabile.)
+#       >>> QUINDI: fra il 4,7% e il 14,2% della gamba IS e' riscaldamento,
+#           non misura. Su una gamba IS di 257 giorni sono 12-37 giorni.
+#           NON e' stato scorporato dalla finestra: @DAQUANDO resta al
+#           pavimento tick misurato 2024.09.26 perche' spostarlo in avanti
+#           costerebbe campione su un motore che ne ha gia' poco, e il
+#           campione e' il vincolo n.1 qui. E' una SCELTA, dichiarata, non
+#           una svista. Chi legge i numeri dell'IS sappia che i primi 12-37
+#           giorni sono piu' poveri di operazioni del resto.
+#  (B2) LA DISTANZA DELLO STOP NON VIENE MISURATA DA QUESTO ROUND.
+#       Gia' spiegato per esteso alla sezione 5. La tabella del costo
+#       resta [DERIVATO] anche dopo la corsa. Serve un round di 5 corse
+#       singole per lato, oppure una modifica a ExportTrades().
+#  (B3) L'ATR DI NASUSD NON E' MAI STATO MISURATO, SU NESSUN TF.
+#       CANCELLO_COSTO_FLOTTA sezione C, riga NASUSD: il valore ATR(14) H1
+#       = 80,2 e' tag [INFERITO], ricavato da una legge di scala tarata sul
+#       Dow e sul DAX. Per questo NON ho costruito la tabella del costo
+#       sull'ATR: l'ho costruita sui due stop [MISURATI] in campo, che sono
+#       numeri veri anche se discordanti fra loro.
+#  (B4) LA FINESTRA DELLO SCAN D'ARCHIVIO NON E' DICHIARATA NEL CSV.
+#       Il file non porta le date. Ho assunto che copra all'incirca la
+#       stessa finestra di 21 mesi, perche' i file prova gemelli della
+#       stessa famiglia (R120a_NASUSD) usano @DAQUANDO 2024.09.26. E'
+#       un'ASSUNZIONE [NON VERIFICATA]: se la finestra fosse diversa, il
+#       confronto di n del cancello T2 perde forza (il confronto di PF
+#       regge lo stesso, perche' e' un rapporto).
+#  (B5) UN SOLO REGIME. La finestra 2024.09.26 - 2026.06.30 e' 21 mesi di
+#       Nasdaq, in larga parte rialzisti. Il corto e' proprio il lato che
+#       soffre in un regime del genere: un PF basso qui NON e' una condanna
+#       del corto in assoluto (Emendamento B: il vecchio giudica il
+#       rischio, il recente il merito). La prova di regime NON e' in questo
+#       round.
+#  (B6) IL BINARIO IN CAMPO NON E' QUESTO SORGENTE. La sedia 970913 gira
+#       un binario del 04/08 con difetti noti di dimensionamento
+#       (RIMETTERE_IL_CAMPO_IN_PARI_2026-09-12.md r.97, difetto #2
+#       "lotto doppio"). Questo round gira il sorgente a HEAD. Quindi i
+#       numeri di questo round NON descrivono la sedia viva: descrivono il
+#       motore. Sono due cose diverse e non vanno confuse in referto.
+#  (B7) NON HO GUARDATO FUORI CASA. Nessun .set pubblico, nessun sorgente
+#       di terzi e' stato consultato per scegliere la banda 5-17: la banda
+#       viene dal suggerimento interno di CANCELLO_COSTO_FLOTTA r.660
+#       ("5 -> 8/10"), allargata a 17 per avere un asse che arrivi fin
+#       dove la tabella del costo dice che servirebbe. Un giro di
+#       riferimenti esterni sui valori tipici dello swing-stop del
+#       Supertrend NON e' stato fatto. Dichiarato.
+#
+# --------------------------------------------------------------------------
+# 11. IL COSTO IN TEMPO MACCHINA
+# --------------------------------------------------------------------------
+#  5 celle x 2 tranche (IS + OOS) = 10 passate su questo file.
+#  Col gemello R236b: 20 passate sul round.
+#  Tick reali su NASUSD H1, finestra 21 mesi. [NON MISURATO] il minutaggio
+#  per passata su questo motore: non ho un cronometro d'archivio per
+#  SupertrendReversal a tick reali su H1 e non lo invento.
+#
+# --------------------------------------------------------------------------
+# 12. VINCOLI DI BANCO -- e quello che il file NON puo' imporre
+# --------------------------------------------------------------------------
+#  MODELLO: TICK REALI (Modello 4). NON e' passabile da questo file: va
+#  chiesto dalla riga di lancio. Questo round NON si legge se gira in OHLC.
+#
+#  >>> DEPOSITO 100000 -- CLASSE 646, E IL FILE NON PUO' IMPORLO.
+#      walkforward_generico.ps1 NON ha una direttiva @DEPOSITO: non esiste
+#      riga che io possa scrivere qui per fissare il deposito. Il default
+#      del driver e' 10000. Percio' la riga di lancio DEVE portare
+#      -Deposito 100000 (classe 647 regola 4). Senza quel parametro il
+#      round gira a 10000 e i numeri NON sono confrontabili.
+#      E su QUESTO motore non e' un formalismo: il commento del codice a
+#      r.549-550 racconta che su 225JPY "a deposito 100k profitti identici
+#      al 10k, DD 0,01%" -- cioe' il dimensionamento di questo EA E' GIA'
+#      STATO falsato una volta dal deposito. Il DD in percentuale dipende
+#      dal deposito, e il DD e' l'unica cosa che questo round puo'
+#      davvero decidere (T5).
+#
+#  @FRAZIONEIS 0.40 e' scritta QUI DENTRO (classe 647): senza la riga
+#  esplicita il driver applica il suo default in silenzio e la finestra
+#  dichiarata in prosa non sarebbe quella girata (classe 393).
+#  Taglio: IS 2024.09.26 -> circa 2025.06.10 (257 giorni, 8,4 mesi);
+#          OOS circa 2025.06.10 -> 2026.06.30 (385 giorni, 12,7 mesi).
+#
+#  @DAQUANDO 2024.09.26 = pavimento dei tick reali MISURATO (classe 590).
+#  Non e' una scelta editoriale: prima di quella data i tick non ci sono.
+#  @FINOA 2026.06.30 = bordo d'archivio della flotta, lo stesso di R235.
+#  @PERIODO H1, e MOTIVATO: a H4 questo simbolo fa n fra 5 e 14 (archivio,
+#  ricontato) ed e' crollato a PF 0,68 a tick reali; sotto H1 il costo
+#  peggiora (lo stop scala con la radice del TF, lo spread no), e la
+#  tabella della sezione 5 mostra che a H1 siamo GIA' sotto la frontiera.
+#  Scendere di TF senza prima aggiustare lo stop sarebbe andare nella
+#  direzione sbagliata su tutte e due le cose insieme.
+#  InpTF e' un ENUM: pinnato col valore esplicito H1 = 16385, e NON messo
+#  ad asse (su un enum il passo viene ignorato e il conto delle celle
+#  inganna -- classe 287).
+#
+#  UN SOLO ASSE: InpSLLookback. Tutto il resto e' pinnato in forma nuda.
+#  Asse: 5 || 5 || 3 || 17 || Y -> celle 5, 8, 11, 14, 17.
+#  InpSLLookback e' un int, NON un enum: il passo CONTA, e il conto e'
+#  |17 - 5| / 3 + 1 = 5 celle. Verificato da controlla_prova.py.
+#  NIENTE griglia larga (regola del 19/08): StMult, StAtrPeriod e TP_RR
+#  restano PINNATI all'ancora. Non si rimettono ad asse.
+#
+#  MAGIC 764220 -- verificato vergine da me il 23/09/2026: zero occorrenze
+#  in tutto il repository (esclusi .git e .claude). Il gemello usa 764221.
+#
+#  NON PINNO InpNewsCurrencies: il suo valore e' la stringa VUOTA, e un pin
+#  vuoto MT5 lo IGNORA usando il default compilato -- e' esattamente il
+#  difetto per cui esiste controlla_prova.py. Con InpUseNewsFilter=false
+#  e' inerte comunque. Stesso motivo per InpNewsFile, lasciato al default.
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- il lato: CORTO PURO. E' la ragione del file.
+InpAllowLong=false
+InpAllowShort=true
+
+# --- timeframe operativo (ENUM, pinnato esplicito: H1 = 16385)
+InpTF=16385
+
+# --- ancora: centro dell'altopiano StMult 3,5 / AtrP 7 (sezione 4)
+InpStMult=3.5
+InpStAtrPeriod=7
+InpTP_RR=2.5
+
+# --- pattern del rimbalzo (valori dell'archivio, verificati nel CSV)
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+
+# --- confluenza tecnica (accesa in archivio: e' lei che detta B1)
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+# --- ingresso frazionato
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- stop e target: QUI c'e' l'unico asse del file
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+
+# --- rischio (fisso: e' cio' che rende il lotto l'inverso dello stop)
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+# --- filtro orario: SPENTO, come in tutte e 118 le righe d'archivio
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+
+# --- filtro notizie: spento
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+# --- generali
+InpComment=STREV_R236a
+InpFridayClose=false
+InpFridayCloseHour=20
+InpUsaGuardian=false
+InpMagic=764220
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+
+# --- L'ASSE, unico: lo swing dello stop. 5 celle: 5, 8, 11, 14, 17
+InpSLLookback=5||5||3||17||Y
+# ==========================================================================
