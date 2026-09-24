@@ -68,41 +68,85 @@ il RISCHIO*). Questa non è una condanna: è **un'attesa dichiarata e un innesco
 
 ---
 
-## 3️⃣ 🕵️ L'INDIZIATO CON NOME E COGNOME: **`770260`, il Nasdaq**
+## 3️⃣ ✏️ **L'INDIZIATO È STATO ASSOLTO** — correzione del 24/09, ore 06:30
 
-**È l'UNICA sedia che ha logato qualcosa in tutti e due i giorni. E tutte e due le volte era un
-RIFIUTO, per lo stesso motivo:**
+🔴 **La prima stesura di questa sezione incriminava `770260` (Nasdaq Apertura)** come *"candidato
+numero uno a una revisione"*, perché era l'unica sedia che avesse logato in tutti e due i giorni e
+lo aveva fatto due volte su due per **rifiutare** (*"rottura con volumi insufficienti, salto"*).
+**Ho costruito tre contro-esempi e sono andato a guardare. Tutti e tre hanno ucciso l'accusa.**
+
+### ❌ Ipotesi 1 — *"la soglia dei volumi è tarata su un feed diverso"*. **FALSIFICATA dal sorgente.**
+`ABTG_Nasdaq_Apertura_US.mq5` r.2513-2527, funzione `VolumeOKtf`:
+```cpp
+double avg = sum / n;                              // media delle n barre PRIMA della rottura
+return((double)v[0] >= InpVolMult * avg);          // volume della barra di rottura
 ```
-22/09 16:11  CLAU12_Nasdaq_Apertura_US (US100.cash,M5)
-             RETEST BUY: rottura con volumi insufficienti, salto (regola Emiliano).
-23/09 16:06  CLAU12_Nasdaq_Apertura_US (US100.cash,M5)
-             RETEST SELL: rottura con volumi insufficienti, salto (regola Emiliano).
-```
-🟢 **Buona notizia dentro la cattiva: quella sedia FUNZIONA.** Si sveglia all'ora giusta, vede la
-rottura, arriva fino al retest e **decide**. Non è muta, non è staccata, non è rotta.
-🔴 **La cattiva**: **2 occasioni su 2 fermate dallo stesso filtro**, il controllo dei volumi.
+👉 La soglia è un **RAPPORTO** (barra ÷ media delle sue 20 precedenti, **sullo stesso simbolo**),
+non un numero assoluto. 🟢 **Un rapporto è indipendente dalla scala del feed**: che il broker
+dichiari volumi da 500 o da 50.000, il rapporto è lo stesso. L'argomento della "scala diversa"
+**è morto**. *(Sopravvive un argomento di secondo ordine sulla granularità dei tick: più debole, e
+non l'ho misurato.)*
 
-### 🔴 E c'è un precedente che trasforma il sospetto in un'ipotesi seria
-`CONTRATTI_DELLE_SEDIE_FTMO_2026-09-20.md` §6 dice di `770260`, misurato **prima** della challenge:
-> **campo piccolo `50503392`: 0 · campo 100k `50504263`: 0** — 🔴 *"**mai operata**: nessun
-> forward, il contratto è **solo di banco**"*
+### ❌ Ipotesi 2 — *"il filtro è acceso per sbaglio su quella sedia"*. **FALSIFICATA dall'archivio.**
+Vero che è l'**unica** delle tre Aperture su FTMO ad avere `InpUseVolumeFilter=true` (DAX e Dow ce
+l'hanno `false`). 🔴 Ma non è uno sbaglio: **è la cella migliore di un A/B che abbiamo già fatto.**
+`risultati_archivio/Walkforward_Aperture/NASDAQ_B_motore_OOS.csv`, `InpEntryMode=2` — e la sedia in
+campo gira **esattamente** `InpEntryMode=2`:
 
-👉 **Una sedia che in forward non ha MAI aperto una posizione, su due conti diversi, e che in
-challenge rifiuta due volte su due per lo stesso motivo.** Il promesso di banco è 0,360 op/giorno;
-il misurato in campo è **0,000** su tutti e tre i conti.
-🔴 **Questa non è più bassa frequenza: è un'ipotesi di FILTRO CHE NON PASSA MAI**, e ha un modo
-pulito per essere falsificata.
+| filtro volumi | PF | n | **DD%** |
+|---|---:|---:|---:|
+| **acceso** (in campo) | **1,1094** | 94 | 🟢 **3,675** |
+| spento | 1,0408 | 240 | 🔴 8,790 |
 
-### 🧪 IL CONTRO-ESEMPIO, scritto prima di misurare
-Se il filtro volumi fosse tarato bene, dovrebbe **lasciar passare** una frazione ragionevole dei
-retest — diciamo almeno 1 su 3. L'ipotesi rivale è che la soglia dei volumi sia tarata su un
-**feed diverso** (il banco quota `NASUSD` su BCM, la challenge quota `US100.cash` su FTMO: **due
-broker, due scale di volume**) e che su FTMO non passi **mai**.
-👉 **Le due ipotesi divergono su un numero solo**: la quota di retest accettati.
-🔴 **0 su N con N ≥ 6** separa le due spiegazioni. Oggi N = 2: **non basta**, e non lo spaccio per
-una conclusione.
+🟢 **Il filtro compra un DD 2,4 volte più basso e alza pure il PF.** Su una challenge dove il muro
+giornaliero uccide il 18,2% delle corse, è un ottimo affare. **La sedia è configurata bene, e
+contro una misura.**
+
+### ❌ Ipotesi 3 — *"l'ora di sessione è sbagliata"*. **FALSIFICATA dal contro-controllo.**
+`InpSessionHour=16:30` sul Nasdaq fa scattare l'allarme di casa (*"Nasdaq = 14 in ora server BCM;
+se è 15 → cestinare"*). 🔴 Ma FTMO **non è BCM**. Il contro-controllo sono le altre due sedie:
+
+| sedia | `InpSessionHour:Min` su FTMO | apertura vera (IT) | offset implicito |
+|---|---|---|---|
+| DAX | **10:00** | 09:00 | IT **+1** |
+| Dow | **16:30** | 15:30 | IT **+1** |
+| Nasdaq | **16:30** | 15:30 | IT **+1** |
+
+🟢 **Tutte e tre concordi: il server FTMO è ora italiana +1** (GMT+3, la convenzione FTMO d'estate).
+Quindi 16:30 server = **15:30 italiane = l'apertura vera**. ✅ **Giusto.** E torna anche con i log:
+i due rifiuti alle 16:06 e 16:11 italiane cadono ~36 minuti dopo l'inizio sessione, cioè in pieno
+retest.
+
+### 🧮 E il conto che avrei dovuto fare PRIMA di incriminarla
+A **0,360 op/giorno** promessi, in **3 giornate** le attese sono **1,08** posizioni.
+👉 **P(zero) = 34,0%.** 🔴 **Zero posizioni in tre giorni su quella sedia è NORMALISSIMO**, non un
+indizio. Avevo scambiato **una coincidenza visibile** (era l'unica a logare, perché è l'unica che
+loga i rifiuti) **per un'anomalia**. Le altre cinque tacevano perché logano solo quando agiscono.
+
+🔴 **La classe del difetto**: *ho preso per indiziato l'unico testimone che parlava.* La sedia col
+filtro è anche l'unica che **dichiara** di aver deciso; le altre, mute, sembravano innocenti solo
+perché non dicono niente. **La visibilità non è colpevolezza.**
 
 ---
+
+## 3️⃣-bis 🔴 MA LO SCARTO DELLA **ROSA** RESTA, ED È SIGNIFICATIVO
+
+Assolta la singola sedia, il numero d'insieme non se ne va. Test di Poisson su `λ = 2,683/giorno`:
+
+| finestra | attese | osservate | P(≤ osservate) | lettura |
+|---|---:|---:|---:|---|
+| 2 giornate | 5,4 | 2 | 9,7% | 🟠 dentro la variazione |
+| 2 giornate | 5,4 | **1** | **3,0%** | 🔴 **significativo** |
+| 3 giornate | 8,0 | 2 | **1,3%** | 🔴 **significativo** |
+
+👉 **Se il conto vero è 1-2 posizioni aperte, la rosa sta sparando meno del contratto in modo che
+il caso non spiega.** Ma il numero esatto di posizioni **aperte** (non piazzate) non ce l'ho: gli
+ordini che vedo sono **pendenti**, e un pendente non è una posizione.
+🔴 **Ed è qui che morde un difetto già noto e ancora aperto**: `ABTG_Trades_FTMO.csv` esiste, è
+fresco e pesa **0,4 KB**, ma `CODA_12` **non lo conta** perché cerca `position_id` mentre
+l'esportatore scrive `pid`. **Il per-trade della challenge non entra in nessuna misura di casa.**
+👉 **Riparare quel contatore è la cosa che trasforma questo sospetto in un numero**, e non tocca il
+forward: è un confronto di nomi di colonna in uno script di lettura.
 
 ## 4️⃣ ⚪ CHE COSA QUESTA MISURA **NON** DICE, e va detto
 
