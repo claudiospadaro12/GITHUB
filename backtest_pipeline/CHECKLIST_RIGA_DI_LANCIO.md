@@ -35107,3 +35107,98 @@ guasto dei dati del simbolo. Ed è **documentato nell'EA stesso** (caso 225JPY, 
 via**: cambiano taglia, compounding e DD%, non il numero di operazioni.
 **La regola**: prima di citare un `return` come meccanismo, si legge **l'ultima riga della funzione
 che produce il valore**. Una guardia che non può scattare non spiega niente.
+
+## 🧮 CLASSE 740 — **la soglia di campione dichiarata in POSIZIONI e misurata in DEAL**
+
+24/09/2026, R244 — e la stessa trappola mi aveva preso su **R242** poche ore prima.
+Un file prova scrive `n >= 150` (Emendamento A, che è scritto in **POSIZIONI**) e poi legge la
+colonna `Trades` del CSV. 🔴 Con un'uscita frazionata (`InpTP1Pct > 0`) **`Trades` conta DEAL**.
+**Controprova aritmetica, verificata alla fonte**: `Expected Payoff × Trades = Profit` **esatto**
+su tutti e due i lati (`27,71564 × 101 = 2799,28` · `−21,15688 × 157 = −3321,63`) → `Trades` è il
+**divisore delle statistiche di MT5**, non il conto delle posizioni.
+🔴 **Il fattore `k` non è un numero: è una forchetta**, misurata sullo stesso motore nei per-trade
+d'archivio — **1,00 · 1,2143 · 1,3228 · 1,5 · 1,5714 · 1,8745**.
+
+| k | lo short attraversa 150 posizioni? |
+|---|---|
+| 1,0000 | fra C=14 e C=15 |
+| 1,2143 | fra C=15 e C=16 — e le celle sopra 150 diventano **due**, non tre |
+| **1,3228** *(campione n=316)* | solo a C=17 |
+| 1,5714 · **1,8745** | 🔴 **MAI, in nessuna cella dell'asse** |
+
+👉 **Il criterio di successo del round — «TRE celle contigue con n≥150» — era raggiungibile SOLO a
+`k=1,00`**, cioè solo se l'uscita non fosse frazionata. Ma il file la frazionava nei propri pin.
+🟢 **La riparazione costa ZERO tempo macchina**: `k` si misura **una volta**, sulla cella d'ancora
+che va girata comunque, con **una passata singola** (`Optimization=0`) che produce il referto
+per-trade con **posizioni e deal separati**. E `k` è **diverso fra i due lati**: non si eredita.
+**La regola**: ogni file prova con `InpTP1Pct`/`InpTP2Pct` > 0 **dichiara l'unità di ogni `n`** e
+**come misurerà `k`**. La formula operativa è *"dividi per k, POI confronta"*.
+
+## 🕖 CLASSE 741 — **la tabella dei costi parte dall'ora del CUTOFF e dimentica l'ora del PIAZZAMENTO**
+
+Stesso round. Il conto dei `40×` elencava «le ore toccate» a partire dall'**ora 8**. 🔴 Ma il
+pendente nasce alle **07:59 server**, cioè dentro l'**ora 7** — e l'ora 7 è molto peggiore
+(verificato in `spread_orario_D30EUR.csv`):
+
+| ora server | mediana | **p95** | tick |
+|---|---:|---:|---:|
+| **7** *(il piazzamento)* | **2,80** | 🔴 **4,10** | 746.714 |
+| 8 | 1,70 | 2,70 | 1.847.049 |
+
+🟢 **Nessun cancello si ribalta** (`238,7/4,10 = 58,2×`, sopra i 40×) **ma il margine vero è la
+metà** di quello scritto: **1,46×**, non 2,1×. E cade la frase *"l'unica cella che muove qualcosa è
+C=17"*, perché il p95 dell'ora 16 (2,90) non è più il peggiore di nessuna cella.
+**La regola**: la finestra di esposizione allo spread parte dall'**istante in cui l'ordine viene
+piazzato**, non dalla prima ora piena in cui potrebbe eseguire. Un minuto in un'ora cara **conta
+come quell'ora**, finché non si ha lo spread del minuto.
+
+## 🪆 CLASSE 742 — **la monotonia usata per validare l'asse, e poi le N celle contate come N prove indipendenti**
+
+Stesso round, ed è **auto-contraddittorio dentro lo stesso file**. Il par. 5 dimostra che l'asse è
+pulito perché **le giornate riempite a `C` contengono quelle di `C−1`** (monotonia = teorema sul
+codice, verificato). Il par. 8 legge poi *"il segno della pendenza su **nove celle**, che nove punti
+determinano molto meglio di due"*.
+🔴 **Le due cose non possono stare insieme**: la monotonia dice che i campioni sono **NIDIFICATI**.
+Nove PF cumulati non sono nove osservazioni — e una pendenza liscia è **quasi garantita dal rumore**
+quando ogni punto contiene il precedente.
+🟢 **E la statistica indipendente era già nei numeri del CSV**, senza una passata in più — il
+**PF MARGINALE**, cioè il PF delle **sole operazioni aggiunte** fra un cutoff e il successivo:
+`L(C)=Profit/(PF−1)` · `G(C)=PF·L(C)` · `PF_marg = (G(C)−G(C−1))/(L(C)−L(C−1))`.
+Le firme passano da separazioni di **0,021-0,171** (cumulato) a **0,26-0,41** (marginale), e due
+ipotesi che sul cumulato *"scendono tutte e due"* finiscono **dalle parti opposte di 1,00**.
+**La regola**: su un asse **monotono/annidato** le firme si leggono sul **marginale**, mai sul
+cumulato. E se un file usa la nidificazione per difendersi, **non può usarla anche per contare**.
+
+## 🏠 CLASSE 743 — **elencare i terminali che NON si toccano sulla macchina dove NON si gira, e tacere il conto della macchina dove si GIRA**
+
+Stesso round. I file elencavano diligentemente i sei terminali del VPS che il round **non** tocca
+(regola dei terminali multipli, applicata bene) — e **non nominavano** il terminale della macchina
+su cui il round gira davvero: su `DESKTOP-H4D7CAJ` il driver usa
+`C:\Program Files\BCM Markets MT5 Terminal`, **loggato sul conto 50503392**, e da quella macchina
+il **14/08/2026 sono partiti ordini VERI** (#3160534/#3160535, −104,60).
+🔴 **La lista delle esclusioni dà l'impressione di aver coperto il perimetro, e invece copre solo
+la metà dove non succede niente.**
+**La regola**: il perimetro si scrive **cominciando dalla macchina che esegue**, col suo conto in
+chiaro e l'avvertenza che la riguarda; le esclusioni vengono **dopo**. Un perimetro fatto di soli
+"NON" non è un perimetro.
+
+## 🔌 CLASSE 744 — **`grep -c` che vale 0 esce con codice 1, e la `&&` dopo salta la scrittura IN SILENZIO**
+
+24/09/2026, e l'ho fatto **io**, nello stesso comando con cui registravo le classi 740-743.
+Avevo scritto, in una riga sola:
+```
+for n in 740 741 742 743; do echo -n "$n: "; grep -c "CLASSE $n" CHECKLIST...; done && cat >> CHECKLIST... <<'EOF'
+```
+🔴 **`grep -c` restituisce exit status 1 quando il conteggio è ZERO** — cioè **proprio quando il
+numero di classe è libero, che è il caso che volevo**. Il `for` esce col codice dell'ultimo comando,
+quindi `&& cat` **non è mai partito**. Le quattro classi **non sono state scritte**, e nessuno ha
+detto niente.
+🔴 **E il danno vero è nel verbale**: il commit successivo portava il messaggio *"Classi 740-743,
+numeri cercati col grep"* mentre nel commit c'erano **due file su tre**. Un messaggio di commit che
+descrive lavoro non fatto è peggio di un messaggio assente.
+🟢 **L'ho preso subito** perché dopo il commit guardo sempre `git show --stat` (è il rimedio della
+classe 734): il conto dei file **non tornava**.
+**La regola**: **niente `&&` dopo un comando il cui codice di uscita è un RISULTATO e non un esito**
+(`grep`, `grep -c`, `diff`, `test`). Si separano con `;`, oppure si chiude con `|| true`. E dopo
+ogni commit si confronta `git show --stat` con l'elenco dei file che si credeva di aver toccato:
+**il verbale si verifica, non si spera.**
