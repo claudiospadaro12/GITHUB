@@ -31,7 +31,11 @@
 #  alla propria domanda. In piu' il long e' l'unico lato con n >= 150
 #  su OGNI cella da C=12 in su: e' li' che l'invariante di monotonia
 #  (par. 5) si verifica su un campione leggibile, cosa che questo file
-#  NON puo' fare sulle sue celle di sinistra (n atteso 7-73).
+#  NON puo' fare sulle sue celle di sinistra (n atteso 7-73 deal).
+#  *** ATTENZIONE ALL'UNITA': "n >= 150 su ogni cella da C=12 in su" e'
+#  vero in DEAL; in POSIZIONI il long ne ha fra DUE e CINQUE di celle
+#  sopra il pavimento, non sei (par. 6-bis del gemello). Resta vero che
+#  e' il lato PIU' POPOLOSO, che e' quello che serve qui. ***
 # =====================================================================
 #
 #  --- 0. IL PERIMETRO ------------------------------------------------
@@ -44,6 +48,15 @@
 #  girano piu' sul VPS mentre una challenge e' viva") e' bloccante.
 #  *** LA SEDIA VIVA 770411 (MaxMinNotte DAX Short, challenge FTMO) NON
 #  VIENE SFIORATA: magic diverso, conto diverso, macchina diversa. ***
+#  >>> E VA DETTO ANCHE DELLA MACCHINA SU CUI IL ROUND GIRA, perche'
+#      elencare solo cio' che NON si tocca sul VPS lascia scoperto il
+#      bersaglio vero: su DESKTOP-H4D7CAJ il terminale usato dal driver
+#      e' `C:\Program Files\BCM Markets MT5 Terminal`, ***loggato sul
+#      conto 50503392***, e il referto del driver stesso avverte che il
+#      14/08/2026 da quella macchina sono PARTITI ordini veri
+#      (#3160534/#3160535, -104,60). *** PRIMA DI LANCIARE: verificare
+#      che quel terminale NON abbia sedie attaccate. *** Non e' un
+#      banco solo-tester. <<<
 #
 #  --- 1. DA DOVE NASCE, E IL NUMERO CHE SCEGLIE L'ASSE ----------------
 #  R242 (report/REFERTO_R242_2026-09-24.md) ha misurato lo short di
@@ -70,6 +83,16 @@
 #  almeno un riempimento, non il loro numero.
 #     ==> giornate SENZA nessun riempimento: ALMENO 440-258 = 182,
 #         cioe' ALMENO il ***41,4%***.
+#  >>> *** E QUI 101 E 157 SONO DEAL, NON GIORNATE (par. 6-bis). ***
+#      Scriverli come "giornate riempite" e' l'errore di unita' che
+#      questo file ripara. Le giornate vere sono 101/k e 157/k', quindi
+#      MENO: il tetto 258 scende (a k=1,3228 diventa ~195) e le giornate
+#      vuote salgono da >=182 a >=245, cioe' da >=41,4% a >=55,7%.
+#      *** LA DIREZIONE DELL'ERRORE E' A FAVORE DELLA TESI DI QUESTO
+#      PARAGRAFO ***: il buco da riempire e' PIU' grande di quanto
+#      scritto, non meno, e la causa (2) resta la piu' grande. Nessuna
+#      conclusione del par. 1 si ribalta; i suoi numeri vanno letti coi
+#      due valori accanto. <<<
 #  Le cause possibili sono due sole, e stanno in due righe di codice:
 #    (1) InpMinBoxPts=6800 scarta la giornata PRIMA di piazzare (r.331);
 #    (2) il pendente non viene toccato entro InpEntryCutoffHour (r.258).
@@ -86,7 +109,9 @@
 #      150 nemmeno svuotandolo del tutto: 101 + 10,4% x 440 = 147. <<<
 #  >>> CONTO CHE VA SCRITTO PERCHE' E' AL LIMITE: anche ANNULLANDO il
 #      pavimento (InpMinBoxPts=0) lo short arriverebbe al massimo a
-#      ***147***, cioe' ANCORA SOTTO 150 -- e ci arriverebbe rompendo
+#      ***147 DEAL*** (e a 111 posizioni con k=1,3228: la conclusione
+#      regge A MAGGIOR RAGIONE in posizioni), cioe' ANCORA SOTTO 150 --
+#      e ci arriverebbe rompendo
 #      la frontiera del costo (par. 2). Il pavimento non e' solo la
 #      strada sbagliata: e' una strada che NON ARRIVA. <<<
 #
@@ -108,7 +133,12 @@
 #  >>> E VISTO CHE NON LO TOCCO, IL CONTO PER "OGNI VALORE PROPOSTO"
 #      E' UNO SOLO, ed e' questo. Per memoria di chi leggesse una
 #      proposta futura di abbassarlo, ecco i numeri che dovrebbe
-#      portare (tutti DERIVATI dalla stessa formula):
+#      portare (tutti DERIVATI dalla stessa formula).
+#      *** L'UNITA' DI MISURA DI QUESTA SOTTOTABELLA E' LO SPREAD DELLE
+#      ORE PIENE 8-15 (mediana 1,70 / p95 2,70), NON quello dell'ora 7
+#      del piazzamento (2,80 / 4,10): contro l'ora 7 i moltiplicatori
+#      qui sotto vanno divisi per 1,65 sulla mediana e per 1,52 sul
+#      p95. Il 4800 della soglia esatta vale contro 1,70. ***
 #        6800 -> stop_min 88,0 idx -> 51,8x mediana / 32,6x p95
 #        6000 -> stop_min 80,0 idx -> 47,1x mediana / 29,6x p95
 #        5000 -> stop_min 70,0 idx -> 41,2x mediana / 25,9x p95
@@ -120,8 +150,9 @@
 #  ANCORE DI SPREAD, misurate, con la fonte e la riga:
 #    backtest_pipeline/risultati_archivio/spread_flotta/
 #    spread_orario_D30EUR.csv -- VERIFICATO OGGI riga per riga
-#    (r.1 = intestazione, quindi r.10 = ora server 8):
-#      ora  8: mediana 1,70  p95 2,70   <-- ora del piazzamento
+#    (r.1 = intestazione, quindi r.9 = ora server 7, r.10 = ora 8):
+#      ora  7: mediana 2,80  p95 ***4,10***  <-- L'ORA DEL PIAZZAMENTO
+#      ora  8: mediana 1,70  p95 2,70   <-- prima ora piena di portata
 #      ora  9: mediana 1,70  p95 1,90
 #      ora 10: mediana 1,70  p95 1,90
 #      ora 11: mediana 1,60  p95 1,90
@@ -142,30 +173,48 @@
 #  report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par. 5].
 #     stop tipico = 218,7 + 20,0 = ***238,7 idx***, IDENTICO in tutte
 #     e nove le celle.
+#  *** CORREZIONE DEL CANCELLO, 24/09/2026: L'ORA 7 ENTRA IN TUTTE E
+#      NOVE LE CELLE, E LA PRIMA STESURA DI QUESTA TABELLA LA OMETTEVA. ***
+#  Il pendente si piazza alle ***07:59 server***, cioe' DENTRO L'ORA 7
+#  (r.9 del CSV: mediana 2,80 p95 4,10), non dentro l'ora 8. Il minuto
+#  07:59-08:00 e' in portata in OGNI cella, quindi "ore toccate" parte
+#  da 7 dappertutto e la colonna del peggiore va ricalcolata.
 #   C   finestra   ore toccate   peggior mediana  x      peggior p95  x
-#   9   07:59-09:00    8            1,70     140,4x        2,70     88,4x
-#  10   07:59-10:00    8-9          1,70     140,4x        2,70     88,4x
-#  11   07:59-11:00    8-10         1,70     140,4x        2,70     88,4x
-#  12   07:59-12:00    8-11         1,70     140,4x        2,70     88,4x
-#  13   07:59-13:00    8-12         1,70     140,4x        2,70     88,4x
-#  14   07:59-14:00    8-13         1,70     140,4x        2,70     88,4x
-#  15   07:59-15:00    8-14         1,70     140,4x        2,70     88,4x
-#  16   07:59-16:00    8-15         1,70     140,4x        2,70     88,4x
-#  17   07:59-17:00    8-16         1,70     140,4x        ***2,90***  82,3x
-#  >>> TUTTE E NOVE LE CELLE PASSANO I 40x CON UN FATTORE >= 2,1 ANCHE
-#      SUL p95. L'asse NON sposta la frontiera del costo. <<<
-#  >>> L'UNICA CELLA CHE LA MUOVE DI QUALCOSA E' C=17, e va scritta: il
-#      cutoff alle 17:00 mette in portata l'ora 16, il cui p95 vale 2,90
-#      invece di 2,70. Effetto sul caso PEGGIORE AMMESSO (giornata col
-#      box esattamente al pavimento di 68 idx E spread al 95esimo
-#      percentile): 88,0/2,70 = 32,6x diventa 88,0/2,90 = ***30,3x***,
-#      cioe' -7,1%. Tutti e due sono SOTTO i 40x -- ed e' un fatto che
-#      R242b aveva gia' dichiarato per la sua griglia, NON una novita'
-#      di questo round: e' la congiunzione di DUE code (box al minimo E
-#      spread al p95). Il caso tipico resta 140x/88x. <<<
+#   9   07:59-09:00    7-8          2,80      85,3x        4,10     58,2x
+#  10   07:59-10:00    7-9          2,80      85,3x        4,10     58,2x
+#  11   07:59-11:00    7-10         2,80      85,3x        4,10     58,2x
+#  12   07:59-12:00    7-11         2,80      85,3x        4,10     58,2x
+#  13   07:59-13:00    7-12         2,80      85,3x        4,10     58,2x
+#  14   07:59-14:00    7-13         2,80      85,3x        4,10     58,2x
+#  15   07:59-15:00    7-14         2,80      85,3x        4,10     58,2x
+#  16   07:59-16:00    7-15         2,80      85,3x        4,10     58,2x
+#  17   07:59-17:00    7-16         2,80      85,3x        4,10     58,2x
+#  >>> TUTTE E NOVE LE CELLE PASSANO LO STESSO I 40x, CON UN FATTORE
+#      ***1,46x*** SUL p95 (non 2,1x come diceva la prima stesura) e
+#      2,13x sulla mediana. Il cancello di costo NON si ribalta -- ma il
+#      margine vero e' meta' di quello scritto prima, e va letto cosi'. <<<
+#  >>> E L'ASSE CONTINUA A NON SPOSTARE LA FRONTIERA: il peggiore ora e'
+#      l'ora 7, che e' comune a tutte e nove le celle. Per questo la
+#      colonna e' COSTANTE e l'ora 16 (p95 2,90, in portata solo a C=17)
+#      non e' piu' il peggiore di nessuna cella: 2,90 < 4,10. <<<
+#  >>> QUANTO PESA DAVVERO L'ORA 7, dichiarato: e' UN MINUTO su 61-541.
+#      Prendere il suo p95 come "peggiore della finestra" e' la
+#      convenzione PRUDENTE gia' usata in questa tabella, non una stima
+#      di quello che succedera'. Il caso TIPICO, cioe' l'ora in cui il
+#      grosso dei riempimenti cade (8-15, mediana 1,60-1,70), resta
+#      ***140x/88x***. <<<
+#  >>> IL CASO PEGGIORE AMMESSO peggiora di conseguenza, e si scrive:
+#      giornata col box esattamente al pavimento (68 idx -> stop 88,0) E
+#      spread al p95 dell'ora 7 -> 88,0/4,10 = ***21,5x***, contro i
+#      32,6x (ora 8) e 30,3x (ora 16) della prima stesura. Tutti e tre
+#      sono SOTTO i 40x: e' la congiunzione di DUE code, gia' dichiarata
+#      da R242b per la sua griglia, NON una novita' di questo round --
+#      ma adesso il numero peggiore e' 21,5x, non 30,3x. <<<
 #  >>> E LA TENSIONE SI DICHIARA INVECE DI NASCONDERLA: per far passare
 #      i 40x anche al caso peggiore ammesso servirebbe
-#      InpMinBoxPts >= 40 x 2,90 x 100 - 2000 = ***9600 punti***.
+#      InpMinBoxPts >= 40 x 4,10 x 100 - 2000 = ***14400 punti***
+#      (con l'ora 7 in portata; erano 9600 nella prima stesura, che
+#      usava il 2,90 dell'ora 16).
 #      Quello TOGLIEREBBE operazioni, cioe' l'opposto esatto della
 #      domanda di questo round. E' un round diverso, non questo. <<<
 #
@@ -242,10 +291,13 @@
 #  della r.367 nasce ORDER_TIME_SPECIFIED con quella scadenza.
 #  Con il pin di R242 (250) il pendente piazzato alle 07:59 muore alle
 #  ***12:09***.
-#  >>> SE LASCIASSI 250, SEI CELLE SU NOVE SAREBBERO IDENTICHE FRA
-#      LORO: da C=13 in su il cutoff non morderebbe mai, perche' la
-#      scadenza avrebbe gia' ucciso il pendente alle 12:09. Nove
-#      passate, quattro esiti distinti. *** E' ESATTAMENTE LA MANOPOLA
+#  >>> SE LASCIASSI 250, ***CINQUE*** CELLE SU NOVE SAREBBERO IDENTICHE
+#      FRA LORO: da C=13 in su (cioe' C=13, 14, 15, 16, 17 -- cinque, e
+#      la prima stesura scriveva "sei", che e' un errore di conta) il
+#      cutoff non morderebbe mai, perche' la scadenza avrebbe gia'
+#      ucciso il pendente alle 12:09. Nove passate, ***CINQUE*** esiti
+#      distinti (C=9, C=10, C=11, C=12 piu' il gruppo collassato), non
+#      quattro. *** E' ESATTAMENTE LA MANOPOLA
 #      INERTE DEL CENSIMENTO DEL 09/09 (874 CSV su 1.960 con passate a
 #      esito identico), fabbricata a mano. *** <<<
 #  Quindi la scadenza va portata a un valore che NON morda in NESSUNA
@@ -258,6 +310,26 @@
 #  *** NON E' UN SECONDO ASSE: e' un pin scelto per RENDERE VISIBILE
 #      il primo. Una manopola portata dove non agisce non aggiunge una
 #      variabile, ne toglie una. ***
+#  >>> E LA DOMANDA "MA A C BASSI IL PIN NUOVO CAMBIA QUALCOSA?" HA UNA
+#      RISPOSTA ESATTA, NON UN'OPINIONE: ***NO, SU QUATTRO CELLE SU
+#      NOVE.*** A C=9, 10, 11, 12 il cutoff scatta al minuto 540, 600,
+#      660, 720, tutti PRIMA del minuto 729 (la morte del pendente col
+#      pin vecchio 250). Quindi su quelle quattro celle i pin 250 e 600
+#      danno risultati IDENTICI BIT A BIT, e il cancello del par. 5 ne
+#      e' un caso particolare (C=12). Il pin nuovo agisce SOLO su
+#      C=13-17, ed e' esattamente dove il pin vecchio avrebbe nascosto
+#      l'asse. Le due variabili non si muovono insieme: la seconda e'
+#      ferma dove la prima si muove poco, e assente dove la prima
+#      conta. <<<
+#  >>> IL CONTO REGGE ANCHE SE IL PRIMO TICK ARRIVA IN RITARDO, e va
+#      detto perche' e' l'unico modo di romperlo: exp si calcola alla
+#      r.339 quando TryPlace gira, cioe' al primo tick >= 07:59. Se
+#      quel tick arriva con un ritardo d, il pin 250 muore al minuto
+#      729+d e il pin 600 al 1079+d. Per C<=12 il cutoff resta prima di
+#      729+d per OGNI d>=0, quindi l'identita' vale sempre; e perche' il
+#      pin 600 arrivi a mordere prima del flat servirebbe 1079+d < 1050,
+#      cioe' d < -29 minuti: un tick PRIMA del piazzamento, impossibile.
+#      Nessun ritardo rompe niente, in nessuna delle due direzioni. <<<
 #  >>> E LA CELLA DELL'ANCORA NON CAMBIA, ed e' il punto delicato: a
 #      C=12 il cutoff scatta alle 12:00 (minuto 720), che e' PRIMA sia
 #      di 12:09 (pin vecchio) sia di 17:59 (pin nuovo). Quindi la cella
@@ -309,7 +381,80 @@
 #  La cella viva 770411 e' gia' short-only, quindi su questo lato NON
 #  si devia sui due input di lato (il gemello long SI').
 #
+#  --- 6-bis. *** L'UNITA' DI MISURA DI OGNI `n` DI QUESTO FILE, E LA
+#             RIPARAZIONE OBBLIGATORIA DEL CANCELLO DEL CAMPIONE. ***
+#             (correzione del cancello di giudizio, 24/09/2026)
+#  La prima stesura di questo file NON diceva in che unita' fosse
+#  scritto `n`, e questo da solo rende il cancello del campione una
+#  frase che non misura quello che dice. Adesso si dichiara:
+#
+#  *** TUTTI I NUMERI `n` DI QUESTO FILE -- l'ancora 101, la tabella del
+#      par. 7 (7...186), la `m` del contro-esempio del par. 8, il tetto
+#      440 -- SONO ESPRESSI IN ***DEAL***, cioe' nella colonna `Trades`
+#      dei CSV di ottimizzazione di MT5. NON SONO POSIZIONI. ***
+#  Il motivo e' nel pin di questo stesso file: `InpTP1Pct=50` (piu'
+#  `InpTP2Pct=50`, `InpUseEMA200Target`, il trailing). L'uscita e'
+#  FRAZIONATA, quindi una posizione chiude in piu' deal e la colonna
+#  `Trades` li conta tutti. Verificato alla fonte sui CSV di R242 (tutte
+#  le righe hanno `InpTP1Pct=50`) e sull'archivio `080957cf-valid_
+#  MaxMin_D30EUR.csv` (idem). Controprova aritmetica sul CSV: la colonna
+#  `Expected Payoff` e' esattamente `Profit / Trades`
+#  (27,71564 x 101 = 2799,28), cioe' `Trades` e' il divisore delle
+#  statistiche, non il numero di posizioni.
+#
+#  *** E IL PAVIMENTO DEI 150 DELL'EMENDAMENTO A E' SCRITTO IN
+#      POSIZIONI. *** Quindi "n >= 150" confrontato con la colonna
+#      `Trades` NON E' IL CANCELLO CHE DICE DI ESSERE, ed e' il difetto
+#      che questa sezione ripara.
+#
+#  IL FATTORE k = deal / posizione NON E' UN NUMERO, E' UNA FORCHETTA
+#  gia' misurata su QUESTO motore nei per-trade in archivio (correzione
+#  in testa a report/REFERTO_R242_2026-09-24.md):
+#      1,00 - 1,2143 - 1,3228 - 1,5 - 1,5714 - 1,8745
+#  e i due campioni piu' grossi (n=316 e n=263 posizioni) danno
+#  ***1,3228*** e ***1,8745***.
+#
+#  *** CHE COSA CAMBIA, CON I NUMERI, E CAMBIA IL ROUND INTERO. ***
+#  Il modello del par. 7 e' calibrato su p0 = 101/440: se 101 sono deal,
+#  quel p0 NON e' un tasso di riempimento, e' gonfiato di k. Rifatto
+#  correttamente (p0 = (101/k)/440, stessa formula, stesso t0), il
+#  campione in POSIZIONI e' questo:
+#   k        C=13   C=14   C=15   C=16   C=17   attraversa 150?
+#   1,0000    124    143    160    174    186   fra C=14 e C=15
+#   1,2143    106    125    141    155    167   fra C=15 e C=16
+#   1,3228     98    117    133    148    160   fra C=16 e C=17
+#   1,5000     88    107    123    137    150   MAI (150 esatto a C=17)
+#   1,5714     85    103    119    134    146   ***MAI***
+#   1,8745     73     91    107    121    133   ***MAI***
+#  >>> CONSEGUENZA SUL CANCELLO DI SUCCESSO DEL PAR. 9 ("TRE CELLE
+#      CONTIGUE con n >= 150"): e' raggiungibile SOLO a k = 1,00. Gia'
+#      a k = 1,2143 -- il MINIMO osservato sopra 1 -- le celle sopra 150
+#      sono due (C=16 e C=17), non tre. Ai due k dei campioni piu'
+#      grossi lo short NON TOCCA 150 POSIZIONI IN NESSUNA CELLA
+#      DELL'ASSE. *** Cioe': se k non viene misurato, questo round puo'
+#      tornare "n=186" e non voler dire niente. *** <<<
+#
+#  *** LA RIPARAZIONE, E COSTA ZERO TEMPO MACCHINA IN PIU'. ***
+#  k si misura UNA VOLTA su questa configurazione esatta, e la cella
+#  dove misurarlo va girata comunque: e' l'ancora C=12 del par. 5.
+#   1) la cella C=12 si gira ANCHE in passata SINGOLA (Optimization=0),
+#      che produce il referto per-trade con posizioni E deal separati;
+#   2) k := deal / posizioni di quella passata, un numero, non una
+#      forchetta;
+#   3) OGNI `n` di questo file si converte dividendo per k PRIMA di
+#      toccare il pavimento dei 150.
+#  >>> E IL CONTROLLO CHE LA MISURA E' BUONA: la passata singola deve
+#      dare ***esattamente 101 deal***, gli stessi del cancello del
+#      par. 5. Se ne da' altri, non e' la stessa cella e k non vale. <<<
+#
+#  *** FINCHE' k NON E' MISURATO, IL VERDETTO DI QUESTO ROUND SUL
+#      CAMPIONE E' "NON ANCORA MISURATO", MAI "n >= 150 RAGGIUNTO". ***
+#  E il rischio (Emendamento B) si legge lo stesso: il DD non ha
+#  bisogno di sapere in che unita' si contano le uscite.
+#
 #  --- 7. L'ATTESA DI CAMPIONE, DICHIARATA PRIMA DEI NUMERI -----------
+#  *** LEGGERE PRIMA IL PAR. 6-bis: OGNI `n` DI QUESTA TABELLA E' IN
+#      DEAL. In posizioni va diviso per k. ***
 #  MODELLO, e questa volta e' CALIBRATO sul dato invece che sulla
 #  teoria -- perche' in R242 il mio modello di trasporto ha sovrastimato
 #  ***14 celle su 14*** (referto r.123-126), ed e' un difetto che ho
@@ -330,10 +475,32 @@
 #  15     421    0,9091  0,36331     ***160***
 #  16     481    0,8505  0,39505     ***174***
 #  17     541    0,8019  0,42258     ***186***
-#  ATTESA: n non decrescente da ~7 a ~186, e *** il pavimento dei 150 si
-#  attraversa fra C=14 e C=15 ***. Banda dichiarata +/-25% sullo
-#  SCARTO dall'ancora (non sul valore: all'ancora lo scarto e' zero).
-#  Tetto duro 440 (una operazione al giorno, par. 3f).
+#  ATTESA: n non decrescente da ~7 a ~186 ***DEAL***. Banda dichiarata
+#  +/-25% sullo SCARTO dall'ancora (non sul valore: all'ancora lo
+#  scarto e' zero).
+#  >>> *** IL PAVIMENTO DEI 150 SI ATTRAVERSA FRA C=14 E C=15 SOLO SE
+#      k = 1,00. *** In posizioni (par. 6-bis) il punto di attraversa-
+#      mento e' fra C=15 e C=16 a k=1,2143, fra C=16 e C=17 a k=1,3228,
+#      e NON ESISTE da k=1,5714 in su. La frase "si attraversa fra C=14
+#      e C=15" della prima stesura vale in DEAL e in nessun'altra
+#      unita'. <<<
+#  TETTO DURO: ***440 x k deal*** (una POSIZIONE al giorno, par. 3f, per
+#  al massimo k deal ciascuna). In deal il tetto sta quindi fra 440 e
+#  ~825, e il numero che NON puo' essere superato in nessun caso e'
+#  ***440 POSIZIONI***. La prima stesura scriveva "tetto duro 440" sulla
+#  colonna Trades: sbagliato di unita', e avrebbe potuto dichiarare
+#  illeggibile un CSV sano.
+#  >>> *** E IL VERSO DELL'ERRORE E' GIA' MISURATO, non ignoto: in R242
+#      lo STESSO modello ha SOVRASTIMATO 14 celle su 14, di -18% fino a
+#      -58% (referto r.123-126 e la tabella r.148-160). La ricalibra-
+#      zione sull'ancora toglie l'errore di LIVELLO, non quello di
+#      FORMA, e non c'e' ragione di credere che la forma abbia cambiato
+#      segno. *** Quindi la lettura prudente di questa tabella e' il
+#      BORDO BASSO della banda +/-25%, cioe' n(C=17) ~ 165 deal e non
+#      186. Sommato al fattore k (par. 6-bis), il pavimento dei 150
+#      POSIZIONI si allontana ancora: a k=1,3228 e bordo basso il round
+#      non lo tocca in nessuna cella. *** E' l'esito da aspettarsi, e
+#      va scritto adesso perche' dopo sembrerebbe una scusa. *** <<<
 #  >>> DOVE QUESTO MODELLO PUO' SBAGLIARE, e in che verso: la
 #      volatilita' intraday del DAX non e' costante. Le ore 12-14
 #      server (pranzo europeo) sono le piu' quiete e il modello ci
@@ -419,6 +586,48 @@
 #      cella si legge solo per n. La differenza 1,41 contro 2,53 e'
 #      enorme, ma n=40 la rende un INDIZIO, non un verdetto. <<<
 #
+#  --- 8-bis. *** IL DISCRIMINANTE CHE SEPARA DAVVERO HP DA ALT: IL PF
+#             MARGINALE. *** (aggiunto dal cancello di giudizio, 24/09)
+#  Il confronto cella-per-cella qui sopra e' DEBOLE per una ragione che
+#  questo stesso file dimostra al par. 5: per l'invariante di monotonia
+#  le nove celle sono NIDIFICATE -- la cella C contiene tutte le
+#  operazioni della C-1. Quindi i nove PF NON sono nove osservazioni
+#  indipendenti: sono nove statistiche CUMULATE, fortissimamente
+#  correlate, e una loro pendenza "liscia" e' quasi garantita anche dal
+#  rumore. *** Non si puo' usare la monotonia per dimostrare l'asse e
+#  poi contare i nove punti come nove prove: e' la stessa nidificazione
+#  che rende vera la prima e debole la seconda. ***
+#
+#  LA STATISTICA INDIPENDENTE ESISTE, E SI RICAVA DAGLI STESSI DUE
+#  NUMERI CHE IL CSV GIA' PORTA (Profit e Profit Factor), senza una
+#  passata in piu':
+#     L(C) = Profit(C) / (PF(C) - 1)      G(C) = PF(C) x L(C)
+#     *** PF marginale fra due celle contigue = (G(C)-G(C-1)) /
+#         (L(C)-L(C-1)) ***
+#  cioe' il profit factor delle SOLE operazioni che il cutoff piu'
+#  lungo ha aggiunto. Quelle sono un campione DISGIUNTO da cella a
+#  cella: e' il blocco delle giornate riempite fra il cutoff C-1 e il
+#  cutoff C, e nient'altro.
+#  >>> E LA SEPARAZIONE E' LARGA, non 0,02: <<<
+#     HP  predice PF marginale ~= ***1,409*** (stesso edge delle prime)
+#     ALT predice PF marginale ~= ***1,00***  (somma zero, per
+#                                             definizione dell'ipotesi)
+#     WHIPSAW predice PF marginale ***< 1,00***
+#     DRIFT  predice PF marginale ***> 1,409*** e, sul gemello long,
+#            un marginale simmetricamente PEGGIORE di 0,744
+#  *** 0,41 di distanza fra HP e ALT, contro i 0,021-0,060 del confronto
+#      cumulato a C=13. E' QUESTO il cancello che discrimina, e il
+#      referto di questo round deve riportarlo cella per cella. ***
+#  >>> I DUE LIMITI, dichiarati: (a) ai C bassi il blocco marginale e'
+#      piccolo (a C=10 sono ~33 operazioni attese) e il suo PF e'
+#      rumoroso -- si legge come indizio, non come verdetto, e si
+#      pretende n_marginale >= 30 per commentarlo; (b) la TAGLIA dei
+#      lotti dipende dal saldo, che cambia da cella a cella, quindi
+#      G(C)-G(C-1) non e' ESATTAMENTE il lordo delle giornate nuove. E'
+#      un effetto del secondo ordine (il saldo si muove di pochi punti
+#      percentuali, DD atteso 2-5%) e per di piu' si semplifica in
+#      buona parte nel RAPPORTO. Va dichiarato, non ignorato. <<<
+#
 #  *** LA SOGLIA 1,38 NON SI ABBASSA, E NON SI ALZA. *** E' quella
 #  congelata da R242b e viene da li': 1,28 (predizione dell'ipotesi
 #  "abbiamo solo tolto il pedaggio") + 0,10 di margine. La geometria
@@ -452,26 +661,54 @@
 #  dell'ancora a C=12, monotonia di n). Se uno dei due fallisce, IL
 #  ROUND NON SI LEGGE e non si scrive nessun verdetto sul motore.
 #
-#  POI n, cella per cella:
-#    n >= 150 -> il MERITO si legge (Emendamento A del 16/08).
-#    50 <= n < 150 -> merito SOSPESO: si scrive PF, DD e n e si dice
+#  POI n, cella per cella. *** OGNI SOGLIA QUI SOTTO E' IN POSIZIONI,
+#  cioe' si applica a `Trades / k` e MAI alla colonna `Trades` nuda
+#  (par. 6-bis). Se k non e' stato misurato, nessuna di queste righe si
+#  puo' pronunciare e il campione e' "NON ANCORA MISURATO". ***
+#    n_pos >= 150 -> il MERITO si legge (Emendamento A del 16/08).
+#    50 <= n_pos < 150 -> merito SOSPESO: si scrive PF, DD e n e si dice
 #         "indizio". Il RISCHIO si legge lo stesso (Emendamento B).
-#         ATTESO su C=10, C=11, C=12, C=13, C=14.
-#    n < 50 -> "NON MISURATO", mai "non funziona". ATTESO su C=9.
-#    n > 440 -> impossibile: la guardia "un trade al giorno" non ha
-#         retto e il CSV non e' leggibile.
+#    n_pos < 50 -> "NON MISURATO", mai "non funziona".
+#    n_pos > 440 -> impossibile: la guardia "un trade al giorno" non ha
+#         retto e il CSV non e' leggibile. (In deal il tetto e' 440 x k:
+#         un `Trades` sopra 440 NON e' di per se' un'anomalia.)
+#  >>> DOVE CADONO LE CELLE, E DIPENDE DA k. A k=1,00 (deal=posizioni)
+#      il merito si leggerebbe da C=15 in su; a k=1,3228 solo a C=17; a
+#      k=1,5714 e oltre *** su NESSUNA cella dell'asse ***. L'attesa
+#      per cella non si puo' congelare prima di k: si congela la
+#      REGOLA, e la regola e' "dividi per k, poi confronta". <<<
 #
 #  >>> CHE COSA FA DIRE "IL CAMPIONE SI PUO' ALLARGARE SENZA PERDERE
 #      L'EDGE" (e nient'altro lo fa): <<<
-#    TRE CELLE CONTIGUE dell'asse, tutte con n >= 150, tutte con
-#    PF >= ***1,38***, e la cella CENTRALE delle tre con DD <= 10,0%.
+#    TRE CELLE CONTIGUE dell'asse, tutte con ***n_pos >= 150***, tutte
+#    con PF >= ***1,38***, e la cella CENTRALE delle tre con DD <= 10,0%.
 #    Il numero che si riporta e' quello della cella CENTRALE.
 #    *** MAI IL PICCO. *** Se una cella sporge e le vicine no, si
 #    scrive "NON C'E' UNA CONFIGURAZIONE ROBUSTA", che e' un risultato.
-#    E PER L'ATTESA DEL PAR. 7 LE UNICHE TRE CONTIGUE CON n>=150 SONO
-#    C=15, C=16, C=17: e' li' che il round si gioca.
+#  >>> *** E VA DETTO PRIMA, PERCHE' CAMBIA COME SI LEGGE IL ROUND: CON
+#      k >= 1,2143 QUESTO CANCELLO E' IRRAGGIUNGIBILE SU QUESTO ASSE ***
+#      (par. 6-bis: a k=1,2143 le celle sopra 150 posizioni sono due,
+#      da k=1,3228 in su al massimo una). La prima stesura diceva "le
+#      uniche tre contigue con n>=150 sono C=15, C=16, C=17": vero in
+#      deal, falso in posizioni per ogni k misurato sopra 1.
+#      *** QUINDI L'ESITO PIU' PROBABILE DI QUESTO ROUND E' "IL CUTOFF
+#      NON BASTA A PORTARE LO SHORT A 150 POSIZIONI", e quello E' la
+#      risposta alla domanda del round -- non un fallimento. *** La
+#      domanda che resta aperta in quel caso e' se serva un secondo
+#      asse (InpPlaceHour, par. 3g) o piu' simboli, non se questo
+#      motore vada archiviato. <<<
 #
-#  CHE COSA LO FALSIFICA, con i numeri gia' calcolati al par. 8:
+#  CHE COSA LO FALSIFICA, con i numeri gia' calcolati al par. 8.
+#  >>> *** LA CURVA ALT VA RICALCOLATA SUGLI n OSSERVATI, NON LETTA
+#      DALLA TABELLA. *** I cinque numeri qui sotto sono ALT valutata
+#      sugli n PREVISTI dal par. 7: se il round torna con n diversi,
+#      ALT predice altro. La formula da riapplicare e' quella del
+#      par. 8, PF(C) = (9650,7 + 81,70 m)/(6851,4 + 81,70 m) con
+#      m = n(C) - 101 preso dal CSV. Esempio, perche' non resti
+#      astratto: con n(C=13)=130 invece di 124, ALT predice 1,304 e non
+#      1,320. La banda +/-0,05 assorbe scarti di quell'ordine, ma il
+#      confronto si fa sui numeri veri. (L'unita' qui non morde: ALT e
+#      m sono tutti e due in deal, e il rapporto e' coerente.) <<<
 #    - PF che SCENDE lungo l'asse e atterra entro +/-0,05 dalla curva
 #      ALT (1,320 / 1,271 / 1,240 / 1,219 / 1,203) o dalla sua variante
 #      prudente (1,359 / 1,326 / 1,302 / 1,285 / 1,271)
@@ -645,6 +882,25 @@
 #     tempo per entrare" da "entrare piu' tardi nella giornata": sono
 #     la stessa cosa per costruzione, e non e' un difetto dell'asse, e'
 #     cosa significa allungare una finestra.
+#  8. *** k (deal per posizione) NON E' MISURATO SU QUESTA CONFIGURA-
+#     ZIONE ***: e' una forchetta 1,00-1,8745 presa da altre celle
+#     dello stesso motore (par. 6-bis). Finche' la passata singola a
+#     C=12 non lo fissa, il confronto col pavimento dei 150 e' SOSPESO,
+#     non stimato. E' il buco piu' grosso del round: lo stesso numero
+#     `n=186` significa "sopra il pavimento" o "trenta sotto" a seconda
+#     di k.
+#  9. Le ***440 giornate operative*** della finestra sono [DERIVATE],
+#     non contate sul feed: 2024.09.26 - 2026.06.30 fa ***459 giorni
+#     feriali*** e il 440 e' 459 meno ~19 festivi di borsa. Il modello
+#     del par. 7 scala linearmente con questo numero: se le giornate
+#     vere fossero 450, tutti gli `n attesi` salirebbero del 2,3%. Non
+#     sposta nessun cancello, ma e' una stima travestita da costante.
+# 10. Lo spread dell'***ora 7***, che e' l'ora del piazzamento (p95
+#     4,10, par. 2), e' quello dell'ora INTERA, mentre l'esposizione
+#     vera e' di UN MINUTO (07:59-08:00). Il 58,2x della tabella dei
+#     40x e' quindi PRUDENTE per costruzione, e il numero che descrive
+#     il caso tipico resta 140x. Un p95 del solo minuto 07:59 non e'
+#     misurato e non c'e' nel CSV orario.
 # =====================================================================
 
 @SIMBOLO  D30EUR

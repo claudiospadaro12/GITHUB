@@ -31,6 +31,13 @@
 #  *** LA SEDIA VIVA 770411 NON VIENE SFIORATA ***: magic diverso,
 #  conto diverso, macchina diversa -- e per di piu' quella sedia e'
 #  SHORT-ONLY, mentre questo file e' il lato LONG.
+#  >>> E VA DETTO ANCHE DELLA MACCHINA SU CUI IL ROUND GIRA: su
+#      DESKTOP-H4D7CAJ il terminale usato dal driver e' `C:\Program
+#      Files\BCM Markets MT5 Terminal`, ***loggato sul conto
+#      50503392***, e il referto del driver avverte che il 14/08/2026 da
+#      quella macchina sono PARTITI ordini veri (#3160534/#3160535,
+#      -104,60). *** PRIMA DI LANCIARE: verificare che quel terminale
+#      NON abbia sedie attaccate. *** Non e' un banco solo-tester. <<<
 #
 #  --- 1. *** PERCHE' QUESTO FILE ESISTE, VISTO CHE IL LONG E' GIA'
 #             MISURATO NEGATIVO. *** ---------------------------------
@@ -52,8 +59,10 @@
 #
 #  RAGIONE 2 -- *** E' L'UNICO LATO SU CUI L'INVARIANTE DI MONOTONIA
 #  (par. 5) SI VERIFICA SU UN CAMPIONE LEGGIBILE IN OGNI CELLA. ***
-#  Qui n e' atteso 157 all'ancora e cresce: da C=12 in su ogni cella
-#  sta sopra il pavimento dei 150. Sul gemello le celle di sinistra
+#  Qui n e' atteso 157 deal all'ancora e cresce: da C=12 in su ogni
+#  cella sta sopra il pavimento dei 150 IN DEAL, e da C=13/C=14/C=16 in
+#  su in POSIZIONI a seconda di k (par. 6-bis) -- in ogni caso sono le
+#  celle piu' popolose del round. Sul gemello le celle di sinistra
 #  hanno n atteso 7-73, dove un'anomalia di poche unita' si confonde
 #  col nulla. Se l'asse NON fa quello che il codice dice, e' qui che si
 #  vede per primo -- e in quel caso NON si legge nessuno dei due file.
@@ -150,11 +159,14 @@
 #  della r.355 nasce ORDER_TIME_SPECIFIED con quella scadenza.
 #  Col pin di R242 (250) il pendente piazzato alle 07:59 muore alle
 #  ***12:09***.
-#  >>> SE LASCIASSI 250, SEI CELLE SU NOVE SAREBBERO IDENTICHE FRA
-#      LORO: da C=13 in su il cutoff non morderebbe mai. Nove passate,
-#      quattro esiti distinti. *** E' LA MANOPOLA INERTE DEL CENSIMENTO
+#  >>> SE LASCIASSI 250, ***CINQUE*** CELLE SU NOVE SAREBBERO IDENTICHE
+#      FRA LORO: da C=13 in su, cioe' C=13, 14, 15, 16, 17 -- cinque, e
+#      la prima stesura scriveva "sei", che e' un errore di conta. Il
+#      cutoff non morderebbe mai su quelle. Nove passate, ***CINQUE***
+#      esiti distinti (C=9, C=10, C=11, C=12 piu' il gruppo collassato),
+#      non quattro. *** E' LA MANOPOLA INERTE DEL CENSIMENTO
 #      DEL 09/09 fabbricata a mano, e su questo lato sarebbe anche
-#      peggio: con n~180-240 per cella, sei CSV identici
+#      peggio: con n~180-240 per cella, cinque CSV identici
 #      sembrerebbero un altopiano perfetto. *** <<<
 #  IL CONTO ESATTO:
 #     piazzamento 07:59 = minuto 479
@@ -166,6 +178,21 @@
 #      rendere visibile il primo. Toglie una variabile, non la aggiunge. ***
 #  A C=12 il cutoff (minuto 720) scatta prima sia di 12:09 sia di
 #  17:59, quindi la cella dell'ancora non cambia: vedi par. 5.
+#  >>> E LA DOMANDA "A C BASSI IL PIN NUOVO CAMBIA QUALCOSA?" HA UNA
+#      RISPOSTA ESATTA: ***NO, SU QUATTRO CELLE SU NOVE.*** A C=9, 10,
+#      11, 12 il cutoff scatta al minuto 540, 600, 660, 720, tutti PRIMA
+#      del minuto 729 (morte del pendente col pin vecchio 250): su
+#      quelle quattro celle i pin 250 e 600 danno risultati IDENTICI, e
+#      il cancello del par. 5 ne e' il caso particolare C=12. Il pin
+#      nuovo agisce SOLO su C=13-17, cioe' esattamente dove il vecchio
+#      avrebbe nascosto l'asse. Le due manopole non si muovono insieme:
+#      la seconda e' assente dove la prima conta. <<<
+#  >>> IL CONTO REGGE ANCHE COL PRIMO TICK IN RITARDO: exp nasce alla
+#      r.339 quando TryPlace gira, cioe' al primo tick >= 07:59. Con un
+#      ritardo d, il pin 250 muore al minuto 729+d e il 600 al 1079+d.
+#      Per C<=12 il cutoff resta prima di 729+d per ogni d>=0; e perche'
+#      il pin 600 mordesse prima del flat servirebbe 1079+d < 1050,
+#      cioe' d < -29 minuti: impossibile. <<<
 #
 #  --- 5. IL CANCELLO TECNICO: DUE CONTROLLI DURI, PRIMA DEL PF -------
 #  CONTROLLO 1 -- LA RIPRODUZIONE DELL'ANCORA, *** RICALCOLATA SUL CSV
@@ -243,7 +270,73 @@
 #      E' il lato di questo file.
 #   e) InpPendingExpiryMin 250 -> ***600***, motivata al par. 4.
 #
+#  --- 6-bis. *** L'UNITA' DI MISURA DI OGNI `n` DI QUESTO FILE, E LA
+#             RIPARAZIONE OBBLIGATORIA DEL CANCELLO DEL CAMPIONE. ***
+#             (correzione del cancello di giudizio, 24/09/2026)
+#  La prima stesura non diceva in che unita' fosse scritto `n`. Adesso
+#  si dichiara, e su QUESTO lato cambia il verdetto, non solo un numero.
+#
+#  *** TUTTI I NUMERI `n` DI QUESTO FILE -- l'ancora 157, la tabella del
+#      par. 7 (29...237), la `m` del contro-esempio del par. 8, il tetto
+#      440 -- SONO IN ***DEAL***, cioe' nella colonna `Trades` dei CSV
+#      di ottimizzazione di MT5. NON SONO POSIZIONI. ***
+#  Il motivo e' nel pin di questo stesso file: `InpTP1Pct=50` (piu'
+#  `InpTP2Pct=50`, EMA200, trailing) -> uscita FRAZIONATA -> una
+#  posizione chiude in piu' deal e `Trades` li conta tutti. Verificato
+#  alla fonte: tutte le righe dei CSV di R242 e dell'archivio
+#  `080957cf-valid_MaxMin_D30EUR.csv` hanno `InpTP1Pct=50`. Controprova
+#  aritmetica: `Expected Payoff` = `Profit / Trades`
+#  (-21,15688 x 157 = -3321,63), cioe' `Trades` e' il divisore delle
+#  statistiche, non il conto delle posizioni.
+#
+#  *** E IL PAVIMENTO DEI 150 DELL'EMENDAMENTO A E' SCRITTO IN
+#      POSIZIONI. *** Confrontarlo con `Trades` non e' il cancello che
+#      dice di essere.
+#
+#  FORCHETTA MISURATA di k = deal/posizione su QUESTO motore (correzione
+#  in testa a report/REFERTO_R242_2026-09-24.md):
+#      1,00 - 1,2143 - 1,3228 - 1,5 - 1,5714 - 1,8745
+#  con i due campioni piu' grossi (n=316 e n=263 posizioni) a
+#  ***1,3228*** e ***1,8745***.
+#
+#  *** CHE COSA CAMBIA SU QUESTO LATO, CON I NUMERI. *** Il modello del
+#  par. 7 e' calibrato su p0 = 157/440: se 157 sono deal, p0 e' gonfiato
+#  di k. Rifatto con p0 = (157/k)/440, il campione in POSIZIONI e':
+#   k        C=12   C=13   C=14   C=15   C=16   C=17   celle >= 150
+#   1,0000    157    180    199    214    226    237   SEI (C=12..17)
+#   1,2143    129    153    172    188    201    213   CINQUE (C=13..17)
+#   1,3228    119    142    162    178    191    203   QUATTRO (C=14..17)
+#   1,5000    105    128    147    164    178    190   TRE (C=15..17)
+#   1,5714    100    123    142    159    173    185   TRE (C=15..17)
+#   1,8745     84    106    125    142    156    168   ***DUE*** (C=16,17)
+#  >>> LA FRASE DEL PAR. 7 "IL MERITO DI QUESTO LATO E' LEGGIBILE SU SEI
+#      CELLE SU NOVE" VALE SOLO A k=1,00. In posizioni le celle col
+#      merito leggibile sono fra ***DUE e CINQUE***, non sei. <<<
+#  >>> *** MA IL VERDETTO DI QUESTO LATO NON SI RIBALTA, ed e' la
+#      notizia buona: anche nel caso peggiore (k=1,8745) restano DUE
+#      celle sopra il pavimento, e il riferimento e' che l'archivio fa
+#      0/18 sopra PF 1,00 e R242a 0/7. *** Quello che cambia e' la
+#      LARGHEZZA del verdetto: non si potra' scrivere "negativo in nove
+#      regimi con merito leggibile", ma "negativo in nove regimi, con il
+#      merito leggibile su N di essi", dove N si scrive DOPO aver
+#      misurato k. Il certificato del 09/09 vuole quel numero. <<<
+#
+#  *** LA RIPARAZIONE, A COSTO ZERO DI TEMPO MACCHINA. *** k si misura
+#  una volta sola, e sulla cella che va girata comunque:
+#   1) la cella C=12 si gira ANCHE in passata SINGOLA (Optimization=0),
+#      che produce il referto per-trade con posizioni E deal separati;
+#   2) k := deal/posizioni di quella passata -- un numero, non una
+#      forchetta;
+#   3) ogni `n` si converte dividendo per k PRIMA di toccare i 150.
+#  >>> CONTROLLO CHE LA MISURA SIA BUONA: la passata singola deve dare
+#      ***esattamente 157 deal***, gli stessi del cancello del par. 5.
+#      Se ne da' altri, non e' la stessa cella e k non vale. E k e'
+#      DIVERSO fra i due lati (uscite diverse): quello del gemello NON
+#      si eredita, esattamente come z0. <<<
+#
 #  --- 7. L'ATTESA DI CAMPIONE, DICHIARATA PRIMA DEI NUMERI -----------
+#  *** LEGGERE PRIMA IL PAR. 6-bis: OGNI `n` DI QUESTA TABELLA E' IN
+#      DEAL. In posizioni va diviso per k. ***
 #  MODELLO calibrato sul dato invece che sulla teoria -- perche' in
 #  R242 il mio modello di trasporto ha sovrastimato ***14 celle su 14***
 #  (referto r.123-126) e va riparato, non ripetuto.
@@ -265,13 +358,28 @@
 #  15     421    0,6972  0,48570     ***214***
 #  16     481    0,6522  0,51425     ***226***
 #  17     541    0,6150  0,53855     ***237***
-#  ATTESA: n non decrescente da ~29 a ~237. Banda +/-25% sullo SCARTO
-#  dall'ancora. Tetto duro 440 (una operazione al giorno: gPhase torna
-#  a MMP_WAIT solo al cambio di giornata, ResetDay r.294).
-#  >>> *** IL MERITO DI QUESTO LATO E' LEGGIBILE SU SEI CELLE SU NOVE ***
-#      (da C=12 in su, n atteso >= 157). E' il contrario del gemello,
-#      dove il merito e' leggibile solo sulle ultime tre. Su questo
-#      lato quindi il verdetto NON si puo' rimandare per campione. <<<
+#  ATTESA: n non decrescente da ~29 a ~237 ***DEAL***. Banda +/-25%
+#  sullo SCARTO dall'ancora.
+#  TETTO DURO: ***440 x k deal*** (una POSIZIONE al giorno: gPhase torna
+#  a MMP_WAIT solo al cambio di giornata, ResetDay r.294, per al
+#  massimo k deal ciascuna). Il numero che non puo' essere superato in
+#  nessun caso e' ***440 POSIZIONI***; in deal il tetto sta fra 440 e
+#  ~825. La prima stesura scriveva "tetto duro 440" sulla colonna
+#  Trades: sbagliato di unita', e avrebbe potuto dichiarare illeggibile
+#  un CSV sano.
+#  >>> *** IL MERITO DI QUESTO LATO E' LEGGIBILE SU SEI CELLE SU NOVE
+#      SOLO SE k = 1,00. *** In posizioni le celle leggibili sono fra
+#      DUE e CINQUE a seconda di k (tabella del par. 6-bis). Resta vero
+#      che questo lato e' il piu' popoloso e che il verdetto NON si
+#      rimanda per campione -- ma QUANTE celle lo reggano e' un numero
+#      che si scrive dopo aver misurato k, non prima. <<<
+#  >>> *** E IL VERSO DELL'ERRORE E' GIA' MISURATO: in R242 lo STESSO
+#      modello ha SOVRASTIMATO 14 celle su 14, da -18% a -58% (referto
+#      r.123-126 e tabella r.148-160). La ricalibrazione sull'ancora
+#      toglie l'errore di LIVELLO, non quello di FORMA. *** Lettura
+#      prudente: BORDO BASSO della banda +/-25%, cioe' n(C=17) ~ 217
+#      deal e non 237. Sommato a k (par. 6-bis), le celle col merito
+#      leggibile scendono verso il bordo basso dell'intervallo 2-5. <<<
 #  >>> DOVE IL MODELLO PUO' SBAGLIARE, e in che verso: la volatilita'
 #      intraday del DAX non e' costante. Le ore 12-14 server (pranzo)
 #      sono le piu' quiete -> il modello ci mette troppe rotture;
@@ -324,13 +432,70 @@
 #      scoprirlo dopo: su questo lato il contro-esempio NON e' un
 #      cancello a cella singola. *** Diventa forte solo come FORMA:
 #      *** il SEGNO della pendenza su nove celle ***, che ALT e DRIFT
-#      hanno opposto (par. 2), e che nove punti determinano molto
-#      meglio di due. <<<
+#      hanno opposto (par. 2). >>> *** CORREZIONE DEL 24/09: la frase
+#      "nove punti determinano molto meglio di due" NON REGGE su
+#      campioni NIDIFICATI, e il par. 5 dimostra che lo sono. La lettura
+#      corretta e' al par. 8-ter (PF MARGINALE), che separa le quattro
+#      firme di 0,26 invece che di 0,046. *** <<<
+#  >>> E LA CURVA ALT VA RICALCOLATA SUGLI n OSSERVATI, non letta da
+#      questa tabella: i numeri qui sopra sono ALT valutata sugli n
+#      PREVISTI dal par. 7. La formula da riapplicare e'
+#      PF(C) = (9646,7 + 72,02 m)/(12968,3 + 72,02 m) con m = n(C)-157
+#      preso dal CSV. (L'unita' non morde: ALT e m sono tutti e due in
+#      deal.) <<<
 #  >>> E LA CELLA C=9 E' IL DISCRIMINANTE MIGLIORE DEL FILE: ALT predice
 #      0,122 e HP 0,744, cioe' un abisso. Ma n atteso e' 29 (sotto 50),
 #      quindi il MERITO e' sospeso e quel numero si scrive come
 #      INDIZIO, non come verdetto. Va scritto lo stesso: l'Emendamento
 #      B sospende il merito, non la registrazione del numero. <<<
+#
+#  --- 8-ter. *** IL DISCRIMINANTE CHE SEPARA DAVVERO LE QUATTRO FIRME:
+#             IL PF MARGINALE. *** (aggiunto dal cancello di giudizio,
+#             24/09/2026 -- e su QUESTO lato e' la riparazione del buco
+#             n.3, non un di piu')
+#  Il par. 8 dichiara che HP e ALT distano 0,046-0,171, cioe' MENO del
+#  margine di casa, e ripiega sul "segno della pendenza su nove celle,
+#  che nove punti determinano molto meglio di due".
+#  *** QUEL RIPIEGO NON REGGE COSI' COM'E', e lo dimostra il par. 5 di
+#      questo stesso file: *** per l'invariante di monotonia le nove
+#      celle sono NIDIFICATE -- la cella C contiene tutte le operazioni
+#      della C-1. I nove PF non sono nove osservazioni indipendenti:
+#      sono nove statistiche CUMULATE, fortemente correlate, e una loro
+#      pendenza "liscia" e' quasi garantita anche dal rumore. Non si
+#      puo' usare la nidificazione per dimostrare l'asse e poi contare i
+#      nove punti come nove prove.
+#
+#  LA STATISTICA INDIPENDENTE ESISTE E SI RICAVA DAI DUE NUMERI CHE IL
+#  CSV GIA' PORTA (Profit e Profit Factor), senza una passata in piu':
+#     L(C) = Profit(C) / (PF(C) - 1)      G(C) = PF(C) x L(C)
+#     *** PF marginale = (G(C)-G(C-1)) / (L(C)-L(C-1)) ***
+#  cioe' il profit factor delle SOLE operazioni aggiunte fra il cutoff
+#  C-1 e il cutoff C: un blocco DISGIUNTO da cella a cella.
+#  >>> E QUI LE QUATTRO FIRME SI SEPARANO DAVVERO: <<<
+#     HP      -> marginale ~= ***0,744*** (stesso anti-edge delle prime)
+#     ALT     -> marginale ~= ***1,00***  (somma zero, per definizione)
+#     WHIPSAW -> marginale ***< 0,744***
+#     DRIFT   -> marginale ***< 0,744*** qui E ***> 1,409*** sul gemello
+#  *** 0,26 di distanza fra HP e ALT su questo lato (0,41 sul gemello),
+#      contro i 0,046-0,171 del confronto cumulato. E ALT contro
+#      WHIPSAW passa da "tutti e due scendono" a due numeri che stanno
+#      dalle parti opposte di 1,00. E' QUESTO il cancello che
+#      discrimina, e il referto deve riportarlo cella per cella su tutti
+#      e due i lati. ***
+#  >>> I DUE LIMITI, dichiarati: (a) ai C bassi il blocco marginale e'
+#      piccolo e il suo PF e' rumoroso -- si pretende n_marginale >= 30
+#      deal per commentarlo, sotto e' indizio; (b) la TAGLIA dei lotti
+#      dipende dal saldo, che cambia da cella a cella, quindi
+#      G(C)-G(C-1) non e' ESATTAMENTE il lordo delle giornate nuove:
+#      effetto del secondo ordine (DD atteso 6-10%), e per di piu' in
+#      buona parte semplificato dal RAPPORTO. Va dichiarato, non
+#      ignorato. <<<
+#  >>> E RESTA VERO CHE QUESTO FILE SERVE, anzi serve di piu': il PF
+#      marginale separa ALT da DRIFT sullo short solo se si guarda il
+#      SEGNO del marginale sui DUE lati insieme. La matrice del par. 2
+#      non e' una giustificazione a posteriori -- e' congelata qui,
+#      prima dei numeri -- ma la sua LETTURA passa dal marginale, non
+#      dal cumulato. <<<
 #
 #  *** LA SOGLIA DI QUESTO LATO E' 1,10, E NON SI MUOVE. *** E' quella
 #  congelata da R242a, e li' e' motivata cosi': 1,10 sta sopra il tetto
@@ -387,31 +552,50 @@
 #     (InpBoxStartHour pinnato a 6), ne' il buffer (1000 punti), ne' il
 #     modo di stop (MM_SL_OPPOSITE).
 #  Spread D30EUR per ora server, da risultati_archivio/spread_flotta/
-#  spread_orario_D30EUR.csv, VERIFICATO OGGI riga per riga (r.1 =
-#  intestazione, quindi r.10 = ora 8): ora 8 = 1,70/2,70 mediana/p95;
-#  ore 9-15 = 1,60-1,70 / 1,90; ora 16 = 1,70 / ***2,90***.
+#  spread_orario_D30EUR.csv, VERIFICATO riga per riga (r.1 =
+#  intestazione, quindi r.9 = ora 7, r.10 = ora 8):
+#     ora 7 = ***2,80 / 4,10*** mediana/p95   <-- L'ORA DEL PIAZZAMENTO
+#     ora 8 = 1,70 / 2,70 ; ore 9-15 = 1,60-1,70 / 1,90 ;
+#     ora 16 = 1,70 / ***2,90*** ; ora 17 = 2,60 / 2,90.
+#  *** CORREZIONE DEL CANCELLO, 24/09/2026: L'ORA 7 ENTRA IN TUTTE E
+#      NOVE LE CELLE E LA PRIMA STESURA LA OMETTEVA. *** Il pendente si
+#      piazza alle ***07:59 server***, cioe' DENTRO L'ORA 7, non l'ora
+#      8: il minuto 07:59-08:00 e' in portata in OGNI cella.
 #   C   ore toccate   peggior mediana   x        peggior p95   x
-#   9      8             1,70        140,4x         2,70      88,4x
-#  10      8-9           1,70        140,4x         2,70      88,4x
-#  11      8-10          1,70        140,4x         2,70      88,4x
-#  12      8-11          1,70        140,4x         2,70      88,4x
-#  13      8-12          1,70        140,4x         2,70      88,4x
-#  14      8-13          1,70        140,4x         2,70      88,4x
-#  15      8-14          1,70        140,4x         2,70      88,4x
-#  16      8-15          1,70        140,4x         2,70      88,4x
-#  17      8-16          1,70        140,4x     ***2,90***     82,3x
-#  >>> TUTTE E NOVE LE CELLE PASSANO I 40x CON UN FATTORE >= 2,1 ANCHE
-#      SUL p95. L'asse NON sposta la frontiera del costo. <<<
+#   9      7-8           2,80         85,3x         4,10      58,2x
+#  10      7-9           2,80         85,3x         4,10      58,2x
+#  11      7-10          2,80         85,3x         4,10      58,2x
+#  12      7-11          2,80         85,3x         4,10      58,2x
+#  13      7-12          2,80         85,3x         4,10      58,2x
+#  14      7-13          2,80         85,3x         4,10      58,2x
+#  15      7-14          2,80         85,3x         4,10      58,2x
+#  16      7-15          2,80         85,3x         4,10      58,2x
+#  17      7-16          2,80         85,3x         4,10      58,2x
+#  >>> TUTTE E NOVE LE CELLE PASSANO LO STESSO I 40x, ma con un fattore
+#      ***1,46x*** sul p95 (non 2,1x come diceva la prima stesura) e
+#      2,13x sulla mediana. Il cancello NON si ribalta; il margine vero
+#      e' meta' di quello scritto prima. <<<
+#  >>> E L'ASSE CONTINUA A NON SPOSTARE LA FRONTIERA: il peggiore e'
+#      l'ora 7, comune a tutte e nove le celle, quindi la colonna e'
+#      COSTANTE. L'ora 16 (p95 2,90, in portata solo a C=17) non e' piu'
+#      il peggiore di nessuna cella, perche' 2,90 < 4,10. <<<
+#  >>> QUANTO PESA DAVVERO L'ORA 7: e' UN MINUTO su 61-541. Prenderne il
+#      p95 come "peggiore della finestra" e' la convenzione PRUDENTE
+#      gia' usata in questa tabella, non una previsione. Il caso TIPICO
+#      (ore 8-15, mediana 1,60-1,70) resta ***140x/88x***. <<<
 #  CASO PEGGIORE AMMESSO (giornata col box esattamente al pavimento di
 #  68,0 idx E spread al 95esimo percentile):
 #     stop_min = 68,0 + 20,0 = 88,0 idx
 #     88,0/1,70 = ***51,8x***  (passa)
-#     88,0/2,70 = ***32,6x***  (sotto 40x, gia' dichiarato da R242)
-#     88,0/2,90 = ***30,3x***  (solo C=17: -7,1% rispetto al 32,6x)
-#  >>> L'UNICA CELLA CHE MUOVE QUALCOSA E' C=17, e la muove sulla
-#      congiunzione di DUE code. Il caso tipico resta 140x/88x. Per far
+#     88,0/2,70 = ***32,6x***  (ora 8, sotto 40x, gia' dichiarato da R242)
+#     88,0/2,90 = ***30,3x***  (ora 16)
+#     88,0/4,10 = ***21,5x***  (ora 7: il peggiore vero, in TUTTE le celle)
+#  >>> Sono tutti e tre sotto i 40x, ed e' la congiunzione di DUE code
+#      (box al minimo E spread al p95) gia' dichiarata da R242b per la
+#      sua griglia -- ma il numero peggiore e' 21,5x, non 30,3x. Per far
 #      passare i 40x anche al caso peggiore servirebbe
-#      InpMinBoxPts >= 40 x 2,90 x 100 - 2000 = ***9600 punti***, che
+#      InpMinBoxPts >= 40 x 4,10 x 100 - 2000 = ***14400 punti*** (erano
+#      9600 nella prima stesura, che usava il 2,90 dell'ora 16), che
 #      TOGLIEREBBE operazioni: e' un round diverso, non questo. <<<
 #
 #  --- 9. LE SOGLIE, CONGELATE PRIMA DEI NUMERI -----------------------
@@ -421,13 +605,19 @@
 #  e' il piu' popoloso, un suo fallimento invalida anche la lettura del
 #  gemello.
 #
-#  POI n, cella per cella:
-#    n >= 150 -> il MERITO si legge (Emendamento A del 16/08).
-#         ATTESO su C=12 ... C=17 (sei celle).
-#    50 <= n < 150 -> merito SOSPESO: si scrive PF, DD e n e si dice
+#  POI n, cella per cella. *** OGNI SOGLIA QUI SOTTO E' IN POSIZIONI,
+#  cioe' si applica a `Trades / k` e MAI alla colonna `Trades` nuda
+#  (par. 6-bis). Senza k misurato nessuna di queste righe si pronuncia,
+#  e il campione e' "NON ANCORA MISURATO". ***
+#    n_pos >= 150 -> il MERITO si legge (Emendamento A del 16/08).
+#         ATTESO su DUE-CINQUE celle della coda destra, a seconda di k
+#         (tabella del par. 6-bis); su SEI solo se k = 1,00.
+#    50 <= n_pos < 150 -> merito SOSPESO: si scrive PF, DD e n e si dice
 #         "indizio". Il RISCHIO si legge lo stesso (Emendamento B).
-#         ATTESO su C=10 e C=11.
-#    n < 50 -> "NON MISURATO", mai "non funziona". ATTESO su C=9.
+#    n_pos < 50 -> "NON MISURATO", mai "non funziona". ATTESO su C=9.
+#    n_pos > 440 -> impossibile (la guardia "un trade al giorno" non ha
+#         retto). In deal il tetto e' 440 x k: un `Trades` sopra 440
+#         NON e' di per se' un'anomalia.
 #
 #  >>> CHE COSA FAREBBE RIAPRIRE IL LATO LONG (e nient'altro lo fa): <<<
 #    TRE CELLE CONTIGUE dell'asse, tutte con n >= 150, tutte con
@@ -442,9 +632,12 @@
 #
 #  CHE COSA CHIUDE IL LATO LONG, con un NUMERO invece che per
 #  stanchezza:
-#    - tutte le celle con n>=150 sotto PF 1,00 -> *** il long di questo
-#      motore su questo simbolo e' negativo in NOVE regimi di
-#      riempimento diversi ***, e questa e' la SECONDA misura
+#    - tutte le celle con ***n_pos***>=150 sotto PF 1,00 -> *** il long
+#      di questo motore su questo simbolo e' negativo in NOVE regimi di
+#      riempimento diversi, con il merito leggibile su N di essi ***
+#      (N = 2-5 a seconda di k, par. 6-bis: il numero si scrive DOPO
+#      aver misurato k, e "nove regimi col merito leggibile" NON si puo'
+#      scrivere), e questa e' la SECONDA misura
 #      indipendente che il certificato del 09/09 richiede (la prima e'
 #      R242a). Riga per REGISTRO_TEST con PF, n, DD e cancello.
 #      >>> *** MA IL CERTIFICATO RESTA INCOMPLETO LO STESSO ***: manca
@@ -604,6 +797,24 @@
 #     il contrasto fra celle, mai inventarlo. ***
 #  7. Il TF non e' mai stato cambiato su questo motore: M15 qui e in
 #     tutto l'archivio. Vale per il certificato (par. 9).
+#  8. *** k (deal per posizione) NON E' MISURATO SU QUESTA CONFIGURA-
+#     ZIONE ***: e' una forchetta 1,00-1,8745 presa da altre celle dello
+#     stesso motore (par. 6-bis). Finche' la passata singola a C=12 non
+#     lo fissa, il confronto col pavimento dei 150 e' SOSPESO, non
+#     stimato -- e su questo lato decide QUANTO e' largo il verdetto
+#     negativo (due celle o cinque).
+#  9. Le ***440 giornate operative*** sono [DERIVATE], non contate sul
+#     feed: 2024.09.26 - 2026.06.30 fa ***459 giorni feriali***, e 440
+#     e' 459 meno ~19 festivi di borsa. Il modello del par. 7 scala
+#     linearmente con questo numero.
+# 10. Lo spread dell'***ora 7***, che e' l'ora del piazzamento (p95
+#     4,10, par. 8-bis), e' quello dell'ora INTERA mentre l'esposizione
+#     vera e' di UN MINUTO (07:59-08:00): il 58,2x della tabella dei 40x
+#     e' PRUDENTE per costruzione. Un p95 del solo minuto 07:59 non e'
+#     misurato e non c'e' nel CSV orario.
+# 11. Il "segno della pendenza su nove celle" del par. 8 era una
+#     statistica su campioni NIDIFICATI (buco riparato al par. 8-ter):
+#     la lettura corretta passa dal PF MARGINALE, non dal cumulato.
 # =====================================================================
 
 @SIMBOLO  D30EUR
