@@ -78,7 +78,10 @@
 #        0,053, il 4%. Il **3.0 e' il PICCO**, e la regola di casa vieta
 #        il picco. A tick (B) i due valori disponibili sono 1,14375 e
 #        1,19515: 0,05 di differenza, cioe' **dentro** la banda di
-#        correzione OHLC->tick gia' misurata in casa (+0,054/+0,157).
+#        correzione OHLC->tick gia' misurata in casa (0,054-0,157: la
+#        fonte la scrive col `+`, ma e' un VALORE ASSOLUTO -- in tutte e
+#        8 le coppie del censimento del 26/07 il PF a tick e' piu'
+#        BASSO. Ricontato cella per cella il 24/09).
 #        >>> E' una DEVIAZIONE dalla frase "ancora del Dow = 3.5/9/3.0"
 #            che gira nei referti, dichiarata qui in chiaro. Compra una
 #            cosa che vale di piu': nel gemello corto tiene la differenza
@@ -220,6 +223,25 @@
 #      gia' dentro il denominatore. L'obiezione "avete cambiato piu' cose
 #      insieme" e' **falsificata sul rapporto**, non sulla cella.
 #
+#  🔴 **LA TERZA IPOTESI, che le due qui sopra NON coprono e che questo
+#      round NON PUO' ESCLUDERE -- e su questo lato pesa di PIU', perche'
+#      qui le manopole mosse sono DUE (Buco 2):**
+#      **H_int** : la taratura NON agisce allo STESSO modo dentro e fuori
+#      la finestra. Allora il **rapporto** si muove per SOLA taratura,
+#      senza che la finestra faccia niente di suo.
+#      >>> Perche' non si esclude: R240b e R243b sono le due righe di una
+#          tabella **2x2** (ancora x finestra), e la differenza fra i due
+#          rapporti **E' il termine di INTERAZIONE**. Un'interazione non
+#          distingue *"la finestra e' neutra con l'ancora giusta"* da
+#          *"l'ancora giusta lavora meglio nelle ore 14-21"*: e' la
+#          STESSA casella.
+#      >>> Cosa NON tocca: la cella SPENTA resta un controllo valido
+#          della taratura, e H_anc resta falsificabile.
+#      >>> 🔴 VINCOLO SUL REFERTO: il ramo piatto si scrive *"il controllo
+#          TORNA PIATTO con l'ancora del Dow"* -- fatto sulla COPPIA
+#          ancora-ore -- e **non** *"la finestra non fa niente al lungo
+#          del Dow"*, che sarebbe un'affermazione su TUTTE le tarature.
+#
 #  🔴 **IL CASO CHE SMONTEREBBE IL ROUND, scritto prima**: se la cella
 #      SPENTA torna **dentro 1,25-1,40** (cioe' NON si muove dal 1,33033
 #      di R240b: le due manopole sono inerti su questo lato) **E** il
@@ -253,35 +275,55 @@
 #
 #  LA CATENA, rifatta sui numeri di QUESTA cella (non copiata dal corto:
 #  il corto parte da PF 0,97084 su n=76, questo da 1,33033 su n=114, e il
-#  risultato NON e' lo stesso):
+#  risultato NON e' lo stesso) -- E IL PRIMO ANELLO E' UNA BANDA:
 #    risparmio per operazione       = 2,7 - 1,9 = **0,8 idx**
-#    stop [INFERITO, pavimento] = 3,5 x ATR(9) ~ 3,5 x 78,0 = **273 idx**
-#      (ATR(14) U30USD H1 = **78,0 [MISURATO]**, n=5,
-#       `report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md` r.159 e r.239;
-#       la sostituzione ATR(14)->ATR(9) e' un'approssimazione NON
-#       quantificata, dichiarata. Ed e' un PAVIMENTO: r.386-389 prende il
-#       PIU' protettivo fra linea Supertrend ed estremo di 5 barre, piu'
-#       buffer -> lo stop vero e' >= 273 idx per costruzione.)
-#    rischio per operazione = 1,0% di 100.000 = 1.000 EUR su 273 idx
-#                           = **3,663 EUR per idx**
-#    risparmio per operazione = 0,8 x 3,663 = **2,93 EUR**
-#    su n=114 = **334 EUR**
+#    🔴 **LA DISTANZA INGRESSO->SL DI QUESTA GEOMETRIA NON E' MISURATA**,
+#       e R240a l'aveva gia' congelato (r.153: *"il 40x: SOSPESO. La
+#       distanza ingresso->SL di questa geometria non e' misurata e serve
+#       la FASE 1 (Optimization=0, Giornale acceso), che oggi non esiste
+#       come riga di lancio."*). **R243 EREDITA la sospensione.**
+#    🔴 **E `3,5 x ATR` NON E' LO STOP, per costruzione del codice.**
+#       `InpStMult x ATR` e' la SEMI-LARGHEZZA della banda Supertrend
+#       misurata da `hl2` (`SupertrendSeries`: `bUp = hl2 +
+#       InpStMult*atr`, `bLo = hl2 - InpStMult*atr`), **non** la distanza
+#       ingresso->SL. L'ingresso e' ADDOSSO alla banda (r.347/354,
+#       `closeNear`: la candela [2] chiude entro `InpNearAtr*atr` =
+#       **1,0 x ATR** dalla linea) e lo SL e' ADDOSSO alla banda
+#       (r.386-389, `sl = max(stLine,ext) + buf` sullo short): stanno
+#       dalla **STESSA PARTE**, quindi la larghezza della banda **si
+#       cancella, non si somma**. Il conto vecchio la sommava.
+#    >>> STOP `[INFERITO, BANDA]` = **1,0 - 2,0 x ATR(9)**, e l'ATR di
+#        casa e' a sua volta una banda dichiarata -- **78,0 [MISURATO]
+#        n=5 vivo** e **88,2 [MISURATO] n=33 backtest R112**, e il referto
+#        ADR r.159-163 dice *"scrivo entrambi"*: **stop ~ 78 - 176 idx**,
+#        NON 273.
+#    rischio per operazione = 1,0% di 100.000 = 1.000 EUR sullo stop
+#                           = **5,67 - 12,82 EUR per idx**
+#    risparmio per operazione = 0,8 x quello = **4,54 - 10,26 EUR**
+#    su n=114 = **517 - 1.169 EUR**
 #    da PF 1,33033 e Profit +3.190,79: GL = **9.659** e GP = **12.850**
-#    spostando 334 EUR dal costo, per qualunque ripartizione fra vincenti
-#    e perdenti (provata a 35, 57 e 70 vincenti su 114):
-#      PF -> **1,370 - 1,374**  ->  **R_tick da solo costo = 1,030-1,033**
-#  >>> **IL COSTO, DA SOLO, VALE UN RAPPORTO DI ~1,03 SU QUESTA CELLA**
-#      (sul corto vale ~1,025: il numero e' DIVERSO ed e' per questo che
-#      si rifa'). Quindi:
+#    spostando quel risparmio dal costo, per qualunque ripartizione fra
+#    vincenti e perdenti (provata a 35, 57 e 70 vincenti su 114):
+#      PF -> **1,392 - 1,493** -> **R_tick da solo costo = 1,046-1,122**
+#  >>> **IL COSTO, DA SOLO, VALE UN RAPPORTO DI 1,05-1,12 SU QUESTA
+#      CELLA** (sul corto vale 1,04-1,09: il numero e' DIVERSO ed e' per
+#      questo che si rifa'; col conto vecchio e sbagliato veniva ~1,03).
+#      Quindi:
 #      - il costo **NON PUO' spiegare** un rapporto di 0,6978: va nel
 #        verso OPPOSTO. Cioe' in R240b la finestra ha fatto **peggio di
-#        quanto il suo vantaggio di costo avrebbe dovuto farle fare**;
+#        quanto il suo vantaggio di costo avrebbe dovuto farle fare** --
+#        e con la banda corretta ha fatto peggio **di piu'**;
 #      - e un rapporto piatto (1,00) su questo lato vuol dire, a rigore,
-#        che **il meccanismo mangia esattamente il vantaggio di costo**.
+#        che **il meccanismo mangia il vantaggio di costo e un po' di
+#        piu'** (1,05-1,12 atteso dal solo costo).
 #      Sono due frasi diverse e nel referto vanno tenute separate.
+#      - 🔴 **E IL RAMO `1,20-1,79` VA LETTO CON PRUDENZA NUOVA**: contro
+#        un costo che da solo vale fino a **1,12**, la soglia 1,20 e'
+#        **sottile**, non comoda. Nel referto si scrive sottile.
 #  >>> LIMITE DEL CONTO, dichiarato: vale se la finestra filtrasse LE
 #      STESSE operazioni. Non le filtra (r.314-322 libera slot). E' un
-#      ORDINE DI GRANDEZZA, non un'uguaglianza.
+#      ORDINE DI GRANDEZZA, non un'uguaglianza -- e la banda si riporta
+#      SEMPRE intera, mai il suo estremo comodo.
 #  >>> E fra R240 e R243 il costo e' lo STESSO (stesso simbolo, stesse
 #      ore, stesso modello): si CANCELLA nel confronto fra i due round.
 #
@@ -362,9 +404,15 @@
 #
 #  R_tick = PF(ACCESA) / PF(SPENTA) del LUNGO in OOS:
 #    0,80-1,19 -> 🟢 **PIATTO: IL CONTROLLO TIENE, e con l'ancora del Dow
-#                 la lettura di R238 si trasferisce.** E' anche la prova
-#                 che il **0,6978 di R240b era un fatto dei PIN**, non
-#                 del simbolo: notizia grossa, e va scritta come tale.
+#                 la lettura di R238 si trasferisce.** E' anche
+#                 **l'indizio piu' forte** che il 0,6978 di R240b fosse
+#                 un fatto dei PIN e non del simbolo.
+#                 🔴 **INDIZIO, NON PROVA, e la parola conta**: e' UNA
+#                 coppia di corse su n ~76 spenta / ~57 accesa, senza
+#                 ripetizione e **senza barra d'errore** -- questo round
+#                 non ne produce nessuna, e a questi campioni un
+#                 rapporto di PF si muove anche per sola varianza.
+#                 Notizia grossa lo stesso: ma si scrive "indizio".
 #    1,20-1,79 -> 🟠 DIVERGENZA lieve nell'altro verso: sul Dow la
 #                 finestra AIUTA anche il lungo. Si riporta, non si
 #                 conclude -- e si guarda subito quanto di quell'aiuto
@@ -375,7 +423,15 @@
 #    < 0,80    -> 🔴 **la finestra PEGGIORA il lungo ANCHE con l'ancora
 #                 del Dow.** Allora R240b non era colpa dei pin, e su
 #                 U30USD la finestra taglia via operazioni buone dal
-#                 lungo a prescindere dalla taratura (ipotesi H_ses).
+#                 lungo **con tutte e due le ancore MISURATE** -- cioe'
+#                 il risultato e' **compatibile con H_ses**.
+#                 >>> 🔴 **"A PRESCINDERE DALLA TARATURA" NON SI SCRIVE.**
+#                     Due tarature non sono tutte le tarature, e H_ses
+#                     e' un'affermazione universale che due punti non
+#                     dimostrano. E' la stessa delimitazione che il
+#                     gemello corto applica gia' alla tabella congiunta
+#                     ("NESSUNA DELLE DUE ANCORE MISURATE"): i due file
+#                     devono dirlo nello stesso modo.
 #                 >>> E allora il **controllo non e' recuperabile su
 #                     questo simbolo**, e qualunque cosa faccia il corto
 #                     va letta senza di lui: si scrive che l'effetto del
@@ -448,34 +504,70 @@
 #   - la separazione COSTO/MECCANISMO **dentro** il round: servirebbe una
 #     terza cella a -Spread FISSO, che qui non c'e' (come in R238 e
 #     R240: stessa incognita, stesso verso). Quello che c'e' e' la STIMA
-#     della Parte 4: ~1,03 su questa cella.
+#     della Parte 4: **1,05-1,12** su questa cella -- margine SOTTILE
+#     contro la soglia 1,20.
+#   - il CANCELLO DI COSTO `stop >= 40 x spread`: **SOSPESO** (Parte 8).
+#     La distanza ingresso->SL non e' misurata su questa geometria e il
+#     round non la misura. Il referto NON puo' scrivere "H1 non e'
+#     escluso per costo".
+#   - se la finestra sia neutra sul lungo del Dow **per ogni** taratura:
+#     fuori portata, ne sono misurate DUE (H_int, Parte 4).
 #   - l'ancora del LUNGO del Dow: non esiste e questo round non la
 #     fabbrica (Buco 1).
 #
 # ==========================================================================
-#  ### PARTE 8 -- IL CANCELLO DI COSTO `stop >= 40 x spread`, col numero
+#  ### PARTE 8 -- IL CANCELLO DI COSTO `stop >= 40 x spread`: **SOSPESO**
 # ==========================================================================
 #  Pedaggio sugli indici = SPREAD E BASTA (commissione 0,0000 MISURATA su
 #  n=302 deal, `report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md`).
-#    stop [INFERITO, pavimento] = 3,5 x ATR(9) ~ 3,5 x 78,0 = **273 idx**
-#    spread MEDIANO dentro la finestra (ora 14, la piu' cara): **2,0**
-#      273 / 2,0 = **136,5x**  -> PASSA il 40x con **+241%**
-#    spread MEDIANO fuori finestra (ore 0-2; la cella SPENTA opera anche
-#    li'): **2,8**
-#      273 / 2,8 = **97,5x**   -> PASSA il 40x con **+144%**
-#    spread **p95** dell'ora 14 (il caso vincolante vero): **3,0**
-#      273 / 3,0 = **91,0x**   -> PASSA il 40x con **+128%**
-#  >>> CONTRO-ESEMPIO DEL CANCELLO (regola del 10/09): perche' il 40x
-#      CADA al p95 dell'ora 14 servirebbe
-#        ATR(9) < 40 x 3,0 / 3,5 = **34,3 idx**, cioe' il **44%** di 78,0.
-#      Margine **56%**. Un ATR a periodo 9 che valga meno della meta' di
-#      quello a periodo 14 sulla stessa serie H1 non e' un caso
-#      plausibile -- e lo stop vero e' comunque **piu' largo** del
-#      pavimento (r.386-389: il piu' protettivo di due ancore + buffer).
-#  >>> H1 **NON e' escluso per costo**. M30/M15 non sono in questo round:
-#      sarebbero un secondo gradino e renderebbero il risultato non
-#      attribuibile (e M30 su questa famiglia ha gia' un file scritto e
-#      mai girato: R190c).
+#  🔴 **IL CANCELLO NON SI PUO' COMPILARE, E QUINDI NON SI COMPILA.** Il
+#  numeratore del 40x e' la distanza **ingresso -> SL**, e su questa
+#  geometria **NON E' MISURATA**. R240a l'aveva gia' congelato (r.153:
+#  *"il 40x: SOSPESO... serve la FASE 1 (Optimization=0, Giornale
+#  acceso), che oggi non esiste come riga di lancio"*) e **R243 EREDITA
+#  la sospensione**: un round gemello non revoca un cancello sospeso dal
+#  round che sta riproducendo.
+#  >>> 🔴 **E NON SI METTE `3,5 x ATR` AL SUO POSTO**: e' la semi-larghezza
+#      della banda Supertrend misurata da `hl2` (`SupertrendSeries`),
+#      mentre ingresso (r.347/354) e stop (r.386-389) stanno TUTTI E DUE
+#      addosso alla banda -- la larghezza si cancella. Darebbe 273 idx,
+#      cioe' **~3,5 volte** lo stop plausibile, e nel verso COMODO.
+#  >>> QUELLO CHE SI PUO' DIRE, e si dice con la banda intera:
+#      stop `[INFERITO, BANDA]` **1,0-2,0 x ATR(9)** = **78 - 176 idx**
+#      (ATR di casa in banda **78,0-88,2**, referto ADR r.159-163).
+#        contro spread MEDIANO dentro (ora 14, la piu' cara) **2,0**
+#          -> **39,0x - 88,2x**   🔴 il 40x cade DENTRO la banda
+#        contro spread MEDIANO fuori (ore 0-2, dove la cella SPENTA opera
+#        anche) **2,8** -> **27,9x - 63,0x**   🔴 il 40x cade DENTRO
+#        contro **p95** dell'ora 14 **3,0** -> **26,0x - 58,8x**   🔴 idem
+#  >>> CONTRO-ESEMPIO DEL CANCELLO (regola del 10/09), e stavolta
+#      **l'alternativa VINCE**: perche' il 40x cada al p95 dell'ora 14
+#      basta uno stop **< 120 idx**, cioe' **1,5 x ATR(9)** -- che sta
+#      **DENTRO** la banda inferita. Il vecchio contro-esempio
+#      ("servirebbe un ATR del 44%") reggeva solo perche' partiva da un
+#      numeratore gonfiato di 3,5 volte.
+#  >>> **CONCLUSIONE, ed e' un NON SO:** su tutte e tre le statistiche di
+#      spread la banda **scavalca il 40x**. H1 su U30USD con questa
+#      geometria **non e' dichiarato passato e non e' dichiarato
+#      escluso**. Il round PUO' girare lo stesso (R240 e' girato con la
+#      stessa sospensione), ma il referto **NON puo' scrivere "H1 non e'
+#      escluso per costo"**.
+#  >>> 🔴 **LA VIA PIU' CORTA AL NUMERO CHE MANCA, col suo costo:** UNA
+#      passata a `Optimization=0` col Giornale acceso sulla cella SPENTA
+#      OOS (**~2,25 minuti**, stessa base di ritmo della Parte 9) stampa
+#      le distanze ingresso->SL vere e chiude il cancello per sempre su
+#      tutta la famiglia SupRev. 🟢 **E IL NUMERO C'E' GIA' NEL CODICE,
+#      verificato a HEAD il 24/09: r.422-423 stampa `"... mercato %.2f
+#      lot @ ENTRY SL ... TP ..."` a ogni ingresso**, gia' acceso da
+#      `InpVerbose=true` pinnato qui sotto; serve solo `Optimization=0`
+#      (in ottimizzazione le Print girano sugli agenti e non si leggono,
+#      checklist 34 e 34-ter). 🔴 **E NON basta il per-trade**: r.719
+#      `ExportTrades()` scrive SOLO i deal di USCITA (`close_time`,
+#      `price`, `net_profit`); ingresso e SL non ci sono. Manca la riga
+#      di lancio: e' la prima cosa da chiedere dopo R243.
+#  >>> M30/M15 non sono in questo round: sarebbero un secondo gradino e
+#      renderebbero il risultato non attribuibile (e M30 su questa
+#      famiglia ha gia' un file scritto e mai girato: R190c).
 #
 # ==========================================================================
 #  ### PARTE 9 -- IL COSTO IN TEMPO MACCHINA, ricavato dai TICK ###
@@ -512,8 +604,15 @@
 #    possibile.
 #  MODELLO: 4 (TICK REALI) -- non imponibile dal file: e' `-Modello`.
 #  DEPOSITO: la riga di lancio DEVE passare **-Deposito 100000** (default
-#    del driver 10000; a lotto nullo l'EA fa `return` a r.400, quindi il
-#    deposito muove l'n e romperebbe il confronto con R240).
+#    del driver 10000). 🔴 **E LA RAGIONE VA CORRETTA: NON e' il `return`
+#    a r.400.** `LotByRisk` chiude con `MathMax(mn, MathMin(mx, lot))`,
+#    quindi **per deposito piccolo il lotto non arriva mai a zero: si
+#    SCHIACCIA sul minimo** -- documentato nel commento dell'EA stesso
+#    (caso 225JPY, 08/08/2026: *"a deposito 100k profitti identici al
+#    10k, DD 0,01%"*). `r.400` scatta solo se `lossPerLot<=0`, cioe' per
+#    un guasto dei dati del simbolo, non per il deposito. Il deposito
+#    conta lo stesso e per un'ALTRA via -- **taglia, compounding del
+#    saldo e DD% cambiano** -- e con essi la confrontabilita' con R240.
 #  -Spread: **NON si passa**, come in R240. Incognita DICHIARATA, uguale
 #    nei due round.
 #  FINESTRA: `@FRAZIONEIS 0.40` con 2024.09.26 -> 2026.06.30 = 642

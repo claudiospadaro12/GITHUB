@@ -35028,3 +35028,82 @@ progetto dove il messaggio di commit è il verbale della misura, **è il verbale
   `git diff --cached --name-only` — se compare un file che non hai nominato, **fermati**.
 🔴 **Vale ogni volta che in sessione c'è almeno un agente vivo**, cioè quasi sempre. E il controllo
 costa un comando: non c'è motivo di saltarlo.
+
+## 📏 CLASSE 735 — **il moltiplicatore di una BANDA scambiato per la distanza dello STOP**
+
+24/09/2026, R243. I file scrivevano `stop [INFERITO] = 3,5 × ATR(9) ≈ 273 idx`, usando `InpStMult`.
+🔴 **Verificato nel sorgente** (`ABTG_SupertrendReversal.mq5`): r.515
+`bUp = hl2 + InpStMult*atr` — `InpStMult × ATR` è la **semi-larghezza della banda misurata da
+`hl2`**, non una distanza ingresso→stop. E la geometria mette i due **dalla stessa parte**:
+r.347/354 l'ingresso chiude **entro `InpNearAtr*atr` dalla linea**, r.389
+`sl = MathMin(stLine,ext) - buf` mette lo stop **sulla linea**.
+👉 **La larghezza della banda POSIZIONA entrambi, non li SEPARA: si cancella.** Il conto la
+sommava, gonfiando il numeratore dei 40× di **~3,5 volte** — e **nel verso comodo**.
+
+| spread | col 273 idx (sbagliato) | con la banda vera 78-176 idx |
+|---|---|---|
+| mediana 2,0 | 136,5× *"+241%"* | **39,0× – 88,2×** 🔴 il 40× cade **dentro** |
+| p95 3,0 | 91,0× *"+128%"* | **26,0× – 58,8×** 🔴 dentro |
+
+🔴 **E il contro-esempio del file era falso**: diceva *"per far cadere il 40× servirebbe un ATR(9)
+pari al 44% dell'ATR(14): non plausibile"*. Basta uno stop `< 1,5 × ATR(9)`, **dentro** la banda
+inferita. **L'alternativa vince** — difetto del 10/09 alla lettera.
+🟢 **E la cosa che rende la classe utile**: il codice **calcolava già il numero giusto**, r.392
+`double risk = isLong ? (entry-sl) : (sl-entry);`
+**La regola**: la distanza ingresso→SL si legge **nella riga che la calcola** (`sl = …` e
+`risk = entry − sl`), **mai** da un parametro del motore — e meno che mai dal moltiplicatore di una
+banda (Supertrend, Keltner, Bollinger), dove ingresso e stop stanno **dallo stesso lato**.
+
+## ⏸️ CLASSE 736 — **un cancello SOSPESO da un round, RIAPERTO dal gemello senza una misura nuova**
+
+Stesso round. `R240a` r.153, testuale: *"il 40x: **SOSPESO**. La distanza ingresso→SL di questa
+geometria **non è misurata** e serve la FASE 1 (`Optimization=0`, Giornale acceso), che oggi non
+esiste come riga di lancio"*.
+🔴 R243 **revocava quella sospensione in silenzio** e concludeva *"H1 **non è escluso per costo**"*
+— e fra i due round **non è stata fatta nessuna misura**: solo un numero inferito, e per giunta
+quello della classe 735.
+**La regola**: una sospensione **si eredita**. Per revocarla serve **il numero che mancava**, e il
+file deve dire **quale misura l'ha prodotto**. Un cancello che si riapre perché nel frattempo
+qualcuno ha scritto una stima non è un cancello.
+🟢 **Via corta al numero, trovata nel codice**: r.422-423 stampa già
+`"... mercato %.2f lot @ ENTRY SL ... TP ..."` a ogni ingresso, e `InpVerbose=true` è già pinnato.
+Serve solo `Optimization=0` → **1 passata, ~2,25 minuti**, e il cancello si chiude **su tutta la
+famiglia SupRev** (oggi aperto su R238, R240 e R243 insieme).
+🔴 E **non basta il per-trade**: `ExportTrades()` scrive **solo i deal di uscita** — ingresso e SL
+non ci sono.
+
+## 🔀 CLASSE 737 — **due ipotesi in gara che non sono esaustive: manca l'INTERAZIONE**
+
+Stesso round. Il contro-esempio metteva `H_meccanismo` contro `H_taratura` e concludeva che, poiché
+la taratura sta **nel denominatore**, un rapporto alto misura il meccanismo.
+🔴 **Manca una terza ipotesi che il disegno non può escludere**: *la taratura non agisce allo stesso
+modo dentro e fuori la finestra*. R240 e R243 sono **due righe di una tabella 2×2** (ancora ×
+finestra): la differenza fra i due rapporti **È il termine di interazione**, e un'interazione **non
+attribuisce la causa a un fattore solo**. Il passaggio *"la taratura è nel denominatore"* assume —
+senza dirlo — che agisca **moltiplicativamente e in modo uguale** sulle due celle.
+**La regola**: se il contro-esempio ha **due** ipotesi, si controlla che non esista la terza *"i due
+fattori interagiscono"*. Se esiste, **si vieta al referto la parola che attribuisce la causa a uno
+solo**: si scrive *"si replica CON L'ANCORA DEL DOW"* (un fatto sulla **coppia**), non *"il
+meccanismo esiste sul Dow"*.
+
+## 🌍 CLASSE 738 — **la conclusione UNIVERSALE ("a prescindere da X") tirata da DUE punti**
+
+Stesso round, file del lungo: *"la finestra taglia via operazioni buone **a prescindere dalla
+taratura**"*. 🔴 Le tarature misurate sono **due**. Due non sono **tutte**.
+👉 È la **classe 180** (*l'insieme si elenca per nome, mai per differenza*) applicata alle
+**tarature** invece che ai simboli. ✅ Corretto in *"con tutte e due le ancore MISURATE"*.
+🔴 Aggravante che la rende facile da prendere: **il gemello corto aveva già la versione giusta**
+(*"con nessuna delle due ancore misurate"*). **Due file gemelli che si contraddicono sono un
+segnale**, e si legge prima del cancello.
+
+## 🔢 CLASSE 739 — **`MathMax(minVolume, …)` in un dimensionatore: il lotto non arriva MAI a zero**
+
+Stesso round: *"a lotto nullo l'EA fa `return` a r.400, quindi il deposito muove l'n"*. 🔴 **Falso**:
+`LotByRisk` chiude con `MathMax(mn, MathMin(mx, lot))` — a deposito piccolo il lotto **si schiaccia
+sul minimo**, non si annulla. Il `return` di r.400 scatta solo se `lossPerLot <= 0`, cioè per un
+guasto dei dati del simbolo. Ed è **documentato nell'EA stesso** (caso 225JPY, 08/08: *"a deposito
+100k profitti identici al 10k, DD 0,01%"*).
+🟢 **L'istruzione operativa resta giusta** (`-Deposito 100000` è obbligatorio) ma **per un'altra
+via**: cambiano taglia, compounding e DD%, non il numero di operazioni.
+**La regola**: prima di citare un `return` come meccanismo, si legge **l'ultima riga della funzione
+che produce il valore**. Una guardia che non può scattare non spiega niente.
