@@ -28,7 +28,7 @@
 #  semi-larghezza della banda, classe 735).
 #
 #  --- 2. PERCHE' UNA PASSATA SINGOLA --------------------------------
-#  L'EA stampa gia' la distanza a ogni ingresso (r.423-424:
+#  L'EA stampa gia' la distanza a ogni ingresso (r.422-423:
 #  "LONG/SHORT mercato %.2f lot @ ENTRY SL ... TP ...", attiva con
 #  InpVerbose=true, pinnato). Ma il driver di casa forza Optimization=1
 #  (walkforward_generico.ps1 r.1015 e r.2013), e sugli agenti di
