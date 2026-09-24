@@ -31,7 +31,8 @@
 #  L'EA stampa gia' la distanza a ogni ingresso (r.422-423:
 #  "LONG/SHORT mercato %.2f lot @ ENTRY SL ... TP ...", attiva con
 #  InpVerbose=true, pinnato). Ma il driver di casa forza Optimization=1
-#  (walkforward_generico.ps1 r.1015 e r.2013), e sugli agenti di
+#  (walkforward_generico.ps1 r.2013; r.1015 e' solo l'anteprima di
+#  -SoloControllo), e sugli agenti di
 #  ottimizzazione le Print non si leggono. Il per-trade dell'EA
 #  (ExportTrades) scrive SOLO i deal di uscita: ingresso e SL non ci sono.
 #
@@ -55,14 +56,21 @@
 #    H_VECCHIA (R243 prima della correzione): 3,5 x ATR ~ 273 punti.
 #  >>> Se la mediana esce sopra ~240, la classe 735 era SBAGLIATA e la
 #      scrivo come tale. Lo accetto prima di vedere il numero. <<<
+#  >>> Fra ~176 e ~240 (zona che nessuna delle due predice): si scrive
+#      "NE' H_BANDA NE' H_VECCHIA", senza assegnarla a nessuna. Il verdetto
+#      di costo del par. 5 NON dipende da quale ipotesi vince: si fa sui
+#      numeri misurati, ingresso per ingresso. <<<
 #
 #  --- 5. IL VERDETTO SUL COSTO, CONGELATO PRIMA ---------------------
 #  Per ogni ingresso: rapporto = distanza / spread MEDIANO dell'ORA server
 #  d'ingresso (risultati_archivio/spread_flotta/spread_orario_U30USD.csv:
 #  2,6-2,8 nelle ore 0-13 e 23, 1,8-2,0 nelle ore 14-21).
 #    PASSA        se la MEDIANA dei rapporti >= 40
-#    AL PELO      se sta fra 40 e 50 (si scrive per esteso)
+#    AL PELO      e' un PASSA con la mediana fra 40 e 50: passa, e lo si
+#                 scrive per esteso accanto (non e' una terza categoria)
 #    NON PASSA    se < 40
+#  Vale SOLO sui lati il cui riepilogo dice "ESITO LATO ...: AFFIDABILE".
+#  Un lato NON AFFIDABILE non riceve verdetto di costo: resta SOSPESO.
 #  E si riportano SEMPRE, accanto (classe 724: un cancello a due statistiche
 #  si riporta con tutte e due): la quota di ingressi sotto 40x, e lo stesso
 #  conto sullo spread p95 dell'ora (il bordo cattivo). Il conto lo faccio io
@@ -76,6 +84,17 @@
 #  positivo (3 = 3, doppioni scartati, riga pre-esistente esclusa, distanze
 #  e quantili esatti) e NEGATIVO (una riga illeggibile -> 3 contro 4 ->
 #  ROTTO). La rete funziona in tutti e due i versi.
+#  E UN SECONDO CONTROLLO (v2, cancello del 24/09): quello incrociato prova
+#  il LETTORE, non l'INI. Se MT5 ignorasse [TesterInputs] l'EA girerebbe
+#  coi default (H4, Supertrend(10,3.5), due lati) e i due conteggi
+#  coinciderebbero lo stesso. Quindi si legge anche la riga d'avvio
+#  dell'EA (r.266: "avviato su U30USD PERIOD_H1. Supertrend(9,3.5)."),
+#  l'intestazione di ogni riga IMBUTO, il lato e il verso dello SL di ogni
+#  ingresso: se uno solo non torna, CONFIGURAZIONE ROTTA. Collaudato sul
+#  codice vero: log coi default -> incrociato OK ma configurazione ROTTA.
+#  Il lato vale solo se TUTTI E DUE i controlli sono OK.
+#  In piu' si raccoglie il report .htm di ogni passata: la tabella ordini
+#  ha prezzo e S/L, cioe' una seconda misura che non passa dalle Print.
 #
 #  --- 7. CHE COSA NON DICE -----------------------------------------
 #  - Vale per la geometria di R243. Per R240 (StAtrPeriod 7 sul corto,
@@ -85,6 +104,31 @@
 #    distanza PIU' grande: il cancello lo decide la tranche piu' stretta.
 #  - Non misura il merito: PF e n di queste due passate su finestra intera
 #    NON sono R243 (che taglia IS/OOS) e non si leggono come tali.
-#  - Un formato di log mai visto: l'unico log d'agente in archivio viene da
-#    un'OTTIMIZZAZIONE (niente Print). Il parser cerca la riga ovunque nel
-#    testo, e il controllo incrociato del par. 6 e' la garanzia.
+#  - Un formato di log non ancora visto PER QUESTA RIGA: l'unico log
+#    d'agente in archivio (zip R242) viene da un'OTTIMIZZAZIONE, dove le
+#    Print di OnTick non escono. MA quel log contiene le Print di OnInit
+#    ("ABTG_MaxMinNotte (D30EUR,M15)<TAB>2024.09.28 00:00:00   MAXMIN
+#    AUTOTEST ...") e sta sotto %APPDATA%\MetaQuotes, che e' la radice che
+#    questo script legge: e' la prova, su questa macchina, di DOVE scrive
+#    l'agente e di che forma ha la riga. E una passata singola
+#    Optimization=0 coi valori SECCHI non e' una prima volta: R99 (23/08,
+#    RIGA_R99_ORO_RISCHIO.ps1 r.914-963) l'ha gia' fatta sulla gemella
+#    ABTG_SupertrendReversal_Ottimizzato (XAUUSD H4), leggendo la STESSA
+#    riga "[STReversal] ... mercato" dai log: stesso canale, altro EA.
+#    Il parser cerca la riga ovunque nel testo, e i due controlli del par. 6
+#    sono la garanzia.
+#
+#  --- 8. LE DIRETTIVE, per il cancello controlla_prova.py -----------
+#  Questo file NON e' letto dallo script (che ha la finestra scritta in
+#  $DA/$A, r.57-58): le righe qui sotto la DICHIARANO nella forma che il
+#  cancello sa leggere, e devono restare identiche a quelle dello script.
+#  La data d'inizio e' la stessa di R240/R243 su U30USD (@DAQUANDO
+#  2024.09.26 nei loro file prova): pavimento dei tick BCM sugli indici.
+#  Il cancello controlla_prova.py su questo file risponde "nessun asse Y":
+#  e' giusto e NON si aggira, perche' questa e' una passata SINGOLA per
+#  costruzione e non passa dal driver (che la rifiuterebbe).
+#  EA: ABTG_SupertrendReversal
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
