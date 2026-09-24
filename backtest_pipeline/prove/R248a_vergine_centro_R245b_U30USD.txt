@@ -9,7 +9,7 @@
 #
 #  >>> LA DOMANDA, UNA SOLA
 #  Il candidato #1 (REFERTO_R245 par. 0; R247) ha il merito misurato su un
-#  OOS che finisce il 2026.06.30: la stessa data di 517 file prova su 981
+#  OOS che finisce il 2026.06.30: la stessa data di 494 file prova .txt su 916
 #  (caccia Unger del 24/09, verificato alla fonte dal coordinatore). Quell'
 #  OOS e' CONSUMATO. Qui si fa UNA lettura della cella, cosi' com'e', su
 #  storico che NESSUN round di questo EA ha mai visto:

@@ -10,7 +10,7 @@
 ## 0. 🔴 PRIMA DI TUTTO: DA DOVE VENGONO QUESTI NUMERI
 
 > **Le fonti primarie di Unger sono ANCORA bloccate dalla rete di questa sessione** (blog Unger Academy, YouTube, podcast Better System Trader, Traders' Tips, ProRealCode, Benzinga, Wiley, Amazon, Google Books). Ricontrollato oggi dal coordinatore: `ungeracademy.com` → `EGRESS_BLOCKED` sia con `curl` che con `WebFetch`.
-> **130 host provati in tutto, 9 rispondono.**
+> **87 + 43 host provati nelle due cacce (16 in comune: ~114 distinti), 9 rispondono.**
 
 Quindi ogni riga di questo referto porta la sua etichetta, e **l'etichetta è parte del numero**:
 
@@ -23,7 +23,7 @@ Quindi ogni riga di questo referto porta la sua etichetta, e **l'etichetta è pa
 | **[SONDA]** | contato da noi su dati DAX 2011-2018 (non BCM) | misura di **occasioni**, mai di edge |
 | **[INFERITO]** | ragionamento nostro | si dice da cosa |
 
-🟢 **La notizia buona**: stavolta c'è **un pezzo di meccanica di Unger letto nel sorgente**, il **Weekly Factor** (TASC settembre 2023, porting Pine di PineCodersTASC). Il coordinatore l'ha riaperto: la pagina TradingView dice *"Original Author: Andrea Unger"*, con filtro corpo 5gg / range 5gg, ingresso M15 sulla rottura del giorno prima e uscita a fine giornata **[VERIFICATO]**.
+🟢 **La notizia buona**: stavolta c'è **un pezzo di meccanica di Unger letto nel sorgente**, il **Weekly Factor** (TASC settembre 2023, porting Pine di PineCodersTASC). Il coordinatore l'ha riaperto, e il cancello di nuovo: la pagina TradingView dice *"an article written by Andrea Unger titled “The Weekly Factor”"* e l'intestazione del sorgente Pine dice *"Article By: Andrea Unger"*, con filtro corpo 5gg / range 5gg, ingresso M15 sulla rottura del giorno prima e uscita a fine giornata **[VERIFICATO]**.
 
 🚫 **Non aperti di proposito**: le copie non autorizzate del libro (scribd, pdfcoffee e simili) e i mirror che aggirerebbero il blocco di rete (translate.goog, web.archive).
 
@@ -89,7 +89,7 @@ TEMPO       : IF intraday THEN flat a fine sessione (SetExitOnClose)
 | flat a fine sessione | ✅ c'è | `ABTG_DAX_Apertura_EU.mq5` r.266-268 (`InpCloseHour/Min`, `InpCloseAtEnd`) | identico |
 | uscita a N barre/giorni | ✅ c'è | `ABTG_PunteLarry.mq5` r.162 (`InpMaxDaysHold=5`), `ABTG_CostToCost.mq5` r.163 | il suo "5 giorni" = il nostro default |
 | stop in **moneta fissa** | ❌ **per scelta** | `LotByRisk` in `ABTG_EMA200.mq5` r.467-495 | 🟢 **la nostra è quella giusta per le prop**: uno stop in euro fissi non scala fra simboli, il rischio % allo stop sì |
-| breakeven con cautela | ✅ | `InpBreakevenAtTP1`, `InpBEatR` (DAX r.331-332) | 🤝 sul Dow **[CASA]** "niente BE: 6 confronti puliti su 8 in perdita" (`ABTG_Dow_Apertura_US.mq5` r.287) |
+| breakeven con cautela | ✅ | `InpBreakevenAtTP1`, `InpBEatR` (`mql5/Experts/ABTG_DAX_Apertura_EU.mq5` r.331-332) | 🤝 sul Dow **[CASA]** "niente BE: 6 confronti puliti su 8 in perdita" (`ABTG_Dow_Apertura_US.mq5` r.287) |
 | trailing "quasi mai" | ⚔️ **CONTRADDETTO in casa** | `ABTG_Dow_Apertura_US.mq5` r.289-292 | **[CASA]** trailing M5 sul Dow: PF **1,24 → 1,37**, DD **6,9% → 5,3%**. **Si tiene la nostra misura** |
 | **"Open Position Profit"** (tieni la notte SOLO i trade in perdita) | ❌ | — | 🔴 **DA NON IMPORTARE**: è esposizione notturna condizionata alla perdita. La notte su indice da noi è **chiusa per rischio**: il 16/03/2020 costa **1,51 anni di edge** (`report/SECONDA_CACCIA_2026-09-12.md` §4.3). È la forma di rischio che il DD giornaliero della prop punisce |
 
@@ -101,7 +101,7 @@ TEMPO       : IF intraday THEN flat a fine sessione (SetExitOnClose)
 ```
 WEEKLY FACTOR   : attivo IF |O[5]-C[1]| < 0,5 x (maxH5 - minL5)               [VERIFICATO]
 DAILY FACTOR    : attivo IF |O[1]-C[1]| < x x (H[1]-L[1]),  x = 25%            [SNIPPET]
-                  (un porting MetaTrader di terzi dice 50%: DISCORDI)          [TERZI]
+                  (un porting MetaTrader di terzi dice 50%: DISCORDI)          [TERZI, pagina non aperta]
 DAY DROP        : (C[1]-L[1]) < DDV x (H[1]-L[1]),  DDV in 0..1                [SNIPPET]
 GIORNO SETTIMANA: E4 salta il VENERDI'                                          [SNIPPET]
 VIX             : spegni IF VIX e' in cima al ranking delle ultime 100 osservazioni [SNIPPET]
@@ -115,9 +115,9 @@ IERI ESTREMO    : non operare dopo un giorno di movimento direzionale estremo  [
 |---|---|---|
 | **Weekly / Daily Factor sul D1** (regime del giorno prima) | ❌ **NON c'è**. **[CASA]** Grep su 115 EA: i filtri corpo/range sono tutti sulla **candela di segnale** (`ABTG_PTE.mq5` r.64, `ABTG_ORB.mq5` r.144), mai sul regime di ieri | 🟠 **buco vero e piccolo** (1 input, ~15 righe), MA da provare solo come **motore costitutivo** (§6, ipotesi C) |
 | giorno della settimana | 🟡 solo in `DAX_MASTER_PROP` e `TurnaroundTuesday` | 🚫 **non lo proponiamo**: è data mining puro, un cerotto (0 su 5) |
-| bias per ora del giorno | ✅ **misurato e CHIUSO** | **[CASA]** DAX: **0 fasce asimmetriche su 72** in OOS (`REFERTO_OROLOGIO_INDICI_DAX_2026-09-07.md`) |
+| bias per ora del giorno | ✅ **misurato e CHIUSO** | **[CASA]** DAX: **0 fasce asimmetriche su 72** in OOS (`backtest_pipeline/risultati_archivio/REFERTO_OROLOGIO_INDICI_DAX_2026-09-07.md`) |
 | bias overnight (il suo E10) | ✅ **misurato e CHIUSO per rischio** | **[CASA]** merito sì (t = +2,86, 8 anni su 9), **rischio no** (§2.2) |
-| ATR / volatilità | ✅ c'è | `InpUseAtrFilter` (DAX r.364-365), `ABTG_VolExpBreak` |
+| ATR / volatilità | ✅ c'è | `InpUseAtrFilter` (`mql5/Experts/ABTG_DAX_Apertura_EU.mq5` r.364-365), `ABTG_VolExpBreak` |
 | ADX come filtro | ✅ già provato | R20, fallito |
 
 ### 3.3 Come sceglie i filtri senza overfitting [SNIPPET]
@@ -133,19 +133,19 @@ IERI ESTREMO    : non operare dopo un giorno di movimento direzionale estremo  [
 
 ### 4.1 Le formule, scritte bene
 
-**Fixed Fractional** [SNIPPET: "non più dell'1% dell'equity"]
+**Fixed Fractional** [SNIPPET, attribuzione incerta: "non più dell'1% dell'equity"]
 ```
 lotti = EQUITY x r / perdita_per_lotto_allo_stop
 ```
-**[CASA]** Noi: `lotti = BALANCE x 0,65% / perdita_per_lotto(distanza_SL)` (`ABTG_EMA200.mq5` r.470, perdita per lotto da `OrderCalcProfit` r.479).
-🟡 **Una differenza vera, mai dichiarata**: lui calcola sull'**equity**, noi sul **saldo**. Con posizioni aperte in perdita noi apriamo un po' più grande. **È materia di taglia: la decide Claudio.**
+**[CASA]** Noi: `lotti = BALANCE x 0,65% / perdita_per_lotto(distanza_SL)` (`ABTG_EMA200.mq5` r.470, perdita per lotto da `OrderCalcProfit` r.480).
+🟡 **Una differenza vera, non dichiarata in nessun documento trovato [INFERITO dal codice]**: lui calcola sull'**equity**, noi sul **saldo**. Con posizioni aperte in perdita noi apriamo un po' più grande. **È materia di taglia: la decide Claudio.**
 
 **Percent Volatility** [SNIPPET]
 ```
 lotti = rischio_monetario / (ATR_D1 x valore_di_1_punto_per_lotto)
 ```
 🧪 **Contro-esempio [INFERITO dall'algebra]**: sedia a stop di **range** (apertura DAX), ATR invariato, range del giorno doppio. Il Percent Volatility tiene **lo stesso lotto** e la perdita allo stop **raddoppia**. La nostra **dimezza il lotto** e la perdita allo stop resta al rischio dichiarato. **Per il muro giornaliero della prop conta la seconda.**
-Le due formule coincidono solo quando lo stop è `k × ATR` (`EMA200`, `InpSLatr=1.0`).
+Le due formule coincidono solo quando lo stop è proporzionale all'**ATR D1**; `EMA200` ci va vicino ma usa l'ATR del suo TF (`InpTF`, r.260) [INFERITO dal codice].
 
 **Fixed Ratio** (Ryan Jones, trattato nel suo libro) [TERZI]
 ```
@@ -155,11 +155,11 @@ N(P)      = floor( 0,5 + sqrt(0,25 + 2 x P / DELTA) )
 🧪 **Contro-esempio fatto**: la versione di FXStreet **senza il +0,5**, con DELTA = P = 5.000, dà 1 contratto invece di **2**. **Quella formula non va copiata.**
 🔴 **Riga prop [INFERITO]**: il Fixed Ratio sale a **gradini interi** (1 → 2 contratti vuol dire taglia ×2 in un colpo). La voce 8 delle pratiche vietate FTMO parla di *"substantially larger position sizes compared to other trades"*. **Non lo consigliamo in prop.**
 
-**Kelly come TETTO, mai come bersaglio** [SNIPPET]
+**Kelly come TETTO, mai come bersaglio** [SNIPPET, attribuzione incerta: la frase compare solo accanto al dominio SEO scartato]
 ```
 f* = W - (1-W)/b       # W = % vincenti, b = vincita media / perdita media
 ```
-**[CASA]** Coi nostri numeri (`report/AUDIT_USCITE_2026-09-09.md` r.101-104) f* viene **0,16-0,25**. Siamo **20-35 volte sotto** il tetto. Un solo regime, quindi resta un tetto indicativo.
+**[CASA]** Coi nostri numeri (`report/AUDIT_USCITE_2026-09-09.md` r.101-104) f* viene **0,13-0,25** (DAX 0,229 con parziale / 0,245 senza; Dow 0,156 / 0,131). Contro lo 0,0065 nostro siamo **20-38 volte sotto** il tetto. Un solo regime, quindi resta un tetto indicativo.
 
 ### 4.2 Scaling, piramidazione, portafoglio [SNIPPET]
 | regola Unger | noi |
@@ -187,14 +187,14 @@ D3  "Caso Benzina": IF 6 mesi senza nuovi massimi THEN PAUSA (non scarto)
 | valore scelto | il **migliore DENTRO** l'area di stabilità [SNIPPET] | il **CENTRO** dell'altopiano, mai il picco | 🟢 **NOI** (e in R70 la differenza ha ribaltato un verdetto) |
 | trade minimi | **30** (intervista Radio 24) [SNIPPET] | **150 IS + 150 OOS** | 🟢 **NOI, 5 volte** |
 | walk-forward | **non la usa** [SNIPPET, due pagine concordi] | IS/OOS a finestre **e** altopiano | 🟢 **NOI più larghi** |
-| filtri aggiunti in serie = overfitting | lo dice | l'abbiamo **contato**: 0 su 5 | 🟢 **NOI** |
+| filtri aggiunti in serie = overfitting | lo dice [SNIPPET] | l'abbiamo **contato**: 0 su 5 | 🟢 **NOI** |
 | Monte Carlo | la distribuzione del DD | **p99**, rimescolando giorni interi | 🟢 **NOI** |
 | **OOS contaminato** | *"non basta che un periodo sia etichettato OOS: non deve aver influenzato, nemmeno indirettamente, lo sviluppo"* [SNIPPET] | ❌ **nessuna regola** | 🔴 **LUI** |
 
 ### 🔴 Il punto dove Unger ci batte, contato alla fonte
-**[CASA, ricontato dal coordinatore]** **517 file prova su 981** citano la stessa fine del fuori campione, `2026.06.30`. La finestra OOS di casa è stata guardata da centinaia di prove: **non è più vergine**. Questo non rende falsi i numeri di contratto. Dice però che sono stati **scelti guardando** quella finestra.
+**[CASA, ricontato dal coordinatore]** **494 file prova (`.txt`) su 916** citano la stessa fine del fuori campione, `2026.06.30` (517 su 979 contando anche gli `.md`/`.py`/`.csv` della cartella; conteggio a `1c4ed445`). La finestra OOS di casa è stata guardata da centinaia di prove: **non è più vergine**. Questo non rende falsi i numeri di contratto. Dice però che sono stati **scelti guardando** quella finestra.
 
-👉 **Già in lavorazione stanotte**: **R248, la finestra VERGINE**. Il candidato #1 (breakout del Dow di R245) e la sedia viva `770202` vengono letti **una volta sola** su **luglio-settembre 2026**, con i criteri congelati prima. I file prova sono in preparazione; la riga passa dai due cancelli e **aspetta la firma di Claudio**.
+👉 **In preparazione, NON lanciato**: **R248, la finestra vergine per questo EA** (2026.07.01 → 2026.09.18). Il candidato #1 (breakout del Dow di R245) e la sedia viva `770202` **verranno** letti **una volta sola**, con i criteri congelati prima. I file prova sono scritti e aspettano lo strato 2; **la riga di lancio non esiste ancora**: passerà dai due cancelli e partirà solo su via libera di Claudio, sul PC di backtest. ⚠️ **Con ~41 operazioni la finestra giudica il RISCHIO, non il MERITO** (Emendamento B): il PF si scrive e **non decide**.
 
 ---
 
@@ -209,26 +209,32 @@ INPUT   : InpRangeMode = 2 (RANGE_PREVBAR)      r.274
           InpLevelTF   = PERIOD_D1              r.275   <- MAI messo ad asse in casa
           InpEntryMode = 0 (BREAKOUT)  contro  3 (RANGE_FADE)   r.273, enum r.203-206
           InpPendingExpiryMin = 510 (08:00 -> 16:30)            r.282
-          InpCloseHour/Min = 16:30 · InpSLMode = 0 (estremo opposto)
+          InpCloseHour/Min = 16:30 · InpMinStopPts = 0
+          STOP UGUALE NEI DUE BRACCI: InpSLMode = 1 (ATR) + stesso InpAtrSlMult
+            (RANGE_FADE IGNORA InpSLMode e InpBufferPoints: stop = InpAtrSlMult x ATR
+             del TF del grafico, r.1277-1279 -- classe 706)
+          STESSI LIVELLI: InpBufferPoints = 0, InpFadeOffsetPts = 0;
+            InpSlippagePts dichiarato (sposta SOLO il braccio STOP)
           InpAllowLong / InpAllowShort separati (regola dei due lati, 25/08)
 DOMANDA : sul DAX BCM, agli STESSI livelli di ieri, vince lo STOP o il LIMIT?
 ```
-- **[CASA] Perché non è già stato fatto**: `InpLevelTF` ha girato solo **M15..H4** (`prove/R133a_livelliTF_NASUSD.txt`). **D1 mai.** Verificati dal coordinatore i valori degli enum nel sorgente.
+- **[CASA] Cosa c'è già**: `InpLevelTF` **non è mai stato messo ad asse** (nessuno dei 267 CSV con quella colonna la fa variare; `prove/R133a_livelliTF_NASUSD.txt`, M15..H4 su NASUSD, è scritto ma **mai lanciato**: `report/LE_MANOPOLE_INERTI_2026-09-23.md` §4.6). **Ma D1 come valore FISSO è già girato una volta sul DAX, in BREAKOUT**: `backtest_pipeline/risultati_archivio/DAX_Apertura/apert_DAX_M5_doc_brk_realtick_D30EUR.csv` (M5, tick reali, 119 passate / 32 esiti, ordini vivi 120 min, **n 61-71, PF 0,52-2,12**, mediana delle passate 0,76; finestra non scritta nel CSV). Campione sotto 150 e scadenza diversa: **non è un verdetto, è il prior**. Il braccio **RANGE_FADE su D1 non ha righe**; il FADE sul range d'apertura è archiviato senza edge (PF **0,715 / 0,720**, n 419/430, stesso referto §4.7). Enum verificati in `mql5/Experts/ABTG_DAX_Apertura_EU.mq5`. Il test delle "2 righe" di Unger è su barre D1 senza uscita serale [SNIPPET]: l'ipotesi A ne è un adattamento intraday [INFERITO].
 - **[SONDA] L'evento esiste**: sul DAX 2011-2018 la rottura del massimo/minimo di ieri dopo le 08:00 capita circa **121 volte l'anno**. **MA nel 36,6% dei giorni il livello è già "consumato" prima delle 08:00**: è la lezione OOPS, e **va rimisurata sui tick BCM**, perché la sonda non vede la notte.
-- 🔴 **La trappola da contare prima di leggere un PF [INFERITO dal codice]**: nei giorni "consumati" lo stop dalla parte già rotta viene **rifiutato** (log `BUY/SELL STOP fallito`, r.1214/r.1238) e resta vivo solo l'altro lato. Quei giorni fanno un'operazione **mono-lato non voluta**.
-- **Frontiera del costo [SONDA]**: stop all'estremo opposto di ieri ≈ **197× lo spread** mediano (p10 ~97×). Passa largo.
+- 🔴 **La trappola da contare prima di leggere un PF [INFERITO dal codice]**: nei giorni "consumati" lo stop dalla parte già rotta viene **rifiutato** (log `BUY/SELL STOP fallito`, r.1214/r.1238; nel braccio FADE il LIMIT dalla parte già rotta è rifiutato allo stesso modo: `SELL/BUY LIMIT (fade) fallito`, r.1296/r.1313) e resta vivo solo l'altro lato. Quei giorni fanno un'operazione **mono-lato non voluta**.
+- **Frontiera del costo [SONDA]**: i ≈ **197× lo spread** (p10 ~97×) valgono SOLO per il braccio STOP con stop all'estremo opposto di ieri. Con lo stop ATR comune ai due bracci la frontiera **va ricalcolata** sull'ATR(14) del TF del grafico: `[NON MISURATO]`.
+- ⚠️ **Orologio**: BCM è UTC+1 fisso; nei mesi d'inverno le 08:00 server sono le 08:00 italiane (un'ora PRIMA del cash) e le 16:30 non sono la chiusura. Una prova 2024.09.26 → oggi a orari fissi MESCOLA due tempistiche: va spezzata per stagione o dichiarata (`OROLOGIO_BCM_2026-09-24.md`).
 - ⚠️ **Sovrapposizione**: stessa fascia oraria di `770101`. Se passa, si misura la correlazione con `770101` **prima** di qualunque vivaio.
 
 ### 🥈 IPOTESI B — La "prima ora del future" con spostamento · **1 input nuovo**
-- `ABTG_DAX_Apertura_EU`, `InpRangeMode=1`, `InpPrevWindowMin=60` (range 07-08 server), BREAKOUT, ordini vivi 08-09.
+- `ABTG_DAX_Apertura_EU`, `InpRangeMode=1`, `InpPrevWindowMin=60` (range 07-08 server), BREAKOUT, `InpPendingExpiryMin=60` (ordini vivi solo 08-09).
 - **Manca un input**: lo spostamento oggi è in **punti fissi** (`InpBufferPoints` r.277), quello di Unger è una **frazione del range** (k = 0,75). Servono circa 5 righe, quindi **firma e sviluppatore**.
-- **[CASA]** In RETEST ha già dato **PF OOS 0,861** (n = 320, DD 15,6%). In **BREAKOUT** è **NON ANCORA MISURATO**, non morto.
-- **[SONDA]** Con k = 0,75 la rottura entro le 09:00 capita nel **57,6%** dei giorni. Stop con k = 0 ≈ **42× lo spread**: sul confine. **Vive solo con lo spostamento o col pavimento `InpMinStopPts`.**
+- **[CASA]** In RETEST ha già dato **PF OOS 0,861** (n = 320, DD 15,6%; modello di quel CSV `[INCERTO]`). In **BREAKOUT** è **NON ANCORA MISURATO**, non morto.
+- **[SONDA, DAX future 2011-2018, non BCM: da rimisurare sui tick BCM D30EUR, con la fascia 07-08 server quotata]** Con k = 0,75 la rottura entro le 09:00 capita nel **57,6%** dei giorni. Stop con k = 0 ≈ **42× lo spread**: sul confine. **Vive solo con lo spostamento o col pavimento `InpMinStopPts`.**
 - ⚠️ **Orologio**: dal 26/10 la prima ora del future diventa **08-09 server** (BCM UTC+1 fisso, `OROLOGIO_BCM_2026-09-24.md`).
 
 ### 🥉 IPOTESI C — Weekly/Daily Factor come motore COSTITUTIVO di A · **~15 righe**
 - Tesi scritta **prima** dei numeri: *"la rottura di ieri paga dopo una fase di indecisione"*. La cella col filtro si congela **insieme** ad A, non dopo averla vista.
-- **[SONDA]** Weekly Factor vero sul **52,5%** delle rotture (~64/anno/simbolo), Daily Factor 25% sul **29%** (~35/anno). **Il singolo simbolo non arriva a 150 per metà**: il verdetto è **solo di famiglia** (3 indici).
+- **[SONDA, DAX future 2011-2018, non BCM: da rimisurare sui tick BCM]** Weekly Factor vero sul **52,5%** delle rotture (~64/anno/simbolo), Daily Factor 25% sul **29%** (~35/anno). **Il singolo simbolo non arriva a 150 per metà**: il verdetto è **solo di famiglia** (3 indici).
 - Parte **solo se A mostra un motore vivo**.
 
 ---
@@ -238,11 +244,11 @@ DOMANDA : sul DAX BCM, agli STESSI livelli di ieri, vince lo STOP o il LIMIT?
 | | |
 |---|---|
 | 🟢 **Dove siamo già avanti** | centro dell'altopiano, 150 + 150 trade, Monte Carlo p99, filtri-cerotto contati, rischio % allo stop invece che in euro fissi, trailing del Dow misurato |
-| 🟠 **Cosa prendiamo** | (1) l'**OOS vergine** → già in lavorazione come R248; (2) il **test delle 2 righe** sul livello D1 → ipotesi A, zero codice; (3) il **Weekly Factor** come motore costitutivo → ipotesi C, dopo A |
+| 🟠 **Cosa prendiamo** | (1) l'**OOS vergine** → in preparazione come R248 (non lanciato; giudica il rischio, non il merito); (2) il **test delle 2 righe** sul livello D1 → ipotesi A, zero codice; (3) il **Weekly Factor** come motore costitutivo → ipotesi C, dopo A |
 | 🔴 **Cosa NON prendiamo** | stop in moneta fissa, Fixed Ratio in prop, "Open Position Profit", filtri giorno-della-settimana, bias overnight, OOPS |
 | ❓ **Cosa resta aperto** | il walk-forward (due snippet concordi, nessuna pagina aperta), il 25% o 50% del Daily Factor, il codice EasyLanguage ufficiale del Weekly Factor |
 
-🧭 **Bussola**: niente di tutto questo **schiera una sedia entro il 1° ottobre**. È ricerca. Il pezzo più vicino a una sedia è **R248**: rafforza un candidato che c'è già, invece di inventarne uno nuovo.
+🧭 **Bussola**: niente di tutto questo **schiera una sedia entro il 1° ottobre**. È ricerca. Il pezzo più vicino a una sedia è **R248**: mette alla prova sul RISCHIO un candidato che c'è già (con ~41 operazioni non può confermarne il merito), invece di inventarne uno nuovo.
 
 ### 📥 La lista della spesa per Claudio (5 pagine gratis, nessun acquisto: per lui non sono bloccate)
 | # | URL | cosa chiude |

@@ -10,6 +10,8 @@ Precedente letto prima di uscire (non rifatto): `CACCIA_ANDREA_UNGER_2026-09-14.
 (OOPS = 0 trade su 288 celle sul CFD quasi-24h), `report/SECONDA_CACCIA_2026-09-12.md`
 §4 (gamba notturna su indice: CHIUSA per rischio).
 
+> ✏️ **ERRATA del 24/09 sera (cancello su `report/METODO_UNGER_2026-09-24.md`)**: al §6 e al §7 ipotesi A, *"D1 mai"* e *"R133a ha girato"* sono **falsi**. R133a non e' mai stato lanciato; D1 come valore FISSO ha gia' girato sul DAX in BREAKOUT (`risultati_archivio/DAX_Apertura/apert_DAX_M5_doc_brk_realtick_D30EUR.csv`, 119 passate, n 61-71, PF 0,52-2,12). E il braccio RANGE_FADE ignora `InpSLMode`/`InpBufferPoints` (stop ATR, r.1277-1279): i due bracci differiscono in stop e livello. Versione corretta nel referto di sintesi. Classe 773.
+
 ---
 
 ## 0. LA RIGA CHE CONTA
