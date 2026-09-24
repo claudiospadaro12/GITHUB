@@ -1,0 +1,179 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-09-24 03:32:18  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 8
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260922   (27.9 KB, ultima scrittura 2026-09-22 23:53) ---
+    righe totali: 105
+    RIGHE DI ORDINE / DEAL: 12
+      HL001:00:00.246ABTG_PunteLarry (XAUUSD,H1)[LARRY] SETUP LONG [SMASH libro] del 2026.09.22: ingresso STOP @ 4383.29 (punta/gap 51.01 = 0.68 x ATR D1).
+      EQ001:00:00.694ABTG_PunteLarry (XAUUSD,H1)[LARRY] PENDENTE BUY STOP @ 4383.29  SL 4315.14  TP 4485.51  lot 0.01  (pattern SMASH libro, punta/gap 0.68 x ATR, scadenza 2026.09.22 23:59, ordine 3425377)
+      NS001:00:00.836ABTG_CostToCost (GBPCAD,H4)[COST] conferma valida ma posizione gia' aperta: nessun ingresso.
+      CD008:00:00.233ABTG_EMA200 (U30USD,H1)[EMA200] SELL LIMIT 1 @ 52157.70 SL 52258.90 TP 51955.30 lot 0.20
+      GQ008:00:00.283ABTG_EMA200 (U30USD,H1)[EMA200] SELL LIMIT 2 @ 52191.40 SL 52258.90 TP 52056.40 lot 0.30
+      JN008:00:00.480ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] BUY STOP @ 4378.49 SL 4336.94 TP 4544.69 lot 0.01
+      HS008:00:00.480ABTG_MaxMinNotte (XAUUSD,M15)CTrade::OrderSend: sell stop 0.01 XAUUSD at 4336.94 sl: 4378.49 tp: 4170.74 [invalid price]
+      HE010:56:34.303ABTG_DAX_Apertura_EU (D30EUR,M5)[DAX Apertura EU] BUY LIMIT (retest) @ 25622.90000  SL 25455.90000  lot 0.30
+      NN013:00:00.308ABTG_EMA200_Ottimizzato (XAUUSD,H4)[EMA200] SELL LIMIT 1 @ 4360.62 SL 4409.72 TP 4262.42 lot 0.01
+      EI013:00:00.340ABTG_EMA200_Ottimizzato (XAUUSD,H4)[EMA200] SELL LIMIT 2 @ 4379.96 SL 4409.72 TP 4320.44 lot 0.01
+      MJ015:45:00.602ABTG_ORB_Ottimizzato (U30USD,M5)[ORB_OTT] BUY STOP @ 52340.50000 SL 52201.50000 TP 52757.50000 lot 0.40
+      DP017:00:00.426ABTG_SupertrendReversal_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4328.36 sl: 4291.49 tp: 4420.04 [invalid price]
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260923   (31.4 KB, ultima scrittura 2026-09-23 19:35) ---
+    righe totali: 113
+    RIGHE DI ORDINE / DEAL: 37
+      OS000:59:00.221ABTG_PunteLarry (XAUUSD,H1)[LARRY] pendente non piu' attivo (scaduto o cancellato): giornata chiusa.
+      NQ001:00:00.546ABTG_PunteLarry (EURAUD,H1)[LARRY] SETUP SHORT [SMASH punta] del 2026.09.23: ingresso STOP @ 1.60800 (punta/gap 0.00268 = 0.49 x ATR D1).
+      FQ001:00:00.566ABTG_PunteLarry (U30USD,H1)[LARRY] SETUP SHORT [SMASH punta] del 2026.09.23: ingresso STOP @ 51714.50 (punta/gap 279.00 = 0.54 x ATR D1).
+      HJ001:00:00.720ABTG_PunteLarry (EURAUD,H1)[LARRY] PENDENTE SELL STOP @ 1.60800  SL 1.61540  TP 1.59690  lot 0.05  (pattern SMASH punta, punta/gap 0.49 x ATR, scadenza 2026.09.23 23:59, ordine 3435506)
+      PS001:00:00.731ABTG_PunteLarry (U30USD,H1)[LARRY] PENDENTE SELL STOP @ 51714.50  SL 52484.90  TP 50558.90  lot 0.10  (pattern SMASH punta, punta/gap 0.54 x ATR, scadenza 2026.09.23 23:59, ordine 3435507)
+      EM003:25:50.945ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      QH003:25:51.146ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      PG003:25:51.291ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      JE003:25:51.349ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      DP003:25:51.651ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      OO003:25:51.944ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      QM003:25:52.046ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      JH003:25:52.243ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      OF003:25:52.400ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      NE003:25:52.544ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      QP003:25:52.648ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      LN003:25:53.442ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      MM003:25:53.748ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      PH003:25:53.802ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      DF003:25:53.851ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      ME003:25:53.900ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      RS003:25:54.001ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      CN003:25:54.668ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      PM003:25:54.719ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      PK003:25:54.771ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      HF003:25:55.174ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      GE003:25:55.270ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      KS003:25:55.571ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      HN003:25:55.671ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      OL003:25:55.773ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      QK003:25:55.869ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      JF003:25:56.025ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      MD003:25:56.073ABTG_EMA200_Ottimizzato (XAUUSD,H4)CTrade::OrderSend: modify position #3430899 XAUUSD (sl: 4345.65, tp: 4262.42) [invalid stops]
+      LJ008:00:00.304ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] BUY STOP @ 4371.75 SL 4330.70 TP 4535.95 lot 0.01
+      PE008:00:00.336ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] SELL STOP @ 4330.70 SL 4371.75 TP 4166.50 lot 0.01
+      MI010:00:00.220ABTG_EasyTrend (CHFJPY,H1)[EZ] SEGNALE SHORT alle 08:00: livello d'ingresso 191.820 (chiusura candela segnale), estremo figura 192.273, SL 192.303. Candela linreg O=191.902 H=191.946 L=191.822 C=191.862, plot 191.875.
+      JE015:00:00.247ABTG_SupRev_NAS_H1_Ottimizzato (NASUSD,H1)CTrade::OrderSend: buy stop 0.60 NASUSD at 30675.80 sl: 30617.80 tp: 30849.20 [invalid price]
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 541452707
+=====================================================================
+
+--- GIORNO 20260923   (98.2 KB, ultima scrittura 2026-09-23 23:58) ---
+    righe totali: 344
+    RIGHE DI ORDINE / DEAL: 1
+      CH016:06:00.189CLAU12_Nasdaq_Apertura_US (US100.cash,M5)[Nasdaq Apertura US] RETEST SELL: rottura con volumi insufficienti, salto (regola Emiliano).
+    GUARDIAN, ultima riga del giorno:
+      NI023:55:02.174CLAU12_Guardian (NZDJPY,H1)[GUARDIAN] eq=78242.32  dayLoss=0.00%  totDD=2.20%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20260924   (15.5 KB, ultima scrittura 2026-09-24 03:30) ---
+    righe totali: 55
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      IF003:30:04.028CLAU12_Guardian (NZDJPY,H1)[GUARDIAN] eq=78242.32  dayLoss=0.00%  totDD=2.20%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260923   (98 KB, ultima scrittura 2026-09-23 23:55) ---
+    righe totali: 344
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      RE023:55:03.471ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=101341.30  dayLoss=2.86%  totDD=-1.34%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20260924   (15.1 KB, ultima scrittura 2026-09-24 03:25) ---
+    righe totali: 55
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      OQ003:30:03.318ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=101341.30  dayLoss=0.00%  totDD=-1.34%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260923   (83.8 KB, ultima scrittura 2026-09-23 23:55) ---
+    righe totali: 293
+    RIGHE DI ORDINE / DEAL: 1
+      QF015:45:00.344ABTG_ORB_Ottimizzato (EURAUD,H1)[ORB_OTT] BUY STOP @ 11.61729 SL 11.61604 TP 11.62103 lot 0.65
+    GUARDIAN, ultima riga del giorno:
+      ES023:55:03.331ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7550.74  dayLoss=0.00%  totDD=-0.68%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20260924   (13.1 KB, ultima scrittura 2026-09-24 03:30) ---
+    righe totali: 47
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      JN003:30:03.175ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7550.74  dayLoss=0.00%  totDD=-0.68%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
