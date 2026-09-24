@@ -35357,3 +35357,11 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🗳️ CLASSE 775 — **il file col MOTORE DIVERSO DAL PIN che continua a votare nella pre-lettura**
 - **Caso (24/09, riga R248, scenario `eaalt` dell'harness)**: il controllo della classe 166 stampava in rosso "MOTORE DIVERSO DAL PIN: G0 NON si legge", ma la PRE-LETTURA contava lo stesso il G0 di quel file e lo stampava in verde fra i "NON NULLI con G0 non rosso". Preso dal cancello (strato 2) prima dell'invio; correzione `$g0Map[$L]=$(if($div.Count -gt 0){2}else{$g0Liv})`, testata con l'harness.
 - **Regola**: un esito che dichiara "non si legge" (motore diverso, file nullo, rc di guasto) forza lo stato del file in **ogni** conteggio successivo. Estende la 772 dal G1 al 166. Il contro-esempio si esegue (EA alterato -> il file deve uscire dall'elenco dei validi).
+
+## 📐 CLASSE 776 — **attesa di una metrica di PERCORSO (DD) ricavata su una finestra di lunghezza diversa dalla gamba che il cancello misura**
+- **Caso (24/09, R249a par. 1 e 6)**: "DD a due cifre atteso su ogni file" veniva dal DD della sonda su finestre di 2 anni, ma il cancello RISCHIO misura gambe di 9 e 13 mesi. Rifatto per gamba: R249e mediana 9,2% (P>10% = 0,34-0,37), non "a due cifre"; nel blocco A il cancello e' rosso con P 0,87-1,00 in ogni braccio, quindi non discrimina STOP contro LIMIT. Preso dal cancello (strato 2).
+- **Regola**: DD, peggior giornata e ogni metrica che dipende dal percorso si attendono sulla STESSA lunghezza della gamba giudicata. Se il cancello e' rosso sotto tutte le ipotesi, si dichiara che e' un'etichetta, non una misura.
+
+## 🎯 CLASSE 777 — **frequenza per file stimata da una sonda che filtra i giorni su un insieme di condizioni PIU' LARGO di quello che il file usa**
+- **Caso (24/09, R249 par. 5)**: la sonda scartava il giorno se uno QUALSIASI dei due livelli di ieri era gia' consumato, mentre ogni file ne usa uno solo. Rifatto per livello: 0,242 / 0,284 per feriale contro 0,229 / 0,254 dichiarati; braccio OOS ~145, a un passo da 150, e la clausola "se supera 150 il merito si legge" non aveva criterio congelato. Preso dal cancello (strato 2).
+- **Regola**: la frequenza attesa si stima con lo STESSO filtro della cella. Una clausola che scatta "se il conteggio sorprende" si congela prima, oppure resta solo descrittiva.

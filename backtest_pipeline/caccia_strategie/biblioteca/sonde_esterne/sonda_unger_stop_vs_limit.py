@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Nata il 24/09/2026 per i file prova R249 (ipotesi A del Metodo Unger, stop contro limit sui livelli D1 di ieri):
-#   backtest_pipeline/prove/R249a_unger_A_D30EUR_BRK_LONG_atr.txt (file di testa).
+#   backtest_pipeline/prove/R249a_ungerA_D30EUR_BRK_LONG_atr.txt (file di testa).
 # DATI: gli stessi di sonda_unger_eventi.py (FutureSharks/financial-data, histdata M1 GRXEUR 2011-2018, GPL-3.0),
 #   salvati come dati/GRXEUR_<ANNO>.csv. Uso: python3 sonda_unger_stop_vs_limit.py  (dalla cartella che contiene dati/)
 # LIMITI: NON e' BCM; OHLC M1 (barra d'ingresso ambigua trattata come STOP); dati solo 07-21 server (niente notte);
@@ -132,3 +132,57 @@ for mode in ('fix','atr'):
             dds.append(d)
         dds.sort()
         print('%s %-5s quota stop pieni %.2f  DD in R (finestre di 2 anni): mediano %.1f  peggiore %.1f'%(mode,k,stopfrac,dds[len(dds)//2],dds[-1]))
+
+# PARTE 4 (strato 2, 24/09): contro-esempio del cancello S1 e tasso PER LIVELLO (un lato per file).
+# H1 = candela 07:00-07:59 (default del core ABTG_DEF_LEVEL_TF=PERIOD_H1, r.168): ordine piazzabile alle 08 e toccato entro le 16:30.
+# D1sep = conta il giorno se e' consumato solo l'ALTRO livello (il file ne usa uno solo).
+nf=len(days)-1; cH1={'H':0,'L':0}; cD1={'H':0,'L':0}
+for i in range(1,len(days)):
+    prev=byday[days[i-1]]; PDH=max(b[2] for b in prev); PDL=min(b[3] for b in prev)
+    today=byday[days[i]]
+    pre=[b for b in today if mins(b[0])<480]; arm=[b for b in today if 480<=mins(b[0])<990]
+    if not arm or not pre: continue
+    o=arm[0][1]; h1=[b for b in today if 420<=mins(b[0])<480]
+    if h1:
+        H=max(b[2] for b in h1); L=min(b[3] for b in h1)
+        cH1['H']+= (o<H and any(b[2]>=H for b in arm)); cH1['L']+= (o>L and any(b[3]<=L for b in arm))
+    cD1['H']+= (not any(b[2]>=PDH for b in pre) and o<PDH and any(b[2]>=PDH for b in arm))
+    cD1['L']+= (not any(b[3]<=PDL for b in pre) and o>PDL and any(b[3]<=PDL for b in arm))
+for k in 'HL':
+    print('S1 livello %s: H1 %.3f/feriale (~%.0f su 459)  D1 per livello %.3f (~%.0f)  soglia 0,45 (207)'%(k,cH1[k]/nf,cH1[k]/nf*459,cD1[k]/nf,cD1[k]/nf*459))
+
+# PARTE 5 (strato 2, 24/09): la regola del par. 6 COM'E' SCRITTA (classe 764) e il DD PER GAMBA.
+# Finestre contigue IS 183 + OOS 276 feriali, passo 20; 'STOP avanti' = D>0 in tutte e due le gambe.
+def run_d(mode):
+    src=open(__file__).read(); c=src[src.index('# PARTE 2'):src.index("for mode in ('fix','atr'):")]
+    c=c.replace("res[arm_name+name].append((days[i].year,r))","res[arm_name+name].append((days[i],r))")
+    h={}; exec(c,h); return h['run'](mode)[0]
+def ddp(rs):
+    eq=pk=1.0; m=0
+    for r in rs: eq*=1+0.01*r; pk=max(pk,eq); m=max(m,1-eq/pk)
+    return m*100
+for mode in ('fix','atr'):
+    R=run_d(mode); W=[j for j in range(1,len(days),20) if j+459<len(days)]
+    for k in ('BRKH','FADEH','BRKL','FADEL'):
+        A=dict(R[k]); o=[]
+        for nm,a,b in (('IS',0,183),('OOS',183,459)):
+            v=[ddp([A[d] for d in sorted(A) if d in set(days[j+a:j+b])]) for j in W]
+            o.append('%s med %.1f%% P(>10%%) %.2f'%(nm,st.median(v),sum(x>10 for x in v)/len(v)))
+        print('DD per gamba',mode,k,' | '.join(o))
+    for lv,a,b in (('H','BRKH','FADEH'),('L','BRKL','FADEL')):
+        A=dict(R[a]); B=dict(R[b])
+        for tipo in ('effetto','nullo'):
+            random.seed(3); c=[0,0,0]; reps=1 if tipo=='effetto' else 20
+            for j in W:
+                for _ in range(reps):
+                    Ds=[]
+                    for x,y in ((0,183),(183,459)):
+                        S=set(days[j+x:j+y]); xa=[];xb=[]
+                        for d in sorted(A):
+                            if d in S:
+                                u,v=A[d],B[d]
+                                if tipo=='nullo' and random.random()<.5: u,v=v,u
+                                xa.append(u); xb.append(v)
+                        Ds.append(pf(xa)-pf(xb))
+                    c[0 if Ds[0]>0 and Ds[1]>0 else (1 if Ds[0]<0 and Ds[1]<0 else 2)]+=1
+            T=sum(c); print('regola par.6',mode,lv,tipo,'STOP %.2f LIMIT %.2f NONDEC %.2f'%(c[0]/T,c[1]/T,c[2]/T))

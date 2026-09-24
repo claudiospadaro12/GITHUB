@@ -88,8 +88,18 @@
 #     stare sopra 1 e' BRK LONG su PDH, blocco F. Blocco A: tutto sotto 1
 #     atteso (stop a ~14x spread, par. 5).
 #   - DD: in unita' di R la sonda da' DD mediano 12-22 R su finestre di 2
-#     anni (peggiore 24-40 R) col fisso, 32-62 R con l'ATR. A 1% per
-#     operazione e compounding: DD a DUE CIFRE atteso su ogni file. Non e'
+#     anni (peggiore 24-40 R) col fisso, 32-62 R con l'ATR. MA il cancello
+#     misura la GAMBA (IS 183, OOS 276 feriali), non 2 anni: rifatto sulla
+#     sonda a finestre contigue IS 183 + OOS 276 feriali (79 finestre,
+#     passo 20, sonda PARTE 5), 1% e compounding, DD% per gamba, mediana e
+#     P(>10%):
+#       blocco F: BRK LONG IS 9,2% (0,37) OOS 9,2% (0,34); FADE SHORT 13,2%
+#         (0,68) / 14,8% (0,82); BRK SHORT 13,0% (0,71) / 15,7% (0,80);
+#         FADE LONG 11,7% (0,63) / 13,7% (0,77).
+#       blocco A: 16-33% mediano, P(>10%) 0,87-1,00 in OGNI braccio (colonna
+#         ATR della sonda non leggibile: solo ordine di grandezza).
+#     Quindi: DD a due cifre atteso su 7 celle su 8; su R249e (BRK LONG
+#     blocco F) NO: mediana 9,2%, ROSSO atteso in un caso su tre. Non e'
 #     una taglia proposta: e' il rischio che il round deve MISURARE.
 #   - n: par. 4.
 #
@@ -167,7 +177,13 @@
 #  OOS 276 = 110 inverno + 166 estate (40% inverno).
 #  PERCHE' NON SI SPEZZA: (a) il confronto e' APPAIATO -- i due bracci di un
 #  livello vedono lo STESSO orologio negli STESSI giorni, quindi lo
-#  sfasamento non favorisce nessuno dei due per costruzione; (b) spezzare in
+#  sfasamento non entra nel PF di UNO solo dei due. MA NON e' neutro per
+#  costruzione su D: se l'ora prima della cash (inverno) favorisce il limit
+#  piu' dello stop, o il contrario (interazione stagione x meccanismo,
+#  classi 737/765), D ne e' spostata, e di QUANTO dipende dalla quota
+#  d'inverno della gamba (IS 60%, OOS 40%): un segno di D diverso fra IS e
+#  OOS puo' essere l'orologio e non il regime. [NON MISURATO]: lo guarda
+#  solo la lettura per stagione qui sotto, descrittiva; (b) spezzare in
 #  5 finestre stagionali farebbe 40 file con campioni da 10-40 operazioni
 #  l'uno. COSTO dichiarato: (1) IS e OOS hanno quote d'inverno diverse
 #  (60% contro 40%): una differenza IS/OOS NON si attribuisce al regime
@@ -187,6 +203,10 @@
 #  16:30): PDH 0,229/feriale, PDL 0,254/feriale.
 #     per FILE:  IS ~42 (PDH) / ~46 (PDL)   OOS ~63 / ~70   tutta ~105 / ~117
 #     per BRACCIO (L+S sommati): IS ~88   OOS ~133
+#     NB: la sonda scarta il giorno se E' consumato UNO QUALSIASI dei due
+#     livelli; con un lato per file conta solo il SUO. Rifatto per livello
+#     (sonda PARTE 4): PDH 0,242, PDL 0,284/feriale -> per file
+#     ~111 / ~130, braccio OOS ~145: a un passo da 150 (vedi par. 6 MERITO).
 #  Correzione BCM ignota e di verso ignoto: la D1 BCM include notte e sera
 #  di ieri (livelli piu' larghi, meno tocchi) e la notte di OGGI puo'
 #  consumare il livello prima delle 08:00 (sulla sonda, senza notte, il
@@ -201,12 +221,20 @@
 #      ABTG_Nasdaq_Apertura_US, stesso ramo PREVBAR, coi LORO orari e il
 #      calendario USA): file NON preparati in questo round (buco dichiarato).
 #      Il RISCHIO (DD) si legge a qualunque n (Emendamento B).
-#  POTENZA del confronto appaiato (sonda, ricampionamento): se l'effetto
-#  della sonda fosse vero, P(PF_BRK > PF_FADE) = 0,78 su PDH e 0,61 su PDL
-#  a n=105; 0,90 / 0,70 a n=315 (famiglia). Se NON c'e' differenza: 0,50.
-#  ==> il segno della differenza sul DAX da solo e' un INDIZIO debole su
-#      PDH e quasi un lancio di moneta su PDL (classe 178): si scrive, non
-#      decide.
+#  POTENZA (classe 764: la regola COM'E' SCRITTA al par. 6, non il PF
+#  sull'intera finestra). Sonda, stop fisso = blocco F. P(PF_BRK > PF_FADE)
+#  su UNA finestra: 0,78 su PDH e 0,61 su PDL a n=105; 0,90 / 0,70 a n=315
+#  (famiglia). Ma la regola chiede D > 0 in TUTTE E DUE le gambe:
+#     STOP avanti / LIMIT avanti / NON DECISO
+#     PDH  effetto sonda: 0,49 / 0,00 / 0,51   nullo: 0,26 / 0,24 / 0,50
+#     PDL  effetto sonda: 0,24 / 0,10 / 0,66   nullo: 0,26 / 0,23 / 0,51
+#     (finestre contigue IS 183 + OOS 276 feriali, 79 finestre, passo 20;
+#     nullo = scambio a caso dentro la coppia; sonda PARTE 5).
+#  ==> su PDH "STOP avanti" e' un INDIZIO (0,49 contro 0,26 del nullo); su
+#      PDL la regola NON separa l'effetto della sonda dal nullo (0,24 contro
+#      0,26): qualunque esito su PDL e' NON INFORMATIVO sul DAX da solo, e
+#      si scrive cosi' (classe 178). Blocco A: potenza NON calcolabile (colonna
+#      ATR della sonda non leggibile). Si scrive, non decide.
 #
 # ==========================================================================
 #  5. FRONTIERA DEL COSTO (stop >= 40 x spread; D30EUR ore 08: 1,70 prudente,
@@ -261,13 +289,23 @@
 #  RISCHIO (a qualunque n, Emendamento B): Equity DD% di una gamba > 10%
 #     (dieci stop pieni all'1%) -> ROSSO di rischio per quella cella,
 #     scritto accanto al PF. Riferimento, non soglia: 770101 nella stessa
-#     finestra (R246e) IS 5,44%, OOS 7,23%.
+#     finestra (R246e) IS 5,44%, OOS 7,23%. E' un'ETICHETTA di rischio, non
+#     un discriminatore fra i bracci: sulla sonda nel blocco A e' ROSSO con
+#     P 0,87-1,00 in ogni braccio (par. 1), quindi un ROSSO del blocco A non
+#     dice niente su STOP contro LIMIT; nel blocco F separa solo R249e.
 #  MERITO: SOSPESO su D30EUR (par. 4). Si SCRIVONO, per livello e per gamba:
 #     D = PF_BRK - PF_FADE e il segno. Lettura: "STOP avanti" se D > 0 in
 #     tutte e due le gambe su quel livello, "LIMIT avanti" se D < 0 in
 #     tutte e due, altrimenti "NON DECISO". Mai "vince": e' un INDIZIO per
-#     la famiglia. Se il conteggio sorprende e un braccio (L+S) supera 150
-#     CONTATE in una gamba, su quella gamba il merito si legge.
+#     la famiglia. Su PDL l'esito si scrive "NON INFORMATIVO" qualunque sia
+#     (par. 4, potenza). OGNI D si scrive con accanto "OROLOGIO MESCOLATO:
+#     IS 60% inverno, OOS 40%" (par. 3): un NON DECISO per segno opposto fra
+#     le gambe NON si attribuisce al regime senza la lettura per stagione.
+#     Se un braccio (L+S) supera 150 CONTATE in una gamba (atteso vicino:
+#     ~145 OOS, par. 4), su quella gamba si SCRIVONO PF e DD del braccio,
+#     SOLO blocco F (il blocco A e' fuori frontiera): DESCRITTIVO, nessuna
+#     soglia di merito congelata, quindi nessuna promozione e nessuna
+#     archiviazione da questo round.
 #  CONTRO IL DEFAULT: la sedia del DAX (770101, RETEST sul range 35')
 #     e' un motore DIVERSO; non c'e' un default di questo motore da
 #     battere. Il confronto utile, se mai, e' la correlazione con 770101.

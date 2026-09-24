@@ -27,7 +27,7 @@
 #  ATTESA DICHIARATA (prima dei numeri; fonti e limiti in R249a par. 1):
 #   PF: sonda colonna ATR 0,571 (NON leggibile: 182 barre ambigue su 513).
 #   n per file: IS ~46, OOS ~70, tutta ~117 (stima dalla sonda, correzione BCM ignota).
-#   DD: sonda ATR: DD mediano 62,0 R, peggiore 99,4 R; a 1% per operazione -> DD a due cifre atteso.
+#   DD: sonda ATR: DD mediano 62,0 R, peggiore 99,4 R (finestre di 2 anni); PER GAMBA a 1%: mediano IS 25,6% OOS 33,3%, P(>10%) 1,00/1,00 (colonna ATR non leggibile: ordine di grandezza).
 #  CANCELLI (congelati, R249a par. 6): G1 gemelle 794903/794953 identiche in
 #   CSV e per-trade tranne il magic, se no NULLO; S1 Trades IS+OOS > 207 ->
 #   pin D1 non arrivato, NULLO; S2 nessuna chiusura dopo le 16:31; S3
@@ -35,6 +35,9 @@
 #   RISCHIO: Equity DD% di una gamba > 10% -> ROSSO di rischio. MERITO
 #   SOSPESO su D30EUR da solo (nessuna meta' arriva a 150): si scrive D =
 #   PF_BRK - PF_FADE per gamba, e il segno e' un INDIZIO per la famiglia.
+#   OROLOGIO MESCOLATO accanto a ogni D (IS 60% inverno, OOS 40%, R249a par. 3).
+#   Livello PDL: esito della regola NON INFORMATIVO sul DAX da solo (R249a par. 4).
+#   CERTIFICATO: qualunque esito -> NON ANCORA MISURATO, MAI morto (R249a par. 6).
 #  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794903.csv
 #   e abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794953.csv (ultima gamba = OOS).
 #   La riga deve raccoglierli (classe 754): servono a G1, S2, alla lettura

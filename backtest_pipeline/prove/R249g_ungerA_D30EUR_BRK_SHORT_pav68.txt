@@ -29,7 +29,7 @@
 #  ATTESA DICHIARATA (prima dei numeri; fonti e limiti in R249a par. 1):
 #   PF: sonda stop fisso PF 0,957 n 513, boot90 [0,77;1,16].
 #   n per file: IS ~46, OOS ~70, tutta ~117 (stima dalla sonda, correzione BCM ignota).
-#   DD: sonda fisso: DD mediano 21,8 R, peggiore 37,3 R; a 1% per operazione -> DD a due cifre atteso.
+#   DD: sonda fisso: DD mediano 21,8 R, peggiore 37,3 R (finestre di 2 anni); PER GAMBA a 1%: mediano IS 13,0% OOS 15,7%, P(>10%) 0,71/0,80.
 #  CANCELLI (congelati, R249a par. 6): G1 gemelle 794907/794957 identiche in
 #   CSV e per-trade tranne il magic, se no NULLO; S1 Trades IS+OOS > 207 ->
 #   pin D1 non arrivato, NULLO; S2 nessuna chiusura dopo le 16:31; S3
@@ -37,6 +37,9 @@
 #   RISCHIO: Equity DD% di una gamba > 10% -> ROSSO di rischio. MERITO
 #   SOSPESO su D30EUR da solo (nessuna meta' arriva a 150): si scrive D =
 #   PF_BRK - PF_FADE per gamba, e il segno e' un INDIZIO per la famiglia.
+#   OROLOGIO MESCOLATO accanto a ogni D (IS 60% inverno, OOS 40%, R249a par. 3).
+#   Livello PDL: esito della regola NON INFORMATIVO sul DAX da solo (R249a par. 4).
+#   CERTIFICATO: qualunque esito -> NON ANCORA MISURATO, MAI morto (R249a par. 6).
 #  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794907.csv
 #   e abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794957.csv (ultima gamba = OOS).
 #   La riga deve raccoglierli (classe 754): servono a G1, S2, alla lettura
