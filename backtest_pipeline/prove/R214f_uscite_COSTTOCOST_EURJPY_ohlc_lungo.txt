@@ -137,12 +137,12 @@
 #  --------------------------------------------------------------------
 #  Identico a R214e, e lo ripeto perche' un buco taciuto e' un buco
 #  perso:
-#  (a) *** InpTP_R VIVE SOLO DENTRO exit 1 *** (sorgente r.831 e
-#      r.374-375). La cella 1 e' "R-based CON N = 1,5", e quel 1,5 non
+#  (a) *** InpTP_R VIVE SOLO DENTRO exit 1 *** (sorgente r.973 e
+#      r.409-410). La cella 1 e' "R-based CON N = 1,5", e quel 1,5 non
 #      e' mai stato messo ad asse. Se exit 1 esce male, il verdetto
 #      onesto e' "exit 1 A 1,5 R esce male".
 #  (b) InpMaxBarsHold (time-stop, pinnato a 100) morde in modo diverso
-#      sulle tre celle: exit 2 non ha TP (r.828), quindi e' la piu'
+#      sulle tre celle: exit 2 non ha TP (r.970), quindi e' la piu'
 #      esposta all'orologio. In r127c, su exit 2, e' misurato NON
 #      vincolante da 75 barre in su. Su exit 0 e exit 1: [NON
 #      MISURATO].
@@ -170,9 +170,15 @@
 #      FIRMA DI CLAUDIO.
 #  D7  *** IL MURO GIORNALIERO -- AGGIUNTO IL 23/09/2026, ED E' L'UNICO
 #      CANCELLO DI QUESTO FILE CHE ARRIVA GIA' CON IL SUO NUMERO. ***
-#      SOGLIA: la colonna "Peggior Giornata %" deve restare
-#      > -5,00 in TUTTE E DUE le finestre, su ogni cella che si voglia
-#      chiamare schierabile.
+#      SOGLIA: la colonna "Peggior Giornata FTMO %" deve restare
+#      > -5,00 x (1,00 / R_sedia) in TUTTE E DUE le finestre, su ogni
+#      cella che si voglia chiamare schierabile.
+#      *** CORRETTO IL 24/09/2026, PRIMA DEI NUMERI: qui c'era scritto
+#      "la colonna Peggior Giornata %". Il VERDETTO FTMO si legge dalla
+#      colonna nuova (D7-ter). La colonna di prima resta con DUE
+#      mestieri, e solo quelli: (1) il numero del GUARDIAN IN CAMPO
+#      (D7-bis); (2) l'ANCORA di regressione su exit 2 (-4.2160 /
+#      -8.0159), che e' scritta su QUELLA colonna e su quella resta. ***
 #      >>> PERCHE' ARRIVA ADESSO: le soglie D1-D5 di questo file erano
 #          scritte TUTTE su Equity DD %, cioe' sul muro TOTALE. Il
 #          23/09 e' stato misurato che su questo motore il tappo e'
@@ -182,7 +188,7 @@
 #          (fattore 5,1x fra la stima di tabella, -1,57%, e il numero
 #          vero letto nell'OPTFRAME dell'EA).
 #      >>> LA COLONNA C'E' GIA' E NON COSTA NIENTE: ABTG_CostToCost.mq5
-#          r.1170 scrive stats[7] = gWorstDayPct e r.1195 la mette
+#          r.1312 scrive stats[7] = gWorstDayPct e r.1347 la mette
 #          nell'intestazione. *** Ed e' PRESENTE nei due CSV che sono
 #          gia' l'ancora di questo file *** -- verificato riga per
 #          riga il 23/09 su
@@ -237,7 +243,7 @@
 #          perdita giornaliera FTMO (D7-bis). ***
 #  D7-bis *** LA COLONNA E' DALL'EQUITY, FTMO DAL BALANCE: TESTO
 #      COMPLETO IN R214e, punto C7-bis (aggiunto il 24/09/2026). ***
-#      In breve: l'EA (sorgente r.480-494) prende come base l'EQUITY al
+#      In breve: l'EA (sorgente r.619-633) prende come base l'EQUITY al
 #      primo tick del giorno del server BCM; FTMO
 #      (docs/REGOLAMENTO_FTMO_2026-08.md r.26-27) il BALANCE delle
 #      00:00 CE(S)T, e il limite e' il 5% del capitale INIZIALE.
@@ -254,12 +260,46 @@
 #            il conto nel preset FTMO). D7 che fallisce = il Guardian
 #            scatterebbe, e con l'OHLC come limite inferiore anche
 #            questo e' un fatto.
+#            (*** PRECISATO IL 24/09/2026: da oggi D7 si legge sulla
+#            colonna FTMO. La lettura del Guardian resta QUI, su questa
+#            colonna, contro -3,50 / -4,50 x (1,00 / R_sedia), come in
+#            R214e C7-bis. ***)
 #          - LA PERDITA GIORNALIERA FTMO e' [NON MISURATA] da questo
 #            round, in tutte e due le direzioni.
+#            (*** SUPERATO IL 24/09/2026: ora la misura la colonna
+#            "Peggior Giornata FTMO %", D7-ter. ***)
 #          - L'ANCORA NON CAMBIA: la cella exit 2 deve ancora
 #            riprodurre -4.2160 / -8.0159, perche' e' la STESSA metrica
 #            dello stesso EA. D7 come controllo di regressione resta
 #            intero.
+#  D7-ter *** LA COLONNA "Peggior Giornata FTMO %" -- AGGIUNTA ALL'EA IL
+#      24/09/2026. TESTO COMPLETO IN R214e, punto C7-ter. ***
+#      In breve: riferimento = BALANCE alle 00:00 italiane (= 23:00
+#      server BCM, input InpFtmoDayHourServer pinnato a 23), ricostruito
+#      togliendo i deal fatti dopo il confine; perdita = equity -
+#      riferimento; % sul capitale INIZIALE (100.000). In CODA alle
+#      colonne statistiche, dopo "Serie Perdente Peggiore".
+#      >>> CONTRO-ESEMPIO (R214e C7-ter): +1% aperto a mezzanotte e
+#          restituito -> vecchia -0,99%, FTMO 0,00%; -2% aperto a
+#          mezzanotte che scende a -3% -> vecchia -1,02%, FTMO -3,00%;
+#          stop in gap sul primo tick del giorno a -1,271% -> vecchia
+#          0,00%, FTMO -1,271%. Le due colonne NON sono ordinate.
+#      >>> COSA SI LEGGE QUI:
+#          - VERDETTO FTMO (D7): colonna nuova, soglia -5,00 x (1,00 /
+#            R_sedia), zona grigia entro il 3%.
+#          - *** QUESTA COLONNA NON HA ANCORA: r127c e' stata girata
+#            prima che esistesse. Il suo primo numero su exit 2 e' una
+#            misura NUOVA, non un controllo di regressione. ***
+#          - *** SU 6,5 ANNI IL DENOMINATORE FISSO PESA: *** il lotto e'
+#            una % del balance corrente e la r127c OOS finisce a +71%
+#            (Profit 71284.16 su 100.000). Una perdita di 1 R a fine
+#            finestra vale ~1,7% del capitale iniziale invece di ~1%:
+#            la colonna SOVRASTIMA rispetto a una challenge (che si
+#            chiude a +10%). Le giornate peggiori vanno DATATE nel
+#            per-trade prima di chiamarle muro.
+#          - e' OHLC: la colonna e' un LIMITE INFERIORE, come l'altra.
+#      >>> L'ANCORA DI TUTTE LE ALTRE COLONNE NON CAMBIA: la colonna e
+#          l'input nuovi non toccano ingressi, uscite, lotti o magic.
 #
 #  7. COSTO -- tetto dichiarato
 #  --------------------------------------------------------------------
@@ -347,6 +387,12 @@ InpRiskPercent=1.0
 InpComment=R214F USCITE OHLC
 InpMagic=788212
 InpVerbose=false
+# InpFtmoDayHourServer: PIN a 23, FISSO (D7-ter). Ora SERVER BCM delle
+#   00:00 italiane. Governa SOLO la colonna "Peggior Giornata FTMO %":
+#   nessun ingresso, uscita, lotto o magic lo legge, quindi NON e' una
+#   differenza rispetto a r127c sui numeri dell'ancora. Pinnato perche'
+#   il suo valore decide la colonna del verdetto D7.
+InpFtmoDayHourServer=23
 # InpLogImbuto NON PINNATO DI PROPOSITO: r127c non lo pinnava e
 #   prendeva il default compilato. Pinnarlo sarebbe una differenza in
 #   piu' su un file che deve riprodurre alla quinta cifra (punto 2).

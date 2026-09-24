@@ -189,6 +189,25 @@ input bool   InpVerbose        = true;    // log estesi
 //    CIECA (report/PERCHE_ENTRANO_POCO_2026-09-11.md).
 input bool   InpLogImbuto = true;   // Imbuto: riepilogo giornaliero dei rifiuti nel Giornale
 
+//--- PERDITA GIORNALIERA "COME LA CONTA FTMO" (24/09/2026): governa SOLO
+//    una colonna del CSV di ottimizzazione, NON il trading. Nessun
+//    ingresso, uscita, lotto o magic la legge.
+//    E' l'ORA DEL SERVER in cui comincia il giorno FTMO. FTMO azzera il
+//    Max Daily Loss alle 00:00 CE(S)T = mezzanotte ITALIANA
+//    (docs/REGOLAMENTO_FTMO_2026-08.md, par. 2).
+//    23 VALE SOLO CON L'OFFSET BCM = ORA ITALIANA - 1 (CLAUDE.md, "FUSO
+//    ORARIO BCM"): 00:00 italiane = 23:00 server BCM del giorno PRIMA.
+//    Stesso numero di mql5/Presets/ABTG_Guardian_FTMO_2Step.set
+//    ("23 = ora SERVER BCM ... 23:00 BCM = 00:00 CET"). Su un server con
+//    un offset diverso VA CAMBIATO: sul server FTMO (italiana + 1) la
+//    stessa mezzanotte e' l'ora 1, ed e' per questo che il preset del
+//    Guardian che gira su FTMO porta InpDailyResetHour=1. Qui il tester
+//    gira sui dati BCM, quindi l'orologio e' quello BCM.
+//    [NON MISURATO]: che l'offset IT-1 valga anche nei mesi di ora
+//    solare. Se in inverno fosse diverso, in quei mesi il confine del
+//    giorno e' sbagliato di un'ora.
+input int    InpFtmoDayHourServer = 23;  // Ora SERVER d'inizio del giorno FTMO (00:00 italiane; 23 = offset BCM IT-1)
+
 //==================================================================
 //  STATO
 //==================================================================
@@ -245,6 +264,22 @@ double gDayStartEquity = 0.0;
 double gDayMinEquity   = 0.0;
 double gWorstDayPct    = 0.0;   // numero NEGATIVO
 int    gDayEqStamp     = -1;
+
+//--- SECONDA METRICA, "COME LA CONTA FTMO" (24/09/2026). La prima (qui
+//    sopra) resta com'era: e' il numero del Guardian in campo, che misura
+//    la giornata dall'EQUITY. Questa invece segue la regola FTMO:
+//     - riferimento = BALANCE all'inizio del giorno FTMO (00:00 italiane,
+//       InpFtmoDayHourServer in ora server): il floating aperto a
+//       mezzanotte NON entra nel riferimento;
+//     - perdita = equity istantanea - riferimento (il floating c'e');
+//     - denominatore = CAPITALE INIZIALE, non il saldo del giorno.
+double gFtmoInitCapital  = 0.0;   // deposito del tester (ACCOUNT_BALANCE in OnInit)
+double gFtmoDayBalance   = 0.0;   // balance al confine del giorno FTMO corrente
+double gWorstFtmoDayPct  = 0.0;   // numero NEGATIVO: (equity - riferimento) / capitale iniziale
+long   gFtmoDayKey       = -1;    // indice del giorno FTMO corrente (-1 = nessuno ancora)
+int    gFtmoGiorni       = 0;     // giorni FTMO visti (diagnostica)
+int    gFtmoRicostruiti  = 0;     // riferimenti ricostruiti togliendo i deal fatti DOPO il confine
+int    gFtmoFallback     = 0;     // riferimenti presi = balance del tick (cronologia non leggibile)
 
 void Log(string m){ if(InpVerbose) Print("[COST] ", m); }
 
@@ -391,6 +426,15 @@ int OnInit()
      { Print("ERRORE: InpEntryWindowBars deve essere >= 1 (1 = solo la barra della conferma)."); return(INIT_FAILED); }
    if(InpRiskPercent<=0.0)
      { Print("ERRORE: InpRiskPercent deve essere > 0."); return(INIT_FAILED); }
+   if(InpFtmoDayHourServer<0 || InpFtmoDayHourServer>23)
+     { Print("ERRORE: InpFtmoDayHourServer deve stare fra 0 e 23 (ora server)."); return(INIT_FAILED); }
+
+   //--- METRICA FTMO (solo misura): il capitale iniziale e' il deposito.
+   //    Nel tester, in OnInit, ACCOUNT_BALANCE E' il deposito. In forward
+   //    sarebbe il saldo all'aggancio, NON il capitale iniziale della prop:
+   //    questa colonna e' pensata per il tester, e in forward non esce
+   //    (OnTester non gira).
+   gFtmoInitCapital=AccountInfoDouble(ACCOUNT_BALANCE);
 
    gTrade.SetExpertMagicNumber(InpMagic);
    gTrade.SetTypeFillingBySymbol(_Symbol);
@@ -475,6 +519,101 @@ void RicostruisciStruttura()
   }
 
 //==================================================================
+//  PERDITA GIORNALIERA COME LA CONTA FTMO -- SOLO MISURA (24/09/2026)
+//  Nessuna condizione di trading legge queste variabili: finiscono
+//  soltanto in OnTester (colonna "Peggior Giornata FTMO %").
+//
+//  IL GIORNO FTMO. Va da InpFtmoDayHourServer:00 di un giorno server a
+//  InpFtmoDayHourServer:00 del giorno server dopo, quindi ATTRAVERSA la
+//  mezzanotte del server (con 23: dalle 23:00 del giorno k-1 alle
+//  22:59:59 del giorno k). Lo si numera come fa il Guardian
+//  (ABTG_Guardian.mq5, PropDayKey): si sposta indietro l'orologio di
+//  InpFtmoDayHourServer ore e si prende il giorno. Cosi' i tick fra la
+//  mezzanotte server e il confine restano nel giorno FTMO di prima,
+//  senza casi speciali.
+//
+//  IL RIFERIMENTO = BALANCE AL CONFINE, anche se il primo tick arriva
+//  TARDI (weekend, festivi, buchi di feed). Il balance al confine si
+//  RICOSTRUISCE: balance del primo tick MENO il risultato di tutti i
+//  deal fatti dal confine in poi. Perche' non basta il balance del
+//  primo tick: se quel tick apre in GAP oltre lo stop, lo stop viene
+//  eseguito su QUEL tick e il balance che leggiamo contiene gia' la
+//  perdita. Preso cosi' com'e', il riferimento la assorbirebbe e la
+//  metrica la perderebbe proprio nel caso peggiore (il gap del
+//  lunedi' -- per-trade 772351: peggior operazione -1,271% il
+//  2026.03.01 23:05, domenica sera, in gap). Con la ricostruzione il
+//  riferimento non dipende da quando arriva il primo tick, ne' dall'ordine
+//  fra esecuzione degli stop e OnTick dentro lo stesso tick.
+//  I deal si sommano su TUTTO il conto (ogni magic, ogni simbolo), come
+//  il balance di FTMO; depositi e crediti esclusi (non sono trading).
+//
+//  LIMITI DICHIARATI:
+//   - fra il confine e il primo tick non c'e' prezzo, quindi l'equity
+//     di quel tratto NON si misura: se il mercato e' chiuso non esiste,
+//     se e' un buco di feed si perde (cioe' la metrica SOTTOSTIMA in
+//     quel tratto, mai sovrastima);
+//   - il primo giorno FTMO del test prende il balance del primo tick
+//     (non c'e' un confine precedente da cui ricostruire: il deposito
+//     del tester e' un deal anch'esso);
+//   - se la cronologia non si legge, il riferimento e' il balance del
+//     tick e il caso si conta (gFtmoFallback, stampato da OnTester);
+//   - l'equity e' vista SOLO sui tick: tra un tick e l'altro non c'e'
+//     niente da vedere (a modello OHLC il minimo intra-barra e' quello
+//     dei tick sintetici, come per la metrica di prima).
+//==================================================================
+double FtmoBalanceAlConfine(const datetime confine,const double balOra,bool &ok)
+  {
+   ok=false;
+   if(!HistorySelect(confine,TimeCurrent()+1)) return(balOra);
+   double dopo=0.0;
+   int n=HistoryDealsTotal();
+   for(int i=0;i<n;i++)
+     {
+      ulong tk=HistoryDealGetTicket(i);
+      if(tk==0) continue;
+      if((datetime)HistoryDealGetInteger(tk,DEAL_TIME)<confine) continue;
+      long tipo=HistoryDealGetInteger(tk,DEAL_TYPE);
+      if(tipo==(long)DEAL_TYPE_BALANCE || tipo==(long)DEAL_TYPE_CREDIT) continue;
+      dopo+=HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)
+           +HistoryDealGetDouble(tk,DEAL_COMMISSION)+HistoryDealGetDouble(tk,DEAL_FEE);
+     }
+   double rif=balOra-dopo;
+   if(rif<=0.0) return(balOra);   // numero assurdo: meglio il balance del tick, e si conta come fallback
+   ok=true;
+   return(rif);
+  }
+
+void FtmoGiornataTick()
+  {
+   datetime ora=TimeCurrent();
+   if(ora<=0) return;
+   double bal=AccountInfoDouble(ACCOUNT_BALANCE);
+   double eq =AccountInfoDouble(ACCOUNT_EQUITY);
+   if(gFtmoInitCapital<=0.0) gFtmoInitCapital=bal;   // OnInit non l'ha preso: primo tick
+   if(gFtmoInitCapital<=0.0) return;
+
+   long sec=(long)InpFtmoDayHourServer*3600;
+   long key=((long)ora-sec)/86400;
+   if(key!=gFtmoDayKey)
+     {
+      if(gFtmoDayKey<0)
+         gFtmoDayBalance=bal;                        // primo giorno del test: nessun confine da cui ricostruire
+      else
+        {
+         datetime confine=(datetime)(key*86400+sec);
+         bool ok=false;
+         gFtmoDayBalance=FtmoBalanceAlConfine(confine,bal,ok);
+         if(ok) gFtmoRicostruiti++; else gFtmoFallback++;
+        }
+      gFtmoDayKey=key;
+      gFtmoGiorni++;
+     }
+
+   double pct=100.0*(eq-gFtmoDayBalance)/gFtmoInitCapital;
+   if(pct<gWorstFtmoDayPct) gWorstFtmoDayPct=pct;
+  }
+
+//==================================================================
 //  TICK / NUOVA BARRA
 //==================================================================
 void OnTick()
@@ -493,6 +632,9 @@ void OnTick()
     double _giornata = 100.0 * (gDayMinEquity - gDayStartEquity) / gDayStartEquity;
     if(_giornata < gWorstDayPct) gWorstDayPct = _giornata;
    }
+   //--- seconda metrica, quella di FTMO: stessa posizione e stesso motivo
+   //    (prima del filtro di nuova barra). Solo misura, nessuna decisione.
+   FtmoGiornataTick();
 
    //--- TUTTA la logica lavora su barre CHIUSE del TF della struttura: la
    //    regola della violazione e' definita sulle chiusure, non sui tick.
@@ -1158,7 +1300,7 @@ double OnTester()
   {
    PrintFunnel();
    ExportTrades();
-   double stats[10];
+   double stats[11];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -1170,6 +1312,16 @@ double OnTester()
    stats[7] = gWorstDayPct;                             // Peggior Giornata % (negativo)
    stats[8] = TesterStatistics(STAT_MAX_CONLOSSES);     // Perdite Consecutive Max
    stats[9] = TesterStatistics(STAT_CONLOSSMAX);        // Serie Perdente Peggiore (denaro)
+   //--- IN CODA (24/09/2026), per non spostare nessuna colonna esistente:
+   //    la perdita giornaliera come la conta FTMO (base = BALANCE al
+   //    confine del giorno FTMO, % sul CAPITALE INIZIALE, floating
+   //    incluso). Vedi FtmoGiornataTick. stats[7] resta la metrica di
+   //    prima (base = equity, giorno server): e' quella del Guardian.
+   stats[10] = gWorstFtmoDayPct;                        // Peggior Giornata FTMO % (negativo)
+   PrintFormat("[COST-FTMO] peggior giornata FTMO %.4f%% (colonna di prima, dall'equity: %.4f%%) | capitale iniziale %.2f | "
+               "giorno FTMO dalle %02d:00 server | giorni %d, riferimenti ricostruiti dai deal %d, fallback al balance del tick %d",
+               gWorstFtmoDayPct,gWorstDayPct,gFtmoInitCapital,InpFtmoDayHourServer,
+               gFtmoGiorni,gFtmoRicostruiti,gFtmoFallback);
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -1192,14 +1344,14 @@ void OnTesterDeinit()
       FrameInputs(pass, params, pcount);
       if(!header_scritto)
         {
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore";
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Peggior Giornata FTMO %";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
         }
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f",
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.4f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
-                                data[7], data[8], data[9]);
+                                data[7], data[8], data[9], data[10]);
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
