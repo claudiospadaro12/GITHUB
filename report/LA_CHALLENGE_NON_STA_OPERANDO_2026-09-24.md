@@ -27,7 +27,18 @@ attaccato e muto: sta misurando.
 
 🟢 **E `pausa=off / cap=off` vuol dire "non scattati", non "spenti"** — e lo so perché ho il
 contro-esempio: il **22/09 alle 23:55**, con `dayLoss=2.20%`, diceva **anche lì** `pausa=off`.
-Coerente: la soglia di pausa è **4,0%**, e il 2,20% le sta sotto. Il meccanismo è armato.
+✏️ **CORRETTO il 24/09**: la prima stesura scriveva che la soglia di pausa è **4,0%**. 🔴 **Falso,
+e il numero l'avevo messo a memoria.** Letta nel `.chr` in campo (`CODA_08` r.3437-3451):
+`InpDailyPausePct=**3,5**` · `InpDailyLossPct=**4,5**` · `InpTotalDDPct=**9,3**` ·
+`InpMaxOpenRiskPct=**4,00**` · `InpStartBalance=80000` · `InpAction=0`.
+🟢 La conclusione **non cambia** (2,20% sta sotto 3,5% come stava sotto 4,0%: il meccanismo è
+armato e non scattato), ma il numero sì — e un numero a memoria dentro un referto è un numero
+che qualcuno userà.
+🎯 **E una cosa torna al centesimo**: il *"la perdita di una giornata viene tagliata a 4,5%"* del
+Monte Carlo è **esattamente** `InpDailyLossPct=4.5` con `InpAction=0`. Corrispondenza 1:1 fra il
+modello e il campo.
+🔴 **Resta aperto e non è mio**: `InpMaxOpenRiskPct=**4,00**` in campo contro il **3,25% firmato il
+18/08**. Già chiesto a Claudio il 23/09, **ancora senza risposta**.
 
 ---
 

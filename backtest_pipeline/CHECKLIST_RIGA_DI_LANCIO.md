@@ -34997,3 +34997,34 @@ incriminare chi si vede, si chiede: *"chi altro avrebbe parlato, se avesse avuto
 dire?"* — e si confronta l'osservato con la **sua** attesa, non con quella degli altri.
 🟢 **Il contro-esempio, qui, ha funzionato**: tre ipotesi scritte e tre uccise **prima** che
 diventassero una riga verso il campo.
+
+## 🧺 CLASSE 734 — **`git add` PER NOME non basta: l'INDICE è condiviso, e `git commit` porta via anche lo staged di un altro**
+
+24/09/2026, e l'ho fatto **io**, nel commit `6c8b0239`.
+
+**Quello che ho scritto** (e che credevo bastasse, perché è la regola di casa):
+```
+git add backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md backtest_pipeline/righe/CODA_12_pertrade_posizioni.ps1
+git commit -F -
+```
+**Quello che è finito nel commit**: quei due file **più `report/GUARDIAN_SEI_SEDIE_2026-09-24.md`
+(451 righe)** — il file di un **agente parallelo**, che io non ho mai nominato.
+
+🔴 **Il meccanismo NON è `git add -A`** (l'agente colpito l'aveva supposto, e la supposizione era
+sbagliata: verificato, nei miei comandi non c'è). È più insidioso: **`git add` aggiunge all'indice,
+e `git commit` senza percorsi committa TUTTO L'INDICE.** L'agente aveva già messo il suo file in
+staging; il mio `commit` se l'è portato via **senza che né io né lui facessimo niente di vietato**.
+👉 **La regola "mai `git add -A` con agenti in parallelo" è VERA ma INSUFFICIENTE**: protegge dal
+prendere i file *non tracciati* di altri, non da quelli che altri hanno già **messo in staging**.
+
+**Il danno**: il contenuto resta integro (md5 identico), ma la **tracciabilità si perde** — chi
+cerca "Guardian sei sedie" nel log lo trova sotto un messaggio che parla di `CODA_12`. E in un
+progetto dove il messaggio di commit è il verbale della misura, **è il verbale che si rompe**.
+
+### ✅ IL RIMEDIO, ed è una riga
+- **committare limitando i percorsi**: `git commit <file1> <file2> -F msg` — i percorsi passati a
+  `commit` **vincono sull'indice** e lo staged altrui resta dov'è;
+- **oppure**, prima di ogni commit, guardare che cosa c'è davvero:
+  `git diff --cached --name-only` — se compare un file che non hai nominato, **fermati**.
+🔴 **Vale ogni volta che in sessione c'è almeno un agente vivo**, cioè quasi sempre. E il controllo
+costa un comando: non c'è motivo di saltarlo.
