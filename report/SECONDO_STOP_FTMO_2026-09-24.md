@@ -67,3 +67,34 @@ regime. Giorni di borsa mediani al +10%: **20**.
   **l'uscita del modello già in repo dal 23/09**, non una proposta. E lo scenario pessimista dice
   che a 1,00% (57,2%) si sta **come** a 2,00% (57,6%): la taglia da sola non è la leva, sotto le
   ipotesi peggiori.
+
+---
+
+## 5. 🚀 CHE COSA SA FARE LA ROSA — i numeri che il Monte Carlo usa, letti uno per uno
+
+Stesse fonti del Monte Carlo (`mc_challenge_ftmo.py`, `carica()`): **4 sedie su 6**, **242
+giornate di borsa**, **tick reali**, finestra **2025.06.10 → 2026.06.29**, riportate a **2,00%**
+(la taglia in campo). ⚠️ È backtest, un regime solo: sono il **contratto**, non una promessa.
+
+| | |
+|---|---:|
+| somma in 242 giornate @2% | **+108,4%** |
+| media per giornata | **+0,448%** |
+| **giornate VERDI** | **162 su 242 = 66,9%** |
+| giornata verde media / rossa media | +1,71% / −2,13% |
+| **profit factor per giornate** | **1,64** |
+| migliore giornata | +8,30% |
+| **mesi in positivo** | **11 su 13** — e i due rossi valgono −0,2% e −1,1% |
+
+Mesi: `2025.06 +7,5` · `07 +10,5` · `08 +0,2` · `09 +22,6` · `10 +2,2` · `11 +15,6` · `12 −0,2` ·
+`2026.01 +13,2` · `02 +14,3` · `03 +16,0` · `04 −1,1` · `05 +0,5` · `06 +7,2`
+
+### La rimonta, in giornate
+- i due stop della challenge (**−4,28%**) valgono **~9,6 giornate medie** della rosa (4,28 / 0,448);
+- per arrivare al target (88.000 €) servono **+14,9%** dall'equity di oggi: in 242 giornate la
+  rosa ha fatto **+108,4%**, cioè **~7 volte** quello che manca.
+
+### 🔴 E il numero che tiene onesti gli altri
+**Solo il 22,9%** delle finestre di **20 giornate esatte** fa +14,9% da sola (51 su 223). Il 74,6%
+del Monte Carlo non dice *"in 20 giorni"*: dice *"prima di toccare il 10%"*, e regge **perché la
+challenge non ha limite di tempo**. 👉 **Il tempo non è il nostro nemico. Il muro del 10% sì.**
