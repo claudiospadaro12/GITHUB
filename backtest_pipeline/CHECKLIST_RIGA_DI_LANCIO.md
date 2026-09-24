@@ -35325,3 +35325,7 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🕳️ CLASSE 767 — **il cancello [FUSO] guarda solo `InpSessionHour`/`InpIbInizioOra`: gli EA con ALTRI nomi d'orario non sono mai stati controllati**
 - **Caso (24/09, R246q/r MaxMin DAX)**: la dichiarazione `@ORARIO_INVERNALE` esce "ORFANA", perche' `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` usa `InpBoxStartHour`, `InpBoxEndHour`, `InpPlaceHour`, `InpEntryCutoffHour`, `InpCloseHour`. Quindi un MaxMin con l'orario sbagliato di un'ora **non e' mai stato bloccato** dal controllo deterministico, ne' prima ne' dopo la classe 763.
 - **Regola**: finche' il cancello non conosce gli input orari per EA, sugli EA senza `InpSessionHour` il controllo d'ora e' **solo** di strato 2, e va detto nel file prova. Riparazione: una mappa EA -> input orari -> ora di riferimento, nel cancello.
+
+## 🧩 CLASSE 768 — **confondente dichiarato a META': su una metrica si', sulla gemella no; per un esito si', per l'opposto no**
+- **Caso (24/09, R246m par. 1.4 e 5.1)**: il cambio di candela H4 del filtro EMA del Dow era dichiarato per il PF ma non per la FREQUENZA, che passa dallo stesso cancello (EA solo long, `longOK` solo se `gBias` 0/+1, r.1308); e l'interpretazione era scritta per l'esito OROLOGIO ma non per STAGIONE/MISTO, dove la candela puo' COMPENSARE l'orologio.
+- **Regola**: un confondente si scrive per **ogni** metrica che passa dal suo punto nel codice (si cerca dove la variabile contaminata viene letta) e per **ogni** zona del verdetto.

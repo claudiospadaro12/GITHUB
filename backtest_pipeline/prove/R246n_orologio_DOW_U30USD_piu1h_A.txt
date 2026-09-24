@@ -44,8 +44,9 @@
 #  cioe' R246m + R246n; r246_bande_attese.py sez. 5):
 #   se H_STAGIONE: PF [1,19 ; 2,35], posizioni [67,5 ; 84,5];
 #   se H_OROLOGIO: PF [0,50 ; 1,26], posizioni [48,5 ; 64,4].
-#   Il PF si SOVRAPPONE per 0,07 (1,19-1,26); le posizioni no. Sul Dow Q2
-#   porta dentro anche il cambio di candela H4 del filtro (R246m par. 1.4).
+#   Il PF si SOVRAPPONE per 0,07 (1,19-1,26); le posizioni no. Sul Dow PF
+#   E posizioni portano dentro anche il cambio di candela H4 del filtro
+#   (EA solo long, il bias decide se il giorno opera: R246m par. 1.4).
 #  Questo file DA SOLO non da' verdetto: criterio in R246m par. 5.
 #  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_Dow_Apertura_US_U30USD_794606.csv
 #  e abtg_trades_ABTG_Dow_Apertura_US_U30USD_794656.csv (ultima gamba = OOS).
