@@ -449,3 +449,18 @@ toccare un EA vivo è una decisione di Claudio. Metto solo i fatti e i prezzi.
 oggi** sul file che lo contiene. Dove un numero viene da un altro referto, è scritto accanto.
 Dove una misura non esiste, c'è scritto che cosa manca e come si prende — e non c'è un numero al
 suo posto.*
+
+---
+
+## 📌 NOTA DI TRACCIABILITÀ — come questo file è finito in repo
+
+Questo referto era stato messo in `git add` **per nome** (mai `git add -A`, regola di casa) ed è
+stato **inglobato dal commit di un'altra sessione che lavorava in parallelo**
+(`6c8b0239 «CODA_12 v2…»`): al momento del mio `git commit` l'indice era già vuoto.
+🟢 **Il contenuto è integro** — verificato: `md5` del file nel commit **identico** a quello del
+file sul disco. 🔴 **Ma il messaggio di commit che lo accompagna parla d'altro**, quindi chi un
+domani cercherà «quando è stato verificato il Guardian sulle sei sedie» nel log **non lo troverà
+lì dentro**. Da qui questa nota, e il commit che la porta.
+👉 **Classe da mettere in checklist**: *due sessioni che committano sullo stesso branch nello
+stesso minuto — chi usa `git add -A` si porta via il lavoro staged dell'altra*. Non si perde
+niente, ma **si perde la tracciabilità**, che in questo repo è metà del valore.
