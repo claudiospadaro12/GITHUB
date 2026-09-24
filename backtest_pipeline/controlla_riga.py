@@ -39,7 +39,7 @@ I QUATTRO OGGETTI, e perche' non si controllano allo stesso modo:
 
 USCITA: 0 = nessun difetto BLOCCANTE. 1 = almeno uno. I RILIEVI non bloccano.
 """
-import argparse, os, re, subprocess, sys
+import argparse, datetime, os, re, subprocess, sys
 
 BLOCCANTI = []
 RILIEVI   = []
@@ -1288,8 +1288,18 @@ def controlla_riga_lancio(riga):
         rileva("RACCOLTA", "non vedo la raccolta: ogni risultato deve arrivare anche sul Desktop del VPS (regola 11/08)")
 
     # --- 7. ora server
+    # CLASSE 763 (24/09/2026): la regola e' ora A CALENDARIO (vedi
+    # controlla_file_prova). Qui la riga resta BLOCCATA come prima, e di
+    # proposito: una riga di lancio non ha una FINESTRA leggibile a macchina a
+    # cui legare la stagione, quindi un 9/15 in riga non si puo' distinguere
+    # dal difetto del 06/08. Il 9/15 d'inverno si scrive SOLO in un file
+    # prova, con la dichiarazione '#  @ORARIO_INVERNALE <motivo>'.
     if re.search(r"(InpSessionHour|InpIbInizioOra|SessionHour)\s*[= ]\s*(9|15)\b", riga):
-        blocca("FUSO", "ora ITALIANA al posto dell'ora SERVER: server BCM = italiana - 1. DAX = 8 (non 9), Nasdaq = 14 (non 15)")
+        blocca("FUSO", "9/15 in una RIGA DI LANCIO: d'estate e' l'ora ITALIANA al posto dell'ora"
+               " SERVER (BCM = italiana - 1: DAX 8, USA 14). D'inverno BCM e' UTC+1 fisso e"
+               " 9/15 sarebbero la cash (report/OROLOGIO_BCM_2026-09-24.md), ma una riga non"
+               " ha una finestra da cui leggere la stagione: il 9/15 voluto va in un FILE PROVA"
+               " con '#  @ORARIO_INVERNALE <motivo>' (classe 763)")
 
 # =====================================================================
 # CLASSE 225 (11/09/2026) -- IL CANCELLO ADESSO SA CHE OGGETTO STA GUARDANDO.
@@ -1430,6 +1440,201 @@ def controlla_md(path, testo):
           + "  [" + os.path.basename(path) + "]")
     controlla_prosa(path, testo, blocchi, mac_doc)
 
+# =====================================================================
+# CLASSE 763 (24/09/2026) -- L'ORA DELLA CASH SI SCRIVE A CALENDARIO.
+# Fino a oggi il cancello incideva "server BCM = italiana - 1" come COSTANTE e
+# bloccava InpSessionHour=9 (DAX) / =15 (USA) come "ora italiana". Misurato in
+# report/OROLOGIO_BCM_2026-09-24.md: BCM e' UTC+1 FISSO (sugli indici su tutto
+# lo storico BCM, dal 2024.09.26). Quindi:
+#   DAX cash 09:00 CET/CEST -> UTC 07:00 (ora legale UE) / 08:00 (ora solare UE)
+#                           -> server  8 d'estate / 9 d'inverno  (calendario UE)
+#   USA cash 09:30 New York -> UTC 13:30 (ora legale USA) / 14:30 (ora solare USA)
+#                           -> server 14:30 d'estate / 15:30 d'inverno (calendario USA)
+# Le settimane sfasate (USA gia'/ancora in ora legale, UE no) si prendono da
+# sole: il DAX segue SOLO il calendario UE, gli USA SOLO quello USA.
+# Una finestra che attraversa le stagioni (quasi tutte) NON ha un'ora giusta
+# unica. Il disegno, e non ammorbidisce niente:
+#   - 8 / 14: PASSANO come prima (convenzione di casa per l'estate). Rilievo
+#     solo se la finestra non ha NEMMENO UN giorno d'estate;
+#   - 9 / 15 SENZA dichiarazione: BLOCCATI come prima (il difetto del 06/08);
+#   - 9 / 15 CON '#  @ORARIO_INVERNALE <motivo>' (in COMMENTO, come
+#     '@DAQUANDO-DALLA-RIGA': il driver salta le righe '#', controlla_prova
+#     boccia le direttive vive sconosciute): RILIEVO con il conto dei giorni,
+#     da leggere allo strato 2 -- MA solo se il calendario la regge. Restano
+#     BLOCCATI anche dichiarati: motivo < 20 caratteri; simbolo non del mercato
+#     di quell'ora (9 = DAX, 15 = USA); finestra non leggibile; finestra senza
+#     NESSUN giorno misurato in cui la cash cade a quell'ora server;
+#   - qualunque altro valore: come prima (nessun controllo qui).
+# =====================================================================
+OROLOGIO_UTC1_INDICI = datetime.date(2024, 9, 26)  # inizio storico indici BCM, gia' UTC+1 fisso
+FINO_DI_FABBRICA     = "2026.06.30"                # walkforward_generico.ps1: $Fino senza @FINOA
+SIMBOLI_DAX = re.compile(r"^(D30EUR|DAX|GER|DE30|DE40)", re.I)
+SIMBOLI_USA = re.compile(r"^(U30USD|NASUSD|US30|US100|US500|USTEC|NAS100|SPX|DJ30)", re.I)
+ORA_INVERNALE = {"9": ("DAX", 8, "09:00"), "15": ("USA", 14, "15:30")}   # valore -> mercato, ora estiva, cash d'inverno
+
+def _domenica(anno, mese, n):
+    """n-esima domenica del mese (n=-1: l'ultima)."""
+    if n > 0:
+        d = datetime.date(anno, mese, 1)
+        d += datetime.timedelta(days=(6 - d.weekday()) % 7)
+        return d + datetime.timedelta(weeks=n - 1)
+    d = datetime.date(anno + (mese == 12), mese % 12 + 1, 1) - datetime.timedelta(days=1)
+    return d - datetime.timedelta(days=(d.weekday() - 6) % 7)
+
+def ora_legale_ue(d):
+    return _domenica(d.year, 3, -1) <= d < _domenica(d.year, 10, -1)
+
+def ora_legale_usa(d):
+    return _domenica(d.year, 3, 2) <= d < _domenica(d.year, 11, 1)
+
+def ora_cash_server(mercato, d):
+    """Ora SERVER BCM (solo l'ora) dell'apertura cash il giorno d. None prima
+    del 2024.09.26: sugli indici BCM l'orologio prima di li' NON e' misurato
+    (e un feed _EXT ha l'orologio del suo import, non quello di BCM)."""
+    if d < OROLOGIO_UTC1_INDICI:
+        return None
+    if mercato == "DAX":
+        return 8 if ora_legale_ue(d) else 9
+    return 14 if ora_legale_usa(d) else 15
+
+def finestra_prova(testo):
+    """(da, a, fonte) dalle direttive VIVE come le legge il driver (vince
+    l'ULTIMA), oppure da FromDate/ToDate. Senza @FINOA vale la data di
+    fabbrica del driver, e si DICHIARA."""
+    dirv, ini = {}, {}
+    for r in testo.splitlines():
+        t = r.strip()
+        m = re.match(r"^@(DAQUANDO|FINOA)\s+(\d{4}\.\d{2}\.\d{2})\s*$", t, re.I)
+        if m:
+            dirv[m.group(1).upper()] = m.group(2)
+        m = re.match(r"^(FromDate|ToDate)\s*=\s*(\d{4}\.\d{2}\.\d{2})", t)
+        if m:
+            ini[m.group(1)] = m.group(2)
+    if "DAQUANDO" in dirv:
+        da, a = dirv["DAQUANDO"], dirv.get("FINOA", FINO_DI_FABBRICA)
+        fonte = "@DAQUANDO/@FINOA" if "FINOA" in dirv else "@DAQUANDO + fine DI FABBRICA del driver"
+    elif "FromDate" in ini and "ToDate" in ini:
+        da, a, fonte = ini["FromDate"], ini["ToDate"], "FromDate/ToDate"
+    else:
+        return None
+    try:
+        d0 = datetime.datetime.strptime(da, "%Y.%m.%d").date()
+        d1 = datetime.datetime.strptime(a, "%Y.%m.%d").date()
+    except ValueError:
+        return None
+    return (d0, d1, fonte) if d0 <= d1 else None
+
+def conta_stagioni(mercato, d0, d1):
+    """Giorni lun-ven della finestra, divisi per ora server della cash."""
+    conto = {8: 0, 9: 0, 14: 0, 15: 0, None: 0}
+    d = d0
+    while d <= d1:
+        if d.weekday() < 5:
+            conto[ora_cash_server(mercato, d)] += 1
+        d += datetime.timedelta(days=1)
+    return conto
+
+def simbolo_prova(testo):
+    sim = None
+    for r in testo.splitlines():
+        m = re.match(r"^\s*@SIMBOLO\s+(\S+)", r, re.I)
+        if m:
+            sim = m.group(1)
+    return sim
+
+def mercato_di(simbolo):
+    if not simbolo:
+        return None
+    if SIMBOLI_DAX.match(simbolo):
+        return "DAX"
+    if SIMBOLI_USA.match(simbolo):
+        return "USA"
+    return None
+
+def dichiarazione_invernale(testo):
+    """(riga, motivo) della dichiarazione in COMMENTO; None se assente."""
+    for i, r in enumerate(testo.splitlines(), 1):
+        m = re.match(r"^\s*[#;]\s*@ORARIO_INVERNALE\b[\s:=\-]*(.*)$", r)
+        if m:
+            return (i, m.group(1).strip())
+    return None
+
+def controlla_ora_cash(path, testo):
+    """Classe 763: InpSessionHour / InpIbInizioOra a calendario."""
+    dich = dichiarazione_invernale(testo)
+    viva = [i for i, r in enumerate(testo.splitlines(), 1)
+            if re.match(r"^\s*@ORARIO_INVERNALE\b", r)]
+    fin = finestra_prova(testo)
+    sim = simbolo_prova(testo)
+    mer = mercato_di(sim)
+    fin_txt = (fin[0].strftime("%Y.%m.%d") + " -> " + fin[1].strftime("%Y.%m.%d")
+               + " (" + fin[2] + ")") if fin else "NON LEGGIBILE"
+    visti_9_15 = False
+    for i, r in enumerate(testo.splitlines(), 1):
+        m = re.match(r"\s*(InpSessionHour|InpIbInizioOra)\s*=\s*(\d+)", r)
+        if not m:
+            continue
+        nome, val = m.group(1), m.group(2)
+        testa = "r." + str(i) + ": " + nome + "=" + val
+        if val in ORA_INVERNALE:
+            visti_9_15 = True
+            mer_att, ora_est, cash_inv = ORA_INVERNALE[val]
+            if not dich:
+                blocca("FUSO", testa + " senza dichiarazione: d'estate e' l'ora ITALIANA al"
+                       " posto dell'ora SERVER (difetto del 06/08: DAX 8, USA 14)."
+                       + (" C'e' '@ORARIO_INVERNALE' come direttiva VIVA (r."
+                          + ",".join(str(x) for x in viva) + "): va in un COMMENTO '#',"
+                          " il driver non la legge e controlla_prova la boccia." if viva else "")
+                       + " Se il " + val + " e' VOLUTO (d'inverno BCM e' UTC+1 fisso e la cash"
+                       " " + mer_att + " e' alle " + cash_inv + " server), dichiaralo con"
+                       " '#  @ORARIO_INVERNALE <motivo>' (classe 763)", path)
+                continue
+            di, motivo = dich
+            if len(motivo) < 20:
+                blocca("FUSO", testa + ": '@ORARIO_INVERNALE' (r." + str(di) + ") senza un"
+                       " motivo vero ('" + motivo + "'): serve a DICHIARARE perche' si arma"
+                       " alla cash d'inverno, non a zittire il cancello (min. 20 caratteri)", path)
+                continue
+            if mer != mer_att:
+                blocca("FUSO", testa + " dichiarato invernale, ma " + val + " e' l'ora d'inverno"
+                       " del mercato " + mer_att + " e il simbolo e' '" + str(sim) + "'"
+                       + (" (mercato " + mer + ")" if mer else " (mercato non riconosciuto)")
+                       + ": la dichiarazione non regge", path)
+                continue
+            if not fin:
+                blocca("FUSO", testa + " dichiarato invernale, ma la FINESTRA non si legge"
+                       " (@DAQUANDO/@FINOA o FromDate/ToDate): senza finestra la stagione non"
+                       " si puo' contare", path)
+                continue
+            c = conta_stagioni(mer_att, fin[0], fin[1])
+            n_inv, n_est, n_nm = c[ora_est + 1], c[ora_est], c[None]
+            conto = ("finestra " + fin_txt + ", giorni lun-ven con la cash " + mer_att
+                     + " alle " + str(ora_est + 1) + " server: " + str(n_inv) + ", alle "
+                     + str(ora_est) + ": " + str(n_est) + ", prima del 2024.09.26 (orologio"
+                     " indici BCM non misurato): " + str(n_nm))
+            if n_inv == 0:
+                blocca("FUSO", testa + " dichiarato invernale, ma nella " + conto + ". Nessun"
+                       " giorno della finestra ha la cash a quell'ora server: la dichiarazione"
+                       " non regge", path)
+                continue
+            rileva("FUSO", testa + " DICHIARATO invernale (@ORARIO_INVERNALE r." + str(di)
+                   + ": '" + motivo[:160] + "'). " + conto + ". Nei " + str(n_est)
+                   + " giorni d'estate l'EA arma UN'ORA DOPO la cash"
+                   + (", nei " + str(n_nm) + " prima del 2024.09.26 a un'ora non misurata" if n_nm else "")
+                   + ". Il cancello NON giudica se e' voluto: lo legge lo strato 2 (classe 763)", path)
+        elif val in ("8", "14") and fin:
+            mer_att = "DAX" if val == "8" else "USA"
+            if mer == mer_att:
+                c = conta_stagioni(mer_att, fin[0], fin[1])
+                if c[int(val)] == 0 and c[int(val) + 1] > 0:
+                    rileva("FUSO", testa + ": finestra " + fin_txt + " TUTTA in ora solare"
+                           " (" + str(c[int(val) + 1]) + " giorni lun-ven): con BCM UTC+1 fisso"
+                           " la cash " + mer_att + " e' alle " + str(int(val) + 1) + " server,"
+                           " non alle " + val + ". L'EA arma un'ora PRIMA della cash (classe 763)", path)
+    if dich and not visti_9_15:
+        rileva("FUSO", "'@ORARIO_INVERNALE' dichiarato (r." + str(dich[0]) + ") ma nessun"
+               " InpSessionHour/InpIbInizioOra vale 9 o 15: dichiarazione ORFANA (classe 763)", path)
+
 def controlla_file_prova(path, dati, testo):
     """Un file prova NON e' PowerShell: e' il formato di casa
        InpTal=1.0||1.0||0||1.0||N
@@ -1444,26 +1649,26 @@ def controlla_file_prova(path, dati, testo):
     except UnicodeDecodeError:
         blocca("ASCII", "il file prova contiene byte non-ASCII: lo legge PowerShell 5.1"
                " (ANSI) e finisce dentro un .ini del tester", path)
-    # ora SERVER, non italiana (regola fissa di CLAUDE.md: server = italiana - 1)
+    # ora SERVER, non italiana -- A CALENDARIO dalla classe 763 (24/09/2026).
     # Due livelli, e la differenza e' voluta:
     #  - i due nomi NOTI (InpSessionHour, InpIbInizioOra) con 9 o 15 sono il
-    #    difetto gia' pagato: BLOCCANTE, come nel controllo della riga.
+    #    difetto gia' pagato: BLOCCANTI, salvo dichiarazione invernale che il
+    #    calendario regge (controlla_ora_cash, qui sopra).
     #  - gli ALTRI nomi di ora d'INIZIO (RangeStart, Inizio, Start) con 9 o 15
     #    sono un RILIEVO e non un errore: ogni EA chiama i suoi input come vuole
     #    e un 15 puo' essere legittimo. Quello che NON puo' essere legittimo e'
     #    non essersene accorti. (Un'ora di CHIUSURA a 15 o a 21 non si tocca:
     #    li' il 15 e' un orario di fine, non l'apertura sbagliata di un cash.)
+    controlla_ora_cash(path, testo)
     for i, r in enumerate(testo.splitlines(), 1):
-        m = re.match(r"\s*(InpSessionHour|InpIbInizioOra)\s*=\s*(\d+)", r)
-        if m and m.group(2) in ("9", "15"):
-            blocca("FUSO", "r." + str(i) + ": " + m.group(1) + "=" + m.group(2)
-                   + " e' ora ITALIANA. Il server BCM e' un'ora indietro: DAX 8, Nasdaq 14", path)
+        if re.match(r"\s*(InpSessionHour|InpIbInizioOra)\s*=", r):
             continue
         m = re.match(r"\s*(Inp\w*(?:RangeStart|Inizio|Start)\w*Hour)\s*=\s*(\d+)", r, re.I)
         if m and m.group(2) in ("9", "15"):
             rileva("FUSO", "r." + str(i) + ": " + m.group(1) + "=" + m.group(2)
                    + " e' un'ora d'INIZIO che vale 9 o 15, cioe' l'ora ITALIANA di apertura"
-                   + " di DAX e Nasdaq. In ora SERVER sarebbero 8 e 14. Va confermato a mano:"
+                   + " di DAX e Nasdaq. In ora SERVER d'estate sarebbero 8 e 14 (d'inverno, BCM"
+                   + " UTC+1 fisso, 9 e 15:30: classe 763). Va confermato a mano:"
                    + " il cancello non sa come si chiamano gli input di questo EA", path)
     # CLASSE 439 (19/09/2026) -- IL COMMENTO DI UN FILE PROVA COMINCIA CON ';',
     # NON CON '#', E righe_utili() SA SOLO IL '#'.
