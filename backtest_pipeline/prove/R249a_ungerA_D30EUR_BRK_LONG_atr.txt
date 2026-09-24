@@ -1,0 +1,400 @@
+#  EA: ABTG_DAX_Apertura_EU
+# ==========================================================================
+#  R249a -- IPOTESI A DEL METODO UNGER: "IERI COME LIVELLO", STOP CONTRO LIMIT
+#  ABTG_DAX_Apertura_EU su D30EUR M5 -- TICK REALI -- deposito 100000
+#  CELLA: BREAKOUT (stop) -- SOLO LONG -- livello = MASSIMO D1 di ieri (PDH)
+#  BLOCCO A (stop = 1,5 x ATR(14) M5, InpMinStopPts=0: il disegno com'e'
+#  scritto nel referto dopo il PASS del cancello)
+#  magic gemelli 794901 / 794951
+#  QUESTO E' IL FILE DI TESTA DEL ROUND R249 (8 file): qui sta TUTTO il
+#  ragionamento. R249b..h portano solo le loro differenze.
+#  E' RICERCA: NON avvicina nessuna sedia al 1 ottobre. Non promuove, non
+#  archivia, non tocca taglie, sedie, preset, forward o conti.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400 (C:\MT5_Backtest), NON su nessun terminale di conto vivo.
+# ==========================================================================
+#
+#  >>> LA DOMANDA, UNA SOLA (report/METODO_UNGER_2026-09-24.md par. 6 A)
+#  Sul DAX BCM, agli STESSI livelli di ieri (InpRangeMode=2, InpLevelTF=D1),
+#  vince l'ordine STOP (InpEntryMode=0) o l'ordine LIMIT (InpEntryMode=3,
+#  RANGE_FADE)? Con stop IDENTICO nei due bracci e i due lati separati.
+#
+# ==========================================================================
+#  0. IL DISEGNO: 8 file = 2 blocchi x 2 livelli x 2 meccanismi
+# ==========================================================================
+#  Sullo STESSO livello i due bracci scommettono in verso OPPOSTO:
+#     livello PDH (massimo di ieri): BRK LONG (buy stop)  contro FADE SHORT (sell limit)
+#     livello PDL (minimo di ieri) : BRK SHORT (sell stop) contro FADE LONG (buy limit)
+#  Quindi il confronto e' APPAIATO per livello, non per lato:
+#     R249a BRK LONG  <->  R249b FADE SHORT   (PDH, blocco A)
+#     R249c BRK SHORT <->  R249d FADE LONG    (PDL, blocco A)
+#     R249e BRK LONG  <->  R249f FADE SHORT   (PDH, blocco F)
+#     R249g BRK SHORT <->  R249h FADE LONG    (PDL, blocco F)
+#  Un lato per file (regola dei due lati, 25/08): niente OCO fra i lati.
+#  UNA VARIABILE PER FILE: dentro ogni file varia solo InpMagic (asse
+#  tecnico gemello, G1). Fra file cambia InpEntryMode+lato (la cella) e,
+#  fra i blocchi, SOLO InpMinStopPts (0 contro 6800).
+#
+#  BLOCCO A (a-d): stop = 1,5 x ATR(14) del grafico M5, letto alle 08:00
+#     (AtrValue() = barra CHIUSA 1, r.2241-2246). E' il disegno del referto.
+#  BLOCCO F (e-h): stesso disegno + pavimento InpMinStopPts=6800 (68 punti
+#     indice = 40 x 1,70 di spread) con InpSkipIfTight=false. AGGIUNTO dal
+#     cercatore di parametri: il blocco A e' FUORI dalla frontiera del costo
+#     (par. 5) e il vincitore potrebbe dipendere dalla taglia dello stop
+#     (classe 737, interazione). Chi coordina puo' toglierlo: e' un blocco
+#     intero, non tocca il disegno di a-d.
+#
+# ==========================================================================
+#  1. IL PRIOR, LETTO PRIMA DEI NUMERI
+# ==========================================================================
+#  (i) D1 in BREAKOUT sul DAX e' gia' girato (classe 773):
+#     risultati_archivio/DAX_Apertura/apert_DAX_M5_doc_brk_realtick_D30EUR.csv
+#     119 passate / 32 esiti, n 61-71, PF 0,516-2,118 (mediana 0,758;
+#     39 passate su 119 sopra 1), DD 1,66-3,77%. MA con filtri ACCESI
+#     (InpUseSupertrend3, InpUseCorrelation SPXUSD, volumi+ATR, news),
+#     due lati con OCO, ordini vivi 120 min, SL=range, trailing FISSO 1-8
+#     punti indice, rischio 2%. Finestra NON scritta nel CSV.
+#     Manopola INERTE verificata nel CSV: InpRangeMinutes (12 valori) non
+#     cambia niente sotto PREVBAR -- i 32 esiti sono ESATTAMENTE 4 buffer x
+#     8 trailing, un esito per coppia. Indizio: buffer 100 PF mediano 1,736
+#     (36 passate), 400 -> 0,629: piu' vicino al livello, meglio per lo stop.
+#     Campione < 150 e disegno diverso: PRIOR, non verdetto.
+#  (ii) FADE sul range d'APERTURA: archiviato senza edge, PF 0,715/0,720
+#     (n 419/430) -- report/LE_MANOPOLE_INERTI_2026-09-23.md par. 4.7;
+#     DAX_Apertura/ANALISI_MOTORI_DAX_M5.md: 0 passate su 136 sopra PF 1,
+#     DD mediano 23,5%. Il livello qui e' DIVERSO (D1 di ieri, non i primi
+#     minuti): e' un meccanismo nuovo, non una griglia sul fade morto. Per
+#     questo UNA cella per braccio e NESSUNA griglia d'ingresso.
+#  (iii) SONDA, NON BCM: caccia_strategie/biblioteca/sonde_esterne/
+#     sonda_unger_stop_vs_limit.py (DAX future histdata M1 2011-2018, OHLC,
+#     dati solo 07-21 server, livelli = sessione 07-21 di ieri, orologio
+#     sempre allineato al cash). Stesso disegno, ordini 08:00-16:30:
+#                         stop fisso 0,283% (=68 su 24000)   stop 1,5 x ATR M5
+#       PDH BRK LONG      PF 1,275 n 463 [boot90 1,04;1,55]   PF 0,965
+#       PDH FADE SHORT    PF 0,911 n 463 [0,73;1,12]          PF 0,757
+#       PDL BRK SHORT     PF 0,957 n 513 [0,77;1,16]          PF 0,571
+#       PDL FADE LONG     PF 0,845 n 513 [0,70;1,01]          PF 0,653
+#     Stop pieni 59-66% (fisso), 83-90% (ATR). Con lo stop ATR il 30-35%
+#     delle barre d'ingresso sono AMBIGUE su M1 (trattate come stop): la
+#     colonna ATR della sonda NON e' leggibile, i tick reali la risolvono.
+#     Controprova del simulatore, eseguita: con stop enorme r_brk + r_fade
+#     = -2 x costo su ogni tocco (max scarto 0,00028 R).
+#
+#  ATTESA DICHIARATA (scritta qui, prima dei numeri BCM):
+#   - DIREZIONE: STOP >= LIMIT su tutti e due i livelli, nei due blocchi.
+#     Differenza piu' netta su PDH (sonda: +0,36 di PF) che su PDL (+0,11).
+#   - LIVELLO: PF assoluti vicini a 1 o sotto (priore di casa: i motori
+#     d'apertura DAX 2024-26 stanno a 0,7-0,8). L'unica cella che puo'
+#     stare sopra 1 e' BRK LONG su PDH, blocco F. Blocco A: tutto sotto 1
+#     atteso (stop a ~14x spread, par. 5).
+#   - DD: in unita' di R la sonda da' DD mediano 12-22 R su finestre di 2
+#     anni (peggiore 24-40 R) col fisso, 32-62 R con l'ATR. A 1% per
+#     operazione e compounding: DD a DUE CIFRE atteso su ogni file. Non e'
+#     una taglia proposta: e' il rischio che il round deve MISURARE.
+#   - n: par. 4.
+#
+# ==========================================================================
+#  2. GLI INPUT, VERIFICATI NEL SORGENTE (mql5/Experts/ABTG_DAX_Apertura_EU.mq5,
+#     2885 righe, ramo lavoro) -- e i NO-OP PER CELLA (classe 706/708)
+# ==========================================================================
+#  LETTI e uguali nelle 8 celle:
+#   InpRangeMode (r.274, enum r.226-232) = 2 PREVBAR: ComputeLevels r.1113-
+#     1118 -> hi/lo = iHigh/iLow(InpLevelTF, 1). Stessa funzione nei due
+#     rami (TryPlaceBreakout r.1169, TryPlaceRangeFade r.1259).
+#   InpLevelTF (r.275, ENUM_TIMEFRAMES) = 16408 = PERIOD_D1.
+#   InpSessionHour/Min (r.263-264) = 8:00 server: refEndMin = openMin per
+#     ogni modo non OPENING (r.860 fade, r.881 breakout).
+#   InpCloseHour/Min (r.266-267) = 16:30: r.811-815 -> EndOfSession() cancella i
+#     pendenti e chiude (InpCloseAtEnd=true, r.268).
+#   InpPendingExpiryMin (r.282) = 510: scadenza dell'ordine in TUTTI e due
+#     i rami (r.1190, r.1275) -- stessa semantica (classe 708 verificata).
+#     08:00 + 510 min = 16:30: coincide col flat.
+#   InpAllowLong/InpAllowShort (r.283-284): un lato per file.
+#   InpAtrSlMult (r.327) = 1,5 e InpAtrPeriodMgmt (r.328) = 14: BRK r.1198/
+#     r.1222 (con InpSLMode=1), FADE r.1277 (sempre). gAtrH su
+#     PERIOD_CURRENT (r.510): il TF del grafico E' il TF dell'ATR.
+#   InpMinStopPts (r.357): BRK r.1202/r.1226, FADE r.1279. Blocco A = 0.
+#   InpMinRangePts/InpMaxRangePts (r.285-286) = 0: spenti in tutti e due i
+#     rami (r.1174-1177, r.1263-1266). Il range D1 e' 25.000-35.000 punti:
+#     un tetto acceso lo ucciderebbe.
+#   InpTP1_R (r.329) = 0 -> tp = 0.0 in tutti e due i rami (r.1208, r.1232,
+#     r.1290, r.1307): NESSUN take profit.
+#   InpTP1_ClosePct (r.330) = 0 -> parziale spenta (cancello r.2359
+#     "InpTP1_ClosePct > 0"); InpBEatR=0 (r.2405); InpUseTrailing=false
+#     (r.2441). USCITA = SOLO stop o flat 16:30 (il test "a due righe" di
+#     Unger esce a fine seduta). La gestione ad asse e' il passo DOPO, e
+#     solo se un braccio mostra un motore.
+#   InpRiskPercent (r.325) = 1 (CalcLotByRisk r.2251, su BALANCE): serve
+#     solo al tester. NON e' una taglia per il campo.
+#   InpMaxSpread=0 (SpreadOK r.2651: sempre vero); filtri trend/correlazione/
+#     VWAP/volumi/ATR/news/spazio tutti SPENTI; InpUsaGuardian=false.
+#  LETTI da UN SOLO ramo -- NO-OP sull'altro (classe 706):
+#   InpSLMode (r.326) = 1 ATR: letto SOLO da BREAKOUT (r.1198/r.1222); il
+#     FADE non lo guarda (r.1277). Con 1 lo stop del BRK = entry -/+
+#     ATR x mult, lo stesso del FADE: e' il pin che rende IDENTICI gli stop.
+#   InpBufferPoints (r.277) = 0: BRK entra a livello + EffectiveBuffer()
+#     = max(0, SYMBOL_TRADE_STOPS_LEVEL) (r.2535-2540); FADE lo usa SOLO
+#     come ripiego se ATR = 0 (r.1278). Lo STOPS_LEVEL di D30EUR su BCM e'
+#     [NON MISURATO] (INVENTARIO_MOTORI_APERTURA_2026-09-24 N12): se e' >0
+#     il BRK entra un po' OLTRE il livello. Si dichiara, non si corregge.
+#   InpSlippagePts (r.356) = 0: letto SOLO dal BRK (r.1197/r.1221).
+#   InpFadeOffsetPts (r.290) = 0: letto SOLO dal FADE (r.1286/r.1303).
+#   InpSkipIfTight (r.358) = false: letto SOLO dal BRK e SOLO se
+#     InpMinStopPts > 0 (r.1202-1205): INERTE in tutto il blocco A e in
+#     tutti i FADE. Nel blocco F false = alza lo stop al pavimento come fa
+#     il FADE (r.1279), invece di SALTARE il trade: con true i due bracci
+#     NON sarebbero piu' gemelli.
+#  INERTI in TUTTE le 8 celle (pin di forma, valore di fabbrica):
+#   InpRangeMinutes (usato solo con OPENING, r.819/r.1124; sotto PREVBAR
+#     verificato inerte anche nel CSV del prior), InpPrevWindowMin (solo
+#     RANGE_PREV r.1126), InpRetestOffsetPts e InpAllowReverse (solo
+#     RETEST), InpDelayMinutes/InpDelayDirMode (solo DELAYED), InpGap*
+#     (solo GAPFILL), InpOCTimeframe (solo OPENCONFIRM), InpBreakevenAtTP1
+#     (annidato nella parziale spenta, classe 594), InpTrailMode/TF/
+#     AtrMult/FixedPts/StartR (sotto InpUseTrailing=false), InpRound*
+#     (sotto InpUseRoundLevels=false), satelliti di filtri spenti.
+#
+# ==========================================================================
+#  3. OROLOGIO: SI DICHIARA, NON SI SPEZZA (e perche')
+# ==========================================================================
+#  BCM e' UTC+1 FISSO (report/OROLOGIO_BCM_2026-09-24.md). D'ESTATE le 08:00
+#  BCM sono le 09:00 italiane = apertura Xetra, e le 16:30 BCM = 17:30 =
+#  chiusura. D'INVERNO le 08:00 BCM sono le 08:00 italiane (un'ora PRIMA del
+#  cash) e le 16:30 BCM sono le 16:30 (un'ora PRIMA della chiusura).
+#  Calendario UE, per data di chiusura: INVERNO = 2024.10.27 <= g <
+#  2025.03.30 e 2025.10.26 <= g < 2026.03.29, il resto ESTATE.
+#  Feriali (contati): IS 183 = 110 inverno + 73 estate (60% inverno);
+#  OOS 276 = 110 inverno + 166 estate (40% inverno).
+#  PERCHE' NON SI SPEZZA: (a) il confronto e' APPAIATO -- i due bracci di un
+#  livello vedono lo STESSO orologio negli STESSI giorni, quindi lo
+#  sfasamento non favorisce nessuno dei due per costruzione; (b) spezzare in
+#  5 finestre stagionali farebbe 40 file con campioni da 10-40 operazioni
+#  l'uno. COSTO dichiarato: (1) IS e OOS hanno quote d'inverno diverse
+#  (60% contro 40%): una differenza IS/OOS NON si attribuisce al regime
+#  senza guardare la stagione; (2) d'inverno l'ATR delle 08:00 misura la
+#  notte fonda (06:50-07:55 italiane), quindi lo stop del blocco A e'
+#  ancora piu' stretto; (3) d'inverno si perde l'ultima ora di Xetra.
+#  LETTURA PER STAGIONE: solo sulla gamba OOS (il per-trade che resta e'
+#  quello dell'ultima gamba, classe 455), per data di chiusura, DESCRITTIVA:
+#  non decide niente (n per stagione per file ~25-45).
+#  Stessa fascia oraria della sedia 770101: se un braccio passasse, prima
+#  di tutto si misura la correlazione con 770101 (referto par. 6 A).
+#
+# ==========================================================================
+#  4. FREQUENZA E CAMPIONE -- il verdetto di MERITO NON e' di questo round
+# ==========================================================================
+#  Stima (sonda, per feriale, livello dentro alle 08:00 e toccato entro le
+#  16:30): PDH 0,229/feriale, PDL 0,254/feriale.
+#     per FILE:  IS ~42 (PDH) / ~46 (PDL)   OOS ~63 / ~70   tutta ~105 / ~117
+#     per BRACCIO (L+S sommati): IS ~88   OOS ~133
+#  Correzione BCM ignota e di verso ignoto: la D1 BCM include notte e sera
+#  di ieri (livelli piu' larghi, meno tocchi) e la notte di OGGI puo'
+#  consumare il livello prima delle 08:00 (sulla sonda, senza notte, il
+#  36,6% dei giorni e' gia' "consumato" alle 08). Nei giorni consumati
+#  l'ordine dalla parte gia' rotta e' RIFIUTATO dal server (prezzo non
+#  valido: "BUY/SELL STOP fallito" r.1214/r.1238, "(fade) fallito"
+#  r.1296/r.1313) e quel file quel giorno non opera: con un lato per file
+#  la trappola "mono-lato non voluto" del referto NON esiste.
+#  ==> NESSUNA meta' arriva a 150, nemmeno sommando i due lati. Dichiarato
+#      PRIMA: il MERITO su D30EUR da solo e' SOSPESO. Il verdetto di merito
+#      e' di FAMIGLIA (gemelli ABTG_Dow_Apertura_US e
+#      ABTG_Nasdaq_Apertura_US, stesso ramo PREVBAR, coi LORO orari e il
+#      calendario USA): file NON preparati in questo round (buco dichiarato).
+#      Il RISCHIO (DD) si legge a qualunque n (Emendamento B).
+#  POTENZA del confronto appaiato (sonda, ricampionamento): se l'effetto
+#  della sonda fosse vero, P(PF_BRK > PF_FADE) = 0,78 su PDH e 0,61 su PDL
+#  a n=105; 0,90 / 0,70 a n=315 (famiglia). Se NON c'e' differenza: 0,50.
+#  ==> il segno della differenza sul DAX da solo e' un INDIZIO debole su
+#      PDH e quasi un lancio di moneta su PDL (classe 178): si scrive, non
+#      decide.
+#
+# ==========================================================================
+#  5. FRONTIERA DEL COSTO (stop >= 40 x spread; D30EUR ore 08: 1,70 prudente,
+#     report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par. 3.2)
+# ==========================================================================
+#  BLOCCO A: [INFERITO, NON MISURATO su BCM] ~14x -> FUORI FRONTIERA.
+#   Due strade indipendenti danno lo stesso ordine di grandezza:
+#   - MAPPA par. 8: ATR M5 medio di SESSIONE 20,2 -> stop 30,3 = 17,8x.
+#     Ma e' la media della giornata: l'EA legge l'ATR alle 08:00;
+#   - sonda: ATR(14) M5 alle 08:00 = 0,0621 x range del giorno (mediana;
+#     p10 0,034, p90 0,104), = 0,725 x l'ATR della seduta. Con l'ADR BCM
+#     252,2 [MIS, n=53]: stop 1,5 x ATR = 23,5 punti indice (p10 12,9, p90
+#     39,4) = 13,8x lo spread; giorni sopra 68 punti: ~0%.
+#   Il blocco A e' quindi uno STRUMENTO DI MISURA della domanda (quale
+#   meccanismo, a stop stretto), NON una candidata.
+#   VIA PER MISURARLO A COSTO ZERO (dentro questo round): nel blocco F lo
+#   stop e' 68 punti (tranne i giorni con 1,5 x ATR > 68), quindi i suoi
+#   per-trade calibrano il valore per punto del lotto (lotto = balance x
+#   1% / (valore x 68), passo 0,10); applicato ai lotti del blocco A (stessa
+#   gamba OOS, stesso deposito) da' lo stop di OGNI operazione in punti. La
+#   riga deve RACCOGLIERE i 16 per-trade (classe 754). Alternativa: un test
+#   SINGOLO (Optimization=0, InpVerbose=true) che scrive nel giornale
+#   "BUY STOP @ x SL y" (r.1212) e "SELL LIMIT (fade) @ x SL y" (r.1294)
+#   -- in ottimizzazione Print() non esiste
+#   (classe 771).
+#  BLOCCO F: 68 punti = 40,0x a 1,70 PER COSTRUZIONE (sul bordo: al P95
+#   dello spread orario, 2,70, sono 25x). Lo stop e' di fatto FISSO:
+#   InpAtrSlMult morde solo se 1,5 x ATR > 68 (sonda: ~0% dei giorni).
+#
+# ==========================================================================
+#  6. CANCELLI E SOGLIE, CONGELATI PRIMA
+# ==========================================================================
+#  G1 DETERMINISMO (ogni file): le gemelle 7949xx / +50 identiche in Profit,
+#     PF, DD, Trades in tutti e due i CSV, e i due per-trade identici riga
+#     per riga tranne il magic. Se no -> file NULLO: esce da OGNI conteggio
+#     (classe 772), e il suo compagno di livello non si confronta.
+#  S1 IL PIN D1 E' ARRIVATO (contro-esempio costruito): con InpLevelTF
+#     rimasto a H1 (default del core, r.168) il livello sarebbe la candela
+#     07:00-08:00: sulla sonda, ordine piazzabile e toccato entro le 16:30
+#     0,747 (massimo) / 0,762 (minimo) per feriale -> ~343 / ~350 per file
+#     su 459 feriali. Con D1: 0,229 / 0,254 -> ~105 / ~117. SOGLIA: Trades
+#     per file (IS+OOS) > 207 (0,45 x 459, a meta' strada) -> pin NON
+#     arrivato -> file NULLO.
+#  S2 FLAT: nessuna chiusura dopo le 16:31 nel per-trade OOS. Se no NULLO.
+#  S3 APPAIAMENTO: su ogni livello e in ogni gamba Trades(FADE) <= Trades(BRK)
+#     (il buy stop scatta quando l'ASK tocca il massimo BID di ieri; il sell
+#     limit solo quando lo tocca il BID: il FADE si riempie in un
+#     sottoinsieme dei giorni). Se il FADE supera il BRK di piu' di 3
+#     operazioni -> il confronto di quel livello e' [NON CONFRONTABILE].
+#  E0 L'EVENTO ESISTE SU BCM (lezione OOPS): Trades per file (IS+OOS) >= 30.
+#     Sotto: "evento quasi assente sul CFD" -- esito di MISURA, non morte.
+#  RISCHIO (a qualunque n, Emendamento B): Equity DD% di una gamba > 10%
+#     (dieci stop pieni all'1%) -> ROSSO di rischio per quella cella,
+#     scritto accanto al PF. Riferimento, non soglia: 770101 nella stessa
+#     finestra (R246e) IS 5,44%, OOS 7,23%.
+#  MERITO: SOSPESO su D30EUR (par. 4). Si SCRIVONO, per livello e per gamba:
+#     D = PF_BRK - PF_FADE e il segno. Lettura: "STOP avanti" se D > 0 in
+#     tutte e due le gambe su quel livello, "LIMIT avanti" se D < 0 in
+#     tutte e due, altrimenti "NON DECISO". Mai "vince": e' un INDIZIO per
+#     la famiglia. Se il conteggio sorprende e un braccio (L+S) supera 150
+#     CONTATE in una gamba, su quella gamba il merito si legge.
+#  CONTRO IL DEFAULT: la sedia del DAX (770101, RETEST sul range 35')
+#     e' un motore DIVERSO; non c'e' un default di questo motore da
+#     battere. Il confronto utile, se mai, e' la correlazione con 770101.
+#  CERTIFICATO: questo round da' PF, n, DD sul DAX. NON mette l'uscita ad
+#     asse, NON prova i gemelli, il TF del grafico morde solo sull'ATR.
+#     Qualunque esito -> "NON ANCORA MISURATO", MAI "morto".
+#
+# ==========================================================================
+#  7. TEMPO MACCHINA (DESKTOP-H4D7CAJ, UN SOLO AGENTE, IN SERIE, classe 751)
+# ==========================================================================
+#  Stesso EA, stesso simbolo, stesso TF, stessa finestra, stessa macchina,
+#  stesse 2 passate per file: R246e (22:53:22 -> 22:54:16) e R246f
+#  (22:59:11 -> 23:00:06) = 54-55 s a file (IS 7 s + OOS 13 s di tester per
+#  2 passate, il resto e' avvio/chiusura del terminale): LOG_TESTER/
+#  0002_Tester_logs_20260924.log. Qui gli ordini vivono 08:00-16:30 invece
+#  di 2 ore: il tempo del tester a tick reali lo fanno i tick, non l'EA
+#  [INFERITO]. 8 file x ~55 s = ~7,5 min. Tetto: 20 min; oltre, si guarda.
+#
+# ==========================================================================
+#  8. BUCHI DICHIARATI
+# ==========================================================================
+#  - SYMBOL_TRADE_STOPS_LEVEL di D30EUR su BCM: [NON MISURATO] (sposta
+#    l'ingresso del solo BRK).
+#  - Se BCM ha una barra D1 della DOMENICA, il lunedi' "ieri" e' quella
+#    barra corta: [NON MISURATO]. Si vede dai lunedi' nel per-trade.
+#  - Quota di giorni "consumati" alle 08:00 su BCM: [NON MISURATO] in
+#    questo round (Print() muto in ottimizzazione, classe 771); si stima
+#    da Trades / feriali contro la sonda.
+#  - Spread dell'ora 08 BCM PER STAGIONE: [NON MISURATO] (il file orario
+#    mescola estate e inverno).
+#  - Gemelli Dow/Nasdaq: NON preparati. Senza, il merito resta sospeso.
+#  - Livelli della sonda (sessione 07-21) diversi dalla D1 BCM (00-24).
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=16
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=0
+InpRangeMode=2
+InpLevelTF=16408
+InpPrevWindowMin=60
+InpBufferPoints=0
+InpOCTimeframe=0
+InpPendingExpiryMin=510
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=1
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=0
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=false
+InpBEatR=0
+InpUseTrailing=false
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpSpaceMode=0
+InpSpaceTF=16388
+InpSpaceMinR=0.0
+InpSpaceMaxR=0.0
+InpSpaceEma1=14
+InpSpaceEma2=50
+InpSpaceEma3=100
+InpSpaceEma4=200
+InpSpaceUseST=false
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794901||794901||50||794951||Y

@@ -1,0 +1,141 @@
+#  EA: ABTG_DAX_Apertura_EU
+# ==========================================================================
+#  R249g -- IPOTESI A DEL METODO UNGER: "IERI COME LIVELLO", STOP CONTRO LIMIT
+#  ABTG_DAX_Apertura_EU su D30EUR M5 -- TICK REALI -- deposito 100000
+#  CELLA: BREAKOUT (stop) -- SOLO SHORT -- sell stop sul MINIMO D1 di ieri (PDL)
+#  BLOCCO F (stesso disegno + pavimento InpMinStopPts=6800 = 68 punti
+#  indice = 40 x 1,70 di spread, InpSkipIfTight=false): stop di fatto FISSO
+#  a 68 punti nei due bracci, dentro la frontiera per costruzione.
+#  magic gemelli 794907 / 794957
+#  TUTTO il ragionamento sta nel file di testa R249a (par. 0-8): disegno,
+#  prior, input riga per riga, orologio, campione, costo, cancelli, tempo,
+#  buchi. Qui SOLO le differenze e i numeri di QUESTO file.
+#  E' RICERCA: NON avvicina nessuna sedia al 1 ottobre.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400 (C:\MT5_Backtest), NON su nessun terminale di conto vivo.
+# ==========================================================================
+#  PIN: identico a R249a input per input, TRANNE:
+#   InpEntryMode=0 (BREAKOUT), InpAllowLong=false, InpAllowShort=true,
+#   InpMinStopPts=6800 (blocco A: 0), e il magic. Dal gemello di blocco
+#   (stessa cella, blocco A) cambia SOLO InpMinStopPts.
+#   Una sola variabile DENTRO il file: il magic (asse tecnico G1).
+#  NO-OP IN QUESTA CELLA (classe 706): InpFadeOffsetPts (solo FADE).
+#  InpSkipIfTight=false MORDE qui: se lo stop ATR e' sotto 68 punti
+#  lo ALZA a 68 (r.1205/r.1229) invece di saltare il trade -- come il FADE.
+#  LETTI: InpSLMode=1 (r.1198/r.1222), InpBufferPoints=0 -> max(0, STOPS_LEVEL)
+#  [NON MISURATO], InpSlippagePts=0 (r.1197/r.1221).
+#  CONFRONTO APPAIATO: R249h (stesso livello PDL, meccanismo opposto,
+#  stesso blocco). Gemello di blocco: R249c (stessa cella, altro stop).
+#  ATTESA DICHIARATA (prima dei numeri; fonti e limiti in R249a par. 1):
+#   PF: sonda stop fisso PF 0,957 n 513, boot90 [0,77;1,16].
+#   n per file: IS ~46, OOS ~70, tutta ~117 (stima dalla sonda, correzione BCM ignota).
+#   DD: sonda fisso: DD mediano 21,8 R, peggiore 37,3 R; a 1% per operazione -> DD a due cifre atteso.
+#  CANCELLI (congelati, R249a par. 6): G1 gemelle 794907/794957 identiche in
+#   CSV e per-trade tranne il magic, se no NULLO; S1 Trades IS+OOS > 207 ->
+#   pin D1 non arrivato, NULLO; S2 nessuna chiusura dopo le 16:31; S3
+#   Trades(FADE) <= Trades(BRK)+3 sul livello PDL; E0 Trades IS+OOS >= 30;
+#   RISCHIO: Equity DD% di una gamba > 10% -> ROSSO di rischio. MERITO
+#   SOSPESO su D30EUR da solo (nessuna meta' arriva a 150): si scrive D =
+#   PF_BRK - PF_FADE per gamba, e il segno e' un INDIZIO per la famiglia.
+#  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794907.csv
+#   e abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794957.csv (ultima gamba = OOS).
+#   La riga deve raccoglierli (classe 754): servono a G1, S2, alla lettura
+#   per stagione e alla misura dello stop del blocco A (R249a par. 5).
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=16
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=0
+InpRangeMode=2
+InpLevelTF=16408
+InpPrevWindowMin=60
+InpBufferPoints=0
+InpOCTimeframe=0
+InpPendingExpiryMin=510
+InpAllowLong=false
+InpAllowShort=true
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=1
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=0
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=false
+InpBEatR=0
+InpUseTrailing=false
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=6800
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpSpaceMode=0
+InpSpaceTF=16388
+InpSpaceMinR=0.0
+InpSpaceMaxR=0.0
+InpSpaceEma1=14
+InpSpaceEma2=50
+InpSpaceEma3=100
+InpSpaceEma4=200
+InpSpaceUseST=false
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794907||794907||50||794957||Y
