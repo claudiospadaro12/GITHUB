@@ -429,6 +429,24 @@ Su Nasdaq, DAX e Dow:
 - Negli EA/`.ini` `InpSessionHour` va SEMPRE messo in ORA SERVER (quindi 8 per il DAX, 14:30 per il Nasdaq).
 - Verifica rapida di un CSV di risultati: colonna `InpSessionHour` deve essere **8** (DAX) / **14** (Nasdaq). Se è 9 / 15 → ora sbagliata, cestinare.
 
+### 🕰️ CORRETTO IL 24/09/2026 — l'offset "IT − 1" NON vale tutto l'anno
+Misurato su ~24.400 deal del repo con quattro ancore indipendenti (apertura FX della domenica,
+pausa del rollover, dati USA delle 8:30 ET, aperture cash): **BCM oggi e' UTC+1 FISSO**, senza ora
+legale. Quindi **d'estate BCM = ora italiana − 1, d'INVERNO BCM = ora italiana**.
+- **Forex**: fino a dicembre 2024 l'orologio era quello vecchio (IT − 1 tutto l'anno); il cambio cade
+  fra il **26/12/2024 23:03 e il 02/02/2025 23:05** (giorno esatto `[NON MISURATO]`).
+- **Indici** (storico dal 2024.09.26): UTC+1 fisso su tutto l'arco.
+- 🔴 **Conseguenza per i backtest**: nei mesi d'inverno un EA con `InpSessionHour=8` (DAX) o 14:30
+  (USA) ha armato **un'ora prima dell'apertura cash**. I numeri di contratto di `770101`, `770202`,
+  `770411` MESCOLANO due tempistiche (`770202`: PF 0,78 su n=73 nei mesi allineati, 1,66 su n=57 in
+  quelli sfasati — ricontato alla fonte; la causa del divario **non e' dimostrata**, EMA200 che non
+  dipende dall'ora oscilla anch'esso).
+- 🔴 **Conseguenza per il campo BCM**: dal 26/10 (DAX) e dal 02/11 (USA) le sedie a ora fissa
+  armano un'ora prima dell'apertura. **Decisione di Claudio entro il 25/10.** FTMO (IT + 1 tutto
+  l'anno) non e' toccato nell'orario, ma d'inverno le sue sedie faranno cio' che il backtest
+  d'inverno NON ha misurato.
+- Misura completa: `report/OROLOGIO_BCM_2026-09-24.md`.
+
 ### ⚠️ Ora dei LOG di MT5 ≠ ora del GRAFICO (imparata il 06/08, sbagliando)
 - **Schede Esperti e Giornale → ORA LOCALE del PC.** Sul VPS Windows sta in ora italiana,
   quindi un ordine datato `09:15` nel log è stato piazzato alle **08:15 server**.
