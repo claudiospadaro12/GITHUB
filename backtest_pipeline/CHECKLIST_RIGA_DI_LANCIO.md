@@ -34812,3 +34812,73 @@ modo **identico**. 🟢 Quindi **non distorce l'asse: comprime il contrasto** e 
 **La regola**: quando un artefatto colpisce **tutte** le celle allo stesso modo, **la direzione
 dell'errore è informazione** e va scritta. Chiamarlo "rischio" senza dire il verso fa buttare un round
 sano — o fa temere un falso positivo che quella meccanica **non può produrre**.
+
+## 🔢 CLASSE 722 — **il codice di uscita che la riga produrrà DI SICURO, e che il riepilogo chiama guasto**
+
+R242, 24/09/2026. La riga pinna `@FRAZIONEIS 1.0` (una tranche sola). Verificato nel driver
+(`RIGA_ROUND_VPS.ps1` r.1162-1170): la gamba OOS **non produce nessun CSV** → `$mancanti += "OOS"` →
+`"NON MISURATO -- CSV mancanti o vuoti: OOS"` → **`exit 2`, su tutte e due le gambe, sempre**.
+🔴 Il `RIEPILOGO` stampava la legenda `rc 2 = NON MISURATO` **senza l'eccezione**, accanto a un
+`CATENA COMPLETA: 2 cartelle su 2` verde. Claudio legge `rc 2 NON MISURATO` su un round **perfettamente
+riuscito** e lo rilancia, o lo butta.
+🔴 **E il rimedio esisteva già**: la riga R190/R187 del 19/09 ce l'aveva testuale
+(`report/RIGHE_R190_R187_2026-09-19.md` r.161). Non essendo mai diventata una classe, **è sparita al
+round successivo** — che è esattamente il motivo per cui questa checklist esiste.
+**La regola**: se una scelta **dichiarata** del file prova determina un `rc` diverso da 0, quel `rc`
+si annuncia **per numero** accanto alla legenda, nella stessa riga in cui la legenda lo chiamerebbe
+fallimento. E si dice **quale `rc` sarebbe invece un guasto vero** (qui: `rc 1`, non partita).
+
+## 📋 CLASSE 723 — **il numero RIELABORATO invece che CITATO nel testo iniettato**
+
+Stesso round. Il `NON_PROMUOVIBILE.txt` che la riga scrive sul Desktop è un **digest** del file prova.
+Scriveva `LONG: appaiata 0,7302 -> 1,021 . migliore 0,9471 -> 1,021`; il file prova
+(`R242a` r.301-302) dice `0,7302 -> 0,787` e `0,9471 -> 1,021 (il tetto)`.
+🔴 **Impossibile anche per aritmetica**: col trasporto `×1,078` dichiarato due righe sopra,
+`0,9471 × 1,078 = 1,021` ✅ ma `0,7302 × 1,078 = 0,787`, **non 1,021**.
+🔴 **E il danno si propaga**: chi legge `0,7302 → 1,021` deduce `×1,40`, lo applica allo short
+(`1,18742 × 1,40 = 1,66`) e **la soglia 1,38 del round diventa irraggiungibile per costruzione**. Il
+cancello più importante si autodistrugge nel documento che dovrebbe difenderlo.
+👉 Aggravante: il digest **va sul Desktop e sopravvive al file prova**. Un digest che cambia una cifra
+è **peggio di nessun digest**.
+**La regola**: ogni numero del testo iniettato si **cita** dal file prova, carattere per carattere, e
+il cancello lo confronta. Un numero che nel digest è stato *ricalcolato* è un numero nuovo, e i numeri
+nuovi non nascono nei riassunti.
+
+## ⚖️ CLASSE 724 — **il cancello dichiarato solo sulla metà che conviene (e vale nei DUE versi)**
+
+Stesso round, e questa classe l'hanno violata **due stesure di seguito, in direzioni opposte**.
+- **Stesura 1**: *"Stop minimo possibile 88,0 idx = 51,8× allo spread adottato. **Nessuna operazione
+  può nascere sotto i 40×. È un PIN, non una previsione.**"* 🔴 Teneva la **mediana** (1,70) e taceva
+  il **p95** (2,70), dove `88,0 / 2,70 = 32,6×` — **sotto i 40×**. Un assoluto costruito su metà misura.
+- **Stesura 2** (la correzione del cancello): *"passa sulla mediana, non passa sul p95"*. 🔴 Teneva il
+  **pavimento teorico** e taceva la **geometria attesa**, che il file prova misura al par. 8: stop
+  `146,2-272,5 idx` = **86,0×-160,3× sulla mediana e 54,2×-100,9× sul p95**, cioè **tutte e sette le
+  celle passano a tutti e due gli spread**, la peggiore con margine `1,4×`. Detta così, un round
+  largamente dentro il cancello sembrava marginale.
+✅ Riscritta su **due piani dichiarati**: il `32,6×` è il **pavimento**, non una cella — tocca solo la
+giornata in cui il box arriva esattamente al minimo.
+**La regola**: un cancello che ha **più di una statistica** (mediana e p95) o **più di un piano**
+(limite teorico e geometria attesa) si riporta **con tutti**, e l'assoluto si scrive **solo** se passa
+al bordo cattivo. 🔴 E la correzione di una metà taciuta **non è un permesso di tacere l'altra**: una
+mezza verità pessimista è lo stesso difetto di una ottimista.
+
+## 📊 CLASSE 725 — **`med` scritto per "mediana" su un numero a cavallo di una soglia**
+
+Stesso round. Il digest scriveva `n med 148` per il long. Ricalcolato dal CSV: **mediana 148,5**,
+**media 152,0**. 🔴 Il pavimento di casa è **150**: le due statistiche **stanno ai due lati della
+soglia**, quindi l'abbreviazione **decide il verdetto**. (E i file prova scrivevano `149/255` dove la
+riga scriveva `148/253`: due troncamenti diversi della stessa mediana.)
+**La regola**: vicino a una soglia si scrive la statistica **per esteso** (`n MEDIANO`), o **tutte e
+due**. E si aggiunge che **il pavimento si legge cella per cella, mai su un riassunto**.
+
+## ⏱️ CLASSE 726 — **il costo in tempo contato sulle passate NOMINALI quando la riga stessa dichiara quante sono VERE**
+
+Stesso round. La riga diceva `TEMPO ATTESO ~15-25 minuti: 28 passate x 0,700 min/passata` e **due
+frasi dopo** `le passate vere sono 14 su 28`. 🔴 Due affermazioni che **non possono essere vere
+insieme**, dentro la stessa riga. Il precedente di casa dice che la gamba OOS degenere **costa ~0**
+(`report/R187_..._2026-09-19.md` r.209).
+👉 Parente in dimensione-tempo della **classe 712** (il ritmo macchina è proprietà del motore e dei
+tick del simbolo), ma qui il difetto è **interno alla riga**, non un trasporto fra simboli.
+**La regola**: il moltiplicatore del tempo è il numero di passate **VERE**, e si scrive accanto alla
+frase che le dichiara. Si aggiunge sempre che **il tester spartisce le passate fra gli agenti: può
+finire prima, e finire prima non vuol dire che sia fallita.**
