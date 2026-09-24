@@ -459,10 +459,26 @@ doveva piazzare il suo ordine, avremmo perso l'operazione **e non lo avremmo nem
   opera.
 - 🔴 **E LA CONSEGUENZA CHE COSTA, da non dimenticare: il RUNNER NOTTURNO GIRA SUL VPS.**
   `backtest_pipeline/runner_abtg.ps1` r.91: `$Ora = "03:30"  # ora VPS della corsa notturna`,
-  ed e' un'**attivita' pianificata registrata sul VPS**. 👉 Finche' non viene **sospesa o
-  spostata**, ogni notte alle 03:30 il VPS rifa' da solo quello che il 21/09 e' stato fatto a
-  mano — e una corsa a tick che sfora arriva **dentro la sessione del mattino**.
-  **Sospenderla e' un'azione sul VPS: serve una riga, e la riga passa dal cancello.**
+  ed e' un'**attivita' pianificata registrata sul VPS**.
+  ✏️ **CORRETTO IL 24/09/2026, e la correzione cambia l'azione.** Qui c'era scritto che *"ogni
+  notte alle 03:30 il VPS rifa' da solo quello che il 21/09 e' stato fatto a mano"* e che andava
+  **sospeso**. 🔴 **Misurato: falso.** Il referto di quella notte
+  (`backtest_pipeline/coda/referti/REFERTO_RUNNER_20260924_033003.txt`) dice: *perimetro SOLA
+  LETTURA + corsia ROUND sul solo `C:\MT5_Backtest`* · **12 righe eseguite, di cui in corsia
+  ROUND: ZERO** · ~2,5 minuti in tutto. **Nessuno Strategy Tester e' partito**, e il banco
+  `50504400` e' davvero spento (ultimo giornale **21/09 14:51**).
+  🟢 **Quindi sospenderlo sarebbe un danno**: spegnerebbe **12 sonde di sola lettura** che ogni
+  notte ci consegnano i dati del campo — fra cui quella che il 24/09 ha **verificato che il
+  Guardian su FTMO e' vivo**, dopo che il Monte Carlo lo dava `[NON VERIFICATO]` accanto a
+  **+13,7 punti** di probabilita' di passare.
+  🔴 **Il pericolo vero e' un altro e va scritto preciso: la corsia ROUND ESISTE**, punta a
+  `C:\MT5_Backtest` (il terminale che il 21/09 ha inchiodato la macchina) e **parte da sola se
+  qualcuno mette una riga di round in `CODA.txt`**. Oggi quella coda ne ha **zero** e `CODA.txt`
+  non e' toccato dal 21/09 21:14: il rischio e' **ARMATO MA SCARICO**.
+  👉 La riparazione giusta e' **un cancello che rifiuti la corsia ROUND finche' una challenge e'
+  viva**, non spegnere tutto. E' una modifica al runner, quindi **una firma di Claudio**, e la
+  riga passa dai cancelli come tutto il resto.
+  Misura: `report/LA_CHALLENGE_NON_STA_OPERANDO_2026-09-24.md` §4.
 - 🟢 Quello che sul VPS **resta** (non consuma CPU in modo apprezzabile): le righe di **sola
   lettura** (giornali, spread logger, pagella), l'aggiornamento news delle 07:20, la pagella
   serale delle 23:15.
