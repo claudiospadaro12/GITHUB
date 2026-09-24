@@ -1,0 +1,21 @@
+RIEPILOGO R245 -- bordo di InpEmaSlow, breakout apertura DOW (U30USD M5, ABTG_Nasdaq_Apertura_US)
+data: 2026-09-24 15:09:19
+fine: 2026-09-24 15:37:06   durata minuti: 28   (stima 20-26; tetto 37-51; oltre 60 e BLOCCATA)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 NON toccato)
+pin : f489a6216b2dd83c361415a38151f3c595de0fd3
+deposito 10000 passato (banco d archivio); -Spread NON passato = spread reale dei tick
+
+R245a  modello 4   rc 0   motore = pin (SHA256)
+R245b  modello 4   rc 0   motore = pin (SHA256)
+R245c  modello 4   rc 0   motore = pin (SHA256)
+R245d  modello 4   rc 0   motore = pin (SHA256)
+R245e  modello 4   rc 0   motore = pin (SHA256)
+R245f  modello 4   rc 0   motore = pin (SHA256)
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin): MOTORE = PIN in ogni round partito
+
+CARTELLE ATTESE: 6   TROVATE: 6   -> CATENA COMPLETA
+
+PRIMA DI QUALUNQUE NUMERO: il cancello G0 (par. 4 di R245a). Le 32 celle d ancora 140/160/180/200 devono riprodurre l archivio: n IDENTICO, PF +-0,0005, DD +-0,01. Se G0 non e VERDE i numeri d archivio NON si mescolano.
+n e in POSIZIONI (TP1_ClosePct=0). Le 4 TP hanno le STESSE entrate: 3 TP su 4 e robustezza, non 4 prove. Cancello di costo AL PELO: mediana 41,25x a spread 3,00, 47,5 per cento dei giorni sotto 40x.

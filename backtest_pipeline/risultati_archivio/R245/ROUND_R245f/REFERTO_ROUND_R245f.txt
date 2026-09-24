@@ -1,0 +1,53 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : f489a6216b2dd83c361415a38151f3c595de0fd3
+data            : 2026-09-24 15:33:08   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_Nasdaq_Apertura_US
+file prova      : R245f_emaslow_SHORT_TP050_U30USD.txt   (9193 byte, dal pin)
+etichetta       : R245f
+simbolo         : U30USD
+periodo         : M5
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nasdaq_Apertura_US\ABTG_Nasdaq_Apertura_US_U30USD_IS_R245f.csv
+  righe : 7
+    Pass 0    Profit 1575.89      PF 1.84308    Equity DD % 5.7784     Trades 68
+    Pass 1    Profit 1478.28      PF 1.79307    Equity DD % 5.7784     Trades 69
+    Pass 2    Profit 1432.32      PF 1.75975    Equity DD % 5.7784     Trades 69
+    Pass 3    Profit 1325.38      PF 1.63927    Equity DD % 5.7784     Trades 72
+    Pass 4    Profit 1418.62      PF 1.65206    Equity DD % 5.7784     Trades 76
+    Pass 5    Profit 1321.94      PF 1.58388    Equity DD % 5.7784     Trades 78
+    Pass 6    Profit 1338.67      PF 1.58948    Equity DD % 5.7784     Trades 79
+  ESITO : LETTO -- 7 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nasdaq_Apertura_US\ABTG_Nasdaq_Apertura_US_U30USD_OOS_R245f.csv
+  righe : 7
+    Pass 0    Profit -196.86      PF 0.87245    Equity DD % 4.7039     Trades 42
+    Pass 1    Profit -298.54      PF 0.79216    Equity DD % 4.0691     Trades 36
+    Pass 2    Profit -116.33      PF 0.90788    Equity DD % 4.0691     Trades 34
+    Pass 3    Profit 199.14       PF 1.20335    Equity DD % 3.6243     Trades 31
+    Pass 4    Profit 64.29        PF 1.06709    Equity DD % 3.486      Trades 30
+    Pass 5    Profit 64.29        PF 1.06709    Equity DD % 3.486      Trades 30
+    Pass 6    Profit 64.29        PF 1.06709    Equity DD % 3.486      Trades 30
+  ESITO : LETTO -- 7 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO

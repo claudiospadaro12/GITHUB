@@ -55,6 +55,12 @@ quelli sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non c
 
 ---
 
+## 🟢 R245 — GIRATO il 24/09: altopiano `InpEmaSlow` 160-260, CENTRO 200 (aperto a destra)
+- 6/6 rc 0, motore = pin, 28 min. **G0 GIALLO**: n identico in 32/32 ancore, PF/DD in deriva (lotto, r.2045) -> lettura SOLO interna.
+- Cella al centro (200, TP 0,50): IS PF **1,252** n 154 DD 7,10% · OOS PF **1,489** n 197 DD 6,86% @1%. 140 cade solo su n IS 147. H1 (altopiano) confermata.
+- Lati: si scambiano fra IS e OOS; allarme corto 2/6, non scatta. Coerenza e+f=b: OOS esatta, IS residuo 5-14 crescente con l'EMA (seme).
+- Restano: DD a 2% ~14% [DERIVATO], costo 40x AL PELO, sovrapposizione con 770202 [NON MISURATA]. Referto: `report/REFERTO_R245_2026-09-24.md`.
+
 ## ⏳ R245 — il BORDO di `InpEmaSlow` sul breakout di apertura Dow (`ABTG_Nasdaq_Apertura_US`, U30USD M5) — PRONTO, NON ANCORA GIRATO (24/09/2026)
 - Domanda: nell'archivio il blocco buono sta su EmaSlow 160/180/200 e **200 e' il bordo della griglia**: senza l'altro lato non c'e' un centro. R245 misura **140..260** (7 celle) x 4 TP + lati separati: **6 file, 42 celle, 84 passate**, magic 765241-765246, `-Deposito 10000` (banco d'archivio).
 - Cancello G0 prima di tutto: le **32 celle d'ancora** 140-200 devono riprodurre l'archivio (n identico, PF +-0,0005). La riga controlla con **SHA256 dopo ogni job** che EA e include compilati siano quelli del pin `f489a621` (classe 166).
