@@ -35321,3 +35321,7 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🎭 CLASSE 766 — **"falso allarme atteso" attribuito per esclusione NON verificata**
 - **Caso (24/09, riga R246)**: sulle finestre A il driver esce rc 2 per il CSV `_IS` di un giorno (atteso), ma esce rc 2 **anche** quando `_OOS` ha righe con **Trades=0** (`RIGA_ROUND_VPS.ps1` r.1164-1170: "NON E' GIRATA", EA muto). La riga contava solo le RIGHE di `_OOS` e scriveva "FALSO ALLARME ATTESO" anche su un guasto vero. Contro-esempio eseguito dal cancello (scenario `oos0`).
 - **Regola**: un messaggio che ASSOLVE deve verificare la negazione dell'ipotesi alternativa (qui: N righe **e** N righe con Trades>0), e il suo contro-esempio si esegue. Parente delle classi 178 e 758.
+
+## 🕳️ CLASSE 767 — **il cancello [FUSO] guarda solo `InpSessionHour`/`InpIbInizioOra`: gli EA con ALTRI nomi d'orario non sono mai stati controllati**
+- **Caso (24/09, R246q/r MaxMin DAX)**: la dichiarazione `@ORARIO_INVERNALE` esce "ORFANA", perche' `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` usa `InpBoxStartHour`, `InpBoxEndHour`, `InpPlaceHour`, `InpEntryCutoffHour`, `InpCloseHour`. Quindi un MaxMin con l'orario sbagliato di un'ora **non e' mai stato bloccato** dal controllo deterministico, ne' prima ne' dopo la classe 763.
+- **Regola**: finche' il cancello non conosce gli input orari per EA, sugli EA senza `InpSessionHour` il controllo d'ora e' **solo** di strato 2, e va detto nel file prova. Riparazione: una mappa EA -> input orari -> ora di riferimento, nel cancello.
