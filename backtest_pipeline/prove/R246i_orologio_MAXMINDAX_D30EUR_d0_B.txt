@@ -1,0 +1,122 @@
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+# ==========================================================================
+#  R246i -- OROLOGIO O STAGIONE? -- TESTA DEL BLOCCO MAXMIN (sedia 770411)
+#  ABTG_MaxMinNotte_DAX_Short_Ottimizzato su D30EUR M15 -- TICK REALI --
+#  deposito 100000
+#  CELLA: la cella ESATTA del per-trade 770413 (R16b) -- orologio d0
+#  FINESTRA B (= R16b): 2024.09.26 -> 2026.06.30, taglio 0.40
+#  magic gemelli 794621 / 794671
+#  Il ragionamento del round sta in R246a (par. 0-12). Qui SOLO quello che
+#  e' del MaxMin. Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul
+#  VPS, NON su 50504400, NON su nessun conto.
+# ==========================================================================
+#  PIN: dal CSV risultati_prove/ABTG_MaxMinNotte_DAX_Short_Ottimizzato/
+#  ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_OOS_ptb.csv, input per
+#  input (R16b pinnava SOLO il magic: il resto era il default compilato del
+#  09/08, e il CSV lo riporta tutto). Nato dopo: InpUsaGuardian=false. Il
+#  binario da 6ee09c21 a oggi cambia solo per 5fc0bc31 (Guardian, 15 righe
+#  aggiunte, spente dal pin). Lato: SOLO SHORT (InpAllowLong=0,
+#  InpAllowShort=1 nel CSV).
+#  GLI INPUT ORARI, letti nel sorgente (r.51-64): InpBoxStartHour/Min,
+#  InpBoxEndHour/Min, InpPlaceHour/Min, InpEntryCutoffHour/Min,
+#  InpCloseHour/Min. InpPendingExpiryMin (r.67) e' una DURATA: non si sposta.
+#    d0 : box 23:00-04:59, piazzamento 07:59, cutoff 08:30, flat 17:30
+#    -1h: box 22:00-03:59, piazzamento 06:59, cutoff 07:30, flat 16:30
+#  ComputeBox (r.200-219): "if(tStart>=tEnd) tStart-=86400" -> 22:00 >= 03:59
+#  quindi il box -1h comincia il giorno prima, come quello d0.
+#  CALENDARIO: UE, come il DAX (R246e).
+#
+#  G0 (solo questo file): R16b (CSV ptb, stessi numeri della serie 770413)
+#     IS  Profit 4766.96  PF 1.87803  DD 3.0977  Trades 20
+#     OOS Profit 6143.38  PF 2.15985  DD 1.9213  Trades 21
+#     per-trade 21 righe, 14 posizioni, somma 6143.38 (= 770413)
+#     Nota: il CSV ptb in archivio porta i magic 770411/770412 (primo
+#     lancio); il per-trade 770413 e' del rilancio e la sua somma coincide
+#     al centesimo con Profit OOS. VERDE/GIALLO/ROSSO come R246a par. 5.
+#  G1: gemelle 794621/794671 identiche.
+#  S1 SENTINELLA: d0 -> nessuna uscita prima delle 08:00 (piazzamento 07:59;
+#     misurato su 770413: minimo 08:02:28). -1h -> per-trade NON identico a
+#     d0 e nessuna uscita dopo le 16:31. "Almeno un'uscita prima delle
+#     08:00" e' ATTESO (a d0 8 uscite su 21 cadono entro la prima ora dal
+#     piazzamento) ma con ~9 posizioni non e' garantito: se manca, S1 e'
+#     GIALLO, non ROSSO. Per-trade -1h identico a d0 -> NULLO.
+#  G2: la gamba IS del CSV di questo file e' il riferimento di R246k (d0,
+#     finestra A): somma e deal del per-trade di R246k attesi identici.
+#
+#  ATTESA DICHIARATA (python3 backtest_pipeline/r246_bande_attese.py):
+#  ancora B: estate 6 posizioni, 0,036 pos/feriale, PF 2,032; inverno 8
+#  posizioni, 0,073 pos/feriale, PF 2,245.
+#  >>> PF: NON DISCRIMINANTE PER COSTRUZIONE (classe 178). H_STAGIONE n~9
+#      [0,69 ; 7,52], H_OROLOGIO n~17 [1,16 ; 4,51]; verdetto sbagliato 46%
+#      o 45%. Il PF del MaxMin qui NON si legge per nessuna decisione.
+#  >>> FREQUENZA, INDIZIO DEBOLE: posizioni -1h sui 237 feriali estivi A+B,
+#      H_STAGIONE [4,9 ; 12,3], H_OROLOGIO [12,1 ; 22,4]: le bande si
+#      TOCCANO (12,1-12,3). Zone Qf 0,30/0,70 (soglie 11,2 / 14,7): se
+#      H_STAGIONE (0,815 ; 0,167 ; 0,018), se H_OROLOGIO (0,066 ; 0,193 ;
+#      0,741). Precondizione: divario dentro il round >= 0,018 pos/feriale.
+#  n: 9-17 posizioni per casella: NON e' un campione. Merito SOSPESO, e il
+#     rischio si legge (DD) ma su una manciata di operazioni.
+#  COSTO 40x: stop ATR (InpSLMode=1, ATR M15 x 2,5): [NON MISURATO] sia a
+#     d0 sia a -1h (spread D30EUR ore 06/07 BCM mediano 3,70 / 2,80 contro
+#     1,70 dell'ora 08, spread_orario_D30EUR.csv).
+#  Tempo: 0,214 min/passata e' di R242 (ABTG_MaxMinNotte, EA SORELLA):
+#     per questo binario [NON MISURATO] (classe 712).
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=59
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000
+InpTP1_R=1
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=3
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794621||794621||50||794671||Y

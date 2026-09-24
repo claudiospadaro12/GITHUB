@@ -1,0 +1,91 @@
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+# ==========================================================================
+#  R246j -- OROLOGIO O STAGIONE? -- ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR M15 -- TICK REALI -- dep. 100000
+#  OROLOGIO -1h (TUTTO l'orario spostato): box 22:00-03:59, piazzamento 06:59, cutoff 07:30, flat 16:30 BCM
+#  FINESTRA B (= R47/R16): 2024.09.26 -> 2026.06.30, taglio 0.40. Per-trade =
+#  gamba OOS 2025.06.10 -> 2026.06.30 (la finestra del Monte Carlo).
+#  magic gemelli 794622 / 794672
+#  TUTTO il ragionamento sta nel file di testa del round, R246a, e per
+#  questa sedia in R246i. Qui solo le differenze e i numeri di QUESTO file.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400 (C:\MT5_Backtest), NON su nessun terminale di conto.
+# ==========================================================================
+#  PIN: identico a R246i input per input, TRANNE gli input d'orologio
+#  (box 22:00-03:59, piazzamento 06:59, cutoff 07:30, flat 16:30 BCM)
+#  e il magic. Una sola variabile fra i file: lo spostamento
+#  dell'orologio (o la finestra), mai due insieme.
+#  CANCELLI (congelati, R246a par. 5):
+#   G1 gemelle 794622/794672 identiche in CSV e per-trade (tranne magic).
+#   G2 la gamba IS del CSV di questo file e' il riferimento di R246l
+#      (stesso orologio, finestra A).
+#   S1 sentinella dell'orologio: per-trade diverso da d0; nessuna uscita dopo le 16:31; uscite prima delle 08:00 attese (GIALLO se assenti).
+#      Se fallisce o se il per-trade e' identico all'altro orologio:
+#      il pin d'orario non e' arrivato all'EA -> file NULLO.
+#  CONFRONTO: R246i (stessa finestra, altro orologio).
+#  ATTESA DICHIARATA (sui giorni ESTIVI della cella -1h, finestre A+B
+#  insieme, cioe' R246j + R246l):
+#  PF NON DISCRIMINANTE (R246i). Frequenza (indizio debole): se
+#  H_STAGIONE [4,9 ; 12,3]; se H_OROLOGIO [12,1 ; 22,4] posizioni.
+#  Questo file DA SOLO non da' verdetto: il criterio (zone Q 0,30/0,70,
+#  precondizione sul divario d0) sta in R246a par. 7 e in R246i.
+#  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_794622.csv
+#  e abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_794672.csv (ultima gamba = OOS).
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpBoxStartHour=22
+InpBoxStartMin=0
+InpBoxEndHour=3
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=6
+InpPlaceMin=59
+InpEntryCutoffHour=7
+InpEntryCutoffMin=30
+InpCloseHour=16
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000
+InpTP1_R=1
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=3
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794622||794622||50||794672||Y

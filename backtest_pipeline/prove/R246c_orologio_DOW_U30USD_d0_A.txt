@@ -1,0 +1,124 @@
+#  EA: ABTG_Dow_Apertura_US
+# ==========================================================================
+#  R246c -- OROLOGIO O STAGIONE? -- ABTG_Dow_Apertura_US U30USD M5 -- TICK REALI -- dep. 100000
+#  OROLOGIO d0: armo 14:30, flat 17:30 BCM
+#  FINESTRA A: 2024.09.26 -> 2025.06.09, taglio 0.002. Gamba IS = UN giorno
+#  (2024.09.26, CSV _IS atteso VUOTO o da 0 byte: falso allarme atteso del
+#  runner). Gamba OOS 2024.09.27 -> 2025.06.09 = il PER-TRADE del primo
+#  inverno (2024/25, sfasato anche lui) e dell'estate A.
+#  magic gemelli 794603 / 794653
+#  TUTTO il ragionamento sta nel file di testa del round, R246a (che e'
+#  anche la testa di questa sedia). Qui solo le differenze e i numeri.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400 (C:\MT5_Backtest), NON su nessun terminale di conto.
+# ==========================================================================
+#  PIN: identico a R246a input per input, TRANNE gli input d'orologio
+#  (armo 14:30, flat 17:30 BCM)
+#  e il magic. Una sola variabile fra i file: lo spostamento
+#  dell'orologio (o la finestra), mai due insieme.
+#  CANCELLI (congelati, R246a par. 5):
+#   G1 gemelle 794603/794653 identiche in CSV e per-trade (tranne magic).
+#   G2 somma net_profit e numero di deal del per-trade di questo file
+#      contro Profit e Trades della gamba IS di R246a (stesso orologio,
+#      finestra B): attesi IDENTICI; unica causa ammessa di scarto il
+#      26/09/2024, che qui non c'e'. Si dichiara lo scarto, non si presume.
+#   S1 sentinella dell'orologio: nessuna uscita prima delle 15:05 ne' dopo le 17:31 BCM.
+#      Se fallisce o se il per-trade e' identico all'altro orologio:
+#      il pin d'orario non e' arrivato all'EA -> file NULLO.
+#  CONFRONTO: R246d (stessa finestra, altro orologio).
+#  ATTESA DICHIARATA (sui giorni ESTIVI della cella -1h, finestre A+B
+#  insieme, cioe' R246b + R246d):
+#  se H_STAGIONE: PF estate -1h (A+B) in [0,55 ; 1,15], posizioni in
+#  [76,9 ; 96,7]; se H_OROLOGIO: [1,27 ; 2,22] e [106,4 ; 127,5].
+#  Questo file DA SOLO non da' verdetto: il criterio (zone Q 0,30/0,70,
+#  precondizione sul divario d0) sta in R246a par. 7.
+#  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_Dow_Apertura_US_U30USD_794603.csv
+#  e abtg_trades_ABTG_Dow_Apertura_US_U30USD_794653.csv (ultima gamba = OOS).
+# ==========================================================================
+
+@SIMBOLO    U30USD
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2025.06.09
+@FRAZIONEIS 0.002
+
+InpUsaGuardian=false
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=1000
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=400
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794603||794603||50||794653||Y

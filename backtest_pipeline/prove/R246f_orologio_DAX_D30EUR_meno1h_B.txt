@@ -1,0 +1,130 @@
+#  EA: ABTG_DAX_Apertura_EU
+# ==========================================================================
+#  R246f -- OROLOGIO O STAGIONE? -- ABTG_DAX_Apertura_EU D30EUR M5 -- TICK REALI -- dep. 100000
+#  OROLOGIO -1h (TUTTO l'orario spostato): armo 07:00, flat 16:30 BCM
+#  FINESTRA B (= R47/R16): 2024.09.26 -> 2026.06.30, taglio 0.40. Per-trade =
+#  gamba OOS 2025.06.10 -> 2026.06.30 (la finestra del Monte Carlo).
+#  magic gemelli 794612 / 794662
+#  TUTTO il ragionamento sta nel file di testa del round, R246a, e per
+#  questa sedia in R246e. Qui solo le differenze e i numeri di QUESTO file.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400 (C:\MT5_Backtest), NON su nessun terminale di conto.
+# ==========================================================================
+#  PIN: identico a R246e input per input, TRANNE gli input d'orologio
+#  (armo 07:00, flat 16:30 BCM)
+#  e il magic. Una sola variabile fra i file: lo spostamento
+#  dell'orologio (o la finestra), mai due insieme.
+#  CANCELLI (congelati, R246a par. 5):
+#   G1 gemelle 794612/794662 identiche in CSV e per-trade (tranne magic).
+#   G2 la gamba IS del CSV di questo file e' il riferimento di R246h
+#      (stesso orologio, finestra A).
+#   S1 sentinella dell'orologio: nessuna uscita dopo le 16:31; >= 10% delle uscite prima delle 08:35.
+#      Se fallisce o se il per-trade e' identico all'altro orologio:
+#      il pin d'orario non e' arrivato all'EA -> file NULLO.
+#  CONFRONTO: R246e (stessa finestra, altro orologio).
+#  ATTESA DICHIARATA (sui giorni ESTIVI della cella -1h, finestre A+B
+#  insieme, cioe' R246f + R246h):
+#  PF NON DISCRIMINANTE (R246e). Frequenza: se H_STAGIONE posizioni
+#  estate -1h (A+B) in [144,3 ; 163,1]; se H_OROLOGIO [177,1 ; 193,4].
+#  Questo file DA SOLO non da' verdetto: il criterio (zone Q 0,30/0,70,
+#  precondizione sul divario d0) sta in R246a par. 7 e in R246e.
+#  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794612.csv
+#  e abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794662.csv (ultima gamba = OOS).
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpSessionHour=7
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=16
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpSpaceMode=0
+InpSpaceTF=16388
+InpSpaceMinR=0.0
+InpSpaceMaxR=0.0
+InpSpaceEma1=14
+InpSpaceEma2=50
+InpSpaceEma3=100
+InpSpaceEma4=200
+InpSpaceUseST=false
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794612||794612||50||794662||Y
