@@ -59,7 +59,7 @@ quelli sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non c
 - Domanda: nell'archivio il blocco buono sta su EmaSlow 160/180/200 e **200 e' il bordo della griglia**: senza l'altro lato non c'e' un centro. R245 misura **140..260** (7 celle) x 4 TP + lati separati: **6 file, 42 celle, 84 passate**, magic 765241-765246, `-Deposito 10000` (banco d'archivio).
 - Cancello G0 prima di tutto: le **32 celle d'ancora** 140-200 devono riprodurre l'archivio (n identico, PF +-0,0005). La riga controlla con **SHA256 dopo ogni job** che EA e include compilati siano quelli del pin `f489a621` (classe 166).
 - 🟠 **Il costo e' AL PELO, e va detto accanto a qualunque numero**: stop mediano 123,75 idx = **41,25x** a spread 3,00; **212 giornate su 446 (47,5%)** sotto 40x (ricontato su `Studio_U30USD.csv`).
-- File prova: PASS dello strato 2 dopo due correzioni (asse esteso anche a sinistra, esiti elencati per intero). Riga `backtest_pipeline/righe/RIGA_R245_DOW_EMASLOW.txt`: PASS dopo una correzione. Classi 749-752.
+- File prova: PASS dello strato 2 dopo due correzioni (asse esteso anche a sinistra, esiti elencati per intero). Riga `backtest_pipeline/righe/RIGA_R245_DOW_EMASLOW.txt`: PASS dopo una correzione, **poi riaperta**: il controllo 166 era un fail-open (classe 753, variabile `$att` riusata), chiuso con `$sha166` e contro-esempio eseguito; **ri-cancello in corso, finche' non torna la riga NON esce**. Classi 749-752.
 - ⚠️ Da annotare nel referto: il par. 10 di R245a (al pin) porta la stima vecchia del tempo (~10 min); **quella giusta e' 20-26 min, tetto 37-51**: stesso EA, stessa macchina, un solo agente.
 
 ---
