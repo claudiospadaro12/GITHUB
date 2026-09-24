@@ -9,7 +9,7 @@
 #  CORTO, non della finestra in generale"*. Cioe': il lungo non era un
 #  secondo esperimento, era **il CONTROLLO**.
 #
-#  🔴 **In R240 (U30USD, ancora del NASDAQ) IL CONTROLLO NON HA TENUTO:**
+#  [!] **In R240 (U30USD, ancora del NASDAQ) IL CONTROLLO NON HA TENUTO:**
 #      LUNGO OOS: PF spenta **1,33033** (n 114) -> accesa **0,92837**
 #                 (n 86) -> **R_tick = 0,6978**, ramo `< 0,80`
 #      DD  OOS:   3,3812 -> 2,9411 -> R_DD 0,8699
@@ -70,7 +70,7 @@
 #        in TUTTE E TRE le fonti: 0,610 / 0,706 / 0,779). Si prende lo
 #        stesso perche' questo round NON sceglie una cella da promuovere:
 #        **riproduce l'ancora GIA' DICHIARATA dall'archivio** per togliere
-#        di mezzo la spiegazione (2). 🔴 Conseguenza congelata: **R243
+#        di mezzo la spiegazione (2). [!] Conseguenza congelata: **R243
 #        NON PROMUOVE NIENTE**, qualunque numero esca.
 #    `InpTP_RR = 2.5` -- **CENTRO** dell'unico altopiano PIATTO misurato
 #        sul Dow: in OHLC, a 3.5/9, TP_RR 2.0/2.5/3.0 danno
@@ -104,7 +104,7 @@
 #   Il corto parte da 3.5/**7**, questo lato parte da 2.5/**12**: sono due
 #   distanze DIVERSE dall'ancora del Dow, e producono attese diverse.)
 # ==========================================================================
-#  🔴 **IL PUNTO DI PARTENZA DI QUESTO LATO E' PIU' LONTANO.**
+#  [!] **IL PUNTO DI PARTENZA DI QUESTO LATO E' PIU' LONTANO.**
 #  R240a (corto) girava StMult **3.5** / AtrP **7**: dall'ancora del Dow
 #  (3.5/9) lo separa **UNA manopola, un passo di due**.
 #  R240b (questo lato) girava StMult **2.5** / AtrP **12**: dall'ancora
@@ -156,7 +156,7 @@
 # ==========================================================================
 #  ### PARTE 3 -- I DUE BUCHI DI QUESTO LATO, dichiarati prima ###
 # ==========================================================================
-#  🔴 **BUCO 1 -- L'ANCORA DEL DOW E' STATA TARATA CON DUE LATI ACCESI.**
+#  [!] **BUCO 1 -- L'ANCORA DEL DOW E' STATA TARATA CON DUE LATI ACCESI.**
 #     Tutte e quattro le fonti (A, B, C, D) girano `InpAllowLong=true` E
 #     `InpAllowShort=true`. **Sul Dow il lato lungo da solo non e' MAI
 #     stato tarato.** Questo file lo gira da solo perche' la regola dei
@@ -173,14 +173,14 @@
 #         **cancella** nel confronto R240 <-> R243 e **non si cancella**
 #         nel confronto con l'archivio a due lati.
 #
-#  🔴 **BUCO 2 -- QUI CAMBIANO DUE MANOPOLE INSIEME** (StMult 2.5->3.5 e
+#  [!] **BUCO 2 -- QUI CAMBIANO DUE MANOPOLE INSIEME** (StMult 2.5->3.5 e
 #     AtrP 12->9), mentre sul gemello corto ne cambia una sola. Il
 #     contro-esempio della Parte 4 regge lo stesso -- perche' poggia sul
 #     **rapporto**, non sulla cella -- ma la lettura di quale delle due
 #     manopole abbia fatto cosa **resta fuori portata**, e il referto non
 #     puo' scriverla. Chi la scrivesse lo farebbe senza misura.
 #
-#  🔴 **BUCO 3 -- IL REGIME, e su questo lato il verso e' l'OPPOSTO del
+#  [!] **BUCO 3 -- IL REGIME, e su questo lato il verso e' l'OPPOSTO del
 #     corto.** I tick BCM sugli indici sono 21 mesi e **UN SOLO REGIME,
 #     un toro**. Il lungo parte **FAVORITO per costruzione**: un PF
 #     decente su questo lato non e' merito del motore ne' della finestra,
@@ -223,7 +223,7 @@
 #      gia' dentro il denominatore. L'obiezione "avete cambiato piu' cose
 #      insieme" e' **falsificata sul rapporto**, non sulla cella.
 #
-#  🔴 **LA TERZA IPOTESI, che le due qui sopra NON coprono e che questo
+#  [!] **LA TERZA IPOTESI, che le due qui sopra NON coprono e che questo
 #      round NON PUO' ESCLUDERE -- e su questo lato pesa di PIU', perche'
 #      qui le manopole mosse sono DUE (Buco 2):**
 #      **H_int** : la taratura NON agisce allo STESSO modo dentro e fuori
@@ -237,12 +237,12 @@
 #          STESSA casella.
 #      >>> Cosa NON tocca: la cella SPENTA resta un controllo valido
 #          della taratura, e H_anc resta falsificabile.
-#      >>> 🔴 VINCOLO SUL REFERTO: il ramo piatto si scrive *"il controllo
+#      >>> [!] VINCOLO SUL REFERTO: il ramo piatto si scrive *"il controllo
 #          TORNA PIATTO con l'ancora del Dow"* -- fatto sulla COPPIA
 #          ancora-ore -- e **non** *"la finestra non fa niente al lungo
 #          del Dow"*, che sarebbe un'affermazione su TUTTE le tarature.
 #
-#  🔴 **IL CASO CHE SMONTEREBBE IL ROUND, scritto prima**: se la cella
+#  [!] **IL CASO CHE SMONTEREBBE IL ROUND, scritto prima**: se la cella
 #      SPENTA torna **dentro 1,25-1,40** (cioe' NON si muove dal 1,33033
 #      di R240b: le due manopole sono inerti su questo lato) **E** il
 #      rapporto si muove tanto, allora il movimento non ha spiegazione
@@ -251,7 +251,7 @@
 #      suo stesso risultato, e si guarda il BANCO (determinismo, binario,
 #      modello, deposito) prima dei parametri.
 #
-#  🔴 **E IL CONTRO-ESEMPIO PIU' SCOMODO, che va scritto perche' e' quello
+#  [!] **E IL CONTRO-ESEMPIO PIU' SCOMODO, che va scritto perche' e' quello
 #      che fa comodo tacere: un lungo che torna PIATTO NON PROVA che il
 #      corto ha ragione.** Il piatto del lungo e' una condizione
 #      NECESSARIA perche' la lettura di R238 si trasferisca, non
@@ -270,19 +270,19 @@
 #    MEDIANA idx, ore 14-21 (dentro): 2,0 2,0 1,9 1,9 1,9 1,9 1,9 1,8
 #    MEDIANA idx, ore 0-13 e 23 (fuori): 2,6 - 2,8
 #    ora 22: 2,1 su 104.230 tick = lo 0,16% del file (bordo, non fascia)
-#  🔴 ATTENZIONE: **76-80** e **104-112** nei referti NON sono lo spread:
+#  [!] ATTENZIONE: **76-80** e **104-112** nei referti NON sono lo spread:
 #     sono la FRONTIERA `40 x spread`. Confonderli sbaglia di 40 volte.
 #
 #  LA CATENA, rifatta sui numeri di QUESTA cella (non copiata dal corto:
 #  il corto parte da PF 0,97084 su n=76, questo da 1,33033 su n=114, e il
 #  risultato NON e' lo stesso) -- E IL PRIMO ANELLO E' UNA BANDA:
 #    risparmio per operazione       = 2,7 - 1,9 = **0,8 idx**
-#    🔴 **LA DISTANZA INGRESSO->SL DI QUESTA GEOMETRIA NON E' MISURATA**,
+#    [!] **LA DISTANZA INGRESSO->SL DI QUESTA GEOMETRIA NON E' MISURATA**,
 #       e R240a l'aveva gia' congelato (r.153: *"il 40x: SOSPESO. La
 #       distanza ingresso->SL di questa geometria non e' misurata e serve
 #       la FASE 1 (Optimization=0, Giornale acceso), che oggi non esiste
 #       come riga di lancio."*). **R243 EREDITA la sospensione.**
-#    🔴 **E `3,5 x ATR` NON E' LO STOP, per costruzione del codice.**
+#    [!] **E `3,5 x ATR` NON E' LO STOP, per costruzione del codice.**
 #       `InpStMult x ATR` e' la SEMI-LARGHEZZA della banda Supertrend
 #       misurata da `hl2` (`SupertrendSeries`: `bUp = hl2 +
 #       InpStMult*atr`, `bLo = hl2 - InpStMult*atr`), **non** la distanza
@@ -317,7 +317,7 @@
 #        che **il meccanismo mangia il vantaggio di costo e un po' di
 #        piu'** (1,05-1,12 atteso dal solo costo).
 #      Sono due frasi diverse e nel referto vanno tenute separate.
-#      - 🔴 **E IL RAMO `1,20-1,79` VA LETTO CON PRUDENZA NUOVA**: contro
+#      - [!] **E IL RAMO `1,20-1,79` VA LETTO CON PRUDENZA NUOVA**: contro
 #        un costo che da solo vale fino a **1,12**, la soglia 1,20 e'
 #        **sottile**, non comoda. Nel referto si scrive sottile.
 #  >>> LIMITE DEL CONTO, dichiarato: vale se la finestra filtrasse LE
@@ -403,29 +403,29 @@
 #      CONTRADDICE R238 -- ed e' la classe 690, gia' pagata su R238b.
 #
 #  R_tick = PF(ACCESA) / PF(SPENTA) del LUNGO in OOS:
-#    0,80-1,19 -> 🟢 **PIATTO: IL CONTROLLO TIENE, e con l'ancora del Dow
+#    0,80-1,19 -> [ok] **PIATTO: IL CONTROLLO TIENE, e con l'ancora del Dow
 #                 la lettura di R238 si trasferisce.** E' anche
 #                 **l'indizio piu' forte** che il 0,6978 di R240b fosse
 #                 un fatto dei PIN e non del simbolo.
-#                 🔴 **INDIZIO, NON PROVA, e la parola conta**: e' UNA
+#                 [!] **INDIZIO, NON PROVA, e la parola conta**: e' UNA
 #                 coppia di corse su n ~76 spenta / ~57 accesa, senza
 #                 ripetizione e **senza barra d'errore** -- questo round
 #                 non ne produce nessuna, e a questi campioni un
 #                 rapporto di PF si muove anche per sola varianza.
 #                 Notizia grossa lo stesso: ma si scrive "indizio".
-#    1,20-1,79 -> 🟠 DIVERGENZA lieve nell'altro verso: sul Dow la
+#    1,20-1,79 -> [~] DIVERGENZA lieve nell'altro verso: sul Dow la
 #                 finestra AIUTA anche il lungo. Si riporta, non si
 #                 conclude -- e si guarda subito quanto di quell'aiuto
-#                 e' il ~1,03 di solo COSTO (Parte 4).
-#    >= 1,80   -> 🔴 DIVERGENZA FORTE, e **non e' una buona notizia in
+#                 e' il 1,05-1,12 di solo COSTO (Parte 4).
+#    >= 1,80   -> [!] DIVERGENZA FORTE, e **non e' una buona notizia in
 #                 piu'**: e' una CREPA nella lettura "l'effetto e' del
 #                 lato corto". Va scritta come crepa, non festeggiata.
-#    < 0,80    -> 🔴 **la finestra PEGGIORA il lungo ANCHE con l'ancora
+#    < 0,80    -> [!] **la finestra PEGGIORA il lungo ANCHE con l'ancora
 #                 del Dow.** Allora R240b non era colpa dei pin, e su
 #                 U30USD la finestra taglia via operazioni buone dal
 #                 lungo **con tutte e due le ancore MISURATE** -- cioe'
 #                 il risultato e' **compatibile con H_ses**.
-#                 >>> 🔴 **"A PRESCINDERE DALLA TARATURA" NON SI SCRIVE.**
+#                 >>> [!] **"A PRESCINDERE DALLA TARATURA" NON SI SCRIVE.**
 #                     Due tarature non sono tutte le tarature, e H_ses
 #                     e' un'affermazione universale che due punti non
 #                     dimostrano. E' la stessa delimitazione che il
@@ -445,27 +445,27 @@
 #      vero prodotto del round (identica nel gemello R243a, apposta):
 #      corto      | lungo        | si scrive
 #      -----------|--------------|---------------------------------------
-#      >= 1,80    | 0,80-1,19    | 🟢 R238 SI REPLICA sul Dow con l'ancora
+#      >= 1,80    | 0,80-1,19    | [ok] R238 SI REPLICA sul Dow con l'ancora
 #                 | (piatto)     | giusta: il controllo tiene e l'effetto
 #                 |              | e' del LATO CORTO. Massimo esito
 #                 |              | possibile di questo round.
-#      >= 1,80    | fuori banda  | 🟠 la finestra muove TUTTI E DUE i
+#      >= 1,80    | fuori banda  | [~] la finestra muove TUTTI E DUE i
 #                 |              | lati: effetto di SESSIONE, non del
 #                 |              | lato corto. La lettura di R238 resta
 #                 |              | INCRINATA come dopo R240.
-#      0,80-1,19  | qualunque    | 🔴 la finestra USA non muove il corto
+#      0,80-1,19  | qualunque    | [!] la finestra USA non muove il corto
 #                 |              | del Dow con NESSUNA delle due ancore.
 #                 |              | Chiude il trasferimento R238 -> Dow.
 #                 |              | **NON chiude il motore.**
-#      < 0,80     | qualunque    | 🔴 la finestra peggiora il corto con
+#      < 0,80     | qualunque    | [!] la finestra peggiora il corto con
 #                 |              | tutte e due le ancore.
 #
-#  🪦 **IL CERTIFICATO DI MORTE, perche' non si scriva "morto" per
+#  [morto] **IL CERTIFICATO DI MORTE, perche' non si scriva "morto" per
 #     stanchezza.** Anche col ramo piu' brutto, R243 + R240 chiudono UNA
 #     domanda (il trasferimento del meccanismo di R238 sul Dow), non il
 #     candidato. Restano scoperte, ed e' quello che va in
 #     `REGISTRO_TEST.md`:
-#       1. PF -> OK (R240 + R243) · 2. n + DD -> OK
+#       1. PF -> OK (R240 + R243) - 2. n + DD -> OK
 #       3. gestione dell'uscita ad asse su QUESTO binario e QUESTO
 #          simbolo -> **DA DICHIARARE**: gli assi `InpTrailOnST` /
 #          `InpExitOnFlip` / `InpFirstFraction` su U30USD esistono in
@@ -478,7 +478,7 @@
 #          sessione propria dell'indice).
 #       5. TF cambiato -> **NO su questa geometria**: H1 e basta. R190c
 #          (M30) e' scritto e MAI GIRATO.
-#     🔴 Con la 3 e la 5 scoperte, il verdetto resta **"NON ANCORA
+#     [!] Con la 3 e la 5 scoperte, il verdetto resta **"NON ANCORA
 #        MISURATO"**, con scritto cosa manca.
 #
 # ==========================================================================
@@ -520,14 +520,14 @@
 # ==========================================================================
 #  Pedaggio sugli indici = SPREAD E BASTA (commissione 0,0000 MISURATA su
 #  n=302 deal, `report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md`).
-#  🔴 **IL CANCELLO NON SI PUO' COMPILARE, E QUINDI NON SI COMPILA.** Il
+#  [!] **IL CANCELLO NON SI PUO' COMPILARE, E QUINDI NON SI COMPILA.** Il
 #  numeratore del 40x e' la distanza **ingresso -> SL**, e su questa
 #  geometria **NON E' MISURATA**. R240a l'aveva gia' congelato (r.153:
 #  *"il 40x: SOSPESO... serve la FASE 1 (Optimization=0, Giornale
 #  acceso), che oggi non esiste come riga di lancio"*) e **R243 EREDITA
 #  la sospensione**: un round gemello non revoca un cancello sospeso dal
 #  round che sta riproducendo.
-#  >>> 🔴 **E NON SI METTE `3,5 x ATR` AL SUO POSTO**: e' la semi-larghezza
+#  >>> [!] **E NON SI METTE `3,5 x ATR` AL SUO POSTO**: e' la semi-larghezza
 #      della banda Supertrend misurata da `hl2` (`SupertrendSeries`),
 #      mentre ingresso (r.347/354) e stop (r.386-389) stanno TUTTI E DUE
 #      addosso alla banda -- la larghezza si cancella. Darebbe 273 idx,
@@ -536,10 +536,10 @@
 #      stop `[INFERITO, BANDA]` **1,0-2,0 x ATR(9)** = **78 - 176 idx**
 #      (ATR di casa in banda **78,0-88,2**, referto ADR r.159-163).
 #        contro spread MEDIANO dentro (ora 14, la piu' cara) **2,0**
-#          -> **39,0x - 88,2x**   🔴 il 40x cade DENTRO la banda
+#          -> **39,0x - 88,2x**   [!] il 40x cade DENTRO la banda
 #        contro spread MEDIANO fuori (ore 0-2, dove la cella SPENTA opera
-#        anche) **2,8** -> **27,9x - 63,0x**   🔴 il 40x cade DENTRO
-#        contro **p95** dell'ora 14 **3,0** -> **26,0x - 58,8x**   🔴 idem
+#        anche) **2,8** -> **27,9x - 63,0x**   [!] il 40x cade DENTRO
+#        contro **p95** dell'ora 14 **3,0** -> **26,0x - 58,8x**   [!] idem
 #  >>> CONTRO-ESEMPIO DEL CANCELLO (regola del 10/09), e stavolta
 #      **l'alternativa VINCE**: perche' il 40x cada al p95 dell'ora 14
 #      basta uno stop **< 120 idx**, cioe' **1,5 x ATR(9)** -- che sta
@@ -552,16 +552,16 @@
 #      escluso**. Il round PUO' girare lo stesso (R240 e' girato con la
 #      stessa sospensione), ma il referto **NON puo' scrivere "H1 non e'
 #      escluso per costo"**.
-#  >>> 🔴 **LA VIA PIU' CORTA AL NUMERO CHE MANCA, col suo costo:** UNA
+#  >>> [!] **LA VIA PIU' CORTA AL NUMERO CHE MANCA, col suo costo:** UNA
 #      passata a `Optimization=0` col Giornale acceso sulla cella SPENTA
 #      OOS (**~2,25 minuti**, stessa base di ritmo della Parte 9) stampa
 #      le distanze ingresso->SL vere e chiude il cancello per sempre su
-#      tutta la famiglia SupRev. 🟢 **E IL NUMERO C'E' GIA' NEL CODICE,
+#      tutta la famiglia SupRev. [ok] **E IL NUMERO C'E' GIA' NEL CODICE,
 #      verificato a HEAD il 24/09: r.422-423 stampa `"... mercato %.2f
 #      lot @ ENTRY SL ... TP ..."` a ogni ingresso**, gia' acceso da
 #      `InpVerbose=true` pinnato qui sotto; serve solo `Optimization=0`
 #      (in ottimizzazione le Print girano sugli agenti e non si leggono,
-#      checklist 34 e 34-ter). 🔴 **E NON basta il per-trade**: r.719
+#      checklist 34 e 34-ter). [!] **E NON basta il per-trade**: r.719
 #      `ExportTrades()` scrive SOLO i deal di USCITA (`close_time`,
 #      `price`, `net_profit`); ingresso e SL non ci sono. Manca la riga
 #      di lancio: e' la prima cosa da chiedere dopo R243.
@@ -604,7 +604,7 @@
 #    possibile.
 #  MODELLO: 4 (TICK REALI) -- non imponibile dal file: e' `-Modello`.
 #  DEPOSITO: la riga di lancio DEVE passare **-Deposito 100000** (default
-#    del driver 10000). 🔴 **E LA RAGIONE VA CORRETTA: NON e' il `return`
+#    del driver 10000). [!] **E LA RAGIONE VA CORRETTA: NON e' il `return`
 #    a r.400.** `LotByRisk` chiude con `MathMax(mn, MathMin(mx, lot))`,
 #    quindi **per deposito piccolo il lotto non arriva mai a zero: si
 #    SCHIACCIA sul minimo** -- documentato nel commento dell'EA stesso
@@ -647,7 +647,7 @@
 #    (`mql5/Experts/ABTG_SupertrendReversal.mq5`, 794 righe, ultimo
 #    commit sul file b45dd009 dell'11/09): non copiate da un altro
 #    documento (classe 731).
-#  BERSAGLIO: **PC DI BACKTEST**. 🔴 NON il VPS: la challenge e' viva e
+#  BERSAGLIO: **PC DI BACKTEST**. [!] NON il VPS: la challenge e' viva e
 #    la regola del 21/09 vieta i round sul VPS. NON il piccolo 50503392,
 #    NON il 100k 50504263, NON il reale 10105439, NON l'FTMO 541452707.
 #  CANCELLO: questo file NON LANCIA NIENTE. La riga di lancio la scrive
