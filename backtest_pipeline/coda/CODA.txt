@@ -3206,3 +3206,25 @@ f4e1c2fc712c0d2d0391d0b8313a6380884abbb3 | backtest_pipeline/righe/CODA_12_pertr
 # =====================================================================
 # [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 2faa7e37790eaef4bb6398fc4c9b0a8c57764a4a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R178a_slmode_gapfill_225JPY.txt -Etichetta r178a -Modello 4 -Deposito 100000
 # =====================================================================
+
+# ---------------------------------------------------------------------
+# NOTA DEL 24/09/2026 -- ERRATA AL MESSAGGIO DEL COMMIT PRECEDENTE
+# Nel commit che ha aggiornato il pin di CODA_12 (r.605) ho scritto
+# "Nessun'altra riga della coda puntava al pin vecchio". ALLA LETTERA E'
+# FALSO, e me ne sono accorto da un grep che dava 1 invece di 0.
+# La riga superstite e' la r.525: STESSO pin 8d9d4fb9, ma
+#   - e' un ALTRO script (RIGA_SOTTILE_ROUND.ps1, non CODA_12),
+#   - e' COMMENTATA e marcata [SOSPESO 21/09 -- CHALLENGE VIVA],
+#   - ed e' una riga di CORSIA ROUND, sospesa proprio perche' la
+#     challenge FTMO 541452707 sta operando.
+# Quindi la conclusione operativa regge (nessuna riga ATTIVA e nessuna
+# riga di CODA_12 restava indietro), ma la frase no. Un pin condiviso fra
+# righe diverse e' normale: il pin e' un COMMIT, non un file.
+#
+# E quella riga e' anche la prova fisica di una cosa scritta stamattina
+# in report/LA_CHALLENGE_NON_STA_OPERANDO_2026-09-24.md par. 4: il
+# rischio della corsia ROUND e' "ARMATO MA SCARICO". Eccolo, l'armamento:
+# basta togliere un '#' e alle 03:30 parte uno Strategy Tester sul VPS
+# mentre le sei sedie operano. Non lo tolgo, e nessuno lo tolga senza la
+# firma di Claudio.
+# ---------------------------------------------------------------------
