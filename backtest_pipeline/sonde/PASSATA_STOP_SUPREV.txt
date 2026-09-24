@@ -1,0 +1,90 @@
+# =====================================================================
+#  PASSATA STOP SUPREV -- LA DISTANZA INGRESSO->SL, MISURATA
+#  Guidata da: backtest_pipeline/righe/PASSATA_STOP_SUPREV.ps1
+#  Chiesta da Claudio il 24/09/2026: "PREPARA LA PASSATA DA 2 MINUTI SUL SUPREV"
+#
+#  QUESTO FILE NON LANCIA NIENTE. Bersaglio: PC DI BACKTEST DESKTOP-H4D7CAJ,
+#  terminale unico C:\Program Files\BCM Markets MT5 Terminal, loggato sul
+#  DEMO 50503392 (da quella macchina il 14/08/2026 sono partiti ordini veri:
+#  AllowLiveTrading=false in tutte e due le .ini). NON toccati: VPS
+#  VMI3047753 e i suoi sei terminali, FTMO 541452707, REALE 10105439, 100k
+#  50504263, manuale 50503635, banco 50504400.
+#
+#  --- 0. IL TEMPO, E UNA CORREZIONE ALLA MIA STIMA -------------------
+#  Avevo detto "2 minuti" (2,25). ERA SBAGLIATO, e per la classe 712/726:
+#  2,25 era 18 minuti di R240 DIVISI per 8 passate, ma quelle passate
+#  coprivano MEZZA finestra ciascuna (IS o OOS) e giravano DUE ALLA VOLTA
+#  in parallelo. Per file, R240 ha impiegato ~8,85 minuti per coprire
+#  2024.09.26 -> 2026.06.30 UNA volta per cella. Una passata singola sulla
+#  finestra intera costa quindi ~8 minuti, e le passate sono DUE (i due
+#  lati). STIMA DICHIARATA: 15-25 MINUTI. Non fermarla prima di 45.
+#
+#  --- 1. LA DOMANDA, UNA SOLA ---------------------------------------
+#  Qual e' la distanza ingresso->SL degli ingressi di ABTG_SupertrendReversal
+#  su U30USD H1, con l'ancora del Dow di R243 (StMult 3.5, StAtrPeriod 9,
+#  NearAtr 1.0, TP_RR 2.5, SLLookback 5, SLBufferPips 3.0)?
+#  Il cancello "stop >= 40 x spread" su questa famiglia e' SOSPESO da R240a
+#  r.153, e R243 lo aveva chiuso con un numero sbagliato (3,5 x ATR = la
+#  semi-larghezza della banda, classe 735).
+#
+#  --- 2. PERCHE' UNA PASSATA SINGOLA --------------------------------
+#  L'EA stampa gia' la distanza a ogni ingresso (r.423-424:
+#  "LONG/SHORT mercato %.2f lot @ ENTRY SL ... TP ...", attiva con
+#  InpVerbose=true, pinnato). Ma il driver di casa forza Optimization=1
+#  (walkforward_generico.ps1 r.1015 e r.2013), e sugli agenti di
+#  ottimizzazione le Print non si leggono. Il per-trade dell'EA
+#  (ExportTrades) scrive SOLO i deal di uscita: ingresso e SL non ci sono.
+#
+#  --- 3. COSA SI GIRA, ESATTAMENTE ----------------------------------
+#  Due passate singole, Optimization=0, tick reali (Model=4), deposito
+#  100000, EUR, leva 100, ExecutionMode=0, nessuna riga Spread (come R240 e
+#  R243: il default -1 del driver), finestra 2024.09.26 -> 2026.06.30.
+#  Input = TUTTE le righe Inp dei file prova R243a (corto) e R243b (lungo),
+#  ridotte al PRIMO valore. I due file differiscono SOLO per lato, commento
+#  e magic (verificato con diff): la geometria dello stop e' identica.
+#  L'asse InpUseTimeWindow=0||0||1||1||Y diventa 0 = finestra SPENTA: la
+#  cella con piu' ingressi, e la geometria dello stop non dipende dalla
+#  finestra (lo stop si calcola a r.386-392, che non legge l'orario).
+#
+#  --- 4. L'ATTESA, DICHIARATA PRIMA DEI NUMERI ----------------------
+#  Due ipotesi, e NON si sovrappongono:
+#    H_BANDA (cancello del 24/09, classe 735): ingresso e stop stanno dalla
+#      stessa parte della banda; la distanza e' ~1,0-2,0 x ATR, cioe'
+#      MEDIANA fra ~78 e ~176 punti indice (ATR(14) U30USD H1 = 78,0-88,2,
+#      referto ADR r.159-163, usato come ancora: ATR(9) non e' misurato).
+#    H_VECCHIA (R243 prima della correzione): 3,5 x ATR ~ 273 punti.
+#  >>> Se la mediana esce sopra ~240, la classe 735 era SBAGLIATA e la
+#      scrivo come tale. Lo accetto prima di vedere il numero. <<<
+#
+#  --- 5. IL VERDETTO SUL COSTO, CONGELATO PRIMA ---------------------
+#  Per ogni ingresso: rapporto = distanza / spread MEDIANO dell'ORA server
+#  d'ingresso (risultati_archivio/spread_flotta/spread_orario_U30USD.csv:
+#  2,6-2,8 nelle ore 0-13 e 23, 1,8-2,0 nelle ore 14-21).
+#    PASSA        se la MEDIANA dei rapporti >= 40
+#    AL PELO      se sta fra 40 e 50 (si scrive per esteso)
+#    NON PASSA    se < 40
+#  E si riportano SEMPRE, accanto (classe 724: un cancello a due statistiche
+#  si riporta con tutte e due): la quota di ingressi sotto 40x, e lo stesso
+#  conto sullo spread p95 dell'ora (il bordo cattivo). Il conto lo faccio io
+#  sul CSV quando torna lo zip: lo script MISURA, non giudica.
+#
+#  --- 6. IL CONTROLLO CHE PUO' BOCCIARE LA PASSATA STESSA -----------
+#  L'EA stampa ogni giorno "[STREV-IMBUTO] ... | ENTRATE n | quadratura".
+#  La SOMMA degli n deve essere UGUALE al numero di righe "mercato" lette.
+#  Se non lo e': CONTROLLO INCROCIATO ROTTO, e i numeri non si usano.
+#  Collaudato il 24/09 su log finti UTF-16 col codice VERO dello script:
+#  positivo (3 = 3, doppioni scartati, riga pre-esistente esclusa, distanze
+#  e quantili esatti) e NEGATIVO (una riga illeggibile -> 3 contro 4 ->
+#  ROTTO). La rete funziona in tutti e due i versi.
+#
+#  --- 7. CHE COSA NON DICE -----------------------------------------
+#  - Vale per la geometria di R243. Per R240 (StAtrPeriod 7 sul corto,
+#    StMult 2.5 / StAtrPeriod 12 sul lungo) e' una stima vicina, non una
+#    misura. Per NASUSD (R238) non dice niente: serve la sua passata.
+#  - Misura la tranche a MERCATO. Il pendente (InpUsePending, +20 pips) ha
+#    distanza PIU' grande: il cancello lo decide la tranche piu' stretta.
+#  - Non misura il merito: PF e n di queste due passate su finestra intera
+#    NON sono R243 (che taglia IS/OOS) e non si leggono come tali.
+#  - Un formato di log mai visto: l'unico log d'agente in archivio viene da
+#    un'OTTIMIZZAZIONE (niente Print). Il parser cerca la riga ovunque nel
+#    testo, e il controllo incrociato del par. 6 e' la garanzia.
