@@ -1,0 +1,714 @@
+# =====================================================================
+#  R244a -- IL TASSO DI RIEMPIMENTO SUL DAX, LATO SHORT
+#  EA: ABTG_MaxMinNotte
+#
+#  LA DOMANDA DEL ROUND, una sola:
+#    "Lo short riempie 101 giornate su ~440 (il 23%). Che cosa ferma le
+#     altre sette su dieci -- e allargando la SOLA finestra d'ingresso
+#     si arriva sopra le 150 operazioni SENZA che il PF scenda sotto
+#     1,38 e SENZA toccare la frontiera del costo?"
+#  Asse: InpEntryCutoffHour, e solo quello. Una variabile.
+#
+#  GEMELLO: R244b_riempimento_MaxMinNotte_D30EUR_long.txt
+#  I due file sono la REGOLA DEI DUE LATI firmata il 25/08 (bloccante su
+#  Nasdaq/DAX/Dow). *** NON SONO COPIE ***: ogni numero che descrive IL
+#  LATO e' stato ricalcolato per lo SHORT dal suo CSV (classe 690/716).
+#  Sul lato long il prior d'archivio e' 0/18 sopra PF 1,00, su questo e'
+#  17/18: usare il numero del gemello sbaglierebbe in due direzioni
+#  opposte. Gli unici numeri di long che compaiono qui stanno al par. 9
+#  (la matrice delle firme), sono ETICHETTATI, e servono a spiegare
+#  perche' il gemello esiste -- non a fondare nessuna soglia di qui.
+#
+#  >>> PERCHE' IL GEMELLO ESISTE, VISTO CHE IL LONG E' GIA' MISURATO
+#      NEGATIVO (e "per simmetria" non e' una risposta): <<<
+#  Non e' simmetria: e' l'UNICO strumento che separa due spiegazioni
+#  rivali di un eventuale successo di questo file. Se qui il PF regge
+#  mentre n sale, le spiegazioni sono (A) la geometria ha edge anche
+#  sulle operazioni tardive, oppure (B) la finestra 2024-2026 ha una
+#  tendenza direzionale che premia QUALUNQUE short tardivo. A e B fanno
+#  la STESSA previsione su questo file e previsioni OPPOSTE sul gemello
+#  (par. 9). Senza il gemello, B resta in piedi e il round non risponde
+#  alla propria domanda. In piu' il long e' l'unico lato con n >= 150
+#  su OGNI cella da C=12 in su: e' li' che l'invariante di monotonia
+#  (par. 5) si verifica su un campione leggibile, cosa che questo file
+#  NON puo' fare sulle sue celle di sinistra (n atteso 7-73).
+# =====================================================================
+#
+#  --- 0. IL PERIMETRO ------------------------------------------------
+#  Questo file NON lancia niente e non promuove niente. Bersaglio
+#  previsto: PC DI BACKTEST DESKTOP-H4D7CAJ.
+#  NON il VPS VMI3047753 e nessuno dei suoi sei terminali: FTMO
+#  541452707 (C:\FTMO, sei sedie vive fra cui 770411), REALE 10105439
+#  (C:\BCM_Reale), 100k 50504263, piccolo 50503392, manuale 50503635,
+#  banco 50504400 (C:\MT5_Backtest). La regola del 21/09 ("i round non
+#  girano piu' sul VPS mentre una challenge e' viva") e' bloccante.
+#  *** LA SEDIA VIVA 770411 (MaxMinNotte DAX Short, challenge FTMO) NON
+#  VIENE SFIORATA: magic diverso, conto diverso, macchina diversa. ***
+#
+#  --- 1. DA DOVE NASCE, E IL NUMERO CHE SCEGLIE L'ASSE ----------------
+#  R242 (report/REFERTO_R242_2026-09-24.md) ha misurato lo short di
+#  questo motore su D30EUR M15, asse InpBoxStartHour, 7 celle:
+#    PF 1,019 - 1,469, TUTTE E SETTE in profitto, DD 1,43 - 5,63%,
+#    ma *** TUTTE E SETTE sotto n=150 *** (96-130). Verdetto: indizio
+#    forte, MERITO SOSPESO PER CAMPIONE.
+#  E la via che il referto aveva proposto (allungare la finestra) e'
+#  MORTA e scritta come morta nella sezione di correzione: BCM su
+#  D30EUR parte dal 2024.09.26 ed e' COMPLETO (tre fonti indipendenti,
+#  r.148-160 del referto). Fino a oggi si guadagnerebbe +14,3%:
+#  n 96-130 -> 110-149. *** ANCORA SOTTO 150. ***
+#
+#  >>> IL CONTO CHE SCEGLIE L'ASSE, E L'HO FATTO IO SUI CSV DI R242,
+#      NON SU UN'IMPRESSIONE. <<<
+#  Alla cella H=6 (quella che questo file pinna, par. 3), nella stessa
+#  finestra di ~440 giornate operative:
+#     short riempito  101 giornate = 22,95%
+#            (R242/ABTG_MaxMinNotte_D30EUR_IS_R242b.csv, Pass 2)
+#     long  riempito  157 giornate = 35,68%
+#            (R242/ABTG_MaxMinNotte_D30EUR_IS_R242a.csv, Pass 2)
+#  Le due corse sono A UN LATO e INDIPENDENTI, quindi una giornata puo'
+#  comparire in tutte e due: 101+157=258 e' un TETTO alle giornate con
+#  almeno un riempimento, non il loro numero.
+#     ==> giornate SENZA nessun riempimento: ALMENO 440-258 = 182,
+#         cioe' ALMENO il ***41,4%***.
+#  Le cause possibili sono due sole, e stanno in due righe di codice:
+#    (1) InpMinBoxPts=6800 scarta la giornata PRIMA di piazzare (r.331);
+#    (2) il pendente non viene toccato entro InpEntryCutoffHour (r.258).
+#  La (1) e' limitata dall'alto da R242 stesso: il prezzo stimato del
+#  pavimento e' 0,3-3,9% delle giornate e il controllo dichiarato e'
+#  CIECO fino al 10,4% (R242b par. 7). Quindi:
+#     causa (1)  <=  10,4% delle giornate  (tetto, non stima)
+#     causa (2)  >=  41,4% - 10,4% = 31,0% delle giornate
+#  *** LA CAUSA (2) E' PIU' GRANDE DELLA (1) DI ALMENO 2,9 VOLTE, e
+#      contro la stima derivata (3,9%) di circa 8 volte. ***
+#  >>> E' per QUESTO che l'asse e' il cutoff e non il pavimento: non
+#      perche' il pavimento sia intoccabile (vedi par. 2), ma perche'
+#      e' il gate PICCOLO. Girare il gate piccolo non puo' portare a
+#      150 nemmeno svuotandolo del tutto: 101 + 10,4% x 440 = 147. <<<
+#  >>> CONTO CHE VA SCRITTO PERCHE' E' AL LIMITE: anche ANNULLANDO il
+#      pavimento (InpMinBoxPts=0) lo short arriverebbe al massimo a
+#      ***147***, cioe' ANCORA SOTTO 150 -- e ci arriverebbe rompendo
+#      la frontiera del costo (par. 2). Il pavimento non e' solo la
+#      strada sbagliata: e' una strada che NON ARRIVA. <<<
+#
+#  --- 2. InpMinBoxPts NON SI TOCCA, E IL CONTO DEI 40x E' QUI ---------
+#  r.331: if(InpMinBoxPts>0 && widthPts<InpMinBoxPts) -> niente ordini
+#  quel giorno. Il ramo sta PRIMA della biforcazione long/short (r.347 e
+#  r.359), quindi vale identico sui due lati. Righe RICONTATE OGGI
+#  24/09/2026 sul file che il driver compilera',
+#  mql5/Experts/ABTG_MaxMinNotte.mq5, 918 righe, v1.11 (classe 731).
+#  Taratura: 6800 punti = ***68,0 punti indice*** (1000 punti = 10 idx
+#  sul DAX BCM, commento r.140).
+#
+#  *** QUESTO FILE LASCIA InpMinBoxPts FERMO A 6800. ***
+#  Motivo, col numero: e' il pavimento che rende ESECUTIVO il cancello
+#  di costo invece che predetto. Abbassarlo farebbe nascere operazioni
+#  con lo stop sotto i 40x. Il conto dello stop minimo ammesso:
+#     stop_min = InpMinBoxPts/100 + 2 x buffer(10 idx)
+#     a 6800 -> 68,0 + 20,0 = ***88,0 idx***
+#  >>> E VISTO CHE NON LO TOCCO, IL CONTO PER "OGNI VALORE PROPOSTO"
+#      E' UNO SOLO, ed e' questo. Per memoria di chi leggesse una
+#      proposta futura di abbassarlo, ecco i numeri che dovrebbe
+#      portare (tutti DERIVATI dalla stessa formula):
+#        6800 -> stop_min 88,0 idx -> 51,8x mediana / 32,6x p95
+#        6000 -> stop_min 80,0 idx -> 47,1x mediana / 29,6x p95
+#        5000 -> stop_min 70,0 idx -> 41,2x mediana / 25,9x p95
+#        4800 -> stop_min 68,0 idx -> ***40,0x*** mediana / 25,2x p95
+#        4000 -> stop_min 60,0 idx -> 35,3x mediana / 22,2x p95  <-- ROTTO
+#      *** Sotto 4800 punti la MEDIANA stessa scende sotto i 40x ***
+#      (soglia esatta: (40 x 1,70 - 20) x 100 = 4800). <<<
+#
+#  ANCORE DI SPREAD, misurate, con la fonte e la riga:
+#    backtest_pipeline/risultati_archivio/spread_flotta/
+#    spread_orario_D30EUR.csv -- VERIFICATO OGGI riga per riga
+#    (r.1 = intestazione, quindi r.10 = ora server 8):
+#      ora  8: mediana 1,70  p95 2,70   <-- ora del piazzamento
+#      ora  9: mediana 1,70  p95 1,90
+#      ora 10: mediana 1,70  p95 1,90
+#      ora 11: mediana 1,60  p95 1,90
+#      ora 12: mediana 1,60  p95 1,90
+#      ora 13: mediana 1,60  p95 1,90
+#      ora 14: mediana 1,70  p95 1,90
+#      ora 15: mediana 1,70  p95 1,90
+#      ora 16: mediana 1,70  p95 ***2,90***
+#      ora 17: mediana 2,60  p95 2,90   (fuori portata: cutoff max 17:00)
+#
+#  *** IL CONTO DEI 40x, CELLA PER CELLA DELLA GRIGLIA. ***
+#  Lo stop NON dipende dall'asse: r.361-362 lo calcola come
+#  (gBoxHigh+buf) - (gBoxLow-buf) = ampiezza del box + 2 buffer, e
+#  l'asse non tocca ne' il box (InpBoxStartHour pinnato a 6) ne' il
+#  buffer (1000 punti pinnato) ne' il modo di stop (MM_SL_OPPOSITE).
+#  Ampiezza attesa del box a H=6 (18 ore): 218,7 idx [DERIVATA, legge
+#  ATR(T)=ADR x sqrt(T/1440) su ADR 252,5 idx misurato n=52,
+#  report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par. 5].
+#     stop tipico = 218,7 + 20,0 = ***238,7 idx***, IDENTICO in tutte
+#     e nove le celle.
+#   C   finestra   ore toccate   peggior mediana  x      peggior p95  x
+#   9   07:59-09:00    8            1,70     140,4x        2,70     88,4x
+#  10   07:59-10:00    8-9          1,70     140,4x        2,70     88,4x
+#  11   07:59-11:00    8-10         1,70     140,4x        2,70     88,4x
+#  12   07:59-12:00    8-11         1,70     140,4x        2,70     88,4x
+#  13   07:59-13:00    8-12         1,70     140,4x        2,70     88,4x
+#  14   07:59-14:00    8-13         1,70     140,4x        2,70     88,4x
+#  15   07:59-15:00    8-14         1,70     140,4x        2,70     88,4x
+#  16   07:59-16:00    8-15         1,70     140,4x        2,70     88,4x
+#  17   07:59-17:00    8-16         1,70     140,4x        ***2,90***  82,3x
+#  >>> TUTTE E NOVE LE CELLE PASSANO I 40x CON UN FATTORE >= 2,1 ANCHE
+#      SUL p95. L'asse NON sposta la frontiera del costo. <<<
+#  >>> L'UNICA CELLA CHE LA MUOVE DI QUALCOSA E' C=17, e va scritta: il
+#      cutoff alle 17:00 mette in portata l'ora 16, il cui p95 vale 2,90
+#      invece di 2,70. Effetto sul caso PEGGIORE AMMESSO (giornata col
+#      box esattamente al pavimento di 68 idx E spread al 95esimo
+#      percentile): 88,0/2,70 = 32,6x diventa 88,0/2,90 = ***30,3x***,
+#      cioe' -7,1%. Tutti e due sono SOTTO i 40x -- ed e' un fatto che
+#      R242b aveva gia' dichiarato per la sua griglia, NON una novita'
+#      di questo round: e' la congiunzione di DUE code (box al minimo E
+#      spread al p95). Il caso tipico resta 140x/88x. <<<
+#  >>> E LA TENSIONE SI DICHIARA INVECE DI NASCONDERLA: per far passare
+#      i 40x anche al caso peggiore ammesso servirebbe
+#      InpMinBoxPts >= 40 x 2,90 x 100 - 2000 = ***9600 punti***.
+#      Quello TOGLIEREBBE operazioni, cioe' l'opposto esatto della
+#      domanda di questo round. E' un round diverso, non questo. <<<
+#
+#  --- 3. PERCHE' L'ASSE E' IL CUTOFF E NON LE ALTRE MANOPOLE ----------
+#  Ho riaperto il sorgente e censito TUTTE le manopole che decidono se
+#  una giornata produce un'operazione RIEMPITA. Righe ricontate oggi
+#  sul file a HEAD (918 righe, v1.11). Sono otto, non cinque:
+#   a) InpMinBoxPts (dich. r.122, gate r.331) -- il pavimento.
+#      FERMO (par. 2). E per il par. 1 non porta comunque a 150.
+#   b) InpMaxBoxPts (dich. r.123, gate r.332) -- pinnato a 0 = SPENTO.
+#      Girarlo puo' solo TOGLIERE giornate: direzione sbagliata.
+#   c) InpMaxSpread (dich. r.186, gate r.333 -> SpreadOK r.770).
+#      *** INERTE COME PINNATO ***: r.770 e'
+#      "if(InpMaxSpread<=0) return(true)", e il pin e' 0. Non e' una
+#      casella libera, e' una manopola gia' a fondo corsa.
+#   d) InpUseCorrelation (dich. r.164, gate r.341-343 via CorrBias).
+#      Pinnato false -> bias 0 -> shortOK vero sempre. E' la manopola
+#      piu' potente mai misurata su questo lato (REGISTRO_TEST
+#      r.673-676: corr ON, PF 2,05 e DD 3,1% con n=41), ma accenderla
+#      DIVIDE il campione per ~2,4: e' l'opposto di questo round.
+#      E' il round DOPO, e su questo lato e' il primo da riaccendere.
+#   e) InpUsaGuardian (dich. r.109, gate r.346).
+#      *** INERTE NEL TESTER, ed e' dimostrato dal codice, non assunto ***:
+#      ABTG_GuardiaIngresso legge SOLO GlobalVariable scritte da
+#      ABTG_Guardian.mq5 (ABTG_PausaGuardian.mqh r.717-747); nel tester
+#      quel programma non gira, ABTG_GVLeggi (r.664-669) restituisce 0
+#      su GlobalVariableCheck falso, e ABTG_PausaAttiva_Calc (r.321) e
+#      ABTG_CapAttivo_Calc (r.339) ritornano false su un valore <= 0.
+#      Fail-open dichiarato nell'intestazione dell'include. Quindi
+#      nessuna cella puo' perdere una giornata per il Guardian.
+#      >>> SERVE ALL'INVARIANTE DEL PAR. 5: se il Guardian mordesse,
+#          la monotonia di n non sarebbe piu' garantita, perche' il
+#          percorso di equity e' DIVERSO da cella a cella. <<<
+#   f) InpOneTradePerDay (dich. r.136, gate r.284) + la macchina a
+#      stati. *** E' IL TETTO DURO (n <= 1 al giorno) MA E' UNA
+#      MANOPOLA INERTE NEL TESTER, e va detto perche' sembra il
+#      colpevole e non lo e'. *** gPhase va WAIT -> PLACED -> DONE e
+#      torna a WAIT solo al cambio di giornata (ResetDay, r.294): il
+#      piazzamento e' dentro "if(gPhase==MMP_WAIT ...)" (r.274), quindi
+#      *** anche con InpOneTradePerDay=false si piazza una volta sola
+#      al giorno ***. Il commento r.282-283 del sorgente lo dice
+#      esplicitamente. Metterlo ad asse produrrebbe 2 celle con esito
+#      IDENTICO: e' esattamente la manopola inerte del censimento del
+#      09/09, e la si dichiara casella CHIUSA, non casella libera.
+#   g) InpPlaceHour/Min (dich. r.126-127, gate r.274) -- 07:59.
+#      Anticiparlo allungherebbe la finestra DALL'ALTRO CAPO, ma
+#      cambierebbe anche il REGIME degli ingressi (rotture notturne a
+#      libro sottile, prima dell'apertura cassa delle 08:00 server).
+#      Sono DUE cose in una manopola. E' un round a se', ed e' il
+#      candidato naturale se questo fallisce.
+#   h) InpEntryCutoffHour/Min (dich. r.128-129, gate r.258) +
+#      InpPendingExpiryMin (dich. r.137, usato r.339). *** L'ASSE. ***
+#
+#  >>> PERCHE' (h) E NON (g), con un criterio e non con un gusto: <<<
+#  Il cutoff allunga la finestra SENZA cambiare niente altro. La prova
+#  e' meccanica: il piazzamento (r.274) e il calcolo del box (r.327,
+#  ComputeBox) e dei livelli (r.336-337) e dello stop (r.361-362) NON
+#  leggono InpEntryCutoffHour. L'unico effetto dell'asse e' spostare
+#  l'istante in cui r.260 cancella un pendente non toccato.
+#  Conseguenze, tutte verificabili:
+#    - lo STOP e' identico in tutte le celle -> la frontiera dei 40x
+#      non si muove (par. 2);
+#    - il RISCHIO per operazione e' identico -> i DD sono confrontabili;
+#    - l'insieme delle giornate riempite e' MONOTONO per costruzione
+#      (par. 5) -> c'e' un invariante duro da controllare, che nessun
+#      altro asse di questa lista offre.
+#  (g) invece muove il regime insieme alla finestra: sarebbe la stessa
+#  critica che R242 si e' fatta da solo ("l'asse muove due cose
+#  insieme"), e la si evita potendo.
+#
+#  --- 4. LA SECONDA MANOPOLA CHE VA MOSSA, E PERCHE' NON E' UN SECONDO
+#         ASSE -- InpPendingExpiryMin 250 -> 600 -----------------------
+#  r.339: exp = TimeCurrent() + InpPendingExpiryMin*60, e il SellStop
+#  della r.367 nasce ORDER_TIME_SPECIFIED con quella scadenza.
+#  Con il pin di R242 (250) il pendente piazzato alle 07:59 muore alle
+#  ***12:09***.
+#  >>> SE LASCIASSI 250, SEI CELLE SU NOVE SAREBBERO IDENTICHE FRA
+#      LORO: da C=13 in su il cutoff non morderebbe mai, perche' la
+#      scadenza avrebbe gia' ucciso il pendente alle 12:09. Nove
+#      passate, quattro esiti distinti. *** E' ESATTAMENTE LA MANOPOLA
+#      INERTE DEL CENSIMENTO DEL 09/09 (874 CSV su 1.960 con passate a
+#      esito identico), fabbricata a mano. *** <<<
+#  Quindi la scadenza va portata a un valore che NON morda in NESSUNA
+#  cella, e il conto e' esatto:
+#     piazzamento 07:59 = minuto 479
+#     cutoff piu' tardo della griglia 17:00 = minuto 1020
+#     flat di fine giornata (r.254) 17:30 = minuto 1050
+#     scadenza con pin 600 -> minuto 479+600 = ***1079 = 17:59***
+#     1079 > 1050 > 1020  ==> LA SCADENZA NON MORDE MAI.
+#  *** NON E' UN SECONDO ASSE: e' un pin scelto per RENDERE VISIBILE
+#      il primo. Una manopola portata dove non agisce non aggiunge una
+#      variabile, ne toglie una. ***
+#  >>> E LA CELLA DELL'ANCORA NON CAMBIA, ed e' il punto delicato: a
+#      C=12 il cutoff scatta alle 12:00 (minuto 720), che e' PRIMA sia
+#      di 12:09 (pin vecchio) sia di 17:59 (pin nuovo). Quindi la cella
+#      C=12 di questo round deve riprodurre ESATTAMENTE la cella H=6 di
+#      R242b. Vedi il cancello del par. 5. <<<
+#
+#  --- 5. IL CANCELLO TECNICO: DUE CONTROLLI DURI, PRIMA DEL PF -------
+#  Questo round non ha bisogno di due celle gemelle sul magic per il
+#  cancello G1 di determinismo: ne ha due MIGLIORI, che vengono gratis.
+#
+#  CONTROLLO 1 -- LA RIPRODUZIONE DELL'ANCORA.
+#  La cella C=12 deve riprodurre la cella Pass 2 di
+#  risultati_archivio/R242/ABTG_MaxMinNotte_D30EUR_IS_R242b.csv:
+#        n = ***101***   PF = ***1,40859***   DD = ***2,0209%***
+#        Profit = ***+2799,28***
+#  Le sole differenze di pin fra le due passate sono: la scadenza
+#  (par. 4, dimostrata non mordente a C=12), il magic (761810 ->
+#  762510) e il commento ("MAXMIN PD SHORT" -> "MAXMIN CUT SHORT").
+#  Magic e commento sono INERTI NEL TESTER e non e' un'assunzione: il
+#  magic serve solo a FILTRARE ordini/posizioni/storico altrui
+#  (SelPos r.772, ContaPosizioniMie r.548-559, la guardia r.270-271) e
+#  in una corsa con un solo EA non c'e' nulla di altrui da filtrare; il
+#  commento compare solo nelle Log e nel campo comment dell'ordine.
+#  >>> SOGLIA: n ESATTAMENTE 101 e PF entro 0,00002 da 1,40859. Se non
+#      torna, NON si legge nessun PF di questo round: vuol dire che una
+#      delle tre differenze NON era inerte, e va trovata prima. <<<
+#
+#  CONTROLLO 2 -- L'INVARIANTE DI MONOTONIA, che e' un teorema sul
+#  codice e non un'attesa statistica.
+#  Il pendente si piazza alle 07:59 in modo IDENTICO in tutte le celle
+#  (r.274 non legge il cutoff; ComputeBox r.301-320, i livelli r.336-337
+#  e lo stop r.361-362 nemmeno). L'unica cosa che il cutoff decide e'
+#  QUANDO r.260 cancella un pendente non toccato. Quindi l'insieme
+#  delle giornate riempite a cutoff C e' un SOVRAINSIEME di quello a
+#  cutoff C' < C.
+#     ==> ***n DEVE essere non decrescente lungo tutto l'asse, senza
+#         una sola eccezione.***
+#  >>> SE n CALA ANCHE DI UNO, il CSV non e' leggibile e non si commenta
+#      nessun PF: vuol dire che qualcosa che credo inerte non lo e'
+#      (il Guardian del par. 3e, il filtro news, la scadenza del
+#      par. 4). E' un falsificatore DURO, non una banda. <<<
+#
+#  --- 6. LE DEVIAZIONI DALLA CELLA VIVA, dichiarate come SCELTE -------
+#  Cella di riferimento: mql5/Presets/ABTG_MaxMinNotte_DAX_Short_
+#  Ottimizzato_D30EUR_M15_770411_100K.set. Questo file eredita le TRE
+#  deviazioni gia' dichiarate in R242b (SLMode 1->0, cutoff 8:30->asse,
+#  correlazione ON->OFF) e ne aggiunge UNA:
+#    d) InpPendingExpiryMin 250 -> ***600***, motivata al par. 4.
+#  La cella viva 770411 e' gia' short-only, quindi su questo lato NON
+#  si devia sui due input di lato (il gemello long SI').
+#
+#  --- 7. L'ATTESA DI CAMPIONE, DICHIARATA PRIMA DEI NUMERI -----------
+#  MODELLO, e questa volta e' CALIBRATO sul dato invece che sulla
+#  teoria -- perche' in R242 il mio modello di trasporto ha sovrastimato
+#  ***14 celle su 14*** (referto r.123-126), ed e' un difetto che ho
+#  scritto io e che devo riparare, non ripetere.
+#  Cammino senza deriva, barriera a distanza d: p(t) = 2(1-Phi(z)),
+#  z = z0 x sqrt(t0/t). *** z0 NON viene dall'ADR: viene dall'unico
+#  punto MISURATO di questa configurazione ***, cioe' la cella C=12 del
+#  par. 5 (n=101 su 440 giornate -> p0 = 0,22955 -> z0 = 1,2015).
+#  Cosi' il modello non puo' sbagliare all'ancora per costruzione, e
+#  l'unica incertezza residua e' la FORMA, non il livello.
+#   C    t (min)   z       p        n atteso
+#   9      61    2,3882  0,01693       ***7***
+#  10     121    1,6957  0,08994      ***40***
+#  11     181    1,3864  0,16561      ***73***
+#  12     241    1,2015  0,22955     ***101***  <- ancora, per costruzione
+#  13     301    1,0751  0,28232     ***124***
+#  14     361    0,9817  0,32624     ***143***
+#  15     421    0,9091  0,36331     ***160***
+#  16     481    0,8505  0,39505     ***174***
+#  17     541    0,8019  0,42258     ***186***
+#  ATTESA: n non decrescente da ~7 a ~186, e *** il pavimento dei 150 si
+#  attraversa fra C=14 e C=15 ***. Banda dichiarata +/-25% sullo
+#  SCARTO dall'ancora (non sul valore: all'ancora lo scarto e' zero).
+#  Tetto duro 440 (una operazione al giorno, par. 3f).
+#  >>> DOVE QUESTO MODELLO PUO' SBAGLIARE, e in che verso: la
+#      volatilita' intraday del DAX non e' costante. Le ore 12-14
+#      server (pranzo europeo) sono le piu' quiete e il modello ci
+#      mette TROPPE rotture; l'ora 14-15 server (apertura cassa USA,
+#      15:30 italiane) e' la piu' mossa e il modello ce ne mette TROPPE
+#      POCHE. I due errori hanno segno opposto e si compensano in parte,
+#      ma non si annullano: e' per questo che la banda e' larga. <<<
+#  >>> E C'E' UN NUMERO SCRITTO DA ALTRI CHE NON COINCIDE COL MIO, e lo
+#      dichiaro invece di sceglierlo: R242b par. 6b diceva "col cutoff
+#      a 17:00 il campione salirebbe di un altro ~40%". Il mio modello
+#      dice +84% (101 -> 186). Sono DUE PREVISIONI, non un fatto contro
+#      una previsione: quella era un inciso [NON MISURATO], questa e'
+#      un modello ancorato al punto misurato. *** Il round decide, e
+#      se esce ~140 a C=17 ha ragione quell'inciso e ha torto il mio
+#      modello, e va scritto cosi'. *** <<<
+#  >>> CONTROLLO DI PLAUSIBILITA' CONTRO IL GEMELLO (numero del long,
+#      ETICHETTATO): a C=17 il long e' atteso a p=0,539. La somma
+#      0,423+0,539 = 0,961 NON e' la probabilita' di un'unione (le due
+#      corse sono separate e una giornata puo' contare in tutte e due),
+#      ma se tutte e due uscissero cosi' alte vorrebbe dire che ~50%
+#      delle giornate tocca ENTRAMBE le barriere entro le 17:00, cioe'
+#      attraversa una larghezza di box intera avanti e indietro.
+#      *** Quello non e' un dettaglio: e' il meccanismo con cui il PF
+#      dovrebbe degradare *** -- gli ingressi tardivi sarebbero in
+#      buona parte seconde gambe di un movimento gia' fatto. E' la
+#      previsione fisica dell'ipotesi ALT del par. 8. <<<
+#
+#  --- 8. IL PF ATTESO, E IL CONTRO-ESEMPIO OBBLIGATORIO --------------
+#  IL RIFERIMENTO DA BATTERE NON E' "NIENTE". Sul lato SHORT di questo
+#  motore su questo simbolo l'archivio ha un ALTOPIANO: sottoinsieme
+#  short-only di risultati_archivio/MaxMinNotte/080957cf-valid_MaxMin_
+#  D30EUR.csv, 18 celle, ***17 su 18 sopra PF 1,00***, PF mediano
+#  1,0915, cella appaiata (buffer 1000, TP2 3,0) PF ***1,18742*** con
+#  n=107 e DD 7,2851% a rischio 1 (REGISTRO_TEST r.637).
+#  E il riferimento IMMEDIATO di questo round e' l'ancora del par. 5:
+#  ***PF 1,40859 con n=101***.
+#
+#  >>> IL CONTRO-ESEMPIO (regola del 10/09). LA DOMANDA E' PROPRIO
+#      QUELLA DELLA TRAPPOLA: piu' operazioni NON e' un merito. <<<
+#  IPOTESI HP (quella che spero): le operazioni aggiunte allungando il
+#    cutoff portano lo STESSO edge delle prime. Predice PF PIATTO a
+#    ~1,409 su tutto l'asse, n che sale.
+#  IPOTESI ALT (quella che va esclusa): le operazioni aggiunte sono a
+#    SOMMA ZERO -- rotture tardive che non vanno da nessuna parte.
+#    *** E QUESTA PREDIZIONE SI CALCOLA, non si evoca. ***
+#    Dall'ancora: PF=G/L=1,40859 e G-L=+2799,28
+#      -> L0 = 2799,28/0,40859 = 6851,4 ; G0 = 9650,7
+#      -> per operazione: vincita lorda 95,55 ; perdita lorda 67,84
+#      -> "mezzo giro" neutro per operazione aggiunta: 81,70
+#    Ogni operazione aggiunta porta +81,70 di lordo e +81,70 di perdita:
+#      PF(C) = (9650,7 + 81,70 m) / (6851,4 + 81,70 m),  m = n(C)-101
+#   C    n atteso    ALT: PF predetto    margine sotto la soglia 1,38
+#   10      40           2,527           (n/a: n<150, e a sinistra ALT
+#   11      73           1,615            predice PF PIU' ALTO, vedi sotto)
+#   12     101           1,409  (ancora)
+#   13     124           1,320                0,060   <-- NON DISCRIMINA
+#   14     143           1,271                0,109
+#   15     160           1,240                0,140
+#   16     174           1,219                0,161
+#   17     186           1,203                0,177
+#  (le due tabelle di ALT sono calcolate sugli n NON arrotondati)
+#  >>> VARIANTE PRUDENTE DI ALT, e va scritta perche' PEGGIORA LA MIA
+#      POSIZIONE: un ingresso alle 16:30 viene appiattito dal flat delle
+#      17:30 (r.254/r.490) prima di poter percorrere un giro intero,
+#      quindi porta MENO lordo di 81,70. Con meta' giro (40,85):
+#        C=13: 1,359   C=14: 1,326   C=15: ***1,302***
+#        C=16: 1,285   C=17: 1,271
+#      Margini sotto 1,38: 0,021 / 0,054 / 0,078 / 0,095 / 0,109. <<<
+#  >>> QUINDI, DICHIARATO PRIMA DEI NUMERI: *** LA SOGLIA 1,38
+#      DISCRIMINA HP DA ALT SOLO DA C=16 IN SU *** (margine >= 0,095,
+#      cioe' >= il margine di casa 0,10 entro l'arrotondamento). A
+#      C=13 non discrimina affatto (0,021-0,060) e a C=14/C=15
+#      discrimina debolmente. Chi legge il referto deve avere questo
+#      davanti, altrimenti leggera' un 1,39 a C=13 come una vittoria
+#      mentre e' dentro la predizione dell'alternativa. <<<
+#  >>> E LA META' SINISTRA DELL'ASSE E' UN SECONDO TEST DELLA STESSA
+#      IPOTESI, IN DIREZIONE OPPOSTA -- gratis: se ALT e' vera,
+#      ACCORCIARE il cutoff deve ALZARE il PF (si tolgono operazioni a
+#      somma zero da un libro che guadagna). ALT predice 1,615 a C=11 e
+#      2,527 a C=10; HP predice ~1,409 piatto. A C=9 il conto di ALT
+#      nella variante piena da' una perdita lorda NEGATIVA, cioe' e'
+#      fuori dal suo dominio (la variante prudente da' 1,924): quella
+#      cella si legge solo per n. La differenza 1,41 contro 2,53 e'
+#      enorme, ma n=40 la rende un INDIZIO, non un verdetto. <<<
+#
+#  *** LA SOGLIA 1,38 NON SI ABBASSA, E NON SI ALZA. *** E' quella
+#  congelata da R242b e viene da li': 1,28 (predizione dell'ipotesi
+#  "abbiamo solo tolto il pedaggio") + 0,10 di margine. La geometria
+#  del box e' la STESSA di R242b cella H=6, quindi la predizione del
+#  pedaggio non cambia e la soglia non va ricalcolata.
+#
+#  DD ATTESO [DERIVATO, e il metodo si scrive]: ancora 2,0209% a n=101.
+#  Due meccanismi, tutti e due dichiarati:
+#    - se l'edge regge, il DD cresce piu' lentamente della radice;
+#    - se l'edge non regge (ALT), il DD cresce come sqrt(n):
+#      2,0209 x sqrt(186/101) = ***2,74%*** a C=17.
+#  BANDA DICHIARATA 1,5 - 5,0%. Cancello di casa 10,0%.
+#  >>> MI ASPETTO DI PASSARE IL CANCELLO DEL 10% CON MARGINE AMPIO, e
+#      lo scrivo adesso perche' conta: se il round torna con DD ~3%,
+#      *** quello NON e' una bella sorpresa, e' esattamente il
+#      previsto *** e non aggiunge una virgola alla prova che il
+#      campione allargato valga. Il DD basso e' una proprieta' gia'
+#      nota del lato short di questo motore, non un merito di R244. <<<
+#
+#  VERIFICA DEL LOTTO (il tranello che falserebbe il DD): rischio
+#  0,65% x 100.000 = 650 EUR; 1 lotto D30EUR = 1,00 EUR per punto
+#  indice [MISURATO n=155, data/statements/trades_auto.csv +
+#  trades_100k.csv]. Stop tipico 238,7 idx -> 2,72 lotti; stop piu'
+#  stretto ammesso 88,0 idx -> 7,38 lotti. Tutti e due lontanissimi dal
+#  lotto minimo, quindi LotByRisk (r.730-759) non viene schiacciato dal
+#  MathMax(mn, ...) e il DD in percentuale resta una funzione del
+#  rischio dichiarato.
+#
+#  --- 9. LE SOGLIE, CONGELATE PRIMA DEI NUMERI -----------------------
+#  PRIMA DI TUTTO I DUE CANCELLI DURI DEL PAR. 5 (riproduzione
+#  dell'ancora a C=12, monotonia di n). Se uno dei due fallisce, IL
+#  ROUND NON SI LEGGE e non si scrive nessun verdetto sul motore.
+#
+#  POI n, cella per cella:
+#    n >= 150 -> il MERITO si legge (Emendamento A del 16/08).
+#    50 <= n < 150 -> merito SOSPESO: si scrive PF, DD e n e si dice
+#         "indizio". Il RISCHIO si legge lo stesso (Emendamento B).
+#         ATTESO su C=10, C=11, C=12, C=13, C=14.
+#    n < 50 -> "NON MISURATO", mai "non funziona". ATTESO su C=9.
+#    n > 440 -> impossibile: la guardia "un trade al giorno" non ha
+#         retto e il CSV non e' leggibile.
+#
+#  >>> CHE COSA FA DIRE "IL CAMPIONE SI PUO' ALLARGARE SENZA PERDERE
+#      L'EDGE" (e nient'altro lo fa): <<<
+#    TRE CELLE CONTIGUE dell'asse, tutte con n >= 150, tutte con
+#    PF >= ***1,38***, e la cella CENTRALE delle tre con DD <= 10,0%.
+#    Il numero che si riporta e' quello della cella CENTRALE.
+#    *** MAI IL PICCO. *** Se una cella sporge e le vicine no, si
+#    scrive "NON C'E' UNA CONFIGURAZIONE ROBUSTA", che e' un risultato.
+#    E PER L'ATTESA DEL PAR. 7 LE UNICHE TRE CONTIGUE CON n>=150 SONO
+#    C=15, C=16, C=17: e' li' che il round si gioca.
+#
+#  CHE COSA LO FALSIFICA, con i numeri gia' calcolati al par. 8:
+#    - PF che SCENDE lungo l'asse e atterra entro +/-0,05 dalla curva
+#      ALT (1,320 / 1,271 / 1,240 / 1,219 / 1,203) o dalla sua variante
+#      prudente (1,359 / 1,326 / 1,302 / 1,285 / 1,271)
+#      -> *** LE OPERAZIONI IN PIU' NON PORTANO EDGE. Lo short e'
+#         TAPPATO a n~101 nella finestra disponibile *** -- e questo e'
+#         un NUMERO, non una stanchezza. Va scritto come verdetto
+#         positivo del round, non come fallimento.
+#    - meno di tre celle contigue sopra 1,38 -> picco di rumore.
+#    - celle sopra 1,38 ma con n < 150 -> "non misurato", non "vivo".
+#    - tre celle contigue sopra 1,38 con n>=150 MA con il gemello long
+#      che PEGGIORA lungo lo stesso asse -> *** NON si scrive "edge":
+#      si scrive "compatibile con una tendenza direzionale della
+#      finestra" *** (matrice qui sotto). E' il motivo per cui il
+#      gemello esiste.
+#    - tutte le celle sotto 1,19 -> il cutoff allargato e' PEGGIO
+#      dell'altopiano d'archivio, e la casella si chiude con un numero.
+#
+#  >>> LA MATRICE DELLE FIRME, dichiarata prima. I numeri del LONG sono
+#      ETICHETTATI e servono SOLO a questa tabella; le soglie di questo
+#      file non ne dipendono. <<<
+#   ipotesi                       PF SHORT lungo l'asse   PF LONG [etich.]
+#   HP  edge anche sulle tardive   piatto ~1,409           piatto ~0,744
+#   ALT tardive a somma zero       SCENDE 1,41 -> 1,20     SALE 0,74 -> 0,82
+#   DRIFT direzione della finestra SALE sopra 1,409        SCENDE sotto 0,744
+#   WHIPSAW tardive peggio di zero SCENDE sotto 1,203      SCENDE sotto 0,744
+#  *** ALT e DRIFT si distinguono SOLO guardando il long: sullo short
+#      fanno previsioni diverse ma tutte e due "non HP", e DRIFT
+#      somiglia a un successo. Senza il gemello, un DRIFT verrebbe
+#      letto come edge. ***
+#
+#  E A QUALUNQUE n (Emendamento B, il rischio non si sospende mai):
+#    DD > 10,0% su una cella -> rilievo di RISCHIO, anche con PF bello.
+#    DD > 20,0% -> bocciata per rischio a prescindere dal PF.
+#
+#  CONFRONTO COL DEFAULT, obbligatorio: il default di casa per lo short
+#  del DAX e' il box notturno 23:00-04:59 con cutoff 08:30 (altopiano
+#  d'archivio, centro appaiato PF 1,19 / DD 7,29% / n=107). Se nessuna
+#  cella con n>=150 arriva a 1,38, la risposta onesta e' *** "il cutoff
+#  a 12:00 di R242 era gia' il punto giusto: allargarlo non aggiunge
+#  niente" *** -- ed e' un risultato.
+#  >>> E VA DETTO UNA VOLTA IN CHIARO: la cella VIVA 770411 gira a
+#      correlazione ON e fa PF 2,05 / DD 3,1% / n=41 (REGISTRO r.666).
+#      *** Quella NON e' il metro di questo round *** (qui la
+#      correlazione e' spenta, par. 3d) e batterla non e' in programma. <<<
+#
+#  --- 10. IL PREZZO DELLA SCELTA DEL PIN H=6, dichiarato -------------
+#  L'asse di R242b aveva DUE celle sopra 1,38: H=3 (PF 1,469, n=99) e
+#  H=6 (PF 1,409, n=101). *** HO PINNATO H=6, che NON e' il picco ***,
+#  e i motivi sono tre, tutti con un numero:
+#   1. H=3 E' il picco dell'asse di R242b. Pinnare un picco e poi
+#      trovarci un altopiano sopra e' il modo canonico di fabbricare
+#      una cella "verde per caso" (regola del 19/08).
+#   2. H=6 ha n piu' alto (101 contro 99): parte con 2 operazioni di
+#      vantaggio verso il pavimento dei 150, che e' l'oggetto del round.
+#   3. *** H=6 RENDE IL ROUND PIU' DIFFICILE ***, e lo scrivo apposta:
+#      l'ancora di H=6 sta 0,029 sopra la soglia 1,38, quella di H=3 ci
+#      starebbe 0,089 sopra. Scegliendo H=6 rinuncio a 0,06 di margine
+#      gratuito. Qualunque degrado vero si vedra'.
+#  PREZZO, dichiarato prima: se questo round PASSA, *** il risultato
+#  NON e' promuovibile finche' non e' riprodotto anche a H=3 ***
+#  (stesso asse, altre 9 celle, ~2 minuti). E' la prova fuori campione
+#  che ogni allargamento si paga, come dice la regola di casa.
+#
+#  --- 11. LA FINESTRA, E COME SI PAGA IL FUORI CAMPIONE --------------
+#  2024.09.26 -> 2026.06.30, modello 4 = TICK REALI.
+#  *** LA FINESTRA NON SI PUO' CAMBIARE ***, e non per abitudine: il
+#  cancello del par. 5 (riproduzione esatta dell'ancora di R242b)
+#  richiede la STESSA finestra, lo STESSO modello e lo STESSO deposito.
+#  Cambiare anche solo la data di fine renderebbe il cancello cieco.
+#  I tick di D30EUR sono MISURATI e coprono la finestra:
+#  risultati_archivio/misura_tick/REFERTO_MISURA_TICK_D30EUR.txt --
+#  "I TICK REALI DI D30EUR PARTONO DAL 2024.09.26 (35408137 tick)".
+#  @FRAZIONEIS 1.0 = una sola tranche, gamba OOS DEGENERE (rc 2 atteso
+#  e annunciato). Con 7-186 operazioni per cella uno split 40/60
+#  lascerebbe tutte e due le gambe sotto il pavimento dei 150.
+#  IL FUORI CAMPIONE SI PAGA IN TRE MODI, e sono scritti:
+#   a) SUBITO: il gemello long e' un campione indipendente sullo stesso
+#      asse, e non "di conferma" ma DISCRIMINANTE (matrice par. 9).
+#   b) SUBITO: la riproduzione dell'ancora (par. 5) e' un fuori
+#      campione sul METODO, non sui dati: verifica che la catena sia la
+#      stessa che ha prodotto R242.
+#   c) DOPO: la riproduzione a H=3 (par. 10) e la prova di REGIME sul
+#      DAX 2010-2018. *** BLOCCO DICHIARATO ***: il simbolo D30EUR_EXT
+#      non e' importato in MT5 e il CANCELLO ZERO sugli _EXT e' ANCORA
+#      CHIUSO (report/STORICO_INDICI_SCARICATO_2026-09-10.md). Finche'
+#      non si apre, la prova di regime e' un DATO, non una corsa.
+#
+#  --- 12. IL COSTO IN TEMPO MACCHINA ---------------------------------
+#  BASE MISURATA, e non e' una stima d'archivio: e' R242, cioe' lo
+#  STESSO motore, STESSO simbolo, STESSA finestra, STESSO modello,
+#  STESSA macchina. Il round e' girato il 24/09/2026 dalle 07:18 alle
+#  07:21 (report/REFERTO_R242_2026-09-24.md r.3; referto del driver
+#  R242/REFERTO_ROUND_R242b.txt, "data: 2026-09-24 07:20:08") e ha
+#  prodotto ***14 passate vere in 3 minuti*** = 0,214 min/passata,
+#  compilazione e due avvii di MT5 INCLUSI.
+#  QUESTO ROUND: 9 celle x 2 file = ***18 passate vere*** (+18 sulla
+#  gamba OOS degenere, finestra vuota, costo ~0).
+#     3 min x (18/14) = ***3,9 minuti***.
+#  L'avvio e la compilazione non scalano col numero di celle, quindi il
+#  vero e' fra 3,0 e 3,9 min.
+#  >>> STIMA DICHIARATA: ***4-6 MINUTI*** per il round intero (i due
+#      file insieme), banda alta apposta. <<<
+#  LIMITE DELLA BASE, dichiarato: le celle di R242 avevano 96-188
+#  operazioni, qui la coda destra ne avra' fino a ~237 (gemello). Il
+#  tempo del tester e' dominato dal replay dei tick, che e' identico,
+#  non dalle operazioni -- ma la banda e' tenuta alta per questo.
+#
+#  --- 13. I VINCOLI DI BANCO CHE QUESTO FILE NON PUO' IMPORRE --------
+#  (classe 692: stanno nella riga di lancio, non qui dentro)
+#    -Deposito 100000  -> OBBLIGATORIO. Il default del driver e' 10000
+#       (walkforward_generico.ps1 r.200) e a 10.000 EUR il cancello
+#       della riproduzione (par. 5) fallirebbe per un motivo finto.
+#    -Modello 4        -> tick reali. E' il default (r.190), ma va
+#       verificato nel referto: un numero OHLC e' SCREENING, mai un
+#       verdetto.
+#    -FrazioneIS       -> lo impone @FRAZIONEIS qui sotto (1.0).
+#    -Spread           -> *** INCOGNITA DICHIARATA ***, identica a
+#       R242b: il default e' -1 (r.202), cioe' nessuna riga Spread
+#       nell'.ini. A modello 4 dovrebbe venire dai tick, ma il driver
+#       stesso scrive "NON MISURATO" (r.208). *** DEVE essere lo stesso
+#       di R242b, qualunque sia ***, altrimenti il cancello del par. 5
+#       fallisce senza che sia colpa dell'asse.
+#
+#  --- 14. IL MAGIC, E IL COMANDO CON CUI L'HO CERCATO ----------------
+#  ***762510 -- VERGINE.*** Comando eseguito il 24/09/2026 su tutto il
+#  repo, *** comprese le otto .claude/worktrees/ *** (grep -r di GNU
+#  non rispetta .gitignore, quindi le vede davvero):
+#    grep -rIn -oE "\b7625[0-9]{2}\b" . --exclude-dir=.git
+#  Esito: ZERO occorrenze in tutto il blocco 7625xx. Il gemello long
+#  usa 762500, dello stesso blocco vergine.
+#  >>> NON E' 770411 (la sedia viva short del DAX, challenge FTMO
+#      541452707) e NON E' 761810 (R242b): nessuna collisione. <<<
+#
+#  --- 15. I BUCHI DICHIARATI -----------------------------------------
+#  1. *** LA CAUSA (1) NON VIENE MISURATA DA QUESTO ROUND ***, viene
+#     solo LIMITATA DALL'ALTO (par. 1). Il conteggio esatto delle
+#     giornate scartate dal pavimento e' la riga di log r.331, e un CSV
+#     di ottimizzazione non porta il log per passata (il driver forza
+#     Optimization=1 e le passate girano sugli agenti). La misura vera
+#     e' la sonda backtest_pipeline/sonde/SONDA_BOX_D30EUR.txt, che
+#     parte quando Claudio torna. *** I DUE LAVORI SONO
+#     COMPLEMENTARI, NON ALTERNATIVI: la sonda misura il gate piccolo,
+#     questo round gira il gate grande. ***
+#  2. L'ampiezza del box a H=6 (218,7 idx) e' [DERIVATA] dalla legge
+#     sqrt su un ADR misurato, non letta barra per barra. Tutta la
+#     tabella dei 40x del par. 2 ne dipende. Se la sonda dicesse
+#     un'ampiezza molto diversa, e' la tabella a essere sbagliata, non
+#     il round -- ma i moltiplicatori sono cosi' alti (140x tipico) che
+#     servirebbe un errore di 3,5 volte per arrivare a 40x.
+#  3. I lunedi' ricevono un box artefatto (il box comincia di domenica,
+#     iBarShift r.308 restituisce l'ultima barra di venerdi'): R242b
+#     par. 7 lo stima ~20% delle giornate, quota [NON MISURATA].
+#     *** Qui pero' l'inerzia e' NON DIFFERENZIALE in modo ancora piu'
+#     forte che in R242: il box e' PINNATO, quindi tutte e nove le
+#     celle ricevono lo STESSO box identico ogni giorno *** e l'unica
+#     cosa che cambia e' quanto a lungo il pendente resta vivo. Il
+#     lunedi' non puo' inventare un altopiano.
+#  4. L'errore di FORMA del modello di n (par. 7) non e' quantificato:
+#     la banda +/-25% e' una scelta, non una misura.
+#  5. La deviazione standard del PF a n=150-190 e' [NON MISURATA] -- il
+#     campo "Sharpe Ratio" del CSV di MT5 non e' utilizzabile per
+#     ricavarla (vale 5,39 su una cella e -4,36 su un'altra: e' scalato
+#     in un modo che non conosco). Per questo il margine resta 0,10,
+#     lo stesso dichiarato in R242b, e non un errore standard.
+#  6. Il TF non e' mai stato cambiato su questo motore: M15 qui e in
+#     tutto l'archivio. Se il verdetto di questo round dovesse
+#     ARCHIVIARE lo short, il certificato di morte del 09/09 NON
+#     sarebbe completo: mancherebbe il punto 5. In quel caso il
+#     verdetto corretto resta "NON ANCORA MISURATO SU ALTRI TF".
+#  7. Questo round NON dice niente su altri simboli e non separa "piu'
+#     tempo per entrare" da "entrare piu' tardi nella giornata": sono
+#     la stessa cosa per costruzione, e non e' un difetto dell'asse, e'
+#     cosa significa allungare una finestra.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=6||6||0||6||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=0||0||0||0||N
+InpBoxEndMin=0||0||0||0||N
+InpMinBoxPts=6800||6800||0||6800||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=12||9||1||17||Y
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=600||600||0||600||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON e' pinnato DI PROPOSITO: il valore voluto e' la
+# stringa VUOTA, e un pin di stringa vuota NON arriva all'EA (MT5 lo
+# ignora e usa il default compilato). E' il controllo 3 di
+# controlla_prova.py, nato dal caso ABTG_FiboH4_Multi che misuro' otto
+# volte lo stesso basket. Qui il default compilato E' "", cioe'
+# esattamente il valore voluto, e InpUseNewsFilter=false lo rende
+# comunque inerte.
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMIN CUT SHORT
+InpMagic=762510||762510||0||762510||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
