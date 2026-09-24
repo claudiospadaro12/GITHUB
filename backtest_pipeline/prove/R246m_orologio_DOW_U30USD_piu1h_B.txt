@@ -164,14 +164,13 @@
 #     contro l'effetto candela. Non eliminabile dagli input (cambiare
 #     InpFilterTF cambierebbe il motore). Quanto spesso il bias cambia fra
 #     le due candele: [NON MISURATO] (nessuno storico H4 U30USD in repo);
-#     si misura a costo zero dai log degli AGENT del tester (InpVerbose=
-#     true: riga "RETEST armato: ... bias %d" giorno per giorno, d0
-#     R246a/c contro d+1 R246m/n; le gemelle stampano lo stesso bias, e
-#     con UN agente le passate sono in serie), raccolti dalle radici
-#     %APPDATA%\MetaQuotes come fa gia' la riga R246 (LOG_TESTER):
-#     LA RIGA LI RACCOGLIE (classe 754). Se nel round non ci sono, la
-#     quota di giorni con bias diverso resta [NON MISURATO] e si scrive
-#     accanto a Q2 e Qf2 del Dow.
+#     [!] ERRATA 24/09 (cancello della riga): NON si misura dai log degli
+#     AGENT. Il driver gira in Optimization=1 e in ottimizzazione MT5 NON
+#     esegue Print() (classe 526): le righe "RETEST armato ... bias" di
+#     ABTGLog NON sono nei log, e zero righe NON vuol dire zero giorni.
+#     La quota di giorni con bias diverso resta [NON MISURATO] e si scrive
+#     accanto a Q2 e Qf2 del Dow. Via per misurarla: un TEST SINGOLO
+#     (Optimization=0) di R246m e R246a, oppure lo storico H4 U30USD.
 #     DAX (filtro EMA spento) e MaxMin (correla-
 #     zione su H1, che si sposta allineata) NON hanno questo residuo;
 #   - MaxMin: correlazione su SPXUSD (BCM) contro US500.cash (FTMO).
