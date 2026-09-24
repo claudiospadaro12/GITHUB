@@ -98,3 +98,46 @@ Mesi: `2025.06 +7,5` · `07 +10,5` · `08 +0,2` · `09 +22,6` · `10 +2,2` · `1
 **Solo il 22,9%** delle finestre di **20 giornate esatte** fa +14,9% da sola (51 su 223). Il 74,6%
 del Monte Carlo non dice *"in 20 giorni"*: dice *"prima di toccare il 10%"*, e regge **perché la
 challenge non ha limite di tempo**. 👉 **Il tempo non è il nostro nemico. Il muro del 10% sì.**
+
+---
+
+## 6. 📋 LO STORICO COMPLETO DELLA CHALLENGE — tre posizioni, **due decisioni**
+
+Dagli screenshot di Claudio (Storico → Posizioni/Affari), riconciliato al centesimo:
+
+| data | sedia | lotti | ingresso → uscita | EUR | rischio **voluto** | slittamento |
+|---|---|---:|---|---:|---:|---:|
+| 22/09 | `771531` EMA200 **S1** | 9,11 | 52.160,28 → 52.265,82 | −844,58 | } **1.600,99 = 2,00%** | } 7,83 pt = **+9,8%** |
+| 22/09 | `771531` EMA200 **S2** | 13,67 | 52.189,78 → 52.265,82 | −913,10 | } | } |
+| 24/09 | `770411` MaxMin DAX | 25,23 | 25.286,39 → 25.352,52 | −1.668,46 | **1.621,03 = 2,03%** | 1,88 pt = +2,9% |
+| | | | **totale** | **−3.426,14** | | |
+
+Bilancio **76.573,86** ✅ (= 80.000 − 3.426,14). Cambio EUR/USD implicito sulle due gambe Dow:
+**1,13840 / 1,13839** — identico, quindi le due gambe sono state convertite allo stesso istante.
+
+🟢 **S1 e S2 sono due gambe della STESSA idea** (stesso SL 52.257,99, chiuse nello stesso
+secondo): le posizioni sono tre, **le decisioni sono due**. E **tutte e due erano dimensionate
+esattamente al contratto**: 2,00% e 2,03%.
+🟠 **Lo slittamento del Dow (+9,8%) è vicino allo scenario "pessimista" del Monte Carlo
+(+10,5%)**; sul DAX (+2,9%) è molto sotto. Media pesata sui due stop: **+6,3%**. Quindi la
+probabilità realistica sta **fra il 68,4% e il 74,6%** (i due scenari con Guardian a 2%), non
+sopra.
+
+## 7. 🎲 QUANTO ERA PROBABILE PARTIRE COSÌ
+
+Win rate **per posizione** dai per-trade del Monte Carlo (stessa finestra, tick reali):
+
+| sedia | posizioni | vinte | **win rate** | PF |
+|---|---:|---:|---:|---:|
+| `770101` DAX Apertura | 193 | 143 | **74,1%** | 1,40 |
+| `770202` Dow Apertura | 96 | 64 | **66,7%** | 1,27 |
+| `771531` EMA200 | 257 | 156 | **60,7%** | 1,52 |
+| `770411` MaxMin | 14 | 8 | 57,1% | 2,16 ⚠️ *campione sottile* |
+
+👉 **P(EMA200 perde la prima) × P(MaxMin perde la prima) = 39,3% × 42,9% = 16,8%.**
+**Una volta su sei** una challenge con queste sedie parte con le prime due decisioni in perdita.
+⚠️ Due avvertenze: (1) per EMA200 le "posizioni" sono **gambe**, correlate fra loro, quindi il
+39,3% è un'approssimazione per setup; (2) `770411` ha solo 14 posizioni.
+🔴 **E NIENTE FALLACIA DEL GIOCATORE**: due perdite **non** rendono più probabile una vincita.
+La prossima operazione ha le **stesse** probabilità di prima. Il fatto rassicurante è un altro:
+**non rendono nemmeno meno probabile una vincita**. Il motore è lo stesso di una settimana fa.
