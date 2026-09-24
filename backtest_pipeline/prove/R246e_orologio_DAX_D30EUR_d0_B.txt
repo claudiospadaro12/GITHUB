@@ -48,8 +48,10 @@
 #      CONTATO, di merito) ma NON decide orologio/stagione.
 #  >>> DECIDE LA FREQUENZA. Posizioni della cella -1h sui 237 feriali estivi
 #      A+B: H_STAGIONE [144,3 ; 163,1], H_OROLOGIO [177,1 ; 193,4]: DISGIUNTE.
-#      Zone Qf 0,30/0,70 (soglie 163,2 / 175,8 posizioni): se H_STAGIONE
-#      (0,901 ; 0,097 ; 0,001), se H_OROLOGIO (0,000 ; 0,068 ; 0,932).
+#      Zone Qf 0,30/0,70 (soglie all'ancora 163,2 / 175,8 posizioni; nel
+#      round si ricalcolano dai riferimenti d0 A+B). Regola com'e' scritta
+#      (script sez. 4): se H_STAGIONE P(pre) 0,994 (0,885 ; 0,112 ; 0,003),
+#      se H_OROLOGIO P(pre) 0,993 (0,000 ; 0,091 ; 0,909).
 #      Precondizione: divario di frequenza DENTRO il round (d0, A+B) >=
 #      0,067 pos/feriale (meta' dell'ancora 0,134); se no -> "DIVARIO NON
 #      RIPRODOTTO".

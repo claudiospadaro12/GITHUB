@@ -51,9 +51,11 @@
 #      o 45%. Il PF del MaxMin qui NON si legge per nessuna decisione.
 #  >>> FREQUENZA, INDIZIO DEBOLE: posizioni -1h sui 237 feriali estivi A+B,
 #      H_STAGIONE [4,9 ; 12,3], H_OROLOGIO [12,1 ; 22,4]: le bande si
-#      TOCCANO (12,1-12,3). Zone Qf 0,30/0,70 (soglie 11,2 / 14,7): se
-#      H_STAGIONE (0,815 ; 0,167 ; 0,018), se H_OROLOGIO (0,066 ; 0,193 ;
-#      0,741). Precondizione: divario dentro il round >= 0,018 pos/feriale.
+#      TOCCANO (12,1-12,3). Zone Qf 0,30/0,70 (soglie all'ancora 11,2 /
+#      14,7; nel round dai riferimenti d0 A+B). Regola com'e' scritta
+#      (script sez. 4): se H_STAGIONE P(pre) 0,893 (0,795 ; 0,161 ; 0,044),
+#      se H_OROLOGIO P(pre) 0,896 (0,070 ; 0,233 ; 0,697).
+#      Precondizione: divario dentro il round >= 0,018 pos/feriale.
 #  n: 9-17 posizioni per casella: NON e' un campione. Merito SOSPESO, e il
 #     rischio si legge (DD) ma su una manciata di operazioni.
 #  COSTO 40x: stop ATR (InpSLMode=1, ATR M15 x 2,5): [NON MISURATO] sia a

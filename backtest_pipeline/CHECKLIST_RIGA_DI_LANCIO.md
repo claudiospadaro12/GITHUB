@@ -35307,4 +35307,12 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 
 ## 🕰️ CLASSE 763 — **il cancello deterministico incide una regola che oggi sappiamo vera solo MEZZO anno**
 - **Caso (24/09, R246)**: `controlla_riga.py` blocca per costruzione `InpSessionHour=9` (DAX) e `=15` (USA) come "ora italiana" [FUSO]. Da `report/OROLOGIO_BCM_2026-09-24.md`: BCM e' **UTC+1 fisso**, quindi d'inverno 9 e 15 sono **le ore server giuste della cash**. La casella "+1h d'inverno" (cio' che FTMO fara' d'inverno) non si e' potuta scrivere.
-- **Regola**: una regola di fuso in un controllo deterministico va scritta a **calendario** (stagione della finestra del file prova), non come costante. Finche' il cancello non e' riscritto, un 9/15 **dichiarato** in un file prova d'inverno va motivato nel file e letto a mano dallo strato 2. La riscrittura del cancello e' un lavoro da fare, non un'eccezione da concedere.
+- **Regola**: una regola di fuso in un controllo deterministico va scritta a **calendario** (stagione della finestra del file prova), non come costante. Finche' il cancello non e' riscritto, **la casella non si scrive**: un FAIL dello strato 1 non si scavalca (classe 759). ✏️ *corretto lo stesso giorno dal cancello*: la prima stesura chiedeva allo strato 2 di leggere a mano cio' che lo strato 1 blocca. La riscrittura a calendario di `controlla_riga.py` r.1456-1461 e' il lavoro da fare.
+
+## 🎲 CLASSE 764 — **la potenza di una regola di verdetto calcolata a soglie FISSE, mentre la regola congelata misura i riferimenti DENTRO il round**
+- **Caso (24/09, R246a par. 7)**: potenza per OROLOGIO dichiarata 0,803; simulando la regola com'e' scritta (PF_E0 e D rumorosi, precondizione D>=0,44) viene **0,716**, MISTO fino al 25% e un ~8% di "divario non riprodotto" non dichiarato.
+- **Regola**: si simula la regola com'e' scritta, riferimenti e precondizione compresi, e si dichiara P(precondizione) sotto ogni ipotesi.
+
+## 🧭 CLASSE 765 — **una conseguenza per il campo derivata da una casella NON misurata, assumendo l'effetto uguale in ogni stagione**
+- **Caso (24/09, R246a mappa FTMO)**: "OROLOGIO -> V1" vale solo se l'effetto e' lo stesso d'estate e d'inverno; lo misura solo la casella d+1, bloccata dal cancello [FUSO].
+- **Regola**: la si marca [INFERITO] e si nomina la casella che la misura.

@@ -260,7 +260,11 @@
 #     stesso binario sulla stessa macchina), ma parla di un'altra serie: la
 #     conseguenza per il MC va rifatta col per-trade d0 di QUESTO round, non
 #     con 772505. Il ROSSO NON ferma la lettura: cambia a che cosa si
-#     riferisce.
+#     riferisce. E con G0 non VERDE/GIALLO le bande del par. 6, le soglie
+#     di precondizione (0,44 e 0,054) e le probabilita' del par. 7 sono
+#     [NON CONFRONTABILI] (calcolate su 772505): si rifanno con
+#     r246_bande_attese.py puntato sul per-trade d0 B di QUESTO round,
+#     PRIMA di aprire i per-trade -1h (classe 750).
 #  G2 COERENZA FRA FINESTRE (ogni coppia A/B allo stesso orologio): somma
 #     net_profit e numero di deal del per-trade A contro Profit e Trades
 #     della gamba IS del CSV B. Attesi IDENTICI; se differiscono, l'unica
@@ -334,23 +338,35 @@
 #     Q >= 0,70           -> OROLOGIO
 #     Q <= 0,30           -> STAGIONE
 #     0,30 < Q < 0,70     -> MISTO / NON SEPARATO (entrambe, o rumore)
-#  Probabilita' a priori (bootstrap seme 5, 6000 ricampionamenti, n
-#  proiettati), triple (STAGIONE ; MISTO ; OROLOGIO):
-#     se e' vera H_STAGIONE: (0,832 ; 0,136 ; 0,032)
-#     se e' vera H_OROLOGIO: (0,012 ; 0,185 ; 0,803)
-#     => verdetto SBAGLIATO 3,2% / 1,2%; zona MISTO 14-19%.
+#  Probabilita' a priori della REGOLA COM'E' SCRITTA (script, sez. 4,
+#  seme 13, 6000 ricampionamenti: riferimenti d0 A+B misurati nel round,
+#  parte B = serie del MC, parte A ricampionata), triple (STAGIONE ;
+#  MISTO ; OROLOGIO) condizionate alla precondizione:
+#     se e' vera H_STAGIONE: P(D>=0,44) 0,921 -> (0,829 ; 0,138 ; 0,033)
+#     se e' vera H_OROLOGIO: P(D>=0,44) 0,919 -> (0,033 ; 0,251 ; 0,716)
+#     => verdetto SBAGLIATO ~3,3% in tutti e due i versi; zona MISTO
+#     14-25%; e ~8% di "DIVARIO NON RIPRODOTTO" anche se il divario del MC
+#     e' vero e stabile. (A soglie FISSE dell'ancora, sez. 2, uscivano
+#     (0,832;0,136;0,032) e (0,012;0,185;0,803): ignoravano il rumore di
+#     PF_E0 e di D, che la regola misura dentro il round.)
 #  VERDETTO sulla FREQUENZA (tutti e tre): stessa regola con le posizioni
 #     per feriale al posto del PF (Df = r_I0 - r_E0, Qf = (r_E-1h - r_E0)/
 #     Df), precondizione Df >= meta' del divario d'ancora (Dow 0,054).
-#     Dow: se H_STAGIONE (0,879 ; 0,118 ; 0,003); se H_OROLOGIO (0,005 ;
-#     0,131 ; 0,864).
+#     Regola com'e' scritta (sez. 4), P(pre) e triple:
+#     Dow    H_STAGIONE 0,965 (0,847;0,143;0,010)  H_OROLOGIO 0,964
+#            (0,010;0,173;0,816)
+#     DAX    H_STAGIONE 0,994 (0,885;0,112;0,003)  H_OROLOGIO 0,993
+#            (0,000;0,091;0,909)
+#     MaxMin H_STAGIONE 0,893 (0,795;0,161;0,044)  H_OROLOGIO 0,896
+#            (0,070;0,233;0,697)
 #  Le due letture (PF e frequenza) sono DUE verdetti, non uno: possono
 #  divergere (l'armo in pre-mercato puo' cambiare quante volte si entra
 #  senza cambiare quanto rende ogni ingresso). Si scrivono tutti e due.
 #  Onesta' del bootstrap: assume celle INDIPENDENTI. Le celle d0 e -1h
-#  girano sugli STESSI giorni, quindi sotto H_STAGIONE il loro rumore e'
-#  correlato e l'errore vero e' PIU' PICCOLO di quello scritto (il numero
-#  scritto e' prudente). Le bande sono calcolate sulla sola B e proiettate
+#  girano sugli STESSI giorni, quindi il rumore di X e di PF_E0 e'
+#  correlato e per QUESTA parte l'errore vero e' PIU' PICCOLO di quello
+#  della sez. 4 (prudente). NON era prudente ignorare il rumore dei
+#  riferimenti A+B: la sez. 4 lo include. Le bande sono calcolate sulla sola B e proiettate
 #  su A+B: se l'inverno 2024/25 e' diverso, lo dice D.
 #  Lettura descrittiva, NON verdetto: PF d0 inverno 2024/25 contro inverno
 #  2025/26 separati (il "buon inverno" si ripete su due inverni sfasati?).
@@ -358,6 +374,9 @@
 #  CHE COSA SIGNIFICA PER FTMO (decisione di Claudio, qui solo la mappa):
 #   OROLOGIO -> d'inverno le sedie FTMO (armo alla cash) fanno la casella
 #      "alla cash", cioe' l'estate: lo scenario del MC e' V1 (70,8%).
+#      [INFERITO, non misurato: vale solo se l'effetto dell'orologio non
+#      dipende dalla stagione. Lo misura la casella d+1 d'inverno, par. 12
+#      punto 1.]
 #   STAGIONE -> d'inverno FTMO fa la stagione invernale: resta V0 (74,6%).
 #   MISTO / DIVARIO NON RIPRODOTTO -> nessuno dei due e' misurato come vero;
 #      serve la casella d+1 d'inverno (par. 12).

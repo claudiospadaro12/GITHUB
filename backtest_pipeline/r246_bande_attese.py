@@ -31,7 +31,7 @@ ONESTA': il bootstrap tratta le celle come INDIPENDENTI; d0 e -1h girano
 sugli stessi giorni, quindi sotto H_STAGIONE l'errore vero e' PIU'
 PICCOLO di quello stampato (numero prudente).
 
-USO:  python3 backtest_pipeline/r246_bande_attese.py     (~1 minuto)
+USO:  python3 backtest_pipeline/r246_bande_attese.py     (~8 secondi)
 """
 import collections
 import csv
@@ -171,5 +171,47 @@ def main():
           f"  -> {'SOVRAPPOSTE' if bO[400] <= bS[3600] else 'disgiunte'}")
 
 
+def sezione4():
+    print()
+    print("=== 4. LA REGOLA COM'E' SCRITTA (par. 7): riferimenti d0 A+B MISURATI NEL ROUND, seme 13, 6000 ===")
+    print("    parte B = serie del MC (fissa se G0 VERDE), parte A = ricampionata; celle indipendenti.")
+    print("    P(pre) = probabilita' che la precondizione passi; triple CONDIZIONATE a pre.")
+    random.seed(13)
+    R = 6000
+    for k, (f, cal) in F.items():
+        pos = carica(f, cal)
+        E = list(pos['E'].values())
+        I = list(pos['I'].values())
+        fb, fa = feriali(*B, cal), feriali(*A, cal)
+        rE, rI = len(E) / fb[0], len(I) / fb[1]
+        fE, fI = fb[0] + fa[0], fb[1] + fa[1]
+        nAE, nAI = round(rE * fa[0]), round(rI * fa[1])
+        pE = pf([v for L in E for v in L])
+        pI = pf([v for L in I for v in L])
+        for H in ('STAGIONE', 'OROLOGIO'):
+            zp, zf, okp, okf = [0, 0, 0], [0, 0, 0], 0, 0
+            for _ in range(R):
+                e0 = pf([v for L in E + [random.choice(E) for _ in range(nAE)] for v in L])
+                i0 = pf([v for L in I + [random.choice(I) for _ in range(nAI)] for v in L])
+                src, r = (E, rE) if H == 'STAGIONE' else (I, rI)
+                x = pf([v for _ in range(round(r * fE)) for v in random.choice(src)])
+                D = i0 - e0
+                if D >= (pI - pE) / 2:
+                    okp += 1
+                    q = (x - e0) / D
+                    zp[0 if q <= 0.30 else (2 if q >= 0.70 else 1)] += 1
+                fe0 = (len(E) + sum(random.random() < rE for _ in range(fa[0]))) / fE
+                fi0 = (len(I) + sum(random.random() < rI for _ in range(fa[1]))) / fI
+                fx = sum(random.random() < r for _ in range(fE)) / fE
+                Df = fi0 - fe0
+                if Df >= (rI - rE) / 2:
+                    okf += 1
+                    q = (fx - fe0) / Df
+                    zf[0 if q <= 0.30 else (2 if q >= 0.70 else 1)] += 1
+            t = lambda z, n: f"({z[0] / n:.3f} ; {z[1] / n:.3f} ; {z[2] / n:.3f})"
+            print(f"{k} se H_{H}: PF P(pre)={okp / R:.3f} {t(zp, okp)} | FREQ P(pre)={okf / R:.3f} {t(zf, okf)}")
+
+
 if __name__ == "__main__":
     main()
+    sezione4()
