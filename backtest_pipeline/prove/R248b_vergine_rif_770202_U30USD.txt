@@ -1,0 +1,165 @@
+# ==========================================================================
+#  R248b -- LA SEDIA VIVA 770202 SULLA FINESTRA VERGINE (riferimento)
+#  ABTG_Dow_Apertura_US su U30USD M5 -- TICK REALI -- deposito 100000
+#  cella di contratto R47c (per-trade 772505) -- magic 765283/765284
+# ==========================================================================
+#  >>> TUTTO IL RAGIONAMENTO STA IN R248a (file di testa del round): la
+#      domanda, la prova che la finestra e' vergine, le date (@FINOA
+#      2026.09.19 perche' la fine del tester e' esclusiva), il disegno a
+#      due gambe con l'ancora, il deposito, G1/G-OOS/G-DATI, lo script
+#      delle bande, la potenza, il costo 40x, la sovrapposizione
+#      descrittiva, il tempo e i buchi.
+#  PERCHE' C'E': "sostituire o affiancare" il candidato R245 a 770202
+#  chiede un numero FRESCO anche per 770202, sulla STESSA finestra e sullo
+#  STESSO banco. 770202 qui e' il RIFERIMENTO, non un candidato: questo
+#  file non tocca la sedia in campo, ne' il suo preset, ne' la sua taglia.
+#  NON VERGINE DEL TUTTO, dichiarato: il FORWARD di 770202 ha girato in
+#  parte di questa finestra ed e' stato letto (TOPPA_CHIUSURA_PER_TICKET_
+#  2026-09-19 r.73-78). In backtest la finestra non l'ha vista nessuno.
+#  Il confronto backtest/forward deal per deal su questa finestra e' una
+#  misura in piu' a costo zero di macchina: NON fatta qui.
+#
+#  I PIN: copiati da R246a (d0, finestra B = R47c) riga per riga, stesse
+#  righe vive e stesso ordine. R246a ha riprodotto 772505 ALLA RIGA (per-
+#  trade 794601 identico a 772505 tranne il magic: diff delle colonne
+#  close_time/symbol/position_id/deal_type/volume/price/net_profit VUOTO,
+#  verificato 24/09). Cambiano SOLO: le tre direttive (stesse di R248a) e
+#  il magic dell'asse. Verificabile col diff delle righe vive contro R246a.
+#  (Il G1 di R246a e' stato annullato per UN centesimo su UN deal della
+#  gamba IS: REFERTO_R246 par. 1. Qui vale il G1 sui campi che decidono,
+#  con la tolleranza scritta in R248a par. 5.)
+#
+#  LE GAMBE (stesse di R248a):
+#     gamba IS  2025.07.01 -> 2026.06.30 -> ANCORA
+#     gamba OOS 2026.07.01 -> 2026.09.19 (fine esclusiva) -> VERGINE
+#
+#  G0 ANCORA, sul CSV _IS. Qui la gamba IS NON e' la stessa corsa del
+#  contratto: 772505 partiva il 2025.06.10 (R47c, taglio 0,40), questa il
+#  2025.07.01. Riferimento = il per-trade 772505 dalle chiusure del
+#  2025.07.01: 123 deal, 91 posizioni (R247: "91 dei 96 giorni cadono
+#  nell'OOS di R247b"; autotest T8).
+#     VERDE  = Trades 123 ESATTO e PF in [1,2257 ; 1,2347] e Profit in
+#              [5573 ; 5770]  (r248_bande_vergine.py --g0: stesso saldo
+#              di partenza 100000 contro i 100000 + i primi 7 deal di
+#              772505, parziale al 50% arrotondato, 2000 simulazioni)
+#     GIALLO = Trades 123 esatto e PF o Profit fuori banda (il lotto non
+#              e' quello del modello, gli ingressi si'); OPPURE Trades
+#              diverso di AL PIU' 2 deal (= una posizione): partendo 15
+#              feriali piu' tardi, l'EMA 50 H4 dei primi giorni puo'
+#              differire. Si legge, e il giallo si scrive.
+#     ROSSO  = Trades diverso di piu' di 2: il banco non rifa' 770202. Il
+#              riferimento NON si legge; R248a si legge lo stesso (e' un
+#              altro EA, un'altra ancora).
+#
+#  LE BANDE (r248_bande_vergine.py --bande, stesso metodo di R248a par. 6,
+#  sorgente = per-trade 772505, 96 posizioni su 275 feriali 2025.06.10 ->
+#  2026.06.29, tasso 0,349 -> ~20 posizioni attese sull'anno):
+#     POSIZIONI  10 - 27   (p2,5 - p97,5, feriali d'ESTATE USA)
+#     DD SALDO CHIUSO  p95 5,54%  p99 7,16%  (anno intero; mediana 2,52%)
+#     (solo estate: p95 4,32% p99 5,43% -- qui la stagione CONTA:
+#      la banda che decide resta quella della promessa, cioe' l'anno)
+#  I RAMI sono quelli di R248a par. 6, con questi numeri. Il G-DATI si
+#  legge SOLO su R248a (stesso simbolo e stesso feed; 770202 entra troppo
+#  poco perche' una settimana vuota voglia dire qualcosa): qui si stampa
+#  come informazione.
+#  Riferimento del 18/08, NON un ramo: DD chiuso di 772505 sull'anno 4,22%
+#  (equity 4,39%); nel nullo il 15,2% delle finestre da 58 feriali lo supera.
+#  L'ATTESA, DICHIARATA PRIMA: ~18 posizioni (mediana estate), DD chiuso
+#  ~2,5%, PF SOTTO 1: i feriali d'estate della sorgente fanno PF 0,78 su 58
+#  posizioni (inverno 1,70 su 38, PF sui rendimenti), e la stessa finestra
+#  di calendario un anno prima (2025.07.01 -> 2025.09.18) fa 18 posizioni,
+#  DD chiuso 2,21%, PF 0,35. Il PF NON decide (n ~18).
+#  QUESTO FILE NON PROMUOVE, NON ARCHIVIA, NON TOCCA TAGLIE NE' SEDIE.
+#  EA: ABTG_Dow_Apertura_US
+# ==========================================================================
+
+@SIMBOLO    U30USD
+@PERIODO    M5
+@DAQUANDO   2025.07.01
+@FINOA      2026.09.19
+@FRAZIONEIS 0.819
+
+# --- 79 PIN + L'ASSE COPIATI DA R246a RIGA PER RIGA (stessa forma true/false).
+InpUsaGuardian=false
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=1000
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=400
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpMaxSpread=0
+InpVerbose=true
+# --- L'ASSE, unico e TECNICO: il magic, due gemelle (G1 + classe 134).
+#     765283 e 765284 vergini (rg "76528[0-9]" sul repo intero = 0, 24/09).
+InpMagic=765283||765283||1||765284||Y
+# ==========================================================================
