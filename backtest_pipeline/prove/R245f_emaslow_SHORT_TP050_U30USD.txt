@@ -74,7 +74,7 @@
 #  NESSUNA CELLA DI QUESTO FILE PUO' ESSERE PROMOSSA.
 #  VINCOLI DELLA RIGA: -Deposito 10000 (default del driver, NON 100000),
 #  -Modello 4, -Spread non passato, PC DI BACKTEST.
-#  TEMPO: ~1,5 min per questo file (banda 1,1-2,1) al ritmo di R88; tetto
+#  TEMPO: ~1,7 min per questo file (banda 1,1-2,1) al ritmo di R88; tetto
 #  ~9 min al ritmo di R240. Vedi R245a par. 10.
 #  EA: ABTG_Nasdaq_Apertura_US
 # ==========================================================================

@@ -36,7 +36,7 @@
 #  avere due copie che possono divergere.
 #  VINCOLI DELLA RIGA: -Deposito 10000 (default del driver, NON 100000),
 #  -Modello 4, -Spread non passato, PC DI BACKTEST.
-#  TEMPO: ~1,5 min per questo file (banda 1,1-2,1) al ritmo misurato di
+#  TEMPO: ~1,7 min per questo file (banda 1,1-2,1) al ritmo misurato di
 #  R88; tetto ~9 min al ritmo di R240. Vedi R245a par. 10.
 #  QUESTO FILE NON PROMUOVE, NON ARCHIVIA, NON TOCCA TAGLIE NE' SEDIE.
 #  EA: ABTG_Nasdaq_Apertura_US
