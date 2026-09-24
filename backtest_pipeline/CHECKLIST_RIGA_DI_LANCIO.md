@@ -35296,3 +35296,11 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🕛 CLASSE 760 — **l'ora del reset FTMO calcolata col VERSO sbagliato dell'offset del server**
 - **Caso (24/09, specifica della colonna FTMO in `ABTG_CostToCost`)**: il coordinatore ha scritto *"BCM = IT-1, quindi la mezzanotte italiana e' l'01:00 server"*. E' il contrario: se l'ora server e' ora italiana **meno** 1, le 00:00 italiane sono le **23:00 BCM del giorno prima**. Lo diceva gia' il preset `ABTG_Guardian_FTMO_2Step.set` ("23:00 BCM = 00:00 CET"); il `InpDailyResetHour=1` del Guardian vale perche' quello gira sul server **FTMO** (IT+1). L'ha preso l'agente sviluppatore prima del codice.
 - **Regola**: un confine orario si scrive come conversione esplicita `ora_IT -> ora_server` con il segno, e si confronta con un file di casa che ha gia' la risposta (preset del Guardian) prima di usarlo. Mai trasferire un'ora da un server all'altro.
+
+## 🔎 CLASSE 761 — **un limite scritto "[NON MISURATO]" che il repo ha GIA' misurato, nel file citato come contro-esempio**
+- **Caso (24/09, EA `ABTG_CostToCost` colonna FTMO e file R214e/f)**: "che l'offset IT-1 valga anche d'inverno: [NON MISURATO]". Lo stop in gap di 772351 alle **2026.03.01 23:05**, citato nello stesso lavoro come contro-esempio (c), e' di per se' la prova che quell'inverno la settimana FX apriva alle 23:00 server.
+- **Regola**: prima di scrivere [NON MISURATO] si cerca nei per-trade e nei referti la grandezza che lo decide; in particolare nei file gia' aperti.
+
+## 🗓️ CLASSE 762 — **un offset di fuso trattato come COSTANTE su una finestra di piu' anni**
+- **Caso (24/09, `InpFtmoDayHourServer=23` fisso)**: dai per-trade l'orologio BCM appare **ora italiana -1 fino all'inverno 2023/24** e **GMT+1 fisso** (= ora italiana d'inverno) almeno dal 02/02/2025: col 23 fisso sbaglia il confine nel **42,5%** dei giorni di R214e e nel **17,7%** di R214f. [INDIZIO del cancello: misura dedicata in corso, `report/OROLOGIO_BCM_2026-09-24.md`.]
+- **Regola**: ogni confine orario su piu' anni si scrive come calendario (ora legale EU/USA + data d'eventuale cambio d'orologio del broker), non come numero.
