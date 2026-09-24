@@ -35317,3 +35317,7 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🧭 CLASSE 765 — **una conseguenza per il campo derivata da una casella NON misurata, assumendo l'effetto uguale in ogni stagione**
 - **Caso (24/09, R246a mappa FTMO)**: "OROLOGIO -> V1" vale solo se l'effetto e' lo stesso d'estate e d'inverno; lo misura solo la casella d+1, bloccata dal cancello [FUSO].
 - **Regola**: la si marca [INFERITO] e si nomina la casella che la misura.
+
+## 🎭 CLASSE 766 — **"falso allarme atteso" attribuito per esclusione NON verificata**
+- **Caso (24/09, riga R246)**: sulle finestre A il driver esce rc 2 per il CSV `_IS` di un giorno (atteso), ma esce rc 2 **anche** quando `_OOS` ha righe con **Trades=0** (`RIGA_ROUND_VPS.ps1` r.1164-1170: "NON E' GIRATA", EA muto). La riga contava solo le RIGHE di `_OOS` e scriveva "FALSO ALLARME ATTESO" anche su un guasto vero. Contro-esempio eseguito dal cancello (scenario `oos0`).
+- **Regola**: un messaggio che ASSOLVE deve verificare la negazione dell'ipotesi alternativa (qui: N righe **e** N righe con Trades>0), e il suo contro-esempio si esegue. Parente delle classi 178 e 758.
