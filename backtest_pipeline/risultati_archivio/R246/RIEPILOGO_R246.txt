@@ -1,0 +1,43 @@
+RIEPILOGO R246 -- OROLOGIO O STAGIONE? (12 file: Dow/DAX/MaxMin x d0/-1h x finestra B/A, TICK REALI)
+data: 2026-09-24 22:51:48
+fine: 2026-09-24 23:04:13   durata minuti: 12   (dichiarato 8,7-12,2; tetto largo ~72; oltre 72 e BLOCCATA)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : f824b2f408e89941847d020c59f6589647a53d2a
+deposito 100000 passato (= R47 e R16); modello 4; etichette R246a ... R246l, una per file
+FINESTRE A (R246c, R246d, R246g, R246h, R246k, R246l): CSV _IS vuoto = FALSO ALLARME ATTESO, rc 2 atteso. Si legge il CSV _OOS e il suo per-trade.
+
+R246a  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R246e  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R246i  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R246b  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R246c  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+R246d  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+R246f  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R246g  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+R246h  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+R246j  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R246k  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+R246l  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, rc 2 su una finestra B, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 12
+ROUND PARTITI (rc diverso da 1): 12 su 12
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh, unico include nostro dei tre EA): MOTORE = PIN in tutti i 12 round partiti
+CARTELLE ATTESE: 12   TROVATE: 12   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 7946xx, scritti DOPO l avvio): 24 su 24
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic): sulle B = la finestra del Monte Carlo, sulle A = il primo inverno 2024/25.
+
+I CANCELLI, CONGELATI PRIMA (R246a par. 5, R246e, R246i). PRIMA di qualunque numero:
+G1 DETERMINISMO (ogni file): le due gemelle (magic m e m+50) identiche in Profit, PF, DD, Trades in tutti e due i CSV, e i due per-trade identici RIGA PER RIGA tranne la colonna magic. Se no -> quel file e NULLO.
+G0 RIPRODUZIONE (solo i d0 della finestra B). VERDE = identico al centesimo e per-trade identico riga per riga tranne il magic; GIALLO = Trades identici e |delta Profit| <= 1%; ROSSO = altrimenti.
+   R246a Dow (R47c, 772505): IS Profit 2811.84 PF 1.22247 DD 5.6692 Trades 74 | OOS Profit 6721.93 PF 1.27013 DD 4.3941 Trades 130 | per-trade 130 righe, 96 posizioni, somma 6721.93
+   R246e DAX (R47a, 772501): IS Profit 3789.36 PF 1.12634 DD 5.4362 Trades 175 | OOS Profit 18029.58 PF 1.39709 DD 7.2328 Trades 270 | per-trade 270 righe, 193 posizioni, somma 18029.58
+   R246i MaxMin (R16b, 770413): IS Profit 4766.96 PF 1.87803 DD 3.0977 Trades 20 | OOS Profit 6143.38 PF 2.15985 DD 1.9213 Trades 21 | per-trade 21 righe, 14 posizioni, somma 6143.38
+   ROSSO NON ferma la lettura: cambia a che cosa si riferisce. Con G0 non VERDE/GIALLO le bande del par. 6, le soglie di precondizione e le probabilita del par. 7 sono [NON CONFRONTABILI]: si rifanno con r246_bande_attese.py sul per-trade d0 B di QUESTO round PRIMA di aprire i per-trade -1h (classe 750).
+G2 COERENZA FRA FINESTRE (stesso orologio): somma net_profit e numero di deal del per-trade A contro Profit e Trades della gamba IS del CSV B. Coppie: R246c-R246a, R246d-R246b, R246g-R246e, R246h-R246f, R246k-R246i, R246l-R246j. Attesi IDENTICI; unica causa ammessa di scarto il 26/09/2024, si dichiara e si usa il per-trade A.
+S1 SENTINELLA DELL OROLOGIO (la manopola deve MORDERE, classe 156):
+   Dow  d0: nessuna uscita prima delle 15:05 BCM ne dopo le 17:31. -1h: nessuna dopo le 16:31 e ALMENO il 10% delle uscite prima delle 15:05.
+   DAX  d0: nessuna uscita prima delle 08:35 BCM ne dopo le 17:31. -1h: nessuna dopo le 16:31 e ALMENO il 10% delle uscite prima delle 08:35.
+   MaxMin d0: nessuna uscita prima delle 08:00. -1h: per-trade NON identico a d0 e nessuna uscita dopo le 16:31; almeno un uscita prima delle 08:00 attesa, se manca S1 e GIALLO, non ROSSO.
+   Per-trade -1h identico a d0, o S1 ROSSO -> il pin d orario non e arrivato all EA: round NULLO, non nessun effetto.
+VERDETTO (R246a par. 7, congelato): riferimenti d0 A+B dentro il round, D = PF_I0 - PF_E0, Q = (PF_E-1h - PF_E0)/D. Precondizione D >= 0,44 (Dow). Q >= 0,70 OROLOGIO, Q <= 0,30 STAGIONE, in mezzo MISTO. Il PF decide SOLO sul Dow (su DAX e MaxMin e NON DISCRIMINANTE per costruzione, classe 178). Secondo verdetto sulla FREQUENZA per tutti e tre: Qf = (r_E-1h - r_E0)/Df con r = posizioni per feriale, precondizione Df >= 0,054 Dow, 0,067 DAX, 0,018 MaxMin; sul MaxMin e un indizio debole. I due verdetti si scrivono tutti e due. Dow e MaxMin n<150: INDIZIO, merito sospeso; il DD si legge sempre (Emendamento B).
