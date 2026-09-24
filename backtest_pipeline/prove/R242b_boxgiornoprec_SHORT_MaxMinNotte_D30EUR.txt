@@ -1,0 +1,515 @@
+# =====================================================================
+#  R242b -- IL BOX DEL GIORNO PRECEDENTE SUL DAX, LATO SHORT
+#  EA: ABTG_MaxMinNotte
+#
+#  LA DOMANDA DEL ROUND, una sola:
+#    "Quando lo stop passa da ~86x a ~160x lo spread, sullo STESSO
+#     simbolo, con lo STESSO binario e la STESSA gestione, il segno
+#     cambia?"
+#  Asse: la GEOMETRIA DEL BOX, e solo quella. Una variabile.
+#
+#  GEMELLO: R242a_boxgiornoprec_LONG_MaxMinNotte_D30EUR.txt
+#  I due file sono la REGOLA DEI DUE LATI firmata il 25/08 (bloccante su
+#  Nasdaq/DAX/Dow). *** NON SONO COPIE ***: ogni riga di codice e ogni
+#  numero che descrive IL LATO sono stati riaperti e ricalcolati per lo
+#  SHORT (classe 690/716). Qui dentro non c'e' un numero di long.
+#  >>> E il DAX e' esattamente il simbolo dove questo conta: la cella
+#      viva 770411 e' SHORT-ONLY, e sullo stesso CSV d'archivio il lato
+#      long fa PIU' operazioni ma PF piu' basso. I due lati di questo
+#      motore su questo simbolo NON si assomigliano. <<<
+# =====================================================================
+#
+#  --- 0. IL PERIMETRO ------------------------------------------------
+#  Questo file NON lancia niente. Bersaglio previsto: PC DI BACKTEST
+#  (NON il VPS: la challenge e' viva e la regola del 21/09 e' bloccante;
+#  NON il piccolo 50503392, NON il 100k 50504263, NON il reale 10105439,
+#  NON il banco VPS 50504400).
+#
+#  --- 1. LA CASELLA ERA VUOTA, E L'HO VERIFICATA IO -------------------
+#  Censimento fatto DENTRO i CSV (non sui nomi) il 24/09/2026 su tutto
+#  backtest_pipeline/risultati_archivio/**/*.csv, leggendo le colonne
+#  InpBoxStartHour/Min e InpBoxEndHour/Min:
+#    21 file, 396 celle con un box. GEOMETRIE DISTINTE: DUE.
+#      23:00 -> 04:59  (5h59m)  348 celle
+#      22:00 -> 06:59  (8h59m)   48 celle  (MaxMin_Oro fase1, 4 TF)
+#  >>> IL BOX NON HA MAI SUPERATO LE NOVE ORE IN UNA CORSA MISURATA. <<<
+#  Il giorno intero (23h59m) non e' mai stato girato su nessun simbolo,
+#  su nessuno dei due lati.
+#  ERRATA al dossier da cui nasce il round (caccia_strategie/
+#  CACCIA_STOP_AMPIO_2026-09-24.md par. 5.1.1): vedi par. 1 del gemello
+#  -- due errori, la seconda geometria e il file sorgente citato.
+#  In breve, e vale anche qui: il dossier cita le righe del file
+#  mql5/Experts/standalone/ABTG_MaxMinNotte.mq5 (468 righe, v1.00), che
+#  ***non e' il binario che girera'***. Il driver compila
+#  mql5/Experts/<EA>.mq5 (walkforward_generico.ps1 r.317, r.1912, r.1929):
+#  918 righe, v1.11. Le righe dello SHORT, riverificate da me su QUEL
+#  file, stanno al par. 3.
+#
+#  --- 2. QUAL E' L'ASSE, E PERCHE' QUESTO E NON UN ALTRO --------------
+#  ASSE = InpBoxStartHour, da 0 a 18 con passo 3 -> SETTE celle.
+#  I DUE ESTREMI DEL BOX SONO PINNATI A 00:00 (InpBoxEndHour=0,
+#  InpBoxEndMin=0). Con quel pin, per OGNI H fra 0 e 23 vale
+#  tStart >= tEnd, quindi il box diventa
+#        [ IERI alle H:00  ->  OGGI alle 00:00 ]
+#  cioe' la coda del giorno precedente, lunga (24 - H) ore.
+#    H=0  -> 24h = IL GIORNO PRECEDENTE INTERO (la casella mai provata)
+#    H=18 ->  6h = la sola sera del giorno precedente
+#  Ho scelto l'ora d'INIZIO e non la durata perche' l'EA non ha un input
+#  "durata": la durata si ottiene SOLO muovendo uno dei due estremi, e
+#  muovere l'estremo FINALE cambierebbe anche il MOMENTO in cui il box
+#  si chiude rispetto al piazzamento (due variabili in una). Pinnando la
+#  fine a mezzanotte, il box finisce sempre allo stesso istante e cambia
+#  solo quanto indietro comincia: UNA variabile, non due.
+#
+#  --- 3. LA PROVA CHE L'ASSE TOCCA IL RAMO ***SHORT*** (classe 713) ---
+#  Righe di mql5/Experts/ABTG_MaxMinNotte.mq5 (918 righe, v1.11), lette
+#  oggi sul file che il driver compilera'. *** SONO LE RIGHE DELLO
+#  SHORT, NON QUELLE DEL LONG: le ho riaperte una per una. ***
+#    r.112  enum ENUM_MM_SL { MM_SL_OPPOSITE=0, MM_SL_ATR=1, MM_SL_FIXED=2 };
+#           -> InpSLMode=0 E' MM_SL_OPPOSITE. Letto dall'ENUM.
+#    r.303-306 (ComputeBox): tEnd e tStart nascono TUTTI E DUE sulla
+#           data di OGGI; solo tStart puo' arretrare:
+#             if(tStart>=tEnd) tStart-=86400;
+#    r.349-350 (TryPlace):  buyPx = gBoxHigh+buf ; sellPx = gBoxLow-buf
+#    r.361  double sl = SLforShort(sellPx, buyPx, atr);
+#    r.385  if(InpSLMode==MM_SL_OPPOSITE) sl=oppLevel;   (SLforShort)
+#           -> per lo SHORT oppLevel e' ***buyPx***, cioe' l'estremo
+#              ALTO del box PIU' il buffer.
+#    r.362  double dist = sl - sellPx;
+#           = (gBoxHigh+buf) - (gBoxLow-buf) = AMPIEZZA DEL BOX + DUE
+#             buffer. Sette durate di box = sette stop diversi.
+#             L'asse NON e' inerte sul lato short.
+#    r.367  gTrade.SellStop(lot, sellPx, _Symbol, sl, tp, ...)
+#
+#  >>> IL CARDINE E' UN SOLO CARATTERE, E VA SCRITTO: `>=`, NON `>`. <<<
+#  Alla cella H=0 vale tStart == tEnd (00:00 == 00:00). Con `>` il box
+#  sarebbe di UN SOLO ISTANTE e la cella piu' importante del round
+#  misurerebbe spazzatura. Con `>=` (che e' cio' che c'e' scritto)
+#  arretra di 86400 s e il box e' il giorno intero.
+#
+#  --- 3-bis. I TRE RAMI CHE SI RIBALTANO, CONTROLLATI UNO PER UNO -----
+#  (classe 716: su un file gemello la tabella dei rami si ribalta, e un
+#   "nessun effetto" copiato dal lato opposto e' una dichiarazione falsa)
+#   a) TRAILING, r.465:
+#        n = ask + a*InpTrailAtrMult;  if((n<sl || sl==0) && n<openP)
+#      La guardia e' ***n < openP***, cioe' lo specchio della guardia
+#      long (n > openP alla r.464). CONCLUSIONE, ricontrollata e NON
+#      copiata: anche sullo short il trailing ***non stringe mai dentro
+#      la perdita***. Lo stop d'ingresso a 1 ADR e' reale.
+#   b) TERZO TARGET EMA200, r.455:
+#        if(!isLong && e[0] < openP && ask <= e[0]) -> chiude tutto
+#      Per uno SHORT che rompe il MINIMO di un giorno intero, la EMA200
+#      su M15 (media di ~2 giorni) sta ***SOPRA*** l'ingresso, quindi
+#      e[0] < openP e' FALSA e il terzo target e' atteso quasi INERTE.
+#      >>> Qui il ramo E' l'opposto di quello del long (r.454 chiede
+#          e[0] > openP), ma la CONCLUSIONE viene fuori uguale, e viene
+#          fuori da questo conto, non dal file gemello. <<<
+#   c) BREAKEVEN, r.429:
+#        (!dirLong && (slPrec==0 || bePari < slPrec))
+#      Lo stop in pari si applica solo se MIGLIORA lo stop, e per lo
+#      short "migliorare" vuol dire ABBASSARE. Il ramo e' presente e
+#      corretto; e' comunque atteso raro (par. 8: il primo target sta a
+#      1R = un ADR intero di distanza).
+#
+#  --- 4. IL DIFETTO CHE HO TROVATO NELLA BOZZA DEL DOSSIER ------------
+#  La bozza del par. 8 di CACCIA_STOP_AMPIO proponeva
+#      InpPlaceHour=22 InpPlaceMin=5 ... InpCloseHour=21
+#  >>> QUELLA CONFIGURAZIONE FA ZERO OPERAZIONI, E NON PER IL MERCATO. <<<
+#  OnTick r.253-254:  if(nowMin >= InpCloseHour*60+InpCloseMin)
+#                       { EndOfDay(); return; }
+#  Alle 22:05 (1325 min) la condizione 1325 >= 1290 e' VERA: la funzione
+#  RITORNA prima del blocco di piazzamento (r.274). Il round sarebbe
+#  uscito con sette celle a zero trade.
+#  Qui l'ordine e' verificato e scritto: 00:00 (fine box, gia' passata)
+#  < 07:59 (piazzo, 479) < 12:00 (cutoff, 720) < 17:30 (flat, 1050).
+#
+#  --- 5. LA SECONDA TRAPPOLA: LA SCADENZA DEL PENDENTE ----------------
+#  r.335: exp = TimeCurrent() + InpPendingExpiryMin*60, e il SellStop
+#  della r.367 nasce ORDER_TIME_SPECIFIED con quella scadenza. Col
+#  default di casa (90) il pendente piazzato alle 07:59 MUORE alle
+#  09:29: la finestra d'opportunita' sarebbe 90 minuti, non quella
+#  dichiarata, e nessuna riga del CSV lo direbbe.
+#  Qui InpPendingExpiryMin=250 -> 07:59 + 250 min = 12:09, cioe' nove
+#  minuti DOPO il cutoff delle 12:00. Il cancello che morde e' il
+#  cutoff (voluto); la scadenza e' la rete di sicurezza.
+#
+#  --- 6. LE TRE DEVIAZIONI DALLA CELLA VIVA, dichiarate come SCELTE ---
+#  Cella di riferimento: mql5/Presets/ABTG_MaxMinNotte_DAX_Short_
+#  Ottimizzato_D30EUR_M15_770411_100K.set (foto .chr del 06/09/2026).
+#  >>> NOTA CHE VALE SOLO PER QUESTO FILE: la cella viva e' GIA'
+#      short-only (InpAllowLong=false, InpAllowShort=true). Quindi su
+#      questo lato il file NON devia dal vivo sui due input di lato,
+#      mentre il gemello long SI'. Le deviazioni qui sono TRE, non
+#      quattro. <<<
+#  a) InpSLMode 1 (ATR) -> ***0 (OPPOSITE)***. E' L'OGGETTO DEL ROUND.
+#     Conseguenza: InpAtrSLmult=2.5 e InpSLFixedPts=3000 diventano
+#     ***INERTI*** (r.385-386 li legge solo negli altri due rami). Li
+#     pinno lo stesso per non far credere a un default diverso, ma chi
+#     legge non deve credere che lo stop sia 2,5 ATR.
+#  b) InpEntryCutoffHour 8:30 -> ***12:00***. MOTIVO, col numero: col
+#     cutoff a 31 minuti dal piazzamento un box da un giorno intero
+#     verrebbe rotto al ribasso troppo di rado (par. 8: il lato short
+#     ha la frequenza PIU' BASSA dei due) e il campione non arriverebbe
+#     ai 150. A 12:00 ogni ingresso ha comunque 5h30m di corsa prima
+#     del flat delle 17:30.
+#     CONTRO-ESEMPIO SU QUESTA SCELTA: col cutoff a 17:00 il campione
+#     salirebbe di un altro ~40%, ma una quota di ingressi verrebbe
+#     appiattita dal flat prima di poter toccare qualunque barriera:
+#     n piu' grande, informazione per operazione piu' piccola. Scelta
+#     dichiarata PRIMA dei numeri, identica in tutte e sette le celle
+#     (e' un pin, non una variabile: non confonde l'asse).
+#  c) InpUseCorrelation true -> ***false***. E QUI IL PREZZO E' PIU'
+#     ALTO CHE SUL GEMELLO, e va detto: il filtro SPXUSD e' stato
+#     misurato proprio SULLO SHORT DEL DAX, ed e' la chiave --
+#     REGISTRO_TEST r.673-676: "corr ON, buffer 1000, AtrSL 2.5,
+#     TP2 3.0" fa PF 2,05 e DD 3,1% con n=41, contro "corr OFF
+#     (qualsiasi)" PF 1,0-1,25 e DD 6-9% con n~100.
+#     >>> Spegnerlo sullo short significa misurare la geometria contro
+#         il riferimento PEGGIORE del motore, non il migliore. E' la
+#         scelta giusta lo stesso: acceso, il filtro divide il campione
+#         per ~2,4 e nessuna cella arriverebbe a 150 -- si leggerebbe
+#         l'asse attraverso un filtro invece che l'asse. Il filtro e'
+#         il ROUND DOPO, e su questo lato e' il primo da riaccendere. <<<
+#  TUTTO IL RESTO e' la cella viva, carattere per carattere, tranne
+#  InpMinBoxPts (par. 7) e InpPendingExpiryMin (par. 5).
+#
+#  --- 7. InpMinBoxPts=6800 NON E' UNA MANOPOLA LIBERA: E' DUE CANCELLI -
+#  r.328-329: if(InpMinBoxPts>0 && widthPts<InpMinBoxPts) -> niente
+#  ordini quel giorno (e il ramo sta PRIMA della biforcazione long/short,
+#  quindi vale identico sui due lati). Taratura: 6800 punti = ***68,0
+#  punti indice*** (1000 punti = 10 idx sul DAX BCM, commento r.140).
+#  CANCELLO 1 -- IL COSTO, RESO ESECUTIVO INVECE CHE PREDETTO.
+#    stop minimo possibile = 68,0 + 2 x 10,0 = ***88,0 idx***
+#    88,0 / 1,70 (spread adottato ora 08) = ***51,8x*** -> sopra i 40x
+#    88,0 / 2,70 (p95 ora 08, il bordo cattivo) = 32,6x -> sotto i 40x
+#         ma molto sopra il pavimento duro 13,3x.
+#  CANCELLO 2 -- IL LUNEDI', DOVE L'ASSE SAREBBE INERTE.
+#    Il box di lunedi' comincia di DOMENICA, quando il DAX non quota:
+#    iBarShift(..., false) restituisce l'ultima barra di VENERDI', e
+#    ***tutte e sette le celle ricevono LO STESSO box*** (inerzia di
+#    classe 713, su ~20% delle giornate). Il box artefatto vale la
+#    forchetta del fine settimana piu' la sera di domenica, tipicamente
+#    sotto i 68 idx: il pavimento lo scarta.
+#    RESIDUO DICHIARATO: i lunedi' con forchetta grossa (> 68 idx)
+#    passano lo stesso e restano inerti. Stima [NON MISURATA] 1-3%.
+#  PREZZO DEL PAVIMENTO, cella per cella (stima [DERIVATA], range
+#  giornalieri lognormali con sigma 0,35): scarta lo 0,0% delle giornate
+#  a H=0 e il ***3,9%*** a H=18. Monotono e piccolo, ma NON nullo: il
+#  controllo e' nel CSV, sulla colonna Trades (par. 8).
+#
+#  --- 8. L'ATTESA, DICHIARATA PRIMA DEI NUMERI -----------------------
+#  ANCORE, tutte con la fonte:
+#    ADR D30EUR = 252,5 idx   [MISURATO n=52]
+#      report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par.5
+#    spread D30EUR ora 08 = 1,70 mediana / 2,70 p95   [MISURATO]
+#      risultati_archivio/spread_flotta/spread_orario_D30EUR.csv r.10
+#      (30,9 M tick, 2024.09.26->2026.06.30, solo-bid 0,000)
+#    legge di casa ATR(T) = ADR x sqrt(T/1440), residuo -1%
+#      report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md par.4
+#    1 lotto D30EUR = ***1,00 EUR per punto indice***  [MISURATO n=155,
+#      mediana su data/statements/trades_auto.csv + trades_100k.csv]
+#
+#  AMPIEZZA DEL BOX E STOP (stop = ampiezza + 20 idx; sullo short la
+#  distanza e' la stessa del long perche' r.362 usa gli stessi due
+#  estremi, l'ho riverificata al par. 3):
+#    H   ore   box idx   stop idx   stop/1,70   stop/2,70
+#    0   24    252,5     272,5      160,3x       100,9x
+#    3   21    236,2     256,2      150,7x        94,9x
+#    6   18    218,7     238,7      140,4x        88,4x
+#    9   15    199,6     219,6      129,2x        81,3x
+#   12   12    178,5     198,5      116,8x        73,5x
+#   15    9    154,6     174,6      102,7x        64,7x
+#   18    6    126,2     146,2       86,0x        54,2x
+#  >>> TUTTE E SETTE LE CELLE PASSANO I 40x A TUTTI E DUE GLI SPREAD. <<<
+#  Per confronto, dalla stessa casa: la cella viva SHORT 770411
+#  (2,5 x ATR M15 = 64,5 idx) sta a ***37,9x***, cioe' SOTTO il
+#  pavimento di lavoro dei 40x; la griglia d'archivio (1,5 x ATR M15 =
+#  38,7 idx) sta a ***22,8x***. Il round NON li rimisura (par. 10).
+#
+#  ATTESA DI CAMPIONE (lato SHORT, e solo SHORT).
+#  Base misurata: risultati_archivio/MaxMinNotte/080957cf-valid_MaxMin_
+#  D30EUR.csv, 72 celle, box notturno 23:00-04:59, cutoff 08:30,
+#  InpRiskPercent=1, modello tick. Mediana Trades:
+#      short-only ***107***  (contro 149 del long e 255 dei due lati)
+#  >>> LO SHORT E' IL LATO MENO FREQUENTE DEI DUE: 107 contro 149. Non
+#      lo eredito dal gemello, lo leggo sul suo sottoinsieme. <<<
+#  Riscalato alla mia finestra (fattore 642/911 = 0,705, la stessa
+#  catena di R187a): short-only ***75,4*** su ~440 giornate operative
+#  -> probabilita' di rottura al ribasso p = ***0,1714***, da cui
+#  z = 1,3676.
+#  CONTROLLO CONTRO UN NUMERO SCRITTO DA ALTRI (regola del 10/09):
+#  0,1714 (short) + 0,2387 (long, ricalcolato nel file gemello) =
+#  0,4102; 0,4102 x 440 = ***180,5***, e R187a par.4 dichiara ***180***
+#  per il box notturno nella stessa finestra, ricavato per DUE strade
+#  diverse dalle mie. Scarto 0,3%: la catena regge.
+#  Modello di trasporto (cammino senza deriva, barriera a distanza d,
+#  tempo t): p = 2 x (1 - Phi(z)), z proporzionale a d / sqrt(t).
+#    d = meta' ampiezza del box + 1 buffer (d della base = 73,04 idx);
+#    t = 241 min (07:59 -> 12:00) contro i 31 min della base;
+#    sqrt(241/31) = 2,7882.
+#    H     d idx   k       z'      p       n atteso (x440, meno pavim.)
+#     0    136,2   0,6691  0,915   0,360   ***158***
+#     3    128,1   0,6290  0,860   0,390   ***171***
+#     6    119,3   0,5860  0,801   0,423   ***186***
+#     9    109,8   0,5392  0,737   0,461   ***203***
+#    12     99,3   0,4875  0,667   0,505   ***222***
+#    15     87,3   0,4287  0,586   0,558   ***243***
+#    18     73,1   0,3591  0,491   0,623   ***264***
+#  ATTESA DICHIARATA: n cresce in modo MONOTONO da ~158 a ~264 scendendo
+#  lungo l'asse, banda +/-30% (111 - 343). Tetto duro 440 (un solo trade
+#  al giorno, garantito dalla macchina a stati: si piazza solo con
+#  gPhase==MMP_WAIT, r.274).
+#  >>> AVVERTENZA CHE IL GEMELLO NON HA: LA CELLA H=0, QUELLA PIU'
+#      IMPORTANTE DEL ROUND, E' PREVISTA A RIDOSSO DEL PAVIMENTO --
+#      158 contro 150. Se esce sotto, il MERITO di quella cella e'
+#      SOSPESO e si legge solo il rischio. Non e' una sorpresa: e'
+#      scritto prima. <<<
+#  >>> E questo e' anche il controllo del pavimento InpMinBoxPts: se n
+#      NON cresce in modo monotono, o se cala fra H=15 e H=18, il
+#      pavimento sta mordendo piu' del 3,9% previsto e il confronto fra
+#      celle va riletto prima del PF. <<<
+#
+#  PF ATTESO: ***NESSUNO, e la direzione dell'archivio e' NEGATIVA.***
+#  Riaperto io oggi lo stesso CSV: le 18 celle A DUE LATI del box
+#  notturno su D30EUR fanno 0 su 18 sopra PF 1,00 (da 0,828 a 0,992),
+#  n mediano 253, DD mediano 17,0% e massimo 20,3% a InpRiskPercent=1.
+#  IL NUMERO CHE RIGUARDA QUESTO LATO, letto sul suo sottoinsieme:
+#  la miglior cella ***short-only*** del file e' PF ***1,18742***, DD
+#  7,2851%, n=107 (buffer 1000, TP2 3,0) -- ed e' anche la miglior
+#  cella dell'intero file. REGISTRO_TEST r.637 la riporta identica.
+#  >>> QUINDI SULLO SHORT L'ASTICELLA E' PIU' ALTA CHE SUL LONG: il
+#      riferimento da battere non e' 0,99, e' ***1,19***. Un PF di 1,12
+#      su questo lato NON sarebbe una scoperta: sarebbe un
+#      PEGGIORAMENTO della geometria che gia' abbiamo. <<<
+#  >>> E vale lo stesso avvertimento di casa: se il segnale e' morto di
+#      suo, allargare lo stop non lo resuscita, perde piu' lentamente.
+#      E' l'esito piu' probabile, ed e' scritto PRIMA dei numeri. <<<
+#
+#  DD ATTESO: 17,0% x 0,65 = ***11,1%*** (banda 7-15%). E lo dico
+#  chiaro: mi aspetto di NON passare il cancello di rischio del 10%.
+#  La soglia resta quella di casa e non si muove per far entrare il
+#  candidato. Se esce PF buono con DD 11%, il verdetto e' "geometria
+#  con edge, TAGLIA da rifare", non "promosso".
+#
+#  VERIFICA DEL LOTTO (il tranello che falserebbe il DD): rischio
+#  0,65% x 100.000 = 650 EUR; stop piu' largo 272,5 idx x 1,00 EUR/idx
+#  = 272,50 EUR per lotto -> ***2,39 lotti***. Stop piu' stretto
+#  ammesso (88,0 idx) -> 7,39 lotti. Tutti e due lontanissimi dal lotto
+#  minimo, quindi LotByRisk (r.730-760) non viene schiacciato dal
+#  MathMax(mn, ...) e il DD in percentuale resta una funzione del
+#  rischio dichiarato.
+#
+#  --- 9. LE SOGLIE, CONGELATE PRIMA DEI NUMERI -----------------------
+#  PRIMA DI TUTTO SI GUARDA n, cella per cella:
+#    n >= 150 -> il MERITO si legge (Emendamento A del 16/08).
+#    50 <= n < 150 -> merito SOSPESO per quella cella: si scrive PF, DD
+#         e n e si dice "indizio". Il RISCHIO si legge lo stesso
+#         (Emendamento B). ATTESO possibile sulla cella H=0.
+#    n < 50 -> "NON MISURATO -- CONFIGURAZIONE DA RILEGGERE", mai "non
+#         funziona": si ricontrollano l'ordine degli orari (par. 4), la
+#         scadenza (par. 5) e il pavimento (par. 7).
+#    n == 0 su TUTTE le celle -> difetto di configurazione, non un
+#         risultato. n > 440 -> impossibile: la guardia "un trade al
+#         giorno" non ha retto e il CSV non e' leggibile.
+#
+#  >>> CHE COSA FA DIRE "IL SEGNO E' CAMBIATO" (e nient'altro lo fa): <<<
+#    TRE CELLE CONTIGUE dell'asse, tutte con n >= 150, tutte con
+#    PF >= ***1,29*** (cioe' 1,19 dell'archivio short + 0,10 di margine
+#    fuori dal rumore -- ed e' la soglia DI QUESTO LATO, piu' alta di
+#    quella del gemello, perche' su questo lato l'archivio ha gia' una
+#    cella positiva), e la cella CENTRALE delle tre con DD <= 10,0%.
+#    Il numero che si riporta e' quello della cella CENTRALE.
+#    ***MAI IL PICCO.*** Se la cella migliore sporge e le due vicine no,
+#    il risultato si scrive "NON C'E' UNA CONFIGURAZIONE ROBUSTA", che
+#    e' un risultato e non un fallimento.
+#  CHE COSA LO FALSIFICA:
+#    - zero o una sola cella sopra 1,29 -> picco di rumore, niente.
+#    - celle sopra 1,29 ma con n < 150 -> "non misurato", non "vivo".
+#    - tutte e sette sotto 1,19 -> ***la geometria del giorno intero e'
+#      PEGGIO del box notturno sullo stesso lato***, e la casella si
+#      chiude con un numero. Questo e' l'esito che l'archivio prevede.
+#    - tutte e sette sotto 1,00 -> ***il collo di bottiglia NON era il
+#      pedaggio: era il segnale***, e la famiglia dei livelli di
+#      giornata si chiude con un NUMERO invece che per analogia.
+#  E A QUALUNQUE n (Emendamento B, il rischio non si sospende mai):
+#    DD > 10,0% -> rilievo di RISCHIO, anche con PF bello.
+#    DD > 20,0% su una cella qualsiasi -> geometria bocciata per rischio
+#      a prescindere dal PF.
+#  CONFRONTO COL DEFAULT, obbligatorio e su questo lato SEVERO: il
+#  default di casa per lo short del DAX NON e' "niente", e' la cella
+#  viva 770411. Se la cella centrale dell'altopiano non batte 1,19 di
+#  almeno 0,10 di PF, la risposta onesta e' ***"il box notturno va
+#  bene, il giorno intero non aggiunge niente"*** -- ed e' un risultato.
+#
+#  --- 10. CHE COSA QUESTO ROUND NON PUO' DIRE ------------------------
+#  1. NON separa "stop piu' largo" da "gestione ri-scalata". TP1, TP2,
+#     TPfinal e il trailing sono in R, e R cambia con la cella: l'asse
+#     muove tutte e due le cose insieme.
+#  2. NON e' il confronto 37x contro 148x a UNA variabile. La banda
+#     misurata qui e' 86x - 160x. La banda 22x-38x sta in archivio ma
+#     con DUE differenze oltre allo stop (modo di stop e cutoff): quel
+#     confronto e' un INDIZIO, non una misura.
+#  3. NON dice niente su altri simboli (solo D30EUR), su altri TF (M15
+#     fisso) e sul filtro di correlazione -- che su QUESTO lato e' la
+#     manopola piu' potente mai misurata (par. 6c) ed e' spenta.
+#  4. NON promuove niente e non tocca nessun forward. In particolare
+#     ***non tocca la sedia viva 770411***: magic diverso (761810),
+#     conto diverso, banco diverso.
+#  5. Il trailing e il breakeven tengono lo stop REALIZZATO sotto
+#     quello d'ingresso: qualunque "stop medio" letto dai deal sara' un
+#     LIMITE INFERIORE (classe 688), mai la distanza d'ingresso. La
+#     distanza d'ingresso e' quella della tabella del par. 8.
+#     (E il trailing short non stringe dentro la perdita: r.465,
+#     verificato al par. 3-bis.)
+#
+#  --- 11. LA FINESTRA, E COME SI PAGA IL FUORI CAMPIONE --------------
+#  2024.09.26 -> 2026.06.30, modello 4 = TICK REALI.
+#  I tick di D30EUR sono MISURATI e coprono la finestra:
+#  risultati_archivio/misura_tick/REFERTO_MISURA_TICK_D30EUR.txt --
+#  "I TICK REALI DI D30EUR PARTONO DAL 2024.09.26 (35408137 tick)", e la
+#  data coincide col muro delle barre M1. NON e' sotto sonda.
+#  La data di fine e' quella di R103/R187 apposta: cambiarla renderebbe
+#  non confrontabili i numeri d'archivio del par. 8.
+#  @FRAZIONEIS 1.0 = una sola tranche, gamba OOS DEGENERE. Scelta
+#  dichiarata: con ~158-264 operazioni per cella, uno split 40/60
+#  darebbe ~63 IS e ~95 OOS, ***tutti e due sotto il pavimento dei 150***.
+#  IL FUORI CAMPIONE SI PAGA IN DUE MODI, e sono scritti:
+#   a) SUBITO E GRATIS: il file GEMELLO (lato long) e' un secondo
+#      campione indipendente sullo stesso asse. L'altopiano vale solo se
+#      compare in TUTTI E DUE. Se compare solo qui, e' una proprieta'
+#      del LATO short -- che su questo simbolo e' gia' successo una
+#      volta (REGISTRO_TEST r.637-640) e sarebbe una conferma, non una
+#      sorpresa; e allora va scritto cosi', non come "il motore va".
+#   b) DOPO: prova di REGIME sul DAX 2010-2018, che i dati ce li
+#      abbiamo (report/STORICO_INDICI_SCARICATO_2026-09-10.md: D30EUR
+#      1.718.805 barre M1, 2010.11.15 -> 2018.12.28, prezzi controllati
+#      contro la realta'). *** BLOCCO DICHIARATO ***: il simbolo
+#      D30EUR_EXT non e' ancora importato in MT5 e il CANCELLO ZERO
+#      sugli _EXT e' ANCORA CHIUSO (stesso referto, prossimi passi 2 e
+#      3). Finche' non si apre, la prova di regime e' disponibile come
+#      DATO e non come corsa.
+#
+#  --- 12. IL COSTO IN TEMPO MACCHINA ---------------------------------
+#  BASE MISURATA, stesso motore e stesso simbolo di banco:
+#    risultati_archivio/R104_REFERTO_DRIVER_20260825_0738.txt r.15 --
+#    "durata: 0.7 minuti di passata", ABTG_MaxMinNotte D30EUR M15,
+#    2024.09.26 -> 2026.08.24, modello 4, deposito 100000.
+#  Nessuna scala sui tick: e' lo STESSO simbolo (35.408.137 tick).
+#  QUESTO FILE: 7 celle x 2 gambe = 14 passate, di cui 7 sulla gamba OOS
+#  degenere (finestra vuota, costo ~0).
+#    7 passate vere x 0,7 = 4,9 min + compilazione e avvio ~3 min
+#    => ***STIMA 8-12 MINUTI*** per questo file.
+#    Col gemello accanto: ***15-25 MINUTI*** per il round intero.
+#  LIMITE DELLA BASE, dichiarato: R104 girava con n=29 operazioni, qui
+#  ne sono attese ~158-264 per cella. Il tempo del tester e' dominato
+#  dal replay dei tick, non dalle operazioni, ma la stima e' tenuta in
+#  banda alta apposta.
+#
+#  --- 13. I VINCOLI DI BANCO CHE QUESTO FILE NON PUO' IMPORRE --------
+#  (classe 692: stanno nella riga di lancio, non qui dentro)
+#    -Deposito 100000   -> OBBLIGATORIO. Il default del driver e' 10000
+#       (walkforward_generico.ps1 r.200): a 10.000 EUR il lotto da 2,39
+#       diventa 0,239 e il confronto coi numeri d'archivio salta.
+#    -Modello 4         -> tick reali. E' gia' il default (r.190), ma va
+#       verificato nel referto: un numero OHLC e' SCREENING, mai un
+#       verdetto.
+#    -Spread            -> ***INCOGNITA DICHIARATA***. Il default e' -1
+#       (r.202), cioe' NESSUNA riga Spread nell'.ini: MT5 usa il valore
+#       che ha in memoria. A modello 4 lo spread dovrebbe venire dai
+#       tick, ma il driver stesso scrive "NON MISURATO" su questo punto
+#       (r.208). Se serve certezza, -Spread 0 (spread corrente,
+#       dichiarato).
+#    -FrazioneIS        -> lo impone @FRAZIONEIS qui sotto (1.0).
+#
+#  --- 14. IL MAGIC, E IL COMANDO CON CUI L'HO CERCATO ----------------
+#  761810 -- VERGINE. Comando eseguito il 24/09/2026 su tutto il repo,
+#  ***comprese*** .claude/worktrees (R187a le aveva escluse):
+#    grep -rIn -oE "\b7618[0-9]{2}\b" . --exclude-dir=.git
+#  Esito al momento della scrittura: ZERO occorrenze in tutto il blocco
+#  7618xx. Il gemello long usa 761800, dello stesso blocco.
+#  >>> E NON E' 770411: la sedia viva dello short del DAX non viene
+#      sfiorata da questo round. <<<
+#
+#  --- 15. I BUCHI DICHIARATI -----------------------------------------
+#  1. L'ampiezza attesa del box e' DERIVATA dalla legge sqrt, non
+#     misurata: nessuno ha mai letto il range 00:00-00:00 del DAX barra
+#     per barra. Se il CSV desse stop realizzati molto diversi dalla
+#     tabella del par. 8, la tabella e' sbagliata, non il round.
+#  2. Il sigma 0,35 usato per stimare quanto scarta InpMinBoxPts e'
+#     [NON MISURATO]. Il controllo vero e' la monotonia di n.
+#  3. I lunedi' con forchetta grossa restano inerti (par. 7), quota
+#     [NON MISURATA].
+#  4. La prova di regime 2010-2018 e' bloccata dal CANCELLO ZERO _EXT.
+#  5. ASIMMETRIA FRA I GEMELLI, dichiarata: su questo lato esiste una
+#     cella d'archivio POSITIVA (PF 1,19) e sul lato long no. Quindi il
+#     round non e' simmetrico: sul long basta superare 1,10, qui serve
+#     1,29. Non e' un doppio standard, e' lo stesso standard applicato
+#     a due riferimenti diversi -- ma chi legge il referto deve avere
+#     le due soglie davanti, altrimenti confrontera' mele con pere.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=0||0||3||18||Y
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=0||0||0||0||N
+InpBoxEndMin=0||0||0||0||N
+InpMinBoxPts=6800||6800||0||6800||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=12||12||0||12||N
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=250||250||0||250||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON e' pinnato DI PROPOSITO: il valore voluto e' la
+# stringa VUOTA, e un pin di stringa vuota NON arriva all'EA (MT5 lo
+# ignora e usa il default compilato). E' il controllo 3 di
+# controlla_prova.py, nato dal caso ABTG_FiboH4_Multi che misuro' otto
+# volte lo stesso basket. Qui il default compilato E' "", cioe'
+# esattamente il valore voluto, e InpUseNewsFilter=false lo rende
+# comunque inerte.
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMIN PD SHORT
+InpMagic=761810||761810||0||761810||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
