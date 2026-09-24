@@ -1,0 +1,18 @@
+RIEPILOGO R243 -- finestra USA sul DOW con l ancora del DOW (U30USD H1, ABTG_SupertrendReversal, lati separati)
+data: 2026-09-24 16:08:51
+fine: 2026-09-24 16:31:44   durata minuti: 23   (stima 16-24; tetto 30; oltre 45 e BLOCCATA)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 NON toccato)
+pin : 7e255a8279be7a82868ebf6484a7957a3fab2035
+deposito 100000 passato (come R240); -Spread NON passato = INCOGNITA DICHIARATA, uguale a R240
+
+R243a  modello 4   rc 0   motore = pin (SHA256)
+R243b  modello 4   rc 0   motore = pin (SHA256)
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin): MOTORE = PIN in ogni round partito
+
+CARTELLE ATTESE: 2   TROVATE: 2   -> CATENA COMPLETA
+
+PRIMA DI QUALUNQUE NUMERO: n, PF e DD di TUTTE E DUE le celle (finestra SPENTA 0 e ACCESA 1), IS e OOS, piu il rapporto dei DD. Se PF(SPENTA) < 1,00 il rapporto si scrive ma NON si legge come replica; se PF(SPENTA) < 0,50 il rapporto NON si scrive; cella con zero perdite = PF degenere, si scrivono n, netto e DD.
+SENTINELLA S2 (non bloccante): somma delle operazioni a finestra SPENTA dei due lati (R243a IS+OOS + R243b IS+OOS) sopra 269; sotto 240 si guarda il BANCO prima dei parametri.
+R240 e R243 sono due righe di una tabella 2x2 (ancora x finestra): la differenza fra i rapporti e anche INTERAZIONE (H_int). Vietata la parola meccanismo da sola. Cancello di costo 40x: SOSPESO EREDITATO da R240 (distanza ingresso->SL non misurata).

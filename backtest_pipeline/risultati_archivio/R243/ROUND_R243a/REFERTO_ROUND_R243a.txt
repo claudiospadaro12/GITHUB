@@ -1,0 +1,43 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 7e255a8279be7a82868ebf6484a7957a3fab2035
+data            : 2026-09-24 16:08:52   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_SupertrendReversal
+file prova      : R243a_ancoradow_SUPREV_U30USD_short.txt   (46366 byte, dal pin)
+etichetta       : R243a
+simbolo         : U30USD
+periodo         : H1
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_SupertrendReversal\ABTG_SupertrendReversal_U30USD_IS_R243a.csv
+  righe : 2
+    Pass 0    Profit 2019.01      PF 1.29177    Equity DD % 3.6977     Trades 68
+    Pass 1    Profit 2491.38      PF 1.48805    Equity DD % 3.9213     Trades 48
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_SupertrendReversal\ABTG_SupertrendReversal_U30USD_OOS_R243a.csv
+  righe : 2
+    Pass 0    Profit 3875.66      PF 1.6431     Equity DD % 3.3431     Trades 78
+    Pass 1    Profit 1792.66      PF 1.29817    Equity DD % 3.4975     Trades 66
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO

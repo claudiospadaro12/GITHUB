@@ -1,0 +1,786 @@
+# ==========================================================================
+#  R243a -- LA FINESTRA USA SUL DOW **CON L'ANCORA DEL DOW**, lato CORTO
+#  ABTG_SupertrendReversal -- U30USD H1 -- TICK REALI
+#  E' il gemello di R240a con UNA SOLA differenza di motore: StAtrPeriod.
+# ==========================================================================
+#  PERCHE' ESISTE (24/09/2026, subito dopo il referto di R240)
+#  R240 ha misurato sul CORTO del Dow, a tick reali, con l'ANCORA DEL
+#  NASDAQ (StMult 3.5 / StAtrPeriod 7 / TP_RR 2.5):
+#      OOS  PF spenta 0,97084 (n 76) -> accesa 0,93376 (n 54)
+#           R_tick = 0,9618        -> ramo "0,80-1,19 = NON replicato"
+#           R_DD   = 3,3022 -> 3,5040 = 1,0612 (il DD PEGGIORA)
+#  contro il riferimento NASUSD di R238: R_tick 2,2059 e R_DD 0,498.
+#
+#  >>> E IL REFERTO DI R240 NON HA SCRITTO "MORTO", per una ragione che
+#      stava nel file prova PRIMA dei numeri: il ramo basso e' CONFUSO
+#      fra DUE spiegazioni che R240 non separa --
+#        (1) il meccanismo della finestra non esiste sul Dow;
+#        (2) i pin di R240 sono l'ANCORA DEL NASDAQ e il Dow con la
+#            PROPRIA ancora non e' mai stato girato dentro questo EA.
+#      R243 esiste per separarle. E' l'unica cosa che fa.
+#
+# ==========================================================================
+#  ### PARTE 1 -- DOVE STA DAVVERO L'ANCORA DEL DOW, letta nei CSV ###
+#  (e la prima cosa da scrivere e' che le tre corse citate NON CONCORDANO,
+#   e due delle tre NON SONO MAI GIRATE. E' un risultato, non un intoppo.)
+# ==========================================================================
+#  Il referto di R240 e il file prova di R240a nominano tre corse SupRev
+#  d'archivio su U30USD: R123b, R135a, R190c. Aperte tutte e tre il
+#  24/09/2026. Ecco cosa portano DAVVERO:
+#
+#  R123b -- `prove/R123b_U30USD_01_stmult.txt`, etichetta SRDOW123B,
+#      magic 784110, EA `ABTG_SupRev_DOW_H1_Ottimizzato`, U30USD H1,
+#      TICK REALI, split IS/OOS 0.40, **DUE LATI ACCESI**, finestra
+#      oraria SPENTA (InpUseTimeWindow=0, 0-24).
+#      Pin: StAtrPeriod 9 / NearAtr 1 / TP_RR 3.0. Asse: StMult.
+#      >>> E' L'UNICA DELLE TRE CHE E' STATA MISURATA. CSV in repo, in
+#          DUE copie: `risultati_prove/r123/` e `risultati_prove/
+#          r123_dal_vps/`, file ..._U30USD_{IS,OOS}_R123BSTMULT.csv
+#      StMult   PF IS (n)        PF OOS (n)
+#        2.5    0,87674 (180)    0,91405 (261)
+#        3.0    1,08369 (144)    0,95320 (200)
+#        3.5    0,98837 (117)    1,38944 (152)
+#        4.0    0,72133 (100)    1,09271 (112)
+#        4.5    2,01707  (97)    1,41820 (117)
+#
+#  R135a -- `prove/R135a_U30USD_atrperiod_oltre12.txt`.
+#      >>> **RITIRATO IL 12/09/2026 E MAI LANCIATO.** Le prime 14 righe
+#          del file sono il cartello: "NON METTERE IN CODA, NON
+#          LANCIARE", motivo: il blocco C aveva gia' dichiarato A6
+#          ("non c'e' una configurazione robusta su questo asse") e
+#          allargare LO STESSO asse dopo un A6 e' cio' che il limite del
+#          19/08 vieta. ZERO CSV in tutto il repo (cercati il 24/09:
+#          `find . -iname "*R135*"` non restituisce nessun .csv).
+#      >>> QUINDI R135a NON PORTA NESSUN PIN MISURATO. Porta una
+#          PROPOSTA: StMult 3.5 / TP_RR 3.0 / asse AtrP 13-20.
+#
+#  R190c -- `prove/R190c_tfM30_SUPREVDOW_U30USD.txt`, magic 789330,
+#      asse InpTF (M30 vs H1). Pin: StMult 3.5 / **StAtrPeriod 12** /
+#      TP_RR 3.0, due lati accesi.
+#      >>> ZERO CSV in tutto il repo (cercati il 24/09: nessun file
+#          contiene "SRDOW190C" e nessun .csv porta l'etichetta R190C).
+#          **MAI GIRATA, o quantomeno i risultati non sono mai
+#          rientrati.** Non porta un pin misurato: porta un pin
+#          EREDITATO da R123c passata 6.
+#      >>> E IL PIN CHE EREDITA E' **AtrP 12, NON 9**. Cioe' le tre
+#          corse NON CONCORDANO fra loro: R123b/R135a stanno su 9,
+#          R190c sta su 12.
+#
+#  >>> CONCLUSIONE DELLA PARTE 1, e va detta per come e':
+#      **UNA SOLA delle tre corse citate e' una misura (R123b), e le tre
+#      non concordano sul periodo ATR (9 contro 12).** L'ancora del Dow
+#      NON si puo' prendere da quella terna. Si prende dai CSV che la
+#      terna stessa cita come antenati, e sono QUATTRO, tutti in repo:
+#
+#   (A) CENSIMENTO OHLC 26/07/2026 -- periodo INTERO, due lati:
+#       `risultati_archivio/SupRev_nuovi_indici/
+#        642b6b88-valid_SupRevScr_U30USD_H1.csv` (27 passate)
+#   (B) CENSIMENTO TICK 26/07/2026 -- periodo INTERO, due lati:
+#       `.../valid_SupRevRT_U30USD_H1_realtick.csv` (8 passate)
+#   (C) R123c -- asse StAtrPeriod 6-12, tick, split, due lati:
+#       `risultati_prove/r123_dal_vps/..._{IS,OOS}_R123CATRP.csv`
+#   (D) R123d -- asse NearAtr 0,50-1,50, tick, split, due lati:
+#       `risultati_prove/r123_dal_vps/..._{IS,OOS}_R123DNEARATR.csv`
+#
+# ==========================================================================
+#  ### PARTE 2 -- LA SCELTA DELLA CELLA, asse per asse ###
+#  REGOLA DI CASA APPLICATA E DICHIARATA: **CENTRO DELL'ALTOPIANO, MAI IL
+#  PICCO.** Dove un altopiano NON c'e', lo scrivo -- e allora la cella non
+#  si sceglie "al centro di niente": si sceglie sul numero di misure
+#  INDIPENDENTI che la reggono, e si dichiara che altopiano non ce n'e'.
+# ==========================================================================
+#
+#  ASSE `InpStMult` (fonti: R123b split-tick + A OHLC + B tick-intero)
+#    OOS split (R123b): 2.5 0,914 | 3.0 0,953 | 3.5 1,389 | 4.0 1,093 |
+#                       4.5 1,418
+#    IS  split (R123b): 2.5 0,877 | 3.0 1,084 | 3.5 0,988 | 4.0 0,721 |
+#                       4.5 2,017
+#    OHLC intero (A, AtrP 9, TP 3.0): 2.5 1,084 | 3.0 1,095 | 3.5 1,334
+#    TICK intero (B, AtrP 9, TP 3.0): 3.0 1,040 | 3.5 1,195
+#    >>> **NON C'E' ALTOPIANO, e la forma lo grida.** In OOS le tre celle
+#        contigue 3.5-4.0-4.5 stanno tutte sopra 1, ma con un BUCO nel
+#        mezzo (1,389 -> 1,093 -> 1,418): un altopiano non ha un buco al
+#        centro. In IS la stessa terna fa 0,988 -> 0,721 -> 2,017: il
+#        4.5 sporge di +1,30 sul vicino con n=97. E' la definizione di
+#        picco di rumore (soglia A4 di R123c: la cella viva sopra 1,20
+#        con ENTRAMBE le vicine sotto 1,05).
+#    >>> Quello su cui le fonti CONCORDANO e' una cosa sola: **3.5 sta
+#        sopra 1,00 in TRE misure indipendenti** (OOS split 1,389 - tick
+#        intero 1,195 - OHLC intero 1,334). Nessun altro valore di
+#        StMult ce la fa in tutte e tre.
+#    >>> SCELTO: **InpStMult = 3.5**, dichiarato NON come centro di un
+#        altopiano (non esiste) ma come il valore con tre misure
+#        indipendenti concordi. E' anche il default compilato di
+#        `ABTG_SupRev_DOW_H1_Ottimizzato.mq5`, cioe' "l'ancora del Dow"
+#        per come l'archivio la chiama.
+#
+#  ASSE `InpStAtrPeriod` (fonti: C split-tick + A + B)
+#    OOS split (C): 6 0,914 | 7 0,882 | 8 1,164 | 9 1,389 | 10 0,610 |
+#                   11 0,559 | 12 1,359
+#    IS  split (C): 6 0,557 | 7 0,851 | 8 0,781 | 9 0,988 | 10 0,888 |
+#                   11 0,836 | 12 1,177
+#    OHLC intero (A, StMult 3.5, TP 3.0): 8 1,015 | 9 1,334 | 10 0,779
+#    TICK intero (B, StMult 3.5, TP 3.0):           9 1,195 | 10 0,706
+#    >>> **NON C'E' ALTOPIANO NEMMENO QUI**, ed e' gia' agli atti: il
+#        verdetto congelato del blocco C e' **A6** ("non c'e' una
+#        configurazione robusta su questo asse"), scritto in
+#        `risultati_archivio/R123_BLOCCO_C_2026-09-12.md`. Il tratto
+#        contiguo sopra 1,10 in OOS e' {8, 9}: DUE celle, e due celle
+#        sono un segmento, non un piano. Il 12 e' alto ma isolato
+#        (l'11 e' la cella peggiore dell'asse, 0,559).
+#    >>> Il 10 CROLLA in tutte e tre le fonti (0,610 - 0,706 - 0,779):
+#        e' l'unico fatto solido dell'asse, ed e' un fatto NEGATIVO.
+#    >>> SCELTO: **InpStAtrPeriod = 9**, e la ragione e' la stessa di
+#        prima: e' l'unico valore sopra 1,00 in TRE misure indipendenti
+#        (1,389 - 1,195 - 1,334), ed e' l'ancora dichiarata dall'archivio
+#        (default compilato dell'_Ottimizzato del Dow).
+#        >>> LO SCOMODO, E LO SCRIVO IO PRIMA CHE LO SCRIVA IL CANCELLO:
+#            **9 e' il PICCO del suo asse in OOS.** La regola di casa
+#            direbbe di non prenderlo. La prendo lo stesso, e il motivo
+#            e' che QUESTO ROUND NON SCEGLIE UNA CELLA DA PROMUOVERE:
+#            riproduce l'ANCORA GIA' DICHIARATA DELL'ARCHIVIO per
+#            togliere di mezzo la spiegazione (2). Se prendessi l'8
+#            "per prudenza" misurerei una TERZA ancora, mai dichiarata
+#            da nessuno, e il round non risponderebbe piu' alla sua
+#            domanda. [!] **CONSEGUENZA CONGELATA ORA: qualunque numero
+#            esca da R243 NON PROMUOVE NIENTE e non puo' essere citato
+#            come "cella robusta". L'asse su cui sta e' A6.**
+#
+#  ASSE `InpTP_RR` (fonte: A OHLC, a StMult 3.5 / AtrP 9)
+#    2.0 -> 1,294 (n 279) | 2.5 -> 1,281 (n 273) | 3.0 -> 1,334 (n 273)
+#    TICK intero (B): 2.5 -> 1,14375 (n 273) | 3.0 -> 1,19515 (n 273)
+#    >>> **QUI L'ALTOPIANO C'E' DAVVERO, ed e' PIATTO**: tre celle
+#        contigue dentro una banda di 0,053 (il 4% del valore), con n
+#        praticamente identico. Il suo **CENTRO E' 2.5**. Il **PICCO e'
+#        3.0**, ed e' esattamente quello che la regola di casa vieta di
+#        scegliere.
+#    >>> SCELTO: **InpTP_RR = 2.5.**
+#    >>> E QUESTA E' UNA DEVIAZIONE DALLA FRASE "ancora del Dow =
+#        3.5/9/3.0" che gira nei referti, quindi la dichiaro in chiaro:
+#        il 3.0 e' il default compilato dell'_Ottimizzato, ma sull'asse
+#        TP_RR misurato sul Dow il 3.0 e' il PICCO e il 2.5 e' il
+#        CENTRO. Fra i due ballano 0,05 di PF a tick (1,14375 contro
+#        1,19515), cioe' **dentro la banda di correzione OHLC->tick gia'
+#        misurata in casa (+0,054 / +0,157, mediana +0,106; fonte:
+#        `prove/R123c_U30USD_02_atrperiod.txt`)**: la scelta non compra
+#        ne' vende merito. (La banda e' scritta col `+` nella sua fonte,
+#        ma e' un VALORE ASSOLUTO: nelle 8 coppie OHLC/tick del
+#        censimento del 26/07 il PF a tick e' **sempre PIU' BASSO**.
+#        Ricontato cella per cella il 24/09: qui prendiamo il valore a
+#        tick piu' basso dei due, quindi la scelta resta prudente.)
+#    >>> **E COMPRA UNA COSA CHE VALE MOLTO DI PIU': L'ATTRIBUZIONE.**
+#        Con TP_RR a 2.5, questo file differisce da R240a per **UN SOLO
+#        parametro di motore: InpStAtrPeriod, da 7 a 9.** (StMult era
+#        gia' 3.5 in tutti e due: l'ancora del Nasdaq e quella del Dow,
+#        sul CORTO, distano UN PASSO SU UNA MANOPOLA SOLA. Verificato
+#        sui due file, non ricordato.) Senza questo, R240->R243
+#        cambierebbe DUE cose e il contro-esempio della Parte 4 non si
+#        potrebbe nemmeno scrivere.
+#    >>> E UN FATTO MISURATO CHE LA RENDE INDOLORE SUL CAMPIONE: nel
+#        censimento a tick (B) **TP_RR non muove n**: 273/273 a StMult
+#        3.5, 346/346 a 3.0, 248/248 a 3.5/AtrP10, 303/304 a 3.0/AtrP10.
+#        Cambiare 3.0 in 2.5 cambia le USCITE, non quante operazioni si
+#        aprono.
+#    >>> SE IL COORDINATORE PREFERISCE IL 3.0 LETTERALE: si cambia una
+#        riga e il round resta leggibile. Costa l'attribuzione a un
+#        parametro solo, e il file lo dice adesso, non dopo.
+#
+#  ASSE `InpNearAtr` (fonte: D, split-tick)
+#    OOS: 0,50 -> 0,992 (n 122) | 0,75 -> 1,284 (133) | 1,00 -> 1,389
+#         (152) | 1,25 -> 1,322 (172) | 1,50 -> 1,322 (172)
+#    >>> **L'UNICO ASSE DOVE UN CENTRO ESISTE.** 0,75-1,00-1,25 sono tre
+#        celle contigue tutte sopra 1,28, e il **centro e' 1,00** --
+#        che e' esattamente il valore dell'ancora. Qui la regola di casa
+#        e il default COINCIDONO, e il pin non e' ereditato: e' difeso.
+#    >>> E una manopola INERTE misurata, da segnare: 1,25 e 1,50 danno
+#        n=172 e PF 1,32197 IDENTICI alla quinta cifra. Sopra 1,25 la
+#        manopola non morde (soglia A3). Casella libera, non provata.
+#    >>> SCELTO: **InpNearAtr = 1.0** (come R240a: nessuna differenza).
+#
+#  >>> RIASSUNTO DELL'ANCORA SCELTA, e da dove viene ciascun numero:
+#        InpStMult      = 3.5   <- 3 misure concordi, NON un altopiano
+#        InpStAtrPeriod = 9     <- 3 misure concordi, NON un altopiano
+#                                  (e' il picco del suo asse: dichiarato)
+#        InpTP_RR       = 2.5   <- CENTRO dell'unico altopiano piatto
+#        InpNearAtr     = 1.0   <- CENTRO dell'unico altopiano vero
+#      Tutti gli altri pin: identici a R240a, riga per riga.
+#
+# ==========================================================================
+#  ### PARTE 3 -- IL BUCO CHE QUESTA ANCORA SI PORTA DIETRO ###
+# ==========================================================================
+#  [!] **L'ANCORA DEL DOW E' STATA TARATA CON DUE LATI ACCESI. SEMPRE.**
+#  Tutte e quattro le fonti (A, B, C, D) girano `InpAllowLong=true` E
+#  `InpAllowShort=true`. **Sul Dow nessuno dei due lati e' mai stato
+#  tarato DA SOLO.** Questo file lo gira da solo, perche' la regola dei
+#  due lati del 25/08 lo impone e perche' altrimenti non sarebbe
+#  confrontabile con R240a.
+#  >>> Quindi R243 misura "l'ancora A DUE LATI del Dow, applicata a un
+#      lato per volta". Non e' la stessa cosa di "l'ancora del corto del
+#      Dow", che NON ESISTE in archivio. **E' un buco, e va scritto nel
+#      referto anche se il risultato e' bello.**
+#  >>> E NON E' UN DETTAGLIO DI FORMA: il codice tiene UNA POSIZIONE ALLA
+#      VOLTA (`mql5/Experts/ABTG_SupertrendReversal.mq5`, r.314 `if
+#      (HasPosition())` ... r.320 `return;` e r.322 `if(HasPending())
+#      { ... return; }` -- RICONTATE sul file a HEAD il 24/09/2026,
+#      794 righe totali). Spegnere un lato LIBERA SLOT: il lato
+#      superstite puo' prendere operazioni che a due lati non prendeva.
+#      Un lato solo non e' un sottoinsieme dei due lati.
+#
+#  [!] **E R240a HA LO STESSO BUCO, IDENTICO E NELLO STESSO VERSO**: anche
+#  la' l'ancora del Nasdaq era per-lato ma il confronto interno era fra
+#  due celle dello stesso lato. Quindi il buco **si cancella** nel
+#  confronto R240 <-> R243, e **non si cancella** nel confronto con
+#  l'archivio a due lati. Le due cose si dicono separate.
+#
+# ==========================================================================
+#  ### PARTE 4 -- IL CONTRO-ESEMPIO, OBBLIGATORIO E SCRITTO PRIMA ###
+#  "Se R243 torna un rapporto ALTO, come distinguo 'il meccanismo esiste'
+#   da 'abbiamo cambiato DUE cose insieme'?"
+# ==========================================================================
+#  LE DUE IPOTESI IN GARA:
+#    H_mecc : la finestra USA e' un MECCANISMO che esiste anche sul Dow.
+#             R240 non l'ha visto perche' i pin erano del Nasdaq.
+#    H_tar  : la finestra sul Dow NON FA NIENTE. Fra R240 e R243 cambia
+#             solo la QUALITA' DI BASE della cella, cioe' la taratura.
+#
+#  >>> LA CHIAVE: **la cella a finestra SPENTA non sa niente della
+#      finestra.** Quella cella misura la TARATURA E BASTA. Quindi il
+#      round porta dentro di se' il controllo della seconda variabile,
+#      e le due ipotesi predicono la STESSA COSA su quella cella e COSE
+#      DIVERSE sul rapporto.
+#
+#  PREDIZIONE DELLA CELLA SPENTA, col numero e con la derivazione.
+#    R240a, corto OOS, finestra spenta, AtrP 7: PF 0,97084 (n 76).
+#    Delta MISURATO di AtrP 7->9 a StMult 3.5 su U30USD (fonte C,
+#    due lati, TP 3.0): IS 0,85085 -> 0,98837 (+0,1375 / x1,162);
+#                       OOS 0,88180 -> 1,38944 (+0,5076 / x1,576).
+#    Trasferito sul corto da solo (additivo -> 1,478; moltiplicativo ->
+#    1,530; il trasferimento attraversa binario, TP_RR e numero di lati,
+#    quindi la banda e' larga apposta):
+#      >>> ATTESO PF(SPENTA) OOS = **1,05 - 1,55**   (centro ~1,48)
+#      >>> ATTESO PF(SPENTA) IS  = **1,05 - 1,35**   (centro ~1,25)
+#      >>> ATTESO n(SPENTA) OOS  = **55 - 90**  (76 x 152/165 = 70)
+#      >>> ATTESO n(SPENTA) IS   = **55 - 90**  (70 x 117/117 = 70)
+#      >>> ATTESO n(ACCESA)      = **0,71 x la spenta** (in R240a la
+#          finestra tagliava il 28,6% IS e il 28,9% OOS) = ~50 / ~50
+#
+#  LA TABELLA CHE SEPARA LE DUE IPOTESI, congelata ORA:
+#    ipotesi | PF(SPENTA) OOS |   R_tick OOS   |   R_DD OOS
+#    --------|----------------|----------------|-------------
+#    H_tar   |   1,05 - 1,55  | **0,85 - 1,10**| **0,95 - 1,15**
+#            |                | (resta il      | (resta l'1,0612
+#            |                |  0,9618 di R240)|  di R240)
+#    H_mecc  |   1,05 - 1,55  | **>= 1,80**    | **<= 0,70**
+#            |   (LA STESSA)  | (il 2,2059 del | (lo 0,498 del
+#            |                |  Nasdaq)       |  Nasdaq)
+#  >>> **LE DUE IPOTESI SONO INDISTINGUIBILI SULLA CELLA SPENTA E
+#      SEPARATE SUL RAPPORTO.** Percio': se la cella spenta sale come
+#      previsto, la taratura HA MORSO ed e' stata misurata da sola; se
+#      in piu' il rapporto NON sale, l'obiezione "avete cambiato due
+#      cose insieme" e' **falsificata**, perche' la seconda cosa ha il
+#      suo numero separato. E se salgono TUTTI E DUE, il rapporto non
+#      e' spiegabile dalla taratura: la taratura e' gia' contabilizzata
+#      nel denominatore.
+#
+#  [!] **LA TERZA IPOTESI, che le due qui sopra NON coprono e che questo
+#      round NON PUO' ESCLUDERE. La scrivo prima che lo faccia il
+#      cancello, perche' e' il punto debole vero del contro-esempio:**
+#      **H_int** : la taratura NON agisce allo STESSO modo dentro e fuori
+#      la finestra (AtrP 7->9 puo' cambiare il motore piu' nelle ore
+#      14-21 che nelle altre). Allora il **rapporto** si muove per SOLA
+#      taratura, senza nessun meccanismo di sessione.
+#      >>> Perche' il round non la esclude: R240 e R243 sono le due righe
+#          di una tabella **2x2** (AtrP x finestra), e la differenza fra
+#          i due rapporti **E' il termine di INTERAZIONE**. Un'interazione
+#          non distingue *"il filtro funziona con la taratura giusta"* da
+#          *"la taratura funziona nelle ore giuste"*: e' la STESSA
+#          casella, letta da due lati.
+#      >>> Cosa NON tocca: la cella SPENTA resta un controllo valido
+#          della taratura (li' la finestra non c'e'), e H_tar resta
+#          falsificabile. Cade **solo** il passo *"se il rapporto sale,
+#          allora ESISTE IL MECCANISMO"*. La frase onesta diventa:
+#          **"allora conta la COPPIA taratura-ore, e quale dei due pesi
+#          di piu' questo round non lo separa."**
+#      >>> [!] VINCOLO SUL REFERTO, congelato ora: **la parola "MECCANISMO"
+#          non si scrive da sola.** Il ramo `>= 1,80` si legge *"si
+#          replica sul Dow CON L'ANCORA DEL DOW"* -- che e' un fatto sulla
+#          COPPIA -- e NON *"il meccanismo della finestra esiste sul Dow"*.
+#      >>> E la via per separarla, col suo costo: una terza riga del 2x2
+#          su un'ancora INTERMEDIA (AtrP 8, l'unica altra cella sopra 1,10
+#          in OOS) = **4 passate, ~9 minuti**. Non e' in questo round
+#          perche' misurerebbe una terza ancora mai dichiarata (vedi
+#          Parte 2), ma e' la mossa successiva se il rapporto sale.
+#
+#  [!] **IL CASO CHE SMONTEREBBE IL ROUND, e lo scrivo prima**: se la
+#      cella SPENTA torna **dentro 0,90-1,05** (cioe' NON si muove da
+#      R240: la taratura e' inerte) **E** il rapporto torna **alto**,
+#      allora il rapporto alto non ha nessuna spiegazione dentro il
+#      round. In quel caso **NON si scrive "il meccanismo esiste"**: si
+#      scrive che il round ha prodotto un numero che il suo stesso
+#      controllo non regge, e si guarda il BANCO (determinismo, binario,
+#      modello, deposito) prima dei parametri. E' la disciplina di una
+#      sentinella che non riproduce, applicata a un rapporto.
+#
+#  ------------------------------------------------------------------
+#  >>> IL SECONDO CONTRO-ESEMPIO, ed e' quello del COSTO. QUANTO VALE
+#      LA FINESTRA SE FOSSE **SOLO** SPREAD PIU' BASSO?
+#  ------------------------------------------------------------------
+#  La finestra non seleziona solo le ORE: seleziona anche il COSTO.
+#  `risultati_archivio/spread_flotta/spread_orario_U30USD.csv`
+#  (64.711.285 tick; il file dei tick ne conta 67.618.571, cioe' il
+#  logger ne copre il 95,7% -- differenza dichiarata, non spiegata qui):
+#    MEDIANA idx, ore 14-21 (dentro): 2,0 2,0 1,9 1,9 1,9 1,9 1,9 1,8
+#    MEDIANA idx, ore 0-13 e 23 (fuori): 2,6 - 2,8
+#    ora 22: 2,1 su 104.230 tick = lo 0,16% del file (bordo, non fascia)
+#  [!] ATTENZIONE: i numeri **76-80** e **104-112** che girano nei referti
+#     NON sono lo spread: sono la FRONTIERA `40 x spread` che se ne
+#     ricava. Chi li scambia sbaglia di QUARANTA VOLTE.
+#
+#  LA CATENA, tutta -- E IL PRIMO ANELLO E' UNA BANDA, NON UN NUMERO:
+#    risparmio per operazione       = 2,7 - 1,9 = **0,8 idx**
+#    [!] **LA DISTANZA INGRESSO->SL DI QUESTA GEOMETRIA NON E' MISURATA.**
+#       R240a lo aveva gia' congelato e R243 **NON lo revoca**:
+#       `prove/R240a_finestra_TICK_SUPREV_U30USD_short.txt` r.153 --
+#       *"il 40x: SOSPESO. La distanza ingresso->SL di questa geometria
+#       non e' misurata e serve la FASE 1 (Optimization=0, Giornale
+#       acceso), che oggi non esiste come riga di lancio."*
+#    [!] **E `3,5 x ATR` NON E' LO STOP, per costruzione del codice.**
+#       `InpStMult x ATR` e' la SEMI-LARGHEZZA della banda Supertrend
+#       misurata da `hl2` (`SupertrendSeries`: `bLo = hl2 -
+#       InpStMult*atr`, `bUp = hl2 + InpStMult*atr`), **non** la distanza
+#       ingresso->SL. La geometria d'ingresso mette l'ingresso ADDOSSO
+#       alla banda (r.347/354, `closeNear`: la candela [2] chiude entro
+#       `InpNearAtr*atr` = **1,0 x ATR** dalla linea) e r.386-389 mette lo
+#       SL ADDOSSO alla banda (`sl = min(stLine,ext) - buf`). Ingresso e
+#       stop stanno **dalla STESSA PARTE** della banda: la larghezza della
+#       banda **si cancella, non si somma**. Il vecchio conto la sommava.
+#    >>> STOP `[INFERITO, BANDA]` = **1,0 - 2,0 x ATR(9)**, e l'ATR di
+#        casa e' anch'esso una banda dichiarata -- **78,0 [MISURATO] n=5
+#        vivo** e **88,2 [MISURATO] n=33 backtest R112**, e il referto ADR
+#        r.159-163 dice testualmente *"scrivo entrambi"*, quindi qui si
+#        scrivono entrambi: **stop ~ 78 - 176 idx**, NON 273.
+#    rischio per operazione = 1,0% di 100.000 = 1.000 EUR sullo stop
+#                           = **5,67 - 12,82 EUR per idx**
+#    risparmio per operazione = 0,8 x quello = **4,54 - 10,26 EUR**
+#    su n=76 (la cella spenta di R240a) = **345 - 780 EUR**
+#    da PF 0,97084 e Profit -267,28 si ricavano GL = 9.166 e GP = 8.899
+#    spostando quel risparmio dal costo, per QUALUNQUE ripartizione fra
+#    vincenti e perdenti (provata a 23, 38 e 50 vincenti su 76: il
+#    risultato balla di 0,002):
+#      PF -> **1,0086 - 1,0594** -> **R_tick da solo costo = 1,039-1,091**
+#  >>> **IL COSTO, DA SOLO, VALE UN RAPPORTO DI 1,04-1,09 SUL CORTO**
+#      (col conto vecchio e sbagliato veniva 1,025: il verso dell'errore
+#      era quello COMODO, e va detto). Il 2,2059 del Nasdaq resta un
+#      ordine di grandezza sopra. Quindi:
+#      - un ramo **>= 1,80 NON si spiega col costo** (margine x1,65);
+#      - un ramo **>= 1,20 non si spiega col costo**, ma il margine e'
+#        **SOTTILE** (1,20 contro 1,09) e nel referto va chiamato sottile;
+#      - [!] **e la frase che il conto vecchio sbagliava**: un ramo attorno
+#        a **1,00 NON e' "compatibile con solo costo"** -- e' **PEGGIO**
+#        del solo costo. Col solo vantaggio di spread il rapporto atteso
+#        e' 1,04-1,09: se torna 1,00, il meccanismo si e' mangiato il
+#        vantaggio di costo, e si scrive esattamente cosi'.
+#  >>> E IL LIMITE DEL CONTO, dichiarato: vale se la finestra filtrasse
+#      LE STESSE operazioni. Non le filtra (r.314-322 libera slot). E'
+#      un ORDINE DI GRANDEZZA, non un'uguaglianza -- e ora l'ordine di
+#      grandezza e' piu' vicino di prima, quindi la banda si riporta
+#      SEMPRE intera, mai il suo estremo comodo.
+#  >>> E fra R240 e R243 il costo e' lo STESSO (stesso simbolo, stesse
+#      ore, stesso modello): si CANCELLA nel confronto fra i due round.
+#
+# ==========================================================================
+#  ### PARTE 5 -- I CANCELLI DI INTERPRETABILITA', congelati ORA ###
+# ==========================================================================
+#  Un rapporto ha DUE campioni, non uno. Stesse soglie di R240a, per
+#  coerenza di cancello (non perche' siano leggi):
+#  >>> SOGLIA (1): n(OOS, finestra SPENTA) < 20  -> NON INTERPRETABILE
+#  >>> SOGLIA (2): n(OOS, finestra ACCESA) < 15  -> NON INTERPRETABILE
+#      LO STESSO. Un denominatore grasso non salva un numeratore su tre
+#      operazioni.
+#  In tutti e due i casi non si scrive nessun rapporto: si scrive
+#  "l'ancora del Dow quasi non opera su un lato solo (n=...)", che e'
+#  comunque un fatto.
+#  >>> ATTESA: n spenta ~70 e n accesa ~50. **I cancelli dovrebbero
+#      passare largo**, e se NON passano e' gia' una notizia (vorrebbe
+#      dire che la taratura ha tagliato il campione, e non e' cio' che
+#      il conto sopra prevede).
+#
+#  IL CANCELLO SUL PF ASSOLUTO -- stesse regole di R240a:
+#   (a) se PF(SPENTA) < 1,00 il rapporto si calcola e si scrive, ma NON
+#       si legge come "il meccanismo si replica": la frase esatta e' "su
+#       un motore che PERDE, il filtro cambia la perdita di un fattore X".
+#       >>> E qui vale il contrario del solito: l'attesa e' che la cella
+#           spenta stia **SOPRA** 1,00 (1,05-1,55). Se torna SOTTO,
+#           la prima cosa da scrivere e' che **l'ancora del Dow non ha
+#           morso sul corto da solo**, e solo dopo il rapporto.
+#   (b) se PF(SPENTA) < 0,50 il rapporto NON si scrive affatto.
+#   (c) se una delle due celle ha ZERO operazioni in perdita il PF e'
+#       degenere: si scrivono n, netto e DD, mai il rapporto.
+#  >>> E SI RIPORTA SEMPRE: n, PF e DD di TUTTE E DUE le celle, piu' il
+#      rapporto dei DD. Il DD si legge a qualunque n (Emendamento B) ed
+#      e' stata la misura piu' solida di R238 (0,498) e la piu' netta di
+#      R240 (1,0612). Un referto col solo PF butta via meta' del dato.
+#
+#  SENTINELLA S1 -- DETERMINISMO: **NON C'E' in questo file** e lo
+#      dichiaro. Nessuna coppia gemella sul magic: l'asse e' gia'
+#      l'interruttore e aggiungerne un'altra romperebbe la regola
+#      dell'unico asse. Precedente di casa: G1 passato 949/949
+#      (`report/MANOPOLE_INERTI_2026-09-09.md` r.40) e R240 e' girato
+#      con `rc 0` su tutte e due le gambe il 24/09.
+#
+#  SENTINELLA S2 -- DIREZIONALE, NON BLOCCANTE, e ricavata dal CODICE:
+#      la somma delle operazioni a finestra SPENTA dei due lati
+#      (R243a IS+OOS) + (R243b IS+OOS) **deve stare SOPRA 269**.
+#      >>> Da dove viene il 269: e' n(IS)+n(OOS) della cella 3.5/9 a DUE
+#          LATI misurata in R123c (117+152). Il censimento a tick del
+#          26/07 sulla stessa configurazione da' 273: i due differiscono
+#          dell'1,5%, ed e' la deriva del binario fra i due round.
+#      >>> Il VERSO e' obbligato dal codice: un lato solo LIBERA slot
+#          (r.314-322), quindi puo' solo AGGIUNGERE operazioni rispetto
+#          ai due lati. Se la somma torna **sotto 240**, il banco ha
+#          fatto qualcosa di diverso da quello che crediamo, e si
+#          guarda il banco prima dei parametri.
+#      >>> NON E' BLOCCANTE: R243 gira `ABTG_SupertrendReversal` e il
+#          269 viene da `ABTG_SupRev_DOW_H1_Ottimizzato`, con TP_RR 3.0
+#          invece di 2.5. Due binari diversi e un pin diverso: il
+#          confronto e' di ORDINE DI GRANDEZZA e di VERSO, non di cifra.
+#
+#  CANCELLO CROCIATO T1: **NON C'E'**, come in R240 e per lo stesso
+#      motivo: su U30USD non esiste nessuna corsa a UN LATO SOLO con
+#      questi pin. Un solo banco, un solo passaggio, nessun numero
+#      d'archivio da riprodurre alla cifra.
+#
+# ==========================================================================
+#  ### PARTE 6 -- I RAMI, congelati PRIMA dei numeri ###
+# ==========================================================================
+#  R_tick = PF(ACCESA) / PF(SPENTA) del CORTO in OOS:
+#    >= 1,80   -> [ok] **IL MECCANISMO DI R238 SI REPLICA SUL DOW CON
+#                 L'ANCORA DEL DOW.** E allora la spiegazione (2) era
+#                 quella giusta e R240 va riletto come "round coi pin
+#                 sbagliati", non come "meccanismo assente".
+#    1,20-1,79 -> si replica RIDOTTO. Si riporta il rapporto e la quota
+#                 rispetto al Nasdaq (R_tick / 2,2059). NON e' la
+#                 "frazione conservata" di R238 (quella era OHLC->tick
+#                 sullo STESSO simbolo): qui il paragone e' fra due
+#                 SIMBOLI, e si chiama con un nome diverso apposta.
+#    0,80-1,19 -> [!] **NON replicato NEMMENO con l'ancora del Dow.** E
+#                 questo ramo, a differenza di quello di R240, NON e'
+#                 piu' confuso con la spiegazione (2): la spiegazione
+#                 (2) e' stata misurata e messa nel denominatore.
+#    < 0,80    -> [!] con l'ancora del Dow la finestra PEGGIORA il corto.
+#  >>> La soglia 1,80 e' la convenzione di R238 riusata, non una legge.
+#      A 1,79 o 1,81 si scrive **"sul confine"**. Non si arrotonda verso
+#      la conclusione comoda, in nessuno dei due versi.
+#
+#  >>> E LA LETTURA CONGIUNTA COI DUE LATI, congelata adesso perche' e'
+#      il vero prodotto del round (R243b = il file gemello, lato lungo):
+#      corto      | lungo        | si scrive
+#      -----------|--------------|---------------------------------------
+#      >= 1,80    | 0,80-1,19    | [ok] R238 SI REPLICA sul Dow con l'ancora
+#                 | (piatto)     | giusta: il controllo tiene e l'effetto
+#                 |              | e' del LATO CORTO. Massimo esito
+#                 |              | possibile di questo round.
+#      >= 1,80    | fuori banda  | [~] la finestra muove TUTTI E DUE i
+#                 |              | lati: e' un effetto di SESSIONE, non
+#                 |              | del lato corto. Si riporta, non si
+#                 |              | conclude, e la lettura di R238 resta
+#                 |              | INCRINATA come dopo R240.
+#      0,80-1,19  | qualunque    | [!] la finestra USA non muove il corto
+#                 |              | del Dow con NESSUNA delle due ancore
+#                 |              | misurate. Chiude il trasferimento
+#                 |              | R238 -> Dow. **NON chiude il motore.**
+#      < 0,80     | qualunque    | [!] la finestra peggiora il corto con
+#                 |              | tutte e due le ancore.
+#
+#  [morto] **E IL CERTIFICATO DI MORTE, PERCHE' NON SI SCRIVA "MORTO" PER
+#     STANCHEZZA.** Anche col ramo piu' brutto, R243 + R240 chiudono UNA
+#     domanda (il trasferimento del meccanismo di R238 sul Dow), non il
+#     candidato. Restano scoperte, e vanno elencate nel referto:
+#       1. PF                       -> OK (R240 + R243)
+#       2. n + DD                   -> OK
+#       3. gestione dell'uscita ad asse su QUESTO binario e QUESTO
+#          simbolo -> **DA DICHIARARE**: gli assi `InpTrailOnST` /
+#          `InpExitOnFlip` / `InpFirstFraction` su U30USD esistono in
+#          repo (R120b, R120e, R124a, A1_SUPREV_DOW_H1_01/02) ma su
+#          ALTRI binari. Su `ABTG_SupertrendReversal` + U30USD: da
+#          verificare corsa per corsa, non da dare per fatto.
+#       4. simboli gemelli          -> parziale (NASUSD in R238, U30USD
+#          qui; D30EUR e SPXUSD mai, e sul DAX la finestra 14-22 e'
+#          una DOMANDA DIVERSA -- vedi R240a)
+#       5. TF cambiato              -> **NO su questa geometria**. H1 e
+#          basta. R190c (M30) e' scritto e MAI GIRATO.
+#     [!] Con la 3 e la 5 scoperte, il verdetto in `REGISTRO_TEST.md`
+#        resta **"NON ANCORA MISURATO"**, con scritto cosa manca.
+#
+# ==========================================================================
+#  ### PARTE 7 -- COSA QUESTO ROUND NON PUO' DIRE ###
+# ==========================================================================
+#   - il MERITO: l'n atteso e' 50-90 per cella, **lontanissimo dai 150**
+#     (Emendamento A). Nessuna promozione, nessuno spegnimento,
+#     qualunque PF esca. E l'asse su cui sta l'ancora e' A6.
+#   - il REGIME: i tick BCM sugli indici sono 21 mesi e **UN SOLO
+#     REGIME, un toro**. Uno short misurato qui parte svantaggiato per
+#     costruzione. Regola C dell'Emendamento della Finestra: **NON
+#     soddisfatta, e non lo sara' alla fine del round.**
+#   - la falsificazione per contatori: NON SI FA, e si sa prima. Le
+#     passate girano in Optimization=1 (sugli agenti) e li' le Print non
+#     si leggono (checklist 34 e 34-ter); OnTester esporta stats[7]
+#     senza nessun contatore in colonna.
+#   - la separazione COSTO/MECCANISMO **dentro** il round: servirebbe una
+#     terza cella a -Spread FISSO, che qui non c'e' (come in R238 e
+#     R240: stessa incognita, stesso verso, quindi il confronto FRA I
+#     ROUND resta coerente). Quello che c'e' e' la STIMA della Parte 4:
+#     il costo da solo vale **1,04-1,09** sul corto, e serve a dire
+#     quando NON basta -- con un margine SOTTILE contro la soglia 1,20.
+#   - il CANCELLO DI COSTO `stop >= 40 x spread`: **SOSPESO** (Parte 8).
+#     La distanza ingresso->SL non e' misurata su questa geometria e il
+#     round non la misura. Il referto NON puo' scrivere "H1 non e'
+#     escluso per costo".
+#   - l'ancora del CORTO del Dow: non esiste e questo round non la
+#     fabbrica. Vedi Parte 3.
+#
+# ==========================================================================
+#  ### PARTE 8 -- IL CANCELLO DI COSTO `stop >= 40 x spread`: **SOSPESO**
+# ==========================================================================
+#  Pedaggio sugli indici = SPREAD E BASTA (commissione 0,0000 MISURATA
+#  su n=302 deal, `report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md`).
+#  [!] **IL CANCELLO NON SI PUO' COMPILARE, E QUINDI NON SI COMPILA.** Il
+#  numeratore del 40x e' la distanza **ingresso -> SL**, e su questa
+#  geometria **NON E' MISURATA**. R240a l'aveva gia' congelato (r.153:
+#  *"il 40x: SOSPESO... serve la FASE 1 (Optimization=0, Giornale acceso),
+#  che oggi non esiste come riga di lancio"*) e **R243 EREDITA la
+#  sospensione**: un round gemello non revoca un cancello sospeso dal
+#  round che sta riproducendo.
+#  >>> [!] **E NON SI METTE `3,5 x ATR` AL SUO POSTO.** `InpStMult x ATR` e'
+#      la semi-larghezza della banda Supertrend misurata da `hl2`
+#      (`SupertrendSeries`), mentre ingresso (r.347/354) e stop
+#      (r.386-389) stanno TUTTI E DUE addosso alla banda: la larghezza si
+#      cancella. Usarlo darebbe 273 idx, cioe' **~3,5 volte** lo stop
+#      plausibile, e nel verso COMODO -- che e' il peggiore dei due.
+#  >>> QUELLO CHE SI PUO' DIRE, e si dice con la banda intera:
+#      stop `[INFERITO, BANDA]` **1,0-2,0 x ATR(9)** = **78 - 176 idx**
+#      (ATR di casa in banda **78,0-88,2**, referto ADR r.159-163).
+#        contro spread MEDIANO dentro (ora 14, la piu' cara) **2,0**
+#          -> **39,0x - 88,2x**   [!] il 40x cade DENTRO la banda
+#        contro spread MEDIANO fuori (ore 0-2, dove la cella SPENTA opera
+#        anche) **2,8** -> **27,9x - 63,0x**   [!] il 40x cade DENTRO
+#        contro **p95** dell'ora 14 **3,0** -> **26,0x - 58,8x**   [!] idem
+#  >>> CONTRO-ESEMPIO DEL CANCELLO, come lo vuole la regola del 10/09, e
+#      stavolta **l'alternativa VINCE**: perche' il 40x cada al p95
+#      dell'ora 14 basta uno stop **< 120 idx**, cioe' **1,5 x ATR(9)** --
+#      che sta **DENTRO** la banda inferita, non fuori. Il vecchio
+#      contro-esempio ("servirebbe un ATR del 44%") reggeva solo perche'
+#      partiva da un numeratore gonfiato di 3,5 volte.
+#  >>> **CONCLUSIONE, ed e' un NON SO, non un SI':** su tutte e tre le
+#      statistiche di spread la banda **scavalca il 40x**. H1 su U30USD
+#      con questa geometria **non e' dichiarato passato e non e'
+#      dichiarato escluso**. Questo **NON impedisce a R243 di girare** --
+#      R240 e' girato con la stessa sospensione -- ma **VIETA al referto
+#      di scrivere "H1 non e' escluso per costo"**.
+#  >>> [!] **E LA VIA PIU' CORTA AL NUMERO CHE MANCA, col suo costo, perche'
+#      "non accontentiamoci" vuol dire proporla:** UNA passata a
+#      `Optimization=0` con il Giornale acceso sulla cella SPENTA OOS
+#      (**~2,25 minuti**, stessa base di ritmo della Parte 9) stampa le
+#      distanze ingresso->SL vere e **chiude il cancello per sempre su
+#      tutta la famiglia SupRev**. [ok] **E IL NUMERO C'E' GIA' NEL CODICE,
+#      verificato a HEAD il 24/09: r.422-423 stampa `"... mercato %.2f
+#      lot @ ENTRY SL ... TP ..."` a ogni ingresso**, gia' acceso da
+#      `InpVerbose=true` pinnato qui sotto; serve solo `Optimization=0`
+#      (in ottimizzazione le Print girano sugli agenti e non si leggono,
+#      checklist 34 e 34-ter). [!] **E NON basta il per-trade**: r.719
+#      `ExportTrades()` scrive SOLO i deal di USCITA (`close_time`,
+#      `price`, `net_profit`); ingresso e SL non ci sono. Non e' in
+#      questo round solo perche' manca la riga di lancio: e' la prima
+#      cosa da chiedere dopo R243, non un "prima o poi".
+#  >>> M30/M15 non sono in questo round: sarebbero un secondo gradino e
+#      renderebbero non attribuibile il risultato (e M30 su questo motore
+#      ha gia' un file scritto e mai girato: R190c).
+#
+# ==========================================================================
+#  ### PARTE 9 -- IL COSTO IN TEMPO MACCHINA, ricavato dai TICK ###
+#  (classe 712: il ritmo si trasporta sui TICK, non sulle passate)
+# ==========================================================================
+#  BASE MISURATA, ed e' la migliore che esista per questo round:
+#    R240 -- **stesso simbolo, stesso TF, stesso modello (4, tick reali),
+#    stessa finestra, stesso taglio** -- ha fatto **8 passate in 18
+#    minuti** (24/09/2026, 07:40-07:58, PC di backtest DESKTOP-H4D7CAJ,
+#    `report/REFERTO_R240_2026-09-24.md` r.3).
+#    U30USD porta **67.618.571 tick** dal 2024.09.26
+#    (`risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt`).
+#    -> **2,25 min/passata** a 67,6 M tick.
+#  R243 e' IDENTICO per struttura: 2 file x 2 celle x 2 gambe (IS+OOS)
+#    = **8 passate**, stesso simbolo, stessi tick.
+#    -> **18 minuti**. BANDA DICHIARATA: **16 - 24 minuti.**
+#  >>> La banda e' STRETTA per costruzione, non per ottimismo: qui non
+#      si trasporta niente fra simboli diversi -- i tick sono LO STESSO
+#      NUMERO. Il 33% di margine in alto copre solo il jitter di
+#      macchina. Se sfora i 30 minuti, qualcosa gira diverso da R240
+#      (modello, agenti, cache) e va guardato.
+#  >>> COSTO DELLA SOLA GAMBA DI QUESTO FILE (R243a): 4 passate,
+#      **~9 minuti**, banda 8-12.
+#
+# ==========================================================================
+#  ### PARTE 10 -- IGIENE, VERIFICATA A MANO IL 24/09/2026 ###
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+#    -- lo STESSO binario di R240. Non
+#    `ABTG_SupRev_DOW_H1_Ottimizzato`: quello porta l'ancora nei
+#    DEFAULT e non ha i contatori dell'imbuto, e usarlo cambierebbe
+#    binario E taratura insieme. Qui l'ancora del Dow si riproduce
+#    DENTRO questo EA, coi pin -- che e' esattamente cio' che il file
+#    prova di R240a aveva gia' scritto essere possibile.
+#  MODELLO: 4 (TICK REALI) -- non imponibile dal file: e' `-Modello`.
+#  DEPOSITO: la riga di lancio DEVE passare **-Deposito 100000** (default
+#    del driver 10000). [!] **E LA RAGIONE VA CORRETTA rispetto a quella
+#    che gira nei file gemelli: NON e' il `return` a r.400.** `LotByRisk`
+#    chiude con `MathMax(mn, MathMin(mx, lot))`, quindi **per deposito
+#    piccolo il lotto non arriva mai a zero: si SCHIACCIA sul minimo** --
+#    ed e' documentato nel commento dell'EA stesso (caso 225JPY,
+#    08/08/2026: *"a deposito 100k profitti identici al 10k, DD 0,01%"*).
+#    `r.400` si legge solo se `lossPerLot<=0`, che e' un guasto dei dati
+#    del simbolo, non un effetto del deposito. Il deposito conta lo
+#    stesso, e per un'ALTRA via: **taglia, compounding del saldo e DD%
+#    cambiano**, e con essi la confrontabilita' con R240. Quindi si passa
+#    100000 per il motivo giusto.
+#  -Spread: **NON si passa**, come in R240. Resta un'INCOGNITA
+#    DICHIARATA, uguale nei due round.
+#  FINESTRA: `@FRAZIONEIS 0.40` con 2024.09.26 -> 2026.06.30 = 642
+#    giorni, floor(642 x 0,40) = 256, meta = **2025.06.09**. Quindi
+#    IS 2024.09.26-2025.06.09 e OOS 2025.06.10-2026.06.30: **le stesse
+#    di R240**, ricontate col conto del driver (walkforward_generico.ps1
+#    r.661), non ricordate.
+#  MAGIC: **764280**, blocco VERGINE. Cercato il 24/09/2026 su TUTTO il
+#    repo, **comprese le worktree degli agenti** (`.claude/worktrees/`,
+#    8 worktree vive): `grep -rl "764280" .` -> **ZERO occorrenze**.
+#    Stessa verifica su 764281 (il gemello lungo) -> ZERO.
+#    VIETATI qui: 764260/764261 (R240), 784110/784120/784130 (R123),
+#    789330 (R190c), 970916 (la sedia SupRev DOW).
+#  ETICHETTA: `R243` -- `grep -rn "R243"` su tutto il repo il
+#    24/09/2026: **ZERO occorrenze** prima di questo file. Libera.
+#  PIN DI STRINGA: `InpComment` porta un valore NON vuoto. `InpNewsFile`
+#    e `InpNewsCurrencies` NON sono pinnati di proposito: il pin di una
+#    stringa a valore VUOTO viene IGNORATO da MT5 (classe FiboH4,
+#    controllo 3 di controlla_prova.py) e i default compilati sono gia'
+#    quelli giusti.
+#  RISCHIO: `InpRiskPercent = 1.0` = il dial di MISURA, lo stesso di
+#    R240. Taglie e rischio in campo sono di CLAUDIO.
+#  GUARDIAN: `InpUsaGuardian=false`, come R240. Nel tester le
+#    GlobalVariable del Guardian non esistono e la guardia sarebbe
+#    comunque fail-open: spegnerlo rende la cosa esplicita invece che
+#    implicita, e tiene i numeri confrontabili con R240.
+#  RIGHE SORGENTE CITATE: r.314 / r.320 / r.322 (una posizione alla
+#    volta), r.326 (la finestra, `hour<Start || hour>=End`), r.386-389
+#    (lo stop: il piu' protettivo fra linea Supertrend ed estremo di 5
+#    barre, piu' buffer), r.400 (`if(totLot<=0) return`), r.258
+#    (`hAtr = iATR(_Symbol,InpTF,InpStAtrPeriod)`), r.347/354
+#    (`closeNear` con `InpNearAtr*atr`). **RICONTATE sul file a HEAD il
+#    24/09/2026** (`mql5/Experts/ABTG_SupertrendReversal.mq5`, 794
+#    righe, ultimo commit sul file b45dd009 dell'11/09): non copiate da
+#    un altro documento (classe 731).
+#  BERSAGLIO: **PC DI BACKTEST**. [!] NON il VPS: la challenge e' viva e
+#    la regola del 21/09 vieta i round sul VPS. NON il piccolo 50503392,
+#    NON il 100k 50504263, NON il reale 10105439, NON l'FTMO 541452707.
+#  CANCELLO: questo file NON LANCIA NIENTE. La riga di lancio la scrive
+#    il coordinatore DOPO i due strati (controlla_prova.py +
+#    controllo-preventivo). Finche' non tornano, niente esce.
+#
+# ==========================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- il lato: CORTO DA SOLO (regola dei due lati, 25/08). Ogni numero di
+# --- questo lato si ricalcola QUI: nessuna cifra si copia dal gemello.
+InpAllowLong=false
+InpAllowShort=true
+
+# --- timeframe operativo (ENUM, pinnato esplicito: H1 = 16385)
+InpTF=16385
+
+# --- L'ANCORA DEL DOW, e ogni valore ha la sua fonte nella Parte 2:
+# ---   3.5 = 3 misure concordi (OOS split 1,389 / tick intero 1,195 /
+# ---         OHLC intero 1,334). NON un altopiano: dichiarato.
+# ---   9   = 3 misure concordi (1,389 / 1,195 / 1,334). E' il PICCO del
+# ---         suo asse: dichiarato, e per questo il round NON PROMUOVE.
+# ---   2.5 = CENTRO dell'unico altopiano piatto misurato sul Dow
+# ---         (TP_RR 2.0/2.5/3.0 -> 1,294 / 1,281 / 1,334 in OHLC).
+# ---         Il 3.0 e' il PICCO, e la regola di casa vieta il picco.
+# ---         E tiene la differenza con R240a a UN SOLO parametro.
+InpStMult=3.5
+InpStAtrPeriod=9
+InpTP_RR=2.5
+
+# --- stop: identico a R240a. Qui l'asse sono le ORE, non lo stop.
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+# --- pattern del rimbalzo. NearAtr 1.0 = CENTRO dell'unico altopiano
+# --- VERO misurato sul Dow (R123d: 0,75/1,00/1,25 -> 1,284/1,389/1,322).
+# --- Sopra 1,25 la manopola e' INERTE (1,25 e 1,50 danno n=172 e PF
+# --- 1,32197 identici alla quinta cifra): casella libera, non provata.
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+
+# --- confluenza tecnica: identica a R240a
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+# --- target e uscita: identici a R240a
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+
+# --- ingresso frazionato: identico a R240a
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- rischio: dial di MISURA, identico a R240a
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+# --- LA FASCIA: ora SERVER BCM (= ora italiana - 1). Il cash USA apre
+# --- alle 15:30 italiane = 14:30 server, e il Dow ha lo stesso orologio
+# --- del Nasdaq (09:30 New York tutti e due). La finestra e' [14,22) --
+# --- r.326 usa `hour<Start || hour>=End` -- quindi copre le ore server
+# --- 14..21. CONTROPROVA SUL SIMBOLO, non sul ragionamento:
+# --- spread_orario_U30USD.csv da' una MEDIANA di 1,8-2,0 idx nelle ore
+# --- 14-21 contro 2,6-2,8 nelle ore 0-13 e 23: le ore pinnate SONO la
+# --- sessione liquida di U30USD. (I 76-80 e i 104-112 dei referti sono
+# --- la FRONTIERA 40 x spread, NON lo spread: chi li copia qui sbaglia
+# --- di 40 volte.) Pinnate identiche a R240a: l'asse e' l'interruttore.
+InpStartHour=14
+InpEndHour=22
+
+# --- filtro notizie: spento, come R240a
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+# --- generali
+InpComment=STREV_R243a
+InpFridayClose=false
+InpFridayCloseHour=20
+InpUsaGuardian=false
+InpMagic=764280
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+
+# --- L'ASSE, unico: l'interruttore della finestra oraria. 2 celle: 0 e 1.
+# --- E' LO STESSO ASSE DI R240a, apposta: il round si legge SOLO nel
+# --- confronto con quello, e cambiare anche l'asse renderebbe il
+# --- confronto impossibile.
+InpUseTimeWindow=0||0||1||1||Y
+# ==========================================================================

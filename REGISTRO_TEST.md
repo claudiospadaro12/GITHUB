@@ -55,6 +55,11 @@ quelli sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non c
 
 ---
 
+## 🔴🟢 R243 — GIRATO il 24/09: la finestra USA NON aiuta il Dow nemmeno con l'ancora del Dow (NON un morto)
+- R_tick OOS: corto **0,790**, lungo **0,794**, tutti e due `< 0,80` e **sul confine**. Chiude il trasferimento R238 -> Dow con le due ancore misurate.
+- 🟢 Trovato: **corto a finestra SPENTA con l'ancora del Dow, PF IS 1,292 (n 68) · OOS 1,643 (n 78)**, DD 3,3-3,7%. Sopra la banda dichiarata; n<150 -> indizio.
+- Manca al certificato: uscita ad asse, gemelli, TF, **costo 40x (la passata sugli stop del SupRev lo misura)**. Referto: `report/REFERTO_R243_2026-09-24.md`.
+
 ## 🟠 R244 — GIRATO il 24/09: il cutoff NON allarga il corto di MaxMinNotte D30EUR (NON un morto)
 - Ancora C=12 riprodotta alla cifra (101 / 1,40859; 157 / 0,74387), monotonia OK, **k = 1,42 misurato** dal per-trade (C=17).
 - Corto: max **~105 posizioni** (C=17) < 150 -> merito sospeso. **PF marginale 12->17 = 0,588 su 48 deal** (indizio WHIPSAW: i riempimenti tardivi perdono). Il PF sale accorciando il cutoff, ma C<=10 sta sotto 50 posizioni.
