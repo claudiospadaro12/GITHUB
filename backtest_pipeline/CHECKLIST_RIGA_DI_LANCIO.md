@@ -35202,3 +35202,50 @@ classe 734): il conto dei file **non tornava**.
 (`grep`, `grep -c`, `diff`, `test`). Si separano con `;`, oppure si chiude con `|| true`. E dopo
 ogni commit si confronta `git show --stat` con l'elenco dei file che si credeva di aver toccato:
 **il verbale si verifica, non si spera.**
+
+## 🪞 CLASSE 745 — **il controllo incrociato che prova il LETTORE, e non la CONFIGURAZIONE**
+
+24/09/2026, passata stop SupRev v1 (mia). Il controllo era: *righe `mercato` lette == somma degli
+`ENTRATE` delle righe IMBUTO*. Collaudato positivo e negativo, e **funzionava** — ma i due conteggi
+vengono **dallo stesso EA**. 🔴 Se MT5 ignorasse `[TesterInputs]`, l'EA girerebbe coi **default del
+sorgente** (verificato: `InpTF=PERIOD_H4`, `InpStAtrPeriod=10`, due lati, magic 770901 — r.51-107):
+un'**altra geometria**, e i due conteggi coinciderebbero lo stesso → *"CONTROLLO INCROCIATO: OK"* su
+numeri di un altro motore.
+**La regola**: un controllo incrociato fra due uscite dello **stesso** programma prova che il
+**lettore** non perde righe, **non** che il programma ha girato **con la configurazione dichiarata**.
+Quella si prova **a parte**: prima, che l'ini contenga i pin (una volta sola ciascuno); dopo, che il
+programma **dichiari** di aver girato con quei pin (qui: la riga d'avvio a r.266, *"avviato su U30USD
+PERIOD_H1. Supertrend(9,3.5)"*). Contro-esempio da costruire sempre: **"e se l'ini fosse ignorato?"**
+
+## 🔎 CLASSE 746 — **"è la prima volta" detto senza cercare il precedente**
+
+Stessa passata. Nel brief al cancello ho scritto *"È la PRIMA volta che nel progetto si lancia una
+passata SINGOLA"*, e nel file prova *"l'unico log d'agente in archivio non contiene Print EA"*.
+🔴 **Falso tutti e due**, verificato: `RIGA_R99_ORO_RISCHIO.ps1` r.947 ha già `Optimization=0` (23/08,
+passata singola sulla gemella `_Ottimizzato` dello stesso EA, con le stesse radici dei log e il report
+`.htm` già pronti); e il log d'agente di R242 contiene **28 righe EA** di OnInit — che tra l'altro
+**confermano il formato reale** che il parser si aspettava.
+**La regola**: *"non esiste"* e *"è la prima volta"* sono affermazioni su **tutto il repo**, e si
+fanno **dopo un `grep`**, non prima. È la regola del 10/09 (*"prima si cerca il file che ha già la
+risposta"*) applicata agli strumenti invece che ai numeri.
+
+## 🏷️ CLASSE 747 — **lo strato 1 dà OK al "marcatore controllato" senza verificare che il marcatore ESISTA al pin**
+
+Stessa passata. Il cancello deterministico controlla che la riga **cerchi** un marcatore nello script
+scaricato; non controlla che **quel** marcatore sia **presente nel file a quel pin**. Con la riga che
+cercava `v2` e il pin fermo alla `v1`, lo strato 1 ha dato **OK**. 🟢 Il fallimento sarebbe stato
+**chiuso** (la riga si ferma al marcatore), ma il cancello **non l'ha visto**: l'ha visto il giudizio.
+**La regola, finché lo strumento non la impara**: dopo ogni aggiornamento di pin si fa **a mano**
+`curl <raw>/<PIN>/<script> | grep -c <MARCATORE>` → deve dare **1**. È una riga. 📌 Candidata a
+diventare un controllo di `controlla_riga.py`.
+
+## 🧩 CLASSE 748 — **`controlla_prova.py` non ha una modalità per la passata singola**
+
+Stessa passata. Sul file prova di una passata singola il cancello risponde *"nessun asse Y"* **per
+costruzione**: il formato di casa presuppone un'ottimizzazione. Non è un difetto del file.
+**La regola**: su questa classe di oggetti il cancello deterministico **si dichiara non applicabile**,
+e la copertura poggia su `controlla_riga.py --oggetto ps1` + il giudizio. **Si dichiara, non si
+aggira** (per esempio inventando un asse finto per far comparire un OK).
+📌 E un post-scriptum sulla **744**, perché **l'ho rifatta** due ore dopo averla scritta: un `mv`
+fallito seguito da `&&` ha saltato un commit. **L'ho presa di nuovo leggendo `git show --stat`**: il
+verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che non basta.
