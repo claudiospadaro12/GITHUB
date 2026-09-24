@@ -55,6 +55,10 @@ quelli sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non c
 
 ---
 
+## 🟢 R247 — GIRATO il 24/09 sera: per-trade del candidato #1, G0/G1 VERDI
+- DD a 1%: IS 6,38%, OOS 5,94% (a 2%: ~12,8/11,9% [DERIVATO], sopra il 10% FTMO). Peggior giornata −1,1/−1,2%.
+- Sovrapposizione con 770202: entra nel 96% dei suoi giorni, stesso verso 91/92, rho 0,16/0,25. **PARZIALE** (non diversifica: rapp_DD 0,903 > q95 0,851), allarme di coda no. Referto: `report/REFERTO_R247_2026-09-24.md`.
+
 ## ⏳ R246 INVERNO (R246m-r) e R247 — PRONTI (PASS strato 2, pin `782d7280`)
 - **R246m-r**: la casella d+1 (le sedie FTMO armano alla cash anche d'inverno, come faranno dal 26/10). 18 passate vere, ~5 min. Si lancia DOPO R246. Il bias H4 del Dow resta [NON MISURATO] (classe 771).
 - **R247a/b**: il per-trade della cella centrale di R245b (candidato #1), per la sovrapposizione con 770202 e il DD giornaliero. ~3-6 min. Soglie contro un nullo per permutazione (classe 769). Lo script e' `backtest_pipeline/r247_sovrapposizione.py`.

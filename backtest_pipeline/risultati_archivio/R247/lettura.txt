@@ -1,0 +1,56 @@
+
+=== G0 abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765271.csv ===
+  magic 765271  riga CSV: Trades 154  PF 1.25176  Profit 1180.94  DD 7.1002  PeggiorGiornata -1.1046
+   (i)   ancora n 154 PF 1.25176 Profit 1180.94 -> OK
+   (ii)  per-trade: 154 deal, 154 posizioni, somma 1180.94, PF 1.25176 (intervallo d'arrotondamento 1.25157-1.25194)
+         deal == Trades: OK | somma entro +-0.78: OK | PF riga nell'intervallo: OK
+   (iii) DD saldo chiuso 6.3776 <= Equity DD 7.1002: OK | peggior giornata chiusa -1.1046 >= -1.1046: OK
+  G0 VERDE  (abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765271.csv)
+
+=== G0 abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765273.csv ===
+  magic 765273  riga CSV: Trades 197  PF 1.48894  Profit 2961.61  DD 6.8640  PeggiorGiornata -1.1958
+   (i)   ancora n 197 PF 1.48894 Profit 2961.61 -> OK
+   (ii)  per-trade: 197 deal, 197 posizioni, somma 2961.61, PF 1.48894 (intervallo d'arrotondamento 1.48875-1.48914)
+         deal == Trades: OK | somma entro +-0.99: OK | PF riga nell'intervallo: OK
+   (iii) DD saldo chiuso 5.9447 <= Equity DD 6.8640: OK | peggior giornata chiusa -1.1958 >= -1.1958: OK
+  G0 VERDE  (abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765273.csv)
+
+=== G1 ===
+  G1 VERDE: 154 righe identiche tranne il magic (765271 / 765272)
+
+=== G1 ===
+  G1 VERDE: 197 righe identiche tranne il magic (765273 / 765274)
+
+=== (b) DD GIORNO PER GIORNO -- abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765271.csv ===
+  deposito 10000.00 -> saldo finale 11180.94 | giorni con operazione 154 | in perdita 52
+  DD MASSIMO del saldo chiuso: 6.3776% per deal | 6.3776% a fine giornata  (minorante dell'Equity DD del tester)
+  PEGGIOR GIORNATA chiusa: -1.1046%  | giornate <= -1,00%: 12 | serie piu' lunga sotto il picco: 35 giornate con operazione
+  le 5 peggiori: 2025.02.11 -1.105%; 2024.11.26 -1.093%; 2024.12.04 -1.070%; 2024.12.24 -1.034%; 2024.11.29 -1.032%
+  a rischio 2.00% [DERIVATO lineare, classe 547, x2.00]: DD ~12.76% | peggior giornata ~-2.21%
+
+=== (b) DD GIORNO PER GIORNO -- abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765273.csv ===
+  deposito 10000.00 -> saldo finale 12961.61 | giorni con operazione 197 | in perdita 64
+  DD MASSIMO del saldo chiuso: 5.9447% per deal | 5.9447% a fine giornata  (minorante dell'Equity DD del tester)
+  PEGGIOR GIORNATA chiusa: -1.1958%  | giornate <= -1,00%: 22 | serie piu' lunga sotto il picco: 70 giornate con operazione
+  le 5 peggiori: 2025.07.09 -1.196%; 2025.12.24 -1.113%; 2026.05.25 -1.091%; 2025.12.29 -1.065%; 2025.10.14 -1.045%
+  a rischio 2.00% [DERIVATO lineare, classe 547, x2.00]: DD ~11.89% | peggior giornata ~-2.39%
+
+  TUTTE LE TRANCHE (additivo, [DERIVATO]): peggior giornata -1.1958% | DD additivo 6.5500%
+
+=== (a) SOVRAPPOSIZIONE CON LA SEDIA VIVA ===
+  finestra comune: 2025.06.10 -> 2026.06.29  |  pesi viva 1.00 nuova 1.00  (pesi = scala lineare, NON una taglia)
+  giorni con ingresso: viva 96 | nuova 209 | almeno una (U) 213 | TUTTE E DUE (C) 92
+  quota dei giorni della viva in cui entra anche la nuova: 0.958 | della nuova: 0.440
+  sui 92 giorni in comune: STESSO verso 91 | OPPOSTO 1 | misti 0
+  rho_U (P/L% giornaliero, giorni U, 0 dove una non entra) = 0.160
+  rho_C (solo giorni in comune)                          = 0.247
+  giorni in perdita della viva 31, in cui perde anche la nuova 13  -> P = 0.419  (nullo q95 0.419)
+  DD additivo %: viva 4.279 | nuova 5.969 | SOMMA 9.258  -> DD(somma)/(DDv+DDn) = 0.903  (nullo q95 0.851)  [DERIVATO: stesso conto, additivo]
+  peggior giornata %: viva -1.023 | nuova -1.196 | SOMMA -2.088  -> rapporto 1.746  (nullo q95 1.835)
+  (nullo = 2000 permutazioni, seme 247: stessi giorni, P/L% della nuova rimescolati fra i suoi giorni)
+  VERDETTO (a): PARZIALE (ne' raddoppio ne' diversificazione: si legge con la taglia)
+  ALLARME DI CODA (rapp_PG o P(perde|viva perde) SOPRA il q95 del nullo): non scatta
+  giorni FUORI dalla finestra comune (esclusi da (a)): viva 0 | nuova 142
+  serie giornaliera scritta in /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/R247/r247_giorni.csv
+
+  chiusure FUORI dalla sessione 14:30-17:31: 0  (giorno d'ingresso = giorno di chiusura: VERIFICATO sulle chiusure)

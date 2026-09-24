@@ -1,0 +1,31 @@
+RIEPILOGO R247 -- IL PER-TRADE DELLA CELLA CENTRALE DI R245b (2 file, ABTG_Nasdaq_Apertura_US U30USD M5, InpEmaSlow 200, TP 0,50, due lati, TICK REALI)
+data: 2026-09-24 22:37:22
+fine: 2026-09-24 22:40:16   durata minuti: 3   (dichiarato 3-6; massimo ragionevole ~11; non fermarla prima di 20, oltre e BLOCCATA)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : 782d7280c115f1cd7e656a594d22f2ba35036c3e
+deposito 10000 passato (= banco di R245); modello 4; spread NON passato; etichette R247a, R247b
+R247a: gamba OOS DEGENERE, CSV _OOS da 0 byte e rc 2 = FALSO ALLARME ATTESO SOLO se il CSV _IS di R247a ha 2 righe con Trades>0 E il CSV _OOS degenere ha 0 righe. Su R247a si legge il CSV _IS e il per-trade 765271/765272.
+
+R247a  leggi _IS    rc 2   motore = pin (SHA256, 2 file)   _IS fresco 2 righe, Trades>0 su 2   _OOS degenere: 0 byte, righe 0   (rc 2 dalla gamba OOS degenere = FALSO ALLARME ATTESO)
+R247b  leggi _OOS   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, _IS di R247a o _OOS di R247b mancante o senza 2 righe con Trades>0, rc 2 su R247b.
+CSV DA LEGGERE NON BUONI (_IS di R247a, _OOS di R247b: mancanti, vuoti o senza 2 righe con Trades>0): 0 su 2
+rc 2 SU R247b (GUASTO VERO): 0
+ROUND PARTITI (rc diverso da 1): 2 su 2
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, ABTG_Nasdaq_Apertura_US.mq5 + ABTG_PausaGuardian.mqh, unico include nostro dell EA): MOTORE = PIN in tutti i 2 round partiti
+CARTELLE ATTESE: 2   TROVATE: 2   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_<magic>.csv, magic 765271, 765272, 765273, 765274, scritti DOPO l avvio): 4 su 4
+RIGHE DATI DEI PER-TRADE TROVATI: 765271 154 righe dati (attese 154) | 765272 154 righe dati (attese 154) | 765273 197 righe dati (attese 197) | 765274 197 righe dati (attese 197)
+PER-TRADE TROVATI CON RIGHE DATI DIVERSE DALL ATTESO (154 per 765271/765272, 197 per 765273/765274): 0
+   Se 765271/765272 hanno 0 righe dati, la gamba degenere di R247a ha SOVRASCRITTO il per-trade IS: G0 ROSSO, per-trade IS [NON MISURATO], si torna al coordinatore (R247a par. 3), nessun tentativo a caso. Il per-trade 765273/765274 e quello della gamba OOS di R247b (gira per seconda): la sua prima chiusura NON deve cadere prima del 2025.07.01.
+
+I CANCELLI, CONGELATI PRIMA (R247a par. 5, R247b). G1 e G0 si guardano PER PRIMI:
+G1 DETERMINISMO: le due righe di OGNI CSV identiche fra le gemelle (765271/765272 nel _IS di R247a; 765273/765274 nel _IS e nel _OOS di R247b) in Profit, PF, DD, Trades, Peggior Giornata; i due per-trade identici RIGA PER RIGA tranne la colonna magic. Se no -> file NULLO.
+G0 RIPRODUZIONE ALLA CIFRA (R245b, cella InpEmaSlow=200, Pass 3), NIENTE GIALLO: VERDE = tutto, ROSSO = anche una sola cosa.
+   IS  (_IS di R247a e di R247b): Trades 154   PF 1.25176   Profit 1180.94   Equity DD % 7.1002   Peggior Giornata % -1.1046
+   OOS (_OOS di R247b)          : Trades 197   PF 1.48894   Profit 2961.61   Equity DD % 6.8640   Peggior Giornata % -1.1958
+   per-trade 765271 contro _IS: 154 deal = 154 position_id, somma netti 1180.94 entro +-0,78, PF nell intervallo d arrotondamento che contiene 1.25176, DD saldo chiuso <= 7.1002, peggior giornata chiusa >= -1.1046.
+   per-trade 765273 contro _OOS: 197 deal = 197 position_id, somma 2961.61 entro +-0,99, PF nell intervallo d arrotondamento che contiene 1.48894, DD saldo chiuso <= 6.8640, peggior giornata chiusa >= -1.1958, prima chiusura NON prima del 2025.07.01.
+   Qualunque differenza vuol dire che il per-trade NON e della cella: allora (a) e (b) NON si calcolano.
+LETTURA (dopo la raccolta): python3 backtest_pipeline/r247_sovrapposizione.py con --nuovo pt_765271@10000 e pt_765273@10000, --viva 772505@100000, --g0 pt_765271 CSV_IS_R247a 154 1.25176 1180.94, --g0 pt_765273 CSV_OOS_R247b 197 1.48894 2961.61, --gemello per le due coppie (comando intero in R247a par. 5). Soglie di (a) contro il NULLO PER PERMUTAZIONE (R247a par. 6, classe 769); (b) alla taglia vera = [DERIVATO lineare], la taglia e di Claudio.
