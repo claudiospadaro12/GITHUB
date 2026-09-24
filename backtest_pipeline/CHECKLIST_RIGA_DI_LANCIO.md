@@ -35257,3 +35257,11 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 📐 CLASSE 750 — **il file che dichiara "l'archivio non si mescola" in un paragrafo e lo mescola in un altro**
 - **Caso (24/09, R245a)**: il par. 4 dice che con G0-GIALLO/ROSSO *"i numeri d'archivio NON si mescolano"*, mentre il par. 9 (confronto A9) mette il centro di R245 contro l'archivio a EmaSlow 40/60 senza condizioni. Parente della classe 742: una regola vale solo se la applica ogni paragrafo del file.
 - **Regola**: ogni confronto con l'archivio va **condizionato all'esito G0** e si scrive `[NON CONFRONTABILE]` se G0 non e' verde.
+
+## ⏱️ CLASSE 751 — **il tempo scalato PER FILE fra round con passate per file diverse, su una macchina con UN SOLO agente**
+- **Caso (24/09, riga R245)**: stima "~11 min al ritmo di R88" (altro EA, altra macchina) e tetto "~54 min" = 6 x (18 min / 2 file di R240). Ma R240 aveva 4 passate per file e R245 ne ha 14, e il log del tester di R240 dice che su `DESKTOP-H4D7CAJ` gira **un solo agente** ("Core 1", "local 2 tasks"): le passate vanno **in serie**. Al ritmo per passata di R240 sarebbero ~3 ore. La soglia "non fermare prima di 60" reggeva solo perche' due errori si compensavano.
+- **Regola**: prima di scalare un tempo si legge in un log del tester della macchina bersaglio `local N tasks` e l'elenco dei Core. Con un solo agente si scala **per passata**, e si preferiscono i tempi dello **stesso EA sulla stessa macchina** (qui R196A-R200E del 21/09).
+
+## 🧬 CLASSE 752 — **la riga costruita per COPIA eredita le protezioni della domanda VECCHIA, non quelle della nuova**
+- **Caso (24/09, riga R245)**: copiata da R240, che non aveva ancore di riproduzione e quindi non portava il controllo della classe 166 (EA e include scaricati dal RAMO `lavoro`, non dal pin: `walkforward_generico.ps1` r.264). R245 si legge solo col cancello G0 (32 celle d'ancora): senza la 166, un commit sul ramo fra approvazione e lancio farebbe leggere un G0-ROSSO come "deriva del motore" con un binario diverso da quello dichiarato.
+- **Regola**: quando si copia una riga, si elencano le protezioni che la **domanda nuova** richiede (ancora -> 166 con SHA256 dopo ogni job) e si controlla che ci siano. E' l'inverso della classe "residui della copia".
