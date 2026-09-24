@@ -34741,3 +34741,74 @@ che nel file prova è *"si replica RIDOTTO"* — **spariva**. E il foglio è que
 **per primo**.
 **Regola**: un riassunto operativo **non ridefinisce le soglie**: le **cita**, col rimando al file che
 le ha congelate.
+
+---
+
+# 🧱 QUATTRO CLASSI DAL CANCELLO SU R242 — e la prima **l'ho commessa io nel brief all'agente**
+
+Numeri del COORDINATORE (classe 662).
+
+## 🎭 CLASSE 718 — **il PRIOR d'archivio preso da un sottoinsieme PIÙ LARGO di quello che il round misura**
+
+### Il fatto
+Ho scritto, nel brief e in chat: *"il motore ha **0 celle positive su 18 con n=253**, cioè un campione
+pieno"*. 🔴 **È il sottoinsieme A DUE LATI.** Lo stesso CSV, spaccato per lato (riaperto e ricontato):
+
+| sottoinsieme | sopra 1,00 | PF | n med | DD med | DD max |
+|---|---|---|---:|---:|---:|
+| **due lati** *(quello che avevo citato)* | **0/18** | 0,828-0,992 | 253 | 17,04% | 20,30% |
+| **LONG only** | **0/18** | 0,716-0,947 | **148** | 21,32% | 23,95% |
+| **SHORT only** | 🟢 **17/18** | 0,991-**1,187** | 107 | **8,81%** | 9,31% |
+
+👉 **I due lati fanno 0/18 e 17/18.** Il numero a due lati è **vero e non descrive il motore**.
+🔴 E su quel numero avevo costruito **la domanda stessa** che ho dato al cancello (*"viola la regola
+del 19/08 su un motore senza edge?"*): **la premessa era falsa.** `ABTG_MaxMinNotte` sul DAX ha una
+sedia — `770411` — **che sta operando la challenge adesso**.
+🔴 **Conseguenza sul metro, e andava nelle due direzioni opposte**: il `DD atteso 11,1%` stava in
+tutti e due i file ed era **sottostimato sul long** (vero ~13,9%) e **sovrastimato 2,4 volte sullo
+short** (vero ~4,7%). Sullo short la frase era **rovesciata**: *"mi aspetto di NON passare il cancello
+del 10%"* quando la cella appaiata ne predice il passaggio **con margine ampio**.
+
+**La regola**: l'attesa si calcola sul sottoinsieme **IDENTICO alla configurazione pinnata** — stesso
+lato, stesso buffer, stesso TP — e **si dichiara quale sottoinsieme è**. Un prior preso più largo non
+è conservativo: è **un altro esperimento**.
+
+## 🎯 CLASSE 719 — **la soglia NON confrontata con la predizione dell'IPOTESI ALTERNATIVA, quando il round esiste proprio per quell'ipotesi**
+
+R242 nasce da: *"il risultato negativo d'archivio poteva essere un artefatto del COSTO"*. Allora
+**quanto vale il PF se si toglie SOLO il pedaggio?** Il cancello l'ha calcolato (`c = spread/stop`,
+trasporto `×(1+c_a)/(1-c_a)×(1-c_n)/(1+c_n)` = **×1,078**):
+
+| lato | archivio appaiato | predizione della sola rimozione del pedaggio | soglia dichiarata | margine |
+|---|---:|---:|---:|---:|
+| LONG | 0,7302 · migliore 0,9471 | **1,021** | 1,10 | 🟢 **+0,08** |
+| SHORT | **1,18742** | **1,2805** | 1,29 | 🔴 **+0,01** |
+
+🔴 Sullo short **la soglia coincideva con l'alternativa**: un 1,28-1,30 sarebbe stato spiegato per
+intero **dalla rimozione del pedaggio**, che non è la domanda del round. **Classe 178 quasi alla
+lettera.** ✅ Alzata a **1,38**, più una fascia dichiarata **1,19-1,38 = "ZONA DEL PEDAGGIO"**.
+🟢 **E la difesa del round diventa VERA solo con questa aritmetica**: scritta senza il numero
+(*"potrebbe essere un artefatto"*) **era un aggiramento comodo**. Col numero, sul long, l'alternativa
+**non cade nella banda**.
+
+**La regola**: se un round nasce da *"il vecchio risultato poteva essere un artefatto di X"*, **il
+numero che X predice si CALCOLA e si SCRIVE**, e la soglia deve starci sopra di un margine
+dichiarato. Se ci coincide, **il round non può rispondere alla propria domanda**.
+
+## 🔍 CLASSE 720 — **il controllo dichiarato di cui non si è calcolata la SENSIBILITÀ**
+
+I file dicevano che *"il controllo vero è la monotonia di `n`"* contro un pavimento che morde in modo
+differenziale. 🔴 Calcolato: perché `n(H=18)` scenda sotto `n(H=15)` il pavimento dovrebbe togliere
+**8,8% (long) / 10,4% (short)** contro il **3,9%** dichiarato. 👉 **Il controllo è cieco fino a ~2,3-2,7
+volte il guasto che dovrebbe sorvegliare.**
+**La regola**: un controllo si dichiara **con la sua soglia di rilevabilità**. Senza, non è un
+controllo: è una **rassicurazione**.
+
+## ➖ CLASSE 721 — **l'inerzia NON DIFFERENZIALE scritta come rischio invece che come DILUIZIONE**
+
+L'artefatto del lunedì (box che inizia di domenica, DAX chiuso) colpisce **tutte e sette** le celle in
+modo **identico**. 🟢 Quindi **non distorce l'asse: comprime il contrasto** e spinge verso il nullo.
+👉 **Può NASCONDERE un altopiano, non inventarlo.**
+**La regola**: quando un artefatto colpisce **tutte** le celle allo stesso modo, **la direzione
+dell'errore è informazione** e va scritta. Chiamarlo "rischio" senza dire il verso fa buttare un round
+sano — o fa temere un falso positivo che quella meccanica **non può produrre**.

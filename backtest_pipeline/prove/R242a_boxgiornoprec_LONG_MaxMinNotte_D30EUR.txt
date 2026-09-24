@@ -166,10 +166,33 @@
 #    RESIDUO DICHIARATO: i lunedi' con forchetta grossa (> 68 idx)
 #    passano lo stesso e restano inerti. Stima [NON MISURATA] 1-3% delle
 #    giornate. Non so chiuderla senza toccare il codice, e non lo faccio.
+#    >>> MA LA DIREZIONE DELL'ERRORE VA SCRITTA, ed e' la meta'
+#        rassicurante: l'inerzia del lunedi' e' ***NON DIFFERENZIALE***.
+#        Tutte e sette le celle ricevono lo STESSO box, quindi o il
+#        pavimento lo toglie a tutte e sette, o tutte e sette fanno le
+#        STESSE operazioni. Nel secondo caso quelle operazioni aggiungono
+#        P/L IDENTICO a ogni cella: ***comprimono il contrasto fra celle,
+#        spingendo verso il NULLO***. Il lunedi' puo' NASCONDERE un
+#        altopiano, non puo' INVENTARLO. <<<
 #  PREZZO DEL PAVIMENTO, cella per cella (stima [DERIVATA], range
-#  giornalieri lognormali con sigma 0,35): scarta lo 0,0% delle giornate
-#  a H=0 e il ***3,9%*** a H=18. Monotono e piccolo, ma NON nullo:
-#  il controllo e' nel CSV, sulla colonna Trades (par. 8).
+#  giornalieri lognormali con sigma 0,35): scarta lo 0,3% delle giornate
+#  a H=0 e il ***3,7-3,9%*** a H=18 (gia' sottratto dalla colonna "n
+#  atteso" del par. 8). Piccolo, ma ***DIFFERENZIALE PER COSTRUZIONE***:
+#  un box da 6h e' piu' stretto di uno da 24h, quindi il pavimento a 68
+#  idx morde le celle alte dell'asse e non quelle basse. Le celle si
+#  confrontano quindi su popolazioni di giornate leggermente diverse.
+#  >>> E QUANTO VEDE IL CONTROLLO DICHIARATO? L'HO CALCOLATO, e la prima
+#      stesura non l'aveva fatto. Perche' n(H=18) scenda sotto n(H=15)
+#      il pavimento dovrebbe togliere l'***8,8%*** a H=18 invece del
+#      3,9%. Cioe': ***la monotonia di n e' CIECA fino a ~2,3 volte il
+#      valore che dovrebbe sorvegliare.*** E' un controllo GROSSOLANO,
+#      non "il controllo vero": prende un guasto del pavimento, non una
+#      sua deriva. <<<
+#  LA MISURA ESATTA NON E' DISPONIBILE, e si dichiara: il conteggio
+#  giusto sarebbe la riga di log r.330 ("box stretto (lateralita'):
+#  niente trade.", e InpVerbose=true e' pinnato) contata per cella -- ma
+#  un CSV di OTTIMIZZAZIONE non porta il log per passata. Quindi questo
+#  resta un ***BUCO***, non un controllo (par. 15).
 #
 #  --- 8. L'ATTESA, DICHIARATA PRIMA DEI NUMERI ------------------------
 #  ANCORE, tutte con la fonte:
@@ -234,19 +257,62 @@
 #      celle va riletto prima del PF. <<<
 #
 #  PF ATTESO: ***NESSUNO, e la direzione dell'archivio e' NEGATIVA.***
-#  Riaperto io oggi lo stesso CSV: le 18 celle A DUE LATI del box
-#  notturno su D30EUR fanno ***0 su 18 sopra PF 1,00*** (da 0,828 a
-#  0,992), con n mediano 253 -- cioe' ***sopra il pavimento dei 150:
-#  quel merito NON e' sospeso, e' misurato ed e' negativo***.
-#  DD mediano 17,0% e massimo 20,3% a InpRiskPercent=1.
+#  >>> CORREZIONE DEL 24/09 (classe nuova "prior da sottoinsieme piu'
+#      largo del round"): la prima stesura citava le 18 celle A DUE LATI
+#      (0 su 18 sopra 1,00, da 0,828 a 0,992, n mediano 253, DD mediano
+#      17,0%). ***QUEL SOTTOINSIEME NON DESCRIVE QUESTO ROUND***, che e'
+#      a UN LATO. Sullo stesso CSV i due lati NON si assomigliano: il
+#      long fa 0/18 e lo short fa 17/18. Qui sotto c'e' solo il LONG. <<<
+#  Riaperto io oggi lo stesso CSV, sottoinsieme ***long-only***, 18 celle
+#  (buffer 500/1000/1500 x TP2 1,5-4,0):
+#    ***0 su 18 sopra PF 1,00***, da ***0,7157 a 0,9471***, PF mediano
+#    ***0,7522***; n mediano ***148,5***; DD mediano ***21,32%***,
+#    massimo ***23,95%*** a InpRiskPercent=1.
+#  CELLA APPAIATA (stesso buffer 1000 e stesso TP2 3,0 che questo file
+#  pinna, che e' il confronto onesto): PF ***0,7302***, DD ***21,354%***,
+#  n ***147***.
+#  >>> Il merito del lato long NON e' sospeso: e' misurato ed e'
+#      NEGATIVO, e ***piu' negativo*** di quanto dicesse la prima
+#      stesura (0,73 appaiato, non 0,99). L'n mediano 148,5 sta pero'
+#      appena SOTTO il pavimento dei 150: cella per cella quel verdetto
+#      e' al bordo, ed e' una ragione in piu' per misurare, non meno. <<<
 #  >>> SE IL SEGNALE E' MORTO DI SUO, ALLARGARE LO STOP NON LO RESUSCITA:
 #      PERDE PIU' LENTAMENTE. E' L'ESITO PIU' PROBABILE DI QUESTO ROUND,
 #      ed e' scritto PRIMA dei numeri apposta. <<<
 #
-#  DD ATTESO: 17,0% x 0,65 = ***11,1%*** (banda 7-15%). E lo dico
-#  chiaro: ***mi aspetto di NON passare il cancello di rischio del 10%.***
+#  >>> IL CONTRO-ESEMPIO OBBLIGATORIO (regola del 10/09), CHE NELLA
+#      PRIMA STESURA MANCAVA, ED E' LA DIFESA VERA DI QUESTO ROUND. <<<
+#  Questo round esiste perche' l'archivio girava SOTTO la frontiera del
+#  costo (22,8x). L'ipotesi alternativa a "il segno e' cambiato" e'
+#  quindi: ***abbiamo solo tolto il pedaggio, e il segnale e' identico.***
+#  Quel numero si CALCOLA, e senza calcolarlo la difesa sarebbe un
+#  aggiramento comodo invece che una misura.
+#    costo per operazione in unita' di R:  c = spread / stop
+#      archivio (stop 1,5 x ATR M15 = 38,7 idx):  c = 1,70/38,7 = 4,393%
+#      cella H=0  (stop 272,5 idx):               c = 1,70/272,5 = 0,624%
+#      cella H=18 (stop 146,2 idx):               c = 1,70/146,2 = 1,163%
+#    trasporto  PF_nuovo = PF_arch x (1+c_a)/(1-c_a) x (1-c_n)/(1+c_n)
+#      archivio -> H=0 : ***x 1,0784***   archivio -> H=18: x 1,0668
+#    LIMITE SUPERIORE DICHIARATO: il conto assume vincita media = perdita
+#    media = 1R. Con TP1 a 1R e TP2 a 3R la vincita media e' > 1R, quindi
+#    l'effetto vero del costo e' PIU' PICCOLO di questo. E' un tetto
+#    GENEROSO verso il round, apposta.
+#  CHE COSA PREDICE L'IPOTESI ALTERNATIVA SU QUESTO LATO:
+#    cella appaiata 0,7302 -> ***0,787***
+#    migliore cella long d'archivio 0,9471 -> ***1,021***  (il tetto)
+#  >>> LA SOGLIA DI QUESTO FILE E' 1,10, E STA SOPRA IL TETTO 1,02 DI
+#      ALMENO 0,08. Quindi un PASS su questo lato NON e' spiegabile con
+#      la sola rimozione del pedaggio: l'alternativa NON cade dentro la
+#      banda. La difesa "il vecchio risultato poteva essere un artefatto
+#      di costo" e' QUI una difesa vera, e lo e' per questo numero. <<<
+#
+#  DD ATTESO: ***13,9%*** = 21,354% (cella appaiata long) x 0,65,
+#  banda 10-18% [DERIVATO]. La prima stesura scriveva 11,1% partendo dal
+#  DD a DUE LATI (17,0%): era il sottoinsieme sbagliato e SOTTOSTIMAVA.
+#  E lo dico chiaro: ***mi aspetto di NON passare il cancello di rischio
+#  del 10%, e di non passarlo di parecchio.***
 #  La soglia resta quella di casa e non si muove per far entrare il
-#  candidato. Se esce PF buono con DD 11%, il verdetto e' "geometria con
+#  candidato. Se esce PF buono con DD 14%, il verdetto e' "geometria con
 #  edge, TAGLIA da rifare", non "promosso".
 #
 #  VERIFICA DEL LOTTO (il tranello che falserebbe il DD): rischio
@@ -290,10 +356,18 @@
 #    DD > 10,0% -> rilievo di RISCHIO, anche con PF bello.
 #    DD > 20,0% su una cella qualsiasi -> la geometria e' bocciata per
 #      rischio a prescindere dal PF.
-#  CONFRONTO COL DEFAULT, obbligatorio: se la cella centrale
-#  dell'altopiano non batte la geometria d'archivio (box notturno, due
-#  lati, PF max 0,992) di almeno 0,10 di PF, la risposta onesta e'
-#  "non c'e' un guadagno fuori dal rumore".
+#  CONFRONTO COL DEFAULT, obbligatorio -- E IL DEFAULT E' DEL MIO LATO.
+#  La prima stesura confrontava con "box notturno, DUE LATI, PF max
+#  0,992": mele con pere. Il default di un round long-only e' la
+#  geometria d'archivio ***long-only***:
+#    cella appaiata (buffer 1000, TP2 3,0): PF ***0,7302***
+#    migliore cella long d'archivio:        PF ***0,9471***
+#  Se la cella centrale dell'altopiano non batte 0,9471 (la piu'
+#  generosa delle due) di almeno 0,10 di PF -- cioe' se non arriva a
+#  ***1,047*** -- non c'e' un guadagno fuori dal rumore.
+#  >>> E il vincolo che MORDE resta 1,10, non 1,047, perche' 1,10 e'
+#      anche la soglia che sta sopra il tetto dell'ipotesi di solo-costo
+#      (1,02, par. 8). Si applica LA PIU' ALTA DELLE DUE: ***1,10***. <<<
 #
 #  --- 10. CHE COSA QUESTO ROUND NON PUO' DIRE ------------------------
 #  1. NON separa "stop piu' largo" da "gestione ri-scalata". TP1, TP2,
@@ -393,9 +467,20 @@
 #     tabella del par. 8, la tabella e' sbagliata, non il round.
 #  2. Il sigma 0,35 usato per stimare quanto scarta InpMinBoxPts e'
 #     [NON MISURATO]: e' un valore tipico per i range giornalieri, non
-#     un numero di casa. Il controllo vero e' la monotonia di n.
+#     un numero di casa. E il controllo dichiarato (monotonia di n) e'
+#     ***CIECO fino all'8,8%*** contro un 3,9% atteso (par. 7): quindi
+#     una deriva del pavimento fra il 4% e l'8,8% passa INOSSERVATA e
+#     resta un buco aperto. La misura esatta (conteggio della riga di
+#     log r.330 per cella) NON e' leggibile da un CSV di ottimizzazione.
 #  3. I lunedi' con forchetta grossa restano inerti (par. 7), quota
-#     [NON MISURATA].
+#     [NON MISURATA] -- ma l'inerzia e' NON DIFFERENZIALE e spinge verso
+#     il nullo: dilusce, non falsifica (par. 7).
+#  5. Il TF non e' mai stato cambiato su questo motore: M15 e basta, qui
+#     e in tutto l'archivio. Se il verdetto di questo round dovesse
+#     ARCHIVIARE il lato long, il certificato di morte del 09/09 non
+#     sarebbe completo: mancherebbe il punto 5 (TF cambiato almeno una
+#     volta). In quel caso il verdetto corretto e' "NON ANCORA
+#     MISURATO SU ALTRI TF", non "morto".
 #  4. La prova di regime 2010-2018 e' bloccata dal CANCELLO ZERO _EXT
 #     (par. 11b). Non e' un buco di questo round, ma e' il conto che
 #     resta aperto.

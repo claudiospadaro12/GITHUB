@@ -12,7 +12,10 @@
 #  I due file sono la REGOLA DEI DUE LATI firmata il 25/08 (bloccante su
 #  Nasdaq/DAX/Dow). *** NON SONO COPIE ***: ogni riga di codice e ogni
 #  numero che descrive IL LATO sono stati riaperti e ricalcolati per lo
-#  SHORT (classe 690/716). Qui dentro non c'e' un numero di long.
+#  SHORT (classe 690/716). Nessun numero di questo file e' ereditato dal
+#  long: gli unici numeri di long che compaiono stanno al par. 15 pt. 5,
+#  etichettati, e servono SOLO a mostrare perche' le due soglie dei
+#  gemelli sono diverse.
 #  >>> E il DAX e' esattamente il simbolo dove questo conta: la cella
 #      viva 770411 e' SHORT-ONLY, e sullo stesso CSV d'archivio il lato
 #      long fa PIU' operazioni ma PF piu' basso. I due lati di questo
@@ -192,10 +195,32 @@
 #    sotto i 68 idx: il pavimento lo scarta.
 #    RESIDUO DICHIARATO: i lunedi' con forchetta grossa (> 68 idx)
 #    passano lo stesso e restano inerti. Stima [NON MISURATA] 1-3%.
+#    >>> MA LA DIREZIONE DELL'ERRORE VA SCRITTA, ed e' la meta'
+#        rassicurante: l'inerzia del lunedi' e' ***NON DIFFERENZIALE***.
+#        Tutte e sette le celle ricevono lo STESSO box, quindi o il
+#        pavimento lo toglie a tutte e sette, o tutte e sette fanno le
+#        STESSE operazioni, che aggiungono P/L IDENTICO a ogni cella:
+#        ***comprimono il contrasto fra celle, spingendo verso il
+#        NULLO***. Il lunedi' puo' NASCONDERE un altopiano, non
+#        INVENTARLO. <<<
 #  PREZZO DEL PAVIMENTO, cella per cella (stima [DERIVATA], range
-#  giornalieri lognormali con sigma 0,35): scarta lo 0,0% delle giornate
-#  a H=0 e il ***3,9%*** a H=18. Monotono e piccolo, ma NON nullo: il
-#  controllo e' nel CSV, sulla colonna Trades (par. 8).
+#  giornalieri lognormali con sigma 0,35): scarta lo 0,3% delle giornate
+#  a H=0 e il ***3,7-3,9%*** a H=18 (gia' sottratto dalla colonna "n
+#  atteso" del par. 8). Piccolo, ma ***DIFFERENZIALE PER COSTRUZIONE***:
+#  un box da 6h e' piu' stretto di uno da 24h, quindi il pavimento a 68
+#  idx morde le celle alte dell'asse e non quelle basse. Le celle si
+#  confrontano su popolazioni di giornate leggermente diverse.
+#  >>> E QUANTO VEDE IL CONTROLLO DICHIARATO? L'HO CALCOLATO, e la
+#      prima stesura non l'aveva fatto. Perche' n(H=18) scenda sotto
+#      n(H=15) il pavimento dovrebbe togliere il ***10,4%*** a H=18
+#      invece del 3,9%. Cioe': ***la monotonia di n e' CIECA fino a ~2,7
+#      volte il valore che dovrebbe sorvegliare.*** E' un controllo
+#      GROSSOLANO, non "il controllo vero". <<<
+#  LA MISURA ESATTA NON E' DISPONIBILE, e si dichiara: il conteggio
+#  giusto sarebbe la riga di log r.330 ("box stretto (lateralita'):
+#  niente trade.", e InpVerbose=true e' pinnato) contata per cella -- ma
+#  un CSV di OTTIMIZZAZIONE non porta il log per passata. Quindi questo
+#  resta un ***BUCO***, non un controllo (par. 15).
 #
 #  --- 8. L'ATTESA, DICHIARATA PRIMA DEI NUMERI -----------------------
 #  ANCORE, tutte con la fonte:
@@ -269,27 +294,92 @@
 #      pavimento sta mordendo piu' del 3,9% previsto e il confronto fra
 #      celle va riletto prima del PF. <<<
 #
-#  PF ATTESO: ***NESSUNO, e la direzione dell'archivio e' NEGATIVA.***
-#  Riaperto io oggi lo stesso CSV: le 18 celle A DUE LATI del box
-#  notturno su D30EUR fanno 0 su 18 sopra PF 1,00 (da 0,828 a 0,992),
-#  n mediano 253, DD mediano 17,0% e massimo 20,3% a InpRiskPercent=1.
-#  IL NUMERO CHE RIGUARDA QUESTO LATO, letto sul suo sottoinsieme:
-#  la miglior cella ***short-only*** del file e' PF ***1,18742***, DD
-#  7,2851%, n=107 (buffer 1000, TP2 3,0) -- ed e' anche la miglior
-#  cella dell'intero file. REGISTRO_TEST r.637 la riporta identica.
+#  PF ATTESO -- E QUI LA PRIMA STESURA SI ERA SBAGLIATA DI GROSSO.
+#  >>> CORREZIONE DEL 24/09 (classe nuova "prior da sottoinsieme piu'
+#      largo del round"). La prima stesura apriva con "0 su 18 sopra PF
+#      1,00" e con "esiste UNA cella d'archivio positiva". Il primo
+#      numero e' delle celle A DUE LATI, che NON descrivono un round a
+#      un lato; il secondo e' ***FALSO***. Ricontati oggi sul CSV: <<<
+#    SOTTOINSIEME ***SHORT-ONLY***, 18 celle (buffer x TP2):
+#      ***17 su 18 sopra PF 1,00***, da 0,9909 a 1,18742,
+#      PF mediano ***1,0915***; n mediano ***107***;
+#      DD mediano ***8,81%***, massimo ***9,31%*** a InpRiskPercent=1.
+#      buf 500 : 1,048 1,064 1,093 1,097 1,092 1,092
+#      buf 1000: 1,114 1,157 1,184 ***1,187*** 1,186 1,186
+#      buf 1500: 0,991 1,051 1,063 1,067 1,076 1,076
+#  >>> NON E' UNA CELLA: E' UN ALTOPIANO. E REGISTRO_TEST r.666 lo
+#      diceva gia' -- la cella viva 770411 e' annotata "scelto
+#      (centrale del plateau)". Avevo letto "unica viva" (che nel
+#      registro vuol dire: l'unico INDICE sopravvissuto dei quattro) e
+#      l'avevo trasformato in "unica cella positiva". <<<
+#  CELLA APPAIATA (stesso buffer 1000 e stesso TP2 3,0 che questo file
+#  pinna, cioe' il confronto onesto): PF ***1,18742***, DD ***7,2851%***,
+#  n ***107***. REGISTRO_TEST r.637 la riporta identica. E' il centro
+#  della riga buffer 1000, non un picco che sporge: le vicine fanno
+#  1,184 e 1,186. ***Quindi 1,19 e' il riferimento GIUSTO*** -- ma va
+#  letto come centro di un altopiano, non come una fortuna isolata.
 #  >>> QUINDI SULLO SHORT L'ASTICELLA E' PIU' ALTA CHE SUL LONG: il
 #      riferimento da battere non e' 0,99, e' ***1,19***. Un PF di 1,12
 #      su questo lato NON sarebbe una scoperta: sarebbe un
 #      PEGGIORAMENTO della geometria che gia' abbiamo. <<<
 #  >>> E vale lo stesso avvertimento di casa: se il segnale e' morto di
 #      suo, allargare lo stop non lo resuscita, perde piu' lentamente.
-#      E' l'esito piu' probabile, ed e' scritto PRIMA dei numeri. <<<
+#      Su QUESTO lato pero' il segnale NON e' morto (17/18), quindi
+#      l'esito piu' probabile non e' "perde piu' lentamente": e'
+#      ***"guadagna piu' o meno come prima"***. Ed e' il caso piu'
+#      insidioso dei due -- vedi il contro-esempio qui sotto. <<<
 #
-#  DD ATTESO: 17,0% x 0,65 = ***11,1%*** (banda 7-15%). E lo dico
-#  chiaro: mi aspetto di NON passare il cancello di rischio del 10%.
+#  >>> IL CONTRO-ESEMPIO OBBLIGATORIO (regola del 10/09), CHE NELLA
+#      PRIMA STESURA MANCAVA, E CHE SU QUESTO LATO CAMBIA LA SOGLIA. <<<
+#  Questo round esiste perche' l'archivio girava SOTTO la frontiera del
+#  costo (22,8x). L'ipotesi alternativa a "il segno e' cambiato" e'
+#  quindi: ***abbiamo solo tolto il pedaggio, e il segnale e' identico.***
+#  Quel numero si CALCOLA. Senza calcolarlo, "il vecchio risultato era un
+#  artefatto di costo" e' un aggiramento comodo, non una difesa.
+#    costo per operazione in unita' di R:  c = spread / stop
+#      archivio (stop 1,5 x ATR M15 = 38,7 idx):  c = 1,70/38,7 = 4,393%
+#      cella H=0  (stop 272,5 idx):               c = 1,70/272,5 = 0,624%
+#      cella H=18 (stop 146,2 idx):               c = 1,70/146,2 = 1,163%
+#    trasporto  PF_nuovo = PF_arch x (1+c_a)/(1-c_a) x (1-c_n)/(1+c_n)
+#      archivio -> H=0 : ***x 1,0784***   archivio -> H=18: x 1,0668
+#    LIMITE SUPERIORE DICHIARATO: il conto assume vincita media =
+#    perdita media = 1R. Con TP1 a 1R e TP2 a 3R la vincita media e'
+#    > 1R, quindi l'effetto vero del costo e' PIU' PICCOLO. E' un tetto
+#    generoso verso il round, apposta.
+#  CHE COSA PREDICE L'IPOTESI ALTERNATIVA SU QUESTO LATO:
+#    cella appaiata 1,18742 -> ***1,2805***  (H=0)   1,2667  (H=18)
+#    mediana dell'altopiano 1,0915 -> 1,1770 (H=0)
+#  >>> E QUI STA IL PROBLEMA CHE HA CAMBIATO LA SOGLIA DI QUESTO FILE.
+#      La prima stesura chiedeva ***1,29*** (= 1,19 + 0,10 di margine
+#      "fuori dal rumore"). Ma l'ipotesi alternativa predice ***1,28***.
+#      Margine: ***0,01***, cioe' MENO dell'errore del modello che lo
+#      produce. Un risultato di 1,28-1,30 sarebbe spiegato per intero da
+#      "abbiamo tolto il pedaggio e non e' successo altro" -- che NON e'
+#      la domanda di questo round. Con la soglia a 1,29 il round non
+#      puo' rispondere alla propria domanda (classe: l'alternativa cade
+#      DENTRO la banda). <<<
+#  >>> SOGLIA CORRETTA DI QUESTO LATO: ***1,38*** = 1,28 (predizione
+#      dell'ipotesi di solo-costo) + 0,10 (lo stesso margine che il file
+#      usa dappertutto). E si noti la direzione: la soglia SALE, non
+#      scende. Non si ammorbidisce un criterio per far entrare un
+#      candidato -- si alza perche' quello vecchio non discriminava. <<<
+#
+#  DD ATTESO: ***4,7%*** = 7,2851% (cella appaiata short) x 0,65,
+#  banda 3-7% [DERIVATO]. La prima stesura scriveva 11,1% partendo dal
+#  DD a DUE LATI (17,0%): era il sottoinsieme sbagliato e SOVRASTIMAVA
+#  di circa 2,4 volte -- e con esso la frase "mi aspetto di NON passare
+#  il cancello di rischio del 10%", che era l'attesa ROVESCIATA.
+#  >>> L'ATTESA GIUSTA E' L'OPPOSTA: ***mi aspetto di PASSARE il
+#      cancello del 10% con margine ampio***, perche' lo short di questo
+#      motore ha DD massimo d'archivio 9,31% gia' a rischio 1%. Scriverlo
+#      adesso conta: se il round torna con DD ~5%, quello NON e' una
+#      bella sorpresa da festeggiare, e' ***esattamente il previsto***, e
+#      non aggiunge una virgola alla prova che la geometria sia
+#      migliore. Il DD basso qui non e' un merito del round nuovo: e'
+#      una proprieta' gia' nota del lato short. <<<
 #  La soglia resta quella di casa e non si muove per far entrare il
-#  candidato. Se esce PF buono con DD 11%, il verdetto e' "geometria
-#  con edge, TAGLIA da rifare", non "promosso".
+#  candidato. Se esce PF buono con DD sopra il 10%, il verdetto e'
+#  "geometria con edge, TAGLIA da rifare", non "promosso".
 #
 #  VERIFICA DEL LOTTO (il tranello che falserebbe il DD): rischio
 #  0,65% x 100.000 = 650 EUR; stop piu' largo 272,5 idx x 1,00 EUR/idx
@@ -314,17 +404,28 @@
 #
 #  >>> CHE COSA FA DIRE "IL SEGNO E' CAMBIATO" (e nient'altro lo fa): <<<
 #    TRE CELLE CONTIGUE dell'asse, tutte con n >= 150, tutte con
-#    PF >= ***1,29*** (cioe' 1,19 dell'archivio short + 0,10 di margine
-#    fuori dal rumore -- ed e' la soglia DI QUESTO LATO, piu' alta di
-#    quella del gemello, perche' su questo lato l'archivio ha gia' una
-#    cella positiva), e la cella CENTRALE delle tre con DD <= 10,0%.
+#    PF >= ***1,38***, e la cella CENTRALE delle tre con DD <= 10,0%.
+#    DA DOVE VIENE 1,38 (e perche' NON e' piu' 1,29):
+#      1,28 = quello che predice l'ipotesi "abbiamo solo tolto il
+#             pedaggio, il segnale e' identico" (par. 8)
+#    + 0,10 = il margine fuori dal rumore, lo stesso di tutto il file
+#    = ***1,38***. La soglia DEVE stare sopra la predizione
+#    dell'alternativa, altrimenti non distingue le due spiegazioni.
+#    1,29 (= 1,19 + 0,10, la prima stesura) ci stava sopra di 0,01:
+#    meno dell'errore del modello. Non discriminava.
+#    E' la soglia DI QUESTO LATO, piu' alta di quella del gemello (1,10)
+#    perche' su questo lato l'archivio ha gia' un ALTOPIANO positivo
+#    (17 celle su 18) e quindi c'e' molto piu' da battere.
 #    Il numero che si riporta e' quello della cella CENTRALE.
 #    ***MAI IL PICCO.*** Se la cella migliore sporge e le due vicine no,
 #    il risultato si scrive "NON C'E' UNA CONFIGURAZIONE ROBUSTA", che
 #    e' un risultato e non un fallimento.
 #  CHE COSA LO FALSIFICA:
-#    - zero o una sola cella sopra 1,29 -> picco di rumore, niente.
-#    - celle sopra 1,29 ma con n < 150 -> "non misurato", non "vivo".
+#    - zero o una sola cella sopra 1,38 -> picco di rumore, niente.
+#    - celle sopra 1,38 ma con n < 150 -> "non misurato", non "vivo".
+#    - celle fra 1,19 e 1,38 -> ***ZONA DEL PEDAGGIO***: compatibili con
+#      "abbiamo tolto il costo e basta". Si scrive cosi', per esteso,
+#      e NON si scrive "geometria migliore".
 #    - tutte e sette sotto 1,19 -> ***la geometria del giorno intero e'
 #      PEGGIO del box notturno sullo stesso lato***, e la casella si
 #      chiude con un numero. Questo e' l'esito che l'archivio prevede.
@@ -336,10 +437,19 @@
 #    DD > 20,0% su una cella qualsiasi -> geometria bocciata per rischio
 #      a prescindere dal PF.
 #  CONFRONTO COL DEFAULT, obbligatorio e su questo lato SEVERO: il
-#  default di casa per lo short del DAX NON e' "niente", e' la cella
-#  viva 770411. Se la cella centrale dell'altopiano non batte 1,19 di
-#  almeno 0,10 di PF, la risposta onesta e' ***"il box notturno va
-#  bene, il giorno intero non aggiunge niente"*** -- ed e' un risultato.
+#  default di casa per lo short del DAX NON e' "niente", e' un
+#  ALTOPIANO d'archivio di 17 celle positive su 18 (par. 8), il cui
+#  centro appaiato a questa configurazione fa PF 1,19 con DD 7,29% e
+#  n=107. Se la cella centrale dell'altopiano nuovo non arriva a 1,38,
+#  la risposta onesta e' ***"il box notturno va bene, il giorno intero
+#  non aggiunge niente"*** -- ed e' un risultato.
+#  >>> E VA DETTO UNA VOLTA IN CHIARO: il default d'archivio qui gira a
+#      corr OFF, esattamente come questo round (tutte e 72 le celle del
+#      CSV hanno InpUseCorrelation=0, verificato). Quindi il confronto
+#      e' mele con mele. La cella VIVA 770411 invece gira a corr ON e
+#      fa PF 2,05 / DD 3,1% / n=41 (REGISTRO r.666): ***quella non e' il
+#      metro di questo round***, ed e' molto piu' alta di 1,38. Batterla
+#      non e' in programma qui, e non si deve far finta di provarci. <<<
 #
 #  --- 10. CHE COSA QUESTO ROUND NON PUO' DIRE ------------------------
 #  1. NON separa "stop piu' largo" da "gestione ri-scalata". TP1, TP2,
@@ -436,16 +546,29 @@
 #     per barra. Se il CSV desse stop realizzati molto diversi dalla
 #     tabella del par. 8, la tabella e' sbagliata, non il round.
 #  2. Il sigma 0,35 usato per stimare quanto scarta InpMinBoxPts e'
-#     [NON MISURATO]. Il controllo vero e' la monotonia di n.
+#     [NON MISURATO]. E il controllo dichiarato (monotonia di n) e'
+#     ***CIECO fino al 10,4%*** contro un 3,9% atteso (par. 7): una
+#     deriva del pavimento fra il 4% e il 10,4% passa INOSSERVATA e
+#     resta un buco aperto. La misura esatta (conteggio della riga di
+#     log r.330 per cella) NON e' leggibile da un CSV di ottimizzazione.
 #  3. I lunedi' con forchetta grossa restano inerti (par. 7), quota
-#     [NON MISURATA].
+#     [NON MISURATA] -- ma l'inerzia e' NON DIFFERENZIALE e spinge verso
+#     il nullo: diluisce, non falsifica (par. 7).
 #  4. La prova di regime 2010-2018 e' bloccata dal CANCELLO ZERO _EXT.
-#  5. ASIMMETRIA FRA I GEMELLI, dichiarata: su questo lato esiste una
-#     cella d'archivio POSITIVA (PF 1,19) e sul lato long no. Quindi il
-#     round non e' simmetrico: sul long basta superare 1,10, qui serve
-#     1,29. Non e' un doppio standard, e' lo stesso standard applicato
-#     a due riferimenti diversi -- ma chi legge il referto deve avere
-#     le due soglie davanti, altrimenti confrontera' mele con pere.
+#  5. ASIMMETRIA FRA I GEMELLI, dichiarata: su questo lato l'archivio ha
+#     un ALTOPIANO di 17 celle positive su 18 (centro appaiato PF 1,19)
+#     e sul lato long ha 0 su 18 (centro appaiato PF 0,73). Quindi il
+#     round non e' simmetrico: sul long serve 1,10, qui serve ***1,38***.
+#     Non e' un doppio standard, e' lo stesso standard applicato a due
+#     riferimenti diversi E alla predizione dell'ipotesi di solo-costo,
+#     che sui due lati vale 1,02 e 1,28 -- ma chi legge il referto deve
+#     avere le due soglie davanti, altrimenti confrontera' mele e pere.
+#  6. Il TF non e' mai stato cambiato su questo motore: M15 e basta, qui
+#     e in tutto l'archivio. Se il verdetto di questo round dovesse
+#     ARCHIVIARE la geometria, il certificato di morte del 09/09 non
+#     sarebbe completo: mancherebbe il punto 5 (TF cambiato almeno una
+#     volta). In quel caso il verdetto corretto e' "NON ANCORA MISURATO
+#     SU ALTRI TF", non "morto".
 # =====================================================================
 
 @SIMBOLO  D30EUR
