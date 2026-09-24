@@ -1,0 +1,121 @@
+# =====================================================================
+#  SONDA BOX D30EUR -- IL CENSIMENTO DEL BOX, GIORNO PER GIORNO
+#  Strumento: mql5/Scripts/ABTG_Notte_Study.mq5 (gia' in casa, 05/08)
+#  Guidato da: backtest_pipeline/righe/SONDA_BOX_D30EUR.ps1
+#
+#  QUESTO FILE NON LANCIA NIENTE. Bersaglio previsto: PC DI BACKTEST
+#  DESKTOP-H4D7CAJ, terminale unico, conto DEMO 50503392.
+#  NON il VPS VMI3047753 e nessuno dei suoi sei terminali: FTMO
+#  541452707 (C:\FTMO, sei sedie vive), REALE 10105439 (C:\BCM_Reale),
+#  100k 50504263, piccolo 50503392, manuale 50503635, banco 50504400
+#  (C:\MT5_Backtest). Nessun tester, nessun ordine, nessun preset di EA.
+#
+#  --- 1. LA DOMANDA, UNA SOLA --------------------------------------
+#  Lo short di ABTG_MaxMinNotte (R242) riempie 96-130 giornate su ~440,
+#  cioe' il 22-30%. Le altre sette su dieci non fanno niente. Le cause
+#  possibili sono DUE e oggi non sappiamo separarle:
+#    (1) InpMinBoxPts=6800 (68,0 idx) scarta la giornata PRIMA di
+#        piazzare l'ordine  (EA r.328-329);
+#    (2) il pendente non viene toccato entro InpPendingExpiryMin=250 /
+#        InpEntryCutoffHour=12.
+#  >>> QUESTA SONDA MISURA ESATTAMENTE LA (1), giorno per giorno e
+#      cella per cella. La (2) si ricava per DIFFERENZA contro gli n
+#      gia' misurati da R242. <<<
+#
+#  --- 2. PERCHE' UNA SONDA E NON UN ROUND --------------------------
+#  Il file prova di R242 aveva gia' dichiarato questo numero un BUCO:
+#  "la misura esatta non e' estraibile da un CSV di ottimizzazione".
+#  Il motivo e' meccanico e verificato: il driver forza Optimization=1
+#  (walkforward_generico.ps1 r.2013), le passate girano sugli AGENTI, e
+#  li' le Print() non si leggono. La riga di log che conterebbe le
+#  giornate scartate (EA r.330, "box stretto (lateralita'): niente
+#  trade.") non arriva in nessun CSV.
+#  >>> Uno SCRIPT invece gira sul terminale, non sugli agenti: le Print
+#      si leggono e il CSV si scrive. E' la strada giusta, non un
+#      ripiego. <<<
+#
+#  --- 3. COME SI RIPRODUCE IL BOX DI R242 (verificato nel sorgente) -
+#  ABTG_Notte_Study r.90-92:
+#      if(InpNightStartHour <= InpNightEndHour)
+#         return(ora>=InpNightStartHour && ora<InpNightEndHour);
+#      return(ora>=InpNightStartHour || ora<InpNightEndHour);
+#  Il box di R242 va da InpBoxStartHour:00 del giorno D-1 a 00:00 del
+#  giorno D (EA r.178-183: "if(tStart>=tEnd) tStart-=86400").
+#    H=3..18 -> NightStart=H, NightEnd=0  -> ramo 2: ora>=H. ESATTO.
+#    H=0     -> NightStart=0, NightEnd=24 -> ramo 1: ora>=0 && ora<24
+#               = tutto il giorno. ESATTO.
+#  >>> TRAPPOLA EVITATA: con H=0 e NightEnd=0 il ramo 1 darebbe
+#      "ora>=0 && ora<0" = SEMPRE FALSO, cioe' box VUOTO e zero righe.
+#      La sonda usa 24 per quella cella sola, ed e' scritto qui. <<<
+#
+#  --- 4. IL TF NON INTRODUCE UNO SCARTO, ED E' UN CONTO ------------
+#  L'EA calcola il box sul grafico M15; lo script legge M5. Il massimo
+#  di una finestra e' il massimo dei massimi delle sue sottobarre, e 15
+#  e' multiplo di 5: con i bordi sull'ORA TONDA le due misure coincidono
+#  per costruzione. Residuo dichiarato: l'EA trova i bordi con iBarShift
+#  sul TF del grafico, quindi puo' sbagliare di UNA barra M15 (fino a 15
+#  minuti) su un bordo. Su un box da 6-24 ore e' sotto lo 0,5%.
+#
+#  --- 5. L'ATTESA, DICHIARATA PRIMA DEI NUMERI ---------------------
+#  Da R242 (par. 7 dei due file prova), la stima DERIVATA del prezzo del
+#  pavimento era: scarta lo 0,3% delle giornate a H=0 e il 3,7-3,9% a
+#  H=18. MA il controllo di monotonia E' SCATTATO in R242 (n cala fra
+#  H=15 e H=18: long 188->134, short 130->110), e quel controllo e'
+#  cieco fino a 8,8% (long) / 10,4% (short).
+#  ATTESA: quota sotto 6800 punti in CRESCITA MONOTONA lungo l'asse,
+#  da ~0,3% a H=0 fino ad ALMENO 8,8% a H=18.
+#
+#  >>> IL CONTRO-ESEMPIO OBBLIGATORIO (regola del 10/09), e qui e'
+#      affilato perche' l'ipotesi alternativa e' GIA' SOSPETTA: <<<
+#  Un box PIU' STRETTO mette i livelli di rottura PIU' VICINI al prezzo,
+#  quindi dovrebbe far riempire DI PIU', non di meno. Il calo di n a
+#  H=18 va quindi CONTRO l'intuizione, e ha due spiegazioni rivali:
+#    IPOTESI A (la mia): lo scarta il pavimento.
+#       predice sotto-6800 a H=18 >= 8,8%.
+#    IPOTESI B: il pavimento c'entra poco e il calo nasce altrove
+#       (p.es. il box stretto si forma tardi e il pendente vive meno).
+#       predice sotto-6800 a H=18 intorno al 3,9% previsto, o meno.
+#  >>> LE DUE PREDIZIONI NON SI SOVRAPPONGONO: 3,9% contro 8,8% e' un
+#      fattore 2,3. La sonda DISTINGUE. Se esce ~4%, LA MIA LETTURA DI
+#      R242 E' SBAGLIATA e va riscritta -- ed e' un esito che accetto
+#      prima di vedere il numero. <<<
+#
+#  --- 6. IL SECONDO CONTROLLO, CONTRO UN NUMERO SCRITTO DA ALTRI ---
+#  La mediana dell'ampiezza a H=0 (box di 24 ore) deve valere circa
+#  l'ADR: 252,5 idx = ***25.250 punti***, misurato n=52 in
+#  report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par.5, da una catena
+#  diversa da questa.
+#  >>> Se la mediana a H=0 esce lontana da 25.250 (diciamo fuori da
+#      20.000-31.000), allora NON e' il pavimento a essere sbagliato:
+#      e' l'ANCORA ADR, che R242 ha usato per calcolare TUTTI gli stop
+#      attesi e tutta la tabella dei 40x. Sarebbe la scoperta piu'
+#      importante di questa corsa, e va guardata PER PRIMA. <<<
+#
+#  --- 7. E IL TERZO, CHE RIPARA UNO STRUMENTO MIO ------------------
+#  In R242 il mio modello di trasporto di n (cammino senza deriva con
+#  barriera) ha sovrastimato ***14 celle su 14***, e 7 su 7 dello short
+#  sono uscite FUORI dalla banda dichiarata. Con l'ampiezza vera giorno
+#  per giorno quel modello si ricalibra sui dati invece che sulla
+#  teoria. Non e' l'obiettivo della sonda, e' un prodotto gratis.
+#
+#  --- 8. CHE COSA QUESTA SONDA NON DICE ----------------------------
+#  >>> La colonna sessione_rompe NON E' UTILIZZABILE per H=0..H=15, e
+#      non e' un difetto: e' la geometria. Il "giorno logico" dello
+#      script parte a NightStartHour (r.81-84), quindi per H basso la
+#      sessione del giorno dopo cade in un ALTRO giorno logico, e il
+#      ciclo la salta ("if(InNotte(ora)) continue" + finestra 8:00-17:30
+#      che le ore 0-2 non soddisfano). La colonna esce "nessuno".
+#      >>> QUINDI NON SI USA, e nessun numero di questa corsa poggia su
+#          di lei. La colonna che conta e' ampiezza_notte_pts, e QUELLA
+#          e' giusta per tutte e sette le celle. <<<
+#  >>> Non misura la causa (2) (pendente scaduto): si ricava per
+#      differenza, e la differenza e' una STIMA, non una misura.
+#  >>> Non e' un round e non promuove niente. Nessuna sedia cambia,
+#      nessun parametro in forward viene toccato.
+#
+#  --- 9. COSTO ------------------------------------------------------
+#  Sette avvii di MT5 con /config, uno script che legge ~130.000 barre
+#  M5 ciascuno. Stima 3-8 minuti in tutto. Timeout per corsa: 6 minuti,
+#  oltre i quali la cella esce MANCANTE e la sonda VA AVANTI con le
+#  altre invece di fermarsi: sei celle su sette rispondono lo stesso
+#  alla domanda.
