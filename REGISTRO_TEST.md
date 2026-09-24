@@ -84,9 +84,16 @@ era nemmeno in parte misurabile. Questa è una casella **chiusa**, non sospesa.
 È fermo su un numero **MANCANTE** (campione), non su uno **BRUTTO**: le due celle sopra
 soglia lo sono su una soglia **alzata apposta** da 1,29 a 1,38 per escludere il pedaggio,
 tutte e sette le celle sono in profitto, e **ogni cella dei due lati sta sotto il cancello
-del 10% di DD**. Via più corta al numero: **allungare la finestra** a ~4 anni (tetto del
-tester su M15) → ×2,29 → n ≈ 220-300. 🔴 Prerequisito: **sondare la profondità vera dei dati
-BCM su D30EUR** (regola del 25/08: si misura, non si assume).
+del 10% di DD**.
+✏️ **CORRETTO IL 24/09**: qui c'era scritto che la via più corta era **allungare la finestra a
+~4 anni**. 🔴 **È MORTA**: BCM su `D30EUR` parte dal **2024.09.26** ed è `COMPLETO` — il broker
+non ha di più (misurato tre volte, `report/STORICO_MT5BACKTEST_ESITO_2026-09-08.md` r.38-40).
+Fino a oggi si guadagnerebbe il **+14,3%**, che non basta.
+👉 **La via vera è il TASSO DI RIEMPIMENTO** (`InpOneTradePerDay` mette un tetto di 1 al giorno, e
+lo short riempie il 22-30% delle giornate): è il round **R244**, in preparazione.
+🔴 **E serve per TUTTI E DUE I LATI, non solo lo short**: la colonna `Trades` conta **deal**, non
+posizioni (`InpTP1Pct=50`), quindi in posizioni **nessuna cella di nessun lato** arriva a 150.
+Vedi la correzione in testa a `report/REFERTO_R242_2026-09-24.md`.
 
 ### Cosa ha prodotto, oltre al verdetto
 - 🔴 **Il controllo del pavimento è SCATTATO su tutti e due i lati** (monotonia di `n` rotta
