@@ -41,7 +41,7 @@
 #     APPLICA, E VA DETTO PRIMA ***
 #  --------------------------------------------------------------------
 #  InpExitMode non e' un numero su una scala: 0, 1 e 2 sono TRE
-#  MACCHINE DIVERSE (r.972-973 e r.1044-1052 del sorgente):
+#  MACCHINE DIVERSE (r.1078-1079 e r.1150-1158 del sorgente):
 #    0 = TP sull'ultima punta opposta, congelata alla conferma;
 #    1 = TP a InpTP_R x rischio iniziale;
 #    2 = NESSUN TP: si esce quando gira il trend intermedio.
@@ -203,8 +203,8 @@
 #  --------------------------------------------------------------------
 #  Cercato nel sorgente, e ci sono DUE dipendenze. Le dichiaro invece
 #  di scoprirle dopo:
-#  (a) *** InpTP_R VIVE SOLO DENTRO exit 1 *** (r.973:
-#      'else if(InpExitMode==1) tp = ... InpTP_R*riskDist'; e r.409-410
+#  (a) *** InpTP_R VIVE SOLO DENTRO exit 1 *** (r.1079:
+#      'else if(InpExitMode==1) tp = ... InpTP_R*riskDist'; e r.446-447
 #      lo valida SOLO in quel caso). Quindi la cella 1 non e' "l'uscita
 #      R-based": e' "l'uscita R-based CON N = 1,5", e quel 1,5 non e'
 #      MAI stato messo ad asse su questo motore. *** L'asse muove
@@ -213,7 +213,7 @@
 #      male, il verdetto onesto e' "exit 1 A 1,5 R esce male", non
 #      "l'uscita R-based non funziona". ***
 #  (b) InpMaxBarsHold (time-stop) agisce su tutte e tre, ma NON allo
-#      stesso modo: exit 2 non ha TP (r.970), quindi e' la cella che
+#      stesso modo: exit 2 non ha TP (r.1076), quindi e' la cella che
 #      dipende di piu' dall'orologio. In r127c, a exit 2, il time-stop
 #      e' misurato NON VINCOLANTE da 75 barre in su. Qui e' pinnato a
 #      100 = il valore vivo. Su exit 0 e exit 1 la sua vincolativita'
@@ -275,7 +275,7 @@
 #              chiuderebbe in un giorno solo. Era esattamente questo
 #              il caso.
 #      >>> LA COLONNA C'E' GIA' E NON COSTA NIENTE: ABTG_CostToCost.mq5
-#          r.1312 scrive stats[7] = gWorstDayPct e r.1347 la mette
+#          r.1418 scrive stats[7] = gWorstDayPct e r.1453 la mette
 #          nell'intestazione "...,Trades,Peggior Giornata %,...".
 #          Verificata presente nei CSV di questo motore
 #          (scan_h4/scan_ABTG_CostToCost_H4_EURJPY.csv e i due
@@ -324,7 +324,7 @@
 #            R_sedia = 1,00 -> -5,00 . R_sedia = 1,30 -> -3,85 .
 #            R_sedia = 2,00 -> -2,50 (valori di ESEMPIO, non proposte).
 #          PERCHE' LA SCALA E' LINEARE, e fin dove: l'EA tiene UNA
-#          posizione alla volta (sorgente r.846-848) e il lotto e'
+#          posizione alla volta (sorgente r.952-954) e il lotto e'
 #          proporzionale al rischio, quindi ogni perdita in % raddoppia
 #          col rischio, a meno dell'arrotondamento del lotto (a 100.000
 #          i lotti del per-trade 772351 vanno da 1,82 a 6,05: il passo
@@ -342,7 +342,7 @@
 #  C7-bis *** LA COLONNA "Peggior Giornata %" NON E' LA PERDITA
 #      GIORNALIERA DI FTMO. AGGIUNTO IL 24/09/2026, PRIMA DEI NUMERI,
 #      E CAMBIA COSA C7 PUO' DIRE. ***
-#      COME LA CALCOLA L'EA (sorgente r.619-633, OnTick): base = EQUITY
+#      COME LA CALCOLA L'EA (sorgente r.725-739, OnTick): base = EQUITY
 #      al primo tick del giorno del SERVER BCM; minimo = equity minima
 #      del giorno; % sull'equity di base.
 #      COME LA CALCOLA FTMO (docs/REGOLAMENTO_FTMO_2026-08.md r.26-27):
@@ -359,6 +359,9 @@
 #      (c) CONFINE DEL GIORNO: 00:00 server BCM = 01:00 ora italiana
 #          (CLAUDE.md, fuso BCM), FTMO azzera alle 00:00 italiane.
 #          Un'ora di scarto; verso non determinato.
+#          (*** PRECISATO IL 24/09/2026: vale d'estate e col vecchio
+#          orologio. Negli inverni DOPO il cambio 00:00 server = 00:00
+#          italiane e lo scarto e' zero: tabella in C7-ter. ***)
 #      >>> IL CONTRO-ESEMPIO, MISURATO in repo e non immaginato:
 #          r41 OOS (exit 2, long, rischio 1,00, deposito 100.000),
 #          risultati_prove/ABTG_CostToCost/r41/
@@ -415,17 +418,21 @@
 #          (*** FATTA IL 24/09/2026: e' la colonna del C7-ter. ***)
 #  C7-ter *** LA COLONNA "Peggior Giornata FTMO %" -- AGGIUNTA ALL'EA IL
 #      24/09/2026, PRIMA DEI NUMERI. DA QUI SI LEGGE IL VERDETTO FTMO. ***
-#      COME LA CALCOLA L'EA (sorgente FtmoBalanceAlConfine r.564-584 e
-#      FtmoGiornataTick r.586-614, chiamata in OnTick r.637 subito dopo
-#      la metrica di prima; OnTester r.1320
-#      stats[10]; intestazione r.1347, ULTIMA delle colonne statistiche,
+#      COME LA CALCOLA L'EA (sorgente FtmoBalanceAlConfine r.666-686 e
+#      FtmoGiornataTick r.688-720, chiamata in OnTick r.743 subito dopo
+#      la metrica di prima; confine da FtmoConfine r.645-655 e
+#      FtmoChiave r.658-664; OnTester r.1426
+#      stats[10]; intestazione r.1453, ULTIMA delle colonne statistiche,
 #      dopo "Serie Perdente Peggiore": nessuna colonna esistente cambia
 #      posizione fra le statistiche):
 #       . riferimento = BALANCE al confine del giorno FTMO, cioe' alle
-#         00:00 italiane = InpFtmoDayHourServer = 23 ora server BCM
-#         (BCM = italiana - 1: 00:00 IT = 23:00 BCM del giorno PRIMA;
-#         stesso 23 del preset mql5/Presets/ABTG_Guardian_FTMO_2Step.set,
-#         nota "23:00 BCM = 00:00 CET");
+#         00:00 italiane scritte in ora server BCM. *** CORRETTO IL
+#         24/09/2026: il confine NON e' un'ora fissa. *** Con
+#         InpFtmoOrologio=1 (pinnato qui) l'EA lo calcola giorno per
+#         giorno dalla tabella qui sotto; il 23 fisso di prima
+#         (InpFtmoDayHourServer, stesso numero del preset
+#         mql5/Presets/ABTG_Guardian_FTMO_2Step.set) e' giusto solo
+#         d'estate e col vecchio orologio;
 #       . perdita = equity istantanea - riferimento (floating incluso);
 #       . % sul CAPITALE INIZIALE = deposito del tester (100.000).
 #      Il riferimento e' RICOSTRUITO (balance del primo tick del giorno
@@ -468,12 +475,39 @@
 #            deposito. Una cella in zona grigia si rigira A R_sedia.
 #          - fra il confine e il primo tick non c'e' prezzo: l'equity di
 #            quel tratto non si misura (mercato chiuso = non esiste).
-#          - l'offset BCM = IT-1 nei mesi di ora solare e' [NON
-#            MISURATO]: se fosse diverso, in quei mesi il confine e'
-#            spostato di un'ora.
+#          - L'OROLOGIO BCM (qui c'era "offset IT-1 d'inverno [NON
+#            MISURATO]": *** MISURATO IL 24/09/2026 ***,
+#            report/OROLOGIO_BCM_2026-09-24.md):
+#              orologio      | periodo            | BCM =          | 00:00 IT =
+#              VECCHIO       | fino al cambio     | ora IT - 1     | 23:00 server
+#              NUOVO estate  | dal cambio, UE leg.| UTC+1 fisso    | 23:00 server
+#              NUOVO inverno | dal cambio, UE sol.| UTC+1 = ora IT | 00:00 server
+#            Conta solo il calendario UE (FTMO azzera all'ora italiana;
+#            il vecchio orologio seguiva l'ora legale UE: 8 eventi USA a
+#            ora fissa nelle settimane sfasate cadono all'ora UTC).
+#            DATA DEL CAMBIO sullo storico FOREX: forchetta
+#            (26/12/2024 23:03 ; 02/02/2025 23:05] server, giorno
+#            [NON MISURATO]. Pin InpFtmoBcmFissoDal=20250101, dentro la
+#            forchetta. Giorni di mercato col confine AMBIGUO: 24 (lun-ven
+#            30/12/2024-31/01/2025 meno l'01/01); col pin ne sono
+#            sbagliati di un'ora al massimo 22 (cambio al 02/02) o 2
+#            (cambio al 28/12) = al massimo 4,2% dei 518 giorni lun-ven.
+#            >>> QUOTA DI GIORNI COL CONFINE FISSO 23 SBAGLIATO in questa
+#                finestra (2024.07.05-2026.06.30, 518 giorni lun-ven):
+#                150-175 = 29,0-33,8% secondo la data del cambio nella
+#                forchetta (173 = 33,4% col pin 20250101). Il report
+#                scrive 150-176: il 176 conta anche il 27/12/2024, il
+#                cui confine (26/12 23:00) precede l'affare delle 23:03
+#                gia' col vecchio orologio. NON il 42,5% (220) della
+#                classe 762, che mette il cambio al 27/10/2024.
+#            [NON MISURATO] la settimana 28/10-01/11/2024 (5 giorni,
+#            1,0%): e' la sola in cui un evento (NFP 01/11/2024, 13:30:40
+#            su 3 simboli) da' l'orologio "New York + 5" invece di IT-1.
+#            Li' la colonna usa IT-1 (confine 23:00).
 #          - a modello 1 (R214f) l'equity intra-barra e' quella dei tick
 #            sintetici: la colonna e' un LIMITE INFERIORE, come l'altra.
-#      >>> ANCORA: la colonna nuova e l'input InpFtmoDayHourServer NON
+#      >>> ANCORA: la colonna nuova e gli input InpFtmoDayHourServer,
+#          InpFtmoOrologio, InpFtmoBcmFissoDal NON
 #          toccano ingressi, uscite, lotti o magic. Le altre colonne di
 #          una passata con lo stesso motore devono tornare IDENTICHE.
 #
@@ -583,12 +617,23 @@ InpVerbose=false
 #   passata con InpLogImbuto=true: li' l'imbuto dice DOVE si perdono i
 #   segnali, ed e' l'unico posto dove serve.
 InpLogImbuto=false
-# InpFtmoDayHourServer: PIN a 23, FISSO (C7-ter). E' l'ora SERVER BCM
-#   delle 00:00 italiane (BCM = italiana - 1). Governa SOLO la colonna
-#   "Peggior Giornata FTMO %": nessun ingresso, uscita, lotto o magic
-#   lo legge. NON e' 1: 1 e' la stessa mezzanotte sul server FTMO
-#   (italiana + 1), e il tester qui gira sui dati BCM.
+# InpFtmoDayHourServer: PIN a 23 (C7-ter). Con InpFtmoOrologio=1 NON
+#   e' letto: resta pinnato perche' e' il valore della modalita' 0.
+#   NON e' 1: 1 e' la stessa mezzanotte sul server FTMO (italiana + 1),
+#   e il tester qui gira sui dati BCM.
 InpFtmoDayHourServer=23
+# InpFtmoOrologio: PIN a 1 = confine dal calendario BCM (tabella in
+#   C7-ter): 23:00 server col vecchio orologio e d'estate, 00:00 server
+#   negli inverni dopo il cambio.
+InpFtmoOrologio=1
+# InpFtmoBcmFissoDal: PIN a 20250101. Il cambio d'orologio sul FOREX
+#   cade in (26/12/2024 23:03 ; 02/02/2025 23:05], giorno [NON
+#   MISURATO]: 20250101 e' dentro la forchetta (settimana festiva).
+#   24 giorni di mercato ambigui, al massimo 22 sbagliati di un'ora.
+#   NON 20240926: quella e' la data dello storico INDICI.
+#   I tre input governano SOLO la colonna "Peggior Giornata FTMO %":
+#   nessun ingresso, uscita, lotto o magic li legge.
+InpFtmoBcmFissoDal=20250101
 
 # --- L'UNICO ASSE: IL MECCANISMO D'USCITA. 3 celle, 6 passate.
 #     0 = cost-to-cost puro . 1 = R-based (a 1,5 R) . 2 = flip di

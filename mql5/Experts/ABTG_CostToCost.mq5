@@ -203,10 +203,45 @@ input bool   InpLogImbuto = true;   // Imbuto: riepilogo giornaliero dei rifiuti
 //    stessa mezzanotte e' l'ora 1, ed e' per questo che il preset del
 //    Guardian che gira su FTMO porta InpDailyResetHour=1. Qui il tester
 //    gira sui dati BCM, quindi l'orologio e' quello BCM.
-//    [NON MISURATO]: che l'offset IT-1 valga anche nei mesi di ora
-//    solare. Se in inverno fosse diverso, in quei mesi il confine del
-//    giorno e' sbagliato di un'ora.
-input int    InpFtmoDayHourServer = 23;  // Ora SERVER d'inizio del giorno FTMO (00:00 italiane; 23 = offset BCM IT-1)
+//    L'ORA DEL CONFINE NON E' COSTANTE SUI DATI BCM (24/09/2026).
+//    Misura: report/OROLOGIO_BCM_2026-09-24.md (eventi USA a ora fissa
+//    UTC, pausa di rollover, apertura della domenica, aperture cash).
+//      orologio      | periodo                  | BCM =           | 00:00 IT =
+//      VECCHIO       | fino al cambio           | ora IT - 1      | 23:00 server
+//                    |                          | (UE, tutto anno)| SEMPRE
+//      NUOVO estate  | dal cambio, UE legale    | UTC+1 fisso     | 23:00 server
+//      NUOVO inverno | dal cambio, UE solare    | UTC+1 = ora IT  | 00:00 server
+//    Conta SOLO il calendario UE (ultima domenica di marzo / di ottobre):
+//    FTMO azzera all'ora ITALIANA, e l'orologio vecchio seguiva l'ora
+//    legale UE: nelle settimane sfasate (USA gia'/ancora in ora legale,
+//    UE no) gli eventi USA a ora fissa cadono all'ora UTC = ora server
+//    (FOMC 17/03/2021 alle 18:00, NFP 04/11/2022 e 03/11/2023 e CPI
+//    12/03/2024 alle 12:30, piu' altri 4 = 8 riscontri nei per-trade);
+//    col modello "New York + 5" gli stessi eventi danno UN riscontro
+//    solo, NFP 01/11/2024 alle 13:30:40 su 3 simboli. L'apertura della
+//    domenica e la pausa di
+//    rollover NON decidono: nelle settimane sfasate dell'orologio vecchio
+//    restano alle 22:0x server (sono sessioni del broker, non eventi).
+//    [NON MISURATO] la settimana 28/10-01/11/2024 (5 giorni lun-ven):
+//    e' quella dell'unico riscontro contrario; qui vale il calendario UE.
+//    InpFtmoOrologio = 1 applica la tabella giorno per giorno;
+//    = 0 usa InpFtmoDayHourServer fisso (il comportamento di prima).
+//    DATA DEL CAMBIO, storico FOREX: forchetta (26/12/2024 23:03 ;
+//    02/02/2025 23:05] server -- ultimo segno del vecchio orologio
+//    (affare AUDJPY nella pausa delle 23:00) e primo del nuovo (apertura
+//    della domenica alle 23:05 su 5 simboli). Il giorno esatto e'
+//    [NON MISURATO]. Default 20250101: settimana festiva, dentro la
+//    forchetta. Giorni di mercato col confine AMBIGUO (lun-ven dal
+//    30/12/2024 al 31/01/2025, meno l'01/01; il 27/12 no: il suo confine,
+//    26/12 23:00, e' prima dell'affare delle 23:03 gia' vecchio) = 24.
+//    Col default ne sono sbagliati di un'ora al massimo 22 (se il cambio
+//    fosse al 02/02) o 2 (30-31/12, se fosse al 28/12).
+//    ATTENZIONE: sugli INDICI lo storico BCM (dal 26/09/2024) e' UTC+1
+//    fisso su tutto l'arco: per un indice InpFtmoBcmFissoDal va messo
+//    a 20240926 (o prima), NON al valore del forex.
+input int    InpFtmoDayHourServer = 23;  // Ora SERVER d'inizio del giorno FTMO se InpFtmoOrologio=0 (23 = offset BCM IT-1)
+input int    InpFtmoOrologio      = 1;   // 0 = ora fissa InpFtmoDayHourServer; 1 = calendario BCM (ora legale UE + cambio d'orologio)
+input int    InpFtmoBcmFissoDal   = 20250101; // AAAAMMGG: da qui BCM = UTC+1 fisso, prima IT-1 (solo orologio 1). Forex: cambio fra 27/12/2024 e 02/02/2025
 
 //==================================================================
 //  STATO
@@ -269,7 +304,7 @@ int    gDayEqStamp     = -1;
 //    sopra) resta com'era: e' il numero del Guardian in campo, che misura
 //    la giornata dall'EQUITY. Questa invece segue la regola FTMO:
 //     - riferimento = BALANCE all'inizio del giorno FTMO (00:00 italiane,
-//       InpFtmoDayHourServer in ora server): il floating aperto a
+//       in ora server da FtmoConfine): il floating aperto a
 //       mezzanotte NON entra nel riferimento;
 //     - perdita = equity istantanea - riferimento (il floating c'e');
 //     - denominatore = CAPITALE INIZIALE, non il saldo del giorno.
@@ -280,6 +315,8 @@ long   gFtmoDayKey       = -1;    // indice del giorno FTMO corrente (-1 = nessu
 int    gFtmoGiorni       = 0;     // giorni FTMO visti (diagnostica)
 int    gFtmoRicostruiti  = 0;     // riferimenti ricostruiti togliendo i deal fatti DOPO il confine
 int    gFtmoFallback     = 0;     // riferimenti presi = balance del tick (cronologia non leggibile)
+datetime gFtmoDa         = 0;     // confine d'inizio del giorno FTMO corrente (ora server)
+datetime gFtmoA          = 0;     // confine d'inizio del giorno FTMO successivo (ora server)
 
 void Log(string m){ if(InpVerbose) Print("[COST] ", m); }
 
@@ -428,6 +465,10 @@ int OnInit()
      { Print("ERRORE: InpRiskPercent deve essere > 0."); return(INIT_FAILED); }
    if(InpFtmoDayHourServer<0 || InpFtmoDayHourServer>23)
      { Print("ERRORE: InpFtmoDayHourServer deve stare fra 0 e 23 (ora server)."); return(INIT_FAILED); }
+   if(InpFtmoOrologio<0 || InpFtmoOrologio>1)
+     { Print("ERRORE: InpFtmoOrologio ammette 0 (ora fissa) o 1 (calendario BCM)."); return(INIT_FAILED); }
+   if(InpFtmoBcmFissoDal<19700101 || InpFtmoBcmFissoDal>21001231)
+     { Print("ERRORE: InpFtmoBcmFissoDal va scritto AAAAMMGG (es. 20250101)."); return(INIT_FAILED); }
 
    //--- METRICA FTMO (solo misura): il capitale iniziale e' il deposito.
    //    Nel tester, in OnInit, ACCOUNT_BALANCE E' il deposito. In forward
@@ -523,14 +564,16 @@ void RicostruisciStruttura()
 //  Nessuna condizione di trading legge queste variabili: finiscono
 //  soltanto in OnTester (colonna "Peggior Giornata FTMO %").
 //
-//  IL GIORNO FTMO. Va da InpFtmoDayHourServer:00 di un giorno server a
-//  InpFtmoDayHourServer:00 del giorno server dopo, quindi ATTRAVERSA la
-//  mezzanotte del server (con 23: dalle 23:00 del giorno k-1 alle
-//  22:59:59 del giorno k). Lo si numera come fa il Guardian
-//  (ABTG_Guardian.mq5, PropDayKey): si sposta indietro l'orologio di
-//  InpFtmoDayHourServer ore e si prende il giorno. Cosi' i tick fra la
-//  mezzanotte server e il confine restano nel giorno FTMO di prima,
-//  senza casi speciali.
+//  IL GIORNO FTMO. Va dalle 00:00 italiane alle 00:00 italiane dopo,
+//  scritte in ora server da FtmoConfine: con InpFtmoOrologio=0 alle
+//  InpFtmoDayHourServer:00 fisse (con 23: dalle 23:00 del giorno k-1
+//  alle 22:59:59 del giorno k, come PropDayKey del Guardian); con
+//  InpFtmoOrologio=1 alle 23:00 o alle 00:00 server secondo la tabella
+//  sopra InpFtmoBcmFissoDal (giornate di 23, 24 o 25 ore server).
+//  FtmoChiave numera il giorno con la data italiana D: i tick fra la
+//  mezzanotte server e il confine restano nel giorno FTMO giusto, senza
+//  casi speciali. Il calendario si ricalcola solo quando un tick esce
+//  da [gFtmoDa, gFtmoA).
 //
 //  IL RIFERIMENTO = BALANCE AL CONFINE, anche se il primo tick arriva
 //  TARDI (weekend, festivi, buchi di feed). Il balance al confine si
@@ -561,6 +604,65 @@ void RicostruisciStruttura()
 //     niente da vedere (a modello OHLC il minimo intra-barra e' quello
 //     dei tick sintetici, come per la metrica di prima).
 //==================================================================
+//--- CALENDARIO DEL CONFINE (24/09/2026). g = indice del giorno
+//    (secondi / 86400). Lo stato dell'ora legale alla mezzanotte italiana
+//    del giorno D e' quello del POMERIGGIO del giorno D-1: il cambio d'ora
+//    UE (domenica 01:00 UTC) non cade mai alla mezzanotte italiana.
+//    Serve SOLO il calendario UE: FTMO segue l'ora italiana, l'orologio
+//    BCM vecchio era "ora italiana - 1" tutto l'anno e il nuovo e' UTC+1
+//    fisso (tabella sopra InpFtmoBcmFissoDal). Il calendario USA non
+//    entra: le settimane in cui USA e UE non sono allineati non spostano
+//    ne' l'ora italiana ne' l'orologio BCM.
+int FtmoDomenica(const int anno,const int mese,const int n)   // n>0: n-esima domenica; n=0: l'ultima
+  {
+   MqlDateTime s; ZeroMemory(s);
+   s.year=anno; s.mon=mese; s.day=1; s.hour=12;
+   datetime t=StructToTime(s);
+   MqlDateTime r; TimeToStruct(t,r);
+   while(r.day_of_week!=0){ t+=86400; TimeToStruct(t,r); }
+   if(n>0) return(r.day+7*(n-1));
+   int d=r.day;
+   while(true)
+     {
+      datetime t2=t+7*86400;
+      MqlDateTime r2; TimeToStruct(t2,r2);
+      if(r2.mon!=mese) break;
+      t=t2; d=r2.day;
+     }
+   return(d);
+  }
+
+bool FtmoLegaleEU(const long g)    // ora legale europea a mezzogiorno del giorno g
+  {
+   MqlDateTime r; TimeToStruct((datetime)(g*86400+43200),r);
+   if(r.mon<3 || r.mon>10) return(false);
+   if(r.mon>3 && r.mon<10) return(true);
+   if(r.mon==3) return(r.day>=FtmoDomenica(r.year,3,0));
+   return(r.day<FtmoDomenica(r.year,10,0));
+  }
+
+//--- istante SERVER delle 00:00 italiane che aprono il giorno FTMO D
+datetime FtmoConfine(const long D)
+  {
+   if(InpFtmoOrologio==0)
+      return((datetime)(D*86400+(long)InpFtmoDayHourServer*3600-(InpFtmoDayHourServer>=12?86400:0)));
+   long g=D-1;
+   MqlDateTime r; TimeToStruct((datetime)(D*86400),r);
+   int dataD=r.year*10000+r.mon*100+r.day;
+   int offIT =(FtmoLegaleEU(g)?2:1);                        // Italia: UTC+2 legale, UTC+1 solare
+   int offSrv=(dataD>=InpFtmoBcmFissoDal ? 1 : offIT-1);   // BCM: UTC+1 fisso dal cambio; prima ora italiana - 1 (confine sempre 23:00)
+   return((datetime)(D*86400-(long)(offIT-offSrv)*3600));
+  }
+
+//--- giorno FTMO a cui appartiene l'istante server t
+long FtmoChiave(const datetime t)
+  {
+   long D=(long)t/86400;
+   if(t>=FtmoConfine(D+1)) return(D+1);
+   if(t>=FtmoConfine(D))   return(D);
+   return(D-1);
+  }
+
 double FtmoBalanceAlConfine(const datetime confine,const double balOra,bool &ok)
   {
    ok=false;
@@ -592,17 +694,21 @@ void FtmoGiornataTick()
    if(gFtmoInitCapital<=0.0) gFtmoInitCapital=bal;   // OnInit non l'ha preso: primo tick
    if(gFtmoInitCapital<=0.0) return;
 
-   long sec=(long)InpFtmoDayHourServer*3600;
-   long key=((long)ora-sec)/86400;
+   long key=gFtmoDayKey;
+   if(gFtmoDayKey<0 || ora<gFtmoDa || ora>=gFtmoA)   // il calendario si ricalcola solo quando si esce dal giorno
+     {
+      key=FtmoChiave(ora);
+      gFtmoDa=FtmoConfine(key);
+      gFtmoA =FtmoConfine(key+1);
+     }
    if(key!=gFtmoDayKey)
      {
       if(gFtmoDayKey<0)
          gFtmoDayBalance=bal;                        // primo giorno del test: nessun confine da cui ricostruire
       else
         {
-         datetime confine=(datetime)(key*86400+sec);
          bool ok=false;
-         gFtmoDayBalance=FtmoBalanceAlConfine(confine,bal,ok);
+         gFtmoDayBalance=FtmoBalanceAlConfine(gFtmoDa,bal,ok);
          if(ok) gFtmoRicostruiti++; else gFtmoFallback++;
         }
       gFtmoDayKey=key;
@@ -1319,8 +1425,8 @@ double OnTester()
    //    prima (base = equity, giorno server): e' quella del Guardian.
    stats[10] = gWorstFtmoDayPct;                        // Peggior Giornata FTMO % (negativo)
    PrintFormat("[COST-FTMO] peggior giornata FTMO %.4f%% (colonna di prima, dall'equity: %.4f%%) | capitale iniziale %.2f | "
-               "giorno FTMO dalle %02d:00 server | giorni %d, riferimenti ricostruiti dai deal %d, fallback al balance del tick %d",
-               gWorstFtmoDayPct,gWorstDayPct,gFtmoInitCapital,InpFtmoDayHourServer,
+               "orologio %d (0 = fisso alle %02d:00 server, 1 = calendario BCM, UTC+1 fisso dal %d) | giorni %d, riferimenti ricostruiti dai deal %d, fallback al balance del tick %d",
+               gWorstFtmoDayPct,gWorstDayPct,gFtmoInitCapital,InpFtmoOrologio,InpFtmoDayHourServer,InpFtmoBcmFissoDal,
                gFtmoGiorni,gFtmoRicostruiti,gFtmoFallback);
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);

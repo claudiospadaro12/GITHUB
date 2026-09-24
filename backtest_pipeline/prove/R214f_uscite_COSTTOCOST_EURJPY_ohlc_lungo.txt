@@ -137,12 +137,12 @@
 #  --------------------------------------------------------------------
 #  Identico a R214e, e lo ripeto perche' un buco taciuto e' un buco
 #  perso:
-#  (a) *** InpTP_R VIVE SOLO DENTRO exit 1 *** (sorgente r.973 e
-#      r.409-410). La cella 1 e' "R-based CON N = 1,5", e quel 1,5 non
+#  (a) *** InpTP_R VIVE SOLO DENTRO exit 1 *** (sorgente r.1079 e
+#      r.446-447). La cella 1 e' "R-based CON N = 1,5", e quel 1,5 non
 #      e' mai stato messo ad asse. Se exit 1 esce male, il verdetto
 #      onesto e' "exit 1 A 1,5 R esce male".
 #  (b) InpMaxBarsHold (time-stop, pinnato a 100) morde in modo diverso
-#      sulle tre celle: exit 2 non ha TP (r.970), quindi e' la piu'
+#      sulle tre celle: exit 2 non ha TP (r.1076), quindi e' la piu'
 #      esposta all'orologio. In r127c, su exit 2, e' misurato NON
 #      vincolante da 75 barre in su. Su exit 0 e exit 1: [NON
 #      MISURATO].
@@ -188,7 +188,7 @@
 #          (fattore 5,1x fra la stima di tabella, -1,57%, e il numero
 #          vero letto nell'OPTFRAME dell'EA).
 #      >>> LA COLONNA C'E' GIA' E NON COSTA NIENTE: ABTG_CostToCost.mq5
-#          r.1312 scrive stats[7] = gWorstDayPct e r.1347 la mette
+#          r.1418 scrive stats[7] = gWorstDayPct e r.1453 la mette
 #          nell'intestazione. *** Ed e' PRESENTE nei due CSV che sono
 #          gia' l'ancora di questo file *** -- verificato riga per
 #          riga il 23/09 su
@@ -243,7 +243,7 @@
 #          perdita giornaliera FTMO (D7-bis). ***
 #  D7-bis *** LA COLONNA E' DALL'EQUITY, FTMO DAL BALANCE: TESTO
 #      COMPLETO IN R214e, punto C7-bis (aggiunto il 24/09/2026). ***
-#      In breve: l'EA (sorgente r.619-633) prende come base l'EQUITY al
+#      In breve: l'EA (sorgente r.725-739) prende come base l'EQUITY al
 #      primo tick del giorno del server BCM; FTMO
 #      (docs/REGOLAMENTO_FTMO_2026-08.md r.26-27) il BALANCE delle
 #      00:00 CE(S)T, e il limite e' il 5% del capitale INIZIALE.
@@ -274,8 +274,8 @@
 #            intero.
 #  D7-ter *** LA COLONNA "Peggior Giornata FTMO %" -- AGGIUNTA ALL'EA IL
 #      24/09/2026. TESTO COMPLETO IN R214e, punto C7-ter. ***
-#      In breve: riferimento = BALANCE alle 00:00 italiane (= 23:00
-#      server BCM, input InpFtmoDayHourServer pinnato a 23), ricostruito
+#      In breve: riferimento = BALANCE alle 00:00 italiane (confine in
+#      ora server: tabella qui sotto), ricostruito
 #      togliendo i deal fatti dopo il confine; perdita = equity -
 #      riferimento; % sul capitale INIZIALE (100.000). In CODA alle
 #      colonne statistiche, dopo "Serie Perdente Peggiore".
@@ -298,8 +298,33 @@
 #            chiude a +10%). Le giornate peggiori vanno DATATE nel
 #            per-trade prima di chiamarle muro.
 #          - e' OHLC: la colonna e' un LIMITE INFERIORE, come l'altra.
+#      >>> IL CONFINE (qui c'era "= 23:00 server BCM, InpFtmoDayHourServer
+#          pinnato a 23": *** CORRETTO IL 24/09/2026 ***,
+#          report/OROLOGIO_BCM_2026-09-24.md; testo completo in R214e
+#          C7-ter). Con InpFtmoOrologio=1 l'EA (FtmoConfine r.645-655)
+#          lo calcola giorno per giorno:
+#              orologio      | periodo            | BCM =          | 00:00 IT =
+#              VECCHIO       | fino al cambio     | ora IT - 1     | 23:00 server
+#              NUOVO estate  | dal cambio, UE leg.| UTC+1 fisso    | 23:00 server
+#              NUOVO inverno | dal cambio, UE sol.| UTC+1 = ora IT | 00:00 server
+#          Conta solo il calendario UE. DATA DEL CAMBIO sullo storico
+#          FOREX: forchetta (26/12/2024 23:03 ; 02/02/2025 23:05] server,
+#          giorno [NON MISURATO]; pin InpFtmoBcmFissoDal=20250101. Giorni
+#          di mercato col confine AMBIGUO: 24 (lun-ven 30/12/2024-
+#          31/01/2025 meno l'01/01), al massimo 22 sbagliati col pin.
+#          >>> QUOTA DI GIORNI COL CONFINE FISSO 23 SBAGLIATO in questa
+#              finestra (2020.01.01-2026.06.30, 1695 giorni lun-ven):
+#              150-175 = 8,8-10,3% (173 = 10,2% col pin). Sono gli STESSI
+#              giorni di R214e (gli inverni dopo il cambio): prima del
+#              cambio il 23 fisso e' giusto.
+#          [NON MISURATO] le settimane sfasate dell'orologio vecchio
+#          (USA e UE non allineati): 85 giorni lun-ven in questa
+#          finestra. Otto eventi USA a ora fissa (2021-03 -> 2024-03)
+#          danno IT-1 anche li' (confine 23:00, ed e' quello usato);
+#          UNO solo, l'NFP del 01/11/2024, da' "New York + 5". La
+#          settimana 28/10-01/11/2024 (5 giorni) resta dubbia.
 #      >>> L'ANCORA DI TUTTE LE ALTRE COLONNE NON CAMBIA: la colonna e
-#          l'input nuovi non toccano ingressi, uscite, lotti o magic.
+#          gli input nuovi non toccano ingressi, uscite, lotti o magic.
 #
 #  7. COSTO -- tetto dichiarato
 #  --------------------------------------------------------------------
@@ -387,12 +412,17 @@ InpRiskPercent=1.0
 InpComment=R214F USCITE OHLC
 InpMagic=788212
 InpVerbose=false
-# InpFtmoDayHourServer: PIN a 23, FISSO (D7-ter). Ora SERVER BCM delle
-#   00:00 italiane. Governa SOLO la colonna "Peggior Giornata FTMO %":
-#   nessun ingresso, uscita, lotto o magic lo legge, quindi NON e' una
-#   differenza rispetto a r127c sui numeri dell'ancora. Pinnato perche'
-#   il suo valore decide la colonna del verdetto D7.
+# InpFtmoDayHourServer / InpFtmoOrologio / InpFtmoBcmFissoDal: PIN a
+#   23 / 1 / 20250101 (D7-ter, tabella dell'orologio; con
+#   InpFtmoOrologio=1 il 23 non e' letto). Governano SOLO la colonna
+#   "Peggior Giornata FTMO %": nessun ingresso, uscita, lotto o magic
+#   li legge, quindi NON sono una differenza rispetto a r127c sui
+#   numeri dell'ancora. Pinnati perche' il loro valore decide la
+#   colonna del verdetto D7. 20250101: cambio d'orologio FOREX in
+#   (26/12/2024 23:03 ; 02/02/2025 23:05], giorno [NON MISURATO].
 InpFtmoDayHourServer=23
+InpFtmoOrologio=1
+InpFtmoBcmFissoDal=20250101
 # InpLogImbuto NON PINNATO DI PROPOSITO: r127c non lo pinnava e
 #   prendeva il default compilato. Pinnarlo sarebbe una differenza in
 #   piu' su un file che deve riprodurre alla quinta cifra (punto 2).
