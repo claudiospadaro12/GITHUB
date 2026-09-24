@@ -6,6 +6,8 @@ il **pilastro 4 (money management)** e il **pilastro 5 (ottimizzazione e
 validazione)**. Riparte da `CACCIA_ANDREA_UNGER_2026-09-14.md` e non rifà
 quello che c'è già scritto (§2.2 sizing, §3.1 walk-forward, §7 lista della spesa)._
 
+
+> ✏️ **ERRATA del 24/09 sera (cancello su `report/METODO_UNGER_2026-09-24.md`)**: il conteggio "518/519 su 981" mescola file non-prova e sottocartelle: i file prova `.txt` che citano `2026.06.30` sono **494 su 916** (517 su 979 contando `.md`/`.py`/`.csv`; a `1c4ed445`). Il Kelly coi numeri di `AUDIT_USCITE` r.101-104 e' **0,13-0,25**, cioe' **20-38 volte** sopra il nostro 0,0065 (non 20-35). Fa fede il referto di sintesi.
 ---
 
 ## 🔴 LA RIGA CHE CONTA

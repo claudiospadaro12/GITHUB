@@ -23,7 +23,7 @@ Quindi ogni riga di questo referto porta la sua etichetta, e **l'etichetta è pa
 | **[SONDA]** | contato da noi su dati DAX 2011-2018 (non BCM) | misura di **occasioni**, mai di edge |
 | **[INFERITO]** | ragionamento nostro | si dice da cosa |
 
-🟢 **La notizia buona**: stavolta c'è **un pezzo di meccanica di Unger letto nel sorgente**, il **Weekly Factor** (TASC settembre 2023, porting Pine di PineCodersTASC). Il coordinatore l'ha riaperto, e il cancello di nuovo: la pagina TradingView dice *"an article written by Andrea Unger titled “The Weekly Factor”"* e l'intestazione del sorgente Pine dice *"Article By: Andrea Unger"*, con filtro corpo 5gg / range 5gg, ingresso M15 sulla rottura del giorno prima e uscita a fine giornata **[VERIFICATO]**.
+🟢 **La notizia buona**: stavolta c'è **un pezzo di meccanica di Unger letto nel sorgente**, il **Weekly Factor** (TASC settembre 2023, porting Pine di PineCodersTASC). Il coordinatore l'ha riaperto, e il cancello di nuovo: la pagina TradingView dice *"an article written by Andrea Unger titled “The Weekly Factor""* e l'intestazione del sorgente Pine dice *"Article By: Andrea Unger"*, con filtro corpo 5gg / range 5gg, ingresso M15 sulla rottura del giorno prima e uscita a fine giornata **[VERIFICATO]**.
 
 🚫 **Non aperti di proposito**: le copie non autorizzate del libro (scribd, pdfcoffee e simili) e i mirror che aggirerebbero il blocco di rete (translate.goog, web.archive).
 
@@ -86,7 +86,7 @@ TEMPO       : IF intraday THEN flat a fine sessione (SetExitOnClose)
 
 | Unger | noi | dove | verdetto |
 |---|---|---|---|
-| flat a fine sessione | ✅ c'è | `ABTG_DAX_Apertura_EU.mq5` r.266-268 (`InpCloseHour/Min`, `InpCloseAtEnd`) | identico |
+| flat a fine sessione | ✅ c'è | `mql5/Experts/ABTG_DAX_Apertura_EU.mq5` r.266-268 (`InpCloseHour/Min`, `InpCloseAtEnd`) | identico |
 | uscita a N barre/giorni | ✅ c'è | `ABTG_PunteLarry.mq5` r.162 (`InpMaxDaysHold=5`), `ABTG_CostToCost.mq5` r.163 | il suo "5 giorni" = il nostro default |
 | stop in **moneta fissa** | ❌ **per scelta** | `LotByRisk` in `ABTG_EMA200.mq5` r.467-495 | 🟢 **la nostra è quella giusta per le prop**: uno stop in euro fissi non scala fra simboli, il rischio % allo stop sì |
 | breakeven con cautela | ✅ | `InpBreakevenAtTP1`, `InpBEatR` (`mql5/Experts/ABTG_DAX_Apertura_EU.mq5` r.331-332) | 🤝 sul Dow **[CASA]** "niente BE: 6 confronti puliti su 8 in perdita" (`ABTG_Dow_Apertura_US.mq5` r.287) |
@@ -194,7 +194,7 @@ D3  "Caso Benzina": IF 6 mesi senza nuovi massimi THEN PAUSA (non scarto)
 ### 🔴 Il punto dove Unger ci batte, contato alla fonte
 **[CASA, ricontato dal coordinatore]** **494 file prova (`.txt`) su 916** citano la stessa fine del fuori campione, `2026.06.30` (517 su 979 contando anche gli `.md`/`.py`/`.csv` della cartella; conteggio a `1c4ed445`). La finestra OOS di casa è stata guardata da centinaia di prove: **non è più vergine**. Questo non rende falsi i numeri di contratto. Dice però che sono stati **scelti guardando** quella finestra.
 
-👉 **In preparazione, NON lanciato**: **R248, la finestra vergine per questo EA** (2026.07.01 → 2026.09.18). Il candidato #1 (breakout del Dow di R245) e la sedia viva `770202` **verranno** letti **una volta sola**, con i criteri congelati prima. I file prova sono scritti e aspettano lo strato 2; **la riga di lancio non esiste ancora**: passerà dai due cancelli e partirà solo su via libera di Claudio, sul PC di backtest. ⚠️ **Con ~41 operazioni la finestra giudica il RISCHIO, non il MERITO** (Emendamento B): il PF si scrive e **non decide**.
+👉 **In preparazione, NON lanciato**: **R248, la finestra vergine per questo EA** (2026.07.01 → 2026.09.18). Il candidato #1 (breakout del Dow di R245) e la sedia viva `770202` **verranno** letti **una volta sola**, con i criteri congelati prima. I file prova sono scritti e aspettano lo strato 2; **la riga di lancio è in preparazione e non ha passato i cancelli**: ci passerà e partirà solo su via libera di Claudio, sul PC di backtest. ⚠️ **Con ~41 operazioni la finestra giudica il RISCHIO, non il MERITO** (Emendamento B): il PF si scrive e **non decide**.
 
 ---
 
@@ -263,3 +263,5 @@ DOMANDA : sul DAX BCM, agli STESSI livelli di ieri, vince lo STOP o il LIMIT?
 
 ---
 _Nessun EA toccato. Nessun parametro in forward toccato. Nessuna taglia proposta. Nessun acquisto. Conto reale 10105439 non toccato._
+
+_Cancello: strato 1 OK; strato 2 FAIL (7 difetti) -> **PASS alla seconda passata** sul commit `4d142cbb`; rilievi facoltativi applicati dopo._
