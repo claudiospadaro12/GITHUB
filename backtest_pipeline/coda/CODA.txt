@@ -602,7 +602,7 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 # [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R139b_EMA200_GBPUSD_H4_LS.txt -Etichetta r139b -Modello 1 -Deposito 10000
 # [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_FiboH4_Multi -Prova R139c_FIBOH4_GBPUSD_unsimbolo.txt -Etichetta r139c -Modello 1 -Deposito 10000
 
-8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/CODA_12_pertrade_posizioni.ps1
+f4e1c2fc712c0d2d0391d0b8313a6380884abbb3 | backtest_pipeline/righe/CODA_12_pertrade_posizioni.ps1
 # =====================================================================
 #  I QUATTRO EA MAI GIRATI -- quattro righe, NON cinque
 #  Aggiunte il 12/09/2026 sera, dopo PASS dei DUE strati del cancello.
