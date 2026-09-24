@@ -34882,3 +34882,79 @@ tick del simbolo), ma qui il difetto è **interno alla riga**, non un trasporto 
 **La regola**: il moltiplicatore del tempo è il numero di passate **VERE**, e si scrive accanto alla
 frase che le dichiara. Si aggiunge sempre che **il tester spartisce le passate fra gli agenti: può
 finire prima, e finire prima non vuol dire che sia fallita.**
+
+## 🕳️ CLASSE 727 — **lo strumento di riproduzione che NON VEDE le giornate in cui la geometria dell'originale DEGENERA, e sono proprio quelle di cui parla la misura**
+
+Sonda del box D30EUR, 24/09/2026. `ABTG_Notte_Study` riproduce cella per cella il box di
+`ABTG_MaxMinNotte`, e la formula è identica (verificato r.90-92). 🔴 **Ma la POPOLAZIONE no.**
+Lo script scorre le barre vere: il giorno logico che conterrebbe il box del **lunedì** comincia
+di domenica, di domenica il DAX non quota, quindi `have=false` → r.158 `continue` → **nessuna
+riga**. L'EA invece usa `iBarShift(...,false)`, che **restituisce l'ultima barra di venerdì** e
+produce un box artefatto — e `R242b` par. 7 dice testualmente che quei box *"tipicamente sotto i
+68 idx: **il pavimento lo scarta**"*.
+👉 **La sonda toglieva dal denominatore proprio le giornate che l'ipotesi da verificare dà per
+scartate.** E l'errore andava **nella direzione comoda**: confrontare il numero grezzo con la
+soglia di R242 sarebbe stata **una conferma costruita**, non una misura.
+**La regola**: riprodurre una formula **non** riproduce la popolazione. Prima di confrontare una
+percentuale con una soglia presa da un altro strumento, si chiede **su quali giornate è calcolato
+il denominatore di ciascuno dei due**, e si converte (`soglia_sonda = soglia_originale / (1−q)`)
+— misurando `q`, mai assumendolo. 🟢 E si verifica che il **contro-esempio sopravviva** alla
+conversione: qui 3,9→4,9 e 8,8→11,0 lasciano il rapporto a **2,26**, quindi la sonda distingue
+ancora. Se la conversione avvicinasse le due ipotesi, lo strumento non servirebbe più.
+
+## 🗑️ CLASSE 728 — **la colonna dichiarata INUTILIZZABILE senza calcolare su QUALI celle lo è davvero**
+
+Stessa sonda. Avevo scritto che la colonna `sessione_rompe` era inutilizzabile per **H=0…H=15**.
+🔴 Ricalcolato cella per cella (filtro r.195-196: `if(InNotte(ora)) continue` + `480 ≤ mm < 1050`;
+le ore non notturne del giorno logico sono `0…H−1`): è vuota **solo** per H=0, 3, 6.
+
+| cella | copre davvero |
+|---|---|
+| H=9 | 08:00-08:59 |
+| **H=12** | **08:00-11:59** |
+| H=15 | 08:00-14:59 |
+| H=18 | 08:00-17:29 |
+
+🎯 **H=12 è praticamente la finestra d'ingresso dell'EA** (piazza 07:59, cutoff 12:00, scadenza
+250 min). Lì la sonda misura **anche la seconda causa** e **predice l'n short di R242, che a H=12
+vale 120** — cioè l'unico controllo che può **bocciare la sonda intera**. Era in cestino.
+**La regola**: *"non si usa"* costa zero da scrivere e può buttare via il controllo più affilato
+che si ha. La copertura di una colonna si **calcola cella per cella**, non si dichiara in blocco.
+
+## 🧭 CLASSE 729 — **il TF di un calcolo attribuito al GRAFICO quando il sorgente lo ha scritto dentro**
+
+Stessa sonda. Avevo scritto, dichiarandolo *"verificato nel sorgente"*, che *"l'EA calcola il box
+sul grafico M15"*. 🔴 **Falso**: `ComputeBox` ha `PERIOD_M1` **inchiodato cinque volte**
+(`ABTG_MaxMinNotte.mq5` r.308-318: `iBarShift`/`iHighest`/`iLowest`/`iHigh`/`iLow`). Attaccare
+l'EA a un M15 **non cambia il box**.
+🔴 **Aggravante che rende l'errore facile**: esiste una manopola omonima, `InpMgmtTF=PERIOD_M15`,
+che è **reale** ma governa **ATR ed EMA200** (r.146), non il box. Il nome dell'input **conferma
+l'ipotesi sbagliata**, che è il modo peggiore di sbagliare.
+🟢 La correzione rende il residuo **più piccolo** (una barra M1, non 15 minuti) — ma il difetto
+non è la grandezza: è aver scritto *"verificato"* accanto a una cosa che il sorgente smentisce.
+👉 Parente stretta della **classe 713** (il TF inerte su 4 modi su 6 dell'Apertura, stesso
+`PERIOD_M1` hardcoded). **È la seconda volta.**
+**La regola**: il TF di un calcolo si legge **nella chiamata**, mai dal TF del grafico e mai dal
+nome di un input che gli assomiglia.
+
+## ⚖️ CLASSE 730 — **la soglia di rilevabilità del LATO SBAGLIATO**
+
+Stessa sonda: nasce dal problema dello **short** (96-130 giornate) e citava la soglia di cecità
+del **long** (8,8%). Il pavimento è **uno solo** per i due lati (`r.331` sta **prima** della
+biforcazione), ma le due soglie sono diverse (8,8% long, 10,4% short → riscalate 11,0 e 13,0).
+🔴 In mezzo c'è una fascia in cui il risultato spiegherebbe il calo del long e lascerebbe quello
+dello short **senza spiegazione**: **mezza risposta spacciata per conferma**.
+**La regola**: se un meccanismo è condiviso dai due lati, si dichiarano **tutte e due** le soglie,
+e si dice cosa vuol dire cadere **in mezzo**. (Parente della **724**, ma qui la metà taciuta è un
+**lato**, non una statistica.)
+
+## 📑 CLASSE 731 — **le righe sorgente CITATE dal round precedente invece che RICONTATE sul file a HEAD**
+
+Stessa sonda: il file prova diceva *"EA r.328-329"* per il test del pavimento (vero: **r.331**) e
+*"r.178-183"* per `tStart-=86400` (vero: **r.306**), copiate da `R242` invece che ricontate — e si
+presentava come **letto oggi**. Scarto piccolo (2-3 righe e un blocco intero), **conseguenza zero
+questa volta**, ma una citazione di riga è un **puntatore**: se il file si muove, il puntatore
+mente in silenzio e il controllo successivo guarda il posto sbagliato.
+**La regola**: ogni `r.NNN` che entra in un documento nuovo si **riconta sul file a HEAD** nel
+momento in cui lo si scrive. Citare la citazione di un altro documento è **una copia, non una
+lettura**.
