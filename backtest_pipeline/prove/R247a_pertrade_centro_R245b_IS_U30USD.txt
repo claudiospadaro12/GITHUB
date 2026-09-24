@@ -195,22 +195,40 @@
 #   P(coperd) = giorni in perdita della viva in cui perde anche la nuova
 #   rapp_DD = DD(somma) / (DD viva + DD nuova), additivi
 #   rapp_PG = |peggior giornata della somma| / max(|peggiori singole|)
-#  LE SOGLIE (le stesse costanti stanno in r247_sovrapposizione.py r.84-93):
+#  LE SOGLIE (le stesse costanti stanno in r247_sovrapposizione.py, blocco
+#  SOGLIE in testa, cambiate NELLO STESSO COMMIT):
+#   NULLO PER PERMUTAZIONE (q95): i record giornalieri della nuova
+#      rimescolati fra i SUOI giorni della finestra comune, 2000 volte, seme
+#      247 = stessi giorni, stessa quota, stessi C, P/L INDIPENDENTI. q95_x
+#      e' il 95esimo percentile di x in quel nullo.
 #   RADDOPPIO DEL RISCHIO se rho_U >= 0,50, OPPURE (quota_viva >= 0,50 E
 #      rho_C >= 0,70): la seconda sedia fa la STESSA scommessa della prima.
 #   COPERTURA se rho_U <= -0,50 (si annullano: pedaggio doppio per niente).
-#   DIVERSIFICAZIONE se rho_U <= 0,20 E rho_C < 0,50 E rapp_DD < 0,87 E
-#      rapp_PG < 1,50.
+#   DIVERSIFICAZIONE se rho_U <= 0,20 E rho_C < 0,50 E rapp_DD <= q95 E
+#      rapp_PG <= q95 E P(coperd) <= q95.
 #   PARZIALE altrimenti: si legge insieme alla taglia, ed e' di Claudio.
-#   ALLARME DI CODA, a parte e a qualunque n (Emendamento B): rapp_PG >=
-#      1,80 oppure P(coperd) >= 0,70. Non cambia il verdetto: si scrive
-#      accanto.
-#  DA DOVE VENGONO I NUMERI: per due serie di pari volatilita' e
-#  correlazione rho, il DD della somma sta a quello delle due sommate come
-#  sqrt((1+rho)/2): 0,866 a rho 0,5 (da qui 0,87), 0,775 a rho 0,2, 0,707 a
-#  rho 0, 1 a rho 1. rho_C 0,70 = meta' della varianza in comune. Errore
-#  standard di rho con ~200 giorni U ~0,06, con ~80 giorni C ~0,06-0,09 a
-#  rho 0,7: le fasce 0,20 / 0,50 distano piu' di 3 errori.
+#   NON LEGGIBILE se rho_U o rho_C non si calcolano (meno di 3 giorni).
+#   ALLARME DI CODA, a parte e a qualunque n (Emendamento B): rapp_PG > q95
+#      oppure P(coperd) > q95. Si scrive accanto.
+#   rapp_PG e la peggior giornata della SOMMA si stampano SEMPRE in
+#      assoluto: sono il numero per la pausa del Guardian (4,0%).
+#  PERCHE' NON LE SOGLIE FISSE DELLA PRIMA STESURA (rapp_DD < 0,87, rapp_PG
+#  < 1,50, coda a rapp_PG >= 1,80 o P(coperd) >= 0,70) -- IL CONTRO-ESEMPIO
+#  DELLO STRATO 2 (24/09, classe 178): con perdite LIMITATE a ~1R (lo
+#  stop), due sedie INDIPENDENTI che entrano negli stessi giorni hanno quasi
+#  certamente un giorno in cui perdono lo stop tutte e due. Simulato contro
+#  il per-trade VERO di 772505 (nuova indipendente, 55% perdite fra -0,95 e
+#  -1,20%, quota ~0,95, 400 serie): rapp_PG 1,82 mediana, 1,84 al p95 (la
+#  copia: 2,00); DIVERSIFICAZIONE 0 su 400; allarme di coda 84-88%;
+#  P(coperd) al p95 0,61-0,71; rapp_DD al p95 0,88-0,92. Le soglie fisse
+#  rispondevano all'esposizione, non alla correlazione: l'attesa "DIVERSI-
+#  FICAZIONE e' il MENO probabile" era vera PER COSTRUZIONE. Col nullo:
+#  indipendenti -> DIVERSIFICAZIONE 91/100, coda 3/100; nuova che copia il
+#  segno della viva nel 50% dei giorni -> coda 97/100; nell'80% -> PARZIALE
+#  100/100, coda 100/100.
+#  rho: rho_C 0,70 = meta' della varianza in comune. Errore standard di rho
+#  con ~200 giorni U ~0,06, con ~80 giorni C ~0,06-0,09 a rho 0,7: le fasce
+#  0,20 / 0,50 distano piu' di 3 errori.
 #  IL CONTRO-ESEMPIO CHE HA CAMBIATO LE SOGLIE (classe 178): una sedia che
 #  entra in MOLTI piu' giorni ma che, nei giorni della viva, fa la stessa
 #  cosa, ha rho_U DILUITO dagli zeri: nel collaudo T5 esce 0,40, sotto
@@ -230,9 +248,9 @@
 #  dentro, lungo, lo stesso giorno. Stop diversi (range 15' contro 35'),
 #  uscite diverse (TP 1,5R contro parziale a 1R + BE), trailing uguale (barra
 #  M5 precedente). Mi aspetto: quota_viva 0,80-1,00; stesso verso 0,80-0,97;
-#  rho_C 0,45-0,80; rho_U 0,25-0,55; P(coperd) 0,55-0,85. Esito piu'
-#  probabile: PARZIALE o RADDOPPIO; DIVERSIFICAZIONE e' il MENO probabile,
-#  e lo scrivo prima.
+#  rho_C 0,45-0,80; rho_U 0,25-0,55; P(coperd) 0,55-0,85 e SOPRA il q95
+#  del nullo. Esito piu' probabile: PARZIALE o RADDOPPIO con l'allarme di
+#  coda; DIVERSIFICAZIONE e' il MENO probabile, e lo scrivo prima.
 #
 # ==========================================================================
 #  7. (b) IL DD GIORNO PER GIORNO -- come si legge, SCRITTO PRIMA

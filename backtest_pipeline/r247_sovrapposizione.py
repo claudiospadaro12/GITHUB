@@ -70,6 +70,7 @@ import csv
 import math
 import os
 import sys
+import random
 import tempfile
 from collections import OrderedDict, defaultdict
 from datetime import datetime
@@ -86,11 +87,18 @@ S_RADD_QUOTA = 0.50     # quota dei giorni della viva in cui entra anche la nuov
 S_RADD_RHO_C = 0.70     # rho sui soli giorni in comune
 S_DIV_RHO_U = 0.20
 S_DIV_RHO_C = 0.50
-S_DIV_RAPP_DD = 0.87    # DD(somma) / (DD_viva + DD_nuova)
-S_DIV_RAPP_PG = 1.50    # |peggior giornata somma| / max(|peggiori singole|)
 S_COP_RHO_U = -0.50
-S_CODA_RAPP_PG = 1.80   # allarme di coda
-S_CODA_COPERD = 0.70    # P(nuova perde | viva perde), giorni della viva
+# rapp_DD, rapp_PG e P(coperd) NON hanno piu' una soglia fissa: si
+# confrontano col NULLO PER PERMUTAZIONE (stessi giorni, P/L% della nuova
+# rimescolati fra i SUOI giorni della finestra comune = stessa esposizione,
+# P/L indipendenti). Contro-esempio che l'ha imposto (strato 2, 24/09):
+# con perdite limitate a ~1R due sedie INDIPENDENTI sugli stessi giorni
+# danno rapp_PG 1,77-1,84 (la copia 2,00): la soglia fissa 1,50 rendeva
+# DIVERSIFICAZIONE irraggiungibile (0/400) e l'allarme 1,80 scattava sul
+# nullo nell'84-88% dei casi. Il numero assoluto si STAMPA lo stesso.
+N_PERM = 2000
+SEME_PERM = 247
+Q_NULLO = 0.95
 
 
 # =====================================================================
@@ -306,6 +314,8 @@ def unisci(tranches):
 
 
 def verdetto_a(m):
+    if any(math.isnan(m[k]) for k in ("rho_u", "rho_c")):
+        return "NON LEGGIBILE (rho non calcolabile: meno di 3 giorni o varianza nulla)"
     if m["rho_u"] <= S_COP_RHO_U:
         return "COPERTURA (si annullano: pedaggio doppio per niente)"
     if m["rho_u"] >= S_RADD_RHO_U:
@@ -313,13 +323,37 @@ def verdetto_a(m):
     if m["quota_viva"] >= S_RADD_QUOTA and m["rho_c"] >= S_RADD_RHO_C:
         return ("RADDOPPIO DEL RISCHIO sui giorni della viva (quota %.2f >= %.2f e rho_C >= %.2f)"
                 % (m["quota_viva"], S_RADD_QUOTA, S_RADD_RHO_C))
-    if (m["rho_u"] <= S_DIV_RHO_U and not (m["rho_c"] >= S_DIV_RHO_C)
-            and m["rapp_dd"] < S_DIV_RAPP_DD and m["rapp_pg"] < S_DIV_RAPP_PG):
+    if (m["rho_u"] <= S_DIV_RHO_U and m["rho_c"] < S_DIV_RHO_C
+            and m["rapp_dd"] <= m["q_rapp_dd"] and m["rapp_pg"] <= m["q_rapp_pg"]
+            and not (m["p_coperd"] > m["q_p_coperd"])):
         return "DIVERSIFICAZIONE"
     return "PARZIALE (ne' raddoppio ne' diversificazione: si legge con la taglia)"
 
 
-def misura_a(gv, gn, comune, peso_v, peso_n):
+def misura_a(gv, gn, comune, peso_v, peso_n, n_perm=N_PERM):
+    m = _misura_base(gv, gn, comune, peso_v, peso_n)
+    # NULLO: stessi giorni della nuova (quindi stessa quota e stessi C),
+    # i suoi record giornalieri rimescolati fra quei giorni.
+    d0, d1 = comune
+    chiavi = sorted(k for k in gn if d0 <= k <= d1)
+    recs = [gn[k] for k in chiavi]
+    rng = random.Random(SEME_PERM)
+    nul = {"rapp_dd": [], "rapp_pg": [], "p_coperd": []}
+    for _ in range(n_perm):
+        rng.shuffle(recs)
+        mp = _misura_base(gv, dict(zip(chiavi, recs)), comune, peso_v, peso_n)
+        for k in nul:
+            if not math.isnan(mp[k]):
+                nul[k].append(mp[k])
+    for k, v in nul.items():
+        v.sort()
+        m["q_" + k] = v[min(len(v) - 1, int(Q_NULLO * len(v)))] if v else float("nan")
+    m["verdetto"] = verdetto_a(m)
+    m["coda"] = (m["rapp_pg"] > m["q_rapp_pg"]) or (m["p_coperd"] > m["q_p_coperd"])
+    return m
+
+
+def _misura_base(gv, gn, comune, peso_v, peso_n):
     d0, d1 = comune
     dv = {k: v for k, v in gv.items() if d0 <= k <= d1}
     dn = {k: v for k, v in gn.items() if d0 <= k <= d1}
@@ -351,8 +385,6 @@ def misura_a(gv, gn, comune, peso_v, peso_n):
         else float("nan"),
         "giorni_U": U, "xv": xv, "xn": xn, "xs": xs,
     }
-    m["verdetto"] = verdetto_a(m)
-    m["coda"] = (m["rapp_pg"] >= S_CODA_RAPP_PG) or (m["p_coperd"] >= S_CODA_COPERD)
     return m
 
 
@@ -370,14 +402,17 @@ def stampa_a(m, comune, peso_v, peso_n, invalido):
     print("  rho_U (P/L%% giornaliero, giorni U, 0 dove una non entra) = %.3f" % m["rho_u"])
     print("  rho_C (solo giorni in comune)                          = %.3f" % m["rho_c"])
     print("  giorni in perdita della viva %d, in cui perde anche la nuova %d  -> P = %.3f"
-          % (m["perde_v"], m["coperd"], m["p_coperd"]))
+          "  (nullo q%.0f %.3f)" % (m["perde_v"], m["coperd"], m["p_coperd"], 100 * Q_NULLO, m["q_p_coperd"]))
     print("  DD additivo %%: viva %.3f | nuova %.3f | SOMMA %.3f  -> DD(somma)/(DDv+DDn) = %.3f"
-          "  [DERIVATO: stesso conto, additivo]" % (m["ddv"], m["ddn"], m["dds"], m["rapp_dd"]))
-    print("  peggior giornata %%: viva %.3f | nuova %.3f | SOMMA %.3f  -> rapporto %.3f"
-          % (m["peg_v"], m["peg_n"], m["peg_s"], m["rapp_pg"]))
+          "  (nullo q%.0f %.3f)  [DERIVATO: stesso conto, additivo]"
+          % (m["ddv"], m["ddn"], m["dds"], m["rapp_dd"], 100 * Q_NULLO, m["q_rapp_dd"]))
+    print("  peggior giornata %%: viva %.3f | nuova %.3f | SOMMA %.3f  -> rapporto %.3f  (nullo q%.0f %.3f)"
+          % (m["peg_v"], m["peg_n"], m["peg_s"], m["rapp_pg"], 100 * Q_NULLO, m["q_rapp_pg"]))
+    print("  (nullo = %d permutazioni, seme %d: stessi giorni, P/L%% della nuova rimescolati fra i suoi giorni)"
+          % (N_PERM, SEME_PERM))
     print("  VERDETTO (a): %s%s" % (m["verdetto"], tag))
-    print("  ALLARME DI CODA (peggior giornata somma >= %.2f x singola, o P(perde|viva perde) >= %.2f): %s"
-          % (S_CODA_RAPP_PG, S_CODA_COPERD, "SCATTA" if m["coda"] else "non scatta"))
+    print("  ALLARME DI CODA (rapp_PG o P(perde|viva perde) SOPRA il q%.0f del nullo): %s"
+          % (100 * Q_NULLO, "SCATTA" if m["coda"] else "non scatta"))
 
 
 def stampa_b(nome, tt, rischio_base, rischi, invalido):
@@ -629,6 +664,36 @@ def autotest():
     m = misura_a(gv, tranche(leggi_pertrade(pd_), 10000.0)["giorni"], comune, 1.0, 1.0)
     chk("T6 disgiunti: C = 0 e peggior giornata somma = la peggiore delle due",
         m["C"] == 0 and abs(m["peg_s"] - min(m["peg_v"], m["peg_n"])) < 1e-12)
+
+    # T7: IL CONTRO-ESEMPIO DELLO STRATO 2 (24/09). Perdite LIMITATE a ~1R
+    #     (come uno stop), due sedie INDIPENDENTI, la nuova entra nel 95%
+    #     dei giorni della viva. Con le soglie fisse (rapp_PG < 1,50;
+    #     allarme a 1,80) usciva PARZIALE + coda SCATTA per costruzione.
+    def a_bin(giorni, r):
+        out = []
+        for d in giorni:
+            out.append((d, -r.uniform(0.95, 1.20) if r.random() < 0.55 else
+                        r.choice([r.uniform(1.3, 1.6), r.uniform(0.1, 1.2)])))
+        return out
+    rb = random.Random(7)
+    vb = a_bin([d for d in G if rb.random() < 0.40], rb)
+    dvb = dict(vb)
+    nb = a_bin([d for d in G if rb.random() < (0.95 if d in dvb else 0.70)], rb)
+    pvb, pnb = os.path.join(tmp, "vb.csv"), os.path.join(tmp, "nb.csv")
+    _scrivi_pt(pvb, a_deals(vb), "900007")
+    _scrivi_pt(pnb, a_deals(nb), "900008")
+    gvb = tranche(leggi_pertrade(pvb), 10000.0)["giorni"]
+    m = misura_a(gvb, tranche(leggi_pertrade(pnb), 10000.0)["giorni"], comune, 1.0, 1.0)
+    chk("T7 perdite limitate, indipendenti, quota ~0,95: rapp_PG > 1,50 (la vecchia soglia non passava)",
+        m["rapp_pg"] > 1.50, "(%.3f, nullo q95 %.3f)" % (m["rapp_pg"], m["q_rapp_pg"]))
+    chk("T7 ... verdetto DIVERSIFICAZIONE e coda NON scatta", m["verdetto"] == "DIVERSIFICAZIONE"
+        and not m["coda"], "(%s; coda %s; P %.3f q %.3f)" % (m["verdetto"], m["coda"], m["p_coperd"],
+                                                              m["q_p_coperd"]))
+    pcb = os.path.join(tmp, "cb.csv")
+    _scrivi_pt(pcb, a_deals(vb), "900009")
+    m = misura_a(gvb, tranche(leggi_pertrade(pcb), 10000.0)["giorni"], comune, 1.0, 1.0)
+    chk("T7 copia a perdite limitate: RADDOPPIO e coda SCATTA", m["verdetto"].startswith("RADDOPPIO")
+        and m["coda"], "(%s; rapp_pg %.3f q %.3f)" % (m["verdetto"], m["rapp_pg"], m["q_rapp_pg"]))
 
     # --- G0: contro-esempi -------------------------------------------------
     deals = a_deals(ind)

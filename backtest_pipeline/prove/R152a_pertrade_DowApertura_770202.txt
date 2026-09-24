@@ -308,6 +308,9 @@ InpVerbose=true||true||0||true||N
 #    - Confronto DD/profitto contro l'ancora resta APPROSSIMATO
 #      (paragrafo sopra): la taglia e' diversa (0,65% qui, 1,0%
 #      nell'ancora) per scelta dichiarata, non per errore.
+#    [!] ERRATA 24/09 (cancello R247): FALSO -- il per-trade di R152a (770208) ha
+#        130 deal / 96 posizioni = la SOLA gamba OOS 2025.06.10 -> 2026.06.30
+#        (senza @FRAZIONEIS gira a 0,40 e la gamba OOS sovrascrive la IS).
 #    - Il CSV copre TUTTA la finestra (IS+OOS insieme, come lo
 #      esporta ExportTrades() -- HistorySelect(0, TimeCurrent())).
 #      mc_dd_cella.py va lanciato UNA VOLTA su tutto il file (soglia
