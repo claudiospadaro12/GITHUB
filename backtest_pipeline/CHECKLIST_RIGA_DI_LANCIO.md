@@ -35269,3 +35269,26 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🪤 CLASSE 753 — **una variabile riusata per due cose nella stessa riga: il contatore sovrascrive la tabella del controllo, e il controllo passa senza guardare niente**
 - **Caso (24/09, riga R245, gia' con PASS di strato 2 e NON ancora lanciata)**: la tabella degli hash della classe 166 si chiamava `$att=@{}`, e il contatore d'attesa di MT5 ereditato da R240 si chiama `$att=0` e riparte a ogni job. Da li' `@($att.Keys)` e' vuoto, `$div` resta vuoto, e la riga stampa **"motore = pin (SHA256)" anche con EA alterato o assente**. Non l'hanno visto ne' lo strato 1 ne' lo strato 2 ne' il coordinatore: l'ha trovato l'agente che costruiva R244/R243, **facendo girare il contro-esempio** in pwsh.
 - **Regola**: un controllo aggiunto a una riga esistente usa **nomi che nella riga non compaiono** (grep del nome prima di sceglierlo), e il suo contro-esempio si **esegue** (EA alterato -> deve uscire DIVERSO), non si ragiona. Buco anche di `controlla_riga.py`: non vede una variabile assegnata con tipi diversi.
+
+## 📦 CLASSE 754 — **il file prova promette una misura "a costo zero" nel round, e la riga la lascia fuori scrivendo "non misurato"**
+- **Caso (24/09, R244)**: il par. 6-bis dice che k = deal/posizioni si misura in questo round; la riga scriveva "k NON e' misurato da questa riga", mentre `ExportTrades()` di `ABTG_MaxMinNotte` scrive gratis `Common\Files\abtg_trades_..._<magic>.csv` con `position_id` (ultima passata, classe 455). Corretto: la riga raccoglie il PERTRADE filtrato `-ge $T0`.
+- **Regola**: ogni misura che il file prova dichiara parte del round o la riga la esegue/raccoglie, o il file la sposta esplicitamente a un round successivo.
+
+## 🔢 CLASSE 755 — **l'elenco "per nome" scritto con un NUMERO cardinale che invecchia copiandolo di riga in riga**
+- **Caso (24/09)**: "VPS e i suoi sei terminali" da R240 a R245, R244, R243 e alla passata SupRev: mancavano **Pepperstone e Tickmill** (le cartelle dati del VPS sono piu' di sei). Parente della classe 180.
+- **Regola**: niente cardinale nell'elenco dei NON TOCCATI ("TUTTE le sue cartelle dati -- ..."), si elenca dal censimento piu' recente.
+
+## 👯 CLASSE 756 — **la riga riassume due gemelli con una frase vera solo per uno**
+- **Caso (24/09, riga R243)**: "Gemello di R240 con UNA sola differenza (StAtrPeriod)": vero per il corto R243a, falso per il lungo R243b che cambia DUE manopole (StMult 2.5->3.5 e StAtrPeriod 12->9).
+- **Regola**: una frase riassuntiva di N file si verifica file per file.
+
+## 🔡 CLASSE 757 — **in PowerShell `$A` e `$a` sono LA STESSA variabile** (estensione della 753)
+- **Caso (24/09, `PASSATA_STOP_SUPREV.ps1`)**: `$A = '2026.06.30'` (ToDate dell'ini) e `foreach($a in $diversi)` r.120. Oggi latente (il foreach precede un `throw`), ma e' lo schema del fail-open di R245.
+- **Regola**: il grep del nome nuovo si fa **senza distinguere maiuscole** (`grep -i`).
+
+## 🟩 CLASSE 758 — **messaggio verde vero solo perche' l'insieme e' vuoto**
+- **Caso (24/09, righe R243/R244/R245)**: se tutti i job escono rc 1, il riepilogo stampa comunque in verde "MOTORE = PIN in ogni round partito" su **zero** round partiti. Rilievo, non bloccante: le righe per job dicono NON VERIFICATO. Rimedio alla prossima revisione: stampare quanti round sono partiti.
+
+## 🧱 CLASSE 759 — **lo strato 2 dichiara PASS su un file prova che lo strato 1 BLOCCA**
+- **Caso (24/09, R243a/b)**: il cancello di giudizio ha dato "R243a: PASS" su un file con **24+ emoji** (byte non-ASCII, che PS 5.1 legge ANSI); `controlla_riga.py --oggetto prova` lo **bloccava**. Lo strato 1 era stato rieseguito solo sulle RIGHE, non sui file prova.
+- **Regola**: il PASS di un round richiede lo strato 1 **su ogni file prova E sulla riga**, rieseguito dopo l'ultima modifica; il coordinatore lo rilancia lui prima di accettare un PASS.
