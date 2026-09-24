@@ -1,0 +1,553 @@
+# ==========================================================================
+#  R245a -- IL BORDO DESTRO DI InpEmaSlow DEL "770201" (DOW BREAKOUT 2 LATI)
+#  ABTG_Nasdaq_Apertura_US su U30USD M5 -- TICK REALI -- InpTP1_R = 0.33
+#  DUE LATI (configurazione di contratto) -- magic 765241
+#  QUESTO E' IL FILE DI TESTA DEL ROUND: qui sta TUTTO il ragionamento
+#  (pin, finestra, ancora, unita' di n, stop, lati, attesa, soglie,
+#  tempo, buchi). R245b-f rimandano qui e portano solo le loro differenze.
+# ==========================================================================
+#
+#  >>> LA DOMANDA, UNA SOLA
+#  Le 11 celle su 40 che passano INSIEME PF>=1,10 + n>=150 + DD<=10% in
+#  tutte e due le finestre (report/CHI_E_PIU_VICINO_AL_CAMPO_2026-09-24.md
+#  par. 3.1-A) stanno su InpEmaSlow 160/180/200, e 200 E' L'ESTREMO della
+#  griglia d'archivio. La regola "centro dell'altopiano, MAI il picco"
+#  oggi non ha un referente: un blocco che tocca il bordo non ha un centro
+#  noto. R245 estende l'asse a 220/240/260 e rimisura 160/180/200 come
+#  ancore, sulle due finestre, per ognuno dei quattro InpTP1_R.
+#  >>> Non promuove niente. Non tocca taglie. Non tocca nessuna sedia.
+#
+# ==========================================================================
+#  1. QUALE EA, e perche' NON e' ABTG_Dow_Apertura_US
+# ==========================================================================
+#  L'archivio l'ha prodotto backtest_pipeline/dow_apertura.ps1, fase
+#  "walkforward": r.37 $EA="ABTG_Nasdaq_Apertura_US" ("e' l'EA
+#  dell'apertura USA: il Dow apre alla stessa ora"). E la colonna InpMagic
+#  del CSV vale 770201 su 80 righe su 80 = il ABTG_DEF_MAGIC di QUESTO
+#  sorgente (ABTG_Nasdaq_Apertura_US.mq5 r.38). "770201" e' quindi
+#  l'etichetta della configurazione d'archivio, non una sedia viva: la
+#  sedia Dow che vola (770202) e' un ALTRO EA (ABTG_Dow_Apertura_US), in
+#  RETEST, solo long, range 35'.
+#  >>> Compilare ABTG_Dow_Apertura_US per questo round vorrebbe dire
+#      misurare un sorgente diverso da quello che ha fatto l'archivio
+#      (dubbio lasciato [NON VERIFICATO] in CHI_ALTRO_PUO_SCHIERARSI r.165-169:
+#      qui e' CHIUSO dal lanciatore e dal magic, non da un diff).
+#
+# ==========================================================================
+#  2. DA DOVE VENGONO I PIN -- dal CSV, non da memoria
+# ==========================================================================
+#  risultati_archivio/Dow_Apertura/dow_walkforward_{IS,OOS}.csv: 40+40
+#  righe, 77 colonne Inp*. Letto con uno script il 24/09: 75 colonne
+#  hanno UN SOLO valore su tutte e 80 le righe, 2 variano (InpEmaSlow,
+#  InpTP1_R). Le 75 costanti sono i pin qui sotto, al valore del CSV, con
+#  TRE eccezioni dichiarate:
+#   - InpMagic 770201 -> blocco VERGINE 765241..765246 (un magic per file).
+#     Verificato PRIMA di scrivere: grep -rn "76524[0-9]" su tutto il
+#     repo, comprese le 8 .claude/worktrees = 0 occorrenze; non e' nessuno
+#     dei magic FTMO vivi 770101 770202 770260 770411 770511 771531 779001.
+#     In una corsa a EA singolo il magic non tocca nessun risultato
+#     (lo legge solo la guardia A4, HaGiaOperatoOggi, e in tester ci sono
+#     solo i deal di questo EA).
+#   - InpNewsCurrencies: nel CSV e' la STRINGA VUOTA. Un pin vuoto MT5 lo
+#     ignora (controlla_prova.py lo rifiuta), il driver lo salta, e il
+#     default compilato (r.296) e' gia' "". OMESSO, stesso effetto.
+#   - InpAllowLong/InpAllowShort: 1/1 come il CSV in R245a-d; cambiano
+#     SOLO in R245e/f (par. 6).
+#  E 21 input che a HEAD esistono e nel CSV no (aggiunti dopo il 05/08):
+#  pinnati al valore NEUTRO, riga per riga sotto, ognuno con la riga del
+#  sorgente che ne dimostra il percorso d'uscita. InpUsaGuardian=0 (e non
+#  1 come in R241): nel tester e' comunque un no-op, ma 0 e' il percorso
+#  LETTERALMENTE identico a quello dell'archivio, che il Guardian non
+#  l'aveva.
+#  Bool scritti 1/0 come li scriveva dow_apertura.ps1: e' la forma che ha
+#  prodotto l'archivio, e che MT5 ha onorato (filtro EMA 1 vs 0 ha dato
+#  PF 1,24 contro 1,03 in DOW_MOTORE.md: il pin MORDEVA).
+#
+# ==========================================================================
+#  3. LA FINESTRA -- identica all'archivio, tranne UNA data dichiarata
+# ==========================================================================
+#  Archivio (dow_apertura.ps1 al commit 511cc977, r.234-235):
+#     IS  2024.01.01 -> 2025.06.30     OOS 2025.07.01 -> 2026.06.30
+#  Qui: @DAQUANDO 2024.09.26  @FINOA 2026.06.30  @FRAZIONEIS 0.4322
+#  Il driver taglia a Meta = Inizio + floor(giorni x f)
+#  (walkforward_generico.ps1 r.934): 642 giorni x 0,4322 = 277,47 -> 277
+#  -> IS 2024.09.26 -> 2025.06.30 , OOS 2025.07.01 -> 2026.06.30.
+#  f valido in [277/642 ; 278/642) = [0,43146 ; 0,43302): 0,4322 sta nel
+#  mezzo, 0,0008 da ciascun bordo.
+#  >>> L'UNICA differenza e' l'inizio IS: 2024.01.01 nell'archivio,
+#      2024.09.26 qui. Lo storico BCM sugli indici PARTE dal 2024.09.26
+#      (misurato, commit 2f4c95ae: SERIES_SERVER_FIRSTDATE su U30USD),
+#      quindi l'archivio girava gia' DI FATTO da li'. Qui si scrive la
+#      data vera. Se questo cambiasse qualcosa lo dice l'ancora (par. 4),
+#      e lo dice SOLO sulle celle IS: e' la firma per riconoscerlo.
+#  Banco identico all'archivio: Model 4 (tick reali), Deposit 10000, EUR,
+#  Leverage 100, OptimizationCriterion 6, ExecutionMode 0, nessuna riga
+#  Spread (dow_apertura.ps1 r.269-275 contro driver r.2008-2021).
+#
+#  >>> VINCOLI DELLA RIGA DI LANCIO (non imponibili dal file):
+#   - -Deposito 10000, cioe' il DEFAULT del driver. **NON** passare
+#     -Deposito 100000 come in R239/R241: col lotto calcolato sul saldo
+#     cambia l'arrotondamento dei lotti, e l'ancora non riprodurrebbe.
+#   - -Modello 4. -Spread NON passato (come l'archivio).
+#   - gira sul PC DI BACKTEST (firma del 21/09), MAI sul VPS.
+#
+# ==========================================================================
+#  4. L'ANCORA -- cancello G0, e si guarda PER PRIMO
+# ==========================================================================
+#  L'asse parte da 160, non da 220, APPOSTA: le 12 celle 160/180/200 x 4
+#  TP (per finestra) sono gia' nell'archivio e devono tornare.
+#  PERCHE' NON E' SCONTATO CHE TORNINO: l'archivio e' stato girato col
+#  sorgente di allora (ultimo commit dell'EA prima del CSV bf1f86e7 del
+#  05/08 04:25 = 822ec56d del 02/08); da li' a HEAD il file ha +994/-56
+#  righe. Letto il diff sul percorso di QUESTA configurazione:
+#   - cambia davvero una cosa sola: CalcLotByRisk usa OrderCalcProfit
+#     (r.2045, commit 3af47ed9 del 08/08) al posto del tick value. "Sui
+#     simboli sani i due calcoli coincidono" dice il commento, NON una
+#     misura su U30USD: puo' spostare il lotto, quindi Profit/DD, NON n;
+#   - EndOfSession chiude per ticket (r.2377) invece di PositionClose per
+#     simbolo: con una posizione sola e' lo stesso gesto;
+#   - guardia A4 (legge lo storico deal del giorno): la macchina a stati
+#     fa gia' un ciclo al giorno, quindi non toglie ingressi;
+#   - tutto il resto (Guardian, R30, F1, runner, trailing a soglia,
+#     tetto A1) e' pinnato NEUTRO ed esce prima di fare qualcosa.
+#  Ci sono inoltre due cause NON di codice: l'inizio IS (par. 3) e una
+#  eventuale revisione dello storico tick sul PC di backtest.
+#  >>> TRE ESITI, congelati ora:
+#   G0-VERDE "RIPRODOTTO": nelle 24 celle d'ancora (12 IS + 12 OOS, file
+#      a-d) n IDENTICO e PF entro +-0,0005 e DD entro +-0,01 punti.
+#      -> archivio e R245 si leggono INSIEME.
+#   G0-GIALLO "DERIVA DI SOLDI": n identico in tutte e 24, PF o DD fuori
+#      tolleranza in qualcuna. -> R245 si legge SOLO al suo interno
+#      (160-260 tutto dallo stesso binario); i numeri d'archivio NON si
+#      mescolano. Indiziato: r.2045.
+#   G0-ROSSO "NON RIPRODOTTO": n diverso anche in UNA sola cella d'ancora.
+#      -> prima si capisce PERCHE', poi si legge. Se differiscono solo le
+#      celle IS -> inizio finestra / seme dell'EMA (par. 8, buco 2); se
+#      anche le OOS -> il motore a HEAD non e' quello d'archivio. La
+#      lettura interna 160-260 si produce lo stesso (e' il binario che
+#      verrebbe schierato), ma si scrive "motore a HEAD", e le "11 celle"
+#      del referto dell'architetto si RIFANNO dai numeri di R245, non si
+#      citano.
+#  LE ANCORE DI QUESTO FILE (archivio, InpTP1_R=0.33), che le celle 160/180/200
+#  devono riprodurre (cancello G0 di R245a):
+#       EmaSlow  finestra   PF        n    DD %      Profit
+#        160     IS        1.30353   153  6.0879    1225.56
+#        160     OOS       1.34859   197  8.6965    1627.19
+#        180     IS        1.38214   154  6.0879    1497.74
+#        180     OOS       1.39980   197  8.6965    1826.86
+#        200     IS        1.32116   154  6.0879    1278.08
+#        200     OOS       1.49911   197  7.1848    2248.40
+#  (fonte: risultati_archivio/Dow_Apertura/dow_walkforward_{IS,OOS}.csv)
+#
+#  Un secondo controllo GRATIS, esatto per codice: dentro la stessa
+#  finestra e lo stesso InpEmaSlow, n deve essere IDENTICO nei quattro
+#  file a-d. InpTP1_R sposta solo il TP (RunnerTP, r.1707-1711), non crea
+#  ne' toglie ingressi. Nell'archivio vale 10 righe su 10 in tutte e due
+#  le finestre. Se in R245 non vale, c'e' un percorso che dipende dal
+#  conto (lotto/margine) e va trovato prima di leggere.
+#
+# ==========================================================================
+#  5. n e' in POSIZIONI -- verificato, non assunto (classe 740)
+# ==========================================================================
+#  - InpTP1_ClosePct = 0 su 40/40 righe IS e 40/40 OOS del CSV (letto).
+#  - Il blocco della parziale ha il cancello InpTP1_ClosePct > 0 &&
+#    < 100 (r.2143): con 0 NON GIRA, e dentro lo stesso cancello sta
+#    anche il breakeven al TP1 (che qui e' comunque 0).
+#  - Ogni posizione esce UNA volta (SL, TP, trailing, o chiusura di fine
+#    sessione 17:30), news flatten spento: un deal di uscita per posizione.
+#  - La prova empirica: se ci fossero deal di parziale, n cambierebbe con
+#    InpTP1_R. Nell'archivio n e' INVARIANTE sulle 4 TP in 10 EmaSlow su
+#    10, IS e OOS.
+#  >>> Quindi la colonna Trades di questo round E' il numero di
+#      POSIZIONI, e il pavimento n>=150 si applica cosi' com'e'.
+#  (R245 pinna InpTP1_ClosePct=0: resta vero anche qui.)
+#
+# ==========================================================================
+#  6. LO STOP, letto nel codice che lo calcola (classe 735) -- E' AL PELO
+# ==========================================================================
+#  ABTG_Nasdaq_Apertura_US.mq5 a HEAD (1549beaa), TryPlaceBreakout:
+#    r.980  buffer = EffectiveBuffer()
+#    r.981  buyPx  = rangeHigh + buffer
+#    r.982  sellPx = rangeLow  - buffer
+#    r.995  entry(long) = buyPx + InpSlippagePts*_Point
+#    r.996  sl(long)    = sellPx          (InpSLMode=0 = SL_RANGE)
+#    r.998  dist        = entry - sl
+#    r.1020-1023 lato corto, speculare: entry = sellPx - slip, sl = buyPx
+#  EffectiveBuffer r.2339-2349: B = max(InpBufferPoints, STOPS_LEVEL) x
+#  _Point, con R30 spento (r.2347 non gira).
+#  ==> dist = R + 2B + slippage. Con InpSlippagePts=0 e InpBufferPoints=200
+#      (letti nel CSV) e U30USD a 2 decimali: dist = R + 4,00 idx.
+#  LA FORMULA DELL'ARCHITETTO (R + 2B) E' QUELLA DEL CODICE. Due dettagli
+#  che la muovono SOLO a favore:
+#   - se SYMBOL_TRADE_STOPS_LEVEL di U30USD su BCM fosse > 200 punti, B
+#     crescerebbe: [NON MISURATO], e puo' solo allargare lo stop;
+#   - il range si legge su PERIOD_M1 dalla barra delle 14:30 a quella
+#     delle 14:45 COMPRESA (r.941-946, count = |i0-i1|+1): un minuto in
+#     piu' della finestra nominale, quindi R(EA) >= R(15').
+#  Il pavimento InpMinStopPts=500 (5,00 idx) con InpSkipIfTight=0
+#  (r.1001-1004) alza lo stop a 5 idx solo se fosse piu' stretto: inerte.
+#  L'ATR non entra (SL_RANGE). Il trailing muove lo stop DOPO l'ingresso:
+#  il cancello misura ingresso -> SL iniziale.
+#
+#  IL CONTO, rifatto sul file grezzo e non copiato:
+#  risultati_archivio/studio_apertura/Studio_U30USD.csv, colonna
+#  ampiezza_pt, n = 446 giornate (breakout CIECO, entrambi i lati):
+#    R mediano 119,75 idx -> stop mediano 123,75 idx
+#    spread ora 14 BCM: 3,00 (logger vivo, prudente) / 2,00 (archivio tick)
+#    stop / spread mediano = 41,25x (a 3,00)  |  61,9x (a 2,00)
+#  >>> A 3,00 IL MARGINE SUL PAVIMENTO 40x E' +3,1%. AL PELO.
+#      Basta uno stop mediano piu' corto del 3,1% (sotto 120,0 idx) per
+#      ribaltarlo. E non e' un dettaglio teorico: lo spread e' quantizzato
+#      a 1,00 (2,00 o 3,00), quindi si sposta a scatti del 33-50%, non
+#      del 3%.
+#  >>> E PER OPERAZIONE, non alla mediana: nel file grezzo 212 giornate
+#      su 446 (47,5%) hanno lo stop sotto 120,0 idx, cioe' sotto 40x a
+#      spread 3,00; a spread 2,00 sono 138 su 446 (30,9%). Il P10 dello
+#      stop e' 34,8 idx = 11,6x a 3,00, sotto anche il pavimento duro
+#      13,3x. Il cancello di casa si pronuncia sulla MEDIANA e lo si
+#      rispetta; ma va scritto che quasi META' delle operazioni sta sotto.
+#  >>> Limite della fonte: le 446 giornate sono del breakout CIECO
+#      (entrambi i lati, filtro H4 con EMA 50 nello studio). Le giornate
+#      che l'EA opera davvero col filtro EMA 160-260 sono un SOTTOINSIEME:
+#      il loro range mediano e' [NON MISURATO].
+#  R245 non cambia lo stop: nessuna delle manopole dello stop si muove.
+#
+# ==========================================================================
+#  7. I DUE LATI (regola del 25/08) -- perche' a-d sono a due lati, e
+#     perche' esistono R245e/f
+# ==========================================================================
+#  COME SI COMPORTANO I DUE LATI IN QUESTO EA, letto al codice:
+#  InpEmaFast=1 su H4 (r.459) = la chiusura dell'ultima barra H4; TrendBias
+#  (r.1749-1755) confronta quella chiusura con l'EMA lenta: +1 o -1, MAI 0
+#  salvo CopyBuffer fallito o uguaglianza esatta. TryPlaceBreakout
+#  (r.984-986) piazza SOLO il lato concesso. Quindi, a filtro acceso:
+#  UN SOLO LATO PER GIORNATA, deciso dal prezzo e non dal conto.
+#  >>> Conseguenza 1: la configurazione "due lati" NON e' un OCO fra due
+#      pendenti: e' un interruttore giornaliero. n(L+S) = n(L) + n(S)
+#      ESATTO, su giornate disgiunte. E' lo stesso meccanismo che R239 ha
+#      misurato sull'EA gemello (Dow OOS: 88 + 149 = 237, residuo 0).
+#  >>> Conseguenza 2 -- PERCHE' IL CONTRATTO E' A DUE LATI: e' l'UNICA
+#      configurazione di questo motore che arriva a n>=150 IN TUTTE E DUE
+#      le finestre (IS 153-154). Ogni lato da solo sta sotto 150 per
+#      costruzione (la somma fa ~154 IS / ~197 OOS). Non e' una scelta di
+#      PF: e' l'unica in cui il MERITO si puo' leggere.
+#  >>> Conseguenza 3 -- PERCHE' SERVONO COMUNQUE I FILE PER LATO: la regola
+#      del 25/08 lo chiede su Dow/DAX/Nasdaq, e sull'EA gemello (RETEST 35',
+#      stesso simbolo, stesso filtro) R239 ha trovato il CORTO in perdita
+#      da solo (OOS PF 0,877 su n 88) con IS e OOS di SEGNO OPPOSTO. Per il
+#      770201 la divisione per lato e' [NON MISURATA]. R245e (solo lungo)
+#      e R245f (solo corto), a InpTP1_R=0,50, stesso asse: il ragionamento
+#      di lettura sta nelle loro teste. Si possono lanciare A PARTE da a-d:
+#      rispondono a una domanda diversa, e nessuna delle due puo' promuovere.
+#
+# ==========================================================================
+#  8. L'ATTESA, SCRITTA PRIMA DEI NUMERI -- e il contro-esempio
+# ==========================================================================
+#  Quello che l'archivio dice gia' (40 celle per finestra, ricontate):
+#   - n dipende solo da EmaSlow: IS 138 -> 154 (sale fino a 160, poi 153-154
+#     piatto); OOS 186 -> 197-198 (piatto da 100 in su).
+#   - PF OOS: 40/40 fra 1,267 e 1,560. A 200 la riga OOS SPORGE (1,465-1,546
+#     contro 1,286-1,400 a 160-180).
+#   - PF IS a TP 0,33/0,50/0,67: 1,244-1,382 su 160-200, in CALO da 180 a
+#     200 (-0,061 / -0,068 / -0,080). TP 0,84: 1,076-1,144, e a 200 e'
+#     SOTTO 1,10 (e' l'unica delle 12 celle 160-200 che cade).
+#   - Spearman IS->OOS negativo (-0,357 sul PF): la classifica non si
+#     trasporta.
+#
+#  IPOTESI H1 -- "altopiano: il margine e' nel motore, la taratura e'
+#  rumore" (la tesi di DOW_MOTORE.md). Predice sulle 12 celle NUOVE:
+#     n IS 150-158 ; n OOS 195-199 ; n invariante fra le 4 TP
+#     PF OOS dentro [1,267 ; 1,560]
+#     PF IS a TP 0,33-0,67 dentro [1,20 ; 1,40] ; TP 0,84 dentro [1,05 ; 1,20]
+#     DD fra 4% e 9% in tutte e due le finestre
+#     -> celle che passano tutto: 9-12 su 12 ; a 240+260: >= 6 su 8
+#  IPOTESI H2 -- "200 era il bordo di un declino IS". Si estrapola la
+#  pendenza 180->200 cella per cella (PF IS):
+#                 220     240     260
+#     TP 0,33    1,260   1,199   1,138
+#     TP 0,50    1,190   1,123   1,055
+#     TP 0,67    1,164   1,084   1,005
+#     TP 0,84    1,007   0,939   0,870
+#     -> celle che passano tutto: ~6 su 12 ; a 240+260: <= 3 su 8
+#
+#  >>> IL CONTRO-ESEMPIO CHE MI SONO COSTRUITO CONTRO (classe 178), e che
+#      CAMBIA come si legge il round:
+#   (a) A 220 LE DUE IPOTESI SI SOVRAPPONGONO. H2 predice 1,260/1,190/1,164
+#       sulle tre TP buone: sono DENTRO la banda di H1 [1,20;1,40] per due
+#       TP su tre. La dispersione del PF IS su 100-200 a TP 0,50 e' ~0,05:
+#       a 220 la distanza H1-H2 e' ~2 volte quella, a 240 ~3,6, a 260 ~5.
+#       ==> 220 DA SOLA NON DECIDE NIENTE. Decide la coppia 240/260.
+#   (b) L'OOS NON SEPARA LE DUE IPOTESI SUL CANCELLO: le tiene tutte e due
+#       sopra 1,10 (l'archivio non ha una cella OOS sotto 1,267). Se H2 e'
+#       vera, in OOS si vedra' solo il PF di 220-260 tornare verso il
+#       livello 140-180 (~1,29-1,40), cioe' la "sporgenza" di 200 era
+#       rumore. Non tocca i cancelli, ma decide QUALE PF si cita: si cita
+#       la MEDIANA del blocco, MAI quella della cella 200.
+#   (c) IL CAMPIONE NON SEPARA NIENTE: tutte e due le ipotesi predicono
+#       n IS ~154. Se n IS scende sotto 150 a 220-260, la causa e' di
+#       CAMPIONE (e si scrive cosi'), non di merito.
+#   (d) LA VERITA' SCOMODA DEL BLOCCO DELLE 11: il merito (PF) passa su
+#       TUTTO l'asse 20-200 in OOS; quello che separa 160-200 da 20-140 e'
+#       SOLO n IS (147 -> 153, a 3-4 operazioni dal pavimento). Quindi R245
+#       trova dove il merito IS e' LEGGIBILE, non dove il motore e'
+#       MIGLIORE. Va detto accanto a qualunque centro esca.
+#
+# ==========================================================================
+#  9. LE SOGLIE, congelate ORA (non si toccano dopo i numeri)
+# ==========================================================================
+#  Per cella, in IS E in OOS, a InpRiskPercent=1 (pin d'archivio):
+#   C-a PF >= 1,10   C-b n >= 150 (POSIZIONI, par. 5)   C-c Equity DD % <= 10,00
+#  Il RISCHIO si legge a qualunque n (Emendamento B). Il MERITO sopra 150.
+#  LA SELEZIONE (regola di casa, dichiarata insieme al numero):
+#   - un valore v di InpEmaSlow PASSA se almeno 3 delle 4 TP (file a-d)
+#     passano C-a, C-b, C-c in tutte e due le finestre;
+#   - il BLOCCO e' la corsa CONTIGUA di valori che passano e che contiene
+#     180 (misurato in R245, non preso dall'archivio);
+#   - il CENTRO e' il punto medio del blocco; si sceglie il valore di
+#     griglia piu' vicino; a PARITA' vince il valore PIU' BASSO (deciso
+#     ora: e' quello con piu' misure indipendenti quando il pari cade fra
+#     200 e 220);
+#   - il centro e' "interno" solo se ha almeno UN vicino che passa da
+#     ciascun lato. Se il blocco arriva a 260, l'altopiano e' ANCORA
+#     aperto a destra e si scrive; se non e' interno, si scrive "non c'e'
+#     una configurazione robusta su questo asse", non si sceglie.
+#  Esiti possibili, scritti prima: blocco 160-200 -> centro 180 ; 160-220 ->
+#  pari 180/200 -> 180 ; 160-240 -> 200 ; 160-260 -> pari 200/220 -> 200.
+#  ==> Qualunque cosa esca, il centro cade in 180-200: R245 NON cambia la
+#      sedia di molto. Compra il diritto di scrivere "centro" invece di
+#      "bordo". E' il suo valore, ed e' onesto dirlo prima.
+#  E' MEGLIO DEL DEFAULT? Il valore scelto il 03/08 in DOW_MOTORE.md era
+#  InpEmaSlow=50 (mai misurato nel walk-forward: sta fra 40 e 60, che
+#  cadono SOLO su n IS 140). Regola A9 di casa: un vantaggio < 0,10 di PF
+#  su una cella non e' un vantaggio. Quindi il centro di R245 e' "migliore
+#  nel merito" solo se il suo PF OOS supera di >= 0,10 sia EmaSlow 40 sia
+#  60 alla stessa TP (archivio a TP 0,50: 1,33985 e 1,35810). Altrimenti
+#  si scrive: "nel merito il default va bene; la differenza e' la
+#  LEGGIBILITA' (n IS >= 150)". Ed e' un risultato.
+#  INFORMATIVO, non cancello: la colonna "Peggior Giornata %" (a HEAD
+#  l'OnTester la scrive, stats[7]; l'archivio NON ce l'ha). A 1% di
+#  rischio, una giornata sotto -2,50% a 2% diventerebbe ~-5% [DERIVATO
+#  lineare, classe 547]: si segnala, non si boccia -- la taglia e' di
+#  Claudio. Ed e' un dato NUOVO anche sulle ancore: altra ragione per
+#  rimisurare 160-200 invece di fidarsi dell'archivio.
+#  >>> LA TAGLIA NON SI TOCCA: il round gira a 1%. Il fatto, scritto come
+#      fatto e NON come proposta: riscalando lineare a 2,00% (la taglia che
+#      vola) nessuna delle 11 celle resta sotto il muro del 10%
+#      (CHI_E_PIU_VICINO par. 3.1-C). E' una FIRMA DI CLAUDIO.
+#
+# ==========================================================================
+#  10. IL TEMPO MACCHINA, RIDERIVATO (classi 712/726)
+# ==========================================================================
+#  IL NUMERO DA CUI SI PARTIVA NON E' UNA MISURA. "24 passate x 0,085
+#  min/passata = 2 minuti": lo 0,085 viene da MAPPA_COSTO_SIMBOLI_TF r.33,
+#  che lo cita come misurato da CHI_ALTRO_PUO_SCHIERARSI r.64 ("80 passate
+#  ~ 6,8 min"). Ma CHI_ALTRO r.172-174 mostra da dove viene quel 6,8: e'
+#  l'USCITA di una formula, T = 0,6 + 0,077 x passate, applicata a UN
+#  file da 80 passate. Una proiezione citata come misura (circolare).
+#  LA MISURA VERA DA CUI QUELLA FORMULA E' TARATA:
+#  risultati_archivio/r88_csv/STATO_NOTTE.txt (19-20/08), orologio per
+#  FILE (INIZIO/FINE): ABTG_ORB_Ottimizzato, U30USD, M5, tick reali,
+#  finestra 2024.09.26 -> 2026.06.30 (stesso simbolo, TF, modello e
+#  finestra; EA diverso ma stessa famiglia: breakout d'apertura su M5,
+#  fermo fuori sessione):
+#     R88a  48 celle  96 passate  8,0 min   (formula: 7,99)
+#     R88b   8 celle  16 passate  2,1 min   (formula: 1,83, -13%)
+#     R88c/c2/c3  4 celle  8 passate  1,3 / 1,2 / 1,1 min  (formula: 1,22)
+#  Macchina: il referto non la stampa ([INFERITO] PC di backtest).
+#  COME SI SCALA: il costo e' PER FILE, non per passata. Ogni file paga
+#  un avvio fisso (~0,6 min: terminale, compilazione, due finestre) e le
+#  sue celle girano IN PARALLELO sugli agenti. Lo 0,085 e' la media di un
+#  file da 96 passate, dove l'avvio si spalma; su file piccoli la media
+#  per passata RADDOPPIA (R88c: 8 passate / 1,2 min = 0,15).
+#  R245, un asse per file (controlla_prova.py lo impone):
+#     per file: 6 celle x 2 finestre = 12 passate -> 0,6 + 0,077 x 12 =
+#               1,52 min ; banda misurata 1,1 (R88c3, 8 p) - 2,1 (R88b, 16 p)
+#     R245a-d (4 file, 48 passate)  ~ 6,1 min   [banda 4,4 - 8,4]
+#     R245e-f (2 file, 24 passate)  ~ 3,0 min   [banda 2,2 - 4,2]
+#     TOTALE  (6 file, 72 passate)  ~ 9,1 min   [banda 6,6 - 12,6]
+#  E la versione dell'architetto (3 celle nuove, 4 file): 4 x (0,6 +
+#  0,077 x 6) = 4,25 min, non 2,0 (x2,1).
+#  >>> IL TETTO, e va detto: sullo STESSO simbolo e sulla stessa finestra
+#      di tick, ma sul PC di backtest DESKTOP-H4D7CAJ e con un altro EA,
+#      R240 (24/09, REFERTO_R240 r.3) ha fatto 2 file in 18 min = 9 min
+#      per file, 7,5 volte R88. La differenza fra R88 e R240 e' [NON
+#      SPIEGATA] (costo per tick dell'EA SupertrendReversal o macchina):
+#      col ritmo di R240, 6 file = ~54 min.
+#  ==> SI PIANIFICA ~10 MINUTI, e la corsa NON si ferma prima di 60.
+#      Il tempo di QUESTO EA su QUESTA macchina e' [NON MISURATO]: lo
+#      misura il primo file, e va scritto nel referto.
+#
+# ==========================================================================
+#  11. I BUCHI, DICHIARATI
+# ==========================================================================
+#   1. Deriva del codice fra archivio (822ec56d) e HEAD: la decide G0.
+#   2. SEME DELL'EMA IN IS: prima del 2024.09.26 BCM non ha barre, quindi
+#      l'EMA H4 in IS parte senza storia. Il tratto "contaminato" cresce
+#      con InpEmaSlow (a 260 barre H4 il peso del seme e' ancora ~e^-2 =
+#      13,5%, cioe' ~43 giorni di borsa su ~190 dell'IS): e' un fattore
+#      di confusione che CRESCE LUNGO L'ASSE, solo in IS. L'OOS ha 9 mesi
+#      di storia davanti; quante barre il tester precarichi e' [NON
+#      MISURATO], ma 260 barre H4 sono ~43 giorni, contro ~9 mesi.
+#      Per questo il cancello del merito IS a 240-260 va letto con questa
+#      riga accanto.
+#   3. La TAGLIA a 2%: firma di Claudio, non proposta (par. 9).
+#   4. Sovrapposizione con la sedia 770202 (stesso simbolo, stessa ora,
+#      stesso filtro H4): [NON MISURATA].
+#   5. Griglia H4 di FTMO sfasata di 2 ore da BCM: il filtro di questo
+#      motore E' su H4. Tutti i numeri qui sono BCM. [NON MISURATO] su FTMO.
+#   6. Il cancello di costo e' AL PELO (par. 6), e sul feed FTMO lo spread
+#      all'apertura USA e' [NON MISURATO] all'ora giusta.
+#   7. SYMBOL_TRADE_STOPS_LEVEL di U30USD su BCM [NON MISURATO] (puo'
+#      solo allargare lo stop).
+#   8. Un simbolo, un broker, 21 mesi, UN regime (toro): Emendamento C.
+#   9. Settimane di disallineamento dell'ora legale USA/Europa: l'ora
+#      d'armo e' fissa a 14:30 server; se in quelle settimane l'apertura
+#      cash cade a un'altra ora server, il range delle 14:30 non e'
+#      l'apertura. Proprieta' della configurazione d'archivio, non di
+#      R245: [NON MISURATO] qui.
+#  10. Il tempo di questo EA sul PC di backtest: [NON MISURATO] (par. 10).
+#
+#  QUESTO ROUND NON PROMUOVE, NON ARCHIVIA, NON TOCCA TAGLIE NE' SEDIE.
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.4322
+
+# --- 75 pin LETTI DAL CSV D'ARCHIVIO: valore COSTANTE su tutte e 80 le righe
+#     (40 IS + 40 OOS) di dow_walkforward_{IS,OOS}.csv. Stessa forma 1/0 dei bool
+#     del lanciatore che ha prodotto l'archivio (dow_apertura.ps1). Tre eccezioni
+#     DICHIARATE: InpMagic (blocco vergine 76524x), InpAllowLong/InpAllowShort
+#     (solo in R245e/f), e InpNewsCurrencies OMESSO: nel CSV e' la stringa vuota,
+#     un pin vuoto MT5 lo ignora, e il default compilato (r.296) e' gia' "".
+#     InpEmaSlow e' l'ASSE (in fondo); InpTP1_R e' pinnato al valore di QUESTO file.
+InpTP1_R=0.33
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMagic=765241
+InpMaxSpread=0
+InpVerbose=1
+
+# --- 21 input che a HEAD ESISTONO e nel CSV d'archivio NO (aggiunti dopo il
+#     05/08): pinnati al valore NEUTRO, quello che lascia il percorso di codice
+#     identico alla versione che ha prodotto l'archivio. Riga sorgente a HEAD
+#     di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (ricontate il 24/09 a 1549beaa).
+#   InpUsaGuardian: r.92  -- spento: percorso identico a prima della migrazione (PausaGuardian.mqh r.1600 esce subito)
+#   InpMaxPosSimbolo: r.206 -- tetto A1 spento (default)
+#   InpOCTimeframe: r.214 -- PERIOD_CURRENT, serve solo a OPENCONFIRM: NO-OP qui
+#   InpTrailStartR: r.269 -- 0 = trailing armato subito, come prima (r.2244)
+#   InpRunnerTP_R: r.282 -- 0 = TP storico a 3 x InpTP1_R (r.1694)
+#   InpMinBreakoutRangeATR: r.324 -- 0 = breakout a pendenti nudo (r.777-780)
+#   InpUseVolRegime: r.343 -- R30 spento (r.1905, r.1966)
+#   InpVolAtrPeriod: r.344 -- default, NO-OP col regime spento
+#   InpVolLookback: r.345 -- default, NO-OP
+#   InpVolLowPct: r.346 -- default, NO-OP
+#   InpVolHighPct: r.347 -- default, NO-OP
+#   InpVolLowOffMult: r.348 -- default, NO-OP
+#   InpVolHighOffMult: r.349 -- default, NO-OP
+#   InpVolLowSlMult: r.350 -- default, NO-OP
+#   InpVolHighSlMult: r.351 -- default, NO-OP
+#   InpVolHighSizeMult: r.352 -- default, NO-OP
+#   InpUseSRFilter: r.361 -- R30 S/R spento (r.1984 esce subito)
+#   InpSRProximityPts: r.362 -- default, NO-OP
+#   InpSRUsePrevDay: r.363 -- default, NO-OP
+#   InpSRUseRoundNumbers: r.364 -- default, NO-OP
+#   InpSRRoundInterval: r.365 -- default, NO-OP
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+
+# --- L'ASSE, unico: InpEmaSlow 160..260 passo 20 = 6 celle.
+#     160/180/200 = ANCORE (gia' misurate); 220/240/260 = NUOVE.
+InpEmaSlow=200||160||20||260||Y
+# ==========================================================================

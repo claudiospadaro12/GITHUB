@@ -1,0 +1,220 @@
+# ==========================================================================
+#  R245e -- I DUE LATI DEL "770201", LETTI SEPARATI -- SOLO LUNGO
+#  ABTG_Nasdaq_Apertura_US su U30USD M5 -- TICK REALI -- InpTP1_R = 0.50
+#  magic 765245
+# ==========================================================================
+#  >>> E' UNA SECONDA DOMANDA, e si puo' lanciare A PARTE da R245a-d.
+#      Il ragionamento comune (EA, pin, finestra, stop, tempo, buchi) sta
+#      in R245a; qui c'e' solo quello che e' dei lati.
+#  Questo file e' IDENTICO a R245b (InpTP1_R 0.50, due lati) TRANNE DUE
+#  PIN: il LATO (InpAllowShort=0 in R245e, InpAllowLong=0 in R245f; l'altro
+#  resta 1 come nel CSV) e InpMagic 765245.
+#  Verificabile col diff dei pin contro R245b.
+#
+#  PERCHE' ESISTE: regola del 25/08 (su Dow, DAX e Nasdaq si misurano
+#  SEMPRE tutti e due i lati) + il segnale gia' pagato sull'EA gemello:
+#  R239 (ABTG_Dow_Apertura_US, RETEST 35', stesso simbolo, stesso filtro
+#  H4) ha trovato il CORTO in perdita da solo, OOS PF 0,877 su n 88, con IS
+#  e OOS di SEGNO OPPOSTO su tutti e due i lati. Per il 770201 (BREAKOUT,
+#  range 15') la divisione per lato non e' MAI stata misurata.
+#  PERCHE' InpTP1_R = 0.50: e' il valore che il preset del Dow portava gia'
+#  il 04/08 (DOW_MOTORE.md, "InpTP1_R = 0.5 -> TP 1,5R"), scelto PRIMA del
+#  walk-forward, quindi non pescato dal picco; ed e' dentro la banda
+#  centrale 0,50-0,67 dell'asse TP. Un file per lato, un asse: InpEmaSlow.
+#
+# ==========================================================================
+#  COME SI LEGGE, congelato ORA
+# ==========================================================================
+#  1. LA PROVA DI COERENZA, ESATTA PER CODICE -- si guarda PER PRIMA.
+#     Col filtro EMA acceso TrendBias da' +1 o -1 (r.1749-1755) e
+#     TryPlaceBreakout piazza SOLO quel lato (r.984-986): un lato per
+#     giornata, deciso dal prezzo H4, non dal conto. Quindi, cella per
+#     cella e finestra per finestra:
+#          n(R245e) + n(R245f) = n(R245b)      ESATTO
+#     Il residuo n(e)+n(f)-n(b) puo' essere > 0 SOLO nei giorni in cui
+#     CopyBuffer fallisce (bias 0 -> due pendenti in OCO nella cella a due
+#     lati). Atteso: 0 in OOS; in IS al piu' qualche unita' nei primissimi
+#     giorni (EMA senza storia prima del 2024.09.26). Mai negativo.
+#     >>> Se il residuo e' NEGATIVO, o > 0 in OOS: la lettura al codice e'
+#         SBAGLIATA e questo file non si legge. E' la falsificazione.
+#     (Il Profit NON e' additivo esatto: il lotto si calcola sul saldo,
+#      che segue strade diverse nelle tre celle. Si somma con tolleranza.)
+#
+#  2. IL MERITO PER LATO E' SOSPESO PER COSTRUZIONE, e si sa prima.
+#     La somma dei due lati fa ~154 in IS e ~197 in OOS: nessun lato da
+#     solo arriva a 150 in una finestra (Emendamento A). La quota del
+#     lungo attesa e' 0,55-0,80 del totale [DERIVATO: nello studio cieco
+#     di Studio_U30USD.csv le giornate con H4trend UP sono 268 su 439 con
+#     trend noto = 61,0% con EMA 50; con un'EMA piu' lenta dentro un toro
+#     la quota tende a salire -- NON misurato su 160-260].
+#     UNA LETTURA AGGREGATA, dichiarata come DERIVATA: sommando IS+OOS
+#     (21 mesi, ~351 posizioni in due lati) il lungo arriva a ~193-281 e
+#     il merito si LEGGE; il corto a ~70-158, di norma ancora sospeso.
+#     Formula: da Profit P e PF di ogni finestra, GL = P/(PF-1), GP = PF x
+#     GL (non calcolabile se PF = 1 esatto); PF_agg = (GP_IS+GP_OOS) /
+#     (GL_IS+GL_OOS). Le due finestre partono entrambe da 10.000: la somma
+#     e' omogenea. Controllo della formula: sulla cella a due lati (R245b)
+#     GP(e)+GP(f) e GL(e)+GL(f) devono tornare entro il 5% di GP(b) e
+#     GL(b) (non esatti: capitale composto). Se non tornano, la formula
+#     non si usa.
+#
+#  3. IL RISCHIO SI LEGGE A QUALUNQUE n (Emendamento B): Equity DD % per
+#     lato <= 10,00 a 1%, in IS e in OOS.
+#
+#  4. UN ALLARME, NON UN VERDETTO: se il lato CORTO ha PF OOS < 1,00 in
+#     almeno 4 dei 6 valori di InpEmaSlow, si scrive "lato corto sospetto:
+#     replica su un SECONDO motore il segnale di R239" e si porta a
+#     Claudio, perche' tocca la configurazione DI CONTRATTO (due lati).
+#     NON si scrive "il corto non funziona" (n < 150) e NON si spegne
+#     niente: la cella a due lati e' l'unica di questo motore che arriva a
+#     n >= 150 in tutte e due le finestre (R245a par. 7), e togliere un
+#     lato la riporterebbe sotto il pavimento.
+#
+#  NESSUNA CELLA DI QUESTO FILE PUO' ESSERE PROMOSSA.
+#  VINCOLI DELLA RIGA: -Deposito 10000 (default del driver, NON 100000),
+#  -Modello 4, -Spread non passato, PC DI BACKTEST.
+#  TEMPO: ~1,5 min per questo file (banda 1,1-2,1) al ritmo di R88; tetto
+#  ~9 min al ritmo di R240. Vedi R245a par. 10.
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.4322
+
+# --- 75 pin LETTI DAL CSV D'ARCHIVIO: valore COSTANTE su tutte e 80 le righe
+#     (40 IS + 40 OOS) di dow_walkforward_{IS,OOS}.csv. Stessa forma 1/0 dei bool
+#     del lanciatore che ha prodotto l'archivio (dow_apertura.ps1). Tre eccezioni
+#     DICHIARATE: InpMagic (blocco vergine 76524x), InpAllowLong/InpAllowShort
+#     (solo in R245e/f), e InpNewsCurrencies OMESSO: nel CSV e' la stringa vuota,
+#     un pin vuoto MT5 lo ignora, e il default compilato (r.296) e' gia' "".
+#     InpEmaSlow e' l'ASSE (in fondo); InpTP1_R e' pinnato al valore di QUESTO file.
+InpTP1_R=0.50
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=0
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMagic=765245
+InpMaxSpread=0
+InpVerbose=1
+
+# --- 21 input che a HEAD ESISTONO e nel CSV d'archivio NO (aggiunti dopo il
+#     05/08): pinnati al valore NEUTRO, quello che lascia il percorso di codice
+#     identico alla versione che ha prodotto l'archivio. Riga sorgente a HEAD
+#     di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (ricontate il 24/09 a 1549beaa).
+#   InpUsaGuardian: r.92  -- spento: percorso identico a prima della migrazione (PausaGuardian.mqh r.1600 esce subito)
+#   InpMaxPosSimbolo: r.206 -- tetto A1 spento (default)
+#   InpOCTimeframe: r.214 -- PERIOD_CURRENT, serve solo a OPENCONFIRM: NO-OP qui
+#   InpTrailStartR: r.269 -- 0 = trailing armato subito, come prima (r.2244)
+#   InpRunnerTP_R: r.282 -- 0 = TP storico a 3 x InpTP1_R (r.1694)
+#   InpMinBreakoutRangeATR: r.324 -- 0 = breakout a pendenti nudo (r.777-780)
+#   InpUseVolRegime: r.343 -- R30 spento (r.1905, r.1966)
+#   InpVolAtrPeriod: r.344 -- default, NO-OP col regime spento
+#   InpVolLookback: r.345 -- default, NO-OP
+#   InpVolLowPct: r.346 -- default, NO-OP
+#   InpVolHighPct: r.347 -- default, NO-OP
+#   InpVolLowOffMult: r.348 -- default, NO-OP
+#   InpVolHighOffMult: r.349 -- default, NO-OP
+#   InpVolLowSlMult: r.350 -- default, NO-OP
+#   InpVolHighSlMult: r.351 -- default, NO-OP
+#   InpVolHighSizeMult: r.352 -- default, NO-OP
+#   InpUseSRFilter: r.361 -- R30 S/R spento (r.1984 esce subito)
+#   InpSRProximityPts: r.362 -- default, NO-OP
+#   InpSRUsePrevDay: r.363 -- default, NO-OP
+#   InpSRUseRoundNumbers: r.364 -- default, NO-OP
+#   InpSRRoundInterval: r.365 -- default, NO-OP
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+
+# --- L'ASSE, unico: InpEmaSlow 160..260 passo 20 = 6 celle.
+#     160/180/200 = ANCORE (gia' misurate); 220/240/260 = NUOVE.
+InpEmaSlow=200||160||20||260||Y
+# ==========================================================================
