@@ -63,3 +63,12 @@ Il **REALE** è quello con `Path` = `C:\BCM_Reale\terminal64.exe`. Il **100k** �
 
 ## ↩️ Come si torna indietro
 Quando FTMO risponde, e **se** la risposta lo permette: grafico → **tasto destro → Modelli → Carica modello** → quello salvato al punto 1. Controllare che la faccina sia 🙂 e che "Algo Trading" sia verde.
+
+---
+
+## ✅ ESEGUITO — 24/09/2026 sera (foto dei giornali mandate da Claudio)
+- **REALE `10105439`** (profilo `Default`): `ABTG_DAX_Apertura_EU (D30EUR,M5) removed` 22:49:09 · `ABTG_ORB_Ottimizzato (U30USD,M5) removed` 22:49:21.
+- **100k `50504263`** (profilo `SQUADRA 100K`): `ABTG_DAX_Apertura_EU` 22:50:30 · `ABTG_Dow_Apertura_US` 22:50:39 · `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` 22:50:47 · `ABTG_ORB_Ottimizzato` 22:50:56, tutti `removed`.
+- **In più, dopo la segnalazione**: tolto anche `Nasdaq_PreOpen_Breakout_EA` dal grafico **NASUSD,M5** del 100k. Il grafico non c'era nei `.chr` della notte; il giornale del 24/09 15:30 mostra `sell 21.6 NASUSD` e `cancel sell stop 9.2`, cioe' la firma 70/30 dell'EA esterno. Claudio l'aveva attaccato al 100k.
+- **Profili salvati su tutti e due i terminali** (dichiarato da Claudio).
+- **Da verificare**: la sonda `CODA_01` della notte del 25/09 alle 03:30 deve NON trovare 770101, 770202, 770411, 770611 ne' il PreOpen su REALE e 100k, e deve trovare ancora Guardian, SlippageLogger, SupRev 225JPY e TradeExporter. Da annotare anche: grafico **AUDUSD,H1** nuovo sul 100k (fuori dal perimetro dell'hedging).
