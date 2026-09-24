@@ -55,6 +55,10 @@ quelli sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non c
 
 ---
 
+## ⏳ R246 INVERNO (R246m-r) e R247 — PRONTI (PASS strato 2, pin `782d7280`)
+- **R246m-r**: la casella d+1 (le sedie FTMO armano alla cash anche d'inverno, come faranno dal 26/10). 18 passate vere, ~5 min. Si lancia DOPO R246. Il bias H4 del Dow resta [NON MISURATO] (classe 771).
+- **R247a/b**: il per-trade della cella centrale di R245b (candidato #1), per la sovrapposizione con 770202 e il DD giornaliero. ~3-6 min. Soglie contro un nullo per permutazione (classe 769). Lo script e' `backtest_pipeline/r247_sovrapposizione.py`.
+
 ## ⏳ R246 — PRONTO (PASS strato 2 su file prova e riga): orologio o stagione sulle sedie d'apertura
 - 12 file (Dow 770202, DAX 770101, MaxMin 770411 x d0/-1h x finestre A/B), 36 passate vere, ~9-12 min (tetto 72). Riga `backtest_pipeline/righe/RIGA_R246_OROLOGIO.txt`, pin `f824b2f4`, 24 per-trade raccolti, controllo 166 per job, `_OOS` buono = 2 righe con Trades>0 (classe 766).
 - Dow: bande disgiunte (STAGIONE [0,55;1,15] contro OROLOGIO [1,27;2,22]), potenza della regola com'e' scritta 0,716. DAX e MaxMin: decide la FREQUENZA, non il PF.
