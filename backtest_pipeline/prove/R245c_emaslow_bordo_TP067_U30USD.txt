@@ -14,14 +14,16 @@
 #  Verificabile col diff dei pin: nessun'altra riga viva cambia.
 #
 #  COSA MISURA QUESTO FILE: la colonna InpTP1_R = 0.67 della griglia
-#  InpEmaSlow 160..260. Con InpTP1_ClosePct=0 (niente parziale) InpTP1_R
+#  InpEmaSlow 140..260. Con InpTP1_ClosePct=0 (niente parziale) InpTP1_R
 #  fissa SOLO il TP finale a 3 x InpTP1_R in R (TpTotalR r.1694, RunnerTP
 #  r.1707-1711): non crea e non toglie ingressi, quindi n deve uscire
 #  IDENTICO a R245a/b/c/d cella per cella (controllo gratis, par. 4 di
 #  R245a).
-#  LE ANCORE DI QUESTO FILE (archivio, InpTP1_R=0.67), che le celle 160/180/200
+#  LE ANCORE DI QUESTO FILE (archivio, InpTP1_R=0.67), che le celle 140/160/180/200
 #  devono riprodurre (cancello G0 di R245a):
 #       EmaSlow  finestra   PF        n    DD %      Profit
+#        140     IS        1.27773   147  6.3238    1238.98
+#        140     OOS       1.26748   198  6.2246    1490.09
 #        160     IS        1.29224   153  6.0879    1316.94
 #        160     OOS       1.28557   197  6.5882    1586.98
 #        180     IS        1.32354   154  6.0879    1432.13
@@ -176,7 +178,8 @@ InpSRUsePrevDay=1
 InpSRUseRoundNumbers=1
 InpSRRoundInterval=10000
 
-# --- L'ASSE, unico: InpEmaSlow 160..260 passo 20 = 6 celle.
+# --- L'ASSE, unico: InpEmaSlow 140..260 passo 20 = 7 celle.
+#     140 = BORDO SINISTRO misurato (archivio: n IS 147, cade SOLO su C-b);
 #     160/180/200 = ANCORE (gia' misurate); 220/240/260 = NUOVE.
-InpEmaSlow=200||160||20||260||Y
+InpEmaSlow=200||140||20||260||Y
 # ==========================================================================

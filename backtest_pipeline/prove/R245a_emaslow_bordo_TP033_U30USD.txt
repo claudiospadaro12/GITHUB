@@ -13,7 +13,7 @@
 #  par. 3.1-A) stanno su InpEmaSlow 160/180/200, e 200 E' L'ESTREMO della
 #  griglia d'archivio. La regola "centro dell'altopiano, MAI il picco"
 #  oggi non ha un referente: un blocco che tocca il bordo non ha un centro
-#  noto. R245 estende l'asse a 220/240/260 e rimisura 160/180/200 come
+#  noto. R245 estende l'asse a 220/240/260 e rimisura 140/160/180/200 come
 #  ancore, sulle due finestre, per ognuno dei quattro InpTP1_R.
 #  >>> Non promuove niente. Non tocca taglie. Non tocca nessuna sedia.
 #
@@ -94,7 +94,7 @@
 # ==========================================================================
 #  4. L'ANCORA -- cancello G0, e si guarda PER PRIMO
 # ==========================================================================
-#  L'asse parte da 160, non da 220, APPOSTA: le 12 celle 160/180/200 x 4
+#  L'asse parte da 140, non da 220, APPOSTA: le 16 celle 140/160/180/200 x 4
 #  TP (per finestra) sono gia' nell'archivio e devono tornare.
 #  PERCHE' NON E' SCONTATO CHE TORNINO: l'archivio e' stato girato col
 #  sorgente di allora (ultimo commit dell'EA prima del CSV bf1f86e7 del
@@ -113,24 +113,26 @@
 #  Ci sono inoltre due cause NON di codice: l'inizio IS (par. 3) e una
 #  eventuale revisione dello storico tick sul PC di backtest.
 #  >>> TRE ESITI, congelati ora:
-#   G0-VERDE "RIPRODOTTO": nelle 24 celle d'ancora (12 IS + 12 OOS, file
+#   G0-VERDE "RIPRODOTTO": nelle 32 celle d'ancora (16 IS + 16 OOS, file
 #      a-d) n IDENTICO e PF entro +-0,0005 e DD entro +-0,01 punti.
 #      -> archivio e R245 si leggono INSIEME.
-#   G0-GIALLO "DERIVA DI SOLDI": n identico in tutte e 24, PF o DD fuori
+#   G0-GIALLO "DERIVA DI SOLDI": n identico in tutte e 32, PF o DD fuori
 #      tolleranza in qualcuna. -> R245 si legge SOLO al suo interno
-#      (160-260 tutto dallo stesso binario); i numeri d'archivio NON si
+#      (140-260 tutto dallo stesso binario); i numeri d'archivio NON si
 #      mescolano. Indiziato: r.2045.
 #   G0-ROSSO "NON RIPRODOTTO": n diverso anche in UNA sola cella d'ancora.
 #      -> prima si capisce PERCHE', poi si legge. Se differiscono solo le
 #      celle IS -> inizio finestra / seme dell'EMA (par. 8, buco 2); se
 #      anche le OOS -> il motore a HEAD non e' quello d'archivio. La
-#      lettura interna 160-260 si produce lo stesso (e' il binario che
+#      lettura interna 140-260 si produce lo stesso (e' il binario che
 #      verrebbe schierato), ma si scrive "motore a HEAD", e le "11 celle"
 #      del referto dell'architetto si RIFANNO dai numeri di R245, non si
 #      citano.
-#  LE ANCORE DI QUESTO FILE (archivio, InpTP1_R=0.33), che le celle 160/180/200
+#  LE ANCORE DI QUESTO FILE (archivio, InpTP1_R=0.33), che le celle 140/160/180/200
 #  devono riprodurre (cancello G0 di R245a):
 #       EmaSlow  finestra   PF        n    DD %      Profit
+#        140     IS        1.25093   147  6.3238    1007.81
+#        140     OOS       1.31880   198  8.3313    1495.67
 #        160     IS        1.30353   153  6.0879    1225.56
 #        160     OOS       1.34859   197  8.6965    1627.19
 #        180     IS        1.38214   154  6.0879    1497.74
@@ -208,7 +210,7 @@
 #      rispetta; ma va scritto che quasi META' delle operazioni sta sotto.
 #  >>> Limite della fonte: le 446 giornate sono del breakout CIECO
 #      (entrambi i lati, filtro H4 con EMA 50 nello studio). Le giornate
-#      che l'EA opera davvero col filtro EMA 160-260 sono un SOTTOINSIEME:
+#      che l'EA opera davvero col filtro EMA 140-260 sono un SOTTOINSIEME:
 #      il loro range mediano e' [NON MISURATO].
 #  R245 non cambia lo stop: nessuna delle manopole dello stop si muove.
 #
@@ -273,8 +275,9 @@
 #  >>> IL CONTRO-ESEMPIO CHE MI SONO COSTRUITO CONTRO (classe 178), e che
 #      CAMBIA come si legge il round:
 #   (a) A 220 LE DUE IPOTESI SI SOVRAPPONGONO. H2 predice 1,260/1,190/1,164
-#       sulle tre TP buone: sono DENTRO la banda di H1 [1,20;1,40] per due
-#       TP su tre. La dispersione del PF IS su 100-200 a TP 0,50 e' ~0,05:
+#       sulle tre TP buone: e' DENTRO la banda di H1 [1,20;1,40] per UNA
+#       TP su tre (0,33: 1,260); le altre due cadono 0,010 e 0,036 sotto
+#       il bordo, meno di una dispersione. La dispersione del PF IS su 100-200 a TP 0,50 e' ~0,05:
 #       a 220 la distanza H1-H2 e' ~2 volte quella, a 240 ~3,6, a 260 ~5.
 #       ==> 220 DA SOLA NON DECIDE NIENTE. Decide la coppia 240/260.
 #   (b) L'OOS NON SEPARA LE DUE IPOTESI SUL CANCELLO: le tiene tutte e due
@@ -301,6 +304,15 @@
 #  LA SELEZIONE (regola di casa, dichiarata insieme al numero):
 #   - un valore v di InpEmaSlow PASSA se almeno 3 delle 4 TP (file a-d)
 #     passano C-a, C-b, C-c in tutte e due le finestre;
+#     ATTENZIONE (classe 742): le 4 TP con lo stesso EmaSlow hanno le
+#     STESSE entrate (n invariante per codice, r.1694). "3 TP su 4" e' un
+#     criterio di ROBUSTEZZA dell'uscita, NON 4 prove indipendenti; lo
+#     stesso vale per i conteggi "x su 12" di H1/H2.
+#     SEME DELL'EMA [NON MISURATO, ragionato]: nelle prime settimane le EMA
+#     da 140 in su partono dallo stesso seme e si somigliano: il seme rende
+#     le celle PIU' SIMILI (spinge verso H1). Se esce H2 il seme non lo
+#     spiega; se esce H1, parte della piattezza IS a 240-260 puo' essere
+#     il seme.
 #   - il BLOCCO e' la corsa CONTIGUA di valori che passano e che contiene
 #     180 (misurato in R245, non preso dall'archivio);
 #   - il CENTRO e' il punto medio del blocco; si sceglie il valore di
@@ -311,15 +323,28 @@
 #     ciascun lato. Se il blocco arriva a 260, l'altopiano e' ANCORA
 #     aperto a destra e si scrive; se non e' interno, si scrive "non c'e'
 #     una configurazione robusta su questo asse", non si sceglie.
+#   - il bordo SINISTRO e' 140, misurato qui (correzione del cancello
+#     24/09: con l'asse da 160 il bordo tagliato si spostava solo da destra
+#     a sinistra). Se 140 NON passa, il blocco e' chiuso a sinistra da una
+#     MISURA. Se 140 PASSA, l'altopiano e' aperto anche a sinistra (120 e
+#     sotto non rimisurati: archivio n IS 145-146): si scrive "aperto a
+#     sinistra", come per 260 a destra.
+#   - la regola del PARI (vince il piu' basso) vale per OGNI pari, anche
+#     160/180: e' dichiarata ora, prima dei numeri, e non si cambia dopo.
 #  Esiti possibili, scritti prima: blocco 160-200 -> centro 180 ; 160-220 ->
-#  pari 180/200 -> 180 ; 160-240 -> 200 ; 160-260 -> pari 200/220 -> 200.
-#  ==> Qualunque cosa esca, il centro cade in 180-200: R245 NON cambia la
+#  pari 180/200 -> 180 ; 160-240 -> 200 ; 160-260 -> pari 200/220 -> 200
+#  (aperto a destra) ; 140-200 -> pari 160/180 -> 160 (aperto a sinistra) ;
+#  140-220 -> 180 ; 140-240 -> pari 180/200 -> 180 ; 140-260 -> 200 (aperto
+#  da tutte e due le parti).
+#  ==> Qualunque cosa esca, il centro cade in 160-200: R245 NON cambia la
 #      sedia di molto. Compra il diritto di scrivere "centro" invece di
 #      "bordo". E' il suo valore, ed e' onesto dirlo prima.
 #  E' MEGLIO DEL DEFAULT? Il valore scelto il 03/08 in DOW_MOTORE.md era
 #  InpEmaSlow=50 (mai misurato nel walk-forward: sta fra 40 e 60, che
 #  cadono SOLO su n IS 140). Regola A9 di casa: un vantaggio < 0,10 di PF
-#  su una cella non e' un vantaggio. Quindi il centro di R245 e' "migliore
+#  su una cella non e' un vantaggio. SOLO con G0-VERDE (con G0-GIALLO o
+#  G0-ROSSO 40 e 60 non sono rimisurati e il confronto si scrive [NON
+#  CONFRONTABILE]): il centro di R245 e' "migliore
 #  nel merito" solo se il suo PF OOS supera di >= 0,10 sia EmaSlow 40 sia
 #  60 alla stessa TP (archivio a TP 0,50: 1,33985 e 1,35810). Altrimenti
 #  si scrive: "nel merito il default va bene; la differenza e' la
@@ -360,11 +385,11 @@
 #  file da 96 passate, dove l'avvio si spalma; su file piccoli la media
 #  per passata RADDOPPIA (R88c: 8 passate / 1,2 min = 0,15).
 #  R245, un asse per file (controlla_prova.py lo impone):
-#     per file: 6 celle x 2 finestre = 12 passate -> 0,6 + 0,077 x 12 =
-#               1,52 min ; banda misurata 1,1 (R88c3, 8 p) - 2,1 (R88b, 16 p)
-#     R245a-d (4 file, 48 passate)  ~ 6,1 min   [banda 4,4 - 8,4]
-#     R245e-f (2 file, 24 passate)  ~ 3,0 min   [banda 2,2 - 4,2]
-#     TOTALE  (6 file, 72 passate)  ~ 9,1 min   [banda 6,6 - 12,6]
+#     per file: 7 celle x 2 finestre = 14 passate -> 0,6 + 0,077 x 14 =
+#               1,68 min ; banda misurata 1,1 (R88c3, 8 p) - 2,1 (R88b, 16 p)
+#     R245a-d (4 file, 56 passate)  ~ 6,7 min   [banda 4,4 - 8,4]
+#     R245e-f (2 file, 28 passate)  ~ 3,4 min   [banda 2,2 - 4,2]
+#     TOTALE  (6 file, 84 passate)  ~ 10,1 min  [banda 6,6 - 12,6]
 #  E la versione dell'architetto (3 celle nuove, 4 file): 4 x (0,6 +
 #  0,077 x 6) = 4,25 min, non 2,0 (x2,1).
 #  >>> IL TETTO, e va detto: sullo STESSO simbolo e sulla stessa finestra
@@ -373,7 +398,7 @@
 #      per file, 7,5 volte R88. La differenza fra R88 e R240 e' [NON
 #      SPIEGATA] (costo per tick dell'EA SupertrendReversal o macchina):
 #      col ritmo di R240, 6 file = ~54 min.
-#  ==> SI PIANIFICA ~10 MINUTI, e la corsa NON si ferma prima di 60.
+#  ==> SI PIANIFICA ~11 MINUTI, e la corsa NON si ferma prima di 60.
 #      Il tempo di QUESTO EA su QUESTA macchina e' [NON MISURATO]: lo
 #      misura il primo file, e va scritto nel referto.
 #
@@ -547,7 +572,8 @@ InpSRUsePrevDay=1
 InpSRUseRoundNumbers=1
 InpSRRoundInterval=10000
 
-# --- L'ASSE, unico: InpEmaSlow 160..260 passo 20 = 6 celle.
+# --- L'ASSE, unico: InpEmaSlow 140..260 passo 20 = 7 celle.
+#     140 = BORDO SINISTRO misurato (archivio: n IS 147, cade SOLO su C-b);
 #     160/180/200 = ANCORE (gia' misurate); 220/240/260 = NUOVE.
-InpEmaSlow=200||160||20||260||Y
+InpEmaSlow=200||140||20||260||Y
 # ==========================================================================

@@ -35249,3 +35249,11 @@ aggira** (per esempio inventando un asse finto per far comparire un OK).
 📌 E un post-scriptum sulla **744**, perché **l'ho rifatta** due ore dopo averla scritta: un `mv`
 fallito seguito da `&&` ha saltato un commit. **L'ho presa di nuovo leggendo `git show --stat`**: il
 verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che non basta.
+
+## 📐 CLASSE 749 — **l'asse esteso da UN lato solo, mentre la regola del blocco vieta l'archivio: il bordo tagliato cambia lato, non sparisce**
+- **Caso (24/09, R245)**: per trovare il centro dell'altopiano di `InpEmaSlow` (200 = bordo destro dell'archivio) l'asse era stato esteso a 160..260. La regola di selezione dice pero' che il blocco si prende *"misurato in R245, non preso dall'archivio"*: se 160 passa, l'estremo SINISTRO del blocco e' sempre il bordo dell'asse, mai una misura. Contro-esempio del cancello: con +3 operazioni IS a 140 (n archivio 147) il blocco sarebbe stato 140-200, cioe' centro 160 invece del 180 scritto negli esiti. Stessi numeri, due risposte diverse.
+- **Regola**: quando si estende un asse per trovare un CENTRO, si misurano **tutti e due** gli estremi, oppure la regola dichiara da quale fonte si chiude l'altro. Corretto con asse 140..260: +12 passate, circa 1 minuto.
+
+## 📐 CLASSE 750 — **il file che dichiara "l'archivio non si mescola" in un paragrafo e lo mescola in un altro**
+- **Caso (24/09, R245a)**: il par. 4 dice che con G0-GIALLO/ROSSO *"i numeri d'archivio NON si mescolano"*, mentre il par. 9 (confronto A9) mette il centro di R245 contro l'archivio a EmaSlow 40/60 senza condizioni. Parente della classe 742: una regola vale solo se la applica ogni paragrafo del file.
+- **Regola**: ogni confronto con l'archivio va **condizionato all'esito G0** e si scrive `[NON CONFRONTABILE]` se G0 non e' verde.

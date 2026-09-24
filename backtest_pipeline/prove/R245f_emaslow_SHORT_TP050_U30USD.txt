@@ -46,7 +46,7 @@
 #     lungo attesa e' 0,55-0,80 del totale [DERIVATO: nello studio cieco
 #     di Studio_U30USD.csv le giornate con H4trend UP sono 268 su 439 con
 #     trend noto = 61,0% con EMA 50; con un'EMA piu' lenta dentro un toro
-#     la quota tende a salire -- NON misurato su 160-260].
+#     la quota tende a salire -- NON misurato su 140-260].
 #     UNA LETTURA AGGREGATA, dichiarata come DERIVATA: sommando IS+OOS
 #     (21 mesi, ~351 posizioni in due lati) il lungo arriva a ~193-281 e
 #     il merito si LEGGE; il corto a ~70-158, di norma ancora sospeso.
@@ -62,7 +62,8 @@
 #     lato <= 10,00 a 1%, in IS e in OOS.
 #
 #  4. UN ALLARME, NON UN VERDETTO: se il lato CORTO ha PF OOS < 1,00 in
-#     almeno 4 dei 6 valori di InpEmaSlow, si scrive "lato corto sospetto:
+#     almeno 4 dei 6 valori 160-260 di InpEmaSlow (140 si riporta ma
+#     non entra nel conteggio: la soglia congelata non cambia), si scrive "lato corto sospetto:
 #     replica su un SECONDO motore il segnale di R239" e si porta a
 #     Claudio, perche' tocca la configurazione DI CONTRATTO (due lati).
 #     NON si scrive "il corto non funziona" (n < 150) e NON si spegne
@@ -214,7 +215,8 @@ InpSRUsePrevDay=1
 InpSRUseRoundNumbers=1
 InpSRRoundInterval=10000
 
-# --- L'ASSE, unico: InpEmaSlow 160..260 passo 20 = 6 celle.
+# --- L'ASSE, unico: InpEmaSlow 140..260 passo 20 = 7 celle.
+#     140 = BORDO SINISTRO misurato (archivio: n IS 147, cade SOLO su C-b);
 #     160/180/200 = ANCORE (gia' misurate); 220/240/260 = NUOVE.
-InpEmaSlow=200||160||20||260||Y
+InpEmaSlow=200||140||20||260||Y
 # ==========================================================================
