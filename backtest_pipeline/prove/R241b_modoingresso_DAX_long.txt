@@ -1,3 +1,40 @@
+# ==========================================================================
+#  >>> SECONDA CORREZIONE, 24/09 NOTTE: ANCHE IL VERDETTO SUL COSTO DI
+#      QUESTO FILE E' SUPERATO. <<<
+# ==========================================================================
+#  Qui sotto c'e' scritto che il cancello del costo e' PRONUNCIATO E NON
+#  PASSA sulla cella 2 (33,0x), e che da quel numero si derivano le celle
+#  0, 1 e 4. **Quel 33,0x e' costruito su un numero FALSIFICATO.**
+#
+#  LA PROVA, ed e' geometrica e non statistica
+#  (report/IL_COSTO_DEL_DAX_RISOLTO_2026-09-24.md):
+#    - il 33,0x nasce da uno stop REALIZZATO di 56,1 idx [MIS n=2], da cui
+#      si deduceva un range di 35 minuti di ~53,1 idx;
+#    - ma il range di 15 MINUTI del D30EUR e' MISURATO a 54,65 idx con
+#      n=440 (MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md r.611);
+#    - 53,1 / 54,65 = x0,972: vorrebbe dire che il range di 35 minuti e'
+#      PIU' PICCOLO di quello di 15. IMPOSSIBILE: la finestra di 35 minuti
+#      CONTIENE quella di 15.
+#  >>> Il 56,1 era uno stop realizzato con breakeven e trailing accesi su
+#      DUE gambe: un LIMITE INFERIORE (classe 688), non una mediana.
+#
+#  QUANTO SI SPOSTANO LE CELLE, col range vero (~83,5 idx a 35'):
+#    cella 2 RETEST        range + B - O = 86,5  -> ~50,9x  -> PASSA
+#    celle 0/1 BREAKOUT    range + 2B    = 93,5  -> ~55,0x  -> PASSA
+#    cella 4 DELAYED       range nudo    = 83,5  -> ~49,1x  -> PASSA
+#    cella 3 RANGE_FADE    NON cambia: usa l'ATR, non il range
+#    cella 5 OPENCONFIRM   >= cella 0    -> PASSA a maggior ragione
+#  >>> Quindi la frase "tutti i modi falliscono il costo" e' FALSA, e il
+#      round R241 cambia significato: il costo non e' piu' la ragione per
+#      cui nessuna cella si promuove.
+#
+#   MA IL ROUND RESTA SOSPESO LO STESSO, per l'ALTRA ragione, che non e'
+#      cambiata: i sei modi erano GIA' MISURATI dal 05-06/08, e questo file
+#      spenderebbe 24 passate per riscoprirli. Vedi l'avviso qui sotto.
+#  >>> E il divieto di promozione resta: le sedie 770101 e 770202 operano
+#      sulla challenge, e ogni cambio in campo e' di Claudio.
+# ==========================================================================
+
 
 # ==========================================================================
 #  >>> AVVISO DEL 24/09, AGGIUNTO DOPO LA SCRITTURA: LA PREMESSA DI QUESTO
