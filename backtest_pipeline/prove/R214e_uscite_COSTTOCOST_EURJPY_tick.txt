@@ -63,11 +63,26 @@
 #       modello non e' 4). Questo file gira a MODELLO 4: modelli
 #       diversi non si confrontano.
 #  (ii) LA FINESTRA E' DIVERSA PER FORZA. I tick reali BCM sul FOREX
-#       partono dal 2024.07.05 -- MISURATO, non scelto:
+#       partono dal 2024.07.05 -- MISURATO su TRE coppie, non scelto:
 #       backtest_pipeline/risultati_archivio/
 #       NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md, righe verbatim del
 #       Diario del tester: "EURUSD: ticks data begins from 2024.07.05
-#       00:00". Prima di quella data, a modello 4, MT5 NON si ferma:
+#       00:00" (idem GBPUSD, EURGBP).
+#       *** CORRETTO IL 24/09/2026: SU EURJPY IL PAVIMENTO E'
+#       [NON MISURATO]. *** La nota misura EURUSD, GBPUSD ed EURGBP e
+#       nient'altro: su EURJPY il 2024.07.05 e' un'ESTENSIONE da tre
+#       coppie a una quarta (famiglia della classe 612, il pavimento
+#       di un mercato applicato a un altro). La RIGA di questo round
+#       (righe/RIGA_R214EF_COSTTOCOST.txt) cerca nei log del tester la
+#       riga "EURJPY: ticks data begins from" e la ricopia nel
+#       riepilogo: e' li' che il pavimento diventa MISURATO.
+#       >>> SE quella data esce DOPO il 2024.07.05, il tratto fra le
+#           due date e' a tick GENERATI e va dichiarato nel referto
+#           (con la percentuale della gamba IS che copre). Se esce
+#           PRIMA o UGUALE, nessun effetto: la finestra parte comunque
+#           dal 2024.07.05. Se la riga NON si trova, il pavimento resta
+#           [NON MISURATO] e si scrive cosi'.
+#       Prima di quella data, a modello 4, MT5 NON si ferma:
 #       genera i tick dalle barre M1 (sul forex le M1 ci sono, quindi
 #       e' un fallback silenzioso, non un errore -- ma NON sono tick
 #       veri, e la colonna spread e' RICOSTRUITA).
@@ -284,16 +299,123 @@
 #          DIMOSTRA NIENTE finche' non si sa in che data e' caduta la
 #          giornata peggiore di r127c -- e quel dato e' [NON
 #          MISURATO], si legge nel per-trade, non nel CSV di griglia.
-#          Un C7 che FALLISCE, invece, e' un fatto. ***
-#      >>> LA TAGLIA, dichiarata: questo round gira a
-#          InpRiskPercent = 1,00, e a rischio 1,00 la colonna E' GIA'
-#          il numero di campo, quindi il -5,00 si legge cosi' com'e'.
-#          Se qualcuno schierasse a 2,00 la soglia diventerebbe
-#          -2,50 sulla stessa colonna. *** Sul numero gia' misurato
-#          (-8,0159) il verdetto non cambia in nessuno dei due casi. ***
+#          (Qui c'era scritto "Un C7 che FALLISCE, invece, e' un
+#          fatto": *** CORRETTO IL 24/09/2026, NON E' VERO PER FTMO ***
+#          -- vedi C7-bis subito sotto.)
+#      >>> LA TAGLIA (qui c'era scritto "a rischio 1,00 la colonna E'
+#          GIA' il numero di campo": *** CORRETTO IL 24/09/2026 ***,
+#          e per DUE ragioni): (1) la GRANDEZZA non e' quella FTMO, vedi
+#          C7-bis; (2) la TAGLIA di campo non e' 1,00. Le sedie FTMO
+#          in repo girano a InpRiskPercent=2.00 (per esempio
+#          mql5/Presets/FTMO/ABTG_EMA200_771531_FTMO.set r.149,
+#          ABTG_Dow_Apertura_US_770202_FTMO.set r.283) e una a 1.30
+#          (ABTG_PostNews_ECB_EURUSD_771204_FTMO.set r.114). *** La
+#          taglia di UNA SEDIA COSTTOCOST NON ESISTE: e' una firma di
+#          Claudio. Qui si scrive come VARIABILE, R_sedia (in %), e NON
+#          si propone. ***
+#          REGOLA DI LETTURA, congelata prima dei numeri:
+#            soglia sulla colonna a 1,00% = -5,00 x (1,00 / R_sedia).
+#            R_sedia = 1,00 -> -5,00 . R_sedia = 1,30 -> -3,85 .
+#            R_sedia = 2,00 -> -2,50 (valori di ESEMPIO, non proposte).
+#          PERCHE' LA SCALA E' LINEARE, e fin dove: l'EA tiene UNA
+#          posizione alla volta (sorgente r.704-706) e il lotto e'
+#          proporzionale al rischio, quindi ogni perdita in % raddoppia
+#          col rischio, a meno dell'arrotondamento del lotto (a 100.000
+#          i lotti del per-trade 772351 vanno da 1,82 a 6,05: il passo
+#          0,01 pesa meno dello 0,6%). Sulla colonna di EQUITA' pero'
+#          il ritracciamento di un profitto aperto e' SUB-lineare (la
+#          base del giorno cresce con il profitto accumulato): la scala
+#          lineare ne SOVRASTIMA la taglia, quindi e' prudente per un
+#          PASSA e puo' dare un falso NON PASSA. Il fattore misurato
+#          sul DD per x2 e' 1,956-1,990 (punto 5v). >>> Una cella che
+#          cade entro il 3% della soglia convertita e' ZONA GRIGIA: si
+#          dichiara e serve UNA corsa diretta a R_sedia (2 passate).
+#          *** Sul -8,0159 gia' misurato la conversione non salva
+#          nessuna taglia >= 1,00 -- ma vedi C7-bis: quel numero NON e'
+#          la perdita giornaliera FTMO. ***
+#  C7-bis *** LA COLONNA "Peggior Giornata %" NON E' LA PERDITA
+#      GIORNALIERA DI FTMO. AGGIUNTO IL 24/09/2026, PRIMA DEI NUMERI,
+#      E CAMBIA COSA C7 PUO' DIRE. ***
+#      COME LA CALCOLA L'EA (sorgente r.480-494, OnTick): base = EQUITY
+#      al primo tick del giorno del SERVER BCM; minimo = equity minima
+#      del giorno; % sull'equity di base.
+#      COME LA CALCOLA FTMO (docs/REGOLAMENTO_FTMO_2026-08.md r.26-27):
+#      base = BALANCE registrato alle 00:00 CE(S)T; limite = 5% del
+#      capitale INIZIALE; confronto con l'equity istantanea.
+#      TRE DIFFERENZE, ciascuna con il suo verso:
+#      (a) *** PROFITTO APERTO A MEZZANOTTE: l'EA lo conta come perdita
+#          quando lo restituisce, FTMO NO *** (il balance non lo
+#          contiene). Verso: la colonna SOVRASTIMA. E' il caso tipico
+#          di exit 2, che NON ha TP e restituisce il profitto aperto.
+#      (b) PERDITA APERTA A MEZZANOTTE: FTMO la conta dal balance,
+#          l'EA solo per la parte che matura DOPO il primo tick.
+#          Verso: la colonna SOTTOSTIMA.
+#      (c) CONFINE DEL GIORNO: 00:00 server BCM = 01:00 ora italiana
+#          (CLAUDE.md, fuso BCM), FTMO azzera alle 00:00 italiane.
+#          Un'ora di scarto; verso non determinato.
+#      >>> IL CONTRO-ESEMPIO, MISURATO in repo e non immaginato:
+#          r41 OOS (exit 2, long, rischio 1,00, deposito 100.000),
+#          risultati_prove/ABTG_CostToCost/r41/
+#          ABTG_CostToCost_EURJPY_OOS_r41.csv: Peggior Giornata %
+#          -4.0041, Trades 64. Il per-trade della STESSA cella,
+#          risultati_prove/trades_cost/
+#          abtg_trades_ABTG_CostToCost_EURJPY_772351.csv (64 righe):
+#          PEGGIOR OPERAZIONE CHIUSA -1,271% del saldo (2026.03.01
+#          23:05, domenica: apertura del lunedi' in gap, cioe' oltre lo
+#          stop), MIGLIORE +7,647%, e MAI piu' di UNA chiusura nello
+#          stesso giorno. Con una posizione alla volta e al massimo
+#          una chiusura al giorno (misurato su QUESTO per-trade, non
+#          garantito dal codice: su H4 le barre sono sei al giorno), in
+#          un giorno di quel campione stanno sotto l'ingresso al massimo
+#          DUE operazioni (una chiusa, una aperta dopo), cioe' ~2,54%
+#          al gap peggiore
+#          misurato: dei 4,0041 punti ALMENO 1,46 (un terzo) sono
+#          PROFITTO APERTO RESTITUITO, e 2,73 (due terzi) se quel giorno
+#          ha perso una sola operazione. FTMO quella parte non la conta.
+#          (Scarto dichiarato: la somma netta del per-trade e'
+#          22.836,02 contro Profit 22.252,20 del CSV, 583,82 NON
+#          SPIEGATO; le due grandezze usate qui -- peggior operazione
+#          e chiusure per giorno -- non dipendono da quello scarto.)
+#      >>> QUINDI, E LO SCRIVO PRIMA DEI NUMERI:
+#          - C7 NON PASSA su questa colonna  =  "il Guardian IN CAMPO
+#            scatterebbe": il Guardian misura la giornata dall'EQUITY
+#            (report/GUARDIAN_BASELINE_GIORNALIERA_2026-09-08.md: modo 0
+#            = equita', ed e' quello in campo), e la sua emergenza
+#            chiude TUTTE le posizioni del conto, non solo questa sedia
+#            (mql5/Presets/ABTG_Guardian_FTMO_2Step.set: InpDailyLossPct
+#            4.5 su InpStartBalance 80000, InpDailyPausePct 3.5,
+#            InpAction=0 = FlattenAll, InpCloseAllMagics=true; sorgente
+#            ABTG_Guardian.mq5 r.681-697). *** Le soglie del Guardian
+#            sono 3,5 e 4,5, non 5,00: su questa colonna, a R_sedia, la
+#            pausa scatta a -3,50 x (1,00 / R_sedia) e l'emergenza a
+#            -4,50 x (1,00 / R_sedia), con la sedia DA SOLA sul conto. ***
+#            E' un fatto operativo vero e pesa sulla convivenza con le
+#            altre sedie. *** NON E' "FTMO chiuderebbe il conto". ***
+#          - C7 PASSA su questa colonna  =  non dimostra il muro FTMO,
+#            per la differenza (b).
+#          - LA PERDITA GIORNALIERA FTMO di questo motore e' [NON
+#            MISURATA] da questo round. Quello che si puo' dire senza
+#            corse e' un LIMITE: con una posizione alla volta, ogni
+#            operazione che tocca il giorno pesa al massimo ~1 R piu'
+#            il gap (misurato 1,271 R); il numero di operazioni
+#            perdenti per giorno e' [NON MISURATO] su questa finestra.
+#      >>> LA MISURA CHE LA CHIUDE costa ZERO passate in piu' ma UNA
+#          modifica all'EA (solo metrica, OnTick + OnTester): una
+#          seconda colonna con base = BALANCE al confine del giorno.
+#          Non e' in questo file perche' un file prova non tocca un EA:
+#          e' una decisione di chi tiene il motore, e passa dal
+#          cancello come ogni modifica a un EA.
 #
 #  8. COSTO -- tetto dichiarato, non stima centrale
 #  --------------------------------------------------------------------
+#  *** CORRETTO IL 24/09/2026 (classe 751): il tempo e' dichiarato
+#  nella RIGA, PER PASSATA, perche' su DESKTOP-H4D7CAJ gira UN SOLO
+#  agente. Nessuna corsa di ABTG_CostToCost su quella macchina esiste
+#  in repo e il conteggio dei tick EURJPY BCM non e' misurato: il
+#  tempo e' [NON MISURATO], con un tetto prudente scritto nella riga.
+#  I numeri qui sotto sono la stima ORIGINALE del 22/09, lasciata per
+#  tracciabilita': il 24/09 R240 (stessa macchina, altro EA) ha
+#  misurato ~135 s per passata, sopra il "caso largo" di 89,6. ***
 #  3 celle x 2 finestre = 6 PASSATE.
 #  Base MISURATA il 21/09 sul PC di backtest (DESKTOP-H4D7CAJ),
 #  modello 4, 8 passate M5 su indice: caso stretto 2 min 41 s
@@ -335,8 +457,10 @@
 #
 #  10. LA FINESTRA, LO SPREAD, IL MAGIC
 #  --------------------------------------------------------------------
-#  @DAQUANDO 2024.07.05 e' MISURATO, non scelto (classe 590):
-#  risultati_archivio/NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md.
+#  @DAQUANDO 2024.07.05 e' MISURATO su EURUSD, GBPUSD, EURGBP, non
+#  scelto (classe 590): risultati_archivio/
+#  NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md. Su EURJPY: [NON MISURATO],
+#  lo misura la riga di lancio (punto 3-ii, corretto il 24/09).
 #  @FINOA 2026.06.30 + @FRAZIONEIS 0.40 -> 725 giorni,
 #  floor(725 x 0,40) = 290 -> IS ~2024.07.05-2025.04.21,
 #  OOS ~2025.04.22-2026.06.30. *** Le date esatte del taglio le

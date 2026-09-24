@@ -217,15 +217,49 @@
 #          file e' OHLC, e l'OHLC NON VEDE LE ESCURSIONI INTRA-BARRA.
 #          Quindi anche il -8,0159 e' un LIMITE INFERIORE: la giornata
 #          vera puo' solo essere PEGGIORE. *** Una cella che passa D7
-#          qui NON e' dimostrata dentro il muro; una che lo fallisce
-#          qui e' dimostrata FUORI. Asimmetria da scrivere nel
-#          referto, ed e' la stessa forma della classe 562.
-#      >>> LA TAGLIA, dichiarata: si gira a InpRiskPercent = 1,00, e a
-#          rischio 1,00 la colonna E' GIA' il numero di campo, quindi
-#          il -5,00 si legge cosi' com'e'. A 2,00 la soglia
-#          diventerebbe -2,50 sulla stessa colonna. *** Sul -8,0159
-#          gia' misurato il verdetto non cambia in nessuno dei due
-#          casi. ***
+#          qui NON e' dimostrata dentro il muro.
+#          (Qui c'era scritto anche "una che lo fallisce qui e'
+#          dimostrata FUORI": *** CORRETTO IL 24/09/2026 -- VALE PER IL
+#          GUARDIAN IN CAMPO, NON PER FTMO. *** La ragione e' la
+#          GRANDEZZA, non il modello: vedi D7-bis.)
+#      >>> LA TAGLIA (qui c'era scritto "a rischio 1,00 la colonna E'
+#          GIA' il numero di campo": *** CORRETTO IL 24/09/2026 ***):
+#          la taglia di una sedia CostToCost NON ESISTE, e' una firma
+#          di Claudio; qui e' la VARIABILE R_sedia (in %), non una
+#          proposta. Le sedie FTMO in repo girano a 2.00 (una a 1.30):
+#          e' un fatto dei preset, non una scelta per questa sedia.
+#          REGOLA DI LETTURA, identica a R214e C7 e congelata prima dei
+#          numeri: soglia sulla colonna a 1,00% = -5,00 x (1,00 /
+#          R_sedia); zona grigia entro il 3% della soglia convertita
+#          (la scala lineare sovrastima il ritracciamento del profitto
+#          aperto, che e' sub-lineare). *** Sul -8,0159 gia' misurato
+#          nessuna taglia >= 1,00 passa -- ma il -8,0159 NON e' la
+#          perdita giornaliera FTMO (D7-bis). ***
+#  D7-bis *** LA COLONNA E' DALL'EQUITY, FTMO DAL BALANCE: TESTO
+#      COMPLETO IN R214e, punto C7-bis (aggiunto il 24/09/2026). ***
+#      In breve: l'EA (sorgente r.480-494) prende come base l'EQUITY al
+#      primo tick del giorno del server BCM; FTMO
+#      (docs/REGOLAMENTO_FTMO_2026-08.md r.26-27) il BALANCE delle
+#      00:00 CE(S)T, e il limite e' il 5% del capitale INIZIALE.
+#      Quindi il profitto aperto restituito conta per la colonna e NON
+#      per FTMO (la colonna sovrastima: e' il caso di exit 2, senza
+#      TP), mentre la perdita aperta a mezzanotte conta per FTMO e
+#      solo in parte per la colonna (la colonna sottostima).
+#      CONTRO-ESEMPIO MISURATO: r41 OOS, exit 2, rischio 1,00 --
+#      colonna -4.0041, ma la peggior operazione chiusa del per-trade
+#      772351 e' -1,271% e mai piu' di una chiusura al giorno.
+#      >>> COSA SI LEGGE QUI, E COSA NO:
+#          - LA COLONNA E' IL NUMERO DEL GUARDIAN IN CAMPO (base
+#            equita', pausa 3,5 / emergenza 4,5 con FlattenAll su tutto
+#            il conto nel preset FTMO). D7 che fallisce = il Guardian
+#            scatterebbe, e con l'OHLC come limite inferiore anche
+#            questo e' un fatto.
+#          - LA PERDITA GIORNALIERA FTMO e' [NON MISURATA] da questo
+#            round, in tutte e due le direzioni.
+#          - L'ANCORA NON CAMBIA: la cella exit 2 deve ancora
+#            riprodurre -4.2160 / -8.0159, perche' e' la STESSA metrica
+#            dello stesso EA. D7 come controllo di regressione resta
+#            intero.
 #
 #  7. COSTO -- tetto dichiarato
 #  --------------------------------------------------------------------
@@ -240,6 +274,14 @@
 #      prudente che uso nel referto e' quello del modello 4
 #      (6 x 89,6 s = 9,0 minuti), che per un modello 1 e' quasi
 #      certamente LARGO. Si misura alla prima corsa e si scrive.
+#  *** AGGIUNTO IL 24/09/2026 (classe 751): il tempo che conta e'
+#  quello dichiarato nella RIGA (righe/RIGA_R214EF_COSTTOCOST.txt),
+#  PER PASSATA, perche' su DESKTOP-H4D7CAJ gira UN SOLO agente e le
+#  passate vanno in serie. Il 24/09 R240 (stessa macchina, altro EA,
+#  modello 4) ha misurato ~135 s per passata con i costi fissi: il
+#  "9,0 minuti" qui sopra NON e' un tetto per quella macchina. La riga
+#  scrive la durata di OGNI job nel riepilogo: e' li' che questo
+#  numero diventa MISURATO. ***
 #
 #  8. BUCHI DICHIARATI DI QUESTO ROUND
 #  --------------------------------------------------------------------
