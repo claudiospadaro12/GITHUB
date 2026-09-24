@@ -1,0 +1,103 @@
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+# ==========================================================================
+#  R246r -- CASELLA d+1 -- ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR M15 -- TICK REALI -- dep. 100000
+#  OROLOGIO +1h (TUTTO l'orario spostato): box 00:00-05:59, piazzamento
+#  08:59, cutoff 09:30, flat 18:30 BCM
+#  FINESTRA A (= R246k): 2024.09.26 -> 2025.06.09, taglio 0.002. Gamba IS
+#  = UN giorno (CSV _IS atteso vuoto: falso allarme atteso SOLO se l'_OOS
+#  ha righe con Trades>0, classe 766). Gamba OOS 2024.09.27 -> 2025.06.09
+#  = il PER-TRADE del primo inverno (2024/25) alla cash.
+#  magic gemelli 794626 / 794676
+#  @ORARIO_INVERNALE casella d+1 di R246, finestra A: piazza 08:59 BCM = 1' prima di Xetra in ora solare UE (BCM UTC+1 fisso), come la sedia FTMO 770411 dal 26/10; d'estate 1h DOPO
+#  Il ragionamento sta in R246m (casella d+1) e in R246q (MaxMin). Qui
+#  solo le differenze e i numeri di QUESTO file.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400 (C:\MT5_Backtest), NON su nessun terminale di conto (50503392,
+#  50504263, 10105439, 541452707). Non tocca taglie, preset, sedie.
+# ==========================================================================
+#  RILIEVO DEL CANCELLO DETERMINISTICO (controlla_riga.py --oggetto prova,
+#  classe 763), riportato testuale:
+#   ~ [FUSO] '@ORARIO_INVERNALE' dichiarato (r.11) ma nessun
+#   InpSessionHour/InpIbInizioOra vale 9 o 15: dichiarazione ORFANA
+#   (classe 763)
+#  ORFANA per costruzione (R246q): il cancello non conosce i nomi degli
+#  input orari di questo EA. Calendario UE: 110 feriali d'inverno in A.
+# ==========================================================================
+#  PIN: identico a R246k input per input, TRANNE i 5 input d'orologio
+#  (box 00:00-05:59, piazzamento 08:59, cutoff 09:30, flat 18:30 BCM) e il
+#  magic. Una sola variabile contro R246k: lo spostamento dell'orologio.
+#  Contro R246q: solo la finestra.
+#  CANCELLI (congelati, R246m par. 3 e R246q):
+#   G1 gemelle 794626/794676 identiche in CSV e per-trade (tranne magic).
+#   G2 somma net_profit e numero di deal del per-trade di questo file
+#      contro Profit e Trades della gamba IS di R246q (stesso orologio,
+#      finestra B): attesi IDENTICI; unica causa ammessa il 26/09/2024.
+#   S1 per-trade diverso da R246k; nessuna uscita prima delle 08:59 ne'
+#      dopo le 18:31 BCM; con meno di 3 uscite S1 e' GIALLA. Per-trade
+#      identico a R246k -> file NULLO.
+#  CONFRONTO: R246k (stessa finestra, d0) e R246l (-1h).
+#  ATTESA DICHIARATA (giorni d'inverno UE della d+1, A+B = R246q + R246r):
+#   PF NON DISCRIMINANTE (R246q). Frequenza (indizio debole): se
+#   H_STAGIONE [11,1 ; 20,9]; se H_OROLOGIO [4,4 ; 11,6] posizioni.
+#  Questo file DA SOLO non da' verdetto: criterio in R246m par. 5 e R246q.
+#  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_794626.csv
+#  e abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_794676.csv (ultima gamba = OOS).
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2025.06.09
+@FRAZIONEIS 0.002
+
+InpUsaGuardian=false
+InpBoxStartHour=0
+InpBoxStartMin=0
+InpBoxEndHour=5
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=8
+InpPlaceMin=59
+InpEntryCutoffHour=9
+InpEntryCutoffMin=30
+InpCloseHour=18
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000
+InpTP1_R=1
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=3
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794626||794626||50||794676||Y

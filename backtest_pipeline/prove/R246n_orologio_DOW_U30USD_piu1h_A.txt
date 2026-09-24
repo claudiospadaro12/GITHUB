@@ -1,0 +1,139 @@
+#  EA: ABTG_Dow_Apertura_US
+# ==========================================================================
+#  R246n -- CASELLA d+1 -- ABTG_Dow_Apertura_US U30USD M5 -- TICK REALI -- dep. 100000
+#  OROLOGIO +1h (TUTTO l'orario spostato): armo 15:30, flat 18:30 BCM
+#  FINESTRA A (= R246c): 2024.09.26 -> 2025.06.09, taglio 0.002. Gamba IS
+#  = UN giorno (2024.09.26, CSV _IS atteso vuoto: falso allarme atteso SOLO
+#  se l'_OOS ha righe con Trades>0, classe 766). Gamba OOS 2024.09.27 ->
+#  2025.06.09 = il PER-TRADE del primo inverno (2024/25) alla cash.
+#  magic gemelli 794606 / 794656
+#  @ORARIO_INVERNALE casella d+1 di R246, finestra A: armo 15:30 BCM = cash NY in ora solare USA (BCM UTC+1 fisso), come la sedia FTMO 770202 dal 02/11; d'estate 1h DOPO
+#  TUTTO il ragionamento della casella d+1 sta in R246m (e quello del round
+#  in R246a). Qui solo le differenze e i numeri di QUESTO file.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400 (C:\MT5_Backtest), NON su nessun terminale di conto (50503392,
+#  50504263, 10105439, 541452707). Non tocca taglie, preset, sedie.
+# ==========================================================================
+#  RILIEVO DEL CANCELLO DETERMINISTICO (controlla_riga.py --oggetto prova,
+#  classe 763), riportato testuale:
+#   ~ [FUSO] r.61: InpSessionHour=15 DICHIARATO invernale
+#   (@ORARIO_INVERNALE r.10: 'casella d+1 di R246, finestra A: armo 15:30
+#   BCM = cash NY in ora solare USA (BCM UTC+1 fisso), come la sedia FTMO
+#   770202 dal 02/11; d'estate 1h DOPO'). finestra 2024.09.26 ->
+#   2025.06.09 (@DAQUANDO/@FINOA), giorni lun-ven con la cash USA alle 15
+#   server: 90, alle 14: 93, prima del 2024.09.26 (orologio indici BCM non
+#   misurato): 0. Nei 93 giorni d'estate l'EA arma UN'ORA DOPO la cash. Il
+#   cancello NON giudica se e' voluto: lo legge lo strato 2 (classe 763)
+#  Nella finestra A i giorni "alle 14" sono l'estate A (autunno 2024 e
+#  primavera 2025): li' la d+1 arma alle 10:30 NY e NON si legge (R246m
+#  par. 1.3), salvo i feriali UE-solare/USA-legale, vivi per FTMO.
+# ==========================================================================
+#  PIN: identico a R246c input per input, TRANNE InpSessionHour (15),
+#  InpCloseHour (18) e il magic. Una sola variabile contro R246c: lo
+#  spostamento dell'orologio. Contro R246m: solo la finestra.
+#  CANCELLI (congelati, R246m par. 3):
+#   G1 gemelle 794606/794656 identiche in CSV e per-trade (tranne magic).
+#   G2 somma net_profit e numero di deal del per-trade di questo file
+#      contro Profit e Trades della gamba IS di R246m (stesso orologio,
+#      finestra B): attesi IDENTICI; unica causa ammessa il 26/09/2024.
+#   S1 nessuna uscita prima delle 16:05 ne' dopo le 18:31 BCM (a d0 il 59%
+#      delle uscite cade prima delle 16:05). Per-trade identico a R246c o
+#      S1 fallita -> il pin d'orario non e' arrivato: file NULLO.
+#  CONFRONTO: R246c (stessa finestra, d0) e R246d (-1h).
+#  ATTESA DICHIARATA (giorni d'INVERNO USA della d+1, finestre A+B insieme,
+#  cioe' R246m + R246n; r246_bande_attese.py sez. 5):
+#   se H_STAGIONE: PF [1,19 ; 2,35], posizioni [67,5 ; 84,5];
+#   se H_OROLOGIO: PF [0,50 ; 1,26], posizioni [48,5 ; 64,4].
+#   Il PF si SOVRAPPONE per 0,07 (1,19-1,26); le posizioni no. Sul Dow Q2
+#   porta dentro anche il cambio di candela H4 del filtro (R246m par. 1.4).
+#  Questo file DA SOLO non da' verdetto: criterio in R246m par. 5.
+#  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_Dow_Apertura_US_U30USD_794606.csv
+#  e abtg_trades_ABTG_Dow_Apertura_US_U30USD_794656.csv (ultima gamba = OOS).
+# ==========================================================================
+
+@SIMBOLO    U30USD
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2025.06.09
+@FRAZIONEIS 0.002
+
+InpUsaGuardian=false
+InpSessionHour=15
+InpSessionMin=30
+InpRangeMinutes=35
+InpCloseHour=18
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=1000
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=400
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794606||794606||50||794656||Y

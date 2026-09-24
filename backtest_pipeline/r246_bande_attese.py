@@ -31,7 +31,14 @@ ONESTA': il bootstrap tratta le celle come INDIPENDENTI; d0 e -1h girano
 sugli stessi giorni, quindi sotto H_STAGIONE l'errore vero e' PIU'
 PICCOLO di quello stampato (numero prudente).
 
-USO:  python3 backtest_pipeline/r246_bande_attese.py     (~8 secondi)
+USO:  python3 backtest_pipeline/r246_bande_attese.py     (~9 secondi)
+
+SEZIONE 5 (24/09, casella d+1, prove/R246m-r): la cella con TUTTO l'orario
++1h letta sui giorni d'INVERNO (d'inverno arma ALLA CASH, come le sedie
+FTMO). Q2 = (rif_I0 - X)/(rif_I0 - rif_E0), stesse zone e stessa
+precondizione di R246a par. 7, regola simulata com'e' scritta (classe
+764). Le sezioni 1-4 danno gli stessi numeri di prima: la sez. 5 ha semi
+propri (17, 19, 23) e gira DOPO.
 """
 import collections
 import csv
@@ -123,16 +130,23 @@ def main():
               f"PF E={pE:.3f} I={pI:.3f} divario={pI - pE:.3f}")
         q = lambda b, p: sorted(b)[min(len(b) - 1, int(p * len(b)))]
         for nome, nS, nO, sS, sO in (("X1 estate -1h", round(rE * fE), round(rI * fE), 'E', 'I'),
-                                     ("X2 inverno +1h (casella NON in R246)", round(rI * fI), round(rE * fI), 'I', 'E')):
+                                     ("X2 inverno +1h (casella d+1, R246m-r)", round(rI * fI), round(rE * fI), 'I', 'E')):
             bS = boot(pos, sS, nS, R)
             bO = boot(pos, sO, nO, R)
             print(f"   {nome}: H_STAGIONE n={nS} [{q(bS, .1):.2f} ; {q(bS, .9):.2f}]  "
                   f"H_OROLOGIO n={nO} [{q(bO, .1):.2f} ; {q(bO, .9):.2f}]")
-        for nome, dd in (("Y1 posizioni estate -1h", fE), ("Y2 posizioni inverno +1h (NON in R246)", fI)):
-            sE = math.sqrt(rE * (1 - rE) / dd)
-            sI = math.sqrt(rI * (1 - rI) / dd)
-            print(f"   {nome}: giorni={dd}  H_STAGIONE [{(rE - 1.2816 * sE) * dd:.1f} ; {(rE + 1.2816 * sE) * dd:.1f}]"
-                  f"  H_OROLOGIO [{(rI - 1.2816 * sI) * dd:.1f} ; {(rI + 1.2816 * sI) * dd:.1f}]")
+        # 24/09 (casella d+1): fino a oggi Y2 stampava H_STAGIONE col tasso
+        # ESTIVO e H_OROLOGIO con l'INVERNALE, come Y1. Per Y2 e' il
+        # contrario (d+1 d'inverno: H_STAGIONE -> tasso invernale, H_OROLOGIO
+        # -> tasso estivo). Numeri invariati, ETICHETTE scambiate: Y2 non era
+        # citato in nessun file R246a-l (latente). Corretto qui, senza toccare
+        # il flusso casuale (Y non usa random).
+        for nome, dd, rS, rO in (("Y1 posizioni estate -1h", fE, rE, rI),
+                                 ("Y2 posizioni inverno +1h (casella d+1, R246m-r)", fI, rI, rE)):
+            sS = math.sqrt(rS * (1 - rS) / dd)
+            sO = math.sqrt(rO * (1 - rO) / dd)
+            print(f"   {nome}: giorni={dd}  H_STAGIONE [{(rS - 1.2816 * sS) * dd:.1f} ; {(rS + 1.2816 * sS) * dd:.1f}]"
+                  f"  H_OROLOGIO [{(rO - 1.2816 * sO) * dd:.1f} ; {(rO + 1.2816 * sO) * dd:.1f}]")
 
     print()
     print("=== 2. ZONE DEL VERDETTO (Q 0,30 / 0,70), seme 5, 6000 ricampionamenti ===")
@@ -212,6 +226,103 @@ def sezione4():
             print(f"{k} se H_{H}: PF P(pre)={okp / R:.3f} {t(zp, okp)} | FREQ P(pre)={okf / R:.3f} {t(zf, okf)}")
 
 
+def sezione5():
+    """CASELLA d+1 (R246m-r, 24/09/2026): tutto l'orario +1h, letta sui
+    giorni d'INVERNO. d'inverno la cella d+1 arma ALLA CASH (cio' che le sedie
+    FTMO faranno da fine ottobre). Confronto con la d0 d'ESTATE (alla cash).
+      H_OROLOGIO: d+1 inverno ~ d0 ESTATE  (conta la tempistica)
+      H_STAGIONE: d+1 inverno ~ d0 INVERNO (conta la stagione)
+    Q2 = (PF_I0 - PF_I+1) / (PF_I0 - PF_E0): H_OROLOGIO -> ~1, H_STAGIONE -> ~0.
+    Stesse zone (0,30 / 0,70), stessa precondizione (D >= meta' del divario
+    d'ancora) e stessi riferimenti d0 A+B misurati nel round di R246a par. 7.
+    Stesso metodo di sezione4 (classe 764): riferimenti rumorosi, P(pre)."""
+    print()
+    print("=== 5. CASELLA d+1 (R246m-r): PF e frequenza della d+1 sui giorni d'INVERNO A+B ===")
+    print("    Q2 = (rif_I0 - X)/(rif_I0 - rif_E0): Q2>=0,70 OROLOGIO, Q2<=0,30 STAGIONE.")
+    print("    5a bande p10-p90 seme 17 (5000); 5b regola com'e' scritta seme 19 (6000);"
+          " 5c contro-esempio sola B seme 23 (4000).")
+    q = lambda b, p: sorted(b)[min(len(b) - 1, int(p * len(b)))]
+    random.seed(17)
+    R = 5000
+    for k, (f, cal) in F.items():
+        pos = carica(f, cal)
+        fb, fa = feriali(*B, cal), feriali(*A, cal)
+        fI = fb[1] + fa[1]
+        rE, rI = len(pos['E']) / fb[0], len(pos['I']) / fb[1]
+        pE = pf([v for L in pos['E'].values() for v in L])
+        pI = pf([v for L in pos['I'].values() for v in L])
+        D = pI - pE
+        nS, nO = round(rI * fI), round(rE * fI)
+        bS = boot(pos, 'I', nS, R)
+        bO = boot(pos, 'E', nO, R)
+        sS = math.sqrt(rI * (1 - rI) / fI)
+        sO = math.sqrt(rE * (1 - rE) / fI)
+        print(f"5a {k}: giorni inverno A+B={fI}; X2 PF d+1 inverno: H_STAGIONE n={nS} [{q(bS, .1):.2f} ; {q(bS, .9):.2f}]"
+              f"  H_OROLOGIO n={nO} [{q(bO, .1):.2f} ; {q(bO, .9):.2f}]"
+              f"  -> {'SOVRAPPOSTE' if q(bS, .1) <= q(bO, .9) else 'disgiunte'}")
+        print(f"      Y2 posizioni d+1 inverno: H_STAGIONE [{(rI - 1.2816 * sS) * fI:.1f} ; {(rI + 1.2816 * sS) * fI:.1f}]"
+              f"  H_OROLOGIO [{(rE - 1.2816 * sO) * fI:.1f} ; {(rE + 1.2816 * sO) * fI:.1f}]")
+        print(f"      soglie all'ancora: PF OROLOGIO se X <= {pI - 0.70 * D:.3f}, STAGIONE se X >= {pI - 0.30 * D:.3f};"
+              f" posizioni OROLOGIO se <= {(rI - 0.70 * (rI - rE)) * fI:.1f}, STAGIONE se >= {(rI - 0.30 * (rI - rE)) * fI:.1f}")
+
+    random.seed(19)
+    R = 6000
+    for k, (f, cal) in F.items():
+        pos = carica(f, cal)
+        E = list(pos['E'].values())
+        I = list(pos['I'].values())
+        fb, fa = feriali(*B, cal), feriali(*A, cal)
+        rE, rI = len(E) / fb[0], len(I) / fb[1]
+        fE, fI = fb[0] + fa[0], fb[1] + fa[1]
+        nAE, nAI = round(rE * fa[0]), round(rI * fa[1])
+        pE = pf([v for L in E for v in L])
+        pI = pf([v for L in I for v in L])
+        for H in ('STAGIONE', 'OROLOGIO'):
+            zp, zf, okp, okf = [0, 0, 0], [0, 0, 0], 0, 0
+            for _ in range(R):
+                e0 = pf([v for L in E + [random.choice(E) for _ in range(nAE)] for v in L])
+                i0 = pf([v for L in I + [random.choice(I) for _ in range(nAI)] for v in L])
+                src, r = (I, rI) if H == 'STAGIONE' else (E, rE)
+                x = pf([v for _ in range(round(r * fI)) for v in random.choice(src)])
+                D = i0 - e0
+                if D >= (pI - pE) / 2:
+                    okp += 1
+                    q2 = (i0 - x) / D
+                    zp[0 if q2 <= 0.30 else (2 if q2 >= 0.70 else 1)] += 1
+                fe0 = (len(E) + sum(random.random() < rE for _ in range(fa[0]))) / fE
+                fi0 = (len(I) + sum(random.random() < rI for _ in range(fa[1]))) / fI
+                fx = sum(random.random() < r for _ in range(fI)) / fI
+                Df = fi0 - fe0
+                if Df >= (rI - rE) / 2:
+                    okf += 1
+                    q2 = (fi0 - fx) / Df
+                    zf[0 if q2 <= 0.30 else (2 if q2 >= 0.70 else 1)] += 1
+            t = lambda z, n: f"({z[0] / n:.3f} ; {z[1] / n:.3f} ; {z[2] / n:.3f})" if n else "(n/d)"
+            print(f"5b {k} se H_{H}: PF P(pre)={okp / R:.3f} {t(zp, okp)} | FREQ P(pre)={okf / R:.3f} {t(zf, okf)}")
+
+    random.seed(23)
+    pos = carica(*F['DOW'])
+    n = len(pos['I'])
+    bS = sorted(boot(pos, 'I', n, 4000))
+    bO = sorted(boot(pos, 'E', n, 4000))
+    print(f"5c DOW X2 con la SOLA B (n={n} pos. d'inverno): H_STAGIONE [{bS[400]:.2f} ; {bS[3600]:.2f}]"
+          f"  H_OROLOGIO [{bO[400]:.2f} ; {bO[3600]:.2f}]"
+          f"  -> {'SOVRAPPOSTE' if bS[400] <= bO[3600] else 'disgiunte'}")
+
+    # giorni in cui il calendario UE e quello USA non concordano (Dow): FTMO
+    # (ora italiana + 1, calendario UE) arma a 15:30 BCM = 10:30 NY in ora
+    # legale USA -- un'ora TARDI -- e la cella d+1 fa lo stesso. Il Dow li
+    # classifica ESTATE (calendario USA): fuori dal verdetto d'inverno.
+    fer = 0
+    d = A[0]
+    while d <= B[1]:
+        if d.weekday() < 5 and inverno(d, 'UE') and not inverno(d, 'USA'):
+            fer += 1
+        d += dt.timedelta(1)
+    print(f"5d DOW feriali A+B con UE in ora solare e USA in ora legale (d+1 = FTMO = 10:30 NY): {fer}")
+
+
 if __name__ == "__main__":
     main()
     sezione4()
+    sezione5()
