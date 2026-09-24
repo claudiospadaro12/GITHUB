@@ -1,0 +1,48 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 223dc6548b5cb2031e17988107b520544d839970
+data            : 2026-09-24 15:59:39   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_MaxMinNotte
+file prova      : R244b_riempimento_MaxMinNotte_D30EUR_long.txt   (51948 byte, dal pin)
+etichetta       : R244b
+simbolo         : D30EUR
+periodo         : M15
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte\ABTG_MaxMinNotte_D30EUR_IS_R244b.csv
+  righe : 9
+    Pass 0    Profit -3783.83     PF 0.54686    Equity DD % 5.1013     Trades 85
+    Pass 1    Profit -3026.15     PF 0.70412    Equity DD % 5.0151     Trades 127
+    Pass 2    Profit -3780.11     PF 0.69155    Equity DD % 6.2738     Trades 143
+    Pass 3    Profit -3321.63     PF 0.74387    Equity DD % 5.6463     Trades 157
+    Pass 4    Profit -2222.41     PF 0.8394     Equity DD % 4.8806     Trades 171
+    Pass 5    Profit -2077.22     PF 0.8512     Equity DD % 4.8661     Trades 177
+    Pass 6    Profit -1794.56     PF 0.87873    Equity DD % 4.8172     Trades 187
+    Pass 7    Profit -1410.72     PF 0.90608    Equity DD % 4.5665     Trades 196
+    Pass 8    Profit -1685.12     PF 0.89134    Equity DD % 4.8323     Trades 206
+  ESITO : LETTO -- 9 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte\ABTG_MaxMinNotte_D30EUR_OOS_R244b.csv
+  ESITO : NON MISURATO -- CSV DA 0 BYTE
+  >>> Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: guardare il log
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: NON MISURATO -- CSV mancanti o vuoti: OOS

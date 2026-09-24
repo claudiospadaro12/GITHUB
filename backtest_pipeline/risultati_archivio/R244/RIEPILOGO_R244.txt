@@ -1,0 +1,22 @@
+RIEPILOGO R244 -- tasso di riempimento, InpEntryCutoffHour 9..17 (ABTG_MaxMinNotte, D30EUR M15, lati separati)
+data: 2026-09-24 15:57:22
+fine: 2026-09-24 16:01:53   durata minuti: 5   (stima 4-6; tetto 12; oltre 20 e BLOCCATA)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 NON toccato)
+pin : 223dc6548b5cb2031e17988107b520544d839970
+deposito 100000 passato (come R242); -Spread NON passato = INCOGNITA DICHIARATA, identica a R242
+FRAZIONEIS 1.0 = una tranche sola: la gamba OOS e DEGENERE, i suoi CSV non si leggono
+
+R244a  modello 4   rc 2   motore = pin (SHA256)
+R244b  modello 4   rc 2   motore = pin (SHA256)
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito
+QUI rc 2 E ATTESO SU TUTTI E DUE E NON E UN GUASTO (FRAZIONEIS 1.0: la gamba OOS non produce CSV). Si legge il CSV _IS. Guasto vero = rc 1.
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin): MOTORE = PIN in ogni round partito
+
+CARTELLE ATTESE: 2   TROVATE: 2   -> CATENA COMPLETA
+
+PRIMA DI QUALUNQUE NUMERO, il par. 5 dei file prova. CONTROLLO 1 -- la cella C=12 riproduce R242 alla cifra: R244a SHORT n ESATTAMENTE 101, PF entro 0,00002 da 1,40859 (DD 2,0209, Profit +2799,28); R244b LONG n ESATTAMENTE 157, PF entro 0,00002 da 0,74387 (DD 5,6463, Profit -3321,63). Se non torna, NESSUN PF di quel file si legge.
+CONTROLLO 2 -- n NON DECRESCENTE lungo tutto l asse 9..17, senza una sola eccezione (teorema sul codice, non attesa statistica).
+UNITA: ogni n del CSV e in DEAL (InpTP1Pct=50, uscita frazionata), NON in posizioni. k = deal/posizioni NON esce dai CSV di ottimizzazione: lo puo dare SOLO il PERTRADE qui sotto (UNA cella, l ultima eseguita). Se non si identifica, serve la passata SINGOLA a C=12 (par. 6-bis), che deve dare esattamente 101 deal sullo short. Finche k manca, il verdetto sul pavimento dei 150 e NON ANCORA MISURATO, mai n>=150 RAGGIUNTO. Il DD si legge lo stesso (Emendamento B).
+PERTRADE (Common Files, magic 762510 e 762500, scritti DOPO l avvio): 2 su 2. E la ULTIMA passata eseguita di ciascun lato: righe = deal di uscita, si identifica la cella confrontandole con la colonna Trades del CSV _IS; posizioni = position_id distinti; k = righe / posizioni. Se la cella non si identifica in modo univoco o il file ha zero righe, k resta NON MISURATO.
+Le 9 celle sono NIDIFICATE: si leggono col PF MARGINALE fra celle contigue, non come 9 prove indipendenti (par. 8-bis).

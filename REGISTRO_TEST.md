@@ -55,6 +55,12 @@ quelli sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non c
 
 ---
 
+## 🟠 R244 — GIRATO il 24/09: il cutoff NON allarga il corto di MaxMinNotte D30EUR (NON un morto)
+- Ancora C=12 riprodotta alla cifra (101 / 1,40859; 157 / 0,74387), monotonia OK, **k = 1,42 misurato** dal per-trade (C=17).
+- Corto: max **~105 posizioni** (C=17) < 150 -> merito sospeso. **PF marginale 12->17 = 0,588 su 48 deal** (indizio WHIPSAW: i riempimenti tardivi perdono). Il PF sale accorciando il cutoff, ma C<=10 sta sotto 50 posizioni.
+- Lungo: PF 0,55-0,91 in ogni cella. DD corto 1,3-2,4% @0,65%.
+- **Cosa manca al certificato**: asse `InpPlaceHour`, altri simboli, **TF (mai cambiato)**. Referto: `report/REFERTO_R244_2026-09-24.md`.
+
 ## 🟢 R245 — GIRATO il 24/09: altopiano `InpEmaSlow` 160-260, CENTRO 200 (aperto a destra)
 - 6/6 rc 0, motore = pin, 28 min. **G0 GIALLO**: n identico in 32/32 ancore, PF/DD in deriva (lotto, r.2045) -> lettura SOLO interna.
 - Cella al centro (200, TP 0,50): IS PF **1,252** n 154 DD 7,10% · OOS PF **1,489** n 197 DD 6,86% @1%. 140 cade solo su n IS 147. H1 (altopiano) confermata.
