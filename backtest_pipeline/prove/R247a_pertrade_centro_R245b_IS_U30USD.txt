@@ -1,0 +1,452 @@
+# ==========================================================================
+#  R247a -- IL PER-TRADE DELLA CELLA CENTRALE DI R245b, TRANCHE IS
+#  ABTG_Nasdaq_Apertura_US su U30USD M5 -- TICK REALI -- DUE LATI
+#  InpEmaSlow = 200 FISSO, InpTP1_R = 0.50 -- magic 765271/765272 (gemelle)
+#  QUESTO E' IL FILE DI TESTA DEL ROUND: qui sta tutto il ragionamento.
+#  R247b porta solo le sue differenze.
+# ==========================================================================
+#
+#  >>> LA DOMANDA, UNA SOLA
+#  R245 ha trovato il centro dell'altopiano del breakout Dow a due lati
+#  (report/REFERTO_R245_2026-09-24.md par. 0 e 2): InpEmaSlow=200, TP 0,50.
+#  Prima di diventare una sedia gli mancano due misure che escono SOLO dal
+#  PER-TRADE della cella, e il CSV di ottimizzazione non lo da':
+#   (a) la SOVRAPPOSIZIONE con la sedia viva 770202 (ABTG_Dow_Apertura_US,
+#       stesso indice, stessa apertura 14:30 server): giorni in cui entrano
+#       tutte e due, stesso verso o opposto, correlazione dei P/L giornalieri;
+#   (b) il DD GIORNO PER GIORNO e la peggior giornata, da cui Claudio ricava
+#       il DD alla taglia vera. La taglia e' SUA: qui c'e' solo il numero.
+#  Il round NON misura niente di nuovo sul motore: RIFA' una cella gia'
+#  misurata per farle lasciare il per-trade. Non promuove, non archivia,
+#  non tocca taglie, sedie, preset o conti.
+#
+# ==========================================================================
+#  1. IL PER-TRADE C'E' -- letto nel sorgente, non assunto
+# ==========================================================================
+#  mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (invariato dal pin f489a621 di
+#  R245: git diff f489a621 HEAD sull'EA e su mql5/Include/ = vuoto, 24/09):
+#   r.2564 void ExportTrades()
+#   r.2567 nome = "abtg_trades_" + MQL_PROGRAM_NAME + "_" + _Symbol + "_"
+#          + InpMagic + ".csv"
+#   r.2568 FileOpen(..., FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON, ';')
+#          -> cartella COMUNE: %APPDATA%\MetaQuotes\Terminal\Common\Files
+#   r.2570 colonne close_time;symbol;magic;position_id;deal_type;volume;
+#          price;net_profit -- una riga per DEAL DI USCITA (r.2577), netto =
+#          profit + swap + commission (r.2578)
+#   r.2593 OnTester() chiama ExportTrades() SENZA nessun if: ogni passata
+#          che gira davvero lo scrive, e sovrascrive il file del suo magic.
+#  FILE ATTESI DA QUESTO FILE (e sono gli UNICI due):
+#     abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765271.csv
+#     abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765272.csv
+#  UNITA': la colonna Trades del CSV di ottimizzazione conta i DEAL
+#  (classe 454, misurato su 772505: Trades 130, 130 deal, 96 posizioni).
+#  Qui InpTP1_ClosePct=0 (R245a par. 5): un deal di uscita per posizione,
+#  quindi deal = posizioni = Trades. Se il per-trade avesse piu' righe che
+#  position_id distinti, la cella NON e' quella di R245b.
+#
+# ==========================================================================
+#  2. PERCHE' DUE FILE E NON UNO -- il per-trade dell'IS si PERDE
+# ==========================================================================
+#  walkforward_generico.ps1 r.934-937: due gambe, IS poi OOS, con lo STESSO
+#  magic; il driver non tocca Common\Files fra una gamba e l'altra (grep di
+#  "abtg_trades" nel driver: zero occorrenze fuori dal messaggio sulla
+#  cache). Quindi resta il per-trade della gamba che gira PER SECONDA.
+#  MISURATO, non ragionato: il per-trade 772505 (R47c, @DAQUANDO 2024.09.26,
+#  FrazioneIS 0.40) comincia il 2025.06.10 = primo giorno della gamba OOS
+#  (642 x 0,40 = 256,8 -> 256 -> IS fino al 2025.06.09). 130 deal, tutti
+#  dal 2025.06.10 in poi.
+#  >>> Con UN file a @FRAZIONEIS 0.4322 il per-trade dell'IS -- la finestra
+#      col crollo di aprile 2025, quella in cui il VECCHIO giudica il
+#      RISCHIO (Emendamento B) -- andrebbe perso. Per (b) e' la meta' che
+#      conta di piu'. Quindi:
+#       R247a (questo file) = la tranche IS DA SOLA  -> per-trade IS
+#       R247b               = le finestre di R245b tali e quali -> per-trade
+#                             OOS (la gamba IS rigira e fa da ancora gratis)
+#  >>> Rilievo di passaggio, NON corretto qui (non e' un file mio):
+#      prove/R152a_pertrade_DowApertura_770202.txt, sezione buchi, scrive
+#      "Il CSV copre TUTTA la finestra (IS+OOS insieme)". Per quanto sopra
+#      copre SOLO la gamba OOS (2025.06.10 -> 2026.06.30).
+#
+# ==========================================================================
+#  3. COME QUESTO FILE ISOLA L'IS -- stesse date di R245b, al giorno
+# ==========================================================================
+#  R245b: 2024.09.26 -> 2026.06.30 = 642 giorni x 0,4322 = 277,47 -> 277
+#         -> gamba IS 2024.09.26 -> 2025.06.30 (R245a par. 3).
+#  Qui:   @DAQUANDO 2024.09.26 @FINOA 2025.06.30 @FRAZIONEIS 1.0
+#         277 giorni x 1,0 = 277 -> Meta = 2025.06.30
+#         -> gamba IS  2024.09.26 -> 2025.06.30  (FromDate/ToDate IDENTICI
+#            alla gamba IS di R245b: e' LA STESSA corsa del tester)
+#         -> gamba OOS 2025.07.01 -> 2025.06.30  DEGENERE (FromDate>ToDate)
+#  PERCHE' NON IL TRUCCO DI R246c (@FRAZIONEIS 0.002, gamba buona per
+#  seconda): la gamba buona partirebbe il 2024.09.27 e il 2024.09.26 -- il
+#  PRIMO giorno di storico BCM -- resterebbe fuori. Nelle prime settimane
+#  dell'IS l'EMA non ha storia e l'EA piazza i due pendenti (R245 par. 4:
+#  a EmaSlow 200 i giorni "a due lati" dell'IS sono 11): se il 26/09 ha
+#  un'operazione, n esce 153 e il G0 "alla cifra" diventa impossibile PER
+#  COSTRUZIONE. Partire dal 2024.09.25 (prima gamba su un giorno senza
+#  dati) ha un comportamento del tester [NON MISURATO] in casa.
+#  IL RISCHIO DI QUESTA SCELTA, DICHIARATO: che la gamba degenere
+#  sovrascriva il per-trade dell'IS con un file vuoto. NON misurato
+#  direttamente. Indizio: R242a/b (@FRAZIONEIS 1.0) hanno lasciato il CSV
+#  OOS a 0 BYTE (risultati_archivio/R242/REFERTO_ROUND_R242a.txt): il file
+#  lo crea OnTesterDeinit, e l'intestazione la scrive solo al PRIMO frame
+#  (r.2632); 0 byte = zero frame = zero OnTester = zero ExportTrades
+#  [INFERITO]. E se succedesse lo stesso, lo prende il G0 (par. 5, strato
+#  ii: per-trade da sola intestazione -> ROSSO; collaudo G0-f dello
+#  script). Allora il per-trade IS resta [NON MISURATO] e si torna al
+#  coordinatore: nessun tentativo a caso.
+#  ATTESO E NORMALE: il runner chiudera' R247a con rc 2 = NON MISURATO per
+#  il CSV _OOS da 0 byte (come R242). Il CSV da leggere e' l'_IS. Il guasto
+#  vero sarebbe rc 1.
+#  TETTO DELLE 100.000 BARRE: 277 giorni di M5 ~ 55k barre: sotto.
+#
+# ==========================================================================
+#  4. IL MAGIC, E PERCHE' E' UN ASSE
+# ==========================================================================
+#  765271/765272 qui, 765273/765274 in R247b. Verificato PRIMA di scrivere:
+#  rg "76527[0-9]" su tutto il repo, .claude/worktrees comprese = 0
+#  occorrenze (24/09). Non e' nessuno dei magic vivi.
+#  PERCHE' NUOVO: il tester ha una cache per passata; una cella gia'
+#  calcolata con gli stessi input NON si riesegue e NON riscrive il
+#  per-trade (walkforward_generico.ps1, avviso dopo la lettura del CSV).
+#  R245b l'ha calcolata col magic 765242: con 765242 il per-trade potrebbe
+#  non nascere.
+#  PERCHE' DUE (asse tecnico gemello): il driver rifiuta una prova senza
+#  assi (classe 134), e le due gemelle sono il cancello G1 di determinismo.
+#  Il magic nel tester lo legge solo la guardia A4 (HaGiaOperatoOggi), che
+#  vede solo i deal di questa passata: non tocca il risultato (R245a par. 2).
+#
+# ==========================================================================
+#  5. I CANCELLI, CONGELATI PRIMA -- G1 e G0 si guardano PER PRIMI
+# ==========================================================================
+#  BANCO IDENTICO A R245 (vincoli della riga, non imponibili dal file):
+#  -Deposito 10000 (NON 100000), -Modello 4, -Spread NON passato, PC DI
+#  BACKTEST DESKTOP-H4D7CAJ, MAI il VPS. Stesso binario (par. 1).
+#  LA RIGA DEVE RACCOGLIERE I PER-TRADE (classe 754: una misura dichiarata
+#  nel file o la riga la raccoglie, o il file la sposta): i QUATTRO file
+#  abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_76527{1,2,3,4}.csv da
+#  %APPDATA%\MetaQuotes\Terminal\Common\Files, solo se LastWriteTime >=
+#  inizio della corsa (un file vecchio con lo stesso nome non e' di
+#  questo round), e deve DIRE A VOCE quanti ne ha trovati su 4. Il driver
+#  non li copia (par. 2): senza quella raccolta il round non ha prodotto
+#  la sua misura.
+#  G1 DETERMINISMO: le due righe del CSV _IS (765271 e 765272) identiche in
+#     Profit, PF, DD, Trades, Peggior Giornata; i due per-trade identici
+#     RIGA PER RIGA tranne la colonna magic. Se no -> file NULLO.
+#  G0 RIPRODUZIONE, "alla cifra" (R245b, cella InpEmaSlow=200, Pass 3):
+#     CSV _IS, riga di ciascun magic:
+#        Trades 154   PF 1.25176   Profit 1180.94   Equity DD % 7.1002
+#        Peggior Giornata % -1.1046
+#     per-trade 765271 (strato ii e iii di r247_sovrapposizione.py):
+#        154 deal = 154 position_id distinti
+#        somma netti = 1180.94 entro +-0,78 (0,005 x 155: arrotondamento
+#        dei netti al centesimo)
+#        PF dei deal dentro l'intervallo d'arrotondamento che contiene
+#        1.25176
+#        DD del saldo chiuso <= 7.1002 (minorante dell'equity: con una
+#        posizione alla volta ogni saldo e' un valore di equity)
+#        peggior giornata chiusa >= -1.1046 (quella dell'EA e' sull'equity
+#        intraday, r.653-663: piu' profonda o uguale)
+#     VERDE  = tutto. ROSSO = anche una sola cosa.
+#     NIENTE GIALLO, e il perche': in R245 il giallo era la deriva di lotto
+#     fra il binario d'agosto e HEAD. Qui binario, banco, finestra e input
+#     sono QUELLI di R245b: qualunque differenza vuol dire che il per-trade
+#     non e' della cella, e allora (a) e (b) NON si calcolano.
+#  IL CONTRO-ESEMPIO DEL G0, ESEGUITO SU DATI VERI (24/09): 772505 contro
+#  la riga OOS di r47c -> VERDE (130 deal, somma 6721.93, PF 1.27013 =
+#  CSV); lo STESSO per-trade contro la riga IS di r47c -> ROSSO su (ii) e
+#  (iii) anche se la riga (i) torna: e' esattamente il caso "per-trade di
+#  una gamba letto come l'altra" che questo round deve escludere.
+#  COMANDO DI LETTURA (dopo la raccolta, entrambi i file):
+#   python3 backtest_pipeline/r247_sovrapposizione.py \
+#     --nuovo <pt_765271>@10000 --nuovo <pt_765273>@10000 \
+#     --viva backtest_pipeline/risultati_prove/aperture_r47/abtg_trades_ABTG_Dow_Apertura_US_U30USD_772505.csv@100000 \
+#     --g0 <pt_765271> <CSV_IS_R247a>  154 1.25176 1180.94 \
+#     --g0 <pt_765273> <CSV_OOS_R247b> 197 1.48894 2961.61 \
+#     --gemello <pt_765271> <pt_765272> --gemello <pt_765273> <pt_765274> \
+#     --giorni-csv r247_giorni.csv
+#
+# ==========================================================================
+#  6. (a) LA SOVRAPPOSIZIONE -- come si legge, SCRITTO PRIMA DEI NUMERI
+# ==========================================================================
+#  LA SERIE DELLA SEDIA VIVA: per-trade 772505 = cella di 770202 (R47c:
+#  retest 35', buffer 1000, offset 400, solo lungo, TP1 1R, parziale 50%,
+#  BE al TP1) a rischio 1%, deposito 100000, gamba OOS 2025.06.10 ->
+#  2026.06.29: 96 posizioni in 96 giorni (una al giorno), 130 deal, tutte
+#  LUNGHE, chiusure fra 15:17 e 17:30 server. Che sia la cella che vola
+#  lo dice R152a (8 dei 9 campi fuori default fissati identici da R16c/R47,
+#  il nono e' il rischio) e R246a par. 2: [INFERITO da quelle due fonti,
+#  non rifatto qui]. 91 dei 96 giorni cadono nell'OOS di R247b, 5 (dal
+#  2025.06.10 al 2025.06.30) nella tranche IS di R247a.
+#  FINESTRA COMUNE = 2025.06.10 -> 2026.06.29. L'IS di 770202 (col crollo
+#  di aprile 2025) NON e' nel repo: (a) in quel regime e' [NON MISURATO]
+#  (vedi i buchi: la via piu' corta e' R246c, gia' scritto).
+#  UNITA': il giorno = data di chiusura, ora server BCM (le due sedie sono
+#  intraday, chiusura 17:30; lo script CONTROLLA che ogni chiusura cada in
+#  14:30-17:31, e se no lo stampa). P/L% del giorno = netto / saldo a
+#  inizio giornata della propria tranche. La SOMMA delle due e' "due sedie
+#  a 1% sullo stesso conto", additiva: [DERIVATO].
+#  LE METRICHE:
+#   quota_viva = giorni in comune / giorni della viva
+#   stesso / opposto verso sui giorni in comune (deal_type d'uscita)
+#   rho_U = Pearson dei P/L% giornalieri sui giorni in cui ALMENO UNA entra
+#           (0 per quella che non entra)
+#   rho_C = Pearson sui soli giorni in comune
+#   P(coperd) = giorni in perdita della viva in cui perde anche la nuova
+#   rapp_DD = DD(somma) / (DD viva + DD nuova), additivi
+#   rapp_PG = |peggior giornata della somma| / max(|peggiori singole|)
+#  LE SOGLIE (le stesse costanti stanno in r247_sovrapposizione.py r.84-93):
+#   RADDOPPIO DEL RISCHIO se rho_U >= 0,50, OPPURE (quota_viva >= 0,50 E
+#      rho_C >= 0,70): la seconda sedia fa la STESSA scommessa della prima.
+#   COPERTURA se rho_U <= -0,50 (si annullano: pedaggio doppio per niente).
+#   DIVERSIFICAZIONE se rho_U <= 0,20 E rho_C < 0,50 E rapp_DD < 0,87 E
+#      rapp_PG < 1,50.
+#   PARZIALE altrimenti: si legge insieme alla taglia, ed e' di Claudio.
+#   ALLARME DI CODA, a parte e a qualunque n (Emendamento B): rapp_PG >=
+#      1,80 oppure P(coperd) >= 0,70. Non cambia il verdetto: si scrive
+#      accanto.
+#  DA DOVE VENGONO I NUMERI: per due serie di pari volatilita' e
+#  correlazione rho, il DD della somma sta a quello delle due sommate come
+#  sqrt((1+rho)/2): 0,866 a rho 0,5 (da qui 0,87), 0,775 a rho 0,2, 0,707 a
+#  rho 0, 1 a rho 1. rho_C 0,70 = meta' della varianza in comune. Errore
+#  standard di rho con ~200 giorni U ~0,06, con ~80 giorni C ~0,06-0,09 a
+#  rho 0,7: le fasce 0,20 / 0,50 distano piu' di 3 errori.
+#  IL CONTRO-ESEMPIO CHE HA CAMBIATO LE SOGLIE (classe 178): una sedia che
+#  entra in MOLTI piu' giorni ma che, nei giorni della viva, fa la stessa
+#  cosa, ha rho_U DILUITO dagli zeri: nel collaudo T5 esce 0,40, sotto
+#  0,50, con rho_C = 1. Con la sola regola su rho_U il verdetto sarebbe
+#  "parziale" su una sedia che nei giorni della viva E' la viva
+#  raddoppiata. Da qui la seconda regola del raddoppio.
+#  E UN SECONDO CONTRO-ESEMPIO, che dice cosa NON leggere: la quota dei
+#  giorni in comune e lo stesso verso NON separano "stessa scommessa" da
+#  "indipendenti". R247 entra in ~197 feriali su 261 dell'OOS (~0,75) ed e'
+#  lunga in 156-171 casi su 197 (R245 par. 5): due sedie INDIPENDENTI
+#  darebbero gia' quota ~0,75 e stesso verso ~0,8. Quei due numeri
+#  descrivono l'ESPOSIZIONE, non la correlazione. Separano rho_C e P(coperd).
+#  L'ATTESA, e il perche': sui giorni in cui 770202 entra (rottura AL
+#  RIALZO del range di 35' + 10 idx, filtro EMA50 H4 al rialzo), il range di
+#  15' di R247 e' contenuto in quello di 35', quindi il suo massimo + 2 idx
+#  e' gia' stato rotto: se il filtro EMA200 di R247 e' lungo, R247 e' GIA'
+#  dentro, lungo, lo stesso giorno. Stop diversi (range 15' contro 35'),
+#  uscite diverse (TP 1,5R contro parziale a 1R + BE), trailing uguale (barra
+#  M5 precedente). Mi aspetto: quota_viva 0,80-1,00; stesso verso 0,80-0,97;
+#  rho_C 0,45-0,80; rho_U 0,25-0,55; P(coperd) 0,55-0,85. Esito piu'
+#  probabile: PARZIALE o RADDOPPIO; DIVERSIFICAZIONE e' il MENO probabile,
+#  e lo scrivo prima.
+#
+# ==========================================================================
+#  7. (b) IL DD GIORNO PER GIORNO -- come si legge, SCRITTO PRIMA
+# ==========================================================================
+#  Per ogni tranche (IS da R247a, OOS da R247b), a rischio 1% come R245:
+#   - P/L% di ogni giornata sul saldo di inizio giornata; peggior giornata;
+#     le 5 peggiori; giornate <= -1,00%;
+#   - DD massimo del SALDO CHIUSO, per deal e a fine giornata (e' un
+#     MINORANTE dell'Equity DD del tester, che resta il numero del
+#     contratto: 7,10% IS / 6,86% OOS);
+#   - la conversione LINEARE a 2% (e a qualunque altra con --rischio-conv),
+#     marcata [DERIVATO lineare, classe 547]: il lotto a 2% arrotonda
+#     diversamente e l'equity si capitalizza diversamente. NON e' una misura.
+#  L'ATTESA: una posizione al giorno (InpOneTradePerDay=1), quindi la
+#  giornata = un'operazione. Peggior giornata chiusa fra -1,10 e -0,95 (IS)
+#  e fra -1,20 e -0,95 (OOS): una perdita da 1R piu' lo scivolamento. DD a
+#  saldo chiuso fra ~6,1 e 7,10 (IS) e fra ~5,9 e 6,86 (OOS): l'equity
+#  aggiunge al piu' l'escursione di UNA posizione, <= ~1R.
+#  A 2% [DERIVATO lineare]: DD ~12-14%, peggior giornata ~-2,0/-2,4%.
+#  RIFERIMENTI DI CASA, non soglie di questo round: pausa Guardian 4,0% e
+#  emergenza 4,9% al giorno; muro statico 10% (REFERTO_R245 par. 6).
+#  E UN'AVVERTENZA PER CHI LEGGE (a) E (b) INSIEME: la peggior giornata
+#  della SOMMA (a) e' quella che conta per la pausa del Guardian se le due
+#  sedie girano sullo stesso conto. Quella di (b) e' la sedia da sola.
+#
+# ==========================================================================
+#  8. IL TEMPO MACCHINA (classe 751: UN SOLO agente, passate in serie)
+# ==========================================================================
+#  Su DESKTOP-H4D7CAJ il tester ha un solo agente (log di R240, classe 751).
+#  STESSO EA, STESSA MACCHINA, STESSA FINESTRA: R245, 84 passate in 28 min
+#  (RIEPILOGO_R245.txt), orologio per file dai REFERTO_ROUND:
+#     R245a 7:00 (primo file: compilazione e cache dei tick)
+#     R245b 4:25  R245c 4:16  R245d 4:18  R245e 3:49  R245f 3:58
+#  -> a regime ~4,3 min per file da 14 passate = ~18,9 s per passata TUTTO
+#  COMPRESO (R245b: 265 s / 14). Quanto sia avvio fisso e quanto passata
+#  e' [NON SEPARABILE]: tutti i file di R245 avevano 14 passate.
+#  QUESTO ROUND: R247a 2 passate vere (IS) + gamba degenere (costo ~0,
+#  R187); R247b 4 passate (2 IS + 2 OOS) = 6 passate vere, 2 file.
+#     minimo: 6 x 18,9 s = ~1,9 min
+#     massimo ragionevole: 2 file x 4,4 min (come se ogni file costasse un
+#     R245b intero) + 2,6 min di primo avvio (R245a meno il regime) = ~11 min
+#  ==> SI PIANIFICANO ~3-6 MINUTI; la corsa NON si ferma prima di 20.
+#
+# ==========================================================================
+#  9. I BUCHI, DICHIARATI
+# ==========================================================================
+#   1. (a) solo nel regime dell'OOS (toro): il per-trade IS di 770202 non
+#      e' nel repo. La via piu' corta c'e' gia': R246c (d0, finestra A,
+#      magic 794603/794653, deposito 100000) lascia il per-trade di 770202
+#      2024.09.27 -> 2025.06.09; quando torna si passa a questo script come
+#      secondo --viva (@100000) e (a) si rilegge SUL CROLLO. Costo aggiunto
+#      di macchina: zero (R246 e' gia' scritto e ha il PASS dello strato 2).
+#   2. 772505 e' girato il 14/08 col binario di allora: se R246a (d0 B,
+#      stessa cella, stessa finestra) torna col G0 VERDE contro 772505, la
+#      serie e' confermata a HEAD; se no, (a) si rifa' col per-trade di
+#      R246a e si scrive.
+#   3. Gamba degenere di R247a: sovrascrittura del per-trade [NON
+#      MISURATA], coperta dal G0 (par. 3).
+#   4. OROLOGIO BCM (report/OROLOGIO_BCM_2026-09-24.md): d'inverno tutte e
+#      due le sedie armano alle 14:30 server = un'ora prima della cash.
+#      Stessa ora per entrambe, quindi la SOVRAPPOSIZIONE non ne e'
+#      falsata; il LIVELLO dei P/L d'inverno si', e (b) lo eredita. R246
+#      misura la causa.
+#   5. Un simbolo, un broker (BCM), 21 mesi. Su FTMO la griglia H4 e' sfasata
+#      di 2 ore (R245a buco 5): il filtro di questa cella e' su H4.
+#   6. Il DD alla taglia vera e' [DERIVATO lineare]: la misura vera e' un
+#      round a quel rischio, e la taglia la decide Claudio.
+#   7. Costo 40x AL PELO (R245a par. 6): questo round non lo tocca.
+#
+#  QUESTO ROUND NON PROMUOVE, NON ARCHIVIA, NON TOCCA TAGLIE NE' SEDIE.
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2025.06.30
+@FRAZIONEIS 1.0
+
+# --- 75 pin LETTI DAL CSV D'ARCHIVIO: valore COSTANTE su tutte e 80 le righe
+#     (40 IS + 40 OOS) di dow_walkforward_{IS,OOS}.csv. Stessa forma 1/0 dei bool
+#     del lanciatore che ha prodotto l'archivio (dow_apertura.ps1). Tre eccezioni
+#     DICHIARATE: InpMagic (qui ASSE tecnico gemello, in fondo), InpAllowLong/
+#     InpAllowShort (1/1 come il CSV: due lati), e InpNewsCurrencies OMESSO: nel
+#     CSV e' la stringa vuota, un pin vuoto MT5 lo ignora, e il default compilato
+#     (r.296) e' gia' "". InpTP1_R=0.50 e InpEmaSlow=200 = la cella centrale.
+#     BLOCCO COPIATO DA R245b RIGA PER RIGA (stesse righe vive, stesso ordine),
+#     tolto InpMagic=765242 (diventa l'asse) e aggiunto InpEmaSlow=200 (era l'asse).
+InpTP1_R=0.50
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMaxSpread=0
+InpVerbose=1
+
+# --- 21 input che a HEAD ESISTONO e nel CSV d'archivio NO (aggiunti dopo il
+#     05/08): pinnati al valore NEUTRO, quello che lascia il percorso di codice
+#     identico alla versione che ha prodotto l'archivio. Riga sorgente a HEAD
+#     di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (ricontate il 24/09 a 1549beaa).
+#   InpUsaGuardian: r.92  -- spento: percorso identico a prima della migrazione (PausaGuardian.mqh r.1600 esce subito)
+#   InpMaxPosSimbolo: r.206 -- tetto A1 spento (default)
+#   InpOCTimeframe: r.214 -- PERIOD_CURRENT, serve solo a OPENCONFIRM: NO-OP qui
+#   InpTrailStartR: r.269 -- 0 = trailing armato subito, come prima (r.2244)
+#   InpRunnerTP_R: r.282 -- 0 = TP storico a 3 x InpTP1_R (r.1694)
+#   InpMinBreakoutRangeATR: r.324 -- 0 = breakout a pendenti nudo (r.777-780)
+#   InpUseVolRegime: r.343 -- R30 spento (r.1905, r.1966)
+#   InpVolAtrPeriod: r.344 -- default, NO-OP col regime spento
+#   InpVolLookback: r.345 -- default, NO-OP
+#   InpVolLowPct: r.346 -- default, NO-OP
+#   InpVolHighPct: r.347 -- default, NO-OP
+#   InpVolLowOffMult: r.348 -- default, NO-OP
+#   InpVolHighOffMult: r.349 -- default, NO-OP
+#   InpVolLowSlMult: r.350 -- default, NO-OP
+#   InpVolHighSlMult: r.351 -- default, NO-OP
+#   InpVolHighSizeMult: r.352 -- default, NO-OP
+#   InpUseSRFilter: r.361 -- R30 S/R spento (r.1984 esce subito)
+#   InpSRProximityPts: r.362 -- default, NO-OP
+#   InpSRUsePrevDay: r.363 -- default, NO-OP
+#   InpSRUseRoundNumbers: r.364 -- default, NO-OP
+#   InpSRRoundInterval: r.365 -- default, NO-OP
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+
+# --- LA CELLA: InpEmaSlow FISSO al centro di R245 (REFERTO_R245 par. 0).
+InpEmaSlow=200
+
+# --- L'ASSE, unico e TECNICO: il magic, due gemelle (G1 + classe 134).
+#     765271 e 765272 vergini (rg "76527[0-9]" sul repo intero = 0, 24/09).
+InpMagic=765271||765271||1||765272||Y
+# ==========================================================================
