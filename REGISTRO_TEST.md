@@ -52,3 +52,51 @@ quelli sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non c
 - 📌 Classi nuove in checklist: **538** (la riga su piu' righe fisiche: il `throw`
   non ferma le successive) · **539** · **540** (`-ArgumentList` non cita: uno spazio
   spezza il comando) · **541** · **542** · **543** · **544**.
+
+---
+
+## 🪦❌ R242 — `ABTG_MaxMinNotte` D30EUR M15, il box del GIORNO PRECEDENTE (24/09/2026)
+
+**NON SI SCRIVE NESSUN MORTO.** Delle cinque caselle del certificato (09/09) ne manca
+**una, la stessa sui due lati**: 🔴 **il TF non è mai stato cambiato** — M15 qui e in tutto
+l'archivio `MaxMinNotte`. Verdetto corretto: **`NON ANCORA MISURATO SU ALTRI TF`**.
+
+Tick reali, deposito 100.000, rischio 0,65%, 2024.09.26→2026.06.30, asse
+`InpBoxStartHour` 0-18 passo 3 (box da 24h a 6h). Referto: `report/REFERTO_R242_2026-09-24.md`.
+CSV: `backtest_pipeline/risultati_archivio/R242/`.
+
+| lato | PF (min-max) | n | DD% | soglia congelata | esito |
+|---|---|---|---|---|---|
+| **LONG** | 0,732 - **0,941** | 134-188 | 4,14-6,34 | 3 contigue PF≥1,10, n≥150 | 🔴 **0 celle sopra 1,00.** Merito **leggibile** (5/7 con n≥150) e **negativo** |
+| **SHORT** | 1,019 - **1,469** | 96-130 | **1,43**-5,63 | 3 contigue PF≥1,38, n≥150 | 🟠 **NON MISURATO**: run contigua **2** celle invece di 3, e **7/7 sotto n=150** |
+
+### Il numero che chiude la domanda del round (lato long)
+| | stop | × spread | PF |
+|---|---:|---:|---:|
+| archivio, cella appaiata | 38,7 idx | 22,8× | 0,7302 |
+| R242 H=0 | ~272,5 idx | ~160× | **0,73216** |
+
+👉 **Stop allargato 7 volte, PF mosso di +0,002** contro i +0,057 che prediceva la sola
+rimozione del pedaggio. **Il costo non era la spiegazione del negativo del long**, e non lo
+era nemmeno in parte misurabile. Questa è una casella **chiusa**, non sospesa.
+
+### Perché lo SHORT torna in coda all'imbuto e non in archivio
+È fermo su un numero **MANCANTE** (campione), non su uno **BRUTTO**: le due celle sopra
+soglia lo sono su una soglia **alzata apposta** da 1,29 a 1,38 per escludere il pedaggio,
+tutte e sette le celle sono in profitto, e **ogni cella dei due lati sta sotto il cancello
+del 10% di DD**. Via più corta al numero: **allungare la finestra** a ~4 anni (tetto del
+tester su M15) → ×2,29 → n ≈ 220-300. 🔴 Prerequisito: **sondare la profondità vera dei dati
+BCM su D30EUR** (regola del 25/08: si misura, non si assume).
+
+### Cosa ha prodotto, oltre al verdetto
+- 🔴 **Il controllo del pavimento è SCATTATO su tutti e due i lati** (monotonia di `n` rotta
+  fra H=15 e H=18: long 188→134, short 130→110). `InpMinBoxPts=6800` morde all'estremo dei
+  box stretti **almeno 2,3-2,7×** più del 3,9% modellato.
+- 🔴 **Il modello di trasporto di `n` sovrastima in modo sistematico**: **14 celle su 14**
+  sotto la previsione, e **7 su 7** dello short **fuori dalla banda dichiarata** (111-343).
+  Va corretto prima di riusarlo per dimensionare un round.
+- 🔴 **Il "DD atteso" era etichettato `[DERIVATO]` ma non era una previsione controllata**:
+  riscalava una cella d'archivio con un altro `InpAtrSLmult` e un'altra scadenza.
+  Sovrastimato 2,2-3,4×. Etichetta giusta: `[ANCORA DEBOLE]`.
+- 📌 Classi nuove in checklist dal cancello su questa riga: **722** · **723** · **724** ·
+  **725** · **726**.
