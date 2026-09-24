@@ -55,6 +55,11 @@ quelli sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non c
 
 ---
 
+## ⏳ R246 — PRONTO (PASS strato 2 su file prova e riga): orologio o stagione sulle sedie d'apertura
+- 12 file (Dow 770202, DAX 770101, MaxMin 770411 x d0/-1h x finestre A/B), 36 passate vere, ~9-12 min (tetto 72). Riga `backtest_pipeline/righe/RIGA_R246_OROLOGIO.txt`, pin `f824b2f4`, 24 per-trade raccolti, controllo 166 per job, `_OOS` buono = 2 righe con Trades>0 (classe 766).
+- Dow: bande disgiunte (STAGIONE [0,55;1,15] contro OROLOGIO [1,27;2,22]), potenza della regola com'e' scritta 0,716. DAX e MaxMin: decide la FREQUENZA, non il PF.
+- Casella "+1h d'inverno" (cio' che fara' FTMO dal 26/10): ora scrivibile con `@ORARIO_INVERNALE` (classe 763 risolta), NON ancora scritta.
+
 ## 🔴🟢 R243 — GIRATO il 24/09: la finestra USA NON aiuta il Dow nemmeno con l'ancora del Dow (NON un morto)
 - R_tick OOS: corto **0,790**, lungo **0,794**, tutti e due `< 0,80` e **sul confine**. Chiude il trasferimento R238 -> Dow con le due ancore misurate.
 - 🟢 Trovato: **corto a finestra SPENTA con l'ancora del Dow, PF IS 1,292 (n 68) · OOS 1,643 (n 78)**, DD 3,3-3,7%. Sopra la banda dichiarata; n<150 -> indizio.
