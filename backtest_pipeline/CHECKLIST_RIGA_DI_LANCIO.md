@@ -35304,3 +35304,7 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🗓️ CLASSE 762 — **un offset di fuso trattato come COSTANTE su una finestra di piu' anni**
 - **Caso (24/09, `InpFtmoDayHourServer=23` fisso)**: dai per-trade l'orologio BCM appare **ora italiana -1 fino all'inverno 2023/24** e **GMT+1 fisso** (= ora italiana d'inverno) almeno dal 02/02/2025: col 23 fisso sbaglia il confine nel **42,5%** dei giorni di R214e e nel **17,7%** di R214f. [INDIZIO del cancello: misura dedicata in corso, `report/OROLOGIO_BCM_2026-09-24.md`.]
 - **Regola**: ogni confine orario su piu' anni si scrive come calendario (ora legale EU/USA + data d'eventuale cambio d'orologio del broker), non come numero.
+
+## 🕰️ CLASSE 763 — **il cancello deterministico incide una regola che oggi sappiamo vera solo MEZZO anno**
+- **Caso (24/09, R246)**: `controlla_riga.py` blocca per costruzione `InpSessionHour=9` (DAX) e `=15` (USA) come "ora italiana" [FUSO]. Da `report/OROLOGIO_BCM_2026-09-24.md`: BCM e' **UTC+1 fisso**, quindi d'inverno 9 e 15 sono **le ore server giuste della cash**. La casella "+1h d'inverno" (cio' che FTMO fara' d'inverno) non si e' potuta scrivere.
+- **Regola**: una regola di fuso in un controllo deterministico va scritta a **calendario** (stagione della finestra del file prova), non come costante. Finche' il cancello non e' riscritto, un 9/15 **dichiarato** in un file prova d'inverno va motivato nel file e letto a mano dallo strato 2. La riscrittura del cancello e' un lavoro da fare, non un'eccezione da concedere.
