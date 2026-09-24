@@ -15,12 +15,16 @@
 #  cioe' il 22-30%. Le altre sette su dieci non fanno niente. Le cause
 #  possibili sono DUE e oggi non sappiamo separarle:
 #    (1) InpMinBoxPts=6800 (68,0 idx) scarta la giornata PRIMA di
-#        piazzare l'ordine  (EA r.328-329);
+#        piazzare l'ordine  (EA r.331; R242 la cita come "r.328-329",
+#        ma sul file a HEAD e' la 331 -- ricontata oggi);
 #    (2) il pendente non viene toccato entro InpPendingExpiryMin=250 /
 #        InpEntryCutoffHour=12.
 #  >>> QUESTA SONDA MISURA ESATTAMENTE LA (1), giorno per giorno e
-#      cella per cella. La (2) si ricava per DIFFERENZA contro gli n
-#      gia' misurati da R242. <<<
+#      cella per cella, su TUTTE E SETTE le celle. <<<
+#  >>> E MISURA ANCHE LA (2), ma solo su QUATTRO celle (H=9,12,15,18) e
+#      su finestre diverse: il conto e' al par. 8. Sulle altre tre
+#      (H=0,3,6) la (2) resta una STIMA per differenza contro gli n di
+#      R242, e una stima non e' una misura. <<<
 #
 #  --- 2. PERCHE' UNA SONDA E NON UN ROUND --------------------------
 #  Il file prova di R242 aveva gia' dichiarato questo numero un BUCO:
@@ -28,8 +32,8 @@
 #  Il motivo e' meccanico e verificato: il driver forza Optimization=1
 #  (walkforward_generico.ps1 r.2013), le passate girano sugli AGENTI, e
 #  li' le Print() non si leggono. La riga di log che conterebbe le
-#  giornate scartate (EA r.330, "box stretto (lateralita'): niente
-#  trade.") non arriva in nessun CSV.
+#  giornate scartate (EA r.331, "box stretto (lateralita'): niente
+#  trade.", stessa riga del test) non arriva in nessun CSV.
 #  >>> Uno SCRIPT invece gira sul terminale, non sugli agenti: le Print
 #      si leggono e il CSV si scrive. E' la strada giusta, non un
 #      ripiego. <<<
@@ -40,7 +44,9 @@
 #         return(ora>=InpNightStartHour && ora<InpNightEndHour);
 #      return(ora>=InpNightStartHour || ora<InpNightEndHour);
 #  Il box di R242 va da InpBoxStartHour:00 del giorno D-1 a 00:00 del
-#  giorno D (EA r.178-183: "if(tStart>=tEnd) tStart-=86400").
+#  giorno D (EA r.306: "if(tStart>=tEnd) tStart-=86400", dentro
+#  ComputeBox che comincia alla r.301 -- righe ricontate oggi sul file
+#  a HEAD, non copiate da R242).
 #    H=3..18 -> NightStart=H, NightEnd=0  -> ramo 2: ora>=H. ESATTO.
 #    H=0     -> NightStart=0, NightEnd=24 -> ramo 1: ora>=0 && ora<24
 #               = tutto il giorno. ESATTO.
@@ -49,21 +55,100 @@
 #      La sonda usa 24 per quella cella sola, ed e' scritto qui. <<<
 #
 #  --- 4. IL TF NON INTRODUCE UNO SCARTO, ED E' UN CONTO ------------
-#  L'EA calcola il box sul grafico M15; lo script legge M5. Il massimo
-#  di una finestra e' il massimo dei massimi delle sue sottobarre, e 15
-#  e' multiplo di 5: con i bordi sull'ORA TONDA le due misure coincidono
-#  per costruzione. Residuo dichiarato: l'EA trova i bordi con iBarShift
-#  sul TF del grafico, quindi puo' sbagliare di UNA barra M15 (fino a 15
-#  minuti) su un bordo. Su un box da 6-24 ore e' sotto lo 0,5%.
+#  >>> CORRETTO IL 24/09 DAL CANCELLO, e la prima stesura diceva il
+#      FALSO: "l'EA calcola il box sul grafico M15". NON E' VERO, e il
+#      TF non e' nemmeno quello del grafico: ComputeBox lo ha SCRITTO
+#      DENTRO. ABTG_MaxMinNotte r.308-318, cinque chiamate di fila:
+#        iBarShift(_Symbol,PERIOD_M1,tStart,false)
+#        iBarShift(_Symbol,PERIOD_M1,tEnd,false)
+#        iHighest (_Symbol,PERIOD_M1,MODE_HIGH,count,start)
+#        iLowest  (_Symbol,PERIOD_M1,MODE_LOW, count,start)
+#        iHigh/iLow(_Symbol,PERIOD_M1,...)
+#      InpMgmtTF=PERIOD_M15 esiste, ma serve ad ATR ed EMA200 (r.146),
+#      NON al box. Attaccare l'EA a un grafico M15 non cambia il box.
+#  >>> LA CORREZIONE RENDE IL RESIDUO PIU' PICCOLO, NON PIU' GRANDE, e
+#      va detto perche' e' la parte buona: l'EA legge M1, lo script M5.
+#      Il massimo di una finestra e' il massimo dei massimi delle sue
+#      sottobarre, e 5 divide 60: con i bordi sull'ORA TONDA le due
+#      misure coincidono PER COSTRUZIONE. iBarShift(...,false) puo'
+#      sbagliare il bordo di UNA barra M1 (un minuto), non di 15.
+#  >>> RESIDUO VERO, E VA SCRITTO PERCHE' NON E' ZERO: count =
+#      |iS-iE|+1 include anche la barra del MINUTO 00:00, mentre lo
+#      script esclude l'ora 0 per intero (ora>=H). Differenza: un
+#      minuto su un box da 6 a 24 ore, e in UN VERSO SOLO (l'EA vede
+#      un filo di piu'). Un box che passa il pavimento per meno di un
+#      minuto di escursione e' un caso che questa sonda conta dalla
+#      parte sbagliata -- ed e' l'unico.
+#
+#  --- 4-bis. LA POPOLAZIONE NON E' QUELLA DI R242, E IL DELTA SONO I
+#             LUNEDI'. E' IL DIFETTO PIU' GRAVE CHE IL CANCELLO HA
+#             TROVATO IL 24/09, ed era SOTTO AL NASO: sta scritto in
+#             R242b par. 7 "CANCELLO 2", cioe' nel file che questa
+#             sonda dice di verificare. -----------------------------
+#  R242b par. 7, testuale: "Il box di lunedi' comincia di DOMENICA,
+#  quando il DAX non quota: iBarShift(..., false) restituisce l'ultima
+#  barra di VENERDI', e tutte e sette le celle ricevono LO STESSO box
+#  (...su ~20% delle giornate). Il box artefatto (...) tipicamente
+#  sotto i 68 idx: IL PAVIMENTO LO SCARTA."
+#  >>> QUELLE GIORNATE, NEL CENSIMENTO, NON CI SONO AFFATTO. <<<
+#  Lo script non fa iBarShift: scorre le barre vere. Il giorno logico
+#  che conterrebbe il box del lunedi' comincia di DOMENICA (r.81-84), e
+#  di domenica non c'e' nessuna barra -> "have" resta false -> r.158
+#  "if(!have || hi<=lo){ i=fineGiorno; continue; }" -> NESSUNA RIGA.
+#  Simmetrico e opposto: le righe datate VENERDI' sono i box di un
+#  SABATO che l'EA non opera mai, e sono IN PIU'.
+#  >>> QUINDI IL DENOMINATORE DELLA SONDA NON E' IL DENOMINATORE DI
+#      R242 (classe 284), e la differenza va NELLA DIREZIONE CHE
+#      CONVIENE ALLA MIA IPOTESI: la sonda toglie dal conto proprio le
+#      giornate che R242 da' per scartate dal pavimento. Confrontare il
+#      numero grezzo con l'8,8% sarebbe una conferma costruita. <<<
+#  LA CONVERSIONE, scritta prima dei numeri (q_lun = quota di giornate
+#  operative che sono lunedi', ~0,20):
+#      %scartate_EA = q_lun + (1 - q_lun) x %scartate_sonda
+#      soglia_sonda = soglia_R242 / (1 - q_lun)
+#    atteso  3,9%  ->  4,9%       cieco LONG  8,8%  -> 11,0%
+#                                 cieco SHORT 10,4% -> 13,0%
+#  >>> E q_lun NON SI ASSUME: la sonda lo MISURA. La TABELLA B del
+#      riepilogo conta le righe per giorno della settimana; la colonna
+#      "dom" e' il numero di box del lunedi' che il censimento ha visto.
+#      Se esce 0, la conversione qui sopra e' obbligatoria. Se esce
+#      diversa da 0 (il broker quota la domenica sera), allora quei box
+#      ci sono e vanno letti a parte, perche' sono di poche ore. <<<
+#
+#  --- 4-ter. E NEMMENO LA FINESTRA E' QUELLA DI R242 ---------------
+#  R242: @DAQUANDO 2024.09.26  @FINOA 2026.06.30 = ~440 giornate.
+#  Questa sonda: InpDaysBack=760 contro TimeCurrent(), cioe' 2024.08.26
+#  -> oggi. Il bordo sinistro coincide lo stesso, perche' 2024.09.26 e'
+#  il FONDO DEL BARILE dei dati BCM su D30EUR (referto R242 r.153-155:
+#  M5 = 129.930 barre da 2024.09.26); il bordo DESTRO no: ci sono ~3
+#  mesi in piu', +14,3% di giornate (referto R242 r.166-167).
+#  >>> NON accorcio la corsa -- quei tre mesi sono informazione, e sono
+#      i piu' recenti. La TABELLA A porta le percentuali IN DUE
+#      COLONNE: tutta la finestra, e la sola finestra di R242. I
+#      confronti con gli n di R242 si fanno SOLO sulla seconda. <<<
+#  @DAQUANDO-DALLA-RIGA la finestra la fissa la riga di lancio con
+#    -GiorniIndietro (760 di default) e il muro dei dati del broker; il
+#    sottoinsieme 2024.09.26-2026.06.29 e' ritagliato DENTRO lo script
+#    (SONDA_BOX_D30EUR.ps1, $R242Da/$R242A) e stampato a parte.
 #
 #  --- 5. L'ATTESA, DICHIARATA PRIMA DEI NUMERI ---------------------
 #  Da R242 (par. 7 dei due file prova), la stima DERIVATA del prezzo del
 #  pavimento era: scarta lo 0,3% delle giornate a H=0 e il 3,7-3,9% a
 #  H=18. MA il controllo di monotonia E' SCATTATO in R242 (n cala fra
 #  H=15 e H=18: long 188->134, short 130->110), e quel controllo e'
-#  cieco fino a 8,8% (long) / 10,4% (short).
-#  ATTESA: quota sotto 6800 punti in CRESCITA MONOTONA lungo l'asse,
-#  da ~0,3% a H=0 fino ad ALMENO 8,8% a H=18.
+#  cieco fino a 8,8% (long) / 10,4% (short) -- R242a r.186 e R242b
+#  r.215-216, citati e non ricalcolati.
+#  >>> E LE DUE SOGLIE VANNO SCRITTE TUTTE E DUE, perche' questa sonda
+#      nasce dallo SHORT (96-130 giornate su ~440) e la soglia dello
+#      short e' 10,4%, non 8,8%. Il pavimento e' UNO SOLO per i due lati
+#      (r.328-329 sta PRIMA della biforcazione, R242 par. 7), quindi un
+#      risultato fra 8,8% e 10,4% spiegherebbe il calo del LONG e
+#      lascerebbe quello dello SHORT senza spiegazione: NON e' un
+#      "ipotesi A confermata", e' mezza risposta. Va letto cosi'. <<<
+#  ATTESA (nelle unita' della sonda, cioe' GIA' divise per 1-q_lun,
+#  par. 4-bis, e sulla sola finestra di R242, par. 4-ter):
+#    quota sotto 6800 in CRESCITA MONOTONA lungo l'asse, da ~0,4% a H=0
+#    fino ad ALMENO 11,0% a H=18 (13,0% per spiegare anche lo short).
 #
 #  >>> IL CONTRO-ESEMPIO OBBLIGATORIO (regola del 10/09), e qui e'
 #      affilato perche' l'ipotesi alternativa e' GIA' SOSPETTA: <<<
@@ -71,20 +156,38 @@
 #  quindi dovrebbe far riempire DI PIU', non di meno. Il calo di n a
 #  H=18 va quindi CONTRO l'intuizione, e ha due spiegazioni rivali:
 #    IPOTESI A (la mia): lo scarta il pavimento.
-#       predice sotto-6800 a H=18 >= 8,8%.
+#       predice sotto-6800 a H=18 >= 11,0% (>= 13,0% per lo short).
 #    IPOTESI B: il pavimento c'entra poco e il calo nasce altrove
 #       (p.es. il box stretto si forma tardi e il pendente vive meno).
-#       predice sotto-6800 a H=18 intorno al 3,9% previsto, o meno.
-#  >>> LE DUE PREDIZIONI NON SI SOVRAPPONGONO: 3,9% contro 8,8% e' un
-#      fattore 2,3. La sonda DISTINGUE. Se esce ~4%, LA MIA LETTURA DI
-#      R242 E' SBAGLIATA e va riscritta -- ed e' un esito che accetto
-#      prima di vedere il numero. <<<
+#       predice sotto-6800 a H=18 intorno al 4,9% previsto, o meno.
+#  >>> LE DUE PREDIZIONI NON SI SOVRAPPONGONO: 4,9% contro 11,0% e' un
+#      fattore 2,2 -- e il fattore SOPRAVVIVE al riscalamento dei
+#      lunedi', che era la cosa da verificare: dividere tutti e due per
+#      lo stesso (1-q_lun) non li avvicina. La sonda DISTINGUE. Se esce
+#      ~5%, LA MIA LETTURA DI R242 E' SBAGLIATA e va riscritta -- ed e'
+#      un esito che accetto prima di vedere il numero. <<<
+#  >>> E LA ZONA GRIGIA SI DICHIARA, invece di far finta che non ci
+#      sia: fra 6% e 10% la sonda NON decide, perche' il riscalamento
+#      poggia su q_lun misurato e su un "tipicamente sotto i 68 idx"
+#      che R242 non ha quantificato. In quella fascia il verdetto e'
+#      "non ancora misurato", e la misura che manca e' il conteggio
+#      vero dei box di lunedi' -- che si prende attaccando l'EA con
+#      InpVerbose e contando le righe r.330, NON da questa sonda. <<<
 #
 #  --- 6. IL SECONDO CONTROLLO, CONTRO UN NUMERO SCRITTO DA ALTRI ---
 #  La mediana dell'ampiezza a H=0 (box di 24 ore) deve valere circa
 #  l'ADR: 252,5 idx = ***25.250 punti***, misurato n=52 in
-#  report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par.5, da una catena
-#  diversa da questa.
+#  report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par.5 (tabella dei tetti
+#  ADR/spread, riga D30EUR), da una catena diversa da questa. Il numero
+#  e' CITATO, non ricalcolato.
+#  >>> MA "circa" NON BASTA, E IL CANCELLO HA RAGIONE: 25.250 e' una
+#      MEDIA, la sonda stampa una MEDIANA, e i range giornalieri sono
+#      storti a destra. Con il sigma che R242 usa per conto suo (0,35,
+#      par. 7), mediana = media x exp(-sigma^2/2) = x0,941, cioe'
+#      ***23.800 punti***. QUELLO e' il numero da aspettarsi, e sta
+#      dentro la banda 20.000-31.000 con margine da tutte e due le
+#      parti. Scriverlo conta: senza, una lettura di 23.800 sembra uno
+#      scarto del 6% e invece e' il centro. <<<
 #  >>> Se la mediana a H=0 esce lontana da 25.250 (diciamo fuori da
 #      20.000-31.000), allora NON e' il pavimento a essere sbagliato:
 #      e' l'ANCORA ADR, che R242 ha usato per calcolare TUTTI gli stop
@@ -99,15 +202,38 @@
 #  teoria. Non e' l'obiettivo della sonda, e' un prodotto gratis.
 #
 #  --- 8. CHE COSA QUESTA SONDA NON DICE ----------------------------
-#  >>> La colonna sessione_rompe NON E' UTILIZZABILE per H=0..H=15, e
-#      non e' un difetto: e' la geometria. Il "giorno logico" dello
-#      script parte a NightStartHour (r.81-84), quindi per H basso la
-#      sessione del giorno dopo cade in un ALTRO giorno logico, e il
-#      ciclo la salta ("if(InNotte(ora)) continue" + finestra 8:00-17:30
-#      che le ore 0-2 non soddisfano). La colonna esce "nessuno".
-#      >>> QUINDI NON SI USA, e nessun numero di questa corsa poggia su
-#          di lei. La colonna che conta e' ampiezza_notte_pts, e QUELLA
-#          e' giusta per tutte e sette le celle. <<<
+#  >>> CORRETTO IL 24/09 DAL CANCELLO, E QUI STAVO BUTTANDO VIA IL
+#      CONTROLLO PIU' AFFILATO CHE HO. La prima stesura diceva: "la
+#      colonna sessione_rompe NON E' UTILIZZABILE per H=0..H=15". E'
+#      SBAGLIATO, e il conto si fa in due righe.
+#      Il filtro e' r.195-196: "if(InNotte(ora)) continue;" e poi
+#      "if(mm<sStart || mm>=sEnd) continue;" con sStart=480 (08:00) e
+#      sEnd=1050 (17:30). Le ore NON notturne del giorno logico sono
+#      0..H-1 del giorno DOPO. Quindi la finestra davvero coperta e'
+#      da 08:00 a min(H-1,17), cella per cella:
+#        H=0,3,6  -> VUOTA (nessuna ora >= 8). Qui la prima stesura
+#                    aveva ragione, ed e' il terzo dei sette casi.
+#        H=9      -> 08:00-08:59
+#        H=12     -> 08:00-11:59
+#        H=15     -> 08:00-14:59
+#        H=18     -> 08:00-17:29  (tutta la sessione)
+#  >>> E LA CELLA H=12 E' UN REGALO: 08:00-11:59 e' ESATTAMENTE la
+#      finestra d'ingresso dell'EA (piazza alle 07:59, InpEntryCutoff
+#      12:00, scadenza 250 min = 12:09). Quindi a H=12 la sonda misura
+#      ANCHE LA CAUSA (2), giorno per giorno, e non per differenza. <<<
+#  >>> IL CONTROLLO CHE NE NASCE, ed e' contro un numero scritto da
+#      altri: il conteggio "box >= 6800 E sessione_rompe = MIN" a H=12
+#      PREDICE l'n short di R242, che a H=12 vale ***120*** (referto
+#      R242 r.87). Non e' un'uguaglianza, ed e' una FORCHETTA con due
+#      correzioni di segno NOTO, dichiarate prima:
+#        IN ECCESSO: la sonda rompe sull'estremo nudo, l'EA sul
+#          livello + buffer 1000 punti (10 idx). Piu' rotture qui.
+#        IN DIFETTO: mancano i box di lunedi' (par. 4-bis), ~20%.
+#      Se il conteggio esce dentro 100-190, la catena regge; se esce a
+#      50 o a 350, e' la GEOMETRIA a non essere quella di R242 e tutto
+#      il resto della sonda va riletto PRIMA di guardare il pavimento.
+#      >>> QUESTO E' IL CONTROLLO DA GUARDARE PER PRIMO: e' l'unico
+#          che puo' bocciare la sonda intera. <<<
 #  >>> Non misura la causa (2) (pendente scaduto): si ricava per
 #      differenza, e la differenza e' una STIMA, non una misura.
 #  >>> Non e' un round e non promuove niente. Nessuna sedia cambia,
@@ -119,3 +245,20 @@
 #  oltre i quali la cella esce MANCANTE e la sonda VA AVANTI con le
 #  altre invece di fermarsi: sei celle su sette rispondono lo stesso
 #  alla domanda.
+#  >>> IL MODO IN CUI QUESTA CORSA PUO' DEGRADARE, dichiarato: MT5 non
+#      apre una seconda istanza sulla stessa cartella dati. Se un
+#      terminale non si chiude entro i 90 secondi previsti, TUTTE le
+#      celle rimaste escono MANCANTI a catena. Non produce numeri
+#      sbagliati -- produce numeri ASSENTI, ed e' la degradazione che
+#      si preferisce. Lo script lo dice in rosso quando succede, invece
+#      di lasciarlo dedurre da sei MANCANTI di fila. <<<
+#
+#  --- 10. CHE COSA QUESTA CORSA NON PUO' TOCCARE -------------------
+#  Doppia guardia sul nome macchina (nella riga di lancio E dentro lo
+#  script): fuori da DESKTOP-H4D7CAJ non parte. Nessuno Strategy
+#  Tester, AllowLiveTrading=false in tutte e sette le corse, nessun
+#  ordine, nessun EA compilato, nessun preset di EA riscritto (i .set
+#  che crea si chiamano abtg_sonda_box_H**.set e non esistono altrove).
+#  Il VPS VMI3047753 e i suoi SEI terminali -- FTMO 541452707, REALE
+#  10105439, 100k 50504263, piccolo 50503392, manuale 50503635, banco
+#  50504400 -- non vengono nominati da nessun percorso di scrittura.

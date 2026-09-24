@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_SONDA_BOX_D30EUR_v1
+#  MARCATORE_SONDA_BOX_D30EUR_v2
 #  SONDA_BOX_D30EUR.ps1 -- IL CENSIMENTO DEL BOX, GIORNO PER GIORNO
 #
 #  CHE COSA MISURA, e una cosa sola:
@@ -139,6 +139,12 @@ Dico ('compilato: ' + $ex5) 'Green'
 #     H>0  -> NightEnd=0   (InNotte r.92: H<=0 falso -> ora>=H || ora<0 = ora>=H)
 #     Sono le DUE forme che riproducono il box di R242, verificate nel
 #     sorgente r.90-92. Con H=0 e NightEnd=0 la finestra sarebbe VUOTA.
+#     RESIDUO, misurato e non assunto: l'EA prende gli estremi su
+#     PERIOD_M1 (ABTG_MaxMinNotte r.308-318, il TF e' SCRITTO nel codice,
+#     non e' quello del grafico) e include anche la barra del minuto
+#     00:00; questo script legge M5 ed esclude l'ora 0. I bordi stanno
+#     sull'ora tonda e 5 divide 60, quindi lo scarto sta sotto UNA barra
+#     M5 su un box da 6 a 24 ore.
 # ---------------------------------------------------------------------
 Titolo '2 - LE SETTE CORSE'
 $dsk  = [Environment]::GetFolderPath('Desktop')
@@ -205,6 +211,12 @@ foreach($H in $CELLE){
   }
   $att = 0
   while((@(Get-Process -Name terminal64 -ErrorAction SilentlyContinue)).Count -gt 0 -and $att -lt 18){ Start-Sleep -Seconds 5; $att = $att + 1 }
+  if((@(Get-Process -Name terminal64 -ErrorAction SilentlyContinue)).Count -gt 0){
+    Dico ('IL TERMINALE NON SI E CHIUSO entro 90 secondi dopo ' + $et + '. La cella dopo NON') 'Red'
+    Dico ('partira: MT5 non apre una seconda istanza sulla stessa cartella dati, quindi la') 'Red'
+    Dico ('riga StartUp non viene letta e TUTTE le celle rimaste usciranno MANCANTI. Non e') 'Red'
+    Dico ('un numero sbagliato, e un numero assente: chiudi MT5 a mano e rilancia la sonda.') 'Red'
+  }
 
   if($ok){
     $dest = Join-Path $Cart ('SONDA_BOX_' + $SIMBOLO + '_' + $et + '.csv')
@@ -221,32 +233,166 @@ foreach($H in $CELLE){
 
 # ---------------------------------------------------------------------
 #  3. LA LETTURA IN CONSOLE. Solo conteggi: la sonda NON giudica.
+#
+#     ATTENZIONE A COSA E' LA COLONNA "data": e' il giorno in cui il box
+#     COMINCIA. La giornata operativa dell'EA e' quella DOPO. Da qui due
+#     cose che vanno CONTATE e non assunte (classe 284, denominatore):
+#       - una riga datata DOMENICA e' il box del LUNEDI'. Il DAX non
+#         quota la domenica, quindi quelle righe NON ESISTONO: il
+#         censimento NON VEDE i lunedi'. L'EA invece quel giorno opera,
+#         e riceve un box artefatto (iBarShift(...,false) torna all'ultima
+#         barra di VENERDI', R242b par.7 "CANCELLO 2"), che il pavimento
+#         scarta quasi sempre. Le due popolazioni NON coincidono.
+#       - una riga datata VENERDI' e' il box di un SABATO, giornata che
+#         l'EA non opera mai: e' in piu', non in meno.
+#     Per questo qui si stampa il calendario, non solo la percentuale.
 # ---------------------------------------------------------------------
-Titolo '3 - QUANTE GIORNATE SCARTA IL PAVIMENTO (6800 punti = 68,0 idx)'
-$tab = New-Object System.Collections.ArrayList
-[void]$tab.Add('cella   giornate   sotto 6800   %scartate   mediana pts')
+Titolo '3 - IL CENSIMENTO DEL BOX'
+
+$inv    = [Globalization.CultureInfo]::InvariantCulture
+# finestra di R242 (@DAQUANDO 2024.09.26 / @FINOA 2026.06.30) tradotta in
+# giorni di INIZIO BOX: il box della giornata 2026.06.30 comincia il 29.
+$R242Da = New-Object DateTime 2024,9,26
+$R242A  = New-Object DateTime 2026,6,29
+$NOMIDOW = @('dom','lun','mar','mer','gio','ven','sab')
+
+function Mediana($arr){
+  $k = $arr.Count
+  if($k -eq 0){ return 0.0 }
+  $s = @($arr | Sort-Object)
+  if($k % 2 -eq 1){ return [double]$s[[int](($k-1)/2)] }
+  return ([double]$s[$k/2 - 1] + [double]$s[$k/2]) / 2.0
+}
+
+$righeA = New-Object System.Collections.ArrayList
+$righeB = New-Object System.Collections.ArrayList
+$righeC = New-Object System.Collections.ArrayList
+[void]$righeA.Add('cella  giornate  dal          al           sotto6800    %   mediana | dentro R242: gg  sotto    %')
+[void]$righeB.Add('cella   dom(=lun EA)  lun  mar  mer  gio  ven(=sab EA)  sab')
+[void]$righeC.Add('cella  finestra coperta   rompeMAX  rompeMIN  nessuno | col box>=6800: MAX   MIN')
+
 foreach($H in $CELLE){
   $et = 'H' + ([string]$H).PadLeft(2,'0')
-  $f = Join-Path $Cart ('SONDA_BOX_' + $SIMBOLO + '_' + $et + '.csv')
-  if(-not (Test-Path -LiteralPath $f)){ [void]$tab.Add(($et + '     -- CSV MANCANTE --')); continue }
-  $amp = New-Object System.Collections.ArrayList
+  $f  = Join-Path $Cart ('SONDA_BOX_' + $SIMBOLO + '_' + $et + '.csv')
+  if(-not (Test-Path -LiteralPath $f)){
+    [void]$righeA.Add($et + '   -- CSV MANCANTE --')
+    [void]$righeB.Add($et + '   -- CSV MANCANTE --')
+    [void]$righeC.Add($et + '   -- CSV MANCANTE --')
+    continue
+  }
+
+  $amp = New-Object System.Collections.ArrayList     # tutte le ampiezze
+  $ampR= New-Object System.Collections.ArrayList     # solo dentro la finestra di R242
+  $dow = @(0,0,0,0,0,0,0)
+  $sotto=0; $sottoR=0; $rMax=0; $rMin=0; $rNo=0; $fMax=0; $fMin=0
+  $dMin=$null; $dMax=$null; $senzaData=0
   $primo = $true
   foreach($riga in (Get-Content -LiteralPath $f)){
     if($primo){ $primo = $false; continue }
     $c = $riga -split ';'
     if($c.Count -lt 2){ continue }
     $v = 0.0
-    if([double]::TryParse($c[1], [Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$v)){ [void]$amp.Add($v) }
+    if(-not [double]::TryParse($c[1], [Globalization.NumberStyles]::Float, $inv, [ref]$v)){ continue }
+    [void]$amp.Add($v)
+    if($v -lt $PAVIMENTO){ $sotto = $sotto + 1 }
+
+    $rot = ''
+    if($c.Count -ge 8){ $rot = $c[7].Trim() }
+    if($rot -eq 'MAX'){ $rMax = $rMax + 1; if($v -ge $PAVIMENTO){ $fMax = $fMax + 1 } }
+    elseif($rot -eq 'MIN'){ $rMin = $rMin + 1; if($v -ge $PAVIMENTO){ $fMin = $fMin + 1 } }
+    else { $rNo = $rNo + 1 }
+
+    $d = New-Object DateTime 1,1,1
+    if([DateTime]::TryParseExact($c[0].Trim(),'yyyy.MM.dd',$inv,[Globalization.DateTimeStyles]::None,[ref]$d)){
+      $dow[[int]$d.DayOfWeek] = $dow[[int]$d.DayOfWeek] + 1
+      if($dMin -eq $null -or $d -lt $dMin){ $dMin = $d }
+      if($dMax -eq $null -or $d -gt $dMax){ $dMax = $d }
+      if($d -ge $R242Da -and $d -le $R242A){
+        [void]$ampR.Add($v)
+        if($v -lt $PAVIMENTO){ $sottoR = $sottoR + 1 }
+      }
+    } else { $senzaData = $senzaData + 1 }
   }
+
   $n = $amp.Count
-  if($n -eq 0){ [void]$tab.Add(($et + '     -- NESSUNA RIGA LEGGIBILE --')); continue }
-  $sotto = @($amp | Where-Object { $_ -lt $PAVIMENTO }).Count
-  $ord = @($amp | Sort-Object)
-  $med = if($n % 2 -eq 1){ $ord[[int](($n-1)/2)] } else { ($ord[$n/2 - 1] + $ord[$n/2]) / 2.0 }
-  [void]$tab.Add(($et.PadRight(8) + ([string]$n).PadLeft(8) + ([string]$sotto).PadLeft(13) +
-                  ([string][math]::Round(100.0*$sotto/$n,1)).PadLeft(12) + ([string][math]::Round($med,0)).PadLeft(14)))
+  if($n -eq 0){
+    [void]$righeA.Add($et + '   -- NESSUNA RIGA LEGGIBILE --')
+    [void]$righeB.Add($et + '   -- NESSUNA RIGA LEGGIBILE --')
+    [void]$righeC.Add($et + '   -- NESSUNA RIGA LEGGIBILE --')
+    continue
+  }
+  $med  = Mediana $amp
+  $nR   = $ampR.Count
+  $pct  = [math]::Round(100.0*$sotto/$n,1)
+  $pctR = if($nR -gt 0){ [math]::Round(100.0*$sottoR/$nR,1) } else { 0.0 }
+  $sDa  = if($dMin -ne $null){ $dMin.ToString('yyyy.MM.dd') } else { '??????????' }
+  $sA   = if($dMax -ne $null){ $dMax.ToString('yyyy.MM.dd') } else { '??????????' }
+  [void]$righeA.Add($et.PadRight(7) + ([string]$n).PadLeft(7) + '  ' + $sDa + '   ' + $sA + '   ' +
+                    ([string]$sotto).PadLeft(7) + ([string]$pct).PadLeft(7) +
+                    ([string][math]::Round($med,0)).PadLeft(9) + ' |' +
+                    ([string]$nR).PadLeft(15) + ([string]$sottoR).PadLeft(7) + ([string]$pctR).PadLeft(7))
+  [void]$righeB.Add($et.PadRight(7) + ([string]$dow[0]).PadLeft(9) + ([string]$dow[1]).PadLeft(8) +
+                    ([string]$dow[2]).PadLeft(5) + ([string]$dow[3]).PadLeft(5) + ([string]$dow[4]).PadLeft(5) +
+                    ([string]$dow[5]).PadLeft(9) + ([string]$dow[6]).PadLeft(12))
+
+  # QUANTA sessione vede davvero la colonna sessione_rompe, cella per cella.
+  # Il ciclo r.191-196 del sorgente salta le barre della notte e tiene solo
+  # 08:00 <= mm < 17:30. Le ore NON notturne del giorno logico sono 0..H-1
+  # (del giorno DOPO), quindi la finestra coperta e' da 08:00 a min(H-1,17).
+  $hUlt  = [math]::Min($H-1,17)
+  $copre = '-- niente --   '
+  if($H -gt 8){
+    if($hUlt -ge 17){ $copre = '08:00-17:29    ' }
+    else { $copre = '08:00-' + ([string]$hUlt).PadLeft(2,'0') + ':59    ' }
+  }
+  $nota = ''
+  if($H -eq 12){ $nota = '  <== e LA FINESTRA D INGRESSO DELL EA (piazza 07:59, cutoff 12:00)' }
+  [void]$righeC.Add($et.PadRight(7) + $copre + ([string]$rMax).PadLeft(8) + ([string]$rMin).PadLeft(10) +
+                    ([string]$rNo).PadLeft(9) + ' |' + ([string]$fMax).PadLeft(17) + ([string]$fMin).PadLeft(6) + $nota)
+  if($senzaData -gt 0){ [void]$righeB.Add('       (' + $senzaData + ' righe con data illeggibile in ' + $et + ')') }
 }
-foreach($r in $tab){ Write-Host ('   ' + $r) }
+
+Write-Host ''
+Write-Host '   TABELLA A -- IL PAVIMENTO (6800 punti = 68,0 idx)' -ForegroundColor White
+foreach($r in $righeA){ Write-Host ('   ' + $r) }
+Write-Host ''
+Write-Host '   TABELLA B -- CHE GIORNATE SONO (la data e il giorno in cui il box COMINCIA:' -ForegroundColor White
+Write-Host '   la giornata operativa dell EA e quella DOPO)' -ForegroundColor White
+foreach($r in $righeB){ Write-Host ('   ' + $r) }
+Write-Host ''
+Write-Host '   TABELLA C -- LA SESSIONE DEL GIORNO DOPO (causa 2), con la finestra che la' -ForegroundColor White
+Write-Host '   colonna sessione_rompe copre DAVVERO in quella cella' -ForegroundColor White
+foreach($r in $righeC){ Write-Host ('   ' + $r) }
+
+# ---------------------------------------------------------------------
+#  3-bis. LE TRE AVVERTENZE CHE DECIDONO SE I NUMERI SONO CONFRONTABILI.
+#         Si stampano SEMPRE, anche quando tutto e' andato bene: un
+#         elenco di soli difetti descrive male la realta'.
+# ---------------------------------------------------------------------
+$avv = New-Object System.Collections.ArrayList
+[void]$avv.Add('1. LA POPOLAZIONE NON E QUELLA DI R242, e la differenza e i LUNEDI.')
+[void]$avv.Add('   Guarda la colonna dom di TABELLA B. Se e ZERO, il censimento non vede')
+[void]$avv.Add('   nessun box del lunedi (il DAX non quota di domenica), mentre R242 quei')
+[void]$avv.Add('   lunedi li ha contati tutti e li' + " " + 'da per scartati dal pavimento')
+[void]$avv.Add('   (R242b par.7 CANCELLO 2: box artefatto da iBarShift, ~20% delle')
+[void]$avv.Add('   giornate, tipicamente sotto 68 idx). Quindi:')
+[void]$avv.Add('     %scartate DELL EA  =  q_lun + (1 - q_lun) x %scartate DI QUESTA TABELLA')
+[void]$avv.Add('   e AL CONTRARIO le soglie di R242, che sono scritte su TUTTE le giornate,')
+[void]$avv.Add('   vanno DIVISE per (1 - q_lun) prima di confrontarle con la colonna %:')
+[void]$avv.Add('     atteso 3,9%   -> 4,9%   con q_lun = 0,20')
+[void]$avv.Add('     cieco  8,8%   -> 11,0%  (LONG)   cieco 10,4% -> 13,0% (SHORT)')
+[void]$avv.Add('   Confrontare il numero grezzo con 8,8 e un errore di classe 284.')
+[void]$avv.Add('2. LA FINESTRA NON E QUELLA DI R242. Questa corsa arriva a OGGI; R242 si')
+[void]$avv.Add('   ferma al 2026.06.30. Per questo TABELLA A porta le due colonne: usa')
+[void]$avv.Add('   quelle di destra (dentro R242) per qualunque confronto con i suoi n.')
+[void]$avv.Add('3. LA COLONNA sessione_rompe NON E CIECA DAPPERTUTTO, e TABELLA C dice')
+[void]$avv.Add('   dove. E vuota solo a H00/H03/H06. A H12 copre 08:00-11:59, che e')
+[void]$avv.Add('   ESATTAMENTE la finestra d ingresso dell EA: li la colonna MIN col box')
+[void]$avv.Add('   sopra il pavimento e una PREDIZIONE DIRETTA dell n short di R242 (120')
+[void]$avv.Add('   a H=12), da leggere come forchetta -- in ECCESSO perche qui non c e il')
+[void]$avv.Add('   buffer di 1000 punti, in DIFETTO perche mancano i lunedi.')
+Write-Host ''
+foreach($r in $avv){ Write-Host ('   ' + $r) -ForegroundColor Yellow }
 
 # ---------------------------------------------------------------------
 #  4. RACCOLTA
@@ -258,24 +404,32 @@ $ri = New-Object System.Collections.ArrayList
 [void]$ri.Add('pc  : ' + $env:COMPUTERNAME + '   (PC di backtest; VPS VMI3047753 NON toccato)')
 [void]$ri.Add('pin : ' + $Pin)
 [void]$ri.Add('terminale: ' + $Terminal + '   (conto 50503392, AllowLiveTrading=false in tutte e sette le corse)')
-[void]$ri.Add('giorni indietro chiesti: ' + $GiorniIndietro)
+[void]$ri.Add('giorni indietro chiesti: ' + $GiorniIndietro + '   (finestra effettiva: vedi TABELLA A)')
 [void]$ri.Add('')
 [void]$ri.Add('CORSE ATTESE: 7   RIUSCITE: ' + $fatti)
 foreach($z in $esiti){ [void]$ri.Add('  ' + $z) }
 [void]$ri.Add('')
-[void]$ri.Add('QUANTE GIORNATE SCARTA IL PAVIMENTO (6800 punti = 68,0 idx):')
-foreach($r in $tab){ [void]$ri.Add('  ' + $r) }
+[void]$ri.Add('TABELLA A -- IL PAVIMENTO (6800 punti = 68,0 idx):')
+foreach($r in $righeA){ [void]$ri.Add('  ' + $r) }
 [void]$ri.Add('')
-[void]$ri.Add('CHE COSA QUESTA SONDA NON DICE, e va letto prima di usarla:')
-[void]$ri.Add('  - la colonna sessione_rompe NON E UTILIZZABILE per le celle H=0..H=15.')
-[void]$ri.Add('    Il giorno logico dello script parte a NightStartHour: per H basso la')
-[void]$ri.Add('    sessione del giorno dopo cade in un ALTRO giorno logico e la colonna')
-[void]$ri.Add('    esce sempre nessuno. Non e un difetto della sonda: e la geometria.')
-[void]$ri.Add('    La colonna che conta qui e ampiezza_notte_pts, e quella e giusta')
-[void]$ri.Add('    per tutte e sette le celle.')
-[void]$ri.Add('  - la sonda misura il PAVIMENTO (causa 1). La causa 2 -- il pendente che')
-[void]$ri.Add('    scade senza essere toccato -- si ricava per DIFFERENZA contro gli n')
-[void]$ri.Add('    gia misurati da R242, non la misura questa corsa.')
+[void]$ri.Add('TABELLA B -- CHE GIORNATE SONO (data = giorno di INIZIO del box):')
+foreach($r in $righeB){ [void]$ri.Add('  ' + $r) }
+[void]$ri.Add('')
+[void]$ri.Add('TABELLA C -- LA SESSIONE DEL GIORNO DOPO (causa 2):')
+foreach($r in $righeC){ [void]$ri.Add('  ' + $r) }
+[void]$ri.Add('')
+[void]$ri.Add('PRIMA DI CONFRONTARE QUESTI NUMERI CON R242:')
+foreach($r in $avv){ [void]$ri.Add('  ' + $r) }
+[void]$ri.Add('')
+[void]$ri.Add('CHE COSA QUESTA SONDA NON DICE:')
+[void]$ri.Add('  - non misura la causa 2 in tutte le celle: TABELLA C dice in quali si')
+[void]$ri.Add('    puo leggere e su che finestra. Dove la finestra coperta e vuota, la')
+[void]$ri.Add('    causa 2 resta una STIMA per differenza, non una misura.')
+[void]$ri.Add('  - la geometria del box e riprodotta, non identica: l EA legge gli estremi')
+[void]$ri.Add('    su PERIOD_M1 (ABTG_MaxMinNotte r.308-318), questo script su M5, e l EA')
+[void]$ri.Add('    include anche la barra del minuto 00:00. Residuo sotto una barra M5.')
+[void]$ri.Add('  - non e un round e non promuove niente: nessuna sedia, nessun preset di')
+[void]$ri.Add('    EA, nessun ordine e nessun Strategy Tester sono stati toccati.')
 ($ri -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'RIEPILOGO_SONDA.txt') -Encoding ASCII
 
 $zip = Join-Path $dsk 'SONDA_BOX_D30EUR.zip'
