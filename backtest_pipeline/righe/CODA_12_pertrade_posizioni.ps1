@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_CODA_12_PERTRADE_POSIZIONI_v2
+#  MARCATORE_CODA_12_PERTRADE_POSIZIONI_v3
 #  RUNNER_SOLA_LETTURA
 # ---------------------------------------------------------------------
 #  COSA FA: apre i per-trade che gli EA lasciano in Common\Files e, per
@@ -68,6 +68,10 @@
 #   3. Il conteggio delle posizioni e' un conteggio di position_id
 #      DISTINTI. Se una posizione fosse aperta in netting da piu'
 #      ingressi resterebbe UNA: e' giusto cosi' per l'Emendamento A.
+#      E un identificativo VUOTO entra nell'insieme come stringa vuota:
+#      tutte le righe senza id valgono UN secchio, cioe' UNA posizione
+#      che non esiste. Non lo tolgo (cambierebbe in silenzio i conteggi
+#      gia' agli atti dei file per-deal): lo CONTO e lo STAMPO in rosso.
 #   4. Tetto dichiarato: file oltre 40 MB o oltre 400000 righe non si
 #      leggono per intero, e la riga lo dice invece di fingere. Serve a
 #      non piantare una catena che non ha timeout.
@@ -105,7 +109,7 @@ function Titolo($t){ Write-Host ""; Write-Host ("=== " + $t + " ===") -Foregroun
 
 Write-Host "#####################################################################"
 Write-Host "#  CODA_12 -- PER-TRADE: DEAL, POSIZIONI, RAPPORTO                  #"
-Write-Host "#  MARCATORE_CODA_12_PERTRADE_POSIZIONI_v2                           #"
+Write-Host "#  MARCATORE_CODA_12_PERTRADE_POSIZIONI_v3                           #"
 Write-Host ("#  ora locale di questa macchina: " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss"))
 Write-Host "#  SOLA LETTURA: apre file e stampa numeri.                          #"
 Write-Host "#####################################################################"
@@ -138,7 +142,7 @@ if(-not (Test-Path -LiteralPath $cart)){
 #  il file ancora aperto (lo stesso accorgimento di CODA_05).
 # ---------------------------------------------------------------------
 function ContaPerTrade([string]$path){
-  $r = @{ ok=$false; motivo=""; deal=0; posizioni=0; rapporto=0.0; primo=""; ultimo=""; tagliato=$false; famiglia="" }
+  $r = @{ ok=$false; motivo=""; deal=0; posizioni=0; rapporto=0.0; primo=""; ultimo=""; tagliato=$false; famiglia=""; vuoti=0; minimo=""; massimo="" }
   $fi = $null
   try{ $fi = Get-Item -LiteralPath $path -ErrorAction Stop }catch{ $r.motivo = "non leggibile"; return $r }
   if($fi.Length -gt 41943040){ $r.motivo = ("TETTO: " + [math]::Round($fi.Length/1MB,1) + " MB, oltre i 40 MB dichiarati. NON contato."); return $r }
@@ -149,7 +153,7 @@ function ContaPerTrade([string]$path){
     $sr = New-Object IO.StreamReader($fs)
   }catch{ $r.motivo = "aperto da qualcun altro in modo esclusivo"; return $r }
 
-  $iPid = -1; $iClose = -1; $n = 0; $righe = 0
+  $iPid = -1; $iClose = -1; $n = 0; $righe = 0; $nVuoti = 0
   $visti = New-Object 'System.Collections.Generic.HashSet[string]'
   try{
     $intest = $sr.ReadLine()
@@ -181,11 +185,28 @@ function ContaPerTrade([string]$path){
       $c = $l.Split(';')
       if($c.Length -le $iPid){ continue }
       $n++
-      [void]$visti.Add($c[$iPid].Trim())
+      #  UN ID VUOTO NON E' UNA POSIZIONE, ma nella HashSet ci entra lo
+      #  stesso come stringa vuota e diventa UN SECCHIO. Non lo tolgo --
+      #  toglierlo cambierebbe in silenzio i conteggi gia' agli atti --
+      #  ma lo CONTO, cosi' chi legge sa di quanto e' gonfio il numero.
+      $id = $c[$iPid].Trim()
+      if($id -eq ""){ $nVuoti++ }
+      [void]$visti.Add($id)
       if($iClose -ge 0 -and $c.Length -gt $iClose){
         $t = $c[$iClose].Trim()
         if($r.primo -eq ""){ $r.primo = $t }
         $r.ultimo = $t
+        #  PRIMA/ULTIMA RIGA NON SONO IL PRIMO/ULTIMO ISTANTE. Nei
+        #  per-trade da tester le righe escono in ordine di chiusura e le
+        #  due cose coincidono; nel per-posizione dell'esportatore NO: le
+        #  righe seguono l'ordine del deal di APERTURA (ABTG_TradeExporter
+        #  r.136-145) e portano la chiusura, quindi si scavalcano. Il
+        #  formato 'aaaa.mm.gg hh:mm:ss' e' ordinabile come testo, quindi
+        #  gli ESTREMI VERI si tengono da parte senza costare niente.
+        if($t -ne ""){
+          if($r.minimo -eq "" -or $t -lt $r.minimo){ $r.minimo = $t }
+          if($r.massimo -eq "" -or $t -gt $r.massimo){ $r.massimo = $t }
+        }
       }
     }
   }catch{
@@ -197,6 +218,7 @@ function ContaPerTrade([string]$path){
 
   $r.deal = $n
   $r.posizioni = $visti.Count
+  $r.vuoti = $nVuoti
   if($visti.Count -gt 0){ $r.rapporto = [math]::Round($n / $visti.Count, 4) }
   $r.ok = $true
   return $r
@@ -236,13 +258,40 @@ foreach($f in $tutti){
   if($c.famiglia -eq "per-posizione"){
     Write-Host ("     POSIZIONI  : " + $c.posizioni + "   <<< e' questa l'unita' dell'Emendamento A")
     Write-Host ("     righe      : " + $c.deal + "   (file PER-POSIZIONE: una riga = una posizione chiusa)")
-    Write-Host  "     rapporto   : non si applica -- vale 1 per COSTRUZIONE, non per misura"
+    #  L'INVARIANTE SI VERIFICA, NON SI DICHIARA. "una riga = una
+    #  posizione" e' vero per come scrive ABTG_TradeExporter (aggrega
+    #  per pid, r.136-145, e pid==0 lo salta a r.131). Ma se il file
+    #  arrivasse da un'altra penna, o fosse troncato a meta' riga, i due
+    #  numeri divergerebbero e la didascalia direbbe una cosa FALSA
+    #  accanto a un numero vero. Qui si CONFRONTANO.
+    if($c.deal -eq $c.posizioni){
+      Write-Host  "     rapporto   : non si applica -- vale 1 per COSTRUZIONE, e su questo file e' VERIFICATO (righe = pid distinti)"
+    } else {
+      Write-Host ("     rapporto   : ATTENZIONE -- l'invariante NON REGGE su questo file: " + $c.deal + " righe ma " + $c.posizioni + " pid distinti.") -ForegroundColor Red
+      Write-Host  "                  Un per-posizione con pid RIPETUTI o VUOTI non e' un per-posizione:"
+      Write-Host  "                  il numero POSIZIONI qui sopra NON si puo' usare come operazioni."
+    }
   } else {
     Write-Host ("     deal uscita: " + $c.deal)
     Write-Host ("     POSIZIONI  : " + $c.posizioni + "   <<< e' questa l'unita' dell'Emendamento A")
     Write-Host ("     rapporto   : " + $c.rapporto + "   (deal per posizione)")
   }
-  Write-Host ("     close_time : dal " + $c.primo + "  al  " + $c.ultimo)
+  if($c.famiglia -eq "per-posizione"){
+    #  Qui si stampano gli ESTREMI, non la prima e l'ultima riga: su
+    #  questo formato le righe non sono in ordine di chiusura.
+    Write-Host ("     close_time : dal " + $c.minimo + "  al  " + $c.massimo + "   (estremi; le righe NON sono in ordine di chiusura)")
+  } else {
+    Write-Host ("     close_time : dal " + $c.primo + "  al  " + $c.ultimo)
+    if($c.minimo -ne $c.primo -or $c.massimo -ne $c.ultimo){
+      Write-Host ("     ATTENZIONE : le righe NON sono in ordine di chiusura. Estremi veri: dal " + $c.minimo + " al " + $c.massimo) -ForegroundColor Red
+    }
+  }
+  if($c.vuoti -gt 0){
+    Write-Host ("     ATTENZIONE : " + $c.vuoti + " righe hanno l'identificativo di posizione VUOTO.") -ForegroundColor Red
+    Write-Host  "                  Tutte insieme valgono UN secchio solo dentro POSIZIONI, quindi"
+    Write-Host  "                  quel numero contiene UNA posizione che non esiste. Vale per"
+    Write-Host  "                  tutte e due le famiglie."
+  }
   if($c.tagliato){
     Write-Host "     ATTENZIONE : TETTO DI RIGHE RAGGIUNTO (400000): i numeri sopra sono PARZIALI." -ForegroundColor Red
   }
@@ -282,7 +331,16 @@ Titolo "RIEPILOGO IN UNA TABELLA SOLA"
 Write-Host "nome                                                        deal  posizioni  rapporto  data file"
 foreach($e in ($esiti | Sort-Object { $_.nome })){
   $d = "-"; $p = "-"; $rr = "-"
-  if($e.c.ok){ $d = "" + $e.c.deal; $p = "" + $e.c.posizioni; $rr = "" + $e.c.rapporto }
+  if($e.c.ok){
+    $d = "" + $e.c.deal; $p = "" + $e.c.posizioni; $rr = "" + $e.c.rapporto
+    #  IL NUMERO RIFIUTATO NEL DETTAGLIO NON PUO' RIENTRARE DALLA
+    #  TABELLA. Su un file PER-POSIZIONE il rapporto non e' una misura:
+    #  o vale 1 per costruzione, o l'invariante e' rotta. Stamparci il
+    #  quoziente sarebbe lo stesso numero finto, dieci righe piu' sotto.
+    if($e.c.famiglia -eq "per-posizione"){
+      if($e.c.deal -eq $e.c.posizioni){ $rr = "1cost" } else { $rr = "ROTTO" }
+    }
+  }
   Write-Host ($e.nome.PadRight(58) + $d.PadLeft(6) + $p.PadLeft(11) + $rr.PadLeft(10) + "  " + $e.data)
 }
 Write-Host ""
@@ -294,5 +352,10 @@ Write-Host "e' quella che i CSV di riepilogo chiamano Trades, e NON e' la stessa
 Write-Host "il rapporto stampato qui accanto dice di quanto sbaglierebbe chi le"
 Write-Host "confondesse. Il nome del file NON dice la FINESTRA: per sapere quale"
 Write-Host "finestra descrive, si guarda la gamba che ha girato PER ULTIMA."
+Write-Host "DUE FAMIGLIE, e la colonna rapporto lo dice: '1cost' = file PER-POSIZIONE"
+Write-Host "(una riga = una posizione, VERIFICATO su quel file: non e' una misura, e'"
+Write-Host "un'identita'); 'ROTTO' = per-posizione con identificativi ripetuti o vuoti,"
+Write-Host "e li' la colonna posizioni NON si legge come operazioni; un NUMERO = file"
+Write-Host "PER-DEAL, e li' il rapporto e' misurato davvero."
 Write-Host ""
 Write-Host "Questa riga HA SOLO LETTO E STAMPATO."
