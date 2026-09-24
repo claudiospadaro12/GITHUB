@@ -35333,3 +35333,11 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🎲 CLASSE 769 — **soglia FISSA su una metrica il cui valore sotto l'ipotesi NULLA dipende dall'esposizione, non dalla correlazione**
 - **Caso (24/09, R247a par. 6)**: "diversificazione" richiedeva peggior giornata della somma < 1,5 volte la singola. Ma due sedie INDIPENDENTI con perdite limitate dallo stop, che entrano negli stessi giorni, prendono quasi sempre lo stop insieme almeno un giorno: sotto il nullo rapp_PG ha mediana 1,82 (q95 1,99 su 772505 rimescolato). DIVERSIFICAZIONE usciva **0 volte su 400** su sedie indipendenti: la soglia non misurava niente.
 - **Regola**: metriche di sovrapposizione o di coda si confrontano con un **nullo per permutazione che conserva l'esposizione** (stessi giorni, P/L rimescolati), e si mostra il valore sotto indipendenza PRIMA di congelare la soglia. Parente delle classi 178 e 764.
+
+## 📏 CLASSE 770 — **il controllo che MISURA ma non GIUDICA**
+- **Caso (24/09, riga R247)**: la riga calcolava le righe del `_OOS` degenere (`$nDgR`) e le righe dei per-trade contro l'atteso (154/197), le stampava in grigio, ma l'etichetta "FALSO ALLARME ATTESO" non le usava e nessun contatore diventava rosso. Una gamba degenere che GIRA e sovrascrive il per-trade IS con la sola intestazione passava "tutto bene" (contro-esempio eseguito dal cancello, scenario `sovrascritto`).
+- **Regola**: ogni numero atteso aggiunto a una riga ha un contatore e un esito, e l'etichetta che assolve lo include.
+
+## 🔇 CLASSE 771 — **la classe 754 soddisfatta raccogliendo un contenitore che per la classe 526 e' VUOTO**
+- **Caso (24/09, R246m par. 1.4 + riga R246 INVERNO)**: "il bias H4 si misura a costo zero dai log degli agent, la riga li raccoglie" -- ma il driver gira in Optimization=1 e in ottimizzazione `Print()` non esiste: i log ci sono, le righe `RETEST armato ... bias` no. Il paracadute "se non ci sono -> NON MISURATO" non scattava perche' i LOG c'erano. Errore scritto dal coordinatore su proposta del cancello e passato dallo strato 2 dei file prova; preso dallo strato 2 della riga.
+- **Regola**: prima di scrivere "la riga la raccoglie" ci si chiede *"da dove esce: dal report/CSV o dal giornale?"* (classe 526). Se esce dal giornale serve un TEST SINGOLO (Optimization=0), altrimenti si scrive [NON MISURATO].
