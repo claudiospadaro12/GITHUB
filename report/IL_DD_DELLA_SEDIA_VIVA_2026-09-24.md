@@ -32,8 +32,14 @@ indipendenti danno lo stesso numero.
 ## 2️⃣ 🔴 E QUI STA IL PROBLEMA, che non è nella sedia ma nella TAGLIA
 
 La sedia `770101` gira sulla challenge FTMO `541452707` a **`InpRiskPercent = 2,00`**.
-Il tetto di perdita totale della challenge è **10%** (`report/PIANO_CHALLENGE_OTTOBRE_v2.md` r.268),
-con un limite giornaliero del 5%.
+Il tetto di perdita totale della challenge è **10%**, ed è **STATICO**: l'equity non deve mai
+scendere sotto il **90% del saldo iniziale** (`docs/REGOLAMENTO_FTMO_2026-08.md` r.26-27 —
+**72.000 su 80.000**). Il limite giornaliero è **5% sull'EQUITY**, col riferimento al **balance
+delle 00:00**.
+✏️ **CORRETTO il 24/09**: la prima stesura citava `PIANO_CHALLENGE_OTTOBRE_v2.md` r.268. 🔴 **Fonte
+sbagliata** — quella riga è una nota di archiviazione dentro la sezione in cui FundedNext sostituisce
+FTMO. Il numero era giusto, la fonte no, e una fonte sbagliata su una regola di challenge è un
+difetto come gli altri.
 
 | | valore |
 |---|---:|
@@ -99,3 +105,35 @@ Le tre strade, coi numeri accanto — **nessuna è mia da prendere**:
 R239 l'ha misurata. **Le altre cinque girano anche loro a `2,00%`, e il loro contratto è scritto a
 `0,65%`.** La stessa moltiplicazione non è stata fatta per nessuna. 👉 **È il primo lavoro che
 propongo per domani**, e costa **zero macchina**: sta tutto nel censimento.
+
+
+---
+
+## 🔴 AGGIORNAMENTO DEL 24/09 — **il conto è stato fatto su tutte e sei, e il quadro è peggiore**
+
+`report/IL_DD_DELLE_SEI_SEDIE_2026-09-24.md`:
+
+# DUE sedie su sei sfondano il 10% DA SOLE in OOS. TRE contando anche l'IS.
+
+| sedia | DD @ 2,00% | > 10%? |
+|---|---:|:--|
+| `771531` EMA200 Dow | **15,66%** (IS 11,47%) | 🔴 **sì, in tutte e due** |
+| `770101` DAX Apertura | **14,50%** (IS 10,82%) | 🔴 **sì, in tutte e due** |
+| `770202` Dow Apertura | 8,79% · **IS 11,35%** | 🟠 solo IS |
+| `770511` · `770260` · `770411` | 7,8-8,4% · 7,9% · 3,8% | 🟢 no |
+
+## 🧱 E IL NUMERO DI PORTAFOGLIO **ESISTE, ED È MISURATO**
+`report/DD_PORTAFOGLIO_FTMO_2026-09-20.md` r.108-117, a rischio **2,00%**:
+- **DD dal picco: 13,91%** · peggior giornata **−6,87%** (26/02/2026) · **2 giornate oltre il muro del 5%**
+- 🔴 **Monte Carlo: il 12,4% delle sequenze sfonda il 10% statico** — contro **1,7%** a rischio 1,00%.
+  **×7,3, non ×2.**
+- ⚠️ Ed è un **PAVIMENTO**: misurato su **4 sedie su 6** (mancano due **correlate** a quelle presenti)
+  e aggregato **per giorno**, quindi cieco al flottante intragiornaliero.
+
+🟢 **E la notizia buona, che va detta**: la **diversificazione funziona** — la somma dei DD fa 19,28%,
+i combinati **5,19%**. 👉 **Il problema non è che si sommano: è la TAGLIA.**
+
+🟢 **E una firma di Claudio ha già tolto una sedia dalla lista**: il 21/09 alle 20:22 (*"ACCENDILA AL
+50%"*) la `770260` è passata a `InpTP1_ClosePct=50`, e la cella nuova misura **7,86% / 7,31%** —
+l'unico contratto del progetto **misurato alla taglia E al deposito veri**. La vecchia faceva 12,36%
+in IS: **avrebbe sfondato**.
