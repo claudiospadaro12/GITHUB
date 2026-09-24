@@ -35292,3 +35292,7 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🧱 CLASSE 759 — **lo strato 2 dichiara PASS su un file prova che lo strato 1 BLOCCA**
 - **Caso (24/09, R243a/b)**: il cancello di giudizio ha dato "R243a: PASS" su un file con **24+ emoji** (byte non-ASCII, che PS 5.1 legge ANSI); `controlla_riga.py --oggetto prova` lo **bloccava**. Lo strato 1 era stato rieseguito solo sulle RIGHE, non sui file prova.
 - **Regola**: il PASS di un round richiede lo strato 1 **su ogni file prova E sulla riga**, rieseguito dopo l'ultima modifica; il coordinatore lo rilancia lui prima di accettare un PASS.
+
+## 🕛 CLASSE 760 — **l'ora del reset FTMO calcolata col VERSO sbagliato dell'offset del server**
+- **Caso (24/09, specifica della colonna FTMO in `ABTG_CostToCost`)**: il coordinatore ha scritto *"BCM = IT-1, quindi la mezzanotte italiana e' l'01:00 server"*. E' il contrario: se l'ora server e' ora italiana **meno** 1, le 00:00 italiane sono le **23:00 BCM del giorno prima**. Lo diceva gia' il preset `ABTG_Guardian_FTMO_2Step.set` ("23:00 BCM = 00:00 CET"); il `InpDailyResetHour=1` del Guardian vale perche' quello gira sul server **FTMO** (IT+1). L'ha preso l'agente sviluppatore prima del codice.
+- **Regola**: un confine orario si scrive come conversione esplicita `ora_IT -> ora_server` con il segno, e si confronta con un file di casa che ha gia' la risposta (preset del Guardian) prima di usarlo. Mai trasferire un'ora da un server all'altro.
