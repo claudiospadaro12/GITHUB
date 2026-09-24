@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_CODA_12_PERTRADE_POSIZIONI_v1
+#  MARCATORE_CODA_12_PERTRADE_POSIZIONI_v2
 #  RUNNER_SOLA_LETTURA
 # ---------------------------------------------------------------------
 #  COSA FA: apre i per-trade che gli EA lasciano in Common\Files e, per
@@ -105,7 +105,7 @@ function Titolo($t){ Write-Host ""; Write-Host ("=== " + $t + " ===") -Foregroun
 
 Write-Host "#####################################################################"
 Write-Host "#  CODA_12 -- PER-TRADE: DEAL, POSIZIONI, RAPPORTO                  #"
-Write-Host "#  MARCATORE_CODA_12_PERTRADE_POSIZIONI_v1                           #"
+Write-Host "#  MARCATORE_CODA_12_PERTRADE_POSIZIONI_v2                           #"
 Write-Host ("#  ora locale di questa macchina: " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss"))
 Write-Host "#  SOLA LETTURA: apre file e stampa numeri.                          #"
 Write-Host "#####################################################################"
@@ -138,7 +138,7 @@ if(-not (Test-Path -LiteralPath $cart)){
 #  il file ancora aperto (lo stesso accorgimento di CODA_05).
 # ---------------------------------------------------------------------
 function ContaPerTrade([string]$path){
-  $r = @{ ok=$false; motivo=""; deal=0; posizioni=0; rapporto=0.0; primo=""; ultimo=""; tagliato=$false }
+  $r = @{ ok=$false; motivo=""; deal=0; posizioni=0; rapporto=0.0; primo=""; ultimo=""; tagliato=$false; famiglia="" }
   $fi = $null
   try{ $fi = Get-Item -LiteralPath $path -ErrorAction Stop }catch{ $r.motivo = "non leggibile"; return $r }
   if($fi.Length -gt 41943040){ $r.motivo = ("TETTO: " + [math]::Round($fi.Length/1MB,1) + " MB, oltre i 40 MB dichiarati. NON contato."); return $r }
@@ -157,11 +157,19 @@ function ContaPerTrade([string]$path){
     $hh = $intest.Split(';')
     for($i=0; $i -lt $hh.Length; $i++){
       $k = $hh[$i].Trim().Trim('"')
-      if($k -eq "position_id"){ $iPid = $i }
+      #  DUE FAMIGLIE DI PER-TRADE, e vanno lette in modo DIVERSO.
+      #  'position_id' = file PER-DEAL: piu' righe possono condividere la
+      #  stessa posizione, e il rapporto deal/posizione si MISURA.
+      #  'pid'         = file PER-POSIZIONE (lo scrive ABTG_TradeExporter):
+      #  una riga = una posizione chiusa, e il rapporto vale 1 PER
+      #  COSTRUZIONE, non per misura. Scriverlo come se fosse misurato
+      #  sarebbe un numero finto.
+      if($k -eq "position_id"){ $iPid = $i; $r.famiglia = "per-deal" }
+      if($k -eq "pid" -and $iPid -lt 0){ $iPid = $i; $r.famiglia = "per-posizione" }
       if($k -eq "close_time"){  $iClose = $i }
     }
     if($iPid -lt 0){
-      $r.motivo = ("intestazione senza colonna position_id: [" + $intest + "]")
+      $r.motivo = ("intestazione senza colonna position_id NE' pid: [" + $intest + "]")
       return $r
     }
     while($true){
@@ -225,9 +233,15 @@ foreach($f in $tutti){
     Write-Host "                  successiva ha troncato il file di quella buona."
     continue
   }
-  Write-Host ("     deal uscita: " + $c.deal)
-  Write-Host ("     POSIZIONI  : " + $c.posizioni + "   <<< e' questa l'unita' dell'Emendamento A")
-  Write-Host ("     rapporto   : " + $c.rapporto + "   (deal per posizione)")
+  if($c.famiglia -eq "per-posizione"){
+    Write-Host ("     POSIZIONI  : " + $c.posizioni + "   <<< e' questa l'unita' dell'Emendamento A")
+    Write-Host ("     righe      : " + $c.deal + "   (file PER-POSIZIONE: una riga = una posizione chiusa)")
+    Write-Host  "     rapporto   : non si applica -- vale 1 per COSTRUZIONE, non per misura"
+  } else {
+    Write-Host ("     deal uscita: " + $c.deal)
+    Write-Host ("     POSIZIONI  : " + $c.posizioni + "   <<< e' questa l'unita' dell'Emendamento A")
+    Write-Host ("     rapporto   : " + $c.rapporto + "   (deal per posizione)")
+  }
   Write-Host ("     close_time : dal " + $c.primo + "  al  " + $c.ultimo)
   if($c.tagliato){
     Write-Host "     ATTENZIONE : TETTO DI RIGHE RAGGIUNTO (400000): i numeri sopra sono PARZIALI." -ForegroundColor Red

@@ -34958,3 +34958,42 @@ mente in silenzio e il controllo successivo guarda il posto sbagliato.
 **La regola**: ogni `r.NNN` che entra in un documento nuovo si **riconta sul file a HEAD** nel
 momento in cui lo si scrive. Citare la citazione di un altro documento è **una copia, non una
 lettura**.
+
+## 🏷️ CLASSE 732 — **l'oggetto sbagliato passato al cancello, e il FAIL letto come difetto dell'oggetto**
+
+24/09/2026. Ho passato `CODA_12_pertrade_posizioni.ps1` — uno **script eseguito dal runner** — a
+`controlla_riga.py --oggetto **riga**`. Sono usciti **due bloccanti**: *"nessun pin"* e *"non
+verifica il MARCATORE dello script scaricato"*.
+🔴 **Tutti e due falsi**, e per una ragione strutturale: uno script della CODA **non ha un pin e non
+scarica niente** — è il *runner* che lo pinna (il referto notturno stampa lo SHA di ogni riga). Il
+cancello stava verificando **il contratto di un altro oggetto**.
+🟢 **E lo strumento aveva già il tipo giusto**: `--oggetto ps1` esiste, e sullo stesso file dà
+**5 passati, nessun difetto**. Il difetto era **nella mia chiamata**, non nel file né nel cancello.
+🔴 **Il pericolo vero non è perdere due minuti**: è che un FAIL su un contratto sbagliato spinge a
+"riparare" ciò che non è rotto (qui: aggiungere un pin a uno script che non lo può avere), oppure a
+**smettere di fidarsi del cancello** — che è il modo in cui un cancello muore.
+**La regola**: `--oggetto` si **dichiara sempre e si sceglie guardando che cosa fa l'oggetto**, non
+la sua estensione. Un `.ps1` può essere una *riga di lancio*, uno *script pinnato da altri* o uno
+*strumento locale*: sono **tre contratti diversi**. E un bloccante che chiede una proprietà che
+l'oggetto **non può avere per costruzione** si legge come **tipo sbagliato**, non come difetto.
+
+## 👁️ CLASSE 733 — **l'unico testimone che parla scambiato per l'indiziato**
+
+24/09/2026, sulle sedie FTMO. Su sei sedie, **una sola** (`770260`, Nasdaq) aveva righe nel
+giornale in tutti e due i giorni, e tutte e due erano **rifiuti** (*"volumi insufficienti, salto"*).
+L'ho incriminata come *"candidato numero uno a una revisione"*.
+🔴 **Sbagliato, e in modo istruttivo**: quella sedia è l'unica che **dichiara di aver deciso**,
+perché è l'unica delle tre Aperture col filtro volumi acceso — e quel filtro **loga quando
+rifiuta**. Le altre cinque tacevano **non perché non decidono, ma perché logano solo quando
+agiscono**.
+🧮 E il conto che avrei dovuto fare prima: a **0,360 op/giorno** promessi, in **3 giornate** le
+attese sono **1,08** posizioni → **P(zero) = 34%**. Zero in tre giorni è **il caso normale**.
+👉 Le tre ipotesi che avevo costruito (soglia assoluta / filtro acceso per sbaglio / ora di sessione
+sbagliata) sono state **tutte e tre falsificate alla fonte** — e la terza, in particolare, mi
+avrebbe fatto proporre di cambiare l'ora a una sedia **viva e configurata giusta**.
+**La regola**: in una flotta dove gli strumenti **non logano tutti allo stesso modo**, la
+frequenza di apparizione nei log misura la **verbosità**, non il comportamento. Prima di
+incriminare chi si vede, si chiede: *"chi altro avrebbe parlato, se avesse avuto qualcosa da
+dire?"* — e si confronta l'osservato con la **sua** attesa, non con quella degli altri.
+🟢 **Il contro-esempio, qui, ha funzionato**: tre ipotesi scritte e tre uccise **prima** che
+diventassero una riga verso il campo.
