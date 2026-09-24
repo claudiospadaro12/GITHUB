@@ -1,0 +1,46 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : e02a970afe0f26e421d32ca5c4b4344256cb1d02
+data            : 2026-09-24 07:18:35   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_MaxMinNotte
+file prova      : R242a_boxgiornoprec_LONG_MaxMinNotte_D30EUR.txt   (31795 byte, dal pin)
+etichetta       : R242a
+simbolo         : D30EUR
+periodo         : M15
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte\ABTG_MaxMinNotte_D30EUR_IS_R242a.csv
+  righe : 7
+    Pass 0    Profit -3354.46     PF 0.73216    Equity DD % 5.6422     Trades 155
+    Pass 1    Profit -3106.42     PF 0.75756    Equity DD % 5.6239     Trades 158
+    Pass 2    Profit -3321.63     PF 0.74387    Equity DD % 5.6463     Trades 157
+    Pass 3    Profit -2012.49     PF 0.85543    Equity DD % 4.1442     Trades 172
+    Pass 4    Profit -2820.78     PF 0.83572    Equity DD % 5.6104     Trades 180
+    Pass 5    Profit -1096.57     PF 0.94136    Equity DD % 6.336      Trades 188
+    Pass 6    Profit -3837.93     PF 0.78476    Equity DD % 5.6919     Trades 134
+  ESITO : LETTO -- 7 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte\ABTG_MaxMinNotte_D30EUR_OOS_R242a.csv
+  ESITO : NON MISURATO -- CSV DA 0 BYTE
+  >>> Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: guardare il log
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: NON MISURATO -- CSV mancanti o vuoti: OOS
