@@ -72,9 +72,22 @@
 //|   verso. Col primo movimento non si "salta" piu' la candela: si  |
 //|   ASPETTA che il prezzo si muova. Modo TICK escluso (non ha      |
 //|   candele).                                                       |
+//|  1.07 (richiesta di Claudio, 25/09 sera, dopo la prova 1.06 in   |
+//|   perdita: "apre il trade solo se la candela del minuto          |
+//|   successivo apre oltre la meta' del corpo della candela          |
+//|   precedente... se il prezzo e' laterale, non apre ordini"):     |
+//|   regola MEZZO CORPO. A candela nuova, dopo InpFirstMoveSeconds, |
+//|   precedente VERDE e prezzo SOPRA la meta' del suo corpo -> LONG;|
+//|   precedente ROSSA e prezzo SOTTO la meta' -> SHORT; altrimenti  |
+//|   (prezzo dalla parte sbagliata, doji, corpo < InpCorpoMinimoPts)|
+//|   NESSUNA ondata in quella candela. Verso bloccato per candela   |
+//|   come in 1.06. Nota onesta: in M1 la candela nuova apre dove ha |
+//|   chiuso la precedente, quindi "oltre la meta'" al secondo zero   |
+//|   e' quasi sempre vero: il filtro morde grazie all'attesa di     |
+//|   InpFirstMoveSeconds e al corpo minimo.                         |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.06"
+#property version   "1.07"
 #include <Trade\Trade.mqh>
 
 #define CONTO_AMMESSO 50503635   // il SOLO conto su cui questo EA accetta di girare
@@ -82,17 +95,18 @@
 
 enum ENUM_DIR_MODE   { DIR_FROM_MANUAL=0, DIR_LONG=1, DIR_SHORT=2 };
 enum ENUM_ENTRY_MODE { ENTRY_MANUALE=0, ENTRY_CANDELA=1 };
-enum ENUM_CANDLE_RULE { CR_PREV_CANDLE=0, CR_FIRST_MOVE=1, CR_TICK=2, CR_CICLO=3 };
+enum ENUM_CANDLE_RULE { CR_PREV_CANDLE=0, CR_FIRST_MOVE=1, CR_TICK=2, CR_CICLO=3, CR_MEZZO_CORPO=4 };
 enum ENUM_CICLO_REGOLA { CICLO_SEGNO=0, CICLO_INCROCIO=1 };
 
 input group "=== Modo d'ingresso ==="
 input ENUM_ENTRY_MODE InpEntryMode       = ENTRY_MANUALE;   // MANUALE: verso dalla tua posizione (o fisso), rientra subito. CANDELA: verso da candela/tick/ciclo
 input ENUM_TIMEFRAMES InpCandleTF        = PERIOD_M1;       // CANDELA/CICLO: timeframe (M1 consigliato)
-input ENUM_CANDLE_RULE InpCandleRule     = CR_TICK;         // CANDELA: verso dal PRIMO MOVIMENTO della candela, dalla candela PRECEDENTE, dai TICK (senza candele), oppure dal CICLO
+input ENUM_CANDLE_RULE InpCandleRule     = CR_TICK;         // CANDELA: verso dal PRIMO MOVIMENTO, dalla candela PRECEDENTE, dai TICK (senza candele), dal CICLO, oppure MEZZO CORPO (precedente verde e prezzo sopra la meta' del suo corpo = long; rossa e sotto = short; altrimenti niente)
 input int           InpTickWindow        = 5;               // TICK: numero di tick su cui si misura il movimento
 input int           InpFirstMoveSeconds  = 3;               // CANDELA/primo movimento: secondi dopo l'apertura in cui si legge il verso
 input double        InpFirstMovePoints   = 1.0;             // CANDELA/primo movimento e TICK: movimento minimo in PUNTI MT5 (_Point) per decidere
 input int           InpMaxWavesPerCandle = 3;               // CANDELA: ondate massime dentro la stessa candela, tutte nello stesso verso (0 = senza limite)
+input double        InpCorpoMinimoPts    = 0.0;             // MEZZO CORPO: corpo minimo della candela precedente in PUNTI MT5 (0 = qualunque; sotto = laterale, niente ondate)
 
 input group "=== CICLO (oscillatore Alta Velocita' di Claudio, sul TF InpCandleTF) ==="
 input ENUM_CICLO_REGOLA InpCicloRegola   = CICLO_SEGNO;     // SEGNO: opera nel colore dell'ultima barra chiusa (verde=long, rosso=short). INCROCIO: fino a InpMaxWavesPerCandle ondate nella candela dell'incrocio, stesso verso
@@ -266,10 +280,10 @@ void Status()
       modo = "CICLO " + (InpCicloRegola == CICLO_SEGNO ? "segno" : "incrocio") + " " + EnumToString(InpCandleTF);
       modo += (gCycOk ? " = " + DoubleToString(gCyc1, 2) + " (prima " + DoubleToString(gCyc2, 2) + ")" : " (calcolo...)");
      }
-   else modo = "CANDELA " + (InpCandleRule == CR_FIRST_MOVE ? "primo movimento " : "precedente ") + EnumToString(InpCandleTF);
+   else modo = "CANDELA " + (InpCandleRule == CR_FIRST_MOVE ? "primo movimento " : (InpCandleRule == CR_MEZZO_CORPO ? "mezzo corpo " : "precedente ")) + EnumToString(InpCandleTF);
    if(InpEntryMode == ENTRY_CANDELA && InpCandleRule != CR_TICK)
       modo += "   [verso bloccato per candela: " + (gLockBar == 0 ? "in attesa" : (gLockDir > 0 ? "LONG" : (gLockDir < 0 ? "SHORT" : "nessuno"))) + ", ondate " + IntegerToString(gLockWaves) + (InpMaxWavesPerCandle > 0 ? "/" + IntegerToString(InpMaxWavesPerCandle) : "") + "]";
-   string s = "ABTG_ScalperDirezionale 1.06  " + _Symbol + "   modo: " + modo + "\n";
+   string s = "ABTG_ScalperDirezionale 1.07  " + _Symbol + "   modo: " + modo + "\n";
    s += "stato: " + (gActive ? "ATTIVO" : "FERMO (premi START)") + (gStopReason != "" ? "  [" + gStopReason + "]" : "") + "\n";
    s += "verso: " + dir + (gDirFromManual ? " (dalla tua posizione a mano)" : "") + "   ondata: " + IntegerToString(Positions()) + " posizioni x " + IntegerToString(InpMaxSeconds) + " s\n";
    s += "lotto attuale: " + DoubleToString(gLot, 2) + "   ondate: " + IntegerToString(gWaves) + "   posizioni chiuse: " + IntegerToString(gPosClosed) + "   aperte ora: " + IntegerToString(ArraySize(gPos)) + "\n";
@@ -325,6 +339,7 @@ int OnInit()
       Alert("ABTG_ScalperDirezionale: VOLUME_MIN ", DoubleToString(vmin, 2), " su ", _Symbol, " > lotto dichiarato: NON alzo la taglia da solo, NON parto");
       return(INIT_FAILED);
      }
+   if(InpCorpoMinimoPts < 0.0) { Alert("ABTG_ScalperDirezionale: InpCorpoMinimoPts < 0: NON parto"); return(INIT_FAILED); }
    if(InpMaxWavesPerCandle < 0) { Alert("ABTG_ScalperDirezionale: InpMaxWavesPerCandle < 0: NON parto"); return(INIT_FAILED); }
    if(InpPositions < 1 || InpPositions > MAX_POSIZIONI)
      {
@@ -361,7 +376,7 @@ int OnInit()
      }
    DrawButton();
    Status();
-   Log("1.06 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
+   Log("1.07 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
        + " tickvalue " + DoubleToString(SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE), 4)
        + " stopslevel " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL))
        + " spread " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_SPREAD)) + " pt");
@@ -760,6 +775,21 @@ bool DecideDir()
         {
          double po = iOpen(_Symbol, InpCandleTF, 1), pc = iClose(_Symbol, InpCandleTF, 1);
          if(pc > po) dir = 1; else if(pc < po) dir = -1;
+        }
+      else if(InpCandleRule == CR_MEZZO_CORPO)   // "apre oltre la meta' del corpo della candela precedente"
+        {
+         if(TimeTradeServer() - bt < InpFirstMoveSeconds) { gLastAction = "candela nuova: leggo il prezzo contro la meta' del corpo fra " + IntegerToString(InpFirstMoveSeconds) + " s"; return false; }
+         double po = iOpen(_Symbol, InpCandleTF, 1), pc = iClose(_Symbol, InpCandleTF, 1);
+         double corpo = MathRound(MathAbs(pc - po) / _Point);
+         double mid = (po + pc) / 2.0;
+         double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+         string perche;
+         if(corpo < MathMax(InpCorpoMinimoPts, 1.0)) { dir = 0; perche = "precedente senza corpo (" + DoubleToString(corpo, 0) + " pt): laterale"; }
+         else if(pc > po && bid > mid) { dir = 1;  perche = "precedente VERDE e prezzo sopra la meta' (" + DoubleToString(bid, _Digits) + " > " + DoubleToString(mid, _Digits) + ")"; }
+         else if(pc < po && bid < mid) { dir = -1; perche = "precedente ROSSA e prezzo sotto la meta' (" + DoubleToString(bid, _Digits) + " < " + DoubleToString(mid, _Digits) + ")"; }
+         else { dir = 0; perche = "prezzo dalla parte sbagliata della meta' (" + DoubleToString(bid, _Digits) + " vs " + DoubleToString(mid, _Digits) + ", precedente " + (pc > po ? "verde" : "rossa") + "): niente"; }
+         gLastAction = "MEZZO CORPO: " + perche;
+         Log(gLastAction);
         }
       else   // CR_FIRST_MOVE: "se la candela apre long..." - si ASPETTA il primo movimento, non si salta la candela
         {

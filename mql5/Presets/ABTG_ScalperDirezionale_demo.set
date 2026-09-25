@@ -11,13 +11,18 @@
 ;   InpCandleRule=1 (PRIMO MOVIMENTO): a candela M1 nuova, dopo 1 s, il primo movimento del prezzo decide il verso; fino a 3 ondate
 ;   da 20 s nello stesso verso (1 + 20 + 0,5 + 20 + 0,5 + 20 = ~62 s: la terza sconfina di poco nella candela dopo).
 ;   Per usare il Ciclo al posto del primo movimento: InpCandleRule=3 (il verso resta bloccato per candela lo stesso).
+; MEZZO CORPO (1.07, Claudio 25/09 sera, prova in corso): InpCandleRule=4. A candela M1 nuova, dopo 3 s: precedente VERDE e prezzo
+;   sopra la meta' del suo corpo -> ondata LONG; precedente ROSSA e prezzo sotto la meta' -> SHORT; altrimenti NIENTE in quella candela.
+;   InpMaxWavesPerCandle=1: una decisione = un esito, cosi' il CSV dice se la regola ha un segno (poi si puo' alzare a 2).
+;   InpCorpoMinimoPts=0: corpo minimo della precedente spento; per saltare le candele piatte del laterale si mette un numero (es. 10 = 0,10 $).
 InpEntryMode=1
 InpCandleTF=1
-InpCandleRule=1
+InpCandleRule=4
 InpTickWindow=5
-InpFirstMoveSeconds=1
+InpFirstMoveSeconds=3
 InpFirstMovePoints=1.0
-InpMaxWavesPerCandle=3
+InpMaxWavesPerCandle=1
+InpCorpoMinimoPts=0.0
 InpCicloRegola=0
 InpCicloMinimo=0.0
 InpK1Len=5
