@@ -6,13 +6,18 @@
 ;   InpCicloRegola=1 = INCROCIO: una sola ondata per incrocio dello zero. I nove numeri del ciclo sono quelli della fonte.
 ; ONDATE (1.04, numeri di Claudio, 25/09 sera: "8 ordini con lo stesso lotto... 20 secondi"): InpPositions=8, InpMaxSeconds=20.
 ;   Una ondata = 8 posizioni x lotto attuale, 16 richieste al server (8 aperture + 8 chiusure): con InpMaxRequestsPerDay=500 sono ~31 ondate per START.
-;   Caso peggiore di una ondata: 8 x -2 EUR = -16 EUR, contro la perdita di sessione di 20 EUR.
+;   Caso peggiore di una ondata: 8 x -2 EUR = -16 EUR, contro la perdita di sessione di 20 EUR (controllata a ondata chiusa: tetto vero ~36).
+; VERSO BLOCCATO PER CANDELA (1.06, Claudio 25/09 sera: "se la candela apre long, i trade devono essere tutti long... 3 ordini nel minuto"):
+;   InpCandleRule=1 (PRIMO MOVIMENTO): a candela M1 nuova, dopo 1 s, il primo movimento del prezzo decide il verso; fino a 3 ondate
+;   da 20 s nello stesso verso (1 + 20 + 0,5 + 20 + 0,5 + 20 = ~62 s: la terza sconfina di poco nella candela dopo).
+;   Per usare il Ciclo al posto del primo movimento: InpCandleRule=3 (il verso resta bloccato per candela lo stesso).
 InpEntryMode=1
 InpCandleTF=1
-InpCandleRule=3
+InpCandleRule=1
 InpTickWindow=5
-InpFirstMoveSeconds=3
+InpFirstMoveSeconds=1
 InpFirstMovePoints=1.0
+InpMaxWavesPerCandle=3
 InpCicloRegola=0
 InpCicloMinimo=0.0
 InpK1Len=5

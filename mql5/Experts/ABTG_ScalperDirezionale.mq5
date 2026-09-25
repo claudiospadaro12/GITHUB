@@ -62,9 +62,18 @@
 //|  1.05 (cancello 1.04: PASS con tre ritocchi): chiusura rifiutata |
 //|   ritentata con attesa che raddoppia fino a 60 s (classe 810);   |
 //|   motivo sul pannello dopo un cambio di input o grafico.         |
+//|  1.06 (richiesta di Claudio, 25/09 sera: "se la candela apre     |
+//|   long, i trade devono essere tutti long... 3 ordini all'interno |
+//|   del minuto della stessa direzione"): VERSO BLOCCATO PER        |
+//|   CANDELA. A candela nuova si decide UNA volta (primo movimento, |
+//|   candela precedente o Ciclo, secondo InpCandleRule) e tutte le  |
+//|   ondate di quella candela (max InpMaxWavesPerCandle) hanno quel |
+//|   verso. Col primo movimento non si "salta" piu' la candela: si  |
+//|   ASPETTA che il prezzo si muova. Modo TICK escluso (non ha      |
+//|   candele).                                                       |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.05"
+#property version   "1.06"
 #include <Trade\Trade.mqh>
 
 #define CONTO_AMMESSO 50503635   // il SOLO conto su cui questo EA accetta di girare
@@ -82,6 +91,7 @@ input ENUM_CANDLE_RULE InpCandleRule     = CR_TICK;         // CANDELA: verso da
 input int           InpTickWindow        = 5;               // TICK: numero di tick su cui si misura il movimento
 input int           InpFirstMoveSeconds  = 3;               // CANDELA/primo movimento: secondi dopo l'apertura in cui si legge il verso
 input double        InpFirstMovePoints   = 1.0;             // CANDELA/primo movimento e TICK: movimento minimo in PUNTI MT5 (_Point) per decidere
+input int           InpMaxWavesPerCandle = 3;               // CANDELA: ondate massime dentro la stessa candela, tutte nello stesso verso (0 = senza limite)
 
 input group "=== CICLO (oscillatore Alta Velocita' di Claudio, sul TF InpCandleTF) ==="
 input ENUM_CICLO_REGOLA InpCicloRegola   = CICLO_SEGNO;     // SEGNO: opera nel colore dell'ultima barra chiusa (verde=long, rosso=short). INCROCIO: una ondata per incrocio dello zero
@@ -164,6 +174,9 @@ string   gStopReason   = "";
 string   gLastAction   = "-";
 string   gCsv          = "";
 datetime gCandleDone   = 0;      // barra gia' usata (modo CANDELA / CICLO incrocio)
+datetime gLockBar      = 0;      // candela su cui il verso e' stato deciso e BLOCCATO
+int      gLockDir      = 0;      // il verso bloccato per quella candela (0 = nessuna ondata in questa candela)
+int      gLockWaves    = 0;      // ondate gia' aperte in questa candela
 double   gTicks[];               // ultimi bid (modo TICK)
 datetime gCycBar       = 0;      // barra su cui e' stato calcolato il ciclo (si ricalcola solo a barra nuova)
 double   gCyc1         = 0.0;    // ciclo sull'ultima barra CHIUSA [1]
@@ -252,8 +265,10 @@ void Status()
       modo = "CICLO " + (InpCicloRegola == CICLO_SEGNO ? "segno" : "incrocio") + " " + EnumToString(InpCandleTF);
       modo += (gCycOk ? " = " + DoubleToString(gCyc1, 2) + " (prima " + DoubleToString(gCyc2, 2) + ")" : " (calcolo...)");
      }
-   else modo = "CANDELA " + EnumToString(InpCandleTF);
-   string s = "ABTG_ScalperDirezionale 1.05  " + _Symbol + "   modo: " + modo + "\n";
+   else modo = "CANDELA " + (InpCandleRule == CR_FIRST_MOVE ? "primo movimento " : "precedente ") + EnumToString(InpCandleTF);
+   if(InpEntryMode == ENTRY_CANDELA && InpCandleRule != CR_TICK)
+      modo += "   [verso bloccato per candela: " + (gLockBar == 0 ? "in attesa" : (gLockDir > 0 ? "LONG" : (gLockDir < 0 ? "SHORT" : "nessuno"))) + ", ondate " + IntegerToString(gLockWaves) + (InpMaxWavesPerCandle > 0 ? "/" + IntegerToString(InpMaxWavesPerCandle) : "") + "]";
+   string s = "ABTG_ScalperDirezionale 1.06  " + _Symbol + "   modo: " + modo + "\n";
    s += "stato: " + (gActive ? "ATTIVO" : "FERMO (premi START)") + (gStopReason != "" ? "  [" + gStopReason + "]" : "") + "\n";
    s += "verso: " + dir + (gDirFromManual ? " (dalla tua posizione a mano)" : "") + "   ondata: " + IntegerToString(Positions()) + " posizioni x " + IntegerToString(InpMaxSeconds) + " s\n";
    s += "lotto attuale: " + DoubleToString(gLot, 2) + "   ondate: " + IntegerToString(gWaves) + "   posizioni chiuse: " + IntegerToString(gPosClosed) + "   aperte ora: " + IntegerToString(ArraySize(gPos)) + "\n";
@@ -309,6 +324,7 @@ int OnInit()
       Alert("ABTG_ScalperDirezionale: VOLUME_MIN ", DoubleToString(vmin, 2), " su ", _Symbol, " > lotto dichiarato: NON alzo la taglia da solo, NON parto");
       return(INIT_FAILED);
      }
+   if(InpMaxWavesPerCandle < 0) { Alert("ABTG_ScalperDirezionale: InpMaxWavesPerCandle < 0: NON parto"); return(INIT_FAILED); }
    if(InpPositions < 1 || InpPositions > MAX_POSIZIONI)
      {
       Alert("ABTG_ScalperDirezionale: InpPositions deve essere fra 1 e ", MAX_POSIZIONI, ": NON parto");
@@ -328,7 +344,7 @@ int OnInit()
    if(InpDirection == DIR_SHORT) { gDir = -1; gDirFromManual = false; }
    gLot = NormLot(InpLotStart);
    gCycBar = 0; gCycOk = false; gCyc1 = 0.0; gCyc2 = 0.0;   // un cambio di input NON ricarica l'EA: le globali restano (classe 816)
-   gCandleDone = 0;
+   gCandleDone = 0; gLockBar = 0; gLockDir = 0; gLockWaves = 0;
    gStopReason = (gActive ? "input o grafico cambiato: premi START" : gStopReason);
    gActive = false;                                           // dopo un cambio di input si preme START di nuovo
    gCsv = "abtg_scalper_ondate_" + IntegerToString(login) + ".csv";
@@ -344,7 +360,7 @@ int OnInit()
      }
    DrawButton();
    Status();
-   Log("1.05 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
+   Log("1.06 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
        + " tickvalue " + DoubleToString(SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE), 4)
        + " stopslevel " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL))
        + " spread " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_SPREAD)) + " pt");
@@ -709,49 +725,54 @@ bool DecideDir()
       gDir = dir; gDirFromManual = false;
       return true;
      }
-   if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_CICLO)
-     {
-      CycleUpdate();
-      if(!gCycOk) { gLastAction = "CICLO: storia insufficiente su " + EnumToString(InpCandleTF) + ", aspetto"; return false; }
-      int dir = 0;
-      if(InpCicloRegola == CICLO_SEGNO)
-        {
-         if(MathAbs(gCyc1) < InpCicloMinimo) { gLastAction = "CICLO " + DoubleToString(gCyc1, 2) + " sotto il minimo " + DoubleToString(InpCicloMinimo, 2) + ": aspetto"; return false; }
-         dir = (gCyc1 >= 0.0) ? 1 : -1;   // verde = long, rosso = short (zero esatto al lato positivo, come in ABTG_Cycle)
-        }
-      else
-        {
-         if(gCycBar == gCandleDone) { gLastAction = "CICLO incrocio: barra gia' usata, aspetto la prossima"; return false; }
-         gCandleDone = gCycBar;   // una decisione per barra, anche se non c'e' incrocio
-         if(gCyc2 <  0.0 && gCyc1 >= 0.0) dir = 1;         // incrocio verso l'alto = minimo di ciclo formato
-         else if(gCyc2 >= 0.0 && gCyc1 <  0.0) dir = -1;   // verso il basso = massimo di ciclo formato
-         if(dir == 0) { gLastAction = "CICLO: nessun incrocio su questa barra (" + DoubleToString(gCyc2, 2) + " -> " + DoubleToString(gCyc1, 2) + ")"; return false; }
-        }
-      gDir = dir; gDirFromManual = false;
-      return true;
-     }
    if(InpEntryMode == ENTRY_CANDELA)
      {
+      // VERSO BLOCCATO PER CANDELA (1.06): si decide una volta a candela nuova, poi si riusa
       datetime bt = iTime(_Symbol, InpCandleTF, 0);
       if(bt == 0) return false;
-      if(bt == gCandleDone) { gLastAction = "candela gia' usata: aspetto la prossima"; return false; }
-      double op = iOpen(_Symbol, InpCandleTF, 0);
+      if(bt == gLockBar)
+        {
+         if(gLockDir == 0) { gLastAction = "candela senza verso: aspetto la prossima"; return false; }
+         if(InpMaxWavesPerCandle > 0 && gLockWaves >= InpMaxWavesPerCandle) { gLastAction = "candela: " + IntegerToString(gLockWaves) + " ondate fatte, aspetto la prossima"; return false; }
+         gDir = gLockDir; gDirFromManual = false;
+         return true;
+        }
+      // candela nuova: si decide
       int dir = 0;
-      if(InpCandleRule == CR_PREV_CANDLE)
+      if(InpCandleRule == CR_CICLO)
+        {
+         CycleUpdate();
+         if(!gCycOk) { gLastAction = "CICLO: storia insufficiente su " + EnumToString(InpCandleTF) + ", aspetto"; return false; }
+         if(gCycBar != bt) { gLastAction = "CICLO: barra non ancora aggiornata, aspetto"; return false; }
+         if(InpCicloRegola == CICLO_SEGNO)
+           {
+            if(MathAbs(gCyc1) < InpCicloMinimo) { dir = 0; }   // sotto il minimo: candela senza ondate
+            else dir = (gCyc1 >= 0.0) ? 1 : -1;               // verde = long, rosso = short (zero esatto al lato positivo, come in ABTG_Cycle)
+           }
+         else
+           {
+            if(gCyc2 <  0.0 && gCyc1 >= 0.0) dir = 1;         // incrocio verso l'alto = minimo di ciclo formato
+            else if(gCyc2 >= 0.0 && gCyc1 <  0.0) dir = -1;   // verso il basso = massimo di ciclo formato
+           }
+        }
+      else if(InpCandleRule == CR_PREV_CANDLE)
         {
          double po = iOpen(_Symbol, InpCandleTF, 1), pc = iClose(_Symbol, InpCandleTF, 1);
          if(pc > po) dir = 1; else if(pc < po) dir = -1;
         }
-      else
+      else   // CR_FIRST_MOVE: "se la candela apre long..." - si ASPETTA il primo movimento, non si salta la candela
         {
          if(TimeTradeServer() - bt < InpFirstMoveSeconds) { gLastAction = "candela nuova: leggo il verso fra " + IntegerToString(InpFirstMoveSeconds) + " s"; return false; }
+         double op = iOpen(_Symbol, InpCandleTF, 0);
          double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
          double mv = (bid - op) / _Point;
          if(mv >= InpFirstMovePoints) dir = 1; else if(mv <= -InpFirstMovePoints) dir = -1;
+         if(dir == 0) { gLastAction = "candela nuova: aspetto il primo movimento (" + DoubleToString(mv, 1) + " pt)"; return false; }
         }
-      gCandleDone = bt;   // una sola decisione per candela, anche se si salta
-      if(dir == 0) { gLastAction = "candela senza verso: saltata"; return false; }
+      gLockBar = bt; gLockDir = dir; gLockWaves = 0; gCandleDone = bt;
+      if(dir == 0) { gLastAction = "candela senza verso: nessuna ondata fino alla prossima"; return false; }
       gDir = dir; gDirFromManual = false;
+      Log("candela " + TimeToString(bt, TIME_MINUTES) + ": verso bloccato " + (dir > 0 ? "LONG" : "SHORT"));
       return true;
      }
    return (gDir != 0);   // modo MANUALE: verso gia' noto (dalla posizione a mano o fisso)
@@ -810,6 +831,7 @@ void TryOpenWave()
      }
    if(aperte > 0)
      {
+      if(InpEntryMode == ENTRY_CANDELA && InpCandleRule != CR_TICK) gLockWaves++;
       gLastAction = "ondata " + IntegerToString(gWaveId) + ": aperte " + IntegerToString(aperte) + "/" + IntegerToString(np) + " " + (gDir > 0 ? "LONG" : "SHORT") + " x " + DoubleToString(lot, 2)
                     + (noStops ? " SENZA stop sul server (stop morbido)" : "") + (rc != TRADE_RETCODE_DONE ? " - poi rifiuto " + IntegerToString((int)rc) : "");
       Log(gLastAction);
