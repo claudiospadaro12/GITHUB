@@ -40,31 +40,55 @@
 //|   B6 pausa vera in ms; un rifiuto aspetta 5 s; 5 rifiuti = STOP  |
 //|  1.02 (seconda passata del cancello, PASS con residui):          |
 //|   N1 "chiusura mandata" scade dopo 3 s: se il server non esegue  |
-//|      (PLACED/PARTIAL) si rimanda, la posizione non resta orfana  |
+//|      si rimanda, la posizione non resta orfana; PLACED = mandata |
 //|   N2 OnDeinit chiude solo se il conto e' quello ammesso          |
 //|   N3 identificativo di posizione letto dal deal d'ingresso       |
 //|   N4 "perdite di fila" (conta anche le uscite a tempo);          |
 //|      motivo di chiusura dal DEAL_REASON (sl/tp/a mano)           |
 //|   pulsante START spostato sotto il pannello (il trading rapido   |
 //|      di MT5 lo copriva: visto da Claudio il 25/09 sera)          |
+//|  1.03 (25/09 sera, richiesta di Claudio: "non capisco come       |
+//|      scelga buy o sell... abbinarlo al cycle"): regola CICLO.    |
+//|      Verso dall'oscillatore CICLO "Alta Velocita'" (formula       |
+//|      ORIGINALE di Claudio, copiata riga per riga da               |
+//|      ABTG_Cycle.mq5 / ABTG_Ciclo.mq5): SEGNO = si opera nel      |
+//|      colore dell'istogramma sull'ultima barra CHIUSA (verde =    |
+//|      long, rosso = short); INCROCIO = una sola operazione per    |
+//|      incrocio dello zero. Sul ciclo NON esiste un PF misurato in |
+//|      casa (R148 = solo collaudo di compilazione): e' una RAGIONE |
+//|      per il verso, non un edge provato. Il CSV lo misura.        |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.02"
+#property version   "1.03"
 #include <Trade\Trade.mqh>
 
 #define CONTO_AMMESSO 50503635   // il SOLO conto su cui questo EA accetta di girare
 
 enum ENUM_DIR_MODE   { DIR_FROM_MANUAL=0, DIR_LONG=1, DIR_SHORT=2 };
 enum ENUM_ENTRY_MODE { ENTRY_MANUALE=0, ENTRY_CANDELA=1 };
-enum ENUM_CANDLE_RULE { CR_PREV_CANDLE=0, CR_FIRST_MOVE=1, CR_TICK=2 };
+enum ENUM_CANDLE_RULE { CR_PREV_CANDLE=0, CR_FIRST_MOVE=1, CR_TICK=2, CR_CICLO=3 };
+enum ENUM_CICLO_REGOLA { CICLO_SEGNO=0, CICLO_INCROCIO=1 };
 
 input group "=== Modo d'ingresso ==="
 input ENUM_ENTRY_MODE InpEntryMode       = ENTRY_MANUALE;   // MANUALE: verso dalla tua posizione (o fisso), rientra subito. CANDELA: una operazione per candela
 input ENUM_TIMEFRAMES InpCandleTF        = PERIOD_M1;       // CANDELA: timeframe della candela (M1 consigliato)
-input ENUM_CANDLE_RULE InpCandleRule     = CR_TICK;         // CANDELA: verso dal PRIMO MOVIMENTO della candela, dalla candela PRECEDENTE, oppure dai TICK (senza candele)
+input ENUM_CANDLE_RULE InpCandleRule     = CR_TICK;         // CANDELA: verso dal PRIMO MOVIMENTO della candela, dalla candela PRECEDENTE, dai TICK (senza candele), oppure dal CICLO
 input int           InpTickWindow        = 5;               // TICK: numero di tick su cui si misura il movimento
 input int           InpFirstMoveSeconds  = 3;               // CANDELA/primo movimento: secondi dopo l'apertura in cui si legge il verso
 input double        InpFirstMovePoints   = 1.0;             // CANDELA/primo movimento e TICK: movimento minimo in PUNTI MT5 (_Point) per decidere
+
+input group "=== CICLO (oscillatore Alta Velocita' di Claudio, sul TF InpCandleTF) ==="
+input ENUM_CICLO_REGOLA InpCicloRegola   = CICLO_SEGNO;     // SEGNO: opera nel colore dell'ultima barra chiusa (verde=long, rosso=short). INCROCIO: una operazione per incrocio dello zero
+input double        InpCicloMinimo       = 0.0;             // SEGNO: |ciclo| minimo per operare (0 = qualunque valore). Unita' dell'oscillatore
+input int           InpK1Len             = 5;               // Stoch 1 - lunghezza K (fonte: 5)
+input int           InpK1Smo             = 3;               // Stoch 1 - lisciatura  (fonte: 3)
+input int           InpK2Len             = 14;              // Stoch 2 - lunghezza K (fonte: 14)
+input int           InpK2Smo             = 3;               // Stoch 2 - lisciatura  (fonte: 3)
+input int           InpK3Len             = 45;              // Stoch 3 - lunghezza K (fonte: 45)
+input int           InpK3Smo             = 14;              // Stoch 3 - lisciatura  (fonte: 14)
+input int           InpK4Len             = 75;              // Stoch 4 - lunghezza K (fonte: 75)
+input int           InpK4Smo             = 20;              // Stoch 4 - lisciatura  (fonte: 20)
+input int           InpMmLen             = 9;               // MM: la media mobile che viene sottratta (fonte: 9)
 
 input group "=== Verso e avvio (modo MANUALE) ==="
 input ENUM_DIR_MODE InpDirection          = DIR_FROM_MANUAL; // Verso: dalla TUA prima posizione a mano, oppure fisso
@@ -86,7 +110,7 @@ input bool          InpResetOnLoss        = true;            // dopo una perdita
 
 input group "=== Freni (fissi) ==="
 input double        InpMaxLossSessionEuro = 20.0;            // perdita massima chiusa dall'avvio: poi STOP
-input int           InpMaxConsecutiveLosses = 3;             // stop di fila: poi STOP
+input int           InpMaxConsecutiveLosses = 3;             // perdite di fila (anche le uscite a tempo in perdita): poi STOP
 input int           InpMaxTradesPerMinute = 6;               // aperture al minuto: oltre, aspetta
 input int           InpMaxRequestsPerDay  = 500;             // richieste al server dall'avvio (START le azzera): poi STOP
 input int           InpStartHour          = 0;               // ora SERVER da cui puo' operare
@@ -117,6 +141,10 @@ string   gCsv          = "";
 double   gLastProfitSeen = 0.0;
 datetime gCandleDone   = 0;      // candela gia' usata (modo CANDELA)
 double   gTicks[];               // ultimi bid (modo TICK)
+datetime gCycBar      = 0;       // barra su cui e' stato calcolato il ciclo (si ricalcola solo a barra nuova)
+double   gCyc1        = 0.0;     // ciclo sull'ultima barra CHIUSA [1]
+double   gCyc2        = 0.0;     // ciclo sulla barra [2]
+bool     gCycOk       = false;
 //--- pause in millisecondi (GetTickCount, differenza unsigned: regge il giro del contatore)
 uint     gPauseFromMs  = 0;
 uint     gPauseLenMs   = 0;
@@ -179,9 +207,9 @@ void DrawButton()
    if(ObjectFind(0, BTN) < 0)
      {
       ObjectCreate(0, BTN, OBJ_BUTTON, 0, 0, 0);
-      ObjectSetInteger(0, BTN, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+      ObjectSetInteger(0, BTN, OBJPROP_CORNER, CORNER_LEFT_LOWER);
       ObjectSetInteger(0, BTN, OBJPROP_XDISTANCE, 10);
-      ObjectSetInteger(0, BTN, OBJPROP_YDISTANCE, 150);   // sotto il pannello di stato: il trading rapido di MT5 copre l'angolo in alto
+      ObjectSetInteger(0, BTN, OBJPROP_YDISTANCE, 40);    // angolo in BASSO: visibile su ogni grafico alto >= 40 px; il trading rapido di MT5 sta in alto (cancello 1.02, classe 814)
       ObjectSetInteger(0, BTN, OBJPROP_XSIZE, 160);
       ObjectSetInteger(0, BTN, OBJPROP_YSIZE, 28);
       ObjectSetInteger(0, BTN, OBJPROP_FONTSIZE, 10);
@@ -195,8 +223,10 @@ void DrawButton()
 void Status()
   {
    string dir = (gDir > 0 ? "LONG" : (gDir < 0 ? "SHORT" : "nessuno"));
-   string modo = (InpEntryMode == ENTRY_MANUALE) ? "MANUALE" : (InpCandleRule == CR_TICK ? "TICK (" + IntegerToString(InpTickWindow) + " tick, min " + DoubleToString(InpFirstMovePoints, 1) + " pt)" : "CANDELA " + EnumToString(InpCandleTF));
-   string s = "ABTG_ScalperDirezionale 1.02  " + _Symbol + "   modo: " + modo + "\n";
+   string modo = (InpEntryMode == ENTRY_MANUALE) ? "MANUALE" : (InpCandleRule == CR_TICK ? "TICK (" + IntegerToString(InpTickWindow) + " tick, min " + DoubleToString(InpFirstMovePoints, 1) + " pt)"
+                 : (InpCandleRule == CR_CICLO ? "CICLO " + (InpCicloRegola == CICLO_SEGNO ? "segno" : "incrocio") + " " + EnumToString(InpCandleTF) + (gCycOk ? " = " + DoubleToString(gCyc1, 2) + " (prima " + DoubleToString(gCyc2, 2) + ")" : " (calcolo...)")
+                 : "CANDELA " + EnumToString(InpCandleTF)));
+   string s = "ABTG_ScalperDirezionale 1.03  " + _Symbol + "   modo: " + modo + "\n";
    s += "stato: " + (gActive ? "ATTIVO" : "FERMO (premi START)") + (gStopReason != "" ? "  [" + gStopReason + "]" : "") + "\n";
    s += "verso: " + dir + (gDirFromManual ? " (dalla tua posizione a mano)" : "") + "\n";
    s += "lotto attuale: " + DoubleToString(gLot, 2) + "   cicli: " + IntegerToString(gCycles) + (gOpenPosId != 0 ? "   posizione aperta: " + IntegerToString((long)gOpenPosId) : "") + "\n";
@@ -251,6 +281,12 @@ int OnInit()
       Alert("ABTG_ScalperDirezionale: VOLUME_MIN ", DoubleToString(vmin, 2), " su ", _Symbol, " > lotto dichiarato: NON alzo la taglia da solo, NON parto");
       return(INIT_FAILED);
      }
+   if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_CICLO)
+     {
+      if(InpK1Len < 1 || InpK2Len < 1 || InpK3Len < 1 || InpK4Len < 1 || InpK1Smo < 1 || InpK2Smo < 1 || InpK3Smo < 1 || InpK4Smo < 1 || InpMmLen < 1)
+        { Alert("ABTG_ScalperDirezionale: parametri del CICLO devono essere >= 1: NON parto"); return(INIT_FAILED); }
+      if(InpCicloMinimo < 0.0) { Alert("ABTG_ScalperDirezionale: InpCicloMinimo < 0: NON parto"); return(INIT_FAILED); }
+     }
    trade.SetExpertMagicNumber((ulong)InpMagic);
    trade.SetDeviationInPoints((ulong)InpDeviationPts);
    trade.SetTypeFillingBySymbol(_Symbol);
@@ -270,7 +306,7 @@ int OnInit()
      }
    DrawButton();
    Status();
-   Log("1.02 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
+   Log("1.03 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
        + " tickvalue " + DoubleToString(SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE), 4)
        + " stopslevel " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL)));
    if(InpAutoStart && (gDir != 0 || InpEntryMode == ENTRY_CANDELA)) StartAll();
@@ -362,7 +398,7 @@ bool NetOfPosition(ulong posId, double &net, double &pout, string &reason)
         {
          out = true; pout = HistoryDealGetDouble(d, DEAL_PRICE);
          long r = HistoryDealGetInteger(d, DEAL_REASON);
-         reason = (r == DEAL_REASON_SL ? "server SL" : (r == DEAL_REASON_TP ? "server TP" : (r == DEAL_REASON_EXPERT ? "" : "chiusa a mano/altro")));
+         reason = (r == DEAL_REASON_SL ? "server SL" : (r == DEAL_REASON_TP ? "server TP" : (r == DEAL_REASON_EXPERT ? "EA (motivo perso)" : "chiusa a mano/altro")));
         }
      }
    return out;
@@ -419,7 +455,7 @@ bool Settle()
       if(gCloseWhy == "") { StopAll("posizione sparita senza deal di uscita"); gOpenPosId = 0; gGoneMs = 0; return false; }
       net = gLastProfitSeen; pout = gClosePout; gCloseWhy += " (netto stimato)";
      }
-   string why = (gCloseWhy != "" ? gCloseWhy : (reason != "" ? reason : "server SL/TP"));
+   string why = (gCloseWhy != "" ? gCloseWhy : (reason != "" ? reason : "server SL/TP"));   // gCloseWhy pieno vince sempre
    int secs = (int)(TimeTradeServer() - gOpenTime);
    gOpenPosId = 0; gGoneMs = 0; gCloseWhy = "";
    AfterClose(net, gOpenVerso, gOpenLot, gOpenPin, pout, secs, why);
@@ -461,7 +497,8 @@ void ManageOpen(ulong ticket)
    if(gCloseRetryMs != 0 && (uint)(GetTickCount() - gCloseRetryMs) < 1000) return;   // chiusura rifiutata: si riprova dopo 1 s
    double pout = (verso == "LONG") ? SymbolInfoDouble(_Symbol, SYMBOL_BID) : SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    gRequests++;
-   if(trade.PositionClose(ticket) && trade.ResultRetcode() == TRADE_RETCODE_DONE)
+   bool okc = trade.PositionClose(ticket); uint rcc = trade.ResultRetcode();
+   if(okc && (rcc == TRADE_RETCODE_DONE || rcc == TRADE_RETCODE_PLACED))   // PLACED = accettata, in volo (classe 815)
      {
       gCloseWhy = why; gClosePout = pout; gCloseRetryMs = 0; gCloseSentMs = GetTickCount();
       gLastAction = "chiusura mandata (" + why + ")";
@@ -469,9 +506,84 @@ void ManageOpen(ulong ticket)
    else
      {
       gCloseRetryMs = GetTickCount();
-      gLastAction = "chiusura RIFIUTATA (" + IntegerToString((int)trade.ResultRetcode()) + ") - riprovo fra 1 s";
+      gLastAction = "chiusura RIFIUTATA (" + IntegerToString((int)rcc) + ") - riprovo fra 1 s";
       Log(gLastAction);
      }
+  }
+//+------------------------------------------------------------------+
+//| CICLO "Alta Velocita'" - formula ORIGINALE di Claudio, copiata    |
+//| riga per riga da ABTG_Cycle.mq5 (CycleSeries, r.560-621), che a  |
+//| sua volta la copia da ABTG_AltaVelocita.mq5 e ABTG_Ciclo.mq5.     |
+//|   K1=SMA(St(5),3) K2=SMA(St(14),3) K3=SMA(St(45),14)              |
+//|   K4=SMA(St(75),20)                                               |
+//|   I=(4.1*K1+2.5*K2+K3+4*K4)/11.6 ; CICLO = I - SMA(I,9)           |
+//| St(n) = (close-lowest(low,n))/(highest(high,n)-lowest(low,n))*100 |
+//| Range nullo -> 50 (neutro), come nella fonte.                     |
+//| Indice 0 = barra in corso, 1 = ultima chiusa, 2 = quella prima.   |
+//+------------------------------------------------------------------+
+double StocRaw_Calc(const double close, const double lo, const double hi)
+  {
+   double rng = hi - lo;
+   if(rng <= 0.0) return(50.0);
+   return((close - lo) / rng * 100.0);
+  }
+bool CycleSeries(ENUM_TIMEFRAMES tf, int need, double &cycOut[])
+  {
+   if(need < 2) need = 2;
+   int maxSmo = (int)MathMax(MathMax(InpK1Smo, InpK2Smo), MathMax(InpK3Smo, InpK4Smo));
+   int maxLen = (int)MathMax(MathMax(InpK1Len, InpK2Len), MathMax(InpK3Len, InpK4Len));
+   int mRaw  = need + maxSmo + InpMmLen + 3;
+   int nBars = mRaw + maxLen + 5;
+   MqlRates r[]; ArraySetAsSeries(r, true);
+   int n = CopyRates(_Symbol, tf, 0, nBars, r);
+   if(n < nBars) return(false);
+   int kLen[4]; int kSmo[4];
+   kLen[0] = InpK1Len; kLen[1] = InpK2Len; kLen[2] = InpK3Len; kLen[3] = InpK4Len;
+   kSmo[0] = InpK1Smo; kSmo[1] = InpK2Smo; kSmo[2] = InpK3Smo; kSmo[3] = InpK4Smo;
+   double kSm[][4]; ArrayResize(kSm, mRaw);
+   double raw[];  ArrayResize(raw, mRaw);
+   for(int k = 0; k < 4; k++)
+     {
+      int L = kLen[k], S = kSmo[k];
+      for(int i = 0; i < mRaw; i++)
+        {
+         int len = (int)MathMin(L, n - i);
+         double hi = r[i].high, lo = r[i].low;
+         for(int j = i; j < i + len; j++)
+           { if(r[j].high > hi) hi = r[j].high; if(r[j].low < lo) lo = r[j].low; }
+         raw[i] = StocRaw_Calc(r[i].close, lo, hi);
+        }
+      for(int i = 0; i < mRaw; i++)
+        {
+         int len = (int)MathMin(S, mRaw - i);
+         double sm = 0.0;
+         for(int j = i; j < i + len; j++) sm += raw[j];
+         kSm[i][k] = sm / len;
+        }
+     }
+   double comp[]; ArrayResize(comp, mRaw);
+   for(int i = 0; i < mRaw; i++)
+      comp[i] = (4.1 * kSm[i][0] + 2.5 * kSm[i][1] + 1.0 * kSm[i][2] + 4.0 * kSm[i][3]) / 11.6;
+   ArrayResize(cycOut, need + 1);
+   for(int i = 0; i <= need; i++)
+     {
+      int len = (int)MathMin(InpMmLen, mRaw - i);
+      double sm = 0.0;
+      for(int j = i; j < i + len; j++) sm += comp[j];
+      cycOut[i] = comp[i] - sm / len;
+     }
+   return(true);
+  }
+//+------------------------------------------------------------------+
+// ricalcola il ciclo SOLO a barra nuova (le barre chiuse non cambiano)
+void CycleUpdate()
+  {
+   datetime bt = iTime(_Symbol, InpCandleTF, 0);
+   if(bt == 0) { gCycOk = false; return; }
+   if(bt == gCycBar && gCycOk) return;
+   double c[];
+   if(!CycleSeries(InpCandleTF, 2, c)) { gCycOk = false; return; }
+   gCycBar = bt; gCyc1 = c[1]; gCyc2 = c[2]; gCycOk = true;
   }
 //+------------------------------------------------------------------+
 void Registra(double lot)   // apertura riuscita: la posizione entra nei conti
@@ -507,6 +619,26 @@ void TryOpen()
       if(mv >= InpFirstMovePoints) dir = 1; else if(mv <= -InpFirstMovePoints) dir = -1;
       if(dir == 0) { gLastAction = "TICK: movimento " + DoubleToString(mv, 1) + " pt, sotto il minimo: aspetto"; return; }
       ArrayResize(gTicks, 0);   // dopo la decisione si ricomincia a contare
+      gDir = dir; gDirFromManual = false;
+     }
+   else if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_CICLO)
+     {
+      CycleUpdate();
+      if(!gCycOk) { gLastAction = "CICLO: storia insufficiente su " + EnumToString(InpCandleTF) + ", aspetto"; return; }
+      int dir = 0;
+      if(InpCicloRegola == CICLO_SEGNO)
+        {
+         if(MathAbs(gCyc1) < InpCicloMinimo) { gLastAction = "CICLO " + DoubleToString(gCyc1, 2) + " sotto il minimo " + DoubleToString(InpCicloMinimo, 2) + ": aspetto"; return; }
+         dir = (gCyc1 >= 0.0) ? 1 : -1;   // verde = long, rosso = short (zero esatto al lato positivo, come in ABTG_Cycle)
+        }
+      else
+        {
+         if(gCycBar == gCandleDone) { gLastAction = "CICLO incrocio: barra gia' usata, aspetto la prossima"; return; }
+         gCandleDone = gCycBar;   // una decisione per barra, anche se non c'e' incrocio
+         if(gCyc2 <  0.0 && gCyc1 >= 0.0) dir = 1;    // incrocio verso l'alto = minimo di ciclo formato
+         else if(gCyc2 >= 0.0 && gCyc1 <  0.0) dir = -1;   // verso il basso = massimo di ciclo formato
+         if(dir == 0) { gLastAction = "CICLO: nessun incrocio su questa barra (" + DoubleToString(gCyc2, 2) + " -> " + DoubleToString(gCyc1, 2) + ")"; return; }
+        }
       gDir = dir; gDirFromManual = false;
      }
    else if(InpEntryMode == ENTRY_CANDELA)
@@ -593,6 +725,7 @@ void Work()
       int n = ArraySize(gTicks);
       if(n == 0 || gTicks[n - 1] != b) { ArrayResize(gTicks, n + 1); gTicks[n] = b; if(n + 1 > MathMax(InpTickWindow, 2)) ArrayRemove(gTicks, 0, 1); }
      }
+   if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_CICLO) CycleUpdate();   // per il pannello: il valore si vede anche da FERMO
    // verso dalla posizione a mano
    ulong mt = 0; int md = 0;
    bool manual = FindManual(mt, md);
