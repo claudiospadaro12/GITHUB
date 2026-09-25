@@ -1,5 +1,5 @@
 # =====================================================================
-#  SOSPENDI_SEDIE_PICCOLO_CHR.ps1              MARCATORE_SOSPENDI_PICCOLO_CHR_v1
+#  SOSPENDI_SEDIE_PICCOLO_CHR.ps1              MARCATORE_SOSPENDI_PICCOLO_CHR_v2
 #
 #  BERSAGLIO: VPS VMI3047753, SOLO la cartella dati del piccolo 50503392
 #    %APPDATA%\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
@@ -60,6 +60,10 @@ $PROGRAMMA   = 'C:\Program Files\BCM Markets MT5 Terminal'
 $HASHDATI    = '215D85D767A1C39E22D242C8114BF9F5'
 $PROFILO     = 'ORO'
 $SIMB_INDICI = @('U30USD','D30EUR','NASUSD','225JPY')
+# v2 (cancello 25/09, classe 180 sui processi): i terminal64 vivi ammessi si
+# ELENCANO per cartella. Un terminal64 in una cartella che non e' qui (anche il
+# piccolo lanciato da un percorso scritto diverso, es. 8.3 C:\PROGRA~1\...) = FERMO.
+$ALTRI_NOTI = @('C:\FTMO','C:\BCM_Reale','C:\Program Files\BCM Markets MT5 Terminal -V3','C:\MT5_MANUALE','C:\MT5_Backtest','C:\Program Files\Pepperstone MetaTrader 5','C:\Program Files\Tickmill Europe MT5 Terminal')
 
 # --- LE 15 SEDIE (report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md par. 1).
 #     c = campo del magic dentro <inputs> dell'EA; tf e chr = foto CODA_01
@@ -99,8 +103,13 @@ function Scrivi-Esito([string]$stato){
     Write-Host ("esito scritto in: " + $f) -ForegroundColor Green
   } catch { Write-Host ("ESITO NON SCRITTO SUL DESKTOP: " + $_.Exception.Message) -ForegroundColor Red }
 }
-function Ferma([string]$perche){
+function Ferma([string]$perche, [switch]$GiaScritto){
   Dillo "" $null
+  if($GiaScritto){
+    Dillo ("FERMO DOPO LA SCRITTURA: i .chr SONO GIA' STATI SCRITTI (backup sul Desktop, BACKUP_PROFILO_ORO_" + $TS + "). " + $perche) 'Red'
+    Scrivi-Esito "FERMO_DOPO_SCRITTURA"
+    exit 3
+  }
   Dillo ("FERMO, NIENTE E' STATO SCRITTO: " + $perche) 'Red'
   Scrivi-Esito "FERMO_GUARDIA"
   exit 2
@@ -172,6 +181,14 @@ function Analizza($file){
   $r.Blocco = $mm[0]
   $blk = $mm[0].Value
   $r.EA = Campo $blk "name"
+  if($r.EA -eq "-"){
+    $mp = [regex]::Match($blk, "(?im)^[ \t]*path[ \t]*=[ \t]*Experts\\(.+?)\.ex5")
+    if($mp.Success){ $r.EA = [IO.Path]::GetFileNameWithoutExtension($mp.Groups[1].Value) }
+  }
+  # v2: MT5 scrive un blocco <expert> anche sui grafici SENZA EA (nome vuoto o
+  # 'Main'): CODA_08 25/09, 'senza <expert> 0' su tutte le cartelle dati. Stessa
+  # regola di CODA_08: quello NON e' un EA, e non entra nella spazzata.
+  if($r.EA -eq "-" -or $r.EA -ieq "Main"){ $r.Azione = "NESSUN EA"; $r.Nota = "blocco <expert> senza EA (nome '" + $r.EA + "'): non si tocca"; return $r }
   $im = [regex]::Match($blk, '(?s)<inputs>(.*?)</inputs>')
   $inp = ""; if($im.Success){ $inp = $im.Groups[1].Value }
   $mg  = Campo $inp "InpMagic"
@@ -193,7 +210,7 @@ function Percorso-Dir([string]$p){
   if($i -lt 0){ return "" }
   return $q.Substring(0, $i)
 }
-function Guardia-Processi([string]$quando){
+function Guardia-Processi([string]$quando, [switch]$GiaScritto){
   $percorsi = @()
   if($ProvaRadice){
     $percorsi = @($ProvaTerminali -split '\|' | Where-Object { $_.Trim().Length -gt 0 })
@@ -206,7 +223,7 @@ function Guardia-Processi([string]$quando){
       if(-not $x){
         try { $w = Get-CimInstance Win32_Process -Filter ("ProcessId=" + $p.Id) -ErrorAction Stop; if($w){ $x = $w.ExecutablePath } } catch { $x = $null }
       }
-      if(-not $x){ Ferma ("terminal64 PID " + $p.Id + " ha il percorso NON LEGGIBILE (" + $quando + "): potrebbe essere il piccolo. Senza sapere chi e', non si tocca niente.") }
+      if(-not $x){ Ferma ("terminal64 PID " + $p.Id + " ha il percorso NON LEGGIBILE (" + $quando + "): potrebbe essere il piccolo. Senza sapere chi e', non si tocca niente.") -GiaScritto:$GiaScritto }
       $percorsi += $x
     }
     Dillo ("    processi terminal64 vivi (" + $quando + "): " + $percorsi.Count) $null
@@ -214,14 +231,16 @@ function Guardia-Processi([string]$quando){
   foreach($x in $percorsi){
     $d = Percorso-Dir $x
     $ePiccolo = ($d -ieq $PROGRAMMA)
-    $tag = "altro terminale, NON toccato"; if($ePiccolo){ $tag = "IL PICCOLO 50503392" }
+    $eNoto = ($ALTRI_NOTI -icontains $d)
+    $tag = "SCONOSCIUTO"; if($ePiccolo){ $tag = "IL PICCOLO 50503392" } elseif($eNoto){ $tag = "altro terminale noto, NON toccato" }
     Dillo ("      " + $x + "   -> " + $tag) $null
-    if($ePiccolo){ Ferma ("il terminale del piccolo 50503392 (" + $PROGRAMMA + ") e' APERTO (" + $quando + "). Alla chiusura riscriverebbe i .chr e rimetterebbe le sedie. Chiudilo A MANO (File -> Esci, dopo aver fatto la foto dei grafici) e rilancia.") }
+    if($ePiccolo){ Ferma ("il terminale del piccolo 50503392 (" + $PROGRAMMA + ") e' APERTO (" + $quando + "). Alla chiusura riscriverebbe i .chr e rimetterebbe le sedie. Chiudilo A MANO (File -> Esci, dopo aver fatto la foto dei grafici) e rilancia.") -GiaScritto:$GiaScritto }
+    if(-not $eNoto){ Ferma ("terminal64 in una cartella NON in elenco (" + $d + ", " + $quando + "): potrebbe essere il piccolo lanciato da un altro percorso. Senza sapere chi e', non si tocca niente.") -GiaScritto:$GiaScritto }
   }
 }
 
 # ---------------------------------------------------------------- avvio
-Dillo "=== SOSPENDI SEDIE INDICE DEL PICCOLO 50503392 NEI .chr DEL PROFILO ORO -- MARCATORE_SOSPENDI_PICCOLO_CHR_v1 ===" 'Cyan'
+Dillo "=== SOSPENDI SEDIE INDICE DEL PICCOLO 50503392 NEI .chr DEL PROFILO ORO -- MARCATORE_SOSPENDI_PICCOLO_CHR_v2 ===" 'Cyan'
 Dillo ("ora locale di questa macchina: " + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $INV) + "   macchina " + $env:COMPUTERNAME + "   utente " + $env:USERNAME) $null
 Dillo ("BERSAGLIO: VPS " + $MACCHINA + ", SOLO la cartella dati " + $HASHDATI + " del piccolo 50503392 (" + $PROGRAMMA + ", SENZA -V3), profilo " + $PROFILO + ", a terminale CHIUSO.") 'Green'
 Dillo "NON TOCCATI: FTMO 541452707 (C:\FTMO), REALE 10105439 (C:\BCM_Reale), 100k 50504263 (BCM Markets MT5 Terminal -V3), manuale 50503635 (C:\MT5_MANUALE), banco 50504400 (C:\MT5_Backtest), Pepperstone, Tickmill. Nessun processo chiuso o aperto." 'Green'
@@ -412,7 +431,7 @@ foreach($r in $bersagli){
     Dillo ("    ERRORE su " + $r.Chr + ": " + $_.Exception.Message + " -- rimesso l'originale.") 'Red'
   }
 }
-Guardia-Processi "dopo la scrittura"
+Guardia-Processi "dopo la scrittura" -GiaScritto
 
 # rilettura finale per contenuto: nessuna delle 15 deve avere ancora l'EA
 $dopo = @()
