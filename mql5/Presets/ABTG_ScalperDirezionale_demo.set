@@ -3,7 +3,7 @@
 ; Modo TICK (25/09 sera): InpEntryMode=1, InpCandleRule=2, verso dal movimento degli ultimi 5 tick, minimo 1 punto.
 ; Modo CICLO (scelto da Claudio, 25/09 sera, "abbinarlo al cycle"): InpEntryMode=1, InpCandleRule=3, InpCicloRegola=0 (SEGNO):
 ;   opera nel colore dell'istogramma del Ciclo sull'ultima barra CHIUSA del TF InpCandleTF (1 = M1): verde = long, rosso = short.
-;   InpCicloRegola=1 = INCROCIO: una sola ondata per incrocio dello zero. I nove numeri del ciclo sono quelli della fonte.
+;   InpCicloRegola=1 = INCROCIO: fino a InpMaxWavesPerCandle ondate nella candela dell'incrocio, stesso verso. I nove numeri del ciclo sono quelli della fonte.
 ; ONDATE (1.04, numeri di Claudio, 25/09 sera: "8 ordini con lo stesso lotto... 20 secondi"): InpPositions=8, InpMaxSeconds=20.
 ;   Una ondata = 8 posizioni x lotto attuale, 16 richieste al server (8 aperture + 8 chiusure): con InpMaxRequestsPerDay=500 sono ~31 ondate per START.
 ;   Caso peggiore di una ondata: 8 x -2 EUR = -16 EUR, contro la perdita di sessione di 20 EUR (controllata a ondata chiusa: tetto vero ~36).

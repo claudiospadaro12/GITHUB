@@ -48,8 +48,9 @@
 //|   Claudio, copiata riga per riga da ABTG_Cycle.mq5 /             |
 //|   ABTG_Ciclo.mq5, fedelta' verificata al bit dal cancello):      |
 //|   SEGNO = si opera nel colore dell'istogramma sull'ultima barra  |
-//|   CHIUSA (verde = long, rosso = short); INCROCIO = una sola      |
-//|   operazione per incrocio dello zero. Sul ciclo NON esiste un PF |
+//|   CHIUSA (verde = long, rosso = short); INCROCIO = fino a        |
+//|   InpMaxWavesPerCandle ondate nella candela dell'incrocio (1.06).|
+//|   Sul ciclo NON esiste un PF                                     |
 //|   leggibile in casa: R148a/bL/bS (NASUSD M30, 15/09) sono GIRATI |
 //|   ma i numeri non sono mai arrivati nel repo; XAUUSD M1 mai      |
 //|   provato. E' una RAGIONE per il verso, non un edge provato.     |
@@ -94,7 +95,7 @@ input double        InpFirstMovePoints   = 1.0;             // CANDELA/primo mov
 input int           InpMaxWavesPerCandle = 3;               // CANDELA: ondate massime dentro la stessa candela, tutte nello stesso verso (0 = senza limite)
 
 input group "=== CICLO (oscillatore Alta Velocita' di Claudio, sul TF InpCandleTF) ==="
-input ENUM_CICLO_REGOLA InpCicloRegola   = CICLO_SEGNO;     // SEGNO: opera nel colore dell'ultima barra chiusa (verde=long, rosso=short). INCROCIO: una ondata per incrocio dello zero
+input ENUM_CICLO_REGOLA InpCicloRegola   = CICLO_SEGNO;     // SEGNO: opera nel colore dell'ultima barra chiusa (verde=long, rosso=short). INCROCIO: fino a InpMaxWavesPerCandle ondate nella candela dell'incrocio, stesso verso
 input double        InpCicloMinimo       = 0.0;             // SEGNO: |ciclo| minimo per operare (0 = qualunque valore). Unita' dell'oscillatore
 input int           InpK1Len             = 5;               // Stoch 1 - lunghezza K (fonte: 5)
 input int           InpK1Smo             = 3;               // Stoch 1 - lisciatura  (fonte: 3)
@@ -717,7 +718,7 @@ bool DecideDir()
      {
       int n = ArraySize(gTicks);
       if(n < MathMax(InpTickWindow, 2)) { gLastAction = "TICK: raccolgo " + IntegerToString(n) + "/" + IntegerToString(InpTickWindow) + " tick"; return false; }
-      double mv = (gTicks[n - 1] - gTicks[0]) / _Point;
+      double mv = MathRound((gTicks[n - 1] - gTicks[0]) / _Point);   // arrotondato: 0,99999 non e' "meno di 1 punto" (classe 820)
       int dir = 0;
       if(mv >= InpFirstMovePoints) dir = 1; else if(mv <= -InpFirstMovePoints) dir = -1;
       if(dir == 0) { gLastAction = "TICK: movimento " + DoubleToString(mv, 1) + " pt, sotto il minimo: aspetto"; return false; }
@@ -765,7 +766,7 @@ bool DecideDir()
          if(TimeTradeServer() - bt < InpFirstMoveSeconds) { gLastAction = "candela nuova: leggo il verso fra " + IntegerToString(InpFirstMoveSeconds) + " s"; return false; }
          double op = iOpen(_Symbol, InpCandleTF, 0);
          double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
-         double mv = (bid - op) / _Point;
+         double mv = MathRound((bid - op) / _Point);   // arrotondato (classe 820)
          if(mv >= InpFirstMovePoints) dir = 1; else if(mv <= -InpFirstMovePoints) dir = -1;
          if(dir == 0) { gLastAction = "candela nuova: aspetto il primo movimento (" + DoubleToString(mv, 1) + " pt)"; return false; }
         }
