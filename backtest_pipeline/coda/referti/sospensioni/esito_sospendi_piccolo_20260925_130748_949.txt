@@ -1,0 +1,116 @@
+=== SOSPENDI SEDIE INDICE DEL PICCOLO 50503392 NEI .chr DEL PROFILO ORO -- MARCATORE_SOSPENDI_PICCOLO_CHR_v2 ===
+ora locale di questa macchina: 2026-09-25 13:07:49   macchina VMI3047753   utente Administrator
+BERSAGLIO: VPS VMI3047753, SOLO la cartella dati 215D85D767A1C39E22D242C8114BF9F5 del piccolo 50503392 (C:\Program Files\BCM Markets MT5 Terminal, SENZA -V3), profilo ORO, a terminale CHIUSO.
+NON TOCCATI: FTMO 541452707 (C:\FTMO), REALE 10105439 (C:\BCM_Reale), 100k 50504263 (BCM Markets MT5 Terminal -V3), manuale 50503635 (C:\MT5_MANUALE), banco 50504400 (C:\MT5_Backtest), Pepperstone, Tickmill. Nessun processo chiuso o aperto.
+MODO: ESEGUI (scrive)   spazzata: solo elencata
+--- GUARDIA (b): terminale del piccolo chiuso?
+    processi terminal64 vivi (inizio): 4
+      C:\FTMO\terminal64.exe   -> altro terminale noto, NON toccato
+      C:\BCM_Reale\terminal64.exe   -> altro terminale noto, NON toccato
+      C:\Program Files\BCM Markets MT5 Terminal -V3\terminal64.exe   -> altro terminale noto, NON toccato
+      C:\MT5_MANUALE\terminal64.exe   -> altro terminale noto, NON toccato
+--- GUARDIA (c): cartella dati C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+    origin.txt -> 'C:\Program Files\BCM Markets MT5 Terminal'
+--- GUARDIA (d): profilo attivo in config\common.ini
+    ProfileLast=ORO
+    cartella profilo: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Profiles\Charts\ORO
+--- LETTURA: 45 file chart*.chr nel profilo ORO (ultima modifica piu' recente: 2026-09-23 19:35)
+
+grafico      simbolo  TF   EA                                       magic                    AZIONE
+chart01.chr  NZDCAD   H1   ABTG_TradeExporter                       -                        RESTA
+chart02.chr  U30USD   H1   ABTG_PTE                                 771321                   SOSPENDI (riga 1)
+chart03.chr  GBPUSD   H1   ABTG_BreakingBand                        772161                   RESTA
+chart04.chr  EURUSD   H1   ABTG_BreakingBand                        772162                   RESTA
+chart05.chr  AUDUSD   H1   ABTG_BreakingBand                        772163                   RESTA
+chart06.chr  GBPUSD   H1   ABTG_GapFill                             772231                   RESTA
+chart07.chr  EURUSD   H1   ABTG_GapFill                             772232                   RESTA
+chart08.chr  AUDUSD   H1   ABTG_GapFill                             772233                   RESTA
+chart09.chr  U30USD   H1   ABTG_GapFill                             772234                   SOSPENDI (riga 2)
+chart10.chr  225JPY   H1   ABTG_GapFill                             772235                   SOSPENDI (riga 3)
+chart11.chr  U30USD   H1   ABTG_PunteLarry                          772341                   SOSPENDI (riga 4)
+chart12.chr  EURAUD   H1   ABTG_PunteLarry                          772342                   RESTA
+chart13.chr  XAUUSD   H1   ABTG_PunteLarry                          772343                   RESTA
+chart14.chr  GBPJPY   H1   ABTG_PunteLarry                          772344                   RESTA
+chart15.chr  GBPUSD   H1   ABTG_PunteLarry                          772345                   RESTA
+chart16.chr  EURCAD   H1   ABTG_PunteLarry                          772346                   RESTA
+chart17.chr  EURJPY   H4   ABTG_CostToCost                          772361                   RESTA
+chart18.chr  GBPCAD   H4   ABTG_CostToCost                          772362                   RESTA
+chart19.chr  XAGUSD   H4   -                                        -                        NESSUN EA
+chart20.chr  CHFJPY   H1   ABTG_EasyTrend                           772421                   RESTA
+chart21.chr  GBPUSD   H1   ABTG_EasyTrend                           772422                   RESTA
+chart22.chr  AUDJPY   H1   -                                        -                        NESSUN EA
+chart23.chr  225JPY   M1   ABTG_GapContinuation                     774101 (InpMagicNumber)  SOSPENDI (riga 5)
+chart24.chr  GBPUSD   H1   ABTG_PTE                                 771332                   RESTA
+chart25.chr  USDJPY   H1   -                                        -                        NESSUN EA
+chart26.chr  GBPUSD   H1   ABTG_PTE                                 771322                   RESTA
+chart27.chr  U30USD   H4   ABTG_SuperWave                           770531                   SOSPENDI (riga 6)
+chart28.chr  GBPUSD   H4   -                                        -                        NESSUN EA
+chart29.chr  XAUUSD   M15  ABTG_MaxMinNotte                         770402                   RESTA
+chart30.chr  D30EUR   M5   ABTG_DAX_Apertura_EU                     770101                   SOSPENDI (riga 7)
+chart31.chr  U30USD   M5   ABTG_Dow_Apertura_US                     770202                   SOSPENDI (riga 8)
+chart32.chr  D30EUR   M15  ABTG_MaxMinNotte_DAX_Short_Ottimizzato   770411                   SOSPENDI (riga 9)
+chart33.chr  U30USD   H1   -                                        -                        NESSUN EA
+chart34.chr  XAUUSD   H4   ABTG_EMA200_Ottimizzato                  971501                   RESTA
+chart35.chr  225JPY   H2   ABTG_SupertrendReversal                  770924                   SOSPENDI (riga 10)
+chart36.chr  XAUUSD   H4   ABTG_SupertrendReversal_Ottimizzato      970901                   RESTA
+chart37.chr  U30USD   H1   ABTG_SuperWave_DOW_H1_Ottimizzato        770511                   SOSPENDI (riga 11)
+chart38.chr  D30EUR   H4   ABTG_SupRev_DAX_H4_Ottimizzato           970912                   SOSPENDI (riga 12)
+chart39.chr  NASUSD   H1   ABTG_SupRev_NAS_H1_Ottimizzato           970913                   SOSPENDI (riga 13)
+chart40.chr  U30USD   M5   ABTG_ORB_Ottimizzato                     770611                   SOSPENDI (riga 14)
+chart41.chr  NASUSD   M15  ABTG_Nasdaq_Apertura_US                  770250                   SOSPENDI (riga 15)
+chart42.chr  USDJPY   M5   ABTG_PostNews                            771203                   RESTA
+chart43.chr  EURJPY   M5   ABTG_PostNews                            771201                   RESTA
+chart44.chr  EURUSD   M5   ABTG_PostNews                            771202                   RESTA
+chart45.chr  CADCHF   H1   ABTG_SpreadLogger                        -                        RESTA
+
+--- ELENCO ATTESO (15, report par. 1) contro TROVATI per contenuto
+ 1. ABTG_PTE                                 U30USD  magic 771321  H1   -> chart02.chr
+ 2. ABTG_GapFill                             U30USD  magic 772234  H1   -> chart09.chr
+ 3. ABTG_GapFill                             225JPY  magic 772235  H1   -> chart10.chr
+ 4. ABTG_PunteLarry                          U30USD  magic 772341  H1   -> chart11.chr
+ 5. ABTG_GapContinuation                     225JPY  magic 774101  M1   -> chart23.chr
+ 6. ABTG_SuperWave                           U30USD  magic 770531  H4   -> chart27.chr
+ 7. ABTG_DAX_Apertura_EU                     D30EUR  magic 770101  M5   -> chart30.chr
+ 8. ABTG_Dow_Apertura_US                     U30USD  magic 770202  M5   -> chart31.chr
+ 9. ABTG_MaxMinNotte_DAX_Short_Ottimizzato   D30EUR  magic 770411  M15  -> chart32.chr
+10. ABTG_SupertrendReversal                  225JPY  magic 770924  H2   -> chart35.chr
+11. ABTG_SuperWave_DOW_H1_Ottimizzato        U30USD  magic 770511  H1   -> chart37.chr
+12. ABTG_SupRev_DAX_H4_Ottimizzato           D30EUR  magic 970912  H4   -> chart38.chr
+13. ABTG_SupRev_NAS_H1_Ottimizzato           NASUSD  magic 970913  H1   -> chart39.chr
+14. ABTG_ORB_Ottimizzato                     U30USD  magic 770611  M5   -> chart40.chr
+15. ABTG_Nasdaq_Apertura_US                  NASUSD  magic 770250  M15  -> chart41.chr
+TROVATE da sospendere: 15 su 15 attese   non trovate: 0   trovate piu' volte: 0
+SPAZZATA (indice con EA, fuori tabella): 0   anomali/illeggibili: 0   restano (forex/oro/servizio): 25
+
+--- BACKUP dell'INTERA cartella del profilo ORO
+    BACKUP VERIFICATO: 48 file, SHA256 uguali uno per uno -> C:\Users\Administrator\Desktop\BACKUP_PROFILO_ORO_20260925_130748_949
+    processi terminal64 vivi (subito prima di scrivere): 4
+      C:\FTMO\terminal64.exe   -> altro terminale noto, NON toccato
+      C:\BCM_Reale\terminal64.exe   -> altro terminale noto, NON toccato
+      C:\Program Files\BCM Markets MT5 Terminal -V3\terminal64.exe   -> altro terminale noto, NON toccato
+      C:\MT5_MANUALE\terminal64.exe   -> altro terminale noto, NON toccato
+    TOLTO <expert> da chart02.chr (U30USD ABTG_PTE 771321)   byte 124168 -> 121738 (blocco 2430, UTF-16LE+BOM)
+    TOLTO <expert> da chart09.chr (U30USD ABTG_GapFill 772234)   byte 121674 -> 120200 (blocco 1474, UTF-16LE+BOM)
+    TOLTO <expert> da chart10.chr (225JPY ABTG_GapFill 772235)   byte 25252 -> 23774 (blocco 1478, UTF-16LE+BOM)
+    TOLTO <expert> da chart11.chr (U30USD ABTG_PunteLarry 772341)   byte 121998 -> 120192 (blocco 1806, UTF-16LE+BOM)
+    TOLTO <expert> da chart23.chr (225JPY ABTG_GapContinuation 774101 (InpMagicNumber))   byte 25950 -> 23770 (blocco 2180, UTF-16LE+BOM)
+    TOLTO <expert> da chart27.chr (U30USD ABTG_SuperWave 770531)   byte 124084 -> 121730 (blocco 2354, UTF-16LE+BOM)
+    TOLTO <expert> da chart30.chr (D30EUR ABTG_DAX_Apertura_EU 770101)   byte 260336 -> 255638 (blocco 4698, UTF-16LE+BOM)
+    TOLTO <expert> da chart31.chr (U30USD ABTG_Dow_Apertura_US 770202)   byte 126426 -> 121722 (blocco 4704, UTF-16LE+BOM)
+    TOLTO <expert> da chart32.chr (D30EUR ABTG_MaxMinNotte_DAX_Short_Ottimizzato 770411)   byte 256954 -> 254100 (blocco 2854, UTF-16LE+BOM)
+    TOLTO <expert> da chart35.chr (225JPY ABTG_SupertrendReversal 770924)   byte 27800 -> 25304 (blocco 2496, UTF-16LE+BOM)
+    TOLTO <expert> da chart37.chr (U30USD ABTG_SuperWave_DOW_H1_Ottimizzato 770511)   byte 124186 -> 121730 (blocco 2456, UTF-16LE+BOM)
+    TOLTO <expert> da chart38.chr (D30EUR ABTG_SupRev_DAX_H4_Ottimizzato 970912)   byte 258070 -> 255638 (blocco 2432, UTF-16LE+BOM)
+    TOLTO <expert> da chart39.chr (NASUSD ABTG_SupRev_NAS_H1_Ottimizzato 970913)   byte 108172 -> 105738 (blocco 2434, UTF-16LE+BOM)
+    TOLTO <expert> da chart40.chr (U30USD ABTG_ORB_Ottimizzato 770611)   byte 124770 -> 121722 (blocco 3048, UTF-16LE+BOM)
+    TOLTO <expert> da chart41.chr (NASUSD ABTG_Nasdaq_Apertura_US 770250)   byte 110452 -> 105740 (blocco 4712, UTF-16LE+BOM)
+    processi terminal64 vivi (dopo la scrittura): 4
+      C:\FTMO\terminal64.exe   -> altro terminale noto, NON toccato
+      C:\BCM_Reale\terminal64.exe   -> altro terminale noto, NON toccato
+      C:\Program Files\BCM Markets MT5 Terminal -V3\terminal64.exe   -> altro terminale noto, NON toccato
+      C:\MT5_MANUALE\terminal64.exe   -> altro terminale noto, NON toccato
+
+--- RILETTURA: sedie della tabella ancora con EA: 0   spazzata ancora con EA: 0   file tolti: 15   errori: 0
+BACKUP: C:\Users\Administrator\Desktop\BACKUP_PROFILO_ORO_20260925_130748_949   -> per tornare indietro: -Annulla 'C:\Users\Administrator\Desktop\BACKUP_PROFILO_ORO_20260925_130748_949'
+ATTENZIONE: gli ORDINI PENDENTI gia' sul server NON sono toccati da questo script. Alla riapertura del piccolo 50503392 guarda la scheda Trade.
+STATO: ESEGUITO_OK

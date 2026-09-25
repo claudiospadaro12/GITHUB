@@ -82,3 +82,14 @@ Se e quando servirà, ogni sedia si riattacca con le impostazioni salvate in `CO
 - **PC di backtest DESKTOP-H4D7CAJ**: il suo MT5 è loggato sullo **stesso** conto 50503392. **Se lì ci sono sedie attaccate, operano su questo conto e la sonda notturna del VPS non le vede**: è già successo il 14/08 (ordini #3160534/#3160535). Che oggi non ne abbia è **[NON MISURATO]**: se quel PC è acceso con MT5 aperto, guardalo **prima delle 15:30** e togli ogni EA dai grafici U30USD, D30EUR, NASUSD e 225JPY. Se è spento, lo guardi alla prossima accensione.
 - **Pepperstone, manuale 50503635 (C:\MT5_MANUALE), banco 50504400 (C:\MT5_Backtest)**: zero sedie nel profilo attivo (CODA_01 25/09). **Reale 10105439**: nessuna sedia su indici (solo ORB EURAUD, Guardian, SlippageLogger). ⚠️ Le operazioni **a mano** su Dow, DAX o Nasdaq non le vede nessuna sonda, e per FTMO rischiano di contare come le altre.
 - Se ci sono **già state** sovrapposizioni opposte dal 21/09: misura in corso (`report/HEDGING_DEMO_E_CORRELATI_2026-09-25.md`).
+
+---
+
+## ✅ ESEGUITO — piccolo 50503392, 25/09/2026 13:07 (ora VPS), con la riga `RIGA_SOSPENDI_SEDIE_PICCOLO.txt` (pin b392f20d, PASS dei due strati)
+- Prova a secco: **15 su 15** trovate per contenuto, 0 non trovate, 0 doppie, SPAZZATA 0, anomali 0, 25 grafici forex/oro/servizio che restano, `STATO: SECCO_OK`.
+- Scrittura: **tolto `<expert>` da 15 file** (chart02, 09, 10, 11, 23, 27, 30, 31, 32, 35, 37, 38, 39, 40, 41), rilettura: sedie della tabella ancora con EA **0**, errori **0**, `STATO: ESEGUITO_OK`.
+- **Backup verificato** (48 file, SHA256 uno per uno): `Desktop\BACKUP_PROFILO_ORO_20260925_130748_949` sul VPS; per tornare indietro serve `-Annulla` su quella cartella (riga da scrivere e passare dal cancello).
+- Guardie: 4 terminal64 vivi (FTMO, REALE, 100k -V3, manuale), tutti "altro terminale noto"; il piccolo chiuso.
+- Referti archiviati: `backtest_pipeline/coda/referti/sospensioni/` (esiti e console di secco ed esegui).
+- **Da verificare**: (1) alla riapertura del piccolo, che MT5 carichi i 15 grafici SENZA EA e le sedie forex/oro con la faccina [NON VERIFICATO il comportamento di MT5 su un .chr senza blocco <expert>]; (2) nella scheda Trade, pendenti/posizioni su U30USD, D30EUR, NASUSD, 225JPY (es. il PunteLarry SELL STOP U30USD del 23/09); (3) la sonda CODA_01 della notte.
+- **Resta da fare a mano**: il 225JPY 770901 sul 100k 50504263.
