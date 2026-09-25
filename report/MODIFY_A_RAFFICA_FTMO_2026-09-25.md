@@ -16,8 +16,10 @@ codice o dall'aritmetica · **[NON VERIFICATO]** / **[NON MISURATO]** = manca il
    e `InpBEatR=0`.
 2. **"invalid stops" = stop DAL LATO SBAGLIATO del prezzo**, non stop troppo vicino: su FTMO
    `GER40.cash` ha `StopsLevel=0` e `FreezeLevel=0`. Il trailing non confronta mai lo stop proposto
-   col Bid, e dopo un riempimento RETEST il Bid sta **sotto** il minimo della candela precedente
-   per costruzione.
+   col Bid. Dopo un riempimento RETEST, ogni volta che il trailing vuole muovere (minimo della
+   candela precedente sopra l'ingresso), quello stop sta sopra il Bid per costruzione
+   (`Bid < Ask <= ingresso < minimo precedente`). Se il minimo precedente e' sotto l'ingresso non
+   parte niente: e' il caso del reale il 24/09 (§1).
 3. **Ritenta a ogni tick** perche' il rifiuto non cambia niente: lo stop resta quello vecchio, le
    condizioni restano vere, `OnTick` rilancia `ManagePosition`. Si ferma solo quando il Bid risale
    sopra 25400,14, quando chiude la candela, o quando la posizione chiude.
@@ -29,11 +31,16 @@ codice o dall'aritmetica · **[NON VERIFICATO]** / **[NON MISURATO]** = manca il
 
 ## 1. Quale codice gira, e quale ramo manda la modify
 
-**Versione in campo** (fonte: `report/SCHIERAMENTO_FTMO_2026-09-20.md` §5.1 r.179 e §5.2 r.199):
-`ABTG_DAX_Apertura_EU.mq5` al pin **`9fca63d9`** (2425 righe), preset
-`mql5/Presets/FTMO/ABTG_DAX_Apertura_EU_770101_FTMO.set`.
+**Versione in campo:** sul grafico FTMO gira **`CLAU12_DAX_Apertura_EU.ex5`**, copia rinominata
+(`report/RINOMINA_CLAU12_2026-09-20.md`), compilata il **20/09 16:58**. Il suo sorgente in `C:\FTMO`
+ha **2426 righe** = `ABTG_DAX_Apertura_EU.mq5` al pin **`9fca63d9`** (2425) + 1 [MISURATO per
+numero di righe, **NON** per impronta byte] (`backtest_pipeline/coda/referti/CODA_06_quale_codice_gira_20260925_033004.log`
+r.209-214; pin da `report/SCHIERAMENTO_FTMO_2026-09-20.md` §5.1 r.179). Le righe della raffica sono
+firmate `CLAU12_DAX_Apertura_EU`. Gli `ABTG_*.mq5` presenti in `C:\FTMO` **non hanno `.ex5`**
+(`CODA_06` r.183-188): correggere e compilare quelli **non cambia niente sul grafico**.
 
-**Preset** [MISURATO, file .set]: `InpEntryMode=2` (RETEST) · `InpTP1_R=1.0` ·
+**Preset** [MISURATO sul file del repo `mql5/Presets/FTMO/ABTG_DAX_Apertura_EU_770101_FTMO.set`,
+`SCHIERAMENTO` §5.2 r.199; **NON VERIFICATO** che sia quello caricato sul grafico]: `InpEntryMode=2` (RETEST) · `InpTP1_R=1.0` ·
 `InpTP1_ClosePct=50` · `InpBreakevenAtTP1=true` · **`InpBEatR=0.0`** · `InpUseTrailing=true` ·
 **`InpTrailStartR=0.0`** (il trailing si arma subito) · **`InpTrailMode=1`** (PREVBAR) ·
 **`InpTrailTF=5`** (M5).
@@ -47,7 +54,7 @@ codice o dall'aritmetica · **[NON VERIFICATO]** / **[NON MISURATO]** = manca il
 | **r.1987** | **trailing BUY** | **Si'**: `newSL = iLow(_Symbol, InpTrailTF, 1)` (r.2004), minimo della candela M5 precedente |
 | r.1993 | trailing SELL | no, la posizione e' BUY |
 
-**Il condizionale che manda la richiesta** (r.1985-1987, identico a HEAD r.2444-2447):
+**Il condizionale che manda la richiesta** (r.1985-1987, identico a HEAD r.2445-2447):
 
 ```mql5
 double newSL = TrailStopBuy(bid);
@@ -129,20 +136,26 @@ giorno sono solo **tetti**, perche' contano anche le righe d'ordine delle altre 
 | scenario | richieste | etichetta |
 |---|---:|---|
 | 24/09 FTMO, com'e' andata | **38 certe, <= ~93** (42 s x 2,19/s), <= 101 dal totale della sonda | MISURATO / INFERITO |
-| **un episodio RETEST, candela intera** (riempimento al primo secondo, Bid mai sopra il minimo per 300 s) | **<= 657** a 2,19/s | INFERITO (tetto dalla chiusura della candela, §1) |
+| **un episodio RETEST, candela intera** (riempimento al primo secondo, Bid mai sopra il minimo per 300 s), al ritmo MEDIO | **<= 657** a 2,19/s | INFERITO (tetto dalla chiusura della candela, §1) |
+| **idem, al ritmo MASSIMO misurato**: intervallo minimo 0,082 s su FTMO = ~12/s | **<= ~3.660 con UNA sedia sola**; supera le 2.000 se tiene >= 6,7 richieste/s per 300 s | INFERITO |
 | **le tre sedie Apertura sullo stesso conto** (`770101`+`770202`+`770260`, stesso codice, §3) nello stesso giorno, ognuna a candela intera | **<= ~1.971** a 2,19/s | INFERITO |
 | idem al ritmo piu' alto visto nel repo (5,27/s, `EMA200_Ottimizzato` XAUUSD, 23/09) | 1.581 per sedia, **~4.743** per tre | INFERITO |
 | caso generale (non-RETEST): posizione in profitto, ogni candela scambia sotto il minimo della precedente restando sopra l'ingresso | **nessun tetto nel codice**: una candela alla volta, finche' la condizione si ripete | INFERITO |
 
 **Lettura onesta:**
-- Il giorno osservato e' a **~5% della soglia** (<= 101 su 2.000). Fin qui la notte aveva ragione.
-- **Ma la distanza dal tetto non e' grande**: il caso peggiore di UNA giornata con le tre sedie
-  d'apertura riempite male tocca **da solo** le 2.000, al ritmo del DAX. Improbabile (serve che
-  tre riempimenti cadano tutti sotto il minimo precedente e che il prezzo non risalga per minuti),
-  **non impossibile**: su 6 ingressi `770101` del reale coperti dai giornali (11, 15, 16, 17, 22,
-  24/09) **2 hanno avuto la raffica** [MISURATO].
-- [NON VERIFICATO] se FTMO conti una modify rifiutata come "richiesta al server". Per prudenza si
-  conta. [NON VERIFICATO] se il limite sia una soglia secca o un criterio di schema.
+- **La raffica** del 24/09 vale **~5% della soglia** (<= 101 su 2.000). **Il TOTALE DEL GIORNO
+  NON e' misurato**: la sonda legge `MQL5\Logs`, dove `CTrade` stampa solo le richieste
+  **FALLITE**. Ordini, modify riuscite (come il trailing tick per tick di `770411`), parziali e
+  chiusure li' non ci sono.
+- **Ma la distanza dal tetto non e' grande**: al ritmo **medio** (2,19/s) servono **tre sedie**
+  d'apertura riempite male nello stesso giorno per toccare le 2.000; al ritmo **massimo misurato**
+  (~12/s) ne basta **UNA** [INFERITO]. Improbabile (serve un riempimento sotto il minimo
+  precedente e un prezzo che non risale per minuti), **non impossibile**: su 6 ingressi `770101`
+  del reale coperti dai giornali (11, 15, 16, 17, 22, 24/09) **2 hanno avuto la raffica** [MISURATO].
+- [NON VERIFICATO] se il rifiuto arrivi dal **server FTMO** o sia un **controllo del terminale**
+  (e quindi se conti come "richiesta al server"; per prudenza si conta). [NON VERIFICATO]
+  l'**unita'** del limite: per conto e per giorno, o "su singoli trade/pendenti" come dice
+  `report/REGOLAMENTI_PROP_2026-09-08.md` r.99.
 
 ---
 
@@ -159,8 +172,16 @@ Letti i sorgenti **ai pin in campo** (`SCHIERAMENTO_FTMO_2026-09-20.md` §5.1).
 | `770511` SuperWave | `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5` @ `872dba82`, r.341-342 | Supertrend | **SI'**: `stLine<bid` / `>ask` | trailing sicuro; il breakeven r.331 scatta a +1R, lontano dal prezzo |
 | PostNews `77120x` (non chiesta) | `ABTG_PostNews.mq5` @ `61dc18c9`, r.406-407 | fisso: +25 pip -> SL a 15 pip | implicita (trigger 25 > 15) | sicuro |
 
-Nei giornali delle sonde 09/09-24/09 **non ci sono** rifiuti per Dow e Nasdaq [MISURATO]: il
-difetto e' **latente** li', non smentito.
+Nei giornali delle sonde 09/09-24/09 non ci sono rifiuti per Dow e Nasdaq, ma l'assenza e'
+**MISURATA solo sulle righe stampate**. In sette giorni-conto la sonda ha tagliato (11/09 e 17/09
+sui tre BCM: 302/232/229 e 168/161/159 righe non stampate; 24/09 FTMO: 63), e li' l'assenza **non
+e' misurata**.
+- `770260` Nasdaq: righe d'ordine/segnale in giorni **NON tagliati** (14, 15, 16, 18/09 sul piccolo;
+  22 e 23/09 su FTMO) senza raffica = **non scattato in 6 occasioni** [MISURATO] (se in quelle
+  occasioni ci sia stato un riempimento RETEST non e' letto qui: la riga FTMO del 22/09 e' un
+  segnale scartato per volumi).
+- `770202` Dow: **nessuna riga d'ordine in nessun giornale letto** -> difetto **latente, mai messo
+  alla prova**.
 
 **Un rischio in piu', latente, su `771531`** [INFERITO, mai osservato]: a r.272-291 il 1o obiettivo
 e' la EMA14 (`InpTP1_ATRmult=0`). L'ordine 1 sta a `EMA200 + 0,2 ATR`; il filtro d'ingresso chiede
@@ -184,8 +205,13 @@ XAUUSD BCM (la guardia controlla il lato, non la distanza) [NON MISURATO].
 Replica prima dell'invio la regola del server (`Bid - SL >= StopsLevel` per un BUY,
 `SL - Ask >= StopsLevel` per un SELL). Le modify che il server avrebbe accettato partono
 **identiche**; quelle che avrebbe rifiutato **non partono**, e si scrive una riga di log per ticket
-per candela. Stesso blocco per i tre file (DAX HEAD r.2441-2456 · Dow r.1812-1827 · Nasdaq HEAD
-r.2245-2260; blocchi identici verificati con `diff`).
+per candela. Il blocco, al **PIN in campo**: DAX `9fca63d9` **r.1981-1996** · Dow **r.1812-1827** ·
+Nasdaq **r.2225-2240**; identici fra loro e a HEAD (verificato con `diff`).
+
+**La correzione si applica SOPRA `9fca63d9`, NON sopra HEAD**: HEAD porta **+460 righe** sul DAX e
+**+21/-1** sul Nasdaq mai girate in campo. **Il diff qui sotto e' ILLUSTRATIVO**: e' numerato su
+HEAD, l'intestazione `+2441,40` dovrebbe essere `+2441,49`, manca il contesto in coda, e
+`git apply --check` lo rifiuta. Quello vero si genera sul ramo aperto dal pin.
 
 ```diff
 --- a/mql5/Experts/ABTG_DAX_Apertura_EU.mq5
@@ -271,13 +297,23 @@ tentativo sarebbe passato. Per questo e' separata: e' una scelta, non una ripara
   guardia esclude (per esempio `SL == Bid` con `StopsLevel=0`), la lista dei deal cambierebbe. La
   prova: `770101` sulla stessa finestra, "Ogni tick basato su tick reali", pin `9fca63d9` contro
   pin + parte A. **Lista dei deal uguale al centesimo e righe `invalid stops` da N a 0** = neutra.
-  Deal diversi = la guardia non e' neutra e non si schiera.
+  Deal diversi = la guardia non e' neutra e non si schiera. Tre condizioni perche' la prova valga:
+  1. nella corsa del pin le righe `invalid stops` devono essere **N > 0**, con una finestra che
+     contenga l'**11/09 e il 17/09**: altrimenti "deal uguali" non prova niente;
+  2. su **tutti e tre** i file (`770101`, `770202`, `770260`);
+  3. sul **PC di backtest**, non sul VPS.
 - In campo cambia una cosa sola: le raffiche spariscono (da 38-101 richieste per episodio a 0, piu'
   1 riga di log per candela).
 
 ### Cosa serve per portarla in campo (tutto firma di Claudio)
 
-Tre file (`770101`, `770202`, `770260`), un pin nuovo, ricompilazione sul terminale FTMO
-`541452707` (`C:\FTMO`) con la regola dei terminali multipli, e i due strati del cancello prima
-dell'invio. Fino ad allora il rischio vivo e' quello misurato: raffiche da decine di richieste,
-lontane dalle 2.000 nel giorno visto, con un caso peggiore teorico che le tocca.
+Tre file (`770101`, `770202`, `770260`): **pin nuovo = `9fca63d9` + parte A**, ricopiato nei tre
+**`CLAU12_*.mq5`** e ricompilato sul terminale FTMO **`541452707` (`C:\FTMO`)**, con la regola dei
+terminali multipli e i due strati del cancello prima dell'invio. **Ricompilare gli `ABTG_*` li' non
+tocca il binario attaccato.** La ricompilazione **ricarica l'EA**: si fa **senza posizioni aperte**
+delle tre sedie, poi si verifica con `CODA_06` e con la riga "avviato" del giornale.
+
+Fino ad allora il **rischio vivo misurato** = raffiche da **28-39 righe stampate** (<= 101 su FTMO),
+**~5%** della soglia nel giorno visto. Il **caso peggiore teorico** la supera con **tre sedie al
+ritmo medio** o con **una sola al ritmo massimo**; probabilita' **bassa** [INFERITO]; conseguenza
+[NON VERIFICATO].
