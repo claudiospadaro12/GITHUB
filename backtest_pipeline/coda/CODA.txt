@@ -76,7 +76,7 @@
 #
 
 # --- 1. che cosa e' attaccato, e dove. La foto di stanotte.
-d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
+e81da508f9fbdd160aa675503c57a708c38d54e0 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
 
 # --- 2. chi ha scritto nei log e chi e' muto.
 5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1
