@@ -93,11 +93,22 @@ def freschezza(path):
     ⚠️ IL LIMITE, dichiarato perche' conta: un CSV che arriva IDENTICO —
     il conto non ha chiuso niente di nuovo — **non lascia traccia in git**.
     Quindi "fermo al giorno X" vuol dire *"da X non arriva CONTENUTO
-    NUOVO"*, NON *"la consegna e' rotta"*. Sono due cose diverse e da qui
-    non si distinguono: per distinguerle serve un timbro scritto DENTRO il
-    file dall'esportatore, che oggi non esiste.
+    NUOVO"*, NON *"la consegna e' rotta"*. Sono due cose diverse e **da qui
+    dentro** non si distinguono.
     Ed e' esattamente per questo che il verdetto non e' "zero" ne' "guasto",
     ma **DATO NON ARRIVATO**: dice quello che sappiamo e si ferma li'.
+
+    ✏️ CORRETTO IL 25/09/2026, e la correzione cambia cosa si va a guardare.
+    Qui c'era scritto che per distinguerle "serve un timbro scritto DENTRO il
+    file dall'esportatore, che oggi non esiste". **Falso**: il timbro non e'
+    dentro il file, e' ACCANTO. Sul piccolo 50503392 muto dal 23/09 la
+    separazione l'hanno fatta tre referti di SOLA LETTURA gia' scritti dal
+    runner delle 03:30 (classe 824): il **giornale giornaliero** di MT5
+    (nessun 20260924 ne' 20260925 per quella cartella, mentre FTMO/100k/REALE
+    li avevano tutti e due), la **data del file** in Common\\Files rispetto ai
+    due gemelli scritti dallo stesso EA la stessa notte, e il conteggio dei
+    terminal64 vivi. Verdetto vero: **terminale fermo dal 23/09 19:35**.
+    Referto: report/giornata_2026-09-25.md §1.
 
     Torna (data 'AAAA-MM-GG' o None, fonte).
     """
@@ -425,6 +436,37 @@ def main():
     su_richiesta = bool(argomenti)
     rif = giorno if su_richiesta else oggi_data
 
+    # ---------- LA RICADUTA SU UN GIORNO PASSATO NON LO RISCRIVE ----------
+    #
+    # Difetto MECCANICO, terza occorrenza: 15/09 (evitata a mano), 24/09,
+    # 25/09 (tornato da solo). Nella corsa SERALE automatica `giorno` viene da
+    # max(close_time) del CSV del PICCOLO: se quel conto non consegna, `giorno`
+    # scivola indietro da solo e la pagella di stasera si scrive **sopra**
+    # quella di un giorno passato, timbrandoci dentro lo STATO DI OGGI — il
+    # saldo del 100k e la tabella di freschezza, che sono calcolati su
+    # `rif = oggi_data` proprio due righe qui sopra.
+    # Il 24/09 ha messo `100.081,32` dove stava `101.341,30`; il 25/09 ha
+    # riscritto giornata_2026-09-23.md con "Saldo realizzato AL 2026-09-24".
+    # Tutte e due annullate a mano con `git checkout` prima della consegna:
+    # una toppa che sta nell'attenzione di chi guarda non e' una toppa.
+    #
+    # Quel file e' gia' stato scritto, giusto, la sua sera: non si tocca.
+    # Con la data passata a mano (`su_richiesta`) la rigenerazione resta
+    # possibile, ed e' corretta: li' `rif = giorno`, quindi la freschezza
+    # risponde alla domanda giusta ("il CSV copriva quella data?").
+    if (not su_richiesta) and giorno != oggi_data and os.path.exists(
+            os.path.join(OUT_DIR, "giornata_%s.md" % giorno)):
+        sys.exit(
+            "PAGELLA NON SCRITTA, ed e' voluto.\n"
+            "  Oggi e' il %s, ma l'ultima chiusura nel CSV del piccolo\n"
+            "  50503392 e' del %s: la pagella ricadrebbe su un giorno PASSATO\n"
+            "  e riscriverebbe report/giornata_%s.md con lo STATO DI OGGI\n"
+            "  (saldo del 100k, tabella di freschezza).\n"
+            "  -> La pagella di stasera si scrive A MANO, dicendo che e' a mano.\n"
+            "  -> Per rigenerare DAVVERO quel giorno, con la sua data:\n"
+            "       python3 backtest_pipeline/analizza_trades.py %s"
+            % (oggi_data, giorno, giorno, giorno))
+
     CONTI = (("piccolo 50503392", CSV_IN),
              ("100k 50504263",    CSV_100K),
              ("reale 10105439",   CSV_REALE))
@@ -518,9 +560,15 @@ def main():
             "dell'**ultimo cambiamento di contenuto nel repo**. Un CSV che "
             "arriva **identico** (nessuna posizione chiusa nuova) non lascia "
             "traccia: `fermo` vuol dire *\"da li' non arriva contenuto "
-            "nuovo\"*, **non** *\"la consegna e' rotta\"*. Per separare i due "
-            "casi al 100% serve un timbro scritto **dentro** il file "
-            "dall'esportatore — oggi non c'e'.", ""]
+            "nuovo\"*, **non** *\"la consegna e' rotta\"*. Da **dentro il "
+            "repo** i due casi non si separano — ma **sul VPS si', e senza "
+            "riga nuova**: il runner delle 03:30 scrive gia' il **giornale "
+            "giornaliero** di ogni terminale (`CODA_09`: MT5 ne scrive uno "
+            "per ogni giorno in cui gira) e la **data dei file** in "
+            "`Common\\Files` (`CODA_05`, da confrontare con i CSV gemelli "
+            "scritti dallo stesso esportatore la stessa notte). Cosi' il "
+            "25/09 si e' accertato che il piccolo era **fermo dal 23/09 "
+            "19:35** — vedi `report/giornata_2026-09-25.md` §1.", ""]
 
     if ereditate:
         out += ["> ⚠️ %d posizion%s apert%s in giorni precedenti e chius%s oggi "
@@ -721,6 +769,24 @@ def main():
             r["_ot"] = tempo(r.get("open_time", ""))
             r["_ct"] = tempo(r.get("close_time", ""))
         r100 = [r for r in r100 if r["_ot"] and r["_ct"]]
+
+        # ---------- IL SALDO DI UNA PAGELLA E' QUELLO DI QUEL GIORNO --------
+        #
+        # Trovato il 25/09 provando a ROMPERE la toppa appena scritta, non
+        # confermandola: rigenerato a mano il 23/09 con la data esplicita, la
+        # sezione stampava **100.081,32**, cioe' il saldo DOPO le tre
+        # operazioni del 24/09, invece di **101.341,30**. Causa: `netto_storico`
+        # sommava il file INTERO, `giorno` non lo guardava nessuno.
+        # 🔴 Quindi il difetto non era solo la ricaduta automatica: **qualunque**
+        # rigenerazione di un giorno passato timbrava il saldo di OGGI. La
+        # guardia messa sopra chiudeva la porta e lasciava aperta la finestra.
+        # Nel caso normale (giorno = oggi) questo filtro non toglie niente:
+        # nessuna riga puo' chiudere dopo oggi.
+        # 📌 La sezione del conto REALE ha la stessa forma (`netto storico`
+        # sommato su tutto il file) e le servira' lo stesso filtro: oggi quel
+        # CSV non esiste, quindi la modifica **non e' provabile** e non la
+        # faccio alla cieca. Dichiarato, non dimenticato.
+        r100 = [r for r in r100 if r["_ct"].strftime("%Y-%m-%d") <= giorno]
 
         def _netto(r):
             return num(r, "profit") + num(r, "swap") + num(r, "commission")
