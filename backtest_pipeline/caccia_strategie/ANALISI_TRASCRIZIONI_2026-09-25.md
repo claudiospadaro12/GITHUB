@@ -236,3 +236,52 @@ secondo è buy"*) dice che **nemmeno a voce si ricostruisce quali ordini fossero
 Nessuna trascrizione scartata: è un file solo, e ha materiale. Dentro il file, **non diventano
 spunto**: la lezione su pazienza/mindset (r.183-189, 223-237, 409-421: nessun numero), il corso
 di scalping annunciato per ottobre (r.383), gli scambi personali con la chat (r.283-309, 385-395).
+
+---
+
+## 4. 📸 ADDENDUM — IL POST DELLO STESSO GIORNO (3 screenshot caricati da Claudio, 25/09 pomeriggio)
+
+**Fonte:** due schermate MT5 del conto mostrato nel post (conto **live**, broker Onam Trading,
+modalita' **Hedge**, valuta **EUR**; numero e intestatario **non trascritti di proposito**), ore
+server 11:27:32 e 11:29:32. La terza schermata e' **nostra** (100k `50504263`, vedi §4.6).
+**Tutti i numeri qui sotto sono letti dalla foto e ricontati in Python.** Niente toccato.
+
+### 4.1 ⏰ L'orologio del conto [INFERITO]
+La prima operazione del giorno apre alle **10:00:03 server** e chiude 25 secondi dopo con +39
+punti: e' l'apertura cash del DAX (09:00 IT), quindi **server = ora italiana + 1** (come FTMO).
+Contro-esempio: se il server fosse l'ora italiana, 10:00:03 sarebbe un minuto qualunque della
+mattina, e uno scatto di 39 punti in 25 secondi a un orario casuale e' molto meno plausibile.
+Da qui: i sell limit DAX sono stati piazzati alle **08:48, 09:06 e 09:07 italiane**, cioe' in
+**pre-apertura e in apertura**, dentro la live.
+
+### 4.2 🔢 Cosa si legge, ricontato
+| | dato | fonte |
+|---|---|---|
+| saldo / equity alle 11:27 | 439,92 / 467,52 EUR; margine 20,31 per 0,4 lotti = **leva ~1:500** [DERIVATO: 0,4 x 25.385,55 / 20,31] | schermata 1 |
+| valore del punto DAX | **1 EUR/punto/lotto** (39 punti x 1,0 = 39,00; 69 x 0,4 = 27,60) | schermate 1-2 |
+| chiuso nel giorno | **+85,40 EUR** su 5 operazioni, tutte long `GEREUR` | schermata 2 |
+| saldo d'inizio giornata | **387,92** [DERIVATO: 439,92 - 52,00 chiusi prima delle 11:27] -> fine 473,32 = **+22,0% in una mattina** | 1+2 |
+| 1 lotto sul saldo d'inizio | nozionale **~65 volte il saldo**: 388 punti contro = conto azzerato | [DERIVATO] |
+| stop sui DAX | **nessuno** su 5 chiuse + 1 aperta + 4 pendenti, salvo uno a 0,6 punti dall'ingresso (di fatto un pareggio) | schermate 1-2 |
+
+### 4.3 ✅ Cosa chiudono dei buchi del §1 (G1-G7)
+- **G7 / P5 — CHIUSO**: le size sono **lotti veri**: sell limit **0,2 @ 25.503,42 · 0,5 @ 25.517,24 · 1,0 @ 25.529,13** (size crescente verso l'alto, M10). **P7 — CHIUSO**: *"una 04 e una 08"* = buy **0,4 @ 25.385,55** (aperto) + buy limit **0,8 @ 25.373,02**. P6 (*"0.020, 0.040"*) resta non ricostruito.
+- **G2 / P8 — CHIUSO in parte**: *"500, 509"* = il **tondo 25.500** (il primo sell limit sta a +3,42) e un **livello disegnato a 25.509,48** (etichetta sull'asse destro). Altri livelli disegnati: 25.468,00 e 25.384,66. P9-P11 restano [INFERITO].
+- **G4 — CAMBIA**: la coppia con i pendenti a schermo non e' GBPJPY ma **CHFJPY** (la trascrizione diceva *"CHFGV"* [INCERTO]): **sell LIMIT** (ritorno), non sell stop: 0,6 @ 191,241 e 0,3 @ 190,989, **stop comune 191,510**.
+- **G6 — CHIUSO in parte**: l'indicatore e' **"VWAP-ATR PRO v3.20"** su M15, con VWAP 25.403,5, *Z-Score* 1,53 -> 2,00 in due minuti, *MTF BULL*. Tipo di ancoraggio: [NON VISIBILE].
+- **Distanza fra i pendenti — MISURATA DIVERSA dal dichiarato**: sell 13,82 e 11,89 punti; buy 12,53 e 17,50. La live diceva **15-20** (P1-P2): in campo **12-18**.
+- G1, G3, G5: nessuna risposta nelle foto.
+
+### 4.4 🚩 Le bandiere, ora con i numeri
+- **R1 CONFERMATA**: tre sell limit DAX piazzati fra le 08:48 e le 09:07 IT **mentre l'indicatore dice MTF BULL** e mentre lui compra: long e short sullo **stesso** conto (hedge).
+- **R2 CONFERMATA in esecuzione**: buy 0,8 @ 25.416,05 (10:47:44) e **un minuto dopo** buy 0,8 @ 25.398,55 (-17,5 punti), chiusi insieme a +11,20 netti; poi buy 0,4 @ 25.385,55 con **0,8 sotto** @ 25.373,02 = **la size doppia sotto**, il "secondo giro".
+- **R6 SUPERATA dai fatti**: la live diceva *"stop entro 40 euro"*. Sui DAX **lo stop a piattaforma non c'e'**. Sul CHFJPY, se entrambi i limit si riempiono e va a stop: **~176 EUR = 37,7% dell'equity** [DERIVATO: valore del pip 1.000 JPY / 180,24 EURJPY = 5,55 EUR per lotto; ipotesi **lotto forex standard da 100.000**, non verificabile dalla foto: con un lotto da 10.000 sarebbe il 3,8%].
+- In una prop con perdita giornaliera al 5%: **un solo stop CHFJPY vale ~7 giornate di limite**; un giorno DAX come il 24/09 (~575 punti di escursione a schermo) contro 1 lotto senza stop **azzera il conto**.
+
+### 4.5 🎯 Cosa cambia per noi
+- **Niente di schierabile**, e nessun candidato nuovo: il metodo e' discrezionale, senza stop, con media al ribasso. Resta valido **solo S1** (RETEST sul massimo/minimo di ieri), gia' scritto al §2 e senza codice nuovo.
+- 🔴 **Rischio hedging per Claudio, e non e' teorico**: FTMO (`docs/RISPOSTA_SUPPORTO_FTMO_2026-09-25.md`) vieta posizioni **opposte su indici correlati su conti diversi**, demo compresi. Oggi la sedia FTMO `770101` era **long GER40 @ 25.468,62** mentre questi sell limit stavano a 25.503-25.529. **Copiare a mano i suoi ordini** su un qualunque conto di Claudio mentre FTMO e' long DAX, Dow o Nasdaq = **esattamente il caso vietato**.
+- Il +22% in una mattina e' **vero** (e' nella CroniStoria), ma e' il rovescio della stessa medaglia: leva ~1:500, 1 lotto su 388 EUR, niente stop. **Non e' un criterio e non entra in nessuna tabella.**
+
+### 4.6 🖥️ La terza schermata e' la nostra: 100k `50504263`, 13:15 IT
+Giornale: 24/09 22:50:30-22:52:47 rimossi `ABTG_DAX_Apertura_EU`, `ABTG_Dow_Apertura_US`, `ABTG_MaxMinNotte_DAX_Short_Ottimizzato`, `ABTG_ORB_Ottimizzato` (U30USD), `Nasdaq_PreOpen_Breakout_EA`; 25/09 **13:14:47** rimosso `ABTG_SupertrendReversal` (225JPY,H2). Barra di stato: profilo **`SQUADRA 100K`**. **Gia' agli atti** (`report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`, ESEGUITO): nessun dato nuovo; il **salvataggio del profilo** resta da confermare con `CODA_01` del 26/09.
