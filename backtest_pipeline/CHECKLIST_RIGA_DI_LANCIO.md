@@ -35373,3 +35373,11 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🧩 CLASSE 779 — **ipotesi raggruppate da un referto per una domanda, ereditate per un'altra domanda su cui si SEPARANO**
 - **Caso (25/09, stesso referto §4 e §6.2)**: `IL_CONFINE_DEL_GIORNO` §4.1 raggruppava "FTMO UTC+3 fisso" e "FTMO col DST americano" in un'unica ipotesi, giusto per la settimana 25/10-01/11. Il referto le ha fuse anche per l'inverno, dove danno 8:30 NY contro 9:30 NY, e ha proposto una lettura dell'offset il solo 26/10, che non le distingue. Preso dal cancello (strato 2).
 - **Regola**: quando si riusa un elenco di ipotesi per una domanda diversa, si ricontrolla ipotesi per ipotesi che la risposta sia la stessa; e la DATA della misura proposta deve separarle.
+
+## 🔎 CLASSE 780 — **il controllo SOSTITUTIVO "per differenza" dichiarato mentre il dato DIRETTO sta gia' nel CSV che la riga legge**
+- **Caso (25/09, riga R249)**: l'arrivo di `InpEntryMode` era scritto `[NON MISURATO]` e sostituito da confronti fra per-trade; ma l'EA scrive in `OnTesterDeinit` i `FrameInputs` di ogni passata, e le colonne `Inp*` dei CSV `_IS`/`_OOS` che la riga gia' importa portano il valore vero di ogni pin (verificato su R246e). Corretto con il controllo "PIN DAL CSV" (100 confronti per file, colonna assente = NULLO, conteggio diverso da 100 = NON LEGGIBILE). Preso dal cancello (strato 2).
+- **Regola**: prima di costruire un proxy si guarda se il dato c'e' gia' nei file raccolti. Il "[NON MISURATO]" si scrive solo dopo aver cercato.
+
+## 👫 CLASSE 781 — **il controllo di COPPIA che certifica un file usando un compagno NULLO**
+- **Caso (25/09, riga R249, scenario `nulpair` eseguito)**: R249b NULLO (G-OOS rosso) e R249c col pin non arrivato; la riga stampava "ENTRATA R249b/R249c: per-trade diversi = ok" e metteva R249c fra i NON NULLI. Lo stesso "ok" usciva con due per-trade vuoti. Estende 772/775 ai controlli di coppia. Preso dal cancello (strato 2).
+- **Regola**: con un file NULLO nella coppia (o con zero operazioni) il controllo e' NON VERIFICABILE e non assolve; ogni file va certificato con una misura PROPRIA.
