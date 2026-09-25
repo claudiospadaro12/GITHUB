@@ -150,8 +150,8 @@ Verificato: **al massimo 1 posizione al giorno** per sedia.
 | **`770202`** | 13 / **9** | +0,606 | **[−0,27 ; +1,93]** | 0,091 | **0,158** |
 
 Il cancello aveva ottenuto R245 [+0,25 ; +1,32] p 0,011 e `770202` [−0,27 ; +1,92] p 0,162: lo script riproduce gli
-intervalli. Il p di `770202` differisce di 0,004 (0,158 contro 0,162) e l'estremo alto di 0,01; la causa della differenza
-non è misurata (implementazione del ricampionamento). ⚠️ **Con 10 e 9 blocchi d'inverno questa lettura è grezza.**
+intervalli. Il p di `770202` differisce di 0,004 (0,158 contro 0,162) e l'estremo alto di 0,01; la differenza viene dal
+flusso casuale: il cancello aveva riusato il generatore dopo il bootstrap, lo script riparte dal seme 2509. ⚠️ **Con 10 e 9 blocchi d'inverno questa lettura è grezza.**
 
 ⚠️ **Onestà sul p**: la divisione estate/inverno è nata **guardando i dati**: `OROLOGIO_BCM` del 24/09 su 770202, poi
 **R248a §7 sull'OOS di R245**. Quindi il p OOS (0,027) e quello sui due anni (0,018) **contengono l'osservazione che ha
@@ -402,3 +402,5 @@ _Riproduzione: `python3 backtest_pipeline/merito_inverno.py` (esce 1 se un'ancor
 - blocchi di mese (nullo → IC contiene 0; differenza piantata → IC esclude 0; mese a cavallo = due blocchi);
 - DD composto;
 - ancora spostata di un centesimo → ROSSO._
+
+_Cancello: strato 1 OK; strato 2 FAIL (D1-D8) -> **PASS alla seconda passata** su `cf62a02e`; rilievi facoltativi applicati dopo._

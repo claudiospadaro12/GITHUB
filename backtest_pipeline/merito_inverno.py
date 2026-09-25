@@ -571,6 +571,7 @@ def autotest():
     # T2 PF: formula su numeri noti
     chk('T2 pf([3,-1,-2]) = 1,0 ; pf([2,-1]) = 2,0', abs(pf([3, -1, -2]) - 1) < 1e-12 and abs(pf([2, -1]) - 2) < 1e-12)
 
+    # 25/09: mese = (k//2)%12, cosi' ogni blocco ha una vincita e una perdita (col k%12 i blocchi erano tutti vincenti o tutti perdenti e il PF andava a infinito)
     def sint(pf_e, pf_i, n_e, n_i, seme):
         rnd = random.Random(seme)
         out = []
