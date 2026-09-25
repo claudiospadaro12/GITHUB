@@ -61,7 +61,7 @@
 //|   D4 solo conti HEDGING: in netting l'EA non parte.              |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.01"
+#property version   "1.02"
 #property description "Guardia dello stop per le operazioni MANUALI. NON apre mai operazioni."
 #property description "SL sul server a ingresso -/+ N, stop virtuale di riserva, log [STOPMANUALE]."
 
@@ -480,6 +480,7 @@ bool GuardOk(const string sym, const double D, const MqlTick &tk)
      }
    double spread = tk.ask - tk.bid;
    double pt     = SymbolInfoDouble(sym, SYMBOL_POINT);
+   if(spread <= 0.0) return false;   // tick anomalo (ask<=bid): non si sblocca su un campione senza spread (cancello 1.01, R1)
    if(D > spread)
      {
       if(g_guardNextMs[k] != 0)
@@ -584,6 +585,7 @@ void SoftClose(const ulong ticket, const string sym, const bool isBuy,
    if(ok && (rc == TRADE_RETCODE_DONE || rc == TRADE_RETCODE_DONE_PARTIAL || rc == TRADE_RETCODE_PLACED))
      {
       g_st[i].closeFails = 0;
+      g_st[i].nextCloseMs = now + SM_BACKOFF_CLOSE_MS;   // la chiusura puo' essere ancora in volo: niente secondo close al tick dopo (cancello 1.01, R2)
       Azione(StringFormat("STOP VIRTUALE: chiusa a mercato %s ticket %I64u %s ingresso %s, soglia %s, prezzo %s (retcode %u)",
                           sym, ticket, (isBuy ? "BUY" : "SELL"), Px(sym, entry), Px(sym, thr), Px(sym, px), rc));
       return;
@@ -1046,9 +1048,9 @@ int OnInit()
       Log("TP / BE / trailing non possono essere negativi. L'EA non parte.");
       return INIT_PARAMETERS_INCORRECT;
      }
-   if(InpPipPoints < 0 || InpBackoffSec < 1 || InpMaxModifyPerMin < 1 || InpDeviationPts < 0)
+   if(InpPipPoints < 0 || InpBackoffSec < 1 || InpBackoffSec > SM_BACKOFF_MAX_S || InpMaxModifyPerMin < 1 || InpDeviationPts < 0)
      {
-      Log("InpPipPoints >= 0, InpBackoffSec >= 1, InpMaxModifyPerMin >= 1, InpDeviationPts >= 0. L'EA non parte.");
+      Log("InpPipPoints >= 0, InpBackoffSec fra 1 e 900, InpMaxModifyPerMin >= 1, InpDeviationPts >= 0. L'EA non parte.");
       return INIT_PARAMETERS_INCORRECT;
      }
    if(!InpServerSL && !InpSoftStop)
