@@ -103,11 +103,14 @@ def freschezza(path):
     file dall'esportatore, che oggi non esiste". **Falso**: il timbro non e'
     dentro il file, e' ACCANTO. Sul piccolo 50503392 muto dal 23/09 la
     separazione l'hanno fatta tre referti di SOLA LETTURA gia' scritti dal
-    runner delle 03:30 (classe 824): il **giornale giornaliero** di MT5
-    (nessun 20260924 ne' 20260925 per quella cartella, mentre FTMO/100k/REALE
-    li avevano tutti e due), la **data del file** in Common\\Files rispetto ai
-    due gemelli scritti dallo stesso EA la stessa notte, e il conteggio dei
-    terminal64 vivi. Verdetto vero: **terminale fermo dal 23/09 19:35**.
+    runner delle 03:30 (classe 824): il **log Esperti** giornaliero
+    (MQL5\\Logs, non il Giornale del terminale: nessun 20260924 ne' 20260925
+    per quella cartella, mentre FTMO/100k/REALE li avevano tutti e due), la
+    **data del file** in Common\\Files rispetto ai due gemelli scritti dallo
+    stesso EA la stessa notte, e il conteggio dei terminal64 vivi.
+    Verdetto vero: **TERMINALE DEL VPS fermo dal 23/09 19:35** — e non "il
+    conto", che e' loggato anche sul PC di backtest e resta [NON MISURATO]
+    (classe 826: il terminale fermo non e' il conto fermo).
     Referto: report/giornata_2026-09-25.md §1.
 
     Torna (data 'AAAA-MM-GG' o None, fonte).
@@ -562,13 +565,16 @@ def main():
             "traccia: `fermo` vuol dire *\"da li' non arriva contenuto "
             "nuovo\"*, **non** *\"la consegna e' rotta\"*. Da **dentro il "
             "repo** i due casi non si separano — ma **sul VPS si', e senza "
-            "riga nuova**: il runner delle 03:30 scrive gia' il **giornale "
-            "giornaliero** di ogni terminale (`CODA_09`: MT5 ne scrive uno "
-            "per ogni giorno in cui gira) e la **data dei file** in "
+            "riga nuova**: il runner delle 03:30 scrive gia' il **log "
+            "Esperti** giornaliero di ogni terminale (`CODA_09`, `MQL5\\Logs`: "
+            "MT5 ne scrive uno per ogni giorno in cui gira con EA attaccati) "
+            "e la **data dei file** in "
             "`Common\\Files` (`CODA_05`, da confrontare con i CSV gemelli "
             "scritti dallo stesso esportatore la stessa notte). Cosi' il "
-            "25/09 si e' accertato che il piccolo era **fermo dal 23/09 "
-            "19:35** — vedi `report/giornata_2026-09-25.md` §1.", ""]
+            "25/09 si e' accertato che il **terminale VPS** del piccolo era "
+            "**fermo dal 23/09 19:35** (il **conto**, loggato anche sul PC di "
+            "backtest, resta [NON MISURATO]) — vedi "
+            "`report/giornata_2026-09-25.md` §1.", ""]
 
     if ereditate:
         out += ["> ⚠️ %d posizion%s apert%s in giorni precedenti e chius%s oggi "
