@@ -6,6 +6,17 @@
 #  Si lancia con: -Deposito 80000 -Modello 4
 # =====================================================================
 #
+#  !!! ERRATA 25/09/2026 -- LEGGERE PRIMA DI LANCIARE !!!
+#  La premessa qui sotto ("il retest-short sul DAX non e' mai stato
+#  girato") e' FALSA. La FASE M del 07/08 (commit 0a4e17c7,
+#  risultati_archivio/Walkforward_Aperture/DAX_M_direzione_IS/OOS.csv)
+#  ha InpEntryMode=2 (RETEST), InpSessionHour=8, range 25/35/45, e
+#  misura SOLO SHORT: IS PF 0,846 n152 DD 10,54% / OOS PF 1,065 n243
+#  DD 12,05% (range 35, rischio 1%); long+short OOS PF 1,237 contro
+#  1,423 del solo long. Il cancello c1 di questo file cade gia' con
+#  quei numeri. Questo round resta solo una RIPETIZIONE su binario e
+#  deposito nuovi. Quadro: report/LATO_SHORT_DAX_APERTURA_2026-09-25.md
+#
 #  PERCHE' ESISTE -- domanda di Claudio, 22/09 mattina
 #  ---------------------------------------------------
 #  "Ma perche' non riusciamo con la stessa filosofia del retest a fare
