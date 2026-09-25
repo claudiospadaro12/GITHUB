@@ -38,9 +38,18 @@
 //|   B4 la posizione aperta si gestisce SEMPRE, anche da FERMO      |
 //|   B5 orologio = TimeTradeServer(), i 10 s scattano senza tick    |
 //|   B6 pausa vera in ms; un rifiuto aspetta 5 s; 5 rifiuti = STOP  |
+//|  1.02 (seconda passata del cancello, PASS con residui):          |
+//|   N1 "chiusura mandata" scade dopo 3 s: se il server non esegue  |
+//|      (PLACED/PARTIAL) si rimanda, la posizione non resta orfana  |
+//|   N2 OnDeinit chiude solo se il conto e' quello ammesso          |
+//|   N3 identificativo di posizione letto dal deal d'ingresso       |
+//|   N4 "perdite di fila" (conta anche le uscite a tempo);          |
+//|      motivo di chiusura dal DEAL_REASON (sl/tp/a mano)           |
+//|   pulsante START spostato sotto il pannello (il trading rapido   |
+//|      di MT5 lo copriva: visto da Claudio il 25/09 sera)          |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.01"
+#property version   "1.02"
 #include <Trade\Trade.mqh>
 
 #define CONTO_AMMESSO 50503635   // il SOLO conto su cui questo EA accetta di girare
@@ -112,6 +121,7 @@ double   gTicks[];               // ultimi bid (modo TICK)
 uint     gPauseFromMs  = 0;
 uint     gPauseLenMs   = 0;
 uint     gCloseRetryMs = 0;
+uint     gCloseSentMs  = 0;
 //--- la posizione in corso, per identificativo (B3): cosi' le chiusure del server vengono contate
 ulong    gOpenPosId    = 0;
 string   gOpenVerso    = "";
@@ -171,7 +181,7 @@ void DrawButton()
       ObjectCreate(0, BTN, OBJ_BUTTON, 0, 0, 0);
       ObjectSetInteger(0, BTN, OBJPROP_CORNER, CORNER_LEFT_UPPER);
       ObjectSetInteger(0, BTN, OBJPROP_XDISTANCE, 10);
-      ObjectSetInteger(0, BTN, OBJPROP_YDISTANCE, 25);
+      ObjectSetInteger(0, BTN, OBJPROP_YDISTANCE, 150);   // sotto il pannello di stato: il trading rapido di MT5 copre l'angolo in alto
       ObjectSetInteger(0, BTN, OBJPROP_XSIZE, 160);
       ObjectSetInteger(0, BTN, OBJPROP_YSIZE, 28);
       ObjectSetInteger(0, BTN, OBJPROP_FONTSIZE, 10);
@@ -186,12 +196,12 @@ void Status()
   {
    string dir = (gDir > 0 ? "LONG" : (gDir < 0 ? "SHORT" : "nessuno"));
    string modo = (InpEntryMode == ENTRY_MANUALE) ? "MANUALE" : (InpCandleRule == CR_TICK ? "TICK (" + IntegerToString(InpTickWindow) + " tick, min " + DoubleToString(InpFirstMovePoints, 1) + " pt)" : "CANDELA " + EnumToString(InpCandleTF));
-   string s = "ABTG_ScalperDirezionale 1.01  " + _Symbol + "   modo: " + modo + "\n";
+   string s = "ABTG_ScalperDirezionale 1.02  " + _Symbol + "   modo: " + modo + "\n";
    s += "stato: " + (gActive ? "ATTIVO" : "FERMO (premi START)") + (gStopReason != "" ? "  [" + gStopReason + "]" : "") + "\n";
    s += "verso: " + dir + (gDirFromManual ? " (dalla tua posizione a mano)" : "") + "\n";
    s += "lotto attuale: " + DoubleToString(gLot, 2) + "   cicli: " + IntegerToString(gCycles) + (gOpenPosId != 0 ? "   posizione aperta: " + IntegerToString((long)gOpenPosId) : "") + "\n";
    s += "netto chiuso: " + DoubleToString(gCumTotal, 2) + " EUR   perdita sessione: " + DoubleToString(gLossSession, 2) + " / " + DoubleToString(InpMaxLossSessionEuro, 2) + "\n";
-   s += "stop di fila: " + IntegerToString(gConsecLoss) + " / " + IntegerToString(InpMaxConsecutiveLosses) + "   richieste: " + IntegerToString(gRequests) + " / " + IntegerToString(InpMaxRequestsPerDay) + "\n";
+   s += "perdite di fila: " + IntegerToString(gConsecLoss) + " / " + IntegerToString(InpMaxConsecutiveLosses) + "   richieste: " + IntegerToString(gRequests) + " / " + IntegerToString(InpMaxRequestsPerDay) + "\n";
    s += "ultima azione: " + gLastAction;
    Comment(s);
   }
@@ -260,7 +270,7 @@ int OnInit()
      }
    DrawButton();
    Status();
-   Log("1.01 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
+   Log("1.02 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
        + " tickvalue " + DoubleToString(SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE), 4)
        + " stopslevel " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL)));
    if(InpAutoStart && (gDir != 0 || InpEntryMode == ENTRY_CANDELA)) StartAll();
@@ -273,7 +283,7 @@ void OnDeinit(const int reason)
    EventKillTimer();
    // una posizione dello scalper SENZA stop sul server non si lascia nuda quando l'EA viene staccato
    ulong mine = 0;
-   if(reason != REASON_CHARTCHANGE && FindMine(mine) && PositionSelectByTicket(mine) && PositionGetDouble(POSITION_SL) == 0.0)
+   if(reason != REASON_CHARTCHANGE && ContoAmmesso() && FindMine(mine) && PositionSelectByTicket(mine) && PositionGetDouble(POSITION_SL) == 0.0)
      {
       Log("stacco con posizione senza stop sul server: la chiudo (" + IntegerToString((long)mine) + ")");
       trade.PositionClose(mine);
@@ -336,9 +346,9 @@ int OpensLastMinute()
   }
 //+------------------------------------------------------------------+
 // netto della posizione dallo storico; true solo se c'e' il deal di USCITA
-bool NetOfPosition(ulong posId, double &net, double &pout)
+bool NetOfPosition(ulong posId, double &net, double &pout, string &reason)
   {
-   net = 0.0; pout = 0.0;
+   net = 0.0; pout = 0.0; reason = "";
    bool out = false;
    if(!HistorySelectByPosition((long)posId)) return false;
    int tot = HistoryDealsTotal();
@@ -348,7 +358,12 @@ bool NetOfPosition(ulong posId, double &net, double &pout)
       if(d == 0) continue;
       net += HistoryDealGetDouble(d, DEAL_PROFIT) + HistoryDealGetDouble(d, DEAL_COMMISSION) + HistoryDealGetDouble(d, DEAL_SWAP) + HistoryDealGetDouble(d, DEAL_FEE);
       long e = HistoryDealGetInteger(d, DEAL_ENTRY);
-      if(e == DEAL_ENTRY_OUT || e == DEAL_ENTRY_OUT_BY) { out = true; pout = HistoryDealGetDouble(d, DEAL_PRICE); }
+      if(e == DEAL_ENTRY_OUT || e == DEAL_ENTRY_OUT_BY)
+        {
+         out = true; pout = HistoryDealGetDouble(d, DEAL_PRICE);
+         long r = HistoryDealGetInteger(d, DEAL_REASON);
+         reason = (r == DEAL_REASON_SL ? "server SL" : (r == DEAL_REASON_TP ? "server TP" : (r == DEAL_REASON_EXPERT ? "" : "chiusa a mano/altro")));
+        }
      }
    return out;
   }
@@ -387,7 +402,7 @@ void AfterClose(double net, string verso, double lot, double pin, double pout, i
    gPauseFromMs = GetTickCount();
    gPauseLenMs = (uint)MathMax(InpPauseMs, 0);
    if(gLossSession >= InpMaxLossSessionEuro) StopAll("perdita di sessione " + DoubleToString(gLossSession, 2) + " >= " + DoubleToString(InpMaxLossSessionEuro, 2));
-   else if(gConsecLoss >= InpMaxConsecutiveLosses) StopAll(IntegerToString(gConsecLoss) + " stop di fila");
+   else if(gConsecLoss >= InpMaxConsecutiveLosses) StopAll(IntegerToString(gConsecLoss) + " perdite di fila");
   }
 //+------------------------------------------------------------------+
 // B3: chiude i conti della posizione in corso quando non c'e' piu' (chiusa da noi O dal server).
@@ -397,14 +412,14 @@ bool Settle()
    if(gOpenPosId == 0) return true;
    if(PositionSelectByTicket(gOpenPosId)) { gGoneMs = 0; return true; }
    if(gGoneMs == 0) gGoneMs = GetTickCount();
-   double net = 0, pout = 0;
-   if(!NetOfPosition(gOpenPosId, net, pout))
+   double net = 0, pout = 0; string reason = "";
+   if(!NetOfPosition(gOpenPosId, net, pout, reason))
      {
       if((uint)(GetTickCount() - gGoneMs) < 3000) return false;   // storico in arrivo: aspetta, non apre
       if(gCloseWhy == "") { StopAll("posizione sparita senza deal di uscita"); gOpenPosId = 0; gGoneMs = 0; return false; }
       net = gLastProfitSeen; pout = gClosePout; gCloseWhy += " (netto stimato)";
      }
-   string why = (gCloseWhy != "" ? gCloseWhy : "server SL/TP");
+   string why = (gCloseWhy != "" ? gCloseWhy : (reason != "" ? reason : "server SL/TP"));
    int secs = (int)(TimeTradeServer() - gOpenTime);
    gOpenPosId = 0; gGoneMs = 0; gCloseWhy = "";
    AfterClose(net, gOpenVerso, gOpenLot, gOpenPin, pout, secs, why);
@@ -427,7 +442,12 @@ void ManageOpen(ulong ticket)
   {
    if(!PositionSelectByTicket(ticket)) return;
    if(gOpenPosId == 0) Adopt(ticket);
-   if(ticket == gOpenPosId && gCloseWhy != "") return;   // chiusura gia' mandata: evita il doppio close
+   if(ticket == gOpenPosId && gCloseWhy != "")            // chiusura gia' mandata: evita il doppio close...
+     {
+      if((uint)(GetTickCount() - gCloseSentMs) < 3000) return;
+      Log("chiusura (" + gCloseWhy + ") mandata 3 s fa, posizione ancora aperta: riprovo");   // ...ma non per sempre (N1)
+      gCloseWhy = "";
+     }
    double profit = PositionGetDouble(POSITION_PROFIT) + PositionGetDouble(POSITION_SWAP);
    gLastProfitSeen = profit;
    datetime opened = (datetime)PositionGetInteger(POSITION_TIME);
@@ -441,9 +461,9 @@ void ManageOpen(ulong ticket)
    if(gCloseRetryMs != 0 && (uint)(GetTickCount() - gCloseRetryMs) < 1000) return;   // chiusura rifiutata: si riprova dopo 1 s
    double pout = (verso == "LONG") ? SymbolInfoDouble(_Symbol, SYMBOL_BID) : SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    gRequests++;
-   if(trade.PositionClose(ticket))
+   if(trade.PositionClose(ticket) && trade.ResultRetcode() == TRADE_RETCODE_DONE)
      {
-      gCloseWhy = why; gClosePout = pout; gCloseRetryMs = 0;
+      gCloseWhy = why; gClosePout = pout; gCloseRetryMs = 0; gCloseSentMs = GetTickCount();
       gLastAction = "chiusura mandata (" + why + ")";
      }
    else
@@ -457,6 +477,8 @@ void ManageOpen(ulong ticket)
 void Registra(double lot)   // apertura riuscita: la posizione entra nei conti
   {
    gOpenPosId = trade.ResultOrder();
+   if(trade.ResultDeal() > 0 && HistoryDealSelect(trade.ResultDeal()))
+      gOpenPosId = (ulong)HistoryDealGetInteger(trade.ResultDeal(), DEAL_POSITION_ID);   // N3: l'identificativo vero, dal deal d'ingresso
    gOpenVerso = (gDir > 0 ? "LONG" : "SHORT");
    gOpenLot   = lot;
    gOpenPin   = trade.ResultPrice();
