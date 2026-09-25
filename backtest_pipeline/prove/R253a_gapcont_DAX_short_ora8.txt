@@ -321,6 +321,39 @@
 #  seduta a ogni tick SOLO nelle giornate armate (~14%): stimo 1-3 minuti
 #  per passata lunga -> 5-12 minuti in tutto. Da misurare.
 # =====================================================================
+# =====================================================================
+#  8. CANCELLO (strato 1 + strato 2) -- 25/09/2026
+# =====================================================================
+#  Strato 1: controlla_prova 2 file / 4 celle / 8 passate / 0 problemi,
+#  34 pin, ASCII puro.
+#  Strato 2 (controllo-preventivo): FAIL al primo giro su 5aab021a (otto
+#  correzioni: P0 pin dal CSV -- classe 780; VWAP e meta' gap assenti
+#  dalla sonda -- 777; verdetto asimmetrico di R1/R3 -- 804, nuova;
+#  sedute di confine -- 805, nuova; S2 con falso NULLO e contro-esempi
+#  sbagliati; moncone -- 766; O1 cucitura e O2 non misurabile -- 781;
+#  orari EA r.1019/r.1256). FAIL al secondo giro su ce43eb37 (D1-D8
+#  applicate alla lettera, ma il file non citava CE9: frequenza, confronto
+#  di segno, attesa di toro e R1 ancora su P2d). PASS al terzo giro su
+#  abc1d9ed con C1-C4 applicate alla lettera e le correzioni dell'audit
+#  controllo-caccia (blocco informativo, NON cancelli). Pin identici a
+#  ce43eb37 (righe non di commento uguali); R253b invariato.
+#  Riprodotti dal cancello all'output archiviato: CE9 (n 152, +0,2301 R,
+#  t 2,47, DD 4,8 R) e verifica_audit (pavimento 90%, geometria EA t 1,83,
+#  O2 sulla sonda 69%); orologio histdata = New York con ora legale USA
+#  (picco d'apertura a 03:00 grezze, 04:00 nelle settimane sfasate).
+#  Contro-esempio su R1: la geometria EA approssimata fa DD 6,48 R e
+#  serie 6 sulla sonda: R1 (6,5 R) e R3 (<= 8) valgono anche li'.
+#  Geometria EA approssimata (audit): DD 6,48 R, serie 6 [misurato dal
+#  cancello su copia di sonda_dax_short_verifica_audit.py]: R1 e R3
+#  valgono anche li'. Via piu' corta dopo una catena verde: il PAVIMENTO
+#  dello stop (90% dei trade della sonda), che l'EA non ha come input
+#  (InpStopBufferPoints e' un buffer, non un pavimento): modifica all'EA.
+#  Il PASS copre i PIN e i CRITERI di R253a e R253b. NON e' una riga di
+#  lancio: la riga (PC DESKTOP-H4D7CAJ, mai il VPS, -Deposito 10000,
+#  -Modello 4, niente -Spread/-Ritardo/-FrazioneIS, -Etichetta R253a /
+#  R253b, rc 2 del moncone assolto SOLO da E0) passa dai cancelli per
+#  conto suo.
+# =====================================================================
 @SIMBOLO    D30EUR
 @PERIODO    M5
 @DAQUANDO   2024.09.26
