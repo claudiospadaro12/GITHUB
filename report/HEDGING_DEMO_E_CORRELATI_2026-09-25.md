@@ -34,7 +34,7 @@ Etichette: **[MISURATO]** = letto in un file del repo, con fonte · **[INFERITO]
    | scenario | solo stesso indice | + correlati DAX/Dow/Nasdaq | + Nikkei [INFERITO] |
    |---|---|---|---|
    | **A, alle 03:30 del 25/09** (piccolo muto, gira solo `770901` 100k; `770901` tolto alle 13:14:47, vedi 🕐) | **0** | **0** | 0 osservati · rotazione **6,5%/giorno**, **~73% in 20 gg** (n=5 posizioni, fragile) |
-   | **B, piccolo riacceso** con il profilo ORO attuale | **17,9%/giorno** → **97%** in 20 gg | **35,7%/giorno** → **~100%** | 35,7% → ~100% |
+   | **B, se le 15 sedie indice tornassero sul piccolo** (profilo ORO del 25/09 03:30, prima della sospensione delle 13:07) | **17,9%/giorno** → **97%** in 20 gg | **35,7%/giorno** → **~100%** | 35,7% → ~100% |
 
 ---
 
@@ -103,8 +103,8 @@ stesso indice o su un altro.
   - 🟢 Il terminale e' **muto dal 20/07** (CODA_05 e CODA_09: ultimo log 2026-07-20 22:19).
 - **Pepperstone**, **manuale `50503635`**: 0 sedie, nessun log. 🔴 **I trade a mano non li vede nessuna sonda** [NON MISURATO].
 
-### 2.4 Chi opera DAVVERO oggi, e quali residui ci sono su disco
-- 🔴 **Il piccolo e' MUTO dal 23/09 alle 19:35 italiane** [INFERITO forte]. Nello stesso minuto si fermano tre cose [MISURATO]:
+### 2.4 Chi operava DAVVERO alle 03:30 del 25/09, e quali residui ci sono su disco
+- 🔴 **Il terminale VPS del piccolo e' MUTO dal 23/09 alle 19:35 italiane** [INFERITO forte]; il CONTO `50503392` e' [NON MISURATO] da quell'ora (§3.4 punto 5). Nello stesso minuto si fermano tre cose [MISURATO]:
   - l'ultimo log Esperti (`CODA_05_..._20260925` r.23-25, *"ultimo log Esperti: 2026-09-23 19:35"*);
   - `ABTG_Trades.csv` in Common\Files (ultima scrittura 2026-09-23 19:35, CODA_05 r.106);
   - tutti i 45 `.chr` del profilo ORO, salvati come alla chiusura del terminale.
@@ -137,7 +137,7 @@ della sonda) **non cambia** questo elenco.
 ### 3.2 Il lato non-FTMO: cosa copre ogni fonte
 | conto | fonte | copre fino a | buco |
 |---|---|---|---|
-| piccolo `50503392` | `data/statements/trades_auto.csv` (solo posizioni **chiuse**) | 23/09 **18:35 BCM**, cioe' l'esportatore fermo alle 19:35 italiane | da li' in poi niente: il terminale e' muto. Vedi §3.4 |
+| piccolo `50503392` | `data/statements/trades_auto.csv` (solo posizioni **chiuse**) | 23/09 **18:35 BCM**, cioe' l'esportatore fermo alle 19:35 italiane | da li' in poi niente: il terminale VPS e' muto, il conto no (PC di backtest). Vedi §3.4 punti 1 e 5 |
 | 100k `50504263` | `trades_100k.csv` | **completo al 25/09 03:11** (40 righe in repo = 40 in Common\Files, CODA_12 r.23-28) | nessuno |
 | REALE `10105439` | ledger dello SlippageLogger (CODA_10 del 25/09, **tutti** i deal dal 04/09) | 25/09 02:30 server | nessuno sul deal. Dal 04/09 le sole posizioni sono `770101` D30EUR |
 | Tickmill · Pepperstone · manuale | nessun per-trade | | Tickmill e' muto dal 20/07. Manuale e Pepperstone: **[NON MISURATO]** |
@@ -187,7 +187,7 @@ della sonda) **non cambia** questo elenco.
 **Metodo** (quello del 24/09, esteso):
 - **Proxy delle sedie FTMO**: le posizioni sul piccolo delle stesse sedie (`770101` solo buy, `770411`, `770202`, `770511`,
   `771531`), dal 14/08 al 22/09, **28 giorni di borsa**, 54 posizioni.
-- **Controparti**: le posizioni forward delle sedie **oggi nel profilo attivo** dei conti non-FTMO.
+- **Controparti**: le posizioni forward delle sedie **nel profilo attivo del 25/09 03:30** dei conti non-FTMO (prima delle sospensioni: vedi 🕐).
 - Si contano gli intervalli sovrapposti di verso opposto, si deduplicano per giornata × coppia di sedie, e si tiene la frequenza
   = giornate con un episodio / 28.
 - P(≥1 in 20 giorni di borsa) = 1 − e^(−20·f), come il 24/09. 20 giorni e' la mediana Monte Carlo al target.
@@ -204,7 +204,7 @@ assegna "copia", non "opposta": lo strumento sa dire di no.
 | scenario | sedie controparte | **stesso indice** | **giornate con un episodio correlato DAX/Dow/Nasdaq** (2 in comune con lo stesso indice: 31/08, 03/09) | **stesso + correlati FTMO** | **+ Nikkei** [INFERITO] |
 |---|---|---|---|---|---|
 | **A, 25/09 03:30** (piccolo muto, Tickmill muto; superato alle 13:14:47, vedi 🕐) | 100k `770901` (5 posizioni in finestra) | **0**: nessuna sedia | **0**: nessuna sedia | **0** | osservati **0/28**. Rotazione: **1,8/28 = 6,5%/giorno → ~73% in 20 gg** (min 0, max 4 giornate) |
-| **B, piccolo riacceso** (profilo ORO del 25/09) | le 15 sedie indice del piccolo + `770901` | **5/28 = 17,9%/giorno → 97%** (rotazione 19,4% → 98%) | **7/28 = 25,0%/giorno → 99%** | **10/28 = 35,7%/giorno → ~100%** (rotazione 37,3%) | 10/28 (rotazione **42,5%/giorno**) |
+| **B, se le 15 sedie indice tornassero** (profilo ORO del 25/09 03:30, prima della sospensione) | le 15 sedie indice del piccolo + `770901` | **5/28 = 17,9%/giorno → 97%** (rotazione 19,4% → 98%) | **7/28 = 25,0%/giorno → 99%** | **10/28 = 35,7%/giorno → ~100%** (rotazione 37,3%) | 10/28 (rotazione **42,5%/giorno**) |
 | controllo: perimetro del 24/09, prima della sospensione | B + 100k `770101`/`770202`/`770411`/`770611` + REALE (ledger solo dal 04/09) | 5/28 | 7/28 | 10/28 | 10/28 |
 
 **Le giornate opposte "solo correlati" dello scenario B** (UTC):
@@ -254,4 +254,4 @@ Il 22/09 e' **l'episodio vero** del §3.
 - sorgenti: `mql5/Experts/ABTG_GapFill.mq5` r.437 · `ABTG_PunteLarry.mq5` r.696-701 · `Gold_Ichimoku_TK_ATR_EA.mq5` r.49-53 · `BREAKOUT_EA_JPY.mq5` r.348
 
 ---
-_Cancello: strato 1 OK; strato 2 FAIL (D1 stato superato dalle sospensioni, D2 provenienza, D3 REALE nel controllo, D4 conto contro terminale -> classe 792, D5 etichetta, D6 prova) -> correzioni applicate, in attesa della seconda passata._
+_Cancello: strato 1 OK; strato 2 FAIL (D1 stato superato dalle sospensioni, D2 provenienza, D3 REALE nel controllo, D4 conto contro terminale -> classe 792, D5 etichetta, D6 prova) -> correzioni applicate; strato 2 FAIL in seconda passata (5 frasi al presente superate dalle sospensioni: r.37, r.106-107, r.140, r.190, r.207) -> correzioni applicate alla lettera; terza passata PASS._
