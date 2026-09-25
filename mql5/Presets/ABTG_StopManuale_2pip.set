@@ -1,0 +1,40 @@
+; =====================================================================
+;  PRESET ABTG_StopManuale -- l'esempio di Claudio: stop a 2 pip
+;  Scritto il 25/09/2026. Guardia dello stop per le operazioni MANUALI.
+;  L'EA NON APRE OPERAZIONI: mette lo SL a ingresso -/+ 2 pip sulle
+;  posizioni aperte a mano (magic 0) del simbolo del grafico.
+;
+;  >>> LEGGERE PRIMA DI CARICARLO <<<
+;  1. "2 pip" vale 20 punti su EURUSD/USDJPY (Digits 5/3), ma su un
+;     simbolo a 2 decimali (GER40.cash, US30.cash, XAUUSD su FTMO) vale
+;     2 PUNTI MT5 = 0.02: DENTRO lo spread. La guardia spread
+;     (InpSpreadGuard=true) in quel caso BLOCCA il simbolo e lo scrive
+;     nel log. Su indici e oro va scelta l'unita' giusta (InpUnit=1 punti,
+;     oppure InpPipPoints) -- decisione di Claudio, non di questo file.
+;  2. Pensato per il conto DEMO MANUALE 50503635 (C:\MT5_MANUALE).
+;     Sul conto REALE 10105439 l'EA rifiuta di partire.
+;  3. Nessuna taglia qui dentro: l'EA non apre e non dimensiona niente.
+;
+;  Enum: InpUnit 0=PIPS 1=POINTS . InpSymbolScope 0=CHART_ONLY 1=ALL_SYMBOLS
+; =====================================================================
+InpStopPips=2.0
+InpUnit=0
+InpPipPoints=0
+InpServerSL=true
+InpSoftStop=true
+InpSpreadGuard=true
+InpCloseOnAttach=false
+InpTakePips=0.0
+InpBEPips=0.0
+InpTrailPips=0.0
+InpTrailStartPips=0.0
+InpTrailStepPips=1.0
+InpSymbolScope=0
+InpOnlyManual=true
+InpIgnoreMagics=
+InpAlsoPendings=false
+InpDeviationPts=50
+InpBackoffSec=30
+InpMaxModifyPerMin=4
+InpMagic=779900
+InpVerbose=false
