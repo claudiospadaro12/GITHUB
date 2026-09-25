@@ -176,10 +176,12 @@ Nei giornali delle sonde 09/09-24/09 non ci sono rifiuti per Dow e Nasdaq, ma l'
 **MISURATA solo sulle righe stampate**. In sette giorni-conto la sonda ha tagliato (11/09 e 17/09
 sui tre BCM: 302/232/229 e 168/161/159 righe non stampate; 24/09 FTMO: 63), e li' l'assenza **non
 e' misurata**.
-- `770260` Nasdaq: righe d'ordine/segnale in giorni **NON tagliati** (14, 15, 16, 18/09 sul piccolo;
-  22 e 23/09 su FTMO) senza raffica = **non scattato in 6 occasioni** [MISURATO] (se in quelle
-  occasioni ci sia stato un riempimento RETEST non e' letto qui: la riga FTMO del 22/09 e' un
-  segnale scartato per volumi).
+- `770260` Nasdaq: **nessun riempimento RETEST letto nei giornali**, quindi il difetto **non ha mai avuto
+  l'occasione di scattare**: latente, mai messo alla prova, come il Dow. Le sei righe Nasdaq dei giorni NON
+  tagliati non sono occasioni: 14, 15, 16 e 18/09 sul piccolo sono `ABTG_Nasdaq_Apertura_US` **M15 a rottura
+  (SELL STOP)**, un'altra configurazione (preset di repo `InpEntryMode=0`, magic `770201` [INFERITO: la magic
+  non e' nel giornale]); 22 e 23/09 su FTMO sono **segnali RETEST scartati per volumi** ("salto", nessun
+  ordine) [MISURATO].
 - `770202` Dow: **nessuna riga d'ordine in nessun giornale letto** -> difetto **latente, mai messo
   alla prova**.
 
@@ -317,3 +319,5 @@ Fino ad allora il **rischio vivo misurato** = raffiche da **28-39 righe stampate
 **~5%** della soglia nel giorno visto. Il **caso peggiore teorico** la supera con **tre sedie al
 ritmo medio** o con **una sola al ritmo massimo**; probabilita' **bassa** [INFERITO]; conseguenza
 [NON VERIFICATO].
+
+_Cancello: strato 1 OK; strato 2 FAIL (4+3) -> FAIL (solo r.179-182, `770260`) -> corretto col testo del cancello; **PASS** condizionato a questa sostituzione, dichiarato dal cancello stesso._
