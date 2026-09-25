@@ -1,0 +1,36 @@
+RIF  P2d gap-down>=0,50% corto (deve riprodurre la sonda)  n  175  E +0.1850 R  t +2.12  dirINFO +0.1596  stop med 68.0  anni+ 6/8
+      2011:+0.17(40) 2012:-0.01(29) 2013:+0.02(12) 2014:+0.14(12) 2015:+0.50(18) 2016:+0.29(27) 2017:-0.20(8) 2018:+0.30(29)
+      somma +32.4 R | DD massimo 6.5 R | serie perdente piu lunga 5
+CE1  P2d in scala invariante (pav 0,27 ATR, costo scalato) n  175  E +0.2430 R  t +2.30  dirINFO +0.2036  stop med 46.0  anni+ 5/8
+      2011:+0.35(40) 2012:-0.02(29) 2013:+0.52(12) 2014:-0.02(12) 2015:+0.52(18) 2016:+0.33(27) 2017:-0.27(8) 2018:+0.24(29)
+      somma +42.5 R | DD massimo 6.6 R | serie perdente piu lunga 6
+CE1b P2c (>=0,25%) in scala invariante                     n  313  E +0.1093 R  t +1.42  dirINFO +0.1183  stop med 42.2  anni+ 7/8
+      2011:+0.08(55) 2012:+0.03(46) 2013:+0.12(24) 2014:+0.06(25) 2015:+0.15(34) 2016:+0.12(51) 2017:-0.33(27) 2018:+0.43(51)
+      somma +34.2 R | DD massimo 13.9 R | serie perdente piu lunga 10
+CE2  stessa meccanica corta, TUTTE le sedute               n 1325  E +0.0350 R  t +1.27  dirINFO +0.0547  stop med 68.0  anni+ 4/8
+      2011:+0.08(161) 2012:+0.01(173) 2013:-0.05(166) 2014:-0.00(173) 2015:-0.01(168) 2016:+0.03(165) 2017:-0.02(152) 2018:+0.24(167)
+      somma +46.3 R | DD massimo 31.9 R | serie perdente piu lunga 17
+CE2b stessa meccanica corta, |gap| < 0,25% (giorni senza gap) n  573  E -0.0377 R  t -0.99  dirINFO +0.0003  stop med 68.0  anni+ 2/8
+      2011:-0.23(43) 2012:-0.01(66) 2013:-0.09(94) 2014:-0.02(97) 2015:-0.05(62) 2016:-0.15(61) 2017:+0.01(88) 2018:+0.15(62)
+      somma -21.6 R | DD massimo 43.2 R | serie perdente piu lunga 12
+CE3  corto nei giorni di gap-UP >= 0,50%                   n  248  E +0.0542 R  t +0.77  dirINFO +0.0322  stop med 68.0  anni+ 5/8
+      2011:+0.18(46) 2012:+0.03(41) 2013:+0.18(14) 2014:-0.13(25) 2015:-0.09(42) 2016:+0.00(34) 2017:-0.11(15) 2018:+0.32(31)
+      somma +13.4 R | DD massimo 17.1 R | serie perdente piu lunga 15
+CE4  P2d senza bersaglio (stop o tempo)                    n  175  E +0.1305 R  t +1.50  dirINFO +0.1230  stop med 68.0  anni+ 6/8
+      2011:+0.13(40) 2012:-0.03(29) 2013:+0.02(12) 2014:+0.16(12) 2015:+0.41(18) 2016:+0.06(27) 2017:-0.35(8) 2018:+0.34(29)
+      somma +22.8 R | DD massimo 7.5 R | serie perdente piu lunga 5
+CE5  LUNGO su gap-up >= 0,50% (specchio della famiglia)    n  243  E +0.0427 R  t +0.65  dirINFO +0.0246  stop med 68.0  anni+ 4/8
+      2011:-0.03(41) 2012:-0.11(24) 2013:+0.27(22) 2014:+0.30(24) 2015:+0.12(43) 2016:-0.05(41) 2017:+0.31(20) 2018:-0.29(28)
+      somma +10.4 R | DD massimo 13.2 R | serie perdente piu lunga 5
+CE5b LUNGO su gap-up >= 0,25%                              n  422  E +0.0339 R  t +0.70  dirINFO +0.0141  stop med 68.0  anni+ 5/8
+      2011:-0.09(58) 2012:+0.05(53) 2013:+0.12(51) 2014:+0.22(48) 2015:+0.03(64) 2016:-0.07(60) 2017:+0.20(35) 2018:-0.08(53)
+      somma +14.3 R | DD massimo 12.0 R | serie perdente piu lunga 7
+CE6a gap-down >= 0,35%                                     n  238  E +0.1459 R  t +2.03  dirINFO +0.1320  stop med 68.0  anni+ 6/8
+      2011:+0.13(49) 2012:+0.04(38) 2013:-0.07(18) 2014:+0.11(18) 2015:+0.20(26) 2016:+0.23(36) 2017:-0.17(12) 2018:+0.35(41)
+      somma +34.7 R | DD massimo 8.7 R | serie perdente piu lunga 9
+CE6b gap-down >= 0,75%                                     n  100  E +0.1697 R  t +1.47  dirINFO +0.1573  stop med 68.0  anni+ 6/8
+      2011:+0.03(28) 2012:+0.17(14) 2013:-0.13(4) 2014:+0.19(9) 2015:+0.65(10) 2016:+0.38(17) 2017:+0.16(3) 2018:-0.07(15)
+      somma +17.0 R | DD massimo 7.8 R | serie perdente piu lunga 5
+CE6c gap-down >= 0,35% in scala invariante                 n  238  E +0.1490 R  t +1.67  dirINFO +0.1436  stop med 43.0  anni+ 6/8
+      2011:+0.11(49) 2012:+0.02(38) 2013:+0.34(18) 2014:-0.02(18) 2015:+0.28(26) 2016:+0.20(36) 2017:-0.52(12) 2018:+0.37(41)
+      somma +35.5 R | DD massimo 11.8 R | serie perdente piu lunga 8

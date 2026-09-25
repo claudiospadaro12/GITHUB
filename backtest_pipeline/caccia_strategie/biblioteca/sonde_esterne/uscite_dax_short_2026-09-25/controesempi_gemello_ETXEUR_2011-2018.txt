@@ -1,0 +1,15 @@
+CE8  GEMELLO ETX: gap-down>=0,50% corto, scala invariante  n  186  E +0.1514 R  t +1.51  dirINFO +0.1508  stop med 14.0  anni+ 5/8
+      2011:+0.08(40) 2012:+0.14(30) 2013:+0.80(10) 2014:-0.17(14) 2015:+0.31(25) 2016:+0.34(27) 2017:-0.12(10) 2018:-0.01(30)
+      somma +28.2 R | DD massimo 8.5 R | serie perdente piu lunga 7
+CE8b GEMELLO ETX: gap-down>=0,35% corto, scala invariante  n  259  E +0.0892 R  t +1.07  dirINFO +0.1152  stop med 13.0  anni+ 6/8
+      2011:+0.05(49) 2012:+0.02(39) 2013:+0.79(19) 2014:-0.17(22) 2015:+0.17(28) 2016:+0.16(45) 2017:-0.49(17) 2018:+0.13(40)
+      somma +23.1 R | DD massimo 18.6 R | serie perdente piu lunga 12
+CE8c GEMELLO ETX: gap-down>=0,75% corto, scala invariante  n  100  E +0.2622 R  t +1.87  dirINFO +0.2842  stop med 15.3  anni+ 7/8
+      2011:+0.28(29) 2012:+0.25(12) 2013:+0.10(3) 2014:+0.31(9) 2015:+0.54(12) 2016:+0.44(17) 2017:+0.48(4) 2018:-0.28(14)
+      somma +26.2 R | DD massimo 5.2 R | serie perdente piu lunga 4
+CE8d GEMELLO ETX: LUNGO su gap-up>=0,50%, scala invariante n  230  E +0.1061 R  t +1.26  dirINFO +0.1076  stop med 13.0  anni+ 6/8
+      2011:+0.04(34) 2012:+0.09(28) 2013:+0.23(22) 2014:+0.21(20) 2015:+0.30(41) 2016:-0.01(40) 2017:+0.26(12) 2018:-0.13(33)
+      somma +24.4 R | DD massimo 6.5 R | serie perdente piu lunga 6
+CE8e GEMELLO ETX: stessa meccanica corta, |gap|<0,25%      n  439  E -0.0429 R  t -0.71  dirINFO +0.0171  stop med 11.0  anni+ 2/8
+      2011:-0.04(36) 2012:-0.08(51) 2013:-0.06(61) 2014:-0.08(71) 2015:-0.07(64) 2016:-0.21(47) 2017:+0.08(54) 2018:+0.11(55)
+      somma -18.8 R | DD massimo 41.4 R | serie perdente piu lunga 8

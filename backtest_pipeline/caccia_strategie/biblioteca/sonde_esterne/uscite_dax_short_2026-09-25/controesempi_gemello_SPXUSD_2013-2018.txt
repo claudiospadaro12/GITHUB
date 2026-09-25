@@ -1,0 +1,12 @@
+CE7  GEMELLO SPX: gap-down>=0,50% corto, scala invariante  n   84  E +0.0741 R  t +0.49  dirINFO +0.1561  stop med 6.9  anni+ 3/8
+      2013:+0.13(13) 2014:+0.53(8) 2015:-0.07(25) 2016:+0.14(16) 2017:-0.02(3) 2018:-0.01(19)
+      somma +6.2 R | DD massimo 12.1 R | serie perdente piu lunga 8
+CE7b GEMELLO SPX: gap-down>=0,35% corto, scala invariante  n  128  E -0.0357 R  t -0.30  dirINFO +0.0877  stop med 6.8  anni+ 4/8
+      2013:+0.18(15) 2014:+0.29(14) 2015:-0.31(35) 2016:-0.10(28) 2017:+0.08(8) 2018:+0.05(28)
+      somma -4.6 R | DD massimo 17.2 R | serie perdente piu lunga 10
+CE7c GEMELLO SPX: LUNGO su gap-up>=0,50%, scala invariante n  105  E +0.1322 R  t +1.10  dirINFO +0.1584  stop med 6.1  anni+ 3/8
+      2013:-0.09(16) 2014:-0.04(14) 2015:+0.22(24) 2016:-0.02(21) 2017:+0.93(6) 2018:+0.23(24)
+      somma +13.9 R | DD massimo 6.1 R | serie perdente piu lunga 6
+CE7d GEMELLO SPX: stessa meccanica corta, |gap|<0,25%      n  496  E -0.0225 R  t -0.40  dirINFO -0.0296  stop med 4.9  anni+ 3/8
+      2013:+0.07(71) 2014:-0.25(84) 2015:-0.01(84) 2016:+0.04(84) 2017:-0.03(103) 2018:+0.07(70)
+      somma -11.2 R | DD massimo 42.4 R | serie perdente piu lunga 14

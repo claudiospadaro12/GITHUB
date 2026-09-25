@@ -4156,3 +4156,36 @@ per ogni round il `REFERTO_ROUND_*.txt` e i due CSV `_IS_`/`_OOS_`, **aperti e l
 colonna il 22-23/09/2026**. Referti di lettura: `report/DD_NASDAQ_R199_2026-09-21.md` ·
 `report/DD_NASDAQ_IL_ROUND_GIA_FATTO_2026-09-22.md` · `report/PROFONDITA_RETEST_2026-09-21.md` ·
 `report/VERDETTO_R202_2026-09-21.md`._
+
+---
+
+## 🐻 25/09/2026 — SECONDA CACCIA DAX SHORT dopo R251: 10 meccanismi misurati FUORI, 1 in coda (`CACCIA_DAX_SHORT_2026-09-25.md`)
+
+Regola della seconda caccia (19/08) dopo R251 (short retest d'apertura **bocciato per rischio**).
+**Zero passate di tester, zero EA/preset/sedie toccati.** Sonda esterna `GRXEUR` M1 **2011-2018**
+(8 anni, 2.017 sedute, costo 1,70, ambiguita' a sfavore, controllo appaiato), criteri G1-G4
+**pushati prima** (`473c57f6`): `caccia_strategie/biblioteca/sonde_esterne/sonda_dax_short_meccanismi.py`.
+🔴 **Nessuna di queste righe e' un certificato di morte**: e' SCREENING esterno, non BCM, non tick.
+Il verdetto per tutte le celle mai girate su BCM resta **NON ANCORA MISURATO (sonda esterna negativa)**.
+
+| cella | E netta · t · anni+ · stop med | esito sonda |
+|---|---|---|
+| ITSM 1a -> ultima mezz'ora, corto (con notte / solo seduta) | −0,046 R t −3,26 2/8 · −0,057 R t −4,51 1/8 · stop 30x | 🔴 negativa **e sotto la frontiera del costo** |
+| fade del gap-up >=0,25% / >=0,50% | −0,018 R 3/8 · −0,030 R 3/8 | 🔴 negativa |
+| apertura USA: inversione / continuazione | −0,022 R · +0,007 R | 🔴 piatta |
+| 10:00 New York, corto incondizionato | −0,010 R 2/8, info +0,015 | 🔴 volatilita', non direzione |
+| cono di rumore, SOLO corto | −0,028 R 3/8, info −0,012 | 🔴 conferma lo zero del 12/09 (trailing VWAP NON misurabile) |
+| gap-down continuazione >=0,25% | +0,110 R t 1,80 5/8 | 🟠 manca G1 e G3 |
+| **gap-down continuazione >=0,50%** (rottura del min. range 15', 2R) | **+0,185 R t 2,12 6/8, DD 6,5 R, n 175** | 🟢 **PASSA-SONDA** + 6 contro-esempi (gap = motore; lungo speculare senza informazione; EuroStoxx concorde t 1,51; S&P NO t 0,49) |
+
+- 📦 **In coda, NON girato:** `prove/GAPCONT_DAX_SHORT_a_ora8.txt` + `_b_ora9.txt`
+  (`ABTG_GapContinuation`, D30EUR solo short, orologio in fase come R252; `controlla_prova.py` OK).
+  Merito **sospeso per aritmetica** in partenza (~0,09 posizioni/seduta): il round giudica catena,
+  costo, rischio e sovrapposizione con 770411/770105.
+- 🔧 **Difetto di strumento trovato leggendo (non un verdetto):** `ABTG_DAX_Apertura_EU`
+  `InpEntryMode=1` (`GAPFILL`) su D30EUR misura il gap sulle **barre D1 del CFD**
+  (`iClose(D1,1)` / `iOpen(D1,0)`, r.2013-2014), non il gap della cash: in FASE B **7 e 9
+  operazioni**. Il gap di cassa sul DAX si misura con `ABTG_GapContinuation` (chiusura della
+  seduta precedente sulle M1, r.637-655).
+- 📄 Fonte esterna letta sul PDF: arXiv **2605.04004** (Mesfin, MNQ 2021-2025), _gap continuation
+  short_ netto +14,52 pti, T 1,46, 35 op. OOS, 2024 negativo: _"most credible near-miss"_.
