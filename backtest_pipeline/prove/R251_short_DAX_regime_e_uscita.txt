@@ -391,7 +391,13 @@
 #    SOSPESA                rischio passato, POSIZIONI OOS < 150 o non
 #                           dimostrate: MERITO SOSPESO, RISCHIO GIUDICATO.
 #                           Se passa anche M1-M3 si scrive "INDIZIO
-#                           FAVOREVOLE, merito sospeso", mai "promossa".
+#                           FAVOREVOLE, merito sospeso", mai "promossa",
+#                           SEMPRE con accanto Trades IS/OOS della cella
+#                           e dell'ancora (152/243). Strada A: se la cella
+#                           ha Trades OOS < 122 (meta' dell'ancora), R1/R2
+#                           passati si scrivono "DD minore PER MINORE
+#                           ESPOSIZIONE" (ipotesi H0, par. 9), non
+#                           "rischio passato".
 #    BOCCIATA PER MERITO    posizioni >= 150 e M1, M2 o M3 fallito
 #    PROMOSSA AL PASSO DOPO tutto passato, M4 compreso
 #  E SI SCRIVE SEMPRE SE LA CELLA BATTE IL DEFAULT: se nessuna cella
@@ -521,6 +527,7 @@
 #  - REGISTRO_TEST r.92, riga A3 ("SOLO SHORT, ST OFF ... in coda"): e'
 #    superata dalla FASE M e resta "in coda".
 #
+#  (25/09: i due rilievi su REGISTRO_TEST sono stati corretti nel commit d4d5b1ad.)
 # =====================================================================
 #  17. IL MAGIC, E IL COMANDO CON CUI L'HO CERCATO
 # =====================================================================
@@ -532,6 +539,21 @@
 #  solo a separare i quattro per-trade in Common\Files.
 # =====================================================================
 
+#
+# =====================================================================
+#  18. CANCELLO (strato 1 + strato 2) -- 25/09/2026
+# =====================================================================
+#  Strato 1: controlla_prova 4 file / 12 celle / 24 passate / 0 problemi;
+#  controlla_riga --oggetto prova rc=0 su R251, R251b, R251c, R251d.
+#  Strato 2 (controllo-preventivo): FAIL al primo giro su 591eea7f (tre
+#  difetti: trailing che sposta la parziale via r.2356, classe 793; G2 di
+#  R251d non stretto; M2/M3 senza la clausola della classe 550), PASS al
+#  secondo giro su 7b924919 con le correzioni applicate alla lettera.
+#  Il PASS copre i PIN e i CRITERI di questo file e dei tre file B. NON
+#  e' una riga di lancio: la riga (PC DESKTOP-H4D7CAJ, mai il VPS,
+#  -Deposito 10000, -Modello 4, niente -Spread/-Ritardo/-FrazioneIS)
+#  passa dai cancelli per conto suo.
+# =====================================================================
 @SIMBOLO    D30EUR
 @PERIODO    M5
 @DAQUANDO   2024.09.26
