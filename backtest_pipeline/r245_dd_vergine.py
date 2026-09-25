@@ -148,6 +148,15 @@ def proxy_stop(p, passo=0.1):
     return (r / ((p["vol"] + passo) * p["px"]) * 100.0, r / (p["vol"] * p["px"]) * 100.0)
 
 
+def lotto_pari(pos, h=0.05):
+    """BANCO PARI [DERIVATO]: toglie l'arrotondamento del lotto (MathFloor a
+    passo 0,1, EA r.2069) posizione per posizione. Il lotto esatto sta in
+    [vol ; vol+0,1): stima centrale vol+h, h=0,05 (parte frazionaria uniforme).
+    Vale per OGNI uscita (il rendimento e' proporzionale al lotto), non solo
+    per gli SL. Tarata sugli SL (autotest T11): stesso R a banco pari."""
+    return [dict(p, ret=p["ret"] * (p["vol"] + h) / p["vol"]) for p in pos]
+
+
 # ---------------------------------------------------------------------
 #  statistiche di una sequenza di posizioni
 # ---------------------------------------------------------------------
@@ -539,6 +548,27 @@ def lettura():
     cf("ORA alla media sorgente + TRAIL scalate",
        lambda p: se["media_ora"] if p["tipo"] == "ORA" else (p["ret"] * kt if p["tipo"] == "TRAIL" else p["ret"]))
 
+    # ---- 2e. BANCO PARI su TUTTE le uscite [DERIVATO] (correzione del cancello)
+    print("\n[2e] BANCO PARI -- lotto esatto stimato (vol+0,05) su vergine E nulli: l'arrotondamento"
+          " tocca OGNI uscita, non solo gli SL")
+    Vp = lotto_pari(V)
+    svp = statistiche(Vp)
+    for nome_n, ser in (("nullo 1", feriali_estate_sorgente(S)), ("nullo 2", feriali_estate_storia(S, A))):
+        bp = nullo(ser, Lv, trasforma=lotto_pari)
+        print("  %s: DD p95 %.2f%%" % (nome_n, B.quantile([b["dd"] for b in bp], 0.95)))
+        for k in ("dd", "media_sl", "media_ora", "media_trail", "attesa"):
+            le, ge, _ = posizione_nel_nullo(bp, k, svp[k])
+            print("    %-40s vergine %s -> %s (P<=%.4f P>=%.4f)" % (dict(STAT)[k], fmt(svp[k], k), giudizio(le, ge), le, ge))
+    sep = statistiche(lotto_pari(Se))
+    print("  medie a banco pari, sorgente d'estate: SL %+.3f ORA %+.3f TRAIL %+.3f | vergine: SL %+.3f ORA %+.3f TRAIL %+.3f"
+          % (sep["media_sl"], sep["media_ora"], sep["media_trail"], svp["media_sl"], svp["media_ora"], svp["media_trail"]))
+    ktp = sep["media_trail"] / svp["media_trail"]
+    for nome, f in (("ORA alla media della sorgente a banco pari", lambda p: sep["media_ora"] if p["tipo"] == "ORA" else p["ret"]),
+                    ("TRAIL scalate x%.3f" % ktp, lambda p: p["ret"] * ktp if p["tipo"] == "TRAIL" else p["ret"]),
+                    ("ORA + TRAIL", lambda p: sep["media_ora"] if p["tipo"] == "ORA" else (p["ret"] * ktp if p["tipo"] == "TRAIL" else p["ret"]))):
+        print("  controfattuale a banco pari (scelto DOPO i numeri) %-44s DD %.2f%% (vergine a banco pari %.2f%%)"
+              % (nome, dd_saldo([f(p) for p in Vp]), svp["dd"]))
+
     # ---- 2d. il feed
     print("\n[2d] FEED DEL TESTER contro FEED VIVO BCM (rendiconti del VPS, stessa ora al secondo)")
     rf = confronto_feed(V)
@@ -751,6 +781,17 @@ def autotest():
     ok("T10 supporto del nullo 1: media ORA simulata >= ORA peggiore della sorgente",
        min_boot >= min_ora - 1e-9, "min simulata %.3f, ORA peggiore %.3f, vergine %.3f"
        % (min_boot, min_ora, statistiche(V)["media_ora"]))
+
+    # T11 TARATURA del banco pari (contro-esempio): a lotto esatto la perdita
+    # media degli SL deve coincidere fra vergine (100000) e sorgente d'estate
+    # (10000), perche' lo stop vale -1R a qualunque deposito; e h=0,10 deve
+    # SOVRACORREGGERE (se no h non e' identificato dagli SL).
+    sl_v = statistiche(lotto_pari(V))["media_sl"]
+    sl_s = statistiche(lotto_pari(Se))["media_sl"]
+    sl_s10 = statistiche(lotto_pari(Se, 0.10))["media_sl"]
+    ok("T11 banco pari: SL medi vergine/sorgente entro 0,02 a h=0,05; h=0,10 li separa di piu'",
+       abs(sl_v - sl_s) <= 0.02 and abs(statistiche(lotto_pari(V, 0.10))["media_sl"] - sl_s10) > abs(sl_v - sl_s),
+       "vergine %.3f, sorgente %.3f" % (sl_v, sl_s))
 
     n_ok = sum(esiti)
     print("  AUTOTEST %d/%d %s" % (n_ok, len(esiti), "PASS" if n_ok == len(esiti) else "FAIL"))

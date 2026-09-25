@@ -1,6 +1,6 @@
 # 🔬 R245: da dove viene il DD dell'8,38% nella finestra vergine
 
-**25/09/2026** · sola lettura, **zero tempo macchina** · script `backtest_pipeline/r245_dd_vergine.py` (autotest **20/20 PASS**) · seme **248** e generatore **identici** a `r248_bande_vergine.py` (le finestre simulate sono quelle della banda congelata: il p95 d'estate torna **7,44%** alla cifra)
+**25/09/2026** · sola lettura, **zero tempo macchina** · script `backtest_pipeline/r245_dd_vergine.py` (autotest **21/21 PASS**) · seme **248** e generatore **identici** a `r248_bande_vergine.py` (le finestre simulate sono quelle della banda congelata: il p95 d'estate torna **7,44%** alla cifra)
 Dati: per-trade vergine `R248/PERTRADE/…765281.csv` (39 posizioni, deposito 100.000) · sorgente `R247/PERTRADE/…765273.csv` (R247b, 197 posizioni, deposito 10.000) · tranche precedente `…765271.csv` (R247a, 154 posizioni) · rendiconti vivi `data/statements/trades_auto.csv`, `trades_100k.csv` · calendari `mql5/Files/abtg_news*.csv` · EURUSD `data/snapshots/*.json`
 
 Riproduzione: `python3 backtest_pipeline/r245_dd_vergine.py` (lettura) · `--autotest` (contro-esempi)
@@ -8,11 +8,11 @@ Riproduzione: `python3 backtest_pipeline/r245_dd_vergine.py` (lettura) · `--aut
 ---
 
 ## 0. 🧭 In una riga
-> **Il DD non viene da una serie di stop e nemmeno da poche perdite grandi: è un'emorragia lenta di 24 posizioni in 36 feriali. Tutte le FREQUENZE sono nella norma (quante posizioni, quanti stop, quante uscite a ORA, serie perdenti, lati). Fuori norma c'è la PROFONDITÀ delle 6 uscite a ORA fissa delle 17:30 (−0,61% di media contro −0,23% della sorgente) e, per un effetto di banco, la dimensione degli stop (lotto più fine a 100.000). Quando il confronto si allarga a tutta la storia della cella, le uscite a ORA e il DD scendono "al bordo" (P = 3,1% e 3,6%). La causa resta [NON SEPARATA] fra sfortuna del contratto e regime di mercato. Escluse dalla misura: serie di stop, feed (sui punti confrontabili), orologio fra le due estati, FOMC dentro la posizione, stop diverso.**
+> **Il DD non viene da una serie di stop e nemmeno da poche perdite grandi: è un'emorragia lenta di 24 posizioni in 36 feriali. Tutte le FREQUENZE sono nella norma (quante posizioni, quanti stop, quante uscite a ORA, serie perdenti, lati). La perdita media degli stop, che grezza esce fuori, è un effetto del BANCO (lotto arrotondato a passo 0,1: d'estate a 10.000 ogni uscita pesa ~6,6% in meno) e a lotto pari torna uguale (−1,04% contro −1,03%). Lo stesso effetto tocca TUTTE le uscite: a lotto pari, contro la sorgente d'estate resta fuori la PROFONDITÀ delle 6 uscite a ORA fissa delle 17:30 (−0,62% contro −0,25%, P 0,2%) e il DD è al bordo (8,45% contro p95 7,93%, P 3,3%); contro tutta la storia della cella DD e uscite a ORA stanno nella norma (P 5,2% e 5,0%, sul filo) e resta fuori la media delle TRAIL (guadagni piccoli, P 0,8%) [DERIVATO]. La causa resta [NON SEPARATA] fra sfortuna del contratto e regime di mercato. Escluse dalla misura: serie di stop, feed (sui punti confrontabili), orologio fra le due estati, FOMC dentro la posizione, stop diverso.**
 
 ## 1. 📉 Scomposizione del DD (domanda 1)
 
-**Il tratto peggiore**: picco **09/07** → minimo **28/08/2026**, cioè **50 giorni di calendario, 36 feriali, 24 posizioni**, DD **8,38%** (è tutto il DD della finestra; dopo il 28/08 non si approfondisce più: massimo 8,30% il 14/09, chiusura al 7,51% sotto il picco).
+**Il tratto peggiore**: picco **09/07** → minimo **28/08/2026**, cioè **50 giorni di calendario, 36 feriali, 24 posizioni chiuse DOPO il picco** (dal 10/07 al 28/08 inclusi; 25 contando anche la chiusura del 09/07 che fa il picco), DD **8,38%** (è tutto il DD della finestra; dopo il 28/08 non si approfondisce più: massimo 8,30% il 14/09, chiusura al 7,51% sotto il picco).
 
 | tipo d'uscita (dedotto) | posizioni nel tratto | somma | media |
 |---|---:|---:|---:|
@@ -51,13 +51,15 @@ Nullo 1 = bootstrap a blocchi di 5 feriali sui **170 feriali d'estate di R247b**
 | media delle TRAIL | +0,192% | +0,266% | +0,216% | +0,324% | norma (P 0,063) | 🔴 FUORI (P 0,018) |
 | **DD saldo chiuso** | **8,38%** | 7,00% | 3,11% | 6,38% | 🔴 FUORI (P 0,022) | 🟠 al bordo (P 0,036; p95 **7,92%**) |
 
+⚠️ La tabella è GREZZA: vergine a 100.000, nulli a 10.000. A lotto pari (sezione [2e] dello script, tarata sugli SL: T11) cambiano quattro giudizi, nullo 1 / nullo 2: perdita media SL → norma / norma; media ORA → FUORI (P 0,002) / norma (P 0,050); media TRAIL → al bordo (P 0,034) / FUORI (P 0,008); DD 8,45% → al bordo (P 3,3%, p95 7,93%) / norma (P 5,2%, p95 8,52%).
+
 **Controlli con numeri scritti da altri, tutti tornati**: DD della vergine 8,38% e netto −5.686,90 (R248) · 120 posizioni estive con PF 0,94 (R248a §7) · stessa finestra 2025: 39 posizioni, DD 3,11%, PF 1,04 (R248a §7) · DD della sorgente 5,9447% (R247) · R247a 154 posizioni, somma 1.180,94 (R247) · p95 estivo 7,44% (R248).
 
 **Cosa NON può spiegare il DD, ed è nella norma (il contro-esempio chiesto)**: la **frequenza degli stop** (20,5% contro 23,3%), la **lunghezza delle serie** (2 SL consecutivi, 4 perdenti), il **numero di posizioni**, la **quota di uscite a ORA** (15,4%, la stessa identica dell'anno prima), il **lato** e il **win rate**. Se il DD venisse da "più stop del solito" o da "una serie", almeno una di queste sarebbe fuori, e invece nessuna lo è.
 
-**Cosa è fuori norma, e quanto pesa** (controfattuali sul percorso vergine, [DERIVATO], non sono misure della causa):
-- 🟠 **La perdita media degli SL è un effetto del BANCO, ed è misurato.** A 10.000 il lotto arrotondato sotto a passo 0,1 rende gli stop più leggeri del 6-7%. L'ancora lo conferma sulla stessa corsa 2025-26: Equity DD **6,864% a 10.000** contro **7,010% a 100.000**. Riportati gli SL alla taglia della sorgente, il DD passa da 8,38% a **7,96%**. Con il nullo moltiplicato per 1,021, il p95 diventa **7,59%**. 👉 **È vero ma non basta**: da solo non riporta il DD sotto banda.
-- 🔴 **La profondità delle uscite a ORA porta l'eccesso.** Con le 6 uscite a ORA alla media della sorgente, il DD scende a **6,27%**, sotto il p95. Se si scalano anche le TRAIL, arriva a **5,49%**.
+**Cosa è fuori norma, e quanto pesa** (controfattuali sul percorso vergine, [DERIVATO], **scelti DOPO aver visto quali componenti uscivano fuori**: non sono misure della causa):
+- 🟠 **La perdita media degli SL è un effetto del BANCO, ed è misurato.** A 10.000 il lotto arrotondato sotto a passo 0,1 rende gli stop più leggeri del 6-7%. Il fattore d'estate si ricava posizione per posizione dai volumi (frazione di lotto 0,934 a 10.000, 0,991 a 100.000) ed è tarato sugli SL: a lotto pari −1,028 contro −1,037 (T11). L'ancora annuale (Equity DD 6,864% contro 7,010%, fattore 1,021) NON è il fattore d'estate: d'inverno i lotti sono ~3 volte più grandi. A lotto pari la vergine fa 8,45% contro un p95 di 7,93%: 👉 **È vero ma non basta da solo.**
+- 🟠 **Controfattuale sulle uscite a ORA** (scelto dopo i numeri): a lotto pari, con le 6 uscite a ORA alla media della sorgente (−0,252%) il DD scende da 8,45% a **6,41%**; scalando anche le TRAIL arriva a **5,45%**; le sole TRAIL lo portano a 7,51%.
 - ⚠️ **Però "FUORI" contro il nullo 1 è anche un limite del nullo** (autotest T10). La sorgente ha solo **12** uscite a ORA, la peggiore a −0,605%, e un bootstrap non può produrre una media sotto quel minimo. La vergine sta a −0,610. Contro tutta la storia della cella, dove **R247a d'estate ha tre uscite a ORA fra −0,73 e −0,83**, le uscite a ORA diventano "al bordo" (P 0,031) e il DD pure (P 0,036). **Profondità così la cella le ha già fatte, ma non in un anno solo.**
 - 📌 Sui confronti multipli: 16 statistiche per 2 nulli. La calibrazione T6 misura fino al **7,5%** di falsi "FUORI" per statistica (discrete), quindi un "al bordo" isolato non pesa da solo.
 
@@ -85,12 +87,13 @@ Il per-trade **non ha né ingresso né SL**. Si può usare solo un **proxy dal v
 | ipotesi | esito | la misura |
 |---|---|---|
 | **Serie di stop / più stop del solito** | ❌ **ESCLUSA** | quota SL, serie e win rate nella norma in tutti e due i nulli |
-| **Dati o feed del PC di backtest** | ❌ **ESCLUSA sui punti verificabili** | frequenza in banda, G-DATI verde; **3 uscite di R245 su 39 identiche al centesimo al feed VIVO** (08/07 17:30:00 ORA, 10/08, 13/08), più **6 su 6** per 770202 fino al **28/08** (dopo il 21/08). Le 6 uscite a ORA sono **tutte prima del 21/08**. Le altre 36 uscite restano [NON VERIFICATE] |
+| **Dati o feed del PC di backtest** | ❌ **ESCLUSA sui punti verificabili** | frequenza in banda, G-DATI verde; **3 uscite di R245 su 39 identiche al centesimo al feed VIVO** (07/08 17:30:00 ORA, 10/08, 13/08), più il per-trade vergine di 770202 (R248b 765283) identico al vivo su **3 uscite distinte** (10/08, 13/08, 28/08; 6 confronti perché ognuna è sia in `trades_auto.csv` sia in `trades_100k.csv`): **4 istanti distinti** in tutto. Delle 6 uscite a ORA ne è verificata **1** (07/08). Le altre 36 uscite restano [NON VERIFICATE] |
 | **Orologio** | ❌ **ESCLUSA fra le due estati** | stesso orologio (UTC+1 fisso sugli indici): 17:30 server = 12:30 ET in tutte e due; quota ORA **identica** (15,4%) all'anno prima |
+| **Binario diverso fra sorgente e vergine** | ❌ **ESCLUSA sul tratto comune** | stesso pin della vergine (`4d142cbb`, R248a) sulla corsa 2025.07.01-2026.06.30: 197 posizioni, PF 1,484 a 100.000 contro 197 e 1,489 di R247b a 10.000 (`REFERTO_ROUND_R248a.txt`) |
 | **FOMC dentro la posizione** | ❌ **ESCLUSA** | FOMC alle 19:00 server, uscita forzata alle 17:30 |
 | **Stop più largo / range diverso** | ❌ **ESCLUSA** (entro il proxy) | §4 |
-| **Banco: deposito 100.000 contro 10.000** | 🟠 **MISURATA, parziale** | SL più pesanti del 6,8%, fattore sull'Equity DD 1,021: **−0,4 punti** di DD, non basta da solo |
-| **Sfortuna del contratto (H0)** | ✅ **COMPATIBILE** | DD P 2,2% (contratto) e **3,6%** (storia intera, p95 7,92%); ORA "al bordo" contro la storia |
+| **Banco: deposito 100.000 contro 10.000** | 🟠 **MISURATA, parziale** | lotto a passo 0,1: d'estate a 10.000 ogni uscita pesa ~6,6% in meno (a 100.000 ~0,9%); spiega tutto lo scarto degli SL; a lotto pari la vergine fa 8,45% contro p95 7,93%: non basta da solo |
+| **Sfortuna del contratto (H0)** | ✅ **COMPATIBILE** | DD P 2,2% (contratto) e **3,6%** (storia intera, p95 7,92%); a lotto pari **3,3%** (p95 7,93%) e **5,2%** (p95 8,52%) [DERIVATO]; ORA "al bordo" contro la storia |
 | **Regime: rotture che si spengono e scivolano fino alle 12:30 ET** (lug-ago 2026, 23 long su 24) | ✅ **COMPATIBILE** | è la forma osservata (ORA profonde, TRAIL piccole, zero TP) ma non ha una misura propria |
 | **Dati 10:00 ET dentro la posizione** | ❓ **[NON MISURATO]** | calendario bucato |
 
@@ -102,6 +105,9 @@ Il per-trade **non ha né ingresso né SL**. Si può usare solo un **proxy dal v
 ⚠️ **Il limite, detto chiaro**: nessuna di queste misure trasforma 58 feriali in una prova. **Sfortuna e regime si separano davvero solo con altro fuori campione.** Questo referto non promuove, non archivia e non tocca il ramo "revisione" di R248.
 
 ## 6. 🪦 Cosa resta aperto
-Causa del DD: **[NON SEPARATA]** fra sfortuna del contratto e regime. Escluse con misura: serie di stop, feed (sui punti confrontabili), orologio fra le estati, FOMC intraday, stop diverso. Il banco (deposito) è misurato e parziale. Restano [NON MISURATI]: dati 10:00 ET, 36 uscite su 39 contro il feed vivo, EURUSD 2025, ingresso e SL esatti.
+Causa del DD: **[NON SEPARATA]** fra sfortuna del contratto e regime. Escluse con misura: serie di stop, feed (sui punti confrontabili), orologio fra le estati, FOMC intraday, stop diverso. Il banco (deposito) è misurato e parziale; a lotto pari il DD resta sopra il p95 del contratto (8,45% contro 7,93%). Escluso anche il binario sul tratto comune. Restano [NON MISURATI]: dati 10:00 ET, 36 uscite su 39 contro il feed vivo, EURUSD 2025, ingresso e SL esatti.
 
 _Nessun EA toccato, nessuna taglia, nessuna sedia, nessun conto. Zero tempo macchina._
+
+---
+_Cancello: strato 1 OK; strato 2 FAIL (D1 banco non propagato -> classe 791; D2 data; D3 conteggio; D4 etichetta; D5 binario) -> correzioni applicate, in attesa della seconda passata._
