@@ -189,11 +189,4 @@ contro la pagella del 19/08, la stima di R su gambe sintetiche e, dopo il cancel
 piccolo con la gemella dà 1 episodio (−3,75 R), senza dà 0 (−2,86 R) anche alla soglia −2,94; nessun
 NASUSD; evento in R proprio −2,942; IC Poisson esatto k=6 = 2,20-13,06._
 
-_Cancello: strato 1 (`controlla_riga.py --oggetto md`) **nessun difetto meccanico** (rilievi letti: nessun
-blocco ```; il conto `50504263` compare solo come fonte dei dati, in lettura). Strato 2
-(`controllo-preventivo`): **FAIL alla prima passata** su `03de12e5`, con 5 difetti bloccanti. F1 è la
-classe **798** nuova: l'episodio forward del 27-29/07 esisteva solo per la SELL gemella della doppia
-istanza. Gli altri: F2 la `770101` al 2,0% fino al 17/08 letta come arrotondamento dei lotti, e il filtro
-senza simbolo; F3 il verso dello slittamento nel §0.2; F4 nessun legame col costo di oggi; F5 il
-rimescolamento sopravvalutato. Tutti corretti, con i numeri nuovi rifatti dallo strumento.
-🔴 **In attesa della seconda passata: il documento non va a Claudio prima del PASS.**_
+_Cancello: strato 1 (`controlla_riga.py --oggetto md`) **nessun difetto meccanico** (rilievi letti: nessun blocco ```; il conto `50504263` compare solo come fonte dei dati, in lettura). Strato 2 (`controllo-preventivo`): **FAIL alla prima passata** su `03de12e5` con 5 difetti bloccanti. F1 era la classe **798** nuova (checklist, `a2f2a146`): l'episodio forward del 27-29/07 esisteva solo per la SELL gemella della doppia istanza. F2: la `770101` al 2,0% fino al 17/08 letta come arrotondamento dei lotti, e il filtro senza simbolo. F3: il verso dello slittamento nel §0.2. F4: nessun legame col costo di oggi. F5: il rimescolamento sopravvalutato. ✅ **PASS alla seconda passata** su `24db9d55`: correzioni applicate alla lettera; i numeri nuovi (forward con e senza la gemella alle due soglie, sensibilita' combinata, IC Poisson) sono stampati dallo strumento e ricontrollati; accettate le due deviazioni (38 giornate col filtro B9; R `770101` ristimato senza la gemella, 109,45 → −2,86 R, la lettura prudente: con R 114,30 sarebbe −2,74). Autotest 21/21._
