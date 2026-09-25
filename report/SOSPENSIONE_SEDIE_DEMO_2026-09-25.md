@@ -93,3 +93,4 @@ Se e quando servirà, ogni sedia si riattacca con le impostazioni salvate in `CO
 - Referti archiviati: `backtest_pipeline/coda/referti/sospensioni/` (esiti e console di secco ed esegui).
 - **Da verificare**: (1) alla riapertura del piccolo, che MT5 carichi i 15 grafici SENZA EA e le sedie forex/oro con la faccina [NON VERIFICATO il comportamento di MT5 su un .chr senza blocco <expert>]; (2) nella scheda Trade, pendenti/posizioni su U30USD, D30EUR, NASUSD, 225JPY (es. il PunteLarry SELL STOP U30USD del 23/09); (3) la sonda CODA_01 della notte.
 - **Resta da fare a mano**: il 225JPY 770901 sul 100k 50504263.
+- ✅ **100k 50504263 (profilo `SQUADRA 100K`)**: dalla foto del giornale mandata da Claudio, `2026.09.25 13:14:47.591 Experts expert ABTG_SupertrendReversal (225JPY,H2) removed`. Salvataggio del profilo: da confermare (la foto non lo mostra); verifica anche dalla sonda CODA_01 della notte del 26/09.
