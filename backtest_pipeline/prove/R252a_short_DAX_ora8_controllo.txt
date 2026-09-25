@@ -1,0 +1,702 @@
+# =====================================================================
+#  R252 -- IL LATO SHORT DELL'APERTURA DAX CON L'OROLOGIO IN FASE
+#          CON LA CASH TUTTO L'ANNO
+#  EA: ABTG_DAX_Apertura_EU   (motore della sedia 770101, D30EUR M5)
+#  FILE DI TESTA DEL ROUND, e cella R252a (short, ora 8, il CONTROLLO).
+#  Qui stanno il ragionamento, le attese e i cancelli di TUTTA la
+#  famiglia R252a..R252f. Gli altri cinque file portano solo le loro
+#  differenze e rimandano qui.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026: i round non girano piu' sul VPS).
+#  Prima del round vale l'avvertenza gia' scritta nei referti R246 e
+#  R251: il terminale di quel PC e' loggato su un conto demo e da li' il
+#  14/08 sono partiti ordini veri. Si controlla che non abbia SEDIE
+#  attaccate.
+#
+#  VINCOLI DI BANCO (classe 692: stanno nella riga di lancio, non qui;
+#  li scrivo perche' chi la scrive li trovi -- sono QUELLI DI R251):
+#    -Deposito 10000 (= FASE M = R251: con un altro deposito il G0 non
+#        riproduce e i tetti R1/R2 non valgono).
+#    -Modello 4 (tick reali). Un numero OHLC qui e' solo screening.
+#    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo
+#        da' '@FRAZIONEIS' qui sotto; un -FrazioneIS diverso fa MORIRE il
+#        driver, walkforward_generico.ps1 r.713-740).
+#    MaxBars=100000000 come in R246/R251 (REFERTO_ROUND_*: "tetto
+#        barre"): qui la gamba e' UNA SOLA da 641 giorni di M5.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca preset, EA, sedie, conti, taglie o parametri del forward. Non
+#  promuove niente in campo: ogni esito e' materiale per Claudio.
+# =====================================================================
+#
+# =====================================================================
+#  1. LA DOMANDA, E COSA E' GIA' MISURATO
+# =====================================================================
+#  Claudio, 25/09: "DOBBIAMO TROVARE IL LATO SHORT DEL DAX. ED ADESSO."
+#  R251 (report/REFERTO_R251_2026-09-25.md) ha bocciato PER RISCHIO lo
+#  short "identico al long" (DD_fisso IS 11,19%, OOS 12,74% contro 5,79 /
+#  8,21 del long) e ogni ritocco dell'uscita. Ma OGNI numero di R251
+#  mescola due tempistiche: InpSessionHour=8 e' ORA SERVER BCM, e lo
+#  storico indici BCM e' UTC+1 FISSO (report/OROLOGIO_BCM_2026-09-24.md
+#  par. 3.2). La cash Xetra (09:00 ora tedesca) cade alle 8 server
+#  d'ESTATE e alle 9 server d'INVERNO: d'inverno l'ora 8 arma UN'ORA
+#  PRIMA della cash, sul pre-mercato.
+#  R251 par. 4, sul per-trade OOS dell'ancora (792520, 181 posizioni):
+#       estate  96 posizioni  PF 1,390  +516,09
+#       inverno 85 posizioni  PF 0,899  -261,35
+#  E UN FATTO NUOVO, contato per questo round (r252_attese.py sez. 3-bis):
+#  >>> TUTTO il DD OOS del controllo sta DENTRO l'inverno sfasato. <<<
+#       DD a saldo chiuso 1246,06 EUR dal picco del 2025.11.20 al minimo
+#       del 2026.01.23, picco E minimo in inverno. I due blocchi d'estate
+#       hanno DD interni di 284,72 (2,85%) e 333,37 (3,33%).
+#  Quindi il DD che boccia R2 e' fatto TUTTO di giornate che un orologio
+#  in fase con la cash giocherebbe diversamente. Non dice che la curva in
+#  fase passa: dice che la domanda e' APERTA, e che R2 non e' deciso da
+#  R251. Sull'IS la divisione per stagione NON esiste (nessun per-trade
+#  IS dello short in archivio): [NON MISURATO].
+#
+#  LA STRADA DI QUESTO ROUND: lo short nudo (geometria R251, identica al
+#  long 770101 a specchio) con l'ora IN FASE con la cash tutto l'anno:
+#  InpSessionHour 8 d'estate e 9 d'inverno, chiusura 17:30 / 18:30.
+#  E' quello che esegue un server in fase con Xetra. FTMO lo e' SE segue
+#  il calendario europeo GMT+2/+3 (docs/REGOLAMENTO_FTMO_2026-08.md r.130,
+#  report/OROLOGIO_BCM par. 5.3): la regola e' DOCUMENTATA, la data del
+#  cambio e' [NON MISURATA] (PRESET_FTMO_OROLOGIO N1/N3, misura del 25/10;
+#  IL_MERITO_E_D_INVERNO par. 0.6 tiene aperta anche l'ipotesi UTC+3
+#  fisso). Quindi R252 misura "lo short alla cash tutto l'anno", e
+#  "= FTMO" vale sotto quella ipotesi documentata, non misurata.
+#  Su BCM la stessa cosa richiederebbe un preset che cambia ora con la
+#  stagione (o un EA che lo faccia): decisione di Claudio, NON qui.
+#
+# =====================================================================
+#  2. PERCHE' SEI FILE, E PERCHE' NON FINESTRE STAGIONALI
+# =====================================================================
+#  L'EA non ha un'ora che segue l'ora legale (input letti dal sorgente a
+#  HEAD: solo InpSessionHour/InpCloseHour in ora server). Nessun EA si
+#  tocca. Quindi la curva "in fase" NON si fa girare: si RICOMPONE dal
+#  per-trade di due corse, una a ora 8 e una a ora 9 (par. 5).
+#  Scartate, e perche':
+#   - finestre stagionali con @DAQUANDO/@FINOA: sei segmenti (tre
+#     estati e due inverni spezzati sulle due ere) per due orologi; ogni
+#     file ha DUE gambe e il per-trade sopravvive SOLO per la seconda
+#     (classe 455: un file per magic, la gamba OOS sovrascrive la IS);
+#     ogni finestra riparte da 10000 (il DD di un'era non e' la somma
+#     dei DD dei pezzi); ogni inizio rifa' il riscaldamento del
+#     Supertrend (R251 par. 5). Solo per la strada principale: 6
+#     segmenti in fase + 2 inverni di controllo = 8 pezzi che vogliono il
+#     per-trade (le posizioni si contano li'), cioe' 8 file e 32 passate,
+#     piu' dell'intera famiglia qui sotto.
+#   - UNA corsa lunga per orologio, col taglio messo a UN GIORNO (come le
+#     finestre A di R246): la gamba IS e' un moncone (2024.09.26), la
+#     gamba OOS e' CONTINUA 2024.09.27 -> 2026.06.30 e il suo per-trade
+#     copre TUTTE e due le ere. E' la stessa macchina di R246 (finestre
+#     A, taglio 0.002), che ha girato (REFERTO_R246 par. 3).
+#  LA FAMIGLIA (asse di OGNI file = InpMagic, due gemelle a passo 50: il
+#  cancello G1 e UN PER-TRADE PER GEMELLA, come R246):
+#    R252a  short nudo, ora 8 / 17:30   (IL CONTROLLO = R251)   792601/792651
+#    R252b  short nudo, ora 9 / 18:30                           792602/792652
+#    R252c  short + Supertrend H12, ora 8 / 17:30               792603/792653
+#    R252d  short + Supertrend H12, ora 9 / 18:30               792604/792654
+#    R252e  LONG nudo, ora 8 / 17:30   (riferimento)            792605/792655
+#    R252f  LONG nudo, ora 9 / 18:30   (riferimento)            792606/792656
+#    6 file x 2 celle x 2 gambe = 24 PASSATE (12 lunghe + 12 moncone).
+#  Fra a e b (c e d, e ed f) cambia UNA cosa: l'OROLOGIO, cioe' ora di
+#  armo E ora di chiusura spostate insieme di un'ora (come le caselle
+#  -1h/+1h di R246, "tutto l'orario spostato"). La chiusura e' attesa
+#  INERTE sullo short: sul per-trade 792520 l'uscita piu' tarda del giorno
+#  e' alle 16:27:46, zero uscite dopo le 17:31 (r252_attese.py sez. 2).
+#
+# =====================================================================
+#  3. LA GEOMETRIA: QUELLA DELL'ANCORA DI R251, PIN PER PIN
+# =====================================================================
+#  Pin = R251b (prove/R251b_short_DAX_uscita_parziale.txt, PASS del
+#  cancello su 7b924919), cella 50 = l'ancora di R251: RETEST, range 35,
+#  InpRetestOffsetPts 200, buffer 500, parziale 50% a TP1 1,0R con BE,
+#  trailing PREVBAR M5 armato subito, rischio 1%, niente reverse. Tutto
+#  il ragionamento sui pin inerti (GapFill, ConfirmMode, EMA, Guardian nel
+#  tester, TrailStartR, SpaceMode, NewsCurrencies non pinnato) sta in
+#  R251 par. 3 e vale identico.
+#  Differenze per file rispetto a R251b cella 50 (diff eseguito):
+#    tutti:        InpTP1_ClosePct fermo a 50 (N), asse = InpMagic
+#    R252b/d/f:    InpSessionHour 9, InpCloseHour 18 (min 30)
+#    R252c/d:      InpUseSupertrend true, InpStTF 16396 (H12), periodo 10
+#                  e moltiplicatore 2,5 = R251 (la cella H12 di R251)
+#    R252e/f:      InpAllowLong true, InpAllowShort false
+#  Controprova del long: le pin di R246e (il long d0 di 770101, finestra
+#  B) confrontate una per una con R251b: differiscono SOLO lato
+#  (Long/Short), magic, InpTP1_ClosePct (asse di R251b) e InpUsaGuardian
+#  (no-op nel tester). Quindi R252e e' il long di R246e/R246g e della
+#  FASE M (P4) sullo stesso binario: il G0 lo verifica (par. 6).
+#
+# =====================================================================
+#  4. LE FINESTRE E IL CALENDARIO
+# =====================================================================
+#  @DAQUANDO 2024.09.26  @FINOA 2026.06.30  @FRAZIONEIS 0.001, in TUTTI e
+#  sei i file. Il driver (walkforward_generico.ps1 r.934): Meta = Inizio
+#  + floor(642 x 0,001) = Inizio + floor(0,642) = Inizio. Quindi:
+#    gamba IS  = 2024.09.26 -> 2024.09.26  (MONCONE di un giorno)
+#    gamba OOS = 2024.09.27 -> 2026.06.30  (la corsa CONTINUA, 641 giorni)
+#  Serve f < 1/642 = 0,00156; 0,001 ha margine. Ricalcolato in Python.
+#  IL MONCONE: il CSV _IS atteso VUOTO o a zero righe utili, rc 2 del
+#  driver ATTESO (come le finestre A di R246: RIEPILOGO_R246 "FALSO
+#  ALLARME ATTESO"). MA CLASSE 766: la riga lo assolve SOLO se il CSV
+#  _OOS ha 2 righe con Trades > 0; se no e' un guasto vero.
+#  Il 2024.09.26 esce dalla corsa continua. In R246 quel giorno ha ZERO
+#  operazioni in tutte le celle (long a ora 8 e 7, Dow, MaxMin: REFERTO_
+#  R246 par. 3); per lo short e per l'ora 9 e' [NON VERIFICATO] e lo dice
+#  il G0 (par. 6).
+#  LE ERE (le stesse di R251, per data di chiusura; le posizioni chiudono
+#  in giornata, InpCloseAtEnd):
+#    IS  = 2024.09.27 -> 2025.06.30   (R251: dal 2024.09.26)
+#    OOS = 2025.07.01 -> 2026.06.30
+#  IL CALENDARIO D'INVERNO: ora solare UE, dall'ultima domenica di ottobre
+#  all'ultima di marzo, INTERVALLO SEMIAPERTO per data:
+#    2024.10.27 <= d < 2025.03.30    e    2025.10.26 <= d < 2026.03.29
+#  (identico a r246_bande_attese.py INV['UE'] e a ora_legale_ue() di
+#  controlla_riga.py). Il DAX segue SOLO il calendario UE: la settimana
+#  di disallineamento UE/USA non lo tocca. Primo giorno feriale d'inverno
+#  2024.10.28 e 2025.10.27; primo d'estate 2025.03.31 e 2026.03.30.
+#  FERIALI lun-ven (r252_attese.py sez. 0):
+#    IS  (dal 09.27)   estate  87   inverno 110
+#    OOS               estate 151   inverno 110
+#  Lo storico D30EUR parte dal 2024.09.26: e' tutto. Prova di regime sugli
+#  indici non possibile su questo banco (R251 par. 4): dichiarato.
+#
+# =====================================================================
+#  5. LA CURVA IN FASE: COME SI RICOMPONE (CONGELATO PRIMA DEI NUMERI)
+# =====================================================================
+#  Per ogni configurazione X (short nudo, short H12, long):
+#    IN FASE   = righe per-trade della corsa a ORA 8 con data d'ESTATE
+#              + righe della corsa a ORA 9 con data d'INVERNO.
+#    CONTROLLO = tutte le righe della corsa a ORA 8 (= R251 sullo short).
+#  Perche' e' lecito: InpOneTradePerDay + InpCloseAtEnd = ogni giornata e'
+#  indipendente (entra e chiude in giornata, nessuno stato portato al
+#  giorno dopo tranne il SALDO, che fa la taglia). Le righe d'estate della
+#  corsa a ora 8 sono LE STESSE in controllo e in fase.
+#  IL SALDO E' L'UNICA COSA CHE NON SI TRASFERISCE: ogni corsa ha la sua
+#  taglia. Due metodi, TUTTI E DUE calcolati e riportati:
+#    A (ribasato): per ogni posizione p, B_corsa(p) = 10000 + somma dei
+#      net_profit della SUA corsa chiusi prima del primo deal di p;
+#      r(deal) = net_profit / B_corsa(p). La curva dell'era riparte da
+#      10000 e ogni deal aggiunge r x (saldo della curva prima di p).
+#    B (denaro): i net_profit come sono, ciascuno col lotto della sua
+#      corsa.
+#  Per era (IS, OOS): posizioni (per position_id DENTRO la corsa), deal,
+#  Profit, PF per POSIZIONE e PF sui deal, EP per posizione, DD a saldo
+#  chiuso (in EUR e in % di 10000), peggior giornata a saldo chiuso.
+#  DD_chiuso <= DD di equity per costruzione (l'equity passa per ogni
+#  saldo di chiusura). Il fattore k = DD_fisso del CSV / DD_chiuso dal
+#  per-trade, sulla STESSA corsa, si misura nel round su:
+#    - R252a righe IS contro il CSV IS di R251b cella 50 (se G0 VERDE:
+#      stessa corsa, 1119,07 EUR = 501,27 / 0,44793);
+#    - 792520 (archivio R251) contro il CSV OOS di R251b cella 50: gia'
+#      misurato, k = 1,0227 (r252_attese.py sez. 1);
+#    - la gamba continua di OGNUNO dei sei file: DD_fisso del CSV _OOS
+#      (Profit / Recovery Factor) contro il DD_chiuso del suo per-trade.
+#    k = il MASSIMO di questi (in archivio: 1,0227 short, 1,0380 D1).
+#  L'ERRORE DEL METODO A, e (IL CONTRO-ESEMPIO DELLA RICOMPOSIZIONE, contro
+#  numeri scritti da ALTRI): le righe OOS di R252a partono da un saldo di
+#  10000 - 501,27 = 9498,73 (se G0 VERDE), quelle di R251 da 10000. Si
+#  ribasano col metodo A e si confrontano con 792520 (R251):
+#    e = |DD_chiuso A(R252a, OOS) - 1246,06| / 1246,06,
+#  e accanto |Profit A - 254,74| e lo scarto per posizione (mediana,
+#  massimo). Il lotto va a passi di 0,10 su lotti di 0,20-1,70 (volumi di
+#  792520): l'arrotondamento e' l'errore che e misura (classe 791).
+#  Si riporta anche lo SCARTO DI SALDO piu' grande fra una corsa e la
+#  curva in fase (|B_corsa(p) / saldo della curva prima di p - 1|): e e'
+#  misurato a uno scarto del ~5%. REGOLA CONGELATA: se nella curva in
+#  fase lo scarto massimo supera il 10% (il doppio del test), R1/R2 con
+#  DD stimato fra 0,8 e 1,2 volte la soglia sono NON RISOLTI d'ufficio.
+#
+#  >>> IL SUPERTREND NON CAMBIA GIORNATE COL CAMBIO D'ORA (letto nel
+#  codice, non assunto). SupertrendDir (r.2197, CopyRates a r.2202) chiede
+#  CopyRates(sym, tf, 0, 215): la candela corrente e' l'indice 0, il
+#  calcolo arriva all'indice 1 (l'ultima CHIUSA). TrendBias si legge una
+#  volta, all'armo (r.1582), a range chiuso: 08:35 o 09:35 server. A
+#  quelle due ore la candela corrente e' LA STESSA su ogni TF da H4 in su
+#  (H4 08:00-12:00, H6 06:00-12:00, H8 08:00-16:00, H12 00:00-12:00,
+#  D1). Quindi il filtro H12 sceglie le STESSE giornate a ora 8 e a ora
+#  9: cambia solo DOVE si entra, non QUANDO si puo'. Contro-esempio che
+#  romperebbe questa frase: un TF con un confine fra 08:35 e 09:35
+#  (H1, M30): li' l'ora sposterebbe anche il filtro. Non in questo round.
+#
+# =====================================================================
+#  6. I CANCELLI PRELIMINARI, CONGELATI PRIMA DEI NUMERI
+# =====================================================================
+#  Confronti in centesimi con epsilon 0,000001 (classe 794), nelle due
+#  direzioni.
+#  G0 RIPRODUZIONE -- lega il round al banco di R251 e della FASE M:
+#   R252a (short, ora 8), righe con data <= 2025.06.30, ogni gemella:
+#     VERDE  = 152 deal, somma net_profit -501,27 al centesimo, 119
+#              posizioni (= Trades di R251b cella 0 IS);
+#     GIALLO = 152 deal e |delta| <= 5,01 (1%, la regola di R251);
+#     ROSSO  = il resto.
+#     Contro-esempio: se lo short avesse operato il 2024.09.26 (fuori
+#     dalla corsa continua), i deal sarebbero MENO di 152 -> ROSSO, e la
+#     causa si legge (prima riga del per-trade contro la FASE M).
+#   R252a righe >= 2025.07.01 contro 792520 (archivio R251), riga per
+#     riga NELL'ORDINE (non per position_id, che nella corsa continua e'
+#     un altro numero): close_time, deal_type, price IDENTICI su 243
+#     righe, 181 posizioni. net_profit e volume NON si confrontano (saldo
+#     diverso). VERDE-STRUTTURA o ROSSO.
+#     L'UNICA ECCEZIONE AMMESSA, SCRITTA ADESSO, E PERCHE': il lotto va a
+#     passi di 0,10 con minimo 0,10 (D30EUR, report/CORSIA_DEMO_SUPERWAVE_
+#     DAX_2026-09-08.md r.65; floor a r.2285 del sorgente). Una posizione
+#     che a saldo piu' basso scende a 0,10 lotti NON fa la parziale
+#     (NormalizeVolume r.2545-2552 torna 0) ma fa lo stesso il BE (r.2384-
+#     2397): ha UN deal invece di due, con l'uscita finale identica (il
+#     trailing non guarda partialDone con InpTrailStartR=0, r.2437-2441;
+#     letto nel codice, non misurato). Quindi:
+#     un deal di parziale mancante in R252a e' ammesso SOLO dove R252a ha
+#     0,10 lotti; l'ultimo deal della posizione deve restare identico.
+#     Atteso: nessun caso (su 792520 la posizione piu' piccola e' 0,40
+#     lotti; x 0,95 = 0,38 -> 0,30, parziale 0,10: si fa).
+#   R252c/R252d (H12) -- IL CONTROLLO DEI PIN NON DIPENDE DA R251:
+#     il filtro TOGLIE giornate e non tocca le altre (stesso range, stesso
+#     retest, stessa gestione: par. 5), quindi ogni deal di R252c deve
+#     avere un gemello in R252a con close_time e price IDENTICI (lotto e
+#     net_profit no: saldo diverso), e ogni deal di R252d un gemello in
+#     R252b. VERDE-SOTTOINSIEME se vale per TUTTI i deal, ROSSO se anche
+#     uno solo manca (pin del filtro non arrivato, o un meccanismo non
+#     visto nel codice: si cerca prima di leggere).
+#     E, informativo, contro il CSV di R251 cella H12 (Pass 3): IS 61 deal
+#     e +216,88, OOS 126 deal. Qui una differenza NON e' un guasto del
+#     banco (quello lo dice R252a): la corsa continua parte un giorno dopo
+#     R251 e SupertrendDir calcola sulle ultime 215 candele H12 (r.2197-
+#     2202); finche' la storia ne ha meno, le due corse calcolano su
+#     finestre diverse. La finestra e' piena in tutte e due dal ~2025.02.25
+#     [DERIVATO: 215 H12 a 2 per feriale dal 2024.09.26]. Stessa cosa per
+#     la gamba OOS di R251 se il tester non le ha servito storico prima del
+#     2025.07.01 (R251 par. 5, [NON VERIFICATO]). Si scrive "UGUALE A
+#     R251" o "DIVERSO DA R251 di N deal", e il perche' resta [INFERITO].
+#   R252e (long, ora 8) contro la FASE M P4: IS 189 deal e +394,97 al
+#     centesimo, OOS 256 deal (DAX_M_direzione_IS/OOS.csv, riletti per
+#     questo file). E G0-BIS, strutturale, contro R246: POSIZIONI di R252e
+#     fra 2024.09.27 e 2025.06.09 contro 794613 (R246g), dal 2025.06.10
+#     contro 794611 (R246e): stesse posizioni, e per ognuna close_time e
+#     price dell'ULTIMO deal identici (deposito diverso: volumi e
+#     net_profit no). Il deal di parziale puo' mancare in R252e SOLO dove
+#     R252e ha 0,10 lotti (stessa eccezione di sopra: a 100000 il lotto e'
+#     10 volte piu' grande e la parziale si fa sempre). Se G0-BIS non e'
+#     VERDE, la lettura di frequenza del par. 10 e' solo descrittiva.
+#   G0 ROSSO NON annulla il round (le curve si confrontano DENTRO il
+#     round), ma rende R1/R2 [NON CONFRONTABILI] per quella configurazione
+#     (i tetti vengono dal banco della FASE M, classe 750).
+#  G1 DETERMINISMO: in ogni file le due gemelle hanno CSV _OOS identici
+#     (Profit, PF, Equity DD, Trades, Peggior Giornata) e per-trade
+#     identici riga per riga tranne la colonna magic. Se no, il FILE e'
+#     NULLO e la configurazione che lo usa e' NULLA (classe 772: un file
+#     nullo non vota).
+#  S1 SENTINELLA DELL'OROLOGIO (la manopola deve mordere, classe 31-bis):
+#     file a ora 8: zero uscite prima delle 08:35 e dopo le 17:31;
+#     file a ora 9: zero uscite prima delle 09:35 e dopo le 18:31.
+#     Contro-esempio: se il pin dell'ora 9 non arriva, la corsa e' quella
+#     a ora 8, e sul per-trade 792520 il 43,6% delle uscite (106 su 243)
+#     cade prima delle 09:35; sul long d0 di R246 il 48,5% (216 su 445).
+#     S1 fallito = file NULLO.
+#  G2 LE MANOPOLE DEVONO MORDERE:
+#     - l'orologio: le righe d'inverno di ora 9 NON identiche a quelle di
+#       ora 8 (conseguenza di S1; se identiche e S1 passa, c'e' un guasto
+#       da capire prima di leggere);
+#     - il filtro H12: deal di R252c < deal di R252a e deal di R252d <
+#       deal di R252b, in tutte e due le ere. Uguali = il Supertrend ha
+#       reso 0 (classe 31-bis, R251 par. 5): NON ESEGUITA.
+#
+# =====================================================================
+#  7. n: DEAL E POSIZIONI (classe 454)
+# =====================================================================
+#  Il per-trade ha position_id: le POSIZIONI si CONTANO, non si stimano.
+#  Il merito si legge solo con POSIZIONI OOS DELLA CURVA IN FASE >= 150.
+#  Con parziale al 50% e BE a TP1 una posizione ha 1 o 2 deal. Sul long
+#  d0 di R246 e sullo short 792520 il PF per posizione e il PF sui deal
+#  COINCIDONO al millesimo (1,108/1,108, 1,389/1,389, 1,0652/1,06519):
+#  col BE le due uscite di una posizione hanno lo stesso segno. Si
+#  riportano comunque TUTTI E DUE; se stanno da parti opposte di una
+#  soglia, quel cancello e' NON RISOLTO (classe 550).
+#  L'IS (~110-120 posizioni attese) resta SOSPESO sul merito, come in
+#  R251: l'IS giudica il RISCHIO (Emendamento B).
+#
+# =====================================================================
+#  8. LE ATTESE, DICHIARATE PRIMA DEI NUMERI
+#     python3 backtest_pipeline/r252_attese.py (seme 252, ~5 s)
+# =====================================================================
+#  [STIME A PRIORI: servono a capire DOPO se il round si e' comportato
+#  come previsto; NON sono cancelli.]
+#  CONTROLLO (R252a) = R251: OOS 181 posizioni, PF 1,0652, EP +1,4074,
+#   DD_chiuso 12,461%, DD_fisso 12,744%. IS 119 posizioni, PF 0,846,
+#   DD_fisso 11,19%.
+#  CURVA IN FASE, OOS -- bootstrap dell'inverno, estate fissa (96
+#  posizioni vere), sotto le due ipotesi:
+#   H_O "orologio" (d'inverno alla cash rende come d'estate alla cash):
+#     posizioni 160-166-172 (p10-p50-p90), P(>=150) 0,999
+#     PF per posizione 1,152-1,397-1,706, P(M1) 0,944, P(M2) 0,887
+#     DD_chiuso 3,33-4,32-7,20%, P(DD x k <= 8,21) 0,934 (k 1,0380, il
+#     massimo in archivio; e non incluso: si misura nel round)
+#   H_S "stagione" (d'inverno alla cash rende come l'inverno a ora 8):
+#     posizioni 175-181-187, P(>=150) 1,000
+#     PF per posizione 0,867-1,068-1,320, P(M1) 0,424, P(M2) 0,297
+#     DD_chiuso 5,40-9,66-16,57%, P(DD x k <= 8,21) 0,333
+#   ONESTA' DEL BOOTSTRAP (contro-esempio eseguito nello script): sotto
+#   H_S la curva in fase E' il controllo ricampionato, e il DD VERO del
+#   controllo (12,461%) cade al percentile 0,715 della banda H_S: il
+#   ricampionamento i.i.d. rompe i grappoli di perdite, quindi le bande
+#   di DD sono OTTIMISTE. Il PF vero cade al percentile 0,495: non
+#   distorto.
+#   PAVIMENTO [DERIVATO]: il blocco d'estate 2026 entra INTERO nella
+#   curva in fase, e su 792520 il suo DD interno e' 333,37 EUR (3,33%):
+#   DD_chiuso OOS in fase >= ~3,3%, a meno della scala del saldo (metodo
+#   B) e di e (metodo A).
+#  >>> CLASSE 178: le bande di PF di H_O e H_S si SOVRAPPONGONO in
+#  [1,152 ; 1,320]; quelle di frequenza no (172 < 175). QUESTO ROUND NON
+#  DECIDE "OROLOGIO O STAGIONE" e non lo dichiara: misura cosa fa lo short
+#  alla cash. La frequenza si SCRIVE (descrittiva), il PF si giudica coi
+#  cancelli del par. 9.
+#  CURVA IN FASE, IS -- [NON STIMABILE dall'archivio]: nessun per-trade IS
+#  dello short. Per passare R1 la curva in fase deve portare il DD IS da
+#  1119,07 EUR a <= 579 EUR (-48%). Succede solo se, come nell'OOS, il DD
+#  IS sta nelle giornate d'inverno sfasate; se sta nel rialzo d'estate
+#  (IS = rialzo 19.000 -> 24.300, R251 par. 9), no. ATTESA DICHIARATA: R1
+#  e' il cancello piu' probabile a cadere, probabilita' NON calcolabile.
+#  CONTROLLO DELLE ESTATI: per costruzione le righe d'estate di R252a e
+#  R251 coincidono (G0): la curva in fase e il controllo differiscono SOLO
+#  in 110 + 110 feriali d'inverno.
+#
+# =====================================================================
+#  9. IL CANCELLO, CONGELATO PRIMA DEI NUMERI
+# =====================================================================
+#  Nessun esito di questo round tocca il campo. "Promossa" vuol dire
+#  SOLO: passa al passo di misura dopo (par. 13).
+#  RIFERIMENTO DEL RISCHIO = QUELLO DI R251, IMMUTATO (il long della FASE
+#  M, stessa panca): R1 5,79% (394,97 / 0,68191 / 100) e R2 8,21%
+#  (1800,19 / 2,19287 / 100). Il long IN FASE di R252f si RIPORTA accanto
+#  e NON sposta i tetti, qualunque cosa dica (i criteri non si cambiano
+#  dopo i numeri).
+#  RISCHIO -- a qualunque n (Emendamento B). DD della curva in fase,
+#  metodi A e B, k e e del par. 5:
+#    R1 (IS) e R2 (OOS), soglia S = 5,79 / 8,21:
+#      PASSA       se max(A,B) x k x (1+e) <= S
+#      FALLISCE    se min(A,B) x (1-e) > S   (il DD a saldo chiuso e' un
+#                  pavimento del DD di equity: fallire qui e' un fatto)
+#      NON RISOLTO altrimenti (classe 550).
+#    R3 peggior giornata >= -1,10%, CONDIZIONE SUFFICIENTE MISURATA: il
+#      "Peggior Giornata %" del CSV _OOS (la gamba continua, tutte e due le
+#      ere) del file a ora 8 E di quello a ora 9 della configurazione, tutti
+#      e due >= -1,10 -> PASSA (le giornate in fase sono un sottoinsieme
+#      delle loro). Se uno dei due e' sotto: la giornata si cerca sul
+#      per-trade a saldo chiuso (su 792520 e 792510 la peggiore a saldo
+#      chiuso E' quella del CSV: -1,0042 e -1,0039, r252_attese.py sez.
+#      1); se cade nella stagione che quel file NON porta nella curva in
+#      fase -> PASSA, se ci cade -> FALLISCE, se non si trova -> NON
+#      RISOLTO.
+#  MERITO -- solo se POSIZIONI OOS in fase >= 150 (contate). IL RECENTE
+#  GIUDICA IL MERITO. CONTROLLO dello short nudo = le righe di R252a,
+#  stesso metodo e stessa era (per H12 il riferimento e' un altro: par.
+#  11).
+#    M1  PF per posizione OOS in fase >= 1,10 (A e B).
+#    M2  MEGLIO DEL CONTROLLO OLTRE IL RUMORE: PF OOS in fase >= PF OOS
+#        controllo + 0,10 E EP per posizione in fase > EP controllo
+#        (classe 795: d'inverno gli INGRESSI cambiano, quindi la conferma
+#        e' PER OPERAZIONE, non Profit o DD).
+#    M3  CONCORDANZA: PF IS in fase > PF IS controllo E PF OOS in fase >
+#        PF OOS controllo (non chiede che l'IS guadagni).
+#    M4  NON APPLICABILE ALLO SHORT NUDO, E SI DICE PERCHE': l'orologio non
+#        e' un parametro scelto fra tanti guardando i numeri, e' la
+#        condizione di esecuzione di un server in fase con la cash. Due
+#        stati, nessun altopiano da leggere e nessun picco da scegliere.
+#        Sul Supertrend H12 vale INVECE il verdetto M4 di R251 ("NON C'E'
+#        UNA CONFIGURAZIONE ROBUSTA": cella isolata), che questo round NON
+#        puo' cambiare (par. 11).
+#  ESITI, per configurazione, in quest'ordine:
+#    NULLO                G1 o S1 fallito su un suo file, o per-trade
+#                         mancante
+#    [NON CONFRONTABILE]  G0 ROSSO: R1/R2 non si leggono (il resto si')
+#    BOCCIATA PER RISCHIO R1, R2 o R3 FALLISCE
+#    RISCHIO NON RISOLTO  nessuno fallisce, almeno uno NON RISOLTO
+#    SOSPESA              rischio passato, posizioni OOS < 150: merito
+#                         sospeso; se passa M1-M3 si scrive "INDIZIO
+#                         FAVOREVOLE, merito sospeso", mai "promossa"
+#    BOCCIATA PER MERITO  posizioni >= 150 e M1, M2 o M3 fallito
+#    PROMOSSA AL PASSO DOPO  tutto passato
+#  E SI SCRIVE SEMPRE SE LA CURVA IN FASE BATTE IL CONTROLLO: se M2
+#  fallisce la frase e' "L'OROLOGIO IN FASE NON BATTE LO SHORT A ORA 8
+#  OLTRE IL RUMORE" -- ed e' un risultato.
+#  E SI SCRIVE SEMPRE ACCANTO: posizioni per stagione, PF per stagione,
+#  il DD e dove sta (date di picco e minimo), il Profit, i due metodi.
+#
+# =====================================================================
+#  10. IL LONG DI RIFERIMENTO (R252e, R252f) -- NON DECIDE NIENTE
+# =====================================================================
+#  Perche' c'e': R246 INVERNO (R246o/p, la casella d+1 del DAX, cioe' il
+#  long 770101 armato alla cash d'inverno) NON HA RISULTATI IN REPO: in
+#  risultati_archivio/R246 ci sono solo ROUND_R246a..l e nessun per-trade
+#  794615/794665/794616/794666. report/NOTTE_2026-09-25.md r.47 dice che
+#  la riga era stata mandata il 24/09 sera ("se non e' gia' girata"):
+#  se e' girata sul PC di backtest, i CSV non sono stati raccolti
+#  [NON VERIFICATO]. Prima di lanciare R252e/f si chiede a Claudio: se
+#  R246 INVERNO ha girato, R252f resta utile (banco 10000 dei tetti) ma la
+#  lettura di frequenza del DAX va fatta sui file di R246, non qui.
+#  In ogni caso il long in fase NON e' misurato su questo banco, e i
+#  tetti R1/R2 vengono da un long che d'inverno arma nel pre-mercato.
+#  Si riportano per il long le stesse grandezze della curva in fase
+#  (metodi A e B, per era, per stagione). NON c'e' esito di promozione.
+#  LETTURA DI FREQUENZA con le bande CONGELATE di R246o (R246o header,
+#  r246_bande_attese.py sez. 5): posizioni del long a ora 9 sui 220
+#  feriali d'inverno della corsa continua (la stessa popolazione di A+B,
+#  2024.09.27 -> 2026.06.30): H_STAGIONE [164,1 ; 179,9], H_OROLOGIO
+#  [133,6 ; 151,7], regola Qf2 com'e' scritta in R246o con i riferimenti
+#  d0 presi da R252e. Vale come la lettura di R246 SOLO se G0-BIS di
+#  R252e e' VERDE (le posizioni sono indipendenti dal deposito, i
+#  riferimenti no se le righe non coincidono); altrimenti descrittiva.
+#  Il PF del long d+1 resta NON DISCRIMINANTE (R246o: bande [1,16;1,88] e
+#  [0,93;1,81]).
+#  ATTESA: long d0 A+B (sez. 4 dello script, = REFERTO_R246 par. 5.2):
+#  estate 157 posizioni PF 1,108, inverno 168 PF 1,389.
+#  >>> CONSEGUENZA PER LA CODA: se R252 gira con G0-BIS VERDE, la parte
+#  DAX di RIGA_R246_INVERNO (R246o, R246p) e' ridondante per la frequenza.
+#  Restano non misurate le caselle d+1 del Dow (R246m/n) e del MaxMin
+#  (R246q/r). Decisione del coordinatore, non di questo file.
+#
+# =====================================================================
+#  11. IL SECONDARIO: SUPERTREND H12 SOTTO L'OROLOGIO GIUSTO (R252c/d)
+# =====================================================================
+#  R251: H12 unica cella che passa R1-R3 e M1-M3 (IS 61 deal PF 1,214
+#  DD_fisso 3,62%; OOS 126 deal PF 1,771 DD_fisso 4,95%), isolata ->
+#  "NON C'E' UNA CONFIGURAZIONE ROBUSTA". Regola del 19/08: NIENTE griglia
+#  intorno al picco. QUI NON SI GRIGLIA: una sola cella, rigirata con
+#  l'orologio in fase, senza vicine.
+#  COSA PUO' USCIRE E COSA NO, scritto adesso:
+#   - PUO' MORIRE: se la curva in fase H12 fallisce R1-R3, o M1 (PF OOS <
+#     1,10), l'indizio di R251 cade: era un effetto della tempistica
+#     mista.
+#   - NON PUO' ESSERE PROMOSSA da questo round: posizioni OOS attese
+#     sotto 150 (R251 H12 OOS: 126 DEAL, quindi al piu' 126 posizioni) ->
+#     merito SOSPESO; e anche se per sorpresa arrivasse a 150, M4 resta
+#     quello di R251. Il massimo esito e' "INDIZIO CHE SOPRAVVIVE ALLA
+#     TEMPISTICA IN FASE CON LA CASH, merito sospeso, non robusto".
+#  M1-M3 di H12 si leggono contro lo short NUDO IN FASE (R252a+b, il suo
+#  "default"), conferma per operazione (classe 795); accanto, descrittivo,
+#  contro H12 a ora 8.
+#  Il filtro sceglie le stesse giornate alle due ore (par. 5): il
+#  confronto H12-ora8 / H12-in-fase cambia SOLO gli ingressi d'inverno.
+#  La divisione per stagione di H12 a ora 8 e' [NON MISURATA] fino a oggi
+#  (il per-trade di R251 e' la cella D1): R252c la da' per la prima volta.
+#  ATTESA [STIMA]: margine di DD a ora 8 di 2,17 punti (IS) e 3,26 (OOS)
+#  sui tetti; nessun bootstrap possibile senza per-trade.
+#  Il RESTO DELL'ASSE H4-D1 in fase (che R251 par. 6 indica come "tutto
+#  l'asse", perche' M4 vieta il picco) NON e' in questo round: 32 passate
+#  in piu' (4 celle x 2 orologi = 8 file x 4). Buco dichiarato (par. 15).
+#
+# =====================================================================
+#  12. IL COSTO (stop >= 40 x spread) E IL TF
+# =====================================================================
+#  Lo stop e' range + 3,0 idx (R251 par. 12). ALLA CASH (estate a ora 8,
+#  inverno a ora 9): AMMESSO, ~50x [DERIVATO: IL_COSTO_DEL_DAX_RISOLTO
+#  2026-09-24; R246o: 49,1x con spread prudente 1,70; spread mediano
+#  dell'ora 09 BCM 1,70, dell'ora 08 1,70, spread_orario_D30EUR.csv].
+#  Il range alla cash d'inverno (09:00 BCM) come tale e' [NON MISURATO],
+#  direzione attesa favorevole (R246o).
+#  IL CONTROLLO d'inverno arma NEL PRE-MERCATO: li' il 40x e' [NON
+#  MISURATO], limite inferiore 20,2x (R246a par. 10, righe 426-427).
+#  Quindi e' la cella di R251 d'inverno, non quella in fase, a stare
+#  fuori dalla frontiera verificata: un motivo in piu' per misurare questa.
+#  Le righe d'estate della corsa a ora 9 (un'ora DOPO la cash) NON entrano
+#  in nessuna curva: si scrivono solo come descrizione.
+#  TF: M5, quello della sedia. Col RETEST il costo lo fa il range dei 35
+#  minuti, non la candela; il TF del grafico tocca solo l'ATR di gestione
+#  (R251 par. 5). Nessun TF piu' basso in gioco. Il punto 5 del
+#  certificato (TF cambiato) resta APERTO (par. 15).
+#
+# =====================================================================
+#  13. I PASSI DOPO (NON in questo round), SOLO SE "PROMOSSA" O "INDIZIO"
+# =====================================================================
+#  1. Lo short in fase sui GEMELLI U30USD e NASUSD (regola dei due lati
+#     25/08, certificato punto 4): con la stessa macchina (ora 14/15 USA).
+#  2. Il TF (certificato punto 5).
+#  3. Lo slot con il long (R251 par. 13: sulla stessa sedia la giornata ha
+#     UN posto; 256 + 243 != 316 in FASE M). Nessuna strada gratis.
+#  4. La tempistica FTMO VERA: il 25/10 si misura il cambio d'ora del
+#     server FTMO (PRESET_FTMO_OROLOGIO N3). Su BCM, un preset per
+#     stagione o un EA che segua l'ora legale: firma di Claudio.
+#
+# =====================================================================
+#  14. IL TEMPO MACCHINA
+# =====================================================================
+#  DESKTOP-H4D7CAJ ha UN SOLO agente (classe 751): passate in serie.
+#  CALIBRAZIONE SULLO STESSO EA, STESSO SIMBOLO, STESSA MACCHINA:
+#   R246e (finestra B, 2 gemelle x 642 giorni) 54 s; R246g (finestra A,
+#   moncone + 256 giorni, 2 gemelle) 44 s (RIEPILOGO_R246, orari dei
+#   REFERTO_ROUND). Retta: ~37 s fissi per file (compilazione, due avvii
+#   di MT5, moncone) + ~0,013 s per giorno-cella. Controprova su R251:
+#   4 file, 12 celle x 641 giorni -> 4 x 37 + 7692 x 0,013 = ~249 s;
+#   misurato 16:51:39 -> 16:56:09 = 270 s.
+#  QUESTO ROUND: 6 file, 12 celle x 641 giorni (+ 12 monconi):
+#   6 x 37 + 7692 x 0,013 = ~324 s.
+#  >>> STIMA DICHIARATA: 5-8 MINUTI per tutta la famiglia. <<<
+#  TETTO LARGO: il caso lento del 21/09 (89,6 s per passata di mezza
+#  finestra, report/I_CSV_A_ZERO_PERCHE_2026-09-22.md r.171) vale ~180 s
+#  per una passata continua da 641 giorni: 12 x 180 s = 36 min, piu' i
+#  monconi. Oltre i 40 minuti ci si ferma e si guarda.
+#  Il Supertrend si ricalcola una volta al giorno: costo trascurabile.
+#
+# =====================================================================
+#  15. I BUCHI DICHIARATI (cosa questo round NON misura)
+# =====================================================================
+#  - La curva in fase NON gira come un'unica corsa: e' RICOMPOSTA (par.
+#    5). Il DD e' [DERIVATO] con k ed e misurati; il vero DD di un EA che
+#    cambia ora da solo e' [NON MISURATO] (richiederebbe un EA nuovo).
+#  - L'IS dello short per stagione: esce da questo round per la prima
+#    volta (R252a), ma le attese IS non hanno una base (par. 8).
+#  - Il resto dell'asse Supertrend (H4, H6, H8, D1) in fase: M4 di R251
+#    resta com'e'.
+#  - Il filtro EMA 1/50 H4 sul lato short (R251 par. 15): no.
+#  - Gemelli U30USD/NASUSD (certificato punto 4) e TF (punto 5): no.
+#  - Lo slot con il long: no.
+#  - La data del cambio d'ora di FTMO (misura del 25/10): no.
+#  - Il 2024.09.26 (fuori dalla corsa continua): solo tramite G0.
+#  - Taglia vera (0,65% BCM, 2,00% FTMO): DD al banco 1%; la scala lineare
+#    e' un LIMITE SUPERIORE, non un'identita' (classe 547). Nessuna taglia
+#    proposta.
+#
+# =====================================================================
+#  16. RILIEVI SUL REPO (trovati preparando il round, NON corretti qui)
+# =====================================================================
+#  - CLAUDE.md (sez. FUSO, 24/09) scrive "FTMO (IT + 1 tutto l'anno)"
+#    come un fatto; report/IL_MERITO_E_D_INVERNO_2026-09-25.md par. 0.6 e
+#    report/PRESET_FTMO_OROLOGIO_2026-09-20.md (N1, N3) lo tengono [NON
+#    MISURATO] (una riga di documentazione, data del cambio ignota, e
+#    anche l'ipotesi UTC+3 fisso). Qui si usa la forma prudente (par. 1).
+#  - REFERTO_R251 par. 6 prescrive "rifare l'ancora e TUTTO l'asse H4-D1
+#    con l'ora in fase". Questo round rifa' l'ancora e SOLO H12: dichiarato
+#    al par. 11, perche' R252 non puo' promuovere H12 in nessun caso.
+#  - RIGA_R246_INVERNO.txt (PASS su 782d7280): NESSUN RISULTATO IN REPO
+#    (nessuna cartella ROUND_R246m..r in risultati_archivio/R246), mentre
+#    report/NOTTE_2026-09-25.md r.47 la mette in coda "se non e' gia'
+#    girata". O non e' girata, o e' girata e non e' stata raccolta: [NON
+#    VERIFICATO], si chiede a Claudio. Finche' non torna, il par. 7.1 del
+#    REFERTO_R246 resta tutto [INFERITO].
+#
+# =====================================================================
+#  17. IL MAGIC, E IL COMANDO CON CUI L'HO CERCATO
+# =====================================================================
+#  Blocco 7926xx, VERGINE. Comando eseguito il 25/09 su tutto il repo,
+#  comprese le cartelle .claude/worktrees:
+#     grep -rIn -oE "\b7926[0-9]{2}\b" . --exclude-dir=.git   -> 0 righe
+#  (e 7927xx, 7928xx: 0 righe). Gemelle a passo 50: 792601..792606 e
+#  792651..792656. Il magic non entra nel calcolo (le gemelle lo
+#  provano): serve a separare i DODICI per-trade in Common\Files,
+#     abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_<magic>.csv,
+#  ognuno = la gamba OOS (continua) della sua gemella.
+#
+# =====================================================================
+#  18. PER CHI SCRIVE LA RIGA (non e' una riga: e' l'elenco di cosa
+#      questo round RICHIEDE, classe 754)
+# =====================================================================
+#  - Ordine: R252a, R252b, R252c, R252d, R252e, R252f.
+#  - Raccogliere i 12 per-trade (magic sopra), scritti DOPO l'avvio del
+#    proprio job; ognuno deve avere date da 2024.09.27 in poi e somma
+#    net_profit = Profit del CSV _OOS della sua cella (entro 0,05).
+#  - CSV _IS da un giorno: vuoto ATTESO (rc 2) SOLO se il CSV _OOS ha 2
+#    righe con Trades > 0 (classe 766).
+#  - Classe 166: SHA256 di ABTG_DAX_Apertura_EU.mq5 e
+#    ABTG_PausaGuardian.mqh dopo ogni job, contro il pin.
+#  - Per il G0 servono in archivio (gia' ci sono): R251/PERTRADE/
+#    ..._792520.csv, R251/ROUND_R251b e ROUND_R251 (CSV),
+#    Walkforward_Aperture/DAX_M_direzione_IS/OOS.csv, R246/PERTRADE/
+#    ..._794611.csv e ..._794613.csv.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=792601||792601||50||792651||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

@@ -1,0 +1,134 @@
+# =====================================================================
+#  R252b -- LATO SHORT DELL'APERTURA DAX, OROLOGIO IN FASE: L'ORA 9
+#  EA: ABTG_DAX_Apertura_EU   (motore della sedia 770101, D30EUR M5)
+#  SHORT NUDO, InpSessionHour 9, chiusura 18:30. Magic 792602 / 792652.
+#
+#  TUTTO IL RAGIONAMENTO, LE ATTESE, I CANCELLI E I VINCOLI DI BANCO
+#  STANNO NEL FILE DI TESTA: prove/R252a_short_DAX_ora8_controllo.txt.
+#  Qui solo le differenze. Stessi pin di R252a tranne InpSessionHour (9),
+#  InpCloseHour (18) e il magic (diff eseguito: 3 righe).
+#  @ORARIO_INVERNALE R252: ora 9 BCM = cash Xetra in ora solare UE (BCM indici UTC+1
+#  fisso); di questa corsa entrano nella curva in fase SOLO le righe d'INVERNO, quelle
+#  d'estate (un'ora DOPO la cash) si scrivono e basta (testa R252a par. 5 e 12).
+#
+#  COSA MISURA
+#   Le righe d'INVERNO di questa corsa (2024.10.28-2025.03.28 e
+#   2025.10.27-2026.03.27, feriali 110 + 110) sono lo short ALLA CASH
+#   d'inverno: 09:00 BCM = 09:00 CET = Xetra. Con le righe d'estate di
+#   R252a fanno la CURVA IN FASE (testa par. 5).
+#   Le righe d'ESTATE di questa corsa armano alle 09:00 BCM = 10:00 CEST,
+#   un'ora DOPO la cash: non descrivono niente di vivo, non entrano in
+#   nessuna curva, si scrivono come descrizione (R246o, stessa nota).
+#  CANCELLI PROPRI
+#   G1: gemelle 792602/792652 identiche (CSV _OOS e per-trade tranne il
+#       magic). S1: zero uscite prima delle 09:35 BCM e dopo le 18:31.
+#       Contro-esempio: pin non arrivato = corsa a ora 8, e 106 uscite su
+#       243 (43,6%) del per-trade 792520 cadono prima delle 09:35.
+#   G0: non c'e' (cella nuova). Il legame col banco lo da' R252a.
+#  COSTO 40x: alla cash, come l'estate di R252a: ammesso [DERIVATO],
+#   il range d'inverno alla cash come tale [NON MISURATO] (testa par. 12).
+#  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_DAX_Apertura_EU_
+#   D30EUR_792602.csv e _792652.csv = la gamba OOS continua 2024.09.27 ->
+#   2026.06.30 di ciascuna gemella.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS.
+#  Banco: -Deposito 10000, -Modello 4, niente -Spread / -Ritardo /
+#  -FrazioneIS, MaxBars come R251 (testa, riquadro iniziale). Nessuna
+#  riga di lancio qui.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=9||9||0||9||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=18||18||0||18||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=792602||792602||50||792652||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
