@@ -48,7 +48,7 @@ l'ORB del Dow sullo **stesso conto e con lo stesso magic 770611**. Il 24/09 sono
 DAX (**22:49:09** locali) e ORB Dow (**22:49:21**) — la sospensione per l'hedging con FTMO,
 `report/SOSPENSIONE_SEDIE_HEDGING_2026-09-24.md` §ESEGUITO r.69-73 — e poi e' stato salvato il
 profilo (punto 5 della stessa procedura, r.58): e' per questo che `chart05.chr` nasce alle
-**22:53**. E' rimasta **solo l'istanza EURAUD**. [MISURATO]
+**22:53**. E' rimasta **solo l'istanza EURAUD**. [MISURATO gli orari; INFERITO il nesso col .chr]
 
 🟠 **La verifica scritta in quel referto** (r.74: *"deve NON trovare ... 770611 ... su
 REALE"*) **alla lettera non e' soddisfatta** dalla foto del 25/09: il 770611 c'e' ancora, su
@@ -171,7 +171,7 @@ Equita' serali: `CODA_09_..._20260915_033005.log`, `..._20260916_033005.log`,
 🧪 **Il contro-esempio, fatto**: le ipotesi alternative **sbagliano**. 1,0% dell'**equita'**
 → 2,53 · 4,50 · 2,82 · 0,97 lotti; 0,65% del **bilancio** → 1,10 · 1,95 · 1,22 · 0,42; 0,65%
 dell'equita' → 1,65 · 2,93 · 1,83 · 0,63; pip fisso 6,137 (cambio del 17/08) → 1,70 · 3,02 ·
-1,90. **Solo "1,0% del bilancio, pip del giorno" fa 4 su 4.** 👉 Il `1.0` del `.chr` descrive
+1,90 · 0,65 (sbaglia 3 su 4). **Solo "1,0% del bilancio, pip del giorno" fa 4 su 4.** 👉 Il `1.0` del `.chr` descrive
 l'istanza **da sempre**. [INFERITO, calcolo rifatto ordine per ordine]
 
 - 🟢 **Rischio REALIZZATO oggi: 0 EUR**, perche' l'ingresso e' irraggiungibile. [INFERITO]
@@ -308,3 +308,5 @@ gestione, gemelli e TF: il verdetto e' **"NON ANCORA MISURATO"**.
 dall'1,0% del bilancio contro lotti stampati, 4 su 4 (1,0% dell'equita' e 0,65% del bilancio
 falliscono); regola "ultima riga = file piu' vecchio" della sonda CODA_02 provata sul Guardian.
 Rivisto dopo il FAIL del cancello (strato 2), correzioni D1-D9.*
+
+_Cancello: strato 1 OK; strato 2 FAIL (D1-D9) -> **PASS alla seconda passata** su `bfd07525`; rilievi minori applicati dopo._
