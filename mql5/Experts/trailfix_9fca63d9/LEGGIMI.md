@@ -75,3 +75,6 @@ richiede la firma di Claudio.
 Lo stesso difetto (raffica di modify su [invalid stops]) e' stato visto anche sui BCM, reale
 `10105439` compreso (11/09 e 17/09): questo pacchetto copre SOLO le CLAU12 su FTMO. I BCM restano
 come sono finche' Claudio non decide.
+
+---
+_Cancello: strato 1 OK (md rc 0); strato 2 FAIL (D1 tolleranza di mezzo punto su `stopsDist`, classe 820; D2 contro-esempio di neutralita' dal lato sbagliato, classe 825; D3/D4 conteggi e quattro preset) -> **PASS alla seconda passata** su `4000150c`. Il messaggio di quel commit dice "classe 824": e' la 825 (collisione di numero con un'altra sessione, classe 194)._
