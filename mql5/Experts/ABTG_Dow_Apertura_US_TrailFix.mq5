@@ -1827,8 +1827,11 @@ void ManageOneTicket(ulong ticket, double bid, double ask)
       //  lo stop resta quello vecchio e al tick dopo parte la stessa richiesta
       //  (FTMO 24/09 #170199888: 38 rifiuti in 16,9 s; BCM 11/09 e 17/09).
       //  Qui si replica la regola del server PRIMA di inviare: BUY solo se
-      //  SL < Bid - StopsLevel, SELL solo se SL > Ask + StopsLevel (disuguaglianza
-      //  STRETTA; il mezzo punto assorbe il rumore dei double, i prezzi stanno
+      //  Bid - SL >= StopsLevel, SELL solo se SL - Ask >= StopsLevel (disuguaglianza
+      //  LARGA come nel referto par. 4: si blocca solo cio' che il server rifiuta con
+      //  QUALSIASI lettura della regola, quindi deal identici PER COSTRUZIONE; se il
+      //  server fosse stretto, l'uguaglianza esatta parte e viene rifiutata come nel
+      //  pin, e si vede in (c). Il mezzo punto assorbe il rumore dei double, i prezzi stanno
       //  sulla griglia di _Point). FreezeLevel NON entra: riguarda lo stop
       //  ESISTENTE vicino al prezzo, non quello nuovo (su FTMO vale 0).
       //  Atteso: stesse modify accettate, stessi deal, zero rifiuti.
@@ -1839,7 +1842,7 @@ void ManageOneTicket(ulong ticket, double bid, double ask)
          double newSL = TrailStopBuy(bid);
          if(newSL > 0 && newSL > sl && newSL > openP)
            {
-            if(NormalizePrice(newSL) < bid - stopsDist - 0.5*_Point)
+            if(NormalizePrice(newSL) <= bid - stopsDist + 0.5*_Point)
                gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
             else
                TrailSaltoLog(ticket, NormalizePrice(newSL), bid, stopsDist, true);
@@ -1850,7 +1853,7 @@ void ManageOneTicket(ulong ticket, double bid, double ask)
          double newSL = TrailStopSell(ask);
          if(newSL > 0 && (newSL < sl || sl == 0) && newSL < openP)
            {
-            if(NormalizePrice(newSL) > ask + stopsDist + 0.5*_Point)
+            if(NormalizePrice(newSL) >= ask + stopsDist - 0.5*_Point)
                gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
             else
                TrailSaltoLog(ticket, NormalizePrice(newSL), ask, stopsDist, false);
@@ -1871,8 +1874,7 @@ void TrailSaltoLog(ulong ticket, double newSL, double px, double stopsDist, bool
    if(bar == sBar) return;
    sBar = bar;
    //  margine con segno: negativo = stop OLTRE il prezzo, 0 = stop SUL prezzo,
-   //  positivo ma <= StopsLevel = troppo vicino. Serve a riconoscere nel log
-   //  i casi di uguaglianza (contro-esempio del criterio "deal identici").
+   //  positivo ma < StopsLevel = troppo vicino (rifiutato con qualsiasi regola).
    double margine = (isBuy ? (px - newSL) : (newSL - px)) / _Point;
    ABTGLog(StringFormat("TRAILFIX trailing saltato (%s): stop %.2f, prezzo %.2f, margine %.2f pt, StopsLevel %.0f pt, ticket %I64u: nessuna richiesta al server.",
                         (isBuy ? "BUY" : "SELL"), newSL, px, margine, stopsDist/_Point, ticket));

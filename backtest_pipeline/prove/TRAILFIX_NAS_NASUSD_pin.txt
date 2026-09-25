@@ -32,6 +32,11 @@
 #  input del pin), con QUATTRO cambi DICHIARATI e nient'altro:
 #   1. orologio riportato a BCM (il tester gira sul feed BCM): InpSessionHour
 #      16->14, InpCloseHour 19->17 (tabella "BCM FTMO" del preset stesso);
+#      [!] VALE D'ESTATE. BCM e' UTC+1 fisso: nei mesi d'inverno della gamba
+#      IS (fine ott./inizio nov. 2025 -> mar. 2026) questa cella arma UN'ORA
+#      PRIMA dell'apertura cash, la sedia FTMO no. Irrilevante per G1 e (b):
+#      pin e fix vedono lo stesso orologio. La gamba OOS 07-09/2026 e' tutta
+#      estate (report/OROLOGIO_BCM_2026-09-24.md).
 #   2. InpRiskPercent 2.00 -> 1: E' IL BANCO DEI ROUND DI CASA, NON UNA
 #      TAGLIA. La taglia (2,00% FTMO) e' di Claudio e qui non si misura;
 #   3. InpUsaGuardian true -> false: nel tester il Guardian non c'e' (pin
@@ -65,10 +70,16 @@
 #       (close_time, symbol, magic, position_id, deal_type, volume, price,
 #       net_profit). Una sola differenza = la guardia NON e' neutra e NON si
 #       schiera: si leggono le righe "TRAILFIX trailing saltato" della corsa
-#       fix (il "margine" 0 = caso di uguaglianza SL==prezzo, il contro-esempio
-#       noto) e si torna al coordinatore.
-#   (c) ZERO righe "[invalid stops]" nella corsa TrailFix, sulla stessa
-#       finestra su cui il pin ne ha N > 0.
+#       fix (con la guardia LARGA ogni salto ha margine < StopsLevel, cioe' era
+#       rifiutato con qualsiasi regola: una differenza nei deal e' quindi un
+#       DIFETTO DI IMPLEMENTAZIONE, non il bordo della regola) e si torna al
+#       coordinatore.
+#   (c) ZERO righe "modify position #... [invalid stops]" (stesso testo di (a))
+#       nella corsa TrailFix, sulla stessa finestra su cui il pin ne ha N > 0.
+#       Una riga residua con sl nuovo == prezzo d'ingresso e' il BREAKEVEN (non
+#       coperto dalla guardia): si conta a parte e si dichiara, non fa fallire
+#       (c). Una residua con sl == Bid - StopsLevel esatto misura che il server
+#       e' STRETTO (vedi guardia LARGA).
 #   G-DATI (informativo, NON un criterio): ultima close_time del per-trade;
 #       se < 2026.09.17 l'11/09 e/o il 17/09 non sono nel feed e si DICHIARA.
 #
