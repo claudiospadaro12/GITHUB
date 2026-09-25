@@ -1,0 +1,29 @@
+; ABTG_ScalperDirezionale -- preset DEMO (manuale 50503635, C:\MT5_MANUALE). NON FTMO, NON reale 10105439.
+; Modo MANUALE: verso dalla tua prima posizione a mano; target +3 EUR, stop -2 EUR, 10 s, lotto 0.01 -> +0.01 ogni 10 EUR, max 0.10.
+; Per il modo CANDELA: InpEntryMode=1 (M1, primo movimento dopo 3 s, minimo 1 punto).
+InpEntryMode=0
+InpCandleTF=1
+InpCandleRule=1
+InpFirstMoveSeconds=3
+InpFirstMovePoints=1.0
+InpDirection=0
+InpAutoStart=false
+InpStopWhenManualClosed=true
+InpTargetEuro=3.0
+InpStopEuro=2.0
+InpMaxSeconds=10
+InpPauseMs=500
+InpLotStart=0.01
+InpLotStep=0.01
+InpStepEveryEuro=10.0
+InpLotMax=0.10
+InpResetOnLoss=true
+InpMaxLossSessionEuro=20.0
+InpMaxConsecutiveLosses=3
+InpMaxTradesPerMinute=6
+InpMaxRequestsPerDay=500
+InpStartHour=0
+InpEndHour=24
+InpMagic=779901
+InpDeviationPts=50
+InpVerbose=true
