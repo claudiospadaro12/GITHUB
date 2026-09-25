@@ -1,0 +1,458 @@
+# ==========================================================================
+#  R248a -- LA FINESTRA VERGINE PER IL CANDIDATO #1 (cella centrale R245b)
+#  ABTG_Nasdaq_Apertura_US su U30USD M5 -- TICK REALI -- DUE LATI
+#  InpEmaSlow = 200, InpTP1_R = 0.50 -- magic 765281/765282 (gemelle)
+#  QUESTO E' IL FILE DI TESTA DEL ROUND: qui sta tutto il ragionamento.
+#  R248b (la sedia viva 770202 sulla stessa finestra) porta solo le sue
+#  differenze.
+# ==========================================================================
+#
+#  >>> LA DOMANDA, UNA SOLA
+#  Il candidato #1 (REFERTO_R245 par. 0; R247) ha il merito misurato su un
+#  OOS che finisce il 2026.06.30: la stessa data di 494 file prova .txt su 916
+#  (caccia Unger del 24/09, verificato alla fonte dal coordinatore). Quell'
+#  OOS e' CONSUMATO. Qui si fa UNA lettura della cella, cosi' com'e', su
+#  storico che NESSUN round di questo EA ha mai visto:
+#     2026.07.01 -> 2026.09.18 (ultimo venerdi' pieno), 58 feriali.
+#  e nella stessa riga la sedia viva 770202 (R248b) sulla stessa finestra,
+#  cosi' "sostituire o affiancare" ha un numero fresco per tutte e due.
+#  Con ~41 posizioni la finestra giudica il RISCHIO (Emendamento B), NON il
+#  merito: il PF si scrive e NON decide.
+#  NON promuove, NON archivia, NON tocca taglie, sedie, preset o conti.
+#
+# ==========================================================================
+#  1. LA FINESTRA E' VERGINE PER QUESTO EA -- la prova, 24/09
+# ==========================================================================
+#  (i)  prove/: le direttive VIVE '@FINOA' del repo sono 279 a 2026.06.30
+#       e 2 a 2026.08.31 (RELATIVO_R117BIS_NAS e _GEMELLO: EA ABTG_Relativo,
+#       NASUSD, "preparato e mai corso" -- CENSIMENTO_CASELLE_VUOTE_
+#       2026-09-22 r.164). Nessun '@DAQUANDO'/'@FINOA' nel 2026.07-09.
+#       I file SENZA @FINOA girano alla data di fabbrica del driver,
+#       2026.06.30 (walkforward_generico.ps1 r.187).
+#  (ii) risultati_archivio/: 94 per-trade abtg_trades_*.csv nel repo,
+#       ZERO chiusure dal 2026.07.01 in poi. Nei log e referti del tester
+#       nessuna finestra ABTG_Nasdaq_Apertura_US ne' ABTG_Dow_Apertura_US
+#       oltre il 2026.06.30. L'unico "ToDate" oltre giugno su U30USD e'
+#       R109 (2026.08.21), EA ABTG_AtrExhaustVol: altro motore.
+#  (iii) report/: le date 2026.07-09 che compaiono accanto a questi EA
+#       sono giornali del FORWARD (770202 in campo: TOPPA_CHIUSURA_PER_
+#       TICKET_2026-09-19 r.73-78), mai backtest della cella R245.
+#  ==> VERGINE per ABTG_Nasdaq_Apertura_US e per la cella R245. Per 770202
+#      (R248b) NON lo e' del tutto: il suo FORWARD ha girato in parte della
+#      finestra ed e' stato letto. 770202 qui e' il RIFERIMENTO, non il
+#      candidato: la verginita' serve al candidato.
+#
+# ==========================================================================
+#  2. LE DATE -- e perche' @FINOA e' 2026.09.19 (un SABATO)
+# ==========================================================================
+#  MISURATO 24/09: il log del tester scrive "from 2025.07.01 00:00 to
+#  2026.06.30 00:00" (R246/LOG_TESTER/0002_Tester_logs_20260924.log) e su
+#  94 per-trade del repo ZERO chiusure cadono il 2026.06.30 (martedi'),
+#  mentre 25 file ne hanno il 06.29 e 18 il 06.26. La fine del tester e'
+#  ESCLUSIVA: l'OOS "fino al 2026.06.30" finisce in realta' il 06.29.
+#  Quindi, per avere venerdi' 18 DENTRO: @FINOA 2026.09.19. Il contro-
+#  esempio: se la fine fosse invece inclusiva, il 19 e' sabato e il Dow
+#  non quota -> nessun effetto. La scelta regge sotto TUTTE E DUE le ipotesi.
+#  PERCHE' NON UN'ALTRA DATA: si potrebbe arrivare a mercoledi' 23 (+3
+#  feriali, ~+2 posizioni, +5%). Non cambia la potenza (par. 6) e mescola
+#  la settimana in cui la challenge FTMO e' partita (21/09). Resta il 18.
+#
+#  IL DISEGNO: DUE GAMBE, e NON la gamba unica di R247a -- per avere
+#  un'ANCORA gratis nella stessa corsa:
+#     @DAQUANDO 2025.07.01  @FINOA 2026.09.19  @FRAZIONEIS 0.819
+#     giorni 2025.07.01 -> 2026.09.19 = 445; floor(445 x 0,819) = 364
+#     -> Meta = 2026.06.30
+#     gamba IS  2025.07.01 -> 2026.06.30  = FromDate/ToDate IDENTICI alla
+#               gamba OOS di R247b/R245b: e' LA STESSA corsa del tester,
+#               cambia solo il deposito (par. 4). Gira PRIMA: il suo per-
+#               trade viene sovrascritto (R247a par. 2), il CSV _IS resta
+#               e fa da ANCORA G0.
+#     gamba OOS 2026.07.01 -> 2026.09.19 = LA FINESTRA VERGINE. Gira DOPO:
+#               e' il per-trade che resta in Common\Files.
+#  Margine sulla frazione: 445 x 0,8180 = 364,01 e 445 x 0,8202 = 365,0
+#  -> 0,819 sta a +0,45 / -0,55 giorni dai due bordi.
+#  IL GIORNO CHE SI PERDE, dichiarato: il 2026.06.30 non sta in nessuna
+#  delle due gambe (fine esclusiva della IS, inizio OOS il 07.01). E'
+#  vergine anche lui; resta fuori per tenere l'ancora alla corsa esatta
+#  di R247b. 1 feriale su 59.
+#  STORIA DELL'EMA: la gamba vergine parte il 2026.07.01 come la gamba OOS
+#  di R247b partiva il 2025.07.01: qualunque storia il tester dia all'EMA
+#  200 H4 prima della data d'inizio, la da' allo stesso modo alle due
+#  gambe. Nessuna differenza di metodo fra la misura di contratto e questa.
+#
+# ==========================================================================
+#  3. I DATI DOPO GIUGNO SUL PC DI BACKTEST -- NON MISURATI, e si guardano
+# ==========================================================================
+#  Nessun round di casa ha mai girato U30USD oltre il 2026.08.21 (R109).
+#  Se il tester non avesse i tick fino al 18/09, a modello 4 ripiega in
+#  silenzio (R109 RIGA, D2). Quindi un cancello G-DATI, congelato qui e
+#  nello script (r248_bande_vergine.py, g_dati):
+#   G-DATI ROSSO se una settimana PIENA (lun-ven dentro la finestra) non
+#   ha nessuna posizione della cella R245, o se l'ultima chiusura e' prima
+#   del 2026.09.14. Nel contratto (R247b, 260 feriali): 0 settimane vuote
+#   su 53, buco massimo 4 feriali. Collaudo: un feed tagliato al 31/08
+#   da' ROSSO (3 settimane vuote), un feed intero con un feriale su due
+#   da' VERDE (autotest T6/T6b).
+#   Con G-DATI ROSSO la finestra NON si legge: prima i dati, poi il rischio.
+#
+# ==========================================================================
+#  4. IL BANCO, E IL DEPOSITO 100000 -- cosa costa all'ancora
+# ==========================================================================
+#  -Deposito 100000 (richiesto dal coordinatore: e' il deposito di 772505,
+#  la cella di contratto di 770202, e rende le due sedie confrontabili
+#  sullo stesso banco), -Modello 4, -Spread NON passato (= R245/R247),
+#  PC DI BACKTEST DESKTOP-H4D7CAJ, MAI il VPS (firma del 21/09). EA e
+#  include invariati dai pin di R246/R247 (git diff f824b2f4..HEAD e
+#  782d7280..HEAD su ABTG_Nasdaq_Apertura_US.mq5, ABTG_Dow_Apertura_US.mq5
+#  e mql5/Include/ = vuoto, 24/09).
+#  COSA COSTA: R247b era a 10000, quindi l'ancora NON e' piu' "alla cifra".
+#  Il lotto (CalcLotByRisk, MathFloor a passo 0,1 a r.2069) a 10000 va da
+#  0,3 a 6,4 lotti: l'arrotondamento pesa fino al 33% sui piu' piccoli. A
+#  100000 i lotti sono 3-64 (sotto il tetto SYMBOL_VOLUME_MAX 100, R114
+#  GSPEC): il per-trade vergine esce PIU' pulito di quello di contratto.
+#  Le bande sono in %, quindi non dipendono dal deposito.
+#  La banda d'arrotondamento dell'ancora e' SIMULATA, non assunta
+#  (r248_bande_vergine.py --g0: lotto ideale uniforme nel passo, 2000
+#  simulazioni, p0,1-p99,9). Il PF di R247b a 10000 (1,48894) ci cade
+#  dentro (autotest T7b): la banda non boccia la cella giusta.
+#
+# ==========================================================================
+#  5. I CANCELLI, CONGELATI PRIMA -- si guardano PER PRIMI, in quest'ordine
+# ==========================================================================
+#  G1 DETERMINISMO, SUI CAMPI CHE DECIDONO (proposta (c) di REFERTO_R246
+#     par. 1: in R246a le gemelle hanno differito di UN CENTESIMO su UN
+#     deal, e il G1 senza tolleranza ha annullato il file. Qui la
+#     tolleranza e' scritta PRIMA dei numeri):
+#     le due righe di OGNI CSV (_IS e _OOS) con Trades IDENTICI, PF uguale
+#     alla quarta decimale, |delta Profit| <= 0,05 EUR, |delta DD| <= 0,01;
+#     i due per-trade identici RIGA PER RIGA in close_time, position_id,
+#     deal_type, volume, price, e net_profit entro 0,01 per riga.
+#     Altrimenti -> file NULLO.
+#  G0 ANCORA, sul CSV _IS (gamba 2025.07.01 -> 2026.06.30, deposito 100000):
+#     VERDE  = Trades 197 ESATTO e PF in [1,4501 ; 1,4959] e Profit in
+#              [28694 ; 31223]  (banda --g0, par. 4)
+#     GIALLO = Trades 197 esatto, PF o Profit FUORI banda: gli ingressi
+#              sono quelli della cella, il lotto no. Il per-trade vergine
+#              si legge (le bande sono in %), e il giallo si scrive.
+#     ROSSO  = Trades diverso da 197: il banco non rifa' il contratto. La
+#              finestra vergine NON si legge. Si torna al coordinatore.
+#     Contro-esempio: la tranche IS di R247a (l'anno prima) ha 154 deal:
+#     l'anno sbagliato non passa (autotest T7).
+#  G-OOS: il per-trade 765281 deve avere TUTTE le chiusure fra il
+#     2026.07.01 e il 2026.09.18. Se ne ha una prima, e' quello della gamba
+#     IS: la sovrascrittura non e' avvenuta -> ROSSO (lo script lo fa:
+#     provato sul per-trade di R247b, rc 1).
+#  G-DATI: par. 3.
+#
+# ==========================================================================
+#  6. LE BANDE E I RAMI -- scritti PRIMA dei numeri
+# ==========================================================================
+#  SCRIPT: backtest_pipeline/r248_bande_vergine.py (seme 248, 20000
+#  repliche, bootstrap a BLOCCHI di 5 feriali, cioe' una settimana, per
+#  tenere insieme le perdite a grappolo). Sorgente = per-trade OOS R247b
+#  (765273, 197 posizioni su 260 feriali 2025.07.01 -> 2026.06.29, G0
+#  VERDE in R247). Proiezione sui 58 feriali della finestra vergine.
+#  Controllo contro un numero scritto da ALTRI: il DD del saldo chiuso
+#  sull'intera sorgente esce 5,9447% = quello di r247_sovrapposizione.py
+#  in R247 (lettura.txt). Autotest 13/13 PASS.
+#  LE BANDE CHE DECIDONO (--bande, riga ">>> BANDE CONGELATE"):
+#     POSIZIONI  34 - 47  (p2,5 - p97,5; bootstrap dei soli feriali
+#                d'ESTATE USA della sorgente: la finestra vergine e' TUTTA
+#                estate, cash alle 14:30 server, e R246 ha misurato che sul
+#                Dow l'orario sposta la frequenza. Sull'anno intero la
+#                banda sarebbe 37-50: con quella, 34-36 posizioni sarebbero
+#                un falso allarme d'orologio)
+#     DD SALDO CHIUSO  p95 7,31%  p99 9,30%  (anno intero = la PROMESSA
+#                del contratto; mediana 3,67%. Solo estate: p95 7,44% p99
+#                9,13%: la banda del DD NON dipende dalla stagione)
+#  PERCHE' IL DD DEL SALDO CHIUSO e non l'Equity DD del CSV: lo stesso
+#  metro per bande e lettura. L'Equity DD si stampa accanto (e' piu'
+#  profondo: in R247b 6,86 contro 5,94).
+#  I RAMI:
+#   G-DATI ROSSO o G0 ROSSO o G-OOS ROSSO -> NON LEGGIBILE. Niente numeri.
+#   FREQ FUORI BANDA (n < 34 o n > 47) -> prima si sospetta il BANCO (dati,
+#     orologio, binario), non il mercato. Il ramo del DD si scrive ma resta
+#     SOSPESO finche' la causa non e' trovata. Per Claudio: nessuna
+#     decisione su questo numero.
+#   RISCHIO COERENTE (DD <= 7,31%) -> la finestra vergine NON obietta al
+#     rischio promesso. "Sostituire o affiancare" resta sui numeri di
+#     contratto + R247 (a) PARZIALE, e la scelta e' di Claudio.
+#   RISCHIO SOPRA BANDA (7,31% < DD <= 9,30%) -> revisione PRIMA di
+#     qualunque schieramento: il candidato non entra ne' al posto ne'
+#     accanto finche' la causa non e' scritta. Decide Claudio.
+#   RISCHIO FUORI CONTRATTO (DD > 9,30%) -> il candidato si FERMA: il suo
+#     rischio non e' quello promesso. Si cerca la causa (orologio, dati,
+#     binario) con una misura, non con un argomento.
+#   Riferimento del 18/08, stampato accanto e NON un ramo: se il DD della
+#     finestra supera il DD di contratto sull'anno (5,94% chiuso), in
+#     forward scatterebbe la corsia RISCHIO. Nel nullo succede nel 12,7%
+#     delle finestre da 58 feriali (il p90 e' 6,32%): non e' un allarme.
+#   IL PF SI SCRIVE E NON DECIDE (n ~41 < 150).
+#  LA POTENZA, MISURATA E DETTA PRIMA (autotest T3, contro-esempio forte):
+#     se il rischio VERO fosse il DOPPIO del contratto, la finestra lo
+#     vedrebbe sopra il p95 solo nel 50% dei casi (sopra il p99 nel 29%);
+#     a x1,5 nel 25%; a x3 nell'83%. ==> RISCHIO COERENTE NON VUOL DIRE
+#     "rischio confermato": vuol dire "non smentito da 58 feriali". Una
+#     serie col DD DOPPIO del contratto chiuso (11,89%) esce FUORI
+#     CONTRATTO (T2): un disastro si vede, un raddoppio no sempre.
+#
+# ==========================================================================
+#  7. L'ATTESA, DICHIARATA PRIMA -- e perche'
+# ==========================================================================
+#  n posizioni: ~41 (mediana estate; 44 sull'anno). Due festivi USA dentro
+#     (03/07 e 07/09), presenti in proporzione anche nella sorgente.
+#  DD saldo chiuso: ~3,7% (mediana), dentro 7,31% con probabilita' 95%
+#     se il motore e' quello del contratto.
+#  PF: VICINO A 1, NON 1,49. E lo scrivo prima perche' e' la cosa che
+#     rischia di essere letta male. Nella sorgente R247b i feriali d'ESTATE
+#     USA (cash alle 14:30 server, come TUTTA la finestra vergine) fanno PF
+#     0,94 su 120 posizioni; quelli d'INVERNO (EA armato un'ora PRIMA
+#     della cash, OROLOGIO_BCM_2026-09-24) fanno PF 2,13 su 77 (PF sui
+#     rendimenti %, r248_bande_vergine.py; stesso anno: PF 1,49 in soldi). E la stessa
+#     finestra di calendario un anno prima (2025.07.01 -> 2025.09.18) fa
+#     39 posizioni, DD chiuso 3,11%, PF sui rendimenti 1,04. Mi aspetto PF
+#     0,8-1,3. Un PF sotto 1 qui NON smentisce il contratto: ne ripete
+#     l'estate. Un PF 1,49 NON lo conferma: n e' piccolo.
+#  >>> RILIEVO DI PASSAGGIO, che va oltre questo round: TUTTO il merito
+#      OOS del candidato sta nei mesi in cui arma un'ora prima della cash.
+#      E' lo stesso disegno di 770202 (0,78 d'estate, 1,70 d'inverno sulla
+#      sua sorgente, stesso calcolo). R246 misura la causa (orologio o
+#      stagione); questo round no.
+#
+# ==========================================================================
+#  8. IL COSTO 40x SULLA FINESTRA NUOVA -- MEZZO MISURATO
+# ==========================================================================
+#  LATO SPREAD, MISURATO dentro la finestra: logger vivo U30USD ora 14
+#  server, 2026.09.04 -> 2026.09.11, 3578 campioni su 5 giornate:
+#  mediana 3,00, p95 3,00, max 9,00 idx (data/spread_vivo/SPREAD_VIVO_
+#  2026-09-12_orario.csv). E' il valore "prudente" di R245a par. 6.
+#  LATO STOP: [NON MISURATO]. Il per-trade (ExportTrades, r.2570) scrive
+#  close_time, volume, prezzo d'USCITA e netto: NIENTE prezzo d'ingresso
+#  ne' SL. Dal volume si ricaverebbe lo stop solo conoscendo la perdita
+#  per lotto per punto in EUR (OrderCalcProfit): [NON MISURATO] in casa.
+#  Il cancello resta quello di R245a par. 6: 41,25x alla mediana del
+#  breakout cieco a spread 3,00, AL PELO, 47,5% delle giornate sotto 40x.
+#  La via corta per misurarlo: aggiungere entry e SL all'ExportTrades --
+#  e' una modifica all'EA, fuori da questo round.
+#
+# ==========================================================================
+#  9. LA SOVRAPPOSIZIONE SULLA FINESTRA VERGINE -- DESCRITTIVA
+# ==========================================================================
+#  Con i per-trade vergini delle due sedie (765281 e 765283, tutti e due a
+#  100000) si rilancia r247_sovrapposizione.py con --comune 2026.07.01
+#  2026.09.18. Con ~20 giorni della viva il nullo per permutazione non ha
+#  potenza: i numeri (quota, stesso verso, rho, somma) si SCRIVONO e il
+#  verdetto (a) NON decide. Il verdetto (a) resta quello di R247 (PARZIALE).
+#
+# ==========================================================================
+#  10. IL TEMPO MACCHINA (classe 751: UN solo agente, passate in serie)
+# ==========================================================================
+#  STESSO PC, STESSI EA, LETTO NEL LOG DEL TESTER (R246/LOG_TESTER):
+#   ABTG_Nasdaq_Apertura_US, gamba 2025.07.01 -> 2026.06.30, 7 passate:
+#     "optimization done in 2 minutes 02 seconds" = 17,4 s per passata-anno
+#   ABTG_Dow_Apertura_US, gamba 2025.06.10 -> 2026.06.30, 2 passate: 34 s
+#     = 17 s per passata-anno
+#  R248a: IS 2 x 17,4 = 35 s + OOS 2 x 17,4 x 80/365 = 8 s
+#  R248b: IS 2 x 17   = 34 s + OOS 2 x 17 x 80/365   = 8 s
+#  tester puro ~1,4 min; + avvio per gamba (~12-15 s, stesso log) e
+#  compilazione/primo avvio (R245a: +2,6 min) -> ~2-4 min. Rischio
+#  aggiunto: i tick dal 22/08 al 18/09 forse non sono in cache e vanno
+#  SCARICATI ("preliminary downloading of history ticks"): [NON MISURATO],
+#  stimo +1-3 min.
+#  ==> SI PIANIFICANO ~3-6 MINUTI; la corsa NON si ferma prima di 20.
+#
+# ==========================================================================
+#  11. LA RACCOLTA E LA LETTURA (la riga la scrive il coordinatore)
+# ==========================================================================
+#  La riga DEVE raccogliere (classe 754) da %APPDATA%\MetaQuotes\Terminal\
+#  Common\Files, solo se LastWriteTime >= inizio della corsa, e dire a voce
+#  quanti ne ha trovati su 4:
+#     abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765281.csv
+#     abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765282.csv
+#     abtg_trades_ABTG_Dow_Apertura_US_U30USD_765283.csv
+#     abtg_trades_ABTG_Dow_Apertura_US_U30USD_765284.csv
+#  LETTURA, nell'ordine:
+#   1. G1 e G0 sui CSV _IS/_OOS (par. 5); G-OOS e G-DATI dallo script;
+#   2. python3 backtest_pipeline/r248_bande_vergine.py --leggi R245 \
+#        <pt_765281> 100000
+#      python3 backtest_pipeline/r248_bande_vergine.py --leggi 770202 \
+#        <pt_765283> 100000
+#   3. (descrittiva) python3 backtest_pipeline/r247_sovrapposizione.py \
+#        --nuovo <pt_765281>@100000 --viva <pt_765283>@100000 \
+#        --gemello <pt_765281> <pt_765282> --gemello <pt_765283> <pt_765284> \
+#        --comune 2026.07.01 2026.09.18
+#
+# ==========================================================================
+#  12. I BUCHI, DICHIARATI
+# ==========================================================================
+#   1. Potenza: la finestra NON esclude un raddoppio del rischio (par. 6).
+#   2. Merito: n ~41 < 150, e la finestra e' TUTTA estate: il PF non dice
+#      niente sul contratto annuale (par. 7).
+#   3. Tick dopo il 21/08 sul PC di backtest: [NON MISURATI]; li prende il
+#      G-DATI, non li assume nessuno.
+#   4. Costo 40x lato stop: [NON MISURATO] (par. 8).
+#   5. Ancora non "alla cifra" per il deposito 100000 (par. 4): banda
+#      simulata. A 10000 lo sarebbe, ma le due sedie non starebbero sullo
+#      stesso banco.
+#   6. Il 2026.06.30 e' fuori da tutte e due le gambe (par. 2).
+#   7. Un simbolo, un broker (BCM). FTMO ha la griglia H4 sfasata di 2 ore
+#      (R245a buco 5): il filtro di questa cella e' su H4.
+#   8. Sul PC di backtest il terminale e' loggato sul 50503392 (REFERTO_
+#      ROUND_R247b, AVVERTENZA): prima del round, nessuna sedia attaccata.
+#      E' un vincolo della riga, non di questo file.
+#
+#  QUESTO ROUND NON PROMUOVE, NON ARCHIVIA, NON TOCCA TAGLIE NE' SEDIE.
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2025.07.01
+@FINOA    2026.09.19
+@FRAZIONEIS 0.819
+
+# --- BLOCCO DEI PIN COPIATO DA R247b RIGA PER RIGA (stesse righe vive,
+#     stesso ordine). Cambiano SOLO: le tre direttive @DAQUANDO/@FINOA/
+#     @FRAZIONEIS qui sopra e il magic dell'asse in fondo. Verificabile col
+#     diff delle righe vive contro R247b. Le note che seguono sono di R247b.
+# --- 75 pin LETTI DAL CSV D'ARCHIVIO: valore COSTANTE su tutte e 80 le righe
+#     (40 IS + 40 OOS) di dow_walkforward_{IS,OOS}.csv. Stessa forma 1/0 dei bool
+#     del lanciatore che ha prodotto l'archivio (dow_apertura.ps1). Tre eccezioni
+#     DICHIARATE: InpMagic (qui ASSE tecnico gemello, in fondo), InpAllowLong/
+#     InpAllowShort (1/1 come il CSV: due lati), e InpNewsCurrencies OMESSO: nel
+#     CSV e' la stringa vuota, un pin vuoto MT5 lo ignora, e il default compilato
+#     (r.296) e' gia' "". InpTP1_R=0.50 e InpEmaSlow=200 = la cella centrale.
+#     BLOCCO COPIATO DA R245b RIGA PER RIGA (stesse righe vive, stesso ordine),
+#     tolto InpMagic=765242 (diventa l'asse) e aggiunto InpEmaSlow=200 (era l'asse).
+InpTP1_R=0.50
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMaxSpread=0
+InpVerbose=1
+
+# --- 21 input che a HEAD ESISTONO e nel CSV d'archivio NO (aggiunti dopo il
+#     05/08): pinnati al valore NEUTRO, quello che lascia il percorso di codice
+#     identico alla versione che ha prodotto l'archivio. Riga sorgente a HEAD
+#     di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (ricontate il 24/09 a 1549beaa).
+#   InpUsaGuardian: r.92  -- spento: percorso identico a prima della migrazione (PausaGuardian.mqh r.1600 esce subito)
+#   InpMaxPosSimbolo: r.206 -- tetto A1 spento (default)
+#   InpOCTimeframe: r.214 -- PERIOD_CURRENT, serve solo a OPENCONFIRM: NO-OP qui
+#   InpTrailStartR: r.269 -- 0 = trailing armato subito, come prima (r.2244)
+#   InpRunnerTP_R: r.282 -- 0 = TP storico a 3 x InpTP1_R (r.1694)
+#   InpMinBreakoutRangeATR: r.324 -- 0 = breakout a pendenti nudo (r.777-780)
+#   InpUseVolRegime: r.343 -- R30 spento (r.1905, r.1966)
+#   InpVolAtrPeriod: r.344 -- default, NO-OP col regime spento
+#   InpVolLookback: r.345 -- default, NO-OP
+#   InpVolLowPct: r.346 -- default, NO-OP
+#   InpVolHighPct: r.347 -- default, NO-OP
+#   InpVolLowOffMult: r.348 -- default, NO-OP
+#   InpVolHighOffMult: r.349 -- default, NO-OP
+#   InpVolLowSlMult: r.350 -- default, NO-OP
+#   InpVolHighSlMult: r.351 -- default, NO-OP
+#   InpVolHighSizeMult: r.352 -- default, NO-OP
+#   InpUseSRFilter: r.361 -- R30 S/R spento (r.1984 esce subito)
+#   InpSRProximityPts: r.362 -- default, NO-OP
+#   InpSRUsePrevDay: r.363 -- default, NO-OP
+#   InpSRUseRoundNumbers: r.364 -- default, NO-OP
+#   InpSRRoundInterval: r.365 -- default, NO-OP
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+
+# --- LA CELLA: InpEmaSlow FISSO al centro di R245 (REFERTO_R245 par. 0).
+InpEmaSlow=200
+
+# --- L'ASSE, unico e TECNICO: il magic, due gemelle (G1 + classe 134).
+#     765281 e 765282 vergini (rg "76528[0-9]" sul repo intero, .claude/
+#     worktrees comprese = 0 occorrenze, 24/09). Magic NUOVO anche perche'
+#     la cache del tester non rigira una passata gia' calcolata e allora
+#     non riscrive il per-trade (R247a par. 4).
+InpMagic=765281||765281||1||765282||Y
+# ==========================================================================
