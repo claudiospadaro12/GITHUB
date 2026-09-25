@@ -21,9 +21,9 @@ della `770101` **byte per byte, salvo tre righe** · **stesso binario in campo**
 separati** (letto nel codice) · ✅ **FTMO ammette per iscritto le posizioni opposte sullo STESSO conto**.
 
 🟢 **E una buona notizia che non ci aspettavamo, misurata nel codice (§③.3)**: per come sono costruiti
-ingressi e stop, **la long e la short di questa coppia non possono stare aperte INSIEME** — il livello che
-arma una è esattamente lo stop dell'altra. Il giorno peggiore della coppia è **uno stop DOPO l'altro**, mai
-due stop in contemporanea.
+ingressi e stop, con i due preset identici **il livello che arma una è esattamente lo stop dell'altra**: nel
+caso normale la long e la short **non stanno aperte insieme** e il giorno peggiore è **uno stop DOPO l'altro**.
+Non è un "mai": vale quando le due istanze fotografano lo stesso range; i casi in cui non succede sono in §③.3.
 
 ---
 
@@ -107,21 +107,19 @@ stesso EA una seconda volta.
 `CLAU12_DAX_Apertura_EU (GER40.cash,M5)`. Le due istanze si distinguono dal **contenuto** della riga
 (`lati=SOLO SHORT` / `SOLO LONG`, `RETEST SELL` / `RETEST BUY`), non dall'intestazione.
 
-### ③.3 🟢 La coppia NON può stare aperta insieme — e il contro-esempio che ho provato a costruire
+### ③.3 🟢 Nel caso normale la coppia non sta aperta insieme — e i casi in cui succede
 Nel ramo RETEST (`MonitorRetest()`, r.1465-1545): la short si arma quando `bid <= sellTrig`, con
 `sellTrig = rangeLow − buffer` (r.1472); **lo stop della long è proprio `sellTrig`** (r.1489, `InpSLMode=0`
 = stop sul bordo opposto). Specularmente la long si arma a `buyTrig` (r.1471), **che è lo stop della short**
 (r.1522). Il buffer è `max(500 punti, stops level)` (r.2075-2080): **identico per le due istanze**, che
-leggono lo stesso simbolo sullo stesso M5.
+leggono lo stesso simbolo sullo stesso M5. Il range invece è una FOTO presa al tick di armamento e comprende la candela M1 in formazione delle 10:35 (ComputeRangeWindow r.1008-1012: iBarShift(tEnd) restituisce la barra corrente).
 - 🧪 **Contro-esempio cercato**: *long aperta, il prezzo scende, la short entra mentre la long è ancora
   viva?* No: la short si **arma** allo stesso tick in cui la long **viene stoppata** (stesso prezzo, stesso
   lato del book), e l'ordine che piazza è un **SELL LIMIT a `rangeLow + 200`**, **sopra** il prezzo: si
-  riempie solo se il prezzo **risale di ~700 punti**, a long già chiusa. Il trailing e il breakeven
+  riempie solo se il prezzo **risale di ~700 punti MT5 = ~7 punti indice (GER40.cash Digits 2)**, a long già chiusa. Il trailing e il breakeven
   **alzano** lo stop della long, quindi la chiudono **prima**, mai dopo. Idem a specchio.
-- ⚠️ **Il residuo, dichiarato**: uno stop lato server che non viene eseguito mentre il prezzo fa 700 punti
-  nel verso opposto. Non l'ho misurato; non ho trovato un modo realistico perché succeda.
-- 👉 Quindi **la coppia `770101`+`770105` non crea mai un'esposizione opposta simultanea**, e **non somma
-  mai 4% di rischio aperto da sola**. La somma simultanea resta possibile **con le altre sedie** (§⑤).
+- ⚠️ I residui, dichiarati (nessuno misurato): (1) range diversi fra le due istanze -- tick saltato da una delle due alle 10:35, dati M1 non pronti (ArmRetest riprova al tick dopo), riavvio o attacco a sessione iniziata (l'istanza riarmata rilegge la 10:35 completa): se il sellTrig della short sta SOPRA lo stop della long, la short si arma con la long viva e il SELL LIMIT, 7 punti indice piu' su, puo' riempirsi con la long aperta = posizioni opposte simultanee (a specchio per la long); (2) uno stop lato server non eseguito; (3) i due preset che smettono di essere identici (SLMode, BufferPoints, RetestOffsetPts, RangeMinutes, SessionHour, MinStopPts ritoccati su una sola).
+- 👉 Quindi **la coppia `770101`+`770105`** nel caso normale non crea un'esposizione opposta simultanea ne' 4% di rischio aperto da sola; nei residui qui sopra si' (frequenza [NON MISURATA], attesa bassa). La somma simultanea resta possibile **con le altre sedie** (§⑤).
 
 ---
 
@@ -141,7 +139,7 @@ conti, *«eccezione: posizioni opposte sullo STESSO conto»*.
 > «strategies that artificially distribute profit across multiple days without proportionally distributing
 > market risk, such as hedging or holding opposing positions on the same or highly correlated instruments.»
 
-Per il §③.3 questa coppia **non tiene mai posizioni opposte insieme**, quindi questa voce non la descrive.
+Per il §③.3 questa coppia, nel caso normale, non tiene posizioni opposte insieme (residui in §③.3). Posizioni opposte simultanee su GER40.cash esistono gia' dal 20/09: 770101 long e 770411 short (M15) possono stare aperte insieme; il supporto (24/09) le ammette sullo stesso conto.
 `docs/REGOLAMENTO_FTMO_2026-09-20.md` **non parla** di posizioni opposte sullo stesso conto (verificato per
 parola: nessuna occorrenza).
 
@@ -159,8 +157,7 @@ accesa, **una qualunque posizione LONG su DAX, Dow o Nasdaq in un altro conto** 
 `770105` è aperta **è la fattispecie vietata**.
 - 🟢 La rete c'è ed è firmata: le sospensioni del **24/09** (REALE e 100k) e del **25/09**
   (`report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`: 15 grafici indice del piccolo + il `225JPY` del 100k).
-- 🔴 **Che quelle sospensioni siano ESEGUITE è `[NON VERIFICATO]` da qui**: la prova è la sonda notturna
-  (`CODA_01`) della prossima notte, che deve mostrare **zero sedie indice** su quei terminali. 👉
+- 🔴 Eseguite secondo i referti: piccolo 25/09 13:07 ESEGUITO_OK (15/15, backup verificato), 100k 225JPY rimosso alle 13:14:47 (foto del giornale, salvataggio del profilo da confermare) -- report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md; REALE e 100k gia' a zero sedie indice nel profilo attivo in CODA_01 del 25/09 r.83-110. La conferma indipendente e' [NON ANCORA LETTA]: la CODA_01 della notte del 26/09 deve mostrare zero sedie indice, e restano da vedere pendenti/posizioni indice sul piccolo (es. il SELL STOP PunteLarry U30USD del 23/09). 👉
   **Prerequisito prima di accendere la `770105`.**
 - ⚠️ Con una sonda sul VPS si vedono i terminali del VPS: il piccolo è loggato anche sul PC di backtest
   (classe 792), quindi quel conto si verifica dallo **Storico lato server**, non dal VPS.
@@ -176,6 +173,9 @@ insieme**: **4,00% di rischio sullo stesso simbolo nello stesso verso**. Lo stes
 *«la difesa contro questa regola»* e dice che la sanzione descritta è **gradata** (*«first warned»*). **Nessuna
 decisione qui**: è un fatto da sapere.
 
+### ④.4 Le 2.000 richieste al giorno (Forbidden Practices, docs/REGOLAMENTO_FTMO_2026-08.md r.93).
+La 770105 gira lo STESSO CLAU12_DAX_Apertura_EU.ex5 con la raffica di modify del trailing (report/MODIFY_A_RAFFICA_FTMO_2026-09-25.md); il ramo SELL (r.1990-1993 al pin 9fca63d9) ha il difetto a specchio: lo stop proposto (massimo della M5 precedente) non e' confrontato con l'Ask e dopo un riempimento RETEST sta sotto l'Ask -> invalid stops a ogni tick. Quel referto: <= ~657 richieste per sedia al ritmo medio, <= ~1.971 con tre sedie d'apertura; con la quarta <= ~2.628, SOPRA le 2.000 [INFERITO, stessa aritmetica]. Probabilita' bassa, conseguenza [NON VERIFICATA]. La TrailFix in attesa (firma di Claudio) sul binario DAX copre anche la 770105 (stesso .ex5), ma la ricompilazione ricarica TUTTI E DUE i grafici: si fa senza posizioni aperte ne' della 770101 ne' della 770105.
+
 ---
 
 ## ⑤ 🛡️ IL GUARDIAN CON UNA SEDIA IN PIÙ AL 2% — solo numeri
@@ -189,24 +189,24 @@ La taglia è il 2% del **SALDO** al momento dell'ordine (`CalcLotByRisk`, r.1794
 **Punto di partenza** `[DERIVATO]` da `report/TERZO_STOP_FTMO_2026-09-25.md`: saldo **75.090,72 €** dopo il
 terzo stop. Se il saldo di Claudio è diverso, i numeri si spostano di conseguenza.
 
-### ⑤.1 Il giorno peggiore della coppia: la long stoppata, POI la short stoppata (§③.3: in fila, non insieme)
+### ⑤.1 Il giorno peggiore della coppia: la long stoppata, POI la short stoppata (§③.3: in fila nel caso normale)
 | | € | % dei 80.000 |
 |---|---:|---:|
 | stop 1 (2% di 75.090,72) | −1.501,81 | 1,88% |
-| stop 2 (2% del saldo rimasto, 73.588,91) | −1.471,78 | 1,84% |
-| **giorno peggiore della coppia** | **−2.973,59** | **3,72%** *(= 3,96% del saldo d'inizio giorno)* |
-| contro la **pausa** 3,5% (2.800) | 🔴 superata di 173,59 → blocca i **nuovi** ingressi di tutte le sedie per il resto del giorno | |
-| contro l'**emergenza giornaliera** 4,5% (3.600) | 🟠 non raggiunta da sola: **mancano 626,41 €**. Basta che un'altra sedia perda ~0,4 R lo stesso giorno | |
-| contro il **muro FTMO giornaliero** 5% (4.000) | margine **1.026,41 €** | |
+| stop 2 (2% del saldo rimasto, 73.588,91, oppure del saldo intero: il SELL LIMIT viene dimensionato allo stesso tick in cui la long è stoppata, e se il saldo mostra già quello stop è [NON MISURATO]) | −1.471,78 … −1.501,81 | 1,84-1,88% |
+| **giorno peggiore della coppia** | **−2.973,59 … −3.003,62** | **3,72-3,75%** *(= 3,96-4,00% del saldo d'inizio giorno)* |
+| contro la **pausa** 3,5% (2.800) | 🟠 aritmetica, non accade a questo saldo: l'emergenza TOTALE scatta prima, a −2.530,72. A saldi piu' alti la pausa blocca solo i NUOVI ordini e non cancella i pendenti gia' piazzati (Guardian v1.12 r.428-437, nessun OrderDelete in B1; classe 645): un SELL LIMIT della 770105 piazzato prima della pausa si riempie lo stesso fino alla scadenza di 120 min o alle 19:30. | |
+| contro l'**emergenza giornaliera** 4,5% (3.600) | 🟠 non raggiunta da sola: **mancano 626,41 € (596,38 nel caso pessimistico)**. Basta che un'altra sedia perda ~0,4 R lo stesso giorno | |
+| contro il **muro FTMO giornaliero** 5% (4.000) | margine **1.026,41 € (996,38)** | |
 
 🔴 **E contro l'emergenza TOTALE 9,3%**: dal saldo di oggi mancano **2.530,72 €**; la coppia nel suo giorno
-peggiore ne perde **2.973,59**. 👉 **Arriva prima l'emergenza del Guardian**: chiude tutto a **72.560** e
+peggiore ne perde **2.973,59 … 3.003,62**. 👉 **Arriva prima l'emergenza del Guardian**: chiude tutto a **72.560** e
 ferma la challenge **senza scadenza** (latch `GV_FAILED`, classe 796). È lo stesso esito dei *"due stop di
 fila"* di `TERZO_STOP` §3 — con la `770105` c'è **una strada in più** per arrivarci **nello stesso giorno**.
-Il muro FTMO del 10% (72.000) resterebbe intatto per **117,13 €** se l'emergenza non intervenisse; lo
+Il muro FTMO del 10% (72.000) resterebbe intatto per **117,13 € (87,10)** se l'emergenza non intervenisse; lo
 slittamento della chiusura d'emergenza è `[NON MISURATO]`.
 
-### ⑤.2 Due stop INSIEME: la short con un'altra sedia (non con la long)
+### ⑤.2 Due stop INSIEME: la short con un'altra sedia (con la long solo nei residui di §③.3)
 | | € | % dei 80.000 |
 |---|---:|---:|
 | due posizioni al 2% aperte insieme (es. `770105` + `770411`, o + `770202`) | −3.003,62 | 3,75% *(= 4,00% del saldo)* |
@@ -240,7 +240,7 @@ D30EUR M5 **BCM**, tick reali, **deposito 10.000**, **rischio 1%**.
   **estate PF 1,39** (96 posizioni) · **inverno PF 0,90** (85).
 - 🕰️ **Orologio**: nel backtest BCM d'inverno l'ora 8 arma **un'ora prima** della cash
   (`report/OROLOGIO_BCM_2026-09-24.md`); **FTMO è in fase con la cash tutto l'anno** (IT+1). **R252**
-  (`backtest_pipeline/prove/R252a..f`, commit `81ceaab1`) lo sta misurando: **i numeri qui sopra possono
+  (`backtest_pipeline/prove/R252a..f`, PASS del cancello al commit `43079258`) lo sta misurando: **i numeri qui sopra possono
   cambiare** con quella misura, in un verso che oggi non si conosce.
 - 🪑 **Corsia RISCHIO del criterio di uscita** (firma del 18/08): il DD promesso da confrontare col forward è
   quello di questa tabella **alla taglia vera** — cioè il 25,49% limite superiore. ⚠️ **Contro il muro del
@@ -323,7 +323,7 @@ lunedì **prima delle 09:00 italiane**, va bene.
 |---|---|---|
 | **1** | ▶️ la riga del §⑦ (PowerShell sul VPS) | ultima riga `ESITO: FATTO` |
 | **2** | nel terminale FTMO: **File → Nuovo grafico → `GER40.cash`**, poi timeframe **M5** | un grafico **in più**; quello della `770101` resta com'è |
-| **3** | dal **Navigatore → Expert Advisors**, trascinare **`CLAU12_DAX_Apertura_EU`** sul grafico **nuovo** | si apre la finestra delle proprietà dell'EA |
+| **3** | dal **Navigatore → Expert Advisors**, trascinare **`CLAU12_DAX_Apertura_EU`** sul grafico **nuovo**. MAI sul grafico della 770101: MT5 tiene UN solo EA per grafico e il trascinamento LO SOSTITUISCE -- la long sparirebbe senza errori, e una sua posizione aperta resterebbe senza parziale, trailing e chiusura delle 19:30 (il magic 770105 non la gestisce). | si apre la finestra delle proprietà dell'EA |
 | **4** | scheda **Input → Carica** → `ABTG_DAX_Apertura_EU_770105_SHORT_FTMO.set` | nella lista: **`InpMagic` = 770105**, **`InpAllowLong` = false**, **`InpAllowShort` = true**, **`InpRiskPercent` = 2.0**, `InpSessionHour` = 10, `InpCloseHour` = 19 |
 | **5** | scheda **Comune**: spunta **"Consenti trading algoritmico"** → **OK** | — |
 | **6** | guardare il pulsante **Algo Trading** in alto: dev'essere **già verde** (acceso per le altre sedie). 🔴 **Non premerlo**: se lo premi lo spegni per **tutte** | resta verde |
@@ -334,6 +334,8 @@ lunedì **prima delle 09:00 italiane**, va bene.
   L'EA **non scrive niente sul grafico** (nessun `Comment()` nel codice): quello che si vede è nome e faccina.
 - **Qual è quale, con certezza**: tasto destro sul grafico → **Expert Advisors → Proprietà** → scheda **Input**:
   `InpMagic` **770101** su uno, **770105** sull'altro. È l'unico posto dove il magic si legge.
+  E che la 770101 ci sia ANCORA: Proprieta' del suo grafico -> InpMagic 770101, InpAllowLong true.
+- La notte dopo: CODA_01 deve mostrare in C:\FTMO la riga CLAU12_DAX_Apertura_EU GER40.cash M5 magic 770105 rischio 2.00 oltre a quella della 770101; se manca, il .chr non e' ancora sul disco e un riavvio potrebbe perdere la sedia [INFERITO].
 - **Scheda Esperti** (in basso nel terminale, non un file): subito dopo l'attacco compaiono due righe
   `[DAX Apertura EU]`; la seconda deve dire **`lati=SOLO SHORT`** e **`rischio=2.00%`**:
   `[DAX Apertura EU] avviato su GER40.cash. Apertura server 10:00, range 35 min, flat 19:30.`
@@ -374,6 +376,7 @@ lunedì **prima delle 09:00 italiane**, va bene.
    (nota nell'intestazione copiata del preset).
 9. ⚪ **Nessuna compilazione serve e nessuna è stata provata**: si usa il binario `CLAU12_DAX_Apertura_EU` già
    in campo.
+10. Raffica di modify (§④.4): con la 770105 il caso peggiore al ritmo medio sale da ~1.971 a ~2.628 richieste/giorno contro il tetto FTMO delle 2.000.
 
 ---
 
