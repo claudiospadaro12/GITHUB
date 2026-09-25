@@ -16,7 +16,7 @@ Cosa calcola (tutto dai per-trade dell'archivio, niente a memoria):
     peggior giornata a saldo chiuso, serie perdente piu' lunga;
   - K1: stop mediano delle uscite a stop pieno (posizioni con UN solo deal in
     perdita), |net|/volume a 1 EUR/pt/lotto; il valore del punto e' MISURATO
-    dal per-trade (parziale + stop in pari: net / (volume x distanza di prezzo));
+    dal per-trade (posizioni a due deal, ingresso eliminato: due equazioni, due incognite);
   - R1 DD <= 6,5% / R2 peggior giornata >= -1,10% / R3 serie <= 8, verdetto
     ASIMMETRICO (classe 804): ROSSO boccia a qualunque n, VERDE = "NON VIOLATO
     su n = X" con la probabilita' che un motore senza edge lo passi;
@@ -134,14 +134,19 @@ def k1_stop(pos):
     return (st.median(stops) if stops else None), len(stops), (min(stops) if stops else None), (max(stops) if stops else None)
 
 def valore_punto(pos):
-    """EUR per punto per lotto MISURATO senza assumerlo: nelle posizioni con parziale + stop in pari
-    la distanza di PREZZO fra il deal della parziale e quello in pari e' 1 R in punti indice;
-    net della parziale / (volume x distanza) = valore del punto per lotto"""
+    """EUR per punto per lotto MISURATO senza assumerlo e senza assumere dove sta l'ingresso:
+    una posizione con DUE deal di uscita ha un solo ingresso E; per uno SHORT net_i = vol_i x (E - price_i) x V
+    (per un LONG x (price_i - E)). Due equazioni, due incognite: V = s x (net_1/vol_1 - net_2/vol_2) / (price_2 - price_1),
+    s = +1 short / -1 long. Vale per parziale + pari (anche con slittamento del pari) e per parziale + 2R;
+    una commissione per lotto uguale sui due deal si cancella nella differenza."""
     v = []
     for p in pos:
-        if len(p["deals"]) == 2 and abs(p["deals"][1]["net"]) < 5:
-            d1, d2 = p["deals"]; dist = d2["price"] - d1["price"]
-            if dist > 0: v.append(d1["net"] / (d1["vol"] * dist))
+        if len(p["deals"]) != 2: continue
+        d1, d2 = p["deals"]
+        dp = d2["price"] - d1["price"]
+        if d1["type"] != d2["type"] or dp == 0 or d1["vol"] <= 0 or d2["vol"] <= 0: continue
+        s = 1.0 if d1["type"] == 0 else -1.0   # deal_type 0 = BUY che chiude uno SHORT
+        v.append(s * (d1["net"] / d1["vol"] - d2["net"] / d2["vol"]) / dp)
     return v
 
 def dd_fisso_csv(path):
@@ -241,7 +246,7 @@ def referto():
     L.append("  per anno (in fase, denaro): " + " | ".join(f"{y}: n {v[0]} {v[1]:+.2f}" for y, v in sorted(o["anni"].items())))
     for lab, pp in (("gambe intere", list(pa) + list(pb)), ("in fase", o["fase"])):
         v = valore_punto(pp)
-        if v: L.append(f"VALORE DEL PUNTO misurato dal per-trade ({lab}, posizioni parziale + stop in pari): n {len(v)}, min {min(v):.3f}, mediana {st.median(v):.3f}, max {max(v):.3f} EUR/pt/lotto")
+        if v: L.append(f"VALORE DEL PUNTO misurato dal per-trade ({lab}, tutte le posizioni a due deal, ingresso eliminato): n {len(v)}, min {min(v):.3f}, mediana {st.median(v):.3f}, max {max(v):.3f} EUR/pt/lotto")
     med, nst, mn, mx = o["k1"]
     if med is None: L.append("K1 COSTO: nessuna uscita a stop pieno nel campione -> [NON MISURABILE]")
     else:
@@ -289,7 +294,17 @@ def autotest():
     # scarto di saldo: b#1 B_corsa 10000 vs curva 9900 -> 1,01%; a#3 B_corsa 9950 vs curva 9702 -> 2,56%
     assert 0.0255 < o["scarto_max"] < 0.0257, o["scarto_max"]
     assert p_noedge(25) == 0.635 and p_noedge(5) == 0.95 and p_noedge(60) == 0.40
-    print("AUTOTEST OK (curva in fase, metodo A, K1, scarto, P senza edge)")
+    # valore del punto, contro-esempio: short ingresso 20000, parziale 0,4 a 19900 (+40), pari SLITTATO a 20005 su 0,6 (-3,00):
+    # il vecchio stimatore (net_1 / (vol_1 x distanza)) dava 40/(0,4 x 105) = 0,952; quello a due equazioni deve dare 1,000
+    def mkp(t, vol, price, net, typ=0): return {"t": datetime.strptime(t, "%Y.%m.%d %H:%M:%S"), "pid": 9, "type": typ, "vol": vol, "price": price, "net": net}
+    vp = valore_punto(posizioni([mkp("2025.06.10 10:00:00", 0.4, 19900.0, 40.0), mkp("2025.06.10 11:00:00", 0.6, 20005.0, -3.0)]))
+    assert len(vp) == 1 and abs(vp[0] - 1.0) < 1e-9, vp
+    # stesso caso con uscita a 2R (19800 su 0,6 = +120) e caso LONG speculare (deal_type 1)
+    vp = valore_punto(posizioni([mkp("2025.06.10 10:00:00", 0.4, 19900.0, 40.0), mkp("2025.06.10 11:00:00", 0.6, 19800.0, 120.0)]))
+    assert abs(vp[0] - 1.0) < 1e-9, vp
+    vp = valore_punto(posizioni([mkp("2025.06.10 10:00:00", 0.4, 20100.0, 40.0, 1), mkp("2025.06.10 11:00:00", 0.6, 19995.0, -3.0, 1)]))
+    assert abs(vp[0] - 1.0) < 1e-9, vp
+    print("AUTOTEST OK (curva in fase, metodo A, K1, scarto, P senza edge, valore del punto)")
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("--autotest", action="store_true"); a = ap.parse_args()
