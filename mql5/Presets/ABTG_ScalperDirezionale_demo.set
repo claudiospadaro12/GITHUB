@@ -1,9 +1,10 @@
 ; ABTG_ScalperDirezionale -- preset DEMO (manuale 50503635, C:\MT5_MANUALE). NON FTMO, NON reale 10105439.
 ; Modo MANUALE: verso dalla tua prima posizione a mano; target +3 EUR, stop -2 EUR, 10 s, lotto 0.01 -> +0.01 ogni 10 EUR, max 0.10.
-; Per il modo CANDELA: InpEntryMode=1 (M1, primo movimento dopo 3 s, minimo 1 punto).
-InpEntryMode=0
+; Modo TICK (scelto da Claudio, 25/09 sera): InpEntryMode=1, InpCandleRule=2, verso dal movimento degli ultimi 5 tick, minimo 1 punto.
+InpEntryMode=1
 InpCandleTF=1
-InpCandleRule=1
+InpCandleRule=2
+InpTickWindow=5
 InpFirstMoveSeconds=3
 InpFirstMovePoints=1.0
 InpDirection=0

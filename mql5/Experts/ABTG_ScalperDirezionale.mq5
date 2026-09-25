@@ -22,7 +22,9 @@
 //|  Modo CANDELA (aggiunto su richiesta, 25/09 sera): una sola     |
 //|  operazione per candela (M1 consigliato), verso dal PRIMO        |
 //|  MOVIMENTO della candela nuova (dopo N secondi) o dalla candela  |
-//|  precedente. Non e' una strategia: e' un test misurato dal CSV. |
+//|  precedente; oppure dai TICK: verso dal movimento degli ultimi   |
+//|  N tick (default 5, minimo 1 punto), senza candele.              |
+//|  Non e' una strategia: e' un test misurato dal CSV.             |
 //|  I numeri onesti sono nel referto di casa.                       |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
@@ -32,12 +34,13 @@
 
 enum ENUM_DIR_MODE   { DIR_FROM_MANUAL=0, DIR_LONG=1, DIR_SHORT=2 };
 enum ENUM_ENTRY_MODE { ENTRY_MANUALE=0, ENTRY_CANDELA=1 };
-enum ENUM_CANDLE_RULE { CR_PREV_CANDLE=0, CR_FIRST_MOVE=1 };
+enum ENUM_CANDLE_RULE { CR_PREV_CANDLE=0, CR_FIRST_MOVE=1, CR_TICK=2 };
 
 input group "=== Modo d'ingresso ==="
 input ENUM_ENTRY_MODE InpEntryMode       = ENTRY_MANUALE;   // MANUALE: verso dalla tua posizione (o fisso), rientra subito. CANDELA: una operazione per candela
 input ENUM_TIMEFRAMES InpCandleTF        = PERIOD_M1;       // CANDELA: timeframe della candela (M1 consigliato)
-input ENUM_CANDLE_RULE InpCandleRule     = CR_FIRST_MOVE;   // CANDELA: verso dal PRIMO MOVIMENTO della candela nuova, oppure dalla candela PRECEDENTE
+input ENUM_CANDLE_RULE InpCandleRule     = CR_TICK;         // CANDELA: verso dal PRIMO MOVIMENTO della candela, dalla candela PRECEDENTE, oppure dai TICK (senza candele)
+input int           InpTickWindow        = 5;               // TICK: numero di tick su cui si misura il movimento
 input int           InpFirstMoveSeconds  = 3;               // CANDELA/primo movimento: secondi dopo l'apertura in cui si legge il verso
 input double        InpFirstMovePoints   = 1.0;             // CANDELA/primo movimento: movimento minimo in punti per decidere (sotto: si salta la candela)
 
@@ -92,6 +95,7 @@ string   gLastAction   = "-";
 string   gCsv          = "";
 double   gLastProfitSeen = 0.0;
 datetime gCandleDone   = 0;      // candela gia' usata (modo CANDELA)
+double   gTicks[];               // ultimi bid (modo TICK)
 double   gCandleOpen   = 0.0;
 const string BTN = "ABTG_SCALPER_BTN";
 
@@ -148,7 +152,8 @@ void DrawButton()
 void Status()
   {
    string dir = (gDir > 0 ? "LONG" : (gDir < 0 ? "SHORT" : "nessuno"));
-   string s = "ABTG_ScalperDirezionale  " + _Symbol + "   modo: " + (InpEntryMode == ENTRY_CANDELA ? "CANDELA " + EnumToString(InpCandleTF) : "MANUALE") + "\n";
+   string modo = (InpEntryMode == ENTRY_MANUALE) ? "MANUALE" : (InpCandleRule == CR_TICK ? "TICK (" + IntegerToString(InpTickWindow) + " tick, min " + DoubleToString(InpFirstMovePoints, 1) + " pt)" : "CANDELA " + EnumToString(InpCandleTF));
+   string s = "ABTG_ScalperDirezionale  " + _Symbol + "   modo: " + modo + "\n";
    s += "stato: " + (gActive ? "ATTIVO" : "FERMO") + (gStopReason != "" ? "  [" + gStopReason + "]" : "") + "\n";
    s += "verso: " + dir + (gDirFromManual ? " (dalla tua posizione a mano)" : "") + "\n";
    s += "lotto attuale: " + DoubleToString(gLot, 2) + "   cicli: " + IntegerToString(gCycles) + "\n";
@@ -353,7 +358,18 @@ void ManageOpen(ulong ticket)
 //+------------------------------------------------------------------+
 void TryOpen()
   {
-   if(InpEntryMode == ENTRY_CANDELA)
+   if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_TICK)
+     {
+      int n = ArraySize(gTicks);
+      if(n < MathMax(InpTickWindow, 2)) { gLastAction = "TICK: raccolgo " + IntegerToString(n) + "/" + IntegerToString(InpTickWindow) + " tick"; return; }
+      double mv = (gTicks[n - 1] - gTicks[0]) / _Point;
+      int dir = 0;
+      if(mv >= InpFirstMovePoints) dir = 1; else if(mv <= -InpFirstMovePoints) dir = -1;
+      if(dir == 0) { gLastAction = "TICK: movimento " + DoubleToString(mv, 1) + " pt, sotto il minimo: aspetto"; return; }
+      ArrayResize(gTicks, 0);   // dopo la decisione si ricomincia a contare
+      gDir = dir; gDirFromManual = false;
+     }
+   else if(InpEntryMode == ENTRY_CANDELA)
      {
       datetime bt = iTime(_Symbol, InpCandleTF, 0);
       if(bt == 0) return;
@@ -437,6 +453,12 @@ void TryOpen()
 //+------------------------------------------------------------------+
 void Work()
   {
+   if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_TICK)
+     {
+      double b = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+      int n = ArraySize(gTicks);
+      if(n == 0 || gTicks[n - 1] != b) { ArrayResize(gTicks, n + 1); gTicks[n] = b; if(n + 1 > MathMax(InpTickWindow, 2)) ArrayRemove(gTicks, 0, 1); }
+     }
    // verso dalla posizione a mano
    ulong mt = 0; int md = 0;
    bool manual = FindManual(mt, md);
