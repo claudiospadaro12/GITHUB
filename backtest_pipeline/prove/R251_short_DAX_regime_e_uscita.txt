@@ -1,0 +1,615 @@
+# =====================================================================
+#  R251 -- IL LATO SHORT DELL'APERTURA DAX: LE DUE STRADE MAI MISURATE
+#  EA: ABTG_DAX_Apertura_EU   (motore della sedia 770101, D30EUR M5)
+#  FILE DI TESTA DEL ROUND. Qui stanno il ragionamento, le attese e i
+#  cancelli di TUTTA la famiglia R251 / R251b / R251c / R251d. I tre file
+#  B portano solo le loro differenze e rimandano qui.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026: i round non girano piu' sul VPS).
+#  Prima del round vale l'avvertenza gia' scritta nei referti R246
+#  (REFERTO_ROUND_R246e.txt, riga AVVERTENZA): il terminale di quel PC e'
+#  loggato su un conto demo e da li' il 14/08 sono partiti ordini veri.
+#  Si controlla che non abbia SEDIE attaccate.
+#
+#  VINCOLI DI BANCO (classe 692: stanno nella riga di lancio, non qui;
+#  li scrivo perche' chi la scrive li trovi):
+#    -Deposito 10000  = default del driver (walkforward_generico.ps1
+#        r.200) = Deposit=10000 della FASE M (walkforward_aperture.ps1
+#        r.583). CON UN ALTRO DEPOSITO L'ANCORA NON RIPRODUCE (e R246,
+#        R205a, R51 giravano a 100000/80000: NON sono il riferimento).
+#    -Modello 4 (tick reali). Un numero OHLC qui e' solo screening.
+#    NIENTE -Spread (l'ini della FASE M non aveva la riga Spread,
+#        walkforward_aperture.ps1 r.570-590), NIENTE -Ritardo,
+#    NIENTE -FrazioneIS: il taglio lo da' '@FRAZIONEIS' qui sotto, e un
+#        -FrazioneIS diverso dalla riga fa MORIRE il driver (r.713-740).
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca preset, EA, sedie, conti, taglie o parametri del forward. Non
+#  promuove niente in campo: ogni esito e' materiale per Claudio.
+# =====================================================================
+#
+# =====================================================================
+#  1. LA DOMANDA, E COSA E' GIA' MISURATO
+# =====================================================================
+#  Claudio, 25/09 sera: "Perche' non riusciamo a fare la stessa identica
+#  cosa con lo short?"  Quadro: report/LATO_SHORT_DAX_APERTURA_2026-09-25.md
+#
+#  L'INTERRUTTORE E' GIA' MISURATO, E PERDE. FASE M del 07/08 (commit
+#  0a4e17c7), CSV risultati_archivio/Walkforward_Aperture/
+#  DAX_M_direzione_IS.csv e _OOS.csv, RETEST, range 35, ora 8, rischio
+#  1%, deposito 10000, tick reali -- riletti riga per riga il 25/09:
+#                    Profit     PF       Equity DD %  Trades  RF
+#    SHORT IS  (P7)   -501,27   0,84559  10,5396      152    -0,44793
+#    SHORT OOS (P7)   +254,74   1,06519  12,0490      243     0,19989
+#    LONG  IS  (P4)   +394,97   1,13119   5,3585      189     0,68191
+#    LONG  OOS (P4)  +1800,19   1,42325   6,7169      256     2,19287
+#  Vicini short: range 25 PF IS 0,82352 / OOS 0,93414; range 45 PF IS
+#  0,77140 / OOS 1,21230. (Il REFERTO_FASE_M scrive 0,845 per l'IS: e' la
+#  troncatura di 0,84559; il 0,846 di LATO_SHORT e' l'arrotondamento.)
+#
+#  MA LO SHORT DELL'APERTURA NON E' "MORTO": per il certificato di morte
+#  del 09/09 manca la gestione dell'uscita messa ad asse, e manca il
+#  filtro di regime. Sono le due strade di questo round.
+#   (A) FILTRO DI REGIME SUL SOLO LATO SHORT: si vende solo quando il
+#       trend del TF superiore e' al ribasso. MAI misurato sullo short di
+#       questo EA. Precedenti in casa, e perche' non sono questa domanda:
+#       REGISTRO_TEST r.90 riga A1 (ST ON su ENTRAMBI i lati, range 15,
+#       geometria pre-06/08, "morto (config sbagliata)", CSV NON TROVATO
+#       in repo); r.94 riga A5 ("direzione ADATTIVA Supertrend D1", stile
+#       Monza) in coda e MAI girata -- da li' viene il D1 di questo asse.
+#       Grep del 25/09 su TUTTI i CSV del repo con InpUseSupertrend e
+#       InpRetestOffsetPts: nessuna riga DAX con un filtro di trend acceso.
+#   (B) GESTIONE DELL'USCITA PROPRIA DELLO SHORT. Sul DAX l'uscita e'
+#       stata messa ad asse SOLO sul long (R46a, R137c, R202B, referto
+#       REFERTO_TRAILING_SOGLIA) e sul long+short (FASE F). MAI sul solo
+#       short: grep del 25/09 su tutti i CSV D30EUR con EntryMode=2 e
+#       almeno una fra InpUseTrailing / InpTP1_ClosePct / InpTP1_R ad
+#       asse -> lati (1,0) o (1,1), mai (0,1).
+#
+# =====================================================================
+#  2. PERCHE' QUATTRO FILE E NON UNO
+# =====================================================================
+#  controlla_prova.py (controllo 4) boccia un file con piu' di UN asse Y:
+#  "un file prova misura UNA variabile alla volta". Le due strade sono
+#  quattro variabili, quindi il round e' una famiglia:
+#    R251  (questo)  strada A  InpStTF H4..D1, Supertrend ACCESO  5 celle
+#    R251b           strada B  InpTP1_ClosePct 0 / 50             2 celle
+#    R251c           strada B  InpUseTrailing  0 / 1              2 celle
+#    R251d           strada B  InpTP1_R 0,5 / 1,0 / 1,5           3 celle
+#    TOTALE 12 celle x 2 gambe = 24 PASSATE.
+#  LO SHORT NUDO (l'ANCORA) non puo' stare in questo file: sarebbe un
+#  secondo asse (InpUseSupertrend). Sta TRE VOLTE nei file B, come cella
+#  gemella: R251b cella 50, R251c cella 1, R251d cella 1,0. Ha gli stessi
+#  identici pin di questo file tranne InpUseSupertrend=false, InpStTF
+#  fermo a H1 (inerte a filtro spento) e il magic.
+#  ==> R251 NON SI LEGGE DA SOLO: senza almeno un file B non ha il
+#      termine di confronto. Ordine consigliato: R251b, R251c, R251d, R251.
+#
+# =====================================================================
+#  3. LA GEOMETRIA: QUELLA VIVA DI 770101, PIU' TRE INTERRUTTORI E UNA TAGLIA
+# =====================================================================
+#  Fonte dei pin: mql5/Presets/ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set
+#  (sha1(12) c7dca7065415 = l'originale dichiarato nel preset FTMO; diff
+#  riga per riga fatto il 25/09: il FTMO cambia SOLO ora +2, chiusura +2,
+#  CorrSymbol e rischio 2,00). Ore in ORA SERVER BCM: InpSessionHour=8,
+#  chiusura 17:30. Rispetto al preset vivo cambiano solo:
+#    InpAllowLong  = false   (la domanda: solo short)
+#    InpAllowShort = true
+#    InpAllowReverse = false (= campo; MonitorReverse r.1028 esce subito)
+#    InpRiskPercent  = 1,0   TAGLIA DI BANCO = FASE M. In campo e' 0,65
+#       (BCM) e 2,00 (FTMO): ogni DD va riportato alla taglia vera e la
+#       scala lineare e' un LIMITE SUPERIORE, non un'identita' (classe 547).
+#  LA FASE M AVEVA CINQUE PIN DIVERSI DAL PRESET VIVO (tre gruppi). Sono
+#  INERTI su questa configurazione -- verificato nel sorgente a HEAD
+#  48f31d79, non assunto (confronto pin per pin col CSV della FASE M
+#  rifatto in Python il 25/09: nessun'altra differenza):
+#    InpUseGapFill 1 (FASE M) / false (vivo): il dispatch va per
+#       InpEntryMode (r.847-885); con RETEST il flag non si legge (r.574
+#       e' un log che vale solo per EntryMode=GAPFILL).
+#    InpConfirmMode 1 / 0: ConfirmOK r.2673 esce true a volumi E ATR
+#       spenti; MonitorRetest chiama solo VolumeOK, true a filtro spento
+#       (r.2705).
+#    InpEmaFast/InpEmaSlow/InpFilterTF 1/50/H4 contro 14/200/H1: gli
+#       handle EMA nascono solo con InpUseEmaFilter acceso (r.517-520).
+#  Si pinnano i valori VIVI (come R205a). Input nati DOPO la FASE M, tutti
+#  a no-op su questa configurazione:
+#    InpUsaGuardian=true: nel tester il canale del Guardian non esiste e
+#       ABTG_GuardiaIngresso lascia passare (include
+#       ABTG_PausaGuardian.mqh r.1719, "nessun guardiano: fail-open");
+#    InpTrailStartR=0 (r.2440: a 0 il trailing arma subito, come prima);
+#    InpSpaceMode=0 (r.1986: a OFF non si calcola niente).
+#  InpNewsCurrencies NON e' pinnato: e' una stringa VUOTA, e un pin vuoto
+#  non arriva all'EA (controlla_prova, controllo 3). Il default compilato
+#  e' la stessa stringa vuota, e il filtro news e' spento.
+#
+# =====================================================================
+#  4. LE FINESTRE: QUELLE DELLA FASE M, AL GIORNO
+# =====================================================================
+#    IS  2024.09.26 -> 2025.06.30     OOS 2025.07.01 -> 2026.06.30
+#  (walkforward_aperture.ps1 r.131-132). Il driver taglia cosi'
+#  (walkforward_generico.ps1 r.934): Meta = Inizio + floor(giorni x f).
+#  2024.09.26 -> 2026.06.30 = 642 giorni; serve floor(642 x f) = 277,
+#  cioe' 0,43146 <= f < 0,43302. Con f = 0,4322: 642 x 0,4322 = 277,47
+#  -> 277 -> IS fino al 2025.06.30, OOS dal 2025.07.01. Ricalcolato in
+#  Python il 25/09, ed e' lo stesso 0,4322 gia' usato e motivato in
+#  prove/R247a (par. 2).
+#  (Il taglio 0,40 di R205a/R246 darebbe IS fino al 2025.06.09: finestre
+#  DIVERSE, ~14 operazioni in piu' nell'OOS -- REFERTO_TRAILING_SOGLIA
+#  par. 0 -- e l'ancora non riprodurrebbe.)
+#  Lo storico D30EUR parte dal 2024.09.26 (sonda di casa): e' la finestra
+#  intera, un regime e mezzo (REGISTRO_TEST r.80-82). La prova di regime
+#  sugli indici NON e' possibile su questo banco (storici _EXT: cancello
+#  ancora chiuso). Si dichiara, non si aggira.
+#
+# =====================================================================
+#  5. LA STRADA A (QUESTO FILE): COME IL FILTRO TOCCA LA VENDITA
+# =====================================================================
+#  Letto nel sorgente, riga per riga:
+#   - ArmRetest (r.1569) calcola gBias = TrendBias() UNA volta al giorno,
+#     all'armamento (r.1582), cioe' a range chiuso (08:35 server).
+#   - TrendBias (r.2120): con InpUseSupertrend acceso, st =
+#     SupertrendDir(_Symbol, InpStTF, 10, 2,5) (r.2136) e, se st != 0,
+#     bias = st (r.2137). Candela usata: la ULTIMA CHIUSA del TF (indice
+#     1, ciclo r.2216 "i >= 1"): niente sguardo nel futuro.
+#   - MonitorRetest (r.1907): shortOK = (gBias == 0 || gBias == -1)
+#     (r.1920); la SELL LIMIT parte solo se InpAllowShort && shortOK
+#     (r.1966). Col Supertrend AL RIALZO (bias +1) la giornata non vende.
+#   - Il lato long e' spento DAL PRIMO TERMINE: r.1923 comincia con
+#     "InpAllowLong &&", quindi con InpAllowLong=false il filtro NON puo'
+#     toccare altro che le vendite. Verificato, non assunto.
+#  ASSE: InpStTF = H4, H6, H8, H12, D1 (ENUM_TIMEFRAMES: il driver e MT5
+#  spazzolano i MEMBRI fra 16388 e 16408, il passo e' ignorato;
+#  controlla_prova lo conta a 5). Periodo 10 e moltiplicatore 2,5 = i
+#  default dell'EA e del preset vivo: nessun valore inventato. H4 e D1
+#  sono i due candidati del mandato; H6/H8/H12 servono a leggere
+#  l'ALTOPIANO invece del picco.
+#  >>> LA TRAPPOLA DEL FILTRO CHE DIVENTA NEUTRO (classe 31-bis) <<<
+#  SupertrendDir ritorna 0 se ha meno di 15 barre (r.2203) o se il
+#  buffer ATR non e' completo (r.2209), e con bias 0 la vendita PASSA.
+#  Quindi un Supertrend che non gira da' una cella IDENTICA all'ancora:
+#  quella cella e' NON ESEGUITA, non "filtro neutro" (cancello G2, par. 8).
+#  E un limite dichiarato: lo storico parte il 2024.09.26, quindi nella
+#  gamba IS le prime 15 barre del TF sono SENZA filtro -- su H4 circa 3
+#  giorni, su D1 circa le prime TRE SETTIMANE di ottobre 2024 -- e dopo
+#  c'e' un riscaldamento (la ricorsione parte da dir=+1, r.2215, e
+#  finche' ha poche barre tende a dire "rialzo", cioe' a bloccare lo
+#  short). Nella gamba OOS lo storico precedente c'e' (15 mesi): se il
+#  tester lo serve prima del 2025.07.01 e' [NON VERIFICATO] qui.
+#
+# =====================================================================
+#  6. LA STRADA B (R251b/c/d): COSA MUOVONO DAVVERO LE MANOPOLE
+# =====================================================================
+#   - InpTP1_ClosePct = 0 SPEGNE ANCHE IL BREAKEVEN: il BE a TP1 sta
+#     DENTRO il ramo della parziale (r.2359 -> r.2391). Gia' visto in
+#     archivio: FASE F, righe ClosePct 0 con BE 0 e BE 1 identiche al
+#     centesimo (manopola inerte). Cella 0 = posizione intera, stop,
+#     trailing, TP finale.
+#   - IL "TP DEL RUNNER" NON E' UNA MANOPOLA DI QUESTO EA: il TP
+#     dell'ordine e' entry -/+ dist x TpTotalR(), e TpTotalR = 3 x
+#     InpTP1_R (r.2085). Quindi l'asse InpTP1_R di R251d sposta INSIEME
+#     il primo obiettivo e il TP finale (0,5 -> 1,5R; 1,0 -> 3R; 1,5 ->
+#     4,5R). Un TP del runner indipendente richiede una modifica all'EA:
+#     fuori da questo round (niente EA toccati).
+#   - InpUseTrailing = 0: uscita solo a stop / BE / TP finale / chiusura
+#     delle 17:30. Il trailing acceso e' PREVBAR su M5 armato subito
+#     (InpTrailMode=1, InpTrailTF=5, InpTrailStartR=0; r.2440-2451): per
+#     uno short porta lo stop al massimo della candela M5 precedente solo
+#     quando quel massimo e' gia' sotto l'ingresso.
+#   - NESSUNA di queste manopole tocca l'ingresso: le operazioni aperte
+#     sono le STESSE in tutte le celle B (stesso range, stessa rottura,
+#     stesso slot; il lotto cambia col saldo ma non va mai a zero a 1% su
+#     10000). Quindi il numero di POSIZIONI e' identico in tutte le celle
+#     B, ed e' quello dell'ancora.
+#
+# =====================================================================
+#  7. n: DEAL, NON POSIZIONI (classe 454) -- E COME SI CONTA IL 150
+# =====================================================================
+#  La colonna Trades conta i DEAL di uscita. Con la parziale al 50% una
+#  posizione ne fa 1 o 2. Quindi per una cella con ClosePct 50:
+#       ceil(Trades/2) <= POSIZIONI <= Trades
+#  Ancora: IS 76..152, OOS 122..243 posizioni. INDETERMINATO sul 150.
+#  STIMA [DERIVATA, non misurata]: col rapporto deal/posizioni del LONG
+#  sulla stessa geometria (R137c: IS 175/132 = 1,33, OOS 270/193 = 1,40;
+#  193 posizioni contate sul per-trade di R246e) lo short farebbe ~114
+#  posizioni IS e ~174 OOS.
+#  >>> LA MISURA ESATTA LA DA' R251b CELLA 0: senza parziale ogni
+#      posizione fa UN deal, quindi Trades = POSIZIONI, e per il par. 6
+#      vale per TUTTA la famiglia B. E' la prima volta che il numero di
+#      posizioni dello short nudo viene contato. <<<
+#  Controllo incrociato gratuito (come R205a su R202B): POSIZIONI <=
+#  min(Trades) e >= max(Trades)/2 sulle celle B; la cella 0 deve cadere
+#  dentro quella forchetta. Se no, le celle B NON hanno gli stessi
+#  ingressi e il par. 6 e' smentito: si cerca perche' prima di leggere.
+#  Per le celle A (filtro acceso) il numero esatto NON esce da questo
+#  round: vale solo la forchetta ceil(T/2)..T.
+#
+# =====================================================================
+#  8. I CANCELLI PRELIMINARI, CONGELATI PRIMA DEI NUMERI
+# =====================================================================
+#  G0 RIPRODUZIONE (sulle tre celle ancora dei file B), contro la FASE M
+#     SHORT range 35 del par. 1:
+#       VERDE  = Profit identico al centesimo, PF e DD alla quarta
+#                decimale, Trades identici (152 IS, 243 OOS);
+#       GIALLO = Trades identici e |delta Profit| <= 1% (IS +-5,01 EUR,
+#                OOS +-2,55 EUR) -- stessa regola del G0 di R246;
+#       ROSSO  = tutto il resto.
+#     ATTESA: VERDE. Fra il 07/08 e HEAD i commit sull'EA sono 11; quelli
+#     che agiscono nel tester su questa configurazione li ho cercati uno
+#     per uno: il fix del lotto 3af47ed9 (08/08, OrderCalcProfit al posto
+#     del tick value) su un indice in EUR con conto in EUR non dovrebbe
+#     cambiare il lotto [RAGIONATO, NON MISURATO: e' l'unica causa
+#     plausibile di un GIALLO].
+#     CONTRO-ESEMPI (che cosa darebbe un banco sbagliato, e dove cade):
+#       taglio 0,40 invece di 0,4322  -> Trades diversi         -> ROSSO
+#       deposito 80000/100000         -> Profit x8/x10          -> ROSSO
+#       rischio 0,65 invece di 1,0    -> Profit ~x0,65          -> ROSSO
+#       lato sbagliato / filtro acceso-> Trades diversi         -> ROSSO
+#       ClosePct o TrailTF sbagliati  -> Trades diversi         -> ROSSO
+#     ROSSO NON annulla il round (le celle si confrontano con l'ancora
+#     DENTRO il round), ma annulla il legame con la FASE M: i tetti R1/R2
+#     qui sotto vengono dal LONG della FASE M e diventano [NON
+#     CONFRONTABILI] finche' la cella long non e' rigirata su questo
+#     binario e questo deposito (1 file, 4 passate, ~1 minuto).
+#  G1 DETERMINISMO: le tre ancore gemelle (R251b cella 50, R251c cella 1,
+#     R251d cella 1,0; magic diversi, pin identici) IDENTICHE al centesimo
+#     in Profit, PF, DD e Trades, in tutte e due le gambe. Se no, il round
+#     e' NULLO (i file non hanno girato lo stesso binario o gli stessi
+#     pin). Sostituisce l'asse tecnico sul magic: il round non rischia
+#     zero passate (l'ancora opera 152/243 volte).
+#  G2 LA MANOPOLA DEVE MORDERE (classi 31-bis e 156):
+#     - strada A: ogni cella di R251 deve avere Trades STRETTAMENTE minore
+#       dell'ancora in tutte e due le gambe. Cella identica all'ancora =
+#       NON ESEGUITA (il Supertrend ha reso 0). Cella a 0 Trades = il
+#       filtro ha bloccato tutto: NON LEGGIBILE, si guarda SupertrendDir.
+#     - R251b: Trades(cella 0) < Trades(cella 50). Uguali = la parziale
+#       non e' mai scattata o il pin non e' arrivato.
+#     - R251d: Trades(0,5) >= Trades(1,0) >= Trades(1,5) (piu' basso il
+#       primo obiettivo, piu' posizioni lo toccano, piu' deal). Se si
+#       rovescia, il pin non e' arrivato.
+#     - R251c: la cella 0 deve differire dall'ancora almeno nel Profit.
+#
+# =====================================================================
+#  9. LE ATTESE, DICHIARATE PRIMA DEI NUMERI
+# =====================================================================
+#  IL MERCATO DELLE DUE FINESTRE (misurato sui prezzi d'uscita del repo):
+#    IS  = RIALZO: da ~19.000 (ott 2024) a ~24.300 (giu 2025), con il
+#          crollo di aprile 2025 (minimo d'uscita 19.965) -- per-trade
+#          R109_deal_anomali/D30EUR_00_long_pertrade_singola.csv, min/max
+#          per mese.
+#    OOS = LATERALE: 21.900-25.500, con la discesa di marzo 2026 --
+#          R246/PERTRADE/abtg_trades_..._794611.csv.
+#  STRADA A -- [STIMA A PRIORI: serve a capire DOPO se la manopola ha
+#  morso come previsto; NON e' un cancello]:
+#    - n SCENDE in ogni cella, e di molto nell'IS (finestra di rialzo: i
+#      giorni col Supertrend al ribasso sono pochi). Ordini di grandezza
+#      attesi, in deal: H4 IS 45-90 / OOS 90-150; D1 IS 10-45 / OOS 50-120.
+#      In ogni caso Trades OOS < 243 (G2).
+#    - ==> IL MERITO DELLA STRADA A SARA' QUASI CERTAMENTE SOSPESO: con
+#      Trades OOS < 243 le posizioni sono < 243 e, sotto 300 deal, la
+#      forchetta del par. 7 non puo' dimostrare 150 posizioni. Il round
+#      MISURA il RISCHIO del filtro (regola B, a qualunque n) e quanto
+#      TAGLIA; il merito resta un INDIZIO.
+#    - IPOTESI H1 (il regime salva lo short): PF della cella > PF
+#      dell'ancora in ENTRAMBE le gambe, di almeno 0,10.
+#      IPOTESI H0 (il filtro sfoltisce a caso): PF delle celle intorno a
+#      quello dell'ancora (0,85 IS / 1,07 OOS) e DD in calo SOLO per
+#      l'esposizione minore. Con 50-120 deal una differenza di PF di
+#      0,2-0,3 sta ancora nel rumore: un verde qui e' un INDIZIO.
+#  STRADA B -- attese dai precedenti del LONG sulla stessa geometria:
+#    - R251b parziale: sul long la cella 0 batte la 50 in tutte e due le
+#      gambe (R137c: IS PF 1,183 contro 1,126; OOS 1,491 contro 1,397, DD
+#      piu' basso). Sul long+short FASE F quasi pari (IS 0,991/0,998, OOS
+#      1,286/1,237). Per lo short l'ipotesi [INFERITA] di LATO_SHORT par. 3
+#      (discesa veloce, rimbalzo a V) predice il CONTRARIO: la parziale
+#      aiuta. Attesa: |delta PF| <= 0,12 (l'ampiezza degli spostamenti
+#      della FASE F), nessun salvataggio.
+#    - R251c trailing: sul long il trailing SPENTO e' il ribaltamento da
+#      manuale (R46a, parziale 50: IS PF 1,394 contro 1,126, OOS 1,026
+#      contro 1,397; parziale 0: OOS DD 22,50%). Attesa: DD in salita,
+#      concordanza IS/OOS che fallisce.
+#    - R251d TP1_R: sul long 1,0 e' il migliore in tutte e due le gambe
+#      (R202B, asse 0,25-1,00). Per lo short l'ipotesi par. 3 predice
+#      meglio 0,5. Attesa: Trades(0,5) > Trades(1,0) > Trades(1,5).
+#    - ATTESA COMPLESSIVA, SCRITTA ADESSO: nessuna cella B porta il PF
+#      OOS sopra 1,10 con il DD sotto quello del long. Il salto
+#      necessario e' da 0,85 a 1,10 in IS e da 1,07 a 1,10+ in OOS
+#      INSIEME a un DD dimezzato: la FASE F non ha mai spostato il PF di
+#      piu' di 0,12. Se succede, e' la sorpresa che si verifica, non che
+#      si festeggia.
+#
+# =====================================================================
+#  10. IL CANCELLO DI PROMOZIONE, CONGELATO PRIMA DEI NUMERI
+# =====================================================================
+#  "Promozione" qui vuol dire SOLO: la cella passa al PASSO DI MISURA
+#  successivo (par. 13). Nessun esito di questo round tocca il campo.
+#  Le celle si confrontano con l'ANCORA DENTRO IL ROUND (A = le tre
+#  gemelle, identiche per G1). DD_fisso% = (Profit / Recovery Factor) /
+#  10000 x 100: il DD in denaro su denominatore FISSO (classe 550: la
+#  colonna "Equity DD %" divide per il PICCO, che cambia da cella a
+#  cella). Profit 0 -> [NON CALCOLABILE DAL CSV]. "Equity DD %" si
+#  riporta sempre accanto.
+#  RIFERIMENTO DEL RISCHIO = IL LONG DELLA FASE M, stessa panca (1%,
+#  10000, stesse finestre), perche' la domanda e' "fare lo short COME il
+#  long": uno short piu' rischioso del long NON e' la stessa cosa.
+#     long IS  DD_fisso = 394,97 / 0,68191 / 100  = 5,79%
+#     long OOS DD_fisso = 1800,19 / 2,19287 / 100 = 8,21%
+#     (l'ancora short: IS 11,19%, OOS 12,74% -- boccia R1/R2, com'e' giusto)
+#  RISCHIO -- si legge a QUALUNQUE n (Emendamento B, 16/08). L'IS, la
+#  finestra vecchia, giudica il RISCHIO:
+#    R1  DD_fisso IS  <= 5,79%
+#    R2  DD_fisso OOS <= 8,21%
+#    R3  Peggior Giornata % >= -1,10 in tutte e due le gambe (tutte le
+#        celle della FASE M stanno fra -1,00 e -1,08: con un'operazione
+#        al giorno a 1%, sotto -1,10 c'e' una perdita oltre 1R in un
+#        giorno, e prima di tutto si guarda perche').
+#  MERITO -- si legge SOLO se le POSIZIONI OOS sono >= 150 DIMOSTRATE
+#  (par. 7: per le celle B dalla cella 0 di R251b; per le celle A solo se
+#  Trades OOS >= 300, cioe' mai in questo round). IL RECENTE GIUDICA IL
+#  MERITO; l'IS, con ~114 posizioni stimate, resta sospeso sul merito
+#  anche per l'ancora:
+#    M1  PF OOS >= 1,10  (soglia di casa: criterio 2 della FASE M, e la
+#        regola del mandato sui motori a PF < 1,10)
+#    M2  MEGLIO DEL DEFAULT, OLTRE IL RUMORE: PF OOS >= PF OOS(A) + 0,10
+#        E Profit OOS > Profit OOS(A).
+#    M3  CONCORDANZA: la manopola sposta il PF NELLO STESSO VERSO in IS e
+#        in OOS (PF IS > PF IS(A) E PF OOS > PF OOS(A)). NON chiede che
+#        l'IS guadagni (regola B): chiede che l'effetto non si ribalti.
+#        Un effetto che si ribalta e' il nono ribaltamento IS->OOS di
+#        casa, non un edge.
+#    M4  ALTOPIANO, MAI IL PICCO:
+#        - strada A (5 celle ordinate H4 < H6 < H8 < H12 < D1): servono
+#          ALMENO 3 CELLE CONTIGUE che passano R1-R3 e M1-M3; si sceglie
+#          quella CENTRALE del tratto; con un tratto pari si porta avanti
+#          la centrale piu' vicina a H8 (il centro dell'asse), dichiarato
+#          adesso. Una cella che sporge e le vicine no = "NON C'E' UNA
+#          CONFIGURAZIONE ROBUSTA", e si scrive cosi'.
+#        - R251d (3 celle): solo 1,0 puo' essere un centro. Se vince un
+#          BORDO (0,5 o 1,5) l'esito e' "DIREZIONE INDICATA, NON UNA
+#          CONFIGURAZIONE": il round dopo allunga l'asse da quella parte.
+#        - R251b e R251c sono INTERRUTTORI, non parametri: su due valori
+#          l'altopiano non si definisce. Li sostituisce M3 piu' la prova
+#          successiva del par. 13.
+#  ESITI POSSIBILI, per cella, in quest'ordine:
+#    NON ESEGUITA           G2 fallito (manopola che non morde)
+#    NULLO                  G1 fallito (tutto il round)
+#    BOCCIATA PER RISCHIO   R1, R2 o R3 fallito -- a qualunque n
+#    SOSPESA                rischio passato, POSIZIONI OOS < 150 o non
+#                           dimostrate: MERITO SOSPESO, RISCHIO GIUDICATO.
+#                           Se passa anche M1-M3 si scrive "INDIZIO
+#                           FAVOREVOLE, merito sospeso", mai "promossa".
+#    BOCCIATA PER MERITO    posizioni >= 150 e M1, M2 o M3 fallito
+#    PROMOSSA AL PASSO DOPO tutto passato, M4 compreso
+#  E SI SCRIVE SEMPRE SE LA CELLA BATTE IL DEFAULT: se nessuna cella
+#  passa M2, la frase e' "NESSUNA MANOPOLA BATTE LO SHORT NUDO OLTRE IL
+#  RUMORE" -- e siccome lo short nudo boccia gia' R1/R2, lo short
+#  d'apertura su questa geometria resta NON PROMUOVIBILE, con le due
+#  strade finalmente MISURATE (e il certificato del 09/09 completo sui
+#  punti 3 e, per la strada A, sul filtro).
+#  IL PF SI RIPORTA SEMPRE ACCANTO AL PROFIT: con la parziale al 50% e il
+#  BE, il PF dipende da quante posizioni toccano TP1 (R205a, c1-bis);
+#  il Profit e' la somma dei P/L delle posizioni ed e' immune.
+#
+# =====================================================================
+#  11. L'OROLOGIO D'INVERNO -- DICHIARATO, NON RISOLTO QUI
+# =====================================================================
+#  InpSessionHour=8 e' ORA SERVER BCM. Lo storico INDICI di BCM e' UTC+1
+#  FISSO su tutto l'arco (report/OROLOGIO_BCM_2026-09-24.md par. 3.2):
+#  d'estate 08:00 server = 09:00 italiane = apertura Xetra; d'INVERNO
+#  08:00 server = 08:00 italiane = UN'ORA PRIMA di Xetra, e il range dei
+#  35 minuti si fa sul PRE-MERCATO. Mesi "sfasati" (ultima domenica di
+#  ottobre -> ultima di marzo): IS 2024.10.27 -> 2025.03.30 (circa 5 mesi
+#  su 9), OOS 2025.10.26 -> 2026.03.29 (circa 5 su 12). QUINDI OGNI
+#  NUMERO DI QUESTO ROUND MESCOLA DUE TEMPISTICHE, come i numeri di
+#  contratto di 770101 (47% delle uscite da mesi sfasati, OROLOGIO par.
+#  5.1.1). La sedia FTMO arma all'apertura cash tutto l'anno: d'inverno fa
+#  una cosa che questo backtest NON misura.
+#  LA DIVISIONE ESTATE/INVERNO DA QUESTO ROUND NON ESCE: il CSV di
+#  ottimizzazione da' solo aggregati, e il per-trade (ExportTrades
+#  nell'OnTester, r.2788, Common\Files\abtg_trades_ABTG_DAX_Apertura_EU_
+#  D30EUR_<magic>.csv) e' UNO per magic: ogni passata lo sovrascrive, e
+#  resta quello dell'ULTIMA passata della gamba OOS (R247a par. 2). Si
+#  riconosce a quale cella appartiene confrontando righe e somma
+#  net_profit con Trades e Profit del CSV. Se e' la cella 0 o 50 di
+#  R251b, la divisione dell'OOS dello short NUDO si fa gratis. Per
+#  qualunque altra cella serve la corsa per-trade successiva (par. 13).
+#  E il contro-esempio che impedisce di dare la colpa all'orologio vale
+#  anche qui: dividere per orologio e' dividere per STAGIONE (EMA200,
+#  insensibile all'ora, va da PF 2,05 a 0,87 fra le stesse due meta':
+#  OROLOGIO par. 5.1.3).
+#
+# =====================================================================
+#  12. IL COSTO (stop >= 40 x spread) E IL TF
+# =====================================================================
+#  Lo stop dello short e' la STESSA formula del long: entry = minimo +
+#  offset (r.1973), SL = massimo + buffer (r.1915, r.1974), dist = SL -
+#  entry (r.1976), cioe' range + 5,0 - 2,0 = range + 3,0 idx.
+#  report/IL_COSTO_DEL_DAX_RISOLTO_2026-09-24.md: spread 1,70 idx, serve
+#  range 35' >= 65,0 idx, atteso ~83,5 -> ~50x contro il pavimento di
+#  40x. [DERIVATO, non MISURATO: range 15' misurato n=440 piu' la legge
+#  radice-T validata in casa]. NESSUN asse di questo round tocca lo stop:
+#  il filtro cambia i GIORNI (se i giorni ribassisti hanno range piu'
+#  larghi il rapporto sale, [NON MISURATO]), le manopole B toccano solo
+#  l'uscita. TF: M5, quello della sedia; con il RETEST il costo lo fa il
+#  range dei 35 minuti, non la candela del grafico. Nessun TF piu' basso
+#  in gioco, nessuna esclusione per costo da dichiarare.
+#
+# =====================================================================
+#  13. LO SLOT -- E I PASSI DOPO (NON in questo round)
+# =====================================================================
+#  QUESTO ROUND MISURA LO SHORT DA SOLO, E LO SHORT DA SOLO NON E' LA
+#  SEDIA. Sulla sedia la giornata ha UN posto: appena il primo LIMIT e'
+#  piazzato si passa a PH_PLACED (r.1998 per la SELL) e MonitorRetest non
+#  viene piu' chiamato (r.887-899), quindi il primo lato che rompe si
+#  prende la giornata. Misurato in FASE M: 256 + 243 != 316. Unire un
+#  eventuale short filtrato al long e' una domanda SUCCESSIVA, con tre
+#  strade gia' note e nessuna gratis: stesso EA a due lati (lo slot
+#  ruba), InpAllowReverse (R51: RISERVA, peggior giornata x1,9), oppure
+#  un'istanza separata con magic proprio (due posizioni possibili sullo
+#  stesso D30EUR: cap C1 e cluster, decisione di Claudio).
+#  PASSI SUCCESSIVI, SOLO SE UNA CELLA ARRIVA A "PROMOSSA" O "INDIZIO":
+#    1. per-trade della cella scelta, R247-style (due file, una gamba
+#       ciascuno, magic gemelli): posizioni contate e divisione estate /
+#       inverno. ~4 passate, 1-2 minuti.
+#    2. la stessa cella sui GEMELLI (U30USD, NASUSD) -- regola dei due
+#       lati del 25/08 e certificato punto 4.
+#    3. l'unione con il long (lo slot), come sopra.
+#
+# =====================================================================
+#  14. IL TEMPO MACCHINA
+# =====================================================================
+#  DESKTOP-H4D7CAJ ha UN SOLO agente (classe 751): passate in serie.
+#  CALIBRAZIONE SULLO STESSO EA, STESSO SIMBOLO, STESSA MACCHINA:
+#  RIEPILOGO_R246 + REFERTO_ROUND_R246e/f -- R246e ha fatto 4 passate a
+#  finestra piena (642 giorni per cella) fra le 22:53:22 e le 22:54:16
+#  (inizio del job dopo) = ~54 s, compilazione e due avvii di MT5
+#  inclusi; R246f 55 s. ==> ~13,5 s per passata, ~27 s per cella.
+#  QUESTO ROUND: 12 celle x 2 gambe = 24 passate, 641 giorni per cella
+#  (277 + 364): 12 x 27 s = ~5,4 min, piu' l'avvio di quattro file.
+#  >>> STIMA DICHIARATA: 5-8 MINUTI per tutta la famiglia. <<<
+#  TETTO LARGO: 89,6 s per passata (il caso lento del 21/09 sulla stessa
+#  macchina, report/I_CSV_A_ZERO_PERCHE_2026-09-22.md r.171) x 24 =
+#  ~36 minuti. Oltre i 36 minuti ci si ferma e si guarda.
+#  Il Supertrend si ricalcola una volta al giorno (r.1582): costo
+#  trascurabile.
+#
+# =====================================================================
+#  15. I BUCHI DICHIARATI (cosa questo round NON misura)
+# =====================================================================
+#  - Il filtro EMA: InpUseEmaFilter con 1/50 su H4 e' il filtro della
+#    sedia gemella 770202 (preset FTMO Dow) -- il candidato piu' naturale
+#    dopo il Supertrend. NON in questo round (budget 24 passate).
+#  - Parziale 25/75, InpTrailStartR, InpTrailTF, trailing ATR/FISSO,
+#    InpBEatR sul lato short: NON in questo round.
+#  - Il TP del runner indipendente dal TP1: non esiste nell'EA (par. 6).
+#  - Periodo e moltiplicatore del Supertrend: fermi ai default (10/2,5).
+#  - La divisione estate/inverno (par. 11) e il numero esatto di
+#    posizioni delle celle A (par. 7).
+#  - La prova di regime (storico lungo): non disponibile sugli indici di
+#    questo banco (par. 4).
+#  - Lo slot con il long (par. 13).
+#  - I gemelli U30USD e NASUSD.
+#
+# =====================================================================
+#  16. RILIEVI SUL REPO (trovati preparando il round, NON corretti qui)
+# =====================================================================
+#  - REFERTO_ROUND51_REVERSE_DAX.md par. 0 scrive che il riferimento
+#    +1198,79 / PF 1,237 / DD 10,49% (fasi B1/M/I/L) era "senza parziale
+#    ne' BE". I CSV dicono il contrario: DAX_M_direzione_OOS.csv,
+#    DAX_F_gestione_OOS.csv e DAX_L_rangemode_OOS.csv hanno quella cella
+#    con InpTP1_ClosePct=50 e InpBreakevenAtTP1=1. (La conclusione di R51
+#    "non e' una riproduzione" resta vera per un'altra ragione: R51
+#    girava a deposito 100000, la FASE M a 10000.)
+#  - REGISTRO_TEST r.4035-4040 scrive che il lato short dell'apertura "e'
+#    un no su tutti e tre". Per il certificato del 09/09 va letto "NON
+#    ANCORA MISURATO": uscita e filtro non erano mai stati messi ad asse
+#    sullo short (lo dice gia' LATO_SHORT par. 5).
+#  - REGISTRO_TEST r.92, riga A3 ("SOLO SHORT, ST OFF ... in coda"): e'
+#    superata dalla FASE M e resta "in coda".
+#
+# =====================================================================
+#  17. IL MAGIC, E IL COMANDO CON CUI L'HO CERCATO
+# =====================================================================
+#  Blocco 7925xx, VERGINE. Comando eseguito il 25/09 su tutto il repo,
+#  comprese le cartelle .claude/worktrees:
+#     grep -rIn -oE "\b7925[0-9]{2}\b" . --exclude-dir=.git   -> 0 righe
+#  R251 = 792510, R251b = 792520, R251c = 792530, R251d = 792540.
+#  Il magic non entra nel calcolo (le gemelle di R246 lo provano): serve
+#  solo a separare i quattro per-trade in Common\Files.
+# =====================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.4322
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=true||true||0||true||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16388||16388||1||16408||Y
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=792510||792510||0||792510||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
