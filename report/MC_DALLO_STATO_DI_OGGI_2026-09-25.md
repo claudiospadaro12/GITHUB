@@ -25,7 +25,7 @@ Si rifà con `python3 backtest_pipeline/mc_challenge_ftmo_stato.py` (~50 s) · c
    fermate arriva **entro 5 giornate**: **P(fine corsa nei prossimi 5 giorni di borsa) = 21-24%** (§4).
 4. ⚠️ **Il cap 3,25 NON blocca la seconda posizione a 2%**: nel codice il cap non è
    prospettico, quindi **a 2,00% il 3,25 e il 4,00 lasciano entrare entrambi due posizioni** e
-   bloccano la terza. Lo scenario (b) come era stato descritto **non esiste nel codice** (§3).
+   bloccano l'INVIO di un terzo ordine, non un pendente già piazzato: nessuno dei due è un tetto al rischio simultaneo, è una guardia sull'aggiunta (classe 645). Lo scenario (b) come era stato descritto **non esiste nel codice** (§3).
 
 ---
 
@@ -66,6 +66,7 @@ a 2,00%).
 |---|---:|---|
 | saldo a inizio 25/09 | **76.643,52** | riga Guardian del 24/09 23:55 (`eq=76643.52 totDD=4.20%`), `CODA_09` del 25/09 |
 | stop del 25/09 (`770101`) | −1.552,80 | `TERZO_STOP_FTMO_2026-09-25.md` §1 |
+| scarto fra il 76.573,86 del 24/09 e il 76.643,52 | **+69,66** | [DERIVATO, non ricontato dal deal]: la 770101 del 24/09 (#170199888, BUY LIMIT retest 10,70 lotti, CODA_09 25/09) chiusa in positivo |
 | **saldo di partenza** | **75.090,72** = **0,938634** del 80.000 | ✅ torna con il referto |
 | DD totale statico | **6,14%** | ✅ torna |
 | target fase 1 (+10% = 88.000) | mancano **12.909,28** = **+17,19%** dal saldo | |
@@ -99,8 +100,8 @@ di quelle due firme (e su `InpStartBalance=100000`).
 riga *«margine dall'emergenza Guardian 9,9% (72.080) 3.010,72»* va letta con il 9,3%, e la riga
 *«Due di fila: saldo ~72.117, 37 EUR sopra l'emergenza»* si capovolge: **72.117 è 443 EUR SOTTO
 72.560**, quindi **il secondo stop pieno di fila fa scattare il Guardian**. Quando scatta, il
-codice (`ABTG_Guardian.mq5` r.752-757) chiude tutto e scrive **«CHALLENGE FERMATA»**
-(`GV_FAILED`, pausa di 30 giorni): il conto **non è violato**, ma la corsa **finisce**. Nel modello
+codice (`ABTG_Guardian.mq5` r.752-757; righe del sorgente a HEAD; in campo gira la v1.12, CODA_06 25/09 r.212: stessa logica alle r.410/423/436/444 di d884f7e1) chiude tutto e scrive **«CHALLENGE FERMATA»**
+(`GV_FAILED`). Il blocco NON scade: il codice non azzera mai GV_FAILED, ripete FlattenAll a ogni secondo (r.771-773; v1.12 in campo r.423) e rinnova a ogni giro la scadenza di 30 giorni della pausa (r.781; v1.12 r.436). Si riparte solo cancellando a mano ABTG_GUARD_541452707_FAILED. Il conto **non è violato**, ma la corsa **finisce**. Nel modello
 è un esito a sé, `FERMATA GUARDIAN`.
 
 **Stop pieni consecutivi che portano a ≤ 72.560** (taglia in % del saldo, composta):
@@ -124,8 +125,8 @@ Quindi, con sedie a 2,00%:
 
 | cap | 0 posizioni | 1 aperta (2,0%) | 2 aperte (~4,0%) |
 |---|---|---|---|
-| **4,00** (in campo) | entra | 2,0 < 4,00 → **entra la 2ª** | ≥ 4,00 → blocca la 3ª *(solo se la somma arriva a 4,00: con gli arrotondamenti del lotto può fermarsi a 3,99 e lasciar entrare la 3ª)* |
-| **3,25** (firmato 18/08) | entra | 2,0 < 3,25 → 🔴 **entra la 2ª** | ≥ 3,25 → blocca la 3ª, **sempre** |
+| **4,00** (in campo) | entra | 2,0 < 4,00 → **entra la 2ª** | ≥ 4,00 → blocca l'INVIO di un 3° ordine (stessa riserva sui pendenti) *(solo se la somma arriva a 4,00: con gli arrotondamenti del lotto può fermarsi a 3,99 e lasciar entrare la 3ª)* |
+| **3,25** (firmato 18/08) | entra | 2,0 < 3,25 → 🔴 **entra la 2ª** | ≥ 3,25 → blocca l'INVIO di un 3° ordine; un pendente piazzato quando il cap era libero scatta lo stesso (ABTG_PausaGuardian.mqh r.49-51, classe 645: le sei sedie FTMO entrano tutte per pendente, CODA_08 25/09) |
 
 🔴 Il commento del preset (*«3.25 … lasciava passare UNA SOLA posizione»*) e la descrizione dello
 scenario (b) (*«blocca una seconda posizione da 2%»*) **non corrispondono al codice**. A 2,00% la
@@ -138,6 +139,7 @@ estremi** (tutte le operazioni della giornata considerate sovrapposte, ordine = 
 - **"max 2 sedie/giornata"**: il morso massimo di un cap a due posizioni (vale per 3,25 **e** 4,00);
 - **"1 sedia/giornata"**: la lettura *"una alla volta"* del commento del preset (**non è il codice**).
 Le giornate con ≥3 sedie sono **25 su 242**, con ≥2 sono 137.
+Il limite "max 2 sedie/giornata" è il morso MASSIMO del cap, non quello atteso: coi pendenti il cap morde meno.
 
 ---
 
@@ -154,8 +156,8 @@ minimo di 1 giorno di trading ancora da fare. "gg" = **giornate con operazioni**
 | **(b) cap firmato** | 2,00% · cap 3,25 | **= (a)** nel modello (§3) | | | | | | |
 | ↳ limite: max 2 sedie/giornata | 2,00% · 3,25 o 4,00 | 59,3% | 40,7% | 0,0% | 0,0% | 22 (25) | 5 (6) | 20,1% |
 | ↳ limite: 1 sedia/giornata *(non è il codice)* | 2,00% | 49,3% | 50,7% | 0,0% | 0,0% | 37 (42) | 8 (9) | 17,5% |
-| **(c)** *valori già firmati altrove, NESSUNA PROPOSTA* | **1,00%** · cap 3,25 | **75,3%** | **24,7%** | 0,0% | 0,0% | 58 (66) | 10 (12) | **5,0%** |
-| **(c)** *valori già firmati altrove, NESSUNA PROPOSTA* | **0,65%** · cap 3,25 | **88,1%** | **11,9%** | 0,0% | 0,0% | 99 (113) | 16 (18) | **0,9%** |
+| **(c)** *1,00%: taglia di preset demo BCM e tetto PROPOSTO il 19/09 (FIRME_2026-09-19_SERA.md r.71), NON firmato — solo riferimento, NESSUNA PROPOSTA* | **1,00%** · cap 3,25 | **75,3%** | **24,7%** | 0,0% | 0,0% | 58 (66) | 10 (12) | **5,0%** |
+| **(c)** *0,65%: taglia firmata di casa (preset 100k 50504263 e REALE) — solo riferimento, NESSUNA PROPOSTA* | **0,65%** · cap 3,25 | **88,1%** | **11,9%** | 0,0% | 0,0% | 99 (113) | 16 (18) | **0,9%** |
 
 - **Il muro FTMO (10% e 5%) vale 0,0% per costruzione** finché il Guardian lavora: il taglio del
   giornaliero a 4,5% e la fermata a 9,3% arrivano prima. Quanto costa se il Guardian **non** lavora
@@ -187,7 +189,7 @@ minimo di 1 giorno di trading ancora da fare. "gg" = **giornate con operazioni**
 | Guardian 4,9 / 9,9 (valori NON in campo) | 60,8 | 39,2 | 0 | 0 | 19,6 | +3,6 |
 | 🔴 Guardian SPENTO (fail-open, buco B3) | 51,8 | — | **30,9** | **17,4** | 20,1 | −5,4 |
 
-**Stessa tabella in breve per le altre due taglie** (*valori già firmati altrove, NESSUNA PROPOSTA*):
+**Stessa tabella in breve per le altre due taglie** (*1,00%: preset demo BCM e tetto PROPOSTO il 19/09, NON firmato · 0,65%: taglia firmata di casa — solo riferimento, NESSUNA PROPOSTA*):
 
 | variante | 1,00% PASS | 0,65% PASS |
 |---|---:|---:|
@@ -198,9 +200,9 @@ minimo di 1 giorno di trading ancora da fare. "gg" = **giornate con operazioni**
 | Guardian SPENTO | 81,7 *(muro 10% 18,3, giornaliero 0)* | 92,4 *(muro 10% 7,6)* |
 
 📏 **Il confronto con il 24/09, a semantica fissa**: il MC del 24/09 dava **74,6%** senza
-modellare la fermata del Guardian. **Con** il 9,3% dallo stesso stato (76.573,86) viene **70,8%**:
+modellare la fermata del Guardian. **Con** il 9,3% dallo stesso stato (76.573,86) viene **70,84%** (non è la V1 del 24/09, 70,76%: i due numeri coincidono solo per arrotondamento, come il −3,8; lo stampa lo script, riga «CONFRONTO COL 24/09»):
 i MC precedenti erano **3,8 punti ottimisti** su questo punto. Da oggi, con la semantica vecchia,
-si passa da 74,6% a **62,4%** (−12,2, lo stop di oggi). Con la semantica di campo si passa da 70,8% a
+si passa da 74,6% a **62,4%** (−12,2, lo stop di oggi). Con la semantica di campo si passa da 70,84% a
 **57,2%** (−13,6).
 
 ---
@@ -224,7 +226,7 @@ si passa da 74,6% a **62,4%** (−12,2, lo stop di oggi). Con la semantica di ca
    MISURATO]`**: è l'unica strada per cui il muro FTMO del 10% può diventare > 0 col Guardian vivo.
 4. 🔴 **P/L realizzato, non equity.** Il 5% FTMO e il Guardian leggono l'**equity**: una
    giornata che scende sotto 72.560 e poi risale **non** è vista dal modello → la fermata del
-   Guardian è **sottostimata**. Scarto misurato sul DAX: −15,7%.
+   Guardian è **sottostimata**. Scarto misurato sul DAX: −15,7% (DD_PORTAFOGLIO_FTMO_2026-09-20.md r.125: 6,25% contro 7,2328% del tester a tick).
 5. 🟠 **Il cap e la pausa sono approssimati**: senza l'ora d'ingresso il cap ha solo due limiti
    estremi (§3), e la pausa 3,5% toglie le operazioni che **chiudono** dopo la soglia (anche quelle
    aperte prima, che in campo resterebbero).
@@ -232,8 +234,9 @@ si passa da 74,6% a **62,4%** (−12,2, lo stop di oggi). Con la semantica di ca
    leggermente il DD. **×0,65** idem in proporzione.
 7. 🟠 **Un solo regime** (toro 2025-26). Nessun rimescolamento fabbrica un 2020.
 8. 🟠 **La fermata del Guardian è trattata come fine della corsa.** Nel codice lo è
-   (`GV_FAILED`, pausa di 30 giorni); ripartire a mano da 72.560 con 560 EUR di spazio non è
+   (`GV_FAILED`, blocco senza scadenza finché la GV non si cancella a mano); ripartire a mano da 72.560 con 560 EUR di spazio non è
    modellato.
+9. 🔴 **Cambio di taglia a metà challenge: non modellato e non verificato.** Le Forbidden Practices valgono anche in Challenge (docs/REGOLAMENTO_FTMO_2026-09-20.md §④). Il testo letto il 20/09 nomina «substantially larger position sizes compared to your other simulated trades»; la lettura di casa del 19/09 (FIRME_2026-09-19_SERA.md r.71-73) dice «alzare e poi abbassare è una pratica proibita». Se passare da 2,00% a 1,00%/0,65% sia ammesso è [NON VERIFICATO] con FTMO: le righe (c) misurano il conto, non la regola.
 
 ---
 

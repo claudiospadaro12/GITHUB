@@ -49,7 +49,7 @@ IL CAP C1 (InpMaxOpenRiskPct), LETTO NEL CODICE:
     cap_max=1 : tiene la prima sedia sola              (lettura "una alla volta")
 
 USO:
-  python3 backtest_pipeline/mc_challenge_ftmo_stato.py            # tabella completa (~2-4 min)
+  python3 backtest_pipeline/mc_challenge_ftmo_stato.py            # tabella completa (~50 s)
   python3 backtest_pipeline/mc_challenge_ftmo_stato.py --autotest # controlli, poi esce
 """
 import collections, datetime as dt, os, random, statistics, sys
@@ -353,9 +353,12 @@ def main():
             k, b = stop_al_guardian(t, sl)
             print("  taglia %.2f%%  slip x%.3f : %d stop (saldo dopo %d-1 = %.2f)" % (t, sl, k, k, stop_al_guardian_prima(t, sl)))
 
+    o24 = simula_stato(base, 2.0, 76573.86 / BANCO, guardian=0.045, g_tot=0.093)
+    print("\n[CONFRONTO COL 24/09 A SEMANTICA FISSA] stato 76.573,86, 2,00%%, G 4,5 + 9,3: PASS %.2f%%" % o24['p']['PASS'])
+
     kw = dict(guardian=G_GIORN, g_tot=G_TOT, min_giorni=MIN_GIORNI_RESTANTI)
-    for fatt, etich in [(2.0, "2,00% (a) e (b)"), (1.0, "1,00% [gia' firmata altrove, NESSUNA PROPOSTA]"),
-                        (0.65, "0,65% [gia' firmata altrove, NESSUNA PROPOSTA]")]:
+    for fatt, etich in [(2.0, "2,00% (a) e (b)"), (1.0, "1,00% [preset demo BCM e tetto PROPOSTO il 19/09, NON firmato -- solo riferimento, NESSUNA PROPOSTA]"),
+                        (0.65, "0,65% [taglia firmata di casa, preset 100k e REALE -- solo riferimento, NESSUNA PROPOSTA]")]:
         print("\n[TAGLIA %s]" % etich)
         righe = [
             ("M  modello di campo (G 4,5 + 9,3)", base, fer_pool, {}),
