@@ -59,9 +59,12 @@
 //|   elenco; freni e anti-martingala sul netto dell'ondata; cache   |
 //|   del ciclo azzerata in OnInit (cancello 1.03, classe 816);      |
 //|   START richiesto di nuovo dopo un cambio di input.              |
+//|  1.05 (cancello 1.04: PASS con tre ritocchi): chiusura rifiutata |
+//|   ritentata con attesa che raddoppia fino a 60 s (classe 810);   |
+//|   motivo sul pannello dopo un cambio di input o grafico.         |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.04"
+#property version   "1.05"
 #include <Trade\Trade.mqh>
 
 #define CONTO_AMMESSO 50503635   // il SOLO conto su cui questo EA accetta di girare
@@ -136,7 +139,8 @@ struct SPos
    string   closeWhy;    // "" = nessuna chiusura mandata
    double   pout;
    uint     sentMs;      // quando e' stata mandata la chiusura
-   uint     retryMs;     // chiusura rifiutata: si riprova dopo 1 s
+   uint     retryMs;     // chiusura rifiutata: quando
+   uint     retryLen;    // ... e quanto si aspetta (1 s, poi raddoppia fino a 60 s: niente raffiche a mercato fermo)
    uint     goneMs;      // da quando non si vede piu' fra le posizioni
    double   lastProfit;  // ultimo profitto visto (stima se lo storico non arriva)
   };
@@ -249,7 +253,7 @@ void Status()
       modo += (gCycOk ? " = " + DoubleToString(gCyc1, 2) + " (prima " + DoubleToString(gCyc2, 2) + ")" : " (calcolo...)");
      }
    else modo = "CANDELA " + EnumToString(InpCandleTF);
-   string s = "ABTG_ScalperDirezionale 1.04  " + _Symbol + "   modo: " + modo + "\n";
+   string s = "ABTG_ScalperDirezionale 1.05  " + _Symbol + "   modo: " + modo + "\n";
    s += "stato: " + (gActive ? "ATTIVO" : "FERMO (premi START)") + (gStopReason != "" ? "  [" + gStopReason + "]" : "") + "\n";
    s += "verso: " + dir + (gDirFromManual ? " (dalla tua posizione a mano)" : "") + "   ondata: " + IntegerToString(Positions()) + " posizioni x " + IntegerToString(InpMaxSeconds) + " s\n";
    s += "lotto attuale: " + DoubleToString(gLot, 2) + "   ondate: " + IntegerToString(gWaves) + "   posizioni chiuse: " + IntegerToString(gPosClosed) + "   aperte ora: " + IntegerToString(ArraySize(gPos)) + "\n";
@@ -325,6 +329,7 @@ int OnInit()
    gLot = NormLot(InpLotStart);
    gCycBar = 0; gCycOk = false; gCyc1 = 0.0; gCyc2 = 0.0;   // un cambio di input NON ricarica l'EA: le globali restano (classe 816)
    gCandleDone = 0;
+   gStopReason = (gActive ? "input o grafico cambiato: premi START" : gStopReason);
    gActive = false;                                           // dopo un cambio di input si preme START di nuovo
    gCsv = "abtg_scalper_ondate_" + IntegerToString(login) + ".csv";
    if(!FileIsExist(gCsv))
@@ -339,7 +344,7 @@ int OnInit()
      }
    DrawButton();
    Status();
-   Log("1.04 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
+   Log("1.05 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
        + " tickvalue " + DoubleToString(SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE), 4)
        + " stopslevel " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL))
        + " spread " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_SPREAD)) + " pt");
@@ -549,7 +554,7 @@ void Adopt(ulong ticket)   // dopo un riavvio: una posizione dello scalper gia' 
    gPos[n].lot      = PositionGetDouble(POSITION_VOLUME);
    gPos[n].pin      = PositionGetDouble(POSITION_PRICE_OPEN);
    gPos[n].t        = (datetime)PositionGetInteger(POSITION_TIME);
-   gPos[n].closeWhy = ""; gPos[n].pout = 0; gPos[n].sentMs = 0; gPos[n].retryMs = 0; gPos[n].goneMs = 0; gPos[n].lastProfit = 0;
+   gPos[n].closeWhy = ""; gPos[n].pout = 0; gPos[n].sentMs = 0; gPos[n].retryMs = 0; gPos[n].retryLen = 0; gPos[n].goneMs = 0; gPos[n].lastProfit = 0;
    if(!gWaveOpen) { gWaveOpen = true; gWaveNet = 0.0; gWaveN = 0; gWaveId++; }
    gWaveN++;
    Log("posizione adottata: " + IntegerToString((long)id));
@@ -576,19 +581,20 @@ void ManageOne(ulong ticket)
    else if(profit <= -InpStopEuro) why = "stop";
    else if(age >= InpMaxSeconds) why = "tempo";
    if(why == "") return;
-   if(gPos[i].retryMs != 0 && (uint)(GetTickCount() - gPos[i].retryMs) < 1000) return;   // chiusura rifiutata: si riprova dopo 1 s
+   if(gPos[i].retryMs != 0 && (uint)(GetTickCount() - gPos[i].retryMs) < gPos[i].retryLen) return;   // chiusura rifiutata: si riprova dopo l'attesa
    double pout = (verso == "LONG") ? SymbolInfoDouble(_Symbol, SYMBOL_BID) : SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    gRequests++;
    bool okc = trade.PositionClose(ticket); uint rcc = trade.ResultRetcode();
    if(okc && (rcc == TRADE_RETCODE_DONE || rcc == TRADE_RETCODE_PLACED))   // PLACED = accettata, in volo (classe 815)
      {
-      gPos[i].closeWhy = why; gPos[i].pout = pout; gPos[i].retryMs = 0; gPos[i].sentMs = GetTickCount();
+      gPos[i].closeWhy = why; gPos[i].pout = pout; gPos[i].retryMs = 0; gPos[i].retryLen = 0; gPos[i].sentMs = GetTickCount();
       gLastAction = "chiusura mandata (" + why + ") " + IntegerToString((long)id);
      }
    else
      {
       gPos[i].retryMs = GetTickCount();
-      gLastAction = "chiusura RIFIUTATA (" + IntegerToString((int)rcc) + ") - riprovo fra 1 s";
+      gPos[i].retryLen = (gPos[i].retryLen == 0 ? 1000 : (uint)MathMin(gPos[i].retryLen * 2, 60000));   // 1, 2, 4 ... 60 s (classe 810)
+      gLastAction = "chiusura RIFIUTATA (" + IntegerToString((int)rcc) + ") - riprovo fra " + IntegerToString(gPos[i].retryLen / 1000) + " s";
       Log(gLastAction);
      }
   }
@@ -683,7 +689,7 @@ void Registra(double lot)   // apertura riuscita: la posizione entra nei conti d
    gPos[n].lot      = lot;
    gPos[n].pin      = trade.ResultPrice();
    gPos[n].t        = TimeTradeServer();
-   gPos[n].closeWhy = ""; gPos[n].pout = 0; gPos[n].sentMs = 0; gPos[n].retryMs = 0; gPos[n].goneMs = 0; gPos[n].lastProfit = 0;
+   gPos[n].closeWhy = ""; gPos[n].pout = 0; gPos[n].sentMs = 0; gPos[n].retryMs = 0; gPos[n].retryLen = 0; gPos[n].goneMs = 0; gPos[n].lastProfit = 0;
    gWaveN++;
    gRejects = 0;
   }

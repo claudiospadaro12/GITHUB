@@ -1,5 +1,5 @@
 ; ABTG_ScalperDirezionale -- preset DEMO (manuale 50503635, C:\MT5_MANUALE). NON FTMO, NON reale 10105439.
-; Modo MANUALE: verso dalla tua prima posizione a mano; target +3 EUR, stop -2 EUR, 10 s, lotto 0.01 -> +0.01 ogni 10 EUR, max 0.10.
+; Modo MANUALE: verso dalla tua prima posizione a mano; target +3 EUR, stop -2 EUR per posizione, 20 s, lotto 0.01 -> +0.01 ogni 10 EUR, max 0.10.
 ; Modo TICK (25/09 sera): InpEntryMode=1, InpCandleRule=2, verso dal movimento degli ultimi 5 tick, minimo 1 punto.
 ; Modo CICLO (scelto da Claudio, 25/09 sera, "abbinarlo al cycle"): InpEntryMode=1, InpCandleRule=3, InpCicloRegola=0 (SEGNO):
 ;   opera nel colore dell'istogramma del Ciclo sull'ultima barra CHIUSA del TF InpCandleTF (1 = M1): verde = long, rosso = short.
