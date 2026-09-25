@@ -1,5 +1,15 @@
 # =====================================================================
 #  MARCATORE_CODA_01_SEDIE_ATTACCATE_v2
+#  MARCATORE_CODA_01_SEDIE_ATTACCATE_v3
+#  v3 (25/09/2026 sera, richiesta di Claudio: "stanotte voglio che
+#  controlli nella challenge se il lato short del dax retest ho fatto
+#  correttamente"): in piu' la colonna LATI, letta dai campi
+#  InpAllowLong / InpAllowShort del .chr (SOLO SHORT / SOLO LONG /
+#  L+S / -). Sola lettura come prima. La sedia 770105 (gemella SHORT
+#  della 770101 su FTMO, attaccata il 25/09 alle 20:47) deve uscire
+#  con magic 770105, rischio 2.0, lati SOLO SHORT. Se il .chr non e'
+#  ancora stato salvato da MT5 (limite dichiarato sotto), la riga NON
+#  compare: si legge il giornale (CODA_09), non si conclude "assente".
 #  RUNNER_SOLA_LETTURA
 # ---------------------------------------------------------------------
 #  COSA FA: legge i .chr di TUTTE le cartelle dati e STAMPA che cosa e'
@@ -146,6 +156,19 @@ function TF($tipo,$size){
     default { return ("t" + $tipo + "s" + $s) }
   }
 }
+function Vero($v){
+  if($v -eq $null){ return $false }
+  $t = ([string]$v).Trim().ToLower()
+  return ($t -eq "1" -or $t -eq "true")
+}
+function Lati($lng,$sht){
+  if($lng -eq "-" -and $sht -eq "-"){ return "-" }
+  $l = Vero $lng; $s = Vero $sht
+  if($l -and $s){ return "L+S" }
+  if($l){ return "SOLO LONG" }
+  if($s){ return "SOLO SHORT" }
+  return "NESSUNO"
+}
 function Campo($txt,$chiave){
   $m = [regex]::Match($txt, "(?im)^[ \t]*" + [regex]::Escape($chiave) + "[ \t]*=[ \t]*(.*?)[ \t]*$")
   if($m.Success -and $m.Groups[1].Value.Trim().Length -gt 0){ return $m.Groups[1].Value.Trim() }
@@ -186,9 +209,10 @@ foreach($d in $cart){
       #     senza <expert> non ha nessuna sedia sopra.
       if($ea -eq "-" -or $ea -ieq "Main"){ continue }
       if($txt -notmatch "<expert>"){ continue }
-      $r = ("{0,-38} {1,-8} {2,-5} magic {3,-9} rischio {4,-7} [{5}\{6}]" -f `
+      $r = ("{0,-38} {1,-8} {2,-5} magic {3,-9} rischio {4,-7} lati {7,-10} [{5}\{6}]" -f `
             $ea, (Campo $txt "symbol"), (TF (Campo $txt "period_type") (Campo $txt "period_size")), `
-            (Campo $txt "InpMagic"), (Campo $txt "InpRiskPercent"), $p.Name, $x.Name)
+            (Campo $txt "InpMagic"), (Campo $txt "InpRiskPercent"), $p.Name, $x.Name, `
+            (Lati (Campo $txt "InpAllowLong") (Campo $txt "InpAllowShort")))
       if($attivo){ $vive += $r } else { $resid += $r }
     }
   }
