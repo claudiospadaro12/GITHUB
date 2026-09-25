@@ -638,6 +638,27 @@
 #    ultima >= 2026.03.30, somma = Profit _OOS entro 0,05 (un per-trade del
 #    moncone, solo intestazione, passerebbe "date da 2024.09.27 in poi").
 # =====================================================================
+#
+# =====================================================================
+#  19. CANCELLO (strato 1 + strato 2) -- 25/09/2026
+# =====================================================================
+#  Strato 1: controlla_prova 6 file / 12 celle / 24 passate / 0 problemi;
+#  controlla_riga --oggetto prova rc=0 su R252a..R252f ([FUSO] atteso e
+#  dichiarato sui file a ora 9).
+#  Strato 2 (controllo-preventivo): FAIL al primo giro su 81ceaab1 (cinque
+#  correzioni: lotti 0,20-1,70 falsi; e tarato su un solo campione con
+#  lotti d'inverno a ora 8 -> e_eff = max(e, 0,05) con la sez. 5 dello
+#  script; k solo moltiplicativo su un eccesso additivo -> D; eccezione
+#  del lotto minimo mancante nel sottoinsieme H12; modello della riga non
+#  nominato, e la riga R251 farebbe NULLI tutti e sei i file -- classe
+#  800), PASS al secondo giro su 23fa2feb con le correzioni applicate
+#  alla lettera; R252b..R252f identici byte per byte a 81ceaab1.
+#  Il PASS copre i PIN e i CRITERI di questo file e dei cinque file
+#  gemelli. NON e' una riga di lancio: la riga (PC DESKTOP-H4D7CAJ, mai
+#  il VPS, -Deposito 10000, -Modello 4, niente -Spread/-Ritardo/
+#  -FrazioneIS, modello RIGA_R246_OROLOGIO finestre A) passa dai
+#  cancelli per conto suo.
+# =====================================================================
 @SIMBOLO    D30EUR
 @PERIODO    M5
 @DAQUANDO   2024.09.26
