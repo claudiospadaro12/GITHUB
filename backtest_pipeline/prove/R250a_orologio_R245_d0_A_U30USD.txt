@@ -1,0 +1,630 @@
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+#  R250a -- OROLOGIO O STAGIONE PER IL CANDIDATO #1 (cella centrale R245b)
+#  ABTG_Nasdaq_Apertura_US su U30USD M5 -- TICK REALI -- DUE LATI
+#  InpEmaSlow = 200, InpTP1_R = 0.50 -- deposito 10000 (= R245/R247)
+#  CELLA: d0 (armo 14:30, flat 17:30 BCM) -- FINESTRA A (tranche IS)
+#  magic gemelli 765301 / 765351
+#  QUESTO E' IL FILE DI TESTA DEL ROUND R250: qui sta TUTTO il ragionamento
+#  (domanda, disegno, confondente, pin, finestre, calendario, cancelli,
+#  attesa, bande, verdetto, n, rischio, lati, costo 40x, tempo, conseguenze,
+#  buchi). R250b-f rimandano qui e portano solo le loro differenze.
+#  >>> Non promuove niente. Non archivia niente. Non tocca taglie, preset,
+#      sedie ne' conti.
+#  >>> Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (regola del 21/09):
+#      NON sul VPS, NON sul banco 50504400 (C:\MT5_Backtest), NON su
+#      nessun terminale di conto (50503392, 50504263, 10105439, 541452707).
+# ==========================================================================
+#
+# ==========================================================================
+#  0. LA DOMANDA, UNA SOLA
+# ==========================================================================
+#  Il candidato #1 (R245b centro, per-trade R247 765271/765273) guadagna
+#  quasi solo d'inverno (report/IL_MERITO_E_D_INVERNO_2026-09-25.md par. 2):
+#  due anni, estate PF 0,982 su 199 posizioni, inverno 1,800 su 152; il
+#  102% del netto e' invernale. BCM e' UTC+1 FISSO: d'inverno 14:30 BCM =
+#  8:30 NY, un'ora PRIMA della cash. Quel referto (par. 5 e 8 punto 1) dice
+#  che la causa e' [NON MISURATO]: OROLOGIO (armare alle 8:30 NY) o
+#  STAGIONE (l'inverno in se')? R250 separa le due spostando TUTTO
+#  l'orario dell'EA a stagione ferma, come R246 ha fatto per 770202:
+#                         armo 8:30 NY             armo 9:30 NY (cash)
+#     ESTATE  (E)         -1h  [R250c/d, NUOVA]    d0   [R250a/b = R247]
+#     INVERNO (I)         d0   [R250a/b = R247]    +1h  [R250e/f, NUOVA]
+#  H_OROLOGIO: -1h d'estate ~ d0 d'inverno, e +1h d'inverno ~ d0 d'estate.
+#  H_STAGIONE: -1h d'estate ~ d0 d'estate,  e +1h d'inverno ~ d0 d'inverno.
+#  A differenza di R246 (che aveva solo la -1h, e la d+1 scritta a parte)
+#  qui le due caselle nuove girano INSIEME: il verdetto principale le usa
+#  tutte e due (par. 7), e questo lo rende immune a uno spostamento che
+#  peggiori (o migliori) tutte e due le celle (autotest T10).
+#
+# ==========================================================================
+#  1. IL DISEGNO: 6 FILE = {d0, -1h, +1h} x {finestra A, finestra B}
+# ==========================================================================
+#   file   orologio  armo/flat BCM   finestra                   magic
+#   R250a  d0        14:30 / 17:30   A = tranche IS (= R247a)   765301/765351
+#   R250b  d0        14:30 / 17:30   B = R245b tale e quale     765302/765352
+#                                        (= R247b)
+#   R250c  -1h       13:30 / 16:30   A                          765303/765353
+#   R250d  -1h       13:30 / 16:30   B                          765304/765354
+#   R250e  +1h       15:30 / 18:30   A                          765305/765355
+#   R250f  +1h       15:30 / 18:30   B                          765306/765356
+#  MAGIC VERGINI: "7653[0-9][0-9]" a parola intera = ZERO occorrenze su
+#  tutti i rami (git grep refs/heads + refs/remotes) e sul disco (grep -r
+#  con .claude/worktrees), 25/09/2026. "R250" e "r250_" idem: zero, prima
+#  di questo file e di backtest_pipeline/r250_bande_attese.py.
+#  Asse = MAGIC GEMELLO (m||m||50||m+50||Y), come R246: serve al G1, al
+#  driver (classe 134: senza asse non gira niente) e al PER-TRADE PER
+#  CELLA (classe 455: ogni magic lascia il suo file in Common\Files).
+#  UNA VARIABILE PER FILE: fra i file cambia UNA cosa, lo SPOSTAMENTO
+#  d dell'orario (d0 / -1h / +1h) applicato IN BLOCCO a InpSessionHour e
+#  InpCloseHour (un solo orologio, non due manopole: R246a par. 1.2),
+#  oppure la finestra (A/B). Contro R247a/b cambiano solo il magic e,
+#  nelle celle spostate, le due ore (diff eseguito: vedi R250b-f).
+#
+#  1.1 PERCHE' SI SPOSTA TUTTO L'ORARIO, e cosa sono le ore rispetto a NY
+#  Nel sorgente tutti i tempi del percorso d'ingresso sono RELATIVI a
+#  InpSessionHour/Min (ABTG_Nasdaq_Apertura_US.mq5 a HEAD f88f37a6:
+#  r.708-709 openMin e rangeEndMin; r.769-782 ramo BREAKOUT che piazza a
+#  rangeEndMin; r.988 scadenza = piazzamento + InpPendingExpiryMin) oppure
+#  a InpCloseHour/Min (r.701, flat di fine seduta). Nessun'ora scritta a
+#  numero nel percorso. Filtri che potrebbero leggere un'altra ora: volumi
+#  e ATR spenti (InpUseVolumeFilter=0, InpUseAtrFilter=0 -> ConfirmOK
+#  r.2483 esce true), spread spento (InpMaxSpread=0, r.2463), news spento,
+#  regime R30 spento: nessuno legge l'orario.
+#  BCM UTC+1 fisso (report/OROLOGIO_BCM_2026-09-24.md). NY: EDT = UTC-4
+#  d'estate, EST = UTC-5 d'inverno (calendario USA, par. 4):
+#    d0   14:30 BCM = 13:30 UTC = 9:30 EDT (cash) / 8:30 EST (pre-mercato)
+#         flat 17:30 BCM = 12:30 EDT / 11:30 EST
+#    -1h  13:30 BCM = 8:30 EDT (pre-mercato)  / 7:30 EST
+#         flat 16:30 BCM = 11:30 EDT = il flat d0 d'INVERNO
+#    +1h  15:30 BCM = 10:30 EDT               / 9:30 EST (cash)
+#         flat 18:30 BCM = 12:30 EST = il flat d0 d'ESTATE
+#  Quindi -1h d'estate fa, rispetto a NY, ESATTAMENTE la giornata d0
+#  d'inverno (armo 8:30, decisione 8:45, flat 11:30), e +1h d'inverno
+#  ESATTAMENTE la giornata d0 d'estate (9:30, 9:45, 12:30). La -1h
+#  d'inverno (7:30 EST) e la +1h d'estate (10:30 EDT) NON descrivono
+#  niente: si stampano, non votano.
+#  Misurato che il flat MORDE: nel per-trade d0 R247 le uscite dalle
+#  16:31 sono 20/154 (A) e 23/197 (B), quasi tutte d'estate (script, sez.
+#  4); spostare solo l'armo darebbe una giornata piu' lunga o piu' corta.
+#
+#  1.2 IL CONFONDENTE DELLA CANDELA H4 (classe 768) -- QUI E' ASSENTE PER
+#      COSTRUZIONE, e lo dico per ogni metrica e ogni zona
+#  Il bias si legge UNA volta al giorno, in TryPlaceBreakout (r.984,
+#  TrendBias r.1745-1756: CopyBuffer shift 1 = ultima H4 CHIUSA, EMA 1
+#  contro EMA 200 su H4, InpFilterTF=16388), al piazzamento = armo + 15'
+#  (InpRangeMinutes=15). Griglia H4 ancorata alla mezzanotte SERVER:
+#    -1h decisione 13:45 -> H4 in corso 12-16 -> legge la 08-12 BCM
+#    d0  decisione 14:45 -> H4 in corso 12-16 -> legge la 08-12 BCM
+#    +1h decisione 15:45 -> H4 in corso 12-16 -> legge la 08-12 BCM
+#  (r250_bande_attese.py sez. 5.) STESSA candela, STESSO giorno, nelle tre
+#  celle: il cancello del giorno (longOK/shortOK, r.985-986) e' IDENTICO
+#  giorno per giorno. Differenza con R246m: li' il range era 35' e la d+1
+#  decideva alle 16:05, DOPO la chiusura della 12-16 (candela diversa).
+#  Per metrica: sul PF e sulla FREQUENZA il bias non puo' spiegare nessuna
+#  differenza fra le celle, perche' e' lo stesso. Per zona: un OROLOGIO,
+#  uno STAGIONE e un MISTO NON vengono dalla candela, e uno STAGIONE qui
+#  ASSOLVE l'orologio anche sul filtro (in R246 non poteva).
+#  RESIDUO, dichiarato per tutte le metriche e tutte le zone: l'ETA'
+#  dell'informazione. La candela 08-12 BCM chiude alle 12:00 BCM, cioe'
+#  1h45 prima della decisione a -1h, 2h45 a d0, 3h45 a +1h. Il valore del
+#  bias e' lo stesso, il mercato che segue no: e' parte dell'orologio,
+#  non un confondente.
+#  SENTINELLA S2 (descrittiva, par. 5.5): se il bias e' identico, nei
+#  giorni in cui la d0 e la cella spostata entrano TUTTE E DUE il VERSO
+#  deve essere lo stesso (bias +1 -> solo lungo, -1 -> solo corto).
+#  Eccezione: i giorni del SEME dell'EMA (bias 0 -> due pendenti in OCO),
+#  11 nella tranche IS a EmaSlow 200 (REFERTO_R245 par. 4). Si contano i
+#  giorni in verso opposto DAL 2024.11.15 [INFERITO: 200 barre H4 a ~6 per
+#  feriale = ~34 feriali dal 26/09]. Atteso: ZERO. Se non e' zero, la mia
+#  lettura del codice e' sbagliata e ogni zona si scrive "orologio +
+#  candela", come in R246.
+#
+#  1.3 IL CANCELLO [FUSO] (classi 763 e 767), verificato eseguendolo
+#  - InpSessionHour=14 (R250a/b): passa senza rilievo, come R247.
+#  - InpSessionHour=13 (R250c/d): il cancello NON lo giudica (conosce solo
+#    8/9 e 14/15): nessun rilievo, verificato (e come R246b). La lettura e'
+#    di strato 2: 13:30 BCM = 8:30 EDT d'estate, 7:30 EST d'inverno, cioe'
+#    VOLUTAMENTE un'ora (d'estate) o due (d'inverno) prima della cash.
+#  - InpSessionHour=15 (R250e/f): passa SOLO con '#  @ORARIO_INVERNALE
+#    <motivo>' in commento; il cancello stampa un RILIEVO con i giorni
+#    d'inverno/d'estate della finestra, da leggere allo strato 2.
+#
+# ==========================================================================
+#  2. IL PIN: la cella di R247 input per input
+# ==========================================================================
+#  Blocco copiato da R247a RIGA PER RIGA (e R247a da R245b): 75 pin letti
+#  dal CSV d'archivio + 21 input nati dopo, al valore neutro + InpEmaSlow
+#  =200; i commenti di provenienza sono quelli di R247a, lasciati intatti.
+#  Cambiano SOLO: InpMagic (asse gemello nuovo) e, nelle celle spostate,
+#  InpSessionHour e InpCloseHour. InpSessionMin=30 e InpCloseMin=30 FISSI.
+#  EA E INCLUDE INVARIATI dal pin di R247: git diff 782d7280 HEAD --
+#  mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 mql5/Include/ = VUOTO (25/09,
+#  HEAD f88f37a6). Quindi le d0 di R250 DEVONO rifare R247 (G0, par. 5.2).
+#  DEPOSITO 10000 (NON 100000): e' il banco di R245/R247, ed e' quello che
+#  rende possibile il G0 contro 765271-765274. Non sta nel file: lo passa
+#  la riga (-Deposito 10000), come in R247.
+#
+# ==========================================================================
+#  3. LE FINESTRE, e come ogni cella lascia il SUO per-trade
+# ==========================================================================
+#  Il driver gira due gambe (IS poi OOS) con lo stesso magic: resta il
+#  per-trade della gamba che gira PER SECONDA (R247a par. 2, misurato).
+#  FINESTRA A (R250a/c/e) = R247a: @DAQUANDO 2024.09.26 @FINOA 2025.06.30
+#    @FRAZIONEIS 1.0 -> gamba IS 2024.09.26 -> 2025.06.30 (la tranche IS
+#    di R245b al giorno), gamba OOS DEGENERE (FromDate > ToDate). MISURATO
+#    in R247a: la degenere lascia il CSV _OOS a 0 byte e NON sovrascrive il
+#    per-trade (154 righe = R245b). Qui si legge il CSV _IS e il per-trade.
+#    rc 2 del driver sul CSV _OOS = FALSO ALLARME ATTESO SOLO se il CSV _IS
+#    ha 2 righe con Trades>0 E il CSV _OOS ha 0 righe (classe 766).
+#  FINESTRA B (R250b/d/f) = R247b: @DAQUANDO 2024.09.26 @FINOA 2026.06.30
+#    @FRAZIONEIS 0.4322 -> 642 x 0,4322 = 277,47 -> 277: gamba IS 2024.09.26
+#    -> 2025.06.30 (CSV _IS: ancora G2 gratis), gamba OOS 2025.07.01 ->
+#    2026.06.30 = il PER-TRADE che resta.
+#  Fine del tester ESCLUSIVA (R248a par. 2, misurato): A finisce il
+#  2025.06.29, B il 2026.06.29. Tetto 100.000 barre: ogni gamba <= 365
+#  giorni di M5 (~75k): sotto.
+#
+# ==========================================================================
+#  4. IL CALENDARIO, DICHIARATO PRIMA DEI NUMERI
+# ==========================================================================
+#  Stagione per DATA DI CHIUSURA del deal, calendario USA (il solo che
+#  conta con BCM UTC+1 fisso: R246a par. 4), intervalli [inizio, fine):
+#     INVERNO 2024.11.03 <= g < 2025.03.09  e  2025.11.02 <= g < 2026.03.08
+#  (r246_bande_attese.INV['USA'], importato, non copiato). Feriali lun-ven
+#  (festivi inclusi, uguali per tutte le celle):
+#                 estate   inverno
+#     A             107       90
+#     B             170       90
+#     A+B           277      180
+#  Unita': PF sui deal di uscita = PF sulle posizioni (InpTP1_ClosePct=0:
+#  un deal per posizione, R247a par. 1), n = posizioni, al massimo una al
+#  giorno (InpOneTradePerDay=1; verificato su R247: max 1).
+#
+# ==========================================================================
+#  5. I CANCELLI, CONGELATI PRIMA -- in quest'ordine, PRIMA di ogni numero
+# ==========================================================================
+#  5.0 MOTORE E PIN. Classe 166: SHA256 di ABTG_Nasdaq_Apertura_US.mq5 e
+#     ABTG_PausaGuardian.mqh contro il pin dopo ogni job; diverso -> file
+#     NON VALIDO (classe 775). PIN DAL CSV (classe 780): le colonne
+#     InpMagic, InpSessionHour, InpSessionMin, InpCloseHour, InpCloseMin,
+#     InpEmaSlow, InpTP1_R, InpFilterTF di OGNI riga dei CSV _IS/_OOS letti
+#     uguali al pin del file (esistono: header di R247b, verificato);
+#     colonna assente o valore diverso -> file NON VALIDO.
+#  5.1 G1 DETERMINISMO, SUI CAMPI CHE DECIDONO (proposta (c) di REFERTO_
+#     R246 par. 1, adottata da R248a; tolleranza scritta PRIMA dei numeri):
+#     le due righe di ogni CSV letto con Trades IDENTICI, PF uguale alla
+#     quarta decimale, |delta Profit| <= 0,05, |delta DD| <= 0,01; i due
+#     per-trade identici RIGA PER RIGA in close_time, position_id,
+#     deal_type, volume, price, e net_profit entro 0,01 per riga. Altrimenti
+#     -> file NULLO. (Autotest T6: il centesimo di R246a passa, due no.)
+#  5.2 G0 RIPRODUZIONE (SOLO le d0), VERDE o ROSSO, NIENTE GIALLO:
+#     R250a: CSV _IS Trades 154, PF 1.25176, Profit 1180.94, Equity DD %
+#        7.1002, Peggior Giornata % -1.1046 (= R247a); per-trade 765301
+#        uguale a 765271 sui campi di 5.1 (magic a parte), 154 righe.
+#     R250b: CSV _IS come sopra; CSV _OOS Trades 197, PF 1.48894, Profit
+#        2961.61, DD 6.8640, PG -1.1958 (= R247b); per-trade 765302 uguale
+#        a 765273 sui campi di 5.1, 197 righe, prima chiusura >= 2025.07.01.
+#     Tolleranze = quelle del G1 (5.1). VERDE = tutto; ROSSO = anche una
+#     cosa. Con G0 ROSSO i riferimenti del par. 6-7 NON sono quelli di R247
+#     e NIENTE si legge (classe 750): si torna al coordinatore.
+#  5.3 G2 COERENZA FRA FINESTRE (stesso orologio: a/b, c/d, e/f): per-trade
+#     A contro la riga del CSV _IS di B: numero di deal = Trades, e
+#     |somma netti - Profit| <= 0,005 x (n+1); CSV _IS di A e di B uguali
+#     alle tolleranze di 5.1 (e' la STESSA corsa del tester). Coppia con un
+#     membro non VALIDO -> NON VERIFICABILE, e non certifica l'altro
+#     (classe 781).
+#  5.4 S1 LA MANOPOLA DEVE MORDERE (classe 156), ora di chiusura BCM:
+#     d0 : nessuna uscita prima delle 14:45 ne' dalle 17:31 (R247: min
+#          14:50:21, max 17:30:01).
+#     -1h: nessuna prima delle 13:45 ne' dalle 16:31; ALMENO il 10% prima
+#          delle 14:45 (a d0 e' 0 per costruzione; atteso ~67-73%: sono le
+#          uscite d0 prima delle 15:45, 103/154 in A e 144/197 in B).
+#     +1h: nessuna prima delle 15:45 ne' dalle 18:31; ALMENO il 3% dalle
+#          17:31 (a d0 e' 0 per costruzione; atteso ~12-13%: le uscite d0
+#          dalle 16:31, 20/154 e 23/197).
+#     E per-trade spostato NON identico al d0. Se S1 e' ROSSO -> il pin non
+#     e' arrivato: file NULLO, non "nessun effetto". Contro-esempi eseguiti
+#     (autotest T5): pin non arrivato, solo l'armo arrivato, solo il flat
+#     arrivato -> ROSSO in tutti i casi.
+#  5.5 S2 SENTINELLA DEL CONFONDENTE (par. 1.2): giorni in verso opposto
+#     fra d0 e cella spostata, dal 2024.11.15. Non blocca: se > 0, ogni
+#     zona del verdetto si scrive "orologio + candela".
+#  5.6 CHI VOTA (classi 772, 775, 781). Un file e' VALIDO solo se passa
+#     5.0, 5.1 e 5.4. Un file NON VALIDO NON VOTA IN NESSUN CONTEGGIO: esce
+#     dai cancelli superati, dai G2, dalle statistiche e dalla sintesi; i
+#     suoi numeri si stampano solo come DIAGNOSI. La sintesi elenca PER
+#     NOME i file su cui ogni statistica si regge (autotest T7).
+#
+# ==========================================================================
+#  6. L'ATTESA E LE BANDE, DICHIARATE PRIMA DEI NUMERI
+# ==========================================================================
+#  Tutti i numeri di questo paragrafo e del 7 si rifanno a seme fisso con
+#      python3 backtest_pipeline/r250_bande_attese.py        (~6 s)
+#      python3 backtest_pipeline/r250_bande_attese.py --autotest (28/28)
+#  RIFERIMENTI d0 (per-trade R247; fissi se G0 VERDE):
+#     A : estate PF 1,0246 su 79 (0,7383/feriale), inverno 1,4443 su 75
+#         (0,8333); D = 0,4197, Df = 0,0950
+#     B : estate 0,9542 su 120 (0,7059), inverno 2,1261 su 77 (0,8556);
+#         D = 1,1719, Df = 0,1497
+#     A+B: estate 0,9820 su 199 (0,7184), inverno 1,7997 su 152 (0,8444);
+#         D = 0,8176, Df = 0,1260
+#  (Rifatti alla cifra dai numeri di IL_MERITO_E_D_INVERNO par. 2.1 e di
+#  REFERTO_R247: ancore dello script, esce 1 se non tornano.)
+#  BANDE p10-p90 del PF delle celle nuove (bootstrap sulle posizioni, seme
+#  250, 5000), n = posizioni/feriale dell'ipotesi x feriali:
+#     A  -1h estate : H_STAGIONE n=79 [0,73 ; 1,47]  H_OROLOGIO n=89
+#                     [1,05 ; 2,02] -> SOVRAPPOSTE, e la mediana di
+#                     H_OROLOGIO (1,45) cade DENTRO la banda di H_STAGIONE
+#     A  +1h inverno: H_STAGIONE n=75 [1,01 ; 2,09]  H_OROLOGIO n=66
+#                     [0,69 ; 1,50] -> SOVRAPPOSTE, mediane dentro
+#     >>> CONTRO-ESEMPIO (classe 178): su A la SINGOLA cella NON separa le
+#         ipotesi: Q e Q2 su A sono NON DISCRIMINANTI PER COSTRUZIONE, si
+#         stampano e non votano.
+#     A+B -1h estate: H_S n=199 [0,79 ; 1,24]  H_O n=234 [1,48 ; 2,19]
+#     A+B +1h inverno: H_S n=152 [1,42 ; 2,31] H_O n=129 [0,74 ; 1,32]
+#                     -> DISGIUNTE tutte e due
+#  POSIZIONI (binomiale, p10-p90):
+#     A  -1h estate (107 fer.): H_S [73,2 ; 84,8]  H_O [84,2 ; 94,1]
+#     A  +1h inverno (90 fer.): H_S [70,5 ; 79,5]  H_O [61,1 ; 71,8]
+#     A+B -1h estate (277):     H_S [189,4 ; 208,6] H_O [226,2 ; 241,6]
+#     A+B +1h inverno (180):    H_S [145,8 ; 158,2] H_O [121,6 ; 137,0]
+#  LA MIA ATTESA, e perche' (scritta prima, e puo' sbagliare):
+#   - FREQUENZA -> OROLOGIO. Motivo: il divario di frequenza d0 (0,72 contro
+#     0,84 posizioni/feriale su A+B) ha una causa meccanica plausibile: alle
+#     8:30 NY il range di 15' e' piu' stretto del range alla cash, e un
+#     range stretto viene rotto piu' spesso. R246 l'ha misurato sul Dow
+#     (altro motore, stessa apertura): frequenza -> OROLOGIO (sospeso dal
+#     G1), e sul DAX -> OROLOGIO pieno. Attesa: Qfc_A >= 0,70.
+#   - PF -> NESSUNA ATTESA FORTE, zona piu' probabile MISTO. A favore
+#     dell'orologio: d'inverno META' delle posizioni (76/152) nasce e muore
+#     prima della cash con PF 1,80 (IL_MERITO par. 2.6), e il range delle
+#     8:30 NY contiene i dati USA delle 8:30 ET [INFERITO]. A favore della
+#     stagione: R246 sul Dow (770202) dice STAGIONE sul PF (sospeso,
+#     fragile, n<150). Due indizi opposti, nessuno sul motore di R250.
+#   - Posizioni attese: -1h d'estate A ~79-89, +1h d'inverno A ~66-75;
+#     A+B ~199-234 e ~129-152.
+#   - DD: [NON MISURATO] per le celle nuove. Riferimento di un ALTRO
+#     motore: in R246 le celle -1h del Dow avevano Equity DD 10,3-11,7%
+#     contro 4,4-5,7% delle d0. Qui le d0 fanno 7,10% (A) e 6,86% (OOS B).
+#     Nessuna soglia: le celle nuove sono strumenti (par. 9 e 11).
+#
+# ==========================================================================
+#  7. IL CRITERIO DI VERDETTO, CONGELATO
+# ==========================================================================
+#  Q   = (PF_E-1h - PF_E0) / D     Q2 = (PF_I0 - PF_I+1) / D
+#  Qc  = (Q + Q2) / 2              -> OROLOGIO ~ 1, STAGIONE ~ 0
+#  S   = (Q2 - Q) / 2              -> interazione del 2x2, descrittiva
+#  Qf, Qf2, Qfc, Sf: le stesse con le posizioni per feriale (Df).
+#  Zone: <= 0,30 STAGIONE, >= 0,70 OROLOGIO, in mezzo MISTO.
+#  Nessuna precondizione su D: con G0 VERDE i riferimenti SONO quelli di
+#  R247 (D_A = 0,4197 noto oggi); con G0 ROSSO non si legge niente.
+#  PERCHE' Qc E NON Q O Q2 DA SOLI: (i) sulla sola A la singola cella non
+#  discrimina (par. 6); (ii) CONTRO-ESEMPIO: le d0 sono le celle su cui
+#  EmaSlow e TP sono stati SCELTI (R245, sulla tranche A): se lo
+#  spostamento peggiora TUTTE E DUE le celle nuove di delta, Q scende e Q2
+#  sale di delta/D, e Q o Q2 da soli direbbero STAGIONE o OROLOGIO per un
+#  effetto che non e' ne' l'uno ne' l'altro. Qc non si muove, S si'
+#  (autotest T10, sotto tutte e due le ipotesi).
+#
+#  7.1 IL CAMPIONE CHE CONFERMA (classe 778), congelato qui
+#  L'ipotesi "il merito e' d'inverno" e' NATA sulla tranche OOS di R247b
+#  (B, R248a par. 7) e IL_MERITO par. 2.3 ha gia' usato A come replica
+#  (+0,420, p 0,206). Le celle NUOVE di R250 non le ha viste nessuno, ma i
+#  riferimenti d0 di B sono quelli che hanno generato l'ipotesi. Quindi:
+#   >>> VERDETTO DI CONFERMA = Qc e Qfc sulla SOLA finestra A (file R250a,
+#       R250c, R250e; G0 di R250a). E' quello che si scrive come verdetto.
+#   >>> B e A+B si stampano come LETTURA DESCRITTIVA, "contiene la meta'
+#       generatrice", mai come conferma. Se A e A+B dicono cose diverse,
+#       vale A, con la sua potenza scritta qui sotto.
+#  Potenza della regola com'e' scritta (classe 764; seme 2502, 6000;
+#  triple = probabilita' di STAGIONE ; MISTO ; OROLOGIO):
+#     A  Qc   se H_STAGIONE (0,690 ; 0,199 ; 0,112)
+#             se H_OROLOGIO (0,117 ; 0,183 ; 0,700)
+#        p10-p50-p90: H_S [-0,80 ; 0,01 ; 0,74]  H_O [0,25 ; 0,99 ; 1,77]
+#        -> le mediane cadono FUORI dalla banda altrui: DISCRIMINA, ma con
+#           verdetto SBAGLIATO ~11-12% in tutti e due i versi e MISTO
+#           ~18-20%. Lo scrivo prima: e' un INDIZIO, non una sentenza.
+#     A  Qfc  se H_STAGIONE (0,834 ; 0,155 ; 0,011)
+#             se H_OROLOGIO (0,011 ; 0,154 ; 0,835)  -> DISCRIMINA
+#     A+B Qc  (0,917 ; 0,082 ; 0,001) / (0,002 ; 0,080 ; 0,919)
+#     A+B Qfc (0,975 ; 0,025 ; 0,000) / (0,000 ; 0,027 ; 0,973)
+#  In unita' della cella, sulla A: PF -1h d'estate STAGIONE se <= 1,1505,
+#  OROLOGIO se >= 1,3184; PF +1h d'inverno OROLOGIO se <= 1,1505,
+#  STAGIONE se >= 1,3184; posizioni -1h (107 fer.) STAGIONE se <= 82,05,
+#  OROLOGIO se >= 86,12; +1h (90 fer.) OROLOGIO se <= 69,01, STAGIONE se
+#  >= 72,43. (Stampe per sole letture di Q/Q2; il verdetto e' Qc/Qfc.)
+#  Onesta' del bootstrap: celle trattate come INDIPENDENTI. Le celle nuove
+#  girano sugli STESSI giorni delle d0: sotto H_STAGIONE l'errore vero e'
+#  PIU' PICCOLO di quello stampato (prudente).
+#  PF e FREQUENZA sono DUE verdetti e possono divergere (R246 l'ha visto):
+#  si scrivono tutti e due. Lettura congiunta Q/Q2 (R246m par. 5.1) e S:
+#  descrittive, su A non votano.
+#
+#  7.2 CHE COSA VUOL DIRE OGNI ZONA (conseguenze per il campo: TUTTE
+#      [INFERITO] a round girato, classe 765; decisioni di Claudio)
+#   - OROLOGIO: il merito e' "armare alle 8:30 NY". Su BCM d'inverno la
+#     cella fa quello che ha fatto il backtest (contratto invariato). Su
+#     FTMO, se d'inverno il server passa a UTC+2 (arma alle 9:30 NY),
+#     varrebbe la casella +1h d'inverno misurata QUI. E la -1h d'estate
+#     (armare alle 8:30 NY tutto l'anno) diventa un'IPOTESI di cella
+#     nuova, NON una promozione: va provata su dati mai visti (par. 14,
+#     punto 3) e sul costo 40x in pre-mercato (par. 11).
+#   - STAGIONE: il merito e' dell'inverno; su FTMO d'inverno alla cash la
+#     cella terrebbe il PF invernale [INFERITO]. L'estate a PF ~1 e'
+#     strutturale: il contratto e' "estate ~1, inverno ~1,8".
+#   - MISTO: nessuna delle due e' misurata come vera; vale la +1h
+#     d'inverno MISURATA qui per il caso FTMO UTC+2, e nient'altro.
+#  In tutte e tre le zone la candela H4 e' esclusa per costruzione (par.
+#  1.2) se S2 = 0; se S2 > 0, ogni zona diventa "orologio + candela".
+#
+# ==========================================================================
+#  8. n E IL PAVIMENTO DEI 150
+# ==========================================================================
+#  Sulla A (la conferma) OGNI casella sta sotto 150: 79/75 le d0, ~79-89
+#  e ~66-75 le nuove. Il MERITO e' SOSPESO: il verdetto e' una lettura
+#  CAUSALE sul contratto, "INDIZIO a n<150", ne' promozione ne' bocciatura.
+#  Su A+B l'estate supera 150 (~199-234), l'inverno ci sta vicino
+#  (~129-152): descrittivo (par. 7.1). Il RISCHIO si legge a qualunque n.
+#
+# ==========================================================================
+#  9. IL RISCHIO (Emendamento B), a qualunque n
+# ==========================================================================
+#  Per ogni file: Equity DD % e Peggior Giornata % dai CSV letti; dal
+#  per-trade, DD del saldo chiuso (minorante) e peggior giornata PER
+#  STAGIONE. Un DD e' un fatto accaduto: si scrive anche sulle celle
+#  strumento. Riferimenti per la lettura (NON soglie di questo round):
+#  pausa Guardian 4,0% al giorno, muro statico FTMO 10%.
+#
+# ==========================================================================
+#  10. I DUE LATI (regola del 25/08)
+# ==========================================================================
+#  La cella e' A DUE LATI (InpAllowLong=1, InpAllowShort=1): tutte e due
+#  le direzioni sono misurate in ogni file. Lettura per lato (deal_type
+#  dell'uscita: 1 = chiude un lungo, 0 = chiude un corto) per stagione e
+#  per cella: DESCRITTIVA, n per lato e stagione molto sotto 150.
+#
+# ==========================================================================
+#  11. IL COSTO 40x (stop >= 40 x spread)
+# ==========================================================================
+#  d0: R245a par. 6, "AL PELO": stop mediano 123,75 idx = 41,25x allo
+#  spread 3,00 (Studio_U30USD.csv, 446 giornate alle 14:30 BCM). Quel
+#  campione e' una MISCELA: i suoi giorni d'inverno sono gia' pre-mercato.
+#  -1h (pre-mercato d'estate): [NON MISURATO]. Pavimento col metodo di
+#  R246a par. 10 (ADR x rad(15/W) = 39,57 idx, + 2 x buffer 2,00 = 43,57
+#  idx) su spread mediano dell'ora 13 BCM 2,60 = 16,8x [DERIVATO; e' un
+#  pavimento, non una stima]. >>> Le celle -1h sono STRUMENTI DI MISURA,
+#  non candidate: ESCLUSE PER COSTO come candidate finche' il range delle
+#  8:30 NY non e' misurato.
+#  +1h d'inverno (alla cash): si giudica come la d0 d'estate; spread
+#  mediano ora 15 BCM 2,00 (R246m par. 7). Il range alla cash d'inverno
+#  come tale e' [NON MISURATO].
+#  E LO STESSO BUCO VALE PER IL CANDIDATO: il suo merito e' d'inverno, cioe'
+#  in pre-mercato, dove il 40x e' [NON MISURATO] (R246a par. 10). Lettura a
+#  costo zero, DESCRITTIVA e [DERIVATA]: nei giorni comuni il rapporto dei
+#  VOLUMI d0/spostata e' circa l'inverso del rapporto degli stop (lotto a
+#  rischio 1%), sporcato dal passo 0,1 lotti a deposito 10000 (fino al 33%,
+#  R248a par. 4). Non e' un cancello 40x.
+#  Il PF a tick reali contiene gia' lo spread vero di ogni ora.
+#
+# ==========================================================================
+#  12. IL TEMPO MACCHINA (classi 712, 726, 751)
+# ==========================================================================
+#  DESKTOP-H4D7CAJ ha UN SOLO agente (classe 751): passate in serie.
+#  STESSO EA, STESSA MACCHINA, STESSE FINESTRE: R247, dai REFERTO_ROUND
+#  (risultati_archivio/R247): R247a partito 22:37:22, R247b 22:38:36, fine
+#  22:40:16 (RIEPILOGO_R247).
+#     file A (2 passate da 277 g + gamba degenere): 74 s, avvio compreso
+#     file B (2 x 277 g + 2 x 365 g = 1284 giorni-passata): 100 s
+#        -> 0,078 s per giorno-passata
+#  R250: 3 file A + 3 file B. Passate nominali 24, vere 18 (le 6 gambe
+#  degeneri costano ~0).
+#     minimo: A al ritmo di B (554 x 0,078 = 43 s) -> 3 x 43 + 3 x 100 =
+#             429 s = ~7,2 min
+#     come R247: 3 x 74 + 3 x 100 = 522 s = ~8,7 min
+#  Le celle spostate girano gli stessi tick: stesso costo per passata.
+#  TETTO LARGO: 89,6 s per passata (caso largo del 21/09 sulla stessa
+#  macchina, R246a par. 11) x 24 nominali = 35,8 min.
+#  ==> SI PIANIFICANO ~7-9 MINUTI; la corsa NON si ferma prima di 20;
+#      oltre 36 e' BLOCCATA.
+#  Ordine consigliato: R250a e R250b PER PRIMI (i G0 dicono se i
+#  riferimenti sono quelli di R247), poi c, d, e, f.
+#
+# ==========================================================================
+#  13. AVVICINA UNA SEDIA? Detto com'e'
+# ==========================================================================
+#  NON crea una sedia e NON cambia il contratto su BCM (d'inverno la
+#  cella arma alle 8:30 NY come il suo backtest, qualunque sia il
+#  verdetto). Serve a DUE decisioni di Claudio, e solo a quelle:
+#   (1) quale numero di contratto descrive la cella su FTMO d'inverno se
+#       il server passa a UTC+2 (IL_MERITO par. 4 e 6.2): la +1h
+#       d'inverno e' quel numero, su feed BCM;
+#   (2) se l'armo alle 8:30 NY TUTTO l'anno merita una prova su dati mai
+#       visti (solo con OROLOGIO).
+#  Sulla scelta "sostituire o affiancare 770202" pesa solo in quanto
+#  cambia cosa ci si aspetta dal candidato su FTMO d'inverno. E' una
+#  misura di DECISIONE, non ponteggio, e non una sedia.
+#
+# ==========================================================================
+#  14. I BUCHI DICHIARATI
+# ==========================================================================
+#   1. Un solo regime (toro 2024-2026 col crollo di aprile), un broker
+#      (feed BCM), due inverni: Emendamento C non soddisfatto.
+#   2. La conferma (A) ha potenza scritta al par. 7.1: ~70% di verdetto
+#      giusto, ~11-12% sbagliato sul PF. n<150 ovunque su A.
+#   3. La conferma VERA del merito invernale e' un inverno che nessuno ha
+#      visto: dal 02/11/2026. E per la -1h d'estate (se OROLOGIO) la via
+#      piu' corta e' la finestra vergine di R248 (2026.07.01 -> 2026.09.18,
+#      tutta estate, ~45-50 posizioni: giudica il rischio, non il merito).
+#      Nessuna delle due e' in R250.
+#   4. Il 40x in pre-mercato: [NON MISURATO] (par. 11), per le celle -1h
+#      E per l'inverno del candidato.
+#   5. Il seme dell'EMA nella tranche A (~11 giorni a bias 0): uguale in
+#      tutte le celle; escluso da S2 con una data [INFERITA] (par. 1.2).
+#   6. La selezione di R245 e' stata fatta sulla A: gonfia il LIVELLO di
+#      tutte e due le d0 allo stesso modo [INFERITO]; finisce in S, non
+#      in Qc (par. 7).
+#   7. FTMO: feed, spread e griglia H4 diversi (su FTMO la candela del
+#      bias e' un'altra: R248a buco 7); offset d'inverno [NON MISURATO]
+#      (IL_MERITO par. 4). Ogni conseguenza per FTMO resta [INFERITA].
+#   8. La -1h d'inverno (7:30 EST) e la +1h d'estate (10:30 EDT): stampate,
+#      non descrivono nessuna sedia, non votano.
+#
+#  CHE COSA DEVE FARE LA RIGA (non scritta qui): -Deposito 10000, modello
+#  4, spread NON passato, i 6 file in serie (a, b per primi); raccogliere
+#  da %APPDATA%\MetaQuotes\Terminal\Common\Files i 12 per-trade
+#  abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_<magic>.csv FRESCHI
+#  (LastWriteTime >= avvio; classi 135 e 754) per i magic 765301-765306 e
+#  765351-765356, dicendo a voce quanti su 12 e con quante righe (attese
+#  154 per 765301/765351, 197 per 765302/765352); l'impronta SHA256 di EA
+#  e include contro il pin (classe 166); rc 2 sui file A = falso allarme
+#  atteso SOLO alle condizioni del par. 3 (classe 766).
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2025.06.30
+@FRAZIONEIS 1.0
+
+# --- 75 pin LETTI DAL CSV D'ARCHIVIO: valore COSTANTE su tutte e 80 le righe
+#     (40 IS + 40 OOS) di dow_walkforward_{IS,OOS}.csv. Stessa forma 1/0 dei bool
+#     del lanciatore che ha prodotto l'archivio (dow_apertura.ps1). Tre eccezioni
+#     DICHIARATE: InpMagic (qui ASSE tecnico gemello, in fondo), InpAllowLong/
+#     InpAllowShort (1/1 come il CSV: due lati), e InpNewsCurrencies OMESSO: nel
+#     CSV e' la stringa vuota, un pin vuoto MT5 lo ignora, e il default compilato
+#     (r.296) e' gia' "". InpTP1_R=0.50 e InpEmaSlow=200 = la cella centrale.
+#     BLOCCO COPIATO DA R245b RIGA PER RIGA (stesse righe vive, stesso ordine),
+#     tolto InpMagic=765242 (diventa l'asse) e aggiunto InpEmaSlow=200 (era l'asse).
+InpTP1_R=0.50
+# --- R250: OROLOGIO d0 (armo 14:30, flat 17:30 BCM). InpSessionHour e InpCloseHour spostati INSIEME
+#     (un solo orologio, R250a par. 1); InpSessionMin/InpCloseMin fissi a 30.
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMaxSpread=0
+InpVerbose=1
+
+# --- 21 input che a HEAD ESISTONO e nel CSV d'archivio NO (aggiunti dopo il
+#     05/08): pinnati al valore NEUTRO, quello che lascia il percorso di codice
+#     identico alla versione che ha prodotto l'archivio. Riga sorgente a HEAD
+#     di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (ricontate il 24/09 a 1549beaa).
+#   InpUsaGuardian: r.92  -- spento: percorso identico a prima della migrazione (PausaGuardian.mqh r.1600 esce subito)
+#   InpMaxPosSimbolo: r.206 -- tetto A1 spento (default)
+#   InpOCTimeframe: r.214 -- PERIOD_CURRENT, serve solo a OPENCONFIRM: NO-OP qui
+#   InpTrailStartR: r.269 -- 0 = trailing armato subito, come prima (r.2244)
+#   InpRunnerTP_R: r.282 -- 0 = TP storico a 3 x InpTP1_R (r.1694)
+#   InpMinBreakoutRangeATR: r.324 -- 0 = breakout a pendenti nudo (r.777-780)
+#   InpUseVolRegime: r.343 -- R30 spento (r.1905, r.1966)
+#   InpVolAtrPeriod: r.344 -- default, NO-OP col regime spento
+#   InpVolLookback: r.345 -- default, NO-OP
+#   InpVolLowPct: r.346 -- default, NO-OP
+#   InpVolHighPct: r.347 -- default, NO-OP
+#   InpVolLowOffMult: r.348 -- default, NO-OP
+#   InpVolHighOffMult: r.349 -- default, NO-OP
+#   InpVolLowSlMult: r.350 -- default, NO-OP
+#   InpVolHighSlMult: r.351 -- default, NO-OP
+#   InpVolHighSizeMult: r.352 -- default, NO-OP
+#   InpUseSRFilter: r.361 -- R30 S/R spento (r.1984 esce subito)
+#   InpSRProximityPts: r.362 -- default, NO-OP
+#   InpSRUsePrevDay: r.363 -- default, NO-OP
+#   InpSRUseRoundNumbers: r.364 -- default, NO-OP
+#   InpSRRoundInterval: r.365 -- default, NO-OP
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+
+# --- LA CELLA: InpEmaSlow FISSO al centro di R245 (REFERTO_R245 par. 0).
+InpEmaSlow=200
+
+# --- L'ASSE, unico e TECNICO: il magic, due gemelle (G1, classe 134,
+#     per-trade per cella). 765301 e 765351 vergini ("7653[0-9][0-9]" a
+#     parola intera = 0 su tutti i rami e sul disco, 25/09).
+InpMagic=765301||765301||50||765351||Y
+# ==========================================================================

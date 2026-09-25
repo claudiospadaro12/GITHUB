@@ -1,0 +1,204 @@
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+#  R250f -- OROLOGIO O STAGIONE PER IL CANDIDATO #1 (cella centrale R245b)
+#  ABTG_Nasdaq_Apertura_US su U30USD M5 -- TICK REALI -- DUE LATI
+#  InpEmaSlow = 200, InpTP1_R = 0.50 -- deposito 10000 (= R245/R247)
+#  CELLA: +1h (armo 15:30, flat 18:30 BCM) -- FINESTRA B
+#  magic gemelli 765306 / 765356
+#  @ORARIO_INVERNALE casella +1h di R250: armo 15:30 BCM = cash NY in ora solare USA (BCM UTC+1 fisso), cioe' la d0 d'estate portata d'inverno; d'estate arma 1h DOPO la cash (10:30 NY) e quei giorni non votano
+#  >>> TUTTO IL RAGIONAMENTO STA IN R250a (file di testa del round R250):
+#      domanda, disegno, confondente H4, pin, finestre, calendario,
+#      cancelli, attesa, bande, verdetto, n, rischio, lati, costo 40x,
+#      tempo, conseguenze, buchi. Qui solo le DIFFERENZE e i suoi numeri.
+#  >>> Non promuove, non archivia, non tocca taglie, preset, sedie, conti.
+#  >>> Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON sul
+#      banco 50504400 (C:\MT5_Backtest), NON su nessun terminale di conto
+#      (50503392, 50504263, 10105439, 541452707).
+# ==========================================================================
+#
+#  DIFFERENZE DA R250a (righe vive; diff eseguito, 25/09):
+#   - finestra B = R247b tale e quale: @FINOA 2026.06.30,
+#     @FRAZIONEIS 0.4322 -> 642 x 0,4322 = 277 giorni: gamba IS
+#     2024.09.26 -> 2025.06.30 (gira PRIMA, il suo per-trade viene
+#     sovrascritto; il CSV _IS resta e fa da ancora G0/G2), gamba OOS
+#     2025.07.01 -> 2026.06.30 (fine esclusiva: 06.29) = il PER-TRADE.
+#   - InpSessionHour=15 e InpCloseHour=18 (R250a: 14 e 17): orologio +1h
+#   - InpMagic=765306||765306||50||765356||Y (R250a: 765301/765351)
+#
+#  COSA E': armo 15:30 BCM = 9:30 EST d'inverno (ALLA CASH) = la
+#  giornata d0 D'ESTATE portata d'inverno (flat 18:30 = 12:30 EST).
+#  E' anche la casella che una sedia FTMO farebbe d'inverno se il
+#  server passasse a UTC+2 (IL_MERITO par. 4) [INFERITO, feed BCM].
+#  SI LEGGE SUI SOLI GIORNI D'INVERNO (calendario USA, R250a par. 4).
+#  D'estate arma alle 10:30 EDT: stampato, NON vota (R250a par. 1.1).
+#  [FUSO]: 15 passa SOLO per la riga @ORARIO_INVERNALE qui in testa; il
+#  cancello stampa un RILIEVO coi giorni d'inverno/estate: e' voluto.
+#  Riconciliazione col rilievo: il cancello conta fino al @FINOA COMPRESO
+#  (279 feriali d'estate, 180 d'inverno), lo script 277 / 180: la fine
+#  del tester e' ESCLUSIVA (R248a par. 2): il 2025.06.30 non sta in
+#  nessuna gamba e il 2026.06.30 resta fuori. Gli inverni coincidono.
+#  S1 +1h: nessuna uscita prima delle 15:45 ne' dalle 18:31, ALMENO il
+#     3% dalle 17:31 (atteso ~12-13%), per-trade NON identico alla d0
+#     della stessa finestra.
+#  S2 (confondente H4, R250a par. 1.2 e 5.5): contro R250b, giorni comuni
+#     in verso opposto dal 2024.11.15: attesi ZERO (stessa candela 08-12).
+#  G2: il per-trade di R250e contro il CSV _IS di QUESTO file.
+#  VOTO: solo nelle letture DESCRITTIVE B e A+B (R250a par. 7.1).
+#  ATTESA (R250a par. 6, lettura B descrittiva): posizioni invernali su
+#     90 feriali ~77 (H_S) / ~64 (H_O); OROLOGIO se <= 67,57, STAGIONE
+#     se >= 72,96; PF OROLOGIO se <= 1,3058, STAGIONE se >= 1,7746.
+#  COSTO 40x: d'inverno alla cash, come la d0 d'estate; [NON MISURATO]
+#     come tale (R250a par. 11). Strumento di misura, non candidata.
+#  TEMPO: ~100 s (come R247b: 4 passate).
+#  PER-TRADE atteso in Common\Files (gli UNICI due di questo file):
+#     abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765306.csv
+#     abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765356.csv
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.4322
+
+# --- 75 pin LETTI DAL CSV D'ARCHIVIO: valore COSTANTE su tutte e 80 le righe
+#     (40 IS + 40 OOS) di dow_walkforward_{IS,OOS}.csv. Stessa forma 1/0 dei bool
+#     del lanciatore che ha prodotto l'archivio (dow_apertura.ps1). Tre eccezioni
+#     DICHIARATE: InpMagic (qui ASSE tecnico gemello, in fondo), InpAllowLong/
+#     InpAllowShort (1/1 come il CSV: due lati), e InpNewsCurrencies OMESSO: nel
+#     CSV e' la stringa vuota, un pin vuoto MT5 lo ignora, e il default compilato
+#     (r.296) e' gia' "". InpTP1_R=0.50 e InpEmaSlow=200 = la cella centrale.
+#     BLOCCO COPIATO DA R245b RIGA PER RIGA (stesse righe vive, stesso ordine),
+#     tolto InpMagic=765242 (diventa l'asse) e aggiunto InpEmaSlow=200 (era l'asse).
+InpTP1_R=0.50
+# --- R250: OROLOGIO +1h (armo 15:30, flat 18:30 BCM). InpSessionHour e InpCloseHour spostati INSIEME
+#     (un solo orologio, R250a par. 1); InpSessionMin/InpCloseMin fissi a 30.
+InpSessionHour=15
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=18
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMaxSpread=0
+InpVerbose=1
+
+# --- 21 input che a HEAD ESISTONO e nel CSV d'archivio NO (aggiunti dopo il
+#     05/08): pinnati al valore NEUTRO, quello che lascia il percorso di codice
+#     identico alla versione che ha prodotto l'archivio. Riga sorgente a HEAD
+#     di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (ricontate il 24/09 a 1549beaa).
+#   InpUsaGuardian: r.92  -- spento: percorso identico a prima della migrazione (PausaGuardian.mqh r.1600 esce subito)
+#   InpMaxPosSimbolo: r.206 -- tetto A1 spento (default)
+#   InpOCTimeframe: r.214 -- PERIOD_CURRENT, serve solo a OPENCONFIRM: NO-OP qui
+#   InpTrailStartR: r.269 -- 0 = trailing armato subito, come prima (r.2244)
+#   InpRunnerTP_R: r.282 -- 0 = TP storico a 3 x InpTP1_R (r.1694)
+#   InpMinBreakoutRangeATR: r.324 -- 0 = breakout a pendenti nudo (r.777-780)
+#   InpUseVolRegime: r.343 -- R30 spento (r.1905, r.1966)
+#   InpVolAtrPeriod: r.344 -- default, NO-OP col regime spento
+#   InpVolLookback: r.345 -- default, NO-OP
+#   InpVolLowPct: r.346 -- default, NO-OP
+#   InpVolHighPct: r.347 -- default, NO-OP
+#   InpVolLowOffMult: r.348 -- default, NO-OP
+#   InpVolHighOffMult: r.349 -- default, NO-OP
+#   InpVolLowSlMult: r.350 -- default, NO-OP
+#   InpVolHighSlMult: r.351 -- default, NO-OP
+#   InpVolHighSizeMult: r.352 -- default, NO-OP
+#   InpUseSRFilter: r.361 -- R30 S/R spento (r.1984 esce subito)
+#   InpSRProximityPts: r.362 -- default, NO-OP
+#   InpSRUsePrevDay: r.363 -- default, NO-OP
+#   InpSRUseRoundNumbers: r.364 -- default, NO-OP
+#   InpSRRoundInterval: r.365 -- default, NO-OP
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+
+# --- LA CELLA: InpEmaSlow FISSO al centro di R245 (REFERTO_R245 par. 0).
+InpEmaSlow=200
+
+# --- L'ASSE, unico e TECNICO: il magic, due gemelle (G1, classe 134,
+#     per-trade per cella). 765306 e 765356 vergini ("7653[0-9][0-9]" a
+#     parola intera = 0 su tutti i rami e sul disco, 25/09).
+InpMagic=765306||765306||50||765356||Y
+# ==========================================================================
