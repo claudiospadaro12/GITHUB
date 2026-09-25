@@ -4178,7 +4178,7 @@ Il verdetto per tutte le celle mai girate su BCM resta **NON ANCORA MISURATO (so
 | gap-down continuazione >=0,25% | +0,110 R t 1,80 5/8 | 🟠 manca G1 e G3 |
 | **gap-down continuazione >=0,50%** (rottura del min. range 15', 2R) | **+0,185 R t 2,12 6/8, DD 6,5 R, n 175** | 🟢 **PASSA-SONDA** + 6 contro-esempi (gap = motore; lungo speculare senza informazione; EuroStoxx concorde t 1,51; S&P NO t 0,49) |
 
-- 📦 **In coda, NON girato:** `prove/R253a_gapcont_DAX_short_ora8.txt` + `R253b_gapcont_DAX_short_ora9.txt`
+- 📦 **Girato il 25/09 (era in coda):** `prove/R253a_gapcont_DAX_short_ora8.txt` + `R253b_gapcont_DAX_short_ora9.txt`
   ✅ **GIRATO il 25/09 22:52-22:55 (2 min) sul PC di backtest, catena VERDE** (`report/REFERTO_R253_2026-09-25.md`, archivio `risultati_archivio/R253/`): curva in fase **29 posizioni** in 21 mesi, PF 0,898, EP −0,041 R, DD chiuso 5,63% (R1 ≤ 6,5 NON VIOLATO su n 29, P senza edge 0,56, oltre il peggio di CE9 4,8 R), pegg. giorno −0,98%, serie 3; K1 stop mediano 116 pti = 68× spread AMMESSO; O1 vs 770411 17%; O2 vs 770105 NON MISURABILE (zip R252 assente). **Merito SOSPESO, segno DISCORDE con CE9 ma dentro l'attesa di toro. Certificato: NON ANCORA MISURATO** (mancano uscita ad asse, gemelli E50/F40, range 5/10/15).
   (`ABTG_GapContinuation`, D30EUR solo short, orologio in fase come R252; `controlla_prova.py` OK).
   Merito **sospeso per aritmetica** in partenza (~0,09 posizioni/seduta): il round giudica catena,

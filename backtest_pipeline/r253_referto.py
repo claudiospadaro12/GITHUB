@@ -15,7 +15,8 @@ Cosa calcola (tutto dai per-trade dell'archivio, niente a memoria):
     PF per posizione e sui deal, EP per posizione, DD a saldo chiuso (EUR e %),
     peggior giornata a saldo chiuso, serie perdente piu' lunga;
   - K1: stop mediano delle uscite a stop pieno (posizioni con UN solo deal in
-    perdita), |net|/volume a 1 EUR/pt/lotto [DA VERIFICARE sul contratto];
+    perdita), |net|/volume a 1 EUR/pt/lotto; il valore del punto e' MISURATO
+    dal per-trade (parziale + stop in pari: net / (volume x distanza di prezzo));
   - R1 DD <= 6,5% / R2 peggior giornata >= -1,10% / R3 serie <= 8, verdetto
     ASIMMETRICO (classe 804): ROSSO boccia a qualunque n, VERDE = "NON VIOLATO
     su n = X" con la probabilita' che un motore senza edge lo passi;
@@ -132,6 +133,17 @@ def k1_stop(pos):
     stops = [abs(p["net"]) / p["vol"] for p in pos if len(p["deals"]) == 1 and p["net"] < 0 and p["vol"] > 0]
     return (st.median(stops) if stops else None), len(stops), (min(stops) if stops else None), (max(stops) if stops else None)
 
+def valore_punto(pos):
+    """EUR per punto per lotto MISURATO senza assumerlo: nelle posizioni con parziale + stop in pari
+    la distanza di PREZZO fra il deal della parziale e quello in pari e' 1 R in punti indice;
+    net della parziale / (volume x distanza) = valore del punto per lotto"""
+    v = []
+    for p in pos:
+        if len(p["deals"]) == 2 and abs(p["deals"][1]["net"]) < 5:
+            d1, d2 = p["deals"]; dist = d2["price"] - d1["price"]
+            if dist > 0: v.append(d1["net"] / (d1["vol"] * dist))
+    return v
+
 def dd_fisso_csv(path):
     with open(path) as f:
         rows = list(csv.DictReader(f))
@@ -227,17 +239,21 @@ def referto():
     L.append(f"  scarto di saldo massimo corsa/curva (metodo A): {o['scarto_max']*100:.2f}%  (regola: sopra il 10% R1/R2 con DD fra 0,8 e 1,2 volte la soglia sono NON RISOLTI)")
     L.append(f"  estate (a): {o['fase_estate']['n']} pos, Profit {o['fase_estate']['profit']:+.2f}, PF {o['fase_estate']['pf_pos']:.3f} | inverno (b): {o['fase_inverno']['n']} pos, Profit {o['fase_inverno']['profit']:+.2f}, PF {o['fase_inverno']['pf_pos']:.3f}")
     L.append("  per anno (in fase, denaro): " + " | ".join(f"{y}: n {v[0]} {v[1]:+.2f}" for y, v in sorted(o["anni"].items())))
+    for lab, pp in (("gambe intere", list(pa) + list(pb)), ("in fase", o["fase"])):
+        v = valore_punto(pp)
+        if v: L.append(f"VALORE DEL PUNTO misurato dal per-trade ({lab}, posizioni parziale + stop in pari): n {len(v)}, min {min(v):.3f}, mediana {st.median(v):.3f}, max {max(v):.3f} EUR/pt/lotto")
     med, nst, mn, mx = o["k1"]
     if med is None: L.append("K1 COSTO: nessuna uscita a stop pieno nel campione -> [NON MISURABILE]")
     else:
         esito = "AMMESSO" if med >= K1_OK else ("FRAGILE" if med >= K1_MIN else "ESCLUSO PER COSTO")
-        L.append(f"K1 COSTO: stop mediano {med:.1f} pti (n {nst} stop pieni, min {mn:.1f} max {mx:.1f}; 1 EUR/pt/lotto [DA VERIFICARE]) -> {esito} (soglie 68 / 22,6); vs spread 1,70: {med/1.70:.1f}x")
+        L.append(f"K1 COSTO: stop mediano {med:.1f} pti (n {nst} stop pieni, min {mn:.1f} max {mx:.1f}; 1 EUR/pt/lotto, misurato dal per-trade qui sopra) -> {esito} (soglie 68 / 22,6); vs spread 1,70: {med/1.70:.1f}x")
     n = fA["n"]
     pn = p_noedge(n)
     for tag, val, ok, soglia in (("R1 DD chiuso %", fA["dd_pct"], fA["dd_pct"] <= R1_MAX, f"<= {R1_MAX}"),
                                  ("R2 pegg. giorno %", fA["pegg_pct"], fA["pegg_pct"] >= R2_MIN, f">= {R2_MIN}"),
                                  ("R3 serie perdente", fA["serie"], fA["serie"] <= R3_MAX, f"<= {R3_MAX}")):
-        if ok: L.append(f"{tag} {val:.2f} ({soglia}): NON VIOLATO su n = {n} posizioni in fase (P che un motore senza edge lo passi a n={n}: {pn:.2f})" + (" - oltre il peggio di CE9 (4,8 R)" if tag.startswith("R1") and val > 4.8 else ""))
+        pstr = f"P che un motore senza edge lo passi a n={n}: {pn:.2f}" if tag.startswith("R1") else "P senza edge: non data dal modello della classe 804 (misura R1)"
+        if ok: L.append(f"{tag} {val:.2f} ({soglia}): NON VIOLATO su n = {n} posizioni in fase ({pstr})" + (" - oltre il peggio di CE9 (4,8 R)" if tag.startswith("R1") and val > 4.8 else ""))
         else: L.append(f"{tag} {val:.2f} ({soglia}): ROSSO -> BOCCIATO PER RISCHIO (vale a qualunque n)")
     L.append(f"MERITO: SOSPESO per aritmetica (n {n} << 150). EP per posizione in fase {o['ep_R']:+.3f} R (mediana {o['ep_R_med']:+.3f} R) -> segno {'CONCORDE' if o['ep_R'] > 0 else 'DISCORDE'} con la sonda CE9 (+0,230 R); attesa di toro CE9: fra -0,20 e +0,25 R")
     L.append(f"  crollo 2025.03.31-2025.05.09: {o['crollo'][0]} posizioni, {o['crollo'][1]:+.2f} EUR, {o['crollo'][2]:+.2f} R")
