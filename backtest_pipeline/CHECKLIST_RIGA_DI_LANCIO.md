@@ -35405,3 +35405,7 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 💶 CLASSE 787 — **rischio implicito dai lotti diviso per una BASE diversa da quella del codice di sizing** (parente della 146)
 - **Caso (25/09, stesso referto)**: i lotti ORB sul reale divisi per l'equity del Guardian davano "0,66% contro 1,0% dichiarato" e due ipotesi inventate (rischio cambiato dopo il 23/09); ma `LotByRisk` usa `ACCOUNT_BALANCE` e il reale ha 2.500 di credito: all'1,0% del BILANCIO i lotti tornano 4 su 4. In piu' il valore del pip era preso da una tabella di un altro giorno. Preso dal cancello (strato 2).
 - **Regola**: prima di dire che i lotti contraddicono il preset, si ripredicono con la formula del sorgente, la base che usa il codice e il prezzo del giorno; si pubblica il contro-esempio delle basi alternative.
+
+## 📸 CLASSE 788 — **elenco CHIUSO di rimozione ricavato dalla foto del profilo salvato (.chr), senza spazzata del terminale vivo** (parente della 786)
+- **Caso (25/09, `report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`)**: l'elenco delle 15 sedie da togliere veniva dai `.chr` (foto del profilo salvato: piccolo 23/09 19:35), che non vedono un EA attaccato dopo l'ultimo salvataggio. Precedente reale: 24/09, `Nasdaq_PreOpen_Breakout_EA` su NASUSD M5 del 100k, fuori dai `.chr`, aveva operato. Preso dal cancello (strato 2).
+- **Regola**: ogni istruzione "togli queste sedie" si chiude con una SPAZZATA per simbolo nel terminale vivo, e dichiara la data della foto da cui viene l'elenco.

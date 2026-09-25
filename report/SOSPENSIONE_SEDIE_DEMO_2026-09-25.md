@@ -18,9 +18,9 @@
 ### Primo passo: capire quale finestra è quale (sola lettura)
 Finestra PowerShell **sul VPS**. La riga non tocca niente: stampa PID, titolo e cartella di ogni MT5 aperto.
 ```powershell
-Get-Process terminal64 | Select-Object Id, MainWindowTitle, Path | Format-Table -AutoSize
+$p = @(Get-Process terminal64 -ErrorAction SilentlyContinue); "processi terminal64 vivi: " + $p.Count; $p | Select-Object Id, MainWindowTitle, @{n='Path';e={ if($_.Path){ $_.Path } else { 'NON LEGGIBILE (processo di altro utente o elevato)' } }} | Format-List
 ```
-Il **piccolo** è la riga la cui colonna Path sta nella cartella del programma BCM **senza** il suffisso V3, con **50503392** nel titolo. Il **100k** è la riga la cui cartella **finisce con il suffisso V3**, con **50504263** nel titolo.
+Stampa un blocco per ogni MT5 aperto, senza colonne tagliate. Se stampa "processi terminal64 vivi: 0", la riga ha funzionato ma non vede nessun MT5: fermati e dimmelo. Il **piccolo** è il blocco il cui Path sta nella cartella del programma BCM **senza** il suffisso V3, con **50503392** nel titolo. Il **100k** è il blocco la cui cartella **finisce con il suffisso V3**, con **50504263** nel titolo.
 
 ---
 
@@ -31,7 +31,7 @@ Il **piccolo** è la riga la cui colonna Path sta nella cartella del programma B
 | 2 | **U30USD H1** | `ABTG_GapFill` | 772234 |
 | 3 | **225JPY H1** | `ABTG_GapFill` | 772235 |
 | 4 | **U30USD H1** | `ABTG_PunteLarry` | 772341 |
-| 5 | **225JPY M1** | `ABTG_GapContinuation` | (magic non letto dalla sonda) |
+| 5 | **225JPY M1** | `ABTG_GapContinuation` | 774101 (CODA_01 stampa "-" perché l'EA chiama il magic InpMagicNumber; il numero è in CODA_08) |
 | 6 | **U30USD H4** | `ABTG_SuperWave` | 770531 |
 | 7 | **D30EUR M5** | `ABTG_DAX_Apertura_EU` | 770101 |
 | 8 | **U30USD M5** | `ABTG_Dow_Apertura_US` | 770202 |
@@ -44,7 +44,7 @@ Il **piccolo** è la riga la cui colonna Path sta nella cartella del programma B
 | 15 | **NASUSD M15** | `ABTG_Nasdaq_Apertura_US` | 770250 |
 
 ❌ **Sul piccolo NON si toccano** tutte le altre sedie, forex e oro (BreakingBand, GapFill forex, PunteLarry forex e oro, CostToCost, EasyTrend, PTE GBPUSD, MaxMinNotte XAUUSD, EMA200 oro, SupertrendReversal oro, PostNews), e nemmeno TradeExporter e SpreadLogger.
-⚠️ Sul piccolo ci sono **più grafici con lo stesso simbolo** (cinque U30USD H1/H4, due D30EUR, due NASUSD, tre 225JPY). Quale EA sta sul grafico lo dice il **nome in alto a destra del grafico**, non il simbolo.
+⚠️ Sul piccolo ci sono **più grafici con lo stesso simbolo**: sette U30USD (cinque H1/H4 e due M5), tre D30EUR (M5, M15, H4), due NASUSD (H1, M15), tre 225JPY (M1, H1, H2). Quale EA sta sul grafico lo dice il **nome in alto a destra del grafico**, non il simbolo.
 
 ## 2) 100k `50504263` (`BCM Markets MT5 Terminal -V3`, profilo `SQUADRA 100K`): 1 grafico
 | grafico (TF) | EA | magic | cosa fare |
@@ -60,13 +60,14 @@ Il **piccolo** è la riga la cui colonna Path sta nella cartella del programma B
 ## ✋ Come si fa
 0. **Prima di tutto, scheda "Trade" in basso** di quel terminale. Guarda se ci sono **posizioni aperte** o **ordini pendenti** su U30USD, D30EUR, NASUSD o 225JPY.
    - **Ordini pendenti** di queste sedie: dopo aver tolto l'EA **cancellali** (tasto destro sull'ordine → Elimina). Togliere l'EA **non** cancella i pendenti: restano sul server e possono ancora eseguirsi. È un demo, quindi cancellarli non costa niente.
-   - **Posizioni aperte** di queste sedie: **non chiuderle di tua iniziativa. Mandami la foto** della scheda Trade: dal verso si capisce se c'è una sovrapposizione opposta con FTMO, e **decidi tu** se chiuderle. Stop e take profit stanno sul server, anche senza EA.
+   - **Posizioni aperte** di queste sedie: **non chiuderle di tua iniziativa. Mandami la foto** della scheda Trade: dal verso si capisce se c'è una sovrapposizione opposta con FTMO, e **decidi tu** se chiuderle. Stop e take profit stanno sul server, anche senza EA. 🔴 **Ma il resto della gestione si spegne con l'EA**: chiusura a fine seduta, chiusura del venerdì, pareggio, chiusure parziali, trailing. Oggi è **venerdì**: una posizione lasciata aperta senza EA **resta aperta nel fine settimana** col solo stop. Per ogni posizione scegli tu: chiuderla adesso, oppure tenerla sapendo che nessuno la gestirà più.
 1. Sul grafico della sedia: **tasto destro → Expert Advisors → Rimuovi**.
 2. In alto a destra del grafico **l'icona dell'EA sparisce**. Nella scheda **Esperti** compare una riga del tipo *"expert ... removed"*.
 3. Il grafico **resta aperto**: si toglie solo l'EA.
+3-bis. **Spazzata finale, prima di salvare il profilo**: scorri TUTTE le linguette dei grafici in basso in quel terminale. Ogni grafico U30USD, D30EUR, NASUSD o 225JPY che ha ancora un EA in alto a destra va tolto lo stesso, anche se NON è in tabella, e me lo scrivi col nome. La tabella è la foto del profilo salvato (piccolo 23/09 19:35, 100k 24/09 22:52): un EA attaccato dopo lì non c'è, ed è successo ieri col Nasdaq_PreOpen sul 100k. Sul 100k restano solo TradeExporter su EURUSD e Guardian su AUDNZD.
 4. 🔴 **Finiti TUTTI i grafici di quel terminale: File → Profili → Salva profilo.** Se la voce è "Salva con nome…", scegli lo **stesso nome** (`ORO` sul piccolo, `SQUADRA 100K` sul 100k) e conferma la sovrascrittura. **Senza questo passo, al primo riavvio le sedie tornano da sole.**
 
-⏰ **Prima delle 15:30 italiane**, cioè l'apertura USA: è l'ora in cui Dow e Nasdaq Apertura, ORB e Nasdaq sparano sia sul piccolo sia su FTMO.
+⏰ **Prima delle 15:30 italiane** (apertura USA): sul piccolo sparano Dow Apertura, Nasdaq Apertura e ORB, su FTMO Dow Apertura e Nasdaq Apertura. Le sedie DAX hanno già armato alle 9:00: nella scheda Trade (punto 0) guarda anche D30EUR.
 
 ## ✅ Controllo, fatto da noi
 - Mandami una foto della scheda **Esperti** di ciascun terminale dopo le rimozioni, e la foto della scheda **Trade** se c'erano posizioni aperte.
@@ -78,5 +79,6 @@ Se e quando servirà, ogni sedia si riattacca con le impostazioni salvate in `CO
 ## 📌 Cosa resta fuori, detto chiaro
 - **Tickmill** (XAUUSD Ichimoku, USDJPY breakout) e le sedie **oro/forex** del piccolo restano accese. FTMO non ha sedie su quei simboli. La loro correlazione con gli indici è **[NON MISURATA]**, e FTMO non dà una lista.
 - **ORB su EURAUD del reale `10105439`**: forex, fuori da questa sospensione; la decisione è aperta a parte (`report/ORB_EURAUD_SUL_REALE_2026-09-25.md`).
-- **PC di backtest `DESKTOP-H4D7CAJ`**: il suo terminale è loggato sullo **stesso** conto `50503392`. Le righe dei round già si fermano se trovano MT5 aperto e chiedono di staccare le sedie, ma **se lì ci fossero sedie attaccate operebbero su questo stesso conto**: va controllato a vista la prossima volta che lo apri.
+- **PC di backtest DESKTOP-H4D7CAJ**: il suo MT5 è loggato sullo **stesso** conto 50503392. **Se lì ci sono sedie attaccate, operano su questo conto e la sonda notturna del VPS non le vede**: è già successo il 14/08 (ordini #3160534/#3160535). Che oggi non ne abbia è **[NON MISURATO]**: se quel PC è acceso con MT5 aperto, guardalo **prima delle 15:30** e togli ogni EA dai grafici U30USD, D30EUR, NASUSD e 225JPY. Se è spento, lo guardi alla prossima accensione.
+- **Pepperstone, manuale 50503635 (C:\MT5_MANUALE), banco 50504400 (C:\MT5_Backtest)**: zero sedie nel profilo attivo (CODA_01 25/09). **Reale 10105439**: nessuna sedia su indici (solo ORB EURAUD, Guardian, SlippageLogger). ⚠️ Le operazioni **a mano** su Dow, DAX o Nasdaq non le vede nessuna sonda, e per FTMO rischiano di contare come le altre.
 - Se ci sono **già state** sovrapposizioni opposte dal 21/09: misura in corso (`report/HEDGING_DEMO_E_CORRELATI_2026-09-25.md`).
