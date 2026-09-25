@@ -1,0 +1,9 @@
+=== PRESET DELLA SEDIA 770105 (SHORT DAX) SUL TERMINALE FTMO -- 2026-09-25 20:45:34 ora Windows del VPS ===
+BERSAGLIO: finestra PowerShell sul VPS VMI3047753. Scrive UN SOLO file, ABTG_DAX_Apertura_EU_770105_SHORT_FTMO.set, nella cartella MQL5\Presets del terminale FTMO 541452707 (cartella programma C:\FTMO). Non apre e non chiude MT5, non tocca grafici, EA, profili, ordini, posizioni.
+VIETATO TOCCARE, e questa riga NON tocca: il grafico della 770101 e le altre sedie FTMO, il Guardian, il piccolo 50503392 (BCM Markets MT5 Terminal), il 100k 50504263 (-V3), il REALE 10105439 (C:\BCM_Reale), il banco 50504400 (C:\MT5_Backtest), il manuale 50503635 (C:\MT5_MANUALE), Pepperstone, Tickmill.
+[1/5] cartella dati 46C9F8E9FF0C747B2B5E09BCC13D5237 -> origin.txt = C:\FTMO : OK
+[2/5] giornale: conto 541452707 trovato in 7 file di logs : OK
+[3/5] preset scaricato dal pin, marcatore e SHA256 giusti, righe chiave presenti (magic 770105, SOLO SHORT, rischio 2.00, ore 10 e 19:30) : OK
+[4/5] SCRITTO e riletto dal disco: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\46C9F8E9FF0C747B2B5E09BCC13D5237\MQL5\Presets\ABTG_DAX_Apertura_EU_770105_SHORT_FTMO.set
+[5/5] Adesso i passi a mano del referto SEDIA_SHORT_DAX_FTMO: grafico NUOVO GER40.cash M5, trascinare CLAU12_DAX_Apertura_EU, Carica questo preset.
+ESITO: FATTO

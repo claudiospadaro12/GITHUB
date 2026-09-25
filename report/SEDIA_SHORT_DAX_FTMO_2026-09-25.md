@@ -398,3 +398,7 @@ lunedì **prima delle 09:00 italiane**, va bene.
 
 ---
 _Cancello: preset e riga PASS alla prima passata; istruzioni FAIL (C1-C8: "mai" sulla geometria, 2.000 richieste/giorno, commit R252, avviso stesso grafico, pausa come fatto) -> **PASS alla seconda passata** su `77e61eac` con la condizione dell'errata 11 (scelta a: il commento del preset non si corregge per non cambiare lo SHA). Classi nuove 801-803._
+
+## ✅ ESEGUITO — la riga del preset (25/09 20:45:34 ora VPS)
+Zip di Claudio `PRESET_SHORT_DAX_FTMO_20260925_204534.zip`: `ESITO: FATTO`. Serrature passate: cartella dati `46C9F8E9…` con `origin.txt = C:\FTMO`, conto `541452707` trovato in 7 giornali; preset scaricato dal pin, marcatore e SHA256 giusti; **scritto e riletto** in `C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\46C9F8E9FF0C747B2B5E09BCC13D5237\MQL5\Presets\ABTG_DAX_Apertura_EU_770105_SHORT_FTMO.set`. SHA256 del file nello zip ricontato dal coordinatore: `9F936D7B…5730CC` = pin. Referto archiviato in `backtest_pipeline/coda/referti/sospensioni/PRESET_770105_20260925/`.
+**La sedia NON è ancora attaccata**: restano i gesti a mano del §⑧, con il prerequisito del §④.2 (CODA_01 del 26/09).
