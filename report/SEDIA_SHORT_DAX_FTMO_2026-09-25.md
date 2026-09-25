@@ -377,6 +377,7 @@ lunedì **prima delle 09:00 italiane**, va bene.
 9. ⚪ **Nessuna compilazione serve e nessuna è stata provata**: si usa il binario `CLAU12_DAX_Apertura_EU` già
    in campo.
 10. Raffica di modify (§④.4): con la 770105 il caso peggiore al ritmo medio sale da ~1.971 a ~2.628 richieste/giorno contro il tetto FTMO delle 2.000.
+11. Errata del commento del preset (r.16): "il range si costruisce sul grafico" e' SBAGLIATO -- il range si costruisce su M1 (ComputeRangeWindow r.1007-1012). M5 resta GIUSTO per un'altra ragione: il contratto R251 e' misurato su M5 e la 770101 gira su M5; con questo preset il TF del grafico entra solo nell'ATR di ripiego (AtrValue su PERIOD_CURRENT), che con SLMode=0 e TrailStartR=0 non cambia gli ingressi ne' il trailing. Il commento non si corregge per non cambiare lo SHA256 del preset gia' verificato (pin 3d23327e): le righe ';' MT5 le ignora.
 
 ---
 
@@ -394,3 +395,6 @@ lunedì **prima delle 09:00 italiane**, va bene.
 `docs/REGOLAMENTO_FTMO_2026-08.md` r.91, r.94 · `docs/REGOLAMENTO_FTMO_2026-09-20.md` §④ ·
 `report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md` · `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md` classi 174,
 547, 645, 671, 755, 783, 791, 792, 796.
+
+---
+_Cancello: preset e riga PASS alla prima passata; istruzioni FAIL (C1-C8: "mai" sulla geometria, 2.000 richieste/giorno, commit R252, avviso stesso grafico, pausa come fatto) -> **PASS alla seconda passata** su `77e61eac` con la condizione dell'errata 11 (scelta a: il commento del preset non si corregge per non cambiare lo SHA). Classi nuove 801-803._
