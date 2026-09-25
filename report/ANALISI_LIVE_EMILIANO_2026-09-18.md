@@ -676,3 +676,13 @@ relatori + Paolo Scaglione e Renzo, **tutta sul DAX**). Il referto e':
 
 *Aggiornamento scritto il 21/09/2026. Nessuna azione eseguita: EA, preset, forward e
 conto reale 10105439 non toccati.*
+
+---
+
+# 🔗 SEGUITO DEL 25/09/2026 — nuova live, referto separato
+👉 `backtest_pipeline/caccia_strategie/ANALISI_TRASCRIZIONI_2026-09-25.md`. Tocca questo referto
+in due punti: **(1)** §1.1-2 *"non puoi fare i pari"*: il 25/09 la fonte fa **BE a +20 punti e
+chiude metà** (r.165-167), dopo aver detto nella stessa live che dimezzare è inutile (r.139) →
+contraddizione **aperta**, nessuna regola estraibile sul BE; **(2)** §1.1-1 frazione d'ingresso:
+arrivano altri numeri (*"un lotto e due lotti"*, 0.2/0.5/grosso, distanza 15-20 punti), nessuna
+misura. `InpFirstFraction` resta **MAI misurato**.

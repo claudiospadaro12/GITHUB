@@ -167,3 +167,19 @@ Cosa cambia rispetto a questo dossier, in tre righe — **i dettagli stanno là*
 
 **Assenze confermate anche all'ottava trascrizione**: martingala 0 · griglia 0 ·
 recovery 0 · mediazione 0 · no-stop 0 · trucchi anti-prop 0 · **regole prop 0**.
+
+---
+
+## 🔗 SEGUITO — live del 25/09/2026 (referto separato, non duplicato qui)
+
+👉 **`backtest_pipeline/caccia_strategie/ANALISI_TRASCRIZIONI_2026-09-25.md`**
+(fonte: `docs/live_emiliano/trascrizioni/LIVE_EMILIANO_2026-09-25.txt`, 436 righe).
+La sintesi incrociata aggiornata (tabella dei valori convergenti su tutte le live) sta **là**, §1.1.
+
+- 🔁 **Distanza fra i pendenti ~20 punti: seconda live** (18/09 e 25/09) · **size 1:2 verso il
+  livello più forte: terza live** (14/09, 18/09, 25/09). Stessa fonte = coerenza, non verifica.
+- 🆕 **Il retest del massimo di ieri, rotto nella notte**, è l'ipotesi A di Unger con il terzo
+  tipo d'ordine: R249 ha STOP e FADE, **non il RETEST**. A zero codice su `ABTG_DAX_Apertura_EU`.
+- 🔴 **Assenze non più confermate**: la media al ribasso pianificata (*"secondo giro"* con la size
+  più grande sotto, r.157-161) e l'ingresso *"sbagliato appositamente"* per mostrare il recupero
+  (r.341-361) tornano. Marcati **NON ADOTTABILI**.
