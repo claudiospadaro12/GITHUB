@@ -41,12 +41,15 @@ CONTRO-ESEMPIO (la domanda "un pool di giornate indipendenti sottostima l'ammucc
   p = frazione dei rimescolamenti con episodi >= di quelli veri.
 
 LATO FORWARD (demo BCM, data/statements/trades_auto.csv = piccolo 50503392 al 1,00%;
-trades_100k.csv = 100k 50504263 allo 0,65%): stesse magic delle sedie FTMO (770101, 770202,
-770411, 771531; i preset FTMO cambiano solo ora, nome simbolo, rischio e magic:
-report/CONTRATTI_DELLE_SEDIE_FTMO_2026-09-20.md par.2). Unita': R = uno stop pieno della
-sedia su QUEL conto, stimato come mediana degli stop pieni osservati (sul piccolo il DAX
-perde ~2,3% del saldo a stop: la % del saldo lo peserebbe il doppio). L'evento FTMO in R:
--4.909,28 / 1.600 = -3,068 R, identico a -6,1366% @2,00%.
+trades_100k.csv = 100k 50504263 allo 0,65%): stesse sedie (magic BCM 770101, 770202, 770411,
+771531); i preset FTMO cambiano ora, simbolo, rischio e magic
+(report/CONTRATTI_DELLE_SEDIE_FTMO_2026-09-20.md par.2). Filtro magic + SIMBOLO (regola B9).
+Unita': R = uno stop pieno della sedia su QUEL conto, mediana degli stop pieni osservati.
+Sul piccolo la 770101 girava al 2,0% fino al 17/08 (ABTG_DEF_RISK 2.0,
+report/DIAGNOSI_770101_SIZING_2026-08-31.md): i suoi stop pieni sono tutti di quell'epoca.
+ANOMALIE (classe 798): pid gia' diagnosticati come anomalia di configurazione; il piccolo si
+legge CON e SENZA. L'evento FTMO in R nominale: -4.909,28 / 1.600 = -3,068 R (= -6,1366% @2%);
+in R "proprio" (mediana dei suoi 3 stop, 1.668,46) = -2,942 R: si contano tutte e due.
 
 USO:
   python3 backtest_pipeline/serie_perdente_ftmo.py
@@ -67,6 +70,11 @@ EVENTO_ATTIVO = {'2026.09.22': True, '2026.09.23': False, '2026.09.24': True, '2
 SOGLIA = sum(EVENTO_EUR.values()) / BANCO          # -0,0613660 @2,00%
 EPS = 1e-12
 NPERM, SEME = 10000, 25
+SIMBOLO = {'770101': 'D30EUR', '770202': 'U30USD', '770411': 'D30EUR', '771531': 'U30USD'}
+ANOMALIE = {'2933140': 'SELL gemella 29/07, doppia istanza di prima del 17/08 (DIAGNOSI_770101_SIZING_2026-08-31 p.5)'}
+STOP_FTMO = (1757.68, 1668.46, 1552.80)              # i 3 stop veri della challenge
+SOGLIA_R = SOGLIA / (RISCHIO / 100.0)                # -3,068 R (R nominale 1.600)
+SOGLIA_R_PROPRIO = sum(EVENTO_EUR.values()) / statistics.median(STOP_FTMO)   # -2,942 R
 ANCORE = {  # saldo di fine 19/08 (report/PAGELLA_2026-08-19.md par.1) e rischio per sedia
     'piccolo 50503392': ('trades_auto.csv', 5076.62, 1.00, ['770101', '770202', '770411', '771531']),
     '100k 50504263':    ('trades_100k.csv', 99380.25, 0.65, ['770101', '770202', '770411']),
@@ -179,13 +187,15 @@ def pool_saldo(giorni, composto=True):
 
 
 # ---------------------------------------------------------------- forward
-def carica_forward(nome):
+def carica_forward(nome, senza_anomalie=False):
     fil, saldo, rischio, magic = ANCORE[nome]
     p = os.path.join(QUI, '..', 'data', 'statements', fil)
     tr = []
     with open(p, newline='') as fh:
         for r in csv.DictReader(fh, delimiter=';'):
-            if r['magic'] in magic:
+            if r['magic'] in magic and r['symbol'] == SIMBOLO[r['magic']]:
+                if senza_anomalie and r['pid'] in ANOMALIE:
+                    continue
                 net = float(r['profit']) + float(r['commission']) + float(r['swap'])
                 tr.append((r['close_time'], r['magic'], net, r['close_reason'], r['strategy']))
     return tr, saldo, rischio, magic
@@ -215,6 +225,39 @@ def giorni_R(tr, R):
         d[t[:10]][0] += net / R[mm][0]; d[t[:10]][1] += net
         d[t[:10]][2].append('%s:%+.0f' % (mm, net))
     return d
+
+
+def ic_poisson(k, a=0.05):
+    """Intervallo esatto (Garwood) al 95% per un conteggio Poisson k, per bisezione sulla cdf."""
+    import math
+
+    def cdf(n, l):
+        return sum(math.exp(-l) * l ** i / math.factorial(i) for i in range(n + 1)) if n >= 0 else 0.0
+
+    def bis(f, lo, hi):
+        for _ in range(200):
+            c = (lo + hi) / 2.0
+            if f(c) > 0: lo = c
+            else: hi = c
+        return (lo + hi) / 2.0
+    su = bis(lambda l: cdf(k, l) - a / 2, 0.0, 100.0)
+    giu = 0.0 if k == 0 else bis(lambda l: a / 2 - (1 - cdf(k - 1, l)), 0.0, 100.0)
+    return giu, su
+
+
+def leggi_forward(nome, senza_anomalie=False):
+    tr, saldo, rischio, magic = carica_forward(nome, senza_anomalie)
+    Rr = stima_R(tr, saldo, rischio, magic)
+    d = giorni_R(tr, Rr)
+    dd = list(d); v = [d[k][0] for k in dd]
+    out = {'tr': tr, 'R': Rr, 'd': d, 'dd': dd, 'v': v}
+    for K in (3, 4):
+        out['K%d' % K] = [(dd[a], dd[b]) for a, b in episodi(finestre(v, K, SOGLIA_R), K)]
+        out['K%d_proprio' % K] = [(dd[a], dd[b]) for a, b in episodi(finestre(v, K, SOGLIA_R_PROPRIO), K)]
+        out['peggiore_K%d' % K] = peggiore(v, K)[0]
+    out['b'] = [(dd[a], dd[b]) for a, b in episodi(tutte_neg(v, 3), 3)]
+    out['serie'] = serie_max(v)
+    return out
 
 
 # ---------------------------------------------------------------- autotest
@@ -292,6 +335,20 @@ def autotest():
     R = stima_R(tr, 5000.0, 1.0, ['E', 'D', 'Z'])
     chk("R: gambe EMA stesso giorno sommate (36), singola e pareggio esclusi; DAX 2 stop separati (115); Z nominale",
         R['E'][:2] == (36.0, 1) and R['D'][:2] == (115.0, 2) and R['Z'][2] == 'NOMINALE', str(R))
+    # 7. classe 798: il forward del piccolo con e senza la gemella del 29/07, e il filtro magic+simbolo
+    con = leggi_forward('piccolo 50503392'); senza = leggi_forward('piccolo 50503392', senza_anomalie=True)
+    chk("piccolo CON la gemella: 1 episodio K3 (27-29/07), peggior K3 < -3,068 R",
+        len(con['K3']) == 1 and con['peggiore_K3'] <= SOGLIA_R, "(%.2f R)" % con['peggiore_K3'])
+    chk("piccolo SENZA la gemella 2933140: 0 episodi K3 e K4 (anche a -2,94 R), peggior K3 ~ -2,86 R",
+        not senza['K3'] and not senza['K4'] and not senza['K3_proprio'] and not senza['K4_proprio']
+        and abs(senza['peggiore_K3'] + 2.86) < 0.005,
+        "(K3 %.3f R, K4 %.3f R, R 770101 %.2f)" % (senza['peggiore_K3'], senza['peggiore_K4'], senza['R']['770101'][0]))
+    chk("filtro magic+simbolo: nessun NASUSD nel forward del piccolo (22/07 escluso)",
+        not any(t[0].startswith('2026.07.22') for t in con['tr']))
+    chk("evento in R proprio = -4.909,28 / 1.668,46 = -2,942 R", abs(SOGLIA_R_PROPRIO + 2.9424) < 0.0005,
+        "(%.4f)" % SOGLIA_R_PROPRIO)
+    g, u = ic_poisson(6)
+    chk("IC Poisson esatto k=6: 2,20 - 13,06", abs(g - 2.2013) < 0.001 and abs(u - 13.0591) < 0.001, "(%.4f - %.4f)" % (g, u))
     print("AUTOTEST: %s" % ("TUTTO VERDE" if ok else "ROSSO"))
     return ok
 
@@ -345,8 +402,9 @@ def main():
         dd = datt if k[:2] in ('a1', 'b_') else tutti
         inv = sum(1 for a, b in ep if not al.tutto_allineato(dd[a]))
         n = len(ep)
-        print("   %-7s episodi %2d | ogni %s feriali | %.2f / anno | in mesi non tutto-allineati: %d"
-              % (k, n, ("%.0f" % (fer / n)) if n else "mai (>%d)" % fer, n / anni, inv))
+        g, u = ic_poisson(n)
+        print("   %-7s episodi %2d | ogni %s feriali | %.2f / anno (IC95 Poisson %.2f-%.2f) | in mesi non tutto-allineati: %d"
+              % (k, n, ("%.0f" % (fer / n)) if n else "mai (>%d)" % fer, n / anni, g / anni, u / anni, inv))
     s, i = serie_max(a2)
     print("\n[SERIE NEGATIVA PIU' LUNGA] %d giornate con operazioni, da %s a %s, somma %s"
           % (s, datt[i], datt[i + s - 1], pct(sum(a2[i:i + s]))))
@@ -376,6 +434,9 @@ def main():
     vsl = dict(zip(datt, sl))
     print("[SENSIBILITA' slittamento x%.4f sulle perdite (3 stop veri FTMO)] %s"
           % (st.SLIP_MISURATO, conta(sl, [vsl.get(d, 0.0) for d in tutti])))
+    cb = [x * st.SLIP_MISURATO if x < 0 else x for x in ps]
+    vcb = dict(zip(datt, cb))
+    print("[SENSIBILITA' combinata saldo corrente + slittamento] %s" % conta(cb, [vcb.get(d, 0.0) for d in tutti]))
 
     vero = conta(base, cal)
     print("\n[CONTRO-ESEMPIO] vero contro rimescolato (%d permutazioni, seme %d)" % (NPERM, SEME))
@@ -409,24 +470,25 @@ def main():
                 print("   stesso giorno %-14s x %-14s n=%3d  (troppo poche)" % (nomi[x], nomi[y], len(com)))
 
     print("\n" + "=" * 100)
-    print("FORWARD BCM -- unita' R (uno stop pieno della sedia su quel conto); soglia %.3f R" % (SOGLIA / 0.02))
-    for nome in ANCORE:
-        tr, saldo, rischio, magic = carica_forward(nome)
-        R = stima_R(tr, saldo, rischio, magic)
-        d = giorni_R(tr, R)
-        print("\n[%s] %d operazioni, %s -> %s | R: %s" % (nome, len(tr), min(t[0] for t in tr)[:10], max(t[0] for t in tr)[:10],
-              {k: "%.2f (%s, n=%d)" % (v[0], v[2], v[1]) for k, v in R.items()}))
-        dd = list(d); v = [d[k][0] for k in dd]
+    print("FORWARD BCM -- unita' R (uno stop pieno della sedia su quel conto); soglie %.3f R (nominale) e %.3f R (proprio)"
+          % (SOGLIA_R, SOGLIA_R_PROPRIO))
+    print("ANOMALIE: %s" % ANOMALIE)
+    letture = [('piccolo 50503392', False), ('piccolo 50503392', True), ('100k 50504263', False)]
+    for nome, senza in letture:
+        o = leggi_forward(nome, senza)
+        tr, d, dd = o['tr'], o['d'], o['dd']
+        print("\n[%s%s] %d operazioni, %s -> %s | R: %s" % (nome, " SENZA ANOMALIE" if senza else "", len(tr),
+              min(t[0] for t in tr)[:10], max(t[0] for t in tr)[:10],
+              {k: "%.2f (%s, n=%d)" % (v[0], v[2], v[1]) for k, v in o['R'].items()}))
         for k in dd:
             print("   %s %+6.2f R %+9.2f EUR  %s" % (k, d[k][0], d[k][1], ' '.join(d[k][2])))
         for K in (3, 4):
-            ep = episodi(finestre(v, K, SOGLIA / 0.02), K)
-            print("   a1 K=%d somma <= %.3f R: %d episodi %s" % (K, SOGLIA / 0.02, len(ep), [(dd[a], dd[b]) for a, b in ep]))
-        ep = episodi(tutte_neg(v, 3), 3)
-        s, i = serie_max(v)
-        print("   b 3 negative di fila: %d episodi %s | serie max %d (%s) | peggiore K4 %.2f R | peggiore K3 %.2f R"
-              % (len(ep), [(dd[a], dd[b]) for a, b in ep], s, dd[i] if i is not None else '-',
-                 peggiore(v, 4)[0], peggiore(v, 3)[0]))
+            print("   a1 K=%d: <= %.3f R %d episodi %s | <= %.3f R %d episodi | peggiore %.2f R"
+                  % (K, SOGLIA_R, len(o['K%d' % K]), o['K%d' % K], SOGLIA_R_PROPRIO, len(o['K%d_proprio' % K]),
+                     o['peggiore_K%d' % K]))
+        s_, i = o['serie']
+        print("   b 3 negative di fila: %d episodi %s | serie max %d (%s)"
+              % (len(o['b']), o['b'], s_, dd[i] if i is not None else '-'))
     print("=" * 100)
 
 
