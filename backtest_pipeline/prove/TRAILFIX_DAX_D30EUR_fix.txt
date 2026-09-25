@@ -1,0 +1,175 @@
+# ==========================================================================
+#  TRAILFIX_DAX_fix -- DOPO: pin + guardia TRAILFIX
+#  ABTG_DAX_Apertura_EU_TrailFix su D30EUR M5 -- TICK REALI -- deposito 100000
+#  cella = preset FTMO della sedia 770101 (orologio BCM) -- magic 765291/765292
+# ==========================================================================
+#
+#  ------------------------------------------------------------------------
+#  LA DOMANDA, UNA SOLA: la guardia TRAILFIX e' NEUTRA sui deal e toglie
+#  le modify rifiutate? (report/MODIFY_A_RAFFICA_FTMO_2026-09-25.md par. 4,
+#  "Cosa cambia nei backtest"). NON misura il merito della sedia, NON
+#  promuove, NON archivia, NON tocca taglie, preset, sedie o conti.
+#  Coppia PRIMA/DOPO: ABTG_DAX_Apertura_EU_Pin9fca (byte-identico a
+#  ABTG_DAX_Apertura_EU.mq5 al pin 9fca63d9 = il sorgente del CLAU12_* in campo) contro
+#  ABTG_DAX_Apertura_EU_TrailFix (pin + guardia). I due file prova della coppia sono
+#  IDENTICI riga per riga tranne '# EA:' e la sigla: stesse direttive,
+#  stessi pin, STESSO asse di magic 765291/765292 (cosi' la colonna magic
+#  del per-trade coincide e il confronto e' un diff secco). Vergini:
+#  rg "76529[0-9]" sul repo intero = 0 righe, 25/09/2026.
+#
+#  PERCHE' LE COPIE _Pin9fca (e non -Pin 9fca63d9): walkforward_generico.ps1
+#  scarica il sorgente da raw/lavoro (r.264-265 $EABranch="lavoro" cablato,
+#  r.317), NON dal -Pin di RIGA_ROUND_VPS.ps1 (che pinna solo driver e file
+#  prova). A HEAD ABTG_DAX_Apertura_EU.mq5 NON e' il pin in campo (DAX +460
+#  righe, Nasdaq +21/-1; Dow oggi uguale ma senza garanzia). Quindi il pin
+#  va in repo come file a se', byte-identico (cmp contro
+#  git show 9fca63d9:... = nessuna differenza, 25/09/2026). Il nome del file
+#  entra in MQL_PROGRAM_NAME: i per-trade si chiamano
+#  abtg_trades_<Expert>_D30EUR_<magic>.csv e pin/fix NON si sovrascrivono.
+#
+#  LA CELLA: il preset FTMO in campo mql5/Presets/FTMO/ABTG_DAX_Apertura_EU_770101_FTMO.set,
+#  TUTTI gli input copiati nell'ordine (82 su 82, stesso elenco degli
+#  input del pin), con QUATTRO cambi DICHIARATI e nient'altro:
+#   1. orologio riportato a BCM (il tester gira sul feed BCM): InpSessionHour
+#      10->8, InpCloseHour 19->17 (tabella "BCM FTMO" del preset stesso);
+#   2. InpRiskPercent 2.00 -> 1: E' IL BANCO DEI ROUND DI CASA, NON UNA
+#      TAGLIA. La taglia (2,00% FTMO) e' di Claudio e qui non si misura;
+#   3. InpUsaGuardian true -> false: nel tester il Guardian non c'e' (pin
+#      dei round di casa, es. R248b);
+#   4. InpCorrSymbol US500.cash -> SPXUSD (nome BCM; INERTE: correlazione spenta).
+#  InpNewsCurrencies vuoto NON si scrive: il driver salta i valori vuoti
+#  (walkforward_generico.ps1 r.840) e il default del pin e' gia' "".
+#  DEPOSITO da passare sulla riga: 100000 (banco prop come R248; con 10000 il
+#  lotto minimo schiaccerebbe il rischio). Modello 4 (tick reali).
+#
+#  LE FINESTRE (stesse direttive di R248a/b, gia' passate dal cancello):
+#     gamba IS  2025.07.01 -> 2026.06.30
+#     gamba OOS 2026.07.01 -> 2026.09.19 (fine esclusiva): CONTIENE l'11/09
+#               e il 17/09/2026, i giorni delle raffiche su D30EUR BCM.
+#  [NON MISURATO] lo storico tick oltre il 21/08/2026 sul PC di backtest
+#  DESKTOP-H4D7CAJ: lo sta verificando R248. Se il feed si ferma prima, la
+#  gamba OOS NON contiene i due giorni e vale solo quello che c'e' (G-DATI).
+#
+#  ------------------------------------------------------------------------
+#  CRITERI, CONGELATI PRIMA DEL NUMERO (25/09/2026). Tutti su TUTTE E TRE le
+#  coppie (DAX 770101, Dow 770202, Nasdaq 770260). VERDE solo se passano tutti.
+#   G1 DETERMINISMO: le due gemelle 765291/765292 identiche (Profit, PF, DD,
+#      Trades, Peggior Giornata) in ogni CSV. Se no -> coppia NULLA.
+#   (a) N > 0: nella corsa del PIN almeno UNA riga
+#       "modify position #... [invalid stops]" (testo di CTrade, stesso del
+#       campo: CODA_09 del 25/09 r.98). Con N = 0 "deal uguali" NON prova
+#       niente e la coppia e' NON MISURATA (non verde).
+#   (b) DEAL IDENTICI fra pin e TrailFix: CSV _IS e _OOS uguali colonna per
+#       colonna; per-trade della gamba OOS (gira per seconda e sovrascrive
+#       quello della IS, stesso magic) uguale RIGA PER RIGA su TUTTE le colonne
+#       (close_time, symbol, magic, position_id, deal_type, volume, price,
+#       net_profit). Una sola differenza = la guardia NON e' neutra e NON si
+#       schiera: si leggono le righe "TRAILFIX trailing saltato" della corsa
+#       fix (il "margine" 0 = caso di uguaglianza SL==prezzo, il contro-esempio
+#       noto) e si torna al coordinatore.
+#   (c) ZERO righe "[invalid stops]" nella corsa TrailFix, sulla stessa
+#       finestra su cui il pin ne ha N > 0.
+#   G-DATI (informativo, NON un criterio): ultima close_time del per-trade;
+#       se < 2026.09.17 l'11/09 e/o il 17/09 non sono nel feed e si DICHIARA.
+#
+#  >>> IL LIMITE DEL DRIVER, DICHIARATO: walkforward_generico.ps1 scrive
+#      SEMPRE Optimization=1 (r.2013) e in ottimizzazione Print e log di CTrade
+#      NON escono (classi 526 e 771). Con QUESTO file e il driver di casa si
+#      misurano G1 e (b); (a) e (c) chiedono un TEST SINGOLO (Optimization=0)
+#      per EA, sull'intera finestra @DAQUANDO -> @FINOA, magic 765291, con la
+#      lettura del giornale dell'agente (schema di righe\PASSATA_STOP_SUPREV.ps1).
+#      Quella riga NON e' scritta qui: senza, (a) e (c) restano [NON MISURATO]
+#      e la coppia non e' verde.
+#  EA: ABTG_DAX_Apertura_EU_TrailFix
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2025.07.01
+@FINOA      2026.09.19
+@FRAZIONEIS 0.819
+
+# --- 80 PIN dal preset FTMO 770101 (4 cambi dichiarati sopra; InpNewsCurrencies vuoto omesso) + l'asse del magic.
+InpUsaGuardian=false
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+# --- L'ASSE, unico e TECNICO: il magic, due gemelle (G1 + classe 134).
+InpMagic=765291||765291||1||765292||Y
+InpMaxSpread=0
+InpVerbose=true
+# ==========================================================================
