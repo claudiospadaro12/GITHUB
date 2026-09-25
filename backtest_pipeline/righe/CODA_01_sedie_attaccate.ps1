@@ -9,7 +9,9 @@
 #  della 770101 su FTMO, attaccata il 25/09 alle 20:47) deve uscire
 #  con magic 770105, rischio 2.0, lati SOLO SHORT. Se il .chr non e'
 #  ancora stato salvato da MT5 (limite dichiarato sotto), la riga NON
-#  compare: si legge il giornale (CODA_09), non si conclude "assente".
+#  compare e stanotte NON c'e' riserva automatica: CODA_09 scarta le
+#  righe CONFIG/avviato e la sedia non ha ancora operato. Verdetto in
+#  quel caso: NON VERIFICATO, non "assente" (classe 822).
 #  RUNNER_SOLA_LETTURA
 # ---------------------------------------------------------------------
 #  COSA FA: legge i .chr di TUTTE le cartelle dati e STAMPA che cosa e'
@@ -176,7 +178,7 @@ function Campo($txt,$chiave){
 }
 
 $root = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-Write-Host "=== SEDIE ATTACCATE (v2) -- profilo ATTIVO separato dai RESIDUI ==="
+Write-Host "=== SEDIE ATTACCATE (v3, con LATI) -- profilo ATTIVO separato dai RESIDUI ==="
 Write-Host ("data lettura: " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss") + "  (ora locale)")
 if(-not (Test-Path $root)){ Write-Host "NESSUNA cartella MetaQuotes\Terminal"; exit 1 }
 $cart = @(Get-ChildItem $root -Directory -ErrorAction SilentlyContinue | Where-Object { Test-Path (Join-Path $_.FullName "MQL5") })
