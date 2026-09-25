@@ -35365,3 +35365,11 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 🎯 CLASSE 777 — **frequenza per file stimata da una sonda che filtra i giorni su un insieme di condizioni PIU' LARGO di quello che il file usa**
 - **Caso (24/09, R249a par. 4)**: la sonda scartava il giorno se uno QUALSIASI dei due livelli di ieri era gia' consumato, mentre ogni file ne usa uno solo. Rifatto per livello: 0,242 / 0,284 per feriale contro 0,229 / 0,254 dichiarati; braccio OOS ~145, a un passo da 150, e la clausola "se supera 150 il merito si legge" non aveva criterio congelato. Preso dal cancello (strato 2).
 - **Regola**: la frequenza attesa si stima con lo STESSO filtro della cella. Una clausola che scatta "se il conteggio sorprende" si congela prima, oppure resta solo descrittiva.
+
+## 🔁 CLASSE 778 — **p combinato su un campione che CONTIENE la meta' da cui l'ipotesi e' nata**
+- **Caso (25/09, `report/IL_MERITO_E_D_INVERNO_2026-09-25.md` §0.1/§2.3)**: R245, "il merito e' d'inverno" con p 0,018 sui due anni. Ma l'ipotesi era nata guardando l'OOS (R248a §7); la sola meta' non guardata prima (IS) va nello stesso verso (+0,42) con p 0,21. Preso dal cancello (strato 2).
+- **Regola**: si dichiara quale sotto-campione ha generato l'ipotesi, e il numero di CONFERMA si calcola solo sul resto. Il p sull'insieme si puo' scrivere, ma non come conferma.
+
+## 🧩 CLASSE 779 — **ipotesi raggruppate da un referto per una domanda, ereditate per un'altra domanda su cui si SEPARANO**
+- **Caso (25/09, stesso referto §4 e §6.2)**: `IL_CONFINE_DEL_GIORNO` §4.1 raggruppava "FTMO UTC+3 fisso" e "FTMO col DST americano" in un'unica ipotesi, giusto per la settimana 25/10-01/11. Il referto le ha fuse anche per l'inverno, dove danno 8:30 NY contro 9:30 NY, e ha proposto una lettura dell'offset il solo 26/10, che non le distingue. Preso dal cancello (strato 2).
+- **Regola**: quando si riusa un elenco di ipotesi per una domanda diversa, si ricontrolla ipotesi per ipotesi che la risposta sia la stessa; e la DATA della misura proposta deve separarle.
