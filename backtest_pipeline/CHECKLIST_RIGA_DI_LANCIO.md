@@ -35385,3 +35385,11 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## ⚖️ CLASSE 782 — **potenza di una regola di verdetto dichiarata solo sotto le DUE ipotesi in gara, quando la loro PREMESSA comune non e' stabilita sul campione che giudica**
 - **Caso (25/09, R250a par. 7.1)**: la conferma "orologio o stagione" del candidato R245 si leggeva sulla sola finestra A, con potenza dichiarata ~70% giusto / ~11-12% sbagliato sotto H_STAGIONE e H_OROLOGIO. Ma entrambe presuppongono un divario vero D>0, e su A non e' stabilito (p 0,206). Sotto H_NULLO la regola scriveva una direzione sul PF nel 73% dei casi. Corretto con A+B come VETO di concordanza (sbagliato ~0,1%, H_NULLO ~30%). Preso dal cancello (strato 2), contro-esempio eseguito.
 - **Regola**: si simula SEMPRE anche l'ipotesi nulla della premessa. Se il campione di conferma e' debole, la parte che contiene la meta' generatrice si usa come VETO, mai come conferma.
+
+## 🏷️ CLASSE 783 — **la correzione proposta sul sorgente col nome del repo, mentre sul terminale gira una COPIA RINOMINATA compilata a parte**
+- **Caso (25/09, `report/MODIFY_A_RAFFICA_FTMO_2026-09-25.md`)**: il referto proponeva di correggere `ABTG_DAX/Dow/Nasdaq_Apertura_*.mq5` e ricompilare sul terminale FTMO; ma sul grafico gira `CLAU12_*_Apertura_*.ex5` (compilato il 20/09 16:58), e gli `ABTG_*` in `C:\FTMO` non hanno nemmeno `.ex5` (`CODA_06_quale_codice_gira_20260925_033004.log` r.183-188 contro r.209-214). Preso dal cancello (strato 2).
+- **Regola**: prima di proporre una correzione "in campo" si legge in CODA_06 QUALE binario e' attaccato e da quale sorgente; la toppa si scrive sul pin che gira, nel file che gira.
+
+## 📈 CLASSE 784 — **"caso peggiore" di un conteggio di richieste calcolato al ritmo MEDIO, e conteggio preso da una scheda che stampa solo i FALLIMENTI**
+- **Caso (25/09, stesso referto §2)**: il tetto era stimato a 2,19 richieste/s, ma nella stessa fonte l'intervallo minimo misurato era 0,082 s (~12/s): una sedia sola puo' superare le 2.000. E "il giorno e' al 5% della soglia" usava `MQL5\Logs`, dove `CTrade` stampa solo le richieste fallite. Preso dal cancello (strato 2).
+- **Regola**: il caso peggiore si calcola al limite fisico misurato (ritmo massimo, non medio); e prima di dire "totale del giorno" si verifica che la fonte veda TUTTE le richieste, non solo gli errori.
