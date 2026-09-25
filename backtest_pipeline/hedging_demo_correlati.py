@@ -1,3 +1,15 @@
+"""hedging_demo_correlati.py -- sovrapposizioni FTMO 541452707 x conti BCM (25/09/2026).
+Referto: report/HEDGING_DEMO_E_CORRELATI_2026-09-25.md.  SOLA LETTURA di file del repo.
+OROLOGIO: tutto in UTC. trades_auto.csv / trades_100k.csv / ledger REALE sono in ora SERVER BCM
+(UTC+1 fisso) -> -1h. Le 4 posizioni FTMO sono scritte a mano in UTC (server FTMO UTC+3 -3h):
+fonti PRIMO_STOP_FTMO_2026-09-22 r.17-18, SECONDO_STOP_FTMO_2026-09-24 r.11-12,
+CODA_09_20260925 r.97 (BUY LIMIT F4 15:17:03 IT) e CODA_12_20260925 r.21 (chiusura F4).
+NON COPERTO: posizioni ancora APERTE (i CSV hanno solo le chiuse); conto 50503392 operato da
+un altro terminale dopo il 23/09 19:35 IT (es. PC di backtest DESKTOP-H4D7CAJ); Tickmill,
+Pepperstone, manuale 50503635; REALE prima del 04/09 (ledger avviato 04/09).
+Uso: python3 hedging_demo_correlati.py [--autotest]
+"""
+import sys
 import csv, math
 from datetime import datetime, timedelta, date
 F="%Y.%m.%d %H:%M:%S"
@@ -23,7 +35,9 @@ for line in open(R+"backtest_pipeline/coda/referti/CODA_10_slippage_20260925_033
         tt=datetime.strptime(t,F)-timedelta(hours=1)
         if io=="IN": e["o"]=tt; e["side"]="buy" if tipo=="ACQUISTO" else "sell"; e["vol"]=vol
         else: e["c"]=tt if e["c"] is None or tt>e["c"] else e["c"]
-Rl=list(led.values())
+Rl=[x for x in led.values() if x["o"] is not None and x["c"] is not None]
+_inc=[x for x in led.values() if x["o"] is None or x["c"] is None]
+if _inc: print("ATTENZIONE REALE: posizioni incomplete nel ledger (aperte o nate prima del 04/09), NON contate:",[x["pid"] for x in _inc])
 FT=[dict(pid="F1",sym="US30.cash",side="sell",o=datetime(2026,9,22,9,52,1),c=datetime(2026,9,22,11,45,51),magic="771531",note="EMA200 S1"),
     dict(pid="F2",sym="US30.cash",side="sell",o=datetime(2026,9,22,9,52,31),c=datetime(2026,9,22,11,45,51),magic="771531",note="EMA200 S2"),
     dict(pid="F3",sym="GER40.cash",side="sell",o=datetime(2026,9,24,7,2,4),c=datetime(2026,9,24,7,14,49),magic="770411",note="MaxMin DAX short"),
@@ -35,6 +49,32 @@ def cls(a,b):
         if "NIK" in (ia,ib): return "INDICE CORRELATO Nikkei [INFERITO]"
         return "INDICE CORRELATO (DAX/Dow/Nasdaq, esempio FTMO)"
     return "zona grigia forex/oro [INFERITO]"
+
+def _overlap(a,b):
+    s=max(a["o"],b["o"]); e=min(a["c"],b["c"]); return (s,e) if s<e else None
+def autotest():
+    ok=True
+    def chk(nome,cond):
+        nonlocal ok
+        print(("PASS " if cond else "FAIL ")+nome); ok=ok and cond
+    t=lambda h,m,s=0: datetime(2026,9,22,h,m,s)
+    f1=dict(sym="US30.cash",side="sell",o=t(9,52,1),c=t(11,45,51))
+    dax=dict(sym="D30EUR",side="buy",o=t(8,56,41),c=t(10,13,45))
+    # T1 l'episodio vero: opposto, correlato FTMO, 21:44
+    ov=_overlap(f1,dax); chk("T1 22/09 trovato 21:44 e classe esempio FTMO", ov is not None and ov[1]-ov[0]==timedelta(minutes=21,seconds=44) and "esempio FTMO" in cls(f1["sym"],dax["sym"]))
+    # T2 ipotesi alternativa dell'orologio (+1h invece di +2h): l'episodio sparisce -> il verdetto dipende dallo scarto, che e' ancorato dalla copia 771531 allo stesso secondo
+    f1b=dict(f1,o=f1["o"]+timedelta(hours=1),c=f1["c"]+timedelta(hours=1)); chk("T2 con scarto sbagliato di 1h NON si sovrappone", _overlap(f1b,dax) is None)
+    # T3 copia nello stesso verso: sovrapposta ma non opposta
+    cp=dict(sym="U30USD",side="sell",o=t(9,52,1),c=t(11,45,51)); chk("T3 copia = stesso verso", _overlap(f1,cp) and cp["side"]==f1["side"])
+    # T4 Nikkei resta [INFERITO], non entra nel conteggio FTMO
+    chk("T4 Nikkei non e' 'esempio FTMO'", "esempio FTMO" not in cls("US30.cash","225JPY"))
+    # T5 forex/oro -> zona grigia
+    chk("T5 XAUUSD zona grigia", cls("GER40.cash","XAUUSD").startswith("zona grigia"))
+    # T6 intervalli che si toccano soltanto (chiude = apre) non sono sovrapposizione
+    chk("T6 bordo esatto non conta", _overlap(dict(o=t(10,0),c=t(11,0)),dict(o=t(11,0),c=t(12,0))) is None)
+    print("AUTOTEST", "OK" if ok else "FALLITO"); return ok
+if "--autotest" in sys.argv:
+    sys.exit(0 if autotest() else 1)
 print("=== Q2: posizioni FTMO x posizioni non-FTMO sovrapposte (UTC) ===")
 for f in FT:
     for b in P+K+Rl:
@@ -82,7 +122,7 @@ def run(d0,d1,counter,label):
 d0=datetime(2026,8,14); d1=datetime(2026,9,23)
 run(d0,d1,[b for b in P if b["magic"] in ACT_P]+[b for b in K if b["magic"] in ACT_K],"B: piccolo RIACCESO (profilo ORO attuale) + 100k 770901")
 run(d0,d1,[b for b in K if b["magic"] in ACT_K],"A: com'e' oggi (piccolo spento): solo 100k 770901")
-run(d0,d1,[b for b in P if b["magic"] in ACT_P]+[b for b in K if b["magic"] in ACT_K]+[b for b in K if b["magic"] in {"770101","770202","770411","770611"}],"C: controllo = perimetro del 24/09 (sedie BCM prima della sospensione)")
+run(d0,d1,[b for b in P if b["magic"] in ACT_P]+[b for b in K if b["magic"] in ACT_K]+[b for b in K if b["magic"] in {"770101","770202","770411","770611"}]+[b for b in Rl if b["magic"] in {"770101","770202","770411","770611"}],"C: controllo = perimetro del 24/09 (sedie BCM prima della sospensione; REALE solo dal 04/09)")
 
 print("\n=== posizioni 100k 770901 e piccolo 770924/772235/774101 (Nikkei) nella finestra ===")
 for b in K+P:

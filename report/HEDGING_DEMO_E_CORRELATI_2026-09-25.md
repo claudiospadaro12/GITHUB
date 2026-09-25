@@ -1,12 +1,14 @@
 # ⚖️ HEDGING FRA CONTI, SECONDA MISURA: i DEMO e gli indici CORRELATI (25/09/2026)
 
-**25/09/2026** · branch `lavoro` · **SOLA LETTURA E MISURA**: nessun EA, preset, terminale o conto toccato; nessun commit.
+**25/09/2026** · branch `lavoro` · **SOLA LETTURA E MISURA**: nessun EA, preset, terminale o conto toccato. Misura sui file del **25/09 03:30**, prima delle sospensioni delle 13:07 e 13:14:47 (vedi 🕐).
 Vincolo nuovo: `docs/RISPOSTA_SUPPORTO_FTMO_2026-09-25.md` (Jonas Friedrich). I **demo di altri broker contano**. Contano gli
 **strumenti correlati**, e l'esempio lo scrive FTMO stessa: *"long DAX on one account and short Dow Jones or Nasdaq on
 another"*. Non c'e' soglia e non c'e' distinzione fra accidentale e voluto. Vale in valutazione.
-Macchina di partenza: `report/HEDGING_FRA_CONTI_2026-09-24.md` (quel giorno senza script). Stavolta lo script c'e':
-`hedg.py` nella cartella scratchpad della sessione. **Non e' in repo.**
+Macchina di partenza: `report/HEDGING_FRA_CONTI_2026-09-24.md` (quel giorno senza script). Stavolta lo script c'e' ed e' in repo:
+`backtest_pipeline/hedging_demo_correlati.py` (ogni numero di §3.3 e §4 esce da li').
 Etichette: **[MISURATO]** = letto in un file del repo, con fonte · **[INFERITO]** = dedotto · **[NON MISURATO]** = manca il dato.
+
+🕐 **AGGIORNAMENTO 25/09 pomeriggio: lo stato di OGGI non e' quello delle 03:30** (`report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`, ESEGUITO): piccolo `50503392` **15/15 sedie indice tolte** dai `.chr` del profilo `ORO` alle **13:07** (ora VPS), `ESEGUITO_OK`, terminale chiuso; che MT5 alla riapertura carichi quei grafici senza EA e' [NON VERIFICATO]. 100k `50504263`: `ABTG_SupertrendReversal` 225JPY H2 (`770901`) **rimosso alle 13:14:47**; salvataggio del profilo `SQUADRA 100K` [NON VERIFICATO] fino a `CODA_01` del 26/09. Sedie indice non-FTMO attive: **0**, con tre riserve [NON MISURATO]: posizioni/pendenti gia' sul server (§3.4), salvataggio del profilo 100k, conto `50503392` operato da un'altra macchina (§3.4 punto 5).
 
 ---
 
@@ -21,17 +23,17 @@ Etichette: **[MISURATO]** = letto in un file del repo, con fonte · **[INFERITO]
 2. 🟢 **Sullo STESSO indice: zero opposte** dal 21/09. Tutte le sovrapposizioni sullo stesso indice sono **copie nello stesso
    verso**: 22/09 Dow (piccolo), 24/09 DAX short (100k), 24/09 DAX long (REALE e 100k). [MISURATO]
 3. 📋 **Censimento, profili ATTIVI del 25/09 03:30**: **16 sedie non-FTMO su indici**. **15 sono sul piccolo** (Dow 7 · DAX 3 ·
-   Nasdaq 2 · Nikkei 3) e **1 sul 100k** (`770901` Nikkei). REALE, Tickmill, Pepperstone e manuale: **0**. Poi c'e' la **zona grigia**
+   Nasdaq 2 · Nikkei 3) e **1 sul 100k** (`770901` Nikkei). REALE, Tickmill, Pepperstone, manuale `50503635` e banco `50504400` (`C:\MT5_Backtest`): **0**. Poi c'e' la **zona grigia**
    (forex e oro): **23** sedie sul piccolo, **1** sul REALE (`770611` EURAUD) e **2** su Tickmill.
-4. 🔴 **Ma il piccolo e' MUTO dal 23/09 alle 19:35 italiane** [INFERITO forte]. In quel minuto si fermano tre cose: l'ultimo log
+4. 🔴 **Ma il terminale VPS del piccolo e' MUTO dal 23/09 alle 19:35 italiane** [INFERITO forte]; il CONTO `50503392` da quell'ora e' [NON MISURATO] (loggato anche sul PC di backtest, §3.4 punto 5). In quel minuto si fermano tre cose: l'ultimo log
    Esperti, l'ultimo `ABTG_Trades.csv` e tutti i 45 `.chr`, salvati insieme come alla chiusura del terminale. Il giornale del 24/09
-   non esiste. Vuol dire che **oggi opera 1 sedia indice su 16**, ma **al primo riavvio del terminale ne operano 16**.
+   non esiste. Alle 03:30 del 25/09 voleva dire **1 sedia indice su 16 operativa** e **16 al primo riavvio**; dopo le sospensioni delle 13:07 e 13:14:47 sono **0 attive** nei profili (riserve nel riquadro 🕐).
    Tickmill e' muto dal **20/07**.
 5. 📈 **Rischio per giornata, con lo stesso metodo del 24/09** (forward 14/08-22/09, 28 giorni di borsa):
 
    | scenario | solo stesso indice | + correlati DAX/Dow/Nasdaq | + Nikkei [INFERITO] |
    |---|---|---|---|
-   | **A, com'e' oggi** (piccolo muto, gira solo `770901` 100k) | **0** | **0** | 0 osservati · rotazione **6,5%/giorno**, **~73% in 20 gg** (n=5 posizioni, fragile) |
+   | **A, alle 03:30 del 25/09** (piccolo muto, gira solo `770901` 100k; `770901` tolto alle 13:14:47, vedi 🕐) | **0** | **0** | 0 osservati · rotazione **6,5%/giorno**, **~73% in 20 gg** (n=5 posizioni, fragile) |
    | **B, piccolo riacceso** con il profilo ORO attuale | **17,9%/giorno** → **97%** in 20 gg | **35,7%/giorno** → **~100%** | 35,7% → ~100% |
 
 ---
@@ -108,7 +110,7 @@ stesso indice o su un altro.
   - tutti i 45 `.chr` del profilo ORO, salvati come alla chiusura del terminale.
 
   Nel CODA_09 del 25/09 il piccolo **non ha un giornale del 24/09**, e l'ultima autorizzazione letta e' quella del 20/09 (CODA_03).
-  👉 **Al riavvio del terminale le 15 sedie indice del profilo ORO ripartono**, se `Algo Trading` e' verde [INFERITO].
+  👉 Alle 03:30, al riavvio sarebbero ripartite le 15 sedie indice del profilo ORO. **Dalle 13:07 non sono piu' nei `.chr`**; che MT5 le carichi davvero senza EA e' [NON VERIFICATO].
 - **100k**: le sedie DAX, Dow, MaxMin e ORB stanno **ancora su disco** nel profilo `Default` (CODA_01, "RESIDUI"). Se si cambia
   profilo, rientrano.
 
@@ -158,11 +160,11 @@ della sonda) **non cambia** questo elenco.
   - La riga dell'NPO in `trades_100k.csv` ha `session_low` **30198,50**: il sell stop e' mancato per **0,70 punti**.
   - Se fosse partito, sarebbe stato **short Nasdaq contro il long DAX FTMO F4**, cioe' opposto per correlazione.
   - Che `session_low` sia il minimo vero del giorno e' [INFERITO]: la semantica della colonna non e' documentata.
-  - Che il sell stop **non** sia stato riempito e' [MISURATO]: il file del 100k e' completo e non ha short NASUSD.
+  - Che il sell stop **non** sia stato riempito e' [MISURATO]: il giornale del 24/09 ha `cancel sell stop` (`SOSPENSIONE_SEDIE_HEDGING_2026-09-24.md` r.72) e il file del 100k, completo, non ha short NASUSD chiusi.
 
 ### 3.4 🔴 I buchi dichiarati (classe 786)
-1. **Il piccolo dal 23/09 18:35 BCM a oggi: [NON MISURATO]**. Con il terminale muto nessun EA apre, ma **il server riempie i
-   pendenti e tiene le posizioni aperte**.
+1. **Il piccolo dal 23/09 18:35 BCM a oggi: [NON MISURATO]**. Con il terminale VPS muto nessun EA di QUEL terminale apre (il PC di backtest e' il punto 5), ma **il server riempie i
+   pendenti e tiene le posizioni aperte**, e togliere gli EA dai grafici non le chiude.
    - Nel giornale del 23/09 c'e' **`772341` PunteLarry SELL STOP U30USD @ 51714,50**, lotto 0,10, SL 52484,90, TP 50558,90,
      scadenza **server** 23/09 23:59 (`ORDER_TIME_SPECIFIED`, sorgente r.696-701).
    - 51714,50 e' **il minimo del 22/09** (`session_low` delle righe `771531` del 22/09).
@@ -170,12 +172,13 @@ della sonda) **non cambia** questo elenco.
      il tempo e' spento. Sarebbe **OPPOSTO al long DAX FTMO F4** del 24/09 (13:17-13:36 UTC).
    - Il riempimento **non e' misurato** (lo diceva gia' il 24/09). Si chiude guardando la scheda Storico/Trade del conto
      `50503392`.
-   - 🔴 **Attenzione**: se lo si fa riaprendo quel terminale MT5, **ripartono anche le sue 15 sedie indice** [INFERITO].
+   - 🟠 Dalle 13:07 le 15 sedie indice non sono piu' nei `.chr`: riaprire quel terminale non dovrebbe farle ripartire, ma e' [NON VERIFICATO] (`SOSPENSIONE_SEDIE_DEMO` §ESEGUITO, "Da verificare" 1).
      L'app mobile o il web terminal di BCM leggono lo stesso conto **senza avviare EA**.
 2. Altre posizioni del piccolo **aperte** al momento della chiusura, per esempio una seconda gamba SupRev NAS: `trades_auto.csv`
    ha solo le chiuse [NON MISURATO].
 3. **Conto manuale `50503635` e Pepperstone**: nessuna sonda vede i trade a mano [NON MISURATO].
 4. **Il giornale del 21/09 manca** (gia' dichiarato il 24/09). E' irrilevante: il 21/09 FTMO non aveva posizioni.
+5. **Il conto `50503392` sul PC di backtest `DESKTOP-H4D7CAJ`**: quel MT5 e' loggato sullo stesso conto (ordini veri #3160534/#3160535 il 14/08) e nessuna sonda lo legge. Si chiude con lo Storico del CONTO (app o web terminal BCM), che vede i deal di tutte le macchine [NON MISURATO].
 
 ---
 
@@ -198,11 +201,11 @@ assegna "copia", non "opposta": lo strumento sa dire di no.
 
 ### 4.2 I numeri
 
-| scenario | sedie controparte | **stesso indice** | **solo correlati DAX/Dow/Nasdaq** | **stesso + correlati FTMO** | **+ Nikkei** [INFERITO] |
+| scenario | sedie controparte | **stesso indice** | **giornate con un episodio correlato DAX/Dow/Nasdaq** (2 in comune con lo stesso indice: 31/08, 03/09) | **stesso + correlati FTMO** | **+ Nikkei** [INFERITO] |
 |---|---|---|---|---|---|
-| **A, oggi** (piccolo muto, Tickmill muto) | 100k `770901` (5 posizioni in finestra) | **0**: nessuna sedia | **0**: nessuna sedia | **0** | osservati **0/28**. Rotazione: **1,8/28 = 6,5%/giorno → ~73% in 20 gg** (min 0, max 4 giornate) |
+| **A, 25/09 03:30** (piccolo muto, Tickmill muto; superato alle 13:14:47, vedi 🕐) | 100k `770901` (5 posizioni in finestra) | **0**: nessuna sedia | **0**: nessuna sedia | **0** | osservati **0/28**. Rotazione: **1,8/28 = 6,5%/giorno → ~73% in 20 gg** (min 0, max 4 giornate) |
 | **B, piccolo riacceso** (profilo ORO del 25/09) | le 15 sedie indice del piccolo + `770901` | **5/28 = 17,9%/giorno → 97%** (rotazione 19,4% → 98%) | **7/28 = 25,0%/giorno → 99%** | **10/28 = 35,7%/giorno → ~100%** (rotazione 37,3%) | 10/28 (rotazione **42,5%/giorno**) |
-| controllo: perimetro del 24/09, prima della sospensione | B + REALE/100k `770101`/`770202`/`770411`/`770611` | 5/28 | 7/28 | 10/28 | 10/28 |
+| controllo: perimetro del 24/09, prima della sospensione | B + 100k `770101`/`770202`/`770411`/`770611` + REALE (ledger solo dal 04/09) | 5/28 | 7/28 | 10/28 | 10/28 |
 
 **Le giornate opposte "solo correlati" dello scenario B** (UTC):
 
@@ -220,12 +223,11 @@ Il 22/09 e' **l'episodio vero** del §3.
 
 ### 4.3 Come si leggono
 - 🔴 **La sospensione del 24/09 ha tolto dal perimetro il DENARO VERO, non la FREQUENZA.** Il controllo e B danno **le stesse
-  10 giornate**: ogni episodio di REALE e 100k aveva gia' la sua gemella sul piccolo, per esempio il 22/09.
+  10 giornate**: ogni episodio del 100k e del REALE (quest'ultimo solo dal 04/09, inizio del ledger) aveva gia' la sua gemella sul piccolo, per esempio l'08/09 e il 22/09; il REALE fra il 14/08 e il 03/09 e' [NON MISURATO].
 - 🔴 **Gli indici correlati raddoppiano la frequenza** rispetto al solo stesso indice: da 17,9% a **35,7% dei giorni di borsa**.
   In pratica, col piccolo acceso, **una giornata su tre**.
-- 🟢 **Oggi (A) il rischio su DAX, Dow e Nasdaq e' zero per costruzione**: nessuna sedia non-FTMO attiva su quei tre. Pero'
-  **dipende da un terminale spento**, non da una scelta registrata. Il profilo ORO ha ancora le 15 sedie.
-- 🟠 **Il Nikkei (A)** dice 0 osservati, ma **~73% in 20 giorni** a tempi indipendenti. Vale **solo se** FTMO considera il Nikkei
+- 🟢 **In A il rischio di NUOVE entrate su DAX, Dow e Nasdaq e' zero per costruzione**: nessuna sedia non-FTMO attiva su quei tre. Alle 03:30 dipendeva da un terminale spento; **dalle 13:07 dipende da una scelta registrata** (15 sedie tolte dai `.chr`). Fuori da questo zero restano posizioni/pendenti gia' sul server e il PC di backtest (§3.4), [NON MISURATO].
+- 🟠 **Il Nikkei (A, alle 03:30)** diceva 0 osservati, ma **~73% in 20 giorni** a tempi indipendenti. Dalle 13:14:47 `770901` e' tolto: oggi conta solo se il profilo del 100k non e' stato salvato. Vale **solo se** FTMO considera il Nikkei
   correlato, e questo e' [INFERITO]. E' costruito su **5 posizioni**: e' un ordine di grandezza, non una misura.
 
 ### 4.4 Confidenza: BASSA-MEDIA, per le stesse ragioni del 24/09 e due in piu'
@@ -248,4 +250,8 @@ Il 22/09 e' **l'episodio vero** del §3.
 - sedie: `CODA_01_sedie_attaccate_20260925_033004.log` · lati: `CODA_08_preset_dai_chr_20260925_033004.log` · stato terminali: `CODA_05_foto_fresca_20260925_033004.log`, `CODA_03_..._20260925`
 - FTMO: `CODA_12_pertrade_posizioni_20260925_033004.log` r.16-21 · `report/PRIMO_STOP_FTMO_2026-09-22.md` r.17-18 · `SECONDO_STOP_FTMO_2026-09-24.md` §1, §6 · `MODIFY_A_RAFFICA_FTMO_2026-09-25.md` §1 · giornale `CODA_09_giornale_operativo_20260925_033004.log`
 - non-FTMO: `data/statements/trades_auto.csv` · `trades_100k.csv` · `CODA_10_slippage_20260925_033004.log` (REALE) · `CODA_09_..._20260923_033004.log` e `..._20260925_033004.log`
+- script: `backtest_pipeline/hedging_demo_correlati.py` (`--autotest` 6/6) · sospensioni eseguite: `report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md` §ESEGUITO
 - sorgenti: `mql5/Experts/ABTG_GapFill.mq5` r.437 · `ABTG_PunteLarry.mq5` r.696-701 · `Gold_Ichimoku_TK_ATR_EA.mq5` r.49-53 · `BREAKOUT_EA_JPY.mq5` r.348
+
+---
+_Cancello: strato 1 OK; strato 2 FAIL (D1 stato superato dalle sospensioni, D2 provenienza, D3 REALE nel controllo, D4 conto contro terminale -> classe 792, D5 etichetta, D6 prova) -> correzioni applicate, in attesa della seconda passata._
