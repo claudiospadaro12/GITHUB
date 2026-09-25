@@ -1,0 +1,82 @@
+diff --git a/pin_9fca63d9/ABTG_Nasdaq_Apertura_US.mq5 b/trailfix_9fca63d9/CLAU12_Nasdaq_Apertura_US.mq5
+index c601ba0..95321c6 100644
+--- a/pin_9fca63d9/ABTG_Nasdaq_Apertura_US.mq5
++++ b/trailfix_9fca63d9/CLAU12_Nasdaq_Apertura_US.mq5
+@@ -1,4 +1,20 @@
+ //+------------------------------------------------------------------+
++//| TRAILFIX -- CLAU12_Nasdaq_Apertura_US.mq5
++//|  Origine : mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 al pin 9fca63d9
++//|            (sorgente in campo su FTMO dal 20/09/2026).
++//|  Data    : 25/09/2026
++//|  Modifica: SOLO la Parte A del referto
++//|            report/MODIFY_A_RAFFICA_FTMO_2026-09-25.md (par. 4):
++//|            guardia del lato giusto del prezzo prima della
++//|            PositionModify del trailing + TrailRinvioLog.
++//|            Niente Parte B, nessun altro cambio.
++//|  Sedie   : 770260 Nasdaq RETEST
++//|  USO     : ricompilazione CLAU12 sul terminale FTMO 541452707
++//|            (C:\FTMO). NON per i terminali BCM.
++//|  Stato   : NON in campo. Serve la firma di Claudio e la prova di
++//|            neutralita' (vedi LEGGIMI.md in questa cartella).
++//+------------------------------------------------------------------+
++//+------------------------------------------------------------------+
+ //|                                 ABTG_Nasdaq_Apertura_US.mq5       |
+ //|                                                                  |
+ //|  EA "APERTURA AMERICANA" (Nasdaq / NASUSD) - MetaTrader 5        |
+@@ -2224,21 +2240,54 @@ void ManageOneTicket(ulong ticket, double bid, double ask)
+    bool trailArmato = (InpTrailStartR <= 0) || (profR >= InpTrailStartR);
+    if(InpUseTrailing && trailArmato)
+      {
++      //  25/09/2026 -- GUARDIA DEL LATO GIUSTO (raffica FTMO del 24/09, #170199888).
++      //  Il trailing PREVBAR propone il minimo/massimo della candela PRECEDENTE e
++      //  non guarda dove sta il prezzo ADESSO. Dopo un riempimento RETEST il Bid
++      //  e' sotto quel minimo: il server risponde [invalid stops], lo stop resta
++      //  quello vecchio e al tick dopo si rimanda la stessa richiesta (38 rifiuti
++      //  in 16,9 s). Qui si replica la regola del server PRIMA di inviare: le
++      //  modifiche che sarebbero passate partono identiche, le altre non partono.
++      double stopsDist = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL) * _Point;
+       if(type == POSITION_TYPE_BUY)
+         {
+          double newSL = TrailStopBuy(bid);
+          if(newSL > 0 && newSL > sl && newSL > openP)
+-            gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
++           {
++            if(bid - NormalizePrice(newSL) >= stopsDist)
++               gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
++            else
++               TrailRinvioLog(ticket, NormalizePrice(newSL), bid);
++           }
+         }
+       else if(type == POSITION_TYPE_SELL)
+         {
+          double newSL = TrailStopSell(ask);
+          if(newSL > 0 && (newSL < sl || sl == 0) && newSL < openP)
+-            gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
++           {
++            if(NormalizePrice(newSL) - ask >= stopsDist)
++               gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);
++            else
++               TrailRinvioLog(ticket, NormalizePrice(newSL), ask);
++           }
+         }
+      }
+   }
+ 
++//+------------------------------------------------------------------+
++//| Trailing rinviato (stop dal lato sbagliato del prezzo): UNA riga  |
++//| per ticket per candela, e nessuna richiesta al server.           |
++//+------------------------------------------------------------------+
++void TrailRinvioLog(ulong ticket, double newSL, double px)
++  {
++   static ulong    sTk  = 0;
++   static datetime sBar = 0;
++   datetime bar = iTime(_Symbol, InpTrailTF, 0);
++   if(ticket == sTk && bar == sBar) return;
++   sTk = ticket; sBar = bar;
++   ABTGLog(StringFormat("trailing rinviato: stop %.2f dal lato sbagliato del prezzo %.2f (ticket %I64u), nessuna richiesta al server.",
++                        newSL, px, ticket));
++  }
++
+ //+------------------------------------------------------------------+
+ //| Nuovo stop di trailing per un LONG secondo InpTrailMode          |
+ //+------------------------------------------------------------------+
