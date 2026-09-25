@@ -8,8 +8,8 @@ Etichette: **[VERIFICATO]** letto sulla pagina o nel sorgente · **[MISURATO]** 
 
 ## 0. 🎯 La riga che conta
 
-> **Ho guardato 120 titoli del Code Base, 194 script TradingView (17 strategie) e ~15 paper o pagine: 5 fonti vive e 6 murate. Poi ho misurato io 10 meccanismi con una sonda su 8 anni di DAX esterno. 1 solo arriva al sorgente e passa i cancelli della sonda, e lo proverei: la CONTINUAZIONE DEL GAP-DOWN all'apertura Xetra (`ABTG_GapContinuation`, già in casa, zero codice).** Il motivo: è l'unica delle 10 celle che passa G1-G4, e regge sei contro-esempi costruiti per romperla. Il più importante: nei giorni senza gap la stessa meccanica perde, quindi il motore è il gap. Il lato lungo speculare sul DAX non ha la stessa informazione, quindi è un motore corto per costruzione.
-> **Onestà sui numeri:** è un **indizio, non una scoperta**. Passa 1 cella su 10, con t +2,12. Il gemello EuroStoxx concorda (t 1,51), il gemello S&P no (t 0,49). Sul feed BCM fa **~0,09 posizioni per seduta**, quindi il merito resta sospeso. Il primo round giudica catena, costo, rischio e sovrapposizione con 770411/770105.
+> **Ho guardato 120 titoli del Code Base, 194 script TradingView (29 strategie) e ~15 paper o pagine, più la prima pagina di QuantConnect Research: 6 fonti vive e 6 murate. Poi ho misurato io 10 meccanismi con una sonda su 8 anni di DAX esterno. 1 solo arriva al sorgente e passa i cancelli della sonda: la CONTINUAZIONE DEL GAP-DOWN all'apertura Xetra (`ABTG_GapContinuation`, già in casa, zero codice).** La proverei **come prova di catena, costo e sovrapposizione, non come candidato sedia**. È l'unica delle 10 celle che passa G1-G4. Dei contro-esempi il più importante: nei giorni senza gap la stessa meccanica perde, quindi il motore è il gap. Il lato lungo speculare sul DAX non ha la stessa informazione, quindi è un motore corto per costruzione.
+> **Onestà sui numeri (corretta dopo l'audit controllo-caccia del 25/09):** è un **indizio debole, non una scoperta**. Passa 1 cella su 10, con t +2,12. Nel **90%** delle operazioni lo stop è il pavimento di 68 punti, non la struttura. **Con la geometria dell'EA scende a t 1,83, sotto G1.** In scala invariante **nessuna soglia passa G1 e G3 insieme**. Senza le 5 operazioni migliori ha t 1,53. Il gemello EuroStoxx concorda (t 1,51), il gemello S&P no (t 0,49). Un precedente di casa (A69 GapCash Nasdaq) ha già **ribaltato il segno** passando dai dati esterni ai tick BCM. Sul feed BCM fa **~0,075 posizioni per seduta, ~34-35 in fase (tetto)**, quindi il merito resta sospeso. Il primo round giudica catena, costo, rischio e sovrapposizione con 770411/770105.
 
 ---
 
@@ -18,6 +18,12 @@ Etichette: **[VERIFICATO]** letto sulla pagina o nel sorgente · **[MISURATO]** 
 `CLAUDE.md` · `report/LATO_SHORT_DAX_APERTURA_2026-09-25.md` · `report/REFERTO_R251_2026-09-25.md` · `report/ORA_10ET_SULLA_770101_2026-09-25.md` · `report/IL_CORTO_DI_DAX_E_NASDAQ_2026-09-23.md` (R233, censimento dei corti per colonne) · `report/CENSIMENTO_LATO_SHORT_2026-09-09.md` · `report/CACCIA_TF_BASSO_2026-09-12.md` (cono di rumore) · `report/CACCIA_M30_INDICI_2026-09-08.md` e `report/CACCIA_SUPREV_ALTERNATIVE_2026-09-12.md` (il cimitero per meccanismo) · `backtest_pipeline/REGISTRO_TEST.md` (r.840-972, 1195-1262, 1901-2012, 2250-2300, 4025-4060) · `caccia_strategie/ANALISI_TRASCRIZIONI_2026-09-25.md` (S1) · le cacce short precedenti (`CACCIA_2026-08-16_F_SHORT`, `_H_SHORT_APERTURE`, `CACCIA_SHORT_INDICI_2026-08-29`, `CACCIA_SHORT_FREQUENZA_2026-09-06`) · `PROMEMORIA_SBLOCCO_FONTI.md` · prove `R249*`, `R251*`, `R252*` · preset FTMO `770411` · sorgenti `ABTG_GapContinuation.mq5`, `ABTG_DAX_Apertura_EU.mq5` (modi d'ingresso), `ABTG_IntradayMomentum.mq5`, `ABTG_OutOfNoise.mq5`, `ABTG_GapFill.mq5`, `ABTG_LiquiditySweep.mq5`, `ABTG_TurnaroundTuesday.mq5`, `ABTG_SupRev_DAX_H1_Ottimizzato.mq5`.
 
 **Il buco, con i numeri:** il corto DAX in campo è uno solo, `770411` (rottura del box notturno, apertura). Il 25/09 Claudio ha firmato `770105` (gemella short della 770101 su FTMO). Tutte e due **lavorano nella prima mezz'ora sullo stesso lato**. Il buco vero è quindi un corto che **guadagni nelle discese** ("lavora nel crollo", ROBUSTEZZA) **senza essere lo stesso segnale** delle due corte del mattino.
+
+**Archivio che NON avevo incrociato alla prima stesura (aggiunto dopo l'audit):**
+- `report/SWEEP_MECCANISMI_2026-08-23.md` §4 **D1**: **stesso candidato, stesso EA, stesso paper**. Proposto il 23/08 dietro un **PASSO 0** (contare i gap veri su D30EUR/U30USD, "se <150: chiuso"), **mai girato**.
+- **A69 GapCash Nasdaq** (07/09, `risultati_archivio/REFERTO_GAPCASH_PASSO0_2026-09-07.md`): positivo sui dati esterni (**+0,0988%**), **segno ROVESCIATO sui tick BCM (−0,0487%)**. È il precedente diretto di uno screening esterno sul gap che non ha retto su BCM.
+- `prove/GAPCASH_RICONQUISTA_PASSO0.txt` (08/09): stessa famiglia, in coda, **mai girato**.
+- Sul **225JPY** il lato short dello **stesso EA** ha P/L OOS **−2.182** (`report/CENSIMENTO_LATO_SHORT_2026-09-09.md` r.419; R65/R66).
 
 **Già in corsa o pronto, e non lo duplico:** R252 (short retest d'apertura con l'orologio in fase, in corso) · R249a-h (Unger A: STOP contro LIMIT sul massimo/minimo di ieri, riga pronta) · R233 punto 3 (corona SupRev corto D30EUR H1).
 
@@ -29,7 +35,7 @@ Etichette: **[VERIFICATO]** letto sulla pagina o nel sorgente · **[MISURATO]** 
 |---|---|---|---|
 | **MQL5 Code Base** elenco `/en/code/mt5/experts` (+page2, page3) | titoli veri | **200**, 120 titoli con id. Fra questi `75301 Nikkei 225 Gap Continuation EA`, `73674 001 - Turnaround Tuesday`, `68951 Liquidity Sweep H4 - M15`, tutti già in casa | 🟢 PASSA |
 | **MQL5** scheda `/en/code/75301` | autore + data | **200**: _"by 'MauriyKiku' … 2026.07.24"_, `datePublished 2026-07-24T10:56:57`, **`dateModified 2026-09-15T12:58:37`**, `UserDownloads:771` | 🟢 PASSA |
-| **TradingView** `pubscripts-suggest-json` | risultati per tag | **200** su 8 query (`dax`, `gap fill`, `gap fade`, `previous day high`, `failed breakout`, `intraday momentum`, `us open`, `overnight gap`): 194 script, **17 strategie** (`type 2`) | 🟢 PASSA |
+| **TradingView** `pubscripts-suggest-json` | risultati per tag | **200** su 8 query (`dax`, `gap fill`, `gap fade`, `previous day high`, `failed breakout`, `intraday momentum`, `us open`, `overnight gap`): 194 script, **29 strategie** (`type 2`: 12 `access 1` aperte, 12 `access 2`, 5 `access 3`) | 🟢 PASSA |
 | **arXiv** pagina `abs/2010.01727` | titolo noto | **200**, _"Strikingly Suspicious Overnight and Intraday Returns"_ | 🟢 PASSA |
 | **arXiv** PDF `pdf/2605.04004` | PDF vero | **200, 834.734 byte**, letto (sez. 4.4, tab. 6 e 13) | 🟢 PASSA |
 | `export.arxiv.org` API | 4 voci | 🔴 **HTTP 406** (anche con `Accept: application/atom+xml`): oggi l'API è muta | 🔴 NULLA oggi, sostituita da `abs`/`pdf` |
@@ -38,7 +44,8 @@ Etichette: **[VERIFICATO]** letto sulla pagina o nel sorgente · **[MISURATO]** 
 | 🔴 `papers.ssrn.com` | abstract 4729284 | **403** | 🔴 NULLA |
 | 🔴 `github.com/search` e `api.github.com` | ricerca repo | **403** tutti e due | 🔴 NULLA (quarta caccia di fila) |
 | 🔴 `forexfactory.com` | home | **403** | 🔴 NULLA |
-| 🔴 `quantpedia.com/strategies/` | slug | **200** ma pagina Next.js **senza contenuto** leggibile (0 slug) | 🔴 NULLA di fatto |
+| 🔴 `quantpedia.com/strategies/` | slug | **308, redirect a `/screener`** (pagina Next.js senza contenuto leggibile: 0 slug) | 🔴 NULLA di fatto |
+| **QuantConnect** `quantconnect.com/research/` (mandato §3.F) | pagina vera | **200, 272.356 byte**, 20 discussioni in prima pagina (bug report, broker, un _"Intraday Trading Strategy for Futures Contract NQ"_ a indicatori). **Nessuna** su DAX, gap o short intraday. La ricerca è in JS, quindi **non** l'ho battuta per tema | 🟡 VISITATA, resa zero, dichiarata |
 | 🔴 `centaur.reading.ac.uk`, `nottingham-repository`, `sciencedirect.com`, `researchgate.net`, `mdpi.com` | PDF dei paper | **EGRESS_BLOCKED / connect_rejected** | 🔴 NULLA |
 
 ---
@@ -63,13 +70,18 @@ Etichette: **[VERIFICATO]** letto sulla pagina o nel sorgente · **[MISURATO]** 
 | P5 **cono di rumore SOLO CORTO** (formula OutOfNoise r.697-700) | 731 | 0,362 | −0,028 R | −0,80 | −0,012 | 94 (55x) | 3/8 | 🔴 no (conferma lo zero del 12/09) |
 
 P2d per anno **[MISURATO]**: 2011 +0,17 · 2012 −0,01 · 2013 +0,02 · 2014 +0,14 · **2015 +0,50** · 2016 +0,29 · 2017 −0,20 (n 8) · **2018 +0,30**. Somma +32,4 R, **DD massimo 6,5 R**, serie perdente più lunga 5.
+⚠️ **Tre fragilità di P2d, misurate dall'audit e riprodotte da me alla cifra** (`sonde_esterne/sonda_dax_short_verifica_audit.py`):
+- **La sonda non è l'EA.** Nel **90%** delle 175 operazioni lo stop è il **pavimento di 68 punti**; lo stop naturale ha mediana **37,5**. Con la geometria dell'EA approssimata (massimo del range + 15, nessun pavimento, cancellazione a metà gap, TWAP al posto della VWAP) fa **n 152, +0,196 R, t 1,83: SOTTO G1**.
+- **Coda:** senza le 3 operazioni migliori ha t **1,77**; senza le 5 migliori **1,53**.
+- **Orologio di histdata:** il file è in ora di New York con l'ora legale USA. Nelle settimane in cui USA e UE cambiano ora in date diverse, le 08:00 della sonda cadono **un'ora prima della cash**. **9 operazioni su 175** cadono lì; senza di loro: n 166, +0,190 R, t 2,10. Il "collaudato tre volte" **non copre** quelle settimane.
+
 ⚠️ **Molteplicità dichiarata:** su 10 celle, una che passa per caso ha una probabilità non trascurabile. Per questo la cella viene portata al tester, e ha senso solo coi contro-esempi del §3.1.
 
 ### 3.1 🧪 I contro-esempi: ho provato a rompere P2d (post-hoc e dichiarati; `sonda_dax_short_controesempi.py`)
 
 | contro-esempio | cosa direbbe "P2d è un artefatto" | numero | esito |
 |---|---|---|---|
-| CE1 **scala**: 68 punti su un DAX a 7.000 sono uno stop più largo che a 24.000 | l'edge sparisce con lo stop in unità di volatilità | pavimento 0,27×ATR20 e costo scalato: **+0,243 R, t 2,30**, 5/8 anni | ✅ regge |
+| CE1 **scala**: 68 punti su un DAX a 7.000 sono uno stop più largo che a 24.000 | l'edge sparisce con lo stop in unità di volatilità | pavimento 0,27×ATR20 e costo scalato: **+0,243 R, t 2,30, ma solo 5/8 anni** · CE1b 0,25%: t 1,42 · CE6c 0,35%: +0,149 R, t 1,67 | 🔴 **FALLISCE G3.** Nella scala che somiglia a BCM **nessuna soglia passa G1 e G3 insieme**: l'altopiano esiste **solo col pavimento di 68 punti** (corretto dopo l'audit; la prima stesura diceva "regge") |
 | CE2 **il gap è il motore?** | la stessa rottura del minimo fa uguale ogni giorno | tutte le sedute **+0,035 R** (t 1,27); **senza gap −0,038 R** | ✅ il motore è il gap |
 | CE3 **verso** | basta un gap qualsiasi | corto dopo un gap-**UP** ≥0,50%: +0,054 R, t 0,77 | ✅ conta il verso |
 | CE4 **uscita** | è il bersaglio 2R | senza bersaglio (stop o tempo): **+0,131 R**, 6/8 anni | ✅ non è il 2R |
@@ -77,15 +89,16 @@ P2d per anno **[MISURATO]**: 2011 +0,17 · 2012 −0,01 · 2013 +0,02 · 2014 +0
 | CE6 **soglia** | la cella 0,50 è un picco | 0,35% **+0,146 (t 2,03)** · 0,50% +0,185 · 0,75% +0,170 (t 1,47) | ✅ altopiano, centro 0,50 |
 | CE8 gemello **EuroStoxx** (ETXEUR, stessa seduta) | sul gemello non c'è | ≥0,50% **+0,151 R, t 1,51**; ≥0,75% **+0,262, t 1,87**; senza gap −0,043 | 🟡 concorde, ma lì vive anche il lungo (+0,106, t 1,26), e non è indipendente dal DAX |
 | CE7 gemello **S&P 500** (SPXUSD 2013-2018) | è universale | ≥0,50% **+0,074 R, t 0,49**; ≥0,35% −0,036 | 🔴 **non conferma** |
-| CE9 **cancellazione a metà gap** come l'EA (r.804-815), aggiunta dopo il cancello del 25/09 | la sonda senza cancellazione gonfia il segno | n **152**, **+0,230 R, t 2,47**, 7/8 anni, DD 4,8 R | ✅ regge; il **filtro VWAP** dell'EA (r.1104) **non è approssimabile**: histdata non ha volumi |
+| CE9 **cancellazione a metà gap** come l'EA (r.815, lato SELL), aggiunta dopo il cancello del 25/09 | la sonda senza cancellazione gonfia il segno | n **152**, **+0,230 R, t 2,47**, 7/8 anni, DD 4,8 R | ✅ regge col pavimento di 68; il **filtro VWAP** dell'EA (r.1104) non si calcola (histdata senza volumi). L'audit l'ha approssimato con la TWAP e **senza pavimento**: t 1,83 (§3) |
 
-📄 **Fonte esterna, letta sul PDF [VERIFICATO]:** Mesfin, _"Structural Limits of OHLCV-Based Intraday Momentum Signals in MNQ Futures"_, **arXiv 2605.04004** (05/05/2026), sez. 4.4, tab. 6 e 13. Il **gap continuation short** su MNQ 2021-2025 fa **lordo +16,53 · netto +14,52 punti, T 1,46, 35 operazioni OOS**, con il **2024 a −11,87**. L'autore lo chiama _"the most credible near-miss in the study"_ e lo tiene _"as a candidate for future investigation"_. Il meccanismo è lo stesso, la geometria no (lì velocità Kalman, qui rottura del range), e il profilo è lo stesso: vive negli anni di discesa e cede nel toro. Numeri **dell'autore, NON verificati da noi**: non pesano sul punteggio.
+📄 **Fonte esterna, letta sul PDF [VERIFICATO]:** Mesfin, _"Structural Limits of OHLCV-Based Intraday Momentum Signals in MNQ Futures"_, **arXiv 2605.04004** (05/05/2026), sez. 4.4, tab. 6 e 13. Il **gap continuation short** su MNQ 2021-2025 fa **lordo +16,53 · netto +14,52 punti, T 1,46, 35 operazioni OOS**, con il **2024 a −11,87**. L'autore lo chiama _"the most credible near-miss in the study"_ e lo tiene _"as a candidate for future investigation"_. Il meccanismo è lo stesso, la geometria no (lì velocità Kalman, qui rottura del range). Tabella 6: **2023 (toro) +14,53**, 2024 −11,87, 2025 parziale +10,27, 2022 escluso. "Vive nelle discese e cede nel toro" **non è nel paper** [INFERITO, non dal paper].
+🔴 **Versioni:** io ho letto la **v3** (online 15/09/2026). La casa aveva letto la **v2** il 23/08 (`report/SWEEP_MECCANISMI_2026-08-23.md` r.285-313): **T 3,23, n 22, win 68%**, _"Statistically, it looks real"_. **Fra le due versioni l'autore ha RIDOTTO il suo stesso segnale (T 3,23 → 1,46).** Numeri **dell'autore, NON verificati da noi**: non pesano sul punteggio.
 
 ---
 
 ## 4. 🏆 La shortlist (ordinata)
 
-### 🥇 1. Continuazione del gap-down all'apertura Xetra: **PROVA SUBITO**
+### 🥇 1. Continuazione del gap-down all'apertura Xetra: **PROVA SUBITO come prova di catena, costo e sovrapposizione, non come candidato sedia**
 
 ```
 NOME            Nikkei 225 Gap Continuation EA  -> in casa: ABTG_GapContinuation.mq5 (adozione minima 16/08)
@@ -100,23 +113,25 @@ TESI            "guadagna perche' il gap-down del DAX e' prezzo gia' scoperto fu
                  il flusso della cash europea arriva DOPO e spinge nello stesso verso"
 MECCANICA       ingresso: gap <= -0,50% dalla chiusura cash di ieri, ask < minimo del range 15' E < VWAP,
                 entro 90'; uscita: parziale 40% a 1R + pari, finale 2R, flat 5' prima della chiusura;
-                stop: massimo del range + buffer. Cancellata se richiude meta' del gap (r.804).
+                stop: massimo del range + buffer. Cancellata se richiude meta' del gap (r.815; r.804 e' il ramo gap-up).
 GESTIONE RISCHIO % dell'equity (CalculateEntryVolume r.866, OrderCalcProfit), SL vero al broker,
                 1 posizione al giorno
 BANDIERE ROSSE  nessuna (niente martingala, griglia, recovery, DLL, WebRequest; stop vero r.1110)
 COSTO PORTING   0 ore (zero codice: InpSessionTimeMode=1 manuale in ora server, InpEnableBuyGaps=false)
 PUNTEGGIO       semplicita' 1 (34 input) · il filtro E' il motore 2 (CE2: senza gap perde) · tesi 2 ·
-                buco 2 (corto che lavora nel crollo) · testabile senza riscritture 2   -> 9
-VERDETTO        PROVA SUBITO
-PERCHE'         unica cella su 10 che passa la sonda, regge 6 contro-esempi, zero codice; ma n basso.
+                buco 1 (lavora nel crollo, ma sovrapposizione probabile con 770411/770105:
+                O2 stimato sulla sonda 69%) · testabile senza riscritture 2   -> 8
+VERDETTO        PROVA SUBITO come prova di catena, costo e sovrapposizione, NON come candidato sedia
+PERCHE'         unica cella su 10 che passa la sonda, zero codice; ma con la geometria dell'EA
+                t 1,83 (sotto G1), in scala invariante manca G3, n basso: e' un indizio debole.
 ```
 - **Cosa terrei:** il motore (gap + rottura del range + VWAP + annullamento a meta' gap).
 - **Cosa rifarei, dopo:** la gestione dell'uscita, a turno (certificato p.3). Poi il buffer dello stop in funzione dello spread (R55).
 - **Frontiera del costo [DERIVATO]:** stop ≥ range 15' + 15 punti. Il range 15' D30EUR BCM ha **mediana 54,65 e P10 23,89 (n 440, MISURATO)**, quindi stop mediano ≥ ~69,7 punti = **~41x** lo spread di 1,70. Al P10 fa ~22,9x. Il numero vero lo dà il per-trade (cancello K1).
-- **Frequenza [DERIVATO dalla sonda]:** gap-down ≥0,50% nel **14,0%** delle sedute, ingresso nel **62%** → **~40 posizioni** sulle ~458 sedute in fase del feed BCM. Il toro ne toglie una parte: banda attesa 10-45. **Merito sospeso per aritmetica, qualunque cosa esca.**
+- **Frequenza [DERIVATO dalla sonda]:** gap-down ≥0,50% nel **14,0%** delle sedute. Con la cancellazione a metà gap (CE9) l'ingresso scende al **54%** → **~0,075 posizioni per seduta, ~35 posizioni** sulle ~458 sedute in fase del feed BCM (P2d senza cancellazione: 62%, ~40). È un **TETTO** (classe 777): il VWAP e il toro ne tolgono altre. Banda attesa 10-45. **Merito sospeso per aritmetica, qualunque cosa esca.**
 - ⚠️ **Zero codice, ma non con l'EA della sedia.** `ABTG_DAX_Apertura_EU` ha un modo `GAPFILL` (`InpEntryMode=1`), ma **misura il gap sulle barre D1 del CFD** (`iClose(D1,1)` e `iOpen(D1,0)`, r.2013-2014), cioè il gap di mezzanotte, **non quello della cash** [INFERITO dal codice]. Coerente: nella FASE B ha fatto **7 e 9 operazioni** (`DAX_B_motore_IS/OOS.csv`). Il veicolo giusto è `ABTG_GapContinuation`, che trova la chiusura della seduta precedente sulle M1 (r.637-655).
 
-🏛️ **Riga prop.** In ottica prop questo motore fa **al massimo 1 posizione al giorno**, quindi la peggior giornata è ~−1 R (−0,65% al rischio di casa). I guadagni si concentrano negli **episodi di discesa**, dove la flotta long perde: è l'unico candidato di oggi che **copre il crollo**. Nel toro la sonda dice ~0 per posizione e poche posizioni, quindi una curva **piatta, non discendente**. Il DD trailing la punisce poco [INFERITO dalla sonda, non misurato]. 🔴 **Rischio di sovrapposizione vero:** nei giorni di gap-down anche `770411` (rottura del box notturno, ordine alle 07:59 server) e `770105` (retest short) sono probabilmente corte **la stessa mattina**. Oggi è **[NON MISURATO]**: la notte non c'è nei dati esterni. È il cancello O1/O2 del file prova: sopra il 50% di giornate in comune, **non è additivo a rischio pieno**. Estendere la famiglia a E50EUR non aggiunge giornate indipendenti, perché i gap-down arrivano gli stessi giorni.
+🏛️ **Riga prop.** In ottica prop questo motore fa **al massimo 1 posizione al giorno**, quindi la peggior giornata è ~−1 R (−0,65% al rischio di casa). I guadagni si concentrano negli **episodi di discesa**, dove la flotta long perde: è l'unico candidato di oggi che **copre il crollo**. Nel toro la sonda dice ~0 per posizione e poche posizioni, quindi una curva **piatta, non discendente**. Il DD trailing la punisce poco [INFERITO dalla sonda, non misurato]. 🔴 **Rischio di sovrapposizione vero:** nei giorni di gap-down anche `770411` (rottura del box notturno, ordine alle 07:59 server) e `770105` (retest short) sono probabilmente corte **la stessa mattina**. **O2 stimato sulla sonda** (tutto dentro la cash, geometria della 770105 approssimata sulle M1: range 35', rottura sotto il minimo − 5, limit a minimo + 2, scadenza 120'): **121 giornate su 175 = 69%** con un corto 770105 lo stesso giorno. È un indizio di **NON ADDITIVO A RISCHIO PIENO**. Per 770411 serve la notte, che nei dati esterni non c'è: **[NON MISURATO]**. Decidono i cancelli O1/O2 del file prova sul per-trade BCM: sopra il 50% di giornate in comune, **non è additivo a rischio pieno**. Estendere la famiglia a E50EUR non aggiunge giornate indipendenti, perché i gap-down arrivano gli stessi giorni.
 
 ### 🥈 2. Falsa rottura del massimo di ieri → corto (sell limit sul PDH): **GIÀ PRONTO, non lo duplico → IN CODA (lanciare R249)**
 - **Meccanismo:** stop-run sopra il massimo di ieri e rientro. È il "liquidity sweep" del mandato, portato sul livello più ovvio.
@@ -151,24 +166,25 @@ PERCHE'         unica cella su 10 che passa la sonda, regge 6 contro-esempi, zer
 | `ABTG_DAX_Apertura_EU` modo `GAPFILL` su D30EUR | sorgente r.2011-2075 | **non fedele**: gap sulle D1 del CFD, non sulla cash (7/9 operazioni in FASE B). Difetto di strumento, non un verdetto sul meccanismo |
 | `SupRev` corto D30EUR H1 | R233 §5.3 | **fuori dal perimetro intraday** [INFERITO dagli input di `ABTG_SupRev_DAX_H1_Ottimizzato.mq5` r.51-108: nessuna chiusura di sessione, solo `InpExitOnFlip`/trailing]. Resta la proposta di R233, non la duplico |
 | Code Base, arrivi dal 13/09: 77595 PSAR, 77535 RegimeRouter, 77167/77220 scalper "burst", 77470 EMA cross, 77639/77691/77206 oro, più attrezzi (pannelli, guardiani prop, logger) e demo Renko | MQL5 (titoli; descrizioni lette per 77595, 77535, 77167, 77220, 77470) | nessun motore DAX o corto. Famiglie morte (incroci, breakout/MR generici), scalper a tick sotto la frontiera del costo, oro fuori bersaglio. **Quinta conferma: il Code Base produce attrezzi, non motori** |
-| TradingView, 17 strategie su 8 tag | suggest-json | quelle pertinenti sono **già in biblioteca**: `DAX Shooter 5M` (th3web), `SP500 Session Gap Fade` (exlux), `Gap Filling Strategy` (alexgrover: **nessuno stop**), `IU Gap Fill`, `Previous Day High and Low Breakout` (ceyhun). Le altre sono scalper DAX a TP fisso da 7-20 punti (peba1967: sotto la frontiera per costruzione, e sorgente non aperto, `access 2`) o multi-asset generiche. `Overnight Gap Analysis` (TradeAutomation) **non letto**, dichiarato |
+| TradingView, 29 strategie su 8 tag (12 aperte) | suggest-json | quelle pertinenti sono **già in biblioteca**: `DAX Shooter 5M` (th3web), `SP500 Session Gap Fade` (exlux), `Gap Filling Strategy` (alexgrover: **nessuno stop**), `IU Gap Fill`, `Previous Day High and Low Breakout` (ceyhun). Le altre sono scalper DAX a TP fisso da 7-20 punti (peba1967: sotto la frontiera per costruzione, e sorgente non aperto, `access 2`) o multi-asset generiche. `Overnight Gap Analysis` (TradeAutomation) **non letto**, dichiarato |
 
 ---
 
 ## 6. 🕳️ Cosa NON ho potuto vedere
 
-1. **SSRN, GitHub (UI e API), Forex Factory: 403.** Quantpedia: pagina senza contenuto. **Tutti i PDF accademici** (Reading, Nottingham, ScienceDirect, ResearchGate, MDPI): EGRESS_BLOCKED. Per questo Li-Sakkas-Urquhart (ITSM internazionale) e _"When overnight is not simultaneous…"_ (ScienceDirect) sono **solo titoli**: non so se il DAX sia fra i 12 mercati su 16 **[INCERTO]**. Ho sostituito la lettura con la misura (§3).
+1. **SSRN, GitHub (UI e API), Forex Factory: 403.** Quantpedia: **redirect 308** a `/screener`, senza contenuto. QuantConnect: prima pagina vista, ricerca per tema non battuta (JS). **Tutti i PDF accademici** (Reading, Nottingham, ScienceDirect, ResearchGate, MDPI): EGRESS_BLOCKED. Per questo Li-Sakkas-Urquhart (ITSM internazionale) e _"When overnight is not simultaneous…"_ (ScienceDirect) sono **solo titoli**: non so se il DAX sia fra i 12 mercati su 16 **[INCERTO]**. Ho sostituito la lettura con la misura (§3).
 2. **API arXiv: HTTP 406** oggi. Ho usato `abs` e `pdf`.
 3. **La notte del DAX non c'è** nei dati esterni (histdata copre 07:00-21:00 server): **la sovrapposizione con 770411 non si stima fuori**. Si misura solo sul per-trade BCM (cancello O1).
 4. **Nessuna barra D30EUR BCM in repo**: quante giornate di gap-down ≥0,50% ci siano sul feed BCM è **[NON MISURATO]**. Il numero di §4.1 è derivato dal 2011-2018.
-5. **Il sorgente 75301 è stato modificato il 15/09** (dopo la nostra adozione del 16/08, v1.50): cosa sia cambiato è **[INCERTO]**. Non l'ho riscaricato: la nostra copia è quella del file prova.
+5. **L'orologio della sonda nelle settimane di disallineamento USA/UE** (9 operazioni su 175): i numeri senza di loro sono al §3.
+6. **Il sorgente 75301 è stato modificato il 15/09** (dopo la nostra adozione del 16/08, v1.50): cosa sia cambiato è **[INCERTO]**. Non l'ho riscaricato: la nostra copia è quella del file prova.
 
 ---
 
 ## 7. 📦 Consegnato
 
 - `backtest_pipeline/prove/R253a_gapcont_DAX_short_ora8.txt` (file di testa: estate, 08:00-16:30 BCM) e `R253b_gapcont_DAX_short_ora9.txt` (inverno, 09:00-17:30). Criteri congelati **prima** dei numeri; asse = magic gemello (G1); 2 file × 2 celle = **8 passate, 4 lunghe**, stima 5-12 minuti **[STIMA]**. `controlla_prova.py`: **OK, 0 problemi**. Sigla **R253** (assegnata dal coordinatore). Prima stesura FAIL allo strato 2 del cancello; corretta con i cancelli P0 (classe 780), S2 riscritto, le sedute di confine (805), il verdetto asimmetrico di R1 (804), la frequenza come TETTO (777), il moncone (766) e O1/O2 (781).
-- Attrezzi: `biblioteca/sonde_esterne/sonda_dax_short_meccanismi.py` (criteri pushati prima, `473c57f6`) e `sonda_dax_short_controesempi.py`. Uscite in `biblioteca/sonde_esterne/uscite_dax_short_2026-09-25/`.
+- Attrezzi: `biblioteca/sonde_esterne/sonda_dax_short_meccanismi.py` (criteri pushati prima, `473c57f6`), `sonda_dax_short_controesempi.py` e `sonda_dax_short_verifica_audit.py` (riproduce le cifre dell'audit controllo-caccia). Uscite in `biblioteca/sonde_esterne/uscite_dax_short_2026-09-25/`.
 - 🔴 **Nessuna riga di lancio.** Prima di scriverla va passata da `CHECKLIST_RIGA_DI_LANCIO.md` e dai due strati del cancello. Gira **solo sul PC di backtest**.
 
 ## 8. ❓ La domanda a cui il primo test deve rispondere

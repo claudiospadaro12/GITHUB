@@ -1,0 +1,6 @@
+tutti (175, 0.185, 2.12)
+floor binding % 90.28571428571429 nat med 37.5
+senza 3 migliori (172, 0.1536, 1.77) senza 5 (170, 0.1322, 1.53)
+mismatch n 9 senza (166, 0.1902, 2.1)
+O2 giorni con retest short 770105-like 121 su 175 =69% E P2d in quei giorni (121, 0.2851, 2.77)
+geometria EA approssimata (152, 0.1956, 1.83) stop EA mediano n/a

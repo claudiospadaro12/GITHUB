@@ -38,7 +38,7 @@
 #     655, LoadOpeningRange r.660-677). Sotto -InpMinimumSellGapPercent =
 #     giornata armata sul lato SELL.
 #   - cancellata per sempre se il prezzo richiude oltre META' del gap
-#     (UpdateSetupMetrics r.804 e seguenti).
+#     (UpdateSetupMetrics r.815 per il lato SELL; r.804 e' il ramo gap-up).
 #   - ingresso a mercato quando ask < minimo del range (InpOpeningRange-
 #     Minutes) E ask < VWAP di seduta (r.1104), entro InpMaxEntryMinutes-
 #     FromOpen dall'apertura.
@@ -72,7 +72,10 @@
 #  CONTRO-ESEMPI costruiti CONTRO P2d (sonda_dax_short_controesempi.py,
 #  post-hoc e dichiarati: provano a romperla, non scelgono):
 #   CE1 scala invariante (pavimento 0,27 ATR20, costo scalato): +0,243 R,
-#       t 2,30 -> regge (non e' un artefatto dei 68 pti su un DAX a 7.000).
+#       t 2,30 ma SOLO 5/8 anni -> FALLISCE G3. Nella scala che somiglia
+#       al feed BCM NESSUNA soglia passa G1 e G3 insieme (CE1b 0,25%:
+#       t 1,42; CE6c 0,35%: +0,149 R, t 1,67): l'altopiano esiste solo
+#       col pavimento di 68 pti (correzione dell'audit, 25/09).
 #   CE2 stessa meccanica su TUTTE le sedute: +0,035 R t 1,27; sui giorni
 #       SENZA gap (|gap| < 0,25%): -0,038 R -> il MOTORE E' IL GAP.
 #   CE3 corto nei giorni di gap-UP >= 0,50%: +0,054 R t 0,77 -> e' il
@@ -88,11 +91,18 @@
 #   CE7 gemello S&P 500 (SPXUSD 2013-2018): +0,074 R t 0,49 -> NON
 #       conferma. Fuori casa (arXiv 2605.04004, Mesfin 2026, MNQ 2021-2025,
 #       letto sul PDF): "gap continuation short" netto +14,52 pti, T 1,46,
-#       35 operazioni OOS, 2024 negativo -> "the most credible near-miss",
-#       stesso profilo: vive negli anni di discesa, cede nel toro.
+#       35 operazioni OOS, 2024 negativo -> "the most credible near-miss".
+#       Letta la v3 (15/09/2026); la casa aveva letto la v2 il 23/08
+#       (report/SWEEP_MECCANISMI_2026-08-23.md r.285-313: T 3,23, n 22,
+#       win 68%, "Statistically, it looks real"): fra le due versioni
+#       l'autore ha RIDOTTO il suo stesso segnale (T 3,23 -> 1,46).
+#       Tab. 6: 2023 (toro) +14,53, 2024 -11,87, 2025 parziale +10,27,
+#       2022 escluso. "Vive nelle discese, cede nel toro" e' [INFERITO,
+#       non dal paper].
 #   LETTURA ONESTA: e' un INDIZIO su un motore corto che nel toro sta
 #   circa a zero e guadagna nelle discese. Non e' una scoperta: 1 cella
-#   su 10, t 2,12, gemello USA che non conferma.
+#   su 10, t 2,12, gemello USA che non conferma, in scala invariante non
+#   passa G3, e con la geometria dell'EA scende sotto G1 (par. 5, fine).
 #
 # =====================================================================
 #  3. COSA MISURA QUESTO ROUND, E COSA NON PUO' MISURARE
@@ -101,10 +111,13 @@
 #  archivio/REFERTO_SONDA_STORICO_17-08.md par. 3, stato COMPLETO) e
 #  contiene UN regime (toro, col crollo di aprile 2025 dentro).
 #  Frequenza attesa [DERIVATO dalla sonda]: gap-down >= 0,50% nel 14,0%
-#  delle sedute, ingresso nel 62% di quelle -> ~0,087 posizioni/seduta.
-#  Sulle ~458 sedute feriali in fase (estate 238 + inverno 220, conto di
-#  r252_attese.py riportato in R252a par. 4) -> ~40 posizioni in fase.
-#  Il toro ne toglie una parte: BANDA ATTESA 10-45 posizioni in fase; 45 e' un TETTO (VWAP e meta' gap non nella sonda, par. 5).
+#  delle sedute; con la cancellazione a meta' gap (CE9) ingresso nel 54%
+#  di quelle -> 152 su 2.017 = ~0,075 posizioni/seduta (P2d senza
+#  cancellazione: 62%, ~0,087). Sulle ~458 sedute feriali in fase (estate
+#  238 + inverno 220, conto di r252_attese.py riportato in R252a par. 4)
+#  -> ~35 posizioni in fase. Il toro e il VWAP ne tolgono altre: BANDA
+#  ATTESA 10-45 posizioni in fase; ~35 e' un TETTO (VWAP non misurabile
+#  nella sonda, par. 5), 45 copre il rumore di conteggio sopra il tetto.
 #  >>> IL MERITO E' SOSPESO PER ARITMETICA QUALUNQUE COSA ESCA (n << 150).
 #  Il round giudica: la CATENA (l'EA gira su D30EUR, il gap e' quello
 #  della cash), il RISCHIO SOLO IN NEGATIVO (una violazione boccia a qualunque n; il rispetto a n piccolo non assolve), il COSTO
@@ -156,11 +169,14 @@
 #     DIFFERENZA DICHIARATA dalla sonda: la sonda usava un PAVIMENTO di 68
 #     pti (allarga lo stop quando il range e' stretto); l'EA usa un
 #     BUFFER fisso. Sui giorni di range stretto l'EA ha stop piu' corti.
-#     ALTRE DUE DIFFERENZE, non misurate dalla sonda (P2d, r.143-154):
-#     niente filtro VWAP (EA r.1104) e niente cancellazione a meta' gap
-#     (EA r.815). Tutte e due TOLGONO giornate (classe 777): la frequenza
-#     del par. 3 e' un TETTO, e il confronto di segno si scrive "con la
-#     sonda SENZA VWAP e senza cancellazione a meta' gap".
+#     ALTRE DUE DIFFERENZE dalla sonda P2d (r.143-154). La cancellazione
+#     a meta' gap (EA r.815) e' MISURATA dopo il cancello: CE9 (sonda_
+#     dax_short_controesempi.py) n 152 contro 175 (-13% delle POSIZIONI;
+#     ingresso nel 54% dei gap-down invece del 62%), +0,230 R, t +2,47,
+#     7/8 anni, DD massimo 4,8 R. Il filtro VWAP (EA r.1104) NON e'
+#     misurabile fuori (histdata senza volumi) e toglie altre giornate
+#     (classe 777): la frequenza del par. 3 resta un TETTO. Il confronto
+#     di segno si fa con CE9: "con la sonda CE9, SENZA VWAP".
 #  InpEnableBuyGaps=false: SOLO SHORT (il lungo e' stato misurato nella
 #     sonda, CE5, e non ha la stessa informazione sul DAX).
 #     InpMinimumBuyGapPercent e InpBuyRiskPercent restano > 0 perche'
@@ -188,6 +204,30 @@
 #  ASSE UNICO = InpMagicNumber, due gemelle a passo 50 (cancello G1 e un
 #     per-trade per gemella, come R246/R252). Magic 792701/792751:
 #     grepati liberi nel repo il 25/09/2026 (zero occorrenze di 7927xx).
+#
+#  ATTESE INFORMATIVE DALL'AUDIT (controllo-caccia, 25/09). NON sono
+#  cancelli e NON cambiano nessun cancello del par. 6: servono a leggere
+#  i numeri senza illudersi. Riprodotte da me alla cifra
+#  (sonde_esterne/sonda_dax_short_verifica_audit.py):
+#   - la sonda NON e' l'EA: nel 90% delle 175 operazioni di P2d lo stop e'
+#     il PAVIMENTO di 68 pti (stop naturale mediano 37,5 pti). Con la
+#     geometria dell'EA (massimo del range + 15, nessun pavimento,
+#     cancellazione a meta' gap, TWAP al posto della VWAP): n 152,
+#     +0,196 R, t 1,83. >>> Se la geometria dell'EA vale quanto sulla
+#     sonda, l'attesa e' t ~1,8, SOTTO G1.
+#   - fragilita': senza le 3 operazioni migliori t 1,77; senza le 5
+#     migliori t 1,53.
+#   - orologio di histdata: il file e' in ora di New York con l'ora legale
+#     USA; nelle settimane in cui USA e UE cambiano ora in date diverse le
+#     08:00 della sonda sono un'ora PRIMA della cash. 9 operazioni su 175
+#     cadono li'; senza: n 166, +0,190 R, t 2,10. Il "collaudato tre
+#     volte" non copre quelle settimane.
+#   - O2 stimato SULLA SONDA (tutto dentro la cash): nel 69% delle
+#     giornate di P2d (121 su 175) la geometria della 770105 (range 35',
+#     rottura sotto il minimo - 5, limit a minimo + 2, scadenza 120';
+#     approssimata sulle M1) avrebbe un corto lo stesso giorno. Indizio
+#     di "NON ADDITIVO A RISCHIO PIENO"; il numero che decide resta O2 sul
+#     per-trade BCM. 770411 vuole la notte: resta per BCM.
 #
 # =====================================================================
 #  6. CANCELLI, CONGELATI PRIMA DEI NUMERI
@@ -227,11 +267,14 @@
 #      VERIFICARE sul contratto BCM prima della lettura]) >= 68 pti ->
 #      AMMESSO; fra 22,6 (13,3x) e 68 -> FRAGILE, si scrive col numero;
 #      sotto 22,6 -> ESCLUSO PER COSTO.
-#  RISCHIO (fatto accaduto, vale a qualunque n), sulla curva IN FASE:
+#  RISCHIO (fatto accaduto: una VIOLAZIONE vale a qualunque n, il rispetto no, classe 804), sulla curva IN FASE:
 #   R1 DD a saldo chiuso a rischio 1% <= 6,5% (= 6,5 R, il DD massimo di
 #      P2d in OTTO anni di sonda esterna). Se 21 mesi di BCM fanno peggio
 #      di otto anni di storia esterna, il motore su BCM e' un altro ->
 #      BOCCIATO PER RISCHIO.
+#      CE9, il meccanismo piu' vicino all'EA (con meta' gap), fa DD 4,8 R:
+#      il tetto resta 6,5 R (congelato su P2d, il piu' largo). Un DD fra
+#      4,8 e 6,5 R si scrive "oltre il peggio di CE9" accanto a R1.
 #      Contro-esempio di potenza, scritto adesso: con n ~30 e un motore a
 #      moneta (vincita 2R parziale, perdita 1R) il DD tipico e' 4-7 R:
 #      R1 NON separa l'edge dal caso, separa solo il catastrofico. Lo so e
@@ -246,10 +289,11 @@
 #   R2 peggior giornata a saldo chiuso >= -1,10% (un ciclo al giorno).
 #   R3 serie perdente piu' lunga <= 8 (sonda: 5 su 175 posizioni).
 #  MERITO: SOSPESO per aritmetica (n << 150), qualunque esito. La sola
-#   frase ammessa: "indizio CONCORDE / DISCORDE con la sonda" (segno
+#   frase ammessa: "indizio CONCORDE / DISCORDE con la sonda CE9" (segno
 #   dell'EP per posizione in fase), accanto al numero di posizioni.
 #   Attesa dalla sonda per un anno di toro: fra -0,20 e +0,14 R per
-#   posizione (2012, 2013, 2014, 2017). Il crollo di aprile 2025 e' la
+#   posizione con P2d, fra -0,20 e +0,25 R con CE9 (2012, 2013, 2014,
+#   2017). Il crollo di aprile 2025 e' la
 #   sola finestra dove la sonda prevede guadagno netto: si scrive a parte
 #   quanto P/L sta fra 2025.03.31 e 2025.05.09.
 #  SOVRAPPOSIZIONE (regola di rotta: mai due EA sullo stesso segnale/
