@@ -1834,7 +1834,7 @@ void ManageOneTicket(ulong ticket, double bid, double ask)
       //  pin, e si vede in (c). Il mezzo punto assorbe il rumore dei double, i prezzi stanno
       //  sulla griglia di _Point). FreezeLevel NON entra: riguarda lo stop
       //  ESISTENTE vicino al prezzo, non quello nuovo (su FTMO vale 0).
-      //  Atteso: stesse modify accettate, stessi deal, zero rifiuti.
+      //  Atteso: stesse modify accettate, stessi deal, zero rifiuti salvo l'uguaglianza esatta se il server e' stretto, vedi (c).
       //  Referto: report/MODIFY_A_RAFFICA_FTMO_2026-09-25.md
       double stopsDist = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL) * _Point;
       if(type == POSITION_TYPE_BUY)
