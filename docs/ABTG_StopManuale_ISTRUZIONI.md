@@ -71,22 +71,35 @@ comportamento di base è solo lo stop richiesto da Claudio.
 - **Idempotente.** Uno SL già giusto entro 1 punto non viene rispedito. Dopo un
   riavvio del terminale l'EA riparte da zero e rilegge tutto dal server: non ha
   stato che si rompe.
+  ⚠️ **Riavvio = nuovo attacco.** Anche un cambio di timeframe o di input
+  riavvia l'EA: una posizione GIA' oltre la soglia in quel momento viene
+  trattata come "preesistente" (non chiusa, nessuno SL aggiunto) finche' non
+  rientra. Succede solo se lo SL sul server non stava alla soglia (minimo del
+  broker, rifiuto, EA spento mentre il prezzo passava).
 - **Mai uno stop dal lato sbagliato del prezzo.** Ogni SL viene confrontato con
   Bid (per i BUY) o Ask (per i SELL) **prima** di spedirlo. È la lezione della
   modify a raffica del 25/09 (`report/MODIFY_A_RAFFICA_FTMO_2026-09-25.md`):
   lì il trailing chiedeva uno stop sopra il prezzo e il server rispondeva
   "invalid stops" a ogni tick.
-- **Niente raffiche.** Dopo un rifiuto l'EA aspetta `InpBackoffSec` (30 s) e lo
-  scrive nel log **una volta**; lo stesso rifiuto non viene riscritto per 5
-  minuti. In più, al massimo `InpMaxModifyPerMin` (4) modifiche al minuto per
-  posizione. Una chiusura a mercato rifiutata si ritenta dopo 2 s, sempre con
-  il log una volta sola.
+- **Niente raffiche.** Dopo una **modifica** rifiutata l'EA aspetta
+  `InpBackoffSec` (30 s); a ogni rifiuto di fila l'attesa **raddoppia**
+  (30 s, 60 s, 2 min, 4 min, 8 min) fino a un tetto di **15 minuti**, e torna a
+  30 s al primo successo. Una **chiusura a mercato** rifiutata segue due strade:
+  per i rifiuti di prezzo (requote, prezzo cambiato, prezzo fuori) si ritenta
+  dopo 2 s, raddoppiando fino a 60 s; per tutti gli altri (per esempio mercato
+  chiuso) si parte da 60 s e si raddoppia fino a 15 minuti. Anche qui l'attesa
+  si azzera quando la chiusura riesce. Il rifiuto si scrive nel log **una
+  volta**, e lo stesso rifiuto non viene riscritto per 5 minuti. In più, al
+  massimo `InpMaxModifyPerMin` (4) modifiche al minuto per posizione.
 - **Posizioni già sotto quando lo attacchi.** Se attacchi l'EA mentre hai una
   posizione già oltre la soglia (magari la tieni apposta), l'EA **non** la
-  chiude: la segnala nel log e sul grafico. Se il prezzo rientra sopra la soglia
+  chiude e non ci mette nessuno SL: la segnala nel log e sul grafico. Se il prezzo rientra sopra la soglia
   la protegge come le altre. Per chiuderle subito: `InpCloseOnAttach=true`.
 - **Conto reale bloccato.** Sul conto `10105439` l'EA rifiuta di partire. Serve
   la firma di Claudio, e allora si toglie il blocco in `OnInit` e si ricompila.
+- **Solo conti HEDGING.** Su un conto in modo NETTING l'EA rifiuta di partire:
+  in netting la posizione del simbolo è una sola, e una posizione a magic 0 può
+  contenere volume aperto da un EA.
 - **Algo Trading spento = nessuna protezione**, e lo dice: sul grafico compare
   `NON CONSENTITO - NON PROTEGGO NULLA` e il log lo ripete ogni 60 s.
 
@@ -126,7 +139,7 @@ I numeri che il repo ha davvero, misurati il 20/09/2026 sul terminale **FTMO**
 
 Sui simboli **BCM** (`D30EUR`, `U30USD`, `NASUSD`, oro) lo stops level è
 **[NON MISURATO]** nel repo (`report/LE_UNITA_NEI_PRESET_VIVI_2026-09-23.md`
-punto 4). Sul conto manuale `50503635` **non è misurato nemmeno lì**: la prima
+§5 punto 4). Sul conto manuale `50503635` **non è misurato nemmeno lì**: la prima
 riga di log dell'EA all'avvio lo stampa (`AVVIO ... Stops level N punti, freeze
 level M punti, spread ora S punti`), quindi basta attaccarlo per averlo.
 
@@ -137,13 +150,18 @@ level M punti, spread ora S punti`), quindi basta attaccarlo per averlo.
 - **Simboli a 2 decimali** (indici e oro sui conti misurati sopra): con la
   regola automatica **1 pip = 1 punto = 0.01**. "2 pip" = **0.02**, cioè
   **dentro lo spread** (sul DAX FTMO lo spread era 1,43).
+  Vale anche sul manuale BCM: la sonda BCM misura `D30EUR`/`U30USD`/`NASUSD` a
+  `Digits=2`, `Point=0,01` (`report/LE_UNITA_NEI_PRESET_VIVI_2026-09-23.md` §4,
+  tabella dei contro-esempi).
 
 Con N dentro lo spread la regola "chiudi appena va sotto di N" chiuderebbe
 **ogni operazione subito, per il solo spread**: un BUY nasce già sotto di uno
 spread. Per questo c'è **la guardia spread** (`InpSpreadGuard=true`): se N non
 supera lo spread, l'EA **non agisce su quel simbolo** (niente SL, niente
-chiusure), lo scrive nel log con i numeri e lo mostra sul grafico, e ricontrolla
-ogni 60 s. Una volta superata, la guardia non si ricontrolla più in quella
+chiusure) e ricontrolla **a ogni tick**; il log con i numeri si riscrive ogni
+60 s. 🔴 Alla prima volta parte un **Alert** e sul grafico compare la riga
+`!!! N POSIZIONI SENZA STOP`. E se già all'avvio N non supera lo spread del
+grafico, l'avviso (log + Alert) arriva **prima che tu apra**. Una volta superata, la guardia non si ricontrolla più in quella
 sessione: così uno spread che si allarga durante una notizia **non spegne** la
 protezione di una posizione già aperta.
 
@@ -196,7 +214,12 @@ titolo porta `50503635`. Poi, dentro quel terminale:
 1. copiare `ABTG_StopManuale.mq5` in `MQL5\Experts\` di **quel** terminale e
    compilarlo in MetaEditor (0 errori);
 2. copiare `ABTG_StopManuale_2pip.set` in `MQL5\Presets\`;
-3. aprire il grafico del simbolo che si trada a mano e trascinarci l'EA;
+3. aprire un grafico NUOVO del simbolo (File -> Nuovo grafico) e trascinarci
+   l'EA. 🔴 MT5 tiene un solo EA per grafico: se in alto a destra c'è già il
+   nome di un altro EA (per esempio `ABTG_ScalperDirezionale`, pensato per lo
+   stesso conto), trascinandoci sopra `ABTG_StopManuale` quell'EA viene tolto
+   senza nessun errore. Dopo il gesto controllare che l'altro EA sia ancora sul
+   suo grafico;
 4. scheda **Input** → **Carica** → `ABTG_StopManuale_2pip.set` (rileggere §4.2
    se il simbolo è un indice o l'oro);
 5. scheda **Comune**: spuntare **Consenti Algo Trading**; sul terminale il
@@ -205,7 +228,10 @@ titolo porta `50503635`. Poi, dentro quel terminale:
    con stops level, freeze level e spread. Se il numero di conto non è
    `50503635`, **staccarlo subito**: sei sul terminale sbagliato.
 
-**Prova su demo consigliata prima di fidarsi:** aprire a mano 0,01 lotti,
+**Prova su demo consigliata prima di fidarsi:** aprire a mano il lotto minimo
+del simbolo (Specifiche -> Volume minimo; su `D30EUR` BCM è 0,10,
+`backtest_pipeline/risultati_archivio/R114_CORSA_20260827/REFERTO_R114.txt`
+r.78). La taglia resta tua. Poi
 controllare che entro un secondo compaia lo SL a `ingresso - N` (BUY) e la
 riga `SL a ...` nel log.
 
@@ -236,3 +262,5 @@ riga `SL a ...` nel log.
 4. **Su quale conto?** Il preset è pensato per il demo manuale `50503635`. Su
    FTMO le operazioni a mano contano come le altre per il regolamento: decisione
    tua.
+5. **Perimetro:** oggi parte su ogni conto tranne `10105439`. Vuoi che parta
+   SOLO su `50503635`, così allargarlo a FTMO diventa una ricompilazione voluta?

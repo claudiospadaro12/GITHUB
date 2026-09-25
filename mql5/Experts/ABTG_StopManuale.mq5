@@ -38,16 +38,30 @@
 //|                                                                  |
 //|  LEZIONE DI CASA APPLICATA (modify a raffica, 25/09/2026)        |
 //|   Mai ritentare la stessa modifica rifiutata a ogni tick: dopo   |
-//|   un rifiuto si aspetta InpBackoffSec (30 s) e si logga UNA      |
-//|   volta; in piu' tetto di InpMaxModifyPerMin modifiche al minuto |
-//|   per posizione. E mai uno stop dal lato sbagliato del prezzo:   |
-//|   ogni SL viene confrontato col Bid/Ask PRIMA di spedirlo.       |
+//|   un rifiuto si aspetta InpBackoffSec (30 s), poi l'attesa       |
+//|   RADDOPPIA a ogni rifiuto di fila fino a 15 min (si azzera al   |
+//|   primo successo) e si logga UNA volta; in piu' tetto di         |
+//|   InpMaxModifyPerMin modifiche al minuto per posizione. E mai    |
+//|   uno stop dal lato sbagliato del prezzo: ogni SL viene          |
+//|   confrontato col Bid/Ask PRIMA di spedirlo.                     |
+//|   Solo conti HEDGING: in netting l'EA rifiuta di partire.        |
 //|                                                                  |
 //|  Scritto il 25/09/2026. NON COMPILATO in questo ambiente (niente |
 //|  MetaEditor): va compilato e provato su DEMO prima di tutto.     |
+//|                                                                  |
+//|  1.01 (25/09/2026) - correzioni del cancello:                    |
+//|   D1 back-off con raddoppio (modify: 30 s -> 15 min; chiusura:   |
+//|      2 s -> 60 s per rifiuti di prezzo, 60 s -> 15 min per gli   |
+//|      altri, es. mercato chiuso), azzerato al successo.           |
+//|   D2 pendente con SL gia' piu' stretto del minimo del broker:    |
+//|      non lo allarga piu' (prima lo portava al minimo).           |
+//|   D3 guardia spread: ricontrolla a ogni tick (log ogni 60 s),    |
+//|      Alert alla prima volta, riga "!!! N POSIZIONI SENZA STOP"   |
+//|      sul grafico, avviso in OnInit se N non supera lo spread.    |
+//|   D4 solo conti HEDGING: in netting l'EA non parte.              |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.00"
+#property version   "1.01"
 #property description "Guardia dello stop per le operazioni MANUALI. NON apre mai operazioni."
 #property description "SL sul server a ingresso -/+ N, stop virtuale di riserva, log [STOPMANUALE]."
 
@@ -61,7 +75,8 @@
 #define SM_TIMER_MS          250           // scansione anche senza tick (serve per ALL_SYMBOLS)
 #define SM_BACKOFF_CLOSE_MS  2000          // attesa dopo una chiusura a mercato rifiutata
 #define SM_LOG_RIPETI_MS     300000        // stesso rifiuto: si riscrive nel log al massimo ogni 5 min
-#define SM_GUARDIA_RIPROVA_MS 60000        // simbolo bloccato dalla guardia spread: si ricontrolla ogni 60 s
+#define SM_GUARDIA_RIPROVA_MS 60000        // simbolo bloccato dalla guardia spread: si riscrive nel log ogni 60 s
+#define SM_BACKOFF_MAX_S     900           // tetto del back-off con raddoppio: 15 minuti
 
 //==================================================================
 // ENUM
@@ -126,6 +141,8 @@ struct SMStato
    uint              lastRet;      // ultimo retcode scritto nel log
    ulong             lastLogMs;    // ora dell'ultimo log di rifiuto
    ulong             lastInfoMs;   // ora dell'ultimo log informativo (anti-ripetizione)
+   int               modFails;     // modifiche rifiutate di fila (back-off con raddoppio)
+   int               closeFails;   // chiusure a mercato rifiutate di fila (back-off con raddoppio)
   };
 
 CTrade   g_trade;
@@ -331,6 +348,8 @@ int StIdx(const ulong ticket)
    g_st[n].lastRet     = 0;
    g_st[n].lastLogMs   = 0;
    g_st[n].lastInfoMs  = 0;
+   g_st[n].modFails    = 0;
+   g_st[n].closeFails  = 0;
    return n;
   }
 
@@ -392,17 +411,30 @@ bool CanModify(const ulong ticket)
    return true;
   }
 
+// Back-off con raddoppio: baseMs al primo rifiuto, poi x2 a ogni rifiuto
+// di fila, mai oltre maxMs. Un rifiuto che non cambia (mercato chiuso,
+// stop invalido) non deve generare una richiesta ogni 30 s per ore.
+ulong BackoffMs(const ulong baseMs, const int fails, const ulong maxMs)
+  {
+   ulong w = baseMs;
+   for(int k = 1; k < fails && w < maxMs; k++)
+      w *= 2;
+   return (w > maxMs ? maxMs : w);
+  }
+
 void NoteModifyFailure(const ulong ticket, const uint rc, const string cosa)
   {
    int   i   = StIdx(ticket);
    ulong now = GetTickCount64();
-   g_st[i].nextModMs = now + (ulong)InpBackoffSec * 1000;
+   g_st[i].modFails++;
+   ulong w = BackoffMs((ulong)InpBackoffSec * 1000, g_st[i].modFails, (ulong)SM_BACKOFF_MAX_S * 1000);
+   g_st[i].nextModMs = now + w;
    if(rc != g_st[i].lastRet || g_st[i].lastLogMs == 0 || now - g_st[i].lastLogMs >= SM_LOG_RIPETI_MS)
      {
       g_st[i].lastRet   = rc;
       g_st[i].lastLogMs = now;
-      Log(StringFormat("RIFIUTATA %s ticket %I64u: retcode %u (%s). Riprovo fra %d s, non a ogni tick.",
-                       cosa, ticket, rc, g_trade.ResultRetcodeDescription(), InpBackoffSec));
+      Log(StringFormat("RIFIUTATA %s ticket %I64u: retcode %u (%s). Rifiuto n.%d di fila: riprovo fra %I64u s.",
+                       cosa, ticket, rc, g_trade.ResultRetcodeDescription(), g_st[i].modFails, w / 1000));
      }
   }
 
@@ -412,7 +444,8 @@ void NoteModifyFailure(const ulong ticket, const uint rc, const string cosa)
 // Se N <= spread la regola "chiudi appena va sotto di N" chiude OGNI
 // operazione subito, per il solo spread: e' quasi sempre un'unita'
 // sbagliata (es. 2 pip = 0.02 sul DAX a 2 decimali). Il simbolo resta
-// fermo (nessuno SL, nessuna chiusura) e si ricontrolla ogni 60 s.
+// fermo (nessuno SL, nessuna chiusura) e si ricontrolla a ogni tick; il
+// log si riscrive ogni 60 s, e alla prima volta parte un Alert (1.01).
 // Una volta passato, non si ricontrolla piu' in questa sessione: cosi'
 // un allargamento dello spread durante una notizia NON spegne la
 // protezione di una posizione gia' aperta.
@@ -434,8 +467,6 @@ bool GuardOk(const string sym, const double D, const MqlTick &tk)
      {
       if(g_guardOk[k])
          return true;
-      if(now < g_guardNextMs[k])
-         return false;
      }
    else
      {
@@ -457,13 +488,19 @@ bool GuardOk(const string sym, const double D, const MqlTick &tk)
       g_guardOk[k] = true;
       return true;
      }
-   g_guardOk[k]     = false;
-   g_guardNextMs[k] = now + SM_GUARDIA_RIPROVA_MS;
-   Log(StringFormat("GUARDIA SPREAD: su %s N = %s (%.0f punti) NON supera lo spread %s (%.0f punti). "
-                    "La regola chiuderebbe ogni operazione per il solo spread: NON agisco su %s. "
-                    "Controlla InpUnit / InpPipPoints (1 pip qui = %d punti). Ricontrollo fra 60 s.",
-                    sym, Px(sym, D), (pt > 0 ? D / pt : 0.0), Px(sym, spread), (pt > 0 ? spread / pt : 0.0),
-                    sym, PipPoints(sym)));
+   g_guardOk[k] = false;
+   if(now >= g_guardNextMs[k])
+     {
+      bool primo = (g_guardNextMs[k] == 0);
+      g_guardNextMs[k] = now + SM_GUARDIA_RIPROVA_MS;
+      Log(StringFormat("GUARDIA SPREAD: su %s N = %s (%.0f punti) NON supera lo spread %s (%.0f punti). "
+                       "La regola chiuderebbe ogni operazione per il solo spread: NON agisco su %s. "
+                       "Controlla InpUnit / InpPipPoints (1 pip qui = %d punti). Ricontrollo a ogni tick, riscrivo fra 60 s.",
+                       sym, Px(sym, D), (pt > 0 ? D / pt : 0.0), Px(sym, spread), (pt > 0 ? spread / pt : 0.0),
+                       sym, PipPoints(sym)));
+      if(primo)
+         Alert(SM_PREFISSO + "GUARDIA SPREAD su " + sym + ": la posizione NON ha stop (N dentro lo spread). Vedi Esperti.");
+     }
    return false;
   }
 
@@ -546,6 +583,7 @@ void SoftClose(const ulong ticket, const string sym, const bool isBuy,
    uint rc = g_trade.ResultRetcode();
    if(ok && (rc == TRADE_RETCODE_DONE || rc == TRADE_RETCODE_DONE_PARTIAL || rc == TRADE_RETCODE_PLACED))
      {
+      g_st[i].closeFails = 0;
       Azione(StringFormat("STOP VIRTUALE: chiusa a mercato %s ticket %I64u %s ingresso %s, soglia %s, prezzo %s (retcode %u)",
                           sym, ticket, (isBuy ? "BUY" : "SELL"), Px(sym, entry), Px(sym, thr), Px(sym, px), rc));
       return;
@@ -555,13 +593,19 @@ void SoftClose(const ulong ticket, const string sym, const bool isBuy,
       LogV(StringFormat("ticket %I64u gia' chiuso dal server (SL scattato prima di me).", ticket));
       return;
      }
-   g_st[i].nextCloseMs = now + SM_BACKOFF_CLOSE_MS;
+   // Back-off con raddoppio: i rifiuti di PREZZO sono transitori (2 s -> 60 s),
+   // gli altri (es. mercato chiuso) no: 60 s -> 15 min, niente raffica per ore.
+   g_st[i].closeFails++;
+   bool transitorio = (rc == TRADE_RETCODE_REQUOTE || rc == TRADE_RETCODE_PRICE_CHANGED || rc == TRADE_RETCODE_PRICE_OFF);
+   ulong w = transitorio ? BackoffMs(SM_BACKOFF_CLOSE_MS, g_st[i].closeFails, 60000)
+                         : BackoffMs(60000, g_st[i].closeFails, (ulong)SM_BACKOFF_MAX_S * 1000);
+   g_st[i].nextCloseMs = now + w;
    if(rc != g_st[i].lastRet || g_st[i].lastLogMs == 0 || now - g_st[i].lastLogMs >= SM_LOG_RIPETI_MS)
      {
       g_st[i].lastRet   = rc;
       g_st[i].lastLogMs = now;
-      Log(StringFormat("RIFIUTATA chiusura a mercato ticket %I64u %s: retcode %u (%s). Riprovo fra %d s.",
-                       ticket, sym, rc, g_trade.ResultRetcodeDescription(), SM_BACKOFF_CLOSE_MS / 1000));
+      Log(StringFormat("RIFIUTATA chiusura a mercato ticket %I64u %s: retcode %u (%s). Riprovo fra %I64u s.",
+                       ticket, sym, rc, g_trade.ResultRetcodeDescription(), w / 1000));
      }
   }
 
@@ -744,11 +788,13 @@ void ManagePosition(const ulong ticket)
    uint rc = g_trade.ResultRetcode();
    if(ok && rc == TRADE_RETCODE_DONE)
      {
+      g_st[StIdx(ticket)].modFails = 0;
       Azione(StringFormat("%s ticket %I64u %s: %s", sym, ticket, (isBuy ? "BUY" : "SELL"), motivo));
       return;
      }
    if(rc == TRADE_RETCODE_NO_CHANGES)
      {
+      g_st[StIdx(ticket)].modFails = 0;
       LogV(StringFormat("ticket %I64u: il server dice 'nessuna modifica' (gia' a posto).", ticket));
       return;
      }
@@ -831,13 +877,18 @@ void ManagePending(const ulong ticket)
          newSL  = thr;
          motivo = StringFormat("SL a %s sul pendente (prezzo ordine %s)", Px(sym, thr), Px(sym, entry));
         }
-      else
+      else if(sl <= 0.0 || (isBuy ? (limSL > sl + pt * 0.5) : (limSL < sl - pt * 0.5)))
         {
+         // Nessuno SL, oppure SL piu' largo del minimo del broker: lo porto al
+         // minimo consentito. Se lo SL attuale e' gia' piu' stretto del minimo,
+         // si va al ramo sotto e NON lo si allarga.
          newSL  = limSL;
-         motivo = StringFormat("SL ALLARGATO al minimo consentito sul pendente: richiesto %s, messo %s "
-                               "(stops level %d punti, freeze level %d punti)",
-                               Px(sym, thr), Px(sym, limSL), stpLv, frzLv);
+         motivo = StringFormat("SL %s al minimo consentito sul pendente: richiesto %s, messo %s (stops level %d punti, freeze level %d punti)",
+                               (sl <= 0.0 ? "ALLARGATO" : "STRETTO"), Px(sym, thr), Px(sym, limSL), stpLv, frzLv);
         }
+      else
+         InfoOnce(ticket, StringFormat("pendente %I64u %s: SL attuale %s gia' piu' stretto del minimo del broker %s. Non lo allargo.",
+                                       ticket, sym, Px(sym, sl), Px(sym, limSL)));
      }
 
    if(InpTakePips > 0.0 && tp <= 0.0)
@@ -874,11 +925,15 @@ void ManagePending(const ulong ticket)
    uint rc = g_trade.ResultRetcode();
    if(ok && rc == TRADE_RETCODE_DONE)
      {
+      g_st[StIdx(ticket)].modFails = 0;
       Azione(StringFormat("%s pendente %I64u: %s", sym, ticket, motivo));
       return;
      }
    if(rc == TRADE_RETCODE_NO_CHANGES)
+     {
+      g_st[StIdx(ticket)].modFails = 0;
       return;
+     }
    NoteModifyFailure(ticket, rc, StringFormat("modifica pendente (%s)", motivo));
   }
 
@@ -956,6 +1011,8 @@ void UpdateComment()
                      (InpAlsoPendings ? "SI" : "off"));
    s += StringFormat("Posizioni sorvegliate: %d | pendenti: %d | bloccate dalla guardia spread: %d | preesistenti oltre soglia: %d\n",
                      g_nPos, g_nPend, g_nBloccate, g_nPreesist);
+   if(g_nBloccate > 0)
+      s += StringFormat("!!! %d POSIZIONI SENZA STOP: N dentro lo spread (guardia spread). Controlla InpUnit / InpPipPoints !!!\n", g_nBloccate);
    s += "Trading algoritmico: " + (g_tradeOk ? "OK" : "NON CONSENTITO - NON PROTEGGO NULLA") + "\n";
    s += "Ultima azione: " + g_ultima;
    Comment(s);
@@ -970,6 +1027,13 @@ int OnInit()
    if(login == SM_CONTO_REALE)
      {
       Log(StringFormat("CONTO REALE %I64d: l'EA NON PARTE. Serve la firma di Claudio (e allora si toglie il blocco in OnInit).", login));
+      return INIT_FAILED;
+     }
+   // Solo HEDGING: in netting la posizione del simbolo e' una sola, e una
+   // posizione a magic 0 puo' contenere volume aperto da un EA.
+   if(AccountInfoInteger(ACCOUNT_MARGIN_MODE) != ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)
+     {
+      Log("Conto NON in modo HEDGING: in netting una posizione a magic 0 puo' contenere volume di un EA. L'EA non parte.");
       return INIT_FAILED;
      }
    if(InpStopPips <= 0.0)
@@ -1020,6 +1084,17 @@ int OnInit()
                     (int)SymbolInfoInteger(_Symbol, SYMBOL_SPREAD),
                     (InpSymbolScope == SM_CHART_ONLY ? "CHART_ONLY" : "ALL_SYMBOLS"),
                     (InpOnlyManual ? "solo magic 0" : "tutte le magic non in lista")));
+
+   // Avviso PRIMA che Claudio apra: se N non supera gia' lo spread del grafico,
+   // le posizioni a mano su questo simbolo resterebbero senza stop.
+   MqlTick tk0;
+   if(InpSpreadGuard && D > 0.0 && SymbolInfoTick(_Symbol, tk0) && tk0.ask > tk0.bid && D <= tk0.ask - tk0.bid)
+     {
+      string w = StringFormat("ATTENZIONE: su %s N = %s NON supera lo spread attuale %s. Le posizioni a mano su %s resterebbero SENZA STOP (guardia spread). Controlla InpUnit / InpPipPoints PRIMA di aprire.",
+                              _Symbol, Px(_Symbol, D), Px(_Symbol, tk0.ask - tk0.bid), _Symbol);
+      Log(w);
+      Alert(SM_PREFISSO + w);
+     }
 
    InitPreesistenti();
    EventSetMillisecondTimer(SM_TIMER_MS);
