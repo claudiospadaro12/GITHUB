@@ -200,6 +200,60 @@ def boot_diff(pos, rep=REP, seme=SEME):
             'p_le0': sum(1 for x in out if x <= 0) / float(len(out)), 'valide': len(out)}
 
 
+def blocchi(pos):
+    """blocchi = (mese di chiusura, stagione): un mese a cavallo del cambio
+    d'ora (marzo, novembre) da' due blocchi, uno per stagione."""
+    b = collections.OrderedDict()
+    for p in pos:
+        b.setdefault((p['mese'], p['inv']), []).append(p['net'])
+    return b
+
+
+def boot_blocchi(pos, rep=REP, seme=SEME):
+    """blocchi mese x stagione ricampionati DENTRO la stagione (stessi numeri
+    di blocchi), statistica PF_I - PF_E. Tiene insieme le posizioni di uno
+    stesso mese (dipendenza di regime dentro il mese)."""
+    bb = blocchi(pos)
+    E = [v for (m, i), v in bb.items() if not i]
+    I = [v for (m, i), v in bb.items() if i]
+    rnd = random.Random(seme)
+    out = []
+    for _ in range(rep):
+        e = [x for _k in E for x in E[rnd.randrange(len(E))]]
+        i = [x for _k in I for x in I[rnd.randrange(len(I))]]
+        a, b = pf(i), pf(e)
+        if math.isfinite(a) and math.isfinite(b):
+            out.append(a - b)
+    out.sort()
+    q = lambda x: rv.quantile(out, x)  # noqa: E731
+    return {'q025': q(0.025), 'q05': q(0.05), 'q50': q(0.5), 'q95': q(0.95), 'q975': q(0.975),
+            'p_le0': sum(1 for x in out if x <= 0) / float(len(out)), 'valide': len(out),
+            'nE': len(E), 'nI': len(I)}
+
+
+def perm_blocchi(pos, rep=REP, seme=SEME):
+    """etichette di stagione permutate fra i BLOCCHI (stesso numero di
+    blocchi d'inverno). p = P(diff_perm >= diff_oss)."""
+    bb = list(blocchi(pos).items())
+    vals = [v for _k, v in bb]
+    lab = [k[1] for k, _v in bb]
+    f = lambda L: (pf([x for v, l in zip(vals, L) if l for x in v])  # noqa: E731
+                   - pf([x for v, l in zip(vals, L) if not l for x in v]))
+    oss = f(lab)
+    rnd = random.Random(seme)
+    ge = 0
+    for _ in range(rep):
+        rnd.shuffle(lab)
+        if f(lab) >= oss:
+            ge += 1
+    return oss, (ge + 1) / float(rep + 1)
+
+
+def max_pos_giorno(pos):
+    c = collections.Counter((p['tranche'], p['giorno']) for p in pos)
+    return max(c.values()) if c else 0
+
+
 def perm_p(pos, rep=REP, seme=SEME):
     nets = [p['net'] for p in pos]
     lab = [p['inv'] for p in pos]
@@ -367,6 +421,16 @@ def sezione_stat(nome, pos):
     return b, oss, p
 
 
+def sezione_blocchi(nome, pos):
+    b = boot_blocchi(pos)
+    oss, p = perm_blocchi(pos)
+    print('  %s [BLOCCHI mese x stagione: %d d\'estate, %d d\'inverno; max posizioni/giorno %d]: diff %.3f | '
+          'bootstrap (seme %d, %d rep, %d valide) p2,5 %.3f p5 %.3f p95 %.3f p97,5 %.3f | P(diff<=0) %.4f | '
+          'permutazione fra blocchi p %.4f'
+          % (nome, b['nE'], b['nI'], max_pos_giorno(pos), oss, SEME, REP, b['valide'], b['q025'], b['q05'],
+             b['q95'], b['q975'], b['p_le0'], p))
+
+
 def sezione_jk(nome, pos):
     jk = jackknife_mesi(pos)
     dmin = min(jk, key=lambda x: x[3])
@@ -408,8 +472,11 @@ def sezione_lati(nome, pos):
 def stampa_sovrapp():
     print('\n=== SOVRAPPOSIZIONE R245 x 770202 PER STAGIONE (finestra 2024.09.27 -> 2026.06.29, '
           'giorni per data di chiusura, nullo %d permutazioni seme %d) ===' % (rs.N_PERM, rs.SEME_PERM))
-    for nome, st in (('ANNO', None), ('ESTATE', False), ('INVERNO', True)):
-        m = sovrapp(st)
+    casi = [('A', None, ('2024.09.27', '2025.06.09')), ('B=R247', None, ('2025.06.10', '2026.06.29')),
+            ('ANNO', None, ('2024.09.27', '2026.06.29')), ('ESTATE', False, ('2024.09.27', '2026.06.29')),
+            ('INVERNO', True, ('2024.09.27', '2026.06.29'))]
+    for nome, st, com in casi:
+        m = sovrapp(st, comune=com)
         print('  %-7s giorni viva %3d nuova %3d C %3d | quota viva %.3f | stesso verso %d opposto %d | '
               'rho_U %.3f rho_C %.3f | P(perde|viva perde) %.3f (q95 %.3f) | DD somma/(DDv+DDn) %.3f '
               '(q95 %.3f) | peggior giornata somma %.3f%% rapp %.3f (q95 %.3f) | %s | allarme di coda: %s'
@@ -420,20 +487,35 @@ def stampa_sovrapp():
           'qui si applicano a finestre diverse e NON fanno verdetto)')
 
 
+def offset_ftmo(ipotesi, giorno):
+    """offset UTC del server FTMO. Oggi UTC+3 (MISURATO 20/09). Dal cambio:
+    'UE'  -> UTC+2 dal 25/10/2026 (calendario europeo);
+    'USA' -> UTC+2 dal 01/11/2026 (calendario americano);
+    'FISSO' -> UTC+3 tutto l'anno. Quale valga e' [NON MISURATO]."""
+    if ipotesi == 'FISSO':
+        return 3
+    if ipotesi == 'UE':
+        return 2 if dt.date(2026, 10, 25) <= giorno < dt.date(2027, 3, 28) else 3
+    if ipotesi == 'USA':
+        return 2 if dt.date(2026, 11, 1) <= giorno < dt.date(2027, 3, 14) else 3
+    raise ValueError(ipotesi)
+
+
 def stampa_ftmo():
-    print('\n=== ORA DI NEW YORK DELL\'ARMO (InpSessionHour:Min) ===')
-    casi = [('BCM 14:30, UTC+1 fisso', 14, 30, 1), ('FTMO 16:30 se server UTC+3', 16, 30, 3),
-            ('FTMO 16:30 se server UTC+2', 16, 30, 2)]
-    print('  (FTMO UTC+3 e\' MISURATO il 20/09; quale offset valga dal 25/10 e\' [NON MISURATO]:')
-    print('   UTC+2 = calendario UE (2 fonti su 3), UTC+3 fisso = REGOLAMENTI_PROP r.106)')
-    giorni = [('estate 15/07/2026', dt.date(2026, 7, 15)), ('27/10/2026 (UE solare, USA legale)', dt.date(2026, 10, 27)),
+    print('\n=== ORA DI NEW YORK DELL\'ARMO (BCM 14:30 UTC+1 fisso; FTMO 16:30 in tre ipotesi) ===')
+    print('  (FTMO UTC+3 e\' MISURATO il 20/09; quale ipotesi valga dal 25/10 e\' [NON MISURATO].')
+    print('   BCM UTC+1 fisso anche nell\'inverno 2026/27 e\' [INFERITO]: misurato fino a giugno 2026)')
+    giorni = [('estate 15/07/2026', dt.date(2026, 7, 15)), ('27/10/2026', dt.date(2026, 10, 27)),
               ('inverno 15/01/2027', dt.date(2027, 1, 15))]
-    for nome, h, m, off in casi:
+    righe = [('BCM 14:30 (UTC+1 fisso)', 14, 30, lambda g: 1)]
+    for ip in ('UE', 'USA', 'FISSO'):
+        righe.append(('FTMO 16:30 ipotesi %s' % ip, 16, 30, (lambda i: lambda g: offset_ftmo(i, g))(ip)))
+    for nome, h, m, off in righe:
         cel = []
         for gn, g in giorni:
-            hh, mm = ora_ny(h, m, off, g)
-            cel.append('%s -> %02d:%02d NY' % (gn, hh, mm))
-        print('  %-40s %s' % (nome, ' | '.join(cel)))
+            hh, mm = ora_ny(h, m, off(g), g)
+            cel.append('%s -> %02d:%02d NY (UTC+%d)' % (gn, hh, mm, off(g)))
+        print('  %-26s %s' % (nome, ' | '.join(cel)))
 
 
 def main():
@@ -452,6 +534,9 @@ def main():
         if nome in SEDIE:
             for lab in sorted(set(p['tranche'] for p in pos)):
                 sezione_stat('   %s solo %s' % (nome, lab), [p for p in pos if p['tranche'] == lab])
+    print('\n=== LA STESSA DIFFERENZA A BLOCCHI DI MESE (grezzo: pochi blocchi d\'inverno) ===')
+    for nome in SEDIE:
+        sezione_blocchi(nome, tutte[nome][0])
     print('\n=== JACKKNIFE PER MESE (e concentrazione) ===')
     for nome in list(SEDIE) + list(CONTRO):
         sezione_jk(nome, tutte[nome][0])
@@ -493,7 +578,7 @@ def autotest():
             # vincite +pfx, perdite -1, 50/50: PF atteso = pfx
             for k in range(n):
                 v = pfx if k % 2 == 0 else -1.0
-                out.append({'net': v * (1 + 0.1 * rnd.random()), 'inv': flag, 'mese': '2025-%02d' % (1 + k % 12),
+                out.append({'net': v * (1 + 0.1 * rnd.random()), 'inv': flag, 'mese': '2025-%02d' % (1 + (k // 2) % 12),
                             'ret': v / 1000.0})
         return out
     # T3 nullo: stesso PF nelle due stagioni -> la banda deve contenere 0
@@ -521,6 +606,20 @@ def autotest():
     chk('T8 FTMO 16:30: UTC+3 luglio 9:30, UTC+2 gennaio 9:30, UTC+3 gennaio 8:30, UTC+2 27/10 10:30',
         ora_ny(16, 30, 3, dt.date(2026, 7, 15)) == (9, 30) and ora_ny(16, 30, 2, dt.date(2027, 1, 15)) == (9, 30)
         and ora_ny(16, 30, 3, dt.date(2027, 1, 15)) == (8, 30) and ora_ny(16, 30, 2, dt.date(2026, 10, 27)) == (10, 30))
+    # T8b le tre ipotesi FTMO: 27/10 UE 10:30, USA 9:30, FISSO 9:30; gennaio UE 9:30, USA 9:30, FISSO 8:30
+    g1, g2 = dt.date(2026, 10, 27), dt.date(2027, 1, 15)
+    f = lambda ip, g: ora_ny(16, 30, offset_ftmo(ip, g), g)  # noqa: E731
+    chk('T8b FTMO tre ipotesi: 27/10 UE 10:30 USA 9:30 FISSO 9:30; gennaio 9:30 9:30 8:30',
+        f('UE', g1) == (10, 30) and f('USA', g1) == (9, 30) and f('FISSO', g1) == (9, 30)
+        and f('UE', g2) == (9, 30) and f('USA', g2) == (9, 30) and f('FISSO', g2) == (8, 30))
+    # T8c blocchi: nullo -> IC contiene 0; differenza piantata -> esclude 0; un mese a cavallo = 2 blocchi
+    s0 = sint(1.2, 1.2, 120, 77, 7)
+    s1 = sint(0.95, 2.1, 120, 77, 8)
+    b0, b1 = boot_blocchi(s0, rep=2000), boot_blocchi(s1, rep=2000)
+    chk('T8c blocchi: nullo IC [%.2f ; %.2f] contiene 0, piantata IC [%.2f ; %.2f] esclude 0'
+        % (b0['q025'], b0['q975'], b1['q025'], b1['q975']), b0['q025'] < 0 < b0['q975'] and b1['q025'] > 0)
+    chk('T8d mese a cavallo del cambio d\'ora = due blocchi',
+        len(blocchi([{'mese': '2025-11', 'inv': False, 'net': 1.0}, {'mese': '2025-11', 'inv': True, 'net': 1.0}])) == 2)
     # T9 DD composto su serie nota: +10%, -20% -> 20%
     chk('T9 dd_composto([0,1 ; -0,2]) = 20%', abs(dd_composto([0.1, -0.2]) - 20.0) < 1e-9)
     # T10 i controlli d'ingresso devono essere VERDI sui file veri e ROSSI su un'ancora falsa

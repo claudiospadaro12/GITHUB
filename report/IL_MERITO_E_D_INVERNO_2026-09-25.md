@@ -2,7 +2,7 @@
 
 **25/09/2026** · branch `lavoro` · **SOLA LETTURA**: nessun backtest, nessun EA, preset o parametro toccato, nessuna riga
 mandata al VPS o al PC di backtest, nessun terminale aperto. Taglie e rischio: di Claudio, **non toccati e non proposti**.
-Script riproducibile: **`python3 backtest_pipeline/merito_inverno.py`** (~23 s) · autotest **`--autotest`** (10/10 OK).
+Script riproducibile: **`python3 backtest_pipeline/merito_inverno.py`** (~23 s) · autotest **`--autotest`** (13/13 OK).
 
 Etichette: **[MISURATO]** = contato dai per-trade del repo · **[DERIVATO]** = calcolato da numeri misurati con una convenzione
 dichiarata · **[INFERITO]** = ragionamento, non misura · **[NON MISURATO]** = buco dichiarato.
@@ -13,32 +13,42 @@ dichiarata · **[INFERITO]** = ragionamento, non misura · **[NON MISURATO]** = 
 
 1. ❄️ **R245 (candidato #1)**: il merito di contratto è **tutto invernale**, e il disegno **regge**. Sui due anni: estate PF
    **0,982 su 199** posizioni, inverno **1,800 su 152**; **102%** del netto viene dall'inverno. Bootstrap della differenza
-   (+0,818): intervallo 95% **[+0,12 ; +1,69]**, permutazione **p = 0,018**. Il jackknife per mese **non la inverte mai**
-   (0 mesi su 22). Anche **senza i 3 mesi d'inverno migliori** l'inverno resta a PF **1,421 su 99**. **[MISURATO]**
+   (+0,818): intervallo 95% **[+0,12 ; +1,69]**, permutazione **p = 0,018** (a blocchi di mese [+0,25 ; +1,32], p 0,010).
+   ⚠️ Ma l'ipotesi è **nata sull'OOS** (R248a §7: p OOS 0,027 è la stessa osservazione che l'ha suggerita). **La replica
+   vera è solo l'IS**: +0,420, IC95 **[−0,54 ; +1,64]**, p **0,206**, cioè stesso segno ma **non distinguibile dal rumore**.
+   Il jackknife per mese **non la inverte mai** (0 mesi su 22). Anche **senza i 3 mesi d'inverno migliori** l'inverno resta a PF **1,421 su 99**. **[MISURATO]**
 2. 🟠 **`770202` (sedia viva)**: stesso segno ma **più debole e più concentrato**. Estate **0,886 su 84**, inverno **1,493 su 68**.
    L'intervallo 95% della differenza è **[−0,42 ; +1,86]** e **contiene lo zero** (p = 0,15). Nel primo anno la differenza
    **non c'è** (A: 1,203 contro 1,231). **Togliendo 2 mesi d'inverno** (nov-2025 e gen-2025) l'inverno scende a **1,004**. **[MISURATO]**
-3. 🧪 **Il contro-esempio non trova un "inverno buono per tutti"**, anzi il contrario. Quattro motori **senza orario** sullo
-   stesso U30USD vanno **peggio** d'inverno: EMA200 H1 (`771521`) **2,053 → 0,868**, con intervallo **tutto sotto zero**.
-   Stesso verso per AtrExhaust long e short (R109, due inverni) e per SuperWave H2. 👉 **La spaccatura non è la stagione
-   "generica" del Dow.** Però il contro-esempio ha **poco potere** sulla stagione *intraday dell'apertura* (§3.3). Resta
-   in piedi R246, che sul Dow dice **STAGIONE**, ma **sospeso, fragile e a n<150**. **Causa: NON DIMOSTRATA.**
+3. 🧪 **Il contro-esempio non trova un "inverno buono per la tendenza"**, anzi il contrario, ma vale su **due motori di
+   tendenza e UN solo inverno** (2025/26). Sullo stesso U30USD, EMA200 H1 (`771521`, n 169/88) fa **2,053 → 0,868** con
+   intervallo **tutto sotto zero**; SuperWave H2 (`770521`, n 22/28) va nello stesso verso, su un campione minuscolo.
+   AtrExhaust (R109) è un fade e **non discrimina** (§2.5). 👉 **La spaccatura non è "d'inverno il Dow tira" su scala H1/H2.**
+   Il contro-esempio ha però **poco potere** sulla stagione *intraday dell'apertura* (§2.5). Resta in piedi R246, che sul
+   Dow dice **STAGIONE**, ma **sospeso, fragile e a n<150**. **Causa: NON DIMOSTRATA.**
 4. 🔎 **Un indizio nuovo sul meccanismo di R245**: d'inverno **metà** delle posizioni (**76 su 152**) si chiude **prima delle
-   15:30 BCM**, cioè **tutta nel pre-mercato** (8:30-9:30 NY). Quella metà fa PF **1,804**, uguale all'altra (1,797). Il merito
-   invernale di R245 **non ha bisogno dell'apertura cash**. **[MISURATO]** sull'ora di chiusura. **[INFERITO]**: il range delle
-   14:30-14:45 BCM d'inverno cade **sui dati USA delle 8:30 ET**.
+   15:30 BCM**, cioè **tutta nel pre-mercato** (8:30-9:30 NY). Quella metà fa PF **1,804**, come l'altra (1,797), e porta il
+   **40% del netto invernale** (+1.697,80 su +4.240,40). **Per l'altro 60%** (chiuse dalle 15:30, +2.542,60) **il ruolo della
+   cash non è misurato**. **[MISURATO]** sull'ora di chiusura. **[INFERITO]**: il range delle 14:30-14:45 BCM d'inverno cade
+   **sui dati USA delle 8:30 ET**.
 5. 🔗 **Sovrapposizione per stagione**: d'estate le due sedie si muovono **più insieme** (ρ_C **0,54**), d'inverno meno
    (ρ_C **0,18**). Ma entrano insieme nell'**89-96%** dei giorni della viva **in tutte e due** le stagioni.
    🔴 **E c'è un numero nuovo**: sulla finestra A (l'IS col crollo di aprile, che R247 non vedeva) R245 perde in **12 dei 17**
-   giorni in cui perde la viva (0,706 contro q95 0,529). **L'allarme di coda di R247 lì SCATTA.** È descrittivo e poggia su
-   17 giorni. **[MISURATO]**
-6. 🕰️ **FTMO (oggi server UTC+3, MISURATO il 20/09)**: `770202` arma alle 16:30 FTMO = **9:30 NY**, la cella **allineata**,
-   quella che in backtest **perde** (0,886 su 84). **Dal 02/11** dipende da un numero **[NON MISURATO]**:
-   - server **UTC+2** (calendario UE, 2 fonti su 3): **9:30 NY**, di nuovo la cella allineata;
-   - server **fisso a UTC+3**: **8:30 NY**, la cella sfasata che guadagna.
-   Nella settimana 26-30/10, con UTC+2, arma alle **10:30 NY**: una cella **mai misurata**. **[DERIVATO]** dalle regole di calendario.
+   giorni in cui perde la viva (0,706 contro q95 0,529). **L'allarme di coda di R247 lì scatterebbe**: è una lettura
+   **descrittiva, non giudicata**, su 17 giorni. E d'inverno la ρ più bassa **non** dà un DD più diversificato (DD somma
+   0,971 contro q95 0,908). **[MISURATO]**
+6. 🕰️ **FTMO (oggi server UTC+3, MISURATO il 20/09)**: `770202` arma alle 16:30 FTMO = **9:30 NY**, cioè la cella
+   allineata **d'estate**, che in backtest **perde** (0,886 su 84, misurato **solo d'estate**). **Dal 25/10** dipende da un
+   numero **[NON MISURATO]**, e le ipotesi sono **tre** (`IL_CONFINE_DEL_GIORNO` r.154, `PRESET_FTMO_OROLOGIO` §8):
+   - **UTC+2 col calendario UE** dal 25/10: **10:30 NY** nella settimana 26-30/10 (cella **mai misurata**), poi **9:30 NY**;
+   - **UTC+2 col calendario USA** dal 01/11: **9:30 NY** sempre;
+   - **UTC+3 fisso**: 9:30 NY fino al 30/10, **8:30 NY** dal 02/11 (la cella sfasata, **come il backtest**).
+   🔴 **9:30 NY d'inverno è una cella MAI MISURATA**, non "la cella che perde": il suo PF è **[INFERITO]** fra circa 0,89 e
+   circa 1,49 per `770202` (fra il PF estivo e quello invernale, a seconda che la causa sia orologio o stagione).
+   **[DERIVATO]** dalle regole di calendario.
 7. 🏦 **BCM (UTC+1 fisso)**: d'inverno le due armano alle **8:30 NY**, **come il loro backtest**. Sulle BCM il contratto
-   d'inverno descrive quello che faranno. **[DERIVATO]**
+   d'inverno descrive quello che faranno. **[DERIVATO]**, se BCM resta UTC+1 fisso anche nell'inverno 2026/27
+   (**[INFERITO]**: misurato fino a giugno 2026, e il forex BCM ha già cambiato orologio una volta, fra 12/2024 e 02/2025).
 8. 📐 **Per R248**: **non cambia il disegno**, e conferma l'attesa scritta. La finestra vergine è tutta estate, e l'estate di
    R245 vale **PF 0,98 su 199** posizioni in casa. Un PF ~1 in R248 **non è una notizia**. R248 giudica il **rischio**;
    **il merito vive dove R248 non guarda**.
@@ -129,9 +139,25 @@ Posizioni ricampionate **dentro** ogni stagione, seme **2509**, 10.000 repliche.
 | `770202` solo A (26 / 30) | +0,028 | [−2,97 ; +1,65] | [−4,63 ; +2,16] | 0,511 | 0,485 |
 | `770202` solo B (58 / 38) | +0,881 | [−0,13 ; +2,44] | [−0,32 ; +2,92] | 0,076 | 0,134 |
 
-⚠️ **Onestà sul p**: la divisione estate/inverno è nata **guardando i dati** (`OROLOGIO_BCM` del 24/09 su 770202, poi R248a
-su R245). Questi p sono **descrittivi**, non una conferma. Una conferma vera ha bisogno di un **inverno che nessuno ha
-ancora visto** (dal 02/11/2026).
+**La stessa differenza a blocchi di mese** (dallo script, `sezione_blocchi`). I blocchi sono mese × stagione (un mese a
+cavallo del cambio d'ora dà due blocchi), ricampionati **dentro** la stagione; la permutazione scambia le etichette **fra
+blocchi**; seme 2509, 10.000 repliche. Tiene insieme le posizioni di uno stesso mese (dipendenza di regime).
+Verificato: **al massimo 1 posizione al giorno** per sedia.
+
+| sedia | blocchi estate / inverno | diff. | IC 95% a blocchi | P(diff ≤ 0) | p permutazione fra blocchi |
+|---|---|---:|---|---:|---:|
+| **R245** | 15 / **10** | +0,818 | **[+0,25 ; +1,32]** | 0,003 | **0,010** |
+| **`770202`** | 13 / **9** | +0,606 | **[−0,27 ; +1,93]** | 0,091 | **0,158** |
+
+Il cancello aveva ottenuto R245 [+0,25 ; +1,32] p 0,011 e `770202` [−0,27 ; +1,92] p 0,162: lo script riproduce gli
+intervalli. Il p di `770202` differisce di 0,004 (0,158 contro 0,162) e l'estremo alto di 0,01; la causa della differenza
+non è misurata (implementazione del ricampionamento). ⚠️ **Con 10 e 9 blocchi d'inverno questa lettura è grezza.**
+
+⚠️ **Onestà sul p**: la divisione estate/inverno è nata **guardando i dati**: `OROLOGIO_BCM` del 24/09 su 770202, poi
+**R248a §7 sull'OOS di R245**. Quindi il p OOS (0,027) e quello sui due anni (0,018) **contengono l'osservazione che ha
+suggerito l'ipotesi**. **Per R245 la replica vera è solo l'IS**: +0,420, IC95 [−0,54 ; +1,64], p 0,206, stesso segno ma
+**non distinguibile dal rumore**. Questi p sono **descrittivi**, non una conferma. Una conferma vera ha bisogno di un
+**inverno che nessuno ha ancora visto** (dal 02/11/2026).
 
 ### 2.4 🔪 Jackknife per mese: togliendo un mese alla volta il disegno regge? [MISURATO]
 
@@ -152,18 +178,23 @@ ancora visto** (dal 02/11/2026).
 | EMA200 H1 `771521` (R31, sedia `771531`) | 2025.06.12-2026.06.26 | **2,053** (169) | **0,868** (88) | **−1,185** | **[−2,25 ; −0,35]** | 13/13 |
 | AtrExhaustVol M15 LONG `774432` (R109) | 2024.09.30-2026.08.20 | 1,058 (557) | 0,852 (329) | −0,205 | [−0,48 ; +0,08] | 24/24 |
 | AtrExhaustVol M15 SHORT `774442` (R109) | idem | 0,961 (581) | 0,849 (342) | −0,112 | [−0,37 ; +0,17] | 24/24 |
-| SuperWave H2 `770521` (R23d) | 2025.06.19-2026.06.17 | 6,288 (22) | 1,250 (28) | −5,04 | [−25,5 ; −0,005] | 10/10 |
+| SuperWave H2 `770521` (R23d) | 2025.06.19-2026.06.17 | 6,288 (22) | 1,250 (28) | −5,04 | [−25,5 ; −0,005] ¹ | 10/10 |
+
+¹ IC su **8.771 repliche valide su 10.000**: tolte quelle con PF estivo infinito (nessuna perdita estiva ricampionata).
+⚠️ **AtrExhaust arriva al 2026.08.20**, 7 settimane oltre la fine di R245 (2026.06.29).
 
 Per segmento, AtrExhaust copre **due inverni**:
 - LONG: estati 1,105 · 0,952 · 1,228, inverni **0,759 · 0,989**;
 - SHORT: estati 1,463 · 1,002 · 0,738, inverni **0,817 · 0,895**.
 
-**Nessuno** dei quattro ha il disegno "tutti gli inverni meglio di tutte le estati".
+**Nessuno** dei quattro ha il disegno "tutti gli inverni meglio di tutte le estati". Ma quelli che **discriminano** sono
+**due** (i motori di tendenza), e vedono **un solo inverno** (2025/26).
 
 **Che cosa dice e che cosa NON dice** (contro-esempio del contro-esempio):
-- ✅ **Esclude la forma semplice di "è il mercato"**: l'inverno 2024/25-2025/26 **non** è stato buono per tutto quello che
-  gira sul Dow. Per i motori di tendenza (EMA200, SuperWave) è stato **il periodo peggiore**. Se la causa fosse "d'inverno il
-  Dow tira", EMA200 avrebbe dovuto guadagnare **di più**, e invece fa −1,19 con l'intervallo tutto negativo.
+- ✅ **Esclude, per l'inverno 2025/26, la forma semplice di "è il mercato"**: per i due motori di tendenza (EMA200 n
+  169/88, SuperWave n 22/28) quell'inverno è stato **il periodo peggiore**. Se la causa fosse "d'inverno il Dow tira",
+  EMA200 avrebbe dovuto guadagnare **di più**, e invece fa −1,19 con l'intervallo tutto negativo. SuperWave, a n 22/28,
+  conferma solo il verso. **Sull'inverno 2024/25 nessun motore di tendenza è in casa** [NON MISURATO].
 - ⚠️ **AtrExhaust è un fade**: se l'inverno avesse più spinta intraday, un fade andrebbe **peggio**. Il suo segno è quindi
   **compatibile con tutte e due** le spiegazioni, e **non discrimina** (classe 178).
 - ❌ **Non esclude una stagione propria dell'apertura su M5**: in casa **non esiste** un motore breakout M5 senza orario sul
@@ -173,7 +204,7 @@ Per segmento, AtrExhaust copre **due inverni**:
   - Sul DAX, armare prima d'estate **perde** (0,774 su 184).
   - 👉 **Per R245 quella prova non è mai girata.**
 - **Sintesi onesta**:
-  - **non** è la stagione generica del Dow [MISURATO, 4 motori];
+  - **non** è "la tendenza del Dow era più forte d'inverno" [MISURATO su 2 motori di tendenza, 1 inverno];
   - per `770202` l'unico test diretto **pende verso la stagione dell'apertura**, [MISURATO ma sospeso];
   - per R245 la causa è **[NON MISURATO]**.
 
@@ -188,9 +219,12 @@ Per segmento, AtrExhaust copre **due inverni**:
 | `770202` | ❄️ inverno | n 8 · PF 0,219 · −1.591,45 | n 60 · PF 1,618 · +12.800,72 |
 | `770202` | estate | n 7 · PF ∞ · +1.418,43 | n 77 · PF 0,790 · −3.093,93 |
 
-- **R245**: d'inverno **metà delle posizioni nasce e muore nel pre-mercato** (8:30-9:30 NY) e rende **come l'altra metà**.
-  D'estate a perdere sono le posizioni **lunghe**, oltre la prima ora. 👉 Il merito invernale di R245 **non** è "range sul
-  pre-mercato, ingresso deciso dalla cash": è diverso dal meccanismo descritto per `r84a` (`OROLOGIO_BCM` §5.1.2).
+- **R245**: d'inverno **metà delle posizioni nasce e muore nel pre-mercato** (8:30-9:30 NY), con lo stesso PF dell'altra
+  metà, e porta il **40% del netto invernale** (+1.697,80 su +4.240,40). **Per l'altro 60%** (chiuse dalle 15:30 BCM,
+  +2.542,60) **il ruolo della cash non è misurato**: il per-trade non ha l'ora d'ingresso. D'estate a perdere sono **le
+  posizioni che restano aperte oltre le 10:30 NY** (chiuse dalle 15:30 BCM: **PF 0,696 su 104**). 👉 Almeno il 40% del
+  merito invernale di R245 **non passa dalla cash**, e questo lo distingue dal meccanismo descritto per `r84a`
+  (`OROLOGIO_BCM` §5.1.2).
   **[INFERITO]**: il range 14:30-14:45 BCM d'inverno cade **sulle 8:30 ET dei dati USA** (CPI, NFP, vendite). Verificarlo
   per giorno di dato è **[NON MISURATO]**: il calendario del repo è bucato proprio sull'inverno 2025/26
   (`abtg_news_2021_2025_UTC.csv` finisce a dicembre 2025 e ha 3-5 righe al mese da aprile 2025; `abtg_news.csv` ne ha 17).
@@ -215,7 +249,8 @@ Per segmento, AtrExhaust copre **due inverni**:
 
 ## 3. 🔗 Domanda 2: sovrapposizione R245 × `770202` PER STAGIONE
 
-Metodo e funzioni di `r247_sovrapposizione.py` **importati, non copiati**. Giorni per data di chiusura, P/L% sul saldo di inizio
+Metodo e funzioni di `r247_sovrapposizione.py` **importati, non copiati**; tutte le righe della tabella escono da
+`stampa_sovrapp()`. Giorni per data di chiusura, P/L% sul saldo di inizio
 giornata, nullo per permutazione (2000, seme 247) **dentro la stagione**. La finestra B rifà R247 alla cifra (§1).
 🔴 **Le soglie di R247a §6 sono congelate per la finestra B dell'anno.** Applicate a finestre diverse **non fanno
 verdetto**: qui sono **descrittive**.
@@ -223,7 +258,7 @@ verdetto**: qui sono **descrittive**.
 | finestra | giorni viva | C | quota viva | stesso verso | ρ_U | ρ_C | P(perde \| viva perde) (q95 nullo) | DD somma/(DDv+DDn) (q95) | allarme di coda |
 |---|---:|---:|---:|---:|---:|---:|---|---|---|
 | **B (= R247)** 2025.06.10-2026.06.29 | 96 | 92 | 0,958 | 91 | 0,160 | 0,247 | 0,419 (0,419) | 0,903 (0,851) | no |
-| **A** 2024.09.27-2025.06.09 (col crollo) | 56 | 50 | 0,893 | — | — | 0,301 | **0,706 (0,529)**: 12 su 17 | — | 🔴 **SCATTA** |
+| **A** 2024.09.27-2025.06.09 (col crollo) | 56 | 50 | 0,893 | 42 | 0,177 | 0,301 | **0,706 (0,529)**: 12 su 17 | 0,853 (0,926) | 🔴 **SCATTA** |
 | A+B, anno | 152 | 142 | 0,934 | 133 | 0,166 | 0,265 | **0,521 (0,417)** | 0,853 (0,902) | 🔴 SCATTA |
 | A+B, **estate** | 84 | 77 | 0,917 | 70 | 0,290 | **0,539** | 0,522 (0,435) | 0,915 (0,940) | 🔴 SCATTA |
 | A+B, **inverno** | 68 | 65 | 0,956 | 63 | 0,109 | **0,184** | 0,520 (0,480) | **0,971 (0,908)** | 🔴 SCATTA |
@@ -232,13 +267,16 @@ verdetto**: qui sono **descrittive**.
   giorni comuni. La quota **non dipende dalla stagione** (sono la stessa idea sullo stesso minuto).
 - 📈 **D'estate i P/L si muovono di più insieme** (ρ_C **0,54** contro 0,18 d'inverno): perdono **insieme**, proprio nella
   stagione in cui **nessuna delle due guadagna**. **[MISURATO]**
-- 🔴 **Il buco dichiarato da R247 è chiuso, e il numero non è bello**. Nell'IS col crollo (finestra A) R245 perde in **12 dei
-  17** giorni in cui perde la viva: 0,706, contro 0,529 del nullo al q95. **È un'osservazione su 17 giorni**, e non un verdetto:
-  il criterio non era congelato per quella finestra. **[MISURATO]**
+- 🔴 **Il buco dichiarato da R247 è letto (descrittivo, non giudicato), e il numero non è bello**. Nell'IS col crollo
+  (finestra A) R245 perde in **12 dei 17** giorni in cui perde la viva: 0,706, contro 0,529 del nullo al q95. **È
+  un'osservazione su 17 giorni**, e non un verdetto: il criterio non era congelato per quella finestra. **[MISURATO]**
+- 🔴 **D'inverno il DD della somma sta SOPRA il nullo** (0,971 contro q95 0,908): la ρ più bassa **non** dà un DD più
+  diversificato. Descrittivo. **[MISURATO]**
 - Peggior giornata della somma (1% + 1%, additivo **[DERIVATO]**):
+  - finestra A: −2,04%, rapporto 1,845 (q95 1,897);
   - A+B: −2,09%, rapporto 1,746 (q95 1,832);
   - inverno: −2,07%, rapporto 1,856 (q95 1,902).
-  Nessuno dei due sopra il nullo.
+  Nessuno sopra il nullo.
 
 ---
 
@@ -252,28 +290,31 @@ Orari dei preset:
 
 Offset dei server:
 - FTMO oggi **UTC+3**: `DeltaServerGMT +03:00`, 20/09, terminale `541452707` (`IL_CONFINE_DEL_GIORNO` §3.1) **[MISURATO]**.
-- BCM **UTC+1 fisso** (`OROLOGIO_BCM`) **[MISURATO]** fino all'inverno 2025/26.
-- FTMO dal 25/10: **[NON MISURATO]**. Il repo ha **due** letture incompatibili (`IL_CONFINE_DEL_GIORNO` §3.3).
+- BCM **UTC+1 fisso** (`OROLOGIO_BCM`) **[MISURATO]** fino a giugno 2026. Che resti così nell'inverno 2026/27 è
+  **[INFERITO]**: il forex BCM ha già cambiato orologio una volta, fra 12/2024 e 02/2025.
+- FTMO dal 25/10: **[NON MISURATO]**. Le ipotesi sono **tre** (`IL_CONFINE_DEL_GIORNO` r.154 e §3.3,
+  `PRESET_FTMO_OROLOGIO` §8): **UTC+2 col calendario UE** dal 25/10, **UTC+2 col calendario USA** dal 01/11, **UTC+3 fisso**.
 
-Ore calcolate da `ora_ny()` (autotest T7/T8) **[DERIVATO]**:
+Ore calcolate da `ora_ny()` e `offset_ftmo()` (autotest T7/T8/T8b; stampate da `stampa_ftmo()`) **[DERIVATO]**:
 
-| periodo | BCM 14:30 (UTC+1) | FTMO 16:30 se **UTC+2** d'inverno (calendario UE) | FTMO 16:30 se **fisso UTC+3** |
-|---|---|---|---|
-| oggi → 23/10 | 9:30 NY · allineata | 9:30 NY (oggi è UTC+3, **misurato**) | 9:30 NY |
-| **26-30/10** (UE solare, USA legale) | 9:30 · allineata | **10:30 NY** · 🔴 cella **mai misurata** | 9:30 · allineata |
-| **dal 02/11** (inverno USA) | **8:30 NY** · 🟢 **sfasata = come il backtest** | **9:30 NY** · 🔴 **allineata = la cella che perde** | **8:30 NY** · sfasata = come il backtest |
+| periodo | BCM 14:30 (UTC+1) | FTMO 16:30, **UTC+2 calendario UE** | FTMO 16:30, **UTC+2 calendario USA** | FTMO 16:30, **UTC+3 fisso** |
+|---|---|---|---|---|
+| oggi → 23/10 | 9:30 NY | 9:30 NY (oggi UTC+3, **misurato**) | 9:30 NY | 9:30 NY |
+| **26-30/10** (UE solare, USA legale) | 9:30 NY | **10:30 NY** · 🔴 **mai misurata** | 9:30 NY | 9:30 NY |
+| **dal 02/11** (inverno USA) | **8:30 NY** · 🟢 **come il backtest** | **9:30 NY** · 🔴 **mai misurata d'inverno** | **9:30 NY** · 🔴 **mai misurata d'inverno** | **8:30 NY** · 🟢 **come il backtest** |
 
-Che cosa vale ogni cella, dai numeri di §2 **[MISURATO]**:
+Che cosa vale ogni cella **misurata**, dai numeri di §2 **[MISURATO]**:
 
 | cella | `770202` | R245 |
 |---|---|---|
-| **allineata** (9:30 NY) | PF **0,886** su 84 | PF **0,982** su 199 |
-| **sfasata** (8:30 NY) | PF **1,493** su 68 | PF **1,800** su 152 |
+| **allineata d'estate** (9:30 NY, **solo estate**) | PF **0,886** su 84 | PF **0,982** su 199 |
+| **sfasata d'inverno** (8:30 NY, **solo inverno**) | PF **1,493** su 68 | PF **1,800** su 152 |
 
-La cella **d'inverno alla cash**, cioè FTMO con UTC+2, **non è mai stata misurata** né per `770202` (R246m-r, file scritti
-e non girati) né per R245 (nessun file). Quello che ci si aspetta lì è **[INFERITO]**:
-- se la causa è **stagione**, circa PF invernale;
-- se è **orologio**, circa PF estivo.
+🔴 **La cella 9:30 NY d'inverno non è in questa tabella perché nessuno l'ha mai misurata**: né per `770202` (R246m-r, file
+scritti e non girati) né per R245 (nessun file). **Non è "la cella che perde"**: lo 0,886 è misurato **solo d'estate**.
+Il suo PF è **[INFERITO]** fra circa **0,89 e circa 1,49** per `770202`, e fra circa 0,98 e circa 1,80 per R245:
+- vicino al PF invernale, se la causa è **stagione**;
+- vicino al PF estivo, se è **orologio**.
 
 📌 **FTMO porta anche un secondo scarto che l'ora non risolve**: la griglia H4 del filtro EMA. BCM e FTMO distano 2h
 d'estate e 1h d'inverno con UTC+2. Vale per tutte e due le celle (R248a, buco 7).
@@ -283,7 +324,8 @@ d'estate e 1h d'inverno con UTC+2. Vale per tutte e due le celle (R248a, buco 7)
 ## 5. 👉 Che cosa cambia per R248 (e che cosa no)
 
 - **Il disegno non cambia**: R248 è una finestra **tutta estiva**, di circa 41 posizioni, e giudica il **RISCHIO** con bande
-  già congelate. Il rischio **non** dipende dalla stagione (§2.7). Le bande restano valide.
+  già congelate. Il rischio **non è più basso d'estate** (§2.7: 7,00% contro 5,14% **[DERIVATO]**, minorante). Le bande
+  restano valide.
 - **L'attesa di R248a ("PF vicino a 1") è confermata dai numeri di casa**:
   - estate R245 **0,982 su 199** sui due anni;
   - estate OOS **0,954 su 120**;
@@ -292,7 +334,8 @@ d'estate e 1h d'inverno con UTC+2. Vale per tutte e due le celle (R248a, buco 7)
 - 🔴 **Quello che R248 NON può dire, e ora si sa quanto pesa**: **il 102% del netto di contratto di R245 è invernale**, e R248
   non vede inverno. **Per "sostituire o affiancare" il numero che manca non è in R248**:
   - la **casella orologio-contro-stagione** di R245 (R246 a −1h d'estate, mai girata per questo EA);
-  - la **casella d'inverno alla cash** (d+1), cioè quello che farebbe su FTMO con UTC+2.
+  - la **casella d'inverno alla cash** (d+1), cioè quello che farebbe su FTMO se il server d'inverno è UTC+2 (calendario UE
+    o USA).
   Sono corse da **PC di backtest**, dell'ordine dei minuti (tempi di R248a §10: circa 17 s per passata-anno). Si scrivono
   e si passano ai cancelli **prima**.
 
@@ -302,9 +345,11 @@ d'estate e 1h d'inverno con UTC+2. Vale per tutte e due le celle (R248a, buco 7)
 
 1. 🕰️ **Il contratto d'inverno di una sedia d'apertura è "armare alle 8:30 NY" o "armare alla cash"?** Su BCM le due cose sono
    diverse da novembre, e il **backtest ha misurato la prima**. È la domanda del 25/10, e decide quale numero di contratto usare.
-2. 📞 **L'offset FTMO d'inverno**: la lettura di `TimeTradeServer()−TimeGMT()` sul terminale **`541452707` (`C:\FTMO`)** il
-   **26/10**, oppure la domanda scritta al supporto FTMO. Da quel solo numero dipende se su FTMO `770202` (e un'eventuale R245)
-   d'inverno arma sulla cella **che guadagna** o su quella **che perde**.
+2. 📞 **L'offset FTMO d'inverno**: la lettura di `TimeTradeServer()−TimeGMT()` sul terminale **`541452707` (`C:\FTMO`)**
+   va fatta **DUE volte, il 26/10 E il 02/11**. Il 26/10 da solo **non separa** "UTC+3 fisso" da "UTC+2 col calendario USA":
+   in tutti e due i casi quel giorno legge +3. In alternativa, la domanda scritta al supporto FTMO. Da quel numero dipende
+   se su FTMO `770202` (e un'eventuale R245) d'inverno arma sulla cella **misurata che guadagna** (8:30 NY) o su una cella
+   **mai misurata** (9:30 NY d'inverno).
 3. 🧪 **Vuoi le due caselle mancanti di R245 prima di scegliere fra sostituire e affiancare?** Cioè −1h d'estate
    (orologio contro stagione) e +1h d'inverno (alla cash). Costo: minuti di PC di backtest, file prova da scrivere e passare ai
    cancelli.
@@ -331,8 +376,9 @@ PC di backtest.
 ## 8. 🪦 Che cosa questo referto NON misura
 
 1. **La causa** (orologio o stagione) per R245: **[NON MISURATO]**. Per `770202` c'è solo R246: sospeso, fragile, n<150.
-2. **La cella d'inverno alla cash**, cioè FTMO con UTC+2: **[NON MISURATO]** per tutte e due.
-3. **L'offset FTMO dal 25/10**: **[NON MISURATO]**.
+2. **La cella d'inverno alla cash**, cioè FTMO con UTC+2 (calendario UE o USA): **[NON MISURATO]** per tutte e due.
+3. **L'offset FTMO dal 25/10**: **[NON MISURATO]**, tre ipotesi (UTC+2 UE, UTC+2 USA, UTC+3 fisso). E la cella **9:30 NY
+   d'inverno** non è misurata per nessuna delle due sedie.
 4. **Il ruolo dei dati USA delle 8:30** nel merito invernale di R245: **[INFERITO]**. Il calendario del repo è bucato
    sull'inverno 2025/26.
 5. **Un solo regime** (toro 2024-2026 col crollo di aprile), **due** inverni, **un** broker (feed BCM): l'Emendamento C
@@ -340,15 +386,19 @@ PC di backtest.
 6. **I p-value** sono su un'ipotesi nata dai dati: **descrittivi**.
 7. **DD per stagione**: calcolato per posizione sul saldo chiuso della sotto-serie, quindi **minorante** del DD del tester
    **[DERIVATO]**.
+8. **BCM UTC+1 fisso nell'inverno 2026/27**: **[INFERITO]**, misurato fino a giugno 2026.
+9. **La fonte FTMO "GMT+3" del 5/3**, citata in `REGOLAMENTI_PROP_2026-09-08.md` r.106 (la base dell'ipotesi "UTC+3
+   fisso"), **non è raggiungibile da qui**: **[NON VERIFICATO]**.
 
 ---
-_Riproduzione: `python3 backtest_pipeline/merito_inverno.py` (esce 1 se un'ancora non torna) · autotest 10/10:
+_Riproduzione: `python3 backtest_pipeline/merito_inverno.py` (esce 1 se un'ancora non torna) · autotest 13/13:
 - calendario;
 - formula del PF;
 - nullo (PF uguali → l'IC contiene 0);
 - differenza piantata (0,95 contro 2,1 → l'IC esclude 0);
 - permutazione sotto nullo e alternativa;
 - mese outlier che il jackknife deve scoprire;
-- ora NY per BCM e FTMO nei tre casi;
+- ora NY per BCM e FTMO nelle tre ipotesi, con le date di cambio;
+- blocchi di mese (nullo → IC contiene 0; differenza piantata → IC esclude 0; mese a cavallo = due blocchi);
 - DD composto;
 - ancora spostata di un centesimo → ROSSO._
