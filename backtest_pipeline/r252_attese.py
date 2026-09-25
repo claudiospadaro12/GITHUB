@@ -34,17 +34,21 @@ SEZIONI
      due le corse, par. 5 del file di testa): si ricampiona solo l'inverno.
   4. il long di riferimento: divisione per stagione del per-trade d0 di
      R246 (794613 finestra A + 794611 finestra B, deposito 100000)
+  5. banda dell'errore e del metodo A (classe 800): simulazione
+     dell'arrotondamento del lotto a saldi diversi (seme 252, 2000
+     estrazioni per caso), lotti d'inverno come a ora 8 e x0,55
 
 ONESTA': il bootstrap tratta le posizioni come indipendenti e il DD come
 funzione del solo ordine dentro l'inverno; la sequenza vera ha autocorre-
 lazione (le perdite a grappolo). Le bande sono ORDINI DI GRANDEZZA per
 dire DOPO se il round si e' comportato come previsto, NON cancelli.
 
-USO:  python3 backtest_pipeline/r252_attese.py        (~5 secondi)
+USO:  python3 backtest_pipeline/r252_attese.py
 """
 import collections
 import csv
 import datetime as dt
+import math
 import os
 import random
 
@@ -289,6 +293,40 @@ def main():
     print("  S1 del long: uscite d0 prima delle 09:35: %d su %d = %.1f%%"
           % (prima935, len(ra + rb), 100.0 * prima935 / len(ra + rb)))
     print("  (A e B sono DUE corse: la chiave di posizione e' file+position_id, non il solo id)")
+
+    print()
+    sez5()
+
+
+def sez5():
+    print("=== 5. BANDA DELL'ERRORE e DEL METODO A (classe 800), seme 252 ===")
+    pos = collections.OrderedDict()
+    with open(os.path.join(PT, 'R251/PERTRADE/abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_792520.csv'), newline='') as fh:
+        for x in csv.DictReader(fh, delimiter=';'):
+            d = dt.datetime.strptime(x['close_time'], '%Y.%m.%d %H:%M:%S').date()
+            pos.setdefault(x['position_id'], []).append((d, float(x['volume']), float(x['net_profit'])))
+    P = list(pos.values())
+    random.seed(252)
+    for wsc in (1.0, 0.55):      # lotti d'inverno come a ora 8 / x0,55 (mediana estate 1,00 / inverno 1,80)
+        for g in (0.05, 0.10):   # scarto di saldo corsa/curva
+            es = []
+            for _ in range(2000):
+                St = S = 10000.0
+                Br = 10000.0 * (1 - g)
+                sT, sA = [], []
+                for dl in P:
+                    sc = wsc if inverno(dl[0][0]) else 1.0
+                    vt = sum(v for _d, v, _p in dl)
+                    plu = sum(p for _d, _v, p in dl) / (vt + 0.05)          # P/L per lotto
+                    le = (vt + 0.1 * random.random()) * sc                  # lotto esatto a 10000
+                    lt = max(0.1, math.floor(le * St / 10000 / 0.1 + 1e-9) * 0.1)  # EA in fase, suo saldo
+                    lr = max(0.1, math.floor(le * Br / 10000 / 0.1 + 1e-9) * 0.1)  # corsa, altro saldo
+                    sT.append(plu * lt); St += plu * lt
+                    a = plu * lr / Br * S; sA.append(a); S += a; Br += plu * lr
+                dT = dd_chiuso(sT)
+                es.append(abs(dd_chiuso(sA) - dT) / dT)
+            print("  lotti inverno x%.2f  scarto %2d%%: e p50 %.4f p90 %.4f p99 %.4f max %.4f"
+                  % (wsc, 100 * g, q(es, .5), q(es, .9), q(es, .99), max(es)))
 
 
 if __name__ == '__main__':

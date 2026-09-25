@@ -200,13 +200,24 @@
 #  ribasano col metodo A e si confrontano con 792520 (R251):
 #    e = |DD_chiuso A(R252a, OOS) - 1246,06| / 1246,06,
 #  e accanto |Profit A - 254,74| e lo scarto per posizione (mediana,
-#  massimo). Il lotto va a passi di 0,10 su lotti di 0,20-1,70 (volumi di
-#  792520): l'arrotondamento e' l'errore che e misura (classe 791).
+#  massimo). Il lotto va a passi di 0,10; su 792520 i DEAL vanno da 0,20
+#  a 4,50 lotti, le POSIZIONI da 0,40 a 4,50 (estate mediana 1,00 max
+#  2,00; inverno a ora 8 mediana 1,80 max 4,50: pre-mercato = range
+#  stretti = lotti grandi): l'arrotondamento e' l'errore che e misura
+#  (classe 791).
 #  Si riporta anche lo SCARTO DI SALDO piu' grande fra una corsa e la
 #  curva in fase (|B_corsa(p) / saldo della curva prima di p - 1|): e e'
 #  misurato a uno scarto del ~5%. REGOLA CONGELATA: se nella curva in
 #  fase lo scarto massimo supera il 10% (il doppio del test), R1/R2 con
 #  DD stimato fra 0,8 e 1,2 volte la soglia sono NON RISOLTI d'ufficio.
+#  e_eff = max(e, 0,05). e si misura su UN campione (R252a vs R251) il cui
+#  DD cade TUTTO nell'inverno a ora 8, lotti 1,8-4,5; la curva in fase
+#  porta d'inverno righe alla CASH, lotti attesi ~1,0: arrotondamento
+#  ~doppio. Simulazione r252_attese.py sez. 5 (seme 252, 2000 estrazioni,
+#  lotto esatto uniforme nel passo): lotti del controllo e p50 0,6% p90
+#  1,4% max 3,0%; lotti d'inverno x0,55 e p50 1,2% p90 3,0% p99 4,9% max
+#  6,9%. Un e misurato allo 0,1% e' un'estrazione fortunata, non un
+#  limite.
 #
 #  >>> IL SUPERTREND NON CAMBIA GIORNATE COL CAMBIO D'ORA (letto nel
 #  codice, non assunto). SupertrendDir (r.2197, CopyRates a r.2202) chiede
@@ -259,6 +270,9 @@
 #     R252b. VERDE-SOTTOINSIEME se vale per TUTTI i deal, ROSSO se anche
 #     uno solo manca (pin del filtro non arrivato, o un meccanismo non
 #     visto nel codice: si cerca prima di leggere).
+#     Eccezione, stessa del par. 6: un deal di parziale di R252c (R252d)
+#     senza gemello e' ammesso SOLO dove R252a (R252b) ha 0,10 lotti in
+#     quella posizione.
 #     E, informativo, contro il CSV di R251 cella H12 (Pass 3): IS 61 deal
 #     e +216,88, OOS 126 deal. Qui una differenza NON e' un guasto del
 #     banco (quello lo dice R252a): la corsa continua parte un giorno dopo
@@ -331,7 +345,7 @@
 #     posizioni 160-166-172 (p10-p50-p90), P(>=150) 0,999
 #     PF per posizione 1,152-1,397-1,706, P(M1) 0,944, P(M2) 0,887
 #     DD_chiuso 3,33-4,32-7,20%, P(DD x k <= 8,21) 0,934 (k 1,0380, il
-#     massimo in archivio; e non incluso: si misura nel round)
+#     massimo in archivio; e_eff e D non inclusi: par. 5 e 9)
 #   H_S "stagione" (d'inverno alla cash rende come l'inverno a ora 8):
 #     posizioni 175-181-187, P(>=150) 1,000
 #     PF per posizione 0,867-1,068-1,320, P(M1) 0,424, P(M2) 0,297
@@ -372,12 +386,22 @@
 #  e NON sposta i tetti, qualunque cosa dica (i criteri non si cambiano
 #  dopo i numeri).
 #  RISCHIO -- a qualunque n (Emendamento B). DD della curva in fase,
-#  metodi A e B, k e e del par. 5:
+#  metodi A e B, k, e_eff e D del par. 5 e qui sotto:
 #    R1 (IS) e R2 (OOS), soglia S = 5,79 / 8,21:
-#      PASSA       se max(A,B) x k x (1+e) <= S
-#      FALLISCE    se min(A,B) x (1-e) > S   (il DD a saldo chiuso e' un
-#                  pavimento del DD di equity: fallire qui e' un fatto)
+#      PASSA       se max(A,B) x (1+e_eff) x k <= S E max(A,B) x (1+e_eff)
+#                  + D <= S, con D = max sulle tarature di (DD_fisso -
+#                  DD_chiuso)/100 (archivio 0,283 e 0,288 punti)
+#      FALLISCE    se min(A,B) x (1-e_eff) > S   (il DD a saldo chiuso e'
+#                  un pavimento del DD di equity: fallire qui e' un fatto)
 #      NON RISOLTO altrimenti (classe 550).
+#      Perche' anche D: l'eccesso equity-meno-chiuso e' ~28 EUR COSTANTE
+#      (1274,40 - 1246,06 = 28,34 sullo short; 785,26 - 756,48 = 28,78 su
+#      D1), additivo e non moltiplicativo: su un DD piccolo il solo k lo
+#      sottostima e darebbe un PASSA falso appena sotto la soglia.
+#    INFORMATIVO, NON UN CANCELLO: se le due estati OOS di 792520 si
+#      uniscono di seguito, il DD a saldo chiuso e' 503,05 EUR (5,03%;
+#      ricontato il 25/09 sulle righe d'estate in ordine). E' il numero
+#      realistico se l'inverno in fase contribuisse ZERO, non un pavimento.
 #    R3 peggior giornata >= -1,10%, CONDIZIONE SUFFICIENTE MISURATA: il
 #      "Peggior Giornata %" del CSV _OOS (la gamba continua, tutte e due le
 #      ere) del file a ora 8 E di quello a ora 9 della configurazione, tutti
@@ -603,6 +627,16 @@
 #    ..._792520.csv, R251/ROUND_R251b e ROUND_R251 (CSV),
 #    Walkforward_Aperture/DAX_M_direzione_IS/OOS.csv, R246/PERTRADE/
 #    ..._794611.csv e ..._794613.csv.
+#  - MODELLO DELLA RIGA = RIGA_R246_OROLOGIO (finestre A), NON
+#    RIGA_R251_SHORT_DAX. Quella scrive "rc 2 su QUALUNQUE file = GUASTO
+#    VERO", mette il file in $mot -> FILE NULLO, esige _IS e _OOS con una
+#    riga per cella e legge i PIN DAL CSV (classe 780) anche dal _IS:
+#    copiata qui fa NULLI tutti e sei i file. Per R252: rc 2 E rc 0
+#    ammessi se _OOS ha 2 righe con Trades>0 (rc 0 = il 2024.09.26 ha
+#    operato: G0 ROSSO atteso, si scrive); rc 1 = guasto; PIN DAL CSV solo
+#    dal _OOS; per-trade con righe > 0, prima chiusura >= 2024.09.27,
+#    ultima >= 2026.03.30, somma = Profit _OOS entro 0,05 (un per-trade del
+#    moncone, solo intestazione, passerebbe "date da 2024.09.27 in poi").
 # =====================================================================
 @SIMBOLO    D30EUR
 @PERIODO    M5
