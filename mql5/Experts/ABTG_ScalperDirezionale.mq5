@@ -14,18 +14,19 @@
 //|  qui. NON per FTMO (tetto 2.000 richieste/giorno, Forbidden      |
 //|  Practices) e NON per il conto reale 10105439.                   |
 //|                                                                  |
-//|  Cosa fa: una posizione alla volta nel verso scelto; chiude a    |
-//|  +InpTargetEuro netti, o a -InpStopEuro netti (stop anche sul    |
-//|  server), o dopo InpMaxSeconds; poi rientra. Il lotto SALE solo  |
-//|  quando il guadagno chiuso cresce (anti-martingala), MAI dopo    |
-//|  una perdita. Freni fissi: perdita di sessione, stop di fila,    |
-//|  ordini al minuto, richieste dall'avvio. Ogni ciclo va in un CSV,|
-//|  ANCHE se a chiudere e' stato lo SL/TP del server.               |
-//|  Modo CANDELA (aggiunto su richiesta, 25/09 sera): una sola     |
-//|  operazione per candela (M1 consigliato), verso dal PRIMO        |
-//|  MOVIMENTO della candela nuova (dopo N secondi) o dalla candela  |
-//|  precedente; oppure dai TICK: verso dal movimento degli ultimi   |
-//|  N tick (default 5, minimo 1 punto), senza candele.              |
+//|  Cosa fa: apre un'ONDATA di InpPositions posizioni (stesso lotto,|
+//|  stesso verso); ogni posizione chiude a +InpTargetEuro netti, o  |
+//|  a -InpStopEuro netti (stop anche sul server), o dopo            |
+//|  InpMaxSeconds; quando l'ondata e' tutta chiusa, dopo la pausa,  |
+//|  ne parte un'altra. Il lotto SALE solo quando il guadagno chiuso |
+//|  cresce (anti-martingala), MAI dopo una perdita. Freni fissi,    |
+//|  misurati sul NETTO DELL'ONDATA: perdita di sessione, ondate in  |
+//|  perdita di fila, ondate al minuto, richieste dall'avvio. Ogni   |
+//|  posizione va in un CSV, ANCHE se a chiudere e' stato lo SL/TP   |
+//|  del server.                                                     |
+//|  Modo CANDELA (aggiunto su richiesta, 25/09 sera): verso dal     |
+//|  PRIMO MOVIMENTO della candela nuova o dalla candela precedente; |
+//|  dai TICK (movimento degli ultimi N tick); oppure dal CICLO.     |
 //|  Non e' una strategia: e' un test misurato dal CSV.             |
 //|  I numeri onesti sono nel referto di casa.                       |
 //|                                                                  |
@@ -35,34 +36,36 @@
 //|      alzate in silenzio)                                         |
 //|   B3 contabilita' per identificativo di posizione: le chiusure   |
 //|      del server (SL/TP) passano dai freni e dal CSV              |
-//|   B4 la posizione aperta si gestisce SEMPRE, anche da FERMO      |
-//|   B5 orologio = TimeTradeServer(), i 10 s scattano senza tick    |
+//|   B4 le posizioni aperte si gestiscono SEMPRE, anche da FERMO    |
+//|   B5 orologio = TimeTradeServer(), il tempo scatta senza tick    |
 //|   B6 pausa vera in ms; un rifiuto aspetta 5 s; 5 rifiuti = STOP  |
-//|  1.02 (seconda passata del cancello, PASS con residui):          |
-//|   N1 "chiusura mandata" scade dopo 3 s: se il server non esegue  |
-//|      si rimanda, la posizione non resta orfana; PLACED = mandata |
-//|   N2 OnDeinit chiude solo se il conto e' quello ammesso          |
-//|   N3 identificativo di posizione letto dal deal d'ingresso       |
-//|   N4 "perdite di fila" (conta anche le uscite a tempo);          |
-//|      motivo di chiusura dal DEAL_REASON (sl/tp/a mano)           |
-//|   pulsante START spostato sotto il pannello (il trading rapido   |
-//|      di MT5 lo copriva: visto da Claudio il 25/09 sera)          |
-//|  1.03 (25/09 sera, richiesta di Claudio: "non capisco come       |
-//|      scelga buy o sell... abbinarlo al cycle"): regola CICLO.    |
-//|      Verso dall'oscillatore CICLO "Alta Velocita'" (formula       |
-//|      ORIGINALE di Claudio, copiata riga per riga da               |
-//|      ABTG_Cycle.mq5 / ABTG_Ciclo.mq5): SEGNO = si opera nel      |
-//|      colore dell'istogramma sull'ultima barra CHIUSA (verde =    |
-//|      long, rosso = short); INCROCIO = una sola operazione per    |
-//|      incrocio dello zero. Sul ciclo NON esiste un PF misurato in |
-//|      casa (R148 = solo collaudo di compilazione): e' una RAGIONE |
-//|      per il verso, non un edge provato. Il CSV lo misura.        |
+//|  1.02: "chiusura mandata" scade dopo 3 s (PLACED = mandata);     |
+//|   OnDeinit chiude solo sul conto ammesso; id posizione dal deal; |
+//|   motivo di chiusura dal DEAL_REASON; pulsante in basso.         |
+//|  1.03 (richiesta di Claudio: "non capisco come scelga buy o     |
+//|   sell... abbinarlo al cycle"): regola CICLO. Verso              |
+//|   dall'oscillatore CICLO "Alta Velocita'" (formula ORIGINALE di  |
+//|   Claudio, copiata riga per riga da ABTG_Cycle.mq5 /             |
+//|   ABTG_Ciclo.mq5, fedelta' verificata al bit dal cancello):      |
+//|   SEGNO = si opera nel colore dell'istogramma sull'ultima barra  |
+//|   CHIUSA (verde = long, rosso = short); INCROCIO = una sola      |
+//|   operazione per incrocio dello zero. Sul ciclo NON esiste un PF |
+//|   leggibile in casa: R148a/bL/bS (NASUSD M30, 15/09) sono GIRATI |
+//|   ma i numeri non sono mai arrivati nel repo; XAUUSD M1 mai      |
+//|   provato. E' una RAGIONE per il verso, non un edge provato.     |
+//|  1.04 (richiesta di Claudio: "apra 8 ordini con lo stesso lotto, |
+//|   con lotti ad incrementare, 20 secondi"): ONDATE di             |
+//|   InpPositions posizioni; contabilita' per posizione con         |
+//|   elenco; freni e anti-martingala sul netto dell'ondata; cache   |
+//|   del ciclo azzerata in OnInit (cancello 1.03, classe 816);      |
+//|   START richiesto di nuovo dopo un cambio di input.              |
 //+------------------------------------------------------------------+
 #property copyright "ABTG"
-#property version   "1.03"
+#property version   "1.04"
 #include <Trade\Trade.mqh>
 
 #define CONTO_AMMESSO 50503635   // il SOLO conto su cui questo EA accetta di girare
+#define MAX_POSIZIONI 10         // tetto duro delle posizioni per ondata (codice, non input)
 
 enum ENUM_DIR_MODE   { DIR_FROM_MANUAL=0, DIR_LONG=1, DIR_SHORT=2 };
 enum ENUM_ENTRY_MODE { ENTRY_MANUALE=0, ENTRY_CANDELA=1 };
@@ -70,15 +73,15 @@ enum ENUM_CANDLE_RULE { CR_PREV_CANDLE=0, CR_FIRST_MOVE=1, CR_TICK=2, CR_CICLO=3
 enum ENUM_CICLO_REGOLA { CICLO_SEGNO=0, CICLO_INCROCIO=1 };
 
 input group "=== Modo d'ingresso ==="
-input ENUM_ENTRY_MODE InpEntryMode       = ENTRY_MANUALE;   // MANUALE: verso dalla tua posizione (o fisso), rientra subito. CANDELA: una operazione per candela
-input ENUM_TIMEFRAMES InpCandleTF        = PERIOD_M1;       // CANDELA: timeframe della candela (M1 consigliato)
+input ENUM_ENTRY_MODE InpEntryMode       = ENTRY_MANUALE;   // MANUALE: verso dalla tua posizione (o fisso), rientra subito. CANDELA: verso da candela/tick/ciclo
+input ENUM_TIMEFRAMES InpCandleTF        = PERIOD_M1;       // CANDELA/CICLO: timeframe (M1 consigliato)
 input ENUM_CANDLE_RULE InpCandleRule     = CR_TICK;         // CANDELA: verso dal PRIMO MOVIMENTO della candela, dalla candela PRECEDENTE, dai TICK (senza candele), oppure dal CICLO
 input int           InpTickWindow        = 5;               // TICK: numero di tick su cui si misura il movimento
 input int           InpFirstMoveSeconds  = 3;               // CANDELA/primo movimento: secondi dopo l'apertura in cui si legge il verso
 input double        InpFirstMovePoints   = 1.0;             // CANDELA/primo movimento e TICK: movimento minimo in PUNTI MT5 (_Point) per decidere
 
 input group "=== CICLO (oscillatore Alta Velocita' di Claudio, sul TF InpCandleTF) ==="
-input ENUM_CICLO_REGOLA InpCicloRegola   = CICLO_SEGNO;     // SEGNO: opera nel colore dell'ultima barra chiusa (verde=long, rosso=short). INCROCIO: una operazione per incrocio dello zero
+input ENUM_CICLO_REGOLA InpCicloRegola   = CICLO_SEGNO;     // SEGNO: opera nel colore dell'ultima barra chiusa (verde=long, rosso=short). INCROCIO: una ondata per incrocio dello zero
 input double        InpCicloMinimo       = 0.0;             // SEGNO: |ciclo| minimo per operare (0 = qualunque valore). Unita' dell'oscillatore
 input int           InpK1Len             = 5;               // Stoch 1 - lunghezza K (fonte: 5)
 input int           InpK1Smo             = 3;               // Stoch 1 - lisciatura  (fonte: 3)
@@ -95,23 +98,24 @@ input ENUM_DIR_MODE InpDirection          = DIR_FROM_MANUAL; // Verso: dalla TUA
 input bool          InpAutoStart          = false;           // true = parte da solo appena conosce il verso (altrimenti pulsante START)
 input bool          InpStopWhenManualClosed = true;          // si ferma se chiudi la posizione manuale che ha dato il verso
 
-input group "=== Ciclo ==="
-input double        InpTargetEuro         = 3.0;             // chiude in utile a +X euro NETTI
-input double        InpStopEuro           = 2.0;             // chiude in perdita a -Y euro NETTI (stop anche sul server)
+input group "=== Ondata ==="
+input int           InpPositions          = 1;               // posizioni per ondata (stesso lotto, stesso verso), max 10
+input double        InpTargetEuro         = 3.0;             // ogni posizione chiude in utile a +X euro NETTI
+input double        InpStopEuro           = 2.0;             // ogni posizione chiude in perdita a -Y euro NETTI (stop anche sul server)
 input int           InpMaxSeconds         = 10;              // durata massima di una posizione (secondi)
-input int           InpPauseMs            = 500;             // pausa fra una chiusura e il rientro (ms)
+input int           InpPauseMs            = 500;             // pausa fra la fine di un'ondata e la prossima (ms)
 
 input group "=== Lotti (salgono SOLO col guadagno) ==="
-input double        InpLotStart           = 0.01;            // lotto di partenza
+input double        InpLotStart           = 0.01;            // lotto di partenza (per posizione)
 input double        InpLotStep            = 0.01;            // aumento del lotto
 input double        InpStepEveryEuro      = 10.0;            // ... ogni X euro di guadagno chiuso dall'avvio
-input double        InpLotMax             = 0.10;            // tetto del lotto
-input bool          InpResetOnLoss        = true;            // dopo una perdita si riparte dal lotto di partenza
+input double        InpLotMax             = 0.10;            // tetto del lotto (per posizione)
+input bool          InpResetOnLoss        = true;            // dopo un'ondata in perdita si riparte dal lotto di partenza
 
-input group "=== Freni (fissi) ==="
+input group "=== Freni (fissi, sul netto dell'ONDATA) ==="
 input double        InpMaxLossSessionEuro = 20.0;            // perdita massima chiusa dall'avvio: poi STOP
-input int           InpMaxConsecutiveLosses = 3;             // perdite di fila (anche le uscite a tempo in perdita): poi STOP
-input int           InpMaxTradesPerMinute = 6;               // aperture al minuto: oltre, aspetta
+input int           InpMaxConsecutiveLosses = 3;             // ondate in perdita di fila (anche per uscite a tempo): poi STOP
+input int           InpMaxTradesPerMinute = 6;               // ondate al minuto: oltre, aspetta
 input int           InpMaxRequestsPerDay  = 500;             // richieste al server dall'avvio (START le azzera): poi STOP
 input int           InpStartHour          = 0;               // ora SERVER da cui puo' operare
 input int           InpEndHour            = 24;              // ora SERVER oltre la quale si ferma (24 = mai)
@@ -120,6 +124,22 @@ input group "=== Generali ==="
 input long          InpMagic              = 779901;          // magic dell'EA (le posizioni a mano hanno magic 0)
 input int           InpDeviationPts       = 50;              // slippage ammesso in punti
 input bool          InpVerbose            = true;            // log nel giornale Esperti
+
+//--- una posizione dell'ondata, per identificativo (B3): cosi' le chiusure del server vengono contate
+struct SPos
+  {
+   ulong    id;          // POSITION_IDENTIFIER
+   string   verso;
+   double   lot;
+   double   pin;
+   datetime t;
+   string   closeWhy;    // "" = nessuna chiusura mandata
+   double   pout;
+   uint     sentMs;      // quando e' stata mandata la chiusura
+   uint     retryMs;     // chiusura rifiutata: si riprova dopo 1 s
+   uint     goneMs;      // da quando non si vede piu' fra le posizioni
+   double   lastProfit;  // ultimo profitto visto (stima se lo storico non arriva)
+  };
 
 //--- stato
 CTrade   trade;
@@ -130,35 +150,30 @@ double   gLot          = 0.0;
 double   gCumProgress  = 0.0;    // guadagno chiuso che fa salire il lotto (si azzera con InpResetOnLoss)
 double   gCumTotal     = 0.0;    // netto chiuso dall'avvio
 double   gLossSession  = 0.0;
-int      gConsecLoss   = 0;
-int      gCycles       = 0;
+int      gConsecLoss   = 0;      // ondate in perdita di fila
+int      gWaves        = 0;      // ondate chiuse
+int      gPosClosed    = 0;      // posizioni chiuse
 int      gRequests     = 0;
 int      gRejects      = 0;      // aperture rifiutate di fila
-datetime gOpenTimes[];           // aperture recenti (per il tetto al minuto)
+datetime gWaveTimes[];           // ondate recenti (per il tetto al minuto)
 string   gStopReason   = "";
 string   gLastAction   = "-";
 string   gCsv          = "";
-double   gLastProfitSeen = 0.0;
-datetime gCandleDone   = 0;      // candela gia' usata (modo CANDELA)
+datetime gCandleDone   = 0;      // barra gia' usata (modo CANDELA / CICLO incrocio)
 double   gTicks[];               // ultimi bid (modo TICK)
-datetime gCycBar      = 0;       // barra su cui e' stato calcolato il ciclo (si ricalcola solo a barra nuova)
-double   gCyc1        = 0.0;     // ciclo sull'ultima barra CHIUSA [1]
-double   gCyc2        = 0.0;     // ciclo sulla barra [2]
-bool     gCycOk       = false;
+datetime gCycBar       = 0;      // barra su cui e' stato calcolato il ciclo (si ricalcola solo a barra nuova)
+double   gCyc1         = 0.0;    // ciclo sull'ultima barra CHIUSA [1]
+double   gCyc2         = 0.0;    // ciclo sulla barra [2]
+bool     gCycOk        = false;
 //--- pause in millisecondi (GetTickCount, differenza unsigned: regge il giro del contatore)
 uint     gPauseFromMs  = 0;
 uint     gPauseLenMs   = 0;
-uint     gCloseRetryMs = 0;
-uint     gCloseSentMs  = 0;
-//--- la posizione in corso, per identificativo (B3): cosi' le chiusure del server vengono contate
-ulong    gOpenPosId    = 0;
-string   gOpenVerso    = "";
-double   gOpenLot      = 0.0;
-double   gOpenPin      = 0.0;
-double   gClosePout    = 0.0;
-datetime gOpenTime     = 0;
-string   gCloseWhy     = "";
-uint     gGoneMs       = 0;
+//--- l'ondata in corso
+SPos     gPos[];
+bool     gWaveOpen     = false;  // c'e' un'ondata i cui conti non sono ancora chiusi
+double   gWaveNet      = 0.0;    // netto accumulato dell'ondata in corso
+int      gWaveN        = 0;      // posizioni aperte nell'ondata in corso
+int      gWaveId       = 0;      // numero progressivo dell'ondata (finisce nel CSV)
 const string BTN = "ABTG_SCALPER_BTN";
 
 //+------------------------------------------------------------------+
@@ -209,7 +224,7 @@ void DrawButton()
       ObjectCreate(0, BTN, OBJ_BUTTON, 0, 0, 0);
       ObjectSetInteger(0, BTN, OBJPROP_CORNER, CORNER_LEFT_LOWER);
       ObjectSetInteger(0, BTN, OBJPROP_XDISTANCE, 10);
-      ObjectSetInteger(0, BTN, OBJPROP_YDISTANCE, 40);    // angolo in BASSO: visibile su ogni grafico alto >= 40 px; il trading rapido di MT5 sta in alto (cancello 1.02, classe 814)
+      ObjectSetInteger(0, BTN, OBJPROP_YDISTANCE, 40);    // angolo in BASSO: visibile su ogni grafico alto >= 40 px; il trading rapido di MT5 sta in alto (classe 814)
       ObjectSetInteger(0, BTN, OBJPROP_XSIZE, 160);
       ObjectSetInteger(0, BTN, OBJPROP_YSIZE, 28);
       ObjectSetInteger(0, BTN, OBJPROP_FONTSIZE, 10);
@@ -220,18 +235,26 @@ void DrawButton()
    ObjectSetInteger(0, BTN, OBJPROP_STATE, false);
   }
 //+------------------------------------------------------------------+
+int Positions() { return (int)MathMin(MathMax(InpPositions, 1), MAX_POSIZIONI); }
+//+------------------------------------------------------------------+
 void Status()
   {
    string dir = (gDir > 0 ? "LONG" : (gDir < 0 ? "SHORT" : "nessuno"));
-   string modo = (InpEntryMode == ENTRY_MANUALE) ? "MANUALE" : (InpCandleRule == CR_TICK ? "TICK (" + IntegerToString(InpTickWindow) + " tick, min " + DoubleToString(InpFirstMovePoints, 1) + " pt)"
-                 : (InpCandleRule == CR_CICLO ? "CICLO " + (InpCicloRegola == CICLO_SEGNO ? "segno" : "incrocio") + " " + EnumToString(InpCandleTF) + (gCycOk ? " = " + DoubleToString(gCyc1, 2) + " (prima " + DoubleToString(gCyc2, 2) + ")" : " (calcolo...)")
-                 : "CANDELA " + EnumToString(InpCandleTF)));
-   string s = "ABTG_ScalperDirezionale 1.03  " + _Symbol + "   modo: " + modo + "\n";
+   string modo;
+   if(InpEntryMode == ENTRY_MANUALE) modo = "MANUALE";
+   else if(InpCandleRule == CR_TICK) modo = "TICK (" + IntegerToString(InpTickWindow) + " tick, min " + DoubleToString(InpFirstMovePoints, 1) + " pt)";
+   else if(InpCandleRule == CR_CICLO)
+     {
+      modo = "CICLO " + (InpCicloRegola == CICLO_SEGNO ? "segno" : "incrocio") + " " + EnumToString(InpCandleTF);
+      modo += (gCycOk ? " = " + DoubleToString(gCyc1, 2) + " (prima " + DoubleToString(gCyc2, 2) + ")" : " (calcolo...)");
+     }
+   else modo = "CANDELA " + EnumToString(InpCandleTF);
+   string s = "ABTG_ScalperDirezionale 1.04  " + _Symbol + "   modo: " + modo + "\n";
    s += "stato: " + (gActive ? "ATTIVO" : "FERMO (premi START)") + (gStopReason != "" ? "  [" + gStopReason + "]" : "") + "\n";
-   s += "verso: " + dir + (gDirFromManual ? " (dalla tua posizione a mano)" : "") + "\n";
-   s += "lotto attuale: " + DoubleToString(gLot, 2) + "   cicli: " + IntegerToString(gCycles) + (gOpenPosId != 0 ? "   posizione aperta: " + IntegerToString((long)gOpenPosId) : "") + "\n";
+   s += "verso: " + dir + (gDirFromManual ? " (dalla tua posizione a mano)" : "") + "   ondata: " + IntegerToString(Positions()) + " posizioni x " + IntegerToString(InpMaxSeconds) + " s\n";
+   s += "lotto attuale: " + DoubleToString(gLot, 2) + "   ondate: " + IntegerToString(gWaves) + "   posizioni chiuse: " + IntegerToString(gPosClosed) + "   aperte ora: " + IntegerToString(ArraySize(gPos)) + "\n";
    s += "netto chiuso: " + DoubleToString(gCumTotal, 2) + " EUR   perdita sessione: " + DoubleToString(gLossSession, 2) + " / " + DoubleToString(InpMaxLossSessionEuro, 2) + "\n";
-   s += "perdite di fila: " + IntegerToString(gConsecLoss) + " / " + IntegerToString(InpMaxConsecutiveLosses) + "   richieste: " + IntegerToString(gRequests) + " / " + IntegerToString(InpMaxRequestsPerDay) + "\n";
+   s += "ondate in perdita di fila: " + IntegerToString(gConsecLoss) + " / " + IntegerToString(InpMaxConsecutiveLosses) + "   richieste: " + IntegerToString(gRequests) + " / " + IntegerToString(InpMaxRequestsPerDay) + "\n";
    s += "ultima azione: " + gLastAction;
    Comment(s);
   }
@@ -254,15 +277,16 @@ void StartAll()
    gCumTotal = 0.0;
    gLossSession = 0.0;
    gConsecLoss = 0;
-   gCycles = 0;
+   gWaves = 0;
+   gPosClosed = 0;
    gRequests = 0;
    gRejects = 0;
    gPauseLenMs = 0;
    gLot = NormLot(InpLotStart);
-   ArrayResize(gOpenTimes, 0);
+   ArrayResize(gWaveTimes, 0);
    ArrayResize(gTicks, 0);
    gLastAction = "START";
-   Log("START - lotto " + DoubleToString(gLot, 2));
+   Log("START - lotto " + DoubleToString(gLot, 2) + " x " + IntegerToString(Positions()) + " posizioni per ondata, " + IntegerToString(InpMaxSeconds) + " s");
    DrawButton();
    Status();
   }
@@ -281,6 +305,11 @@ int OnInit()
       Alert("ABTG_ScalperDirezionale: VOLUME_MIN ", DoubleToString(vmin, 2), " su ", _Symbol, " > lotto dichiarato: NON alzo la taglia da solo, NON parto");
       return(INIT_FAILED);
      }
+   if(InpPositions < 1 || InpPositions > MAX_POSIZIONI)
+     {
+      Alert("ABTG_ScalperDirezionale: InpPositions deve essere fra 1 e ", MAX_POSIZIONI, ": NON parto");
+      return(INIT_FAILED);
+     }
    if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_CICLO)
      {
       if(InpK1Len < 1 || InpK2Len < 1 || InpK3Len < 1 || InpK4Len < 1 || InpK1Smo < 1 || InpK2Smo < 1 || InpK3Smo < 1 || InpK4Smo < 1 || InpMmLen < 1)
@@ -290,25 +319,30 @@ int OnInit()
    trade.SetExpertMagicNumber((ulong)InpMagic);
    trade.SetDeviationInPoints((ulong)InpDeviationPts);
    trade.SetTypeFillingBySymbol(_Symbol);
+   gDir = 0; gDirFromManual = false;
    if(InpDirection == DIR_LONG)  { gDir = 1;  gDirFromManual = false; }
    if(InpDirection == DIR_SHORT) { gDir = -1; gDirFromManual = false; }
    gLot = NormLot(InpLotStart);
-   gCsv = "abtg_scalper_" + IntegerToString(login) + ".csv";
+   gCycBar = 0; gCycOk = false; gCyc1 = 0.0; gCyc2 = 0.0;   // un cambio di input NON ricarica l'EA: le globali restano (classe 816)
+   gCandleDone = 0;
+   gActive = false;                                           // dopo un cambio di input si preme START di nuovo
+   gCsv = "abtg_scalper_ondate_" + IntegerToString(login) + ".csv";
    if(!FileIsExist(gCsv))
      {
       int h = FileOpen(gCsv, FILE_WRITE | FILE_CSV | FILE_ANSI | FILE_SHARE_READ, ';');
       if(h != INVALID_HANDLE)
         {
-         FileWrite(h, "ora_chiusura", "simbolo", "verso", "lotto", "ingresso", "uscita", "secondi", "netto", "cumulato", "motivo");
+         FileWrite(h, "ora_chiusura", "simbolo", "ondata", "verso", "lotto", "ingresso", "uscita", "secondi", "netto", "cumulato", "motivo");
          FileClose(h);
         }
       else Log("CSV non creato (" + IntegerToString(GetLastError()) + "): " + gCsv);
      }
    DrawButton();
    Status();
-   Log("1.03 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
+   Log("1.04 caricato su " + _Symbol + " - conto " + IntegerToString(login) + " - SOLO DEMO - vmin " + DoubleToString(vmin, 2)
        + " tickvalue " + DoubleToString(SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE), 4)
-       + " stopslevel " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL)));
+       + " stopslevel " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL))
+       + " spread " + IntegerToString(SymbolInfoInteger(_Symbol, SYMBOL_SPREAD)) + " pt");
    if(InpAutoStart && (gDir != 0 || InpEntryMode == ENTRY_CANDELA)) StartAll();
    EventSetMillisecondTimer(250);
    return(INIT_SUCCEEDED);
@@ -317,12 +351,18 @@ int OnInit()
 void OnDeinit(const int reason)
   {
    EventKillTimer();
-   // una posizione dello scalper SENZA stop sul server non si lascia nuda quando l'EA viene staccato
-   ulong mine = 0;
-   if(reason != REASON_CHARTCHANGE && ContoAmmesso() && FindMine(mine) && PositionSelectByTicket(mine) && PositionGetDouble(POSITION_SL) == 0.0)
+   // le posizioni dello scalper SENZA stop sul server non si lasciano nude quando l'EA viene staccato
+   if(reason != REASON_CHARTCHANGE && reason != REASON_PARAMETERS && ContoAmmesso())
      {
-      Log("stacco con posizione senza stop sul server: la chiudo (" + IntegerToString((long)mine) + ")");
-      trade.PositionClose(mine);
+      for(int i = PositionsTotal() - 1; i >= 0; i--)
+        {
+         ulong t = PositionGetTicket(i);
+         if(t == 0 || !PositionSelectByTicket(t)) continue;
+         if(PositionGetString(POSITION_SYMBOL) != _Symbol || PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
+         if(PositionGetDouble(POSITION_SL) != 0.0) continue;
+         Log("stacco con posizione senza stop sul server: la chiudo (" + IntegerToString((long)t) + ")");
+         trade.PositionClose(t);
+        }
      }
    ObjectDelete(0, BTN);
    Comment("");
@@ -357,27 +397,43 @@ bool FindManual(ulong &ticket, int &dir)
    return false;
   }
 //+------------------------------------------------------------------+
-bool FindMine(ulong &ticket)
+// tutte le posizioni dello scalper (magic InpMagic, questo simbolo)
+int FindMine(ulong &tickets[])
   {
+   ArrayResize(tickets, 0);
    for(int i = PositionsTotal() - 1; i >= 0; i--)
      {
       ulong t = PositionGetTicket(i);
       if(t == 0 || !PositionSelectByTicket(t)) continue;
       if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
       if(PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
-      ticket = t;
-      return true;
+      int n = ArraySize(tickets);
+      ArrayResize(tickets, n + 1);
+      tickets[n] = t;
      }
-   return false;
+   return ArraySize(tickets);
   }
 //+------------------------------------------------------------------+
-int OpensLastMinute()
+int PosIndex(ulong id)
+  {
+   for(int i = 0; i < ArraySize(gPos); i++) if(gPos[i].id == id) return i;
+   return -1;
+  }
+//+------------------------------------------------------------------+
+void PosRemove(int i)
+  {
+   int n = ArraySize(gPos);
+   for(int k = i; k < n - 1; k++) gPos[k] = gPos[k + 1];
+   ArrayResize(gPos, n - 1);
+  }
+//+------------------------------------------------------------------+
+int WavesLastMinute()
   {
    datetime now = TimeTradeServer();
    int k = 0;
-   for(int i = 0; i < ArraySize(gOpenTimes); i++)
-      if(now - gOpenTimes[i] < 60) gOpenTimes[k++] = gOpenTimes[i];
-   ArrayResize(gOpenTimes, k);
+   for(int i = 0; i < ArraySize(gWaveTimes); i++)
+      if(now - gWaveTimes[i] < 60) gWaveTimes[k++] = gWaveTimes[i];
+   ArrayResize(gWaveTimes, k);
    return k;
   }
 //+------------------------------------------------------------------+
@@ -409,16 +465,28 @@ void WriteCsv(string verso, double lot, double pin, double pout, int secs, doubl
    int h = FileOpen(gCsv, FILE_READ | FILE_WRITE | FILE_CSV | FILE_ANSI | FILE_SHARE_READ, ';');
    if(h == INVALID_HANDLE) { Log("CSV non scrivibile (" + IntegerToString(GetLastError()) + "): riga persa"); return; }
    FileSeek(h, 0, SEEK_END);
-   FileWrite(h, TimeToString(TimeTradeServer(), TIME_DATE | TIME_SECONDS), _Symbol, verso, DoubleToString(lot, 2),
+   FileWrite(h, TimeToString(TimeTradeServer(), TIME_DATE | TIME_SECONDS), _Symbol, IntegerToString(gWaveId), verso, DoubleToString(lot, 2),
              DoubleToString(pin, _Digits), DoubleToString(pout, _Digits), IntegerToString(secs),
              DoubleToString(net, 2), DoubleToString(gCumTotal, 2), why);
    FileClose(h);
   }
 //+------------------------------------------------------------------+
-void AfterClose(double net, string verso, double lot, double pin, double pout, int secs, string why)
+// una posizione dell'ondata e' chiusa e contata: va nel CSV e nel netto dell'ondata
+void AfterPositionClose(double net, string verso, double lot, double pin, double pout, int secs, string why)
   {
-   gCycles++;
+   gPosClosed++;
    gCumTotal += net;
+   gWaveNet += net;
+   WriteCsv(verso, lot, pin, pout, secs, net, why);
+   gLastAction = "chiusa " + verso + " " + why + " netto " + DoubleToString(net, 2);
+   Log(gLastAction + " (ondata " + IntegerToString(gWaveId) + ")");
+  }
+//+------------------------------------------------------------------+
+// l'ondata e' tutta chiusa: anti-martingala e freni sul NETTO DELL'ONDATA
+void AfterWave()
+  {
+   gWaves++;
+   double net = gWaveNet;
    if(net > 0)
      {
       gConsecLoss = 0;
@@ -432,80 +500,94 @@ void AfterClose(double net, string verso, double lot, double pin, double pout, i
       gLossSession += -net;
       if(InpResetOnLoss) { gCumProgress = 0.0; gLot = NormLot(InpLotStart); }
      }
-   WriteCsv(verso, lot, pin, pout, secs, net, why);
-   gLastAction = "chiuso " + why + " netto " + DoubleToString(net, 2) + " -> lotto " + DoubleToString(gLot, 2);
+   gLastAction = "ondata " + IntegerToString(gWaveId) + " chiusa: netto " + DoubleToString(net, 2) + " -> lotto " + DoubleToString(gLot, 2);
    Log(gLastAction);
+   gWaveOpen = false; gWaveNet = 0.0; gWaveN = 0;
    gPauseFromMs = GetTickCount();
    gPauseLenMs = (uint)MathMax(InpPauseMs, 0);
    if(gLossSession >= InpMaxLossSessionEuro) StopAll("perdita di sessione " + DoubleToString(gLossSession, 2) + " >= " + DoubleToString(InpMaxLossSessionEuro, 2));
-   else if(gConsecLoss >= InpMaxConsecutiveLosses) StopAll(IntegerToString(gConsecLoss) + " perdite di fila");
+   else if(gConsecLoss >= InpMaxConsecutiveLosses) StopAll(IntegerToString(gConsecLoss) + " ondate in perdita di fila");
   }
 //+------------------------------------------------------------------+
-// B3: chiude i conti della posizione in corso quando non c'e' piu' (chiusa da noi O dal server).
-// true = niente in sospeso, si puo' procedere.
+// B3: chiude i conti delle posizioni che non ci sono piu' (chiuse da noi O dal server).
+// true = niente in sospeso, si puo' aprire un'ondata nuova.
 bool Settle()
   {
-   if(gOpenPosId == 0) return true;
-   if(PositionSelectByTicket(gOpenPosId)) { gGoneMs = 0; return true; }
-   if(gGoneMs == 0) gGoneMs = GetTickCount();
-   double net = 0, pout = 0; string reason = "";
-   if(!NetOfPosition(gOpenPosId, net, pout, reason))
+   bool pending = false;
+   for(int i = ArraySize(gPos) - 1; i >= 0; i--)
      {
-      if((uint)(GetTickCount() - gGoneMs) < 3000) return false;   // storico in arrivo: aspetta, non apre
-      if(gCloseWhy == "") { StopAll("posizione sparita senza deal di uscita"); gOpenPosId = 0; gGoneMs = 0; return false; }
-      net = gLastProfitSeen; pout = gClosePout; gCloseWhy += " (netto stimato)";
+      if(PositionSelectByTicket(gPos[i].id)) { gPos[i].goneMs = 0; continue; }
+      if(gPos[i].goneMs == 0) gPos[i].goneMs = GetTickCount();
+      double net = 0, pout = 0; string reason = "";
+      string why = gPos[i].closeWhy;
+      if(!NetOfPosition(gPos[i].id, net, pout, reason))
+        {
+         if((uint)(GetTickCount() - gPos[i].goneMs) < 3000) { pending = true; continue; }   // storico in arrivo: aspetta
+         if(why == "") { StopAll("posizione " + IntegerToString((long)gPos[i].id) + " sparita senza deal di uscita"); PosRemove(i); continue; }
+         net = gPos[i].lastProfit; pout = gPos[i].pout; why += " (netto stimato)";
+        }
+      if(why == "") why = (reason != "" ? reason : "server SL/TP");   // closeWhy pieno vince sempre
+      int secs = (int)(TimeTradeServer() - gPos[i].t);
+      AfterPositionClose(net, gPos[i].verso, gPos[i].lot, gPos[i].pin, pout, secs, why);
+      PosRemove(i);
      }
-   string why = (gCloseWhy != "" ? gCloseWhy : (reason != "" ? reason : "server SL/TP"));   // gCloseWhy pieno vince sempre
-   int secs = (int)(TimeTradeServer() - gOpenTime);
-   gOpenPosId = 0; gGoneMs = 0; gCloseWhy = "";
-   AfterClose(net, gOpenVerso, gOpenLot, gOpenPin, pout, secs, why);
-   return true;
+   if(pending) return false;
+   if(ArraySize(gPos) > 0) return false;
+   if(gWaveOpen) AfterWave();
+   return !gWaveOpen;
   }
 //+------------------------------------------------------------------+
-void Adopt(ulong ticket)   // dopo un riavvio: la posizione dello scalper gia' aperta entra nei conti
+void Adopt(ulong ticket)   // dopo un riavvio: una posizione dello scalper gia' aperta entra nei conti
   {
    if(!PositionSelectByTicket(ticket)) return;
-   gOpenPosId = (ulong)PositionGetInteger(POSITION_IDENTIFIER);
-   gOpenVerso = (PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY) ? "LONG" : "SHORT";
-   gOpenLot   = PositionGetDouble(POSITION_VOLUME);
-   gOpenPin   = PositionGetDouble(POSITION_PRICE_OPEN);
-   gOpenTime  = (datetime)PositionGetInteger(POSITION_TIME);
-   gCloseWhy  = ""; gGoneMs = 0;
-   Log("posizione adottata: " + IntegerToString((long)gOpenPosId));
+   ulong id = (ulong)PositionGetInteger(POSITION_IDENTIFIER);
+   if(PosIndex(id) >= 0) return;
+   int n = ArraySize(gPos);
+   ArrayResize(gPos, n + 1);
+   gPos[n].id       = id;
+   gPos[n].verso    = (PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY) ? "LONG" : "SHORT";
+   gPos[n].lot      = PositionGetDouble(POSITION_VOLUME);
+   gPos[n].pin      = PositionGetDouble(POSITION_PRICE_OPEN);
+   gPos[n].t        = (datetime)PositionGetInteger(POSITION_TIME);
+   gPos[n].closeWhy = ""; gPos[n].pout = 0; gPos[n].sentMs = 0; gPos[n].retryMs = 0; gPos[n].goneMs = 0; gPos[n].lastProfit = 0;
+   if(!gWaveOpen) { gWaveOpen = true; gWaveNet = 0.0; gWaveN = 0; gWaveId++; }
+   gWaveN++;
+   Log("posizione adottata: " + IntegerToString((long)id));
   }
 //+------------------------------------------------------------------+
-void ManageOpen(ulong ticket)
+void ManageOne(ulong ticket)
   {
    if(!PositionSelectByTicket(ticket)) return;
-   if(gOpenPosId == 0) Adopt(ticket);
-   if(ticket == gOpenPosId && gCloseWhy != "")            // chiusura gia' mandata: evita il doppio close...
+   ulong id = (ulong)PositionGetInteger(POSITION_IDENTIFIER);
+   int i = PosIndex(id);
+   if(i < 0) { Adopt(ticket); i = PosIndex(id); if(i < 0) return; }
+   if(gPos[i].closeWhy != "")            // chiusura gia' mandata: evita il doppio close...
      {
-      if((uint)(GetTickCount() - gCloseSentMs) < 3000) return;
-      Log("chiusura (" + gCloseWhy + ") mandata 3 s fa, posizione ancora aperta: riprovo");   // ...ma non per sempre (N1)
-      gCloseWhy = "";
+      if((uint)(GetTickCount() - gPos[i].sentMs) < 3000) return;
+      Log("chiusura (" + gPos[i].closeWhy + ") mandata 3 s fa, posizione ancora aperta: riprovo");   // ...ma non per sempre (N1)
+      gPos[i].closeWhy = "";
      }
    double profit = PositionGetDouble(POSITION_PROFIT) + PositionGetDouble(POSITION_SWAP);
-   gLastProfitSeen = profit;
-   datetime opened = (datetime)PositionGetInteger(POSITION_TIME);
-   int age = (int)(TimeTradeServer() - opened);
-   string verso = (PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY) ? "LONG" : "SHORT";
+   gPos[i].lastProfit = profit;
+   int age = (int)(TimeTradeServer() - gPos[i].t);
+   string verso = gPos[i].verso;
    string why = "";
    if(profit >= InpTargetEuro) why = "target";
    else if(profit <= -InpStopEuro) why = "stop";
    else if(age >= InpMaxSeconds) why = "tempo";
    if(why == "") return;
-   if(gCloseRetryMs != 0 && (uint)(GetTickCount() - gCloseRetryMs) < 1000) return;   // chiusura rifiutata: si riprova dopo 1 s
+   if(gPos[i].retryMs != 0 && (uint)(GetTickCount() - gPos[i].retryMs) < 1000) return;   // chiusura rifiutata: si riprova dopo 1 s
    double pout = (verso == "LONG") ? SymbolInfoDouble(_Symbol, SYMBOL_BID) : SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    gRequests++;
    bool okc = trade.PositionClose(ticket); uint rcc = trade.ResultRetcode();
    if(okc && (rcc == TRADE_RETCODE_DONE || rcc == TRADE_RETCODE_PLACED))   // PLACED = accettata, in volo (classe 815)
      {
-      gCloseWhy = why; gClosePout = pout; gCloseRetryMs = 0; gCloseSentMs = GetTickCount();
-      gLastAction = "chiusura mandata (" + why + ")";
+      gPos[i].closeWhy = why; gPos[i].pout = pout; gPos[i].retryMs = 0; gPos[i].sentMs = GetTickCount();
+      gLastAction = "chiusura mandata (" + why + ") " + IntegerToString((long)id);
      }
    else
      {
-      gCloseRetryMs = GetTickCount();
+      gPos[i].retryMs = GetTickCount();
       gLastAction = "chiusura RIFIUTATA (" + IntegerToString((int)rcc) + ") - riprovo fra 1 s";
       Log(gLastAction);
      }
@@ -514,12 +596,15 @@ void ManageOpen(ulong ticket)
 //| CICLO "Alta Velocita'" - formula ORIGINALE di Claudio, copiata    |
 //| riga per riga da ABTG_Cycle.mq5 (CycleSeries, r.560-621), che a  |
 //| sua volta la copia da ABTG_AltaVelocita.mq5 e ABTG_Ciclo.mq5.     |
+//| Fedelta' al bit verificata dal cancello (25/09).                  |
 //|   K1=SMA(St(5),3) K2=SMA(St(14),3) K3=SMA(St(45),14)              |
 //|   K4=SMA(St(75),20)                                               |
 //|   I=(4.1*K1+2.5*K2+K3+4*K4)/11.6 ; CICLO = I - SMA(I,9)           |
 //| St(n) = (close-lowest(low,n))/(highest(high,n)-lowest(low,n))*100 |
 //| Range nullo -> 50 (neutro), come nella fonte.                     |
 //| Indice 0 = barra in corso, 1 = ultima chiusa, 2 = quella prima.   |
+//| Sul grafico: il valore del pannello e' la PENULTIMA colonna       |
+//| dell'indicatore (l'ultima e' la barra in corso, che si muove).    |
 //+------------------------------------------------------------------+
 double StocRaw_Calc(const double close, const double lo, const double hi)
   {
@@ -586,66 +671,64 @@ void CycleUpdate()
    gCycBar = bt; gCyc1 = c[1]; gCyc2 = c[2]; gCycOk = true;
   }
 //+------------------------------------------------------------------+
-void Registra(double lot)   // apertura riuscita: la posizione entra nei conti
+void Registra(double lot)   // apertura riuscita: la posizione entra nei conti dell'ondata
   {
-   gOpenPosId = trade.ResultOrder();
+   ulong id = trade.ResultOrder();
    if(trade.ResultDeal() > 0 && HistoryDealSelect(trade.ResultDeal()))
-      gOpenPosId = (ulong)HistoryDealGetInteger(trade.ResultDeal(), DEAL_POSITION_ID);   // N3: l'identificativo vero, dal deal d'ingresso
-   gOpenVerso = (gDir > 0 ? "LONG" : "SHORT");
-   gOpenLot   = lot;
-   gOpenPin   = trade.ResultPrice();
-   gOpenTime  = TimeTradeServer();
-   gCloseWhy  = ""; gGoneMs = 0; gRejects = 0; gCloseRetryMs = 0;
-   int n = ArraySize(gOpenTimes);
-   ArrayResize(gOpenTimes, n + 1);
-   gOpenTimes[n] = gOpenTime;
+      id = (ulong)HistoryDealGetInteger(trade.ResultDeal(), DEAL_POSITION_ID);   // l'identificativo vero, dal deal d'ingresso
+   int n = ArraySize(gPos);
+   ArrayResize(gPos, n + 1);
+   gPos[n].id       = id;
+   gPos[n].verso    = (gDir > 0 ? "LONG" : "SHORT");
+   gPos[n].lot      = lot;
+   gPos[n].pin      = trade.ResultPrice();
+   gPos[n].t        = TimeTradeServer();
+   gPos[n].closeWhy = ""; gPos[n].pout = 0; gPos[n].sentMs = 0; gPos[n].retryMs = 0; gPos[n].goneMs = 0; gPos[n].lastProfit = 0;
+   gWaveN++;
+   gRejects = 0;
   }
 //+------------------------------------------------------------------+
-void TryOpen()
+// decide il verso secondo il modo scelto; false = niente da fare adesso
+bool DecideDir()
   {
-   if(!ContoAmmesso()) { StopAll("conto non ammesso"); return; }
-   // cancelli PRIMA della decisione del verso (che consuma tick o candela)
-   MqlDateTime dt; TimeToStruct(TimeTradeServer(), dt);
-   if(dt.hour < InpStartHour || dt.hour >= InpEndHour) { gLastAction = "fuori orario"; return; }
-   if(gRequests >= InpMaxRequestsPerDay) { StopAll("tetto richieste " + IntegerToString(InpMaxRequestsPerDay)); return; }
-   if(OpensLastMinute() >= InpMaxTradesPerMinute) { gLastAction = "attesa: tetto aperture al minuto"; return; }
-   if(gPauseLenMs > 0 && (uint)(GetTickCount() - gPauseFromMs) < gPauseLenMs) return;
    if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_TICK)
      {
       int n = ArraySize(gTicks);
-      if(n < MathMax(InpTickWindow, 2)) { gLastAction = "TICK: raccolgo " + IntegerToString(n) + "/" + IntegerToString(InpTickWindow) + " tick"; return; }
+      if(n < MathMax(InpTickWindow, 2)) { gLastAction = "TICK: raccolgo " + IntegerToString(n) + "/" + IntegerToString(InpTickWindow) + " tick"; return false; }
       double mv = (gTicks[n - 1] - gTicks[0]) / _Point;
       int dir = 0;
       if(mv >= InpFirstMovePoints) dir = 1; else if(mv <= -InpFirstMovePoints) dir = -1;
-      if(dir == 0) { gLastAction = "TICK: movimento " + DoubleToString(mv, 1) + " pt, sotto il minimo: aspetto"; return; }
+      if(dir == 0) { gLastAction = "TICK: movimento " + DoubleToString(mv, 1) + " pt, sotto il minimo: aspetto"; return false; }
       ArrayResize(gTicks, 0);   // dopo la decisione si ricomincia a contare
       gDir = dir; gDirFromManual = false;
+      return true;
      }
-   else if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_CICLO)
+   if(InpEntryMode == ENTRY_CANDELA && InpCandleRule == CR_CICLO)
      {
       CycleUpdate();
-      if(!gCycOk) { gLastAction = "CICLO: storia insufficiente su " + EnumToString(InpCandleTF) + ", aspetto"; return; }
+      if(!gCycOk) { gLastAction = "CICLO: storia insufficiente su " + EnumToString(InpCandleTF) + ", aspetto"; return false; }
       int dir = 0;
       if(InpCicloRegola == CICLO_SEGNO)
         {
-         if(MathAbs(gCyc1) < InpCicloMinimo) { gLastAction = "CICLO " + DoubleToString(gCyc1, 2) + " sotto il minimo " + DoubleToString(InpCicloMinimo, 2) + ": aspetto"; return; }
+         if(MathAbs(gCyc1) < InpCicloMinimo) { gLastAction = "CICLO " + DoubleToString(gCyc1, 2) + " sotto il minimo " + DoubleToString(InpCicloMinimo, 2) + ": aspetto"; return false; }
          dir = (gCyc1 >= 0.0) ? 1 : -1;   // verde = long, rosso = short (zero esatto al lato positivo, come in ABTG_Cycle)
         }
       else
         {
-         if(gCycBar == gCandleDone) { gLastAction = "CICLO incrocio: barra gia' usata, aspetto la prossima"; return; }
+         if(gCycBar == gCandleDone) { gLastAction = "CICLO incrocio: barra gia' usata, aspetto la prossima"; return false; }
          gCandleDone = gCycBar;   // una decisione per barra, anche se non c'e' incrocio
-         if(gCyc2 <  0.0 && gCyc1 >= 0.0) dir = 1;    // incrocio verso l'alto = minimo di ciclo formato
+         if(gCyc2 <  0.0 && gCyc1 >= 0.0) dir = 1;         // incrocio verso l'alto = minimo di ciclo formato
          else if(gCyc2 >= 0.0 && gCyc1 <  0.0) dir = -1;   // verso il basso = massimo di ciclo formato
-         if(dir == 0) { gLastAction = "CICLO: nessun incrocio su questa barra (" + DoubleToString(gCyc2, 2) + " -> " + DoubleToString(gCyc1, 2) + ")"; return; }
+         if(dir == 0) { gLastAction = "CICLO: nessun incrocio su questa barra (" + DoubleToString(gCyc2, 2) + " -> " + DoubleToString(gCyc1, 2) + ")"; return false; }
         }
       gDir = dir; gDirFromManual = false;
+      return true;
      }
-   else if(InpEntryMode == ENTRY_CANDELA)
+   if(InpEntryMode == ENTRY_CANDELA)
      {
       datetime bt = iTime(_Symbol, InpCandleTF, 0);
-      if(bt == 0) return;
-      if(bt == gCandleDone) { gLastAction = "candela gia' usata: aspetto la prossima"; return; }
+      if(bt == 0) return false;
+      if(bt == gCandleDone) { gLastAction = "candela gia' usata: aspetto la prossima"; return false; }
       double op = iOpen(_Symbol, InpCandleTF, 0);
       int dir = 0;
       if(InpCandleRule == CR_PREV_CANDLE)
@@ -655,60 +738,80 @@ void TryOpen()
         }
       else
         {
-         if(TimeTradeServer() - bt < InpFirstMoveSeconds) { gLastAction = "candela nuova: leggo il verso fra " + IntegerToString(InpFirstMoveSeconds) + " s"; return; }
+         if(TimeTradeServer() - bt < InpFirstMoveSeconds) { gLastAction = "candela nuova: leggo il verso fra " + IntegerToString(InpFirstMoveSeconds) + " s"; return false; }
          double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
          double mv = (bid - op) / _Point;
          if(mv >= InpFirstMovePoints) dir = 1; else if(mv <= -InpFirstMovePoints) dir = -1;
         }
       gCandleDone = bt;   // una sola decisione per candela, anche se si salta
-      if(dir == 0) { gLastAction = "candela senza verso: saltata"; return; }
+      if(dir == 0) { gLastAction = "candela senza verso: saltata"; return false; }
       gDir = dir; gDirFromManual = false;
+      return true;
      }
-   if(gDir == 0) return;
-   double lot = NormLot(gLot);
+   return (gDir != 0);   // modo MANUALE: verso gia' noto (dalla posizione a mano o fisso)
+  }
+//+------------------------------------------------------------------+
+// apre UNA posizione nel verso gDir; ritorna il retcode (DONE = aperta)
+uint OpenOne(double lot, bool &noStops)
+  {
    double slDist = EuroToPriceDist(InpStopEuro, lot);
    double tpDist = EuroToPriceDist(InpTargetEuro, lot);
    double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
    double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
    double sl = 0, tp = 0;
    bool ok = false;
+   if(!noStops)
+     {
+      gRequests++;
+      if(gDir > 0) { sl = NormalizeDouble(ask - slDist, _Digits); tp = NormalizeDouble(ask + tpDist, _Digits); ok = trade.Buy(lot, _Symbol, 0.0, sl, tp, "SCALPER LONG"); }
+      else         { sl = NormalizeDouble(bid + slDist, _Digits); tp = NormalizeDouble(bid - tpDist, _Digits); ok = trade.Sell(lot, _Symbol, 0.0, sl, tp, "SCALPER SHORT"); }
+      if(ok && trade.ResultRetcode() == TRADE_RETCODE_DONE) { Registra(lot); return TRADE_RETCODE_DONE; }
+      if(trade.ResultRetcode() != TRADE_RETCODE_INVALID_STOPS) return trade.ResultRetcode();
+      noStops = true;   // stop troppo vicino al minimo del broker: da qui in poi l'ondata va senza stop sul server (stop morbido)
+     }
    gRequests++;
-   if(gDir > 0)
+   ok = (gDir > 0) ? trade.Buy(lot, _Symbol, 0.0, 0.0, 0.0, "SCALPER LONG (stop morbido)")
+                   : trade.Sell(lot, _Symbol, 0.0, 0.0, 0.0, "SCALPER SHORT (stop morbido)");
+   if(ok && trade.ResultRetcode() == TRADE_RETCODE_DONE) { Registra(lot); return TRADE_RETCODE_DONE; }
+   return trade.ResultRetcode();
+  }
+//+------------------------------------------------------------------+
+void TryOpenWave()
+  {
+   if(!ContoAmmesso()) { StopAll("conto non ammesso"); return; }
+   // cancelli PRIMA della decisione del verso (che consuma tick o candela)
+   MqlDateTime dt; TimeToStruct(TimeTradeServer(), dt);
+   if(dt.hour < InpStartHour || dt.hour >= InpEndHour) { gLastAction = "fuori orario"; return; }
+   int np = Positions();
+   if(gRequests + 2 * np > InpMaxRequestsPerDay) { StopAll("tetto richieste " + IntegerToString(InpMaxRequestsPerDay) + " (un'ondata intera non ci sta)"); return; }
+   if(WavesLastMinute() >= InpMaxTradesPerMinute) { gLastAction = "attesa: tetto ondate al minuto"; return; }
+   if(gPauseLenMs > 0 && (uint)(GetTickCount() - gPauseFromMs) < gPauseLenMs) return;
+   if(!DecideDir()) return;
+   if(gDir == 0) return;
+   double lot = NormLot(gLot);
+   gWaveOpen = true; gWaveNet = 0.0; gWaveN = 0; gWaveId++;
+   int n = ArraySize(gWaveTimes);
+   ArrayResize(gWaveTimes, n + 1);
+   gWaveTimes[n] = TimeTradeServer();
+   bool noStops = false;
+   uint rc = TRADE_RETCODE_DONE;
+   int aperte = 0;
+   for(int k = 0; k < np; k++)
      {
-      sl = NormalizeDouble(ask - slDist, _Digits);
-      tp = NormalizeDouble(ask + tpDist, _Digits);
-      ok = trade.Buy(lot, _Symbol, 0.0, sl, tp, "SCALPER LONG");
+      rc = OpenOne(lot, noStops);
+      if(rc != TRADE_RETCODE_DONE) break;   // un rifiuto ferma l'ondata: si va avanti con quelle aperte
+      aperte++;
      }
-   else
+   if(aperte > 0)
      {
-      sl = NormalizeDouble(bid + slDist, _Digits);
-      tp = NormalizeDouble(bid - tpDist, _Digits);
-      ok = trade.Sell(lot, _Symbol, 0.0, sl, tp, "SCALPER SHORT");
-     }
-   if(ok && trade.ResultRetcode() == TRADE_RETCODE_DONE)
-     {
-      Registra(lot);
-      gLastAction = "aperto " + (gDir > 0 ? "LONG " : "SHORT ") + DoubleToString(lot, 2) + " sl " + DoubleToString(sl, _Digits) + " tp " + DoubleToString(tp, _Digits);
+      gLastAction = "ondata " + IntegerToString(gWaveId) + ": aperte " + IntegerToString(aperte) + "/" + IntegerToString(np) + " " + (gDir > 0 ? "LONG" : "SHORT") + " x " + DoubleToString(lot, 2)
+                    + (noStops ? " SENZA stop sul server (stop morbido)" : "") + (rc != TRADE_RETCODE_DONE ? " - poi rifiuto " + IntegerToString((int)rc) : "");
       Log(gLastAction);
       return;
      }
-   // se lo stop e' rifiutato (troppo vicino), UN tentativo senza stop sul server: lo stop morbido resta
-   uint rc = trade.ResultRetcode();
-   if(rc == TRADE_RETCODE_INVALID_STOPS)
-     {
-      gRequests++;
-      ok = (gDir > 0) ? trade.Buy(lot, _Symbol, 0.0, 0.0, 0.0, "SCALPER LONG (stop morbido)")
-                      : trade.Sell(lot, _Symbol, 0.0, 0.0, 0.0, "SCALPER SHORT (stop morbido)");
-      if(ok && trade.ResultRetcode() == TRADE_RETCODE_DONE)
-        {
-         Registra(lot);
-         gLastAction = "aperto SENZA stop sul server (troppo vicino al minimo del broker): stop morbido a -" + DoubleToString(InpStopEuro, 2) + " EUR";
-         Log(gLastAction);
-         return;
-        }
-      rc = trade.ResultRetcode();
-     }
-   // rifiuto: pausa di 5 s, e al quinto rifiuto di fila STOP (niente raffiche verso il server)
+   // nessuna aperta: l'ondata non e' mai esistita
+   gWaveOpen = false; gWaveId--;
+   ArrayResize(gWaveTimes, n);
    gPauseFromMs = GetTickCount();
    gPauseLenMs = 5000;
    gRejects++;
@@ -735,13 +838,15 @@ void Work()
       else if(gDirFromManual && manual && md != gDir) { gDir = md; gLastAction = "verso aggiornato dalla tua posizione: " + (md > 0 ? "LONG" : "SHORT"); Log(gLastAction); }
       if(gActive && gDirFromManual && InpStopWhenManualClosed && !manual) { StopAll("posizione manuale chiusa"); gDir = 0; gDirFromManual = false; }
      }
-   // B3/B4: prima si chiudono i conti della posizione appena sparita, poi si gestisce quella aperta, SEMPRE (anche da FERMO)
-   if(!Settle()) { Status(); return; }
-   ulong mine = 0;
-   if(FindMine(mine)) { ManageOpen(mine); Status(); return; }
+   // B3/B4: prima si chiudono i conti delle posizioni sparite, poi si gestiscono quelle aperte, SEMPRE (anche da FERMO)
+   bool settled = Settle();
+   ulong mine[];
+   int nm = FindMine(mine);
+   if(nm > 0) { for(int i = 0; i < nm; i++) ManageOne(mine[i]); Status(); return; }
+   if(!settled) { Status(); return; }
    if(!gActive) { Status(); return; }
    if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !MQLInfoInteger(MQL_TRADE_ALLOWED)) { gLastAction = "Algo Trading spento"; Status(); return; }
-   TryOpen();
+   TryOpenWave();
    Status();
   }
 //+------------------------------------------------------------------+
