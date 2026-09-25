@@ -20,7 +20,7 @@ Finestra PowerShell **sul VPS**. La riga non tocca niente: stampa PID, titolo e 
 ```powershell
 Get-Process terminal64 | Select-Object Id, MainWindowTitle, Path | Format-Table -AutoSize
 ```
-Il **piccolo** è quello con `Path` = `C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe` (senza `-V3`) e **50503392** nel titolo. Il **100k** ha `Path` che finisce in `BCM Markets MT5 Terminal -V3\terminal64.exe` e **50504263** nel titolo.
+Il **piccolo** è la riga la cui colonna Path sta nella cartella del programma BCM **senza** il suffisso V3, con **50503392** nel titolo. Il **100k** è la riga la cui cartella **finisce con il suffisso V3**, con **50504263** nel titolo.
 
 ---
 
