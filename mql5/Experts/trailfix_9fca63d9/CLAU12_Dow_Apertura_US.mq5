@@ -1834,7 +1834,7 @@ void ManageOneTicket(ulong ticket, double bid, double ask)
       //  quello vecchio e al tick dopo si rimanda la stessa richiesta (38 rifiuti
       //  in 16,9 s). Qui si replica la regola del server PRIMA di inviare: le
       //  modifiche che sarebbero passate partono identiche, le altre non partono.
-      double stopsDist = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL) * _Point;
+      double stopsDist = ((double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL) - 0.5) * _Point;  // -0,5 pt: tolleranza FP (classe 820)
       if(type == POSITION_TYPE_BUY)
         {
          double newSL = TrailStopBuy(bid);

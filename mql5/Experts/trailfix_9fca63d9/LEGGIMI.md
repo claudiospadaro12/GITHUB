@@ -28,8 +28,14 @@ richiede la firma di Claudio.
   a ogni tick). Se lo stop proposto e' dal lato sbagliato non parte nessuna richiesta, e
   `TrailRinvioLog` scrive una riga per ticket per candela di `InpTrailTF`. Niente Parte B, niente
   `input` nuovi, nessun altro cambio. Piu' un commento ASCII in testa.
+- **Una riga diversa dal referto (cancello del 25/09 notte, classi 820/825):** `stopsDist =
+  ((double)StopsLevel - 0.5) * _Point`, mezzo punto di tolleranza. Senza, con `StopsLevel = k > 0`
+  la guardia bloccherebbe al confine esatto il 40-71% delle modify che il server accetta (k = 1-10,
+  100.000 coppie di prezzi). Con `StopsLevel=0` (FTMO oggi) il comportamento e' identico al
+  referto: passa `SL == Bid`, si blocca lo stop anche solo un tick oltre il prezzo.
 - **Diff:** in ogni file cambiano due punti: la testa (+16) e il blocco trailing piu' la funzione
-  nuova (+34 / -2). Il file al pin si ricostruisce byte per byte togliendo queste due parti.
+  nuova (+35 / -2; 51 righe aggiunte in tutto). Il file al pin si ricostruisce byte per byte
+  togliendo queste due parti.
 
 ## Cosa manca per portarli in campo
 
@@ -40,9 +46,14 @@ richiede la firma di Claudio.
    - finestra che contenga l'**11/09 e il 17/09**, e nella corsa del pin le righe `invalid stops`
      devono essere **N > 0**. Se sono 0, "deal uguali" non prova niente;
    - superata se la **lista dei deal e' identica al centesimo** e le righe `invalid stops` passano
-     **da N a 0**. Se i deal cambiano, la guardia non e' neutra e non si schiera. Il caso da
-     guardare e' uno stop esattamente uguale al Bid/Ask con `StopsLevel=0`: la guardia (`>=`) lo
-     lascia passare.
+     **da N a 0**. Se i deal cambiano, la guardia non e' neutra e non si schiera. La guardia puo'
+     solo NON mandare una richiesta che il pin mandava: quelle che lascia passare (compreso lo stop
+     esattamente uguale al Bid/Ask con `StopsLevel=0`) sono identiche al pin e non possono cambiare
+     i deal. La neutralita' si rompe solo se la guardia blocca una modify che il tester avrebbe
+     accettato: e' quello che la prova deve cercare, e il punto a rischio e' il confine esatto
+     `Bid - SL == StopsLevel` (classe 820, chiuso dalla tolleranza di mezzo punto). Lo `StopsLevel`
+     del simbolo usato sul PC di backtest va scritto nel referto della prova (sui BCM e' [NON
+     MISURATO]).
 3. **Ricompilazione CLAU12 sul terminale FTMO `541452707` (`C:\FTMO`)**, NON sui BCM:
    - si fa **senza posizioni aperte** delle sedie `770101`, `770105`, `770202`, `770260`, perche' la
      ricompilazione ricarica l'EA;
@@ -53,8 +64,14 @@ richiede la firma di Claudio.
 
 ## Limiti noti
 
-- `TrailRinvioLog` scrive solo se `InpVerbose=true`, che e' il valore nei tre preset FTMO. Con
+- `TrailRinvioLog` scrive solo se `InpVerbose=true`, che e' il valore nei quattro preset FTMO del repo
+  (`770101`, `770105`, `770202`, `770260`; quelli caricati sui grafici [NON VERIFICATO]). Con
   `false` non scrive niente, ma la guardia funziona lo stesso.
 - La memoria anti-ripetizione tiene un solo ticket. Con due posizioni aperte insieme sullo stesso
   grafico (stesso magic) le righe di log potrebbero alternarsi a ogni tick. Sarebbe solo rumore nel
   giornale: al server non parte nessuna richiesta.
+
+## Fuori perimetro, detto per non dimenticarlo
+Lo stesso difetto (raffica di modify su [invalid stops]) e' stato visto anche sui BCM, reale
+`10105439` compreso (11/09 e 17/09): questo pacchetto copre SOLO le CLAU12 su FTMO. I BCM restano
+come sono finche' Claudio non decide.

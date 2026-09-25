@@ -320,4 +320,6 @@ Fino ad allora il **rischio vivo misurato** = raffiche da **28-39 righe stampate
 ritmo medio** o con **una sola al ritmo massimo**; probabilita' **bassa** [INFERITO]; conseguenza
 [NON VERIFICATO].
 
+**Erratum 25/09 notte (cancello del pacchetto `mql5/Experts/trailfix_9fca63d9/`, classi 820/825):** la riga `stopsDist = StopsLevel * _Point` del diff qui sopra blocca al confine esatto, in virgola mobile, il 40-71% delle modify che il server accetta quando `StopsLevel = k > 0` (k 1-10, misurato su 100.000 coppie di prezzi): nel pacchetto e' `((double)StopsLevel - 0.5) * _Point`. E il contro-esempio "SL == Bid con StopsLevel 0" e' dal lato sbagliato: quello stop la guardia lo lascia passare, quindi pin e pin+A mandano la stessa richiesta e i deal non possono cambiare; la neutralita' si rompe solo se la guardia BLOCCA una modify che il tester accetterebbe.
+
 _Cancello: strato 1 OK; strato 2 FAIL (4+3) -> FAIL (solo r.179-182, `770260`) -> corretto col testo del cancello; **PASS** condizionato a questa sostituzione, dichiarato dal cancello stesso._
