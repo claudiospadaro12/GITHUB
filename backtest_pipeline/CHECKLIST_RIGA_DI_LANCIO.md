@@ -35409,3 +35409,7 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 📸 CLASSE 788 — **elenco CHIUSO di rimozione ricavato dalla foto del profilo salvato (.chr), senza spazzata del terminale vivo** (parente della 786)
 - **Caso (25/09, `report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`)**: l'elenco delle 15 sedie da togliere veniva dai `.chr` (foto del profilo salvato: piccolo 23/09 19:35), che non vedono un EA attaccato dopo l'ultimo salvataggio. Precedente reale: 24/09, `Nasdaq_PreOpen_Breakout_EA` su NASUSD M5 del 100k, fuori dai `.chr`, aveva operato. Preso dal cancello (strato 2).
 - **Regola**: ogni istruzione "togli queste sedie" si chiude con una SPAZZATA per simbolo nel terminale vivo, e dichiara la data della foto da cui viene l'elenco.
+
+## 🧪 CLASSE 789 — **il banco costruito sulla forma ATTESA del file, non su quella MISURATA dal referto che la legge ogni notte** (parente della 236-bis)
+- **Caso (25/09, `backtest_pipeline/righe/SOSPENDI_SEDIE_PICCOLO_CHR.ps1` v1)**: nel banco un grafico "senza EA" non aveva nessun blocco `<expert>`, mentre `CODA_08` misura ogni notte che MT5 lo scrive sempre (vuoto o col nome `Main`: "senza <expert> 0" in tutte le cartelle). Cosi' la spazzata dichiarava "EA fuori tabella" su grafici senza EA e chiedeva a Claudio di confermare la rimozione di EA inesistenti. Preso dal cancello (strato 2), riprodotto.
+- **Regola**: ogni banco su un formato MT5 prende i suoi casi limite (grafico senza EA, EA senza input, codifiche) dai conteggi dei referti CODA, non da come ce li immaginiamo.
