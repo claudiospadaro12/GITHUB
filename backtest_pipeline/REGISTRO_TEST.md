@@ -4043,6 +4043,11 @@ Sul MERITO, il certificato resta aperto di una casella.**
    non sono MAI stati messi ad asse**: per il certificato il lato short dell'apertura e' **NON ANCORA
    MISURATO**, non morto. Round preparato: **R251** (`prove/R251*`), quadro in
    `report/LATO_SHORT_DAX_APERTURA_2026-09-25.md`.
+   🆕 **R251 CORSO il 25/09** (`report/REFERTO_R251_2026-09-25.md`): short identico al long e ritocchi d'uscita
+   **BOCCIATI PER RISCHIO** (DD_fisso IS 10,4-24,2% contro 5,79% del long); filtro Supertrend: R1-R3 passati su
+   H12 e D1, merito **SOSPESO** (n OOS < 150), H12 unica cella M1-M3 e isolata -> *"NON C'E' UNA CONFIGURAZIONE
+   ROBUSTA"*. Per il certificato resta **NON ANCORA MISURATO**: mancano il punto 5 (TF mai cambiato) e il punto 4
+   sul filtro (U30USD, NASUSD).
    ✏️ **E sulla sedia viva `770101` (25/09, cancello di R251, classe 793)**: col trailing acceso la parziale
    non e' a 1R ma a **mediana 0,57R** (ripiego ATR r.2356, misurato su R246e 794611). I numeri di contratto
    restano validi (il backtest lo contiene); sbagliata era la descrizione (`LA_BANDA_BASSA` r.406-408, errata).
