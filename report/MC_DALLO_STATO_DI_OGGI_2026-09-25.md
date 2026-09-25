@@ -262,3 +262,6 @@ si passa da 74,6% a **62,4%** (−12,2, lo stop di oggi). Con la semantica di ca
 python3 backtest_pipeline/mc_challenge_ftmo_stato.py --autotest   # 17 controlli, esce 0 se verde
 python3 backtest_pipeline/mc_challenge_ftmo_stato.py              # tabelle di §2, §4, §5
 ```
+
+---
+_Cancello: strato 1 OK; strato 2 FAIL alla prima passata su `6ec2c2bb` (M1 cap presentato come tetto, classe 645 · M2 blocco del Guardian "30 giorni" invece che senza scadenza, classe 796 nuova · M3 righe di HEAD invece della v1.12 in campo · M4 1,00% etichettato "firmato" ma mai firmato · M5 manca il limite Forbidden Practices sul cambio di taglia · M6 minori) -> FAIL alla seconda passata su `6f6f8e82` (3 righe vecchie nel docstring dello script) -> **PASS** su `7841707b`. Numeri mai cambiati: riprodotti al decimale i MC del 23/09 e del 24/09 e la V1; autotest 17/17; 57,2 · 75,3 · 88,1 e il 70,84 di confronto rifatti dal cancello. Nessuna proposta di taglia, cap o Guardian: i numeri sono per la decisione di Claudio._

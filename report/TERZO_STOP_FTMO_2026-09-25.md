@@ -41,3 +41,6 @@ Sola lettura: nessun EA, preset o conto toccato.
 ## 4. Il quadro dei tre stop
 22/09 `PRIMO_STOP_FTMO` · 24/09 `SECONDO_STOP_FTMO` (`770411`, −1.668,46; −1.621,03 era la perdita allo SL) · 25/09 questo (`770101`, −1.552,80).
 Tre stop pieni in cinque giornate di challenge, tutti eseguiti come da contratto.
+
+---
+_Cancello: strato 1 OK; strato 2 FAIL alla prima passata su `dcb8e3a8` (4 difetti: blocco del Guardian letto come "30 giorni" invece che SENZA scadenza, classe 796 nuova; cap 3,25/4,00 presentato come tetto sulla terza posizione mentre i pendenti passano, classe 645; righe del codice di HEAD invece della v1.12 in campo; secondo stop a -1.621,03 invece di -1.668,46) -> **PASS alla seconda passata** su `6f6f8e82`. Tutti i numeri (75.090,72 · 73.588,91 · 72.117,13 · 1.029 / 443 · 2.447,20 / 1.247,20 / 2.047,20) ricalcolati e invariati; saldo e stop confermati in modo indipendente dallo screenshot di Claudio (Storico -> Posizioni, 17:37). Nessuna taglia, cap o preset toccato: sono firme di Claudio._
