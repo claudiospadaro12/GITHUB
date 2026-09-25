@@ -20,7 +20,9 @@
 #             InpTrailMode=1, InpTrailTF=5, InpTrailStartR=0, r.2440-2451).
 #             Gemella G1 di R251b cella 50 e R251d cella 1,0.
 #   cella 0 = trailing SPENTO: uscita a stop, BE dopo TP1, TP finale a 3R
-#             o chiusura delle 17:30. Parziale e BE restano accesi.
+#             o chiusura delle 17:30. Parziale e BE restano accesi,
+#             e la parziale scatta a 1R VERO (a trailing acceso quasi
+#             sempre prima: ripiego ATR r.2356, testa par. 6).
 #
 #  ATTESA, SCRITTA PRIMA
 #   - G2: la cella 0 deve differire dall'ancora almeno nel Profit.

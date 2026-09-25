@@ -19,9 +19,11 @@
 #   Il TP dell'ordine e' entry - dist x TpTotalR(), e TpTotalR() = 3 x
 #   InpTP1_R (r.2085). Quindi questo asse muove INSIEME il primo
 #   obiettivo (parziale 50% + BE) e il TP FINALE del runner:
-#     cella 0,5 -> parziale a 0,5R, TP finale 1,5R
-#     cella 1,0 -> parziale a 1,0R, TP finale 3,0R   = L'ANCORA
-#     cella 1,5 -> parziale a 1,5R, TP finale 4,5R
+#     cella 0,5 -> parziale a 0,5 x riskDist, TP finale 1,5R
+#     cella 1,0 -> parziale a 1,0 x riskDist, TP finale 3,0R   = L'ANCORA
+#     cella 1,5 -> parziale a 1,5 x riskDist, TP finale 4,5R
+#     (riskDist = R iniziale, oppure 1,5 x ATR M5 dopo che il trailing
+#     ha passato l'ingresso, r.2356; testa par. 6)
 #   Un TP del runner indipendente NON esiste in questo EA: servirebbe una
 #   modifica al codice, fuori dal round. La cella 1,0 e' la gemella G1 di
 #   R251b cella 50 e R251c cella 1.
@@ -30,9 +32,11 @@
 #   gambe; qui si guarda anche OLTRE (1,5), che sul long nessuno ha girato.
 #
 #  ATTESA, SCRITTA PRIMA
-#   - G2 (meccanico): Trades(0,5) >= Trades(1,0) >= Trades(1,5). Piu'
-#     basso il primo obiettivo, piu' posizioni lo toccano, piu' deal di
-#     uscita. Se l'ordine si rovescia, il pin non e' arrivato.
+#   - G2 (meccanico): Trades(0,5) >= Trades(1,0) >= Trades(1,5) CON
+#     Trades(0,5) > Trades(1,5), e Profit NON identico al centesimo fra le
+#     tre celle. Piu' basso il primo obiettivo, piu' posizioni lo toccano,
+#     piu' deal di uscita. Se l'ordine si rovescia, o se le tre celle
+#     sono uguali, il pin non e' arrivato: NON ESEGUITA.
 #   - PF: l'ipotesi [INFERITA] di LATO_SHORT par. 3 (discesa veloce,
 #     rimbalzo a V) predice 0,5 migliore; il precedente del long (R202B)
 #     predice 1,0. Nessun salvataggio atteso: |delta PF| <= 0,12.

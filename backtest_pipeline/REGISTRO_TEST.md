@@ -4043,6 +4043,9 @@ Sul MERITO, il certificato resta aperto di una casella.**
    non sono MAI stati messi ad asse**: per il certificato il lato short dell'apertura e' **NON ANCORA
    MISURATO**, non morto. Round preparato: **R251** (`prove/R251*`), quadro in
    `report/LATO_SHORT_DAX_APERTURA_2026-09-25.md`.
+   ✏️ **E sulla sedia viva `770101` (25/09, cancello di R251, classe 793)**: col trailing acceso la parziale
+   non e' a 1R ma a **mediana 0,57R** (ripiego ATR r.2356, misurato su R246e 794611). I numeri di contratto
+   restano validi (il backtest lo contiene); sbagliata era la descrizione (`LA_BANDA_BASSA` r.406-408, errata).
 
 ### 🕳️ LA CASELLA LIBERA: **`InpSessionHour` non è MAI stato messo ad asse**
 Su 2.376 CSV, **230** portano la colonna `InpSessionHour`. Di questi: `InpRangeMinutes` ad asse in

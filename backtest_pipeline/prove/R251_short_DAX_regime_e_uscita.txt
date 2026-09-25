@@ -187,14 +187,21 @@
 #   - IL "TP DEL RUNNER" NON E' UNA MANOPOLA DI QUESTO EA: il TP
 #     dell'ordine e' entry -/+ dist x TpTotalR(), e TpTotalR = 3 x
 #     InpTP1_R (r.2085). Quindi l'asse InpTP1_R di R251d sposta INSIEME
-#     il primo obiettivo e il TP finale (0,5 -> 1,5R; 1,0 -> 3R; 1,5 ->
-#     4,5R). Un TP del runner indipendente richiede una modifica all'EA:
+#     il TP finale (0,5 -> 1,5R; 1,0 -> 3R; 1,5 -> 4,5R dell'R INIZIALE,
+#     fissato all'ordine) e il primo obiettivo, che vale X x R iniziale
+#     solo finche' il trailing non ha portato lo stop oltre l'ingresso,
+#     e X x 1,5 x ATR14(M5) dopo (r.2356). Un TP del runner indipendente richiede una modifica all'EA:
 #     fuori da questo round (niente EA toccati).
 #   - InpUseTrailing = 0: uscita solo a stop / BE / TP finale / chiusura
 #     delle 17:30. Il trailing acceso e' PREVBAR su M5 armato subito
 #     (InpTrailMode=1, InpTrailTF=5, InpTrailStartR=0; r.2440-2451): per
 #     uno short porta lo stop al massimo della candela M5 precedente solo
 #     quando quel massimo e' gia' sotto l'ingresso.
+#   >>> IL TRAILING SPOSTA ANCHE LA PARZIALE: con lo stop oltre
+#     l'ingresso InitialSL (r.2488) torna lo stop corrente, riskDist <= 0,
+#     e r.2356 ripiega su 1,5 x ATR14(M5). Misurato sul long (R246e
+#     794611): parziale a mediana 0,57R, 73% sotto 0,8R. Quindi R251c
+#     cella 0 cambia DUE cose (niente trailing E parziale a 1R vero).
 #   - NESSUNA di queste manopole tocca l'ingresso: le operazioni aperte
 #     sono le STESSE in tutte le celle B (stesso range, stessa rottura,
 #     stesso slot; il lotto cambia col saldo ma non va mai a zero a 1% su
@@ -263,9 +270,11 @@
 #       filtro ha bloccato tutto: NON LEGGIBILE, si guarda SupertrendDir.
 #     - R251b: Trades(cella 0) < Trades(cella 50). Uguali = la parziale
 #       non e' mai scattata o il pin non e' arrivato.
-#     - R251d: Trades(0,5) >= Trades(1,0) >= Trades(1,5) (piu' basso il
-#       primo obiettivo, piu' posizioni lo toccano, piu' deal). Se si
-#       rovescia, il pin non e' arrivato.
+#     - R251d: Trades(0,5) >= Trades(1,0) >= Trades(1,5) CON
+#       Trades(0,5) > Trades(1,5), e Profit NON identico al centesimo fra
+#       le tre celle (piu' basso il primo obiettivo, piu' posizioni lo
+#       toccano, piu' deal). Se si rovescia, o se le tre celle sono
+#       uguali, il pin non e' arrivato: NON ESEGUITA.
 #     - R251c: la cella 0 deve differire dall'ancora almeno nel Profit.
 #
 # =====================================================================
@@ -356,6 +365,12 @@
 #        l'IS guadagni (regola B): chiede che l'effetto non si ribalti.
 #        Un effetto che si ribalta e' il nono ribaltamento IS->OOS di
 #        casa, non un edge.
+#    M2/M3 fra celle con rapporto deal/posizioni diverso (tutte le B
+#        tranne le gemelle): il PF sulle uscite e' distorto (classe 550).
+#        Il verso va confermato da Profit E DD_fisso (immuni); se il PF
+#        dice un verso e Profit/DD_fisso l'altro, il cancello e' NON
+#        RISOLTO. PROMOSSA vale solo se al passo 1 del par. 13 il PF
+#        ricontato per position_id conferma M1-M3.
 #    M4  ALTOPIANO, MAI IL PICCO:
 #        - strada A (5 celle ordinate H4 < H6 < H8 < H12 < D1): servono
 #          ALMENO 3 CELLE CONTIGUE che passano R1-R3 e M1-M3; si sceglie

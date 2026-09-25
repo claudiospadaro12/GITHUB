@@ -406,6 +406,7 @@ al contrario. **4 passate la chiudono.**
 🔬 **L'ho cercata, la candidata più probabile a rompere l'invarianza, e non rompe**: l'obiettivo
 della **parziale** (r.1909) usa il `riskDist` calcolato con `partialDone = false`, che torna `curSL`,
 cioè lo stop **vero** del range — **non passa dall'ATR**.
+> ✏️ **ERRATA 25/09/2026 (cancello di R251)**: vero solo **finché il trailing non ha portato lo stop oltre l'ingresso**. Da lì `InitialSL()` (oggi r.2488-2494) torna lo stop corrente, `riskDist <= 0` e r.2356 ripiega su `AtrValue()*InpAtrSlMult` = 1,5 x ATR14 del **grafico**. Misurato sul long (per-trade `R246/PERTRADE/..._794611.csv`): la parziale scatta a **mediana 0,57R**, il 73% sotto 0,8R. Quindi il TF del grafico **non è del tutto inerte**: alimenta il punto della parziale. I numeri di contratto restano validi (i backtest contengono già questo comportamento); sbagliata era la **descrizione**.
 
 **Attesa dichiarata:** (a) **IDENTITÀ** con R47a alla quinta cifra — IS `175 / 1,12634 / 5,4362%`,
 OOS `270 / 1,39709 / 7,2328%` ⇒ *"il TF d'ingresso è INERTE, misurato oltre che letto"*, casella 5
