@@ -20,7 +20,7 @@ GUARDIAN IN CAMPO (CODA_08 del 25/09, chart06.chr modificato il 24/09 08:06,
 = mql5/Presets/ABTG_Guardian_FTMO_2Step.set):
   InpStartBalance=80000  InpDailyLossPct=4.5  InpTotalDDPct=9.3  InpDDMode=0
   InpDailyPausePct=3.5   InpMaxOpenRiskPct=4.00  InpAction=0 (CHIUDI+BLOCCA)
-  -> emergenza totale a 72.560 EUR: "CHALLENGE FERMATA" (GV_FAILED, pausa 30 gg).
+  -> emergenza totale a 72.560 EUR: "CHALLENGE FERMATA" (GV_FAILED, blocco SENZA scadenza: la GV non si azzera mai, classe 796).
      Nel modello e' un esito a se': FERMATA_GUARDIAN (conto NON violato, corsa finita).
 
 COSA C'E' DI NUOVO RISPETTO A mc_challenge_ftmo.simula():
@@ -36,12 +36,13 @@ COSA C'E' DI NUOVO RISPETTO A mc_challenge_ftmo.simula():
   come m.simula(): e' la prima cosa che --autotest verifica.
 
 IL CAP C1 (InpMaxOpenRiskPct), LETTO NEL CODICE:
-  ABTG_Guardian.mq5 r.789: il flag si accende se riskPct >= cap, con riskPct =
+  ABTG_Guardian.mq5 r.789 a HEAD (v1.12 in campo: r.444): il flag si accende se riskPct >= cap, con riskPct =
   somma entry->SL delle posizioni APERTE; ABTG_PausaGuardian.mqh
   ABTG_MotivoStop_Calc(): l'EA rifiuta l'ingresso se il flag e' acceso.
   NON e' prospettico. Quindi a 2,00% per sedia:
-    cap 4,00 -> una posizione (2,0) libera; due (4,0 se la somma e' >= 4,00) bloccano la TERZA
-    cap 3,25 -> una posizione (2,0 < 3,25) libera -> entra la SECONDA; due (4,0) bloccano la TERZA
+    cap 4,00 -> una posizione (2,0) libera; due (4,0 se la somma e' >= 4,00) bloccano l'INVIO di un 3o ordine
+    cap 3,25 -> una posizione (2,0 < 3,25) libera -> entra la SECONDA; due (4,0) bloccano l'INVIO di un 3o ordine
+    (classe 645: un PENDENTE piazzato a cap libero scatta lo stesso; le sei sedie FTMO entrano per pendente)
   Il per-trade NON ha l'ora d'ingresso: la sovrapposizione non si misura. Il
   modello ne da' due LIMITI ESTREMI (tutte le operazioni della giornata
   sovrapposte, ordine = ora della prima chiusura):

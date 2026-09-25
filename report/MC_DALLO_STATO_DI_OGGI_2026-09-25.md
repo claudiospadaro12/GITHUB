@@ -66,7 +66,7 @@ a 2,00%).
 |---|---:|---|
 | saldo a inizio 25/09 | **76.643,52** | riga Guardian del 24/09 23:55 (`eq=76643.52 totDD=4.20%`), `CODA_09` del 25/09 |
 | stop del 25/09 (`770101`) | −1.552,80 | `TERZO_STOP_FTMO_2026-09-25.md` §1 |
-| scarto fra il 76.573,86 del 24/09 e il 76.643,52 | **+69,66** | [DERIVATO, non ricontato dal deal]: la 770101 del 24/09 (#170199888, BUY LIMIT retest 10,70 lotti, CODA_09 25/09) chiusa in positivo |
+| scarto fra il 76.573,86 del 24/09 e il 76.643,52 | **+69,66** | [CONFERMATO: screenshot di Claudio, Storico → Posizioni 17:37, GER40 buy 10,70 +69,66]: la 770101 del 24/09 (#170199888, BUY LIMIT retest 10,70 lotti, CODA_09 25/09) chiusa in positivo |
 | **saldo di partenza** | **75.090,72** = **0,938634** del 80.000 | ✅ torna con il referto |
 | DD totale statico | **6,14%** | ✅ torna |
 | target fase 1 (+10% = 88.000) | mancano **12.909,28** = **+17,19%** dal saldo | |
