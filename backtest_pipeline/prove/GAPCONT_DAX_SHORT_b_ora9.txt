@@ -1,0 +1,74 @@
+# =====================================================================
+#  GAPCONT_DAX_SHORT_b -- CONTINUAZIONE DEL GAP-DOWN ALL'APERTURA XETRA
+#  EA: ABTG_GapContinuation
+#  D30EUR, SOLO SHORT, ORA 9 / chiusura 17:30 (= orologio d'INVERNO).
+#
+#  TUTTO IL RAGIONAMENTO, LA SONDA, I CONTRO-ESEMPI, I PIN E I CANCELLI
+#  STANNO NEL FILE DI TESTA: prove/GAPCONT_DAX_SHORT_a_ora8.txt.
+#  Qui solo le differenze (diff eseguito: 4 righe di pin):
+#    InpSessionOpenHour 9 (era 8), InpSessionCloseHour 17 (era 16),
+#    InpMagicNumber 792702/792752 (era 792701/792751), InpComment GCDAXS9.
+#
+#  COSA MISURA
+#   Le righe d'INVERNO di questa corsa (ora solare UE, semiaperto per data
+#   di chiusura: 2024.10.27 <= d < 2025.03.30 e 2025.10.26 <= d <
+#   2026.03.29) sono il gap della CASH d'inverno: apertura 09:00 BCM =
+#   09:00 CET = Xetra, "chiusura di ieri" = ultima M1 prima delle 17:30
+#   BCM = 17:30 CET. Con le righe d'ESTATE del file a fanno la curva IN
+#   FASE (testa par. 4).
+#   Le righe d'ESTATE di questa corsa aprono alle 09:00 BCM = 10:00 CEST,
+#   un'ora DOPO la cash: non descrivono niente di vivo, non entrano in
+#   nessuna curva, si scrivono come descrizione (stessa nota di R252b).
+#  CANCELLI PROPRI (gli altri identici alla testa, par. 6)
+#   S2 OROLOGIO: tutte le uscite fra le 09:16 e le 17:26 server.
+#      Contro-esempio: pin dell'ora non arrivato (corsa a ora 8) -> uscite
+#      prima delle 09:16 -> NULLO. Pin del modo non arrivato (JST) ->
+#      uscite fra 01:00 e 07:30 -> NULLO.
+#   C0 per-trade atteso in Common\Files:
+#      abtg_trades_ABTG_GapContinuation_D30EUR_792702.csv / _792752.csv
+#   Magic 792702/792752 grepati liberi il 25/09/2026.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS.
+#  Banco: -Deposito 10000, -Modello 4, niente -Spread / -Ritardo /
+#  -FrazioneIS, MaxBars=100000000 (testa). Nessuna riga di lancio qui.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionTimeMode=1||1||0||1||N
+InpSessionOpenHour=9||9||0||9||N
+InpSessionOpenMinute=0||0||0||0||N
+InpSessionCloseHour=17||17||0||17||N
+InpSessionCloseMinute=30||30||0||30||N
+InpOpeningRangeMinutes=15||15||0||15||N
+InpMaxEntryMinutesFromOpen=90||90||0||90||N
+InpExitMinutesBeforeClose=5||5||0||5||N
+InpEnableBuyGaps=false||false||0||false||N
+InpMinimumBuyGapPercent=0.50||0.50||0||0.50||N
+InpEnableSellGaps=true||true||0||true||N
+InpMinimumSellGapPercent=0.50||0.50||0||0.50||N
+InpUseRealVolumeIfAvailable=true||true||0||true||N
+InpMaxSpreadPoints=0.0||0.0||0||0.0||N
+InpMaxSpreadToStopPercent=10.0||10.0||0||10.0||N
+InpStopBufferPoints=1500.0||1500.0||0||1500.0||N
+InpBuyRiskPercent=1.0||1.0||0||1.0||N
+InpSellRiskPercent=1.0||1.0||0||1.0||N
+InpReduceRiskOnSmallSellGap=false||false||0||false||N
+InpSellFullRiskFromGapPct=1.25||1.25||0||1.25||N
+InpSmallSellRiskPercent=0.25||0.25||0||0.25||N
+InpFixedLots=0.0||0.0||0||0.0||N
+InpMaxLots=0.0||0.0||0||0.0||N
+InpPartialClosePercent=40.0||40.0||0||40.0||N
+InpPartialTargetR=1.0||1.0||0||1.0||N
+InpFinalTargetR=2.0||2.0||0||2.0||N
+InpMoveStopToBreakEven=true||true||0||true||N
+InpMagicNumber=792702||792702||50||792752||Y
+InpMaxSlippagePoints=30||30||0||30||N
+InpShowStatusOnChart=false||false||0||false||N
+InpPrintDailyDiagnostics=false||false||0||false||N
+InpComment=GCDAXS9
+InpLogImbuto=true||true||0||true||N

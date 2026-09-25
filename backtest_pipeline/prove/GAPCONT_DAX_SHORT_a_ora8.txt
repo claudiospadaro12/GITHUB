@@ -1,0 +1,283 @@
+# =====================================================================
+#  GAPCONT_DAX_SHORT_a -- CONTINUAZIONE DEL GAP-DOWN ALL'APERTURA XETRA
+#  EA: ABTG_GapContinuation   (adozione minima di "Nikkei 225 Gap
+#      Continuation EA", MQL5 Code Base 75301; attribuzione nel sorgente)
+#  D30EUR, SOLO SHORT, ORA 8 / chiusura 16:30 (= orologio d'ESTATE).
+#  FILE DI TESTA della coppia a/b. Il file b porta solo le differenze.
+#  Sigla R: DA ASSEGNARE da chi mette il round in coda (non ho preso un
+#  numero R per non collidere con R252, in corso in parallelo).
+#
+#  Nato dalla SECONDA CACCIA del 25/09/2026 dopo R251 (short retest
+#  d'apertura BOCCIATO PER RISCHIO). Dossier:
+#  backtest_pipeline/caccia_strategie/CACCIA_DAX_SHORT_2026-09-25.md
+#  E' RICERCA: non avvicina nessuna sedia al 1 ottobre, non promuove
+#  niente in campo, non tocca preset, EA, sedie, conti, taglie.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma del
+#  21/09/2026). Il terminale di quel PC e' loggato su un demo: prima si
+#  controlla che non abbia sedie attaccate (avvertenza di R246/R251).
+#  VINCOLI DI BANCO (stanno nella riga di lancio, classe 692; sono quelli
+#  di R251/R252): -Deposito 10000, -Modello 4 (tick reali), niente
+#  -Spread / -Ritardo / -FrazioneIS, MaxBars=100000000.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO.
+# =====================================================================
+#
+# =====================================================================
+#  1. LA TESI (una riga) E IL MECCANISMO
+# =====================================================================
+#  "Guadagna perche' un gap-down del DAX all'apertura Xetra e' prezzo gia'
+#   scoperto altrove (sessione USA dopo le 17:30, Asia, pre-mercato): se il
+#   primo quarto d'ora non lo richiude e il prezzo ROMPE il minimo del
+#   range iniziale, il flusso della cash europea arriva dopo e spinge nella
+#   stessa direzione -- continuazione, non riempimento."
+#  Meccanica (sorgente letto, ABTG_GapContinuation.mq5):
+#   - gap = apertura della seduta / ultima chiusura M1 della seduta
+#     precedente - 1 (PrepareSetup r.739, FindPreviousSessionClose r.637-
+#     655, LoadOpeningRange r.660-677). Sotto -InpMinimumSellGapPercent =
+#     giornata armata sul lato SELL.
+#   - cancellata per sempre se il prezzo richiude oltre META' del gap
+#     (UpdateSetupMetrics r.804 e seguenti).
+#   - ingresso a mercato quando ask < minimo del range (InpOpeningRange-
+#     Minutes) E ask < VWAP di seduta (r.1104), entro InpMaxEntryMinutes-
+#     FromOpen dall'apertura.
+#   - stop = massimo del range + InpStopBufferPoints (r.1110); target
+#     finale = InpFinalTargetR x R (r.1123); parziale InpPartialClose-
+#     Percent a InpPartialTargetR con stop in pari; uscita forzata
+#     InpExitMinutesBeforeClose prima della chiusura.
+#   - rischio in % dell'equity (CalculateEntryVolume r.866, OrderCalcProfit). Nessun
+#     martingala, nessuna griglia, stop vero al broker, un ciclo al giorno.
+#
+# =====================================================================
+#  2. PERCHE' QUESTO E NON ALTRO: LA SONDA ESTERNA (numeri, non opinioni)
+# =====================================================================
+#  caccia_strategie/biblioteca/sonde_esterne/sonda_dax_short_meccanismi.py
+#  (criteri G1-G4 e 10 celle CONGELATI e pushati PRIMA di girarla, commit
+#  473c57f6). GRXEUR histdata M1 2011-2018 (8 anni: crollo 2011, crollo
+#  2015, laterale 2016, orso 2018), 2.017 sedute cash, costo 1,70 pti,
+#  ambiguita' intrabarra a sfavore. Controllo APPAIATO = stessa barra,
+#  stessa distanza, lato opposto. NON E' BCM, NON SONO TICK: screening.
+#   Cella che ha passato G1-G4 (UNA su DIECI):
+#    P2d gap-down >= 0,50%, corto sulla rottura del minimo del range 15',
+#    stop max(68 pti, massimo del range), bersaglio 2R, uscita 16:24:
+#    n 175 (0,087/seduta) - E netta +0,185 R - t +2,12 - informazione
+#    direzionale +0,160 R - 6 anni positivi su 8 - DD massimo 6,5 R -
+#    serie perdente piu' lunga 5.
+#    per anno: 2011 +0,17 | 2012 -0,01 | 2013 +0,02 | 2014 +0,14 |
+#              2015 +0,50 | 2016 +0,29 | 2017 -0,20 (n 8) | 2018 +0,30
+#   Le altre nove celle NON passano (ITSM ultima mezz'ora, 10:00 NY,
+#   gap-up fade x2, apertura USA inversione/continuazione, cono di rumore
+#   solo corto, gap-down >= 0,25% che si ferma a t 1,80): dossier par. 3.
+#  CONTRO-ESEMPI costruiti CONTRO P2d (sonda_dax_short_controesempi.py,
+#  post-hoc e dichiarati: provano a romperla, non scelgono):
+#   CE1 scala invariante (pavimento 0,27 ATR20, costo scalato): +0,243 R,
+#       t 2,30 -> regge (non e' un artefatto dei 68 pti su un DAX a 7.000).
+#   CE2 stessa meccanica su TUTTE le sedute: +0,035 R t 1,27; sui giorni
+#       SENZA gap (|gap| < 0,25%): -0,038 R -> il MOTORE E' IL GAP.
+#   CE3 corto nei giorni di gap-UP >= 0,50%: +0,054 R t 0,77 -> e' il
+#       verso del gap che conta.
+#   CE4 senza bersaglio (stop o tempo): +0,131 R t 1,50 -> non e' il 2R.
+#   CE5 LUNGO sul gap-up (specchio): +0,043 R t 0,65 -> ASIMMETRICO sul
+#       DAX: e' un motore CORTO, non "continuazione del gap" in generale.
+#   CE6 soglia 0,35 / 0,50 / 0,75%: +0,146 (t 2,03) / +0,185 / +0,170
+#       (t 1,47) -> altopiano leggibile, centro 0,50.
+#   CE8 gemello EUROSTOXX (ETXEUR, stessa seduta): +0,151 R t 1,51 a 0,50%,
+#       +0,262 R t 1,87 a 0,75%; giorni senza gap -0,043 -> CONCORDE, ma
+#       li' anche il lungo vive (+0,106 t 1,26): non indipendente dal DAX.
+#   CE7 gemello S&P 500 (SPXUSD 2013-2018): +0,074 R t 0,49 -> NON
+#       conferma. Fuori casa (arXiv 2605.04004, Mesfin 2026, MNQ 2021-2025,
+#       letto sul PDF): "gap continuation short" netto +14,52 pti, T 1,46,
+#       35 operazioni OOS, 2024 negativo -> "the most credible near-miss",
+#       stesso profilo: vive negli anni di discesa, cede nel toro.
+#   LETTURA ONESTA: e' un INDIZIO su un motore corto che nel toro sta
+#   circa a zero e guadagna nelle discese. Non e' una scoperta: 1 cella
+#   su 10, t 2,12, gemello USA che non conferma.
+#
+# =====================================================================
+#  3. COSA MISURA QUESTO ROUND, E COSA NON PUO' MISURARE
+# =====================================================================
+#  Il feed BCM degli indici parte dal 2024.09.26 (MISURATO: risultati_
+#  archivio/REFERTO_SONDA_STORICO_17-08.md par. 3, stato COMPLETO) e
+#  contiene UN regime (toro, col crollo di aprile 2025 dentro).
+#  Frequenza attesa [DERIVATO dalla sonda]: gap-down >= 0,50% nel 14,0%
+#  delle sedute, ingresso nel 62% di quelle -> ~0,087 posizioni/seduta.
+#  Sulle ~458 sedute feriali in fase (estate 238 + inverno 220, conto di
+#  r252_attese.py riportato in R252a par. 4) -> ~40 posizioni in fase.
+#  Il toro ne toglie una parte: BANDA ATTESA 10-45 posizioni in fase.
+#  >>> IL MERITO E' SOSPESO PER ARITMETICA QUALUNQUE COSA ESCA (n << 150).
+#  Il round giudica: la CATENA (l'EA gira su D30EUR, il gap e' quello
+#  della cash), il RISCHIO (fatto accaduto, vale a qualunque n), il COSTO
+#  (stop misurato) e la SOVRAPPOSIZIONE con le due corte DAX gia' in campo
+#  o firmate (770411 MaxMinNotte, 770105 gemella SHORT della 770101).
+#
+# =====================================================================
+#  4. L'OROLOGIO: PERCHE' DUE FILE (stessa macchina di R252)
+# =====================================================================
+#  Lo storico indici BCM e' UTC+1 FISSO (report/OROLOGIO_BCM_2026-09-24.md
+#  par. 3.2): la cash Xetra 09:00-17:30 ora tedesca cade 08:00-16:30 BCM
+#  d'ESTATE e 09:00-17:30 BCM d'INVERNO. L'EA in modo manuale prende le
+#  ore COSI' COME SONO (SessionTimeForDate r.429-432): nessun cambio
+#  d'ora. Quindi con ora 8 d'inverno misurerebbe un ALTRO gap (apertura =
+#  pre-mercato, "chiusura di ieri" = un'ora prima della chiusura Xetra).
+#   file a: ora 8 / 16:30  -> in fase SOLO d'ESTATE
+#   file b: ora 9 / 17:30  -> in fase SOLO d'INVERNO
+#  Inverno (ora solare UE), intervallo semiaperto per data di chiusura:
+#    2024.10.27 <= d < 2025.03.30   e   2025.10.26 <= d < 2026.03.29
+#  (identico a R252a par. 4). Le posizioni chiudono in giornata (uscita
+#  forzata 5' prima della chiusura), un ciclo al giorno: la curva IN FASE
+#  si RICOMPONE dal per-trade = righe d'estate del file a + righe
+#  d'inverno del file b, col metodo A (ribasato) e B (denaro) di R252a
+#  par. 5. Le righe fuori fase si scrivono come descrizione e basta.
+#
+# =====================================================================
+#  5. I PIN, E LE SCELTE (una per riga, col perche')
+# =====================================================================
+#  InpSessionTimeMode=1 (MANUALE ora server): il default 0 converte da JST
+#     per Darwinex e metterebbe la seduta di notte. Contro-esempio del pin
+#     non arrivato: uscite fra 01:00 e 07:30 -> cancello S2.
+#  InpOpeningRangeMinutes=15: il massimo che l'EA accetta (OnInit r.1351,
+#     5-15); e' il range che la sonda ha misurato, e il piu' largo per il
+#     costo.
+#  InpStopBufferPoints=1500 (= 15 punti indice; D30EUR 100 punti MT5 per
+#     punto indice, misurato in casa). Stop = massimo del range 15' + 15
+#     meno l'ingresso (ingresso <= minimo del range): stop >= range + 15.
+#     Range 15' D30EUR BCM MISURATO: mediana 54,65, P10 23,89 (n 440,
+#     report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md r.268) -> stop mediano
+#     >= ~69,7 = ~41x lo spread di 1,70 [DERIVATO]; al P10 >= 38,9 = 22,9x
+#     (sopra il pavimento duro 13,3x, sotto il 40x). Il numero vero lo da'
+#     il per-trade (cancello COSTO, par. 6).
+#     DIFFERENZA DICHIARATA dalla sonda: la sonda usava un PAVIMENTO di 68
+#     pti (allarga lo stop quando il range e' stretto); l'EA usa un
+#     BUFFER fisso. Sui giorni di range stretto l'EA ha stop piu' corti.
+#  InpEnableBuyGaps=false: SOLO SHORT (il lungo e' stato misurato nella
+#     sonda, CE5, e non ha la stessa informazione sul DAX).
+#     InpMinimumBuyGapPercent e InpBuyRiskPercent restano > 0 perche'
+#     OnInit li valida (r.1359-1360): inerti col lato spento.
+#  InpMinimumSellGapPercent=0.50: il centro dell'altopiano della sonda
+#     (CE6: 0,35 / 0,50 / 0,75). Non il picco.
+#  InpReduceRiskOnSmallSellGap=false: l'asimmetria di rischio dell'autore
+#     resta spenta come in R65/R66 (rischio pieno su ogni cella).
+#  InpSellRiskPercent=1.0: rischio di BANCO (R251/R252), non una proposta
+#     di taglia.
+#  InpPartialClosePercent 40 / InpPartialTargetR 1,0 / InpFinalTargetR
+#     2,0 / BE acceso: la GESTIONE DELL'AUTORE, non toccata. La sonda
+#     usava 2R secco senza parziale; CE4 dice che il bersaglio non e' il
+#     motore. La gestione si mette ad asse SOLO dopo (certificato p.3).
+#  InpMaxEntryMinutesFromOpen=90, InpExitMinutesBeforeClose=5: default
+#     dell'autore, uguali alla sonda (ingresso 08:15-09:29, uscita 16:24).
+#  InpMaxSpreadToStopPercent=10: default dell'autore (spread <= 10% dello
+#     stop); la frontiera 40x si giudica sul per-trade, non si impone qui.
+#  InpUsaGuardian=true: nel tester e' fail-open (commento r.108-111):
+#     inerte, e cosi' il file e' gia' uguale a un eventuale preset.
+#  @PERIODO M5: il TF del grafico e' INERTE per questo EA (tutte le
+#     CopyRates sono PERIOD_M1 fisso: r.647, r.663, r.685). M5 e' il banco
+#     di R251/R252. Per il certificato (p.5, "TF cambiato") la manopola
+#     equivalente e' InpOpeningRangeMinutes, non il grafico.
+#  ASSE UNICO = InpMagicNumber, due gemelle a passo 50 (cancello G1 e un
+#     per-trade per gemella, come R246/R252). Magic 792701/792751:
+#     grepati liberi nel repo il 25/09/2026 (zero occorrenze di 7927xx).
+#
+# =====================================================================
+#  6. CANCELLI, CONGELATI PRIMA DEI NUMERI
+# =====================================================================
+#  CATENA (se uno fallisce il round e' NULLO, non un verdetto):
+#   C0 per-trade presente per tutte e due le gemelle, nei due file;
+#      atteso in Common\Files:
+#      abtg_trades_ABTG_GapContinuation_D30EUR_792701.csv / _792751.csv
+#   G1 gemelle identiche (CSV _OOS e per-trade, tranne il magic).
+#   L0 LATO: TUTTI i deal di uscita hanno deal_type 0 (BUY = chiusura di
+#      uno short). Contro-esempio: pin di InpEnableBuyGaps non arrivato ->
+#      compaiono uscite deal_type 1 -> NULLO.
+#   S2 OROLOGIO: tutte le uscite fra le 08:16 e le 16:26 server (file a).
+#      Contro-esempio: InpSessionTimeMode non arrivato (default JST) ->
+#      uscite fra 01:00 e 07:30 -> NULLO.
+#   E0 EVENTI: Trades del CSV _OOS > 0 su tutte e due le gemelle. Se e'
+#      0, NULLO: si fa UNA corsa singola (in ottimizzazione i Print sono
+#      spenti, R251 par. 2) e si legge il funnel di PrintFunnel (OnTester
+#      r.1603): cntSetupShort = 0 o cntNoRange ~ tutte le giornate vuol
+#      dire M1 non servite nel tester (MaxBars). Non si cambia nessun
+#      parametro.
+#  COSTO (vale a qualunque n):
+#   K1 stop mediano delle uscite a stop pieno, dal per-trade
+#      (|net_profit| / volume, D30EUR 1 EUR per punto per lotto [DA
+#      VERIFICARE sul contratto BCM prima della lettura]) >= 68 pti ->
+#      AMMESSO; fra 22,6 (13,3x) e 68 -> FRAGILE, si scrive col numero;
+#      sotto 22,6 -> ESCLUSO PER COSTO.
+#  RISCHIO (fatto accaduto, vale a qualunque n), sulla curva IN FASE:
+#   R1 DD a saldo chiuso a rischio 1% <= 6,5% (= 6,5 R, il DD massimo di
+#      P2d in OTTO anni di sonda esterna). Se 21 mesi di BCM fanno peggio
+#      di otto anni di storia esterna, il motore su BCM e' un altro ->
+#      BOCCIATO PER RISCHIO.
+#      Contro-esempio di potenza, scritto adesso: con n ~30 e un motore a
+#      moneta (vincita 2R parziale, perdita 1R) il DD tipico e' 4-7 R:
+#      R1 NON separa l'edge dal caso, separa solo il catastrofico. Lo so e
+#      lo dichiaro: e' un cancello di RISCHIO, non di merito.
+#   R2 peggior giornata a saldo chiuso >= -1,10% (un ciclo al giorno).
+#   R3 serie perdente piu' lunga <= 8 (sonda: 5 su 175 posizioni).
+#  MERITO: SOSPESO per aritmetica (n << 150), qualunque esito. La sola
+#   frase ammessa: "indizio CONCORDE / DISCORDE con la sonda" (segno
+#   dell'EP per posizione in fase), accanto al numero di posizioni.
+#   Attesa dalla sonda per un anno di toro: fra -0,20 e +0,14 R per
+#   posizione (2012, 2013, 2014, 2017). Il crollo di aprile 2025 e' la
+#   sola finestra dove la sonda prevede guadagno netto: si scrive a parte
+#   quanto P/L sta fra 2025.03.31 e 2025.05.09.
+#  SOVRAPPOSIZIONE (regola di rotta: mai due EA sullo stesso segnale/
+#   simbolo/lato a rischio pieno), informativa, sul per-trade:
+#   O1 quota delle giornate con una posizione di questo motore in cui
+#      770411 (per-trade R246, MaxMinNotte_DAX_Short_Ottimizzato
+#      d0 = 794621 finestra B e 794623 finestra A, prove R246i/R246k) ha una
+#      posizione lo stesso giorno;
+#   O2 idem contro lo short nudo d'apertura di R252a/R252b (= geometria
+#      della 770105 firmata il 25/09).
+#   Oltre il 50% -> "NON ADDITIVO A RISCHIO PIENO" accanto al numero.
+#  CERTIFICATO (09/09): comunque vada, NON ANCORA MISURATO. Dopo questo
+#   round mancano: gestione dell'uscita ad asse (p.3), gemelli E50EUR /
+#   F40EUR (p.4), la manopola InpOpeningRangeMinutes 5/10/15 (p.5).
+#
+# =====================================================================
+#  7. TEMPO MACCHINA [STIMA, non misurata su questo EA]
+# =====================================================================
+#  2 file x 2 gemelle x (moncone IS + gamba continua) = 8 passate, di cui
+#  4 lunghe su 641 giorni di D30EUR a tick. La VWAP rilegge le M1 della
+#  seduta a ogni tick SOLO nelle giornate armate (~14%): stimo 1-3 minuti
+#  per passata lunga -> 5-12 minuti in tutto. Da misurare.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionTimeMode=1||1||0||1||N
+InpSessionOpenHour=8||8||0||8||N
+InpSessionOpenMinute=0||0||0||0||N
+InpSessionCloseHour=16||16||0||16||N
+InpSessionCloseMinute=30||30||0||30||N
+InpOpeningRangeMinutes=15||15||0||15||N
+InpMaxEntryMinutesFromOpen=90||90||0||90||N
+InpExitMinutesBeforeClose=5||5||0||5||N
+InpEnableBuyGaps=false||false||0||false||N
+InpMinimumBuyGapPercent=0.50||0.50||0||0.50||N
+InpEnableSellGaps=true||true||0||true||N
+InpMinimumSellGapPercent=0.50||0.50||0||0.50||N
+InpUseRealVolumeIfAvailable=true||true||0||true||N
+InpMaxSpreadPoints=0.0||0.0||0||0.0||N
+InpMaxSpreadToStopPercent=10.0||10.0||0||10.0||N
+InpStopBufferPoints=1500.0||1500.0||0||1500.0||N
+InpBuyRiskPercent=1.0||1.0||0||1.0||N
+InpSellRiskPercent=1.0||1.0||0||1.0||N
+InpReduceRiskOnSmallSellGap=false||false||0||false||N
+InpSellFullRiskFromGapPct=1.25||1.25||0||1.25||N
+InpSmallSellRiskPercent=0.25||0.25||0||0.25||N
+InpFixedLots=0.0||0.0||0||0.0||N
+InpMaxLots=0.0||0.0||0||0.0||N
+InpPartialClosePercent=40.0||40.0||0||40.0||N
+InpPartialTargetR=1.0||1.0||0||1.0||N
+InpFinalTargetR=2.0||2.0||0||2.0||N
+InpMoveStopToBreakEven=true||true||0||true||N
+InpMagicNumber=792701||792701||50||792751||Y
+InpMaxSlippagePoints=30||30||0||30||N
+InpShowStatusOnChart=false||false||0||false||N
+InpPrintDailyDiagnostics=false||false||0||false||N
+InpComment=GCDAXS8
+InpLogImbuto=true||true||0||true||N
