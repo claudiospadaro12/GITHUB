@@ -35381,3 +35381,7 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## 👫 CLASSE 781 — **il controllo di COPPIA che certifica un file usando un compagno NULLO**
 - **Caso (25/09, riga R249, scenario `nulpair` eseguito)**: R249b NULLO (G-OOS rosso) e R249c col pin non arrivato; la riga stampava "ENTRATA R249b/R249c: per-trade diversi = ok" e metteva R249c fra i NON NULLI. Lo stesso "ok" usciva con due per-trade vuoti. Estende 772/775 ai controlli di coppia. Preso dal cancello (strato 2).
 - **Regola**: con un file NULLO nella coppia (o con zero operazioni) il controllo e' NON VERIFICABILE e non assolve; ogni file va certificato con una misura PROPRIA.
+
+## ⚖️ CLASSE 782 — **potenza di una regola di verdetto dichiarata solo sotto le DUE ipotesi in gara, quando la loro PREMESSA comune non e' stabilita sul campione che giudica**
+- **Caso (25/09, R250a par. 7.1)**: la conferma "orologio o stagione" del candidato R245 si leggeva sulla sola finestra A, con potenza dichiarata ~70% giusto / ~11-12% sbagliato sotto H_STAGIONE e H_OROLOGIO. Ma entrambe presuppongono un divario vero D>0, e su A non e' stabilito (p 0,206). Sotto H_NULLO la regola scriveva una direzione sul PF nel 73% dei casi. Corretto con A+B come VETO di concordanza (sbagliato ~0,1%, H_NULLO ~30%). Preso dal cancello (strato 2), contro-esempio eseguito.
+- **Regola**: si simula SEMPRE anche l'ipotesi nulla della premessa. Se il campione di conferma e' debole, la parte che contiene la meta' generatrice si usa come VETO, mai come conferma.
