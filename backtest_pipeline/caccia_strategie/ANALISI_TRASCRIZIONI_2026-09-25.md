@@ -74,7 +74,7 @@ come una **trappola** del braccio STOP: **per Emiliano quei giorni sono il setup
 | **RETEST del massimo/minimo di ieri** nel verso del trend (r.45, r.63) | `ABTG_DAX_Apertura_EU.mq5`: `InpEntryMode=ABTG_RETEST` (r.273, enum r.205 *"leva Emiliano"*) + `InpRangeMode=2 RANGE_PREVBAR` + `InpLevelTF=PERIOD_D1` (r.274-275). `ComputeLevels()` r.1113-1119 prende massimo e minimo della candela D1 chiusa; `MonitorRetest()` r.1907+ vede la rottura al primo tick (`ask >= buyTrig`) e piazza il BUY LIMIT sul livello (r.1956). **Quindi il giorno "rotto nella notte" diventa subito un LIMIT sul massimo di ieri: è proprio il setup della live** [INFERITO dal codice] | 🟢 **NUOVO e TESTABILE a ZERO codice** — R249 ha STOP e FADE, **non il RETEST** |
 | Livelli di ieri come ipotesi | `report/METODO_UNGER_2026-09-24.md` §6 A · `prove/R249a..h` | 🟢 in casa, **ma solo due bracci su tre** |
 | **VWAP come FILTRO di lato** | `InpUseVwapFilter` + `InpVwapTF=M15` (r.320-322) — **misurato in R101**: DAX PF OOS **−0,061**, Dow **+0,007**, G3 **incoerente** (`risultati_archivio/R101_REFERTO.md` r.75, r.93) | ⛔ **già misurato, niente candidato** |
-| **VWAP come LIVELLO d'ingresso** (limit sul VWAP, r.47-49) | **non esiste** in `ABTG_DAX_Apertura_EU`. Vicino: `ABTG_VwapRevert` (reversione alla banda VWAP ± sigma, motore diverso), **passo 0 mai corso** (`report/CENSIMENTO_CASELLE_VUOTE_2026-09-22.md` r.113, r.413-419) | 🟡 nuovo come ingresso, ma il pezzo di casa più vicino è **fermo al passo 0**: prima quello |
+| **VWAP come LIVELLO d'ingresso** (limit sul VWAP, r.47-49) | **non esiste** in `ABTG_DAX_Apertura_EU`. Vicino: `ABTG_VwapRevert` (reversione alla banda VWAP ± sigma, motore diverso). ✏️ **ERRATA 25/09 sera**: qui c'era scritto *"passo 0 mai corso"*, ripreso da `report/CENSIMENTO_CASELLE_VUOTE_2026-09-22.md` r.413-419. **Falso**: il passo 0 è **corso il 03/09** su D30EUR M15, 4 celle, **S0 NON PASSA su tutte e quattro** (rapporto punti/spread −0,11 / −0,21 / −0,14 / −0,21; `REGISTRO_TEST.md` r.1251; `risultati_archivio/vwaprevert/CORSA_2026-09-03_1711_FALSIFICATO.txt`) | 🟡 nuovo come ingresso; il pezzo di casa più vicino è **falsificato su D30EUR M15** (altri TF e simboli: [NON MISURATI]) |
 | **Filtro daily + weekly concordi** (r.43, r.295) | **nessun input dedicato.** Ma `TrendBias()`/`CombineBias()` (EA r.2120-2174) **somma i filtri e dà "nessun ordine" se discordano**: `InpUseEmaFilter` con `InpFilterTF=D1` + `InpUseSupertrend` con `InpStTF=W1` = **"D e W concordi" a zero codice** [INFERITO dal codice] | 🟡 **approssimabile**, con una trappola (v. certificato) |
 | **Numero tondo come INGRESSO** | `InpUseRoundLevels` esiste **solo come obiettivo** (r.341-343) — e come obiettivo **COSTA** su tutti e due gli indici (R101 `08_tondi`: DAX −0,090, Dow −0,057) · come veto di vicinanza in `ABTG_Apertura_3Ingressi` (`InpSRUseRoundNumbers`) | 🟡 come ingresso **non esiste**; come target è **misurato e bocciato** |
 | **BE a +20 punti, metà chiusa** | `InpTP1_R=1.0` + `InpTP1_ClosePct=50` + `InpBreakevenAtTP1=true` (r.329-331) — **stessa struttura, in R invece che in punti fissi**; misurata in FASE F (PF 1,237 OOS, `AUDIT_USCITE_2026-09-09.md`) | 🟢 **già in casa**, in una forma migliore (in R scala con la volatilità) |
@@ -203,7 +203,7 @@ secondo è buy"*) dice che **nemmeno a voce si ricostruisce quali ordini fossero
 |---|---|---|---|
 | **S1** | **Il terzo braccio di R249: RETEST sul massimo/minimo di ieri** — `ABTG_DAX_Apertura_EU`, `InpEntryMode=2`, `InpRangeMode=2`, `InpLevelTF=D1`, `InpSLMode=1` (ATR, come i due bracci), `InpMinRangePts=0` e `InpMaxRangePts=0` (la candela D1 supera sempre i 40 punti), lati separati | 🟢 **ALTA** | zero codice, famiglia viva, completa un confronto **già firmato** (STOP / FADE / LIMIT sugli stessi livelli) |
 | S2 | Filtro "D e W concordi" come asse **su S1**, non da solo: `InpUseEmaFilter` D1 + `InpUseSupertrend` W1 | 🟡 media | filtro di trend = asse già misurato con esiti misti (R101: EMA H1 migliora l'OOS e peggiora l'IS; Supertrend×3 **ribaltone** di regime). Si prova solo **se S1 ha un motore** |
-| S3 | VWAP come livello d'ingresso | 🟡 bassa | prima va corso il passo 0 di `ABTG_VwapRevert` (**pronto dal 03/09, mai corso**) |
+| S3 | VWAP come livello d'ingresso | 🟡 bassa | ✏️ ERRATA 25/09: `ABTG_VwapRevert` **non è "mai corso"**: passo 0 corso il 03/09, S0 negativo su 4 celle D30EUR M15 (`REGISTRO_TEST.md` r.1251). Il VWAP come **livello** resta non misurato |
 | S4 | BE a +20 punti fissi | 🔴 no | abbiamo già il BE in R, misurato (FASE F), e la fonte si contraddice (R7) |
 | S5 | Numero tondo come ingresso | 🔴 no | come obiettivo è **misurato e costa** su DAX e Dow (R101 `08_tondi`); come ingresso non c'è una regola di costruzione (quale tondo: 100? 50? il passo non è dettato) |
 | S6 | Forza valutaria / "distanza 4.9" | 🔴 no | strumento non nostro, scala ignota |
@@ -285,3 +285,37 @@ Da qui: i sell limit DAX sono stati piazzati alle **08:48, 09:06 e 09:07 italian
 
 ### 4.6 🖥️ La terza schermata e' la nostra: 100k `50504263`, 13:15 IT
 Giornale: 24/09 22:50:30-22:52:47 rimossi `ABTG_DAX_Apertura_EU`, `ABTG_Dow_Apertura_US`, `ABTG_MaxMinNotte_DAX_Short_Ottimizzato`, `ABTG_ORB_Ottimizzato` (U30USD), `Nasdaq_PreOpen_Breakout_EA`; 25/09 **13:14:47** rimosso `ABTG_SupertrendReversal` (225JPY,H2). Barra di stato: profilo **`SQUADRA 100K`**. **Gia' agli atti** (`report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`, ESEGUITO): nessun dato nuovo; il **salvataggio del profilo** resta da confermare con `CODA_01` del 26/09.
+
+---
+
+## 5. 📜 ADDENDUM 2 — IL DECALOGO PUBBLICATO LO STESSO GIORNO (2 screenshot, 25/09 ~15:36 IT)
+
+**Fonte:** post *"Regole imprescindibili per il tuo trading profittevole"* nella comunita' del
+corso, firmato dal relatore, pubblicato ~5 ore prima delle 15:36 IT (= la mattina della live).
+Dieci regole di principio, **zero parametri con valore**. Confronto riga per riga con il nostro
+codice e con **la pratica della stessa mattina** (§4, foto della piattaforma).
+
+| # | regola (sintesi fedele) | da noi | la stessa mattina, a piattaforma (§4) |
+|---|---|---|---|
+| 1 | Aspetta il mercato: entra quando si presenta la configurazione prevista | ogni EA entra solo a condizione | — |
+| 2 | Scegli prima lo strumento | simbolo fisso per sedia; la scelta giornaliera non e' codificabile senza una regola (S6: no) | — |
+| 3 | Parti dalla direzionalita' | filtri di trend misurati, esiti misti (R101) | 🔴 3 sell limit DAX con l'indicatore su *MTF BULL* (R1) |
+| 4 | Accordo fra volume e D1 | su CFD il volume e' **tick volume** (M12); filtro D1 = S2 | — |
+| 5 | Piu' timeframe | come la 3 | — |
+| 6 | Confluenze concrete: **il VWAP, da solo, non basta** | 🟢 **concorda con TRE nostre misure**: `ABTG_VwapRevert` S0 negativo 4/4 (03/09) · Retest-VWAP nudo **PF 1,002** su n=625 (31/08) · filtro VWAP R101 DAX **−0,061** | — |
+| 7 | **Piano prima dell'ordine: stop definito in anticipo, anche per un pendente** | 🟢 **stop sul server sempre**, per costruzione | 🔴 **nessuno stop a piattaforma** sui 4 pendenti DAX e sul long aperto (uno stop mentale e' [NON MISURATO]); il CHFJPY lo stop ce l'ha |
+| 8 | **Dimensiona la posizione sul rischio**; conto piccolo = piu' disciplina | 🟢 `InpRiskPercent` fisso per sedia (FTMO 2,00, firma di Claudio) | 🔴 1 lotto su ~388 EUR senza stop; CHFJPY a stop ~37,7% dell'equity [DERIVATO, §4.4] |
+| 9 | Rispetta il piano dopo la live: il pendente lasciato sul VWAP va gestito con le stesse regole | l'EA lo fa per costruzione | alle 11:27 server il VWAP e' a 25.403,5 e **nessun pendente sta li'** (il piu' vicino: buy limit 25.373,02); se prima c'era: [NON MISURATO] |
+| 10 | Valuta il processo, non il profitto: *"abbiamo ... rispettato il rischio?"* | 🟢 e' il nostro cancello e il certificato di morte | la risposta della mattina, **con le regole 7 e 8 del decalogo stesso**, e' no sul lato DAX |
+
+**Lettura.** Il decalogo e' **buono** e coincide quasi riga per riga con regole che da noi sono
+**codice**, non buoni propositi (7, 8, 10). La regola 6 e' l'unica che porta un contenuto
+tecnico, e **le nostre misure le danno ragione** (tre volte). Lo scarto fra regola scritta e
+pratica dello stesso giorno (3, 7, 8) e' il motivo per cui una regola, da noi, vale solo quando
+e' dentro l'EA.
+
+**Cosa ne copiamo: niente di nuovo.** Nessun parametro, nessun candidato. Una fonte in piu'
+(sempre la **stessa**, quindi non una verifica) a favore di principi gia' in campo.
+
+**Trovato strada facendo:** l'errata al §1.3 e S3 (il passo 0 di `ABTG_VwapRevert` era dato per
+*"mai corso"*, ed e' corso e falsificato il 03/09): l'errore viene dal censimento del 22/09, r.413-419.

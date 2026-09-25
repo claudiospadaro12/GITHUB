@@ -411,6 +411,8 @@ Ordine = **quello che potrebbero dare ÷ quanto costano**.
 | **contro-esempio** | *«R89 l'aveva chiuso»* → `REGISTRO_TEST` dice che R89 lo chiuse **e che è stato riaperto** su una tesi nuova (reversal, pag. 26/28). E il TF della struttura **non è mai stato girato**: il certificato di morte è **incompleto sulla casella 5** |
 
 ### 7 — `ABTG_OutOfNoise` + `ABTG_VwapRevert` · **il PASSO 0 già scritto e verde** · **16 P, ≈ 24 min**
+> ✏️ **ERRATA 25/09/2026**: per `ABTG_VwapRevert` il *"mai corso"* qui sotto e' **falso**: il passo 0 e' corso il **03/09** su D30EUR M15 (4 celle, **S0 NON PASSA** su tutte: `REGISTRO_TEST.md` r.1251, `risultati_archivio/vwaprevert/CORSA_2026-09-03_1711_FALSIFICATO.txt`). Per `ABTG_OutOfNoise` non verificato in questa errata.
+
 | | |
 |---|---|
 | **casella** | due motori **VWAP** — meccanismo che **in casa non esiste** — con il passo 0 pronto dal 29/08 e 03/09 e mai corso |
