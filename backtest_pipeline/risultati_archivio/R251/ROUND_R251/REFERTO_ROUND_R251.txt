@@ -1,0 +1,49 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 7f5abfb53d7ef610087c8c4ccb71aa86e7eca4fd
+data            : 2026-09-25 16:54:45   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_DAX_Apertura_EU
+file prova      : R251_short_DAX_regime_e_uscita.txt   (38432 byte, dal pin)
+etichetta       : R251
+simbolo         : D30EUR
+periodo         : M5
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_IS_R251.csv
+  righe : 5
+    Pass 0    Profit 325.36       PF 1.35752    Equity DD % 3.3583     Trades 65
+    Pass 1    Profit 446.8        PF 1.3676     Equity DD % 4.2929     Trades 78
+    Pass 2    Profit 468.8        PF 1.38793    Equity DD % 4.2842     Trades 76
+    Pass 3    Profit 216.88       PF 1.21426    Equity DD % 3.4197     Trades 61
+    Pass 4    Profit -212.43      PF 0.76253    Equity DD % 4.8182     Trades 41
+  ESITO : LETTO -- 5 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_OOS_R251.csv
+  righe : 5
+    Pass 0    Profit -90.62       PF 0.9543     Equity DD % 8.4499     Trades 118
+    Pass 1    Profit -66.18       PF 0.95689    Equity DD % 6.9141     Trades 95
+    Pass 2    Profit 162.54       PF 1.12012    Equity DD % 5.8345     Trades 88
+    Pass 3    Profit 1221.02      PF 1.77127    Equity DD % 4.7213     Trades 126
+    Pass 4    Profit 792.32       PF 1.41834    Equity DD % 7.4367     Trades 126
+  ESITO : LETTO -- 5 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO

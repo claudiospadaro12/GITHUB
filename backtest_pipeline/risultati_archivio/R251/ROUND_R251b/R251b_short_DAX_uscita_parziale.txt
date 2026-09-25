@@ -1,0 +1,150 @@
+# =====================================================================
+#  R251b -- LATO SHORT DELL'APERTURA DAX, STRADA B: LA PARZIALE
+#  EA: ABTG_DAX_Apertura_EU   (motore della sedia 770101, D30EUR M5)
+#  ASSE: InpTP1_ClosePct = 0 / 50       2 celle x 2 gambe = 4 passate
+#  Magic 792520.
+#
+#  TUTTO IL RAGIONAMENTO, LE ATTESE, I CANCELLI E I VINCOLI DI BANCO
+#  STANNO NEL FILE DI TESTA: prove/R251_short_DAX_regime_e_uscita.txt.
+#  Qui solo le differenze. Stessi pin di R251 tranne: InpUseSupertrend =
+#  false (lo short NUDO), InpStTF fermo a H1 (inerte a filtro spento),
+#  l'asse qui sotto e il magic.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS.
+#  Banco: -Deposito 10000, -Modello 4, niente -Spread / -Ritardo /
+#  -FrazioneIS (testa, riquadro iniziale). Nessuna riga di lancio qui.
+# =====================================================================
+#
+#  COSA MISURA
+#   cella 50 = L'ANCORA (lo short nudo, geometria viva 770101): gemella
+#              G1 di R251c cella 1 e R251d cella 1,0, e G0 contro la
+#              FASE M SHORT range 35 (testa par. 8).
+#   cella  0 = senza parziale. ATTENZIONE, ACCOPPIAMENTO DI CODICE: il
+#              breakeven a TP1 sta DENTRO il ramo della parziale (r.2359
+#              -> r.2391), quindi a 0 si spegne ANCHE il BE (InpBEatR=0).
+#              La posizione intera esce a stop, trailing, TP finale a 3R
+#              o chiusura delle 17:30. (FASE F lo mostra in archivio:
+#              righe ClosePct 0 con BE 0 e 1 identiche al centesimo.)
+#
+#  PERCHE' QUESTO FILE PRIMA DEGLI ALTRI
+#   Senza parziale ogni posizione fa UN deal di uscita: la colonna
+#   Trades della cella 0 E' IL NUMERO DI POSIZIONI dello short nudo, e
+#   vale per tutte le celle B (stessi ingressi, testa par. 6). Decide se
+#   il MERITO della strada B si puo' leggere (>= 150 posizioni OOS).
+#   Forchetta obbligata dalla cella 50: IS 76..152, OOS 122..243.
+#   Stima [DERIVATA dal long, R137c]: ~114 IS, ~174 OOS.
+#
+#  ATTESA, SCRITTA PRIMA
+#   - G2: Trades(0) < Trades(50) in tutte e due le gambe. Uguali = la
+#     parziale non e' mai scattata o il pin non e' arrivato: NON ESEGUITA.
+#   - PF: sul LONG la cella 0 batte la 50 in tutte e due le gambe (R137c:
+#     IS 1,183 contro 1,126; OOS 1,491 contro 1,397). Per lo short
+#     l'ipotesi [INFERITA] di LATO_SHORT par. 3 dice il contrario.
+#     Nessun salvataggio atteso: |delta PF| <= 0,12 (ampiezza FASE F).
+#   - Il Profit si legge sempre accanto al PF (testa par. 10).
+#
+#  PER-TRADE: in Common\Files resta
+#   abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_792520.csv = l'ULTIMA passata
+#   della gamba OOS. Se e' la cella 0 o 50 (si riconosce da righe e somma
+#   net_profit), la divisione estate/inverno dell'OOS dello short nudo
+#   esce gratis (testa par. 11). I quattro file hanno magic diversi e
+#   non si sovrascrivono fra loro; li sovrascrive solo un RILANCIO dello
+#   stesso file: si raccolgono tutti e quattro a fine round.
+# =====================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.4322
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=0.0||0.0||50.0||50.0||Y
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=792520||792520||0||792520||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

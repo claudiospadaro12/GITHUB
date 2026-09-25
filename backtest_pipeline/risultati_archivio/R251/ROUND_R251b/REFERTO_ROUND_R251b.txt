@@ -1,0 +1,43 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 7f5abfb53d7ef610087c8c4ccb71aa86e7eca4fd
+data            : 2026-09-25 16:51:39   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_DAX_Apertura_EU
+file prova      : R251b_short_DAX_uscita_parziale.txt   (6249 byte, dal pin)
+etichetta       : R251b
+simbolo         : D30EUR
+periodo         : M5
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_IS_R251b.csv
+  righe : 2
+    Pass 0    Profit -403.51      PF 0.87684    Equity DD % 9.7969     Trades 119
+    Pass 1    Profit -501.27      PF 0.84559    Equity DD % 10.5396    Trades 152
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_OOS_R251b.csv
+  righe : 2
+    Pass 0    Profit 410.41       PF 1.10498    Equity DD % 12.4498    Trades 181
+    Pass 1    Profit 254.74       PF 1.06519    Equity DD % 12.049     Trades 243
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO
