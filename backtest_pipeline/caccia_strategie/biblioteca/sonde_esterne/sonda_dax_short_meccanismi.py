@@ -77,10 +77,12 @@ def cammina(d, m0, verso, entry, dist, tgt=None, mend=CLOSE):
     stop a distanza dist, target tgt (prezzo) opzionale, uscita a close(mend).
     pessimista: stop prima del target nella stessa barra. ritorna punti lordi."""
     sl = entry - dist if verso > 0 else entry + dist
+    ultimo = entry
     for k in range(m0, mend+1):
         b = by[d].get(k)
         if not b: continue
         o, h, l, c = b
+        ultimo = c
         if verso > 0:
             if l <= sl: return -dist
             if tgt is not None and h >= tgt: return tgt - entry
@@ -88,6 +90,7 @@ def cammina(d, m0, verso, entry, dist, tgt=None, mend=CLOSE):
             if h >= sl: return -dist
             if tgt is not None and l <= tgt: return entry - tgt
     cc = close_at(d, mend)
+    if cc is None: cc = ultimo   # buco di barre a fine finestra: ultimo close visto
     return (cc - entry) * verso
 
 # ATR20 della giornata cash (high-low 08:00-16:29), sulle 20 sedute PRECEDENTI
