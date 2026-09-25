@@ -77,7 +77,7 @@ for i, d in enumerate(giorni):
     if i >= 20: atr20[d] = statistics.mean(rng[x] for x in giorni[i-20:i])
     if i >= 1: prevd[d] = giorni[i-1]
 
-def run(nome, filtro, verso=-1, scala=False, target=True):
+def run(nome, filtro, verso=-1, scala=False, target=True, metagap=False):
     xs = []
     for d in giorni:
         if d not in atr20 or d not in prevd: continue
@@ -87,9 +87,16 @@ def run(nome, filtro, verso=-1, scala=False, target=True):
         if not filtro(gp): continue
         A = atr20[d]; pav = 0.27*A if scala else PAV; cost = COSTO/252.5*A if scala else COSTO
         rh, rl = hilo(d, OPEN, OPEN+14)
+        # CE9 (25/09, richiesto dal cancello): cancellazione a META' GAP come l'EA (r.804-815):
+        # se dall'apertura il massimo tocca PC + 0,5 x (O - PC) prima dell'ingresso, la giornata e' persa.
+        # La VWAP dell'EA NON e' approssimabile: histdata non ha volumi.
+        mezzo = PC + 0.5*(O - PC); massimo = None
         for k in range(OPEN+15, OPEN+90):
             b = by[d].get(k)
             if not b: continue
+            if metagap:
+                massimo = max(massimo, b[1]) if massimo is not None else max(rh, b[1])
+                if massimo >= mezzo: break
             if verso < 0 and b[2] < rl:
                 entry = rl if b[0] >= rl else b[0]; dist = max(pav, rh - entry)
             elif verso > 0 and b[1] > rh:
@@ -131,6 +138,7 @@ if GEMELLO:
     run('CE7d GEMELLO SPX: stessa meccanica corta, |gap|<0,25%', lambda g: abs(g) < 0.0025, scala=True)
     sys.exit()
 run('RIF  P2d gap-down>=0,50% corto (deve riprodurre la sonda)', lambda g: g <= -0.005)
+run('CE9  P2d + cancellazione a meta gap (come EA r.804-815)', lambda g: g <= -0.005, metagap=True)
 run('CE1  P2d in scala invariante (pav 0,27 ATR, costo scalato)', lambda g: g <= -0.005, scala=True)
 run('CE1b P2c (>=0,25%) in scala invariante', lambda g: g <= -0.0025, scala=True)
 run('CE2  stessa meccanica corta, TUTTE le sedute', lambda g: True)

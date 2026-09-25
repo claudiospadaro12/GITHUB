@@ -1,10 +1,10 @@
 # =====================================================================
-#  GAPCONT_DAX_SHORT_b -- CONTINUAZIONE DEL GAP-DOWN ALL'APERTURA XETRA
+#  R253b -- CONTINUAZIONE DEL GAP-DOWN ALL'APERTURA XETRA
 #  EA: ABTG_GapContinuation
 #  D30EUR, SOLO SHORT, ORA 9 / chiusura 17:30 (= orologio d'INVERNO).
 #
 #  TUTTO IL RAGIONAMENTO, LA SONDA, I CONTRO-ESEMPI, I PIN E I CANCELLI
-#  STANNO NEL FILE DI TESTA: prove/GAPCONT_DAX_SHORT_a_ora8.txt.
+#  STANNO NEL FILE DI TESTA: prove/R253a_gapcont_DAX_short_ora8.txt.
 #  Qui solo le differenze (diff eseguito: 4 righe di pin):
 #    InpSessionOpenHour 9 (era 8), InpSessionCloseHour 17 (era 16),
 #    InpMagicNumber 792702/792752 (era 792701/792751), InpComment GCDAXS9.
@@ -20,12 +20,14 @@
 #   un'ora DOPO la cash: non descrivono niente di vivo, non entrano in
 #   nessuna curva, si scrivono come descrizione (stessa nota di R252b).
 #  CANCELLI PROPRI (gli altri identici alla testa, par. 6)
-#   S2 OROLOGIO: tutte le uscite fra le 09:16 e le 17:26 server.
-#      Contro-esempio: pin dell'ora non arrivato (corsa a ora 8) -> uscite
-#      prima delle 09:16 -> NULLO. Pin del modo non arrivato (JST) ->
-#      uscite fra 01:00 e 07:30 -> NULLO.
+#   S2 OROLOGIO: tutte le uscite con 09:15:00 <= close_time <= 17:26:59
+#      server. Contro-esempio: modo non arrivato (JST) -> seduta 02:00-
+#      10:30 o 03:00-11:30, uscite fra 02:15 e 11:25 -> NULLO. L'ora
+#      d'apertura non arrivata NON e' un contro-esempio (default EA = 9,
+#      r.125). La chiusura non arrivata (default 15:30) la prende P0.
 #   C0 per-trade atteso in Common\Files:
 #      abtg_trades_ABTG_GapContinuation_D30EUR_792702.csv / _792752.csv
+#      P0 identico alla testa, magic 792702 / 792752.
 #   Magic 792702/792752 grepati liberi il 25/09/2026.
 #
 #  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS.

@@ -77,6 +77,7 @@ P2d per anno **[MISURATO]**: 2011 +0,17 · 2012 −0,01 · 2013 +0,02 · 2014 +0
 | CE6 **soglia** | la cella 0,50 è un picco | 0,35% **+0,146 (t 2,03)** · 0,50% +0,185 · 0,75% +0,170 (t 1,47) | ✅ altopiano, centro 0,50 |
 | CE8 gemello **EuroStoxx** (ETXEUR, stessa seduta) | sul gemello non c'è | ≥0,50% **+0,151 R, t 1,51**; ≥0,75% **+0,262, t 1,87**; senza gap −0,043 | 🟡 concorde, ma lì vive anche il lungo (+0,106, t 1,26), e non è indipendente dal DAX |
 | CE7 gemello **S&P 500** (SPXUSD 2013-2018) | è universale | ≥0,50% **+0,074 R, t 0,49**; ≥0,35% −0,036 | 🔴 **non conferma** |
+| CE9 **cancellazione a metà gap** come l'EA (r.804-815), aggiunta dopo il cancello del 25/09 | la sonda senza cancellazione gonfia il segno | n **152**, **+0,230 R, t 2,47**, 7/8 anni, DD 4,8 R | ✅ regge; il **filtro VWAP** dell'EA (r.1104) **non è approssimabile**: histdata non ha volumi |
 
 📄 **Fonte esterna, letta sul PDF [VERIFICATO]:** Mesfin, _"Structural Limits of OHLCV-Based Intraday Momentum Signals in MNQ Futures"_, **arXiv 2605.04004** (05/05/2026), sez. 4.4, tab. 6 e 13. Il **gap continuation short** su MNQ 2021-2025 fa **lordo +16,53 · netto +14,52 punti, T 1,46, 35 operazioni OOS**, con il **2024 a −11,87**. L'autore lo chiama _"the most credible near-miss in the study"_ e lo tiene _"as a candidate for future investigation"_. Il meccanismo è lo stesso, la geometria no (lì velocità Kalman, qui rottura del range), e il profilo è lo stesso: vive negli anni di discesa e cede nel toro. Numeri **dell'autore, NON verificati da noi**: non pesano sul punteggio.
 
@@ -166,7 +167,7 @@ PERCHE'         unica cella su 10 che passa la sonda, regge 6 contro-esempi, zer
 
 ## 7. 📦 Consegnato
 
-- `backtest_pipeline/prove/GAPCONT_DAX_SHORT_a_ora8.txt` (file di testa: estate, 08:00-16:30 BCM) e `…_b_ora9.txt` (inverno, 09:00-17:30). Criteri congelati **prima** dei numeri; asse = magic gemello (G1); 2 file × 2 celle = **8 passate, 4 lunghe**, stima 5-12 minuti **[STIMA]**. `controlla_prova.py`: **OK, 0 problemi**. Sigla R **da assegnare** (non ho preso R253 per non collidere col round in corso).
+- `backtest_pipeline/prove/R253a_gapcont_DAX_short_ora8.txt` (file di testa: estate, 08:00-16:30 BCM) e `R253b_gapcont_DAX_short_ora9.txt` (inverno, 09:00-17:30). Criteri congelati **prima** dei numeri; asse = magic gemello (G1); 2 file × 2 celle = **8 passate, 4 lunghe**, stima 5-12 minuti **[STIMA]**. `controlla_prova.py`: **OK, 0 problemi**. Sigla **R253** (assegnata dal coordinatore). Prima stesura FAIL allo strato 2 del cancello; corretta con i cancelli P0 (classe 780), S2 riscritto, le sedute di confine (805), il verdetto asimmetrico di R1 (804), la frequenza come TETTO (777), il moncone (766) e O1/O2 (781).
 - Attrezzi: `biblioteca/sonde_esterne/sonda_dax_short_meccanismi.py` (criteri pushati prima, `473c57f6`) e `sonda_dax_short_controesempi.py`. Uscite in `biblioteca/sonde_esterne/uscite_dax_short_2026-09-25/`.
 - 🔴 **Nessuna riga di lancio.** Prima di scriverla va passata da `CHECKLIST_RIGA_DI_LANCIO.md` e dai due strati del cancello. Gira **solo sul PC di backtest**.
 

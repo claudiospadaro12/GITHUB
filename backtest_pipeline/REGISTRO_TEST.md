@@ -4178,7 +4178,7 @@ Il verdetto per tutte le celle mai girate su BCM resta **NON ANCORA MISURATO (so
 | gap-down continuazione >=0,25% | +0,110 R t 1,80 5/8 | 🟠 manca G1 e G3 |
 | **gap-down continuazione >=0,50%** (rottura del min. range 15', 2R) | **+0,185 R t 2,12 6/8, DD 6,5 R, n 175** | 🟢 **PASSA-SONDA** + 6 contro-esempi (gap = motore; lungo speculare senza informazione; EuroStoxx concorde t 1,51; S&P NO t 0,49) |
 
-- 📦 **In coda, NON girato:** `prove/GAPCONT_DAX_SHORT_a_ora8.txt` + `_b_ora9.txt`
+- 📦 **In coda, NON girato:** `prove/R253a_gapcont_DAX_short_ora8.txt` + `R253b_gapcont_DAX_short_ora9.txt`
   (`ABTG_GapContinuation`, D30EUR solo short, orologio in fase come R252; `controlla_prova.py` OK).
   Merito **sospeso per aritmetica** in partenza (~0,09 posizioni/seduta): il round giudica catena,
   costo, rischio e sovrapposizione con 770411/770105.

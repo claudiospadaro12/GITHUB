@@ -1,6 +1,9 @@
 RIF  P2d gap-down>=0,50% corto (deve riprodurre la sonda)  n  175  E +0.1850 R  t +2.12  dirINFO +0.1596  stop med 68.0  anni+ 6/8
       2011:+0.17(40) 2012:-0.01(29) 2013:+0.02(12) 2014:+0.14(12) 2015:+0.50(18) 2016:+0.29(27) 2017:-0.20(8) 2018:+0.30(29)
       somma +32.4 R | DD massimo 6.5 R | serie perdente piu lunga 5
+CE9  P2d + cancellazione a meta gap (come EA r.804-815)    n  152  E +0.2301 R  t +2.47  dirINFO +0.2017  stop med 68.0  anni+ 7/8
+      2011:+0.34(28) 2012:+0.02(27) 2013:+0.02(12) 2014:+0.25(11) 2015:+0.69(16) 2016:+0.22(22) 2017:-0.20(8) 2018:+0.27(28)
+      somma +35.0 R | DD massimo 4.8 R | serie perdente piu lunga 5
 CE1  P2d in scala invariante (pav 0,27 ATR, costo scalato) n  175  E +0.2430 R  t +2.30  dirINFO +0.2036  stop med 46.0  anni+ 5/8
       2011:+0.35(40) 2012:-0.02(29) 2013:+0.52(12) 2014:-0.02(12) 2015:+0.52(18) 2016:+0.33(27) 2017:-0.27(8) 2018:+0.24(29)
       somma +42.5 R | DD massimo 6.6 R | serie perdente piu lunga 6

@@ -1,11 +1,10 @@
 # =====================================================================
-#  GAPCONT_DAX_SHORT_a -- CONTINUAZIONE DEL GAP-DOWN ALL'APERTURA XETRA
+#  R253a -- CONTINUAZIONE DEL GAP-DOWN ALL'APERTURA XETRA
 #  EA: ABTG_GapContinuation   (adozione minima di "Nikkei 225 Gap
 #      Continuation EA", MQL5 Code Base 75301; attribuzione nel sorgente)
 #  D30EUR, SOLO SHORT, ORA 8 / chiusura 16:30 (= orologio d'ESTATE).
 #  FILE DI TESTA della coppia a/b. Il file b porta solo le differenze.
-#  Sigla R: DA ASSEGNARE da chi mette il round in coda (non ho preso un
-#  numero R per non collidere con R252, in corso in parallelo).
+#  Sigla R: R253 (a = testa, b = inverno).
 #
 #  Nato dalla SECONDA CACCIA del 25/09/2026 dopo R251 (short retest
 #  d'apertura BOCCIATO PER RISCHIO). Dossier:
@@ -19,6 +18,9 @@
 #  VINCOLI DI BANCO (stanno nella riga di lancio, classe 692; sono quelli
 #  di R251/R252): -Deposito 10000, -Modello 4 (tick reali), niente
 #  -Spread / -Ritardo / -FrazioneIS, MaxBars=100000000.
+#  IL MONCONE (come R252a par. 4): gamba IS = 2024.09.26 sola, CSV _IS
+#  atteso VUOTO e rc 2 del driver ATTESO; lo assolve SOLO E0 (CSV _OOS
+#  con 2 righe e Trades > 0), classe 766. Il 2024.09.26 esce dalla curva.
 #  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO.
 # =====================================================================
 #
@@ -102,10 +104,10 @@
 #  delle sedute, ingresso nel 62% di quelle -> ~0,087 posizioni/seduta.
 #  Sulle ~458 sedute feriali in fase (estate 238 + inverno 220, conto di
 #  r252_attese.py riportato in R252a par. 4) -> ~40 posizioni in fase.
-#  Il toro ne toglie una parte: BANDA ATTESA 10-45 posizioni in fase.
+#  Il toro ne toglie una parte: BANDA ATTESA 10-45 posizioni in fase; 45 e' un TETTO (VWAP e meta' gap non nella sonda, par. 5).
 #  >>> IL MERITO E' SOSPESO PER ARITMETICA QUALUNQUE COSA ESCA (n << 150).
 #  Il round giudica: la CATENA (l'EA gira su D30EUR, il gap e' quello
-#  della cash), il RISCHIO (fatto accaduto, vale a qualunque n), il COSTO
+#  della cash), il RISCHIO SOLO IN NEGATIVO (una violazione boccia a qualunque n; il rispetto a n piccolo non assolve), il COSTO
 #  (stop misurato) e la SOVRAPPOSIZIONE con le due corte DAX gia' in campo
 #  o firmate (770411 MaxMinNotte, 770105 gemella SHORT della 770101).
 #
@@ -127,6 +129,12 @@
 #  si RICOMPONE dal per-trade = righe d'estate del file a + righe
 #  d'inverno del file b, col metodo A (ribasato) e B (denaro) di R252a
 #  par. 5. Le righe fuori fase si scrivono come descrizione e basta.
+#  LE QUATTRO SEDUTE DI CONFINE (classe 805): la "chiusura di ieri" il
+#  lunedi' del cambio sta sull'ALTRO orologio. 2024.10.28 e 2025.10.27
+#  (file b): 17:29 BCM di un venerdi' d'estate = 18:30 CEST, un'ora DOPO
+#  la cash. 2025.03.31 e 2026.03.30 (file a): 16:29 BCM di un venerdi'
+#  d'inverno = 16:30 CET, un'ora PRIMA di Xetra. Fuori dalla curva in
+#  fase; se hanno una posizione, si scrive a parte col numero.
 #
 # =====================================================================
 #  5. I PIN, E LE SCELTE (una per riga, col perche')
@@ -148,6 +156,11 @@
 #     DIFFERENZA DICHIARATA dalla sonda: la sonda usava un PAVIMENTO di 68
 #     pti (allarga lo stop quando il range e' stretto); l'EA usa un
 #     BUFFER fisso. Sui giorni di range stretto l'EA ha stop piu' corti.
+#     ALTRE DUE DIFFERENZE, non misurate dalla sonda (P2d, r.143-154):
+#     niente filtro VWAP (EA r.1104) e niente cancellazione a meta' gap
+#     (EA r.815). Tutte e due TOLGONO giornate (classe 777): la frequenza
+#     del par. 3 e' un TETTO, e il confronto di segno si scrive "con la
+#     sonda SENZA VWAP e senza cancellazione a meta' gap".
 #  InpEnableBuyGaps=false: SOLO SHORT (il lungo e' stato misurato nella
 #     sonda, CE5, e non ha la stessa informazione sul DAX).
 #     InpMinimumBuyGapPercent e InpBuyRiskPercent restano > 0 perche'
@@ -163,7 +176,7 @@
 #     usava 2R secco senza parziale; CE4 dice che il bersaglio non e' il
 #     motore. La gestione si mette ad asse SOLO dopo (certificato p.3).
 #  InpMaxEntryMinutesFromOpen=90, InpExitMinutesBeforeClose=5: default
-#     dell'autore, uguali alla sonda (ingresso 08:15-09:29, uscita 16:24).
+#     dell'autore, a un minuto dalla sonda: l'EA entra fra 08:15:00 e 09:30:00 (r.1019) ed esce alle 16:25 (r.1256); la sonda 08:15-09:29 e 16:24.
 #  InpMaxSpreadToStopPercent=10: default dell'autore (spread <= 10% dello
 #     stop); la frontiera 40x si giudica sul per-trade, non si impone qui.
 #  InpUsaGuardian=true: nel tester e' fail-open (commento r.108-111):
@@ -183,13 +196,25 @@
 #   C0 per-trade presente per tutte e due le gemelle, nei due file;
 #      atteso in Common\Files:
 #      abtg_trades_ABTG_GapContinuation_D30EUR_792701.csv / _792751.csv
+#   P0 PIN DAL CSV (classe 780): le colonne Inp* dei CSV _OOS (2 righe,
+#      FrameInputs r.1636) portano il valore vero di ogni pin. Per ogni
+#      riga i 33 pin fissi uguali al file (numeri come numeri, bool 0/1,
+#      InpSessionTimeMode = 1) e InpMagicNumber = 792701 / 792751.
+#      Colonna assente o valore diverso = NULLO; confronti != 2 x 34 =
+#      NON LEGGIBILE. Contro-esempi che nessun altro cancello vede:
+#      InpSessionCloseHour non arrivato (default 15) -> chiusura di ieri
+#      alle 15:29 e uscita 15:25, S2 VERDE; InpSellRiskPercent (default
+#      0,50) o InpReduceRiskOnSmallSellGap (default true) non arrivati ->
+#      DD in % dimezzato o a un quarto, R1 VERDE FALSO.
 #   G1 gemelle identiche (CSV _OOS e per-trade, tranne il magic).
 #   L0 LATO: TUTTI i deal di uscita hanno deal_type 0 (BUY = chiusura di
 #      uno short). Contro-esempio: pin di InpEnableBuyGaps non arrivato ->
 #      compaiono uscite deal_type 1 -> NULLO.
-#   S2 OROLOGIO: tutte le uscite fra le 08:16 e le 16:26 server (file a).
-#      Contro-esempio: InpSessionTimeMode non arrivato (default JST) ->
-#      uscite fra 01:00 e 07:30 -> NULLO.
+#   S2 OROLOGIO: tutte le uscite con 08:15:00 <= close_time <= 16:26:59
+#      server (file a; ingresso ammesso da 08:15:00, r.1475).
+#      Contro-esempio: InpSessionTimeMode non arrivato (JST, Darwinex
+#      GMT+2/+3) -> seduta 01:00-09:30 o 02:00-10:30, uscite fra 01:15 e
+#      10:25 -> NULLO. La CHIUSURA non arrivata S2 non la vede: la prende P0.
 #   E0 EVENTI: Trades del CSV _OOS > 0 su tutte e due le gemelle. Se e'
 #      0, NULLO: si fa UNA corsa singola (in ottimizzazione i Print sono
 #      spenti, R251 par. 2) e si legge il funnel di PrintFunnel (OnTester
@@ -211,6 +236,13 @@
 #      moneta (vincita 2R parziale, perdita 1R) il DD tipico e' 4-7 R:
 #      R1 NON separa l'edge dal caso, separa solo il catastrofico. Lo so e
 #      lo dichiaro: e' un cancello di RISCHIO, non di merito.
+#      VERDETTO ASIMMETRICO (classe 804): R1 ROSSO = BOCCIATO PER RISCHIO
+#      a qualunque n. R1 VERDE si scrive "R1 NON VIOLATO su n = X
+#      posizioni in fase", MAI "rischio passato", con accanto la
+#      probabilita' che un motore SENZA edge lo passi a quell'n (modello
+#      qui sopra, costo 0,03 R, 20.000 cammini, seme 801): n 10 0,95 .
+#      20 0,73 . 30 0,54 . 40 0,40 (a -0,20 R: 0,85 . 0,44 . 0,21 .
+#      0,10). Stessa regola per R3.
 #   R2 peggior giornata a saldo chiuso >= -1,10% (un ciclo al giorno).
 #   R3 serie perdente piu' lunga <= 8 (sonda: 5 su 175 posizioni).
 #  MERITO: SOSPESO per aritmetica (n << 150), qualunque esito. La sola
@@ -225,9 +257,13 @@
 #   O1 quota delle giornate con una posizione di questo motore in cui
 #      770411 (per-trade R246, MaxMinNotte_DAX_Short_Ottimizzato
 #      d0 = 794621 finestra B e 794623 finestra A, prove R246i/R246k) ha una
-#      posizione lo stesso giorno;
+#      posizione lo stesso giorno; sulla CURVA IN FASE, sedute di
+#      confine escluse; 794623 per d <= 2025.06.09, 794621 per
+#      d >= 2025.06.10 (cucitura del G0-BIS di R252a).
 #   O2 idem contro lo short nudo d'apertura di R252a/R252b (= geometria
-#      della 770105 firmata il 25/09).
+#      della 770105 firmata il 25/09). SOLO se R252a/R252b hanno G1 e
+#      S1 VERDI (classe 781); finche' il loro per-trade non e' in
+#      archivio, O2 = [NON MISURABILE], non 0%.
 #   Oltre il 50% -> "NON ADDITIVO A RISCHIO PIENO" accanto al numero.
 #  CERTIFICATO (09/09): comunque vada, NON ANCORA MISURATO. Dopo questo
 #   round mancano: gestione dell'uscita ad asse (p.3), gemelli E50EUR /
