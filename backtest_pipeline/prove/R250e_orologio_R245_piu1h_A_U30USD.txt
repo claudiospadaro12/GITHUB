@@ -41,6 +41,7 @@
 #  VOTO: e' la cella nuova della CONFERMA (classe 778): entra in Q2 e in
 #     Qc/Qfc della finestra A (R250a par. 7.1). Se NON VALIDO, Qc e Qfc
 #     sulla A sono NON LEGGIBILI (autotest T7): nessun verdetto.
+#     Verdetto di conferma SOLO se A+B concorda (veto).
 #  ATTESA (R250a par. 6): posizioni invernali ~75 (H_STAGIONE) / ~66
 #     (H_OROLOGIO) su 90 feriali; PF invernale: bande SOVRAPPOSTE sulla
 #     A, la singola cella non decide (decide Qc con R250c).

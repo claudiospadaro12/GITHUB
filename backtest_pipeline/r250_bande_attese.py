@@ -44,8 +44,8 @@ Celle trattate come INDIPENDENTI: sotto H_STAGIONE le celle spostate
 girano sugli STESSI giorni della d0, quindi l'errore vero e' PIU' PICCOLO
 di quello stampato (prudente).
 
-USO:  python3 backtest_pipeline/r250_bande_attese.py            (~15 s)
-      python3 backtest_pipeline/r250_bande_attese.py --autotest (~2 s)
+USO:  python3 backtest_pipeline/r250_bande_attese.py            (~10 s, misurato 9,7 s)
+      python3 backtest_pipeline/r250_bande_attese.py --autotest (34 test, ~0,1 s)
 Esce 1 se un'ancora non torna.
 """
 import collections
@@ -217,6 +217,55 @@ def soglie(ref):
         pf_p_orol=pI - HI * D, pf_p_stag=pI - LO * D,           # +1h inverno: OROL se <=, STAG se >=
         n_m_stag=(rE + LO * Df) * fE, n_m_orol=(rE + HI * Df) * fE,
         n_p_orol=(rI - HI * Df) * fI, n_p_stag=(rI - LO * Df) * fI)
+
+
+def conferma(zA, zAB):
+    """classe 782 (proposta): verdetto di CONFERMA = zona di A, SOLO se A+B concorda.
+    A+B non leggibile -> A da sola, 'concordanza NON VERIFICATA' (classe 781)."""
+    if zA == 'NON LEGGIBILE':
+        return 'NON LEGGIBILE'
+    if zAB == 'NON LEGGIBILE':
+        return zA + ' (A SOLA: concordanza NON VERIFICATA)'
+    return zA if zA == zAB else 'NON CONCORDE'
+
+
+def regola_congiunta(dati, rip=6000, seme=2503):
+    """potenza della regola di conferma (A, A+B, A concorde con A+B) sotto TRE ipotesi:
+    STAGIONE, OROLOGIO e NULLO (nessun divario vero: celle spostate estratte dal pool
+    E+I della stessa finestra, al tasso medio). Celle A e B estratte separatamente,
+    A+B = unione: A e A+B sono CORRELATE come nel round."""
+    random.seed(seme)
+    A, AB = dati['A'], dati['AB']
+    out = {}
+    for H in ('STAGIONE', 'OROLOGIO', 'NULLO'):
+        cnt = collections.defaultdict(collections.Counter)
+        for _ in range(rip):
+            cel = {}
+            for k in ('A', 'B'):
+                pos, ref = dati[k][1], dati[k][2]
+                E, I = pos['E'], pos['I']
+                if H == 'STAGIONE':
+                    sm, rm, sp, rp = E, ref['rE'], I, ref['rI']
+                elif H == 'OROLOGIO':
+                    sm, rm, sp, rp = I, ref['rI'], E, ref['rE']
+                else:
+                    r = (ref['nE'] + ref['nI']) / (ref['fE'] + ref['fI'])
+                    sm, rm, sp, rp = E + I, r, E + I, r
+                cel[k] = ([random.choice(sm) for _ in range(round(rm * ref['fE']))],
+                          [random.choice(sp) for _ in range(round(rp * ref['fI']))],
+                          sum(random.random() < rm for _ in range(ref['fE'])),
+                          sum(random.random() < rp for _ in range(ref['fI'])))
+            sA = statistiche(A[2], pf_pos(cel['A'][0]), pf_pos(cel['A'][1]), cel['A'][2], cel['A'][3])
+            sAB = statistiche(AB[2], pf_pos(cel['A'][0] + cel['B'][0]), pf_pos(cel['A'][1] + cel['B'][1]),
+                              cel['A'][2] + cel['B'][2], cel['A'][3] + cel['B'][3])
+            for st in ('Qc', 'Qfc'):
+                zA, zAB = zona(sA[st]), zona(sAB[st])
+                cnt[st + ' A'][zA] += 1
+                cnt[st + ' A+B'][zAB] += 1
+                cnt[st + ' conferma'][conferma(zA, zAB)] += 1
+        out[H] = {k: tuple(c[z] / rip for z in ('STAGIONE', 'MISTO', 'OROLOGIO', 'NON CONCORDE'))
+                  for k, c in cnt.items()}
+    return out
 
 
 # ------------------------------------------------------------------ cancelli
@@ -433,6 +482,14 @@ def main():
                   % (st, *rr['STAGIONE']['S_banda'][st], *rr['OROLOGIO']['S_banda'][st]))
 
     print()
+    print('=== 3b. LA CONFERMA SOTTO TRE IPOTESI (classe 782 proposta), seme 2503, 6000 ===')
+    print('    quadruple = (STAGIONE ; MISTO ; OROLOGIO ; NON CONCORDE); NULLO = nessun divario vero')
+    rc = regola_congiunta(dati)
+    for H in ('STAGIONE', 'OROLOGIO', 'NULLO'):
+        for k in ('Qc A', 'Qc A+B', 'Qc conferma', 'Qfc A', 'Qfc A+B', 'Qfc conferma'):
+            print('    se H_%-8s %-13s (%.3f ; %.3f ; %.3f ; %.3f)' % ((H, k) + rc[H][k]))
+
+    print()
     print('=== 4. S1: TARATURA SUL PER-TRADE d0 (R247), ora di chiusura BCM ===')
     for k in ('A', 'B'):
         rows = dati[k][0]
@@ -504,6 +561,17 @@ def autotest():
     early = [dict(r, t=max(r['t'], '14:45:00')) for r in early]
     chk('T5g S1 -1h con InpSessionHour NON arrivato (niente prima delle 14:45) -> ROSSO',
         s1(early, 'm1h', d0)[0] == 'ROSSO')
+    # T5h/T5i: i due guasti di pin che T5c-g non coprono
+    late = [dict(r, t=r['t']) for r in sposta(d0, -1)]
+    late = [dict(r, t=(r['t'] if r['t'] < '16:00:00' else '%02d%s' % (int(r['t'][:2]) + 1, r['t'][2:])))
+            for r in late]
+    chk('T5h S1 -1h con InpCloseHour NON arrivato (uscite oltre le 16:31) -> ROSSO',
+        s1(late, 'm1h', d0)[0] == 'ROSSO' and max(r['t'] for r in late) >= '16:31:00')
+    ear = sposta(d0, +1)
+    ear = [dict(r, t=('%02d%s' % (int(r['t'][:2]) - 1, r['t'][2:]) if r['t'] < '16:45:00' else r['t']))
+           for r in ear]
+    chk('T5i S1 +1h con InpSessionHour NON arrivato (uscite prima delle 15:45) -> ROSSO',
+        s1(ear, 'p1h', d0)[0] == 'ROSSO' and min(r['t'] for r in ear) < '15:45:00')
     # T6: G1 sui campi che decidono
     gem = [dict(r) for r in d0]
     chk('T6a G1 gemelle identiche -> PASS', g1_pertrade(d0, gem)[0] == 'PASS')
@@ -556,6 +624,11 @@ def autotest():
         s10 = statistiche(refA, xm - dl, xp - dl, None, None)
         chk('T10 %s + spostamento che peggiora di 0,15 -> Qc=%.0f, S=+0,15/D' % (H, att),
             abs(s10['Qc'] - att) < 1e-9 and abs(s10['S'] - dl / refA['D']) < 1e-9)
+    chk('T11a conferma: A OROLOGIO, A+B OROLOGIO -> OROLOGIO', conferma('OROLOGIO', 'OROLOGIO') == 'OROLOGIO')
+    chk('T11b conferma: A OROLOGIO, A+B MISTO -> NON CONCORDE', conferma('OROLOGIO', 'MISTO') == 'NON CONCORDE')
+    chk('T11c conferma: A MISTO, A+B STAGIONE -> NON CONCORDE', conferma('MISTO', 'STAGIONE') == 'NON CONCORDE')
+    chk('T11d conferma: A+B NON LEGGIBILE -> A sola, dichiarata',
+        conferma('STAGIONE', 'NON LEGGIBILE') == 'STAGIONE (A SOLA: concordanza NON VERIFICATA)')
     print('autotest: %d falliti' % fall)
     return 1 if fall else 0
 

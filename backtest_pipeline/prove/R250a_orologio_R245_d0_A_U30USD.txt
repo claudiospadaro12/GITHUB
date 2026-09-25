@@ -240,8 +240,8 @@
 #  6. L'ATTESA E LE BANDE, DICHIARATE PRIMA DEI NUMERI
 # ==========================================================================
 #  Tutti i numeri di questo paragrafo e del 7 si rifanno a seme fisso con
-#      python3 backtest_pipeline/r250_bande_attese.py        (~6 s)
-#      python3 backtest_pipeline/r250_bande_attese.py --autotest (28/28)
+#      python3 backtest_pipeline/r250_bande_attese.py        (~10 s)
+#      python3 backtest_pipeline/r250_bande_attese.py --autotest (34/34)
 #  RIFERIMENTI d0 (per-trade R247; fissi se G0 VERDE):
 #     A : estate PF 1,0246 su 79 (0,7383/feriale), inverno 1,4443 su 75
 #         (0,8333); D = 0,4197, Df = 0,0950
@@ -312,23 +312,52 @@
 #  (B, R248a par. 7) e IL_MERITO par. 2.3 ha gia' usato A come replica
 #  (+0,420, p 0,206). Le celle NUOVE di R250 non le ha viste nessuno, ma i
 #  riferimenti d0 di B sono quelli che hanno generato l'ipotesi. Quindi:
-#   >>> VERDETTO DI CONFERMA = Qc e Qfc sulla SOLA finestra A (file R250a,
-#       R250c, R250e; G0 di R250a). E' quello che si scrive come verdetto.
-#   >>> B e A+B si stampano come LETTURA DESCRITTIVA, "contiene la meta'
-#       generatrice", mai come conferma. Se A e A+B dicono cose diverse,
-#       vale A, con la sua potenza scritta qui sotto.
+#   >>> VERDETTO DI CONFERMA = la zona di Qc (e di Qfc) sulla finestra A
+#       (file R250a, R250c, R250e; G0 di R250a), SCRITTA SOLO SE la stessa
+#       statistica su A+B cade nella STESSA zona; altrimenti si scrive
+#       "NON CONCORDE" (conferma() nello script, autotest T11).
+#   >>> Se A+B e' NON LEGGIBILE (un file B non VALIDO) si scrive la zona di
+#       A con l'etichetta "concordanza NON VERIFICATA" e con la potenza di
+#       A DA SOLA qui sotto, righe H_NULLO comprese.
+#   >>> A+B fa da VETO, MAI da conferma: un veto TOGLIE verdetti, non ne
+#       crea (classe 778). B e A+B si stampano anche come LETTURA
+#       DESCRITTIVA, "contiene la meta' generatrice".
+#   PERCHE' IL VETO: la premessa D > 0 sulla A NON e' stabilita (IL_MERITO
+#   par. 2.3: +0,420, p 0,206; ed e' la tranche su cui R245 ha scelto la
+#   cella). Sotto H_NULLO (nessun divario vero: celle spostate estratte dal
+#   pool E+I) la A da sola scrive OROLOGIO 0,369 e STAGIONE 0,366 sul PF;
+#   col veto 0,153 e 0,145 (script sez. 3b, qui sotto). Selezione su B
+#   [DERIVATO]: un D_B gonfiato spinge Qc verso MISTO sotto tutte e due le
+#   ipotesi, quindi il veto su A+B pende verso "NON CONCORDE", non verso
+#   una direzione.
 #  Potenza della regola com'e' scritta (classe 764; seme 2502, 6000;
 #  triple = probabilita' di STAGIONE ; MISTO ; OROLOGIO):
 #     A  Qc   se H_STAGIONE (0,690 ; 0,199 ; 0,112)
 #             se H_OROLOGIO (0,117 ; 0,183 ; 0,700)
 #        p10-p50-p90: H_S [-0,80 ; 0,01 ; 0,74]  H_O [0,25 ; 0,99 ; 1,77]
-#        -> le mediane cadono FUORI dalla banda altrui: DISCRIMINA, ma con
-#           verdetto SBAGLIATO ~11-12% in tutti e due i versi e MISTO
-#           ~18-20%. Lo scrivo prima: e' un INDIZIO, non una sentenza.
+#        -> le mediane cadono FUORI dalla banda altrui: DISCRIMINA, ma A DA
+#           SOLA (senza veto) ha verdetto SBAGLIATO ~11-12% in tutti e due
+#           i versi e MISTO ~18-20%: per questo il veto qui sotto.
 #     A  Qfc  se H_STAGIONE (0,834 ; 0,155 ; 0,011)
 #             se H_OROLOGIO (0,011 ; 0,154 ; 0,835)  -> DISCRIMINA
 #     A+B Qc  (0,917 ; 0,082 ; 0,001) / (0,002 ; 0,080 ; 0,919)
 #     A+B Qfc (0,975 ; 0,025 ; 0,000) / (0,000 ; 0,027 ; 0,973)
+#  CONFERMA COL VETO, la regola com'e' scritta sopra (script sez. 3b,
+#  regola_congiunta, seme 2503, 6000; celle A e B estratte a parte e A+B =
+#  la loro unione, correlate come nel round; quadruple = STAGIONE ; MISTO ;
+#  OROLOGIO ; NON CONCORDE):
+#     Qc   se H_STAGIONE (0,684 ; 0,026 ; 0,000 ; 0,290)
+#          se H_OROLOGIO (0,001 ; 0,018 ; 0,692 ; 0,289)
+#          se H_NULLO    (0,145 ; 0,198 ; 0,153 ; 0,504)
+#     Qfc  se H_STAGIONE (0,836 ; 0,014 ; 0,000 ; 0,150)
+#          se H_OROLOGIO (0,000 ; 0,019 ; 0,826 ; 0,155)
+#          se H_NULLO    (0,083 ; 0,435 ; 0,076 ; 0,405)
+#  A DA SOLA sotto H_NULLO (STAGIONE ; MISTO ; OROLOGIO), stessa sez. 3b:
+#     Qc  (0,366 ; 0,264 ; 0,369)      Qfc (0,250 ; 0,487 ; 0,262)
+#  Nota: la sez. 3b usa il seme 2503, la sez. 3 il 2502; le righe "A da
+#  sola" delle due sezioni differiscono quindi di poco (es. Qc H_STAGIONE
+#  0,702 contro 0,690). Tutti i numeri della 3b sono identici a quelli
+#  ottenuti dal cancello.
 #  In unita' della cella, sulla A: PF -1h d'estate STAGIONE se <= 1,1505,
 #  OROLOGIO se >= 1,3184; PF +1h d'inverno OROLOGIO se <= 1,1505,
 #  STAGIONE se >= 1,3184; posizioni -1h (107 fer.) STAGIONE se <= 82,05,
@@ -450,8 +479,10 @@
 # ==========================================================================
 #   1. Un solo regime (toro 2024-2026 col crollo di aprile), un broker
 #      (feed BCM), due inverni: Emendamento C non soddisfatto.
-#   2. La conferma (A) ha potenza scritta al par. 7.1: ~70% di verdetto
-#      giusto, ~11-12% sbagliato sul PF. n<150 ovunque su A.
+#   2. La conferma (A col veto di A+B, par. 7.1): ~68-69% giusto, ~0,1%
+#      sbagliato sul PF, ~29% NON CONCORDE; se sulla A il divario non c'e'
+#      (H_NULLO, non escluso: p 0,206) scrive comunque una direzione ~30%
+#      delle volte (0,145 + 0,153). n<150 su A.
 #   3. La conferma VERA del merito invernale e' un inverno che nessuno ha
 #      visto: dal 02/11/2026. E per la -1h d'estate (se OROLOGIO) la via
 #      piu' corta e' la finestra vergine di R248 (2026.07.01 -> 2026.09.18,

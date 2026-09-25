@@ -36,7 +36,8 @@
 #  S2 (confondente H4, R250a par. 1.2 e 5.5): contro R250b, giorni comuni
 #     in verso opposto dal 2024.11.15: attesi ZERO (stessa candela 08-12).
 #  G2: il per-trade di R250c contro il CSV _IS di QUESTO file.
-#  VOTO: solo nelle letture DESCRITTIVE B e A+B (R250a par. 7.1).
+#  VOTO: nelle letture DESCRITTIVE B e A+B, e nel VETO di concordanza della
+#     conferma su A (R250a par. 7.1): puo' togliere un verdetto, mai crearlo.
 #  ATTESA (R250a par. 6, lettura B descrittiva): posizioni estive su 170
 #     feriali ~120 (H_S) / ~145 (H_O); STAGIONE se <= 127,63, OROLOGIO
 #     se >= 137,81; PF STAGIONE se <= 1,3058, OROLOGIO se >= 1,7746.
