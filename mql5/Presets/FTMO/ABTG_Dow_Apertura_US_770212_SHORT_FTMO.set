@@ -1,0 +1,494 @@
+; ==========================================================================
+; ABTG_Dow_Apertura_US -- SEDIA 770212 -- GEMELLA **SHORT** DELLA 770202
+; US30.cash M5 -- PRESET PER IL TERMINALE **FTMO**. NON usarlo su BCM.
+; Scritto il 26/09/2026. ASCII PURO (regola 17/08).
+; MARCATORE_PRESET_SHORT_DOW_FTMO_v1
+; ==========================================================================
+;
+; BERSAGLIO ....: SOLO il terminale MT5 FTMO, conto 541452707, cartella
+;                 programma C:\FTMO. Binario in campo: CLAU12_Dow_Apertura_US
+;                 (compilato il 20/09 16:58 da ABTG_Dow_Apertura_US.mq5 al pin
+;                 9fca63d9, 2205 righe -- CODA_06 del 26/09 r.211 ne conta 2206,
+;                 lo scarto +1 di tutti i file -- e rinominato: classe 783).
+;                 E' LO STESSO EA della 770202. Nessuna compilazione serve.
+;                 NON 50503392, NON 50504263, NON 10105439 (C:\BCM_Reale),
+;                 NON 50504400 (C:\MT5_Backtest), NON 50503635 (C:\MT5_MANUALE),
+;                 NON Pepperstone, NON Tickmill.
+; GRAFICO ......: un grafico NUOVO US30.cash M5. Su C:\FTMO ci sono GIA' TRE
+;                 grafici US30.cash e NESSUNO va toccato: chart02 M5 = 770202
+;                 (Dow Apertura LONG), chart04 H1 = 771531 (EMA200, con una
+;                 posizione SHORT aperta sul weekend), chart05 H1 = 770511
+;                 (SuperWave). MT5 tiene UN solo EA per grafico: trascinare
+;                 l'EA su uno di quelli lo SOSTITUISCE senza errori.
+;
+; LA FIRMA (Claudio, chat del 26/09/2026): lo SHORT del Dow, gemella della
+;   770202, su FTMO 541452707 al 2%, come la 770105 del 25/09 per il DAX.
+;   *** ENTRA PER FIRMA, NON PER PROMOZIONE. ***
+;   *** InpRiskPercent=2.00 E' LA TAGLIA FIRMATA DA CLAUDIO, non una proposta. ***
+;   Il testo letterale della firma va nel verbale report/FIRME_2026-09-26.md.
+;
+; IL MAGIC ......: 770212. git grep 770212 = 0 occorrenze, git log -S770212
+;                 --all = 0 commit (26/09). NON 770206/770207: sono i magic
+;                 del round R16c (per-trade abtg_trades_..._770206.csv, usato
+;                 da dd_riordino_nasdaq.py come proxy della 770202 LONG).
+;
+; ORIGINE ......: copia di mql5/Presets/FTMO/ABTG_Dow_Apertura_US_770202_FTMO.set
+;                 (sha256 a6f642ec1c6e48e1f68a10137ca69b80b3bf3e359d758ba2f63b290a96f93f46,
+;                 ultimo commit 0127d449). Tutto cio' che sta sotto la riga
+;                 "COPIA DEL PRESET 770202" e' quel file BYTE PER BYTE, salvo TRE righe:
+;                   InpAllowLong    true    -> false
+;                   InpAllowShort   false   -> true
+;                   InpMagic        770202  -> 770212
+;                 Confronto con la foto del grafico VIVO della 770202 su C:\FTMO
+;                 (CODA_08_preset_dai_chr_20260926_033003.log r.1883-1970, .chr del
+;                 25/09 20:47): 81 input su 81 uguali (2.0 contro 2.00: stesso valore).
+;                 Nomi: i 81 input del sorgente al pin 9fca63d9, stesso ordine.
+;                 IDENTICO ALLA 770202, quindi: apertura 16:30 FTMO, range 35 min,
+;                 flat 19:30, RETEST (EntryMode 2), buffer 1000, offset retest 400,
+;                 TP1_R 1.0, parziale 50%, breakeven al TP1, trailing PREVBAR M5,
+;                 MinStopPts 500 (SkipIfTight false), filtro EMA H4 1/50 ACCESO,
+;                 OneTradePerDay true, UsaGuardian true, rischio 2.00.
+;                 ATTENZIONE: l'intestazione copiata sotto racconta la 770202 (LONG):
+;                 e' la sua storia, non questa sedia. Valgono le 81 righe di valori.
+;
+; IL FILTRO EMA H4 SUL LATO SHORT -- letto nel sorgente al pin 9fca63d9:
+;   r.403-411  handle iMA(_Symbol, InpFilterTF=H4, 1 e 50, MODE_EMA, PRICE_CLOSE);
+;              se non si creano: INIT_FAILED (l'EA non parte).
+;   r.1495-1502 TrendBias(): CopyBuffer shift 1 = ULTIMA CANDELA H4 CHIUSA;
+;              e = (EMA1 > EMA50) ? +1 : (EMA1 < EMA50 ? -1 : 0).
+;   r.654-658 + r.1281: il bias si legge UNA VOLTA, all'armamento
+;              (fine range = 16:30 + 35 = 17:05 server FTMO), e vale per il giorno.
+;   r.1309     shortOK = (gBias == 0 || gBias == -1);
+;   r.1345     SELL LIMIT solo se InpAllowShort && shortOK && bid <= sellTrig.
+;   ==> REGOLA: SHORT AMMESSO SOLO SE LA CHIUSURA DELL'ULTIMA H4 CHIUSA E'
+;       SOTTO LA EMA50 H4 della stessa candela (EMA1 = la chiusura stessa).
+;       Il long della 770202 e' ammesso solo se e' SOPRA (r.1308).
+;   ==> CONSEGUENZA: 770202 e 770212 leggono la stessa candela allo stesso
+;       minuto: nel caso normale operano in giorni DISGIUNTI (contato in R54a:
+;       long 74 + short 73 = due lati 147 in IS; 130 + 73 = 203 in OOS).
+;   ==> FAIL-OPEN, dichiarato: se le due medie sono uguali o CopyBuffer
+;       fallisce, il bias resta 0 e lo short passa SENZA filtro (r.1498-1501).
+;   ==> QUALE CANDELA: in campo FTMO alle 17:05 la H4 chiusa e' la 12:00-16:00
+;       server (chiusa alle 15:00 italiane d'estate); nel backtest BCM alle
+;       15:05 era la 08:00-12:00 BCM (chiusa alle 13:00 italiane). Candele
+;       diverse: la differenza sui risultati e' NON MISURATA.
+;
+; IL CONTRATTO DICHIARATO -- R54a, SOLO SHORT, EMA H4 1/50 acceso, U30USD M5
+; BCM, tick reali, deposito 100000, rischio 1%, armamento 14:30 BCM tutto
+; l'anno (risultati_archivio/csv_r54/*_r54a.csv, gemelle 772601/772602 uguali):
+;   IS  2024.09.26-2025.06.09 : n 73  profit +6.463,44  PF 1,511  DD_fisso 2,794%
+;   OOS 2025.06.10-2026.06.30 : n 73  profit -2.591,58  PF 0,840  DD_fisso 8,763%
+;   L'INTERRUTTORE (ptc, REGISTRO_TEST r.4035-4042, due lati contro solo long,
+;   range 25/35/45): OOS -3.281 / -2.795 / -6.010. A range 35 i giorni sono
+;   disgiunti, quindi il -2.795,08 e' quasi tutto lo short (R54a: -2.591,58).
+;   A 2,00% il DD_fisso OOS scala a ~17,5% (17,53%): LIMITE SUPERIORE (scala
+;   lineare, classe 547). Il muro FTMO del Max Loss e' 10% statico.
+;   NON MISURATI sullo short: gestione dell'uscita, filtro di regime diverso
+;   dall'EMA, EMA spento, orologio in fase con la cash tutto l'anno. Li misura
+;   R255 (backtest_pipeline/prove/R255a_short_DOW_ancora_1430.txt), IN
+;   PREPARAZIONE: i numeri qui sopra possono cambiare con quella misura.
+;
+; ERRATA DELL'INTESTAZIONE COPIATA (non corretta sotto, per restare byte per byte):
+;   la frase "Se FTMO e BCM cambiano nello STESSO giorno il delta resta +2" e'
+;   FALSA: BCM non cambia ora (UTC+1 fisso), d'inverno FTMO = BCM + 1
+;   (report/OROLOGIO_BCM_2026-09-24.md par. 5.3). L'ora 16:30 FTMO resta
+;   = 15:30 italiane = apertura di Wall Street tutto l'anno SE FTMO segue il
+;   calendario europeo; nella settimana 26/10-30/10/2026 (USA ancora in ora
+;   legale) la sedia arma alle 10:30 di New York, un'ora tardi: NON MISURATO.
+; ==========================================================================
+;
+; ================= COPIA DEL PRESET 770202 (invariata salvo 3 righe) =================
+; ==========================================================================
+; ABTG_Dow_Apertura_US -- SEDIA 770202 -- U30USD M5
+; PRESET RIMAPPATO PER L'OROLOGIO **FTMO**. NON usarlo su BCM.
+; Generato il 20/09/2026 da backtest_pipeline/rimappa_preset_ftmo.py. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; BERSAGLIO ....: terminale MT5 FTMO (challenge 100k 2-Step).
+;                 NON 50503392, NON 50504263, NON 10105439 (C:\BCM_Reale),
+;                 NON 50504400 (C:\MT5_Backtest).
+; ORIGINALE ....: mql5/Presets/ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set
+;                 sha1(12) b706603b97ed -- se cambia, questo file va rigenerato.
+;
+; ATTENZIONE, QUESTA SEDIA HA **DUE** ORIGINALI IN REPO E IO HO SCELTO:
+;   base usata ..: mql5/Presets/...ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set  -> InpRiskPercent=0.65, InpUsaGuardian=true
+;   NON usata ...: mql5/Presets/sedie_piccolo/recupero2/...  -> InpRiskPercent=1.0
+;                  e SENZA la riga InpUsaGuardian.
+;   PERCHE': 0,65% e' la taglia firmata di casa e il cap C1 (3,25% = 5 x 0,65)
+;   e' tarato su quella; la famiglia recupero2 e' quella del DEMO PICCOLO
+;   50503392. Su un 100k FTMO con perdita giornaliera al 5%, 1,0% per
+;   operazione x 5 posizioni aperte = il limite giornaliero in un colpo solo.
+;   *** E' UN PARAMETRO DI RISCHIO: LA SCELTA VA CONFERMATA DA CLAUDIO. ***
+;   Se la firma dicesse recupero2, questo file si rigenera in 10 secondi con
+;   backtest_pipeline/rimappa_preset_ftmo.py cambiando il percorso di partenza.
+;
+; PERCHE' +2, e da dove viene il numero
+;   docs/REGOLAMENTO_FTMO_2026-08.md r.130: server FTMO = GMT+2 inverno /
+;     GMT+3 estate, cioe' ORA ITALIANA +1.
+;   CLAUDE.md (regola fissa): server BCM = ORA ITALIANA -1.
+;   Oggi 19/09/2026 siamo in ora estiva: IT=UTC+2, BCM=UTC+1, FTMO=UTC+3.
+;   ==> FTMO = BCM + 2. Un preset non rimappato farebbe partire la sedia
+;       DUE ORE PRIMA, su un mercato che non e' quello misurato.
+;
+; COSA E' CAMBIATO -- e NIENTE ALTRO
+;   input                  BCM    FTMO   ora italiana
+;   InpSessionHour         14     16     15:30 IT (= 14:30 BCM = 16:30 FTMO)
+;   InpCloseHour           17     19     18:30 IT (= 17:30 BCM = 19:30 FTMO)
+;
+; NOTE DI QUESTA SEDIA
+;   Apertura Wall Street. 14:30 BCM = 15:30 IT = 16:30 FTMO. Flat 17:30 -> 19:30.
+;   RILIEVO CHE L'ORA NON RISOLVE -- leggere prima di accendere:
+;     questa sedia ha InpUseEmaFilter=true su InpFilterTF=16388 (H4).
+;     La GRIGLIA delle candele H4 e' ancorata alla mezzanotte del SERVER:
+;       BCM  (UTC+1) -> H4 aperte alle 23,03,07,11,15,19 UTC
+;       FTMO (UTC+3) -> H4 aperte alle 21,01,05,09,13,17 UTC
+;     Sono griglie DIVERSE (2h di sfasamento su un passo di 4h), quindi la
+;     EMA(50) su H4 NON vale gli stessi numeri del backtest. Non e' un input
+;     orario e NON l'ho toccato: va misurato o firmato, non aggiustato.
+;
+; CAMBIO DI ORA DI FINE OTTOBRE -- QUESTO FILE HA UNA SCADENZA
+;   Il DST europeo finisce DOMENICA 25 OTTOBRE 2026; quello americano
+;   DOMENICA 1 NOVEMBRE 2026. Se FTMO e BCM cambiano nello STESSO giorno
+;   (tutti e due su DST europeo) il delta resta +2 e non si tocca niente.
+;   Se FTMO seguisse il DST AMERICANO, fra il 25/10 e il 01/11 il delta
+;   diventerebbe +3 per una settimana. NON E' VERIFICABILE DA QUI:
+;   la misura e' UNA SOLA e va fatta a terminale FTMO acceso ->
+;   confrontare l'ora dell'ultima candela M1 con l'ora UTC. Va messa
+;   in calendario per il 25/10/2026.
+; --------------------------------------------------------------------------
+; ==========================================================================
+; ABTG_Dow_Apertura_US -- SEDIA 770202 -- U30USD M5
+; Conto: DEMO 100K 50504263, cartella "C:\Program Files\BCM Markets MT5
+; Terminal -V3", profilo ATTIVO "SQUADRA 100K".
+; NON il piccolo 50503392 (cartella SENZA -V3). NON il reale 10105439.
+; Scritto il 11/09/2026 dall'architetto-prop. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; CHE COS'E' QUESTO FILE, in una riga:
+;   E' la FOTOGRAFIA dei parametri che GIRANO OGGI, non una proposta e non
+;   un miglioramento. NESSUN VALORE E' STATO SCELTO DA ME: sono tutti COPIATI
+;   dalla foto del .chr vivo. Dove qualcosa non mi torna c'e' un RILIEVO in
+;   fondo, e il valore resta com'e'.
+;
+; --------------------------------------------------------------------------
+; 1) DA DOVE VIENE OGNI RIGA -- una sola fonte, dichiarata
+; --------------------------------------------------------------------------
+;   FONTE [MISURATO DA NOI, rango 1]:
+;     backtest_pipeline/coda/referti/CODA_08_preset_dai_chr_20260911_033002.log
+;     righe 3267-3386, blocco:
+;       "--- SEDIA: ABTG_Dow_Apertura_US su U30USD magic 770202 [chart02.chr]"
+;       "; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3"
+;       "; profilo: SQUADRA 100K"
+;     Il log e' una LETTURA del file
+;     ...\Terminal\BCA8AD18563BF5B64A433C2662D0A104\MQL5\Profiles\Charts\
+;     SQUADRA 100K\chart02.chr  -- nessuna scrittura, nessun terminale toccato.
+;
+;   SIMBOLO E TIMEFRAME [stessa corsa del runner, file gemello]:
+;     CODA_01_sedie_attaccate_20260911_033002.log riga 74:
+;       "ABTG_Dow_Apertura_US  U30USD  M5  magic 770202  rischio 0.65"
+;
+;   QUALE CONTO STA IN QUELLA CARTELLA [letto dai GIORNALI, non da una tabella]:
+;     CODA_03_conti_dei_terminali_20260911_033002.log:
+;       "CARTELLA BCA8AD18563BF5B64A433C2662D0A104 ->
+;        C:\Program Files\BCM Markets MT5 Terminal -V3 -> CONTO 50504263"
+;
+; --------------------------------------------------------------------------
+; 2) *** LA DATA DELLA FOTO -- IL CONTRO-ESEMPIO, COSTRUITO PRIMA ***
+; --------------------------------------------------------------------------
+; DOMANDA: un preset scritto da un .chr del 6 settembre descrive la sedia di
+; OGGI, 11 settembre?
+;   -> Il log lo dichiara: "; .chr modificato il: 2026-09-06 08:01".
+;      LA FOTO HA CINQUE GIORNI. Un .chr si riscrive quando il profilo viene
+;      SALVATO (o alla chiusura del terminale), non a ogni tick: se qualcuno
+;      avesse cambiato un input il 7, l'8 o il 9 SENZA salvare il profilo,
+;      QUESTO FILE NON LO SAPREBBE.
+;   -> QUANTO E' GRAVE, misurato e non stimato: il .chr del 6/09 08:01 e'
+;      COERENTE con la riga di CODA_01 della corsa di STANOTTE (11/09 03:30),
+;      che rilegge gli stessi file e stampa "rischio 0.65" -- ma e' la STESSA
+;      fonte riletta, quindi NON e' una conferma indipendente.
+;   -> CONCLUSIONE ONESTA: questo preset e' *** LA MIGLIOR FOTO CHE ABBIAMO,
+;      ED E' DEL 06/09/2026 ***. L'unica conferma indipendente possibile e'
+;      leggere la finestra Input dell'EA sul terminale 50504263 (-V3), che e'
+;      un gesto sul campo e NON e' nel mio perimetro.
+;
+; --------------------------------------------------------------------------
+; 3) *** COSA C'E' NEL .CHR E QUI NON C'E' -- la differenza dichiarata ***
+; --------------------------------------------------------------------------
+; Il blocco del log stampa "; parametri stampati: 113". Qui sotto ce ne sono
+; *** 81 ***. I 32 mancanti NON sono stati tolti per scelta: NON SONO DELL'EA.
+;
+;   LA PROVA, e non e' un'impressione:
+;   a) i 32 (InpMostraEma, InpMostraBollinger, InpEma1..InpEma4, InpBbPeriodo,
+;      InpBbDeviazione, InpMostraMaxIeri..., InpCol*, InpStile*, InpSpes*,
+;      InpMostraEtichette, InpFontSize e un SECONDO InpVerbose) compaiono
+;      IDENTICI anche sotto "SEDIA: ABTG_TradeExporter su NZDCAD" (riga 27 del
+;      log) -- e ABTG_TradeExporter.mq5 ha QUATTRO input in tutto (righe 25-28);
+;   b) l'unico file del repo che dichiara InpMostraEma e'
+;      mql5/Indicators/ABTG_Look.mq5 -- e' un INDICATORE, non un EA;
+;   c) due input con lo stesso nome (InpVerbose due volte, a true e a false)
+;      NON possono stare nello stesso EA: in MQL5 non compila.
+;   -> Quei 32 valori sono gli input dell'INDICATORE ABTG_Look appeso al
+;      grafico, che lo strumento CODA_08 accorpa al blocco <expert>.
+;      *** E' UN DIFETTO DELLO STRUMENTO, segnalato qui e nel rilievo R4. ***
+;      Metterli in un preset di EA vorrebbe dire scrivere il falso.
+;
+;   VERIFICA CHE I 81 SIANO ESATTAMENTE GLI INPUT DELL'EA (meccanica):
+;     i nomi delle 81 righe qui sotto, NELL'ORDINE, sono IDENTICI ai nomi delle
+;     81 dichiarazioni "input" di mql5/Experts/ABTG_Dow_Apertura_US.mq5
+;     (confronto riga per riga: diff vuoto). Stesso insieme, stesso ordine.
+;
+; --------------------------------------------------------------------------
+; 4) *** QUALE BINARIO DESCRIVE -- e qui la notizia e' BUONA ***
+; --------------------------------------------------------------------------
+; report/IL_CAMPO_E_FERMO_A_AGOSTO_2026-09-11.md misura che in campo girano
+; 42 sorgenti su 42 DIVERSI dal repo. [!!] Va detto ogni volta. MA quel referto
+; guarda il terminale del PICCOLO. Su QUESTO terminale (-V3, conto 50504263):
+;
+;   CODA_06_quale_codice_gira_20260911_033002.log riga 256:
+;     ABTG_Dow_Apertura_US.mq5   VER 1.01   RIGHE 2148   GUARD SI
+;     compilato il 2026-08-19 23:09
+;   repo:  #property version "1.01"  .  wc -l = 2147  .  InpUsaGuardian presente
+;   ultimo commit che tocca il file: d83c196 del 2026-08-19
+;     ("Migrazione Guardian (pezzo 7): la famiglia Apertura")
+;
+;   -> SCARTO DI UNA RIGA SOLA (2148 contro 2147), e la data di compilazione
+;      e' LO STESSO GIORNO dell'ultimo commit. Questa sedia NON e' fra le 42
+;      ferme ad agosto in senso pieno: e' allineata al repo di oggi.
+;      [LIMITE, lo stesso del referto: MT5 esegue l'.ex5, e il .mq5 accanto
+;      non e' una prova del contenuto del binario. E lo scarto di 1 riga non
+;      e' spiegato -- probabile riga finale senza a-capo, NON VERIFICATO.]
+;   -> CONFERMA INDIPENDENTE, ed e' la piu' forte: il .chr del binario in campo
+;      contiene InpUsaGuardian, e nell'ordine giusto. Il binario del PICCOLO
+;      (v1.00, 2065 righe, GUARD "no", compilato 08/08) NON ce l'ha: infatti il
+;      suo .chr stampa 112 parametri invece di 113. La differenza fra i due
+;      terminali si LEGGE nei dati, non si assume.
+;   -> COSA MANCA COMUNQUE: il fix del lotto dell'08/09 (commit 872dba8) NON
+;      ha toccato questo file (ultimo commit 19/08), quindi qui non manca
+;      niente. Ma il PAVIMENTO DEL LOTTO nel codice c'e' lo stesso
+;      (riga 1657: lot = MathMax(minLot, MathMin(maxLot, lot))). Vedi R3.
+;
+; --------------------------------------------------------------------------
+; 5) LA SECONDA ISTANZA DELLA STESSA SEDIA -- differenza campo per campo
+; --------------------------------------------------------------------------
+; Lo stesso magic 770202 gira ANCHE sul piccolo 50503392 (profilo ORO,
+; chart31.chr, log righe 1878-1996). Confronto meccanico dei due blocchi:
+;
+;   | campo            | 100k 50504263 (QUESTO FILE) | piccolo 50503392 |
+;   | InpUsaGuardian   | true                        | *** ASSENTE ***  |
+;   | InpRiskPercent   | 0.65                        | 1.0              |
+;   ... e NIENT'ALTRO: gli altri 79 campi sono identici carattere per
+;   carattere (diff dei due blocchi: 2 sole differenze).
+;
+; [!!] DUE SEDIE DIVERSE CON LO STESSO MAGIC SU DUE CONTI DIVERSI. Non e' un
+;    problema di esecuzione (i conti sono separati), ma lo diventa per la
+;    CONTABILITA': qualunque conteggio che filtri per magic 770202 senza
+;    filtrare anche il CONTO mescola due taglie diverse. Rilievo R1.
+; [!!] Un preset per il piccolo NON e' questo file con 0.65 -> 1.0: il binario
+;    del piccolo NON HA l'input InpUsaGuardian, quindi caricare 81 righe su un
+;    EA che ne accetta 80 e' un preset che non corrisponde. Chi lo scrivera'
+;    deve partire dal blocco del piccolo, non da questo. NON l'ho scritto io
+;    qui: sarebbe stato un file dedotto, e i file dedotti sono il difetto.
+;
+; --------------------------------------------------------------------------
+; 6) E ADESSO I VALORI. NON SONO I DEFAULT DEL SORGENTE, ed e' il punto.
+; --------------------------------------------------------------------------
+; Sette campi in cui il .chr vivo e il DEFAULT COMPILATO divergono. Senza
+; questo file, trascinare l'EA su un grafico da' UN'ALTRA STRATEGIA:
+;
+;   | campo             | default sorgente        | QUI (cio' che gira) |
+;   | InpEntryMode      | ABTG_BREAKOUT (0)       | 2 = RETEST          |
+;   | InpRangeMinutes   | 15 (ABTG_DEF_RANGE_MIN) | 35                  |
+;   | InpBufferPoints   | 200 (ABTG_DEF_BUFFER)   | 1000.0              |
+;   | InpRetestOffsetPts| 0                       | 400.0               |
+;   | InpTP1_R          | 0.5                     | 1.0                 |
+;   | InpTP1_ClosePct   | 0                       | 50.0                |
+;   | InpBreakevenAtTP1 | false                   | true                |
+;   | InpAllowShort     | true                    | false               |
+;   | InpRiskPercent    | 1.0 (ABTG_DEF_RISK r.67)| 0.65                |
+;
+; NOTA su una riga del piano che va corretta: PIANO_CHALLENGE_OTTOBRE_v2.md
+; r.131 scrive "il sorgente porta ABTG_DEF_RISK 2.0". Nel sorgente di QUESTO
+; EA il default e' *** 1.0 *** (riga 67); il 2.0 e' il fallback generico del
+; blocco #ifndef (riga 140), che qui non si applica. Il senso della frase
+; resta valido (il default NON e' 0,65), il numero no.
+;
+; TRADUZIONE DEI CODICI, per chi rilegge (NON sono scelte, sono letture):
+;   InpSessionHour=14 / InpSessionMin=30 -> 14:30 ORA SERVER BCM = 15:30
+;     italiana, apertura del cash USA (regola del fuso, CLAUDE.md). CORRETTO.
+;   InpCloseHour=17 / InpCloseMin=30     -> 17:30 server = 18:30 italiane.
+;   InpLevelTF=16385 = PERIOD_H1 . InpFilterTF=16388 = PERIOD_H4
+;   InpStTF=16385 = H1 . InpCorrTF=16385 = H1 . InpVwapTF=15 = PERIOD_M15
+;   InpTrailTF=5 = PERIOD_M5 . InpOCTimeframe=0 = PERIOD_CURRENT
+;   InpEntryMode=2 = ABTG_RETEST . InpRangeMode=0 = ABTG_RANGE_OPENING
+;   InpSLMode=0 = ABTG_SL_RANGE . InpTrailMode=1 = ABTG_TRAIL_PREVBAR
+;   InpDelayDirMode=0 = ABTG_DIR_BREAK . InpConfirmMode=0 = ABTG_CONF_OR
+; ==========================================================================
+
+InpUsaGuardian=true
+InpSessionHour=16
+InpSessionMin=30
+InpRangeMinutes=35
+InpCloseHour=19
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=1000.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=false
+InpAllowShort=true
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=400.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=US500.cash
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+;
+;  !!! TAGLIA PORTATA A 2.00% -- FIRMA DI CLAUDIO DEL 20/09/2026.
+;  Qui c'era 0.65. Deciso da lui dopo il conto sul 100k demo: nei 38 giorni
+;  veri (10/08-17/09) la flotta a 0,65% ha fatto +3.890,91 con un DD MAX
+;  REALIZZATO dello 0,96%; rigiocati a 2,00% quegli stessi 38 giorni danno
+;  +11.984 (+11,98%) con DD max 2,96% -- challenge superata, muro a 10%.
+;  AGLI ATTI, come promesso: il PEGGIOR TRATTO del backtest OOS a 2,00%
+;  vale 14,46% su 770101 e SFONDA il muro statico del 10%. Rischio SCELTO,
+;  non subito. La soglia dove il peggior tratto storico tocca il muro e' 1,38%.
+;  La taglia e' UNIFORME su tutte: FTMO vieta le size erratiche
+;  (Forbidden Practices, 'substantially larger or smaller position sizes').
+;
+InpRiskPercent=2.00
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=500.0
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=770212
+InpMaxSpread=0
+InpVerbose=true
+
+; ==========================================================================
+; 7) *** LA VERIFICA CHE NON MI ASPETTAVO DI POTER FARE: R1 SI CHIUDE ***
+; --------------------------------------------------------------------------
+; R1 = "esiste un round che ha promosso ESATTAMENTE la configurazione che
+; gira?". Per quasi tutta la flotta non e' verificabile. Qui SI', e a mano.
+;
+; PASSO 1 -- quali campi del vivo NON sono il default compilato? Confronto
+; meccanico fra le 81 righe qui sopra e i #define del sorgente (righe 57-69,
+; che sono quelli in vigore: il blocco #ifndef delle righe 119-164 e' il
+; fallback generico e NON si applica a questo EA). Escono NOVE campi:
+;   InpRangeMinutes 35 . InpEntryMode 2 . InpBufferPoints 1000 .
+;   InpAllowShort false . InpRetestOffsetPts 400 . InpTP1_R 1.0 .
+;   InpTP1_ClosePct 50 . InpBreakevenAtTP1 true . InpRiskPercent 0.65
+;
+; PASSO 2 -- il file prova del round R16 (backtest_pipeline/prove/
+; R16c_pertrade_Dow.txt, @SIMBOLO U30USD @PERIODO M5 @DAQUANDO 2024.09.26)
+; fissa: InpEntryMode=2 . InpRangeMode=0 . InpRangeMinutes=35 .
+; InpBufferPoints=1000 . InpRetestOffsetPts=400 . InpAllowLong=1 .
+; InpAllowShort=0 . InpRiskPercent=1.0 . InpTP1_R=1.0 . InpTP1_ClosePct=50 .
+; InpBreakevenAtTP1=1 . InpUseTrailing=1 . InpTrailMode=1 . InpTrailTF=5.
+;
+; -> *** OTTO DEI NOVE CAMPI NON-DEFAULT SONO FISSATI DA R16c ALLO STESSO
+;    IDENTICO VALORE. *** Il nono e' InpRiskPercent: banco 1,0% / campo 0,65%
+;    (la taglia A1 firmata da Claudio il 09/08). Tutti gli altri 72 campi del
+;    vivo sono i default compilati, cioe' quelli con cui R16c e' girato.
+;    La sedia che gira E' la cella di R16, alla taglia firmata. Non e' una
+;    ricostruzione: sono due liste confrontate riga per riga.
+; -> [LIMITE, dichiarato] R16c gira a Deposito 100.000 (lancia_r54.ps1:91 usa
+;    la stessa taglia per la famiglia) e il DD di quel round e' misurato a
+;    rischio 1,0%: il DD a 0,65% e' un APPROSSIMATO lineare, convenzione di
+;    casa, non una misura.
+;
+; ==========================================================================
+; 8) RILIEVI -- cose che NON ho corretto, e che vanno lette
+; ==========================================================================
+; R1 [!!] STESSO MAGIC, DUE CONTI, DUE TAGLIE. 770202 gira a 0,65% sul 100k
+;    50504263 e a 1,0% sul piccolo 50503392 (par. 5). Ogni conteggio che
+;    filtri per magic senza filtrare il CONTO mescola due sedie diverse.
+;    NON TOCCATO: e' cio' che gira. Serve una decisione di Claudio, non mia.
+;
+; R2 [!] InpMaxSpread=0 -> IL FILTRO SPREAD E' SPENTO, e questa sedia entra
+;    alle 14:30 server, cioe' nel minuto di apertura del cash USA, che e' il
+;    momento in cui lo spread e' piu' largo della giornata. Il costo all-in
+;    misurato dal piano (51,0x il pavimento) usa uno stop *** INFERITO ***
+;    (~102 punti indice, ZERO gambe in stop misurate):
+;    PIANO_CHALLENGE_OTTOBRE_v2.md r.131. NON TOCCATO.
+;
+; R3 [ok] PAVIMENTO DEL LOTTO (classe 229): QUI NON MORDE, e il conto e' questo.
+;    U30USD ha VOLUME_MIN 0,10 e vale ~0,861 EUR per punto indice per lotto
+;    (DOSSIER_SCHIERAMENTO_EMA200_DOW_2026-09-09.md r.148 e r.163, misurato su
+;    quattro fonti indipendenti). Con stop ~102 punti, 0,10 lotti rischiano
+;    ~8,8 EUR: il pavimento morderebbe solo sotto ~1.350 EUR di saldo a 0,65%.
+;    Il 100k e' due ordini di grandezza sopra. -> Il rischio dichiarato qui
+;    e' anche il rischio vero. [CALCOLATO su numeri misurati, non misurato
+;    in campo: 0 gambe in stop di questa sedia sono mai state osservate.]
+;
+; R4 [!!] DIFETTO DELLO STRUMENTO, non della sedia: CODA_08 accorpa al blocco
+;    <expert> gli input degli INDICATORI appesi al grafico (par. 3). Chi
+;    mantiene la coda del runner dovrebbe separarli: oggi chiunque copi un
+;    blocco del log dentro un .set ci mette 32 righe false.
+;
+; R5 [!] InpUseNewsFilter=false. Questa sedia NON ferma niente sulle notizie,
+;    e apre a mercato aperto USA. E' coerente col fatto misurato oggi
+;    (commit 7006b4e: le sedie che operano il filtro notizie non ce l'hanno),
+;    ma resta un rischio dichiarato per una challenge con muro giornaliero.
+;
+; R6 [ok] InpVerbose=true: NON toccarlo. E' la riga di Giornale che permette di
+;    leggere il lotto piazzato, unico modo di accorgersi del pavimento (R3).
+;
+; R7 [--] InpTrailFixedPts=410 e InpDelayMinutes=30 sono INERTI in questa
+;    configurazione (InpTrailMode=1 = candela precedente; InpEntryMode=2 =
+;    RETEST, non DELAYED). Restano scritti perche' questo file FOTOGRAFA.
+; ==========================================================================
