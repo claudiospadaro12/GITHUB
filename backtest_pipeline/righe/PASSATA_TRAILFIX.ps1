@@ -729,6 +729,10 @@ function ValutaC2($cp, $ca, $n1){
     $r.Nota = 'RINVIO illeggibili ' + $r.Illeggibili + ', ticket non traducibili con la mappa di N1 ' + $r.NonTradotti + ', senza gemella ' + $r.Senza + ' con ' + $cp.RifIlleggibili + ' RIFIUTO del PIN senza ticket/istante leggibili, ' + $cp.Illeggibili + ' file di log del PIN illeggibili'
     return $r
   }
+  if($ca.Illeggibili -gt 0 -or $cp.Illeggibili -gt 0){
+    $r.Nota = 'file di log illeggibili: PIN ' + $cp.Illeggibili + ', PINA ' + $ca.Illeggibili + ' -- righe RIFIUTO/RINVIO forse non lette: N2 e C2 non si certificano verdi su una lettura incompleta (classe 829)'
+    return $r
+  }
   $r.Stato = 'VERDE'; $r.Nota = 'ogni RINVIO ha la sua RIFIUTO gemella nel PIN'
   return $r
 }
