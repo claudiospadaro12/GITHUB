@@ -104,6 +104,7 @@ $ErrorActionPreference = 'Stop'
 $IC = [Globalization.CultureInfo]::InvariantCulture
 [Threading.Thread]::CurrentThread.CurrentCulture   = $IC
 [Threading.Thread]::CurrentThread.CurrentUICulture = $IC
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 $T_INIZIO = Get-Date
 
 function Dico($t,$c='Gray'){ Write-Host ('   ' + $t) -ForegroundColor $c }
@@ -309,7 +310,9 @@ Dico ('include in MQL5\Include: SHA256 ok') 'Green'
 
 function Compila($mq5, $ex5, $logC){
   Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
+  if(Test-Path -LiteralPath $ex5){ throw ((Split-Path -Leaf $ex5) + ' VECCHIO NON CANCELLABILE: la sua comparsa non proverebbe la compilazione di adesso (classe 270). Non si parte.') }
   Remove-Item -LiteralPath $logC -Force -ErrorAction SilentlyContinue
+  $tC = Get-Date
   # il verdetto NON e' il codice d'uscita di MetaEditor (a volte si
   # stacca): e' l'esistenza del .ex5 appena prodotto (modello v2).
   $pMe = Start-Process -FilePath $MetaEditor -ArgumentList @(('/compile:' + $mq5), ('/log:' + $logC)) -PassThru
@@ -323,6 +326,8 @@ function Compila($mq5, $ex5, $logC){
   # una compilazione alla volta: si aspetta che MetaEditor esca
   $att = 0
   while(-not $pMe.HasExited -and $att -lt 30){ Start-Sleep -Seconds 2; $att = $att + 1 }
+  $dEx5 = (Get-Item -LiteralPath $ex5).LastWriteTime
+  if($dEx5 -lt $tC.AddSeconds(-2)){ throw ((Split-Path -Leaf $ex5) + ' ha data ' + $dEx5.ToString('yyyy-MM-dd HH:mm:ss') + ', PRIMA della compilazione delle ' + $tC.ToString('HH:mm:ss') + ': non e il compilato di adesso (classe 270). Non si parte.') }
 }
 
 foreach($k in $ORDINE_SRC){
@@ -417,7 +422,7 @@ foreach($S in $SEDIE){
                         Rif=0; RifDist=0; Rinv=0; RinvDist=0; Rif0911=0; Rif0917=0; EsempiRif=(New-Object System.Collections.ArrayList);
                         Storia=@{}; FileLetti=0; Illeggibili=0; Avvii=''; Cfg=''; PtCopia=''; PtSha=''; PtRighe=-1; Sec=0; Ora0=''; Ora1='';
                         Deal=0; C0dRosso=$false; Coda=(New-Object System.Collections.ArrayList);
-                        RinvList=(New-Object System.Collections.ArrayList); RifSet=@{}; RifIlleggibili=0 })
+                        RinvList=(New-Object System.Collections.ArrayList); RifSet=@{}; RifIlleggibili=0; FileIlleggibili=(New-Object System.Collections.ArrayList) })
   }
 }
 
@@ -485,7 +490,7 @@ foreach($C in $CORSE){
   foreach($f in @(ElencoLog)){
     $off = 0; if($foto.ContainsKey($f.FullName)){ $off = [long]$foto[$f.FullName] }
     if($f.Length -le $off){ continue }
-    try{ $testo = LeggiCoda $f.FullName $off }catch{ $C.Illeggibili = $C.Illeggibili + 1; continue }
+    try{ $testo = LeggiCoda $f.FullName $off }catch{ $C.Illeggibili = $C.Illeggibili + 1; [void]$C.FileIlleggibili.Add($f.FullName); continue }
     $C.FileLetti = $C.FileLetti + 1
     [void]$sb.AppendLine('===== ' + $f.FullName + '   (letto dal byte ' + $off + ')')
     [void]$sb.AppendLine($testo)
@@ -607,7 +612,7 @@ else {
     $csvN3 = Join-Path $MqlFil 'PREVOLO_FTMO_specifiche.csv'
     if(Test-Path -LiteralPath $csvN3){ Rename-Item -LiteralPath $csvN3 -NewName ('PREVOLO_FTMO_specifiche.csv.pre_R254_' + (Get-Date).ToString('yyyyMMdd_HHmmss')) }
     $iniN3 = Join-Path $Work 'n3_startup.ini'
-    $testoN3 = "[Experts]`r`nAllowLiveTrading=false`r`nEnabled=true`r`n`r`n" +
+    $testoN3 = "[Experts]`r`nAllowLiveTrading=false`r`nAllowDllImport=false`r`nEnabled=true`r`n`r`n" +
                "[StartUp]`r`nScript=" + $N3_NOME + "`r`nScriptParameters=" + $setN3 + "`r`nSymbol=D30EUR`r`nPeriod=M5`r`n"
     Set-Content -LiteralPath $iniN3 -Value $testoN3 -Encoding Unicode
     $t0n = Get-Date
@@ -719,9 +724,9 @@ function ValutaC2($cp, $ca, $n1){
     if($cp.RifSet.ContainsKey($tp + '|' + $x.Ts)){ $r.Con = $r.Con + 1 }
     else { $r.Senza = $r.Senza + 1; if($r.PrimaSenza -eq ''){ $r.PrimaSenza = $x.Riga + '   (ticket PIN cercato ' + $tp + ')' } }
   }
-  if($r.Senza -gt 0 -and $cp.RifIlleggibili -eq 0){ $r.Stato = 'ROSSO'; $r.Nota = 'almeno una RINVIO senza RIFIUTO gemella nel PIN: la guardia ha trattenuto una modify che il tester accettava'; return $r }
+  if($r.Senza -gt 0 -and $cp.RifIlleggibili -eq 0 -and $cp.Illeggibili -eq 0){ $r.Stato = 'ROSSO'; $r.Nota = 'almeno una RINVIO senza RIFIUTO gemella nel PIN: la guardia ha trattenuto una modify che il tester accettava'; return $r }
   if($r.Senza -gt 0 -or $r.Illeggibili -gt 0 -or $r.NonTradotti -gt 0){
-    $r.Nota = 'RINVIO illeggibili ' + $r.Illeggibili + ', ticket non traducibili con la mappa di N1 ' + $r.NonTradotti + ', senza gemella ' + $r.Senza + ' con ' + $cp.RifIlleggibili + ' RIFIUTO del PIN senza ticket/istante leggibili'
+    $r.Nota = 'RINVIO illeggibili ' + $r.Illeggibili + ', ticket non traducibili con la mappa di N1 ' + $r.NonTradotti + ', senza gemella ' + $r.Senza + ' con ' + $cp.RifIlleggibili + ' RIFIUTO del PIN senza ticket/istante leggibili, ' + $cp.Illeggibili + ' file di log del PIN illeggibili'
     return $r
   }
   $r.Stato = 'VERDE'; $r.Nota = 'ogni RINVIO ha la sua RIFIUTO gemella nel PIN'
@@ -801,6 +806,7 @@ foreach($C in $CORSE){
   [void]$R.Add('--- CORSA ' + $C.Id + '  sedia ' + $C.Sedia.Sedia + '  ' + $C.Nome + '.ex5  ' + $C.Sedia.Simbolo + ' ' + $PERIODO + '  magic ' + $C.Magic + '  (' + $C.Prova + ')')
   if(-not $C.Girata){ [void]$R.Add('   ' + $C.Motivo); [void]$R.Add(''); continue }
   [void]$R.Add('   avvio ' + $C.Ora0 + '  fine ' + $C.Ora1 + '  durata ' + $C.Sec + ' s  interrotta dal tetto: ' + $C.Interrotta + '   log letti ' + $C.FileLetti + '  illeggibili ' + $C.Illeggibili)
+  foreach($fi in $C.FileIlleggibili){ [void]$R.Add('   log ILLEGGIBILE: ' + $fi) }
   [void]$R.Add('   DEAL righe ' + $C.Deal + '   RIFIUTO righe ' + $C.Rif + ' (distinte ' + $C.RifDist + ', senza ticket/istante leggibili ' + $C.RifIlleggibili + ')   RINVIO righe ' + $C.Rinv + ' (distinte ' + $C.RinvDist + ')')
   if($C.C0dRosso){
     [void]$R.Add('   C0 d) ROSSO -- ultime righe del log letto:')
