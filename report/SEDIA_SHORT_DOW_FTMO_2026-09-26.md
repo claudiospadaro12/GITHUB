@@ -11,7 +11,9 @@ una riga che lo porta sul terminale e i gesti a mano. **Niente parte verso Claud
 > 🔴 **La decisione e la taglia `InpRiskPercent=2.00` sono di Claudio.** Questo documento non propone
 > nessun'altra taglia e non rimette in discussione la firma: mette accanto i numeri, come ieri.
 > 🔴 **Entra per FIRMA, non per PROMOZIONE**: il numero misurato dice di no (§⑥). Va scritto così in ogni tabella.
-> ⚪ Il testo letterale della firma va nel verbale `report/FIRME_2026-09-26.md`, che **oggi non esiste** in repo.
+> ⚪ Il testo letterale della firma è nel verbale `report/FIRME_2026-09-26.md` (commit `8b5b383f`).
+> 🛑 **La riga del §⑦ NON parte verso Claudio finché lui non CONFERMA la firma con il numero di R54a davanti**
+> (§⑥.2: OOS PF 0,840 su n 73, DD_fisso ~17,5% al 2%): la firma è arrivata **prima** di quel numero. Niente è in campo.
 
 ---
 
@@ -29,7 +31,8 @@ sotto: **nel caso normale le due gemelle operano in giorni DISGIUNTI**. Contato 
 stesso giorno, uno stop dopo l'altro).
 
 🔴 **La notizia che pesa (§⑤.2)**: lo short del Dow arma **allo stesso minuto** del Nasdaq `770260` (16:30 FTMO,
-range 35, due lati, nessun filtro). In un'apertura USA che rompe al ribasso **due short al 2% su due indici
+range 35, due lati, **nessun filtro di trend** — EMA spento — ma **filtro volumi acceso**, `InpUseVolumeFilter=true` nel
+`.chr` vivo, `CODA_08` r.1971-2075, che può saltare la rottura). In un'apertura USA che rompe al ribasso **due short al 2% su due indici
 correlati** possono entrare insieme, e il cap C1 non li ferma (gli ordini partono come pendenti).
 
 ---
@@ -56,8 +59,8 @@ correlati** possono entrare insieme, e il cap C1 non li ferma (gli ordini parton
 
 ## ② 🧾 IL PRESET — cosa cambia rispetto alla `770202`, e nient'altro
 
-**File:** `mql5/Presets/FTMO/ABTG_Dow_Apertura_US_770212_SHORT_FTMO.set` · ASCII puro · **non ancora committato**:
-il pin della riga si scrive **dopo** il commit. SHA256 del file oggi:
+**File:** `mql5/Presets/FTMO/ABTG_Dow_Apertura_US_770212_SHORT_FTMO.set` · ASCII puro · committato in `8b5b383f`
+(= il pin della riga). SHA256 del file al pin:
 `9A6D249991B33937219F759130CF846BEC004B9234726395433CD6036A4FD3B4` (cambia solo se si tocca il file).
 
 | riga | `770202` (long, in campo) | `770212` (short, nuova) |
@@ -309,15 +312,14 @@ morto.
 > Scrive **UN SOLO file** (`ABTG_Dow_Apertura_US_770212_SHORT_FTMO.set`) in `MQL5\Presets` della cartella dati del
 > terminale **FTMO `541452707`** (`C:\FTMO`, cartella dati `46C9F8E9FF0C747B2B5E09BCC13D5237`). **Non attacca
 > niente**: l'attacco è a mano (§⑧).
-> 🚫 **NON tocca**: i tre grafici `US30.cash` già vivi (`770202`, `771531` con la posizione aperta, `770511`), le
-> altre sedie FTMO, il Guardian, il REALE `10105439` (`C:\BCM_Reale`), il 100k `50504263` (`-V3`), il piccolo
+> 🚫 **NON tocca**: i grafici `US30.cash` già vivi (`770202` M5, `771531` H1 con la posizione aperta, `770511` H1), le
+> altre sedie FTMO (`770101`, `770105`, `770260`, `770411`), il Guardian `779001`, `ABTG_TradeExporter`,
+> `ABTG_SpreadLogger`, il pulsante **Algo Trading**, il REALE `10105439` (`C:\BCM_Reale`), il 100k `50504263` (`-V3`), il piccolo
 > `50503392`, il manuale `50503635` (`C:\MT5_MANUALE`), il banco `50504400` (`C:\MT5_Backtest`), Pepperstone,
 > Tickmill. Il terminale FTMO **può restare aperto**.
 
-File: `backtest_pipeline/righe/RIGA_PRESET_SHORT_DOW_FTMO.txt` (una riga, ASCII). 🔴 **Porta due segnaposto che
-vanno sostituiti PRIMA di mandarla**: `NUOVOPIN40HEX` (il commit che contiene il preset) e `NUOVOSHA` (lo SHA256
-del preset al pin; oggi `9A6D2499…4A6FD3B4`). Se `NUOVOSHA` resta com'è, la riga **si ferma da sola** (caso H
-del §⑦.1). La riga **non** è ricopiata qui: la fonte è una sola, il file.
+File: `backtest_pipeline/righe/RIGA_PRESET_SHORT_DOW_FTMO.txt` (una riga, ASCII). **Pinnata il 26/09** (commit
+`05dd5628`): pin `8b5b383f4903c8c469846e1766dd05e1b5fc0fee`, SHA256 `9A6D2499…6A4FD3B4` (per intero nel §②). La riga **non** è ricopiata qui: la fonte è una sola, il file.
 
 Cosa fa, in ordine (identica alla riga della `770105`, cambiano nome, marcatore e righe chiave):
 guardia macchina `VMI3047753` → TLS 1.2 → banner BERSAGLIO + NON TOCCATI → cartella dati `46C9F8E9…` con
@@ -347,15 +349,15 @@ attesi dentro**: `REFERTO.txt` e `ABTG_Dow_Apertura_US_770212_SHORT_FTMO.set`. U
 | **J** | preset **sbagliato con SHA coerente** (`InpMagic=770202`) | 🟢 `il preset non contiene la riga InpMagic=770212`, rifiuta | **0** |
 
 🟢 In **tutti** i casi la cartella dati **esca del REALE** (`E23E1504…`, col conto FTMO nel giornale apposta) ha
-avuto **zero** file scritti. Il download è stato **simulato** (il preset non è ancora su GitHub): l'URL costruito
-dalla riga è quello giusto (`…/<pin>/mql5/Presets/FTMO/ABTG_Dow_Apertura_US_770212_SHORT_FTMO.set`).
+avuto **zero** file scritti. Il download era **simulato** alla prima stesura; dopo il push l'URL costruito
+dalla riga risponde **HTTP 200** e il file scaricato ha lo SHA256 atteso (cancello di giudizio, 26/09). URL: `…/8b5b383f…/mql5/Presets/FTMO/ABTG_Dow_Apertura_US_770212_SHORT_FTMO.set`.
 ⚠️ **Limiti dichiarati**: banco **pwsh 7 su Linux**, il VPS ha **Windows PowerShell 5.1** (parse 0 errori, nessun
 costrutto solo-pwsh-7 aggiunto rispetto alla riga di ieri, che su 5.1 **è girata**: zip del 25/09 20:45:34);
-HTTP 200 dal pin vero **non provato** (serve il push).
+HTTP 200 dal pin vero **provato** dopo il push (vedi sopra).
 
 ### ⑦.2 Il cancello deterministico
-`controlla_riga.py --oggetto riga` col pin di un commit che contiene il preset (clone locale nello scratch, **il
-repo non è stato committato**): **rc 0**, 6 verdi (ASCII, pin vero, marcatore controllato, marcatore **presente al
+`controlla_riga.py --riga` sul file pinnato, nel repo vero a `05dd5628` (rilanciato dal cancello di giudizio il 26/09):
+**rc 0**, 6 verdi (ASCII, pin vero, marcatore controllato, marcatore **presente al
 pin nel file giusto**, macchina inchiodata, raccolta). **Un rilievo, 671**: `C:\MT5_Backtest` compare **nella lista
 dei NON toccati**. Col pin di un commit che **non** contiene il file il cancello dà **FAIL 187** (404): è il
 comportamento giusto, e ricorda che **il pin va scritto dopo il commit**. Come ieri: la cartella in cui la riga
@@ -383,7 +385,7 @@ candela H4 (§③.2). **Oggi (sabato), domani, o lunedì prima delle 15:30 itali
 ### I passi
 | # | gesto | ✅ come si vede che è andata |
 |---|---|---|
-| **1** | ▶️ la riga del §⑦ (PowerShell sul VPS, **con pin e SHA sostituiti**) | ultima riga `ESITO: FATTO` |
+| **1** | ▶️ la riga del §⑦ (PowerShell sul VPS, **dopo la conferma di Claudio col numero di R54a davanti**) | ultima riga `ESITO: FATTO` |
 | **2** | nel terminale FTMO: **File → Nuovo grafico → `US30.cash`**, poi timeframe **M5** | un grafico `US30.cash` **in più**; i tre già vivi restano com'erano |
 | **3** | dal **Navigatore → Expert Advisors**, trascinare **`CLAU12_Dow_Apertura_US`** sul grafico **nuovo**. 🔴 **MAI su uno dei tre `US30.cash` già vivi**: MT5 tiene UN solo EA per grafico e il trascinamento **LO SOSTITUISCE** senza errori. Su `chart02` sparirebbe la `770202`; su `chart04` sparirebbe la `771531` e la sua **posizione short aperta** resterebbe senza gestione (il magic `770212` non la conosce) | si apre la finestra delle proprietà dell'EA |
 | **4** | scheda **Input → Carica** → `ABTG_Dow_Apertura_US_770212_SHORT_FTMO.set` | nella lista: **`InpMagic` = 770212**, **`InpAllowLong` = false**, **`InpAllowShort` = true**, **`InpRiskPercent` = 2.0**, `InpSessionHour` = 16, `InpSessionMin` = 30, `InpCloseHour` = 19, **`InpUseEmaFilter` = true**, `InpFilterTF` = H4 |
@@ -429,7 +431,8 @@ candela H4 (§③.2). **Oggi (sabato), domani, o lunedì prima delle 15:30 itali
 2. 🔴 **La coppia short `770212` + `770260` allo stesso minuto** (§⑤.2): due stop insieme superano l'emergenza
    totale; il cap C1 non li ferma perché entrano per pendente. **Frequenza `[NON MISURATA]`.**
 3. 🔴 **Monte Carlo con la `770105` e la `770212`: `[NON MISURATO]`.**
-4. 🔴 **Verbale `report/FIRME_2026-09-26.md`: non esiste**, va scritto col testo letterale della firma.
+4. 🔴 **Conferma della firma con R54a davanti: MANCA.** Il verbale `report/FIRME_2026-09-26.md` c'è (commit `8b5b383f`) e
+   dice che la firma è arrivata **prima** del numero: finché Claudio non conferma, la riga non parte e niente va in campo.
 5. 🟠 **TrailFix**: la `770212` non è nell'elenco R254 "4/4" (§④.4); la ricompilazione va fatta senza posizioni
    della `770202` né della `770212`.
 6. 🟠 **R255** può spostare il contratto (uscita, regime, EMA spento, orologio in fase).
