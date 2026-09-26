@@ -1,0 +1,81 @@
+# =====================================================================
+#  R258v -- LONDRA ORB ALL'ORA GIUSTA -- BLOCCO B -- ALTOPIANO DEL BUFFER sulla riga DESIGNATA (M4)
+#  EA: ABTG_Londra_ORB   (M5)   simbolo EURUSD
+#  ora 8 fissa: ora 8 = canale 07-08, ordini 08 server: apertura di Londra d'estate e nel vecchio orologio; la convenzione del PDF negli inverni dal 2025
+#  Scritto il 26/09/2026. CRITERI: quelli di R258a par. 7, CONGELATI PRIMA
+#  DEI NUMERI e validi per TUTTI i file R258. Qui solo cio' che e' proprio
+#  di questo file. Sorgente dell'EA: mql5/Experts/ABTG_Londra_ORB.mq5
+#  (490 righe, ultimo commit 3af47ed9), NON la copia standalone/.
+# =====================================================================
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026: sul VPS operano le sedie della challenge).
+#  Prima si controlla che il terminale del PC non abbia sedie attaccate.
+#  VINCOLI DI BANCO (stanno nella riga di lancio, classe 692):
+#    -Deposito 10000 (rischio di banco InpRiskPercent=1.0, pinnato qui)
+#    -Modello 4 (tick reali)
+#    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo da'
+#    '@FRAZIONEIS' qui sotto; un -FrazioneIS diverso fa morire il driver),
+#    MaxBars=100000000 come in R246/R251/R252/R253.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca EA, preset, sedie, conti, taglie o parametri del forward. Non
+#  promuove niente in campo: ogni esito e' materiale per Claudio.
+#
+#  FINESTRA: IS 2024.07.05..2025.04.21 (207 feriali) / OOS 2025.04.22..2026.06.30 (311 feriali)
+#  CELLE 3 x 2 gambe = 6 passate.
+#
+#  ASSE UNICO: InpBufferPips 1 / 3 / 5 sulla riga DESIGNATA di EURUSD:
+#  ora 8, F=50 (R258a par. 7). Serve SOLO a M4 (altopiano, mai il picco):
+#  la riga b=3 promuove solo se anche b=1 e b=5 passano R1 e M1.
+#  CONTROLLO INCROCIATO X1: la riga b=3 di questo file = la riga F=50 di
+#  R258d al centesimo (stessi pin di trading, cambiano magic e commento).
+#  Stop minimo per costruzione (F/2 + b) sulle tre righe: 26,0 / 28,0 / 30,0 pip = 39,2x / 42,2x / 45,2x all-in
+#  Magic 795861 (vergine, grep del 26/09).
+# =====================================================================
+
+@SIMBOLO    EURUSD
+@PERIODO    M5
+@DAQUANDO   2024.07.05
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpRangeStartHour=7||7||0||7||N
+InpRangeStartMin=0||0||0||0||N
+InpRangeEndHour=8||8||0||8||N
+InpRangeEndMin=0||0||0||0||N
+InpMinRangePips=50||50||0||50||N
+InpMaxRangePips=0||0||0||0||N
+InpPlaceHour=8||8||0||8||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=12||12||0||12||N
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=240||240||0||240||N
+InpBufferPips=3.0||1.0||2.0||5.0||Y
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpSLMode=0||0||0||0||N
+InpHalveOnOpposite=0||0||0||0||N
+InpTPRangeMult=1.0||1.0||0||1.0||N
+InpUsePartial=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=0||0||0||0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=60||60||0||60||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=GBP,USD
+InpComment=R258V LDN EURUSD H8
+InpMagic=795861||795861||0||795861||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N

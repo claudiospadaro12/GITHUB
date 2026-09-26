@@ -1,0 +1,86 @@
+# =====================================================================
+#  R258n -- LONDRA ORB ALL'ORA GIUSTA -- BLOCCO F -- ORA FISSA SU GAMBE STAGIONALI (curva IN FASE per gambe)
+#  EA: ABTG_Londra_ORB   (M5)   simbolo EURUSD
+#  ora 9 = canale 08-09, ordini 09 server: Londra +1h d'estate e nel vecchio orologio; apertura di Londra negli inverni dal 2025
+#  Scritto il 26/09/2026. CRITERI: quelli di R258a par. 7, CONGELATI PRIMA
+#  DEI NUMERI e validi per TUTTI i file R258. Qui solo cio' che e' proprio
+#  di questo file. Sorgente dell'EA: mql5/Experts/ABTG_Londra_ORB.mq5
+#  (490 righe, ultimo commit 3af47ed9), NON la copia standalone/.
+# =====================================================================
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026: sul VPS operano le sedie della challenge).
+#  Prima si controlla che il terminale del PC non abbia sedie attaccate.
+#  VINCOLI DI BANCO (stanno nella riga di lancio, classe 692):
+#    -Deposito 10000 (rischio di banco InpRiskPercent=1.0, pinnato qui)
+#    -Modello 4 (tick reali)
+#    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo da'
+#    '@FRAZIONEIS' qui sotto; un -FrazioneIS diverso fa morire il driver),
+#    MaxBars=100000000 come in R246/R251/R252/R253.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca EA, preset, sedie, conti, taglie o parametri del forward. Non
+#  promuove niente in campo: ogni esito e' materiale per Claudio.
+#
+#  FINESTRA: IS 2025.03.31..2025.10.24 = ESTATE (150 feriali) / OOS 2025.10.25..2026.03.27 = INVERNO (110 feriali)
+#  CELLE 8 x 2 gambe = 16 passate.
+#
+#  PERCHE' ESISTE: l'EA non scrive un per-trade (R258a par. 3 D1), quindi la
+#  curva IN FASE non si ricompone riga per riga come in R252/R255. Qui la
+#  si ricompone per GAMBE: '@FRAZIONEIS 0.5748' su 361 giorni da' Meta =
+#  2025.03.31 + floor(207,5) = 2025.10.24 (driver r.934, verificato col
+#  calcolo): IS = estate 2025 intera, OOS = inverno 2025/26 intero. Il cambio
+#  d'ora europeo e britannico e' la notte del 26/10/2025.
+#  In questo file, ora 9:
+#    gamba ESTATE  = Londra +1h
+#    gamba INVERNO = LONDRA IN FASE
+#  ASSE: InpMinRangePips 0..70 passo 10 (8), b=3 fisso. Magic 795839.
+#  Il merito e' SOSPESO per aritmetica in ogni gamba (<= 150 e <= 110
+#  feriali): si legge solo H2 (R258a par. 7) e il rischio R1.
+# =====================================================================
+
+@SIMBOLO    EURUSD
+@PERIODO    M5
+@DAQUANDO   2025.03.31
+@FINOA      2026.03.27
+@FRAZIONEIS 0.5748
+
+InpRangeStartHour=8||8||0||8||N
+InpRangeStartMin=0||0||0||0||N
+InpRangeEndHour=9||9||0||9||N
+InpRangeEndMin=0||0||0||0||N
+InpMinRangePips=0||0||10||70||Y
+InpMaxRangePips=0||0||0||0||N
+InpPlaceHour=9||9||0||9||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=13||13||0||13||N
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=18||18||0||18||N
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=240||240||0||240||N
+InpBufferPips=3.0||3.0||0||3.0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpSLMode=0||0||0||0||N
+InpHalveOnOpposite=0||0||0||0||N
+InpTPRangeMult=1.0||1.0||0||1.0||N
+InpUsePartial=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=0||0||0||0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=60||60||0||60||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=GBP,USD
+InpComment=R258N LDN EURUSD H9
+InpMagic=795839||795839||0||795839||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N

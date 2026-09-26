@@ -1,0 +1,92 @@
+# =====================================================================
+#  R258p -- LONDRA ORB ALL'ORA GIUSTA -- BLOCCO L -- SCREENING OHLC M1 2008-2024 (vecchio orologio)
+#  EA: ABTG_Londra_ORB   (H4)   simbolo GBPUSD
+#  ora 8 = canale 07-08, ordini 08 server: apertura di Londra d'estate e nel vecchio orologio; la convenzione del PDF negli inverni dal 2025
+#  Scritto il 26/09/2026. CRITERI: quelli di R258a par. 7, CONGELATI PRIMA
+#  DEI NUMERI e validi per TUTTI i file R258. Qui solo cio' che e' proprio
+#  di questo file. Sorgente dell'EA: mql5/Experts/ABTG_Londra_ORB.mq5
+#  (490 righe, ultimo commit 3af47ed9), NON la copia standalone/.
+# =====================================================================
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026: sul VPS operano le sedie della challenge).
+#  Prima si controlla che il terminale del PC non abbia sedie attaccate.
+#  VINCOLI DI BANCO (stanno nella riga di lancio, classe 692):
+#    -Deposito 10000 (rischio di banco InpRiskPercent=1.0, pinnato qui)
+#    -Modello 1 (OHLC M1): SOLO SCREENING
+#    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo da'
+#    '@FRAZIONEIS' qui sotto; un -FrazioneIS diverso fa morire il driver),
+#    MaxBars=100000000 come in R246/R251/R252/R253.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca EA, preset, sedie, conti, taglie o parametri del forward. Non
+#  promuove niente in campo: ogni esito e' materiale per Claudio.
+#
+#  FINESTRA: IS 2008.01.02..2016.04.03 (2153 feriali) / OOS 2016.04.04..2024.07.04 (2154 feriali)
+#  CELLE 8 x 2 gambe = 16 passate.
+#
+#  SCREENING, MAI UN VERDETTO DI MERITO. Modello 1 (OHLC M1): i tick prima del
+#  2024.07.05 NON sono reali (NOTA_PAVIMENTO_TICK_FOREX_2026-09-01), e sulla
+#  famiglia breakout l'OHLC ha gonfiato il PF del 71-125% (REGISTRO_TEST r.112).
+#  COSA INVECE E' AFFIDABILE ANCHE QUI: l'ampiezza W del canale (massimi e
+#  minimi delle M1, che sono dati veri) e quindi la SCANSIONE di F, cioe' la
+#  distribuzione di W su 16,5 anni e la quota di giorni che passa il costo.
+#  OROLOGIO: 2008-2024.07 e' tutto VECCHIO orologio (server = ora di Londra
+#  tutto l'anno): l'ora 8 ha lo stesso significato OGNI giorno. Verificato
+#  sul repo solo dal 2018 (HistData) e dal 2020 (deal); 2008-2017 [NON
+#  VERIFICATO].
+#  GRAFICO H4 APPOSTA: il TF e' inerte (T1 lo prova sui tick) e H4 tiene
+#  ogni gamba a ~12.900 barre, sotto il tetto delle 100.000 anche senza
+#  MaxBars (su M5 la finestra farebbe ~1,24 milioni di barre).
+#  PREREQUISITO: profondita' M1 di GBPUSD sul banco misurata PRIMA (
+#  scarica_storico.ps1 -Simboli "GBPUSD" -SoloReferto, LEGGIMI.md). Se parte
+#  dopo il 2008.01.02 si scrive un file NUOVO con la data misurata, non si
+#  corregge questo dopo i numeri.
+#  ASSE: InpMinRangePips 0..70 passo 10 (8), b=3 fisso. Magic 795848.
+# =====================================================================
+
+@SIMBOLO    GBPUSD
+@PERIODO    H4
+@DAQUANDO   2008.01.02
+@FINOA      2024.07.04
+@FRAZIONEIS 0.50
+
+InpRangeStartHour=7||7||0||7||N
+InpRangeStartMin=0||0||0||0||N
+InpRangeEndHour=8||8||0||8||N
+InpRangeEndMin=0||0||0||0||N
+InpMinRangePips=0||0||10||70||Y
+InpMaxRangePips=0||0||0||0||N
+InpPlaceHour=8||8||0||8||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=12||12||0||12||N
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=240||240||0||240||N
+InpBufferPips=3.0||3.0||0||3.0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpSLMode=0||0||0||0||N
+InpHalveOnOpposite=0||0||0||0||N
+InpTPRangeMult=1.0||1.0||0||1.0||N
+InpUsePartial=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=0||0||0||0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=60||60||0||60||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=GBP,USD
+InpComment=R258P LDN GBPUSD H8
+InpMagic=795848||795848||0||795848||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
