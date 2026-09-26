@@ -1,0 +1,184 @@
+# =====================================================================
+#  R259e -- NIGHTLY su D30EUR: IL FILTRO QB IN UNITA' SBAGLIATA, SPENTO CON UN INPUT
+#           L'unico asse e' InpMaxNightVolPips {0,45}: la cella 45 RIPRODUCE
+#           la corsa d'archivio, la cella 0 e' la PRIMA MISURA del motore.
+#  EA: ABTG_Nightly   (D30EUR M15)   candidato NON ANCORA MISURATO su D30EUR
+#
+#  GIRA SUL PC DI BACKTEST DESKTOP-H4D7CAJ, NON SUL VPS (firma 21/09).
+#     -Deposito 10000 -Modello 1
+#  NOTA SUL NOME: qui "_PIN" vuol dire "tutti gli input PINNATI a mano".
+#  NON e' il "PIN/PINA" di R254 (corsa col sorgente a uno SHA fissato).
+#
+#  1. LA DIAGNOSI DELLO ZERO -- nel sorgente, non a memoria
+#  --------------------------------------------------------------------
+#  Archivio: risultati_prove/ABTG_Nightly/ABTG_Nightly_D30EUR_IS_ohlc.csv e
+#  _OOS_ohlc.csv: Trades 0 / 0 (passate gemelle 771701/771702).
+#  Causa, mql5/Experts/ABTG_Nightly.mq5 a HEAD:
+#    r.72      input double InpMaxNightVolPips = 45;
+#    r.109-113 PipSize(): (Digits==3 || Digits==5) ? _Point*10 : _Point
+#    r.198-202 NightH1Vol() = ATR(14,H1) / PipSize()
+#    r.213     if(InpMaxNightVolPips>0 && qb>=InpMaxNightVolPips) ... return(true)
+#  D30EUR: Digits = 2, Point = 0,01 (sonda
+#  215D85D7_ABTG_InfoBroker.csv) ==> la soglia "45 pip" vale 0,45 punti indice
+#  di ATR(H1). Il filtro esclude la notte e r.169 non riprova.
+#
+#  2. LA CORREZIONE E' UN INPUT, NON UNA MODIFICA DEL SORGENTE
+#  --------------------------------------------------------------------
+#  InpMaxNightVolPips=0 spegne il cancello (r.213: "InpMaxNightVolPips>0 &&")
+#  e NON cambia nient'altro: qb si calcola lo stesso (r.212) e lo stop
+#  resta 1 x ATR(14,H1) (r.220: qb*pip = ATR in prezzo, qualunque PipSize).
+#  Sui forex misurati il cancello a 45 pip e' [INFERITO] quasi mai
+#  mordente (i numeri del PDF, PAG 11-19, sono 7-22 pip), quindi QB=0 qui
+#  e' la cosa PIU' VICINA al motore che ha girato su EURUSD/GBPUSD/USDCHF.
+#  Misurare il QB del PDF IN UNITA' GIUSTA sugli indici richiede invece il
+#  sorgente: e' la diff proposta nel referto par.3, NON serve a questo file.
+#
+#  3. L'ANCORA DENTRO IL ROUND (il contro-esempio costruito prima)
+#  --------------------------------------------------------------------
+#  La cella 45 gira sulla STESSA finestra, modello, deposito, TF e
+#  frazione delle corse d'archivio ==> DEVE riprodurre 0 / 0.
+#  Se non le riproduce, prima di leggere la cella 0 si capisce PERCHE'
+#  (dati del banco cambiati? binario diverso?). Non si legge a occhio.
+#
+#  4. LA FINESTRA E IL REGIME (Emendamento A: si DICHIARA)
+#  --------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26 @FINOA 2026.06.30 @FRAZIONEIS 0.40 -- IDENTICA alle
+#  corse d'archivio (prove/CODA.csv r.41-48; driver al commit 400a4624:
+#  -Fino 2026.06.30, -FrazioneIS 0.40). Taglio 2025.06.10.
+#  Feriali: IS 183, OOS 275. Un solo arco (settembre 2024 -> giugno 2026):
+#  NON contiene LATERALE/CROLLO/TORO/ORSO. E' un regime solo: lo si scrive.
+#  PREREQUISITO -- barre M1 sul disco (box da PERIOD_M1, r.183-190):
+#      SI: 643.567 barre M1 dal 2024.09.26, COMPLETO
+#      (risultati_archivio/ABTG_StoricoScaricato.csv r.2). Macchina: [NON
+#      VERIFICATO]. Prima non c'e' storico BCM: e' il pavimento degli indici.
+#
+#  5. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  (A) n, cella 0 [STIMA]: alla frequenza dei 4 forex misurati (0,323-0,590
+#      op/feriale) fa IS 59-108 e OOS 89-162. ==> il MERITO e' atteso
+#      SOSPESO almeno in IS (Emendamento A). Il RISCHIO si legge comunque.
+#      E' dichiarato PRIMA: questo file compra la FREQUENZA e il RISCHIO,
+#      non un verdetto di merito.
+#  (B) PF: nessun numero del PDF (zero performance dichiarate in 33 pagine,
+#      caccia_strategie/ANALISI_NIGHTLY_PDF_2026-08-23.md par.4). Ipotesi
+#      alternativa "nessun edge" [STIMA, referto par.4.2]: a n=100 il PF
+#      del puro caso sta fra 0,60 e 1,50 al 95% (secondo il costo). Un PF
+#      sotto 1,50 a questo n NON separa l'edge dal caso.
+#  (C) DD: atteso > 10 R sulla finestra (modello nullo: mediana 12-19 R a
+#      n=100-150, secondo il costo). Il cancello di rischio giudica la
+#      taglia, non l'edge -- e resta com'e'.
+#  (D) Il costo (stop >= 40 x spread), spread h05:
+#      2,8 punti indice mediana / 2,8 P95 alle h05 server, GG=5
+#      (data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv) ==> frontiera 40x =
+#      112 punti di stop. ATR(14,H1): [NON MISURATO]; [DERIVATO] 51,5-58,5
+#      punti = ATR(14) M30 36,4-41,4 x sqrt(2)
+#      (report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md r.14-17), e alle
+#      05:00 l'ATR pesa le ore quiete, quindi e' semmai PIU' BASSO.
+#      ==> stop/spread = 18,4-20,9x: SOTTO la frontiera di lavoro (40x),
+#      sopra quella dura (13,3x). CON LA GESTIONE DI DEFAULT (1 x ATR)
+#      D30EUR E' ESCLUSO PER COSTO dalla promozione, col numero accanto.
+#      Si gira lo stesso: costa 3,3 minuti e da' la FREQUENZA e il RISCHIO,
+#      che oggi mancano. La via al costo e' InpSLatrMult nello stadio 2
+#      (2,0 x ATR = 103-117 punti = 36,8-41,8x [DERIVATO]).
+#
+#  6. LE SOGLIE, CONGELATE PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  S0 cella 45 che NON riproduce l'archivio -> ROUND NON LETTO finche' non
+#     si sa perche' (par.3).
+#  S1 cella 0 con 0 operazioni in una finestra -> NON e' "senza edge": e'
+#     storico mancante o motore che non riempie; si guarda la prima data M1
+#     sul disco. Rapporto op/feriale IS/OOS fuori da 0,5-2,0 -> sospetto
+#     troncamento silenzioso (classe 590), si guarda il disco PRIMA del PF.
+#  S2 n < 150 in una finestra -> MERITO SOSPESO. Il RISCHIO si legge.
+#  S3 DD > 10% in una finestra (@1%, deposito 10000) -> "fuori per RISCHIO
+#     alla gestione di default". NON e' un certificato di morte: il punto 3
+#     (uscita ad asse) resta vuoto finche' non gira lo stadio 2.
+#  S4 frontiera del costo sotto 40x -> nessuna cella promuovibile, qualunque
+#     PF (par.5-D).
+#  S5 PF >= 1,10 in tutte e due le finestre -> SOLO screening passato: serve
+#     -Modello 4 sul muro tick (2024.09.26, TICK COMPLETO: ABTG_StoricoScaricato.csv) e, sui sei simboli,
+#     la probabilita' che almeno uno passi PER CASO e' ~25% [STIMA].
+#
+#  7. MAGIC E COSTO
+#  --------------------------------------------------------------------
+#  MAGIC 787265: grep su tutto il repo (esclusi .git e .claude), ZERO
+#  occorrenze fuori dai file R259 (26/09/2026).
+#  Costo [STIMA, tetto alto]: 2 celle x 0,670 min + 2 min di avvio = ~3,3
+#  min. Ancora: R202A, DESKTOP-H4D7CAJ, 0,670 min/cella su 642 giorni
+#  (CHECKLIST_RIGA_DI_LANCIO.md classe 625), -Modello 4: per -Modello 1 e'
+#  un TETTO.
+#
+#  COSA QUESTO FILE NON FA, dichiarato
+#  --------------------------------------------------------------------
+#  - NON e' a tick reali: -Modello 1 e' SOLO SCREENING. Il fattore
+#    OHLC->tick misurato in casa e' 1,72x-3,51x sul PF, e l'OHLC e'
+#    OTTIMISTA sul PF e SOTTOSTIMA il DD
+#    (report/I_MORTI_E_LO_STORICO_2026-09-23.md r.76-78 e r.561).
+#    Nessuna promozione esce da qui.
+#  - NON tocca nessun parametro d'INGRESSO del motore (box, orari, offset,
+#    SL, TP): cambia SOLO il cancello che oggi blocca il simbolo. Il motore
+#    e' quello che ha misurato EURUSD/GBPUSD/USDCHF/EURCHF: cosi' il numero
+#    che esce si mette ACCANTO a quelli, stessa geometria.
+#  - NON mette ad asse l'uscita (InpTPfrac, InpCloseAtCutoff, InpSLatrMult,
+#    InpSLpips): e' lo STADIO 2, un file per manopola, SOLO sui simboli che
+#    passano S1 qui sotto. Referto, par.5.
+#  - NON cambia il TF: su questo EA il TF del grafico e' STRUTTURALMENTE
+#    INERTE (box da PERIOD_M1 r.183-193, ATR da PERIOD_H1 r.120, nessun
+#    input di timeframe; report/RIESAME_MORTI_NOTTURNI_2026-09-22.md
+#    par.3b). @PERIODO M15 e' quello delle corse d'archivio
+#    (prove/CODA.csv r.41-48), messo apposta per riprodurle.
+#  - NON tocca InpRiskPercent: 1,0 e' il dial di MISURA (come i 20 CSV
+#    d'archivio), non la taglia in campo. Le taglie le firma Claudio.
+#  - I TRE INPUT STRINGA restano al DEFAULT COMPILATO (un pin di stringa
+#    vuoto MT5 lo ignora, controlla_prova.py lo blocca):
+#      InpNewsFile="abtg_news.csv"  InpNewsCurrencies=""  InpComment="NIGHTLY"
+#    I primi due sono STRUTTURALMENTE INERTI (InpUseNewsFilter=0: r.168 e
+#    r.366 escono prima di leggerli); il terzo e' l'etichetta dell'ordine.
+#    Totale input dell'EA: 34 = 30 pinnati + 1 asse + 3 stringhe. Nessun buco.
+#  - Il .ex5 sul banco corrisponde al .mq5 a HEAD: [NON MISURATO]. L'unica
+#    differenza di sorgente rispetto alle corse d'archivio dell'08/08 e' la
+#    migrazione Guardian del 19/08 (commit 5fc0bc31, r.30-42 e r.226), che
+#    nel tester e' FAIL-OPEN per costruzione (commento r.36-39).
+#  - Referto completo: report/NIGHTLY_SEI_SIMBOLI_2026-09-26.md
+# ---------------------------------------------------------------------
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- ASSE UNICO: il cancello QB. 2 celle: 0 = MISURA (spento), 45 = ANCORA d'archivio
+InpMaxNightVolPips=0||0||45||45||Y
+
+# --- tutti gli altri input FISSATI, uno per uno, col default del sorgente
+InpMagic=787265||787265||0||787265||N
+InpUsaGuardian=1||1||0||1||N
+InpBoxStartHour=22||22||0||22||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpPlaceHour=5||5||0||5||N
+InpPlaceMin=0||0||0||0||N
+InpCutoffHour=7||7||0||7||N
+InpCutoffMin=0||0||0||0||N
+InpCloseAtCutoff=0||0||0||0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpEdgeOffsetPips=0||0||0||0||N
+InpOneShotPerNight=1||1||0||1||N
+InpSLpips=0||0||0||0||N
+InpAtrPeriod=14||14||0||14||N
+InpSLatrMult=1.0||1.0||0||1.0||N
+InpTPfrac=0.5||0.5||0||0.5||N
+InpMinRangePips=0||0||0||0||N
+InpMaxRangePips=0||0||0||0||N
+InpBlockNightActive=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=60||60||0||60||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N

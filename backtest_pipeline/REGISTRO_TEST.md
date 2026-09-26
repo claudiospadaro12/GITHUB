@@ -692,6 +692,20 @@ toccano questo registro — il resto sta nel referto, non si duplica:
   > stesso → causa `[NON MISURATO]`. ➡️ Il "0/8" e' un verdetto su **TRE**
   > mercati; gli altri sei tornano in coda all'imbuto come **NON ANCORA
   > MISURATI**. 📄 `report/CONTRADDIZIONI_CHIUSE_2026-09-09.md` §C5.
+  > 🔧 **AGGIORNAMENTO 26/09/2026 — le sei cause sono lette nel sorgente e i
+  > sei simboli si sbloccano con UN INPUT, senza toccare l'EA.** AUDUSD/USDJPY:
+  > `ABTG_Nightly.mq5` **r.167** (rifiuto **per nome**, regola del PDF PAG 22)
+  > → `InpBlockNightActive=0`; la causa **non e' piu' `[NON MISURATO]`** (era
+  > gia' in `R220a` §7-ii e `I_CSV_A_ZERO_PERCHE_2026-09-22.md` r.180).
+  > XAUUSD/D30EUR/U30USD: r.109-113 + r.213 (QB in "pip" = `_Point`) →
+  > `InpMaxNightVolPips=0`. 🔴 **XAGUSD resta APERTO**: il QB spiega l'OOS (4),
+  > non l'IS a zero (seconda causa possibile: M1 assenti). Sei file prova
+  > **`prove/R259_nightly_<SIMBOLO>_PIN.txt`** (12 celle, 24 passate, ~29 min
+  > [STIMA], `controlla_prova.py` OK), ognuno con una cella **ancora** che deve
+  > riprodurre lo zero d'archivio. 💸 **D30EUR escluso per COSTO** alla gestione
+  > di default (18,4-20,9× [DERIVATO] < 40×), U30USD **fragile** (39,0-44,1×).
+  > NON ancora lanciati: manca lo strato 2 del cancello. 📄
+  > `report/NIGHTLY_SEI_SIMBOLI_2026-09-26.md`.
 - ✅ Il **BREAKOUT** del box (questa famiglia) e' confermato dal PDF e dalla
   misura di casa (91,1% delle notti rompe un lato, `NOTTE_ORO.md`).
 - 🆕 Unica proposta uscita: **BREAKIN del box notturno** (falsa rottura →
