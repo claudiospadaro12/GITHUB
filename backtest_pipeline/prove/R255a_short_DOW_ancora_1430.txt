@@ -465,10 +465,24 @@
 #     VIOLATO      se min(A,B) x (1 - e_eff) > S
 #     RISPETTATO   se max(A,B) x (1 + e_eff) <= S
 #     NON RISOLTO  altrimenti (classe 550)
-#  R3: VIOLATO se la peggior giornata a saldo chiuso della curva in fase,
-#     metodi A e B, e' sotto -1,10 in almeno uno dei due; condizione
-#     sufficiente di RISPETTO: il "Peggior Giornata %" del CSV _OOS dei due
-#     file >= -1,10 (le giornate della curva sono un sottoinsieme).
+#  R3: la GIORNATA si misura come P/L chiuso della giornata diviso il
+#     SALDO DELLA CURVA ALL'INIZIO DI QUELLA GIORNATA (lo stesso
+#     denominatore dei tetti -1,0062/-1,0227, r255_attese.py
+#     peggior_giorno, e del "Peggior Giornata %" dell'EA r.570-575; NON il
+#     10000 fisso della classe 550, che vale per il DD: con quello una
+#     curva salita a 11000 fa -1,10 con una perdita di 1R).
+#     VIOLATO se la peggior giornata della curva in fase, metodi A e B, e'
+#     sotto -1,10 in almeno uno dei due.
+#     Condizione sufficiente di RISPETTO, SOLO PER IL METODO A: il
+#     "Peggior Giornata %" del CSV _OOS dei due file >= -1,10 (in A ogni
+#     giornata della curva ha la % della SUA corsa -- un ciclo al giorno,
+#     base = saldo della corsa a inizio giornata -- e l'EA la misura sul
+#     minimo di EQUITY, che non e' mai meno profondo del chiuso). Per il
+#     metodo B NON e' sufficiente (denaro della corsa diviso il saldo
+#     della CURVA, che puo' stare sotto quello della corsa): il B si
+#     calcola SEMPRE, e se A rispetta e B viola vale VIOLATO, con lo
+#     scarto di saldo di quella giornata scritto accanto. (Corretto dal
+#     controllo preventivo il 26/09, classe 833, prima dei numeri.)
 #  VERDETTO ASIMMETRICO (classe 804): una VIOLAZIONE boccia a qualunque n
 #  (e' un fatto accaduto). Il RISPETTO si scrive "R1 (R2) NON VIOLATO su
 #  n = X posizioni", MAI "rischio passato" sotto la n a cui un motore
@@ -634,6 +648,19 @@
 #    InpBEatR; periodo e moltiplicatore del Supertrend (fermi a 10/2,5);
 #    EMA lenta diversa da 50 sullo short: NO.
 #  - Il TP del runner indipendente dal TP1: non esiste nell'EA (par. 5).
+#  - IL RISCALDAMENTO A INIZIO STORICO (limite gia' dichiarato in R251
+#    par. 5, qui ripreso dal controllo preventivo il 26/09, classe 834):
+#    lo storico indici BCM parte il 2024.09.26, e la corsa continua
+#    parte li'. Il Supertrend non vota con meno di 15 barre del suo TF
+#    (r.1574): nell'era IS le prime ~15 barre sono SENZA filtro (H4 ~3
+#    feriali, H6 ~4, H8 ~5, H12 ~8, D1 ~15, cioe' ottobre 2024 quasi
+#    intero) e dopo la ricorsione parte da dir=+1 (r.1586) con poche
+#    barre, cioe' tende a VIETARE lo short. L'EMA 50 su H4 matura dopo
+#    ~50 barre H4 (~8-9 feriali). Per l'ancora non tocca il G0 (r6 e
+#    R54a partono dallo stesso 2024.09.26); per gli stXX tocca l'era IS
+#    (M3) su al massimo ~15 dei 182 feriali. Nell'era OOS lo storico
+#    precedente c'e' (la corsa e' continua). Se il tester serva barre D1
+#    prima del 2024.09.26: [NON VERIFICATO].
 #  - Gemelli NASUSD e SPXUSD (certificato punto 4) e TF (punto 5): NO.
 #  - Lo slot col long: col filtro EMA i lati sono gia' DISGIUNTI (par. 1),
 #    ma per NUDO e Supertrend lo slot torna una domanda [NON MISURATA].
