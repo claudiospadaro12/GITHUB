@@ -1,0 +1,513 @@
+#  EA: ABTG_DAX_Apertura_EU
+# ==========================================================================
+#  R254a -- PROVA DI NEUTRALITA' DELLA TRAILFIX -- sedia 770101 -- corsa PIN
+#  ABTG_DAX_Apertura_EU su D30EUR M5 -- TICK REALI -- deposito 10000 -- CORSA SINGOLA
+#  QUESTO FILE = il sorgente IN CAMPO su FTMO (pin 9fca63d9), SENZA la Parte A.
+#  GEMELLO: R254a_trailfix_770101_PINA.txt (identico riga per riga negli input;
+#  cambia SOLO il sorgente che la riga compila)
+# ==========================================================================
+#  >>> Non promuove niente. Non tocca taglie, preset, EA, forward.
+#  >>> Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale
+#      C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul
+#      VPS VMI3047753: ne' sul banco 50504400 (C:\MT5_Backtest), ne' su
+#      nessun terminale di conto (50503392 VPS, 50504263, 10105439,
+#      541452707 FTMO). Firma di Claudio del 21/09/2026.
+#
+#  IL SORGENTE CHE LA RIGA DEVE COMPILARE PER QUESTA CORSA (questo file
+#  NON lo porta: lo porta la riga di lancio, per percorso e per commit):
+#    percorso : mql5/Experts/ABTG_DAX_Apertura_EU.mq5
+#    commit   : 9fca63d98046e60b29f9300fc09dad7738cc887d
+#    SHA256   : d9f4636471a1b2632936e398bac3cbccef6fda89c1b432626b21d8dd7e719dd3
+#    righe    : 2425
+#    compilato come ABTG_DAX_Apertura_EU.ex5 (il nome finisce nel nome del per-trade:
+#    MQL_PROGRAM_NAME, r. ExportTrades del sorgente)
+#    include  : mql5/Include/ABTG_PausaGuardian.mqh al commit 9fca63d9
+#               SHA256 3ec971152e85e0082488cc4243ff45ae09948c191d52ab96050b48f94641a737
+#               (IDENTICO al commit 1d68dadd e a cffea2ad: git diff vuoto)
+#  >>> NON walkforward_generico.ps1 COM'E' OGGI: compila l'EA dal RAMO
+#      lavoro e non dal pin (classe 166), non sa scaricare un sorgente in
+#      una sottocartella di Experts, e scrive Optimization=1 cablato.
+#      Il perche' e l'alternativa: file di testa R254a_..._PIN, par. 5-6.
+#
+#  SEDIA 770101 -- il preset FTMO tradotto su BCM, input per input
+#    fonte : mql5/Presets/FTMO/ABTG_DAX_Apertura_EU_770101_FTMO.set
+#            SHA256 234b4b40fb920357fe782b17ccdc0f879b5ff5b631540f6ee6f1f24a0e6f6918 (letto a HEAD cffea2ad)
+#    righe del preset che cambiano (TUTTE le altre sono copiate ESATTE):
+#      InpSessionHour     FTMO 10           -> qui 8
+#      InpCloseHour       FTMO 19           -> qui 17
+#      InpCorrSymbol      FTMO US500.cash   -> qui SPXUSD
+#      InpRiskPercent     FTMO 2.00         -> qui 1.0
+#      InpNewsCurrencies  FTMO (vuoto)      -> qui (riga OMESSA)
+#      InpMagic           FTMO 770101       -> qui 792901||792901||50||792951||Y
+#    perche':
+#      - InpSessionHour/InpCloseHour: il preset FTMO e' rimappato +2 h
+#        sull'orologio FTMO (sua intestazione, 'PERCHE' +2'); si torna
+#        all'ORA SERVER BCM dell'originale: 8:00 e flat 17:30.
+#      - InpCorrSymbol: US500.cash non esiste su BCM; SPXUSD e' il valore
+#        dell'originale BCM. InpUseCorrelation=false: non entra nel conto.
+#      - InpRiskPercent: rischio di BANCO 1%, non la taglia FTMO 2,00%
+#        (consegna della sessione principale). Cambia i lotti, NON quali
+#        ingressi e quali modify partono: identico nelle due corse.
+#      - InpNewsCurrencies: vuoto nel preset e vuoto nel default compilato
+#        ("" nei tre sorgenti al pin); una riga a valore vuoto MT5 la
+#        ignora (controlla_prova.py, controllo 3): si omette e vale "".
+#        InpUseNewsFilter=false: non entra nel conto.
+#      - InpMagic: magic VERGINE del round (asse tecnico a due gemelle,
+#        passo 50). In corsa singola vale il PRIMO valore.
+#    Input del sorgente = righe del preset: stesso insieme di nomi,
+#    nessuno in piu' e nessuno in meno (confronto fatto sui due sorgenti
+#    al pin e sul preset). Il pin e la PINA hanno gli STESSI input
+#    (il pacchetto non aggiunge input: LEGGIMI.md del pacchetto).
+#
+#  ATTESE DI C0 (stampate dall'EA in avvio, tag [DAX Apertura EU]):
+#    avviato su D30EUR. Apertura server 08:00, range 35 min, flat 17:30.
+#    CONFIG IN USO -> motore=ABTG_RETEST | ... | lati=SOLO LONG | rischio=1.00% | ...
+#      ... | trail=ABTG_TRAIL_PREVBAR PERIOD_M5 | trail da=0.00R
+#  PER-TRADE ATTESO (Common\Files):
+#    abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_792901.csv
+#    (col driver anche _792951, la gemella)
+#
+#  QUESTO E' IL FILE DI TESTA DEL ROUND R254: qui sta TUTTO il
+#  ragionamento (par. 0-9). Gli altri 7 file rimandano qui e portano
+#  la loro identita', la loro traduzione del preset e i CANCELLI.
+#
+# ==========================================================================
+#  0. LA DOMANDA, UNA SOLA
+# ==========================================================================
+#  La Parte A (mql5/Experts/trailfix_9fca63d9/, LEGGIMI.md) mette una
+#  guardia davanti alla PositionModify del trailing PREVBAR: se lo stop
+#  proposto sta dal lato sbagliato del prezzo (bid - SL < StopsLevel - 0,5
+#  pt per un BUY, SL - ask < StopsLevel - 0,5 pt per un SELL) la richiesta
+#  NON parte. La guardia puo' solo NON mandare una richiesta che il pin
+#  mandava. Se il tester la rifiutava comunque ("invalid stops"), i deal
+#  non cambiano. Se invece la guardia blocca una richiesta che il tester
+#  avrebbe ACCETTATO, i deal cambiano: e' questo che la prova cerca.
+#  report/MODIFY_A_RAFFICA_FTMO_2026-09-25.md par. "Cosa cambia nei
+#  backtest", e LEGGIMI.md del pacchetto, "Cosa manca", punto 2.
+#
+# ==========================================================================
+#  1. IL DISEGNO: 8 FILE = 4 SEDIE x {PIN, PINA}
+# ==========================================================================
+#   file                            sedia   sorgente (commit)                simbolo magic
+#   R254a_trailfix_770101_PIN.txt   770101  ABTG_DAX_Apertura_EU (9fca63d9)   D30EUR 792901/792951
+#   R254a_trailfix_770101_PINA.txt  770101  CLAU12_DAX_Apertura_EU (1d68dadd) D30EUR 792901/792951
+#   R254b_trailfix_770105_PIN.txt   770105  ABTG_DAX_Apertura_EU (9fca63d9)   D30EUR 792902/792952
+#   R254b_trailfix_770105_PINA.txt  770105  CLAU12_DAX_Apertura_EU (1d68dadd) D30EUR 792902/792952
+#   R254c_trailfix_770202_PIN.txt   770202  ABTG_Dow_Apertura_US (9fca63d9)   U30USD 792903/792953
+#   R254c_trailfix_770202_PINA.txt  770202  CLAU12_Dow_Apertura_US (1d68dadd) U30USD 792903/792953
+#   R254d_trailfix_770260_PIN.txt   770260  ABTG_Nasdaq_Apertura_US (9fca63d9)   NASUSD 792904/792954
+#   R254d_trailfix_770260_PINA.txt  770260  CLAU12_Nasdaq_Apertura_US (1d68dadd) NASUSD 792904/792954
+#  Dentro ogni coppia i due file sono IDENTICI in tutte le righe vive
+#  (input, direttive, magic): cambia SOLO il sorgente, e lo porta la riga.
+#  STESSO MAGIC nella coppia, di proposito: il per-trade non contiene il
+#  nome dell'EA (colonne close_time;symbol;magic;position_id;deal_type;
+#  volume;price;net_profit, r. ExportTrades) e il nome dell'EA sta solo nel
+#  NOME del file (abtg_trades_<MQL_PROGRAM_NAME>_<SIM>_<MAGIC>.csv). Quindi
+#  i due per-trade di una coppia NON si sovrascrivono (nomi diversi: ABTG_ e
+#  CLAU12_) e, se la guardia e' neutra, sono BYTE PER BYTE IDENTICI: il
+#  cancello N1 diventa un confronto di SHA256, senza tolleranze da tarare.
+#  Magic DIVERSI fra le sedie: 770101 e 770105 girano lo STESSO sorgente
+#  sullo STESSO simbolo, e con lo stesso magic il secondo per-trade
+#  sovrascriverebbe il primo.
+#  MAGIC VERGINI: il blocco 7929xx ha ZERO occorrenze come numero in tutto
+#  il repo, 26/09/2026, PRIMA di scrivere questi file: git grep sul ramo
+#  lavoro a cffea2ad = 0; grep -r sul disco, cartelle .claude comprese = 0;
+#  git grep su tutti i 23 riferimenti locali e remoti: solo lo STESSO file
+#  data/snapshots/2026-08-10.json su 7 rami claude/*, dove la cifra sta
+#  dentro un decimale ("corr": 0.4248892792900201), non e' un magic.
+#  "R254" idem: zero occorrenze.
+#
+# ==========================================================================
+#  2. LA FINESTRA: @DAQUANDO 2026.05.31  @FINOA 2026.09.25
+# ==========================================================================
+#  - Contiene l'11/09/2026 (venerdi') e il 17/09/2026 (giovedi'): le due
+#    raffiche DAX viste su TUTTI e tre i conti BCM (report MODIFY_A par. 2).
+#    Che il tester le riproduca e' [NON VERIFICATO]: dipende da tick uguali
+#    e da riempimenti RETEST uguali. Controllo d'aggancio INFORMATIVO (non e'
+#    un cancello): per 770101 si scrive se nel log PIN ci sono righe RIFIUTO
+#    datate 2026.09.11 e 2026.09.17 (ora del tester = ora server BCM).
+#  - Tutta ESTATE: BCM UTC+1 = ora italiana - 1 per tutta la finestra
+#    (report/OROLOGIO_BCM_2026-09-24.md). Ora 8 = 09:00 IT = apertura Xetra,
+#    14:30 = 15:30 IT = apertura cash USA. Nessun mese "sfasato".
+#  - 2026.05.31 e' una DOMENICA, e non il 2026.06.01 proposto: vedi par. 3.
+#  - [NON VERIFICATO] che lo storico tick BCM sul PC di backtest arrivi al
+#    25/09/2026. L'ultimo round d'archivio sul DAX (R251) finiva al
+#    2026.06.30: luglio-settembre 2026 sul PC non risulta mai scaricato. Il
+#    tester lo scarica dal server BCM al primo uso ("preliminary downloading
+#    of history ticks"); il referto scrive la riga "history ticks
+#    synchronized from ... to ..." di ogni simbolo. Se l'ultimo tick e'
+#    prima del 2026.09.17, la finestra NON contiene le raffiche di campo:
+#    si scrive cosi' (N0 resta valido su qualunque altro episodio).
+#
+# ==========================================================================
+#  3. @FRAZIONEIS 0.001 (MONCONE) -- e perche' conta poco
+# ==========================================================================
+#  In CORSA SINGOLA (par. 5) @FRAZIONEIS NON si usa: una corsa sola da
+#  @DAQUANDO a @FINOA. La direttiva c'e' per il caso in cui qualcuno faccia
+#  girare questi file col driver: 117 giorni, floor(117 x 0,001) = 0 ->
+#    gamba IS  2026.05.31 -> 2026.05.31 (MONCONE: una domenica, nessuna
+#              sessione delle quattro sedie; CSV _IS atteso vuoto, rc 2 =
+#              FALSO ALLARME ATTESO)
+#    gamba OOS 2026.06.01 -> 2026.09.25 (gira per SECONDA: il per-trade che
+#              resta in Common\Files e' il suo)
+#  Per questo @DAQUANDO e' la DOMENICA 31/05: con 2026.06.01 il moncone si
+#  mangerebbe il lunedi' 1 giugno (giorno di borsa) e le due strade
+#  (corsa singola / driver) coprirebbero sedute DIVERSE. Cosi' coprono le
+#  STESSE: 2026.06.01 -> 2026.09.25. Non si usa @FRAZIONEIS 1.0 (seconda
+#  gamba con FromDate > ToDate, comportamento di MT5 NON MISURATO, R242b).
+#  Precedente del moncone: R246c/R252/R253 (un giorno feriale); un moncone
+#  di DOMENICA non e' mai girato in casa [NON MISURATO]: se MT5 lo
+#  rifiutasse, cade solo la gamba IS, che si butta comunque.
+#
+# ==========================================================================
+#  4. BANCO
+# ==========================================================================
+#  Deposit 10000, Currency EUR, Leverage 100 (= la scheda .ini del driver,
+#  walkforward_generico.ps1 r.2002-2026), rischio 1% (InpRiskPercent=1.0).
+#  NON le taglie FTMO. Model 4 = "Ogni tick basato su tick reali".
+#  ExecutionMode=0, nessuna riga Spread: spread dai tick reali.
+#  [Experts] AllowLiveTrading=false: il terminale del PC e' loggato sul
+#  demo 50503392 e il 14/08/2026 da quella macchina sono partiti ordini veri.
+#
+# ==========================================================================
+#  5. PERCHE' CORSA SINGOLA: VERIFICATO NELL'ARCHIVIO, 26/09/2026
+# ==========================================================================
+#  Domanda: in OTTIMIZZAZIONE i log dell'agente del tester contengono le
+#  righe "failed modify" / "invalid stops"? Se si', N0 e N2 si leggono dal
+#  driver di casa. MISURATO: NO.
+#   - risultati_archivio/R251/LOG_TESTER/ (5 file) e R246/LOG_TESTER/ (4
+#     file), convertiti da UTF-16 LE: ZERO righe "invalid stops", ZERO
+#     "failed modify", ZERO "modif", ZERO "deal", ZERO " buy "/" sell ".
+#     (Il primo grep senza conversione dava zero PER COSTRUZIONE: i log di
+#     MT5 sono UTF-16. Rifatto convertito.)
+#   - Il contro-esempio che rende lo zero una misura e non un'assenza di
+#     eventi: nel log dell'agente di R251
+#     (0003_Agent-127.0.0.1-3000_logs_20260925.log, 872 righe) le 24
+#     passate di R251 (16:52-16:56, "OnTester result ... passed in") hanno
+#     TRADE VERI (R251b OOS: 243 operazioni, per-trade 792520 da 243 righe,
+#     RIEPILOGO_R251.txt) e nel log ci sono ZERO righe di deal o d'ordine.
+#     In ottimizzazione il giornale di trading dell'agente NON si scrive:
+#     una raffica, se c'e', non lascia traccia. Nello stesso log le Print
+#     di OnInit ci sono (24 righe "[DAX Apertura EU] avviato su", una per
+#     passata) e quelle di OnTick no (0 righe "[DAX Apertura EU]" diverse
+#     da avviato/RICORDA/CONFIG): e' la classe 526 vista da vicino.
+#   - Tutti i 198 file .log del repo, convertiti: le sole righe "invalid
+#     stops"/"failed modify" stanno nei giornali di CAMPO
+#     (coda/referti/CODA_09_giornale_operativo_*.log). Nessun log di tester.
+#  QUINDI N0 e N2 NON SONO MISURABILI IN OTTIMIZZAZIONE, e la prova e'
+#  disegnata come CORSA SINGOLA (Optimization=0): il giornale del tester
+#  in corsa singola e' quello che l'utente vede nella scheda Diario del
+#  tester, e ci finiscono le righe di trading e le Print di OnTick (e' il
+#  presupposto su cui gira righe\PASSATA_STOP_SUPREV.ps1, che legge le
+#  righe "mercato ... SL" stampate in OnTick). Il FORMATO esatto delle righe
+#  di rifiuto in corsa singola NON e' mai stato letto in casa [NON
+#  MISURATO]: la regex copre le due forme note dal campo ("failed modify
+#  #... [Invalid stops]" del giornale, "CTrade::OrderSend: modify position
+#  #... [invalid stops]" di CTrade: coda/referti/CODA_09_giornale_
+#  operativo_20260925_033004.log r.54-56 e report/caccia_ticket/
+#  caccia_ticket_VMI3047753.txt, righe "failed modify #3088009").
+#  Il per-trade (N1) esce anche dalla corsa singola: ExportTrades() e'
+#  chiamata da OnTester(), che MT5 chiama a fine test anche fuori
+#  ottimizzazione.
+#
+# ==========================================================================
+#  6. IL BLOCCO: NESSUNO STRUMENTO DI CASA LANCIA QUESTA PROVA COM'E' OGGI
+# ==========================================================================
+#  (a) walkforward_generico.ps1 scrive Optimization=1 CABLATO (r.2013;
+#      r.1015 e' l'anteprima): per il par. 5 non vede N0/N2.
+#  (b) CLASSE 166: il driver scarica l'EA da $RawBase =
+#      .../GITHUB/lavoro (r.264-265, 317), NON dal pin passato a
+#      RIGA_ROUND_VPS.ps1 (che pinna solo driver e file prova, r.163,
+#      1021-1029). A HEAD ABTG_DAX_Apertura_EU.mq5 NON e' il pin 9fca63d9
+#      (+460 righe mai girate in campo, LEGGIMI del pacchetto): la corsa PIN
+#      misurerebbe un altro motore. RIGA_R251 lo intercetta a posteriori
+#      (SHA dopo ogni job -> "MOTORE DIVERSO DAL PIN"), qui lo farebbe
+#      SEMPRE.
+#  (c) il driver scarica $Expert.mq5 in src_prove\ senza sottocartelle: il
+#      sorgente PINA sta in mql5/Experts/trailfix_9fca63d9/ e non ci arriva.
+#  PROPOSTA (la scrive e la fa passare dal cancello la sessione principale,
+#  NON questo file): una passata singola sul modello di
+#  righe\PASSATA_STOP_SUPREV.ps1 v2, che GIA' fa le cose che servono -
+#  gira solo su DESKTOP-H4D7CAJ, rifiuta MT5 aperto e altre installazioni,
+#  scarica EA e include AL PIN per percorso, compila e aspetta il .ex5,
+#  scrive un .ini con Optimization=0 / Model=4 / AllowLiveTrading=false /
+#  ShutdownTerminal=1, fotografa i .log prima e legge SOLO le code scritte
+#  dopo, in UTF-16. Da aggiungere: 8 corse invece di 2; per ogni corsa il
+#  sorgente (percorso + commit + SHA256 di questa intestazione); il nome di
+#  compilazione ABTG_<EA> / CLAU12_<EA>; input = TUTTE le righe Inp di
+#  questo file ridotte al primo valore; i conteggi RIFIUTO / RINVIO / avvio
+#  / CONFIG per corsa; la copia dei due per-trade e il loro SHA256; il
+#  LOG_TESTER di ogni corsa nello zip. Per N3: lo script di sola lettura
+#  mql5/Scripts/ABTG_PrevoloFTMO_Specifiche.mq5 (colonne StopsLevelPts e
+#  FreezeLevelPts; il suo dizionario riconosce D30EUR, U30USD e NASUSD)
+#  lanciato sul terminale del PC con InpSelezionaSimboli=false (il default:
+#  non aggiunge simboli, resta sola lettura).
+#  Nota sul nome: compilare il pin come ABTG_<EA>.ex5 sovrascrive sul PC il
+#  compilato che il driver rifa' comunque da capo a ogni round (r.1926-
+#  1971): innocuo, ma va detto. Un nome distinto cambierebbe solo il nome
+#  del per-trade.
+#  RIPIEGO, se la passata singola non si fa: il driver resta inutilizzabile
+#  per il PIN (b). Resterebbe solo copiare i due sorgenti al pin in
+#  mql5/Experts/ come file NUOVI di primo livello (modifica al repo degli
+#  EA: fuori dal perimetro di questo file) e leggere il SOLO N1, con N0 e
+#  N2 [NON MISURABILI]: esito massimo "DEAL IDENTICI, GUARDIA NON
+#  DIMOSTRATA ESERCITATA", che NON e' NEUTRA.
+#
+# ==========================================================================
+#  7. COSA QUESTA PROVA NON COPRE (dichiarato prima)
+# ==========================================================================
+#  - il server FTMO: il tester replica la regola del server, non il server.
+#    Requote, rifiuti per altri motivi, latenza, esecuzione della prop vera:
+#    NON coperti.
+#  - lo StopsLevel: su FTMO e' 0 per i tre simboli; su BCM e' [NON
+#    MISURATO] (serve N3). Il commento dei sorgenti dice "NASUSD ha stops
+#    level = 100 punti" (EffectiveBuffer, CLAU12_DAX_Apertura_EU.mq5 r.2122): se vero,
+#    R254d prova il ramo k>0 (tolleranza di mezzo punto, classe 820) e NON
+#    il ramo k=0 di FTMO. Il referto dice, simbolo per simbolo, QUALE ramo
+#    e' stato provato.
+#  - SOLO il ramo TRAILING e' toccato dalla Parte A. Il breakeven al 1o
+#    obiettivo (r.1936 del pin DAX) non ha guardia: un suo rifiuto
+#    comparirebbe in TUTTE E DUE le corse, e fa scattare N2 (esito 4).
+#  - la memoria anti-ripetizione di TrailRinvioLog tiene UN ticket: con due
+#    posizioni insieme le righe RINVIO possono alternarsi. Non tocca N0, N1,
+#    N2 (conta solo zero / non zero).
+#  - il per-trade elenca solo i deal di USCITA (DEAL_ENTRY_OUT / OUT_BY):
+#    un ingresso diverso si vede solo attraverso l'uscita della sua
+#    posizione (prezzo, volume, net_profit). La Parte A non tocca gli
+#    ingressi.
+#  - UNA finestra di 4 mesi. Se una sedia esce NON MISURATA (N0 rosso), la
+#    via piu' corta al numero e' la STESSA coppia con @DAQUANDO 2024.09.26
+#    (tutto lo storico BCM degli indici): costo ~3-4 volte la corsa, file
+#    nuovi da scrivere e far passare dal cancello. Non e' prevista qui.
+#  - l'OROLOGIO d'inverno e gli altri difetti noti delle sedie: fuori tema.
+#
+# ==========================================================================
+#  8. TEMPO MACCHINA (stima dichiarata)
+# ==========================================================================
+#  Riferimento misurato: R251, 24 passate DAX M5 tick reali (gambe di 9 e
+#  12 mesi) in 5 minuti (RIEPILOGO_R251.txt), su UN SOLO agente (log del
+#  tester: solo "Core 1", 127.0.0.1:3000), da 2,5 a 8,2 s per passata (log
+#  dell'agente, 16:52-16:56). Qui 4 mesi per corsa: il test in se' vale
+#  pochi secondi. Il costo e' tutto di contorno: per ogni corsa apertura e
+#  chiusura del terminale, compilazione, giornale completo acceso (in corsa
+#  singola ogni modify e ogni rifiuto e' una riga). Stima: ~1-2 minuti per
+#  corsa, 8 corse = ~10-20 minuti, PIU' lo scarico iniziale dei tick
+#  luglio-settembre 2026 dei tre simboli (mai scaricati sul PC, par. 2:
+#  NON STIMABILE, di solito minuti). Tetto largo: 60 minuti, oltre ci si
+#  ferma e si guarda.
+#  Sul driver (se mai): 8 file x 2 celle x 2 gambe = 32 passate (16
+#  moncone), ~5 minuti, ma senza N0/N2.
+#
+# ==========================================================================
+#  9. [NON VERIFICATO] / [NON MISURATO], in un posto solo
+# ==========================================================================
+#  - storico tick BCM sul PC fino al 25/09/2026 (par. 2);
+#  - che il tester riproduca le raffiche dell'11/09 e del 17/09 (par. 2);
+#  - il formato delle righe di rifiuto in corsa singola (par. 5);
+#  - StopsLevel/FreezeLevel BCM dei tre simboli (N3);
+#  - un moncone di domenica nel driver (par. 3; irrilevante in corsa
+#    singola);
+#  - che i preset FTMO del repo siano quelli caricati sui grafici FTMO
+#    (LEGGIMI del pacchetto, "Limiti noti"): la prova usa quelli del repo.
+#
+# ==========================================================================
+#  CANCELLI -- CONGELATI QUI, PRIMA DEI NUMERI (identici in tutti gli 8
+#  file R254; il ragionamento completo sta nel file di testa
+#  R254a_trailfix_770101_PIN.txt, par. 5-7)
+# ==========================================================================
+#  Si giudica PER SEDIA, sulla COPPIA di corse PIN + PINA della sedia.
+#  Le due corse girano ciascuna UNA volta, CORSA SINGOLA (Optimization=0),
+#  "Ogni tick basato su tick reali" (Model=4), Deposit 10000 EUR, leva 100,
+#  ExecutionMode=0, nessuna riga Spread, input = la PRIMA cella di ogni
+#  riga qui sotto (magic = il primo valore dell'asse).
+#  "Log della corsa" = tutti i .log scritti DOPO l'avvio di QUELLA corsa
+#  sotto %APPDATA%\MetaQuotes (cartella dati + agenti del tester) e sotto
+#  <installazione>\Tester, letti dall'offset fotografato prima dell'avvio
+#  (schema di righe\PASSATA_STOP_SUPREV.ps1 v2). I log di MT5 sono UTF-16 LE.
+#  Regex RIFIUTO (senza distinzione maiuscole):  invalid stops|failed modify
+#  Regex RINVIO  (solo PINA):                     trailing rinviato: stop
+#
+#  C0 VALIDITA' (se una sola manca -> PROVA NULLA, non si legge altro):
+#   a) il sorgente compilato per la corsa PIN ha lo SHA256 dichiarato qui
+#      sopra (pin 9fca63d9) e quello della corsa PINA il suo (pin 1d68dadd);
+#      l'include ABTG_PausaGuardian.mqh ha SHA256 3ec97115...;
+#   b) nel log di OGNUNA delle due corse c'e' la riga d'avvio dell'EA con
+#      simbolo, ora d'apertura e flat attesi, e la riga "CONFIG IN USO"
+#      con motore=ABTG_RETEST, i lati attesi, rischio=1.00%,
+#      trail=ABTG_TRAIL_PREVBAR PERIOD_M5, trail da=0.00R; e l'etichetta
+#      dell'expert nel log e' ABTG_<EA> nella corsa PIN e CLAU12_<EA> nella
+#      corsa PINA (e' la prova stampata che ha girato il binario giusto);
+#   c) i due per-trade abtg_trades_<ABTG|CLAU12>_<EA>_<SIM>_<MAGIC>.csv in
+#      Common\Files esistono e sono scritti DOPO l'avvio della propria
+#      corsa (ExportTrades scrive l'intestazione anche a zero operazioni).
+#      Zero righe dati NON e' "nessun trade" finche' non si guarda il log:
+#      con b) verde la corsa e' girata senza operazioni, N1 si legge lo
+#      stesso e N0 sara' rosso (esito 3, NON MISURATA); con b) rosso la
+#      corsa non e' girata -> PROVA NULLA.
+#  N1 NEUTRALITA' DEI DEAL: i due per-trade sono IDENTICI BYTE PER BYTE
+#      (SHA256 uguale). Stesso magic, e il nome dell'EA sta SOLO nel nome
+#      del file: quindi sono le 8 colonne close_time, symbol, magic,
+#      position_id, deal_type, volume, price, net_profit, riga per riga, al
+#      centesimo. Se lo SHA differisce, il referto scrive il numero di righe
+#      di ciascuno e la PRIMA riga diversa.
+#      UN SOLO caso gia' deciso qui, prima dei numeri: se le righe sono
+#      tante quante, nello stesso ordine, e differiscono SOLO nella colonna
+#      position_id, E la corrispondenza id PIN -> id PINA e' biunivoca e
+#      costante su tutte le righe (stessi deal raggruppati nelle stesse
+#      posizioni), N1 e' VERDE "PER RINUMERAZIONE" e il referto lo scrive
+#      con questo nome. Perche': [NON MISURATO] se nel tester una richiesta
+#      di modifica RIFIUTATA consumi numeri di ticket; se li consumasse, la
+#      corsa PIN (che manda i rifiuti) e la PINA (che non li manda)
+#      numererebbero le posizioni in modo diverso con deal identici. Ogni
+#      altra differenza, anche di un centesimo o di un secondo, e' ROSSO.
+#  N0 LA PROVA PROVA QUALCOSA: nel log della corsa PIN le righe RIFIUTO
+#      sono > 0. Il numero e' informativo (la stessa richiesta puo'
+#      comparire in piu' forme: riga del tester "failed modify" e riga di
+#      CTrade "[invalid stops]"); il cancello guarda solo zero / non zero.
+#  N2 LA RAFFICA SPARISCE: nel log della corsa PINA le righe RIFIUTO sono 0.
+#  C1 COERENZA (vale solo se N0, N1 e N2 sono verdi): nel log della corsa
+#      PINA le righe RINVIO sono > 0. Con deal identici, rifiuti nel PIN e
+#      zero rifiuti nella PINA, ogni richiesta che il PIN si e' visto
+#      rifiutare la PINA NON l'ha mandata, e l'unico punto del sorgente che
+#      trattiene una modify e' la guardia, che lo scrive (InpVerbose=true).
+#      Zero righe RINVIO vuol dire che la corsa PINA non e' quella
+#      dichiarata (InpVerbose non applicato, binario sbagliato) -> PROVA
+#      NULLA. (Se invece N2 e' rosso, C1 non si guarda: i rifiuti possono
+#      venire tutti da un ramo senza guardia, e allora le righe RINVIO
+#      possono mancare legittimamente.)
+#  N3 StopsLevel (e FreezeLevel) del simbolo sul terminale del PC di
+#      backtest: SCRITTI nel referto, con la fonte. Non e' un cancello di
+#      esito, ma senza N3 il referto dichiara [NON MISURATO] QUALE ramo della
+#      guardia e' stato provato (StopsLevel 0 = il ramo di FTMO, dove
+#      GER40.cash, US30.cash e US100.cash hanno 0 [MISURATO,
+#      risultati_prove/PREVOLO_FTMO_specifiche_2026-09-20.csv r.40-42];
+#      StopsLevel k>0 = il ramo con la tolleranza di mezzo punto).
+#
+#  ESITO PER SEDIA, in QUEST'ORDINE (il primo che scatta decide):
+#   1. C0 rosso                        -> PROVA NULLA (si rifa' la corsa)
+#   2. N1 rosso                        -> NON NEUTRA: la guardia cambia i
+#                                         deal. NON SI SCHIERA. (Vale anche
+#                                         con N0 rosso: un deal diverso e'
+#                                         un fatto, a qualunque n.)
+#   3. N0 rosso                        -> NON MISURATA: finestra senza
+#                                         raffiche per questa sedia, "deal
+#                                         uguali" non prova niente.
+#   4. N2 rosso                        -> NEUTRA SUI DEAL, RAFFICA NON
+#                                         AZZERATA: non si schiera come
+#                                         "correzione" finche' le righe
+#                                         residue non sono classificate
+#                                         (SL richiesto = prezzo d'ingresso
+#                                         della posizione -> breakeven
+#                                         al 1o obiettivo, senza guardia:
+#                                         r.1936 nel pin DAX, ramo omologo
+#                                         nel Dow e nel Nasdaq; oltre
+#                                         l'ingresso ->
+#                                         trailing, cioe' la guardia l'ha
+#                                         lasciata passare; altro).
+#   5. C1 rosso                        -> PROVA NULLA
+#   6. altrimenti                      -> NEUTRA
+#  IL PACCHETTO: ogni file CLAU12 e' coperto SOLO dalle sue sedie con esito
+#  NEUTRA (DAX = 770101 E 770105; Dow = 770202; Nasdaq = 770260). Un file
+#  con una sola sedia NON MISURATA non e' coperto: si scrive cosi' e la
+#  decisione passa a Claudio. NIENTE esito "neutra per analogia" fra file:
+#  il blocco modificato e' identico nei tre sorgenti, ma la prova no.
+#  Questo round NON promuove niente, NON tocca taglie ne' preset, NON tocca
+#  nessuna sedia in campo. Misura UNA cosa: se la Parte A cambia i deal.
+#
+#  STRATO 1 (controlla_prova.py) va lanciato con --ea ESPLICITO: la riga
+#  "#  EA:" di un file PINA nomina CLAU12_<EA>, che non sta in
+#  mql5/Experts/ (sta nella sottocartella del pacchetto), e quella di un
+#  file PIN risolverebbe il sorgente di HEAD, non quello al pin:
+#    python3 backtest_pipeline/controlla_prova.py \
+#      --ea mql5/Experts/trailfix_9fca63d9/CLAU12_<EA>.mq5  <file PINA>
+#    git show 9fca63d9:mql5/Experts/ABTG_<EA>.mq5 > /tmp/pin_<EA>.mq5
+#    python3 backtest_pipeline/controlla_prova.py --ea /tmp/pin_<EA>.mq5 <file PIN>
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2026.05.31
+@FINOA      2026.09.25
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=792901||792901||50||792951||Y
+InpMaxSpread=0
+InpVerbose=true
