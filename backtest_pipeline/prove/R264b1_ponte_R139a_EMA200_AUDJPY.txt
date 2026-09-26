@@ -1,0 +1,81 @@
+#  EA: ABTG_EMA200
+# =====================================================================
+#  R264b1 -- PONTE AUDJPY: le 4 celle ESATTE di R139a (0.25 / 0.5, TP
+#    1.5-3.0) sulla finestra del genetico, OHLC
+#  Banco (sta nella RIGA di lancio, classe 692): -Deposito 10000,
+#    -MODELLO 1 (OHLC M1) = SCREENING: puo' BOCCIARE, non PROMUOVERE.
+#  Finestra: MONCONE. IS = 2023.12.31 (domenica, 1 giorno: CSV _IS
+#    vuoto e rc 2 ATTESI, cancello E0 della testa); OOS = 2024.01.01
+#    -> 2026.06.30 = ESATTAMENTE la finestra del genetico/scansione.
+#  Asse: InpTP_RR da 1.5 a 3.01 passo 0.5 = 4 celle x 2 finestre = 8 passate.
+#  Pin che cambiano rispetto agli altri file: DUE LATI, O1 0.25, O2 0.5, TP ASSE,
+#    InpComment=R264B1_PONTE, InpMagic 796512.
+#  Per-trade atteso in Common\Files (sovrascritto a ogni passata:
+#    resta l'ULTIMA, classe 455):
+#      abtg_trades_ABTG_EMA200_AUDJPY_796512.csv
+#  ATTESE, SOGLIE, CANCELLI E BUCHI: nel file di TESTA
+#    prove/R264a_controllo_EMA200_GBPUSD.txt (par. 9 (il conflitto AUDJPY)).
+#  >>> ATTESA SCRITTA PRIMA (testa par. 9): DEVE CONFERMARE R139a.
+#      CONFERMA  = almeno 3 celle su 4 con PF >= 1,45: il 1,514 e' una
+#                  FETTA D'EPOCA, R139a (MORTO) regge, AUDJPY resta in
+#                  archivio e R221b diventa ridondante (proposta).
+#      SMENTITA  = almeno 3 su 4 sotto 1,25: OHLC e tick non concordano
+#                  sulla STESSA finestra -> il verdetto di R139a perde il
+#                  banco -> AUDJPY "NON ANCORA MISURATO" (non resuscitato).
+#      in mezzo  = NON CONCLUDENTE, e si scrive cosi'.
+#      Previsione puntuale: CONFERMA, PF 1,55-1,95 (tick d'archivio
+#      1,62295-1,71095 su 3 di queste 4 celle + scarto OHLC-tick misurato
+#      su AUDJPY H4 +0,040 / +0,167).
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma
+#  del 21/09/2026). Nessuna riga di lancio qui. Non tocca EA, preset,
+#  sedie, conti, taglie o il forward. Generato da prove/R264_GENERA.py.
+# =====================================================================
+@SIMBOLO    AUDJPY
+@PERIODO    H4
+@DAQUANDO   2023.12.31
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=1||1||0||1||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpUseAdrFilter=0||0||0||0||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpUseOrder2=1||1||0||1||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpUseCutoff=0||0||0||0||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpLogImbuto=1||1||0||1||N
+InpComment=R264B1_PONTE
+InpMagic=796512||796512||0||796512||N
+InpTP_RR=1.5||1.5||0.5||3.01||Y
+InpOrder2Atr=0.5||0.5||0||0.5||N
+InpOrder1Atr=0.25||0.25||0||0.25||N

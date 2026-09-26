@@ -1,0 +1,681 @@
+#  EA: ABTG_EMA200
+# =====================================================================
+#  R264 -- EMA200 H4 A DUE LATI SU GBPUSD / AUDJPY / GBPJPY / XAUUSD:
+#          IL GENETICO HA TROVATO UN MOTORE, O UNA FETTA DI CALENDARIO?
+#  FILE DI TESTA DELLA FAMIGLIA R264 (17 file), e cella R264a_controllo
+#  (ancora G0 di GBPUSD). Qui stanno ragionamento, attese, soglie e buchi
+#  di TUTTA la famiglia; gli altri 16 portano solo le loro differenze e
+#  rimandano qui. Generati da prove/R264_GENERA.py (prosa in
+#  prove/R264_TESTA.txt.in; pin scritti UNA volta nel generatore).
+#  EURUSD solo corto sta nella famiglia sorella R265 (testa propria:
+#  prove/R265a_atr_controllo_EMA200_EURUSD_short.txt).
+#  Scritto il 26/09/2026. ATTESE E SOGLIE CONGELATE PRIMA DEI NUMERI.
+#  Richiesta: report/CHI_E_PIU_VICINO_AL_CAMPO_2026-09-24.md par. 0,
+#  tabella par. 2 righe 5-9, par. 6 conflitto n. 2.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma del
+#  21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest), NE' su nessun
+#  terminale di conto (50503392, 50504263, 10105439, 541452707 FTMO).
+#  Il terminale di quel PC e' loggato sul demo 50503392 e il 14/08 da li'
+#  sono partiti ordini veri: prima si controlla che non abbia SEDIE
+#  attaccate (avvertenza di R246/R255).
+#
+#  VINCOLI DI BANCO (classe 692: stanno nella RIGA di lancio; qui si
+#  dichiarano perche' chi la scrive li trovi):
+#    -Deposito 10000 in TUTTI i 17 file = il banco del genetico e di
+#        R139a/b. Il confronto con l'archivio E' il punto. NON e' una
+#        taglia: nessuna taglia e' proposta qui.
+#    -Modello 4 (tick reali) SOLO nei 4 file *_controllo (G0).
+#    -Modello 1 (OHLC M1) in TUTTI gli altri 13 (walk-forward lunghi e
+#        ponte). E' SCREENING: puo' BOCCIARE, non puo' PROMUOVERE.
+#        Il driver appende "_ohlc" ai CSV quando il modello non e' 4.
+#    NIENTE -Spread, -Ritardo, -FrazioneIS (il taglio sta in @FRAZIONEIS;
+#    un -FrazioneIS diverso fa MORIRE il driver, r.713-740).
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca EA, preset, sedie, conti, taglie o parametri del forward, e non
+#  promuove niente: ogni esito e' materiale per Claudio.
+#
+# =====================================================================
+#  0. LA RISPOSTA CORTA, PRIMA DEL RESTO
+# =====================================================================
+#  (1) I 150 PER FINESTRA A TICK NON ESISTONO su nessuno dei quattro:
+#      il tick BCM parte dal 2024.07.05 (forex MISURATO, oro INFERITO),
+#      cioe' ~2 anni, e questi simboli fanno 28-74 posizioni/anno.
+#      Quindi il walk-forward a campione pieno e' per forza OHLC M1
+#      (screening), e il verdetto a tick resta R221a/c (gia' scritti).
+#  (2) IL GENETICO HA SCELTO IL VICINATO GUARDANDO 2024.01.01-2026.06.30.
+#      L'unico dato che non ha mai visto e' PRIMA del 2024. Per questo
+#      l'IS di R264 finisce il 2023.12.31 ed e' dimensionato a >= 150
+#      posizioni, e l'OOS e' ESATTAMENTE la finestra del genetico (il
+#      recente, che per l'Emendamento B giudica il merito) -- dichiarato
+#      NON cieco a livello di vicinato (par. 4).
+#  (3) AUDJPY NON HA GRIGLIA D'INGRESSO: e' MORTO su campione pieno
+#      (R139a) e la regola del 19/08 vieta di allargare i parametri
+#      d'ingresso di un motore sotto 1,10 su campione pieno. Riceve solo
+#      il G0 e un PONTE che risolve il conflitto del referto (par. 9).
+#  (4) SU GBPJPY E XAUUSD L'ALTOPIANO DEL GENETICO E' TAGLIATO DAL
+#      BORDO DELLA GRIGLIA (O2 = 0,6 e' il massimo mai provato ed e' dove
+#      stanno i PF piu' alti): e' lo stesso difetto del 770201. La
+#      griglia di R264 va OLTRE il bordo (O2 = 0,7, mai misurato).
+#  (5) LA MIA PREVISIONE, CONTRO DI ME: su 5 simboli non-Dow gia'
+#      passati da un walk-forward, questo motore ne ha retti ZERO (par.
+#      1f). Mi aspetto che R264 bocci in IS almeno 2 dei 3 simboli con
+#      griglia. Se succede, e' un risultato: il certificato diventa
+#      completo e non si riapre senza una tesi nuova.
+#
+# =====================================================================
+#  1. COSA E' GIA' MISURATO -- CERCATO PRIMA DI ORDINARE (classe 411)
+# =====================================================================
+#  (a) IL GENETICO, origine dei numeri 1,231 / 1,514 / 1,240 / 1,381:
+#      risultati_archivio/EMA200/realtick_H4/valid_ABTG_EMA200_H4_realtick_
+#      {GBPUSD,AUDJPY,GBPJPY,XAUUSD}.csv, commit b57374c4 (01/08/2026).
+#      Banco (backtest_pipeline/valida_realtick.ps1 r.180-186, letto da
+#      R139a e R221a): Modello 4, FromDate 2024.01.01, ToDate 2026.06.30,
+#      deposito 10000, rischio 1%, Optimization=2 (GENETICO), UNA
+#      finestra. Binario: sorgente al commit 0953846c (31/07/2026).
+#      ASSI RICONTATI RIGA PER RIGA sui 4 CSV (gli altri 38 input sono
+#      COSTANTI in tutte le righe, verificato il 26/09):
+#        InpAllowLong {0,1} x InpAllowShort {0,1} x InpOrder1Atr
+#        0,05..0,30 (6) x InpOrder2Atr 0,2..0,6 (5) x InpTP_RR 1,5..3,0
+#        (4) = 480 combinazioni. Righe: 134 / 135 / 135 / 145 (28-30%
+#        dello spazio = genetico). Celle a DUE LATI con operazioni:
+#        24 / 28 / 19 / 29.
+#      !!! Lo script NON dichiara O1/O2 in [TesterInputs] (R221a par.
+#      6-bis): venivano dallo STATO SALVATO del tester. Per questo qui
+#      TUTTI i 43 input sono pinnati col flag N esplicito.
+#      LE ANCORE DEL G0 (le celle citate dal referto = la mediana per PF
+#      delle celle a due lati, centrale BASSA a parita' come R221a par. 3):
+#        GBPUSD O1 0.25 O2 0.2 TP 2.0  Pass 139  PF 1,23105  n 362  DD 7,2048  +728,66
+#        AUDJPY O1 0.05 O2 0.4 TP 3.0  Pass 411  PF 1,51365  n 265  DD 6,2606  +1181,78
+#        GBPJPY O1 0.10 O2 0.4 TP 1.5  Pass 55   PF 1,24037  n 221  DD 4,4220  +609,52
+#        XAUUSD O1 0.30 O2 0.4 TP 2.5  Pass 311  PF 1,38074  n 187  DD 6,1446  +991,09
+#      (n = colonna Trades = DEAL DI USCITA, non posizioni: classe 226.)
+#
+#  (b) R139a / R139b -- IL CAMPIONE PIENO C'E' GIA' SU DUE DEI QUATTRO.
+#      OHLC M1, 2010.01.01 -> 2026.06.30, split 0,40 (IS fino ~2016.08),
+#      UNA cella per simbolo, asse InpTP_RR, magic 771560 / 771561.
+#      CSV: risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_{AUDJPY,GBPUSD}
+#      _{IS,OOS}_ohlc_r139{a,b}.csv (commit cb96a6b1, 91bdfd60). Verdetti:
+#      report/AUDJPY_E_GBPUSD_IL_NUMERO_CHE_MANCAVA_2026-09-18.md par. 3-4.
+#        AUDJPY (O1 0.25/O2 0.50): IS PF 0,78043-0,80666, DD 15,35-16,94%,
+#          757-768 deal; OOS PF 0,94923-1,00781, DD 16,89-20,44%,
+#          1322-1345 deal.  -> MORTO (S2 e S3 in entrambe le finestre).
+#        GBPUSD (O1 0.25/O2 0.40): IS PF 0,80318-0,83825, DD 17,73-20,32%,
+#          856-875 deal; OOS PF 1,12701-1,13869, DD 10,05-11,05%,
+#          1292-1321 deal. -> "REGIME, non edge" (S4 su 4 celle su 4).
+#      Deal/posizione MISURATO su QUESTO motore a H4 forex (per-trade del
+#      17/09, coda/referti/CODA_12_pertrade_posizioni_20260917_033003.log
+#      r.846-847): 1,8425 (AUDJPY) e 1,8329 (GBPUSD). Qui si usa 1,838.
+#
+#  (c) R221a / R221b / R221c (scritti il 23/09, NON GIRATI: nessun CSV
+#      r221 in repo): GBPUSD / AUDJPY / XAUUSD, TICK, 2024.07.05 ->
+#      2026.06.30 taglio 0,40, un asse d'ingresso, magic 771541-771543.
+#      E' lo split a tick DENTRO la finestra del genetico: merito
+#      SOSPESO per costruzione (GBPUSD ~57 / ~86 posizioni, R221a par.4).
+#      R264 NON lo duplica: misura FUORI da quella finestra. Se R264b1
+#      CONFERMA (par. 9), R221b e' ridondante: PROPOSTA di toglierlo
+#      dalla coda (decide Claudio).
+#
+#  (d) LO SCARTO OHLC-TICK DI QUESTO MOTORE A H4, GIA' MISURATO E MAI
+#      USATO. risultati_prove/ABTG_EMA200/ABTG_EMA200_{SIM}_{IS,OOS}.csv
+#      (tick) e _ohlc.csv (OHLC), commit 400a4624 (08/08), asse InpTF,
+#      cella di DEFAULT (O1 0.10 / O2 0.35 / TP 2.0, due lati). Finestra
+#      NON dichiarata nel file (prove/ABTG_EMA200.txt senza @DAQUANDO):
+#      [NON VERIFICATA] -- ma e' LA STESSA per le due colonne, e basta
+#      per lo scarto. Riga H4 (InpTF 16388), PF tick | OHLC, n tick | OHLC:
+#        GBPUSD IS  1,38233 | 1,44496  75 | 69    OOS 1,01764 | 1,08273  132 | 131
+#        AUDJPY IS  1,02488 | 1,06440 123 | 122   OOS 3,11833 | 3,28529   97 | 98
+#        GBPJPY IS  1,42294 | 1,57128  92 | 92    OOS 0,98845 | 1,02000  114 | 114
+#        XAUUSD IS  0,82846 | 0,82748  49 | 49    OOS 0,79976 | 0,77628   90 | 91
+#      >>> SCARTO PF OHLC - TICK su 8 coppie: da -0,0235 a +0,1670,
+#          mediana +0,0511. Ottimista in 6 su 8, MAI pessimista oltre
+#          -0,024. Serve a due cose: (i) un PF OHLC fino a 1,10+0,167 =
+#          1,27 puo' ancora essere un 1,10 a tick, quindi 1,27 e' la
+#          soglia "SOLIDO" (par. 8, S2); (ii) un OHLC che BOCCIA regge,
+#          perche' il tick starebbe piu' in basso (stesso argomento di
+#          R139, par. 4 del suo referto).
+#
+#  (e) L'ORO, UN PRIOR SUL RISCHIO DA UN EA PARENTE: report/
+#      CENSIMENTO_CONTRATTI_v2.md r.313: ABTG_EMA200_Ottimizzato 971501
+#      XAUUSD H4, DD 45,91% a rischio 1% su OHLC 22 anni. E' un ALTRO EA
+#      (quanto diverso: [NON VERIFICATO] qui): non si trasferisce, ma e'
+#      scritto accanto perche' R264d non sorprenda nessuno.
+#
+#  (f) IL TASSO DI BASE, SCRITTO CONTRO DI ME. Walk-forward del motore
+#      fuori dal Dow: R29a EURUSD H1 7/30 sparse (no), R32a XAUUSD H1
+#      IS 0/30 positive, R32b 225JPY H1 30/30 IS -> 30/30 OOS rosse
+#      (ribaltato), R139a AUDJPY H4 morto, R139b GBPUSD H4 regime.
+#      DIARIO 12/08: "l'EMA200 e' uno specialista del Dow". ZERO su CINQUE.
+#      (La sedia di famiglia 771531 e' U30USD H1, prove/R29b.)
+#
+#  (g) IL FORWARD CHE NESSUNO HA LETTO: le sedie 771511-771515 (200AUD,
+#      AUDJPY, GBPJPY, SPXUSD, GBPUSD H4) sono attaccate dal 01/08 e
+#      fanno ZERO operazioni nello statement 30/03 -> 11/09
+#      (report/EMA200_I_DUE_REQUISITI_2026-09-12.md par. 6). A 0,17-0,28
+#      pos/giorno se ne aspettavano decine. Relitti o frequenza vera piu'
+#      bassa: si distingue con UNA lettura del Giornale, a costo zero, e
+#      non e' fatta. [NON MISURATO]
+#
+# =====================================================================
+#  2. LE MANOPOLE INERTI, IL BORDO, E LE REGOLE CHE MORDONO QUI
+# =====================================================================
+#  2.1 InpTP_RR E' QUASI INERTE, e allora il box (3) del certificato su
+#      GBPUSD/AUDJPY e' stato riempito con una manopola che il motore
+#      scavalca. MISURATO: GBPUSD 4 gruppi su 5 sotto 0,007 di PF
+#      (R221a par. 1); R139b escursione 0,012 su ~1300 deal; R139a
+#      0,026 (IS) e 0,059 (OOS). IL MECCANISMO (ABTG_EMA200.mq5 a HEAD
+#      b45dd009): r.410 la parziale InpTP1Pct sulla EMA14, r.429 il
+#      breakeven, r.436 il trailing su EMA14 -- tutti DENTRO il blocco
+#      della parziale. Il TP finale lo raggiunge una minoranza del resto.
+#      >>> ECCEZIONE, contata sul CSV: su XAUUSD il TP_RR MORDE nel
+#          genetico -- O1 0.15 / O2 0.5: TP 1,5 / 2,0 / 2,5 / 3,0 ->
+#          PF 1,205 / 1,270 / 1,392 / 1,656 (n 200 / 191 / 179 / 172).
+#          Non e' ad asse qui (buco, par. 11).
+#      >>> LA CASELLA LIBERA VERA E' InpTP1Pct: messa ad asse SOLO sul
+#          Dow (prove/R136c_parziale_U30USD.txt), MAI su forex o oro
+#          (grep dei file prova ABTG_EMA200 con InpTP1Pct||Y: solo U30USD).
+#          Sul Dow ha morso cosi' (risultati_prove/dal_vps/ABTG_EMA200/
+#          ABTG_EMA200_U30USD_{IS,OOS}_r136c.csv): TP1Pct 25/50/75 ->
+#          PF IS 1,20039/1,20110/1,20031, OOS 1,51843/1,52365/1,52560;
+#          TP1Pct 0 -> IS 0,93483 (n 81), OOS 1,28144 (n 165), DD OOS
+#          13,94% contro 7,83%. E' il file R264x4 (par. 6.3).
+#
+#  2.2 L'ALTOPIANO TAGLIATO DAL BORDO. PF mediano delle celle a due lati
+#      per valore di InpOrder2Atr (n celle), dai CSV del genetico:
+#        GBPUSD 0,2:1,224(6) 0,3:1,181(8) 0,4:1,286(4) 0,5:1,253(4) 0,6:1,332(2)
+#        GBPJPY 0,2:1,078(5) 0,3:1,151(2) 0,4:1,259(5) 0,5:1,237(2) 0,6:1,355(5)
+#        XAUUSD 0,2:1,155(3) 0,3:1,151(3) 0,4:1,381(5) 0,5:1,288(9) 0,6:1,683(9)
+#      Su GBPJPY e XAUUSD il PF sale verso 0,6 = IL MASSIMO DELLA
+#      GRIGLIA. Oltre, nessuno ha mai misurato. E' il difetto numero uno
+#      del 770201 (CHI_E_PIU_VICINO par. 3.1), qui su un altro motore.
+#      E n SCENDE con O2 (GBPJPY 0,4: 211-236 deal; 0,6: 204-208; XAUUSD
+#      0,4: 187-236; 0,6: 130-197): allargare costa campione.
+#
+#  2.3 LE REGOLE DI CASA, APPLICATE SIMBOLO PER SIMBOLO
+#      AUDJPY  -- PF < 1,10 su CAMPIONE PIENO in tutte e due le finestre
+#                 (R139a, 411-730 posizioni). Regola del 19/08 e mandato
+#                 del 09/09: NON si allarga sui parametri d'ingresso.
+#                 NESSUNA GRIGLIA. Solo G0 + PONTE (par. 9).
+#      GBPUSD  -- il MERITO recente c'e' (Emendamento B: R139b OOS
+#                 2016-2026 PF 1,127-1,139 su ~705-721 posizioni), quindi
+#                 non e' "sotto 1,10 su campione pieno" e la griglia e'
+#                 ammessa. MA il RISCHIO e' gia' letto e si legge a
+#                 qualunque n: DD OOS 10,05-11,05% @1% sui 10 anni
+#                 recenti, ~19,7-22,0% alla taglia FTMO 2,00% (fattore
+#                 misurato 1,956-1,990, R221a par. 7). Una griglia
+#                 d'ingresso NON e' il modo di abbassarlo (picco di rumore
+#                 sul rischio). R264a si legge come PROVA D'ALTOPIANO, e
+#                 gira PER ULTIMO. La taglia e' di Claudio.
+#      GBPJPY  -- nessuna misura lunga: griglia ammessa, pagata con IS
+#                 pulito + OOS. Il DD del genetico e' il piu' basso dei
+#                 quattro (3,8-4,4% @1% a O2 0,4-0,6): e' il PRIMO in coda.
+#      XAUUSD  -- nessuna misura lunga a H4 su questo EA: ammessa. Prior
+#                 di rischio sfavorevole (par. 1e) e simbolo gia' occupato
+#                 dalla sedia 770402 (sovrapposizione [NON MISURATA]).
+#
+# =====================================================================
+#  3. PERCHE' OHLC M1 (E PERCHE' ANCHE SULL'ORO)
+# =====================================================================
+#  Frequenza DAL CSV del genetico (celle a due lati del vicinato scelto
+#  al par. 6; finestra 912 giorni = 2,497 anni; posizioni = deal/1,838):
+#    simbolo  vicinato O2   deal       deal/anno     pos/anno    anni per 150 pos
+#    GBPUSD   0,3-0,5      280-340    112,1-136,2   61,0-74,1        2,46
+#    GBPJPY   0,5-0,6      204-226     81,7-90,5    44,5-49,2        3,37
+#    XAUUSD   0,5-0,6      130-200     52,1-80,1    28,3-43,6        5,30
+#    AUDJPY   0,4-0,6      255-306    102,1-122,6   55,6-66,7        2,70
+#  Tick BCM: forex dal 2024.07.05 (MISURATO su GBPUSD/EURUSD/EURGBP,
+#  risultati_archivio/NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md r.7-9);
+#  AUDJPY / GBPJPY [INFERITO] dallo stesso pavimento; oro [NON
+#  VERIFICATO]: due fonti di casa non concordano (2024.07.05 contro
+#  "dati ok dal 26/09/2024", MAPPA_COSTO_SIMBOLI_TF par. 6.3).
+#  >>> Anche nel caso migliore (~1,99 anni di tick) le posizioni totali
+#      a tick sono ~121-147 su GBPUSD, ~56-87 sull'oro: NEMMENO UNA
+#      finestra arriva a 150. Lo split a tick con 150 per finestra e'
+#      IMPOSSIBILE su tutti e quattro, ed e' aritmetica, non scelta.
+#  >>> L'OHLC M1 sul forex scende al 1999 (pavimento MISURATO, R102) e
+#      sull'oro al 2004.06.11 (sonda 17/08, risultati_archivio/
+#      sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv r.59). Quindi:
+#      Modello 1 per i walk-forward, Modello 4 solo per il G0 (che deve
+#      rifare il banco d'archivio, tick compresi).
+#  >>> Il prezzo, detto: OHLC = riempimenti ideali dei limiti, spread
+#      CORRENTE su 7 anni di storia, nessuno slippage, e SOTTOSTIMA il DD
+#      (escursioni intra-barra invisibili, R214f par. ii). Per questo
+#      un OHLC BOCCIA e non PROMUOVE (S7).
+#
+# =====================================================================
+#  4. LA FINESTRA -- DIMENSIONATA SULLE OPERAZIONI (Emendamento A)
+# =====================================================================
+#  IS  = [inizio, 2023.12.31]  -- mai visto dal genetico. >= 150 pos.
+#  OOS = [2024.01.01, 2026.06.30] = ESATTAMENTE la finestra del genetico.
+#  Il taglio: walkforward_generico.ps1 r.934 Meta = Inizio +
+#  floor(giorni x FrazioneIS), IS = [Inizio, Meta], OOS = [Meta+1, Fine].
+#    simbolo  @DAQUANDO   giorni  @FRAZIONEIS  floor   Meta        IS anni  pos IS attese
+#    GBPUSD   2020.01.01   2372     0.6157     1460   2023.12.31    4,00     244-296
+#    GBPJPY   2019.01.01   2737     0.667      1825   2023.12.31    5,00     222-246
+#    XAUUSD   2017.01.01   3467     0.7371     2555   2023.12.31    7,00     198-305
+#    (margine al floor >= 0,44 giorni: nessun rischio di virgola mobile)
+#  Perche' 7 anni sull'oro e non 5,3: a O2 = 0,7 (mai misurato) n scende
+#  ancora (par. 2.2); con ~22 pos/anno servono ~6,8 anni. Perche' 5 su
+#  GBPJPY: a O2 0,7 ~40 pos/anno -> 200. GBPUSD: 4 anni bastano (244).
+#  OOS attese: GBPUSD 152-185 pos (merito leggibile); GBPJPY 111-123 e
+#  XAUUSD 71-109: SOTTO 150 -> merito OOS SOSPESO, dichiarato ORA.
+#
+#  !!! PERCHE' L'OOS E' LA FINESTRA DEL GENETICO, E COSA NON DICE.
+#  L'alternativa era un OOS tutto prima del 2024 (cieco del tutto). Non
+#  l'ho scelta per tre ragioni: (i) la richiesta e l'Emendamento B
+#  vogliono il RECENTE a giudicare il merito; (ii) un OOS misto (un po'
+#  prima, un po' dentro il 2024-26) non si scompone senza per-trade, e
+#  il per-trade sopravvive solo per l'ultima cella (classe 455): un
+#  numero misto non si legge; (iii) sulla finestra del genetico l'OHLC
+#  fa da PONTE cella per cella col tick d'archivio (quanto e' ottimista
+#  l'OHLC su QUESTE celle). IL PREZZO, scritto: l'OOS NON E' CIECO a
+#  livello di VICINATO -- che il vicinato sia buono li' lo sapevamo gia'.
+#  E' cieca solo la scelta della CELLA, che si fa in IS.
+#  >>> QUINDI IL NUMERO CHE DISCRIMINA E' L'IS, non l'OOS. Un OOS alto
+#      con IS basso e' il quadro di R139b: REGIME, non edge (S4).
+#
+#  REGIMI DICHIARATI (qualitativi, dalla storia di mercato nota; il
+#  per-trade dell'ultima cella li puo' verificare per anno):
+#    GBPUSD IS 2020-2023: crollo Covid (mar-2020), risalita 2020-21,
+#      dollaro forte e sterlina in caduta nel 2022 (autunno), recupero e
+#      laterale 2023 -> crollo + toro + orso + laterale.
+#    GBPJPY IS 2019-2023: incertezza Brexit 2019, crollo 2020, yen in
+#      caduta 2021-2023 (tendenza lunga al rialzo della coppia) con la
+#      caduta della sterlina 2022 in mezzo -> toro dominante.
+#    XAUUSD IS 2017-2023: salita 2017, discesa/laterale 2018, toro
+#      2019-2020 con crollo di marzo 2020, laterale-orso 2021-2022,
+#      salita 2023 -> tutti e quattro.
+#    OOS 2024-2026.06 (tutti): e' la finestra del genetico; R221a par.
+#      8 la dichiara "post-2024, dollaro in discesa"; sull'oro un toro
+#      forte. Dettagli [NON MISURATI qui].
+#  E l'OROLOGIO: BCM ha cambiato ora sul forex fra il 26/12/2024 e il
+#  02/02/2025 (CLAUDE.md, sezione del 24/09): la griglia H4, ancorata
+#  alla mezzanotte del server, e' tagliata DIVERSAMENTE prima e dopo.
+#  Tocca allo stesso modo genetico, G0 e OOS; separa invece l'IS
+#  (orologio vecchio) dal 2025. Effetto sul segnale: [NON MISURATO].
+#
+# =====================================================================
+#  5. IL G0 -- UN FILE *_controllo PER SIMBOLO (Modello 4, 10000)
+# =====================================================================
+#  Finestra: MONCONE come R255 par. 7: @DAQUANDO 2023.12.31 (domenica),
+#  @FRAZIONEIS 0.001 -> floor(912 x 0,001) = 0 -> IS = 2023.12.31 (un
+#  giorno, nessuna barra: CSV _IS vuoto e rc 2 ATTESI), OOS = 2024.01.01
+#  -> 2026.06.30 = la FromDate/ToDate del genetico. Asse = InpMagic a
+#  due gemelle (passo 50): G1 e un per-trade per gemella.
+#  PERCHE' NON "AL CENTESIMO": il sorgente e' cambiato dal 31/07
+#  (git diff 0953846c HEAD -- mql5/Experts/ABTG_EMA200.mq5, +233/-22):
+#    344a11b9 04/08  breakeven staccato dalla parziale: al LOTTO MINIMO
+#                    (parziale impossibile) oggi il BE scatta e prima no
+#                    -> cambia le USCITE solo dove il lotto e' 0,01.
+#    3af47ed9 08/08  lotto da OrderCalcProfit invece del tick value nudo
+#                    (r.467-496): "sui simboli sani i due calcoli
+#                    coincidono" (commento r.472-476).
+#    6074126d 08/08  ExportTrades in OnTester: nessun effetto sul trading.
+#    26a18566 / b45dd009  Guardian (nel tester FAIL-OPEN: le sue
+#                    GlobalVariable non esistono) + imbuto (solo contatori
+#                    e Print, nessuna condizione: letto nel diff).
+#  SHA256 del sorgente a HEAD (commit b45dd009, 690 righe):
+#    228bb2951dd53c8af10aa24d04ef042a6e35d273e36a4100350003d2f02f7a0c
+#  include ABTG_PausaGuardian.mqh (2461 righe):
+#    3ec971152e85e0082488cc4243ff45ae09948c191d52ab96050b48f94641a737
+#  Diverso dopo il job = CSV NON VALIDO (classe 166).
+#  !!! b45dd009 si intitola "IN CORSO D'OPERA -- NON COMPILARE". Lo
+#  stesso sorgente ha compilato e girato il 13/09 in R139a/b (CSV e
+#  per-trade esistono) [DEDOTTO dalla cronologia]. Se la compilazione
+#  fallisce, il driver lo dice e non si lancia.
+#
+#  BANDE DEL G0, congelate (n = Trades del CSV _OOS, confronto con
+#  l'ancora del par. 1a):
+#    VERDE   |n - n0| <= 1% di n0  E |PF - PF0| <= 0,020  E DD entro +-5%
+#            relativo.
+#    GIALLO  |n - n0| <= 3%        E |PF - PF0| <= 0,050.
+#    ROSSO   il resto: il banco NON rifa' l'archivio. Le letture OOS di
+#            R264 contro il genetico (il PONTE) diventano [NON
+#            CONFRONTABILI]; l'IS resta leggibile da solo.
+#  ATTESA PER SIMBOLO, scritta prima, con la causa:
+#    GBPUSD / AUDJPY / GBPJPY: VERDE. A 10000 e 0,5% per gamba i lotti
+#      stimati stanno a 0,08-0,14 (stop della gamba 1 = (O1+O2+1) x ATR):
+#      il ramo del lotto minimo non si apre, 344a11b9 e' inerte.
+#      [DERIVATO: l'ATR H4 di queste coppie e' NON MISURATO -- lo misura
+#      proprio il G0, K1 sotto.]
+#    XAUUSD: GIALLO o ROSSO, PER UNA CAUSA NOMINATA: gamba 1 = 1,7 x ATR
+#      H4; con ATR dell'ordine delle decine di dollari (NON MISURATO) il
+#      lotto esce ~0,01-0,02, la parziale del 50% arrotonda a 0 e il BE
+#      di 344a11b9 SCATTA (e dopo il BE parte il trailing, r.436). n
+#      deve restare entro +-3% (il BE cambia il prezzo d'uscita, non il
+#      numero dei deal); il PF si sposta di una quantita' [NON STIMATA].
+#      CONTRO-ESEMPIO: se nel per-trade le gambe 1 hanno volume >= 0,02,
+#      la causa e' sbagliata e un ROSSO va spiegato altrimenti.
+#
+#  CANCELLI DELLA CATENA (ogni file, confronti con epsilon 0,000001):
+#    E0 EVENTI: CSV _IS del moncone vuoto e rc 2 ATTESI; li assolve solo
+#       un CSV _OOS con 2 righe e Trades > 0 (classe 766).
+#    P0 PIN DAL CSV (classe 780): ogni colonna Inp del CSV _OOS uguale al
+#       file (bool 0/1), InpMagic = la sua gemella. Diverso = NULLO.
+#    G1 DETERMINISMO: le due gemelle con Trades identici, PF alla quarta
+#       decimale, |delta Profit| <= 0,05, |delta DD| <= 0,01; per-trade
+#       identici riga per riga (close_time, position_id, deal_type,
+#       volume, price; net entro 0,01).
+#    C0 PER-TRADE: presente per le due gemelle, scritto DOPO l'avvio del
+#       job; righe = Trades; somma net_profit = Profit entro 0,05; prima
+#       chiusura >= 2024.01.01.
+#
+#  K1 -- IL CANCELLO DEL COSTO, LETTO GRATIS DAL PER-TRADE DEL G0.
+#  Il cancello e' stop >= 40 x pedaggio. Lo stop PIU' CORTO del motore e'
+#  quello della gamba 2 = InpSLatr x ATR14(H4) = 1,0 x ATR (PlaceOrders
+#  r.354-366: sl comune, gamba 1 a (O1+O2+SLatr) x ATR). NESSUNO lo ha
+#  mai misurato su BCM su questi simboli (R221a par. 8: "[NON MISURATO]").
+#  NON serve codice nuovo: il LOTTO e' funzione dello stop (LotByRisk
+#  r.467-496: rischio = saldo x 0,5% per gamba, floor al passo 0,01).
+#  Dal per-trade: vol = somma dei volumi d'uscita per position_id; saldo
+#  = 10000 + somma dei net chiusi prima; allora
+#      stop in [ R x q / ((vol+0,01) x C) ,  R x q / (vol x C) ]
+#  con R = saldo x 0,005 EUR, C = ContractSize (100000 forex, 100 oro:
+#  sonda 17/08 r.25/33/42/59), q = cambio quota->EUR. Gamba 2 = la
+#  position_id che segue di 1 una position_id presente (i due limiti si
+#  piazzano uno dopo l'altro, r.363-365; la gamba 2 non si riempie senza
+#  la 1 salvo gap). CONTRO-ESEMPIO INTERNO: nelle coppie il rapporto
+#  vol2/vol1 deve stare vicino a (O1+O2+1)/1; se no, l'identificazione e'
+#  sbagliata e K1 e' NULLO.
+#  q: su questi quattro simboli la quota NON e' EUR e il cambio non sta
+#  nel per-trade: si usa la costante della sonda (USD 0,86287; JPY
+#  0,0054147 per yen, MISURA_SPREAD_FOREX r.204-205) e la lettura e'
+#  INDICATIVA: decide solo se la mediana sta fuori di +-15% dalla soglia.
+#  SOGLIE (40 x pedaggio all-in mediano):
+#    GBPUSD  0,7425 pip (0,2 spread + 0,5425 comm., MISURA_SPREAD_FOREX
+#            r.318) -> stop >= 29,7 pip.
+#    GBPJPY  comm. 0,8645 pip (r.281) + spread [NON MISURATO] -> soglia
+#            >= 34,6 pip + 40 x spread: K1 NON DECIDIBILE finche' lo
+#            spread non c'e' (la sonda del 17/08 legge 0 = nessun tick).
+#    AUDJPY  spread e commissione [NON MISURATI]: solo lettura dello stop.
+#    XAUUSD  0,2503 $ (MAPPA_COSTO_SIMBOLI_TF r.242) -> stop >= 10,01 $.
+#  E il limite, detto: il pedaggio e' BCM; FTMO [NON MISURATO].
+#
+# =====================================================================
+#  6. LA GRIGLIA -- ESAUSTIVA, RISTRETTA AL VICINATO, UNA VARIABILE PER FILE
+# =====================================================================
+#  6.1 REGOLA DEL VICINATO, dichiarata prima e uguale per tutti:
+#      O2 = il valore col PF mediano piu' alto fra quelli con >= 4 celle
+#           a due lati nel genetico (par. 2.2), piu' un passo per parte.
+#           Se quel valore e' 0,6 (il bordo), la finestra e' 0,5/0,6/0,7:
+#           0,7 E' OLTRE LA GRIGLIA DEL GENETICO, MAI MISURATO.
+#             GBPUSD -> 0,4 (1,286)  -> O2 0,3 / 0,4 / 0,5
+#             GBPJPY -> 0,6 (1,355)  -> O2 0,5 / 0,6 / 0,7
+#             XAUUSD -> 0,6 (1,683)  -> O2 0,5 / 0,6 / 0,7
+#      O1 = 0,10 / 0,20 / 0,30 (passo 0,10: copre 0,05-0,30 del genetico
+#           col centro 0,20 interno). E' l'ASSE di ogni file.
+#      TP_RR = 2,0 PINNATO = il default compilato (r.76). Motivo: misurato
+#           quasi inerte su GBPUSD (par. 2.1) e, dove morde (oro), si
+#           sceglierebbe il picco. Buco dichiarato (par. 11).
+#      => 3 x 3 = 9 celle per simbolo, 3 file (uno per O2), 18 passate.
+#  6.2 PERCHE' NON LE 480 COMBINAZIONI: una griglia fitta su un motore a
+#      tasso di base 0/5 trova picchi (regola del 19/08). 9 celle su un
+#      IS pulito da >= 150 posizioni bastano a vedere se un ALTOPIANO
+#      esiste; la terza dimensione (TP) e' il passo DOPO, sul centro.
+#  6.3 L'USCITA (file x4): al CENTRO del vicinato (O1 0,20 / O2 centrale
+#      / TP 2,0) l'asse e' InpTP1Pct 0 / 25 / 50 / 75 (50 = default r.78).
+#      TP1Pct = 0 spegne parziale, breakeven E trailing (r.410, r.436):
+#      restano SL e TP a 2R. Sul Dow ha fatto cosi' (par. 2.1). E' il box
+#      (3) del certificato, riempito con la manopola che MORDE.
+#      CANCELLO G2 INCROCIATO, gratis: la cella TP1Pct = 50 del file x4
+#      E' la cella O1 = 0,20 del file x2 (stessi input, magic diverso, e
+#      il magic non tocca il trading) -> Trades, Profit, PF, DD IDENTICI
+#      in IS e in OOS. Diverso = uno dei due file e' NULLO.
+#      !!! TP1Pct = 0 CAMBIA ANCHE LA FREQUENZA: sul Dow n OOS 165 contro
+#      517 deal (posizioni piu' lunghe = candele "occupate", r.322).
+#  6.4 FILE E MAGIC (grep del 26/09 su disco, worktree compresi, e su
+#      tutti i rami remoti: 7965xx e 7985xx = ZERO occorrenze come
+#      magic; l'unica stringa 7965 e' un decimale in un .json di rami
+#      vecchi). NON 7715xx / 7931xx / 7925xx / 7926xx.
+#      file                                   sim     modello  asse               magic
+#      R264a_controllo_EMA200_GBPUSD          GBPUSD  4        InpMagic x2        796501/796551
+#      R264a1_o2_030_EMA200_GBPUSD            GBPUSD  1        O1 (O2 0,3)        796502
+#      R264a2_o2_040_EMA200_GBPUSD            GBPUSD  1        O1 (O2 0,4)        796503
+#      R264a3_o2_050_EMA200_GBPUSD            GBPUSD  1        O1 (O2 0,5)        796504
+#      R264a4_uscita_EMA200_GBPUSD            GBPUSD  1        TP1Pct (0,20/0,4)  796505
+#      R264b_controllo_EMA200_AUDJPY          AUDJPY  4        InpMagic x2        796511/796561
+#      R264b1_ponte_R139a_EMA200_AUDJPY       AUDJPY  1        TP_RR (0,25/0,5)   796512
+#      R264c_controllo_EMA200_GBPJPY          GBPJPY  4        InpMagic x2        796521/796571
+#      R264c1_o2_050 / c2_o2_060 / c3_o2_070  GBPJPY  1        O1                 796522/523/524
+#      R264c4_uscita_EMA200_GBPJPY            GBPJPY  1        TP1Pct (0,20/0,6)  796525
+#      R264d_controllo_EMA200_XAUUSD          XAUUSD  4        InpMagic x2        796531/796581
+#      R264d1_o2_050 / d2_o2_060 / d3_o2_070  XAUUSD  1        O1                 796532/533/534
+#      R264d4_uscita_EMA200_XAUUSD            XAUUSD  1        TP1Pct (0,20/0,6)  796535
+#      Per-trade: Common\Files\abtg_trades_ABTG_EMA200_<SIM>_<magic>.csv
+#      (nei file a griglia sopravvive l'ULTIMA passata = la gamba OOS
+#      dell'ultima cella: serve al rapporto deal/posizione su OHLC).
+#
+# =====================================================================
+#  7. L'ATTESA, DICHIARATA PRIMA DEI NUMERI -- E L'ALTRA SPIEGAZIONE
+# =====================================================================
+#  LE DUE IPOTESI E I NUMERI CHE PRODUCONO (classe 178: la banda va
+#  provata contro l'ALTERNATIVA, non contro il nulla):
+#   H_FETTA (il genetico ha trovato il 2024-26): IS al centro 0,85-1,08,
+#     nessun altopiano (celle sparse sopra e sotto 1), OOS alto. E' il
+#     quadro di R139b (IS 0,80-0,84 / OOS 1,13) e di R32b.
+#   H_MOTORE (il vicinato regge fuori): IS al centro 1,15-1,40 con i
+#     vicini >= 1,10, OOS 1,15-1,40 (la banda della richiesta).
+#   Le due bande NON si sovrappongono: 1,08-1,15 e' la zona grigia, e li'
+#   l'esito si scrive NON CONCLUDENTE, non si arrotonda.
+#  PER SIMBOLO (PF OHLC, centro scelto in IS; DD a rischio 1%):
+#    GBPUSD  n IS 449-545 deal (244-296 pos) -- OOS 280-340 deal.
+#            PF IS 1,00-1,20, previsione puntuale ~1,08 (l'IS 2020-23
+#            sta DENTRO l'OOS 2016-26 di R139b, che a una cella del
+#            vicinato fece 1,13). DD IS 7-13%. PF OOS 1,15-1,40
+#            (genetico sul vicinato 1,147-1,328 + scarto ~0,06).
+#    GBPJPY  n IS 409-453 deal (222-246 pos) -- OOS 204-226 deal.
+#            PF IS 0,95-1,25, previsione ~1,05. DD IS 5-12%.
+#            PF OOS 1,20-1,55 (genetico sul vicinato 1,191-1,369 +
+#            scarto misurato su GBPJPY +0,032 / +0,148).
+#    XAUUSD  n IS 365-561 deal (198-305 pos) -- OOS 130-200 deal.
+#            PF IS 0,85-1,20, previsione ~0,98. DD IS 8-18%.
+#            PF OOS 1,30-1,90 (genetico sul vicinato 1,205-1,882,
+#            mediane 1,288 a O2 0,5 e 1,683 a 0,6; scarto oro ~0).
+#  Se esce PF IS 2,0 con DD 3% su 7 anni, il primo sospetto e' un baco o
+#  un pin che non e' arrivato (P0), non una scoperta.
+#  USCITA (x4): TP1Pct 25/50/75 entro 0,03 di PF fra loro; TP1Pct 0 PIU'
+#  BASSO e con DD PIU' ALTO (come sul Dow). Se TP1Pct 0 batte il 50 di
+#  >= 0,05 in IS E OOS con DD non peggiore, l'uscita del motore e'
+#  sbagliata su questo simbolo: e' una notizia, e si scrive.
+#
+# =====================================================================
+#  8. LE SOGLIE, CONGELATE ORA, COL NUMERO ACCANTO
+# =====================================================================
+#  S0 CATENA: E0, P0, C0 (par. 5) su ogni file; G2 incrociato (par. 6.3);
+#     D0 DATI: tasso IS (deal/anno) fra 0,5 e 2,0 volte il tasso OOS
+#     della stessa cella, altrimenti lo storico M1 sul PC di backtest
+#     e' sospetto (e' il test del tasso di R139a par. 2) -> file NULLO.
+#  S1 CAMPIONE: n IS >= 276 DEAL al centro (= 150 pos x 1,838). Sotto:
+#     merito SOSPESO. OOS sotto 276 deal: merito OOS SOSPESO (atteso su
+#     GBPJPY e XAUUSD, par. 4). Sulla cella TP1Pct = 0 deal = posizioni.
+#  S2 MERITO (screening, in IS, sui 3 x 3):
+#     CENTRO = la cella col massimo di min(PF propria, PF dei vicini
+#     ortogonali presenti); a parita' la piu' vicina a (0,20 / O2
+#     centrale), poi la PIU' BASSA. MAI il picco.
+#     PASSA  se PF IS(centro) >= 1,10 E >= 6 celle su 9 >= 1,10 E tutti
+#            i vicini ortogonali del centro >= 1,00.
+#     SOLIDO se in piu' PF IS(centro) >= 1,27 (= 1,10 + lo scarto OHLC
+#            massimo misurato 0,167, par. 1d): resisterebbe al tick.
+#     BORDO  se il centro sta sull'anello esterno del 3 x 3: "altopiano
+#            toccato dal bordo", nessuna promozione, si allarga di un
+#            passo in quella direzione (round nuovo).
+#     OOS: PF OOS(centro) >= 1,10, letto come conferma DEBOLE (par. 4).
+#  S3 RISCHIO, a qualunque n (Emendamento B): DD IS e DD OOS del centro
+#     <= 10,0% a rischio 1% (il muro statico alla taglia piu' piccola
+#     sensata). Si scrive ACCANTO il derivato a 2,00% (x1,956-1,990):
+#     sotto 5,03% @1% la sedia starebbe nel muro anche alla taglia FTMO.
+#     E' un'INFORMAZIONE per la firma della taglia, non un cancello mio.
+#     OHLC SOTTOSTIMA il DD: sopra soglia BOCCIA, sotto NON dimostra.
+#  S4 SEGNI: IS(centro) < 1,00 e OOS(centro) >= 1,10 -> "REGIME, non
+#     edge" (lo schema R139b), e non si promuove niente.
+#  S5 INERZIA: in un file, fra le 3 celle, delta n < 5 deal E delta PF
+#     < 0,010 -> O1 INERTE su quel simbolo: "casella libera, MISURATA",
+#     e quel file non conta per S2 (soglia di R221a par. 5).
+#  S6 DEFAULT: la cella di default compilata (O1 0,10 / O2 0,35 / TP
+#     2,0) NON e' nella griglia (0,35 non c'e'). Si riporta la vicina
+#     (O1 0,10, O2 del vicinato piu' vicino a 0,35) come PROXY, e si
+#     dice se il centro la batte di >= 0,05: se no, "IL DEFAULT VA BENE".
+#     Sull'uscita il default (TP1Pct 50) E' nell'asse.
+#  S7 BANCO: Modello 1 BOCCIA, non PROMUOVE. Il massimo che R264 puo'
+#     dire e' "PASSA LO SCREENING -> serve il tick", e il tick possibile
+#     e' solo 2024.07.05-2026.06.30 (R221a/c) o un tick ESTERNO
+#     (report/LO_STORICO_ESTERNO_MAPPA_2026-09-23.md) [NON STIMATO].
+#  S8 I VERDETTI POSSIBILI, per nome (classe 180):
+#     PASSA LO SCREENING (SOLIDO o no) | NO PER MERITO (IS < 1,10 su >=
+#     150 pos) | NO PER RISCHIO (S3) | REGIME (S4) | BORDO | SOSPESO
+#     (S1) | NULLO (S0). Dopo R264 un NO su GBPJPY o XAUUSD ha il
+#     certificato del 09/09 COMPLETO: (1) PF, (2) n e DD, (3) uscita ad
+#     asse (x4), (4) gemelli (i quattro simboli + EURUSD di R265), (5)
+#     TF (scansione H1 in risultati_archivio/EMA200/H1_OHLC).
+#
+# =====================================================================
+#  9. AUDJPY -- IL CONFLITTO FRA DUE MISURE DI CASA, E QUALE DEVE VINCERE
+# =====================================================================
+#  CHI_E_PIU_VICINO par. 6 conflitto 2: il genetico dice PF 1,514 (DD
+#  6,26%, 265 deal, 2024-26, tick); R139a dice MORTO (16,5 anni, OHLC).
+#  Il referto dichiara che R139a regge e che il 1,514 "descrive una
+#  fetta". E' un'ARGOMENTAZIONE. Il file R264b1 la trasforma in MISURA.
+#  R264b1 = le 4 celle ESATTE di R139a (O1 0,25 / O2 0,5, TP 1,5 / 2,0 /
+#  2,5 / 3,0) sulla finestra del genetico, a OHLC (lo stesso banco di
+#  R139a). Il tick d'archivio ha 3 di queste 4 celle:
+#    TP 1,5 PF 1,71095 n 276 DD 2,8888 | TP 2,0 PF 1,62295 n 283 DD 2,9009
+#    TP 3,0 PF 1,64064 n 286 DD 2,9174 | TP 2,5 non visitata dal genetico.
+#  LE TRE SPIEGAZIONI E COSA PRODUCONO:
+#   H_ERA (R139a regge, il 2024-26 e' un'epoca buona): l'OHLC sulla
+#     fetta rifa' il tick -> PF 1,55-1,95 (scarto AUDJPY misurato
+#     +0,040 / +0,167).
+#   H_BANCO (l'OHLC di R139a e' il difetto): l'OHLC sulla fetta sta
+#     MOLTO sotto il tick -> < 1,25.
+#   H_BINARIO (l'EA e' cambiato fra il 31/07 e il 13/09): la vede il G0
+#     R264b_controllo (tick, HEAD) contro il 1,51365.
+#  SOGLIE: CONFERMA (vince R139a) = >= 3 celle su 4 con PF >= 1,45.
+#          SMENTITA = >= 3 su 4 sotto 1,25 -> AUDJPY "NON ANCORA
+#          MISURATO" (NON resuscitato: perde il certificato, non guadagna
+#          un merito). In mezzo: NON CONCLUDENTE.
+#  >>> ATTESA SCRITTA PRIMA: DEVE CONFERMARE R139a. Previsione CONFERMA,
+#      e allora (i) il 1,514 esce dalla lista dei candidati come FETTA
+#      D'EPOCA misurata, (ii) R221b diventa ridondante (proposta),
+#      (iii) il certificato di AUDJPY resta completo -- con UNA riserva
+#      scritta al par. 2.1: il box (3) e' stato riempito col TP_RR, che
+#      il motore scavalca; InpTP1Pct su AUDJPY resta MAI MISURATO.
+#      NON lo metto in coda: con PF 0,78-1,01 e DD 15-20% su campione
+#      pieno, un'uscita non ha un motivo misurato per ribaltarlo. E' la
+#      prima cosa da fare SE qualcuno porta una tesi nuova.
+#
+# =====================================================================
+#  10. IL COSTO IN TEMPO MACCHINA -- RICALIBRATO SUL MODELLO SCELTO
+# =====================================================================
+#  Il referto stima 48/56/38/58 passate = 4,3/4,9/3,5/5,1 min col metro
+#  T = 0,6 + 0,077 x passate (CHI_ALTRO_PUO_SCHIERARSI par. 2.3), cioe'
+#  ~5 s a passata: un metro NON tarato su questa macchina. Su
+#  DESKTOP-H4D7CAJ gira UN SOLO agente (classe 751) e R240 ha misurato
+#  ~135 s a passata a modello 4 (prove/R214f par. 7): a quel ritmo 200
+#  passate a tick sarebbero ~7,5 ore.
+#  R264 in PASSATE: controllo 4 file x 2 gemelle = 8 lunghe a tick + 8
+#  monconi; griglia 9 file x 6 = 54 e uscita 3 x 8 = 24 a OHLC; ponte 4
+#  lunghe + 4 monconi a OHLC. Totale 90 lunghe + 12 monconi.
+#  TEMPO, DERIVATO e dichiarato come tale:
+#   - tick: R246a/b (stesso PC, Dow M5, 642 giorni, 2 gemelle) 93-102 s
+#     PER FILE compilazione compresa (R255a par. 14). Qui 912 giorni di
+#     forex H4 con i tick [NON CONTATI] -> 2-6 min per file, 8-24 min.
+#   - OHLC M1: 4 tick sintetici per barra M1, ~3,5 M barre su 9,5 anni ->
+#     ~14 M tick a passata piena, contro i 64,7 M di una passata tick del
+#     Dow (~45 s) -> ~10-40 s a passata + avvii: 78 passate ~15-55 min.
+#   STIMA R264: 25-80 minuti. TETTO LARGO: 135 s x 90 = 3,4 ore; oltre
+#   ci si ferma e si guarda. Il numero vero lo scrive il riepilogo della
+#   riga (durata di ogni job), e va riportato.
+#  ONDE (meglio due round fatti bene che uno largo):
+#   ONDA 1 (i cancelli, ~15-35 min): R264c, R264d, R264a, R264b (G0) e
+#     R264b1 (ponte) -- piu' R265a della famiglia sorella.
+#   ONDA 2 (le griglie, dopo aver letto l'onda 1): c1-c4, poi d1-d4,
+#     poi a1-a4. Se il G0 di un simbolo e' ROSSO, la sua onda 2 si
+#     ferma finche' non si capisce perche'.
+#
+# =====================================================================
+#  11. I BUCHI DICHIARATI -- cosa R264 NON misura
+# =====================================================================
+#  - NESSUN VERDETTO A TICK sul campione pieno: impossibile (par. 3).
+#  - Lo storico M1 sul PC di backtest dal 2017 (oro), 2019 (GBPJPY),
+#    2020 (GBPUSD): [NON VERIFICATO] su quella macchina. Lo prende D0.
+#  - Il pavimento tick dell'oro: [NON VERIFICATO] (par. 3); tocca solo
+#    il G0, che rifa' lo stesso banco dell'archivio.
+#  - TP_RR ad asse sull'oro, dove MORDE (par. 2.1): NON qui. Se R264d
+#    passa lo screening, e' il file dopo (sul centro).
+#  - InpSLatr (la larghezza dello stop): e' la leva se K1 boccia per
+#    costo. NON qui: prima si legge K1.
+#  - Il lotto dell'oro a 10000: gambe a 0,01-0,02 = rischio effettivo
+#    diverso dall'1% dichiarato (classe 228). DD% dell'oro = SOTTOSTIMA.
+#  - Swap su posizioni multi-giorno: il tester usa gli swap CORRENTI su
+#    7 anni. Effetto [NON MISURATO]. Commissioni e swap FTMO [NON MISURATI].
+#  - La griglia H4 di FTMO e' ancorata a un'altra mezzanotte: su FTMO il
+#    motore vede candele H4 DIVERSE (lo stesso difetto della 770202).
+#    [NON MISURATO], e vale per ogni sedia EMA200 H4 su FTMO.
+#  - Sovrapposizione con la 770402 (oro) e con la 771531 (famiglia):
+#    [NON MISURATA]. Correlazione dei quattro fra loro: [NON MISURATA].
+#  - Le sedie 771511-771515 a zero operazioni (par. 1g): lettura mai
+#    fatta; costo zero.
+#  - Il per-trade di R139a (771560, 16,5 anni) sta sul VPS in Common\
+#    Files, se non sovrascritto: una lettura PER ANNO di quel file
+#    risolverebbe il conflitto AUDJPY SENZA tester. Non e' in repo; e'
+#    una riga di sola lettura sul VPS, e non la scrivo io.
+#  - Il .ex5 in campo della 771531 non e' il sorgente a HEAD (CLAUDE.md,
+#    12/09: 486 righe contro 690). Qualunque sedia nuova nascerebbe dal
+#    binario a HEAD: e' quello che il G0 misura.
+#
+# =====================================================================
+#  12. QUESTA CELLA (R264a_controllo): G0 DI GBPUSD
+# =====================================================================
+#  Cella O1 0.25 / O2 0.2 / TP 2.0, due lati, ancora Pass 139: PF
+#  1,23105, n 362, DD 7,2048, Profit 728,66, RF 0,94404. Magic 796501 /
+#  796551. Per-trade: abtg_trades_ABTG_EMA200_GBPUSD_796501.csv e
+#  _796551.csv. Attesa VERDE (par. 5). K1: stop gamba 2 >= 29,7 pip.
+# =====================================================================
+@SIMBOLO    GBPUSD
+@PERIODO    H4
+@DAQUANDO   2023.12.31
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=1||1||0||1||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpUseAdrFilter=0||0||0||0||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpUseOrder2=1||1||0||1||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpUseCutoff=0||0||0||0||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpLogImbuto=1||1||0||1||N
+InpComment=R264A_G0
+InpMagic=796501||796501||50||796551||Y
+InpTP_RR=2.0||2.0||0||2.0||N
+InpOrder2Atr=0.2||0.2||0||0.2||N
+InpOrder1Atr=0.25||0.25||0||0.25||N

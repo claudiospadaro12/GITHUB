@@ -1,0 +1,234 @@
+#  EA: ABTG_EMA200
+# =====================================================================
+#  R265 -- EMA200 H4 EURUSD, SOLO LATO CORTO: PRIMA IL COSTO, POI IL
+#          MERITO. FILE DI TESTA della famiglia R265 (2 file) e cella
+#          R265a: G0 della scansione + LETTURA DELLO STOP (ATR14 H4).
+#  Famiglia sorella di R264 (testa: prove/R264a_controllo_EMA200_GBPUSD
+#  .txt): stesso EA, stessi pin, stessa regola di finestra, stessi
+#  cancelli della catena (R264 par. 5 e 8), qui ripresi per numero.
+#  Generato da prove/R264_GENERA.py (prosa in prove/R265_TESTA.txt.in).
+#  Scritto il 26/09/2026. ATTESE E SOGLIE CONGELATE PRIMA DEI NUMERI.
+#  Richiesta: report/CHI_E_PIU_VICINO_AL_CAMPO_2026-09-24.md riga 9 della
+#  tabella par. 2 e par. 4 (la lettura dell'ATR "costo UNA passata").
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma del
+#  21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest), NE' su nessun
+#  terminale di conto (50503392, 50504263, 10105439, 541452707 FTMO).
+#  Prima si controlla che il terminale di quel PC (loggato sul demo
+#  50503392) non abbia SEDIE attaccate.
+#  VINCOLI DI BANCO (nella RIGA, classe 692): -Deposito 10000,
+#  -Modello 1 (OHLC M1) in TUTTI E DUE i file: R265a perche' deve rifare
+#  una scansione OHLC, R265b perche' il campione pieno a tick non esiste
+#  (par. 4). NIENTE -Spread / -Ritardo / -FrazioneIS.
+#  NESSUNA RIGA DI LANCIO QUI. Non tocca EA, preset, sedie, conti, taglie.
+#
+# =====================================================================
+#  0. LA RISPOSTA CORTA
+# =====================================================================
+#  (1) Il lato corto di EURUSD H4 fa 26 celle su 26 positive nella
+#      scansione -- ma e' una scansione OHLC, GENETICA, a finestra unica,
+#      con un banco NON VERIFICATO (R140a). Nessun walk-forward esiste.
+#  (2) PRIMA DEL MERITO C'E' IL COSTO, e non e' deciso: due ancore di
+#      casa danno 54,2x e 22,2x (R140a). Lo si chiude con UNA lettura:
+#      lo stop della gamba 2 (= 1,0 x ATR14 H4) ricavato dal LOTTO nel
+#      per-trade di R265a. Nessun codice nuovo, nessuno script nuovo.
+#  (3) R265b (8 passate) NON PARTE se quel numero non passa. Il file e'
+#      scritto lo stesso, col cancello in testa.
+#  (4) Previsione, contro di me: K1 NON RISOLTO o FAIL e' piu' probabile
+#      di PASS (l'unica ancora sul feed BCM, n=1, da' 14,7 pip contro una
+#      soglia di 26,6).
+#
+# =====================================================================
+#  1. COSA E' GIA' MISURATO (classe 411)
+# =====================================================================
+#  (a) LA SCANSIONE: risultati_archivio/EMA200/H4_OHLC/scan_ABTG_EMA200_
+#      H4_EURUSD.csv, commit 00fe47bf (31/07/2026), 136 righe. Assi
+#      variabili ricontati il 26/09: SOLO InpAllowLong, InpAllowShort,
+#      InpOrder1Atr, InpOrder2Atr, InpTP_RR (tutti gli altri input
+#      costanti = i pin di R264). Banco [NON VERIFICATO] (R140a: lo
+#      script a quel commit non porta O1/O2 fra gli assi; Model=1,
+#      Optimization=2, 2024.01.01 -> 2026.06.30, deposito 10000 e' una
+#      IPOTESI). R265a la mette alla prova (G0, par. 3).
+#      SOLO CORTO (InpAllowLong=0, InpAllowShort=1): 26 celle, 26 in
+#      utile, PF 1,184-1,565, mediana 1,3206, DD 3,94-6,48%, 148-216 deal.
+#      PF mediano per O2 (n celle): 0,2:1,487(5) 0,3:1,258(6) 0,4:1,228(4)
+#      0,5:1,410(7) 0,6:1,244(4). Per O1: 0,05:1,235(4) 0,10:1,221(4)
+#      0,15:1,325(5) 0,20:1,340(5) 0,25:1,246(1) 0,30:1,435(7). Per TP:
+#      1,5:1,354(5) 2,0:1,293(7) 2,5:1,340(5) 3,0:1,261(9).
+#      SOLO LUNGO: 28 celle, 0 in utile (R140a). DUE LATI: 31, 24 in utile.
+#  (b) L'ANCORA DEL G0 = la cella citata dal referto (centrale ALTA delle
+#      26, PF 1,32379: "PF mediano 1,324"):
+#        O1 0.30 O2 0.5 TP 1.5  Pass 94  PF 1,32379  n 180  DD 4,3273
+#        Profit 441,21  RF 0,96172
+#  (c) R140a (18/09, EURUSD H4 DUE LATI, OHLC 2010-2026, asse TP_RR,
+#      prove/R140a_EMA200_EURUSD_H4_LS.txt): scritto, NON GIRATO (nessun
+#      CSV r140a in repo). R140b / R140c (solo lungo / solo corto sulla
+#      stessa finestra) DICHIARATI in R140a e MAI SCRITTI. R265b non e'
+#      R140c: finestra diversa (IS 2017-2023 pulito, par. 4) e asse O2.
+#  (d) R29a (EURUSD H1, due lati, 21 mesi, tick): OOS PF 1,076-1,224,
+#      DD 9,05-11,98% -- e H1 e' ESCLUSO PER COSTO a 20,8x (R140a).
+#  (e) Il tasso di base del motore fuori dal Dow: ZERO su CINQUE (R264
+#      testa par. 1f).
+#
+# =====================================================================
+#  2. K1 -- IL CANCELLO DEL COSTO, E COME SI LEGGE CON UNA PASSATA
+# =====================================================================
+#  IL METRO (di casa, non scelto qui): stop >= 40 x PEDAGGIO ALL-IN
+#  all'ora d'ingresso, pavimento duro 13,3x (CANCELLO_COSTO_FLOTTA
+#  r.170-171). Sul forex il pedaggio e' spread + commissione (idem
+#  r.202-221; R140a "IL COSTO").
+#    spread EURUSD BCM: mediana 0,200 pip, P95 0,500 pip, n = 84997
+#      campioni, GG = 6 (data/spread_vivo/SPREAD_VIVO_2026-09-12_referto
+#      .txt, blocco EURUSD, "TUTTA LA GIORNATA", citato da R140a)
+#    commissione: 0,4636 pip (calcola_pedaggio_forex.py; MISURA_SPREAD
+#      _FOREX r.234 "l'UNICA ancora genuina")
+#    ALL-IN: 0,6636 pip (mediana) / 0,9636 pip (P95)
+#  >>> SOGLIA K1: stop MEDIANO della gamba 2 >= 40 x 0,6636 = 26,54 pip.
+#      (Al P95: 38,54 pip, riportato come informazione.)
+#      (La richiesta dice "ATR/spread < 40": con lo SPREAD NUDO 0,200 la
+#       soglia sarebbe 8,0 pip e passerebbe quasi per costruzione. Non e'
+#       il metro di casa sul forex, e usarlo sarebbe ammorbidire.)
+#  LE DUE ANCORE CHE NON CONCORDANO (R140a, "IL COSTO"):
+#    A: ATR M15 EURUSD 9,00 pip su feed Oanda 2013-2019, x4 -> 36,0 pip
+#       -> 54,2x (feed diverso, epoca diversa, legge di scala assunta).
+#    B: sedia 772162 BreakingBand EURUSD su BCM, SL 3 x ATR H1 = 22,1 pip
+#       (n = 1) -> ATR H4 ~14,7 pip -> 22,2x.
+#  LA LETTURA: NESSUNO SCRIPT DI CASA STAMPA iATR(EURUSD,H4,14). Cercato
+#  il 26/09: mql5/Scripts (17 script: iATR solo in ABTG_SondaMediazione
+#  e ABTG_ImportaTickEsterno, per altro), backtest_pipeline (nessuno).
+#  Il driver non raccoglie i log degli agenti (walkforward_generico.ps1:
+#  l'unico .log letto e' quello di compilazione, r.1935-1941), e il Print
+#  dell'EA in ottimizzazione [NON VERIFICATO]. LA VIA PIU' CORTA che non
+#  richiede codice nuovo: IL LOTTO.
+#    LotByRisk (ABTG_EMA200.mq5 r.467-496): rischio = SALDO x 0,5% per
+#    gamba (InpRiskPercent 1,0 / 2 gambe, r.361), perdita per lotto da
+#    OrderCalcProfit sullo stop, floor al passo 0,01, minimo 0,01.
+#    Per EURUSD in conto EUR la perdita di 1 lotto su uno stop s e'
+#    100000 x s / P (P = cambio EURUSD): il cambio STA NEL PER-TRADE
+#    (colonna price dello stesso simbolo) -> nessuna costante esterna.
+#      s in [ R x P / ((vol + 0,01) x 100000) ,  R x P / (vol x 100000) ]
+#    R = saldo prima della posizione x 0,005 (saldo = 10000 + somma dei
+#    net_profit chiusi prima); vol = somma dei volumi d'uscita della
+#    position_id (parziale + resto); P = price della prima uscita.
+#    GAMBE: i due limiti si piazzano uno dopo l'altro (r.363-366): la
+#    gamba 2 e' la position_id che segue di 1 una position_id presente;
+#    una position_id sola e' la gamba 1 (la 2 non si riempie senza la 1,
+#    salvo gap). Gamba 1: s1 = (O1+O2+SLatr) x ATR = 1,8 x ATR; gamba 2:
+#    s2 = 1,0 x ATR. ATR per candidata = s1/1,8 (tutte) e s2 (coppie).
+#    CONTRO-ESEMPIO INTERNO, bloccante: nelle coppie vol2/vol1 deve
+#    stare in [1,5 ; 2,2] (atteso 1,8 a meno del floor); e le due stime
+#    dell'ATR (da s1 e da s2) sulla stessa candidata entro +-12%. Se
+#    no, l'identificazione delle gambe e' sbagliata: K1 = NULLO.
+#    Errori residui: floor del lotto (nella forchetta), saldo fra
+#    piazzamento e riempimento (scadenza 6 barre H4 = 24 ore), P
+#    d'uscita invece che d'ingresso: dell'ordine dell'1-2% [DERIVATO].
+#  VERDETTO K1 (congelato):
+#    PASS         mediana dei LIMITI BASSI dello stop di gamba 2 >= 26,54
+#    FAIL         mediana dei LIMITI ALTI < 26,54 -> EURUSD H4 ESCLUSO PER
+#                 COSTO, col numero accanto, e R265b NON PARTE
+#    NON RISOLTO  la soglia sta fra le due mediane -> serve la lettura
+#                 diretta: una corsa SINGOLA (non ottimizzazione) con
+#                 InpVerbose = 1 e il Giornale dell'agente, che stampa
+#                 "SELL LIMIT 2 @ px SL sl" (PlaceLimit, r.384-385);
+#                 oppure un indicatore ATR(14) H4 sul grafico, letto su
+#                 piu' date. R265b resta fermo.
+#  E IL LIMITE: e' il pedaggio BCM; su FTMO spread e commissioni EURUSD
+#  [NON MISURATI] (CHI_E_PIU_VICINO par. 7 punto 3).
+#
+# =====================================================================
+#  3. R265a = G0 DELLA SCANSIONE (questa cella) + K1
+# =====================================================================
+#  Solo corto, O1 0.30 / O2 0.5 / TP 1.5, finestra MONCONE (@DAQUANDO
+#  2023.12.31, @FRAZIONEIS 0.001 -> OOS 2024.01.01 -> 2026.06.30),
+#  Modello 1, 10000, magic 798501 / 798551 (gemelle, passo 50).
+#  Per-trade: abtg_trades_ABTG_EMA200_EURUSD_798501.csv e _798551.csv.
+#  BANDE (come R264 par. 5, contro l'ancora del par. 1b):
+#    VERDE  |n-180| <= 1,8 E |PF-1,32379| <= 0,020 E DD entro +-5% rel.
+#    GIALLO |n-180| <= 5,4 E |PF-1,32379| <= 0,050
+#    ROSSO  il resto -> l'IPOTESI sul banco della scansione e' FALSA:
+#           l'attesa di R265b perde l'ancora (R265b resta leggibile da
+#           solo, e K1 resta valido: il lotto non dipende dall'ancora).
+#  Attesa: VERDE, se l'ipotesi del banco e' giusta (il sorgente e'
+#  cambiato dal 31/07 nei soli punti di R264 par. 5; a 10000 le gambe
+#  EURUSD stanno sopra il lotto minimo). Catena: E0, P0, G1, C0 come
+#  R264 par. 5.
+#
+# =====================================================================
+#  4. R265b = WALK-FORWARD SOLO CORTO (8 passate, BLOCCATO DA K1)
+# =====================================================================
+#  FREQUENZA dal CSV (solo corto, O2 0,2-0,4): 151-216 deal in 912
+#  giorni = 32,9-47,1 posizioni/anno (deal/1,838) -> 150 posizioni in
+#  4,56 anni al tasso basso. A tick (~1,99 anni) 65-94: IMPOSSIBILE.
+#  FINESTRA: @DAQUANDO 2017.01.01, @FRAZIONEIS 0.7371 -> 3467 giorni,
+#  floor(2555,5) = 2555 -> IS 2017.01.01 -> 2023.12.31 (7 anni, MAI
+#  visto dalla scansione), OOS 2024.01.01 -> 2026.06.30 (= la finestra
+#  della scansione, NON cieca a livello di vicinato: R264 par. 4).
+#  Posizioni attese: IS 230-329, OOS 82-118 -> merito OOS SOSPESO,
+#  dichiarato ORA.
+#  PERCHE' 7 ANNI E NON 4,6: UN LATO SOLO SI GUADAGNA ANCHE PER DERIVA.
+#  Il contro-esempio da battere: "il corto rende perche' il dollaro sale".
+#  L'IS 2017-2023 contiene anni di euro in salita (2017, 2020) e di euro
+#  in discesa (2018, 2021-2022), e il 2023 laterale-rialzista
+#  [qualitativo, storia di mercato nota; il per-trade dell'ultima cella
+#  lo verifica per anno]. Quale numero produce l'ALTRA spiegazione:
+#    H_DERIVA: corto in utile negli anni di euro in discesa, in perdita
+#      in quelli in salita -> sull'IS bilanciato PF 0,95-1,08.
+#    H_EDGE:   PF IS >= 1,15 anche con meta' degli anni contro.
+#  1,08-1,15 = zona grigia -> NON CONCLUDENTE.
+#  LA GRIGLIA, una variabile: O1 0,20 (interno, PF mediano 1,340) e
+#  TP 2,0 (il default r.76; per TP il PF mediano sta fra 1,26 e 1,35)
+#  pinnati; ASSE InpOrder2Atr 0,1 / 0,2 / 0,3 / 0,4. Motivo: O2 = 0,2 e'
+#  la colonna migliore (1,487) ed e' il BORDO BASSO della griglia della
+#  scansione -- sotto nessuno ha mai misurato (R140a, "il buco di questa
+#  scelta"). 0,1 e' OLTRE il bordo: e' lo stesso difetto del 770201 e di
+#  GBPJPY/XAUUSD (R264 par. 2.2). Con 0,2 al secondo posto su quattro la
+#  cella ha un vicino per parte.
+#  Magic 798502. Per-trade dell'ultima passata:
+#  abtg_trades_ABTG_EMA200_EURUSD_798502.csv.
+#  ATTESA (PF OHLC; DD a rischio 1%): n IS 423-605 deal; PF IS al centro
+#  0,95-1,25, previsione puntuale ~1,05; DD IS 6-15%. PF OOS 1,20-1,60
+#  (celle corte della scansione a O2 0,2-0,4: 1,184-1,565).
+#  SOGLIE: come R264 par. 8 (S0 catena + D0 tasso, S1 >= 276 deal, S3
+#  DD <= 10% @1% col derivato a 2,00% accanto, S4 segni, S5 inerzia,
+#  S6 default = O2 0,35 non in griglia -> proxy 0,3 e 0,4, S7 banco,
+#  S8 verdetti) con S2 a UNA dimensione:
+#    CENTRO = la cella col massimo di min(PF propria, PF dei vicini).
+#    PASSA  se PF IS(centro) >= 1,10 E >= 3 celle su 4 >= 1,10 E i due
+#           vicini >= 1,00. SOLIDO se in piu' PF IS(centro) >= 1,27.
+#    BORDO  se il centro e' 0,1 o 0,4.
+#
+# =====================================================================
+#  5. COSTO IN TEMPO MACCHINA
+# =====================================================================
+#  R265a: 2 passate lunghe (912 giorni OHLC) + 2 monconi. R265b: 4 x 2
+#  = 8 passate (IS 7 anni + OOS 2,5). Stima DERIVATA come R264 par. 10
+#  (10-40 s a passata OHLC + avvii): R265a 2-5 min, R265b 3-10 min.
+#  TETTO LARGO 135 s x 10 = 23 min. Il numero vero lo scrive la riga.
+#  Ordine: R265a nell'ONDA 1 di R264; R265b SOLO dopo K1 = PASS.
+#
+# =====================================================================
+#  6. BUCHI DICHIARATI
+# =====================================================================
+#  - IL LATO LUNGO NON E' RIMISURATO qui (0/28 nella scansione). La
+#    regola dei due lati del 25/08 e' scritta per gli indici; sul forex
+#    R140a (due lati, 16,5 anni) e' scritto e fermo, R140b mai scritto.
+#  - SWAP: il tester applica gli swap CORRENTI a tutta la storia. Un
+#    motore corto e multi-giorno su EURUSD li incassa o li paga a
+#    seconda del differenziale dei tassi, che dal 2017 al 2026 e'
+#    cambiato di segno e di misura: effetto sul PF [NON MISURATO].
+#  - Il banco della scansione: [NON VERIFICATO] finche' R265a non e'
+#    VERDE.
+#  - La griglia H4 di FTMO e' ancorata a un'altra mezzanotte (R264 par.
+#    11): [NON MISURATO]. Pedaggio FTMO [NON MISURATO].
+#  - Lo storico M1 EURUSD dal 2017 sul PC di backtest [NON VERIFICATO]
+#    (il pavimento del server e' il 1999, R102); lo prende D0.
+#  - K1 con la lettura dal lotto e' INDIRETTA per costruzione: se esce
+#    NON RISOLTO, la lettura diretta costa una corsa singola che il
+#    driver di casa non sa fare (rifiuta i file senza asse).
+#
+# =====================================================================
+#  7. QUESTA CELLA (R265a)
+# =====================================================================
+#  G0 della scansione (VERDE atteso) + K1 (atteso NON RISOLTO o FAIL,
+#  par. 0 punto 4). Se K1 = PASS, R265b entra in coda cosi' com'e'.
+# =====================================================================

@@ -1,0 +1,71 @@
+#  EA: ABTG_EMA200
+# =====================================================================
+#  R264a3 -- GRIGLIA GBPUSD: O2 = 0.5 pinnato, asse O1 0.10 / 0.20 / 0.30,
+#    TP 2.0
+#  Banco (sta nella RIGA di lancio, classe 692): -Deposito 10000,
+#    -MODELLO 1 (OHLC M1) = SCREENING: puo' BOCCIARE, non PROMUOVERE.
+#  Finestra: IS 2020.01.01 -> 2023.12.31 (MAI vista dal genetico)
+#    OOS 2024.01.01 -> 2026.06.30 (= la finestra del genetico: NON
+#    cieca a livello di vicinato, testa par. 4). @FRAZIONEIS 0.6157:
+#    driver r.934 Meta = Inizio + floor(giorni x frazione) = 2023.12.31.
+#  Asse: InpOrder1Atr da 0.10 a 0.31 passo 0.10 = 3 celle x 2 finestre = 6 passate.
+#  Pin che cambiano rispetto agli altri file: DUE LATI, O1 ASSE, O2 0.5, TP 2.0,
+#    InpComment=R264A3, InpMagic 796504.
+#  Per-trade atteso in Common\Files (sovrascritto a ogni passata:
+#    resta l'ULTIMA, classe 455):
+#      abtg_trades_ABTG_EMA200_GBPUSD_796504.csv
+#  ATTESE, SOGLIE, CANCELLI E BUCHI: nel file di TESTA
+#    prove/R264a_controllo_EMA200_GBPUSD.txt (par. 6 (griglia), 7 (attese), 8 (soglie)).
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma
+#  del 21/09/2026). Nessuna riga di lancio qui. Non tocca EA, preset,
+#  sedie, conti, taglie o il forward. Generato da prove/R264_GENERA.py.
+# =====================================================================
+@SIMBOLO    GBPUSD
+@PERIODO    H4
+@DAQUANDO   2020.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.6157
+
+InpUsaGuardian=1||1||0||1||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpUseAdrFilter=0||0||0||0||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpUseOrder2=1||1||0||1||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpUseCutoff=0||0||0||0||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpLogImbuto=1||1||0||1||N
+InpComment=R264A3
+InpMagic=796504||796504||0||796504||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpOrder2Atr=0.5||0.5||0||0.5||N
+InpOrder1Atr=0.10||0.10||0.10||0.31||Y

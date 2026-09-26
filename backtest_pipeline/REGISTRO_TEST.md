@@ -4322,3 +4322,63 @@ questo registro**: non riguarda solo questo candidato e non è stato riletto qui
 ✏️ **Correzione del cancello (26/09)**: la riga di lettura di R263e/f ora porta `--rischio-base 2.0`
 (classe 843): senza, `r247_sovrapposizione.py` stampa una riga `[DERIVATO] a rischio 2.00%` che
 **raddoppia** un per-trade già a 2%.
+
+---
+
+## 📈 26/09/2026 — R264 / R265: `ABTG_EMA200` H4 FUORI DAL GENETICO (GBPUSD · AUDJPY · GBPJPY · XAUUSD) + EURUSD SOLO CORTO — ⏳ IN CODA, NON GIRATI
+
+Richiesta: `report/CHI_E_PIU_VICINO_AL_CAMPO_2026-09-24.md` righe 5-9 (i candidati `EMA200` H4 visti
+solo dal **genetico a finestra unica**, 2024.01.01→2026.06.30, commit `b57374c4`). **Zero passate
+girate, zero EA/preset/sedie toccati.** Banco: **PC di backtest DESKTOP-H4D7CAJ**, mai il VPS (firma
+del 21/09). 19 file generati da `prove/R264_GENERA.py` (prosa in `prove/R264_TESTA.txt.in` /
+`R265_TESTA.txt.in`), `controlla_prova.py --ea mql5/Experts/ABTG_EMA200.mq5` **0 problemi** (57 celle,
+114 passate), `controlla_riga.py --oggetto prova` **nessun difetto meccanico**, ASCII puro.
+Teste: `prove/R264a_controllo_EMA200_GBPUSD.txt` (R264) · `prove/R265a_atr_controllo_EMA200_EURUSD_short.txt` (R265).
+
+**Il disegno in tre righe.** (1) I 150 per finestra **a tick non esistono** su nessuno dei cinque
+(tick BCM dal 2024.07.05, 28-74 pos/anno) ⇒ walk-forward lunghi a **OHLC M1 = screening** (può
+bocciare, non promuovere). (2) **IS = [inizio, 2023.12.31]**, mai visto dal genetico, dimensionato a
+≥150 posizioni dalla frequenza dei CSV; **OOS = 2024.01.01→2026.06.30 = la finestra del genetico**,
+dichiarata **non cieca a livello di vicinato**: il numero che discrimina è l'IS. (3) G0 a tick sulla
+finestra del genetico per ogni simbolo (magic gemelle), che legge anche **lo stop dal lotto** (K1).
+
+| file | domanda | modello · finestra | asse | magic | attesa scritta prima |
+|---|---|---|---|---|---|
+| `R264a_controllo_…GBPUSD` (TESTA) | G0: HEAD rifà il genetico? | tick · moncone → 2024.01.01-2026.06.30 | magic ×2 | 796501/796551 | **VERDE**: PF 1,23105 · n 362 · DD 7,2048 |
+| `R264a1..a3` (O2 0,3/0,4/0,5) | c'è un altopiano fuori dal genetico? | OHLC · IS 2020-2023 (244-296 pos) | O1 0,10/0,20/0,30 | 796502-796504 | IS 1,00-1,20 (punto ~1,08) · OOS 1,15-1,40 |
+| `R264a4_uscita` | box ③ con la manopola che morde | idem | `InpTP1Pct` 0/25/50/75 | 796505 | 25-75 piatti, 0 peggiore (come R136c Dow) |
+| `R264b_controllo_…AUDJPY` | G0 del 1,514 | tick · moncone | magic ×2 | 796511/796561 | VERDE: PF 1,51365 · n 265 |
+| `R264b1_ponte_R139a` | **conflitto §6 del referto** | OHLC · moncone | `InpTP_RR` (celle di R139a) | 796512 | **deve CONFERMARE R139a**: ≥3/4 ≥1,45 (previsto 1,55-1,95) |
+| `R264c_controllo_…GBPJPY` | G0 | tick · moncone | magic ×2 | 796521/796571 | VERDE: PF 1,24037 · n 221 |
+| `R264c1..c3` (O2 0,5/0,6/**0,7**) | altopiano + bordo O2 | OHLC · IS 2019-2023 (222-246 pos) | O1 | 796522-796524 | IS 0,95-1,25 (~1,05) · OOS 1,20-1,55 |
+| `R264c4_uscita` | box ③ | idem | `InpTP1Pct` | 796525 | come a4 |
+| `R264d_controllo_…XAUUSD` | G0 | tick · moncone | magic ×2 | 796531/796581 | **GIALLO/ROSSO per causa nominata** (lotto 0,01 → BE di `344a11b9`) |
+| `R264d1..d3` (O2 0,5/0,6/**0,7**) | altopiano + bordo O2 | OHLC · IS 2017-2023 (198-305 pos) | O1 | 796532-796534 | IS 0,85-1,20 (~0,98) · OOS 1,30-1,90 |
+| `R264d4_uscita` | box ③ | idem | `InpTP1Pct` | 796535 | come a4 |
+| `R265a_atr_controllo_…EURUSD_short` (TESTA) | G0 della scansione + **K1 dal lotto** | OHLC · moncone | magic ×2 | 798501/798551 | G0 VERDE (PF 1,32379 · n 180); **K1 atteso NON RISOLTO o FAIL** |
+| `R265b_short_o2` | walk-forward solo corto | OHLC · IS 2017-2023 (230-329 pos) | O2 0,1/0,2/0,3/0,4 | 798502 | **NON LANCIARE senza K1 = PASS** (stop gamba 2 ≥ 26,54 pip = 40 × 0,6636 all-in); IS ~1,05 |
+
+- 🚫 **AUDJPY NON HA GRIGLIA D'INGRESSO**: R139a lo dà sotto 1,10 su campione pieno (IS 0,78-0,81,
+  OOS 0,95-1,01, 411-730 pos, DD 15-20%) → regola del 19/08. Riceve G0 + **ponte**. Se il ponte
+  CONFERMA, il 1,514 è **una fetta d'epoca misurata** e **R221b diventa ridondante** (proposta: toglierlo
+  dalla coda — decide Claudio).
+- 🔴 **GBPUSD: il RISCHIO è già letto** (R139b OOS 2016-2026 DD 10,05-11,05% @1% ⇒ ~19,7-22,0% a
+  2,00%): la griglia d'ingresso non lo abbassa. R264a si legge come prova d'altopiano e **gira per ultimo**.
+- 🧱 **Bordo**: su GBPJPY e XAUUSD il PF del genetico sale fino a `InpOrder2Atr` 0,6 = massimo della
+  griglia (1,355 / 1,683): R264c3/d3 vanno a **0,7, mai misurato** (stesso difetto del `770201`).
+- 🔎 **Manopola inerte**: `InpTP_RR` quasi inerte su GBPUSD/AUDJPY (R221a §1, R139a/b) ⇒ il box ③ del
+  certificato era riempito con una manopola che il motore scavalca; la casella libera vera è
+  **`InpTP1Pct`** (mai ad asse fuori dal Dow). **Eccezione misurata**: sull'oro il TP_RR morde
+  (1,205→1,656) — non ad asse qui, dichiarato.
+- 📏 **Scarto OHLC−tick di questo motore a H4, mai usato prima** (`risultati_prove/ABTG_EMA200/*_{IS,OOS}{,_ohlc}.csv`,
+  `400a4624`): da −0,0235 a +0,1670, mediana +0,0511 su 8 coppie ⇒ soglia «SOLIDO» a **1,27**.
+- 💰 **Costo ricalibrato**: il metro del referto (`T = 0,6 + 0,077 × passate`, ~5 s/passata) **non vale**
+  su DESKTOP-H4D7CAJ (un solo agente, ~135 s/passata a modello 4, R240). R264: 90 passate lunghe +
+  12 monconi, stima **25-80 min** [DERIVATA], tetto 3,4 h; R265: stima 5-15 min, tetto 23 min.
+  **Onda 1** (G0 ×4 + ponte + R265a) prima; **onda 2** (griglie) dopo averla letta: c → d → a.
+- 🔴 **NON VERIFICATI**: storico M1 sul PC dal 2017/2019/2020 (lo prende il cancello D0) · pavimento
+  tick oro · spread GBPJPY/AUDJPY (K1 non decidibile lì) · pedaggio e griglia H4 di FTMO · swap
+  correnti applicati a 7 anni · sovrapposizione con `770402`/`771531` · le sedie `771511-771515` a
+  **zero operazioni** dal 01/08 (lettura del Giornale mai fatta) · Print dell'EA in ottimizzazione.
+- 🪦 Per il certificato: dopo R264 un NO su GBPJPY o XAUUSD ha **tutte e cinque** le caselle
+  (PF · n+DD · uscita ad asse · gemelli · TF via scansione H1). Oggi: **NON ANCORA MISURATO**.
