@@ -16,7 +16,10 @@
 #  terminale di conto (50503392, 50504263, 10105439, 541452707 FTMO).
 #  Prima si controlla che il terminale di quel PC (loggato sul demo
 #  50503392) non abbia SEDIE attaccate.
-#  VINCOLI DI BANCO (nella RIGA, classe 692): -Deposito 10000,
+#  VINCOLI DI BANCO (nella RIGA, classe 692): -Deposito 10000 in R265a
+#  (rifa' la scansione, che girava a 10000), -Deposito 100000 in R265b
+#  (walk-forward: stessa regola di R264, vincoli di banco in testa --
+#  [corretto dal cancello 26/09]),
 #  -Modello 1 (OHLC M1) in TUTTI E DUE i file: R265a perche' deve rifare
 #  una scansione OHLC, R265b perche' il campione pieno a tick non esiste
 #  (par. 4). NIENTE -Spread / -Ritardo / -FrazioneIS.
@@ -36,7 +39,7 @@
 #      scritto lo stesso, col cancello in testa.
 #  (4) Previsione, contro di me: K1 NON RISOLTO o FAIL e' piu' probabile
 #      di PASS (l'unica ancora sul feed BCM, n=1, da' 14,7 pip contro una
-#      soglia di 26,6).
+#      soglia di 26,54).
 #
 # =====================================================================
 #  1. COSA E' GIA' MISURATO (classe 411)
@@ -88,6 +91,14 @@
 #      (La richiesta dice "ATR/spread < 40": con lo SPREAD NUDO 0,200 la
 #       soglia sarebbe 8,0 pip e passerebbe quasi per costruzione. Non e'
 #       il metro di casa sul forex, e usarlo sarebbe ammorbidire.)
+#  [AGGIUNTO dal cancello 26/09] UN TERZO NUMERO DI CASA, e va scritto:
+#    prove/COLLAUDO_SPREAD_FLOTTA_CRITERI.md r.72 da' EURUSD 0,400 pip
+#    di spread (sonda 17/08 ore 17, UNA lettura) -> all-in 0,864 ->
+#    soglia 34,56 pip. Il logger ha 84.997 campioni su 6 giornate e
+#    all'ora 17 legge mediana 0,200 / P95 0,400: la sonda e' caduta sul
+#    P95. Vince il logger (26,54). Ma se la mediana dello stop cade fra
+#    26,54 e 34,56 si scrive "PASS al metro del logger, sotto il metro
+#    della sonda", non un PASS nudo.
 #  LE DUE ANCORE CHE NON CONCORDANO (R140a, "IL COSTO"):
 #    A: ATR M15 EURUSD 9,00 pip su feed Oanda 2013-2019, x4 -> 36,0 pip
 #       -> 54,2x (feed diverso, epoca diversa, legge di scala assunta).
@@ -108,7 +119,10 @@
 #    (colonna price dello stesso simbolo) -> nessuna costante esterna.
 #      s in [ R x P / ((vol + 0,01) x 100000) ,  R x P / (vol x 100000) ]
 #    R = saldo prima della posizione x 0,005 (saldo = 10000 + somma dei
-#    net_profit chiusi prima); vol = somma dei volumi d'uscita della
+#    net_profit chiusi prima - k x i loro volumi: k = commissione
+#    d'INGRESSO per lotto, che il per-trade NON contiene -- R264 par. 5,
+#    C0, classe 844; su EURUSD k = 2,000 EUR/lotto misurato in R39);
+#    vol = somma dei volumi d'uscita della
 #    position_id (parziale + resto); P = price della prima uscita.
 #    GAMBE: i due limiti si piazzano uno dopo l'altro (r.363-366): la
 #    gamba 2 e' la position_id che segue di 1 una position_id presente;
@@ -192,10 +206,19 @@
 #  DD <= 10% @1% col derivato a 2,00% accanto, S4 segni, S5 inerzia,
 #  S6 default = O2 0,35 non in griglia -> proxy 0,3 e 0,4, S7 banco,
 #  S8 verdetti) con S2 a UNA dimensione:
-#    CENTRO = la cella col massimo di min(PF propria, PF dei vicini).
-#    PASSA  se PF IS(centro) >= 1,10 E >= 3 celle su 4 >= 1,10 E i due
-#           vicini >= 1,00. SOLIDO se in piu' PF IS(centro) >= 1,27.
-#    BORDO  se il centro e' 0,1 o 0,4.
+#    [CORRETTO dal cancello 26/09, classe 845: la v1 prendeva il
+#    massimo di min(PF propria, vicini) e dava BORDO se il centro era
+#    0,1 o 0,4; ma gli estremi hanno UN vicino solo e vincono: su 4
+#    celle PIATTE (sd 0,05) il centro cadeva su un estremo nell'84%.]
+#    CENTRO = fra le due celle INTERNE (0,2 e 0,3) quella col massimo
+#           di min(PF propria, PF dei due vicini); a parita' 0,2.
+#    BORDO  (si legge PER PRIMO) se PF IS(0,1) o PF IS(0,4) >= media
+#           PF IS(0,2 ; 0,3) + 0,08. Simulato: piatto sd 0,03 -> 2,9%,
+#           sd 0,05 -> 17%; rampa di +0,10 a passo verso 0,1 -> 97% /
+#           87%. Nessuna promozione, un passo oltre (round nuovo).
+#    PASSA  se non BORDO E PF IS(centro) >= 1,10 E >= 3 celle su 4 >=
+#           1,10 E i due vicini >= 1,00. SOLIDO se in piu' PF IS(centro)
+#           >= 1,27.
 #
 # =====================================================================
 #  5. COSTO IN TEMPO MACCHINA

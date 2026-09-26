@@ -2,7 +2,7 @@
 # =====================================================================
 #  R265b -- WALK-FORWARD EURUSD SOLO CORTO: O1 0.20 / TP 2.0 pinnati, asse
 #    O2 0.1 / 0.2 / 0.3 / 0.4
-#  Banco (sta nella RIGA di lancio, classe 692): -Deposito 10000,
+#  Banco (sta nella RIGA di lancio, classe 692): -Deposito 100000,
 #    -MODELLO 1 (OHLC M1) = SCREENING: puo' BOCCIARE, non PROMUOVERE.
 #  Finestra: IS 2017.01.01 -> 2023.12.31 (MAI vista dal genetico)
 #    OOS 2024.01.01 -> 2026.06.30 (= la finestra del genetico: NON
@@ -18,10 +18,11 @@
 #    prove/R265a_atr_controllo_EMA200_EURUSD_short.txt (par. 3-7).
 #  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #  !!! NON LANCIARE finche' R265a non ha dato K1 = PASS:            !!!
-#  !!! mediana dello stop dell'ORDINE 2 (= 1,0 x ATR14 H4, il piu'   !!!
-#  !!! corto) / pedaggio all-in mediano EURUSD 0,6636 pip >= 40,     !!!
-#  !!! cioe' mediana >= 26,6 pip. Sotto: EURUSD H4 ESCLUSO PER COSTO !!!
-#  !!! col numero accanto, e questo file NON parte.                 !!!
+#  !!! mediana dei LIMITI BASSI dello stop dell'ORDINE 2 (= 1,0 x   !!!
+#  !!! ATR14 H4, il piu' corto) >= 40 x 0,6636 pip (pedaggio all-in !!!
+#  !!! mediano EURUSD) = 26,54 pip. FAIL: EURUSD H4 ESCLUSO PER     !!!
+#  !!! COSTO col numero accanto; NON RISOLTO: fermo. In tutti e due !!!
+#  !!! i casi questo file NON parte (testa R265a par. 2).           !!!
 #  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma
 #  del 21/09/2026). Nessuna riga di lancio qui. Non tocca EA, preset,

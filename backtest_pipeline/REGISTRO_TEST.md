@@ -4330,7 +4330,8 @@ questo registro**: non riguarda solo questo candidato e non è stato riletto qui
 Richiesta: `report/CHI_E_PIU_VICINO_AL_CAMPO_2026-09-24.md` righe 5-9 (i candidati `EMA200` H4 visti
 solo dal **genetico a finestra unica**, 2024.01.01→2026.06.30, commit `b57374c4`). **Zero passate
 girate, zero EA/preset/sedie toccati.** Banco: **PC di backtest DESKTOP-H4D7CAJ**, mai il VPS (firma
-del 21/09). 19 file generati da `prove/R264_GENERA.py` (prosa in `prove/R264_TESTA.txt.in` /
+del 21/09); `-Deposito 10000` nei 6 file che rifanno l'archivio, `100000` nei 13 walk-forward (cancello
+26/09). 19 file generati da `prove/R264_GENERA.py` (prosa in `prove/R264_TESTA.txt.in` /
 `R265_TESTA.txt.in`), `controlla_prova.py --ea mql5/Experts/ABTG_EMA200.mq5` **0 problemi** (57 celle,
 114 passate), `controlla_riga.py --oggetto prova` **nessun difetto meccanico**, ASCII puro.
 Teste: `prove/R264a_controllo_EMA200_GBPUSD.txt` (R264) · `prove/R265a_atr_controllo_EMA200_EURUSD_short.txt` (R265).
@@ -4382,3 +4383,34 @@ finestra del genetico per ogni simbolo (magic gemelle), che legge anche **lo sto
   **zero operazioni** dal 01/08 (lettura del Giornale mai fatta) · Print dell'EA in ottimizzazione.
 - 🪦 Per il certificato: dopo R264 un NO su GBPJPY o XAUUSD ha **tutte e cinque** le caselle
   (PF · n+DD · uscita ad asse · gemelli · TF via scansione H1). Oggi: **NON ANCORA MISURATO**.
+- 🚦 **Cancello del 26/09 (controllo preventivo, strato 2): FAIL, CORRETTO prima dei numeri** — sei
+  difetti, nessun numero girato:
+  1. **C0 del per-trade avrebbe nullato a vuoto ogni file** (classe 844): `ExportTrades` scrive solo i
+     deal d'uscita e il tester addebita metà commissione sull'**ingresso**. Misurato sui per-trade di
+     R39 contro i CSV: (somma net − Profit)/lotti = **2,000** EUR/lotto EURAUD e EURCAD, **2,305** GBPUSD,
+     **2,310** GBPJPY, **1,716** XAUUSD, **0,000** U30USD. C0 ora chiede k in [1,00 ; 3,00] uguale fra gemelle;
+     K1 toglie k dal saldo.
+  2. **Regola del CENTRO/BORDO sbilanciata** (classe 845): il massimo di min(PF, vicini *presenti*)
+     premia le celle con meno vicini — su un 3×3 **piatto** sceglieva il mezzo nel **3,9%** dei casi
+     (BORDO al **96%** anche sotto H_MOTORE); su R265b gli estremi all'**84%**. Ora: centro = cella di mezzo
+     (R265b: la migliore fra 0,2 e 0,3), BORDO a **gradiente** (fila esterna ≥ fila di mezzo + 0,08),
+     falso allarme simulato e scritto (0,2-8,8% su R264, 2,9-17% su R265b).
+  3. **Formula di K1 col cambio rovesciato** in R264 (classe 846): `R × q/(vol × C)` → `R/(vol × C × q)`
+     (GBPJPY, R 50, vol 0,10: 92 pip contro 0,000027 yen).
+  4. **Metro del pedaggio diverso fra famiglie sorelle**: R264 usava la sonda (GBPUSD 0,2) e R265 il
+     logger. Ora logger per tutti: GBPUSD **0,8425** pip → K1 **33,7** pip (era 29,7); XAUUSD **0,2603 $** →
+     **10,41 $**. R265 dichiara il terzo numero di casa (sonda 0,400 → 34,56 pip) e come si scrive se ci cade in mezzo.
+  5. **Deposito**: **100000** nei 13 walk-forward (a1-a4, c1-c4, d1-d4, R265b), **10000** solo nei 6 file
+     che rifanno l'archivio. A 10000 sull'oro le gambe stanno a 0,01-0,03 nell'OOS: pavimento del lotto
+     (classi 228/229) e parziale impossibile → IS e OOS avrebbero misurato **due uscite diverse**. Aggiunta
+     la spiegazione alternativa del «TP_RR che morde sull'oro» (genetico a 0,01 lotti = SL/TP puri).
+  6. Minori: il «NON COMPILARE» di `b45dd009` ora è **misurato** compilato (il CSV di R139a porta
+     `InpLogImbuto` e `InpUsaGuardian`) e letto il diff; pavimento M1 dell'oro «2004.06.11» era H1/D1 →
+     **NON MISURATO**; margine al floor 0,42 (non 0,44); soglia R265 **26,54** (non 26,6); il G0 dell'oro
+     può spostare anche n oltre il 3%; AUDJPY archiviato sul **RISCHIO** (Emendamento B), scritto.
+  Verificato e **giusto** lo stesso giorno: le 4 ancore del G0 pin per pin sui CSV del genetico (38
+  costanti + assi; diversi solo `InpComment`/`InpMagic`, voluti), le 26 celle corte di EURUSD e l'ancora
+  1,32379, le frequenze e le date di taglio (`floor` ricalcolato: 2023.12.31 su tutti), lo scarto
+  OHLC−tick (8 coppie, mediana +0,0511, max +0,1670), le 3 celle tick del ponte, R139a/b, R136c,
+  un asse per file, i magic 7965xx/7985xx vergini (disco + 12 rami remoti), il conto delle passate
+  (90 + 12, tetto 3,4 h).

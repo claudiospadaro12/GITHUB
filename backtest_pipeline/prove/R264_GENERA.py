@@ -220,7 +220,10 @@ def testa_breve(f):
         r.append(('#  %s -- ' % sig if i == 0 else '#    ') + riga)
     mod = ('MODELLO 4 (TICK REALI)' if f['modello'] == 4
            else 'MODELLO 1 (OHLC M1) = SCREENING: puo\' BOCCIARE, non PROMUOVERE')
-    r.append('#  Banco (sta nella RIGA di lancio, classe 692): -Deposito 10000,')
+    # 26/09 cancello: 10000 solo dove si rifa' l'archivio (G0, ponte,
+    # R265a); 100000 nei walk-forward (classi 228/229, pavimento del lotto).
+    dep = '10000' if f['tipo'] in ('controllo', 'ponte', 'atr') else '100000'
+    r.append('#  Banco (sta nella RIGA di lancio, classe 692): -Deposito %s,' % dep)
     r.append('#    -' + mod + '.')
     if f['frz'] == '0.001':
         r.append('#  Finestra: MONCONE. IS = 2023.12.31 (domenica, 1 giorno: CSV _IS')
@@ -287,10 +290,11 @@ EXTRA['R264b1_ponte_R139a_EMA200_AUDJPY.txt'] = [
 EXTRA['R265b_short_o2_EMA200_EURUSD.txt'] = [
     '#  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',
     '#  !!! NON LANCIARE finche\' R265a non ha dato K1 = PASS:            !!!',
-    '#  !!! mediana dello stop dell\'ORDINE 2 (= 1,0 x ATR14 H4, il piu\'   !!!',
-    '#  !!! corto) / pedaggio all-in mediano EURUSD 0,6636 pip >= 40,     !!!',
-    '#  !!! cioe\' mediana >= 26,6 pip. Sotto: EURUSD H4 ESCLUSO PER COSTO !!!',
-    '#  !!! col numero accanto, e questo file NON parte.                 !!!',
+    '#  !!! mediana dei LIMITI BASSI dello stop dell\'ORDINE 2 (= 1,0 x   !!!',
+    '#  !!! ATR14 H4, il piu\' corto) >= 40 x 0,6636 pip (pedaggio all-in !!!',
+    '#  !!! mediano EURUSD) = 26,54 pip. FAIL: EURUSD H4 ESCLUSO PER     !!!',
+    '#  !!! COSTO col numero accanto; NON RISOLTO: fermo. In tutti e due !!!',
+    '#  !!! i casi questo file NON parte (testa R265a par. 2).           !!!',
     '#  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',
 ]
 

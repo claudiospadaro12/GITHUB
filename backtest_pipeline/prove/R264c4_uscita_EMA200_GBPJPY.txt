@@ -2,7 +2,7 @@
 # =====================================================================
 #  R264c4 -- USCITA GBPJPY: centro della griglia (0.20 / 0.6 / TP 2.0),
 #    asse InpTP1Pct 0 / 25 / 50 / 75
-#  Banco (sta nella RIGA di lancio, classe 692): -Deposito 10000,
+#  Banco (sta nella RIGA di lancio, classe 692): -Deposito 100000,
 #    -MODELLO 1 (OHLC M1) = SCREENING: puo' BOCCIARE, non PROMUOVERE.
 #  Finestra: IS 2019.01.01 -> 2023.12.31 (MAI vista dal genetico)
 #    OOS 2024.01.01 -> 2026.06.30 (= la finestra del genetico: NON

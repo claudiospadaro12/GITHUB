@@ -22,9 +22,19 @@
 #
 #  VINCOLI DI BANCO (classe 692: stanno nella RIGA di lancio; qui si
 #  dichiarano perche' chi la scrive li trovi):
-#    -Deposito 10000 in TUTTI i 17 file = il banco del genetico e di
-#        R139a/b. Il confronto con l'archivio E' il punto. NON e' una
-#        taglia: nessuna taglia e' proposta qui.
+#    -Deposito 10000 SOLO nei 5 file di CONFRONTO con l'archivio (i 4
+#        *_controllo e il ponte R264b1) = il banco del genetico e di
+#        R139a/b: li' il confronto con l'archivio E' il punto.
+#    -Deposito 100000 nei 12 walk-forward (a1-a4, c1-c4, d1-d4).
+#        [CORRETTO dal cancello 26/09] A 10000 sull'oro le gambe stanno
+#        a 0,01-0,03 lotti nell'OOS (ATR H4 di decine di $) e piu' su
+#        nell'IS 2017-2019 [DERIVATO]: il pavimento MathMax (r.495)
+#        alza il rischio oltre lo 0,5% per gamba e la parziale al 50%
+#        (NormVol, r.421) non parte a 0,01 -> IS e OOS misurerebbero
+#        DUE USCITE DIVERSE (classi 228/229; il driver stesso, r.200:
+#        "100000 = taglia prop: serve dove il lotto minimo schiaccia il
+#        rischio"). Senza pavimento PF, RF e DD% sono invarianti alla
+#        taglia; il Profit no. NON e' una taglia: nessuna e' proposta.
 #    -Modello 4 (tick reali) SOLO nei 4 file *_controllo (G0).
 #    -Modello 1 (OHLC M1) in TUTTI gli altri 13 (walk-forward lunghi e
 #        ponte). E' SCREENING: puo' BOCCIARE, non puo' PROMUOVERE.
@@ -171,6 +181,15 @@
 #          genetico -- O1 0.15 / O2 0.5: TP 1,5 / 2,0 / 2,5 / 3,0 ->
 #          PF 1,205 / 1,270 / 1,392 / 1,656 (n 200 / 191 / 179 / 172).
 #          Non e' ad asse qui (buco, par. 11).
+#          [AGGIUNTO dal cancello 26/09] SPIEGAZIONE ALTERNATIVA, da
+#          battere prima di chiamarla mercato: il genetico girava a
+#          10000 col binario 0953846c, PRIMA di 344a11b9. Sull'oro le
+#          gambe a 0,01 lotti non facevano ne' parziale ne' BE ne'
+#          trailing (erano tutti dentro la parziale riuscita): uscita =
+#          SL o TP puri, e allora il TP_RR morde PER COSTRUZIONE. Sugli
+#          altri tre (lotti ~0,07-0,14) no. [NON MISURATO] -- lo
+#          separa d4 (a 100000 la parziale parte): se li' TP1Pct 0 e 50
+#          si staccano come sul Dow, il "morso" era il lotto.
 #      >>> LA CASELLA LIBERA VERA E' InpTP1Pct: messa ad asse SOLO sul
 #          Dow (prove/R136c_parziale_U30USD.txt), MAI su forex o oro
 #          (grep dei file prova ABTG_EMA200 con InpTP1Pct||Y: solo U30USD).
@@ -233,8 +252,10 @@
 #      finestra arriva a 150. Lo split a tick con 150 per finestra e'
 #      IMPOSSIBILE su tutti e quattro, ed e' aritmetica, non scelta.
 #  >>> L'OHLC M1 sul forex scende al 1999 (pavimento MISURATO, R102) e
-#      sull'oro al 2004.06.11 (sonda 17/08, risultati_archivio/
-#      sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv r.59). Quindi:
+#      sull'oro la sonda 17/08 (risultati_archivio/sonda_storico_17-08/
+#      215D85D7_ABTG_InfoBroker.csv r.59) da' 2004.06.11 su H1 e D1
+#      (TF_Misurato = H1): il pavimento M1 dell'oro NON e' misurato
+#      [corretto dal cancello 26/09], lo prende D0. Quindi:
 #      Modello 1 per i walk-forward, Modello 4 solo per il G0 (che deve
 #      rifare il banco d'archivio, tick compresi).
 #  >>> Il prezzo, detto: OHLC = riempimenti ideali dei limiti, spread
@@ -253,7 +274,8 @@
 #    GBPUSD   2020.01.01   2372     0.6157     1460   2023.12.31    4,00     244-296
 #    GBPJPY   2019.01.01   2737     0.667      1825   2023.12.31    5,00     222-246
 #    XAUUSD   2017.01.01   3467     0.7371     2555   2023.12.31    7,00     198-305
-#    (margine al floor >= 0,44 giorni: nessun rischio di virgola mobile)
+#    (margine al floor >= 0,42 giorni -- GBPJPY 1825,579: nessun
+#    rischio di virgola mobile)
 #  Perche' 7 anni sull'oro e non 5,3: a O2 = 0,7 (mai misurato) n scende
 #  ancora (par. 2.2); con ~22 pos/anno servono ~6,8 anni. Perche' 5 su
 #  GBPJPY: a O2 0,7 ~40 pos/anno -> 200. GBPUSD: 4 anni bastano (244).
@@ -320,8 +342,19 @@
 #    3ec971152e85e0082488cc4243ff45ae09948c191d52ab96050b48f94641a737
 #  Diverso dopo il job = CSV NON VALIDO (classe 166).
 #  !!! b45dd009 si intitola "IN CORSO D'OPERA -- NON COMPILARE". Lo
-#  stesso sorgente ha compilato e girato il 13/09 in R139a/b (CSV e
-#  per-trade esistono) [DEDOTTO dalla cronologia]. Se la compilazione
+#  stesso sorgente ha compilato e girato il 13/09 in R139a/b. [MISURATO
+#  dal cancello 26/09: il CSV ABTG_EMA200_AUDJPY_IS_ohlc_r139a.csv
+#  (cb96a6b1) porta le colonne InpUsaGuardian (col. 10) e InpLogImbuto
+#  (col. 52), che esistono solo da 26a18566/b45dd009; l'EA non cambia
+#  dopo b45dd009 (11/09) e l'include dopo cdb2037a (07/09).] COSA VUOL
+#  DIRE PER IL ROUND: (i) R264 compila lo STESSO binario di R139a/b ->
+#  ponte e R139a confrontabili senza H_BINARIO; (ii) contro il
+#  genetico (0953846c) cambiano solo 344a11b9 e 3af47ed9 -- il resto
+#  del diff (imbuto, Guardian) e' stato riletto riga per riga: solo
+#  contatori e Print, e ABTG_GuardiaIngresso coi default e' un no-op
+#  nel tester (canale assente -> true); (iii) il titolo "NON COMPILARE"
+#  NON e' mai stato chiuso da un PASS sul codice: questo round lo
+#  compila per il TESTER, mai per una sedia. Se la compilazione
 #  fallisce, il driver lo dice e non si lancia.
 #
 #  BANDE DEL G0, congelate (n = Trades del CSV _OOS, confronto con
@@ -341,9 +374,11 @@
 #    XAUUSD: GIALLO o ROSSO, PER UNA CAUSA NOMINATA: gamba 1 = 1,7 x ATR
 #      H4; con ATR dell'ordine delle decine di dollari (NON MISURATO) il
 #      lotto esce ~0,01-0,02, la parziale del 50% arrotonda a 0 e il BE
-#      di 344a11b9 SCATTA (e dopo il BE parte il trailing, r.436). n
-#      deve restare entro +-3% (il BE cambia il prezzo d'uscita, non il
-#      numero dei deal); il PF si sposta di una quantita' [NON STIMATA].
+#      di 344a11b9 SCATTA (e dopo il BE parte il trailing, r.436). Anche
+#      n puo' spostarsi oltre il 3% [corretto dal cancello 26/09]: BE e
+#      trailing chiudono prima, il posto si libera prima (r.322) e
+#      l'ingresso successivo cambia. Il PF si sposta di una quantita'
+#      [NON STIMATA].
 #      CONTRO-ESEMPIO: se nel per-trade le gambe 1 hanno volume >= 0,02,
 #      la causa e' sbagliata e un ROSSO va spiegato altrimenti.
 #
@@ -357,8 +392,18 @@
 #       identici riga per riga (close_time, position_id, deal_type,
 #       volume, price; net entro 0,01).
 #    C0 PER-TRADE: presente per le due gemelle, scritto DOPO l'avvio del
-#       job; righe = Trades; somma net_profit = Profit entro 0,05; prima
-#       chiusura >= 2024.01.01.
+#       job; righe = Trades; prima chiusura >= 2024.01.01; e la SOMMA:
+#       [CORRETTO dal cancello 26/09, classe 844] ExportTrades scrive
+#       SOLO i deal d'USCITA, e sul forex/oro il tester addebita meta'
+#       commissione sul deal d'INGRESSO. MISURATO sui per-trade di R39
+#       (risultati_prove/trades_larry contro ABTG_PunteLarry/r39, OOS):
+#       (somma net - Profit) / somma volumi = 2,000 EUR/lotto EURAUD e
+#       EURCAD, 2,305 GBPUSD, 2,310 GBPJPY, 1,716 XAUUSD, 0,000 U30USD.
+#       Quindi "somma net = Profit entro 0,05" NULLEREBBE A VUOTO ogni
+#       file di R264/R265. Regola: k = (somma net - Profit) / somma
+#       volumi deve stare in [1,00 ; 3,00] EUR/lotto (0,002% del
+#       nozionale in valuta base, convertito), UGUALE fra le due
+#       gemelle entro 0,01. Fuori = per-trade NON BUONO.
 #
 #  K1 -- IL CANCELLO DEL COSTO, LETTO GRATIS DAL PER-TRADE DEL G0.
 #  Il cancello e' stop >= 40 x pedaggio. Lo stop PIU' CORTO del motore e'
@@ -368,10 +413,17 @@
 #  NON serve codice nuovo: il LOTTO e' funzione dello stop (LotByRisk
 #  r.467-496: rischio = saldo x 0,5% per gamba, floor al passo 0,01).
 #  Dal per-trade: vol = somma dei volumi d'uscita per position_id; saldo
-#  = 10000 + somma dei net chiusi prima; allora
-#      stop in [ R x q / ((vol+0,01) x C) ,  R x q / (vol x C) ]
+#  = 10000 + somma dei net chiusi prima - k x volumi di quelle posizioni
+#  (k del C0: la commissione d'ingresso non e' nel per-trade); allora
+#      stop in [ R / ((vol+0,01) x C x q) ,  R / (vol x C x q) ]
 #  con R = saldo x 0,005 EUR, C = ContractSize (100000 forex, 100 oro:
-#  sonda 17/08 r.25/33/42/59), q = cambio quota->EUR. Gamba 2 = la
+#  sonda 17/08 r.25/33/42/59), q = cambio quota->EUR (EUR per unita'
+#  di quota), stop in unita' di quota. [CORRETTO dal cancello 26/09,
+#  classe 846: la v1 scriveva "R x q / (vol x C)", cioe' il cambio
+#  ROVESCIATO. Controprova: GBPJPY, R 50, vol 0,10 -> R/(vol C q) =
+#  50/(0,10 x 100000 x 0,0054147) = 0,923 yen = 92 pip, plausibile per
+#  un ATR H4; R x q/(vol C) = 0,000027 yen, assurdo.] Il lotto minimo
+#  (MathMax r.495) rende il limite alto INFINITO a vol = 0,01. Gamba 2 = la
 #  position_id che segue di 1 una position_id presente (i due limiti si
 #  piazzano uno dopo l'altro, r.363-365; la gamba 2 non si riempie senza
 #  la 1 salvo gap). CONTRO-ESEMPIO INTERNO: nelle coppie il rapporto
@@ -382,13 +434,20 @@
 #  0,0054147 per yen, MISURA_SPREAD_FOREX r.204-205) e la lettura e'
 #  INDICATIVA: decide solo se la mediana sta fuori di +-15% dalla soglia.
 #  SOGLIE (40 x pedaggio all-in mediano):
-#    GBPUSD  0,7425 pip (0,2 spread + 0,5425 comm., MISURA_SPREAD_FOREX
-#            r.318) -> stop >= 29,7 pip.
+#    [CORRETTO dal cancello 26/09: STESSO METRO di R265 (spread vivo
+#    "TUTTA LA GIORNATA", data/spread_vivo/SPREAD_VIVO_2026-09-12_
+#    referto.txt: i limiti H4 si riempiono a qualunque ora). La v1
+#    usava la sonda 17/08 (0,2) su GBPUSD e il logger su EURUSD.]
+#    GBPUSD  0,8425 pip (0,300 spread mediano logger, n 84968, GG 6 +
+#            0,5425 comm., MISURA_SPREAD_FOREX r.236) -> stop >= 33,7
+#            pip. (Col metro della sonda, 0,7425: 29,7 pip.)
 #    GBPJPY  comm. 0,8645 pip (r.281) + spread [NON MISURATO] -> soglia
 #            >= 34,6 pip + 40 x spread: K1 NON DECIDIBILE finche' lo
 #            spread non c'e' (la sonda del 17/08 legge 0 = nessun tick).
 #    AUDJPY  spread e commissione [NON MISURATI]: solo lettura dello stop.
-#    XAUUSD  0,2503 $ (MAPPA_COSTO_SIMBOLI_TF r.242) -> stop >= 10,01 $.
+#    XAUUSD  0,2603 $ (0,220 spread mediano logger, n 80139, GG 5 +
+#            0,0403 comm., MAPPA_COSTO_SIMBOLI_TF r.241) -> stop >=
+#            10,41 $. (Il 0,2503 di casa e' alle ore 08/14: 10,01 $.)
 #  E il limite, detto: il pedaggio e' BCM; FTMO [NON MISURATO].
 #
 # =====================================================================
@@ -468,6 +527,10 @@
 #            PF OOS 1,20-1,55 (genetico sul vicinato 1,191-1,369 +
 #            scarto misurato su GBPJPY +0,032 / +0,148).
 #    XAUUSD  n IS 365-561 deal (198-305 pos) -- OOS 130-200 deal.
+#            [cancello 26/09] a 100000 la parziale parte sempre, nel
+#            genetico (10000) sull'oro spesso no: il rapporto deal/pos
+#            dell'oro e' [NON MISURATO] e n in DEAL puo' uscire SOPRA
+#            questa banda senza che sia un difetto (S1 non ne soffre).
 #            PF IS 0,85-1,20, previsione ~0,98. DD IS 8-18%.
 #            PF OOS 1,30-1,90 (genetico sul vicinato 1,205-1,882,
 #            mediane 1,288 a O2 0,5 e 1,683 a 0,6; scarto oro ~0).
@@ -489,16 +552,27 @@
 #     merito SOSPESO. OOS sotto 276 deal: merito OOS SOSPESO (atteso su
 #     GBPJPY e XAUUSD, par. 4). Sulla cella TP1Pct = 0 deal = posizioni.
 #  S2 MERITO (screening, in IS, sui 3 x 3):
-#     CENTRO = la cella col massimo di min(PF propria, PF dei vicini
-#     ortogonali presenti); a parita' la piu' vicina a (0,20 / O2
-#     centrale), poi la PIU' BASSA. MAI il picco.
-#     PASSA  se PF IS(centro) >= 1,10 E >= 6 celle su 9 >= 1,10 E tutti
-#            i vicini ortogonali del centro >= 1,00.
-#     SOLIDO se in piu' PF IS(centro) >= 1,27 (= 1,10 + lo scarto OHLC
+#     [CORRETTO dal cancello 26/09, classe 845. La v1 diceva: CENTRO =
+#     massimo di min(PF propria, PF dei vicini PRESENTI), BORDO = centro
+#     sull'anello. Ma il minimo su MENO vicini e' piu' alto: simulato su
+#     un 3 x 3 PIATTO (PF 1,20 + rumore sd 0,05, 20.000 prove) la regola
+#     sceglie il mezzo nel 3,9% dei casi -> BORDO nel 96% ANCHE sotto
+#     H_MOTORE. Il verdetto non distingueva l'altopiano pieno da quello
+#     tagliato dal bordo.]
+#     CENTRO = la cella di MEZZO (O1 0,20 / O2 centrale): e' il centro
+#            del vicinato dichiarato PRIMA (par. 6.1) e l'unica con tutti
+#            e quattro i vicini. MAI il picco.
+#     BORDO  (si legge PER PRIMO) se una fila esterna -- O1 0,10, O1
+#            0,30, O2 basso o O2 alto: 3 celle -- ha PF IS MEDIO >= quello
+#            della fila di mezzo parallela + 0,08: l'altopiano SALE verso
+#            il bordo. Nessuna promozione; si allarga di un passo in
+#            quella direzione (round nuovo). Simulato: piatto sd 0,03 ->
+#            BORDO 0,2%, sd 0,05 -> 8,8%; rampa di +0,10 a passo ->
+#            79% / 70%. Scritto il falso allarme, non nascosto.
+#     PASSA  se non BORDO E PF IS(mezzo) >= 1,10 E >= 6 celle su 9 >=
+#            1,10 E i 4 vicini del mezzo >= 1,00.
+#     SOLIDO se in piu' PF IS(mezzo) >= 1,27 (= 1,10 + lo scarto OHLC
 #            massimo misurato 0,167, par. 1d): resisterebbe al tick.
-#     BORDO  se il centro sta sull'anello esterno del 3 x 3: "altopiano
-#            toccato dal bordo", nessuna promozione, si allarga di un
-#            passo in quella direzione (round nuovo).
 #     OOS: PF OOS(centro) >= 1,10, letto come conferma DEBOLE (par. 4).
 #  S3 RISCHIO, a qualunque n (Emendamento B): DD IS e DD OOS del centro
 #     <= 10,0% a rischio 1% (il muro statico alla taglia piu' piccola
@@ -561,6 +635,11 @@
 #      NON lo metto in coda: con PF 0,78-1,01 e DD 15-20% su campione
 #      pieno, un'uscita non ha un motivo misurato per ribaltarlo. E' la
 #      prima cosa da fare SE qualcuno porta una tesi nuova.
+#      [Precisato dal cancello 26/09] Per l'Emendamento B l'archivio
+#      di AUDJPY poggia sul RISCHIO (DD OOS 16,89-20,44% @1% su
+#      2016-2026, R139a S3), NON sul merito del 2010-2016: una
+#      CONFERMA del ponte dice che il 1,514 e' un'epoca buona dentro
+#      una storia a DD da muro, non che il recente non guadagni.
 #
 # =====================================================================
 #  10. IL COSTO IN TEMPO MACCHINA -- RICALIBRATO SUL MODELLO SCELTO
@@ -603,8 +682,11 @@
 #    passa lo screening, e' il file dopo (sul centro).
 #  - InpSLatr (la larghezza dello stop): e' la leva se K1 boccia per
 #    costo. NON qui: prima si legge K1.
-#  - Il lotto dell'oro a 10000: gambe a 0,01-0,02 = rischio effettivo
-#    diverso dall'1% dichiarato (classe 228). DD% dell'oro = SOTTOSTIMA.
+#  - Il lotto dell'oro a 10000 (SOLO nel G0 R264d, che deve rifare il
+#    banco d'archivio): gambe a 0,01-0,03, il pavimento MathMax alza il
+#    rischio oltre lo 0,5% per gamba (classe 228) -> Profit e DD% del
+#    G0 dell'oro non sono l'1% dichiarato. I walk-forward d1-d4 girano
+#    a 100000 per questo (vincoli di banco in testa).
 #  - Swap su posizioni multi-giorno: il tester usa gli swap CORRENTI su
 #    7 anni. Effetto [NON MISURATO]. Commissioni e swap FTMO [NON MISURATI].
 #  - La griglia H4 di FTMO e' ancorata a un'altra mezzanotte: su FTMO il
@@ -628,5 +710,6 @@
 #  Cella O1 0.25 / O2 0.2 / TP 2.0, due lati, ancora Pass 139: PF
 #  1,23105, n 362, DD 7,2048, Profit 728,66, RF 0,94404. Magic 796501 /
 #  796551. Per-trade: abtg_trades_ABTG_EMA200_GBPUSD_796501.csv e
-#  _796551.csv. Attesa VERDE (par. 5). K1: stop gamba 2 >= 29,7 pip.
+#  _796551.csv. Attesa VERDE (par. 5). K1: stop gamba 2 >= 33,7 pip
+#  (metro del logger; 29,7 col metro della sonda, par. 5).
 # =====================================================================
