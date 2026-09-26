@@ -1,0 +1,407 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R260 -- IL BREAKOUT AL RIALZO DEL BOX NOTTURNO DELL'ORO (sedia 770402)
+#  EA: ABTG_MaxMinNotte (generico, due lati), XAUUSD, grafico H2
+#  FILE DI TESTA DEL ROUND, e cella R260c (DUE LATI = ANCORA = R103).
+#  Qui stanno il ragionamento, le attese e i cancelli di tutta la
+#  famiglia R260a..R260c (3 file). R260a (solo LONG) e R260b (solo
+#  SHORT) portano solo le loro differenze e rimandano qui.
+#  Scritto il 26/09/2026. Criteri congelati PRIMA dei numeri.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026: i round non girano piu' sul VPS finche' una
+#  challenge e' viva). NE' sul banco 50504400 (C:\MT5_Backtest, che resta
+#  SPENTO), NE' su nessun terminale di conto (50503392, 50504263,
+#  10105439 REALE, 541452707 FTMO). Il terminale di quel PC e' loggato
+#  sul demo 50503392, che ha QUESTA STESSA sedia viva col magic 770402:
+#  prima si controlla che non abbia SEDIE attaccate (avvertenza di
+#  R246/R251/R253/R255). I magic di questo round (par. 9) non toccano
+#  770402 in nessun modo.
+#
+#  VINCOLI DI BANCO (stanno nella riga di lancio, non qui; li scrivo
+#  perche' chi la scrive li trovi):
+#    -Expert ABTG_MaxMinNotte   -Simbolo XAUUSD   -Periodo H2
+#    -Deposito 100000   = il deposito di R103 (R103_CRITERI.md r.212,
+#        "100.000 EUR, leva 100"; il driver scrive Currency=EUR e
+#        Leverage=100, walkforward_generico.ps1 r.2016-2020). Con un
+#        altro deposito il G0 al centesimo NON si legge. NON e' una
+#        taglia proposta: nessuna taglia e' proposta qui.
+#    -Modello 1 (OHLC M1), NON 4 -- par. 4. Il numero che esce e'
+#        SCREENING per il merito e un LIMITE INFERIORE per il rischio.
+#        (Anteprima di -SoloControllo: scrive Model=4 CABLATO, classe
+#        356; la corsa vera usa Model=$Modello, r.2011.)
+#    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo
+#        da' '@FRAZIONEIS' qui sotto; un -FrazioneIS diverso fa MORIRE il
+#        driver, walkforward_generico.ps1 r.713-740).
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca preset, EA, sedie, conti, taglie o parametri del forward. Non
+#  promuove niente: ogni esito e' materiale per Claudio.
+# =====================================================================
+#
+# =====================================================================
+#  1. LA DOMANDA
+# =====================================================================
+#  Claudio, 26/09/2026: "INTENDEVO LA PARTE BREAKOUT DEL MIN MAX ORO.
+#  QUANDO ROMPE AL RIALZO SI ENTRA."
+#  La sedia 770402 e' una STRADDLE: BuyStop sopra il massimo del box
+#  notturno + SellStop sotto il minimo, OCO (HandleOCO r.473: la prima
+#  che si riempie cancella l'altra). Il preset FTMO
+#  (mql5/Presets/FTMO/ABTG_MaxMinNotte_ORO_770402_FTMO.set) ha GIA'
+#  InpAllowLong=true e InpAllowShort=true. Quindi la domanda NON e'
+#  "accendiamo il long": e' "IL LONG, DA SOLO, PORTA EDGE? E QUANTO
+#  RISCHIO PORTA?". Nessuno l'ha mai misurato sulla geometria del preset.
+#
+#  COSA C'E' GIA' IN CASA (e perche' non basta):
+#   (a) R103 (24/08, blocco F23 di risultati_archivio/R103_REFERTO_
+#       DRIVER_FOREX_METALLI_20260824_1922.txt): DUE LATI insieme,
+#       geometria del preset, OHLC M1, 2020.01.01 -> 2026.06.30, 0,5%,
+#       deposito 100000: PF 1.308 (dai deal 1.314), n 693, DD 5.32%,
+#       profitto +24736 EUR, anni negativi 2021 e 2023 (2/7). Binario
+#       5fc0bc31 (per blob, report/SEDIA_770402_COSA_MANCA_2026-09-20.md
+#       par. 1.1). La divisione per LATO NON e' nel repo: la tabella dei
+#       deal di F23 sta solo nello zip R103.
+#   (b) R19b (per-trade risultati_prove/trades_portafoglio/abtg_trades_
+#       ABTG_MaxMinNotte_XAUUSD_770405.csv, 92 deal = 68 posizioni,
+#       riaperto e ricontato il 26/09; lato = deal_type della chiusura,
+#       1 = chiude un LONG):
+#          LONG   39 pos (47 deal)  26 vinte  netto +5.113,45  PF 1,831
+#          SHORT  29 pos (45 deal)  19 vinte  netto +10.761,71 PF 3,279
+#       MA: 9,5 mesi (2025.09.16 -> 2026.06.26, gamba OOS di R19b), n
+#       sotto 150 per lato, grafico M5, e soprattutto UN'ALTRA GEOMETRIA:
+#       box 22:00-06:59 e cutoff 09:30 BCM (prove/R19_pertrade_oro.txt),
+#       non 23:00-04:59 / 08:30 del preset. Sulla stessa finestra il PF
+#       totale di R19b e' 2,45 contro 1,308 di R103 sui 6,5 anni: il PF
+#       ASSOLUTO di R19b NON si e' generalizzato. Quello che puo'
+#       generalizzarsi e' la STRUTTURA: "il long c'e', ma e' il lato
+#       piu' debole".
+#
+# =====================================================================
+#  2. LA FAMIGLIA: TRE CONFIGURAZIONI = TRE FILE
+# =====================================================================
+#  Perche' tre file e non un asse sui lati: il per-trade e' UNO per magic
+#  e in un file con un asse di parametro sopravvive solo quello
+#  dell'ultima cella (classe 455). Quindi, come R252/R255: una
+#  configurazione per file, asse = InpMagic a due gemelle (passo 50: G1
+#  e un per-trade per gemella).
+#   file   config      differenze dalla cella R103        magic
+#   R260a  solo LONG   InpAllowShort=false                795301/795351
+#   R260b  solo SHORT  InpAllowLong=false                 795302/795352
+#   R260c  due lati    nessuna (ANCORA = R103)             795303/795353
+#  3 file x 2 gemelle x 2 gambe = 12 PASSATE (6 lunghe da 6,5 anni + 6
+#  monconi da 1 giorno, par. 5).
+#
+#  E R260c INGLOBA R193a (prove/R193a_binariocontrollo_MaxMinNotte_
+#  XAUUSD.txt, mai girato): stessa cella, stesso binario HEAD, stesso
+#  deposito, stesso modello -- ma sulla FINESTRA PIENA di R103 invece del
+#  taglio 0,40, quindi il confronto PF-contro-PF che R193a dichiarava
+#  IMPOSSIBILE (sua par. B3) qui E' possibile. Se R260c gira, R193a NON
+#  si lancia piu': sarebbe un doppione. R193b (la taglia, asse
+#  InpRiskPercent) resta un round a se': R260 NON muove la taglia (par.
+#  8 fa il conto a tavolino e lo dichiara tale).
+#  Stesso discorso per r151a/r170b (uscite su questa sedia, girati sul
+#  runner 15-20/09 sul binario HEAD con la cella del preset dentro, CSV
+#  MAI trasportati -- STATO_MAXMIN_DAX_LONG_E_ORO_2026-09-26.md par. B.7):
+#  se arrivano PRIMA del lancio e la loro cella-ancora da' PF 1.308 / n
+#  693, il G0 di R260c e' gia' confermato; R260c resta comunque utile per
+#  il PER-TRADE, che quei round non consegnano.
+#
+# =====================================================================
+#  3. LA GEOMETRIA E I PIN -- IL PRESET FTMO TRADOTTO IN ORA BCM
+# =====================================================================
+#  Pin = prove/R103_ABTG_MaxMinNotte_XAUUSD_770402.txt campo per campo
+#  (commit 9c73dd1c), identici a prove/R193a_... salvo magic e commento.
+#  Il preset FTMO e' la stessa cella a +2 h (estate: FTMO = BCM + 2,
+#  report/PRESET_FTMO_OROLOGIO_2026-09-20.md), verificato riga per riga
+#  nel referto STATO_MAXMIN_DAX_LONG_E_ORO_2026-09-26.md par. B.3:
+#     input                BCM (qui)   FTMO (preset)   ora italiana
+#     InpBoxStartHour      23          1               00:00
+#     InpBoxEndHour:Min    4:59        6:59            05:59
+#     InpPlaceHour:Min     7:00        9:00            08:00
+#     InpEntryCutoff       8:30        10:30           09:30
+#     InpCloseHour:Min     17:30       19:30           18:30
+#  buffer 250 punti (= 2,50 $), InpSLMode=0 (MM_SL_OPPOSITE: stop =
+#  estremo opposto del box, SLforLong r.374-380), InpMgmtTF=16386 (H2),
+#  TP1 1R 50% + BE, TP2 2,5R 50%, target EMA200 H2, TP finale 4R,
+#  trailing 2 x ATR(H2), correlazione OFF, news OFF, un trade al giorno.
+#  DIFFERENZE COL PRESET, dichiarate e NON geometriche:
+#    InpRiskPercent 0,5 (banco = R103) contro 2,00 del preset;
+#    InpMaxSpread 0 (= R103) contro 150 del preset: il filtro in campo
+#      puo' solo TOGLIERE ingressi; effetto [NON MISURATO]. Tenerlo a 0
+#      e' la condizione del G0. Una variabile per file: NON si muove qui.
+#    InpCorrSymbol SPXUSD contro US500.cash: inerte (correlazione OFF).
+#    InpNewsCurrencies OMESSO: default compilato = stringa vuota, e un
+#      pin vuoto MT5 lo IGNORA (controlla_prova controllo 3).
+#    InpComment = etichetta del round: entra solo nel commento
+#      dell'ordine (TryPlace r.355/r.367), zero effetto sul trading.
+#
+#  L'OROLOGIO (report/OROLOGIO_BCM_2026-09-24.md): il feed forex BCM era
+#  ORA ITALIANA - 1 tutto l'anno fino a dicembre 2024 e UTC+1 fisso dopo
+#  (cambio fra 26/12/2024 e 02/02/2025, giorno [NON MISURATO]). Il box
+#  23:00-04:59 BCM e' quindi 00:00-05:59 IT su ~70 dei 78 mesi e
+#  23:00-04:59 IT negli inverni 2024/25 (coda) e 2025/26 (~7-8 mesi,
+#  [DERIVATO]). Che l'oro segua l'orologio forex e' [INFERITO] (nessuna
+#  ancora XAUUSD in quel referto). R260 eredita lo stesso impasto di
+#  R103: e' voluto, perche' il G0 e' R103.
+#
+#  BINARIO: walkforward_generico.ps1 compila l'EA dalla testa del ramo
+#  lavoro ($EABranch, r.264 a HEAD; classe 166). Al 26/09 ABTG_MaxMinNotte.mq5 a HEAD =
+#  commit 7d0da9f9 (03/09, v1.11, 918 righe, blob 3ce0ccd6), che e'
+#  ESATTAMENTE il binario che si schiererebbe su FTMO.
+#    SHA256 ABTG_MaxMinNotte.mq5  9346f16a4caad4cf18ee9b772caf06a4
+#                                 97b3c6727e0d0b65250e377e75bfae80
+#    SHA256 ABTG_PausaGuardian.mqh 3ec971152e85e0082488cc4243ff45ae
+#                                 09948c191d52ab96050b48f94641a737
+#  Classe 166: SHA256 dei due file dopo ogni job, contro questi;
+#  diverso = file NON VALIDO. (L'include in campo su FTMO e' 26a18566,
+#  diverso: tocca solo il Guardian, che nel tester e' fail-open.)
+#  InpUsaGuardian=true come R103: nel tester il canale del Guardian non
+#  esiste e ABTG_GuardiaIngresso lascia passare.
+#  HEAD contiene d4da7d7 (breakeven NON piu' annegato nel parziale,
+#  r.418-431) e la guardia "un trade al giorno" (7d0da9f9). Fra 5fc0bc31
+#  (R103) e HEAD c'e' SOLO quella guardia, dichiarata inerte nel tester
+#  (R193a par. B2, rifatto dall'esterno: gOperatoOggi si riaccende solo
+#  con una posizione nostra a cavallo della mezzanotte o un DEAL_ENTRY_IN
+#  di oggi prima delle 07:00, entrambi impossibili con un solo EA e
+#  InpCloseAtEnd=true). Il G0 di R260c e' la MISURA di questa inerzia.
+#
+# =====================================================================
+#  4. PERCHE' OHLC M1 E NON TICK REALI -- il conto, non l'abitudine
+# =====================================================================
+#  Tick reali XAUUSD su BCM: dal 2024.07.05 [R100_REFERTO.md], ma la
+#  profondita' e' [NON VERIFICATA]: due fonti in casa non concordano
+#  (report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par. 6.3).
+#  Anche prendendo per buono il 2024.07.05: ~24 mesi di tick. Frequenza
+#  del LONG sulla geometria del preset, stimata: ~294 posizioni in 6,5
+#  anni (par. 6) = ~45/anno -> ~90 posizioni in 24 mesi: SOTTO 150.
+#  A tick reali il merito del long resterebbe sospeso per costruzione, e
+#  il G0 contro R103 (che e' OHLC dal 2020) non esisterebbe.
+#  -> OHLC M1 dal 2020, come R100, R103, R151a, R193a/b. Dichiarato:
+#  il DD che esce e' un LIMITE INFERIORE e il profitto una STIMA DEL
+#  LORDO (spread corrente, niente slippage, riempimenti ideali).
+#  Una riprova a tick reali sulla coda 2024.07.05 -> 2026.06.30 NON e'
+#  in questo round (buco dichiarato, par. 11).
+#
+# =====================================================================
+#  5. LA FINESTRA: MONCONE DI UN GIORNO + GAMBA PIENA = LA FINESTRA DI R103
+# =====================================================================
+#  @DAQUANDO 2019.12.30, @FINOA 2026.06.30, @FRAZIONEIS 0.0005.
+#  Il driver taglia a Inizio + floor(giorni x frazione) (r.934):
+#  2374 giorni x 0,0005 = 1,187 -> 1 giorno. Quindi:
+#     IS  2019.12.30 -> 2019.12.31  (moncone: si scrive e basta)
+#     OOS 2020.01.01 -> 2026.06.30  (= la finestra di R103, al giorno)
+#  PERCHE': (1) il G0 contro R103 vuole la STESSA data d'inizio (R103
+#  prima operazione 2020.01.02 da log, primo deal 2020.01.03); con
+#  @DAQUANDO 2020.01.01 e una frazione piccola la gamba lunga partirebbe
+#  dopo e perderebbe i primi deal. (2) il per-trade che sopravvive e'
+#  quello della gamba che gira PER SECONDA con lo stesso magic
+#  (RIEPILOGO_R246.txt), cioe' la gamba lunga: il per-trade copre
+#  tutti i 6,5 anni.
+#  rc 2 ammesso SE il CSV _OOS ha 2 righe con Trades > 0; rc 0 ammesso
+#  (il moncone ha operato); rc 1 = guasto. Si legge SOLO il CSV _OOS.
+#
+# =====================================================================
+#  6. L'ATTESA, SCRITTA PRIMA DEI NUMERI
+# =====================================================================
+#  R260c (due lati, = R103):
+#    Profit +24736 EUR (arrotondato all'unita' in R103), PF 1.308, DD
+#    equity 5.32%, Trades 693. Nessuna banda: e' un G0 (par. 7, R1).
+#
+#  R260a (solo LONG) -- il numero di OPERAZIONI:
+#    quota del long nei DEAL di R19b = 47/92 = 51,1% -> 693 x 0,511 =
+#    ~354 deal; k del long in R19b = 47/39 = 1,205 -> ~294 POSIZIONI.
+#    MA il solo-long NON e' un sottoinsieme della straddle: senza l'OCO,
+#    le giornate in cui lo short si riempiva PRIMA e il long sarebbe
+#    arrivato DOPO (entro la scadenza di 90' e il cutoff 08:30) diventano
+#    giornate long. Quindi n_L >= (quota long di R260c), mai meno.
+#    BANDA DICHIARATA: 300-450 deal (~250-370 posizioni) [DERIVATO,
+#    larga: la quota per lato sulla geometria del preset e' [NON
+#    MISURATA]]. In ogni caso sopra 150 posizioni: il MERITO SI LEGGE.
+#
+#  R260a -- IL PF, CONTRO DUE IPOTESI SCRITTE PRIMA:
+#    HP  "R19b generalizza": il long porta edge vero, PF_L ~1,8 su
+#        ~290 posizioni. E' un TETTO, non un centro: R19b stava a 2,45
+#        di PF totale dove R103 sta a 1,308.
+#    HPs "generalizza la STRUTTURA di R19b" (long lato debole):
+#        PF_L < 1,308 < PF_S. Il long ha edge ma meno della media.
+#    H0  "nessun edge sul long": PF_L ~1,0 (0,90-1,05 col costo), e
+#        R2 (par. 7) VIOLATO. Tutto l'edge di R103 starebbe nello short.
+#    Previsione mia, scritta ora: HPs. Motivo: e' l'unica delle tre che
+#    non contraddice ne' R103 ne' R19b.
+#
+#  R260b (solo SHORT): specchio. HPs prevede PF_S > 1,308; n_S con lo
+#    stesso ragionamento: ~339 deal (~218 posizioni), banda 280-420 deal.
+#
+#  IL CONTROLLO DI STRUTTURA, gratis: n_a + n_b >= n_c (par. 6, OCO).
+#    Se n_a + n_b < n_c -> un pin di lato non e' arrivato -> NULLO (L0).
+#    PF e profitti NON si sommano (gli ingressi cambiano): nessuno scriva
+#    "PF_c = media di PF_a e PF_b".
+#
+#  IL RISCHIO del long (si legge a qualunque n, Emendamento B):
+#    DD_L a 0,5%: [NESSUNA BANDA CREDIBILE] -- un sottoinsieme puo' avere
+#    DD maggiore o minore dell'insieme. Scrivo solo la soglia che conta
+#    (par. 8): per non sfondare S3 di R193b a 2,00% servirebbe DD_L <=
+#    2,00% (lineare) / 2,06% (moltiplicativo), cioe' meno del 39% del DD
+#    della sedia intera con piu' di meta' delle operazioni. Lo ritengo
+#    IMPROBABILE, e lo scrivo prima di vederlo.
+#
+# =====================================================================
+#  7. I CANCELLI, CONGELATI PRIMA. Si citano come R<n> [R260].
+# =====================================================================
+#  R0  -SoloControllo: 2 celle per finestra in ogni file. Altrimenti STOP.
+#  R1  G0 SU R260c. VERDE = Trades 693 esatto, PF che arrotonda a 1.308,
+#      Profit che arrotonda a 24736, DD che arrotonda a 5.32.
+#      GIALLO = Trades 693 esatto e |Profit - 24736| <= 1%.
+#      ROSSO = altrimenti. Con ROSSO: R260a e R260b si scrivono ma NON si
+#      leggono contro R103; si indaga (banco non a HEAD? storico M1 oro
+#      mancante sul PC? primo deal dopo 2020.01.03? deposito?). E con
+#      ROSSO la domanda di R193a ("il contratto regge su HEAD?") ha
+#      risposta NO fino a prova contraria: 770402 resta sospesa.
+#      Trades < 693 con tutto il resto in ordine = la guardia di HEAD HA
+#      morso (par. 3): e' esattamente S3 di R193a.
+#  G1  In ogni file le due gemelle identiche al centesimo (Profit, PF, DD,
+#      Trades) e i due per-trade identici riga per riga tranne il magic.
+#      Se no, quel file e' NULLO.
+#  L0  Lato: nel per-trade di R260a TUTTE le chiusure hanno deal_type 1
+#      (chiudono un long); in R260b tutte 0. Una sola eccezione = il pin
+#      del lato non e' arrivato (default compilato: due lati) -> NULLO.
+#      Piu' il controllo di struttura del par. 6 (n_a + n_b >= n_c).
+#  R2  MERITO DEL LONG (R260a), letto sul per-trade in POSIZIONI:
+#      "il long porta edge" SE E SOLO SE
+#        (i)   posizioni >= 150, e
+#        (ii)  PF >= 1,10 sulla finestra piena, e
+#        (iii) PF >= 1,10 su TUTTE E DUE le meta', tagliate al
+#              2023.04.01 (meta' esatta di 2020.01.01-2026.06.30, fissata
+#              ORA: data di CHIUSURA della posizione).
+#      Violata una qualunque delle tre -> "il long da solo NON porta
+#      edge misurabile su questa geometria". Si riporta anche il conto
+#      anno per anno (come R103), senza soglia: e' la spina dorsale.
+#  R3  RISCHIO (a qualunque n): par. 8.
+#  R4  NESSUNA CELLA SI PROMUOVE. Non ci sono celle da scegliere: tre
+#      configurazioni fisse, zero manopole di ingresso mosse. Il round
+#      risponde "il long porta edge si'/no, e con quale DD". Cosa farne
+#      (accendere solo il long, tenere la straddle, niente) e' una firma
+#      di Claudio.
+#
+# =====================================================================
+#  8. IL DD A 2,00% -- DUE FORMULE, UNA BANDA, E LA SOGLIA S3 DI R193b
+# =====================================================================
+#  La taglia del preset FTMO e' 2,00% (firma del 20/09). R260 gira a
+#  0,5% e NON misura il 2,00%: lo fa R193b (asse InpRiskPercent 0,5->2,0,
+#  mai girato). Qui il conto a tavolino, con le DUE formule di R193b B3:
+#     moncone di rischio d = DD misurato a 0,5% (frazione)
+#     moltiplicativo: DD(2%) = 1 - (1 - d)^4    (il lotto sul balance)
+#     lineare:        DD(2%) = 4 x d
+#  Il vero sta nella banda [moltiplicativo ; lineare].
+#  Su R103 (d = 0,0532): 1-(0,9468)^4 = 19,6% ; 4 x 5,32 = 21,3% ->
+#  BANDA 19,6-21,3%.
+#  SOGLIA S3 di R193b (prove/R193b_taglia_MaxMinNotte_XAUUSD.txt r.200-
+#  202): "se il DD misurato a InpRiskPercent=2.00 supera 8,0% ... 770402
+#  NON si schiera a 2,00%". Tradotta sulla misura a 0,5%:
+#     lineare:        4d <= 0,080          -> d <= 2,00%
+#     moltiplicativo: 1-(1-d)^4 <= 0,080   -> d <= 2,06%
+#  -> DD a 0,5% > 2,06%: la configurazione NON sta sotto S3 a 2,00% con
+#     NESSUNA delle due formule. <= 2,00%: ci sta con tutte e due.
+#     In mezzo: non si decide a tavolino, serve R193b sulla stessa cella.
+#  Vale per R260a, R260b e R260c. E resta [DERIVATO]: il verdetto di
+#  rischio a 2,00% lo da' solo una corsa a 2,00%. Il DD OHLC e' un
+#  limite inferiore: questa soglia e' gia' il caso migliore.
+#
+# =====================================================================
+#  9. MAGIC -- VERGINI, CERCATI IL 26/09/2026
+# =====================================================================
+#  Blocco 7953xx, cercato su tutto il disco e su tutti i rami:
+#     grep -rIE --exclude-dir=.git "\b7953[0-9]{2}\b" /home/user -> 0
+#     git grep -E "\b7953[0-9]{2}\b" $(git for-each-ref --format=
+#        '%(refname)' refs/heads refs/remotes)                  -> 0
+#  Esclusi per mandato: 7704xx (sedie), 7931xx (R255), 7925xx, 7926xx.
+#  Anche "R260" non compariva nel repo prima di questi file.
+#  795301/795351 (R260a), 795302/795352 (R260b), 795303/795353 (R260c).
+#  Per-trade attesi in Common\Files (ExportTrades r.846):
+#     abtg_trades_ABTG_MaxMinNotte_XAUUSD_<magic>.csv  (6 file)
+#
+# =====================================================================
+#  10. COSTO IN TEMPO MACCHINA
+# =====================================================================
+#  Base MISURATA sullo stesso EA/simbolo/finestra/modello/deposito:
+#  r151a = 7 celle x (IS 40% + OOS 60%) = 14 passate in 143 s
+#  (coda/referti/REFERTO_RUNNER_20260915_033005.txt r.465-470) ->
+#  ~20,4 s per FINESTRA PIENA. Ma quella misura e' del banco VPS, non
+#  del PC di backtest: la velocita' del PC su oro OHLC e' [NON MISURATA].
+#  Per file: 2 gemelle x 1 finestra piena ~41 s + 2 monconi (secondi).
+#  R260a+b+c: ~2 minuti di tester + avvio/compilazione del driver per
+#  file (R244: 18 passate in 5 minuti tutto compreso). Dichiarato:
+#  3-6 MINUTI.
+#
+# =====================================================================
+#  11. I BUCHI, PER NOME
+# =====================================================================
+#  - Modello OHLC: DD limite inferiore; nessuna riprova a tick reali.
+#  - Lo storico M1 XAUUSD dal 2020 SUL PC DI BACKTEST: [NON VERIFICATO]
+#    (R100/R103/r151a hanno girato altrove). Il G0 lo scopre: primo deal
+#    dopo 2020.01.03 = storico mancante.
+#  - InpMaxSpread 150 del preset: non misurato qui (una variabile per
+#    file).
+#  - La quota per lato sulla geometria del preset: [NON MISURATA] (e'
+#    quello che il round misura).
+#  - L'orologio dell'oro sul feed BCM: [INFERITO] = forex.
+#  - La commissione FTMO sull'oro: [NON MISURATA]; il tester usa quella
+#    BCM.
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H2
+@DAQUANDO   2019.12.30
+@FINOA      2026.06.30
+@FRAZIONEIS 0.0005
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR260C
+InpMagic=795303||795303||50||795353||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

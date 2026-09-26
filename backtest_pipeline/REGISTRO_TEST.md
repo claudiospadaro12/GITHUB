@@ -4204,3 +4204,43 @@ Il verdetto per tutte le celle mai girate su BCM resta **NON ANCORA MISURATO (so
   seduta precedente sulle M1, r.637-655).
 - 📄 Fonte esterna letta sul PDF: arXiv **2605.04004** (Mesfin, MNQ 2021-2025), _gap continuation
   short_ netto +14,52 pti, T 1,46, 35 op. OOS, 2024 negativo: _"most credible near-miss"_.
+
+---
+
+## 🌙 26/09/2026 — R260 / R261: IL LATO LONG DEI DUE MAXMIN — ⏳ IN CODA, NON GIRATI
+
+Richieste di Claudio del 26/09: _"INTENDEVO LA PARTE BREAKOUT DEL MIN MAX ORO. QUANDO ROMPE AL
+RIALZO SI ENTRA"_ · _"ANCHE DEL MINMAX DAX OTT CI SERVE LA VERSIONE LONG"_. Dossier di partenza:
+`report/STATO_MAXMIN_DAX_LONG_E_ORO_2026-09-26.md`. **Zero passate girate, zero EA/preset/sedie
+toccati.** Banco: **PC di backtest DESKTOP-H4D7CAJ**, mai il VPS (firma del 21/09). Tutti e 7 i
+file: `controlla_prova.py` **0 problemi** (19 celle, 38 passate), `controlla_riga.py --oggetto
+prova` **nessun difetto meccanico**, ASCII puro.
+
+| file | domanda | modello · finestra | asse | magic | attesa scritta prima |
+|---|---|---|---|---|---|
+| `prove/R260c_oro_770402_due_lati_ancora.txt` (TESTA) | G0: HEAD `7d0da9f9` ridà R103? | OHLC M1 · 2020.01.01→2026.06.30 (moncone 1 g) | magic x2 | 795303/795353 | PF **1.308** · n **693** · DD **5.32%** · +24736 (R1) |
+| `prove/R260a_oro_770402_solo_long.txt` | il LONG da solo porta edge? | idem | magic x2 | 795301/795351 | 300-450 deal (~250-370 pos.); HP R19b ~1,8 (tetto) · HPs PF_L < 1,308 (previsione) · H0 ~1,0 con R2 violato |
+| `prove/R260b_oro_770402_solo_short.txt` | lo SHORT da solo (chiude il conto dei lati) | idem | magic x2 | 795302/795352 | 280-420 deal; HPs PF_S > 1,308 |
+| `prove/R261d_dax_generico_riproduce_770411_short.txt` | G0-GEN: il generico = `770411`? | tick · 2024.09.26→2026.06.30, taglio 0,40 | magic x2 | 795404/795454 | = r81a/R246i al centesimo (IS 1.87803/20 · OOS 2.15985/21) |
+| `prove/R261c_dax_long_ancora_R244b.txt` | G0-LONG: il banco ridà il long d'archivio? | tick · FRAZIONEIS 1.0 | magic x2 | 795403/795453 | = R244b C=12: PF **0.74387** · DD 5.6463 · n **157** · −3321.63 |
+| `prove/R261a_dax_long_correlazione.txt` (TESTA) | `770411` a lati invertiti, filtro S&P 0/1 | tick · FRAZIONEIS 1.0 | `InpUseCorrelation` 0/1 | 795401 | corr=0 ~135 deal PF 0,65-0,95; corr=1 50-90 deal (~35-63 pos.) → **merito SOSPESO per costruzione**, rischio letto |
+| `prove/R261b_dax_long_mgmttf.txt` | punto ⑤ del certificato sul long | tick · FRAZIONEIS 1.0 | `InpMgmtTF` M15→H4 (7) | 795402 | posizioni costanti fra le celle; H0 = PF piatto; cella M15 == R261a corr=1 (G2) |
+
+- 🔁 **R260c INGLOBA R193a** (stessa cella, stesso binario, ma finestra piena = confronto PF-contro-PF
+  che R193a dichiarava impossibile): **se R260c gira, R193a non si lancia piu'**. **R193b** (taglia
+  0,5→2,0) resta un round a se'. R260c par. 8 traduce la soglia **S3 di R193b** (8,0% a 2,00%)
+  sulla misura a 0,5%: DD > **2,06%** (moltiplicativo) = fuori a 2,00% con tutte e due le formule.
+- 🔎 **La richiesta "ancora R244b C=12 dentro R261a" NON era eseguibile a una variabile**: quella
+  cella ha box 06:00→00:00, `InpMinBoxPts` 6800, `InpSLMode` 0, cutoff 12, scadenza 600 — non e' la
+  geometria di `770411`. Sta in **R261c**, file suo. Il generico contro lo `Short_Ottimizzato`: stessi
+  52 input, 5 default diversi, **nessun ramo short cablato**; 4 differenze di codice inerti nel tester
+  (tabella in R261a par. 2) — le misura **R261d**.
+- 💰 **Costo**: R260 **3-6 min** (base r151a 20,4 s per finestra piena, banco VPS); R261 **3,6-9,1 min**
+  (0,28-0,70 min per finestra piena). Ordine: **R260c → R260a → R260b**; **R261d → R261c → R261a → R261b**.
+- 🔴 **NON VERIFICATI**: storico M1 oro dal 2020 sul PC di backtest · storico H1 di SPXUSD nel tester
+  del PC (cancello T3) · profondita' dei tick oro · orologio dell'oro (= forex, [INFERITO]) · orologio
+  sul long DAX (inverno un'ora prima della cash) · commissioni FTMO.
+- 📌 E il buco del dossier chiuso qui: **R242 e R244 non avevano righe in questo registro**. Lato long
+  DAX, per il certificato: **NON ANCORA MISURATO (③ uscita, ⑤ TF, correlazione a specchio)** con
+  **0 celle su 33 distinte ≥ PF 1,00** a tick (archivio `080957cf` 18, R242a 7, R244b 9, di cui C=12 =
+  R242a H=6); R261 chiude ⑤ e lo specchio.

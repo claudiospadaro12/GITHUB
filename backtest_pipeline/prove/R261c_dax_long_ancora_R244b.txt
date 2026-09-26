@@ -1,0 +1,102 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R261c -- G0-LONG: L'ANCORA DEL LONG D'ARCHIVIO (R244b, cella C=12)
+#  D30EUR M15, TICK REALI, deposito 100000, rischio 0,65% (= R244b)
+#  Asse TECNICO: InpMagic a due gemelle (G1). Magic 795403 / 795453.
+#  Per-trade: abtg_trades_ABTG_MaxMinNotte_D30EUR_795403.csv e _795453.csv
+#
+#  RAGIONAMENTO, CANCELLI E COSTO NEL FILE DI TESTA:
+#    prove/R261a_dax_long_correlazione.txt (par. 3 e T2).
+#
+#  COSA E': la cella C=12 di prove/R244b_riempimento_MaxMinNotte_D30EUR_
+#  long.txt, pin per pin, con l'asse InpEntryCutoffHour FERMATO a 12.
+#  Cambiano SOLO: InpEntryCutoffHour 12||9||1||17||Y -> 12 (pin),
+#  InpComment -> MAXMINR261C (solo commento dell'ordine), InpMagic ->
+#  asse gemello 795403/795453. Stessa finestra, stessa @FRAZIONEIS 1.0.
+#  NON e' la geometria di 770411 (box 06:00->00:00, InpMinBoxPts 6800,
+#  InpSLMode 0, cutoff 12:00, scadenza 600'): per questo sta in un file
+#  suo e non dentro R261a (sarebbe una seconda variabile).
+#  PERCHE' SERVE: e' il long d'archivio su QUESTO EA generico, QUESTO
+#  binario (HEAD 7d0da9f9) e QUESTO banco. Se non torna al centesimo, i
+#  numeri di R261a/b non sono confrontabili con i 34 d'archivio.
+#
+#  ATTESA (G0, nessuna banda): CSV _IS di ogni gemella =
+#    Profit -3321.63   PF 0.74387   DD 5.6463   Trades 157
+#  (risultati_archivio/R244/ROUND_R244b/ABTG_MaxMinNotte_D30EUR_IS_R244b.
+#  csv, riga C=12, ricontata il 26/09; identica alla cella R242a H=6 salvo
+#  la scadenza 250 contro 600). rc 2 ATTESO (FRAZIONEIS 1.0).
+#  CANCELLI: T0 (2 celle), T2 (G0 al centesimo), G1, L0 (tutte le chiusure
+#  deal_type 1). Questo file NON misura niente di nuovo: e' un cancello.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  nessun terminale di conto (50503392, 50504263, 10105439 REALE,
+#  541452707 FTMO, dove 770411 e' in campo). Banco: -Deposito 100000 (= R244b),
+#  -Modello 4, niente -Spread / -Ritardo / -FrazioneIS. Nessuna riga di
+#  lancio qui. Non tocca preset, EA, sedie, conti, taglie.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=6||6||0||6||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=0||0||0||0||N
+InpBoxEndMin=0||0||0||0||N
+InpMinBoxPts=6800||6800||0||6800||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=12||12||0||12||N
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=600||600||0||600||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON e' pinnato DI PROPOSITO: il valore voluto e' la
+# stringa VUOTA, e un pin di stringa vuota NON arriva all'EA (MT5 lo
+# ignora e usa il default compilato). E' il controllo 3 di
+# controlla_prova.py, nato dal caso ABTG_FiboH4_Multi che misuro' otto
+# volte lo stesso basket. Qui il default compilato E' "", cioe'
+# esattamente il valore voluto, e InpUseNewsFilter=false lo rende
+# comunque inerte.
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR261C
+InpMagic=795403||795403||50||795453||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

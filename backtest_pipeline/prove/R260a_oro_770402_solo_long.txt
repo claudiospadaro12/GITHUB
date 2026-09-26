@@ -1,0 +1,95 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R260a -- IL BOX NOTTURNO DELL'ORO (sedia 770402) -- SOLO LONG
+#  XAUUSD H2, OHLC M1 (Modello 1), deposito 100000 (banco), rischio 0,5%
+#  (banco = R103, NON una taglia proposta), binario HEAD 7d0da9f9.
+#  Magic 795301 / 795351 (asse gemello a passo 50: G1 e un per-trade per
+#  gemella). Per-trade atteso in Common\Files:
+#    abtg_trades_ABTG_MaxMinNotte_XAUUSD_795301.csv e _795351.csv
+#
+#  TUTTO IL RAGIONAMENTO, LA GEOMETRIA, L'OROLOGIO, LE ATTESE E I
+#  CANCELLI STANNO NEL FILE DI TESTA:
+#    prove/R260c_oro_770402_due_lati_ancora.txt
+#  Qui solo le differenze. Rispetto a R260c (= cella R103, input per
+#  input) cambiano SOLO:
+#    InpAllowShort = false
+#    InpComment = MAXMINR260A   (solo commento dell'ordine)
+#    InpMagic   = 795301||795301||50||795351||Y
+#  (diff eseguito con uno script sui pin di R260c, non a mano)
+#
+#  ATTESA DI QUESTO FILE (copiata dalla testa, par. 6, scritta PRIMA):
+#    n: 300-450 deal (~250-370 posizioni) -- sopra 150: il MERITO si
+#    legge. PF: HP (R19b generalizza) ~1,8 = TETTO; HPs (struttura di
+#    R19b: long lato debole) PF_L < 1,308; H0 (nessun edge sul long)
+#    PF_L ~1,0 (0,90-1,05) con R2 VIOLATO. Previsione scritta: HPs.
+#    DD a 0,5%: nessuna banda credibile; per stare sotto S3 di R193b a
+#    2,00% servirebbe DD_L <= 2,00% (lineare) / 2,06% (moltiplicativo):
+#    lo ritengo IMPROBABILE, scritto prima.
+#  CANCELLI: R0, R1 (G0 su R260c: se ROSSO questo file si scrive ma non
+#  si legge contro R103), G1, L0 (ogni chiusura del per-trade con
+#  deal_type 1; n_a + n_b >= n_c), R2 (solo sul long), R3/par. 8.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  50503392 (che ha la sedia viva 770402), 50504263, 10105439 (REALE),
+#  541452707 (FTMO). Nessuna riga di lancio qui. Non tocca preset, EA,
+#  sedie, conti, taglie.
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H2
+@DAQUANDO   2019.12.30
+@FINOA      2026.06.30
+@FRAZIONEIS 0.0005
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR260A
+InpMagic=795301||795301||50||795351||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

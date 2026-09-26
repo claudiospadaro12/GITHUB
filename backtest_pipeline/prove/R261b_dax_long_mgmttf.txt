@@ -1,0 +1,110 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R261b -- LA VERSIONE LONG DI 770411 -- ASSE InpMgmtTF (7 celle)
+#  D30EUR M15, TICK REALI, deposito 100000 (banco), rischio 1% (banco)
+#  Magic 795402 (una cella per TF; per-trade = ultima cella, H4:
+#    abtg_trades_ABTG_MaxMinNotte_D30EUR_795402.csv)
+#
+#  TUTTO IL RAGIONAMENTO, LA TABELLA DI CORRISPONDENZA DEI DUE EA,
+#  L'OROLOGIO, I CANCELLI E IL COSTO STANNO NEL FILE DI TESTA:
+#    prove/R261a_dax_long_correlazione.txt
+#  Qui solo le differenze. Rispetto a R261a cambiano SOLO:
+#    InpUseCorrelation = true (PIN: e' la sedia 770411 com'e', filtro
+#                        S&P ACCESO -- la "versione long" chiesta)
+#    InpMgmtTF = 15||15||1||16388||Y  (ASSE: ENUM_TIMEFRAMES, MT5 ignora
+#                        il passo e spazzola i membri fra M15 e H4 =
+#                        M15 M20 M30 H1 H2 H3 H4 = 7 celle, classe 287)
+#    InpComment = MAXMINR261B, InpMagic = 795402
+#  (diff eseguito con uno script sui pin di R261a, non a mano)
+#
+#  PERCHE' QUESTO ASSE: e' il punto 5 del certificato del 09/09 ("il TF
+#  e' stato cambiato?"). Su questo motore il TF del GRAFICO e' inerte (il
+#  box si legge sempre su PERIOD_M1, ComputeBox r.308-318); l'unico TF
+#  che entra nei numeri e' InpMgmtTF (ATR dello stop, EMA200 del 3o
+#  target, ATR del trailing). Vale 15 in OGNI corsa DAX mai fatta.
+#  COSA MUOVE: lo STOP (2,5 x ATR(14) sul TF: salendo si allarga) e le
+#  USCITE. NON muove gli ingressi: TryPlace piazza agli stessi livelli
+#  (massimo del box + buffer) e gli stessi giorni. Quindi le POSIZIONI
+#  devono essere le stesse nelle 7 celle; cambiano i DEAL (parziali).
+#  Il CSV conta deal: la costanza delle posizioni si legge solo sul
+#  per-trade di H4 contro quello di R261a corr=1 (= M15). [Controllo
+#  parziale, dichiarato.]
+#  IL COSTO (frontiera stop >= 40 x spread): la cella M15 sta a 37,9x
+#  (R242a r.219-220, spread BCM 1,70): SOTTO la frontiera. Salendo di TF
+#  lo stop si allarga e il rapporto MIGLIORA; di quanto: [NON MISURATO]
+#  (serve l'ATR per TF, non in archivio).
+#
+#  ATTESA (scritta prima): posizioni ~35-63 in OGNI cella (come R261a
+#  corr=1: stessi ingressi). Merito SOSPESO su tutte e 7 (T4). PF: nessun
+#  centro dichiarato; su R17 oro l'asse InpMgmtTF ha dato un altopiano
+#  PIATTO (SEDIA_770402_COSA_MANCA par. 3 e): l'ipotesi nulla qui e'
+#  "PF piatto lungo l'asse". Una cella che sporge e le vicine no = rumore,
+#  non una scelta (regola di casa: centro dell'altopiano, mai il picco).
+#  CANCELLI: T0 (7 celle), G2 (cella M15 == R261a corr=1 al centesimo),
+#  L0, T3 (se corr=1 di R261a non ha morso, anche qui non morde), T4, T5.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  nessun terminale di conto (50503392, 50504263, 10105439 REALE,
+#  541452707 FTMO, dove 770411 e' in campo). Banco: -Deposito 100000,
+#  -Modello 4, niente -Spread / -Ritardo / -FrazioneIS. Nessuna riga di
+#  lancio qui. Non tocca preset, EA, sedie, conti, taglie.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||1||16388||Y
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=true||true||0||true||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR261B
+InpMagic=795402||795402||0||795402||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

@@ -1,0 +1,320 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R261 -- LA VERSIONE LONG DELLA SEDIA 770411 (MaxMin DAX "OTT")
+#  EA: ABTG_MaxMinNotte (generico), D30EUR M15, TICK REALI
+#  FILE DI TESTA DEL ROUND, e cella R261a: asse InpUseCorrelation 0/1,
+#  SOLO LONG. Qui stanno il ragionamento, le attese e i cancelli di
+#  tutta la famiglia R261a..R261d (4 file). Gli altri rimandano qui.
+#  Scritto il 26/09/2026. Criteri congelati PRIMA dei numeri.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest, che
+#  resta SPENTO), NE' su nessun terminale di conto (50503392, 50504263,
+#  10105439 REALE, 541452707 FTMO, dove 770411 e' IN CAMPO). Il terminale
+#  del PC e' loggato sul demo 50503392: prima si controlla che non abbia
+#  SEDIE attaccate (avvertenza di R246/R251/R253/R255).
+#
+#  VINCOLI DI BANCO (stanno nella riga di lancio, non qui):
+#    -Expert ABTG_MaxMinNotte  -Simbolo D30EUR  -Periodo M15
+#    -Deposito 100000  = il banco di r81a / R194a / R246i / R244b sulla
+#        stessa sedia. NON e' la taglia FTMO: nessuna taglia e' proposta.
+#    -Modello 4 (tick reali). Storico indici BCM dal 2024.09.26,
+#        dichiarato COMPLETO (report/STORICO_MT5BACKTEST_ESITO_2026-09-08.md
+#        r.38-40): e' il fondo del barile, non un'abitudine.
+#    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo da'
+#        '@FRAZIONEIS' nel file; driver r.713-740).
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca preset, EA, sedie, conti, taglie o parametri del forward.
+# =====================================================================
+#
+# =====================================================================
+#  1. LA DOMANDA, E COSA E' GIA' MISURATO
+# =====================================================================
+#  Claudio, 26/09/2026: "ANCHE DEL MINMAX DAX OTT CI SERVE LA VERSIONE
+#  LONG". In campo su FTMO: 770411 = ABTG_MaxMinNotte_DAX_Short_
+#  Ottimizzato, SOLO SHORT, filtro S&P ACCESO (preset mql5/Presets/FTMO/
+#  ABTG_MaxMinNotte_DAX_Short_770411_FTMO.set: InpUseCorrelation=true).
+#  Sullo short il filtro e' la chiave: PF 1,18 -> 2,05, DD 6,1 -> 3,1%,
+#  Trades 98 -> 41 (valid_MaxMin_DAX_short_refine.csv, buffer 1000,
+#  ATR 2,5; REGISTRO_TEST r.661-676).
+#
+#  IL LONG SUL DAX E' GIA' MISURATO -- MA MAI COSI' (referto
+#  report/STATO_MAXMIN_DAX_LONG_E_ORO_2026-09-26.md par. A):
+#   - 34 righe a tick (33 celle distinte, 30 esiti distinti, 9 nidificate):
+#     archivio 080957cf (18), R242a (7), R244b (9). PF 0,547-0,947,
+#     ZERO celle >= 1,00. Posizioni <= 145 (k 1,4207, per-trade R244b).
+#   - MAI con la correlazione ACCESA sul long: tutti i file ABTG_MaxMin*
+#     su D30EUR con correlazione ON hanno InpAllowLong=false.
+#   - MAI con la geometria ESATTA di 770411: l'archivio aveva ATR 1,5 e
+#     TP2 in griglia; R242a/R244b hanno box del giorno precedente,
+#     InpSLMode=0 (stop all'estremo opposto), InpMinBoxPts 6800,
+#     scadenza 250/600', cutoff 9-17 -- tutt'altra geometria.
+#   - MAI con un TF di gestione diverso da M15 (InpMgmtTF=15 ovunque).
+#  -> R261 misura ESATTAMENTE "770411 con i lati invertiti", filtro
+#     spento e acceso (R261a) e sul TF di gestione (R261b), piu' due
+#     file di controllo (R261c, R261d) che rendono leggibili i primi due.
+#
+# =====================================================================
+#  2. IL GENERICO RIPRODUCE LO "SHORT_OTTIMIZZATO"? -- LETTO, E POI MISURATO
+# =====================================================================
+#  Il preset di 770411 gira su ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5
+#  (619 righe, v1.10, ultimo commit 5fc0bc31, blob 405aff55). Per avere
+#  il LONG serve il generico ABTG_MaxMinNotte.mq5 (918 righe, v1.11,
+#  7d0da9f9, blob 3ce0ccd6). Diff dei due sorgenti fatto il 26/09 con i
+#  commenti tolti. TABELLA DI CORRISPONDENZA, INPUT PER INPUT:
+#   - STESSI 52 input (61 righe 'input' meno 9 'input group'), STESSI
+#     nomi, STESSO ordine, STESSI tipi ed enum
+#     (ENUM_MM_SL { OPPOSITE=0, ATR=1, FIXED=2 } in tutti e due: Short_
+#     Ott r.45, generico r.112). Il generico ne ha UNO in piu':
+#     InpAutoTest (stampa in OnInit, zero effetto sul trading).
+#   - Cambiano SOLO CINQUE DEFAULT di trading, piu' commento e magic
+#     (irrilevanti: qui ogni input e' pinnato):
+#       input              Short_Ott   generico   preset FTMO 770411
+#       InpAllowLong       false       true       false
+#       InpAtrSLmult       2.5         1.5        2.5
+#       InpTP2_R           3.0         2.5        3.0
+#       InpUseCorrelation  true        false      true
+#       InpRiskPercent     1.0         2.0        2.00
+#       InpComment/InpMagic  "MAXMIN DAX SHORT"/770411 contro "MAXMIN"/770401
+#   - TUTTI GLI ALTRI input del preset FTMO passano identici, salvo
+#     l'orologio (par. 4) e InpCorrSymbol US500.cash -> SPXUSD (il nome
+#     BCM dello stesso indice guida, come r81a/R194a/R246i).
+#  LOGICA -- nessun ramo short CABLATO nello Short_Ott:
+#   - TryPlace: "if(InpAllowLong && longOK)" / "if(InpAllowShort &&
+#     shortOK)" in tutti e due (Short_Ott r.246/r.258, generico r.347/
+#     r.359). SLforLong/SLforShort identici (Short_Ott r.273/r.281,
+#     generico r.374/r.382). CorrBias identico (Short_Ott r.396, generico
+#     r.698): EMA14 contro EMA100 di SPXUSD su H1, +1 = solo long, -1 =
+#     solo short, 0 = entrambi. Lo SHORT e' ottenuto SOLO dai pin.
+#   - Le differenze di codice sono QUATTRO, e nel tester (un EA solo,
+#     una posizione alla volta) sono tutte inerti PER COSTRUZIONE:
+#     (1) la guardia "un trade al giorno" del generico (PuoArmare_Calc /
+#         UnTradeAlGiorno): inerte nel tester (R193a par. B2);
+#     (2) SelPos: il generico usa PositionSelect(_Symbol) (cieco in
+#         hedging con un vicino, difetto C9), lo Short_Ott scorre le
+#         posizioni per simbolo+magic. Con un solo EA: identici;
+#     (3) PositionClose/PositionModify per _Symbol (generico) contro per
+#         ticket (Short_Ott): con una posizione sola, identici;
+#     (4) Autotest + le sue stampe.
+#  -> Letto: il generico con i pin di 770411 E' la sedia. MISURATO da
+#     R261d (G0-GEN, par. 7): il generico con i pin SHORT di R246i deve
+#     ridare r81a/R246i AL CENTESIMO. Se non li rida', R261a/R261b
+#     misurano "il long del motore generico", NON "il long di 770411".
+#
+# =====================================================================
+#  3. LA FAMIGLIA
+# =====================================================================
+#   file   cosa                                       asse / celle      magic
+#   R261d  G0-GEN: generico = 770411 SHORT (r81a)     magic x2 (G1)     795404/795454
+#   R261c  G0-LONG: ancora del long d'archivio        magic x2 (G1)     795403/795453
+#          (R244b C=12, PF 0,74387, n 157)
+#   R261a  770411 a lati invertiti, CORRELAZIONE      0/1 = 2 celle     795401
+#   R261b  770411 a lati invertiti, InpMgmtTF          7 TF = 7 celle    795402
+#  ORDINE CONSIGLIATO: R261d -> R261c -> R261a -> R261b (i due cancelli
+#  prima: se cadono, i due file di misura si scrivono ma non si leggono).
+#
+#  PERCHE' L'ANCORA "R244b C=12" NON PUO' STARE DENTRO R261a: la cella
+#  R244b C=12 (PF 0,74387, n 157) ha box 06:00 -> 00:00, InpMinBoxPts
+#  6800, InpSLMode 0, cutoff 12:00, scadenza 600' -- NON e' la geometria
+#  di 770411. Messa dentro R261a sarebbe una SECONDA variabile. Quindi va
+#  in un file suo (R261c): certifica che QUESTO banco riproduce il long
+#  d'archivio al centesimo, sullo stesso EA generico. La cella corr=0 di
+#  R261a e' una MISURA NUOVA, senza ancora propria.
+#  CONTROLLO INCROCIATO GRATIS: la cella corr=1 di R261a e la cella
+#  InpMgmtTF=M15 di R261b hanno TUTTI i pin identici (magic a parte):
+#  devono dare lo stesso Profit/PF/DD/Trades AL CENTESIMO (G2).
+#
+# =====================================================================
+#  4. LA GEOMETRIA DI 770411 IN ORA BCM, E L'OROLOGIO
+# =====================================================================
+#     input                BCM (qui)   FTMO (preset)
+#     InpBoxStartHour:Min  23:00       1:00
+#     InpBoxEndHour:Min    4:59        6:59
+#     InpPlaceHour:Min     7:59        9:59
+#     InpEntryCutoff       8:30        10:30
+#     InpCloseHour:Min     17:30       19:30
+#  (= il preset BCM 100k ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_
+#  M15_770411_100K.set e i pin di r81a/R246i). Buffer 1000 punti (= 10
+#  punti indice), InpSLMode=1 (ATR), ATR(14) su M15 x 2,5, TP1 1R 50% +
+#  BE, TP2 3R 50%, target EMA200 M15, TP finale 4R, trailing 2 x ATR,
+#  scadenza 90', un trade al giorno, InpMaxSpread 0 (= preset FTMO).
+#  OROLOGIO: BCM sugli indici e' UTC+1 FISSO su tutto lo storico dal
+#  2024.09.26 (report/OROLOGIO_BCM_2026-09-24.md). Quindi il box
+#  23:00-04:59 BCM e' 00:00-05:59 IT d'estate e 23:00-04:59 IT d'inverno;
+#  il piazzamento delle 07:59 BCM e' 08:59 IT d'estate, 07:59 IT
+#  d'inverno. I numeri di R261 MESCOLANO DUE TEMPISTICHE, come quelli di
+#  770411 (per lo short la prova d'orologio c'e', R246i-l/q/r; per il
+#  long no: [NON MISURATO], buco dichiarato). FTMO resta a IT+1 tutto
+#  l'anno: d'inverno il campo fara' la tempistica ESTIVA del backtest.
+#
+# =====================================================================
+#  5. LA FINESTRA
+# =====================================================================
+#  @DAQUANDO 2024.09.26, @FINOA 2026.06.30, @FRAZIONEIS 1.0: UNA TRANCHE,
+#  CSV _IS = finestra piena, gamba OOS degenere (rc 2 ATTESO, come
+#  R242/R244, dichiarato dal driver r.744-746). E' lo stesso protocollo
+#  dell'ancora R244b, quindi il confronto fra R261c e R244b e' a pari
+#  finestra. Il per-trade che resta e' quello dell'ULTIMA cella
+#  (classe 455; REFERTO_R244 par. 2 lo ha usato cosi'): in R261a = corr=1,
+#  in R261b = H4. R261d usa invece @FRAZIONEIS 0.40 perche' la sua ancora
+#  (r81a) e' su quel taglio.
+#  Allungare fino a oggi (+14,3%) NON si fa qui: costerebbe la riserva di
+#  forward e cambierebbe la finestra dell'ancora (REFERTO_R242).
+#
+# =====================================================================
+#  6. L'ATTESA, SCRITTA PRIMA DEI NUMERI (R261a)
+# =====================================================================
+#  CELLA corr=0 (770411 a lati invertiti, filtro spento):
+#   vicino d'archivio: long, buffer 1000, TP2 3,0, ATR 1,5, scadenza 90',
+#   corr 0 -> PF 0,73024, DD 21,35% @1% (deposito 10.000), Trades 147
+#   (080957cf-valid_MaxMin_D30EUR.csv). Sullo short lo stesso passo
+#   ATR 1,5 -> 2,5 ha tolto ~8% dei deal (107 -> 98, short_refine).
+#   -> Trades ~135 (banda 115-160 deal), PF 0,65-0,95 [DERIVATO; in
+#   R242 lo stop allargato 7 volte ha mosso il PF di +0,002]. DD
+#   [BANDA LARGA]: il vicino ha 21,35% ma a deposito 10.000.
+#  CELLA corr=1 (770411 a lati invertiti = "la versione long"):
+#   IL NUMERO DI OPERAZIONI, due strade, scritte tutte e due:
+#    (a) "il filtro taglia come sullo short": 98 -> 41 = tiene il 41,8%
+#        -> ~56 deal ~40 posizioni.
+#    (b) "il filtro e' uno SPECCHIO": sullo short tiene i giorni con
+#        l'S&P in discesa (41,8%); sul long tiene il COMPLEMENTO (bias
+#        +1), ~58% se il bias 0 e' raro (EMA14 = EMA100 al punto: raro)
+#        -> ~78 deal ~55 posizioni. E la finestra 2024-2026 e' in
+#        maggioranza al rialzo: (b) e' la mia previsione.
+#   -> BANDA 50-90 deal = ~35-63 posizioni. SOTTO 150 in ogni caso: IL
+#   MERITO E' SOSPESO PER COSTRUZIONE, sotto 50 posizioni e' "NON
+#   MISURATO -- campione". Il RISCHIO si legge a qualunque n.
+#   IL PF, contro due ipotesi:
+#    HP  "lo specchio funziona come sullo short": x1,74 (1,18 -> 2,05)
+#        sul PF della cella corr=0 -> ~1,1-1,6.
+#    H0  "il filtro non salva il long": PF corr=1 ~ PF corr=0 (0,65-0,95).
+#   Discrimina l'INDIZIO (non il merito): PF corr=1 >= 1,10 con >= 50
+#   posizioni.
+#
+# =====================================================================
+#  7. I CANCELLI, CONGELATI PRIMA. Si citano come T<n> [R261].
+# =====================================================================
+#  T0  -SoloControllo: R261a 2 celle, R261b 7 celle, R261c 2, R261d 2
+#      per finestra. Altrimenti STOP.
+#  T1  G0-GEN (R261d): IS Profit 4766.96 PF 1.87803 DD 3.0977 Trades 20;
+#      OOS Profit 6143.38 PF 2.15985 DD 1.9213 Trades 21 (RIEPILOGO_
+#      R246.txt, = r81a). Per-trade 21 righe, 14 posizioni, somma
+#      6143.38. VERDE = identico al centesimo. Se NO: R261a/b si scrivono
+#      ma si chiamano "long del generico", non "long di 770411".
+#  T2  G0-LONG (R261c): PF 0.74387, DD 5.6463, Trades 157, Profit
+#      -3321.63 (CSV R244b, C=12) al centesimo. Se NO: il banco o il
+#      binario non riproducono il long d'archivio -> R261a/b NON si
+#      leggono finche' non si capisce perche'.
+#  G1  Le gemelle di R261c e R261d identiche al centesimo.
+#  G2  R261a corr=1 == R261b M15 al centesimo (par. 3).
+#  L0  Nel per-trade di R261a/b/c tutte le chiusure hanno deal_type 1
+#      (chiudono un long); in R261d tutte 0. Un'eccezione = pin di lato
+#      non arrivato -> quel file e' NULLO.
+#  T3  C0 DELLA CORRELAZIONE: se la cella corr=1 ha Trades IDENTICI alla
+#      cella corr=0, il filtro NON HA MORSO (SPXUSD senza storico H1 nel
+#      tester = CorrBias torna 0 e passa tutto: r.700-705) -> cella
+#      NON ESEGUITA, non "il filtro non serve".
+#  T4  MERITO: NESSUNA cella di R261 e' promuovibile (posizioni < 150 per
+#      costruzione, par. 6). Si consegnano INDIZIO e RISCHIO.
+#  T5  RISCHIO (a qualunque n, Emendamento B): R261 gira a 1,00%. La
+#      taglia FTMO e' 2,00%: DD(2%) nella banda [1-(1-d)^2 ; 2d] con d =
+#      DD misurato a 1%. Soglia di casa (S3 di R193b, stessa taglia):
+#      8,0% a 2,00% -> d > 4,0% (lineare) / 4,08% (moltiplicativo) = la
+#      configurazione NON sta sotto S3 a 2,00% [DERIVATO; la misura vera
+#      a 2,00% la da' solo una corsa a 2,00%].
+#
+# =====================================================================
+#  8. MAGIC -- VERGINI, CERCATI IL 26/09/2026
+# =====================================================================
+#  Blocco 7954xx: grep -rIE --exclude-dir=.git "\b7954[0-9]{2}\b"
+#  /home/user -> 0; git grep su tutti i refs/heads e refs/remotes -> 0.
+#  Esclusi per mandato: 7704xx, 7931xx, 7925xx, 7926xx. "R261" non
+#  compariva nel repo prima di questi file.
+#  795401 (R261a), 795402 (R261b), 795403/795453 (R261c),
+#  795404/795454 (R261d). Per-trade in Common\Files:
+#  abtg_trades_ABTG_MaxMinNotte_D30EUR_<magic>.csv (ExportTrades r.846).
+#
+# =====================================================================
+#  9. COSTO IN TEMPO MACCHINA
+# =====================================================================
+#  Due basi, tutte e due dichiarate:
+#   - 0,700 min/passata (R104_REFERTO_DRIVER_20260825_0738.txt r.15:
+#     D30EUR M15 tick, ma sulla copia MFE dello Short_Ott);
+#   - R244 reale: 18 passate in 5 minuti TUTTO COMPRESO, sullo stesso EA
+#     generico, stesso simbolo/TF/modello/deposito/finestra, sul PC di
+#     backtest (REFERTO_R244 intestazione) = ~0,28 min/passata.
+#  R261d 2 gemelle x (IS 40% + OOS 60%) = 2 finestre piene
+#  R261c 2, R261a 2, R261b 7  -> ~13 finestre piene
+#  -> 3,6-9,1 MINUTI in tutto (0,28-0,70 min x 13).
+#
+# =====================================================================
+#  10. I BUCHI, PER NOME
+# =====================================================================
+#  - Merito del long NON leggibile in R261 (posizioni < 150): R261 chiude
+#    il certificato (punto 5 TF, filtro a specchio), non apre una sedia.
+#  - L'orologio sul long (inverno un'ora prima della cash): [NON MISURATO].
+#  - Storico H1 di SPXUSD nel tester del PC: lo scopre T3.
+#  - InpMgmtTF e il costo: la cella viva M15 ha stop 2,5 x ATR(M15) =
+#    64,5 punti indice = 37,9x lo spread BCM 1,70 (R242a r.219-220):
+#    SOTTO la frontiera di casa dei 40x. I TF piu' alti allargano lo stop
+#    (il costo migliora, par. di R261b).
+#  - Commissione FTMO su GER40: [NON MISURATA].
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=0||0||1||1||Y
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR261A
+InpMagic=795401||795401||0||795401||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
