@@ -889,6 +889,21 @@ LETTURA_VIETATI = [
     (r"\.(Kill|Close|CloseMainWindow|Stop|Delete|Remove|Save|WriteAllText|WriteAllLines|AppendText|Create)\s*\(", "chiamata a un METODO che modifica lo stato (es. $_.Kill())"),
     (r"\bNew-Object\b",                      "New-Object: puo' costruire un WebClient o uno scrittore di file"),
     (r"\[\s*System\.IO\.",                   "accesso diretto a System.IO"),
+    # CLASSE 830 (26/09/2026): il buco delle chiamate STATICHE .NET. "\.Metodo(" non
+    # prende "::Metodo(" (davanti c'e' ':' non '.'), "[IO." senza "System." non
+    # veniva preso, e "::new(" scavalcava il divieto su New-Object: una riga con
+    # [IO.File]::WriteAllText(...) / ::Delete(...) / [IO.StreamWriter]::new(...)
+    # usciva "SOLA LETTURA". Trovato dal controllo-preventivo sulla RIGA_VERIFICA_770105.
+    # Il lettore CONDIVISO di casa (classe 163: [IO.File]::Open(..., FileAccess Read,
+    # FileShare ReadWrite) sui giornali vivi di MT5) resta ammesso: apre in LETTURA.
+    # "::new(" da solo NON e' vietato (byte[]::new, List::new sono lettura): lo e' sulle
+    # classi che scrivono, prese dal pattern di classe qui sotto.
+    (r"::\s*(WriteAll\w*|AppendAll\w*|Delete|Move|Copy|Create\w*|OpenWrite|Replace|Start|Kill|Set\w+|Encrypt|Decrypt)\s*\(",
+                                              "chiamata STATICA .NET che scrive, crea o cancella (classe 830)"),
+    (r"\[\s*(System\.)?IO\.(Directory|StreamWriter|FileStream|BinaryWriter)\b",
+                                              "accesso diretto a IO.Directory/StreamWriter/FileStream (classe 830)"),
+    (r"\[\s*(System\.)?IO\.FileAccess\s*\]\s*::\s*(Write|ReadWrite)\b",
+                                              "[IO.File]::Open con accesso in SCRITTURA (classe 830)"),
     (r">",                                    "redirezione: scrive un file"),
 ]
 # CLASSE 235 (11/09/2026) -- IL BLOCCO DI RACCOLTA E' OBBLIGATORIO E IL CANCELLO
