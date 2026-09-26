@@ -34,8 +34,25 @@
 #  lo stop si allarga e il rapporto MIGLIORA; di quanto: [NON MISURATO]
 #  (serve l'ATR per TF, non in archivio).
 #
+#  IL RISCALDAMENTO CAMBIA CON LA CELLA (classe 834, aggiunto dal
+#  controllo preventivo il 26/09, PRIMA dei numeri). Lo storico D30EUR
+#  parte il 2024.09.26 e prima non c'e' niente da caricare. ATR(14) sul
+#  TF di gestione vuole 15 barre chiuse: ~4 ore su M15, ~15 ore su H1,
+#  ~60 ore su H4 = i primi 2-3 giorni di borsa. Finche' non c'e',
+#  AtrVal() (r.714) torna 0 o un valore non a regime, e con InpSLMode=1
+#  lo stop SLforLong (r.374-380) coincide col prezzo d'ingresso -> dist
+#  = 0 (r.350) -> NESSUN ordine quel giorno. Quindi nelle celle alte
+#  possono MANCARE le posizioni dei primi giorni: la costanza delle
+#  posizioni si confronta sulle posizioni aperte DAL 2024.10.01 in poi,
+#  e una differenza prima di quella data e' riscaldamento, non un
+#  difetto. L'EMA200 del 3o target vuole 200 barre: ~2 giorni su M15,
+#  ~5-6 settimane su H4 -- nelle celle alte il 3o target non e' a regime
+#  nel primo mese e mezzo. Tocca le USCITE, cioe' la cosa che l'asse
+#  misura: si dichiara, non si corregge.
+#
 #  ATTESA (scritta prima): posizioni ~35-63 in OGNI cella (come R261a
-#  corr=1: stessi ingressi). Merito SOSPESO su tutte e 7 (T4). PF: nessun
+#  corr=1: stessi ingressi, salvo il riscaldamento qui sopra). Merito
+#  SOSPESO su tutte e 7 (T4). PF: nessun
 #  centro dichiarato; su R17 oro l'asse InpMgmtTF ha dato un altopiano
 #  PIATTO (SEDIA_770402_COSA_MANCA par. 3 e): l'ipotesi nulla qui e'
 #  "PF piatto lungo l'asse". Una cella che sporge e le vicine no = rumore,

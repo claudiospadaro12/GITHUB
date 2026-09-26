@@ -4228,7 +4228,7 @@ prova` **nessun difetto meccanico**, ASCII puro.
 | file | domanda | modello · finestra | asse | magic | attesa scritta prima |
 |---|---|---|---|---|---|
 | `prove/R260c_oro_770402_due_lati_ancora.txt` (TESTA) | G0: HEAD `7d0da9f9` ridà R103? | OHLC M1 · 2020.01.01→2026.06.30 (moncone 1 g) | magic x2 | 795303/795353 | PF **1.308** · n **693** · DD **5.32%** · +24736 (R1) |
-| `prove/R260a_oro_770402_solo_long.txt` | il LONG da solo porta edge? | idem | magic x2 | 795301/795351 | 300-450 deal (~250-370 pos.); HP R19b ~1,8 (tetto) · HPs PF_L < 1,308 (previsione) · H0 ~1,0 con R2 violato |
+| `prove/R260a_oro_770402_solo_long.txt` | il LONG da solo porta edge? | idem | magic x2 | 795301/795351 | 300-450 deal (~250-370 pos.); partizione: HP R2 ok e PF_L ≥ 1,308 (R19b ~1,8 = tetto) · HPs R2 ok e 1,10 ≤ PF_L < 1,308 (previsione) · H0 = R2 violato (centro ~1,0) |
 | `prove/R260b_oro_770402_solo_short.txt` | lo SHORT da solo (chiude il conto dei lati) | idem | magic x2 | 795302/795352 | 280-420 deal; HPs PF_S > 1,308 |
 | `prove/R261d_dax_generico_riproduce_770411_short.txt` | G0-GEN: il generico = `770411`? | tick · 2024.09.26→2026.06.30, taglio 0,40 | magic x2 | 795404/795454 | = r81a/R246i al centesimo (IS 1.87803/20 · OOS 2.15985/21) |
 | `prove/R261c_dax_long_ancora_R244b.txt` | G0-LONG: il banco ridà il long d'archivio? | tick · FRAZIONEIS 1.0 | magic x2 | 795403/795453 | = R244b C=12: PF **0.74387** · DD 5.6463 · n **157** · −3321.63 |
@@ -4248,11 +4248,20 @@ prova` **nessun difetto meccanico**, ASCII puro.
   (0,28-0,70 min per finestra piena). Ordine: **R260c → R260a → R260b**; **R261d → R261c → R261a → R261b**.
 - 🔴 **NON VERIFICATI**: storico M1 oro dal 2020 sul PC di backtest · storico H1 di SPXUSD nel tester
   del PC (cancello T3) · profondita' dei tick oro · orologio dell'oro (= forex, [INFERITO]) · orologio
-  sul long DAX (inverno un'ora prima della cash) · commissioni FTMO.
+  sul long DAX (inverno un'ora prima della cash) · commissioni FTMO · **lo spread in memoria del
+  terminale del PC** (classe 394: R103 scriveva `Spread=0`, `RIGA_ROUND_VPS.ps1` non ha `-Spread`;
+  su R260, in OHLC, e' una delle tre cause possibili di un G0 ROSSO insieme alla guardia e allo
+  storico, e le separa solo R260c con `InpOneTradePerDay=false`).
+- ✏️ **Cancello del 26/09 (controllo preventivo), corretto PRIMA dei numeri**: in R260 le tre ipotesi
+  sul PF del long ora sono una **partizione** (HPs aveva perso il pavimento 1,10 e conteneva H0,
+  classe 178); in R260c un Trades diverso da 693 non si attribuisce piu' da solo alla guardia di
+  HEAD (classe 394); R261b dichiara il **riscaldamento** di ATR/EMA200 che cambia con la cella
+  (classe 834: la costanza delle posizioni si legge dal 2024.10.01).
 - 📌 E il buco del dossier chiuso qui: **R242 e R244 non avevano righe in questo registro**. Lato long
   DAX, per il certificato: **NON ANCORA MISURATO (③ uscita, ⑤ TF, correlazione a specchio)** con
   **0 celle su 33 distinte ≥ PF 1,00** a tick (archivio `080957cf` 18, R242a 7, R244b 9, di cui C=12 =
-  R242a H=6); R261 chiude ⑤ e lo specchio.
+  R242a H=6; **30 esiti distinti**, e le 9 di R244b sono **UNA famiglia nidificata** sul cutoff: la
+  forza del verdetto si legge sulle famiglie, non sulle righe — classe 835); R261 chiude ⑤ e lo specchio.
 
 ---
 

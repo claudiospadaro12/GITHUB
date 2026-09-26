@@ -19,9 +19,13 @@
 #
 #  ATTESA DI QUESTO FILE (copiata dalla testa, par. 6, scritta PRIMA):
 #    n: 300-450 deal (~250-370 posizioni) -- sopra 150: il MERITO si
-#    legge. PF: HP (R19b generalizza) ~1,8 = TETTO; HPs (struttura di
-#    R19b: long lato debole) PF_L < 1,308; H0 (nessun edge sul long)
-#    PF_L ~1,0 (0,90-1,05) con R2 VIOLATO. Previsione scritta: HPs.
+#    legge. PF, tre ipotesi che sono una PARTIZIONE (testa par. 6):
+#    HP  (R19b generalizza) R2 rispettato e PF_L >= 1,308 (R19b ~1,8 =
+#    TETTO); HPs (struttura di R19b: long lato debole) R2 rispettato e
+#    1,10 <= PF_L < 1,308; H0 (nessun edge misurabile) R2 VIOLATO,
+#    centro ~1,0 (0,90-1,05). Previsione scritta: HPs. (Pavimento 1,10
+#    di HPs aggiunto PRIMA dei numeri dal controllo preventivo, 26/09:
+#    senza, HPs conteneva H0 -- classe 178.)
 #    DD a 0,5%: nessuna banda credibile; per stare sotto S3 di R193b a
 #    2,00% servirebbe DD_L <= 2,00% (lineare) / 2,06% (moltiplicativo):
 #    lo ritengo IMPROBABILE, scritto prima.

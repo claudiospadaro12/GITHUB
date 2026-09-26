@@ -33,6 +33,12 @@
 #    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo
 #        da' '@FRAZIONEIS' qui sotto; un -FrazioneIS diverso fa MORIRE il
 #        driver, walkforward_generico.ps1 r.713-740).
+#    !! -Spread NON e' una scelta: RIGA_ROUND_VPS.ps1 NON HA il parametro
+#        (param r.141-156). Ma R103 SCRIVEVA 'Spread=0' nell'.ini
+#        (RIGA_R103_CLASSIFICA_FLOTTA.ps1 r.178 e r.1315, = spread
+#        CORRENTE): qui la riga NON c'e' e MT5 usa lo spread che ha IN
+#        MEMORIA. Buco [NON PINNATO DA QUESTA CORSIA], classe 394: par. 11
+#        e cause del ROSSO in R1.
 #  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
 #  tocca preset, EA, sedie, conti, taglie o parametri del forward. Non
 #  promuove niente: ogni esito e' materiale per Claudio.
@@ -162,7 +168,20 @@
 #  (R193a par. B2, rifatto dall'esterno: gOperatoOggi si riaccende solo
 #  con una posizione nostra a cavallo della mezzanotte o un DEAL_ENTRY_IN
 #  di oggi prima delle 07:00, entrambi impossibili con un solo EA e
-#  InpCloseAtEnd=true). Il G0 di R260c e' la MISURA di questa inerzia.
+#  InpCloseAtEnd=true). Riletto dal cancello il 26/09: anche la seconda
+#  azione della guardia (cancellare il pendente SUPERSTITE a trade finito,
+#  UnTradeAlGiorno) non ha niente da cancellare, perche' HandleOCO (r.473,
+#  chiamata in testa a OnTick r.239) toglie il pendente opposto al PRIMO
+#  tick con la posizione aperta. ATTENZIONE: il changelog dell'EA (r.66-
+#  75) dice il CONTRARIO ("il fix NON e' inerte nel tester"): la lettura
+#  qui e' piu' fine del changelog, ma resta una lettura. Il G0 di R260c
+#  e' la MISURA di questa inerzia.
+#  E L'INCLUDE: "solo quella guardia" vale per il SORGENTE DELL'EA.
+#  ABTG_PausaGuardian.mqh fra 5fc0bc31 e HEAD e' cambiato molto (git diff
+#  5fc0bc31 7d0da9f9: +1563 righe: freno P1, stop S1, tetto P0, cluster
+#  C2), ma sono tutti opt-in che questo EA non passa (chiamata a DUE
+#  argomenti, r.346) e il resto e' fail-open nel tester (include r.1719,
+#  "nessun guardiano su questo conto"): inerte, LETTO, non misurato.
 #
 # =====================================================================
 #  4. PERCHE' OHLC M1 E NON TICK REALI -- il conto, non l'abitudine
@@ -217,14 +236,22 @@
 #    larga: la quota per lato sulla geometria del preset e' [NON
 #    MISURATA]]. In ogni caso sopra 150 posizioni: il MERITO SI LEGGE.
 #
-#  R260a -- IL PF, CONTRO DUE IPOTESI SCRITTE PRIMA:
-#    HP  "R19b generalizza": il long porta edge vero, PF_L ~1,8 su
-#        ~290 posizioni. E' un TETTO, non un centro: R19b stava a 2,45
-#        di PF totale dove R103 sta a 1,308.
-#    HPs "generalizza la STRUTTURA di R19b" (long lato debole):
-#        PF_L < 1,308 < PF_S. Il long ha edge ma meno della media.
-#    H0  "nessun edge sul long": PF_L ~1,0 (0,90-1,05 col costo), e
-#        R2 (par. 7) VIOLATO. Tutto l'edge di R103 starebbe nello short.
+#  R260a -- IL PF, CONTRO TRE IPOTESI SCRITTE PRIMA, che sono una
+#  PARTIZIONE (ogni esito cade in UNA sola):
+#    HP  "R19b generalizza": R2 (par. 7) RISPETTATO e PF_L >= 1,308.
+#        R19b dava ~1,8 su 39 posizioni: e' un TETTO, non un centro
+#        (R19b stava a 2,45 di PF totale dove R103 sta a 1,308).
+#    HPs "generalizza la STRUTTURA di R19b" (long lato debole): R2
+#        RISPETTATO e 1,10 <= PF_L < 1,308. Atteso anche PF_S > 1,308
+#        (R260b): si riporta, NON decide.
+#    H0  "nessun edge misurabile sul long": R2 VIOLATO (PF_L < 1,10
+#        sulla finestra piena o su una meta'). Centro atteso sotto H0:
+#        PF_L ~1,0 (0,90-1,05 col costo). Tutto l'edge di R103 starebbe
+#        nello short.
+#    (Corretto PRIMA dei numeri dal controllo preventivo, 26/09: nella
+#    prima stesura HPs era "PF_L < 1,308" senza pavimento e CONTENEVA H0
+#    -- con PF_L 0,98 la previsione HPs sarebbe uscita "confermata"
+#    insieme a H0. Classe 178: la banda non separava l'alternativa.)
 #    Previsione mia, scritta ora: HPs. Motivo: e' l'unica delle tre che
 #    non contraddice ne' R103 ne' R19b.
 #
@@ -256,8 +283,23 @@
 #      mancante sul PC? primo deal dopo 2020.01.03? deposito?). E con
 #      ROSSO la domanda di R193a ("il contratto regge su HEAD?") ha
 #      risposta NO fino a prova contraria: 770402 resta sospesa.
-#      Trades < 693 con tutto il resto in ordine = la guardia di HEAD HA
-#      morso (par. 3): e' esattamente S3 di R193a.
+#      Trades DIVERSO da 693 NON si attribuisce da solo alla guardia di
+#      HEAD. Le cause concorrenti sono almeno TRE, per nome:
+#        (a) la guardia "un trade al giorno" (par. 3: letta INERTE);
+#        (b) lo SPREAD in memoria del terminale del PC (par. 11, classe
+#            394: R103 scriveva Spread=0, questa corsia non scrive la
+#            riga);
+#        (c) lo storico M1 XAUUSD del PC (par. 11).
+#      CONTRO-ESEMPIO: uno spread di stress rimasto in memoria cambia
+#      riempimenti e parziali -> Trades e PF diversi con la guardia
+#      INNOCENTE; dire "ha morso la guardia" sospenderebbe 770402 per la
+#      ragione sbagliata. DISCRIMINA una corsa in piu', UNA variabile:
+#      R260c con InpOneTradePerDay=false (= v1.10 esatta, changelog
+#      dell'EA r.76-77). Se rida' R103 -> la guardia HA morso (= S3 di
+#      R193a). Se rida' gli stessi numeri di R260c -> la guardia e'
+#      innocente e il ROSSO e' del BANCO (b o c). Se non rida' ne' l'una
+#      ne' l'altra: hanno morso TUTTE E DUE. Finche' quella corsa
+#      non gira, un ROSSO si scrive "banco o guardia, NON SEPARATI".
 #  G1  In ogni file le due gemelle identiche al centesimo (Profit, PF, DD,
 #      Trades) e i due per-trade identici riga per riga tranne il magic.
 #      Se no, quel file e' NULLO.
@@ -344,6 +386,16 @@
 #  - La quota per lato sulla geometria del preset: [NON MISURATA] (e'
 #    quello che il round misura).
 #  - L'orologio dell'oro sul feed BCM: [INFERITO] = forex.
+#  - LO SPREAD: [NON PINNATO DA QUESTA CORSIA] (classe 394). R103
+#    scriveva 'Spread=0' (= corrente) nell'.ini; RIGA_ROUND_VPS.ps1 non
+#    ha -Spread e walkforward_generico.ps1 senza -Spread NON scrive la
+#    riga (r.969-973: "MT5 usa il valore che ha in memoria"). Come morde
+#    QUI: lo spread entra nel riempimento del BuyStop (ask) e nelle
+#    uscite a stop/target (bid) di tutti e tre i file, e il modello e'
+#    OHLC (niente tick reali che portino con se' lo spread vero). Il
+#    G0 di R260c e' il controllo di fatto: VERDE = banco equivalente
+#    a R103. -SoloControllo stampa "nessuna riga Spread nell'.ini": si
+#    scrive nel referto PRIMA dei numeri.
 #  - La commissione FTMO sull'oro: [NON MISURATA]; il tester usa quella
 #    BCM.
 # =====================================================================

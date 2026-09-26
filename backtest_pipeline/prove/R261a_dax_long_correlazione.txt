@@ -259,6 +259,19 @@
 #    SOTTO la frontiera di casa dei 40x. I TF piu' alti allargano lo stop
 #    (il costo migliora, par. di R261b).
 #  - Commissione FTMO su GER40: [NON MISURATA].
+#  - LO SPREAD: [NON PINNATO DA QUESTA CORSIA] (classe 394):
+#    RIGA_ROUND_VPS.ps1 non ha -Spread, l'.ini non ha la riga e MT5 usa
+#    il valore in memoria. Qui morde POCO e lo si controlla: (1) le
+#    ancore R244b, R246i e r81a sono girate sulla STESSA corsia, quindi
+#    l'incognita e' IDENTICA a quella delle ancore (non e' R103, che
+#    scriveva Spread=0); (2) a tick reali lo spread viaggia coi tick;
+#    (3) T1 e T2 al centesimo sono il controllo di fatto. Se T1 o T2
+#    escono ROSSI, lo spread in memoria va nell'elenco delle cause
+#    insieme al binario e allo storico, non dopo.
+#  - IL RISCALDAMENTO (classe 834): lo storico D30EUR parte il
+#    2024.09.26 e prima NON c'e' niente da caricare. Vale per tutte le
+#    celle e per le ancore allo stesso modo (stesso inizio), tranne
+#    che sull'asse di R261b, dove cambia con la cella: vedi R261b.
 # =====================================================================
 @SIMBOLO    D30EUR
 @PERIODO    M15
