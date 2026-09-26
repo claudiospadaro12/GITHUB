@@ -706,6 +706,15 @@ toccano questo registro — il resto sta nel referto, non si duplica:
   > di default (18,4-20,9× [DERIVATO] < 40×), U30USD **fragile** (39,0-44,1×).
   > NON ancora lanciati: manca lo strato 2 del cancello. 📄
   > `report/NIGHTLY_SEI_SIMBOLI_2026-09-26.md`.
+  > 🧱 **CANCELLO 26/09 (controllo-preventivo): FAIL sulla prima stesura, corretto
+  > prima di uscire.** (1) I sei CSV a zero NON sono del commit `400a462` (08/08,
+  > che ha portato solo EURUSD): vengono dalla **coda fascia B, notte 10-11/08**,
+  > importati col commit **`326c28d2`** — la riga del 09/09 qui sopra va letta
+  > cosi'. (2) XAGUSD: lo **storico corto e' gia' misurato dall'08/08**
+  > (`REFERTO_WEEKEND_FASE0.md` r.14-18, 71 trade IS contro 336 OOS), non e' una
+  > "seconda causa possibile": le due cause non si escludono e R259 d si legge
+  > disco -> S1 -> QB. (3) Orologio (box spostato d'inverno dal 2025) e QB di
+  > USDJPY mai esercitato: dichiarati nei file. Classi 838-839.
 - ✅ Il **BREAKOUT** del box (questa famiglia) e' confermato dal PDF e dalla
   misura di casa (91,1% delle notti rompe un lato, `NOTTE_ORO.md`).
 - 🆕 Unica proposta uscita: **BREAKIN del box notturno** (falsa rottura →

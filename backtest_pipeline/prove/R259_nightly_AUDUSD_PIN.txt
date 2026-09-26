@@ -32,6 +32,10 @@
 #  Cella InpBlockNightActive=1 ==> DEVE fare 0 operazioni in IS e in OOS.
 #  Se ne fa anche UNA, la diagnosi del par.1 e' SBAGLIATA e il round NON
 #  si legge (vuol dire che il binario sul banco non e' il sorgente citato).
+#  NB: l'archivio girava su 2024.09.26-2026.06.30, questa finestra e'
+#  2019-2026. Lo zero e' per costruzione su QUALUNQUE finestra, quindi
+#  qui l'ancora prova SOLO che il binario ha r.167 -- non che i dati
+#  del banco siano quelli d'archivio.
 #  Cella InpBlockNightActive=0 ==> la misura. Nient'altro cambia: il QB e
 #  lo stop sono calcolati alla stessa maniera (r.212, r.220).
 #
@@ -40,10 +44,26 @@
 #  @DAQUANDO 2019.01.01 @FINOA 2026.06.30 @FRAZIONEIS 0.50 -- IDENTICA a
 #  R220a-d (EURCHF/EURUSD/GBPUSD/USDCHF), apposta: i sei forex finiscono
 #  sulla STESSA finestra, stesso modello, stessa geometria.
-#  Taglio calcolato: 2022.09.30. Feriali: IS 978, OOS 977.
+#  Taglio del driver (r.934, floor): IS fino al 2022.09.30 compreso,
+#  OOS dal 2022.10.01. Feriali, estremi inclusi: IS 979, OOS 977.
 #  IS contiene LATERALE 2019, CROLLO 2020, TORO 2021, ORSO 2022 al 91%
 #  (prove/PROVA_REGIME_CRITERI.md par.3). OOS: coda dell'orso, 2023-2024,
 #  i 21 mesi dell'archivio. E' walk-forward CONTIGUO, NON prova di regime.
+#  OROLOGIO (classe 762/767: le ore del box NON sono InpSessionHour, il
+#  cancello [FUSO] non le guarda). Box 22:00-04:59, piazzo 05:00, cutoff
+#  07:00 in ORA SERVER BCM, uguali al PDF (PAG 9, "orario del broker",
+#  PDF del 05/05/2024 = orologio VECCHIO). report/OROLOGIO_BCM_2026-09-24.md
+#  par.2.1 e 3.1: fino a dic 2024 il forex BCM e' ora italiana - 1 tutto
+#  l'anno, e la pausa di rollover cade alle 22:00 server = INIZIO del box;
+#  dal cambio (fra 26/12/2024 e 02/02/2025) BCM e' UTC+1 fisso e d'INVERNO
+#  la pausa cade alle 23:00 server = DENTRO il box (che comincia un'ora
+#  prima del rollover). IS 2019-2022: tutto orologio vecchio. OOS: vecchio
+#  fino a dic 2024, poi due inverni col box spostato (feb-mar 2025,
+#  nov 2025-mar 2026): 115-141 feriali OOS su 977 (12-14%, la forchetta
+#  e' la data del cambio), ZERO in IS. Il CSV aggregato NON le separa:
+#  uno scarto IS/OOS puo' venire dall'orologio e non dal mercato. R220a-d
+#  hanno la STESSA mescolanza sulla STESSA finestra: il confronto con i
+#  dormienti resta alla pari. Separarle chiede i per-trade: [NON MISURATO].
 #  PREREQUISITO -- barre M1 sul disco (l'EA legge il box da PERIOD_M1,
 #  r.183-190; senza M1 fa ZERO trade e sembra "senza edge"):
 #      SI su almeno una macchina: 9.614.917 barre M1 dal 1993.04.26, COMPLETO
@@ -54,9 +74,9 @@
 #
 #  4. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
 #  --------------------------------------------------------------------
-#  (A) n, cella 0: frequenza dei 4 forex misurati 0,323-0,590 op/feriale
-#      (EURCHF 148, USDCHF 212, GBPUSD 259, EURUSD 270 su 458 feriali,
-#      CSV d'archivio) ==> [STIMA] 316-577 per finestra. Sopra 150: il
+#  (A) n, cella 0: frequenza dei 4 forex misurati 0,322-0,588 op/feriale
+#      (EURCHF 148, USDCHF 212, GBPUSD 259, EURUSD 270 su 459 feriali,
+#      estremi inclusi, CSV d'archivio) ==> [STIMA] 315-576 per finestra. Sopra 150: il
 #      MERITO si puo' leggere.
 #  (B) PF: se il PDF ha ragione (sui mercati attivi di notte il fade
 #      peggiora), PF di AUDUSD <= PF dei forex "dormienti" sulla stessa
@@ -131,9 +151,19 @@
 #    r.366 escono prima di leggerli); il terzo e' l'etichetta dell'ordine.
 #    Totale input dell'EA: 34 = 30 pinnati + 1 asse + 3 stringhe. Nessun buco.
 #  - Il .ex5 sul banco corrisponde al .mq5 a HEAD: [NON MISURATO]. L'unica
-#    differenza di sorgente rispetto alle corse d'archivio dell'08/08 e' la
+#    differenza di sorgente rispetto alle corse d'archivio e' la
 #    migrazione Guardian del 19/08 (commit 5fc0bc31, r.30-42 e r.226), che
 #    nel tester e' FAIL-OPEN per costruzione (commento r.36-39).
+#    DATA DELLE CORSE D'ARCHIVIO (corretta al cancello del 26/09): i CSV di
+#    questo simbolo NON sono del weekend 08/08 (commit 400a4624, che ha
+#    portato SOLO EURUSD) ma della CODA FASCIA B, notte 10-11/08, PC di
+#    backtest (coda_weekend.ps1 stadio 1 -Modello 1, walkforward_generico.ps1
+#    di fabbrica -Fino 2026.06.30 -FrazioneIS 0.40 -Deposito 10000),
+#    importati col commit 326c28d2 (11/08). Il fix del sizing 3af47ed9
+#    (08/08 11:48, OrderCalcProfit, r.267-284) e' ANTERIORE a quelle
+#    corse: la frase "solo il Guardian" regge per QUESTA data, non per
+#    l'08/08 mattina. Che il .ex5 del banco quella notte lo contenesse:
+#    [NON MISURATO] (l'ancora S0 e' li' per questo).
 #  - Referto completo: report/NIGHTLY_SEI_SIMBOLI_2026-09-26.md
 # ---------------------------------------------------------------------
 

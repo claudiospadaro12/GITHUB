@@ -19,9 +19,10 @@ DOBBIAMO FARE. ABBIAMO L'EA. CERCHIAMO DEI PARAMETRI X OTTIMIZZARLA AL MEGLIO."_
 3. 🔴 **La causa di AUDUSD/USDJPY non è più `[NON MISURATO]`**: è `ABTG_Nightly.mq5` **r.167**, un
    rifiuto **per nome** voluto dal PDF (PAG 22). Era già scritto in `R220a` §7-ii e in
    `I_CSV_A_ZERO_PERCHE_2026-09-22.md` r.180; `REGISTRO_TEST.md` r.686 era rimasto indietro.
-4. 🟠 **Su XAGUSD la causa NON è chiusa**, e lo dico contro l'archivio: il filtro QB spiega l'OOS
-   (4 trade) ma **non spiega un IS a zero**. C'è una seconda causa che predice lo stesso zero
-   (barre M1 assenti). Il file R259 d le separa in una corsa.
+4. 🟠 **Su XAGUSD la causa NON è il solo QB**: il filtro QB non spiega un IS a zero, e lo
+   **storico corto dell'argento è già misurato in casa dall'08/08** (`REFERTO_WEEKEND_FASE0.md`
+   r.14-18: *71 trade IS contro 336 OOS, "finestra IS in gran parte vuota"*). Le due cause **non
+   si escludono**: il file R259 d le legge in ordine (disco → S1 → QB), §2.3.
 5. 💸 **La frontiera del costo morde prima del PF**: **D30EUR** alla gestione di default sta a
    **18,4-20,9×** [DERIVATO] contro il 40× di lavoro → **escluso per costo dalla promozione**, col
    numero; **U30USD** sta **a cavallo** (39,0-44,1× alla mediana, 26-29× al P95).
@@ -36,8 +37,12 @@ DOBBIAMO FARE. ABBIAMO L'EA. CERCHIAMO DEI PARAMETRI X OTTIMIZZARLA AL MEGLIO."_
 
 ### 1.1 I quattro simboli con campione — **niente riottimizzazione dei parametri d'ingresso**
 Fonte: `backtest_pipeline/risultati_prove/ABTG_Nightly/*.csv` (righe 2-3, passate gemelle
-771701/771702 **identiche al centesimo**). Finestra 2024.09.26 → 2026.06.30 (642 giorni, **458
-feriali**), IS 40% (taglio 2025.06.10), deposito 10000, rischio 1%.
+771701/771702 **identiche al centesimo**). Finestra 2024.09.26 → 2026.06.30 (642 giorni, **459
+feriali** estremi inclusi), IS 40% (IS fino al 2025.06.09, OOS dal 2025.06.10), deposito 10000, rischio 1%.
+📅 **Provenienza** (corretta al cancello del 26/09): EURUSD viene dal weekend **08/08** (commit
+`400a4624`, 06:54 — **prima** del fix del sizing `3af47ed9` delle 11:48); GBPUSD, USDCHF e **i sei
+simboli di questo referto** vengono dalla **coda fascia B, notte 10-11/08** (`coda_weekend.ps1`,
+importati col commit `326c28d2`), cioè **dopo** quel fix. EURCHF è il P0 a tick reali del 09/09.
 
 | simbolo | modello | n IS / OOS | PF IS / OOS | DD% IS / OOS | stato |
 |---|---|---:|---:|---:|---|
@@ -117,18 +122,24 @@ default e magic, `diff` fatto). Digits/Point dalla sonda
 - 🧪 **Contro-esempio già caduto** (`I_CSV_A_ZERO` r.202): *"di notte non ci sono dati"* → falso,
   `MaxMinNotte` sugli stessi simboli e box fa 20/21 (D30EUR) e 59/92 (XAUUSD) operazioni.
 
-### 2.3 XAGUSD — **la causa NON è chiusa** (e questa è una scoperta di oggi)
-- Digits **3** (sonda r.58) → `PipSize()=0,01` → la soglia vale **0,45 USD** di ATR(H1): l'argento
-  **a volte** ci sta sotto → **4 operazioni in OOS**. Fin qui `I_CSV_A_ZERO` r.203 ha ragione.
-- 🔴 **Ma allora l'IS a zero chiede un'altra spiegazione.** Per il solo filtro QB, IS = 0 vuol dire
-  ATR(H1) ≥ 0,45 USD in **tutte** le 183 notti feriali dell'IS (settembre 2024 → giugno 2025) e
-  sotto in qualche notte dell'OOS. È possibile — l'ATR dell'argento **non è misurato** in repo — ma
-  c'è una **seconda causa che predice lo stesso zero**: **barre M1 assenti nell'IS** → `ComputeBox`
-  fallisce (r.185/r.207) → *"box non calcolabile: riprovo"* fino al cutoff → zero ordini.
-  `prove/CODA.csv` r.7 (10/08) avvisava già che **sull'oro** lo storico M5 partiva dal 28/02/2025;
-  sull'argento **non c'è scritto niente** → `[NON MISURATO]`, non assunto uguale.
-- ✅ **Le due cause si separano con UNA corsa** (R259 d): se la cella a QB spento fa operazioni
-  **nell'IS**, era il QB; se fa **zero anche lei**, era lo storico.
+### 2.3 XAGUSD — **la causa NON è il solo QB** (e lo storico corto era già misurato)
+- Digits **3** (sonda r.58) → `PipSize()=0,01` → la soglia vale **0,45 USD** di ATR(H1).
+- 🔴 **Il QB da solo non spiega l'IS a zero**: vorrebbe ATR(H1) ≥ 0,45 USD in **tutte** le 183 notti
+  feriali dell'IS e sotto in qualche notte dell'OOS. Possibile (ATR `[NON MISURATO]`), ma c'è una
+  seconda causa che predice lo stesso zero — **barre assenti nell'IS** → `ComputeBox` fallisce
+  (r.185/r.207) → zero ordini.
+- 📚 **E la seconda causa NON è `[NON MISURATO]`: è scritta dall'08/08.**
+  `risultati_archivio/REFERTO_WEEKEND_FASE0.md` r.14-18: *"XAGUSD (argento) BOCCIATO come dato: 71
+  trade IS contro 336 OOS su tutti gli 11 TF insieme — la finestra IS è in gran parte vuota … ogni
+  numero IS su XAGUSD non vale"* (ripreso in `DIARIO.md` r.43 e `ROUND_USCITE_SUPERTREND_2026-09-09.md`
+  r.350). Rapporto 0,21 contro ~0,67 atteso a pari densità. La prima stesura di questo referto diceva
+  *"sull'argento non c'è scritto niente"* e *"scoperta di oggi"*: **falso, corretto al cancello**
+  (classe 761). `[NON MISURATO]` resta solo lo stato **di oggi** del disco.
+- ⚠️ **Le due cause non si escludono** (contro-esempio: IS coperto solo nell'ultimo terzo → la cella
+  a QB spento fa **qualche** operazione in IS e la regola "se fa operazioni era il QB" assolverebbe lo
+  storico a torto). Quindi R259 d si legge **in ordine**: (1) prima data M1 di XAGUSD sul disco,
+  **prima** di lanciare; (2) S1 sul rapporto op/feriale IS/OOS; (3) solo dopo, cella 0 contro cella
+  45 = quanto morde il QB. E anche **l'OOS a 4** è sospetto per la stessa ragione: `[NON MISURATO]`.
 
 ### 2.4 Una differenza fra EA e PDF che nessuno aveva messo in fila (non cambia R259)
 Il PDF (PAG 14) definisce il secondo numero del QB come *"media dell'estensione delle candele H1
@@ -234,17 +245,20 @@ con **default bit-identico** (modo 0 = codice di oggi, anche nei log):
 - 🏷️ **Nome**: qui `_PIN` vuol dire "tutti gli input pinnati a mano". **Non è** il `PIN/PINA` di R254
   (sorgente a SHA fissato): scritto in testa a ogni file.
 - 🔁 **G1 di determinismo**: non c'è una cella gemella sul magic (sarebbe un secondo asse). Il ruolo
-  lo fa **l'ancora**, che è più forte: riproduce un CSV **di un altro giorno** sugli stessi dati. E la
+  lo fa **l'ancora**, che è più forte: riproduce un CSV **di un altro giorno** sugli stessi dati.
+  ⚠️ **Tranne AUDUSD/USDJPY**: lì la finestra (2019-2026) **non** è quella d'archivio
+  (2024.09.26-2026.06.30) e lo zero è per costruzione su qualunque finestra — l'ancora prova solo che
+  il binario ha r.167, non che i dati del banco siano quelli. E la
   famiglia ha già **20 CSV su 20 con gemelli identici al centesimo**.
 
 ### 4.2 L'attesa, dichiarata prima dei numeri
-**Frequenza** — ancorata ai 4 forex misurati: **0,323 / 0,463 / 0,566 / 0,590 op/feriale**
-(EURCHF 148, USDCHF 212, GBPUSD 259, EURUSD 270 su 458 feriali, CSV d'archivio).
+**Frequenza** — ancorata ai 4 forex misurati: **0,322 / 0,462 / 0,564 / 0,588 op/feriale**
+(EURCHF 148, USDCHF 212, GBPUSD 259, EURUSD 270 su 459 feriali estremi inclusi, CSV d'archivio).
 
 | gruppo | feriali IS / OOS | n atteso per finestra [STIMA] | merito leggibile (≥150)? |
 |---|---:|---:|---|
-| AUDUSD, USDJPY | 978 / 977 | **316-577** | ✅ atteso sì |
-| XAUUSD, XAGUSD, D30EUR, U30USD | 183 / 275 | IS **59-108** · OOS **89-162** | 🔴 atteso **SOSPESO** almeno in IS |
+| AUDUSD, USDJPY | 979 / 977 | **315-576** | ✅ atteso sì (USDJPY: meno, se il QB morde — §4.7) |
+| XAUUSD, XAGUSD, D30EUR, U30USD | 183 / 276 | IS **59-108** · OOS **89-162** (XAGUSD IS: una **frazione**, §2.3) | 🔴 atteso **SOSPESO** almeno in IS |
 
 👉 Sui quattro non-forex **lo dichiaro prima**: il file compra **frequenza e rischio**, non un
 verdetto di merito. Lo storico BCM degli indici parte dal **2024.09.26** (`ABTG_StoricoScaricato.csv`
@@ -337,11 +351,35 @@ di R259 è un **tetto**, non una media. Le celle ancora (zero operazioni) costan
    r.183-190). Noto: AUDUSD M1 **COMPLETO dal 1993.04.26** (`R102_REFERTO_DRIVER_BLOCCO1…txt`
    r.486-487, macchina `[NON VERIFICATO]`); D30EUR/U30USD M1 **COMPLETO dal 2024.09.26**
    (`ABTG_StoricoScaricato.csv`). **USDJPY**: `[NON MISURATO]`, e c'è un indizio **contro**
-   (`LO_STORICO_ESTERNO_MAPPA_2026-09-23.md` r.292: scarico M1 2018+ ancora aperto). **XAUUSD,
-   XAGUSD**: `[NON MISURATO]`.
+   (`LO_STORICO_ESTERNO_MAPPA_2026-09-23.md` r.292: scarico M1 2018+ ancora aperto). **XAUUSD**:
+   `[NON MISURATO]` oggi, ma **B9 chiusa l'08/08** (`REFERTO_WEEKEND_FASE0.md` r.17-19, dati dal
+   26/09/2024) e `MaxMinNotte` XAUUSD fa 59/92 sulla stessa finestra. **XAGUSD**: `[NON MISURATO]`
+   oggi, e **all'08/08 l'IS era in gran parte vuoto** (§2.3).
 2. **Round sul PC di backtest, mai sul VPS** (firma 21/09): il banco `50504400` resta spento.
 3. **Nessuna riga di lancio è uscita da qui**: prima di qualunque riga servono `controlla_riga.py` e
    l'agente `controllo-preventivo` (cancello del 09/09). `controlla_prova.py` l'ho girato io: **6/6 OK**.
+
+### 4.7 🕰️ L'orologio e il QB di USDJPY — due confondenti dichiarati PRIMA (aggiunti al cancello del 26/09)
+- **Orologio** (classi 762/767: le ore del box non si chiamano `InpSessionHour`, il cancello `[FUSO]`
+  non le guarda). Box 22:00-04:59, piazzo 05:00, cutoff 07:00 **in ora server BCM**, identici al PDF
+  (PAG 9, *"orario del broker"*, `ANALISI_NIGHTLY_PDF` §1.1). Ma il PDF è del **05/05/2024**, orologio
+  vecchio, dove le 22:00 server erano **la chiusura di New York tutto l'anno** (`OROLOGIO_BCM_2026-09-24.md`
+  §2.1: pausa di rollover alle 22:00). Dal cambio (fra 26/12/2024 e 02/02/2025) **d'inverno il box
+  parte un'ora PRIMA del rollover** (pausa alle 23:00, dentro il box).
+  - **Forex** (2019-2026): IS tutto orologio vecchio; OOS con **115-141 feriali su 977 (12-14%)** nel
+    box spostato. **R220a-d hanno la stessa mescolanza sulla stessa finestra**: il confronto coi
+    dormienti resta alla pari.
+  - **Indici/metalli** (storico UTC+1 fisso su tutto l'arco): feriali d'inverno (calendario USA)
+    **IS 90/183 (49%), OOS 90/276 (33%)** — quote **diverse**, quindi uno scarto IS/OOS può venire
+    dall'orologio e non dal mercato.
+  - Il CSV aggregato **non separa** le due tempistiche: servono i per-trade, `[NON MISURATO]`.
+- **USDJPY, il QB mai esercitato** (classe 839): nella cella di misura il QB a 45 pip **resta acceso**,
+  e su USDJPY **non ha mai girato** (r.167 esce prima di r.212-213). `ATR(14,H1)` alle 05:00 contiene la
+  seduta USA: nei regimi mossi (2022, 2024) può superare 45 pip più spesso che sui dormienti
+  (`[NON MISURATO]`). Quindi (i) un rapporto op/feriale fuori banda può essere **il QB, non un
+  troncamento** — si contano le righe *"QB alto (…): escluso"* del log (r.213) **prima** del disco;
+  (ii) nel test del PDF USDJPY arriva **filtrato sulle notti calme**: se viene meglio dei dormienti, il
+  QB è una spiegazione alternativa da escludere prima di scrivere *"lista nera falsificata"*.
 
 ---
 
@@ -391,6 +429,9 @@ simboli che nessuno ha mai visto, e la **risposta a una regola del PDF** (la lis
 | *"con QB=0 sui forex dormienti il motore sarebbe diverso da quello misurato"* | vero solo se il cancello a 45 pip mordeva sui forex; i numeri del PDF (7-22 pip) e il fatto che l'ATR sia in pip veri lo rendono **[INFERITO] raro**. **Non misurato**, e scritto così | 🟡 inferenza dichiarata |
 | *"AUDUSD/USDJPY: riaprire contro il PDF è inseguire un numero"* | no: la tesi è **del PDF**, e la corsa può solo **confermarla** (PF ≤ dormienti) o **falsificarla**. Nessun parametro d'ingresso si muove | ✅ regge |
 | *"la causa di XAGUSD è chiusa"* (`I_CSV_A_ZERO` r.203) | IS a zero con OOS a 4 non è spiegato dal solo QB senza un ATR misurato; storico M1 mancante predice lo stesso zero | 🔴 **riaperta**, e R259 d la chiude |
+| *"sugli indici/metalli la cella 0 farà zero lo stesso: la scadenza `ORDER_TIME_SPECIFIED` (r.233/244) non è ammessa"* | `ABTG_MaxMinNotte` piazza pendenti con `ORDER_TIME_SPECIFIED` (`ABTG_MaxMinNotte.mq5` r.355/367, `_DAX_Short_Ottimizzato` r.254/266) e fa 20/21 su D30EUR e 59/92 su XAUUSD; lo stesso Nightly fa 4 trade in OOS su XAGUSD; D30EUR quota alle h05 (logger: 3.600 campioni su 5 giorni) | ✅ esclusa (per i **limit** su indici: `[NON MISURATO]`) |
+| *"la cella 0 di XAGUSD separa QB e storico"* (prima stesura) | con un IS coperto solo in parte la cella 0 fa **qualche** operazione e assolverebbe lo storico; e lo storico corto è misurato dall'08/08 | 🔴 **corretta**: lettura in ordine disco → S1 → QB (§2.3) |
+| *"le ore del box sono quelle del PDF, quindi il motore è lo stesso tutto l'anno"* | vero in ora server; ma dal 2025 d'inverno il box parte **prima** del rollover (§4.7) | 🟡 dichiarato, non separabile dal CSV |
 | *"PF 1,15 su 100 operazioni = candidato"* | il nullo arriva a **1,50** al 95% a n=100 | ✅ la soglia di lettura è il segno, non la promozione |
 
 ---
@@ -402,6 +443,10 @@ simboli che nessuno ha mai visto, e la **risposta a una regola del PDF** (la lis
 - **Magic** `787261-787266`: nessuna occorrenza nel repo prima di R259.
 - **Numero di round**: R256-R257 liberi, **R258 è di un altro agente** (`ANALISI_PDF_LONDRA_2026-09-26.md`
   r.9), R259 libero.
+- 🧱 **Strato 2 (controllo-preventivo, 26/09)**: FAIL sulla prima stesura, corretto **prima** di
+  uscire — provenienza dei CSV d'archivio (10-11/08, `326c28d2`, non 08/08 `400a4624`), storico
+  dell'argento già misurato (08/08), feriali a estremi inclusi (459 / IS 979 / OOS 276), orologio e
+  QB di USDJPY non dichiarati (§4.7). Classi 838-839 in `CHECKLIST_RIGA_DI_LANCIO.md`.
 - 🔴 **NON fatto da me**: lo strato 2 del cancello (agente `controllo-preventivo`) e nessuna riga di
   lancio. **Nessun backtest, nessun EA toccato, nessun forward toccato, nessun rischio o taglia proposti.**
 

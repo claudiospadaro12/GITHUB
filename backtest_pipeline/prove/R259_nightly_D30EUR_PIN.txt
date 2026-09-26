@@ -43,10 +43,23 @@
 #  4. LA FINESTRA E IL REGIME (Emendamento A: si DICHIARA)
 #  --------------------------------------------------------------------
 #  @DAQUANDO 2024.09.26 @FINOA 2026.06.30 @FRAZIONEIS 0.40 -- IDENTICA alle
-#  corse d'archivio (prove/CODA.csv r.41-48; driver al commit 400a4624:
-#  -Fino 2026.06.30, -FrazioneIS 0.40). Taglio 2025.06.10.
-#  Feriali: IS 183, OOS 275. Un solo arco (settembre 2024 -> giugno 2026):
+#  corse d'archivio (prove/CODA.csv r.41-48; coda fascia B 10-11/08,
+#  driver di fabbrica -Fino 2026.06.30 -FrazioneIS 0.40). Taglio del
+#  driver (r.934, floor): IS fino al 2025.06.09, OOS dal 2025.06.10.
+#  Feriali, estremi inclusi: IS 183, OOS 276. Un solo arco (settembre 2024 -> giugno 2026):
 #  NON contiene LATERALE/CROLLO/TORO/ORSO. E' un regime solo: lo si scrive.
+#  OROLOGIO (classe 762/767: le ore del box NON sono InpSessionHour, il
+#  cancello [FUSO] non le guarda). Box 22:00-04:59, piazzo 05:00, cutoff
+#  07:00 in ORA SERVER BCM, uguali al PDF (PAG 9, "orario del broker",
+#  PDF del 05/05/2024 = orologio VECCHIO, dove le 22:00 server erano la
+#  chiusura di New York tutto l'anno). Storico indici/metalli di questa
+#  finestra: UTC+1 FISSO su tutto l'arco (report/OROLOGIO_BCM_2026-09-24.md
+#  par.3.2) ==> d'ESTATE il box parte alla chiusura NY, d'INVERNO parte
+#  UN'ORA PRIMA (dentro l'ultima ora della seduta USA). Feriali d'inverno
+#  (calendario USA): IS 90 su 183 (49%), OOS 90 su 276 (33%) -- quote
+#  DIVERSE, quindi uno scarto IS/OOS puo' venire dall'orologio e non dal
+#  mercato. Il CSV aggregato non separa le due tempistiche: servono i
+#  per-trade, [NON MISURATO].
 #  PREREQUISITO -- barre M1 sul disco (box da PERIOD_M1, r.183-190):
 #      SI: 643.567 barre M1 dal 2024.09.26, COMPLETO
 #      (risultati_archivio/ABTG_StoricoScaricato.csv r.2). Macchina: [NON
@@ -54,7 +67,7 @@
 #
 #  5. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
 #  --------------------------------------------------------------------
-#  (A) n, cella 0 [STIMA]: alla frequenza dei 4 forex misurati (0,323-0,590
+#  (A) n, cella 0 [STIMA]: alla frequenza dei 4 forex misurati (0,322-0,588
 #      op/feriale) fa IS 59-108 e OOS 89-162. ==> il MERITO e' atteso
 #      SOSPESO almeno in IS (Emendamento A). Il RISCHIO si legge comunque.
 #      E' dichiarato PRIMA: questo file compra la FREQUENZA e il RISCHIO,
@@ -136,9 +149,19 @@
 #    r.366 escono prima di leggerli); il terzo e' l'etichetta dell'ordine.
 #    Totale input dell'EA: 34 = 30 pinnati + 1 asse + 3 stringhe. Nessun buco.
 #  - Il .ex5 sul banco corrisponde al .mq5 a HEAD: [NON MISURATO]. L'unica
-#    differenza di sorgente rispetto alle corse d'archivio dell'08/08 e' la
+#    differenza di sorgente rispetto alle corse d'archivio e' la
 #    migrazione Guardian del 19/08 (commit 5fc0bc31, r.30-42 e r.226), che
 #    nel tester e' FAIL-OPEN per costruzione (commento r.36-39).
+#    DATA DELLE CORSE D'ARCHIVIO (corretta al cancello del 26/09): i CSV di
+#    questo simbolo NON sono del weekend 08/08 (commit 400a4624, che ha
+#    portato SOLO EURUSD) ma della CODA FASCIA B, notte 10-11/08, PC di
+#    backtest (coda_weekend.ps1 stadio 1 -Modello 1, walkforward_generico.ps1
+#    di fabbrica -Fino 2026.06.30 -FrazioneIS 0.40 -Deposito 10000),
+#    importati col commit 326c28d2 (11/08). Il fix del sizing 3af47ed9
+#    (08/08 11:48, OrderCalcProfit, r.267-284) e' ANTERIORE a quelle
+#    corse: la frase "solo il Guardian" regge per QUESTA data, non per
+#    l'08/08 mattina. Che il .ex5 del banco quella notte lo contenesse:
+#    [NON MISURATO] (l'ancora S0 e' li' per questo).
 #  - Referto completo: report/NIGHTLY_SEI_SIMBOLI_2026-09-26.md
 # ---------------------------------------------------------------------
 
