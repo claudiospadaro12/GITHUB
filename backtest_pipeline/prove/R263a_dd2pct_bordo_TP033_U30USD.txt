@@ -1,0 +1,382 @@
+# ==========================================================================
+#  R263a -- IL DD MISURATO A RISCHIO 2% (NON RISCALATO) DEL "770201"
+#  ABTG_Nasdaq_Apertura_US su U30USD M5 -- TICK REALI -- DUE LATI
+#  InpTP1_R = 0.33 -- InpRiskPercent = 2 -- deposito 100000 -- magic 766401
+#  QUESTO E' IL FILE DI TESTA DI R263: qui sta TUTTO il ragionamento
+#  di R263a-g. Gli altri sei portano solo le loro differenze.
+# ==========================================================================
+#  >>> LA DOMANDA, UNA SOLA
+#  A che drawdown arriva DAVVERO il candidato 770201 alla taglia che vola
+#  sulla challenge FTMO (2,00%, firma di Claudio del 20/09 per le SEDIE IN
+#  CAMPO), misurato dal tester e NON riscalato dall'1%? Oggi il numero e'
+#  solo [DERIVATO lineare, classe 547]: "a 2% ~12-14%, sopra il muro 10%"
+#  (CHI_E_PIU_VICINO par. 3.1-C, REFERTO_R245 par. 6, REFERTO_R247 (b)).
+#  Il riscalamento lineare ignora due cose che il tester invece fa:
+#  (i) il lotto si calcola sul SALDO (capitale composto), (ii) il lotto si
+#  arrotonda al passo e sbatte sul tetto SYMBOL_VOLUME_MAX.
+#  >>> UNA CORSA A 2% NON E' UNA PROPOSTA DI TAGLIA. E' una misura, e resta
+#      tale solo finche' nessuno la legge come un permesso. La taglia e' di
+#      Claudio. Nessuna riga di questo round tocca preset, sedie o conti.
+#  >>> GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI sul VPS, MAI sul
+#      banco 50504400 (C:\MT5_Backtest), MAI su un terminale di conto
+#      (50503392, 50504263, 10105439, 541452707 FTMO).
+#
+# ==========================================================================
+#  1. IL DISEGNO: 7 FILE, UNA VARIABILE PER FILE
+# ==========================================================================
+#   file   cosa                                   asse                 magic
+#   R263a  TP 0,33 a rischio 2%                   InpEmaSlow 160..260  766401
+#   R263b  TP 0,50 a rischio 2%                   InpEmaSlow 160..260  766402
+#   R263c  TP 0,67 a rischio 2%                   InpEmaSlow 160..260  766403
+#   R263d  TP 0,84 a rischio 2%                   InpEmaSlow 160..260  766404
+#   R263e  PER-TRADE centro 200/0.50, tranche IS, 2%      InpMagic gemelle     766411/766412
+#   R263f  PER-TRADE centro 200/0.50, finestre R245b, 2%  InpMagic gemelle     766413/766414
+#   R263g  centro 200/0.50, CURVA DD(taglia)              InpRiskPercent 1..2  766421
+#  a-d = le 24 celle del blocco 160-260 di R245 (tutte e 11 le "celle
+#  buone" del referto CHI_E_PIU_VICINO + le colonne 220/240/260 di R245)
+#  alla taglia di campo: e' il numero "quante celle stanno sotto il muro a
+#  2%" MISURATO. Le colonne 280-320 di R262 NON ci sono: servono solo se
+#  R262 allarga il blocco, e allora si aggiunge un file (buco 1).
+#  PERCHE' IL PER-TRADE SOLO SUL CENTRO: il per-trade e' UNO per magic
+#  (classe 455): in un file con asse EmaSlow sopravvive solo quello
+#  dell'ultima cella. Per averlo su 24 celle servirebbero 48 file. Il CSV
+#  di ottimizzazione da' GIA' Equity DD % e Peggior Giornata % misurati per
+#  cella: e' quella la misura del DD a 2%. Il per-trade (e/f) serve alla
+#  sola cella che andrebbe in campo: DD a saldo chiuso giorno per giorno,
+#  peggior giornata chiusa, e QUANTE posizioni sbattono sul tetto di lotto.
+#  R263g: la stessa cella, cinque taglie. E' la CURVA che Claudio usa per
+#  firmare (a quale taglia il DD misurato tocca il 10%), e porta l'unica
+#  ANCORA NUMERICA a deposito 100000 che esiste (par. 3).
+#
+# ==========================================================================
+#  2. IL BANCO -- DEPOSITO 100000, e perche'
+# ==========================================================================
+#  >>> VINCOLI DELLA RIGA (classe 692): -Deposito 100000 (NON 10000 come
+#   R245/R262: e' la taglia del conto FTMO 541452707, challenge 100k),
+#   -Modello 4 (tick reali), -Spread NON passato, niente -FrazioneIS,
+#   PC DI BACKTEST DESKTOP-H4D7CAJ. R262 e R263 sono quindi DUE RIGHE
+#   DIVERSE (deposito diverso).
+#  PERCHE' 100000: a 10000 il lotto a passo 0,1 si arrotonda in basso e
+#  d'estate ogni uscita pesa ~6,6% in meno (MISURATO in report/R245_IL_DD_
+#  DELLA_FINESTRA_VERGINE_2026-09-25.md par. 2: frazione di lotto 0,934 a
+#  10.000, 0,991 a 100.000). Sulla stessa cella a 1%: Equity DD OOS 6,8640%
+#  a 10000 (R245b) contro 7,0104% a 100000 (R248a gamba IS) = x1,021.
+#  VALUTA: il tester gira in EUR (banco di casa). Il conto FTMO e' in EUR
+#  [INFERITO da report/SCHIERAMENTO_FTMO_2026-09-20.md r.391: margine
+#  GER40.cash in EUR senza cambio]. U30USD e' in USD: ogni P/L passa dal
+#  cambio, come in campo.
+#  IL TETTO DEL LOTTO: SYMBOL_VOLUME_MAX di U30USD su BCM = 100 (dichiarato
+#  in report/PIANO_PROP.md r.926, analisi dial par. avvertenza (a); R109 ha
+#  misurato il taglio su NASUSD: 66 trade su 743). Nel per-trade di R247 a
+#  1%/10000 le posizioni con volume > 5,0 lotti sono 3 su 154 (IS) e 4 su
+#  197 (OOS); > 4,0 lotti 7 e 8. A 2%/100000 il lotto e' ~20 volte quello
+#  (piu' il saldo che cresce piu' in fretta): [DERIVATO] fra 3 e 7 (IS) e
+#  fra 4 e 8 (OOS) posizioni sbattono sul tetto di 100 e rischiano MENO
+#  del 2%. Su FTMO (US30.cash) il tetto e' [NON MISURATO].
+#  IL MARGINE: con lotto <= 100 e U30USD ~44.000 [ordine di grandezza] il
+#  nozionale e' ~4,4 milioni USD (~3,8 milioni EUR); a leva 1:100 ~38.000
+#  EUR di margine su 100.000: sotto. Ma
+#  il tasso di margine del simbolo nel tester e' [NON MISURATO]: se fosse
+#  piu' alto un ordine potrebbe essere RIFIUTATO ("not enough money") e n
+#  scendere. Per questo il G0 su n e' a una via (par. 3).
+#
+# ==========================================================================
+#  3. I CANCELLI, CONGELATI PRIMA DEI NUMERI -- si guardano PER PRIMI
+# ==========================================================================
+#  P0 PIN (classe 780): in ogni riga di ogni CSV la colonna InpRiskPercent
+#     vale 2 (a-f) o il valore dell'asse (g), InpEmaSlow e InpTP1_R quelli
+#     del file. E' il cancello che vede un "2%" non arrivato: se il pin non
+#     morde il tester gira al default compilato ABTG_DEF_RISK = 2.0 (r.47)
+#     -- che qui COINCIDE col valore voluto, quindi P0 si legge per a-f
+#     insieme a G0-SOLDI qui sotto, e per g e' decisivo.
+#  G0-n (a-d, e, f): Trades di ogni cella <= Trades della stessa cella
+#     (EmaSlow, TP, finestra) in R245. VERDE = uguale in tutte. Un DEFICIT
+#     e' ammesso SOLO se il log del tester porta altrettanti rifiuti
+#     ("not enough money" / "no money"): allora si scrive "la taglia 2%
+#     non e' eseguibile in quelle giornate" (ed e' un risultato). Un
+#     ECCESSO, o un deficit senza rifiuti, = ROSSO. Le ancore n (R245):
+#       EmaSlow   n IS (R245)   n OOS (R245)   [uguali nelle 4 TP]
+#        160        153            197
+#        180        154            197
+#        200        154            197
+#        220        157            199
+#        240        158            200
+#        260        158            201
+#  G0-SOLDI (g, l'unica ancora numerica a 100000 che esiste): la cella
+#     InpRiskPercent=1.00, gamba OOS (2025.07.01 -> 2026.06.30), deve
+#     riprodurre ALLA CIFRA la gamba IS di R248a (stessi FromDate/ToDate,
+#     stesso deposito 100000, stesso binario 4d142cbb = HEAD):
+#        Trades 197   Profit 30658.23   PF 1.48439   Equity DD % 7.0104
+#        Peggior Giornata % -1.2309
+#     (fonte: risultati_archivio/R248/ROUND_R248a/*_IS_R248a.csv, 2 righe
+#     gemelle identiche). VERDE = alla cifra. GIALLO = Trades uguale e
+#     soldi diversi (revisione dati sul PC: allora TUTTO R263 si legge al
+#     suo interno). ROSSO = Trades diverso.
+#  G1-INCROCIATO (gratis, esatto per codice: il magic in tester lo legge
+#     solo la guardia A4, che vede solo i deal della passata):
+#     cella 2.00 di R263g == cella 200 di R263b, IS e OOS, alla cifra;
+#     CSV di R263e (gamba IS) e di R263f (gamba OOS) == la stessa cella.
+#     Tre corse, stessi input: diverso = il banco non e' deterministico
+#     e NESSUN numero di R263 si legge.
+#  G1 gemelle (e, f): le due righe del CSV identiche; i due per-trade
+#     identici riga per riga salvo la colonna magic.
+#  G0-STRUTTURA (e, f): il per-trade a 2% ha le STESSE posizioni del
+#     per-trade a 1% di R247 (risultati_archivio/R247/PERTRADE/
+#     abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_765271.csv per e,
+#     _765273.csv per f): close_time, deal_type e price IDENTICI riga per
+#     riga (volume e net_profit NO: taglia e deposito diversi). Stop, TP e
+#     trailing non dipendono dal lotto. Una riga in piu' = ROSSO; una riga
+#     in meno solo con un rifiuto nel log (G0-n).
+#     >>> Lo strumento che fa QUESTO confronto riga per riga NON ESISTE in
+#     repo (r247_sovrapposizione.py fa G0 contro il CSV e la parte (b),
+#     non il confronto fra due per-trade): sono ~20 righe di Python di
+#     sola lettura da scrivere PRIMA di leggere e/f. Buco dichiarato.
+#  C0 PER-TRADE (e, f): quattro file abtg_trades_ABTG_Nasdaq_Apertura_US_
+#     U30USD_7664{11,12,13,14}.csv da %APPDATA%\MetaQuotes\Terminal\Common\
+#     Files, LastWriteTime >= inizio corsa (un file vecchio non vale), e la
+#     riga deve DIRE A VOCE quanti ne ha trovati su 4 (classe 754).
+#     I per-trade di a-d e g NON si leggono (un magic per file con un asse
+#     di parametro: resta solo l'ultima cella, classe 455).
+#
+# ==========================================================================
+#  4. L'ATTESA, SCRITTA PRIMA DEI NUMERI -- con la banda e il contro-esempio
+# ==========================================================================
+#  IL CONTO (e' una DERIVAZIONE, la scrivo per poterla smentire):
+#   (i)  capitale composto: una serie che a 1% fa DD d1 = 1 - 0,99^k, a
+#        2% fa 1 - 0,98^k, non 2 x d1. A d1 = 7% il rapporto e' 0,969; a
+#        d1 = 10,4% e' 0,950. Fattore g in [0,95 ; 0,97].
+#   (ii) deposito 10000 -> 100000: x1,021 MISURATO sulla cella centrale
+#        OOS a 1% (par. 2); d'estate fino a x1,06 (lotto 0,934 -> 0,991).
+#        Fattore in [1,00 ; 1,06].
+#   (iii) tetto di 100 lotti: puo' solo ABBASSARE il DD. Fattore <= 1.
+#  ==> DD misurato(2%, 100000) = DD R245(1%, 10000) x [1,80 ; 2,10].
+#  PER CELLA (a-d): banda = Equity DD % della stessa cella in R245 (sono
+#  le tabelle d'ancora di R262a-d, stesso CSV) x [1,80 ; 2,10]; non la
+#  ricopio qui per non avere due copie. Il DD 1% piu' BASSO fra le 24
+#  celle, preso come il
+#  peggiore delle due finestre, e' 6,8354% (EmaSlow 260 / TP 0,50, IS):
+#  x 1,80 = 12,30%. ==> ATTESA: 0 CELLE SU 24 sotto il muro statico del
+#  10% a 2%, in tutte e due le finestre. Peggior Giornata a 2%: ~2 x
+#  (-1,08 ; -1,20) = da -2,0 a -2,5%: DENTRO il muro giornaliero del 5%.
+#  PER-TRADE (e/f): DD a saldo chiuso di R247 a 1%/10000 = 6,38% (IS) e
+#  5,94% (OOS) (REFERTO_R247 (b)) -> a 2%/100000 in [11,5 ; 13,4] (IS) e
+#  [10,7 ; 12,5] (OOS). Posizioni al tetto di 100 lotti: IS 3-7, OOS 4-8.
+#  CURVA (g), per finestra, DD(r) = DD(1%, 100000) x r x g(r):
+#     OOS, DD(1%) = 7,0104 (ancora):  1,25 -> ~8,7 ; 1,50 -> ~10,3 ;
+#                                     1,75 -> ~11,9 ; 2,00 -> ~13,5
+#     IS,  DD(1%) ~7,25 [DERIVATO 7,1002 x 1,021, NON MISURATO a 100000]:
+#                                     1,25 -> ~9,0 ; 1,50 -> ~10,6 ;
+#                                     1,75 -> ~12,3 ; 2,00 -> ~13,9
+#  ==> ATTESA: 1,00 e 1,25 SOTTO il 10% in tutte e due le finestre; 1,75 e
+#  2,00 SOPRA; 1,50 [NON RISOLTO a priori] (la banda lo mette a cavallo).
+#  Il muro cade fra 1,25 e 1,50 (lineare: 1,38 IS / 1,43 OOS).
+#  >>> IL CONTRO-ESEMPIO (classe 178): che cosa produrrebbe l'ALTRA
+#      spiegazione, cioe' "il 2% del tester non e' il 2%"? Se il pin
+#      InpRiskPercent non arrivasse, a-f girerebbero al default compilato
+#      2.0 (r.47): STESSO numero, invisibile. Per questo il G0-SOLDI sta
+#      su R263g, dove la cella 1.00 E' diversa dal default: se g esce
+#      piatto su tutto l'asse (DD uguale da 1,00 a 2,00) il pin non morde
+#      e R263 e' NULLO. E se una cella di a-d esce SOTTO il 10%, la prima
+#      ipotesi da escludere non e' "il motore regge": e' il tetto di lotto
+#      o un pin, da leggere nel per-trade e in P0. Serve un rapporto
+#      < 1,46 sulla cella migliore: fuori banda di quasi il 20%.
+#
+# ==========================================================================
+#  5. LE SOGLIE -- LEGGONO il rischio, NON promuovono
+# ==========================================================================
+#   C-c MURO STATICO FTMO: Equity DD % <= 10,00, IS E OOS, a 2%.
+#   MURO GIORNALIERO FTMO (informativo, a qualunque n, Emendamento B):
+#   Peggior Giornata % >= -5,00. E sul per-trade (e/f) la peggior giornata
+#   a SALDO CHIUSO dallo script r247_sovrapposizione.py parte (b) con
+#   --deposito-nuovo 100000 (la chiusura del giorno e' un MINORANTE del
+#   flottante intraday).
+#   Il MERITO non si rilegge qui: PF e n a 2% sono gli stessi ingressi di
+#   R245 (G0-n); il PF puo' spostarsi solo per il peso dei lotti.
+#  Qualunque esito: "a 2% il candidato sta / non sta sotto il muro, con
+#  questo numero". NIENTE DI PIU'. La taglia e' una firma di Claudio.
+#
+# ==========================================================================
+#  6. OROLOGIO -- A ORA FISSA 14:30 BCM, come R245 e l'archivio
+# ==========================================================================
+#  Stesso discorso di R262a par. 2: il walk-forward era a 14:30 BCM tutto
+#  l'anno (CSV d'archivio, 80/80 righe); d'inverno USA 14:30 BCM = 8:30
+#  ET. R263 resta a ora fissa per legarsi alle ancore (R245, R247, R248).
+#  Il DD IN FASE (coppie 14:30/15:30 ricomposte dal per-trade come
+#  prove/R255a par. 6-7) e' il passo dopo, e ha senso solo dopo R250.
+#
+# ==========================================================================
+#  7. IL TEMPO MACCHINA -- ritmi MISURATI su questo EA
+# ==========================================================================
+#   R263a-d: 4 file x 6 celle x 2 finestre = 48 passate; al ritmo di R245
+#            (28 min / 84 passate = 0,333 min/passata; 4,67 min per file
+#            da 14) -> ~16 min.
+#   R263e/f: 2 file x 2 gemelle x 2 gambe (una degenere in e) = 8
+#            passate; R247 (stesso disegno, stessa cella) = 3 min per 2
+#            file; R248 = 4 min -> ~3-4 min.
+#   R263g:   1 file x 5 celle x 2 finestre = 10 passate -> ~4 min.
+#   TOTALE R263 ~24 min (tetto 40; oltre 60 si ferma e si guarda).
+#
+# ==========================================================================
+#  8. I BUCHI, DICHIARATI
+# ==========================================================================
+#   1. Colonne 280-320: se R262 allarga il blocco, serve un R263h (stesso
+#      disegno di a-d, asse 280..320, ~4 file). NON scritto.
+#   2. Il confronto per-trade riga per riga (G0-STRUTTURA): strumento da
+#      scrivere (par. 3).
+#   3. SYMBOL_VOLUME_MAX e tasso di margine di US30.cash su FTMO: [NON
+#      MISURATI]. Il tester misura il tetto BCM (100).
+#   4. Slippage: il tester non lo fa; a 20-100 lotti sullo stop d'apertura
+#      R109 ha misurato 21,5 punti su uno stop Nasdaq reale: il DD vero puo'
+#      essere PIU' profondo di quello misurato qui.
+#   5. Ora fissa (par. 6): nessun numero di R263 descrive FTMO a 16:30.
+#   6. Il Guardian (pausa 3,5% / emergenza) non e' nel tester
+#      (InpUsaGuardian=0 come R245): a 2% trasformerebbe DD temporanei in
+#      perdite chiuse (PIANO_PROP C7 avvertenza (c)). [NON MODELLATO]
+#   7. Un simbolo, 21 mesi, un regime per finestra (Emendamento C).
+#
+#  QUESTO ROUND NON PROMUOVE, NON ARCHIVIA, NON PROPONE TAGLIE, NON TOCCA
+#  PRESET NE' SEDIE.
+#  QUESTO FILE NON PROMUOVE, NON PROPONE TAGLIE, NON TOCCA PRESET NE' SEDIE.
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.4322
+
+# --- 75 pin LETTI DAL CSV D'ARCHIVIO (via R245b, PASS del cancello, girato
+#     il 24/09): valore COSTANTE su tutte e 80 le righe di
+#     risultati_archivio/Dow_Apertura/dow_walkforward_{IS,OOS}.csv. Forma 1/0
+#     dei bool come il lanciatore dell'archivio (dow_apertura.ps1). Eccezioni
+#     DICHIARATE: InpMagic (blocchi vergini 7663xx/7664xx, generatore),
+#     InpNewsCurrencies OMESSO (stringa vuota nel CSV = default compilato r.296),
+#     e le righe che QUESTO file cambia: vedi l'intestazione.
+InpTP1_R=0.33
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=2
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMagic=766401
+InpMaxSpread=0
+InpVerbose=1
+
+# --- 21 input che a HEAD ESISTONO e nel CSV d'archivio NO (aggiunti dopo il
+#     05/08): pinnati al valore NEUTRO, quello che lascia il percorso di codice
+#     identico alla versione che ha prodotto l'archivio. Riga sorgente a HEAD
+#     di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (ricontate il 24/09 a 1549beaa).
+#   InpUsaGuardian: r.92  -- spento: percorso identico a prima della migrazione (PausaGuardian.mqh r.1600 esce subito)
+#   InpMaxPosSimbolo: r.206 -- tetto A1 spento (default)
+#   InpOCTimeframe: r.214 -- PERIOD_CURRENT, serve solo a OPENCONFIRM: NO-OP qui
+#   InpTrailStartR: r.269 -- 0 = trailing armato subito, come prima (r.2244)
+#   InpRunnerTP_R: r.282 -- 0 = TP storico a 3 x InpTP1_R (r.1694)
+#   InpMinBreakoutRangeATR: r.324 -- 0 = breakout a pendenti nudo (r.777-780)
+#   InpUseVolRegime: r.343 -- R30 spento (r.1905, r.1966)
+#   InpVolAtrPeriod: r.344 -- default, NO-OP col regime spento
+#   InpVolLookback: r.345 -- default, NO-OP
+#   InpVolLowPct: r.346 -- default, NO-OP
+#   InpVolHighPct: r.347 -- default, NO-OP
+#   InpVolLowOffMult: r.348 -- default, NO-OP
+#   InpVolHighOffMult: r.349 -- default, NO-OP
+#   InpVolLowSlMult: r.350 -- default, NO-OP
+#   InpVolHighSlMult: r.351 -- default, NO-OP
+#   InpVolHighSizeMult: r.352 -- default, NO-OP
+#   InpUseSRFilter: r.361 -- R30 S/R spento (r.1984 esce subito)
+#   InpSRProximityPts: r.362 -- default, NO-OP
+#   InpSRUsePrevDay: r.363 -- default, NO-OP
+#   InpSRUseRoundNumbers: r.364 -- default, NO-OP
+#   InpSRRoundInterval: r.365 -- default, NO-OP
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+
+# --- L'ASSE, unico: InpEmaSlow 160..260 passo 20 = 6 celle = il blocco di
+#     R245 (le 11 celle buone del referto CHI_E_PIU_VICINO + 220/240/260).
+InpEmaSlow=200||160||20||260||Y
+# ==========================================================================

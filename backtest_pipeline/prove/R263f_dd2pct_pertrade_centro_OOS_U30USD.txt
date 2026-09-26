@@ -1,0 +1,178 @@
+# ==========================================================================
+#  R263f -- PER-TRADE A RISCHIO 2% DELLA CELLA CENTRALE, FINESTRE DI R245b (per-trade = gamba OOS)
+#  ABTG_Nasdaq_Apertura_US su U30USD M5 -- TICK REALI -- DUE LATI
+#  InpEmaSlow = 200, InpTP1_R = 0.50, InpRiskPercent = 2 -- deposito 100000
+#  magic gemelle 766413 / 766414 (asse tecnico: G1 + un per-trade per gemella)
+# ==========================================================================
+#
+#  >>> IL RAGIONAMENTO, I CANCELLI (P0, G0-n, G1, G0-STRUTTURA, C0) E
+#      L'ATTESA STANNO IN R263a par. 1-4. Qui solo le differenze.
+#  COSA MISURA: il DD a SALDO CHIUSO giorno per giorno, la peggior
+#  giornata chiusa e le posizioni al TETTO di 100 lotti, a 2%, sulla
+#  sola cella che andrebbe in campo (200 / 0.50 = centro di R245).
+#  Lettura: python3 backtest_pipeline/r247_sovrapposizione.py --nuovo
+#  <per-trade>@100000 --deposito-nuovo 100000 (parte (b)); tetto: righe
+#  con volume = 100.00; G0-STRUTTURA con lo strumento da scrivere.
+#  ATTESA (R263a par. 4): DD saldo chiuso [10,7 ; 12,5] %; al tetto 4-8 posizioni.
+#  SE R262 SPOSTA IL CENTRO: questo file si rigenera PRIMA del lancio
+#  con  python3 backtest_pipeline/prove/R262_R263_GENERA.py --centro
+#  <EmaSlow> <TP1_R>  (cambia solo i due pin; le ancore STRUTTURA di
+#  R247 valgono SOLO per 200/0.50: con un altro centro G0-STRUTTURA
+#  non ha ancora e si scrive).
+#  FINESTRE: IDENTICHE a R245b/R263b (FRAZIONEIS 0.4322). Il per-trade
+#  che resta e' quello della gamba che gira PER SECONDA = OOS 2025.07.01
+#  -> 2026.06.30 (R247a par. 2, misurato su 772505).
+#  ANCORA STRUTTURA: per-trade R247b 765273 (197 righe, 2025.07.01 ->
+#  2026.06.29). ANCORA CSV: cella 200 di R263b, IS e OOS (G1-INCROCIATO).
+#  MAGIC: rg "7664[0-9][0-9]" = 0 su disco e su tutti i rami (26/09).
+#  Nuovi e non 765271-4 di R247: il tester ha una cache per passata e
+#  con un magic gia' usato il per-trade potrebbe non rinascere.
+#  C0: la riga raccoglie abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_
+#  766413.csv e _766414.csv (LastWriteTime >= inizio corsa).
+#  VINCOLI DELLA RIGA: -Deposito 100000, -Modello 4, -Spread non
+#  passato, PC DI BACKTEST DESKTOP-H4D7CAJ (mai il VPS).
+#  TEMPO: ~1,5-2 min (R247: 3 min per 2 file; R248: 4 min).
+#
+#  QUESTO FILE NON PROMUOVE, NON PROPONE TAGLIE, NON TOCCA PRESET NE' SEDIE.
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.4322
+
+# --- 75 pin LETTI DAL CSV D'ARCHIVIO (via R245b, PASS del cancello, girato
+#     il 24/09): valore COSTANTE su tutte e 80 le righe di
+#     risultati_archivio/Dow_Apertura/dow_walkforward_{IS,OOS}.csv. Forma 1/0
+#     dei bool come il lanciatore dell'archivio (dow_apertura.ps1). Eccezioni
+#     DICHIARATE: InpMagic (blocchi vergini 7663xx/7664xx, generatore),
+#     InpNewsCurrencies OMESSO (stringa vuota nel CSV = default compilato r.296),
+#     e le righe che QUESTO file cambia: vedi l'intestazione.
+InpTP1_R=0.50
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=2
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMaxSpread=0
+InpVerbose=1
+
+# --- 21 input che a HEAD ESISTONO e nel CSV d'archivio NO (aggiunti dopo il
+#     05/08): pinnati al valore NEUTRO, quello che lascia il percorso di codice
+#     identico alla versione che ha prodotto l'archivio. Riga sorgente a HEAD
+#     di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (ricontate il 24/09 a 1549beaa).
+#   InpUsaGuardian: r.92  -- spento: percorso identico a prima della migrazione (PausaGuardian.mqh r.1600 esce subito)
+#   InpMaxPosSimbolo: r.206 -- tetto A1 spento (default)
+#   InpOCTimeframe: r.214 -- PERIOD_CURRENT, serve solo a OPENCONFIRM: NO-OP qui
+#   InpTrailStartR: r.269 -- 0 = trailing armato subito, come prima (r.2244)
+#   InpRunnerTP_R: r.282 -- 0 = TP storico a 3 x InpTP1_R (r.1694)
+#   InpMinBreakoutRangeATR: r.324 -- 0 = breakout a pendenti nudo (r.777-780)
+#   InpUseVolRegime: r.343 -- R30 spento (r.1905, r.1966)
+#   InpVolAtrPeriod: r.344 -- default, NO-OP col regime spento
+#   InpVolLookback: r.345 -- default, NO-OP
+#   InpVolLowPct: r.346 -- default, NO-OP
+#   InpVolHighPct: r.347 -- default, NO-OP
+#   InpVolLowOffMult: r.348 -- default, NO-OP
+#   InpVolHighOffMult: r.349 -- default, NO-OP
+#   InpVolLowSlMult: r.350 -- default, NO-OP
+#   InpVolHighSlMult: r.351 -- default, NO-OP
+#   InpVolHighSizeMult: r.352 -- default, NO-OP
+#   InpUseSRFilter: r.361 -- R30 S/R spento (r.1984 esce subito)
+#   InpSRProximityPts: r.362 -- default, NO-OP
+#   InpSRUsePrevDay: r.363 -- default, NO-OP
+#   InpSRUseRoundNumbers: r.364 -- default, NO-OP
+#   InpSRRoundInterval: r.365 -- default, NO-OP
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+
+InpEmaSlow=200
+# --- L'ASSE, unico e TECNICO: le due gemelle sul magic (G1).
+InpMagic=766413||766413||1||766414||Y
+# ==========================================================================

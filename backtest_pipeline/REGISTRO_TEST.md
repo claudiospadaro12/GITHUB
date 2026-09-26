@@ -4253,3 +4253,39 @@ prova` **nessun difetto meccanico**, ASCII puro.
   DAX, per il certificato: **NON ANCORA MISURATO (③ uscita, ⑤ TF, correlazione a specchio)** con
   **0 celle su 33 distinte ≥ PF 1,00** a tick (archivio `080957cf` 18, R242a 7, R244b 9, di cui C=12 =
   R242a H=6); R261 chiude ⑤ e lo specchio.
+
+---
+
+## 📐 26/09/2026 — R262 e R263 sul candidato `770201` (Dow BREAKOUT a due lati, 15', `U30USD` M5) — ⏳ IN CODA, NON GIRATI
+
+EA **`ABTG_Nasdaq_Apertura_US`** (non `ABTG_Dow_Apertura_US`: l'archivio del `770201` l'ha prodotto
+`dow_apertura.ps1` r.37). Pin letti da `prove/R245b_*` dal generatore `prove/R262_R263_GENERA.py`
+(`--verifica` rigenera e confronta byte per byte). `controlla_prova.py`: **11 file, 69 celle, 138
+passate, 0 problemi**; `controlla_riga.py --oggetto prova`: 0 difetti meccanici su 11/11.
+**Nessuna esecuzione, nessuna taglia, nessun preset in campo toccato.** Gira SOLO sul PC di backtest
+`DESKTOP-H4D7CAJ`.
+
+📌 **Contesto che questa riga del registro non aveva**: il bordo 220/240/260 è **già girato** come
+**R245** (24/09, `report/REFERTO_R245_2026-09-24.md`: altopiano 160-260, centro 200, **aperto a
+destra**, G0 giallo per deriva di lotto); per-trade del centro **R247** (DD saldo chiuso 6,38% IS /
+5,94% OOS a 1%, sovrapposizione con `770202` PARZIALE); finestra vergine **R248** (DD 8,38% sopra il
+p95 → **REVISIONE prima di qualunque schieramento**); merito **d'inverno** (`IL_MERITO_E_D_INVERNO`:
+estate PF 0,982 n 199, inverno 1,800 n 152); **R250** (orologio, scritto, PASS, **non girato**).
+
+| round | file | cosa misura | banco | magic | passate | tempo stimato |
+|---|---|---|---|---|---:|---:|
+| **R262** | `R262a-d_emaslow_oltre260_TP0xx` | dove si chiude A DESTRA l'altopiano: `InpEmaSlow` 160..320 × 4 TP (160-260 = ancore G0 **alla cifra** contro R245, stesso binario) | 1%, deposito 10000, tick reali, ora fissa 14:30 | 766301-766304 | 72 | ~24 min |
+| **R263a-d** | `R263a-d_dd2pct_bordo_TP0xx` | DD **misurato** a 2% (non riscalato) sul blocco 160-260 × 4 TP | **2%, deposito 100000** | 766401-766404 | 48 | ~16 min |
+| **R263e/f** | `R263e/f_dd2pct_pertrade_centro_{IS,OOS}` | per-trade a 2% della cella 200/0,50: DD saldo chiuso, peggior giornata, posizioni al tetto di 100 lotti | 2%, 100000, gemelle G1 | 766411/12 · 766413/14 | 8 | ~3-4 min |
+| **R263g** | `R263g_dd_asse_rischio_centro` | curva DD(taglia) 1,00..2,00 sulla cella 200/0,50; **ancora G0-SOLDI alla cifra** = R248a gamba IS (197 / 30658.23 / 1.48439 / 7.0104) | 100000 | 766421 | 10 | ~4 min |
+
+⏱️ Ritmo usato: **0,333 min/passata MISURATO** su questo EA (R245: 84 passate in 28 min). Lo
+0,085 del referto `CHI_E_PIU_VICINO` è una formula tarata su un altro EA (R245a par. 10).
+🎯 **Attese dichiarate nei file**: R262 → H1 probabile, **altopiano aperto fino a 320 = nessun centro
+dichiarabile, `InpEmaSlow` quasi inerte in 160-320**; R263a-d → **0 celle su 24 sotto il muro 10% a
+2%** (banda DD misurato = DD R245 × [1,80 ; 2,10]); R263g → muro fra **1,25 e 1,50** (lineare 1,38 IS /
+1,43 OOS). 🔴 **Priorità proposta: R250 → R263g → R262 → R263a-d**: nessun esito di R262 rende il
+candidato schierabile (i tappi sono R248, l'orologio, la taglia).
+🧾 Preset in **BOZZA** (non schierabile): `mql5/Presets/FTMO/BOZZA_ABTG_Nasdaq_Apertura_US_770201_BREAKOUT_DOW_FTMO.set`
+— rischio **1.00 = FIRMA DI CLAUDIO, non proposta**; magic `770201` vergine su FTMO ma **non** nella
+flotta (default compilato + sedia NASUSD BCM spenta), alternativa vergine `770231`.

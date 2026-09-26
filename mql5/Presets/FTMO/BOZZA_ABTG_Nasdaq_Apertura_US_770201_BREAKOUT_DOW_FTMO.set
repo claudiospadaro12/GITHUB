@@ -1,0 +1,248 @@
+; ==========================================================================
+; *** BOZZA -- NON SCHIERABILE -- NON CARICARE SU NESSUN TERMINALE ***
+; ABTG_Nasdaq_Apertura_US -- CANDIDATO "770201" -- DOW BREAKOUT A DUE LATI
+; range 15' -- US30.cash M5 -- PRESET PER L'OROLOGIO **FTMO** (BCM + 2)
+; Scritto il 26/09/2026 dal cercatore di parametri. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; STATO ........: BOZZA. Il prefisso BOZZA_ vuol dire: questo file NON va su
+;                 nessun terminale finche' (1) Claudio non firma e (2) il
+;                 cancello (controlla_riga + controllo-preventivo) non da' PASS.
+; BERSAGLIO ....: SE e QUANDO firmato: terminale MT5 FTMO 541452707 (C:\FTMO),
+;                 grafico US30.cash M5, EA CLAU12_Nasdaq_Apertura_US (=
+;                 ABTG_Nasdaq_Apertura_US rinominato, report/RINOMINA_CLAU12_
+;                 2026-09-20.md). NON 50503392, NON 50504263, NON 10105439
+;                 (C:\BCM_Reale), NON 50504400 (C:\MT5_Backtest).
+;
+; --------------------------------------------------------------------------
+; 0) PERCHE' IL NOME DICE Nasdaq_Apertura_US E NON Dow_Apertura_US
+; --------------------------------------------------------------------------
+;   La configurazione "770201" e' stata MISURATA con ABTG_Nasdaq_Apertura_US
+;   (backtest_pipeline/dow_apertura.ps1 r.37; magic 770201 = ABTG_DEF_MAGIC
+;   r.38 di quel sorgente; prove/R245a par. 1). ABTG_Dow_Apertura_US e' il
+;   motore della 770202 (RETEST 35', solo long): 81 input contro 98. Un
+;   preset con questo nome caricato sul Dow EA applicherebbe in silenzio gli
+;   input in comune e farebbe girare un MOTORE MAI MISURATO in questa
+;   configurazione. Per questo il file NON si chiama
+;   BOZZA_ABTG_Dow_Apertura_US_770201_BREAKOUT_FTMO.set (nome richiesto):
+;   il nome dice l'EA su cui va, e la parola DOW dice il simbolo.
+;   Verifica meccanica: i 98 nomi qui sotto sono, NELL'ORDINE, le 98
+;   dichiarazioni input di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 e le 98
+;   righe di mql5/Presets/FTMO/ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set.
+;
+; --------------------------------------------------------------------------
+; 1) DA DOVE VIENE OGNI RIGA
+; --------------------------------------------------------------------------
+;   [A] 96 righe = i pin di backtest_pipeline/prove/R245b_emaslow_bordo_
+;       TP050_U30USD.txt (75 costanti del walk-forward d'archivio
+;       risultati_archivio/Dow_Apertura/dow_walkforward_{IS,OOS}.csv + 21
+;       input nati dopo il 05/08 al valore NEUTRO), con InpEmaSlow=200 e
+;       InpTP1_R=0.5. Bool 1/0 -> true/false, decimali nel formato del
+;       preset 770260 FTMO. Stesso binario del round: git diff f489a621 HEAD
+;       sull'EA e sull'include = vuoto (26/09, HEAD 75a70f23).
+;   [B] TRADUZIONI FTMO -- le stesse del rimappatore di casa
+;       (backtest_pipeline/rimappa_preset_ftmo.py, vedi i preset 770202/770260):
+;         input            BCM (contratto)   QUI (FTMO)   ora italiana
+;         InpSessionHour   14                16           15:30 IT
+;         InpCloseHour     17                19           18:30 IT
+;         InpCorrSymbol    SPXUSD            US500.cash   INERTE (correlazione spenta)
+;       FTMO = BCM + 2 oggi (FTMO UTC+3 estate, BCM UTC+1 fisso).
+;   [C] SCELTE DICHIARATE (non misure):
+;         InpUsaGuardian = true   -- il round girava a 0. Come per 770260:
+;             il Guardian puo' solo RIFIUTARE un ingresso, mai aggiungerne.
+;             Per il replay esatto del round va messo a false.
+;         InpMagic = 770201       -- richiesto dal coordinatore. Vedi par. 5.
+;         InpRiskPercent = 1.00   -- vedi par. 4. TAGLIA = FIRMA DI CLAUDIO.
+;         InpNewsCurrencies =     -- stringa vuota: nel CSV e' vuota, e il
+;             default compilato (r.296) e' vuoto.
+;   Unita' in PUNTI (InpBufferPoints=200, InpMinStopPts=500, InpTrail
+;   FixedPts=12532): US30.cash su FTMO ha Digits=2 come U30USD BCM
+;   (report/I_LATI_MANCANTI_2026-09-23.md r.833; report/LE_UNITA_NEI_PRESET_
+;   VIVI_2026-09-23.md r.119): 200 pt = 2,00 punti indice, 500 = 5,00, come
+;   nel round. InpTrailFixedPts e' INERTE (InpTrailMode=1 = candela prec.).
+;
+; --------------------------------------------------------------------------
+; 2) LA CELLA -- CENTRO DICHIARATO, e la sua etichetta
+; --------------------------------------------------------------------------
+;   InpEmaSlow = 200, InpTP1_R = 0.5 = CENTRO di R245 (report/REFERTO_R245_
+;   2026-09-24.md par. 0 e 2): altopiano 160-260 su InpEmaSlow, pari 200/220
+;   -> 200 per la regola congelata; su InpTP1_R 0,33-0,67 -> 0,50.
+;   ETICHETTA: "centro di un altopiano APERTO A DESTRA" (260 passa). SI
+;   AGGIORNA DOPO R262 (prove/R262a-d): se R262 chiude a 260 resta 200; se
+;   sposta il centro si cambia QUESTA riga; se l'altopiano resta aperto
+;   fino a 320 la cella resta 200 ma diventa "valore interno, NON centro".
+;   I NUMERI DELLA CELLA (BCM, ora fissa 14:30 BCM, rischio 1%, deposito
+;   10000, tick reali, stesso binario -- CSV di R245b):
+;     IS  2024.09.26 -> 2025.06.30 : PF 1.25176 | n 154 posizioni | DD 7.1002%
+;     OOS 2025.07.01 -> 2026.06.30 : PF 1.48894 | n 197 posizioni | DD 6.8640%
+;   Finestra vergine 01/07 -> 18/09/2026 (REFERTO_R248, deposito 100000):
+;     39 posizioni, DD saldo chiuso 8.38% = SOPRA il p95 (7.31%) della
+;     promessa -> ramo "REVISIONE PRIMA DI QUALUNQUE SCHIERAMENTO".
+;
+; --------------------------------------------------------------------------
+; 3) *** PERCHE' E' UNA BOZZA -- SEI MOTIVI, PER NOME ***
+; --------------------------------------------------------------------------
+;   1. R248: REVISIONE APERTA. Regola congelata prima del round: "il
+;      candidato non entra ne' al posto ne' accanto a 770202 finche' la
+;      causa del DD non e' scritta. Decide Claudio." Causa [NON SEPARATA]
+;      fra sfortuna e regime (report/R245_IL_DD_DELLA_FINESTRA_VERGINE_
+;      2026-09-25.md).
+;   2. [!!] L'OROLOGIO: SU FTMO QUESTO FILE NON FA LA CELLA DEL CONTRATTO.
+;      Il contratto e' a 14:30 BCM TUTTO L'ANNO (CSV d'archivio: 80/80
+;      righe InpSessionHour=14): d'estate USA = 9:30 NY (la cash), d'inverno
+;      = 8:30 NY (pre-mercato, sui dati delle 8:30 ET). E il merito e'
+;      d'inverno: estate PF 0,982 su 199 posizioni, inverno 1,800 su 152, il
+;      102% del netto (report/IL_MERITO_E_D_INVERNO_2026-09-25.md par. 0).
+;      Qui, 16:30 FTMO = 9:30 NY oggi = LA CELLA ESTIVA, quella che in casa
+;      fa PF ~0,98. Dal 25/10 dipende dall'offset FTMO, [NON MISURATO]: tre
+;      ipotesi in IL_MERITO_E_D_INVERNO par. 6. Orologio o stagione lo dice
+;      R250 (prove/R250a-f, PASS del cancello, NON girati).
+;   3. LA TAGLIA (par. 4).
+;   4. SOVRAPPOSIZIONE con 770202 (report/REFERTO_R247_2026-09-24.md):
+;      entra nel 96% dei giorni della viva (92/96), stesso verso 91/92,
+;      verdetto PARZIALE; a 1% + 1% DD additivo 9,26% [DERIVATO].
+;   5. Filtro EMA su H4: la griglia H4 di FTMO e' sfasata di 2 ore da
+;      quella BCM (preset 770202 FTMO, rilievo): il bias NON vale gli
+;      stessi numeri del backtest. [NON MISURATO].
+;   6. COSTO (cancello C-d): 41,3x a spread 3,00 (prudente), 61,9x a 2,00
+;      (report/CHI_E_PIU_VICINO_AL_CAMPO_2026-09-24.md par. 3.1-B), AL PELO
+;      sul pavimento 40x; 212 giornate su 446 (47,5%) sotto 40x (prove/
+;      R245a par. 6). Spread di US30.cash su FTMO alle 16:30: [NON MISURATO].
+;
+; --------------------------------------------------------------------------
+; 4) LA TAGLIA -- InpRiskPercent = 1.00
+; --------------------------------------------------------------------------
+;   *** TAGLIA = FIRMA DI CLAUDIO, NON PROPOSTA. ***
+;   1.00 e' il banco a cui la cella e' stata misurata, NON un consiglio.
+;   A 2,00% (la taglia delle sedie in campo) 0 celle su 40 d'archivio
+;   passano insieme merito, campione e muro statico 10% [DERIVATO lineare,
+;   classe 547: CHI_E_PIU_VICINO par. 3.1-C]; sulla cella centrale il DD
+;   derivato a 2% e' ~12-14%. La MISURA vera (non riscalata) e' R263
+;   (prove/R263a-g, NON girati); R263g misura la curva DD(taglia) da 1,00 a
+;   2,00. FTMO vieta le size erratiche (preset 770202 FTMO): una taglia
+;   diversa dalle altre sedie e' anch'essa una firma.
+;
+; --------------------------------------------------------------------------
+; 5) IL MAGIC 770201 -- VERGINE SU FTMO, NON VERGINE NELLA FLOTTA
+; --------------------------------------------------------------------------
+;   SU FTMO: vergine. backtest_pipeline/coda/referti/CODA_01_sedie_
+;   attaccate_20260926_033003.log, blocco "programma: C:\FTMO": magic
+;   770101, 770202, 770260, 771531, 770511, 770411, 779001 -- 770201 NO.
+;   Nessun preset in mql5/Presets/FTMO/ lo porta. Nei CODA_0*_20260926 del
+;   26/09 compare UNA volta sola (CODA_05: il per-trade NASUSD del 09/09,
+;   BCM).
+;   [!!] NELLA FLOTTA: e' (a) il magic di DEFAULT compilato dell'EA
+;   (ABTG_DEF_MAGIC r.38: un EA trascinato SENZA preset gira con 770201);
+;   (b) una sedia NASUSD su BCM spenta dal 18/08 con 10 posizioni in
+;   data/statements/trades_auto.csv; (c) il preset 770260 lo ha RIFIUTATO
+;   per questo ("riusarlo mescolerebbe due sedie sotto lo stesso nome").
+;   Alternativa vergine al 26/09: 770231 (grep -w su disco e su tutti i
+;   rami = 0). LA SCELTA E' DI CLAUDIO.
+;
+; --------------------------------------------------------------------------
+; 6) FILTRO NOTIZIE SPENTO, e SCADENZA DI FINE OTTOBRE
+; --------------------------------------------------------------------------
+;   InpUseNewsFilter=false: la cella e' MISURATA cosi' (CSV d'archivio =
+;   0), e mql5/Files/abtg_news.csv e' in ORA ITALIANA (preset 770260 FTMO,
+;   "FILTRO NOTIZIE"): acceso senza shift cadrebbe nell'ora sbagliata.
+;   Il DST europeo finisce il 25/10/2026, quello USA il 01/11/2026: con
+;   l'orologio vale tutto il par. 3.2. Questo file SCADE con l'ora legale.
+; ==========================================================================
+InpUsaGuardian=true
+InpSessionHour=16
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=19
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=true
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=0.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=1
+InpEmaSlow=200
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=US500.cash
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.00
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=0.5
+InpTP1_ClosePct=0.0
+InpBreakevenAtTP1=false
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=12532.0
+InpRunnerTP_R=0.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=500.0
+InpSkipIfTight=false
+InpMinBreakoutRangeATR=0.0
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=1
+InpUseVolRegime=false
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20.0
+InpVolHighPct=80.0
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=false
+InpSRProximityPts=1500.0
+InpSRUsePrevDay=true
+InpSRUseRoundNumbers=true
+InpSRRoundInterval=10000.0
+InpMagic=770201
+InpMaxSpread=0
+InpVerbose=true
