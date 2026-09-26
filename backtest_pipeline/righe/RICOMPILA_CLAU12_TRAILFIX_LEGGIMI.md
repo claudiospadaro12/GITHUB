@@ -104,3 +104,6 @@ del `.ex5` fa ricaricare il binario vecchio, come la compilazione ha fatto ricar
   La differenza e' la stessa Parte A, che non chiama l'include: il trasferimento e' [INFERITO].
 - Lo script e' collaudato su Linux (pwsh 7) con un MetaEditor finto e un albero simulato, non su
   Windows PowerShell 5.1 e non con il MetaEditor vero.
+
+---
+_Cancello: strato 1 OK; strato 2 FAIL (D1 conteggio CODA_06 classe 456; D2 catch esterno senza ripristino, classe 832; D3 via d'uscita MetaEditor; D4 stato MISTO; D5 segnaposto) -> **PASS alla seconda passata** su script `992a1af3` + riga `c03e5dfe`. Rilievi per il messaggio in chat: Ctrl+Alt+FINE dentro RDP; qualunque riga rossa con RIPRISTINO o SHA256 DIVERSO = non toccare niente; "sabato, o domenica entro sera" (i CFD indici riaprono domenica ~23 IT); su C:\FTMO risulta `ABTG_ScalperDirezionale (3).ex5` compilato il 25/09 22:16 (CODA_06): da chiarire con Claudio. IN CODA, NON INVIATA: prerequisito 1 (R254 NEUTRA 4/4) oggi ancora falso._
