@@ -188,8 +188,16 @@
 #   MURO GIORNALIERO FTMO (informativo, a qualunque n, Emendamento B):
 #   Peggior Giornata % >= -5,00. E sul per-trade (e/f) la peggior giornata
 #   a SALDO CHIUSO dallo script r247_sovrapposizione.py parte (b) con
-#   --deposito-nuovo 100000 (la chiusura del giorno e' un MINORANTE del
-#   flottante intraday).
+#   --deposito-nuovo 100000 --rischio-base 2.0 (la chiusura del giorno e'
+#   un MINORANTE del flottante intraday).
+#   >>> --rischio-base 2.0 E' OBBLIGATORIO (classe 843): il default dello
+#   script e' 1.0, e con quello la riga "a rischio 2.00% [DERIVATO x2.00]"
+#   RADDOPPIA un per-trade che e' GIA' a 2% (provato sul per-trade 765271
+#   di R247, a 1%: stampa 6,38% misurato e "a rischio 2.00%: DD ~12,76%",
+#   giusto li'; su un per-trade GIA' a 2% da ~12% la stessa riga direbbe
+#   ~25% "a rischio 2.00%"). Con 2.0 quella riga esce x1,00 = la misura
+#   stessa. Il numero di R263e/f e' SOLO la riga
+#   "DD MASSIMO del saldo chiuso", mai una riga [DERIVATO].
 #   Il MERITO non si rilegge qui: PF e n a 2% sono gli stessi ingressi di
 #   R245 (G0-n); il PF puo' spostarsi solo per il peso dei lotti.
 #  Qualunque esito: "a 2% il candidato sta / non sta sotto il muro, con

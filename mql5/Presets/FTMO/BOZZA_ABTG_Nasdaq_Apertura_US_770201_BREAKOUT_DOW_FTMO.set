@@ -4,6 +4,29 @@
 ; range 15' -- US30.cash M5 -- PRESET PER L'OROLOGIO **FTMO** (BCM + 2)
 ; Scritto il 26/09/2026 dal cercatore di parametri. ASCII PURO (regola 17/08).
 ; ==========================================================================
+; >>> QUATTRO COSE DA LEGGERE PRIMA DI TUTTO IL RESTO (aggiunte dal cancello
+;     controllo-preventivo il 26/09; il dettaglio e' nei par. 2, 3, 5):
+; [!] 1. R248 IMPONE "REVISIONE PRIMA DI QUALUNQUE SCHIERAMENTO": nella
+;        finestra vergine 01/07-18/09/2026 la cella ha fatto DD saldo chiuso
+;        8,38% a 1%, sopra il p95 (7,31%) della promessa. Il candidato non
+;        entra ne' al posto ne' accanto a 770202 finche' la causa non e'
+;        scritta. Decide Claudio (report/REFERTO_R248_2026-09-25.md).
+; [!] 2. SU FTMO, ALLE 16:30 FTMO, QUESTO FILE FA LA CELLA ESTIVA, NON IL
+;        CONTRATTO: 16:30 FTMO = 9:30 NY = la cash, che in casa fa PF ~0,98
+;        (0,982 su 199 posizioni). Il MERITO del contratto sta nel
+;        PRE-MERCATO INVERNALE (14:30 BCM = 8:30 NY d'inverno: PF 1,800 su
+;        152, il 102% del netto; report/IL_MERITO_E_D_INVERNO_2026-09-25.md).
+;        Questo preset NON lo riproduce in nessuna stagione. Lo misura R250.
+; [!] 3. DAL 25/10/2026 conta l'offset FTMO, [NON MISURATO] (tre ipotesi:
+;        UTC+2 calendario UE, UTC+2 calendario USA, UTC+3 fisso): nella
+;        settimana 26-30/10 16:30 FTMO puo' cadere alle 10:30 NY, cella MAI
+;        misurata. Il file SCADE con l'ora legale.
+; [!] 4. MAGIC: default proposto 770231 (vergine su disco, su tutti i rami e
+;        nella storia git al 26/09). 770201 nel NOME del file e' il nome del
+;        CANDIDATO (configurazione d'archivio), NON il magic: 770201 e'
+;        l'alternativa NON vergine nella flotta (par. 5). Scelta di Claudio.
+;        La TAGLIA (InpRiskPercent=1.00) e' FIRMA DI CLAUDIO, NON PROPOSTA.
+; ==========================================================================
 ;
 ; STATO ........: BOZZA. Il prefisso BOZZA_ vuol dire: questo file NON va su
 ;                 nessun terminale finche' (1) Claudio non firma e (2) il
@@ -51,7 +74,9 @@
 ;         InpUsaGuardian = true   -- il round girava a 0. Come per 770260:
 ;             il Guardian puo' solo RIFIUTARE un ingresso, mai aggiungerne.
 ;             Per il replay esatto del round va messo a false.
-;         InpMagic = 770201       -- richiesto dal coordinatore. Vedi par. 5.
+;         InpMagic = 770231       -- DEFAULT PROPOSTO, vergine. 770201 (richiesto
+;             dal coordinatore) e' l'alternativa NON vergine nella flotta.
+;             Vedi par. 5. La scelta e' di Claudio.
 ;         InpRiskPercent = 1.00   -- vedi par. 4. TAGLIA = FIRMA DI CLAUDIO.
 ;         InpNewsCurrencies =     -- stringa vuota: nel CSV e' vuota, e il
 ;             default compilato (r.296) e' vuoto.
@@ -101,6 +126,9 @@
 ;   4. SOVRAPPOSIZIONE con 770202 (report/REFERTO_R247_2026-09-24.md):
 ;      entra nel 96% dei giorni della viva (92/96), stesso verso 91/92,
 ;      verdetto PARZIALE; a 1% + 1% DD additivo 9,26% [DERIVATO].
+;      E sullo stesso US30.cash c'e' la sedia SHORT 770212 IN FIRMA
+;      (report/FIRME_2026-09-26.md), e la 770260 Nasdaq arma allo stesso
+;      minuto: la sovrapposizione con queste due e' [NON MISURATA].
 ;   5. Filtro EMA su H4: la griglia H4 di FTMO e' sfasata di 2 ore da
 ;      quella BCM (preset 770202 FTMO, rilievo): il bias NON vale gli
 ;      stessi numeri del backtest. [NON MISURATO].
@@ -123,7 +151,7 @@
 ;   diversa dalle altre sedie e' anch'essa una firma.
 ;
 ; --------------------------------------------------------------------------
-; 5) IL MAGIC 770201 -- VERGINE SU FTMO, NON VERGINE NELLA FLOTTA
+; 5) IL MAGIC -- PROPOSTO 770231; 770201 VERGINE SU FTMO, NON NELLA FLOTTA
 ; --------------------------------------------------------------------------
 ;   SU FTMO: vergine. backtest_pipeline/coda/referti/CODA_01_sedie_
 ;   attaccate_20260926_033003.log, blocco "programma: C:\FTMO": magic
@@ -136,8 +164,11 @@
 ;   (b) una sedia NASUSD su BCM spenta dal 18/08 con 10 posizioni in
 ;   data/statements/trades_auto.csv; (c) il preset 770260 lo ha RIFIUTATO
 ;   per questo ("riusarlo mescolerebbe due sedie sotto lo stesso nome").
-;   Alternativa vergine al 26/09: 770231 (grep -w su disco e su tutti i
-;   rami = 0). LA SCELTA E' DI CLAUDIO.
+;   QUINDI IL DEFAULT PROPOSTO DI QUESTO FILE E' 770231 (grep -w su disco
+;   e su tutti i rami = 0 fuori da questo file e da REGISTRO_TEST; git log
+;   -S 770231 --all = solo il commit di questa bozza; fuori dal blocco
+;   770206-770211 gia' usato e dal 770212 in firma). 770201 resta
+;   l'ALTERNATIVA, NON vergine nella flotta. LA SCELTA E' DI CLAUDIO.
 ;
 ; --------------------------------------------------------------------------
 ; 6) FILTRO NOTIZIE SPENTO, e SCADENZA DI FINE OTTOBRE
@@ -243,6 +274,6 @@ InpSRProximityPts=1500.0
 InpSRUsePrevDay=true
 InpSRUseRoundNumbers=true
 InpSRRoundInterval=10000.0
-InpMagic=770201
+InpMagic=770231
 InpMaxSpread=0
 InpVerbose=true

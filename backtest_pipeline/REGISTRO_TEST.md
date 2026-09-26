@@ -4296,5 +4296,29 @@ dichiarabile, `InpEmaSlow` quasi inerte in 160-320**; R263a-d → **0 celle su 2
 1,43 OOS). 🔴 **Priorità proposta: R250 → R263g → R262 → R263a-d**: nessun esito di R262 rende il
 candidato schierabile (i tappi sono R248, l'orologio, la taglia).
 🧾 Preset in **BOZZA** (non schierabile): `mql5/Presets/FTMO/BOZZA_ABTG_Nasdaq_Apertura_US_770201_BREAKOUT_DOW_FTMO.set`
-— rischio **1.00 = FIRMA DI CLAUDIO, non proposta**; magic `770201` vergine su FTMO ma **non** nella
-flotta (default compilato + sedia NASUSD BCM spenta), alternativa vergine `770231`.
+— rischio **1.00 = FIRMA DI CLAUDIO, non proposta**; magic **`770231` = default proposto** (vergine su
+disco, su tutti i rami e nella storia git); `770201` = **alternativa NON vergine nella flotta** (default
+compilato dell'EA + sedia NASUSD BCM spenta dal 18/08 con 10 posizioni), vergine solo su FTMO. Il
+`770201` nel nome del file è il nome del **candidato**, non il magic. In testa alla bozza, prima di tutto:
+**R248 = REVISIONE prima di qualunque schieramento**; alle 16:30 FTMO il file fa la **cella ESTIVA**
+(PF ~0,98 in casa) mentre il merito del contratto è nel **pre-mercato invernale**; dal 25/10 l'offset
+FTMO è **[NON MISURATO]**. La scelta del magic e la taglia sono di Claudio.
+
+🧾 **I numeri di R245-R248 che il registro non aveva** (riletti alla fonte dal cancello il 26/09; tutti
+a ora fissa 14:30 BCM, `U30USD` M5, tick reali, cella centrale `InpEmaSlow=200` / `InpTP1_R=0,50`):
+
+| round | cosa | finestra | banco | n (pos.) | PF | DD | peggior giornata | fonte |
+|---|---|---|---|---:|---:|---:|---:|---|
+| **R245b** | cella centrale (asse `InpEmaSlow` 140..260) | IS 2024.09.26→2025.06.30 | 1%, 10000 | 154 | 1,25176 | Equity 7,1002% | −1,1046% | `risultati_archivio/R245/ROUND_R245b/*_IS_*.csv` |
+| **R245b** | idem | OOS 2025.07.01→2026.06.30 | 1%, 10000 | 197 | 1,48894 | Equity 6,8640% | −1,1958% | `…/ROUND_R245b/*_OOS_*.csv` |
+| **R247a/b** | per-trade del centro | IS / OOS | 1%, 10000 | 154 / 197 | — | saldo chiuso **6,38% / 5,94%** | −1,10% / −1,20% | `report/REFERTO_R247_2026-09-24.md` |
+| **R248a** | gamba d'ancora | 2025.07.01→2026.06.30 | 1%, **100000** | 197 | 1,48439 | Equity 7,0104% | −1,2309% | `risultati_archivio/R248/ROUND_R248a/*_IS_*.csv` (G0 VERDE) |
+| **R248a** | **finestra vergine** | 2026.07.01→2026.09.18 | 1%, 100000 | 39 | 0,511 (n<150: non decide) | saldo chiuso **8,38%** (> p95 7,31%) · Equity 8,6817% | −1,1035% (CSV) | `…/ROUND_R248a/*_OOS_*.csv` + `report/REFERTO_R248_2026-09-25.md` → **REVISIONE** |
+
+R245 in sintesi: altopiano 160-260 su 3 TP su 4, centro 200, **bordo destro aperto** (260 passa), bordo
+sinistro 140 chiuso (n IS 147); G0 contro l'archivio del 05/08 **GIALLO** (n identico, soldi diversi:
+causa indiziata `CalcLotByRisk` r.2045, commit `3af47ed9`). **R246** (orologio, più EA) resta **fuori da
+questo registro**: non riguarda solo questo candidato e non è stato riletto qui.
+✏️ **Correzione del cancello (26/09)**: la riga di lettura di R263e/f ora porta `--rischio-base 2.0`
+(classe 843): senza, `r247_sovrapposizione.py` stampa una riga `[DERIVATO] a rischio 2.00%` che
+**raddoppia** un per-trade già a 2%.

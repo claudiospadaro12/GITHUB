@@ -11,7 +11,10 @@
 #  giornata chiusa e le posizioni al TETTO di 100 lotti, a 2%, sulla
 #  sola cella che andrebbe in campo (200 / 0.50 = centro di R245).
 #  Lettura: python3 backtest_pipeline/r247_sovrapposizione.py --nuovo
-#  <per-trade>@100000 --deposito-nuovo 100000 (parte (b)); tetto: righe
+#  <per-trade>@100000 --deposito-nuovo 100000 --rischio-base 2.0
+#  (parte (b); SENZA --rischio-base 2.0 la riga [DERIVATO] "a rischio
+#  2.00%" raddoppia un per-trade gia' a 2%: classe 843, R263a par. 5;
+#  il numero e' SOLO "DD MASSIMO del saldo chiuso"); tetto: righe
 #  con volume = 100.00; G0-STRUTTURA con lo strumento da scrivere.
 #  ATTESA (R263a par. 4): DD saldo chiuso [11,5 ; 13,4] %; al tetto 3-7 posizioni.
 #  SE R262 SPOSTA IL CENTRO: questo file si rigenera PRIMA del lancio
