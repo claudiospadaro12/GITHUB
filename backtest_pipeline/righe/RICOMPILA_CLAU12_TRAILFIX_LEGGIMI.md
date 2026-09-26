@@ -4,8 +4,8 @@
 cancello (strato 1 + `controllo-preventivo`) sulla riga col pin vero.
 
 - Script: `backtest_pipeline/righe/RICOMPILA_CLAU12_TRAILFIX.ps1` (`MARCATORE_RICOMPILA_CLAU12_TRAILFIX_v1`)
-- Riga: `backtest_pipeline/righe/RIGA_RICOMPILA_CLAU12_TRAILFIX_FTMO.txt` (segnaposto `NUOVOPIN40HEX` e
-  `NUOVOSHA` da sostituire dopo il commit)
+- Riga: `backtest_pipeline/righe/RIGA_RICOMPILA_CLAU12_TRAILFIX_FTMO.txt` (pin = il commit dello script
+  qui sopra, SHA256 dello script `E7C11601611A5B0B4B945175D830032A6A5D144B08C06BCB56802AEA3F086723`)
 - Sorgenti: `mql5/Experts/trailfix_9fca63d9/CLAU12_*.mq5` al pin `1d68dadd`
 
 ## Prerequisiti (tutti e tre, nessuno "per analogia")
@@ -55,6 +55,18 @@ non stacca EA, non tocca Algo Trading, non lancia nessun tester.
    sono quelli chiesti (`.PRIMA_TRAILFIX_<ora>`), invisibili al Navigatore.
 3. **MetaEditor aperto = STOP** (lezione del 22/08: con l'editor aperto `/compile` puo' tornare muto).
 
+## Uscita 3 = STATO MISTO possibile, e la via d'uscita se MetaEditor non esce
+- **Codice 3** (fermato DOPO aver scritto): i file compilati PRIMA restano TrailFix, quello che ha fallito e'
+  stato RIMESSO dalla sua copia (SHA verificato), quelli DOPO non sono stati toccati. Lo script stampa la
+  tavola file per file (`Stato-Finale`) anche in questo ramo e l'ESITO dice `STATO MISTO`. Se compare
+  `RIPRISTINO NON RIUSCITO`: non toccare niente e mandare lo zip. Lo stato misto e' accettabile SOLO perche'
+  R254 e' NEUTRA su 4/4 (ogni file e' provato da solo); la verifica in Esperti (sotto) va fatta anche con 3,
+  per i grafici toccati.
+- **MetaEditor che non termina**: lo script lo aspetta (stesso schema di `RIGA_DEPLOY_CONTOREALE.ps1`,
+  provato sul VPS il 03/09). Se la finestra resta ferma sulla compilazione per piu' di 5 minuti: NON
+  chiudere la finestra PowerShell; Gestione attivita' -> chiudere SOLO `metaeditor64.exe`, MAI
+  `terminal64.exe`. Lo script riprende da solo: `.ex5` non fresco = RIPRISTINO di quel file.
+
 ## Come si torna indietro (NON e' una riga di lancio)
 
 Per ciascun EA si ricopiano sopra agli originali le due copie della corsa: `<EA>.mq5.PRIMA_TRAILFIX_<ora>`
@@ -70,7 +82,7 @@ del `.ex5` fa ricaricare il binario vecchio, come la compilazione ha fatto ricar
 2. Faccina sui quattro grafici, **Algo Trading verde**.
 3. Se una riga manca: tasto destro sul grafico, Expert Advisors, Proprieta', OK. **Mai** "Ripristina",
    mai rimuovere e riattaccare.
-4. Sonda `CODA_06` delle 03:30: righe **2474 / 2254 / 2673** e `.ex5` con la data della corsa.
+4. Sonda `CODA_06` delle 03:30: righe **2475 / 2255 / 2674** (CODA_06 conta UNA riga in piu' dello scheletro 2474 / 2254 / 2673: split senza TrimEnd, classe 456; il DAX in campo, scheletro 2425, esce 2426 nel log del 26/09) e `.ex5` con la data della corsa.
 5. Primo giorno di mercato con un trailing: nel giornale le righe `trailing rinviato: stop` al posto
    della raffica `invalid stops`.
 

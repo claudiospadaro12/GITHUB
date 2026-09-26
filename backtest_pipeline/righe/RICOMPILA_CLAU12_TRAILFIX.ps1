@@ -246,6 +246,7 @@ $ZIP     = $CARTREF + '.zip'
 $ESITO   = 'FERMATO PRIMA DI SCRIVERE'
 $CODICE  = 1
 $SCRITTO = $false
+$IN_CORSO = $null
 
 function Posa-Esito {
   if(-not $Esegui){ return }
@@ -264,6 +265,19 @@ function Posa-Esito {
   } catch { Write-Host ('ESITO/zip NON scritti sul Desktop: ' + $_.Exception.Message + ' -- fai una foto di questa finestra.') -ForegroundColor Red }
 }
 
+function Stato-Finale {
+  Titolo 'k) IMPRONTA SCHELETRO DEI SORGENTI ORA IN CAMPO (per il referto e per CODA_06)'
+  foreach($f in $FILE){
+    if(-not $f.PSObject.Properties['PMq5']){ continue }
+    $imp = Impronta-Di $f.PMq5
+    $st = 'NON E LA TRAILFIX'
+    if($imp.Sha -eq $f.SchNuovo -and $imp.Righe -eq $f.RigheNuovo){ $st = 'TrailFix' }
+    $dx = ''
+    if(Test-Path -LiteralPath $f.PEx5){ $dx = (Get-Item -LiteralPath $f.PEx5).LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss', $INV) }
+    Dillo ('   ' + ($f.Nome + '.mq5').PadRight(31) + ' righe ' + $imp.Righe + '  scheletro ' + $imp.Sha + '  -> ' + $st + '   .ex5 ' + $dx) $(if($st -eq 'TrailFix'){ 'Green' } else { 'Red' })
+  }
+}
+
 function Fine($codice, $esito, $colore) {
   $script:CODICE = $codice
   $script:ESITO = $esito
@@ -278,7 +292,10 @@ function Fine($codice, $esito, $colore) {
 function Muori($msg) {
   Dillo '' $null
   Dillo ('FERMO: ' + $msg) 'Red'
-  if($script:SCRITTO){ Fine 3 ('FERMATO DOPO AVER SCRITTO -- leggere le righe sopra: ' + $msg) 'Red' }
+  if($script:SCRITTO){
+    try { Stato-Finale } catch { Dillo ('tavola dello stato finale NON letta: ' + $_.Exception.Message) 'Red' }
+    Fine 3 ('FERMATO DOPO AVER SCRITTO -- STATO MISTO possibile, vedi la tavola k) qui sopra: i file compilati PRIMA restano TrailFix, quello fallito e stato rimesso dalla sua copia, quelli DOPO non sono stati toccati. ' + $msg) 'Red'
+  }
   Fine 1 ('RIFIUTO, nel terminale NON e stato scritto niente -- ' + $msg) 'Red'
 }
 
@@ -519,6 +536,8 @@ function Compila([string]$mq5, [string]$ex5, [string]$log) {
   $tC = Get-Date
   $argomenti = @(('/compile:' + $mq5), ('/inc:' + $dirM), ('/log:' + $log))
   Dillo ('   ' + $ME + ' ' + ($argomenti -join ' ')) $null
+  Dillo '   (Se questa finestra resta FERMA qui per piu di 5 minuti, MetaEditor non e uscito: NON chiudere questa finestra.' 'Yellow'
+  Dillo '    Gestione attivita -> chiudi SOLO metaeditor64.exe, MAI terminal64.exe. Lo script riprende da solo e decide: .ex5 non fresco = RIPRISTINO.)' 'Yellow'
   $global:LASTEXITCODE = $null
   & $ME @argomenti | Out-Null
   $rc = $LASTEXITCODE
@@ -578,6 +597,7 @@ foreach($f in $daFare){
   Dillo '' $null
   Dillo ('-- ' + $f.Nome + '   sedie: ' + $f.Sedie) 'Cyan'
   $script:SCRITTO = $true
+  $script:IN_CORSO = $f
   [IO.File]::WriteAllBytes($f.PMq5, $f.Byte)
   $hs = Sha-File $f.PMq5
   if($hs -ne $f.ShaNuovo){
@@ -605,18 +625,11 @@ foreach($f in $daFare){
   Dillo ('   COMPILATO: ' + $f.Nome + '.ex5  ' + $ex.Length.ToString($INV) + ' byte  data ' + $f.Ex5Data + ' (dopo l avvio delle ' + $c.Avvio.ToString('HH:mm:ss', $INV) + ')  SHA256 ' + (Sha-File $f.PEx5)) 'Green'
   if($c.War -gt 0){ Dillo ('   ATTENZIONE: ' + $c.War + ' warning. Il binario e installato; manda lo zip col log prima di considerarlo chiuso.') 'Yellow' }
   $fatti += $f.Nome
+  $script:IN_CORSO = $null
 }
 
 # =====================================================================
-Titolo 'k) IMPRONTA SCHELETRO DEI SORGENTI ORA IN CAMPO (per il referto e per CODA_06)'
-foreach($f in $FILE){
-  $imp = Impronta-Di $f.PMq5
-  $st = 'NON E LA TRAILFIX'
-  if($imp.Sha -eq $f.SchNuovo -and $imp.Righe -eq $f.RigheNuovo){ $st = 'TrailFix' }
-  $dx = ''
-  if(Test-Path -LiteralPath $f.PEx5){ $dx = (Get-Item -LiteralPath $f.PEx5).LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss', $INV) }
-  Dillo ('   ' + ($f.Nome + '.mq5').PadRight(31) + ' righe ' + $imp.Righe + '  scheletro ' + $imp.Sha + '  -> ' + $st + '   .ex5 ' + $dx) $(if($st -eq 'TrailFix'){ 'Green' } else { 'Red' })
-}
+Stato-Finale
 
 # =====================================================================
 Titolo 'COSA RESTA DA FARE A MANO (e non lo fa questa riga)'
@@ -629,7 +642,8 @@ Dillo '      CLAU12_Dow_Apertura_US (770202), una da CLAU12_Nasdaq_Apertura_US (
 Dillo '   2. Sui quattro grafici la faccina sorridente in alto a destra, e Algo Trading VERDE.' 'Yellow'
 Dillo '   3. Se una riga "avviato su" manca: tasto destro su QUEL grafico -> Expert Advisors -> Proprieta -> OK' 'Yellow'
 Dillo '      (rifa OnInit tenendo gli input). MAI "Ripristina", MAI rimuovere e riattaccare: perde la taratura.' 'Yellow'
-Dillo '   4. Stanotte alle 03:30 la sonda CODA_06 rilegge le impronte: attese righe 2474 / 2254 / 2673 e .ex5 di oggi.' 'Yellow'
+Dillo '   4. Stanotte alle 03:30 la sonda CODA_06 rilegge le impronte: attese righe 2475 / 2255 / 2674 e .ex5 di oggi' 'Yellow'
+Dillo '      (CODA_06 conta UNA riga in piu dello scheletro 2474 / 2254 / 2673: split senza TrimEnd, classe 456).' 'Yellow'
 Dillo '   FINITO SENZA ERRORI DI SCRIPT NON VUOL DIRE IN CAMPO VERIFICATO: lo diventa col punto 1 e con CODA_06.' 'Yellow'
 
 Fine 0 ('FATTO: ' + $fatti.Count + ' file ricompilati con la TrailFix (' + ($fatti -join ', ') + '), ' + $giaFatti + ' gia fatti prima. In campo: DA VERIFICARE in Esperti.') 'Green'
@@ -638,8 +652,14 @@ Fine 0 ('FATTO: ' + $fatti.Count + ' file ricompilati con la TrailFix (' + ($fat
   $msg = $_.Exception.Message
   try { Dillo '' $null; Dillo ('ERRORE IMPREVISTO: ' + $msg) 'Red' } catch { }
   if($script:SCRITTO){
+    if($script:IN_CORSO){
+      $fc = $script:IN_CORSO
+      $script:IN_CORSO = $null
+      try { Ripristina $fc } catch { try { Dillo ('RIPRISTINO NON RIUSCITO di ' + $fc.Nome + ': ' + $_.Exception.Message + ' -- NON toccare niente e manda lo zip: le copie .PRIMA_TRAILFIX_ sono in MQL5\Experts.') 'Red' } catch { } }
+    }
+    try { Stato-Finale } catch { }
     $script:CODICE = 3
-    $script:ESITO = 'ERRORE IMPREVISTO DOPO AVER SCRITTO: ' + $msg + ' -- leggere le righe sopra: i file gia compilati restano TrailFix, le copie .PRIMA_TRAILFIX_ sono in MQL5\Experts.'
+    $script:ESITO = 'ERRORE IMPREVISTO DOPO AVER SCRITTO: ' + $msg + ' -- STATO MISTO possibile, vedi la tavola k) sopra: i file compilati PRIMA restano TrailFix, quello in corso e stato rimesso dalla sua copia (se sopra c e RIPRISTINO NON RIUSCITO, no), le copie .PRIMA_TRAILFIX_ sono in MQL5\Experts.'
   } else {
     $script:CODICE = 1
     $script:ESITO = 'ERRORE IMPREVISTO PRIMA DI TOCCARE GLI ORIGINALI: ' + $msg
