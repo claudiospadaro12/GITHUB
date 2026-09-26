@@ -36,9 +36,15 @@
 #  GRAFICO H4 APPOSTA: il TF e' inerte (T1 lo prova sui tick) e H4 tiene
 #  ogni gamba a ~12.900 barre, sotto il tetto delle 100.000 anche senza
 #  MaxBars (su M5 la finestra farebbe ~1,24 milioni di barre).
-#  PREREQUISITO: profondita' M1 di EURUSD sul banco misurata PRIMA (
-#  scarica_storico.ps1 -Simboli "EURUSD" -SoloReferto, LEGGIMI.md). Se parte
-#  dopo il 2008.01.02 si scrive un file NUOVO con la data misurata, non si
+#  PREREQUISITO: profondita' M1 di EURUSD sul banco MISURATA PRIMA con una
+#  corsa che scarica e censisce, una sola per i sei file L (PC di backtest,
+#  MT5 chiuso): scarica_storico.ps1 -Auto -SenzaTick -Da 2008.01.01
+#  -Timeframes "M1,H4" -Simboli "GBPUSD,EURUSD". Si legge la riga M1 di
+#  EURUSD: PrimaDataServer <= 2008.01.02 e verdetto COMPLETO. NON -SoloReferto:
+#  rilegge l'ultimo ABTG_StoricoScaricato.csv, che si svuota a ogni corsa e
+#  puo' non contenere EURUSD affatto (classe 106; corretto dal cancello del
+#  26/09, la prima stesura diceva -SoloReferto). Se parte dopo il
+#  2008.01.02 si scrive un file NUOVO con la data misurata, non si
 #  corregge questo dopo i numeri.
 #  ASSE: InpMinRangePips 0..70 passo 10 (8), b=3 fisso. Magic 795858.
 # =====================================================================

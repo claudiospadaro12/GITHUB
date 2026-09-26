@@ -324,9 +324,15 @@ def corpo_blocco(lett, blocco, s, h, m):
             "#  GRAFICO H4 APPOSTA: il TF e' inerte (T1 lo prova sui tick) e H4 tiene",
             "#  ogni gamba a ~12.900 barre, sotto il tetto delle 100.000 anche senza",
             "#  MaxBars (su M5 la finestra farebbe ~1,24 milioni di barre).",
-            "#  PREREQUISITO: profondita' M1 di %s sul banco misurata PRIMA (" % s,
-            "#  scarica_storico.ps1 -Simboli \"%s\" -SoloReferto, LEGGIMI.md). Se parte" % s,
-            "#  dopo il 2008.01.02 si scrive un file NUOVO con la data misurata, non si",
+            "#  PREREQUISITO: profondita' M1 di %s sul banco MISURATA PRIMA con una" % s,
+            "#  corsa che scarica e censisce, una sola per i sei file L (PC di backtest,",
+            "#  MT5 chiuso): scarica_storico.ps1 -Auto -SenzaTick -Da 2008.01.01",
+            "#  -Timeframes \"M1,H4\" -Simboli \"GBPUSD,EURUSD\". Si legge la riga M1 di",
+            "#  %s: PrimaDataServer <= 2008.01.02 e verdetto COMPLETO. NON -SoloReferto:" % s,
+            "#  rilegge l'ultimo ABTG_StoricoScaricato.csv, che si svuota a ogni corsa e",
+            "#  puo' non contenere %s affatto (classe 106; corretto dal cancello del" % s,
+            "#  26/09, la prima stesura diceva -SoloReferto). Se parte dopo il",
+            "#  2008.01.02 si scrive un file NUOVO con la data misurata, non si",
             "#  corregge questo dopo i numeri.",
             "#  ASSE: InpMinRangePips 0..70 passo 10 (8), b=3 fisso. Magic %d." % m,
         ]
@@ -400,8 +406,8 @@ TESTA = r"""
 #     duplica: tiene lo SL del PDF (MIDPOINT) e mette ad asse L'ORA e il
 #     CANALE. >>> Il K1 di R216a (par. 7) conta il SOLO spread (40x ->
 #     12,0 pip di stop); con la commissione forex (CANCELLO_COSTO_FLOTTA,
-#     correzione dell'11/09) il 40x chiede 33,6 pip. Va corretto in R216a
-#     PRIMA che giri: e' una segnalazione, questo round non lo tocca.
+#     correzione dell'11/09) il 40x chiede 33,6 pip. CORRETTO in R216a
+#     dal cancello del 26/09, prima che girasse (R216a par. 7, 8(A), 8(B)).
 #  Certificato del 09/09: "NON ANCORA MISURATO", non morto.
 #
 # =====================================================================
@@ -770,7 +776,7 @@ TESTA = r"""
 #  8. I CONTRO-ESEMPI, COSTRUITI PER FAR SBAGLIARE QUESTO ROUND
 # =====================================================================
 #  (a) "Due ore diverse sono solo rumore": QUALE numero produce? Simulato
-#      (seme 258, 4.000 coppie, prove/R258_rumore.py, ~5 min): motore
+#      (seme 258, 4.000 coppie, prove/R258_rumore.py, ~10 s): motore
 #      SENZA edge con la geometria del PDF (W 25 -> SL 15,5, TP 25, payoff
 #      1,61R, p 0,383), esito binario = varianza MASSIMA (le uscite a tempo
 #      la riducono, quindi le bande sono prudenti). Due righe indipendenti:
@@ -780,7 +786,7 @@ TESTA = r"""
 #         300   200  |   0,218     |  0,281  0,330 |   0,267 / 0,048
 #        1900  1900  |   0,025     |  0,111  0,132 |   0,066 / 0,051
 #      (al netto del costo all-in, 0,054 R a operazione, i q90 scendono di
-#      0,02-0,04: si tiene la colonna LORDA, piu' larga.)
+#      0,01-0,04: si tiene la colonna LORDA, piu' larga.)
 #      >>> La soglia di casa +0,10 (R251 M2) qui DECIDEREBBE SUL RUMORE
 #      nel 27-32% dei casi: per l'ora NON si usa. delta(n) = q90 = falso
 #      "decide" <= 5%. Le righe delle tre ore stanno sugli STESSI giorni
@@ -826,8 +832,9 @@ TESTA = r"""
 #         gamba T)                            8-16 min + download M1 2008+
 #   TOTALE ~25-45 minuti + compilazione. Ordine consigliato: a, b, c
 #   (GBPUSD, la domanda) -> g, u, w -> i, j, k -> d, e, f, h, v, x, l, m, n
-#   -> L (dopo
-#   il prerequisito di profondita' M1, e EURUSD r, s, t per primo come
+#   -> L (dopo il prerequisito di profondita' M1 -- una corsa
+#   scarica_storico.ps1 -Auto, MAI -SoloReferto: R258o par. PREREQUISITO,
+#   classe 106 -- e EURUSD r, s, t per primo come
 #   canarino: M32 in PIANO_PROP r.1925 ha visto GBPUSD ~30x piu' lento di
 #   EURUSD su tick GENERATI). Ogni gamba sta sotto le 100.000 barre anche
 #   senza MaxBars: T su M5 59.616 / 89.568; F su M5 43.200 / 31.680; G su

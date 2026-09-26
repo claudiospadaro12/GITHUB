@@ -166,13 +166,24 @@
 #  campioni/ora): data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv
 #      ora server 07 -> mediana 0,300 pip   p95 0,700   max 0,700
 #      ora server 08 -> mediana 0,300 pip   p95 0,700   max 1,000
-#  Frontiera di lavoro stop >= 40 x spread  ->  12,0 pip alla mediana
-#                                               28,0 pip al p95
-#  Pavimento duro    stop >= 13,3 x spread  ->   4,0 pip alla mediana
+#  >>> CORRETTO DAL CANCELLO DEL 26/09/2026, PRIMA CHE GIRASSE (nessun
+#      CSV esiste). La prima stesura contava il SOLO spread (40x -> 12,0
+#      pip). Il conto e' a commissione: il pedaggio di casa sul forex e'
+#      spread + commissione di giro completo (report/CANCELLO_COSTO_FLOTTA_
+#      2026-09-10.md, correzione dell'11/09; classe 290 "COSA SI FA").
+#      Commissione GBPUSD MISURATA: 0,540 pip (prove/COLLAUDO_SPREAD_
+#      FLOTTA_CRITERI.md, tabella del pedaggio all-in). Quindi:
+#      all-in = 0,300 + 0,540 = 0,840 pip alla mediana, 1,240 al p95.
+#  Frontiera di lavoro stop >= 40 x all-in  ->  33,6 pip alla mediana
+#                                               49,6 pip al p95
+#  Pavimento duro    stop >= 13,3 x all-in  ->  11,2 pip alla mediana
 #  Tradotto in ampiezza del canale (con buf = 3 pip):
-#      MIDPOINT passa il 40x se  W >= 18,0 pip  (al p95: W >= 50,0)
-#      OPPOSITE passa il 40x se  W >=  9,0 pip  (al p95: W >= 25,0)
-#      MIDPOINT passa il pavimento duro se W >= 2,0 pip (sempre)
+#      MIDPOINT passa il 40x se  W >= 61,2 pip  (al p95: W >= 93,2)
+#      OPPOSITE passa il 40x se  W >= 30,6 pip  (al p95: W >= 46,6)
+#      MIDPOINT passa il pavimento duro se W >= 16,3 pip (NON sempre)
+#      OPPOSITE passa il pavimento duro se W >=  8,2 pip
+#  (stesse soglie di R258a par. 7 e dell'analisi del PDF, che con la
+#  commissione derivata 0,53 dava W >= 60,4.)
 #  >>> *** E ADESSO LA PARTE CHE NON SI PUO' FARE: W E' [NON MISURATO]
 #      E QUESTO ROUND NON LO MISURA. *** La colonna dello stop non
 #      esiste nel CSV di OptFrame: il blocco in coda al sorgente (r.476)
@@ -196,13 +207,18 @@
 #      giorno (gPhase LP_WAIT -> LP_PLACED, e TryPlace parte solo da
 #      LP_WAIT); HandleOCO cancella il gemello appena una posizione
 #      esiste. Quindi n <= GIORNI FERIALI della finestra:
-#          IS  (2024.07.05 -> 2025.04.20, 290 gg solari) -> 206 feriali
-#          OOS (2025.04.21 -> 2026.06.30, 436 gg solari) -> 312 feriali
+#          IS  (2024.07.05 -> 2025.04.21, 291 gg solari) -> 207 feriali
+#          OOS (2025.04.22 -> 2026.06.30, 435 gg solari) -> 311 feriali
+#      (CORRETTO DAL CANCELLO DEL 26/09: la prima stesura chiudeva l'IS il
+#      2025.04.20, un giorno prima. Il driver, walkforward_generico.ps1
+#      r.934-937, fa Meta = 2024.07.05 + floor(725 x 0,40) = + 290 gg =
+#      2025.04.21, IS = [Inizio, Meta] COMPRESO, OOS da Meta+1. Il
+#      2025.04.21 e' un lunedi': un feriale passa dall'OOS all'IS.)
 #      Attesa: tasso di innesco 50-75% delle giornate (il breakout
 #      dell'apertura di Londra su cable con soli 3 pip di buffer e una
 #      finestra di 4 ore e' facile da innescare), quindi
-#          n IS atteso  103 - 155      n OOS atteso  156 - 234
-#      *** SE n SUPERA 206 (IS) o 312 (OOS) IL MOTORE HA APERTO PIU' DI
+#          n IS atteso  104 - 155      n OOS atteso  156 - 233
+#      *** SE n SUPERA 207 (IS) o 311 (OOS) IL MOTORE HA APERTO PIU' DI
 #      UNA VOLTA AL GIORNO e nessun altro numero di questo round si
 #      legge. *** (Via residua nota: su conto HEDGING i due pendenti
 #      opposti potrebbero riempirsi tutti e due dentro lo stesso tick di
@@ -219,7 +235,9 @@
 #        2. Recovery Factor OOS >= 0,80
 #        3. n OOS >= 150
 #        4. il cancello di costo del punto 7 PASSATO con W misurato
-#           dalla sonda (>= 18,0 pip per MIDPOINT, >= 9,0 per OPPOSITE)
+#           dalla sonda (>= 61,2 pip per MIDPOINT, >= 30,6 per OPPOSITE:
+#           all-in, par. 7 corretto il 26/09; la prima stesura, sul solo
+#           spread, diceva 18,0 e 9,0)
 #      *** Le soglie 1 e 2 sono quelle scritte nel dossier PRIMA che
 #      esistesse un numero. Non si abbassano dopo aver visto il CSV. ***
 #
@@ -321,7 +339,8 @@
 #  finti. ***
 #  @FINOA 2026.06.30 e' la data di fine di casa (67 file prova in
 #  archivio la dichiarano): finestra identica per tutti i round.
-#  @FRAZIONEIS 0.40 -> IS 290 gg solari / OOS 436.
+#  @FRAZIONEIS 0.40 -> IS 291 gg solari (2024.07.05-2025.04.21) / OOS 435
+#  (2025.04.22-2026.06.30): Meta = Inizio + floor(725 x 0,40) = +290 gg.
 #  TETTO DELLE ~100.000 BARRE: GBPUSD M5 fa 288 barre per giorno
 #  feriale, quindi IS ~59.300 barre e OOS ~89.900: tutte e due SOTTO.
 #  La finestra INTERA sarebbe ~149.200, cioe' SOPRA: non si gira mai

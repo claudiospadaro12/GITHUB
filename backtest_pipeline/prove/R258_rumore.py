@@ -1,5 +1,5 @@
 # R258_rumore.py -- contro-esempio di R258 (par. 8 di R258a): rumore del PF per un
-# motore SENZA edge con la geometria del PDF. python3 R258_rumore.py (~5 min).
+# motore SENZA edge con la geometria del PDF. python3 R258_rumore.py (~10 s).
 # Esito binario = varianza MASSIMA (le uscite a tempo la riducono): bande PRUDENTI.
 import random
 random.seed(258)
