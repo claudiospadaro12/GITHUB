@@ -9,6 +9,11 @@
 
 ## 🗓️ 28/09 notte — LA MACCHINA PER LEGGERE GLI ZIP E' PRONTA (challenge FTMO viva dal 22/09)
 
+🔴 **I blocchi di codice PowerShell dentro questo file sono STORIA, non righe da incollare**: il cancello
+deterministico (`controlla_riga.py --oggetto md HANDOFF.md`, 28/09) li boccia (pin sul branch e non su un commit,
+nessun marcatore, r.271/1738/1949). Le righe vive stanno SOLO in `backtest_pipeline/righe/` con il loro PASS e il
+loro SHA256; ognuna arriva a Claudio con il bersaglio dichiarato prima del blocco.
+
 ⚠️ Questo HANDOFF era fermo al 07/09: **lo stato vero dal 20/09 in poi sta nei
 `report/RESOCONTO_AAAA-MM-GG.md` e `report/NOTTE_AAAA-MM-GG.md`** (uno al giorno). Per ripartire in una
 chat nuova: `CLAUDE.md` + l'ultimo `RESOCONTO` + l'ultima `NOTTE` + `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`
