@@ -35990,3 +35990,32 @@ dentro la costruzione (classe 876): PRE-MERCATO B "NON RISOLTO d'ufficio" con sc
 Regola: un criterio che la testa non congela puo' solo SEGNALARE (`SEGNALAZIONE [DERIVATA]`, `sotto/sopra il riferimento`),
 mai usare le parole BOCCIATA/PROMOSSA/RISCHIO PASSATO; e l'autotest verifica l'ASSENZA della parola nella sezione. Corretto
 nel commit (testo, scomposizione COSTRUZIONE/RIBASAMENTO, assert su "BOCCIATA" in R250).
+
+### CLASSE 886 — "RISCHIO PASSATO" scritto su un DD che la testa dichiara LIMITE INFERIORE (OHLC M1): la parola che promuove messa su una misura che puo' solo bocciare (27/09/2026, cancello di `leggi_round_corti_c.py`, sorella della 804 e della 885)
+Caso: `leggi_round_corti_c.py` @ `34b774cd`, `verdetto_rischio()` scriveva `RISCHIO PASSATO su n = X >= 150` sui file a Modello 1
+(griglie R264, R265b, R266, R260d) appena n >= 150. Le teste dicono il contrario per scritto: R264 par. 8 S3 *"OHLC SOTTOSTIMA il DD:
+sopra soglia BOCCIA, sotto NON dimostra"*, R266 par. 4 *"il DD e' un LIMITE INFERIORE"*, R260d par. 3 *"OHLC = limite inferiore"*.
+Contro-esempio eseguito sulla fixture pulita dell'autore: 9 righe `RISCHIO PASSATO` (griglie GBPJPY/XAUUSD n 230/219, R265b 273, R266
+511/279/232/300/232, R260d 210), tutte su DD OHLC. La classe 804 guardava solo l'n; qui l'n e' grande e la parola e' sbagliata lo stesso,
+perche' e' il METRO che non puo' dire "sotto". Regola: un tetto di rischio letto su una misura unilaterale (OHLC, stima, caso migliore)
+ha due esiti soli, VIOLATO e NON VIOLATO; "passato" richiede una misura che non sottostimi (tick, o la corsa della taglia). Corretto nel
+commit di questo cancello (`verdetto_rischio(..., ohlc=True)`, assert nell'autotest: nessun `RISCHIO PASSATO su` in nessuna variante).
+
+### CLASSE 887 — il cancello di RISCHIO "a qualunque n" letto sulla sola finestra RECENTE quando la corsa ha anche la VECCHIA: l'Emendamento B dice il contrario (27/09/2026, stesso cancello, parente della 804)
+Caso: stesso script, R266 R3 (`prove/R266a_asia_box_GBPUSD_TESTA.txt` par. 7: *"R3 RISCHIO (a qualunque n): DD equity a 1,0%"*, senza
+dire quale gamba) calcolato SOLO su `DD OOS`. La fixture dell'autore stessa aveva IS DD 6,50 / OOS 3,90: il lettore scriveva *"sotto S3
+di R193b ... RISCHIO PASSATO su n = 511"* con un DD IS che a 2,00% vale 12,6-13,0% (sopra S3 8,0). La riga fa lo stesso (r.1888 del
+blocco R266: `$ddO` soltanto), quindi il RIEPILOGO lo ripetera'. Regola di casa (CLAUDE.md, Emendamento B): *"il VECCHIO giudica il
+RISCHIO, il RECENTE giudica il MERITO"*: un tetto di rischio che la testa non restringe a una gamba si applica a TUTTE le gambe misurate,
+e si scrive quale ha deciso. Corretto nel commit (`ddR3 = max(IS, OOS)` con la gamba nominata; assert sull'esito VIOLATO).
+
+### CLASSE 888 — un RINVIO scritto dalla riga ("il verdetto per nome lo rifa' il referto") che il lettore RICOPIA invece di ESEGUIRE (27/09/2026, stesso cancello, sorella della 873)
+Caso: la riga C (@ `e8e2fdb8`) sulla griglia R264 scrive *"[file con O1 INERTE (S5) ... la testa (S5) dice che NON conta per S2: il
+verdetto per nome lo rifa il referto]"*. Il lettore @ `34b774cd` stampava la STESSA avvertenza (*"il verdetto e' calcolato ANCHE su
+quel file"*) e il verdetto S2 calcolato con il file inerte dentro. Contro-esempio eseguito: file del mezzo di GBPJPY con O1 inerte (delta n
+2, delta PF 0) -> `PASSA LO SCREENING` sul lettore originale; ora `S2 NON LEGGIBILE PER NOME (S5 ...)` con S3/S4/S1 letti prima. Stessa
+famiglia nello stesso script: la riga rimanda al lettore il D0 dai log di R266 (*"si legge nel giornale dell'agente"*) e il lettore
+aveva `log_tester()` scritto e MAI chiamato. Regola: ogni frase della riga che rimanda al referto ("lo rifa' il referto", "si legge
+nel referto", "lo conferma il referto") e' una RICHIESTA al lettore: si cerca con grep nella riga prima di consegnare il lettore, e per
+ciascuna il lettore o la esegue o scrive per nome perche' non puo'. Ricopiare l'avvertenza e' il rinvio che torna indietro vuoto.
+Corretto nel commit (S5 nel verdetto della griglia e di R265b, `d0_dai_log`, T-contro nell'autotest).

@@ -30,6 +30,12 @@ altopiano al CENTRO mai il picco (3 celle contigue), M1-M3 contro il
 CONTROLLO dello stesso round (modello leggi_r255.py), R4/B6/C6/V5/U6/D6/E4:
 NESSUNA cella si promuove, NESSUNA PROPOSTA DI TAGLIA.
 
+Cancello del 27/09 (strato 2, controllo-preventivo): raccolta cercata prima di leggere (872); NULLI della riga
+UNITI e prova verificata sull'hp= della riga (873); parole d'esito dopo i loro cancelli -- R267c C1, R267b
+B3->B5, ponte con G0 ROSSO, R260d T3/S0, R265b K1 (874); K1 di R264 senza i +-12% di R265 (875); bande
+inclusive con tolleranza e posizioni derivate non arrotondate (794); niente RISCHIO PASSATO su OHLC (886); R3
+di R266 su IS e OOS (887); S5 e D0 dei log eseguiti, non ricopiati (888).
+
 SOLA LETTURA: non tocca EA, preset, prove, CSV, sedie, conti, taglie.
 Scrive SOLO il file passato con --md (default: stdout).
 Etichette: [MISURATO] dal CSV o dal per-trade della raccolta; [DERIVATO] da
@@ -50,6 +56,7 @@ in repo: senza, le letture che ne dipendono restano NON VERIFICABILI.
 """
 import argparse
 import csv
+import hashlib
 import math
 import os
 import re
@@ -69,6 +76,48 @@ except Exception:  # pragma: no cover
     _valore_punto = None
 
 EPS = 1e-6
+# SHA256 del file prova di ogni job, COPIATO dalla riga C (campo hp=, pin 0482fd80; verificato uguale al file
+# a 0482fd80 e a HEAD il 27/09): la prova si verifica contro QUESTO, non contro 'quella che c'e'' (classe 873)
+HP = {
+    "R264c": "A1A236C5F70153C9F62950F463F563F96F02329D42A1D490A9D3FE64632B258D",
+    "R264d": "A2D8510D941270422CDE8C579E44E1F34F31170392C898A85ECCACFF46EE9F62",
+    "R264a": "04398778CE5ADD8CD0B76FFEB4585DD7FA29BF052092951FFFF2E3F215C23A35",
+    "R264b": "AA6C91464C73C65E0591EF35342DBB823992E5F8A9E361BEDF97A9B742636CD6",
+    "R264b1": "8D3F215BF6380732B57B0DCC070F63BB605B96789FDD371585B26BE4F381B05A",
+    "R265a": "DD70D8F03D63F0593006C75591DCC1EF898D46A2BA26C44F3E17F8A2F05A7A27",
+    "R264c1": "4DC1D22F54D2921F596A2085CB9B25329F0EB61984C593FCFCDC4171B27C60A2",
+    "R264c2": "B226F67F901B4028D4BE76B6DE9552EF86E189B89344B79A93DCC95C97CBA50B",
+    "R264c3": "50D369FAC93B04307521DCB6EC3BF9BD339095A1DCA583C05B297A558BDC2D32",
+    "R264c4": "FE1DEEE7EABA9BED3CBC6FEFE4A3A6568B3BE7129A2C7543CED4E90DB212B458",
+    "R264d1": "FB41745DD500D363598B705D7DB66A82657E1A88F9120376B57A4B82A4235C5E",
+    "R264d2": "9350DEF044725A79E40CFA3AAEB127AE97FEDC7C335136029FF6E16023287644",
+    "R264d3": "D38306030B5C0DB22A8C0753FCB34244F7DAB6B5A1BC9BF7F34D18C50D67A118",
+    "R264d4": "AD145244A4CBF67F85833ECEE8CCCDFF55F7A83421841B07B85FAC9E88B62D6B",
+    "R264a1": "E600F0D4A6482830591FB02B7ABC096FD39259D1656F10871E8A13DE6B3D373E",
+    "R264a2": "298352BA8F5000D13F71F6DB40CBDC70F385BFC8DDCBCC885D88FDA1A1A40910",
+    "R264a3": "F0356862C991082673CD3ABE4C408C5C6E72158C5E8BF64744ABEE4C74C093D7",
+    "R264a4": "CE38546E207ECFAB85521DD135BA08C3DBFDECB503797DED71684EDDAA284475",
+    "R265b": "C56C42F1D7BC4D17D0A0C2356DDA37E87D474145A2EE96C5641CF07E8A7FB700",
+    "R266a": "1FD1129C3FCFD1139D2A9537AFC2CEB1FE718F03AE82F9A3B70E4DB133A36539",
+    "R266b": "708A34DF30752A7C011C5A1B86F1A10F403C61F7731FBBC5722689AA1090D3C4",
+    "R266c": "B48F95705DF397BDAA79A10FB0748D0E36CC2732971C2A599AC75F77018E7356",
+    "R266d": "9D0564F74281BAA9A6870FB9121F556B29BE066E6DDACEC3C79A5F1A499F50C7",
+    "R266e": "42B4C1FA897AA7B12863FBE36E47E03A7FB75BEE9C42422F663EE2550C33FC6A",
+    "R266f": "6E75EDB3395DB854C9D415D30595DF3DDB677670BB098010E0E629BC88222949",
+    "R260d": "6D5FFF83C3313AFF5D07AC2CD67F6779F40BC1BA94ED6D0283FC0DF33DCA7A4B",
+    "R267b": "15020FF4E4786382764E00A2DD2B8FA683E9E3194A210C7E424F2F80F240C864",
+    "R267d": "C37FA9745A6E32E03A4D724DBE507004FE715BEE29997526942C56798D1CC887",
+    "R267c": "36A39B94FCEEDCB713F84D3D7C0D20D59C2F0FF5D9EEB97EBFBF8A3B36FD57E4",
+    "R267g2": "6A931D1996587C1AD84572AAA95247CDA1B7F4426F3207890BB0FB3A701FEC7F",
+    "R267g3": "873846FA63ABB8FAE3EE8E1216CB843B18F6DA927A4B1C1C0E625B0F288027C7",
+    "R267g4": "5BC5C96C0B87C183CA0FCBDF49EFDE76106E6B52D2E1B5D26B44DF83C385F352",
+    "R267g1": "1AC56928C6354C54548F01C13C53AB3BEC0C2E8FDDE3D6395E52FBC8C7C77AC2",
+    "R267e1": "FEA35E9D52AA9D3F7A71DAE83AA85402BC9C6A719129F10666CEA55A1E32A1D3",
+    "R267f1": "E4760F18F4D47BD35434B7076CEF8179A226986D1F4C98E379EF55DCF316D491",
+    "R267e2": "C7230975597AB979B76702146493B82C57814E76874C14AD61F8F80661D1B7CD",
+    "R267f2": "435292AFAB0BBF3936C0BBFD8A920136655C1C40DDAB5C2914EE13B1F3F3EA0C",
+}
+TOL = 1e-9               # bande INCLUSIVE su differenze di numeri del CSV: tolleranza, non arrotondamento (classe 794)
 ARCHIVI_REPO = os.path.join(QUI, "risultati_archivio", "ROUND_CORTI_B_2026-09-27")
 PROVE_REPO = os.path.join(QUI, "prove")
 N_MERITO = 150            # posizioni (Emendamento A, criterio di casa)
@@ -155,7 +204,7 @@ K1PAR = {
                   dec="GBPJPY: comm. 0,8645 pip + spread NON MISURATO -> soglia >= 34,6 pip + 40 x spread: K1 NON DECIDIBILE finche' lo spread non c'e'"),
     "R264d": dict(cs=100, q=0.86287, rf=0.005, rat=1.7, rlo=1.36, rhi=2.125, sog=10.41, un="USD", sc=1,
                   dec="XAUUSD: 10,41 $ = 40 x 0,2603 (logger 0,220 + comm. 0,0403); di casa alle 08/14: 10,01 $"),
-    "R265a": dict(cs=100000, q="P", rf=0.005, rat=1.8, rlo=1.5, rhi=2.2, sog=0.002654, un="pip", sc=10000,
+    "R265a": dict(cs=100000, q="P", rf=0.005, rat=1.8, rlo=1.5, rhi=2.2, sog=0.002654, un="pip", sc=10000, atr12=True,
                   dec="EURUSD: 26,54 pip = 40 x 0,6636 (logger 0,200 + comm. 0,4636); al P95 38,54; col metro della sonda 34,56"),
 }
 K1_R266 = {"GBPUSD": 0.00337, "EURUSD": 0.00266}    # R266 par. 5 (277 / 206 punti + 2 x 30 di buffer)
@@ -231,8 +280,27 @@ def leggi_pertrade(path):
 
 
 def leggi_csv(path):
+    """CSV di OptFrame. Una riga con PIU' campi dell'intestazione (virgola dentro un input stringa, classe 883)
+    finisce in r[None] e sposta le colonne: la riga porta il segno '__LUNGA__' e il File la dichiara NULLA
+    (nessun pin stringa di R264-R267 ha virgole: verificato sui 37 file prova e sui default degli EA)."""
+    out = []
     with open(path, encoding="utf-8-sig", newline="") as fh:
-        return [r for r in csv.DictReader(fh) if any((v or "").strip() for v in r.values())]
+        for r in csv.DictReader(fh):
+            lunga = None in r
+            r.pop(None, None)
+            if any((v or "").strip() for v in r.values() if isinstance(v, str)):
+                if lunga:
+                    r["__LUNGA__"] = "1"
+                out.append(r)
+    return out
+
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for blk in iter(lambda: fh.read(1 << 16), b""):
+            h.update(blk)
+    return h.hexdigest().upper()
 
 
 def leggi_testo(path):
@@ -429,8 +497,10 @@ def dd_taglia(d, f, base):
 
 def k1_lotto(pos, prm):
     """K1 dal LOTTO (R264 par. 5 / R265 par. 2, classe 846): coppie gamba1/gamba2 = position_id e position_id+1;
-    stop di gamba 2 in [R/((vol+0,01) C q) ; R/(vol C q)], R = saldo prima x rf. Contro-esempio interno:
-    vol2/vol1 in [rlo ; rhi] e ATR da gamba 1 (s1/rat) e da gamba 2 entro +-12%, altrimenti K1 NULLO."""
+    stop di gamba 2 in [R/((vol+0,01) C q) ; R/(vol C q)], R = saldo prima x rf; a vol = 0,01 il limite alto e'
+    INFINITO (MathMax r.495: R264 par. 5). Contro-esempio interno: vol2/vol1 in [rlo ; rhi] (R264 par. 5 e R265
+    par. 2); le due stime dell'ATR entro +-12% SOLO dove la testa lo congela (R265 par. 2: prm atr12). Sui file
+    R264 la testa NON ha la clausola dei 12%: si conta e si stampa, non annulla (classe 875)."""
     by = {p["pid"]: p for p in pos}
     used, lows, highs, rats, s1s = set(), [], [], [], []
     n_pair = n_sing = rat_ko = atr_ko = v1ge02 = 0
@@ -448,6 +518,10 @@ def k1_lotto(pos, prm):
                 rr1, rr2 = p1["saldo"] * prm["rf"], p2["saldo"] * prm["rf"]
                 lo2, hi2 = rr2 / ((p2["vol"] + 0.01) * prm["cs"] * q), rr2 / (p2["vol"] * prm["cs"] * q)
                 lo1, hi1 = rr1 / ((p1["vol"] + 0.01) * prm["cs"] * q), rr1 / (p1["vol"] * prm["cs"] * q)
+                if p2["vol"] <= 0.0100001:
+                    hi2 = float("inf")      # lotto minimo: lo stop puo' essere piu' largo di qualunque valore
+                if p1["vol"] <= 0.0100001:
+                    hi1 = float("inf")
                 lows.append(lo2)
                 highs.append(hi2)
                 rt = p2["vol"] / p1["vol"]
@@ -456,7 +530,7 @@ def k1_lotto(pos, prm):
                 s1s.append(s1m)
                 if rt < prm["rlo"] or rt > prm["rhi"]:
                     rat_ko += 1
-                if s2m > 0 and abs(s1m / prm["rat"] - s2m) / s2m > 0.12:
+                if s2m > 0 and not (math.isinf(s1m) or math.isinf(s2m)) and abs(s1m / prm["rat"] - s2m) / s2m > 0.12:
                     atr_ko += 1
         else:
             used.add(pid)
@@ -464,7 +538,7 @@ def k1_lotto(pos, prm):
     out = dict(n_pos=len(pos), n_pair=n_pair, n_sing=n_sing, rat_ko=rat_ko, atr_ko=atr_ko, v1ge02=v1ge02,
                med_lo=(statistics.median(lows) if lows else float("nan")), med_hi=(statistics.median(highs) if highs else float("nan")),
                med_rat=(statistics.median(rats) if rats else float("nan")), med_s1=(statistics.median(s1s) if s1s else float("nan")))
-    out["nullo"] = n_pair > 0 and (rat_ko > n_pair / 2.0 or atr_ko > n_pair / 2.0)
+    out["nullo"] = n_pair > 0 and (rat_ko > n_pair / 2.0 or (prm.get("atr12", False) and atr_ko > n_pair / 2.0))
     return out
 
 
@@ -510,7 +584,7 @@ def m123(cand_is, cand_oos, ctrl_is, ctrl_oos, uscita=False):
     ep_c = num(cand_oos["Profit"]) / max(1.0, num(cand_oos["Trades"]))
     ep_r = num(ctrl_oos["Profit"]) / max(1.0, num(ctrl_oos["Trades"]))
     m["M1"] = pf_c >= 1.10
-    m2 = pf_c >= pf_r + 0.10 and ep_c > ep_r
+    m2 = pf_c >= pf_r + 0.10 - TOL and ep_c > ep_r
     if uscita:
         m2 = m2 and num(cand_oos["Profit"]) > num(ctrl_oos["Profit"]) and num(cand_oos["Equity DD %"]) <= num(ctrl_oos["Equity DD %"])
     m["M2"] = m2
@@ -523,11 +597,15 @@ def m123_txt(m):
     return ", ".join("%s %s" % (k, "passa" if v is True else ("fallisce" if v is False else "NON VERIFICABILE")) for k, v in m.items())
 
 
-def verdetto_rischio(violato, n, soglia_txt):
+def verdetto_rischio(violato, n, soglia_txt, ohlc=False):
     """classe 804: una violazione boccia a qualunque n; 'RISCHIO PASSATO' solo con n >= 150 posizioni,
-    altrimenti 'NON VIOLATO su n = X'."""
+    altrimenti 'NON VIOLATO su n = X'. Classe 886: su un DD OHLC (Modello 1) la testa dice 'OHLC SOTTOSTIMA il
+    DD: sopra soglia BOCCIA, sotto NON dimostra' (R264 par. 8 S3, R266 par. 4, R260d par. 3): li' la parola
+    'RISCHIO PASSATO' non si scrive a nessun n."""
     if violato:
         return "VIOLATO (%s; boccia a qualunque n, Emendamento B)" % soglia_txt
+    if ohlc:
+        return "NON VIOLATO su n = %d (%s) -- DD OHLC = LIMITE INFERIORE: sotto soglia NON dimostra, 'RISCHIO PASSATO' non si scrive (classe 886)" % (n, soglia_txt)
     if n >= N_MERITO:
         return "RISCHIO PASSATO su n = %d >= %d (%s, classe 804)" % (n, N_MERITO, soglia_txt)
     return "NON VIOLATO su n = %d (RISCHIO PASSATO solo con n >= %d, classe 804; %s)" % (n, N_MERITO, soglia_txt)
@@ -560,11 +638,16 @@ class Raccolta:
         return os.path.join(self.root, "PERTRADE", "abtg_trades_%s_%s_%s.csv" % (j["e"], j["s"], mg))
 
     def p_prova(self, t):
-        p = os.path.join(self.root, "ROUND_" + t, JOBS[t]["p"])
-        if os.path.exists(p):
-            return p, "raccolta"
-        q = os.path.join(PROVE_REPO, JOBS[t]["p"])
-        return (q, "repo prove/ (NON nella raccolta: P0 letto contro la copia del ramo, non contro quella del pin)") if os.path.exists(q) else (p, "ASSENTE")
+        """(percorso, fonte): prima la raccolta, poi il repo; in TUTTI e due i casi lo SHA256 si confronta con
+        l'hp= della riga (classe 873). SHA diverso -> fonte 'SHA DIVERSO ...' e il P0 e' NULLO."""
+        for p, fonte in ((os.path.join(self.root, "ROUND_" + t, JOBS[t]["p"]), "raccolta"),
+                         (os.path.join(PROVE_REPO, JOBS[t]["p"]), "repo prove/ (NON nella raccolta)")):
+            if os.path.exists(p):
+                sha = sha256_file(p)
+                if sha != HP[t]:
+                    return p, "SHA DIVERSO DAL PIN: prova da %s con SHA256 %s... contro hp= %s... della riga" % (fonte, sha[:8], HP[t][:8])
+                return p, fonte + ", SHA256 = hp= della riga"
+        return os.path.join(self.root, "ROUND_" + t, JOBS[t]["p"]), "ASSENTE"
 
     def p_referto(self, t):
         return os.path.join(self.root, "ROUND_" + t, "REFERTO_ROUND_%s.txt" % t)
@@ -584,10 +667,28 @@ class Raccolta:
                 return ln
         return ""
 
+    def rp(self):
+        """il RIEPILOGO della riga: FILE NULLI (motivi per tag), FILE SALTATI, FILE NON NULLI, CLASSE 166 (classe 873)."""
+        if getattr(self, "_rp", None) is None:
+            RP = dict(presente=bool(self.riepilogo()), nulli={}, saltati={}, nonnulli=None, c166="")
+            for r in self.riepilogo():
+                if r.startswith("FILE NULLI") or r.startswith("FILE SALTATI"):
+                    corpo = r.split("): ", 1)[1] if "): " in r else ""
+                    dest = RP["nulli"] if r.startswith("FILE NULLI") else RP["saltati"]
+                    if corpo.strip() in ("", "nessuno"):
+                        continue
+                    for m in re.finditer(r"(" + TAG_RE + r") \((.*?)\)(?= \| (?:" + TAG_RE + r") \(|\s*$)", corpo):
+                        dest[m.group(1)] = m.group(2)
+                elif r.startswith("FILE NON NULLI"):
+                    corpo = r.split(": ", 1)[1] if ": " in r else ""
+                    RP["nonnulli"] = set() if corpo.strip() == "NESSUNO" else {x.strip() for x in corpo.split(",") if x.strip()}
+                elif r.startswith("CLASSE 166"):
+                    RP["c166"] = r.split("): ", 1)[1] if "): " in r else r
+            self._rp = RP
+        return self._rp
+
     def saltato_txt(self, t):
-        ln = self.riga_riepilogo("FILE SALTATI")
-        m = re.search(r"\b%s \(([^)]*)\)" % t, ln)
-        return m.group(1) if m else ""
+        return self.rp()["saltati"].get(t, "")
 
     def tetto_barre(self, t):
         p = self.p_referto(t)
@@ -618,6 +719,30 @@ class Raccolta:
         if not os.path.isdir(lg):
             return []
         return [os.path.join(lg, f) for f in sorted(os.listdir(lg)) if f.lower().endswith(".log")]
+
+
+TAG_RE = r"(?:R26[4-7][a-z][0-9]?|R260d)"
+
+
+def conta_cartelle(d):
+    return sum(1 for t in JOBS if os.path.isdir(os.path.join(d, "ROUND_" + t)))
+
+
+def trova_raccolta(rac):
+    """classe 872: un percorso sbagliato NON diventa un round NULLO o SALTATO. Si contano PRIMA le cartelle
+    attese: zero cartelle ROUND_<t> e nessun RIEPILOGO -> si scende di UN livello solo se li' c'e' UNA raccolta,
+    dichiarandolo; altrimenti ci si ferma con un errore, mai un referto."""
+    rac = os.path.abspath(rac)
+    if not os.path.isdir(rac):
+        raise SystemExit("ERRORE: %s non e' una cartella (serve la raccolta ROUND_CORTI_C_<data> estratta dallo zip)" % rac)
+    if conta_cartelle(rac) > 0 or os.path.isfile(os.path.join(rac, "RIEPILOGO_ROUND_CORTI_C.txt")):
+        return rac, None
+    figli = [os.path.join(rac, x) for x in sorted(os.listdir(rac)) if os.path.isdir(os.path.join(rac, x))]
+    buoni = [f for f in figli if conta_cartelle(f) > 0 or os.path.isfile(os.path.join(f, "RIEPILOGO_ROUND_CORTI_C.txt"))]
+    if len(buoni) == 1:
+        return buoni[0], "la cartella passata (%s) non e' la raccolta: letta la sua sottocartella %s (scesa di UN livello, classe 872)" % (rac, os.path.basename(buoni[0]))
+    raise SystemExit("ERRORE (classe 872): in %s nessuna cartella ROUND_R264..R267 e nessun RIEPILOGO_ROUND_CORTI_C.txt; sottocartelle con una raccolta: %d (%s). Passare la cartella ROUND_CORTI_C_<data> estratta. NESSUN referto scritto."
+                     % (rac, len(buoni), ", ".join(os.path.basename(b) for b in buoni) or "nessuna"))
 
 
 class PerTrade:
@@ -654,8 +779,17 @@ class File:
         self.pt = OrderedDict()  # magic -> PerTrade
         self.lanciato = rac.lanciato(t)
         self.saltato = ""
+        self.cartella = self.lanciato
         if not self.lanciato:
-            self.saltato = rac.saltato_txt(t) or "cartella ROUND_%s assente (SALTATO o non raccolto)" % t
+            sal = rac.saltato_txt(t)
+            if sal:   # SALTATO SOLO se la riga lo dichiara (R265b senza K1 PASS, onda 2 dopo un G0 ROSSO)
+                self.saltato = sal
+                return
+            # cartella ASSENTE e NON dichiarata SALTATA: catena rotta o raccolta parziale -> NULLO, mai 'saltato' (classe 872)
+            self.lanciato = True
+            self.legs, self.tetto, self.fonte_prova = [], "-", "-"
+            self.nullo.append("E0: cartella ROUND_%s ASSENTE nella raccolta e NON dichiarata SALTATA dalla riga%s: catena rotta o raccolta parziale" % (
+                t, "" if rac.rp()["presente"] else " (RIEPILOGO assente: SALTATO e non raccolto NON si distinguono)"))
             return
         j = self.j
         legs = ["IS", "OOS"] if j["lg"] == "IO" else [j["lg"]]
@@ -666,6 +800,9 @@ class File:
                 self.nullo.append("E0: CSV _%s atteso ASSENTE o 0 byte (%s)" % (leg, os.path.basename(p)))
                 continue
             rows = leggi_csv(p)
+            if any("__LUNGA__" in r for r in rows):
+                self.nullo.append("E0: CSV _%s con righe PIU' LUNGHE dell'intestazione (virgola in un input stringa? classe 883): colonne spostate, NON ricucito" % leg)
+                continue
             npos = sum(1 for r in rows if re.match(r"^[1-9][0-9]*$", str(r.get("Trades", "")).strip()))
             if len(rows) != j["nr"] or npos != j["nr"]:
                 self.nullo.append("E0: CSV _%s con %d righe (Trades>0 su %d), attese %d" % (leg, len(rows), npos, j["nr"]))
@@ -687,6 +824,8 @@ class File:
         self.fonte_prova = fonte_pv
         if fonte_pv == "ASSENTE":
             self.nullo.append("P0: file prova %s ASSENTE (raccolta e repo)" % j["p"])
+        elif fonte_pv.startswith("SHA DIVERSO"):
+            self.nullo.append("P0: %s (classe 873): i pin NON si leggono da una prova che non e' quella del pin" % fonte_pv)
         else:
             pin, asse, _ = leggi_pin_prova(pv)
             if len(pin) != j["np"] or asse != [j["ax"]]:
@@ -892,10 +1031,23 @@ def anni_pos(deals, k, anni):
 # ---------------------------------------------------------------------------
 #  LA LETTURA
 # ---------------------------------------------------------------------------
-def lettura(rac):
+def lettura(rac, nota_percorso=None):
     R = Referto()
     F = OrderedDict((t, File(rac, t)) for t in JOBS)
     EX = OrderedDict((n, Esterno(rac, n)) for n in EXT)
+    # classe 873: i NULLI della riga (motore diverso dal pin, prova, rc 1, freschezza, C0...) si UNISCONO, mai il contrario
+    RP = rac.rp()
+    div = []
+    for t, f in F.items():
+        rn = RP["nulli"].get(t)
+        if rn and f.lanciato:
+            if f.ok:
+                div.append("- %s: NULLO per la riga, NON nullo per il lettore -> NULLO (motivi della riga UNITI): %s" % (t, rn[:260]))
+            f.nullo.append("RIGA: " + rn)
+        elif rn and not f.lanciato:
+            div.append("- %s: NULLO per la riga ma SALTATO nel RIEPILOGO del lettore: %s" % (t, rn[:200]))
+        if RP["presente"] and RP["nonnulli"] is not None and t in RP["nonnulli"] and not f.ok and f.lanciato:
+            div.append("- %s: NON nullo per la riga, NULLO per il lettore: %s" % (t, "; ".join(f.nullo)[:260]))
     R.add("# LETTURA DEL ROUND CORTI C -- R264 (EMA200 H4: G0 tick, ponte AUDJPY, griglie OHLC) + R265 (EURUSD solo corto: G0+K1, walk-forward) + R266 (box asiatico GBPUSD/EURUSD) + R260d (oro solo long col trend dell'oro) + R267 (11 manopole a costo zero; R267a ESCLUSO)",
           "", "Generato da `backtest_pipeline/leggi_round_corti_c.py` sulla raccolta `%s`." % rac.root,
           "Criteri congelati PRIMA dei numeri: `prove/R264_TESTA.txt.in` par. 5-9, `prove/R265_TESTA.txt.in` par. 2-4, `prove/R266a_asia_box_GBPUSD_TESTA.txt` par. 5-8, "
@@ -903,8 +1055,18 @@ def lettura(rac):
           "Etichette: [MISURATO] dal CSV/per-trade della raccolta; [DERIVATO] da una formula della testa; [STIMA]; [NON MISURATO]; [NON VERIFICABILE]. "
           "Posizioni contate per position_id; sul forex/oro ogni saldo toglie k x volume (classe 844: k = (somma net - Profit)/lotti). "
           "**R4/B6/C6/V5/U6/D6/E4: NESSUNA cella si promuove. NESSUNA PROPOSTA DI TAGLIA: ogni riga di taglia e' un riferimento, non una proposta. Nessun preset, EA, sedia o conto e' toccato.**",
-          "", "Pre-lettura della riga (RIEPILOGO_ROUND_CORTI_C.txt): %s -- si RILEGGE, non si crede: i cancelli qui sotto sono rifatti dai CSV e dai per-trade." % (
+          "", "Pre-lettura della riga (RIEPILOGO_ROUND_CORTI_C.txt): %s -- si RILEGGE, non si crede: i cancelli qui sotto sono rifatti dai CSV e dai per-trade, e i NULLI della riga si UNISCONO (classe 873)." % (
               "presente, %d righe" % len(rac.riepilogo()) if rac.riepilogo() else "ASSENTE"), "")
+    if nota_percorso:
+        R.add("- **PERCORSO: %s**" % nota_percorso, "")
+    if RP["presente"]:
+        R.add("- CLASSE 166 dalla riga (il lettore non ha i sorgenti compilati: la legge e la unisce): %s" % (RP["c166"] or "[riga CLASSE 166 NON TROVATA nel RIEPILOGO: motore = pin NON VERIFICATO]"),
+              "- NULLI della riga: %d (%s) | SALTATI della riga: %d (%s)" % (len(RP["nulli"]), ", ".join(RP["nulli"]) or "nessuno", len(RP["saltati"]), ", ".join(RP["saltati"]) or "nessuno"), "")
+    else:
+        R.add("- **[NON VERIFICABILE] `RIEPILOGO_ROUND_CORTI_C.txt` ASSENTE: classe 166 (motore = pin) NON VERIFICATA, rc / freschezza dei CSV e dei per-trade NON VERIFICATI, SALTATO e 'non raccolto' NON distinguibili. I NULLI della riga NON sono uniti: ogni esito qui sotto vale SOLO se la riga non li ha annullati (classe 873).**", "")
+    R.add("## DIVERGENZE fra la riga e il lettore (per nome, classe 873)", "", *(div or ["- nessuna" if RP["presente"] else "- NON VERIFICABILE (RIEPILOGO assente)"]))
+    R.add("")
+    R.esiti["div"] = div
     # --- 0. cancelli
     R.add("## 0. Cancelli di nullita' (secondo strato, indipendente dalla riga)", "",
           "| file | lanciato | esito | motivi / note | tetto barre |", "|---|---|---|---|---|")
@@ -916,7 +1078,7 @@ def lettura(rac):
         else:
             if not f.ok:
                 n_nulli += 1
-            R.add("| %s | si | %s | %s | %s |" % (t, "NON NULLO" if f.ok else "**NULLO**", ("; ".join(f.nullo) if f.nullo else "E0, asse, P0, C0, L0, G1 ok") + ("; " + "; ".join(f.info) if f.info else ""), f.tetto))
+            R.add("| %s | %s | %s | %s | %s |" % (t, "si" if f.cartella else "NO (cartella ASSENTE, non SALTATA)", "NON NULLO" if f.ok else "**NULLO**", ("; ".join(f.nullo) if f.nullo else "E0, asse, P0, C0, L0, G1 ok") + ("; " + "; ".join(f.info) if f.info else ""), f.tetto))
     R.add("", "fonte: `ROUND_<t>/<EA>_<sim>_<gamba><_ohlc>_<t>.csv`, `ROUND_<t>/<prova>` (P0), `PERTRADE/abtg_trades_<EA>_<sim>_<magic>.csv`, `ROUND_<t>/REFERTO_ROUND_<t>.txt` (tetto barre). "
           "Regole: E0 righe attese e Trades>0 (classe 766); P0 pin dal CSV (classe 780); C0 righe = Trades e somma per simbolo (classi 844/855); identificazione stretto-poi-largo, AMBIGUO non nullo (classe 850); L0 lato; G1 gemelle.")
     # R267a: ESCLUSO E DICHIARATO
@@ -971,7 +1133,7 @@ def lettura(rac):
     R.add("")
     sez_r264(rac, F, EX, R)
     sez_r265b(F, EX, R)
-    sez_r266(F, R)
+    sez_r266(F, R, rac)
     sez_r260d(F, EX, R)
     sez_r267(F, EX, R)
     sez_finale(F, R)
@@ -991,7 +1153,8 @@ def g0_livello(f, an):
     dn = abs(num(r["Trades"]) - an["tr"])
     dp = abs(num(r["Profit Factor"]) - an["pf"])
     dd = abs(num(r["Equity DD %"]) - an["dd"]) / an["dd"]
-    lv = 0 if (dn <= 0.01 * an["tr"] and dp <= 0.020 and dd <= 0.05) else (1 if (dn <= 0.03 * an["tr"] and dp <= 0.050) else 2)
+    # bande INCLUSIVE su differenze del CSV: |1,28105 - 1,23105| in virgola mobile e' 0,050000000000000044 (classe 794)
+    lv = 0 if (dn <= 0.01 * an["tr"] + TOL and dp <= 0.020 + TOL and dd <= 0.05 + TOL) else (1 if (dn <= 0.03 * an["tr"] + TOL and dp <= 0.050 + TOL) else 2)
     return lv, dict(r=r, dn=dn, dp=dp, dd=dd)
 
 
@@ -1033,8 +1196,8 @@ def sez_r264(rac, F, EX, R):
             extra = " (nessuna soglia decidibile su questo simbolo: numero riportato)"
         elif ver == "NULLO":
             extra = " (CONTRO-ESEMPIO INTERNO FALLITO: identificazione delle gambe sbagliata)"
-        R.add("  - K1 %s dal LOTTO [DERIVATO dal per-trade %s, R = saldo x 0,5%% per gamba, k %.4f tolto]: posizioni %d, coppie gamba1/gamba2 %d, singole %d, vol2/vol1 mediano %s (atteso %.2f, fuori [%.2f ; %.4g] in %d coppie), ATR da gamba 1 e 2 oltre +-12%% in %d coppie; stop gamba 2 MEDIANO: limite basso %.2f %s, alto %.2f %s (gamba 1 ~%.2f); soglia: %s -> **K1 %s**%s%s" % (
-            t, po.path.split(os.sep)[-1], po.k, ko["n_pos"], ko["n_pair"], ko["n_sing"], f3(ko["med_rat"]), prm["rat"], prm["rlo"], prm["rhi"], ko["rat_ko"], ko["atr_ko"],
+        R.add("  - K1 %s dal LOTTO [DERIVATO dal per-trade %s, R = saldo x 0,5%% per gamba, k %.4f tolto]: posizioni %d, coppie gamba1/gamba2 %d, singole %d, vol2/vol1 mediano %s (atteso %.2f, fuori [%.2f ; %.4g] in %d coppie), ATR da gamba 1 e 2 oltre +-12%% in %d coppie (%s); stop gamba 2 MEDIANO: limite basso %.2f %s, alto %.2f %s (gamba 1 ~%.2f); soglia: %s -> **K1 %s**%s%s" % (
+            t, po.path.split(os.sep)[-1], po.k, ko["n_pos"], ko["n_pair"], ko["n_sing"], f3(ko["med_rat"]), prm["rat"], prm["rlo"], prm["rhi"], ko["rat_ko"], ko["atr_ko"], "clausola della testa R265 par. 2: oltre meta' delle coppie = K1 NULLO" if prm.get("atr12") else "INFORMATIVO: la testa R264 par. 5 congela solo vol2/vol1, la riga aggiunge i 12% e puo' dire NULLO dove la testa no (classe 875)",
             ko["med_lo"] * sc if not math.isnan(ko["med_lo"]) else float("nan"), prm["un"], ko["med_hi"] * sc if not math.isnan(ko["med_hi"]) else float("nan"), prm["un"], ko["med_s1"] * sc if not math.isnan(ko["med_s1"]) else float("nan"), prm["dec"], ver, extra,
             ("; gambe 1 con volume >= 0,02: %d su %d (contro-esempio della causa nominata per il GIALLO/ROSSO d'oro: se >= 0,02 la causa lotto e' SBAGLIATA)" % (ko["v1ge02"], ko["n_pair"])) if t == "R264d" else ""))
         m = misure_pt(po, f.j["dp"])
@@ -1062,10 +1225,12 @@ def sez_r264(rac, F, EX, R):
         ver = "CONFERMA: vince R139a, il 1,514 e' una FETTA D'EPOCA misurata (AUDJPY resta in archivio, poggia sul RISCHIO 2016-2026: DD OOS 16,89-20,44% @1%, Emendamento B)" if n_cf >= 3 else (
             "SMENTITA: OHLC e tick NON concordano sulla stessa finestra, il verdetto di R139a perde il banco -> AUDJPY NON ANCORA MISURATO (non resuscitato)" if n_sm >= 3 else "NON CONCLUDENTE (ne' 3 su 4 >= 1,45 ne' 3 su 4 < 1,25)")
         po = f.pt0()
-        R.add("- celle con PF >= 1,45: %d su 4; sotto 1,25: %d su 4 -> **%s**%s" % (n_cf, n_sm, ver, " [G0 AUDJPY ROSSO: contro il genetico NON CONFRONTABILE, il numero si scrive e non decide]" if G0["R264b"] == 2 else ""),
+        if G0["R264b"] == 2:   # testa par. 5: G0 ROSSO -> le letture OOS contro il genetico (il PONTE) sono NON CONFRONTABILI (classe 874)
+            ver = "NON CONFRONTABILE (G0 R264b ROSSO, testa par. 5: il banco non rifa' l'archivio; la parola CONFERMA/SMENTITA non si scrive)"
+        R.add("- celle con PF >= 1,45: %d su 4; sotto 1,25: %d su 4 -> **%s**%s" % (n_cf, n_sm, ver, " [G0 AUDJPY NON VERIFICABILE: H_BINARIO non esclusa]" if G0["R264b"] == 3 else ""),
               "- per-trade 796512: %s" % ("cella InpTP_RR=%s -> %s" % (po.cell, misure_txt(misure_pt(po, 10000), po.k)) if po else "non identificato o ambiguo"),
               "- previsione della testa: CONFERMA. Riserva scritta al par. 2.1: InpTP1Pct su AUDJPY resta MAI MISURATO (casella 3 riempita col TP_RR, che il motore scavalca).")
-        R.esiti["ponte"] = ver.split(":")[0].split(" ")[0]
+        R.esiti["ponte"] = ver.split(" (")[0].split(":")[0]
     R.add("")
     # --- griglie
     R.add("## 3. R264 -- LE GRIGLIE 3 x 3 (testa par. 6-8: CENTRO = la cella di MEZZO O1 0,20 / O2 centrale, MAI il picco; classe 845)", "")
@@ -1111,7 +1276,7 @@ def sez_griglia(F, R, g, g0lv):
             mz = pfm[(0.2, 1)]
             r10, r20, r30 = (sum(pfm[(o, ic)] for ic in range(3)) / 3.0 for o in (0.1, 0.2, 0.3))
             c0, c1, c2 = (sum(pfm[(o, ic)] for o in (0.1, 0.2, 0.3)) / 3.0 for ic in range(3))
-            bordo = [n for cond, n in ((r10 >= r20 + 0.08, "fila O1 0,10"), (r30 >= r20 + 0.08, "fila O1 0,30"), (c0 >= c1 + 0.08, "colonna O2 %.1f" % g["o2"][0]), (c2 >= c1 + 0.08, "colonna O2 %.1f" % g["o2"][2])) if cond]
+            bordo = [n for cond, n in ((r10 >= r20 + 0.08 - TOL, "fila O1 0,10"), (r30 >= r20 + 0.08 - TOL, "fila O1 0,30"), (c0 >= c1 + 0.08 - TOL, "colonna O2 %.1f" % g["o2"][0]), (c2 >= c1 + 0.08 - TOL, "colonna O2 %.1f" % g["o2"][2])) if cond]
             n110 = sum(1 for v in pfm.values() if v >= 1.10)
             vic = [pfm[(0.1, 1)], pfm[(0.3, 1)], pfm[(0.2, 0)], pfm[(0.2, 2)]]
             vic_ok = all(v >= 1.00 for v in vic)
@@ -1122,7 +1287,13 @@ def sez_griglia(F, R, g, g0lv):
             s4 = mz < 1.00 and pfoM >= 1.10
             banda = ("H_MOTORE (IS al centro 1,15-1,40)" if 1.15 <= mz <= 1.40 else "H_FETTA (IS al centro 0,85-1,08: il genetico ha trovato il 2024-26)" if 0.85 <= mz <= 1.08
                      else "ZONA GRIGIA 1,08-1,15: NON CONCLUDENTE" if 1.08 < mz < 1.15 else "FUORI dalle due bande (%.3f): se e' alto il primo sospetto e' un baco o un pin non arrivato" % mz)
-            ver = ("BORDO (%s)" % ", ".join(bordo) if bordo else "NO PER RISCHIO (S3)" if (ddI > MURO_1PCT or ddO > MURO_1PCT) else "REGIME, non edge (S4: IS < 1,00 e OOS >= 1,10, lo schema R139b)" if s4
+            if inert:   # S5: quel file NON conta per S2 (testa par. 8). BORDO/PASSA/NO PER MERITO sono S2: non si scrivono.
+                ver = ("NO PER RISCHIO (S3)" if (ddI > MURO_1PCT or ddO > MURO_1PCT) else "REGIME, non edge (S4: IS < 1,00 e OOS >= 1,10, lo schema R139b)" if s4
+                       else "SOSPESO (S1: n IS al mezzo %d < %d deal)" % (nIS, DEAL_MERITO) if nIS < DEAL_MERITO
+                       else "S2 NON LEGGIBILE PER NOME (S5: O1 INERTE su %s = casella libera MISURATA; il 3 x 3 non ha 9 misure: nessun BORDO/PASSA/NO PER MERITO)" % ", ".join(inert))
+            else:
+                ver = None
+            ver = ver or ("BORDO (%s)" % ", ".join(bordo) if bordo else "NO PER RISCHIO (S3)" if (ddI > MURO_1PCT or ddO > MURO_1PCT) else "REGIME, non edge (S4: IS < 1,00 e OOS >= 1,10, lo schema R139b)" if s4
                    else "SOSPESO (S1: n IS al mezzo %d < %d deal)" % (nIS, DEAL_MERITO) if nIS < DEAL_MERITO else "PASSA LO SCREENING, SOLIDO (PF IS mezzo >= 1,27)" if solido
                    else "PASSA LO SCREENING (non solido: fra 1,10 e 1,27 un tick puo' riportarlo sotto 1,10)" if passa else "NO PER MERITO (IS < 1,10 al mezzo, o meno di 6 celle su 9 >= 1,10, o un vicino < 1,00)")
             R.add("", "- S5 INERZIA: %s" % (("O1 INERTE su %s (delta n < 5 e delta PF < 0,010: casella libera MISURATA, quel file NON conta per S2)" % ", ".join(inert)) if inert else "O1 morde su tutti e tre i file"),
@@ -1134,11 +1305,11 @@ def sez_griglia(F, R, g, g0lv):
                   "- S4 SEGNI: %s; S6 DEFAULT (proxy O1 0,10 / O2 piu' vicina a 0,35): %s; banda H (classe 178): %s" % (
                       "REGIME" if s4 else "no", " / ".join("O2 %.1f PF IS %s (%s)" % (pv, fpf(pfm[(0.1, g["o2"].index(pv))]), "il centro la batte di >= 0,05" if mz >= pfm[(0.1, g["o2"].index(pv))] + 0.05 else "il centro NON la batte di 0,05: IL DEFAULT VA BENE") for pv in g["prx"]), banda),
                   "- **VERDETTO S8 (per nome): %s**%s%s -- S7: Modello 1 BOCCIA e non PROMUOVE: il massimo e' PASSA LO SCREENING -> serve il tick (2024.07.05 -> 2026.06.30 o storico esterno)" % (
-                      ver, " [file con O1 INERTE (S5): %s, il verdetto e' calcolato ANCHE su quel file; la testa dice che NON conta per S2]" % ", ".join(inert) if inert else "",
+                      ver, " [file con O1 INERTE (S5): %s -- la testa dice che NON conta per S2: il verdetto qui sopra NON usa S2 (la riga lo delegava al referto)]" % ", ".join(inert) if inert else "",
                       " [G0 %s ROSSO: l'OOS contro il genetico e' NON CONFRONTABILE, l'IS resta leggibile da solo]" % sym if g0lv == 2 else ""))
             n_pos_is = int(round(nIS / 1.838))
             R.add("- Emendamento della finestra: l'IS si misura in operazioni (%d deal ~ %d posizioni [DERIVATO 1,838 deal/pos]); il VECCHIO (IS) giudica il RISCHIO (DD IS %.2f), il RECENTE (OOS) il MERITO (PF OOS %s); rischio: %s" % (
-                nIS, n_pos_is, ddI, fpf(pfoM), verdetto_rischio(ddI > MURO_1PCT or ddO > MURO_1PCT, n_pos_is, "DD <= 10,0% @1% in IS e OOS")))
+                nIS, n_pos_is, ddI, fpf(pfoM), verdetto_rischio(ddI > MURO_1PCT or ddO > MURO_1PCT, n_pos_is, "DD <= 10,0% @1% in IS e OOS", ohlc=True)))
             tab_taglie(max(ddI, ddO), 1.0, R, "Equity DD % max(IS, OOS) al mezzo")
             R.esiti["griglia_" + sym] = ver.split(" (")[0]
             R.esiti["centro_" + sym] = (0.2, g["o2"][1])
@@ -1206,6 +1377,11 @@ def sez_r265b(F, EX, R):
         R.esiti["r265b"] = "NULLO"
         R.add("")
         return
+    k1a = R.esiti.get("k1_R265a", "n.d.")
+    if k1a != "PASS":   # testa R265 par. 2/4: R265b parte SOLO con K1 PASS; girato lo stesso -> non si legge (classe 874)
+        R.add("- **NON LETTO**: R265b e' nella raccolta ma il K1 di R265a RICALCOLATO qui e' %s (la testa par. 2 e 4: R265b parte SOLO con K1 PASS). I numeri non si leggono finche' il K1 non e' PASS: e' la riga o il K1 da guardare, non R265b." % k1a, "")
+        R.esiti["r265b"] = "NON_LETTO_K1"
+        return
     pf5, tr5, dd5, pfo5, tro5, ddo5 = {}, {}, {}, {}, {}, {}
     for o2 in (0.1, 0.2, 0.3, 0.4):
         ri, ro = f.r("IS", o2), f.r("OOS", o2)
@@ -1223,7 +1399,7 @@ def sez_r265b(F, EX, R):
     m02, m03 = min(pf5[0.2], pf5[0.1], pf5[0.3]), min(pf5[0.3], pf5[0.2], pf5[0.4])
     ctr = 0.3 if m03 > m02 else 0.2
     med = (pf5[0.2] + pf5[0.3]) / 2.0
-    bordo = [n for c, n in ((pf5[0.1] >= med + 0.08, "O2 0,1"), (pf5[0.4] >= med + 0.08, "O2 0,4")) if c]
+    bordo = [n for c, n in ((pf5[0.1] >= med + 0.08 - TOL, "O2 0,1"), (pf5[0.4] >= med + 0.08 - TOL, "O2 0,4")) if c]
     n110 = sum(1 for v in pf5.values() if v >= 1.10)
     vic_ok = pf5[round(ctr - 0.1, 1)] >= 1.00 and pf5[round(ctr + 0.1, 1)] >= 1.00
     mz = pf5[ctr]
@@ -1232,7 +1408,7 @@ def sez_r265b(F, EX, R):
     nIS, ddI, ddO, pfoM = tr5[ctr], dd5[ctr], ddo5[ctr], pfo5[ctr]
     s4 = mz < 1.00 and pfoM >= 1.10
     banda = "H_EDGE (PF IS >= 1,15 anche con meta' degli anni contro)" if mz >= 1.15 else "H_DERIVA (0,95-1,08: il corto rende per deriva del dollaro)" if 0.95 <= mz <= 1.08 else "ZONA GRIGIA 1,08-1,15: NON CONCLUDENTE" if 1.08 < mz < 1.15 else "FUORI dalle bande (%.3f)" % mz
-    ver = ("O2 INERTE (S5): casella libera MISURATA, S2 non si legge" if inert else "BORDO (%s)" % ", ".join(bordo) if bordo else "NO PER RISCHIO (S3)" if (ddI > MURO_1PCT or ddO > MURO_1PCT) else "REGIME, non edge (S4)" if s4
+    ver = ("NO PER RISCHIO (S3)" if (ddI > MURO_1PCT or ddO > MURO_1PCT) else "O2 INERTE (S5): casella libera MISURATA, S2 non si legge" if inert else "BORDO (%s)" % ", ".join(bordo) if bordo else "REGIME, non edge (S4)" if s4
            else "SOSPESO (S1)" if nIS < DEAL_MERITO else "PASSA LO SCREENING, SOLIDO" if solido else "PASSA LO SCREENING" if passa else "NO PER MERITO")
     picco = max(pf5, key=lambda k: pf5[k])
     R.add("", "- S5: delta n %d, delta PF %.3f -> %s; CENTRO (fra 0,2 e 0,3: massimo di min(propria, vicini), a parita' 0,2): O2 %.1f PF IS **%s** (picco a O2 %.1f PF %s: si scrive, NON si sceglie); BORDO (0,1 o 0,4 >= media(0,2 ; 0,3) + 0,08 = %.3f): %s; celle >= 1,10: %d su 4; vicini >= 1,00: %s" % (
@@ -1240,7 +1416,7 @@ def sez_r265b(F, EX, R):
           "- S1 n IS centro %d %s 276%s; OOS %d %s" % (nIS, ">=" if nIS >= DEAL_MERITO else "<", "" if nIS >= DEAL_MERITO else " SOSPESO", tro5[ctr], "" if tro5[ctr] >= DEAL_MERITO else "< 276: merito OOS SOSPESO (atteso, testa par. 4: 82-118 posizioni)"),
           "- S3 DD IS %.2f / OOS %.2f a 1%% (derivato a 2,00 [DERIVATO]: %.2f-%.2f / %.2f-%.2f); PF OOS centro %s; S6 proxy del default (O2 0,35 non in griglia: 0,3 e 0,4): PF IS %s / %s -> %s; banda: %s" % (
               ddI, ddO, ddI * 1.956, ddI * 1.990, ddO * 1.956, ddO * 1.990, fpf(pfoM), fpf(pf5[0.3]), fpf(pf5[0.4]), "il centro le batte di >= 0,05" if mz >= max(pf5[0.3], pf5[0.4]) + 0.05 else "IL DEFAULT VA BENE", banda),
-          "- **VERDETTO: %s**%s -- Modello 1 boccia e non promuove; rischio: %s" % (ver, " [G0 R265a ROSSO: l'OOS contro la scansione e' NON CONFRONTABILE]" if R.esiti.get("g0_R265a") == "ROSSO" else "", verdetto_rischio(ddI > MURO_1PCT or ddO > MURO_1PCT, int(round(nIS / 1.838)), "DD <= 10,0% @1%")),
+          "- **VERDETTO: %s**%s -- Modello 1 boccia e non promuove; rischio: %s" % (ver, " [G0 R265a ROSSO: l'OOS contro la scansione e' NON CONFRONTABILE]" if R.esiti.get("g0_R265a") == "ROSSO" else "", verdetto_rischio(ddI > MURO_1PCT or ddO > MURO_1PCT, int(round(nIS / 1.838)), "DD <= 10,0% @1%", ohlc=True)),
           "- anno per anno dell'IS: [NON MISURABILE] (il per-trade dell'IS non sopravvive: resta solo la gamba OOS dell'ultima cella); H_DERIVA/H_EDGE letti sul PF IS al centro.")
     po = f.pt0()
     if po:
@@ -1258,7 +1434,26 @@ def sez_r265b(F, EX, R):
 SFASATI = (("2024.12.26", "2025.03.30"), ("2025.10.26", "2026.03.29"))    # R266 par. 3 (orologio BCM)
 
 
-def sez_r266(F, R):
+def d0_dai_log(rac):
+    """R266 par. 7 D0: la riga 'history synchronized from ...' / 'history cache ... from ...' nei giornali
+    dell'agente (LOG_TESTER, UTF-16). Ritorna {simbolo: testo}; nessuna riga -> il simbolo manca (NON VERIFICATO)."""
+    out, prime = {}, {}
+    for pth in rac.log_tester():
+        try:
+            txt = leggi_testo(pth)
+        except OSError:
+            continue
+        for ln in txt.splitlines():
+            m = re.search(r"\b(GBPUSD|EURUSD)\b.*?history.*?from (\d{4}\.\d{2}\.\d{2})", ln)
+            if m and (m.group(1) not in prime or m.group(2) < prime[m.group(1)][0]):
+                prime[m.group(1)] = (m.group(2), os.path.basename(pth))
+    for sym, (d, fn) in prime.items():
+        out[sym] = "prima data dello storico nei log: %s (%s), contro l'inizio IS 2015.01.01 [MISURATO dal giornale; non dice di quale gamba; la testa non congela una data-soglia: si scrive, non decide]" % (d, fn)
+    return out
+
+
+def sez_r266(F, R, rac=None):
+    d0_log = d0_dai_log(rac) if rac is not None else {}
     R.add("## 5. R266 -- BOX ASIATICO 00:00-07:59 GBPUSD / EURUSD (testa R266a par. 6.3 HN/HE/H0, par. 7 R2/R3/K1/D1, R4 nessuna cella si promuove)", "",
           "- regime dichiarato (Emendamento A/C): %s" % REGIMI["R266"],
           "- il per-trade che sopravvive e' quello della gamba OOS (par. 9): le posizioni IS sono DERIVATE da Trades IS / (deal per posizione dell'OOS).", "")
@@ -1276,27 +1471,32 @@ def sez_r266(F, R):
         nOOS = m["n"]
         kdp = m["kdp"]
         trI = num(ri["Trades"])
-        posIS = int(round(trI / kdp)) if kdp and not math.isnan(kdp) and kdp > 0 else -1
-        pos266[t] = dict(oos=nOOS, isD=posIS)
+        # posizioni IS DERIVATE (par. 9): il pavimento 150 si confronta sul valore NON arrotondato (149,5 non e' 150)
+        posISf = (trI / kdp) if kdp and not math.isnan(kdp) and kdp > 0 else -1.0
+        posIS = int(math.floor(posISf + 1e-9)) if posISf >= 0 else -1
+        pos266[t] = dict(oos=nOOS, isD=posISf)
         bd = BAND266[t]
         pfI, pfO, ddI, ddO = num(ri["Profit Factor"]), num(ro["Profit Factor"]), num(ri["Equity DD %"]), num(ro["Equity DD %"])
-        hyp = ("HN campione insufficiente (posizioni IS %d / OOS %d, pavimento 150): MERITO SOSPESO, il rischio si legge" % (posIS, nOOS) if (posIS < N_MERITO or nOOS < N_MERITO)
+        hyp = ("HN campione insufficiente (posizioni IS %.1f [DERIVATE] / OOS %d, pavimento 150): MERITO SOSPESO, il rischio si legge" % (posISf, nOOS) if (posISf < N_MERITO - TOL or nOOS < N_MERITO)
                else "HE EDGE (PF IS %s e PF OOS %s >= 1,10 con >= 150 posizioni per finestra) -> il passo dopo e' un round d'altopiano + riprova a tick: FIRMA di Claudio" % (fpf(pfI), fpf(pfO)) if (pfI >= 1.10 and pfO >= 1.10)
                else "H0 piatto / niente (R2 violato: PF IS %s, PF OOS %s, almeno uno < 1,10)" % (fpf(pfI), fpf(pfO)))
         n_ko, lim_min = k1_r266_campione(po.pos(f.j["dp"]), f.j["s"])
         qA, qB, qT = pf_win(po.deals, SFASATI[0][0], SFASATI[0][1], po.k), pf_win(po.deals, SFASATI[1][0], SFASATI[1][1], po.k), pf_win(po.deals, "", "", po.k)
         sgp, sgl = qA["gp"] + qB["gp"], qA["gl"] + qB["gl"]
         agp, agl = qT["gp"] - sgp, qT["gl"] - sgl
-        pav, tet = dd_taglia(ddO, 2.0, 1.0)
-        r3 = "sotto S3 di R193b (8,0 a 2,00) con la formula lineare" if ddO <= 4.00 else "FUORI da S3 a 2,00 (d > 4,00 lineare%s); OHLC = limite inferiore, il caso migliore" % (" e > 4,08 moltiplicativa" if ddO > 4.08 else "")
+        # R3 a qualunque n su TUTTE E DUE le finestre: il VECCHIO (IS 2015-2019) giudica il rischio (Emendamento B)
+        ddR3, legR3 = (ddI, "IS") if ddI > ddO else (ddO, "OOS")
+        pav, tet = dd_taglia(ddR3, 2.0, 1.0)
+        r3 = ("sotto S3 di R193b (8,0 a 2,00) con la formula lineare" if ddR3 <= 4.00 else "FUORI da S3 a 2,00 (d > 4,00 lineare%s)" % (" e > 4,08 moltiplicativa" if ddR3 > 4.08 else "")) + " (d = il DD piu' alto fra IS e OOS: %s); OHLC = limite inferiore" % legR3
         R.add("- **%s %s %s**: IS %s | OOS %s [MISURATO dal CSV]" % (t, f.j["s"], lato, riga_txt(ri), riga_txt(ro)),
               "  - per-trade OOS %s: %s" % (f.j["pt"][0], misure_txt(m, po.k)),
-              "  - banda n attesa (posizioni, par. 6.2): IS %d-%d, OOS %d-%d -> IS DERIVATE %d %s, OOS %d %s" % (
-                  bd[0], bd[1], bd[2], bd[3], posIS, "SOTTO il limite basso: prima si sospetta lo storico corto (D0), poi le cifre (D1), poi il cancello" if posIS < bd[0] else ("SOPRA la banda" if posIS > bd[1] else "dentro"),
+              "  - D0 STORICO (par. 7, scritto PRIMA del merito IS): %s" % d0_log.get(f.j["s"], "[NON VERIFICATO]: nessuna riga 'history ... from' per %s nei LOG_TESTER della raccolta" % f.j["s"]),
+              "  - banda n attesa (posizioni, par. 6.2): IS %d-%d, OOS %d-%d -> IS DERIVATE %.1f %s, OOS %d %s" % (
+                  bd[0], bd[1], bd[2], bd[3], posISf, "SOTTO il limite basso: prima si sospetta lo storico corto (D0), poi le cifre (D1), poi il cancello" if posIS < bd[0] else ("SOPRA la banda" if posIS > bd[1] else "dentro"),
                   nOOS, "SOTTO" if nOOS < bd[2] else ("SOPRA" if nOOS > bd[3] else "dentro")),
               "  - D1 CIFRE: %s" % ("Trades IS %d < 20 -> NON si legge come niente edge: prima Digits/_Point del simbolo" % trI if trI < 20 else "ok (Trades IS %d >= 20)" % trI),
               "  - **R2 MERITO: %s**" % hyp,
-              "  - R3 RISCHIO a 1%% (a qualunque n): DD IS %.2f / DD OOS %.2f -> a 2,00 [%.2f ; %.2f] %% [DERIVATO, R193b B3] -> %s; %s" % (ddI, ddO, pav, tet, r3, verdetto_rischio(ddO > 4.08, nOOS, "DD OOS a 1% <= 4,08 (S3 di R193b tradotta)")),
+              "  - R3 RISCHIO a 1%% (a qualunque n): DD IS %.2f / DD OOS %.2f -> a 2,00 [%.2f ; %.2f] %% [DERIVATO, R193b B3] -> %s; %s" % (ddI, ddO, pav, tet, r3, verdetto_rischio(ddR3 > 4.08, nOOS, "DD IS e OOS a 1% <= 4,08 (S3 di R193b tradotta)", ohlc=True)),
               "  - K1 a campione sul per-trade OOS (classe 846, q_min 0,80, R = saldo x 1%%): limite alto dello stop minimo %.2f pip contro cancello %.2f pip, posizioni sotto: %d su %d -> %s" % (
                   lim_min * 10000.0, K1_R266[f.j["s"]] * 10000.0, n_ko, m["n"], "costo GARANTITO per costruzione (stop = W + 2 x buffer >= 40x)" if n_ko == 0 else "**COSTO NON GARANTITO: il merito non si legge** (prima D1: Digits del simbolo)"),
               "  - R2 anno per anno OOS (posizioni, k tolto): %s" % anni_pos(po.deals, po.k, ("2020", "2021", "2022", "2023", "2024", "2025", "2026")),
@@ -1330,18 +1530,18 @@ def sez_r260d(F, EX, R):
           "- regime: %s" % REGIMI["R260"])
     exA, exC = EX["R260a"], EX["R260c"]
     # T5: G0 di R260c esterno
-    g0c = 2
+    g0c = 3
     rc = exC.riga(EXT["R260c"]["mg"])
     if rc is not None:
         trV, pfV, prV, ddV = num(rc["Trades"]), num(rc["Profit Factor"]), num(rc["Profit"]), num(rc["Equity DD %"])
         verde = trV == G0_ORO["tr"] and abs(round(pfV, 3) - G0_ORO["pf"]) <= 1e-7 and abs(round(prV, 0) - G0_ORO["pr"]) <= 1e-7 and abs(round(ddV, 2) - G0_ORO["dd"]) <= 1e-7
-        giallo = trV == G0_ORO["tr"] and abs(prV - G0_ORO["pr"]) <= G0_ORO["pr"] * 0.01
+        giallo = trV == G0_ORO["tr"] and abs(prV - G0_ORO["pr"]) <= G0_ORO["pr"] * 0.01 + TOL
         g0c = 0 if verde else (1 if giallo else 2)
-        R.add("- T5 ORDINE: G0 di R260c (esterno, %s): %s contro R103 693 / 1.308 / 24736 / 5.32 -> **%s**" % (exC.fonte, riga_txt(rc), ["VERDE", "GIALLO", "ROSSO (banco o guardia, NON separati: R260d si scrive ma NON si legge contro R103)"][g0c]))
+        R.add("- T5 ORDINE: G0 di R260c (esterno, %s): %s contro R103 693 / 1.308 / 24736 / 5.32 -> **%s**" % (exC.fonte, riga_txt(rc), ["VERDE", "GIALLO", "ROSSO (banco o guardia, NON separati: R260d si scrive ma NON si legge contro R103)", "NV"][g0c]))
     else:
         R.add("- T5 ORDINE: G0 di R260c NON VERIFICABILE qui (%s)" % exC.txt)
     R.add("- ancora R260a: %s" % exA.txt)
-    R.esiti["g0_R260c"] = ["VERDE", "GIALLO", "ROSSO"][g0c]
+    R.esiti["g0_R260c"] = ["VERDE", "GIALLO", "ROSSO", "NV"][g0c]
     f = F["R260d"]
     if not f.ok:
         R.add("- R260d: NON VERIFICABILE (%s)" % ("NULLO: " + "; ".join(f.nullo) if f.lanciato else "SALTATO"), "")
@@ -1350,10 +1550,13 @@ def sez_r260d(F, EX, R):
     rd = f.r("OOS", f.j["pt"][0])
     po = f.pt0()
     ra = exA.riga(EXT["R260a"]["mg"])
+    t3s0 = []   # T3 e S0 VERIFICATI e ok: solo allora la parola del rischio si attribuisce al filtro (T5, classe 874)
     if ra is not None:
         t3ko = num(ra["Trades"]) == num(rd["Trades"]) and abs(num(rd["Profit"]) - num(ra["Profit"])) <= EPS
         if t3ko:
             f.nullo.append("T3 FILTRO NON ESEGUITO (identico a R260a)")
+        else:
+            t3s0.append("T3")
         R.add("- T3 FILTRO ESEGUITO? R260d %s contro R260a %s -> %s" % (riga_txt(rd), riga_txt(ra), "**T3 KO: Trades e Profit IDENTICI a R260a = il filtro NON HA MORSO (fail-open di CorrBias) -> cella NON ESEGUITA, R260d NULLO**" if t3ko else "T3 ok: il filtro ha morso (%s)" % "; ".join(cmp4(rd, ra))))
     else:
         R.add("- T3 NON VERIFICABILE finche' non c'e' il CSV di R260a (riga B): %s" % exA.txt)
@@ -1379,6 +1582,8 @@ def sez_r260d(F, EX, R):
                 first = first or ("%s dt %d px %s" % (ct(d), d["deal_type"], d["price"]))
         if n_ko:
             f.nullo.append("S0 SOTTOINSIEME KO")
+        else:
+            t3s0.append("S0")
         R.add("- S0 SOTTOINSIEME (ogni chiusura di R260d in close_time|deal_type|price esiste in R260a): righe %d, trovate %d, parziali ammesse %d, senza gemello %d%s -> %s" % (
             po.n, n_match, n_parz, n_ko, " (prima: %s)" % first if first else "", "**S0 KO: e' cambiato qualcosa oltre al filtro -> R260d NULLO**" if n_ko else "S0 ok"))
         if not n_ko:
@@ -1404,10 +1609,16 @@ def sez_r260d(F, EX, R):
                 R.add("- certificato di morte (09/09): %s" % certificato(True, True, False, True, False, "PF R260d %s" % fpf(qDf["pf"])))
     ddD = num(rd["Equity DD %"])
     m = misure_pt(po, f.j["dp"])
-    R.add("- RISCHIO (a qualunque n, Emendamento B): DD R260d a 0,5%% %.2f contro 2,00 (lineare) / 2,06 (moltiplicativa) = S3 di R193b tradotta a 0,5%% -> %s%s; %s" % (
-        ddD, "STA SOTTO con tutte e due: l'unico numero che puo' cambiare lo stato della sedia (OHLC = limite inferiore, serve la riprova a tick)" if ddD <= 2.00 else ("sotto solo con la moltiplicativa: serve R193b" if ddD <= 2.06 else "NON sta sotto S3 a 2,00 (a 2,00: %.2f-%.2f %%)" % dd_taglia(ddD, 2.0, 0.5)),
-        " [G0 R260c ROSSO o non verificabile: si scrive, NON si legge contro R103]" if g0c == 2 else "", verdetto_rischio(ddD > 2.06, m["n"], "DD a 0,5% <= 2,06")),
-          "- per-trade 795304: %s" % misure_txt(m, po.k))
+    if not f.ok:
+        R.add("- RISCHIO: R260d e' diventato NULLO in lettura (%s): il DD %.2f si scrive e NON si legge" % ("; ".join(f.nullo), ddD))
+    elif len(t3s0) < 2:
+        R.add("- RISCHIO (numero scritto, parola NON scritta): DD R260d a 0,5%% %.2f contro 2,00 / 2,06 -- %s NON VERIFICATO (manca R260a o il suo per-trade identificato): senza T3 e S0 non si sa se il DD e' quello del filtro o quello di R260a (fail-open di CorrBias, T5) [classe 874]" % (
+            ddD, " e ".join(x for x in ("T3", "S0") if x not in t3s0)))
+    else:
+        R.add("- RISCHIO (a qualunque n, Emendamento B): DD R260d a 0,5%% %.2f contro 2,00 (lineare) / 2,06 (moltiplicativa) = S3 di R193b tradotta a 0,5%% -> %s%s; %s" % (
+            ddD, "STA SOTTO con tutte e due: l'unico numero che puo' cambiare lo stato della sedia (OHLC = limite inferiore, serve la riprova a tick)" if ddD <= 2.00 else ("sotto solo con la moltiplicativa: serve R193b" if ddD <= 2.06 else "NON sta sotto S3 a 2,00 (a 2,00: %.2f-%.2f %%)" % dd_taglia(ddD, 2.0, 0.5)),
+            " [G0 R260c ROSSO o non verificabile: si scrive, NON si legge contro R103]" if g0c >= 2 else "", verdetto_rischio(ddD > 2.06, m["n"], "DD a 0,5% <= 2,06", ohlc=True)))
+    R.add("- per-trade 795304: %s" % misure_txt(m, po.k))
     tab_taglie(ddD, 0.5, R, "Equity DD % a 0,5%")
     R.add("")
 
@@ -1417,9 +1628,9 @@ def sez_r260d(F, EX, R):
 # ---------------------------------------------------------------------------
 def part3(pfA, ddA, pfC, ddC, costo=False):
     """LEVA / PEGGIORA(COSTO) / NULLA (R267e/f/g): PF < ancora - 0,05 = PEGGIORA; DD <= 0,85 x ancora e PF >= ancora - 0,05 = LEVA."""
-    if pfC < pfA - 0.05:
+    if pfC < pfA - 0.05 - TOL:
         return "%s (PF %s < PF ancora %s - 0,05)" % ("COSTO" if costo else "PEGGIORA", fpf(pfC), fpf(pfA))
-    if ddC <= 0.85 * ddA and pfC >= pfA - 0.05:
+    if ddC <= 0.85 * ddA + TOL and pfC >= pfA - 0.05 - TOL:
         return "LEVA (DD %.2f <= 0,85 x %.2f e PF >= PF ancora - 0,05)" % (ddC, ddA)
     return "NULLA"
 
@@ -1447,6 +1658,21 @@ def sottoinsieme(deals, ref_deals, hcut=""):
     return dict(n=n, ko=ko, pz=pz, first=first)
 
 
+def t1t2_riga_b(exR):
+    """T1/T2 di R261 dal RIEPILOGO della riga B (ROUND CORTI B), cercato accanto all'esterno R261a e nel repo. Si riporta, non decide."""
+    cands = []
+    if exR.fonte.startswith("archivio "):
+        cands.append(os.path.join(exR.fonte[len("archivio "):], "RIEPILOGO_ROUND_CORTI_B.txt"))
+    cands.append(os.path.join(ARCHIVI_REPO, "RIEPILOGO_ROUND_CORTI_B.txt"))
+    for c in cands:
+        if os.path.isfile(c):
+            txt = leggi_testo(c)
+            t1 = re.search(r"==> T1 ([A-Z]+)", txt)
+            t2 = re.search(r"-> T2 ([A-Z]+)", txt)
+            return "T1 %s, T2 %s (dal RIEPILOGO della riga B: %s) [si riporta, non decide]" % (t1.group(1) if t1 else "NON TROVATO", t2.group(1) if t2 else "NON TROVATO", c)
+    return "[NON VERIFICATO]: RIEPILOGO_ROUND_CORTI_B.txt non trovato"
+
+
 def sez_r267(F, EX, R):
     R.add("## 7. R267 -- LE MANOPOLE A COSTO ZERO (R267a par. 0: magic fisso, per-trade IDENTIFICATO classe 850; R267a NON LANCIATO)", "")
     exC, exW, exR = EX["R260c"], EX["R255a"], EX["R261a"]
@@ -1460,7 +1686,7 @@ def sez_r267(F, EX, R):
         r0 = f.r("OOS", 0)
         trV, pfV, prV, ddV = num(r0["Trades"]), num(r0["Profit Factor"]), num(r0["Profit"]), num(r0["Equity DD %"])
         verde = trV == G0_ORO["tr"] and abs(round(pfV, 3) - G0_ORO["pf"]) <= 1e-7 and abs(round(prV, 0) - G0_ORO["pr"]) <= 1e-7 and abs(round(ddV, 2) - G0_ORO["dd"]) <= 1e-7
-        giallo = trV == G0_ORO["tr"] and abs(prV - G0_ORO["pr"]) <= G0_ORO["pr"] * 0.01
+        giallo = trV == G0_ORO["tr"] and abs(prV - G0_ORO["pr"]) <= G0_ORO["pr"] * 0.01 + TOL
         b1 = 0 if verde else (1 if giallo else 2)
         b1c = ""
         rcx = exC.riga(EXT["R260c"]["mg"])
@@ -1478,14 +1704,19 @@ def sez_r267(F, EX, R):
         passa = {sv: (dds[sv] <= 2.06 and pfH[sv] >= 1.10 and trs[sv] >= 203) for sv in f.j["av"]}
         centri = [f.j["av"][i] for i in (1, 2, 3) if all(passa[f.j["av"][k]] for k in (i - 1, i, i + 1))]
         picco = max(pfH, key=lambda k: pfH[k])
-        batte = [sv for sv in f.j["av"][1:] if pfH[sv] >= pfH[0] + 0.10]
+        batte = [sv for sv in f.j["av"][1:] if pfH[sv] >= pfH[0] + 0.10 - TOL]
         R.add("- B1 G0 in-file: cella 0 %s contro R103 -> **%s**%s" % (riga_txt(r0), ["VERDE", "GIALLO", "ROSSO: le celle si leggono SOLO fra loro, mai contro R103 (cause come R260c R1: guardia, spread in memoria, storico M1)"][b1], b1c),
               "- B3 morde e toglie soltanto: Trades(2600)=%d < Trades(0)=%d %s; crescite oltre 2 deal lungo l'asse: %d%s" % (trs[2600], trs[0], "**NO -> NULLO**" if b3ko else "si", viol, " -> NON LEGGIBILE" if viol else ""),
               "| InpMinBoxPts | Trades | PF | DD a 0,5 (contro 2,06) | DD/DD0 | n/n0 | passa B4+PF+n |", "|---|---|---|---|---|---|---|")
         for sv in f.j["av"]:
             R.add("| %d | %d | %s | %.2f (%s) | %s | %s | %s |" % (sv, trs[sv], fpf(pfH[sv]), dds[sv], "<= 2,06" if dds[sv] <= 2.06 else "> 2,06", f3(dds[sv] / dds[0] if dds[0] > 0 else float("nan")), f3(trs[sv] / trs[0] if trs[0] > 0 else float("nan")), "si" if passa[sv] else "no"))
-        R.add("", "- B4: un DD che scende in proporzione a n NON e' una leva (si legge DD/DD0 accanto a n/n0); OHLC = limite inferiore.",
-              "- B5 ALTOPIANO, MAI IL PICCO (>= 3 celle contigue con DD <= 2,06, PF >= 1,10, >= 203 deal; CENTRO del tratto): %s; il PICCO di PF sta a %d (%s)%s; celle che battono la cella 0 di >= 0,10: %s" % (
+        R.add("", "- B4: un DD che scende in proporzione a n NON e' una leva (si legge DD/DD0 accanto a n/n0); OHLC = limite inferiore.")
+        if viol or b3ko:   # B3: una crescita > 2 deal = NON LEGGIBILE; pin non arrivato = NULLO. B5 NON si scrive (classe 874)
+            centri = []
+            R.add("- B5 NON LETTO: B3 %s -> la testa dice NON LEGGIBILE; nessun centro, nessun 'DEFAULT VA BENE' (il PICCO di PF sta a %d, %s: si scrive e basta)" % (
+                "NULLO (Trades(2600) >= Trades(0))" if b3ko else "con %d crescite oltre 2 deal" % viol, picco, fpf(pfH[picco])))
+        else:
+            R.add("- B5 ALTOPIANO, MAI IL PICCO (>= 3 celle contigue con DD <= 2,06, PF >= 1,10, >= 203 deal; CENTRO del tratto): %s; il PICCO di PF sta a %d (%s)%s; celle che battono la cella 0 di >= 0,10: %s" % (
                   "centri possibili %s" % ", ".join(str(c) for c in centri) if centri else "NESSUNO: NON C'E' UNA CONFIGURAZIONE ROBUSTA", picco, fpf(pfH[picco]),
                   " -- NON e' il centro: si scrive e NON si sceglie" if (centri and picco not in centri) else "", ", ".join(str(b) for b in batte) if batte else "nessuna -> IL DEFAULT (filtro spento) VA BENE"))
         for sv in f.j["av"][1:]:
@@ -1521,6 +1752,9 @@ def sez_r267(F, EX, R):
     if not f.ok:
         R.add("- R267c: NON VERIFICABILE (%s)" % ("NULLO: " + "; ".join(f.nullo) if f.lanciato else "SALTATO"))
         R.esiti["r267c"] = "NV"
+    elif rowW is None:   # C1: "Senza R255a questo file NON SI LEGGE" (R267_GENERA, R267c par. 5) -- classe 874
+        R.add("- **R267c: NON SI LEGGE (C1)**: R255a assente (%s). La testa: \"Senza R255a questo file NON SI LEGGE\" -- niente C2/C4 contro R255a, niente CODA/CORSA/DENTRO, niente parola di rischio. Il file NON e' nullo: si rilegge quando R255a c'e' (--archivi)." % exW.txt)
+        R.esiti["r267c"] = "NON_LETTO_C1"
     else:
         r16, r17 = f.r("OOS", 16), f.r("OOS", 17)
         t16, t17 = num(r16["Trades"]), num(r17["Trades"])
@@ -1546,7 +1780,7 @@ def sez_r267(F, EX, R):
         pc = []
         for h, rq in ((16, r16), (17, r17)):
             pfc = num(rq["Profit Factor"])
-            pc.append("cella %d:00 %s -> %s" % (h, riga_txt(rq, True), ("CODA (il pomeriggio restituiva)" if pfc >= pfW + 0.10 else "CORSA (i runner erano il margine)" if pfc <= pfW - 0.10 else "DENTRO: il default 17:30 va bene") if not math.isnan(pfW) else "partizione CODA/CORSA/DENTRO NON VERIFICABILE senza R255a"))
+            pc.append("cella %d:00 %s -> %s" % (h, riga_txt(rq, True), ("CODA (il pomeriggio restituiva)" if pfc >= pfW + 0.10 - TOL else "CORSA (i runner erano il margine)" if pfc <= pfW - 0.10 + TOL else "DENTRO: il default 17:30 va bene") if not math.isnan(pfW) else "partizione CODA/CORSA/DENTRO NON VERIFICABILE senza R255a"))
             if rowW is not None:
                 pc.append("  M1-M2 cella %d:00 contro il CONTROLLO R255a (esterno, stesso banco): %s -- ~55 posizioni per era: INDIZIO" % (h, m123_txt(m123(None, rq, None, rowW, uscita=True))))
         R.add("- R267c: C4 G2 Trades 16/17/R255a = %d/%d/%s, Profit diversi %s -> %s" % (t16, t17, rowW["Trades"] if rowW else "n.d.", abs(num(r16["Profit"]) - num(r17["Profit"])) > EPS, "ok" if c4 else "**KO -> NON ESEGUITA**"))
@@ -1586,7 +1820,7 @@ def sez_r267(F, EX, R):
                 v3 = "V3 sottoinsieme (cella %s contro R255a 793101): %d deal, senza gemello %d, parziali ammesse %d%s -> %s" % (po.cell, sw["n"], sw["ko"], sw["pz"], " (primo: %s)" % sw["first"] if sw["first"] else "", "ok" if sw["ko"] == 0 else "**NON LEGGIBILE**")
                 if sw["ko"]:
                     f.nullo.append("V3 SOTTOINSIEME KO")
-        batte = [vm for vm in (0.5, 1, 1.5, 2) if pfH[vm] >= pfH[0] + 0.10]
+        batte = [vm for vm in (0.5, 1, 1.5, 2) if pfH[vm] >= pfH[0] + 0.10 - TOL]
         R.add("- R267d: %s" % v1, "  - V2 morde e toglie soltanto: Trades(2,0)=%d < Trades(0,0)=%d %s, crescite oltre 2 deal: %d" % (trs[2], trs[0], "**NO -> NULLO**" if v2ko else "si", viol),
               "  - r = Trades(1,5)/Trades(0,0) = %s -> **%s**" % (f3(rr), hyp),
               "  | InpVolMult | Trades | PF | DD | Peggior Giornata % | DD/DD0 | n/n0 |", "  |---|---|---|---|---|---|---|")
@@ -1600,7 +1834,8 @@ def sez_r267(F, EX, R):
         R.esiti["r267d_hyp"] = hyp.split(" ")[0]
     R.add("")
     # ---- R267g (DAX long)
-    R.add("### 7.3 R267g1-g4 -- DAX long (base R261a corr=1; U1-U6, D1-D6; regime %s)" % REGIMI["R267dax"], "", "- G0 esterno R261a: %s" % exR.txt)
+    R.add("### 7.3 R267g1-g4 -- DAX long (base R261a corr=1; U1-U6, D1-D6; regime %s)" % REGIMI["R267dax"], "", "- G0 esterno R261a: %s" % exR.txt,
+          "- U1/D1 chiedono anche T1 (R261d) e T2 (R261c) di R261 VERDI -- la riga rimanda 'al referto della riga B' (classe 888): %s" % t1t2_riga_b(exR))
     rR1, rR0 = exR.riga(1), exR.riga(0)
     datesR = set(d["t"].date() for d in exR.pt.deals) if (exR.pt is not None and exR.cell == "1") else set()
     anc = {}
@@ -1738,8 +1973,9 @@ def sez_finale(F, R):
           "- FILE NON NULLI, per nome: %s" % (", ".join(t for t, f in F.items() if f.ok) or "NESSUNO"),
           "- R267a: ESCLUSO E DICHIARATO (par. 6-A), non conta ne' fra i nulli ne' fra i saltati.", "",
           "**NESSUNA PROPOSTA DI TAGLIA. Nessuna cella si promuove. Nessun preset, EA, sedia o conto e' toccato.**", "",
-          "**Cosa resta a mano (non e' in questo script):** la classe 166 (SHA256 del motore e dell'include dopo ogni job) e gli rc dei job si leggono SOLO dal RIEPILOGO/REFERTO della riga; "
-          "il D0 dei log di R266 (riga 'history synchronized' nei giornali dell'agente, LOG_TESTER in UTF-16) resta [NON VERIFICATO] se l'agente non la scrive in ottimizzazione; "
+          "**Cosa resta a mano (non e' in questo script):** la classe 166 (SHA256 del motore e dell'include dopo ogni job) e gli rc dei job il lettore NON li ricalcola (non ha i sorgenti compilati): li legge dal RIEPILOGO e li UNISCE (sezione DIVERGENZE); senza RIEPILOGO restano [NON VERIFICATI]; "
+          "il D0 dei log di R266 e' letto dai LOG_TESTER (sezione 5) e resta [NON VERIFICATO] se l'agente non scrive la riga 'history ... from' in ottimizzazione; "
+          "il K1 di R264 segue la testa R264 par. 5 (solo vol2/vol1): la riga aggiunge i +-12% dell'ATR di R265 e sull'oro a 10000 puo' dire NULLO dove la testa no (e la riga usa quel NULLO per fermare l'onda 2 dell'oro dopo un G0 ROSSO); "
           "lo spread in memoria del terminale (classe 394) NON e' pinnato da questa corsia; la commissione e la griglia H4 di FTMO sono [NON MISURATE]; "
           "ogni decisione su taglie, sedie, R265b dopo un NON RISOLTO, R267a (par. 6-A) e i round d'altopiano dopo un HE/PASSA e' una FIRMA di Claudio.")
     R.esiti["nulli_finali"] = nulli
@@ -1886,10 +2122,19 @@ class Fixture:
     def salta(self, t, motivo):
         self.saltati.append("%s (%s)" % (t, motivo))
 
-    def riepilogo(self):
+    def riepilogo(self, nulli=None):
+        """RIEPILOGO con le ETICHETTE VERE della riga C (RIGA_ROUND_CORTI_C_R264_R267.txt @ e8e2fdb8, blocco raccolta)."""
+        nulli = nulli or {}
+        salt = [x.split(" (")[0] for x in self.saltati]
+        nonn = [t for t in JOBS if t not in salt and t not in nulli]
         with open(os.path.join(self.root, "RIEPILOGO_ROUND_CORTI_C.txt"), "w") as fh:
-            fh.write("RIEPILOGO ROUND CORTI C (FIXTURE dell'autotest, variante %s): 37 job\nMETRO TICK EMA200 H4 MISURATO OGGI dal primo job R264c: 6.2 min per file (2 finestre piene + 2 monconi + compilazione) = ~3.10 min per finestra piena\n"
-                     "FILE SALTATI (non lanciati, non nulli): %s\n" % (self.var, " | ".join(self.saltati) if self.saltati else "nessuno"))
+            fh.write("RIEPILOGO ROUND CORTI C (FIXTURE dell'autotest, variante %s): 37 job\nMETRO TICK EMA200 H4 MISURATO OGGI dal primo job R264c: 6.2 min per file (2 finestre piene + 2 monconi + compilazione) = ~3.10 min per finestra piena\n" % self.var)
+            fh.write("CLASSE 166 (EA e include dal RAMO lavoro, non dal pin; SHA256 dopo ogni job dell EA del job + ABTG_PausaGuardian.mqh, piu il file prova dal pin): %s\n" % (
+                "MOTORE DIVERSO DAL PIN in %d round: quei file NON si leggono, si rifa il pin sul ramo e si rilancia" % len(nulli) if nulli else "MOTORE = PIN in tutti i %d round partiti" % (37 - len(salt))))
+            fh.write("FILE NULLI (rc 1, motore diverso dal pin, prova diversa dal pin, E0, asse o P0, C0 per-trade non buoni o NON IDENTIFICATI, G1, L0, D0, G2 incrociato, L0 struttura, T3/S0 di R260d, B3/V1/V2/V3/C2/C3/C4/U1/U2/U4/D2 di R267; escono da OGNI conteggio): %s\n" % (
+                " | ".join("%s (%s)" % (t, m) for t, m in nulli.items()) if nulli else "nessuno"))
+            fh.write("FILE SALTATI (non lanciati, non nulli): %s\n" % (" | ".join(self.saltati) if self.saltati else "nessuno"))
+            fh.write("FILE NON NULLI, per nome: %s\n" % (", ".join(nonn) if nonn else "NESSUNO"))
         with open(os.path.join(self.root, "LOG_TESTER", "0000_fixture_logs.log"), "wb") as fh:
             fh.write("KS\t0\t09:10:57.000\tTester\tXAUUSD: history synchronized from 2019.12.30\n".encode("utf-16"))
 
@@ -1943,7 +2188,10 @@ def costruisci_fixture(root, variante):
             pt_oos = ema_pt(arcT, D["n_oos"], sym, j["pid"], j["dp"], K1PAR[g["g0"]], ATR[g["g0"]] * 1.2, KFX[sym], PX[sym], j["d0"], j["d1"], D["oos_pf"] + 0.02 * ic)
             X.pt(t, j["pid"], pt_oos)
             for io, o1 in enumerate((0.1, 0.2, 0.3)):
-                ris.append(X.row(t, o1, X.st(D["is_pf"][io][ic], D["n_is"] + 2 * io + ic, D["dd_is"] + 0.1 * io)))
+                if variante == "contro" and gk == "c" and ic == 1:   # S5: O1 INERTE sul file del mezzo (delta n 2, delta PF 0)
+                    ris.append(X.row(t, o1, X.st(1.20, D["n_is"] + io, D["dd_is"] + 0.1 * io)))
+                else:
+                    ris.append(X.row(t, o1, X.st(D["is_pf"][io][ic], D["n_is"] + 2 * io + ic, D["dd_is"] + 0.1 * io)))
                 roo.append(X.row(t, o1, _stat(pt_oos, KFX[sym], 4.0 + 0.1 * io, j["dp"]) if o1 == 0.3 else X.st(D["oos_pf"] + 0.01 * io + 0.02 * ic, D["n_oos"] - 3 * io - ic, 4.0 + 0.1 * io)))
             X.csv(t, "IS", ris)
             X.csv(t, "OOS", roo)
@@ -1984,6 +2232,9 @@ def costruisci_fixture(root, variante):
         deals = box_pt(src, j["s"], j["pt"][0], nmax, dt)
         if variante == "latosbagliato" and t == "R266b":
             deals[7]["deal_type"] = 0
+        if variante == "contro" and t == "R266d":   # parziale al 50%: 2 deal per posizione, IS 299 deal -> 149,5 posizioni DERIVATE
+            deals = [x for d in deals for x in (dict(d, t=d["t"] - timedelta(minutes=30), vol=round(d["vol"] / 2, 2), net=round(d["net"] / 2, 2)), dict(d, vol=round(d["vol"] / 2, 2), net=round(d["net"] / 2, 2)))]
+            n_is = 299
         rows_is, rows_oos = [], []
         for mg in j["pt"]:
             X.pt(t, mg, [dict(d, magic=int(mg)) for d in deals])
@@ -2024,7 +2275,7 @@ def costruisci_fixture(root, variante):
     d26 = [dict(d, magic=796702) for d in arcT if d["pid"] % 3 == 0]
     X.pt(t, j["pid"], d26)
     r0 = X.row(t, 0, dict(Profit=rc["Profit"], EP=rc["Expected Payoff"], PF=rc["Profit Factor"], DD=rc["Equity DD %"], Trades=rc["Trades"]))
-    X.csv(t, "OOS", [r0, X.row(t, 650, X.st(1.15, 520, 1.90)), X.row(t, 1300, X.st(1.20, 330, 1.80)), X.row(t, 1950, X.st(1.35, 250, 1.70)), X.row(t, 2600, _stat(d26, 1.8081, 2.50, j["dp"]))])
+    X.csv(t, "OOS", [r0, X.row(t, 650, X.st(1.15, 520, 1.90)), X.row(t, 1300, X.st(1.20, (600 if variante == "contro" else 330), 1.80)), X.row(t, 1950, X.st(1.35, 250, 1.70)), X.row(t, 2600, _stat(d26, 1.8081, 2.50, j["dp"]))])
     # ---- R267c / R267d
     t, j = "R267c", JOBS["R267c"]
     X.prova(t)
@@ -2079,11 +2330,25 @@ def costruisci_fixture(root, variante):
         X.csv(t, "OOS", [r0, X.row(t, 1, _stat(p1, KFX[sym], dd1, 10000))])
     if variante == "r267a":
         X.prova("R267a")
+    if variante == "contro":
+        # 873: NULLI che solo la riga vede + prova manomessa; 872: una cartella che manca senza essere SALTATA; C1: R255a assente
+        X.riepilogo(nulli=OrderedDict([("R264a", "MOTORE DIVERSO DAL PIN (classe 166): ABTG_EMA200.mq5 SHA256 1234ABCD... contro il pin"), ("R266a", "rc 1: il round non e partito (vedi REFERTO)")]))
+        pv = os.path.join(root, "ROUND_R264c", JOBS["R264c"]["p"])
+        with open(pv, "a") as fh:
+            fh.write("# riga aggiunta dopo il pin: i pin non cambiano, lo SHA si'\n")
+        shutil.rmtree(os.path.join(root, "ROUND_R266f"))
+        for fn in ("ABTG_Dow_Apertura_US_U30USD_OOS_R255a.csv", "abtg_trades_ABTG_Dow_Apertura_US_U30USD_793101.csv"):
+            os.remove(os.path.join(root, "ESTERNI", fn))
+        return root
     X.riepilogo()
+    if variante == "senzariep":
+        os.remove(os.path.join(root, "RIEPILOGO_ROUND_CORTI_C.txt"))
+        shutil.rmtree(os.path.join(root, "ROUND_R265b"))
     return root
 
 
 def autotest(fixture_dir=None):
+    import shutil
     ok = True
 
     def check(cond, msg):
@@ -2146,17 +2411,19 @@ def autotest(fixture_dir=None):
     base = fixture_dir or tempfile.mkdtemp(prefix="lettori_c_")
     print("  fixture in %s" % base)
     E = {}
-    for var in ("pulito", "g0rosso", "latosbagliato", "k1fail", "r267a"):
+    TXT = {}
+    for var in ("pulito", "g0rosso", "latosbagliato", "k1fail", "r267a", "contro", "senzariep"):
         root = costruisci_fixture(os.path.join(base, "ROUND_CORTI_C_" + var), var)
         R = lettura(Raccolta(root))
         with open(os.path.join(root, "REFERTO_LETTURA.md"), "w", encoding="utf-8") as fh:
             fh.write(R.testo())
         E[var] = R.esiti
+        TXT[var] = R.testo()
     P = E["pulito"]
     check(P["n_nulli"] == 0 and P["n_salt"] == 0, "pulito: 37 file NON NULLI, 0 saltati (layout ESATTO della riga: cartelle, suffissi _IS/_OOS/_ohlc, PERTRADE, ESTERNI, RIEPILOGO)")
     check(P["r267a"] == "ESCLUSO_ATTESO", "pulito: R267a assente = ESCLUSO E DICHIARATO, non NULLO")
     check(all(P.get("g0_" + t) == "VERDE" for t in ("R264c", "R264d", "R264a", "R264b", "R265a")), "pulito: 5 G0 VERDI (n, PF entro 0,020, DD entro 5%%): %s" % {t: P.get("g0_" + t) for t in ("R264c", "R264d", "R264a", "R264b", "R265a")})
-    check(P.get("k1_R264a") == "PASS" and P.get("k1_R265a") == "PASS" and P.get("k1_R264c") == "SOLO LETTURA" and P.get("k1_R264d") == "NULLO", "pulito: K1 GBPUSD PASS, EURUSD PASS, GBPJPY SOLO LETTURA, oro NULLO (a 10000 le gambe stanno a 0,02/0,03: il floor del lotto rompe il contro-esempio ATR +-12%%, testa par. 11) (%s)" % {t: P.get("k1_" + t) for t in K1PAR})
+    check(P.get("k1_R264a") == "PASS" and P.get("k1_R265a") == "PASS" and P.get("k1_R264c") == "SOLO LETTURA" and P.get("k1_R264d") == "PASS", "pulito: K1 GBPUSD PASS, EURUSD PASS, GBPJPY SOLO LETTURA, oro PASS: a 10000 le gambe 0,02/0,03 rompono i +-12%% dell'ATR (84 coppie su 93) ma quella clausola e' di R265, la testa R264 par. 5 congela solo vol2/vol1 (1,50 in [1,36 ; 2,125]) -> NON NULLO (classe 875; la riga dira' NULLO: divergenza attesa) (%s)" % {t: P.get("k1_" + t) for t in K1PAR})
     check(P.get("ponte") == "CONFERMA", "pulito: ponte AUDJPY CONFERMA (4 celle >= 1,45)")
     check(P.get("griglia_GBPJPY") == "PASSA LO SCREENING" and P.get("centro_GBPJPY") == (0.2, 0.6) and P.get("picco_GBPJPY") == (0.1, 0.5), "pulito: GBPJPY sceglie il CENTRO (0,20/0,6 PF 1,20) e NON il picco (0,10/0,5 PF 1,38): PASSA LO SCREENING")
     check(P.get("griglia_XAUUSD", "").startswith("REGIME"), "pulito: XAUUSD IS 0,95 / OOS 1,30 -> REGIME, non edge (S4)")
@@ -2174,6 +2441,43 @@ def autotest(fixture_dir=None):
     K = E["k1fail"]
     check(K.get("k1_R265a") == "FAIL" and K.get("r265b") == "SALTATO", "k1fail: K1 EURUSD FAIL (vol 0,36) -> R265b SALTATO, non nullo di catena")
     check(E["r267a"].get("r267a") == "INATTESO", "r267a: cartella ROUND_R267a presente -> INATTESO, NON LETTO (par. 6-A aperto)")
+    # ---- (2) i contro-esempi del cancello del 27/09 (classi 872, 873, 874, 794, 875, 886)
+    padre = os.path.join(base, "PADRE_872")
+    if os.path.isdir(padre):
+        shutil.rmtree(padre)
+    shutil.copytree(os.path.join(base, "ROUND_CORTI_C_pulito"), os.path.join(padre, "ROUND_CORTI_C_2026-09-28"))
+    rr, nota = trova_raccolta(padre)
+    check(rr.endswith("ROUND_CORTI_C_2026-09-28") and nota and "classe 872" in nota, "872: cartella PADRE -> scende di UN livello e lo dichiara (prima: 37 SALTATI e un referto intero)")
+    vuota = os.path.join(base, "VUOTA_872")
+    os.makedirs(vuota, exist_ok=True)
+    try:
+        trova_raccolta(vuota)
+        fermo = False
+    except SystemExit:
+        fermo = True
+    check(fermo, "872: cartella VUOTA -> errore, NESSUN referto")
+    C = E["contro"]
+    NF = C.get("nulli_finali", [])
+    check("R264a" in NF and "R266a" in NF and C.get("g0_R264a") == "NV" and C.get("r266_R266a") == "NV", "873: NULLI della riga (motore diverso dal pin su R264a, rc 1 su R266a) UNITI -> NULLI anche qui, G0 GBPUSD NON VERIFICABILE")
+    check("R264c" in NF and "SHA256" in TXT["contro"] and "SHA DIVERSO DAL PIN" in TXT["contro"], "873: prova R264c nella raccolta con SHA256 diverso dall'hp= della riga (pin identici) -> P0 NULLO")
+    check("R266f" in NF and "R266f" not in [x for x in TXT["contro"].split("FILE SALTATI")[-1].split("\n")[0].split(", ")], "872: cartella ROUND_R266f assente e NON dichiarata SALTATA -> NULLO (catena rotta), non 'saltato'")
+    check(C.get("r267c") == "NON_LETTO_C1" and "NON SI LEGGE (C1)" in TXT["contro"], "874: R267c senza R255a -> NON SI LEGGE (C1 della testa), nessuna parola di rischio")
+    check(C.get("r267b_centri") == [] and "B5 NON LETTO" in TXT["contro"], "874: R267b con Trades(1300) > Trades(650) + 2 -> B3 NON LEGGIBILE -> B5 non scrive centri ne' 'DEFAULT VA BENE'")
+    check(C.get("griglia_GBPJPY", "").startswith("S2 NON LEGGIBILE"), "874/S5: file del mezzo di GBPJPY con O1 INERTE -> il verdetto S2 NON si scrive (la riga lo delega al referto): %s" % C.get("griglia_GBPJPY"))
+    check(C.get("r266_R266d") == "HN" and "149.5 [DERIVATE]" in TXT["contro"], "794/R266: per-trade con parziale (2 deal/posizione), IS 299 deal -> 149,5 posizioni DERIVATE -> HN (prima: round(149,5) = 150 -> H0/HE)")
+    S = E["senzariep"]
+    check("RIEPILOGO_ROUND_CORTI_C.txt` ASSENTE" in TXT["senzariep"] and "R265b" in S.get("nulli_finali", []), "873: RIEPILOGO assente -> dichiarato in testa; ROUND_R265b assente NON diventa 'SALTATO' (non distinguibile) ma NULLO dichiarato")
+    check(all("RISCHIO PASSATO su" not in TXT[v] for v in TXT), "886: nessun 'RISCHIO PASSATO' su un DD OHLC (griglie R264, R265b, R266, R260d) in nessuna variante")
+    check("VIOLATO (DD IS e OOS a 1% <= 4,08" in TXT["pulito"], "R266 R3: DD IS 6,50 / OOS 3,90 -> VIOLATO sul VECCHIO (Emendamento B; prima: 'sotto S3 ... RISCHIO PASSATO su n = 511')")
+    an = ANC_G0["R264a"]
+    class _FF:
+        ok = True
+        j = JOBS["R264a"]
+
+        def r(self, leg, v):
+            return {"Trades": str(an["tr"] + 10), "Profit Factor": "%.5f" % (an["pf"] + 0.05), "Equity DD %": "%.4f" % an["dd"]}
+    lv, _ = g0_livello(_FF(), an)
+    check(lv == 1, "794: G0 GBPUSD con |dn| = 10 (3%% = 10,86) e PF 1,28105 (|dPF| = 0,050 esatto, in virgola mobile 0,050000000000000044) -> GIALLO, non ROSSO (livello %d)" % lv)
     print("AUTOTEST " + ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 
@@ -2188,9 +2492,12 @@ def main():
     a = apr.parse_args()
     if a.autotest:
         sys.exit(autotest(a.fixture_dir))
-    if not a.raccolta or not os.path.isdir(a.raccolta):
+    if not a.raccolta:
         apr.error("serve la cartella della raccolta (o --autotest)")
-    R = lettura(Raccolta(a.raccolta, a.archivi))
+    root, nota = trova_raccolta(a.raccolta)
+    if nota:
+        print("NOTA: " + nota)
+    R = lettura(Raccolta(root, a.archivi), nota)
     if a.md:
         with open(a.md, "w", encoding="utf-8") as fh:
             fh.write(R.testo())
