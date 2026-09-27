@@ -1,0 +1,179 @@
+# ==========================================================================
+#  R262c -- DOVE FINISCE A DESTRA L'ALTOPIANO DI InpEmaSlow DEL "770201"
+#  ABTG_Nasdaq_Apertura_US su U30USD M5 -- TICK REALI -- DUE LATI
+#  InpTP1_R = 0.67 -- rischio 1% -- deposito 10000 -- magic 766303
+# ==========================================================================
+#
+#  >>> TUTTO IL RAGIONAMENTO STA IN R262a (file di testa del round):
+#      domanda, EA, finestre e modello, ancora G0, seme dell'EMA,
+#      attesa H1/H2 col contro-esempio, soglie, regola di selezione,
+#      costo, tempo, priorita' e buchi.
+#  Questo file e' IDENTICO a R262a riga per riga TRANNE DUE PIN:
+#      InpTP1_R = 0.67   (R262a: 0.33)
+#      InpMagic = 766303  (R262a: 766301)
+#  Con InpTP1_ClosePct=0 InpTP1_R fissa SOLO il TP finale (3 x
+#  InpTP1_R, r.1694): n deve uscire IDENTICO a R262a cella per cella.
+#  LE ANCORE G0 DI QUESTO FILE (R245c, stesso binario, alla cifra):
+#       EmaSlow finestra  Trades  Profit     PF        EqDD %   PeggGiorn %
+#        160    IS       153     1421.99   1.29174    6.8241   -1.1053
+#        160    OOS      197     1785.67   1.27075    8.2686   -1.1958
+#        180    IS       154     1509.65   1.31325    6.8241   -1.0941
+#        180    OOS      197     1917.03   1.29563    8.2686   -1.1958
+#        200    IS       154     1154.78   1.23833    6.8241   -1.1154
+#        200    OOS      197     2813.98   1.44184    7.3328   -1.1958
+#        220    IS       157     1189.49   1.24049    6.8241   -1.1116
+#        220    OOS      199     2958.13   1.45402    7.3181   -1.1958
+#        240    IS       158     1140.56   1.23127    7.0914   -1.0982
+#        240    OOS      200     2982.71   1.45560    7.0752   -1.1958
+#        260    IS       158     1232.14   1.25143    6.8241   -1.0994
+#        260    OOS      201     3029.88   1.45990    7.0010   -1.1958
+#  (fonte: backtest_pipeline/risultati_archivio/R245/ROUND_R245c/*.csv)
+#  VINCOLI DELLA RIGA: -Deposito 10000, -Modello 4, -Spread non
+#  passato, PC DI BACKTEST DESKTOP-H4D7CAJ (mai il VPS).
+#  TEMPO: ~6 min per questo file (R262a par. 8).
+#
+#  QUESTO FILE NON PROMUOVE, NON ARCHIVIA, NON TOCCA TAGLIE NE' SEDIE.
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.4322
+
+# --- 75 pin LETTI DAL CSV D'ARCHIVIO (via R245b, PASS del cancello, girato
+#     il 24/09): valore COSTANTE su tutte e 80 le righe di
+#     risultati_archivio/Dow_Apertura/dow_walkforward_{IS,OOS}.csv. Forma 1/0
+#     dei bool come il lanciatore dell'archivio (dow_apertura.ps1). Eccezioni
+#     DICHIARATE: InpMagic (blocchi vergini 7663xx/7664xx, generatore),
+#     InpNewsCurrencies OMESSO (stringa vuota nel CSV = default compilato r.296),
+#     e le righe che QUESTO file cambia: vedi l'intestazione.
+InpTP1_R=0.67
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMagic=766303
+InpMaxSpread=0
+InpVerbose=1
+
+# --- 21 input che a HEAD ESISTONO e nel CSV d'archivio NO (aggiunti dopo il
+#     05/08): pinnati al valore NEUTRO, quello che lascia il percorso di codice
+#     identico alla versione che ha prodotto l'archivio. Riga sorgente a HEAD
+#     di mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (ricontate il 24/09 a 1549beaa).
+#   InpUsaGuardian: r.92  -- spento: percorso identico a prima della migrazione (PausaGuardian.mqh r.1600 esce subito)
+#   InpMaxPosSimbolo: r.206 -- tetto A1 spento (default)
+#   InpOCTimeframe: r.214 -- PERIOD_CURRENT, serve solo a OPENCONFIRM: NO-OP qui
+#   InpTrailStartR: r.269 -- 0 = trailing armato subito, come prima (r.2244)
+#   InpRunnerTP_R: r.282 -- 0 = TP storico a 3 x InpTP1_R (r.1694)
+#   InpMinBreakoutRangeATR: r.324 -- 0 = breakout a pendenti nudo (r.777-780)
+#   InpUseVolRegime: r.343 -- R30 spento (r.1905, r.1966)
+#   InpVolAtrPeriod: r.344 -- default, NO-OP col regime spento
+#   InpVolLookback: r.345 -- default, NO-OP
+#   InpVolLowPct: r.346 -- default, NO-OP
+#   InpVolHighPct: r.347 -- default, NO-OP
+#   InpVolLowOffMult: r.348 -- default, NO-OP
+#   InpVolHighOffMult: r.349 -- default, NO-OP
+#   InpVolLowSlMult: r.350 -- default, NO-OP
+#   InpVolHighSlMult: r.351 -- default, NO-OP
+#   InpVolHighSizeMult: r.352 -- default, NO-OP
+#   InpUseSRFilter: r.361 -- R30 S/R spento (r.1984 esce subito)
+#   InpSRProximityPts: r.362 -- default, NO-OP
+#   InpSRUsePrevDay: r.363 -- default, NO-OP
+#   InpSRUseRoundNumbers: r.364 -- default, NO-OP
+#   InpSRRoundInterval: r.365 -- default, NO-OP
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+
+# --- L'ASSE, unico: InpEmaSlow 160..320 passo 20 = 9 celle.
+#     160..260 = ANCORE G0 (R245, stesso binario); 280/300/320 = NUOVE.
+#     Il bordo sinistro 140 e' gia' MISURATO da R245 (n IS 147).
+InpEmaSlow=200||160||20||320||Y
+# ==========================================================================

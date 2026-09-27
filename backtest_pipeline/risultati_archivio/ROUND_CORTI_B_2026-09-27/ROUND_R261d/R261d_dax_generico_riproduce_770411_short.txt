@@ -1,0 +1,103 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R261d -- G0-GEN: IL GENERICO RIDA' LA SEDIA 770411 (SHORT) AL CENTESIMO?
+#  D30EUR M15, TICK REALI, deposito 100000, rischio 1% (= r81a/R246i)
+#  EA: ABTG_MaxMinNotte (GENERICO), NON lo Short_Ottimizzato.
+#  Asse TECNICO: InpMagic a due gemelle (G1). Magic 795404 / 795454.
+#  Per-trade: abtg_trades_ABTG_MaxMinNotte_D30EUR_795404.csv e _795454.csv
+#
+#  RAGIONAMENTO (tabella di corrispondenza dei due sorgenti, par. 2),
+#  CANCELLI E COSTO NEL FILE DI TESTA: prove/R261a_dax_long_correlazione.txt
+#
+#  COSA E': i pin di prove/R246i_orologio_MAXMINDAX_D30EUR_d0_B.txt (la
+#  cella che ha RIPRODOTTO r81a al centesimo sul Short_Ottimizzato,
+#  RIEPILOGO_R246.txt), valore per valore, girati sul GENERICO. Cambiano
+#  SOLO: l'EA (-Expert ABTG_MaxMinNotte), il formato dei pin (valore
+#  singolo -> v||v||0||v||N, stesso valore), InpMagic -> asse gemello
+#  795404/795454, e si AGGIUNGE InpAutoTest=true (esiste solo nel
+#  generico; stampa in OnInit). Stessa finestra, @FRAZIONEIS 0.40 come
+#  R246i/r81a. InpUsaGuardian=false come R246i (nel tester il Guardian e'
+#  comunque fail-open).
+#  PERCHE' SERVE: il par. 2 della testa dice, dal CODICE, che il generico
+#  con i pin di 770411 E' la sedia. Questo file lo MISURA. Senza, "la
+#  versione long di 770411" e' un'affermazione, non un numero.
+#
+#  ATTESA (G0, nessuna banda):
+#    IS  Profit 4766.96  PF 1.87803  DD 3.0977  Trades 20
+#    OOS Profit 6143.38  PF 2.15985  DD 1.9213  Trades 21
+#    per-trade (gamba OOS): 21 righe, 14 posizioni, somma 6143.38,
+#    tutte le chiusure deal_type 0 (chiudono uno short).
+#  Se torna: il generico = 770411, e R261a/b sono "770411 a lati
+#  invertiti". Se NON torna: le quattro differenze di codice del par. 2
+#  non sono inerti come letto -> R261a/b si chiamano "il long del
+#  generico" e si cerca quale delle quattro morde.
+#  CONTRO-ESEMPIO: se tornasse "quasi" (Trades uguali, Profit a meno
+#  dell'1%) NON e' un verde: sono deterministici tutti e due, e il G0 e'
+#  al centesimo o non e'.
+#  CANCELLI: T0 (2 celle per finestra), T1, G1, L0.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  nessun terminale di conto (50503392, 50504263, 10105439 REALE,
+#  541452707 FTMO, dove 770411 e' in campo). Banco: -Deposito 100000,
+#  -Modello 4, niente -Spread / -Ritardo / -FrazioneIS. Nessuna riga di
+#  lancio qui. Non tocca preset, EA, sedie, conti, taglie.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false||false||0||false||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1||1||0||1||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3||3||0||3||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4||4||0||4||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2||2||0||2||N
+InpUseCorrelation=true||true||0||true||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1||1||0||1||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMIN DAX SHORT
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=795404||795404||50||795454||Y
+InpAutoTest=true||true||0||true||N
