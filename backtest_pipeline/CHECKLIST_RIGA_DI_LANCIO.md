@@ -35698,3 +35698,33 @@ RAMO `lavoro` (`$EABranch`), non dal pin. Regola: ogni promessa di una riga cort
 chiusure e cancellazioni si verifica figlio per figlio (lunga -> driver al pin -> walkforward al
 pin), nominando ogni `$EABranch` e ogni switch condizionale (es. `-ChiudiBacktest`). Corretto in
 `924d86cd`.
+
+### CLASSE 858 — le due ipotesi del file di testa scritte su un SOTTOINSIEME delle celle che la regola di selezione conta: l'esito cade fra le due (27/09/2026, cancello strato 2 sul referto ROUND CORTI B, sorella della 737 e della 178)
+Caso reale: `prove/R262a_emaslow_oltre260_TP033_U30USD.txt` par. 5. La regola (par. 6) fa passare un valore di `InpEmaSlow`
+con >= 3 TP su **4**; H1 = "280/300/320 passano 3 su 4", H2 = "a un valore >= 280 cadono almeno DUE fra TP 0,33/0,50/0,67"
+(**3** TP). Misurato: a 300 e 320 cadono la 0,67 e la 0,84 -> il valore NON passa, H1 falsa, e H2 falsa anche lei perche'
+non contava la 0,84. Il centro l'ha deciso la regola (univoca), ma la previsione non poteva essere smentita pulita.
+Regola: le ipotesi del contro-esempio si scrivono sullo **stesso insieme di celle e con la stessa soglia** della regola che
+decide; prima dei numeri si elenca l'esito che non cade in nessuna delle due. Se esiste, o si aggiunge l'ipotesi o si scrive
+che quel caso lo decide la regola da sola.
+
+### CLASSE 859 — il certificato di morte compilato con DUE METRI: una casella giudicata sulla versione esatta del candidato, un'altra sul parente d'archivio, e "certificato completo" promesso dopo aver riempito solo la prima (27/09/2026, cancello strato 2 sul referto ROUND CORTI B, figlia del certificato del 09/09 e della 211)
+Caso reale: `report/REFERTO_ROUND_CORTI_B_2026-09-27.md` par. 2.4 @ `6700306d`, DAX LONG (versione long di 770411, filtro
+S&P acceso). Casella 3 (uscita) = NO perche' l'asse `InpTP2_R` d'archivio era su "un'altra geometria, filtro spento";
+casella 4 (gemelli) = SI con F40EUR/E50EUR/100GBP d'archivio, tutti a filtro SPENTO. Chiusura: "dopo R267g2-g4, se restano
+sotto 1,00, il certificato e' completo" -> un MORTO con i gemelli mai provati sulla versione che si certifica. Nessun file
+prova in repo li misura.
+Regola: prima di compilare le cinque caselle si scrive **quale candidato** si certifica (versione esatta o famiglia) e si usa
+**quel** metro per tutte e cinque. Se una casella e' piena solo per il parente, per la versione esatta e' NO, e va nell'elenco
+di cosa manca.
+
+### CLASSE 860 — la tabella DD(taglia) per una firma costruita sulla finestra COMODA, con la soglia congelata a UNA taglia messa in colonna col suo nome a tutte, e il vincolo di regolamento della prop omesso (27/09/2026, cancello strato 2 sul referto ROUND CORTI B, parente della 547 e della C4 di R193b)
+Caso reale: `report/REFERTO_ROUND_CORTI_B_2026-09-27.md` par. 1.5 e 5(a) @ `6700306d`, oro 770402 solo long. (1) La tabella
+0,5/1,0/1,5/2,0% e' sui 6,5 anni di R103 e scrive "1,0%: sotto il muro 10%"; il contratto della sedia e' 10,0% a 0,5% dai
+22 anni di R100 (`report/CONTRATTI_SEDIE.md` r.95, "prop: solo <= 0,5%") e R193b A3/C4 congela "decide la finestra PEGGIORE":
+il referto non nominava R100. (2) Colonna "S3 8% (R193b)" a 0,5/1,0/1,5%, mentre S3 e' congelata solo a 2,00% sulla
+sotto-finestra OOS. (3) Il preset FTMO r.98-99 (taglia UNIFORME, FTMO vieta le size erratiche) e R193b C3 omessi in "cosa
+manca per una sedia".
+Regola: una tabella che prepara una firma di TAGLIA porta (a) la finestra da cui viene ogni riga e il numero della finestra
+che il contratto dichiara decisiva, anche se e' di un'altra configurazione, con [NON MISURATO] dove manca; (b) una soglia col
+suo nome solo dove e' congelata, altrove "riferimento"; (c) i vincoli del regolamento che rendono la taglia non neutra.

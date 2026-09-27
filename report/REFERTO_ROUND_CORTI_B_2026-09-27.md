@@ -16,12 +16,12 @@ verificata, non copiata: dove non torna e' scritto (par. 6).
 | round | verdetto | criterio |
 |---|---|---|
 | **R260c** | **G0 VERDE**: 693 / PF 1,30771 / +24736,49 / DD 5,3158 = R103 alla cifra. La guardia "un trade al giorno" di HEAD `7d0da9f9` e' INERTE nel tester (misurato). R193a non serve piu'. | R1 [R260] |
-| **R260a (ORO LONG)** | **R2 RISPETTATO** (279 posizioni, PF 1,336, meta' 1,171 / 1,521). Partizione: **HP** (PF_L >= 1,308), **non HPs** come avevo previsto. Rischio: DD 4,52% a 0,5% > 2,06% -> **FUORI da S3 a 2,00% con tutte e due le formule** [DERIVATO]. | R2, par. 6, par. 8 |
+| **R260a (ORO LONG)** | **R2 RISPETTATO** (279 posizioni, PF 1,336, meta' 1,171 / 1,521). Partizione: **HP** (PF_L >= 1,308), **non HPs** come avevo previsto. Rischio: DD 4,52% a 0,5% > 2,06% -> **FUORI da S3 a 2,00% con tutte e due le formule** [DERIVATO]. Finestra 6,5 anni: il contratto della sedia e' 10,0% a 0,5% sui 22 anni di R100 (straddle), e il solo long sui 22 anni e' **[NON MISURATO]** (par. 1.5, 5a). | R2, par. 6, par. 8 |
 | **R260b (ORO SHORT)** | 232 posizioni, PF 1,255 (meta' 1,116 / 1,404). Si riporta, non decide. La previsione accessoria di HPs (PF_S > 1,308) **cade**: su questa geometria il lato debole e' lo SHORT. | par. 6 |
 | **R261d / R261c** | **T1 VERDE** (generico = 770411 short al centesimo), **T2 VERDE** (banco = long d'archivio R244b al centesimo). R261a/b si leggono come "il long di 770411". | T1, T2, G1 |
 | **R261a (DAX LONG, filtro S&P)** | G2 ok, T3 ok (il filtro MORDE: 147 -> 103 deal). corr=1: 72 posizioni, **PF 0,883 < 1,10 -> NESSUN INDIZIO** (ipotesi H0: il filtro non salva il long). Merito sospeso per costruzione (T4). Rischio: DD 7,82% a 1% > 4,08% -> **FUORI da S3 a 2,00%** [DERIVATO]. | T3, T4, T5 |
 | **R261b (DAX LONG, InpMgmtTF)** | 7/7 celle con PF 0,705-0,883, **zero celle sopra 1,00**. Il punto (5) del certificato e' chiuso. | T4 + H0 di R261b |
-| **DAX LONG, certificato del 09/09** | **NON ANCORA MISURATO (3: uscita)** -- NON "morto". Mancano i rilievi di R267g2-g4 (trailing, breakeven, parziale), in coda nella riga CORTI C. | CLAUDE.md, certificato di morte |
+| **DAX LONG, certificato del 09/09** | **NON ANCORA MISURATO (3: uscita; 4: gemelli col filtro S&P acceso)** -- NON "morto". Mancano i rilievi di R267g2-g4 (trailing, breakeven, parziale), in coda nella riga CORTI C, e i gemelli F40EUR/E50EUR sulla versione col filtro (mai girati, nessun file prova): la casella 4 e' piena solo per il long d'archivio a filtro spento, cioe' con il metro che la casella 3 rifiuta (par. 2.4). | CLAUDE.md, certificato di morte |
 | **R262** | G0 VERDE 48/48. EmaSlow 160-280 PASSA, 300 e 320 NO (2/4). **Blocco 160-280 -> punto medio 220 -> CENTRO 220** (interno). A9: +0,002 di PF contro il default 200 -> **"il 200 va bene; lo spostamento e' solo di REGOLA"**. | par. 6 [R262a] |
 | **R263** | P0 ok, G0-n VERDE, G0-SOLDI VERDE, G1-incrociato VERDE, G0-STRUTTURA VERDE. **0/48 celle-finestra sotto il muro 10% a 2%**. Curva: il muro cade fra **1,25 e 1,50%** (1,38 IS / 1,44 OOS [DERIVATO]). Muro giornaliero: tutte >= -5% (peggiore -2,47%). | par. 3-5 [R263a] |
 
@@ -94,12 +94,19 @@ Il verdetto di rischio a una taglia lo da' solo una corsa a quella taglia (R193b
 
 **Oro LONG (R260a), d = Equity DD del CSV 4,5172%:**
 
-| taglia | moltiplicativa | lineare | contro muro 10% | contro S3 8% |
+| taglia | moltiplicativa | lineare | contro muro 10% (finestra 6,5 anni) | contro 8% (*) |
 |---|---:|---:|---|---|
 | 0,5% (misurato) | 4,52% | 4,52% | sotto | sotto |
 | 1,0% | 8,83% | 9,03% | sotto (nel caso migliore OHLC) | **sopra** |
 | 1,5% | 12,95% | 13,55% | **sopra** | **sopra** |
 | 2,0% | 16,88% | 18,07% | **sopra** | **sopra** |
+
+(*) **8% = la soglia S3 di R193b, congelata SOLO per la taglia 2,00% sulla sotto-finestra OOS** (`prove/R193b_taglia_MaxMinNotte_XAUUSD.txt`
+r.200-202). Alle altre taglie la colonna e' un RIFERIMENTO (stesso margine di 2 punti per l'OHLC, R193b C2), non un cancello congelato.
+**E la finestra, che pesa piu' della formula**: tutta questa tabella e' sui **6,5 anni** di R103. Il contratto della sedia e'
+**10,0% a 0,5%** dai **22 anni** di R100 (19,72% a 1%, straddle, OHLC; `report/CONTRATTI_SEDIE.md` r.95: *"prop: solo <= 0,5%"*),
+e R193b congela (A3 e C4) *"la taglia si decide sul PEGGIORE dei due"* / *"VINCE LA PIU' PRUDENTE"*. Il DD del **solo long sui
+22 anni e' [NON MISURATO]**: finche' non c'e', il "sotto" a 1,0% vale per la finestra corta e **non e' una lettura di taglia**.
 
 Seconda misura (per-trade a saldo chiuso con k, minorante: niente flottante), d = 4,1549%: 0,5% 4,15 · 1,0% 8,14-8,31 ·
 1,5% 11,95-12,46 · 2,0% 15,61-16,62%.
@@ -160,13 +167,16 @@ Fonti: `ROUND_R261{a,b,c,d}/*.csv`, `PERTRADE/abtg_trades_ABTG_MaxMinNotte_D30EU
 | 1 | PF misurato | SI -- ora 0 celle >= 1,00 su 41 distinte a tick (33 d'archivio + 8 nuove di R261: corr=0, corr=1/M15, M20..H4). Massimo 0,947 (archivio), 0,905 fra le nuove |
 | 2 | n e DD | SI -- corr=1: 72 posizioni, DD 7,82% @1% |
 | 3 | **uscita ad asse** | **NO** per la versione long di 770411: nell'archivio solo `InpTP2_R` su un'altra geometria (ATR 1,5, filtro spento; 3,5 e 4,0 = manopola inerte), mai trailing / breakeven / parziale sul long (`report/STATO_MAXMIN_DAX_LONG_E_ORO_2026-09-26.md` A.4). Li misurano **R267g2 (trailing), R267g3 (breakeven), R267g4 (parziale)**, file scritti prima dei numeri, **in coda nella riga CORTI C, non girati**. L'asse InpMgmtTF di R261b muove anche lo stop e il trailing, ma il file di testa lo assegna alla casella 5: contarlo due volte sarebbe riempire due caselle con una misura sola |
-| 4 | simboli gemelli | SI (sul long d'archivio: F40EUR max 0,99852, E50EUR 0,83979, 100GBP 0,63157; mai con il filtro S&P acceso) |
+| 4 | simboli gemelli | **SI per il long d'archivio, NO per la versione long di 770411**: F40EUR max 0,99852, E50EUR 0,83979, 100GBP 0,63157, tutti a filtro S&P SPENTO; col filtro acceso mai girati (nessun file prova in repo). Lo stesso metro della casella 3, che non conta l'asse `InpTP2_R` d'archivio perche' e' un'altra geometria a filtro spento, vale anche qui |
 | 5 | TF cambiato | **SI -- chiuso da R261b** |
 
-**Verdetto: NON ANCORA MISURATO (3: uscita). Non e' "MORTO".** Manca una casella, e la regola del CLAUDE.md dice
-che basta una. Numeri da tenere accanto: PF 0/41 sopra 1,00, versione long 0,883 su 72 posizioni.
+**Verdetto: NON ANCORA MISURATO (3: uscita; 4: gemelli col filtro acceso). Non e' "MORTO".** Sulla versione col filtro mancano
+due caselle, e la regola del CLAUDE.md dice che ne basta una. Numeri da tenere accanto: PF 0/41 sopra 1,00, versione long 0,883 su 72 posizioni.
 **E il limite, che fa parte della stessa regola**: con PF < 1,10 su tutte le 41 celle, **nessun allargamento sui parametri
-d'ingresso**. Gli assi ammessi sono solo quelli dell'uscita (R267g2-g4); dopo di loro, se restano sotto 1,00, il certificato e' completo.
+d'ingresso**. Gli assi ammessi sono quelli dell'uscita (R267g2-g4) e i simboli gemelli della versione col filtro (F40EUR, E50EUR: **nessun file
+prova scritto, non in coda**); solo dopo tutti e due, se restano sotto 1,00, il certificato e' completo. L'alternativa e' dichiarare
+per iscritto che il filtro S&P non cambia il candidato: ma allora, con lo stesso metro, l'asse `InpTP2_R` d'archivio riempie la
+casella 3. **Un metro solo per tutte e cinque le caselle.**
 
 ---
 
@@ -205,7 +215,7 @@ PF sulle 7 celle 160-280, mediana [min-max]:
 |---|---|---|---|---|
 | 0,33 | 1,320 [1,299-1,377] | 1,465 [1,336-1,489] | 6,82 [6,82-6,82] | 8,12 [7,73-10,40] |
 | **0,50** | **1,265** [1,246-1,313] | **1,481** [1,315-1,489] | 7,13 [6,83-8,18] | 6,62 [6,44-8,07] |
-| **0,67** | **1,241** [1,198-1,313] | **1,454** [1,271-1,460] | 6,82 [6,82-7,09] | 7,32 [7,00-8,27] |
+| **0,67** | **1,240** [1,198-1,313] | **1,454** [1,271-1,460] | 6,82 [6,82-7,09] | 7,32 [7,00-8,27] |
 | 0,84 | 1,062 [1,035-1,135] | 1,521 [1,340-1,530] | 7,57 [7,21-9,54] | 7,30 [6,99-8,05] |
 
 ### 3.4 E' meglio del default? (A9)
@@ -217,14 +227,16 @@ E' un risultato: il centro per regola passa da 200 a 220, il merito no.
 - **H1** ("continua fino a 320: 280/300/320 passano 3 su 4") -> **FALSA**: 300 e 320 passano 2 su 4.
 - **H2** ("a un valore >= 280 cadono almeno DUE fra TP 0,33/0,50/0,67") -> **FALSA anche lei**: a 300 e 320 cade UNA
   sola (TP 0,67); la seconda che cade e' la 0,84, che H2 non contava.
-- Quindi H1 e H2 non erano una partizione (parente della classe 178). **Il centro lo decide la regola del par. 6, che e'
+- Quindi H1 e H2 non erano esaustive (classe 737, e registrata come **classe 858**: H2 contava le cadute su 3 TP, la regola
+  le conta su 4; l'esito "cade una sola delle tre + la 0,84" non stava in nessuna delle due). **Il centro lo decide la regola del par. 6, che e'
   univoca**, non le ipotesi. La mia previsione (H1, altopiano aperto) era sbagliata.
 - Contro-esempio (b) del par. 5 ("lo scalino OOS"): a 280-320 l'OOS **non** torna ai livelli 160-180 (1,31-1,34):
   resta 1,46-1,56. La chiusura a destra viene **dall'IS**, cioe' dalla finestra dove il seme dell'EMA (par. 4) conta di piu'
   ([DERIVATO] ~15-17 giornate a due lati su ~158 a 280-320). La regola la legge come chiusura, e io la scrivo cosi';
   aggiungo solo che e' una chiusura IS con l'OOS che sale.
-- **Manopola inerte trovata**: fra 260 e 280 l'OOS e' **identico al centesimo in tutte e 4 le TP** (201 posizioni, stessi
-  soldi); fra 300 e 320 quasi (differenze di 0,46 EUR). In OOS la manopola non morde a passo 20 oltre 260.
+- **Due coppie ferme in OOS**: fra 260 e 280 l'OOS e' **identico al centesimo in tutte e 4 le TP** (201 posizioni, stessi
+  soldi); fra 300 e 320 quasi (differenze di 0,46 EUR). **Ma NON e' una manopola inerte oltre 260**: fra 280 e 300 l'OOS si
+  muove (TP 0,50: PF 1,488 -> 1,531, n 201 -> 200). Due passi fermi su tre non fanno una regola (classe 738).
 
 ---
 
@@ -282,12 +294,22 @@ Il merito (R2) c'e' in OHLC. Quello che segue e' la lista per nome; **nessuna ta
 
 **(a) La taglia e' una firma di Claudio.** Tabella DD [DERIVATO, OHLC = limite inferiore], d = 4,5172% misurato a 0,5%:
 
-| taglia | DD moltiplicativa | DD lineare | muro 10% | S3 8% (R193b) |
+| taglia | DD moltiplicativa | DD lineare | muro 10% (finestra 6,5 anni) | 8% (*) |
 |---|---:|---:|---|---|
 | 0,5% | 4,52% | 4,52% | sotto | sotto |
 | 1,0% | 8,83% | 9,03% | sotto | sopra |
 | 1,5% | 12,95% | 13,55% | sopra | sopra |
 | 2,0% (preset FTMO oggi) | 16,88% | 18,07% | sopra | sopra |
+
+(*) **8% = la soglia S3 di R193b, congelata SOLO per la taglia 2,00% sulla sotto-finestra OOS** (`prove/R193b_taglia_MaxMinNotte_XAUUSD.txt`
+r.200-202). Alle altre taglie la colonna e' un RIFERIMENTO (stesso margine di 2 punti per l'OHLC, R193b C2), non un cancello congelato.
+**E la finestra, che pesa piu' della formula**: tutta questa tabella e' sui **6,5 anni** di R103. Il contratto della sedia e'
+**10,0% a 0,5%** dai **22 anni** di R100 (19,72% a 1%, straddle, OHLC; `report/CONTRATTI_SEDIE.md` r.95: *"prop: solo <= 0,5%"*),
+e R193b congela (A3 e C4) *"la taglia si decide sul PEGGIORE dei due"* / *"VINCE LA PIU' PRUDENTE"*. Il DD del **solo long sui
+22 anni e' [NON MISURATO]**: finche' non c'e', il "sotto" a 1,0% vale per la finestra corta e **non e' una lettura di taglia**.
+**E la taglia non e' neutra sul regolamento**: il preset stesso (r.98-99) scrive *"La taglia e' UNIFORME su tutte: FTMO vieta le
+size erratiche (Forbidden Practices, 'substantially larger or smaller position sizes')"*, e R193b C3 lo dice per questa sedia: una
+sedia a 0,5-1,0% accanto alle altre a 2,00% tocca il **regolamento della prop**, non solo il DD. Anche questo e' della firma di Claudio.
 
 **(b) R193b** (`prove/R193b_taglia_MaxMinNotte_XAUUSD.txt`, scritto il 20/09, **mai girato**): 4 taglie (0,5/1,0/1,5/2,0) x 2 finestre
 = **8 passate**, OHLC, deposito 100000; e' la misura vera del DD alla taglia. Tre cose da sapere prima di lanciarlo:
@@ -328,6 +350,8 @@ Tutto il resto (G0, T1, T2, G2, T3, 0/48, curva, 154/197 righe, 3 e 6 al tetto) 
 ## 7. NON VERIFICATO / NON MISURATO
 - Tutti i DD dell'oro sono OHLC M1: **limite inferiore**; nessuna riprova a tick.
 - DD dell'oro long a 1,0 / 1,5 / 2,0%: **[DERIVATO]** a due formule, mai misurato (serve R193b in versione long).
+- DD del solo long sui **22 anni** di R100 (la finestra del contratto della sedia, 10,0% a 0,5% sulla straddle): **[NON MISURATO]**;
+  R193b A3/C4: la taglia si decide sulla finestra PEGGIORE.
 - Spread in memoria del terminale del PC: **[NON PINNATO]** (classe 394); il G0 VERDE di R260c dice che il banco e' equivalente a R103.
 - Orologio dell'oro = forex **[INFERITO]**; orologio sul long DAX (inverno un'ora prima della cash) **[NON MISURATO]**.
 - R262/R263 a ora fissa 14:30 BCM: **nessun numero descrive FTMO a 16:30** (R250 non girato); R248 = REVISIONE resta aperta.
