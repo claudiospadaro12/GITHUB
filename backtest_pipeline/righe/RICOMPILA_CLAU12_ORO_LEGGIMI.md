@@ -120,8 +120,10 @@ nato, zip) -> ricorsa `2`; `1 errors` -> `3` e disco senza `.mq5` (solo `.ORO_FA
 `ABTG_GuardiaIngresso` -> `3` con la frase sull'include (2 righe); MetaEditor muto -> `3` dopo 20 s; `ABTG_MaxMinNotte.mq5`
 presente -> `1`; `.ex5` orfano -> `1`; macchina `DESKTOP-H4D7CAJ` -> `1`; giornale con `deal #... buy 0.10 XAUUSD` -> `1`
 (con `-IgnoraGiornaleOro` -> `0`); `<expert>` su grafico XAUUSD nel profilo attivo -> `1` (grafico oro senza EA e residuo in
-altro profilo: dichiarati, non bloccano); `-Esegui` senza `-Conferma` -> `1`; pin diverso -> `1`. Riga: parser 0 errori,
-ASCII, nessun `&&`/`||`/`??`.
+altro profilo: dichiarati, non bloccano); `-Esegui` senza `-Conferma` -> `1`; pin diverso -> `1`; include v1.6x al posto
+della v1.20 -> `1` senza scrivere (usato l'include a HEAD del repo, che E' la v1.6x: 2461 righe, scheletro `E9F503F5...`,
+byte SHA `3EC97115...` — quindi "l'include a HEAD" e' proprio quella che g) rifiuta). Riga: parser 0 errori, ASCII, nessun
+`&&`/`||`/`??`.
 
 ## [NON VERIFICATO]
 
