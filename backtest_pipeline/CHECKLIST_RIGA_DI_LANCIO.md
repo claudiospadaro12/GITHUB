@@ -35876,3 +35876,20 @@ R255w ha 0,10 lotti. Regola: il lettore ricopia la soglia con la STESSA forma (t
 arrotondamento) e la regola con le STESSE clausole della fonte; ogni clausola in piu' o in meno e'
 un criterio cambiato dopo il congelamento. Corretto nel commit di questo cancello, con contro-esempi
 nell'autotest.
+
+### CLASSE 876 — il criterio congelato porta dentro un ARTEFATTO DI COSTRUZIONE: la corsa e' continua, la curva riparte per era (27/09/2026, trovata dal cancello su `leggi_r255.py`, lasciata come "domanda per chi ha scritto la testa")
+Caso: R255 gira UNA corsa continua (moncone di 1 giorno + 641 giorni, `@FRAZIONEIS 0.001`), e le
+ere IS/OOS sono un taglio di calendario DENTRO quella corsa. La testa par. 7 dice: curva A "ribasata,
+riparte da 10000 per era" e "scarto di saldo = |saldo della corsa / saldo della curva - 1|". Nell'era
+OOS il saldo della corsa contiene l'utile dell'era IS (LotByRisk ha dimensionato su quello), la
+curva no: uno scarto >= al rendimento IS della corsa nasce PER COSTRUZIONE, non per errore di lotto,
+e puo' far scattare il "NON RISOLTO d'ufficio" (>10%) su R2 a vuoto. Contro-esempio: tre posizioni,
++1.200 in IS, poi -50/+40 in OOS: scarto della lettera 12,0%, scarto a curva continua 0,0%.
+Regola: (1) la lettera NON si riscrive dopo il pin (la testa e' pinnata per SHA nella riga: toccarla
+= classe 873); (2) il lettore applica la lettera E stampa accanto la misura che isola la causa (qui:
+lo scarto a curva continua), dichiarando nel verdetto "l'eccesso e' l'utile dell'era precedente, non
+il lotto"; (3) la decisione resta a chi legge, ma con la causa scritta. Piu' in generale: quando un
+criterio combina due oggetti costruiti in modo diverso (una corsa sola contro una curva che
+riparte), il primo contro-esempio da provare e' "cosa misura il criterio se l'errore che cerca e'
+ZERO?" — se non esce zero, il criterio misura anche la costruzione. Corretto in `leggi_r255.py`
+(`scarto_cont` per era, riga stampata, assert nell'autotest).

@@ -313,7 +313,8 @@ def curva(pos, metodo, deposito=DEPOSITO):
                 pf_pos=(gain / loss if loss > 0 else float('inf')), pf_deal=(gain_d / loss_d if loss_d > 0 else float('inf')),
                 ep=(profit / n if n else 0.0), dd_eur=-dd, dd_pct=-dd / deposito * 100.0,
                 pegg_pct=pegg_pct, pegg_data=pegg_data, pegg_scarto=(gior_scarto.get(pegg_data, 0.0) if pegg_data else 0.0),
-                serie=serie_max, vinte=vinte, scarto_max=(max(scarti) if scarti else 0.0), saldo_fine=saldo)
+                serie=serie_max, vinte=vinte, scarto_max=(max(scarti) if scarti else 0.0), saldo_fine=saldo,
+                scarti_pos=[(p['data'], sc) for p, sc in zip(pos, scarti)])
 
 
 def leggi_csv_oos(path):
@@ -770,9 +771,15 @@ def curve_configurazione(F, cf):
             out[nome] = None
             continue
         c = collections.OrderedDict()
+        # classe 876: la corsa e' UNA (moncone + 641 giorni) e la curva per era riparte da 10000, quindi nell'era OOS
+        # lo scarto della LETTERA (par. 7) contiene anche l'utile dell'era IS della corsa. Si calcola ACCANTO lo scarto
+        # con la curva continua (un solo 10000 all'inizio): e' quello che misura il solo errore di lotto. La regola
+        # d'ufficio resta sulla lettera; il numero continuo e' stampato perche' chi legge veda la causa.
+        cont = {m: curva(pos, m) for m in ('A', 'B')}
         for era in ERE:
             pe = [p for p in pos if era_di(p['data']) == era]
-            c[era] = dict(A=curva(pe, 'A'), B=curva(pe, 'B'), pos=pe,
+            sc_cont = max([sc for m in cont for d, sc in cont[m]['scarti_pos'] if era_di(d) == era] or [0.0])
+            c[era] = dict(A=curva(pe, 'A'), B=curva(pe, 'B'), pos=pe, scarto_cont=sc_cont,
                           estate=sum(1 for p in pe if not inverno_usa(p['data'])), inverno=sum(1 for p in pe if inverno_usa(p['data'])),
                           confine=[(p['data'], p['net']) for p in pe if p['data'] in CONFINE_14 | CONFINE_15],
                           fuori_era=0)
@@ -782,7 +789,7 @@ def curve_configurazione(F, cf):
     return out
 
 
-def leggi_r1r2(dd_a, dd_b, S, e_eff, scarto):
+def leggi_r1r2(dd_a, dd_b, S, e_eff, scarto, scarto_cont=None):
     lo, hi = min(dd_a, dd_b), max(dd_a, dd_b)
     if lo * (1 - e_eff) > S + EPS:
         v = 'VIOLATO'
@@ -792,6 +799,8 @@ def leggi_r1r2(dd_a, dd_b, S, e_eff, scarto):
         v = 'NON RISOLTO'
     if scarto > 0.10 and any(0.8 * S <= d <= 1.2 * S for d in (lo, hi)):     # R252a par. 5 / testa par. 7: anche un VIOLATO (classe 875)
         v = 'NON RISOLTO (d ufficio: scarto di saldo %.1f%% > 10%% e DD fra 0,8 e 1,2 volte la soglia)' % (scarto * 100)
+        if scarto_cont is not None and scarto_cont <= 0.10:
+            v += ' [classe 876: a curva CONTINUA lo scarto e %.1f%% <= 10%%: l eccesso e l utile dell era precedente della corsa, non il lotto; la lettera del par. 7 resta, la causa e dichiarata]' % (scarto_cont * 100)
     return v
 
 
@@ -1018,6 +1027,7 @@ def referto(base):
                          % (era, ce['estate'], ce['inverno'], ', '.join('%s %+.2f' % (ds(d), n) for d, n in ce['confine']) or 'nessuna con posizione'))
                 L.append(riga_curva('A ribas.', ce['A']))
                 L.append(riga_curva('B denaro', ce['B']))
+                L.append('  scarto di saldo a curva CONTINUA (classe 876, solo errore di lotto): %.2f%%' % (ce.get('scarto_cont', 0.0) * 100))
         # gambe intere e k
         for f, pp in ((f4, cv['p4']), (f5, cv['p5'])):
             if pp is None:
@@ -1064,7 +1074,7 @@ def referto(base):
                 v = '[NON CONFRONTABILE] (G0-LONG %s)' % g0l['liv']
                 verd[tag] = 'NON CONFRONTABILE'
             else:
-                v = leggi_r1r2(ce['A']['dd_pct'], ce['B']['dd_pct'], S, e_eff, max(ce['A']['scarto_max'], ce['B']['scarto_max']))
+                v = leggi_r1r2(ce['A']['dd_pct'], ce['B']['dd_pct'], S, e_eff, max(ce['A']['scarto_max'], ce['B']['scarto_max']), ce.get('scarto_cont'))
                 verd[tag] = v.split(' ')[0]
                 if v == 'RISPETTATO':
                     n = ce['A']['n']
@@ -1093,7 +1103,7 @@ def referto(base):
         cc = cv['CONTROLLO']
         vc = []
         for tag, ce, S in (('R1', cc['IS'], R1_MAX), ('R2', cc['OOS'], R2_MAX)):
-            vc.append('%s %s (A %.3f / B %.3f, n %d)' % (tag, '[NON CONFRONTABILE]' if non_confr else leggi_r1r2(ce['A']['dd_pct'], ce['B']['dd_pct'], S, e_eff, max(ce['A']['scarto_max'], ce['B']['scarto_max'])).replace('RISPETTATO', 'NON VIOLATO'), ce['A']['dd_pct'], ce['B']['dd_pct'], ce['A']['n']))
+            vc.append('%s %s (A %.3f / B %.3f, n %d)' % (tag, '[NON CONFRONTABILE]' if non_confr else leggi_r1r2(ce['A']['dd_pct'], ce['B']['dd_pct'], S, e_eff, max(ce['A']['scarto_max'], ce['B']['scarto_max']), ce.get('scarto_cont')).replace('RISPETTATO', 'NON VIOLATO'), ce['A']['dd_pct'], ce['B']['dd_pct'], ce['A']['n']))
         rc3, tc3 = leggi_r3(cc['IS'], cc['OOS'], num(riga_g1(F, f4)['Peggior Giornata %']) >= R3_MIN)
         L.append('  sul CONTROLLO (il BCM a ora fissa, un fatto per QUELLA sedia): %s; R3 %s' % ('; '.join(vc), rc3))
         # -------- merito
@@ -1183,7 +1193,7 @@ def referto(base):
             L.append('           ' + riga_curva('B', cd[era]['B']).strip())
         vd = []
         for tag, ce, S in (('R1', cd['IS'], R1_MAX), ('R2', cd['OOS'], R2_MAX)):
-            vd.append('%s %s' % (tag, '[NON CONFRONTABILE]' if non_confr else leggi_r1r2(ce['A']['dd_pct'], ce['B']['dd_pct'], S, e_eff, max(ce['A']['scarto_max'], ce['B']['scarto_max']))))
+            vd.append('%s %s' % (tag, '[NON CONFRONTABILE]' if non_confr else leggi_r1r2(ce['A']['dd_pct'], ce['B']['dd_pct'], S, e_eff, max(ce['A']['scarto_max'], ce['B']['scarto_max']), ce.get('scarto_cont'))))
         rd3, td3 = leggi_r3(cd['IS'], cd['OOS'], False)
         L.append('   letti coi tetti del long (descrittivi): %s; R3 %s (%s)' % ('; '.join(vd), rd3, td3))
         L.append('   esito della configurazione ancora sulla curva IN FASE (quella che decide): %s' % ra.get('esito'))
@@ -1506,6 +1516,19 @@ def autotest(fixture_dir):
     assert not o['F']['R255i']['nullo'], o['F']['R255i']['nullo']
     # 875: regola d'ufficio dello scarto > 10% anche su un DD che sarebbe VIOLATO (testa par. 7, R252a par. 5)
     assert leggi_r1r2(1.18 * 4.272, 1.19 * 4.272, 4.272, 0.1266, 0.12).startswith('NON RISOLTO (d ufficio')
+
+    # 876: la corsa e' continua, la curva per era riparte da 10000: nell'era OOS lo scarto della LETTERA contiene
+    # l'utile dell'era IS. Curva continua (metodo A): saldo == saldo della corsa -> scarto 0 per costruzione.
+    _mk = lambda k, t, net: dict(pid=k, deals=[dict(t=t, pid=k, type=0, vol=0.5, price=1.0, net=net)], t0=t, t1=t, net=net, vol=0.5, data=t.date())
+    _pos = ribasa([_mk(1, dt.datetime(2025, 1, 8, 16, 0), 1200.0), _mk(2, dt.datetime(2025, 7, 9, 16, 0), -50.0), _mk(3, dt.datetime(2025, 8, 6, 16, 0), 40.0)])
+    _oos = [q for q in _pos if era_di(q['data']) == 'OOS']
+    _lettera = curva(_oos, 'A')['scarto_max']
+    _cont = max(sc for d, sc in curva(_pos, 'A')['scarti_pos'] if era_di(d) == 'OOS')
+    assert abs(_lettera - 0.12) < 1e-9 and _cont < 1e-9, (_lettera, _cont)
+    _v = leggi_r1r2(0.9 * R2_MAX, 0.9 * R2_MAX, R2_MAX, 0.0, _lettera, _cont)
+    assert _v.startswith('NON RISOLTO (d ufficio') and 'classe 876' in _v, _v
+    _v2 = leggi_r1r2(0.9 * R2_MAX, 0.9 * R2_MAX, R2_MAX, 0.0, _lettera)
+    assert 'classe 876' not in _v2
     assert leggi_r1r2(1.18 * 4.272, 1.19 * 4.272, 4.272, 0.1266, 0.05) == 'VIOLATO'
     # 874: M4 decide la parola PROMOSSA (cella che sporge, centro, bordo TP1_R), e un NON RISOLTO non e una bocciatura
     def _r(passa):
@@ -1521,7 +1544,7 @@ def autotest(fixture_dir):
     assert not any('salvo M4' in r['esito'] for r in ris.values())
     print('AUTOTEST OK: tetti dagli archivi (4.693,54 / 4.271,61; -1,0062 / -1,0227), calendario USA, classe 833, R1/R2 con e_eff, '
           'fixture pulito (G0-LONG VERDE, G0-ANCORA 73/73, e_eff = 0,1266, NON VIOLATO su n, R2 RISPETTATO su n>=40 ma NON "rischio passato", SOSPESA), R2 violato, R3 solo B, moncone operato, guasti L0/G1/P0; '
-          'contro-esempi 872 (cartella sbagliata), 873 (NULLO della riga per classe 166, prova diversa dal pin), 874 (M4 e parole finali), 875 (G1 PF, regola d ufficio)')
+          'contro-esempi 872 (cartella sbagliata), 873 (NULLO della riga per classe 166, prova diversa dal pin), 874 (M4 e parole finali), 875 (G1 PF, regola d ufficio), 876 (scarto a curva continua accanto alla lettera)')
     print('fixture e referti in %s' % fixture_dir)
 
 
