@@ -35802,3 +35802,19 @@ le posizioni di R268a erano letti sulla finestra intera coi tick generati dentro
 PER NOME, round per round, come li scrive la testa. Corretto in `a1b4195e`.
 Nota di classe 38: rilanciare la stessa riga senza svuotare `Tester\cache` fa uscire i file NULLI (i
 per-trade non vengono riscritti): fallisce in modo sicuro, ma va svuotata la cache prima di un rilancio.
+
+### CLASSE 868 — la riga porta sul terminale un file che dichiara di se' "NON CARICARE", e chiude su meno condizioni del file (27/09/2026)
+Caso: `RIGA_PRESET_ORO_LONG_FTMO` @ `f8e32030` scaricava e scriveva la BOZZA del preset oro long (che in
+testa dice "NON CARICARE SU NESSUN TERMINALE" e chiude su SETTE punti) controllando CINQUE condizioni
+(mancava R269a). Firmata la taglia, la riga incollata avrebbe scritto la bozza. Regola: il carico si
+interroga sul proprio stato (guardia sulla frase o sul marcatore BOZZA -> STOP), e le condizioni della
+riga coprono TUTTE quelle del file; la riga si ripinna sul preset firmato. Corretto in `7094677a`
+(al pin attuale la riga si ferma SEMPRE: voluto).
+
+### CLASSE 869 — scadenza scritta su un giorno di mercato chiuso (27/09/2026)
+Caso: stessa riga, `-gt 24/10/2026`: il 24/10 e' sabato, un preset scritto quel giorno (il weekend
+consigliato per l'attacco) opera lunedi' 26/10 col delta gia' a +1. Regola: la data limite e' l'ultimo
+giorno di USO valido, e chi scrive in un giorno chiuso scrive per il primo giorno aperto (`-ge`).
+Rilievo collegato (classe 166): l'include a HEAD del repo e' la v1.60 (2461 righe), il campo FTMO ha
+la v1.20 (398 righe, 26a18566): i binari compilati dal RAMO per i round non provano la compilazione
+contro l'include in campo; nel tester il comportamento e' identico (fail-open a 2 argomenti).
