@@ -36039,3 +36039,22 @@ identificazione) calcolato su grandezze che la causa sotto esame quantizza non p
 scrive, e decide solo cio' che la testa gli attribuisce (qui il K1, non il lancio); (3) una regex che cerca la riga di un altro
 script si prova su TUTTI i formati che quello script scrive, compreso quello del ramo NULLO. Corretto: smentita solo con X = N
 (nessuna gamba 1 al pavimento), quota al pavimento stampata e ricopiata nel RIEPILOGO, vol2/vol1 informativo, regex `^G0 R264d[ :]`.
+
+### CLASSE 890 — il CONSUMATORE riusa il PARSER di un lettore passato dal cancello ma non il suo CANCELLO: legge il per-trade di un file che il lettore dichiara NULLO; e la "lettera del preset" letta su 6 input quando la sedia ne ha 90 (28/09/2026, cancello di giudizio su `mc_challenge_ftmo_v2.py --r255` @ `90a4d410`, sorella della 873)
+Caso: il MC della challenge FTMO modella la 770212 dai per-trade R255a/R255b (793101/793102) riusando `leggi_r255` come modulo
+(`trova_raccolta`, `path_pt`, `leggi_pertrade`, `curve_configurazione`), ma NON `pre_lettura_file` (E0/P0/G1/C0/L0/S1) ne' i NULLI della
+riga (`nulli_della_riga`, classe 873): un commento diceva *"la pre-lettura piena e' di leggi_r255"*, e niente la eseguiva ne' la
+stampava. Contro-esempio eseguito sulla raccolta completa di `leggi_r255.genera_fixture('pulito')`: R255a col CSV `_OOS` a
+`InpSessionHour=15` (per il lettore **P0 NULLO**: il per-trade e' di un altro orologio, proprio la grandezza su cui il MC sceglie la
+curva) e la riga che dice R255b **FILE NULLO: MOTORE DIVERSO DAL PIN** -> il MC scriveva lo stesso *"curva scelta FTMO-DOC, 109
+posizioni"* e le frasi *"la 770212 aggiunge/toglie X punti"*. Stesso difetto sul preset: il rifiuto c'era per l'ORA (16:30) ma non
+per gli altri input (un preset con `InpTP1_R=1.5` o la chiusura spostata veniva modellato zitto con la curva R255a) ne' per la
+TAGLIA (con `InpRiskPercent=1.00` in firma la riga stampava *"a fattore 2,0 = 1.00% del preset"*, falsa). Regola: (1) chi riusa un
+lettore ne riusa il CANCELLO, non solo il parser: un file NULLO per il lettore e' ASSENTE per il consumatore, e l'esito della
+pre-lettura si stampa; (2) la lettera di un preset si confronta con la prova INPUT PER INPUT, con l'elenco CHIUSO delle differenze
+ammesse (qui ora/chiusura con lo stesso scarto, magic, rischio, due stringhe spente dai loro interruttori); (3) un rifiuto scritto
+per UN input (l'ora) e non per gli altri e' un cancello a meta'. Corretto: `carica_r255(verifica=True)` in main, autotest (e)/(f)
+nei due sensi (raccolta sana ACCETTATA, P0 e RIGA NULLI RIFIUTATI, preset TP1/chiusura/taglia RIFIUTATI). Nello stesso cancello:
+il verbo *"aggiunge/toglie X punti"* scritto anche quando la banda dei semi attraversa lo zero o non e' calcolata (taglie 1,00 e
+0,65) -> ora *"NON si distingue dal rumore del seme"* / *"banda NON calcolata"*; dichiarati in output la classe 800 (lotti a
+10.000 passo 0,1, e_eff >= 0,1266, portati interi sul conto FTMO) e la griglia H4 di FTMO diversa (testa R255a par. 6).

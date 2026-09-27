@@ -26,6 +26,10 @@ I DUE BUCHI DELLA v1 CHE QUESTO FILE CHIUDE (o dichiara):
                   curva FTMO-DOC dettata dal preset in firma (ora FISSA 16:30 FTMO),
                   IN FASE e CONTROLLO accanto come sensibilita'. Vedi il blocco
                   "770212 Dow short" sotto NON_MODELLATE per la mappa e le scale.
+                  (cancello 28/09, classe 890) SOLO se: la pre-lettura di leggi_r255
+                  (E0/P0/G1/C0/L0/S1 + NULLI della riga) dichiara R255a/R255b NON
+                  nulli; il preset coincide con la prova R255a input per input
+                  (salvo ora/chiusura, magic, rischio); il preset e' a 2,00%.
                   Le operazioni fuori dalle finestre A/B si ignorano e si dichiarano.
   (2) "trade indipendenti" (docs/RISPOSTA_GEMINI_2026-09-27.md par.2). Fatto
       misurato PRIMA di scrivere una riga: la v1 ricampiona GIA' GIORNATE
@@ -185,6 +189,56 @@ def leggi_preset_770212(path=PRESET_770212):
     return out
 
 
+def _inp(path, preset):
+    """Tutti gli input Inp* di un preset (.set) o di un file prova (valore prima di '||'): {input: valore}."""
+    out = {}
+    with open(path, encoding='utf-8', errors='replace') as fh:
+        for riga in fh:
+            r = riga.strip().lstrip('\ufeff')
+            if not r.startswith('Inp') or '=' not in r:
+                continue
+            k, v = r.split('=', 1)
+            out[k.strip()] = v.split('||')[0].strip()
+    return out
+
+
+# (cancello 28/09, classe 890) le SOLE differenze ammesse fra il preset in firma e la prova R255a: ora di sessione e di
+# chiusura (stesso scarto: e' l'orologio), magic, rischio (la scala), e due stringhe che i loro interruttori spengono
+# (InpUseCorrelation=false, InpUseNewsFilter=false). Qualunque altro input diverso = il per-trade NON e' la sedia.
+PRESET_DIFF_AMMESSE = ('InpSessionHour', 'InpCloseHour', 'InpMagic', 'InpRiskPercent', 'InpCorrSymbol', 'InpNewsCurrencies')
+
+
+def confronta_preset_prova(preset_path=PRESET_770212, prova_path=PROVA_R255A):
+    """La LETTERA del preset contro la prova R255a, input per input: [] se il per-trade e' la sedia, altrimenti l'elenco
+       delle differenze. Senza questo, un preset con un'altra gestione dell'uscita verrebbe modellato zitto con la curva
+       R255 (lo stesso difetto che il rifiuto dell'ora evita, su tutti gli altri input)."""
+    def n(v):
+        try:
+            return float(v)
+        except ValueError:
+            return v.lower()
+    p, q = _inp(preset_path, True), _inp(prova_path, False)
+    diff = []
+    for k in sorted(set(p) | set(q)):
+        if k in PRESET_DIFF_AMMESSE:
+            continue
+        if k not in p or k not in q:
+            diff.append('%s solo nel%s' % (k, ' preset' if k in p else 'la prova'))
+        elif n(p[k]) != n(q[k]):
+            diff.append('%s preset=%s prova=%s' % (k, p[k], q[k]))
+    for k, v in (('InpUseCorrelation', 'false'), ('InpUseNewsFilter', 'false')):
+        if p.get(k, '').lower() != v:
+            diff.append('%s=%s nel preset: la sua stringa non e\' piu\' spenta' % (k, p.get(k)))
+    try:
+        d_ses = (int(p['InpSessionHour']) * 60 + int(p['InpSessionMin'])) - (int(q['InpSessionHour']) * 60 + int(q['InpSessionMin']))
+        d_chi = (int(p['InpCloseHour']) * 60 + int(p['InpCloseMin'])) - (int(q['InpCloseHour']) * 60 + int(q['InpCloseMin']))
+        if d_ses != d_chi:
+            diff.append('chiusura spostata di %+d min e sessione di %+d min: la durata della seduta non e\' quella della prova' % (d_chi, d_ses))
+    except (KeyError, ValueError) as e:
+        diff.append('ora di sessione/chiusura non leggibile (%s)' % e)
+    return diff
+
+
 def rischio_misura_r255(path=PROVA_R255A):
     """InpRiskPercent del file prova R255a (la MISURA del per-trade), letto e non ricordato: (valore, riga)."""
     with open(path, encoding='utf-8', errors='replace') as fh:
@@ -208,27 +262,57 @@ def curva_dal_preset(preset):
                      'con quest\'ora la 770212 resta [NON MODELLATA]' % (h, mi))
 
 
-def carica_r255(cartella, curva=None):
+def carica_r255(cartella, curva=None, verifica=True, preset_path=PRESET_770212):
     """Carica i per-trade 793101 (14:30) e 793102 (15:30) dalla raccolta R255 e costruisce le tre curve nel formato
        di carica_v2 (giorni / posizioni / dep / rmis / segue). RIUSA leggi_r255: trova_raccolta (classe 872),
        Raccolta.path_pt, leggi_pertrade, curve_configurazione (posizioni + ribasa + selezione per calendario).
-       curva=None -> quella dettata dal preset; un nome esplicito e' una SCELTA MANUALE e viene etichettata."""
+       curva=None -> quella dettata dal preset; un nome esplicito e' una SCELTA MANUALE e viene etichettata.
+       verifica=True (SEMPRE in main): il CANCELLO del lettore, non solo il suo parser (classe 890) -- per R255a e R255b
+       leggi_r255.pre_lettura_file (E0/P0/G1/C0/L0/S1) UNITO ai NULLI della riga (RIEPILOGO, classe 873): un file NULLO
+       per il lettore e' un file ASSENTE qui. verifica=False solo nell'autotest, sulla fixture sintetica senza CSV."""
     base, nota = lr.trova_raccolta(cartella)
     rc = lr.Raccolta(base)
-    preset = leggi_preset_770212()
+    preset = leggi_preset_770212(preset_path)
     if preset['InpAllowShort'][0].lower() != 'true' or preset['InpAllowLong'][0].lower() != 'false':
         raise SystemExit('preset 770212: InpAllowShort=%s InpAllowLong=%s: il per-trade R255 e\' SOLO SHORT, la 770212 resta [NON MODELLATA]' % (
             preset['InpAllowShort'][0], preset['InpAllowLong'][0]))
     auto, perche = curva_dal_preset(preset)
     scelta = curva or auto
+    if float(preset['InpRiskPercent'][0]) != 2.0:
+        raise SystemExit('preset 770212 r.%d: InpRiskPercent=%s: la scala di questo MC mette la 770212 alla taglia INDICI (fattore '
+                         '2,0 = 2,00%% in campo); con un\'altra taglia in firma la riga "a fattore 2,0 = preset" sarebbe falsa -- '
+                         'la 770212 resta [NON MODELLATA]' % (preset['InpRiskPercent'][1], preset['InpRiskPercent'][0]))
+    diff = confronta_preset_prova(preset_path)
+    if diff:
+        raise SystemExit('preset 770212 DIVERSO dalla prova R255a oltre ora/magic/rischio (%s): il per-trade R255 NON e\' la sedia '
+                         'in firma -- la 770212 resta [NON MODELLATA]' % '; '.join(diff[:6]))
     rmis, riga_rmis = rischio_misura_r255()
     if rmis != 1.0:
         raise SystemExit('prova R255a r.%d: InpRiskPercent=%s, non 1.0: le unita\' della v1 sono alla misura 1%% e questa scala '
                          'non e\' scritta -- la 770212 resta [NON MODELLATA]' % (riga_rmis, rmis))
+    avvisi, nulli_lr = [], {}
+    if verifica:
+        rp = os.path.join(base, 'RIEPILOGO_R255.txt')
+        riep = ''
+        if os.path.exists(rp):
+            with open(rp, encoding='utf-8', errors='replace') as fh:
+                riep = fh.read()
+        else:
+            avvisi.append('RIEPILOGO_R255.txt ASSENTE: classe 166 (motore = pin), rc e freschezza NON VERIFICATI per R255a/R255b')
+        nr = lr.nulli_della_riga(riep)
+        for f in ('R255a', 'R255b'):
+            o = lr.pre_lettura_file(rc, f)
+            nulli_lr[f] = list(o['nullo'])
+            if nr.get(f):
+                nulli_lr[f].append('RIGA (RIEPILOGO): ' + nr[f][:300])
+            elif riep and f not in nr:
+                avvisi.append('%s: nessuna riga di ESITO nel RIEPILOGO: classe 166 e rc NON VERIFICATI' % f)
     F, deals = {}, {}
     for f in ('R255a', 'R255b'):
         g1 = lr.FILE[f]['g1']
         p = rc.path_pt(g1)
+        if nulli_lr.get(f):
+            F[f] = dict(pt={}, nullo=['NULLO per leggi_r255: ' + ' | '.join(nulli_lr[f])]); continue
         if not os.path.exists(p):
             F[f] = dict(pt={}, nullo=['per-trade assente: %s' % p]); continue
         d = lr.leggi_pertrade(p)
@@ -257,10 +341,12 @@ def carica_r255(cartella, curva=None):
                        'moncone': c['scartati'] - len(pos),
                        'b_corsa': (min(p['B_corsa'] for p in pos), max(p['B_corsa'] for p in pos)) if pos else (lr.DEPOSITO, lr.DEPOSITO)}
     if curve.get(scelta) is None:
-        raise SystemExit('curva %s non costruibile (manca il file 15:30, magic %d): la 770212 resta [NON MODELLATA]; '
-                         'con --r255-curva CONTROLLO si modella il solo file 14:30, etichettato come scelta manuale' % (scelta, lr.FILE['R255b']['g1']))
-    return dict(base=base, nota=nota, preset=preset, scelta=scelta, perche=perche, manuale=curva is not None,
-                curve=curve, deals=deals, rmis=(rmis, riga_rmis))
+        raise SystemExit('curva %s non costruibile (file 15:30, magic %d: %s): la 770212 resta [NON MODELLATA]; '
+                         'con --r255-curva CONTROLLO (SCELTA MANUALE) si modella il solo file 14:30, che NON e\' la sedia '
+                         'd\'inverno UE (14:30 BCM = 15:30 FTMO)' % (scelta, lr.FILE['R255b']['g1'], F['R255b']['nullo'][0][:300]))
+    return dict(base=base, nota=nota, preset=preset, scelta=scelta, perche=perche, manuale=curva is not None, auto=auto,
+                curve=curve, deals=deals, rmis=(rmis, riga_rmis), verifica=verifica, avvisi=avvisi,
+                nulli_lr=dict((f, v) for f, v in nulli_lr.items() if v))
 
 
 def aggiungi_770212(dati, r):
@@ -575,12 +661,20 @@ def delta_770212(ris, senza, con):
 
 
 def frase_delta(d, banda):
-    verbo = 'aggiunge' if d > 0 else ('toglie' if d < 0 else 'non sposta')
-    s = "%s %.1f punti di PASS" % (verbo, abs(d))
+    """(cancello 28/09) il VERBO e' un verdetto: 'aggiunge'/'toglie' solo se TUTTI i semi stanno dallo stesso lato dello
+       zero; se la banda lo attraversa la frase dice che il segno non si distingue dal rumore del seme; senza banda
+       (taglie 1,00 / 0,65) lo dice."""
+    semi = "semi %d/%s" % (SEME, "/".join(str(x) for x in SEMI_BANDA))
     if banda:
         tutti = [d] + banda
-        s += " (semi %d/%s: da %+.1f a %+.1f)" % (SEME, "/".join(str(x) for x in SEMI_BANDA), min(tutti), max(tutti))
-    return s
+        lo, hi = min(tutti), max(tutti)
+        if lo < 0 < hi or round(lo, 1) == 0.0 or round(hi, 1) == 0.0:
+            return "NON si distingue dal rumore del seme: da %+.1f a %+.1f punti di PASS (%s)" % (lo, hi, semi)
+        return "%s %.1f punti di PASS (%s: da %+.1f a %+.1f)" % ('aggiunge' if d > 0 else 'toglie', abs(d), semi, lo, hi)
+    if round(d, 1) == 0.0:
+        return "non sposta il PASS (%+.2f punti, seme %d solo: banda non calcolata a questa taglia)" % (d, SEME)
+    return "%s %.1f punti di PASS (seme %d solo: banda NON calcolata a questa taglia, il segno non e' provato contro il rumore)" % (
+        'aggiunge' if d > 0 else 'toglie', abs(d), SEME)
 
 
 def stampa_delta_770212(ris, r255):
@@ -830,7 +924,7 @@ def autotest_r255(chk, dati_v2, S, fixture_dir):
     c("contro-esempio: preset a 14:30 -> RIFIUTATO (nessuna mappa: [NON MODELLATA], non un'altra curva zitta)", rif)
     # 1. fixture pulita: le tre curve, e la FTMO-DOC rifatta A MANO dai deal scritti
     base, d14, d15 = fixture_r255(fixture_dir, 'pulito')
-    r = carica_r255(base)
+    r = carica_r255(base, verifica=False)   # fixture SINTETICA senza CSV: il cancello si prova sotto, in (e)
     c("fixture: raccolta trovata, curva scelta %s, senza scelta manuale" % r['scelta'], r['scelta'] == 'FTMO-DOC' and not r['manuale'])
     cf, cc, ci = r['curve']['FTMO-DOC'], r['curve']['CONTROLLO'], r['curve']['IN FASE']
     c("fixture: 152 posizioni per curva (56 IS + 96 OOS degli archivi), moncone 0", all(len(x['posizioni']) == 152 and x['moncone'] == 0 for x in (cf, cc, ci)),
@@ -864,7 +958,7 @@ def autotest_r255(chk, dati_v2, S, fixture_dir):
     c("(d) il calendario NON si allarga: B resta %s -> %s, %d giorni" % (calB[0], calB[-1], len(calB)), calB[0] == '2025.07.01' and len(calB) == 262)
     # (b) per-trade tutto a zero: P(PASS) invariata al decimale, pool bit per bit uguale
     base0, _, _ = fixture_r255(fixture_dir, 'zero')
-    r0 = carica_r255(base0)
+    r0 = carica_r255(base0, verifica=False)
     dati0 = aggiungi_770212(dict(dati_v2), r0)
     f0, a0 = blocchi(dati0, V1 + ['770105 DAXshort', N_770212], calB, 2.0)
     c("(b) 770212 a zero: pool B bit per bit == senza 770212 (attivo puo' cambiare: %d giornate in piu' 'operate')" % (sum(a0) - sum(a5)), f0 == f5)
@@ -877,7 +971,7 @@ def autotest_r255(chk, dati_v2, S, fixture_dir):
     idx = dict((d, i) for i, d in enumerate(calB))
     giorno = next(d for d, _ in cf['posizioni'] if d in idx and f5[idx[d]] >= 0)
     base5, _, _ = fixture_r255(fixture_dir, 'meno5', data_meno5=giorno)
-    r5 = carica_r255(base5)
+    r5 = carica_r255(base5, verifica=False)
     dati5 = aggiungi_770212(dict(dati_v2), r5)
     fm, am = blocchi(dati5, V1 + ['770105 DAXshort', N_770212], calB, 2.0)
     k = idx[giorno]
@@ -914,7 +1008,61 @@ def autotest_r255(chk, dati_v2, S, fixture_dir):
     R = righe_770212(dati, r, calA, calB, 2.0)
     c("righe 770212: %d righe aggiunte, nomi tutti distinti, con le 2 sensibilita'" % len(R),
       len(R) == 14 and len(set(n for n, *_ in R)) == 14 and sum(1 for n, *_ in R if 'sensibilita' in n) == 2)
-    c("scelta manuale: --r255-curva CONTROLLO viene etichettata", carica_r255(base, 'CONTROLLO')['manuale'] is True)
+    c("scelta manuale: --r255-curva CONTROLLO viene etichettata", carica_r255(base, 'CONTROLLO', verifica=False)['manuale'] is True)
+    # (e) CANCELLO del lettore (classe 890), nei due sensi, sulle raccolte COMPLETE di leggi_r255.genera_fixture
+    def rifiuta(fn):
+        try:
+            fn(); return None
+        except SystemExit as e:
+            return str(e)
+    m_ = rifiuta(lambda: carica_r255(base))
+    c("(e) fixture sintetica SENZA CSV _OOS con verifica=True (main) -> RIFIUTATA (E0: per leggi_r255 e' NULLA)",
+      m_ is not None and 'E0' in m_, "-> %s" % (m_ or 'ACCETTATA')[:160])
+    a603 = lr.leggi_pertrade(R246_PT % (lr.EA, lr.SIMB, 794603)); a601 = lr.leggi_pertrade(R246_PT % (lr.EA, lr.SIMB, 794601))
+    bl = lr.genera_fixture(fixture_dir, 'mc_gate', a603, a601)
+    rg = rifiuta(lambda: carica_r255(bl))
+    c("(e) raccolta COMPLETA e sana (leggi_r255.genera_fixture 'pulito') -> ACCETTATA, pre-lettura senza NULLI", rg is None, "-> %s" % (rg or 'ok')[:160])
+    po = os.path.join(bl, 'ROUND_R255a', '%s_%s_OOS_R255a.csv' % (lr.EA, lr.SIMB))
+    with open(po) as fh:
+        rows = fh.read().splitlines()
+    hdr = rows[0].split(',')
+    for i in (1, 2):
+        v = rows[i].split(','); v[hdr.index('InpSessionHour')] = '15'; rows[i] = ','.join(v)
+    with open(po, 'w') as fh:
+        fh.write('\n'.join(rows) + '\n')
+    m_ = rifiuta(lambda: carica_r255(bl))
+    c("(e) R255a girato a InpSessionHour=15 (P0 NULLO per leggi_r255) -> RIFIUTATA", m_ is not None and 'P0' in m_, "-> %s" % (m_ or 'ACCETTATA')[:160])
+    bl = lr.genera_fixture(fixture_dir, 'mc_gate', a603, a601)
+    rp = os.path.join(bl, 'RIEPILOGO_R255.txt')
+    with open(rp) as fh:
+        t_ = [ln.replace('file NON nullo', 'FILE NULLO: MOTORE DIVERSO DAL PIN') if ln.startswith('R255b ') else ln for ln in fh.read().splitlines()]
+    with open(rp, 'w') as fh:
+        fh.write('\n'.join(t_) + '\n')
+    m_ = rifiuta(lambda: carica_r255(bl))
+    c("(e) la RIGA dice R255b NULLO (motore diverso dal pin) -> FTMO-DOC RIFIUTATA, CONTROLLO proposto come SCELTA MANUALE",
+      m_ is not None and 'MOTORE DIVERSO' in m_ and 'SCELTA MANUALE' in m_, "-> %s" % (m_ or 'ACCETTATA')[:160])
+    rm = carica_r255(bl, 'CONTROLLO')
+    c("(e) ... e con --r255-curva CONTROLLO si modella il solo 14:30, etichettato manuale, con il NULLO di R255b in chiaro",
+      rm['manuale'] and rm['curve']['FTMO-DOC'] is None and 'R255b' in rm['nulli_lr'])
+    # (f) la LETTERA del preset, tutta: un preset con un'altra gestione dell'uscita, o un'altra taglia, NON si modella zitto
+    c("(f) preset in firma == prova R255a salvo ora/magic/rischio: 0 differenze", confronta_preset_prova() == [], "-> %s" % confronta_preset_prova())
+    pf = os.path.join(fixture_dir, 'preset_770212_tp15.set')
+    with open(PRESET_770212, encoding='utf-8', errors='replace') as fh:
+        testo = fh.read()
+    with open(pf, 'w', encoding='utf-8') as fh:
+        fh.write(testo.replace('InpTP1_R=1.0', 'InpTP1_R=1.5').replace('InpCloseHour=19', 'InpCloseHour=20'))
+    dd_ = confronta_preset_prova(pf)
+    c("(f) preset con InpTP1_R=1.5 e chiusura 20:30 -> 2 differenze (TP1 e durata della seduta)",
+      len(dd_) == 2 and any('InpTP1_R' in x for x in dd_) and any('durata' in x for x in dd_), "-> %s" % dd_)
+    pr1 = os.path.join(fixture_dir, 'preset_770212_rischio1.set')
+    with open(pr1, 'w', encoding='utf-8') as fh:
+        fh.write(testo.replace('InpRiskPercent=2.00', 'InpRiskPercent=1.00'))
+    m_ = rifiuta(lambda: carica_r255(base, verifica=False, preset_path=pr1))
+    c("(f) preset con InpRiskPercent=1.00 -> RIFIUTATO (la scala e' scritta per 2,00 = taglia indici in campo)",
+      m_ is not None and 'InpRiskPercent=1.00' in m_, "-> %s" % (m_ or 'ACCETTATO')[:120])
+    c("(f) frase del verbo: banda che attraversa lo zero -> 'NON si distingue'; tutta positiva -> 'aggiunge'; senza banda -> dichiarato",
+      frase_delta(0.6, [-0.2, 0.4, 0.1]).startswith('NON si distingue') and frase_delta(0.6, [0.6, 1.1, 0.9]).startswith('aggiunge')
+      and 'banda NON calcolata' in frase_delta(0.6, None))
     print("AUTOTEST 770212: %s" % ("TUTTO VERDE" if ok[0] else "ROSSO"))
     return ok[0]
 
@@ -949,8 +1097,24 @@ def main(r255=None):
                   pr['InpAllowShort'][0], pr['InpAllowShort'][1], pr['InpAllowLong'][0], pr['InpAllowLong'][1],
                   pr['InpRiskPercent'][0], pr['InpRiskPercent'][1], pr['InpSessionHour'][0], pr['InpSessionHour'][1],
                   pr['InpSessionMin'][0], pr['InpSessionMin'][1]))
-        print("    curva scelta: %s %s-- %s" % (r255['scelta'], '[SCELTA MANUALE --r255-curva] ' if r255['manuale'] else '', r255['perche']))
-        print("    [DERIVATO dal regolamento FTMO, NON MISURATO sul feed FTMO]: la mappa 16:30 FTMO -> 14:30/15:30 BCM per calendario UE")
+        if r255['manuale'] and r255['scelta'] != r255['auto']:
+            print("    curva scelta: %s [SCELTA MANUALE --r255-curva, NON quella del preset] -- il preset detta %s: %s" % (
+                r255['scelta'], r255['auto'], r255['perche']))
+        else:
+            print("    curva scelta: %s %s-- %s" % (r255['scelta'], '[SCELTA MANUALE --r255-curva] ' if r255['manuale'] else '', r255['perche']))
+        print("    preset == prova R255a input per input, salvo ora/chiusura (stesso scarto), magic, rischio e 2 stringhe spente "
+              "(confronta_preset_prova: 0 differenze)")
+        print("    pre-lettura di leggi_r255 (E0/P0/G1/C0/L0/S1 + NULLI della riga): %s" % (
+            'ESEGUITA, R255a e R255b non NULLI' if not r255['nulli_lr'] else
+            'ESEGUITA, NULLI: ' + ' || '.join('%s: %s' % (f, ' | '.join(v)[:200]) for f, v in r255['nulli_lr'].items())))
+        for a_ in r255['avvisi']:
+            print("    ATTENZIONE: %s" % a_)
+        print("    [DERIVATO dal regolamento FTMO, NON MISURATO sul feed FTMO]: la mappa 16:30 FTMO -> 14:30/15:30 BCM per calendario UE; "
+              "e la griglia H4 di FTMO e' DIVERSA da quella BCM (testa R255a par. 6): il filtro EMA H4 del preset su FTMO legge "
+              "altre candele [NON MISURATO]")
+        print("    [classe 800, NON corretto] i lotti del Dow a 10.000 sono piccoli (passo 0,1: fino a ~10-40%% di arrotondamento sul "
+              "singolo lotto, testa R255a par. 7; errore sul DD e_eff >= %.4f): la scala net/10.000 lo porta intero sul conto FTMO, "
+              "dove il lotto a 2,00%% e' ~15 volte piu' grande e quasi senza arrotondamento" % lr.E_MIN)
         print("    misura del per-trade: deposito %.0f, InpRiskPercent=%.1f (prova R255a r.%d), rischio ingresso->SL (InpRiskMode=0); "
               "scala = net / %.0f x fattore (a fattore 2,0 = %s%% del preset)" % (
                   lr.DEPOSITO, r255['rmis'][0], r255['rmis'][1], lr.DEPOSITO, pr['InpRiskPercent'][0]))
