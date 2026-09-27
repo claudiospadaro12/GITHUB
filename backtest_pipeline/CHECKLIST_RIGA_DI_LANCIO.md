@@ -35924,3 +35924,29 @@ vero 102.212,73, DD a saldo chiuso 2,0019% contro 2,0457% ripartendo da 100000 (
 0,9989) perche' l'errore cade su tutti e due i file, ma il DD "che decide" nel caso (ii) e' quello stampato. Regola: una
 lettura ristretta parte dal saldo VERO alla data (i lotti dopo la data sono calcolati su quello) e il picco iniziale e' quel
 saldo; tutte le misure dello stesso tratto usano lo stesso saldo. Corretto nel commit di questo cancello (`Curva.s0`).
+
+### CLASSE 880 — il LATO di una sedia dedotto da un input che il MODO attivo ignora (27/09/2026, cancello strato 2 su `PACCHETTO_PAUSA_ORO_DEMO.md`, parente della 731)
+Caso: `PACCHETTO_PAUSA_ORO_DEMO.md` @ `74e94396` scriveva che lo scalper `779901` del manuale `50503635` *"prende il verso dalla
+prima posizione a mano"* (`InpDirection=0` = `DIR_FROM_MANUAL`) e che *"va nel verso che Claudio sceglie"*. Il preset letto
+(CODA_08 27/09 r.2470-2472) e' `InpEntryMode=1` = `ENTRY_CANDELA` con `InpCandleRule=4` = `CR_MEZZO_CORPO`: il verso lo sceglie
+l'EA a ogni candela M1, e `InpDirection` sta nel gruppo *"Verso e avvio (modo MANUALE)"* (sorgente r.124, r.894): inerte. La
+conclusione L+S era giusta per caso, la ragione no, e la regola "niente operazioni a mano short" era presentata come il
+rimedio principale. Regola: prima di leggere il lato da un input, si legge il SELETTORE DI MODO dello stesso preset e il gruppo
+in cui l'input vive nel sorgente; un input fuori dal modo attivo non e' una misura del lato.
+
+### CLASSE 881 — la verifica di una rimozione che conta QUANTI grafici restano e non QUALI: tolto il grafico sbagliato, il numero torna e il verdetto e' verde (27/09/2026, stesso cancello, sorella della 259 e della 803)
+Caso: la riga di verifica del piccolo `50503392` dopo la pausa oro attendeva "1 grafico ORO con EA" (la `772343` solo long).
+Banco `pwsh`: tolta la `772343` e lasciata la `971501` L+S, stampava `di cui su ORO = 1 ... COMBACIA` in verde. E' esattamente
+l'errore che il documento stesso nominava (classe 803: si sbaglia grafico) e che la verifica doveva prendere. In piu' le
+quattro righe gemelle non mettevano i file illeggibili nel verdetto (classe 177). Regola: una verifica di rimozione con un
+superstite atteso controlla l'IDENTITA' o la PROPRIETA' che giustifica il superstite (qui `InpAllowShort=false`), non il
+conteggio; ogni file non letto fa il verdetto non-verde. Corretto nel commit di questo cancello (`$orobad`, `$ill` nel verdetto).
+
+### CLASSE 882 — la finestra "sicura" per riaprire un terminale ricavata dall'ORARIO NOMINALE degli EA, non dal loro PRIMO TICK dopo l'avvio (27/09/2026, stesso cancello, figlia della 866)
+Caso: ramo B del piccolo (riaprire il terminale chiuso per togliere tre sedie oro): *"feriale lontano dalle 07:00-08:30 BCM e
+dai cambi di candela H4"*. Letto nel codice: `ABTG_EMA200_Ottimizzato` (r.157, r.348-354) e `ABTG_SupertrendReversal_Ottimizzato`
+(r.121, r.283-289) partono con `gLastBar=0`, quindi il primo tick dopo la riapertura e' una "barra nuova" a qualunque ora;
+`ABTG_MaxMinNotte` (r.267-290) in `MMP_WAIT` fra 07:00 e 17:30 BCM piazza i due pendenti al primo tick. La sola finestra vera e'
+il mercato CHIUSO (weekend). Regola: prima di dire "a quest'ora non piazza", si legge lo STATO INIZIALE di ogni EA che si
+riaccende (variabili a zero, fasi di partenza, guardie reload-safe) e lo si segue fino al primo stato stabile; il
+calendario del motore descrive il regime, non l'avvio.
