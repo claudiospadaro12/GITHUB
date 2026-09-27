@@ -35950,3 +35950,43 @@ dai cambi di candela H4"*. Letto nel codice: `ABTG_EMA200_Ottimizzato` (r.157, r
 il mercato CHIUSO (weekend). Regola: prima di dire "a quest'ora non piazza", si legge lo STATO INIZIALE di ogni EA che si
 riaccende (variabili a zero, fasi di partenza, guardie reload-safe) e lo si segue fino al primo stato stabile; il
 calendario del motore descrive il regime, non l'avvio.
+
+### CLASSE 883 — una VIRGOLA dentro un input stringa (`InpNewsCurrencies=GBP,USD`) nel CSV di OptFrame sposta di un campo le colonne che la seguono: `Import-Csv` SCARTA il campo in piu', e il P0 della riga legge `InpMagic`/`InpMaxSpread`/`InpVerbose` SPOSTATI -> tutti i R258 NULLI a vuoto nel RIEPILOGO (27/09/2026, cancello di `leggi_round_corti_a.py`, parente della 766 e della 873)
+Caso: `ABTG_Londra_ORB.mq5` `OnTesterDeinit` scrive la riga come `row += "," + kv[1]` per ogni input, SENZA virgolette
+(verificato su 2.291 CSV d'archivio: nessuna virgoletta, mai). L'input r.84 `InpNewsCurrencies="GBP,USD"` e' pinnato cosi' in
+tutti i 24 file R258: le righe hanno UN campo piu' dell'intestazione. Eseguito con pwsh 7.4: `Import-Csv` su
+`...,InpNewsCurrencies,InpComment,InpMagic,InpMaxSpread,InpVerbose` / `...,GBP,USD,R258A LDN GBPUSD H8,795808,0,1` da'
+`InpComment=USD`, `InpMagic=R258A LDN GBPUSD H8`, `InpMaxSpread=795808`, `InpVerbose=0` e butta l'ultimo campo. La riga
+`RIGA_ROUND_CORTI_A_R250_R258_R259.txt` @ `202505d6` (in corsa sul PC di backtest il 27/09) confronta i 37 pin numerici del file
+contro quelle colonne: `P0 PIN DAL CSV _IS DIVERSO` in OGNI file R258 non saltato, e sul blocco G anche `ASSE DIVERSO`
+(l'asse e' `InpMagic`); poi T1/X1/S1-ora della riga non girano (file gia' NULLI). Il RIEPILOGO dira' R258 tutto NULLO per un
+difetto di LETTURA, non del round. Il lettore @ `9ba82041` ricuciva la virgola (giusto) ma non univa i NULLI della riga
+(classe 873): unirli alla cieca avrebbe annullato tutto R258, ignorarli perdeva motore/prova/rc 1/E0. Regola: (1) prima di
+un P0 su un CSV di OptFrame si guarda se un input STRINGA del file contiene il separatore; se si', la riga conta i campi
+contro l'intestazione e ricuce (o rifiuta dichiarandolo), mai `Import-Csv` nudo; (2) il lettore unisce i NULLI della riga
+motivo per motivo, ed esenta SOLO il P0 (e l'ASSE di un asse che sta DOPO la stringa) quando il CSV ha davvero la virgola E il
+suo P0 sulle colonne ricucite e' VERDE, scrivendo l'esenzione per nome nel referto. Contro-esempio nell'autotest (T10) e
+ricucitura provata anche sul lato opposto: 2.291 CSV reali senza virgola, zero ricuciture (T17 + scansione).
+Corretto nel lettore in questo commit. 🔴 **La riga NON si corregge a corsa partita: il suo RIEPILOGO va letto col lettore.**
+
+### CLASSE 884 — l'ancora di un cancello resa UGUALE per tutti i simboli quando la testa di UNO ne scrive una diversa: S0 di R259 "0/0" ovunque, ma XAGUSD e' IS 0 / OOS 4 con numeri -> un round buono "NON LETTO" (27/09/2026, cancello di `leggi_round_corti_a.py`, parente della 875)
+Caso: `leggi_round_corti_a.py` @ `9ba82041`, R259 S0 = `VERDE se Trades ancora IS == 0 e OOS == 0`. La testa
+`R259_nightly_XAGUSD_PIN.txt` par. 3: la cella 45 *"DEVE riprodurre IS 0 / OOS 4 -- e in OOS: Profit 50.82, PF 1.26185, DD
+1.6582%"*; la riga lo porta nella sua tabella (`aIS=0 aOOS=4 aPr=50.82 aPF=1.26185 aDD=1.6582`) e l'archivio lo conferma
+(`risultati_prove/ABTG_Nightly/ABTG_Nightly_XAGUSD_OOS_ohlc.csv`: 4 / 50.82 / 1.26185 / 1.6582). Contro-esempio eseguito:
+fixture con l'archivio vero di XAGUSD -> il lettore scriveva `S0 ROSSO -> ROUND NON LETTO (S0)`. E la fixture dell'autotest
+aveva messo 0/0 anche su XAGUSD: il test confermava il difetto invece di prenderlo. Regola: le ancore si copiano PER JOB dalla
+tabella della riga (o dalla testa del file), mai generalizzate da "la maggior parte"; la fixture riproduce l'ECCEZIONE, non la
+regola. Corretto nel commit (`R259_ANCORA` con le tolleranze della riga; T11 con 0/4 VERDE e 0/0 ROSSO).
+
+### CLASSE 885 — un blocco [DERIVATO] (metodo preso da un ALTRO round) che scrive la parola di un VERDETTO del round: "VIOLATO -> BOCCIATA PER RISCHIO" dove la testa dice "riferimenti per la lettura, NON soglie" (27/09/2026, cancello di `leggi_round_corti_a.py`, sorella della 874 e della 804)
+Caso: stesso script, R250 "CURVA IN FASE": metodo di R255a par. 7/9 (e_eff, tetti = DD del CONTROLLO d0, R3 = min(-1,10;
+peggior giornata del controllo)) su un round la cui testa (`R250a` par. 9) scrive *"Riferimenti per la lettura (NON soglie di
+questo round): pausa Guardian 4,0%, muro FTMO 10%"* e non nomina nessuna curva in fase. Il titolo diceva [DERIVATO] e *"una
+LETTURA, non un cancello"*, ma le righe stampavano `VIOLATO -> BOCCIATA PER RISCHIO (a qualunque n)` e `R3 VIOLATO ->
+BOCCIATA PER RISCHIO`. Contro-esempio eseguito: fixture pulita -> finestra A IN FASE "BOCCIATA" con DD 10,26% contro un
+"tetto" 6,38% che nessuna testa ha congelato. In piu' lo scarto di saldo della curva in fase (che MESCOLA due corse) portava
+dentro la costruzione (classe 876): PRE-MERCATO B "NON RISOLTO d'ufficio" con scarto 15,3% di cui ribasamento 3,7%.
+Regola: un criterio che la testa non congela puo' solo SEGNALARE (`SEGNALAZIONE [DERIVATA]`, `sotto/sopra il riferimento`),
+mai usare le parole BOCCIATA/PROMOSSA/RISCHIO PASSATO; e l'autotest verifica l'ASSENZA della parola nella sezione. Corretto
+nel commit (testo, scomposizione COSTRUZIONE/RIBASAMENTO, assert su "BOCCIATA" in R250).

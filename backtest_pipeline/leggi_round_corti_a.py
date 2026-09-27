@@ -11,7 +11,8 @@ Markdown da incollare. NON promuove, NON archivia, NON propone taglie.
         contro R247 (765271/765273 dal pin), G2, S1, S2, zone Q/Q2/Qc (r250_bande_attese),
         conferma A col veto di A+B, rischio (Emendamento B), lati, costo descrittivo, e la
         CURVA IN FASE col metodo di R255 par. 7/9 (R1/R2/R3, verdetto asimmetrico classe 804)
-        -- quest'ultima e' [DERIVATA]: la testa R250a par. 9 NON fissa soglie.
+        -- quest'ultima e' [DERIVATA]: la testa R250a par. 9 NON fissa soglie, quindi SEGNALA e non
+        boccia mai (classe 885); lo scarto di saldo si stampa scomposto (classe 876).
   R258  testa prove/R258a_londra_T_GBPUSD_ora8_UK_TESTA.txt par. 7: E0/P0/F0/F1/G1/T1/X1/S1,
         S2 e C-COMM dalla corsa singola (classe 844), K1 dalla scansione di F, R1 DD_fisso
         <= 5,0 per gamba, M1-M4 solo con n OOS >= 150, righe designate, H1/H2/H3 con la
@@ -24,6 +25,10 @@ Regole: ogni numero con la sua fonte (file della raccolta); etichette [MISURATO]
 file della raccolta) / [DERIVATO] (calcolato da numeri misurati o preso da un referto) /
 [NON VERIFICABILE] (file assente o illeggibile). Posizioni contate per position_id.
 Il certificato di morte NON si scrive da un round solo.
+Cancello del 27/09 (strato 2): raccolta cercata prima di leggere (872), NULLI della riga UNITI e prova
+verificata sullo SHA del pin (873) tranne il P0 letto dalla riga su colonne spostate dalla virgola di
+InpNewsCurrencies (883), PROMOSSA solo dopo M4 e M3 sospeso = INDIZIO (874), X1/T1/PG/S1 con la forma
+della riga e della testa (875), ancora S0 per simbolo (884), DERIVATO che non boccia (885).
 
 Uso:
   python3 backtest_pipeline/leggi_round_corti_a.py <cartella_raccolta_estratta> [--out referto.md] [--senza-bande]
@@ -32,18 +37,22 @@ Uso:
 import collections
 import csv
 import datetime as dt
+import hashlib
 import html
 import os
 import re
+import shutil
 import statistics as st
 import sys
+import tempfile
 
 QUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, QUI)
 import r250_bande_attese as r250  # noqa: E402  zone, S1, G1, S2, bande, conferma (testa R250a par. 5-7)
 
 DEPOSITO = 10000.0
-SCRATCH_DEFAULT = '/tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/lettori'
+# cartella delle fixture dell'autotest: MAI un percorso di macchina cablato (cancello 27/09)
+SCRATCH_DEFAULT = os.path.join(tempfile.gettempdir(), 'lettori_corti_a_fixture')
 
 # ----------------------------------------------------------------------------- i 36 job
 # Copiati dalla tabella $J della riga (RIGA_ROUND_CORTI_A_R250_R258_R259.txt): tag, EA, simbolo,
@@ -94,6 +103,36 @@ JOBS = [
     _j('R259', 'R259_U30USD', 'ABTG_Nightly', 'U30USD', 'R259_nightly_U30USD_PIN.txt', 1, 'InpMaxNightVolPips', ['0', '45'], 'N', fis=183, foos=276, anc='45', m1='2024.09.26'),
 ]
 JOB = {j['t']: j for j in JOBS}
+
+# SHA256 del file prova AL PIN, copiati dalla tabella $J della riga (campo hp): la prova si verifica
+# contro QUESTI, da dovunque venga (raccolta o repo), classe 873. Estratti e ricontrollati il 27/09
+# contro prove/ a HEAD (36 su 36 uguali).
+HP = {
+    'R250a': 'B666863F0E9D30E174DF29E69F4B22CC20524FAEF0A3DA283E17F280E6F0F62D', 'R250b': 'A8B12619D7A5BD42D3969A114C879B6713DE7C1C0462A6901150B8A8387109C1',
+    'R250c': '274CA11B00EDAAF7CB9FE38CC22B696BF985D40E18255D4C61F4681622B0632F', 'R250d': 'DBC325DAE516AC1CEF94298322077C273F7E8036A2D34D04AE755C0780D0E11C',
+    'R250e': '5DD25BB699BF6EC3C2BCFEE9587B217533065B7E5A2243195BF169C22B143C04', 'R250f': '2B1483704D2434D79E0351E970245B6C29C7E4DFA588DDBD5CB5063A943BE1EF',
+    'R258a': '4F6DBD4E7D161557FC12CA3A8DA4DD53753B93050E4DB05AB606EC1C928732CF', 'R258b': 'B8AEB4050A0879D51807822AC2D1615E2BD4AEC7CA0F4A690E1775C4D9B865FB',
+    'R258c': 'D047D132DC3B57FD66671881A07F8E1F14072201CDCE0427E1018447DD62C243', 'R258g': '8E72F8699082F71529A14D47D978AA17DFBF0560731AE076C0D3BC9A1C44010B',
+    'R258u': '079AB1F3FE9D8C513622D066F566A62F64F0A22228E676980E7090AD689B8FD7', 'R258w': '90639684C3C69F4CAE6FEA30746E6A92B2D2D0CA166C90488775147D94C0CA4D',
+    'R258i': '6F429991E9C87192E319104BE84285D6CDEC6FE33CCA2C28335EFBF3E1F6AE21', 'R258j': '8999363367A758278F916A39F35FA32565B86C8019EE70455D22FF006C8F026B',
+    'R258k': 'B76108610DDAD0249BC7C0A508583C3C6847FED4567BA97CB9CE53FEE9D5A0E5', 'R258d': 'F521FE111A490D294562A9FC80A263519125108EADF16837BBE50315E2EA4BDD',
+    'R258e': 'B0E3661E154DBA5366F779CAD7DBF7A8F1AECB8A9049B84E599D524984BA60F0', 'R258f': '1A21A6E7158057DAC8F0903A21D19AC24391BDCA17283625D5C105535F8CC74E',
+    'R258h': 'FB33EA8A91662B881ABF6B7415D3BD5D5BF7DBC91FF58920005E5565B085F893', 'R258v': '323D161A99281C23DD90B182CAE83488BC2812E590487841575ACAA224E86D75',
+    'R258x': 'DDC68F9DA4C7AAA9DC691926D2F48600985F2691E98F00C1F9CE8B331241C701', 'R258l': '47E9748378BBE6F248B47F238A908859D2DD56928A959A21679C111E957ABB08',
+    'R258m': 'EEC7E9308C3041740019C6494BE03F69DAF98F20B0A549C224AABA91E283F6B4', 'R258n': '914C164E766C40BA945AFBB08DB684C7A645FDB305315D9199BA57B98B13450C',
+    'R258r': '9F954CC168D07FD5FDFC972E4874B3E24419BBCD97E702F3FB3C0EEFC313E9BD', 'R258s': '4116FBD25FA8A2869BAF669D902344D1C031D63CDC40F7A6F42C2C8ADDC87AF7',
+    'R258t': 'CE833F2A83EF63E0D73C46667679C9D280DD7A16AC82032A0D71AFDAC4EEFCF2', 'R258o': '8F1F66B5488034042295B85035BBC5A962D1D840B9065A661A5ED090F4479E34',
+    'R258p': '7662ACD0CC958B9D0495B3C06B4F818278EE8A6A118D4C0581A6F1B0CB4C9982', 'R258q': '82B5EB66598363E2A85E6E29574A8FA73FA3E39EF68FD85A97900AFEE1AD39CF',
+    'R259_AUDUSD': '1A5E346255E02F22223036852F3790213E9041AB90ACA119BA13BE2AC0AC387B', 'R259_USDJPY': 'A7DDF7310FA5871E4AFA04403E9DB5B46094EA4F4D515DFFD1D27CFE4191630A',
+    'R259_XAUUSD': 'A05F8BD1A30B6A82125A9DF8C322747A7C772A25E9936EA7E85F5960597BE5FC', 'R259_XAGUSD': 'D8267FA9F8ACFDA3D6329B1DD0C4581F34D7567D2A955AF6FA88E927FB050374',
+    'R259_D30EUR': '463344E881F62746B0A36335EA0901D31DF80B1D7F2BB1D058DAA8A702DCF1FE', 'R259_U30USD': '4368D91E6AB448FBC24BD9156560F5E1C0C32F2959D75348F87665FDA349B078',
+}
+# R259 S0 (classe 884): l'ancora d'ARCHIVIO della cella ancora, PER SIMBOLO (riga: aIS/aOOS/aPr/aPF/aDD; teste par. 3).
+# XAGUSD NON e' 0/0: e' IS 0 / OOS 4 con Profit 50.82, PF 1.26185, DD 1.6582 (testa R259 XAGUSD par. 3).
+# Tolleranze della riga: Profit 0,05, PF 0,00005, Equity DD % 0,01.
+R259_ANCORA = {'R259_AUDUSD': (0, 0, None), 'R259_USDJPY': (0, 0, None), 'R259_XAUUSD': (0, 0, None),
+               'R259_XAGUSD': (0, 4, dict(Profit=50.82, PF=1.26185, DD=1.6582)),
+               'R259_D30EUR': (0, 0, None), 'R259_U30USD': (0, 0, None)}
 
 # R250: la testa (par. 5.0) chiede QUESTE colonne uguali al pin in ogni riga dei CSV letti
 R250_PIN_COLS = ('InpSessionHour', 'InpSessionMin', 'InpCloseHour', 'InpCloseMin', 'InpEmaSlow', 'InpTP1_R', 'InpFilterTF')
@@ -213,11 +252,25 @@ def leggi_pt(path):
     return out
 
 
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as fh:
+        for blk in iter(lambda: fh.read(1 << 16), b''):
+            h.update(blk)
+    return h.hexdigest().upper()
+
+
 def leggi_pin(rac, job):
-    """pin del file prova: prima dalla raccolta (ROUND_<tag>/<p>), se manca dal repo (prove/<p>), dichiarandolo."""
+    """pin del file prova: prima dalla raccolta (ROUND_<tag>/<p>), se manca dal repo (prove/<p>), dichiarandolo.
+    In tutti e due i casi il file si verifica contro lo SHA256 del pin scritto nella riga (HP, classe 873):
+    SHA diverso -> pin NON usabili (None), la fonte lo dice."""
     for base, fonte in ((os.path.join(rac, 'ROUND_' + job['t'], job['p']), 'raccolta'),
                         (os.path.join(QUI, 'prove', job['p']), 'repo (NON nella raccolta)')):
         if os.path.isfile(base):
+            sha = sha256_file(base)
+            if HP.get(job['t']) and sha != HP[job['t']]:
+                return None, None, 'prova da %s con SHA256 DIVERSO DAL PIN (%s... contro %s...)' % (fonte, sha[:8], HP[job['t']][:8])
+            fonte = fonte + ', SHA256 = pin'
             pins, asse = {}, None
             with open(base, encoding='utf-8', errors='replace') as fh:
                 for ln in fh:
@@ -232,6 +285,81 @@ def leggi_pin(rac, job):
                     pins[k.strip()] = parti[0].strip()
             return pins, asse, fonte
     return None, None, 'ASSENTE'
+
+
+# ----------------------------------------------------------------------------- raccolta e RIEPILOGO della riga
+TAG_RE = r'(?:R25[08][a-z]|R259_[A-Z0-9]{6})'
+MOTIVI_INIZIO = ('rc 1', 'MOTORE DIVERSO', 'prova ', 'PIN DEL FILE PROVA', 'E0', 'ASSE DIVERSO', 'P0 ', 'C0 ', 'G1 ', 'S1',
+                 'F0 ', 'F1 ', 'T1 ', 'X1 ', 'S0 ', 'S2 ')
+
+
+def conta_cartelle(d):
+    return sum(1 for j in JOBS if os.path.isdir(os.path.join(d, 'ROUND_' + j['t'])))
+
+
+def trova_raccolta(rac):
+    """classe 872: un percorso sbagliato NON diventa un round NULLO. Si contano PRIMA le cartelle attese:
+    zero cartelle ROUND_<tag> e nessun RIEPILOGO -> si scende di UN livello solo se li' c'e' UNA raccolta,
+    dichiarandolo; altrimenti ci si ferma con un errore, mai un referto."""
+    rac = os.path.abspath(rac)
+    if not os.path.isdir(rac):
+        raise SystemExit('ERRORE: %s non e una cartella (serve la raccolta ROUND_CORTI_A_<data> estratta dallo zip)' % rac)
+    if conta_cartelle(rac) > 0 or os.path.isfile(os.path.join(rac, 'RIEPILOGO_ROUND_CORTI_A.txt')):
+        return rac, None
+    figli = [os.path.join(rac, x) for x in sorted(os.listdir(rac)) if os.path.isdir(os.path.join(rac, x))]
+    buoni = [f for f in figli if conta_cartelle(f) > 0 or os.path.isfile(os.path.join(f, 'RIEPILOGO_ROUND_CORTI_A.txt'))]
+    if len(buoni) == 1:
+        return buoni[0], 'la cartella passata (%s) non e la raccolta: letta la sua sottocartella %s (scesa di UN livello, classe 872)' % (rac, os.path.basename(buoni[0]))
+    raise SystemExit('ERRORE (classe 872): in %s nessuna cartella ROUND_R250..R259 e nessun RIEPILOGO_ROUND_CORTI_A.txt; sottocartelle con una raccolta: %d (%s). Passare la cartella ROUND_CORTI_A_<data> estratta. NESSUN referto scritto.'
+                     % (rac, len(buoni), ', '.join(os.path.basename(b) for b in buoni) or 'nessuna'))
+
+
+def spezza_motivi(testo):
+    """i motivi di un NULLO della riga sono uniti con '; ', ma alcuni motivi contengono '; ' al loro interno:
+    un frammento apre un motivo nuovo solo se comincia con una parola-chiave nota."""
+    out = []
+    for fr in testo.split('; '):
+        if not out or fr.startswith(MOTIVI_INIZIO):
+            out.append(fr)
+        else:
+            out[-1] = out[-1] + '; ' + fr
+    return out
+
+
+def leggi_riepilogo(rac):
+    """RIEPILOGO_ROUND_CORTI_A.txt della riga: FILE NULLI (con motivi), FILE SALTATI, FILE NON NULLI, G0 di R250,
+    classe 166. Serve a UNIRE i NULLI che solo la riga vede (motore, prova, rc 1, C0, freschezza) a quelli
+    ricalcolati dal lettore (classe 873)."""
+    RP = dict(presente=False, nulli={}, saltati={}, nonnulli=None, g0={}, c166=None, righe=[])
+    p = os.path.join(rac, 'RIEPILOGO_ROUND_CORTI_A.txt')
+    if not os.path.isfile(p):
+        return RP
+    RP['presente'] = True
+    with open(p, encoding='utf-8', errors='replace') as fh:
+        righe = [x.rstrip() for x in fh]
+    RP['righe'] = righe
+    for r in righe:
+        if r.startswith('FILE NULLI') or r.startswith('FILE SALTATI'):
+            corpo = r.split('): ', 1)[1] if '): ' in r else ''
+            dest = RP['nulli'] if r.startswith('FILE NULLI') else RP['saltati']
+            if corpo.strip() in ('', 'nessuno'):
+                continue
+            for m in re.finditer(r'(' + TAG_RE + r') \((.*?)\)(?= \| ' + TAG_RE + r' \(|\s*$)', corpo):
+                dest[m.group(1)] = spezza_motivi(m.group(2)) if dest is RP['nulli'] else m.group(2)
+        elif r.startswith('FILE NON NULLI'):
+            corpo = r.split(': ', 1)[1] if ': ' in r else ''
+            RP['nonnulli'] = set() if corpo.strip() == 'NESSUNO' else {x.strip() for x in corpo.split(',') if x.strip()}
+        elif r.startswith('R250 G0 RIPRODUZIONE'):
+            corpo = r.split('): ', 1)[1] if '): ' in r else ''
+            for m in re.finditer(r'(R250[ab]) (VERDE|ROSSO|NON VERIFICABILE)', corpo):
+                RP['g0'][m.group(1)] = m.group(2)
+        elif r.startswith('CLASSE 166'):
+            RP['c166'] = r.split('): ', 1)[1] if '): ' in r else r
+    return RP
+
+
+def motivi_riga(RP, tag):
+    return RP['nulli'].get(tag, []) if RP else []
 
 
 # ----------------------------------------------------------------------------- posizioni e curve (metodo R255 par. 7)
@@ -327,9 +455,10 @@ def peggior_giornata(rows):
 
 
 # ============================================================================= R250
-def r250_leggi(rac, senza_bande=False):
+def r250_leggi(rac, senza_bande=False, RP=None):
     """Ritorna (righe markdown, esito strutturato)."""
-    L, E = [], dict(stato={}, g0={}, s1={}, s2={}, g2={}, pin={}, zone={}, conferma={}, fase={}, note=[])
+    L, E = [], dict(stato={}, g0={}, s1={}, s2={}, g2={}, pin={}, zone={}, conferma={}, fase={}, note=[], riga={})
+    forma = []   # divergenze di FORMA fra riga e testa (classe 875): si stampano, non si nascondono
     ea, sym = 'ABTG_Nasdaq_Apertura_US', 'U30USD'
     L.append('## R250 -- OROLOGIO O STAGIONE per il candidato #1 (testa `prove/R250a_orologio_R245_d0_A_U30USD.txt`)')
     L.append('')
@@ -382,7 +511,8 @@ def r250_leggi(rac, senza_bande=False):
         if e0:
             csv_letti.append(('IS', ris))
         if j['fin'] == 'A':
-            e0 = e0 and (roos is not None and len(roos) == 0)
+            # gamba OOS DEGENERE: _OOS a 0 byte o ASSENTE (la riga accetta tutti e due, classe 766)
+            e0 = e0 and ((roos is None and noos == 'ASSENTE') or (roos is not None and len(roos) == 0))
         else:
             e0b = roos is not None and len(roos) == 2 and all((r.get('Trades') or 0) > 0 for r in roos)
             e0 = e0 and e0b
@@ -390,7 +520,7 @@ def r250_leggi(rac, senza_bande=False):
                 csv_letti.append(('OOS', roos))
         # 5.0 PIN dal CSV
         if pins is None:
-            pin_txt = '[NON VERIFICABILE] prova assente'
+            pin_txt = '[NON VERIFICABILE] prova: ' + fonte_pin
             pin_ok = False
         else:
             manc, div, nconf = [], [], 0
@@ -420,6 +550,9 @@ def r250_leggi(rac, senza_bande=False):
             for gamba, rows in csv_letti:
                 if r250.g1_csv(rowdict(rows[0]), rowdict(rows[1])) != 'PASS':
                     g1csv = 'NULLO (%s)' % gamba
+                pa, pb = rows[0].get('Profit Factor'), rows[1].get('Profit Factor')
+                if num(pa) is not None and num(pb) is not None and ((round(pa, 4) == round(pb, 4)) != (abs(pa - pb) <= 0.00005 + 1e-12)):
+                    forma.append('%s G1 %s: PF %s / %s -- testa (r250.g1_csv, "alla quarta decimale" = arrotondamento) e riga (|delta| <= 0,00005) danno esiti DIVERSI; vale la testa, lo si scrive' % (t, gamba, pa, pb))
         g1pt = 'NON VERIFICABILE'
         if pt1 is not None and pt2 is not None:
             es, mot = r250.g1_pertrade(pt1, pt2)
@@ -443,11 +576,14 @@ def r250_leggi(rac, senza_bande=False):
                         probl.append('%s Trades %s' % (gamba, r.get('Trades')))
                     if round(r.get('Profit Factor') or 0, 4) != round(a['PF'], 4):
                         probl.append('%s PF %s' % (gamba, r.get('Profit Factor')))
+                    if (round(r.get('Profit Factor') or 0, 4) == round(a['PF'], 4)) != (abs((r.get('Profit Factor') or 0) - a['PF']) <= 0.00005 + 1e-12):
+                        forma.append('%s G0 %s: PF %s contro %s -- testa (quarta decimale) e riga (|delta| <= 0,00005) DIVERGONO; vale la testa' % (t, gamba, r.get('Profit Factor'), a['PF']))
                     if abs((r.get('Profit') or 0) - a['Profit']) > r250.TOL_PROFIT + 1e-9:
                         probl.append('%s Profit %s' % (gamba, r.get('Profit')))
                     if abs((r.get('Equity DD %') or 0) - a['DD']) > r250.TOL_DD + 1e-9:
                         probl.append('%s DD %s' % (gamba, r.get('Equity DD %')))
-                    if r.get('Peggior Giornata %') is None or abs(r['Peggior Giornata %'] - a['PG']) > 1e-4 + 1e-9:
+                    # PG: la testa non ne fissa la forma; la riga usa |delta| <= 0,00005 (classe 875: la stessa forma)
+                    if num(r.get('Peggior Giornata %')) is None or abs(r['Peggior Giornata %'] - a['PG']) > 0.00005 + 1e-9:
                         probl.append('%s PG %s' % (gamba, r.get('Peggior Giornata %')))
             ak = arch.get(j['fin'])
             if pt1 is None or ak is None:
@@ -460,6 +596,10 @@ def r250_leggi(rac, senza_bande=False):
                     probl.append('prima chiusura %s < 2025.07.01' % min(r['d'] for r in pt1))
             g0 = 'VERDE' if not probl else 'ROSSO (' + '; '.join(probl)[:220] + ')'
             E['g0'][t] = 'VERDE' if not probl else 'ROSSO'
+            gr = (RP or {}).get('g0', {}).get(t)
+            if gr == 'ROSSO' and E['g0'][t] == 'VERDE':
+                E['g0'][t] = 'ROSSO'
+                g0 = 'ROSSO (la RIGA lo scrive ROSSO, il lettore VERDE: vale il ROSSO, classe 873)'
         # 5.5 S2
         s2txt = 'n/a'
         if j['clk'] != 'd0' and pt1 is not None and dati.get(R250_D0[j['fin']], {}).get('pt1') is not None:
@@ -467,14 +607,21 @@ def r250_leggi(rac, senza_bande=False):
             s2txt = '%d / %d' % (com, opp)
             E['s2'][t] = opp
         valido = bool(pin_ok and g1csv == 'PASS' and g1pt == 'PASS' and s1[0] == 'VERDE')
+        rm = motivi_riga(RP, t)
+        E['riga'][t] = rm
+        if rm:
+            valido = False     # classe 873: i NULLI della riga (motore, prova, rc 1, C0, S1 identita) si UNISCONO
         E['stato'][t] = 'VALIDO' if valido else 'NON VALIDO'
         E['s1'][t] = s1[0]
         E['pin'][t] = pin_ok
         d.update(valido=valido, csv_letti=csv_letti)
         dati[t] = d
         L.append('| %s | %s / %s | %s | %s | %s | %s | %s | %s %s | %s | %s | **%s** |' % (
-            t, j['clk'], j['fin'], nis, noos, pin_txt, g1csv, g1pt, s1[0], s1[1], (g0 or 'n/a (non d0)'), s2txt, E['stato'][t]))
+            t, j['clk'], j['fin'], nis, noos, pin_txt, g1csv, g1pt, s1[0], s1[1], (g0 or 'n/a (non d0)'), s2txt,
+            E['stato'][t] + ((' (NULLO DELLA RIGA: ' + '; '.join(rm)[:180] + ')') if rm else '')))
     L.append('')
+    for x in forma:
+        L.append('- DIVERGENZA DI FORMA (classe 875): ' + x)
     L.append('Fonti: `ROUND_<tag>/%s_%s_IS|OOS_<tag>.csv` [MISURATO], `PERTRADE/abtg_trades_%s_%s_<magic>.csv` [MISURATO], pin dal file prova. S1 sulle celle spostate confronta anche l identita col d0 della stessa finestra (per-trade identico = ROSSO). S2 informativo: opposti > 0 -> ogni zona si scrive "orologio + candela".' % (ea, sym, ea, sym))
     L.append('')
     # --- 5.3 G2
@@ -600,9 +747,9 @@ def r250_leggi(rac, senza_bande=False):
     L.append('- costo 40x in pre-mercato (-1h): [NON MISURATO] (testa par. 11): le celle -1h sono STRUMENTI, ESCLUSE PER COSTO come candidate finche il range delle 8:30 NY non e misurato.')
     L.append('')
     # --- curva in fase (metodo R255 par. 7/9), R1/R2/R3 asimmetrici
-    L.append('### R250 -- CURVA IN FASE e R1/R2/R3 [DERIVATO: metodo di R255a par. 7 e 9; la testa R250a par. 9 NON fissa soglie -- e una LETTURA, non un cancello del round]')
+    L.append('### R250 -- CURVA IN FASE e R1/R2/R3 [DERIVATO: metodo di R255a par. 7 e 9; la testa R250a par. 9 NON fissa soglie -- e una LETTURA, non un cancello del round: un DERIVATO puo solo SEGNALARE, MAI bocciare]')
     L.append('')
-    L.append('Curve per finestra (posizioni per position_id, stagione USA per data di chiusura): IN FASE (cash NY tutto l anno) = d0 d ESTATE + (+1h) d INVERNO; PRE-MERCATO (8:30 NY tutto l anno) = (-1h) d ESTATE + d0 d INVERNO; CONTROLLO = d0 intero (il BCM a ora fissa, = il contratto R247). Metodo A ribasato (r = net / saldo della SUA corsa) e B denaro. Tetti R1 (finestra A) e R2 (finestra B) = DD a saldo chiuso della curva CONTROLLO della stessa finestra (il contratto della cella), con e_eff = %.4f (R255a par. 7, pavimento simulato, NON misurato su questo motore): VIOLATO se min(A,B) x (1-e) > S; RISPETTATO se max(A,B) x (1+e) <= S; NON RISOLTO altrimenti. R3 peggior giornata >= %.2f%% (soglia di casa; se il CONTROLLO d0 della finestra fa peggio, il tetto e il SUO numero: il metro deve riconoscere il riferimento) sui metodi A e B. Verdetto ASIMMETRICO (classe 804): una violazione vale a qualunque n; il rispetto si scrive "NON VIOLATO su n = X" -- la P che un motore senza edge lo rispetti NON e data (nessun modello tarato su questo motore).' % (E_EFF_R255, R3_SOGLIA))
+    L.append('Curve per finestra (posizioni per position_id, stagione USA per data di chiusura): IN FASE (cash NY tutto l anno) = d0 d ESTATE + (+1h) d INVERNO; PRE-MERCATO (8:30 NY tutto l anno) = (-1h) d ESTATE + d0 d INVERNO; CONTROLLO = d0 intero (il BCM a ora fissa, = il contratto R247). Metodo A ribasato (r = net / saldo della SUA corsa) e B denaro. Riferimenti R1 (finestra A) e R2 (finestra B) = DD a saldo chiuso della curva CONTROLLO della stessa finestra (il contratto della cella), con e_eff = %.4f (R255a par. 7, pavimento simulato, NON misurato su questo motore): SEGNALAZIONE se min(A,B) x (1-e) > S; SOTTO IL CONTROLLO se max(A,B) x (1+e) <= S; NON RISOLTO altrimenti. R3 peggior giornata >= %.2f%% (soglia di casa; se il CONTROLLO d0 della finestra fa peggio, il riferimento e il SUO numero) sui metodi A e B. NESSUNA di queste parole e un verdetto: la testa R250a par. 9 scrive "riferimenti per la lettura (NON soglie di questo round)" -- una SEGNALAZIONE va a Claudio come domanda, non come BOCCIATA (il muro vero resta il Guardian 4,0%% e il 10%% FTMO, par. 9). Il rispetto si scrive "sotto il CONTROLLO su n = X" (classe 804: la P che un motore senza edge lo rispetti NON e data). SCARTO DI SALDO (classe 876): la curva in fase MESCOLA due corse (d0 e cella spostata); lo scarto |saldo della corsa / saldo della curva - 1| contiene PER COSTRUZIONE l utile dell altra stagione della corsa, quindi si stampa scomposto: COSTRUZIONE = corsa contro curva in denaro (B), RIBASAMENTO = curva B contro curva A (quello che la regola d ufficio di R255 vuole misurare).' % (E_EFF_R255, R3_SOGLIA))
     L.append('')
     for fin in ('A', 'B'):
         d0, dm, dp = (dati.get(x) for x in (R250_D0[fin], 'R250c' if fin == 'A' else 'R250d', 'R250e' if fin == 'A' else 'R250f'))
@@ -623,29 +770,36 @@ def r250_leggi(rac, senza_bande=False):
             pI = [p for p in ribasa(posizioni(cella_I['pt1'])) if r250.stagione(p['data']) == 'I']
             fase = sorted(pE + pI, key=lambda p: p['ct0'])
             cA, cB = curva(fase, 'A'), curva(fase, 'B')
-            # scarto di saldo massimo (metodo A)
-            saldo, scarti = DEPOSITO, []
+            # scarto di saldo massimo (lettera di R255a par. 7) e la sua SCOMPOSIZIONE (classe 876)
+            saldoA = saldoB = DEPOSITO
+            scarti, costr, ribas = [], [], []
             for p in fase:
-                scarti.append(abs(p['B_corsa'] / saldo - 1.0))
-                saldo += p['net_curva_A']
+                scarti.append(abs(p['B_corsa'] / saldoA - 1.0))
+                costr.append(abs(p['B_corsa'] / saldoB - 1.0))
+                ribas.append(abs(saldoB / saldoA - 1.0))
+                saldoA += p['net_curva_A']
+                saldoB += p['net_curva_B']
             scarto = max(scarti) if scarti else 0.0
+            sc_costr = max(costr) if costr else 0.0
+            sc_ribas = max(ribas) if ribas else 0.0
             lo, hi = min(cA['dd_pct'], cB['dd_pct']), max(cA['dd_pct'], cB['dd_pct'])
             if lo * (1 - E_EFF_R255) > S:
-                r12 = 'VIOLATO -> BOCCIATA PER RISCHIO (a qualunque n)'
+                r12 = 'SEGNALAZIONE [DERIVATA]: DD sopra quello del CONTROLLO (min(A,B) x (1-e) = %.2f%% > %.2f%%) -- NON una bocciatura (testa R250a par. 9: nessuna soglia), va a Claudio come domanda' % (lo * (1 - E_EFF_R255), S)
             elif hi * (1 + E_EFF_R255) <= S:
-                r12 = 'NON VIOLATO su n = %d posizioni' % cA['n']
+                r12 = 'sotto il CONTROLLO su n = %d posizioni [DERIVATO]' % cA['n']
             else:
-                r12 = 'NON RISOLTO (classe 550)'
-            if scarto > 0.10 and 0.8 * S <= hi <= 1.2 * S and 'VIOLATO ->' not in r12:
-                r12 = 'NON RISOLTO d ufficio (scarto di saldo %.1f%% > 10%%, R255a par. 7)' % (scarto * 100)
-            # R3: tetto = la soglia di casa, ma MAI piu severo del riferimento stesso (R255a par. 9:
-            # un metro che non riconosce il riferimento non misura): min(-1,10; pegg. giornata del CONTROLLO)
+                r12 = 'NON RISOLTO [DERIVATO] (classe 550)'
+            if scarto > 0.10 and 0.8 * S <= hi <= 1.2 * S and not r12.startswith('SEGNALAZIONE'):
+                r12 = 'NON RISOLTO d ufficio [DERIVATO] (lettera di R255a par. 7: scarto di saldo %.1f%% > 10%%; di cui RIBASAMENTO %.1f%%: %s)' % (
+                    scarto * 100, sc_ribas * 100, 'l eccesso e la COSTRUZIONE (utile dell altra stagione nella corsa), non il lotto' if sc_ribas <= 0.10 else 'il ribasamento da solo supera il 10%')
+            # R3: riferimento = la soglia di casa, ma MAI piu severo del riferimento stesso: min(-1,10; pegg. giornata del CONTROLLO)
             s3 = min(R3_SOGLIA, ctrl['pegg_pct'])
-            r3 = ('VIOLATO (%.2f%% < tetto %.2f%%) -> BOCCIATA PER RISCHIO' % (min(cA['pegg_pct'], cB['pegg_pct']), s3)) if min(cA['pegg_pct'], cB['pegg_pct']) < s3 - 1e-9 else 'NON VIOLATO su n = %d (tetto %.2f%%)' % (cA['n'], s3)
-            E['fase'][(fin, nome)] = dict(r12=r12, r3=r3, n=cA['n'], ddA=cA['dd_pct'], ddB=cB['dd_pct'])
-            L.append('  - %s: n %d (%d estate + %d inverno), metodo A: Profit %.2f PF %.4f DD %.2f%% pegg %s%% serie %d | metodo B: Profit %.2f PF %.4f DD %.2f%% pegg %s%% serie %d | scarto di saldo max %.1f%% | **R%s %s** | **R3 %s**'
+            pmin = min(cA['pegg_pct'], cB['pegg_pct'])
+            r3 = ('SEGNALAZIONE [DERIVATA]: peggior giornata %.2f%% sotto il riferimento %.2f%% -- NON una bocciatura (testa R250a par. 9)' % (pmin, s3)) if pmin < s3 - 1e-9 else 'sopra il riferimento su n = %d (riferimento %.2f%%) [DERIVATO]' % (cA['n'], s3)
+            E['fase'][(fin, nome)] = dict(r12=r12, r3=r3, n=cA['n'], ddA=cA['dd_pct'], ddB=cB['dd_pct'], scarto=scarto, costr=sc_costr, ribas=sc_ribas)
+            L.append('  - %s: n %d (%d estate + %d inverno), metodo A: Profit %.2f PF %.4f DD %.2f%% pegg %s%% serie %d | metodo B: Profit %.2f PF %.4f DD %.2f%% pegg %s%% serie %d | scarto di saldo max %.1f%% (lettera), scomposto (fattori, non addendi): COSTRUZIONE %.1f%% e RIBASAMENTO %.1f%% (classe 876) | **R%s %s** | **R3 %s**'
                      % (nome, cA['n'], len(pE), len(pI), cA['profit'], cA['pf'] or 0, cA['dd_pct'], f2(cA['pegg_pct']), cA['serie'],
-                        cB['profit'], cB['pf'] or 0, cB['dd_pct'], f2(cB['pegg_pct']), cB['serie'], scarto * 100, '1' if fin == 'A' else '2', r12, r3))
+                        cB['profit'], cB['pf'] or 0, cB['dd_pct'], f2(cB['pegg_pct']), cB['serie'], scarto * 100, sc_costr * 100, sc_ribas * 100, '1' if fin == 'A' else '2', r12, r3))
     L.append('')
     L.append('- MERITO sulla curva in fase: SOSPESO per aritmetica (n < 150 in ogni finestra, par. 8). Nessuna proposta di taglia. Il certificato di morte NON si scrive da un round solo.')
     L.append('')
@@ -768,7 +922,7 @@ def leggi_htm_deals(path):
     return deals, bool(idx)
 
 
-def r258_leggi(rac):
+def r258_leggi(rac, RP=None):
     L, E = [], dict(nullo={}, k1={}, r1={}, esito={}, h1={}, h2={}, h3={}, ccomm=None, s2=None, m1={})
     ea = 'ABTG_Londra_ORB'
     L.append('## R258 -- LONDRA ORB ALL ORA GIUSTA (testa `prove/R258a_londra_T_GBPUSD_ora8_UK_TESTA.txt` par. 7-9)')
@@ -784,9 +938,14 @@ def r258_leggi(rac):
         ris, nis = leggi_csv_opt(os.path.join(cart, '%s_%s_IS%s_%s.csv' % (ea, j['s'], sfx, t)))
         roos, noos = leggi_csv_opt(os.path.join(cart, '%s_%s_OOS%s_%s.csv' % (ea, j['s'], sfx, t)))
         pins, asse, fonte = leggi_pin(rac, j)
-        dati[t] = dict(job=j, ris=ris, roos=roos, nis=nis, noos=noos, pins=pins, fonte=fonte, mot=[], saltato=False)
+        dati[t] = dict(job=j, ris=ris, roos=roos, nis=nis, noos=noos, pins=pins, fonte=fonte, mot=[], saltato=False,
+                       ricucito=('ricucite' in (nis or '')) or ('ricucite' in (noos or '')))
+        # SALTATO esiste SOLO per il blocco L (prerequisito M1 dal 2008): un file T/G/B/D/F senza cartella e NULLO
         if ris is None and roos is None and not os.path.isdir(cart):
-            dati[t]['saltato'] = True
+            if j['blk'] == 'L':
+                dati[t]['saltato'] = True
+            else:
+                dati[t]['mot'].append('cartella ROUND_%s ASSENTE (non un blocco L: NON e un salto, e un nullo)' % t)
     # --- catena per file
     L.append('### R258 -- catena per file')
     L.append('')
@@ -810,7 +969,7 @@ def r258_leggi(rac):
                     e0 = False
                     d['mot'].append('E0 %s riga F=0 con Trades 0' % gamba)
         # P0: tutti i pin numerici del file (non asse) uguali in ogni riga; asse coi valori attesi
-        p0txt, p0ok = 'NON VERIFICABILE (prova assente)', False
+        p0txt, p0ok = 'NON VERIFICABILE (prova: %s)' % d['fonte'], False
         if d['pins'] is not None and e0:
             nconf, div = 0, []
             for gamba, rows in (('IS', d['ris']), ('OOS', d['roos'])):
@@ -818,9 +977,12 @@ def r258_leggi(rac):
                 for i, r in enumerate(rows):
                     for k, v in d['pins'].items():
                         pv = num(v)
-                        if pv is None or k not in r:
-                            continue
+                        if pv is None:
+                            continue           # pin stringa (InpNewsFile, InpNewsCurrencies, InpComment): la riga non li confronta
                         nconf += 1
+                        if k not in r:
+                            div.append('%s riga %d colonna %s ASSENTE nel CSV' % (gamba, i + 1, k))
+                            continue
                         if num(r[k]) is None or abs(num(r[k]) - pv) > 1e-6:
                             div.append('%s riga %d %s=%s (pin %s)' % (gamba, i + 1, k, r[k], v))
                     vals.append(num(r.get(j['ax'])))
@@ -871,16 +1033,33 @@ def r258_leggi(rac):
                         d['mot'].append('G1 %s %s: %s contro %s' % (gamba, c, a.get(c), b.get(c)))
             g1 = 'VERDE' if g1ok else 'ROSSO'
         d['e0'] = e0
+        # classe 873: i NULLI della riga si UNISCONO. Eccezione DICHIARATA (classe 883): la virgola dentro
+        # InpNewsCurrencies=GBP,USD sposta di un campo le colonne che la seguono (InpComment, InpMagic,
+        # InpMaxSpread, InpVerbose) e Import-Csv della riga SCARTA il campo in piu': il P0 della riga (e l'ASSE
+        # InpMagic del blocco G) e' letto su colonne SPOSTATE. Si esenta SOLO se il CSV ha davvero la virgola
+        # (ricucito) E il P0 del lettore sulle colonne ricucite e' VERDE; ogni altro motivo della riga vale.
+        d['riga_esenti'] = []
+        for m in motivi_riga(RP, t):
+            spost = d['ricucito'] and p0ok and (m.startswith('P0 PIN DAL CSV') or (m.startswith('ASSE DIVERSO') and j['blk'] == 'G'))
+            if spost:
+                d['riga_esenti'].append(m)
+            else:
+                d['mot'].append('RIGA: ' + m)
         L.append('| %s | %s/%s/%s | %s | %s | %s | %s | %s | %s | %s | %s |' % (
             t, j['blk'], j['s'], j.get('ora', ''), d['nis'], d['noos'], 'VERDE' if e0 else 'ROSSO', p0txt, f0, f1, g1,
-            '**NULLO**: ' + '; '.join(d['mot'])[:160] if d['mot'] else 'passa'))
+            ('**NULLO**: ' + '; '.join(d['mot'])[:200] if d['mot'] else 'passa')
+            + ((' | NULLO della riga NON unito (colonne spostate dalla virgola di InpNewsCurrencies, classe 883; P0 del lettore VERDE sulle colonne ricucite): ' + '; '.join(d['riga_esenti'])[:160]) if d['riga_esenti'] else '')))
     L.append('')
     # --- T1, X1, S1 (incrociati)
     L.append('### R258 -- controlli incrociati T1 (TF inerte), X1 (identita fra file), S1 (l ora morde)')
     L.append('')
 
-    def uguale_cent(a, b, cols=('Profit', 'Profit Factor', 'Trades', 'Equity DD %')):
-        return all(num(a.get(c)) is not None and num(b.get(c)) is not None and abs(num(a[c]) - num(b[c])) <= 0.01 + 1e-9 for c in cols)
+    # "al centesimo" (testa par. 7 T1/X1) con la STESSA forma della riga (X1C): Trades identici, PF entro 0,00005,
+    # Profit e Equity DD % entro 0,005 -- NON 0,01 sul PF, che lascerebbe passare due PF diversi (classe 875)
+    X1C = (('Trades', 1e-6), ('Profit Factor', 0.00005), ('Profit', 0.005), ('Equity DD %', 0.005))
+
+    def uguale_cent(a, b):
+        return all(num(a.get(c)) is not None and num(b.get(c)) is not None and abs(num(a[c]) - num(b[c])) <= tol + 1e-9 for c, tol in X1C)
 
     t1_ko = False
     for g, a in R258_TF_LINK.items():
@@ -915,22 +1094,27 @@ def r258_leggi(rac):
         if not all(x.get('e0') for x in ds.values()):
             L.append('- S1 %s blocco %s: NON VERIFICABILE (E0 su almeno un file d ora)' % (symb, blk))
             continue
-        ok = True
+        ko = set()
         for gamba in ('ris', 'roos'):
             rr = {h: riga_asse(ds[h][gamba], 'InpMinRangePips', 0) for h in ds}
             for h1, h2 in ((7, 8), (8, 9), (7, 9)):
                 a, b = rr[h1], rr[h2]
                 if a is None or b is None or (a.get('Trades') == b.get('Trades') and abs((a.get('Profit') or 0) - (b.get('Profit') or 0)) < 1e-6):
-                    ok = False
-        L.append('- S1 %s blocco %s: righe b=3 F=0 delle tre ore differiscono a due a due in Trades o Profit in ogni gamba: **%s**%s' % (symb, blk, 'VERDE' if ok else 'ROSSO', '' if ok else ' -> pin d ora non arrivati: i tre file NULLI'))
-        if not ok:
-            for x in ds.values():
-                x['mot'].append('S1 ora')
+                    ko.add((h1, h2))
+        # testa par. 7 S1: "Uguali = pin non arrivati -> QUEI file NULLI": solo i file delle coppie uguali (classe 875)
+        nulli_s1 = sorted({h for c in ko for h in c})
+        L.append('- S1 %s blocco %s: righe b=3 F=0 delle tre ore differiscono a due a due in Trades o Profit in ogni gamba: **%s**%s' % (
+            symb, blk, 'VERDE' if not ko else 'ROSSO', '' if not ko else ' -> coppie uguali %s: pin d ora non arrivati, NULLI i file delle ore %s' % (sorted(ko), nulli_s1)))
+        for h in nulli_s1:
+            ds[h]['mot'].append('S1 ora')
     # --- C-COMM e S2
     L.append('')
     L.append('### R258 -- C-COMM (il tester addebita la commissione forex?) e S2 (uscite dentro la giornata), corsa singola R258a b=3 F=0')
     L.append('')
-    deals, hdr = leggi_htm_deals(os.path.join(rac, 'CCOMM_R258', 'CCOMM_R258.htm'))
+    # la riga copia il report per NOME 'CCOMM_R258*.htm*' (il tester puo scrivere .htm o .html): si cerca uguale
+    cc_dir = os.path.join(rac, 'CCOMM_R258')
+    cc_rep = sorted(x for x in (os.listdir(cc_dir) if os.path.isdir(cc_dir) else []) if re.match(r'(?i)^CCOMM_R258.*\.html?$', x))
+    deals, hdr = leggi_htm_deals(os.path.join(cc_dir, cc_rep[0] if cc_rep else 'CCOMM_R258.htm'))
     ccomm_ok, s2_ko = False, False
     if deals is None:
         L.append('- [NON VERIFICABILE] `CCOMM_R258/CCOMM_R258.htm` assente: C-COMM NON VERIFICATO -> M1 si scrive LORDO DI COMMISSIONE e NESSUNA riga puo essere promossa.')
@@ -968,99 +1152,129 @@ def r258_leggi(rac):
             d['mot'].append('S2 KO (C-COMM)')
         E['nullo'][t] = 'NULLO' if d['mot'] else 'passa'
     L.append('')
-    # --- K1, R1, M1-M4, esiti per riga
+    # --- K1, R1, M1-M4, esiti per riga. DUE PASSATE (classe 874): prima le misure di ogni riga, poi M4
+    #     sui file B, e SOLO DOPO la parola dell'esito, che dipende da M4 per le righe designate.
     L.append('### R258 -- per riga: scansione di F, K1 costo, R1 rischio, M1-M4 merito, esito (testa par. 7)')
     L.append('')
     L.append('| file | riga | Trades IS/OOS (quota feriali) | Profit IS/OOS | PF IS/OOS | RF OOS | DD_fisso% IS/OOS | K1 (F*, stop mediano, x) | R1 | M1-M4 | esito |')
     L.append('|---|---|---|---|---|---|---|---|---|---|---|')
-    esiti = {}
+    lordo = '' if ccomm_ok else ' LORDO DI COMMISSIONE (C-COMM %s)' % E['ccomm']
+    righe_m = []
     for t, d in dati.items():
         j = d['job']
         if d['saltato'] or not d.get('e0'):
             continue
-        nullo = bool(d['mot'])
         # scansione di F per K1: dal file stesso (T/F/L) o dal file T dello stesso simbolo/ora 8 (G/B/D, via T1/X1)
         srcF = d if j['blk'] in ('T', 'F', 'L') else dati['R258a' if j['s'] == 'GBPUSD' else 'R258d']
         tf = {}
         if srcF.get('e0'):
             for G in R258_GRID:
-                a, b = riga_asse(srcF['ris'], 'InpMinRangePips', G), riga_asse(srcF['roos'], 'InpMinRangePips', G)
-                if a is not None and b is not None:
-                    tf[G] = (a.get('Trades') or 0) + (b.get('Trades') or 0)
+                a_, b_ = riga_asse(srcF['ris'], 'InpMinRangePips', G), riga_asse(srcF['roos'], 'InpMinRangePips', G)
+                if a_ is not None and b_ is not None:
+                    tf[G] = (a_.get('Trades') or 0) + (b_.get('Trades') or 0)
         for ri, ro in zip(sorted(d['ris'], key=lambda r: num(r.get(j['ax'])) or 0), sorted(d['roos'], key=lambda r: num(r.get(j['ax'])) or 0)):
             axv = num(ri.get(j['ax']))
             F = int(num(ri.get('InpMinRangePips')) or 0)
-            b = num(ri.get('InpBufferPips')) or 3.0
-            es_k1, fs, lo, hi, xlo, xhi = k1(tf, F, b, j['s']) if tf else ('NON CALCOLABILE', None, None, None, None, None)
+            bb = num(ri.get('InpBufferPips'))
+            bb = 3.0 if bb is None else bb
+            es_k1, fs, lo, hi, xlo, xhi = k1(tf, F, bb, j['s']) if tf else ('NON CALCOLABILE', None, None, None, None, None)
             E['k1'][(t, axv)] = es_k1
             ddI, ddO = dd_fisso(ri), dd_fisso(ro)
-            r1 = 'n/d'
-            if j['blk'] == 'L':
-                r1 = 'screening' + (' ALLARME DI REGIME' if any(x is not None and x > R258_R1_MAX for x in (ddI, ddO)) else '')
-            elif ddI is None or ddO is None:
-                r1 = 'NON CALCOLABILE (Profit 0)'
-            else:
-                r1 = 'RISPETTATO' if (ddI <= R258_R1_MAX and ddO <= R258_R1_MAX) else 'VIOLATO'
-            E['r1'][(t, axv)] = r1
             tI, tO = int(ri.get('Trades') or 0), int(ro.get('Trades') or 0)
+            # R1 (testa par. 7): una VIOLAZIONE vale in QUALUNQUE gamba e a qualunque n; il rispetto a n < 150
+            # si scrive "NON VIOLATO su n", mai "RISPETTATO" (classe 804); una gamba NON CALCOLABILE non
+            # nasconde la violazione dell'altra.
+            viol = [g for g, x in (('IS', ddI), ('OOS', ddO)) if x is not None and x > R258_R1_MAX]
+            if j['blk'] == 'L':
+                r1 = 'screening' + (' ALLARME DI REGIME' if viol else '')
+            elif viol:
+                r1 = 'VIOLATO (%s)' % '/'.join(viol)
+            elif ddI is None or ddO is None:
+                r1 = 'NON CALCOLABILE in una gamba (Profit 0: si legge l Equity DD %%), l altra non violata'
+            elif tI >= 150 and tO >= 150:
+                r1 = 'RISPETTATO'
+            else:
+                r1 = 'NON VIOLATO su n = %d/%d' % (tI, tO)
+            if j['blk'] == 'D' and r1.startswith('VIOLATO'):
+                r1 = r1 + ' [blocco D: R1 della testa vale per T, G, F -- segnalato, non boccia]'
+            E['r1'][(t, axv)] = r1
             pfI, pfO, rfO = ri.get('Profit Factor'), ro.get('Profit Factor'), ro.get('Recovery Factor')
-            mtxt = 'n/a'
-            m_ok = None
+            mtxt, m12, m3 = 'n/a', None, None
             if j['blk'] in ('T', 'B') and tO >= 150:
                 m1 = (pfO or 0) >= R258_M1
                 m2 = (rfO or 0) >= R258_M2
                 m3 = 'VERDE' if (tI >= 150 and (pfI or 0) >= 1.0) else ('ROSSO' if tI >= 150 else 'SOSPESO (n IS < 150)')
-                mtxt = 'M1 %s (P senza edge a n %d: %.2f) M2 %s M3 %s' % ('VERDE' if m1 else 'ROSSO', tO, p_noedge_m1(tO), 'VERDE' if m2 else 'ROSSO', m3)
-                m_ok = m1 and m2 and m3 == 'VERDE'
+                mtxt = 'M1 %s%s (P senza edge a n %d: %.2f) M2 %s M3 %s' % ('VERDE' if m1 else 'ROSSO', lordo, tO, p_noedge_m1(tO), 'VERDE' if m2 else 'ROSSO', m3)
+                m12 = m1 and m2
                 E['m1'][(t, axv)] = m1
             elif j['blk'] in ('T', 'B'):
                 mtxt = 'sospeso (n OOS %d < 150)' % tO
-            # esito per riga, in quest ordine
-            if nullo:
-                es = 'NULLO'
-            elif r1 == 'VIOLATO':
-                es = 'BOCCIATA PER RISCHIO'
-            elif es_k1.startswith('ESCLUSA') or 'ESCLUSA' in es_k1:
-                es = 'ESCLUSA PER COSTO'
-            elif j['blk'] == 'L':
-                es = 'SCREENING (nessun verdetto)'
-            elif j['blk'] in ('G', 'D', 'F'):
-                es = 'MAPPA (nessun merito: blocco %s)' % j['blk']
-            elif tO < 150:
-                es = 'SOSPESA (n OOS %d < 150: merito sospeso, rischio %s)' % (tO, r1)
-            elif m_ok:
-                designata = (t in R258_DESIGNATE and abs(b - 3.0) < 1e-6 and F == R258_DESIGNATE[t]) or (j['blk'] == 'B' and abs(b - 3.0) < 1e-6)
-                if designata and es_k1 == 'AMMESSA' and ccomm_ok:
-                    es = 'PROMOSSA AL PASSO SUCCESSIVO (mai in campo: prima D3/D4, orologio per data, firma di Claudio)'
-                else:
-                    es = 'INDIZIO FAVOREVOLE (%s)' % ('riga non designata' if not designata else ('K1 non AMMESSA' if es_k1 != 'AMMESSA' else 'C-COMM non verificato'))
-            elif m_ok is None:
-                es = 'INDIZIO FAVOREVOLE? no: M3 sospeso' if 'SOSPESO' in mtxt else 'senza merito (blocco)'
-            else:
-                es = 'NON PASSA IL MERITO (M1/M2/M3 rosso a n OOS %d): mappa, non promuovibile' % tO
-            esiti[(t, axv)] = es
-            E['esito'][(t, axv)] = es
-            qI, qO = tI / j['fis'], tO / j['foos']
-            L.append('| %s | %s=%g | %d/%d (%.2f/%.2f) | %s/%s | %s/%s | %s | %s/%s | %s | %s | %s | **%s** |' % (
-                t, j['ax'], axv, tI, tO, qI, qO, f2(ri.get('Profit')), f2(ro.get('Profit')), f2(pfI, 4), f2(pfO, 4), f2(rfO, 3), f2(ddI), f2(ddO),
-                ('%s (F* %s, stop [%s; %s) pip = %s-%sx)' % (es_k1, fs, f2(lo, 1), f2(hi, 1), f2(xlo, 1), f2(xhi, 1))) if fs is not None else es_k1, r1, mtxt, es))
-    L.append('')
-    L.append('Fonti: `ROUND_<tag>/%s_<simbolo>_IS|OOS[_ohlc]_<tag>.csv` [MISURATO]; K1, DD_fisso e quote [DERIVATO]. Per G/B/D la scansione di F viene dal file T dello stesso simbolo all ora 8 (identita T1/X1). Blocco L: screening, il DD su gambe di 8 anni NON si confronta col muro.' % ea)
-    # M4 sui file B
-    for t in ('R258u', 'R258v'):
-        d = dati[t]
+            righe_m.append(dict(t=t, j=j, ri=ri, ro=ro, axv=axv, F=F, b=bb, es_k1=es_k1, fs=fs, lo=lo, hi=hi, xlo=xlo, xhi=xhi,
+                                ddI=ddI, ddO=ddO, tI=tI, tO=tO, r1=r1, mtxt=mtxt, m12=m12, m3=m3, pfI=pfI, pfO=pfO, rfO=rfO))
+    # --- M4 sui file B (altopiano b=1/3/5, mai il picco), PRIMA degli esiti
+    m4 = {}
+    for tb, tdes in (('R258u', 'R258a'), ('R258v', 'R258d')):
+        d = dati[tb]
         if not d.get('e0') or d['mot']:
-            L.append('- M4 %s: NON LEGGIBILE (file nullo o E0)' % t)
+            m4[tdes] = ('NON LEGGIBILE', 'file %s nullo o E0 rosso' % tb)
             continue
         passa = {}
         for bv in (1.0, 3.0, 5.0):
-            passa[bv] = E['r1'].get((t, bv)) == 'RISPETTATO' and E['m1'].get((t, bv), False)
+            r1v = E['r1'].get((tb, bv), '')
+            passa[bv] = (not r1v.startswith('VIOLATO')) and not r1v.startswith('NON CALCOLABILE') and r1v != '' and E['m1'].get((tb, bv), False)
         if all(passa.values()):
-            L.append('- M4 %s (altopiano, mai il picco): b=1, b=3, b=5 passano TUTTE R1 e M1 -> vince il CENTRO b=3' % t)
+            m4[tdes] = ('VERDE', 'b=1, b=3, b=5 passano TUTTE R1 e M1 -> vince il CENTRO b=3')
         elif any(passa.values()) and not passa[3.0]:
-            L.append('- M4 %s: un BORDO sporge da solo (%s) -> DIREZIONE INDICATA, NON UNA CONFIGURAZIONE' % (t, ', '.join('b=%g' % k for k, v in passa.items() if v)))
+            m4[tdes] = ('BORDO', 'un BORDO sporge da solo (%s) -> DIREZIONE INDICATA, NON UNA CONFIGURAZIONE' % ', '.join('b=%g' % k for k, v in passa.items() if v))
+        elif passa[3.0]:
+            m4[tdes] = ('NON ALTOPIANO', 'solo %s passano R1 e M1: nessun altopiano (servono tutte e tre)' % ', '.join('b=%g' % k for k, v in passa.items() if v))
         else:
-            L.append('- M4 %s: %s' % (t, 'solo il centro passa: nessun altopiano (servono tutte e tre)' if passa[3.0] else 'nessuna riga passa R1 e M1 (o n OOS < 150: merito sospeso)'))
+            m4[tdes] = ('ROSSO', 'nessuna riga passa R1 e M1 (o n OOS < 150: merito sospeso)')
+        m4[tb] = m4[tdes]
+    E['m4'] = m4
+    # --- esiti, in quest'ordine (testa par. 7): NULLO, BOCCIATA PER RISCHIO, ESCLUSA PER COSTO, SOSPESA, INDIZIO, PROMOSSA
+    for rm in righe_m:
+        t, j, d = rm['t'], rm['j'], dati[rm['t']]
+        es_k1, r1, tO, F, bb = rm['es_k1'], rm['r1'], rm['tO'], rm['F'], rm['b']
+        designata = (t in R258_DESIGNATE and abs(bb - 3.0) < 1e-6 and F == R258_DESIGNATE[t]) or (j['blk'] == 'B' and abs(bb - 3.0) < 1e-6)
+        if d['mot']:
+            es = 'NULLO'
+        elif r1.startswith('VIOLATO') and j['blk'] != 'D':
+            es = 'BOCCIATA PER RISCHIO'
+        elif 'ESCLUSA' in es_k1:
+            es = 'ESCLUSA PER COSTO'
+        elif j['blk'] == 'L':
+            es = 'SCREENING (nessun verdetto)'
+        elif j['blk'] in ('G', 'D', 'F'):
+            es = 'MAPPA (nessun merito: blocco %s)' % j['blk']
+        elif tO < 150:
+            es = 'SOSPESA (n OOS %d < 150: merito sospeso, rischio %s)' % (tO, r1)
+        elif not rm['m12'] or rm['m3'] == 'ROSSO':
+            es = 'NON PASSA IL MERITO (M1/M2/M3 rosso a n OOS %d): mappa, non promuovibile' % tO
+        elif rm['m3'] != 'VERDE':
+            es = 'INDIZIO FAVOREVOLE (M1, M2 verdi; M3 sospeso: n IS < 150)'
+        else:
+            mv = m4.get(t, ('NON LEGGIBILE', 'M4 non applicabile'))[0] if designata else None
+            if not designata:
+                es = 'INDIZIO FAVOREVOLE (riga non designata: DIREZIONE INDICATA per il round dopo)'
+            elif es_k1 != 'AMMESSA':
+                es = 'INDIZIO FAVOREVOLE (K1 %s, non AMMESSA)' % es_k1
+            elif not ccomm_ok:
+                es = 'INDIZIO FAVOREVOLE (C-COMM %s: M1 LORDO DI COMMISSIONE)' % E['ccomm']
+            elif mv != 'VERDE':
+                es = 'NON PROMOSSA: M4 %s (%s)' % (mv, m4.get(t, ('', ''))[1])
+            else:
+                es = 'PROMOSSA AL PASSO SUCCESSIVO (mai in campo: prima D3/D4, orologio per data, firma di Claudio)'
+        E['esito'][(t, rm['axv'])] = es
+        qI, qO = rm['tI'] / j['fis'], tO / j['foos']
+        ri, ro = rm['ri'], rm['ro']
+        L.append('| %s | %s=%g | %d/%d (%.2f/%.2f) | %s/%s | %s/%s | %s | %s/%s | %s | %s | %s | **%s** |' % (
+            t, j['ax'], rm['axv'], rm['tI'], tO, qI, qO, f2(ri.get('Profit')), f2(ro.get('Profit')), f2(rm['pfI'], 4), f2(rm['pfO'], 4), f2(rm['rfO'], 3), f2(rm['ddI']), f2(rm['ddO']),
+            ('%s (F* %s, stop [%s; %s) pip = %s-%sx)' % (es_k1, rm['fs'], f2(rm['lo'], 1), f2(rm['hi'], 1), f2(rm['xlo'], 1), f2(rm['xhi'], 1))) if rm['fs'] is not None else es_k1, r1, rm['mtxt'], es))
+    L.append('')
+    L.append('Fonti: `ROUND_<tag>/%s_<simbolo>_IS|OOS[_ohlc]_<tag>.csv` [MISURATO]; K1, DD_fisso e quote [DERIVATO]. Per G/B/D la scansione di F viene dal file T dello stesso simbolo all ora 8 (identita T1/X1). Blocco L: screening, il DD su gambe di 8 anni NON si confronta col muro.' % ea)
+    for tb in ('R258u', 'R258v'):
+        L.append('- M4 %s (altopiano, mai il picco; decide la PROMOZIONE della riga designata %s): **%s** -- %s' % (tb, 'R258a F=70' if tb == 'R258u' else 'R258d F=50', m4.get(tb, m4.get('R258a' if tb == 'R258u' else 'R258d'))[0], m4.get(tb, m4.get('R258a' if tb == 'R258u' else 'R258d'))[1]))
     L.append('')
     # --- H1 / H2 / H3
     L.append('### R258 -- L ORA: H1 (ora fissa, blocco T), H2 (in fase, blocco F), H3 (screening, blocco L)')
@@ -1174,7 +1388,7 @@ def r258_leggi(rac):
 
 
 # ============================================================================= R259
-def r259_leggi(rac):
+def r259_leggi(rac, RP=None):
     L, E = [], dict(d0={}, s0={}, s1={}, verdetto={}, pf={})
     ea = 'ABTG_Nightly'
     L.append('## R259 -- NIGHTLY sui sei simboli mai misurati (teste `prove/R259_nightly_*_PIN.txt` par. 5-6; `report/NIGHTLY_SEI_SIMBOLI_2026-09-26.md` par. 4)')
@@ -1218,8 +1432,19 @@ def r259_leggi(rac):
             E['verdetto'][symb] = 'NON LETTO'
             continue
         tAI, tAO = int(aI.get('Trades') or 0), int(aO.get('Trades') or 0)
-        s0 = 'VERDE (0/0)' if (tAI == 0 and tAO == 0) else 'ROSSO (%d/%d): ROUND NON LETTO finche non si sa perche' % (tAI, tAO)
-        E['s0'][symb] = 'VERDE' if (tAI == 0 and tAO == 0) else 'ROSSO'
+        # S0: la cella ancora riproduce l'ARCHIVIO del SUO simbolo (testa par. 3; XAGUSD = 0/4 con numeri)
+        xI, xO, xnum = R259_ANCORA[t]
+        s0ok = (tAI == xI and tAO == xO)
+        s0det = ''
+        if s0ok and xnum:
+            dv = [c for c, v, col, tol in (('Profit', xnum['Profit'], 'Profit', 0.05), ('PF', xnum['PF'], 'Profit Factor', 0.00005), ('DD', xnum['DD'], 'Equity DD %', 0.01))
+                  if num(aO.get(col)) is None or abs(num(aO.get(col)) - v) > tol + 1e-9]
+            if dv:
+                s0ok = False
+                s0det = ', OOS diverso dall archivio in ' + '/'.join(dv)
+        s0 = ('VERDE (%d/%d = archivio%s)' % (tAI, tAO, ', Profit/PF/DD OOS entro le tolleranze della riga' if xnum else '')) if s0ok else \
+             'ROSSO (%d/%d contro archivio %d/%d%s): ROUND NON LETTO finche non si sa perche' % (tAI, tAO, xI, xO, s0det)
+        E['s0'][symb] = 'VERDE' if s0ok else 'ROSSO'
         tI, tO = int(mI.get('Trades') or 0), int(mO.get('Trades') or 0)
         qI, qO = tI / j['fis'], tO / j['foos']
         if tI == 0 or tO == 0:
@@ -1232,11 +1457,22 @@ def r259_leggi(rac):
         pfI, pfO = mI.get('Profit Factor'), mO.get('Profit Factor')
         ddI, ddO = mI.get('Equity DD %'), mO.get('Equity DD %')
         s2 = 'sospeso' if (tI < 150 or tO < 150) else 'leggibile'
-        s3 = 'fuori per RISCHIO alla gestione di default' if any(x is not None and x > 10.0 for x in (ddI, ddO)) else 'DD <= 10%'
+        # S3 "DD > 10% @1%, deposito 10000": si guardano Equity DD % (relativo al picco) E DD a deposito fisso
+        # |Profit/RF|/100 (classe 550); se dicono cose diverse si scrive quale ha deciso (il piu severo: Emendamento B)
+        dfI, dfO = dd_fisso(mI), dd_fisso(mO)
+        eq10 = any(x is not None and x > 10.0 for x in (ddI, ddO))
+        fx10 = any(x is not None and x > 10.0 for x in (dfI, dfO))
+        s3 = ('fuori per RISCHIO alla gestione di default' + ('' if eq10 else ' (dal DD a deposito fisso: l Equity DD % relativo sta sotto il 10%)')) if (eq10 or fx10) else 'DD <= 10%'
         s5 = 'screening PASSATO (molteplicita ~25%: un simbolo verde da solo non e un edge)' if (pfI is not None and pfO is not None and pfI >= 1.10 and pfO >= 1.10 and tI > 0 and tO > 0) else 'no'
         E['pf'][symb] = (pfI, pfO, tI, tO)
-        # verdetto per simbolo con le tre ipotesi
-        if E['s0'][symb] == 'ROSSO':
+        # verdetto per simbolo con le tre ipotesi; i NULLI della riga (E0, S0, S1, motore, prova, rc 1) vengono PRIMA (classe 873)
+        rmot = motivi_riga(RP, t)
+        _pp, _aa, fonte9 = leggi_pin(rac, j)
+        if _pp is None:
+            rmot = rmot + ['prova del lettore: ' + fonte9]     # SHA diverso dal pin o prova assente (classe 873)
+        if rmot:
+            v = 'NULLO DELLA RIGA O DELLA PROVA (%s): i numeri qui sono DIAGNOSI, non votano' % '; '.join(rmot)[:200]
+        elif E['s0'][symb] == 'ROSSO':
             v = 'ROUND NON LETTO (S0)'
         elif E['s1'][symb] != 'ok' or d0.startswith('NON'):
             v = 'NON ANCORA MISURATO (prima il disco: D0/S1)'
@@ -1269,38 +1505,54 @@ def r259_leggi(rac):
 
 
 # ============================================================================= riepilogo e referto
-def riepilogo(rac):
+def riepilogo(RP):
     L = []
-    p = os.path.join(rac, 'RIEPILOGO_ROUND_CORTI_A.txt')
-    if not os.path.isfile(p):
-        L.append('- [NON VERIFICABILE] `RIEPILOGO_ROUND_CORTI_A.txt` assente.')
+    if not RP['presente']:
+        L.append('- **[NON VERIFICABILE] `RIEPILOGO_ROUND_CORTI_A.txt` ASSENTE: classe 166 (motore = pin) NON VERIFICATA, SHA della prova solo dal lettore, rc 1 / C0 / freschezza dei CSV NON VERIFICATI. I NULLI della riga NON sono uniti: ogni esito qui sotto vale SOLO se la riga non li ha annullati (classe 873).**')
         return L
-    with open(p, encoding='utf-8', errors='replace') as fh:
-        righe = [x.rstrip() for x in fh]
-    chiavi = ('data:', 'fine:', 'pin :', 'ROUND PARTITI', 'CLASSE 166', 'CARTELLE ATTESE', 'PERTRADE R250', 'ARCHIVI R247', 'PREREQUISITO M1', 'CORSA SINGOLA', 'FILE SALTATI', 'FILE NULLI', 'FILE NON NULLI', 'R250 G0', 'R258 CONTROLLI')
-    for r in righe:
+    chiavi = ('data:', 'fine:', 'pin :', 'ROUND PARTITI', 'CLASSE 166', 'CARTELLE ATTESE', 'PERTRADE R250', 'ARCHIVI R247', 'PREREQUISITO M1', 'CORSA SINGOLA', 'FILE SALTATI', 'FILE NON NULLI', 'R250 G0', 'R258 CONTROLLI')
+    for r in RP['righe']:
         if any(r.startswith(k) for k in chiavi):
-            L.append('- [MISURATO, riga] `%s`' % r[:400])
+            L.append('- [MISURATO, riga] `%s`' % (r if len(r) <= 600 else r[:600] + ' ...[tagliata qui, intera nel file]'))
+    L.append('- [MISURATO, riga] FILE NULLI della riga: %d%s' % (len(RP['nulli']), '' if RP['nulli'] else ' (nessuno)'))
+    for tag, mot in RP['nulli'].items():
+        L.append('  - %s: %s' % (tag, '; '.join(mot)))
     return L
 
 
 def referto(rac, senza_bande=False):
-    rac = os.path.abspath(rac)
+    rac, nota = trova_raccolta(rac)
+    RP = leggi_riepilogo(rac)
     L = ['# REFERTO ROUND CORTI A -- lettura della raccolta `%s`' % os.path.basename(rac), '',
          'Generato da `backtest_pipeline/leggi_round_corti_a.py` il %s. Criteri CONGELATI nei file di testa (R250a par. 5-11, R258a par. 7-9, R259 par. 5-6 + referto NIGHTLY par. 4). Etichette: [MISURATO] letto da un file della raccolta, [DERIVATO] calcolato o preso da un referto, [NON VERIFICABILE] file assente. NESSUNA proposta di taglia; nessuna promozione in campo; il certificato di morte non si scrive da un round solo.' % dt.date.today().isoformat(), '',
-         '## 0. Il RIEPILOGO della riga (cosa e uscito, non il verdetto)', '']
-    L += riepilogo(rac)
+         'Cartelle ROUND_<tag> trovate: %d su %d.%s' % (conta_cartelle(rac), len(JOBS), (' ' + nota) if nota else ''), '',
+         '## 0. Il RIEPILOGO della riga (cosa e uscito, non il verdetto) e i NULLI della riga UNITI a quelli del lettore (classe 873)', '']
+    L += riepilogo(RP)
     L.append('')
-    l1, e1 = r250_leggi(rac, senza_bande)
-    l2, e2 = r258_leggi(rac)
-    l3, e3 = r259_leggi(rac)
+    l1, e1 = r250_leggi(rac, senza_bande, RP)
+    l2, e2 = r258_leggi(rac, RP)
+    l3, e3 = r259_leggi(rac, RP)
+    # divergenze riga/lettore, per nome (si stampano tutte e due le direzioni)
+    div = []
+    if RP['presente'] and RP['nonnulli'] is not None:
+        for j in JOBS:
+            t = j['t']
+            let_nullo = (e1['stato'].get(t) == 'NON VALIDO') if j['r'] == 'R250' else \
+                        (e2['nullo'].get(t) == 'NULLO') if j['r'] == 'R258' else \
+                        (not str(e3['verdetto'].get(t.split('_')[1], '')).startswith(('INDIZIO', 'NIENTE', 'lettura mista', 'NON ANCORA')))
+            riga_nullo = t in RP['nulli']
+            if let_nullo and not riga_nullo and t not in RP['saltati']:
+                div.append('- %s: NON NULLO per la riga, NULLO / NON VALIDO / NON LETTO per il lettore (il lettore e piu severo: vedi il motivo nella sua tabella)' % t)
+            if riga_nullo and j['r'] == 'R258' and e2['nullo'].get(t) != 'NULLO':
+                div.append('- %s: NULLO per la riga, NON nullo per il lettore -- motivi della riga NON uniti perche letti su colonne spostate dalla virgola di InpNewsCurrencies (classe 883): %s' % (t, '; '.join(RP['nulli'][t])[:220]))
     L += l1 + l2 + l3
+    L += ['## DIVERGENZE fra la riga e il lettore (per nome)', ''] + (div or ['- nessuna' if RP['presente'] else '- NON VERIFICABILE (RIEPILOGO assente)']) + ['']
     L += ['## NON LEGGIBILE DALLO SCRIPT (da fare a mano nel referto)', '',
-          '- R250: il 40x in pre-mercato (par. 11) e il range delle 8:30 NY; ogni conseguenza per FTMO (par. 7.2, [INFERITA]); la lettura dei LOG_TESTER; la verifica SHA256 del motore contro il pin (la riga la stampa nel RIEPILOGO, classe 166: qui si ricopia).',
+          '- R250: il 40x in pre-mercato (par. 11) e il range delle 8:30 NY; ogni conseguenza per FTMO (par. 7.2, [INFERITA]); la lettura dei LOG_TESTER; la classe 166 (SHA256 del motore) la verifica SOLO la riga: qui si UNISCONO i suoi NULLI.',
           '- R258: C-COMM se il report .htm non ha la tabella dei deal con Time/Direction/Commission; lo spread STORICO 2024-26 del tester; l orologio prima del 2018; la frequenza di famiglia; D3/D4 (difetti da campo) e la firma di Claudio prima di ogni passo.',
           '- R259: l ATR(14,H1) alle 05:00 (log degli agenti, non raccolti) e quindi la frontiera del costo per simbolo (S4 e presa dal referto, non dai dati); lo spread h05 di AUDUSD e XAGUSD; i per-trade (l EA non li scrive): separare le notti col box spostato dall orologio; il muro tick per AUDUSD/USDJPY/metalli.',
           '- Tutto: la decisione (firme di Claudio: taglie, sedie, conto reale) e la data del cambio d ora; il REGISTRO_TEST si aggiorna a mano con PF, n, DD e cancello.']
-    return '\n'.join(L), dict(r250=e1, r258=e2, r259=e3)
+    return '\n'.join(L), dict(r250=e1, r258=e2, r259=e3, riepilogo=RP)
 
 
 # ============================================================================= FIXTURE (autotest)
@@ -1350,7 +1602,6 @@ def costruisci_fixture(base, scenario='pulito'):
     (ancora, Pass 3); R258/R259 CSV finti con le colonne del driver."""
     rac = os.path.join(base, 'ROUND_CORTI_A_' + scenario)
     if os.path.isdir(rac):
-        import shutil
         shutil.rmtree(rac)
     os.makedirs(rac)
     arch_dir = os.path.join(QUI, 'risultati_archivio')
@@ -1405,8 +1656,7 @@ def costruisci_fixture(base, scenario='pulito'):
         cart = os.path.join(rac, 'ROUND_' + j['t'])
         os.makedirs(cart)
         # copia del file prova dal repo (pin)
-        with open(os.path.join(QUI, 'prove', j['p']), encoding='utf-8', errors='replace') as fh:
-            _scrivi(os.path.join(cart, j['p']), [x.rstrip('\r\n') for x in fh])
+        shutil.copyfile(os.path.join(QUI, 'prove', j['p']), os.path.join(cart, j['p']))   # byte per byte, come Copy-Item del driver (SHA = pin)
         # gamba IS = finestra A (righe dell archivio A o della cella A), gamba OOS = finestra B
         tA = j['t'] if j['fin'] == 'A' else j['t'][:-1] + chr(ord(j['t'][-1]) - 1)
         rowsA = celle[tA]
@@ -1433,6 +1683,11 @@ def costruisci_fixture(base, scenario='pulito'):
         W_MED[('GBPUSD', 8)] = 8.0
     PF_OOS = {('GBPUSD', 7): 0.95, ('GBPUSD', 8): 1.05, ('GBPUSD', 9): 0.98, ('EURUSD', 7): 0.97, ('EURUSD', 8): 1.02, ('EURUSD', 9): 0.99}
     PF_IS = {k: v - 0.03 for k, v in PF_OOS.items()}
+    if scenario == 'promossa':
+        # la riga designata GBPUSD F=70 con n OOS >= 150 (canale largo), PF e RF alti, DD basso: deve arrivare a
+        # PROMOSSA solo se M4 (R258u b=1/3/5) e verde -- contro-esempio della classe 874 (b)
+        W_MED[('GBPUSD', 8)] = 150.0
+        PF_OOS[('GBPUSD', 8)], PF_IS[('GBPUSD', 8)] = 1.60, 1.50
     if scenario in ('h1_010', 'h1_045'):
         PF_OOS[('GBPUSD', 7)] = 1.00
         PF_OOS[('GBPUSD', 8)] = 1.00 + (0.10 if scenario == 'h1_010' else 0.45)
@@ -1451,7 +1706,7 @@ def costruisci_fixture(base, scenario='pulito'):
         prof = round(n * 6.0 * (pf - 1.0) + rnd.uniform(-3, 3), 2)
         if prof == 0:
             prof = 0.5
-        dd_eur = round(300.0 + 40.0 * seed, 2)
+        dd_eur = round((300.0 + 40.0 * seed) * (0.5 if scenario == 'promossa' else 1.0), 2)
         rf = prof / dd_eur
         return prof, pf, rf, dd_eur / 100.0
     pins258 = {}
@@ -1520,8 +1775,7 @@ def costruisci_fixture(base, scenario='pulito'):
     for j in [x for x in JOBS if x['r'] == 'R258']:
         cart = os.path.join(rac, 'ROUND_' + j['t'])
         os.makedirs(cart)
-        with open(os.path.join(QUI, 'prove', j['p']), encoding='utf-8', errors='replace') as fh:
-            _scrivi(os.path.join(cart, j['p']), [x.rstrip('\r\n') for x in fh])
+        shutil.copyfile(os.path.join(QUI, 'prove', j['p']), os.path.join(cart, j['p']))   # byte per byte, come Copy-Item del driver (SHA = pin)
         sfx = '' if j['m'] == 4 else '_ohlc'
         for gamba in ('IS', 'OOS'):
             _scrivi(os.path.join(cart, '%s_%s_%s%s_%s.csv' % (ea2, j['s'], gamba, sfx, j['t'])), csv_cache[(j['t'], gamba)])
@@ -1556,8 +1810,7 @@ def costruisci_fixture(base, scenario='pulito'):
         hdr = ['Pass', 'Profit', 'Expected Payoff', 'Profit Factor', 'Recovery Factor', 'Sharpe Ratio', 'Equity DD %', 'Trades'] + inp
         cart = os.path.join(rac, 'ROUND_' + j['t'])
         os.makedirs(cart)
-        with open(os.path.join(QUI, 'prove', j['p']), encoding='utf-8', errors='replace') as fh:
-            _scrivi(os.path.join(cart, j['p']), [x.rstrip('\r\n') for x in fh])
+        shutil.copyfile(os.path.join(QUI, 'prove', j['p']), os.path.join(cart, j['p']))   # byte per byte, come Copy-Item del driver (SHA = pin)
         nI, nO, pfI, pfO, ddI, ddO = MIS[j['s']]
         for gamba, n, pf, dd in (('IS', nI, pfI, ddI), ('OOS', nO, pfO, ddO)):
             vals = []
@@ -1565,6 +1818,11 @@ def costruisci_fixture(base, scenario='pulito'):
                 if av == j['anc']:
                     tr = 3 if (scenario == 's0_trade' and j['s'] == 'AUDUSD') else 0
                     prof, pfv, rf, ddv = (-30.0, 0.0, -0.3, 1.0) if tr else (0.0, 0.0, 0.0, 0.0)
+                    xI, xO, xnum = R259_ANCORA[j['t']]
+                    if xnum and gamba == 'OOS' and scenario != 'xag_00':
+                        # l'archivio di XAGUSD (testa par. 3): IS 0 / OOS 4, Profit 50.82, PF 1.26185, DD 1.6582
+                        tr, prof, pfv, ddv = xO, xnum['Profit'], xnum['PF'], xnum['DD']
+                        rf = prof / (ddv * 100.0)
                     row = [str(i), '%.2f' % prof, '0.00000', '%.5f' % pfv, '%.5f' % rf, '0.00000', '%.4f' % ddv, str(tr)]
                 else:
                     prof = round(n * 4.0 * (pf - 1.0), 2) or 1.0
@@ -1574,7 +1832,15 @@ def costruisci_fixture(base, scenario='pulito'):
                 vals.append(row)
             _scrivi(os.path.join(cart, '%s_%s_%s_ohlc_%s.csv' % (ea3, j['s'], gamba, j['t'])), _csv_da_righe(hdr, vals))
         _scrivi(os.path.join(cart, 'REFERTO_ROUND_%s.txt' % j['t']), ['REFERTO ROUND (fixture)'])
-    _scrivi(os.path.join(rac, 'RIEPILOGO_ROUND_CORTI_A.txt'), ['RIEPILOGO ROUND CORTI A -- fixture ' + scenario, 'data: 2026-09-28 09:00:00', 'pin : 202505d6', 'ROUND PARTITI (rc diverso da 1, non saltati): 36 su 36   SALTATI: 0', 'FILE NULLI (...): nessuno', 'FILE NON NULLI, per nome: tutti'])
+    # RIEPILOGO con le ETICHETTE VERE della riga (RIGA_ROUND_CORTI_A_R250_R258_R259.txt, 202505d6)
+    _scrivi(os.path.join(rac, 'RIEPILOGO_ROUND_CORTI_A.txt'), [
+        'RIEPILOGO ROUND CORTI A -- fixture ' + scenario, 'data: 2026-09-28 09:00:00', 'pin : 02c70e17eef870c26ef47b81942a0eb23d82aba8',
+        'ROUND PARTITI (rc diverso da 1, non saltati): 36 su 36   SALTATI: 0',
+        'CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job: ...): MOTORE = PIN in tutti i 36 round partiti',
+        'FILE SALTATI (non lanciati: prerequisito M1 del blocco L non soddisfatto; NON sono nulli di catena, escono dai conteggi perche non hanno numeri; R258o: si scrive un file NUOVO con la data misurata): nessuno',
+        'FILE NULLI (rc 1, motore o prova diversi dal pin, E0, asse o P0, C0, G1, S1, F0, F1, T1, X1, S0, S2; escono da OGNI conteggio, classi 772/775/781): nessuno',
+        'FILE NON NULLI, per nome: ' + ', '.join(j['t'] for j in JOBS),
+        'R250 G0 RIPRODUZIONE DI R247 (solo d0: a = CSV _IS 154 / 1.25176 / 1180.94 / 7.1002 e per-trade 765301 = 765271 (file par. 5.2); b = anche _OOS; VERDE o ROSSO, classe 750): R250a VERDE | R250b VERDE'])
     return rac
 
 
@@ -1596,11 +1862,16 @@ def autotest(base):
     assert P['r250']['zone']['A']['Qfc'] == 'STAGIONE', P['r250']['zone']['A']   # frequenza invariata per costruzione: Qf = 0
     assert all(v == 0 for v in P['r250']['s2'].values()), P['r250']['s2']
     assert all(v == 'PASS' for v in P['r250']['g2'].values()), P['r250']['g2']
-    # la fixture gonfia le perdite d inverno della +1h (x pI/pE): la curva IN FASE deve VIOLARE R1 (fatto accaduto,
-    # a qualunque n); la PRE-MERCATO (vincenti d estate gonfiati, perdite invariate) NON viola R1 ne R3
-    assert P['r250']['fase'][('A', 'IN FASE (cash NY)')]['r12'].startswith('VIOLATO'), P['r250']['fase']
-    assert P['r250']['fase'][('A', 'PRE-MERCATO (8:30 NY)')]['r12'].startswith('NON VIOLATO'), P['r250']['fase']
-    assert P['r250']['fase'][('A', 'PRE-MERCATO (8:30 NY)')]['r3'].startswith('NON VIOLATO'), P['r250']['fase']
+    # la fixture gonfia le perdite d inverno della +1h (x pI/pE): la curva IN FASE deve essere SEGNALATA (DD sopra
+    # il controllo) ma MAI "BOCCIATA": la testa R250a par. 9 non fissa soglie, il blocco e [DERIVATO] (cancello 27/09)
+    assert P['r250']['fase'][('A', 'IN FASE (cash NY)')]['r12'].startswith('SEGNALAZIONE'), P['r250']['fase']
+    assert P['r250']['fase'][('A', 'PRE-MERCATO (8:30 NY)')]['r12'].startswith('sotto il CONTROLLO'), P['r250']['fase']
+    assert P['r250']['fase'][('A', 'PRE-MERCATO (8:30 NY)')]['r3'].startswith('sopra il riferimento'), P['r250']['fase']
+    t250 = open(os.path.join(base, 'REFERTO_pulito.md'), encoding='utf-8').read().split('## R258')[0]
+    assert 'BOCCIATA' not in t250.replace('BOCCIATA,', '').replace('ne bocciatura', '').replace('una bocciatura', '').replace('MAI bocciare', '').replace('non come BOCCIATA', ''), 'R250: un DERIVATO scritto come BOCCIATA'
+    # classe 876: lo scarto d ufficio della PRE-MERCATO B e COSTRUZIONE, e il referto lo scompone
+    fb = P['r250']['fase'][('B', 'PRE-MERCATO (8:30 NY)')]
+    assert fb['scarto'] > 0.10 and fb['ribas'] <= 0.10 and 'COSTRUZIONE' in fb['r12'], fb
     # T2 G0 rosso: R250a ROSSO, verdetto NON LEGGIBILE (classe 750)
     assert F['r250']['g0']['R250a'] == 'ROSSO' and F['r250']['g0']['R250b'] == 'VERDE', F['r250']['g0']
     assert F['r250']['conferma']['Qc'] == 'NON LEGGIBILE', F['r250']['conferma']
@@ -1635,14 +1906,120 @@ def autotest(base):
     # T8 mai una proposta di taglia, mai "morto" nel referto pulito
     txt = open(os.path.join(base, 'REFERTO_pulito.md'), encoding='utf-8').read().lower()
     assert 'taglia proposta' not in txt and 'lotti consigliati' not in txt and 'morto' not in txt.replace('certificato di morte', '')
-    print('AUTOTEST: 8/8 PASS (fixture e referti in %s)' % base)
+    # ---------------------------------------------------------------- contro-esempi del cancello del 27/09
+    # T9 (classe 872): cartella madre con UNA raccolta -> si scende di un livello e lo si dichiara; cartella madre
+    #    con PIU raccolte o vuota -> errore, MAI un referto di NULLI
+    solo = os.path.join(base, '_madre_una')
+    if os.path.isdir(solo):
+        shutil.rmtree(solo)
+    os.makedirs(solo)
+    shutil.copytree(os.path.join(base, 'ROUND_CORTI_A_pulito'), os.path.join(solo, 'ROUND_CORTI_A_2026-09-27'))
+    txtm, Em = referto(solo, senza_bande=True)
+    assert 'scesa di UN livello' in txtm and Em['r250']['stato'] == P['r250']['stato'], 'T9 madre con una raccolta'
+    for cattiva in (base, os.path.join(base, '_vuota')):
+        os.makedirs(cattiva, exist_ok=True)
+        try:
+            referto(cattiva, senza_bande=True)
+            raise AssertionError('T9: %s ha prodotto un referto' % cattiva)
+        except SystemExit as e:
+            assert 'classe 872' in str(e), e
+    # T10 (classe 873 + 880): NULLI della riga uniti; P0/ASSE della riga su colonne SPOSTATE non uniti (e dichiarati);
+    #     prova con SHA diverso dal pin -> P0 NON VERIFICABILE -> NULLO; G0 ROSSO della riga vince sul VERDE del lettore
+    rac = costruisci_fixture(base, 'riga_nulli')
+    rp = os.path.join(rac, 'RIEPILOGO_ROUND_CORTI_A.txt')
+    righe = open(rp, encoding='ascii').read().splitlines()
+    nul = ('R250c (S1: per-trade IDENTICO al d0 R250a (la manopola dell orario NON ha morso: pin non arrivato))'
+           ' | R258a (MOTORE DIVERSO DAL PIN)'
+           ' | R258b (P0 PIN DAL CSV _IS DIVERSO (24 valori: InpMagic=[R258B LDN GBPUSD H7] atteso 795807 InpMaxSpread=[795807] atteso 0 InpVerbose=[0] atteso 1); P0 PIN DAL CSV _OOS DIVERSO (24 valori: InpMagic=[R258B LDN GBPUSD H7] atteso 795807))'
+           ' | R258g (ASSE DIVERSO nel _IS [NaN/NaN] attesi 795840/795890; P0 PIN DAL CSV _IS DIVERSO (6 valori: InpMaxSpread=[795840] atteso 0))'
+           ' | R258e (E0: CSV NON BUONI (_IS fresco 8 righe (attese 8; Trades>0 su 8; righe F=0 a zero 0), _OOS ASSENTE O VECCHIO); P0 PIN DAL CSV _IS DIVERSO (1 valori: InpMagic=[x] atteso 795817))'
+           ' | R259_USDJPY (S0 KO: ancora (cella 1) Trades IS 2 / OOS 0 contro archivio 0 / 0 -> ROUND NON LETTO (binario diverso dal sorgente citato, o dati diversi))')
+    righe = [('FILE NULLI (rc 1, motore o prova diversi dal pin, E0, asse o P0, C0, G1, S1, F0, F1, T1, X1, S0, S2; escono da OGNI conteggio, classi 772/775/781): ' + nul) if r.startswith('FILE NULLI') else
+             (r.replace('R250b VERDE', 'R250b ROSSO (per-trade 765302 contro archivio 765273 riga 3 diversa)') if r.startswith('R250 G0') else r) for r in righe]
+    _scrivi(rp, righe)
+    with open(os.path.join(rac, 'ROUND_R258c', JOB['R258c']['p']), 'ab') as fh:
+        fh.write(b'# un byte in piu dopo il pin\n')
+    txtr, Er = referto(rac, senza_bande=True)
+    assert Er['r250']['stato']['R250c'] == 'NON VALIDO' and Er['r250']['stato']['R250e'] == 'VALIDO', Er['r250']['stato']
+    assert Er['r250']['g0']['R250b'] == 'ROSSO' and Er['r250']['g0']['R250a'] == 'VERDE', Er['r250']['g0']
+    N = Er['r258']['nullo']
+    assert N['R258a'] == 'NULLO' and N['R258b'] == 'passa' and N['R258g'] == 'passa' and N['R258c'] == 'NULLO' and N['R258e'] == 'NULLO', N
+    assert 'classe 883' in txtr and 'R258b: NULLO per la riga, NON nullo per il lettore' in txtr, 'T10: esenzione non dichiarata'
+    assert Er['r259']['verdetto']['USDJPY'].startswith('NULLO DELLA RIGA'), Er['r259']['verdetto']['USDJPY']
+    assert Er['r258']['esito'][('R258a', 70.0)] == 'NULLO', Er['r258']['esito'][('R258a', 70.0)]
+    # T11 (S0 XAGUSD = archivio 0/4 con numeri): VERDE nel pulito; una cella ancora a 0/0 e ROSSO
+    assert P['r259']['s0']['XAGUSD'] == 'VERDE', P['r259']['s0']
+    X = referto(costruisci_fixture(base, 'xag_00'), senza_bande=True)[1]['r259']
+    assert X['s0']['XAGUSD'] == 'ROSSO' and X['verdetto']['XAGUSD'] == 'ROUND NON LETTO (S0)', (X['s0'], X['verdetto'])
+    # T12 (classe 874 b): PROMOSSA solo DOPO M4. Designata con M1-M3 verdi e M4 verde -> PROMOSSA; si rompe b=1 di
+    #     R258u (PF OOS 1,00) -> M4 non verde -> la stessa riga NON e promossa
+    rac = costruisci_fixture(base, 'promossa')
+    Q = referto(rac, senza_bande=True)[1]['r258']
+    assert Q['esito'][('R258a', 70.0)].startswith('PROMOSSA'), Q['esito'][('R258a', 70.0)]
+
+    def mod_csv(path, ax, val, cambi):
+        rr = open(path, encoding='ascii').read().splitlines()
+        h = rr[0].split(',')
+        out = [rr[0]]
+        for ln in rr[1:]:
+            c, _ = allinea_riga(h, ln)
+            if abs(float(c[h.index(ax)]) - val) < 1e-6:
+                for k, v in cambi.items():
+                    c[h.index(k)] = v
+            out.append(','.join(c))
+        _scrivi(path, out)
+    mod_csv(os.path.join(rac, 'ROUND_R258u', 'ABTG_Londra_ORB_GBPUSD_OOS_R258u.csv'), 'InpBufferPips', 1.0, {'Profit Factor': '1.00000'})
+    Q2 = referto(rac, senza_bande=True)[1]['r258']
+    assert Q2['m4']['R258a'][0] == 'NON ALTOPIANO', Q2['m4']
+    assert Q2['esito'][('R258a', 70.0)].startswith('NON PROMOSSA: M4'), Q2['esito'][('R258a', 70.0)]
+    # T13 (M3 SOSPESO non e una bocciatura, classe 874 c): n IS 140 sulla designata (e sulla sua gemella X1) -> INDIZIO
+    for f, ax, v in (('ROUND_R258a/ABTG_Londra_ORB_GBPUSD_IS_R258a.csv', 'InpMinRangePips', 70.0), ('ROUND_R258u/ABTG_Londra_ORB_GBPUSD_IS_R258u.csv', 'InpBufferPips', 3.0)):
+        mod_csv(os.path.join(rac, f), ax, v, {'Trades': '140'})
+    Q3 = referto(rac, senza_bande=True)[1]['r258']
+    assert Q3['nullo']['R258a'] == 'passa' and Q3['esito'][('R258a', 70.0)].startswith('INDIZIO FAVOREVOLE (M1, M2 verdi; M3 sospeso'), (Q3['nullo']['R258a'], Q3['esito'][('R258a', 70.0)])
+    # T14 (R1): Profit IS = 0 (DD_fisso non calcolabile) e DD_fisso OOS 6% sulla stessa riga -> VIOLATO (OOS),
+    #     BOCCIATA PER RISCHIO; e una riga a n < 150 che rispetta si scrive NON VIOLATO, mai RISPETTATO
+    rac = costruisci_fixture(base, 'r1_gamba')
+    mod_csv(os.path.join(rac, 'ROUND_R258b', 'ABTG_Londra_ORB_GBPUSD_IS_R258b.csv'), 'InpMinRangePips', 10.0, {'Profit': '0.00', 'Recovery Factor': '0.00000'})
+    pth = os.path.join(rac, 'ROUND_R258b', 'ABTG_Londra_ORB_GBPUSD_OOS_R258b.csv')
+    rr = leggi_csv_opt(pth)[0]
+    prof = riga_asse(rr, 'InpMinRangePips', 10.0)['Profit']
+    mod_csv(pth, 'InpMinRangePips', 10.0, {'Recovery Factor': '%.5f' % (prof / 600.0)})
+    R1 = referto(rac, senza_bande=True)[1]['r258']
+    assert R1['r1'][('R258b', 10.0)] == 'VIOLATO (OOS)' and R1['esito'][('R258b', 10.0)] == 'BOCCIATA PER RISCHIO', (R1['r1'][('R258b', 10.0)], R1['esito'][('R258b', 10.0)])
+    assert P['r258']['r1'][('R258i', 0.0)].startswith('NON VIOLATO su n'), P['r258']['r1'][('R258i', 0.0)]   # blocco F: n IS/OOS < 150
+    assert all(not v.startswith('RISPETTATO') for k, v in P['r258']['r1'].items() if k[0] in ('R258i', 'R258j', 'R258k', 'R258l', 'R258m', 'R258n')), 'RISPETTATO a n < 150'
+    # T15 (D0 R259 al limite esatto): disco dal 2024.09.26 = SODDISFATTO, dal 2024.09.27 = NON; AUDUSD 2019.01.02 = SODDISFATTO
+    assert P['r259']['d0']['XAUUSD'] == 'SODDISFATTO' and P['r259']['d0']['AUDUSD'] == 'SODDISFATTO', P['r259']['d0']
+    ps = os.path.join(rac, 'STORICO', 'STORICO_R259.csv')
+    _scrivi(ps, [x.replace('XAUUSD,M1,2000000,2024.09.26', 'XAUUSD,M1,2000000,2024.09.27').replace('AUDUSD,M1,2000000,2019.01.02', 'AUDUSD,M1,2000000,2019.01.03') for x in open(ps, encoding='ascii').read().splitlines()])
+    D = referto(rac, senza_bande=True)[1]['r259']
+    assert D['d0']['XAUUSD'] == 'NON' and D['d0']['AUDUSD'] == 'NON' and D['verdetto']['XAUUSD'].startswith('NON ANCORA MISURATO (prima il disco'), (D['d0'], D['verdetto']['XAUUSD'])
+    # T16 (C-COMM): k = 5 EUR/lotto (fuori [1;3]) -> C-COMM VERDE e k DICHIARATO fuori banda (la testa chiede solo
+    #     commissione != 0); commissione ZERO -> ROSSO, M1 LORDO e nessuna PROMOSSA anche sulla designata perfetta
+    rac = costruisci_fixture(base, 'promossa')
+    ph = os.path.join(rac, 'CCOMM_R258', 'CCOMM_R258.htm')
+    h16 = open(ph, 'rb').read().decode('utf-16')
+    open(ph, 'wb').write(re.sub(r'<td>(-\d+\.\d+)</td><td>0\.00</td>', lambda m: '<td>%.2f</td><td>0.00</td>' % (float(m.group(1)) / 2.30 * 5.0), h16).encode('utf-16'))
+    txtc, Ec = referto(rac, senza_bande=True)
+    assert Ec['r258']['ccomm'] == 'VERDE' and 'FUORI BANDA' in txtc, 'T16 k fuori banda'
+    open(ph, 'wb').write(re.sub(r'<td>(-\d+\.\d+)</td><td>0\.00</td>', '<td>0.00</td><td>0.00</td>', h16).encode('utf-16'))
+    Ec2 = referto(rac, senza_bande=True)[1]['r258']
+    assert Ec2['ccomm'] == 'ROSSO' and Ec2['esito'][('R258a', 70.0)].startswith('INDIZIO FAVOREVOLE (C-COMM ROSSO'), (Ec2['ccomm'], Ec2['esito'][('R258a', 70.0)])
+    # T17 (ricucitura, punto 3 del cancello): solo quando serve; una riga con UN campo in meno non si ricuce
+    hh = ['a', 'InpNewsCurrencies', 'InpComment', 'InpMagic']
+    assert allinea_riga(hh, '1,GBP,USD,C,7') == (['1', 'GBP,USD', 'C', '7'], 1)
+    assert allinea_riga(hh, '1,,C,7') == (['1', '', 'C', '7'], 0)
+    assert allinea_riga(hh, '1,USD,C,7') == (['1', 'USD', 'C', '7'], 0)
+    assert allinea_riga(hh, '1,C,7') == (None, 0)
+    print('AUTOTEST: 17/17 PASS (fixture e referti in %s)' % base)
     return True
 
 
 def main():
     if '--autotest' in sys.argv:
         args = [a for a in sys.argv[1:] if a != '--autotest']
-        base = args[0] if args else (SCRATCH_DEFAULT if os.path.isdir(os.path.dirname(SCRATCH_DEFAULT)) else os.path.join(os.getcwd(), 'lettori_fixture'))
+        base = args[0] if args else SCRATCH_DEFAULT
         sys.exit(0 if autotest(base) else 1)
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     if not args:
