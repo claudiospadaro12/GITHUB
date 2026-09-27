@@ -35,8 +35,56 @@ modellate + 770105): **P(PASS) 55,1%**, fine corsa entro 5 giorni 25,4%; non mod
 - Per l'oro long: firma su taglia e sedia dopo R268; **pausa delle sedie oro** su piccolo 50503392
   (770402 a due lati + 3), manuale 50503635 (scalper 779901) e Tickmill (Ichimoku): FTMO conta i demo.
 - Risposta di Jonas (FTMO) alle tre domande del 27/09.
+- Dallo zip A in poi: **non leggere la console della riga come verdetto su R258** (classe 883): mandare lo zip, legge il lettore.
 - Entro il 25/10: decisione sull'orologio delle sedie a ora fissa (preset oro scade il 24/10).
 
+## 🌙 Aggiunta delle 21:00 — la sera, in background
+Dichiarato per quello che e': **una sera di ponteggio**, nessuna sedia in piu'. Ma il ponteggio serve
+domani: senza lettori gli zip di A, R255, C e D non diventano verdetti, e senza la procedura di
+pausa la sedia oro non si attacca nemmeno con la firma in mano.
+
+**Quattro consegne, quattro FAIL in prima stesura, quattro correzioni prima di uscire** (l'Agente dei
+Controlli del 13/09, applicato): autotest rifatti da me su tutti e quattro dopo il cancello.
+
+| consegna | commit finale | difetti al cancello | classi nuove |
+|---|---|---|---|
+| lettore R255 `leggi_r255.py` (Dow short a due orologi) | `1abafd59` | 8 + 1 trovato da me | 872-876 |
+| lettore D `leggi_round_corti_d.py` (R268 oro / R269 flat) | `e549b8ea` | 13 | 877-879 |
+| `righe/PACCHETTO_PAUSA_ORO_DEMO.md` (blocco (f) della sedia oro) | `06d9ee01` | 4 bloccanti | 880-882 |
+| lettore A `leggi_round_corti_a.py` (R250/R258/R259) | `4f014012` | 10 | 883-885 |
+
+I difetti che avrebbero dato un **verdetto sbagliato su un round buono**, per nome:
+- cartella madre al posto della raccolta = 24 file NULLI con referto intero (872, in tre lettori su tre);
+- i NULLI che solo la riga vede (motore diverso dal pin, classe 166) ignorati dal lettore (873, tre su tre);
+- "RISCHIO PASSATO" / "PROMOSSA" scritti PRIMA del cancello che li condiziona (874);
+- K1 dell'oro ribaltato da due ancore con uscite a 0,03 $ di distanza sul per-trade 795301 vero (877);
+- sull'oro la regola stretta di identificazione prendeva la cella 1,0 al posto della 2,0 (878);
+- l'ancora S0 di R259 era "0/0" per tutti, XAGUSD ha 0/4: una riproduzione giusta usciva "NON LETTO" (884).
+
+Due cose trovate stasera che cambiano la lettura di domani:
+- 🔴 **classe 883** — la riga A in corsa scrivera' in console "R258 NULLO" quasi ovunque: `ABTG_Londra_ORB` r.484
+  scrive gli input senza virgolette e `InpNewsCurrencies=GBP,USD` mette un campo in piu' nel CSV; `Import-Csv`
+  sposta le colonne e il P0 della riga fallisce. Verificato alla fonte: **nessun job salta** per questo (l'unico
+  blocco condizionato e' L, sullo storico M1). Fa fede il lettore, che ricuce e stampa ogni esenzione per nome.
+- 🔴 **classe 876** — la corsa R255 e' una sola (moncone + 641 giorni) e la curva riparte per era: lo "scarto di
+  saldo" della testa in era OOS contiene l'utile IS della corsa. Contro-esempio: +1.200 in IS poi -50/+40 in OOS
+  = scarto 12,0% per la lettera, 0,0% a curva continua. La testa non si tocca (pinnata); il lettore stampa i due numeri.
+
+**Pacchetto pausa oro demo**: sedie verificate alla fonte, non copiate dalla bozza. Fatti nuovi: il piccolo
+50503392 e' **chiuso dal 23/09 19:35** (CODA_05), Tickmill dal 20/07, e la posizione XAUUSD `#3430899` (short,
+giornale del 23/09 03:25) **puo' essere ancora aperta sul server** [NON MISURATO]. Lo scalper 779901 sul manuale
+gira in modo CANDELA/MEZZO CORPO (CODA_08 r.2470/2472): il verso lo decide l'EA, quindi L+S. Riaperture del
+piccolo e di Tickmill **solo a mercato chiuso** (al primo tick EMA200/Supertrend contano barra nuova e
+MaxMinNotte piazza gli stop). Resta una firma di Claudio: nulla eseguito.
+
+Nota sulla riga D gia' consegnata: usa tolleranza 0,05 sul Profit delle gemelle, la testa dice "al centesimo",
+il lettore ora usa 0,01. Il lettore e' il piu' severo e unisce i NULLI: direzione conservativa, la riga non si
+riconsegna.
+
+In corsa a quest'ora: il lettore della riga C (`leggi_round_corti_c.py`, 37 job), poi il suo cancello.
+Prossima classe libera: 886.
+
 ## 🎯 Domani
-Leggere gli zip (A, R255, C, D) con i criteri congelati; referti al cancello; se R268 regge, la sedia
-oro long passa alla firma. Report della notte alle 06:30.
+Leggere gli zip (A, R255, C, D) con i lettori passati dal cancello; referti al cancello; se R268 regge, la sedia
+oro long passa alla firma (con il pacchetto di pausa gia' pronto). Report della notte alle 06:30 con la prima
+foto del mercato riaperto.
