@@ -90,6 +90,13 @@ senza due versioni in giro, e la riga stessa prevede il rilancio): l'eccezione c
 clausola ATR +-12% fallisce su piu' di meta' delle coppie — clausola che sta SOLO nella testa R265, non in R264 —
 e sull'oro a 10.000 (lotti 0,02/0,03) fallisce per costruzione. Con G0 oro ROSSO (atteso, causa nominata dalla
 testa) **d1-d4 usciranno SALTATI**. Rimedio: mini-riga di 4 job a 100.000 dopo la lettura dello zip C.
+✏️ **Corretto alle 01:00 del 28/09 dal cancello sulla mini-riga (classe 889)**: la diagnosi qui sopra e' INCOMPLETA.
+L'eccezione della riga C richiede ANCHE "gambe 1 con volume >= 0,02: 0", e quella condizione e' insoddisfacibile per
+costruzione: la testa R264 aspetta gambe fra 0,01 e 0,03, e appena l'ATR H4 dell'oro scende sotto ~17 $ la gamba 1
+arrotonda a 0,02 [STIMA: ATR H4 oro non misurato in repo]. Quindi d1-d4 saltano per DUE ragioni indipendenti. La
+mini-riga C2 (`righe/RIGA_ROUND_CORTI_C2_R264D_ORO.txt`, PASS `20b9c544`, SHA256 c20bb09b...) chiede solo che almeno
+una coppia stia al pavimento 0,01 (la causa nominata e' PRESENTE) e stampa la quota; il rapporto vol2/vol1 resta
+informativo per il K1, non decide il lancio. Decisione mia di metodo, non territorio di Claudio.
 Prossima classe libera: 889. Quattro lettori su quattro passati dal cancello.
 
 ## 🎯 Domani
