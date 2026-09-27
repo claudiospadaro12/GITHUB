@@ -35728,3 +35728,14 @@ manca per una sedia".
 Regola: una tabella che prepara una firma di TAGLIA porta (a) la finestra da cui viene ogni riga e il numero della finestra
 che il contratto dichiara decisiva, anche se e' di un'altra configurazione, con [NON MISURATO] dove manca; (b) una soglia col
 suo nome solo dove e' congelata, altrove "riferimento"; (c) i vincoli del regolamento che rendono la taglia non neutra.
+
+### CLASSE 861 — il MARGINE di una soglia scritto arrotondato dalla parte che PASSA ("regge fino a 13,6" quando a 13,6 cade), e la "riga che rifa' tutto" che rifa' solo meta' dei numeri del referto (27/09/2026, cancello strato 2 sul referto STRESS ORO LONG, parente della 860 e della 423)
+Caso reale: `report/STRESS_ORO_LONG_2026-09-27.md` par. 4 @ `30211814`. Soglie di slippage "13,6 / 37,9 / 50,6 punti che
+reggono": bisezione 0,13554 $ e 0,37855 $ -> a 13,6 punti il DD a +25% e' 5,004% (> 5,0%), a 37,9 il PF a +50% e' 1,0998
+(< 1,10). Il valore scritto come "regge" era il primo che CADE. Nello stesso referto la "riga che rifa' tutto" non stampava
+soglie di slippage, sensibilita' a +25%, frontiera 40x per anno, peggior giornata ne' serie perdente (numeri giusti, ma
+riproducibili solo con codice non in repo), e tre arrotondamenti della tabella q fisso erano sbagliati di un millesimo
+(1,27148 scritto 1,272; 1,19347 scritto 1,194; DD 4,3645 scritto 4,37).
+Regola: un margine o una soglia "che regge" si arrotonda **per difetto** (o si scrive con la cifra in piu' che la separa), e
+si prova il valore scritto: deve reggere lui, non il suo vicino. Ogni numero di un referto che promette "la riga che rifa'
+tutto" esce da quella riga; quelli che non ne escono si elencano col comando che li produce.

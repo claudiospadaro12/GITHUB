@@ -34,6 +34,7 @@ import bisect
 import csv
 import collections
 import datetime as dt
+import math
 import statistics
 import sys
 
@@ -172,6 +173,40 @@ def stop_846(pos, k, C, qfun, deposito, rischio, passo=0.01):
     return lo, hi, oss, rapp
 
 
+def giornata_e_serie(pos, k, C, ds, slip, qfun, deposito):
+    """Peggior giornata a saldo chiuso (% del saldo d'inizio giornata, deal in ordine di chiusura)
+       e serie perdente massima in POSIZIONI (netto < 0)."""
+    op, od = netti_posizione(pos, k, C, ds, slip, qfun)
+    od.sort(key=lambda x: x[0])
+    b = deposito
+    giorni = collections.OrderedDict()
+    for t, n in od:
+        giorni.setdefault(t.date(), [b, 0.0])
+        giorni[t.date()][1] += n
+        b += n
+    peggio = min(v[1] / v[0] for v in giorni.values()) * 100.0
+    serie = mx = 0
+    for _, n in op:
+        serie = serie + 1 if n < 0 else 0
+        mx = max(mx, serie)
+    return peggio, mx
+
+
+def soglia_slip(pos, k, C, ds, qfun, deposito, taglio, regge, hi=2.0):
+    """Bisezione sullo slippage (in prezzo) a ds fisso: il massimo per cui regge(scenario) e' vero.
+       Presuppone PF decrescente e DD crescente nello slippage (verificato a passo 1 pt sul caso ORO)."""
+    lo = 0.0
+    if not regge(scenario(pos, k, C, ds, 0.0, qfun, deposito, taglio)):
+        return None
+    for _ in range(60):
+        m = (lo + hi) / 2
+        if regge(scenario(pos, k, C, ds, m, qfun, deposito, taglio)):
+            lo = m
+        else:
+            hi = m
+    return lo
+
+
 # ---------------------------------------------------------------- stampa
 def f2(x):
     return 'inf' if x == float('inf') else f'{x:.3f}'
@@ -231,6 +266,23 @@ def esegui(a):
     for y, xs in anni_stop.items():
         print(f'| {y} | {len(xs)} | {statistics.median(xs):.2f} | {min(xs):.2f} | ' +
               ' | '.join(f'{statistics.median([b / x for x in xs])*100:.2f}%' for b in a.base_spread) + ' |')
+    # frontiera del costo stop >= 40 x spread, per anno, con la banda di arrotondamento del lotto
+    for b in a.base_spread:
+        fr = 40 * b
+        print(f'frontiera 40 x {b:.2f} = {fr:.2f} $: posizioni con stop sotto -- centro / banda [stop alto ; stop basso]')
+        tot_c = tot_h = tot_l = 0
+        per_anno = collections.OrderedDict()
+        for (ds_, x, y, m) in zip(pos.values(), lo, hi, mid):
+            per_anno.setdefault(ds_[0]['t'].year, [0, 0, 0, 0])
+            r_ = per_anno[ds_[0]['t'].year]
+            r_[0] += 1
+            r_[1] += m < fr
+            r_[2] += y < fr
+            r_[3] += x < fr
+        for y, r_ in per_anno.items():
+            print(f'  {y}: {r_[1]}/{r_[0]} (banda {r_[2]}-{r_[3]})')
+            tot_c += r_[1]; tot_h += r_[2]; tot_l += r_[3]
+        print(f'  TOTALE: {tot_c}/{len(mid)} (banda {tot_h}-{tot_l})')
     if oss:
         print('(controprova sotto = SOLO coerenza del filtro: perdita ~ R per costruzione, non indipendente)')
         print(f'controprova stop pieni: n {len(oss)} | stop osservato mediano {statistics.median(oss):.2f} | '
@@ -239,11 +291,11 @@ def esegui(a):
     for b in a.base_spread:
         print(f'\n## Scala -- spread di base {b:.2f} (ds = gradino x base) x slippage in punti ({punto} per punto)')
         print('| gradino | ds $ | slip pt | pos | PF | netto EUR | DD chiuso % | meta\' 1 PF | meta\' 2 PF | '
-              'ds / stop mediano |')
+              '(ds + 2 x slip) / stop mediano |')
         print('|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|')
         risultati = {}
         for g in GRADINI:
-            for sp in SLIP_PUNTI + (SLIP_SENS if g in (0.0,) else []):
+            for sp in SLIP_PUNTI + (SLIP_SENS if g in (0.0, 0.25) else []):
                 ds = g * b
                 r = scenario(pos, a.k, a.C, ds, sp * punto, qfun, a.deposito, taglio)
                 risultati[(g, sp)] = r
@@ -290,6 +342,22 @@ def esegui(a):
                 else:
                     hi_ = m
             print(f'ds a cui PF = {obiettivo:.2f} (slip 2 pt): {lo_:.4f} $ = +{lo_/b*100:.1f}% della base {b:.2f}')
+        # slippage massimo che regge ogni soglia (arrotondato PER DIFETTO a 0,1 pt: il valore stampato regge)
+        crit = [(0.25, 'S1 (PF>=1,20 e DD<=5,0%)', lambda r: r['pf'] >= 1.20 and r['dd'] <= 5.0),
+                (0.50, 'S2 (PF>=1,10)', lambda r: r['pf'] >= 1.10),
+                (1.00, 'S3 (PF>=1,00)', lambda r: r['pf'] >= 1.00)]
+        for g, nome, regge in crit:
+            sl = soglia_slip(pos, a.k, a.C, g * b, qfun, a.deposito, taglio, regge)
+            if sl is None:
+                print(f'slippage massimo per {nome} a +{g*100:.0f}%: cade gia\' a slippage 0')
+                continue
+            r = scenario(pos, a.k, a.C, g * b, sl, qfun, a.deposito, taglio)
+            pt = math.floor(sl / punto * 10) / 10
+            print(f'slippage massimo per {nome} a +{g*100:.0f}%: {sl:.5f} $ = {pt:.1f} pt (per difetto) | '
+                  f'al limite PF {r["pf"]:.4f} DD {r["dd"]:.4f}')
+        for g in GRADINI[:4]:
+            pg, se = giornata_e_serie(pos, a.k, a.C, g * b, 2 * punto, qfun, a.deposito)
+            print(f'+{g*100:.0f}% slip 2: peggior giornata {pg:.3f}% | serie perdente max {se} posizioni')
     return 0
 
 
