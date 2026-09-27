@@ -1,0 +1,225 @@
+; ==========================================================================
+; *** BOZZA -- NON SCHIERABILE -- NON CARICARE SU NESSUN TERMINALE ***
+; ABTG_MaxMinNotte (= CLAU12_MaxMinNotte una volta rinominato) -- ORO
+; SOLO LONG -- XAUUSD -- PRESET PER L'OROLOGIO **FTMO** (BCM + 2)
+; Scritto il 27/09/2026. ASCII PURO (regola 17/08). MARCATORE_BOZZA_ORO_LONG_FTMO_v1
+; ==========================================================================
+; >>> SETTE COSE DA LEGGERE PRIMA DI TUTTO IL RESTO. Finche' UNA sola e'
+;     aperta, questo file resta BOZZA_ e non va su nessun terminale:
+; [!] 1. R268 (tick reali) e R268d (22 anni) NON SONO LETTI: i file prova
+;        sono in coda (backtest_pipeline/prove/R268a..d, commit aee08fa8,
+;        magic 797201-797254), nessuna corsa e' partita. Il DD di questa
+;        variante e' OHLC M1 = LIMITE INFERIORE (referto B par. 7), e il DD
+;        del solo long sui 22 anni del contratto e' [NON MISURATO].
+; [!] 2. L'EA NON E' COMPILATO SU C:\FTMO: CODA_06 del 27/09 (r.179-239)
+;        elenca 56 .mq5 nella cartella 46C9F8E9FF0C747B2B5E09BCC13D5237 e
+;        ABTG_MaxMinNotte.mq5 / CLAU12_MaxMinNotte.mq5 NON ci sono.
+;        RINOMINA_CLAU12.ps1 r.129-135 rinomina 7 file, non questo.
+;        La compilazione contro l'include in campo v1.20 (26a18566) e'
+;        [NON VERIFICATA]. Serve una riga nuova (cancello + firma).
+; [!] 3. LA TAGLIA NON E' FIRMATA. InpRiskPercent=0.50 qui sotto e' il
+;        rischio di BANCO di R260a/R103, non una proposta: vedi la nota
+;        sulla riga. FTMO vieta le size erratiche fra sedie (preset a due
+;        lati r.98-99; R193b C3): 0,50 accanto a 2,00 tocca il regolamento.
+; [!] 4. GLI STOP CADONO NELLA SESSIONE USA: 52% degli stop pieni del long
+;        chiude fra le 13:30 e le 15:29 server BCM (= 15:30-17:29 FTMO), il
+;        19% della vita del trade; gli stop sono il 70% della perdita lorda
+;        (AUTOPSIA_PERSI 27/09 par. B). E circa 1 su 7 e' del DATO USD:
+;        24 stop su 88 entro 30' da un dato High contro 12,5 attesi
+;        (~12 in eccesso). La manopola c'e' (InpCloseHour=13 BCM = 15 FTMO),
+;        il valore NON e' misurato: e' R269a, in coda.
+; [!] 5. IL COSTO: stop mediano forward 32,94 $ contro spread FTMO 0,45 $ =
+;        73x [MISURATO su n=2]; nel per-trade 2020-2026 lo stop mediano e'
+;        14,70 $ [DERIVATO], e con lo spread di OGGI il 70% delle notti
+;        starebbe sotto la frontiera 40x (STRESS_ORO_LONG par. 5). Lo
+;        stress PASSA (PF 1,21 a +100%) MA sui 6,5 anni, non sui 22.
+; [!] 6. L'OROLOGIO DELL'ORO E' [INFERITO] = forex (nessuna ancora XAUUSD in
+;        OROLOGIO_BCM_2026-09-24). Il +2 FTMO/BCM di oggi vale in ora estiva;
+;        dal 25/10/2026 va rimisurato a terminale acceso (candela M1 vs UTC).
+; [!] 7. FTMO, cross-account: il piccolo 50503392 tiene ANCORA la 770402 a
+;        DUE LATI su XAUUSD (CODA_01 27/09, profilo ORO, chart29) piu' altre
+;        tre sedie oro, e Tickmill ha un EA oro. Il supporto FTMO (25/09) dice
+;        che l'esposizione OPPOSTA su un altro conto, ANCHE DEMO, e' vietata.
+;        Un long FTMO con uno short della 770402 del piccolo aperto insieme
+;        e' esattamente quel caso. Decisione di Claudio, non di questo file.
+; ==========================================================================
+;
+; STATO ........: BOZZA. Il prefisso BOZZA_ vuol dire: questo file NON va su
+;                 nessun terminale finche' (1) i sette punti sopra sono chiusi,
+;                 (2) Claudio firma taglia e magic, (3) il cancello
+;                 (controlla_riga + controllo-preventivo) da' PASS alla riga
+;                 che lo porta sul VPS.
+; BERSAGLIO ....: SE e QUANDO firmato: terminale MT5 FTMO 541452707
+;                 (cartella programma C:\FTMO), grafico XAUUSD NUOVO (oggi su
+;                 C:\FTMO non esiste nessun grafico XAUUSD: CODA_01 27/09,
+;                 9 sedie, nessuna su XAUUSD), EA CLAU12_MaxMinNotte.
+;                 NON 50503392 (BCM Markets MT5 Terminal), NON 50504263
+;                 (... -V3), NON 10105439 (C:\BCM_Reale), NON 50504400
+;                 (C:\MT5_Backtest), NON 50503635 (C:\MT5_MANUALE).
+; REFERTO ......: report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md (cosa serve,
+;                 in ordine, chi lo fa, cosa e' firma).
+;
+; --------------------------------------------------------------------------
+; 0) DA DOVE VIENE OGNI RIGA (verifica meccanica, non a mano)
+; --------------------------------------------------------------------------
+;   ORDINE E NOMI: le 53 righe qui sotto sono, NELL'ORDINE, le 53
+;   dichiarazioni "input" di mql5/Experts/ABTG_MaxMinNotte.mq5 a HEAD
+;   (9b838084 = identico al pin 7d0da9f9 del banco: 918 righe, impronta
+;   scheletro 32C692ADD267DD4FA9C500281C2427F5306B1F961AFD1315E867D4B6D717146D,
+;   SHA256 dei byte 9346f16a4caad4cf18ee9b772caf06a497b3c6727e0d0b65250e377e75bfae80).
+;   Il preset a due lati in repo (ABTG_MaxMinNotte_ORO_770402_FTMO.set) ha
+;   52 righe: manca InpAutoTest (r.188 del sorgente, default true, stampa
+;   solo in OnInit). Qui c'e'.
+;   VALORI: la cella R260a (backtest_pipeline/prove/R260a_oro_770402_solo_long.txt,
+;   PASS del referto B) pinna 52 input su 53: InpNewsCurrencies non e'
+;   pinnato e vale il default del sorgente "" (inerte: InpUseNewsFilter=false).
+;
+;   DIFF contro R260a (BCM), eseguito con uno script, 10 righe e NIENTE ALTRO:
+;     input                BCM (R260a)   QUI (FTMO)    ora italiana (estate)
+;     InpBoxStartHour      23            1             00:00 IT  (23+2 = 1 del giorno dopo:
+;                                                       lo scavalco della mezzanotte, r.305-306)
+;     InpBoxEndHour        4             6             05:59 IT
+;     InpPlaceHour         7             9             08:00 IT
+;     InpEntryCutoffHour   8             10            09:30 IT
+;     InpCloseHour         17            19            18:30 IT
+;     InpCorrSymbol        SPXUSD        US500.cash    INERTE (InpUseCorrelation=false, r.700)
+;     InpMaxSpread         0             150           vedi nota sulla riga
+;     InpRiskPercent       0.5           0.50          stesso numero, formato dei preset FTMO
+;     InpComment           MAXMINR260A   MAXMIN ORO LONG   solo commento dell'ordine
+;     InpMagic             795301        770421        vergine, vedi nota sulla riga
+;   I minuti (InpBoxStartMin 0, InpBoxEndMin 59, InpPlaceMin 0,
+;   InpEntryCutoffMin 30, InpCloseMin 30) sono IDENTICI a R260a.
+;
+;   DIFF contro il preset a due lati FTMO in repo, 5 righe e NIENTE ALTRO:
+;     InpAllowShort  true -> false     (il "solo long" di R260a)
+;     InpRiskPercent 2.00 -> 0.50      (banco, NON firma: nota sulla riga)
+;     InpComment     MAXMIN ORO -> MAXMIN ORO LONG
+;     InpMagic       770402 -> 770421
+;     InpAutoTest    (assente) -> true
+;   Quindi gli orari FTMO qui sotto sono gli STESSI, riga per riga, del preset
+;   a due lati generato il 20/09 da rimappa_preset_ftmo.py: box 01:00-06:59,
+;   piazzamento 09:00, cutoff 10:30, flat 19:30.
+;
+;   PERCHE' +2: FTMO = UTC+3 d'estate (docs/REGOLAMENTO_FTMO_2026-08.md
+;   r.130), BCM = UTC+1 fisso (OROLOGIO_BCM_2026-09-24). Il PC di backtest
+;   ha girato R260a in ora BCM. InpMgmtTF=16386 (H2): la griglia H2 e'
+;   identica fra i due server (sfasamento 2h = un passo H2), quindi ATR ed
+;   EMA200 di gestione leggono le stesse candele (nota del preset a due lati).
+;   Il grafico: R260a ha girato su H2 (@PERIODO H2). L'EA non legge il
+;   periodo del grafico (zero occorrenze di _Period / PERIOD_CURRENT: il box
+;   e' su M1 r.306-310, la gestione su InpMgmtTF r.146): il TF del grafico e'
+;   inerte. Sul piccolo la 770402 gira su M15 (CODA_01). Per attaccarla si
+;   usa H2 come il banco, cosi' cio' che e' misurato e cio' che e' in campo
+;   coincidono anche dove non conta.
+;
+; --------------------------------------------------------------------------
+; 1) COSA FA IL GUARDIAN QUI (acceso come tutte le sedie FTMO)
+; --------------------------------------------------------------------------
+;   InpUsaGuardian=true come nei 7 preset FTMO delle sedie (grep 27/09:
+;   770101, 770105, 770202, 770212, 770260, 771531, 770411 = true). L'EA lo
+;   chiama in TryPlace (r.346, forma a 2 argomenti, presente nell'include
+;   v1.20 r.282): il controllo di pausa B1 e cap C1 avviene AL PIAZZAMENTO
+;   del buy stop (09:00 FTMO), non al riempimento (include v1.20 r.27: "un
+;   ordine PENDENTE gia' piazzato quando il cap era libero scattera' lo
+;   stesso"). R260a ha girato con InpUsaGuardian=true e nessun Guardian nel
+;   tester: canale assente = fail-open (include v1.20 r.286), quindi nel backtest
+;   il Guardian non ha tolto niente. In campo puo' solo RIFIUTARE ingressi.
+;
+; --------------------------------------------------------------------------
+; 2) NON VERIFICATO / NON MISURATO (per nome)
+; --------------------------------------------------------------------------
+;   - InpMaxSpread=150 contro 0 del banco: effetto [NON MISURATO].
+;   - Compilazione di ABTG_MaxMinNotte.mq5 @7d0da9f9 contro l'include v1.20
+;     in campo: [NON VERIFICATA] (referto B par. 7).
+;   - Commissione FTMO su XAUUSD: [NON MISURATA] (PREVOLO 20/09 non la
+;     riporta; il banco usa la k BCM 1,8113 EUR/lotto).
+;   - Slippage FTMO: [NON MISURATO]; lo stress regge fino a 13,5 punti.
+;   - Il magic 770421 e' vergine su disco, su tutti i rami e nella storia git
+;     al 27/09/2026 e non compare in CODA_01; il giornale del conto FTMO
+;     541452707 non e' leggibile da qui: [NON VERIFICATO sul conto].
+; --------------------------------------------------------------------------
+InpUsaGuardian=true
+InpBoxStartHour=1
+InpBoxStartMin=0
+InpBoxEndHour=6
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=9
+InpPlaceMin=0
+InpEntryCutoffHour=10
+InpEntryCutoffMin=30
+InpCloseHour=19
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=250
+InpAllowLong=true
+InpAllowShort=false
+InpSLMode=0
+InpMgmtTF=16386
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=3000
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=2.5
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpUseCorrelation=false
+;  InpCorrSymbol: US500.cash e' il nome FTMO dell'S&P (come negli altri
+;  preset FTMO); con InpUseCorrelation=false la riga e' INERTE (r.700:
+;  return 0 prima di aprire il simbolo). R260a aveva SPXUSD (nome BCM).
+InpCorrSymbol=US500.cash
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+;
+;  !!! TAGLIA = FIRMA DI CLAUDIO, NON PROPOSTA. 0.50 e' il rischio di BANCO di
+;  R260a/R103 (contratto della sedia 770402: DD 10,0% a 0,5% sui 22 anni,
+;  R100, straddle, OHLC, CONTRATTI_SEDIE r.95: "prop: solo <= 0,5%"). Il DD
+;  del SOLO LONG sui 22 anni e' [NON MISURATO fino a R268d]. Sui 6,5 anni di
+;  R260a: DD 4,52% a 0,5% (OHLC = limite inferiore); a 1,0% 8,83-9,03%, a 2,0%
+;  16,88-18,07% [DERIVATO a due formule, referto B par. 1.5]. R193b A3/C4:
+;  "la taglia si decide sulla finestra PEGGIORE". Le altre sette sedie FTMO
+;  sono a 2.00: FTMO vieta le size erratiche (preset a due lati r.98-99).
+;  Questo file NON propone nessuna taglia: il numero e' quello misurato.
+;
+InpRiskPercent=0.50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpComment=MAXMIN ORO LONG
+;
+;  MAGIC 770421: VERGINE. Cercato il 27/09/2026: 0 occorrenze su tutto il
+;  disco del repo (fuori .git), 0 su tutti i rami (git grep su ogni ref),
+;  0 commit nella storia (git log -S), assente da CODA_01 del 27/09 (42 sedie
+;  su 8 cartelle dati). Nel blocco 7704xx sono usati 770401-770406 e
+;  770411-770414. NON e' 770402: quello e' il magic della sedia a due lati
+;  VIVA sul piccolo 50503392 (chart29, M15, rischio 0,5, L+S). La scelta
+;  del magic resta di Claudio.
+;
+InpMagic=770421
+;
+;  InpMaxSpread=150 punti = 1,50 $ (XAUUSD FTMO: 2 decimali, PREVOLO 20/09).
+;  E' il valore del preset a due lati in repo e del preset del piccolo
+;  (sedia_MAXMIN_ORO_770402.set). Spread FTMO misurato: 47 punti alle 17:08
+;  del 20/09 (PREVOLO), P95 0,45 $ (STRESS_ORO_LONG): a 150 il filtro non
+;  avrebbe morso li'. Il banco R260a girava a 0 (filtro spento): l'effetto
+;  del 150 sui numeri e' [NON MISURATO]. Con spread > 150 l'EA scrive
+;  "spread alto: niente ordini" e salta la giornata (r.770 + TryPlace).
+;
+InpMaxSpread=150
+InpVerbose=true
+InpAutoTest=true
