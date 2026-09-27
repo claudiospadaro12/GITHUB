@@ -81,10 +81,19 @@ Nota sulla riga D gia' consegnata: usa tolleranza 0,05 sul Profit delle gemelle,
 il lettore ora usa 0,01. Il lettore e' il piu' severo e unisce i NULLI: direzione conservativa, la riga non si
 riconsegna.
 
-In corsa a quest'ora: il lettore della riga C (`leggi_round_corti_c.py`, 37 job), poi il suo cancello.
-Prossima classe libera: 886.
+**Lettore C** (`leggi_round_corti_c.py`): consegnato `34b774cd`, FAIL al cancello con 13 difetti (872/873/874/875/794
+ripetute + 886 "RISCHIO PASSATO su un DD OHLC che e' un limite inferiore", 887 "rischio letto solo sull'OOS", 888
+"il rinvio della riga ricopiato come verdetto"), corretto in `24ec1df1`, autotest 46/46, verificato da me.
+🔴 **Difetto della RIGA C, trovato dal cancello e verificato alla fonte** (non si corregge a corsa non partita
+senza due versioni in giro, e la riga stessa prevede il rilancio): l'eccezione che fa girare l'onda 2 dell'oro
+(d1-d4, uscita o2 su EMA200 XAUUSD a 100.000) richiede che il K1 di R264d non sia NULLO, ma il K1 va NULLO se la
+clausola ATR +-12% fallisce su piu' di meta' delle coppie — clausola che sta SOLO nella testa R265, non in R264 —
+e sull'oro a 10.000 (lotti 0,02/0,03) fallisce per costruzione. Con G0 oro ROSSO (atteso, causa nominata dalla
+testa) **d1-d4 usciranno SALTATI**. Rimedio: mini-riga di 4 job a 100.000 dopo la lettura dello zip C.
+Prossima classe libera: 889. Quattro lettori su quattro passati dal cancello.
 
 ## 🎯 Domani
-Leggere gli zip (A, R255, C, D) con i lettori passati dal cancello; referti al cancello; se R268 regge, la sedia
+Leggere gli zip (A, R255, C, D) con i lettori passati dal cancello; referti al cancello; se d1-d4 di C escono
+SALTATI, preparare la mini-riga a 100.000; se R268 regge, la sedia
 oro long passa alla firma (con il pacchetto di pausa gia' pronto). Report della notte alle 06:30 con la prima
 foto del mercato riaperto.
