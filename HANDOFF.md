@@ -3,9 +3,35 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da li'."*
 >
-> Ultimo aggiornamento: **2026-09-07 pomeriggio** (SpreadLogger con oro acceso sul piccolo, incidente Guardian sul reale risolto). **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+> Ultimo aggiornamento: **2026-09-28 notte** (vedi il blocco 28/09 qui sotto; prima: 2026-09-07 pomeriggio (SpreadLogger con oro acceso sul piccolo, incidente Guardian sul reale risolto). **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
 
 ---
+
+## 🗓️ 28/09 notte — LA MACCHINA PER LEGGERE GLI ZIP E' PRONTA (challenge FTMO viva dal 22/09)
+
+⚠️ Questo HANDOFF era fermo al 07/09: **lo stato vero dal 20/09 in poi sta nei
+`report/RESOCONTO_AAAA-MM-GG.md` e `report/NOTTE_AAAA-MM-GG.md`** (uno al giorno). Per ripartire in una
+chat nuova: `CLAUDE.md` + l'ultimo `RESOCONTO` + l'ultima `NOTTE` + `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`
+(ultime classi). Challenge FTMO `541452707` (80.000, 2-Step) in corsa sul VPS in `C:\FTMO`; i round girano SOLO sul
+PC di backtest `DESKTOP-H4D7CAJ` (regola del 21/09).
+
+**Pronti, tutti passati dal cancello di giudizio (e tutti FAIL in prima stesura — classi 872-891):**
+- `backtest_pipeline/leggi_round_corti_a.py` (zip riga A: R250/R258/R259) — 🔴 la console della riga A dira'
+  "R258 NULLO": e' la virgola di `InpNewsCurrencies` nel CSV (classe 883), non il round; fa fede il lettore.
+- `backtest_pipeline/leggi_r255.py` (zip R255, Dow short a due orologi; classe 876 sullo scarto di saldo).
+- `backtest_pipeline/leggi_round_corti_c.py` (zip C: R264-R267, e ANCHE la raccolta C2).
+- `backtest_pipeline/leggi_round_corti_d.py` (zip D: R268 oro a tick/22 anni, R269 flat/orologio).
+- `backtest_pipeline/righe/RIGA_ROUND_CORTI_C2_R264D_ORO.txt` (PASS 20b9c544): rilancio dei 4 job d1-d4 che la
+  riga C salta per costruzione (classe 889, DUE ragioni); si lancia SOLO dopo lo zip C, la guardia lo verifica.
+- `backtest_pipeline/mc_challenge_ftmo_v2.py --r255 <raccolta>`: modella la 770212 nel Monte Carlo appena c'e' lo
+  zip R255 (senza l'opzione: output identico al centesimo). I numeri della fixture NON sono la 770212.
+- `backtest_pipeline/righe/PACCHETTO_PAUSA_ORO_DEMO.md` (PASS 06d9ee01): procedura del blocco (f) della sedia oro
+  long FTMO — sedie oro sui demo in pausa (FTMO conta i demo). Firma di Claudio; nulla eseguito. Attenzione: short
+  XAUUSD `#3430899` sul piccolo forse ancora aperto [NON MISURATO].
+
+**Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; gli zip A → R255 → C → D (una riga alla volta, MT5
+chiuso in mezzo), poi C2; firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
+risposta di Jonas (FTMO) alle tre domande; orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
 
 ## 🗓️ 07/09 — GIORNATA DI VERDETTI: due piste CHIUSE con numeri nostri
 
