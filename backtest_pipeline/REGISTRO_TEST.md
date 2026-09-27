@@ -4584,3 +4584,40 @@ Archivio: `risultati_archivio/ROUND_CORTI_B_2026-09-27/`. Referto con tabelle e 
   d'ingresso; con k x volume (classe 844) sono **4,15/3,73/4,89%**.
 - 🔴 **NON VERIFICATI**: tick reali sull'oro; spread in memoria del PC (classe 394); orologio dell'oro; R262/R263 a ora fissa
   (nessun numero descrive FTMO a 16:30; R248 = REVISIONE aperta); curva DD(taglia) del centro 220 non misurata; commissioni FTMO.
+
+---
+
+## 🧪 27/09/2026 — R268 (ORO 770402 SOLO LONG A TICK + i 22 anni) e R269 (flat alle 13:00 sull'oro, DAX long -1h) — ⏳ IN CODA, NON GIRATI
+
+Nati da: referto CORTI B par. 5 + Gemini (riga 16) → R268; cancello del referto B (classe 860) → R268d; autopsia dei persi
+(`report/AUTOPSIA_PERSI_2026-09-27.md`, 487d9dc8) → R269. **Solo file prova: nessuna riga di lancio, niente e' girato.**
+Tutti a `controlla_prova.py` 0 problemi (7 file, 16 celle, 32 passate) e `controlla_riga.py --oggetto prova` rc 0.
+Pin = file base campo per campo (diff con script): R260a (PASS `fbf1f05f`) per R268a-d e R269a, R260b per R269b, R261a (cella corr=1) per R269c.
+Banco: **PC di backtest `DESKTOP-H4D7CAJ`, mai il VPS**, deposito 100000. Magic: blocco **7972xx** vergine (disco + tutti i rami, dopo fetch).
+
+| file | domanda | modello · finestra | asse | magic | attesa scritta PRIMA | costo |
+|---|---|---|---|---|---|---|
+| `prove/R268a_oro_long_TICK_testa.txt` (TESTA) | il DD a TICK del solo long | tick · 2024.07.05→2026.06.30, moncone 1 g (gamba dal 2024.07.06) | magic x2 | 797201/797251 | ~92 pos. (84-100), merito SOSPESO; **r = DD_tick/DD_OHLC**: H-CONS <0,90 · **H-AFF 0,90-1,10 (previsione)** · H-CORR 1,10-1,50 · H-NO >1,50; K1 (18 $ = 40 x 0,45): mediana 23,3-28,0 $ → VERDE, quota sotto frontiera 21-40% | 1-4 min [STIMA] |
+| `prove/R268b_oro_long_OHLC_stessa_finestra_G0.txt` | G0 del banco + termine OHLC dello scarto | OHLC · idem | magic x2 | 797202/797252 | = per-trade 795301 dal 2024.07.06: **119 deal / 92 pos. ESATTI**, struttura identica; Profit 5.516-6.141, PF 1,48-1,56, DD chiuso 1,88-2,09% [DERIVATI, lotti ~7% piu' piccoli] | ~1 min |
+| `prove/R268c_oro_long_TICK_asse_rischio.txt` | curva DD(taglia) a tick | tick · idem | `InpRiskPercent` 0,5/1,0/1,5/2,0 | 797203 | Trades identici sulle 4 celle; DD monotono fra le due formule; **parte SOLO se il job R268a <= 5 min** | 2-8 min [STIMA] |
+| `prove/R268d_oro_long_OHLC_22anni.txt` | il solo long sulla finestra del CONTRATTO (22 anni, R100) | OHLC · 2004.06.11→2026.06.30 (gamba dal 2004.06.20) | magic x2 | 797204/797254 | ~946 pos. (tetto 1.234); Equity DD: D1 <=4,52 · **D2 4,52-10,0 (previsione, ~8,5)** · D3 >10,0; G0d = tratto 2020-26 identico a 795301 (375 deal) | 1-2 min + scarico M1 [NON MISURATO] |
+| `prove/R269a_oro_770402_long_close13.txt` (TESTA oro) | flat alle **13:00** BCM (prima di New York) sul long | OHLC · 2020-2026 (= R260a) | magic x2 | 797211/797261 | 279 pos. e **306 deal ESATTI**; 64 deal prima delle 13:00 identici a 795301; PF: P1 >=1,45 · **P2 1,25-1,45 (previsione)** · P3 <1,25; DD: **Q1 <=3,39 (previsione)** · Q2 · Q3 >4,52 | ~1 min |
+| `prove/R269b_oro_770402_short_close13.txt` | idem sullo short | OHLC · idem (= R260b) | magic x2 | 797212/797262 | 232 pos. e **257 deal ESATTI**; P1 >=1,35 · **P2 1,15-1,35** · P3 <1,15; **Q1 <=3,06** · Q2 · Q3 >4,08 | ~1 min |
+| `prove/R269c_dax_long_meno1h.txt` | DAX long (770411 invertito, corr=1) con l'orologio -1h: ingresso PRIMA dell'asta Xetra anche d'estate | tick · 2024.09.26→2026.06.30, tranche unica | magic x2 | 797213/797263 | ~72 pos., merito SOSPESO; PF d'estate: H-ASTA >=1,00 · **H-CAL 0,65-1,00 (previsione)** · H-PEGGIO <0,65 (indizio debole: 0,818→1,00 e' meno di 1 sd bootstrap, 0,290) | ~1 min |
+
+- ✏️ **Deviazioni dal mandato, dichiarate nei file (ognuna con il suo contro-esempio)**: (1) lo scarto tick-OHLC si decide in **rapporto**, non in
+  punti: su questa finestra il DD OHLC e' ~2% e "< 1 punto" chiamerebbe AFFIDABILE un OHLC che sottostima del 45% (classe 178); le bande in punti
+  restano scritte; (2) R268b si confronta con R260a sulle chiusure **>= 2024.07.06**, non 07.05: floor(725 x 0,001) = 0, e la posizione del
+  2024.07.05 cade nel moncone; (3) R268d decide sull'**Equity DD** (il contratto R100 e' in equity), il saldo chiuso accanto; (4) R269a/b: flat alle
+  **13:00** e non 13:30 (13:30 = minuto del dato USA sul vecchio orologio; zero deal di R260a/b nel minuto 13:00 → deal attesi esatti); asse = gemelle,
+  la cella 17:30 e' R260a/b (classe 455/850: il per-trade della 13:00 dev'essere certo); (5) R269c sul **generico** (base 795401) e non su un clone
+  letterale di R246j (Short_Ott): sarebbero state due variabili.
+- 🆕 **Misura di casa trovata e mai letta**: gli stessi 8 CSV tick/OHLC dell'EMA200 H4 citati in R264_TESTA par. (d) per il PF portano anche
+  l'**Equity DD**: r = DD_tick/DD_OHLC 0,864-1,094, mediana 1,004; tick PIU' BASSO in 3 coppie su 8. Il mandato scriveva "per il DD non c'e' misura
+  di casa": c'era. E' il prior di R268 (altro EA: orienta, non si trasferisce).
+- 🔴 **NON VERIFICATI**: la profondita' dei tick XAUUSD (P0-TICK: si legge la riga `XAUUSD: ticks data begins from` nel giornale dell'agente
+  alla prima passata; se piu' tarda del 2024.07.06 la finestra si accorcia e decide il saldo chiuso ristretto); la densita' dei tick oro e quindi il
+  costo a tick; lo scarico M1 2004-2019 sul PC; lo spread in memoria nelle corse OHLC (classe 394); la commissione FTMO; l'orologio dell'oro
+  [INFERITO]; generico = Short_Ott sul LONG (letto, non misurato); R269c senza G0 dentro il file (ancora = T1/T2 del 27/09 + classe 166).
+- 💰 **Costo totale R268 + R269**: ~8-20 min di tester + avvio per job (9 job con R268c), piu' sincronizzazione tick oro e scarico M1 [NON MISURATI];
+  ordine: R268b → R268a → (R268c se il costo lo consente) → R268d → R269a → R269b → R269c. Tetto dichiarato 60 min.

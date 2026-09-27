@@ -1,0 +1,202 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R269c -- IL DAX LONG (770411 a lati invertiti) UN'ORA PRIMA:
+#  LA FINESTRA D'INGRESSO PRIMA DELL'ASTA XETRA ANCHE D'ESTATE
+#  EA: ABTG_MaxMinNotte (generico), D30EUR M15, TICK REALI (-Modello 4),
+#  deposito 100000, rischio 1,0, filtro S&P ACCESO (corr=1), SOLO LONG.
+#  OROLOGIO -1h (TUTTO l'orario spostato, come R246j/l sullo short):
+#  box 22:00-03:59, piazzamento 06:59, cutoff 07:30, flat 16:30 BCM.
+#  Finestra = R261a: 2024.09.26 -> 2026.06.30, tranche unica.
+#  Magic 797213 / 797263 (gemelle a passo 50: G1 e un per-trade per
+#  gemella). Per-trade in Common\Files:
+#    abtg_trades_ABTG_MaxMinNotte_D30EUR_797213.csv e _797263.csv
+#  Scritto il 27/09/2026. Criteri congelati PRIMA dei numeri.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  nessun terminale di conto (50503392, 50504263, 10105439 REALE,
+#  541452707 FTMO, dove 770411 e' IN CAMPO). Il terminale del PC e'
+#  loggato sul demo 50503392: prima si controlla che non abbia SEDIE
+#  attaccate. Vincoli di banco = R261a (sua testa): -Deposito 100000,
+#  -Modello 4, niente -Spread / -Ritardo / -FrazioneIS. Nessuna riga di
+#  lancio qui. Non tocca preset, EA, sedie, conti, taglie.
+# =====================================================================
+#
+#  1. LA DOMANDA (report/AUTOPSIA_PERSI_2026-09-27.md par. A.1 e A.4 #3,
+#     commit 487d9dc8)
+#  Sul per-trade 795401 (R261a, cella corr=1, orologio d0) l'autopsia ha
+#  misurato: long ORA LEGALE (asta Xetra delle 08:00 BCM DENTRO la
+#  finestra 07:59-08:30) PF 0,82 su 45 posizioni (-4.260 EUR) contro ORA
+#  SOLARE (pendente vivo e morto PRIMA della cash delle 09:00 BCM) PF
+#  1,03 su 27 (+308); 24 dei 33 stop pieni chiudono nell'ora 08.
+#  Ricontato qui sullo stesso file: 45 / 0,818 / -4.260 e 27 / 1,030 /
+#  +308, stop 24 su 33 nell'ora 08 [MISURATO]. Lettura dell'autopsia
+#  "asta d'apertura = generatore di rotture false" = [IPOTESI].
+#  La manopola ESISTE (InpPlaceHour/Min r.126-127, InpEntryCutoffHour/
+#  Min r.128-129): la variante -1h che R246j/l ha gia' girato sullo
+#  SHORT (referto R246 par. 0 punto 6: "MaxMin, FREQUENZA -> STAGIONE,
+#  indizio debole"; par. 5.3: "il box notturno a -1h non cambia quante
+#  volte si entra").
+#
+#  2. LA BASE E LA VARIABILE -- e perche' il generico e non un clone
+#     letterale di R246j
+#  Il mandato diceva "clone di prove/R246j con InpAllowLong=true,
+#  InpAllowShort=false, corr=1". R246j gira ABTG_MaxMinNotte_DAX_Short_
+#  Ottimizzato; la BASE di questa domanda (795401, e i numeri
+#  dell'autopsia) e' del GENERICO ABTG_MaxMinNotte (R261a). Il generico
+#  e lo Short_Ott hanno gli stessi 52 input e la stessa logica di lato
+#  (R261a par. 2), e R261d (T1 VERDE, 27/09) ha misurato "generico = 770411"
+#  AL CENTESIMO -- ma SULLO SHORT: sul long l'equivalenza e' LETTA, non
+#  misurata. Clonare R246j vorrebbe dire cambiare EA E orologio insieme
+#  contro la base: DUE variabili. Quindi: pin = R261a campo per campo,
+#  con InpUseCorrelation fisso a 1 (la cella corr=1 di R261a = 795401), e
+#  cambia SOLO IL BLOCCO D'OROLOGIO, identico a R246j:
+#     input                d0 (R261a)   -1h (qui = R246j)
+#     InpBoxStartHour:Min  23:00        22:00
+#     InpBoxEndHour:Min    4:59         3:59
+#     InpPlaceHour:Min     7:59         6:59
+#     InpEntryCutoff       8:30         7:30
+#     InpCloseHour:Min     17:30        16:30
+#  Una variabile (l'orologio), cinque pin che la esprimono, come in R246.
+#  (diff eseguito con uno script sui pin di R261a, non a mano)
+#  L'OROLOGIO: indici BCM UTC+1 FISSO su tutto lo storico dal 2024.09.26
+#  (report/OROLOGIO_BCM_2026-09-24.md): Xetra apre alle 08:00 BCM d'estate
+#  e alle 09:00 BCM d'inverno. A -1h la finestra 06:59-07:30 sta PRIMA
+#  della cash in TUTTE e due le stagioni (d'inverno due ore prima).
+#  IL FLAT a 16:30 e' ATTESO INERTE: sul d0 nessuna posizione long
+#  arriva alle 17:30, tutte chiudono entro le 15:xx (autopsia A.1).
+#
+#  3. IL CONTRO-ESEMPIO, costruito PRIMA (regola del 10/09)
+#  L'autopsia prevede: "se l'asta e' la causa, il -1h porta la quota di
+#  stop nell'ora 08 sotto il 50%". NON DISCRIMINA: a -1h la posizione
+#  d'estate entra alle 06:59-07:30 ed e' ANCORA VIVA alle 08:00, quando
+#  l'asta apre. Se l'asta genera le rotture false, lo stop arriva alle
+#  08:xx lo stesso: la quota nell'ora 08 puo' restare alta con l'asta
+#  COLPEVOLE. Quindi quella quota si scrive e NON decide. Decide il PF
+#  dei giorni d'estate; l'inverno fa da CONTROLLO (a -1h cambia anche
+#  lui: se si muove quanto l'estate, la variabile e' "entrare presto",
+#  non "l'asta").
+#
+#  4. L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#   n: d0 = 72 posizioni (103 deal), 45 d'estate + 27 d'inverno. A -1h
+#   [NON MISURATO]; indizio dallo short (R246 par. 5.3): la frequenza non
+#   si muove con l'orologio -> atteso ~72 posizioni, SENZA banda
+#   credibile. SOTTO 150: MERITO SOSPESO PER COSTRUZIONE; si legge un
+#   INDIZIO e il RISCHIO.
+#   IL PF DEI GIORNI D'ESTATE (ora legale europea: dall'ultima domenica
+#   di marzo all'ultima di ottobre, per data di chiusura, come
+#   autopsia_pertrade.py) -- tre ipotesi, PARTIZIONE:
+#     H-ASTA    PF_estate(-1h) >= 1,00  togliere l'asta dalla finestra
+#               porta l'estate al livello dell'inverno d0 (1,03);
+#     H-CAL     0,65 <= PF_estate(-1h) < 1,00  la stagione e' CALENDARIO:
+#               l'orologio non cambia il long d'estate (d0 0,818);
+#     H-PEGGIO  PF_estate(-1h) < 0,65  il pre-mercato e' PEGGIO dell'asta
+#               (rotture sottili senza volume).
+#   METRO, detto prima: bootstrap IID delle 45 posizioni d'estate d0
+#   (4000 ricampionamenti): sd 0,290, 5-95% 0,459-1,404 [MISURATO];
+#   d'inverno (27): sd 0,627. La distanza fra H-CAL e H-ASTA (0,818 ->
+#   1,00) e' MENO DI UNA sd: qualunque esito e' un INDIZIO DEBOLE, e si
+#   scrive cosi'. PREVISIONE MIA: H-CAL (R246 ha letto STAGIONE sullo
+#   short della stessa sedia).
+#   IL RISCHIO (a qualunque n): Equity DD % del CSV _IS (tranche unica)
+#   contro la base d0 7,8243% a 1%, e DD a saldo chiuso dal per-trade;
+#   a 2,00% le due formule della testa di R260c par. 8 [DERIVATO].
+#   Si scrivono SEMPRE (non decidono): PF e n per stagione, la quota di
+#   stop nell'ora 08 (e 07), il PF d'inverno a -1h contro 1,030 d0, il
+#   conto per mese; lo script e':
+#     python3 backtest_pipeline/autopsia_pertrade.py <per-trade 797213>
+#       --close 16:30 --label "DAX LONG -1h" --confronta <795401>
+#       --label2 "DAX LONG d0"
+#
+#  5. I CANCELLI (congelati)
+#  R0  -SoloControllo: 2 celle per finestra. Altrimenti STOP.
+#  G1  gemelle 797213/797263 identiche in CSV e per-trade tranne il
+#      magic. Se no, NULLO.
+#  L0  tutte le chiusure con deal_type 1. Se no, NULLO.
+#  C0  D30EUR: somma dei net = Profit del CSV entro 0,05 (commissione 0,00
+#      misurata in 24 per-trade su 24, classe 855).
+#  S1  SENTINELLA DELL'OROLOGIO (= R246 S1): per-trade DIVERSO da 795401;
+#      nessuna uscita dopo le 16:31; uscite prima delle 08:00 attese
+#      (GIALLO se assenti). Se il per-trade e' identico a 795401 o c'e'
+#      un'uscita dopo le 16:31: il pin d'orario non e' arrivato -> NULLO.
+#  E0  CSV senza "_ohlc" (modello 4 arrivato). Con @FRAZIONEIS 1.0 si
+#      legge il CSV _IS; l'_OOS e' DEGENERE e ATTESO (rc 2, come R261a:
+#      RIEPILOGO_ROUND_CORTI_B.txt r.13), e il per-trade e' quello della
+#      tranche unica (misurato cosi' in R261a/b/c il 27/09).
+#  NESSUN G0 DENTRO IL FILE, dichiarato: col nuovo orologio nessuna
+#  giornata e' uguale al d0. Il banco sul DAX long e' ancorato da T2
+#  VERDE (R261c = R244b al centesimo) e T1 VERDE (R261d) del 27/09, sullo
+#  stesso PC e binario: classe 166 (SHA256 dell'EA dopo il job contro il
+#  pin) e' la sola garanzia qui. Se il binario e' cambiato, il file NON
+#  si legge contro 795401.
+#  R4  NESSUNA CELLA SI PROMUOVE. L'orario delle sedie d'inverno e' gia'
+#      una decisione di Claudio entro il 25/10 (CLAUDE.md, orologio BCM):
+#      questo file gli porta un indizio sul LONG, non una risposta.
+#
+#  6. COSTO: 2 gemelle x tranche unica D30EUR M15 tick, 21 mesi. MISURATO
+#  sullo stesso PC il 27/09 (R261a/b/c, giornale dell'agente): 5,2-22,2 s
+#  per passata -> ~1 minuto per il job.
+#
+#  7. BUCHI: il generico = Short_Ott sul LONG e' letto, non misurato;
+#  merito sospeso (n ~72); il costo 40x in pre-mercato (spread del DAX
+#  alle 07:00 BCM) [NON MISURATO] (R246a par. 10); la settimana di
+#  disallineamento UE/USA dell'ora legale (il filtro S&P) [NON MISURATA].
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=22||22||0||22||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=3||3||0||3||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=6||6||0||6||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=7||7||0||7||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=16||16||0||16||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=1||1||0||1||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR269C
+InpMagic=797213||797213||50||797263||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

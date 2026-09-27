@@ -1,0 +1,119 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R268c -- ORO 770402 SOLO LONG, TICK REALI: LA CURVA DD(TAGLIA)
+#  XAUUSD H2, TICK REALI (-Modello 4), deposito 100000,
+#  2024.07.05 -> 2026.06.30 (moncone 1 giorno, gamba 2024.07.06 ->).
+#  ASSE: InpRiskPercent 0,5 / 1,0 / 1,5 / 2,0 (4 celle). Magic 797203
+#  (unico: l'asse e' il rischio). Per-trade in Common\Files:
+#    abtg_trades_ABTG_MaxMinNotte_XAUUSD_797203.csv -- ne sopravvive UNO
+#    (classe 455), e quale cella sia NON e' fissato: si IDENTIFICA
+#    (classi 850/855, testa par. 7 G1c) e non si legge se AMBIGUO.
+#
+#  FACOLTATIVO, CON UNA CONDIZIONE DI COSTO CHE LA RIGA DEVE APPLICARE
+#  (classe 854): parte SOLO se il job R268a e' durato <= 5 minuti di
+#  orologio (testa par. 8). Altrimenti non parte e si scrive perche'.
+#
+#  TUTTO IL RAGIONAMENTO, LE ATTESE E I CANCELLI STANNO NEL FILE DI
+#  TESTA:  prove/R268a_oro_long_TICK_testa.txt
+#  Rispetto a R268a cambiano SOLO:
+#    InpRiskPercent = 0.5||0.5||0.5||2.0||Y   (l'ASSE)
+#    InpComment     = MAXMINR268C   (solo commento dell'ordine)
+#    InpMagic       = 797203||797203||0||797203||N
+#  (diff eseguito con uno script sui pin di R260a, non a mano)
+#
+#  COSA MISURA: la curva DD(taglia) MISURATA a tick del solo long, come
+#  R263g ha fatto sul 770201 -- invece delle due formule a tavolino del
+#  referto B par. 1.5. NON e' una proposta: nessun valore dell'asse e'
+#  "consigliato" e il file non ne sceglie nessuno.
+#  CHE COSA NON E' (classe 860, scritto qui perche' nessuno lo dimentichi):
+#  2 anni, UN SOLO REGIME (toro dell'oro 2024-2026), merito sospeso.
+#  NON e' la finestra del contratto (22 anni di R100, straddle geometria
+#  R17: altra configurazione) e NON e' la finestra peggiore (R193b A3/C4:
+#  decide la PEGGIORE; il solo long sui 22 anni lo misura R268d, a OHLC).
+#  Il muro statico del 10% e la S3 di R193b (8% a 2,00% sulla sua
+#  sotto-finestra OOS, straddle) qui sono RIFERIMENTI, non soglie: nessuna
+#  soglia di taglia e' congelata su QUESTO file. Il preset FTMO vuole la
+#  taglia UNIFORME (r.98-99, size erratiche vietate): la taglia e' una
+#  firma di Claudio.
+#
+#  ATTESA (scritta PRIMA):
+#    Trades IDENTICI sulle 4 celle (R193b B5): la taglia non tocca ne'
+#    l'ingresso ne' l'uscita. Atteso ~119 deal (84-100 posizioni, testa
+#    par. 6.1). PF quasi identico fra le celle.
+#    DD MONOTONO crescente; d = DD della cella 0,5 (== R268a, G1c):
+#      DD(f) in [ 1-(1-d)^(f/0,5) ; (f/0,5) x d ]  [DERIVATO], f = taglia.
+#    Esempio col DD a saldo chiuso atteso ~2% (testa par. 6.3): 1,0%
+#    3,96-4,00% ; 1,5% 5,88-6,00% ; 2,0% 7,76-8,00%. L'Equity DD del CSV
+#    e' >= di quello: la banda vera si scrive con il d MISURATO.
+#    Posizioni al tetto dei lotti: nessuna attesa (a 2% e 100000 i lotti
+#    sono ~1: lontani da SYMBOL_VOLUME_MAX).
+#  CANCELLI: R0 (4 celle per finestra), E0 (CSV SENZA "_ohlc"), L0 sul
+#  per-trade identificato, C0, G1c (cella 0,5 == R268a al centesimo;
+#  asse piatto = NULLO; Trades diversi fra le celle = il DD non si legge),
+#  P0-TICK (testa par. 0: nel caso (ii) i DD del CSV sono MISTI e la
+#  curva non decide nulla -- si scrive e basta).
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  50503392 (che ha la sedia viva 770402), 50504263, 10105439 (REALE),
+#  541452707 (FTMO). Nessuna riga di lancio qui. Non tocca preset, EA,
+#  sedie, conti, taglie.
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H2
+@DAQUANDO   2024.07.05
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0.5||2.0||Y
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR268C
+InpMagic=797203||797203||0||797203||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
