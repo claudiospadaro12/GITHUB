@@ -35776,3 +35776,20 @@ fra eventi consecutivi della valuta: sul 2021-2024 il massimo normale e' 6 giorn
 - **Regola**: (1) gli estremi di un Monte Carlo sono [STIMA], con seme e script o con la riproduzione scritta accanto, e non fanno da soglia; (2)
   una disuguaglianza si prova con un contro-esempio che ha **un segno diverso dentro la finestra** (vincita fra perdite), non solo con la serie
   monotona; se non regge, si etichetta [INDICATIVO] e si dice che non decide.
+
+### CLASSE 865 — il cap deciso sul BORDO coi valori nominali, e "cosa somma il cap" non letto nel codice (27/09/2026, parente di 819/861)
+Caso: `SEDIA_ORO_LONG_FTMO_BOZZA` prima stesura: "{2,00;2,00} = 4,00 >= 4,00 -> la terza e' RIFIUTATA" e
+"l'oro a 0,5% fa rifiutare la 770101". Falso due volte: (1) il valore vero e' spostato dal bordo da
+`MathFloor` del lotto, dallo slippage degli ordini stop e dal denominatore equity (non saldo); (2) il
+Guardian in campo (`d884f7e1` v1.12, r.171-199, confronto `>=` r.444) somma SOLO le posizioni aperte,
+NON il rischio del nuovo ordine: l'EA legge una bandiera (include v1.20 r.282-319). Con {0,5 -> 2 -> 2}
+la terza ENTRA (2,5 < 4,00) e in campo ci sono 4,50%. Regola: al bordo si scrive [NON DETERMINABILE]
+con i tre spostamenti; prima di dire cosa decide un cap si legge nel codice cosa somma e come confronta.
+
+### CLASSE 866 — la macchina a stati letta per UN tick solo (27/09/2026)
+Caso: stesso referto, "attaccato alle 14:00 piazza con scadenza 90'": al tick dopo il cutoff (r.258,
+fase MMP_PLACED senza posizione, ora >= 10:30) il pendente viene cancellato; la finestra pericolosa e'
+09:00-10:30 FTMO. E il ramo `TryPlace() == false` (r.346, rifiuto del Guardian) lascia lo stato in
+MMP_WAIT e riprova a ogni tick: se il cap si libera prima del cutoff il buy stop parte in ritardo, un
+ingresso che il banco non ha mai misurato. Regola: ogni "l'EA fa X" si segue fino al primo stato
+stabile, e ogni `return(false)` va seguito nel suo ramo.
