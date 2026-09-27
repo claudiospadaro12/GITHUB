@@ -50,6 +50,18 @@ RACCOLTA_DIR = la cartella ROUND_CORTI_C_<data> estratta dallo zip:
   PERTRADE/abtg_trades_<EA>_<sim>_<magic>.csv, ESTERNI/ (CSV e per-trade di
   R260a/R260c/R261a/R255a se erano sul PC), LOG_TESTER/*.log (UTF-16),
   RIEPILOGO_ROUND_CORTI_C.txt.
+RACCOLTA C2 (mini-riga righe/RIGA_ROUND_CORTI_C2_R264D_ORO.txt, PASS 20b9c544): la
+cartella ROUND_CORTI_C2_<data> col rilancio dei SOLI R264d1..d4 (oro a 100000, OHLC
+M1, IS 2017-2023 / OOS 2024-2026) che la riga C ha SALTATO. Si riconosce da
+RIEPILOGO_ROUND_CORTI_C2.txt (senza RIEPILOGO_ROUND_CORTI_C.txt) o dal nome
+ROUND_CORTI_C2_*: i 33 job di C NON sono in quella raccolta e NON si leggono
+(ASSENTI PER COSTRUZIONE: non NULLI, non SALTATI); il RIEPILOGO C2 si legge con lo
+stesso rp() (classe 166, rc, NULLI uniti: classe 873); G0 R264d e K1 R264d si
+RICOPIANO da RIEPILOGO_ROUND_CORTI_C_letto.txt (la copia del RIEPILOGO C che la
+mini-riga mette nella raccolta) con l'etichetta "[letto dalla riga C, non rifatto]";
+la griglia d1-d3 e l'uscita d4 si leggono con gli stessi cancelli della raccolta C.
+Con TUTTI E DUE i RIEPILOGHI (C e C2) nella stessa cartella la raccolta e' AMBIGUA
+(cartella sbagliata copiata dentro): il lettore si FERMA, nessun referto.
 Gli ESTERNI mancanti si cercano in --archivi e poi in
 risultati_archivio/ROUND_CORTI_B_2026-09-27 (R260a/R260c/R261a); R255a non e'
 in repo: senza, le letture che ne dipendono restano NON VERIFICABILI.
@@ -180,6 +192,8 @@ JOBS = OrderedDict((j["t"], j) for j in [
     _j("R267f2", EMA, "XAUUSD", "R267f2_venerdi_EMA200_XAUUSD.txt", 4, 10000, "", "OOS", "OOS", 2, "InpFridayClose", [0, 1], [], "796732", "1", "", "R267", "fx", 40, "2024.01.01", "2026.06.30", "2023.12.31", "2023.12.31"),
 ])
 assert len(JOBS) == 37
+C2JOBS = ("R264d1", "R264d2", "R264d3", "R264d4")   # i SOLI job della mini-riga C2 (rilancio dell'onda 2 dell'oro a 100000)
+RIEP_C, RIEP_C2, RIEP_C_LETTO = "RIEPILOGO_ROUND_CORTI_C.txt", "RIEPILOGO_ROUND_CORTI_C2.txt", "RIEPILOGO_ROUND_CORTI_C_letto.txt"
 R267A = dict(t="R267a", e=MMN, s="XAUUSD", p="R267a_news_oro_770402.txt")   # ESCLUSO E DICHIARATO (par. 6-A aperto)
 
 # ancore G0 (R264 par. 1a / 12, R265 par. 1b): n, PF, DD, Profit, nome
@@ -628,6 +642,10 @@ class Raccolta:
         self.archivi = archivi
         self.note = []
         self._riep = None
+        self._letto = None
+        self.tipo = tipo_raccolta(root)      # 'C' o 'C2' (si FERMA se la cartella porta tutti e due i RIEPILOGHI)
+        self.c2 = self.tipo == "C2"
+        self.nome_riep = RIEP_C2 if self.c2 else RIEP_C
 
     def p_csv(self, t, leg):
         j = JOBS[t]
@@ -657,7 +675,7 @@ class Raccolta:
 
     def riepilogo(self):
         if self._riep is None:
-            p = os.path.join(self.root, "RIEPILOGO_ROUND_CORTI_C.txt")
+            p = os.path.join(self.root, self.nome_riep)
             self._riep = leggi_testo(p).splitlines() if os.path.exists(p) else []
         return self._riep
 
@@ -666,6 +684,41 @@ class Raccolta:
             if ln.startswith(prefisso):
                 return ln
         return ""
+
+    def riepilogo_letto(self):
+        """C2: la copia del RIEPILOGO C che la mini-riga mette nella raccolta (RIEPILOGO_ROUND_CORTI_C_letto.txt)."""
+        if self._letto is None:
+            p = os.path.join(self.root, RIEP_C_LETTO)
+            self._letto = leggi_testo(p).splitlines() if os.path.exists(p) else []
+        return self._letto
+
+    def g0_k1_letti(self):
+        """C2: G0 R264d e K1 R264d RICOPIATI dal RIEPILOGO C letto, con le STESSE regex della mini-riga ('^G0 R264d[ :]',
+        '^K1 R264d: ', 'coppie gamba1/gamba2 N', 'gambe 1 con volume >= 0,02: X su N', 'in M coppie), ATR'). lv 0..3 come
+        g0_livello (3 = NON VERIFICABILE: file o riga assente); pav = N - X = coppie con la gamba 1 al PAVIMENTO 0,01."""
+        out = dict(lv=3, g0="", k1="", ver="", n_pair=None, rat_ko=None, v1ge02=None, pav=None, fonte="")
+        L = self.riepilogo_letto()
+        if not L:
+            out["fonte"] = "%s ASSENTE nella raccolta" % RIEP_C_LETTO
+            return out
+        out["fonte"] = "%s (%d righe)" % (RIEP_C_LETTO, len(L))
+        g = [ln for ln in L if re.match(r"^G0 R264d[ :]", ln)]
+        k = [ln for ln in L if ln.startswith("K1 R264d: ")]
+        if g:
+            out["g0"] = g[0]
+            m = re.search(r"-> \**(VERDE|GIALLO|ROSSO)\b", g[0])
+            out["lv"] = {"VERDE": 0, "GIALLO": 1, "ROSSO": 2}[m.group(1)] if m else 3
+        if k:
+            out["k1"] = k[0]
+            m = re.search(r"-> K1 (PASS|FAIL|NON RISOLTO|SOLO LETTURA|NULLO|NON CALCOLABILE)", k[0])
+            out["ver"] = m.group(1) if m else "NON LETTO"
+            mp = re.search(r"coppie gamba1/gamba2 ([0-9]+)", k[0])
+            mv = re.search(r"gambe 1 con volume >= 0,02: ([0-9]+) su ([0-9]+)", k[0])
+            mr = re.search(r" in ([0-9]+) coppie\), ATR ", k[0])
+            if mp and mv and mr:
+                out["n_pair"], out["v1ge02"], out["rat_ko"] = int(mp.group(1)), int(mv.group(1)), int(mr.group(1))
+                out["pav"] = out["n_pair"] - out["v1ge02"]
+        return out
 
     def rp(self):
         """il RIEPILOGO della riga: FILE NULLI (motivi per tag), FILE SALTATI, FILE NON NULLI, CLASSE 166 (classe 873)."""
@@ -728,6 +781,24 @@ def conta_cartelle(d):
     return sum(1 for t in JOBS if os.path.isdir(os.path.join(d, "ROUND_" + t)))
 
 
+def _ha_riep(d):
+    return os.path.isfile(os.path.join(d, RIEP_C)) or os.path.isfile(os.path.join(d, RIEP_C2))
+
+
+def tipo_raccolta(root):
+    """'C' o 'C2'. C2 = RIEPILOGO_ROUND_CORTI_C2.txt (senza RIEPILOGO_ROUND_CORTI_C.txt) o nome ROUND_CORTI_C2_*.
+    Contro-esempio del 28/09 (Claudio copia la cartella sbagliata): TUTTI E DUE i RIEPILOGHI nella stessa cartella, o un
+    RIEPILOGO C dentro una ROUND_CORTI_C2_* = raccolta AMBIGUA -> ci si FERMA senza referto. Letta come C darebbe 33
+    NULLI 'cartella ASSENTE' su una C2, letta come C2 ignorerebbe 33 cartelle di una C: nessuna delle due e' una lettura."""
+    hc, hc2 = os.path.isfile(os.path.join(root, RIEP_C)), os.path.isfile(os.path.join(root, RIEP_C2))
+    nome_c2 = os.path.basename(os.path.abspath(root)).startswith("ROUND_CORTI_C2_")
+    if hc and (hc2 or nome_c2):
+        raise SystemExit("ERRORE: raccolta AMBIGUA in %s: c'e' %s insieme %s -- la C2 porta la copia del RIEPILOGO C SOLO col nome %s, mai col nome originale. "
+                         "Cartella sbagliata copiata dentro? Togliere il RIEPILOGO che non appartiene alla cartella (cartelle ROUND_ trovate: %d) e rilanciare. NESSUN referto scritto."
+                         % (root, RIEP_C, ("a " + RIEP_C2 if hc2 else "al nome ROUND_CORTI_C2_*"), RIEP_C_LETTO, conta_cartelle(root)))
+    return "C2" if (hc2 or nome_c2) else "C"
+
+
 def trova_raccolta(rac):
     """classe 872: un percorso sbagliato NON diventa un round NULLO o SALTATO. Si contano PRIMA le cartelle
     attese: zero cartelle ROUND_<t> e nessun RIEPILOGO -> si scende di UN livello solo se li' c'e' UNA raccolta,
@@ -735,13 +806,15 @@ def trova_raccolta(rac):
     rac = os.path.abspath(rac)
     if not os.path.isdir(rac):
         raise SystemExit("ERRORE: %s non e' una cartella (serve la raccolta ROUND_CORTI_C_<data> estratta dallo zip)" % rac)
-    if conta_cartelle(rac) > 0 or os.path.isfile(os.path.join(rac, "RIEPILOGO_ROUND_CORTI_C.txt")):
+    if conta_cartelle(rac) > 0 or _ha_riep(rac):
+        tipo_raccolta(rac)
         return rac, None
     figli = [os.path.join(rac, x) for x in sorted(os.listdir(rac)) if os.path.isdir(os.path.join(rac, x))]
-    buoni = [f for f in figli if conta_cartelle(f) > 0 or os.path.isfile(os.path.join(f, "RIEPILOGO_ROUND_CORTI_C.txt"))]
+    buoni = [f for f in figli if conta_cartelle(f) > 0 or _ha_riep(f)]
     if len(buoni) == 1:
+        tipo_raccolta(buoni[0])
         return buoni[0], "la cartella passata (%s) non e' la raccolta: letta la sua sottocartella %s (scesa di UN livello, classe 872)" % (rac, os.path.basename(buoni[0]))
-    raise SystemExit("ERRORE (classe 872): in %s nessuna cartella ROUND_R264..R267 e nessun RIEPILOGO_ROUND_CORTI_C.txt; sottocartelle con una raccolta: %d (%s). Passare la cartella ROUND_CORTI_C_<data> estratta. NESSUN referto scritto."
+    raise SystemExit("ERRORE (classe 872): in %s nessuna cartella ROUND_R264..R267 e nessun RIEPILOGO_ROUND_CORTI_C.txt / _C2.txt; sottocartelle con una raccolta: %d (%s). Passare la cartella ROUND_CORTI_C_<data> (o ROUND_CORTI_C2_<data>) estratta. NESSUN referto scritto."
                      % (rac, len(buoni), ", ".join(os.path.basename(b) for b in buoni) or "nessuna"))
 
 
@@ -780,6 +853,12 @@ class File:
         self.lanciato = rac.lanciato(t)
         self.saltato = ""
         self.cartella = self.lanciato
+        self.costruzione = rac.c2 and t not in C2JOBS   # raccolta C2: i 33 job di C NON ci sono e NON si leggono (non NULLI, non SALTATI)
+        if self.costruzione:
+            self.saltato = "ASSENTE PER COSTRUZIONE (raccolta C2: rilancio dei soli R264d1-d4; questo job sta nella raccolta C, che qui NON si legge)" + (
+                " [cartella ROUND_%s PRESENTE in una C2: INATTESA, NON letta]" % t if self.lanciato else "")
+            self.lanciato = False
+            return
         if not self.lanciato:
             sal = rac.saltato_txt(t)
             if sal:   # SALTATO SOLO se la riga lo dichiara (R265b senza K1 PASS, onda 2 dopo un G0 ROSSO)
@@ -1048,22 +1127,26 @@ def lettura(rac, nota_percorso=None):
             div.append("- %s: NULLO per la riga ma SALTATO nel RIEPILOGO del lettore: %s" % (t, rn[:200]))
         if RP["presente"] and RP["nonnulli"] is not None and t in RP["nonnulli"] and not f.ok and f.lanciato:
             div.append("- %s: NON nullo per la riga, NULLO per il lettore: %s" % (t, "; ".join(f.nullo)[:260]))
-    R.add("# LETTURA DEL ROUND CORTI C -- R264 (EMA200 H4: G0 tick, ponte AUDJPY, griglie OHLC) + R265 (EURUSD solo corto: G0+K1, walk-forward) + R266 (box asiatico GBPUSD/EURUSD) + R260d (oro solo long col trend dell'oro) + R267 (11 manopole a costo zero; R267a ESCLUSO)",
+    R.add("# LETTURA DEL ROUND CORTI C -- R264 (EMA200 H4: G0 tick, ponte AUDJPY, griglie OHLC) + R265 (EURUSD solo corto: G0+K1, walk-forward) + R266 (box asiatico GBPUSD/EURUSD) + R260d (oro solo long col trend dell'oro) + R267 (11 manopole a costo zero; R267a ESCLUSO)" + (" -- RACCOLTA C2: SOLI R264d1-d4" if rac.c2 else ""),
           "", "Generato da `backtest_pipeline/leggi_round_corti_c.py` sulla raccolta `%s`." % rac.root,
           "Criteri congelati PRIMA dei numeri: `prove/R264_TESTA.txt.in` par. 5-9, `prove/R265_TESTA.txt.in` par. 2-4, `prove/R266a_asia_box_GBPUSD_TESTA.txt` par. 5-8, "
           "`prove/R260d_oro_770402_solo_long_trend_oro.txt` par. 3-4, `prove/R267a_news_oro_770402.txt` par. 0 e `prove/R267_GENERA.py` (B/C/V/E/U/D). "
           "Etichette: [MISURATO] dal CSV/per-trade della raccolta; [DERIVATO] da una formula della testa; [STIMA]; [NON MISURATO]; [NON VERIFICABILE]. "
           "Posizioni contate per position_id; sul forex/oro ogni saldo toglie k x volume (classe 844: k = (somma net - Profit)/lotti). "
           "**R4/B6/C6/V5/U6/D6/E4: NESSUNA cella si promuove. NESSUNA PROPOSTA DI TAGLIA: ogni riga di taglia e' un riferimento, non una proposta. Nessun preset, EA, sedia o conto e' toccato.**",
-          "", "Pre-lettura della riga (RIEPILOGO_ROUND_CORTI_C.txt): %s -- si RILEGGE, non si crede: i cancelli qui sotto sono rifatti dai CSV e dai per-trade, e i NULLI della riga si UNISCONO (classe 873)." % (
-              "presente, %d righe" % len(rac.riepilogo()) if rac.riepilogo() else "ASSENTE"), "")
+          "", "Pre-lettura della riga (%s): %s -- si RILEGGE, non si crede: i cancelli qui sotto sono rifatti dai CSV e dai per-trade, e i NULLI della riga si UNISCONO (classe 873)." % (
+              rac.nome_riep, "presente, %d righe" % len(rac.riepilogo()) if rac.riepilogo() else "ASSENTE"), "")
+    if rac.c2:
+        R.add("- **RACCOLTA C2** (`%s`, mini-riga `righe/RIGA_ROUND_CORTI_C2_R264D_ORO.txt`): rilancio dei SOLI R264d1-d4 (EMA200 H4 XAUUSD a 100.000, OHLC M1, IS 2017-2023 / OOS 2024-2026) che la riga C ha SALTATO; "
+              "**i 33 job di C NON sono in questa raccolta e NON si leggono (non NULLI: ASSENTI PER COSTRUZIONE)**. G0 R264d e K1 R264d si RICOPIANO da `%s` [letto dalla riga C, non rifatto]; "
+              "le sezioni 2 e 4-7 (ponte AUDJPY, R265b, R266, R260d, R267) non esistono qui: stanno nel referto della raccolta C." % (RIEP_C2, RIEP_C_LETTO), "")
     if nota_percorso:
         R.add("- **PERCORSO: %s**" % nota_percorso, "")
     if RP["presente"]:
         R.add("- CLASSE 166 dalla riga (il lettore non ha i sorgenti compilati: la legge e la unisce): %s" % (RP["c166"] or "[riga CLASSE 166 NON TROVATA nel RIEPILOGO: motore = pin NON VERIFICATO]"),
               "- NULLI della riga: %d (%s) | SALTATI della riga: %d (%s)" % (len(RP["nulli"]), ", ".join(RP["nulli"]) or "nessuno", len(RP["saltati"]), ", ".join(RP["saltati"]) or "nessuno"), "")
     else:
-        R.add("- **[NON VERIFICABILE] `RIEPILOGO_ROUND_CORTI_C.txt` ASSENTE: classe 166 (motore = pin) NON VERIFICATA, rc / freschezza dei CSV e dei per-trade NON VERIFICATI, SALTATO e 'non raccolto' NON distinguibili. I NULLI della riga NON sono uniti: ogni esito qui sotto vale SOLO se la riga non li ha annullati (classe 873).**", "")
+        R.add("- **[NON VERIFICABILE] `%s` ASSENTE: classe 166 (motore = pin) NON VERIFICATA, rc / freschezza dei CSV e dei per-trade NON VERIFICATI, SALTATO e 'non raccolto' NON distinguibili. I NULLI della riga NON sono uniti: ogni esito qui sotto vale SOLO se la riga non li ha annullati (classe 873).**" % rac.nome_riep, "")
     R.add("## DIVERGENZE fra la riga e il lettore (per nome, classe 873)", "", *(div or ["- nessuna" if RP["presente"] else "- NON VERIFICABILE (RIEPILOGO assente)"]))
     R.add("")
     R.esiti["div"] = div
@@ -1072,6 +1155,8 @@ def lettura(rac, nota_percorso=None):
           "| file | lanciato | esito | motivi / note | tetto barre |", "|---|---|---|---|---|")
     n_nulli = n_salt = 0
     for t, f in F.items():
+        if f.costruzione:
+            continue
         if not f.lanciato:
             n_salt += 1
             R.add("| %s | NO | SALTATO / non nella raccolta | %s | - |" % (t, f.saltato.replace("|", "/")))
@@ -1081,16 +1166,21 @@ def lettura(rac, nota_percorso=None):
             R.add("| %s | %s | %s | %s | %s |" % (t, "si" if f.cartella else "NO (cartella ASSENTE, non SALTATA)", "NON NULLO" if f.ok else "**NULLO**", ("; ".join(f.nullo) if f.nullo else "E0, asse, P0, C0, L0, G1 ok") + ("; " + "; ".join(f.info) if f.info else ""), f.tetto))
     R.add("", "fonte: `ROUND_<t>/<EA>_<sim>_<gamba><_ohlc>_<t>.csv`, `ROUND_<t>/<prova>` (P0), `PERTRADE/abtg_trades_<EA>_<sim>_<magic>.csv`, `ROUND_<t>/REFERTO_ROUND_<t>.txt` (tetto barre). "
           "Regole: E0 righe attese e Trades>0 (classe 766); P0 pin dal CSV (classe 780); C0 righe = Trades e somma per simbolo (classi 844/855); identificazione stretto-poi-largo, AMBIGUO non nullo (classe 850); L0 lato; G1 gemelle.")
-    # R267a: ESCLUSO E DICHIARATO
-    r267a = os.path.isdir(os.path.join(rac.root, "ROUND_R267a"))
-    R.add("- **R267a** (`%s`): %s" % (R267A["p"], (
+    costr = [t for t, f in F.items() if f.costruzione]
+    if costr:
+        R.add("- **ASSENTI PER COSTRUZIONE (raccolta C2: NON letti, non NULLI ne' SALTATI): %d job di C** (%s)" % (len(costr), ", ".join(costr)))
+    R.esiti["n_costr"], R.esiti["tipo"] = len(costr), rac.tipo
+    # R267a: ESCLUSO E DICHIARATO (solo nella raccolta C: nella C2 non e' pertinente)
+    r267a = os.path.isdir(os.path.join(rac.root, "ROUND_R267a")) and not rac.c2
+    if not rac.c2:
+        R.add("- **R267a** (`%s`): %s" % (R267A["p"], (
         "cartella ROUND_R267a PRESENTE: INATTESO -- la testa par. 6-A lo esclude (LoadNews senza FILE_COMMON: due celle identiche a R260c = misura del NULLA); si legge SOLO se il par. 6-A e' stato chiuso per iscritto, e qui non risulta: NON LETTO"
         if r267a else "ASSENTE, ed e' ATTESO: ESCLUSO E DICHIARATO dalla riga e dalla testa par. 6-A (canale news aperto). NON e' un file NULLO per guasto: resta in coda finche' il par. 6-A non e' chiuso (A1 codice o A2 sandbox).")))
     R.esiti["r267a"] = "INATTESO" if r267a else "ESCLUSO_ATTESO"
     R.esiti["n_nulli"], R.esiti["n_salt"] = n_nulli, n_salt
     # D0 tasso IS/OOS (R264 par. 8 S0) sulle griglie e R265b
     R.add("", "**D0 DATI (R264 par. 8 S0: tasso IS in deal/anno fra 0,5 e 2,0 volte il tasso OOS della stessa cella, altrimenti storico M1 sospetto -> NULLO)**")
-    for t in [x for g in GRID.values() for x in g["f"] + [g["x4"]]] + ["R265b"]:
+    for t in [x for x in [x for g in GRID.values() for x in g["f"] + [g["x4"]]] + ["R265b"] if not (rac.c2 and x not in C2JOBS)]:
         f = F[t]
         if not f.ok:
             R.add("- %s: D0 NON VERIFICABILE (NULLO o SALTATO)" % t)
@@ -1115,6 +1205,8 @@ def lettura(rac, nota_percorso=None):
     # G2 incrociato (R264 par. 6.3)
     R.add("", "**G2 INCROCIATO (R264 par. 6.3: cella TP1Pct=50 del file x4 == cella O1=0,20 del file x2, IS e OOS al centesimo)**")
     for gk, g in GRID.items():
+        if rac.c2 and gk != "d":
+            continue
         x2, x4 = F[g["f"][1]], F[g["x4"]]
         if not (x2.ok and x4.ok):
             R.add("- %s: G2 NON VERIFICABILE (%s o %s NULLO/SALTATO)" % (g["sym"], g["f"][1], g["x4"]))
@@ -1131,11 +1223,14 @@ def lettura(rac, nota_percorso=None):
         else:
             R.add("- %s: %s TP1Pct=50 == %s O1=0,20 in IS e OOS -> G2 ok" % (g["sym"], g["x4"], g["f"][1]))
     R.add("")
-    sez_r264(rac, F, EX, R)
-    sez_r265b(F, EX, R)
-    sez_r266(F, R, rac)
-    sez_r260d(F, EX, R)
-    sez_r267(F, EX, R)
+    if rac.c2:
+        sez_r264_c2(rac, F, R)
+    else:
+        sez_r264(rac, F, EX, R)
+        sez_r265b(F, EX, R)
+        sez_r266(F, R, rac)
+        sez_r260d(F, EX, R)
+        sez_r267(F, EX, R)
     sez_finale(F, R)
     return R
 
@@ -1158,6 +1253,13 @@ def g0_livello(f, an):
     return lv, dict(r=r, dn=dn, dp=dp, dd=dd)
 
 
+# accanto al K1 di R264d, quando almeno una gamba 1 sta al pavimento (classe 889, trovata dal cancello del 28/09): NON cambia il
+# criterio congelato del K1 (vol2/vol1 fuori banda in piu' di meta' delle coppie -> NULLO), lo DIAGNOSTICA; e la griglia d1-d4
+# NON dipende da quel NULLO (sez_griglia legge il solo G0: testa par. 5/10)
+K1_PAV_TXT = ("  - K1 R264d, DIVERGENZA DICHIARATA (classe 889): %d coppie su %d (%.1f%%) hanno la gamba 1 al PAVIMENTO 0,01 [DERIVATO: N - X da 'gambe 1 con volume >= 0,02: X su N']; "
+              "li' il rapporto vol2/vol1 e' QUANTIZZATO (0,01/0,01 = 1,0 e 0,03/0,01 = 3,0 cadono fuori [%.2f ; %.4g] con gambe identificate GIUSTE), quindi il cancello "
+              "'fuori banda in piu' di meta' delle coppie -> K1 NULLO' (%d coppie fuori su %d) dice NULLO per il PAVIMENTO, non per l'identificazione. Il criterio congelato del K1 "
+              "NON cambia (riguarda il COSTO dello stop); la lettura della griglia d1-d4 (par. 3.2) NON dipende da questo NULLO: dipende solo dal G0 (testa par. 5/10).")
 G0_NOME = ["VERDE (il banco rifa' l'archivio: |dn| <= 1%, |dPF| <= 0,020, DD entro +-5%)", "GIALLO (|dn| <= 3% e |dPF| <= 0,050)", "ROSSO: il banco NON rifa' l'archivio", "NON VERIFICABILE (file NULLO o SALTATO)"]
 
 
@@ -1200,6 +1302,10 @@ def sez_r264(rac, F, EX, R):
             t, po.path.split(os.sep)[-1], po.k, ko["n_pos"], ko["n_pair"], ko["n_sing"], f3(ko["med_rat"]), prm["rat"], prm["rlo"], prm["rhi"], ko["rat_ko"], ko["atr_ko"], "clausola della testa R265 par. 2: oltre meta' delle coppie = K1 NULLO" if prm.get("atr12") else "INFORMATIVO: la testa R264 par. 5 congela solo vol2/vol1, la riga aggiunge i 12% e puo' dire NULLO dove la testa no (classe 875)",
             ko["med_lo"] * sc if not math.isnan(ko["med_lo"]) else float("nan"), prm["un"], ko["med_hi"] * sc if not math.isnan(ko["med_hi"]) else float("nan"), prm["un"], ko["med_s1"] * sc if not math.isnan(ko["med_s1"]) else float("nan"), prm["dec"], ver, extra,
             ("; gambe 1 con volume >= 0,02: %d su %d (contro-esempio della causa nominata per il GIALLO/ROSSO d'oro: se >= 0,02 la causa lotto e' SBAGLIATA)" % (ko["v1ge02"], ko["n_pair"])) if t == "R264d" else ""))
+        if t == "R264d" and ko["n_pair"] > 0 and (ko["n_pair"] - ko["v1ge02"]) > 0:
+            pav = ko["n_pair"] - ko["v1ge02"]
+            R.add(K1_PAV_TXT % (pav, ko["n_pair"], 100.0 * pav / ko["n_pair"], prm["rlo"], prm["rhi"], ko["rat_ko"], ko["n_pair"]))
+            R.esiti["k1_pav_" + t] = (pav, ko["n_pair"])
         m = misure_pt(po, f.j["dp"])
         R.add("  - %s: %s" % (t, misure_txt(m, po.k)))
         R.esiti["k1_" + t] = ver
@@ -1239,9 +1345,9 @@ def sez_r264(rac, F, EX, R):
     R.add("")
 
 
-def sez_griglia(F, R, g, g0lv):
+def sez_griglia(F, R, g, g0lv, g0_nota=""):
     sym = g["sym"]
-    R.add("### 3.%s %s (G0 %s: %s) -- %s" % (gk_of(g), sym, g["g0"], ["VERDE", "GIALLO", "ROSSO", "NON VERIFICABILE"][g0lv], g["regime"]), "")
+    R.add("### 3.%s %s (G0 %s: %s%s) -- %s" % (gk_of(g), sym, g["g0"], ["VERDE", "GIALLO", "ROSSO", "NON VERIFICABILE"][g0lv], g0_nota, g["regime"]), "")
     files = [F[t] for t in g["f"]]
     x4 = F[g["x4"]]
     if not all(f.ok for f in files):
@@ -1356,6 +1462,40 @@ def sez_griglia(F, R, g, g0lv):
             R.esiti["uscita_" + sym] = "NOTIZIA" if notizia else "regge"
         else:
             R.add("- USCITA %s: celle mancanti" % g["x4"])
+    R.add("")
+
+
+def sez_r264_c2(rac, F, R):
+    """Raccolta C2: G0 e K1 di R264d RICOPIATI dal RIEPILOGO C letto (il CSV del G0 e il per-trade 796531 NON sono in
+    questa raccolta: non si rifanno), poi la griglia d1-d3 + uscita d4 con gli STESSI cancelli di sez_griglia (S1-S8,
+    banda H, M1-M3 contro il CONTROLLO 50, classe 804, certificato a 5 caselle). Testa R264 par. 5: con G0 ROSSO l'OOS
+    2024-26 contro il genetico e' NON CONFRONTABILE, l'IS 2017-23 si legge da solo."""
+    L = rac.g0_k1_letti()
+    lv = L["lv"]
+    et = " [letto dalla riga C, non rifatto]" if L["g0"] else " [NON letto: riga G0 della riga C assente]"
+    R.add("## 1. R264d -- G0 E K1 DELL'ORO [letto dalla riga C, non rifatto] (testa R264 par. 5; fonte: %s)" % L["fonte"], "")
+    if L["g0"]:
+        R.add("- **G0 R264d [letto dalla riga C, non rifatto] -> %s**: `%s`" % (G0_NOME[lv], L["g0"][:700]))
+    else:
+        R.add("- **G0 R264d: NON VERIFICABILE** (riga 'G0 R264d' non trovata: %s). La griglia d1-d4 si legge lo stesso (par. 3); l'OOS contro il genetico resta NON CONFRONTABILE finche' il G0 non e' letto (testa par. 5/10)." % L["fonte"])
+    if L["k1"]:
+        R.add("- K1 R264d [letto dalla riga C, non rifatto] -> **K1 %s**: `%s`" % (L["ver"], L["k1"][:1000]))
+        if L["n_pair"] is not None and L["n_pair"] > 0:
+            R.add(K1_PAV_TXT % (L["pav"], L["n_pair"], 100.0 * L["pav"] / L["n_pair"], K1PAR["R264d"]["rlo"], K1PAR["R264d"]["rhi"], L["rat_ko"], L["n_pair"]))
+        else:
+            R.add("  - quota di coppie al PAVIMENTO: NON LEGGIBILE dalla riga K1 ricopiata (mancano 'coppie gamba1/gamba2 N', 'gambe 1 con volume >= 0,02: X su N' o 'in M coppie), ATR')")
+    else:
+        R.add("- K1 R264d: NON VERIFICABILE (riga 'K1 R264d: ' non trovata: %s)" % L["fonte"])
+    R.esiti["g0_R264d"] = ["VERDE", "GIALLO", "ROSSO", "NV"][lv]
+    R.esiti["k1_R264d"] = L["ver"] or "NV"
+    R.esiti["k1_pav_R264d"] = (L["pav"], L["n_pair"])
+    ln = rac.riga_riepilogo("metro OHLC della riga C")
+    R.add("", "- metro OHLC (dal RIEPILOGO C2, si riporta): %s" % (ln[:200] if ln else "[NON TROVATO nel RIEPILOGO C2]"), "")
+    R.add("## 2. R264b1 (ponte AUDJPY) e sezioni 4-7 (R265b, R266, R260d, R267): NON in questa raccolta (C2), si leggono nel referto della raccolta C.", "")
+    R.add("## 3. R264 -- LA GRIGLIA 3 x 3 DELL'ORO A 100.000 (testa par. 6-8: CENTRO = la cella di MEZZO O1 0,20 / O2 centrale, MAI il picco; classe 845)", "",
+          "- nota della testa R264 par. 5: G0 R264d %s%s -> l'OOS 2024-26 contro il genetico e' NON CONFRONTABILE; l'IS 2017-23 si legge da solo (par. 4: S2 si legge in IS, l'OOS e' conferma DEBOLE). "
+          "Il deposito 100000 NON e' una taglia (par. 0): e' la ragione del rilancio (a 100000 il pavimento del lotto non morde e la parziale al 50%% parte)." % (["VERDE", "GIALLO", "ROSSO", "NON VERIFICABILE"][lv], et), "")
+    sez_griglia(F, R, GRID["d"], lv, g0_nota=et)
     R.add("")
 
 
@@ -1967,11 +2107,13 @@ def sez_r267(F, EX, R):
 def sez_finale(F, R):
     R.add("## 8. Riepilogo dei file, dopo la lettura (i cancelli di lettura -- D0, G2, L0 struttura, T3/S0, B3/V1/V2/V3/C2/C3/C4/U1/U2/U4/D2 -- si aggiungono a quelli del par. 0)", "")
     nulli = [t for t, f in F.items() if f.lanciato and not f.ok]
-    salt = [t for t, f in F.items() if not f.lanciato]
+    costr = [t for t, f in F.items() if f.costruzione]
+    salt = [t for t, f in F.items() if not f.lanciato and not f.costruzione]
     R.add("- FILE NULLI (escono da OGNI conteggio): %s" % (" | ".join("%s (%s)" % (t, "; ".join(F[t].nullo)) for t in nulli) if nulli else "nessuno"),
           "- FILE SALTATI (non lanciati, NON nulli di catena): %s" % (", ".join(salt) if salt else "nessuno"),
+          *(["- FILE ASSENTI PER COSTRUZIONE (raccolta C2: i job di C NON sono qui e NON si leggono; non NULLI, non SALTATI): %d (%s)" % (len(costr), ", ".join(costr))] if costr else []),
           "- FILE NON NULLI, per nome: %s" % (", ".join(t for t, f in F.items() if f.ok) or "NESSUNO"),
-          "- R267a: ESCLUSO E DICHIARATO (par. 6-A), non conta ne' fra i nulli ne' fra i saltati.", "",
+          *([] if costr else ["- R267a: ESCLUSO E DICHIARATO (par. 6-A), non conta ne' fra i nulli ne' fra i saltati."]), "",
           "**NESSUNA PROPOSTA DI TAGLIA. Nessuna cella si promuove. Nessun preset, EA, sedia o conto e' toccato.**", "",
           "**Cosa resta a mano (non e' in questo script):** la classe 166 (SHA256 del motore e dell'include dopo ogni job) e gli rc dei job il lettore NON li ricalcola (non ha i sorgenti compilati): li legge dal RIEPILOGO e li UNISCE (sezione DIVERGENZE); senza RIEPILOGO restano [NON VERIFICATI]; "
           "il D0 dei log di R266 e' letto dai LOG_TESTER (sezione 5) e resta [NON VERIFICATO] se l'agente non scrive la riga 'history ... from' in ottimizzazione; "
@@ -2139,6 +2281,95 @@ class Fixture:
             fh.write("KS\t0\t09:10:57.000\tTester\tXAUUSD: history synchronized from 2019.12.30\n".encode("utf-16"))
 
 
+def _fix_griglia(X, g, D, arcT, atr, kfx, px, inerte=False):
+    """i 3 file di griglia + l'uscita x4 di una griglia (stesse operazioni, stesso ordine della fixture C originale)."""
+    sym = g["sym"]
+    x2_rows = {}
+    for ic, t in enumerate(g["f"]):
+        j = JOBS[t]
+        X.prova(t)
+        ris, roo = [], []
+        pt_oos = ema_pt(arcT, D["n_oos"], sym, j["pid"], j["dp"], K1PAR[g["g0"]], atr * 1.2, kfx, px, j["d0"], j["d1"], D["oos_pf"] + 0.02 * ic)
+        X.pt(t, j["pid"], pt_oos)
+        for io, o1 in enumerate((0.1, 0.2, 0.3)):
+            if inerte and ic == 1:   # S5: O1 INERTE sul file del mezzo (delta n 2, delta PF 0)
+                ris.append(X.row(t, o1, X.st(1.20, D["n_is"] + io, D["dd_is"] + 0.1 * io)))
+            else:
+                ris.append(X.row(t, o1, X.st(D["is_pf"][io][ic], D["n_is"] + 2 * io + ic, D["dd_is"] + 0.1 * io)))
+            roo.append(X.row(t, o1, _stat(pt_oos, kfx, 4.0 + 0.1 * io, j["dp"]) if o1 == 0.3 else X.st(D["oos_pf"] + 0.01 * io + 0.02 * ic, D["n_oos"] - 3 * io - ic, 4.0 + 0.1 * io)))
+        X.csv(t, "IS", ris)
+        X.csv(t, "OOS", roo)
+        if ic == 1:
+            x2_rows = dict(IS=ris[1], OOS=roo[1])
+    t = JOBS[g["x4"]]["t"]
+    j = JOBS[t]
+    X.prova(t)
+    pt75 = ema_pt(arcT, D["n_oos"] + 4, sym, j["pid"], j["dp"], K1PAR[g["g0"]], atr * 1.2, kfx, px, j["d0"], j["d1"], D["oos_pf"] + 0.03)
+    X.pt(t, j["pid"], pt75)
+    for leg, base_row in (("IS", x2_rows["IS"]), ("OOS", x2_rows["OOS"])):
+        pf50, n50, dd50 = num(base_row["Profit Factor"]), int(num(base_row["Trades"])), num(base_row["Equity DD %"])
+        rows = [X.row(t, 0, X.st(pf50 - 0.08, int(n50 * 0.55), dd50 + 2.0)), X.row(t, 25, X.st(pf50 + 0.01, n50 + 3, dd50 + 0.1)), dict(base_row, InpTP1Pct="50", InpMagic=j["pid"]),
+                (X.row(t, 75, _stat(pt75, kfx, dd50 - 0.1, j["dp"])) if leg == "OOS" else X.row(t, 75, X.st(pf50 - 0.01, n50 + 5, dd50 - 0.1)))]
+        X.csv(t, leg, rows)
+
+
+# le due righe del RIEPILOGO C che la mini-riga C2 legge e ricopia (formato ESATTO della riga C @ 0482fd80, blocco $g0Txt / $kres.txt)
+G0_LETTO_ROSSO = ("G0 R264d XAUUSD gemella 796531 OOS 2024.01.01 -> 2026.06.30: Trades 212, Profit 1010.50, PF 1.21000, Equity DD % 7.9000 contro Pass 311 O1 0.30 / O2 0.4 / TP 2.5 "
+                  "(n 187 PF 1.38074 DD 6.1446 Profit 991.09): |dn| 25 (1% = 1.87, 3% = 5.61), |dPF| 0.171, dDD rel 0.286 -> ROSSO: il banco NON rifa l archivio (causa NOMINATA prima: "
+                  "lotto 0,01-0,02 a 10000 sull oro, parziale che non parte, BE di 344a11b9 che scatta; il contro-esempio e nel K1: gambe 1 con volume >= 0,02)")
+K1_LETTO = ("K1 R264d: K1 dal LOTTO (classe 846: stop in [R/((vol+0,01) x C x q) ; R/(vol x C x q)], R = saldo x 0,5%% per gamba, saldo ricostruito togliendo k x lotti, gamba 2 = position_id "
+            "che segue di 1 una presente): posizioni 212, coppie gamba1/gamba2 %d, singole 2, rapporto vol2/vol1 mediano 1.000 (atteso 1.7, fuori [1.36 ; 2.125] (R265a: [1,5 ; 2,2] dalla sua testa; "
+            "R264: 0,8x-1,25x) in %d coppie), ATR da gamba 1 e da gamba 2 oltre +-12%% in 84 coppie -> CONTRO-ESEMPIO INTERNO FALLITO: identificazione delle gambe sbagliata, K1 NULLO; "
+            "stop gamba 2 MEDIANO: limite basso 28.96 USD, limite alto 57.92 USD (stop gamba 1 mediano ~57.92); gambe 1 con volume >= 0,02: %d su %d (contro-esempio della causa nominata per il "
+            "GIALLO/ROSSO d oro: se >= 0,02 la causa lotto e sbagliata); soglia: XAUUSD: 10,41 $ = 40 x 0,2603 (logger 0,220 + comm. 0,0403); di casa alle 08/14: 10,01 $ -> K1 NULLO")
+
+
+def costruisci_fixture_c2(root, variante, n_pair=105, v1ge02=45, rat_ko=60):
+    """layout ESATTO della raccolta della mini-riga C2 (RIGA_ROUND_CORTI_C2_R264D_ORO.txt @ 20b9c544, blocco raccolta):
+    ROUND_R264d1..d4 (CSV _IS_ohlc/_OOS_ohlc, REFERTO, prova), PERTRADE (796532-796535), LOG_TESTER,
+    RIEPILOGO_ROUND_CORTI_C2.txt (stessi prefissi della riga C) e RIEPILOGO_ROUND_CORTI_C_letto.txt (copia del RIEPILOGO C).
+    Varianti: pulito | senzaletto (manca il RIEPILOGO C letto) | nullo (la riga C2 dichiara NULLO R264d2) | senzariep (manca
+    il RIEPILOGO C2: la C2 si riconosce dal nome)."""
+    import shutil
+    if os.path.isdir(root):
+        shutil.rmtree(root)
+    X = Fixture(root, variante)
+    os.rmdir(os.path.join(root, "ESTERNI"))     # la C2 non ha ESTERNI
+    arcT = _arc("795303")
+    D = dict(is_pf=[[1.30, 1.22, 1.20], [1.24, 1.21, 1.23], [1.18, 1.19, 1.17]], n_is=420, n_oos=150, dd_is=6.0, oos_pf=1.25)
+    _fix_griglia(X, GRID["d"], D, arcT, 15.0, 1.716, lambda p: p)
+    nulli = OrderedDict([("R264d2", "rc 1: il round non e partito (vedi REFERTO)")]) if variante == "nullo" else OrderedDict()
+    nonn = [t for t in C2JOBS if t not in nulli]
+    pav = n_pair - v1ge02
+    with open(os.path.join(root, RIEP_C2), "w") as fh:
+        fh.write("RIEPILOGO ROUND CORTI C2 -- RILANCIO DELL ONDA 2 DELL ORO DI R264 (R264d1/d2/d3/d4: griglia O2 0,5/0,6/0,7 x O1 0,10/0,20/0,30 e uscita TP1Pct 0/25/50/75, EMA200 H4 XAUUSD, OHLC M1, deposito 100000): 4 job. NON E la riga C: e il rilancio dei 4 file che la riga C ha SALTATO (G0 oro ROSSO con K1 marcato NULLO dalla clausola ATR di R265, classe 875). (FIXTURE dell autotest, variante %s)\n" % variante)
+        fh.write("pin : dbf4ccd6ffffffffffffffffffffffffffffffff   (driver e file prova dal pin; EA e include dal RAMO lavoro, classe 166; i file prova sono gli STESSI della riga C @ 0482fd80, stessi SHA256)\n")
+        fh.write("metro OHLC della riga C (c1-c4, a1-a4, stesso EA e modello, stesso PC): 3.10 min per finestra piena (FIXTURE)\n")
+        fh.write("CONDIZIONE DI LANCIO, verificata sul RIEPILOGO della riga C C:\\Users\\x\\Desktop\\ROUND_CORTI_C_2026-09-28\\RIEPILOGO_ROUND_CORTI_C.txt (copiato qui come RIEPILOGO_ROUND_CORTI_C_letto.txt): d1-d4 SALTATI dalla riga C; G0 R264d XAUUSD ROSSO; K1 R264d %d coppie, gambe 1 con volume >= 0,02: %d su %d, al PAVIMENTO 0,01: %d (%.1f%%: la causa nominata dalla testa par. 5 e PRESENTE su quelle coppie e NON e smentita; la smentirebbe solo 0 al pavimento, classe 889), vol2/vol1 fuori banda in %d coppie (INFORMATIVO: al pavimento il rapporto e quantizzato; decide il K1, non il lancio).\n" % (n_pair, v1ge02, n_pair, pav, 100.0 * pav / n_pair, rat_ko))
+        fh.write("G0 DI RIFERIMENTO: R264d della riga C (tick, 10000, contro il genetico Pass 311): %s\n" % G0_LETTO_ROSSO)
+        fh.write("K1 R264d della riga C (ricopiato; la parola NULLO, se c e, viene dalla clausola ATR +-12%% di R265, che la testa R264 NON congela: classe 875): %s\n\n" % (K1_LETTO % (n_pair, rat_ko, v1ge02, n_pair)))
+        fh.write("ROUND LANCIATI: 4 su 4   PARTITI (rc diverso da 1): %d su 4\n" % (4 - len(nulli)))
+        fh.write("CLASSE 166 (EA e include dal RAMO lavoro, non dal pin; SHA256 dopo ogni job di ABTG_EMA200.mq5 + ABTG_PausaGuardian.mqh, piu il file prova dal pin): MOTORE = PIN in tutti i %d round partiti\n" % (4 - len(nulli)))
+        fh.write("CARTELLE ATTESE: 4   TROVATE: 4   -> CATENA COMPLETA\nPERTRADE (Common Files, abtg_trades_ABTG_EMA200_XAUUSD_<magic>.csv, scritti DOPO l avvio del proprio job; ULTIMA passata, cella IDENTIFICATA): 4 su 4\n\n")
+        fh.write("PRE-LETTURA DELLA RIGA (NON e il verdetto: i verdetti li scrivono i criteri congelati nella testa R264 par. 5-8, e il lettore):\n")
+        fh.write("FILE NULLI (rc 1 o 2, motore o prova diversi dal pin, E0, asse o P0, C0 per-trade non buono o NON IDENTIFICATO, D0, G2 incrociato; escono da OGNI conteggio): %s\n" % (" | ".join("%s (%s)" % (t, m) for t, m in nulli.items()) if nulli else "nessuno"))
+        fh.write("FILE SALTATI (non lanciati, non nulli): nessuno (questa riga non ha condizioni fra i job)\n")
+        fh.write("FILE NON NULLI, per nome: %s\n" % (", ".join(nonn) if nonn else "NESSUNO"))
+    with open(os.path.join(root, RIEP_C_LETTO), "w") as fh:
+        fh.write("RIEPILOGO ROUND CORTI C (FIXTURE: la copia del RIEPILOGO della riga C che la mini-riga C2 mette nella raccolta): 37 job\npin : 0482fd8063e533227deb2be1fca3eb57a1251b84\n")
+        fh.write("G0 R264c GBPJPY gemella 796521 OOS 2024.01.01 -> 2026.06.30: Trades 221, Profit 700.00, PF 1.24037, Equity DD % 4.4220 contro Pass 55 O1 0.10 / O2 0.4 / TP 1.5 (n 221 PF 1.24037 DD 4.422 Profit 609.52): |dn| 0 (1% = 2.21, 3% = 6.63), |dPF| 0.000, dDD rel 0.000 -> VERDE (il banco rifa l archivio: |dn| <= 1%, |dPF| <= 0,020, DD entro +-5%)\n")
+        fh.write("K1 R264c: K1 dal LOTTO (...): posizioni 221, coppie gamba1/gamba2 110, singole 1, rapporto vol2/vol1 mediano 1.500 (atteso 1.5, fuori [1.2 ; 1.875] (R265a: [1,5 ; 2,2] dalla sua testa; R264: 0,8x-1,25x) in 0 coppie), ATR da gamba 1 e da gamba 2 oltre +-12% in 0 coppie; stop gamba 2 MEDIANO: limite basso 80.00 pip, limite alto 92.00 pip (stop gamba 1 mediano ~130.00); soglia: GBPJPY: comm. 0,8645 pip + spread NON MISURATO -> K1 SOLO LETTURA (nessuna soglia decidibile su questo simbolo: numero riportato)\n")
+        fh.write("%s\n%s\n" % (G0_LETTO_ROSSO, K1_LETTO % (n_pair, rat_ko, v1ge02, n_pair)))
+        fh.write("FILE SALTATI (non lanciati, non nulli): %s\n" % " | ".join("%s (SALTATO: G0 R264d di XAUUSD ROSSO -> testa R264 par. 10: se il G0 di un simbolo e ROSSO la sua onda 2 si ferma finche non si capisce perche)" % t for t in C2JOBS))
+    with open(os.path.join(root, "LOG_TESTER", "0000_fixture_logs.log"), "wb") as fh:
+        fh.write("KS\t0\t09:10:57.000\tTester\tXAUUSD: history synchronized from 2016.12.30\n".encode("utf-16"))
+    if variante == "senzaletto":
+        os.remove(os.path.join(root, RIEP_C_LETTO))
+    if variante == "senzariep":
+        os.remove(os.path.join(root, RIEP_C2))
+    return root
+
+
 def costruisci_fixture(root, variante):
     import shutil
     if os.path.isdir(root):
@@ -2149,7 +2380,7 @@ def costruisci_fixture(root, variante):
     dow = leggi_pertrade(os.path.join(ARC_R246, "abtg_trades_ABTG_Dow_Apertura_US_U30USD_794603.csv")) + [dict(d, pid=d["pid"] + 1000) for d in leggi_pertrade(os.path.join(ARC_R246, "abtg_trades_ABTG_Dow_Apertura_US_U30USD_794601.csv"))]
     PX = {"GBPUSD": lambda p: 1.20 + (p % 100) / 1000.0, "EURUSD": lambda p: 1.05 + (p % 100) / 1000.0, "GBPJPY": lambda p: 185.0 + (p % 100) / 10.0, "AUDJPY": lambda p: 95.0 + (p % 100) / 10.0, "XAUUSD": lambda p: p}
     KFX = {"GBPUSD": 2.305, "EURUSD": 2.000, "GBPJPY": 2.310, "AUDJPY": 2.20, "XAUUSD": 1.716}
-    ATR = {"R264a": 0.0054, "R264b": 0.90, "R264c": 0.90, "R264d": 15.0, "R265a": (0.0015 if variante == "k1fail" else 0.0045)}
+    ATR = {"R264a": 0.0054, "R264b": 0.90, "R264c": 0.90, "R264d": (40.0 if variante == "pavimento" else 15.0), "R265a": (0.0015 if variante == "k1fail" else 0.0045)}
     # ---- G0 (R264c/d/a/b, R265a): gemelle
     g0_rows = {}
     for t in ("R264c", "R264d", "R264a", "R264b", "R265a"):
@@ -2175,39 +2406,11 @@ def costruisci_fixture(root, variante):
           "d": dict(is_pf=[[0.98, 0.96, 0.99], [0.97, 0.95, 0.96], [0.94, 0.93, 0.95]], n_is=400, n_oos=150, dd_is=9.0, oos_pf=1.30),
           "a": dict(is_pf=[[1.12, 1.14, 1.10], [1.13, 1.15, 1.12], [1.11, 1.12, 1.10]], n_is=250, n_oos=280, dd_is=7.0, oos_pf=1.20)}
     for gk, g in GRID.items():
-        sym, D = g["sym"], GR[gk]
         if variante == "g0rosso" and gk == "c":
             for t in g["f"] + [g["x4"]]:
                 X.salta(t, "SALTATO: G0 R264c di GBPJPY ROSSO -> testa R264 par. 10")
             continue
-        x2_rows = {}
-        for ic, t in enumerate(g["f"]):
-            j = JOBS[t]
-            X.prova(t)
-            ris, roo = [], []
-            pt_oos = ema_pt(arcT, D["n_oos"], sym, j["pid"], j["dp"], K1PAR[g["g0"]], ATR[g["g0"]] * 1.2, KFX[sym], PX[sym], j["d0"], j["d1"], D["oos_pf"] + 0.02 * ic)
-            X.pt(t, j["pid"], pt_oos)
-            for io, o1 in enumerate((0.1, 0.2, 0.3)):
-                if variante == "contro" and gk == "c" and ic == 1:   # S5: O1 INERTE sul file del mezzo (delta n 2, delta PF 0)
-                    ris.append(X.row(t, o1, X.st(1.20, D["n_is"] + io, D["dd_is"] + 0.1 * io)))
-                else:
-                    ris.append(X.row(t, o1, X.st(D["is_pf"][io][ic], D["n_is"] + 2 * io + ic, D["dd_is"] + 0.1 * io)))
-                roo.append(X.row(t, o1, _stat(pt_oos, KFX[sym], 4.0 + 0.1 * io, j["dp"]) if o1 == 0.3 else X.st(D["oos_pf"] + 0.01 * io + 0.02 * ic, D["n_oos"] - 3 * io - ic, 4.0 + 0.1 * io)))
-            X.csv(t, "IS", ris)
-            X.csv(t, "OOS", roo)
-            if ic == 1:
-                x2_rows = dict(IS=ris[1], OOS=roo[1])
-        t = JOBS[g["x4"]]["t"]
-        j = JOBS[t]
-        X.prova(t)
-        pt75 = ema_pt(arcT, D["n_oos"] + 4, sym, j["pid"], j["dp"], K1PAR[g["g0"]], ATR[g["g0"]] * 1.2, KFX[sym], PX[sym], j["d0"], j["d1"], D["oos_pf"] + 0.03)
-        X.pt(t, j["pid"], pt75)
-        ris, roo = [], []
-        for leg, base_row in (("IS", x2_rows["IS"]), ("OOS", x2_rows["OOS"])):
-            pf50, n50, dd50 = num(base_row["Profit Factor"]), int(num(base_row["Trades"])), num(base_row["Equity DD %"])
-            rows = [X.row(t, 0, X.st(pf50 - 0.08, int(n50 * 0.55), dd50 + 2.0)), X.row(t, 25, X.st(pf50 + 0.01, n50 + 3, dd50 + 0.1)), dict(base_row, InpTP1Pct="50", InpMagic=j["pid"]),
-                    (X.row(t, 75, _stat(pt75, KFX[sym], dd50 - 0.1, j["dp"])) if leg == "OOS" else X.row(t, 75, X.st(pf50 - 0.01, n50 + 5, dd50 - 0.1)))]
-            X.csv(t, leg, rows)
+        _fix_griglia(X, g, GR[gk], arcT, ATR[g["g0"]], KFX[g["sym"]], PX[g["sym"]], inerte=(variante == "contro" and gk == "c"))
     # ---- R265b
     t, j = "R265b", JOBS["R265b"]
     if variante == "k1fail":
@@ -2403,6 +2606,11 @@ def autotest(fixture_dir=None):
     check(sw["n"] == 1 and sw["ko"] == 0, "sottoinsieme C2: 1 deal prima delle 17:00 con gemello, il flat delle 17:00 escluso")
     check(verdetto_rischio(False, 120, "x").startswith("NON VIOLATO su n = 120") and verdetto_rischio(False, 150, "x").startswith("RISCHIO PASSATO") and verdetto_rischio(True, 500, "x").startswith("VIOLATO"), "classe 804: NON VIOLATO su n = 120, RISCHIO PASSATO a 150, VIOLATO a qualunque n")
     check("NON ANCORA MISURATO (mancano: (3) uscita ad asse, (5) TF)" in certificato(True, True, False, True, False, "x"), "certificato: 2 caselle mancanti -> NON ANCORA MISURATO, non morto")
+    # classe 889 (cancello del 28/09): al PAVIMENTO 0,01 il rapporto vol2/vol1 e' quantizzato: 0,01/0,01 = 1,0 e 0,01/0,03 = 3,0 cadono fuori [1,36 ; 2,125] con gambe GIUSTE
+    pos = [dict(pid=1, vol=0.01, saldo=10000.0, px=2400.0), dict(pid=2, vol=0.01, saldo=10000.0, px=2400.0), dict(pid=11, vol=0.01, saldo=10000.0, px=2400.0), dict(pid=12, vol=0.03, saldo=10000.0, px=2400.0)]
+    ko = k1_lotto(pos, K1PAR["R264d"])
+    check(ko["n_pair"] == 2 and ko["rat_ko"] == 2 and ko["nullo"] and ko["v1ge02"] == 0 and k1_verdetto("R264d", ko, K1PAR["R264d"]) == "NULLO",
+          "889: oro al PAVIMENTO, coppie 0,01/0,01 (1,0) e 0,01/0,03 (3,0) fuori [1,36 ; 2,125] con gambe GIUSTE -> il K1 congelato dice NULLO; la diagnostica accanto conta 2 coppie su 2 al pavimento (N - X)")
     # ---- (1) fixture dagli archivi veri
     if not (os.path.isdir(ARCHIVI_REPO) and os.path.isdir(ARC_R246)):
         print("  SKIP archivi CORTI B / R246 non trovati")
@@ -2412,7 +2620,7 @@ def autotest(fixture_dir=None):
     print("  fixture in %s" % base)
     E = {}
     TXT = {}
-    for var in ("pulito", "g0rosso", "latosbagliato", "k1fail", "r267a", "contro", "senzariep"):
+    for var in ("pulito", "g0rosso", "latosbagliato", "k1fail", "r267a", "contro", "senzariep", "pavimento"):
         root = costruisci_fixture(os.path.join(base, "ROUND_CORTI_C_" + var), var)
         R = lettura(Raccolta(root))
         with open(os.path.join(root, "REFERTO_LETTURA.md"), "w", encoding="utf-8") as fh:
@@ -2441,6 +2649,9 @@ def autotest(fixture_dir=None):
     K = E["k1fail"]
     check(K.get("k1_R265a") == "FAIL" and K.get("r265b") == "SALTATO", "k1fail: K1 EURUSD FAIL (vol 0,36) -> R265b SALTATO, non nullo di catena")
     check(E["r267a"].get("r267a") == "INATTESO", "r267a: cartella ROUND_R267a presente -> INATTESO, NON LETTO (par. 6-A aperto)")
+    V = E["pavimento"]
+    check(V.get("g0_R264d") == "VERDE" and V.get("k1_R264d") == "NULLO" and V.get("k1_pav_R264d") == (93, 93) and "93 coppie su 93 (100.0%) hanno la gamba 1 al PAVIMENTO 0,01" in TXT["pavimento"] and V.get("griglia_XAUUSD", "").startswith("REGIME") and V.get("uscita_XAUUSD") == "regge",
+          "889/C pavimento: oro a 10000 con ATR 40 -> tutte le gambe a 0,01 (vol2/vol1 = 1,0 in 93 coppie su 93) -> K1 NULLO (criterio congelato, NON toccato) + diagnostica '93 su 93 al PAVIMENTO' accanto; la griglia d1-d4 si legge lo stesso (REGIME), non dipende dal K1")
     # ---- (2) i contro-esempi del cancello del 27/09 (classi 872, 873, 874, 794, 875, 886)
     padre = os.path.join(base, "PADRE_872")
     if os.path.isdir(padre):
@@ -2478,6 +2689,69 @@ def autotest(fixture_dir=None):
             return {"Trades": str(an["tr"] + 10), "Profit Factor": "%.5f" % (an["pf"] + 0.05), "Equity DD %": "%.4f" % an["dd"]}
     lv, _ = g0_livello(_FF(), an)
     check(lv == 1, "794: G0 GBPUSD con |dn| = 10 (3%% = 10,86) e PF 1,28105 (|dPF| = 0,050 esatto, in virgola mobile 0,050000000000000044) -> GIALLO, non ROSSO (livello %d)" % lv)
+    # ---- (3) la raccolta C2 (mini-riga del 28/09, PASS 20b9c544): layout esatto, 4 varianti
+    check(all(E[v].get("tipo") == "C" and E[v].get("n_costr") == 0 for v in E) and all("ASSENTE PER COSTRUZIONE" not in TXT[v] and "RACCOLTA C2" not in TXT[v] for v in TXT),
+          "C2/C: le 7 raccolte C restano di tipo C, 0 ASSENTI PER COSTRUZIONE, nessuna riga C2 nel referto (l'output della raccolta C non cambia)")
+    E2, TXT2 = {}, {}
+    for var in ("pulito", "senzaletto", "nullo", "senzariep"):
+        root = costruisci_fixture_c2(os.path.join(base, "ROUND_CORTI_C2_" + var), var)
+        R = lettura(Raccolta(root))
+        with open(os.path.join(root, "REFERTO_LETTURA.md"), "w", encoding="utf-8") as fh:
+            fh.write(R.testo())
+        E2[var], TXT2[var] = R.esiti, R.testo()
+    C2 = E2["pulito"]
+    check(C2.get("tipo") == "C2" and C2.get("n_costr") == 33 and C2.get("n_nulli") == 0 and C2.get("n_salt") == 0 and "E0: cartella ROUND_" not in TXT2["pulito"],
+          "C2 pulito: riconosciuta (RIEPILOGO_C2 senza RIEPILOGO_C), 4 letti, 33 ASSENTI PER COSTRUZIONE, 0 NULLI, 0 SALTATI (prima: 33 NULLI 'E0: cartella ASSENTE')")
+    check("RACCOLTA C2" in TXT2["pulito"] and "i 33 job di C NON sono in questa raccolta e NON si leggono (non NULLI: ASSENTI PER COSTRUZIONE)" in TXT2["pulito"] and "FILE ASSENTI PER COSTRUZIONE" in TXT2["pulito"] and "R267a" not in TXT2["pulito"].split("## 0.")[1].split("**D0 DATI")[0],
+          "C2 pulito: dichiarazione in testa e nel riepilogo finale; R267a non pertinente (nessuna riga nel par. 0)")
+    check(C2.get("g0_R264d") == "ROSSO" and C2.get("k1_R264d") == "NULLO" and C2.get("k1_pav_R264d") == (60, 105) and TXT2["pulito"].count("[letto dalla riga C, non rifatto]") >= 4 and "60 coppie su 105 (57.1%)" in TXT2["pulito"],
+          "C2 pulito: G0 R264d ROSSO e K1 NULLO RICOPIATI dal RIEPILOGO C letto con l'etichetta, quota al PAVIMENTO 60 su 105 (57,1%%) = N - X accanto al K1 (classe 889), criterio del K1 NON toccato")
+    check("dice NULLO per il PAVIMENTO, non per l'identificazione" in TXT2["pulito"] and "NON dipende da questo NULLO" in TXT2["pulito"], "C2 pulito: la divergenza sul vol2/vol1 quantizzato e' scritta accanto al K1 e la griglia non ne dipende")
+    check(C2.get("griglia_XAUUSD") == "PASSA LO SCREENING" and C2.get("centro_XAUUSD") == (0.2, 0.6) and C2.get("picco_XAUUSD") == (0.1, 0.5) and C2.get("uscita_XAUUSD") == "regge" and "G0 XAUUSD ROSSO: l'OOS contro il genetico e' NON CONFRONTABILE" in TXT2["pulito"],
+          "C2 pulito: griglia d1-d3 letta coi cancelli di casa (CENTRO 0,20/0,6 PF 1,21, picco 0,10/0,5 PF 1,30 NON scelto) + uscita d4 (M1-M3 contro il CONTROLLO 50), OOS NON CONFRONTABILE (G0 ROSSO), IS leggibile")
+    check("M1-M3 TP1Pct 0 contro il CONTROLLO TP1Pct 50" in TXT2["pulito"] and "certificato di morte" in TXT2["pulito"] and "S3 RISCHIO al mezzo" in TXT2["pulito"] and "RISCHIO PASSATO su" not in TXT2["pulito"] and "G2 ok" in TXT2["pulito"] and "D0 ok" in TXT2["pulito"],
+          "C2 pulito: M1-M3, certificato a 5 caselle, S3, D0 e G2 presenti; nessun 'RISCHIO PASSATO' su OHLC (classe 886)")
+    check("CLASSE 166 dalla riga" in TXT2["pulito"] and "MOTORE = PIN in tutti i 4 round partiti" in TXT2["pulito"] and "Pre-lettura della riga (RIEPILOGO_ROUND_CORTI_C2.txt): presente" in TXT2["pulito"] and "metro OHLC (dal RIEPILOGO C2" in TXT2["pulito"],
+          "C2 pulito: RIEPILOGO_C2 letto con rp() (classe 166, NULLI/SALTATI), metro OHLC riportato")
+    S2 = E2["senzaletto"]
+    check(S2.get("g0_R264d") == "NV" and S2.get("k1_R264d") == "NV" and "RIEPILOGO_ROUND_CORTI_C_letto.txt ASSENTE" in TXT2["senzaletto"] and "G0 R264d: NON VERIFICABILE" in TXT2["senzaletto"] and S2.get("griglia_XAUUSD") == "PASSA LO SCREENING" and S2.get("uscita_XAUUSD") == "regge",
+          "C2 senzaletto: RIEPILOGO C letto assente -> G0 e K1 R264d NON VERIFICABILI dichiarati, d1-d4 letti lo stesso")
+    N2 = E2["nullo"]
+    check("R264d2" in N2.get("nulli_finali", []) and "RIGA: rc 1" in TXT2["nullo"] and N2.get("griglia_XAUUSD") == "NV" and N2.get("uscita_XAUUSD") == "regge" and N2.get("n_nulli") == 1,
+          "C2 nullo: NULLO della riga C2 su R264d2 UNITO (classe 873) -> griglia NON VERIFICABILE, uscita d4 letta, G2 NON VERIFICABILE")
+    R2 = E2["senzariep"]
+    check(R2.get("tipo") == "C2" and "RIEPILOGO_ROUND_CORTI_C2.txt` ASSENTE" in TXT2["senzariep"] and R2.get("g0_R264d") == "ROSSO" and R2.get("griglia_XAUUSD") == "PASSA LO SCREENING" and R2.get("n_costr") == 33,
+          "C2 senzariep: senza RIEPILOGO_C2 la C2 si riconosce dal nome ROUND_CORTI_C2_*; RIEPILOGO dichiarato ASSENTE, G0 dal C letto, d1-d4 letti")
+    # contro-esempio 6 (28/09): la C2 con dentro per errore anche RIEPILOGO_ROUND_CORTI_C.txt -> raccolta AMBIGUA, ci si FERMA (nessun referto)
+    amb = os.path.join(base, "ROUND_CORTI_C2_ambigua")
+    if os.path.isdir(amb):
+        shutil.rmtree(amb)
+    shutil.copytree(os.path.join(base, "ROUND_CORTI_C2_pulito"), amb)
+    shutil.copy(os.path.join(amb, RIEP_C_LETTO), os.path.join(amb, RIEP_C))
+    fermi = []
+    for d in (amb, os.path.join(base, "ROUND_CORTI_C_ambigua")):
+        if d != amb:
+            if os.path.isdir(d):
+                shutil.rmtree(d)
+            shutil.copytree(os.path.join(base, "ROUND_CORTI_C_pulito"), d)
+            shutil.copy(os.path.join(amb, RIEP_C2), os.path.join(d, RIEP_C2))
+        try:
+            trova_raccolta(d)
+            fermi.append(False)
+        except SystemExit as e:
+            fermi.append("AMBIGUA" in str(e) and "NESSUN referto" in str(e))
+    check(fermi == [True, True], "contro-esempio 6: C2 con dentro anche RIEPILOGO_ROUND_CORTI_C.txt, e C con dentro anche RIEPILOGO_ROUND_CORTI_C2.txt -> raccolta AMBIGUA: il lettore si FERMA senza referto (ne' 'C con d1-d4 in piu'' ne' 33 NULLI)")
+    os.remove(os.path.join(amb, RIEP_C2))
+    try:
+        trova_raccolta(amb)
+        fermo = False
+    except SystemExit:
+        fermo = True
+    senza = os.path.join(base, "senza_prefisso")
+    if os.path.isdir(senza):
+        shutil.rmtree(senza)
+    shutil.copytree(os.path.join(base, "ROUND_CORTI_C2_pulito"), senza)
+    check(fermo and tipo_raccolta(senza) == "C2", "contro-esempio 6: ROUND_CORTI_C2_* col solo RIEPILOGO C (nome e file discordi) -> si FERMA; C2 senza il prefisso nel nome ma con RIEPILOGO_C2 -> C2")
     print("AUTOTEST " + ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
 
