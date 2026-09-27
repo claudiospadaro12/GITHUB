@@ -1,0 +1,144 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R267g1 -- DAX LONG (770411 a lati invertiti): IL TREND DEL DAX STESSO
+#  EA: ABTG_MaxMinNotte (generico), D30EUR M15, TICK REALI
+#  La parte comune del round sta in prove/R267a_news_oro_770402.txt par. 0.
+#  Le uscite sul long stanno in R267g2 (trailing), g3 (breakeven), g4
+#  (parziale), un asse per file.
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest,
+#  SPENTO), NE' su nessun terminale di conto: 50503392, 50504263,
+#  10105439 (REALE), 541452707 (FTMO). Il terminale del PC e' loggato sul
+#  demo 50503392: prima si controlla che non abbia SEDIE attaccate
+#  (avvertenza di R246/R255). QUESTO FILE NON CONTIENE E NON AUTORIZZA
+#  NESSUNA RIGA DI LANCIO. Non tocca EA, preset, sedie, conti, taglie o
+#  forward, e non promuove niente: ogni esito e' materiale per Claudio.
+#  VINCOLI DI BANCO (nella riga): identici a R261a (-Deposito 100000,
+#    -Modello 4, niente -Spread/-Ritardo/-FrazioneIS; @FRAZIONEIS 1.0 =
+#    una tranche, gamba OOS degenere, rc 2 ATTESO come R242/R244/R261).
+#  Scritto il 27/09/2026. Attese e soglie CONGELATE PRIMA DEI NUMERI.
+# =====================================================================
+#
+#  1. DOMANDA. Ger40 Morning Breakout (Terpstra, mql5 Market 131037
+#  [DICHIARATO]) apre il long "solo in mercato rialzista" del DAX stesso.
+#  R261a guarda lo S&P (lo specchio di 770411); questo file guarda il
+#  DAX. Stesso meccanismo, CorrBias (r.698-709): EMA14 contro EMA100 di
+#  InpCorrSymbol su InpCorrTF, ultima candela CHIUSA, +1 = solo long.
+#
+#  2. BASE = prove/R261a_dax_long_correlazione.txt (PASS f0e6f66e), la
+#  cella corr=1 (la "versione long" di 770411). Cambiano SOLO:
+#    InpUseCorrelation  asse 0/1 -> 1 fisso
+#    InpCorrSymbol      SPXUSD -> D30EUR
+#    InpCorrTF          H1 fisso -> ASSE H4..D1
+#    InpComment MAXMINR267G1, InpMagic 796741 fisso
+#  L'ASSE E' UN ENUM (classe 287): 16388||1||16408 NON fa "H4 e D1": il
+#  driver spazzola i MEMBRI fra i due, cioe' H4, H6, H8, H12, D1 = 5
+#  CELLE. Non e' un errore: sono i TF fra i due chiesti, e danno la curva
+#  per l'altopiano (centro = H8).
+#
+#  3. IL RISCALDAMENTO, DETTO PRIMA (classe 834). Lo storico D30EUR parte
+#  il 2024.09.26 e prima non c'e' niente. L'EMA100 matura dopo ~100
+#  candele del SUO TF: su D1 ~100 sedute = fino a ~febbraio 2025, cioe'
+#  ~1/4 della finestra con un'EMA100 IMMATURA; su H4 poche settimane
+#  [INFERITO: le candele H4 per giorno del D30EUR BCM NON sono contate].
+#  Le celle alte hanno piu' giorni "filtrati male": si scrive accanto.
+#
+#  4. L'ATTESA, SCRITTA PRIMA.
+#  n: la cella corr=0 di R261a e' attesa ~135 deal (banda 115-160, R261a
+#  par. 6). Il DAX sulla finestra e' "in maggioranza al rialzo" (R261a
+#  par. 6 [INFERITO]): il bias +1 terra' PIU' giornate dello specchio
+#  S&P -> 60-85% delle giornate -> ~80-115 deal ~55-80 posizioni
+#  [DERIVATO LARGO]. SOTTO 150 in ogni cella: MERITO SOSPESO PER
+#  COSTRUZIONE. Si legge il RISCHIO.
+#  IL PF, CONTRO DUE IPOTESI (partizione sulla cella centrale H8):
+#    HP  "il trend del DAX salva il long": PF(H8) >= 1,10 E >= 3 celle
+#        contigue >= 1,10 -> "INDIZIO FAVOREVOLE, merito sospeso".
+#    H0  "il filtro non salva il long": PF(H8) < 1,00.
+#    In mezzo (1,00 <= PF(H8) < 1,10, o H8 >= 1,10 senza 3 contigue):
+#        "NON C'E' UNA CONFIGURAZIONE ROBUSTA".
+#  Previsione mia: H0. Motivo: 0 celle su 33 distinte >= PF 1,00 sul long
+#  DAX a tick (REGISTRO_TEST, R260/R261), e dal web nessuna ragione per
+#  un ribaltamento (caccia par. 0 punto 6). La sonda notturna esterna sul
+#  DAX e' NULLA (caccia par. 2.5): nessun prior misurato fuori.
+#
+#  5. I CANCELLI (congelati prima; si citano come D<n> [R267g1]).
+#  D0 -SoloControllo: 5 celle. Altrimenti STOP.
+#  D1 G0 ESTERNO: R261d e R261c VERDI e R261a girato prima nello stesso
+#     giro. Nessuna cella di questo file e' inerte (tutte filtrano), quindi
+#     il G0 in-file non esiste: si scrive, non si finge.
+#  D2 SOTTOINSIEME DI STRUTTURA: Trades(ogni cella) <= Trades(R261a
+#     corr=0) + 2 (il filtro toglie giornate, un ciclo al giorno).
+#  D3 MORDE (T3 di R261a): una cella con Trades IDENTICI a R261a corr=0 =
+#     il bias e' tornato 0 (CopyBuffer fallito: r.704) -> NON ESEGUITA.
+#  D4 L0 dal per-trade (sopravvive SOLO la cella D1: abtg_trades_
+#     ABTG_MaxMinNotte_D30EUR_796741.csv): tutte le chiusure deal_type 1.
+#  D5 RISCHIO (a qualunque n): DD a 1% di ogni cella; soglia di casa T5 di
+#     R261a (DD > 4,0% lineare / 4,08% moltiplicativo = fuori da S3 a
+#     2,00%), [DERIVATO].
+#  D6 NESSUNA CELLA SI PROMUOVE.
+#
+#  6. FINESTRA: identica a R261a (2024.09.26 -> 2026.06.30, @FRAZIONEIS
+#  1.0). 7. COSTO: 5 finestre piene x 0,28-0,70 min = ~1,4-3,5 MIN.
+#  8. BUCHI: l'orologio sul long (inverno un'ora prima della cash) [NON
+#  MISURATO]; EMA 14/100 non ad asse (una variabile); il riscaldamento
+#  (par. 3); per-trade di UNA sola cella (classe 455); commissione FTMO
+#  GER40 [NON MISURATA].
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=1||1||0||1||N
+InpCorrSymbol=D30EUR
+InpCorrTF=16388||16388||1||16408||Y
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR267G1
+InpMagic=796741||796741||0||796741||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

@@ -1,0 +1,318 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R267a -- ORO 770402: IL FILTRO NOTIZIE USD (blocco / chiusura)
+#  EA: ABTG_MaxMinNotte (generico, due lati), XAUUSD H2, OHLC M1
+#  FILE DI TESTA DEL ROUND R267 (par. 0, parte comune) e cella R267a.
+#
+#  >>> CANCELLO: NON LANCIARE. <<<  Il file e' scritto e passa il
+#  cancello meccanico, ma nel tester IL FILTRO NON VEDE IL FILE NEWS
+#  (par. 6, letto nel sorgente, e gia' pagato due volte in casa). Se si
+#  lancia cosi', le due celle escono IDENTICHE a R260c e sembrera' che
+#  "le notizie non contano": sarebbe una misura del NULLA.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest,
+#  SPENTO), NE' su nessun terminale di conto: 50503392, 50504263,
+#  10105439 (REALE), 541452707 (FTMO). Il terminale del PC e' loggato sul
+#  demo 50503392: prima si controlla che non abbia SEDIE attaccate
+#  (avvertenza di R246/R255). QUESTO FILE NON CONTIENE E NON AUTORIZZA
+#  NESSUNA RIGA DI LANCIO. Non tocca EA, preset, sedie, conti, taglie o
+#  forward, e non promuove niente: ogni esito e' materiale per Claudio.
+#  VINCOLI DI BANCO (stanno nella riga, non qui): -Deposito 100000,
+#    -Modello 1 (OHLC M1), niente -Spread/-Ritardo/-FrazioneIS: identici
+#    a R260c (prove/R260c_oro_770402_due_lati_ancora.txt, testa di R260).
+#  Scritto il 27/09/2026. Attese e soglie CONGELATE PRIMA DEI NUMERI.
+# =====================================================================
+#  0. IL ROUND R267 -- PARTE COMUNE A TUTTI I 12 FILE (qui e solo qui)
+# =====================================================================
+#  ORIGINE: Claudio, 26-27/09/2026: "NON FERMIAMOCI DAVANTI A QUALCHE
+#  PARAMENTRO BASSO. SI CERCA SUL WEB SE QUALCHE PARAMETRO C'E' DA
+#  MIGLIORARE." La caccia (CACCIA_PARAMETRI_SEI_FAMIGLIE_2026-09-26.md,
+#  commit 1a2f80ce) ha mappato 14 proposte sui nostri input. R267 scrive
+#  in FILE PROVA quelle che girano a ZERO righe di codice e che non
+#  dipendono da un round non ancora girato. Un file = UNA manopola.
+#  Ogni numero della caccia qui e' citato come [SONDA OANDA, screening]
+#  (Oanda M1 2015-01 -> 2020-05, OHLC, niente BCM, niente 2021-2026) o
+#  [DICHIARATO dal vendor]: MAI come misura di casa.
+#
+#  I 12 FILE (tutti generati da prove/R267_GENERA.py, pin DIFFATI dallo
+#  script contro la base, non ricopiati a mano):
+#   file    EA / simbolo / TF          base      manopola (asse)            celle magic
+#   R267a   MaxMinNotte XAUUSD H2 OHLC R260c     InpNewsFlatten 0/1 (news)  2  796701  NON LANCIARE
+#   R267b   MaxMinNotte XAUUSD H2 OHLC R260c     InpMinBoxPts 0..2600       5  796702
+#   R267c   Dow_Apertura U30USD M5 tick R255a    InpCloseHour 16/17 (:00)   2  796711
+#   R267d   Dow_Apertura U30USD M5 tick R255a    InpVolMult 0..2,0 (vol ON) 5  796712
+#   R267e1  EMA200 GBPJPY H4 tick      R264c     InpUseAdrFilter 0/1        2  796721
+#   R267e2  EMA200 XAUUSD H4 tick      R264d     InpUseAdrFilter 0/1        2  796722
+#   R267f1  EMA200 GBPJPY H4 tick      R264c     InpFridayClose 0/1         2  796731
+#   R267f2  EMA200 XAUUSD H4 tick      R264d     InpFridayClose 0/1         2  796732
+#   R267g1  MaxMinNotte D30EUR M15 tick R261a    InpCorrTF H4..D1 (DAX)     5  796741
+#   R267g2  MaxMinNotte D30EUR M15 tick R261a    InpUseTrailing 0/1         2  796742
+#   R267g3  MaxMinNotte D30EUR M15 tick R261a    InpBreakeven 0/1           2  796743
+#   R267g4  MaxMinNotte D30EUR M15 tick R261a    InpTP1Pct 0..75            4  796744
+#  35 celle, 70 passate per il conto del cancello (celle x 2 finestre);
+#  finestre PIENE vere: 35 (i file a moncone hanno una gamba di 1 giorno,
+#  i DAX hanno @FRAZIONEIS 1.0 e la gamba OOS degenere).
+#
+#  LA REGOLA DI LETTURA CHE VALE PER TUTTI (classe 455): il magic e'
+#  FISSO nei file R267 (l'asse e' la manopola), quindi il per-trade
+#  abtg_trades_<EA>_<SIM>_<magic>.csv lo riscrive ogni passata: resta
+#  SOLO QUELLO DELL'ULTIMA CELLA, gamba lunga. Nessun criterio R267
+#  chiama "n" la colonna Trades: e' [DEAL] (classe 454).
+#  L'ANCORA G0 DI OGNI FILE: dove la manopola ha un valore INERTE, quella
+#  cella sta DENTRO il file e deve rifare la base al centesimo (il magic
+#  non entra nel trading: provato dai G1 di R255/R260/R264). Dove non ce
+#  l'ha (R267c, R267g1) il G0 e' la base stessa, girata PRIMA nello
+#  stesso giro, piu' un controllo di struttura scritto nel file.
+#
+#  MAGIC, VERGINI -- cercati il 27/09/2026, comandi eseguiti:
+#     grep -rIE --exclude-dir=.git -o "\b7967[0-9]{2}\b" /home/user -> 0
+#     git grep -E "\b7967[0-9]{2}\b" $(git for-each-ref --format=
+#        '%(refname)' refs/heads refs/remotes)                   -> 0
+#  (7968xx scartato: 11 occorrenze sui rami remoti.) Anche "R267" non
+#  compariva ne' sul disco ne' su nessun ramo prima di questi file.
+#  Esclusi per mandato: 7704xx (sedie), 7931xx (R255), 7925xx, 7926xx.
+#
+#  IL COSTO, FILE PER FILE (metri dichiarati, nessuno inventato):
+#   metro OHLC oro ~0,7 min/passata (dal mandato; r151a sul banco VPS
+#     dava 20,4 s: la velocita' del PC su oro OHLC e' [NON MISURATA]);
+#   metro tick U30USD 0,333 min/passata (dal mandato) e 93-102 s per un
+#     file R255 da 2 celle (R255a par. 14, stesso PC, stesso carico);
+#   metro tick EMA200 H4 135 s/passata (R240, prove/R214f par. 7);
+#   metro tick D30EUR M15 0,28-0,70 min per finestra piena (R261 par. 9).
+#     R267a  0 (NON LANCIARE; sbloccato: vedi par. 6 -- costo APERTO)
+#     R267b  5 finestre piene x 0,7        = ~3,5 min (+ avvio)  ~4-5 min
+#     R267c  2 celle, carico di un file R255             ~1,3-1,7 min
+#     R267d  5 celle (2,5 volte R267c)                    ~3,3-4,3 min
+#     R267e1/e2/f1/f2  2 finestre piene x 135 s = 4,5 min x 4 = ~18 min
+#     R267g1-g4  13 finestre piene x 0,28-0,70           ~3,6-9,1 min
+#   TOTALE LANCIABILE (senza R267a): ~30-38 MINUTI. TETTO LARGO 2 ORE:
+#   oltre, ci si ferma e si guarda (caso lento del 21/09).
+#   EMA200: con 4 simboli x 2 manopole sarebbero 8 file = ~36 min, sopra
+#   i ~10 min chiesti -> SOLO GBPJPY e XAUUSD (par. 0 di R267e1). E anche
+#   cosi' sono ~18 min: dichiarato, e spezzato in due onde da ~9 min.
+#
+#  ORDINE CONSIGLIATO (le basi PRIMA, perche' sono i G0):
+#   1. R267b  (la sedia piu' vicina al campo; auto-ancorata a R103)
+#   2. R255a -> R267d -> R267c  (Dow: R255a e' il G0 di tutti e due)
+#   3. R261d -> R261c -> R261a -> R267g2, g3, g4, poi R267g1 (DAX)
+#   4. R264c -> R267e1, R267f1  (GBPJPY, onda da ~9 min)
+#   5. R264d -> R267e2, R267f2  (XAUUSD, onda da ~9 min)
+#   6. R267a: NON LANCIARE finche' il suo par. 6-A non e' chiuso.
+#
+#  COSA R267 NON SCRIVE, E PERCHE' (lo stesso elenco sta in REGISTRO_TEST):
+#   - P6 VWAP di lato sul Dow: SCARTATA PER COSTRUZIONE. VwapBias()
+#     (ABTG_Dow_Apertura_US.mq5 r.1464-1485) somma le barre con lo STESSO
+#     GIORNO del server, cioe' dalla mezzanotte BCM: alle 15:05 BCM la
+#     "VWAP" contiene ~15 ore di notte e pre-mercato. Non e' la VWAP della
+#     seduta cash che la proposta intendeva: misurarla darebbe un numero
+#     su un'altra cosa. Serve codice (ancora all'ora d'apertura).
+#   - P3 trend dell'oro come cancello: e' R260d, di un altro agente. Qui
+#     NON si scrive. Solo la nota del prior (par. 6).
+#   - P9a InpCloseAtCutoff e P9b AUDNZD/AUDCAD (Nightly): in coda DOPO
+#     R259, che non e' ancora girato (le celle sarebbero una casella su
+#     un banco non ancora letto).
+#   - P8 (London breakout sul box asiatico via MaxMinNotte): e' R266,
+#     di un altro agente, gia' in coda. P7 (Londra, blocco S di R258):
+#     non in questo mandato; R258 non e' ancora girato.
+#   - Stop in ATR sull'oro (InpSLMode=1): gia' CADUTO in casa
+#     (oro_maxmin_fase1_*.csv: DD 9,3-26,5% contro 3,7-5,7%).
+#   - Ampiezza del box in ATR, ADX/pendenza EMA: servono input nuovi
+#     (codice), fuori da "costo zero".
+#
+# =====================================================================
+#  1. LA DOMANDA
+# =====================================================================
+#  Il tappo della sedia 770402 NON e' il PF (R103: 1,308 su 693 deal),
+#  e' il DD alla taglia: 5,32% a 0,5% -> 19,6-21,3% a 2,00% (R260c par.
+#  8), e per stare sotto S3 di R193b servirebbe DD a 0,5% <= 2,06%. La
+#  caccia (par. 3.3, P1) propone di chiudere/bloccare sulle notizie USD:
+#  la posizione resta aperta fino alle 17:30 BCM, cioe' ATTRAVERSO i dati
+#  USA delle 8:30 ET. Fonti [DICHIARATE dai vendor, nessun numero]: Range
+#  Breakout Day Trader (chiusura N' prima), Range Breakout Beast (3'/3').
+#
+# =====================================================================
+#  2. BASE, E COSA CAMBIA (diff eseguito da R267_GENERA.py)
+# =====================================================================
+#  BASE = R260c (DUE LATI = la cella R103 = la sedia come e' schierata).
+#  Perche' R260c e non R260a (solo long): il tappo e' il DD della SEDIA,
+#  che su FTMO e' a due lati; e il long da solo e' una domanda APERTA
+#  (R260a, non girato): partire da li' impilerebbe due incognite.
+#  Cambiano SOLO:
+#    InpUseNewsFilter    false -> true
+#    InpNewsFile         abtg_news.csv -> abtg_news_2021_2025_UTC.csv
+#    InpNewsCurrencies   (omesso nella base) -> USD
+#    InpNewsShiftMinutes 0 -> 60 (il file e' in UTC; par. 6-C)
+#    InpNewsFlatten      true (pin) -> ASSE 0/1
+#    InpComment MAXMINR267A, InpMagic 796701 fisso (niente gemelle)
+#  Restano: InpNewsMinImpact 3, InpNewsBeforeMin 30, InpNewsAfterMin 30.
+#  COSA FA IL CODICE (ABTG_MaxMinNotte.mq5 a HEAD 7d0da9f9, letto):
+#    r.250-251 newsBlk ad ogni tick; con InpNewsFlatten=true cancella i
+#      pendenti E CHIUDE la posizione; r.276 con newsBlk non PIAZZA.
+#    Cella 0 (blocca): tocca SOLO il piazzamento delle 07:00 BCM.
+#    Cella 1 (chiude): chiude le posizioni vive a [evento-30', evento+30'].
+#
+# =====================================================================
+#  3. L'ATTESA, SCRITTA PRIMA (vale SOLO a par. 6 chiuso)
+# =====================================================================
+#  MISURATO QUI sul file news (script, 27/09): 2971 eventi, tutti High;
+#  2311 USD. Ora UTC degli eventi USD: 12h 629, 13h 548, 14h 475, 15h
+#  248, 18h 157, 17h 85, 11h 61, 19h 51, 16h 36 -- e alle 06h UNO solo
+#  in 5 anni. I feriali 2021.01.04-2025.12.19 con un evento USD fra le
+#  11 e le 16 UTC sono 804 su 1295 = 62,1%.
+#  CELLA 0 (blocca): alle 07:00 BCM (06:00/07:00 UTC) c'e' UN evento USD
+#    in 5 anni -> ATTESA: identica a R260c salvo al piu' UNA giornata
+#    (Trades 693 +-3, PF entro 0,005). E' anche l'ANCORA in-file.
+#  CELLA 1 (chiude): agisce sul 62% dei feriali, su ogni posizione ancora
+#    viva all'ora del dato, ~12-17 BCM (i runner). Tre esiti, una
+#    PARTIZIONE:
+#    LEVA      PF >= 1,20 E DD <= 0,75 x DD(cella 0)
+#    TAGLIA    PF < 1,20 (chiude proprio i giorni grossi, che sono i
+#              vincenti: rischio scritto dalla caccia par. 10.3)
+#    NULLA     il resto (PF >= 1,20 e DD > 0,75 x DD(cella 0))
+#    Previsione mia: TAGLIA. Motivo: il PF di R103 sta nei runner (TP2 a
+#    2,5R, target EMA200, TP finale 4R) e i runner sono vivi a meta'
+#    giornata. [NESSUNA MISURA DI CASA sul verso: e' una previsione.]
+#  PRIOR DI UN'ALTRA MISURA, SCRITTO PERCHE' CONTRADDICE UN FILE VICINO:
+#    la sonda della caccia (par. 2.3) [SONDA OANDA, screening, 2015-2020,
+#    uscita semplificata, n piccoli] trova sul LONG CONTRO il trend D1
+#    (EMA14 < EMA100) E +0,179 R (n 54, t +1,78, PF 1,88) e sul long A
+#    FAVORE del trend E -0,031 R (n 97, PF 0,89). R260d (file di un altro
+#    agente: il trend dell'oro come cancello, NON scritto qui) e questa
+#    sonda SI CONTRADDICONO: IL ROUND DECIDE, non questa nota.
+#
+# =====================================================================
+#  4. I CANCELLI (congelati prima; si citano come N<n> [R267a])
+# =====================================================================
+#  N0 PRONTO: par. 6-A chiuso per iscritto. Altrimenti NON si lancia.
+#  N1 CANARINO NEL LOG (InpVerbose=true, pinnato): ogni passata deve
+#     stampare "[MaxMinNotte] news caricate: N." (LoadNews r.798) con N
+#     = 2971, o 2972 se la riga d'intestazione "Data Ora;Impatto;..."
+#     passasse lo StringToTime [NON VERIFICATO; innocua: impatto 0, non
+#     supera InpNewsMinImpact 3]. Se stampa "file news non trovato:
+#     filtro di fatto spento." -> NULLO.
+#  N2 G0 IN-FILE: cella 0 contro R260c/R103 (Trades 693, PF 1.308, DD
+#     5.32, Profit 24736) entro UNA giornata (par. 3). Se no -> NULLO.
+#  N3 LA MANOPOLA MORDE: cella 1 con Profit diverso dalla cella 0. Uguali
+#     al centesimo = il filtro non ha visto niente -> NULLO.
+#  N4 MERITO: 693 deal ~512 posizioni: si legge. RISCHIO: DD a 0,5%
+#     contro la soglia 2,06% di R260c par. 8 (DD OHLC = LIMITE INFERIORE).
+#  N5 NESSUNA CELLA SI PROMUOVE: una LEVA diventa una proposta a Claudio
+#     con la riprova a tick sulla coda 2024.07.05 -> 2026.06.30.
+#
+# =====================================================================
+#  5. LA FINESTRA
+# =====================================================================
+#  Identica a R260c: @DAQUANDO 2019.12.30, @FINOA 2026.06.30,
+#  @FRAZIONEIS 0.0005 -> moncone di 1 giorno + OOS 2020.01.01-2026.06.30
+#  (= R103). Si legge SOLO il CSV _OOS.
+#
+# =====================================================================
+#  6. PERCHE' NON SI LANCIA -- UN DIFETTO BLOCCANTE, DUE BUCHI, UN COSTO
+# =====================================================================
+#  A (BLOCCANTE, il canale). LoadNews (r.777-799) apre il file con
+#    FileOpen(InpNewsFile, FILE_READ|FILE_CSV|FILE_ANSI, ';'): SENZA
+#    FILE_COMMON, e l'EA NON ha "#property tester_file" (grep: zero
+#    righe). Nel tester ogni agente ha la SUA sandbox MQL5\Files e il
+#    driver di casa non ci copia niente (walkforward_generico.ps1 copia
+#    solo Experts e Include, r.1886-1912). Quindi FileOpen fallisce,
+#    LoadNews logga "file news non trovato" e il filtro SI SPEGNE DA
+#    SOLO. NON e' un'ipotesi: e' il difetto gia' pagato su ABTG_PostNews
+#    (REGISTRO_TEST, "IL CANALE", 4 CSV a Trades 0) e su ABTG_FiboH4_
+#    Multi (commento r.105-110, corretto con InpNewsCommon/FILE_COMMON).
+#    VIE D'USCITA, per nome:
+#     (A1) CODICE: aggiungere a ABTG_MaxMinNotte l'apertura in Common\
+#          Files come FiboH4_Multi (InpNewsCommon, default true, ripiego
+#          sulla sandbox). E' una modifica all'EA della sedia 770402: non
+#          e' "costo zero", passa dai cancelli ed e' una scelta di
+#          Claudio. Con quell'input nuovo questo file va RIGENERATO (un
+#          pin in piu').
+#     (A2) COSTO ZERO, MAI PROVATA IN CASA: copiare a mano il CSV nella
+#          sandbox dell'agente del PC (...\Tester\Agent-127.0.0.1-300x\
+#          MQL5\Files\) prima del job, e lanciare UNA cella in test
+#          singolo per leggere il canarino N1. R93_CRITERI par. 8 la
+#          elenca come piano B, MAI misurata. [NON VERIFICATA]
+#  B (BUCO, la copertura). Il file news copre 2021.01.04 -> 2025.12.19;
+#    la finestra di R103 e' 2020.01.01 -> 2026.06.30. Sui ~18,5 mesi
+#    fuori (tutto il 2020 e 2025.12.20-2026.06.30), cioe' ~24% dei 78
+#    mesi, la cella 1 opera IDENTICA alla cella 0: l'effetto misurato
+#    e' DILUITO verso zero. Accettato per tenere il G0 contro R103.
+#  C (BUCO, l'orologio). Lo shift e' UNO per tutta la corsa (+60). Il
+#    feed forex BCM era ora italiana - 1 fino a dic. 2024 e UTC+1 fisso
+#    dopo (OROLOGIO_BCM_2026-09-24.md; per l'oro [INFERITO] = forex):
+#    +60 e' GIUSTO d'estate e dal 2025, SBAGLIATO di un'ora negli inverni
+#    2021-2024 (~20 dei ~60 mesi coperti). Li' la finestra [ev-30, ev+30]
+#    cade a [ev+30, ev+90]: la chiusura avviene DOPO il dato, non prima.
+#    0 sarebbe sbagliato su ~40 mesi: +60 e' il minore dei due errori.
+#  D (COSTO APERTO). InNewsBlackout (r.810-821) scorre TUTTI i 2971
+#    eventi a OGNI tick, con uno StringFind per evento: su ~13 milioni di
+#    tick OHLC a passata sono ~10^10 iterazioni. Il tempo per passata e'
+#    [NON STIMATO]: potrebbe essere di molte volte il metro 0,7 min. La
+#    prima cella in test singolo (A2) lo misura.
+#
+# =====================================================================
+#  7. BUCHI NON LEGATI AL CANALE
+# =====================================================================
+#  OHLC: DD limite inferiore. Spread [NON PINNATO DA QUESTA CORSIA]
+#  (classe 394, come R260c). Commissione FTMO oro [NON MISURATA].
+#  InpNewsBeforeMin/AfterMin 30/30 NON sono ad asse (una variabile).
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H2
+@DAQUANDO   2019.12.30
+@FINOA      2026.06.30
+@FRAZIONEIS 0.0005
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=true||true||0||true||N
+InpNewsFile=abtg_news_2021_2025_UTC.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=60||60||0||60||N
+InpNewsCurrencies=USD
+InpNewsFlatten=0||0||1||1||Y
+InpComment=MAXMINR267A
+InpMagic=796701||796701||0||796701||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

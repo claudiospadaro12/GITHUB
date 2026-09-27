@@ -1,0 +1,186 @@
+#  EA: ABTG_Dow_Apertura_US
+# =====================================================================
+#  R267d -- DOW SHORT (motore della 770202, lato SHORT): FILTRO VOLUMI
+#  EA: ABTG_Dow_Apertura_US, U30USD M5, TICK REALI
+#  La parte comune del round sta in prove/R267a_news_oro_770402.txt par. 0.
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest,
+#  SPENTO), NE' su nessun terminale di conto: 50503392, 50504263,
+#  10105439 (REALE), 541452707 (FTMO). Il terminale del PC e' loggato sul
+#  demo 50503392: prima si controlla che non abbia SEDIE attaccate
+#  (avvertenza di R246/R255). QUESTO FILE NON CONTIENE E NON AUTORIZZA
+#  NESSUNA RIGA DI LANCIO. Non tocca EA, preset, sedie, conti, taglie o
+#  forward, e non promuove niente: ogni esito e' materiale per Claudio.
+#  VINCOLI DI BANCO (nella riga): identici a R255a (-Deposito 10000,
+#    -Modello 4, MaxBars 100000000, niente -Spread/-Ritardo/-FrazioneIS).
+#  Scritto il 27/09/2026. Attese e soglie CONGELATE PRIMA DEI NUMERI.
+# =====================================================================
+#
+#  1. DOMANDA. "Volume relativo" (ORB stocks in play, QuantConnect, da
+#  Zarattini-Barbon-Aziz [DICHIARATO]) = il nostro InpUseVolumeFilter,
+#  MAI acceso sullo short del Dow (grep dei 24 file R255: false ovunque).
+#
+#  2. BASE = R255a (short, ancora, 14:30, EMA H4 acceso). Cambiano SOLO:
+#    InpUseVolumeFilter  false -> true
+#    InpVolMult          1.5 (pin inerte) -> ASSE 0,0 .. 2,0 passo 0,5
+#                        (celle 0,0 / 0,5 / 1,0 / 1,5 / 2,0)
+#    InpMagic            asse gemello -> 796712 fisso
+#  InpVolAvgBars resta 20 (default = regola Emiliano).
+#  NOMI E UNITA', LETTI NEL SORGENTE (ABTG_Dow_Apertura_US.mq5):
+#    InpUseVolumeFilter (r.317) bool; InpVolMult (r.318) MOLTIPLICATORE
+#    senza unita'; InpVolAvgBars (r.319) numero di BARRE del TF del
+#    grafico (M5). VolumeOKtf (r.2074-2087): tick volume dell'ultima M5
+#    CHIUSA (shift 1) >= InpVolMult x media delle 20 M5 PRIMA di lei;
+#    dati insufficienti o media 0 -> passa. Chiamata nel RETEST alla
+#    rottura (r.1348 short): gBrokeLow diventa true PRIMA del controllo,
+#    quindi un volume insufficiente SALTA LA GIORNATA (niente seconda
+#    occasione). ATTENZIONE: la barra letta e' la M5 chiusa PRIMA del
+#    tick di rottura, non la barra della rottura.
+#  LA CELLA 0,0 E' L'ANCORA IN-FILE: v[0] >= 0 x media e' sempre vero,
+#  quindi il filtro acceso a 0,0 = filtro spento = R255a AL CENTESIMO.
+#
+#  3. L'ATTESA, SCRITTA PRIMA.
+#  PRECEDENTE DI CASA (R84b, NASUSD, InpEntryMode 0 = BREAKOUT, non
+#  retest; risultati_archivio/r84_csv, ricontato il 27/09): filtro 1,5/20
+#  contro spento: IS PF 1,25367 -> 0,87623, Trades 156 -> 62 (x0,397),
+#  DD 6,14 -> 5,86%; OOS PF 0,87315 -> 0,95032, Trades 291 -> 92
+#  (x0,316), DD 17,07 -> 4,59%. Lezione: un AMMAZZA-DD (in OOS; in IS il
+#  DD quasi non si muove), NON un generatore di PF.
+#  PERCHE' SUL DOW PUO' MORDERE MENO [INFERITO, da battere]: per una
+#  rottura nei primi minuti dopo le 15:05 BCM (file 14:30, estate) le 20
+#  M5 della media sono ~13:20-15:00, per ~70% PRE-MERCATO (14 su 20) a
+#  volume basso: la media e' diluita e il rapporto tende a stare sopra 1
+#  -> a 1,5 il filtro toglie meno. Per le rotture piu' tardi la media e'
+#  tutta di seduta e l'argomento cade.
+#  DUE IPOTESI SUL RAPPORTO r = Trades(1,5) / Trades(0,0), NON
+#  sovrapposte (classe 178):
+#    H_R84      r in [0,25 ; 0,50]  (il precedente si trasferisce)
+#    H_DILUITO  r >= 0,70           (la media col pre-mercato)
+#    fra 0,50 e 0,70: NESSUNA DELLE DUE, si scrive il numero.
+#  IL DD: il precedente stesso NON ha un verso unico (R84b: DD x0,27 in
+#  OOS, x0,95 in IS). Attesa scritta: sotto H_R84 DD(1,5)/DD(0,0) fra
+#  0,27 e 0,95; sotto H_DILUITO vicino a 1.
+#  IL PF: ATTESO sotto 1 in tutte le celle (R54a short OOS PF 0,84;
+#  R84b PF sotto 1). n: R255a ~73 + 73 deal: MERITO SOSPESO in ogni cella.
+#
+#  4. I CANCELLI (congelati prima; si citano come V<n> [R267d]).
+#  V0 CATENA di R255a par. 8 (E0, P0 con InpVolMult dal CSV, C0 del
+#     per-trade della SOLA cella 2,0: ..._U30USD_796712.csv, L0 short).
+#  V1 G0 IN-FILE: la cella 0,0 deve essere == R255a AL CENTESIMO
+#     (Trades, Profit, PF, DD del CSV _OOS; il magic non entra nel
+#     trading). Il legame con l'archivio (G0-ANCORA contro R54a, 73 deal
+#     per era) lo porta R255a, che ha il per-trade: la cella 0,0 qui non
+#     ce l'ha (classe 455). R255a NON girato -> la cella 0,0 vale solo
+#     come ancora INTERNA del file, e si scrive cosi'.
+#  V2 MORDE E TOGLIE SOLTANTO: Trades non crescente con InpVolMult (una
+#     giornata saltata non ne crea un'altra: un ciclo al giorno), con
+#     tolleranza 2 deal (parziali al lotto 0,10); Trades(2,0) < Trades(0,0)
+#     altrimenti il pin non e' arrivato -> NULLO.
+#  V3 SOTTOINSIEME (cella 2,0, dal per-trade): ogni deal ha un gemello in
+#     R255a (793101) con close_time, deal_type e price identici (volume e
+#     net no), salvo le parziali mancanti al lotto 0,10. Un deal senza
+#     gemello = NON LEGGIBILE.
+#  V4 RISCHIO (a qualunque n): DD equity e Peggior Giornata % del CSV
+#     _OOS di ogni cella contro la cella 0,0; il tetto R2 di R255a (4,272%
+#     a saldo chiuso) si legge SOLO sulla cella 2,0 (unico per-trade).
+#     Un DD che scende IN PROPORZIONE ai deal NON e' una leva: si scrive
+#     accanto DD(c)/DD(0) e Trades(c)/Trades(0).
+#  V5 ALTOPIANO, MAI IL PICCO; e se nessuna cella batte la 0,0 oltre il
+#     rumore: "IL DEFAULT (filtro spento) VA BENE". NESSUNA PROMOZIONE.
+#
+#  5. FINESTRA: identica a R255a (moncone 1 giorno + 2024.09.27 ->
+#  2026.06.30).
+#  6. COSTO: 5 celle x (moncone + 641 giorni) = 2,5 volte R267c:
+#  5 x 2 x 0,333 = 3,3 min / R255 scalato 47-51 s per cella = 3,9-4,3 min
+#  -> ~3,3-4,3 MIN.
+#  7. BUCHI: il filtro sul NUDO (EMA spento, piu' campione) no;
+#  InpVolAvgBars ad asse no (una variabile); InpUseAtrFilter no (su
+#  NASUSD R84c OOS PF 0,97: stesso ruolo); la curva IN FASE (file 15:30)
+#  no; per-trade di UNA sola cella (classe 455).
+# =====================================================================
+@SIMBOLO    U30USD
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=400.0||400.0||0||400.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=true||true||0||true||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=false||false||0||false||N
+InpUseVolumeFilter=true||true||0||true||N
+InpVolMult=0.0||0.0||0.5||2.0||Y
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMagic=796712||796712||0||796712||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

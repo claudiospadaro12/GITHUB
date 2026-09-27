@@ -4465,3 +4465,73 @@ passate), `controlla_riga.py --oggetto prova` **nessun difetto meccanico** (7 ri
 - 🪦 **Per il certificato del 09/09**: anche dopo R266 sul box asiatico forex restano vuote la casella
   **③ uscita** (gestione di default, mai ad asse) e **⑤ TF** (`InpMgmtTF` M15 fisso). **Un H0 di R266
   NON e' un certificato di morte**: si scrive "NON ANCORA MISURATO (mancano ③ e ⑤)".
+
+---
+
+## 🔧 27/09/2026 — R267: LE PROPOSTE «A COSTO ZERO DI CODICE» DELLA CACCIA PARAMETRI — ⏳ IN CODA, NON GIRATI
+
+Richiesta di Claudio: _"NON FERMIAMOCI DAVANTI A QUALCHE PARAMENTRO BASSO. SI CERCA SUL WEB SE
+QUALCHE PARAMETRO C'E' DA MIGLIORARE."_ Fonte: `caccia_strategie/CACCIA_PARAMETRI_SEI_FAMIGLIE_2026-09-26.md`
+(commit `1a2f80ce`). **Zero passate girate, zero EA/preset/sedie toccati.** Banco: **PC di backtest
+DESKTOP-H4D7CAJ**, mai il VPS (firma del 21/09). 12 file generati da `prove/R267_GENERA.py` (pin
+**diffati dallo script** contro la base: una riga cambiata e non dichiarata = il file non si scrive),
+**un asse per file**, magic fisso (l'asse è la manopola). `controlla_prova.py` **0 problemi** (35 celle,
+70 passate), `controlla_riga.py --oggetto prova` **nessun difetto meccanico** su tutti e 12, ASCII puro.
+Magic **7967xx vergini** (grep disco + tutti i rami: 0; `7968xx` scartato, 11 occorrenze sui remoti).
+Ogni numero della caccia citato come **[SONDA OANDA, screening]** o **[DICHIARATO]**, mai come misura di casa.
+
+| file | base (PASS) | manopola · celle | magic | ancora G0 | attesa scritta PRIMA |
+|---|---|---|---|---|---|
+| `R267a_news_oro_770402.txt` (TESTA) | R260c | `InpNewsFlatten` 0/1 con news USD ON · 2 | 796701 | cella 0 ≈ R103 (±1 giornata) | 🔴 **NON LANCIARE** (sotto). Poi: blocca ≈ inerte (1 evento USD alle 06 UTC in 5 anni); chiude → partizione LEVA/TAGLIA/NULLA, previsione **TAGLIA** |
+| `R267b_minbox_oro_770402.txt` | R260c | `InpMinBoxPts` 0/650/1300/1950/2600 · 5 | 796702 | cella 0 = R103 (1.308 / 693 / 5.32%) | deal 693 / 450-620 / 250-400 / 180-300 / 140-260; il filtro in punti **seleziona l'epoca**; lettura dentro il 2024-26 (H_GIORNO / H_EPOCA / H_ROVESCIO a ±0,30 di PF), previsione **H_EPOCA** |
+| `R267c_short_DOW_uscita90_1430.txt` | R255a | `InpCloseHour` 16/17 (`:00`) · 2 | 796711 | R255a (esterna) + sottoinsieme | tocca anche gli ingressi (pendenti cancellati); proxy dal long: 16:00 sposta l'uscita del 43-52% delle posizioni, 17:00 del 21-27%; previsione DENTRO (17:00) / CORSA (16:00); merito sospeso |
+| `R267d_short_DOW_volumi_1430.txt` | R255a | `InpVolMult` 0-2,0 passo 0,5, filtro ON · 5 | 796712 | cella 0,0 = R255a (inerte per costruzione) | H_R84 r∈[0,25;0,50] contro H_DILUITO r≥0,70 (media col pre-mercato); PF < 1 ovunque; merito sospeso |
+| `R267e1_adr_EMA200_GBPJPY.txt` | R264c | `InpUseAdrFilter` 0/1 · 2 | 796721 | cella 0 = R264c / genetico Pass 55 | **H_INERTE** previsto: 1,5×ATR(H4) ≈ 0,61×ADR < 0,8 [INFERITO] |
+| `R267e2_adr_EMA200_XAUUSD.txt` | R264d | `InpUseAdrFilter` 0/1 · 2 | 796722 | cella 0 = R264d / Pass 311 | idem; oro a 10000 = lotto minimo, si legge solo dentro il file |
+| `R267f1_venerdi_EMA200_GBPJPY.txt` | R264c | `InpFridayClose` 0/1 (ore 20) · 2 | 796731 | cella 0 = R264c | LEVA/COSTO/NULLA, previsione **NULLA** |
+| `R267f2_venerdi_EMA200_XAUUSD.txt` | R264d | `InpFridayClose` 0/1 · 2 | 796732 | cella 0 = R264d | idem; chiusura del venerdì dell'oro a BCM [NON VERIFICATA] |
+| `R267g1_dax_long_trend_DAX.txt` | R261a | `InpCorrTF` H4/H6/H8/H12/D1 su **D30EUR** · 5 (enum) | 796741 | R261a (esterna) + Trades ≤ corr=0 | ~80-115 deal; HP (H8 ≥ 1,10 + 3 contigue) contro H0 (H8 < 1,00), previsione **H0**; riscaldamento EMA100 D1 fino a ~feb 2025 |
+| `R267g2_dax_long_trailing.txt` | R261a corr=1 | `InpUseTrailing` 0/1 · 2 | 796742 | cella 1 = R261a corr=1 | merito sospeso (~35-63 pos.); LEVA/PEGGIORA/NULLA; tutte sotto PF 1 |
+| `R267g3_dax_long_breakeven.txt` | R261a corr=1 | `InpBreakeven` 0/1 · 2 | 796743 | cella 1 = R261a corr=1 | idem |
+| `R267g4_dax_long_parziale.txt` | R261a corr=1 | `InpTP1Pct` 0/25/50/75 · 4 | 796744 | cella 50 = R261a corr=1 | `TP1Pct=0` spegne anche BE e seconda parziale (codice letto); idem |
+
+- 🔴 **R267a — NON LANCIARE, e il motivo è misurato in casa, non supposto.** `ABTG_MaxMinNotte` apre il file
+  news **senza `FILE_COMMON`** (r.780) e senza `#property tester_file`: nel tester ogni agente ha la sua
+  sandbox `MQL5\Files`, il driver non ci copia niente (r.1886-1912), `LoadNews` stampa *"file news non
+  trovato: filtro di fatto spento"* e le due celle escono **identiche a R260c**. È lo **stesso difetto già
+  pagato** su `ABTG_PostNews` (4 CSV a Trades 0) e su `ABTG_FiboH4_Multi` (corretto con `InpNewsCommon`).
+  Vie d'uscita: **(A1)** codice (FILE_COMMON come FiboH4_Multi) = modifica all'EA della sedia `770402` →
+  **firma di Claudio**; **(A2)** copia a mano del CSV nella sandbox dell'agente + una cella in test singolo
+  col canarino *"news caricate: 2971"* → **[NON VERIFICATA]**, mai provata in casa. Più tre buchi scritti nel
+  file: copertura del CSV 2021.01.04-2025.12.19 contro finestra 2020-2026.06 (**~24% dei mesi ciechi**);
+  shift unico +60 sbagliato di un'ora negli inverni 2021-2024 (~20 mesi su 60); **costo per passata [NON
+  STIMATO]** (2971 eventi × StringFind a ogni tick ≈ 10^10 iterazioni).
+- 📊 **Misurato qui, a costo zero**: sul CSV news, **62,1%** dei feriali 2021-2025 ha un dato USD High fra le
+  11 e le 16 UTC (804/1295); il box notturno oro 2025-26 (`ABTG_Notte_Study_XAUUSD.csv`, 371 notti) ha
+  P25 **2609** / P50 **4156** punti; sul long Dow 770202 (per-trade R246) il **42,9-52,1%** delle posizioni
+  esce dopo le 16:00. R84b ricontato: DD OOS 17,07 → 4,59% ma **DD IS 6,14 → 5,86%** (il precedente non ha
+  un verso unico sul DD).
+- 🗑️ **SCARTATE, con il perché:**
+  - **P6 VWAP di lato sul Dow — SCARTATA PER COSTRUZIONE**: `VwapBias()` (r.1464-1485) somma le barre dallo
+    stesso **giorno del server** (mezzanotte BCM), non dall'apertura cash: alle 15:05 BCM contiene ~15 ore di
+    notte e pre-mercato. Misurarla darebbe un numero su un'altra cosa; serve codice (ancora all'apertura).
+  - **P3 trend dell'oro** → è **R260d** (altro agente), non scritto qui. Nota nei file R267a/b: la sonda
+    [SONDA OANDA, screening] dà il long **contro** il trend D1 +0,179 R e **a favore** −0,031 R → **R260d e
+    questa sonda si contraddicono: il round decide.**
+  - **P9a `InpCloseAtCutoff` e P9b AUDNZD/AUDCAD (Nightly) → CODA DOPO R259**: R259 non è ancora girato.
+  - **P8 box asiatico via `MaxMinNotte`** → è **R266** (altro agente, già in coda). **P7 Londra blocco S**:
+    fuori da questo mandato; R258 non è ancora girato.
+  - **Stop in ATR sull'oro**: già caduto (`oro_maxmin_fase1_*`, DD 9,3-26,5%). **Box in ATR, ADX/pendenza
+    EMA**: servono input nuovi (codice).
+  - **EMA200 su GBPUSD/AUDJPY/EURUSD**: fuori per costo (8 file ≈ 36 min contro ~10 chiesti). Tenuti GBPJPY
+    (DD più basso, 4,42%) e XAUUSD (PF più alto fra i vivi, 1,381); AUDJPY ha il PF più alto (1,514) ma è
+    **MORTO** su campione pieno e la regola del 19/08 ne vieta i filtri d'ingresso.
+- 💰 **Costo**: ~**30-38 minuti** di tester lanciabili (R267b ~4-5 · c ~1,3-1,7 · d ~3,3-4,3 · e/f 4×4,5 ≈ 18 ·
+  g1-g4 ~3,6-9,1), tetto largo 2 ore. EMA200 sopra i 10 min anche con due simboli: **spezzato in due onde da
+  ~9 min** (una per simbolo). **Ordine**: R267b → (R255a) R267d, R267c → (R261d/c/a) R267g2-g4, g1 →
+  (R264c) R267e1, f1 → (R264d) R267e2, f2 → R267a **mai finché A non è chiuso**.
+- 🔴 **NON VERIFICATI**: la via A2 della sandbox; il rapporto ATR(H4)/ADR su BCM (la previsione H_INERTE ci
+  poggia); il box oro 2020-2024; la chiusura del venerdì dell'oro a BCM; le candele per giorno del D30EUR;
+  StringToTime sulla riga d'intestazione del CSV news; la velocità del PC su oro OHLC; lo spread in memoria
+  del terminale (classe 394, come R260). **Classe 455 ovunque**: il per-trade sopravvive solo per l'ultima
+  cella di ogni file, e i criteri sono scritti di conseguenza.

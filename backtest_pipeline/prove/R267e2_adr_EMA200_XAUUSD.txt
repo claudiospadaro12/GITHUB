@@ -1,0 +1,164 @@
+#  EA: ABTG_EMA200
+# =====================================================================
+#  R267e2 -- EMA200 H4 XAUUSD: FILTRO ADR (mai acceso)
+#  EA: ABTG_EMA200 (due lati), XAUUSD H4, TICK REALI
+#  La parte comune del round sta in prove/R267a_news_oro_770402.txt par. 0.
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest,
+#  SPENTO), NE' su nessun terminale di conto: 50503392, 50504263,
+#  10105439 (REALE), 541452707 (FTMO). Il terminale del PC e' loggato sul
+#  demo 50503392: prima si controlla che non abbia SEDIE attaccate
+#  (avvertenza di R246/R255). QUESTO FILE NON CONTIENE E NON AUTORIZZA
+#  NESSUNA RIGA DI LANCIO. Non tocca EA, preset, sedie, conti, taglie o
+#  forward, e non promuove niente: ogni esito e' materiale per Claudio.
+#  VINCOLI DI BANCO (nella riga, classe 692): IDENTICI al G0 di R264
+#    (prove/R264a_controllo_EMA200_GBPUSD.txt = testa, par. 5):
+#    -Deposito 10000, -Modello 4 (tick reali), niente -Spread/-Ritardo/
+#    -FrazioneIS. E' il banco del genetico: il confronto con l'archivio
+#    E' il G0.
+#  Scritto il 27/09/2026. Attese e soglie CONGELATE PRIMA DEI NUMERI.
+# =====================================================================
+#
+#  1. BASE = prove/R264d_controllo_EMA200_XAUUSD.txt
+#  (PASS 8bca2cbd), la cella G0 di XAUUSD (O1 0.30 / O2 0.4 / TP 2.5).
+#  Ancora d'archivio del genetico (R264 par. 1a):
+#    Pass 311: PF 1,38074, n 187 deal, DD 6,1446%, +991,09.
+#  Cambiano SOLO: InpUseAdrFilter 0 -> ASSE 0/1, InpComment R267E2,
+#  InpMagic 796722 fisso (niente gemelle: l'asse e' la manopola).
+#  LA CELLA 0 (manopola spenta) E' L'ANCORA IN-FILE: tutti i pin uguali a
+#  R264d, magic a parte -> Trades, Profit, PF, DD IDENTICI al centesimo a
+#  quelli di R264d girato sullo stesso PC (il magic non entra nel trading:
+#  G1 di R264) e, contro il genetico, le bande VERDE/GIALLO/ROSSO di R264
+#  par. 5.
+#
+#  PERCHE' SOLO GBPJPY E XAUUSD (e non i 4 simboli di R264): a 135 s per
+#  passata tick (metro R240) un file = 2 finestre piene = ~4,5 min; 4
+#  simboli x 2 manopole = 8 file = ~36 min, sopra i ~10 min del mandato.
+#  Scelti per numero: GBPJPY = DD PIU' BASSO dei quattro (4,42%); XAUUSD =
+#  PF piu' alto fra i VIVI (1,381). AUDJPY ha il PF piu' alto in assoluto
+#  (1,514) ma e' MORTO su campione pieno (R139a) e la regola del 19/08
+#  vieta di allargarne i filtri d'ingresso; GBPUSD ha DD 7,20% e PF
+#  1,231 (ultimo su tutti e due). Anche cosi' sono 4 file = ~18 min:
+#  dichiarato, e spezzato in due onde da ~9 min (una per simbolo).
+#
+#  2. LA MANOPOLA, LETTA NEL SORGENTE (ABTG_EMA200.mq5, HEAD b45dd009).
+#  InpUseAdrFilter (r.62), InpAdrDays 50 (r.63), InpAdrDistMin 0,0
+#  (r.64), InpAdrDistMax 0,8 (r.65, "guida Paolo ~0,8x ADR"). OnNewBar
+#  (r.332-336): dopo la fascia in ATR (dist = |chiusura - EMA200| fra
+#  0,3 e 1,5 x ATR14 H4, r.331) scarta la candidata se dist > 0,8 x ADR,
+#  ADR = media di (massimo - minimo) delle ultime 50 D1 CHIUSE (r.309-
+#  317). In NESSUN file prova e' mai stato acceso (caccia par. 8).
+#  NON E' UN SOTTOINSIEME: una candidata scartata lascia libero il posto
+#  (HasPosition/HasPending, r.322) e la barra dopo puo' entrare: gli
+#  ingressi SUCCESSIVI possono cambiare.
+#
+#  3. L'ATTESA, SCRITTA PRIMA -- E PERCHE' PREVEDO CHE SIA INERTE.
+#  Il filtro morde solo se 1,5 x ATR14(H4) > 0,8 x ADR50, cioe' se
+#  ATR(H4)/ADR > 0,533. Su una coppia che gira ~24 ore, 6 candele H4 per
+#  giorno: se il prezzo fosse un cammino casuale ATR(H4) ~ ADR/radice(6)
+#  = 0,41 x ADR [INFERITO, NON MISURATO su BCM: il K1 di R264 misura
+#  l'ATR H4 per la prima volta]. Allora 1,5 x ATR ~ 0,61 x ADR < 0,8:
+#  la fascia in ATR taglia PRIMA dell'ADR. Il filtro morde solo quando
+#  l'ATR a 14 candele H4 (~2,3 giorni) corre avanti all'ADR a 50 giorni
+#  (shock di volatilita').
+#  DUE IPOTESI NON SOVRAPPOSTE (classe 178), cella 1 contro cella 0:
+#    H_INERTE  |Trades(1) - Trades(0)| <= 2% di Trades(0) E |dPF| < 0,02
+#              -> "casella MISURATA, manopola INERTE a 0,8": non si
+#              riprova a 0,8; la manopola che morderebbe e' InpAdrDistMax
+#              ~0,5 (NON qui).
+#    H_MORDE   IL RESTO (Trades fuori di +-2% O |dPF| >= 0,02): allora
+#              il rapporto 0,41 e' sbagliato o gli shock sono frequenti,
+#              e si scrive quale. (Trades(1) > Trades(0) e' possibile
+#              per il posto liberato: si scrive, non e' un errore.)
+#  Previsione mia: H_INERTE.
+#  Se MORDE: tre esiti, una PARTIZIONE: LEVA (DD <= 0,85 x DD(0) e PF >=
+#  PF(0) - 0,05) . PEGGIORA (PF < PF(0) - 0,05) . NULLA (il resto).
+#
+#  n: il G0 ha 187 deal ~ 102 posizioni (1,838 deal/posizione, R264 par.
+#  1b): SOTTO 150 -> MERITO SOSPESO. Il RISCHIO si legge a qualunque n.
+#  ORO A 10000 (detto da R264 par. 5 e 11, e vale qui): le gambe stanno a
+#  0,01-0,03 lotti, il pavimento MathMax (r.495) alza il rischio oltre lo
+#  0,5% per gamba e la parziale al 50% non parte: il DD% di questo file
+#  NON e' quello a 1% dichiarato. Il confronto cella 1 / cella 0 resta
+#  valido (stesso banco); il numero assoluto no. Il G0 d'oro e' atteso
+#  GIALLO o ROSSO (R264 par. 5, causa nominata): con ROSSO questo file si
+#  legge SOLO al suo interno.
+#
+#  4. I CANCELLI (congelati prima; si citano come E<n> [R267e2]).
+#  E0 CATENA di R264 par. 5: E0 (moncone: CSV _IS vuoto e rc 2 attesi),
+#     P0 (ogni colonna Inp del CSV _OOS uguale al file, InpUseAdrFilter compresa),
+#     C0 del per-trade (sopravvive SOLO la cella 1: abtg_trades_
+#     ABTG_EMA200_XAUUSD_796722.csv; regola del k di commissione in [1,00 ; 3,00]
+#     EUR/lotto, classe 844).
+#  E1 G0 IN-FILE: cella 0 == R264d al centesimo se girato; contro il
+#     genetico, bande di R264 par. 5. ROSSO -> il file si legge solo al
+#     suo interno.
+#  E2 LA MANOPOLA MORDE: Profit(1) != Profit(0). Identici = casella INERTE MISURATA
+#     (non un difetto: e' H_INERTE).
+#  E3 RISCHIO (a qualunque n, Emendamento B): DD di ogni cella <= 10,0%
+#     a rischio 1% (S3 di R264); accanto il derivato a 2,00%
+#     (x1,956-1,990). Tick, quindi niente riserva OHLC; ma n piccolo.
+#  E4 NESSUNA CELLA SI PROMUOVE: interruttore a due stati, niente
+#     altopiano. Se la cella 1 non batte la 0 oltre il rumore: "IL
+#     DEFAULT (spento) VA BENE", ed e' un esito.
+#  E5 K1 (costo): la manopola non tocca lo stop; K1 e' quello di R264.
+#
+#  5. FINESTRA: identica a R264d (@DAQUANDO 2023.12.31, @FINOA
+#  2026.06.30, @FRAZIONEIS 0.001: moncone di 1 giorno + OOS 2024.01.01
+#  -> 2026.06.30 = la finestra del genetico, NON cieca a livello di
+#  vicinato: R264 par. 4).
+#  6. COSTO: 2 finestre piene x 135 s + 2 monconi = ~4,5 MIN.
+#  7. BUCHI: il campione pieno OHLC (2017/2019 -> 2023) con la manopola
+#  no (sarebbe il passo dopo, sul centro di R264 se passa); GBPUSD,
+#  AUDJPY, EURUSD no (par. 1); commissioni/swap FTMO e griglia H4 di FTMO
+#  [NON MISURATI]; per-trade di UNA sola cella (classe 455).
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H4
+@DAQUANDO   2023.12.31
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=1||1||0||1||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpUseAdrFilter=0||0||1||1||Y
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpUseOrder2=1||1||0||1||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpUseCutoff=0||0||0||0||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpLogImbuto=1||1||0||1||N
+InpComment=R267E2
+InpMagic=796722||796722||0||796722||N
+InpTP_RR=2.5||2.5||0||2.5||N
+InpOrder2Atr=0.4||0.4||0||0.4||N
+InpOrder1Atr=0.30||0.30||0||0.30||N
