@@ -4414,3 +4414,54 @@ finestra del genetico per ogni simbolo (magic gemelle), che legge anche **lo sto
   OHLC−tick (8 coppie, mediana +0,0511, max +0,1670), le 3 celle tick del ponte, R139a/b, R136c,
   un asse per file, i magic 7965xx/7985xx vergini (disco + 12 rami remoti), il conto delle passate
   (90 + 12, tetto 3,4 h).
+
+## 🌏 27/09/2026 — R266 (BOX ASIATICO INTERO GBPUSD/EURUSD) + R260d (TREND DELL'ORO COME CANCELLO SUL LONG DI `770402`) — ⏳ IN CODA, NON GIRATI
+
+Dalla caccia ai meccanismi del 26/09 (`caccia_strategie/CACCIA_MECCANISMI_SEI_FAMIGLIE_2026-09-26.md`,
+`80251fd6`, P1 e P3) e dalla caccia parametri (`CACCIA_PARAMETRI_SEI_FAMIGLIE_2026-09-26.md`,
+`1a2f80ce`, §2.2 e riga P8): **due cose a codice zero** su `ABTG_MaxMinNotte` HEAD `7d0da9f9`. **Zero
+passate girate, zero EA/preset/sedie toccati.** Banco: **PC di backtest DESKTOP-H4D7CAJ**, mai il VPS.
+7 file: `controlla_prova.py --ea mql5/Experts/ABTG_MaxMinNotte.mq5` **0 problemi** (14 celle, 28
+passate), `controlla_riga.py --oggetto prova` **nessun difetto meccanico** (7 rilievi, tutti classe
+225), ASCII puro. **Strato 2 (`controllo-preventivo`): NON ANCORA FATTO.**
+
+| file | domanda | modello · finestra | asse | magic | attesa scritta prima |
+|---|---|---|---|---|---|
+| `prove/R266a_asia_box_GBPUSD_TESTA.txt` (TESTA) | il box asiatico 00:00-07:59 rotto alle 08:00 porta edge sul cavo? due lati | OHLC M1 · IS 2015.01.01→2019.12.31 · OOS 2020.01.01→2026.06.30 (`@FRAZIONEIS 0.4348`) · 10000 · 1,0% | magic x2 | 796601/796651 | posizioni IS 529-1129, OOS 687-1467; **H0 (piatto)**: sonda Oanda OCO E +0,012 R, t +0,40, n 811 |
+| `prove/R266b_asia_box_GBPUSD_solo_long.txt` | il LONG da solo | idem | magic x2 | 796602/796652 | IS 268-573 · OOS 349-745; **H0, il piu' probabile bocciato** (long negativo in 12/12 celle della sonda), PF 0,90-1,00 |
+| `prove/R266c_asia_box_GBPUSD_solo_short.txt` | lo SHORT da solo | idem | magic x2 | 796603/796653 | IS 317-677 · OOS 412-879; H0 (sonda E +0,024, t +0,62) |
+| `prove/R266d_asia_box_EURUSD_due_lati.txt` | gemello EURUSD, due lati | idem | magic x2 | 796604/796654 | IS 378-1129 · OOS 491-1467; H0 |
+| `prove/R266e_asia_box_EURUSD_solo_long.txt` | EURUSD long | idem | magic x2 | 796605/796655 | IS 192-573 · OOS 249-745; **H0, il piu' probabile bocciato**, PF 0,88-1,00; HN possibile in IS |
+| `prove/R266f_asia_box_EURUSD_solo_short.txt` | EURUSD short | idem | magic x2 | 796606/796656 | IS 226-677 · OOS 294-879; H0, ma il **meno improbabile** per HE (sonda +0,033, 5/6 anni), centro 1,00-1,08 |
+| `prove/R260d_oro_770402_solo_long_trend_oro.txt` | il long di `770402` solo se la chiusura H4 dell'oro sta sopra la sua EMA200 H4 | = R260a (OHLC M1, 2019.12.30→2026.06.30, moncone 1 g, 100000, 0,5%) | magic x2 | 795304/795354 | posizioni 125-280 (merito forse SOSPESO); partizione HN/HQ/H0/HG/HR, **previsione HR** (taglia, non separa); T3 = Trades identici a R260a → NON ESEGUITO; S0 = sottoinsieme esatto di R260a |
+
+- 📐 **Partizione di R266 (classe 178)**: HN = posizioni IS o OOS < 150 (merito sospeso) · HE = entrambe
+  ≥ 150 **e** PF IS ≥ 1,10 **e** PF OOS ≥ 1,10 · H0 = entrambe ≥ 150 e almeno un PF < 1,10. Un edge vero
+  sotto 1,10 cade in H0 per definizione, scritto prima.
+- 💰 **Il cancello del costo, nell'unita' letta nel sorgente**: `InpMinBoxPts` confronta
+  `(max-min)/_Point` (r.330-331), cioe' **punti a 5 cifre** (10 = 1 pip); con `InpSLMode=0` lo stop e'
+  **W + 2 x buffer** (r.336-337, r.377). Pedaggio all-in R258a (GBPUSD 0,840 · EURUSD 0,664 pip; metro
+  R264/R265 0,8425 / 0,6636) → **GBPUSD `InpMinBoxPts=277`** (stop ≥ 33,7 pip = 40,0-40,1x) · **EURUSD
+  `206`** (stop ≥ 26,6 pip = 40,06-40,08x). 🔴 **Il 332 del primo dossier era sbagliato qui**: contava W
+  senza i due buffer → stop ≥ 39,2 pip = 46,7x GBPUSD / 59x EURUSD, un cancello piu' stretto di quello
+  di casa non dichiarato.
+- 🕳️ **Contro-esempio trovato nel sorgente**: con `InpPendingExpiryMin` al default **90** e il piazzamento
+  alle 08:00 i pendenti morirebbero alle ~09:30 e il cutoff delle 11:00 sarebbe **inerte** → pin **180**
+  (scadenza = cutoff, come R260c).
+- 🧭 **Geometria scelta: P8 (box 00:00-07:59, piazzo 08:00, buffer 30), non P1 (00:00-06:59, 07:00,
+  buffer 20)**: la sonda da' il box 00-07 UK sull'euro **negativo** (t -1,74/-2,28). Il buffer 20 e' la
+  **cella facoltativa R266g, non scritta** (buffer 20 + `InpMinBoxPts` 297 per tenere fermo il costo), da
+  scrivere solo se R266a esce HE.
+- 🕰️ **Orologio**: IS e OOS fino a dic-2024 = ora di Londra esatta (box 00-08 UK = la sonda); inverni
+  2024/25 e 2025/26 = Londra+1 (~7-8 mesi su 78 dell'OOS), riportati a parte senza soglia.
+- 💰 **Costo**: R266 **12-30 min** [STIMA] (6 file x 2 gemelle x 11,5 anni OHLC; base r151a ~3,1
+  s/anno, velocita' del PC su OHLC forex NON MISURATA), tetto 60 min. R260d **1-3 min**, accodato **dopo
+  R260a** (e' la sua ancora).
+- 🔴 **NON VERIFICATI**: storico M1 GBPUSD/EURUSD dal 2015 sul PC (cancello D0) · STOPS_LEVEL BCM forex
+  (se > 30 il buffer cresce) · spread in memoria del terminale (classe 394) · commissione forex nel
+  tester (C0) · per-trade dell'IS sovrascritto dalla gamba OOS (posizioni IS = Trades/k, derivato) ·
+  EMA a periodo 1 in `iMA` = chiusura (algebra si', MT5 da provare: T3/S0) · riscaldamento EMA200 H4
+  a inizio 2020 · fail-open parziale di `CorrBias` (invisibile a T3).
+- 🪦 **Per il certificato del 09/09**: anche dopo R266 sul box asiatico forex restano vuote la casella
+  **③ uscita** (gestione di default, mai ad asse) e **⑤ TF** (`InpMgmtTF` M15 fisso). **Un H0 di R266
+  NON e' un certificato di morte**: si scrive "NON ANCORA MISURATO (mancano ③ e ⑤)".

@@ -1,0 +1,94 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R266b -- IL BOX ASIATICO INTERO -- GBPUSD SOLO LONG
+#  GBPUSD (grafico H1, inerte), OHLC M1 (Modello 1), deposito 10000
+#  (banco), rischio 1,0% (banco, NON una taglia proposta), binario HEAD
+#  7d0da9f9. Magic 796602 / 796652 (asse gemello a passo 50: G1 e un
+#  per-trade per gemella). Per-trade atteso in Common\Files:
+#    abtg_trades_ABTG_MaxMinNotte_GBPUSD_796602.csv e _796652.csv
+#
+#  TUTTO IL RAGIONAMENTO, LA GEOMETRIA, L'OROLOGIO, IL CANCELLO DEL
+#  COSTO, LE ATTESE E I CANCELLI STANNO NEL FILE DI TESTA:
+#    prove/R266a_asia_box_GBPUSD_TESTA.txt
+#  Qui solo le differenze. Rispetto a R266a (GBPUSD due lati) cambiano
+#  SOLO:
+#    InpAllowShort = false
+#    InpComment    = MAXMINR266B   (solo commento dell'ordine)
+#    InpMagic      = 796602||796602||50||796652||Y
+#  (generato da uno script sui pin di R266a, non a mano)
+#
+#  ATTESA DI QUESTO FILE (dalla testa, par. 6, scritta PRIMA):
+#    n (posizioni): IS 268-573 (centro ~412), OOS 349-745 (~536).
+#    PF: partizione HN / HE / H0 (testa par. 6.3). PREVISIONE: H0, ed e'
+#    il file PIU' PROBABILE BOCCIATO della famiglia insieme a R266e: il
+#    long della sonda e' negativo in 12 celle su 12 (GBPUSD 00-08 long
+#    E -0,020 R a TP 1R, n 412, 2/6 anni positivi). Centro atteso PF
+#    0,90-1,00.
+#    Rischio: DD equity a 1,0% senza banda credibile; ordine di grandezza
+#    sotto H0 ~15-25% (testa par. 6.4). Soglia a 2,00%: d > 4,00% / 4,08%
+#    = fuori da S3 (R3).
+#  CANCELLI: R0, D0, D1, G1, L0, C0, K1, R2, R3, R4 (testa par. 7).
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  50503392, 50504263, 10105439 (REALE), 541452707 (FTMO). Nessuna riga
+#  di lancio qui. Non tocca preset, EA, sedie, conti, taglie.
+# =====================================================================
+@SIMBOLO    GBPUSD
+@PERIODO    H1
+@DAQUANDO   2015.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.4348
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=0||0||0||0||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=7||7||0||7||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=277||277||0||277||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=8||8||0||8||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=11||11||0||11||N
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=180||180||0||180||N
+InpBufferPoints=30||30||0||30||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR266B
+InpMagic=796602||796602||50||796652||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

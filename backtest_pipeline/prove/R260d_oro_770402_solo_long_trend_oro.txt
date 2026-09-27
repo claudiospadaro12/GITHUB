@@ -1,0 +1,240 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R260d -- IL BOX NOTTURNO DELL'ORO (sedia 770402), SOLO LONG,
+#           CON IL TREND DELL'ORO STESSO COME CANCELLO
+#  XAUUSD H2, OHLC M1 (Modello 1), deposito 100000 (banco), rischio 0,5%
+#  (banco = R103, NON una taglia proposta), binario HEAD 7d0da9f9.
+#  Magic 795304 / 795354 (asse gemello a passo 50: G1 e un per-trade per
+#  gemella). Per-trade atteso in Common\Files:
+#    abtg_trades_ABTG_MaxMinNotte_XAUUSD_795304.csv e _795354.csv
+#  Scritto il 27/09/2026. Criteri congelati PRIMA dei numeri.
+#
+#  LA FAMIGLIA E' R260 (testa: prove/R260c_oro_770402_due_lati_ancora.txt,
+#  che porta geometria, orologio, finestra, banco, G0, G1, L0, R2, par. 8
+#  sul DD a 2,00%). L'ANCORA DI QUESTO FILE E' R260a (solo long, filtro
+#  spento). Rispetto a R260a, pin per pin (diff eseguito con uno script
+#  sui pin di R260a, non a mano), cambiano SOLO:
+#    InpUseCorrelation = true          (era false)
+#    InpCorrSymbol     = XAUUSD        (era SPXUSD, inerte a filtro spento)
+#    InpCorrTF         = 16388 = H4    (era 16385 = H1)
+#    InpCorrEmaFast    = 1             (era 14)
+#    InpCorrEmaSlow    = 200           (era 100)
+#    InpComment        = MAXMINR260D   (solo commento dell'ordine)
+#    InpMagic          = 795304||795304||50||795354||Y
+#  Le prime cinque righe sono UN SOLO MECCANISMO (il cancello di
+#  direzione), non cinque variabili: con InpUseCorrelation=false le altre
+#  quattro sono inerti (CorrBias r.700 esce subito con 0). Il confronto
+#  R260a -> R260d e' a UNA variabile: filtro spento / filtro acceso.
+#
+# =====================================================================
+#  1. LA DOMANDA E IL MECCANISMO (CACCIA_MECCANISMI_SEI_FAMIGLIE_
+#     2026-09-26.md par. 4, P3)
+# =====================================================================
+#  "La rottura rialzista del box asiatico dell'oro paga quando l'oro e'
+#  in trend rialzista, e perde quando compra contro un mercato che
+#  scende." Fonte: TradingView "Asia Range Breakout Scalper (GC/Gold)"
+#  (bradenstrock, PUB;8ee9baafc8754294a7b1d9094a870c82, 01/03/2026) --
+#  si porta SOLO la regola di direzione (il suo tester e' viziato da
+#  calc_on_every_tick, par. 4 del dossier). E la stessa scelta,
+#  indipendente, di Code Base 77691 ("when gold trades below its 200 EMA,
+#  the EA simply stops buying").
+#
+#  IL CODICE, LETTO (ABTG_MaxMinNotte.mq5 HEAD 7d0da9f9, 918 righe):
+#   r.164-168  input InpUseCorrelation / InpCorrSymbol / InpCorrTF /
+#              InpCorrEmaFast / InpCorrEmaSlow: ESISTONO con questi nomi
+#              (anche controlla_prova.py lo verifica contro il sorgente).
+#   r.698-709  CorrBias(): iMA(InpCorrSymbol, InpCorrTF, Fast, EMA, CLOSE)
+#              e iMA(..., Slow, ...); CopyBuffer(h,0,1,1,...) = la BARRA
+#              CHIUSA a shift 1, nessun look-ahead; dir = +1 se fast >
+#              slow, -1 se <, 0 se uguali o se una lettura fallisce.
+#   r.341-343  bias +1 -> solo long; -1 -> solo short; 0 -> ENTRAMBI.
+#  EMA a periodo 1: alfa = 2/(1+1) = 1, quindi EMA(1) = la chiusura
+#  stessa [VERIFICATO in algebra; che l'iMA di MT5 accetti periodo 1 e
+#  restituisca la chiusura: INFERITO, lo prova T3/S0]. Quindi:
+#     "piazzo il BuyStop solo se la chiusura H4 dell'ultima barra chiusa
+#      di XAUUSD sta SOPRA la sua EMA200 H4."
+#  Nei giorni con chiusura < EMA200 il bias e' -1: il lato long NON si
+#  piazza, e il lato short e' spento dal pin InpAllowShort=false -> niente
+#  ordini quel giorno. E' esattamente il cancello cercato.
+#  InpCorrSymbol = XAUUSD = il simbolo del grafico: lo storico H4 c'e'
+#  per forza (non e' il caso SPXUSD di R261a T3).
+#
+#  IL FAIL-OPEN, DETTO PRIMA: se iMA o CopyBuffer falliscono (handle
+#  creato e letto nello STESSO tick, r.701-706, indicatore non ancora
+#  calcolato), CorrBias torna 0 e il long PASSA. Un filtro che non
+#  morde non si vede come errore: si vede come R260d == R260a. Da qui T3.
+#
+# =====================================================================
+#  2. IL PRECEDENTE IN CASA, E IL CONTRO-PRECEDENTE
+# =====================================================================
+#  (+) 770411, DAX short, stesso EA: il cancello S&P ha portato il PF da
+#      1,0-1,25 (corr OFF, ~100 trade, DD 6-9%) a 2,05 (corr ON, 41
+#      trade, DD 3,1%) -- REGISTRO_TEST r.661-672, valid_MaxMin_DAX_short
+#      _refine. n = 41: un precedente, non una misura di merito.
+#  (-) stesso registro, r.674: "la correlazione S&P NON salvava il
+#      breakout M5 (test Marco/Emiliano) ma QUI salva il night-box. Il
+#      filtro giusto dipende dalla strategia." E la lezione di casa dei
+#      filtri aggiunti: 0 successi su 5 (CACCIA_MECCANISMI par. 4 P3,
+#      punteggio). Il prior e' quindi NEUTRO, non favorevole.
+#
+# =====================================================================
+#  3. L'ATTESA, SCRITTA PRIMA DEI NUMERI
+# =====================================================================
+#  n: R260a attende ~250-370 posizioni long (R260c par. 6). Il filtro
+#  toglie i giorni con l'oro sotto la sua EMA200 H4. Sul 2020-2026 l'oro
+#  e' stato in maggioranza sopra (toro 2020, laterale 2021-2022, toro
+#  2023-2026), quota dei giorni tenuti [NON MISURATA], stima 55-75%
+#  [STIMA] -> n_d ~140-280 posizioni. Il dossier stimava 125-185
+#  ("dimezzate"). BANDA DICHIARATA: 125-280 posizioni. Il limite basso sta
+#  SOTTO 150: il merito puo' finire SOSPESO per n, il RISCHIO si legge lo
+#  stesso (Emendamento B).
+#
+#  STRUTTURA, e questa e' gratis: il filtro TOGLIE giornate e non ne
+#  AGGIUNGE; con solo long, un trade al giorno e flat alle 17:30, le
+#  giornate sono indipendenti. Quindi ogni chiusura di R260d deve esistere
+#  in R260a con la STESSA ora di chiusura e lo STESSO prezzo (S0); i
+#  lotti e i profitti possono differire (il saldo e' diverso). Le
+#  posizioni RIMOSSE = R260a meno R260d, e si leggono come insieme a se'.
+#
+#  IL PF -- CINQUE ESITI CHE SONO UNA PARTIZIONE (classe 178), valutati
+#  IN QUEST'ORDINE, dopo che T3 e S0 sono passati:
+#    HN "campione sottile": posizioni R260d < 150. Merito SOSPESO; si
+#        riportano PF tenute / PF rimosse come INDIZIO, senza verdetto.
+#    HQ "cancello quasi inerte": posizioni RIMOSSE < 50. Il filtro ha
+#        tolto troppo poco per dire qualcosa: R260d ~ R260a.
+#    H0 "niente edge nemmeno col cancello": R2 di R260 (R260c par. 7:
+#        PF >= 1,10 sulla finestra piena E su tutte e due le meta',
+#        taglio 2023.04.01) VIOLATO su R260d.
+#    HG "il trend dell'oro separa": R2 rispettato su R260d E PF delle
+#        posizioni RIMOSSE <= 0,90 E PF(R260d) >= PF(R260a) + 0,10.
+#    HR "il cancello taglia, non separa": R2 rispettato su R260d ma NON
+#        le due condizioni di HG (le rimosse non erano peggiori, o il
+#        guadagno di PF e' sotto 0,10).
+#  QUALE NUMERO PRODUCE L'ALTRA SPIEGAZIONE ("il filtro e' un sorteggio
+#  a caso delle giornate")? PF tenute ~ PF rimosse ~ PF(R260a), con
+#  rumore ~0,1-0,2 sulle ~100 rimosse [STIMA]. Se R260a esce in HPs
+#  (1,10-1,308), un sorteggio da' PF rimosse ~1,1-1,3 > 0,90: cade in HR,
+#  NON in HG. Se R260a esce ~1,0, un sorteggio da' R260d ~1,0: R2 violato,
+#  H0. Il falso HG sotto sorteggio richiede DUE code insieme (tenute in
+#  su di >= 0,10 e rimosse sotto 0,90): lo stimo 10-20% se il PF vero e'
+#  ~1,08 [STIMA a tavolino, non simulata], molto meno lontano da li'.
+#  Dichiarato, non nascosto.
+#  PREVISIONE MIA, SCRITTA ORA: HR. Motivo: l'oro 2020-2026 e' un toro
+#  lungo; le giornate sotto l'EMA200 H4 sono poche e in parte sono i
+#  rimbalzi dei minimi, dove la rottura al rialzo puo' pagare lo stesso.
+#
+#  IL RISCHIO (a qualunque n, Emendamento B): il punto del cancello NON e'
+#  il PF, e' il DD. 770402 e' bocciata per rischio alla taglia 2,00%
+#  (R103 DD 5,32% a 0,5% -> 19,6-21,3% a 2,00%, R260c par. 8). Soglia S3
+#  di R193b tradotta a 0,5%: DD <= 2,00% (lineare) / 2,06%
+#  (moltiplicativo). Scritto prima: che il solo long filtrato ci stia lo
+#  ritengo IMPROBABILE, ma e' l'unico numero di questo file che puo'
+#  cambiare lo stato della sedia, e si legge a qualunque n.
+#
+# =====================================================================
+#  4. I CANCELLI, CONGELATI PRIMA. Si citano come T<n> [R260d].
+# =====================================================================
+#  Valgono R0, R1 (G0 su R260c), G1, L0, R2, R3, R4 della testa R260c.
+#  In piu':
+#  T3  FILTRO NON ESEGUITO (come R261a T3): se R260d ha Trades IDENTICI a
+#      R260a (e PF/Profit identici), il filtro NON HA MORSO (fail-open di
+#      CorrBias, par. 1) -> cella NON ESEGUITA, non "il filtro non serve".
+#      Si indaga (iMA a periodo 1? handle nello stesso tick?) prima di
+#      qualunque lettura.
+#  S0  SOTTOINSIEME: ogni chiusura del per-trade di R260d (close_time,
+#      price, deal_type) esiste nel per-trade di R260a. Una sola che non
+#      c'e' -> e' cambiato qualcos'altro oltre al filtro -> NULLO.
+#      (Eccezione ammessa e da contare: un deal di parziale presente in
+#      uno e non nell'altro per l'arrotondamento del lotto, NormVol; a
+#      deposito 100000 e 0,5% non atteso.)
+#  T5  ORDINE: R260d si legge SOLO dopo R260a (e' la sua ancora) e dopo
+#      il G0 di R260c. Con G0 ROSSO, R260d si scrive ma non si legge
+#      contro R103, come R260a.
+#
+# =====================================================================
+#  5. MAGIC, COSTO, BUCHI
+# =====================================================================
+#  MAGIC: 795304/795354 VERGINI il 27/09/2026 (grep -rIE su /home/user e
+#  git grep su tutti i refs/heads e refs/remotes: nel blocco 7953xx
+#  compaiono solo 795301-795303 e 795351-795353 di R260a/b/c).
+#  COSTO: 2 gemelle x (moncone 1 giorno + 6,5 anni). Base r151a ~20,4 s
+#  per finestra piena (banco VPS; PC [NON MISURATO]) -> ~41 s di tester
+#  + avvio/compilazione: 1-3 MINUTI [STIMA]. Accodato DOPO R260a.
+#  BUCHI:
+#  - Riscaldamento dell'EMA200 H4: 200 barre H4 = ~33 giorni di borsa
+#    prima del 2019.12.30; quante barre di storia prima dell'inizio il
+#    tester fornisca al cancello: [NON VERIFICATO]. Le prime settimane
+#    del 2020 possono avere un'EMA approssimata.
+#  - La quota di giornate tenute dal filtro: [NON MISURATA] (la si legge
+#    come n_d / n_a).
+#  - Un fail-open PARZIALE (qualche giorno con lettura fallita) non si
+#    vede da T3: R260d resterebbe un sottoinsieme, solo piu' grande. Per
+#    scoprirlo servirebbe ricalcolare la EMA200 H4 BCM giorno per giorno:
+#    [NON FATTO].
+#  - Tutti i buchi di R260 (testa R260c par. 11): OHLC, spread in memoria
+#    (classe 394), storico M1 oro sul PC, orologio dell'oro [INFERITO].
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  50503392 (che ha la sedia viva 770402), 50504263, 10105439 (REALE),
+#  541452707 (FTMO, dove 770402 e' in campo). Nessuna riga di lancio qui.
+#  Non tocca preset, EA, sedie, conti, taglie.
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H2
+@DAQUANDO   2019.12.30
+@FINOA      2026.06.30
+@FRAZIONEIS 0.0005
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=true||true||0||true||N
+InpCorrSymbol=XAUUSD
+InpCorrTF=16388||16388||0||16388||N
+InpCorrEmaFast=1||1||0||1||N
+InpCorrEmaSlow=200||200||0||200||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR260D
+InpMagic=795304||795304||50||795354||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
