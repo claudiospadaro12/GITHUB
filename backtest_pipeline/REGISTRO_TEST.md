@@ -4482,7 +4482,7 @@ Ogni numero della caccia citato come **[SONDA OANDA, screening]** o **[DICHIARAT
 
 | file | base (PASS) | manopola · celle | magic | ancora G0 | attesa scritta PRIMA |
 |---|---|---|---|---|---|
-| `R267a_news_oro_770402.txt` (TESTA) | R260c | `InpNewsFlatten` 0/1 con news USD ON · 2 | 796701 | cella 0 ≈ R103 (±1 giornata) | 🔴 **NON LANCIARE** (sotto). Poi: blocca ≈ inerte (1 evento USD alle 06 UTC in 5 anni); chiude → partizione LEVA/TAGLIA/NULLA, previsione **TAGLIA** |
+| `R267a_news_oro_770402.txt` (TESTA) | R260c | `InpNewsFlatten` 0/1 con news USD ON · 2 | 796701 | cella 0 ≈ R103 (±1 giornata) | 🔴 **NON LANCIARE** (sotto). Poi: blocca ≈ inerte (1 evento USD alle 06 UTC in 5 anni); chiude → partizione LEVA/TAGLIA/NULLA, previsione ~~TAGLIA~~ **VERSO INCERTO** (✏️ emendata PRIMA dei numeri il 27/09: autopsia B.3 rifatto, ~1 stop su 7 vicino a un dato USD; e il calendario ha 3 difetti, §6-B/C del file) |
 | `R267b_minbox_oro_770402.txt` | R260c | `InpMinBoxPts` 0/650/1300/1950/2600 · 5 | 796702 | cella 0 = R103 (1.308 / 693 / 5.32%) | deal 693 / 450-620 / 250-400 / 180-300 / 140-260; il filtro in punti **seleziona l'epoca**; lettura dentro il 2024-26 (H_GIORNO / H_EPOCA / H_ROVESCIO a ±0,30 di PF), previsione **H_EPOCA** |
 | `R267c_short_DOW_uscita90_1430.txt` | R255a | `InpCloseHour` 16/17 (`:00`) · 2 | 796711 | R255a (esterna) + sottoinsieme | tocca anche gli ingressi (pendenti cancellati); proxy dal long: 16:00 sposta l'uscita del 43-52% delle posizioni, 17:00 del 21-27%; previsione DENTRO (17:00) / CORSA (16:00); merito sospeso |
 | `R267d_short_DOW_volumi_1430.txt` | R255a | `InpVolMult` 0-2,0 passo 0,5, filtro ON · 5 | 796712 | cella 0,0 = R255a (inerte per costruzione) | H_R84 r∈[0,25;0,50] contro H_DILUITO r≥0,70 (media col pre-mercato); PF < 1 ovunque; merito sospeso |
@@ -4598,7 +4598,7 @@ Banco: **PC di backtest `DESKTOP-H4D7CAJ`, mai il VPS**, deposito 100000. Magic:
 | file | domanda | modello · finestra | asse | magic | attesa scritta PRIMA | costo |
 |---|---|---|---|---|---|---|
 | `prove/R268a_oro_long_TICK_testa.txt` (TESTA) | il DD a TICK del solo long | tick · 2024.07.05→2026.06.30, moncone 1 g (gamba dal 2024.07.06) | magic x2 | 797201/797251 | ~92 pos. (84-100), merito SOSPESO; **r = DD_tick/DD_OHLC**: H-CONS <0,90 · **H-AFF 0,90-1,10 (previsione)** · H-CORR 1,10-1,50 · H-NO >1,50; K1 (18 $ = 40 x 0,45): mediana 23,3-28,0 $ → VERDE, quota sotto frontiera 21-40% | 1-4 min [STIMA] |
-| `prove/R268b_oro_long_OHLC_stessa_finestra_G0.txt` | G0 del banco + termine OHLC dello scarto | OHLC · idem | magic x2 | 797202/797252 | = per-trade 795301 dal 2024.07.06: **119 deal / 92 pos. ESATTI**, struttura identica; Profit 5.516-6.141, PF 1,48-1,56, DD chiuso 1,88-2,09% [DERIVATI, lotti ~7% piu' piccoli] | ~1 min |
+| `prove/R268b_oro_long_OHLC_stessa_finestra_G0.txt` | G0 del banco + termine OHLC dello scarto | OHLC · idem | magic x2 | 797202/797252 | = per-trade 795301 dal 2024.07.06: **119 deal / 92 pos. ESATTI**, struttura identica; Profit 5.480-6.145, PF 1,481-1,561, DD chiuso 1,877-2,093% [STIMA Monte Carlo senza seme, unione con la riproduzione del cancello; lotti ~7% piu' piccoli; NON e' un cancello] | ~1 min |
 | `prove/R268c_oro_long_TICK_asse_rischio.txt` | curva DD(taglia) a tick | tick · idem | `InpRiskPercent` 0,5/1,0/1,5/2,0 | 797203 | Trades identici sulle 4 celle; DD monotono fra le due formule; **parte SOLO se il job R268a <= 5 min** | 2-8 min [STIMA] |
 | `prove/R268d_oro_long_OHLC_22anni.txt` | il solo long sulla finestra del CONTRATTO (22 anni, R100) | OHLC · 2004.06.11→2026.06.30 (gamba dal 2004.06.20) | magic x2 | 797204/797254 | ~946 pos. (tetto 1.234); Equity DD: D1 <=4,52 · **D2 4,52-10,0 (previsione, ~8,5)** · D3 >10,0; G0d = tratto 2020-26 identico a 795301 (375 deal) | 1-2 min + scarico M1 [NON MISURATO] |
 | `prove/R269a_oro_770402_long_close13.txt` (TESTA oro) | flat alle **13:00** BCM (prima di New York) sul long | OHLC · 2020-2026 (= R260a) | magic x2 | 797211/797261 | 279 pos. e **306 deal ESATTI**; 64 deal prima delle 13:00 identici a 795301; PF: P1 >=1,45 · **P2 1,25-1,45 (previsione)** · P3 <1,25; DD: **Q1 <=3,39 (previsione)** · Q2 · Q3 >4,52 | ~1 min |
@@ -4621,3 +4621,15 @@ Banco: **PC di backtest `DESKTOP-H4D7CAJ`, mai il VPS**, deposito 100000. Magic:
   [INFERITO]; generico = Short_Ott sul LONG (letto, non misurato); R269c senza G0 dentro il file (ancora = T1/T2 del 27/09 + classe 166).
 - 💰 **Costo totale R268 + R269**: ~8-20 min di tester + avvio per job (9 job con R268c), piu' sincronizzazione tick oro e scarico M1 [NON MISURATI];
   ordine: R268b → R268a → (R268c se il costo lo consente) → R268d → R269a → R269b → R269c. Tetto dichiarato 60 min.
+- 🚦 **Cancello strato 2 (27/09): FAIL corretto prima dei numeri, pin INVARIATI** (solo testo): (1) R269a r.28 diceva *"NON e' la news"*
+  citando il B.3 per giorno, ritirato dal cancello dell'autopsia (`ed0a7a70`, classe 862): ora ~1 stop su 7 e' del dato, e il flat alle 13:00
+  misura la sessione USA **stop + news insieme**; (2) R269a par. 2 *"alle 13:00 il dato e' sempre dopo"*: falso nelle settimane di
+  **sfasamento dell'ora legale USA/UE** sul vecchio orologio — **58 eventi USD High 2021-2024 alle 12:30 BCM**, fra cui 4 NFP di novembre
+  (classe 863); (3) R268b/testa: le bande di Profit/PF/DD sono **estremi di un Monte Carlo senza seme**, riprodotti un po' piu' larghi
+  (Profit min 5.480 contro 5.516): [STIMA], unione scritta (classe 864); (4) R268c/testa: il **tetto** `(f/0,5) x d` della curva DD(taglia) non
+  e' un teorema (contro-esempio -1R +1R -1R: 2,0392% contro 2,0100%): [INDICATIVO] (classe 864); (5) G0d scritto `>= 2020.01.03` nella testa e
+  `>= 2020.01.01` in R268d: allineato a **2020.01.01**; (6) R269c: il -1h sposta anche la barra H1 letta dal filtro S&P (`CorrBias` r.698-709),
+  dichiarato. Perimetro allargato su richiesta: **R267a** §3 (previsione **VERSO INCERTO**) e §6-B/C (buco USD 16/11-17/12/2024, USD quasi
+  vuoto dopo il 2025.07.03, **UTC-1 dal 2025.03.30**). Ricontati dal cancello e VERI: 119/92 e la posizione 1356 nel moncone; floor 0 e 8;
+  64/50 deal prima delle 13:00, 306/257, 242 vive, 161 timestop +22.882, 41/50 stop dopo le 13:00, 15/9 rimasti; K1 23,32/27,98 $ e quota
+  [19;37]; bootstrap sd 0,193/0,198/0,290; estate/inverno DAX 45/0,818 e 27/1,030; 81/102 dal 2024.09.26; magic 7972xx vergini.

@@ -192,6 +192,21 @@
 #    Previsione mia: TAGLIA. Motivo: il PF di R103 sta nei runner (TP2 a
 #    2,5R, target EMA200, TP finale 4R) e i runner sono vivi a meta'
 #    giornata. [NESSUNA MISURA DI CASA sul verso: e' una previsione.]
+#    !! EMENDATA PRIMA DEI NUMERI (27/09, cancello di R268/R269 dopo il
+#    cancello dell'autopsia, commit ed0a7a70, classe 862; il file NON e'
+#    girato): ORA UNA MISURA DI CASA C'E'. report/AUTOPSIA_PERSI_
+#    2026-09-27.md B.3 rifatto a grana di minuti sul per-trade di R260a/b:
+#    24 stop pieni su 88 chiudono entro 30' da un dato USD High contro
+#    12,5 attesi per caso (P 0,003), 12 entro 5' contro 4,8; placebo con
+#    l'orologio spostato -> 0 e 0. Cioe' ~12 stop in eccesso, ~1 stop su
+#    7 e' del dato. E le posizioni vive attraverso un dato guadagnano
+#    comunque (PF 1,29 long / 1,31 short sulle chiusure >= 13:00, prima
+#    stesura dell'autopsia). PREVISIONE RISCRITTA: VERSO INCERTO. La
+#    cella 1 toglie ~12 stop (~-1.160 EUR/lotto l'uno) e INSIEME una
+#    parte dei timestop vinti: TAGLIA e LEVA restano entrambe aperte, la
+#    NULLA non si esclude. Un |dPF| < 0,05 fra le celle si legge "i due
+#    effetti si compensano", MAI "la news non conta". La PARTIZIONE
+#    LEVA / TAGLIA / NULLA e le sue soglie NON cambiano.
 #  PRIOR DI UN'ALTRA MISURA, SCRITTO PERCHE' CONTRADDICE UN FILE VICINO:
 #    la sonda della caccia (par. 2.3) [SONDA OANDA, screening, 2015-2020,
 #    uscita semplificata, n piccoli] trova sul LONG CONTRO il trend D1
@@ -259,11 +274,29 @@
 #          (piano B, punti 1 e 3) elenca due varianti VICINE -- il CSV
 #          nella cartella Files del TERMINALE + test singolo; un solo
 #          agente --, MAI misurate. [NON VERIFICATA]
-#  B (BUCO, la copertura). Il file news copre 2021.01.04 -> 2025.12.19;
-#    la finestra di R103 e' 2020.01.01 -> 2026.06.30. Sui ~18,5 mesi
-#    fuori (tutto il 2020 e 2025.12.20-2026.06.30), cioe' ~24% dei 78
-#    mesi, la cella 1 opera IDENTICA alla cella 0: l'effetto misurato
-#    e' DILUITO verso zero. Accettato per tenere il G0 contro R103.
+#  B (BUCO, la copertura). CORRETTO DAL CANCELLO (27/09): qui c'era
+#    scritto "il file news copre 2021.01.04 -> 2025.12.19". FALSO per
+#    l'USD, e verificato riga per riga su mql5/Files/abtg_news_2021_
+#    2025_UTC.csv:
+#     (B1) BUCO 16/11 -> 17/12/2024: ZERO eventi USD (l'ultimo e' il
+#          2024.11.15 13:30, il successivo il Fed del 2024.12.18 19:00;
+#          mancano NFP del 06/12 e CPI dell'11/12). In tutte le valute
+#          sette eventi in 33 giorni (EUR, GBP, NZD, AUD, CAD, CHF).
+#     (B2) QUASI VUOTO DOPO IL 2025.07.03: dal 2025.07.04 al 2025.12.19
+#          solo 4 eventi USD, tutti decisioni Fed (07.30, 09.17, 10.29,
+#          12.10), niente NFP ne' CPI. La copertura USD VERA finisce il
+#          2025.07.03.
+#    La finestra di R103 e' 2020.01.01 -> 2026.06.30. Fuori copertura
+#    USD: tutto il 2020 (12 mesi) + 2025.07.04 -> 2026.06.30 (~12 mesi)
+#    + il buco B1 (~1 mese) = ~25 mesi su 78, cioe' ~32% (la prima
+#    stesura diceva ~24%). Li' la cella 1 opera IDENTICA alla cella 0:
+#    l'effetto misurato e' DILUITO verso zero, piu' di quanto scritto.
+#    Anche il "62,1% dei feriali" del par. 3 ha al denominatore i feriali
+#    fino al 2025.12.19, compresi quelli del tratto vuoto: sul tratto
+#    coperto la quota e' piu' alta [NON RICONTATA].
+#    Accettato per tenere il G0 contro R103, MA DICHIARATO: chi sblocca
+#    il file (par. 6-A) sceglie se girarlo cosi' o su un calendario
+#    riparato (e allora e' un file nuovo, rigenerato).
 #  C (BUCO, l'orologio). Lo shift e' UNO per tutta la corsa (+60). Il
 #    feed forex BCM era ora italiana - 1 fino a dic. 2024 e UTC+1 fisso
 #    dopo (OROLOGIO_BCM_2026-09-24.md; per l'oro [INFERITO] = forex):
@@ -271,6 +304,19 @@
 #    2021-2024 (~20 dei ~60 mesi coperti). Li' la finestra [ev-30, ev+30]
 #    cade a [ev+30, ev+90]: la chiusura avviene DOPO il dato, non prima.
 #    0 sarebbe sbagliato su ~40 mesi: +60 e' il minore dei due errori.
+#    (C2) AGGIUNTO DAL CANCELLO (27/09): IL FILE NON E' UTC DAL
+#    2025.03.30, E' UTC-1. Ancore: NFP 2025.03.07 alle 13:30 (UTC giusto,
+#    8:30 EST) ma NFP 2025.04.04, 2025.06.06 e 2025.07.03 alle 11:30,
+#    CPI 2025.06.11 alle 11:30 (8:30 EDT = 12:30 UTC); Crude Oil
+#    Inventories alle 13:30 invece di 14:30. Con lo shift +60 quegli
+#    eventi arrivano all'ora UTC, cioe' UN'ORA PRIMA dell'ora server
+#    (UTC+1): la finestra [ev-30, ev+30] cade a [dato-90', dato-30'] --
+#    la cella 1 chiude UN'ORA PRIMA del dato e il blocco e' gia' finito
+#    quando il dato esce. Tratto toccato: 2025.03.30 -> 2025.07.03 (~3
+#    mesi, gli ultimi coperti). L'autopsia lo corregge nello script
+#    (CORREZIONI_NEWS, +60' su 136 righe); l'EA con un solo shift NON
+#    puo'. Il calendario si controlla con DUE ANCORE PER ANNO prima di
+#    usarlo (classe 862, punto 2).
 #  D (COSTO APERTO). InNewsBlackout (r.810-821) scorre TUTTI i 2971
 #    eventi a OGNI tick, con uno StringFind per evento: su ~13 milioni di
 #    tick OHLC a passata sono ~10^10 iterazioni. Il tempo per passata e'

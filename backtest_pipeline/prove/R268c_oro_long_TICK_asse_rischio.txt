@@ -41,7 +41,12 @@
 #    l'ingresso ne' l'uscita. Atteso ~119 deal (84-100 posizioni, testa
 #    par. 6.1). PF quasi identico fra le celle.
 #    DD MONOTONO crescente; d = DD della cella 0,5 (== R268a, G1c):
-#      DD(f) in [ 1-(1-d)^(f/0,5) ; (f/0,5) x d ]  [DERIVATO], f = taglia.
+#      DD(f) in [ 1-(1-d)^(f/0,5) ; (f/0,5) x d ], f = taglia: il
+#      PAVIMENTO e' [DERIVATO] (Bernoulli, regge anche con vincite dentro
+#      la finestra del DD); il TETTO e' [INDICATIVO] -- vale solo per sole
+#      perdite. Contro-esempio del cancello (27/09): -1R, +1R, -1R da'
+#      0,5025% a 0,5 e 2,0392% a 2,0, sopra 4 x 0,5025 = 2,0100%. Un DD sopra
+#      il tetto NON annulla niente: si scrive di quanto.
 #    Esempio col DD a saldo chiuso atteso ~2% (testa par. 6.3): 1,0%
 #    3,96-4,00% ; 1,5% 5,88-6,00% ; 2,0% 7,76-8,00%. L'Equity DD del CSV
 #    e' >= di quello: la banda vera si scrive con il d MISURATO.

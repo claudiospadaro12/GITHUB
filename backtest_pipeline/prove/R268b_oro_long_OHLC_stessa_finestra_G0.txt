@@ -32,11 +32,16 @@
 #    2024.07.10 14:55:40, ultima 2026.06.26 17:30:00.
 #    I LOTTI sono ~7% piu' piccoli di R260a (saldo di partenza 100000
 #    contro 107.794,67 di R260a a quella data): i soldi NON coincidono
-#    con R260a, la struttura si'. Bande [DERIVATE, 3000 estrazioni sul
-#    punto di arrotondamento del lotto]:
-#      Profit CSV 5.515,77 -> 6.140,61 EUR
-#      PF in posizioni 1,4836 -> 1,5604
-#      DD a saldo chiuso con k (1,8113) 1,8788 -> 2,0879 %
+#    con R260a, la struttura si'. Bande [STIMA Monte Carlo, estremi di
+#    3000 estrazioni sul punto di arrotondamento del lotto, SENZA seme;
+#    UNIONE con la riproduzione indipendente del cancello del 27/09,
+#    testa par. 6.3]:
+#      Profit CSV 5.480 -> 6.145 EUR   (prima stesura 5.515,77 -> 6.140,61)
+#      PF in posizioni 1,481 -> 1,561  (prima stesura 1,4836 -> 1,5604)
+#      DD a saldo chiuso con k (1,8113) 1,877 -> 2,093 %
+#                                      (prima stesura 1,8788 -> 2,0879)
+#    NON sono un cancello: decide G0 (struttura). Un numero appena fuori
+#    con G0 VERDE = bordo del Monte Carlo, si scrive e basta.
 #      Equity DD % del CSV: [NON DERIVABILE] (flottante), >= saldo chiuso.
 #
 #  CANCELLI (testa par. 7): R0, E0 (CSV con "_ohlc"; E0 contro R268a),

@@ -25,8 +25,16 @@
 #  e il 54% (short, 32/59) degli STOP PIENI chiudono fra le 13:30 e le
 #  15:29 BCM (sessione USA), una fetta che e' il 19% della vita del
 #  trade; gli stop sono il 70% / 82% della perdita lorda da un 20% / 25%
-#  delle posizioni. NON e' la news (contro-esempio B.3: PF 1,18 con news
-#  contro 1,20 senza, long). Manopola che ESISTE: InpCloseHour/
+#  delle posizioni. LA NEWS C'E', IN UNA PARTE (corretto il 27/09 dal
+#  cancello dell'autopsia, commit ed0a7a70, classe 862: la prima stesura
+#  qui diceva "NON e' la news" citando il B.3 per GIORNO, PF 1,18 contro
+#  1,20, che e' stato RITIRATO): alla grana dei minuti 24 stop pieni su
+#  88 (long+short, tratti coperti 2021-2025) chiudono entro 30' da un
+#  dato USD High contro 12,5 attesi per caso (P 0,003), 12 entro 5'
+#  contro 4,8; placebo UTC+2 -> 0 e 0. Quindi ~1 stop su 7 e' del dato,
+#  ~3/4 e' sessione. Il flat alle 13:00 resta la misura giusta della
+#  SESSIONE USA (stop + news INSIEME): non separa le due cause, e non
+#  lo promette. Manopola che ESISTE: InpCloseHour/
 #  InpCloseMin (r.130-131; EndOfDay r.254 e r.487-491: al primo tick con
 #  ora >= InpCloseHour:InpCloseMin cancella i pendenti e chiude la
 #  posizione). Mai messa a 13 su questa sedia.
@@ -43,7 +51,20 @@
 #       GENERATO della barra 13:30, cioe' all'apertura della barra: un
 #       prezzo pre-dato che il tick reale non darebbe -> numero
 #       FAVOREVOLE per costruzione del modello. Alle 13:00 il dato e'
-#       sempre dopo (13:30 o 14:30 BCM a seconda di orologio e stagione).
+#       QUASI sempre dopo (13:30 o 14:30 BCM a seconda di orologio e
+#       stagione). ECCEZIONE, trovata dal cancello (27/09): sul VECCHIO
+#       orologio (2020-2024) nelle settimane di SFASAMENTO dell'ora legale
+#       (USA gia' in EDT dalla seconda domenica di marzo, UE ancora in
+#       solare fino all'ultima; e dall'ultima domenica di ottobre alla
+#       prima di novembre) il dato delle 8:30 ET cade alle 12:30 BCM,
+#       PRIMA del flat: 58 eventi USD High 2021-2024 nel file news
+#       (contati per data contro i due calendari; il 2020 non e' nel
+#       file), fra cui i 4 NFP di novembre 2021.11.05, 2022.11.04,
+#       2023.11.03, 2024.11.01 (12:30 UTC = 12:30 BCM). Sul NUOVO orologio (UTC+1
+#       fisso) lo sfasamento di marzo da' 13:30: dopo. ~3-4 settimane
+#       l'anno per 5 anni: il flat alle 13:00 NON toglie quei dati, e si
+#       dichiara come buco (par. 7). Negli stessi giorni la 13:30 del
+#       punto (a) non e' il minuto del dato.
 #   (b) nel minuto 13:30 R260a ha 9 deal long e 2 short, nel minuto
 #       13:00 ZERO su tutti e due i lati: con le 13:00 il numero di deal
 #       atteso e' ESATTO (par. 4), con le 13:30 no.
@@ -143,7 +164,9 @@
 #  passata lunga, ~1 minuto di orologio per job. R269a ~1 min, R269b
 #  ~1 min.
 #
-#  7. BUCHI: OHLC M1 = DD limite inferiore e uscita delle 13:00 al primo
+#  7. BUCHI: le settimane di sfasamento dell'ora legale USA/UE sul
+#  vecchio orologio, dove il dato delle 8:30 ET cade alle 12:30 BCM,
+#  prima del flat (par. 2 (a)). OHLC M1 = DD limite inferiore e uscita delle 13:00 al primo
 #  tick generato della barra (niente slippage); la stessa domanda a TICK
 #  si puo' fare solo sul tratto 2024.07 -> (R268, P0-TICK) e NON e' qui;
 #  il flat alle 13:30 (sul dato) NON e' misurato (una variabile per

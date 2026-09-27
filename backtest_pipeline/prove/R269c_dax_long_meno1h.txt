@@ -141,6 +141,13 @@
 #  merito sospeso (n ~72); il costo 40x in pre-mercato (spread del DAX
 #  alle 07:00 BCM) [NON MISURATO] (R246a par. 10); la settimana di
 #  disallineamento UE/USA dell'ora legale (il filtro S&P) [NON MISURATA].
+#  Il -1h sposta ANCHE la lettura del filtro S&P: CorrBias() (r.698-709)
+#  legge le EMA 14/100 H1 di SPXUSD sulla barra CHIUSA (shift 1) al
+#  momento del piazzamento, cioe' la barra 05:00-06:00 invece della
+#  06:00-07:00 (letto nel sorgente dal cancello, 27/09). E' parte della
+#  stessa variabile (l'orologio, come in R246j), NON una seconda: ma se
+#  il PF d'estate si muove, il filtro spostato e' una causa concorrente
+#  per nome, e si guarda quante giornate cambiano di permesso.
 # =====================================================================
 @SIMBOLO    D30EUR
 @PERIODO    M15

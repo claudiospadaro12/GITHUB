@@ -266,7 +266,7 @@
 #  mentre R260a al 2024.07.06 aveva 107.794,67 EUR (100000 + somma dei
 #  net meno k x volumi prima di quella data, k 1,8113): i LOTTI di R268b
 #  sono ~7% piu' piccoli, quindi i SOLDI non coincidono con R260a -- la
-#  STRUTTURA si'. Simulazione [DERIVATA]: stesso insieme di deal, lotto
+#  STRUTTURA si'. Simulazione [STIMA Monte Carlo]: stesso insieme di deal, lotto
 #  ricalcolato col saldo nuovo (LotByRisk r.730-758: rischio = saldo x
 #  0,5%, floor al passo 0,01; parziali con NormVol r.761-768 = floor),
 #  net per lotto di ogni deal preso da R260a; incertezza = dove cadeva
@@ -276,6 +276,16 @@
 #     PF in posizioni 1,4836 -> 1,5604
 #     DD saldo chiuso con k 1,8788 -> 2,0879 %
 #     lotti d'ingresso totali 21,54 -> 21,82
+#  !! (cancello strato 2, 27/09) Queste sono gli ESTREMI di 3000
+#  estrazioni SENZA seme e SENZA script in repo: non riproducibili alla
+#  cifra. Riproduzione indipendente del cancello (stesso metodo, split
+#  dei parziali floor(V'/2), seme 0..2999): Profit 5.480,30 -> 6.144,40,
+#  PF 1,4810 -> 1,5601, DD chiuso 1,8771 -> 2,0928 %, lotti 21,54 ->
+#  21,83. Banda da usare = l'UNIONE: Profit 5.480 -> 6.145, PF 1,481 ->
+#  1,561, DD 1,877 -> 2,093. Gli estremi di un Monte Carlo si muovono
+#  col seme: un numero a pochi decimi dal bordo NON e' un segnale. NON e'
+#  un cancello (decide G0, che e' di STRUTTURA): vedi "se un numero ne
+#  esce con i quattro pezzi VERDI" nel par. 7.
 #  (R260a sullo stesso tratto, ai SUOI lotti: net 6.267,47, PF 1,5171,
 #  DD saldo chiuso 1,9965% dal suo saldo 107.794,67 -- scritto per
 #  confronto, NON e' l'atteso.) L'Equity DD % del CSV di R268b NON e'
@@ -296,7 +306,9 @@
 #    MISURA dal file stesso (metodo di prove/COLLAUDO_ORO_770402_LONG_
 #    CRITERI.md par. 4: due deal d'uscita di pari volume a prezzi
 #    diversi, q = (net_1 - net_2) / ((p_1 - p_2) x vol x C)). Sul tratto
-#    di R260a: 11 ancore, q 0,8393 -> 0,9663, mediana 0,8767. Banda usata
+#    di R260a: 11 ancore, q 0,8393 -> 0,9663, mediana 0,8767 (ricontato
+#    dal cancello contando TUTTE le coppie delle posizioni a 3 deal: 12
+#    coppie, mediana 0,8854, minimo e massimo IDENTICI). Banda usata
 #    [q_basso ; q_alto] = [minimo ; massimo] delle ancore di R268a.
 #    CONTROPROVA NUMERICA (classe 846): R 500 EUR, V 0,22, q 0,8767 ->
 #    500 / (0,22 x 100 x 0,8767) = 25,9 $: plausibile per un box
@@ -324,6 +336,12 @@
 #  6.5 IL RISCHIO A TAGLIE DIVERSE (R268c, sua testa breve). Atteso:
 #    DD(f) fra 1-(1-d)^(f/0,5) e (f/0,5) x d, d = DD di R268a a 0,5%;
 #    monotono crescente; Trades IDENTICI sulle quattro celle (R193b B5).
+#    !! Il PAVIMENTO e' un teorema (Bernoulli, vale anche con vincite
+#    dentro la finestra del DD). Il TETTO NO: vale per sole perdite; con
+#    una vincita fra due perdite si supera. Contro-esempio del cancello:
+#    -1R, +1R, -1R -> 0,5025% a 0,5 e 2,0392% a 2,0 contro 4 x 0,5025 =
+#    2,0100% (con +0,5R in mezzo invece regge: 2,9996 contro 3,0000). Il
+#    tetto e' [INDICATIVO], non [DERIVATO], e NON decide.
 #
 #  6.6 I 22 ANNI (R268d, sua testa breve): quattro ipotesi scritte li'.
 #
@@ -378,7 +396,11 @@
 #        (d) deposito o rischio non arrivati (G0-LOTTO lo separa).
 #  G0d IL TRATTO 2020-2026 DI R268d = R260a? (gratis, stessa geometria,
 #      stessi pin): per-trade 797204 ristretto alle chiusure >=
-#      2020.01.03 contro 795301 intero: 375 righe contro 375, abbinate per
+#      2020.01.01 (inizio dell'OOS di R260a; la prima chiusura di 795301
+#      e' il 2020.01.03, quindi una chiusura di R268d il 01-02/01/2020 e'
+#      una DIVERGENZA da vedere, non da tagliare -- allineato a R268d
+#      par. 4 dal cancello del 27/09) contro 795301 intero: 375 righe
+#      contro 375, abbinate per
 #      (close_time, price), deal_type uguale, DIVERSE 0 -> VERDE-STRUTTURA
 #      (i soldi NON si confrontano: il saldo al 2020 di R268d e' un altro).
 #      ROSSO -> R268d NON si legge come "la stessa sedia sui 22 anni".

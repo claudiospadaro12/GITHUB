@@ -35754,3 +35754,25 @@ flag vero su piu' di meta' del campione si dichiara "non separa"; (2) prima di u
 fra eventi consecutivi della valuta: sul 2021-2024 il massimo normale e' 6 giorni) e si controllano due ANCORE per anno
 (NFP/CPI 8:30 ET = 12:30 UTC d'estate, 13:30 d'inverno) — un file che si chiama `_UTC` non e' UTC finche' le ancore non tornano;
 (3) un contro-esempio si prova con il suo PLACEBO (orologio spostato): se il segnale non si spegne, non misurava il meccanismo.
+
+### CLASSE 863 — l'ora di un dato USA detta "SEMPRE" rispetto a un'ora server europea, dimenticando le settimane di SFASAMENTO dell'ora legale USA/UE (27/09/2026, cancello strato 2 su R268/R269, parente della 862 e dell'orologio BCM del 24/09)
+- **Caso**: `prove/R269a_oro_770402_long_close13.txt` par. 2 (a) motivava il flat alle 13:00 con *"alle 13:00 il dato e' sempre dopo (13:30 o
+  14:30 BCM)"*. Sul VECCHIO orologio (server = Londra, fino a fine 2024) nelle settimane in cui gli USA sono gia' in EDT e l'UE ancora in solare
+  (seconda domenica di marzo -> ultima di marzo; ultima di ottobre -> prima di novembre) il dato delle 8:30 ET cade alle **12:30 BCM**, prima del
+  flat: contati per data sul file news, **58 eventi USD High 2021-2024**, fra cui **4 NFP di novembre** (2021.11.05, 2022.11.04, 2023.11.03,
+  2024.11.01). La scelta 13:00 resta difendibile; la frase "sempre" no, e il buco non era dichiarato.
+- **Regola**: ogni "sempre prima/dopo" fra un'ora USA e un'ora server si verifica sulle DUE settimane di sfasamento di marzo e sulla settimana di
+  fine ottobre, **per orologio** (vecchio IT-1 / nuovo UTC+1 fisso), contando gli eventi veri che cadono dall'altra parte. Il "sempre" diventa
+  "quasi sempre, eccetto N eventi" con il numero.
+
+### CLASSE 864 — una banda d'attesa etichettata [DERIVATA] che non lo e': gli ESTREMI di un Monte Carlo senza seme ne' script, e un TETTO algebrico che vale solo per sequenze di sole perdite (27/09/2026, cancello strato 2 su R268, parente della 861 e della 178)
+- **Caso 1**: `prove/R268b_*` e testa R268a par. 6.3: Profit 5.515,77-6.140,61, PF 1,4836-1,5604, DD 1,8788-2,0879% come "[DERIVATE, 3000
+  estrazioni]". Nessun seme, nessuno script in repo; la riproduzione del cancello (stesso metodo, semi 0..2999) da' **5.480-6.144 / 1,481-1,560
+  / 1,877-2,093**: un esito vero poteva cadere "fuori banda" di 35 EUR per il solo seme.
+- **Caso 2**: `prove/R268c_*` e testa par. 6.5: `DD(f) in [1-(1-d)^(f/0,5) ; (f/0,5) x d]` come "[DERIVATO]". Il pavimento e' Bernoulli e regge;
+  il tetto no: con una vincita fra due perdite dentro la finestra del DD si supera (-1R, +1R, -1R: 0,5025% a 0,5 -> **2,0392%** a 2,0 contro
+  4 x 0,5025 = **2,0100%**). E il primo contro-esempio che avevo scritto io (-1R, +0,5R, -1R) **non rompeva niente** (2,9996 contro 3,0000):
+  l'ho rifatto a macchina prima di consegnare, e la regola vale anche per chi la scrive.
+- **Regola**: (1) gli estremi di un Monte Carlo sono [STIMA], con seme e script o con la riproduzione scritta accanto, e non fanno da soglia; (2)
+  una disuguaglianza si prova con un contro-esempio che ha **un segno diverso dentro la finestra** (vincita fra perdite), non solo con la serie
+  monotona; se non regge, si etichetta [INDICATIVO] e si dice che non decide.
