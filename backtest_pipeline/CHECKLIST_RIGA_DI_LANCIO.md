@@ -35739,3 +35739,18 @@ riproducibili solo con codice non in repo), e tre arrotondamenti della tabella q
 Regola: un margine o una soglia "che regge" si arrotonda **per difetto** (o si scrive con la cifra in piu' che la separa), e
 si prova il valore scritto: deve reggere lui, non il suo vicino. Ogni numero di un referto che promette "la riga che rifa'
 tutto" esce da quella riga; quelli che non ne escono si elencano col comando che li produce.
+
+### CLASSE 862 — il CONTRO-ESEMPIO costruito a GRANA SBAGLIATA su un calendario non controllato: un'ipotesi che vive nei MINUTI ("lo stop lo fa il dato") bocciata con un flag per GIORNO vero sul 62% dei giorni, su un file che ha un buco contato come "senza news" e un tratto con l'orologio sbagliato (27/09/2026, cancello strato 2 sul referto AUTOPSIA PERSI, parente della 178 e della 476)
+Caso reale: `report/AUTOPSIA_PERSI_2026-09-27.md` B.3 @ `487d9dc8`. "PF nei giorni CON news USD 12-15 UTC 1,184 contro 1,201
+SENZA: l'ipotesi cade, e' la sessione non il calendario; R267a ha un contro-esempio che lo boccia". Tre difetti sotto un numero
+che si riproduceva esatto: (a) il flag era vero sul 62-63% delle posizioni e non vede uno stop che scatta nei minuti del dato;
+(b) `mql5/Files/abtg_news_2021_2025_UTC.csv` ha UN evento USD fra il 16/11 e il 17/12/2024 e tre dopo il 2025.07.03 — quei
+giorni finivano "senza news"; (c) dal 2025.03.30 il file e' UTC-1 (NFP 2025.06.06 e CPI 2025.07.03 alle 11:30, ISM 2025.04.01
+alle 13:00, FOMC 2025.06.18 alle 17:00), quindi i dati delle 8:30 ET cadevano fuori dalla finestra. Rifatto a grana di minuti con
+l'ora server: 24 stop su 88 entro 30' da un dato contro 12,5 attesi per caso (P 0,003), 12 entro 5' contro 4,8; con gli eventi a
+UTC+2 il segnale va a zero. Conclusione capovolta: la news spiega ~1 stop su 7, non zero.
+Regola: (1) il contro-esempio si costruisce alla GRANA dell'ipotesi (minuti se il meccanismo e' un evento, non il giorno), e un
+flag vero su piu' di meta' del campione si dichiara "non separa"; (2) prima di usare un calendario si stampano i BUCHI (distanza
+fra eventi consecutivi della valuta: sul 2021-2024 il massimo normale e' 6 giorni) e si controllano due ANCORE per anno
+(NFP/CPI 8:30 ET = 12:30 UTC d'estate, 13:30 d'inverno) — un file che si chiama `_UTC` non e' UTC finche' le ancore non tornano;
+(3) un contro-esempio si prova con il suo PLACEBO (orologio spostato): se il segnale non si spegne, non misurava il meccanismo.
