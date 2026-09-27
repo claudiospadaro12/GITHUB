@@ -2,7 +2,7 @@
 ; *** BOZZA -- NON SCHIERABILE -- NON CARICARE SU NESSUN TERMINALE ***
 ; ABTG_MaxMinNotte (= CLAU12_MaxMinNotte una volta rinominato) -- ORO
 ; SOLO LONG -- XAUUSD -- PRESET PER L'OROLOGIO **FTMO** (BCM + 2)
-; Scritto il 27/09/2026. ASCII PURO (regola 17/08). MARCATORE_BOZZA_ORO_LONG_FTMO_v1
+; Scritto il 27/09/2026. ASCII PURO (regola 17/08). MARCATORE_BOZZA_ORO_LONG_FTMO_v2
 ; ==========================================================================
 ; >>> SETTE COSE DA LEGGERE PRIMA DI TUTTO IL RESTO. Finche' UNA sola e'
 ;     aperta, questo file resta BOZZA_ e non va su nessun terminale:
@@ -36,12 +36,22 @@
 ; [!] 6. L'OROLOGIO DELL'ORO E' [INFERITO] = forex (nessuna ancora XAUUSD in
 ;        OROLOGIO_BCM_2026-09-24). Il +2 FTMO/BCM di oggi vale in ora estiva;
 ;        dal 25/10/2026 va rimisurato a terminale acceso (candela M1 vs UTC).
+;        QUESTO FILE SCADE IL 24/10/2026: BCM e' UTC+1 FISSO (OROLOGIO_BCM
+;        24/09), FTMO passa a UTC+2 -> il delta diventa +1, non resta +2
+;        (la nota "se cambiano insieme resta +2" del preset a due lati e'
+;        del 20/09, PRIMA di quella misura: superata). E la cella R260a
+;        d'inverno mescola due orologi (BCM UTC+0 fino a dic-2024, UTC+1
+;        dopo): quale ora FTMO replichi "il backtest" d'inverno NON e'
+;        deciso. Dopo il 24/10 questi orari NON si usano senza riscrittura.
 ; [!] 7. FTMO, cross-account: il piccolo 50503392 tiene ANCORA la 770402 a
 ;        DUE LATI su XAUUSD (CODA_01 27/09, profilo ORO, chart29) piu' altre
-;        tre sedie oro, e Tickmill ha un EA oro. Il supporto FTMO (25/09) dice
+;        tre sedie oro, Tickmill ha un EA oro e il manuale 50503635
+;        (C:\MT5_MANUALE) ha ScalperDirezionale XAUUSD M1 magic 779901
+;        (CODA_01 27/09). Il supporto FTMO (25/09) dice
 ;        che l'esposizione OPPOSTA su un altro conto, ANCHE DEMO, e' vietata.
 ;        Un long FTMO con uno short della 770402 del piccolo aperto insieme
-;        e' esattamente quel caso. Decisione di Claudio, non di questo file.
+;        e' esattamente quel caso. Decisione di Claudio, non di questo file,
+;        ed e' un BLOCCO: va presa PRIMA dell'attacco, non dopo.
 ; ==========================================================================
 ;
 ; STATO ........: BOZZA. Il prefisso BOZZA_ vuol dire: questo file NON va su
@@ -124,6 +134,14 @@
 ;   stesso"). R260a ha girato con InpUsaGuardian=true e nessun Guardian nel
 ;   tester: canale assente = fail-open (include v1.20 r.286), quindi nel backtest
 ;   il Guardian non ha tolto niente. In campo puo' solo RIFIUTARE ingressi.
+;   COME decide (letto nel Guardian in campo, pin d884f7e1 r.171-199 e
+;   r.444): somma il rischio ingresso->SL delle sole POSIZIONI aperte, in %
+;   dell'EQUITY, e alza la bandiera se la somma e' >= 4.00. L'EA legge solo
+;   la bandiera: il rischio del NUOVO ordine NON viene aggiunto.
+;   E SE RIFIUTA: TryPlace ritorna false (r.346), la fase resta MMP_WAIT e
+;   l'EA riprova a ogni tick; se il cap si libera prima delle 10:30 FTMO
+;   il buy stop parte IN RITARDO (ingresso che il banco non ha mai visto);
+;   dopo le 10:30 parte e viene cancellato dal cutoff al tick successivo.
 ;
 ; --------------------------------------------------------------------------
 ; 2) NON VERIFICATO / NON MISURATO (per nome)

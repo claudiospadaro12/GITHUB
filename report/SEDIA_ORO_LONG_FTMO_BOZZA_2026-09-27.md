@@ -22,7 +22,7 @@ DD equity 4,52% a 0,5%** su 2020-2026 OHLC M1, stress dei costi PASS. Per farne 
 **(d)** l'attacco a mano su un grafico XAUUSD nuovo · **(e)** l'aritmetica del Guardian con una sedia in piu' · **(f)** due
 risposte FTMO (una chiusa, una aperta). **Tre di queste sono firme di Claudio** (taglia, magic e compilazione su un conto
 vivo). Il preset in bozza: `mql5/Presets/FTMO/BOZZA_CLAU12_MaxMinNotte_ORO_LONG_FTMO.set`
-(SHA256 `d251ff15faeb62bc17b5835e41d13d06ed56d70c12077d020e78a99fad128956`, ASCII puro, 53 input nell'ordine del sorgente).
+(SHA256 `e5bcabd52df9e6eefbee176e7eda7d5a582186feadd263c111b974a0de727a81`, ASCII puro, 53 input nell'ordine del sorgente).
 
 ---
 
@@ -52,7 +52,7 @@ Get-Process terminal64 | Select Id, MainWindowTitle, Path | Format-List
 | (c) | **preset sul VPS** con una riga modello `RIGA_PRESET_SHORT_DOW` | riga nuova (cancello) + Claudio | no (ma la riga passa dal cancello) | ⚪ non scritta |
 | (d) | **attacco a mano** su grafico XAUUSD nuovo, profilo salvato | ✋ Claudio dentro MT5 | no | ⚪ |
 | (e) | **aritmetica Guardian** con una sedia in piu' a 0,5% | calcolo qui sotto | 🖊️ la **taglia** e' firma | 🟠 fatto a 0,5% di banco |
-| (f) | **FTMO**: posizioni opposte stesso conto (chiusa) · gap trading (aperta) · **cross-account con il piccolo** | risposta FTMO + decisione di Claudio | 🖊️ **si'** (il piccolo) | 🟠 vedi §⑧ |
+| (f) | **FTMO**: posizioni opposte stesso conto (chiusa) · gap trading (aperta) · **cross-account con il piccolo** | risposta FTMO + decisione di Claudio | 🖊️ **si'** (il piccolo) | 🔴 **BLOCCO prima dell'attacco** (§⑧.4) |
 
 **Nessuna taglia e' proposta in questo documento.** Il `0.50` nel preset e' il rischio di banco di R260a.
 
@@ -61,7 +61,7 @@ Get-Process terminal64 | Select Id, MainWindowTitle, Path | Format-List
 ## ③ (a) R268 e R268d — cosa devono dire, e cosa NON possono dire
 
 I quattro file (`backtest_pipeline/prove/R268a..d`, commit `aee08fa8`, magic `797201-797254`, tutti `InpAllowShort=false`,
-rischio 0,5, deposito 100000) sono scritti con criteri congelati PRIMA dei numeri (testa par. 7). Si leggono in quest'ordine:
+rischio 0,5 — R268c: asse 0,5/1,0/1,5/2,0 —, deposito 100000) sono scritti con criteri congelati PRIMA dei numeri (testa par. 7). Si leggono in quest'ordine:
 
 1. **R268b** (OHLC, finestra dei tick 2024.07.05→2026.06.30) = **G0 del banco**: per-trade `797202` contro `795301` ristretto,
    **119 deal esatti**, struttura, lotto e soldi. **ROSSO = R268 NON si legge** (ne' r, ne' R268d).
@@ -117,10 +117,15 @@ terminale senza sedie vive; `RICOMPILA_CLAU12_TRAILFIX.ps1` compila SOLO i suoi 
 campo l'impronta del pin `9fca63d9`. Per l'oro serve **una riga nuova** (copia del `.mq5` al pin → rinomina → F7), modellata
 su `RICOMPILA` lettera per lettera: **a)** guardia macchina `VMI3047753`; **b)** cartella dati per hash + `origin.txt = C:\FTMO`
 + conto `541452707` nel giornale; **c)** giorno = sabato/domenica; **d)** `metaeditor64` chiuso (lezione del 22/08); **e)**
-sorgente scaricato al pin con SHA256 dei byte confrontato in memoria; **g)** include `ABTG_PausaGuardian.mqh` **misurato e
+sorgente scaricato al pin con SHA256 dei byte confrontato in memoria; **f)** stato del disco: `ABTG_MaxMinNotte.mq5`,
+`CLAU12_MaxMinNotte.mq5` e i loro `.ex5` **NON devono esistere** in `MQL5\Experts` di `46C9F8E9...` — se uno c'e', STOP (e' un
+binario NUOVO, non una ricompilazione: niente sovrascritture; per lo stesso motivo il backup **h)** di `RICOMPILA` qui non ha
+niente da copiare, e va detto nella riga); **g)** include `ABTG_PausaGuardian.mqh` **misurato e
 non toccato** = v1.20 pin `26a18566` (398 righe, scheletro `D179846B`), la stessa che ha compilato i binari in campo il
-20/09; **j)** `C:\FTMO\metaeditor64.exe /compile:<mq5> /inc:<MQL5> /log:<log>`, log UTF-16, **"0 errors" obbligatorio**,
-`.ex5` con data DOPO l'avvio (classe 270); **l)** Desktop del VPS + zip.
+20/09; **i)** copia del sorgente al pin come `CLAU12_MaxMinNotte.mq5`, SHA256 **riletto dal disco**; **j)**
+`C:\FTMO\metaeditor64.exe /compile:<mq5> /inc:<MQL5> /log:<log>`, log UTF-16, **"0 errors" obbligatorio**, `.ex5` con data DOPO
+l'avvio (classe 270); **k)** scheletro del file copiato stampato (atteso **918 / `32C692AD...146D`**); **l)** Desktop del VPS + zip;
+**m)** istruzione finale: scheda Esperti di `C:\FTMO`, e **nessun grafico da toccare** (l'attacco e' il passo (d), separato).
 
 **Il vincolo del weekend, riletto per l'oro**: `RICOMPILA` r.361-365 si ferma in feriale perche' le sedie d'apertura
 possono avere posizioni. Qui il binario e' **NUOVO** (nessun grafico lo usa: `CODA_01` 27/09, 9 sedie su `C:\FTMO`,
@@ -145,7 +150,7 @@ La riga si scrive **dopo** (a) e (b) e **dopo** la firma di taglia e magic, sul 
    `541452707` **nei 10 giornali piu' recenti** di `logs\`;
 4. **download dal pin** (`raw.githubusercontent.com/.../<pin>/mql5/Presets/FTMO/<nome>.set`) del file **senza** il
    prefisso `BOZZA_` — cioe' il file che nascera' dalla firma, non questo;
-5. **marcatore** nel file scaricato (qui: `MARCATORE_BOZZA_ORO_LONG_FTMO_v1`; nel file firmato sara' un marcatore
+5. **marcatore** nel file scaricato (qui: `MARCATORE_BOZZA_ORO_LONG_FTMO_v2`; nel file firmato sara' un marcatore
    senza la parola BOZZA) e **SHA256** confrontato con quello scritto nella riga;
 6. **righe chiave presenti**, verificate una per una: `InpMagic=<firmato>`, `InpAllowLong=true`, `InpAllowShort=false`,
    `InpRiskPercent=<firmata>`, `InpBoxStartHour=1`, `InpBoxEndHour=6`, `InpPlaceHour=9`, `InpEntryCutoffHour=10`,
@@ -170,11 +175,17 @@ E prima di consegnarla: `python3 backtest_pipeline/controlla_riga.py --oggetto r
 - **Input → Carica** il `.set` firmato. Nella lista: `InpMagic` = quello firmato, `InpAllowShort` = false,
   `InpRiskPercent` = quella firmata, `InpBoxStartHour` 1, `InpPlaceHour` 9, `InpEntryCutoffHour` 10 / 30, `InpCloseHour` 19 / 30.
 - **Comune**: "Consenti trading algoritmico" → OK. **Algo Trading** in alto gia' verde: **non premerlo**.
-- ⏰ **QUANDO**: 🔴 **non fra le 09:00 e le 19:30 FTMO** (08:00-18:30 italiane). Letto nel codice: il cutoff delle 10:30
-  (r.258) vale solo in fase `MMP_PLACED`; un EA appena attaccato parte in `MMP_WAIT` e, se `nowMin >= 09:00` e oggi non ha
-  operato (r.274-290), **piazza il buy stop subito** sul box della notte, anche alle 14:00, con scadenza 90'. E' un ingresso
-  che il backtest non ha misurato. Finestra buona: **weekend** (il box di lunedi' si calcola dalle 01:00), oppure un feriale
-  **dopo le 19:30 FTMO**.
+- ⏰ **QUANDO**: 🔴 **non fra le 09:00 e le 19:30 FTMO** (08:00-18:30 italiane). Letto nel codice, **seguendo la macchina a
+  stati fino al tick DOPO** (classe 866): un EA appena attaccato parte in `MMP_WAIT` e, se `nowMin >= 09:00` e oggi non ha
+  operato (r.274-290), **piazza il buy stop subito** sul box della notte. Poi dipende dall'ora:
+  - **fra le 09:00 e le 10:30 FTMO** 🔴: il pendente vive davvero fino al cutoff delle 10:30 (r.256-262) — e' un **ingresso in
+    ritardo** che il banco non ha mai visto (il banco piazza alle 09:00 in punto). **Questa e' la finestra pericolosa.**
+  - **fra le 10:30 e le 19:30 FTMO** 🟠: al tick successivo la fase e' `MMP_PLACED`, niente posizione, `nowMin >= 10:30` → il
+    cutoff **cancella** il pendente. Vive **un tick**: scatta solo se quel tick stesso lo attraversa. Rischio piccolo ma non
+    zero, e nel giornale compare un `BUY STOP` + una cancellazione che confonderebbero la lettura del primo giorno.
+  - **dopo le 19:30 o prima delle 09:00 FTMO, o nel weekend** 🟢: `EndOfDay` (r.487-492) oppure attesa del `09:00` — nessun
+    ordine. Finestra buona: **weekend** (l'oro riapre la domenica sera = lunedi' ~01:00 FTMO, il box di lunedi' si calcola da
+    li'), oppure un feriale **dopo le 19:30 FTMO**.
 - **Verifica** (scheda Esperti, ora del PC = italiana): `avviato su XAUUSD. Box server 01:00-06:59, piazzo 09:00, flat 19:30.`
   (r.224) + l'autotest v1.11 in OnInit; faccina 🙂; nel Diario `loaded successfully` senza `removed`.
 - 🔴 **Il profilo va SALVATO** (`File → Profili → Salva profilo`, stesso nome `Default`): **classe 822** — la `770105`
@@ -191,8 +202,13 @@ E prima di consegnarla: `python3 backtest_pipeline/controlla_riga.py --oggetto r
 
 **Guardian in campo** (`mql5/Presets/ABTG_Guardian_FTMO_2Step.set`, chart06 di `C:\FTMO`): `InpStartBalance=80000` · pausa
 giornaliera **3,5%** (2.800 €) · emergenza giornaliera **4,5%** (3.600 €) · emergenza totale **9,3%** (72.560 €) · **cap C1
-4,00%** dell'equity (`ABTG_Guardian.mq5` r.153), rischio misurato ingresso→SL (`InpRiskMode=0`), **solo sulle posizioni
-aperte** (include v1.20 r.27: un pendente gia' piazzato scatta lo stesso). La taglia di ogni sedia e' % del **saldo**
+4,00%** dell'**equity**, rischio misurato ingresso→SL (`InpRiskMode=0`), **solo sulle posizioni aperte** (include v1.20 r.27:
+un pendente gia' piazzato scatta lo stesso). Letto nel Guardian **in campo** (`CLAU12_Guardian` v1.12 = `ABTG_Guardian.mq5` al
+pin `d884f7e1`, scheletro 498 / `A457F2CD...`, `CODA_06` 27/09): dichiarazione r.78, somma `OpenRiskPct` r.171-199 (posizioni,
+non ordini; `OrderCalcProfit` dal prezzo d'**apertura** allo SL), confronto **`riskPct >= InpMaxOpenRiskPct`** r.444. Lato EA
+(include v1.20 `ABTG_GuardiaIngresso` r.282-319 + nucleo `ABTG_CapAttivo_Calc` r.114-119): l'EA legge **solo la bandiera** al momento del piazzamento (`TryPlace` r.346).
+🔴 **Il rischio del NUOVO ordine NON viene sommato**: la domanda che il cap fa e' *"le posizioni gia' aperte valgono gia'
+>= 4,00% dell'equity?"*, non *"aperte + nuova > 4,00%?"*. La taglia di ogni sedia e' % del **saldo**
 all'ordine (`LotByRisk` r.733). Saldo di riferimento **75.090,72 €** [MISURATO, MetriX 26/09 09:15, `SEDIA_SHORT_DOW` §⑤].
 
 | taglia | uno stop | | 
@@ -200,14 +216,32 @@ all'ordine (`LotByRisk` r.733). Saldo di riferimento **75.090,72 €** [MISURATO
 | 0,5% (oro, banco) | **375,45 €** | |
 | 2,0% (le altre sette) | 1.501,81 € | |
 
-**Quante posizioni lascia passare il cap 4,00**, con tutte le altre a 2,00 e l'oro a 0,50 [DERIVATO]:
-- `{2,0 ; 2,0}` = **4,00% → la terza e' RIFIUTATA**, qualunque taglia abbia (anche l'oro, se arriva dopo);
-- `{0,5 ; 2,0}` = 2,50% → la seconda al 2% **entra** → **4,50% in campo, tre posizioni**;
+**Quante posizioni lascia passare il cap 4,00**, con tutte le altre a 2,00 e l'oro a 0,50 [DERIVATO dal codice qui sopra]:
+- 🟢 **La sequenza della mattina non fa rifiutare la `770101`.** Oro pieno alle 09:00 (0,5) → la `770411` alle 09:59 vede
+  **0,5 < 4,00** → entra → la `770101` vede **0,5 + 2,0 = 2,5 < 4,00** (se la `770411` e' gia' posizione; altrimenti 0,5) →
+  **entra** → **4,50% in campo, tre posizioni**. L'ipotesi *"la terza al 2% viene rifiutata perche' 0,5 + 2 + 2 = 4,5 > 4,00"*
+  e' **falsa**: somma il rischio della nuova, e il cap non lo fa.
+- 🔴 **Quando invece l'oro FA rifiutare una sedia al 2%**: quando le posizioni gia' aperte SENZA l'oro valgono **X in
+  [3,50% ; 4,00%)**. Esempio gia' scritto (`SEDIA_SHORT_DOW` §⑤.2): `771531` a due gambe ~1,98% + una sedia al 2,00% = **~3,98% <
+  4,00** → senza oro la terza al 2% **entra** (→ ~5,98%); **con l'oro pieno** → 4,48% ≥ 4,00 → **rifiutata**. L'oro quindi lavora
+  nei due versi: **aggiunge 0,5%** quando X < 3,50, **toglie una sedia al 2%** quando 3,50 ≤ X < 4,00. Quale delle due capiti,
+  e quante volte, **[NON MISURATO]**.
+- 🟠 `{2,0 ; 2,0}` **sta esattamente sul bordo** del `>=`, e il bordo non si decide coi valori nominali (classe 865): il lotto e'
+  arrotondato **per difetto** (`LotByRisk` r.757 `MathFloor`: rischio vero ≤ 2,00% del saldo), lo slippage di un ordine
+  **stop** lo spinge **sopra**, e il denominatore e' l'**equity** (P/L flottante nei due versi). Quindi *"la terza e' rifiutata"*
+  e' **[NON DETERMINABILE a tavolino]**: con i numeri gia' derivati il 26/09 (~3,98%, `SEDIA_SHORT_DOW` §⑤.2) la terza **entra**.
 - `{0,5 ; 2,0 ; 2,0}` allo stop = **3.379,08 €** = sotto l'emergenza giornaliera (3.600 €, margine **220,92 €**) ma **sopra
   la pausa** (2.800 €) e **sopra l'emergenza totale** vista dal saldo di oggi (**2.530,72 €** ai 72.560 €): gia' due stop
   al 2% (3.003,63 €) la superano (`SEDIA_SHORT_DOW` §⑤.1); l'oro aggiunge 375,45 € allo stesso esito, non lo crea.
-- Con la `771531` che tiene una posizione dal weekend (~0,98%, ~735 €): `0,98 + 0,5 = 1,48` → tutto entra; `0,98 + 2 + 2 =
-  4,98 ≥ 4,00` → la terza al 2% e' rifiutata **solo se e' una posizione**, non un pendente gia' piazzato.
+- Con la `771531` che tiene una posizione dal weekend (~0,98%, ~735 €): `0,98 + 0,5 = 1,48 < 4,00` → la prima al 2% entra →
+  `3,48 < 4,00` → **entra anche la seconda al 2%** → **~5,48%** in campo (senza l'oro: `0,98 + 2 = 2,98` → entra → ~4,98%).
+  Qui l'oro **aggiunge**, non toglie.
+- 🔴 **E se il cap rifiuta proprio l'oro alle 09:00** (posizioni H1 del Dow gia' ≥ 4,00%): `TryPlace` ritorna `false` (r.346),
+  la fase **resta `MMP_WAIT`** e l'EA **riprova a ogni tick** (r.274-290), e il cutoff delle 10:30 vale solo in `MMP_PLACED`
+  (r.258). Se il cap si libera **prima delle 10:30** (una posizione chiude, o va a pareggio dopo la prima parziale: con
+  `InpRiskMode=0` il rischio dal prezzo d'apertura allo SL a pareggio vale zero), **il buy stop parte in ritardo** — un
+  ingresso che il banco non ha mai misurato (nel tester il Guardian non c'e': fail-open). Dopo le 10:30 parte e il cutoff lo
+  cancella al tick dopo. Frequenza **[NON MISURATA]**; e' lo stesso ramo della `770411`, che condivide la macchina a stati.
 
 **L'ora d'armo, e la sovrapposizione [NON MISURATA]**: l'oro piazza il buy stop alle **09:00 FTMO** (08:00 IT), quando le sedie
 d'apertura non hanno ancora armato; la `770411` (MaxMin DAX short) arma alle **09:59 FTMO** (`InpPlaceHour=9`, `InpPlaceMin=59`
@@ -238,12 +272,22 @@ non conosce l'oro.
    divieto di esposizione opposta su un altro conto vale **anche per i demo e per altri broker**. Sul piccolo `50503392`
    (`CODA_01` 27/09, profilo `ORO`, 25 sedie) sono VIVE **quattro sedie oro**: `ABTG_MaxMinNotte XAUUSD M15 magic 770402
    rischio 0,5 L+S` (chart29), `PunteLarry XAUUSD 772343` (solo long), `EMA200_Ottimizzato XAUUSD 971501` (L+S),
-   `SupertrendReversal_Ottimizzato XAUUSD 970901` (L+S); e su Tickmill `Gold_Ichimoku_TK_ATR_EA XAUUSD 250604`. La
+   `SupertrendReversal_Ottimizzato XAUUSD 970901` (L+S); su Tickmill `Gold_Ichimoku_TK_ATR_EA XAUUSD M5 250604` (lati non
+   letti dalla sonda: `-`); 🔴 **e sul manuale `50503635` (`C:\MT5_MANUALE`) `ABTG_ScalperDirezionale (4) XAUUSD M1 magic 779901`**
+   (lati `-`), che il 25/09 non c'era (`SOSPENSIONE` r.83: *"zero sedie"*). **Zero sedie oro** nel profilo attivo di: 100k
+   `50504263` (2 sedie, nessuna oro), REALE `10105439` (ORB EURAUD, Guardian, SlippageLogger), Pepperstone (0), banco `50504400`
+   (0), FTMO `541452707` (9, nessuna XAUUSD). Di queste, quelle che possono stare **short** mentre il long FTMO e' aperto sono
+   **cinque**: `770402`, `971501`, `970901` (L+S dal `.chr`) e `250604`, `779901` (lati ignoti = si trattano come L+S). La
+   `772343` e' **solo long** = stesso verso (*"copying ... in the same direction is generally allowed"*, r.18-20). Due buchi
+   dichiarati: **(i)** il **PC di backtest `DESKTOP-H4D7CAJ` e' loggato sullo stesso `50503392`** e le sue sedie la sonda notturna
+   non le vede (`SOSPENSIONE` r.82, gia' successo il 14/08); **(ii)** FTMO conta anche gli strumenti **correlati** e non da'
+   una lista (r.14-16): l'oro contro le sedie USD del piccolo (`BreakingBand`/`GapFill` EURUSD, GBPUSD, AUDUSD; `PostNews`
+   USDJPY...) e' **[INFERITO, NON MISURATO]**. La
    sospensione del 25/09 (`SOSPENSIONE_SEDIE_DEMO_2026-09-25.md` r.80) ha spento gli **indici** e ha scritto: *"le sedie
    oro/forex del piccolo restano accese. FTMO non ha sedie su quei simboli"*. **Il giorno in cui FTMO avra' una sedia oro
    quella frase smette di essere vera**: uno short della `770402` a due lati sul piccolo, aperto mentre il long FTMO e' in
-   campo, e' la fattispecie letterale. Cosa fare delle sedie oro del piccolo (e di Tickmill) **e' una firma di Claudio**,
-   e va data **prima** dell'attacco, non dopo.
+   campo, e' la fattispecie letterale. Cosa fare delle sedie oro del piccolo, di Tickmill e del manuale **e' una firma di
+   Claudio**, e 🔴 **e' un BLOCCO: senza, l'attacco (d) non si fa** — non una nota da leggere dopo.
 
 ---
 
@@ -252,7 +296,15 @@ non conosce l'oro.
 - R268/R268d: **non letti**. Il DD del solo long a tick e sui 22 anni: **[NON MISURATO]**.
 - Compilazione `ABTG_MaxMinNotte.mq5` @`7d0da9f9` contro include v1.20 `26a18566`: **[NON VERIFICATA]**.
 - `InpMaxSpread=150` (contro 0 del banco): effetto **[NON MISURATO]**; commissione e slippage FTMO su XAUUSD: **[NON MISURATI]**.
-- Orologio dell'oro: **[INFERITO]** = forex; il +2 FTMO/BCM scade con l'ora legale del 25/10/2026 (tre ipotesi, nessuna misurata).
+- Orologio dell'oro: **[INFERITO]** = forex. 🔴 **Il preset SCADE il 24/10/2026**: BCM e' **UTC+1 fisso** (`OROLOGIO_BCM_2026-09-24`),
+  FTMO passa a UTC+2 → il delta diventa **+1**, non resta +2 (la nota del preset a due lati, *"se cambiano nello stesso giorno il
+  delta resta +2"*, e' del 20/09, **prima** di quella misura: superata). Se FTMO seguisse il DST americano, +2 fino al 01/11 e
+  poi +1. E la cella R260a d'inverno **mescola due orologi** (BCM UTC+0 fino a dic-2024, UTC+1 dopo): quale ora FTMO replichi
+  "il backtest" d'inverno **non e' deciso** — e cade nella stessa decisione di Claudio del 25/10 (CLAUDE.md, orologio BCM).
+- 🟠 **Invariante della sedia**: `SelPos()` (r.772) usa `PositionSelect(_Symbol)`, che in hedging prende **la prima posizione
+  XAUUSD del conto qualunque sia il magic**. Oggi su `541452707` non ce n'e' nessuna, quindi e' innocuo; **il giorno in cui su
+  quel conto entra una seconda sedia XAUUSD (o un trade a mano sull'oro), cutoff, flat 19:30 e gestione leggono la posizione
+  sbagliata**. Va scritto nel pacchetto firmato come condizione, non scoperto dopo.
 - Magic `770421`: vergine su disco, su tutti i rami, nella storia git e in `CODA_01` al 27/09; **sul giornale del conto FTMO
   [NON VERIFICATO]** (non leggibile da qui). La scelta resta di Claudio.
 - Sovrapposizione oro / `770411` / `770101` nella stessa ora: **[NON MISURATA]**; Monte Carlo senza l'oro.
@@ -266,8 +318,10 @@ non conosce l'oro.
 
 ## ⑩ 📎 FONTI E IMPRONTE
 - Preset BOZZA: `mql5/Presets/FTMO/BOZZA_CLAU12_MaxMinNotte_ORO_LONG_FTMO.set` — SHA256
-  `d251ff15faeb62bc17b5835e41d13d06ed56d70c12077d020e78a99fad128956`, 225 righe, 53 input, ASCII puro, corpo generato da
-  script dall'ordine degli input del sorgente e dai pin di R260a (diff contro R260a: 10 righe; contro il preset a due lati: 5).
+  `e5bcabd52df9e6eefbee176e7eda7d5a582186feadd263c111b974a0de727a81`, 243 righe, marcatore `MARCATORE_BOZZA_ORO_LONG_FTMO_v2`
+  (v1 al commit `8023d58e`; v2 = solo commenti dopo il cancello strato 2, valori identici), 53 input, ASCII puro, corpo generato da
+  script dall'ordine degli input del sorgente e dai pin di R260a (diff contro R260a: 10 righe + `InpNewsCurrencies` assente in R260a = default `""`; contro il preset a due lati: 5).
+  Diff rifatti a script dal cancello strato 2: identici.
 - Sorgente: `mql5/Experts/ABTG_MaxMinNotte.mq5` HEAD `9b838084` = `7d0da9f9`, 918 righe, scheletro `32C692AD...146D`.
 - Preset a due lati: `mql5/Presets/FTMO/ABTG_MaxMinNotte_ORO_770402_FTMO.set` (magic 770402, 2,00, MaxSpread 150).
 - Guardian FTMO: `mql5/Presets/ABTG_Guardian_FTMO_2Step.set` r.124 `InpMaxOpenRiskPct=4.00`.
