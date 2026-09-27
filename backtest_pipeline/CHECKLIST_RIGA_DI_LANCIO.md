@@ -35818,3 +35818,19 @@ giorno di USO valido, e chi scrive in un giorno chiuso scrive per il primo giorn
 Rilievo collegato (classe 166): l'include a HEAD del repo e' la v1.60 (2461 righe), il campo FTMO ha
 la v1.20 (398 righe, 26a18566): i binari compilati dal RAMO per i round non provano la compilazione
 contro l'include in campo; nel tester il comportamento e' identico (fail-open a 2 argomenti).
+
+### CLASSE 870 — il controfattuale distrugge PIU' fattori di quello nominato, e tutta la differenza va all'ipotesi (27/09/2026)
+Caso: `MC_CON_ORO_E_BLOCCHI` @ `0dcf3ed0`: "IID vs blocchi = +4,1 punti = correlazione FRA sedie (crollo
+sistemico)". L'IID per posizione distrugge anche il co-movimento DENTRO la 771531 (77 giornate con 2-8
+posizioni). Scomposto con un IID che rimescola solo fra sedie (IID-S): fra sedie +1,4 (4 sedie) /
+-1,8 (con 770105); dentro la sedia +3,8; 771531 da sola +16,4. Regola: la variante distrugge SOLO il
+fattore nominato; se ne tocca due, si scompone con un contro-esempio a fattore singolo (sedia sola:
+IID-S = blocchi). Corretto in `f2da85f6`.
+
+### CLASSE 871 — il contro-esempio gira in una configurazione DIVERSA da quella della tabella che certifica (27/09/2026)
+Caso: stesso referto: contro-esempio (i) con reimmissione, tabella con blocchi senza reimmissione:
+il delta "entro 1,5 punti" era del campionamento, non della correlazione (-1,19/-1,00/-0,72 nella
+configurazione vera). Regola: il contro-esempio si esegue anche nella configurazione di produzione,
+oppure si dichiara quanto vale lo scarto dovuto al modo di campionare. E la frase "il B1 e' la rete
+contro il crollo sistemico, il MC lo misura" era una sovra-affermazione: e' una proprieta' del modello
+(taglio perfetto sul realizzato), verso plausibile, grandezza in campo [NON MISURATA].
