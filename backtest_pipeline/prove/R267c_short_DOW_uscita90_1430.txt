@@ -68,25 +68,26 @@
 #  5. I CANCELLI (congelati prima; si citano come C<n> [R267c]).
 #  C0 CATENA di R255a par. 8: E0 (moncone), P0 (tutti i pin dal CSV _OOS,
 #     InpCloseHour 16/17 e InpCloseMin 0 compresi), C0 del per-trade
-#     (sopravvive SOLO la cella 17:00: abtg_trades_ABTG_Dow_Apertura_US_
-#     U30USD_796711.csv), L0 (tutte le uscite deal_type 0 = chiudono uno
+#     (abtg_trades_ABTG_Dow_Apertura_US_U30USD_796711.csv, UNO,
+#     IDENTIFICATO: R267a par. 0, classe 850; sia H l'ora della cella
+#     identificata, 16 o 17), L0 (tutte le uscite deal_type 0 = chiudono uno
 #     short). G1 non esiste qui (niente gemelle): se serve, dopo.
 #  C1 G0 ESTERNO = R255a, girato PRIMA nello stesso giro, con i suoi G0
 #     verdi (G0-ANCORA contro R54a). Senza R255a questo file NON SI LEGGE.
-#  C2 SOTTOINSIEME (cella 17:00, dal per-trade): ogni deal con close_time
-#     < 17:00:00 deve avere un gemello in R255a (793101) con close_time,
+#  C2 SOTTOINSIEME (cella H:00 identificata, dal per-trade): ogni deal con
+#     close_time < H:00:00 deve avere un gemello in R255a (793101) con close_time,
 #     deal_type e price IDENTICI (volume e net no: saldo diverso); a
 #     parte le parziali mancanti al lotto 0,10 (R255a par. 5). Un deal
 #     senza gemello = ROSSO: la manopola ha toccato qualcosa che non
 #     doveva -> NON LEGGIBILE.
-#  C3 S1 L'OROLOGIO MORDE (cella 17:00): zero uscite dopo le 17:00:59.
-#     La cella 16:00 si controlla solo col P0 (niente per-trade).
+#  C3 S1 L'OROLOGIO MORDE (cella H:00 identificata): zero uscite dopo le
+#     H:00:59. L'ALTRA cella si controlla solo col P0 (niente per-trade).
 #  C4 G2: Trades(16) <= Trades(17) <= Trades(R255a), e Profit(16) !=
 #     Profit(17). Rovesciato o identico = NON ESEGUITA.
 #  C5 RISCHIO (a qualunque n): DD equity del CSV _OOS di ogni cella e
 #     "Peggior Giornata %" contro R255a (stesso banco, stessa gamba). Il
 #     tetto di casa R2 (4,272% a saldo chiuso, R255a par. 9) si legge
-#     SOLO sulla cella con per-trade (17:00), curva CONTROLLO (tutto il
+#     SOLO sulla cella con per-trade (quella identificata), curva CONTROLLO (tutto il
 #     file 14:30). La curva IN FASE NON si ricompone qui (servirebbe il
 #     file 15:30 e un per-trade per cella): buco dichiarato.
 #  C6 NESSUNA CELLA SI PROMUOVE. Due celle = un interruttore, non un
@@ -100,8 +101,8 @@
 #  -> ~1,3-1,7 MIN.
 #
 #  8. BUCHI: la curva IN FASE (file 15:30) NON e' qui; l'uscita a tempo
-#  sul NUDO (EMA spento) no; InpCloseMin ad asse no; il per-trade della
-#  cella 16:00 non esiste (classe 455); l'effetto sugli INGRESSI (par. 3)
+#  sul NUDO (EMA spento) no; InpCloseMin ad asse no; il per-trade
+#  dell'ALTRA cella non esiste (classi 455/850); l'effetto sugli INGRESSI (par. 3)
 #  non si separa da quello sulle uscite senza un per-trade per cella.
 # =====================================================================
 @SIMBOLO    U30USD

@@ -32,7 +32,8 @@
 #  par. 5.
 #
 #  PERCHE' SOLO GBPJPY E XAUUSD (e non i 4 simboli di R264): a 135 s per
-#  passata tick (metro R240) un file = 2 finestre piene = ~4,5 min; 4
+#  passata tick (metro R240: U30USD H1, ALTRO EA; sull'EMA200 H4 e'
+#  [NON MISURATO], classe 751) un file = 2 finestre piene = ~4,5 min; 4
 #  simboli x 2 manopole = 8 file = ~36 min, sopra i ~10 min del mandato.
 #  Scelti per numero: GBPJPY = DD PIU' BASSO dei quattro (4,42%); XAUUSD =
 #  PF piu' alto fra i VIVI (1,381). AUDJPY ha il PF piu' alto in assoluto
@@ -59,8 +60,9 @@
 #
 #  3. L'ATTESA, SCRITTA PRIMA. La leva e' sul DD (il tappo di R139), non
 #  sul PF. Quante posizioni attraversano il venerdi' sera: [NON MISURATO]
-#  (il per-trade del G0 R264 lo dira'; qui sopravvive quello della cella
-#  1). TRE ESITI, UNA PARTIZIONE, cella 1 contro cella 0:
+#  e il per-trade NON lo dice (solo close_time, nessuna ora d'apertura:
+#  classe 847); lo dice la DIFFERENZA fra le due celle. TRE ESITI, UNA
+#  PARTIZIONE, cella 1 contro cella 0:
 #    LEVA           DD(1) <= 0,85 x DD(0)  E  PF(1) >= PF(0) - 0,05
 #    COSTO          PF(1) < PF(0) - 0,05   (qualunque DD: taglia i trend
 #                   H4 che attraversano il weekend)
@@ -83,14 +85,16 @@
 #  4. I CANCELLI (congelati prima; si citano come E<n> [R267f2]).
 #  E0 CATENA di R264 par. 5: E0 (moncone: CSV _IS vuoto e rc 2 attesi),
 #     P0 (ogni colonna Inp del CSV _OOS uguale al file, InpFridayClose compresa),
-#     C0 del per-trade (sopravvive SOLO la cella 1: abtg_trades_
-#     ABTG_EMA200_XAUUSD_796732.csv; regola del k di commissione in [1,00 ; 3,00]
-#     EUR/lotto, classe 844).
+#     C0 del per-trade (UNO, IDENTIFICATO: R267a par. 0, classe 850;
+#     abtg_trades_ABTG_EMA200_XAUUSD_796732.csv; regola del k di commissione in
+#     [1,00 ; 3,00] EUR/lotto, classe 844).
 #  E1 G0 IN-FILE: cella 0 == R264d al centesimo se girato; contro il
 #     genetico, bande di R264 par. 5. ROSSO -> il file si legge solo al
 #     suo interno.
-#  E2 LA MANOPOLA MORDE: Profit(1) != Profit(0). Identici = NON ESEGUITA oppure nessuna posizione
-#     viva il venerdi' alle 20 (si guarda il per-trade).
+#  E2 LA MANOPOLA MORDE: Profit(1) != Profit(0). Identici = (con P0 verde) nessuna posizione ne'
+#     pendente viva il venerdi' dopo le 20:00: casella INERTE MISURATA.
+#     Conferma dal per-trade (identiche = uguali): zero chiusure di
+#     venerdi' dalle 20:00:00 in poi.
 #  E3 RISCHIO (a qualunque n, Emendamento B): DD di ogni cella <= 10,0%
 #     a rischio 1% (S3 di R264); accanto il derivato a 2,00%
 #     (x1,956-1,990). Tick, quindi niente riserva OHLC; ma n piccolo.
@@ -103,11 +107,12 @@
 #  2026.06.30, @FRAZIONEIS 0.001: moncone di 1 giorno + OOS 2024.01.01
 #  -> 2026.06.30 = la finestra del genetico, NON cieca a livello di
 #  vicinato: R264 par. 4).
-#  6. COSTO: 2 finestre piene x 135 s + 2 monconi = ~4,5 MIN.
+#  6. COSTO: 2 finestre piene x 135 s + 2 monconi = ~4,5 MIN [metro di
+#  un ALTRO EA, classe 751: il G0 R264d, che gira prima, lo misura].
 #  7. BUCHI: il campione pieno OHLC (2017/2019 -> 2023) con la manopola
 #  no (sarebbe il passo dopo, sul centro di R264 se passa); GBPUSD,
 #  AUDJPY, EURUSD no (par. 1); commissioni/swap FTMO e griglia H4 di FTMO
-#  [NON MISURATI]; per-trade di UNA sola cella (classe 455).
+#  [NON MISURATI]; per-trade di UNA sola cella (classi 455/850).
 # =====================================================================
 @SIMBOLO    XAUUSD
 @PERIODO    H4

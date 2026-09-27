@@ -4521,17 +4521,33 @@ Ogni numero della caccia citato come **[SONDA OANDA, screening]** o **[DICHIARAT
   - **P9a `InpCloseAtCutoff` e P9b AUDNZD/AUDCAD (Nightly) → CODA DOPO R259**: R259 non è ancora girato.
   - **P8 box asiatico via `MaxMinNotte`** → è **R266** (altro agente, già in coda). **P7 Londra blocco S**:
     fuori da questo mandato; R258 non è ancora girato.
-  - **Stop in ATR sull'oro**: già caduto (`oro_maxmin_fase1_*`, DD 9,3-26,5%). **Box in ATR, ADX/pendenza
+  - **Stop in ATR sull'oro**: già caduto **a buffer 200**, vicino al pin 250 (`oro_maxmin_fase1_*`, DD 9,3-26,5%
+    contro 3,7-5,7% dello stop all'estremo opposto; caccia §0 punto 2). **Box in ATR, ADX/pendenza
     EMA**: servono input nuovi (codice).
   - **EMA200 su GBPUSD/AUDJPY/EURUSD**: fuori per costo (8 file ≈ 36 min contro ~10 chiesti). Tenuti GBPJPY
     (DD più basso, 4,42%) e XAUUSD (PF più alto fra i vivi, 1,381); AUDJPY ha il PF più alto (1,514) ma è
     **MORTO** su campione pieno e la regola del 19/08 ne vieta i filtri d'ingresso.
 - 💰 **Costo**: ~**30-38 minuti** di tester lanciabili (R267b ~4-5 · c ~1,3-1,7 · d ~3,3-4,3 · e/f 4×4,5 ≈ 18 ·
-  g1-g4 ~3,6-9,1), tetto largo 2 ore. EMA200 sopra i 10 min anche con due simboli: **spezzato in due onde da
+  g1-g4 ~3,6-9,1), tetto largo 2 ore; **esclusi i G0 esterni** (R255a, R261d/c/a, R264c/d). Il 135 s/passata
+  degli EMA200 è il metro di **R240 (U30USD H1, altro EA)**: sull'EMA200 H4 è [NON MISURATO] (classe 751). EMA200 sopra i 10 min anche con due simboli: **spezzato in due onde da
   ~9 min** (una per simbolo). **Ordine**: R267b → (R255a) R267d, R267c → (R261d/c/a) R267g2-g4, g1 →
   (R264c) R267e1, f1 → (R264d) R267e2, f2 → R267a **mai finché A non è chiuso**.
 - 🔴 **NON VERIFICATI**: la via A2 della sandbox; il rapporto ATR(H4)/ADR su BCM (la previsione H_INERTE ci
   poggia); il box oro 2020-2024; la chiusura del venerdì dell'oro a BCM; le candele per giorno del D30EUR;
   StringToTime sulla riga d'intestazione del CSV news; la velocità del PC su oro OHLC; lo spread in memoria
-  del terminale (classe 394, come R260). **Classe 455 ovunque**: il per-trade sopravvive solo per l'ultima
-  cella di ogni file, e i criteri sono scritti di conseguenza.
+  del terminale (classe 394, come R260). **Classi 455 e 850 ovunque**: di ogni file sopravvive UN solo
+  per-trade e **quale cella sia non è fissato**: si **identifica** (righe = Trades e somma = Profit di una riga
+  del CSV; oro/forex con il k della classe 844) prima di leggerlo, e i cancelli sul per-trade seguono la cella
+  identificata — mai il file NULLO per questo.
+- 🚦 **Cancello del 27/09 (strato 2) — FAIL corretto prima dei numeri, pin INVARIATI** (solo intestazioni,
+  rigenerate da `R267_GENERA.py`): **(1)** classe **850** in tutti gli 11 file lanciabili (*"sopravvive SOLO
+  l'ultima cella"*): in R267b la lettura H_GIORNO/H_EPOCA ora usa la soglia S della cella identificata
+  (S = 650 o 0 → NON MISURABILE); in R267c l'ora H della cella identificata; in R267g2-g4 U4 si fa solo se
+  anche il per-trade di R261a è la cella corr=1. **(2)** classi **526/847** in R267a: il canarino N1 *"news
+  caricate"* in ottimizzazione **non può esistere** (Print assente): si legge solo in test singolo, prima del
+  round. **(3)** classe **847** in R267f1/f2: *"il per-trade dirà quante posizioni attraversano il venerdì"* —
+  il per-trade ha solo close_time. **(4)** classe **751**: metro 135 s attribuito all'EMA200 H4, era di R240.
+  **(5)** R267d: la partizione di r lasciava scoperto **r < 0,25**. **(6)** R267g2/g3: dichiarato l'effetto
+  di lato di `ManagePos` r.407-408 (BE e trailing spostano anche il bersaglio TP2, già letto in R151a).
+  **(7)** R267g1: il valore dell'EMA100 **prima di maturare** (seme / 0 / EMPTY_VALUE) è [NON VERIFICATO] e
+  cambia il verso del bias nei primi ~4-5 mesi della cella D1.

@@ -62,12 +62,17 @@
 #     girato, e con T1/T2 di R261 VERDI). Se no -> NULLO.
 #  U2 LA MANOPOLA MORDE: Trades(0) < Trades(50), e Profit NON identico fra 25, 50
 #     e 75. Rovesciato o identico = NON ESEGUITA.
-#  U3 L0 dal per-trade (sopravvive SOLO l'ultima cella: abtg_trades_
-#     ABTG_MaxMinNotte_D30EUR_796744.csv): tutte le chiusure deal_type 1.
+#  U3 L0 dal per-trade (abtg_trades_ABTG_MaxMinNotte_D30EUR_796744.csv,
+#     UNO, IDENTIFICATO: R267a par. 0, classe 850): tutte le chiusure
+#     deal_type 1.
 #  U4 STESSI INGRESSI: le celle cambiano solo l'uscita, e con un ciclo al
 #     giorno e InpCloseAtEnd le giornate operate sono le stesse. Non c'e'
-#     un per-trade per cella: si controlla solo sull'ultima contro R261a
-#     (stesse date di prima chiusura). Diverso = NON LEGGIBILE.
+#     un per-trade per cella: si controlla sulla cella identificata contro
+#     il per-trade di R261a (stesse date di prima chiusura), e SOLO se
+#     anche quello e' identificato come la cella corr=1 (R261a ha lo
+#     stesso difetto: classe 850, asse corr 0/1 a magic fisso). Se R261a
+#     ha scritto la corr=0, U4 NON SI FA (si scrive), il file non e'
+#     NULLO. Diverso = NON LEGGIBILE.
 #  U5 RISCHIO (a qualunque n): soglia T5 di R261a (DD a 1% > 4,0% /
 #     4,08% = fuori da S3 a 2,00%) [DERIVATO].
 #  U6 NESSUNA CELLA SI PROMUOVE. Se nessuna batte l'ancora oltre il
@@ -76,7 +81,12 @@
 #  6. FINESTRA: identica a R261a. 7. COSTO: 4 finestre piene x 0,28-0,70 min = ~1,1-2,8 MIN.
 #  8. BUCHI: l'uscita sulla cella corr=0 no (e' l'altra base); le altre
 #  manopole d'uscita (InpTP2_R, InpTrailAtrMult, InpUseEMA200Target) no;
-#  l'orologio sul long [NON MISURATO]; per-trade di UNA sola cella.
+#  l'orologio sul long [NON MISURATO]; per-trade di UNA sola cella
+#  (classi 455/850). E UN EFFETTO DI LATO GIA' LETTO IN CASA (R151a):
+#  ManagePos r.407-408 ricalcola risk dallo stop CORRENTE e, se <= 0
+#  (stop in pari o sopra l'ingresso), lo sostituisce con ATR x 2,5:
+#  BE e trailing spostano quindi ANCHE il bersaglio della seconda
+#  parziale (TP2 = 3 x risk). La manopola non e' pura: si scrive.
 # =====================================================================
 @SIMBOLO    D30EUR
 @PERIODO    M15

@@ -118,11 +118,24 @@ TESTA_COMUNE = """\
 #  finestre PIENE vere: 35 (i file a moncone hanno una gamba di 1 giorno,
 #  i DAX hanno @FRAZIONEIS 1.0 e la gamba OOS degenere).
 #
-#  LA REGOLA DI LETTURA CHE VALE PER TUTTI (classe 455): il magic e'
-#  FISSO nei file R267 (l'asse e' la manopola), quindi il per-trade
-#  abtg_trades_<EA>_<SIM>_<magic>.csv lo riscrive ogni passata: resta
-#  SOLO QUELLO DELL'ULTIMA CELLA, gamba lunga. Nessun criterio R267
-#  chiama "n" la colonna Trades: e' [DEAL] (classe 454).
+#  LA REGOLA DI LETTURA CHE VALE PER TUTTI (classi 455 e 850): il magic
+#  e' FISSO nei file R267 (l'asse e' la manopola), quindi il per-trade
+#  abtg_trades_<EA>_<SIM>_<magic>.csv lo riscrive ogni passata: ne resta
+#  UNO, gamba lunga, e QUALE CELLA sia NON E' FISSATO (l'ordine di FINE
+#  delle passate non e' garantito: classe 850, corretta dal cancello del
+#  27/09 su tutti i file R267). Il per-trade quindi si IDENTIFICA prima
+#  di leggerlo: righe = Trades di UNA riga del CSV _OOS e somma dei net
+#  = Profit di quella riga (U30USD entro 0,05, commissione misurata
+#  0,000; D30EUR [NON MISURATA]: se non torna entro 0,05 si usa il k;
+#  XAUUSD e forex: k = (somma net - Profit) / somma volumi in [1,00 ;
+#  3,00] EUR/lotto, classe 844). La cella che il file ASPETTA -> si legge
+#  come scritto. UN'ALTRA cella -> si scrive quale, e i cancelli sul
+#  per-trade si leggono su QUELLA cella (soglie d'ora e di valore prese
+#  dalla cella identificata) o, dove il file lo dice, non si fanno: MAI
+#  il file NULLO per questo. NULLO solo se il per-trade non corrisponde
+#  a NESSUNA cella. Celle identiche (manopola inerte) = indifferente.
+#  Il per-trade ha SOLO close_time: nessuna ora d'APERTURA (classe 847).
+#  Nessun criterio R267 chiama "n" la colonna Trades: e' [DEAL] (454).
 #  L'ANCORA G0 DI OGNI FILE: dove la manopola ha un valore INERTE, quella
 #  cella sta DENTRO il file e deve rifare la base al centesimo (il magic
 #  non entra nel trading: provato dai G1 di R255/R260/R264). Dove non ce
@@ -142,7 +155,10 @@ TESTA_COMUNE = """\
 #     dava 20,4 s: la velocita' del PC su oro OHLC e' [NON MISURATA]);
 #   metro tick U30USD 0,333 min/passata (dal mandato) e 93-102 s per un
 #     file R255 da 2 celle (R255a par. 14, stesso PC, stesso carico);
-#   metro tick EMA200 H4 135 s/passata (R240, prove/R214f par. 7);
+#   metro tick 135 s/passata: MISURATO su R240 (U30USD H1 tick, ALTRO
+#     EA, stesso PC; prove/R214f par. 7), NON sull'EMA200 H4: su GBPJPY/
+#     XAUUSD a tick e' [NON MISURATO] (classe 751). Lo misura il G0
+#     R264c/d, che gira PRIMA (ordine sotto): li' si rilegge il tetto;
 #   metro tick D30EUR M15 0,28-0,70 min per finestra piena (R261 par. 9).
 #     R267a  0 (NON LANCIARE; sbloccato: vedi par. 6 -- costo APERTO)
 #     R267b  5 finestre piene x 0,7        = ~3,5 min (+ avvio)  ~4-5 min
@@ -151,7 +167,9 @@ TESTA_COMUNE = """\
 #     R267e1/e2/f1/f2  2 finestre piene x 135 s = 4,5 min x 4 = ~18 min
 #     R267g1-g4  13 finestre piene x 0,28-0,70           ~3,6-9,1 min
 #   TOTALE LANCIABILE (senza R267a): ~30-38 MINUTI. TETTO LARGO 2 ORE:
-#   oltre, ci si ferma e si guarda (caso lento del 21/09).
+#   oltre, ci si ferma e si guarda (caso lento del 21/09). ESCLUSI dal
+#   totale i G0 ESTERNI (R255a, R261d/c/a, R264c/d): sono dei loro round;
+#   se non sono gia' girati si aggiungono, e girano PRIMA.
 #   EMA200: con 4 simboli x 2 manopole sarebbero 8 file = ~36 min, sopra
 #   i ~10 min chiesti -> SOLO GBPJPY e XAUUSD (par. 0 di R267e1). E anche
 #   cosi' sono ~18 min: dichiarato, e spezzato in due onde da ~9 min.
@@ -179,8 +197,9 @@ TESTA_COMUNE = """\
 #   - P8 (London breakout sul box asiatico via MaxMinNotte): e' R266,
 #     di un altro agente, gia' in coda. P7 (Londra, blocco S di R258):
 #     non in questo mandato; R258 non e' ancora girato.
-#   - Stop in ATR sull'oro (InpSLMode=1): gia' CADUTO in casa
-#     (oro_maxmin_fase1_*.csv: DD 9,3-26,5% contro 3,7-5,7%).
+#   - Stop in ATR sull'oro (InpSLMode=1): gia' CADUTO in casa A BUFFER
+#     200, vicino al pin 250 (oro_maxmin_fase1_*.csv: DD 9,3-26,5% contro
+#     3,7-5,7%; caccia par. 0 punto 2).
 #   - Ampiezza del box in ATR, ADX/pendenza EMA: servono input nuovi
 #     (codice), fuori da "costo zero"."""
 
@@ -269,12 +288,18 @@ HEAD_A = """\
 #  4. I CANCELLI (congelati prima; si citano come N<n> [R267a])
 # =====================================================================
 #  N0 PRONTO: par. 6-A chiuso per iscritto. Altrimenti NON si lancia.
-#  N1 CANARINO NEL LOG (InpVerbose=true, pinnato): ogni passata deve
-#     stampare "[MaxMinNotte] news caricate: N." (LoadNews r.798) con N
-#     = 2971, o 2972 se la riga d'intestazione "Data Ora;Impatto;..."
+#  N1 CANARINO NEL LOG (InpVerbose=true, pinnato) -- SI LEGGE SOLO IN
+#     TEST SINGOLO, PRIMA del round. Il driver scrive sempre
+#     Optimization=1 (walkforward_generico.ps1) e in ottimizzazione
+#     Print() non esiste (classi 526 e 847): nella corsa del round la
+#     riga NON C'E' e la sua assenza non dice niente. Nella passata
+#     singola (la cella della via A2, o una cella dopo A1) Log r.210
+#     deve stampare "[MaxMinNotte] news caricate: N." (LoadNews r.798)
+#     con N = 2971, o 2972 se la riga d'intestazione "Data Ora;..."
 #     passasse lo StringToTime [NON VERIFICATO; innocua: impatto 0, non
 #     supera InpNewsMinImpact 3]. Se stampa "file news non trovato:
-#     filtro di fatto spento." -> NULLO.
+#     filtro di fatto spento." -> NON SI LANCIA. Nella corsa ottimizzata
+#     il canarino e' N3, non il log.
 #  N2 G0 IN-FILE: cella 0 contro R260c/R103 (Trades 693, PF 1.308, DD
 #     5.32, Profit 24736) entro UNA giornata (par. 3). Se no -> NULLO.
 #  N3 LA MANOPOLA MORDE: cella 1 con Profit diverso dalla cella 0. Uguali
@@ -314,8 +339,10 @@ HEAD_A = """\
 #     (A2) COSTO ZERO, MAI PROVATA IN CASA: copiare a mano il CSV nella
 #          sandbox dell'agente del PC (...\\Tester\\Agent-127.0.0.1-300x\\
 #          MQL5\\Files\\) prima del job, e lanciare UNA cella in test
-#          singolo per leggere il canarino N1. R93_CRITERI par. 8 la
-#          elenca come piano B, MAI misurata. [NON VERIFICATA]
+#          singolo per leggere il canarino N1. R93_CRITERI par. 8
+#          (piano B, punti 1 e 3) elenca due varianti VICINE -- il CSV
+#          nella cartella Files del TERMINALE + test singolo; un solo
+#          agente --, MAI misurate. [NON VERIFICATA]
 #  B (BUCO, la copertura). Il file news copre 2021.01.04 -> 2025.12.19;
 #    la finestra di R103 e' 2020.01.01 -> 2026.06.30. Sui ~18,5 mesi
 #    fuori (tutto il 2020 e 2025.12.20-2026.06.30), cioe' ~24% dei 78
@@ -413,10 +440,14 @@ HEAD_B = """\
 #
 #  6. IL MERITO -- TRE IPOTESI, UNA PARTIZIONE, LETTE DENTRO UN'EPOCA.
 #  Dal per-trade di R260c (magic 795303, 6,5 anni) e da quello di questo
-#  file (sopravvive SOLO l'ultima cella = 2600, classe 455): nella
-#  finestra 2024.01.01 -> 2026.06.30 (data di CHIUSURA), le posizioni di
-#  R260c si dividono in TENUTE (stessa data e stesso close_time presenti
-#  nel per-trade di 2600) e TOLTE (box < 26 $). PF per posizione delle
+#  file, IDENTIFICATO come dice R267a par. 0 (classe 850: la cella che
+#  sopravvive NON e' fissata; oro = regola del k, classe 844). Sia S la
+#  soglia della cella identificata. Nella finestra 2024.01.01 ->
+#  2026.06.30 (data di CHIUSURA) le posizioni di R260c si dividono in
+#  TENUTE (stessa data e stesso close_time presenti nel per-trade della
+#  cella S) e TOLTE (box < S). Tarata su S = 2600; S = 1950 o 1300 si
+#  legge uguale, con meno TOLTE; S = 650 o 0 -> TOLTE quasi vuote o
+#  vuote: NON MISURABILE (si scrive con S e n). PF per posizione delle
 #  due, dallo STESSO file R260c (stesse taglie, stessa curva):
 #    H_GIORNO   PF_tenute >= PF_tolte + 0,30  (il box stretto e' un
 #               giorno peggiore anche a parita' d'epoca: il filtro e' una
@@ -474,7 +505,7 @@ HEAD_B = """\
 #  10. BUCHI: box 2020-2024 [NON MISURATO]; il filtro in PUNTI non e'
 #  quello in ATR dei vendor (serve codice); InpMaxBoxPts non e' ad asse
 #  (una variabile); OHLC; spread [NON PINNATO DA QUESTA CORSIA] come
-#  R260c; per-trade di UNA sola cella (classe 455): la lettura per anno
+#  R260c; per-trade di UNA sola cella (classi 455/850): la lettura per anno
 #  delle altre quattro celle NON esiste.
 # ====================================================================="""
 
@@ -542,25 +573,26 @@ HEAD_C = """\
 #  5. I CANCELLI (congelati prima; si citano come C<n> [R267c]).
 #  C0 CATENA di R255a par. 8: E0 (moncone), P0 (tutti i pin dal CSV _OOS,
 #     InpCloseHour 16/17 e InpCloseMin 0 compresi), C0 del per-trade
-#     (sopravvive SOLO la cella 17:00: abtg_trades_ABTG_Dow_Apertura_US_
-#     U30USD_796711.csv), L0 (tutte le uscite deal_type 0 = chiudono uno
+#     (abtg_trades_ABTG_Dow_Apertura_US_U30USD_796711.csv, UNO,
+#     IDENTIFICATO: R267a par. 0, classe 850; sia H l'ora della cella
+#     identificata, 16 o 17), L0 (tutte le uscite deal_type 0 = chiudono uno
 #     short). G1 non esiste qui (niente gemelle): se serve, dopo.
 #  C1 G0 ESTERNO = R255a, girato PRIMA nello stesso giro, con i suoi G0
 #     verdi (G0-ANCORA contro R54a). Senza R255a questo file NON SI LEGGE.
-#  C2 SOTTOINSIEME (cella 17:00, dal per-trade): ogni deal con close_time
-#     < 17:00:00 deve avere un gemello in R255a (793101) con close_time,
+#  C2 SOTTOINSIEME (cella H:00 identificata, dal per-trade): ogni deal con
+#     close_time < H:00:00 deve avere un gemello in R255a (793101) con close_time,
 #     deal_type e price IDENTICI (volume e net no: saldo diverso); a
 #     parte le parziali mancanti al lotto 0,10 (R255a par. 5). Un deal
 #     senza gemello = ROSSO: la manopola ha toccato qualcosa che non
 #     doveva -> NON LEGGIBILE.
-#  C3 S1 L'OROLOGIO MORDE (cella 17:00): zero uscite dopo le 17:00:59.
-#     La cella 16:00 si controlla solo col P0 (niente per-trade).
+#  C3 S1 L'OROLOGIO MORDE (cella H:00 identificata): zero uscite dopo le
+#     H:00:59. L'ALTRA cella si controlla solo col P0 (niente per-trade).
 #  C4 G2: Trades(16) <= Trades(17) <= Trades(R255a), e Profit(16) !=
 #     Profit(17). Rovesciato o identico = NON ESEGUITA.
 #  C5 RISCHIO (a qualunque n): DD equity del CSV _OOS di ogni cella e
 #     "Peggior Giornata %" contro R255a (stesso banco, stessa gamba). Il
 #     tetto di casa R2 (4,272% a saldo chiuso, R255a par. 9) si legge
-#     SOLO sulla cella con per-trade (17:00), curva CONTROLLO (tutto il
+#     SOLO sulla cella con per-trade (quella identificata), curva CONTROLLO (tutto il
 #     file 14:30). La curva IN FASE NON si ricompone qui (servirebbe il
 #     file 15:30 e un per-trade per cella): buco dichiarato.
 #  C6 NESSUNA CELLA SI PROMUOVE. Due celle = un interruttore, non un
@@ -574,8 +606,8 @@ HEAD_C = """\
 #  -> ~1,3-1,7 MIN.
 #
 #  8. BUCHI: la curva IN FASE (file 15:30) NON e' qui; l'uscita a tempo
-#  sul NUDO (EMA spento) no; InpCloseMin ad asse no; il per-trade della
-#  cella 16:00 non esiste (classe 455); l'effetto sugli INGRESSI (par. 3)
+#  sul NUDO (EMA spento) no; InpCloseMin ad asse no; il per-trade
+#  dell'ALTRA cella non esiste (classi 455/850); l'effetto sugli INGRESSI (par. 3)
 #  non si separa da quello sulle uscite senza un per-trade per cella.
 # ====================================================================="""
 
@@ -632,6 +664,8 @@ HEAD_D = """\
 #    H_R84      r in [0,25 ; 0,50]  (il precedente si trasferisce)
 #    H_DILUITO  r >= 0,70           (la media col pre-mercato)
 #    fra 0,50 e 0,70: NESSUNA DELLE DUE, si scrive il numero.
+#    r < 0,25: OLTRE R84 (morde PIU' del precedente): nessuna delle due,
+#    si scrive il numero (cosi' l'asse di r e' coperto tutto).
 #  IL DD: il precedente stesso NON ha un verso unico (R84b: DD x0,27 in
 #  OOS, x0,95 in IS). Attesa scritta: sotto H_R84 DD(1,5)/DD(0,0) fra
 #  0,27 e 0,95; sotto H_DILUITO vicino a 1.
@@ -640,7 +674,8 @@ HEAD_D = """\
 #
 #  4. I CANCELLI (congelati prima; si citano come V<n> [R267d]).
 #  V0 CATENA di R255a par. 8 (E0, P0 con InpVolMult dal CSV, C0 del
-#     per-trade della SOLA cella 2,0: ..._U30USD_796712.csv, L0 short).
+#     per-trade ..._U30USD_796712.csv, UNO, IDENTIFICATO: R267a par. 0,
+#     classe 850 -- atteso 2,0, puo' essere un'altra cella; L0 short).
 #  V1 G0 IN-FILE: la cella 0,0 deve essere == R255a AL CENTESIMO
 #     (Trades, Profit, PF, DD del CSV _OOS; il magic non entra nel
 #     trading). Il legame con l'archivio (G0-ANCORA contro R54a, 73 deal
@@ -651,13 +686,14 @@ HEAD_D = """\
 #     giornata saltata non ne crea un'altra: un ciclo al giorno), con
 #     tolleranza 2 deal (parziali al lotto 0,10); Trades(2,0) < Trades(0,0)
 #     altrimenti il pin non e' arrivato -> NULLO.
-#  V3 SOTTOINSIEME (cella 2,0, dal per-trade): ogni deal ha un gemello in
-#     R255a (793101) con close_time, deal_type e price identici (volume e
-#     net no), salvo le parziali mancanti al lotto 0,10. Un deal senza
-#     gemello = NON LEGGIBILE.
+#  V3 SOTTOINSIEME (cella identificata, dal per-trade): ogni deal ha un
+#     gemello in R255a (793101) con close_time, deal_type e price identici
+#     (volume e net no), salvo le parziali mancanti al lotto 0,10. Un deal
+#     senza gemello = NON LEGGIBILE. Se la cella identificata e' la 0,0 il
+#     confronto e' con R255a stesso: non informa, si scrive cosi'.
 #  V4 RISCHIO (a qualunque n): DD equity e Peggior Giornata % del CSV
 #     _OOS di ogni cella contro la cella 0,0; il tetto R2 di R255a (4,272%
-#     a saldo chiuso) si legge SOLO sulla cella 2,0 (unico per-trade).
+#     a saldo chiuso) si legge SOLO sulla cella identificata (unico per-trade).
 #     Un DD che scende IN PROPORZIONE ai deal NON e' una leva: si scrive
 #     accanto DD(c)/DD(0) e Trades(c)/Trades(0).
 #  V5 ALTOPIANO, MAI IL PICCO; e se nessuna cella batte la 0,0 oltre il
@@ -671,7 +707,7 @@ HEAD_D = """\
 #  7. BUCHI: il filtro sul NUDO (EMA spento, piu' campione) no;
 #  InpVolAvgBars ad asse no (una variabile); InpUseAtrFilter no (su
 #  NASUSD R84c OOS PF 0,97: stesso ruolo); la curva IN FASE (file 15:30)
-#  no; per-trade di UNA sola cella (classe 455).
+#  no; per-trade di UNA sola cella (classi 455/850).
 # ====================================================================="""
 
 
@@ -709,7 +745,8 @@ def head_ema(lettera, sim, base, manopola):
 #  par. 5.
 #
 #  PERCHE' SOLO GBPJPY E XAUUSD (e non i 4 simboli di R264): a 135 s per
-#  passata tick (metro R240) un file = 2 finestre piene = ~4,5 min; 4
+#  passata tick (metro R240: U30USD H1, ALTRO EA; sull'EMA200 H4 e'
+#  [NON MISURATO], classe 751) un file = 2 finestre piene = ~4,5 min; 4
 #  simboli x 2 manopole = 8 file = ~36 min, sopra i ~10 min del mandato.
 #  Scelti per numero: GBPJPY = DD PIU' BASSO dei quattro (4,42%%); XAUUSD =
 #  PF piu' alto fra i VIVI (1,381). AUDJPY ha il PF piu' alto in assoluto
@@ -778,8 +815,9 @@ def head_ema(lettera, sim, base, manopola):
 #
 #  3. L'ATTESA, SCRITTA PRIMA. La leva e' sul DD (il tappo di R139), non
 #  sul PF. Quante posizioni attraversano il venerdi' sera: [NON MISURATO]
-#  (il per-trade del G0 R264 lo dira'; qui sopravvive quello della cella
-#  1). TRE ESITI, UNA PARTIZIONE, cella 1 contro cella 0:
+#  e il per-trade NON lo dice (solo close_time, nessuna ora d'apertura:
+#  classe 847); lo dice la DIFFERENZA fra le due celle. TRE ESITI, UNA
+#  PARTIZIONE, cella 1 contro cella 0:
 #    LEVA           DD(1) <= 0,85 x DD(0)  E  PF(1) >= PF(0) - 0,05
 #    COSTO          PF(1) < PF(0) - 0,05   (qualunque DD: taglia i trend
 #                   H4 che attraversano il weekend)
@@ -810,9 +848,9 @@ def head_ema(lettera, sim, base, manopola):
 #  4. I CANCELLI (congelati prima; si citano come E<n> [R267%s]).
 #  E0 CATENA di R264 par. 5: E0 (moncone: CSV _IS vuoto e rc 2 attesi),
 #     P0 (ogni colonna Inp del CSV _OOS uguale al file, %s compresa),
-#     C0 del per-trade (sopravvive SOLO la cella 1: abtg_trades_
-#     ABTG_EMA200_%s_%s.csv; regola del k di commissione in [1,00 ; 3,00]
-#     EUR/lotto, classe 844).
+#     C0 del per-trade (UNO, IDENTIFICATO: R267a par. 0, classe 850;
+#     abtg_trades_ABTG_EMA200_%s_%s.csv; regola del k di commissione in
+#     [1,00 ; 3,00] EUR/lotto, classe 844).
 #  E1 G0 IN-FILE: cella 0 == %s al centesimo se girato; contro il
 #     genetico, bande di R264 par. 5. ROSSO -> il file si legge solo al
 #     suo interno.
@@ -829,18 +867,19 @@ def head_ema(lettera, sim, base, manopola):
 #  2026.06.30, @FRAZIONEIS 0.001: moncone di 1 giorno + OOS 2024.01.01
 #  -> 2026.06.30 = la finestra del genetico, NON cieca a livello di
 #  vicinato: R264 par. 4).
-#  6. COSTO: 2 finestre piene x 135 s + 2 monconi = ~4,5 MIN.
+#  6. COSTO: 2 finestre piene x 135 s + 2 monconi = ~4,5 MIN [metro di
+#  un ALTRO EA, classe 751: il G0 %s, che gira prima, lo misura].
 #  7. BUCHI: il campione pieno OHLC (2017/2019 -> 2023) con la manopola
 #  no (sarebbe il passo dopo, sul centro di R264 se passa); GBPUSD,
 #  AUDJPY, EURUSD no (par. 1); commissioni/swap FTMO e griglia H4 di FTMO
-#  [NON MISURATI]; per-trade di UNA sola cella (classe 455).
+#  [NON MISURATI]; per-trade di UNA sola cella (classi 455/850).
 # =====================================================================""" % (
         lettera,
         "InpUseAdrFilter" if manopola == "adr" else "InpFridayClose",
         sim, magic, base[:5],
         "casella INERTE MISURATA\n#     (non un difetto: e' H_INERTE)" if manopola == "adr"
-        else "NON ESEGUITA oppure nessuna posizione\n#     viva il venerdi' alle 20 (si guarda il per-trade)",
-        base[:5])
+        else "(con P0 verde) nessuna posizione ne'\n#     pendente viva il venerdi' dopo le 20:00: casella INERTE MISURATA.\n#     Conferma dal per-trade (identiche = uguali): zero chiusure di\n#     venerdi' dalle 20:00:00 in poi",
+        base[:5], base[:5])
     return t.replace("%%", "%")
 
 
@@ -882,6 +921,11 @@ HEAD_G1 = """\
 #  ~1/4 della finestra con un'EMA100 IMMATURA; su H4 poche settimane
 #  [INFERITO: le candele H4 per giorno del D30EUR BCM NON sono contate].
 #  Le celle alte hanno piu' giorni "filtrati male": si scrive accanto.
+#  E COSA VALE L'EMA100 PRIMA DI MATURARE e' [NON VERIFICATO]: se il
+#  buffer vale un seme calcolato, il filtro e' solo IMPRECISO; se vale 0
+#  il bias e' +1 (long SEMPRE ammesso, = corr=0); se vale EMPTY_VALUE il
+#  bias e' -1 (long MAI). Sulla cella D1 sono ~4-5 mesi su 21: si guarda
+#  il mese del primo deal (se la cella D1 e' quella identificata).
 #
 #  4. L'ATTESA, SCRITTA PRIMA.
 #  n: la cella corr=0 di R261a e' attesa ~135 deal (banda 115-160, R261a
@@ -910,8 +954,9 @@ HEAD_G1 = """\
 #     corr=0) + 2 (il filtro toglie giornate, un ciclo al giorno).
 #  D3 MORDE (T3 di R261a): una cella con Trades IDENTICI a R261a corr=0 =
 #     il bias e' tornato 0 (CopyBuffer fallito: r.704) -> NON ESEGUITA.
-#  D4 L0 dal per-trade (sopravvive SOLO la cella D1: abtg_trades_
-#     ABTG_MaxMinNotte_D30EUR_796741.csv): tutte le chiusure deal_type 1.
+#  D4 L0 dal per-trade (abtg_trades_ABTG_MaxMinNotte_D30EUR_796741.csv,
+#     UNO, IDENTIFICATO: R267a par. 0, classe 850): tutte le chiusure
+#     deal_type 1 (vale per qualunque cella).
 #  D5 RISCHIO (a qualunque n): DD a 1% di ogni cella; soglia di casa T5 di
 #     R261a (DD > 4,0% lineare / 4,08% moltiplicativo = fuori da S3 a
 #     2,00%), [DERIVATO].
@@ -921,7 +966,7 @@ HEAD_G1 = """\
 #  1.0). 7. COSTO: 5 finestre piene x 0,28-0,70 min = ~1,4-3,5 MIN.
 #  8. BUCHI: l'orologio sul long (inverno un'ora prima della cash) [NON
 #  MISURATO]; EMA 14/100 non ad asse (una variabile); il riscaldamento
-#  (par. 3); per-trade di UNA sola cella (classe 455); commissione FTMO
+#  (par. 3); per-trade di UNA sola cella (classi 455/850); commissione FTMO
 #  GER40 [NON MISURATA].
 # ====================================================================="""
 
@@ -977,12 +1022,17 @@ def head_uscita(lettera, manopola, asse_txt, celle_txt, codice_txt, attesa_txt, 
 #  U1 G0 IN-FILE: cella-ancora == R261a corr=1 al centesimo (se R261a e'
 #     girato, e con T1/T2 di R261 VERDI). Se no -> NULLO.
 #  U2 LA MANOPOLA MORDE: %s
-#  U3 L0 dal per-trade (sopravvive SOLO l'ultima cella: abtg_trades_
-#     ABTG_MaxMinNotte_D30EUR_%s.csv): tutte le chiusure deal_type 1.
+#  U3 L0 dal per-trade (abtg_trades_ABTG_MaxMinNotte_D30EUR_%s.csv,
+#     UNO, IDENTIFICATO: R267a par. 0, classe 850): tutte le chiusure
+#     deal_type 1.
 #  U4 STESSI INGRESSI: le celle cambiano solo l'uscita, e con un ciclo al
 #     giorno e InpCloseAtEnd le giornate operate sono le stesse. Non c'e'
-#     un per-trade per cella: si controlla solo sull'ultima contro R261a
-#     (stesse date di prima chiusura). Diverso = NON LEGGIBILE.
+#     un per-trade per cella: si controlla sulla cella identificata contro
+#     il per-trade di R261a (stesse date di prima chiusura), e SOLO se
+#     anche quello e' identificato come la cella corr=1 (R261a ha lo
+#     stesso difetto: classe 850, asse corr 0/1 a magic fisso). Se R261a
+#     ha scritto la corr=0, U4 NON SI FA (si scrive), il file non e'
+#     NULLO. Diverso = NON LEGGIBILE.
 #  U5 RISCHIO (a qualunque n): soglia T5 di R261a (DD a 1%% > 4,0%% /
 #     4,08%% = fuori da S3 a 2,00%%) [DERIVATO].
 #  U6 NESSUNA CELLA SI PROMUOVE. Se nessuna batte l'ancora oltre il
@@ -991,7 +1041,12 @@ def head_uscita(lettera, manopola, asse_txt, celle_txt, codice_txt, attesa_txt, 
 #  6. FINESTRA: identica a R261a. 7. COSTO: %s
 #  8. BUCHI: l'uscita sulla cella corr=0 no (e' l'altra base); le altre
 #  manopole d'uscita (InpTP2_R, InpTrailAtrMult, InpUseEMA200Target) no;
-#  l'orologio sul long [NON MISURATO]; per-trade di UNA sola cella.
+#  l'orologio sul long [NON MISURATO]; per-trade di UNA sola cella
+#  (classi 455/850). E UN EFFETTO DI LATO GIA' LETTO IN CASA (R151a):
+#  ManagePos r.407-408 ricalcola risk dallo stop CORRENTE e, se <= 0
+#  (stop in pari o sopra l'ingresso), lo sostituisce con ATR x 2,5:
+#  BE e trailing spostano quindi ANCHE il bersaglio della seconda
+#  parziale (TP2 = 3 x risk). La manopola non e' pura: si scrive.
 # =====================================================================""" % (
         asse_txt, lettera.upper(), {"g2": "796742", "g3": "796743", "g4": "796744"}[lettera],
         celle_txt, codice_txt, attesa_txt, lettera,

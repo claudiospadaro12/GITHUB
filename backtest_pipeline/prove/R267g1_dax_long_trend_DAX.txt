@@ -42,6 +42,11 @@
 #  ~1/4 della finestra con un'EMA100 IMMATURA; su H4 poche settimane
 #  [INFERITO: le candele H4 per giorno del D30EUR BCM NON sono contate].
 #  Le celle alte hanno piu' giorni "filtrati male": si scrive accanto.
+#  E COSA VALE L'EMA100 PRIMA DI MATURARE e' [NON VERIFICATO]: se il
+#  buffer vale un seme calcolato, il filtro e' solo IMPRECISO; se vale 0
+#  il bias e' +1 (long SEMPRE ammesso, = corr=0); se vale EMPTY_VALUE il
+#  bias e' -1 (long MAI). Sulla cella D1 sono ~4-5 mesi su 21: si guarda
+#  il mese del primo deal (se la cella D1 e' quella identificata).
 #
 #  4. L'ATTESA, SCRITTA PRIMA.
 #  n: la cella corr=0 di R261a e' attesa ~135 deal (banda 115-160, R261a
@@ -70,8 +75,9 @@
 #     corr=0) + 2 (il filtro toglie giornate, un ciclo al giorno).
 #  D3 MORDE (T3 di R261a): una cella con Trades IDENTICI a R261a corr=0 =
 #     il bias e' tornato 0 (CopyBuffer fallito: r.704) -> NON ESEGUITA.
-#  D4 L0 dal per-trade (sopravvive SOLO la cella D1: abtg_trades_
-#     ABTG_MaxMinNotte_D30EUR_796741.csv): tutte le chiusure deal_type 1.
+#  D4 L0 dal per-trade (abtg_trades_ABTG_MaxMinNotte_D30EUR_796741.csv,
+#     UNO, IDENTIFICATO: R267a par. 0, classe 850): tutte le chiusure
+#     deal_type 1 (vale per qualunque cella).
 #  D5 RISCHIO (a qualunque n): DD a 1% di ogni cella; soglia di casa T5 di
 #     R261a (DD > 4,0% lineare / 4,08% moltiplicativo = fuori da S3 a
 #     2,00%), [DERIVATO].
@@ -81,7 +87,7 @@
 #  1.0). 7. COSTO: 5 finestre piene x 0,28-0,70 min = ~1,4-3,5 MIN.
 #  8. BUCHI: l'orologio sul long (inverno un'ora prima della cash) [NON
 #  MISURATO]; EMA 14/100 non ad asse (una variabile); il riscaldamento
-#  (par. 3); per-trade di UNA sola cella (classe 455); commissione FTMO
+#  (par. 3); per-trade di UNA sola cella (classi 455/850); commissione FTMO
 #  GER40 [NON MISURATA].
 # =====================================================================
 @SIMBOLO    D30EUR

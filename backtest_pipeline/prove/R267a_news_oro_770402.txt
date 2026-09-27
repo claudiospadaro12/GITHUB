@@ -54,11 +54,24 @@
 #  finestre PIENE vere: 35 (i file a moncone hanno una gamba di 1 giorno,
 #  i DAX hanno @FRAZIONEIS 1.0 e la gamba OOS degenere).
 #
-#  LA REGOLA DI LETTURA CHE VALE PER TUTTI (classe 455): il magic e'
-#  FISSO nei file R267 (l'asse e' la manopola), quindi il per-trade
-#  abtg_trades_<EA>_<SIM>_<magic>.csv lo riscrive ogni passata: resta
-#  SOLO QUELLO DELL'ULTIMA CELLA, gamba lunga. Nessun criterio R267
-#  chiama "n" la colonna Trades: e' [DEAL] (classe 454).
+#  LA REGOLA DI LETTURA CHE VALE PER TUTTI (classi 455 e 850): il magic
+#  e' FISSO nei file R267 (l'asse e' la manopola), quindi il per-trade
+#  abtg_trades_<EA>_<SIM>_<magic>.csv lo riscrive ogni passata: ne resta
+#  UNO, gamba lunga, e QUALE CELLA sia NON E' FISSATO (l'ordine di FINE
+#  delle passate non e' garantito: classe 850, corretta dal cancello del
+#  27/09 su tutti i file R267). Il per-trade quindi si IDENTIFICA prima
+#  di leggerlo: righe = Trades di UNA riga del CSV _OOS e somma dei net
+#  = Profit di quella riga (U30USD entro 0,05, commissione misurata
+#  0,000; D30EUR [NON MISURATA]: se non torna entro 0,05 si usa il k;
+#  XAUUSD e forex: k = (somma net - Profit) / somma volumi in [1,00 ;
+#  3,00] EUR/lotto, classe 844). La cella che il file ASPETTA -> si legge
+#  come scritto. UN'ALTRA cella -> si scrive quale, e i cancelli sul
+#  per-trade si leggono su QUELLA cella (soglie d'ora e di valore prese
+#  dalla cella identificata) o, dove il file lo dice, non si fanno: MAI
+#  il file NULLO per questo. NULLO solo se il per-trade non corrisponde
+#  a NESSUNA cella. Celle identiche (manopola inerte) = indifferente.
+#  Il per-trade ha SOLO close_time: nessuna ora d'APERTURA (classe 847).
+#  Nessun criterio R267 chiama "n" la colonna Trades: e' [DEAL] (454).
 #  L'ANCORA G0 DI OGNI FILE: dove la manopola ha un valore INERTE, quella
 #  cella sta DENTRO il file e deve rifare la base al centesimo (il magic
 #  non entra nel trading: provato dai G1 di R255/R260/R264). Dove non ce
@@ -78,7 +91,10 @@
 #     dava 20,4 s: la velocita' del PC su oro OHLC e' [NON MISURATA]);
 #   metro tick U30USD 0,333 min/passata (dal mandato) e 93-102 s per un
 #     file R255 da 2 celle (R255a par. 14, stesso PC, stesso carico);
-#   metro tick EMA200 H4 135 s/passata (R240, prove/R214f par. 7);
+#   metro tick 135 s/passata: MISURATO su R240 (U30USD H1 tick, ALTRO
+#     EA, stesso PC; prove/R214f par. 7), NON sull'EMA200 H4: su GBPJPY/
+#     XAUUSD a tick e' [NON MISURATO] (classe 751). Lo misura il G0
+#     R264c/d, che gira PRIMA (ordine sotto): li' si rilegge il tetto;
 #   metro tick D30EUR M15 0,28-0,70 min per finestra piena (R261 par. 9).
 #     R267a  0 (NON LANCIARE; sbloccato: vedi par. 6 -- costo APERTO)
 #     R267b  5 finestre piene x 0,7        = ~3,5 min (+ avvio)  ~4-5 min
@@ -87,7 +103,9 @@
 #     R267e1/e2/f1/f2  2 finestre piene x 135 s = 4,5 min x 4 = ~18 min
 #     R267g1-g4  13 finestre piene x 0,28-0,70           ~3,6-9,1 min
 #   TOTALE LANCIABILE (senza R267a): ~30-38 MINUTI. TETTO LARGO 2 ORE:
-#   oltre, ci si ferma e si guarda (caso lento del 21/09).
+#   oltre, ci si ferma e si guarda (caso lento del 21/09). ESCLUSI dal
+#   totale i G0 ESTERNI (R255a, R261d/c/a, R264c/d): sono dei loro round;
+#   se non sono gia' girati si aggiungono, e girano PRIMA.
 #   EMA200: con 4 simboli x 2 manopole sarebbero 8 file = ~36 min, sopra
 #   i ~10 min chiesti -> SOLO GBPJPY e XAUUSD (par. 0 di R267e1). E anche
 #   cosi' sono ~18 min: dichiarato, e spezzato in due onde da ~9 min.
@@ -115,8 +133,9 @@
 #   - P8 (London breakout sul box asiatico via MaxMinNotte): e' R266,
 #     di un altro agente, gia' in coda. P7 (Londra, blocco S di R258):
 #     non in questo mandato; R258 non e' ancora girato.
-#   - Stop in ATR sull'oro (InpSLMode=1): gia' CADUTO in casa
-#     (oro_maxmin_fase1_*.csv: DD 9,3-26,5% contro 3,7-5,7%).
+#   - Stop in ATR sull'oro (InpSLMode=1): gia' CADUTO in casa A BUFFER
+#     200, vicino al pin 250 (oro_maxmin_fase1_*.csv: DD 9,3-26,5% contro
+#     3,7-5,7%; caccia par. 0 punto 2).
 #   - Ampiezza del box in ATR, ADX/pendenza EMA: servono input nuovi
 #     (codice), fuori da "costo zero".
 #
@@ -185,12 +204,18 @@
 #  4. I CANCELLI (congelati prima; si citano come N<n> [R267a])
 # =====================================================================
 #  N0 PRONTO: par. 6-A chiuso per iscritto. Altrimenti NON si lancia.
-#  N1 CANARINO NEL LOG (InpVerbose=true, pinnato): ogni passata deve
-#     stampare "[MaxMinNotte] news caricate: N." (LoadNews r.798) con N
-#     = 2971, o 2972 se la riga d'intestazione "Data Ora;Impatto;..."
+#  N1 CANARINO NEL LOG (InpVerbose=true, pinnato) -- SI LEGGE SOLO IN
+#     TEST SINGOLO, PRIMA del round. Il driver scrive sempre
+#     Optimization=1 (walkforward_generico.ps1) e in ottimizzazione
+#     Print() non esiste (classi 526 e 847): nella corsa del round la
+#     riga NON C'E' e la sua assenza non dice niente. Nella passata
+#     singola (la cella della via A2, o una cella dopo A1) Log r.210
+#     deve stampare "[MaxMinNotte] news caricate: N." (LoadNews r.798)
+#     con N = 2971, o 2972 se la riga d'intestazione "Data Ora;..."
 #     passasse lo StringToTime [NON VERIFICATO; innocua: impatto 0, non
 #     supera InpNewsMinImpact 3]. Se stampa "file news non trovato:
-#     filtro di fatto spento." -> NULLO.
+#     filtro di fatto spento." -> NON SI LANCIA. Nella corsa ottimizzata
+#     il canarino e' N3, non il log.
 #  N2 G0 IN-FILE: cella 0 contro R260c/R103 (Trades 693, PF 1.308, DD
 #     5.32, Profit 24736) entro UNA giornata (par. 3). Se no -> NULLO.
 #  N3 LA MANOPOLA MORDE: cella 1 con Profit diverso dalla cella 0. Uguali
@@ -230,8 +255,10 @@
 #     (A2) COSTO ZERO, MAI PROVATA IN CASA: copiare a mano il CSV nella
 #          sandbox dell'agente del PC (...\Tester\Agent-127.0.0.1-300x\
 #          MQL5\Files\) prima del job, e lanciare UNA cella in test
-#          singolo per leggere il canarino N1. R93_CRITERI par. 8 la
-#          elenca come piano B, MAI misurata. [NON VERIFICATA]
+#          singolo per leggere il canarino N1. R93_CRITERI par. 8
+#          (piano B, punti 1 e 3) elenca due varianti VICINE -- il CSV
+#          nella cartella Files del TERMINALE + test singolo; un solo
+#          agente --, MAI misurate. [NON VERIFICATA]
 #  B (BUCO, la copertura). Il file news copre 2021.01.04 -> 2025.12.19;
 #    la finestra di R103 e' 2020.01.01 -> 2026.06.30. Sui ~18,5 mesi
 #    fuori (tutto il 2020 e 2025.12.20-2026.06.30), cioe' ~24% dei 78

@@ -75,10 +75,14 @@
 #
 #  6. IL MERITO -- TRE IPOTESI, UNA PARTIZIONE, LETTE DENTRO UN'EPOCA.
 #  Dal per-trade di R260c (magic 795303, 6,5 anni) e da quello di questo
-#  file (sopravvive SOLO l'ultima cella = 2600, classe 455): nella
-#  finestra 2024.01.01 -> 2026.06.30 (data di CHIUSURA), le posizioni di
-#  R260c si dividono in TENUTE (stessa data e stesso close_time presenti
-#  nel per-trade di 2600) e TOLTE (box < 26 $). PF per posizione delle
+#  file, IDENTIFICATO come dice R267a par. 0 (classe 850: la cella che
+#  sopravvive NON e' fissata; oro = regola del k, classe 844). Sia S la
+#  soglia della cella identificata. Nella finestra 2024.01.01 ->
+#  2026.06.30 (data di CHIUSURA) le posizioni di R260c si dividono in
+#  TENUTE (stessa data e stesso close_time presenti nel per-trade della
+#  cella S) e TOLTE (box < S). Tarata su S = 2600; S = 1950 o 1300 si
+#  legge uguale, con meno TOLTE; S = 650 o 0 -> TOLTE quasi vuote o
+#  vuote: NON MISURABILE (si scrive con S e n). PF per posizione delle
 #  due, dallo STESSO file R260c (stesse taglie, stessa curva):
 #    H_GIORNO   PF_tenute >= PF_tolte + 0,30  (il box stretto e' un
 #               giorno peggiore anche a parita' d'epoca: il filtro e' una
@@ -136,7 +140,7 @@
 #  10. BUCHI: box 2020-2024 [NON MISURATO]; il filtro in PUNTI non e'
 #  quello in ATR dei vendor (serve codice); InpMaxBoxPts non e' ad asse
 #  (una variabile); OHLC; spread [NON PINNATO DA QUESTA CORSIA] come
-#  R260c; per-trade di UNA sola cella (classe 455): la lettura per anno
+#  R260c; per-trade di UNA sola cella (classi 455/850): la lettura per anno
 #  delle altre quattro celle NON esiste.
 # =====================================================================
 @SIMBOLO    XAUUSD

@@ -57,6 +57,8 @@
 #    H_R84      r in [0,25 ; 0,50]  (il precedente si trasferisce)
 #    H_DILUITO  r >= 0,70           (la media col pre-mercato)
 #    fra 0,50 e 0,70: NESSUNA DELLE DUE, si scrive il numero.
+#    r < 0,25: OLTRE R84 (morde PIU' del precedente): nessuna delle due,
+#    si scrive il numero (cosi' l'asse di r e' coperto tutto).
 #  IL DD: il precedente stesso NON ha un verso unico (R84b: DD x0,27 in
 #  OOS, x0,95 in IS). Attesa scritta: sotto H_R84 DD(1,5)/DD(0,0) fra
 #  0,27 e 0,95; sotto H_DILUITO vicino a 1.
@@ -65,7 +67,8 @@
 #
 #  4. I CANCELLI (congelati prima; si citano come V<n> [R267d]).
 #  V0 CATENA di R255a par. 8 (E0, P0 con InpVolMult dal CSV, C0 del
-#     per-trade della SOLA cella 2,0: ..._U30USD_796712.csv, L0 short).
+#     per-trade ..._U30USD_796712.csv, UNO, IDENTIFICATO: R267a par. 0,
+#     classe 850 -- atteso 2,0, puo' essere un'altra cella; L0 short).
 #  V1 G0 IN-FILE: la cella 0,0 deve essere == R255a AL CENTESIMO
 #     (Trades, Profit, PF, DD del CSV _OOS; il magic non entra nel
 #     trading). Il legame con l'archivio (G0-ANCORA contro R54a, 73 deal
@@ -76,13 +79,14 @@
 #     giornata saltata non ne crea un'altra: un ciclo al giorno), con
 #     tolleranza 2 deal (parziali al lotto 0,10); Trades(2,0) < Trades(0,0)
 #     altrimenti il pin non e' arrivato -> NULLO.
-#  V3 SOTTOINSIEME (cella 2,0, dal per-trade): ogni deal ha un gemello in
-#     R255a (793101) con close_time, deal_type e price identici (volume e
-#     net no), salvo le parziali mancanti al lotto 0,10. Un deal senza
-#     gemello = NON LEGGIBILE.
+#  V3 SOTTOINSIEME (cella identificata, dal per-trade): ogni deal ha un
+#     gemello in R255a (793101) con close_time, deal_type e price identici
+#     (volume e net no), salvo le parziali mancanti al lotto 0,10. Un deal
+#     senza gemello = NON LEGGIBILE. Se la cella identificata e' la 0,0 il
+#     confronto e' con R255a stesso: non informa, si scrive cosi'.
 #  V4 RISCHIO (a qualunque n): DD equity e Peggior Giornata % del CSV
 #     _OOS di ogni cella contro la cella 0,0; il tetto R2 di R255a (4,272%
-#     a saldo chiuso) si legge SOLO sulla cella 2,0 (unico per-trade).
+#     a saldo chiuso) si legge SOLO sulla cella identificata (unico per-trade).
 #     Un DD che scende IN PROPORZIONE ai deal NON e' una leva: si scrive
 #     accanto DD(c)/DD(0) e Trades(c)/Trades(0).
 #  V5 ALTOPIANO, MAI IL PICCO; e se nessuna cella batte la 0,0 oltre il
@@ -96,7 +100,7 @@
 #  7. BUCHI: il filtro sul NUDO (EMA spento, piu' campione) no;
 #  InpVolAvgBars ad asse no (una variabile); InpUseAtrFilter no (su
 #  NASUSD R84c OOS PF 0,97: stesso ruolo); la curva IN FASE (file 15:30)
-#  no; per-trade di UNA sola cella (classe 455).
+#  no; per-trade di UNA sola cella (classi 455/850).
 # =====================================================================
 @SIMBOLO    U30USD
 @PERIODO    M5
