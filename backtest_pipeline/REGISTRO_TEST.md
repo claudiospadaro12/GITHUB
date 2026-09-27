@@ -4216,7 +4216,7 @@ Il verdetto per tutte le celle mai girate su BCM resta **NON ANCORA MISURATO (so
 
 ---
 
-## 🌙 26/09/2026 — R260 / R261: IL LATO LONG DEI DUE MAXMIN — ⏳ IN CODA, NON GIRATI
+## 🌙 26/09/2026 — R260 / R261: IL LATO LONG DEI DUE MAXMIN — ✅ GIRATI il 27/09 (ROUND CORTI B): verdetti in fondo, sezione «27/09 — VERDETTI ROUND CORTI B»
 
 Richieste di Claudio del 26/09: _"INTENDEVO LA PARTE BREAKOUT DEL MIN MAX ORO. QUANDO ROMPE AL
 RIALZO SI ENTRA"_ · _"ANCHE DEL MINMAX DAX OTT CI SERVE LA VERSIONE LONG"_. Dossier di partenza:
@@ -4265,7 +4265,7 @@ prova` **nessun difetto meccanico**, ASCII puro.
 
 ---
 
-## 📐 26/09/2026 — R262 e R263 sul candidato `770201` (Dow BREAKOUT a due lati, 15', `U30USD` M5) — ⏳ IN CODA, NON GIRATI
+## 📐 26/09/2026 — R262 e R263 sul candidato `770201` (Dow BREAKOUT a due lati, 15', `U30USD` M5) — ✅ GIRATI il 27/09 (ROUND CORTI B): verdetti in fondo, sezione «27/09 — VERDETTI ROUND CORTI B»
 
 EA **`ABTG_Nasdaq_Apertura_US`** (non `ABTG_Dow_Apertura_US`: l'archivio del `770201` l'ha prodotto
 `dow_apertura.ps1` r.37). Pin letti da `prove/R245b_*` dal generatore `prove/R262_R263_GENERA.py`
@@ -4551,3 +4551,34 @@ Ogni numero della caccia citato come **[SONDA OANDA, screening]** o **[DICHIARAT
   di lato di `ManagePos` r.407-408 (BE e trailing spostano anche il bersaglio TP2, già letto in R151a).
   **(7)** R267g1: il valore dell'EMA100 **prima di maturare** (seme / 0 / EMPTY_VALUE) è [NON VERIFICATO] e
   cambia il verso del bias nei primi ~4-5 mesi della cella D1.
+
+---
+
+## ⚖️ 27/09/2026 — VERDETTI ROUND CORTI B (R260 · R261 · R262 · R263)
+
+Corsa sul PC di backtest `DESKTOP-H4D7CAJ`, 27/09 09:10-09:54, pin `02c70e17`, **18/18 partiti, 0 nulli**.
+Archivio: `risultati_archivio/ROUND_CORTI_B_2026-09-27/`. Referto con tabelle e fonti:
+`report/REFERTO_ROUND_CORTI_B_2026-09-27.md`. Criteri applicati: quelli congelati nei file di testa, e solo quelli.
+**Niente e' promosso, niente e' archiviato, nessuna taglia proposta.**
+
+| round | verdetto | numeri (fonte: CSV/per-trade dell'archivio) |
+|---|---|---|
+| **R260c** oro due lati | **G0 VERDE** = R103 alla cifra: la guardia di HEAD `7d0da9f9` e' inerte nel tester (misurato). **R193a non si lancia piu'** | 693 deal · 511 pos. · PF 1,30771 · +24736,49 · DD 5,3158% @0,5% · anni negativi 2021, 2023 |
+| **R260a** oro SOLO LONG | **R2 RISPETTATO** -> partizione **HP** (PF_L >= 1,308; prevista HPs: sbagliata). Rischio: DD > 2,06% -> **fuori da S3 a 2,00%** con tutte e due le formule [DERIVATO] | 375 deal · **279 pos.** · PF pos. **1,336** (CSV 1,33476) · meta' 1,171 / 1,521 · +14062,14 · DD CSV **4,5172%** @0,5% (saldo chiuso con k 4,15%) · anni negativi 2021, 2023 · a 2,00%: 16,9-18,1% [DERIVATO, OHLC = limite inferiore] |
+| **R260b** oro SOLO SHORT | si riporta, non decide; la previsione "PF_S > 1,308" cade: il lato debole qui e' lo short | 318 deal · 232 pos. · PF pos. 1,255 · meta' 1,116 / 1,404 · DD 4,0755% |
+| R260 struttura | il solo-long e' IDENTICO (close_time e prezzo) alle 375 chiusure long della straddle; 0 giornate con tutti e due i lati: l'OCO non ha mai rubato una giornata in 6,5 anni | n_a + n_b = 693 = n_c |
+| **R261d / R261c** | **T1 VERDE** (generico = 770411 short) · **T2 VERDE** (banco = R244b long) | r81a/R246i e R244b C=12 al centesimo |
+| **R261a** DAX long, filtro S&P | G2 ok · T3 ok (il filtro morde) · **nessun INDIZIO** (H0) · merito sospeso (T4) · rischio **fuori da S3 a 2,00%** [DERIVATO] | corr=0: 147 deal PF 0,90464 DD 7,92% · corr=1: 103 deal, **72 pos.**, **PF 0,883**, DD **7,82%** @1% -> a 2,00% 15,0-15,7% |
+| **R261b** DAX long, InpMgmtTF | punto (5) del certificato CHIUSO; nessuna cella >= 1,00, PF cala salendo di TF | M15..H4: PF 0,883 / 0,869 / 0,705 / 0,823 / 0,761 / 0,724 / 0,721; stesse 72 giornate in M15 e H4 |
+| **DAX LONG (certificato del 09/09)** | **NON ANCORA MISURATO (3: uscita)** — NON morto. Mancano trailing / breakeven / parziale = **R267g2-g4**, in coda nella riga CORTI C | (1) PF: 0 su 41 celle distinte a tick >= 1,00 · (2) n/DD si · (4) gemelli si · (5) TF si (R261b). Limite: nessun allargamento sugli ingressi (PF < 1,10 ovunque) |
+| **R262** 770201 EmaSlow 160..320 | G0 VERDE 48/48 · 160-280 PASSA, 300/320 NO (2/4) · **blocco 160-280 -> CENTRO 220** (interno) · A9: +0,0023 contro 200 -> **"il 200 va bene; lo spostamento e' solo di REGOLA"** · ne' H1 ne' H2 (la chiusura a destra viene dall'IS; OOS 260=280 identico = manopola inerte) | mediana del blocco, TP 0,50: PF IS 1,265 / OOS 1,481; TP 0,67: 1,241 / 1,454 |
+| **R263** 770201 DD a 2% | P0, G0-n, G0-SOLDI, G1-incrociato, G0-STRUTTURA tutti VERDI · **0/48 sotto il muro 10% a 2%** · muro fra **1,25 e 1,50%** (1,38 IS / 1,44 OOS [DERIVATO]) · muro giornaliero mai toccato | curva IS 7,31/9,10/10,85/12,56/14,22 · OOS 7,01/8,73/10,43/12,15/13,81 (1,00..2,00%) · R263e/f saldo chiuso 13,31% / 11,88%, al tetto 100 lotti 3 / 6 posizioni |
+
+- 🔴 **Oro long, cosa manca per una sedia** (referto par. 5): taglia = firma di Claudio (a 1,0% 8,8-9,0%, a 2,0% 16,9-18,1%
+  [DERIVATO, OHLC]); R193b mai girato, punta al banco spento e misura la straddle (serve la variante long); l'EA non e' su
+  `C:\FTMO` (CLAU12 copre 7 file, non questo); preset FTMO a due lati (`InpAllowShort=true`, magic 770402): serve un preset nuovo
+  con magic nuovo; orologio oro [INFERITO]; costo 73,2x su n=2.
+- ✏️ **Pre-lettura della riga corretta alla fonte**: i DD a saldo chiuso dell'oro 4,14/3,70/4,84% erano senza commissione
+  d'ingresso; con k x volume (classe 844) sono **4,15/3,73/4,89%**.
+- 🔴 **NON VERIFICATI**: tick reali sull'oro; spread in memoria del PC (classe 394); orologio dell'oro; R262/R263 a ora fissa
+  (nessun numero descrive FTMO a 16:30; R248 = REVISIONE aperta); curva DD(taglia) del centro 220 non misurata; commissioni FTMO.
