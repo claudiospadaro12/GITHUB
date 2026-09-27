@@ -36019,3 +36019,23 @@ aveva `log_tester()` scritto e MAI chiamato. Regola: ogni frase della riga che r
 nel referto", "lo conferma il referto") e' una RICHIESTA al lettore: si cerca con grep nella riga prima di consegnare il lettore, e per
 ciascuna il lettore o la esegue o scrive per nome perche' non puo'. Ricopiare l'avvertenza e' il rinvio che torna indietro vuoto.
 Corretto nel commit (S5 nel verdetto della griglia e di R265b, `d0_dai_log`, T-contro nell'autotest).
+
+### CLASSE 889 — il CONTRO-ESEMPIO di una causa implementato al suo estremo piu' stretto ("nessuna gamba a 0,02") quando la testa stessa ASPETTA gambe a 0,01-0,03: la guardia non parte MAI e scrive per giunta "causa SMENTITA"; e un controllo di identificazione (vol2/vol1) che la causa sotto esame QUANTIZZA, usato come cancello (28/09/2026, cancello di giudizio su `righe/RIGA_ROUND_CORTI_C2_R264D_ORO.txt` @ `05f5dbb4`, parente della 303, della 390 e della 875)
+Caso: la mini-riga C2 rilancia R264d1-d4 (oro a 100000) solo se nel RIEPILOGO della riga C *"gambe 1 con volume >= 0,02: 0 su N"* e
+vol2/vol1 fuori `[1,36 ; 2,125]` in al massimo N/2 coppie. Ma la testa R264 scrive al par. 5 *"il lotto esce ~0,01-0,02"* e al par. 11
+*"gambe a 0,01-0,03"*, e il resoconto `dbf4ccd6` che ha fatto nascere la riga dice *"lotti 0,02/0,03"*. Conto dal sorgente
+(`ABTG_EMA200.mq5` PlaceOrders/LotByRisk: rischio gamba 1 = (O1+O2+SLatr) x ATR = 1,7 ATR, 0,5% di 10000, floor al passo 0,01):
+gamba 1 >= 0,02 appena l'ATR H4 dell'oro sta sotto ~17 $, il caso normale sull'oro del 2024 a 2000-2700 $ [STIMA: l'ATR H4
+dell'oro NON e' misurato in repo]. Quindi X = 0 non torna nel mondo che la testa stessa aspetta:
+contro-esempio eseguito in pwsh sul formato ESATTO della riga C, scenario misto 38 su 90 -> la riga originale scrive *"la causa ...
+e' SMENTITA, il ROSSO va spiegato altrimenti"* (falso: 52 coppie su 90 stanno al pavimento, dove la parziale del 50% non parte);
+scenario 100% al pavimento con 0,01/0,01 (rapporto 1,0) in 60 coppie su 90 -> la riga originale scrive *"identificazione delle gambe
+sbagliata"* (falso: e' il pavimento che quantizza il rapporto a 1,0 / 2,0 / 3,0). Piu': la regex `^G0 R264d XAUUSD ` non vedeva la
+riga *"G0 R264d: NON VERIFICABILE (file NULLO)"* che la riga C scrive in quel caso, quindi il ramo "NON VERIFICABILE" era codice morto
+e il rifiuto diceva *"manca la riga"*. Regola: (1) un contro-esempio scritto a parole ("se le gambe hanno volume >= 0,02") si
+implementa nella lettura che NON fa contraddire la testa con le sue stesse attese: prima di codificarlo si mette accanto l'attesa
+della testa (qui 0,01-0,03) e si controlla che il mondo atteso NON lo faccia scattare; (2) un controllo di COERENZA (rapporto,
+identificazione) calcolato su grandezze che la causa sotto esame quantizza non puo' fare da cancello a quella causa: si legge e si
+scrive, e decide solo cio' che la testa gli attribuisce (qui il K1, non il lancio); (3) una regex che cerca la riga di un altro
+script si prova su TUTTI i formati che quello script scrive, compreso quello del ramo NULLO. Corretto: smentita solo con X = N
+(nessuna gamba 1 al pavimento), quota al pavimento stampata e ricopiata nel RIEPILOGO, vol2/vol1 informativo, regex `^G0 R264d[ :]`.
