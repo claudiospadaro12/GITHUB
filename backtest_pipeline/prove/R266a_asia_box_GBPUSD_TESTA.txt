@@ -255,6 +255,25 @@
 #       long  (R266e)   192-573              249-745
 #       short (R266f)   226-677              294-879
 #       due lati(R266d) 378-1129             491-1467
+#  AGGIUNTO dal cancello del 27/09, dopo l'audit della caccia
+#  (caccia_strategie/AUDIT_CACCIA_MECCANISMI_2026-09-26.md par. 4.1,
+#  commit d7c667fc), perche' tocca la base di questi numeri:
+#   - la sonda del dossier meccanismi scartava i giorni con < 300 barre
+#     M1 nel box (i piu' quieti, mediana 15-22 pip) SENZA dichiararlo:
+#     le QUOTE di giorni sopra soglia sono gonfiate di qualche punto
+#     (GBPUSD 2019 26% -> 20% tenendo tutti i giorni). Se la sonda P8
+#     (stesso cacciatore, script fuori repo) usa lo stesso filtro
+#     [NON VERIFICATO], la frase "> 68,3%" qui sopra non e' garantita:
+#     la soglia piu' bassa la alza, il filtro tolto la abbassa. Gli n
+#     ASSOLUTI della base invece restano un limite basso rispetto al
+#     filtro (togliere un filtro aggiunge giorni, non ne toglie).
+#   - le quote corrette dell'audit (W >= 27,7 GBPUSD: 31-78% per anno;
+#     W >= 20,6 EURUSD: 16-87%, 2019 al 16%) sono sul box 23:00-05:59
+#     UTC di 7 ore del dossier meccanismi, NON sul box 00-08 UK di 8
+#     ore di R266 (che contiene l'ora 06-07 UTC, la piu' larga del
+#     profilo prima di Londra): non sostituiscono la base P8, ma dicono
+#     che sull'euro l'anno 2019 puo' essere quasi vuoto. E' la ragione
+#     del x0,5 in basso sull'EURUSD, e resta [STIMA].
 #  In ogni cella il limite BASSO della banda sta sopra 150: se esce
 #  sotto, e' un fatto da spiegare (storico, cifre, cancello), non rumore.
 #  CONTROLLO DI STRUTTURA, gratis: n(solo long) + n(solo short) >= n(due
@@ -298,9 +317,19 @@
 # =====================================================================
 #  R0  -SoloControllo: 2 celle per finestra in ogni file (asse = solo
 #      InpMagic, gemelle a passo 50). Altrimenti STOP.
-#  D0  STORICO: il primo deal della gamba IS cade entro il 2015.01.15.
-#      Se dopo -> storico M1 mancante sul PC: la gamba IS e' corta e le
-#      posizioni si ricontano sulla finestra VERA, dichiarandola.
+#  D0  STORICO: la gamba IS deve partire davvero dal 2015. [CORRETTO dal
+#      cancello del 27/09: la v1 diceva "il primo deal della gamba IS
+#      cade entro il 2015.01.15", ma il per-trade dell'IS NON SOPRAVVIVE
+#      (par. 9: la gamba OOS, stesso magic, lo sovrascrive) e il CSV _IS
+#      non porta date: quel numero non lo legge nessuno.] Si legge nel
+#      giornale dell'agente del tester della gamba IS (riga "history
+#      synchronized from ..." / "history cache ... bars from ..." di
+#      GBPUSD/EURUSD M1) [NON VERIFICATO che l'agente la scriva anche in
+#      ottimizzazione]; se non c'e', D0 resta [NON VERIFICATO] e lo si
+#      scrive nel referto PRIMA del merito IS. In ogni caso: posizioni
+#      IS derivate (par. 9) sotto il limite basso della banda (par. 6.2)
+#      -> prima si sospetta lo storico corto, poi il resto. La prova
+#      pulita e' la corsa singola della gamba IS del par. 11.
 #  D1  CIFRE: un file con Trades IS < 20 NON si legge come "niente
 #      edge": prima si verifica Digits del simbolo nel terminale del PC
 #      (par. 5, contro-esempio del 4 cifre).
@@ -313,18 +342,46 @@
 #      controllo di struttura del par. 6.2.
 #  C0  PER-TRADE CONTRO CSV (classe 844, R264): ExportTrades scrive solo
 #      i deal d'USCITA e il tester addebita la meta' della commissione
-#      sull'INGRESSO. (somma net_profit - Profit) / lotti = k, atteso in
+#      sull'INGRESSO. (somma net_profit - Profit del CSV _OOS: il per-
+#      trade che sopravvive e' quello dell'OOS, par. 9) / lotti = k,
+#      atteso in
 #      [1,00 ; 3,00] EUR/lotto (misurato sui per-trade di R39: GBPUSD
 #      2,305, EURAUD/EURCAD 2,000; EURUSD [NON MISURATO]) e UGUALE fra
 #      gemelle. Fuori -> si indaga, non si legge.
-#  K1  COSTO: per costruzione (par. 5). Verifica a campione nel log:
-#      ogni "BUY STOP @ x SL y" / "SELL STOP" ha |x - y| >= 33,7 pip
-#      (GBPUSD) / 26,6 pip (EURUSD). Una sola riga sotto = il buffer
-#      effettivo NON e' quello atteso -> il file si scrive "COSTO NON
-#      GARANTITO" e non si legge il merito.
+#  K1  COSTO: per costruzione (par. 5): stop = W + 2 x max(30,
+#      STOPS_LEVEL) punti >= 337 (GBPUSD) / 266 (EURUSD); EffBuffer
+#      (r.727) puo' solo ALLARGARE lo stop, e l'unica via per cui il
+#      cancello cade e' _Point diverso da 0,00001 (-> D1).
+#      [CORRETTO dal cancello del 27/09: la v1 lo verificava "a campione
+#      nel log" su "BUY STOP @ x SL y". NON si puo', per due ragioni
+#      indipendenti: (a) Log() stampa i prezzi con %.2f (r.356, r.368):
+#      su un 5 cifre la riga e' "BUY STOP @ 1.27 SL 1.27", |x - y| esce
+#      0 o 100 pip, e la regola "una sola riga sotto -> COSTO NON
+#      GARANTITO" avrebbe annullato il merito di OGNI file; (b) il driver
+#      gira Optimization=1 e in ottimizzazione Print() non viene eseguito
+#      (classe 526): quelle righe non esistono proprio.]
+#      VERIFICA A CAMPIONE, SUL PER-TRADE OOS (formula della classe 846,
+#      come R264 K1): per ogni position_id, vol = somma dei volumi
+#      d'uscita; saldo = 10000 + somma dei net delle posizioni chiuse
+#      prima - k x i loro volumi (k del C0); R = saldo x 0,010 EUR;
+#      LotByRisk fa il floor al passo 0,01 (r.757), quindi
+#          stop <= R / (vol x C x q)     (unita' di prezzo, USD)
+#      con C = ContractSize (100000 atteso [NON VERIFICATO sul PC]) e
+#      q = EUR per USD. Per non condannare a torto si usa q_min = 0,80
+#      [STIMA: EURUSD mai sopra ~1,25 nel 2015-2026] (su EURUSD si puo'
+#      usare q = 1 / price della riga, a meno dello stop). Se per UNA
+#      posizione R / (vol x C x 0,80) < 0,00337 (GBPUSD) / 0,00266
+#      (EURUSD), lo stop era sotto il cancello -> "COSTO NON GARANTITO",
+#      il merito non si legge. Controprova numerica: GBPUSD, saldo
+#      10000, stop 33,7 pip, q 0,86 -> lot = floor(100/(0,00337 x 86000))
+#      = 0,34 -> limite 100/(0,34 x 80000) = 0,00368 >= 0,00337: PASSA;
+#      stop 20 pip -> lot 0,58 -> limite 100/(0,58 x 80000) = 0,00216 <
+#      0,00337: CADE. Il test vede uno stop sotto ~0,93 x il cancello,
+#      non uno appena sotto: e' un campione, il cancello e' la costruzione.
 #  R2  MERITO, letto sul per-trade in POSIZIONI (position_id distinti)
 #      e sul CSV per il PF: la partizione del par. 6.3. Si riporta anche
-#      il conto anno per anno, senza soglia (la spina dorsale), e lo
+#      il conto anno per anno, senza soglia (la spina dorsale; SOLO per
+#      l'OOS: il per-trade dell'IS non sopravvive, par. 9), e lo
 #      spezzato OOS mesi allineati / sfasati (par. 3), senza soglia.
 #  R3  RISCHIO (a qualunque n): DD equity a 1,0%. Traduzione a 2,00%
 #      (la taglia FTMO firmata il 20/09) con le due formule di R193b B3:

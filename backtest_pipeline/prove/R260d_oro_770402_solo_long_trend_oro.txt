@@ -38,6 +38,13 @@
 #  calc_on_every_tick, par. 4 del dossier). E la stessa scelta,
 #  indipendente, di Code Base 77691 ("when gold trades below its 200 EMA,
 #  the EA simply stops buying").
+#  L'ORA DELLA FONTE, CORRETTA [AGGIUNTO dal cancello del 27/09, AUDIT_
+#  CACCIA_MECCANISMI_2026-09-26.md P3]: il box di bradenstrock e' 19:00-
+#  00:00 New York = 00:00-04:59 BCM (UTC+1), NON 23:00-04:59 come diceva
+#  il dossier (aveva scritto l'ora UTC chiamandola BCM). Qui non conta:
+#  R260d NON importa il box della fonte, solo la regola di direzione.
+#  Box, piazzamento, cutoff e chiusura sono quelli di R260a (23:00-04:59,
+#  07:00, 08:30, 17:30), identici pin per pin (diff sopra).
 #
 #  IL CODICE, LETTO (ABTG_MaxMinNotte.mq5 HEAD 7d0da9f9, 918 righe):
 #   r.164-168  input InpUseCorrelation / InpCorrSymbol / InpCorrTF /
@@ -70,12 +77,29 @@
 #  (+) 770411, DAX short, stesso EA: il cancello S&P ha portato il PF da
 #      1,0-1,25 (corr OFF, ~100 trade, DD 6-9%) a 2,05 (corr ON, 41
 #      trade, DD 3,1%) -- REGISTRO_TEST r.661-672, valid_MaxMin_DAX_short
-#      _refine. n = 41: un precedente, non una misura di merito.
+#      _refine. Sulla cella viva, dal CSV (report/SEDIA_770411_IL_RIENTRO_
+#      2026-09-20.md r.67-70): PF 1,181 -> 2,053, DD 6,10% -> 3,07%, e
+#      n da 98 a 41 (il filtro ha tolto il 58% delle operazioni). n = 41:
+#      un precedente, non una misura di merito.
 #  (-) stesso registro, r.674: "la correlazione S&P NON salvava il
 #      breakout M5 (test Marco/Emiliano) ma QUI salva il night-box. Il
 #      filtro giusto dipende dalla strategia." E la lezione di casa dei
 #      filtri aggiunti: 0 successi su 5 (CACCIA_MECCANISMI par. 4 P3,
-#      punteggio). Il prior e' quindi NEUTRO, non favorevole.
+#      punteggio).
+#  (-) E LA MISURA PIU' VICINA, ed e' CONTRARIA [AGGIUNTO dal cancello
+#      del 27/09]: CACCIA_PARAMETRI_SEI_FAMIGLIE_2026-09-26.md par. 2.3
+#      (sonda Oanda 2015-2020 sul box di 770402, uscita semplificata a un
+#      solo TP 2,5 R) -- long col trend D1 CONCORDE (EMA14 > EMA100,
+#      barra chiusa) n 97, E -0,031 R, PF 0,89; long CONTRO il trend D1
+#      n 54, E +0,179 R, t +1,78, PF 1,88. Il dossier parametri la scrive
+#      come "contro-esempio pronto per P3". Non e' la stessa regola (D1
+#      EMA14/100 contro H4 chiusura/EMA200), non e' lo stesso regime
+#      (2015-2020, box stretti, contro il 2020-2026 di R260a) e non e'
+#      la stessa uscita: e' un PRIOR, non un verdetto. Ma va nel verso
+#      opposto alla tesi.
+#  Il prior e' quindi CONTRARIO (misura vicina) e NEUTRO al massimo
+#  (precedente di casa su un altro simbolo e un altro lato), mai
+#  favorevole.
 #
 # =====================================================================
 #  3. L'ATTESA, SCRITTA PRIMA DEI NUMERI
@@ -119,6 +143,11 @@
 #  su di >= 0,10 e rimosse sotto 0,90): lo stimo 10-20% se il PF vero e'
 #  ~1,08 [STIMA a tavolino, non simulata], molto meno lontano da li'.
 #  Dichiarato, non nascosto.
+#  E L'ALTRA SPIEGAZIONE CHE HA UN NUMERO (la sonda del par. 2): il
+#  filtro toglie le giornate MIGLIORI (PF rimosse > PF tenute). Dove
+#  cade: PF rimosse > 0,90 -> MAI HG; con R2 rispettato e' HR, con R2
+#  violato e' H0. Un HG e' quindi l'esito che la sonda NON prevede: se
+#  esce, va scritto accanto al prior contrario, non al posto suo.
 #  PREVISIONE MIA, SCRITTA ORA: HR. Motivo: l'oro 2020-2026 e' un toro
 #  lungo; le giornate sotto l'EMA200 H4 sono poche e in parte sono i
 #  rimbalzi dei minimi, dove la rottura al rialzo puo' pagare lo stesso.
@@ -169,8 +198,11 @@
 #    come n_d / n_a).
 #  - Un fail-open PARZIALE (qualche giorno con lettura fallita) non si
 #    vede da T3: R260d resterebbe un sottoinsieme, solo piu' grande. Per
-#    scoprirlo servirebbe ricalcolare la EMA200 H4 BCM giorno per giorno:
-#    [NON FATTO].
+#    scoprirlo servirebbe ricalcolare la EMA200 H4 BCM giorno per giorno,
+#    oppure un contatore delle giornate con CorrBias() == 0 (l'AUDIT P3
+#    lo chiede all'autotest: e' CODICE NUOVO, non in questo round):
+#    [NON FATTO]. Finche' manca, un HQ o un n_d vicino a n_a si scrive
+#    "cancello forse non acceso", mai "il trend dell'oro non separa".
 #  - Tutti i buchi di R260 (testa R260c par. 11): OHLC, spread in memoria
 #    (classe 394), storico M1 oro sul PC, orologio dell'oro [INFERITO].
 #
