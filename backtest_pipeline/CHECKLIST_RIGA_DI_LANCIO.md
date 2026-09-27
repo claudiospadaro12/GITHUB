@@ -35689,3 +35689,12 @@ verbale mostrava il commit *vecchio*. Il rimedio funziona — è la memoria che 
 ## ✂️ CLASSE 856 — **l'ECCEZIONE che la testa ammette PER NOME ("un deal di parziale", "la parziale mancante dove l'altro ha 0,10 lotti") scritta nella riga a grana SBAGLIATA: piu' larga (qualunque deal nella stessa giornata) o assente — nel primo caso il sottoinsieme passa su un'uscita CAMBIATA, nel secondo annulla proprio il caso ammesso** (27/09/2026, cancello della riga ROUND CORTI C, parente della 849 e della 842)
 - **Caso (27/09, stessa riga)**: S0 di R260d (`prove/R260d_*` par. 4: *"Una sola che non c'e' -> NULLO. Eccezione ammessa e da contare: un deal di parziale presente in uno e non nell'altro"*) contava come "parziale ammessa" **ogni** chiusura senza gemello in una giornata presente in R260a. Scenario `s0_final` (prezzo dell'uscita FINALE cambiato in R260a): prima **S0 ok**, dopo **S0 KO -> NULLO**. All'opposto C2/V3 di R267c/d (*"a parte le parziali mancanti al lotto 0,10 (R255a par. 5)"*) non avevano l'eccezione: scenario `c2_partial` prima **ROSSO/NON LEGGIBILE**, dopo **ok con 1 parziale ammessa**; `c2_ko` resta ROSSO in tutte e due. Nella stessa riga, ricaduta della **852**: la banda del contro-esempio K1 di R265a era **[1,44 ; 2,25]** (0,8x-1,25x copiato dal generico di R264) contro **[1,5 ; 2,2]** scritto nella sua testa.
 - **Regola**: un'eccezione si codifica con **la stessa definizione della testa** (deal NON ULTIMO della sua posizione = parziale; e la condizione che la rende lecita, es. 0,10 lotti nell'altro file), si **conta** a parte, e ogni altro scarto resta KO. Per ogni eccezione due scenari: uno che la usa (deve passare) e uno che le somiglia ma non lo e' (deve cadere).
+
+### CLASSE 857 — la riga corta promette sulla CATENA, non solo sul testo della lunga (27/09/2026, figlia di 853 e 166)
+Caso reale: `BOOT_RIGA_CORTI_C.txt` @ `7c1d3232` diceva "scarica SOLO dal suo commit inchiodato":
+vero sul testo della lunga (un solo `irm`), falso sulla catena: il driver al pin della lunga scarica
+`walkforward_generico.ps1` e il file prova, e `walkforward_generico.ps1` compila EA e include dal
+RAMO `lavoro` (`$EABranch`), non dal pin. Regola: ogni promessa di una riga corta su download,
+chiusure e cancellazioni si verifica figlio per figlio (lunga -> driver al pin -> walkforward al
+pin), nominando ogni `$EABranch` e ogni switch condizionale (es. `-ChiudiBacktest`). Corretto in
+`924d86cd`.

@@ -128,7 +128,7 @@ cancello; nessun agente tocca preset in campo, taglie o il conto reale.
   soglia. Domande aperte inviate il 27/09: tipo conto (Standard/Swing) e regole in Challenge,
   "gap trading" sulla pausa notturna del DAX, straddle di pendenti.
 
-## 9. Cosa chiediamo a Gemini
+## 9. Cosa chiediamo a Gemini (vedi anche §15, la conferma)
 1. Una seconda opinione sui criteri (§3): c'è un cancello che manca o uno che punisce senza motivo?
 2. Sull'oro long (§5, prima riga): cosa faresti per decidere la taglia con un DD misurato in OHLC
    (limite inferiore) e ~279 posizioni? Che prova aggiungeresti prima di schierarlo?
@@ -136,3 +136,101 @@ cancello; nessun agente tocca preset in campo, taglie o il conto reale.
    notturno (0/33), Londra (costo 40x). Ogni proposta con: regola precisa, simbolo/TF, ora server,
    numero dichiarato dalla fonte etichettato come tale, e costo in passate.
 4. Errori di metodo che vedi in quello che leggi qui. Non serve essere gentili: serve essere utili.
+
+## 10. Il walk-forward di casa (come si misura, nel dettaglio)
+- **Driver**: `walkforward_generico.ps1` lanciato da `RIGA_ROUND_VPS.ps1`. Legge il file prova
+  (`@SIMBOLO`, `@PERIODO`, `@DAQUANDO`, `@FINOA`, `@FRAZIONEIS`, poi un pin per ogni input dell'EA
+  nel formato `Inp=v||min||passo||max||Y/N`), spezza la finestra in IS (dal `@DAQUANDO` per la
+  frazione dichiarata) e OOS (il resto), compila l'EA dal ramo `lavoro` (classe 166: la riga
+  ricontrolla l'impronta SHA256 di sorgente e include dopo ogni corsa) e lancia lo Strategy Tester
+  di MT5 in ottimizzazione su una griglia con **un solo asse per file**.
+- **Modello**: 4 = tick reali (storico BCM: forex dal 2024.07.05, indici dal 2024.09.26); 1 = OHLC
+  M1 (forex dal 1999, oro dal 2004): OHLC può bocciare, non promuovere, e il suo DD è un limite
+  inferiore.
+- **Gemelle (G1)**: ogni cella gira due volte con magic diversi (es. 795301 e 795351): esiti che
+  differiscono = file nullo (tester non deterministico o input non pinnato).
+- **Ancora (G0)**: in ogni round c'è una cella che deve riprodurre al centesimo una corsa
+  d'archivio (Trades, Profit, PF, DD). Se non riproduce, il banco o il binario sono cambiati e il
+  round non si legge. Il 27/09 tutte le ancore hanno riprodotto (R103, r81a, R244b, R245).
+- **Per-trade**: l'EA esporta ogni deal (`abtg_trades_<EA>_<simbolo>_<magic>.csv`): serve per
+  contare le POSIZIONI (un'operazione con parziale = 2 deal), per il DD a saldo chiuso, la
+  peggior giornata, la curva "in fase" (righe estive di un file + invernali di un altro quando
+  l'orologio del server è sfasato dalla cash), e per il conto anno per anno. Attenzione di
+  casa: su forex e oro il tester addebita metà commissione all'ingresso, e il per-trade porta
+  solo le uscite (classe 844: si riconcilia con un k EUR/lotto).
+- **Contratto della sedia**: DD e frequenza promessi dal backtest della cella promossa; in
+  forward, DD reale > DD promesso -> revisione immediata (criterio di uscita firmato il 18/08);
+  famiglia a 20+ operazioni in perdita -> revisione; tagliando a 6 mesi.
+- **Moncone**: per avere una curva continua su tutta la finestra si usa `@FRAZIONEIS 0.001` (IS
+  di un giorno, OOS = tutto il resto): il driver dice "rc 2 = non misurato" sull'IS vuoto, e la
+  riga lo assolve solo se l'OOS è pieno.
+
+## 11. Il Monte Carlo di casa
+Script `backtest_pipeline/mc_challenge_ftmo_stato.py` (+ `mc_challenge_ftmo*.py`): ricampiona i
+per-trade delle sedie in campo dallo stato attuale del conto (saldo, DD già speso, giorni), con i
+muri FTMO (5% giornaliero su equity, 10% totale) e con il Guardian di campo codificato
+(pausa/emergenza/cap). Ultimo referto `report/MC_DALLO_STATO_DI_OGGI_2026-09-25.md`:
+- dallo stato del 25/09 a taglia 2,00%: **P(PASS) 57,2%** (semi 12-14: 56,7-57,4);
+- il 42,8% restante è la **fermata del Guardian al 9,3%**, e metà di quelle fermate arriva entro
+  5 giornate: **P(fine corsa nei prossimi 5 giorni di borsa) 21-24%**;
+- contro-esempio eseguito: una rovina del giocatore con aritmetica esatta (P(PASS) 15,38% col
+  Guardian a 9,3%, 21,43% col solo muro 10%) riprodotta dal simulatore a 15,35% / 21,33%;
+- limiti dichiarati: il MC non conosce le sedie nuove (770105, 770212), e il Guardian in campo
+  era stato letto male in un referto precedente (corretto dal `.chr` del 24/09).
+Il Guardian **aggiunge +13,7 punti** di probabilità di passare rispetto al solo muro FTMO
+(misura del 24/09), a prezzo di fermarsi prima.
+
+## 12. Il Guardian (l'EA di protezione, magic 779001, un grafico per conto)
+Sorgente `mql5/Experts/ABTG_Guardian.mq5` + include `ABTG_PausaGuardian.mqh` letto dagli EA
+(`ABTG_GuardiaIngresso` prima di ogni ordine). Tre meccanismi:
+- **Muri interni**: perdita giornaliera e DD totale sotto quelli FTMO (in campo su FTMO:
+  saldo iniziale 80.000, giornaliero 4,5%, totale 9,3%, statico dal saldo iniziale): allo scatto
+  chiude tutto e blocca (`InpAction=0`, `InpCloseAllMagics=true`).
+- **B1 pausa morbida**: sotto una perdita giornaliera del 3,5% (FTMO) i NUOVI ingressi sono
+  rifiutati, le posizioni vive restano.
+- **C1 cap del rischio aperto**: somma dei rischi ingresso->SL delle posizioni aperte <= 4,00%
+  dell'equity (FTMO): la posizione che sfonderebbe il cap non entra. Con sedie al 2% = due
+  posizioni insieme. Non ferma i pendenti già piazzati (limite noto). **C2 per cluster** esiste
+  nel codice ma è spento (0) e nessun EA passa la mappa: dimostrato in quattro modi che con C1 al
+  4% non aggiungerebbe protezione finché le sedie sullo stesso cluster sono < 4.
+- Nel tester il Guardian è **fail-open** (nessun canale = tutto passa): i backtest misurano il
+  motore, non la rete. Il Guardian è vivo su FTMO (verificato dal giornale del 24/09).
+- Difetto noto e non ancora corretto in campo: alcune sedie compilate ad agosto non leggono il
+  Guardian (es. EMA200 771531 binario del 04/08: zero occorrenze di `InpUsaGuardian`). La
+  ricompilazione (`RICOMPILA_CLAU12_TRAILFIX`) è pronta, aspetta la prova di neutralità R254 e la
+  firma.
+
+## 13. Orologio (la trappola ricorrente)
+- BCM (broker dei backtest): **UTC+1 fisso** dal 2025 (misurato su ~24.400 deal con quattro
+  ancore). D'estate = ora italiana -1, d'inverno = ora italiana. Fino a dicembre 2024 l'orologio
+  era diverso (= Londra).
+- FTMO: **ora italiana +1 tutto l'anno**.
+- Quindi le sedie d'apertura a ora fissa (DAX 08:00, USA 14:30 BCM) in inverno armano un'ora
+  prima della cash nel backtest: i numeri di contratto **mescolano due tempistiche**. Da qui i
+  round "in fase" (R246, R250, R252, R255): la curva si ricompone prendendo le righe estive da
+  un file e quelle invernali dall'altro. Per il 770201 il merito è quasi tutto nel pre-mercato
+  invernale (PF 1,80 su 152 contro 0,98 su 199 d'estate): su FTMO alle 16:30 farebbe la cella
+  estiva. Decisione sull'orologio delle sedie entro il 25/10.
+
+## 14. TrailFix (una correzione in coda)
+Bug misurato nel trailing delle sedie CLAU12 (DAX/Dow/Nasdaq): il modify dello stop veniva
+rifiutato dal server per distanza sotto lo StopsLevel, con raffiche di richieste (fino a ~2.600
+al giorno con 5 sedie). Correzione "Parte A" scritta e con PASS (`mql5/Experts/trailfix_*`):
+guardia sulla distanza e un log per candela. Prima di andare in campo serve la prova di
+neutralità **R254** (4 sedie, la curva deve restare identica al centesimo dove il bug non
+morde) e la ricompilazione nel weekend con nessuna posizione aperta; entrambe aspettano Claudio.
+
+## 15. La conferma che chiediamo a Gemini
+Claudio vuole da te una **conferma esplicita**, punto per punto, non un riassunto:
+1. Il metodo (§2, §3, §10): è corretto e completo per validare un EA per una prop? Cosa manca?
+2. L'altopiano (§3): la regola "centro del blocco contiguo che passa i cancelli, mai il picco,
+   e l'asse va esteso se il blocco tocca il bordo" è giusta? Come la formalizzeresti?
+3. I cancelli (§3) e la lettura asimmetrica del rischio (un motore senza edge "passa" un tetto di
+   DD con probabilità ~0,35-0,47 sotto le 60 operazioni, quindi "rischio passato" si scrive solo
+   con n >= 60 IS / 40 OOS): condividi?
+4. Il Monte Carlo (§11): assunzioni e limiti che vedi.
+5. Il Guardian (§12): l'aritmetica cap 4% = due posizioni al 2% e l'inutilità del C2 con meno di
+   4 sedie sullo stesso cluster: confermi o smentisci con un contro-esempio?
+6. L'oro long (§5): con PF 1,336 su 279 posizioni (OHLC, 2020-2026, metà 1,17/1,52) e DD 4,5% a
+   0,5%, che cosa serve ancora prima di schierarlo, e che cosa NON serve?
+Rispondi con numeri e regole, e segna ogni punto con CONFERMO / NON CONFERMO / MANCA.
