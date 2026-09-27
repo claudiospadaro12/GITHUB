@@ -35834,3 +35834,45 @@ configurazione vera). Regola: il contro-esempio si esegue anche nella configuraz
 oppure si dichiara quanto vale lo scarto dovuto al modo di campionare. E la frase "il B1 e' la rete
 contro il crollo sistemico, il MC lo misura" era una sovra-affermazione: e' una proprieta' del modello
 (taglio perfetto sul realizzato), verso plausibile, grandezza in campo [NON MISURATA].
+
+### CLASSE 872 — il lettore non distingue "file ASSENTE" da "file CATTIVO": una cartella sbagliata diventa un round NULLO (27/09/2026)
+Caso: `leggi_r255.py` @ `520bc607`, lanciato sulla cartella PADRE della raccolta (lo zip scompattato
+dentro una sottocartella, il caso piu' comune): nessun `ROUND_R255x` trovato, 24 file "E0 CSV _OOS
+ASSENTE" -> 24 NULLI e un referto completo, con esiti, su un round che poteva essere buono.
+Contro-esempio eseguito: `referto(dirname(raccolta))` -> 24 nulli su 24. Regola: il lettore conta
+PRIMA le cartelle attese; zero trovate = si ferma con un errore (o scende di UN livello se la
+raccolta e' li', dichiarandolo), mai un referto. Un NULLO e' un fatto sul file, non sul percorso.
+Corretto nel commit di questo cancello (`trova_raccolta`, autotest con cartella padre e cartella vuota).
+
+### CLASSE 873 — il lettore ricalcola solo quello che SA ricalcolare e ignora i NULLI che solo la riga vede (27/09/2026)
+Caso: stesso script: rileggeva E0/P0/G1/C0/L0/S1 dai file ma NON i NULLI della riga fondati su cio'
+che nella raccolta non c'e' piu' (classe 166 "MOTORE DIVERSO DAL PIN", SHA256 della prova, rc 1,
+freschezza). Contro-esempio eseguito: RIEPILOGO con `R255c ... FILE NULLO: MOTORE DIVERSO DAL PIN`
+-> il lettore dava R255c "ok" e il nudo SOSPESA, cioe' un esito su un motore che non e' quello del
+pin. E la prova veniva presa dal REPO se mancava nella raccolta, senza dirlo. Regola: i NULLI della
+riga si UNISCONO a quelli ricalcolati (mai il contrario), le divergenze si stampano, la prova si
+verifica contro lo SHA256 del pin scritto nella riga, e un RIEPILOGO assente si dichiara in testa
+("classe 166 NON VERIFICATA"). Corretto nel commit di questo cancello.
+
+### CLASSE 874 — la parola dell'esito scritta sulla cella PRIMA del cancello che la condiziona (27/09/2026, parente della 804)
+Caso: stesso script, tre facce dello stesso difetto: (a) "RISCHIO PASSATO (n = 93 >= 40)" stampato
+sulla riga di R2 del NUDO mentre R1 era "NON VIOLATO su n = 55" (< 60): la testa par. 9 scrive
+RISCHIO PASSATO solo con n IS >= 60 E n OOS >= 40, e' una frase della configurazione, non del tetto;
+(b) "PROMOSSA AL PASSO DOPO (salvo M4)" su ogni cella che passava R e M, anche un Supertrend che
+sporge da solo (M4: "NON C'E' UNA CONFIGURAZIONE ROBUSTA") o un bordo del TP1_R ("DIREZIONE
+INDICATA"); (c) un merito NON RISOLTO (PF per posizione e sui deal ai lati opposti, classe 550)
+contato come BOCCIATA PER MERITO. Regola: la parola finale (PASSATO, PROMOSSA, BOCCIATA) si scrive
+DOPO l'ultimo cancello che la condiziona; un NON RISOLTO non e' mai una bocciatura. Corretto nel
+commit di questo cancello (`m4_altopiano`, riga "RISCHIO DELLA CONFIGURAZIONE", `esito_pd`).
+
+### CLASSE 875 — lo stesso criterio congelato implementato in due modi (riga contro lettore, testa contro lettore) (27/09/2026)
+Caso: stesso script: (a) G1 sul PF con `round(x, 4) != round(y, 4)` mentre la riga usa
+|delta| <= 0,00005: 1,234549 contro 1,234551 (delta 0,000002) -> NULLO per il lettore, ok per la
+riga; (b) la regola d'ufficio di R252a/R255a par. 7 ("scarto di saldo > 10%: R1/R2 con DD fra 0,8 e
+1,2 volte la soglia sono NON RISOLTI") implementata con un'eccezione non scritta per i VIOLATI e sul
+solo DD massimo: DD 1,18 x S con scarto 12% -> VIOLATO (BOCCIATA PER RISCHIO) invece di NON RISOLTO;
+(c) l'eccezione del lotto 0,10 del G0-LONG ammessa nei due sensi, la testa la ammette SOLO dove
+R255w ha 0,10 lotti. Regola: il lettore ricopia la soglia con la STESSA forma (tolleranza, non
+arrotondamento) e la regola con le STESSE clausole della fonte; ogni clausola in piu' o in meno e'
+un criterio cambiato dopo il congelamento. Corretto nel commit di questo cancello, con contro-esempi
+nell'autotest.

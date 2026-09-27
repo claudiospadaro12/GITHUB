@@ -89,6 +89,7 @@ import argparse
 import collections
 import csv
 import datetime as dt
+import hashlib
 import math
 import os
 import re
@@ -144,6 +145,42 @@ for _i, (_cf, (_f14, _f15)) in enumerate(CONF.items()):
                         lo='15:05:00' if _ora == '1430' else '16:05:00', hi='17:30:59' if _ora == '1430' else '18:30:59',
                         prova='%s_%s_DOW_%s_%s.txt' % (_f, _lato, _cf, _ora))
 assert FILE['R255a']['g1'] == 793101 and FILE['R255x']['g2'] == 793174 and FILE['R255w']['g1'] == 793123
+N_PIN = 77                        # pin fissi per file prova (riga: np=77), + l'asse InpMagic
+RIGA_R255 = os.path.join(QUI, 'righe', 'RIGA_R255_SHORT_DOW_INFASE.txt')
+
+
+def sha_pin_dalla_riga():
+    """SHA256 dei 24 file prova AL PIN, letti dalla riga (hp=...): classe 873, il lettore verifica la prova che legge"""
+    if not os.path.exists(RIGA_R255):
+        return {}
+    with open(RIGA_R255, encoding='ascii', errors='replace') as fh:
+        s = fh.read()
+    return {t: hp for t, hp in re.findall(r"t='(R255[a-x])';[^}]*?hp='([0-9A-F]{64})'", s)}
+
+
+def trova_raccolta(base):
+    """classe 872: una cartella sbagliata NON deve diventare 24 file NULLI. Ritorna (cartella vera, nota) o esce."""
+    def n_round(d):
+        return sum(1 for f in FILE if os.path.isdir(os.path.join(d, 'ROUND_' + f)))
+    if n_round(base) > 0:
+        return base, ''
+    sotto = [os.path.join(base, x) for x in sorted(os.listdir(base)) if os.path.isdir(os.path.join(base, x))]
+    buone = [d for d in sotto if n_round(d) > 0]
+    if len(buone) == 1:
+        return buone[0], 'raccolta trovata UN livello sotto la cartella data: %s' % buone[0]
+    raise SystemExit('RACCOLTA NON TROVATA in %s: nessuna cartella ROUND_R255a..ROUND_R255x (ne qui ne un livello sotto; %d candidate). '
+                     'Si passa la cartella dello zip SCOMPATTATO, quella che contiene ROUND_R255a\\, PERTRADE\\ e RIEPILOGO_R255.txt. '
+                     'Niente referto: 24 file NULLI per un percorso sbagliato sarebbero un falso.' % (base, len(buone)))
+
+
+def nulli_della_riga(testo):
+    """classe 873: gli ESITI della riga nel RIEPILOGO (una riga per file: 'R255a  rc ... FILE NULLO: motivi' o 'file NON nullo')"""
+    out = collections.OrderedDict()
+    for ln in testo.splitlines():
+        m = re.match(r'^(R255[a-x])\s+rc\b', ln)
+        if m and m.group(1) in FILE:
+            out[m.group(1)] = ln.split('FILE NULLO: ', 1)[1].strip() if 'FILE NULLO: ' in ln else ''
+    return out
 
 
 # ---------------------------------------------------------------- calendario
@@ -335,6 +372,7 @@ class Raccolta:
         self.file = {}          # etichetta -> dict(oos=rows, is_rows, pt={magic: deals}, nullo=[motivi], note=[])
         self.riepilogo = ''
         self.arch = {}
+        self.sha_pin = sha_pin_dalla_riga()
 
     def path_round(self, f, nome):
         return os.path.join(self.base, 'ROUND_' + f, nome)
@@ -397,9 +435,21 @@ def pre_lettura_file(rc, f):
     if not os.path.exists(pp):
         o['nullo'].append('P0 file prova %s ASSENTE (raccolta e repo)' % x['prova'])
     else:
+        with open(pp, 'rb') as fh:
+            sha = hashlib.sha256(fh.read()).hexdigest().upper()
+        hp = rc.sha_pin.get(f)
+        dalla_raccolta = os.path.exists(rc.path_round(f, x['prova']))
+        if hp is None:
+            o['note'].append('SHA256 della prova NON verificato (riga R255 non trovata nel repo)')
+        elif sha != hp:
+            o['nullo'].append('P0 prova %s SHA256 %s... DIVERSO dal pin %s... (%s)' % (x['prova'], sha[:8], hp[:8], 'raccolta' if dalla_raccolta else 'REPO'))
+        else:
+            o['note'].append('prova = pin (SHA256 %s..., letta da %s)' % (sha[:8], 'raccolta' if dalla_raccolta else 'REPO: ASSENTE nella raccolta'))
         pin, asse, stringhe = leggi_pin_prova(pp)
         if asse != ['InpMagic']:
             o['nullo'].append('P0 asse del file prova = %s, atteso [InpMagic]' % asse)
+        if len(pin) != N_PIN:
+            o['nullo'].append('P0 pin del file prova %d, attesi %d' % (len(pin), N_PIN))
         ko = []
         for r in rows:
             for k, v in pin.items():
@@ -416,7 +466,7 @@ def pre_lettura_file(rc, f):
     g1 = []
     if num(a['Trades']) != num(b['Trades']):
         g1.append('Trades %s/%s' % (a['Trades'], b['Trades']))
-    if round(num(a['Profit Factor']), 4) != round(num(b['Profit Factor']), 4):
+    if not abs(num(a['Profit Factor']) - num(b['Profit Factor'])) <= 0.00005 + EPS:     # |delta| <= 0,00005 come la riga (classe 875)
         g1.append('PF %s/%s' % (a['Profit Factor'], b['Profit Factor']))
     if abs(num(a['Profit']) - num(b['Profit'])) > 0.05 + EPS:
         g1.append('Profit %s/%s' % (a['Profit'], b['Profit']))
@@ -496,9 +546,9 @@ def struttura_con_eccezione(mine_pos, arch_pos):
         ka, kb = [chiave(d) for d in a['deals']], [chiave(d) for d in b['deals']]
         if ka == kb:
             continue
-        corto, lungo = (a, b) if len(ka) < len(kb) else (b, a)
-        if len(corto['deals']) == 1 and abs(corto['deals'][0]['vol'] - 0.10) <= EPS and len(lungo['deals']) == 2 \
-                and chiave(corto['deals'][0]) == chiave(lungo['deals'][-1]):
+        # SOLO dove R255w (a) ha 0,10 lotti e un deal (testa par. 8), mai il contrario (classe 875)
+        if len(a['deals']) == 1 and abs(a['deals'][0]['vol'] - 0.10) <= EPS and len(b['deals']) == 2 \
+                and chiave(a['deals'][0]) == chiave(b['deals'][-1]):
             amm += 1
             continue
         return None, 'posizione del %s: deal %s contro %s' % (ds(a['data']), [ds(k[0]) for k in ka], [ds(k[0]) for k in kb])
@@ -740,7 +790,7 @@ def leggi_r1r2(dd_a, dd_b, S, e_eff, scarto):
         v = 'RISPETTATO'
     else:
         v = 'NON RISOLTO'
-    if v != 'VIOLATO' and scarto > 0.10 and 0.8 * S <= hi <= 1.2 * S:
+    if scarto > 0.10 and any(0.8 * S <= d <= 1.2 * S for d in (lo, hi)):     # R252a par. 5 / testa par. 7: anche un VIOLATO (classe 875)
         v = 'NON RISOLTO (d ufficio: scarto di saldo %.1f%% > 10%% e DD fra 0,8 e 1,2 volte la soglia)' % (scarto * 100)
     return v
 
@@ -780,6 +830,53 @@ def e_eff_long(rc, F, g0l):
     return e, es['IS'][0], es['OOS'][0], txt
 
 
+def m4_altopiano(ris):
+    """M4 (testa par. 10) e le parole finali PROMOSSA / NON PROMOSSA, scritte DOPO M4 (classe 874)"""
+    out = []
+    stato = []
+    for cf in ST_ORDINE:
+        r = ris.get(cf, {})
+        stato.append(bool(r.get('passa_r')) and bool(r.get('passa_m')))
+    out.append('   Supertrend %s: celle che passano R1-R3 E M1-M3 (con n >= 150): %s' % ('/'.join(ST_ORDINE), ' '.join('%s=%s' % (c, 'si' if s else 'no') for c, s in zip(ST_ORDINE, stato))))
+    best, cur = [], []
+    for c, s in zip(ST_ORDINE, stato):
+        cur = cur + [c] if s else []
+        if len(cur) > len(best):
+            best = list(cur)
+    centro = None
+    if len(best) >= 3:
+        centro = best[len(best) // 2] if len(best) % 2 == 1 else min(best[len(best) // 2 - 1:len(best) // 2 + 1], key=lambda c: abs(ST_ORDINE.index(c) - ST_ORDINE.index('stH8')))
+        out.append('   -> altopiano di %d celle contigue (%s): si porta avanti la CENTRALE %s%s' % (len(best), ','.join(best), centro, ' (tratto pari: la piu vicina a H8)' if len(best) % 2 == 0 else ''))
+    else:
+        out.append('   -> NON C E UNA CONFIGURAZIONE ROBUSTA fra i Supertrend (tratto contiguo piu lungo: %d)%s' % (len(best), ' [merito sospeso ovunque: M4 non valutabile]' if not any(r.get('passa_m') for r in ris.values() if r) else ''))
+    tp = {cf: bool(ris.get(cf, {}).get('passa_r')) and bool(ris.get(cf, {}).get('passa_m')) for cf in ('tp05', 'ancora', 'tp15')}
+    if tp['ancora']:
+        out.append('   TP1_R (0,5 / 1,0 / 1,5): 1,0 (ancora) passa -> puo essere un centro%s' % ('' if tp['tp05'] or tp['tp15'] else ' (bordi no: centro isolato, si dichiara)'))
+    elif tp['tp05'] or tp['tp15']:
+        out.append('   TP1_R: vince un BORDO (%s) -> DIREZIONE INDICATA, NON UNA CONFIGURAZIONE' % ', '.join(k for k, v in tp.items() if v))
+    else:
+        out.append('   TP1_R: nessuna cella passa rischio e merito -> nessun centro')
+    out.append('   EMA, parziale, trailing, orologio: interruttori, nessun altopiano (li sostituisce M3 piu il passo dopo)')
+    # classe 874: la parola PROMOSSA si scrive DOPO M4, mai "salvo M4" sulla cella
+    for cf, r in ris.items():
+        e = r.get('esito') or ''
+        if not e.startswith('PASSA RISCHIO E MERITO'):
+            continue
+        coda = e[len('PASSA RISCHIO E MERITO'):].replace(': M4 decide nella sez. 5', '')
+        if cf in ST_ORDINE:
+            if cf == centro:
+                r['esito'] = 'PROMOSSA AL PASSO DOPO (centro dell altopiano M4 %s)%s' % (','.join(best), coda)
+            elif centro is not None and cf in best:
+                r['esito'] = 'NON PROMOSSA: passa rischio e merito, ma nell altopiano M4 NON e la centrale (%s)%s' % (centro, coda)
+            else:
+                r['esito'] = 'NON PROMOSSA: passa rischio e merito, ma M4: NON C E UNA CONFIGURAZIONE ROBUSTA (cella che sporge)%s' % coda
+        elif cf in ('tp05', 'tp15'):
+            r['esito'] = 'NON PROMOSSA: M4, vince un BORDO del TP1_R -> DIREZIONE INDICATA, NON UNA CONFIGURAZIONE%s' % coda
+        else:
+            r['esito'] = 'PROMOSSA AL PASSO DOPO (interruttore: nessun altopiano, par. 10)%s' % coda
+    return out
+
+
 # ---------------------------------------------------------------- il referto
 def riga_curva(lbl, c):
     return ('  %-8s %3d pos (%3d deal) Profit %9.2f  PF pos %s / deal %s  EP %+7.2f  vinte %d  DD chiuso %7.2f EUR = %6.3f%%  pegg. giorno %+.3f%% (%s)  serie %d  scarto saldo max %.2f%%'
@@ -787,10 +884,17 @@ def riga_curva(lbl, c):
 
 
 def referto(base):
+    base, nota_base = trova_raccolta(base)
     rc = Raccolta(base)
     L = []
     L.append('LETTURA R255 -- IL LATO SHORT DELL APERTURA DOW A DUE OROLOGI (criteri: prove/R255a_short_DOW_ancora_1430.txt par. 7-17, congelati prima dei numeri)')
     L.append('raccolta: %s' % base)
+    if nota_base:
+        L.append('  ' + nota_base)
+    n_dir = sum(1 for f in FILE if os.path.isdir(rc.path_round(f, '')))
+    L.append('cartelle ROUND_R255a..x trovate: %d su 24%s; SHA256 del pin per i file prova: %s' % (
+        n_dir, '' if n_dir == 24 else ' (le mancanti escono NULLE per E0: e un file mancante, non un file cattivo)',
+        '%d letti dalla riga' % len(rc.sha_pin) if len(rc.sha_pin) == 24 else 'NON LETTI (%d su 24)' % len(rc.sha_pin)))
     prip = os.path.join(base, 'RIEPILOGO_R255.txt')
     riep = {}
     if os.path.exists(prip):
@@ -825,8 +929,23 @@ def referto(base):
         r = riga_g1(F, f)
         oos = ('Trades %s Profit %s PF %s EqDD %s%% Pegg %s%% DD_fisso %.2f' % (r['Trades'], r['Profit'], r['Profit Factor'], r['Equity DD %'], r['Peggior Giornata %'], dd_fisso(r))) if r else 'CSV _OOS non leggibile'
         L.append('  %s %-6s %-5s %s | %s | %s | %s | %s' % (f, FILE[f]['cf'], FILE[f]['ora'], st_, oos, o['is_txt'], '; '.join(o['note']), o['tetto']))
+    # classe 873: i NULLI della riga (classe 166 motore diverso dal pin, SHA della prova, rc 1, freschezza) si
+    # UNISCONO a quelli ricalcolati: il lettore non vede il motore compilato, la riga si'
+    nr = nulli_della_riga(rc.riepilogo)
+    solo_qui = []
+    if not rc.riepilogo:
+        L.append('  ATTENZIONE: RIEPILOGO assente -> classe 166 (motore = pin), rc e freschezza dei file NON VERIFICATI: ogni esito sotto vale SOLO se il motore e quello del pin')
+    elif len(nr) != 24:
+        L.append('  ATTENZIONE: nel RIEPILOGO %d righe di ESITO su 24 (mancano: %s): per quei file classe 166 e rc NON VERIFICATI' % (len(nr), ', '.join(f for f in FILE if f not in nr)))
+    for f in FILE:
+        if nr.get(f):
+            F[f]['nullo'].append('RIGA (RIEPILOGO): ' + nr[f][:300])
+        elif f in nr and F[f]['nullo']:
+            solo_qui.append(f)
     nulli = [f for f in FILE if F[f]['nullo']]
-    L.append('  FILE NULLI (ricalcolati qui): %s' % (', '.join(nulli) if nulli else 'nessuno'))
+    L.append('  FILE NULLI (ricalcolati qui UNITI a quelli della riga): %s' % (', '.join(nulli) if nulli else 'nessuno'))
+    if solo_qui:
+        L.append('  DIVERGENZA: NULLI per il lettore ma NON per la riga: %s (si legge il motivo sopra: o la riga o il lettore sbaglia)' % ', '.join(solo_qui))
     if 'FILE NULLI' in riep:
         L.append('  [riga] ' + riep['FILE NULLI'][:600])
     conf_nulle = {cf for cf, (a, b) in CONF.items() if F[a]['nullo'] or F[b]['nullo']}
@@ -950,7 +1069,8 @@ def referto(base):
                 if v == 'RISPETTATO':
                     n = ce['A']['n']
                     if n >= nmin:
-                        v = 'RISCHIO PASSATO (n = %d >= %d, classe 804)' % (n, nmin)
+                        # classe 874: "RISCHIO PASSATO" e una frase della CONFIGURAZIONE (R1 n IS >= 60 E R2 n OOS >= 40 E R3), non del tetto
+                        v = 'RISPETTATO su n = %d posizioni (>= %d, classe 804)' % (n, nmin)
                     else:
                         p, seg = p_noedge(tab, n)
                         v = 'NON VIOLATO su n = %d posizioni (P che un motore senza edge lo passi: %s%.2f; RISCHIO PASSATO solo da n >= %d)' % (n, '' if seg == '~' else seg, p, nmin)
@@ -959,6 +1079,15 @@ def referto(base):
                      % (tag, 'IS' if tag == 'R1' else 'OOS', ce['A']['dd_pct'], ce['B']['dd_pct'], S, e_eff, min(ce['A']['dd_pct'], ce['B']['dd_pct']) * (1 - e_eff), max(ce['A']['dd_pct'], ce['B']['dd_pct']) * (1 + e_eff), v))
         L.append('  R3 peggior giornata (denominatore = saldo della curva a inizio giornata): %s' % t3)
         verd['R3'] = rr3
+        n_is_, n_oos_ = cs['A']['n'], co['A']['n']
+        if non_confr or 'VIOLATO' in (verd['R1'], verd['R2'], rr3) or verd['R1'] != 'RISPETTATO' or verd['R2'] != 'RISPETTATO':
+            r['rischio'] = ''
+        elif n_is_ >= N_R1 and n_oos_ >= N_R2:
+            r['rischio'] = 'RISCHIO PASSATO (n IS = %d >= %d, n OOS = %d >= %d, R3 rispettato, classe 804)' % (n_is_, N_R1, n_oos_, N_R2)
+        else:
+            r['rischio'] = 'rischio NON VIOLATO su n IS = %d / n OOS = %d (RISCHIO PASSATO solo con n IS >= %d E n OOS >= %d, classe 804)' % (n_is_, n_oos_, N_R1, N_R2)
+        if r['rischio']:
+            L.append('  RISCHIO DELLA CONFIGURAZIONE: ' + r['rischio'])
         L.append('  SERIE PERDENTE (riportata, NON cancello, classe 804): IS %d / OOS %d (long 770202: 3 e 3 su 56 e 96)' % (cs['A']['serie'], co['A']['serie']))
         # rischio sul CONTROLLO (un fatto per quella sedia)
         cc = cv['CONTROLLO']
@@ -975,20 +1104,24 @@ def referto(base):
         if rif[0] in ris and ris[rif[0]].get('curve') and ris[rif[0]]['curve'].get(rif[1]):
             cr = ris[rif[0]]['curve'][rif[1]]
             ro, ri = cr['OOS'], cr['IS']
-            m['M1'] = (co['A']['pf_pos'] >= 1.10 and co['B']['pf_pos'] >= 1.10)
-            lati_opposti = (co['A']['pf_pos'] >= 1.10) != (co['A']['pf_deal'] >= 1.10)
-            mtxt.append('M1 PF pos OOS A %s / B %s (deal A %s) >= 1,10 -> %s' % (pf_txt(co['A']['pf_pos']), pf_txt(co['B']['pf_pos']), pf_txt(co['A']['pf_deal']), 'NON RISOLTO (pos e deal ai lati opposti, classe 550)' if lati_opposti else ('passa' if m['M1'] else 'fallisce')))
-            if lati_opposti:
-                m['M1'] = None
-            m2 = (co['A']['pf_pos'] >= ro['A']['pf_pos'] + 0.10) and (co['A']['ep'] > ro['A']['ep'])
+            # testa par. 10 (classe 550): PF per posizione e sui deal TUTTI E DUE; ai lati opposti di una soglia = NON RISOLTO (None)
+            def esito_pd(v_pos, v_deal):
+                return v_pos if v_pos == v_deal else None
+
+            def txt_m(v):
+                return 'passa' if v is True else ('fallisce' if v is False else 'NON RISOLTO (per posizione e sui deal ai lati opposti, classe 550)')
+            m['M1'] = esito_pd(co['A']['pf_pos'] >= 1.10 and co['B']['pf_pos'] >= 1.10, co['A']['pf_deal'] >= 1.10 and co['B']['pf_deal'] >= 1.10)
+            mtxt.append('M1 PF OOS >= 1,10 (A e B): per posizione A %s / B %s, sui deal A %s / B %s -> %s' % (pf_txt(co['A']['pf_pos']), pf_txt(co['B']['pf_pos']), pf_txt(co['A']['pf_deal']), pf_txt(co['B']['pf_deal']), txt_m(m['M1'])))
+            altro = (co['A']['ep'] > ro['A']['ep'])
             extra = ''
             if cf in USCITE:
-                m2 = m2 and (co['A']['profit'] > ro['A']['profit']) and (co['A']['dd_pct'] <= ro['A']['dd_pct'])
+                altro = altro and (co['A']['profit'] > ro['A']['profit']) and (co['A']['dd_pct'] <= ro['A']['dd_pct'])
                 extra = ', Profit %.2f vs %.2f, DD %.3f vs %.3f (uscite: valgono anche Profit e DD)' % (co['A']['profit'], ro['A']['profit'], co['A']['dd_pct'], ro['A']['dd_pct'])
-            m['M2'] = m2
-            mtxt.append('M2 vs %s %s: PF OOS %s vs %s (+0,10), EP %.2f vs %.2f%s -> %s' % (rif[0], rif[1], pf_txt(co['A']['pf_pos']), pf_txt(ro['A']['pf_pos']), co['A']['ep'], ro['A']['ep'], extra, 'passa' if m2 else 'fallisce'))
-            m['M3'] = (cs['A']['pf_pos'] > ri['A']['pf_pos']) and (co['A']['pf_pos'] > ro['A']['pf_pos'])
-            mtxt.append('M3 concordanza: PF IS %s vs %s, PF OOS %s vs %s -> %s' % (pf_txt(cs['A']['pf_pos']), pf_txt(ri['A']['pf_pos']), pf_txt(co['A']['pf_pos']), pf_txt(ro['A']['pf_pos']), 'passa' if m['M3'] else 'fallisce'))
+            m['M2'] = esito_pd(altro and co['A']['pf_pos'] >= ro['A']['pf_pos'] + 0.10, altro and co['A']['pf_deal'] >= ro['A']['pf_deal'] + 0.10)
+            mtxt.append('M2 vs %s %s: PF OOS per posizione %s vs %s, sui deal %s vs %s (+0,10), EP %.2f vs %.2f%s -> %s' % (rif[0], rif[1], pf_txt(co['A']['pf_pos']), pf_txt(ro['A']['pf_pos']), pf_txt(co['A']['pf_deal']), pf_txt(ro['A']['pf_deal']), co['A']['ep'], ro['A']['ep'], extra, txt_m(m['M2'])))
+            m['M3'] = esito_pd((cs['A']['pf_pos'] > ri['A']['pf_pos']) and (co['A']['pf_pos'] > ro['A']['pf_pos']),
+                               (cs['A']['pf_deal'] > ri['A']['pf_deal']) and (co['A']['pf_deal'] > ro['A']['pf_deal']))
+            mtxt.append('M3 concordanza: PF IS %s vs %s, PF OOS %s vs %s (per posizione; sui deal IS %s vs %s, OOS %s vs %s) -> %s' % (pf_txt(cs['A']['pf_pos']), pf_txt(ri['A']['pf_pos']), pf_txt(co['A']['pf_pos']), pf_txt(ro['A']['pf_pos']), pf_txt(cs['A']['pf_deal']), pf_txt(ri['A']['pf_deal']), pf_txt(co['A']['pf_deal']), pf_txt(ro['A']['pf_deal']), txt_m(m['M3'])))
         else:
             mtxt.append('M1-M3: riferimento %s (%s) NON DISPONIBILE (nullo o non ricomponibile)' % (rif[0], rif[1]))
         r['m'] = m
@@ -1010,12 +1143,17 @@ def referto(base):
             passa_m = all(v is True for v in m.values())
             if n_oos < N_MERITO:
                 esito = 'SOSPESA (posizioni OOS in fase %d < %d: merito SOSPESO)%s' % (n_oos, N_MERITO, ' -- INDIZIO FAVOREVOLE, merito sospeso (M1-M3 passati su n = %d)' % n_oos if passa_m else '')
+            elif any(v is False for v in m.values()):
+                esito = 'BOCCIATA PER MERITO (%s) su n = %d' % (', '.join(k for k, v in m.items() if v is False), n_oos)
             elif not passa_m:
-                esito = 'BOCCIATA PER MERITO (%s) su n = %d' % (', '.join(k for k, v in m.items() if v is not True), n_oos)
+                # classe 874: un NON RISOLTO (o un riferimento mancante) NON e una bocciatura
+                esito = 'MERITO NON RISOLTO (%s: non passati e non falliti) su n = %d' % (', '.join(k for k, v in m.items() if v is not True), n_oos)
             else:
-                esito = 'PROMOSSA AL PASSO DOPO (salvo M4 altopiano, par. 5 qui sotto) su n = %d' % n_oos
+                esito = 'PASSA RISCHIO E MERITO su n = %d: M4 decide nella sez. 5' % n_oos
+            if r.get('rischio'):
+                esito += ' | ' + r['rischio']
         r['esito'] = esito
-        r['passa_r'] = (verd['R1'] == 'RISPETTATO' and verd['R2'] == 'RISPETTATO' and rr3 == 'RISPETTATO')
+        r['passa_r'] = r.get('rischio', '').startswith('RISCHIO PASSATO')     # R1-R3 rispettati E n della classe 804
         r['passa_m'] = all(v is True for v in m.values()) and n_oos >= N_MERITO
         for s in mtxt:
             L.append('  ' + s)
@@ -1023,29 +1161,7 @@ def referto(base):
     # -------- M4 altopiano
     L.append('')
     L.append('5. M4 ALTOPIANO, MAI IL PICCO (par. 10)')
-    stato = []
-    for cf in ST_ORDINE:
-        r = ris.get(cf, {})
-        stato.append(bool(r.get('passa_r')) and bool(r.get('passa_m')))
-    L.append('   Supertrend %s: celle che passano R1-R3 E M1-M3 (con n >= 150): %s' % ('/'.join(ST_ORDINE), ' '.join('%s=%s' % (c, 'si' if s else 'no') for c, s in zip(ST_ORDINE, stato))))
-    best, cur = [], []
-    for c, s in zip(ST_ORDINE, stato):
-        cur = cur + [c] if s else []
-        if len(cur) > len(best):
-            best = list(cur)
-    if len(best) >= 3:
-        centro = best[len(best) // 2] if len(best) % 2 == 1 else min(best[len(best) // 2 - 1:len(best) // 2 + 1], key=lambda c: abs(ST_ORDINE.index(c) - ST_ORDINE.index('stH8')))
-        L.append('   -> altopiano di %d celle contigue (%s): si porta avanti la CENTRALE %s%s' % (len(best), ','.join(best), centro, ' (tratto pari: la piu vicina a H8)' if len(best) % 2 == 0 else ''))
-    else:
-        L.append('   -> NON C E UNA CONFIGURAZIONE ROBUSTA fra i Supertrend (tratto contiguo piu lungo: %d)%s' % (len(best), ' [merito sospeso ovunque: M4 non valutabile]' if not any(r.get('passa_m') for r in ris.values() if r) else ''))
-    tp = {cf: bool(ris.get(cf, {}).get('passa_r')) and bool(ris.get(cf, {}).get('passa_m')) for cf in ('tp05', 'ancora', 'tp15')}
-    if tp['ancora']:
-        L.append('   TP1_R (0,5 / 1,0 / 1,5): 1,0 (ancora) passa -> puo essere un centro%s' % ('' if tp['tp05'] or tp['tp15'] else ' (bordi no: centro isolato, si dichiara)'))
-    elif tp['tp05'] or tp['tp15']:
-        L.append('   TP1_R: vince un BORDO (%s) -> DIREZIONE INDICATA, NON UNA CONFIGURAZIONE' % ', '.join(k for k, v in tp.items() if v))
-    else:
-        L.append('   TP1_R: nessuna cella passa rischio e merito -> nessun centro')
-    L.append('   EMA, parziale, trailing, orologio: interruttori, nessun altopiano (li sostituisce M3 piu il passo dopo)')
+    L.extend(m4_altopiano(ris))
     # -------- riepilogo esiti
     L.append('')
     L.append('6. ESITI PER CONFIGURAZIONE (ordine del par. 10)')
@@ -1082,9 +1198,9 @@ def referto(base):
 
 # ---------------------------------------------------------------- fixture per l'autotest
 def _fixture_dir_default():
-    for cand in (os.environ.get('CLAUDE_SCRATCHPAD'), '/tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad'):
-        if cand and os.path.isdir(cand):
-            return os.path.join(cand, 'lettori_r255')
+    cand = os.environ.get('CLAUDE_SCRATCHPAD')
+    if cand and os.path.isdir(cand):
+        return os.path.join(cand, 'lettori_r255')
     return os.path.join(tempfile.gettempdir(), 'lettori_r255')
 
 
@@ -1250,6 +1366,8 @@ def genera_fixture(dest, variante, arch603, arch601):
         _scrivi_pt(os.path.join(base, 'archivio_R246_pertrade_%d.csv' % mg), mg, src)
     with open(os.path.join(base, 'RIEPILOGO_R255.txt'), 'w') as fh:
         fh.write('RIEPILOGO R255 -- fixture %s\nFILE NULLI (...): nessuno\nG0-LONG R255w (...): fixture\nCLASSE 166 (...): fixture, non verificato\n' % variante)
+        for f in FILE:     # le righe di ESITO della riga, formato di RIGA_R255 (label.PadRight(6) + ' ' + rcTxt ... 'file NON nullo')
+            fh.write('%s rc 2 (moncone _IS di un giorno = FALSO ALLARME ATTESO, _OOS verificato)   motore = pin (SHA256, 2 file)   prova = pin (SHA256) | G1 ok | L0 ok | S1 ok   file NON nullo\n' % f.ljust(6))
     return base
 
 
@@ -1299,7 +1417,12 @@ def autotest(fixture_dir):
     rd = o['ris']['stD1']
     assert rd['n_oos'] < N_R2 and ('NON VIOLATO su n = %d posizioni' % rd['n_oos']) in txt, rd['n_oos']
     rn = o['ris']['nudo']
-    assert rn['n_oos'] >= N_R2 and 'RISCHIO PASSATO (n = %d >= %d' % (rn['n_oos'], N_R2) in txt, rn['n_oos']
+    # classe 874: R2 rispettato su n OOS >= 40 ma n IS < 60 -> la configurazione NON ha "RISCHIO PASSATO"
+    assert rn['n_oos'] >= N_R2 and rn['n_is'] < N_R1 and 'RISPETTATO su n = %d posizioni (>= %d' % (rn['n_oos'], N_R2) in txt, rn['n_oos']
+    assert 'RISCHIO PASSATO (n IS' not in rn['esito'] and 'rischio NON VIOLATO su n IS = %d / n OOS = %d' % (rn['n_is'], rn['n_oos']) in rn['esito'], rn['esito']
+    assert not any(ln.lstrip().startswith(('R1 ', 'R2 ')) and 'RISCHIO PASSATO (' in ln for ln in txt.splitlines())
+    assert 'cartelle ROUND_R255a..x trovate: 24 su 24' in txt and 'SHA256 del pin per i file prova: 24 letti dalla riga' in txt
+    assert all(any(n.startswith('prova = pin (SHA256') for n in F['note']) for F in o['F'].values())
     assert 'moncone di UN giorno: vuoto ATTESO' in txt
     assert o['ris']['long']['esito'].startswith('RIFERIMENTO')
     assert 'NESSUNA PROPOSTA DI TAGLIA' in txt and 'COSA DICE PER LA 770212' in txt
@@ -1338,8 +1461,67 @@ def autotest(fixture_dir):
     assert any(s.startswith('P0') for s in o['F']['R255g']['nullo']), o['F']['R255g']['nullo']
     assert o['ris']['trail0']['esito'] == 'NULLO' and o['ris']['tp05']['esito'] == 'NULLO'
     assert 'NON VERIFICABILE (un file e NULLO)' in txt
+    # ---- contro-esempi del controllo preventivo del 27/09 (classi 872-875)
+    # 872: la cartella PADRE della raccolta (zip scompattato in una sottocartella) -> si trova un livello sotto, non 24 NULLI
+    padre = os.path.join(fixture_dir, 'zip_scompattato')
+    if os.path.isdir(padre):
+        shutil.rmtree(padre)
+    shutil.copytree(os.path.join(fixture_dir, 'ROUND_R255_SHORT_DOW_INFASE_pulito'), os.path.join(padre, 'ROUND_R255_SHORT_DOW_INFASE_pulito'))
+    txt, o = referto(padre)
+    assert not any(F['nullo'] for F in o['F'].values()) and 'raccolta trovata UN livello sotto' in txt
+    vuota = os.path.join(fixture_dir, 'cartella_sbagliata')
+    os.makedirs(os.path.join(vuota, 'a'), exist_ok=True)
+    os.makedirs(os.path.join(vuota, 'b'), exist_ok=True)
+    try:
+        referto(vuota)
+        raise AssertionError('872: una cartella senza ROUND_R255* ha prodotto un referto')
+    except SystemExit as e:
+        assert 'RACCOLTA NON TROVATA' in str(e)
+    # 873: la riga dice NULLO (motore diverso dal pin, classe 166) su un file che il lettore vede sano -> NULLO anche qui
+    base = genera_fixture(fixture_dir, 'c166', a603, a601)
+    rp = os.path.join(base, 'RIEPILOGO_R255.txt')
+    t = open(rp).read().replace('R255c  rc 2 (moncone _IS di un giorno = FALSO ALLARME ATTESO, _OOS verificato)   motore = pin (SHA256, 2 file)',
+                                'R255c  rc 2 (moncone _IS di un giorno = FALSO ALLARME ATTESO, _OOS verificato)   MOTORE DIVERSO DAL PIN: ABTG_Dow_Apertura_US.mq5 SHA256 DIVERSO DAL PIN')
+    righe = t.splitlines()
+    righe = [ln.replace('file NON nullo', 'FILE NULLO: MOTORE DIVERSO DAL PIN') if ln.startswith('R255c ') else ln for ln in righe]
+    open(rp, 'w').write('\n'.join(righe) + '\n')
+    # 873: una prova nella raccolta diversa dal pin -> P0 NULLO
+    pv = os.path.join(base, 'ROUND_R255e', FILE['R255e']['prova'])
+    open(pv, 'a').write('# riga in piu\n')
+    txt, o = referto(base)
+    assert any('MOTORE DIVERSO DAL PIN' in s for s in o['F']['R255c']['nullo']), o['F']['R255c']['nullo']
+    assert o['ris']['nudo']['esito'] == 'NULLO', o['ris']['nudo']['esito']
+    assert any('SHA256' in s and 'DIVERSO dal pin' in s for s in o['F']['R255e']['nullo']), o['F']['R255e']['nullo']
+    # 875: G1 sul PF con la tolleranza della testa (|delta| <= 0,00005), non con l'arrotondamento a 4 decimali
+    base = genera_fixture(fixture_dir, 'g1pf', a603, a601)
+    po = os.path.join(base, 'ROUND_R255i', '%s_%s_OOS_R255i.csv' % (EA, SIMB))
+    rows = open(po).read().splitlines()
+    hdr = rows[0].split(',')
+    for i, val in ((1, '1.234549'), (2, '1.234551')):     # delta 0,000002: stessa PF alla quarta decimale per la testa, round() li separa
+        v = rows[i].split(',')
+        v[hdr.index('Profit Factor')] = val
+        rows[i] = ','.join(v)
+    open(po, 'w').write('\n'.join(rows) + '\n')
+    txt, o = referto(base)
+    assert not o['F']['R255i']['nullo'], o['F']['R255i']['nullo']
+    # 875: regola d'ufficio dello scarto > 10% anche su un DD che sarebbe VIOLATO (testa par. 7, R252a par. 5)
+    assert leggi_r1r2(1.18 * 4.272, 1.19 * 4.272, 4.272, 0.1266, 0.12).startswith('NON RISOLTO (d ufficio')
+    assert leggi_r1r2(1.18 * 4.272, 1.19 * 4.272, 4.272, 0.1266, 0.05) == 'VIOLATO'
+    # 874: M4 decide la parola PROMOSSA (cella che sporge, centro, bordo TP1_R), e un NON RISOLTO non e una bocciatura
+    def _r(passa):
+        return dict(passa_r=passa, passa_m=passa, esito=('PASSA RISCHIO E MERITO su n = 160: M4 decide nella sez. 5' if passa else 'SOSPESA'))
+    ris = collections.OrderedDict((cf, _r(cf in ('stH6', 'tp05', 'nudo'))) for cf in CONF if cf != 'long')
+    m4_altopiano(ris)
+    assert ris['stH6']['esito'].startswith('NON PROMOSSA') and 'sporge' in ris['stH6']['esito'], ris['stH6']['esito']
+    assert ris['tp05']['esito'].startswith('NON PROMOSSA: M4, vince un BORDO'), ris['tp05']['esito']
+    assert ris['nudo']['esito'].startswith('PROMOSSA AL PASSO DOPO (interruttore')
+    ris = collections.OrderedDict((cf, _r(cf in ('stH6', 'stH8', 'stH12', 'stD1'))) for cf in CONF if cf != 'long')
+    m4_altopiano(ris)
+    assert ris['stH8']['esito'].startswith('PROMOSSA AL PASSO DOPO (centro') and ris['stH12']['esito'].startswith('NON PROMOSSA'), (ris['stH8']['esito'], ris['stH12']['esito'])
+    assert not any('salvo M4' in r['esito'] for r in ris.values())
     print('AUTOTEST OK: tetti dagli archivi (4.693,54 / 4.271,61; -1,0062 / -1,0227), calendario USA, classe 833, R1/R2 con e_eff, '
-          'fixture pulito (G0-LONG VERDE, G0-ANCORA 73/73, e_eff = 0,1266, NON VIOLATO su n, RISCHIO PASSATO, SOSPESA), R2 violato, R3 solo B, moncone operato, guasti L0/G1/P0')
+          'fixture pulito (G0-LONG VERDE, G0-ANCORA 73/73, e_eff = 0,1266, NON VIOLATO su n, R2 RISPETTATO su n>=40 ma NON "rischio passato", SOSPESA), R2 violato, R3 solo B, moncone operato, guasti L0/G1/P0; '
+          'contro-esempi 872 (cartella sbagliata), 873 (NULLO della riga per classe 166, prova diversa dal pin), 874 (M4 e parole finali), 875 (G1 PF, regola d ufficio)')
     print('fixture e referti in %s' % fixture_dir)
 
 
