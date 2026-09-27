@@ -36,6 +36,21 @@ I DUE BUCHI DELLA v1 CHE QUESTO FILE CHIUDE (o dichiara):
                      giornaliero per sedia conservato, co-movimento distrutto).
                      E' il modello che Gemini critica, messo accanto per
                      MISURARE quanto vale la correlazione.
+        - IID-S    : (aggiunto al cancello del 27/09) stesso calendario, ma il
+                     TOTALE DI GIORNATA di ogni sedia presente e' estratto a caso
+                     dalle giornate della STESSA sedia: distrugge SOLO il
+                     co-movimento FRA sedie (il "crollo insieme" di Gemini) e
+                     conserva quello DENTRO la sedia. Serve perche' l'IID per
+                     posizione distrugge DUE cose: sulle 4 sedie v1 l'unica con
+                     piu' posizioni al giorno e' la 771531 (77 giornate con >=2
+                     posizioni, fino a 8, coppia di SELL LIMIT con SL comune), e
+                     da sola vale +16 punti di PASS nell'IID per posizione.
+        - DISEGNO  : BLK pesca giornate SENZA reimmissione (come la v1), IID e
+                     IID-S pescano posizioni/giornate di sedia CON reimmissione.
+                     Il confronto pulito (decomposizione in main e contro-esempio
+                     iv) si fa con reimmissione=True per tutti e tre; nella
+                     tabella il disegno misto vale da ~1 a ~3 punti (contro-
+                     esempio i').
 
 UNITA' (regole della v1): valore in frazione del deposito di misura, alla
 taglia della misura; simula_stato moltiplica per `fattore` (2,0 = taglia 2,00%
@@ -44,6 +59,11 @@ delle sedie indici in campo) e applica la frazione fissa sul saldo del giorno.
   770105       : net /  10.000                (misura 1%   -> x fattore)
   ORO a t%     : net / 100.000 x (t/0,5) / fattore   (taglia ASSOLUTA t, non
                  segue il fattore: 0,5% e 1,0% del saldo, come chiesto)
+  [classe 321] l'EA dimensiona sul SALDO CORRENTE del backtest: nella finestra A
+  l'oro ha saldo 110.029-114.352, quindi dividere per 100.000 lo porta a ~0,55-0,57%
+  effettivo (stop veri -535,56 e -558,68). Rinormalizzato sul saldo corrente l'effetto
+  misurato e' <= 0,3 punti su tutte le righe oro: si dichiara, non si corregge (le
+  4 sedie v1 hanno lo stesso effetto ereditato, saldi finali 106-123k).
 Tutti i coefficienti sono potenze di due: le somme restano bit-per-bit uguali
 alla v1 quando le sedie nuove pesano zero (contro-esempio iii).
 
@@ -168,6 +188,25 @@ def pool_posizioni(dati, nomi, cal, fattore, taglia_oro=0.0):
             if d in idx:
                 conta[idx[d]][n] = conta[idx[d]].get(n, 0) + 1
     return pools, conta
+
+
+def comp_sedia_giorno(dati, nomi, cal, fattore, taglia_oro=0.0):
+    """IID-S: per ogni sedia PRESENTE nella giornata k estrae a caso il TOTALE di una
+       giornata della stessa sedia (nella finestra). Presenza conservata, co-movimento
+       FRA sedie distrutto, co-movimento DENTRO la sedia conservato."""
+    lo, hi = cal[0], cal[-1]
+    usa = [n for n in nomi if dati[n]['segue'] or taglia_oro > 0]
+    pools = dict((n, [x * scala(n, dati, fattore, taglia_oro) for d, x in sorted(dati[n]['giorni'].items()) if lo <= d <= hi])
+                 for n in usa)
+    pres = [[n for n in usa if d in dati[n]['giorni']] for d in cal]
+
+    def f(k, rnd):
+        v = 0.0
+        for n in pres[k]:
+            pool = pools[n]
+            v += pool[rnd.randrange(len(pool))]
+        return v
+    return f
 
 
 def comp_iid(pools, conta):
@@ -392,7 +431,7 @@ def autotest():
     o0 = corsa(f0, 2.0, attivo=a0); oA = corsa(fA, 2.0, attivo=aA)
     chk("(iii) ... e la tabella e' identica", o0 == oA, "-> %.4f%% / %.4f%%" % (o0['p']['PASS'], oA['p']['PASS']))
     # 7. CONTRO-ESEMPIO (i): un solo trade per giorno -> blocchi == IID entro il rumore
-    #    universo sintetico: OGNI posizione delle 4 sedie e' la sua giornata (566 giornate, tutte attive)
+    #    universo sintetico: OGNI posizione delle 4 sedie e' la sua giornata (560 giornate, tutte attive)
     pos1 = [(n, x) for n in V1 for _, x in dati[n]['posizioni']]
     f1 = [x / dati[n]['dep'] for n, x in pos1]
     pools1 = dict((n, [x / dati[n]['dep'] for nn, x in pos1 if nn == n]) for n in V1)
@@ -403,6 +442,13 @@ def autotest():
     d = oi['p'].get('PASS', 0) - ob['p'].get('PASS', 0)
     chk("(i) 1 trade/giorno: IID - blocchi = %+.2f punti (rumore +-0,5 su 20.000 sim; tolleranza 1,5)" % d,
         abs(d) < 1.5, "-> blocchi %.2f%%, IID %.2f%%, %d giornate" % (ob['p'].get('PASS', 0), oi['p'].get('PASS', 0), len(f1)))
+    #    (i') la STESSA prova nella configurazione della tabella (blocchi SENZA reimmissione, IID con):
+    #    qui la differenza non e' zero ed e' DISEGNO, non correlazione. Si stampa, non si giudica.
+    ob = simula_v2(f1, 2.0, S_OGGI, **KW_CAMPO)
+    oi = simula_v2(f1, 2.0, S_OGGI, comp=comp_iid(pools1, conta1), **KW_CAMPO)
+    print("       (i') informativo, configurazione della tabella (blocchi SENZA reimmissione): blocchi %.2f%%, IID %.2f%% -> "
+          "IID - blocchi = %+.2f punti di solo DISEGNO (semi 12/13: -1,00 / -0,72)" % (
+              ob['p'].get('PASS', 0), oi['p'].get('PASS', 0), oi['p'].get('PASS', 0) - ob['p'].get('PASS', 0)))
     # 8. CONTRO-ESEMPIO (ii): correlazione artificiale 1 -> P(fermata) blocchi > IID
     #    per ogni sedia i giornalieri ordinati dal peggiore; giornata j = j-esimo peggiore di OGNI sedia
     ordinati = dict((n, sorted(dati[n]['giorni'].values())) for n in V1)
@@ -424,8 +470,23 @@ def autotest():
     ob = simula_v2(f2, 2.0, S_OGGI, attivo=a2, **KW_CAMPO)
     oi = simula_v2(f2, 2.0, S_OGGI, attivo=a2, comp=comp_iid(p2, c2), **KW_CAMPO)
     print("       (ii) informativo, Guardian ACCESO: P(fermata 9,3) blocchi %.1f%% / IID %.1f%%; PASS %.1f%% / %.1f%% "
-          "(il taglio B1 rende le perdite concentrate piu' economiche: NON e' un contro-esempio, e' un fatto del Guardian)" % (
+          "(differenza entro il rumore, semi 12-14: -0,6/-0,2/-0,2; il taglio B1 del MODELLO e' perfetto sul realizzato "
+          "e assorbe la coda: proprieta' del modello, magnitudo in campo [NON MISURATA])" % (
               ob['p'].get('FERMATA_GUARDIAN', 0), oi['p'].get('FERMATA_GUARDIAN', 0), ob['p'].get('PASS', 0), oi['p'].get('PASS', 0)))
+    #    (iv) CONTRO-ESEMPIO della decomposizione: UNA sedia sola (771531, finestra A), tutto CON reimmissione.
+    #    Fra sedie non c'e' niente da distruggere: IID-S deve coincidere coi blocchi. L'IID per posizione
+    #    invece spezza le sue giornate a piu' posizioni: se se ne allontana, e' quello che misura.
+    fE, aE = blocchi(dati, ['771531 EMA200'], calA, 2.0)
+    pE, cE = pool_posizioni(dati, ['771531 EMA200'], calA, 2.0)
+    kw_r = dict(KW_CAMPO, reimmissione=True, attivo=aE)
+    obE = simula_v2(fE, 2.0, S_OGGI, **kw_r)
+    osE = simula_v2(fE, 2.0, S_OGGI, comp=comp_sedia_giorno(dati, ['771531 EMA200'], calA, 2.0), **kw_r)
+    oiE = simula_v2(fE, 2.0, S_OGGI, comp=comp_iid(pE, cE), **kw_r)
+    bE, sE, iE = obE['p'].get('PASS', 0), osE['p'].get('PASS', 0), oiE['p'].get('PASS', 0)
+    chk("(iv) 771531 sola: IID-S - blocchi = %+.2f punti (tolleranza 1,5: niente da distruggere fra sedie)" % (sE - bE),
+        abs(sE - bE) < 1.5, "-> blocchi %.2f%%, IID-S %.2f%%" % (bE, sE))
+    chk("(iv) 771531 sola: IID per posizione - blocchi = %+.2f punti (> 5: misura il co-movimento DENTRO la sedia)" % (iE - bE),
+        iE - bE > 5.0, "-> IID per posizione %.2f%%" % iE)
     # 9. IID sui dati veri: il conteggio delle posizioni per giornata torna
     pA, cA = pool_posizioni(dati, V1, calA, 2.0)
     chk("IID: posizioni nel pool == posizioni contate sul calendario A (%d)" % sum(len(v) for v in pA.values()),
@@ -466,6 +527,20 @@ def main():
             print("    %-16s x %-16s giorni comuni %3d  rho %s  perdono insieme %s" % (
                 a, b, nc, '%+.2f' % rho if rho is not None else '  n/d', ins if ins is not None else 'n/d'))
 
+    print("\n[DECOMPOSIZIONE DEL CO-MOVIMENTO, taglia 2,00%, TUTTO CON reimmissione (disegno neutro), semi 11/12/13]")
+    print("  PASS / fine<=5gg.  BLK = blocchi | IID-S = solo FRA sedie distrutto | IID = anche DENTRO la sedia distrutto")
+    for tag, nomi, cal in [('A: 4 sedie v1', V1, calA), ('B: 4 sedie + 770105', V1 + ['770105 DAXshort'], calB),
+                           ('A: 771531 sola (contro-esempio iv)', ['771531 EMA200'], calA)]:
+        f, a = blocchi(dati, nomi, cal, 2.0)
+        pp, cc = pool_posizioni(dati, nomi, cal, 2.0)
+        cs = comp_sedia_giorno(dati, nomi, cal, 2.0)
+        out = []
+        for sm in (11, 12, 13):
+            kw = dict(KW_CAMPO, reimmissione=True, attivo=a, seme=sm)
+            r = [simula_v2(f, 2.0, S_OGGI, comp=c, **kw) for c in (None, cs, comp_iid(pp, cc))]
+            out.append(" / ".join("%.1f-%.1f" % (o['p'].get('PASS', 0), fine5(o)) for o in r))
+        print("  %-36s BLK / IID-S / IID  ->  %s" % (tag, "  ||  ".join(out)))
+
     righe_md = []
     for fatt, etich in [(2.0, "2,00% (taglia in campo)"),
                         (1.0, "1,00% [preset demo BCM, tetto PROPOSTO il 19/09 e NON firmato -- solo riferimento, NESSUNA PROPOSTA]"),
@@ -480,6 +555,8 @@ def main():
         fA, aA = blocchi(dati, V1, calA, fatt)
         pA, cA = pool_posizioni(dati, V1, calA, fatt)
         righe.append(("IID A: 4 sedie, posizioni indipendenti (modello 'trade indipendenti')", fA, aA, comp_iid(pA, cA), None, None))
+        righe.append(("IID-S A: 4 sedie, giornate di sedia indipendenti (solo FRA sedie)", fA, aA,
+                      comp_sedia_giorno(dati, V1, calA, fatt), None, None))
         righe.append(("BLK A: 4 sedie a blocchi giornalieri (== G0f)", fA, aA, None, None, None))
         for t in (0.5, 1.0):
             f, a = blocchi(dati, V1 + ['795301 ORO'], calA, fatt, t)
@@ -497,6 +574,8 @@ def main():
         righe.append(("BLK B: 4 sedie + 770105 (DAX short, 181 giornate)", f5, a5, None, None, None))
         p5, c5 = pool_posizioni(dati, V1 + ['770105 DAXshort'], calB, fatt)
         righe.append(("IID B: 4 sedie + 770105, posizioni indipendenti", f5, a5, comp_iid(p5, c5), None, None))
+        righe.append(("IID-S B: 4 sedie + 770105, giornate di sedia indipendenti (solo FRA sedie)", f5, a5,
+                      comp_sedia_giorno(dati, V1 + ['770105 DAXshort'], calB, fatt), None, None))
         for t in (0.5, 1.0):
             f, a = blocchi(dati, V1 + ['770105 DAXshort', '795301 ORO'], calB, fatt, t)
             righe.append(("BLK B: 4 sedie + 770105 + ORO %.1f%%" % t, f, a, None, None, None))
