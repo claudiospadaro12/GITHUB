@@ -36058,3 +36058,29 @@ nei due sensi (raccolta sana ACCETTATA, P0 e RIGA NULLI RIFIUTATI, preset TP1/ch
 il verbo *"aggiunge/toglie X punti"* scritto anche quando la banda dei semi attraversa lo zero o non e' calcolata (taglie 1,00 e
 0,65) -> ora *"NON si distingue dal rumore del seme"* / *"banda NON calcolata"*; dichiarati in output la classe 800 (lotti a
 10.000 passo 0,1, e_eff >= 0,1266, portati interi sul conto FTMO) e la griglia H4 di FTMO diversa (testa R255a par. 6).
+
+### CLASSE 891 — una DIAGNOSTICA che ASSEGNA la causa di un verdetto da CONTEGGI aggregati che quella causa non basta a spiegare: "il K1 dice NULLO per il PAVIMENTO, non per l'identificazione" stampato con 5 coppie al pavimento su 105 e il K1 NON nullo, con 10 al pavimento e 70 fuori banda, e quando il NULLO della riga C viene dalla clausola ATR e non dal rapporto (28/09/2026, cancello di giudizio su `leggi_round_corti_c.py` @ `32d1c02e`, figlia della 889, parente della 875 e della 885)
+Caso: il lettore della raccolta C2 (mini-riga R264d1-d4 oro a 100000) scrive accanto al K1 R264d ricopiato dal RIEPILOGO C una
+"DIVERGENZA DICHIARATA (classe 889)" con una frase FISSA, stampata appena c'e' anche una sola gamba 1 al pavimento: *"il cancello
+'fuori banda in piu' di meta' delle coppie -> K1 NULLO' (M coppie fuori su N) dice NULLO per il PAVIMENTO, non per
+l'identificazione"*. Contro-esempi eseguiti sul formato ESATTO della riga C (`$kres.txt` @ `0482fd80`): (a) pavimento 5/105, 3 fuori
+banda, K1 NON RISOLTO -> la frase diceva lo stesso *"dice NULLO"* (il K1 non era nullo); (b) pavimento 10/105, 70 fuori -> anche
+togliendo TUTTE le 10 ne restano >= 60 fuori, oltre la meta' 52,5: il NULLO NON e' del pavimento, e la frase lo assegnava al
+pavimento; (c) la fixture stessa, 60 al pavimento e 60 fuori su 105: la riga K1 da' CONTEGGI, non QUALI coppie sono fuori, quindi
+"per il pavimento" e' al massimo COMPATIBILE, non dimostrato -- e nella riga C la parola NULLO sta dopo *"ATR ... oltre +-12% in 84
+coppie"*: la clausola ATR (che la testa R264 NON congela, classe 875) dice NULLO DA SOLA, e il pavimento non la spiega. Nello stesso
+cancello: (d) la regex del verdetto ricopiato vedeva solo `-> K1 <ver>` e non le altre due forme che la riga C scrive
+(`K1 R264d: K1 NON CALCOLABILE: per-trade ...` e `K1 R264d: NON CALCOLATO`): il referto scriveva "K1 NON LETTO" -- e' la regola (3)
+della 889 NON applicata al K1, ripagata; (e) con il RIEPILOGO C letto assente (G0 non letto) il VERDETTO S8 della griglia usciva
+*"PASSA LO SCREENING"* senza nessuna nota, mentre l'OOS contro il genetico e' non confrontabile anche li' (la mini-riga parte SOLO
+con G0 ROSSO). E una lezione dal rimedio: la prima correzione di (e) passava `c2=True` a `sez_griglia`, dove `c2` e' anche la MEDIA
+DI COLONNA (r. `c0, c1, c2 = ...`): la nota usciva nelle raccolte C (GBPJPY, GBPUSD) e l'autotest non se ne accorgeva perche' il suo
+controllo "nessuna riga C2 nel referto C" cercava `RACCOLTA C2` in maiuscolo; l'ha presa il diff = 0 rifatto DOPO la correzione.
+Regola: (1) una diagnostica che nomina una CAUSA scrive solo quello che i conteggi reggono: con K conteggi e nessun dettaglio per
+coppia, "NON spiegato" se anche togliendo tutti i casi della causa il verdetto resta, "COMPATIBILE [NON DIMOSTRATO]" altrimenti, e
+nessun "dice NULLO" se il verdetto non e' NULLO; (2) se il verdetto ricopiato ha PIU' clausole, si dice QUALE lo ha acceso;
+(3) il diff = 0 contro la versione passata dal cancello si rifa' DOPO ogni correzione, non solo sulla prima stesura, e il controllo
+dell'autotest che lo sostituisce non dipende dal maiuscolo. Corretto: `k1_pav_txt()` a tre rami + clausola ATR letta (`oltre +-12% in
+M coppie`), regex delle tre forme del K1, nota "[G0 XAUUSD NON VERIFICABILE in questa raccolta C2 ...]" sul S8, parametro rinominato
+`raccolta_c2`, controllo C/C2 dell'autotest insensibile al maiuscolo (mutazione del difetto eseguita: ora FAIL). Autotest 64/64;
+diff 0 sulle 7 fixture C contro `24ec1df1`.

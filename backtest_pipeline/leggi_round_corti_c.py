@@ -696,7 +696,7 @@ class Raccolta:
         """C2: G0 R264d e K1 R264d RICOPIATI dal RIEPILOGO C letto, con le STESSE regex della mini-riga ('^G0 R264d[ :]',
         '^K1 R264d: ', 'coppie gamba1/gamba2 N', 'gambe 1 con volume >= 0,02: X su N', 'in M coppie), ATR'). lv 0..3 come
         g0_livello (3 = NON VERIFICABILE: file o riga assente); pav = N - X = coppie con la gamba 1 al PAVIMENTO 0,01."""
-        out = dict(lv=3, g0="", k1="", ver="", n_pair=None, rat_ko=None, v1ge02=None, pav=None, fonte="")
+        out = dict(lv=3, g0="", k1="", ver="", n_pair=None, rat_ko=None, atr_ko=None, v1ge02=None, pav=None, fonte="")
         L = self.riepilogo_letto()
         if not L:
             out["fonte"] = "%s ASSENTE nella raccolta" % RIEP_C_LETTO
@@ -710,8 +710,12 @@ class Raccolta:
             out["lv"] = {"VERDE": 0, "GIALLO": 1, "ROSSO": 2}[m.group(1)] if m else 3
         if k:
             out["k1"] = k[0]
-            m = re.search(r"-> K1 (PASS|FAIL|NON RISOLTO|SOLO LETTURA|NULLO|NON CALCOLABILE)", k[0])
+            # classe 891: la riga C scrive il K1 in TRE forme -- '... -> K1 <ver>' (calcolato, anche nPair = 0 -> NON CALCOLABILE),
+            # 'K1 R264d: K1 NON CALCOLABILE: per-trade ... assente o C0 KO' (senza '->') e 'K1 R264d: NON CALCOLATO' (file NULLO)
+            m = re.search(r"-> K1 (PASS|FAIL|NON RISOLTO|SOLO LETTURA|NULLO|NON CALCOLABILE)", k[0]) or re.match(r"^K1 R264d: (?:K1 )?(NON CALCOLABILE|NON CALCOLATO)\b", k[0])
             out["ver"] = m.group(1) if m else "NON LETTO"
+            ma = re.search(r"oltre \+-12% in ([0-9]+) coppie", k[0])
+            out["atr_ko"] = int(ma.group(1)) if ma else None
             mp = re.search(r"coppie gamba1/gamba2 ([0-9]+)", k[0])
             mv = re.search(r"gambe 1 con volume >= 0,02: ([0-9]+) su ([0-9]+)", k[0])
             mr = re.search(r" in ([0-9]+) coppie\), ATR ", k[0])
@@ -1256,10 +1260,32 @@ def g0_livello(f, an):
 # accanto al K1 di R264d, quando almeno una gamba 1 sta al pavimento (classe 889, trovata dal cancello del 28/09): NON cambia il
 # criterio congelato del K1 (vol2/vol1 fuori banda in piu' di meta' delle coppie -> NULLO), lo DIAGNOSTICA; e la griglia d1-d4
 # NON dipende da quel NULLO (sez_griglia legge il solo G0: testa par. 5/10)
-K1_PAV_TXT = ("  - K1 R264d, DIVERGENZA DICHIARATA (classe 889): %d coppie su %d (%.1f%%) hanno la gamba 1 al PAVIMENTO 0,01 [DERIVATO: N - X da 'gambe 1 con volume >= 0,02: X su N']; "
-              "li' il rapporto vol2/vol1 e' QUANTIZZATO (0,01/0,01 = 1,0 e 0,03/0,01 = 3,0 cadono fuori [%.2f ; %.4g] con gambe identificate GIUSTE), quindi il cancello "
-              "'fuori banda in piu' di meta' delle coppie -> K1 NULLO' (%d coppie fuori su %d) dice NULLO per il PAVIMENTO, non per l'identificazione. Il criterio congelato del K1 "
-              "NON cambia (riguarda il COSTO dello stop); la lettura della griglia d1-d4 (par. 3.2) NON dipende da questo NULLO: dipende solo dal G0 (testa par. 5/10).")
+def k1_pav_txt(pav, n, rat_ko, rlo, rhi, atr_ko=None):
+    """classe 889 + classe 891 (cancello del 28/09): la quota al pavimento si DIAGNOSTICA, non si ASSEGNA come causa.
+    La riga K1 da' solo CONTEGGI (pav al pavimento, rat_ko fuori banda, atr_ko fuori +-12%), non QUALI coppie: il pavimento
+    spiega al piu' pav delle rat_ko fuori. Se anche togliendole tutte ne restano > N/2 fuori, il NULLO del rapporto NON e'
+    del pavimento; se rat_ko <= N/2 il rapporto NON dice NULLO; altrimenti il NULLO e' COMPATIBILE col pavimento, NON dimostrato.
+    E la clausola ATR +-12% (classe 875: la riga C la applica, la testa R264 par. 5 no) puo' dire NULLO da sola."""
+    meta = n / 2.0
+    rest = max(0, rat_ko - pav)
+    if rat_ko <= meta:
+        rat = "rapporto vol2/vol1 fuori [%.2f ; %.4g] in %d coppie su %d, NON oltre la meta' (%.1f): il cancello del rapporto NON dice NULLO" % (rlo, rhi, rat_ko, n, meta)
+    elif rest > meta:
+        rat = ("rapporto vol2/vol1 fuori [%.2f ; %.4g] in %d coppie su %d: anche togliendo TUTTE le %d al pavimento ne restano almeno %d fuori, oltre la meta' (%.1f) "
+               "-> il NULLO del rapporto NON e' spiegato dal pavimento (identificazione delle gambe o altra causa: da capire)" % (rlo, rhi, rat_ko, n, pav, rest, meta))
+    else:
+        rat = ("rapporto vol2/vol1 fuori [%.2f ; %.4g] in %d coppie su %d (oltre la meta' %.1f): le %d coppie al pavimento lo porterebbero sotto la meta' SOLO se le fuori banda "
+               "sono proprio quelle -> il NULLO del rapporto e' COMPATIBILE col pavimento [NON DIMOSTRATO: la riga K1 conta, non dice QUALI coppie sono fuori]" % (rlo, rhi, rat_ko, n, meta, pav))
+    atr = ""
+    if atr_ko is not None:
+        atr = "; clausola ATR +-12%% fuori in %d coppie su %d%s (classe 875: la applica la riga C, la testa R264 par. 5 NON la congela; il pavimento non la spiega)" % (
+            atr_ko, n, " -> DA SOLA dice NULLO nella riga C" if atr_ko > meta else ", non oltre la meta'")
+    return ("  - K1 R264d, DIVERGENZA DICHIARATA (classe 889): %d coppie su %d (%.1f%%) hanno la gamba 1 al PAVIMENTO 0,01 [DERIVATO: N - X da 'gambe 1 con volume >= 0,02: X su N']; "
+            "li' il rapporto vol2/vol1 e' QUANTIZZATO (0,01/0,01 = 1,0 e 0,03/0,01 = 3,0 cadono fuori banda anche con gambe identificate GIUSTE). %s%s. Il criterio congelato del K1 "
+            "NON cambia (riguarda il COSTO dello stop); la lettura della griglia d1-d4 (par. 3.2) NON dipende dal K1: dipende solo dal G0 (testa par. 5/10)." % (
+                pav, n, 100.0 * pav / n, rat, atr))
+
+
 G0_NOME = ["VERDE (il banco rifa' l'archivio: |dn| <= 1%, |dPF| <= 0,020, DD entro +-5%)", "GIALLO (|dn| <= 3% e |dPF| <= 0,050)", "ROSSO: il banco NON rifa' l'archivio", "NON VERIFICABILE (file NULLO o SALTATO)"]
 
 
@@ -1304,7 +1330,7 @@ def sez_r264(rac, F, EX, R):
             ("; gambe 1 con volume >= 0,02: %d su %d (contro-esempio della causa nominata per il GIALLO/ROSSO d'oro: se >= 0,02 la causa lotto e' SBAGLIATA)" % (ko["v1ge02"], ko["n_pair"])) if t == "R264d" else ""))
         if t == "R264d" and ko["n_pair"] > 0 and (ko["n_pair"] - ko["v1ge02"]) > 0:
             pav = ko["n_pair"] - ko["v1ge02"]
-            R.add(K1_PAV_TXT % (pav, ko["n_pair"], 100.0 * pav / ko["n_pair"], prm["rlo"], prm["rhi"], ko["rat_ko"], ko["n_pair"]))
+            R.add(k1_pav_txt(pav, ko["n_pair"], ko["rat_ko"], prm["rlo"], prm["rhi"]))
             R.esiti["k1_pav_" + t] = (pav, ko["n_pair"])
         m = misure_pt(po, f.j["dp"])
         R.add("  - %s: %s" % (t, misure_txt(m, po.k)))
@@ -1345,7 +1371,7 @@ def sez_r264(rac, F, EX, R):
     R.add("")
 
 
-def sez_griglia(F, R, g, g0lv, g0_nota=""):
+def sez_griglia(F, R, g, g0lv, g0_nota="", raccolta_c2=False):
     sym = g["sym"]
     R.add("### 3.%s %s (G0 %s: %s%s) -- %s" % (gk_of(g), sym, g["g0"], ["VERDE", "GIALLO", "ROSSO", "NON VERIFICABILE"][g0lv], g0_nota, g["regime"]), "")
     files = [F[t] for t in g["f"]]
@@ -1412,7 +1438,8 @@ def sez_griglia(F, R, g, g0lv, g0_nota=""):
                       "REGIME" if s4 else "no", " / ".join("O2 %.1f PF IS %s (%s)" % (pv, fpf(pfm[(0.1, g["o2"].index(pv))]), "il centro la batte di >= 0,05" if mz >= pfm[(0.1, g["o2"].index(pv))] + 0.05 else "il centro NON la batte di 0,05: IL DEFAULT VA BENE") for pv in g["prx"]), banda),
                   "- **VERDETTO S8 (per nome): %s**%s%s -- S7: Modello 1 BOCCIA e non PROMUOVE: il massimo e' PASSA LO SCREENING -> serve il tick (2024.07.05 -> 2026.06.30 o storico esterno)" % (
                       ver, " [file con O1 INERTE (S5): %s -- la testa dice che NON conta per S2: il verdetto qui sopra NON usa S2 (la riga lo delegava al referto)]" % ", ".join(inert) if inert else "",
-                      " [G0 %s ROSSO: l'OOS contro il genetico e' NON CONFRONTABILE, l'IS resta leggibile da solo]" % sym if g0lv == 2 else ""))
+                      " [G0 %s ROSSO: l'OOS contro il genetico e' NON CONFRONTABILE, l'IS resta leggibile da solo]" % sym if g0lv == 2 else
+                      (" [G0 %s NON VERIFICABILE in questa raccolta C2 (la mini-riga parte SOLO con G0 ROSSO; classe 891): l'OOS contro il genetico e' NON CONFRONTABILE, l'IS resta leggibile da solo]" % sym if (raccolta_c2 and g0lv == 3) else "")))
             n_pos_is = int(round(nIS / 1.838))
             R.add("- Emendamento della finestra: l'IS si misura in operazioni (%d deal ~ %d posizioni [DERIVATO 1,838 deal/pos]); il VECCHIO (IS) giudica il RISCHIO (DD IS %.2f), il RECENTE (OOS) il MERITO (PF OOS %s); rischio: %s" % (
                 nIS, n_pos_is, ddI, fpf(pfoM), verdetto_rischio(ddI > MURO_1PCT or ddO > MURO_1PCT, n_pos_is, "DD <= 10,0% @1% in IS e OOS", ohlc=True)))
@@ -1481,9 +1508,10 @@ def sez_r264_c2(rac, F, R):
     if L["k1"]:
         R.add("- K1 R264d [letto dalla riga C, non rifatto] -> **K1 %s**: `%s`" % (L["ver"], L["k1"][:1000]))
         if L["n_pair"] is not None and L["n_pair"] > 0:
-            R.add(K1_PAV_TXT % (L["pav"], L["n_pair"], 100.0 * L["pav"] / L["n_pair"], K1PAR["R264d"]["rlo"], K1PAR["R264d"]["rhi"], L["rat_ko"], L["n_pair"]))
+            R.add(k1_pav_txt(L["pav"], L["n_pair"], L["rat_ko"], K1PAR["R264d"]["rlo"], K1PAR["R264d"]["rhi"], L["atr_ko"]))
         else:
-            R.add("  - quota di coppie al PAVIMENTO: NON LEGGIBILE dalla riga K1 ricopiata (mancano 'coppie gamba1/gamba2 N', 'gambe 1 con volume >= 0,02: X su N' o 'in M coppie), ATR')")
+            R.add("  - quota di coppie al PAVIMENTO: %s" % ("ZERO coppie gamba1/gamba2 nella riga K1 ricopiata: niente da contare (K1 %s)" % L["ver"] if L["n_pair"] == 0 else
+                  "NON LEGGIBILE dalla riga K1 ricopiata (mancano 'coppie gamba1/gamba2 N', 'gambe 1 con volume >= 0,02: X su N' o 'in M coppie), ATR': K1 %s)" % L["ver"]))
     else:
         R.add("- K1 R264d: NON VERIFICABILE (riga 'K1 R264d: ' non trovata: %s)" % L["fonte"])
     R.esiti["g0_R264d"] = ["VERDE", "GIALLO", "ROSSO", "NV"][lv]
@@ -1495,7 +1523,7 @@ def sez_r264_c2(rac, F, R):
     R.add("## 3. R264 -- LA GRIGLIA 3 x 3 DELL'ORO A 100.000 (testa par. 6-8: CENTRO = la cella di MEZZO O1 0,20 / O2 centrale, MAI il picco; classe 845)", "",
           "- nota della testa R264 par. 5: G0 R264d %s%s -> l'OOS 2024-26 contro il genetico e' NON CONFRONTABILE; l'IS 2017-23 si legge da solo (par. 4: S2 si legge in IS, l'OOS e' conferma DEBOLE). "
           "Il deposito 100000 NON e' una taglia (par. 0): e' la ragione del rilancio (a 100000 il pavimento del lotto non morde e la parziale al 50%% parte)." % (["VERDE", "GIALLO", "ROSSO", "NON VERIFICABILE"][lv], et), "")
-    sez_griglia(F, R, GRID["d"], lv, g0_nota=et)
+    sez_griglia(F, R, GRID["d"], lv, g0_nota=et, raccolta_c2=True)
     R.add("")
 
 
@@ -2690,7 +2718,7 @@ def autotest(fixture_dir=None):
     lv, _ = g0_livello(_FF(), an)
     check(lv == 1, "794: G0 GBPUSD con |dn| = 10 (3%% = 10,86) e PF 1,28105 (|dPF| = 0,050 esatto, in virgola mobile 0,050000000000000044) -> GIALLO, non ROSSO (livello %d)" % lv)
     # ---- (3) la raccolta C2 (mini-riga del 28/09, PASS 20b9c544): layout esatto, 4 varianti
-    check(all(E[v].get("tipo") == "C" and E[v].get("n_costr") == 0 for v in E) and all("ASSENTE PER COSTRUZIONE" not in TXT[v] and "RACCOLTA C2" not in TXT[v] for v in TXT),
+    check(all(E[v].get("tipo") == "C" and E[v].get("n_costr") == 0 for v in E) and all("ASSENTE PER COSTRUZIONE" not in TXT[v] and "RACCOLTA C2" not in TXT[v].upper() and "891" not in TXT[v] for v in TXT),
           "C2/C: le 7 raccolte C restano di tipo C, 0 ASSENTI PER COSTRUZIONE, nessuna riga C2 nel referto (l'output della raccolta C non cambia)")
     E2, TXT2 = {}, {}
     for var in ("pulito", "senzaletto", "nullo", "senzariep"):
@@ -2706,7 +2734,19 @@ def autotest(fixture_dir=None):
           "C2 pulito: dichiarazione in testa e nel riepilogo finale; R267a non pertinente (nessuna riga nel par. 0)")
     check(C2.get("g0_R264d") == "ROSSO" and C2.get("k1_R264d") == "NULLO" and C2.get("k1_pav_R264d") == (60, 105) and TXT2["pulito"].count("[letto dalla riga C, non rifatto]") >= 4 and "60 coppie su 105 (57.1%)" in TXT2["pulito"],
           "C2 pulito: G0 R264d ROSSO e K1 NULLO RICOPIATI dal RIEPILOGO C letto con l'etichetta, quota al PAVIMENTO 60 su 105 (57,1%%) = N - X accanto al K1 (classe 889), criterio del K1 NON toccato")
-    check("dice NULLO per il PAVIMENTO, non per l'identificazione" in TXT2["pulito"] and "NON dipende da questo NULLO" in TXT2["pulito"], "C2 pulito: la divergenza sul vol2/vol1 quantizzato e' scritta accanto al K1 e la griglia non ne dipende")
+    check("il NULLO del rapporto e' COMPATIBILE col pavimento [NON DIMOSTRATO" in TXT2["pulito"] and "fuori in 84 coppie su 105 -> DA SOLA dice NULLO nella riga C" in TXT2["pulito"] and "NON dipende dal K1" in TXT2["pulito"]
+          and "dice NULLO per il PAVIMENTO" not in TXT2["pulito"], "C2 pulito: la divergenza sul vol2/vol1 quantizzato e' scritta accanto al K1 come COMPATIBILE (non dimostrata: 60 fuori su 105, 60 al pavimento), la clausola ATR 84/105 dice NULLO da sola (875), la griglia non ne dipende")
+    # classe 891 (cancello del 28/09): la diagnostica NON assegna la causa. Contro-esempi: pavimento 5/105 con 3 fuori (K1 non NULLO)
+    # e pavimento 10/105 con 70 fuori (60 fuori NON al pavimento > 52,5): prima la frase diceva in tutti e due 'dice NULLO per il PAVIMENTO'
+    t1, t2, t3 = k1_pav_txt(5, 105, 3, 1.36, 2.125), k1_pav_txt(10, 105, 70, 1.36, 2.125), k1_pav_txt(93, 93, 93, 1.36, 2.125)
+    check("NON oltre la meta' (52.5): il cancello del rapporto NON dice NULLO" in t1 and "COMPATIBILE" not in t1 and "ne restano almeno 60 fuori" in t2 and "NON e' spiegato dal pavimento" in t2 and "COMPATIBILE col pavimento [NON DIMOSTRATO" in t3,
+          "891: pav 5 / fuori 3 -> il rapporto NON dice NULLO; pav 10 / fuori 70 -> NULLO NON spiegato dal pavimento (60 > 52,5); pav 93 / fuori 93 -> COMPATIBILE, NON DIMOSTRATO")
+    check(re.match(r"^K1 R264d: (?:K1 )?(NON CALCOLABILE|NON CALCOLATO)\b", "K1 R264d: K1 NON CALCOLABILE: per-trade della gemella 796531 assente o C0 KO").group(1) == "NON CALCOLABILE"
+          and re.match(r"^K1 R264d: (?:K1 )?(NON CALCOLABILE|NON CALCOLATO)\b", "K1 R264d: NON CALCOLATO").group(1) == "NON CALCOLATO"
+          and re.match(r"^K1 R264d: (?:K1 )?(NON CALCOLABILE|NON CALCOLATO)\b", "K1 R264d: K1 dal LOTTO (classe 846 ...") is None,
+          "891: le due forme del K1 senza '->' della riga C (per-trade assente, file NULLO) si leggono per nome, non 'NON LETTO'")
+    check("[G0 XAUUSD NON VERIFICABILE in questa raccolta C2" in TXT2["senzaletto"].split("VERDETTO S8")[1].split("\n")[0],
+          "891: C2 senzaletto (G0 non letto) -> il VERDETTO S8 porta la nota OOS NON CONFRONTABILE accanto (prima: 'PASSA LO SCREENING' nudo)")
     check(C2.get("griglia_XAUUSD") == "PASSA LO SCREENING" and C2.get("centro_XAUUSD") == (0.2, 0.6) and C2.get("picco_XAUUSD") == (0.1, 0.5) and C2.get("uscita_XAUUSD") == "regge" and "G0 XAUUSD ROSSO: l'OOS contro il genetico e' NON CONFRONTABILE" in TXT2["pulito"],
           "C2 pulito: griglia d1-d3 letta coi cancelli di casa (CENTRO 0,20/0,6 PF 1,21, picco 0,10/0,5 PF 1,30 NON scelto) + uscita d4 (M1-M3 contro il CONTROLLO 50), OOS NON CONFRONTABILE (G0 ROSSO), IS leggibile")
     check("M1-M3 TP1Pct 0 contro il CONTROLLO TP1Pct 50" in TXT2["pulito"] and "certificato di morte" in TXT2["pulito"] and "S3 RISCHIO al mezzo" in TXT2["pulito"] and "RISCHIO PASSATO su" not in TXT2["pulito"] and "G2 ok" in TXT2["pulito"] and "D0 ok" in TXT2["pulito"],
