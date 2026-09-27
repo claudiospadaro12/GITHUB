@@ -35893,3 +35893,34 @@ criterio combina due oggetti costruiti in modo diverso (una corsa sola contro un
 riparte), il primo contro-esempio da provare e' "cosa misura il criterio se l'errore che cerca e'
 ZERO?" — se non esce zero, il criterio misura anche la costruzione. Corretto in `leggi_r255.py`
 (`scarto_cont` per era, riga stampata, assert nell'autotest).
+
+### CLASSE 877 — il cambio misurato con due uscite a PREZZI QUASI UGUALI: l'ancora suppone lo stesso cambio sulle due uscite, e la deriva del cambio divisa per pochi centesimi di prezzo fa esplodere q e rovescia il K1 (27/09/2026, cancello di `leggi_round_corti_d.py`, parente della 846)
+Caso: `leggi_round_corti_d.py` @ `b85cbfca`, K1 della testa R268a par. 6.4 (q = (net1 - net2) / ((p1 - p2) x vol x C),
+banda [min ; max] delle ancore). Sul tratto 2024.07.06 di R260a le 12 ancore stanno in 0,8393-0,9663 e il difetto non si
+vede; sul per-trade 795301 INTERO (2020-2026) due ancore hanno uscite a 0,03 $ di distanza (2020.05.15 1747,71/1747,74 -> q
+1,1067; 2021.05.25 1893,74/1893,71 -> q 0,4348: amplificazione ~300-400 volte della deriva del cambio fra 16:57 e 17:30).
+Con loro il K1 congelato esce NON DECISO (mediane 11,81 / 30,85 $), senza di loro ROSSO (16,55 $ < 18): il verdetto lo
+decidono due righe di rumore. Il flag del lettore ("fuori da [0,5 ; 1,5]") ne vedeva UNA su due, e nella tabella K1 per anno
+di R268d (22 anni, dove queste coppie si moltiplicano) nessuna. Regola: un'ancora si pesa col suo CONDIZIONAMENTO
+(|p - p_ingresso| / |p1 - p2|, qui A > 100 = mal condizionata: fra le buone il massimo e' ~30), non con la plausibilita' del
+q; il verdetto congelato resta quello della testa, ma accanto si scrive il K1 senza le mal condizionate e, se diverge, K1
+esce "SENSIBILE ALLE ANCORE" e va a Claudio cosi'. Nota: la formula vale solo per il LONG (sullo short q esce negativo).
+Corretto nel commit di questo cancello (`ancore_cond`, `k1_diagnostica`, colonna nella tabella 6.1, autotest sul 795301 vero).
+
+### CLASSE 878 — la regola d'identificazione "stretta prima, poi il k" (classe 855) portata sull'ORO, dove la stretta vuol dire k = 0: se torna, torna la cella SBAGLIATA; e il cancello L0 "sul per-trade identificato" scritto nella testa e mai eseguito (27/09/2026, cancello di `leggi_round_corti_d.py`, figlia della 855 e della 844)
+Caso: stesso script, per-trade 797203 di R268c (asse InpRiskPercent, magic unico). La testa R268a par. 7 G1c congela SOLO la
+regola del k (+-0,01 dal k di R268a). Il lettore provava prima |Profit - somma net| <= 0,05, che sull'oro (commissione
+d'ingresso fuori dal per-trade, k ~1,81) non puo' tornare sulla cella giusta: contro-esempio eseguito, riga della cella 1,0
+con Profit = somma dei net del per-trade della cella 2,0 -> il lettore identificava 1,0 (e leggeva il DD della cella
+sbagliata); con la regola della testa 2,0. E "L0 sul per-trade identificato" (testa R268c, CANCELLI) non girava: L0 era
+applicato solo ai magic gemelli. Regola: la regola d'identificazione si ricopia dalla testa del round, non dalla classe
+generica; una regola che su quel simbolo equivale a violare il C0 non si prova nemmeno; ogni cancello che la testa scrive
+"sul per-trade identificato" gira dopo l'identificazione. Corretto nel commit di questo cancello.
+
+### CLASSE 879 — due metri del saldo nella stessa lettura ristretta: il DD del tratto ripartito da 100000 (un saldo che il conto non aveva) mentre il K1 dello stesso tratto usa il saldo vero (27/09/2026, cancello di `leggi_round_corti_d.py`, sorella della 876)
+Caso: stesso script, P0-TICK caso (ii) (tick reali solo da una data piu' tarda): `curva_saldo(..., da=)` faceva ripartire il
+saldo da 100000 alla data, mentre `SaldoPrima` (K1) usava il saldo vero. Sulla fixture da R260a con data 2024.09.26: saldo
+vero 102.212,73, DD a saldo chiuso 2,0019% contro 2,0457% ripartendo da 100000 (+2% relativo); r quasi fermo (0,9988 contro
+0,9989) perche' l'errore cade su tutti e due i file, ma il DD "che decide" nel caso (ii) e' quello stampato. Regola: una
+lettura ristretta parte dal saldo VERO alla data (i lotti dopo la data sono calcolati su quello) e il picco iniziale e' quel
+saldo; tutte le misure dello stesso tratto usano lo stesso saldo. Corretto nel commit di questo cancello (`Curva.s0`).

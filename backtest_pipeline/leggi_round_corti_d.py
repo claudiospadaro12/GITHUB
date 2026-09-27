@@ -170,21 +170,35 @@ def n_pos(deals):
 # ----------------------------------------------------------------------
 #  Saldo chiuso, PF in posizioni, finestra mobile, K1
 # ----------------------------------------------------------------------
+class Curva(list):
+    """lista [(t, saldo)] che ricorda il saldo di PARTENZA (s0): il saldo vero prima del primo punto."""
+    s0 = DEPOSITO
+
+
 def curva_saldo(deals, k, dep=DEPOSITO, da=None):
     """[(t, saldo dopo il deal)] in ordine di chiusura; net - k x vol per deal (classe 844).
-    da = data 'AAAA.MM.DD' da cui partire (P0-TICK caso ii): il saldo riparte da dep li'."""
-    out = []
+    da = data 'AAAA.MM.DD' da cui partire (P0-TICK caso ii): i deal prima di da NON entrano nella
+    curva ma il saldo di partenza e' quello VERO a quella data (dep + netti con k prima), perche' i
+    lotti dopo da sono stati calcolati su quel saldo (cancello 27/09: prima ripartiva da 100000,
+    DD in % su un saldo che il conto non aveva, e K1 invece usava il saldo vero)."""
+    out = Curva()
     s = dep
     for d in sorted(deals, key=lambda x: (x["t"], x["pid"])):
         if da and dstr(d["t"]) < da:
+            s += d["net"] - k * d["vol"]
             continue
+        if not out:
+            out.s0 = s
         s += d["net"] - k * d["vol"]
         out.append((d["t"], s))
+    if not out:
+        out.s0 = s
     return out
 
 
 def dd_chiuso(curva, dep=DEPOSITO):
     """DD massimo a saldo chiuso in % del picco, con date del picco e del fondo."""
+    dep = getattr(curva, "s0", dep)
     pk, dpk, ddm, eur, d_pk, d_fo = dep, None, 0.0, 0.0, None, None
     for t, s in curva:
         if s > pk:
@@ -203,7 +217,7 @@ def finestra_mobile(curva, dep=DEPOSITO, giorni=365):
     b1 = dict(dd=0.0, pk=None, fo=None)
     b2 = dict(pct=0.0, da=None, a=None)
     for i in range(n):
-        t0, s_prima = curva[i][0], (curva[i - 1][1] if i > 0 else dep)
+        t0, s_prima = curva[i][0], (curva[i - 1][1] if i > 0 else getattr(curva, "s0", dep))
         pk, tpk = curva[i][1], t0      # il picco e' una CHIUSURA dentro la finestra (non il saldo prima di essa)
         for j in range(i, n):
             tj, sj = curva[j]
@@ -244,6 +258,47 @@ def ancore_q(deals):
                 if abs(a["vol"] - b["vol"]) < 1e-9 and abs(a["price"] - b["price"]) > 1e-9 and a["vol"] > 0:
                     out.append((a["t"], pid, (a["net"] - b["net"]) / ((a["price"] - b["price"]) * a["vol"] * C_ORO)))
     return sorted(out)
+
+
+AMPLI_MAX = 100.0   # [DIAGNOSTICA, soglia del cancello 27/09, NON congelata]: vedi ancore_cond
+
+
+def ancore_cond(deals):
+    """Le stesse ancore di ancore_q con il loro CONDIZIONAMENTO (classe 877): il metodo suppone lo
+    STESSO cambio sulle due uscite. Se i due prezzi sono quasi uguali, la deriva del cambio fra le
+    due uscite (sul P/L intero |p - p_ingresso|) si divide per |p1 - p2| e l'ancora esplode (795301:
+    2021.05.25 prezzi 1893,74 / 1893,71 -> q 0,4348; 2020.05.15 1747,71 / 1747,74 -> q 1,1067).
+    A = |p - p_ingresso| stimato (|net| max / (vol x C x q mediana)) / |p1 - p2|; A > AMPLI_MAX =
+    MAL CONDIZIONATA. Ritorna [(t, pid, q, dp, A)]."""
+    anc = []
+    by = defaultdict(list)
+    for d in deals:
+        by[d["pid"]].append(d)
+    for pid, ds in by.items():
+        for i in range(len(ds)):
+            for j in range(i + 1, len(ds)):
+                a, b = ds[i], ds[j]
+                if abs(a["vol"] - b["vol"]) < 1e-9 and abs(a["price"] - b["price"]) > 1e-9 and a["vol"] > 0:
+                    anc.append((a["t"], pid, (a["net"] - b["net"]) / ((a["price"] - b["price"]) * a["vol"] * C_ORO), abs(a["price"] - b["price"]), a, b))
+    if not anc:
+        return []
+    qm = statistics.median([x[2] for x in anc])
+    out = []
+    for t, pid, q, dp, a, b in anc:
+        A = (max(abs(a["net"]), abs(b["net"])) / (a["vol"] * C_ORO * abs(qm)) / dp) if qm else float("inf")
+        out.append((t, pid, q, dp, A))
+    return sorted(out)
+
+
+def k1_diagnostica(pos, saldo, anc):
+    """K1 rifatto SENZA le ancore mal condizionate: [DIAGNOSTICA], NON decide (la testa congela [min ; max])."""
+    buone = [q for _, _, q, _, A in anc if A <= AMPLI_MAX]
+    male = [(dstr(t), pid, q, dp, A) for t, pid, q, dp, A in anc if A > AMPLI_MAX]
+    if not male:
+        return male, None
+    if not buone:
+        return male, dict(verdetto="NON LEGGIBILE (nessuna ancora ben condizionata)", smin=None, smax=None, quota=(0, 0), n=len(pos))
+    return male, k1_lotto(pos, saldo, min(buone), max(buone))
 
 
 class SaldoPrima:
@@ -421,6 +476,24 @@ class Raccolta:
                 return ln
         return ""
 
+    def nulli_riga(self):
+        """classe 873: i NULLI che SOLO la riga vede (rc 1, MOTORE DIVERSO DAL PIN / classe 166, prova diversa
+        dal pin, CSV vecchio) si UNISCONO a quelli ricalcolati. Ritorna (dict t -> motivo, stato) con stato
+        'ok' | 'RIEPILOGO ASSENTE' | 'riga FILE NULLI ASSENTE'."""
+        if not self.riepilogo():
+            return {}, "RIEPILOGO ASSENTE"
+        ln = self.riga_riepilogo("FILE NULLI")
+        if not ln:
+            return {}, "riga FILE NULLI ASSENTE"
+        coda = ln.split("conteggio): ", 1)[1] if "conteggio): " in ln else ln.split("): ", 1)[-1]
+        out = {}
+        ms = list(re.finditer(r"\b(R26[89][a-d]) \(", coda))
+        for i, m in enumerate(ms):
+            fine = ms[i + 1].start() if i + 1 < len(ms) else len(coda)
+            mot = coda[m.end():fine].rstrip(" |")
+            out[m.group(1)] = mot[:-1] if mot.endswith(")") else mot
+        return out, "ok"
+
     def tick_da(self):
         """P0-TICK (testa R268a par. 0): la data 'XAUUSD: ticks data begins from' e il caso.
         Priorita': --tick-da > LOG_TESTER > RIEPILOGO_ROUND_CORTI_D.txt. Ritorna (caso, data, fonte)."""
@@ -449,6 +522,20 @@ class Raccolta:
             return (3, None, "riga 'ticks data begins from' NON TROVATA in LOG_TESTER ne' nel RIEPILOGO")
         d = max(found)
         return ((1 if d <= "2024.07.06" else 2), d, fonte + " (" + " / ".join(sorted(found)) + ")")
+
+
+def trova_raccolta(path):
+    """classe 872: si contano PRIMA le cartelle attese. Zero -> si scende di UN livello se la raccolta
+    e' li' (dichiarato), altrimenti errore: un NULLO e' un fatto sul file, non sul percorso."""
+    def conta(p):
+        return sum(1 for t in JOBS if os.path.isdir(os.path.join(p, "ROUND_" + t)))
+    if conta(path) > 0:
+        return path, None
+    sub = [os.path.join(path, x) for x in sorted(os.listdir(path)) if os.path.isdir(os.path.join(path, x)) and conta(os.path.join(path, x)) > 0]
+    if len(sub) == 1:
+        return sub[0], "raccolta trovata UN livello sotto la cartella data: %s" % sub[0]
+    raise SystemExit("NESSUNA cartella ROUND_R268x/R269x in %s%s: non e' la raccolta, NESSUN referto (classe 872)"
+                     % (path, (" (e %d sottocartelle candidate: ambiguo)" % len(sub)) if sub else ""))
 
 
 class File:
@@ -510,7 +597,7 @@ class File:
         # G1 gemelle
         if len(self.j["pt"]) == 2 and all(m in self.pt and self.riga.get(m) for m in self.j["pt"]):
             a, b = (self.riga[m] for m in self.j["pt"])
-            for cn, tol in (("Trades", 1e-6), ("Profit Factor", 0.00005), ("Profit", 0.05), ("Equity DD %", 0.01)):
+            for cn, tol in (("Trades", 1e-6), ("Profit Factor", 0.00005), ("Profit", 0.01), ("Equity DD %", 0.01)):
                 if abs(num(a[cn]) - num(b[cn])) > tol + 1e-9:
                     self.nullo.append("G1: gemelle diverse su %s (%s contro %s)" % (cn, a[cn], b[cn]))
             da, db = (self.pt[m] for m in self.j["pt"])
@@ -563,6 +650,10 @@ def fonte(rac, t, cosa):
 def lettura(rac):
     R = Referto()
     F = OrderedDict((t, File(rac, t)) for t in JOBS)
+    nr, stato_nr = rac.nulli_riga()
+    for t, mot in nr.items():
+        if t in F and F[t].lanciato:
+            F[t].nullo.append("NULLO DELLA RIGA (RIEPILOGO, classe 873): %s" % mot)
     R.add("# LETTURA DEL ROUND CORTI D -- R268 (oro 770402 solo long: tick contro OHLC, K1, curva DD(taglia), 22 anni) + R269 (oro flat 13:00 long/short, DAX long -1h)",
           "",
           "Generato da `backtest_pipeline/leggi_round_corti_d.py` sulla raccolta `%s`." % rac.root,
@@ -574,20 +665,13 @@ def lettura(rac):
           "")
     for n in rac.note:
         R.add("- nota: " + n)
-    # --- 0. i cancelli di nullita' (secondo strato, indipendente dalla riga)
-    R.add("## 0. Cancelli di nullita' (rifatti qui, indipendenti dalla pre-lettura della riga)", "",
-          "| file | lanciato | esito | motivi |", "|---|---|---|---|")
-    for t, f in F.items():
-        if not f.lanciato:
-            sal = rac.riga_riepilogo("FILE SALTATI")
-            R.add("| %s | NO | SALTATO / non nella raccolta | %s |" % (t, sal.replace("|", "/") if sal else "cartella ROUND_%s assente" % t))
-        else:
-            R.add("| %s | si | %s | %s |" % (t, "NON NULLO" if f.ok else "**NULLO**", "; ".join(f.nullo) or "E0 CSV%s, C0, L0, G1 ok" % JOBS[t]["sm"]))
-    R.add("", "fonte: `ROUND_<t>/%s_<simbolo>_<gamba><_ohlc>_<t>.csv` e `PERTRADE/abtg_trades_%s_<simbolo>_<magic>.csv`" % (EA, EA))
-    for t, f in F.items():
-        if f.ok and f.j["kr"] == "oro" and f.k:
-            R.add("- k (classe 844) %s: %s EUR/lotto [MISURATO: (somma net - Profit)/lotti]" % (t, " / ".join("%s %.4f" % (m, f.k[m]) for m in f.j["pt"] if m in f.k)))
-    R.add("")
+    if stato_nr != "ok":
+        R.add("- **%s: i NULLI della riga (rc 1, classe 166 MOTORE DIVERSO DAL PIN, prova diversa dal pin, CSV vecchio) NON sono uniti: classe 166 NON VERIFICATA** (classe 873)" % stato_nr)
+    else:
+        R.add("- NULLI della riga (RIEPILOGO) uniti a quelli ricalcolati: %s" % (", ".join(sorted(nr)) or "nessuno"))
+    # --- 0. i cancelli di nullita' (secondo strato, indipendente dalla riga): la tabella si scrive
+    # ALLA FINE e si inserisce qui, perche' E0, G1c, S-FLAT e S1 annullano DOPO (cancello 27/09)
+    i0 = len(R.L)
     # E0 contro-esempio tick == OHLC
     fa, fb = F["R268a"], F["R268b"]
     if fa.ok and fb.ok:
@@ -601,6 +685,21 @@ def lettura(rac):
             R.add("- E0 ok: tick (R268a) e OHLC (R268b) differiscono (%s contro %s)" % (riga_txt(ra), riga_txt(rb)), "")
     lettura_r268(rac, F, R)
     lettura_r269(rac, F, R)
+    T0 = ["## 0. Cancelli di nullita' (rifatti qui, indipendenti dalla pre-lettura della riga; tabella scritta a lettura FINITA: comprende E0, G1c, S-FLAT, S1)", "",
+          "| file | lanciato | esito | motivi |", "|---|---|---|---|"]
+    for t, f in F.items():
+        if not f.lanciato:
+            sal = rac.riga_riepilogo("FILE SALTATI")
+            T0.append("| %s | NO | SALTATO / non nella raccolta | %s |" % (t, sal.replace("|", "/") if sal else "cartella ROUND_%s assente" % t))
+        else:
+            T0.append("| %s | si | %s | %s |" % (t, "NON NULLO" if f.ok else "**NULLO**", ("; ".join(f.nullo) or "E0 CSV%s, C0, L0, G1 ok" % JOBS[t]["sm"]).replace("|", "/")))
+    T0 += ["", "fonte: `ROUND_<t>/%s_<simbolo>_<gamba><_ohlc>_<t>.csv` e `PERTRADE/abtg_trades_%s_<simbolo>_<magic>.csv`" % (EA, EA)]
+    for t, f in F.items():
+        if f.ok and f.j["kr"] == "oro" and f.k:
+            T0.append("- k (classe 844) %s: %s EUR/lotto [MISURATO: (somma net - Profit)/lotti]" % (t, " / ".join("%s %.4f" % (m, f.k[m]) for m in f.j["pt"] if m in f.k)))
+    T0.append("")
+    R.L[i0:i0] = T0
+    R.esiti["nulli"] = [t for t, f in F.items() if f.lanciato and not f.ok]
     R.add("", "---", "",
           "**Cosa resta a mano (non e' in questo script):** la decisione sull'ora del flat (R269), sull'orologio d'inverno delle sedie (R269c, entro il 25/10) "
           "e su ogni taglia (R268c/d) sono FIRME di Claudio; il P0-TICK caso (iii) resta [NON VERIFICATO] finche' il giornale dell'agente non si legge a mano; "
@@ -705,6 +804,7 @@ def lettura_r268(rac, F, R):
         q_lo, q_hi = (min(qs), max(qs)) if qs else (0.0, 0.0)
         k1 = k1_lotto(posA, SaldoPrima(pa, ka), q_lo, q_hi)
         anom = [(dstr(t), pid, q) for t, pid, q in anc if not (0.5 <= q <= 1.5)]
+        male, k1d = k1_diagnostica(posA, SaldoPrima(pa, ka), ancore_cond([d for d in pa if not da or dstr(d["t"]) >= da]))
         R.add("- ancore q (due deal d'uscita di pari volume a prezzi diversi nella stessa posizione, q = (net1 - net2)/((p1 - p2) x vol x 100)): %d, banda [q_basso ; q_alto] = [%s ; %s], mediana %s [MISURATO] (tratto di R260a: 12 ancore, 0,8393 -> 0,9663)%s"
               % (len(anc), f4(q_lo) if qs else "n.d.", f4(q_hi) if qs else "n.d.", f4(statistics.median(qs)) if qs else "n.d.",
                  ("; ancore ANOMALE fuori da [0,5 ; 1,5] (net piccoli arrotondati al centesimo: allargano la banda, si scrivono, la regola della testa e' [min ; max]): %s"
@@ -714,8 +814,18 @@ def lettura_r268(rac, F, R):
               % (k1["n"], f2(k1["smin"]), f2(k1["smax"]), k1["quota"][0], k1["quota"][1], k1["n"],
                  f2(100.0 * k1["quota"][0] / max(1, k1["n"])), f2(100.0 * k1["quota"][1] / max(1, k1["n"]))),
               "- **K1 %s**%s (attesa della testa: VERDE, mediana minimi 23,32 / massimi 27,98, quota [21%% ; 40%%]). K1 VERDE NON cancella la quota sotto frontiera: si scrive accanto." % (k1["verdetto"], ast),
-              "- fonte: `PERTRADE/abtg_trades_%s_XAUUSD_%s.csv` (volumi, prezzi, net), deposito 100000, k %.4f" % (EA, fa.mg0(), ka), "")
+              "- fonte: `PERTRADE/abtg_trades_%s_XAUUSD_%s.csv` (volumi, prezzi, net), deposito 100000, k %.4f" % (EA, fa.mg0(), ka))
+        if male:
+            R.add("- **ANCORE MAL CONDIZIONATE (classe 877)**: %d con amplificazione A > %.0f (prezzi d'uscita quasi uguali: la deriva del cambio fra le due uscite domina): %s. "
+                  "K1 SENZA di loro [DIAGNOSTICA, soglia NON congelata, NON decide]: %s%s"
+                  % (len(male), AMPLI_MAX, ", ".join("%s pos %d q %.4f |p1-p2| %.2f $ A %.0f" % x for x in male), k1d["verdetto"],
+                     (" -- **DIVERGE dal verdetto congelato: K1 va portato a Claudio come SENSIBILE ALLE ANCORE, non come %s**" % k1["verdetto"].split(" (")[0])
+                     if k1d["verdetto"].split(" (")[0] != k1["verdetto"].split(" (")[0] else " (stesso verdetto del congelato)"))
+        else:
+            R.add("- ancore mal condizionate (classe 877, A > %.0f): nessuna" % AMPLI_MAX)
+        R.add("")
         R.esiti["k1"] = k1
+        R.esiti["k1_diag"] = k1d
     # --- R268c
     R.add("## 5. R268c -- LA CURVA DD(TAGLIA) A TICK (testa par. 6.5, R268c)", "")
     if not fc.lanciato:
@@ -732,10 +842,19 @@ def lettura_r268(rac, F, R):
         trs = [cella(fc.rows, "InpRiskPercent", f)["Trades"] if cella(fc.rows, "InpRiskPercent", f) else "?" for f in TAGLIE]
         piatto = len(set(f4(x) for x in dds)) == 1
         mono = all(dds[i] < dds[i + 1] for i in range(3))
+        tr_ok = len(set(trs)) == 1
+        if "KO" in g1c:
+            fc.nullo.append("G1c: cella 0,5 diversa da R268a al centesimo")
+        if piatto:
+            fc.nullo.append("G1c: asse PIATTO (DD uguali sulle 4 celle) = pin InpRiskPercent non arrivato")
         R.add("- G1c: %s; Trades sulle 4 celle: %s -> %s; DD distinti %d su 4 -> %s; monotono crescente: %s"
               % (g1c, "/".join(trs), "IDENTICI (R193b B5) ok" if len(set(trs)) == 1 else "**DIVERSI: il DD non si legge finche' non si capisce**",
                  len(set(f4(x) for x in dds)), "**PIATTO = pin InpRiskPercent NON MORDE -> R268c NULLO**" if piatto else "il pin morde", "si" if mono else "**NO (S2 di R193b: si indaga prima di leggere)**"))
-        if not piatto and "KO" not in g1c:
+        if not tr_ok and not piatto and "KO" not in g1c:
+            R.add("- **Trades DIVERSI fra le celle (R193b B5): il DD di R268c NON si legge finche' non si capisce** (pavimento del lotto, margine o rifiuti). Si scrivono i DD, senza banda: %s"
+                  % " | ".join("%.1f -> %s" % (f, f4(x)) for f, x in zip(TAGLIE, dds)))
+            R.esiti["c_trades_diversi"] = True
+        if tr_ok and not piatto and "KO" not in g1c:
             d05 = dds[0]
             R.add("", "| InpRiskPercent | Equity DD %% CSV [MISURATO]%s | pavimento 1-(1-d)^(f/0,5) [DERIVATO] | tetto (f/0,5) x d [INDICATIVO] | posizione |" % ast, "|---:|---:|---:|---:|---|")
             for f, ddv in zip(TAGLIE, dds):
@@ -748,17 +867,20 @@ def lettura_r268(rac, F, R):
             # per-trade 797203 identificato (classi 850/855)
             pc = fc.pt.get("797203")
             if pc and fa.ok:
-                cand = [r for r in fc.rows if int(num(r["Trades"])) == len(pc) and abs(num(r["Profit"]) - sum(d["net"] for d in pc)) <= 0.05]
-                regola = "stretta (righe = Trades e |Profit - somma| <= 0,05)"
-                if not cand:
-                    vs = sum(d["vol"] for d in pc)
-                    cand = [r for r in fc.rows if int(num(r["Trades"])) == len(pc) and vs > 0 and abs((sum(d["net"] for d in pc) - num(r["Profit"])) / vs - fa.k0()) <= 0.01]
-                    regola = "larga (righe = Trades e k entro +-0,01 dal k di R268a %.4f)" % fa.k0()
+                # testa R268a par. 7 G1c: SOLO la regola del k. La "stretta" di classe 855 (|Profit - somma|
+                # <= 0,05) sull'oro vuol dire k = 0, fuori dal C0 [1 ; 3]: se torna, torna la cella SBAGLIATA
+                # (cancello 27/09, classe 878).
+                vs = sum(d["vol"] for d in pc)
+                cand = [r for r in fc.rows if int(num(r["Trades"])) == len(pc) and vs > 0 and abs((sum(d["net"] for d in pc) - num(r["Profit"])) / vs - fa.k0()) <= 0.01]
+                regola = "della testa G1c (righe = Trades e k entro +-0,01 dal k di R268a %.4f)" % fa.k0()
                 dist = set((r["Trades"], r["Profit"]) for r in cand)
                 if len(dist) > 1:
                     R.add("- per-trade 797203 AMBIGUO (classe 850): tornano celle diverse (%s), regola %s: NON si legge, il file NON e' nullo" % (", ".join("InpRiskPercent=%s" % r["InpRiskPercent"] for r in cand), regola))
                 elif not cand:
                     R.add("- per-trade 797203 NON IDENTIFICATO contro nessuna cella (regola %s): NON letto, il file NON e' nullo" % regola)
+                elif sum(1 for d in pc if d["deal_type"] != 1):
+                    fc.nullo.append("L0: per-trade 797203 identificato con %d deal di deal_type diverso da 1 (pin di lato NON arrivato)" % sum(1 for d in pc if d["deal_type"] != 1))
+                    R.add("- per-trade 797203 IDENTIFICATO ma **L0 KO** (deal_type diverso da 1): R268c NULLO (testa R268c, CANCELLI: L0 sul per-trade identificato)")
                 else:
                     rr = cand[0]
                     kc = (sum(d["net"] for d in pc) - num(rr["Profit"])) / sum(d["vol"] for d in pc)
@@ -834,19 +956,27 @@ def lettura_r268d(rac, F, R, r_lv, arcL):
           "- RISCHIO a 0,5%%: Equity DD %% CSV **%.4f** contro 4,5172 (R260a) e 10,0 (contratto R100, altra configurazione) -> **%s**; DD a saldo chiuso con k %.4f %% (picco %s, fondo %s) -> %s%s"
           % (ddE, lvE, ch["dd"], dstr(ch["pk"]) if ch["pk"] else "-", dstr(ch["fo"]) if ch["fo"] else "-", lvC,
              " = DIPENDE DALLA MISURA: decide l'EQUITY (contratto R100 criterio A)" if lvC != lvE else " (stessa ipotesi)"))
+    if g0d != "VERDE":
+        R.add("- D1/D2/D3 **NON SI LEGGE** (G0d %s: R268d non si legge contro R260a ne' contro il contratto, testa R268d par. 4). Per completezza il numero cadrebbe in %s." % (g0d, lvE))
     R.add("- %s" % {"D1": "D1: i 6,5 anni sono la finestra peggiore o pari, la taglia si legge su R260a",
                     "D2": "D2: i 22 anni sono PEGGIORI dei 6,5 e dentro il contratto della sedia [riferimento, altra configurazione]: la taglia si legge sui 22 anni (R193b A3/C4)",
-                    "D3": "D3: il solo long a 0,5% sta FUORI dal contratto gia' alla taglia di oggi -> corsia RISCHIO per Claudio (firma del 18/08); nessuna taglia sopra 0,5 da qui"}[lvE])
+                    "D3": "D3: il solo long a 0,5% sta FUORI dal contratto gia' alla taglia di oggi -> corsia RISCHIO per Claudio (firma del 18/08); nessuna taglia sopra 0,5 da qui"}[lvE]
+          if g0d == "VERDE" else "(testo dell'ipotesi omesso: G0d non VERDE)")
     R.add("- previsione della testa: D2, centro ~8,5%.")
-    R.esiti["d_lv"] = lvE
+    R.esiti["d_lv"] = lvE if g0d == "VERDE" else "NON SI LEGGE"
     R.esiti["dd22"] = ddE
     # anno per anno + K1 per anno
     anc_all = ancore_q(pd)
     q_all = [q for _, _, q in anc_all]
+    cond_all = ancore_cond(pd)
+    male_y = defaultdict(list)
+    for t, pid, q, dp, A in cond_all:
+        if A > AMPLI_MAX:
+            male_y[t.year].append((dstr(t), pid, q, dp, A))
     saldo = SaldoPrima(pd, kd)
     R.add("", "### 6.1 Anno per anno (posizioni per data di chiusura, netto meno k x volume) e K1 per anno (q dalle ancore dell'anno; <2 ancore = banda dell'intero file, segnato ^)", "",
-          "| anno | posizioni | netto EUR | PF | ancore q | banda q | K1 stop mediano min/max $ | quota <18 $ [max<18 ; min<18] | K1 |",
-          "|---:|---:|---:|---:|---:|---|---|---|---|")
+          "| anno | posizioni | netto EUR | PF | ancore q | banda q | K1 stop mediano min/max $ | quota <18 $ [max<18 ; min<18] | K1 | ancore mal condizionate (classe 877) / K1 senza [DIAGNOSTICA] |",
+          "|---:|---:|---:|---:|---:|---|---|---|---|---|")
     neg = []
     for y in range(pd[0]["t"].year, pd[-1]["t"].year + 1):
         py = [p for p in posD if p["t_last"].year == y]
@@ -861,9 +991,21 @@ def lettura_r268d(rac, F, R, r_lv, arcL):
             qy, seg = q_all, "^"
         lo, hi = (min(qy), max(qy)) if qy else (0.0, 0.0)
         k1 = k1_lotto(py, saldo, lo, hi)
-        R.add("| %d | %d | %+.2f | %s | %d%s | [%s ; %s] | %s / %s | [%d ; %d] | %s |"
+        if seg:
+            my = [x for v in male_y.values() for x in v]
+            buone = [q for _, _, q, _, A in cond_all if A <= AMPLI_MAX]
+        else:
+            my = male_y.get(y, [])
+            buone = [q for t, _, q, _, A in cond_all if t.year == y and A <= AMPLI_MAX]
+            if len(buone) < 2:
+                buone = [q for _, _, q, _, A in cond_all if A <= AMPLI_MAX]
+        dg = "nessuna"
+        if my:
+            k1y = k1_lotto(py, saldo, min(buone), max(buone)) if buone else dict(verdetto="NON LEGGIBILE")
+            dg = "**%d** (%s) -> %s" % (len(my), ", ".join("q %.4f dp %.2f $" % (x[2], x[3]) for x in my), k1y["verdetto"].split(" (")[0])
+        R.add("| %d | %d | %+.2f | %s | %d%s | [%s ; %s] | %s / %s | [%d ; %d] | %s | %s |"
               % (y, s["n"], s["net"], fpf(s["pf"]), len([1 for t, _, _ in anc_all if t.year == y]), seg, f4(lo) if qy else "n.d.", f4(hi) if qy else "n.d.",
-                 f2(k1["smin"]), f2(k1["smax"]), k1["quota"][0], k1["quota"][1], k1["verdetto"].split(" (")[0]))
+                 f2(k1["smin"]), f2(k1["smax"]), k1["quota"][0], k1["quota"][1], k1["verdetto"].split(" (")[0], dg))
     R.add("", "anni negativi: %s. Sull'oro vecchio (400-1000 $) lo spread in memoria (classe 394, OHLC) e' quello di oggi: gli anni con stop mediano sotto 40 x spread pagano un costo GONFIATO; se il DD massimo cade li' una parte del DD e' costo del modello, si scrive e NON lo si toglie. [MISURATO sul per-trade, K1 DERIVATO dalla formula 846]" % (", ".join(neg) or "nessuno"))
     R.esiti["anni_neg"] = neg
     # finestra mobile
@@ -880,7 +1022,11 @@ def lettura_r268d(rac, F, R, r_lv, arcL):
         corr = R.esiti.get("r")
     if r_lv and r_lv.startswith("H-NO"):
         R.add("", "### 6.3 Tabella DD(taglia): NON SI SCRIVE -- con H-NO nessun DD OHLC di questa sedia entra in una tabella di taglia (testa par. 6.2).")
+    elif g0d != "VERDE":
+        R.add("", "### 6.3 Tabella DD(taglia): NON SI SCRIVE -- G0d %s: R268d non e' la stessa sedia sui 22 anni (testa R268d par. 4)." % g0d)
     else:
+        if not r_lv or r_lv.startswith("NON CALCOLABILE"):
+            R.add("", "- **r NON DISPONIBILE** (R268a o R268b nullo): la tabella qui sotto e' OHLC NON corretto, e H-NO (che la vieterebbe) NON e' escluso: [NON VERIFICATO].")
         d_tab = ddE * corr if corr else ddE
         R.add("", "### 6.3 DD alle taglie 0,5 / 1,0 / 1,5 / 2,0 [DERIVATO con le DUE formule] contro muro 10% e S3 8% -- RIFERIMENTI, NESSUNA PROPOSTA", "",
               "d = Equity DD %% CSV dei 22 anni %.4f%s. Moltiplicativa 1-(1-d)^f (teorema, pavimento), lineare f x d (indicativo, tetto), f = taglia/0,5. OHLC M1: ogni DD e' un LIMITE INFERIORE. 8%% = S3 di R193b, congelata SOLO per la taglia 2,00 sulla sua sotto-finestra: qui riferimento."
@@ -889,7 +1035,8 @@ def lettura_r268d(rac, F, R, r_lv, arcL):
         for f in TAGLIE:
             m, l = dd_taglia(d_tab, f)
             R.add("| %.1f%% | %.2f%% | %.2f%% | %s | %s |" % (f, m, l, "sotto" if l < MURO_22 else ("**sopra**" if m > MURO_22 else "a cavallo (moltiplicativa sotto, lineare sopra)"),
-                                                          "sotto" if l < S3 else ("**sopra**" if m > S3 else "a cavallo")))
+                                                          ("sotto" if l < S3 else ("**sopra**" if m > S3 else "a cavallo")) if abs(f - 2.0) < 1e-9
+                                                          else "- (S3 congelata SOLO a 2,00: classe 860 b)"))
         R.add("", "Seconda misura (saldo chiuso con k, minorante): d %.4f -> %s" % (ch["dd"], " | ".join("%.1f%% %.2f-%.2f" % (f, *dd_taglia(ch["dd"] * (corr or 1.0), f)) for f in TAGLIE)),
               "Il contratto (22 anni, R100, straddle geometria R17) e' un'altra configurazione; la taglia UNIFORME del preset FTMO e ogni scelta di taglia sono una firma di Claudio (R4).")
     R.add("")
@@ -942,6 +1089,12 @@ def lettura_r269(rac, F, R):
         q_lv = ("Q1 (DD_13 <= %.2f = 0,75 x base): il flat taglia il rischio di almeno un quarto" % P["q1"]) if ddq <= P["q1"] else \
                ("Q2 (%.2f < DD_13 <= %.4f): lo taglia meno di un quarto" % (P["q1"], P["q2"])) if ddq <= P["q2"] else \
                ("Q3 (DD_13 > %.4f): non lo taglia" % P["q2"])
+        q_esatto = 0.75 * P["q2"]
+        if q_esatto < ddq <= P["q1"]:
+            q_lv = ("Q1/Q2 AMBIGUO DELLA TESTA (classe 861): DD_13 %.4f sta fra 0,75 x base = %.4f (Q2 per la formula) e il numero scritto %.2f (Q1): "
+                    "la testa scrive tutti e due, e l'arrotondamento %.4f -> %.2f e' dalla parte che PASSA. Si scrive cosi', non si sceglie" % (ddq, q_esatto, P["q1"], q_esatto, P["q1"]))
+        if g0 != "VERDE":
+            p_lv, q_lv = "NON SI LEGGE (G0 ROSSO) -- per completezza " + p_lv, "NON SI LEGGE (G0 ROSSO) -- per completezza " + q_lv
         ch = dd_chiuso(curva_saldo(pq, kq))
         stop = [p for p in pos if p["motivo"] == "STOP_PIENO"]
         ts = [p for p in pos if p["motivo"] == "TIMESTOP"]
@@ -952,8 +1105,8 @@ def lettura_r269(rac, F, R):
               "- STOP PIENI RIMASTI (1 deal in perdita prima delle 13:00, autopsia --close 13:00) [DERIVATO dalla forma dei deal]: **%d** (attesi %d ESATTI dalla testa), netto %+.2f EUR; TIMESTOP alle 13:00: %d posizioni, netto %+.2f EUR, PF %s"
               % (len(stop), P["stop_att"], sum(p["net"] for p in stop), len(ts), sum(p["net"] for p in ts), fpf(pf_pos(ts))),
               "- previsione della testa: P2 e Q1.%s" % ("" if g0 == "VERDE" else " [G0 ROSSO: si scrive, NON si legge contro la base]"))
-        R.esiti["p_lv_" + t] = p_lv[:2]
-        R.esiti["q_lv_" + t] = q_lv[:2]
+        R.esiti["p_lv_" + t] = p_lv[:2] if g0 == "VERDE" else "NON SI LEGGE"
+        R.esiti["q_lv_" + t] = (q_lv[:2] if not q_lv.startswith("Q1/Q2") else "Q1/Q2") if g0 == "VERDE" else "NON SI LEGGE"
         R.esiti["stop_" + t] = len(stop)
         R.L += ap.tabella("Per MOTIVO d'uscita [DERIVATO]", pos, lambda p: p["motivo"], ["STOP_PIENO", "TP1_BE", "TP1_RUN", "TIMESTOP", "ALTRO"])
         R.L += ap.tabella("Per ANNO (posizioni per data di chiusura, net con k)", pos, lambda p: p["t_last"].year)
@@ -1222,7 +1375,7 @@ def costruisci_fixture(root, arcdir, variante):
     for t in JOBS:
         os.makedirs(os.path.join(root, "ROUND_" + t), exist_ok=True)
     with open(os.path.join(root, "RIEPILOGO_ROUND_CORTI_D.txt"), "w") as fh:
-        fh.write("RIEPILOGO ROUND CORTI D (FIXTURE dell'autotest, variante %s)\nP0-TICK (par. 0): P0-TICK caso (i): XAUUSD: ticks data begins from 2024.07.05 <= 2024.07.06\nFILE SALTATI (non lanciati, NON nulli di catena): nessuno\n" % variante)
+        fh.write("RIEPILOGO ROUND CORTI D (FIXTURE dell'autotest, variante %s)\nP0-TICK (par. 0): P0-TICK caso (i): XAUUSD: ticks data begins from 2024.07.05 <= 2024.07.06\nFILE SALTATI (non lanciati, NON nulli di catena): nessuno\nFILE NULLI (rc 1, motore o prova diversi dal pin, E0 CSV atteso non buono o contro-esempio tick==OHLC, asse o P0 diversi, C0 non buono, G1 o L0 falliti, S-FLAT o S1 non arrivati, G1c asse piatto; escono da OGNI conteggio): nessuno\n" % variante)
     return root
 
 
@@ -1251,6 +1404,20 @@ def autotest(fixture_dir=None):
     b1b, _ = finestra_mobile(cur2)
     check(abs(b1b["dd"] - 100.0 * 20 / 110) < 1e-9, "b1 NON vede il crollo a 60 se il picco 130 sta fuori dai 365 giorni (picco e fondo dentro)")
     check(dd_chiuso(cur2)["dd"] > 50, "mentre il DD intero lo vede (%.2f %%)" % dd_chiuso(cur2)["dd"])
+    # (0b) contro-esempi del cancello del 27/09 (classi 872 e caso ii di P0-TICK)
+    d_a = dict(t=datetime(2024, 9, 25, 17, 30), pid=1, net=100.0, vol=0.1, price=1.0, deal_type=1)
+    d_b = dict(t=datetime(2024, 9, 26, 0, 0, 1), pid=2, net=-50.0, vol=0.1, price=1.0, deal_type=1)
+    cz = curva_saldo([d_a, d_b], 1.8, da="2024.09.26")
+    check(len(cz) == 1 and abs(cz.s0 - 100099.82) < 1e-6 and abs(dd_chiuso(cz)["dd"] - 100.0 * 50.18 / 100099.82) < 1e-9,
+          "caso (ii): la curva ristretta parte dal saldo VERO alla data (100099,82), la chiusura del giorno stesso e' dentro")
+    if os.path.isdir(ARCHIVI_REPO):
+        a795 = leggi_pertrade(os.path.join(ARCHIVI_REPO, "abtg_trades_%s_XAUUSD_795301.csv" % EA))
+        p795, s795 = ap.aggrega(a795, k_lotto=K_ARC["795301"]), SaldoPrima(a795, K_ARC["795301"])
+        q795 = [q for _, _, q in ancore_q(a795)]
+        kc = k1_lotto(p795, s795, min(q795), max(q795))
+        male, kd = k1_diagnostica(p795, s795, ancore_cond(a795))
+        check(len(male) == 2 and kc["verdetto"].startswith("NON DECISO") and kd["verdetto"].startswith("ROSSO"),
+              "classe 877 sul 795301 VERO (2020-2026): 2 ancore a prezzi distanti 0,03 $ (q 0,4348 e 1,1067) fanno NON DECISO un K1 che senza di loro e' ROSSO -> la diagnostica lo dice")
     # (1) fixture dagli archivi veri
     if not os.path.isdir(ARCHIVI_REPO):
         print("  SKIP archivi CORTI B non trovati in %s" % ARCHIVI_REPO)
@@ -1272,7 +1439,7 @@ def autotest(fixture_dir=None):
     check(0.95 <= E.get("r", 0) <= 1.05 and E.get("r_lv", "").startswith("H-AFF"), "pulito: r %.3f -> H-AFF" % E.get("r", 0))
     k1 = E.get("k1", {})
     check(k1.get("n") == 92 and k1.get("verdetto", "").startswith("VERDE") and 20 <= k1.get("smin", 0) <= 30, "pulito: K1 n 92, VERDE, mediana minimi %.2f (testa: 23,32 sui lotti di R260a)" % k1.get("smin", 0))
-    check(E.get("c_cella") == 2.0, "pulito: per-trade 797203 IDENTIFICATO come cella 2,0 (regola larga sul k)")
+    check(E.get("c_cella") == 2.0, "pulito: per-trade 797203 IDENTIFICATO come cella 2,0 (regola della testa G1c sul k)")
     check(E.get("g0d") == "VERDE" and E.get("d_lv") in ("D1", "D2"), "pulito: G0d VERDE sul tratto 2020-2026 e D-livello %s" % E.get("d_lv"))
     check(E.get("g0_R269a") == "VERDE" and E.get("stop_R269a") == 15, "pulito: R269a G0 VERDE, stop pieni rimasti 15 (attesi 15 ESATTI)")
     check(E.get("p_lv_R269a") == "P2" and E.get("q_lv_R269a") == "Q1", "pulito: R269a P2 / Q1 (fixture: flat in perdita x0,55, in utile x fw cercato per PF in [1,30 ; 1,40])")
@@ -1286,6 +1453,25 @@ def autotest(fixture_dir=None):
     E = esiti["g0rosso"]
     check(E.get("g0_R268b") == "ROSSO" and "r" not in E and "k1" not in E, "g0rosso: G0 ROSSO -> 'R268 NON SI LEGGE', niente r ne' K1")
     check(E.get("g0_R269a") == "VERDE", "g0rosso: R269 si legge lo stesso")
+    # (1b) classe 873: un NULLO che solo la riga vede (MOTORE DIVERSO DAL PIN) si unisce; classe 872: cartella padre
+    rp = os.path.join(base, "ROUND_CORTI_D_pulito", "RIEPILOGO_ROUND_CORTI_D.txt")
+    orig = open(rp).read()
+    with open(rp, "w") as fh:
+        fh.write(orig.replace("conteggio): nessuno", "conteggio): R269c (MOTORE DIVERSO DAL PIN) | R268d (CSV VECCHIO (scritto prima del job))"))
+    R = lettura(Raccolta(os.path.join(base, "ROUND_CORTI_D_pulito")))
+    check(set(R.esiti.get("nulli", [])) == {"R269c", "R268d"} and "h_lv_R269c" not in R.esiti and "d_lv" not in R.esiti,
+          "classe 873: R269c 'MOTORE DIVERSO DAL PIN' e R268d 'CSV VECCHIO' dal RIEPILOGO -> NULLI anche qui, niente H-* ne' D-*")
+    with open(rp, "w") as fh:
+        fh.write(orig)
+    try:
+        rr, nota = trova_raccolta(base)
+        check(False, "classe 872: la cartella padre con 4 raccolte doveva fermarsi (ambigua), ha preso %s" % rr)
+    except SystemExit:
+        check(True, "classe 872: cartella padre con 4 raccolte candidate -> errore, NESSUN referto")
+    solo = tempfile.mkdtemp(prefix="padre_")
+    os.makedirs(os.path.join(solo, "ROUND_CORTI_D_x", "ROUND_R268b"))
+    rr, nota = trova_raccolta(solo)
+    check(rr.endswith("ROUND_CORTI_D_x") and nota, "classe 872: zip scompattato in una sottocartella -> si scende di UN livello e lo si dichiara")
     # (2) caso (ii): --tick-da sposta la lettura sul saldo chiuso ristretto
     rac = Raccolta(os.path.join(base, "ROUND_CORTI_D_pulito"), tick_da="2024.09.26")
     R = lettura(rac)
@@ -1304,11 +1490,17 @@ def main():
     apr.add_argument("--autotest", action="store_true")
     apr.add_argument("--fixture-dir", default=None, help="dove costruire le fixture dell'autotest (default: cartella temporanea)")
     a = apr.parse_args()
+    if a.tick_da and not re.match(r"^\d{4}\.\d{2}\.\d{2}$", a.tick_da):
+        apr.error("--tick-da vuole AAAA.MM.GG con i PUNTI (es. 2024.09.26): il confronto e' fra stringhe, un altro formato leggerebbe una finestra sbagliata")
     if a.autotest:
         sys.exit(autotest(a.fixture_dir))
     if not a.raccolta or not os.path.isdir(a.raccolta):
         apr.error("serve la cartella della raccolta (o --autotest)")
-    R = lettura(Raccolta(a.raccolta, a.archivi, a.tick_da))
+    root, nota = trova_raccolta(a.raccolta)
+    rac = Raccolta(root, a.archivi, a.tick_da)
+    if nota:
+        rac.note.append(nota)
+    R = lettura(rac)
     if a.md:
         with open(a.md, "w", encoding="utf-8") as fh:
             fh.write(R.testo())
