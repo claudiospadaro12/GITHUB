@@ -35793,3 +35793,12 @@ fase MMP_PLACED senza posizione, ora >= 10:30) il pendente viene cancellato; la 
 MMP_WAIT e riprova a ogni tick: se il cap si libera prima del cutoff il buy stop parte in ritardo, un
 ingresso che il banco non ha mai misurato. Regola: ogni "l'EA fa X" si segue fino al primo stato
 stabile, e ogni `return(false)` va seguito nel suo ramo.
+
+### CLASSE 867 — tetti di tempo e letture "ristrette" congelati nella testa, ricopiati nella riga con un numero solo o sulla finestra intera (27/09/2026, parente di 854)
+Caso: `RIGA_ROUND_CORTI_D` @ `141ecde2`: la testa R268a par. 10 congela "tetto 45 minuti" per R268, la
+riga aveva un solo "60 minuti" per tutto; e nel caso (ii) di P0-TICK (finestra tick piu' corta) il PF e
+le posizioni di R268a erano letti sulla finestra intera coi tick generati dentro, mentre la testa dice
+"ogni lettura si fa sul per-trade ristretto". Regola: la riga porta i tetti e le finestre di lettura
+PER NOME, round per round, come li scrive la testa. Corretto in `a1b4195e`.
+Nota di classe 38: rilanciare la stessa riga senza svuotare `Tester\cache` fa uscire i file NULLI (i
+per-trade non vengono riscritti): fallisce in modo sicuro, ma va svuotata la cache prima di un rilancio.
