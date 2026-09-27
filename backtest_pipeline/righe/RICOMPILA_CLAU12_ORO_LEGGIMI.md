@@ -25,9 +25,14 @@ cancello (strato 1 + `controllo-preventivo`) sulla riga col pin vero. E' la cate
 3. **Sabato o domenica** (ora Windows del VPS). In feriale lo script si ferma; `-ForzaGiorno` esiste ma la riga NON lo passa.
 4. **Nessuna posizione XAUUSD sul conto `541452707`** (scheda Commercio guardata a occhio) e **nessun EA oro attaccato** su
    `C:\FTMO` (CODA_01 27/09: 9 sedie, nessuna su XAUUSD).
-5. **Sedie oro del piccolo `50503392` (`770402` a due lati, `772343`, `971501`, `970901`) e del manuale `50503635` in PAUSA**:
-   blocco FTMO **cross-account** (bozza §②(f) e §⑧.4, risposta FTMO ancora aperta). Lo script **non apre** le altre cartelle
-   dati: questo punto lo dichiara chi lancia.
+5. **Sedie oro del piccolo `50503392` (`770402` a due lati, `772343`, `971501`, `970901`), del manuale `50503635`
+   (`ABTG_ScalperDirezionale` XAUUSD `779901`) e di **Tickmill** (`Gold_Ichimoku_TK_ATR_EA` XAUUSD M5 `250604`, lati ignoti =
+   L+S, `CODA_01` 27/09 r.65) in PAUSA o decise per firma**: blocco FTMO **cross-account** (bozza §②(f) e §⑧.4, che nomina
+   anche Tickmill). Lo script **non apre** le altre cartelle dati: questo punto lo dichiara chi lancia. Nota: per QUESTA riga
+   (compila e basta, nessuna esposizione) il punto e' prudenza; il blocco vero cade sull'attacco (d).
+   _(Tickmill aggiunto dal cancello strato 2 del 27/09: la prima stesura lo ometteva qui e nella domanda `PIATTO` della
+   riga; il messaggio interno dello script, che si vede solo lanciandolo a mano senza `-Conferma`, dice ancora "piccolo e
+   manuale": non ripinnato per questo, dichiarato.)_
 6. 🔴 **Questa riga NON attacca la sedia: compila e basta.** L'attacco a un grafico XAUUSD nuovo e' il passo (d) della bozza,
    a mano, e viene DOPO le risposte FTMO e la firma della taglia.
 
@@ -140,5 +145,6 @@ byte SHA `3EC97115...` — quindi "l'include a HEAD" e' proprio quella che g) ri
 
 ---
 _Cancello: strato 1 (`controlla_riga.py --oggetto ps1` e `--oggetto riga`) rc 0 su script `1277a1aa` e riga; rilievi 457/671
-letti a mano = liste di esclusione, non bersagli. Strato 2 (`controllo-preventivo`): **DA FARE** prima di qualunque invio.
+letti a mano = liste di esclusione, non bersagli. Strato 2 (`controllo-preventivo`, 27/09): script `1277a1aa` / `AF7F878B` **PASS cosi' com'e'** (14 corse
+su albero finto: 7 scenari dell'autore rifatti + 7 nuovi, fra cui include v1.20 con UNA riga cambiata -> 1); riga e LEGGIMI corretti solo nel testo (Tickmill nel punto 4/5).
 IN CODA, NON INVIATA: prerequisito 1 (R268/R268d letti) oggi falso, prerequisito 5 (risposta FTMO cross-account) aperto._
