@@ -19,9 +19,14 @@ I DUE BUCHI DELLA v1 CHE QUESTO FILE CHIUDE (o dichiara):
                   2025.07.01 -> 2026.06.29, deposito 10.000, rischio 1%;
         ORO    -> per-trade R260a/795301 [MISURATO su OHLC], 2020.01.03 ->
                   2026.06.26, deposito 100.000, rischio 0,5%;
-        770212 -> NESSUN per-trade in repo (R54a ha solo i CSV di riepilogo,
-                  R255 non e' girato): [NON MODELLATA]. Niente proxy col segno
-                  cambiato: sarebbe un numero inventato.
+        770212 -> SENZA --r255: [NON MODELLATA] (nessun per-trade in repo; niente
+                  proxy col segno cambiato: sarebbe un numero inventato).
+                  CON --r255 <raccolta ROUND_R255_SHORT_DOW_INFASE_...>: per-trade
+                  R255a/R255b (magic 793101 / 793102, deposito 10.000, rischio 1%),
+                  curva FTMO-DOC dettata dal preset in firma (ora FISSA 16:30 FTMO),
+                  IN FASE e CONTROLLO accanto come sensibilita'. Vedi il blocco
+                  "770212 Dow short" sotto NON_MODELLATE per la mappa e le scale.
+                  Le operazioni fuori dalle finestre A/B si ignorano e si dichiarano.
   (2) "trade indipendenti" (docs/RISPOSTA_GEMINI_2026-09-27.md par.2). Fatto
       misurato PRIMA di scrivere una riga: la v1 ricampiona GIA' GIORNATE
       INTERE (m.serie somma per giornata, simula_stato pesca giornate), quindi
@@ -77,15 +82,19 @@ NON conta come trading day (attivo=False). "giorni" = giorni di borsa.
   piu' regimi per l'oro, ma la correlazione oro-indici e' persa per costruzione.
 
 USO:
-  python3 backtest_pipeline/mc_challenge_ftmo_v2.py            # tabelle (~4 min)
-  python3 backtest_pipeline/mc_challenge_ftmo_v2.py --autotest # controlli e contro-esempi, poi esce
+  python3 backtest_pipeline/mc_challenge_ftmo_v2.py            # tabelle (~4 min), IDENTICHE a prima (senza 770212)
+  python3 backtest_pipeline/mc_challenge_ftmo_v2.py --r255 <cartella ROUND_R255_SHORT_DOW_INFASE_AAAA-MM-GG>
+        [--r255-curva {FTMO-DOC,IN FASE,CONTROLLO}]              # + le righe con la 770212 e le differenze con/senza (~6 min)
+  python3 backtest_pipeline/mc_challenge_ftmo_v2.py --autotest [--fixture-dir DIR]
+        # controlli e contro-esempi, compresa la fixture R255 finta (dagli archivi R246 794603/794601, segno invertito), poi esce
 """
-import collections, csv, datetime as dt, os, random, statistics, sys
+import argparse, collections, csv, datetime as dt, os, random, shutil, statistics, sys, tempfile
 
 QUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, QUI)
 import mc_challenge_ftmo as m                      # noqa: E402
 import mc_challenge_ftmo_stato as st               # noqa: E402  (importa anche al)
+import leggi_r255 as lr                            # noqa: E402  (RIUSO dichiarato: parser, FILE, Raccolta, curve, calendari)
 
 BANCO, S_OGGI, SALDO_OGGI = st.BANCO, st.S_OGGI, st.SALDO_OGGI
 G_GIORN, G_TOT, MIN_GIORNI = st.G_GIORN, st.G_TOT, st.MIN_GIORNI_RESTANTI
@@ -104,6 +113,30 @@ V1 = list(m.SORGENTI)            # le quattro sedie della v1, nell'ordine di m.s
 NON_MODELLATE = ['770212 Dow short (in firma: nessun per-trade in repo, R255 non girato)',
                  '770260 Nasdaq (in campo, nessun per-trade: gia\' fuori dalla v1)',
                  '770511 SuperWave Dow (in campo, nessun per-trade: gia\' fuori dalla v1)']
+
+# ---- 770212 Dow short: si modella SOLO con --r255 <raccolta ROUND_R255_SHORT_DOW_INFASE_...> (27/09/2026, sera)
+#   per-trade   : leggi_r255.FILE['R255a']['g1'] = 793101 (file 14:30 BCM) e ['R255b']['g1'] = 793102 (file 15:30 BCM),
+#                 deposito 10.000 (prova R255a r.22), rischio InpRiskPercent=1.0 (prova r.777, letto a runtime),
+#                 corsa unica moncone 2024.09.26 + 641 giorni 2024.09.27 -> 2026.06.30.
+#   sedia       : preset mql5/Presets/FTMO/ABTG_Dow_Apertura_US_770212_SHORT_FTMO.set (letto a runtime: ora di
+#                 sessione, rischio, magic, lati = la FIRMA in attesa di Claudio, "dal preset in firma", non una proposta).
+#   curva       : ora FISSA 16:30 sul server FTMO; FTMO e' IT+1 tutto l'anno (docs/REGOLAMENTO_FTMO_2026-08.md r.130:
+#                 GMT+2 inverno / GMT+3 estate) -> segue il calendario UE -> sul BCM (UTC+1 fisso) e' 14:30 con UE
+#                 legale e 15:30 con UE solare = la curva FTMO-DOC di leggi_r255 (inverno_ue -> file 15:30). Le altre
+#                 due (IN FASE = calendario USA; CONTROLLO = 14:30 tutto l'anno) si stampano accanto come SENSIBILITA'.
+#                 [DERIVATO dal regolamento, NON MISURATO sul feed FTMO]: la regola dell'orologio FTMO e' documentata,
+#                 non misurata (leggi_r255 par. 7 la chiama DESCRITTIVA).
+#   scala       : net / 10.000 (misura 1%) x fattore, come la 770105: a fattore 2,0 = InpRiskPercent=2.00 del preset.
+#                 Il rischio per operazione si misura ingresso->SL (InpRiskMode=0, CLAUDE.md sez. Guardian) e l'EA
+#                 dimensiona sul SALDO CORRENTE della corsa (classe 321): lo scarto del saldo di corsa da 10.000 si
+#                 stampa (min/max B_corsa da leggi_r255.ribasa) e NON si corregge, come per l'oro e le 4 sedie v1.
+#   finestra    : le operazioni FUORI dalle finestre A/B (era IS 2024.09.27 -> 2025.06.09, moncone, 2026.06.30) si
+#                 IGNORANO e si DICHIARANO col loro numero: il calendario resta quello delle 4 sedie v1 (NON si allarga).
+PRESET_770212 = os.path.join(QUI, '..', 'mql5', 'Presets', 'FTMO', 'ABTG_Dow_Apertura_US_770212_SHORT_FTMO.set')
+PROVA_R255A = os.path.join(QUI, 'prove', 'R255a_short_DOW_ancora_1430.txt')
+N_770212 = '770212 DOWshort'
+CURVE_770212 = ('FTMO-DOC', 'IN FASE', 'CONTROLLO')
+SENS_770212 = dict((c, '770212 [%s]' % c) for c in CURVE_770212)
 
 
 # ---------------------------------------------------------------- dati
@@ -129,6 +162,122 @@ def carica_v2(nomi=None):
         out[nome] = {'giorni': dict(gior), 'posizioni': [(d, x) for d, x in pos.values()],
                      'dep': dep, 'rmis': rmis, 'segue': segue}
     return out
+
+
+# ---------------------------------------------------------------- 770212 da --r255
+def leggi_preset_770212(path=PRESET_770212):
+    """La FIRMA in attesa di Claudio, letta dal preset e NON proposta: {input: (valore, riga)}.
+       Le righe di commento (;) non contano; una chiave che manca ferma tutto."""
+    out = {}
+    with open(path, encoding='utf-8', errors='replace') as fh:
+        for i, riga in enumerate(fh, 1):
+            r = riga.strip().lstrip('\ufeff')
+            if not r or r.startswith(';') or '=' not in r:
+                continue
+            k, v = r.split('=', 1)
+            k = k.strip()
+            if k in ('InpSessionHour', 'InpSessionMin', 'InpRiskPercent', 'InpMagic', 'InpAllowShort', 'InpAllowLong',
+                     'InpCloseHour', 'InpCloseMin', 'InpUsaGuardian', 'InpOneTradePerDay'):
+                out[k] = (v.strip(), i)
+    for k in ('InpSessionHour', 'InpSessionMin', 'InpRiskPercent', 'InpMagic', 'InpAllowShort', 'InpAllowLong'):
+        if k not in out:
+            raise SystemExit('preset 770212 senza la riga %s: %s -- la 770212 resta [NON MODELLATA]' % (k, path))
+    return out
+
+
+def rischio_misura_r255(path=PROVA_R255A):
+    """InpRiskPercent del file prova R255a (la MISURA del per-trade), letto e non ricordato: (valore, riga)."""
+    with open(path, encoding='utf-8', errors='replace') as fh:
+        for i, riga in enumerate(fh, 1):
+            if riga.startswith('InpRiskPercent='):
+                return float(riga.split('=', 1)[1].split('||')[0]), i
+    raise SystemExit('prova R255a senza InpRiskPercent: %s' % path)
+
+
+def curva_dal_preset(preset):
+    """Quale curva del per-trade R255 rappresenta la sedia: decisa dalla LETTERA del preset.
+       16:30 fisso sul server FTMO (IT+1 tutto l'anno) = calendario UE -> 14:30 BCM con UE legale, 15:30 con UE solare
+       = FTMO-DOC (leggi_r255.curve_configurazione: inverno_ue -> file 15:30). Un'altra ora non ha una mappa scritta:
+       si ferma, non si inventa."""
+    h, mi = int(preset['InpSessionHour'][0]), int(preset['InpSessionMin'][0])
+    if (h, mi) == (16, 30):
+        return 'FTMO-DOC', ('InpSessionHour=16 (r.%d) InpSessionMin=30 (r.%d) = ora FISSA 16:30 sul server FTMO (IT+1 tutto '
+                            'l\'anno) = 14:30 BCM con UE legale / 15:30 BCM con UE solare' % (
+                                preset['InpSessionHour'][1], preset['InpSessionMin'][1]))
+    raise SystemExit('preset 770212 con InpSessionHour=%d:%02d: la mappa sulle curve R255 e\' scritta solo per 16:30 FTMO; '
+                     'con quest\'ora la 770212 resta [NON MODELLATA]' % (h, mi))
+
+
+def carica_r255(cartella, curva=None):
+    """Carica i per-trade 793101 (14:30) e 793102 (15:30) dalla raccolta R255 e costruisce le tre curve nel formato
+       di carica_v2 (giorni / posizioni / dep / rmis / segue). RIUSA leggi_r255: trova_raccolta (classe 872),
+       Raccolta.path_pt, leggi_pertrade, curve_configurazione (posizioni + ribasa + selezione per calendario).
+       curva=None -> quella dettata dal preset; un nome esplicito e' una SCELTA MANUALE e viene etichettata."""
+    base, nota = lr.trova_raccolta(cartella)
+    rc = lr.Raccolta(base)
+    preset = leggi_preset_770212()
+    if preset['InpAllowShort'][0].lower() != 'true' or preset['InpAllowLong'][0].lower() != 'false':
+        raise SystemExit('preset 770212: InpAllowShort=%s InpAllowLong=%s: il per-trade R255 e\' SOLO SHORT, la 770212 resta [NON MODELLATA]' % (
+            preset['InpAllowShort'][0], preset['InpAllowLong'][0]))
+    auto, perche = curva_dal_preset(preset)
+    scelta = curva or auto
+    rmis, riga_rmis = rischio_misura_r255()
+    if rmis != 1.0:
+        raise SystemExit('prova R255a r.%d: InpRiskPercent=%s, non 1.0: le unita\' della v1 sono alla misura 1%% e questa scala '
+                         'non e\' scritta -- la 770212 resta [NON MODELLATA]' % (riga_rmis, rmis))
+    F, deals = {}, {}
+    for f in ('R255a', 'R255b'):
+        g1 = lr.FILE[f]['g1']
+        p = rc.path_pt(g1)
+        if not os.path.exists(p):
+            F[f] = dict(pt={}, nullo=['per-trade assente: %s' % p]); continue
+        d = lr.leggi_pertrade(p)
+        tipi = sorted(set(x['type'] for x in d)); magic = sorted(set(x['magic'] for x in d))
+        # controlli minimi (la pre-lettura piena E0/P0/G1/C0/L0/S1 e' di leggi_r255): lato SHORT = deal di chiusura BUY
+        # (deal_type 0), magic = la gemella g1, almeno un deal
+        if not d or tipi != [0] or magic != [str(g1)]:
+            raise SystemExit('per-trade %s: deal_type %s, magic %s, %d deal: non e\' il lato SHORT della gemella g1 '
+                             '(atteso deal_type [0], magic [%d]) -- la 770212 resta [NON MODELLATA]' % (p, tipi, magic, len(d), g1))
+        F[f] = dict(pt={g1: d}, nullo=[]); deals[f] = d
+    if F['R255a']['nullo']:
+        raise SystemExit('senza il per-trade 14:30 (magic %d) la 770212 resta [NON MODELLATA]: %s' % (lr.FILE['R255a']['g1'], F['R255a']['nullo'][0]))
+    cv = lr.curve_configurazione(F, 'ancora')
+    curve = collections.OrderedDict()
+    for nome in CURVE_770212:
+        c = cv[nome]
+        if c is None:
+            curve[nome] = None; continue
+        pos = sorted(c['IS']['pos'] + c['OOS']['pos'], key=lambda p: p['t0'])
+        gior = collections.defaultdict(float)
+        for p in pos:
+            for x in p['deals']:
+                gior[x['t'].strftime('%Y.%m.%d')] += x['net']
+        curve[nome] = {'giorni': dict(gior), 'posizioni': [(p['data'].strftime('%Y.%m.%d'), p['net']) for p in pos],
+                       'dep': lr.DEPOSITO, 'rmis': rmis, 'segue': True, 'pos_lr': pos,
+                       'moncone': c['scartati'] - len(pos),
+                       'b_corsa': (min(p['B_corsa'] for p in pos), max(p['B_corsa'] for p in pos)) if pos else (lr.DEPOSITO, lr.DEPOSITO)}
+    if curve.get(scelta) is None:
+        raise SystemExit('curva %s non costruibile (manca il file 15:30, magic %d): la 770212 resta [NON MODELLATA]; '
+                         'con --r255-curva CONTROLLO si modella il solo file 14:30, etichettato come scelta manuale' % (scelta, lr.FILE['R255b']['g1']))
+    return dict(base=base, nota=nota, preset=preset, scelta=scelta, perche=perche, manuale=curva is not None,
+                curve=curve, deals=deals, rmis=(rmis, riga_rmis))
+
+
+def aggiungi_770212(dati, r):
+    """Mette la curva scelta in dati[N_770212] e le altre due come sensibilita' (chiavi SENS_770212)."""
+    dati[N_770212] = r['curve'][r['scelta']]
+    for c in CURVE_770212:
+        if c != r['scelta'] and r['curve'][c] is not None:
+            dati[SENS_770212[c]] = r['curve'][c]
+    return dati
+
+
+def fuori_finestra(posizioni, cal):
+    """Posizioni [(data, net)] fuori dal calendario dato: (n_dentro, n_fuori, prima_fuori, ultima_fuori)."""
+    lo, hi = cal[0], cal[-1]
+    dentro = [d for d, _ in posizioni if lo <= d <= hi]
+    fuori = [d for d, _ in posizioni if not (lo <= d <= hi)]
+    return len(dentro), len(fuori), (min(fuori) if fuori else None), (max(fuori) if fuori else None)
 
 
 def scala(nome, dati, fattore, taglia_oro):
@@ -361,9 +510,116 @@ def correlazione(dati, nomi, cal):
     return neg2, op2, coppie
 
 
+# ---------------------------------------------------------------- righe della 770212 (solo con --r255)
+def nomi_770212(scelta):
+    """I nomi delle righe aggiunte (in un posto solo: la tabella e le differenze li leggono da qui)."""
+    return collections.OrderedDict([
+        ('A_blk', "BLK A: 4 sedie + 770212 (%s)" % scelta),
+        ('A_oro05', "BLK A: 4 sedie + 770212 + ORO 0,5%"),
+        ('A_oro10', "BLK A: 4 sedie + 770212 + ORO 1,0%"),
+        ('A_iid', "IID A: 4 sedie + 770212, posizioni indipendenti"),
+        ('A_iids', "IID-S A: 4 sedie + 770212, giornate di sedia indipendenti (solo FRA sedie)"),
+        ('B_blk', "BLK B: 4 sedie + 770105 + 770212 (%s)" % scelta),
+        ('B_oro05', "BLK B: 4 sedie + 770105 + 770212 + ORO 0,5%"),
+        ('B_oro10', "BLK B: 4 sedie + 770105 + 770212 + ORO 1,0%"),
+        ('B_iid', "IID B: 4 sedie + 770105 + 770212, posizioni indipendenti"),
+        ('B_iids', "IID-S B: 4 sedie + 770105 + 770212, giornate di sedia indipendenti (solo FRA sedie)"),
+        ('B_iid_oro', "IID B: 4 sedie + 770105 + 770212 + ORO 1,0%, posizioni indipendenti"),
+        ('B_slip', "BLK B: 4 sedie + 770105 + 770212 + ORO 1,0%% + slittamento x%.3f" % SLIP),
+        ('B_sens_IN FASE', "BLK B: 4 sedie + 770105 + 770212 [IN FASE] (sensibilita\': calendario USA)"),
+        ('B_sens_CONTROLLO', "BLK B: 4 sedie + 770105 + 770212 [CONTROLLO] (sensibilita\': 14:30 BCM tutto l\'anno)"),
+        ('B_sens_FTMO-DOC', "BLK B: 4 sedie + 770105 + 770212 [FTMO-DOC] (sensibilita\': calendario UE)")])
+
+
+def righe_770212(dati, r255, calA, calB, fatt):
+    """Le righe della tabella con la 770212 dentro, nello stesso formato (nome, pool, attivo, comp, sost, don)."""
+    N = nomi_770212(r255['scelta'])
+    R = []
+    A5 = V1 + [N_770212]
+    fA, aA = blocchi(dati, A5, calA, fatt)
+    R.append((N['A_blk'], fA, aA, None, None, None))
+    for t, k in ((0.5, 'A_oro05'), (1.0, 'A_oro10')):
+        f, a = blocchi(dati, A5 + ['795301 ORO'], calA, fatt, t)
+        R.append((N[k], f, a, None, None, None))
+    p, c = pool_posizioni(dati, A5, calA, fatt)
+    R.append((N['A_iid'], fA, aA, comp_iid(p, c), None, None))
+    R.append((N['A_iids'], fA, aA, comp_sedia_giorno(dati, A5, calA, fatt), None, None))
+    B6 = V1 + ['770105 DAXshort', N_770212]
+    fB, aB = blocchi(dati, B6, calB, fatt)
+    R.append((N['B_blk'], fB, aB, None, None, None))
+    for t, k in ((0.5, 'B_oro05'), (1.0, 'B_oro10')):
+        f, a = blocchi(dati, B6 + ['795301 ORO'], calB, fatt, t)
+        R.append((N[k], f, a, None, None, None))
+    p, c = pool_posizioni(dati, B6, calB, fatt)
+    R.append((N['B_iid'], fB, aB, comp_iid(p, c), None, None))
+    R.append((N['B_iids'], fB, aB, comp_sedia_giorno(dati, B6, calB, fatt), None, None))
+    p, c = pool_posizioni(dati, B6 + ['795301 ORO'], calB, fatt, 1.0)
+    f, a = blocchi(dati, B6 + ['795301 ORO'], calB, fatt, 1.0)
+    R.append((N['B_iid_oro'], f, a, comp_iid(p, c), None, None))
+    R.append((N['B_slip'], f, a, None, None, 'slip'))
+    for cv in CURVE_770212:
+        if cv != r255['scelta'] and SENS_770212[cv] in dati:
+            f, a = blocchi(dati, V1 + ['770105 DAXshort', SENS_770212[cv]], calB, fatt)
+            R.append((N['B_sens_' + cv], f, a, None, None, None))
+    return R
+
+
+def delta_770212(ris, senza, con):
+    """PASS(con) - PASS(senza) al seme principale e, se c'e' la banda, su ogni seme: (d, [d12, d13, d14])."""
+    (o1, b1), (o2, b2) = ris[senza], ris[con]
+    d = o2['p'].get('PASS', 0) - o1['p'].get('PASS', 0)
+    banda = None
+    if b1 and b2:
+        banda = [y['p'].get('PASS', 0) - x['p'].get('PASS', 0) for x, y in zip(b1, b2)]
+    return d, banda
+
+
+def frase_delta(d, banda):
+    verbo = 'aggiunge' if d > 0 else ('toglie' if d < 0 else 'non sposta')
+    s = "%s %.1f punti di PASS" % (verbo, abs(d))
+    if banda:
+        tutti = [d] + banda
+        s += " (semi %d/%s: da %+.1f a %+.1f)" % (SEME, "/".join(str(x) for x in SEMI_BANDA), min(tutti), max(tutti))
+    return s
+
+
+def stampa_delta_770212(ris, r255):
+    """La frase "la 770212 aggiunge/toglie X punti" con l'intervallo del seme, per ogni coppia con/senza."""
+    N = nomi_770212(r255['scelta'])
+    coppie = [("A, blocchi", "BLK A: 4 sedie a blocchi giornalieri (== G0f)", N['A_blk']),
+              ("A, blocchi + ORO 1,0%", "BLK A: 4 sedie + ORO 1.0% (43 giornate oro, agganciate per data)", N['A_oro10']),
+              ("A, IID (posizioni indipendenti)", "IID A: 4 sedie, posizioni indipendenti (modello 'trade indipendenti')", N['A_iid']),
+              ("B, blocchi", "BLK B: 4 sedie + 770105 (DAX short, 181 giornate)", N['B_blk']),
+              ("B, blocchi + ORO 0,5%", "BLK B: 4 sedie + 770105 + ORO 0.5%", N['B_oro05']),
+              ("B, blocchi + ORO 1,0%", "BLK B: 4 sedie + 770105 + ORO 1.0%", N['B_oro10']),
+              ("B, IID (posizioni indipendenti)", "IID B: 4 sedie + 770105, posizioni indipendenti", N['B_iid']),
+              ("B, IID-S (solo FRA sedie)", "IID-S B: 4 sedie + 770105, giornate di sedia indipendenti (solo FRA sedie)", N['B_iids']),
+              ("B, blocchi + ORO 1,0% + slittamento", "BLK B: 4 sedie + 770105 + ORO 1,0%% + slittamento x%.3f" % SLIP, N['B_slip'])]
+    print("  -- 770212 (%s) con/senza, stessa finestra e stesso seme --" % r255['scelta'])
+    for tag, senza, con in coppie:
+        if senza not in ris or con not in ris:
+            print("     %-38s [riga mancante: %s]" % (tag, senza if senza not in ris else con)); continue
+        d, banda = delta_770212(ris, senza, con)
+        print("     %-38s la 770212 %s" % (tag, frase_delta(d, banda)))
+    # scomposizione IID vs blocchi: quanto vale il co-movimento CON la 770212 dentro, accanto a quello SENZA
+    for tag, blk, iid in [("B senza 770212", "BLK B: 4 sedie + 770105 (DAX short, 181 giornate)", "IID B: 4 sedie + 770105, posizioni indipendenti"),
+                          ("B con 770212", N['B_blk'], N['B_iid']),
+                          ("A senza 770212", "BLK A: 4 sedie a blocchi giornalieri (== G0f)", "IID A: 4 sedie, posizioni indipendenti (modello 'trade indipendenti')"),
+                          ("A con 770212", N['A_blk'], N['A_iid'])]:
+        if blk in ris and iid in ris:
+            d, banda = delta_770212(ris, blk, iid)
+            print("     IID - blocchi, %-24s %+.1f punti%s" % (tag, d, (" (semi: %s)" % "/".join("%+.1f" % x for x in banda)) if banda else ''))
+    for cv in CURVE_770212:
+        k = 'B_sens_' + cv
+        if cv != r255['scelta'] and N[k] in ris:
+            d, banda = delta_770212(ris, N['B_blk'], N[k])
+            print("     sensibilita\' %-10s - %-10s %+.1f punti%s" % (cv, r255['scelta'], d, (" (semi: %s)" % "/".join("%+.1f" % x for x in banda)) if banda else ''))
+
+
 # ---------------------------------------------------------------- autotest
-def autotest():
+def autotest(fixture_dir=None):
     ok = True
+    fixture_dir = fixture_dir or fixture_dir_default()
 
     def chk(nome, cond, dettaglio=''):
         nonlocal ok
@@ -494,13 +750,180 @@ def autotest():
     # 10. stato del conto (dalla v1)
     chk("stato: saldo 75.090,72, DD 6,14%%, giorni ancora da fare %d, Guardian 4,5/9,3" % MIN_GIORNI,
         abs(SALDO_OGGI - 75090.72) < 0.005 and MIN_GIORNI == 1 and G_GIORN == 0.045 and G_TOT == 0.093)
+    ok = autotest_r255(chk, dati, S, fixture_dir) and ok
     print("AUTOTEST: %s" % ("TUTTO VERDE" if ok else "ROSSO"))
     return ok
 
 
+# ---------------------------------------------------------------- autotest della 770212 (fixture R255 finta)
+R246_PT = os.path.join(QUI, 'risultati_archivio', 'R246', 'PERTRADE', 'abtg_trades_%s_%s_%d.csv')
+
+
+def fixture_dir_default():
+    cand = os.environ.get('CLAUDE_SCRATCHPAD')
+    return os.path.join(cand if cand and os.path.isdir(cand) else tempfile.gettempdir(), 'mc_r255')
+
+
+def fixture_r255(dest, variante='pulito', data_meno5=None):
+    """Raccolta R255 FINTA nel formato vero (PERTRADE/abtg_trades_..._793101.csv e _793102.csv, cartelle ROUND_R255a/b
+       vuote per trova_raccolta), costruita dagli archivi VERI R246 794603 (IS) + 794601 (OOS), long a 100.000 / 1%:
+       short = segno INVERTITO, net e lotti / 10 (100.000 -> 10.000 alla stessa misura 1%), deal_type 0, stesse date;
+       file 15:30 = +1 ora e net x0,9 (cosi' le tre curve sono DIVERSE e la selezione per calendario si misura).
+       varianti: 'pulito' | 'zero' (tutti i net a 0) | 'meno5' (la posizione del giorno data_meno5 vale -500,00 =
+       -5% di 10.000; il resto invariato). Ritorna (base, d14, d15) con i deal scritti."""
+    a603 = lr.leggi_pertrade(R246_PT % (lr.EA, lr.SIMB, 794603))
+    a601 = lr.leggi_pertrade(R246_PT % (lr.EA, lr.SIMB, 794601))
+    assert len(a603) == 74 and len(a601) == 130, (len(a603), len(a601))
+    base = os.path.join(dest, 'ROUND_R255_SHORT_DOW_INFASE_mc_' + variante)
+    if os.path.isdir(base):
+        shutil.rmtree(base)
+    for sub in ('PERTRADE', 'ROUND_R255a', 'ROUND_R255b'):
+        os.makedirs(os.path.join(base, sub))
+    d14 = []
+    for src, off in ((a603, 0), (a601, 1000)):
+        for d in src:
+            d14.append(dict(t=d['t'], pid=d['pid'] + off, type=0, vol=round(d['vol'] / 10.0, 2), price=d['price'],
+                            net=round(-d['net'] / 10.0, 2)))
+    if variante == 'zero':
+        for d in d14:
+            d['net'] = 0.0
+    elif variante == 'meno5':
+        pid = [d['pid'] for d in d14 if d['t'].strftime('%Y.%m.%d') == data_meno5]
+        assert pid, data_meno5
+        primo = True
+        for d in d14:
+            if d['pid'] == pid[0]:
+                d['net'] = -500.0 if primo else 0.0; primo = False
+    d15 = [dict(d, t=d['t'] + dt.timedelta(hours=1), net=round(d['net'] * 0.9, 2)) for d in d14]
+    lr._scrivi_pt(os.path.join(base, 'PERTRADE', 'abtg_trades_%s_%s_%d.csv' % (lr.EA, lr.SIMB, lr.FILE['R255a']['g1'])), lr.FILE['R255a']['g1'], d14)
+    lr._scrivi_pt(os.path.join(base, 'PERTRADE', 'abtg_trades_%s_%s_%d.csv' % (lr.EA, lr.SIMB, lr.FILE['R255b']['g1'])), lr.FILE['R255b']['g1'], d15)
+    return base, d14, d15
+
+
+def inverno_ue_a_mano(d):
+    """CONTRO-ESEMPIO: le finestre UE solari scritte per esteso qui (docs/OROLOGIO: ultima domenica di ottobre ->
+       ultima domenica di marzo), senza passare da leggi_r255.INV_UE."""
+    return (dt.date(2024, 10, 27) <= d < dt.date(2025, 3, 30)) or (dt.date(2025, 10, 26) <= d < dt.date(2026, 3, 29))
+
+
+def autotest_r255(chk, dati_v2, S, fixture_dir):
+    ok = [True]
+
+    def c(nome, cond, dettaglio=''):
+        chk(nome, cond, dettaglio); ok[0] = ok[0] and bool(cond)
+    print("AUTOTEST 770212 da --r255 (fixture in %s)" % fixture_dir)
+    calA, calB = S['calA'], S['calB']
+    # 0. la firma letta dal preset, con le righe
+    pr = leggi_preset_770212()
+    c("preset 770212: InpSessionHour=16 (r.%d) InpSessionMin=30 (r.%d) InpRiskPercent=2.00 (r.%d) InpMagic=770212 (r.%d) short-only" % (
+        pr['InpSessionHour'][1], pr['InpSessionMin'][1], pr['InpRiskPercent'][1], pr['InpMagic'][1]),
+        pr['InpSessionHour'][0] == '16' and pr['InpSessionMin'][0] == '30' and float(pr['InpRiskPercent'][0]) == 2.0
+        and pr['InpMagic'][0] == '770212' and pr['InpAllowShort'][0] == 'true' and pr['InpAllowLong'][0] == 'false')
+    cv, _ = curva_dal_preset(pr)
+    c("curva dal preset: ora fissa 16:30 FTMO -> FTMO-DOC", cv == 'FTMO-DOC', "-> %s" % cv)
+    c("misura del per-trade R255a: InpRiskPercent=1.0 (r.%d)" % rischio_misura_r255()[1], rischio_misura_r255()[0] == 1.0)
+    falso = dict(pr); falso['InpSessionHour'] = ('14', 0)
+    try:
+        curva_dal_preset(falso); rif = False
+    except SystemExit:
+        rif = True
+    c("contro-esempio: preset a 14:30 -> RIFIUTATO (nessuna mappa: [NON MODELLATA], non un'altra curva zitta)", rif)
+    # 1. fixture pulita: le tre curve, e la FTMO-DOC rifatta A MANO dai deal scritti
+    base, d14, d15 = fixture_r255(fixture_dir, 'pulito')
+    r = carica_r255(base)
+    c("fixture: raccolta trovata, curva scelta %s, senza scelta manuale" % r['scelta'], r['scelta'] == 'FTMO-DOC' and not r['manuale'])
+    cf, cc, ci = r['curve']['FTMO-DOC'], r['curve']['CONTROLLO'], r['curve']['IN FASE']
+    c("fixture: 152 posizioni per curva (56 IS + 96 OOS degli archivi), moncone 0", all(len(x['posizioni']) == 152 and x['moncone'] == 0 for x in (cf, cc, ci)),
+      "-> %d / %d / %d" % (len(cf['posizioni']), len(cc['posizioni']), len(ci['posizioni'])))
+    mano = sum(d['net'] for d in d14 if not inverno_ue_a_mano(d['t'].date())) + sum(d['net'] for d in d15 if inverno_ue_a_mano(d['t'].date()))
+    c("FTMO-DOC a mano = 14:30 fuori dall'inverno UE + 15:30 dentro (%.2f) == curva caricata (%.2f)" % (mano, sum(cf['giorni'].values())),
+      abs(mano - sum(cf['giorni'].values())) < 1e-6)
+    c("CONTROLLO == tutto il file 14:30 (%.2f)" % sum(d['net'] for d in d14), abs(sum(cc['giorni'].values()) - sum(d['net'] for d in d14)) < 1e-6)
+    c("le tre curve sono DIVERSE fra loro (il file 15:30 vale x0,9): FTMO-DOC %.2f / IN FASE %.2f / CONTROLLO %.2f" % (
+        sum(cf['giorni'].values()), sum(ci['giorni'].values()), sum(cc['giorni'].values())),
+      len(set(round(sum(x['giorni'].values()), 2) for x in (cf, cc, ci))) == 3)
+    c("lato: tutti i deal del per-trade sono chiusure BUY (deal_type 0)", all(d['type'] == 0 for d in r['deals']['R255a'] + r['deals']['R255b']))
+    # (a) senza --r255 non c'e' nessuna 770212 nei dati e la tabella non la conosce
+    c("(a) carica_v2() senza --r255 non contiene la 770212 (stesse %d sedie di oggi)" % len(SORGENTI_V2),
+      N_770212 not in dati_v2 and not any(k in dati_v2 for k in SENS_770212.values()) and len(dati_v2) == len(SORGENTI_V2))
+    dati = aggiungi_770212(dict(dati_v2), r)
+    c("(a) ... e con --r255 le 4 sedie v1 restano bit per bit uguali (blocchi A == pool_feriali v1)",
+      blocchi(dati, V1, calA, 2.0) == S['G0_fer'])
+    # (d) date fuori finestra: le 56 posizioni dell'era IS (2024.09.30 -> 2025.06.05) stanno FUORI da A e da B
+    inA, fuA, pA, uA = fuori_finestra(cf['posizioni'], calA)
+    inB, fuB, pB, uB = fuori_finestra(cf['posizioni'], calB)
+    n_is = sum(1 for d, _ in cf['posizioni'] if d < '2025.06.10')
+    n_pre_b = sum(1 for d, _ in cf['posizioni'] if d < calB[0])
+    c("(d) finestra A: %d dentro, %d FUORI (%s -> %s) == 56 posizioni IS dell'archivio 794603" % (inA, fuA, pA, uA), fuA == 56 == n_is and inA == 96)
+    c("(d) finestra B: %d dentro, %d FUORI == IS + le OOS prima del %s (%d)" % (inB, fuB, calB[0], n_pre_b), fuB == n_pre_b and inB + fuB == 152)
+    f6, a6 = blocchi(dati, V1 + ['770105 DAXshort', N_770212], calB, 2.0)
+    f5, a5 = blocchi(dati, V1 + ['770105 DAXshort'], calB, 2.0)
+    dentro = sum(x for d, x in cf['posizioni'] if calB[0] <= d <= calB[-1]) / lr.DEPOSITO
+    c("(d) blocchi B con 770212 - senza = solo le posizioni DENTRO la finestra (%.6f)" % dentro, abs((sum(f6) - sum(f5)) - dentro) < 1e-9,
+      "-> %.9f" % (sum(f6) - sum(f5)))
+    c("(d) il calendario NON si allarga: B resta %s -> %s, %d giorni" % (calB[0], calB[-1], len(calB)), calB[0] == '2025.07.01' and len(calB) == 262)
+    # (b) per-trade tutto a zero: P(PASS) invariata al decimale, pool bit per bit uguale
+    base0, _, _ = fixture_r255(fixture_dir, 'zero')
+    r0 = carica_r255(base0)
+    dati0 = aggiungi_770212(dict(dati_v2), r0)
+    f0, a0 = blocchi(dati0, V1 + ['770105 DAXshort', N_770212], calB, 2.0)
+    c("(b) 770212 a zero: pool B bit per bit == senza 770212 (attivo puo' cambiare: %d giornate in piu' 'operate')" % (sum(a0) - sum(a5)), f0 == f5)
+    o0 = corsa(f0, 2.0, attivo=a0); o5 = corsa(f5, 2.0, attivo=a5)
+    c("(b) 770212 a zero: P(PASS) %.2f%% contro %.2f%% -> differenza %+.3f punti (< 0,05: invariata al decimale)" % (
+        o0['p'].get('PASS', 0), o5['p'].get('PASS', 0), o0['p'].get('PASS', 0) - o5['p'].get('PASS', 0)),
+      abs(o0['p'].get('PASS', 0) - o5['p'].get('PASS', 0)) < 0.05)
+    # (c) una perdita di -5% in un giorno (-500 su 10.000): stessa giornata = stesso blocco -> la regola 4,5 la vede
+    #     giorno scelto: il primo di B in cui la fixture ha una posizione e le altre 5 sedie NON perdono
+    idx = dict((d, i) for i, d in enumerate(calB))
+    giorno = next(d for d, _ in cf['posizioni'] if d in idx and f5[idx[d]] >= 0)
+    base5, _, _ = fixture_r255(fixture_dir, 'meno5', data_meno5=giorno)
+    r5 = carica_r255(base5)
+    dati5 = aggiungi_770212(dict(dati_v2), r5)
+    fm, am = blocchi(dati5, V1 + ['770105 DAXshort', N_770212], calB, 2.0)
+    k = idx[giorno]
+    c("(c) giornata %s: blocco con 770212 (%.6f) == blocco senza (%.6f) + (-500/10.000)" % (giorno, fm[k], f5[k]), fm[k] == f5[k] + (-500.0 / 10000.0))
+    o_con = simula_v2([fm[k]], 2.0, S_OGGI, attivo=[True], n_sim=2000, **KW_CAMPO)
+    o_sen = simula_v2([f5[k]], 2.0, S_OGGI, attivo=[True], n_sim=2000, **KW_CAMPO)
+    c("(c) pool di quella sola giornata a taglia 2,00%%: CON 770212 -> FERMATA_GUARDIAN %.0f%% (il taglio 4,5 la vede: -5%% x 2 = -10%% > 4,5); "
+      "SENZA -> FERMATA %.0f%%" % (o_con['p'].get('FERMATA_GUARDIAN', 0), o_sen['p'].get('FERMATA_GUARDIAN', 0)),
+      o_con['p'].get('FERMATA_GUARDIAN', 0) == 100.0 and o_sen['p'].get('FERMATA_GUARDIAN', 0) == 0.0)
+    o_off = simula_v2([fm[k]], 2.0, S_OGGI, attivo=[True], n_sim=2000, guardian=None, g_tot=None, min_giorni=MIN_GIORNI)
+    c("(c) stessa giornata, Guardian SPENTO: MORTE_GIORNALIERA %.0f%% (muro FTMO 5%% del banco)" % o_off['p'].get('MORTE_GIORNALIERA', 0),
+      o_off['p'].get('MORTE_GIORNALIERA', 0) == 100.0)
+    pp, cc_ = pool_posizioni(dati5, V1 + ['770105 DAXshort', N_770212], calB, 2.0)
+    o_iid = simula_v2([fm[k]], 2.0, S_OGGI, attivo=[True], n_sim=2000, comp=comp_iid(pp, cc_), **KW_CAMPO)
+    print("       (c) informativo: la stessa giornata nell'IID per posizione (la -500 pescata a caso dal pool 770212): FERMATA %.1f%% "
+          "-- e' quello che l'IID distrugge" % o_iid['p'].get('FERMATA_GUARDIAN', 0))
+    # 4. CONTRO-ESEMPIO DELLA SCALA, rifatto a mano su UNA operazione: P/L a 10.000 e lotto del per-trade -> EUR sul conto
+    #    FTMO al rischio del preset (2,00% del saldo 75.090,72, ingresso->SL) = net x lotto_FTMO / lotto_pertrade
+    pos = min((p for p in cf['pos_lr'] if calB[0] <= p['data'].strftime('%Y.%m.%d') <= calB[-1]), key=lambda p: p['net'])   # lo stop peggiore
+    net, lotto = pos['net'], pos['vol']
+    rischio_ftmo = SALDO_OGGI * float(pr['InpRiskPercent'][0]) / 100.0          # 1.501,81 EUR
+    rischio_mis = lr.DEPOSITO * r['rmis'][0] / 100.0                              # 100,00 EUR
+    lotto_ftmo = lotto * rischio_ftmo / rischio_mis
+    eur_mano = round(net * lotto_ftmo / lotto, 2)
+    eur_mod = round(net * scala(N_770212, dati, 2.0, 0.0) * 2.0 * SALDO_OGGI, 2)
+    c("scala a mano: posizione %s net %.2f (10.000, 1%%), lotto %.2f -> rischio FTMO %.2f EUR (2,00%% di %.2f), lotto FTMO %.4f "
+      "-> %.2f EUR a mano == %.2f EUR nel modello (net/10.000 x 2,0 x saldo)" % (
+          pos['data'], net, lotto, rischio_ftmo, SALDO_OGGI, lotto_ftmo, eur_mano, eur_mod), eur_mano == eur_mod and abs(rischio_ftmo - 1501.81) < 0.005)
+    eur_321 = round(net * (rischio_ftmo / (pos['B_corsa'] * r['rmis'][0] / 100.0)), 2)
+    print("       classe 321: quella posizione fu dimensionata sul saldo di corsa %.2f, non su 10.000: a mano %.2f EUR contro %.2f "
+          "(%+.2f EUR, %+.1f%%) -- DICHIARATO, non corretto (come oro e sedie v1)" % (pos['B_corsa'], eur_321, eur_mano, eur_321 - eur_mano,
+                                                                                    100.0 * (eur_321 / eur_mano - 1.0)))
+    # 5. le righe della tabella con la 770212 esistono e hanno nomi diversi da quelle di oggi
+    R = righe_770212(dati, r, calA, calB, 2.0)
+    c("righe 770212: %d righe aggiunte, nomi tutti distinti, con le 2 sensibilita'" % len(R),
+      len(R) == 14 and len(set(n for n, *_ in R)) == 14 and sum(1 for n, *_ in R if 'sensibilita' in n) == 2)
+    c("scelta manuale: --r255-curva CONTROLLO viene etichettata", carica_r255(base, 'CONTROLLO')['manuale'] is True)
+    print("AUTOTEST 770212: %s" % ("TUTTO VERDE" if ok[0] else "ROSSO"))
+    return ok[0]
+
+
 # ---------------------------------------------------------------- main
-def main():
+def main(r255=None):
     dati = carica_v2()
+    if r255:
+        aggiungi_770212(dati, r255)
     S = scenari(dati)
     calA, calB, calO = S['calA'], S['calB'], S['calORO']
     base, _ = S['G0_pool']; fer_pool, fer_att = S['G0_fer']
@@ -517,10 +940,41 @@ def main():
         print("  %-16s %3d posizioni, %3d giornate (%s -> %s) | in A: %3d | in B: %3d | dep %.0f rischio %.1f%% | %s" % (
             n, len(s['posizioni']), len(s['giorni']), min(s['giorni']), max(s['giorni']), inA, inB, s['dep'], s['rmis'],
             'segue la taglia indici' if s['segue'] else 'taglia ASSOLUTA (0,5 / 1,0)'))
-    print("NON MODELLATE: " + " | ".join(NON_MODELLATE))
+    if r255:
+        pr = r255['preset']
+        print("  %-16s MODELLATA da --r255 %s%s" % (N_770212, r255['base'], (' (%s)' % r255['nota']) if r255['nota'] else ''))
+        print("    dal preset in firma (%s): InpMagic=%s (r.%d) | InpAllowShort=%s (r.%d) InpAllowLong=%s (r.%d) | "
+              "InpRiskPercent=%s (r.%d) | InpSessionHour=%s (r.%d) InpSessionMin=%s (r.%d)" % (
+                  os.path.relpath(PRESET_770212, os.path.join(QUI, '..')), pr['InpMagic'][0], pr['InpMagic'][1],
+                  pr['InpAllowShort'][0], pr['InpAllowShort'][1], pr['InpAllowLong'][0], pr['InpAllowLong'][1],
+                  pr['InpRiskPercent'][0], pr['InpRiskPercent'][1], pr['InpSessionHour'][0], pr['InpSessionHour'][1],
+                  pr['InpSessionMin'][0], pr['InpSessionMin'][1]))
+        print("    curva scelta: %s %s-- %s" % (r255['scelta'], '[SCELTA MANUALE --r255-curva] ' if r255['manuale'] else '', r255['perche']))
+        print("    [DERIVATO dal regolamento FTMO, NON MISURATO sul feed FTMO]: la mappa 16:30 FTMO -> 14:30/15:30 BCM per calendario UE")
+        print("    misura del per-trade: deposito %.0f, InpRiskPercent=%.1f (prova R255a r.%d), rischio ingresso->SL (InpRiskMode=0); "
+              "scala = net / %.0f x fattore (a fattore 2,0 = %s%% del preset)" % (
+                  lr.DEPOSITO, r255['rmis'][0], r255['rmis'][1], lr.DEPOSITO, pr['InpRiskPercent'][0]))
+        for c in CURVE_770212:
+            e = r255['curve'][c]
+            if e is None:
+                print("    %-10s NON COSTRUIBILE (manca il file 15:30)" % c); continue
+            perd = sorted(x for _, x in e['posizioni'] if x < 0)
+            med = perd[len(perd) // 2] if perd else 0.0
+            inA, fuA, pfA, ufA = fuori_finestra(e['posizioni'], calA)
+            inB, fuB, _, _ = fuori_finestra(e['posizioni'], calB)
+            print("    %-10s %3d posizioni, %3d giornate (%s -> %s), somma %+.2f, perdita mediana %.2f (attesa ~-%.0f a 1%% di %.0f) | "
+                  "in A: %3d, FUORI A: %3d (%s -> %s, IGNORATE) | in B: %3d, FUORI B: %3d | moncone 2024.09.26: %d | "
+                  "saldo di corsa %.2f .. %.2f (classe 321: scarto max %.1f%%, DICHIARATO non corretto)" % (
+                      c, len(e['posizioni']), len(e['giorni']), min(e['giorni']), max(e['giorni']), sum(e['giorni'].values()), med,
+                      lr.DEPOSITO * r255['rmis'][0] / 100.0, lr.DEPOSITO, inA, fuA, pfA, ufA, inB, fuB, e['moncone'],
+                      e['b_corsa'][0], e['b_corsa'][1], 100.0 * max(abs(b / lr.DEPOSITO - 1.0) for b in e['b_corsa'])))
+    print("NON MODELLATE: " + " | ".join(n for n in NON_MODELLATE if not (r255 and n.startswith('770212'))))
 
     print("\n[CORRELAZIONE INTRA-GIORNATA, MISURATA sui per-trade]")
-    for tag, nomi, cal in [('A: 4 sedie + oro', V1 + ['795301 ORO'], calA), ('B: 4 sedie + 770105 + oro', V1 + ['770105 DAXshort', '795301 ORO'], calB)]:
+    corr = [('A: 4 sedie + oro', V1 + ['795301 ORO'], calA), ('B: 4 sedie + 770105 + oro', V1 + ['770105 DAXshort', '795301 ORO'], calB)]
+    if r255:
+        corr.append(('B: 4 sedie + 770105 + 770212 (%s) + oro' % r255['scelta'], V1 + ['770105 DAXshort', N_770212, '795301 ORO'], calB))
+    for tag, nomi, cal in corr:
         neg2, op2, coppie = correlazione(dati, nomi, cal)
         print("  finestra %s: giornate con >=2 sedie operative %d, con >=2 sedie in PERDITA insieme %d" % (tag, op2, neg2))
         for a, b, nc, rho, ins in coppie:
@@ -529,8 +983,11 @@ def main():
 
     print("\n[DECOMPOSIZIONE DEL CO-MOVIMENTO, taglia 2,00%, TUTTO CON reimmissione (disegno neutro), semi 11/12/13]")
     print("  PASS / fine<=5gg.  BLK = blocchi | IID-S = solo FRA sedie distrutto | IID = anche DENTRO la sedia distrutto")
-    for tag, nomi, cal in [('A: 4 sedie v1', V1, calA), ('B: 4 sedie + 770105', V1 + ['770105 DAXshort'], calB),
-                           ('A: 771531 sola (contro-esempio iv)', ['771531 EMA200'], calA)]:
+    deco = [('A: 4 sedie v1', V1, calA), ('B: 4 sedie + 770105', V1 + ['770105 DAXshort'], calB),
+            ('A: 771531 sola (contro-esempio iv)', ['771531 EMA200'], calA)]
+    if r255:
+        deco.append(('B: 4 sedie + 770105 + 770212', V1 + ['770105 DAXshort', N_770212], calB))
+    for tag, nomi, cal in deco:
         f, a = blocchi(dati, nomi, cal, 2.0)
         pp, cc = pool_posizioni(dati, nomi, cal, 2.0)
         cs = comp_sedia_giorno(dati, nomi, cal, 2.0)
@@ -585,6 +1042,9 @@ def main():
         don = {'ORO': pool_oro_intero(dati, fatt, 1.0, calO)}
         righe.append(("BLK B + 770105 + ORO 1,0% INTERA STORIA, INDIPENDENTE", f5, a5, None, ['ORO'] * len(f5), don))
         righe.append(("BLK B: 4 sedie + 770105 + ORO 1,0%% + slittamento x%.3f" % SLIP, f, a, None, None, 'slip'))
+        if r255:
+            righe += righe_770212(dati, r255, calA, calB, fatt)
+        ris = collections.OrderedDict()
         for nome, pool, att, comp, sost, don in righe:
             slip = SLIP if don == 'slip' else 1.0
             if don == 'slip':
@@ -595,11 +1055,20 @@ def main():
                 banda = [corsa(pool, fatt, attivo=att, comp=comp, sost=sost, donatori=don, slip=slip, seme=sm) for sm in SEMI_BANDA]
             s = riga_tab(nome, o, banda)
             righe_md.append((fatt, nome, o, banda))
+            ris[nome] = (o, banda)
+        if r255:
+            stampa_delta_770212(ris, r255)
     print("=" * 120)
     return righe_md
 
 
 if __name__ == '__main__':
-    if '--autotest' in sys.argv:
-        sys.exit(0 if autotest() else 1)
-    main()
+    ap = argparse.ArgumentParser(description='MC challenge FTMO v2 (blocchi + 770105 + oro; 770212 solo con --r255)')
+    ap.add_argument('--autotest', action='store_true', help='controlli e contro-esempi (compresa la fixture R255 finta), poi esce')
+    ap.add_argument('--r255', default=None, metavar='CARTELLA', help='raccolta ROUND_R255_SHORT_DOW_INFASE_<data> (o la cartella che la contiene): modella la 770212')
+    ap.add_argument('--r255-curva', default=None, choices=list(CURVE_770212), help='SCELTA MANUALE della curva (default: quella dettata dal preset in firma)')
+    ap.add_argument('--fixture-dir', default=None, help='dove --autotest scrive la raccolta finta (default: $CLAUDE_SCRATCHPAD/mc_r255 o la temp)')
+    a = ap.parse_args()
+    if a.autotest:
+        sys.exit(0 if autotest(a.fixture_dir) else 1)
+    main(carica_r255(a.r255, a.r255_curva) if a.r255 else None)
