@@ -36,15 +36,17 @@
 ;     (sfasamento 2h = esattamente un passo H2), quindi EMA200 e ATR
 ;     di gestione leggono le stesse candele. Verificato, non assunto.
 ;
-; CAMBIO DI ORA DI FINE OTTOBRE -- QUESTO FILE HA UNA SCADENZA
-;   Il DST europeo finisce DOMENICA 25 OTTOBRE 2026; quello americano
-;   DOMENICA 1 NOVEMBRE 2026. Se FTMO e BCM cambiano nello STESSO giorno
-;   (tutti e due su DST europeo) il delta resta +2 e non si tocca niente.
-;   Se FTMO seguisse il DST AMERICANO, fra il 25/10 e il 01/11 il delta
-;   diventerebbe +3 per una settimana. NON E' VERIFICABILE DA QUI:
-;   la misura e' UNA SOLA e va fatta a terminale FTMO acceso ->
-;   confrontare l'ora dell'ultima candela M1 con l'ora UTC. Va messa
-;   in calendario per il 25/10/2026.
+; CAMBIO DI ORA DI FINE OTTOBRE -- QUESTO FILE HA UNA SCADENZA (24/10/2026)
+;   CORRETTO IL 27/09/2026 (classe 860/865 del cancello): la nota di prima
+;   diceva "se cambiano insieme il delta resta +2". E' SUPERATA dalla misura
+;   di report/OROLOGIO_BCM_2026-09-24.md: BCM e' UTC+1 FISSO, senza ora
+;   legale; FTMO e' ora italiana +1 tutto l'anno. Quindi dal 26/10/2026
+;   (fine del DST europeo, domenica 25/10) il delta FTMO-BCM diventa +1,
+;   NON resta +2: gli orari qui sotto (box 01:00-06:59, piazzo 09:00,
+;   cutoff 10:30, flat 19:30) vanno riscritti a +1 (00:00-05:59, 08:00,
+;   09:30, 18:30) con un preset NUOVO che passa dal cancello. La misura
+;   sul terminale FTMO acceso (ultima candela M1 contro UTC) resta da fare
+;   il 25/10 come controllo, non come fonte.
 ; --------------------------------------------------------------------------
 InpUsaGuardian=true
 InpBoxStartHour=1
