@@ -36137,3 +36137,14 @@ lettore lo dica. Regola: una riparazione verifica la FORMA del valore riparato (
 e altrimenti rifiuta a voce alta (riga NON ricucibile -> E0 ROSSO). Limite SCRITTO nel sorgente: una virgola in `InpComment`
 seguita da tre lettere (`X,ABC`) passa la forma e sposta SOLO i due valori stringa, non le colonne numeriche. Corretto nel
 commit del cancello (T22, mutazione che toglie il controllo -> T22 fallisce).
+
+### CLASSE 896 — "zero righe di ordine nel giornale Esperti" letto come "il conto non ha operato": CTrade stampa solo gli ERRORI e gli stop lato server vanno nel giornale del TERMINALE (28/09/2026)
+Caso: CODA_09 delle 03:30 del 28/09 su `C:\FTMO` (`541452707`) scrive *"RIGHE DI ORDINE / DEAL: 0 — questo giorno il
+conto NON ha operato"*. Alle 02:36-02:37 FTMO la posizione `#170709416` SELL 4,84 US30.cash della `771531` e' stata
+chiusa in due deal (+743,56 + swap 7,26), foto di Claudio dallo Storico. Nella stessa sonda la riga del Guardian diceva
+gia' `eq=75841.54 ... rischioAperto=0.00%`. Causa: `ABTG_EMA200.mq5` non chiama `LogLevel` su `CTrade`, il default MQL5
+e' `LOG_LEVEL_ERRORS` (solo ordini falliti stampati: le uniche righe d'ordine mai viste da CODA_09 sono `[invalid stops]`
+e `[market closed]`); gli stop/TP del server si scrivono nel giornale del terminale (`Logs\`), non in `MQL5\Logs\`.
+Regola: un'assenza in un log si legge solo se si sa che cosa quel log SCRIVE nel caso positivo. "0 righe" dal giornale
+Esperti = "nessun ordine fallito", mai "nessuna operazione"; la prova di attivita' e' l'equity/rischio aperto del
+Guardian o lo Storico del conto. La frase di CODA_09 va corretta (modifica a uno script del runner: passa dai cancelli).
