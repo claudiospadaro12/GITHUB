@@ -977,6 +977,26 @@ double OnTester()
 
 int OnTesterInit() { return(INIT_SUCCEEDED); }
 
+//--- Classe 883 (27/09/2026): un VALORE di input con una virgola dentro
+//    (InpNewsCurrencies="GBP,USD") finiva grezzo nel CSV separato da
+//    virgole: UN campo in piu' per riga e tutte le colonne dopo spostate
+//    (Import-Csv / csv.DictReader leggevano InpMagic sbagliato in silenzio).
+//    Un campo con virgola/virgolette/a-capo va fra virgolette (RFC 4180,
+//    virgolette interne raddoppiate); ogni altro campo resta byte per byte
+//    com'era. Stessa funzione di ABTG_Bulge.mq5 (R92).
+//    Nota: StringSplit(...,'=',kv)==2 qui sotto scarta ancora gli input il
+//    cui valore contiene '=' (colonna assente in head E in row: il conteggio
+//    dei campi resta coerente). Non toccato in questa correzione.
+string OptFrame_CsvField(const string v)
+  {
+   if(StringFind(v, ",")  < 0 && StringFind(v, "\"") < 0 &&
+      StringFind(v, "\n") < 0 && StringFind(v, "\r") < 0)
+      return(v);
+   string t = v;
+   StringReplace(t, "\"", "\"\"");
+   return("\"" + t + "\"");
+  }
+
 void OnTesterDeinit()
   {
    string fname = OptFrame_FileName();
@@ -994,13 +1014,13 @@ void OnTesterDeinit()
         {
          string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades";
          for(uint i = 0; i < pcount; i++)
-           { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
+           { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + OptFrame_CsvField(kv[0]); }
          FileWrite(h, head); header_scritto = true;
         }
       string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
       for(uint i = 0; i < pcount; i++)
-        { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
+        { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + OptFrame_CsvField(kv[1]); }
       FileWrite(h, row); righe++;
      }
    FileClose(h);
