@@ -5,6 +5,36 @@ Mandato: Claudio, notte 28/29-09 («fate tutto in background, l'obiettivo e' ave
 **Niente MT5, niente macchina: solo Python sui per-trade gia' in archivio.** Nessuna taglia, nessuna sedia toccata, nessuna
 promozione. E' materiale per la firma pendente di Claudio su `InpTP1_ClosePct=0` e per il prossimo round short.
 
+## PER CLAUDIO, IN 5 RIGHE
+1. **Misura 1, verdetto: «NON SEPARABILE con questi file».** Il vantaggio del senza-parziale (**+4,83 R** in un anno) c'e', ma
+   **sta in 4-5 giornate**: la mediana e' **negativa** (-0,047 R), 51 runner su 77 escono sotto il livello della parziale, e **le 5
+   giornate migliori valgono il 141% del totale**: tolte quelle 5, il senza-parziale PERDE (-1,97 R). 🔴 **Il «toro» di Gemini
+   questa gamba NON lo puo' ne' confermare ne' escludere**: l'anno OOS e' piatto (DAX +2,0%), e il tetto di deriva e' basso **per
+   costruzione** (runner mediano 9 minuti: anche un anno a +25% darebbe circa 0,24 R; per spiegare 4,83 R servirebbe un DAX a circa
+   +500%), quindi il suo «no» non e' un contro-esempio. Il dato utile e' un altro: **il vantaggio esiste anche in un anno senza toro**,
+   ma sono sempre le stesse code (4 delle 5 migliori cadono in mesi GIU': tolte quelle 5, mesi SU e mesi GIU' sono negativi TUTTI E DUE).
+2. 🔴 **Da tenere davanti alla firma (NON e' una scoperta: e' scritto dal 12/09 in `LE_QUATTRO_FIRME` r.714 e dal 22/09 in
+   `LA_CELLA_SENZA_BREAKEVEN`, qui lo si PESA): con `InpTP1_ClosePct=0` il PAREGGIO A TP1 NON SCATTA MAI**, anche con
+   `InpBreakevenAtTP1=1` (annidato in `if(!partialDone && InpTP1_ClosePct > 0 ...)`, dall'08/08 a HEAD). La cella misurata e'
+   **«niente parziale E niente pareggio»**. Sui dati: 2 giornate su 77 divergono (05/01/2026 +2,51 R, 25/02/2026 -1,48 R), insieme
+   **+1,03 R dei 4,83 (21%)**. La cella pulita (`ClosePct=0` + `InpBEatR=1.0`) e' **gia' scritta, `R207b`, dal 22/09, e non ha
+   nessun risultato in archivio**: mai girata. Stato nel repo: preset REALE a 0 dal 14/09 (firma r137c) **con `InpBEatR=0`: il REALE
+   gira GIA' esattamente la cella misurata qui (niente parziale E niente pareggio), non quella pulita**; FTMO, 100k, piccolo a 50.
+   👉 **Cosa cambia nella firma FTMO**: firmare oggi ClosePct 0 vuol dire comprare 4-5 giornate di coda e togliere il pareggio;
+   la misura che separa le due cose e' `R207b` (tetto 17 minuti di PC di backtest, da ri-passare dal cancello). La firma resta tua.
+3. **Misura 2, verdetto: «NON MISURABILE dai per-trade».** Lo short ha il fill in **194 giornate su 268** (72,4%); 74 restano a
+   secco, e il per-trade non dice se il range non si e' rotto o si e' rotto senza ritorno. Sulla parte che SI' si puo' misurare
+   (15 rotture ribassiste CERTE, riconosciute dallo stop pieno del long) il retest ha preso **13 su 15**; lo specchio sul lato
+   rialzista da' **33 su 36**: il retest manca circa una rottura su 8-12, **in tutte e due le direzioni**. Niente che dica «i crolli
+   in particolare». 🔴 Cautela: il controllo della premessa congelato e' CADUTO (8 su 13 entro 1 punto), quindi per regola quel
+   conteggio e' fuori dal verdetto; il verdetto non cambia con o senza. Il P/L dei crolli mancati non sta in nessun file.
+4. **La misura corta che risponde** (file NON scritto, proposta al §4): tre celle short (RETEST vivo con il suo per-trade, che oggi
+   manca · BREAKOUT scadenza 120 · BREAKOUT scadenza 535), circa 3 minuti di PC di backtest. Per la misura 1 il file c'e' gia':
+   **`R207b`** (`ClosePct` 0/50 con `InpBEatR=1.0`), scritto il 22/09 e mai lanciato: va ri-passato dal cancello e mandato.
+5. **Buchi dichiarati**: il per-trade copre solo la gamba OOS (un anno, un regime); l'IS c'e' solo come aggregato; l'ora
+   d'ingresso non e' nell'export; il per-trade dello short VIVO non esiste (R270 ha esportato TrailStartR 1,5 e FIXED).
+   Nessuna taglia, nessuna sedia, nessun preset toccato.
+
 ## 0. CRITERI CONGELATI PRIMA DEI NUMERI (questa sezione e' committata DA SOLA, prima di qualunque calcolo)
 
 **Cosa avevo gia' visto quando ho scritto questa sezione** (per onesta' di tracciabilita'): i numeri aggregati dei CSV R47a/R47b
@@ -122,30 +152,6 @@ Autotest dello script (contro-esempi): due celle identiche -> nessuna differenza
 ESPOSIZIONE (vedi 0.2).
 
 ---
-## PER CLAUDIO, IN 5 RIGHE
-1. **Misura 1, verdetto: «NON SEPARABILE con questi file».** Non e' il toro: il tetto della deriva spiega **0,019 R** su **4,83 R**
-   di vantaggio (254 volte meno), e il vantaggio sta piu' nei mesi in cui il DAX e' SCESO (+4,37 R su 38 giornate) che in quelli
-   saliti (+0,45 R su 39). Ma non e' nemmeno una selezione robusta: la mediana e' **negativa** (-0,047 R), 51 runner su 77 rendono
-   indietro sotto 1R, e **le 5 giornate migliori valgono il 141% del totale**: tolte quelle 5, il senza-parziale PERDE (-1,97 R).
-2. 🔴 **Da tenere davanti alla firma (NON e' una scoperta: e' scritto dal 12/09 in `LE_QUATTRO_FIRME` r.714 e dal 22/09 in
-   `LA_CELLA_SENZA_BREAKEVEN`, qui lo si PESA): con `InpTP1_ClosePct=0` il PAREGGIO A TP1 NON SCATTA MAI**, anche con
-   `InpBreakevenAtTP1=1` (annidato in `if(!partialDone && InpTP1_ClosePct > 0 ...)`, dall'08/08 a HEAD). La cella misurata e'
-   **«niente parziale E niente pareggio»**. Sui dati: 2 giornate su 77 divergono (05/01/2026 +2,51 R, 25/02/2026 -1,48 R), insieme
-   **+1,03 R dei 4,83 (21%)**. La cella pulita (`ClosePct=0` + `InpBEatR=1.0`) e' **gia' scritta, `R207b`, dal 22/09, e non ha
-   nessun risultato in archivio**: mai girata. Stato nel repo: preset REALE a 0 dal 14/09 (firma r137c); FTMO, 100k, piccolo a 50.
-3. **Misura 2, verdetto: «NON MISURABILE dai per-trade».** Lo short ha il fill in **194 giornate su 268** (72,4%); 74 restano a
-   secco, e il per-trade non dice se il range non si e' rotto o si e' rotto senza ritorno. Sulla parte che SI' si puo' misurare
-   (15 rotture ribassiste CERTE, riconosciute dallo stop pieno del long) il retest ha preso **13 su 15**; lo specchio sul lato
-   rialzista da' **33 su 36**: il retest manca circa una rottura su 8-12, **in tutte e due le direzioni**. Niente che dica «i crolli
-   in particolare». 🔴 Cautela: il controllo della premessa congelato e' CADUTO (8 su 13 entro 1 punto), quindi per regola quel
-   conteggio e' fuori dal verdetto; il verdetto non cambia con o senza. Il P/L dei crolli mancati non sta in nessun file.
-4. **La misura corta che risponde** (file NON scritto, proposta al §4): tre celle short (RETEST vivo con il suo per-trade, che oggi
-   manca · BREAKOUT scadenza 120 · BREAKOUT scadenza 535), circa 3 minuti di PC di backtest. Per la misura 1 il file c'e' gia':
-   **`R207b`** (`ClosePct` 0/50 con `InpBEatR=1.0`), scritto il 22/09 e mai lanciato: va ri-passato dal cancello e mandato.
-5. **Buchi dichiarati**: il per-trade copre solo la gamba OOS (un anno, un regime); l'IS c'e' solo come aggregato; l'ora
-   d'ingresso non e' nell'export; il per-trade dello short VIVO non esiste (R270 ha esportato TrailStartR 1,5 e FIXED).
-   Nessuna taglia, nessuna sedia, nessun preset toccato.
-
 ## 1. Controlli di nullita' e struttura (eseguiti, dallo script)
 Script: `backtest_pipeline/misure_costo_zero_dax.py` (autotest 8 su 8 prima delle misure; senza `--autotest` stampa tutto).
 
@@ -163,6 +169,14 @@ Script: `backtest_pipeline/misure_costo_zero_dax.py` (autotest 8 su 8 prima dell
 ✏️ **Nota di implementazione, dichiarata**: la prima stesura dello script dava «ESPOSIZIONE» a due celle IDENTICHE (somma D = 0 <=
 tetto = 0). L'autotest congelato al §0.2 chiede NON SEPARABILE: la regola ESPOSIZIONE ora richiede un guadagno da spiegare
 (somma D > 0). E' la lettura della regola congelata, non un criterio nuovo; l'ha trovato l'autotest prima dei dati veri.
+✏️ **Aggiunta del controllo preventivo (29/09)**: il difetto stava nel CRITERIO, non nello script: la regola «ESPOSIZIONE se somma D
+<= tetto» e l'autotest «celle identiche -> NON SEPARABILE» erano in contraddizione dentro la sezione 0, e la correzione sceglie
+l'autotest. Sui dati veri e' **non vincolante** (somma D = 4,827 > 0: il verdetto e' lo stesso con e senza). 🔴 E la mutazione
+dice una cosa in piu': l'autotest 2 ottiene ESPOSIZIONE solo con `mu` = 2,0 punti/minuto (**627 volte** la deriva vera); sui
+per-trade VERI, «P/L raddoppiato solo sulle vinte» con la deriva vera esce **SELEZIONE**, e resta SELEZIONE anche con la deriva
+moltiplicata per 10, 100, 300. **Il ramo «deriva» di ESPOSIZIONE su questo EA non puo' scattare** (servirebbe `mu` = 0,81 punti/
+minuto, 254 volte quella vera): l'unico ramo di ESPOSIZIONE raggiungibile e' quello dei mesi SU/GIU' (verificato: guadagno solo nei
+mesi SU -> ESPOSIZIONE). Classe 916.
 
 ## 2. MISURA 1 — LONG 770101: SELEZIONE o ESPOSIZIONE?
 Gamba OOS 2025.06.10-2026.06.30, 193 giornate, unita' = R della giornata (1% del saldo della stessa cella prima della giornata).
@@ -176,7 +190,7 @@ Gamba OOS 2025.06.10-2026.06.30, 193 giornate, unita' = R della giornata (1% del
 | in EURO | 18.029,58 / 23.607,28 (+5.577,70: include la composizione) | C0 |
 | D sulle P: mediana · media · quota D>0 | **-0,047** · +0,063 · 33,8% (26 su 77) | |
 | D sulle P: quantili 10/25/50/75/90% | -0,160 / -0,114 / -0,047 / +0,094 / +0,480 | |
-| livello REALE della parziale (R iniziali) 5/25/50/75/95% | 0,213 / 0,379 / **0,568** / 0,876 / 1,070 (59 su 77 sotto 0,9R) | il bersaglio di TP1 si misura dallo stop CORRENTE, che il PREVBAR alza (`InitialSL` con `partialDone=false`). Riconferma su un file diverso della mediana 0,57R di `LA_BANDA_BASSA` errata 25/09 (R246) |
+| livello REALE della parziale (R iniziali) 5/25/50/75/95% | 0,213 / 0,379 / **0,568** / 0,876 / 1,070 (59 su 77 sotto 0,9R) | formula: 2 x P/L del deal 1 / (1% del saldo); l'ingresso non serve perche' il lotto e' tarato perche' lo stop pieno valga 1% del saldo. **Limite: e' un LIMITE INFERIORE** (lotto arrotondato per difetto; deal 1 = 48,5-50% del lotto, mediana 49,7%): corretto per il volume la mediana e' 0,573. Il bersaglio di TP1 si misura dallo stop CORRENTE, che il PREVBAR alza (`InitialSL` con `partialDone=false`). Riconferma su un file diverso della mediana 0,57R di `LA_BANDA_BASSA` errata 25/09 (R246) |
 | D<0: runner uscito sotto il livello della parziale | **51** su 77 (a prezzo, deal 2 < deal 1: 52); senza parziale al TP duro 3R: 6 | |
 | somma D>0 / somma D<0 | +11,261 (26 giornate) / -6,434 (51 giornate) | |
 | durata del runner t2-t1 (minuti) 10/25/50/75/90% | 5 / 6 / **9** / 14 / 21 | ore dei deal |
@@ -221,10 +235,16 @@ Nelle altre 75 giornate P il trailing PREVBAR da 0R aveva gia' portato lo stop s
 - SELEZIONE? somma > 0 **si'** · >= 3 x tetto **si'** · T2 e T3 > 0 **si'** · IS senza >= vivo **si'** · mesi GIU' > 0 **si'** ·
   senza le 5 migliori > 0 **NO (-1,968)** -> **non scatta**.
 
-> **MISURA 1: «NON SEPARABILE con questi file».** Il vantaggio del senza-parziale NON e' deriva di un mercato in salita (la deriva
-> ne spiega un 254-esimo, e rende di piu' nei mesi in discesa), ma e' una **scommessa sulle code** che non regge senza le sue
+> **MISURA 1: «NON SEPARABILE con questi file».** Il vantaggio del senza-parziale esiste in un anno senza toro (DAX +2,0%), ma e'
+> una **scommessa sulle code** che non regge senza le sue
 > 3-4 giornate migliori, su un anno solo, e con dentro un secondo meccanismo (niente pareggio) che l'archivio conosce dal 12/09 ma
 > che il confronto di agosto non separa dalla parziale.
+
+🔴 **Cosa NON dice questo verdetto (controllo preventivo, 29/09)**: che «non e' il toro». Il «no» del ramo deriva e' scontato per
+costruzione (vedi §1: il ramo non puo' scattare su runner da 9 minuti), e il «no» del ramo SU/GIU' e' portato dalle stesse code: 4
+delle 5 giornate migliori (05/01, 25/03, 27/11, 03/11) cadono in mesi GIU', e tolte le 5 migliori la somma e' **-0,598 R** nei mesi
+SU e **-1,370 R** nei mesi GIU'. La tesi di Gemini riguarda il «biennio toro», cioe' la gamba IS, che qui ha solo l'aggregato: su
+questa gamba l'esposizione **non e' ne' confermata ne' esclusa**. Il verdetto (NON SEPARABILE) non cambia.
 
 Attesa dichiarata al §0.2: **confermata** in tutti i punti (S1-S4, mediana negativa, media positiva, somma ~250x sopra la deriva
 contro la «10x» attesa, segno che si ribalta senza le 5 migliori, esito NON SEPARABILE). Non previsti da me (ma gia' in
