@@ -1,0 +1,46 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 02c70e17eef870c26ef47b81942a0eb23d82aba8
+data            : 2026-09-28 10:07:07   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_Nightly
+file prova      : R259_nightly_XAUUSD_PIN.txt   (11872 byte, dal pin)
+etichetta       : R259_XAUUSD
+simbolo         : XAUUSD
+periodo         : M15
+da quando       : 2024.09.26
+modello         : 1  (NON tick reali: screening, non verdetto)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nightly\ABTG_Nightly_XAUUSD_IS_ohlc_R259_XAUUSD.csv
+  righe : 2
+    Pass 0    Profit -1240.76     PF 0.75156    Equity DD % 14.754     Trades 98
+    Pass 1    Profit 0            PF 0          Equity DD % 0          Trades 0
+  ESITO : LETTO, ma 1 righe su 2 hanno Trades = 0
+  >>> Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: guardare il log
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nightly\ABTG_Nightly_XAUUSD_OOS_ohlc_R259_XAUUSD.csv
+  righe : 2
+    Pass 0    Profit -24.97       PF 0.99641    Equity DD % 9.4635     Trades 140
+    Pass 1    Profit 0            PF 0          Equity DD % 0          Trades 0
+  ESITO : LETTO, ma 1 righe su 2 hanno Trades = 0
+  >>> Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: guardare il log
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 1
+  - round girato a Modello 1 (non tick reali): screening, non verdetto
+
+ESITO: ROUND GIRATO CON RILIEVI (1)

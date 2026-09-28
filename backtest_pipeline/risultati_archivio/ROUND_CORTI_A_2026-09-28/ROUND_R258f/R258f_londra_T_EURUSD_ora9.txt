@@ -1,0 +1,105 @@
+# =====================================================================
+#  R258f -- LONDRA ORB ALL'ORA GIUSTA -- BLOCCO T -- ORA FISSA, TICK REALI, finestra tick intera
+#  EA: ABTG_Londra_ORB   (M5)   simbolo EURUSD
+#  ora 9 = canale 08-09, ordini 09 server: Londra +1h d'estate e nel vecchio orologio; apertura di Londra negli inverni dal 2025
+#  Scritto il 26/09/2026. CRITERI: quelli di R258a par. 7, CONGELATI PRIMA
+#  DEI NUMERI e validi per TUTTI i file R258. Qui solo cio' che e' proprio
+#  di questo file. Sorgente dell'EA: mql5/Experts/ABTG_Londra_ORB.mq5
+#  (490 righe, ultimo commit 3af47ed9), NON la copia standalone/.
+# =====================================================================
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026: sul VPS operano le sedie della challenge).
+#  Prima si controlla che il terminale del PC non abbia sedie attaccate.
+#  VINCOLI DI BANCO (stanno nella riga di lancio, classe 692):
+#    -Deposito 10000 (rischio di banco InpRiskPercent=1.0, pinnato qui)
+#    -Modello 4 (tick reali)
+#    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo da'
+#    '@FRAZIONEIS' qui sotto; un -FrazioneIS diverso fa morire il driver),
+#    MaxBars=100000000 come in R246/R251/R252/R253.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca EA, preset, sedie, conti, taglie o parametri del forward. Non
+#  promuove niente in campo: ogni esito e' materiale per Claudio.
+#
+#  FINESTRA: IS 2024.07.05..2025.04.21 (207 feriali) / OOS 2025.04.22..2026.06.30 (311 feriali)
+#  CELLE 8 x 2 gambe = 16 passate.
+#
+#  ASSE UNICO: InpMinRangePips 0..70 passo 10 (8 righe: la SCANSIONE DEL
+#  CANALE, che misura la distribuzione di W e il cancello del costo,
+#  R258a par. 6-7). InpBufferPips = 3 fisso (il PDF). L'altopiano del
+#  buffer (M4) sta nei file B (u, v).
+#  Magic 795819 fisso (vergine: grep su disco e su 23 ref git, 26/09).
+#  Cutoff = ora+4 (identita' cutoff == scadenza 240', R216a par. 2-bis),
+#  chiusura = ora+9 = 18:00 server (prima del rollover delle 22).
+#  EURUSD e' il GEMELLO (certificato p.4): il PDF nomina solo GBPUSD.
+#  InpNewsCurrencies resta il default 'GBP,USD': INERTE (filtro spento).
+#
+#  IL COSTO DI QUESTO SIMBOLO (R258a par. 7 K1), calcolato:
+#   EURUSD: costo all-in mediano c = 0,200 + 0,464 = 0,664 pip
+#           (P95: 0,400 + 0,464 = 0,864 pip)
+#     40x  -> stop >= 26,56 pip ; 13,3x -> stop >= 8,83 pip
+#     b=1: W mediano serve >= 51,1 pip per il 40x, >= 15,7 per il 13,3x
+#     b=3: W mediano serve >= 47,1 pip per il 40x, >= 11,7 per il 13,3x
+#     b=5: W mediano serve >= 43,1 pip per il 40x, >= 7,7 per il 13,3x
+#     stop MINIMO per costruzione = F/2 + b (x = stop / c). La banda qui e'
+#     solo il LIMITE INFERIORE garantito dal pavimento; il verdetto K1 si
+#     legge sullo stop MEDIANO (F*, par. 7). Righe designate: F=70 b=3
+#     GBPUSD e F=50 b=3 EURUSD, le prime AMMESSE a b=3.
+#       F  |  b=1           |  b=3           |  b=5
+#       0  |   1,0   1,5x n/m     |   3,0   4,5x n/m     |   5,0   7,5x n/m
+#      10  |   6,0   9,0x ESCLUSA |   8,0  12,0x ESCLUSA |  10,0  15,1x FRAGILE
+#      20  |  11,0  16,6x FRAGILE |  13,0  19,6x FRAGILE |  15,0  22,6x FRAGILE
+#      30  |  16,0  24,1x FRAGILE |  18,0  27,1x FRAGILE |  20,0  30,1x FRAGILE
+#      40  |  21,0  31,6x FRAGILE |  23,0  34,6x FRAGILE |  25,0  37,7x FRAGILE
+#      50  |  26,0  39,2x FRAGILE |  28,0  42,2x AMMESSA |  30,0  45,2x AMMESSA
+#      60  |  31,0  46,7x AMMESSA |  33,0  49,7x AMMESSA |  35,0  52,7x AMMESSA
+#      70  |  36,0  54,2x AMMESSA |  38,0  57,2x AMMESSA |  40,0  60,2x AMMESSA
+#     (n/m = F=0: lo stop minimo non dice niente, vale il MEDIANO, par. 7 K1)
+# =====================================================================
+
+@SIMBOLO    EURUSD
+@PERIODO    M5
+@DAQUANDO   2024.07.05
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpRangeStartHour=8||8||0||8||N
+InpRangeStartMin=0||0||0||0||N
+InpRangeEndHour=9||9||0||9||N
+InpRangeEndMin=0||0||0||0||N
+InpMinRangePips=0||0||10||70||Y
+InpMaxRangePips=0||0||0||0||N
+InpPlaceHour=9||9||0||9||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=13||13||0||13||N
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=18||18||0||18||N
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=240||240||0||240||N
+InpBufferPips=3.0||3.0||0||3.0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpSLMode=0||0||0||0||N
+InpHalveOnOpposite=0||0||0||0||N
+InpTPRangeMult=1.0||1.0||0||1.0||N
+InpUsePartial=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=0||0||0||0||N
+InpUseTrailing=0||0||0||0||N
+InpTrailTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=60||60||0||60||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsCurrencies=GBP,USD
+InpComment=R258F LDN EURUSD H9
+InpMagic=795819||795819||0||795819||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N

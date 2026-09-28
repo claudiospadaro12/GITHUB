@@ -1,0 +1,56 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 02c70e17eef870c26ef47b81942a0eb23d82aba8
+data            : 2026-09-28 08:20:37   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_Londra_ORB
+file prova      : R258b_londra_T_GBPUSD_ora7_PDF.txt   (5136 byte, dal pin)
+etichetta       : R258b
+simbolo         : GBPUSD
+periodo         : M5
+da quando       : 2024.07.05
+modello         : 4  (tick reali)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Londra_ORB\ABTG_Londra_ORB_GBPUSD_IS_R258b.csv
+  righe : 8
+    Pass 0    Profit -3353.03     PF 0.70123    Equity DD % 34.4457    Trades 203
+    Pass 1    Profit -1029.73     PF 0.7917     Equity DD % 16.073     Trades 78
+    Pass 2    Profit 427.54       PF 1.50066    Equity DD % 4.9831     Trades 16
+    Pass 3    Profit 57.24        PF 1.13842    Equity DD % 2.4711     Trades 7
+    Pass 4    Profit 101.12       PF 1.48942    Equity DD % 2.2545     Trades 4
+    Pass 5    Profit 33.11        PF 1.32249    Equity DD % 2.2545     Trades 2
+    Pass 6    Profit 135.16       PF 219        Equity DD % 0.7825     Trades 1
+    Pass 7    Profit 135.16       PF 219        Equity DD % 0.7825     Trades 1
+  ESITO : LETTO -- 8 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Londra_ORB\ABTG_Londra_ORB_GBPUSD_OOS_R258b.csv
+  righe : 8
+    Pass 0    Profit -4480.27     PF 0.73579    Equity DD % 49.8848    Trades 306
+    Pass 1    Profit -802.86      PF 0.92809    Equity DD % 19.5167    Trades 175
+    Pass 2    Profit 517.37       PF 1.39431    Equity DD % 6.5612     Trades 24
+    Pass 3    Profit 397.6        PF 4.63138    Equity DD % 1.5432     Trades 4
+    Pass 4    Profit -101.15      PF 0          Equity DD % 1.0115     Trades 1
+    Pass 5    Profit 0            PF 0          Equity DD % 0          Trades 0
+    Pass 6    Profit 0            PF 0          Equity DD % 0          Trades 0
+    Pass 7    Profit 0            PF 0          Equity DD % 0          Trades 0
+  ESITO : LETTO, ma 3 righe su 8 hanno Trades = 0
+  >>> Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: guardare il log
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO
