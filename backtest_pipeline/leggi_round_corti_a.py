@@ -29,6 +29,11 @@ Cancello del 27/09 (strato 2): raccolta cercata prima di leggere (872), NULLI de
 verificata sullo SHA del pin (873) tranne il P0 letto dalla riga su colonne spostate dalla virgola di
 InpNewsCurrencies (883), PROMOSSA solo dopo M4 e M3 sospeso = INDIZIO (874), X1/T1/PG/S1 con la forma
 della riga e della testa (875), ancora S0 per simbolo (884), DERIVATO che non boccia (885).
+28/09: i CSV si leggono col parser RFC 4180 del modulo csv (spezza_campi). Formato VECCHIO (binario al pin
+02c70e17, lo zip di riga A): la virgola di InpNewsCurrencies=GBP,USD aggiunge campi -> ricucitura su
+InpNewsCurrencies come prima, esenzione 883 SOLO con campi in eccesso (n_ricucite) E P0 del lettore VERDE.
+Formato NUOVO (scrittore OptFrame di a66dcb07, "GBP,USD" fra virgolette, interne raddoppiate): valori interi
+senza virgolette residue, NESSUNA ricucitura, NESSUNA esenzione: il P0 della riga vale. Autotest 20/20.
 
 Uso:
   python3 backtest_pipeline/leggi_round_corti_a.py <cartella_raccolta_estratta> [--out referto.md] [--senza-bande]
@@ -39,6 +44,7 @@ import csv
 import datetime as dt
 import hashlib
 import html
+import io
 import os
 import re
 import shutil
@@ -187,9 +193,36 @@ def f2(x, n=2):
     return 'n/d' if x is None else ('%.*f' % (n, x))
 
 
+NOTA_RICUCITE = ' (%d con virgola in un input stringa, ricucite su InpNewsCurrencies)'
+NOTA_RFC4180 = ' (%d con campi fra virgolette RFC 4180, letti dal parser csv: nessuna ricucitura)'
+
+
+def spezza_campi(ln):
+    """UNA riga di CSV OptFrame -> lista di campi col parser RFC 4180 del modulo csv (28/09/2026).
+    Formato VECCHIO (binario al pin 02c70e17): nessuna virgoletta, la virgola di InpNewsCurrencies=GBP,USD
+    aggiunge campi -> il parser spezza come ln.split(',') e la ricucitura resta ad allinea_riga.
+    Formato NUOVO (scrittore OptFrame di a66dcb07, RFC 4180): i valori con virgola/virgolette stanno fra
+    virgolette doppie con le interne raddoppiate ("GBP,USD" / "R258A LDN ""GBPUSD"" H8"): il parser li
+    rende interi e SENZA virgolette residue, e il numero di campi coincide con l intestazione.
+    Ritorna la lista dei campi (None se il parser non legge la riga)."""
+    try:
+        return next(csv.reader([ln]))
+    except (csv.Error, StopIteration):
+        return None
+
+
+def n_ricucite(nota):
+    """numero di righe RICUCITE dichiarato nella nota di leggi_csv_opt (0 se la nota non lo dice).
+    E la condizione (a) dell esenzione classe 883: il CSV ha DAVVERO righe con piu campi dell intestazione."""
+    m = re.search(r'\((\d+) con virgola in un input stringa, ricucite su InpNewsCurrencies\)', nota or '')
+    return int(m.group(1)) if m else 0
+
+
 def leggi_csv_opt(path):
     """CSV di OptFrame (virgola). Ritorna (righe, note). Righe: dict colonna -> valore (float se numerico).
-    Le righe duplicate per Pass (quirk visto nell'archivio Nightly) si tengono tutte e si annotano."""
+    Le righe duplicate per Pass (quirk visto nell'archivio Nightly) si tengono tutte e si annotano.
+    Legge tutti e due i formati (vedi spezza_campi): la nota dice quante righe sono state RICUCITE (formato
+    vecchio, campi in eccesso) e quante lette fra virgolette (formato nuovo, NESSUNA ricucitura)."""
     if not os.path.isfile(path):
         return None, 'ASSENTE'
     if os.path.getsize(path) == 0:
@@ -198,31 +231,41 @@ def leggi_csv_opt(path):
         txt = fh.read()
     rows = []
     righe = [x for x in txt.splitlines() if x.strip()]
-    hdr = [h.strip() for h in righe[0].split(',')]
+    hcampi = spezza_campi(righe[0])
+    if hcampi is None:
+        return None, 'intestazione non leggibile dal parser csv'
+    hdr = [h.strip() for h in hcampi]
     if 'Trades' not in hdr:
         return None, 'intestazione senza Trades'
-    ricuciti = 0
+    ricuciti, quotate = 0, 0
     for ln in righe[1:]:
         campi, ric = allinea_riga(hdr, ln)
         ricuciti += ric
         if campi is None:
-            return None, 'riga con %d campi contro %d colonne, non ricucibile' % (len(ln.split(',')), len(hdr))
+            grezzi = spezza_campi(ln)
+            return None, 'riga con %s campi contro %d colonne, non ricucibile' % ('n/d' if grezzi is None else len(grezzi), len(hdr))
+        if ric == 0 and '"' in ln:
+            quotate += 1
         d = {}
         for k, v in zip(hdr, campi):
             fv = num(v)
             d[k] = fv if fv is not None else v.strip()
         rows.append(d)
-    return rows, '%d righe' % len(rows) + (' (%d con virgola in un input stringa, ricucite su InpNewsCurrencies)' % ricuciti if ricuciti else '')
+    return rows, '%d righe' % len(rows) + (NOTA_RICUCITE % ricuciti if ricuciti else '') + (NOTA_RFC4180 % quotate if quotate else '')
 
 
 STRINGHE_CON_VIRGOLA = ('InpNewsCurrencies',)
 
 
 def allinea_riga(hdr, ln):
-    """OptFrame scrive i valori degli input come sono: 'InpNewsCurrencies=GBP,USD' mette una virgola
-    DENTRO la riga e sposta le colonne che seguono (InpComment, InpMagic...). Se la riga ha piu campi
-    dell intestazione, i campi in eccesso si ricuciono dentro InpNewsCurrencies. Ritorna (campi, n_ricuciti)."""
-    campi = ln.split(',')
+    """OptFrame al pin 02c70e17 scrive i valori degli input come sono: 'InpNewsCurrencies=GBP,USD' mette una
+    virgola DENTRO la riga e sposta le colonne che seguono (InpComment, InpMagic...). Se la riga ha piu campi
+    dell intestazione, i campi in eccesso si ricuciono dentro InpNewsCurrencies. Ritorna (campi, n_ricuciti).
+    Una riga del formato NUOVO (valori fra virgolette RFC 4180) esce dal parser gia con il numero giusto di
+    campi: NESSUNA ricucitura (n_ricuciti = 0), il valore e intero e senza virgolette."""
+    campi = spezza_campi(ln)
+    if campi is None:
+        return None, 0
     if len(campi) == len(hdr):
         return campi, 0
     extra = len(campi) - len(hdr)
@@ -939,7 +982,7 @@ def r258_leggi(rac, RP=None):
         roos, noos = leggi_csv_opt(os.path.join(cart, '%s_%s_OOS%s_%s.csv' % (ea, j['s'], sfx, t)))
         pins, asse, fonte = leggi_pin(rac, j)
         dati[t] = dict(job=j, ris=ris, roos=roos, nis=nis, noos=noos, pins=pins, fonte=fonte, mot=[], saltato=False,
-                       ricucito=('ricucite' in (nis or '')) or ('ricucite' in (noos or '')))
+                       ricucito=(n_ricucite(nis) + n_ricucite(noos)) > 0)   # condizione (a) della classe 883: righe con campi in ECCESSO
         # SALTATO esiste SOLO per il blocco L (prerequisito M1 dal 2008): un file T/G/B/D/F senza cartella e NULLO
         if ris is None and roos is None and not os.path.isdir(cart):
             if j['blk'] == 'L':
@@ -1033,11 +1076,14 @@ def r258_leggi(rac, RP=None):
                         d['mot'].append('G1 %s %s: %s contro %s' % (gamba, c, a.get(c), b.get(c)))
             g1 = 'VERDE' if g1ok else 'ROSSO'
         d['e0'] = e0
-        # classe 873: i NULLI della riga si UNISCONO. Eccezione DICHIARATA (classe 883): la virgola dentro
-        # InpNewsCurrencies=GBP,USD sposta di un campo le colonne che la seguono (InpComment, InpMagic,
-        # InpMaxSpread, InpVerbose) e Import-Csv della riga SCARTA il campo in piu': il P0 della riga (e l'ASSE
-        # InpMagic del blocco G) e' letto su colonne SPOSTATE. Si esenta SOLO se il CSV ha davvero la virgola
-        # (ricucito) E il P0 del lettore sulle colonne ricucite e' VERDE; ogni altro motivo della riga vale.
+        # classe 873: i NULLI della riga si UNISCONO. Eccezione DICHIARATA (classe 883): nel formato VECCHIO
+        # (binario al pin 02c70e17) la virgola dentro InpNewsCurrencies=GBP,USD sposta di un campo le colonne
+        # che la seguono (InpComment, InpMagic, InpMaxSpread, InpVerbose) e Import-Csv della riga SCARTA il
+        # campo in piu': il P0 della riga (e l'ASSE InpMagic del blocco G) e' letto su colonne SPOSTATE.
+        # Si esenta SOLO se (a) il CSV ha DAVVERO righe con piu' campi dell'intestazione (ricucito, contate da
+        # n_ricucite) E (b) il P0 del lettore sulle colonne ricucite e' VERDE; ogni altro motivo della riga vale.
+        # Formato NUOVO (scrittore RFC 4180 di a66dcb07): i campi coincidono, Import-Csv legge giusto, quindi
+        # NESSUNA esenzione: il P0 della riga vale (28/09/2026).
         d['riga_esenti'] = []
         for m in motivi_riga(RP, t):
             spost = d['ricucito'] and p0ok and (m.startswith('P0 PIN DAL CSV') or (m.startswith('ASSE DIVERSO') and j['blk'] == 'G'))
@@ -1841,7 +1887,51 @@ def costruisci_fixture(base, scenario='pulito'):
         'FILE NULLI (rc 1, motore o prova diversi dal pin, E0, asse o P0, C0, G1, S1, F0, F1, T1, X1, S0, S2; escono da OGNI conteggio, classi 772/775/781): nessuno',
         'FILE NON NULLI, per nome: ' + ', '.join(j['t'] for j in JOBS),
         'R250 G0 RIPRODUZIONE DI R247 (solo d0: a = CSV _IS 154 / 1.25176 / 1180.94 / 7.1002 e per-trade 765301 = 765271 (file par. 5.2); b = anche _OOS; VERDE o ROSSO, classe 750): R250a VERDE | R250b VERDE'])
+    if scenario == 'rfc4180':
+        _riquota_rfc4180(rac)
     return rac
+
+
+def _riquota_rfc4180(rac):
+    """scenario rfc4180 (28/09/2026): gli STESSI CSV di R258 della fixture pulita riscritti come li scrive il
+    binario compilato da HEAD (scrittore OptFrame di a66dcb07, RFC 4180): "GBP,USD" fra virgolette, InpComment
+    con virgolette interne raddoppiate ("R258A LDN ""GBPUSD"" H8"), ogni altro campo byte per byte com era.
+    csv.QUOTE_MINIMAL quota esattamente i campi con virgola/virgolette/a-capo, come OptFrame_CsvField."""
+    for j in [x for x in JOBS if x['r'] == 'R258']:
+        cart = os.path.join(rac, 'ROUND_' + j['t'])
+        for nome in sorted(os.listdir(cart)):
+            if not nome.endswith('.csv'):
+                continue
+            path = os.path.join(cart, nome)
+            rr = open(path, encoding='ascii').read().splitlines()
+            h = rr[0].split(',')
+            iC = h.index('InpComment')
+            buf = io.StringIO()
+            w = csv.writer(buf, quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
+            w.writerow(h)
+            for ln in rr[1:]:
+                c, _ = allinea_riga(h, ln)
+                c[iC] = c[iC].replace(j['s'], '"%s"' % j['s'])
+                w.writerow(c)
+            _scrivi(path, buf.getvalue().splitlines())
+
+
+NULLI_T10 = ('R250c (S1: per-trade IDENTICO al d0 R250a (la manopola dell orario NON ha morso: pin non arrivato))'
+             ' | R258a (MOTORE DIVERSO DAL PIN)'
+             ' | R258b (P0 PIN DAL CSV _IS DIVERSO (24 valori: InpMagic=[R258B LDN GBPUSD H7] atteso 795807 InpMaxSpread=[795807] atteso 0 InpVerbose=[0] atteso 1); P0 PIN DAL CSV _OOS DIVERSO (24 valori: InpMagic=[R258B LDN GBPUSD H7] atteso 795807))'
+             ' | R258g (ASSE DIVERSO nel _IS [NaN/NaN] attesi 795840/795890; P0 PIN DAL CSV _IS DIVERSO (6 valori: InpMaxSpread=[795840] atteso 0))'
+             ' | R258e (E0: CSV NON BUONI (_IS fresco 8 righe (attese 8; Trades>0 su 8; righe F=0 a zero 0), _OOS ASSENTE O VECCHIO); P0 PIN DAL CSV _IS DIVERSO (1 valori: InpMagic=[x] atteso 795817))'
+             ' | R259_USDJPY (S0 KO: ancora (cella 1) Trades IS 2 / OOS 0 contro archivio 0 / 0 -> ROUND NON LETTO (binario diverso dal sorgente citato, o dati diversi))')
+# formato NUOVO (T19): il P0 della riga e LEGITTIMO (Import-Csv legge giusto le colonne quotate): pin diverso davvero
+NULLI_T19 = ('R258b (P0 PIN DAL CSV _IS DIVERSO (1 valori: InpMagic=[795808] atteso 795807); P0 PIN DAL CSV _OOS DIVERSO (1 valori: InpMagic=[795808] atteso 795807))'
+             ' | R258g (ASSE DIVERSO nel _IS [795840/795891] attesi 795840/795890)')
+
+
+def _riepilogo_con_nulli(rp, nul):
+    righe = open(rp, encoding='ascii').read().splitlines()
+    righe = [('FILE NULLI (rc 1, motore o prova diversi dal pin, E0, asse o P0, C0, G1, S1, F0, F1, T1, X1, S0, S2; escono da OGNI conteggio, classi 772/775/781): ' + nul) if r.startswith('FILE NULLI') else
+             (r.replace('R250b VERDE', 'R250b ROSSO (per-trade 765302 contro archivio 765273 riga 3 diversa)') if r.startswith('R250 G0') else r) for r in righe]
+    _scrivi(rp, righe)
 
 
 def autotest(base):
@@ -1927,16 +2017,7 @@ def autotest(base):
     #     prova con SHA diverso dal pin -> P0 NON VERIFICABILE -> NULLO; G0 ROSSO della riga vince sul VERDE del lettore
     rac = costruisci_fixture(base, 'riga_nulli')
     rp = os.path.join(rac, 'RIEPILOGO_ROUND_CORTI_A.txt')
-    righe = open(rp, encoding='ascii').read().splitlines()
-    nul = ('R250c (S1: per-trade IDENTICO al d0 R250a (la manopola dell orario NON ha morso: pin non arrivato))'
-           ' | R258a (MOTORE DIVERSO DAL PIN)'
-           ' | R258b (P0 PIN DAL CSV _IS DIVERSO (24 valori: InpMagic=[R258B LDN GBPUSD H7] atteso 795807 InpMaxSpread=[795807] atteso 0 InpVerbose=[0] atteso 1); P0 PIN DAL CSV _OOS DIVERSO (24 valori: InpMagic=[R258B LDN GBPUSD H7] atteso 795807))'
-           ' | R258g (ASSE DIVERSO nel _IS [NaN/NaN] attesi 795840/795890; P0 PIN DAL CSV _IS DIVERSO (6 valori: InpMaxSpread=[795840] atteso 0))'
-           ' | R258e (E0: CSV NON BUONI (_IS fresco 8 righe (attese 8; Trades>0 su 8; righe F=0 a zero 0), _OOS ASSENTE O VECCHIO); P0 PIN DAL CSV _IS DIVERSO (1 valori: InpMagic=[x] atteso 795817))'
-           ' | R259_USDJPY (S0 KO: ancora (cella 1) Trades IS 2 / OOS 0 contro archivio 0 / 0 -> ROUND NON LETTO (binario diverso dal sorgente citato, o dati diversi))')
-    righe = [('FILE NULLI (rc 1, motore o prova diversi dal pin, E0, asse o P0, C0, G1, S1, F0, F1, T1, X1, S0, S2; escono da OGNI conteggio, classi 772/775/781): ' + nul) if r.startswith('FILE NULLI') else
-             (r.replace('R250b VERDE', 'R250b ROSSO (per-trade 765302 contro archivio 765273 riga 3 diversa)') if r.startswith('R250 G0') else r) for r in righe]
-    _scrivi(rp, righe)
+    _riepilogo_con_nulli(rp, NULLI_T10)
     with open(os.path.join(rac, 'ROUND_R258c', JOB['R258c']['p']), 'ab') as fh:
         fh.write(b'# un byte in piu dopo il pin\n')
     txtr, Er = referto(rac, senza_bande=True)
@@ -2012,7 +2093,71 @@ def autotest(base):
     assert allinea_riga(hh, '1,,C,7') == (['1', '', 'C', '7'], 0)
     assert allinea_riga(hh, '1,USD,C,7') == (['1', 'USD', 'C', '7'], 0)
     assert allinea_riga(hh, '1,C,7') == (None, 0)
-    print('AUTOTEST: 17/17 PASS (fixture e referti in %s)' % base)
+    # T18 (28/09, formato NUOVO RFC 4180 di a66dcb07): gli stessi CSV di R258 con "GBP,USD" fra virgolette e InpComment
+    #     con virgolette interne raddoppiate -> valori IDENTICI al formato vecchio ricucito (senza virgolette residue),
+    #     ZERO ricuciture, ZERO esenzioni 883, P0 confrontato normalmente (stesso numero di confronti, VERDE)
+    racq = costruisci_fixture(base, 'rfc4180')
+    txtq, Eq = referto(racq, senza_bande=True)
+    with open(os.path.join(base, 'REFERTO_rfc4180.md'), 'w', encoding='utf-8') as fh:
+        fh.write(txtq)
+    racp = os.path.join(base, 'ROUND_CORTI_A_pulito')
+    ncsv = 0
+    for j in [x for x in JOBS if x['r'] == 'R258']:
+        for nome in sorted(os.listdir(os.path.join(racq, 'ROUND_' + j['t']))):
+            if not nome.endswith('.csv'):
+                continue
+            ncsv += 1
+            rq, nq = leggi_csv_opt(os.path.join(racq, 'ROUND_' + j['t'], nome))
+            rp_, np_ = leggi_csv_opt(os.path.join(racp, 'ROUND_' + j['t'], nome))
+            assert n_ricucite(nq) == 0 and 'ricucite' not in nq and 'RFC 4180' in nq and n_ricucite(np_) == len(rp_) > 0, (nome, nq, np_)
+            assert len(rq) == len(rp_) and all(a.get('InpNewsCurrencies') == 'GBP,USD' for a in rq), nome
+            for a, b in zip(rq, rp_):
+                assert a['InpComment'] == b['InpComment'].replace(j['s'], '"%s"' % j['s']) and '""' not in a['InpComment'], (nome, a['InpComment'])
+                assert {k: v for k, v in a.items() if k != 'InpComment'} == {k: v for k, v in b.items() if k != 'InpComment'}, (nome, a, b)
+    assert ncsv == 48, ncsv   # 24 file R258 x IS/OOS
+    assert Eq['r258']['nullo'] == P['r258']['nullo'] and Eq['r258']['esito'] == P['r258']['esito'] and Eq['r258']['k1'] == P['r258']['k1'], 'T18 esiti diversi fra i due formati'
+    assert 'classe 883' not in txtq and 'ricucite' not in txtq and txtq.count('letti dal parser csv: nessuna ricucitura') == 48, 'T18 nota del formato nuovo'
+    txtp = open(os.path.join(base, 'REFERTO_pulito.md'), encoding='utf-8').read()
+    def norm(t):   # via la nota del CSV (con qualunque conteggio) e il nome della fixture: il resto dev essere IDENTICO
+        t = re.sub(r' \(\d+ con (virgola in un input stringa, ricucite su InpNewsCurrencies|campi fra virgolette RFC 4180, letti dal parser csv: nessuna ricucitura)\)', '', t)
+        return t.replace('_rfc4180', '_pulito').replace('fixture rfc4180', 'fixture pulito')
+    assert norm(txtq) == norm(txtp), 'T18: il referto del formato nuovo differisce da quello del vecchio oltre la nota del CSV'
+    assert re.search(r'\| R258a \| T/GBPUSD/8 \| 8 righe \(8 con campi fra virgolette RFC 4180[^|]*\| 8 righe[^|]*\| VERDE \| VERDE \(\d+ confronti', txtq), 'T18 P0 non confrontato normalmente'
+    # T19 (formato NUOVO + NULLI della riga): il P0 della riga e LEGITTIMO -> si UNISCE (classe 873), NESSUNA esenzione 883,
+    #     anche col P0 del lettore VERDE (a); e con il pin DAVVERO diverso nel CSV il P0 del lettore e ROSSO da solo (b)
+    _riepilogo_con_nulli(os.path.join(racq, 'RIEPILOGO_ROUND_CORTI_A.txt'), NULLI_T19)
+    txt19, E19 = referto(racq, senza_bande=True)
+    N19 = E19['r258']['nullo']
+    assert N19['R258b'] == 'NULLO' and N19['R258g'] == 'NULLO' and N19['R258a'] == 'passa', N19
+    assert 'classe 883' not in txt19 and 'NON unito' not in txt19 and 'RIGA: P0 PIN DAL CSV _IS DIVERSO (1 valori: InpMagic=[795808]' in txt19, 'T19: esenzione 883 scattata sul formato NUOVO'
+    assert E19['r258']['esito'][('R258b', 10.0)] == 'NULLO' and E19['r258']['esito'][('R258a', 70.0)] == P['r258']['esito'][('R258a', 70.0)], E19['r258']['esito'][('R258b', 10.0)]
+    pb = os.path.join(racq, 'ROUND_R258b', 'ABTG_Londra_ORB_GBPUSD_IS_R258b.csv')
+    rr = open(pb, encoding='ascii').read().splitlines()
+    hb = rr[0].split(',')
+    assert rr[1].count('"') >= 6 and ',"GBP,USD",' in rr[1], rr[1][-160:]
+    _scrivi(pb, [rr[0]] + [ln.replace(',795807,', ',795808,') for ln in rr[1:]])
+    assert 'InpMagic' in hb and leggi_csv_opt(pb)[0][0]['InpMagic'] == 795808.0
+    txt19b, E19b = referto(racq, senza_bande=True)
+    riga_b = [ln for ln in txt19b.splitlines() if ln.startswith('| R258b |')][0]
+    assert E19b['r258']['nullo']['R258b'] == 'NULLO' and 'ROSSO: IS riga 1 InpMagic=795808.0 (pin 795807)' in riga_b and 'classe 883' not in txt19b, riga_b[:300]
+    # T20 (contro-esempi del 28/09): (a) formato VECCHIO con DUE campi in eccesso (pin GBP,USD,EUR): ricuciti tutti e due
+    #     su InpNewsCurrencies, InpMagic al suo posto; (b) formato NUOVO con InpComment che contiene una virgola E
+    #     virgolette: letto INTERO, stesso numero di campi, zero ricuciture; tutti e due anche da FILE
+    assert allinea_riga(hh, '1,GBP,USD,EUR,C,7') == (['1', 'GBP,USD,EUR', 'C', '7'], 1)
+    assert allinea_riga(hh, '1,"GBP,USD",C,7') == (['1', 'GBP,USD', 'C', '7'], 0)
+    assert allinea_riga(hh, '1,"GBP,USD","R258A, LDN ""GBPUSD"" H8",7') == (['1', 'GBP,USD', 'R258A, LDN "GBPUSD" H8', '7'], 0)
+    h20 = 'Pass,Profit,Trades,InpNewsCurrencies,InpComment,InpMagic'
+    p20 = os.path.join(base, '_t20_vecchio.csv')
+    _scrivi(p20, [h20, '0,1.50,12,GBP,USD,EUR,R258A LDN GBPUSD H8,795807'])
+    r20, n20 = leggi_csv_opt(p20)
+    assert r20[0]['InpNewsCurrencies'] == 'GBP,USD,EUR' and r20[0]['InpComment'] == 'R258A LDN GBPUSD H8' and r20[0]['InpMagic'] == 795807.0 and r20[0]['Trades'] == 12.0, r20
+    assert n20 == '1 righe' + NOTA_RICUCITE % 1 and n_ricucite(n20) == 1, n20
+    p21 = os.path.join(base, '_t20_nuovo.csv')
+    _scrivi(p21, [h20, '0,1.50,12,"GBP,USD","R258A, LDN ""GBPUSD"" H8",795807'])
+    r21, n21 = leggi_csv_opt(p21)
+    assert r21[0]['InpNewsCurrencies'] == 'GBP,USD' and r21[0]['InpComment'] == 'R258A, LDN "GBPUSD" H8' and r21[0]['InpMagic'] == 795807.0 and r21[0]['Trades'] == 12.0, r21
+    assert n21 == '1 righe' + NOTA_RFC4180 % 1 and n_ricucite(n21) == 0, n21
+    print('AUTOTEST: 20/20 PASS (fixture e referti in %s)' % base)
     return True
 
 
