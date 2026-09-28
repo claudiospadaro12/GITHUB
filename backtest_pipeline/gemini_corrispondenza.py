@@ -133,8 +133,12 @@ def autotest():
     assert not os.environ.get("GEMINI_API_KEY_TEST_FAKE")
     # (5) la richiesta ha system_instruction e i file in ordine
     r = costruisci_richiesta([COMANDO], "d")
-    assert r["system_instruction"]["parts"][0]["text"] == s and "FILE: " + COMANDO in r["contents"][0]["parts"][1]["text"]
-    print("AUTOTEST OK (5 controlli: lista nera, fuori repo, istruzione, chiave assente, richiesta)")
+    testi = [x["text"] for x in r["contents"][0]["parts"]]
+    assert r["system_instruction"]["parts"][0]["text"] == s and any("FILE: " + COMANDO in t for t in testi)
+    # (6) la memoria condivisa va SEMPRE in testa, prima di ogni documento
+    if os.path.exists(MEMORIA):
+        assert "FILE: " + MEMORIA in testi[1], "la memoria condivisa deve essere il primo documento"
+    print("AUTOTEST OK (6 controlli: lista nera, fuori repo, istruzione, chiave assente, richiesta)")
 
 def main():
     ap = argparse.ArgumentParser(description="corrispondenza automatica con Gemini (documenti .md del repo -> risposta in docs/gemini/)")
