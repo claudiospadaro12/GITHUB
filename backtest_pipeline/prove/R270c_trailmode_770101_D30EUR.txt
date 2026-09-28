@@ -26,7 +26,7 @@
 #  InpTrailMode, a essere inerti oggi perche' il ramo vivo e' 1).
 #
 #  >>> COSA GIA' SA L'ARCHIVIO, E COSA NO (scavo fatto PRIMA, non dopo)
-#  `report/LE_MANOPOLE_INERTI_2026-09-23.md` §4.1 ha gia' chiuso questo
+#  `report/LE_MANOPOLE_INERTI_2026-09-23.md` par.4.1 ha gia' chiuso questo
 #  asse sui DUE GEMELLI della stessa famiglia, sulla loro cella VIVA:
 #    - Nasdaq (770260, R200E, RETEST, TP1_R 0,5, tick reali, dep 80000):
 #      InpTrailFixedPts=410 (il preset) PF IS 0,658 / OOS 0,804 contro
@@ -49,7 +49,7 @@
 #  per cui FIXED perde su Dow e Nasdaq potrebbe NON valere sul DAX. Il
 #  commento del sorgente per InpTrailFixedPts dice "piano DAX: es. 410
 #  punti" (r.244) -- il 410 e' un numero NATIVO del DAX, non un numero
-#  del DAX copiato su Dow/Nasdaq come LE_MANOPOLE_INERTI §4.1 ha gia'
+#  del DAX copiato su Dow/Nasdaq come LE_MANOPOLE_INERTI par.4.1 ha gia'
 #  dimostrato per quelle due sedie ("un numero del DAX copiato su
 #  Nasdaq e Dow", r.296). Quindi l'ipotesi "FIXED perde anche qui" NON
 #  e' scontata per trasferibilita': qui, a differenza dei gemelli, il
@@ -85,7 +85,7 @@
 #    IS  n 132 posizioni | PF 1,12634 | DD 5,4362% | Profit 3.789,36
 #    OOS n 193 posizioni | PF 1,39709 | DD 7,2328% | Profit 18.029,58
 #  (fonte: `aperture_r47/ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r47a.csv`)
-#  🔴 VERIFICATO qui, come richiesto: R246g usa la finestra A CORTA
+#  [!] VERIFICATO qui, come richiesto: R246g usa la finestra A CORTA
 #  (2024.09.26-2025.06.09, taglio 0,002), NON la finestra B di questo
 #  file (2024.09.26-2026.06.30, taglio 0,40). NON E' LA STESSA FINESTRA
 #  -> per la regola dichiarata nel compito, il G0 di questo file e'
@@ -144,9 +144,9 @@
 #
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI
 #  ------------------------------------------------------------------
-#  Per analogia coi due gemelli (§ sopra): PREVBAR (1, il vivo) atteso
+#  Per analogia coi due gemelli (par. sopra): PREVBAR (1, il vivo) atteso
 #  VINCENTE o AL MASSIMO PARI; ATR (0) atteso PEGGIORE (Dow: -0,124 di
-#  PF, +2,9 punti di DD sull'analogo); FIXED (2) INCERTO (vedi §
+#  PF, +2,9 punti di DD sull'analogo); FIXED (2) INCERTO (vedi par.
 #  incertezza sopra: il 410 e' nativo qui, a differenza dei gemelli
 #  dove perdeva nettamente) -- previsione scomoda dichiarata: NON
 #  escludo che FIXED possa avvicinarsi o pareggiare PREVBAR sul DAX,
@@ -154,7 +154,7 @@
 #  il contrario (FIXED vince nettamente), sarebbe la prima volta su
 #  tutta la famiglia Apertura e andrebbe riletto con sospetto raddoppiato
 #  (contro-esempio: verificare che il vantaggio non sia concentrato in
-#  poche giornate, stesso test della coda di R208b/§2.3 di
+#  poche giornate, stesso test della coda di R208b/par.2.3 di
 #  ALZARE_IL_PF).
 #
 #  BUCHI DICHIARATI

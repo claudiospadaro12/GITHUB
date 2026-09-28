@@ -41,7 +41,7 @@
 #  Cella VIVA = il preset FTMO `770105_SHORT_FTMO.set` input per input,
 #  con le TRE differenze dichiarate dal file stesso (AllowLong/
 #  AllowShort/Magic invertiti rispetto al long) PIU' le differenze gia'
-#  note fra preset FTMO e cella di contratto D30EUR (SCHEDA_770101 §A.2,
+#  note fra preset FTMO e cella di contratto D30EUR (SCHEDA_770101 par.A.2,
 #  28/09): orario rimappato 10/19 -> 8/17 (server BCM, non FTMO),
 #  InpRiskPercent 2,00 -> 1,00 (di banco, non la firma di Claudio),
 #  InpUsaGuardian true -> false (allineato a R246e/R47a, il Guardian e'
@@ -72,7 +72,7 @@
 #
 #  G0 -- LA CELLA InpTrailStartR=0 (il controllo), CONTRO CHE COSA
 #  ------------------------------------------------------------------
-#  🔴 QUESTA FINESTRA (B, deposito 100000, rischio 1%) NON HA UN CSV
+#  [!] QUESTA FINESTRA (B, deposito 100000, rischio 1%) NON HA UN CSV
 #  short GIA' IN REPO A QUESTA ESATTA COMBINAZIONE: R251 (l'unica misura
 #  del lato short su questa sedia) gira su una finestra DIVERSA (IS
 #  2024.09.26-2025.06.30 / OOS 2025.07.01-2026.06.30, non tagliata al
@@ -83,7 +83,7 @@
 #  in futuro confrontera' contro il CSV che uscira' da qui.
 #  RIFERIMENTO D'ORDINE DI GRANDEZZA (NON un G0, un controllo di buon
 #  senso): R251 "ancora" (= short identico al long, InpTrailStartR=0
-#  implicito, come qui) IS n=152 PF=0,846 DD_fisso=11,19% · OOS n=243
+#  implicito, come qui) IS n=152 PF=0,846 DD_fisso=11,19% - OOS n=243
 #  PF=1,065 DD_fisso=12,74% (deposito 10.000, rischio 1%, finestra
 #  diversa, DD_fisso = Profit/RecoveryFactor/10000 -- METODO DIVERSO
 #  dall'Equity DD% del tester: non sommare le due misure). Attesa
@@ -143,7 +143,7 @@
 #      net_profit: nessuna traccia intra-trade, nessun prezzo
 #      d'ingresso per deal. Si puo' derivare il limite INFERIORE della
 #      MFE -- i PUNTI REALIZZATI a chiusura (= net_profit/volume, dato
-#      D30EUR = 1,00 EUR/punto/lotto, §ATTESA sotto) -- ma NON la MFE
+#      D30EUR = 1,00 EUR/punto/lotto, par.ATTESA sotto) -- ma NON la MFE
 #      vera (il prezzo massimo toccato prima della chiusura). Si
 #      dichiara cosi', non si scrive "MFE" per un numero che non lo e'.
 #  R1 (rischio, classe 804 -- asimmetria): ogni cella con Equity DD% IS
@@ -169,7 +169,7 @@
 #      1,00 e' un picco, non un altopiano: verdetto annullato.
 #  A8 (selezione): centro del tratto contiguo, MAI il picco.
 #  A9 (banda di rumore d'esecuzione): un vantaggio di PF < 10,5%
-#      relativo sul controllo (soglia gia' fissata da R208b sul 1° stop
+#      relativo sul controllo (soglia gia' fissata da R208b sul 1  stop
 #      vero FTMO, 22/09, riusata identica per la stessa sedia) e' dentro
 #      il rumore e NON si dichiara vantaggio, anche con l'altopiano.
 #  A5 (asse inerte): se tutte le celle cadono sotto A3, si scrive
@@ -204,15 +204,15 @@
 #  193+132 posizioni). Risultato: su 361 deal vincenti, SOLO 59 (16,3%)
 #  chiudono entro 5 punti indice dall'ingresso (punti realizzati =
 #  net_profit/volume, perche' D30EUR = 1,00 EUR/punto/lotto e
-#  commissione 0,00: § classe 844 sopra); mediana dei vincenti 24,4
-#  punti (P25 8,1 · P75 43,6). I perdenti (84 deal) hanno mediana -54,7
-#  punti (P25 -83,9 · P75 -29,4). >>> QUESTO E' UN LIMITE INFERIORE
+#  commissione 0,00: par. classe 844 sopra); mediana dei vincenti 24,4
+#  punti (P25 8,1 - P75 43,6). I perdenti (84 deal) hanno mediana -54,7
+#  punti (P25 -83,9 - P75 -29,4). >>> QUESTO E' UN LIMITE INFERIORE
 #  della MFE vera (il deal puo' aver toccato un prezzo migliore prima di
 #  richiudere): NON prova che il trailing "tagli" i vincitori piu' di
 #  quanto ne protegga -- prova solo che una minoranza (16,3%) dei
 #  vincitori chiude vicinissima all'ingresso, non la maggioranza come il
 #  compito di apertura del round sembrava presupporre dai tre episodi di
-#  campo (§ NOTA sotto). NON e' lo stesso dato del lato short (nessun
+#  campo (par. NOTA sotto). NON e' lo stesso dato del lato short (nessun
 #  per-trade short a questa finestra): si usa come indizio di ordine di
 #  grandezza sulla STESSA gestione (stesso codice di trailing), non come
 #  misura dello short.

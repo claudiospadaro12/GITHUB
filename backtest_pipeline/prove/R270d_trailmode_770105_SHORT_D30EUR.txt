@@ -18,7 +18,7 @@
 #  ------------------------------------------------------------------
 #  Sullo SHORT questo asse non e' mai stato misurato su NESSUNA sedia
 #  della famiglia Apertura (i due riferimenti di LE_MANOPOLE_INERTI
-#  §4.1 -- R200E Nasdaq e dow_trailing.csv -- sono entrambi sul lato
+#  par.4.1 -- R200E Nasdaq e dow_trailing.csv -- sono entrambi sul lato
 #  LONG). R251 (25/09, `report/REFERTO_R251_2026-09-25.md`) ha
 #  misurato R251c = InpUseTrailing ON/OFF (interruttore generale, non
 #  la scelta del MECCANISMO): trailing SPENTO peggiora IS (PF 0,846 ->
@@ -43,7 +43,7 @@
 #
 #  G0 -- LA CELLA InpTrailMode=1 (il controllo)
 #  ------------------------------------------------------------------
-#  🔴 STESSO BUCO DICHIARATO DI R270b: nessun CSV short esiste in repo
+#  [!] STESSO BUCO DICHIARATO DI R270b: nessun CSV short esiste in repo
 #  a questa esatta finestra/deposito. NESSUN G0 esatto possibile. La
 #  cella InpTrailMode=1 di QUESTO file deve pero' ridare LO STESSO n e
 #  LO STESSO Profit/PF/DD della cella InpTrailStartR=0 di R270b (STESSA

@@ -2,24 +2,24 @@
 #  EA: ABTG_DAX_Apertura_EU          (sedia 770101 LONG, IN CAMPO su FTMO)
 #  R270a -- asse InpTrailStartR sul LATO LONG.
 #
-#  🛑🛑 FILE RITIRATO. NON SI LANCIA, E NON PERCHE' E' DIFFICILE:
-#  🛑🛑 PERCHE' LA RISPOSTA E' GIA' IN REPO, SULLA STESSA SEDIA, SULLA
-#  🛑🛑 STESSA GEOMETRIA, CON IS E OOS SEPARATI, TICK REALI.
+#  [STOP][STOP] FILE RITIRATO. NON SI LANCIA, E NON PERCHE' E' DIFFICILE:
+#  [STOP][STOP] PERCHE' LA RISPOSTA E' GIA' IN REPO, SULLA STESSA SEDIA, SULLA
+#  [STOP][STOP] STESSA GEOMETRIA, CON IS E OOS SEPARATI, TICK REALI.
 #
 #  Resta in prove/ apposta, come R200b (Nasdaq): e' il posto dove il
 #  prossimo che si chiede "InpTrailStartR sul lato long della 770101 e'
 #  mai stato provato?" andra' a guardare. La risposta e' SI'.
 # =====================================================================
 #
-#  🏺 DOVE STA LA RISPOSTA
+#  [archivio] DOVE STA LA RISPOSTA
 #  ------------------------
 #  backtest_pipeline/risultati_archivio/Walkforward_Aperture/
 #      DAX_I_trailing_IS.csv / DAX_I_trailing_OOS.csv
 #      REFERTO_TRAILING_SOGLIA.md (notte 07-08/08/2026)
 #  Griglia 5x5: InpTrailTF (M1..M5) x InpTrailStartR (0 / 0,25 / 0,50 /
 #  0,75 / 1,00). 25 passate per finestra, IS e OOS SEPARATI, TICK REALI.
-#  Configurazione dichiarata nel referto: "RETEST · range 35 · buffer
-#  500 · offset 200 · SOLO LONG · 1%" -- confrontata riga per riga con
+#  Configurazione dichiarata nel referto: "RETEST - range 35 - buffer
+#  500 - offset 200 - SOLO LONG - 1%" -- confrontata riga per riga con
 #  la cella di contratto R47a/R246e (InpEntryMode=2, InpRangeMinutes=35,
 #  InpBufferPoints=500, InpRetestOffsetPts=200, InpAllowLong=true,
 #  InpAllowShort=false, InpRiskPercent=1): STESSA GEOMETRIA, non un
@@ -27,7 +27,7 @@
 #  (colonne InpEntryMode=2, InpRangeMinutes=15 pero' -- vedi RILIEVO
 #  sotto) e nel corpo del referto.
 #
-#  📊 FUORI CAMPIONE (OOS), riga M5 = il TF SCHIERATO oggi
+#  [dati] FUORI CAMPIONE (OOS), riga M5 = il TF SCHIERATO oggi
 #  InpTrailStartR:      0,00      0,25      0,50      0,75      1,00
 #  Profitto OOS      +1810,72  +1635,86  +1020,05   +656,35   +258,67
 #  PF OOS               1,415     n.d.      n.d.      n.d.     1,031
@@ -36,7 +36,7 @@
 #      PROFITTO SCENDE IN MODO MONOTONO LUNGO L'ASSE IN OGNI RIGA.
 #      Sulla riga M5: PF 1,415 -> 1,031, DD 6,71% -> 9,93%.
 #
-#  📊 IN CAMPIONE DICE IL CONTRARIO -- l'ottavo ribaltamento IS->OOS
+#  [dati] IN CAMPIONE DICE IL CONTRARIO -- l'ottavo ribaltamento IS->OOS
 #  gia' misurato in casa (Spearman per riga fra -0,90 e -0,30, globale
 #  sulle 25 celle -0,44). Chi avesse scelto sull'IS avrebbe schierato
 #  M2/1,00 (+1172,94 in campione) e avrebbe fatto fuori campione
@@ -44,7 +44,7 @@
 #  lasciati sul tavolo. E' la trappola che l'Emendamento della Finestra
 #  (CLAUDE.md, regola A) esiste apposta per evitare.
 #
-#  🔒 E C'E' L'ARGOMENTO CHE CHIUDE LA PORTA, ED E' ALGEBRICO --
+#  [pin] E C'E' L'ARGOMENTO CHE CHIUDE LA PORTA, ED E' ALGEBRICO --
 #  ricopiato dal gemello R200b (Nasdaq), e vale identico su questo EA:
 #  mql5/Experts/ABTG_DAX_Apertura_EU.mq5 r.2440:
 #      bool trailArmato = (InpTrailStartR <= 0) || (profR >= InpTrailStartR);
@@ -54,7 +54,7 @@
 #  Nasdaq di R200b) dicono che allontanarsi da zero ALZA il DD e ABBASSA
 #  il PF. LA DIREZIONE CHE MIGLIORA QUESTO ASSE NON ESISTE.
 #
-#  ⚠️ RILIEVO, dichiarato e non nascosto (contro-esempio costruito prima
+#  [att] RILIEVO, dichiarato e non nascosto (contro-esempio costruito prima
 #  di chiudere il file, regola del 10/09): la riga d'intestazione del
 #  CSV DAX_I_trailing_OOS.csv porta InpRangeMinutes=15, non 35, sulla
 #  RIGA DI DATI del Pass 0 letta con `head`. Non e' una contraddizione
@@ -74,7 +74,7 @@
 #  passate) non e' giustificato da un dubbio che il referto stesso non
 #  ha (vedi controllo di sanita' del par. 0 del referto).
 #
-#  ⚖️ LA "TESI NUOVA" di questo round (28/09), e perche' NON basta
+#  [regola] LA "TESI NUOVA" di questo round (28/09), e perche' NON basta
 #  Il compito che apre R270 porta tre osservazioni di campo (FTMO,
 #  24-28/09): vinti minuscoli (+6,5 pt in 43s, +3,0 pt in 9', +5,4 pt in
 #  21') contro un perso a stop pieno (-143 pt, 25/09). MA il referto
@@ -88,14 +88,14 @@
 #  >>> NON C'E' UNA TESI NUOVA che giustifichi una griglia fresca: c'e'
 #      un episodio che il round di agosto aveva gia' previsto per nome.
 #
-#  ✅ LA RISPOSTA, IN UNA RIGA
+#  [ok] LA RISPOSTA, IN UNA RIGA
 #  InpTrailStartR = 0 (il valore in campo, lato LONG) E' GIA' IL VALORE
 #  GIUSTO. Non e' "non misurato": e' misurato due volte (DAX e, per
 #  verso, Nasdaq), fuori campione, tick reali, con IS che dice il
 #  contrario (quindi non e' un caso: e' la trappola che l'Emendamento
 #  della Finestra esiste per riconoscere). Nessuna casella libera qui.
 #
-#  🕳️ L'UNICO BUCO CHE RESTA, dichiarato
+#  [buco] L'UNICO BUCO CHE RESTA, dichiarato
 #  Il referto di agosto gira su una finestra piu' corta (taglio al 40%
 #  ma dati fino a inizio agosto, non fino al 2026.06.30 della cella di
 #  contratto odierna) e su un binario dell'EA di prima della toppa per
@@ -207,6 +207,6 @@
 #  InpMagic=786321||786321||0||786321||N
 #  InpTrailStartR=0.0||0||0.5||1.5||Y
 #  # 4 celle -- se qualcuno la rilancia sapendo gia' l'esito:
-#  #   la cella 0 deve dare IS n 132 PF 1,12634 DD 5,4362 · OOS n 193
+#  #   la cella 0 deve dare IS n 132 PF 1,12634 DD 5,4362 - OOS n 193
 #  #   PF 1,39709 DD 7,2328 (contro aperture_r47/..._{IS,OOS}_r47a.csv)
 # ---------------------------------------------------------------------
