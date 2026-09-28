@@ -36286,3 +36286,17 @@ il **picco OOS**, e la regola di casa e' "mai il picco": la parola "bordo" la fa
 il suo stesso numero dicesse.
 Regola: il giudizio centro/bordo/picco si da' **sull'asse intero stampato** (tutte le celle, IS e OOS), e se la cella
 e' il massimo di una finestra la parola e' "picco" anche quando in un'altra griglia (qui il C8) sta sul bordo.
+
+### CLASSE 908 — un parametro `[string[]]` passato come `a,b` a `powershell -File`: arriva come UNA stringa con la virgola dentro, e lo script cerca un file che non esiste (28/09/2026, verificatore stringhe su `RIGA_LEGGI_GIORNALE_REALE_DAX_25-09.txt` @ `9a8473ca`) — parente della classe 7 (`-Suffisso ""`)
+Caso: la riga lanciava `& powershell -NoProfile -ExecutionPolicy Bypass -File $S -Giorni 20260922,20260925` su uno script
+con `param([string[]]$Giorni)`. Con `-File` gli argomenti NON passano dal parser di PowerShell: `20260922,20260925` arriva
+come **un solo elemento** `'20260922,20260925'`, e lo script (ASCII puro, parse 0 errori, due deterministici puliti)
+cercava `MQL5\Logs\20260922,20260925.log` e stampava **"ASSENTE"** — cioe' "il reale quel giorno non ha giornale",
+la conclusione sbagliata sul caso che la riga doveva chiudere. Riprodotto con `pwsh -File` in locale prima di scriverlo.
+Nella stessa riga, secondo difetto dello stesso tipo "nessuno lo prova sul formato vero": la regex dell'ora
+`^\S+\s+(\d\d):` non prende MAI una riga vera del giornale MT5 (`ME<TAB>0<TAB>15:17:39.196<TAB>...`: dopo il codice c'e'
+il livello `0`), e il conteggio per ora usciva vuoto in silenzio. I referti CODA_09 tolgono i TAB (`ME015:17:39.196`),
+quindi la forma vera va ricostruita, non copiata dal referto.
+Regola: (a) mai elenchi `a,b` come argomento di `-File`: o si lascia il default nello script, o lo script spezza da solo
+(`$x = @($x | ForEach-Object { $_ -split ',' })`) e valida il formato di ogni elemento; (b) ogni regex che legge un
+giornale MT5 si prova su una riga col formato a TAB (codice, livello, ora, sorgente, messaggio) prima della consegna.
