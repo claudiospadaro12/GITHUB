@@ -49,8 +49,20 @@ PC di backtest `DESKTOP-H4D7CAJ` (regola del 21/09).
   910). Si manda SOLO dopo la riga C (una alla volta, MT5 chiuso in mezzo). 🔴 Fino al lancio NON si tocca
   `ABTG_DAX_Apertura_EU.mq5` ne' `ABTG_PausaGuardian.mqh` su `lavoro` (il driver compila dal ramo, classe 892).
 
-**Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; gli zip A → R255 → C → D (una riga alla volta, MT5
-chiuso in mezzo), poi C2; firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
+**28/09 pomeriggio — R255 LETTO (short Dow a due orologi): NULLO alla lettera, BOCCIATO con l'emendamento.**
+- Archivio `risultati_archivio/ROUND_R255_SHORT_DOW_INFASE_2026-09-28/` (24/24 job, 52 min, motore = pin). Lettura A
+  (`report/LETTURA_R255_2026-09-28.md`, criterio alla lettera): **19 file su 24 NULLI per S1**, ognuno per UNA uscita alla
+  riapertura CME dopo un festivo USA (09/01/2025 lutto nazionale, Juneteenth 2025, Memorial Day 2026): classe **912**.
+- Lettura B (`report/LETTURA_R255_2026-09-28_B_EMENDATA.md`, `leggi_r255.py --s1-festivi`, default SPENTA; PASS del cancello
+  `1da84b9f`): S1 emendata DOPO i numeri (classe 900) → **firma di Claudio**. Con la firma: G0 tutti VERDI (ancora = R54a 73/73);
+  **770212 (ancora) BOCCIATA PER RISCHIO** (R2 OOS in fase DD 5,13-5,31% contro tetto 4,27%, n 46; FTMO-DOC PF 0,58/0,51);
+  nudo/parz0/tp15 bocciate per rischio; **stH8** (OOS n 46 PF 2,40 DD 1,43%) e **stH12** (n 39) SOSPESE con indizio favorevole,
+  merito sospeso, rischio NON violato (mai "passato"). Certificato: NON ANCORA MISURATO (mancano gemelli NASUSD/SPXUSD e TF).
+- Le uscite esentate stanno FUORI dalla curva in fase (0 in tutte le configurazioni): la firma decide SE le curve si leggono,
+  non QUANTO valgono (classe 772). `mc_challenge_ftmo_v2.py --r255` NON lanciato: la 770212 e' nulla (A) o bocciata (B).
+
+**Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
+chiuso in mezzo); firma dell'emendamento S1 di R255; firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 risposta di Jonas (FTMO) alle tre domande; orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
 
 ## 🗓️ 07/09 — GIORNATA DI VERDETTI: due piste CHIUSE con numeri nostri
