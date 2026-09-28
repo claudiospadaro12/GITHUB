@@ -71,6 +71,10 @@ Saldo derivato ≈ **73.470** (da 75.971; il numero esatto lo stampa la sonda de
 - perdita di oggi ≈ 2.370 < pausa 2.800: **NESSUN BLOCCO ATTIVO**. 770511 SuperWave (0-24h) puo' entrare stanotte; 770411 alle 09:00
   FTMO, DAX alle 10:00, USA alle 16:30.
 Decisione di Claudio (taglie/conto = sua): congelare (Algo Trading OFF su `C:\FTMO`), ridurre il rischio, o lasciare. Niente eseguito.
+✍️ **DECISO da Claudio alle ~21:40 (testuale): "LASCIAMO APERTO COSI, NON CONGELIAMO NULLA, TANTO MEZZANOTTE E' TRA POCO E SI
+RIAVVIA LA GIORNATA."** Le sette sedie restano accese a 2,00%. Detto a Claudio prima della decisione: il reset di mezzanotte
+(01:00 server) azzera SOLO il contatore giornaliero; lo spazio al pavimento del Guardian (≈911 EUR, totale STATICO dal saldo
+iniziale) NON si riavvia. Sonda 03:30 = primo numero esatto.
 
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
