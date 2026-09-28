@@ -90,6 +90,12 @@ il vivo oltre il rumore, 1,5-2R pari; 🔴 **ma la cella SENZA PARZIALE (`InpTP1
 cella del preset FTMO: PF OOS 0,957, Equity DD 12,31% a 1% (dal picco; muro FTMO dal saldo): sedia bocciata per rischio a questa
 cella, motore NON ANCORA MISURATO; conferma R251. Due PDF per Gemini in `docs/PER_GEMINI_RISULTATO_1/2_*`.
 
+**28/09 ~00:00 — Claudio a letto: «FATE TUTTO IN BACKGROUND. L'OBIETTIVO E' AVERE PIU' SEDIE PER LE PROP».** In corsa di notte
+(un solo agente, Opus, misure che decidono): le due misure A COSTO ZERO dai per-trade gia' in archivio proposte da Gemini e
+riscritte in `docs/RISPOSTA_A_GEMINI_R270_2026-09-28.md`: (1) `ClosePct=0` contro il vivo sul long 770101, esposizione o selezione
+(stesse 132/193 posizioni); (2) short 770105: quanti giorni rotti al ribasso SENZA retest e il loro P/L virtuale. Referto atteso
+per le 06:30. Campo FTMO: tutto aperto a 2,00% per decisione di Claudio; sonda 03:30 = saldo esatto.
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 risposta di Jonas (FTMO) alle tre domande; orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
