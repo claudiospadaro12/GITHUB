@@ -1,0 +1,197 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU          (sedia 770105 SHORT, IN CAMPO su FTMO)
+#  R270d -- asse InpTrailMode sul LATO SHORT (ATR / PREVBAR / FIXED),
+#  con InpTrailStartR fissato al valore vivo (0). Gemello di R270c,
+#  come R270b e' gemello di R270a -- file separato per la regola dei
+#  due lati (25/08): ogni analisi misura SEMPRE i due lati, in due file.
+#  D30EUR M5 -- TICK REALI -- deposito 100000 -- rischio 1,00 (di banco,
+#  NON 2,00: NESSUNA TAGLIA SI PROPONE).
+#  Scritto il 28/09/2026. Criteri congelati PRIMA dei numeri.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400, NON su nessun conto (regola 21/09).
+# =====================================================================
+#
+#  PERCHE' QUESTA MANOPOLA, SU QUESTO LATO -- leggi prima R270c (stessa
+#  cartella, stesso ragionamento sul meccanismo dei tre modi, sui
+#  gemelli Dow/Nasdaq e sull'incertezza del FIXED sul DAX). Qui solo
+#  cio' che e' specifico dello SHORT.
+#  ------------------------------------------------------------------
+#  Sullo SHORT questo asse non e' mai stato misurato su NESSUNA sedia
+#  della famiglia Apertura (i due riferimenti di LE_MANOPOLE_INERTI
+#  §4.1 -- R200E Nasdaq e dow_trailing.csv -- sono entrambi sul lato
+#  LONG). R251 (25/09, `report/REFERTO_R251_2026-09-25.md`) ha
+#  misurato R251c = InpUseTrailing ON/OFF (interruttore generale, non
+#  la scelta del MECCANISMO): trailing SPENTO peggiora IS (PF 0,846 ->
+#  0,626, DD_fisso 11,19% -> 24,17%, R1/R2/R3 tutti violati) e migliora
+#  OOS (PF 1,065 -> 1,124, Profit +254,74 -> +1.006,41). Questo NON
+#  risponde alla domanda di questo file (quale MECCANISMO fra i tre
+#  attivi, non se il trailing va tenuto acceso: R251c gia' dice che
+#  SPEGNERLO del tutto e' rischioso in IS, quindi qui InpUseTrailing
+#  resta TRUE come nel preset -- non si riapre quel confronto).
+#
+#  IL DISEGNO -- come R270c, con lato invertito
+#  ---------------------------------------------------------------
+#  Cella VIVA = R270b input per input (short, InpAllowLong=false,
+#  InpAllowShort=true, magic diverso), con InpTrailStartR=0 FISSO e
+#  InpTrailMode come unico asse: 0/1/2. InpTrailAtrMult=2,0 e
+#  InpTrailFixedPts=410 pinnati (gia' nel preset).
+#  3 celle x 2 finestre = 6 passate.
+#
+#  FINESTRA E DEPOSITO -- identici a R270b/R270c: R246e (finestra B
+#  piena), non R246g/h. @DAQUANDO 2024.09.26 @FINOA 2026.06.30
+#  @FRAZIONEIS 0.40, deposito 100000 in riga di lancio.
+#
+#  G0 -- LA CELLA InpTrailMode=1 (il controllo)
+#  ------------------------------------------------------------------
+#  🔴 STESSO BUCO DICHIARATO DI R270b: nessun CSV short esiste in repo
+#  a questa esatta finestra/deposito. NESSUN G0 esatto possibile. La
+#  cella InpTrailMode=1 di QUESTO file deve pero' ridare LO STESSO n e
+#  LO STESSO Profit/PF/DD della cella InpTrailStartR=0 di R270b (STESSA
+#  configurazione, e' letteralmente lo stesso punto nello spazio dei
+#  parametri raggiunto da due file diversi): questo e' un G0 INTERNO al
+#  round, verificabile SOLO dopo che R270b e' girato, e va controllato
+#  PRIMA di leggere le altre due celle di questo file. Se R270b gira
+#  prima di R270d (ordine consigliato, vedi il referto del round), il
+#  confronto e' immediato; se R270d gira prima, il confronto si fa a
+#  posteriori quando arriva R270b.
+#
+#  S1B INVARIANTE DEL CAMPIONE -- identico a R270c: InpTrailMode e'
+#  letto solo in gestione (r.2461/2474), il numero di posizioni deve
+#  essere COSTANTE nelle 3 celle (uguale a quello della cella 0 di
+#  R270b).
+#
+#  G1 GEMELLE -- non eseguito, stessa ragione di R270b/c.
+#  CLASSE 844 -- k atteso 0 su D30EUR, stessa formula/fonte di R270b.
+#
+#  CRITERI CONGELATI ORA
+#  ------------------------------------------------------------------
+#  M1: PF OOS della cella >= PF OOS della cella 0 di QUESTO file + 0,10
+#      (nessun G0 esterno, come R270b), richiesto solo su n_OOS >= 150.
+#  M2 (MFE): [NON MISURABILE], stessa ragione di R270b/c.
+#  R1 (rischio, classe 804): soglia 9,00% Equity DD%, identica a
+#      R270b/c per coerenza interna al round. VIOLATO = fatto a
+#      qualunque n; sotto soglia si scrive "R1 NON VIOLATO su n = X".
+#  A1/A3/A4/A8/A9/A5/A6/A10: identici a R270b (nessun G0 esterno ->
+#      soglia standard 1,10 IS e OOS, non lo scarto di R208b/R270c).
+#  Emendamento della finestra: identico a R270b/c.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#  ------------------------------------------------------------------
+#  Stessa incertezza dichiarata in R270c per il meccanismo (FIXED
+#  potenzialmente competitivo perche' 410 e' nativo del DAX), MOLTIPLICATA
+#  per l'incertezza di R270b sul verso long/short (R251 ha gia' mostrato
+#  un ribaltamento fra i due lati su un'altra leva d'uscita della stessa
+#  sedia). >>> QUESTO E' IL FILE CON L'ATTESA PIU' INCERTA DEL ROUND:
+#  non si azzarda una direzione. Si dichiara PRIMA che l'esito potrebbe
+#  andare in QUALUNQUE dei tre versi (PREVBAR vince come sui gemelli
+#  long; FIXED vince per la prima volta grazie al numero nativo; oppure
+#  nessuno dei tre supera 1,10 e l'asse e' inerte sul lato short) -- e
+#  che qualunque risultato E' COMUNQUE UNA MISURA, perche' oggi la
+#  risposta e' zero su tutti e tre i punti.
+#
+#  BUCHI DICHIARATI
+#  - Nessun G0 esterno (stesso buco di R270b).
+#  - MFE vera: NON MISURABILE.
+#  - Prova di regime: assente.
+#  - COSTO 40x: invariato.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=false
+InpAllowShort=true
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpTrailStartR=0
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpSpaceMode=0
+InpSpaceTF=16388
+InpSpaceMinR=0.0
+InpSpaceMaxR=0.0
+InpSpaceEma1=14
+InpSpaceEma2=50
+InpSpaceEma3=100
+InpSpaceEma4=200
+InpSpaceUseST=false
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=786324
+#
+# --- L'UNICO ASSE (ENUM: 3 celle x 2 finestre = 6 passate)
+#     0=ATR / 1=PREVBAR (vivo) / 2=FIXED
+InpTrailMode=1||0||1||2||Y
+# ======================================================================

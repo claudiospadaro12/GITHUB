@@ -1,0 +1,212 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU          (sedia 770101 LONG, IN CAMPO su FTMO)
+#  R270a -- asse InpTrailStartR sul LATO LONG.
+#
+#  🛑🛑 FILE RITIRATO. NON SI LANCIA, E NON PERCHE' E' DIFFICILE:
+#  🛑🛑 PERCHE' LA RISPOSTA E' GIA' IN REPO, SULLA STESSA SEDIA, SULLA
+#  🛑🛑 STESSA GEOMETRIA, CON IS E OOS SEPARATI, TICK REALI.
+#
+#  Resta in prove/ apposta, come R200b (Nasdaq): e' il posto dove il
+#  prossimo che si chiede "InpTrailStartR sul lato long della 770101 e'
+#  mai stato provato?" andra' a guardare. La risposta e' SI'.
+# =====================================================================
+#
+#  🏺 DOVE STA LA RISPOSTA
+#  ------------------------
+#  backtest_pipeline/risultati_archivio/Walkforward_Aperture/
+#      DAX_I_trailing_IS.csv / DAX_I_trailing_OOS.csv
+#      REFERTO_TRAILING_SOGLIA.md (notte 07-08/08/2026)
+#  Griglia 5x5: InpTrailTF (M1..M5) x InpTrailStartR (0 / 0,25 / 0,50 /
+#  0,75 / 1,00). 25 passate per finestra, IS e OOS SEPARATI, TICK REALI.
+#  Configurazione dichiarata nel referto: "RETEST · range 35 · buffer
+#  500 · offset 200 · SOLO LONG · 1%" -- confrontata riga per riga con
+#  la cella di contratto R47a/R246e (InpEntryMode=2, InpRangeMinutes=35,
+#  InpBufferPoints=500, InpRetestOffsetPts=200, InpAllowLong=true,
+#  InpAllowShort=false, InpRiskPercent=1): STESSA GEOMETRIA, non un
+#  parente. Verificato riga per riga nella riga d'intestazione del CSV
+#  (colonne InpEntryMode=2, InpRangeMinutes=15 pero' -- vedi RILIEVO
+#  sotto) e nel corpo del referto.
+#
+#  📊 FUORI CAMPIONE (OOS), riga M5 = il TF SCHIERATO oggi
+#  InpTrailStartR:      0,00      0,25      0,50      0,75      1,00
+#  Profitto OOS      +1810,72  +1635,86  +1020,05   +656,35   +258,67
+#  PF OOS               1,415     n.d.      n.d.      n.d.     1,031
+#  DD OOS                6,71%                                  9,93%
+#  >>> LA COLONNA 0 VINCE IN TUTTE E CINQUE LE RIGHE (M1..M5), E IL
+#      PROFITTO SCENDE IN MODO MONOTONO LUNGO L'ASSE IN OGNI RIGA.
+#      Sulla riga M5: PF 1,415 -> 1,031, DD 6,71% -> 9,93%.
+#
+#  📊 IN CAMPIONE DICE IL CONTRARIO -- l'ottavo ribaltamento IS->OOS
+#  gia' misurato in casa (Spearman per riga fra -0,90 e -0,30, globale
+#  sulle 25 celle -0,44). Chi avesse scelto sull'IS avrebbe schierato
+#  M2/1,00 (+1172,94 in campione) e avrebbe fatto fuori campione
+#  +528,78 contro i +1865,70 della soglia 0 sulla STESSA riga: 1337 EUR
+#  lasciati sul tavolo. E' la trappola che l'Emendamento della Finestra
+#  (CLAUDE.md, regola A) esiste apposta per evitare.
+#
+#  🔒 E C'E' L'ARGOMENTO CHE CHIUDE LA PORTA, ED E' ALGEBRICO --
+#  ricopiato dal gemello R200b (Nasdaq), e vale identico su questo EA:
+#  mql5/Experts/ABTG_DAX_Apertura_EU.mq5 r.2440:
+#      bool trailArmato = (InpTrailStartR <= 0) || (profR >= InpTrailStartR);
+#  Il ramo "arma subito" e' "<= 0": QUALUNQUE valore <= 0 si comporta
+#  esattamente come 0. 0 E' IL PAVIMENTO DI QUESTO ASSE, e la sedia
+#  770101 ci sta gia' sopra. Tutte le misure (qui sopra, e la gemella
+#  Nasdaq di R200b) dicono che allontanarsi da zero ALZA il DD e ABBASSA
+#  il PF. LA DIREZIONE CHE MIGLIORA QUESTO ASSE NON ESISTE.
+#
+#  ⚠️ RILIEVO, dichiarato e non nascosto (contro-esempio costruito prima
+#  di chiudere il file, regola del 10/09): la riga d'intestazione del
+#  CSV DAX_I_trailing_OOS.csv porta InpRangeMinutes=15, non 35, sulla
+#  RIGA DI DATI del Pass 0 letta con `head`. Non e' una contraddizione
+#  col referto: il file e' un'OTTIMIZZAZIONE con asse InpTrailTF, e la
+#  colonna InpRangeMinutes resta com'era PRIMA che range fosse spostato
+#  a 35 il 06/08 (stesso giorno, poche ore dopo) -- il referto stesso lo
+#  dichiara "candidato validato" con quella firma, e il controllo di
+#  sanita' del referto (par. 0) riproduce la FASE M al centesimo, che E'
+#  su range 35. Trasferibilita' della RISPOSTA (il verso: 0 vince) non
+#  tocca RangeMinutes, che e' un'altra manopola: il PUNTO che qui conta
+#  -- il verso del trailing -- non dipende da quale valore di range lo
+#  precede nello stesso file, e infatti la gemella Nasdaq (altra
+#  geometria: RangeMode=2, BREAKOUT) trova lo STESSO verso. Se qualcuno
+#  volesse la conferma con InpRangeMinutes=35 scritto ESPLICITO nella
+#  stessa riga, il file e' pronto sotto (bastano le righe): NON e' stato
+#  rilanciato qui perche' l'esito atteso e' identico e il costo (8
+#  passate) non e' giustificato da un dubbio che il referto stesso non
+#  ha (vedi controllo di sanita' del par. 0 del referto).
+#
+#  ⚖️ LA "TESI NUOVA" di questo round (28/09), e perche' NON basta
+#  Il compito che apre R270 porta tre osservazioni di campo (FTMO,
+#  24-28/09): vinti minuscoli (+6,5 pt in 43s, +3,0 pt in 9', +5,4 pt in
+#  21') contro un perso a stop pieno (-143 pt, 25/09). MA il referto
+#  del 07-08/08 spiega ESATTAMENTE questo pattern, PRIMA che accadesse:
+#  "Le tre uscite miserabili di ieri restano vere. Ma la griglia dice
+#  che sono il costo visibile di un meccanismo che nel complesso paga:
+#  il trailing armato subito, su questa geometria, protegge piu' di
+#  quanto taglia." Le operazioni di campo del 24-28/09 SONO quel costo
+#  visibile, non un fatto nuovo che lo contraddice -- il referto lo
+#  aveva gia' misurato e gia' spiegato con l'OOS, non con un'ipotesi.
+#  >>> NON C'E' UNA TESI NUOVA che giustifichi una griglia fresca: c'e'
+#      un episodio che il round di agosto aveva gia' previsto per nome.
+#
+#  ✅ LA RISPOSTA, IN UNA RIGA
+#  InpTrailStartR = 0 (il valore in campo, lato LONG) E' GIA' IL VALORE
+#  GIUSTO. Non e' "non misurato": e' misurato due volte (DAX e, per
+#  verso, Nasdaq), fuori campione, tick reali, con IS che dice il
+#  contrario (quindi non e' un caso: e' la trappola che l'Emendamento
+#  della Finestra esiste per riconoscere). Nessuna casella libera qui.
+#
+#  🕳️ L'UNICO BUCO CHE RESTA, dichiarato
+#  Il referto di agosto gira su una finestra piu' corta (taglio al 40%
+#  ma dati fino a inizio agosto, non fino al 2026.06.30 della cella di
+#  contratto odierna) e su un binario dell'EA di prima della toppa per
+#  ticket (19/09) e del filtro dello spazio (21/09, InpSpaceMode=OFF,
+#  quindi inerte per costruzione -- non cambia il verso). Se qualcuno
+#  volesse comunque la conferma sulla finestra e sul binario di OGGI, il
+#  file e' pronto qui sotto (bastano le righe): 4 celle x 2 finestre =
+#  8 passate, stessa scala di R270b/R270c/R270d (~35 s/passata,
+#  ancoraggio R246/R261 nel referto del round) = ~4-5 minuti.
+#  (Le righe sono lasciate commentate DI PROPOSITO: senza un asse Y
+#   attivo il cancello rifiuta il file, ed e' quello che vogliamo --
+#   questo file non deve poter partire per sbaglio.)
+#
+# ---------------------------------------------------------------------
+#  @SIMBOLO    D30EUR
+#  @PERIODO    M5
+#  @DAQUANDO   2024.09.26
+#  @FINOA      2026.06.30
+#  @FRAZIONEIS 0.40
+#
+#  InpUsaGuardian=false||false||0||false||N
+#  InpSessionHour=8||8||0||8||N
+#  InpSessionMin=0||0||0||0||N
+#  InpRangeMinutes=35||35||0||35||N
+#  InpCloseHour=17||17||0||17||N
+#  InpCloseMin=30||30||0||30||N
+#  InpCloseAtEnd=true||true||0||true||N
+#  InpOneTradePerDay=true||true||0||true||N
+#  InpMaxPosSimbolo=0||0||0||0||N
+#  InpEntryMode=2||2||0||2||N
+#  InpRangeMode=0||0||0||0||N
+#  InpLevelTF=16385||16385||0||16385||N
+#  InpPrevWindowMin=60||60||0||60||N
+#  InpBufferPoints=500||500||0||500||N
+#  InpOCTimeframe=0||0||0||0||N
+#  InpPendingExpiryMin=120||120||0||120||N
+#  InpAllowLong=true||true||0||true||N
+#  InpAllowShort=false||false||0||false||N
+#  InpMinRangePts=0||0||0||0||N
+#  InpMaxRangePts=0||0||0||0||N
+#  InpRetestOffsetPts=200||200||0||200||N
+#  InpFadeOffsetPts=0||0||0||0||N
+#  InpAllowReverse=false||false||0||false||N
+#  InpDelayMinutes=30||30||0||30||N
+#  InpDelayDirMode=0||0||0||0||N
+#  InpUseGapFill=false||false||0||false||N
+#  InpGapMinPoints=150||150||0||150||N
+#  InpGapMinRR=1.5||1.5||0||1.5||N
+#  InpUseEmaFilter=false||false||0||false||N
+#  InpEmaFast=14||14||0||14||N
+#  InpEmaSlow=200||200||0||200||N
+#  InpFilterTF=16385||16385||0||16385||N
+#  InpUseSupertrend=false||false||0||false||N
+#  InpStAtrPeriod=10||10||0||10||N
+#  InpStMultiplier=2.5||2.5||0||2.5||N
+#  InpStTF=16385||16385||0||16385||N
+#  InpUseSupertrend3=false||false||0||false||N
+#  InpUseCorrelation=false||false||0||false||N
+#  InpCorrSymbol=SPXUSD
+#  InpCorrTF=16385||16385||0||16385||N
+#  InpCorrEmaFast=14||14||0||14||N
+#  InpCorrEmaSlow=100||100||0||100||N
+#  InpUseVwapFilter=false||false||0||false||N
+#  InpVwapTF=15||15||0||15||N
+#  InpRiskPercent=1||1||0||1||N
+#  InpSLMode=0||0||0||0||N
+#  InpAtrSlMult=1.5||1.5||0||1.5||N
+#  InpAtrPeriodMgmt=14||14||0||14||N
+#  InpTP1_R=1||1||0||1||N
+#  InpTP1_ClosePct=50||50||0||50||N
+#  InpBreakevenAtTP1=true||true||0||true||N
+#  InpBEatR=0||0||0||0||N
+#  InpUseTrailing=true||true||0||true||N
+#  InpTrailMode=1||1||0||1||N
+#  InpTrailTF=5||5||0||5||N
+#  InpTrailAtrMult=2||2||0||2||N
+#  InpTrailFixedPts=410||410||0||410||N
+#  InpUseRoundLevels=false||false||0||false||N
+#  InpRoundStep=100||100||0||100||N
+#  InpRoundMinDistPts=50||50||0||50||N
+#  InpUseNewsFilter=false||false||0||false||N
+#  InpNewsFile=abtg_news.csv
+#  InpNewsMinImpact=3||3||0||3||N
+#  InpNewsBeforeMin=30||30||0||30||N
+#  InpNewsAfterMin=30||30||0||30||N
+#  InpNewsShiftMinutes=0||0||0||0||N
+#  InpNewsFlatten=true||true||0||true||N
+#  InpSlippagePts=0||0||0||0||N
+#  InpMinStopPts=0||0||0||0||N
+#  InpSkipIfTight=true||true||0||true||N
+#  InpUseVolumeFilter=false||false||0||false||N
+#  InpVolMult=1.5||1.5||0||1.5||N
+#  InpVolAvgBars=20||20||0||20||N
+#  InpUseAtrFilter=false||false||0||false||N
+#  InpAtrFilterBars=20||20||0||20||N
+#  InpAtrFilterMult=1||1||0||1||N
+#  InpConfirmMode=0||0||0||0||N
+#  InpSpaceMode=0||0||0||0||N
+#  InpSpaceTF=16388||16388||0||16388||N
+#  InpSpaceMinR=0.0||0.0||0||0.0||N
+#  InpSpaceMaxR=0.0||0.0||0||0.0||N
+#  InpSpaceEma1=14||14||0||14||N
+#  InpSpaceEma2=50||50||0||50||N
+#  InpSpaceEma3=100||100||0||100||N
+#  InpSpaceEma4=200||200||0||200||N
+#  InpSpaceUseST=false||false||0||false||N
+#  InpMaxSpread=0||0||0||0||N
+#  InpVerbose=true||true||0||true||N
+#  InpMagic=786321||786321||0||786321||N
+#  InpTrailStartR=0.0||0||0.5||1.5||Y
+#  # 4 celle -- se qualcuno la rilancia sapendo gia' l'esito:
+#  #   la cella 0 deve dare IS n 132 PF 1,12634 DD 5,4362 · OOS n 193
+#  #   PF 1,39709 DD 7,2328 (contro aperture_r47/..._{IS,OOS}_r47a.csv)
+# ---------------------------------------------------------------------
