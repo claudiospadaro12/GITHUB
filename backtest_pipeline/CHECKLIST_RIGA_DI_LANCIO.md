@@ -36113,3 +36113,27 @@ radice" ma copre 10 su 96 scrittori. Terzo caso, stesso difetto: il grep dei let
 si prova su un caso che DEVE uscire e uno che NON deve (entrambi nominati); e una correzione "alla radice" dichiara il numero dei
 siti coperti contro il numero dei siti che hanno lo stesso difetto. Non corretto qui (86 EA sono un lavoro a se', nessun pin con
 virgola oggi li tocca): dichiarato nel verdetto del cancello.
+
+### CLASSE 894 — un'ESENZIONE che compensa un difetto PER SORGENTE (il CSV _IS, il CSV _OOS) condizionata su un aggregato delle sorgenti (IS + OOS): se il difetto c'e' in una sola, l'esenzione copre anche l'altra e nasconde un motivo LEGITTIMO (28/09/2026, cancello di giudizio su `leggi_round_corti_a.py` @ `cfd13674`, figlia della 883, sorella della 873)
+Caso: la classe 883 esenta i NULLI della riga "P0 PIN DAL CSV _IS/_OOS" quando la virgola di `InpNewsCurrencies=GBP,USD` sposta
+le colonne che Import-Csv della riga legge. `cfd13674` metteva la condizione (a) su `n_ricucite(nis) + n_ricucite(noos) > 0`:
+un solo booleano per il job. Contro-esempio costruito (T21): R258b con il CSV _IS nel formato VECCHIO (pin `02c70e17`, 8 righe
+ricucite) e il _OOS nel formato NUOVO (RFC 4180 di `a66dcb07`, 0 ricucite: e' il caso di un job rilanciato dopo che
+`ABTG_Londra_ORB` sara' ricorretto, classe 892). La riga dice P0 _IS DIVERSO (colonne spostate: esenzione giusta) e P0 _OOS
+DIVERSO (Import-Csv legge giusto il formato nuovo: motivo VERO). Con `cfd13674` il file usciva **passa** con tutti e due i
+motivi "NON unito"; misurato con la mutazione che rimette la condizione aggregata: T21 fallisce, R258b `passa`. Regola:
+un'esenzione che compensa un difetto di lettura si lega alla SORGENTE che ha il difetto (qui: la gamba scritta nel motivo,
+` _IS`/` _OOS`), e un motivo in cui la sorgente non si legge NON si esenta. Corretto nel commit del cancello: `ric_g` per gamba
++ `re.match(r'(?:P0 PIN DAL CSV|ASSE DIVERSO nel) _(IS|OOS)\b', m)`; diff = 0 su 36 confronti contro `4f014012`.
+
+### CLASSE 895 — una RIPARAZIONE che assume DOVE sta il difetto senza verificare che il valore riparato ne abbia la forma: "i campi in eccesso si ricuciono su InpNewsCurrencies" con la virgola in un ALTRO input stringa sposta in silenzio le colonne in mezzo (28/09/2026, cancello di giudizio su `leggi_round_corti_a.py` @ `cfd13674`, figlia della 883, parente della 893)
+Caso: `allinea_riga` cuce i campi in eccesso dentro `InpNewsCurrencies` per costruzione. Contro-esempio: intestazione
+`InpNewsFile,InpNewsBeforeMin,InpNewsCurrencies,InpComment,InpMagic` e riga `a,b.csv,30,GBP,USD,R258A LDN,795807` (virgola in
+`InpNewsFile`, PRIMA): usciva `InpNewsBeforeMin='b.csv'`, `InpNewsCurrencies='30,GBP,USD'`, nessun avviso -- una colonna
+numerica spostata in silenzio. Oggi non e' reale (al pin `02c70e17` gli input stringa dei tre EA della riga A -- Londra_ORB,
+Nightly, Nasdaq_Apertura_US -- non hanno virgole nei default, e nei 36 file prova l'unico valore con virgola e'
+`InpNewsCurrencies=GBP,USD` nei 24 R258), ma un'altra riga che pinna una stringa con virgola lo renderebbe reale senza che il
+lettore lo dica. Regola: una riparazione verifica la FORMA del valore riparato (qui: lista di valute `^[A-Za-z]{3}(,[A-Za-z]{3})+$`)
+e altrimenti rifiuta a voce alta (riga NON ricucibile -> E0 ROSSO). Limite SCRITTO nel sorgente: una virgola in `InpComment`
+seguita da tre lettere (`X,ABC`) passa la forma e sposta SOLO i due valori stringa, non le colonne numeriche. Corretto nel
+commit del cancello (T22, mutazione che toglie il controllo -> T22 fallisce).

@@ -33,7 +33,8 @@ della riga e della testa (875), ancora S0 per simbolo (884), DERIVATO che non bo
 02c70e17, lo zip di riga A): la virgola di InpNewsCurrencies=GBP,USD aggiunge campi -> ricucitura su
 InpNewsCurrencies come prima, esenzione 883 SOLO con campi in eccesso (n_ricucite) E P0 del lettore VERDE.
 Formato NUOVO (scrittore OptFrame di a66dcb07, "GBP,USD" fra virgolette, interne raddoppiate): valori interi
-senza virgolette residue, NESSUNA ricucitura, NESSUNA esenzione: il P0 della riga vale. Autotest 20/20.
+senza virgolette residue, NESSUNA ricucitura, NESSUNA esenzione: il P0 della riga vale. Cancello 28/09: esenzione 883
+PER GAMBA (classe 894) e ricucitura solo se il valore cucito e una lista di valute (altrimenti NON ricucibile). Autotest 22/22.
 
 Uso:
   python3 backtest_pipeline/leggi_round_corti_a.py <cartella_raccolta_estratta> [--out referto.md] [--senza-bande]
@@ -255,6 +256,12 @@ def leggi_csv_opt(path):
 
 
 STRINGHE_CON_VIRGOLA = ('InpNewsCurrencies',)
+# 28/09 (cancello su cfd13674): il valore RICUCITO deve essere una lista di valute (GBP,USD / GBP,USD,EUR). Se la virgola
+# in eccesso sta in un ALTRO input stringa (InpNewsFile, InpCorrSymbol prima; InpComment dopo), "tutto su
+# InpNewsCurrencies" e sbagliato per costruzione e spostava in SILENZIO le colonne in mezzo: ora la riga e NON ricucibile
+# (E0 ROSSO, NULLO a voce alta). Limite scritto: una virgola in InpComment seguita da tre lettere ('X,ABC') passa il
+# controllo e sposta SOLO i valori stringa InpNewsCurrencies/InpComment (le colonne numeriche restano al loro posto).
+VALUTE_RICUCITE = re.compile(r'^\s*[A-Za-z]{3}(\s*,\s*[A-Za-z]{3})+\s*$')
 
 
 def allinea_riga(hdr, ln):
@@ -273,7 +280,10 @@ def allinea_riga(hdr, ln):
         for col in STRINGHE_CON_VIRGOLA:
             if col in hdr:
                 i = hdr.index(col)
-                campi = campi[:i] + [','.join(campi[i:i + extra + 1])] + campi[i + extra + 1:]
+                cucito = ','.join(campi[i:i + extra + 1])
+                if not VALUTE_RICUCITE.match(cucito):
+                    return None, 0     # virgola in un altro input stringa: ricucire qui sposterebbe colonne in silenzio
+                campi = campi[:i] + [cucito] + campi[i + extra + 1:]
                 return campi, 1
     return None, 0
 
@@ -982,7 +992,8 @@ def r258_leggi(rac, RP=None):
         roos, noos = leggi_csv_opt(os.path.join(cart, '%s_%s_OOS%s_%s.csv' % (ea, j['s'], sfx, t)))
         pins, asse, fonte = leggi_pin(rac, j)
         dati[t] = dict(job=j, ris=ris, roos=roos, nis=nis, noos=noos, pins=pins, fonte=fonte, mot=[], saltato=False,
-                       ricucito=(n_ricucite(nis) + n_ricucite(noos)) > 0)   # condizione (a) della classe 883: righe con campi in ECCESSO
+                       ricucito=(n_ricucite(nis) + n_ricucite(noos)) > 0,   # condizione (a) della classe 883: righe con campi in ECCESSO
+                       ric_g={'IS': n_ricucite(nis) > 0, 'OOS': n_ricucite(noos) > 0})   # (a) PER GAMBA (cancello 28/09, classe 894)
         # SALTATO esiste SOLO per il blocco L (prerequisito M1 dal 2008): un file T/G/B/D/F senza cartella e NULLO
         if ris is None and roos is None and not os.path.isdir(cart):
             if j['blk'] == 'L':
@@ -1084,9 +1095,13 @@ def r258_leggi(rac, RP=None):
         # n_ricucite) E (b) il P0 del lettore sulle colonne ricucite e' VERDE; ogni altro motivo della riga vale.
         # Formato NUOVO (scrittore RFC 4180 di a66dcb07): i campi coincidono, Import-Csv legge giusto, quindi
         # NESSUNA esenzione: il P0 della riga vale (28/09/2026).
+        # (a) vale PER GAMBA (classe 894): un motivo della riga sul _OOS si esenta solo se e il CSV _OOS ad avere campi in
+        # eccesso (e cosi per _IS). IS vecchio + OOS nuovo (job rilanciato col binario corretto): il P0 _OOS della riga e
+        # LEGITTIMO e si unisce. Motivo senza la gamba leggibile (' _IS'/' _OOS' come li scrive la riga): nessuna esenzione.
         d['riga_esenti'] = []
         for m in motivi_riga(RP, t):
-            spost = d['ricucito'] and p0ok and (m.startswith('P0 PIN DAL CSV') or (m.startswith('ASSE DIVERSO') and j['blk'] == 'G'))
+            mg = re.match(r'(?:P0 PIN DAL CSV|ASSE DIVERSO nel) _(IS|OOS)\b', m)
+            spost = bool(mg) and d['ric_g'][mg.group(1)] and p0ok and (m.startswith('P0 PIN DAL CSV') or (m.startswith('ASSE DIVERSO') and j['blk'] == 'G'))
             if spost:
                 d['riga_esenti'].append(m)
             else:
@@ -2157,7 +2172,31 @@ def autotest(base):
     r21, n21 = leggi_csv_opt(p21)
     assert r21[0]['InpNewsCurrencies'] == 'GBP,USD' and r21[0]['InpComment'] == 'R258A, LDN "GBPUSD" H8' and r21[0]['InpMagic'] == 795807.0 and r21[0]['Trades'] == 12.0, r21
     assert n21 == '1 righe' + NOTA_RFC4180 % 1 and n_ricucite(n21) == 0, n21
-    print('AUTOTEST: 20/20 PASS (fixture e referti in %s)' % base)
+    # T21 (cancello 28/09, classe 894): formato MISTO nello stesso job -- R258b con il CSV _IS VECCHIO (virgola, campi in
+    #     eccesso) e il _OOS NUOVO (RFC 4180). La riga, su colonne spostate nel _IS, dice P0 _IS DIVERSO (si esenta: P0
+    #     del lettore VERDE e _IS ricucito); sul _OOS dice P0 DIVERSO (legittimo: Import-Csv legge giusto il formato
+    #     nuovo) -> si UNISCE, R258b NULLO. Con la condizione (a) su IS+OOS insieme i due motivi uscivano esenti tutti e due.
+    rac21 = costruisci_fixture(base, 'rfc4180')
+    nb = 'ABTG_Londra_ORB_GBPUSD_IS_R258b.csv'
+    shutil.copyfile(os.path.join(racp, 'ROUND_R258b', nb), os.path.join(rac21, 'ROUND_R258b', nb))
+    assert n_ricucite(leggi_csv_opt(os.path.join(rac21, 'ROUND_R258b', nb))[1]) == 8
+    assert n_ricucite(leggi_csv_opt(os.path.join(rac21, 'ROUND_R258b', nb.replace('_IS_', '_OOS_')))[1]) == 0
+    _riepilogo_con_nulli(os.path.join(rac21, 'RIEPILOGO_ROUND_CORTI_A.txt'),
+                         'R258b (P0 PIN DAL CSV _IS DIVERSO (24 valori: InpMagic=[R258B LDN GBPUSD H7] atteso 795807);'
+                         ' P0 PIN DAL CSV _OOS DIVERSO (1 valori: InpMagic=[795808] atteso 795807))')
+    txt21, E21 = referto(rac21, senza_bande=True)
+    riga21 = [ln for ln in txt21.splitlines() if ln.startswith('| R258b |')][0]
+    assert E21['r258']['nullo']['R258b'] == 'NULLO', riga21[:400]
+    assert 'RIGA: P0 PIN DAL CSV _OOS DIVERSO' in riga21 and 'NON unito' in riga21 and 'RIGA: P0 PIN DAL CSV _IS' not in riga21, riga21
+    # T22 (cancello 28/09, contro-esempio del punto 4): formato VECCHIO con la virgola in un ALTRO input stringa. Prima di
+    #     InpNewsCurrencies (InpNewsFile) la ricucitura "tutto su InpNewsCurrencies" spostava InpNewsBeforeMin in silenzio;
+    #     dopo (InpComment con parola) cuciva la meta del commento dentro le valute. Ora: NON ricucibile (a voce alta).
+    h22 = ['InpNewsFile', 'InpNewsBeforeMin', 'InpNewsCurrencies', 'InpComment', 'InpMagic']
+    assert allinea_riga(h22, 'a,b.csv,30,GBP,USD,R258A LDN,795807') == (None, 0)
+    assert allinea_riga(h22, 'abtg_news.csv,30,GBP,USD,R258A, LDN,795807') == (None, 0)
+    assert allinea_riga(h22, 'abtg_news.csv,30,GBP,USD,R258A LDN,795807') == (['abtg_news.csv', '30', 'GBP,USD', 'R258A LDN', '795807'], 1)
+    assert allinea_riga(h22, 'abtg_news.csv,30,GBP,USD,EUR,R258A LDN,795807') == (['abtg_news.csv', '30', 'GBP,USD,EUR', 'R258A LDN', '795807'], 1)
+    print('AUTOTEST: 22/22 PASS (fixture e referti in %s)' % base)
     return True
 
 
