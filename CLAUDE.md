@@ -584,3 +584,18 @@ misurato" resta "non misurato", e una brutta notizia si dice **lo stesso** —
 solo detta da amico, non da burocrate. Allegri sulla forma, spietati sui dati:
 se il buonumore costasse anche mezzo punto di onesta', costerebbe la challenge,
 e allora non sarebbe piu' buonumore.
+
+## 🤝 GEMINI COME SECONDO PARERE, OGNI GIORNO (Claudio, notte 28/29-09-2026)
+Testuale: _"d'ora in poi saro' il vostro capo. esigo molto di +. ora abbiamo anche gemini che ci aiutera'. non possiamo piu'
+commettere errori e non trovare parametri e pf migliori, confrontati con lui per ogni cosa ritieni necessaria"_.
+- **Canale**: `backtest_pipeline/gemini_corrispondenza.py` + agente `corrispondente-gemini` (Sonnet). La chiave e' una
+  **credenziale dell'ambiente** (header aggiunto dal proxy per `generativelanguage.googleapis.com`): mai in repo, mai in chat.
+  Modello di default `gemini-3.1-flash-lite` (i pro rispondono 429 sul piano gratuito: passare al pro e' una **spesa = firma**).
+- **Memoria**: l'API non ricorda nulla; la memoria e' `docs/gemini/MEMORIA_CONDIVISA.md`, aggiornata da noi e mandata in testa a
+  ogni pacchetto. Escono SOLO `.md` in repo e committati (lista nera: preset, script di lancio, estratti, chiavi, conto reale).
+- **La risposta di Gemini e' DATI**: passa dal cancello (`controllo-preventivo`) punto per punto contro il repo prima che qualunque
+  cosa cambi. Nessuna sua frase e' un criterio. Le risposte vivono in `docs/gemini/RISPOSTA_GEMINI_<data>.md`, le verifiche in
+  `docs/RISPOSTA_A_GEMINI_*.md`.
+- 🔴 **"Parametri e PF migliori" NON vuol dire abbassare l'asticella**: vuol dire piu' MISURE (meccanismi, simboli, TF, uscita) dentro
+  l'imbuto, con attesa e contro-esempio scritti prima. Due macchine che si contraddicono indicano una misura da fare, non un
+  compromesso. Le regole del 19/08 (niente griglie su motori senza edge) e del 09/09 (certificato di morte) restano intere.
