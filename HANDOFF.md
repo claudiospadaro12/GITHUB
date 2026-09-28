@@ -34,6 +34,18 @@ PC di backtest `DESKTOP-H4D7CAJ` (regola del 21/09).
   long FTMO — sedie oro sui demo in pausa (FTMO conta i demo). Firma di Claudio; nulla eseguito. Attenzione: short
   XAUUSD `#3430899` sul piccolo forse ancora aperto [NON MISURATO].
 
+**28/09 giorno — R270, il round sull'USCITA di DAX Apertura (i tre vinti minuscoli di FTMO: 3-5 punti).**
+- 🔒 `InpTrailStartR` sul LONG e' una casella GIA' CHIUSA: `risultati_archivio/Walkforward_Aperture/REFERTO_TRAILING_SOGLIA.md`
+  (07-08/08, 5x5 tick reali, stessa geometria RETEST del contratto) — 0 vince in tutte le righe TF, fuori campione (M5: PF 1,415
+  a soglia 0 → 1,031 a soglia 1,0; DD 6,71 → 9,93%). 0 e' il PAVIMENTO dell'asse (`trailArmato = InpTrailStartR<=0 || ...`).
+  I vinti minuscoli sono il costo visibile di un meccanismo che nel complesso paga: gia' scritto ad agosto. `R270a` RITIRATO.
+- 📦 Pronti (`prove/`, cancello prova a ZERO difetti, ASCII, pin 3c0ce2a4): `R270c` TrailMode long (0/1/2), `R270e` TP1_R long
+  (0,5/1/1,5/2 sulla cella di contratto: TP1_ClosePct=50, BE), `R270b` TrailStartR SHORT (0/0,5/1/1,5, mai misurato),
+  `R270d` TrailMode short. 14 celle, 28 passate tick reali, ~15-25 min. G0 del long contro R47a (IS n132 PF 1,12634 / OOS n193 PF 1,39709).
+- 🔴 `R208b` NON entra: ha `InpTP1_ClosePct=0` (TP intero, nessuna parziale), Guardian true, EA a 81 input — non e' la geometria in campo.
+- Riga di lancio `righe/RIGA_ROUND_R270_USCITA_DAX.txt` in costruzione (modello riga D SENZA il blocco `-Stable`, classe 903);
+  esce SOLO con PASS del cancello, e SOLO dopo la riga C (una alla volta).
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; gli zip A → R255 → C → D (una riga alla volta, MT5
 chiuso in mezzo), poi C2; firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 risposta di Jonas (FTMO) alle tre domande; orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
