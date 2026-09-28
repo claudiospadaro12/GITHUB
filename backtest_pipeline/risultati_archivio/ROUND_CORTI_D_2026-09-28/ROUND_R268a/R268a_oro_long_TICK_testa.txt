@@ -1,0 +1,560 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R268 -- L'ORO 770402 SOLO LONG A TICK REALI (il DD che l'OHLC non da')
+#  EA: ABTG_MaxMinNotte (generico), XAUUSD, grafico H2
+#  FILE DI TESTA DEL ROUND, e cella R268a: SOLO LONG, TICK REALI
+#  (-Modello 4), finestra dei tick oro BCM, deposito 100000, rischio 0,5.
+#  Qui stanno il ragionamento, le attese e i cancelli di tutta la
+#  famiglia R268a..R268d (4 file). R268b, R268c e R268d portano solo le
+#  loro differenze e rimandano qui.
+#  Scritto il 27/09/2026. Criteri congelati PRIMA dei numeri.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026: i round non girano piu' sul VPS finche' una
+#  challenge e' viva). NE' sul banco 50504400 (C:\MT5_Backtest, che resta
+#  SPENTO), NE' su nessun terminale di conto (50503392, 50504263,
+#  10105439 REALE, 541452707 FTMO). Il terminale di quel PC e' loggato
+#  sul demo 50503392, che ha la sedia viva 770402: prima si controlla
+#  che non abbia SEDIE attaccate (avvertenza di R246/R251/R253/R255).
+#  I magic di questo round (par. 9) non toccano 770402 in nessun modo.
+#
+#  VINCOLI DI BANCO (stanno nella riga di lancio, non qui; li scrivo
+#  perche' chi la scrive li trovi):
+#    -Expert ABTG_MaxMinNotte   -Simbolo XAUUSD   -Periodo H2
+#    -Deposito 100000   = il deposito di R260a/R103 (EUR, leva 100).
+#        NON e' una taglia proposta: nessuna taglia e' proposta qui.
+#    -Modello 4 (TICK REALI) per R268a e R268c;
+#    -Modello 1 (OHLC M1)   per R268b e R268d.
+#        Il driver appende "_ohlc" ai CSV quando il modello non e' 4:
+#        E0 (par. 7) lo usa come prova che il modello e' arrivato.
+#        (Anteprima di -SoloControllo: scrive Model=4 CABLATO, classe
+#        356; la corsa vera usa Model=$Modello.)
+#    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo
+#        da' '@FRAZIONEIS' qui sotto; un -FrazioneIS diverso fa MORIRE il
+#        driver, walkforward_generico.ps1 r.713-740).
+#    !! Lo SPREAD NON e' pinnato da questa corsia (classe 394):
+#        RIGA_ROUND_VPS.ps1 non ha -Spread e walkforward_generico.ps1
+#        senza -Spread NON scrive la riga (r.969-973: "MT5 usa il valore
+#        che ha in memoria"). Come morde QUI: a tick reali lo spread
+#        viaggia coi tick (bid/ask veri): il buco riguarda R268b e R268d
+#        (OHLC). Il G0 di R268b contro R260a (par. 7) e' il controllo di
+#        fatto; e il G0 VERDE di R260c contro R103 (24/08, un'altra
+#        macchina, Spread=0 scritto) e' gia' un INDIZIO che su oro OHLC
+#        lo spread in memoria non ha morso -- un indizio, non una prova
+#        per questo round.
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca preset, EA, sedie, conti, taglie o parametri del forward. Non
+#  promuove niente: ogni esito e' materiale per Claudio.
+# =====================================================================
+#
+# =====================================================================
+#  0. IL PREREQUISITO CHE VIENE PRIMA DI TUTTO: DA QUANDO HA I TICK L'ORO?
+# =====================================================================
+#  La finestra di questo round e' "la profondita' dei tick reali XAUUSD
+#  su BCM". NESSUNO l'ha mai misurata:
+#   - risultati_archivio/NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md: forex
+#     (GBPUSD, EURUSD, EURGBP) "ticks data begins from 2024.07.05", e
+#     testuale "XAUUSD non e' ancora stato misurato";
+#   - report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md r.441-442: profondita'
+#     tick XAUUSD [NON MISURATA], e una contraddizione in casa
+#     (report/DIARIO.md r.43: "dati ok dal 26/09/2024", non un referto);
+#   - prove/R221c_* r.130-160: trasportare il 2024.07.05 dal cable
+#     all'oro e' la CLASSE 612.
+#  Quindi: @DAQUANDO 2024.07.05 e' l'IPOTESI MIGLIORE (= forex), NON un
+#  fatto. PRIMA DI LEGGERE UN SOLO NUMERO si fa:
+#  P0-TICK. Nel giornale dell'agente del tester (Tester\Agent-*\logs,
+#      file del giorno, UTF-16) si cerca la riga
+#          "XAUUSD: ticks data begins from AAAA.MM.GG"
+#      stampata dalla prima passata di R268a, e la si RICOPIA nel
+#      referto. Tre casi, e il referto dice quale:
+#      (i)   data <= 2024.07.06: la gamba lunga (dal 2024.07.06, par. 5)
+#            e' TUTTA a tick reali. Si legge come scritto qui.
+#      (ii)  data PIU' TARDA (es. 2024.09.26): prima di quella data MT5
+#            GENERA i tick dalle M1 in silenzio (NOTA del 01/09, "fallback
+#            silenzioso"). La finestra SI ACCORCIA e si DICHIARA: ogni
+#            lettura di R268a/b/c si fa sul PER-TRADE ristretto alle
+#            chiusure >= quella data (tutti e tre i file, stessa data), e
+#            il DD del CSV di R268a/c diventa "MISTO" e NON decide: decide
+#            il DD a saldo chiuso ricalcolato sul tratto ristretto
+#            (par. 6). Esempio gia' contato: dal 2024.09.26 il per-trade
+#            di R260a ha 81 posizioni / 102 deal (contro 92/119).
+#      (iii) riga NON TROVATA: copertura [NON VERIFICATA]; si legge come
+#            (i) ma ogni numero porta l'asterisco, e si scrive.
+#
+# =====================================================================
+#  1. LA DOMANDA, E COSA E' GIA' MISURATO
+# =====================================================================
+#  Il referto report/REFERTO_ROUND_CORTI_B_2026-09-27.md (par. 1 e 5) e
+#  la seconda opinione docs/RISPOSTA_GEMINI_2026-09-27.md (riga 16)
+#  concordano: l'oro 770402 SOLO LONG ha merito in OHLC --
+#     R260a: 279 posizioni, PF in posizioni 1,3357 (CSV 1,33476), meta'
+#     1,171 / 1,521, +14.062,14 EUR, DD equity CSV 4,5172%, DD saldo
+#     chiuso con k 4,1549%, OHLC M1, 2020.01.01 -> 2026.06.30, 0,5%,
+#     deposito 100000 (per-trade risultati_archivio/ROUND_CORTI_B_
+#     2026-09-27/PERTRADE/abtg_trades_ABTG_MaxMinNotte_XAUUSD_795301.csv)
+#  -- MA il DD OHLC e' un LIMITE INFERIORE (riempimenti ideali, spread
+#  in memoria, niente slippage) e NON si schiera senza una misura a TICK.
+#  R268 risponde a UNA domanda di RISCHIO: "sulla stessa finestra, quanto
+#  si allontana il DD a tick dal DD OHLC?" -- e ne ricava se i DD OHLC
+#  della sedia (6,5 anni di R260a, 22 anni di R268d) sono usabili per
+#  una taglia, e con quale correzione.
+#  NON risponde sul MERITO: a tick ci sono ~92 posizioni (par. 6), sotto
+#  150 -> MERITO SOSPESO PER COSTRUZIONE. Il merito resta quello di R260a.
+#
+#  IL PRIOR DI CASA SULLO SCARTO DD tick - OHLC (e' una misura, non zero):
+#  prove/R264_TESTA.txt.in par. (d) cita le 8 coppie tick/OHLC gia'
+#  girate su ABTG_EMA200 H4 (commit 400a4624, 08/08, cella di default,
+#  finestra NON dichiarata ma uguale fra le due colonne) per il PF
+#  (scarto OHLC - tick da -0,0235 a +0,1670, mediana +0,0511). Gli
+#  stessi CSV portano anche l'EQUITY DD, e NESSUNO l'aveva letto. Letto
+#  oggi (risultati_prove/ABTG_EMA200/ABTG_EMA200_{SIM}_{IS,OOS}.csv
+#  contro _ohlc.csv, riga InpTF=16388), DD tick | OHLC:
+#     GBPUSD IS 3,1039 | 2,8369   OOS 6,3935 | 6,2588
+#     AUDJPY IS 3,9878 | 4,6133   OOS 2,6912 | 2,6742
+#     GBPJPY IS 2,5225 | 2,4438   OOS 3,9372 | 3,9314
+#     XAUUSD IS 2,7414 | 2,7823   OOS 6,2715 | 6,3005
+#  -> scarto tick - OHLC in PUNTI: da -0,626 a +0,267, mediana +0,012;
+#     RAPPORTO r = DD_tick / DD_OHLC: da 0,864 a 1,094, mediana 1,004.
+#     Tick PIU' BASSO dell'OHLC in 3 coppie su 8 (AUDJPY IS, le due
+#     XAUUSD): "tick >= OHLC" NON e' una legge, e' una tendenza.
+#  LIMITI del prior, per nome: e' un ALTRO EA (ingressi a mercato su
+#  indicatore H4), mentre qui si entra con un BUY STOP sulla rottura del
+#  box e si esce su STOP (SL, BE, trailing): proprio il caso in cui il
+#  tick reale (con i salti fra un tick e l'altro) riempie PEGGIO della
+#  M1 generata (che passa per ogni prezzo). Il prior dice l'ordine di
+#  grandezza, non il numero di questo motore.
+#
+# =====================================================================
+#  2. LA FAMIGLIA: QUATTRO FILE, UNA VARIABILE CIASCUNO
+# =====================================================================
+#   file   modello  finestra                 asse                 magic
+#   R268a  4 tick   2024.07.05 -> 2026.06.30 InpMagic (gemelle)   797201/797251
+#   R268b  1 OHLC   2024.07.05 -> 2026.06.30 InpMagic (gemelle)   797202/797252
+#   R268c  4 tick   2024.07.05 -> 2026.06.30 InpRiskPercent 0,5..2,0  797203
+#   R268d  1 OHLC   2004.06.11 -> 2026.06.30 InpMagic (gemelle)   797204/797254
+#  Pin = prove/R260a_oro_770402_solo_long.txt (PASS fbf1f05f) CAMPO PER
+#  CAMPO; cambiano SOLO InpComment (etichetta del round, entra solo nel
+#  commento dell'ordine, TryPlace r.355/r.367) e InpMagic, piu'
+#  InpRiskPercent in R268c (l'asse). Il MODELLO e la FINESTRA non sono
+#  input dell'EA: stanno nella riga (-Modello) e nelle direttive @.
+#  (Diff eseguito con uno script sui pin di R260a, non a mano.)
+#  PERCHE' R268b ESISTE: R260a e' OHLC su 6,5 anni, R268a e' tick su 2:
+#  confrontarli mescola MODELLO e FINESTRA (due variabili). R268b e' la
+#  stessa finestra di R268a a OHLC: lo scarto a - b muove UNA variabile,
+#  il modello. E R268b e' anche il G0 del banco contro R260a (par. 7).
+#  PERCHE' R268d: il contratto della sedia e' "DD 10,0% a 0,5% sui 22
+#  anni di R100" (report/CONTRATTI_SEDIE.md r.95) e R193b A3/C4 congela
+#  "la taglia si decide sulla finestra PEGGIORE". Il solo long sui 22
+#  anni e' [NON MISURATO]: R268d lo misura (a OHLC: e' la sola via, i
+#  tick non esistono prima del 2024) e R268a/b gli danno la correzione.
+#
+# =====================================================================
+#  3. LA GEOMETRIA E L'OROLOGIO (identici a R260a / R260c par. 3)
+# =====================================================================
+#  Box 23:00-04:59 BCM, piazzamento 07:00, cutoff 08:30, chiusura 17:30,
+#  buffer 250 punti (2,50 $), InpSLMode=0 (stop = estremo opposto del
+#  box), InpMgmtTF=16386 (H2), TP1 1R 50% + BE, TP2 2,5R 50%, target
+#  EMA200 H2, TP finale 4R, trailing 2 x ATR(H2), correlazione OFF,
+#  news OFF, un trade al giorno, InpAllowShort=false, InpMaxSpread=0.
+#  Tutto il resto (preset FTMO +2 h, InpMaxSpread 150 del preset,
+#  InpCorrSymbol inerte, InpNewsCurrencies omesso) e' in R260c par. 3.
+#  L'OROLOGIO: che l'oro segua l'orologio forex BCM e' [INFERITO]
+#  (report/OROLOGIO_BCM_2026-09-24.md non ha ancore XAUUSD). La finestra
+#  2024.07.06 -> 2026.06.30 contiene il cambio di orologio (fra il
+#  26/12/2024 e il 02/02/2025, giorno [NON MISURATO]): il box cade a
+#  00:00 IT prima e d'estate dopo, a 23:00 IT negli inverni dopo il
+#  cambio. R268a e R268b hanno lo STESSO impasto: lo scarto a - b non
+#  ne e' toccato. R268d ne eredita l'impasto di R103/R260 sui 22 anni.
+#  BINARIO: walkforward_generico.ps1 compila l'EA dalla testa del ramo
+#  lavoro (classe 166). Al 27/09 ABTG_MaxMinNotte.mq5 a HEAD = commit
+#  7d0da9f9 (lo stesso di R260; SHA256 dei due file in R260c par. 3):
+#  SHA256 dopo ogni job contro quelli; diverso = file NON VALIDO.
+#  REGIME DELLA FINESTRA TICK, dichiarato (Emendamento A): 2024.07 ->
+#  2026.06 e' un TORO dell'oro, UN SOLO REGIME. Il solo long in un toro
+#  e' il caso piu' comodo per il DD: nessun numero di R268a/c descrive
+#  un orso dell'oro. Per questo esiste R268d.
+#
+# =====================================================================
+#  4. PERCHE' TICK REALI (e perche' non si puo' fare di piu')
+# =====================================================================
+#  E' la richiesta: il DD OHLC e' un limite inferiore e la sedia non si
+#  schiera senza misurarlo a tick. Il tick copre SOLO la coda
+#  2024.07 -> 2026.06 (par. 0). Il vincolo delle ~100.000 barre del
+#  tester non morde su H2 (2 anni = ~6.000 barre). Il prezzo, detto:
+#  2 anni = ~92 posizioni long = MERITO SOSPESO per costruzione; qui si
+#  legge solo il RISCHIO (Emendamento B: il rischio si legge a qualunque
+#  n), e lo scarto del MODELLO, che serve a correggere i DD OHLC lunghi.
+#
+# =====================================================================
+#  5. LA FINESTRA: MONCONE + GAMBA LUNGA (conto del driver, classe 840)
+# =====================================================================
+#  @DAQUANDO 2024.07.05, @FINOA 2026.06.30, @FRAZIONEIS 0.001.
+#  Il driver taglia a Inizio + floor(giorni x frazione) (r.934), e l'IS
+#  e' [Inizio, Meta] COMPRESO, l'OOS parte da Meta + 1 (r.935-937):
+#     giorni 725 x 0,001 = 0,725 -> floor = 0. Quindi:
+#     IS  2024.07.05 -> 2024.07.05  (moncone di UN giorno: si butta)
+#     OOS 2024.07.06 -> 2026.06.30  (la gamba che si legge)
+#  Precedente di casa per il floor = 0 (IS di un giorno solo):
+#  prove/COLLAUDO_EMADOW_02_pertrade_IS.txt r.110-114.
+#  CONSEGUENZA, contata sul per-trade di R260a: il 2024.07.05 (venerdi')
+#  ha UNA posizione long (position_id 1356, due deal alle 13:32:59 e
+#  13:39:40): cade nel MONCONE, non nella gamba lunga. Quindi il
+#  confronto con R260a si fa sulle chiusure >= 2024.07.06 (NON >= 07.05).
+#  Il CSV _IS puo' avere Trades 2 (se MT5 gira FromDate = ToDate come
+#  un giorno intero) o 0: NON e' un cancello, si scrive e basta.
+#  Il per-trade che sopravvive e' quello della gamba che gira PER
+#  SECONDA con lo stesso magic (RIEPILOGO_R246.txt), cioe' l'OOS.
+#  rc 0 o rc 2 ammessi SE il CSV _OOS e' fresco con 2 righe (R268a/b/d)
+#  o 4 righe (R268c) e Trades > 0; rc 1 = guasto. Si legge SOLO _OOS.
+#
+# =====================================================================
+#  6. L'ATTESA, SCRITTA PRIMA DEI NUMERI
+# =====================================================================
+#  6.1 IL NUMERO DI OPERAZIONI (R268a).
+#    Contato sul per-trade di R260a (795301) ristretto alle chiusure >=
+#    2024.07.06: 92 POSIZIONI, 119 deal, prima chiusura 2024.07.10
+#    14:55:40, ultima 2026.06.26 17:30:00 (67 posizioni da 1 deal, 23 da
+#    2, 2 da 3). Anni (per chiusura): 2024 28 pos. - 2025 47 - 2026 17.
+#    A tick un BUY STOP puo' riempirsi in una giornata in cui la M1
+#    generata non lo tocca, o viceversa. Banda [DERIVATA dal prior del
+#    par. 1: n tick contro n OHLC differiva fino a 6 su 75, 8%]:
+#    84-100 POSIZIONI. In ogni caso SOTTO 150: merito SOSPESO.
+#
+#  6.2 IL RISCHIO -- LO SCARTO, CONTRO QUATTRO IPOTESI CHE SONO UNA
+#  PARTIZIONE (ogni esito cade in UNA sola). Misura: r = DD_a / DD_b,
+#  con DD = "Equity DD %" del CSV _OOS della gemella bassa (797201 per
+#  a, 797202 per b); nel caso (ii) di P0-TICK: DD a saldo chiuso con k
+#  sul per-trade ristretto (par. 0). Si scrive ANCHE lo scarto in punti
+#  (DD_a - DD_b), che NON decide:
+#    H-CONS  r < 0,90          l'OHLC SOVRASTIMA il DD di questo motore:
+#                              i DD OHLC della sedia sono CONSERVATIVI
+#                              (usabili come tetto, non come pavimento).
+#                              La premessa "OHLC = limite inferiore" cade
+#                              QUI e si scrive.
+#    H-AFF   0,90 <= r < 1,10  OHLC AFFIDABILE per il rischio (dentro la
+#                              banda del prior di casa 0,864-1,094).
+#    H-CORR  1,10 <= r <= 1,50 OHLC DA CORREGGERE: ogni DD OHLC di questa
+#                              sedia (R260a 6,5 anni, R268d 22 anni) si
+#                              moltiplica per r PRIMA di ogni tabella di
+#                              taglia, e il prodotto e' [DERIVATO].
+#    H-NO    r > 1,50          OHLC NON USABILE per il rischio: nessuna
+#                              taglia si ricava da un DD OHLC di questa
+#                              sedia; resta solo il tick (2 anni, un
+#                              regime) e lo si dice.
+#  PREVISIONE MIA, scritta ora: H-AFF, con r sopra 1 (1,00-1,10). Motivo:
+#  il prior di casa e' centrato su 1,004; il meccanismo (stop in
+#  ingresso e in uscita riempiti peggio a tick) spinge sopra 1, ma con
+#  stop mediani da ~26 $ (par. 6.4) uno slippage di qualche decimo di
+#  dollaro vale l'1-2% di R per riempimento: poco.
+#
+#  !! PERCHE' IL RAPPORTO E NON I PUNTI (deviazione dichiarata dal
+#  mandato, che scriveva "< 1 punto / 1-3 / > 3", e che resta scritta qui
+#  per esteso per chi vuole ripristinarla). CONTRO-ESEMPIO (classe 178):
+#  su QUESTA finestra il DD OHLC atteso a 0,5% e' ~2% (par. 6.3). Con le
+#  bande in punti, un DD tick di 2,9% contro 2,0% OHLC (scarto 0,9 punti,
+#  r = 1,45: l'OHLC sottostima del 45%) uscirebbe "OHLC AFFIDABILE". Lo
+#  stesso 45% applicato al contratto dei 22 anni (10,0% a 0,5%) vale
+#  ~4,5 punti, e a 2,00% di taglia ~18 punti. La banda in punti non
+#  separa l'ipotesi che deve separare. In rapporto la soglia non dipende
+#  dalla scala del DD, ed e' la stessa quantita' che poi si applica ai
+#  DD lunghi. A titolo di confronto, sulla scala di QUESTA finestra (DD
+#  OHLC ~2%) le bande del mandato valgono: < 1 punto = r < ~1,5;
+#  1-3 punti = r ~1,5-2,5; > 3 = r > ~2,5.
+#
+#  6.3 I NUMERI ATTESI DI R268b (= G0, par. 7) -- ricavati dal per-trade
+#  di R260a, NON inventati. La gamba di R268b parte con saldo 100000,
+#  mentre R260a al 2024.07.06 aveva 107.794,67 EUR (100000 + somma dei
+#  net meno k x volumi prima di quella data, k 1,8113): i LOTTI di R268b
+#  sono ~7% piu' piccoli, quindi i SOLDI non coincidono con R260a -- la
+#  STRUTTURA si'. Simulazione [STIMA Monte Carlo]: stesso insieme di deal, lotto
+#  ricalcolato col saldo nuovo (LotByRisk r.730-758: rischio = saldo x
+#  0,5%, floor al passo 0,01; parziali con NormVol r.761-768 = floor),
+#  net per lotto di ogni deal preso da R260a; incertezza = dove cadeva
+#  il lotto non arrotondato dentro il suo passo, 3000 estrazioni:
+#     Trades (deal) 119 ESATTO - posizioni 92 ESATTO
+#     Profit CSV (= somma net - k x lotti) 5.515,77 -> 6.140,61 EUR
+#     PF in posizioni 1,4836 -> 1,5604
+#     DD saldo chiuso con k 1,8788 -> 2,0879 %
+#     lotti d'ingresso totali 21,54 -> 21,82
+#  !! (cancello strato 2, 27/09) Queste sono gli ESTREMI di 3000
+#  estrazioni SENZA seme e SENZA script in repo: non riproducibili alla
+#  cifra. Riproduzione indipendente del cancello (stesso metodo, split
+#  dei parziali floor(V'/2), seme 0..2999): Profit 5.480,30 -> 6.144,40,
+#  PF 1,4810 -> 1,5601, DD chiuso 1,8771 -> 2,0928 %, lotti 21,54 ->
+#  21,83. Banda da usare = l'UNIONE: Profit 5.480 -> 6.145, PF 1,481 ->
+#  1,561, DD 1,877 -> 2,093. Gli estremi di un Monte Carlo si muovono
+#  col seme: un numero a pochi decimi dal bordo NON e' un segnale. NON e'
+#  un cancello (decide G0, che e' di STRUTTURA): vedi "se un numero ne
+#  esce con i quattro pezzi VERDI" nel par. 7.
+#  (R260a sullo stesso tratto, ai SUOI lotti: net 6.267,47, PF 1,5171,
+#  DD saldo chiuso 1,9965% dal suo saldo 107.794,67 -- scritto per
+#  confronto, NON e' l'atteso.) L'Equity DD % del CSV di R268b NON e'
+#  ricavabile dal per-trade (flottante): [NON DERIVABILE], atteso >= DD
+#  saldo chiuso.
+#
+#  6.4 K1 -- IL COSTO, DAL PER-TRADE DI R268a (classi 844 e 846).
+#    Frontiera: stop >= 40 x 0,45 $ = 18,00 $ (0,45 $ = P95 FTMO ora 10
+#    server, report/SPREAD_APERTURA_FTMO_2026-09-21.md, GG=1 SOTTILE;
+#    commissione FTMO [NON MISURATA]). Riferimento BCM, NON decide:
+#    40 x 0,2603 $ all-in = 10,41 $ (R264_TESTA par. 5, K1).
+#    Stop dal lotto (formula giusta, classe 846):
+#       stop in [ R / ((V+0,01) x C x q_alto) ; R / (V x C x q_basso) ]
+#    R = saldo prima della posizione x 0,005 (saldo = 100000 + somma dei
+#    net chiusi prima - k x volumi di quelle posizioni, classe 844),
+#    V = volume d'ingresso = somma dei volumi d'uscita della posizione,
+#    C = 100 oz/lotto, q = EUR per USD. q NON sta nel per-trade: si
+#    MISURA dal file stesso (metodo di prove/COLLAUDO_ORO_770402_LONG_
+#    CRITERI.md par. 4: due deal d'uscita di pari volume a prezzi
+#    diversi, q = (net_1 - net_2) / ((p_1 - p_2) x vol x C)). Sul tratto
+#    di R260a: 11 ancore, q 0,8393 -> 0,9663, mediana 0,8767 (ricontato
+#    dal cancello contando TUTTE le coppie delle posizioni a 3 deal: 12
+#    coppie, mediana 0,8854, minimo e massimo IDENTICI). Banda usata
+#    [q_basso ; q_alto] = [minimo ; massimo] delle ancore di R268a.
+#    CONTROPROVA NUMERICA (classe 846): R 500 EUR, V 0,22, q 0,8767 ->
+#    500 / (0,22 x 100 x 0,8767) = 25,9 $: plausibile per un box
+#    notturno dell'oro (stop vivo mediano 32,94 $ su n=2, referto B par.
+#    5(f)). ATTENZIONE: la formula rovesciata R x q / (V x C) darebbe
+#    500 x 0,8767 / 22 = 19,9 $, che NON sembra assurdo: con q vicino a
+#    1 l'errore non si vede a occhio (sbaglia di un fattore q^2 = 0,77,
+#    cioe' -23%, e sposta proprio la quota sotto i 18 $). Per questo la
+#    controprova e' con le UNITA' (EUR = lotti x oz/lotto x $/oz x
+#    EUR/$), non con la plausibilita' del risultato.
+#    REGOLA (n >= 30 posizioni, altrimenti K1 NON LEGGIBILE):
+#      K1 VERDE   mediana degli stop MINIMI >= 18,00 $;
+#      K1 ROSSO   mediana degli stop MASSIMI < 18,00 $;
+#      K1 NON DECISO altrimenti.
+#    Si scrive sempre la QUOTA di posizioni sotto frontiera come
+#    [pavimento ; tetto] = [stop MASSIMO < 18 ; stop MINIMO < 18].
+#    ATTESA [DERIVATA dal per-trade di R260a sul tratto 2024.07.06 ->,
+#    con la banda q delle sue 11 ancore 0,8393-0,9663]: mediana degli
+#    stop MINIMI 23,32 $, dei MASSIMI 27,98 $ -> K1 VERDE; quota sotto
+#    frontiera [19 ; 37] posizioni su 92 = [21% ; 40%]. (Con q fisso
+#    0,86287 della sonda: mediana 26,1-27,2 $, quota 21-25.) Da una notte
+#    su cinque a due su cinque il box e' troppo stretto per il costo
+#    FTMO: K1 VERDE NON cancella quella quota, si scrive accanto.
+#
+#  6.5 IL RISCHIO A TAGLIE DIVERSE (R268c, sua testa breve). Atteso:
+#    DD(f) fra 1-(1-d)^(f/0,5) e (f/0,5) x d, d = DD di R268a a 0,5%;
+#    monotono crescente; Trades IDENTICI sulle quattro celle (R193b B5).
+#    !! Il PAVIMENTO e' un teorema (Bernoulli, vale anche con vincite
+#    dentro la finestra del DD). Il TETTO NO: vale per sole perdite; con
+#    una vincita fra due perdite si supera. Contro-esempio del cancello:
+#    -1R, +1R, -1R -> 0,5025% a 0,5 e 2,0392% a 2,0 contro 4 x 0,5025 =
+#    2,0100% (con +0,5R in mezzo invece regge: 2,9996 contro 3,0000). Il
+#    tetto e' [INDICATIVO], non [DERIVATO], e NON decide.
+#
+#  6.6 I 22 ANNI (R268d, sua testa breve): quattro ipotesi scritte li'.
+#
+# =====================================================================
+#  7. I CANCELLI, CONGELATI PRIMA. Si citano come <nome> [R268].
+# =====================================================================
+#  R0  -SoloControllo: 2 celle per finestra in R268a/b/d, 4 in R268c.
+#      Altrimenti STOP.
+#  E0  MODELLO ARRIVATO: i CSV di R268b/d hanno "_ohlc" nel nome, quelli
+#      di R268a/c NO. E CONTRO-ESEMPIO: se il CSV _OOS di R268a e quello
+#      di R268b sono IDENTICI al centesimo su Trades, Profit, PF ed
+#      Equity DD % -> il -Modello non e' arrivato a uno dei due: R268a/b
+#      NULLI (119 deal a tick e a OHLC con riempimenti uguali al
+#      centesimo non e' un esito credibile).
+#  G1  In R268a, R268b, R268d le due gemelle identiche al centesimo
+#      (Profit, PF, DD, Trades) e i due per-trade identici riga per riga
+#      tranne il magic. Se no, quel file e' NULLO. (A tick e' anche la
+#      prova che il tick reale e' DETERMINISTICO su questo banco.)
+#  L0  Lato: TUTTE le chiusure di ogni per-trade hanno deal_type 1
+#      (chiudono un long). Una sola eccezione = pin del lato non arrivato
+#      -> file NULLO.
+#  C0  Commissione (classe 844): k = (somma net - Profit) / somma volumi
+#      in [1,00 ; 3,00] EUR/lotto e uguale fra le gemelle (R260a: 1,8113).
+#      Ogni ricostruzione del saldo toglie k x volume.
+#  G0  IL BANCO E' QUELLO DI R260a? -- su R268b contro il per-trade
+#      795301 ristretto alle chiusure >= 2024.07.06 (par. 6.3). Tre
+#      pezzi, TUTTI necessari:
+#      G0-n         CSV _OOS di R268b: Trades = 119 esatto.
+#      G0-STRUTTURA per-trade 797202 contro 795301 ristretto: 119 righe
+#                   contro 119, abbinate per CHIAVE (close_time, price),
+#                   NON per posizione (classe 849); deal_type uguale;
+#                   DIVERSE 0. Stesse position raggruppate uguali.
+#      G0-LOTTO     per ogni posizione, V' (R268b) dentro
+#                   [floor(V x B'/B) - 0,01 ; floor((V+0,01) x B'/B) + 0,01]
+#                   con V, B di R260a e B' = saldo di R268b prima della
+#                   posizione (col k): il pin del deposito e del rischio
+#                   sono arrivati.
+#      G0-SOLDI     per ogni deal |net'/vol' - net/vol| <= 0,01/vol' +
+#                   0,01/vol EUR per lotto (arrotondamento al centesimo
+#                   dei due net): il cambio e i prezzi di uscita sono gli
+#                   stessi.
+#      VERDE = tutti e quattro. Allora Profit, PF e DD di R268b cadono
+#      per costruzione nelle bande del par. 6.3; se un numero ne esce con
+#      i quattro pezzi VERDI, l'errore e' nella MIA simulazione, non nel
+#      banco, e si scrive.
+#      ROSSO = anche uno solo manca -> IL BANCO E' CAMBIATO e R268 NON SI
+#      LEGGE (ne' lo scarto, ne' la correzione dei DD lunghi, ne' R268d).
+#      Cause concorrenti, PER NOME, da separare prima di dire quale:
+#        (a) lo SPREAD in memoria del terminale (classe 394);
+#        (b) lo storico M1 XAUUSD del PC ricaricato o diverso;
+#        (c) il binario (SHA256 diverso da quello di R260, classe 166);
+#        (d) deposito o rischio non arrivati (G0-LOTTO lo separa).
+#  G0d IL TRATTO 2020-2026 DI R268d = R260a? (gratis, stessa geometria,
+#      stessi pin): per-trade 797204 ristretto alle chiusure >=
+#      2020.01.01 (inizio dell'OOS di R260a; la prima chiusura di 795301
+#      e' il 2020.01.03, quindi una chiusura di R268d il 01-02/01/2020 e'
+#      una DIVERGENZA da vedere, non da tagliare -- allineato a R268d
+#      par. 4 dal cancello del 27/09) contro 795301 intero: 375 righe
+#      contro 375, abbinate per
+#      (close_time, price), deal_type uguale, DIVERSE 0 -> VERDE-STRUTTURA
+#      (i soldi NON si confrontano: il saldo al 2020 di R268d e' un altro).
+#      ROSSO -> R268d NON si legge come "la stessa sedia sui 22 anni".
+#      Eccezione ammessa PER NOME, a grana di deal (classe 856): nessuna.
+#  G1c R268c: cella 0,5 == CSV _OOS di R268a al centesimo (Trades,
+#      Profit, PF, Equity DD %); DD distinti sulle 4 celle (asse PIATTO =
+#      pin del rischio non arrivato = R268c NULLO); Trades IDENTICI sulle
+#      4 celle (R193b B5; diversi = pavimento del lotto, margine o rifiuti
+#      mordono: il DD di R268c non si legge finche' non si capisce).
+#      Per-trade 797203: si IDENTIFICA (classi 850/855): la cella la cui
+#      riga da' k = (somma net - Profit)/lotti entro +-0,01 dal k di
+#      R268a; piu' celle = AMBIGUO (non si legge, non si annulla);
+#      nessuna = per-trade NON letto, file NON nullo.
+#  P0-TICK  par. 0.
+#  R3  RISCHIO (a qualunque n): par. 6.2 (lo scarto) e R268c/R268d.
+#  R4  NESSUNA CELLA SI PROMUOVE, NESSUNA TAGLIA SI PROPONE. Il round
+#      consegna: r e la sua ipotesi; K1; la curva DD(taglia) a tick su 2
+#      anni (R268c); il DD solo-long sui 22 anni (R268d) corretto con r
+#      se H-CORR. Cosa farne e' una firma di Claudio, con i vincoli che
+#      la classe 860 obbliga a scrivere accanto: la finestra da cui viene
+#      ogni riga; il contratto (22 anni, R100, straddle geometria R17:
+#      altra configurazione); la taglia UNIFORME del preset FTMO (r.98-99:
+#      FTMO vieta le size erratiche; R193b C3).
+#
+# =====================================================================
+#  8. ORDINE E CONDIZIONI DI LANCIO (per la riga; classe 854: dichiarare
+#     una condizione NON e' applicarla -- la riga la deve APPLICARE)
+# =====================================================================
+#  Ordine: R268b -> R268a -> R268c -> R268d.
+#  R268b per primo: e' il G0, ed e' il piu' corto.
+#  R268c SOLO SE il job R268a (2 gemelle x moncone + gamba lunga) ha
+#  impiegato <= 5 minuti di orologio: allora una passata tick lunga sta
+#  sotto ~2 minuti e le 4 celle di R268c sotto ~8 (mandato: "se il costo
+#  resta sotto 10 min"). Oltre i 5 minuti R268c NON parte e si scrive
+#  "R268c non lanciato per costo, R268a = <minuti>".
+#  Nessun'altra condizione d'arresto: un G0 ROSSO si LEGGE dopo, non
+#  ferma la corsa (costa meno finirla che rilanciarla).
+#
+# =====================================================================
+#  9. MAGIC -- VERGINI, CERCATI IL 27/09/2026
+# =====================================================================
+#  Blocco 7972xx, cercato su tutto il disco e su tutti i rami (dopo
+#  git fetch --all):
+#     grep -rIE --exclude-dir=.git "\b7972[0-9]{2}\b" /home/user -> 0
+#     git grep -E "\b7972[0-9]{2}\b" $(git for-each-ref --format=
+#        '%(refname)' refs/heads refs/remotes)                  -> 0
+#  (7968xx scartato: 11 occorrenze sui rami.) Esclusi per mandato:
+#  7953xx, 7966xx, 7967xx; e 7704xx (sedie).
+#  797201/797251 (R268a), 797202/797252 (R268b), 797203 (R268c),
+#  797204/797254 (R268d). Per-trade attesi in Common\Files (ExportTrades
+#  r.846): abtg_trades_ABTG_MaxMinNotte_XAUUSD_<magic>.csv (7 file).
+#
+# =====================================================================
+#  10. COSTO IN TEMPO MACCHINA
+# =====================================================================
+#  Base MISURATA sullo STESSO PC (DESKTOP-H4D7CAJ), giornale dell'agente
+#  del 27/09 (risultati_archivio/ROUND_CORTI_B_2026-09-27/LOG_TESTER/
+#  0003_Agent-127.0.0.1-3000_logs_20260927.log, UTF-16):
+#   - XAUUSD H2 OHLC M1, 6,5 anni (R260): 3,7-5,8 s per passata lunga,
+#     0,3-1,1 s il moncone; ~1 minuto di orologio per job (3 job in ~3').
+#   - D30EUR M15 TICK, 21 mesi (R261): 5,2-22,2 s per passata.
+#   - U30USD M5 TICK, gambe da 9-12 mesi (R262/R263): 8,9-18,7 s.
+#  Il mandato stimava 0,5-1 min per passata tick DAX su 2 anni: il
+#  misurato e' piu' basso (5-22 s). Sull'ORO a tick la densita' dei tick
+#  BCM e' [NON MISURATA] (i conteggi in casa sono D30EUR 30,9 / NASUSD
+#  64,7 / U30USD 156,1 milioni sul 2024.09.26 -> 2026.06.30, MAPPA_COSTO
+#  par. 6.3): STIMA 0,5-2 min per passata lunga.
+#   R268a  2 x (moncone + 2 anni tick)          1-4 min [STIMA]
+#   R268b  2 x (moncone + 2 anni OHLC)          ~1 min (job)
+#   R268c  4 celle x 2 anni tick (se parte)     2-8 min [STIMA]
+#   R268d  2 x (moncone + 22 anni OHLC)         1-2 min (13-20 s per
+#          passata = 3,4 x la misura di R260) [STIMA]
+#  TOTALE: ~5-15 minuti di tester + avvio/compilazione per job, PIU' due
+#  voci [NON MISURATE]: (1) la prima sincronizzazione dei tick XAUUSD sul
+#  PC (se non sono in cache: download di 2 anni di tick, minuti); (2) lo
+#  scarico delle M1 XAUUSD 2004-2019 per R268d (il giornale del 27/09
+#  mostra M1 in cache dal 2018.01.02; piu' indietro [NON VERIFICATO]).
+#  RAM: la NOTA del 01/09 ha visto "no memory for ticks generating" con
+#  8 agenti su 16 GB; dopo, ~1 min a passata con 4 agenti.
+#  Tetto dichiarato: 45 minuti; oltre ci si ferma e si guarda.
+#
+# =====================================================================
+#  11. I BUCHI, PER NOME
+# =====================================================================
+#  - La profondita' dei tick XAUUSD: [NON VERIFICATA] (par. 0, P0-TICK).
+#  - La densita' dei tick XAUUSD e quindi il costo a tick: [NON MISURATI].
+#  - LO SPREAD delle corse OHLC (R268b/d): [NON PINNATO] (classe 394).
+#  - La commissione FTMO su XAUUSD: [NON MISURATA]; il tester usa BCM.
+#  - L'orologio dell'oro: [INFERITO] = forex.
+#  - Il merito a tick: SOSPESO (n ~92 < 150), per costruzione.
+#  - Il prior dello scarto viene da un altro EA (EMA200 H4, ingressi a
+#    mercato): non si trasferisce, orienta.
+#  - Slippage e requote VERI di FTMO: il tick reale del tester li
+#    modella solo in parte (i salti fra tick), non l'esecuzione del
+#    broker. Lo stress in post-processing sta in prove/COLLAUDO_ORO_
+#    770402_LONG_CRITERI.md, non qui.
+#  - Nessuna misura a tick esiste PRIMA del 2024: il DD dei 22 anni
+#    resta OHLC (corretto con r al piu').
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H2
+@DAQUANDO   2024.07.05
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR268A
+InpMagic=797201||797201||50||797251||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

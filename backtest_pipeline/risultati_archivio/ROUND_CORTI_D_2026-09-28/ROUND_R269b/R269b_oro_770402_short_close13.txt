@@ -1,0 +1,112 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R269b -- ORO 770402 SOLO SHORT, FLAT ALLE 13:00 BCM (invece di 17:30)
+#  XAUUSD H2, OHLC M1 (-Modello 1), deposito 100000, rischio 0,5%.
+#  Magic 797212 / 797262 (gemelle a passo 50: G1 e un per-trade per
+#  gemella). Per-trade in Common\Files:
+#    abtg_trades_ABTG_MaxMinNotte_XAUUSD_797212.csv e _797262.csv
+#
+#  TUTTO IL RAGIONAMENTO, I CANCELLI E IL COSTO STANNO NEL FILE DI TESTA:
+#    prove/R269a_oro_770402_long_close13.txt
+#  Base = R260b (prove/R260b_oro_770402_solo_short.txt, per-trade 795302,
+#  k 1,8039). Rispetto a R260b cambiano SOLO:
+#    InpCloseHour 17 -> 13, InpCloseMin 30 -> 0  (l'ora del flat, UNA
+#      variabile in due pin: testa par. 2)
+#    InpComment = MAXMINR269B   (solo commento dell'ordine)
+#    InpMagic   = 797212||797212||50||797262||Y
+#  (diff eseguito con uno script sui pin di R260b, non a mano)
+#
+#  COSA CAMBIA, CONTATO PRIMA (per-trade 795302):
+#   posizioni 232 ESATTE (le entrate non cambiano); 25 chiudono tutte
+#   prima delle 13:00 (net -284,53, PF 0,937): intoccate; 207 sono VIVE
+#   alle 13:00 (net +9.449,81, PF 1,300): riprezzate. Di quelle: 50 stop
+#   pieni dopo le 13:00 (-25.030) e 118 timestop delle 17:30 (+17.175,
+#   PF 3,65 per l'autopsia): il contro-esempio della testa vale qui piu'
+#   forte (lo short ha piu' stop pomeridiani, 50 su 59).
+#
+#  ATTESA (scritta PRIMA): posizioni 232 ESATTE; Trades = 50 deal prima
+#  delle 13:00 + 207 flat = 257 ESATTI [DERIVATO; zero deal di R260b nel
+#  minuto 13:00]; stop pieni rimasti 9 ESATTI. Merito LEGGIBILE (232 >=
+#  150). Base: PF in posizioni 1,2545, Equity DD % 4,0755.
+#   PF -- PARTIZIONE:
+#     P1  PF_13 >= 1,35   la sessione USA e' il rischio da tagliare
+#                         (soglia dell'autopsia, B.4 #1);
+#     P2  1,15 <= PF_13 < 1,35  rischio simmetrico (base 1,255 +-0,1);
+#     P3  PF_13 < 1,15    il flat spegne il timestop del pomeriggio.
+#   Metro: bootstrap IID del PF di R260b (4000 ricampionamenti delle 232
+#   posizioni): sd 0,200, 5-95% 0,971-1,615 [MISURATO].
+#   DD (Equity DD % del CSV _OOS, gemella 797212, 0,5%) -- PARTIZIONE:
+#     Q1  DD_13 <= 3,06%  (<= 0,75 x 4,0755);
+#     Q2  3,06% < DD_13 <= 4,0755%;
+#     Q3  DD_13 > 4,0755%.
+#   PREVISIONE MIA: P2 e Q1 (gli stop pieni sono l'82% della perdita
+#   lorda dello short, autopsia B.1, e 50 dei 59 cadono dopo le 13:00:
+#   -25.030 ai lotti di R260b).
+#  CANCELLI: quelli della testa (R0, G1, L0 con deal_type 0, C0, S-FLAT,
+#  G0-POS 232, G0-PRE contro 795302 sui 50 deal prima delle 13:00, N0
+#  257, R4).
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  50503392 (che ha la sedia viva 770402), 50504263, 10105439 (REALE),
+#  541452707 (FTMO). Nessuna riga di lancio qui. Non tocca preset, EA,
+#  sedie, conti, taglie.
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H2
+@DAQUANDO   2019.12.30
+@FINOA      2026.06.30
+@FRAZIONEIS 0.0005
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=13||13||0||13||N
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR269B
+InpMagic=797212||797212||50||797262||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

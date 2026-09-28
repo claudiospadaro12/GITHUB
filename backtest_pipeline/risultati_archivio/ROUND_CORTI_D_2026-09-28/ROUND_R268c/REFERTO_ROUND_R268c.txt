@@ -1,0 +1,43 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 9b838084bf95dfd157c51fdc96de970386cc6a91
+data            : 2026-09-28 07:35:28   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_MaxMinNotte
+file prova      : R268c_oro_long_TICK_asse_rischio.txt   (5727 byte, dal pin)
+etichetta       : R268c
+simbolo         : XAUUSD
+periodo         : H2
+da quando       : 2024.07.05
+modello         : 4  (tick reali)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte\ABTG_MaxMinNotte_XAUUSD_IS_R268c.csv
+  ESITO : NON MISURATO -- CSV DA 0 BYTE
+  >>> Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: guardare il log
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte\ABTG_MaxMinNotte_XAUUSD_OOS_R268c.csv
+  righe : 4
+    Pass 0    Profit 5165.82      PF 1.45273    Equity DD % 2.3434     Trades 118
+    Pass 1    Profit 10585.28     PF 1.44632    Equity DD % 4.7464     Trades 118
+    Pass 2    Profit 15926.46     PF 1.43462    Equity DD % 7.1353     Trades 118
+    Pass 3    Profit 21613.18     PF 1.43288    Equity DD % 9.4253     Trades 118
+  ESITO : LETTO -- 4 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: NON MISURATO -- CSV mancanti o vuoti: IS

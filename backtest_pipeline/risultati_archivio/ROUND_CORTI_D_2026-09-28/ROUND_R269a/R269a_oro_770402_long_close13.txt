@@ -1,0 +1,233 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R269 -- L'ORO ESCE PRIMA DI NEW YORK? (flat alle 13:00 BCM invece
+#  delle 17:30) -- piu' R269c, il DAX long un'ora prima dell'asta Xetra.
+#  FILE DI TESTA dei due file oro (R269a LONG, R269b SHORT); R269c ha
+#  la sua testa (e' un altro simbolo e un'altra domanda).
+#  R269a: XAUUSD H2, OHLC M1 (-Modello 1), deposito 100000, rischio 0,5%,
+#  SOLO LONG, flat alle 13:00 BCM. Magic 797211 / 797261 (gemelle a
+#  passo 50: G1 e un per-trade per gemella). Per-trade in Common\Files:
+#    abtg_trades_ABTG_MaxMinNotte_XAUUSD_797211.csv e _797261.csv
+#  Scritto il 27/09/2026. Criteri congelati PRIMA dei numeri.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS (firma del
+#  21/09/2026); NON sul banco 50504400 (C:\MT5_Backtest, spento); NON su
+#  50503392 (che ha la sedia viva 770402), 50504263, 10105439 (REALE),
+#  541452707 (FTMO). Nessuna riga di lancio qui. Non tocca preset, EA,
+#  sedie, conti, taglie. Vincoli di banco = R260 (prove/R260c_* testa,
+#  "VINCOLI DI BANCO"): -Deposito 100000, -Modello 1, niente -Spread /
+#  -Ritardo / -FrazioneIS; spread NON pinnato (classe 394).
+# =====================================================================
+#
+#  1. LA DOMANDA (report/AUTOPSIA_PERSI_2026-09-27.md par. B.1 e B.4 #1,
+#     commit 487d9dc8)
+#  L'autopsia del per-trade di R260a/b ha misurato: il 52% (long, 29/56)
+#  e il 54% (short, 32/59) degli STOP PIENI chiudono fra le 13:30 e le
+#  15:29 BCM (sessione USA), una fetta che e' il 19% della vita del
+#  trade; gli stop sono il 70% / 82% della perdita lorda da un 20% / 25%
+#  delle posizioni. LA NEWS C'E', IN UNA PARTE (corretto il 27/09 dal
+#  cancello dell'autopsia, commit ed0a7a70, classe 862: la prima stesura
+#  qui diceva "NON e' la news" citando il B.3 per GIORNO, PF 1,18 contro
+#  1,20, che e' stato RITIRATO): alla grana dei minuti 24 stop pieni su
+#  88 (long+short, tratti coperti 2021-2025) chiudono entro 30' da un
+#  dato USD High contro 12,5 attesi per caso (P 0,003), 12 entro 5'
+#  contro 4,8; placebo UTC+2 -> 0 e 0. Quindi ~1 stop su 7 e' del dato,
+#  ~3/4 e' sessione. Il flat alle 13:00 resta la misura giusta della
+#  SESSIONE USA (stop + news INSIEME): non separa le due cause, e non
+#  lo promette. Manopola che ESISTE: InpCloseHour/
+#  InpCloseMin (r.130-131; EndOfDay r.254 e r.487-491: al primo tick con
+#  ora >= InpCloseHour:InpCloseMin cancella i pendenti e chiude la
+#  posizione). Mai messa a 13 su questa sedia.
+#
+#  2. L'ASSE: ORA + MINUTI, 17:30 -> 13:00, e perche' NON 13:30
+#  Il mandato proponeva "InpCloseHour 13 / 17" (base 17 con
+#  InpCloseMin=30: verificato nel sorgente r.130-131, default 17 e 30, e
+#  in R260a). Scelgo ORA+MINUTI = 13:00 (InpCloseHour=13, InpCloseMin=0).
+#  Motivo, misurato sul per-trade di R260a/b, due numeri:
+#   (a) 13:30 BCM E' IL MINUTO DEL DATO USA delle 8:30 ET sul vecchio
+#       orologio (server = ora di Londra, fino a fine 2024, tutte e due le
+#       stagioni) e d'estate sul nuovo (UTC+1 fisso): un flat alle 13:30
+#       esce SUL dato, non prima. E in OHLC M1 esce al primo tick
+#       GENERATO della barra 13:30, cioe' all'apertura della barra: un
+#       prezzo pre-dato che il tick reale non darebbe -> numero
+#       FAVOREVOLE per costruzione del modello. Alle 13:00 il dato e'
+#       QUASI sempre dopo (13:30 o 14:30 BCM a seconda di orologio e
+#       stagione). ECCEZIONE, trovata dal cancello (27/09): sul VECCHIO
+#       orologio (2020-2024) nelle settimane di SFASAMENTO dell'ora legale
+#       (USA gia' in EDT dalla seconda domenica di marzo, UE ancora in
+#       solare fino all'ultima; e dall'ultima domenica di ottobre alla
+#       prima di novembre) il dato delle 8:30 ET cade alle 12:30 BCM,
+#       PRIMA del flat: 58 eventi USD High 2021-2024 nel file news
+#       (contati per data contro i due calendari; il 2020 non e' nel
+#       file), fra cui i 4 NFP di novembre 2021.11.05, 2022.11.04,
+#       2023.11.03, 2024.11.01 (12:30 UTC = 12:30 BCM). Sul NUOVO orologio (UTC+1
+#       fisso) lo sfasamento di marzo da' 13:30: dopo. ~3-4 settimane
+#       l'anno per 5 anni: il flat alle 13:00 NON toglie quei dati, e si
+#       dichiara come buco (par. 7). Negli stessi giorni la 13:30 del
+#       punto (a) non e' il minuto del dato.
+#   (b) nel minuto 13:30 R260a ha 9 deal long e 2 short, nel minuto
+#       13:00 ZERO su tutti e due i lati: con le 13:00 il numero di deal
+#       atteso e' ESATTO (par. 4), con le 13:30 no.
+#  E' l'autopsia stessa a scrivere "flat prima di New York: 13:00
+#  server" (B.4 #1). Una variabile concettuale (l'ora del flat), due pin
+#  che la esprimono -- come l'orologio di R246 (5 pin, una variabile).
+#  PERCHE' NON UN ASSE 13/17 NELLO STESSO FILE: il per-trade e' uno per
+#  magic e sopravvive quello dell'ultima cella (classi 455/850); la
+#  lettura "quanti stop pieni restano" vuole il per-trade della cella
+#  13:00 CERTO. La cella 17:30 esiste gia' ed e' R260a (per-trade 795301
+#  in archivio, stesso binario, stesso PC): e' la base del confronto. Il
+#  banco si controlla con il G0 dentro questo file (par. 5), senza la
+#  cella 17:30.
+#
+#  3. COSA CAMBIA, CONTATO PRIMA (per-trade 795301, k 1,8113):
+#   - Le ENTRATE non cambiano (07:00-08:30, prima del flat): posizioni
+#     279 ESATTE.
+#   - 37 posizioni chiudono TUTTE prima delle 13:00 (net -3.795,58 ai
+#     lotti di R260a, PF 0,512): il flat non le tocca.
+#   - 242 posizioni sono VIVE alle 13:00 (net +17.857,71, PF 1,523 alle
+#     loro uscite vere): il flat le riprezza TUTTE. Non e' un ritocco:
+#     cambia l'uscita dell'87% delle posizioni.
+#   - Di quelle 242: 41 sono stop pieni dopo le 13:00 (-21.417) e 161 sono
+#     TIMESTOP delle 17:30 (+22.882, PF 2,80 per l'autopsia).
+#  IL CONTRO-ESEMPIO, dichiarato dal mandato e qui col numero: i
+#  timestop VINTI vivono anch'essi attraverso le ore USA. Il per-trade
+#  non dice QUANDO maturava il loro utile (niente curva intragiornaliera):
+#  se matura dopo le 13:00, il flat taglia +22.882 insieme a -21.417, e
+#  il PF CALA. E la cella H4 del DAX (autopsia A.3) ha gia' mostrato
+#  "lasciar correre / chiudere prima" cambiare il segno di 26 giornate
+#  su 72. La previsione dell'autopsia (PF > 1,45) NON e' un'attesa mia.
+#
+#  4. L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#   Posizioni 279 ESATTE. Deal (Trades del CSV) = 64 deal chiusi prima
+#   delle 13:00 in R260a + 1 deal di flat per ognuna delle 242 vive =
+#   306 ESATTI [DERIVATO; zero deal di R260a nel minuto 13:00].
+#   Merito LEGGIBILE (279 >= 150). Base: PF in posizioni 1,3357, Equity
+#   DD % 4,5172 (R260a, stessa finestra e banco).
+#   IL PF -- tre ipotesi che sono una PARTIZIONE (PF in posizioni = net
+#   per posizione meno k x volume):
+#     P1  PF_13 >= 1,45   "la sessione USA e' il rischio da tagliare"
+#                         (soglia dell'autopsia, B.4 #1);
+#     P2  1,25 <= PF_13 < 1,45  "rischio SIMMETRICO: taglia vinti e
+#                         persi" (la base 1,336 +-~0,1);
+#     P3  PF_13 < 1,25    "il motore e' il timestop del pomeriggio: il
+#                         flat alle 13 lo spegne" (il contro-esempio).
+#   Metro della banda +-0,1: meno del bootstrap IID del PF di R260a
+#   (4000 ricampionamenti delle 279 posizioni: sd 0,192, 5-95% 1,061-
+#   1,691 [MISURATO]): un esito in P2 NON e' distinguibile dalla base.
+#   IL DD (Equity DD % del CSV _OOS, gemella 797211, a 0,5%) -- tre
+#   ipotesi, PARTIZIONE, soglia del quarto scelta da me [NON MISURATA]:
+#     Q1  DD_13 <= 3,39%  (<= 0,75 x 4,5172): il flat taglia il rischio
+#                         di almeno un quarto;
+#     Q2  3,39% < DD_13 <= 4,5172%: lo taglia meno di un quarto;
+#     Q3  DD_13 > 4,5172%: non lo taglia (il DD sta nelle 37 posizioni
+#                         del mattino o nei flat in perdita).
+#   PREVISIONE MIA: P2 e Q1. Motivo: 41 stop pieni del pomeriggio
+#   (-21.417) pesano sul DD piu' di quanto i timestop pesino sul PF, ma
+#   il PF perde la coda dei timestop.
+#   Si scrivono SEMPRE (non decidono): le due meta' al 2023.04.01 (R2 di
+#   R260), anno per anno, il DD a saldo chiuso con k, e gli stop pieni
+#   rimasti: 15 ESATTI in R269a (56 - 41: sono deal prima delle 13:00,
+#   identici per G0-PRE) e 9 in R269b (59 - 50). Lo script dell'autopsia
+#   si lancia con --close 13:00 (il flat e' il TIMESTOP nuovo).
+#
+#  5. I CANCELLI (congelati; si citano come <nome> [R269])
+#  R0   -SoloControllo: 2 celle per finestra. Altrimenti STOP.
+#  G1   gemelle 797211/797261 (R269b: 797212/797262) identiche in CSV e
+#       per-trade tranne il magic. Se no, file NULLO.
+#  L0   tutte le chiusure con deal_type 1 (R269a) / 0 (R269b). Se no,
+#       NULLO.
+#  C0   k in [1,00 ; 3,00] EUR/lotto, uguale fra le gemelle (classe 844).
+#  S-FLAT (il pin dell'ora e' arrivato?): nessun deal alle 17:30 e
+#       nessun deal dopo le 13:59:59. Un deal alle 17:30 = pin NON
+#       arrivato = file NULLO.
+#  G0-POS  posizioni = 279 (R269a) / 232 (R269b) ESATTE.
+#  G0-PRE  i deal chiusi PRIMA delle 13:00:00 sono gli STESSI di R260a
+#       (795301: 64 deal) / R260b (795302: 50 deal), abbinati per CHIAVE
+#       (close_time, price) (classe 849), deal_type uguale, DIVERSE 0; e
+#       per ognuno |net'/vol' - net/vol| <= 0,01/vol' + 0,01/vol EUR per
+#       lotto (i LOTTI divergono dal primo giorno riprezzato: il saldo e'
+#       un altro; il netto per lotto no).
+#       G0-POS + G0-PRE VERDI = banco = quello di R260 e pin arrivati.
+#       ROSSO = il file non si legge contro R260a/b; cause per nome:
+#       spread in memoria (classe 394), storico M1, binario (classe 166).
+#  N0   Trades del CSV = 306 (R269a) / 257 (R269b). Diverso con G0 VERDI =
+#       GIALLO: un parziale preso sul primo tick delle 13:00 (ManagePos
+#       r.238 gira prima del controllo del flat r.254); si conta e si
+#       scrive, NON annulla.
+#  R4   NESSUNA CELLA SI PROMUOVE. Il file risponde "il flat alle 13:00
+#       cambia PF e DD, e in che direzione". Cambiare l'ora del flat di
+#       una sedia e' una firma di Claudio (e con FTMO = BCM + 2 h
+#       d'estate, 13:00 BCM = 15:00 sul server FTMO: da tradurre).
+#
+#  6. COSTO: 2 gemelle x (moncone di 2 giorni + 6,5 anni OHLC). MISURATO
+#  sullo stesso PC per R260a (giornale dell'agente 27/09): 3,7-5,8 s per
+#  passata lunga, ~1 minuto di orologio per job. R269a ~1 min, R269b
+#  ~1 min.
+#
+#  7. BUCHI: le settimane di sfasamento dell'ora legale USA/UE sul
+#  vecchio orologio, dove il dato delle 8:30 ET cade alle 12:30 BCM,
+#  prima del flat (par. 2 (a)). OHLC M1 = DD limite inferiore e uscita delle 13:00 al primo
+#  tick generato della barra (niente slippage); la stessa domanda a TICK
+#  si puo' fare solo sul tratto 2024.07 -> (R268, P0-TICK) e NON e' qui;
+#  il flat alle 13:30 (sul dato) NON e' misurato (una variabile per
+#  file); orologio dell'oro [INFERITO] = forex (il vecchio orologio e'
+#  l'ora di Londra: 13:00 BCM = 13:00 Londra fino a fine 2024).
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H2
+@DAQUANDO   2019.12.30
+@FINOA      2026.06.30
+@FRAZIONEIS 0.0005
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=13||13||0||13||N
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR269A
+InpMagic=797211||797211||50||797261||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
