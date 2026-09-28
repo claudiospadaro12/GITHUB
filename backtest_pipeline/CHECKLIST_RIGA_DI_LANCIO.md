@@ -36419,3 +36419,33 @@ entrano nella firma. (2) Ogni verdetto che boccia (costo, merito H0, rischio R3)
 M2 contro il controllo), non si ristampano. Contro-esempi nell'autotest (69/69): 4 ROSSI con 3 senza pavimento -> NON DIMOSTRATA;
 tutti col pavimento -> NON ESCLUSO; segni diversi; 1 solo ROSSO di R264 -> NON APPLICABILE; archivio vero: 6 certificati R266,
 K1 EURUSD 35,3-36,8x, E4 e2 INDIZIO. Mutazioni eseguite (pavimento ignorato, U6 e E4 forzati): FAIL.
+
+### CLASSE 914 — il CERTIFICATO DI MORTE con le caselle cablate a `True` e stampate come "coperte da QUESTO round" senza un file nominato; la banda di classe 178 stampata senza il LATO; e la causa del ROSSO lasciata al lotto dopo che il referto padre l'aveva declassata (28/09/2026, controllo preventivo su `report/LETTURA_ROUND_CORTI_C2_2026-09-28.md` @ `3192ec19`, lettore `leggi_round_corti_c.py` @ `f7d95442`; figlia della 913 e della 180)
+Caso, quattro facce, un solo referto che ARCHIVIA (EMA200 H4 XAUUSD, NO PER RISCHIO su IS 2017-23, DD 13,32% @1% al centro):
+(a) **Caselle cablate.** `sez_griglia` chiamava `certificato(True, True, x4.ok, True, True, ...)`: gemelli e TF a `True` fisso, e la
+funzione li stampava come *"coperte da QUESTO round: (1) PF, (2) n e DD, (3) uscita ad asse, (4) gemelli, (5) TF"*, poi
+*"certificato COMPLETO da questo round + archivio"*. La raccolta C2 e' **solo XAUUSD H4** (InpTF=16388 in 26 righe CSV su 26):
+(4) e (5) non stavano nel round, e "archivio" non nominava niente. La testa R264 par. 8 S8 li assegnava ai "quattro simboli +
+EURUSD di R265", ma nella riga C quei G0 sono ROSSI, le griglie SALTATE, ed EURUSD e' NON ANCORA MISURATO: la premessa della
+testa **non si era avverata** e il lettore la stampava come fatta. Le misure vere esistono: R139a AUDJPY H4 (IS PF 0,780-0,807,
+n 757-768), R139b GBPUSD H4 (IS 0,803-0,838), R32a XAUUSD H1 (IS 0,561-0,846, ma @DAQUANDO 2024.09.26). Il verdetto era giusto
+per caso, non per costruzione: con i file assenti sarebbe uscito COMPLETO lo stesso.
+(b) **Banda senza lato.** *"FUORI dalle due bande (0.836): se e' alto il primo sospetto e' un baco o un pin non arrivato"*: la
+stessa frase per 0,60 e per 2,00. 0,836 e' SOTTO H_FETTA (0,85-1,08), non sopra H_MOTORE: il sospetto del baco non si applica.
+(c) **Causa del ROSSO non riportata.** Il referto C (913) aveva declassato il ROSSO a CAUSA NON DIMOSTRATA; la C2 ricopiava il
+K1 con "23 coppie su 67 al pavimento" e "a 100000 il pavimento del lotto non morde" senza la diagnosi: il lettore finisce col
+credere che la causa sia il lotto.
+(d) **Le due spiegazioni non nominate.** IS < 1 su 9/9 e OOS >= 1,22 su 9/9: REGIME (S4) contro STORICO M1 pre-2024 diverso.
+D0 ok (0,79-0,89) esclude la seconda solo sul TASSO, e la prova di regime dell'IS (toro 2019-20) e' non misurabile (per-trade
+solo OOS, primo deal 2024.01.05): il referto non lo diceva.
+Regola: (1) una casella del certificato riempita FUORI dal round si stampa separata ("dall'ARCHIVIO, per nome"), col file e il
+PF/n/DD letti dal CSV, e vale solo se il file ESISTE, ha Trades > 0 e -- per il TF -- porta un InpTF diverso da quello del
+round; mai un `True` cablato. (2) Una banda di classe 178 fuori dalle due bande dice il LATO, e il sospetto che le corrisponde.
+(3) Una raccolta figlia porta la diagnosi del ROSSO del referto padre, LETTA per quello che dice (e NON LETTO se manca). (4)
+IS e OOS di segno opposto su tutta la griglia: le due spiegazioni per nome, e la prova di regime dichiarata NON MISURATA se il
+per-trade non copre l'IS. Contro-esempi nell'autotest (74/74): file d'archivio assenti -> NON ANCORA MISURATO; CSV del TF con
+InpTF=16388 -> la casella TF non vale; referto padre con "PAVIMENTO NON ESCLUSO" -> non diventa NON DIMOSTRATA; referto assente
+-> NON LETTO; archivio vero C2: banda SOTTO, certificato per nome, causa letta, regime NON MISURATA. Mutazioni eseguite (arch
+spento, banda spenta, filtro TF spento, casella forzata): FAIL. Fixture C: diff 0 (10 referti, a meno della riga col percorso); referto C reale: `tail -n +13` identico.
+Rilievo aperto: fuori dalla C2 (`raccolta_c2=False`) il ramo vecchio resta, per tenere invariato il referto C: una griglia
+R264a/c che un giorno partisse con PF < 1 stamperebbe ancora gemelli e TF "da questo round". Va chiuso prima di quel round.

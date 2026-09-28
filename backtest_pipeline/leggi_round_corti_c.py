@@ -625,12 +625,93 @@ def verdetto_rischio(violato, n, soglia_txt, ohlc=False):
     return "NON VIOLATO su n = %d (RISCHIO PASSATO solo con n >= %d, classe 804; %s)" % (n, N_MERITO, soglia_txt)
 
 
-def certificato(pf_ok, n_dd_ok, uscita_ok, gemelli_ok, tf_ok, pf_txt):
-    """certificato di morte a 5 caselle (CLAUDE.md 09/09): PF, n+DD, uscita ad asse, gemelli, TF."""
+def certificato(pf_ok, n_dd_ok, uscita_ok, gemelli_ok, tf_ok, pf_txt, arch=None):
+    """certificato di morte a 5 caselle (CLAUDE.md 09/09): PF, n+DD, uscita ad asse, gemelli, TF.
+    arch (classe 914): OrderedDict casella -> (ok, testo) per le caselle riempite dall'ARCHIVIO, PER NOME. Quelle caselle NON
+    si scrivono fra le 'coperte da QUESTO round' (prima: gemelli e TF passati a True e stampati come coperti dal round, senza
+    un file nominato). Senza arch l'uscita e' identica a prima (referto C invariato)."""
     caselle = OrderedDict([("(1) PF", pf_ok), ("(2) n e DD", n_dd_ok), ("(3) uscita ad asse", uscita_ok), ("(4) gemelli", gemelli_ok), ("(5) TF", tf_ok)])
+    if arch is None:
+        manc = [k for k, v in caselle.items() if not v]
+        verd = "NON ANCORA MISURATO (mancano: %s)" % ", ".join(manc) if manc else "certificato COMPLETO da questo round + archivio: un NO qui e' un NO con certificato"
+        return "coperte da QUESTO round: %s; %s [%s]" % (", ".join(k for k, v in caselle.items() if v) or "nessuna", verd, pf_txt)
+    for k, (ok, _t) in arch.items():
+        caselle[k] = ok
     manc = [k for k, v in caselle.items() if not v]
-    verd = "NON ANCORA MISURATO (mancano: %s)" % ", ".join(manc) if manc else "certificato COMPLETO da questo round + archivio: un NO qui e' un NO con certificato"
-    return "coperte da QUESTO round: %s; %s [%s]" % (", ".join(k for k, v in caselle.items() if v) or "nessuna", verd, pf_txt)
+    dal_round = [k for k, v in caselle.items() if v and k not in arch]
+    dall_arch = [k for k, (ok, _t) in arch.items() if ok]
+    verd = ("NON ANCORA MISURATO (mancano: %s)" % ", ".join(manc)) if manc else (
+        "certificato COMPLETO (%d caselle da QUESTO round + %d dall'ARCHIVIO, per nome qui accanto): un NO qui e' un NO con certificato" % (len(dal_round), len(dall_arch)))
+    return "coperte da QUESTO round: %s; dall'ARCHIVIO, per nome: %s; %s [%s]" % (
+        ", ".join(dal_round) or "nessuna", " | ".join("%s = %s%s" % (k, "" if ok else "NON RIEMPITA: ", t) for k, (ok, t) in arch.items()) or "nessuna", verd, pf_txt)
+
+
+# classe 914: le caselle (4) gemelli e (5) TF del certificato di R264d (oro) si riempiono SOLO con file d'archivio NOMINATI e
+# PRESENTI nel repo, letti qui (PF/n/DD dal CSV). La testa R264 par. 8 S8 le assegnava ai 'quattro simboli + EURUSD di R265' e
+# alla 'scansione H1': ma nella riga C i G0 di GBPJPY/GBPUSD/AUDJPY sono ROSSI e le loro griglie SALTATE (un G0 e' un controllo
+# di banco, non una misura di merito), ed EURUSD R265 e' NON ANCORA MISURATO. Le misure lunghe dei gemelli sono R139a/R139b.
+BP_DIR = os.path.dirname(os.path.abspath(__file__))
+ARCH_CERT = {
+    "XAUUSD": OrderedDict([
+        ("(4) gemelli", [("R139a EMA200 AUDJPY H4 (16,5 anni, OHLC)", ["risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_AUDJPY_IS_ohlc_r139a.csv", "risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_AUDJPY_OOS_ohlc_r139a.csv"], None),
+                         ("R139b EMA200 GBPUSD H4 (OHLC)", ["risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_GBPUSD_IS_ohlc_r139b.csv", "risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_GBPUSD_OOS_ohlc_r139b.csv"], None)]),
+        ("(5) TF", [("R32a EMA200 XAUUSD H1 (prove/R32a_ema200_xauusd.txt, @DAQUANDO 2024.09.26: finestra recente, NON il 2017-23)", ["risultati_prove/ABTG_EMA200/ABTG_EMA200_XAUUSD_IS_r32a.csv", "risultati_prove/ABTG_EMA200/ABTG_EMA200_XAUUSD_OOS_r32a.csv"], "16388")]),
+    ]),
+}
+ARCH_NOTA = {"(4) gemelli": " (i G0 ROSSI della riga C su GBPJPY/GBPUSD/AUDJPY NON riempiono la casella: controllo di banco, griglie SALTATE)",
+             "(5) TF": " (il TF e' cambiato; il RISCHIO 2017-23 a H1 resta NON MISURATO)"}
+
+
+def arch_cert(sym, base=None):
+    """(classe 914) OrderedDict casella -> (ok, testo) dai CSV d'archivio di ARCH_CERT[sym], letti da `base` (default la cartella
+    di questo script). Una voce vale solo se TUTTI i suoi CSV esistono, hanno almeno una riga con Trades > 0, e -- per la
+    casella TF -- nessuna riga porta InpTF uguale al TF del round (tf_no). Casella ok se almeno una voce vale. None se il
+    simbolo non ha voci (allora il certificato si scrive come prima)."""
+    spec = ARCH_CERT.get(sym)
+    if not spec:
+        return None
+    base = base or BP_DIR
+    out = OrderedDict()
+    for box, voci in spec.items():
+        testi, ok_box = [], False
+        for nome, files, tf_no in voci:
+            parti, ok = [], True
+            for rel in files:
+                pth = os.path.join(base, rel)
+                if not os.path.exists(pth):
+                    parti.append("`%s` ASSENTE" % rel)
+                    ok = False
+                    continue
+                rows = [r for r in leggi_csv(pth) if num(r.get("Trades", "0")) > 0]
+                if not rows:
+                    parti.append("`%s` senza righe con Trades > 0" % rel)
+                    ok = False
+                    continue
+                if tf_no is not None and any(str(r.get("InpTF", "")).strip() == tf_no for r in rows):
+                    parti.append("`%s` porta InpTF = %s (lo STESSO TF del round): non cambia il TF" % (rel, tf_no))
+                    ok = False
+                    continue
+                pf = [num(r["Profit Factor"]) for r in rows]
+                n = [num(r["Trades"]) for r in rows]
+                dd = [num(r["Equity DD %"]) for r in rows]
+                parti.append("`%s`: PF %s-%s, n %d-%d, DD %.2f-%.2f%% a 1%% [MISURATO dal CSV d'archivio]" % (rel, fpf(min(pf)), fpf(max(pf)), min(n), max(n), min(dd), max(dd)))
+            ok_box = ok_box or ok
+            testi.append("%s%s: %s" % (nome, "" if ok else " [NON VALE]", "; ".join(parti)))
+        out[box] = (ok_box, " + ".join(testi) + ARCH_NOTA.get(box, ""))
+    return out
+
+
+def causa_rosso_c(path):
+    """(classe 914) la DIAGNOSI DEL ROSSO del referto della raccolta C (classe 913), LETTA per la C2 (il G0 degli altri tre
+    simboli non e' nella C2: non si rifa'). Ritorna (verdetto, testo): verdetto = il testo in grassetto dopo '-> **' fino al
+    primo punto; ('NON LETTO', motivo) se il file o la riga mancano."""
+    if not path or not os.path.exists(path):
+        return "NON LETTO", "referto della raccolta C `%s` ASSENTE" % (os.path.relpath(path, os.path.dirname(BP_DIR)) if path else "?")
+    for ln in leggi_testo(path).splitlines():
+        if "DIAGNOSI DEL ROSSO" in ln and "-> **" in ln:
+            corpo = ln.split("-> **", 1)[1]
+            return corpo.split(".")[0].strip(" *"), corpo.rstrip("*")
+    return "NON LETTO", "riga 'DIAGNOSI DEL ROSSO' non trovata nel referto della raccolta C"
 
 
 # ---------------------------------------------------------------------------
@@ -1462,6 +1543,11 @@ def sez_griglia(F, R, g, g0lv, g0_nota="", raccolta_c2=False):
             s4 = mz < 1.00 and pfoM >= 1.10
             banda = ("H_MOTORE (IS al centro 1,15-1,40)" if 1.15 <= mz <= 1.40 else "H_FETTA (IS al centro 0,85-1,08: il genetico ha trovato il 2024-26)" if 0.85 <= mz <= 1.08
                      else "ZONA GRIGIA 1,08-1,15: NON CONCLUDENTE" if 1.08 < mz < 1.15 else "FUORI dalle due bande (%.3f): se e' alto il primo sospetto e' un baco o un pin non arrivato" % mz)
+            if raccolta_c2 and mz < 0.85:   # classe 914: il lato si DICE (prima: la frase del lato ALTO stampata anche sotto 0,85)
+                banda = ("SOTTO le due bande (%.3f < 0,85): lato BASSO, oltre H_FETTA (l'IS perde piu' di quanto H_FETTA prevedesse) e lontano da H_MOTORE (1,15-1,40). "
+                         "Il sospetto 'baco o pin non arrivato' della testa par. 7 e' del lato ALTO (> 1,40): qui NON si applica, e il pin e' verificato (P0 sul CSV, par. 0; classe 166 della riga)" % mz)
+            elif raccolta_c2 and mz > 1.40:
+                banda = "SOPRA le due bande (%.3f > 1,40): il primo sospetto e' un baco o un pin non arrivato (testa par. 7), non una scoperta" % mz
             if inert:   # S5: quel file NON conta per S2 (testa par. 8). BORDO/PASSA/NO PER MERITO sono S2: non si scrivono.
                 ver = ("NO PER RISCHIO (S3)" if (ddI > MURO_1PCT or ddO > MURO_1PCT) else "REGIME, non edge (S4: IS < 1,00 e OOS >= 1,10, lo schema R139b)" if s4
                        else "SOSPESO (S1: n IS al mezzo %d < %d deal)" % (nIS, DEAL_MERITO) if nIS < DEAL_MERITO
@@ -1486,6 +1572,14 @@ def sez_griglia(F, R, g, g0lv, g0_nota="", raccolta_c2=False):
             n_pos_is = int(round(nIS / 1.838))
             R.add("- Emendamento della finestra: l'IS si misura in operazioni (%d deal ~ %d posizioni [DERIVATO 1,838 deal/pos]); il VECCHIO (IS) giudica il RISCHIO (DD IS %.2f), il RECENTE (OOS) il MERITO (PF OOS %s); rischio: %s" % (
                 nIS, n_pos_is, ddI, fpf(pfoM), verdetto_rischio(ddI > MURO_1PCT or ddO > MURO_1PCT, n_pos_is, "DD <= 10,0% @1% in IS e OOS", ohlc=True)))
+            if raccolta_c2 and s4:   # classe 914: le DUE spiegazioni di IS < 1 / OOS >= 1,10 per nome, e la prova di regime dell'IS dichiarata
+                prime = [dstr(min(d["t"] for d in po.deals)) for po in (f.pt0() for f in files) if po is not None and po.deals]
+                R.add("- LE DUE SPIEGAZIONI di IS < 1,00 / OOS >= 1,10 (S4; classe 178, per nome): (a) REGIME -- il motore rende solo nel toro dell'oro 2024-26; "
+                      "(b) STORICO -- lo storico M1 2017-23 del PC di backtest non e' quello di oggi (prezzi/spread): D0 ok (par. 0) la esclude SOLO sul TASSO dei deal, "
+                      "NON su prezzi o spread (testa par. 11: storico M1 dal 2017 [NON VERIFICATO]). Nessuna misura di questa raccolta le separa. "
+                      "Prova di regime dell'IS (Emendamento C: %s -- PF < 1 anche nel toro 2019-2020?): **NON MISURATA** -- il per-trade della raccolta parte dal %s (solo OOS) "
+                      "e il CSV d'ottimizzazione da' UN numero per %.0f anni. Il NO PER RISCHIO regge sotto (a) (un DD e' un fatto, Emendamento B); sotto (b) poggerebbe "
+                      "su uno storico sbagliato: si legge NO PER RISCHIO SU QUESTO STORICO, dichiarato." % (g["regime"], min(prime) if prime else "[per-trade NON LETTO]", g["yis"]))
             tab_taglie(max(ddI, ddO), 1.0, R, "Equity DD % max(IS, OOS) al mezzo")
             R.esiti["griglia_" + sym] = ver.split(" (")[0]
             R.esiti["centro_" + sym] = (0.2, g["o2"][1])
@@ -1499,7 +1593,7 @@ def sez_griglia(F, R, g, g0lv, g0_nota="", raccolta_c2=False):
                     if f.t == g["f"][1]:
                         R.esiti["pt_pos_" + sym] = m["n"]
             # certificato (CLAUDE.md 09/09) se il centro esce con PF < 1
-            R.add("- certificato di morte (09/09): %s" % certificato(True, True, x4.ok, True, True, "PF IS mezzo %s, OOS %s" % (fpf(mz), fpf(pfoM))) if mz < 1.0 or pfoM < 1.0 else
+            R.add("- certificato di morte (09/09): %s" % certificato(True, True, x4.ok, True, True, "PF IS mezzo %s, OOS %s" % (fpf(mz), fpf(pfoM)), arch=(arch_cert(sym) if raccolta_c2 else None)) if mz < 1.0 or pfoM < 1.0 else
                   "- certificato di morte: non si apre (PF IS mezzo %s, OOS %s non sotto 1,00); gemelli = i 4 simboli + EURUSD di R265, TF = scansione H1 in risultati_archivio/EMA200/H1_OHLC, uscita ad asse = x4" % (fpf(mz), fpf(pfoM)))
     # uscita x4
     if not x4.ok:
@@ -1557,6 +1651,21 @@ def sez_r264_c2(rac, F, R):
                   "NON LEGGIBILE dalla riga K1 ricopiata (mancano 'coppie gamba1/gamba2 N', 'gambe 1 con volume >= 0,02: X su N' o 'in M coppie), ATR': K1 %s)" % L["ver"]))
     else:
         R.add("- K1 R264d: NON VERIFICABILE (riga 'K1 R264d: ' non trovata: %s)" % L["fonte"])
+    if lv == 2:   # classe 914: la CAUSA del ROSSO si LEGGE dal referto C (classe 913), non si lascia al lotto del K1 qui sopra
+        mdat = re.search(r"(20[0-9]{2}-[0-9]{2}-[0-9]{2})", os.path.basename(os.path.normpath(rac.root)))
+        pc = os.path.join(os.path.dirname(BP_DIR), "report", "LETTURA_ROUND_CORTI_C_%s.md" % mdat.group(1)) if mdat else ""
+        cv, ct = causa_rosso_c(pc) if pc else ("NON LETTO", "referto della raccolta C non individuabile (nessuna data AAAA-MM-GG nel nome della raccolta)")
+        R.esiti["causa_rosso_C"] = cv
+        if cv.startswith("CAUSA NON DIMOSTRATA"):
+            R.add("- **CAUSA DEL ROSSO [letta dal referto della raccolta C `report/%s`, DIAGNOSI DEL ROSSO (classe 913), non rifatta qui]: CAUSA NON DIMOSTRATA.** "
+                  "Il lotto 0,01 NON e' la causa COMUNE dei ROSSI di R264; la quota al pavimento del K1 qui sopra (%s) NON spiega il ROSSO (sull'oro il pavimento resta una causa "
+                  "AGGIUNTIVA possibile, NON dimostrata). Ipotesi per nome: H_BINARIO, H_STORICO, H_SPEC; le separa il G0 col binario 0953846c [NON FATTO]. Per la griglia qui "
+                  "sotto: gira col binario a HEAD (classe 166: MOTORE = PIN), cioe' quello da cui nascerebbe una sedia, quindi H_BINARIO NON tocca la lettura IS; H_STORICO "
+                  "riguarda i tick 2024-26, lo storico M1 2017-23 della griglia e' preso da D0 solo sul TASSO (par. 3, le due spiegazioni)." % (
+                      os.path.basename(pc), ("%d coppie su %d" % (L["pav"], L["n_pair"])) if L["n_pair"] else "non leggibile"))
+        else:
+            R.add("- **CAUSA DEL ROSSO [dal referto della raccolta C, classe 913]: %s** -- %s. La C2 NON la rifa' (il G0 degli altri simboli non e' in questa raccolta): "
+                  "la quota al pavimento del K1 qui sopra NON e' una causa dimostrata." % (cv, ct[:400]))
     R.esiti["g0_R264d"] = ["VERDE", "GIALLO", "ROSSO", "NV"][lv]
     R.esiti["k1_R264d"] = L["ver"] or "NV"
     R.esiti["k1_pav_R264d"] = (L["pav"], L["n_pair"])
@@ -2723,6 +2832,40 @@ def autotest(fixture_dir=None):
               "913 sull'archivio VERO C: G0 ROSSI 4/4 con n piu' alto e PF piu' basso, GBPJPY/GBPUSD/AUDJPY 0 posizioni al pavimento -> CAUSA NON DIMOSTRATA (%s)" % Ev.get("diag_rosso"))
         check(Ev.get("e4_R267e2") == "INDIZIO" and Ev.get("e4_R267e1") == "DEFAULT OK" and Ev.get("e4_R267f1") == "DEFAULT OK" and Ev.get("e4_R267f2") == "DEFAULT OK" and all(Ev.get("u6_" + t) == "DEFAULT OK" for t in ("R267g2", "R267g3", "R267g4")),
               "909(1) sull'archivio VERO C: E4 VALUTATA (e2 oro ADR: M1 e M2 passano -> il default NON e' confermato, INDIZIO), U6 VALUTATA (g2-g4: nessuna cella batte l'ancora -> DEFAULT VA BENE)")
+    # ---- classe 914 (cancello del 28/09 sulla C2): certificato con l'archivio PER NOME, causa del ROSSO letta, banda col lato, due spiegazioni
+    ac = arch_cert("XAUUSD")
+    cz = certificato(True, True, True, True, True, "x", arch=ac)
+    check(ac is not None and ac["(4) gemelli"][0] and ac["(5) TF"][0] and "R139a" in ac["(4) gemelli"][1] and "R32a" in ac["(5) TF"][1]
+          and "coperte da QUESTO round: (1) PF, (2) n e DD, (3) uscita ad asse; dall'ARCHIVIO, per nome: (4) gemelli = R139a" in cz and "certificato COMPLETO (3 caselle da QUESTO round + 2 dall'ARCHIVIO" in cz,
+          "914: oro, gemelli e TF riempiti dall'ARCHIVIO per nome (R139a/R139b, R32a H1), NON fra le caselle 'coperte da QUESTO round'")
+    vuoto = tempfile.mkdtemp(prefix="arch914_")
+    av = arch_cert("XAUUSD", base=vuoto)
+    check(not av["(4) gemelli"][0] and not av["(5) TF"][0] and "NON ANCORA MISURATO (mancano: (4) gemelli, (5) TF)" in certificato(True, True, True, True, True, "x", arch=av) and "ASSENTE" in av["(5) TF"][1],
+          "914 contro-esempio: i file d'archivio ASSENTI -> gemelli e TF NON riempiti -> NON ANCORA MISURATO (prima: True cablato, COMPLETO lo stesso)")
+    for rel in [x for _b, vv in ARCH_CERT["XAUUSD"].items() for _n, ff, _t in vv for x in ff]:
+        os.makedirs(os.path.dirname(os.path.join(vuoto, rel)), exist_ok=True)
+        txt = open(os.path.join(BP_DIR, rel), encoding="utf-8-sig").read()
+        open(os.path.join(vuoto, rel), "w", encoding="utf-8").write(txt.replace(",16385,", ",16388,") if "r32a" in rel else txt)
+    at = arch_cert("XAUUSD", base=vuoto)
+    check(at["(4) gemelli"][0] and not at["(5) TF"][0] and "lo STESSO TF del round" in at["(5) TF"][1],
+          "914 contro-esempio: il CSV del TF con InpTF = 16388 (H4, lo stesso del round) NON riempie la casella TF")
+    shutil.rmtree(vuoto)
+    fk = os.path.join(tempfile.mkdtemp(prefix="ref914_"), "LETTURA_ROUND_CORTI_C_2099-01-01.md")
+    open(fk, "w", encoding="utf-8").write("- **DIAGNOSI DEL ROSSO (classe 913)**: R264d XAUUSD: n +105 -> **segno comune, ma ogni ROSSO ha posizioni al pavimento: la causa del lotto NON e' esclusa, NON e' dimostrata**\n")
+    cf, _t = causa_rosso_c(fk)
+    cr, _t = causa_rosso_c(os.path.join(os.path.dirname(BP_DIR), "report", "LETTURA_ROUND_CORTI_C_2026-09-28.md"))
+    cn, _t = causa_rosso_c(fk + ".manca")
+    check(not cf.startswith("CAUSA NON DIMOSTRATA") and cf.startswith("segno comune") and cn == "NON LETTO" and (cr.startswith("CAUSA NON DIMOSTRATA") or not os.path.exists(os.path.join(os.path.dirname(BP_DIR), "report", "LETTURA_ROUND_CORTI_C_2026-09-28.md"))),
+          "914: la causa del ROSSO si LEGGE dal referto C per quello che dice (PAVIMENTO NON ESCLUSO resta tale, non diventa NON DIMOSTRATA); referto assente -> NON LETTO (%s / %s / %s)" % (cf[:30], cr[:30], cn))
+    shutil.rmtree(os.path.dirname(fk))
+    arcC2 = os.path.join(QUI, "risultati_archivio", "ROUND_CORTI_C2_2026-09-28")
+    if os.path.isdir(arcC2):
+        T2v = lettura(Raccolta(arcC2)).testo()
+        lb = [ln for ln in T2v.split("\n") if "banda H (classe 178)" in ln]
+        lc = [ln for ln in T2v.split("\n") if ln.startswith("- certificato di morte")]
+        check(len(lb) == 1 and "SOTTO le due bande (0.836 < 0,85)" in lb[0] and "se e' alto" not in lb[0] and len(lc) == 1 and "(4) gemelli, (5) TF;" not in lc[0] and "dall'ARCHIVIO, per nome" in lc[0]
+              and "CAUSA DEL ROSSO [letta dal referto della raccolta C" in T2v and "CAUSA NON DIMOSTRATA" in T2v and "**NON MISURATA** -- il per-trade della raccolta parte dal 2024.01.05 (solo OOS)" in T2v,
+              "914 sull'archivio VERO C2: banda col LATO (0,836 SOTTO, non 'se e' alto'), certificato con gemelli/TF dall'archivio per nome, causa del ROSSO NON DIMOSTRATA letta dal referto C, prova di regime dell'IS NON MISURATA")
     # ---- (1) fixture dagli archivi veri
     if not (os.path.isdir(ARCHIVI_REPO) and os.path.isdir(ARC_R246)):
         print("  SKIP archivi CORTI B / R246 non trovati")
