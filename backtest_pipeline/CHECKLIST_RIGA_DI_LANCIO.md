@@ -36391,3 +36391,31 @@ riapertura). (2) Un'esenzione per calendario si limita alle posizioni che NON po
 riapertura (prima del primo armo successivo), e si prova contro il flat mancato della seduta NORMALE dopo il festivo. (3)
 Fail-closed: un festivo non elencato resta NULLO e si stampa "osservato ma non in elenco". Candidato per lo strato 1: un
 file prova con una regola "zero uscite fuori" e senza la parola `festiv`/`riapertura` nel paragrafo = RILIEVO.
+
+### CLASSE 913 — il G0 ROSSO su TUTTI i simboli, nello stesso verso, stampato col solo motivo che la testa aveva nominato per UNO; e il "verdetto che archivia" (ESCLUSO PER COSTO, H0, R3 violato) stampato senza il certificato a 5 caselle (28/09/2026, controllo preventivo su `report/LETTURA_ROUND_CORTI_C_2026-09-28.md` @ `f41b33dd`, lettore `leggi_round_corti_c.py`; parente della 909(2) e della 889)
+Caso, tre facce:
+(a) **La causa di UNO usata per TUTTI.** I cinque G0 della riga C sono ROSSI con la **stessa firma**: n del banco sempre PIU' ALTO
+(GBPJPY +21, XAUUSD +105, GBPUSD +46, AUDJPY +5, EURUSD +26) e PF sempre PIU' BASSO (-0,017 / -0,072 / -0,032 / -0,091 /
+-0,051). Il referto scriveva la causa solo accanto all'oro (*"causa NOMINATA prima, par. 5: lotto 0,01-0,02 a 10000"*) e sui
+tre forex nulla, ne' che l'attesa VERDE della testa era smentita. Contato nel per-trade: posizioni al pavimento 0,01 = **0 su
+144 / 212 / 148** su GBPJPY / GBPUSD / AUDJPY (e 0 su 104 su EURUSD), 61 su 187 sull'oro. Il lotto quindi **non puo' essere
+la causa comune**; gli input del G0 sono uguali a quelli della riga del genetico (confrontati colonna per colonna: cambiano solo
+`InpMagic`, `InpComment` e il formato `0.10`/`0.1`). Causa **NON DIMOSTRATA**, ipotesi per nome: H_BINARIO (sorgente a HEAD
+contro `0953846c`: `3af47ed9`, `344a11b9`), H_STORICO (tick BCM di oggi contro quelli del 01/08), H_SPEC (commissione e swap
+del simbolo). La misura che le separa: lo stesso G0 col binario `0953846c`. E la mini-riga C2 (oro a 100000), che parte
+sull'eccezione "ROSSO con causa nominata", **toglie il pavimento ma non il ROSSO comune**: la sua griglia si legge solo IS.
+(b) **"ESCLUSO PER COSTO" senza certificato.** K1 EURUSD FAIL: stop 23,40-24,40 pip = 35,3-36,8x contro 40x. E' il verdetto
+giusto sul TF **a quello stop**, ma `InpSLatr` (la leva del costo nominata da R264 par. 11) non e' mai stata messa ad asse:
+il candidato e' NON ANCORA MISURATO, e il referto non lo diceva. Sul box asiatico il certificato usciva solo sui 2 file con
+PF < 1 (R266d/e); gli altri 4, bocciati per H0 e per R3, erano senza.
+(c) **La regola ristampata al posto del verdetto** (909(1), stessa famiglia): E4 e U6 scrivevano *"se la cella 1 non batte la 0
+oltre il rumore: IL DEFAULT VA BENE"* su tutti e 4 i file, compreso R267e2 (oro ADR: PF 1,309 -> 1,559, DD 6,07 -> 4,63, M1 e
+M2 passano), dove la condizione e' **falsa**.
+Regola: (1) quando piu' cancelli di catena sono rossi, il lettore **misura la firma comune** (il segno di dn e dPF, simbolo per
+simbolo) e **conta la causa nominata** su ogni simbolo. Se la firma e' comune e almeno un simbolo non ha la causa, scrive "CAUSA
+NON DIMOSTRATA" con le ipotesi per nome e la misura che le separa. I confronti con un banco non verificato si riportano ma non
+entrano nella firma. (2) Ogni verdetto che boccia (costo, merito H0, rischio R3) stampa accanto il certificato a 5 caselle.
+"ESCLUSO PER COSTO" e' un verdetto sul TF a quello stop e porta la leva non misurata per nome. (3) E4 e U6 si valutano (M1 e
+M2 contro il controllo), non si ristampano. Contro-esempi nell'autotest (69/69): 4 ROSSI con 3 senza pavimento -> NON DIMOSTRATA;
+tutti col pavimento -> NON ESCLUSO; segni diversi; 1 solo ROSSO di R264 -> NON APPLICABILE; archivio vero: 6 certificati R266,
+K1 EURUSD 35,3-36,8x, E4 e2 INDIZIO. Mutazioni eseguite (pavimento ignorato, U6 e E4 forzati): FAIL.
