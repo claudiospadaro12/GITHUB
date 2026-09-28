@@ -36449,3 +36449,21 @@ InpTF=16388 -> la casella TF non vale; referto padre con "PAVIMENTO NON ESCLUSO"
 spento, banda spenta, filtro TF spento, casella forzata): FAIL. Fixture C: diff 0 (10 referti, a meno della riga col percorso); referto C reale: `tail -n +13` identico.
 Rilievo aperto: fuori dalla C2 (`raccolta_c2=False`) il ramo vecchio resta, per tenere invariato il referto C: una griglia
 R264a/c che un giorno partisse con PF < 1 stamperebbe ancora gemelli e TF "da questo round". Va chiuso prima di quel round.
+
+### CLASSE 915 — il verdetto "l'uscita e' gia' al suo meglio / casella CHIUSA su tutte le leve" scritto contando solo le manopole del round, mentre l'archivio ha sulla STESSA uscita una cella migliore in tutte e quattro le misure (con firma pendente); e la testa che dichiara "asse mai misurato" un asse che un round di agosto aveva gia' girato e che il round nuovo riproduce al centesimo (28/09/2026, controllo preventivo su `report/LETTURA_R270_2026-09-28.md` @ `9bb3c5b4`; parente della 180 e della 226)
+Caso: la lettura R270 (uscita `770101` LONG, TrailMode + TP1_R) consegnava a Claudio *"l'uscita del LONG e' gia' al suo meglio"* e *"la
+gestione dell'uscita e' stata messa ad asse su tutte le leve. Casella CHIUSA: il vivo e' il centro"*. Nello stesso repo, stesso giorno,
+`report/audit_ea/SCHEDA_770101_DAX_APERTURA_2026-09-28.md` r.367 e `CELLE_MIGLIORI_GIA_MISURATE_2026-09-21.md` §2A tengono aperta una
+firma istruita: `InpTP1_ClosePct` 50 -> 0 (R46a 13/08 = r137c), PF IS 1,126 -> 1,183, OOS 1,397 -> 1,491, DD IS 5,44 -> 4,96, OOS
+7,23 -> 6,27, a parita' di posizioni. E' proprio la leva dei "vinti piccoli" di cui il round parlava. In piu' la testa R270c scriveva
+"sul DAX, sulla cella viva, InpTrailMode NON E' MAI STATO MISURATO" dopo aver cercato per NOME di file (`apert_DAX`): R46a aveva
+gia' ATR contro PREVBAR sulla stessa cella, e R270c mode 0 lo riproduce al centesimo (IS 214 · 9456,35 · 1,19170 · 8,1800; OOS 311 ·
+1950,51 · 1,02751 · 10,8507). Nella stessa lettura: "(n 175/270)" e "n 138/257" erano DEAL scritti come n (classe 226); "6 alternative"
+erano 5; "BUY-close (long)" su un per-trade con deal_type 1 (= SELL); A5 ("TUTTE le celle entro il 10,5%") dichiarato scattato su un
+asse in cui 0,5R stava a −11,1%.
+Regola: (1) un verdetto che dice "al suo meglio", "casella chiusa", "su tutte le leve" si pronuncia sull'insieme ELENCATO per nome
+delle leve misurate nel round (classe 180), e prima di consegnarlo si cerca nell'archivio (`grep` del magic/cella di contratto sui
+`report/CELLE_MIGLIORI_*`, `SCHEDA_<sedia>_*`, e sui CSV con la stessa firma di colonne) se sulla stessa uscita esiste una cella
+MIGLIORE o una firma pendente: se c'e', si scrive accanto, coi numeri. (2) "Asse mai misurato" si prova cercando la MANOPOLA con
+`||Y` nei file prova della stessa sedia (`grep -l "InpTrailMode=.*||Y" prove/*.txt | xargs grep -l D30EUR`), non il nome di un CSV.
+(3) Una regola di inerzia "tutte le celle" si applica all'asse INTERO; un sotto-tratto si scrive come sotto-tratto.
