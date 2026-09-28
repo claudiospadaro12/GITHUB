@@ -43,8 +43,11 @@ PC di backtest `DESKTOP-H4D7CAJ` (regola del 21/09).
   (0,5/1/1,5/2 sulla cella di contratto: TP1_ClosePct=50, BE), `R270b` TrailStartR SHORT (0/0,5/1/1,5, mai misurato),
   `R270d` TrailMode short. 14 celle, 28 passate tick reali, ~15-25 min. G0 del long contro R47a (IS n132 PF 1,12634 / OOS n193 PF 1,39709).
 - 🔴 `R208b` NON entra: ha `InpTP1_ClosePct=0` (TP intero, nessuna parziale), Guardian true, EA a 81 input — non e' la geometria in campo.
-- Riga di lancio `righe/RIGA_ROUND_R270_USCITA_DAX.txt` in costruzione (modello riga D SENZA il blocco `-Stable`, classe 903);
-  esce SOLO con PASS del cancello, e SOLO dopo la riga C (una alla volta).
+- Riga di lancio `righe/RIGA_ROUND_R270_USCITA_DAX.txt` **PRONTA, PASS del cancello in due passate** (commit 41d96bf4, pin
+  e6b89c2b, SHA 9311FD20…): due difetti trovati e corretti PRIMA della consegna (classe 911: per-trade letto con ',' invece di
+  ';'; S1B sui deal invece che sulle posizioni). Modello riga D SENZA `-Stable` (classe 903; il cancello ora lo vede: classe
+  910). Si manda SOLO dopo la riga C (una alla volta, MT5 chiuso in mezzo). 🔴 Fino al lancio NON si tocca
+  `ABTG_DAX_Apertura_EU.mq5` ne' `ABTG_PausaGuardian.mqh` su `lavoro` (il driver compila dal ramo, classe 892).
 
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; gli zip A → R255 → C → D (una riga alla volta, MT5
 chiuso in mezzo), poi C2; firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
