@@ -9,20 +9,45 @@ Guardian o di sedia: sono firme di Claudio.
 
 ## §0. ⚡ In breve (scritto DOPO i numeri; i criteri del §1 sono stati committati prima, `20b05a43`)
 
-1. 🟢 **Nessuna coppia delle 4 sedie con per-trade e' LEGATA** al criterio congelato, su nessun insieme leggibile. Le
-   piu' vicine: `770101`×`771531` (lift 1,66, Fisher p **0,0526**) e `770202`×`771531` nelle 22 giornate in cui
-   operano insieme (lift 1,57, p **0,0588**). [MISURATO]
+0. 🔴 **Le sedie vive su FTMO `541452707` (`C:\FTMO`) sono SETTE, non sei**: le sei dell'elenco `CODA_01` del 28/09
+   (`770101`, `770202`, `770260`, `771531`, `770511`, `770411`) **piu' la `770105`** DAX short, `loaded` il 25/09 alle
+   20:47:27 con `lati=SOLO SHORT` nel giornale (verifica di Claudio del 26/09 08:15, zero `removed`:
+   `NOTTE_2026-09-26.md`), assente da `CODA_01` del 26, 27 e 28/09 per la classe 822. Sugli indici: **DAX 3, Dow 3,
+   Nasdaq 1**. Restano `[NON VERIFICATI]` il magic e la faccina, e nessuna sonda l'ha rivista dopo il 26/09 08:15
+   (weekend: non ha ancora operato). Le frasi "sei sedie" vanno rilette con questo numero, anche quelle scritte DOPO
+   il 25/09: `MC_CON_ORO_E_BLOCCHI_2026-09-27.md` r.270 ("sei sedie a 2% in campo") e `docs/PARERE_EMILIANO_2026-09-28.md`
+   r.40 ("6 sedie su 6 leggono il Guardian").
+1. 🟢 **Nessuna coppia delle 4 sedie della finestra A e' LEGATA** al criterio congelato, su nessun insieme leggibile.
+   Le piu' vicine: `770101`×`771531` (lift 1,66, Fisher p **0,0526**) e `770202`×`771531` nelle 22 giornate in cui
+   operano insieme (lift 1,57, p **0,0588**). [MISURATO] 🔴 **Ma fra le sette sedie vive una coppia LEGATA c'e'**:
+   `770101`×`770105` sulla finestra B (punto 3). "Nessun legame misurabile" non e' "indipendenti": e' un p sopra 0,05
+   su 22-277 giornate.
 2. 🔴 **"Lo stress le lega di piu'" non si puo' dire ne' si' ne' no**: (b-US) ha 10 giornate, (c) come scritta e'
    [NON MISURATO], (a) ha 28 giornate ma **non separa** (flag vero sull'89% dei feriali del tratto completo, classe
    862), la sua parte NFP/CPI/Fed ne ha 14. Il "no" delle celle leggibili e' assenza di prova, non prova d'assenza.
-3. 🔴 **Il legame che c'e' passa dal CALENDARIO, non dagli esiti** — ed e' il punto di Emiliano: `770101`×`770105`
-   perdono insieme piu' del caso (lift 1,66, p **0,020**) perche' operano **le stesse mattine** (coop lift **0,99** su
-   127 giornate); idem `771531`×proxy SuperWave (lift 4,07, p 0,0034; coop 0,98). Una correlazione degli esiti non
-   lo vede.
-4. 🔴 **La coda del portafoglio al 2%, senza Guardian e senza C1** [MISURATO sul realizzato]: 4 sedie, 277 giornate:
-   peggiore **6,87%**, p99 **4,76%**, **11** giornate sopra 3,5% e **4** sopra 4,5%. Con la `770105` (finestra B):
-   peggiore **8,35%**, p95 **4,02%**, **19** e **7**. Nelle 22 giornate in cui `770202` e `771531` operano insieme
-   cadono 4 delle 11 e 2 delle 4 (18% e 9% contro 4,0% e 1,4%).
+3. 🔴 **Il legame che c'e' NON passa dal calendario: passa dallo SCATTARE INSIEME, che dice che giornata e'** — ed e'
+   il punto di Emiliano. `770101`×`770105` perdono insieme piu' del caso (lift 1,66, p **0,020**), ma **non** perche'
+   operino le stesse mattine piu' del caso (**127** giornate comuni contro **125** attese se i calendari fossero
+   indipendenti): perche' nelle giornate in cui scattano **tutte e due** ciascuna perde 3,5-4,7 volte piu' spesso che
+   quando scatta da sola (**32% e 35%** contro **9% e 7%**), e dentro quelle giornate perdono insieme quanto il caso
+   (coop lift **0,99**). Una correlazione calcolata solo sui giorni comuni (come `correlazione()` del MC) non lo vede.
+   `771531`×proxy SuperWave `770521` **[DERIVATO]**: LEGATE su TUTTE (lift 4,07, p 0,0034), ma la versione "giorni
+   comuni" ha **n 11 = NON LEGGIBILE** e per due motori a piu' giorni "operare" vuol dire **chiudere**, cioe' spesso
+   essere fermati: li' la scomposizione non separa il calendario dall'esito (26/02 e 15/10: fermate dallo stesso
+   movimento a 0-2 minuti di distanza). [MISURATO la scomposizione, aggiunta al cancello DOPO i numeri: nessun
+   verdetto cambiato] 🔴 **Nessuna correzione per confronti multipli** (i criteri congelati non la prevedono): i test
+   di Fisher leggibili sono **33**, e al 5% il caso ne darebbe ~1,6 "LEGATE"; con Bonferroni (0,05/33 = 0,0015)
+   **nessuno dei due LEGATE sopravvive**. Sono indizi da misurare ancora, non legami dimostrati.
+4. 🔴 **La coda del portafoglio al 2%, senza Guardian e senza C1** [MISURATO sul realizzato, in % del **deposito
+   fisso** della misura come il MC]: 4 sedie, 277 giornate: peggiore **6,87%**, p99 **4,76%**, **11** giornate sopra
+   3,5% e **4** sopra 4,5%. Con la `770105` (finestra B): peggiore **8,35%**, p95 **4,02%**, **19** e **7**. Nelle 22
+   giornate in cui `770202` e `771531` operano insieme cadono 4 delle 11 e 2 delle 4 (18% e 9% contro 4,0% e 1,4%).
+   🔴 **Classe 321, e qui morde**: i backtest dimensionano sul saldo CORRENTE (saldi finali x1,03-1,23), quindi la % sul
+   deposito fisso gonfia le perdite tarde. Rinormalizzata sul saldo della sedia al momento della chiusura (= 2% del
+   saldo, come in campo): 4 sedie peggiore **6,02**, p95 **2,15**, p99 **4,10**, **11 / 2** sopra 3,5 / 4,5; con la
+   `770105` peggiore **7,96**, p95 **3,69**, **15 / 7**. Sopra 4,5% le 4 sedie passano **da 4 a 2** (restano solo le
+   due giornate a tre sedie, entrambe in c2). 🔴 **E non sono giornate di pausa ne' di taglio del Guardian**: il
+   Guardian misura l'equity col flottante, dalle 01:00 del server FTMO, sul saldo di partenza (§5).
 5. 🔴 **Quanto di quella coda il Guardian avrebbe fermato e' [NON MISURATO]**: il per-trade scrive solo le uscite.
    Mancano del tutto `770260` (Nasdaq), `770511` vera e `770212`: su G i numeri sono un **pavimento**.
 
@@ -148,7 +173,7 @@ della domanda 2 fatti a mano. Se l'autotest fallisce, i numeri non si leggono.
 ## §2. 🧪 IL CONTRO-ESEMPIO, PRIMA DEI NUMERI (regola del 10/09)
 
 Script: **`backtest_pipeline/dipendenza_stress.py`** (ASCII puro, rieseguibile). Autotest:
-`python3 backtest_pipeline/dipendenza_stress.py --autotest` → **PASS, 9 controlli su 9**:
+`python3 backtest_pipeline/dipendenza_stress.py --autotest` → **PASS, 11 controlli su 11** (9 alla consegna, x e xi aggiunti al cancello):
 
 | # | caso costruito a dipendenza NOTA | cosa deve dire | cosa dice |
 |---|---|---|---|
@@ -162,6 +187,8 @@ Script: **`backtest_pipeline/dipendenza_stress.py`** (ASCII puro, rieseguibile).
 | vii | percentile a rango su 1..100; p99 nascosto sotto n 100 | 95 / 99 / nascosto | ✅ |
 | viii | proxy dello stop: 0,01 × saldo / volume, saldo aggiornato, partial sommati | 100 e 198 | ✅ |
 | ix | dati veri: netto per giornata ricalcolato dai deal **==** `carica_v2()` del MC, 5 sedie; calendari 277 / 262 | coincide | ✅ (se no lo script si ferma) |
+| x | classe 321 (cancello): saldo raddoppiato, perdita −2000 | −1000 sul deposito 100.000 | ✅ |
+| xi | scomposizione (cancello): calendari **indipendenti**, perdita solo quando scattano insieme | comuni ~ attese, lift TUTTE alto, coop ~1 | 513 contro 507, lift **3,88** LEGATE, coop **0,99** ✅ |
 
 **Riscontro contro numeri scritti da altri** (il MC, non io): le co-perdite per coppia sull'universo A
 (**5 / 1 / 10 / 6 / 2**) e le giornate con >=2 sedie in perdita (**21**) coincidono con `correlazione()` di
@@ -209,21 +236,31 @@ comprese le illeggibili) nell'uscita dello script; qui ogni coppia per insieme.
 - 🔴 **"Lo stress le lega di piu'" non risulta MAI SI** — ma perche' quasi tutte le celle di stress sono **NON
   LEGGIBILI o NON DEFINITE**, non perche' sia stato dimostrato il contrario. (a) e' leggibile per n ma **non separa**
   (classe 862); (b-US) ha 10 giornate; (b-DAX) ne ha 20 esatte e `770202` in quelle non perde mai.
-- 🟠 **Dove un legame c'e', viene dall'OPERARE insieme, non dall'ESITO** — ed e' esattamente il punto di Emiliano:
-  - `771531`×proxy `770521` [DERIVATO]: **LEGATE** su TUTTE (lift **4,07**, p **0,0034**), ma fra le giornate in cui
-    operano entrambe il lift e' **0,98** (n 11, non leggibile): i due motori di tendenza sul Dow **scelgono le stesse
-    giornate**;
+- 🟠 **Dove un legame c'e', non sta dentro le giornate comuni ma nel fatto di SCATTARE INSIEME** — ed e' il punto di
+  Emiliano. Scomposizione aggiunta al cancello, **dopo** i numeri, senza cambiare nessun verdetto [MISURATO]:
   - `770101`×`770105` (finestra B): **LEGATE** su TUTTE B (lift **1,66**, p **0,020**), ma coop lift **0,99** (p 0,61,
-    n **127**): DAX long e DAX short all'apertura **operano le stesse mattine** (127 su 181), e quando operano insieme
-    perdono insieme esattamente quanto il caso prevede. Una correlazione "sugli esiti" vicina allo zero **non vede**
-    questo legame, perche' sta nel calendario.
+    n **127**). Le giornate comuni sono **quante ne darebbe il caso** (127 contro 125 attese: 181 × 181 / 262), quindi
+    il legame **non** e' "operano le stesse mattine". E' che scattare insieme dice che giornata e': quando scattano
+    tutte e due la `770101` perde il **32%** delle volte e la `770105` il **35%**; quando scatta da sola, **9%** (54
+    giornate) e **7%** (54). Dentro le giornate comuni perdono insieme quanto il caso prevede. Una correlazione calcolata
+    solo sui giorni in cui operano entrambe (`correlazione()` del MC) **non vede** questo legame.
+  - `771531`×proxy `770521` [DERIVATO]: **LEGATE** su TUTTE (lift **4,07**, p **0,0034**); la versione "operano
+    entrambe" (lift 0,98) ha **n 11 = NON LEGGIBILE** al §1.4 e non si legge. Le giornate comuni sono **meno** del caso
+    (11 contro 12,9). E per due motori a piu' giorni "operare" = **chiudere un deal**, che spesso e' lo stop: la
+    scomposizione li' **non separa** il calendario dall'esito. Le due co-perdite piu' grosse (15/10 18:09 e 18:11,
+    26/02 16:21:30 e 16:21:28) sono fermate dallo **stesso movimento**: e' l'ipotesi opposta al "calendario".
+  - 🔴 **Confronti multipli, dichiarati**: il §1.4 non prevede correzione. I test di Fisher leggibili (distinti) di
+    questa tabella e delle sensibilita' sono **33**; al 5% il caso ne darebbe ~1,6 LEGATE. Con Bonferroni (soglia
+    0,0015) **nessuno dei due LEGATE resta** (0,0034 e 0,020). Il verdetto al criterio congelato resta quello scritto;
+    il suo peso e' "indizio da rimisurare", non "legame dimostrato".
 
 ---
 
 ## §5. 💥 DOMANDA 2 — la perdita del portafoglio nel giorno [MISURATO; al 2%, SENZA C1 ne' Guardian applicati]
 
-In % del saldo, alla taglia 2,00%. **N** = netto realizzato (ne' tetto ne' pavimento rispetto al C1); **G** = lordo
-dei deal in perdita (TETTO rispetto al C1, PAVIMENTO rispetto alle sedie mancanti). Nessuno dei due vede il flottante.
+In % del **deposito di misura** (base fissa, la stessa convenzione del MC), alla taglia 2,00%. **N** = netto
+realizzato (ne' tetto ne' pavimento rispetto al C1); **G** = lordo dei deal in perdita (TETTO rispetto al C1,
+PAVIMENTO rispetto alle sedie mancanti). Nessuno dei due vede il flottante.
 
 | portafoglio · insieme | n | peggiore N / G | p95 N / G | p99 N / G | giornate N > 3,5 / > 4,5 | G > 3,5 / > 4,5 |
 |---|---|---|---|---|---|---|
@@ -238,6 +275,24 @@ dei deal in perdita (TETTO rispetto al C1, PAVIMENTO rispetto alle sedie mancant
 | 4 sedie + proxy `770521` · TUTTE A [DERIVATO] | 277 | 8,37 / 8,90 | 2,50 / 4,28 | 6,09 / 6,59 | 12 / 5 | 18 / 8 |
 | 4 + proxy · (c2) [DERIVATO] | 22 | 8,37 / 8,90 | 7,55 / 7,64 | = max | 4 / 2 | 7 / 3 |
 
+🔴 **Classe 321 (aggiunta al cancello, dopo i numeri; la tabella resta quella del criterio congelato).** Gli EA
+dimensionano sul saldo CORRENTE del backtest (saldi finali `770101` x1,18 · `770202` x1,07 · `770411` x1,06 · `771531`
+x1,23 · `770105` x1,03), quindi dividere per il deposito fisso **gonfia le perdite tarde**. Il MC (`mc_challenge_ftmo_v2.py`,
+UNITA') l'ha misurato <= 0,3 punti sulle righe oro e dichiarato "ereditato" per le 4 sedie; su un **conteggio a soglia**
+non e' trascurabile. Rinormalizzata
+ogni perdita sul saldo della sedia prima della chiusura (= 2% del saldo, come dimensiona il campo) [MISURATO]:
+
+| portafoglio · insieme | peggiore N / G | p95 N / G | p99 N / G | N > 3,5 / > 4,5 | G > 3,5 / > 4,5 |
+|---|---|---|---|---|---|
+| 4 sedie · TUTTE A (277) | 6,02 / 6,07 | 2,15 / 3,97 | 4,10 / 6,02 | 11 / **2** | 17 / **3** |
+| 4 sedie · (c2) (22) | 6,02 / 6,07 | 5,99 / 6,02 | = max | 4 / 2 | 7 / 3 |
+| 4 sedie + `770105` · TUTTE B (262) | 7,96 / 8,04 | 3,69 / 3,99 | 5,95 / 6,11 | **15** / 7 | 30 / **7** |
+| 4 sedie + proxy · TUTTE A (277) [DERIVATO] | 7,49 / 8,01 | 2,15 / 3,98 | 5,53 / 6,02 | 12 / 3 | 18 / 4 |
+
+Sopra 4,5% le 4 sedie passano **da 4 a 2**: restano solo le due giornate con **tre** sedie in perdita (26/02 e 15/10),
+e le 2,26-2,50% per sedia del 19/02 e del 02/04 erano compounding del backtest (rinormalizzate: 1,98-2,12%, giornate
+a 4,10 e 4,00). Con la `770105` il salto resta: da **2 a 7** giornate sopra 4,5% (con la rinormalizzazione il suo peso sulla coda **cresce**, non cala).
+
 **Letture:**
 - 🔴 **Il rischio di coda sta dove piu' sedie OPERANO nello stesso giorno, non (dimostrabilmente) nei giorni di
   news.** Nelle 22 giornate (c2) cadono **4 delle 11** giornate sopra la pausa e **2 delle 4** sopra 4,5%: frequenza
@@ -245,7 +300,9 @@ dei deal in perdita (TETTO rispetto al C1, PAVIMENTO rispetto alle sedie mancant
   casa vale qui a rovescio: **un DD accaduto vale a qualunque n** — le due giornate da 6,87 e 6,33 sono **fatti**.
 - 🔴 **La `770105` (attaccata il 25/09, fuori dall'elenco CODA_01 per la classe 822) e' la sedia che sposta di piu' la
   coda**: sulla stessa finestra B le giornate nette sopra la pausa passano da **11 a 19**, sopra 4,5% da **4 a 7**, il
-  p95 da **2,46 a 4,02**. Il motivo e' misurato al §4: opera **le stesse mattine** della `770101`.
+  p95 da **2,46 a 4,02** (rinormalizzata: sopra 4,5% da **2 a 7**). Il motivo e' misurato al §4: non opera le stesse
+  mattine della `770101` piu' del caso (127 contro 125), ma quando scattano tutte e due ciascuna perde 3,5-4,7 volte
+  piu' spesso che da sola.
 - Composizione delle giornate peggiori (ora BCM dei deal in perdita, dall'uscita dello script) — 4 sedie, A:
 
 | giornata | N % | chi perde, e quando (ora BCM di chiusura) | insieme |
@@ -267,6 +324,18 @@ dei deal in perdita (TETTO rispetto al C1, PAVIMENTO rispetto alle sedie mancant
   delle 16:37). 🔴 **Quanto avrebbe salvato e' [NON MISURATO]**: senza gli orari di APERTURA non si sa se la
   posizione era gia' aperta quando la soglia e' scattata, e la pausa guarda l'equity col flottante. E' la misura
   del **carico** che arriva sul Guardian, non del danno a valle del Guardian.
+- 🔴 **"Sopra 3,5%" e "sopra 4,5%" NON sono giornate di pausa ne' di taglio del Guardian**, per quattro differenze
+  lette nel codice e nel preset (`ABTG_Guardian.mq5` r.704-777, `mql5/Presets/ABTG_Guardian_FTMO_2Step.set`):
+  (1) il Guardian misura `dayStart - equity`, cioe' **con il flottante**, qui c'e' solo il realizzato;
+  (2) `dayStart` e' l'**equity** alle `InpDailyResetHour=1` del **server FTMO**, qui il giorno e' la data di chiusura
+  in ora **BCM**: con FTMO = BCM +2 h d'estate e +1 h d'inverno il giorno del Guardian parte alle 23:00 BCM d'estate
+  e alle 00:00 d'inverno. Nella finestra solo la `771531` chiude deal dopo le 23:00 BCM (**10** deal su 517, 2 in perdita,
+  domenica 2026.06.21 23:15) [MISURATO];
+  (3) una posizione a piu' giorni qui pesa **tutta** sul giorno di chiusura, nel Guardian si spalma sui giorni in cui
+  l'equity si e' mossa (la baseline si riprende ogni notte dall'equity, flottante incluso);
+  (4) la % del Guardian e' sul saldo di partenza fisso (`InpStartBalance=80000`), la pausa (3,5) **blocca solo i
+  nuovi ingressi** e il taglio (4,5) chiude tutto e blocca il giorno. Quanto queste quattro differenze spostino i
+  conteggi e' **[NON MISURATO]**.
 - La peggior giornata **di una sola sedia** e' della `771531` (**−4,90**, 2026.06.23): due coppie di ordini nella
   stessa giornata. E' co-movimento DENTRO la sedia, gia' dichiarato dal MC (fino a 8 posizioni).
 
@@ -320,3 +389,5 @@ python3 backtest_pipeline/dipendenza_stress.py --autotest
 python3 backtest_pipeline/dipendenza_stress.py
 ```
 Seme 20260928, 10.000 permutazioni, ~10 s. Legge solo file del repo; non scrive nulla.
+La scomposizione calendario/esito e la coda rinormalizzata (classe 321), aggiunte al cancello, escono in fondo
+all'uscita sotto `== AGGIUNTE AL CANCELLO`.

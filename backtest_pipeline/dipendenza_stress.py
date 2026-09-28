@@ -249,6 +249,40 @@ def conta_k(S, sedie, giorni):
     return c
 
 
+# ------------------------------------------------------------------ aggiunte al cancello (28/09, DOPO i numeri)
+# Nessun verdetto cambia: sono le due misure che il cancello di giudizio ha
+# chiesto per leggere bene quelle congelate.
+def rinormalizzata(S, n):
+    """Classe 321: giorni/lordo con ogni deal diviso per il saldo della sedia
+       PRIMA di quel deal (x dep, cosi' perdite_giorno resta uguale)."""
+    rel, dep = (v2.SORGENTI_V2[n][0], v2.SORGENTI_V2[n][1]) if n != PROXY else (PROXY_REL, PROXY_DEP)
+    return rinorm_da_deal(leggi_deal(rel), dep)
+
+
+def rinorm_da_deal(deal, dep):
+    bal = dep
+    g = collections.defaultdict(float); l = collections.defaultdict(float)
+    for r in sorted(deal, key=lambda r: r['close_time']):
+        x = float(r['net_profit']); d = r['close_time'][:10]
+        g[d] += x / bal * dep
+        if x < 0:
+            l[d] += -x / bal * dep
+        bal += x
+    return dict(giorni=dict(g), lordo=dict(l), dep=dep)
+
+
+def scomponi(ga, gb, U):
+    """Calendario contro esito: giornate comuni osservate/attese e frequenza di
+       perdita di ciascuna sedia quando opera insieme all'altra o da sola."""
+    oa = [d for d in U if d in ga]; ob = [d for d in U if d in gb]
+    co = [d for d in U if d in ga and d in gb]
+    sa = [d for d in oa if d not in gb]; sb = [d for d in ob if d not in ga]
+    fr = lambda g, L: (sum(1 for d in L if g[d] < 0) / len(L)) if L else None
+    return dict(coop=len(co), attese=len(oa) * len(ob) / float(len(U)),
+                a_co=fr(ga, co), a_solo=fr(ga, sa), n_a_solo=len(sa),
+                b_co=fr(gb, co), b_solo=fr(gb, sb), n_b_solo=len(sb))
+
+
 # ------------------------------------------------------------------ stampa
 def f(x, nd=2):
     return '-' if x is None else ('%.*f' % (nd, x)).replace('.', ',')
@@ -394,6 +428,25 @@ def main():
         print('| %s | %d | %d (%s%%) | %d (%s%%) | %d | %s |' % (nome, n, k2[2], f(100.0 * k2[2] / n, 1),
                                                                 oss, f(100.0 * oss / n, 1), k3[3], fp(pp)))
 
+    print('\n== AGGIUNTE AL CANCELLO (dopo i numeri, nessun verdetto cambiato)')
+    print('-- scomposizione calendario / esito delle coppie LEGATE e delle due piu\' vicine')
+    for a, b, cal in (('770101 DAX', S105, calB), (PROXY, '771531 EMA200', U),
+                      ('770101 DAX', '771531 EMA200', U), ('770202 Dow', '771531 EMA200', U)):
+        z = scomponi(S[a]['giorni'], S[b]['giorni'], cal)
+        print('   %s x %s: comuni %d (attese %s) | %s perde %s insieme, %s da sola (n %d) | %s perde %s insieme, %s da sola (n %d)' % (
+            a, b, z['coop'], f(z['attese'], 1), a.split()[0], f(z['a_co'], 3), f(z['a_solo'], 3), z['n_a_solo'],
+            b.split()[0], f(z['b_co'], 3), f(z['b_solo'], 3), z['n_b_solo']))
+    print('-- classe 321: coda rinormalizzata sul saldo della sedia prima di ogni deal')
+    R = dict((n, rinormalizzata(S, n)) for n in V1 + [S105, PROXY])
+    for nome, sedie, cal in (('4 sedie TUTTE A', V1, U), ('4 sedie (c2)', V1, c2),
+                             ('4 sedie TUTTE B', V1, calB), ('4 + 770105 TUTTE B', V1 + [S105], calB),
+                             ('4 + proxy TUTTE A [DERIVATO]', V1 + [PROXY], U)):
+        L, G = perdite_giorno(R, sedie, cal)
+        rl, rg = riassunto(L), riassunto(G)
+        print('   %-30s n %3d | N max %s p95 %s p99 %s >3,5 %d >4,5 %d | G max %s p95 %s p99 %s >3,5 %d >4,5 %d' % (
+            nome, len(cal), f(rl['peggiore']), f(rl['p95']), f(rl['p99']), rl['sopra_p'], rl['sopra_t'],
+            f(rg['peggiore']), f(rg['p95']), f(rg['p99']), rg['sopra_p'], rg['sopra_t']))
+
 
 # ------------------------------------------------------------------ contro-esempi
 def autotest():
@@ -458,6 +511,26 @@ def autotest():
     chk('(viii) proxy: g1 %.1f (0,01x100000/10 = 100), g2 %.1f (0,01x99000/5 = 198); netti %s' % (
         st['2025.01.02'], st['2025.01.03'], g), abs(st['2025.01.02'] - 100) < 1e-9 and abs(st['2025.01.03'] - 198) < 1e-9
         and abs(g['2025.01.03'] - 900) < 1e-9 and decile_alto(st) == ['2025.01.03'])
+    # (x) classe 321, aggiunta al cancello: saldo raddoppiato -> la stessa perdita in EUR pesa la meta'
+    R = rinorm_da_deal([dict(close_time='2025.01.02 10:00:00', net_profit='100000'),
+                        dict(close_time='2025.01.03 10:00:00', net_profit='-2000')], 100000.0)
+    chk('(x) rinormalizzata: -2000 su saldo 200000 -> %s su deposito 100000 (atteso -1000), lordo %s' % (
+        R['giorni']['2025.01.03'], R['lordo']['2025.01.03']),
+        abs(R['giorni']['2025.01.03'] + 1000) < 1e-9 and abs(R['lordo']['2025.01.03'] - 1000) < 1e-9)
+    # (xi) scomposizione, aggiunta al cancello: calendari INDIPENDENTI, perdita solo quando scattano insieme
+    rr = random.Random(11); UU = giorni[:2000]
+    ga = dict((d, 1.0) for d in UU if rr.random() < 0.5)
+    gb = dict((d, 1.0) for d in UU if rr.random() < 0.5)
+    for d in UU:
+        if d in ga and d in gb:
+            ga[d] = -1.0 if rr.random() < 0.6 else 1.0
+            gb[d] = -1.0 if rr.random() < 0.6 else 1.0
+    z = scomponi(ga, gb, UU)
+    rt = coppia(ga, gb, UU); rc = coppia(ga, gb, coop(ga, gb, UU))
+    chk('(xi) scomposizione: comuni %d vs attese %.0f, A perde %.2f insieme / %.2f da sola; lift TUTTE %.2f, coop %.2f' % (
+        z['coop'], z['attese'], z['a_co'], z['a_solo'], rt['lift'], rc['lift']),
+        abs(z['coop'] - z['attese']) < 0.1 * z['attese'] and z['a_solo'] == 0 and z['a_co'] > 0.5
+        and rt['stato'] == 'LEGATE' and abs(rc['lift'] - 1) < 0.15)
     # (ix) coerenza col MC sui dati veri (carica_tutto si ferma se il netto non coincide)
     S, calA, calB = carica_tutto()
     chk('(ix) dati veri: netto per giornata == carica_v2 del MC per 5 sedie; calA %s -> %s (%d), calB %d' % (

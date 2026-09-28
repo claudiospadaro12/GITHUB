@@ -36148,3 +36148,37 @@ e `[market closed]`); gli stop/TP del server si scrivono nel giornale del termin
 Regola: un'assenza in un log si legge solo se si sa che cosa quel log SCRIVE nel caso positivo. "0 righe" dal giornale
 Esperti = "nessun ordine fallito", mai "nessuna operazione"; la prova di attivita' e' l'equity/rischio aperto del
 Guardian o lo Storico del conto. La frase di CODA_09 va corretta (modifica a uno script del runner: passa dai cancelli).
+
+### CLASSE 897 — la versione "solo giorni in cui operano entrambe" letta come prova che il legame "passa dal CALENDARIO", senza confrontare le giornate comuni con quelle ATTESE e su sedie dove "operare" vuol dire "chiudere" (28/09/2026, cancello strato 2 sul referto DIPENDENZA NELLO STRESS)
+Caso: `report/DIPENDENZA_NELLO_STRESS_2026-09-28.md` (757ff37e) scrive in testa che `770101`x`770105` perdono insieme piu'
+del caso (lift 1,66, p 0,020) *"perche' operano le stesse mattine"* (coop lift 0,99), e che `771531`x`770521` *"scelgono le
+stesse giornate"* (coop 0,98). Misurato al cancello: le giornate comuni sono **127 contro 125 attese** (181x181/262) e **11
+contro 12,9** — calendari da caso, non sovrapposti. Il legame sta altrove: quando scattano insieme `770101` e `770105` perdono
+il 32% e 35% delle volte, da sole il 9% e 7%. Per `771531`x`770521` la cella coop aveva **n 11 = NON LEGGIBILE** per il
+criterio congelato, ed e' stata usata lo stesso; e per motori a piu' giorni "operato" = "ha chiuso un deal" = spesso "e'
+stato fermato", quindi condizionare sulle giornate comuni condiziona sull'ESITO (26/02: stop a 2 secondi di distanza).
+Regola: prima di attribuire un legame al calendario si stampano **comuni osservate contro attese** (nA x nB / n) e la
+frequenza di perdita **insieme contro da sola**; la scomposizione "coop" si legge solo se "operare" si decide all'INGRESSO
+(sedie d'apertura), mai per sedie la cui giornata e' definita dall'uscita. Una cella NON LEGGIBILE non sostiene una frase.
+Contro-esempio ora nell'autotest (xi): calendari indipendenti, perdita solo quando scattano insieme -> lift TUTTE 3,88
+LEGATE, coop 0,99, comuni 513 contro 507: "coop ~1" NON vuol dire "calendario".
+
+### CLASSE 898 — un'approssimazione dichiarata trascurabile su una MEDIA ereditata senza rimisurarla da un CONTEGGIO A SOGLIA nella coda (28/09/2026, stesso cancello, figlia della 321)
+Caso: lo stesso referto conta le giornate di portafoglio sopra 3,5% e 4,5% in % del **deposito fisso** (convenzione di
+`mc_challenge_ftmo_v2.py`, che dichiara la classe 321 <= 0,3 punti sulla probabilita' di passare). Ma i backtest
+dimensionano sul saldo CORRENTE (saldi finali x1,03-1,23): rinormalizzate sul saldo, le giornate sopra 4,5% delle 4 sedie
+passano **da 4 a 2** e il peggiore da 6,87 a 6,02 — le due che cadono erano 2+2 sedie a 2,26-2,50% ciascuna, cioe' 2% di
+un saldo cresciuto. Un effetto che sposta una media di pochi decimi puo' spostare di un intero stop una soglia.
+Regola: quando una misura eredita una convenzione con un'approssimazione "trascurabile", la si ri-misura **sulla statistica
+nuova** se questa e' un conteggio a soglia, un percentile di coda o un massimo; se non si puo', si dichiara in testa.
+Contro-esempio nell'autotest (x): saldo raddoppiato, perdita -2000 -> -1000 sul deposito.
+
+### CLASSE 899 — una tabella di decine di test al 5% consegnata con i "LEGATE" in testa senza dire quanti test ci sono ne' quanti ne darebbe il caso (28/09/2026, stesso cancello)
+Caso: il referto DIPENDENZA NELLO STRESS applica un Fisher a una coda con soglia 0,05 a **33** celle leggibili distinte
+(6 coppie x 6 insiemi, versioni "giorni comuni", sensibilita' col proxy e con la `770105`). Due escono LEGATE (p 0,0034 e
+0,020) e finiscono al punto 3 della testa; al 5% il caso ne darebbe ~1,6, e con Bonferroni (0,05/33 = 0,0015) nessuna
+resta. I criteri congelati non prevedevano correzione, e non si cambiano dopo i numeri: ma il NUMERO DEI TEST e l'atteso
+per caso si scrivono accanto ai verdetti. Regola: ogni tabella di verdetti a soglia di p dichiara quanti test contiene,
+quanti "positivi" darebbe il caso e se i positivi sopravvivono a una correzione (anche solo Bonferroni); se non
+sopravvivono, in testa si chiamano "indizi da rimisurare", non "legami". Parente della regola del 19/08 sulla cella verde
+per caso.
