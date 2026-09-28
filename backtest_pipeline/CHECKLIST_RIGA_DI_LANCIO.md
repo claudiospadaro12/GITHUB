@@ -36368,3 +36368,26 @@ essere rotto. Candidato per lo strato 1: `abtg_trades_` + `Split(',')` nella ste
 Nello stesso cancello, recidiva della **455/226** nei quattro file prova R270b-e: la regola di fermo S1B ("posizioni
 costanti in ogni cella, se no NULLO") non era misurabile per cella (per-trade unico per magic pinnato; `Trades` = deal),
 e il G0 citava 132/193 POSIZIONI dove il CSV porta 175/270 DEAL. Corretta nei commenti prima dei numeri.
+
+### CLASSE 912 — la SENTINELLA D'OROLOGIO ("zero uscite fuori finestra") congelata con il solo contro-esempio del pin, senza quello del CALENDARIO: un festivo CME annulla 19 file su 24 e il criterio si emenda a numero visto; e l'emendamento nato cosi' ha un buco suo (28/09/2026, controllo preventivo su `report/LETTURA_R255_2026-09-28_B_EMENDATA.md`, lettore `leggi_r255.py --s1-festivi`, proposta dell'autore)
+**Il caso.** R255 (short Dow a due orologi), testa `prove/R255a_short_DOW_ancora_1430.txt` par. 8: S1 = zero uscite
+prima delle 15:05/16:05 e dalle 17:31/18:31, con UN contro-esempio (ora 15 non arrivata -> 60,3% delle uscite prima delle
+16:05). Nessuna riga sul calendario CME, benche' la **909(b)** avesse gia' visto la stessa cosa su R250 (23:05 dopo il
+Venerdi Santo e dopo la vigilia del 4 luglio). Misurato sui 48 per-trade (6.942 deal): **40 uscite fuori finestra, tutte
+su tre date** -- `2025.01.10 00:25:27` (x16) e `01:19:52`/`03:26:04` (trail0, x2 ciascuna) dopo il lutto nazionale del
+09/01 (CME fermo alle 9:30 ET = 15:30 BCM: le posizioni del file 14:30 restano aperte fino alla riapertura delle 00:00),
+`2025.06.19 23:05:00` (x18, Juneteenth: fermo alle 13:00 ET = 18:00 BCM, prima del flat 18:30 del file 15:30) e
+`2026.05.25 23:05:00` (x2, Memorial Day, stesso meccanismo). Una uscita per file bastava: **19 file su 24 NULLI**, tutte le
+configurazioni NULLE per classe 772, e l'unico modo di leggere il round e' stato un emendamento DOPO i numeri (classe 900,
+lettura B in attesa di firma). E l'emendamento, scritto in fretta sul caso, aveva un ramo senza limite: "(b) prima uscita
+del per-trade dopo la riapertura" con "(a) stesso giorno di calendario della riapertura" d'inverno copriva l'intera seduta
+normale del 10/01 -- un flat mancato alle 19:00 o alle 23:30 usciva ESENTE (eseguito). Corretto in `1da84b9f` (solo prima
+del primo armo, 14:30 BCM); le 38 esenzioni vere passano tutte dal ramo "entro 1h30", nessun numero cambiato.
+**Regola.** (1) Una sentinella d'orologio congelata in testa porta, PRIMA dei numeri, l'elenco PER NOME delle chiusure CME
+nella finestra -- festivi, chiusure anticipate (3 luglio, venerdi del Ringraziamento, 24 dicembre) e giornate straordinarie
+(lutti nazionali) -- con l'ora di fermo e di riapertura in ORA BCM, e dichiara cosa succede alle uscite alla riapertura; i
+contro-esempi sono DUE: pin non arrivato (tutte le uscite spostate) e posizione intrappolata dal fermo (UNA uscita alla
+riapertura). (2) Un'esenzione per calendario si limita alle posizioni che NON possono essere state aperte dopo la
+riapertura (prima del primo armo successivo), e si prova contro il flat mancato della seduta NORMALE dopo il festivo. (3)
+Fail-closed: un festivo non elencato resta NULLO e si stampa "osservato ma non in elenco". Candidato per lo strato 1: un
+file prova con una regola "zero uscite fuori" e senza la parola `festiv`/`riapertura` nel paragrafo = RILIEVO.
