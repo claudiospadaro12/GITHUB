@@ -1,6 +1,24 @@
 
 ---
 
+## 28/09/2026 — ROUND CORTI C2 LETTO: EMA200 H4 XAUUSD, griglia 3x3 a 100.000 (R264d1-d4, OHLC M1)
+
+Archivio `risultati_archivio/ROUND_CORTI_C2_2026-09-28/` (4 job, 5 min, motore = pin `dbf4ccd6`). Referto
+`report/LETTURA_ROUND_CORTI_C2_2026-09-28.md` (PASS del cancello `8c19d0e0`, classe 914: certificato con caselle cablate corretto).
+
+| | IS 2017-2023 | OOS 2024-2026 |
+|---|---|---|
+| PF, 9 celle su 9 | 0,810-0,836 (nessuna sopra 1) | 1,22-1,65 |
+| DD a 1%, cella di mezzo (= anche il picco) | **13,32%** (muro 10%) | 6,02% |
+| n deal | 654-880 | 274-397 |
+| PF di TUTTA la storia (cella di mezzo, lordi) | **0,993** (−614 EUR su 9,5 anni a 1%) | |
+
+🪦 **NO PER RISCHIO, con certificato COMPLETO** (PF, n e DD, uscita ad asse R264d4 da questo round; gemelli R139a AUDJPY
+H4 e R139b GBPUSD H4 e TF R32a XAUUSD H1 dall'archivio, per nome). Il recente e' buono ma NON CONFRONTABILE (G0 ROSSO,
+causa NON DIMOSTRATA, non e' il lotto). Due spiegazioni non separate: regime (edge solo nel toro 2024-26) o storico M1
+pre-2024 diverso; la prova per regime dell'IS e' NON MISURATA. Restano da misurare, se mai: `InpTP_RR`/`InpSLatr` ad asse
+sul 2017-23, il G0 col binario `0953846c`, il rischio 2017-23 a H1. Nessuna taglia.
+
 ## 28/09/2026 — ROUND CORTI C LETTO (R264 EMA200 H4 · R265 EURUSD · R266 box asiatico · R260d oro · R267 manopole)
 
 Archivio `risultati_archivio/ROUND_CORTI_C_2026-09-28/` (24 job girati + 13 SALTATI per costruzione, 51 min, motore = pin
