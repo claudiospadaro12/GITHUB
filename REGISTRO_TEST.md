@@ -1,6 +1,24 @@
 
 ---
 
+## 28/09/2026 — ROUND CORTI C LETTO (R264 EMA200 H4 · R265 EURUSD · R266 box asiatico · R260d oro · R267 manopole)
+
+Archivio `risultati_archivio/ROUND_CORTI_C_2026-09-28/` (24 job girati + 13 SALTATI per costruzione, 51 min, motore = pin
+`0482fd80`). Referto `report/LETTURA_ROUND_CORTI_C_2026-09-28.md` (PASS del cancello `f7d95442`, classe 913).
+
+| round | esito | verdetto |
+|---|---|---|
+| R264 EMA200 H4 (GBPJPY, XAUUSD, GBPUSD, AUDJPY) | **G0 ROSSO 4/4** nello stesso verso (n +5..+105, PF −0,017..−0,091); forex a 0 posizioni al pavimento | ⚪ 12 griglie SALTATE, OOS NON CONFRONTABILI; **causa NON DIMOSTRATA** (H_BINARIO `3af47ed9`/`344a11b9` vs `0953846c` del genetico · H_STORICO · H_SPEC); misura che separa: G0 col binario `0953846c` |
+| R265 EMA200 EURUSD H4 solo corto | K1 FAIL: stop 23,4-24,4 pip = 35,3-36,8× il pedaggio (< 40× = 26,54) | 🔴 **ESCLUSO PER COSTO** con `InpSLatr` 1,0; certificato **NON ANCORA MISURATO** (`InpSLatr` mai ad asse) |
+| R266 box asiatico GBPUSD/EURUSD (6 file) | PF 0,88-1,28, tutti H0; DD a 1% 7,2-21,6% | 🟠 rischio violato a qualunque n; NON ANCORA MISURATO (uscita ad asse, TF) |
+| R260d oro 770402 solo long col trend | T5/T3/S0 ok; 238 op, PF 1,557 vs 1,335; rimosse PF 1,051 (HR: taglia, non separa) | 🔴 RISCHIO VIOLATO (DD 3,38% a 0,5% vs S3 2,00-2,06); nessuna taglia |
+| R267b oro InpMinBoxPts 1300-2600 | PF 1,67-1,93 su 98-199 op | 🟡 indizio, merito sospeso |
+| R267e2 oro EMA200 + filtro ADR | PF 1,309 → 1,559, DD 6,07 → 4,63 (M1, M2 passano) ma banco ROSSO | 🟡 INDIZIO (E4 valutata, classe 913) |
+| R267c/d Dow short, R267g DAX long, R267e1/f | nessuna cella batte l'ancora oltre il rumore | ⚪ default va bene / merito sospeso; DAX long filtrato: mancano i gemelli |
+
+📌 Nota non misurata: il binario in campo della 771531 (`344a11b`) non e' ne' HEAD ne' `0953846c`: il ROSSO tocca anche la base
+di quella sedia [NON MISURATO]. C2 (oro a 100000) e' partita alle ~21:50: toglie il pavimento del lotto, non il ROSSO comune.
+
 ## 28/09/2026 — R255 LETTO: lo SHORT del Dow a due orologi (`ABTG_Dow_Apertura_US`, U30USD M5, tick reali, banco 10.000)
 
 Archivio `risultati_archivio/ROUND_R255_SHORT_DOW_INFASE_2026-09-28/` (24/24 job, 52 min, motore = pin `9f3df205`).

@@ -76,6 +76,10 @@ RIAVVIA LA GIORNATA."** Le sette sedie restano accese a 2,00%. Detto a Claudio p
 (01:00 server) azzera SOLO il contatore giornaliero; lo spazio al pavimento del Guardian (≈911 EUR, totale STATICO dal saldo
 iniziale) NON si riavvia. Sonda 03:30 = primo numero esatto.
 
+**28/09 sera — ROUND C LETTO** (PASS `f7d95442`, classe 913): G0 EMA200 H4 **ROSSI 4/4** con la stessa firma, causa NON
+DIMOSTRATA (misura che separa: G0 col binario `0953846c`); EURUSD H4 ESCLUSO PER COSTO (35,3-36,8×) ma NON ANCORA MISURATO;
+box asiatico e oro-col-trend bocciati per rischio; indizi: oro+ADR, oro box minimo. Dettaglio in `REGISTRO_TEST.md`. C2 in macchina.
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 risposta di Jonas (FTMO) alle tre domande; orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
