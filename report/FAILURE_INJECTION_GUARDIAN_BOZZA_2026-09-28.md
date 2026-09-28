@@ -26,11 +26,15 @@ correzione.
    finché la challenge `541452707` è viva (firma del 21/09).
 4. 🔴 **Il codice dice fail-open in 7 dei 15 casi** (G02, G04, G06, G07, G12, G13, G14), e in un ottavo
    (G08b, il filling) dipende da un file ancora da leggere: il freno si spegne o si allenta **senza una
-   riga di log che lo dica**. Tre (G02, G04, G13) colpiscono direttamente il muro giornaliero, cioè la
+   riga di log che lo dica**. ✏️ Il grado non è lo stesso per tutti e sette: in **cinque** (G04, G06, G07,
+   G12, G14) basta che il guasto accada; in **G13** vale nelle ore **fra** le due ore di reset (fra 1 e 23:
+   22 ore su 24); in **G02** serve anche che le GlobalVariable si perdano col crash, e questo è
+   `[NON MISURATO]` (la variante G02b, che le cancella a mano, è invece certa). Tre (G02, G04, G13) colpiscono direttamente il muro giornaliero, cioè la
    modalità di morte che il Monte Carlo dà per annullata dal Guardian (18,2% → 0,0%,
    `IL_PIANO_DEGLI_OTTO_GIORNI_2026-09-23.md` §3.2).
 5. 🆕 **Tre rilievi nuovi sul codice** (§6): la chiusura d'emergenza è **l'unico `CTrade` su FTMO che non
-   imposta il filling** (le sei sedie lo fanno), il Guardian **non forza mai il salvataggio** delle sue
+   imposta il filling** (le sei sedie censite il 24/09 lo fanno, la settima `770105` è `[NON VERIFICATA]`; se la libreria standard lo adatta da sola in chiusura è
+   solo igiene: `[DA VERIFICARE]`, verifica più corta in G08), il Guardian **non forza mai il salvataggio** delle sue
    GlobalVariable, e **nulla impedisce due Guardian** sullo stesso conto.
 6. ⏱️ Costo per Claudio: **~1 h di preparazione una volta** + **tre sedute da ~1,5 h** + **5 minuti il 26/10**.
    Le prime due sedute coprono i sette guasti ad ALTA priorità.
@@ -43,8 +47,8 @@ correzione.
 |---|---|---|---|
 | `ABTG_Guardian.mq5` | **v1.12**, pin `d884f7e1`, **498 righe**, 16 input | v1.14, 899 righe, 19 input | la v1.14 cambia l'avvio (stampa la baseline in `OnInit`, r.619-620) e aggiunge `InpDailyBaseline`: **i test G01-G03 e G09 vanno rifatti** se Claudio porta in campo la v1.14 |
 | `ABTG_PausaGuardian.mqh` | **v1.20**, pin `26a18566`, **398 righe** | v1.6x, 2461 righe | per chiamate a due argomenti la logica B1/C1 è la stessa, ma si compila **quella del pin** |
-| preset | `ABTG_Guardian_FTMO_2Step.set` letto dal `.chr` (`CODA_08` r.3437-3458) | idem | ancora 80000 · emergenza 4,5 · DD 9,3 statico · pausa 3,5 · cap 4,00 · reset ora 1 · `InpAction=0` · `InpCloseAllMagics=true` |
-| sedie | sei, tutte con `InpUsaGuardian=true`, **nessuna con `pretendi_guardian`** | idem | è il motivo per cui G04 è fail-open |
+| preset | `ABTG_Guardian_FTMO_2Step.set` letto dal `.chr` (`CODA_08` del 24/09 r.3437-3458; stessi valori in quello del **28/09**, r.2177-2196) | idem | ancora 80000 · emergenza 4,5 · DD 9,3 statico · pausa 3,5 · cap 4,00 · reset ora 1 · `InpAction=0` · `InpCloseAllMagics=true` |
+| sedie | **sette**: le sei censite il 24/09, tutte con `InpUsaGuardian=true` e **nessuna con `pretendi_guardian`**, più la `770105` (DAX short, attaccata il 25/09, assente dalla sonda per la classe 822: `docs/PARERE_EMILIANO_2026-09-28.md` punto 4), `[NON VERIFICATA]` su Guardian e filling | idem | è il motivo per cui G04 è fail-open |
 
 📌 **Tutti i numeri di riga "v1.12 r.N" e "v1.20 r.N" di questo documento sono contati sui file al pin**
 (`git show d884f7e1:mql5/Experts/ABTG_Guardian.mq5`, `git show 26a18566:mql5/Include/ABTG_PausaGuardian.mqh`),
@@ -57,8 +61,9 @@ non su HEAD. Dove cito HEAD lo scrivo.
 ### 2.1 🖥️ La macchina: **PC di backtest `DESKTOP-H4D7CAJ`**. Il VPS è fuori.
 - **VPS: nessun test, nessun terminale aperto, nessun EA attaccato**, finché la challenge FTMO
   `541452707` è viva. È la firma del 21/09 (`CLAUDE.md`, "I ROUND NON GIRANO PIU' SUL VPS") estesa per
-  prudenza a qualunque prova che carichi la macchina o apra finestre MT5: sul VPS convivono **sei**
-  cartelle dati e un test sbagliato di finestra lì costa la challenge.
+  prudenza a qualunque prova che carichi la macchina o apra finestre MT5: sul VPS convivono **tutte le
+  cartelle dati elencate al §2.3** (censimento `CODA_08` del 28/09) e un test sbagliato di finestra lì
+  costa la challenge.
 - **Sul PC di backtest si prova solo quando nessun round sta girando**: il tester si mangia le CPU e
   falserebbe i tempi di reazione del Guardian (G06, G08, G12 misurano secondi).
 
@@ -97,13 +102,16 @@ NUOVA e separata sul PC di backtest.** In questo documento: **`[CONTO_GUASTI]`**
 | **100k `50504263`** | `BCM Markets MT5 Terminal -V3` | VPS | dry-run |
 | **banco `50504400`** | `C:\MT5_Backtest` | VPS | spento per firma del 21/09 |
 | **manuale `50503635`** | `C:\MT5_MANUALE` | VPS | conto a mano |
-| **Pepperstone**, **Tickmill** | le loro cartelle | VPS | sedie vive |
-| **piccolo `50503392`** | `BCM Markets MT5 Terminal` sul VPS; **cartella sul PC `[NON MISURATA]`** | VPS **e** PC | §2.2 |
+| **Pepperstone** | `C:\Program Files\Pepperstone MetaTrader 5` | VPS | terminale vivo di un altro broker |
+| **Tickmill** | `C:\Program Files\Tickmill Europe MT5 Terminal` | VPS | sedie vive (XAUUSD, USDJPY: `CODA_08` 28/09) |
+| **piccolo `50503392`** | `C:\Program Files\BCM Markets MT5 Terminal` sul VPS **e** sul PC (tabella macchina→terminale del driver dei round, `I_ROUND_SUL_PC_DI_BACKTEST_2026-09-21.md` §3.1; stato attuale del PC da rileggere con R-A, ultima misura 10/09) | VPS **e** PC | §2.2 |
 
 ### 2.4 🎯 La riga del bersaglio, in testa a ogni test
 > 🖥️ **PC di backtest `DESKTOP-H4D7CAJ`** · ✋ **azione a mano dentro MT5** sul terminale **`[CONTO_GUASTI]`**
 > (`[CARTELLA_GUASTI]`), riconosciuto dalla riga PID + titolo + cartella (§9, riga R-A), **mai a occhio** ·
-> **NON si tocca**: il terminale `50503392` sullo stesso PC, e sul VPS nulla (lista §2.3).
+> **NON si tocca**: il terminale `50503392` sullo stesso PC (`C:\Program Files\BCM Markets MT5 Terminal`), e
+> sul VPS nulla: FTMO `541452707`, REALE `10105439`, 100k `50504263`, banco `50504400`, manuale `50503635`,
+> piccolo `50503392`, Pepperstone, Tickmill (cartelle al §2.3).
 
 Nei test la riga è ripetuta in forma breve (**BERSAGLIO B**), con le eventuali aggiunte.
 
@@ -163,6 +171,23 @@ o resta fermo · 🟠 **misto**.
   - **perdita giornaliera con un lotto minimo**: ancora piccola, tale che `InpDailyLossPct% x A` sia sotto
     il costo di spread di una posizione a lotto minimo aperta **dopo** la baseline.
   Cambiare l'ancora riavvia il Guardian (`OnDeinit` + `OnInit`), ma **la baseline del giorno resta** (r.303-311).
+  🧮 Esempio (numeri di comodo, non una taglia): equity del demo 10.000 e DD 9,3% → `A >= 10.000 / 0,907 =
+  11.025,36`; con `A = 11.100` il limite è `0,093 x 11.100 = 1.032,30` e la distanza `11.100 - 10.000 = 1.100`
+  lo supera → breach al primo secondo. Giornaliero: se lo spread di un lotto minimo costa 0,50, serve
+  `0,045 x A < 0,50`, cioè `A < 11,11`; con `A = 10` il DD totale **non** scatta (`10 - 10.000 < 0`).
+  🔴 Con un'ancora così piccola la finestra fra pausa (3,5% di A) e emergenza (4,5% di A) è larga **dieci
+  centesimi**: in pratica **ogni pausa accesa col trucco timbra anche il blocco del giorno** (r.417, anche in
+  `InpAction=1`).
+- 🧽 **Stato di partenza di OGNI test** (le GlobalVariable sopravvivono fra un test e l'altro, e i blocchi
+  sono latch): prima di ogni test la foto F3 deve mostrare `ABTG_PAUSA_GIORNO_[CONTO_GUASTI]` = 0,
+  `..._BLOCKDAY_V2` diverso da `..._DAYKEY_V2`, `..._FAILED` assente o 0, **salvo** che il test chieda
+  proprio quello stato. Se no: rimuovere il Guardian → pulizia F3 (solo GV con `[CONTO_GUASTI]`) →
+  riattacco. Due latch non si spengono da soli: **`FAILED` nel codice non viene MAI azzerato** (unica
+  scrittura r.410; né il giorno nuovo r.377-381 né `OnInit` lo toccano) e dopo un DD totale `PAUSA_FINO`
+  sta 30 giorni avanti (r.436) e non si accorcia mai (r.215). Senza questa regola un test **eredita** il
+  latch del precedente: la pausa di G01/G02 maschera il cap di G04(a) e G15 (la guardia dà precedenza alla
+  pausa sul cap, v1.20 r.140-141), e il breach di G12(c) o G06(b) toglie la riga di breach che G07(c) e
+  G08(a) usano come orologio (r.414: con il blocco già timbrato non si ristampa).
 - 🔧 **`InpAction=1` (SOLO ALLARME)** per i test che vogliono la pausa **senza** la chiusura. 🔴 Attenzione
   al rilievo R3 del 02/09: il blocco del giorno resta timbrato anche in `InpAction=1`, e rimettendo
   `InpAction=0` lo stesso giorno il Guardian **chiude tutto al primo secondo**. Sul conto dedicato è
@@ -234,11 +259,12 @@ presi; il verdetto sul rischio è la differenza in euro, scritta accanto.
 **1. Il codice.** 🔴 **Fail-open per disegno.** `OnDeinit` azzera il battito (v1.12 r.335). Le GV restano,
 quindi per gli EA il canale **esiste** (v1.20 r.189-194). Il cap è un timestamp che invecchia e **scade
 entro 120 s** (v1.20 r.73-74, r.114-118). La pausa **resta** fino alla sua scadenza (r.97-106). Nessuna
-delle sei sedie passa `pretendi_guardian` (`GUARDIAN_SEI_SEDIE_2026-09-24.md` §5.4), quindi il motivo 3
+delle sei sedie censite passa `pretendi_guardian` (la settima, `770105`, `[NON VERIFICATA]`) (`GUARDIAN_SEI_SEDIE_2026-09-24.md` §5.4), quindi il motivo 3
 (v1.20 r.135-145) non scatta mai. E soprattutto: **sparisce la chiusura d'emergenza**. Nessuna riga
 avvisa: la guardia stampa `via libera` solo se prima stava bloccando (v1.20 r.302-304).
-**2. Come si provoca.** BERSAGLIO B. Due varianti: (a) **cap acceso** (posizione con SL oltre il 4,00%
-dell'equity), sonda che tenta ogni 10 s → tasto destro sul grafico del Guardian → Expert Advisors →
+**2. Come si provoca.** BERSAGLIO B. Due varianti: (a) **cap acceso e pausa SPENTA** (posizione con SL
+oltre il 4,00% dell'equity; foto F3 con `PAUSA_GIORNO` = 0 — con la pausa accesa la sonda resterebbe
+ferma per PAUSA e il test misurerebbe (b), v1.20 r.140-141), sonda che tenta ogni 10 s → tasto destro sul grafico del Guardian → Expert Advisors →
 Rimuovi, orario annotato al secondo; (b) **pausa accesa**, stessa rimozione.
 **3. PASS/FAIL.** È il **criterio 8 del 02/09**, mai eseguito. (a) ✅ comportamento conforme al codice =
 la sonda passa da `INGRESSO BLOCCATO -- CAP` a `via libera` **entro 120-130 s** dalla rimozione e apre
@@ -314,11 +340,24 @@ del secondo dopo (r.423-426), che è la cosa giusta per un rifiuto temporaneo. T
   d'errore di `CTrade` al secondo per tutta la pausa, chiusura alla riapertura **al prezzo della
   riapertura**;
 - **(b) modo di riempimento**: 🔴 il Guardian **non imposta il filling** (0 occorrenze di
-  `SetTypeFilling` in v1.12 e a HEAD), mentre **tutte e sei le sedie** chiamano
+  `SetTypeFilling` in v1.12 e a HEAD), mentre **tutte e sei le sedie censite il 24/09** chiamano
   `SetTypeFillingBySymbol(_Symbol)` (DAX `@9fca63d9` r.434 · Dow r.393 · Nasdaq r.447 · MaxMin `@5fc0bc31`
-  r.137 · SuperWave `@872dba82` r.133 · EMA200 `@26a18566` r.123). Se il `CTrade` della libreria del
+  r.137 · SuperWave `@872dba82` r.133 · EMA200 `@26a18566` r.123; la settima `770105` `[NON VERIFICATA]`: se gira lo stesso binario della 770101 ha la stessa riga). Se il `CTrade` della libreria del
   terminale adatti da solo il filling in chiusura è `[DA VERIFICARE]` nel `Trade.mqh` di `C:\FTMO`
-  (sola lettura). 🔴 **La strada di chiusura del Guardian sui simboli FTMO non è mai stata percorsa**;
+  (sola lettura). ⚖️ **Non è un fatto che la chiusura fallisca**: nelle build recenti la libreria standard
+  chiama `FillingCheck(simbolo)` dentro `PositionClose` e adatta il filling al simbolo **della posizione**
+  (non a quello del grafico NZDJPY); se è così, R-1 è solo igiene. Oggi nel repo non c'è una copia di quel
+  file, quindi nessuna delle due cose è dimostrata. 🔴 **La strada di chiusura del Guardian sui simboli FTMO
+  non è mai stata percorsa**;
+  🔎 **La verifica più corta, prima di G08(b) e a costo zero** (qui solo descritta: la riga la scrive la
+  sessione dopo e passa dai cancelli): sul VPS, **in sola lettura**, il file
+  `MQL5\Include\Trade\Trade.mqh` della cartella dati `46C9F8E9FF0C747B2B5E09BCC13D5237` (programma
+  `C:\FTMO`, conto `541452707`); si cerca `FillingCheck` **dentro il corpo** di `CTrade::PositionClose` e si
+  legge la data del file contro quella dell'`.ex5` del Guardian (**2026-09-20 16:58**, `CODA_06` del 28/09):
+  conta la libreria **con cui è stato compilato**, quindi un file più recente dell'`.ex5` non chiude la
+  domanda. Nessun terminale toccato, e **mai** aprendo il file in un editor (un salvataggio per errore
+  cambierebbe la libreria con cui `C:\FTMO` ricompila). Esito: `FillingCheck` presente e file non più recente
+  → R-1 scende a igiene e G08(b) a priorità MEDIA; assente → G08(b) resta ALTA;
 - **(c) nessuna risposta / timeout**: non si provoca a comando. L'approssimazione è G06(b).
 **2. Come si provoca.** BERSAGLIO B. (a) posizione su un indice aperta prima della sua pausa giornaliera;
 breach per ancora **durante** la pausa. (b) **Solo sul conto di prova FTMO** `[CONTO_TRIAL]`
@@ -383,11 +422,11 @@ gratuita: la stessa verifica **in sola lettura** sui dati già raccolti della ch
 - **(a) Due ingressi nello stesso secondo.** Il cap è calcolato **dopo**, una volta al secondo, sulle
   posizioni già aperte (v1.12 r.440-459); la guardia legge una bandiera (v1.20 r.288-294) e **non prenota
   niente**. Due sedie che chiedono nello stesso secondo passano entrambe. Con il cap a 4,00% e sedie al
-  2,00%, **tre** ingressi simultanei passerebbero: su FTMO quattro sedie su sei stanno sugli indici USA
-  e due armano all'apertura di New York.
+  2,00%, **tre** ingressi simultanei passerebbero: su FTMO quattro sedie su sette stanno sugli indici USA
+  e due armano all'apertura di New York; altre due (`770101`, `770105`) armano insieme sull'apertura del DAX.
 - **(b) Pendenti che si riempiono insieme** all'apertura: invisibili al cap (G07).
 - **(c) Chiusura e rientro.** Se pausa ed emergenza scattano **nello stesso secondo** (un gap),
-  `FlattenAll()` (r.416) gira **prima** di `SetPausa()` (r.435): per la durata delle chiusure una sedia
+  `FlattenAll()` (r.416) gira **prima** di `SetPausa()` (r.432 per la soglia, r.435 per il blocco): per la durata delle chiusure una sedia
   che vede sparire la sua posizione può rientrare. Il ri-tentativo del secondo dopo la richiude, al costo
   di uno spread.
 **2. Come si provoca.** BERSAGLIO B. (a) Due sonde P4 su due grafici, magic diversi, orario di tentativo
@@ -406,10 +445,15 @@ istanze nello stesso terminale scrivono **le stesse** GlobalVariable (v1.12 r.27
 identici il danno è piccolo (doppie chiusure, righe d'errore). Con **ore di reset diverse** (per esempio
 un Guardian del 100k con reset 23 caricato per errore) ognuna vede la chiave del giorno dell'altra come
 "diversa" (r.375) e **riscatta la baseline a ogni secondo** (r.377-378): 🔴 **la perdita del giorno non
-si accumula mai e l'emergenza giornaliera non scatta più**. Due Guardian su **due terminali** loggati sullo
+si accumula mai e l'emergenza giornaliera non scatta più**. ✏️ **Ma solo in una finestra oraria**: le
+due chiavi (`PropDayKey()` r.106-112, ora `t - h x 3600`) differiscono solo quando l'ora server `H` sta
+**fra** le due ore di reset (`h1 <= H < h2`); fuori da lì coincidono e i due Guardian convivono. Con
+reset 1 e 23 la finestra è 01:00-22:59 server, 22 ore su 24. Due Guardian su **due terminali** loggati sullo
 stesso conto: le GV sono per terminale, quindi le sedie dell'altro terminale non vedono né pausa né cap.
 **2. Come si provoca.** BERSAGLIO B. Secondo grafico, stesso binario, preset di prova con **ora di reset
-diversa**; posizione a lotto minimo in perdita.
+diversa**, scelta in modo che l'ora server del test stia **fra** le due ore di reset (per esempio 1 e 23 con
+il test fra le 02:00 e le 22:00 server: fuori da quella finestra il fail-open non c'è e il test esce
+"non conforme" per un motivo sbagliato); posizione a lotto minimo in perdita.
 **3. PASS/FAIL.** ✅ conforme al codice = nel log compare `nuovo giorno prop` **a ogni secondo** e in F3
 l'ora di modifica di `DAYSTART_V2` si aggiorna di continuo. È la prova del fail-open. Qualunque altro
 esito va capito prima di andare avanti.
@@ -419,7 +463,8 @@ va **rimosso e il profilo salvato** prima di chiudere la seduta.
 ### G14 · Guardian riattaccato SENZA preset (o col preset sbagliato)
 **1. Il codice.** 🔴 Con i default del sorgente l'ancora è 0 → viene dalla GV già scritta (r.295), ma le
 soglie diventano **5,0 / 10,0**, cioè **esattamente i muri FTMO** (margine zero), pausa 4,0, cap 3,25 e
-reset all'**ora 0** (r.68-78): un'ora prima del confine FTMO. Nessun avviso, ma le due righe d'avvio
+reset all'**ora 0** (r.68-78): un'ora prima del confine FTMO. Per onestà: il **cap** invece si **stringe**
+(3,25 contro 4,00); il 🔴 viene da emergenza, DD e pausa che si allentano. Nessun avviso, ma le due righe d'avvio
 stampano tutto (r.318-323).
 **2. Come si provoca.** BERSAGLIO B. Rimuovere il Guardian e riattaccarlo **senza** caricare il preset.
 **3. PASS/FAIL.** ✅ PASS del test = le due righe d'avvio mostrano i default e il pannello li conferma.
@@ -431,8 +476,9 @@ Il valore del test è **la procedura**: dopo **ogni** riattacco in campo si legg
 `GUARDIAN_SEI_SEDIE_2026-09-24.md` §1.1). Nel frattempo il battito è vecchio: il cap è già scaduto
 (fail-open per i secondi del caricamento), la pausa invece tiene fino alla sua scadenza. Se le GV sono
 andate perse (G02), `ABTG_CanaleEsiste()` è falso (v1.20 r.189-194) e le sedie passano tutte.
-**2. Come si provoca.** Si osserva dentro G01 e G02: la sonda è su un grafico **precedente** a quello del
-Guardian.
+**2. Come si provoca.** Come G01, ma con il **cap acceso e la pausa SPENTA** (dentro G01 e G02 la pausa è
+accesa e maschera il cap: la guardia controlla la pausa per prima, v1.20 r.140-141), e con la sonda su un
+grafico **precedente** a quello del Guardian. Dentro G02 si osserva solo il caso "GV perse".
 **3. PASS/FAIL.** Si annota il primo tentativo della sonda dopo la riapertura e la prima riga
 `[GUARDIAN] avviato`: se la sonda **passa prima** con il cap che prima del riavvio la bloccava, la finestra
 è misurata in secondi.
@@ -444,16 +490,16 @@ Guardian.
 
 | # | rilievo | dove (v1.12 al pin, se non detto) | effetto | nuovo o già noto |
 |---|---|---|---|---|
-| **R-1** | 🔴 la chiusura d'emergenza **non imposta il filling**, le sei sedie sì | `CTrade gTrade` r.96, `SetExpertMagicNumber` r.316, nessun `SetTypeFilling`; sedie: sei righe citate in G08 | se il `CTrade` del terminale non adatta da solo il filling in chiusura, **`FlattenAll` fallisce su FTMO** e il +13,7 del Monte Carlo non esiste | 🆕 |
+| **R-1** | 🔴 la chiusura d'emergenza **non imposta il filling**, le sei sedie censite sì (la settima `[NON VERIFICATA]`) | `CTrade gTrade` r.96, `SetExpertMagicNumber` r.316, nessun `SetTypeFilling`; sedie: sei righe citate in G08 | `[DA VERIFICARE]`: se la `PositionClose` della libreria adatta il filling al simbolo della posizione (`FillingCheck`, build recenti) è solo igiene; se non lo fa, la chiusura d'emergenza su FTMO **può** essere rifiutata e il +13,7 del Monte Carlo andrebbe rimisurato. Verifica più corta: lettura di `Trade.mqh` di `C:\FTMO` (G08) | 🆕 |
 | **R-2** | 🔴 nessun `GlobalVariablesFlush()` | 0 occorrenze in v1.12 e a HEAD | lo stato del freno (baseline, blocco, pausa) sopravvive a un crash **solo se MT5 lo ha già salvato** | 🆕 |
-| **R-3** | 🔴 nessuna difesa da un secondo Guardian | `OnInit` r.257-326 | con ore di reset diverse la baseline si riscatta ogni secondo (r.375-378) e il freno giornaliero muore | 🆕 |
+| **R-3** | 🔴 nessuna difesa da un secondo Guardian | `OnInit` r.257-326 | con ore di reset diverse la baseline si riscatta ogni secondo (r.375-378) e il freno giornaliero muore, **nelle ore fra le due ore di reset** (r.106-112; 1 e 23 → 22 ore su 24) | 🆕 |
 | **R-4** | 🔴 "variabile persa" = "giorno nuovo" | r.304 (`OnInit`), r.375 (`OnTimer`) | la perdita del giorno si azzera; a HEAD è r.608 e r.715 | noto dal 18/09 (a HEAD) |
 | **R-5** | 🟠 la riga del breach dice "CHIUSO TUTTO" anche con zero chiusure riuscite | r.411-412, r.418-419 | chi legge il log crede chiuso un conto aperto; la verità è solo nello Storico | 🆕 |
 | **R-6** | 🟠 nessun controllo di connessione né di permesso di trading | 0 occorrenze di `TERMINAL_CONNECTED`, `TERMINAL_TRADE_ALLOWED`, `MQL_TRADE_ALLOWED` | cieco e muto durante una disconnessione (anche la riga periodica si ferma, r.489) e con Algo Trading spento | 🆕 |
 | **R-7** | 🟠 `OnInit` v1.12 non stampa la baseline quando cambia giorno all'avvio | r.303-311 | un riavvio a cavallo del reset non lascia traccia nel giornale (la v1.14 lo stampa, HEAD r.619-620) | 🆕 |
-| **R-8** | 🟠 `FlattenAll()` prima di `SetPausa()` nello stesso giro | r.416 contro r.435 | finestra di rientro se pausa ed emergenza scattano insieme | 🆕 |
+| **R-8** | 🟠 `FlattenAll()` prima di `SetPausa()` nello stesso giro | r.416 contro r.432 e r.435 | finestra di rientro se pausa ed emergenza scattano insieme | 🆕 |
 | **R-9** | 🔴 il cap è a posteriori e cieco sui pendenti | r.171-199, r.440-459; v1.20 r.27-30 | sforamento con ingressi simultanei e pendenti | noto (B6, 02/09) |
-| **R-10** | 🔴 nessuna sedia pretende il Guardian | v1.20 r.282-286; sei sedie a due argomenti | Guardian staccato = sedie libere e nessuna chiusura d'emergenza | noto (24/09 §5.4) |
+| **R-10** | 🔴 nessuna sedia pretende il Guardian | v1.20 r.282-286; sei sedie censite a due argomenti, la settima `[NON VERIFICATA]` | Guardian staccato = sedie libere e nessuna chiusura d'emergenza | noto (24/09 §5.4) |
 | **R-11** | 🟠 baseline dall'equity, FTMO dal saldo | r.307, r.378 | più permissivi della prop con flottante negativo sul confine | noto (24/09 §4.3) |
 | **R-12** | 🟠 `PropDayKey()` non limita l'input, `NextResetTime()` sì | r.110 contro r.122 | con un'ora fuori scala il giorno e la scadenza della pausa divergono | noto (18/09, a HEAD) |
 
@@ -476,13 +522,13 @@ dichiarato, oppure solo procedura.
 | G12 | concorrenza tra EA | 🔴 ingressi simultanei e pendenti sforano il cap | ❌ NO | 30 min | 🔴 **ALTA** |
 | G04 | Guardian staccato | 🔴 fail-open per disegno, cap scade in 120 s, emergenza sparita | ❌ NO (criterio 8 del 02/09 mai eseguito) | 15 min | 🔴 **ALTA** |
 | G05 | Algo Trading spento | 🟠 ingressi fermi, emergenza inerte, riga ingannevole | ❌ NO | 15 min | 🔴 **ALTA** |
-| G13 | due Guardian | 🔴 baseline riscattata ogni secondo con reset diversi | ❌ NO | 15 min | 🔴 **ALTA** |
+| G13 | due Guardian | 🔴 baseline riscattata ogni secondo con reset diversi, nelle ore fra i due reset | ❌ NO | 15 min | 🔴 **ALTA** |
 | G06 | perdita di connessione | 🔴 cieco e muto; chiude al ritorno | ❌ NO | 25 min | 🔴 **ALTA** |
 | G09 | cambio giorno server / weekend | 🟠 baseline = equity, non saldo | ❌ NO (crepa misurata nel codice, mai in campo) | 20 min + attesa | 🟠 MEDIA |
 | G10 | cambio d'ora 25/10 | 🟠 ora fissa del server, giusta solo se FTMO passa a GMT+2 | ❌ NO | 5 min il 26/10 | 🟠 MEDIA (**con scadenza**) |
 | G03 | riavvio a cavallo del reset | 🟠 baseline all'ora del riavvio, nessuna riga | ❌ NO | 20 min + ora precisa | 🟠 MEDIA |
 | G07 | pendenti residui | 🔴 pausa e cap non li vedono; 🟢 il breach li cancella | ❌ NO | 30 min | 🟠 MEDIA |
-| G15 | sedie prima del Guardian al riavvio | 🟠 cap scaduto per i secondi del caricamento | ❌ NO | dentro G01/G02 | 🟢 BASSA |
+| G15 | sedie prima del Guardian al riavvio | 🟠 cap scaduto per i secondi del caricamento | ❌ NO | variante di G01 col cap (~10 min) | 🟢 BASSA |
 | G11 | calcolo equity e rischio | 🟢 grandezza giusta, campionata a 1 s | ❌ NO | 30 min (o sola lettura) | 🟢 BASSA |
 | G14 | riattacco senza preset | 🔴 soglie = muri FTMO, reset ora 0; righe d'avvio lo dicono | ❌ NO | 10 min | 🟢 BASSA (è procedura) |
 | G01 | riavvio pulito | 🟢 stato ricostruito dalle GV | ❌ NO (in campo verificato solo il filo, 19/08) | 20 min | 🟢 BASSA |
@@ -496,7 +542,7 @@ dichiarato, oppure solo procedura.
 | seduta | test | perché in quest'ordine |
 |---|---|---|
 | **0** | P0-P7 | senza banco dedicato non parte niente |
-| **1** (~1,5 h) | G01 → G15 (dentro G01) → **G02** → G02b → G04 → **G05** per ultimo | la famiglia "riavvio": è quella del pronto soccorso di `CLAUDE.md`, e G05 lascia un latch |
+| **1** (~1,5 h) | G01 → G15 (variante di G01: cap acceso, pausa spenta) → **G02** → G02b → G04 → **G05** per ultimo | la famiglia "riavvio": è quella del pronto soccorso di `CLAUDE.md`, e G05 lascia un latch |
 | **2** (~1,5 h) | **G12** → G13 → G07(a,b) → **G08(a)** → G07(c) per ultimo | la concorrenza va fatta **a mercato aperto**; G08(a) cade sulla pausa giornaliera di un indice |
 | **3** (~1,5 h) | G06 → G09 → G03 → G11 → G14 | G09 e G03 richiedono di esserci all'ora di reset di prova |
 | **26/10** | G10 | data fissa, 5 minuti |
@@ -538,7 +584,8 @@ ricompilazioni su `C:\FTMO`).
 | ④ | *«la chiusura "riuscita" la leggi dalla riga del Guardian»* | 🟢 no: R-5 mostra che quella riga dice "CHIUSO TUTTO" anche a zero chiusure. **Ogni PASS di chiusura si legge nello Storico** (classe 896) |
 | ⑤ | *«il test del filling sul demo BCM prova FTMO»* | 🔴 no, ed è scritto in G08: su BCM prova BCM. Per FTMO serve `[CONTO_TRIAL]` o nessuna prova |
 | ⑥ | *«il trucco dell'ancora è una soglia travestita»* | 🟢 le percentuali del campo restano (4,5 / 9,3 / 3,5 / 4,00): si sposta solo l'ancora su un conto finto, e la formula viene dal codice (r.393-398). Nessun numero per il campo |
-| ⑦ | *«il 7 su 15 fail-open è contato per differenza»* | 🟢 elencati per nome: **G02, G04, G06, G07, G12, G13, G14**. G08 è contato **a parte** perché il suo 🔴 (filling) è condizionato a un file non letto; G05 è 🟠 perché ferma gli ingressi anche se rende inerte l'emergenza |
+| ⑦ | *«il 7 su 15 fail-open è contato per differenza»* | 🟢 elencati per nome: **G02, G04, G06, G07, G12, G13, G14**. G08 è contato **a parte** perché il suo 🔴 (filling) è condizionato a un file non letto; G05 è 🟠 perché ferma gli ingressi anche se rende inerte l'emergenza. ✏️ E dentro i sette il grado è dichiarato (§0 punto 4): **G02** è condizionato a una perdita delle GV `[NON MISURATA]`, **G13** a una finestra oraria |
+| ⑧ | *«i test si passano lo stato l'uno con l'altro»* | 🟢 sì, se non si pulisce: pausa, blocco e `FAILED` sono latch nelle GlobalVariable. Per questo ogni test parte da una foto F3 di stato pulito (§5, "Stato di partenza") |
 
 ---
 
@@ -562,3 +609,8 @@ ai loro pin (solo `SetTypeFilling` e GlobalVariable), `GUARDIAN_SEI_SEDIE_2026-0
 `COLLAUDO_ENFORCEMENT_FASE1_2026-09-02.md`, `IL_GUARDIAN_CONTRO_LA_REGOLA_CHE_CI_HA_UCCISI_2026-09-18.md`,
 `BREACH_FUNDEDNEXT_2026-09-18.md`, `IL_CONFINE_DEL_GIORNO_2026-09-23.md`, `SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`,
 `IL_PIANO_DEGLI_OTTO_GIORNI_2026-09-23.md` §3.2, classe 896 della checklist.*
+
+*Cancello strato 2 del 28/09 su `44d7d93f`: 12 rilievi riletti sul codice al pin (confermati; R-1 riscritto come
+`[DA VERIFICARE]` con la verifica più corta, R-3 con la sua finestra oraria, R-8 con r.432); aggiunti lo stato di
+partenza dei test (classe 902), la finestra di G13 (classe 901), la settima sedia `770105` e le cartelle dati per nome
+(classi 755 e 761).*

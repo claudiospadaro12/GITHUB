@@ -36195,3 +36195,25 @@ Regola: un controllo nullo costruito su un'estrazione casuale si fa su **molte**
 dalla loro dispersione (almeno 2-3 errori standard della media), mai su una sola; e se il criterio di un contro-esempio
 cambia dopo il suo esito, il referto lo scrive in chiaro ("criterio cambiato dopo il numero": strumento tarato, non
 prova indipendente).
+
+### CLASSE 901 — un effetto dichiarato "a ogni secondo" su due chiavi di giorno spostate di ore diverse, vero solo nella finestra FRA le due ore: il test fatto fuori finestra esce "non conforme" per il motivo sbagliato (28/09/2026, cancello strato 2 su `report/FAILURE_INJECTION_GUARDIAN_BOZZA_2026-09-28.md` @44d7d93f)
+Caso: G13/R-3, due Guardian v1.12 con `InpDailyResetHour` diversi sullo stesso terminale. Il documento diceva che ognuno
+"riscatta la baseline a ogni secondo" (r.375-378). `PropDayKey()` (r.106-112) calcola `DayKey(t - h x 3600)`: con `h1 < h2`
+le due chiavi differiscono **solo** se l'ora server `H` sta in `h1 <= H < h2`; fuori da lì coincidono e i due Guardian
+convivono. Con reset 1 e 23 il fail-open vale 22 ore su 24 (vero e grave), ma il test G13 non fissava l'ora: fatto alle
+23:30 avrebbe dato "nessun nuovo giorno", letto come "il codice non fa quello che diciamo".
+Regola: un effetto che dipende da due orologi spostati si scrive con la sua **finestra** (per quali ore vale), e il test
+che lo misura fissa l'ora dentro la finestra. Contro-esempio obbligatorio: rifare il conto delle due chiavi a un'ora
+fuori dalla finestra.
+
+### CLASSE 902 — test in sequenza sullo stesso stato persistente senza precondizione di "stato pulito": il latch del test prima maschera la variabile del test dopo (28/09/2026, stesso cancello, stesso documento)
+Caso: le prove di failure injection girano sullo stesso conto demo e lo stato del Guardian vive nelle GlobalVariable, che
+sono **latch**: `BLOCKDAY` fino al giorno nuovo (timbrato anche in `InpAction=1`, r.417), `FAILED` **mai azzerato dal
+codice** (unica scrittura r.410), `PAUSA_FINO` a +30 giorni dopo un DD totale (r.436) e mai accorciato (r.215). La seduta 1
+faceva G01/G02 con la pausa accesa e poi G04(a) e G15, che misurano la scadenza del **cap**: la guardia controlla la pausa
+**prima** del cap (`ABTG_MotivoStop_Calc`, include v1.20 r.140-141), quindi la sonda sarebbe rimasta ferma per PAUSA e il
+test avrebbe "bocciato" il codice. Idem un breach lasciato da G12(c)/G06(b) toglie la riga di breach (r.407/r.414) che
+G07(c)/G08(a) usano come orologio.
+Regola: ogni procedura a piu' test sullo stesso stato persistente dichiara lo **stato di partenza** di ogni test (qui: foto
+F3 con pausa 0, blocco diverso dalla chiave del giorno, `FAILED` assente) e il modo di ripristinarlo; e per ogni test si
+chiede "quale test precedente lascia qualcosa che ha la PRECEDENZA sulla variabile che misuro?".
