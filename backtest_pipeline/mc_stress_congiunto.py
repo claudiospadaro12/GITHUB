@@ -348,6 +348,11 @@ def autotest():
     att_ = (ANCORA_BASE_2709[0],) + ANCORA_BASE_2709[1]
     chk("Z2 BLK B + 770105 dallo stato del 27/09: PASS 55,1 (semi 55,0/54,4/55,2) al decimale",
         all(round(x, 1) == y for x, y in zip(vals, att_)), "-> %s" % "/".join("%.2f" % x for x in vals))
+    #    e le altre colonne della stessa riga del 27/09 (MC_CON_ORO_E_BLOCCHI r.150): fermata 44,9, fine<=5 25,4, gg 21 / 5
+    o = corri(fB, aB, S_2709, SEME)
+    chk("Z2 BLK B + 770105 dal 27/09, seme 11: fermata 44,9 | fine<=5gg 25,4 | gg mediani 21 / 5 (r.150 del 27/09)",
+        round(o['p'].get('FERMATA_GUARDIAN', 0), 1) == 44.9 and round(fine5(o), 1) == 25.4 and o['med_pass'] == 21
+        and o['med_fine'] == 5, "-> %.2f / %.2f / %s / %s" % (o['p'].get('FERMATA_GUARDIAN', 0), fine5(o), o['med_pass'], o['med_fine']))
     # Z3 blocchi L=1 == simula_v2 con reimmissione
     a = v2.simula_v2(fB, FATT, S_2809, attivo=aB, reimmissione=True, **KW)
     b = simula_stress(fB, FATT, S_2809, attivo=aB, campione='blocchi', L=1, **KW)

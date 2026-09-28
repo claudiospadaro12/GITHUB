@@ -12,7 +12,7 @@ muro FTMO vale 0,0 per costruzione finche' il Guardian lavora"*). Qui si toglie 
 alla volta e poi insieme.
 **Strumento**: `backtest_pipeline/mc_stress_congiunto.py` (**nuovo**). Importa `mc_challenge_ftmo_v2.py` (commit
 `1c0029a6`, **non modificato**) e la v1, ne riusa dati, calendario, blocchi e simulatore, e aggiunge **solo** tre
-agganci inerti a valore zero. `--autotest`: **25 controlli, tutti verdi**.
+agganci inerti a valore zero. `--autotest`: **26 controlli, tutti verdi**.
 
 > 🔴 **Taglie, cap e soglie del Guardian sono firme di Claudio. Qui NON c'e' nessuna proposta**: ci sono le curve
 > alla configurazione in campo (sedie indici a 2,00%, Guardian 4,5 / 9,3) e, dove richiesto, **la misura** di quale
@@ -39,7 +39,7 @@ agganci inerti a valore zero. `--autotest`: **25 controlli, tutti verdi**.
 5. 💸 **I costi mordono piu' dei grappoli**: spread x2 **−9,2** punti, ingresso +3 punti **−14,1**, spread x2 + 1
    punto **−14,4**, pur costando solo **0,02-0,05 R** per posizione: l'edge del campo e' sottile. I **grappoli** del
    calendario vero **non si distinguono da un ordine a caso** (contro L=1, semi 11-14: blocchi 5 da +0,5 a +0,9;
-   blocchi 10 da +5,2 a +6,3, **a favore** e dentro il rumore d'ordinamento, dev. st. 4,3). Lo scenario avverso (le 5 settimane peggiori a peso 3) toglie **23,5** punti.
+   blocchi 10 da +5,2 a +6,3, **a favore** e dentro il rumore d'ordinamento, dev. st. 4,3). Lo scenario avverso (le 5 settimane peggiori a peso 3) toglie **22,6** punti contro il riferimento a disegno neutro L=1 (**23,5** contro la base, che ha un altro campionamento).
 6. 🧨 **Insieme**: moderato **PASS 31,8% / MURO 24,7%**; severo **18,4% / 81,6%**; severo con le settimane peggiori
    **9,5% / 90,5%** (§4). Sono **scenari pessimisti dichiarati**, non previsioni: dicono **dove** il margine si rompe.
 
@@ -76,14 +76,14 @@ weekend del 25-28/09 ha dato **+7,26**, a favore).
 
 ## 2. ✅ I contro-esempi PRIMA dei numeri (regola del 10/09)
 
-Tutti in `--autotest`, tutti verdi (25 su 25).
+Tutti in `--autotest`, tutti verdi (26 su 26).
 
 | # | contro-esempio | atteso | misurato | esito |
 |---|---|---|---|---|
 | Z0 | stato: 75.090,72 + 750,82 | 75.841,54 | **75.841,54** | ✅ |
 | Z1 | a perturbazione zero == `st.simula_stato` della v1: G0 (242), feriali (277), feriali con slittamento x1,048, base B (262) al 27/09 e al 28/09 | identici | **identici bit per bit** (57,24 / 57,525 / 54,41 / 55,07 / 62,365) | ✅ |
 | Z1' | Guardian SPENTO con sup 50% k2: nessuna chiusura, il superamento non puo' agire | identico alla v1 | **identico** | ✅ |
-| Z2 | le ancore del 27/09: G0 **57,2**; base B + 770105 **55,1** con semi **55,0 / 54,4 / 55,2** | al decimale | **57,24**; **55,07 / 54,95 / 54,44 / 55,18** | ✅ |
+| Z2 | le ancore del 27/09: G0 **57,2**; base B + 770105 **55,1** con semi **55,0 / 54,4 / 55,2** | al decimale | **57,24**; **55,07 / 54,95 / 54,44 / 55,18**; e sulla stessa riga fermata **44,93**, fine ≤ 5 gg **25,36**, gg **21 / 5** (asserito, aggiunto al cancello del 28/09) | ✅ |
 | Z3 | blocchi con L=1 == `v2.simula_v2(reimmissione=True)` | identici | **bit per bit** (61,455) | ✅ |
 | Z4 | costo tutto a zero == nessun costo; un giorno per sedia rifatto a mano (770101 2025.07.03, 2 deal, 14,20 lotti; 771531 2025.07.11, 2 deal, 4,50 lotti; 770105 2025.07.01, 0,90 lotti) | uguali | **uguali a 1e-15**; q D30EUR 1,0000, q U30USD 0,8571 entro l'1% del numero gia' in casa | ✅ |
 | Z5 | soglie del superamento costruite a mano: **totale** dal saldo di oggi, giornata da −10%: muro 10% se sup > 0,35 / 0,948 = **36,92%**; **giornaliero** da 80.000: muro 5% se sup > **25%**; k=2 dimezza | fermata sotto, muro sopra | sup 36,42% → fermata 100%, 37,42% → **muro 10% 100%**; 24% → fermata, 26% → **muro 5% 100%**; 13% x 2 → muro 5% 100% | ✅ |
@@ -96,6 +96,10 @@ calendario mescolato con tolleranza 2 punti, e dava **+4,5** punti di fermata �
 campionatore: **un** ordinamento a caso ha la sua autocorrelazione per caso, e i blocchi la riproducono fedelmente.
 Misurata sui 40 ordinamenti, quella **nube** ha deviazione standard **3,0** (L=5) e **4,3** (L=10) punti di PASS. 👉
 **E' diventata una misura** (§6): il calendario vero si legge **contro quella nube**, non contro lo zero.
+🔴 **Da dire in chiaro: il criterio di Z6' e' stato cambiato DOPO averne visto l'esito** (da "un calendario, tolleranza 2"
+a "media di 40, |media| < 2"), e la metrica e' passata dalla fermata al PASS (qui equivalenti: il muro e' 0). Per
+questo Z6' e' uno **strumento tarato**, non una prova indipendente: dice che il campionatore non fabbrica grappoli
+**in media**, e la nube di §6 va letta come la sua scala, non come un verdetto passato al primo colpo (classe 900).
 
 ---
 
@@ -214,7 +218,7 @@ e emergenza a 72.560 contro muro a 72.000 (differenza **0,007** = 560 EUR), e un
 - 🔴 **E' un campione di un anno solo (toro 2025-26)**: il grappolo vero di un crollo di regime (2020) qui non c'e',
   e un ricampionamento non lo fabbrica. Per questo esiste lo scenario avverso: le **5 settimane peggiori** (08-12/12/2025
   **−10,0%** del saldo a 2%; 30/03-03/04/2026 −7,7%; 13-17/10/2025 −6,8%; 15-19/12/2025 −6,7%; 02-06/02/2026 −5,0%)
-  **a peso 3** tolgono **22 punti** di PASS contro L=1 (semi: −22,6 / −22,2 / −21,9 / −21,8), tutti in fermata, muro 0.
+  **a peso 3** tolgono **22,6 punti** di PASS contro L=1 (semi: −22,6 / −22,2 / −21,9 / −21,8), tutti in fermata, muro 0.
   Da notare: **la sola settimana dell'8-12 dicembre, ripetuta oggi, supera da sola i 4,1 punti** che separano il saldo
   dall'emergenza del Guardian.
 
@@ -274,7 +278,7 @@ sotto stress, e tutto il punto 4 di Emiliano (failure injection del Guardian), c
 ## 📎 Riproducibilita'
 
 ```text
-python3 backtest_pipeline/mc_stress_congiunto.py --autotest    # 25 controlli, esce 0 se verde, ~50 s
+python3 backtest_pipeline/mc_stress_congiunto.py --autotest    # 26 controlli, esce 0 se verde, ~50 s
 python3 backtest_pipeline/mc_stress_congiunto.py               # tutte le tabelle di questo referto, ~3 min 20 s
 python3 backtest_pipeline/mc_stress_congiunto.py --solo-base   # solo le due righe base (27/09 e 28/09)
 ```

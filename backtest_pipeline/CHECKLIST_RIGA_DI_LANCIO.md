@@ -36182,3 +36182,16 @@ per caso si scrivono accanto ai verdetti. Regola: ogni tabella di verdetti a sog
 quanti "positivi" darebbe il caso e se i positivi sopravvivono a una correzione (anche solo Bonferroni); se non
 sopravvivono, in testa si chiamano "indizi da rimisurare", non "legami". Parente della regola del 19/08 sulla cella verde
 per caso.
+
+### CLASSE 900 — un solo campione casuale usato come controllo nullo, e il criterio cambiato dopo averne visto l'esito senza scriverlo (28/09/2026, cancello strato 2 sul referto MC STRESS CONGIUNTO)
+Caso: `backtest_pipeline/mc_stress_congiunto.py` (868fc09b), contro-esempio Z6' "i blocchi non fabbricano il grappolo":
+in prima stesura confrontava blocchi 10 contro L=1 su **UN** calendario mescolato a caso, con tolleranza 2 punti, e
+dava **+4,5** punti di fermata -> FAIL. Non era un difetto del campionatore: un ordinamento a caso ha la sua
+autocorrelazione per caso, e i blocchi la riproducono. Sui 40 ordinamenti la nube ha dev. st. **3,0** (L=5) e **4,3**
+(L=10) punti: la tolleranza 2 su un campione solo stava SOTTO il rumore del controllo stesso. Corretto in "media su 40,
+|media| < 2" (+0,69) — giusto, ma deciso dopo aver visto il FAIL, e il referto lo raccontava come "corretto prima di
+consegnare" senza dire che il criterio era stato cambiato a numero visto.
+Regola: un controllo nullo costruito su un'estrazione casuale si fa su **molte** estrazioni, e la tolleranza si fissa
+dalla loro dispersione (almeno 2-3 errori standard della media), mai su una sola; e se il criterio di un contro-esempio
+cambia dopo il suo esito, il referto lo scrive in chiaro ("criterio cambiato dopo il numero": strumento tarato, non
+prova indipendente).
