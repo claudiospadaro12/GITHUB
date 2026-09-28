@@ -36217,3 +36217,29 @@ G07(c)/G08(a) usano come orologio.
 Regola: ogni procedura a piu' test sullo stesso stato persistente dichiara lo **stato di partenza** di ogni test (qui: foto
 F3 con pausa 0, blocco diverso dalla chiave del giorno, `FAILED` assente) e il modo di ripristinarlo; e per ogni test si
 chiede "quale test precedente lascia qualcosa che ha la PRECEDENZA sulla variabile che misuro?".
+
+### CLASSE 903 — il CANCELLO INLINE della riga usa il DEPOSITO come saldo dell'archivio invece del saldo VERO compensato: G0 ROSSO su un round buono, la testa lo aveva gia' previsto (28/09/2026, zip ROUND_CORTI_D)
+Caso: `backtest_pipeline/righe/RIGA_ROUND_CORTI_D_R268_R269.txt`, pin `9b838084`, job R268b. Il RIEPILOGO della corsa
+scrive **G0-LOTTO KO** (56 posizioni su 92 fuori banda) e **G0 ROSSO -> "il banco e' cambiato, R268 NON SI LEGGE"**,
+con esempio: "posizione archivio 1361 (V 0.44, saldo 100000.00) contro nuova 4 (V 0.41, saldo 100000.00): banda
+[0.43 ; 0.46]". Il **saldo dell'archivio mostrato e' 100000.00: SBAGLIATO.** Verificato a mano sul CSV vero
+(`archivio_CORTI_B_pertrade_795301.csv`): la posizione pid 1361 chiude il 2024.07.10 17:30:00 con **saldo VERO
+compensato (dal 100000 di R260a al 2020.01.01, tutta la storia fino a quel punto) = 107.945,46**, non 100000. Il
+file di testa (`prove/R268b_oro_long_OHLC_stessa_finestra_G0.txt` r.33-36) lo dichiara PRIMA del round: *"I LOTTI
+sono ~7% piu' piccoli di R260a (saldo di partenza 100000 contro 107.794,67 di R260a a quella data)"*. Rifacendo
+G0-LOTTO con la formula della testa e il saldo VERO (ratio B'/B = 100000/107.945,46 = 0,9264): banda attesa
+[0,39 ; 0,42], **il valore osservato 0,41 CADE DENTRO**. Il lettore gia' passato dal cancello
+(`backtest_pipeline/leggi_round_corti_d.py`, funzione `lotto_chk`, chiamata SENZA `da_arc`: usa tutto l'archivio
+dal suo deposito originale, cioe' il saldo VERO) rilegge **G0-LOTTO: fuori banda 0/92 -> VERDE**, e il round si
+legge per intero (r, K1, R268c, R268d). Il cancello INLINE della riga (PowerShell, dentro `& { ... }`) invece
+confronta i lotti contro un saldo FLAT = solo il `-Deposito` passato alla riga, **senza accumulare la storia
+dell'archivio da prima della finestra ristretta**: per ogni posizione dove il saldo vero dell'archivio si e'
+allontanato da 100000 (cioe' quasi tutte, su una corsa di 4,5 anni), il cancello inline grida ROSSO su un round
+che invece legge benissimo.
+Regola: **quando due implementazioni dello STESSO cancello esistono (una inline nella riga per un giudizio a
+caldo, una nel lettore Python per il giudizio vero), la riga NON e' autorevole**: il PASS/FAIL che conta e' quello
+del lettore passato dal cancello, rifatto sui file veri, mai la console della corsa. E una testa che dichiara GIA'
+un numero prima del round (qui: "107.794,67", "~7% piu' piccoli") e' la prima cosa da controllare quando un G0
+esce ROSSO: se il numero c'era gia' scritto, il ROSSO e' quasi sempre nello strumento, non nel round.
+Da fare (non urgente: non blocca la lettura, il lettore e' gia' corretto): riparare il cancello inline di
+`RIGA_ROUND_CORTI_D_R268_R269.txt` prima del prossimo lancio, cosi' la console non mente piu' su questo round.
