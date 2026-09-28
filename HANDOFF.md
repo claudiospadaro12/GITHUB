@@ -84,6 +84,12 @@ box asiatico e oro-col-trend bocciati per rischio; indizi: oro+ADR, oro box mini
 2017-23 PF < 1 su 9/9 celle, DD 13,3% a 1%; PF di tutta la storia 0,993); OOS 2024-26 buono ma non confrontabile. R270
 (uscita DAX) lanciata da Claudio alle ~22:55, zip atteso. Riga di riordino Desktop rimandata: SOLO dopo lo zip R270.
 
+**28/09 notte — R270 LETTO** (PASS `f01d18d2`, classe 915): G0 esatto su R47a (e ATR = R46a). Long: TrailMode/TP1_R non battono
+il vivo oltre il rumore, 1,5-2R pari; 🔴 **ma la cella SENZA PARZIALE (`InpTP1_ClosePct=0`, R46a) batte il vivo su PF e DD, IS e OOS
+(OOS 1,491 vs 1,397; DD 6,27 vs 7,23) e ha una firma di Claudio PENDENTE** (SCHEDA_770101 r.367; sul Dow perde). Short 770105 alla
+cella del preset FTMO: PF OOS 0,957, Equity DD 12,31% a 1% (dal picco; muro FTMO dal saldo): sedia bocciata per rischio a questa
+cella, motore NON ANCORA MISURATO; conferma R251. Due PDF per Gemini in `docs/PER_GEMINI_RISULTATO_1/2_*`.
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 risposta di Jonas (FTMO) alle tre domande; orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).

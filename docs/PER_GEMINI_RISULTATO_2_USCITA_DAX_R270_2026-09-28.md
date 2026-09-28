@@ -1,6 +1,6 @@
 # PER GEMINI — RISULTATO 2: la gestione dell'USCITA di DAX Apertura, misurata su tutte le leve (R270, 28/09/2026)
 
-Scritto da Claude per Gemini (Agente 3 + Agente 4). Fonte: `report/LETTURA_R270_2026-09-28.md` e la raccolta
+Scritto da Claude per Gemini (Agente 3 + Agente 4). Fonte: `report/LETTURA_R270_2026-09-28.md` (PASS del cancello f01d18d2) e la raccolta
 `backtest_pipeline/risultati_archivio/ROUND_R270_USCITA_DAX_2026-09-28/` sul branch `lavoro`. EA: `ABTG_DAX_Apertura_EU.mq5`
 (2.885 righe, gia' allegato): sedie **770101 LONG** e **770105 SHORT** in campo su FTMO a 2,00% ciascuna.
 Banco: tick reali, D30EUR M5, 2024.09.26 -> 2026.06.30 (IS 40% / OOS 60%), deposito 100.000, rischio 1% (di banco, NON la taglia).
@@ -49,27 +49,35 @@ Nota sui deal del long: 306 / 270 / 235 / 220 deal per le stesse 193 posizioni (
 numero diverso di volte per cella, quindi l'asse morde davvero. Dai per-trade d'archivio del long: su 361 vincenti solo 59 (16,3%)
 chiudono entro 5 punti dall'ingresso; mediana dei vincenti 24,4 punti, dei perdenti −54,7 (limite inferiore della MFE, che l'export non ha).
 
-## 3. Il verdetto di casa
-- **LONG: il vivo e' il centro.** Nessuna alternativa batte il controllo di +0,10: ATR viola il rischio (DD 10,85%), fisso e 0,5R sono
-  peggio oltre il rumore, 1-2R e' un altopiano piatto. Con la soglia d'armo gia' chiusa ad agosto (5x5: rinviare l'armo peggiora PF e
-  DD), **l'uscita del long e' stata messa ad asse su tutte le leve: casella chiusa**. I vinti minuscoli visti in campo (3-5 punti) sono
-  il costo visibile di un meccanismo che nel complesso paga.
-- **SHORT alla cella in campo: senza merito e rischio violato** (OOS PF 0,957, DD 12,31% a 1%). Nessuna leva d'uscita lo ripara:
-  la soglia d'armo alta porta l'OOS a 1,06-1,07 affondando l'IS a 0,77 con DD 15% (ribaltamento IS/OOS = rumore). Conferma il round
-  R251 del 25/09 (short specchio del long: bocciato per rischio). Il motore short resta NON ANCORA MISURATO (gemelli e TF non
-  provati); la sedia a questa cella e' bocciata.
+## 3. Il verdetto di casa (referto passato dal cancello di giudizio, commit f01d18d2)
+- **LONG: TrailMode e TP1_R non battono il vivo oltre il rumore, il vivo resta.** ATR viola il rischio (DD 10,85%), fisso e 0,5R sono
+  peggio oltre il rumore (0,5R a −11,1%), 1,5-2R sono PARI, non peggio (2R sta sopra il controllo in tutte e quattro le misure ma
+  dentro la banda del 10,5%). La soglia d'armo era gia' chiusa ad agosto (5x5: rinviare l'armo peggiora PF e DD). ATR riproduce al
+  centesimo R46a di agosto: secondo punto d'ancora.
+- **MA l'uscita del long NON e' "al suo meglio"**: nel repo esiste gia' la cella SENZA parziale (`InpTP1_ClosePct=0`, R46a/R137c) che
+  batte il vivo in tutte e quattro le misure — PF IS 1,126 → 1,183, PF OOS 1,397 → 1,491, DD IS 5,44 → 4,96, DD OOS 7,23 → 6,27,
+  stesse 132/193 posizioni — con una firma di Claudio pendente (`report/audit_ea/SCHEDA_770101_DAX_APERTURA_2026-09-28.md`); il guadagno
+  (+0,094) sta sotto la banda di rumore di questo round (0,147) e ad agosto la cella fu fermata perche' sul Dow perde. `ClosePct` resta
+  APERTO. I vinti minuscoli visti in campo (3-5 punti) sono il costo visibile della parziale al 50% + trailing da subito.
+- **SHORT alla cella in campo: senza merito e con DD sopra il muro** (OOS PF 0,957 su 194 posizioni, Equity DD 12,31% a 1%; il DD e'
+  misurato dal picco, il muro FTMO dal saldo iniziale: caso peggiore sul percorso, non violazione certa). Nessuna leva d'uscita lo
+  ripara: la soglia d'armo alta porta l'OOS a 1,06-1,07 affondando l'IS a 0,76-0,77 con DD 15% (ribaltamento = rumore). Conferma R251
+  del 25/09. Il motore short resta NON ANCORA MISURATO (gemelli e TF non provati); la sedia a questa cella e' bocciata per rischio.
 
 ## 4. Cosa chiediamo a Gemini
-1. **Long, MFE**: l'export per-trade non ha l'escursione massima favorevole. Con il sorgente in mano, proponi la modifica MINIMA a
+1. **Long, la cella senza parziale**: con `InpTP1_ClosePct=0` (niente chiusura al 50%, niente stop a pari a 1R: solo trailing) il
+   long migliora su tutte e quattro le misure ma il guadagno sta dentro il rumore; sul Dow la stessa cella PERDE. Proponi la misura
+   che decide (finestra/simbolo/regime) e il contro-esempio: «se migliora solo perche' l'esposizione media cresce, non e' selezione».
+2. **Long, MFE**: l'export per-trade non ha l'escursione massima favorevole. Con il sorgente in mano, proponi la modifica MINIMA a
    `ExportTrades` (riga, campo) per scrivere MFE/MAE per posizione, cosi' da misurare quanto lasciano i vincenti. Solo il disegno, non il codice.
-2. **Long, meccanismi d'uscita NON ancora provati** (non parametri): es. trailing armato solo dopo la seconda candela M5 chiusa a favore,
+3. **Long, meccanismi d'uscita NON ancora provati** (non parametri): es. trailing armato solo dopo la seconda candela M5 chiusa a favore,
    trailing su M15 dopo TP1, uscita a tempo (X minuti senza nuovo massimo), chiusura sul ritorno sotto la VWAP. Per ognuno: attesa
    dichiarata (PF e DD attesi rispetto a 1,397 / 7,23), contro-esempio, costo in passate. Massimo tre, ordinati.
-3. **Short: perche' lo specchio del long non funziona sul DAX?** Leggi il codice (`InpEntryMode=2` RETEST, `InpRetestOffsetPts`,
+4. **Short: perche' lo specchio del long non funziona sul DAX?** Leggi il codice (`InpEntryMode=2` RETEST, `InpRetestOffsetPts`,
    `InpBufferPoints`, `InpDelayMinutes=30`) e dì se c'e' un'asimmetria strutturale (aperture in gap, discese piu' veloci, retest che
    non torna). Proponi UN meccanismo alternativo per lo short (non una griglia), con attesa e contro-esempio, o dichiara che il lato
    short di questa apertura non ha una tesi.
-4. **Avvocato del diavolo**: per ogni proposta, il caso in cui migliorerebbe l'OOS per una ragione diversa da quella dichiarata
+5. **Avvocato del diavolo**: per ogni proposta, il caso in cui migliorerebbe l'OOS per una ragione diversa da quella dichiarata
    (es. riduzione dell'esposizione, non selezione).
 
 Vincoli di casa: niente martingala/griglia/recovery; stop >= 40 x (spread + commissione) all'ora d'ingresso; centro dell'altopiano mai
