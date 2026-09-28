@@ -223,6 +223,15 @@ FESTIVI_PREVISTI = collections.OrderedDict([
     (dt.date(2026, 6, 19), 'Juneteenth')])
 S1B_FINESTRA = dt.timedelta(minutes=90)     # (b) prima ora e mezza dalla riapertura CME
 S1B_MAX = 2                                 # (c) massimo 2 uscite esenti per per-trade
+S1B_ARMO = dt.time(14, 30)                  # (b) ramo "prima uscita": solo PRIMA del primo armo dopo la riapertura (14:30 BCM,
+                                            # il piu presto dei due file): una posizione aperta DOPO la riapertura non e intrappolata
+                                            # dal festivo (controllo preventivo 28/09: senza, un 19:00 del 2025.01.10 era ESENTE)
+
+
+def limite_armo(r0):
+    """il primo 14:30 BCM alla riapertura o dopo: prima di quell ora nessun file puo avere aperto una posizione nuova"""
+    lim = dt.datetime.combine(r0.date(), S1B_ARMO)
+    return lim if r0 < lim else lim + dt.timedelta(days=1)
 
 
 def riapertura_cme(festivo):
@@ -239,7 +248,8 @@ def s1_esenzioni(deals, fuori, festivi=None):
     """(esenti, restanti, nota). esenti = [(deal, data festivo, nome, condizione b)]. Una uscita fuori finestra e ESENTE
     solo se: (a) cade nella sessione di riapertura CME dopo un festivo ELENCATO (t >= riapertura e stesso giorno di
     calendario BCM della riapertura); (b) t <= riapertura + 1h30, oppure e la PRIMA uscita del per-trade dopo la
-    riapertura; (c) le candidate del per-trade sono al massimo 2 (oltre: nessuna esente)."""
+    riapertura E cade prima del primo armo dopo la riapertura (limite_armo: 14:30 BCM); (c) le candidate del per-trade
+    sono al massimo 2 (oltre: nessuna esente)."""
     festivi = FESTIVI_ESENTI if festivi is None else festivi
     cand, resto = [], []
     for d in fuori:
@@ -250,8 +260,8 @@ def s1_esenzioni(deals, fuori, festivi=None):
                 primo = min((q['t'] for q in deals if q['t'] >= r0), default=None)
                 if d['t'] <= r0 + S1B_FINESTRA:
                     hit = (d, fd, nome, 'b: entro 1h30 dalla riapertura CME %s' % ds(r0))
-                elif d['t'] == primo:
-                    hit = (d, fd, nome, 'b: prima uscita del per-trade dopo la riapertura CME %s' % ds(r0))
+                elif d['t'] == primo and d['t'] < limite_armo(r0):
+                    hit = (d, fd, nome, 'b: prima uscita del per-trade dopo la riapertura CME %s, prima dell armo %s' % (ds(r0), ds(limite_armo(r0))))
                 break
         if hit:
             cand.append(hit)
@@ -971,13 +981,21 @@ def testa_lettura_b():
         '  EMENDAMENTO: una uscita fuori finestra e ESENTE solo se TUTTE: (a) cade nella sessione di riapertura CME dopo una chiusura festiva',
         '  USA ELENCATA PER NOME (t >= riapertura e stesso giorno di calendario BCM della riapertura; riapertura = 18:00 ET del festivo,',
         '  di venerdi la domenica = 23:00 BCM stesso giorno in estate USA, 00:00 BCM del giorno dopo in inverno USA; BCM = UTC+1 fisso);',
-        '  (b) entro 1h30 dalla riapertura, oppure prima uscita del per-trade dopo la riapertura; (c) al massimo %d esenti per per-trade' % S1B_MAX,
+        '  (b) entro 1h30 dalla riapertura, oppure prima uscita del per-trade dopo la riapertura E prima del primo armo successivo (14:30',
+        '  BCM: una posizione aperta DOPO la riapertura non e intrappolata dal festivo); (c) al massimo %d esenti per per-trade' % S1B_MAX,
         '  (oltre: nessuna). Tutto il resto resta NULLO come in A. Il NULLO della riga si toglie solo se il suo UNICO motivo e S1, col',
         '  conteggio uguale a quello del lettore e tutte le uscite esentate.',
         '  DEVIAZIONE DICHIARATA dalla stesura del 28/09: la condizione (a) era "giorno di calendario SUCCESSIVO al festivo". Misurato: in',
         '  estate USA la riapertura (18:00 ET) cade alle 23:00 BCM DELLO STESSO GIORNO (Juneteenth 2025.06.19 23:05, Memorial Day 2026.05.25',
         '  23:05): alla lettera quelle due NON sarebbero esenti. La (a) qui e la sessione di riapertura, piu STRETTA di "23:00-01:30 di un',
         '  giorno qualunque": ogni esenzione sotto riporta anche se soddisfa la stesura letterale.',
+        '  COSA FIRMA CLAUDIO, IN UNA FRASE: SOLO questo emendamento della S1 (quali uscite fuori finestra NON annullano un file), NON un',
+        '  criterio di merito ne di rischio. NON CAMBIANO: i tetti R1 <= 4,694% / R2 <= 4,272% / R3 >= -1,10% e e_eff (par. 7 e 9), il',
+        '  "rischio passato" solo da n IS >= 60 e n OOS >= 40 (classe 804), il merito solo da 150 posizioni OOS, M1-M3, M4 altopiano mai',
+        '  il picco, e tutti gli altri cancelli della catena (E0 P0 G1 C0 L0, G0, G2). Senza firma vale la A.',
+        '  PERCHE IN A ERA TUTTO NULLO, se le uscite esentate NON stanno nella curva che decide (sez. 6: 0 in tutte): classe 772, un file che',
+        '  fallisce un cancello della catena NON VOTA in nessun conteggio, DOVUNQUE cada l uscita che lo fa fallire. La S1 controlla il',
+        '  FILE (la manopola dell ora e arrivata?), non la curva. Quindi la firma decide SE queste curve si leggono, non QUANTO valgono.',
         '']
 
 
@@ -1386,6 +1404,8 @@ def referto(base, s1_festivi=False):
                  'L alternativa "ora 15 non arrivata" la misura G2 L OROLOGIO: righe d inverno 15:30 contro 14:30 DIVERSE in %d coppie su %d leggibili.'
                  % (sum(tot_if.values()), len(tot_if), ', '.join('%s %d' % kv for kv in tot_if.items()),
                     sum(1 for t in g2o if 'DIVERSE = ok' in t), sum(1 for t in g2o if 'NON VERIFICABILE' not in t)))
+        L.append('   PERCHE IN A ERANO NULLE (classe 772): un file che fallisce un cancello di catena non vota DOVUNQUE cada l uscita; le curve IN FASE '
+                 'qui sopra non contengono nessuna uscita esentata, quindi la firma decide SE si leggono, non QUANTO valgono.')
     L.append('   CERTIFICATO (09/09, par. 13): NON ANCORA MISURATO, MAI morto -- mancano i gemelli NASUSD/SPXUSD (punto 4) e il TF del grafico (punto 5); PF, n e DD e uscita ad asse: SI da questo round')
     # -------- 770212
     L.append('')
@@ -1753,6 +1773,16 @@ def autotest(fixture_dir):
     assert riapertura_cme(dt.date(2025, 1, 9)) == dt.datetime(2025, 1, 10, 0, 0) and riapertura_cme(dt.date(2025, 6, 19)) == dt.datetime(2025, 6, 19, 23, 0)
     assert riapertura_cme(dt.date(2026, 5, 25)) == dt.datetime(2026, 5, 25, 23, 0) and riapertura_cme(dt.date(2025, 4, 18)) == dt.datetime(2025, 4, 20, 23, 0)
     assert all(fd.weekday() < 5 for fd in list(FESTIVI_ESENTI) + list(FESTIVI_PREVISTI)) and not set(FESTIVI_ESENTI) & set(FESTIVI_PREVISTI)
+    # contro-esempio 5 (controllo preventivo 28/09): il ramo "prima uscita dopo la riapertura" NON esenta una posizione aperta DOPO
+    # la riapertura (un flat mancato alle 19:00 e alle 23:30 del 2025.01.10, seduta normale); SI esenta una intrappolata che esce
+    # alle 05:00 (oltre 1h30, prima dell armo delle 14:30). Prima della correzione le prime due uscivano ESENTI.
+    _dd = lambda *ts: [{'t': t} for t in ts]
+    for tx in (dt.datetime(2025, 1, 10, 19, 0), dt.datetime(2025, 1, 10, 23, 30), dt.datetime(2025, 1, 10, 14, 30)):
+        _ls = _dd(dt.datetime(2025, 1, 8, 17, 0), tx, dt.datetime(2025, 1, 13, 17, 0))
+        assert s1_esenzioni(_ls, [_ls[1]])[0] == [], tx
+    _ls = _dd(dt.datetime(2025, 1, 8, 17, 0), dt.datetime(2025, 1, 10, 5, 0), dt.datetime(2025, 1, 13, 17, 0))
+    assert len(s1_esenzioni(_ls, [_ls[1]])[0]) == 1 and 'prima dell armo' in s1_esenzioni(_ls, [_ls[1]])[0][0][3]
+    assert limite_armo(dt.datetime(2025, 6, 19, 23, 0)) == dt.datetime(2025, 6, 20, 14, 30) and limite_armo(dt.datetime(2025, 1, 10, 0, 0)) == dt.datetime(2025, 1, 10, 14, 30)
     base = genera_fixture(fixture_dir, 's1b', a603, a601)
 
     def _ritocca(f, cambi):

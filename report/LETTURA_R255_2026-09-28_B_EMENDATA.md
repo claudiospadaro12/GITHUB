@@ -6,13 +6,21 @@ LETTURA B -- S1 EMENDATA DOPO I NUMERI, IN ATTESA DELLA FIRMA DI CLAUDIO
   EMENDAMENTO: una uscita fuori finestra e ESENTE solo se TUTTE: (a) cade nella sessione di riapertura CME dopo una chiusura festiva
   USA ELENCATA PER NOME (t >= riapertura e stesso giorno di calendario BCM della riapertura; riapertura = 18:00 ET del festivo,
   di venerdi la domenica = 23:00 BCM stesso giorno in estate USA, 00:00 BCM del giorno dopo in inverno USA; BCM = UTC+1 fisso);
-  (b) entro 1h30 dalla riapertura, oppure prima uscita del per-trade dopo la riapertura; (c) al massimo 2 esenti per per-trade
+  (b) entro 1h30 dalla riapertura, oppure prima uscita del per-trade dopo la riapertura E prima del primo armo successivo (14:30
+  BCM: una posizione aperta DOPO la riapertura non e intrappolata dal festivo); (c) al massimo 2 esenti per per-trade
   (oltre: nessuna). Tutto il resto resta NULLO come in A. Il NULLO della riga si toglie solo se il suo UNICO motivo e S1, col
   conteggio uguale a quello del lettore e tutte le uscite esentate.
   DEVIAZIONE DICHIARATA dalla stesura del 28/09: la condizione (a) era "giorno di calendario SUCCESSIVO al festivo". Misurato: in
   estate USA la riapertura (18:00 ET) cade alle 23:00 BCM DELLO STESSO GIORNO (Juneteenth 2025.06.19 23:05, Memorial Day 2026.05.25
   23:05): alla lettera quelle due NON sarebbero esenti. La (a) qui e la sessione di riapertura, piu STRETTA di "23:00-01:30 di un
   giorno qualunque": ogni esenzione sotto riporta anche se soddisfa la stesura letterale.
+  COSA FIRMA CLAUDIO, IN UNA FRASE: SOLO questo emendamento della S1 (quali uscite fuori finestra NON annullano un file), NON un
+  criterio di merito ne di rischio. NON CAMBIANO: i tetti R1 <= 4,694% / R2 <= 4,272% / R3 >= -1,10% e e_eff (par. 7 e 9), il
+  "rischio passato" solo da n IS >= 60 e n OOS >= 40 (classe 804), il merito solo da 150 posizioni OOS, M1-M3, M4 altopiano mai
+  il picco, e tutti gli altri cancelli della catena (E0 P0 G1 C0 L0, G0, G2). Senza firma vale la A.
+  PERCHE IN A ERA TUTTO NULLO, se le uscite esentate NON stanno nella curva che decide (sez. 6: 0 in tutte): classe 772, un file che
+  fallisce un cancello della catena NON VOTA in nessun conteggio, DOVUNQUE cada l uscita che lo fa fallire. La S1 controlla il
+  FILE (la manopola dell ora e arrivata?), non la curva. Quindi la firma decide SE queste curve si leggono, non QUANTO valgono.
 
 LETTURA R255 -- IL LATO SHORT DELL APERTURA DOW A DUE OROLOGI (criteri: prove/R255a_short_DOW_ancora_1430.txt par. 7-17, congelati prima dei numeri)
 raccolta: backtest_pipeline/risultati_archivio/ROUND_R255_SHORT_DOW_INFASE_2026-09-28
@@ -726,6 +734,7 @@ archivio R246 per-trade 794601: 130 righe, 96 posizioni, somma 6721.93, chiusure
    LA MANOPOLA BATTE IL RIFERIMENTO (M2, oltre il rumore, calcolato anche sotto 150 ma allora e un INDIZIO): stH8, stH12
    [LETTURA B: esiti con la S1 EMENDATA DOPO I NUMERI (classe 900), in attesa della firma di Claudio; la lettura valida senza firma e la A]
    CONTRO-ESEMPIO DELLA B (se le esenzioni fossero sbagliate): posizioni esentate dentro la curva IN FASE = 0 in tutte le 11 configurazioni lette (ancora 0, nudo 0, parz0 0, tp05 0, tp15 0, stH4 0, stH6 0, stH8 0, stH12 0, stD1 0, long 0); sbagliate, i numeri IN FASE non cambierebbero di un centesimo: cambierebbe SOLO se esistono (file NULLO -> configurazione NULLA, come in A). L alternativa "ora 15 non arrivata" la misura G2 L OROLOGIO: righe d inverno 15:30 contro 14:30 DIVERSE in 11 coppie su 11 leggibili.
+   PERCHE IN A ERANO NULLE (classe 772): un file che fallisce un cancello di catena non vota DOVUNQUE cada l uscita; le curve IN FASE qui sopra non contengono nessuna uscita esentata, quindi la firma decide SE si leggono, non QUANTO valgono.
    CERTIFICATO (09/09, par. 13): NON ANCORA MISURATO, MAI morto -- mancano i gemelli NASUSD/SPXUSD (punto 4) e il TF del grafico (punto 5); PF, n e DD e uscita ad asse: SI da questo round
 
 7. COSA DICE PER LA 770212 (la sedia in firma = la configurazione ANCORA; curva FTMO-DOC, DESCRITTIVA: regola dell orologio FTMO documentata e NON misurata, griglia H4 diversa [NON MISURATO])
