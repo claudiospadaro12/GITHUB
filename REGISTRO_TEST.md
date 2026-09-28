@@ -1,6 +1,27 @@
 
 ---
 
+## 28/09/2026 — R255 LETTO: lo SHORT del Dow a due orologi (`ABTG_Dow_Apertura_US`, U30USD M5, tick reali, banco 10.000)
+
+Archivio `risultati_archivio/ROUND_R255_SHORT_DOW_INFASE_2026-09-28/` (24/24 job, 52 min, motore = pin `9f3df205`).
+Lettura A alla lettera: **19 file su 24 NULLI per S1** (una uscita per file alla riapertura CME dopo un festivo USA:
+classe **912**). Lettura B con l'emendamento S1 **firmato da Claudio il 28/09** (`report/FIRME_2026-09-28.md`,
+`leggi_r255.py --s1-festivi`, PASS `1da84b9f`): G0 tutti VERDI.
+
+| configurazione (short) | OOS in fase n / PF / DD | verdetto |
+|---|---|---|
+| **ancora = sedia 770212 in firma** | 46 / 0,78 / 5,13-5,31% | 🔴 **BOCCIATA PER RISCHIO** (R2 > 4,27%; FTMO-DOC PF 0,58/0,51) → **non si schiera** |
+| nudo · parz0 · tp15 | 46-119 / 0,73-0,87 | 🔴 bocciate per rischio |
+| tp05 · stH6 · stD1 | 46 / 0,82 · 41 / 0,90 · 28 / 0,56 | 🟠 rischio non risolto / sospesa |
+| **stH8** | 46 / **2,40** / 1,43% | 🟡 SOSPESA, indizio favorevole (n < 150, mai "rischio passato") |
+| **stH12** | 39 / 1,26 / 2,54% | 🟡 SOSPESA, indizio favorevole |
+| trail0 | — | ⚪ NULLO (R255k) |
+
+🪦 **Certificato: NON ANCORA MISURATO, non morto.** PF, n, DD e uscita ad asse: SI da questo round; mancano **i gemelli
+NASUSD/SPXUSD** (p.4) e **il TF cambiato** (p.5). La via piu' corta al numero: stH8/stH12 su una finestra/simbolo che porti
+n >= 150 (campione, non griglia). Nota misurata dal lettore: i file 15:30 perdono quasi tutto nell'**estate** (che la curva
+in fase lascia fuori); l'inverno 15:30 e' in perdita nell'era IS e in guadagno nell'era OOS.
+
 ## 21/09/2026 — SEI ROUND SULLE TRE APERTURE (primo giorno di challenge FTMO)
 
 Tutti sul **PC di backtest** `DESKTOP-H4D7CAJ` (firma di Claudio del 21/09: i round
