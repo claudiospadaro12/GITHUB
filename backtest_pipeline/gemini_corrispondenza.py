@@ -30,7 +30,7 @@ import argparse, datetime as dt, hashlib, json, os, re, subprocess, sys, urllib.
 
 COMANDO = "docs/COMANDO_GEMINI_AGENTI_EA_2026-09-28.md"
 OUT_DIR = "docs/gemini"
-MODELLO_DEFAULT = "gemini-2.5-pro"
+MODELLO_DEFAULT = "gemini-3.1-flash-lite"  # il pro (gemini-pro-latest, 3.1-pro) risponde 429 quota sul piano gratuito: passare al pro e' una spesa = firma di Claudio
 ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent"
 NERA_EXT = {".set", ".ps1", ".ini", ".xlsx", ".xls", ".key", ".pem", ".env"}
 NERA_NOME = ("estratto", "statement", "ReportHistory", "chiave", "secret", "token")
