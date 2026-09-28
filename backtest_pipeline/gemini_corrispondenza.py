@@ -67,7 +67,11 @@ def controlla_allegati(files):
             problemi.append(p + ": " + perche)
     return problemi
 
+MEMORIA = "docs/gemini/MEMORIA_CONDIVISA.md"
+
 def costruisci_richiesta(files, domanda):
+    if os.path.exists(MEMORIA) and MEMORIA not in files:
+        files = [MEMORIA] + list(files)  # la memoria va SEMPRE in testa: l'API non ricorda nulla fra uno scambio e l'altro
     parti = [{"text": "DOCUMENTI DEL GIORNO (dal repo, uno per blocco). Rispondi come Agente 3 e Agente 4.\n"}]
     for p in files:
         parti.append({"text": "\n\n===== FILE: %s (SHA256 %s) =====\n%s" % (p, sha(p)[:16], open(p, encoding="utf-8").read())})
@@ -147,6 +151,8 @@ def main():
     problemi = controlla_allegati(a.files)
     if problemi:
         print("RIFIUTATO -- non si manda niente:"); [print("  X " + x) for x in problemi]; sys.exit(2)
+    if os.path.exists(MEMORIA) and MEMORIA not in a.files:
+        a.files = [MEMORIA] + a.files
     richiesta = costruisci_richiesta(a.files, a.domanda)
     n = sum(len(p["text"]) for p in richiesta["contents"][0]["parts"])
     print("manifesto: %d documenti, %d caratteri, modello %s" % (len(a.files), n, a.modello))
