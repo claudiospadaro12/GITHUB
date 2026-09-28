@@ -41,14 +41,46 @@
 #  G0 -- LA CELLA InpTP1_R=1,0 (il controllo)
 #  Deve ridare i numeri di R47a (stessa finestra B): IS n=132 PF 1,12634
 #  DD 5,4362 -- OOS n=193 PF 1,39709 DD 7,2328. Tolleranza: ZERO su
-#  Trades/posizioni, quarta cifra su PF e DD. Se il G0 non torna, il
-#  round e' NULLO: si cerca la causa, non si legge l'asse.
+#  Trades/posizioni, quarta cifra su PF e DD. [deal] nel CSV (colonna
+#  Trades, classe 226): 175 IS / 270 OOS -- e' QUESTO il numero da
+#  confrontare col CSV; 132/193 sono POSIZIONI, vedi S1B corretto.
+#  Se il G0 non torna, il round e' NULLO: si cerca la causa, non si
+#  legge l'asse.
 #
 #  S1B INVARIANTE DEL CAMPIONE: InpTP1_R e' letto SOLO nella gestione
 #  (TP dell'ordine e chiusura parziale), MAI nell'ingresso -> il numero
 #  di POSIZIONI aperte deve restare COSTANTE nelle 4 celle (132 IS / 193
 #  OOS). Il numero di DEAL puo' cambiare (la parziale e' un deal in piu'
 #  quando scatta). Se cambiano le posizioni, il round e' NULLO.
+#
+#  S1B CORRETTO DAL CANCELLO IL 28/09/2026, PRIMA DEI NUMERI
+#  (classi 455 e 226) -- SOSTITUISCE la regola di fermo del paragrafo
+#  S1/S1B qui sopra dove dice "il numero di posizioni per cella".
+#  ------------------------------------------------------------------
+#  Per COSTRUZIONE l'asse InpTP1_R e' letto solo in gestione: le
+#  POSIZIONI aperte sono le stesse in tutte le 4 celle. MA PER CELLA
+#  NON SI POSSONO CONTARE, e il paragrafo sopra lo dava per fatto:
+#   - il CSV porta `Trades` = DEAL DI USCITA, non posizioni (classe
+#     226; sulla cella di controllo R47a/R246e: 175 IS / 270 OOS
+#     [deal] contro 132 / 193 posizioni);
+#   - il per-trade abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786325.csv e'
+#     UNO SOLO per tutto il file: magic pinnato, ogni passata
+#     sovrascrive la precedente (classe 455, commento del sorgente in
+#     ExportTrades). Ne sopravvive UNA passata, l'ultima scritta.
+#  QUINDI, e vale al posto della regola di fermo sopra:
+#   (a) le posizioni (position_id distinti) si contano SOLO sulla
+#       passata che il per-trade ha conservato, identificata con la
+#       somma dei net_profit contro il Profit del CSV (classi 630/855,
+#       k = 0 atteso su D30EUR) e con le date di chiusura (IS o OOS).
+#       Se QUELLA passata ha un numero di posizioni diverso dalle
+#       altre gia' note sulla stessa gamba, il file e' NULLO;
+#   (b) `Trades` [deal] NON e' un invariante di questo asse: quante
+#       volte la parziale di TP1 scatta dipende dall'uscita. Un Trades
+#       che cambia fra le celle NON annulla il file: si scrive [deal]
+#       accanto al PF, mai come n;
+#   (c) sulle celle non identificate n [posizioni] e' "per
+#       costruzione, NON MISURATO": si scrive cosi', non si copia il
+#       numero della cella identificata.
 #
 #  G1 GEMELLE -- NON ESEGUITO (un solo asse per file): determinismo gia'
 #  stabilito da R246e (794611/794661 identici al centesimo).
@@ -84,6 +116,14 @@
 #  hanno lo STESSO numero di deal, la parziale non sta scattando in
 #  nessuna cella e l'asse e' inerte per costruzione (S1b sui deal, non
 #  solo sulle posizioni) -> si controlla PRIMA di leggere il PF.
+#
+#  OROLOGIO (classe del 24/09/2026, report/OROLOGIO_BCM_2026-09-24.md):
+#  BCM sugli indici e' UTC+1 FISSO su tutta la finestra. InpSessionHour=8
+#  e' l'apertura cash nei mesi estivi; nei mesi d'INVERNO (2024.10.27 ->
+#  2025.03.30 e 2025.10.26 -> 2026.03.29) arma UN'ORA PRIMA della cash.
+#  La finestra MESCOLA le due tempistiche, come il contratto R47a/R246e
+#  che fa da riferimento: la lettura e' sulla stessa mescolanza, si
+#  dichiara e non si separa in questo file.
 #
 #  BUCHI DICHIARATI: prova di regime assente (un regime); MFE vera non
 #  misurabile; costo 40x invariato (l'asse non tocca lo stop).
@@ -186,7 +226,8 @@ InpMaxSpread=0
 InpVerbose=true
 InpMagic=786325
 #
-# --- L'UNICO ASSE (ENUM: 3 celle x 2 finestre = 6 passate)
-#     0=ATR / 1=PREVBAR (vivo) / 2=FIXED
+# --- InpTrailMode PINNATO al valore vivo (1 = PREVBAR). NON e' l'asse:
+#     l'unico asse di questo file e' InpTP1_R, piu' sopra (4 celle x 2
+#     finestre = 8 passate). Commento corretto dal cancello il 28/09.
 InpTrailMode=1
 # ======================================================================

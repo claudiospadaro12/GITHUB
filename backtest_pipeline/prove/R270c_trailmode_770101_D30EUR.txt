@@ -84,6 +84,8 @@
 #  gia' il valore vivo in tutte le celle di R208b):
 #    IS  n 132 posizioni | PF 1,12634 | DD 5,4362% | Profit 3.789,36
 #    OOS n 193 posizioni | PF 1,39709 | DD 7,2328% | Profit 18.029,58
+#    [deal] nel CSV (colonna Trades, classe 226): 175 IS / 270 OOS --
+#    e' QUESTO il numero da confrontare col CSV, tolleranza ZERO.
 #  (fonte: `aperture_r47/ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r47a.csv`)
 #  [!] VERIFICATO qui, come richiesto: R246g usa la finestra A CORTA
 #  (2024.09.26-2025.06.09, taglio 0,002), NON la finestra B di questo
@@ -101,6 +103,35 @@
 #  logica "un ciclo al giorno". >>> IL NUMERO DI POSIZIONI DEVE ESSERE
 #  COSTANTE NELLE 3 CELLE (132 IS / 193 OOS, come il G0). Se cambia, il
 #  file si ferma prima di leggere un PF.
+#
+#  S1B CORRETTO DAL CANCELLO IL 28/09/2026, PRIMA DEI NUMERI
+#  (classi 455 e 226) -- SOSTITUISCE la regola di fermo del paragrafo
+#  S1/S1B qui sopra dove dice "il numero di posizioni per cella".
+#  ------------------------------------------------------------------
+#  Per COSTRUZIONE l'asse InpTrailMode e' letto solo in gestione: le
+#  POSIZIONI aperte sono le stesse in tutte le 3 celle. MA PER CELLA
+#  NON SI POSSONO CONTARE, e il paragrafo sopra lo dava per fatto:
+#   - il CSV porta `Trades` = DEAL DI USCITA, non posizioni (classe
+#     226; sulla cella di controllo R47a/R246e: 175 IS / 270 OOS
+#     [deal] contro 132 / 193 posizioni);
+#   - il per-trade abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786323.csv e'
+#     UNO SOLO per tutto il file: magic pinnato, ogni passata
+#     sovrascrive la precedente (classe 455, commento del sorgente in
+#     ExportTrades). Ne sopravvive UNA passata, l'ultima scritta.
+#  QUINDI, e vale al posto della regola di fermo sopra:
+#   (a) le posizioni (position_id distinti) si contano SOLO sulla
+#       passata che il per-trade ha conservato, identificata con la
+#       somma dei net_profit contro il Profit del CSV (classi 630/855,
+#       k = 0 atteso su D30EUR) e con le date di chiusura (IS o OOS).
+#       Se QUELLA passata ha un numero di posizioni diverso dalle
+#       altre gia' note sulla stessa gamba, il file e' NULLO;
+#   (b) `Trades` [deal] NON e' un invariante di questo asse: quante
+#       volte la parziale di TP1 scatta dipende dall'uscita. Un Trades
+#       che cambia fra le celle NON annulla il file: si scrive [deal]
+#       accanto al PF, mai come n;
+#   (c) sulle celle non identificate n [posizioni] e' "per
+#       costruzione, NON MISURATO": si scrive cosi', non si copia il
+#       numero della cella identificata.
 #
 #  G1 GEMELLE -- NON ESEGUITO, stessa ragione di R270b (un solo asse
 #  ammesso dal cancello; determinismo gia' stabilito da R246e/R208b su
@@ -156,6 +187,14 @@
 #  (contro-esempio: verificare che il vantaggio non sia concentrato in
 #  poche giornate, stesso test della coda di R208b/par.2.3 di
 #  ALZARE_IL_PF).
+#
+#  OROLOGIO (classe del 24/09/2026, report/OROLOGIO_BCM_2026-09-24.md):
+#  BCM sugli indici e' UTC+1 FISSO su tutta la finestra. InpSessionHour=8
+#  e' l'apertura cash nei mesi estivi; nei mesi d'INVERNO (2024.10.27 ->
+#  2025.03.30 e 2025.10.26 -> 2026.03.29) arma UN'ORA PRIMA della cash.
+#  La finestra MESCOLA le due tempistiche, come il contratto R47a/R246e
+#  che fa da riferimento: la lettura e' sulla stessa mescolanza, si
+#  dichiara e non si separa in questo file.
 #
 #  BUCHI DICHIARATI
 #  - MFE vera: NON MISURABILE (vedi M2).

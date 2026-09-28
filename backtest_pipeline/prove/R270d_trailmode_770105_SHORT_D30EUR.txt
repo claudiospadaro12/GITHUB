@@ -60,6 +60,34 @@
 #  essere COSTANTE nelle 3 celle (uguale a quello della cella 0 di
 #  R270b).
 #
+#  S1B CORRETTO DAL CANCELLO IL 28/09/2026, PRIMA DEI NUMERI
+#  (classi 455 e 226) -- SOSTITUISCE la regola di fermo del paragrafo
+#  S1/S1B qui sopra dove dice "il numero di posizioni per cella".
+#  ------------------------------------------------------------------
+#  Per COSTRUZIONE l'asse InpTrailMode e' letto solo in gestione: le
+#  POSIZIONI aperte sono le stesse in tutte le 3 celle. MA PER CELLA
+#  NON SI POSSONO CONTARE, e il paragrafo sopra lo dava per fatto:
+#   - il CSV porta `Trades` = DEAL DI USCITA, non posizioni (classe
+#     226; nessun Trades di riferimento short su questa finestra);
+#   - il per-trade abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786324.csv e'
+#     UNO SOLO per tutto il file: magic pinnato, ogni passata
+#     sovrascrive la precedente (classe 455, commento del sorgente in
+#     ExportTrades). Ne sopravvive UNA passata, l'ultima scritta.
+#  QUINDI, e vale al posto della regola di fermo sopra:
+#   (a) le posizioni (position_id distinti) si contano SOLO sulla
+#       passata che il per-trade ha conservato, identificata con la
+#       somma dei net_profit contro il Profit del CSV (classi 630/855,
+#       k = 0 atteso su D30EUR) e con le date di chiusura (IS o OOS).
+#       Se QUELLA passata ha un numero di posizioni diverso dalle
+#       altre gia' note sulla stessa gamba, il file e' NULLO;
+#   (b) `Trades` [deal] NON e' un invariante di questo asse: quante
+#       volte la parziale di TP1 scatta dipende dall'uscita. Un Trades
+#       che cambia fra le celle NON annulla il file: si scrive [deal]
+#       accanto al PF, mai come n;
+#   (c) sulle celle non identificate n [posizioni] e' "per
+#       costruzione, NON MISURATO": si scrive cosi', non si copia il
+#       numero della cella identificata.
+#
 #  G1 GEMELLE -- non eseguito, stessa ragione di R270b/c.
 #  CLASSE 844 -- k atteso 0 su D30EUR, stessa formula/fonte di R270b.
 #
@@ -88,6 +116,14 @@
 #  nessuno dei tre supera 1,10 e l'asse e' inerte sul lato short) -- e
 #  che qualunque risultato E' COMUNQUE UNA MISURA, perche' oggi la
 #  risposta e' zero su tutti e tre i punti.
+#
+#  OROLOGIO (classe del 24/09/2026, report/OROLOGIO_BCM_2026-09-24.md):
+#  BCM sugli indici e' UTC+1 FISSO su tutta la finestra. InpSessionHour=8
+#  e' l'apertura cash nei mesi estivi; nei mesi d'INVERNO (2024.10.27 ->
+#  2025.03.30 e 2025.10.26 -> 2026.03.29) arma UN'ORA PRIMA della cash.
+#  La finestra MESCOLA le due tempistiche, come il contratto R47a/R246e
+#  che fa da riferimento: la lettura e' sulla stessa mescolanza, si
+#  dichiara e non si separa in questo file.
 #
 #  BUCHI DICHIARATI
 #  - Nessun G0 esterno (stesso buco di R270b).
