@@ -36256,3 +36256,33 @@ Regola: **un bug si dichiara con la riga di codice che lo produce e con una ripr
 sbagliato al carattere** (qui: 56/92 e la stessa prima riga). Se la riproduzione non ridà l'output, la diagnosi e'
 un'ipotesi e si scrive come tale. E quando si confronta un numero con quello di una testa, si usa la STESSA
 definizione (qui: col k).
+
+### CLASSE 905 — uno stress che decide a un'ipotesi PIU' DURA del misurato consegnato senza la riga al valore MISURATO: il lettore vede "FRAGILE" e non sa che il verdetto viene tutto dall'ipotesi (28/09/2026, cancello strato 2 sulle schede audit `770101`/`770202` @ `55172b0a`)
+Caso: `SCHEDA_770101_DAX_APERTURA_2026-09-28.md` scrive in testa *"Stress dei costi -> FRAGILE"* (+50% spread, slippage
+2 punti su OGNI deal: PF 1,0451). Il campo misurato (SlippageLogger reale BCM, n=7) dice 0,41 medio sugli stop e 0,06
+sugli ingressi LIMIT: rifatto con lo stesso script, +50% a slip 0,41 su ogni deal da' PF **1,268**, cioe' sopra la
+soglia del PASS con margine. La scheda dava il margine per bisezione (1,5 punti) ma non il PF al misurato; sulla
+`770202` invece, con i 7,83 punti dell'unico stop FTMO su `US30.cash` messi su ogni stop perdente, +50% da' 1,095:
+li' il FRAGILE regge anche fuori dall'ipotesi. Due sedie, stessa parola, significati diversi.
+Regola: quando il gradino che decide e' un'ipotesi piu' severa del misurato (dichiarata e congelata: va bene), la
+consegna stampa ACCANTO la riga al valore misurato (media e massimo) e dice in una frase se il verdetto CAMBIA.
+Il criterio congelato non si tocca: la riga in piu' e' informativa, ma senza di lei la parola del verdetto descrive
+l'ipotesi e non la sedia.
+
+### CLASSE 906 — l'intervallo di confidenza di un confronto citato accanto ai numeri di un ALTRO confronto (28/09/2026, stesso cancello, scheda `770202` §0 punto 3)
+Caso: *"PF 0,782 su 58 ... 1,663 su 38 [OOS]. Differenza non dimostrata (IC95 [-0,42 ; +1,86], p 0,15)"*. L'IC e il p
+del referto citato (`IL_MERITO_E_D_INVERNO_2026-09-25.md` r.138) sono sulla popolazione **A+B due anni, 84 contro 68
+posizioni**, non sull'OOS 58/38: sul 58/38 un intervallo non e' mai stato calcolato. Il senso ("non dimostrata") e'
+lo stesso, ma chi rilegge crede che l'intervallo misuri quei numeri.
+Regola: un IC, un p o un lift si cita con **la popolazione su cui e' stato calcolato, per nome e con gli n**. Se i
+numeri accanto sono di un'altra popolazione, lo si scrive, e per la loro si dichiara [NON MISURATO].
+
+### CLASSE 907 — la cella viva sul MASSIMO di un asse etichettata "bordo" leggendo solo i vicini che servono: l'etichetta e' piu' morbida del numero scritto accanto (28/09/2026, stesso cancello, scheda `770101` §B.3)
+Caso: la scheda scriveva *"R35: IS positivo su 25-35 e crolla a 40; OOS 35 = massimo dell'asse (1,415), 40 = 1,405,
+30 = 1,101, 45 = 1,090 -> 35 e' il punto dove si toccano il blocco IS e il blocco OOS"* e in tabella *"bordo, non
+centro"*. Riletto l'asse intero: l'IS e' positivo anche a 45-60 (1,031 / 1,264 / 1,162 / 1,314) con buchi a 20 e 40,
+cioe' frastagliato; l'OOS e' una cresta di due celle (35-40) con i vicini a 1,09-1,10. Sull'asse R35 la cella viva e'
+il **picco OOS**, e la regola di casa e' "mai il picco": la parola "bordo" la faceva sembrare meno esposta di quanto
+il suo stesso numero dicesse.
+Regola: il giudizio centro/bordo/picco si da' **sull'asse intero stampato** (tutte le celle, IS e OOS), e se la cella
+e' il massimo di una finestra la parola e' "picco" anche quando in un'altra griglia (qui il C8) sta sul bordo.

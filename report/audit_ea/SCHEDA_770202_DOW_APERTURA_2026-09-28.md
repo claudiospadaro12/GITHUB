@@ -19,13 +19,17 @@ misurati · **[INFERITO]** = ragionamento, non misura · **[NON MISURATO]** = bu
    merito non si giudica, il rischio sì.
 3. 🔴 **La casella che FTMO gira d'estate è quella che perde**: nei mesi con l'ora legale USA (armo alla cash, come
    FTMO) PF **0,782 su 58 posizioni** (73 deal); nei mesi sfasati (armo un'ora prima) **1,663 su 38** [MISURATO,
-   rifatto dal per-trade = i numeri di `CLAUDE.md`, che sono in **deal**]. Differenza **non dimostrata** (IC95
-   [−0,42 ; +1,86], p 0,15, `IL_MERITO_E_D_INVERNO_2026-09-25.md` §0 punto 2).
+   rifatto dal per-trade = i numeri di `CLAUDE.md`, che sono in **deal**]. Differenza **non dimostrata**: sui due anni
+   A+B (84 estate contro 68 inverno) IC95 [−0,42 ; +1,86], p 0,15 (`IL_MERITO_E_D_INVERNO_2026-09-25.md` §0 punto 2,
+   tabella r.138); **sul solo OOS 58/38 un intervallo non è stato calcolato** [NON MISURATO].
 4. 🟠 **Stress dei costi → FRAGILE** (criteri congelati): +25% di spread con slippage 2 punti PF **1,0793**, +50%
    PF **1,0513**. Lo slippage massimo che tiene PF ≥ 1,10 a +50% è **1,3 punti**; l'unico stop vero misurato su
    `US30.cash` FTMO (sedia `771531`) ha slittato **7,83 punti** (n=1). E a +50%/slip 2 il DD a saldo chiuso ×2 tocca
-   **10,07%** [DERIVATO].
-5. ⚪ **In campo FTMO: zero ordini** nei giornali completi del 22-23/09, **zero posizioni** fino al 28/09 03:30. Sui BCM
+   **10,07%** [DERIVATO]. Allo slippage **misurato altrove** il quadro cambia: 0,41 su ogni deal (media stop DAX BCM,
+   altro simbolo) → +50% PF **1,174**; 7,83 solo sull'uscita delle posizioni in perdita → **1,095** (§C.3).
+5. ⚪ **In campo FTMO: zero ordini** nei giornali completi del 22-23/09 (l'EA stampa **da sé** ogni `BuyLimit`
+   riuscito o fallito con `InpVerbose=true`: l'assenza qui è una misura, classe 896 rispettata, §D.1), **zero posizioni**
+   fino al 28/09 03:30. Sui BCM
    l'ultima operazione è del **28/08**: **20 sedute** di silenzio al 25/09 contro un record OOS di **23** → il
    **30/09** diventa una domanda nuova (`PERCHE_770202_E_MUTA_2026-09-19.md` §8) [MISURATO/DERIVATO].
 6. 🟠 **`InpEmaSlow=50` su H4 non è mai stato misurato su questa cella** (0 file in repo), e la griglia H4 di FTMO
@@ -164,7 +168,9 @@ positivi / negativi = **1,27013**, netto **+6.721,93**, 130 righe, **96** `posit
 `..._OOS_r47c.csv` r.2 (PF 1,27013, Profit 6.721,93, Trades 130). Seconda prova, contro il numero di `CLAUDE.md`:
 split per ora legale USA (09/03-02/11/2025, 08/03-01/11/2026) sulla data di chiusura → estate **73 deal PF 0,782**,
 inverno **57 deal PF 1,662** = *"PF 0,78 su n=73 … 1,66 su n=57"*, **al millesimo** (in posizioni: **58** e **38**)
-[MISURATO].
+[MISURATO]. Precisazione sulla casella "come FTMO d'estate": **2** delle 58 posizioni cadono nelle settimane in cui
+gli USA sono già (o ancora) in ora legale e l'Europa no (26/10-01/11/2025, 08-28/03/2026): lì BCM arma alla cash, ma
+FTMO col calendario UE armerebbe alle 10:30 NY. Sulle altre **56** l'equivalenza regge [DERIVATO].
 
 ### B.5 ❄️ Stagione e orologio — dove sta il merito
 
@@ -234,6 +240,17 @@ sotto 1 già al gradino base con slippage 2.
   che tiene PF ≥ 1,00 a +100%: **1,9 punti** (3,00). 🔴 **Qui il campo non aiuta**: la `770202` **non ha mai avuto un
   riempimento su FTMO** né sul reale, e le 3 posizioni del 100k sono tutte vincenti da trailing (nessuno slittamento
   misurabile). L'unico stop vero su `US30.cash` FTMO (`771531`, 22/09) ha slittato **7,83 punti** (n=1).
+  🔴 **Lo stesso script a slippage diversi dai 2 punti** (base 3,00, `scenario` importato) [DERIVATO]:
+
+  | spread | slip 0,41 su ogni deal (media stop **DAX** BCM, altro simbolo) | slip 1,7 su ogni deal | 7,83 **solo** sull'uscita delle 31 posizioni in perdita, 0 altrove | slip 2 (decide) |
+  |---|---:|---:|---:|---:|
+  | +25% | 1,2048 | 1,1021 | 1,1224 | 1,0793 |
+  | +50% | **1,1743** | **1,0736** | **1,0952** | **1,0513** |
+
+  👉 Anche con lo slittamento FTMO del 22/09 messo su **ogni** stop perdente la sedia resta sopra 1,00 ma **sotto
+  1,10** a +50%: qui, diversamente dalla `770101`, il FRAGILE **non** dipende solo dall'ipotesi dei 2 punti. Lettura
+  **informativa**, il criterio congelato decide a 2 punti. (La colonna 7,83 è costruita a mano, q interpolato come lo
+  script, spread su tutto il volume, e **non** passa dallo script.)
 - **RISCHIO**: il DD a saldo chiuso ×2 **tocca il muro del 10% a +50% con slippage 2** (10,07%) e lo supera a +100%
   (10,51%) [DERIVATO lineare, dal picco]. In IS il DD equity @2% sta **già** a 11,34% al gradino base (§B.1). La
   peggior giornata della sedia da sola resta sotto la pausa 3,5% del Guardian (max 2,57%).
@@ -259,9 +276,17 @@ sotto 1 già al gradino base con slippage 2.
 |---|---|---|
 | 21/09 | giornale non letto da `CODA_09`; **nessuna posizione** (il per-trade FTMO parte dal 22/09) | `CODA_12_..._20260928` r.16-20 |
 | 22/09 · 23/09 | **zero righe d'ordine** (giornali **completi**: 4 e 1 righe, nessuna del Dow Apertura) | `CODA_09_..._20260923`, `..._20260924` [MISURATO] |
-| 24/09 · 25/09 | nessuna posizione; **ordini piazzati e scaduti non esclusi** (giornali troncati al tetto di 40 righe: 63 e 299 non stampate) | [DERIVATO: le 6 posizioni del per-trade FTMO sono tutte attribuite ad altre sedie] |
+| 24/09 · 25/09 | nessuna posizione; **ordini piazzati e scaduti non esclusi** (giornali troncati al tetto di 40 righe: 63 e 299 non stampate) | [DERIVATO: le 6 posizioni del per-trade FTMO (`CODA_12` r.16-20) sono `771531` ×3, `770411` ×1, `770101` ×2 — `HEDGING_FRA_CONTI_2026-09-24.md` §4, `TERZO_STOP_FTMO`, `NOTTE_2026-09-28.md`] |
 | 26/09 → 28/09 03:30 | zero righe d'ordine | `CODA_09` 27 e 28/09 [MISURATO] |
 
+- **Perché "zero righe" qui vuol dire "zero ordini" e non solo "zero ordini falliti" (classe 896)**: `CTrade` stampa
+  solo gli errori, ma la sedia stampa **da sé** `BUY LIMIT (retest) @ ...` **dopo** un `BuyLimit` riuscito (r.1337) e
+  `BUY LIMIT (retest) fallito` se no (r.1339), via `ABTGLog` che scrive solo con `InpVerbose=true` — e `InpVerbose=true`
+  è nel `.chr` vivo (`CODA_08_..._20260928` r.1968). Il filtro di `CODA_09` prende `buy` senza maiuscole
+  (`CODA_09_giornale_operativo.ps1` r.115): la stessa riga della `770101` il 22/09 compare (`CODA_09_..._20260923`
+  r.94). Il rifiuto del Guardian non stampa una riga d'ordine (le righe GUARDIAN sono escluse dal conteggio, r.116), ma
+  a fine 22/09 e 23/09 il Guardian FTMO segna `pausa=off cap=off` (`CODA_09_..._20260923`/`..._20260924`): un rifiuto
+  quei giorni non aveva motivo di scattare [MISURATO nel codice e nel giornale].
 - **Il perché di FTMO è [NON MISURATO]**: il `bias` EMA e le righe `RETEST armato` stanno nel log **Esperti** di
   `C:\FTMO`, che nessuna sonda notturna legge (`CODA_02` guarda solo i BCM). Via più corta: una riga di **sola
   lettura** sul VPS che stampi **intere** le righe `CLAU12_Dow_Apertura_US` di `C:\FTMO\MQL5\Logs` dal 21/09 (come
@@ -271,7 +296,9 @@ sotto 1 già al gradino base con slippage 2.
 
 - 100k `50504263`: **3 posizioni** (10/08, 13/08, 28/08), tutte vincenti da trailing, **+282,02 €**
   (`data/statements/trades_100k.csv`, aggiornato il 24/09) [MISURATO]. Piccolo `50503392`: 4 posizioni, +0,35 €.
-- Giornali BCM completi del 22-25/09: nessuna riga d'ordine del Dow Apertura [MISURATO, `CODA_09`].
+- Giornali BCM: nessuna riga d'ordine del Dow Apertura sul **100k** 22-25/09 e sul **piccolo** 22-23/09 [MISURATO,
+  `CODA_09`]; il piccolo **non ha giornali dopo il 23/09** (ultimo file `20260923` anche nella sonda del 28/09), quindi
+  il suo 24-25/09 è **[NON MISURATO]**.
 - **Sedute mute** dal 31/08 al 25/09: **20** (le 15 fino al 18/09 di `PERCHE_770202_E_MUTA` §0, 07/09 compreso perché BCM
   ha quotato, + 5) [DERIVATO]. Record del motore nel suo OOS: **23** (per-trade `770206`, stesso referto).
   👉 **Il 30/09 la siccità eguaglia il record**: è la data del **TAGLIANDO** già scritta (§8 del referto), il giorno prima

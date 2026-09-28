@@ -23,10 +23,13 @@ misurati · **[INFERITO]** = ragionamento, non misura · **[NON MISURATO]** = bu
 4. 🟠 **Stress dei costi → FRAGILE** (criteri congelati): a **+25%** di spread con slippage 2 punti PF **1,0730**
    (≥ 1,00), a **+50%** PF **1,0451** (< 1,10). Il margine vero: lo slippage massimo che tiene PF ≥ 1,10 a +50% è
    **1,5 punti indice** per deal; il campo BCM reale ha misurato **−0,1 punti** mediani all'ingresso e **0,41** medi
-   sugli stop (n=7) [MISURATO, §C.3].
+   sugli stop (n=7) [MISURATO, §C.3]. 🔴 **Il FRAGILE viene TUTTO dall'ipotesi dei 2 punti**: con lo slippage
+   **misurato** (0,41 su ogni deal, ingresso compreso) a +50% il PF è **1,268** (sopra 1,10); con **1,7** (il massimo
+   misurato) su ogni deal è **1,085** [DERIVATO, stesso script, §C.3]. Il verdetto congelato resta FRAGILE.
 5. 🟠 **Orologio**: su FTMO la sedia arma **sempre** all'apertura Xetra; il suo backtest d'inverno armava **un'ora
    prima**. La cella "inverno alla cash" è **[NON MISURATO]** (R246o/p pronti, non girati) [§A.3, §B.6].
-6. 🟢 **In campo FTMO ha fatto quello che il contratto dice**: 3 ordini, 2 riempiti (+69,66 e −1.552,80 EUR),
+6. 🟢 **In campo FTMO ha fatto quello che il contratto dice**: 3 ordini (dal giornale Esperti, riga stampata dall'EA
+   **dopo** un `BuyLimit` riuscito, §D.1), 2 riempiti (+69,66 e −1.552,80 EUR, dai referti degli stop),
    taglia 2,0% esatta su tutti e tre, slittamento sullo stop 0,65 punti [MISURATO, §D]. Anomalia vera: la **raffica
    di `modify` rifiutate** del trailing (24 e 25/09), lontana dal tetto FTMO delle 2.000 richieste.
 
@@ -41,7 +44,7 @@ misurati · **[INFERITO]** = ragionamento, non misura · **[NON MISURATO]** = bu
 | sorgente a HEAD | `mql5/Experts/ABTG_DAX_Apertura_EU.mq5`, `#property version "1.01"` (r.27), **2885 righe**, ultimo commit `99f58562` (21/09, "Filtro dello spazio") | `git log` / `wc -l` al 28/09 | [MISURATO] |
 | binario sul grafico FTMO | **`CLAU12_DAX_Apertura_EU`** (copia rinominata), sorgente in `C:\FTMO` **1.01 / 2426 righe / GUARD SI / compilato 2026-09-20 16:58** | `backtest_pipeline/coda/referti/CODA_06_quale_codice_gira_20260928_033005.log` r.210 (decodifica utf-8-sig) | [MISURATO] |
 | pin del binario | **`9fca63d9`** (19/09, "Toppa per ticket"), 2425 righe = 2426 − 1 | `report/SCHIERAMENTO_FTMO_2026-09-20.md` §5.1; `report/GUARDIAN_SEI_SEDIE_2026-09-24.md` r.172 | [MISURATO per numero di righe, **non** per impronta byte] |
-| scarto campo ↔ HEAD | **+460 righe a HEAD**: `5d52a456`/`bfacc1fd`/`99f58562` del 21/09 (filtro dello spazio, `InpSpaceMinR`/`InpSpaceMaxR` r.397-398, default 0 = no-op) — **NON in campo** | `git log` | [MISURATO] |
+| scarto campo ↔ HEAD | **+460 righe a HEAD, 0 tolte** (`git diff 9fca63d9 HEAD`): `5d52a456`/`bfacc1fd`/`99f58562` del 21/09 (filtro dello spazio). L'interruttore è **`InpSpaceMode` r.395, default `ABTG_SPACE_OFF`**: a OFF nessun handle creato e nessun calcolo; `InpSpaceMinR`/`InpSpaceMaxR` r.397-398 (default 0) contano solo a modo ATTIVO — **NON in campo** | `git log` / `git diff` | [MISURATO] |
 | stesso EA sul 100k | `C:\Program Files\BCM Markets MT5 Terminal -V3`: 1.01 / **2361 righe** / compilato 19/08 23:09 (= vintage `d83c1960`, pre-toppa per ticket) | `CODA_06_..._20260928` r.378 | [MISURATO] |
 | `ABTG_DAX_Apertura_EU.mq5` in `C:\FTMO` | presente, **senza `.ex5`** — non è quello che gira | `CODA_06` r.183 | [MISURATO] |
 
@@ -136,7 +139,7 @@ dell'ultima candela M1 contro UTC, a terminale FTMO acceso, il 26/10.
 | n per il merito | ≥ 150 posizioni | 🟢 OOS 193 · 🔴 **IS 132** (merito IS sospeso, Emendamento A) | n ≥ 30 (≥ 60 per il DD) | 🟢 tutte e due le finestre |
 | PF | ≥ 1,10 IS **e** OOS | 🟢 1,126 / 1,397 (l'IS **al filo**: +0,026) | PF < 1,10 = degrado | 🟢 nessun degrado |
 | DD alla taglia di volo | entro il muro 10% statico | 🔴 **14,47% / 14,14%** (dal picco: il muro FTMO si misura dal saldo iniziale, `CONTRATTI` §10) | — | — |
-| selezione | centro dell'altopiano, mai il picco | 🟠 **bordo, non centro** (§B.3) | — | — |
+| selezione | centro dell'altopiano, mai il picco | 🟠 **bordo nel C8; sull'asse R35 è il MASSIMO OOS** (cresta di due celle 35-40), non un centro (§B.3) | — | — |
 | OOS vero | finestra mai usata per scegliere | 🔴 **NO per range e buffer** (§B.3) | — | — |
 
 ### B.3 🏔️ Altopiano: la cella in campo è centro o picco?
@@ -153,9 +156,11 @@ FASE A geometria, FASE D retest C8, FASE E riempimento C11, **tick reali**), fin
 - **Buffer 500**: "centro dell'altopiano" (r.89 del sorgente; C8). 🟢
 - **Offset 200**: C11 (`REFERTO_FASE_E_C11.md`): range 35 positivo a tutti e quattro i livelli, crescita monotona
   (PF 1,107 → 1,176) (`DIARIO.md` r.52). 🟢 non è un picco.
-- **R35** (`risultati_prove/aperture_r35/`, gestione viva, deposito 10.000, rischio 1%): IS positivo su 25-35
-  (1,146 / 1,207 / **1,131**) e crolla a 40 (0,934); OOS **35 = massimo dell'asse (1,415)**, 40 = 1,405, 30 = 1,101,
-  45 = 1,090. 👉 35 è il **punto dove si toccano** il blocco IS (bordo destro) e il blocco OOS (bordo sinistro).
+- **R35** (`risultati_prove/aperture_r35/`, gestione viva, deposito 10.000, rischio 1%): IS 25-35 positivo
+  (1,146 / 1,207 / **1,131**), buco a 40 (0,934), di nuovo positivo 45-60 (1,031 / 1,264 / 1,162 / 1,314), buco anche
+  a 20 (0,998): **l'IS è frastagliato, non disegna un altopiano**. OOS: **35 = massimo dell'asse (1,415)**, 40 = 1,405,
+  i vicini 30 = 1,101 e 45 = 1,090. 👉 Sull'asse R35 la cella viva è la **cima di una cresta di due celle (35-40)**,
+  cioè il **picco OOS**, non il centro di un altopiano: la regola di casa ("mai il picco") qui morde.
 - **`InpTP1_R` 1,00**: in R202B (0,25-1,00) è il massimo in IS (1,127) **e** in OOS (1,395), ma è il **bordo destro della
   griglia**: il centro non è noto. `R208b` (TP1_R oltre 1) è pronto e non girato (`ALZARE_IL_PF_2026-09-22.md` r.417).
 - **`InpBEatR` 0**: R201A (0-0,90): lo 0,15 è il picco (OOS 1,516) con vicino 0,30 = ultimo — **non selezionabile**
@@ -247,6 +252,18 @@ Sulla base FTMO **1,23**: slip 2 → base 1,1016 · +25% **1,0809** · +30% 1,07
   uscite su stop **n=7, media 0,41, P95/massimo 1,7** [MISURATO, n piccolo, **BCM e non FTMO**]. Su FTMO lo stop del
   25/09 ha slittato **0,65 punti** (`TERZO_STOP_FTMO_2026-09-25.md` §1, n=1). 👉 Il gradino che decide applica
   **2 punti su ogni deal** (4 punti per andata e ritorno): è lo scenario pessimista dichiarato, non il campo.
+  🔴 **Lo stesso script allo slippage MISURATO** (`scenario` importato, stessa scala; lo slippage si applica a ingresso
+  **e** a ogni uscita, quindi 0,41 anche sull'ingresso LIMIT che ne ha misurati 0,06 di media) [DERIVATO]:
+
+  | spread (base 1,70) | slip 0,41 (media stop BCM) | slip 1,7 (massimo misurato) | slip 2 (decide) |
+  |---|---:|---:|---:|
+  | base | 1,3331 | 1,1430 | 1,1016 |
+  | +25% | 1,3005 | 1,1136 | 1,0730 |
+  | +50% | **1,2683** | **1,0847** | **1,0451** |
+
+  👉 **Il verdetto FRAGILE dipende interamente dall'ipotesi**: al campo medio la sedia sta sopra 1,10 con margine,
+  al massimo misurato su ogni deal no. Lettura **informativa**: il criterio congelato decide a 2 punti e **non si
+  cambia dopo i numeri**. Con n=7 BCM (non FTMO), il campo non basta a scegliere fra le due colonne.
 - **RISCHIO**: il DD a saldo chiuso ×2 sta **sopra il 10% in OGNI gradino, base compresa** (12,50% a slip 0) — è lo
   stesso fatto del §B.2 (DD equity @2% 14,47%), non una scoperta dello stress. La peggior giornata della sedia **da
   sola** resta sotto la pausa del Guardian (3,5%) in tutta la scala (max 2,78%) [DERIVATO]. Le giornate cattive vere
@@ -279,6 +296,15 @@ Sulla base FTMO **1,23**: slip 2 → base 1,1016 · +25% **1,0809** · +30% 1,07
 | 25/09 | BUY LIMIT 25.468,24 SL 25.391,24 lot 19,90 alle 10:28 IT, riempito **12:27:10 FTMO** | 🔴 **−1.552,80 €** allo stop alle **17:02:18 FTMO** (= 10:02 New York); slittamento **0,65 pt** | 77,00 × 19,90 = 1.532 € = 2,00% di 76.643,52 | `TERZO_STOP_FTMO_2026-09-25.md` §1 |
 | 26/09 → 28/09 03:30 | nessuna riga d'ordine | — | — | `CODA_09` 27 e 28/09 [MISURATO] |
 
+- **Da dove vengono gli ordini (classe 896)**: il giornale Esperti **non** vede gli ordini riusciti di `CTrade`
+  (stampa solo gli errori), ma questa sedia stampa **da sé** `BUY LIMIT (retest) @ ... lot ...` **solo dopo** un
+  `BuyLimit` riuscito (pin r.1506; il fallimento stampa "fallito", r.1508) con `InpVerbose=true` nel preset e nel
+  `.chr`. Quindi le righe d'ordine qui sopra sono ordini **piazzati**; i **riempimenti** vengono dai referti degli
+  stop (`RESOCONTO_2026-09-24`, `TERZO_STOP_FTMO`), e le 6 posizioni del per-trade FTMO (`CODA_12` r.16-20) sono
+  `771531` ×3, `770411` ×1 e questa sedia ×2 (`HEDGING_FRA_CONTI_2026-09-24.md` §4, `NOTTE_2026-09-28.md`)
+  [MISURATO]. I giorni 24-25/09 del giornale sono **troncati** al tetto di 40 righe: un secondo ordine nello stesso giorno è
+  escluso dal codice (`gBrokeHigh` si alza alla prima rottura, pin r.1481-1483, con ripristino al riavvio r.1448),
+  non dal giornale.
 - **Frequenza**: 2 riempimenti in 5 sedute (21-25/09) = 0,40 contro 0,699 promesse. **n = 2: non giudica niente**
   [DERIVATO].
 - **Corsia RISCHIO (firma del 18/08)**: DD forward della sedia su FTMO = −1.483,14 € = **1,85%** di 80.000, contro il
