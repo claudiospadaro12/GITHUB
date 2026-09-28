@@ -1286,16 +1286,55 @@ def k1_pav_txt(pav, n, rat_ko, rlo, rhi, atr_ko=None):
                 pav, n, 100.0 * pav / n, rat, atr))
 
 
+def diag_rosso(DIAG, R):
+    """classe 913 (cancello del 28/09, parente della 909(2)): un G0 ROSSO si DIAGNOSTICA per nome prima di scriverne la causa.
+    La testa R264 par. 5 nomina UNA causa (il lotto al pavimento 0,01 sull'oro) e prevede VERDE sui tre forex. Se i ROSSI sono
+    piu' d'uno con lo STESSO segno (n del banco piu' alto e PF piu' basso del genetico) e almeno uno NON ha nessuna posizione al
+    pavimento, il lotto NON puo' essere la causa COMUNE: si scrive CAUSA NON DIMOSTRATA con le ipotesi per nome, e la misura che
+    le separa. Nessun cancello congelato cambia: e' una diagnosi, non un verdetto."""
+    # la firma COMUNE si misura sui soli G0 di R264 (tick contro il genetico TICK, banco documentato: testa par. 1a); R265a confronta
+    # con una scansione OHLC dal banco NON VERIFICATO (R265 par. 1a): si riporta accanto, non entra nel conto
+    D4 = OrderedDict((t, d) for t, d in DIAG.items() if t.startswith("R264"))
+    if len(D4) < 2:
+        R.esiti["diag_rosso"] = "NON APPLICABILE (%d ROSSO di R264)" % len(D4)
+        return
+    righe = []
+    for t, d in DIAG.items():
+        righe.append("%s %s: n %+d, PF %+.3f, posizioni al pavimento 0,01: %s%s" % (t, d["s"], d["dn"], d["dpf"], ("%d su %d" % (d["pav"], d["npos"])) if d["pav"] is not None else "[per-trade NON LETTO]",
+                                                                                   " (banco della scansione NON VERIFICATO: si riporta, non entra nella firma)" if not t.startswith("R264") else ""))
+    stesso = all(d["dn"] > 0 for d in D4.values()) or all(d["dn"] < 0 for d in D4.values())
+    stesso = stesso and (all(d["dpf"] < 0 for d in D4.values()) or all(d["dpf"] > 0 for d in D4.values()))
+    senza = [d["s"] for d in D4.values() if d["pav"] == 0]
+    if stesso and senza:
+        ver = ("CAUSA NON DIMOSTRATA. Lo stesso segno (n del banco %s, PF %s del genetico) su tutti i %d ROSSI di R264, e %d simboli (%s) SENZA nessuna posizione al pavimento: il lotto 0,01 "
+               "(causa nominata dalla testa R264 par. 5 per l'oro) NON e' la causa COMUNE, e l'attesa VERDE della testa sui forex e' SMENTITA. "
+               "Sull'oro il pavimento resta una causa AGGIUNTIVA possibile, NON dimostrata. Ipotesi per nome: H_BINARIO (il sorgente a HEAD non e' "
+               "0953846c del genetico: 3af47ed9 lotto da OrderCalcProfit, 344a11b9 breakeven); H_STORICO (i tick BCM di oggi non sono quelli del "
+               "01/08); H_SPEC (commissione/swap del simbolo nel tester di oggi). La misura che le separa: lo STESSO G0 col binario 0953846c "
+               "(rifa' l'archivio -> H_BINARIO; non lo rifa' -> H_STORICO/H_SPEC)" % ("PIU' ALTO" if list(D4.values())[0]["dn"] > 0 else "PIU' BASSO", "PIU' BASSO" if list(D4.values())[0]["dpf"] < 0 else "PIU' ALTO", len(D4), len(senza), ", ".join(senza)))
+        R.esiti["diag_rosso"] = "NON DIMOSTRATA"
+    elif stesso:
+        ver = "segno comune, ma ogni ROSSO ha posizioni al pavimento: la causa del lotto NON e' esclusa, NON e' dimostrata"
+        R.esiti["diag_rosso"] = "PAVIMENTO NON ESCLUSO"
+    else:
+        ver = "segni DIVERSI fra i ROSSI: nessuna firma comune, causa NON DIMOSTRATA simbolo per simbolo"
+        R.esiti["diag_rosso"] = "SEGNI DIVERSI"
+    R.add("- **DIAGNOSI DEL ROSSO (classe 913, [MISURATO] dal CSV e dal per-trade della gemella; banco contro genetico)**: " + " | ".join(righe) + " -> **" + ver + "**")
+
+
 G0_NOME = ["VERDE (il banco rifa' l'archivio: |dn| <= 1%, |dPF| <= 0,020, DD entro +-5%)", "GIALLO (|dn| <= 3% e |dPF| <= 0,050)", "ROSSO: il banco NON rifa' l'archivio", "NON VERIFICABILE (file NULLO o SALTATO)"]
 
 
 def sez_r264(rac, F, EX, R):
     R.add("## 1. R264 / R265a -- G0 DEI BANCHI (testa R264 par. 5, R265 par. 3) e K1 DAL LOTTO (classe 846)", "")
     G0, K1 = {}, {}
+    DIAG = OrderedDict()   # classe 913: per ogni G0 ROSSO il SEGNO di dn e dPF e le posizioni al pavimento 0,01 (dal per-trade)
     for t in ("R264c", "R264d", "R264a", "R264b", "R265a"):
         f, an = F[t], ANC_G0[t]
         lv, g = g0_livello(f, an)
         G0[t] = lv
+        if lv == 2 and g is not None:
+            DIAG[t] = dict(s=f.j["s"], dn=num(g["r"]["Trades"]) - an["tr"], dpf=num(g["r"]["Profit Factor"]) - an["pf"], pav=None, npos=None)
         if g is None:
             R.add("- **G0 %s %s: %s**" % (t, f.j["s"], G0_NOME[3]))
         else:
@@ -1311,6 +1350,8 @@ def sez_r264(rac, F, EX, R):
             R.add("  - K1 %s: NON CALCOLABILE (%s)" % (t, K1[t]["txt"]))
             continue
         pos = po.pos(f.j["dp"])
+        if t in DIAG:
+            DIAG[t]["pav"], DIAG[t]["npos"] = sum(1 for x in pos if x["vol"] < 0.015), len(pos)
         ko = k1_lotto(pos, prm)
         ver = k1_verdetto(t, ko, prm)
         sc = prm["sc"]
@@ -1335,8 +1376,10 @@ def sez_r264(rac, F, EX, R):
         m = misure_pt(po, f.j["dp"])
         R.add("  - %s: %s" % (t, misure_txt(m, po.k)))
         R.esiti["k1_" + t] = ver
+        R.esiti["k1med_" + t] = (ko["med_lo"] * sc, ko["med_hi"] * sc)
     for t in G0:
         R.esiti["g0_" + t] = ["VERDE", "GIALLO", "ROSSO", "NV"][G0[t]]
+    diag_rosso(DIAG, R)
     # metro tick
     ln = rac.riga_riepilogo("METRO TICK EMA200")
     R.add("", "- metro tick EMA200 H4 (dalla riga, si riporta): %s" % (ln[:200] if ln else "[NON TROVATO nel RIEPILOGO]"), "")
@@ -1538,6 +1581,13 @@ def sez_r265b(F, EX, R):
     if not f.lanciato:
         R.add("- SALTATO (non lanciato, NON un nullo di catena): %s -> K1 di R265a = %s" % (f.saltato, R.esiti.get("k1_R265a", "n.d.")))
         R.esiti["r265b"] = "SALTATO"
+        mk = R.esiti.get("k1med_R265a")
+        if R.esiti.get("k1_R265a") == "FAIL" and mk:
+            # classe 913(2): ESCLUSO PER COSTO e' un verdetto sul TF a QUESTO stop (CLAUDE.md: "quel TF si dichiara escluso PER COSTO,
+            # con il numero accanto"), non la morte del candidato: accanto va il certificato a 5 caselle
+            R.add("- **EURUSD H4 solo corto ESCLUSO PER COSTO a InpSLatr 1,0**: stop mediano della gamba 2 [%.2f ; %.2f] pip = %.1f-%.1fx il pedaggio all-in 0,6636 pip, contro 40x = 26,54 (testa R265 par. 2) [DERIVATO dal lotto]. "
+                  "Certificato di morte (09/09) del CANDIDATO EMA200 EURUSD solo corto: %s -- la leva del costo nominata dalla testa R264 par. 11 e' InpSLatr (la larghezza dello stop), MAI messa ad asse; TF: H1 escluso per costo 20,8x (R140a), H4 qui" % (
+                      mk[0], mk[1], mk[0] / 0.6636, mk[1] / 0.6636, certificato(True, True, False, True, True, "(5) TF dall archivio R29a/R140a, non da questo round; G0 R265a: vedi par. 1")))
         R.add("")
         return
     if not f.ok:
@@ -1671,7 +1721,7 @@ def sez_r266(F, R, rac=None):
               "  - spezzato OOS (informazione, non cancello): mesi SFASATI (orologio BCM, par. 3) %d pos PF %s, mesi ALLINEATI %d pos PF %s" % (
                   qA["n"] + qB["n"], fpf(sgp / sgl if sgl > 0 else float("inf")), qT["n"] - qA["n"] - qB["n"], fpf(agp / agl if agl > 0 else float("inf"))))
         tab_taglie(ddO, 1.0, R, "Equity DD % OOS")
-        if pfI < 1.0 or pfO < 1.0:
+        if pfI < 1.0 or pfO < 1.0 or hyp.startswith("H0") or ddR3 > 4.00:   # classe 913(2): ogni bocciatura (merito H0 o rischio R3) porta il certificato, non solo i PF < 1
             R.add("  - certificato di morte (09/09): %s -- R4: un H0 NON e' un certificato di morte (gestione = default dell'EA, TF fisso H1)" % certificato(True, True, False, True, False, "PF IS %s, OOS %s" % (fpf(pfI), fpf(pfO))))
         R.esiti["r266_" + t] = hyp.split(" ")[0]
     # L0 struttura
@@ -2029,12 +2079,15 @@ def sez_r267(F, EX, R):
             if dX:
                 f.nullo.append("U1 cella-ancora diversa da R261a corr=1")
         pfA, ddA = num(ra["Profit Factor"]), num(ra["Equity DD %"])
-        cc, prof = [], {}
+        cc, prof, batte6 = [], {}, []
         for av in vals:
             rq = f.r("IS", av)
             prof[av] = rq["Profit"]
             pfc, ddc = num(rq["Profit Factor"]), num(rq["Equity DD %"])
-            cc.append("%s: %s%s; DD a 1%% %s" % (av, riga_txt(rq), " -> %s; M1-M2 vs ancora: %s" % (part3(pfA, ddA, pfc, ddc), m123_txt(m123(None, rq, None, ra, uscita=True))) if av != ancv else " (ANCORA)", "> 4,08: FUORI da S3 a 2,00 (U5)" if ddc > 4.08 else ("fra 4,00 e 4,08" if ddc > 4.00 else "<= 4,00")))
+            mU = m123(None, rq, None, ra, uscita=True) if av != ancv else None
+            if mU is not None and mU["M1"] is True and mU["M2"] is True:
+                batte6.append(av)
+            cc.append("%s: %s%s; DD a 1%% %s" % (av, riga_txt(rq), " -> %s; M1-M2 vs ancora: %s" % (part3(pfA, ddA, pfc, ddc), m123_txt(mU)) if av != ancv else " (ANCORA)", "> 4,08: FUORI da S3 a 2,00 (U5)" if ddc > 4.08 else ("fra 4,00 e 4,08" if ddc > 4.00 else "<= 4,00")))
         if t == "R267g4":
             t0v, t50 = num(f.r("IS", 0)["Trades"]), num(f.r("IS", 50)["Trades"])
             ok2 = t0v < t50 and (prof[25] != prof[50] or prof[50] != prof[75])
@@ -2057,7 +2110,9 @@ def sez_r267(F, EX, R):
         for x in cc:
             R.add("  - " + x)
         R.add("  - %s" % u2, "  - per-trade %s: %s" % (f.j["pid"], ("cella %s: %s" % (po.cell, misure_txt(misure_pt(po, f.j["dp"]), po.k))) if po else "non identificato o ambiguo"), "  - %s" % u4,
-              "  - n ~35-63 posizioni: MERITO SOSPESO PER COSTRUZIONE; effetto di lato R151a: BE e trailing spostano anche TP2; U6 nessuna promozione: se nessuna cella batte l'ancora oltre il rumore IL DEFAULT VA BENE = casella (3) riempita")
+              "  - n ~35-63 posizioni: MERITO SOSPESO PER COSTRUZIONE; effetto di lato R151a: BE e trailing spostano anche TP2; U6 nessuna promozione -- VALUTATA (classe 909(1), rumore = M1 e M2 contro l'ancora, M3 NON VERIFICABILE): %s" % (
+                  ("celle che battono l'ancora su M1 e M2: nessuna -> IL DEFAULT VA BENE = casella (3) riempita") if not batte6 else ("celle che battono l'ancora su M1 e M2: %s -> il default NON e' confermato: INDIZIO, merito SOSPESO (casella (3) misurata, non chiusa)" % ", ".join(str(b) for b in batte6))))
+        R.esiti["u6_" + t] = "DEFAULT OK" if not batte6 else "INDIZIO " + ",".join(str(b) for b in batte6)
     f = F["R267g1"]
     if not f.ok:
         R.add("- R267g1: NON VERIFICABILE (%s)" % ("NULLO: " + "; ".join(f.nullo) if f.lanciato else "SALTATO"))
@@ -2114,6 +2169,8 @@ def sez_r267(F, EX, R):
             part = "H_INERTE (|dTrades| <= 2% e |dPF| < 0,02): casella MISURATA, manopola INERTE a 0,8 (la manopola che morderebbe e' InpAdrDistMax ~0,5, NON qui)" if (abs(tr1 - tr0) <= 0.02 * tr0 and abs(pf1 - pf0) < 0.02) else "H_MORDE (Trades fuori +-2%% o |dPF| >= 0,02): il rapporto ATR(H4)/ADR 0,41 e' sbagliato o gli shock sono frequenti -> %s" % part3(pf0, dd0, pf1, dd1)
         else:
             part = part3(pf0, dd0, pf1, dd1, costo=True)
+        mE = m123(None, r1, None, r0, uscita=(man == "InpFridayClose"))
+        batteE = mE["M1"] is True and mE["M2"] is True
         po = f.pt0()
         fri = ""
         if man == "InpFridayClose" and po is not None:
@@ -2121,11 +2178,13 @@ def sez_r267(F, EX, R):
             fri = " | chiusure di venerdi' dalle 20:00:00 nel per-trade della cella %s: %d%s" % (po.cell, nF, " (cella 1: attese le chiusure forzate)" if po.cell == "1" else " (cella 0: se 0 e Profit identici, la manopola e' inerte)")
         R.add("- **%s (%s, %s)**: %s" % (t, f.j["s"], man, e1),
               "  - cella 0 %s | cella 1 %s | E2 morde: %s | **%s**%s" % (riga_txt(r0), riga_txt(r1), "Profit diversi, la manopola ha morso" if morde else "Profit IDENTICI: casella INERTE MISURATA (H_INERTE), non un difetto", part, fri),
-              "  - M1-M2 cella 1 contro il CONTROLLO cella 0 dello stesso file: %s -- ~100-120 posizioni: INDIZIO, merito SOSPESO" % m123_txt(m123(None, r1, None, r0, uscita=(man == "InpFridayClose"))),
+              "  - M1-M2 cella 1 contro il CONTROLLO cella 0 dello stesso file: %s -- ~100-120 posizioni: INDIZIO, merito SOSPESO" % m123_txt(mE),
               "  - E3 rischio: DD 0/1 %.2f/%.2f a 1%% contro 10,0 -> %s, derivato a 2,00 x1,956-1,990: %.2f-%.2f%s" % (dd0, dd1, "sotto" if (dd0 <= 10.0 and dd1 <= 10.0) else "**SOPRA il muro**", dd1 * 1.956, dd1 * 1.990, " [ORO a 10000: lotti 0,01-0,03, il DD% NON e' quello a 1% dichiarato; il confronto 1/0 resta valido]" if f.j["s"] == "XAUUSD" else ""),
               "  - per-trade %s: %s" % (f.j["pid"], ("cella %s: %s" % (po.cell, misure_txt(misure_pt(po, f.j["dp"]), po.k))) if po else "non identificato o ambiguo"),
-              "  - E4 nessuna promozione (se la cella 1 non batte la 0 oltre il rumore: IL DEFAULT (spento) VA BENE); E5 K1 = quello di %s" % bs)
+              "  - E4 nessuna promozione -- VALUTATA (classe 909(1), rumore = M1 e M2 contro la cella 0, M3 NON VERIFICABILE): %s; E5 K1 = quello di %s" % (
+                  "la cella 1 batte la 0 su M1 e M2 (PF %s contro %s, DD %.2f contro %.2f) -> il default (spento) NON e' confermato: INDIZIO, merito SOSPESO" % (fpf(pf1), fpf(pf0), dd1, dd0) if batteE else "la cella 1 NON batte la 0 su M1 e M2 -> IL DEFAULT (spento) VA BENE", bs))
         R.esiti[t] = part.split(" ")[0]
+        R.esiti["e4_" + t] = "INDIZIO" if batteE else "DEFAULT OK"
     R.add("")
 
 
@@ -2639,6 +2698,31 @@ def autotest(fixture_dir=None):
     ko = k1_lotto(pos, K1PAR["R264d"])
     check(ko["n_pair"] == 2 and ko["rat_ko"] == 2 and ko["nullo"] and ko["v1ge02"] == 0 and k1_verdetto("R264d", ko, K1PAR["R264d"]) == "NULLO",
           "889: oro al PAVIMENTO, coppie 0,01/0,01 (1,0) e 0,01/0,03 (3,0) fuori [1,36 ; 2,125] con gambe GIUSTE -> il K1 congelato dice NULLO; la diagnostica accanto conta 2 coppie su 2 al pavimento (N - X)")
+    # classe 913 (cancello del 28/09): la diagnosi del ROSSO. Contro-esempi: (a) 4 ROSSI con lo stesso segno e forex senza pavimento
+    # -> NON DIMOSTRATA (il lotto non e' la causa comune); (b) ogni ROSSO con posizioni al pavimento -> PAVIMENTO NON ESCLUSO (non
+    # "dimostrato"); (c) segni diversi -> SEGNI DIVERSI; (d) un solo ROSSO di R264 (R265a non conta) -> NON APPLICABILE
+    def _dg(spec):
+        Rx = Referto()
+        diag_rosso(OrderedDict((t, dict(s=t, dn=a, dpf=b, pav=c, npos=100)) for t, a, b, c in spec), Rx)
+        return Rx.esiti["diag_rosso"], Rx.testo()
+    va, ta = _dg([("R264c", 21, -0.017, 0), ("R264d", 105, -0.072, 61), ("R264a", 46, -0.032, 0), ("R264b", 5, -0.091, 0)])
+    vb, _ = _dg([("R264c", 21, -0.017, 3), ("R264d", 105, -0.072, 61)])
+    vc, _ = _dg([("R264c", 21, 0.017, 0), ("R264d", 105, -0.072, 61)])
+    vd, _ = _dg([("R264d", 105, -0.072, 61), ("R265a", 26, -0.051, 0)])
+    check(va == "NON DIMOSTRATA" and "H_BINARIO" in ta and "0953846c" in ta and vb == "PAVIMENTO NON ESCLUSO" and vc == "SEGNI DIVERSI" and vd.startswith("NON APPLICABILE"),
+          "913: 4 ROSSI stesso segno, 3 senza pavimento -> NON DIMOSTRATA con ipotesi per nome; tutti col pavimento -> NON ESCLUSO; segni diversi; 1 solo ROSSO R264 (+R265a) -> NON APPLICABILE (%s/%s/%s/%s)" % (va, vb, vc, vd))
+    arcC = os.path.join(QUI, "risultati_archivio", "ROUND_CORTI_C_2026-09-28")
+    if os.path.isdir(arcC):
+        Rv = lettura(Raccolta(arcC))
+        Tv, Ev = Rv.testo(), Rv.esiti
+        check(sum(1 for ln in Tv.split("\n") if ln.startswith("  - certificato di morte") and "(5) TF) [PF IS" in ln) == 6,
+              "913(2) sull'archivio VERO C: i 6 file del box asiatico (tutti H0 e R3 VIOLATO) portano il certificato NON ANCORA MISURATO, non solo i 2 con un PF < 1")
+        check(Ev.get("k1_R265a") == "FAIL" and "[23.40 ; 24.40] pip = 35.3-36.8x" in Tv and "NON ANCORA MISURATO (mancano: (3) uscita ad asse) [(5) TF dall archivio" in Tv,
+              "913(2) sull'archivio VERO C: K1 EURUSD FAIL (stop 23,40-24,40 pip = 35,3-36,8x contro 40x) -> ESCLUSO PER COSTO a InpSLatr 1,0, e il candidato resta NON ANCORA MISURATO (manca (3): InpSLatr mai ad asse)")
+        check(Ev.get("diag_rosso") == "NON DIMOSTRATA" and "R264c GBPJPY: n +21, PF -0.017, posizioni al pavimento 0,01: 0 su 144" in Tv and "R264d XAUUSD: n +105, PF -0.072, posizioni al pavimento 0,01: 61 su 187" in Tv,
+              "913 sull'archivio VERO C: G0 ROSSI 4/4 con n piu' alto e PF piu' basso, GBPJPY/GBPUSD/AUDJPY 0 posizioni al pavimento -> CAUSA NON DIMOSTRATA (%s)" % Ev.get("diag_rosso"))
+        check(Ev.get("e4_R267e2") == "INDIZIO" and Ev.get("e4_R267e1") == "DEFAULT OK" and Ev.get("e4_R267f1") == "DEFAULT OK" and Ev.get("e4_R267f2") == "DEFAULT OK" and all(Ev.get("u6_" + t) == "DEFAULT OK" for t in ("R267g2", "R267g3", "R267g4")),
+              "909(1) sull'archivio VERO C: E4 VALUTATA (e2 oro ADR: M1 e M2 passano -> il default NON e' confermato, INDIZIO), U6 VALUTATA (g2-g4: nessuna cella batte l'ancora -> DEFAULT VA BENE)")
     # ---- (1) fixture dagli archivi veri
     if not (os.path.isdir(ARCHIVI_REPO) and os.path.isdir(ARC_R246)):
         print("  SKIP archivi CORTI B / R246 non trovati")
