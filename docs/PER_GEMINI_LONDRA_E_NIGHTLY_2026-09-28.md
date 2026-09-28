@@ -31,8 +31,12 @@ Tutti e sei fuori per RISCHIO alla gestione di default (Equity DD 7-62% a 1%), P
 mercati attivi di notte il fade peggiora") non e' contraddetta: AUDUSD 0,95 e USDJPY 0,67 stanno sotto i simboli
 "dormienti" gia' misurati (0,59-1,05).
 
-**R250 -- orologio del candidato Nasdaq (770201)**: due celle su sei nulle per un cancello formale; con la sola
+**R250 -- orologio del candidato Nasdaq (770201)**: due celle su sei nulle per UNA uscita ciascuna fuori orario
+(chiusura di fine seduta scattata al primo tick dopo due festivi USA: 03/04/2026 e 03/07/2025); con la sola
 finestra A il verdetto e' "orologio" (non "stagione") ma sotto 150 operazioni: indizio, non prova.
+
+Nota tecnica: due file su 36 (R258k, R258s) sono nulli per un guasto del tester MT5 ("OnTesterInit works too
+long"), non del motore: si rilanciano in ~6 minuti e non cambiano nessun verdetto.
 
 ## 2. Cosa NON e' misurato (e quindi il candidato NON e' archiviato come morto)
 Per la regola di casa un candidato si dichiara MORTO solo con cinque caselle piene: PF, n+DD, **gestione
