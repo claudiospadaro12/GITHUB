@@ -109,6 +109,14 @@ scambio in `docs/gemini/RISPOSTA_GEMINI_2026-09-28_2207.md` (da verificare); dos
 weekend/pause >2h obbligatoria e finestra news 2+2 min senza esecuzioni (serve un filtro a livello conto: da progettare prima del
 passaggio). `docs/RISPOSTA_SUPPORTO_FTMO_2026-09-29.md`.
 
+**29/09 ~01:00 — CACCIA CONGIUNTA CON GEMINI, primi due giri fatti via API** (dossier di 23 motori `docs/PER_GEMINI_EA_FUORI_GIOCO_2026-09-29.md`,
+risposte `docs/gemini/RISPOSTA_GEMINI_2026-09-28_2226.md` e `_2228.md`). 🔴 **DA FARE ALLE 06:30 (sessione nuova)**: cancello di giudizio
+(Opus) sulle tre risposte di Gemini (2207, 2226, 2228) con la tabella «punto · verifica nel repo · cosa se ne fa» — in particolare:
+InpMgmtTF "ATTIVO" (righe 105/154/155/347 di MaxMinNotte: verificare), la stima Londra "3-8 pip" contro il dossier A1 r.412,
+la riformulazione A7 (filtro ATR H1 sul Dow short: e' un meccanismo o una griglia travestita? n>=150), A4 InpSLatr 1,5 su
+EMA200 EURUSD (citata "ABTG_Guardian.mq5 riga 105": file sbagliato), A11 timestop su MaxMinNotte. Poi: riga R207b
+(`righe/RIGA_R207B_DA_MANDARE.md`, pin da rifare) dai cancelli, e proposta a Claudio dell'ordine dei round.
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
