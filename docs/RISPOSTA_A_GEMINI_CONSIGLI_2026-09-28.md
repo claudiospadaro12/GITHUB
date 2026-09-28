@@ -13,3 +13,19 @@ Niente e' stato eseguito: ogni azione passa dal cancello e, dove tocca il campo,
 Nota di metodo: tre punti su quattro erano gia' nel repo (1, 3, 4 in forma di classe o di regola). Il punto 2 e' il contributo
 nuovo. Buon segno per il lettore di codice; per il proponente, la prossima consegna deve citare i file del repo che gia'
 trattano il punto (era nel comando: «se esiste evidenza, citarla»).
+
+---
+
+## Seconda consegna di Gemini, sera del 28/09: «Guida per il miglioramento del Profit Factor» (`docs/GEMINI_GUIDA_MIGLIORAMENTO_PF_2026-09-28.pdf`, 2 pagine)
+
+| # | Punto | Verifica nel repo | Cosa se ne fa |
+|---|---|---|---|
+| 1 | Regola zero: mai ottimizzare i parametri di un motore senza edge; cambiare meccanismi/simboli/TF/uscita | E' la regola del 19/08 e del 09/09 di `CLAUDE.md`, ricopiata. | Niente: gia' legge. |
+| 2 | L'edge sta nell'uscita: trailing dinamico (Dow 1,238 → 1,371 con la candela M5 precedente), parziali e breakeven ad asse | I numeri sono NOSTRI (`dow_trailing.csv`, `LE_MANOPOLE_INERTI_2026-09-23.md`). **R270 di stasera ha appena misurato l'uscita del DAX su tutte le leve: il vivo e' il centro, TP1_R inerte fra 1 e 2R** (`report/LETTURA_R270_2026-09-28.md`). | Gia' fatto; la guida arriva dopo la misura. |
+| 3 | Shift del TF (H4 → H1/M15) per frequenza, rispettando stop >= 40x spread | Regola di casa (motto del 09/09: TF piu' bassi, frontiera del costo). Sull'oro EMA200 il TF e' gia' stato cambiato (R32a H1: PF 0,56-0,85, nel certificato di stasera). | Niente di nuovo. |
+| 4 | Filtro dello SPAZIO (`InpSpaceMode`) e filtro VWAP/trend di fondo | Gli input **esistono gia'** nel sorgente (`ABTG_DAX_Apertura_EU.mq5`: `InpSpaceMode`, `InpUseVwapFilter`, `InpUseEmaFilter`), a default spenti: sono nelle 874 corse a manopole inerti. L'"oro col trend" (R260d) e' stato misurato stasera: **rischio violato**. | Candidato per un round SOLO se proposto con attesa e contro-esempio (classe 178); oggi nessuna misura dice che accendere `InpSpaceMode` aiuti. |
+| 5 | Oro EMA200 H4 regime-dependent: filtro di regime (ATR D1) che spegne l'EA nei laterali invece di cestinare il motore | Idea legittima ma a rischio di **adattamento a posteriori**: il filtro va definito PRIMA su una regola indipendente e provato su 2017-23 E 2024-26 con la prova di regime (Emendamento C). R260d ha gia' provato un filtro di trend sull'oro (770402, non EMA200): taglia, non separa. | Se Claudio lo vuole: file prova con filtro ATR-D1 definito ex ante, attesa dichiarata, contro-esempio "il filtro spegne anche il 2024-26". In coda, non urgente. |
+
+Bilancio delle due consegne: 7 punti su 9 gia' scritti nel repo o gia' misurati oggi; 2 candidati (tokenizer AST per il
+cancello; filtro di regime ex ante sull'oro EMA200). Per la prossima consegna Gemini deve citare i file del repo che gia' trattano
+il punto e proporre l'ATTESA con il contro-esempio, come chiede il comando (Agente 3 e 4).
