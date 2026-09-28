@@ -75,6 +75,7 @@ PWSH7_ONLY = [
     (r"-AsHashtable",             "-AsHashtable (pwsh 7)"),
     (r"(?<!\$)\(\s*if\s*\(",      "'(if ...)' usato come espressione fra parentesi (pwsh 7). NB: '$(if ...)' e' una SUBEXPRESSION ed e' valida: non e' questo il caso"),
     (r"\?\?",                     "operatore null-coalescing '??' (pwsh 7)"),
+    (r"Sort-Object\b[^|;\n]*\s-Stable\b", "'Sort-Object -Stable' (pwsh 7; classe 903: su 5.1 sotto Continue il blocco muore e i saldi restano al deposito = falso G0 ROSSO nella riga D del 28/09)"),
 ]
 
 def leggi(path):
@@ -237,7 +238,13 @@ def righe_utili(testo):
             if re.match(r"^[\"\']@", riga.strip()):
                 dentro_here = False
             continue
-        fuori.append((i, senza_stringhe(riga.split("#", 1)[0])))
+        # CLASSE 910 (28/09/2026): PRIMA si tolgono le stringhe, POI il
+        # commento. Nell'ordine inverso un '#' DENTRO una stringa (il ticket
+        # '#3160534' nella guardia MT5-aperto) tagliava la riga di lancio
+        # come se fosse un commento: della riga D (86 KB) restavano 718 byte
+        # di codice nudo, e `Sort-Object -Stable` (classe 903) era INVISIBILE
+        # a controlla_pwsh7. Misurato, non ipotizzato.
+        fuori.append((i, senza_stringhe(riga).split("#", 1)[0]))
     return fuori
 
 
@@ -259,7 +266,13 @@ def senza_stringhe(nudo):
     Sbaglia nel verso SICURO -- puo' nascondere codice dentro una stringa
     mal chiusa, non puo' inventare un difetto che non c'e'.
     """
-    return re.sub(r"'[^']*'", "''", re.sub(r'"[^"]*"', '""', nudo))
+    # CLASSE 910-bis (28/09/2026): l'apostrofo RADDOPPIATO ('') e' l'escape di
+    # PowerShell dentro un literal a singole. La vecchia regex r"'[^']*'" lo
+    # leggeva come chiusura+apertura e andava fuori sincrono: sulla riga D
+    # (86 KB) restavano 718 byte di "codice nudo" e `Sort-Object -Stable`
+    # (classe 903) era INVISIBILE. Ora la stringa si chiude solo su un
+    # apostrofo NON seguito da un altro apostrofo.
+    return re.sub(r"'(?:[^']|'')*'", "''", re.sub(r'"[^"]*"', '""', nudo))
 
 def controlla_pwsh7(path, testo):
     trovati = []
@@ -1761,6 +1774,16 @@ def esamina(tipo, percorso):
                    " virgoletta dentro un literal a singole, tipo .Trim('\"'), basta -- ma"
                    " FINCHE' RESTA DISPARI QUESTO CANCELLO NON E' AFFIDABILE."
                    " Rimedio: usare [char]34 al posto della virgoletta letterale")
+        # CLASSE 910 (28/09/2026) -- IL PARSER VERO NON GIRAVA SULLE RIGHE.
+        # controlla_parser (classe 242) era chiamato SOLO per --oggetto ps1.
+        # Misurato scrivendo RIGA_ROUND_R270: una `}` di chiusura DUPLICATA
+        # (che chiudeva due volte l'involucro `& { ... }`) passava questo
+        # cancello con "nessun difetto meccanico"; pwsh la boccia subito
+        # ("Unexpected token '}'"). Una riga e' PowerShell come uno script:
+        # si passa allo stesso parser (e ai controlli pwsh7, classe 903:
+        # `Sort-Object -Stable` sotto Continue ha prodotto un falso G0 ROSSO).
+        controlla_parser(percorso)
+        controlla_pwsh7(percorso, testo)
         controlla_riga_lancio(riga)
     elif tipo == "ps1":
         controlla_ascii(percorso, dati)

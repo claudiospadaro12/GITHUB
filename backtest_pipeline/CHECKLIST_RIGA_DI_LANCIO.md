@@ -36323,3 +36323,26 @@ verdetto del certificato (NON ANCORA MISURATO se manca un punto), non "morto"; (
 attribuisce leggendo il `LOG_TESTER` (guasto del tester vs raccolta) prima di consegnare. Contro-esempi nell'autotest
 T23-T25 (PF esattamente 1,00; file assente; uscita alle 23:05 di un mercoledi qualunque; gemella divergente; guasto prima di
 ogni lancio o dopo un job di un'altra riga).
+
+### CLASSE 910 — il cancello delle RIGHE non compilava e non vedeva il codice: il parser vero girava solo sui `.ps1`, e un `#` dentro una stringa tagliava la riga come un commento (28/09/2026, trovata scrivendo `RIGA_ROUND_R270_USCITA_DAX.txt`, misurata sulla riga D)
+Due buchi nello stesso strato 1, per lo stesso oggetto (`--oggetto riga`), entrambi misurati e non ipotizzati:
+(a) **Il parser di PowerShell (classe 242) era chiamato SOLO per `--oggetto ps1`.** Una riga di lancio e' PowerShell come
+uno script, ma `esamina()` la passava solo ai controlli testuali. Prova diretta: la riga R270 con UNA graffa di chiusura in
+piu' (l'involucro `& { ... }` chiuso due volte, bug di assemblaggio davvero introdotto e poi tolto dall'agente che la
+scriveva) usciva dal cancello con *"nessun difetto meccanico"*; `pwsh` la boccia subito con `Unexpected token '}'`.
+(b) **`righe_utili` toglieva il commento PRIMA delle stringhe.** Il taglio `riga.split("#")` avveniva sul testo grezzo,
+quindi il PRIMO `#` dentro una stringa -- il ticket `#3160534` nella guardia MT5-aperto, presente in TUTTE le righe recenti
+-- chiudeva il "codice nudo" li'. Misurato sulla riga D (86.218 byte): al controllo `controlla_pwsh7` arrivavano **718
+byte**; dopo la correzione 48.540. Conseguenza concreta: `Sort-Object -Stable` (classe 903, il falso G0 ROSSO del 28/09)
+era INVISIBILE al cancello anche dopo averlo messo in lista -- e ci e' andato oggi, con la lista PWSH7_ONLY che prima non
+lo aveva.
+Rimedio, in `controlla_riga.py`: per `--oggetto riga` si chiamano ANCHE `controlla_parser` e `controlla_pwsh7`;
+`righe_utili` fa `senza_stringhe(riga)` PRIMA di `split("#")`; `senza_stringhe` chiude un literal a singole solo su un
+apostrofo NON raddoppiato (`''` e' l'escape di PowerShell); `Sort-Object ... -Stable` entra in `PWSH7_ONLY`.
+Contro-esempi eseguiti: riga R270 pulita -> PASS; R270 + `}` in piu' -> `X [PARSER]`; R270 + `Get-ChildItem | Sort-Object
+-Property Name -Stable` in CODA AL CODICE -> `X [PWSH7]`; la stessa parola `-Stable` dentro la PROSA della riga (una
+stringa che spiega perche' non c'e') -> nessun rilievo; riga D vera -> **FAIL** per classe 903 (giusto: non va riusata
+com'e'). Regressione vecchio/nuovo sulle 46 righe in `righe/` e su 32 script: solo la riga D cambia esito.
+Lezione: **"il controllo esiste" non vuol dire "il controllo gira su questo oggetto"**. Quando si aggiunge una classe alla
+lista nera, si costruisce SUBITO il contro-esempio che la fa scattare: se non scatta, la lista e' un'illusione (qui lo
+era da quando esiste `controlla_pwsh7` per le righe).
