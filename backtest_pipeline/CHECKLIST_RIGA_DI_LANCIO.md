@@ -36084,3 +36084,32 @@ dell'autotest che lo sostituisce non dipende dal maiuscolo. Corretto: `k1_pav_tx
 M coppie`), regex delle tre forme del K1, nota "[G0 XAUUSD NON VERIFICABILE in questa raccolta C2 ...]" sul S8, parametro rinominato
 `raccolta_c2`, controllo C/C2 dell'autotest insensibile al maiuscolo (mutazione del difetto eseguita: ora FAIL). Autotest 64/64;
 diff 0 sulle 7 fixture C contro `24ec1df1`.
+
+### CLASSE 892 — una correzione a un sorgente EA su `lavoro` che l'autore dichiara "non tocca le righe gia' consegnate, scaricano il commit pinnato", mentre il driver di quelle righe compila l'EA dal RAMO `lavoro` e confronta lo SHA256 col pin: la riga A in attesa esce "MOTORE DIVERSO DAL PIN" su tutti i 24 job R258 (28/09/2026, cancello di giudizio su `a66dcb07`, parente della 166)
+Caso: `a66dcb07` (classe 883 alla radice) cambia lo scrittore OptFrame di 10 EA, fra cui `ABTG_Londra_ORB.mq5`. Il messaggio
+di commit dice *"le righe gia' consegnate scaricano il commit pinnato"*. Falso per costruzione: `RIGA_ROUND_VPS.ps1` scarica dal
+`$PIN` il DRIVER, ma `walkforward_generico.ps1` (anche al pin `02c70e17`, r.264-317) ha `$EABranch="lavoro"` e scarica
+`mql5/Experts/<EA>.mq5` dal RAMO; la riga A stessa lo stampa (*"CLASSE 166: il driver compila l EA e gli include dal RAMO lavoro,
+NON dal pin"*) e controlla `shaEa166['ABTG_Londra_ORB']='AB8912AF...'`. Misurato: SHA256 di Londra_ORB a `02c70e17` e `51bb44f5`
+= `ab8912af...`, a `a66dcb07` = `4d6610d6...`. Ogni job R258 (24 dei 36 della riga A, zip non ancora arrivato) compilato dopo il
+push (28/09 00:21 UTC) esce `MOTORE DIVERSO DAL PIN` -> *"Quei file NON si leggono: si rifa il pin sul ramo e si rilancia"*.
+Regola: (1) prima di cambiare un `.mq5` su `lavoro` si elencano per nome le righe CONSEGNATE E NON ANCORA LETTE che usano quell'EA
+(`grep` del nome in `backtest_pipeline/righe/` + la loro tabella `shaEa166`), e per ognuna si stabilisce DA DOVE il driver prende
+il sorgente leggendo il driver AL SUO PIN, non il messaggio di commit; (2) se una riga in attesa pinna lo SHA256 di quell'EA, la
+modifica aspetta lo zip (o si rifa' il pin della riga passando dal cancello). Corretto nel commit del cancello: `ABTG_Londra_ORB.mq5`
+riportato byte per byte a `51bb44f5` (SHA256 `ab8912af...` = pin della riga A); gli altri 9 restano (nessuna riga in attesa li
+pinna: B/C/C2/D/R255 usano MaxMinNotte, Nasdaq_Apertura_US, EMA200, Dow_Apertura_US). Londra_ORB si ripara DOPO lo zip A.
+
+### CLASSE 893 — l'INSIEME su cui si lavora dedotto da un grep MAI provato su un contro-esempio: "10 EA con la virgola" erano 2, "alla radice" su 10 scrittori quando quelli grezzi sono 96, e il grep dei lettori "che spezzano a mano" cerca solo `split(',')` fra apici singoli (28/09/2026, sessione principale + cancello di giudizio su `a66dcb07`, sorella della 180)
+Caso: la sessione principale ha scelto i 10 EA da correggere con un grep che li diceva "con la virgola in un input"; misurato: gli
+input stringa con virgola nel DEFAULT sono in 2 soli (`ABTG_DAX_M3` r.89 `"EUR,USD"`, `ABTG_Londra_ORB` r.84 `"GBP,USD"`), e i
+pin con virgola in `prove/` e `.set` sono solo di quei due. Gli altri 8 hanno `InpNewsCurrencies="USD"/"EUR"`: correzione
+PREVENTIVA, non "con la virgola". E il rovescio: lo scrittore grezzo `row += "," + kv[1]` resta in **86** EA (`grep -l`), **51** dei
+quali hanno lo stesso `InpNewsCurrencies` e `ABTG_FiboH4_Multi` ha `InpSymbols` "separati da ; o ,": il commit si chiama "alla
+radice" ma copre 10 su 96 scrittori. Terzo caso, stesso difetto: il grep dei lettori manuali proposto per il cancello
+(`split(','\|Split(','\|-split ','`) non vede `.Split(",")`, `-split ","`, `riga.split(",")` (contro-esempio: 20+ righe in
+`backtest_pipeline/` che quel grep salta, es. `RIGA_SPREADLOGGER_RACCOLTA.ps1:556`, `RIGA_CHAOSABL.ps1:370`,
+`anatomia_aperture.py:747`). Regola: l'insieme di un intervento si ELENCA per nome e si dichiara il criterio; il grep che lo produce
+si prova su un caso che DEVE uscire e uno che NON deve (entrambi nominati); e una correzione "alla radice" dichiara il numero dei
+siti coperti contro il numero dei siti che hanno lo stesso difetto. Non corretto qui (86 EA sono un lavoro a se', nessun pin con
+virgola oggi li tocca): dichiarato nel verdetto del cancello.
