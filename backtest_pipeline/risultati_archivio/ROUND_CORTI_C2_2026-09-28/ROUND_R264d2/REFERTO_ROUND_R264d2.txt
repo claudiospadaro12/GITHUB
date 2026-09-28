@@ -1,0 +1,46 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : dbf4ccd6ea9bcf02fc0a9cd88589f5496371fc94
+data            : 2026-09-28 22:11:38   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_EMA200
+file prova      : R264d2_o2_060_EMA200_XAUUSD.txt   (2787 byte, dal pin)
+etichetta       : R264d2
+simbolo         : XAUUSD
+periodo         : H4
+da quando       : 2017.01.01
+modello         : 1  (NON tick reali: screening, non verdetto)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_EMA200\ABTG_EMA200_XAUUSD_IS_ohlc_R264d2.csv
+  righe : 3
+    Pass 0    Profit -12283.28    PF 0.83137    Equity DD % 14.2886    Trades 668
+    Pass 1    Profit -11748.3     PF 0.8359     Equity DD % 13.3236    Trades 777
+    Pass 2    Profit -12764.22    PF 0.81811    Equity DD % 13.8435    Trades 867
+  ESITO : LETTO -- 3 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_EMA200\ABTG_EMA200_XAUUSD_OOS_ohlc_R264d2.csv
+  righe : 3
+    Pass 0    Profit 9901.13      PF 1.446      Equity DD % 5.871      Trades 282
+    Pass 1    Profit 11134.34     PF 1.53473    Equity DD % 6.0202     Trades 311
+    Pass 2    Profit 10793.62     PF 1.54721    Equity DD % 6.3053     Trades 364
+  ESITO : LETTO -- 3 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 1
+  - round girato a Modello 1 (non tick reali): screening, non verdetto
+
+ESITO: ROUND GIRATO CON RILIEVI (1)
