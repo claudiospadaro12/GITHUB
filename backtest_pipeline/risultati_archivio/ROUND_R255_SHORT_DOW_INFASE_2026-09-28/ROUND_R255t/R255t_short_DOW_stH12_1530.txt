@@ -1,0 +1,119 @@
+#  EA: ABTG_Dow_Apertura_US
+# =====================================================================
+#  R255t -- IL LATO SHORT DELL'APERTURA DOW -- SHORT
+#  U30USD M5, TICK REALI, deposito 10000 (banco), rischio 1% (banco)
+#  CONFIGURAZIONE "stH12": REGIME: nudo + Supertrend H12 (10 / 2,5)
+#  OROLOGIO 15:30 / flat 18:30 BCM = cash NY in ORA SOLARE USA.
+#  @ORARIO_INVERNALE R255: armo 15:30 BCM = 9:30 EST, cash NY in ora solare USA (BCM
+#  indici UTC+1 fisso); di questa corsa entrano nella curva IN FASE SOLO le righe
+#  d'INVERNO USA, quelle d'estate (10:30 EDT, un'ora DOPO la cash) si scrivono e basta.
+#  Magic 793120 / 793170 (asse gemello a passo 50: G1 e un per-trade per
+#  gemella). Per-trade atteso in Common\Files:
+#    abtg_trades_ABTG_Dow_Apertura_US_U30USD_793120.csv e _793170.csv
+#
+#  TUTTO IL RAGIONAMENTO, I PIN, L'OROLOGIO, LE ATTESE E I CANCELLI
+#  STANNO NEL FILE DI TESTA: prove/R255a_short_DOW_ancora_1430.txt.
+#  Qui solo le differenze. Rispetto alla BASE (prove/R254c_trailfix_
+#  770202_PIN.txt, input per input) cambiano SOLO:
+#    InpSessionHour = 15 (BASE 14)
+#    InpCloseHour = 18 (BASE 17)
+#    InpAllowLong = false
+#    InpAllowShort = true
+#    InpUseEmaFilter = false
+#    InpUseSupertrend = true
+#    InpStTF = 16396
+#    InpMagic = 793120||793120||50||793170||Y
+#  (generato da prove/R255_GENERA.py: diff dei pin eseguito nel
+#   generatore, non a mano; --verifica lo rifa' contro il disco)
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ, MAI SUL VPS.
+#  Banco: -Deposito 10000, -Modello 4, niente -Spread / -Ritardo /
+#  -FrazioneIS, MaxBars=100000000 (testa, riquadro iniziale). Nessuna
+#  riga di lancio qui. Non tocca preset, EA, sedie, conti, taglie.
+# =====================================================================
+@SIMBOLO    U30USD
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=15||15||0||15||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=18||18||0||18||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=400.0||400.0||0||400.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=true||true||0||true||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16396||16396||0||16396||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=false||false||0||false||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMagic=793120||793120||50||793170||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
