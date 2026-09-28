@@ -36218,28 +36218,41 @@ Regola: ogni procedura a piu' test sullo stesso stato persistente dichiara lo **
 F3 con pausa 0, blocco diverso dalla chiave del giorno, `FAILED` assente) e il modo di ripristinarlo; e per ogni test si
 chiede "quale test precedente lascia qualcosa che ha la PRECEDENZA sulla variabile che misuro?".
 
-### CLASSE 903 — il CANCELLO INLINE della riga usa il DEPOSITO come saldo dell'archivio invece del saldo VERO compensato: G0 ROSSO su un round buono, la testa lo aveva gia' previsto (28/09/2026, zip ROUND_CORTI_D)
+### CLASSE 903 — il CANCELLO INLINE della riga usa `Sort-Object -Stable` (solo pwsh 7) sotto `ErrorActionPreference='Continue'`: sulla 5.1 gli elenchi ordinati escono VUOTI in silenzio e G0 esce ROSSO su un round buono (28/09/2026, zip ROUND_CORTI_D; causa corretta dal cancello strato 2)
 Caso: `backtest_pipeline/righe/RIGA_ROUND_CORTI_D_R268_R269.txt`, pin `9b838084`, job R268b. Il RIEPILOGO della corsa
 scrive **G0-LOTTO KO** (56 posizioni su 92 fuori banda) e **G0 ROSSO -> "il banco e' cambiato, R268 NON SI LEGGE"**,
 con esempio: "posizione archivio 1361 (V 0.44, saldo 100000.00) contro nuova 4 (V 0.41, saldo 100000.00): banda
-[0.43 ; 0.46]". Il **saldo dell'archivio mostrato e' 100000.00: SBAGLIATO.** Verificato a mano sul CSV vero
-(`archivio_CORTI_B_pertrade_795301.csv`): la posizione pid 1361 chiude il 2024.07.10 17:30:00 con **saldo VERO
-compensato (dal 100000 di R260a al 2020.01.01, tutta la storia fino a quel punto) = 107.945,46**, non 100000. Il
-file di testa (`prove/R268b_oro_long_OHLC_stessa_finestra_G0.txt` r.33-36) lo dichiara PRIMA del round: *"I LOTTI
-sono ~7% piu' piccoli di R260a (saldo di partenza 100000 contro 107.794,67 di R260a a quella data)"*. Rifacendo
-G0-LOTTO con la formula della testa e il saldo VERO (ratio B'/B = 100000/107.945,46 = 0,9264): banda attesa
-[0,39 ; 0,42], **il valore osservato 0,41 CADE DENTRO**. Il lettore gia' passato dal cancello
-(`backtest_pipeline/leggi_round_corti_d.py`, funzione `lotto_chk`, chiamata SENZA `da_arc`: usa tutto l'archivio
-dal suo deposito originale, cioe' il saldo VERO) rilegge **G0-LOTTO: fuori banda 0/92 -> VERDE**, e il round si
-legge per intero (r, K1, R268c, R268d). Il cancello INLINE della riga (PowerShell, dentro `& { ... }`) invece
-confronta i lotti contro un saldo FLAT = solo il `-Deposito` passato alla riga, **senza accumulare la storia
-dell'archivio da prima della finestra ristretta**: per ogni posizione dove il saldo vero dell'archivio si e'
-allontanato da 100000 (cioe' quasi tutte, su una corsa di 4,5 anni), il cancello inline grida ROSSO su un round
-che invece legge benissimo.
-Regola: **quando due implementazioni dello STESSO cancello esistono (una inline nella riga per un giudizio a
-caldo, una nel lettore Python per il giudizio vero), la riga NON e' autorevole**: il PASS/FAIL che conta e' quello
-del lettore passato dal cancello, rifatto sui file veri, mai la console della corsa. E una testa che dichiara GIA'
-un numero prima del round (qui: "107.794,67", "~7% piu' piccoli") e' la prima cosa da controllare quando un G0
-esce ROSSO: se il numero c'era gia' scritto, il ROSSO e' quasi sempre nello strumento, non nel round.
-Da fare (non urgente: non blocca la lettura, il lettore e' gia' corretto): riparare il cancello inline di
-`RIGA_ROUND_CORTI_D_R268_R269.txt` prima del prossimo lancio, cosi' la console non mente piu' su questo round.
+[0.43 ; 0.46]". Il saldo dell'archivio mostrato e' 100000.00: SBAGLIATO. Dal CSV vero
+(`archivio_CORTI_B_pertrade_795301.csv`) il saldo di R260a prima della posizione 1361 (primo deal 2024.07.10
+14:55:40) e' **107.794,67 col k 1,8113** (107.945,46 senza k): lo stesso numero della testa
+`prove/R268b_oro_long_OHLC_stessa_finestra_G0.txt` r.33-36, scritto PRIMA del round. Con B'/B = 0,9277 la banda e'
+[0,39 ; 0,42] e 0,41 ci sta dentro; sull'intero tratto 0/92 fuori banda (ricalcolo indipendente del cancello, e
+verificate anche le posizioni archivio 1475, 1588, 1653, 1900, 1908, 1922 con saldo archivio fino a 114.159,77).
+**La causa NON e' "il deposito al posto del saldo"** (prima stesura di questa classe, smentita leggendo il codice):
+`$lottoChk` e `$ddChiuso` accumulano la storia correttamente, ma ordinano con `Sort-Object -Property
+@{Expression={$_.ct}} -Stable`. `-Stable` esiste solo da PowerShell 7 (par. 81: il PC di backtest ha la 5.1), e la
+riga passa a `$ErrorActionPreference='Continue'` prima di quei blocchi: il comando fallisce senza fermare nulla,
+`$ordA`/`$ordB` escono vuoti, e **tutti e due i saldi** restano al deposito. Riprodotto estraendo il codice dalla
+riga e girandolo sui file veri: con `-Stable` valido 0/92; con il parametro inesistente sotto `Continue` 56/92 e
+prima riga identica al carattere alla console. Lo stesso guasto azzera "r a saldo chiuso (deal a: 0, b: 0)" e il
+"DD saldo chiuso 0.0000 %" del per-trade 797203 nel RIEPILOGO.
+Regola: (1) **`-Stable` e' un costrutto pwsh-7 come `&&` e `??`**, e oggi `controlla_riga.py` NON lo prende (lista
+`controlla_pwsh7`): va aggiunto al cancello deterministico. (2) Un ordinamento che deve essere stabile sulla 5.1 si
+fa con una **seconda chiave d'indice** (`Sort-Object ct, i`), non con `-Stable`. (3) Quando due implementazioni
+dello stesso cancello esistono (inline nella riga, lettore Python), decide il lettore passato dal cancello; e se la
+testa aveva gia' scritto il numero prima del round, il ROSSO va cercato prima nello strumento.
+Da fare (non urgente: non blocca la lettura, il lettore e' gia' corretto): togliere `-Stable` dalla riga CORTI D
+prima del prossimo lancio, e cercarlo nelle altre righe `righe/*.txt` e `*.ps1`.
+
+### CLASSE 904 — la diagnosi di un bug scritta dall'EFFETTO, senza leggere il codice che lo produce ne' riprodurlo: la riparazione prescritta avrebbe toccato codice sano (28/09/2026, stesso caso della 903)
+Caso: la prima stesura della classe 903 e dell'erratum di `report/LETTURA_ROUND_CORTI_D_2026-09-28.md` diceva che
+il cancello inline "confronta contro un saldo FLAT, senza accumulare la storia dell'archivio" e prescriveva di
+ripararlo cosi'. Il codice di `$lottoChk` **accumula gia'** (ciclo `foreach($qa in $ordA)` con `$bA=$bA + net -
+k x vol`): la diagnosi era dedotta dal sintomo ("saldo 100000.00"), non letta. Il guasto vero era a monte
+(`-Stable`, classe 903), e colpiva anche il saldo del round nuovo e i DD a saldo chiuso, che la diagnosi scritta
+non vedeva. Nella stessa stesura il saldo "vero" era scritto senza k (107.945,46) accanto a quello della testa col
+k (107.794,67), presentati come lo stesso numero.
+Regola: **un bug si dichiara con la riga di codice che lo produce e con una riproduzione che ridia l'output
+sbagliato al carattere** (qui: 56/92 e la stessa prima riga). Se la riproduzione non ridà l'output, la diagnosi e'
+un'ipotesi e si scrive come tale. E quando si confronta un numero con quello di una testa, si usa la STESSA
+definizione (qui: col k).
