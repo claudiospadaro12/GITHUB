@@ -34,7 +34,9 @@ della riga e della testa (875), ancora S0 per simbolo (884), DERIVATO che non bo
 InpNewsCurrencies come prima, esenzione 883 SOLO con campi in eccesso (n_ricucite) E P0 del lettore VERDE.
 Formato NUOVO (scrittore OptFrame di a66dcb07, "GBP,USD" fra virgolette, interne raddoppiate): valori interi
 senza virgolette residue, NESSUNA ricucitura, NESSUNA esenzione: il P0 della riga vale. Cancello 28/09: esenzione 883
-PER GAMBA (classe 894) e ricucitura solo se il valore cucito e una lista di valute (altrimenti NON ricucibile). Autotest 22/22.
+PER GAMBA (classe 894) e ricucitura solo se il valore cucito e una lista di valute (altrimenti NON ricucibile). Cancello 28/09 sera (classe 909):
+la CHIUSURA di R258 (par. 7) si VALUTA per nome, un S1 rosso di R250 si DIAGNOSTICA (uscite fuori, giorno, chiusure USA
+[INFERITO]) senza toccare il NULLO, e i guasti "Tester cannot be initialized" di LOG_TESTER si legano al job. Autotest 25/25.
 
 Uso:
   python3 backtest_pipeline/leggi_round_corti_a.py <cartella_raccolta_estratta> [--out referto.md] [--senza-bande]
@@ -169,6 +171,14 @@ R258_ORE = {('GBPUSD', 'T'): {7: 'R258b', 8: 'R258a', 9: 'R258c'}, ('EURUSD', 'T
             ('GBPUSD', 'L'): {7: 'R258o', 8: 'R258p', 9: 'R258q'}, ('EURUSD', 'L'): {7: 'R258r', 8: 'R258s', 9: 'R258t'}}
 R258_S2_LO, R258_S2_HI = '08:00:00', '17:00:59'      # C-COMM = R258a (ora 8): uscite dentro 08:00-17:00
 CL844_K = (1.0, 3.0)                                # classe 844: meta' commissione sull'ingresso, EUR/lotto
+# classe 909 (28/09/2026): chiusure e sedute ridotte del mercato USA nelle finestre di R250 (calendario NYSE/CME,
+# [INFERITO]: NON misurato sul feed BCM). Servono SOLO alla DIAGNOSI di un S1 rosso (un'uscita fuori finestra alla
+# prima quotazione dopo una chiusura), MAI al verdetto: il NULLO del par. 5.4 resta alla lettera.
+CHIUSURE_USA = {dt.date(2025, 1, 9): 'NYSE chiusa (lutto nazionale Carter)',
+                dt.date(2025, 4, 18): 'Venerdi Santo', dt.date(2025, 7, 3): 'vigilia del 4 luglio, seduta ridotta',
+                dt.date(2025, 11, 28): 'giorno dopo il Ringraziamento, seduta ridotta',
+                dt.date(2025, 12, 24): 'vigilia di Natale, seduta ridotta', dt.date(2026, 4, 3): 'Venerdi Santo'}
+GIORNI_IT = ('lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica')
 
 # R259: frontiera del costo dal referto NIGHTLY par. 4.3 (NON e' nella raccolta: si dichiara)
 R259_COSTO = {
@@ -676,6 +686,33 @@ def r250_leggi(rac, senza_bande=False, RP=None):
     for x in forma:
         L.append('- DIVERGENZA DI FORMA (classe 875): ' + x)
     L.append('Fonti: `ROUND_<tag>/%s_%s_IS|OOS_<tag>.csv` [MISURATO], `PERTRADE/abtg_trades_%s_%s_<magic>.csv` [MISURATO], pin dal file prova. S1 sulle celle spostate confronta anche l identita col d0 della stessa finestra (per-trade identico = ROSSO). S2 informativo: opposti > 0 -> ogni zona si scrive "orologio + candela".' % (ea, sym, ea, sym))
+    # classe 909 (28/09/2026): un S1 ROSSO si DIAGNOSTICA per nome prima di attribuirlo al pin. Il NULLO resta (par. 5.4
+    # alla lettera); qui si scrive QUALI uscite stanno fuori, in che giorno della settimana, e se cadono alla prima quotazione
+    # dopo una chiusura del mercato USA (CHIUSURE_USA, [INFERITO]). Una manopola che morde (quota in banda, tutte le altre
+    # uscite dentro) con 1-2 uscite fuori su giorni di chiusura NON e' "pin non arrivato".
+    for t, d in dati.items():
+        j = d['job']
+        pt = d.get('pt1')
+        if E['s1'].get(t) != 'ROSSO' or not pt or j['clk'] not in r250.S1:
+            continue
+        c = r250.S1[j['clk']]
+        fuori = [r for r in pt if not (c['min_uscita'] <= r['t'] < c['max_uscita'])]
+        if not fuori or len(fuori) == len(pt):
+            continue
+        dentro = [r['t'] for r in pt if r not in fuori]
+        pt2 = d.get('pt2') or []
+        fuori2 = [(r['ct'], r['net']) for r in pt2 if not (c['min_uscita'] <= r['t'] < c['max_uscita'])]
+        gem = ('la gemella G1 (magic %s) le ripete identiche' % j['g2']) if fuori2 == [(r['ct'], r['net']) for r in fuori] else \
+              ('la gemella G1 (magic %s) DIVERGE: %d uscite fuori' % (j['g2'], len(fuori2)))
+        desc = []
+        for r in fuori:
+            vic = sorted(k for k in CHIUSURE_USA if dt.timedelta(0) <= r['d'] - k <= dt.timedelta(days=3))
+            causa = ('prima quotazione dopo %s %s (%s) [INFERITO dal calendario NYSE/CME, non dal feed]' % (
+                GIORNI_IT[vic[-1].weekday()], vic[-1].isoformat(), CHIUSURE_USA[vic[-1]])) if vic else 'causa NON DIAGNOSTICATA'
+            desc.append('%s %s %s posizione %s net %.2f: %s' % (GIORNI_IT[r['d'].weekday()], r['d'].isoformat(), r['t'], r['pid'], r['net'], causa))
+        L.append('- DIAGNOSI S1 %s (magic %s; NON vota, il NULLO del par. 5.4 resta): %d uscite su %d fuori %s-%s, le altre %d dentro (min %s max %s). Fuori: %s. %s' % (
+            t, j['g1'], len(fuori), len(pt), c['min_uscita'], c['max_uscita'], len(dentro), min(dentro), max(dentro), ' | '.join(desc),
+            'Tutte le uscite fuori cadono dopo una chiusura del mercato: la causa e il CALENDARIO (chiusura a fine seduta rimandata alla riapertura), NON un pin non arrivato; %s.' % gem if all('INFERITO' in x for x in desc) else 'Almeno un uscita fuori senza chiusura di mercato vicina: il pin resta il sospetto; %s.' % gem))
     L.append('')
     # --- 5.3 G2
     L.append('### R250 -- G2 coerenza fra finestre (par. 5.3) e classe 844 (k = (somma net - Profit) / somma volumi, atteso 0 su U30USD)')
@@ -1444,6 +1481,35 @@ def r258_leggi(rac, RP=None):
                 symb, h, 100.0 * (a0['Trades'] or 0) / d['job']['fis'], 100.0 * (o0['Trades'] or 0) / d['job']['foos'], Fq, ('%.1f%%' % (100.0 * totq / tot0)) if (totq is not None and tot0) else 'n/d', es_k1, fs))
     L.append('- NON misurato da R258 (par. 9, dichiarato): la curva IN FASE riga per riga (D1: solo per gambe, H2, su UN anno); orari d uscita, peggior giornata e serie perdente (R2/R3 [NON MISURABILI], D1); il filtro notizie e la verifica S/R del PDF; la gestione dell uscita (R216a); i due lati separati; requote/rifiuti/spread storico; il giorno esatto del cambio d orologio (26 feriali IS ambigui); l orologio BCM prima del 2018; la frequenza di FAMIGLIA.')
     L.append('- Cosa chiude il candidato (par. 7): se su GBPUSD E EURUSD le righe F=0 delle tre ore hanno PF OOS < 1,00 con Trades OOS >= 150 e K1 FRAGILE o ESCLUSO -> in REGISTRO_TEST con PF, n, DD e cancello; il certificato resta NON ANCORA MISURATO finche manca il p.3 (R216a). Nessuna proposta di taglia.')
+    # classe 909 (28/09/2026): la condizione di chiusura si VALUTA, non si ristampa; le sei righe per NOME (classe 180).
+    # K1 "NON RISOLTA -> X" vale la banda PEGGIORE X (testa par. 7); un file nullo o assente = NON VALUTABILE, mai "vera".
+    elenco, stato_ch = [], 'SODDISFATTA'
+    for symb in ('GBPUSD', 'EURUSD'):
+        for h, tag in sorted(R258_ORE[(symb, 'T')].items()):
+            d = dati[tag]
+            o0 = riga_asse(d['roos'], 'InpMinRangePips', 0) if (d.get('e0') and not d['mot']) else None
+            if o0 is None:
+                stato_ch = 'NON VALUTABILE'
+                elenco.append('%s %s ora %d: NON VALUTABILE (file nullo o assente)' % (tag, symb, h))
+                continue
+            kx = str(E['k1'].get((tag, 0.0), 'NON CALCOLABILE'))
+            banda = kx.split('->')[-1]
+            pf, n = o0.get('Profit Factor'), int(o0.get('Trades') or 0)
+            ok = pf is not None and pf < 1.0 and n >= 150 and ('ESCLUSA' in banda or 'FRAGILE' in banda)
+            if not ok and stato_ch == 'SODDISFATTA':
+                stato_ch = 'NON SODDISFATTA'
+            elenco.append('%s %s ora %d: PF OOS %s su n %d, DD_fisso%% OOS %s, Equity DD %% OOS %s, K1 %s -> %s' % (
+                tag, symb, h, f2(pf, 4), n, f2(dd_fisso(o0)), f2(o0.get('Equity DD %')), kx, 'si' if ok else 'NO'))
+    E['chiusura'] = stato_ch
+    if stato_ch == 'SODDISFATTA':
+        esito_ch = 'va in REGISTRO_TEST.md (a mano) con PF, n, DD e cancello; verdetto **NON ANCORA MISURATO** (manca il p.3 del certificato: gestione dell uscita ad asse, R216a) -- NON "morto"'
+    elif stato_ch == 'NON VALUTABILE':
+        esito_ch = 'la chiusura NON si scrive: prima si rileggono le righe mancanti'
+    else:
+        esito_ch = 'il candidato NON si chiude da questo round'
+    L.append('- **CONDIZIONE DI CHIUSURA (par. 7) valutata sulle sei righe b=3 F=0 del blocco T, per nome: %s** -> %s. [MISURATO dai CSV _OOS; K1 DERIVATO]' % (stato_ch, esito_ch))
+    for x in elenco:
+        L.append('  - ' + x)
     L.append('')
     return L, E
 
@@ -1581,6 +1647,45 @@ def riepilogo(RP):
     return L
 
 
+def _leggi_log(path):
+    with open(path, 'rb') as fh:
+        raw = fh.read()
+    if raw[:2] == b'\xff\xfe':
+        return raw[2:].decode('utf-16-le', errors='replace')
+    return raw.decode('utf-8', errors='replace')
+
+
+def guasti_tester(rac):
+    """classe 909 (28/09/2026): una gamba con CSV ASSENTE si attribuisce per nome. Nel log del Tester la riga
+    'Tester cannot be initialized' (OnTesterInit oltre il tempo) si lega al job lanciato per ultimo prima di lei
+    (riga 'launched with <ini>' del giornale del terminale, stessa ora locale del PC). Ritorna [(ora, messaggio, ini, tag)]."""
+    d = os.path.join(rac, 'LOG_TESTER')
+    if not os.path.isdir(d):
+        return None
+    lanci, guasti = [], []
+    for fn in sorted(os.listdir(d)):
+        if not fn.lower().endswith('.log'):
+            continue
+        for ln in _leggi_log(os.path.join(d, fn)).splitlines():
+            f = ln.split('\t')
+            if len(f) < 5:
+                continue
+            m = re.search(r'launched with (\S+\.ini)', f[4])
+            if f[3] == 'Terminal' and m:
+                lanci.append((f[2], m.group(1)))
+            elif f[3] == 'Tester' and 'cannot be initialized' in f[4]:
+                guasti.append((f[2], f[4].strip()))
+    tags = {j['t'] for j in JOBS}
+    out = []
+    for ora, msg in guasti:
+        prima = [x for x in lanci if x[0] <= ora]
+        ini = max(prima)[1] if prima else None
+        m = re.search(r'_(IS|OOS)(?:_ohlc)?_(R\d+[a-z]?(?:_[A-Z0-9]+)?)\.ini$', ini or '')
+        tag = m.group(2) if (m and m.group(2) in tags) else None
+        out.append((ora, msg, ini, tag, m.group(1) if m else None))
+    return out
+
+
 def referto(rac, senza_bande=False):
     rac, nota = trova_raccolta(rac)
     RP = leggi_riepilogo(rac)
@@ -1589,6 +1694,15 @@ def referto(rac, senza_bande=False):
          'Cartelle ROUND_<tag> trovate: %d su %d.%s' % (conta_cartelle(rac), len(JOBS), (' ' + nota) if nota else ''), '',
          '## 0. Il RIEPILOGO della riga (cosa e uscito, non il verdetto) e i NULLI della riga UNITI a quelli del lettore (classe 873)', '']
     L += riepilogo(RP)
+    gt = guasti_tester(rac)
+    if gt is None:
+        L.append('- [NON VERIFICABILE] `LOG_TESTER/` assente: i CSV ASSENTI non si attribuiscono (tester o raccolta).')
+    elif not gt:
+        L.append('- [MISURATO, LOG_TESTER] righe "Tester cannot be initialized": nessuna.')
+    for ora, msg, ini, tag, gamba in (gt or []):
+        L.append('- [MISURATO, LOG_TESTER] guasto del TESTER alle %s (ora locale del PC): "%s" -> ultimo job lanciato prima: `%s`%s' % (
+            ora, msg, os.path.basename((ini or '?').replace('\\', '/')),
+            (' = gamba %s di %s: quella gamba NON e girata (CSV ASSENTE per guasto del tester, NON della raccolta; rimedio: rilanciare la sola gamba) (classe 909)' % (gamba, tag)) if tag else ' (job non di questa riga: informativo)'))
     L.append('')
     l1, e1 = r250_leggi(rac, senza_bande, RP)
     l2, e2 = r258_leggi(rac, RP)
@@ -1609,7 +1723,7 @@ def referto(rac, senza_bande=False):
     L += l1 + l2 + l3
     L += ['## DIVERGENZE fra la riga e il lettore (per nome)', ''] + (div or ['- nessuna' if RP['presente'] else '- NON VERIFICABILE (RIEPILOGO assente)']) + ['']
     L += ['## NON LEGGIBILE DALLO SCRIPT (da fare a mano nel referto)', '',
-          '- R250: il 40x in pre-mercato (par. 11) e il range delle 8:30 NY; ogni conseguenza per FTMO (par. 7.2, [INFERITA]); la lettura dei LOG_TESTER; la classe 166 (SHA256 del motore) la verifica SOLO la riga: qui si UNISCONO i suoi NULLI.',
+          '- R250: il 40x in pre-mercato (par. 11) e il range delle 8:30 NY; ogni conseguenza per FTMO (par. 7.2, [INFERITA]); la lettura dei LOG_TESTER oltre ai guasti \"Tester cannot be initialized\" (sezione 0); la classe 166 (SHA256 del motore) la verifica SOLO la riga: qui si UNISCONO i suoi NULLI.',
           '- R258: C-COMM se il report .htm non ha la tabella dei deal con Time/Direction/Commission; lo spread STORICO 2024-26 del tester; l orologio prima del 2018; la frequenza di famiglia; D3/D4 (difetti da campo) e la firma di Claudio prima di ogni passo.',
           '- R259: l ATR(14,H1) alle 05:00 (log degli agenti, non raccolti) e quindi la frontiera del costo per simbolo (S4 e presa dal referto, non dai dati); lo spread h05 di AUDUSD e XAGUSD; i per-trade (l EA non li scrive): separare le notti col box spostato dall orologio; il muro tick per AUDUSD/USDJPY/metalli.',
           '- Tutto: la decisione (firme di Claudio: taglie, sedie, conto reale) e la data del cambio d ora; il REGISTRO_TEST si aggiorna a mano con PF, n, DD e cancello.']
@@ -2196,7 +2310,88 @@ def autotest(base):
     assert allinea_riga(h22, 'abtg_news.csv,30,GBP,USD,R258A, LDN,795807') == (None, 0)
     assert allinea_riga(h22, 'abtg_news.csv,30,GBP,USD,R258A LDN,795807') == (['abtg_news.csv', '30', 'GBP,USD', 'R258A LDN', '795807'], 1)
     assert allinea_riga(h22, 'abtg_news.csv,30,GBP,USD,EUR,R258A LDN,795807') == (['abtg_news.csv', '30', 'GBP,USD,EUR', 'R258A LDN', '795807'], 1)
-    print('AUTOTEST: 22/22 PASS (fixture e referti in %s)' % base)
+    # T23 (classe 909): la condizione di chiusura di R258 (testa par. 7) si VALUTA. Pulito: R258a/R258d a PF OOS 1,05/1,02
+    #     -> NON SODDISFATTA. Portate a 0,97 -> SODDISFATTA e il testo dice NON ANCORA MISURATO, mai "morto". Contro-esempi:
+    #     PF esattamente 1,00 (la soglia e stretta) -> NON SODDISFATTA; un _OOS assente -> NON VALUTABILE, mai "vera".
+    assert P['r258']['chiusura'] == 'NON SODDISFATTA', P['r258']['chiusura']
+    r23 = os.path.join(base, 'ROUND_CORTI_A_chiusura')
+    shutil.rmtree(r23, ignore_errors=True)
+    shutil.copytree(os.path.join(base, 'ROUND_CORTI_A_pulito'), r23)
+
+    def pf_f0(tag, sym, pf):
+        # la riga F=0 di a/d ha tre copie legate dalla catena (T1: g/h tutte le righe; X1: w/x la riga StartMin=0):
+        # si cambiano INSIEME, altrimenti T1/X1 annullano giustamente tutto il round (e il test misurerebbe la catena)
+        cop = {'R258a': [('R258a', 'InpMinRangePips'), ('R258g', None), ('R258w', 'InpRangeStartMin')],
+               'R258d': [('R258d', 'InpMinRangePips'), ('R258h', None), ('R258x', 'InpRangeStartMin')]}.get(tag, [(tag, 'InpMinRangePips')])
+        for tg, col in cop:
+            pth = os.path.join(r23, 'ROUND_%s' % tg, 'ABTG_Londra_ORB_%s_OOS_%s.csv' % (sym, tg))
+            rr = open(pth, encoding='ascii', newline='').read().split('\r\n')
+            h = rr[0].split(',')
+            for i in range(1, len(rr)):
+                v = rr[i].split(',')
+                if len(v) > 3 and (col is None or v[-1 if h[-1] == col else h.index(col)] in ('0', '0.0', '0.00')):
+                    v[h.index('Profit Factor')] = '%.5f' % pf
+                    rr[i] = ','.join(v)
+            open(pth, 'w', encoding='ascii', newline='').write('\r\n'.join(rr))
+    pf_f0('R258a', 'GBPUSD', 0.97)
+    pf_f0('R258d', 'EURUSD', 0.97)
+    t23, E23 = referto(r23, senza_bande=True)
+    assert E23['r258']['chiusura'] == 'SODDISFATTA' and 'NON ANCORA MISURATO** (manca il p.3' in t23 and '-- NON "morto"' in t23, E23['r258']['chiusura']
+    pf_f0('R258c', 'GBPUSD', 1.0)
+    assert referto(r23, senza_bande=True)[1]['r258']['chiusura'] == 'NON SODDISFATTA', 'T23: PF 1,00 contato come < 1,00'
+    os.remove(os.path.join(r23, 'ROUND_R258f', 'ABTG_Londra_ORB_EURUSD_OOS_R258f.csv'))
+    pf_f0('R258c', 'GBPUSD', 0.97)
+    assert referto(r23, senza_bande=True)[1]['r258']['chiusura'] == 'NON VALUTABILE', 'T23: file assente contato come chiusura'
+    # T24 (classe 909): DIAGNOSI di un S1 rosso di R250 per nome. (a) uscita spostata a domenica 2026-04-05 23:05 su
+    #     765304 e sulla gemella 765354 -> S1 ROSSO e file NON VALIDO (il NULLO resta), diagnosi CALENDARIO + gemella identica;
+    #     (b) contro-esempio: uscita alle 23:05 di mercoledi 2025-10-15 (nessuna chiusura) -> "il pin resta il sospetto";
+    #     (c) spostata solo su 765304 -> la gemella DIVERGE.
+    r24 = os.path.join(base, 'ROUND_CORTI_A_s1diag')
+
+    def sposta(mg, vecchio, nuovo):
+        pth = os.path.join(r24, 'PERTRADE', 'abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_%s.csv' % mg)
+        tx = open(pth, encoding='ascii', newline='').read()
+        assert tx.count(vecchio) == 1, (mg, vecchio)
+        open(pth, 'w', encoding='ascii', newline='').write(tx.replace(vecchio, nuovo))
+    for caso in ('a', 'b', 'c'):
+        shutil.rmtree(r24, ignore_errors=True)
+        shutil.copytree(os.path.join(base, 'ROUND_CORTI_A_pulito'), r24)
+        v0, v1 = ('2026.04.07 14:15:01', '2026.04.05 23:05:02') if caso != 'b' else ('2025.10.15 14:11:52', '2025.10.15 23:05:02')
+        for mg in (('765304', '765354') if caso != 'c' else ('765304',)):
+            sposta(mg, v0 + ';U30USD;' + mg, v1 + ';U30USD;' + mg)
+        t24, E24 = referto(r24, senza_bande=True)
+        assert E24['r250']['s1']['R250d'] == 'ROSSO' and E24['r250']['stato']['R250d'] == 'NON VALIDO', (caso, E24['r250']['s1'])
+        dg = [x for x in t24.splitlines() if x.startswith('- DIAGNOSI S1 R250d')]
+        assert len(dg) == 1 and '1 uscite su' in dg[0], (caso, dg)
+        if caso == 'a':
+            assert 'domenica 2026-04-05 23:05:02' in dg[0] and 'Venerdi Santo' in dg[0] and 'la causa e il CALENDARIO' in dg[0] and 'le ripete identiche' in dg[0], dg[0]
+        elif caso == 'b':
+            assert 'causa NON DIAGNOSTICATA' in dg[0] and 'il pin resta il sospetto' in dg[0] and 'CALENDARIO' not in dg[0], dg[0]
+        else:
+            assert 'DIVERGE' in dg[0], dg[0]
+    # T25 (classe 909): LOG_TESTER in UTF-16 col BOM, formato a TAB vero (codice, livello, ora, sorgente, messaggio).
+    #     "Tester cannot be initialized" si lega al job lanciato per ULTIMO prima di lei -> gamba OOS di R258k; contro-esempi:
+    #     un guasto prima di ogni lancio e uno dopo il lancio di un job di ALTRA riga (R268b) -> informativi, senza tag.
+    r25 = os.path.join(base, 'ROUND_CORTI_A_logtester')
+    shutil.rmtree(r25, ignore_errors=True)
+    shutil.copytree(os.path.join(base, 'ROUND_CORTI_A_pulito'), r25)
+    os.makedirs(os.path.join(r25, 'LOG_TESTER'), exist_ok=True)
+    term = ['PI\t0\t07:31:56.317\tTerminal\tlaunched with C:\\U\\abtg_round\\gen_ABTG_MaxMinNotte_XAUUSD_IS_ohlc_R268b.ini',
+            'PI\t0\t09:00:36.238\tTerminal\tlaunched with C:\\U\\abtg_round\\gen_ABTG_Londra_ORB_GBPUSD_OOS_R258k.ini',
+            'FN\t0\t09:03:12.719\tTerminal\tlaunched with C:\\U\\abtg_round\\gen_ABTG_Londra_ORB_EURUSD_IS_R258d.ini']
+    test = ['XX\t3\t06:00:00.000\tTester\tOnTesterInit works too long. Tester cannot be initialized.',
+            'YY\t3\t07:40:00.000\tTester\tOnTesterInit works too long. Tester cannot be initialized.',
+            'OF\t3\t09:01:34.235\tTester\tOnTesterInit works too long...',
+            'FM\t3\t09:02:51.787\tTester\tOnTesterInit works too long. Tester cannot be initialized.']
+    for nome, rr in (('0000_term_logs_20260928.log', term), ('0002_Tester_logs_20260928.log', test)):
+        with open(os.path.join(r25, 'LOG_TESTER', nome), 'wb') as fh:
+            fh.write(b'\xff\xfe' + '\r\n'.join(rr).encode('utf-16-le'))
+    gt = guasti_tester(r25)
+    assert [(g[0], g[3], g[4]) for g in gt] == [('06:00:00.000', None, None), ('07:40:00.000', None, 'IS'), ('09:02:51.787', 'R258k', 'OOS')], gt
+    t25 = referto(r25, senza_bande=True)[0]
+    assert t25.count('job non di questa riga: informativo') == 2 and 'gamba OOS di R258k: quella gamba NON e girata' in t25, 'T25'
+    assert '[NON VERIFICABILE] `LOG_TESTER/` assente' in open(os.path.join(base, 'REFERTO_pulito.md'), encoding='utf-8').read(), 'T25 pulito senza LOG_TESTER'
+    print('AUTOTEST: 25/25 PASS (fixture e referti in %s)' % base)
     return True
 
 

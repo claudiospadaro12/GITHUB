@@ -49,6 +49,8 @@ Cartelle ROUND_<tag> trovate: 36 su 36.
   - R258p: P0 PIN DAL CSV _IS DIVERSO (24 valori: InpMagic=[R258P LDN GBPUSD H8] atteso 795848 InpVerbose=[0] atteso 1 InpMaxSpread=[795848] atteso 0 InpMagic=[R258P LDN GBPUSD H8] atteso 795848 InpVerbose=[0] atteso 1 InpMaxSpread=[795848] atteso 0); P0 PIN DAL CSV _OOS DIVERSO (24 valori: InpMagic=[R258P LDN GBPUSD H8] atteso 795848 InpVerbose=[0] atteso 1 InpMaxSpread=[795848] atteso 0 InpMagic=[R258P LDN GBPUSD H8] atteso 795848 InpVerbose=[0] atteso 1 InpMaxSpread=[795848] atteso 0)
   - R258q: P0 PIN DAL CSV _IS DIVERSO (24 valori: InpMagic=[R258Q LDN GBPUSD H9] atteso 795849 InpVerbose=[0] atteso 1 InpMaxSpread=[795849] atteso 0 InpMagic=[R258Q LDN GBPUSD H9] atteso 795849 InpVerbose=[0] atteso 1 InpMaxSpread=[795849] atteso 0); P0 PIN DAL CSV _OOS DIVERSO (24 valori: InpMagic=[R258Q LDN GBPUSD H9] atteso 795849 InpVerbose=[0] atteso 1 InpMaxSpread=[795849] atteso 0 InpMagic=[R258Q LDN GBPUSD H9] atteso 795849 InpVerbose=[0] atteso 1 InpMaxSpread=[795849] atteso 0)
   - R259_XAGUSD: S1 KO: cella di misura (0) con 0 operazioni in IS -> NON e senza edge: storico M1 mancante o motore che non riempie, si guarda la prima data M1 (prerequisito) PRIMA del PF
+- [MISURATO, LOG_TESTER] guasto del TESTER alle 09:02:51.787 (ora locale del PC): "OnTesterInit works too long. Tester cannot be initialized." -> ultimo job lanciato prima: `gen_ABTG_Londra_ORB_GBPUSD_OOS_R258k.ini` = gamba OOS di R258k: quella gamba NON e girata (CSV ASSENTE per guasto del tester, NON della raccolta; rimedio: rilanciare la sola gamba) (classe 909)
+- [MISURATO, LOG_TESTER] guasto del TESTER alle 09:51:38.939 (ora locale del PC): "OnTesterInit works too long. Tester cannot be initialized." -> ultimo job lanciato prima: `gen_ABTG_Londra_ORB_EURUSD_IS_ohlc_R258s.ini` = gamba IS di R258s: quella gamba NON e girata (CSV ASSENTE per guasto del tester, NON della raccolta; rimedio: rilanciare la sola gamba) (classe 909)
 
 ## R250 -- OROLOGIO O STAGIONE per il candidato #1 (testa `prove/R250a_orologio_R245_d0_A_U30USD.txt`)
 
@@ -69,6 +71,8 @@ Criteri: par. 5.0 PIN dal CSV, 5.1 G1, 5.2 G0 (solo d0), 5.3 G2, 5.4 S1, 5.5 S2,
 | R250f | p1h / B | 2 righe | 2 righe | VERDE (32 confronti, pin da raccolta, SHA256 = pin) | PASS | PASS | ROSSO min 15:47:49 max 23:05:00, quota dalle 17:31:00 = 0.102 | n/a (non d0) | 138 / 0 | **NON VALIDO (NULLO DELLA RIGA: S1 KO: 2 uscite fuori 15:45:00-18:30:59 (pin dell orario non arrivato? testa par. 5.4))** |
 
 Fonti: `ROUND_<tag>/ABTG_Nasdaq_Apertura_US_U30USD_IS|OOS_<tag>.csv` [MISURATO], `PERTRADE/abtg_trades_ABTG_Nasdaq_Apertura_US_U30USD_<magic>.csv` [MISURATO], pin dal file prova. S1 sulle celle spostate confronta anche l identita col d0 della stessa finestra (per-trade identico = ROSSO). S2 informativo: opposti > 0 -> ogni zona si scrive "orologio + candela".
+- DIAGNOSI S1 R250d (magic 765304; NON vota, il NULLO del par. 5.4 resta): 1 uscite su 227 fuori 13:45:00-16:31:00, le altre 226 dentro (min 13:48:16 max 15:59:56). Fuori: domenica 2026-04-05 23:05:02 posizione 361 net 49.69: prima quotazione dopo venerdi 2026-04-03 (Venerdi Santo) [INFERITO dal calendario NYSE/CME, non dal feed]. Tutte le uscite fuori cadono dopo una chiusura del mercato: la causa e il CALENDARIO (chiusura a fine seduta rimandata alla riapertura), NON un pin non arrivato; la gemella G1 (magic 765354) le ripete identiche.
+- DIAGNOSI S1 R250f (magic 765306; NON vota, il NULLO del par. 5.4 resta): 1 uscite su 176 fuori 15:45:00-18:31:00, le altre 175 dentro (min 15:47:49 max 18:30:00). Fuori: giovedi 2025-07-03 23:05:00 posizione 6 net -121.92: prima quotazione dopo giovedi 2025-07-03 (vigilia del 4 luglio, seduta ridotta) [INFERITO dal calendario NYSE/CME, non dal feed]. Tutte le uscite fuori cadono dopo una chiusura del mercato: la causa e il CALENDARIO (chiusura a fine seduta rimandata alla riapertura), NON un pin non arrivato; la gemella G1 (magic 765356) le ripete identiche.
 
 ### R250 -- G2 coerenza fra finestre (par. 5.3) e classe 844 (k = (somma net - Profit) / somma volumi, atteso 0 su U30USD)
 
@@ -361,6 +365,13 @@ Fonti: `ROUND_<tag>/ABTG_Londra_ORB_<simbolo>_IS|OOS[_ohlc]_<tag>.csv` [MISURATO
 - EURUSD ora 9 [DERIVATO]: (A) innesco b=3 F=0 = 93% dei feriali IS / 94% OOS (atteso 75-97%); (B) quota di giornate operate con W >= 50 pip (~ soglia 40x all-in) = 2.3% (atteso < 10% all ora 7, < 20% all ora 8); (C) riga F=0: K1 NON RISOLTA -> ESCLUSA PER COSTO (scavalca il 13,3x) con F* 10 (atteso FRAGILE o ESCLUSA); (D) W(ora 8) > W(ora 7) si legge su F* qui sopra
 - NON misurato da R258 (par. 9, dichiarato): la curva IN FASE riga per riga (D1: solo per gambe, H2, su UN anno); orari d uscita, peggior giornata e serie perdente (R2/R3 [NON MISURABILI], D1); il filtro notizie e la verifica S/R del PDF; la gestione dell uscita (R216a); i due lati separati; requote/rifiuti/spread storico; il giorno esatto del cambio d orologio (26 feriali IS ambigui); l orologio BCM prima del 2018; la frequenza di FAMIGLIA.
 - Cosa chiude il candidato (par. 7): se su GBPUSD E EURUSD le righe F=0 delle tre ore hanno PF OOS < 1,00 con Trades OOS >= 150 e K1 FRAGILE o ESCLUSO -> in REGISTRO_TEST con PF, n, DD e cancello; il certificato resta NON ANCORA MISURATO finche manca il p.3 (R216a). Nessuna proposta di taglia.
+- **CONDIZIONE DI CHIUSURA (par. 7) valutata sulle sei righe b=3 F=0 del blocco T, per nome: SODDISFATTA** -> va in REGISTRO_TEST.md (a mano) con PF, n, DD e cancello; verdetto **NON ANCORA MISURATO** (manca il p.3 del certificato: gestione dell uscita ad asse, R216a) -- NON "morto". [MISURATO dai CSV _OOS; K1 DERIVATO]
+  - R258b GBPUSD ora 7: PF OOS 0.7358 su n 306, DD_fisso% OOS 54.93, Equity DD % OOS 49.88, K1 ESCLUSA PER COSTO -> si
+  - R258a GBPUSD ora 8: PF OOS 0.9748 su n 296, DD_fisso% OOS 38.21, Equity DD % OOS 32.08, K1 NON RISOLTA -> ESCLUSA PER COSTO (scavalca il 13,3x) -> si
+  - R258c GBPUSD ora 9: PF OOS 0.8197 su n 294, DD_fisso% OOS 32.26, Equity DD % OOS 31.39, K1 FRAGILE -> si
+  - R258e EURUSD ora 7: PF OOS 0.8653 su n 306, DD_fisso% OOS 36.95, Equity DD % OOS 33.16, K1 ESCLUSA PER COSTO -> si
+  - R258d EURUSD ora 8: PF OOS 0.9059 su n 296, DD_fisso% OOS 30.02, Equity DD % OOS 26.99, K1 NON RISOLTA -> ESCLUSA PER COSTO (scavalca il 13,3x) -> si
+  - R258f EURUSD ora 9: PF OOS 0.7025 su n 293, DD_fisso% OOS 53.02, Equity DD % OOS 52.16, K1 NON RISOLTA -> ESCLUSA PER COSTO (scavalca il 13,3x) -> si
 
 ## R259 -- NIGHTLY sui sei simboli mai misurati (teste `prove/R259_nightly_*_PIN.txt` par. 5-6; `report/NIGHTLY_SEI_SIMBOLI_2026-09-26.md` par. 4)
 
@@ -412,7 +423,7 @@ Le tre ipotesi, dichiarate prima (referto par. 4.2) [STIMA]:
 
 ## NON LEGGIBILE DALLO SCRIPT (da fare a mano nel referto)
 
-- R250: il 40x in pre-mercato (par. 11) e il range delle 8:30 NY; ogni conseguenza per FTMO (par. 7.2, [INFERITA]); la lettura dei LOG_TESTER; la classe 166 (SHA256 del motore) la verifica SOLO la riga: qui si UNISCONO i suoi NULLI.
+- R250: il 40x in pre-mercato (par. 11) e il range delle 8:30 NY; ogni conseguenza per FTMO (par. 7.2, [INFERITA]); la lettura dei LOG_TESTER oltre ai guasti "Tester cannot be initialized" (sezione 0); la classe 166 (SHA256 del motore) la verifica SOLO la riga: qui si UNISCONO i suoi NULLI.
 - R258: C-COMM se il report .htm non ha la tabella dei deal con Time/Direction/Commission; lo spread STORICO 2024-26 del tester; l orologio prima del 2018; la frequenza di famiglia; D3/D4 (difetti da campo) e la firma di Claudio prima di ogni passo.
 - R259: l ATR(14,H1) alle 05:00 (log degli agenti, non raccolti) e quindi la frontiera del costo per simbolo (S4 e presa dal referto, non dai dati); lo spread h05 di AUDUSD e XAGUSD; i per-trade (l EA non li scrive): separare le notti col box spostato dall orologio; il muro tick per AUDUSD/USDJPY/metalli.
 - Tutto: la decisione (firme di Claudio: taglie, sedie, conto reale) e la data del cambio d ora; il REGISTRO_TEST si aggiorna a mano con PF, n, DD e cancello.

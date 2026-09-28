@@ -36300,3 +36300,26 @@ quindi la forma vera va ricostruita, non copiata dal referto.
 Regola: (a) mai elenchi `a,b` come argomento di `-File`: o si lascia il default nello script, o lo script spezza da solo
 (`$x = @($x | ForEach-Object { $_ -split ',' })`) e valida il formato di ogni elemento; (b) ogni regex che legge un
 giornale MT5 si prova su una riga col formato a TAB (codice, livello, ora, sorgente, messaggio) prima della consegna.
+
+### CLASSE 909 — il lettore RISTAMPA la regola invece di VALUTARLA, e lascia al NULLO la causa IPOTIZZATA dalla riga: tre buchi nello stesso referto (28/09/2026, controllo preventivo su `report/LETTURA_ROUND_CORTI_A_2026-09-28.md`, lettore `leggi_round_corti_a.py`)
+Caso, tre facce della stessa lacuna ("il lettore dice cosa guardare, non cosa ha visto"):
+(a) **R258, la chiusura del candidato**: il referto stampava *"Cosa chiude il candidato (par. 7): se su GBPUSD E EURUSD le
+righe F=0 ... -> in REGISTRO_TEST"* e basta. La condizione era **vera** (sei righe per nome: PF OOS 0,7358/0,9748/0,8197 e
+0,8653/0,9059/0,7025 su n 293-306, K1 ESCLUSA/FRAGILE) ma nessuna riga lo diceva: chi archiviava doveva ricalcolarla a
+mano, e il passo fra "la regola" e "morto" restava senza testimone.
+(b) **R250d/R250f NULLI per S1** con il motivo della riga *"2 uscite fuori ... (pin dell orario non arrivato?)"*. Letto il
+per-trade: **una** uscita per magic (due con la gemella G1, identiche), su 227 e 176; tutte le altre dentro la finestra e la
+quota che morde in banda (0,740 / 0,102). Le due fuori sono `domenica 2026-04-05 23:05:02` (dopo il Venerdi Santo 03/04) e
+`giovedi 2025-07-03 23:05:00` (vigilia del 4 luglio, seduta ridotta): la chiusura di fine seduta e' scattata alla prima
+quotazione dopo la riapertura. Il NULLO resta (par. 5.4 alla lettera), ma la causa era il **calendario**, non il pin.
+(c) **R258k e R258s NULLI per E0** ("_OOS ASSENTE", "_IS ASSENTE") senza causa. Nel `LOG_TESTER` c'era, due volte e solo
+li': `OnTesterInit works too long. Tester cannot be initialized.` (09:02:51 dopo il lancio di `..._OOS_R258k.ini`,
+09:51:38 dopo `..._IS_ohlc_R258s.ini`): guasto del TESTER, non della raccolta, e il rimedio e' rilanciare la sola gamba.
+Regola: (1) una condizione di chiusura/archiviazione congelata nella testa si **valuta** nel lettore, sulle righe elencate
+per nome, con esito SODDISFATTA / NON SODDISFATTA / NON VALUTABILE (un file nullo non e' mai "vero"), e il testo porta il
+verdetto del certificato (NON ANCORA MISURATO se manca un punto), non "morto"; (2) un cancello di catena rosso si
+**diagnostica per nome** (quali righe, che giorno, che ora) prima di scriverne la causa, e la causa ipotizzata dalla riga
+("pin non arrivato?") non si ricopia se i dati la contraddicono -- la diagnosi non tocca il NULLO; (3) un CSV ASSENTE si
+attribuisce leggendo il `LOG_TESTER` (guasto del tester vs raccolta) prima di consegnare. Contro-esempi nell'autotest
+T23-T25 (PF esattamente 1,00; file assente; uscita alle 23:05 di un mercoledi qualunque; gemella divergente; guasto prima di
+ogni lancio o dopo un job di un'altra riga).
