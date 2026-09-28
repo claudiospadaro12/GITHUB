@@ -61,8 +61,10 @@ def controlla_allegati(files):
         e = os.path.splitext(p)[1].lower()
         if e in NERA_EXT or any(n.lower() in os.path.basename(p).lower() for n in NERA_NOME):
             problemi.append(p + ": in lista NERA (preset, script di lancio, estratti, chiavi non escono)")
-        if e != ".md":
-            problemi.append(p + ": si mandano solo .md (le fonti sono il repo, non gli zip)")
+        if e not in (".md", ".mq5", ".mqh"):
+            problemi.append(p + ": si mandano solo .md e sorgenti .mq5/.mqh (le fonti sono il repo, non gli zip)")
+        if e in (".mq5", ".mqh") and not p.startswith("mql5/"):
+            problemi.append(p + ": un sorgente esce solo dalla cartella mql5/ del repo")
         ok, perche = in_repo_e_pulito(p)
         if not ok:
             problemi.append(p + ": " + perche)
@@ -75,7 +77,7 @@ def costruisci_richiesta(files, domanda):
         files = [MEMORIA] + list(files)  # la memoria va SEMPRE in testa: l'API non ricorda nulla fra uno scambio e l'altro
     parti = [{"text": "DOCUMENTI DEL GIORNO (dal repo, uno per blocco). Rispondi come Agente 3 e Agente 4.\n"}]
     for p in files:
-        parti.append({"text": "\n\n===== FILE: %s (SHA256 %s) =====\n%s" % (p, sha(p)[:16], open(p, encoding="utf-8").read())})
+        parti.append({"text": "\n\n===== FILE: %s (SHA256 %s) =====\n%s" % (p, sha(p)[:16], open(p, encoding="utf-8", errors="replace").read())})
     if domanda:
         parti.append({"text": "\n\nDOMANDA DEL GIORNO: " + domanda})
     return {
