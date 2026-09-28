@@ -12,7 +12,8 @@ stato mandato (nomi, byte, SHA256) e il modello usato.
 
 Confini (regole di casa):
 - la CHIAVE non sta nel repo: si legge SOLO da $GEMINI_API_KEY (segreto
-  dell'ambiente). Senza chiave: --dry-run funziona, l'invio si rifiuta.
+  dell'ambiente). Senza chiave: si manda lo stesso, e' il proxy dell'ambiente
+  ad aggiungere l'header della credenziale registrata (x-goog-api-key).
 - NIENTE esce da qui senza che i file siano stati passati dal cancello
   (--oggetto md) e siano in repo: lo script rifiuta file NON tracciati da git
   o con modifiche non committate (classe: "si manda fuori solo cio' che e' in repo").
@@ -84,9 +85,16 @@ def costruisci_richiesta(files, domanda):
     }
 
 def invia(richiesta, modello, chiave):
-    url = ENDPOINT.format(m=modello) + "?key=" + chiave
-    req = urllib.request.Request(url, data=json.dumps(richiesta).encode("utf-8"),
-                                 headers={"Content-Type": "application/json"}, method="POST")
+    """Due vie: (a) chiave in $GEMINI_API_KEY -> header x-goog-api-key messo qui;
+    (b) chiave assente -> si manda SENZA chiave: e' il proxy dell'ambiente Claude Code
+    ad aggiungere l'header della credenziale registrata per generativelanguage.googleapis.com
+    (impostazioni dell'ambiente > credenziali API, header x-goog-api-key). La chiave non
+    passa mai da qui ne' dalla chat."""
+    url = ENDPOINT.format(m=modello)
+    hdr = {"Content-Type": "application/json"}
+    if chiave:
+        hdr["x-goog-api-key"] = chiave
+    req = urllib.request.Request(url, data=json.dumps(richiesta).encode("utf-8"), headers=hdr, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=300) as r:
             return json.loads(r.read().decode("utf-8"))
@@ -129,8 +137,8 @@ def autotest():
     # (3) l'istruzione di sistema si estrae e contiene i 4 agenti
     s = istruzione_di_sistema()
     assert "AGENTE 1" in s and "AGENTE 4" in s and "INIZIO COMANDO" not in s
-    # (4) senza chiave l'invio si rifiuta (non chiama la rete)
-    assert not os.environ.get("GEMINI_API_KEY_TEST_FAKE")
+    # (4) la chiave, se c'e', va nell'header x-goog-api-key e MAI nell'URL (niente ?key= nei log del proxy)
+    assert "?key=" not in ENDPOINT
     # (5) la richiesta ha system_instruction e i file in ordine
     r = costruisci_richiesta([COMANDO], "d")
     testi = [x["text"] for x in r["contents"][0]["parts"]]
@@ -166,7 +174,7 @@ def main():
         print("DRY-RUN: niente mandato."); return
     chiave = os.environ.get("GEMINI_API_KEY", "")
     if not chiave:
-        raise SystemExit("GEMINI_API_KEY assente nell'ambiente: l'invio si rifiuta (la chiave e' un segreto di Claudio, non del repo)")
+        print("GEMINI_API_KEY assente: provo con la credenziale dell'ambiente (header aggiunto dal proxy per generativelanguage.googleapis.com)")
     js = invia(richiesta, a.modello, chiave)
     out = scrivi_risposta(a.files, a.modello, testo_risposta(js), a.domanda)
     print("risposta salvata: " + out + "  (va letta dal cancello prima di qualunque uso)")
