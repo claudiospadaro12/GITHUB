@@ -1,0 +1,45 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : e6b89c2baf1a80141561bdb9fea4604971b0de99
+data            : 2026-09-28 22:31:19   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_DAX_Apertura_EU
+file prova      : R270d_trailmode_770105_SHORT_D30EUR.txt   (9681 byte, dal pin)
+etichetta       : R270d
+simbolo         : D30EUR
+periodo         : M5
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_IS_R270d.csv
+  righe : 3
+    Pass 0    Profit -10655.64    PF 0.75735    Equity DD % 12.4532    Trades 163
+    Pass 1    Profit -995.51      PF 0.96513    Equity DD % 7.4732     Trades 138
+    Pass 2    Profit -4230.61     PF 0.64976    Equity DD % 7.1549     Trades 108
+  ESITO : LETTO -- 3 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_OOS_R270d.csv
+  righe : 3
+    Pass 0    Profit 2601.39      PF 1.0395     Equity DD % 11.413     Trades 317
+    Pass 1    Profit -1865.37     PF 0.95734    Equity DD % 12.3052    Trades 257
+    Pass 2    Profit -4921.87     PF 0.73428    Equity DD % 8.8316     Trades 199
+  ESITO : LETTO -- 3 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO

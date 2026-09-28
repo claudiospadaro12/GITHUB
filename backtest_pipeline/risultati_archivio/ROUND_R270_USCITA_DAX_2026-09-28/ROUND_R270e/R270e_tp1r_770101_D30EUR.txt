@@ -1,0 +1,233 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU          (sedia 770101 LONG, IN CAMPO su FTMO)
+#  R270e -- asse InpTP1_R (il PRIMO BERSAGLIO, dove si chiude il 50% e
+#  si porta lo stop a pari) sul LATO LONG, SULLA CELLA DI CONTRATTO.
+#  D30EUR M5 -- TICK REALI -- deposito 100000 -- rischio 1,00 (di banco,
+#  NON 2,00: NESSUNA TAGLIA SI PROPONE).
+#  Scritto il 28/09/2026. Criteri congelati PRIMA dei numeri.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400, NON su nessun conto (regola 21/09).
+# =====================================================================
+#
+#  PERCHE' QUESTO FILE E NON R208b (misurato alla fonte il 28/09)
+#  ------------------------------------------------------------------
+#  R208b_bersaglio_770101_D30EUR.txt mette ad asse InpTP1_R ma su una
+#  geometria che NON e' quella in campo: InpTP1_ClosePct=0 (nessuna
+#  chiusura parziale: TP1_R diventa il TP INTERO), InpUsaGuardian=true,
+#  e 81 input pinnati (EA vecchio, senza i 9 InpSpace*). La cella di
+#  contratto (R246e = R47a = preset FTMO rimappato) ha InpTP1_ClosePct=50,
+#  InpBreakevenAtTP1=true, InpUsaGuardian=false, 90 input. Quindi R208b
+#  risponde a "quanto vale un TP intero a X R", NON a "il primo bersaglio
+#  a 1R con meta' posizione e stop a pari lascia soldi sul tavolo?".
+#  La seconda e' la domanda di oggi (i tre vinti minuscoli del 24-28/09
+#  su FTMO chiudono a 3-5 punti: la meta' che resta dopo TP1 viene
+#  falciata dal trailing sulla candela precedente, armato da subito).
+#  >>> R208b resta valido per la SUA domanda; NON entra in questo round.
+#
+#  IL DISEGNO -- una sola variabile
+#  ------------------------------------------------------------------
+#  Cella VIVA = R246e input per input (identica a R270c, cambia SOLO
+#  l'asse). Asse: InpTP1_R = 0,5 / 1,0 (controllo, vivo) / 1,5 / 2,0.
+#  InpTP1_ClosePct=50, InpBreakevenAtTP1=true, InpTrailStartR=0,
+#  InpTrailMode=1 restano PINNATI ai valori vivi. 4 celle x 2 finestre
+#  = 8 passate.
+#  NOTA DI MECCANICA (sorgente r.1951/2081): il TP dell'ordine e' messo a
+#  dist*TpTotalR(), quindi InpTP1_R sposta ANCHE il TP intero della meta'
+#  che resta, non solo il punto della chiusura parziale. Va letto cosi'.
+#
+#  FINESTRA E DEPOSITO -- come R270b/c (finestra B di R246e/R47a:
+#  2024.09.26 -> 2026.06.30, IS 40%, deposito 100000, rischio 1,00).
+#
+#  G0 -- LA CELLA InpTP1_R=1,0 (il controllo)
+#  Deve ridare i numeri di R47a (stessa finestra B): IS n=132 PF 1,12634
+#  DD 5,4362 -- OOS n=193 PF 1,39709 DD 7,2328. Tolleranza: ZERO su
+#  Trades/posizioni, quarta cifra su PF e DD. [deal] nel CSV (colonna
+#  Trades, classe 226): 175 IS / 270 OOS -- e' QUESTO il numero da
+#  confrontare col CSV; 132/193 sono POSIZIONI, vedi S1B corretto.
+#  Se il G0 non torna, il round e' NULLO: si cerca la causa, non si
+#  legge l'asse.
+#
+#  S1B INVARIANTE DEL CAMPIONE: InpTP1_R e' letto SOLO nella gestione
+#  (TP dell'ordine e chiusura parziale), MAI nell'ingresso -> il numero
+#  di POSIZIONI aperte deve restare COSTANTE nelle 4 celle (132 IS / 193
+#  OOS). Il numero di DEAL puo' cambiare (la parziale e' un deal in piu'
+#  quando scatta). Se cambiano le posizioni, il round e' NULLO.
+#
+#  S1B CORRETTO DAL CANCELLO IL 28/09/2026, PRIMA DEI NUMERI
+#  (classi 455 e 226) -- SOSTITUISCE la regola di fermo del paragrafo
+#  S1/S1B qui sopra dove dice "il numero di posizioni per cella".
+#  ------------------------------------------------------------------
+#  Per COSTRUZIONE l'asse InpTP1_R e' letto solo in gestione: le
+#  POSIZIONI aperte sono le stesse in tutte le 4 celle. MA PER CELLA
+#  NON SI POSSONO CONTARE, e il paragrafo sopra lo dava per fatto:
+#   - il CSV porta `Trades` = DEAL DI USCITA, non posizioni (classe
+#     226; sulla cella di controllo R47a/R246e: 175 IS / 270 OOS
+#     [deal] contro 132 / 193 posizioni);
+#   - il per-trade abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786325.csv e'
+#     UNO SOLO per tutto il file: magic pinnato, ogni passata
+#     sovrascrive la precedente (classe 455, commento del sorgente in
+#     ExportTrades). Ne sopravvive UNA passata, l'ultima scritta.
+#  QUINDI, e vale al posto della regola di fermo sopra:
+#   (a) le posizioni (position_id distinti) si contano SOLO sulla
+#       passata che il per-trade ha conservato, identificata con la
+#       somma dei net_profit contro il Profit del CSV (classi 630/855,
+#       k = 0 atteso su D30EUR) e con le date di chiusura (IS o OOS).
+#       Se QUELLA passata ha un numero di posizioni diverso dalle
+#       altre gia' note sulla stessa gamba, il file e' NULLO;
+#   (b) `Trades` [deal] NON e' un invariante di questo asse: quante
+#       volte la parziale di TP1 scatta dipende dall'uscita. Un Trades
+#       che cambia fra le celle NON annulla il file: si scrive [deal]
+#       accanto al PF, mai come n;
+#   (c) sulle celle non identificate n [posizioni] e' "per
+#       costruzione, NON MISURATO": si scrive cosi', non si copia il
+#       numero della cella identificata.
+#
+#  G1 GEMELLE -- NON ESEGUITO (un solo asse per file): determinismo gia'
+#  stabilito da R246e (794611/794661 identici al centesimo).
+#  CLASSE 844 -- k atteso 0,0000 su D30EUR (commissione 0,00 misurata).
+#
+#  CRITERI CONGELATI ORA (identici a R270c)
+#  M1 (merito): PF OOS cella >= PF OOS controllo (1,39709) + 0,10, con
+#     n OOS >= 150 (193 atteso: passa).
+#  M2 (MFE): [NON MISURABILE] dall'export per-trade in repo.
+#  R1 (rischio, classe 804): ogni cella con Equity DD% IS o OOS > 9,00%
+#     e' VIOLATA (fatto, a qualunque n). Sotto soglia: "R1 NON VIOLATO
+#     su n = X", mai "rischio passato". E DD della cella <= DD del
+#     controllo x 1,10 per essere candidabile.
+#  A1 (altopiano): si promuove una cella SOLO se batte M1 E le due
+#     vicine sull'asse non sono peggiori del controllo (centro
+#     dell'altopiano, mai il picco: 4 celle = altopiano di 3 al massimo).
+#  A5: se tutte le celle stanno entro il 10,5% relativo del controllo,
+#     "manopola inerte sul merito": si scrive e si chiude la casella.
+#  A10: nessuna promozione, nessuna taglia, nessuna sedia toccata: una
+#     cella che passasse va a Claudio come PROPOSTA con i numeri.
+#  Emendamento della finestra: IS 9,4 mesi, un regime solo (storico BCM
+#     dal 2024.09.26): il MERITO e' misurato su un regime, si dichiara.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#  ------------------------------------------------------------------
+#  Dalla distribuzione dei vincenti (stima_punti_realizzati.py: 361 deal
+#  vincenti, mediana 24,4 punti, P75 43,6; stop tipico ~55 punti = 1R)
+#  la meta' posizione a 1R e' presa da una MINORANZA dei vincenti (P75 <
+#  1R). Attesa: TP1_R=0,5 alza la percentuale di parziali prese ma
+#  taglia la coda; 1,5/2,0 la prendono di rado e la coda vive del solo
+#  trailing. Attesa NON direzionata sul PF: e' esattamente cio' che non
+#  sappiamo. Il contro-esempio che romperebbe la lettura: se le 4 celle
+#  hanno lo STESSO numero di deal, la parziale non sta scattando in
+#  nessuna cella e l'asse e' inerte per costruzione (S1b sui deal, non
+#  solo sulle posizioni) -> si controlla PRIMA di leggere il PF.
+#
+#  OROLOGIO (classe del 24/09/2026, report/OROLOGIO_BCM_2026-09-24.md):
+#  BCM sugli indici e' UTC+1 FISSO su tutta la finestra. InpSessionHour=8
+#  e' l'apertura cash nei mesi estivi; nei mesi d'INVERNO (2024.10.27 ->
+#  2025.03.30 e 2025.10.26 -> 2026.03.29) arma UN'ORA PRIMA della cash.
+#  La finestra MESCOLA le due tempistiche, come il contratto R47a/R246e
+#  che fa da riferimento: la lettura e' sulla stessa mescolanza, si
+#  dichiara e non si separa in questo file.
+#
+#  BUCHI DICHIARATI: prova di regime assente (un regime); MFE vera non
+#  misurabile; costo 40x invariato (l'asse non tocca lo stop).
+#  Tempo macchina: 8 passate tick reali D30EUR M5 ~ 4-6 min (30 s/passata
+#  di R246). Magic vergine 786325 (zero occorrenze repo-wide il 28/09).
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1||0.5||0.5||2||Y
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpTrailStartR=0
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpSpaceMode=0
+InpSpaceTF=16388
+InpSpaceMinR=0.0
+InpSpaceMaxR=0.0
+InpSpaceEma1=14
+InpSpaceEma2=50
+InpSpaceEma3=100
+InpSpaceEma4=200
+InpSpaceUseST=false
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=786325
+#
+# --- InpTrailMode PINNATO al valore vivo (1 = PREVBAR). NON e' l'asse:
+#     l'unico asse di questo file e' InpTP1_R, piu' sopra (4 celle x 2
+#     finestre = 8 passate). Commento corretto dal cancello il 28/09.
+InpTrailMode=1
+# ======================================================================

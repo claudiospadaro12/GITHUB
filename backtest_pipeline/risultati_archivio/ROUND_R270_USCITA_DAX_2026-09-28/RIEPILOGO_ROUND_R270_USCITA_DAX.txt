@@ -1,0 +1,25 @@
+RIEPILOGO ROUND R270 USCITA DAX -- gestione uscita ABTG_DAX_Apertura_EU, 770101 LONG (R270c, R270e) + 770105 SHORT (R270b, R270d), 4 file, deposito 100000, rischio 1,00 pinnato nel file
+data: 2026-09-28 22:27:26
+fine: 2026-09-28 22:32:25   durata minuti: 5   (dichiarato 15-25 di tester, tetto 40 minuti)
+durata per job (secondi, driver compreso): R270c 71 | R270e 77 | R270b 83 | R270d 65
+pc  : DESKTOP-H4D7CAJ   (VPS VMI3047753 e tutte le sue cartelle dati NON toccati)
+pin : e6b89c2baf1a80141561bdb9fea4604971b0de99
+job: tutti -Modello 4 (tick reali) -Deposito 100000, rischio 1,00 pinnato nel file. Ordine: R270c, R270e, R270b, R270d. Modello della riga: RIGA_ROUND_CORTI_D_R268_R269 (senza G0-LOTTO ne Sort-Object -Stable, classe 903).
+
+R270c  rc 0 (girato)   durata 71 s   motore = pin (SHA256, EA + include)   prova = pin (SHA256)    [_IS fresco 3 righe, Trades>0 su 3] [_OOS fresco 3 righe, Trades>0 su 3, asse InpTrailMode [0/1/2] ok] P0 pin dal CSV _OOS ok (261 confronti + asse) | per-trade 786323: 195 righe, chiusure 2025.06.11 -> 2026.06.25, somma 2430.08 (letto, informativo), L0 deal con deal_type diverso da 1: 0   file NON nullo
+R270e  rc 0 (girato)   durata 77 s   motore = pin (SHA256, EA + include)   prova = pin (SHA256)    [_IS fresco 4 righe, Trades>0 su 4] [_OOS fresco 4 righe, Trades>0 su 4, asse InpTP1_R [0.5/1/1.5/2] ok] P0 pin dal CSV _OOS ok (348 confronti + asse) | per-trade 786325: 220 righe, chiusure 2025.06.11 -> 2026.06.25, somma 19269.29 (letto, informativo), L0 deal con deal_type diverso da 1: 0   file NON nullo
+R270b  rc 0 (girato)   durata 83 s   motore = pin (SHA256, EA + include)   prova = pin (SHA256)    [_IS fresco 4 righe, Trades>0 su 4] [_OOS fresco 4 righe, Trades>0 su 4, asse InpTrailStartR [0/0.5/1/1.5] ok] P0 pin dal CSV _OOS ok (348 confronti + asse) | per-trade 786322: 285 righe, chiusure 2025.06.10 -> 2026.06.29, somma 6315.66 (letto, informativo), L0 deal con deal_type diverso da 0: 0   file NON nullo
+R270d  rc 0 (girato)   durata 65 s   motore = pin (SHA256, EA + include)   prova = pin (SHA256)    [_IS fresco 3 righe, Trades>0 su 3] [_OOS fresco 3 righe, Trades>0 su 3, asse InpTrailMode [0/1/2] ok] P0 pin dal CSV _OOS ok (261 confronti + asse) | per-trade 786324: 199 righe, chiusure 2025.06.10 -> 2026.06.29, somma -4921.87 (letto, informativo), L0 deal con deal_type diverso da 0: 0   file NON nullo
+
+rc 0 = ROUND GIRATO | 3 = GIRATO CON RILIEVI (letto il REFERTO_ROUND) | 2 = NON ATTESO qui (nessun moncone, nessuna tranche unica: leggere il REFERTO_ROUND e il log) | 1 = non e partito.
+ROUND LANCIATI: 4 su 4   PARTITI (rc diverso da 1): 4 su 4
+CLASSE 166/892 (EA e include dal RAMO lavoro, non dal pin; SHA256 dopo ogni job di ABTG_DAX_Apertura_EU.mq5 + ABTG_PausaGuardian.mqh, piu il file prova dal pin): MOTORE = PIN in tutti i 4 round partiti
+CARTELLE ATTESE: 4   TROVATE: 4   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_<magic>.csv, informativo classe 455, mai motivo di NULLO da solo): 4 su 4 trovati freschi
+LOG_TESTER: 13 file .log scritti DOPO l avvio.
+
+PRE-LETTURA DELLA RIGA (NON e il verdetto: nessun G0 contro un riferimento e calcolato qui, lo fa il lettore Python dopo, classe 903/2026-09-28):
+FILE NULLI (rc 1, motore o prova diversi dal pin, CSV _IS o _OOS non buono, asse o P0 diversi: escono da OGNI conteggio di merito): nessuno
+FILE NON NULLI, per nome: R270c, R270e, R270b, R270d
+
+DA QUI IN POI E LETTURA, NON RIGA: nessuna cella si promuove, nessuna taglia si propone. La lettura del merito, il confronto col vivo e il verdetto sono del lettore Python e di Claudio.
