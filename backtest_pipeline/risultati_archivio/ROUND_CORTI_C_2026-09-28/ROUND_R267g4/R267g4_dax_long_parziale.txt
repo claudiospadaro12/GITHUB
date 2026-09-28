@@ -1,0 +1,148 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R267g4 -- DAX LONG (770411 a lati invertiti, filtro S&P acceso):
+#            L'USCITA, casella (3) del certificato -- LA PARZIALE AL PRIMO TARGET
+#  EA: ABTG_MaxMinNotte (generico), D30EUR M15, TICK REALI
+#  La parte comune del round sta in prove/R267a_news_oro_770402.txt par. 0.
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest,
+#  SPENTO), NE' su nessun terminale di conto: 50503392, 50504263,
+#  10105439 (REALE), 541452707 (FTMO). Il terminale del PC e' loggato sul
+#  demo 50503392: prima si controlla che non abbia SEDIE attaccate
+#  (avvertenza di R246/R255). QUESTO FILE NON CONTIENE E NON AUTORIZZA
+#  NESSUNA RIGA DI LANCIO. Non tocca EA, preset, sedie, conti, taglie o
+#  forward, e non promuove niente: ogni esito e' materiale per Claudio.
+#  VINCOLI DI BANCO (nella riga): identici a R261a (-Deposito 100000,
+#    -Modello 4, @FRAZIONEIS 1.0: una tranche, rc 2 ATTESO).
+#  Scritto il 27/09/2026. Attese e soglie CONGELATE PRIMA DEI NUMERI.
+# =====================================================================
+#
+#  1. DOMANDA. Sul long DAX la gestione dell'uscita NON e' MAI stata
+#  messa ad asse (certificato del 09/09, casella (3); caccia P11b). Un
+#  asse per file: trailing (g2), breakeven (g3), parziale (g4).
+#
+#  2. BASE = prove/R261a_dax_long_correlazione.txt (PASS f0e6f66e), cella
+#  corr=1 (filtro S&P ACCESO: la "versione long" di 770411). Cambiano SOLO:
+#    InpUseCorrelation  asse 0/1 -> 1 fisso
+#    InpTP1Pct          50 (pin) -> ASSE 0 / 25 / 50 / 75
+#    InpComment MAXMINR267G4, InpMagic 796744 fisso
+#  LA CELLA DELLA BASE STA NELL'ASSE (cella 50): e' l'ANCORA IN-FILE e deve
+#  rifare R261a corr=1 AL CENTESIMO (Profit, PF, DD, Trades): il magic
+#  non entra nel trading. E' anche == la cella M15 di R261b (G2 di R261),
+#  e le celle-ancora di g2, g3, g4 sono IDENTICHE fra loro.
+#
+#  3. COSA FA IL CODICE (ABTG_MaxMinNotte.mq5, HEAD 7d0da9f9, ManagePos:
+#  primo target r.411, breakeven r.428, trailing r.459):
+#  con InpTP1Pct=0 l'intero blocco del primo target salta
+#  (condizione InpTP1Pct>0): NIENTE parziale, NIENTE breakeven, e
+#  quindi NIENTE seconda parziale (richiede gPart1). Restano SL, target
+#  EMA200, trailing, TP finale 4R, chiusura 17:30. Le celle 25/50/75
+#  cambiano solo la quota chiusa a 1R (il BE resta).
+#
+#  4. L'ATTESA, SCRITTA PRIMA.
+#  n: la cella base e' attesa 50-90 deal = ~35-63 posizioni (R261a par.
+#  6): MERITO SOSPESO PER COSTRUZIONE in ogni cella; sotto 50 posizioni
+#  "NON MISURATO -- campione". Si legge il RISCHIO.
+#  Trades: cella 0 PIU' BASSA (niente deal di parziale: deal ~
+#  posizioni); 25/50/75 uguali o quasi. Sul Dow EMA200 (R136c) la
+#  parziale 0 ha fatto IS 0,93 contro 1,20 e DD OOS 13,94% contro
+#  7,83%: altro motore, stesso verso atteso qui.
+#  Tre esiti, una PARTIZIONE, ogni cella contro la cella-ancora:
+#    LEVA      DD <= 0,85 x DD(ancora) E PF >= PF(ancora) - 0,05
+#    PEGGIORA  PF < PF(ancora) - 0,05
+#    NULLA     il resto
+#  Attesa onesta sul livello: TUTTE LE CELLE SOTTO PF 1 (0 celle su 33
+#  distinte >= 1,00 sul long DAX a tick; un'uscita non crea un edge che
+#  l'ingresso non ha). Se la cella-ancora esce >= 1,10 (HP di R261a), la
+#  lettura delle uscite diventa interessante: si scrive, non si promuove.
+#
+#  5. I CANCELLI (congelati prima; si citano come U<n> [R267g4]).
+#  U0 -SoloControllo: 4 celle. Altrimenti STOP.
+#  U1 G0 IN-FILE: cella-ancora == R261a corr=1 al centesimo (se R261a e'
+#     girato, e con T1/T2 di R261 VERDI). Se no -> NULLO.
+#  U2 LA MANOPOLA MORDE: Trades(0) < Trades(50), e Profit NON identico fra 25, 50
+#     e 75. Rovesciato o identico = NON ESEGUITA.
+#  U3 L0 dal per-trade (abtg_trades_ABTG_MaxMinNotte_D30EUR_796744.csv,
+#     UNO, IDENTIFICATO: R267a par. 0, classe 850): tutte le chiusure
+#     deal_type 1.
+#  U4 STESSI INGRESSI: le celle cambiano solo l'uscita, e con un ciclo al
+#     giorno e InpCloseAtEnd le giornate operate sono le stesse. Non c'e'
+#     un per-trade per cella: si controlla sulla cella identificata contro
+#     il per-trade di R261a (stesse date di prima chiusura), e SOLO se
+#     anche quello e' identificato come la cella corr=1 (R261a ha lo
+#     stesso difetto: classe 850, asse corr 0/1 a magic fisso). Se R261a
+#     ha scritto la corr=0, U4 NON SI FA (si scrive), il file non e'
+#     NULLO. Diverso = NON LEGGIBILE.
+#  U5 RISCHIO (a qualunque n): soglia T5 di R261a (DD a 1% > 4,0% /
+#     4,08% = fuori da S3 a 2,00%) [DERIVATO].
+#  U6 NESSUNA CELLA SI PROMUOVE. Se nessuna batte l'ancora oltre il
+#     rumore: "IL DEFAULT VA BENE" -- ed e' la casella (3) riempita.
+#
+#  6. FINESTRA: identica a R261a. 7. COSTO: 4 finestre piene x 0,28-0,70 min = ~1,1-2,8 MIN.
+#  8. BUCHI: l'uscita sulla cella corr=0 no (e' l'altra base); le altre
+#  manopole d'uscita (InpTP2_R, InpTrailAtrMult, InpUseEMA200Target) no;
+#  l'orologio sul long [NON MISURATO]; per-trade di UNA sola cella
+#  (classi 455/850). E UN EFFETTO DI LATO GIA' LETTO IN CASA (R151a):
+#  ManagePos r.407-408 ricalcola risk dallo stop CORRENTE e, se <= 0
+#  (stop in pari o sopra l'ingresso), lo sostituisce con ATR x 2,5:
+#  BE e trailing spostano quindi ANCHE il bersaglio della seconda
+#  parziale (TP2 = 3 x risk). La manopola non e' pura: si scrive.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=0||0||25||75||Y
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=1||1||0||1||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR267G4
+InpMagic=796744||796744||0||796744||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

@@ -1,0 +1,193 @@
+#  EA: ABTG_Dow_Apertura_US
+# =====================================================================
+#  R267c -- DOW SHORT (motore della 770202, lato SHORT): USCITA A TEMPO
+#  EA: ABTG_Dow_Apertura_US, U30USD M5, TICK REALI
+#  La parte comune del round sta in prove/R267a_news_oro_770402.txt par. 0.
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest,
+#  SPENTO), NE' su nessun terminale di conto: 50503392, 50504263,
+#  10105439 (REALE), 541452707 (FTMO). Il terminale del PC e' loggato sul
+#  demo 50503392: prima si controlla che non abbia SEDIE attaccate
+#  (avvertenza di R246/R255). QUESTO FILE NON CONTIENE E NON AUTORIZZA
+#  NESSUNA RIGA DI LANCIO. Non tocca EA, preset, sedie, conti, taglie o
+#  forward, e non promuove niente: ogni esito e' materiale per Claudio.
+#  VINCOLI DI BANCO (nella riga, classe 692): identici a R255a:
+#    -Deposito 10000, -Modello 4 (tick reali), MaxBars 100000000, niente
+#    -Spread/-Ritardo/-FrazioneIS. Modello di riga = RIGA_R252 (moncone,
+#    rc 2 e rc 0 ammessi se il CSV _OOS ha 2 righe con Trades > 0).
+#  Scritto il 27/09/2026. Attese e soglie CONGELATE PRIMA DEI NUMERI.
+# =====================================================================
+#
+#  1. DOMANDA. L'unica uscita pubblica che R255 non ha: lo stop a tempo
+#  a open+90' (ORB V2, mql5.com/en/blogs/post/751385: ordini chiusi alle
+#  18:00 server con apertura 16:30 = 90' [DICHIARATO, 1 anno di dati]).
+#
+#  2. BASE = R255a (SHORT, ancora, orologio 14:30 = la 770202 a lati
+#  invertiti, EMA H4 acceso): testa del ragionamento in
+#  prove/R255a_short_DOW_ancora_1430.txt. Cambiano SOLO:
+#    InpCloseMin   30 -> 0
+#    InpCloseHour  17 -> ASSE 16/17  (celle 16:00 e 17:00 BCM)
+#    InpMagic      asse gemello -> 796711 fisso
+#  COSA SONO LE DUE CELLE (orologio BCM UTC+1 fisso, R255a par. 6):
+#    16:00 BCM = open cash + 90' D'ESTATE USA (14:30 = 9:30 EDT);
+#              d'inverno USA = 10:00 EST = cash + 30'.
+#    17:00 BCM = cash + 150' d'estate; D'INVERNO = 11:00 EST = cash + 90'.
+#  Cioe' sul file 14:30 ogni cella e' "cash + 90'" in UNA stagione.
+#  La base (17:30) NON e' nell'asse: il suo G0 e' R255a (par. 5).
+#
+#  3. LA MANOPOLA TOCCA ANCHE GLI INGRESSI -- letto, non assunto.
+#  A InpCloseHour:InpCloseMin EndOfSession() (r.1929-1940) cancella i
+#  PENDENTI e chiude la posizione; e da li' in poi OnTick esce prima dello
+#  switch (r.613-617). Il SELL LIMIT del retest nasce alla rottura dopo le
+#  15:05 con scadenza 120' (R255a par. 4): i limiti riempiti o le rotture
+#  avvenute DOPO le 16:00 (o 17:00) SPARISCONO. Quindi NON vale il
+#  G0-INGRESSI di R255 (stesse giornate): vale un G0-SOTTOINSIEME (par. 5).
+#
+#  4. L'ATTESA, SCRITTA PRIMA.
+#  Proxy MISURATO SUL LONG (non trasferito allo short: e' solo l'ordine
+#  di grandezza di quante uscite la manopola sposta). Per-trade R246 del
+#  long 14:30 (risultati_archivio/R246/PERTRADE/..._794603 e _794601,
+#  script 27/09), posizioni la cui ULTIMA uscita e' alle/ dopo:
+#       era IS  (794603, 56 pos.):  16:00 -> 24 (42,9%)  17:00 -> 15 (26,8%)
+#       era OOS (794601, 96 pos.):  16:00 -> 50 (52,1%)  17:00 -> 20 (20,8%)
+#  Quindi la cella 16:00 cambia l'uscita di ~40-50% delle posizioni, la
+#  17:00 di ~20-27% [PROXY DAL LONG].
+#  n: R255a atteso = R54a, 73 + 73 deal (~55 posizioni per era, R255a
+#  par. 11): MERITO SOSPESO PER ARITMETICA in ogni cella. Si legge il
+#  RISCHIO. Trades: 16:00 <= 17:00 <= R255a (G2).
+#  IL PF (CSV _OOS = la corsa continua 2024.09.27 -> 2026.06.30), tre
+#  esiti, una PARTIZIONE, cella per cella contro R255a:
+#    CODA      PF >= PF(R255a) + 0,10  (il pomeriggio restituiva)
+#    CORSA     PF <= PF(R255a) - 0,10  (i runner erano il margine)
+#    DENTRO    il resto: "il default (17:30) va bene" -- ed e' un esito.
+#  Previsione mia: DENTRO sulla 17:00, CORSA sulla 16:00. Motivo: sul
+#  long 770202 il trailing M5 e' stato la vittoria (PF 1,24 -> 1,37,
+#  caccia par. 5.3) e la replica pubblica dell'ORB 5' da' il Dow NETTO
+#  -0,081 R (Krueger 25/09/2026 [DICHIARATO]).
+#
+#  5. I CANCELLI (congelati prima; si citano come C<n> [R267c]).
+#  C0 CATENA di R255a par. 8: E0 (moncone), P0 (tutti i pin dal CSV _OOS,
+#     InpCloseHour 16/17 e InpCloseMin 0 compresi), C0 del per-trade
+#     (abtg_trades_ABTG_Dow_Apertura_US_U30USD_796711.csv, UNO,
+#     IDENTIFICATO: R267a par. 0, classe 850; sia H l'ora della cella
+#     identificata, 16 o 17), L0 (tutte le uscite deal_type 0 = chiudono uno
+#     short). G1 non esiste qui (niente gemelle): se serve, dopo.
+#  C1 G0 ESTERNO = R255a, girato PRIMA nello stesso giro, con i suoi G0
+#     verdi (G0-ANCORA contro R54a). Senza R255a questo file NON SI LEGGE.
+#  C2 SOTTOINSIEME (cella H:00 identificata, dal per-trade): ogni deal con
+#     close_time < H:00:00 deve avere un gemello in R255a (793101) con close_time,
+#     deal_type e price IDENTICI (volume e net no: saldo diverso); a
+#     parte le parziali mancanti al lotto 0,10 (R255a par. 5). Un deal
+#     senza gemello = ROSSO: la manopola ha toccato qualcosa che non
+#     doveva -> NON LEGGIBILE.
+#  C3 S1 L'OROLOGIO MORDE (cella H:00 identificata): zero uscite dopo le
+#     H:00:59. L'ALTRA cella si controlla solo col P0 (niente per-trade).
+#  C4 G2: Trades(16) <= Trades(17) <= Trades(R255a), e Profit(16) !=
+#     Profit(17). Rovesciato o identico = NON ESEGUITA.
+#  C5 RISCHIO (a qualunque n): DD equity del CSV _OOS di ogni cella e
+#     "Peggior Giornata %" contro R255a (stesso banco, stessa gamba). Il
+#     tetto di casa R2 (4,272% a saldo chiuso, R255a par. 9) si legge
+#     SOLO sulla cella con per-trade (quella identificata), curva CONTROLLO (tutto il
+#     file 14:30). La curva IN FASE NON si ricompone qui (servirebbe il
+#     file 15:30 e un per-trade per cella): buco dichiarato.
+#  C6 NESSUNA CELLA SI PROMUOVE. Due celle = un interruttore, non un
+#     altopiano.
+#
+#  6. FINESTRA: identica a R255a (@DAQUANDO 2024.09.26, @FINOA 2026.06.30,
+#  @FRAZIONEIS 0.001: moncone di 1 giorno + corsa continua).
+#
+#  7. COSTO: stesso carico di un file R255 (2 celle x moncone + 641
+#  giorni): 93-102 s (R255a par. 14) / 4 passate x 0,333 min = 1,3 min
+#  -> ~1,3-1,7 MIN.
+#
+#  8. BUCHI: la curva IN FASE (file 15:30) NON e' qui; l'uscita a tempo
+#  sul NUDO (EMA spento) no; InpCloseMin ad asse no; il per-trade
+#  dell'ALTRA cella non esiste (classi 455/850); l'effetto sugli INGRESSI (par. 3)
+#  non si separa da quello sulle uscite senza un per-trade per cella.
+# =====================================================================
+@SIMBOLO    U30USD
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=16||16||1||17||Y
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=400.0||400.0||0||400.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=true||true||0||true||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=false||false||0||false||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMagic=796711||796711||0||796711||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

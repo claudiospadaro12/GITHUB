@@ -1,0 +1,44 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 0482fd8063e533227deb2be1fca3eb57a1251b84
+data            : 2026-09-28 20:03:35   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_MaxMinNotte
+file prova      : R266c_asia_box_GBPUSD_solo_short.txt   (3674 byte, dal pin)
+etichetta       : R266c
+simbolo         : GBPUSD
+periodo         : H1
+da quando       : 2015.01.01
+modello         : 1  (NON tick reali: screening, non verdetto)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte\ABTG_MaxMinNotte_GBPUSD_IS_ohlc_R266c.csv
+  righe : 2
+    Pass 0    Profit 717.11       PF 1.04518    Equity DD % 20.3726    Trades 818
+    Pass 1    Profit 717.13       PF 1.04518    Equity DD % 20.3726    Trades 818
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte\ABTG_MaxMinNotte_GBPUSD_OOS_ohlc_R266c.csv
+  righe : 2
+    Pass 0    Profit 1109.02      PF 1.07472    Equity DD % 12.6967    Trades 927
+    Pass 1    Profit 1109.02      PF 1.07472    Equity DD % 12.6967    Trades 927
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 1
+  - round girato a Modello 1 (non tick reali): screening, non verdetto
+
+ESITO: ROUND GIRATO CON RILIEVI (1)

@@ -1,0 +1,203 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R267b -- ORO 770402: AMPIEZZA MINIMA DEL BOX (il ripiego senza codice
+#           del filtro d'ampiezza "relativo" dei vendor)
+#  EA: ABTG_MaxMinNotte (generico, due lati), XAUUSD H2, OHLC M1
+#  La parte comune del round (magic, costi, ordine, cosa non si scrive)
+#  sta in prove/R267a_news_oro_770402.txt par. 0.
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest,
+#  SPENTO), NE' su nessun terminale di conto: 50503392, 50504263,
+#  10105439 (REALE), 541452707 (FTMO). Il terminale del PC e' loggato sul
+#  demo 50503392: prima si controlla che non abbia SEDIE attaccate
+#  (avvertenza di R246/R255). QUESTO FILE NON CONTIENE E NON AUTORIZZA
+#  NESSUNA RIGA DI LANCIO. Non tocca EA, preset, sedie, conti, taglie o
+#  forward, e non promuove niente: ogni esito e' materiale per Claudio.
+#  VINCOLI DI BANCO (nella riga): -Deposito 100000, -Modello 1 (OHLC M1),
+#    niente -Spread/-Ritardo/-FrazioneIS: identici a R260c.
+#  Scritto il 27/09/2026. Attese e soglie CONGELATE PRIMA DEI NUMERI.
+# =====================================================================
+#
+#  1. DOMANDA. Tre fonti pubbliche mettono un'ampiezza MINIMA al box
+#  (GoldLondonBreakout 0,15-0,70 x ATR D1, code/75586; Range Breakout
+#  Beast 0,10-0,50% del prezzo; nsclk 10-100 pip) [DICHIARATO, nessun
+#  numero]. La versione giusta (in ATR) e' CODICE (2 input nuovi). Qui
+#  il ripiego a costo zero: InpMinBoxPts in PUNTI ASSOLUTI (r.122, test
+#  r.331: box < soglia -> niente trade quel giorno).
+#
+#  2. BASE = R260c (due lati = R103 = la sedia schierata; stesso motivo
+#  di R267a par. 2). Cambiano SOLO: InpMinBoxPts 0 -> ASSE 0..2600 passo
+#  650 (0 / 650 / 1300 / 1950 / 2600 punti = 0 / 6,50 / 13,00 / 19,50 /
+#  26,00 $, punto XAUUSD = 0,01 $: il buffer 250 = 2,50 $ di R260c),
+#  InpComment MAXMINR267B, InpMagic 796702 fisso.
+#
+#  3. PERCHE' QUESTI CINQUE VALORI (ragionati, non una griglia fitta).
+#  Lo stop del long con InpSLMode=0 e' buyPx - sellPx = BOX + 2 x buffer
+#  = BOX + 5,00 $ (TryPlace r.336-337 e SLforLong r.374-380). Allora il cancello
+#  di costo di casa "stop >= 40 x costo" si traduce in un box minimo:
+#    0     = ANCORA G0 (filtro spento, = R260c = R103 al centesimo)
+#    650   sopra la frontiera 40x del costo BCM: 0,2503 $ x 40 = 10,01 $
+#          di stop -> box >= 5,01 $ (MAPPA_COSTO_SIMBOLI_TF r.242)
+#    1300  = ESATTAMENTE la frontiera 40x dello spread FTMO (0,45 $ x 40
+#          = 18 $ di stop -> box >= 13,00 $; spread FTMO [MISURATO GG=1,
+#          ora 10], MAPPA r.623). La sedia vive su FTMO.
+#    1950  frontiera FTMO con commissione [IPOTESI della caccia: 0,10 $
+#          -> 0,55 $ x 40 = 22 $ -> box >= 17 $] piu' un margine
+#    2600  ~P25 del box 2025-26 (sotto), = il 2500 proposto dalla caccia
+#  E' anche la risposta a "la cella verde per caso": cinque valori con
+#  una ragione ciascuno, letti come CURVA, mai come picco.
+#
+#  4. LA DISTRIBUZIONE DEL BOX, E IL FATTO DI REGIME DA DICHIARARE.
+#  (a) 2025-2026, MISURATA in casa (script 27/09 su risultati_archivio/
+#      MaxMin_Oro/ABTG_Notte_Study_XAUUSD.csv, 371 notti 2025.02.28 ->
+#      2026.08.04, box 22:00-06:59, PIU' LARGO del preset 23:00-04:59):
+#      P5 1334 . P10 1685 . P25 2609 . P50 4156 . P75 6044 . P90 8666.
+#      Quota sotto soglia: 650 -> 0,3% . 1300 -> 4,6% . 1950 -> 14,8% .
+#      2600 -> 24,3%. Col box VERO (piu' corto) queste quote sono un
+#      PAVIMENTO [DERIVATO].
+#  (b) 2015-2020 [SONDA OANDA, screening] (caccia par. 2.3): stop mediano
+#      10,26 $ e il 94,5% degli stop < 18 $ = il 94% dei giorni sarebbe
+#      ESCLUSO PER COSTO a FTMO. Stop = box + 5 $, quindi box mediano
+#      ~5,3 $ [DERIVATO] (la caccia arrotonda a "box ~10 $").
+#  (c) 2020-2024: [NON MISURATO]. E' il pezzo che pesa di piu' in R103
+#      (~5 anni su 6,5).
+#  >>> CONSEGUENZA, detta prima: in punti ASSOLUTI il filtro SELEZIONA
+#      L'EPOCA prima che il giorno. A 1300 e sopra tiene [DERIVATO] quasi
+#      solo il 2024-2026. Un PF che sale col filtro puo' essere SOLO il
+#      mix d'epoca. Per questo il par. 6 legge DENTRO un'epoca.
+#
+#  5. L'ATTESA SUL NUMERO DI OPERAZIONI (DEAL, classe 454), scritta prima:
+#     cella 0 = 693 esatto (G0). 650: 450-620. 1300: 250-400.
+#     1950: 180-300. 2600: 140-260. [DERIVATO LARGO dal par. 4: tagli
+#     del 40-55% (650) e 85-95% (1300) sui giorni 2020-2023, pavimenti
+#     del par. 4a sul 2025-26.] 150 posizioni = ~203 deal (k = 693/512 =
+#     1,354, R103): sopra, il MERITO si legge; sotto, SOSPESO.
+#
+#  6. IL MERITO -- TRE IPOTESI, UNA PARTIZIONE, LETTE DENTRO UN'EPOCA.
+#  Dal per-trade di R260c (magic 795303, 6,5 anni) e da quello di questo
+#  file, IDENTIFICATO come dice R267a par. 0 (classe 850: la cella che
+#  sopravvive NON e' fissata; oro = regola del k, classe 844). Sia S la
+#  soglia della cella identificata. Nella finestra 2024.01.01 ->
+#  2026.06.30 (data di CHIUSURA) le posizioni di R260c si dividono in
+#  TENUTE (stessa data e stesso close_time presenti nel per-trade della
+#  cella S) e TOLTE (box < S). Tarata su S = 2600; S = 1950 o 1300 si
+#  legge uguale, con meno TOLTE; S = 650 o 0 -> TOLTE quasi vuote o
+#  vuote: NON MISURABILE (si scrive con S e n). PF per posizione delle
+#  due, dallo STESSO file R260c (stesse taglie, stessa curva):
+#    H_GIORNO   PF_tenute >= PF_tolte + 0,30  (il box stretto e' un
+#               giorno peggiore anche a parita' d'epoca: il filtro e' una
+#               leva vera)
+#    H_EPOCA    |PF_tenute - PF_tolte| < 0,30  (il filtro sceglie solo
+#               l'epoca; il PF dell'insieme si muove per il mix)
+#    H_ROVESCIO PF_tolte >= PF_tenute + 0,30
+#    Con n_tolte < 30 posizioni: NON MISURABILE (si scrive con n).
+#  Previsione mia: H_EPOCA. Motivo: la sonda (caccia par. 2.3) da' il
+#  quintile piu' stretto E -0,132 R ma a t -0,81 = rumore; e la banda del
+#  vendor tagliava il 9% e non cambiava niente [SONDA OANDA, screening].
+#  0,30 di PF: dell'ordine di uno scarto tipo del PF a n 30-60 per parte
+#  [DERIVATO, NON simulato]: e' un INDIZIO, non un certificato.
+#  Senza R260c girato (e il suo per-trade 795303) questa lettura e' NON
+#  MISURABILE: restano B3-B5 sul CSV.
+#  PRIOR SUL TREND (stessa nota di R267a par. 3): long CONTRO il trend D1
+#  E +0,179 R, A FAVORE -0,031 R [SONDA OANDA, screening]. R260d (altro
+#  agente, trend come cancello, NON scritto qui) e questa sonda si
+#  contraddicono: il round decide.
+#
+#  7. I CANCELLI (congelati prima; si citano come B<n> [R267b])
+#  B0 -SoloControllo: 5 celle per finestra. Altrimenti STOP.
+#  B1 G0 IN-FILE, cella 0 contro R103 con le bande di R260c R1: VERDE =
+#     Trades 693, PF che arrotonda a 1.308, Profit a 24736, DD a 5.32;
+#     GIALLO = Trades 693 e |Profit - 24736| <= 1%; ROSSO il resto. Se
+#     R260c e' gia' girato: cella 0 == R260c AL CENTESIMO (il magic non
+#     tocca il trading). ROSSO -> le celle si leggono SOLO fra loro, mai
+#     contro R103; cause concorrenti per nome come R260c R1 (guardia,
+#     spread in memoria, storico M1).
+#  B2 P0: la colonna InpMinBoxPts del CSV _OOS = 0/650/1300/1950/2600.
+#  B3 MORDE E TOGLIE SOLTANTO: Trades(2600) < Trades(0) (altrimenti il pin
+#     non e' arrivato -> NULLO), e Trades non crescente con la soglia
+#     (una giornata tolta non ne crea un'altra: un ciclo al giorno,
+#     InpCloseAtEnd). Una violazione > 2 deal = NON LEGGIBILE (i deal di
+#     parziale dipendono dal lotto, da cui la tolleranza).
+#  B4 RISCHIO, a qualunque n (Emendamento B): DD a 0,5% di ogni cella
+#     contro 2,06% (soglia S3 di R193b tradotta, R260c par. 8). Un DD che
+#     scende IN PROPORZIONE a n (meno giorni, meno anni esposti) NON e'
+#     una leva: si scrive accanto il rapporto DD(cella)/DD(0) e
+#     Trades(cella)/Trades(0). OHLC = DD limite inferiore.
+#  B5 ALTOPIANO, MAI IL PICCO: si porta avanti (se mai) la cella CENTRALE
+#     di un tratto di >= 3 celle contigue che passano B4 e hanno PF >=
+#     1,10 con >= 203 deal. Una cella che sporge = "NON C'E' UNA
+#     CONFIGURAZIONE ROBUSTA". Se nessuna batte la cella 0 oltre 0,10 di
+#     PF, la frase e' "IL DEFAULT (filtro spento) VA BENE".
+#  B6 NESSUNA CELLA SI PROMUOVE: materiale per Claudio, con riprova a tick.
+#
+#  8. FINESTRA: identica a R260c (moncone 1 giorno + OOS 2020.01.01 ->
+#  2026.06.30). Si legge SOLO il CSV _OOS.
+#
+#  9. COSTO: 5 finestre piene x ~0,7 min + 5 monconi + avvio = ~4-5 MIN
+#  (metro OHLC oro del mandato; la velocita' del PC su oro OHLC e' [NON
+#  MISURATA]).
+#
+#  10. BUCHI: box 2020-2024 [NON MISURATO]; il filtro in PUNTI non e'
+#  quello in ATR dei vendor (serve codice); InpMaxBoxPts non e' ad asse
+#  (una variabile); OHLC; spread [NON PINNATO DA QUESTA CORSIA] come
+#  R260c; per-trade di UNA sola cella (classi 455/850): la lettura per anno
+#  delle altre quattro celle NON esiste.
+# =====================================================================
+@SIMBOLO    XAUUSD
+@PERIODO    H2
+@DAQUANDO   2019.12.30
+@FINOA      2026.06.30
+@FRAZIONEIS 0.0005
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||650||2600||Y
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR267B
+InpMagic=796702||796702||0||796702||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

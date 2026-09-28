@@ -1,0 +1,566 @@
+#  EA: ABTG_MaxMinNotte
+# =====================================================================
+#  R266 -- IL BOX ASIATICO INTERO SU GBPUSD ED EURUSD (famiglia D)
+#  EA: ABTG_MaxMinNotte (generico, binario HEAD 7d0da9f9), codice zero
+#  FILE DI TESTA DEL ROUND, e cella R266a (GBPUSD, DUE LATI).
+#  Qui stanno il ragionamento, le attese e i cancelli di tutta la
+#  famiglia R266a..R266f (6 file). Gli altri cinque portano solo le loro
+#  differenze e rimandano qui.
+#  Scritto il 26-27/09/2026. Criteri congelati PRIMA dei numeri.
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma di
+#  Claudio del 21/09/2026: i round non girano piu' sul VPS finche' una
+#  challenge e' viva). NE' sul banco 50504400 (C:\MT5_Backtest, che resta
+#  SPENTO), NE' su nessun terminale di conto (50503392, 50504263,
+#  10105439 REALE, 541452707 FTMO). Il terminale del PC e' loggato sul
+#  demo 50503392: prima si controlla che non abbia SEDIE attaccate
+#  (avvertenza di R246/R251/R253/R255). I magic di questo round (par. 9)
+#  non toccano nessuna sedia.
+#
+#  VINCOLI DI BANCO (stanno nella riga di lancio, non qui; li scrivo
+#  perche' chi la scrive li trovi):
+#    -Expert ABTG_MaxMinNotte   -Simbolo GBPUSD (a/b/c) o EURUSD (d/e/f)
+#    -Periodo H1  (INERTE per questo EA: nel sorgente ZERO occorrenze di
+#        _Period / PERIOD_CURRENT / Period(); il box si legge su
+#        PERIOD_M1 (ComputeBox r.301-320) e ATR/EMA200 su InpMgmtTF=M15.
+#        H1 e non M15 per stare lontani dal tetto ~100.000 barre del
+#        grafico su 6,5 anni di gamba OOS; MaxBars=100000000 come in
+#        R246/R251-R255 se la riga lo porta.)
+#    -Deposito 10000 (banco, NON una taglia proposta)
+#    -Modello 1 (OHLC M1), NON 4 -- par. 4. Il numero che esce e'
+#        SCREENING per il merito e un LIMITE INFERIORE per il rischio.
+#    NIENTE -Spread, NIENTE -Ritardo, NIENTE -FrazioneIS (il taglio lo
+#        da' '@FRAZIONEIS' qui sotto; un -FrazioneIS diverso fa MORIRE il
+#        driver, walkforward_generico.ps1 r.713-740).
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO. Non
+#  tocca preset, EA, sedie, conti, taglie o parametri del forward. Non
+#  promuove niente: ogni esito e' materiale per Claudio.
+# =====================================================================
+#
+# =====================================================================
+#  1. LA DOMANDA, E COSA C'E' GIA' IN CASA
+# =====================================================================
+#  Claudio, 26/09/2026: "DOBBIAMO AVERE + SEDIE". La caccia ai
+#  meccanismi dello stesso giorno (caccia_strategie/CACCIA_MECCANISMI_
+#  SEI_FAMIGLIE_2026-09-26.md, commit 80251fd6, par. 4 P1) ha promosso
+#  per primo IL BOX ASIATICO INTERO sul forex con ABTG_MaxMinNotte,
+#  perche' si prova a CODICE ZERO e perche' in casa NON E' MAI STATO
+#  MISURATO DAVVERO:
+#   - l'unica corsa forex d'archivio (risultati_prove/ABTG_MaxMinNotte/
+#     ABTG_MaxMinNotte_EURUSD_{IS,OOS}_ohlc.csv) aveva InpBufferPoints=
+#     1000 (su EURUSD a 5 cifre = 100 pip: il buffer del DAX),
+#     InpSLMode=1 (ATR), box 23:00-04:59 -> Trades 1 in IS, 0 in OOS.
+#     RILETTO oggi dal CSV: e' una casella VUOTA, non una casella provata.
+#   - su GBPUSD MaxMinNotte non e' mai girato (REGISTRO_TEST r.3843-
+#     3850, censimento per contenuto: D30EUR 24 CSV, XAUUSD 14,
+#     EURUSD 2, GBPUSD assente = 0).
+#  Per il certificato del 09/09 il box asiatico sul forex e' quindi
+#  NON ANCORA MISURATO (mancano PF, n, DD, gemelli, uscita, TF).
+#
+#  E' la stessa tesi che in casa VIVE sull'oro (770402, R103: PF 1,308
+#  su 693 deal, OHLC 2020-2026): la liquidita' si accumula nel range
+#  delle ore asiatiche e l'apertura europea lo rompe con un flusso che
+#  prosegue nella mattinata. R266 chiede: SUL CAVO E SULL'EURO, CON LO
+#  STOP ALL'ESTREMO OPPOSTO E IL CANCELLO DEL COSTO ACCESO, QUESTA
+#  ROTTURA PORTA EDGE? E QUANTO RISCHIO PORTA?
+#
+#  NON SI SOVRAPPONE a R258 (ABTG_Londra_ORB, canale di UN'ora 06-07 /
+#  07-08 UK): qui il box e' di OTTO ore, e il motore e' un altro.
+#
+# =====================================================================
+#  2. LA GEOMETRIA, E PERCHE' QUESTA E NON QUELLA DEL PRIMO DOSSIER
+# =====================================================================
+#  Due dossier dello stesso giorno propongono due geometrie:
+#   (P1) CACCIA_MECCANISMI par. 4.1: box 00:00-06:59 server, piazzo
+#        07:00, buffer 20 punti, InpMinBoxPts 332, cutoff 10:00, flat
+#        17:30.
+#   (P8) caccia_strategie/CACCIA_PARAMETRI_SEI_FAMIGLIE_2026-09-26.md
+#        (commit 1a2f80ce) par. 2.2 e riga P8:
+#        box 00:00-07:59, piazzo 08:00, cutoff 11:00, flat 17:00,
+#        InpSLMode=0, InpBufferPoints=30, lati separati.
+#  SCELTA: P8, per tre ragioni scritte PRIMA dei numeri:
+#   (a) e' la geometria su cui esiste una SONDA con il costo dedotto
+#       (P8 par. 2.2, Oanda M1 2015-01 -> 2020-05-14): il box 00-08 UK;
+#       il box 00-07 UK su EURUSD esce NEGATIVO (due lati E -0,063 R
+#       t -1,74 a TP 1R; E -0,091 t -2,28 a TP 1,5R). Provare per primo
+#       il box con il prior peggiore sarebbe spendere la corsa male.
+#   (b) passa il costo in piu' giorni: GBPUSD 00-08 UK W >= 30,6 pip nel
+#       68,3% dei giorni contro il 43,7% del box 00-07 (P8 par. 2.1):
+#       piu' operazioni = il muro dei 150 si passa prima.
+#   (c) il piazzamento alle 08:00 server = 08:00 di Londra nel regime
+#       vecchio dell'orologio (par. 3): l'apertura di Londra, dove la
+#       tesi dice che arriva il flusso.
+#  Il buffer: 30 punti (= 3 pip, P8 e sonda). Il buffer 20 di P1 NON e'
+#  un secondo asse: e' la CELLA FACOLTATIVA R266g, NON SCRITTA (par. 10).
+#
+#  PIN (nomi verificati nel sorgente, r.117-188):
+#     InpBoxStartHour:Min   0:00      InpBoxEndHour:Min     7:59
+#     InpPlaceHour:Min      8:00      InpEntryCutoffHour:Min 11:00
+#     InpCloseHour:Min      17:00     InpCloseAtEnd         true
+#     InpPendingExpiryMin   180       InpBufferPoints       30
+#     InpSLMode             0 (MM_SL_OPPOSITE)
+#     InpMinBoxPts          277 (GBPUSD) / 206 (EURUSD) -- par. 5
+#     InpMaxBoxPts          0
+#     InpOneTradePerDay     true      InpUsaGuardian        true
+#  Gestione = DEFAULT COMPILATO dell'EA (il dossier: "TP/gestione di
+#  default"), scritta per esteso perche' nessun pin resti implicito:
+#     InpMgmtTF=M15 (15), ATR 14, TP1 1R 50% + breakeven, TP2 2,5R 50%,
+#     3o target EMA200(M15), TP finale 4R, trailing 2 x ATR(M15) (parte
+#     solo sopra il prezzo d'ingresso, r.464-465), correlazione OFF,
+#     news OFF, InpMaxSpread 0.
+#  Rischio 1,0% (banco), deposito 10000.
+#
+#  PERCHE' InpPendingExpiryMin=180 E NON IL DEFAULT 90 -- IL CONTRO-
+#  ESEMPIO: la scadenza del pendente e' TimeCurrent()+InpPendingExpiryMin
+#  (r.339). Col default 90 e il piazzamento alle 08:00 i pendenti
+#  morirebbero alle ~09:30 e il cutoff delle 11:00 (r.258) sarebbe
+#  INERTE: la cella misurerebbe una finestra d'ingresso di 90' dicendo
+#  di misurarne una di 180'. Con 180 scadenza e cutoff coincidono, come
+#  in R260c (piazzo 07:00, scadenza 90', cutoff 08:30 = stesso istante).
+#
+#  PERCHE' IL BOX 00:00-07:59 NON SCAVALCA LA MEZZANOTTE: ComputeBox
+#  toglie un giorno solo se inizio >= fine (r.306); qui 00:00 < 07:59,
+#  quindi il box e' dello STESSO giorno, dalla mezzanotte server.
+#
+# =====================================================================
+#  3. L'OROLOGIO -- DICHIARATO, NON CORRETTO DI NASCOSTO
+# =====================================================================
+#  report/OROLOGIO_BCM_2026-09-24.md: il feed forex BCM era ORA
+#  ITALIANA - 1 tutto l'anno fino a dicembre 2024 (= UTC+0 d'inverno,
+#  UTC+1 d'estate = ESATTAMENTE l'ora di Londra, stesse date DST UE/UK),
+#  e UTC+1 FISSO dopo (cambio fra 26/12/2024 e 02/02/2025, giorno
+#  [NON MISURATO]).
+#   - IS 2015-2019 e OOS fino a dic-2024: box = 00:00-07:59 LONDRA,
+#     piazzo alle 08:00 LONDRA. E' la geometria esatta della sonda P8
+#     (box 00-08 UK con la regola DST britannica).
+#   - OOS negli inverni 2024/25 (coda, dal cambio al 30/03/2025) e
+#     2025/26 (26/10/2025-29/03/2026): server = Londra + 1 -> box
+#     23:00-06:59 Londra, piazzo alle 07:00 Londra (un'ora PRIMA
+#     dell'apertura). ~7-8 mesi su 78 della gamba OOS [DERIVATO, come
+#     R260c par. 3].
+#  Il round NON corregge (sarebbe cambiare la cella a meta' finestra).
+#  Si riporta, senza soglia, il PF della gamba OOS spezzato fra MESI
+#  ALLINEATI e MESI SFASATI (per-trade, data di chiusura; fine della
+#  finestra sfasata 2024/25 presa al 30/03/2025, inizio al 26/12/2024 =
+#  limite PRUDENTE del cambio). Informazione, non cancello.
+#
+# =====================================================================
+#  4. PERCHE' OHLC M1 E NON TICK REALI -- il conto, non l'abitudine
+# =====================================================================
+#  I tick reali forex BCM coprono ~2 anni al massimo (profondita'
+#  [NON VERIFICATA] su questi due simboli; R258 dichiara il pavimento
+#  2024.07.05 per il Londra_ORB). A ~75-90 posizioni/anno per lato
+#  (par. 6) due anni danno 150-180: IS e OOS NON starebbero entrambi
+#  sopra 150. Lo storico M1 forex BCM parte da gennaio 1999 (R102,
+#  REGISTRO_TEST r.1002-1004: "Prima operazione 1999.01.04"), ma e' OHLC.
+#  -> OHLC M1, dichiarato: il DD e' un LIMITE INFERIORE e il profitto una
+#  STIMA DEL LORDO (spread del feed/terminale, niente slippage,
+#  riempimenti ideali, ambiguita' intrabarra risolta dal generatore di
+#  MT5, non a sfavore). Il verdetto lo daranno i tick reali: una riprova
+#  a tick sulla coda 2024-2026 NON e' in questo round (buco, par. 11).
+#
+# =====================================================================
+#  5. IL CANCELLO DEL COSTO -- InpMinBoxPts NELL'UNITA' GIUSTA
+# =====================================================================
+#  METRO DI CASA: stop >= 40 x pedaggio ALL-IN (spread + commissione),
+#  pavimento duro 13,3x (report/CANCELLO_COSTO_FLOTTA_2026-09-10.md
+#  r.170-171).
+#  Pedaggio all-in (R258a r.307-312, spread mediano ore 07-12 server
+#  del logger vivo + commissione MISURATA in
+#  prove/COLLAUDO_SPREAD_FLOTTA_CRITERI.md r.70-73):
+#     GBPUSD 0,300 + 0,540 = 0,840 pip  (metro R264: 0,8425)
+#     EURUSD 0,200 + 0,464 = 0,664 pip  (metro R265: 0,6636)
+#     40x:  GBPUSD 33,60 pip (33,70 col metro R264)
+#           EURUSD 26,56 pip (26,54 col metro R265)
+#  L'UNITA', LETTA NEL SORGENTE (non assunta):
+#     r.330  widthPts=(gBoxHigh-gBoxLow)/_Point
+#     r.331  if(InpMinBoxPts>0 && widthPts<InpMinBoxPts) -> niente trade
+#  InpMinBoxPts e' in PUNTI DEL SIMBOLO. GBPUSD Digits=5 (report/
+#  LE_UNITA_NEI_PRESET_VIVI_2026-09-23.md r.412); EURUSD a 5 decimali
+#  sul BCM (prezzi del per-trade risultati_prove/trades_gap/
+#  abtg_trades_ABTG_GapFill_EURUSD_772215.csv: 1.15887). Quindi
+#  _Point = 0,00001 e 10 punti = 1 pip.
+#  LO STOP, LETTO NEL SORGENTE: con InpSLMode=0 l'ingresso long e'
+#  massimo + buffer (buyPx r.336) e lo stop e' minimo - buffer (sellPx
+#  r.337, SLforLong r.377); specchio per lo short. Quindi
+#        STOP = W + 2 x buffer        (W = ampiezza del box)
+#  e il buffer effettivo e' max(InpBufferPoints, STOPS_LEVEL) (r.727):
+#  se lo stops level del BCM fosse > 30 lo stop si ALLARGA (il cancello
+#  resta rispettato, l'ingresso si allontana: [NON MISURATO]).
+#  CONTO:
+#     GBPUSD: W >= 337 - 60 = 277 punti = 27,7 pip -> stop >= 33,7 pip
+#             = 40,1x (0,840) / 40,0x (0,8425)          InpMinBoxPts=277
+#     EURUSD: W >= 265,6 - 60 = 205,6 -> 206 punti = 20,6 pip -> stop
+#             >= 26,6 pip = 40,06x (0,664) / 40,08x (0,6636)
+#                                                       InpMinBoxPts=206
+#  Il cancello vale PER OGNI OPERAZIONE, per costruzione, non sulla
+#  mediana: nessuna operazione di R266 ha lo stop sotto 40x il pedaggio
+#  mediano. Al P95 del pedaggio (GBPUSD 0,700+0,540 = 1,240 pip; EURUSD
+#  0,400+0,464 = 0,864 pip; R258a r.493 e r.515) lo stop minimo vale
+#  27,2x e 30,8x: FRAGILE nelle ore di spread alto, dichiarato.
+#  E' un CANCELLO DI COSTO FISSATO DALL'ARITMETICA, NON UNA MANOPOLA.
+#
+#  IL CONTRO-ESEMPIO SUL NUMERO DEL DOSSIER (332): il 332 di P1 era "W
+#  >= 33,2 pip" col pedaggio 0,83 e SENZA contare i due buffer. Messo qui
+#  vorrebbe stop >= 39,2 pip = 46,7x su GBPUSD e 59x su EURUSD: un
+#  cancello piu' stretto di quello di casa, che taglia giornate buone
+#  per il costo senza che nessuno lo dichiari. E se il feed fosse a 4
+#  cifre (_Point 0,0001), 277 punti diventerebbero 277 PIP: Trades ~0.
+#  -> cancello D1 (par. 7): un file con Trades IS < 20 NON si legge come
+#  "il motore non ha edge": prima si controllano le cifre (LE_UNITA,
+#  regola 1: "il punto 1 viene PRIMA di qualunque conclusione").
+#
+# =====================================================================
+#  6. L'ATTESA, SCRITTA PRIMA DEI NUMERI
+# =====================================================================
+#  6.1 IL PRIOR, ed e' SFAVOREVOLE (CACCIA_PARAMETRI par. 2.2, sonda
+#  Oanda M1 UTC 2015-01-01 -> 2020-05-14 = 5,37 anni, OHLC M1, ambiguita'
+#  intrabarra A SFAVORE, costo all-in dedotto, box 00-08 UK, buy stop
+#  max+3 / sell stop min-3, SL opposto, TP fisso, cutoff box+3h, flat
+#  17:00 UK, SOLO giorni con W sopra la soglia di costo):
+#     GBPUSD 00-08 long   TP1R E -0,020 R, n 412, 2/6 anni positivi;
+#                         TP1,5R -0,029; TP2R -0,012
+#     GBPUSD 00-08 short  TP1R E +0,024 R, t +0,62, n 486; +0,003; +0,014
+#     GBPUSD 00-08 OCO    TP1R E +0,012 R, t +0,40, n 811; -0,000; +0,009
+#     EURUSD 00-08 long   E -0,028 / -0,046 / -0,049
+#     EURUSD 00-08 short  E +0,033 t +0,78 5/6 anni / +0,026 / +0,036
+#  Lettura della sonda stessa: "PIATTO: nessuna cella con |t| > 0,8 sul
+#  lato positivo; il LONG e' NEGATIVO in tutte e 12 le celle".
+#  Tradotto in PF a TP 1R simmetrico, PF ~ (1+E)/(1-E) [DERIVATO,
+#  approssimato: la gestione di R266 NON e' quella della sonda]:
+#  OCO GBPUSD ~1,02; long GBPUSD ~0,96; short GBPUSD ~1,05; short
+#  EURUSD ~1,07. NESSUNO sopra 1,10.
+#  La sonda copre GLI STESSI ANNI della gamba IS (par. 8): l'IS di R266
+#  e' quindi anche una REPLICA SU UN ALTRO FEED (BCM invece di Oanda) e
+#  con un'altra gestione. L'OOS 2020-2026 non l'ha visto nessuno.
+#
+#  6.2 IL NUMERO DI OPERAZIONI (posizioni; i deal sono k volte tanto,
+#  k ~1,2-1,4 per i parziali: R19b 1,205, R261 1,4207):
+#  base = sonda GBPUSD 00-08 (soglia W >= 30,6): long 412/5,37 = 76,7
+#  all'anno, short 486/5,37 = 90,5, OCO 811/5,37 = 151.
+#  Qui la soglia e' W >= 27,7 (piu' bassa: passa una quota di giorni
+#  [NON MISURATA], > 68,3%) -> fattore 1,00-1,15 [STIMA]. Banda larga
+#  x0,7-x1,3 per il feed diverso e la gestione diversa (la gestione non
+#  cambia gli INGRESSI, il feed si'). Conto: basso = base x 1,00 x 0,7;
+#  alto = base x 1,15 x 1,3; centro = base x 1,075 (script, non a mano).
+#     GBPUSD            IS 5,0 anni          OOS 6,5 anni
+#       long  (R266b)   268-573 (c. ~412)    349-745 (c. ~536)
+#       short (R266c)   317-677 (c. ~486)    412-879 (c. ~632)
+#       due lati(R266a) 529-1129 (c. ~812)   687-1467 (c. ~1055)
+#  EURUSD: la sonda da' la quota di giorni sopra soglia (68,1% a 23,6
+#  pip, simile a GBPUSD) ma NON l'n per lato -> stessa base, banda piu'
+#  larga x0,5-x1,3, perche' il 2017-2019 sull'euro e' il regime piu'
+#  compresso della serie (box mediano 2019 14,7 pip sul box 23-06 UTC,
+#  CACCIA_MECCANISMI par. 4.1):
+#       long  (R266e)   192-573              249-745
+#       short (R266f)   226-677              294-879
+#       due lati(R266d) 378-1129             491-1467
+#  AGGIUNTO dal cancello del 27/09, dopo l'audit della caccia
+#  (caccia_strategie/AUDIT_CACCIA_MECCANISMI_2026-09-26.md par. 4.1,
+#  commit d7c667fc), perche' tocca la base di questi numeri:
+#   - la sonda del dossier meccanismi scartava i giorni con < 300 barre
+#     M1 nel box (i piu' quieti, mediana 15-22 pip) SENZA dichiararlo:
+#     le QUOTE di giorni sopra soglia sono gonfiate di qualche punto
+#     (GBPUSD 2019 26% -> 20% tenendo tutti i giorni). Se la sonda P8
+#     (stesso cacciatore, script fuori repo) usa lo stesso filtro
+#     [NON VERIFICATO], la frase "> 68,3%" qui sopra non e' garantita:
+#     la soglia piu' bassa la alza, il filtro tolto la abbassa. Gli n
+#     ASSOLUTI della base invece restano un limite basso rispetto al
+#     filtro (togliere un filtro aggiunge giorni, non ne toglie).
+#   - le quote corrette dell'audit (W >= 27,7 GBPUSD: 31-78% per anno;
+#     W >= 20,6 EURUSD: 16-87%, 2019 al 16%) sono sul box 23:00-05:59
+#     UTC di 7 ore del dossier meccanismi, NON sul box 00-08 UK di 8
+#     ore di R266 (che contiene l'ora 06-07 UTC, la piu' larga del
+#     profilo prima di Londra): non sostituiscono la base P8, ma dicono
+#     che sull'euro l'anno 2019 puo' essere quasi vuoto. E' la ragione
+#     del x0,5 in basso sull'EURUSD, e resta [STIMA].
+#  In ogni cella il limite BASSO della banda sta sopra 150: se esce
+#  sotto, e' un fatto da spiegare (storico, cifre, cancello), non rumore.
+#  CONTROLLO DI STRUTTURA, gratis: n(solo long) + n(solo short) >= n(due
+#  lati), in POSIZIONI, per simbolo (l'OCO fa al massimo UNA posizione
+#  al giorno, e ogni giornata dei due lati e' una giornata del long o
+#  dello short da soli). Se no -> un pin di lato non e' arrivato -> L0.
+#
+#  6.3 IL PF -- TRE IPOTESI CHE SONO UNA PARTIZIONE (classe 178: ogni
+#  esito cade in UNA sola), per OGNI file:
+#    HN "campione insufficiente": posizioni IS < 150 OPPURE posizioni
+#        OOS < 150. Il MERITO e' SOSPESO; il RISCHIO si legge lo stesso.
+#    HE "edge": posizioni IS >= 150 E OOS >= 150 E PF IS >= 1,10 E
+#        PF OOS >= 1,10.
+#    H0 "piatto / niente" (R2 violato): posizioni IS >= 150 E OOS >= 150
+#        E (PF IS < 1,10 OPPURE PF OOS < 1,10).
+#  Quale numero produce L'ALTRA spiegazione? Sotto H0 (la sonda) il PF
+#  atteso e' 0,95-1,07: cade FUORI da HE con qualunque rumore ragionevole
+#  (su ~400 posizioni l'errore del PF e' ~0,08-0,10 [STIMA]). Un edge
+#  VERO ma piccolo (PF 1,03-1,09) cade in H0 PER DEFINIZIONE: la soglia
+#  di casa e' 1,10 e sotto non si distingue dal piatto. Scritto ora.
+#  PREVISIONE MIA, SCRITTA PRIMA:
+#    - H0 su TUTTI E SEI i file. E' l'attesa principale.
+#    - il LATO LONG (R266b, R266e) e' il PIU' PROBABILE BOCCIATO: negativo
+#      in 12 celle su 12 della sonda. Centro atteso PF 0,90-1,00.
+#    - lo SHORT DI EURUSD (R266f) e' l'unico con un segno coerente nella
+#      sonda (5/6 anni, t < 0,8): il "meno improbabile" per HE, e
+#      comunque previsto H0 (centro 1,00-1,08).
+#    - HN lo ritengo improbabile su GBPUSD, possibile solo sull'IS di
+#      EURUSD (regime compresso 2017-2019).
+#
+#  6.4 IL RISCHIO (a qualunque n, Emendamento B): DD equity a 1,0%.
+#  [NESSUNA BANDA CREDIBILE dalla sonda] -- solo l'ordine di grandezza a
+#  tavolino: sotto H0 (deriva ~0) una passeggiata di n ~500 posizioni con
+#  dispersione ~0,7-0,9 R per posizione ha un DD massimo atteso
+#  dell'ordine di 1,25 x sigma x radice(n) = ~20-25 R [STIMA a tavolino,
+#  formula della passeggiata senza deriva], cioe' ~15-25% a 1,0%.
+#  Scritto prima: sotto H0 mi aspetto DD OOS SOPRA il 10% a 1,0%.
+#
+# =====================================================================
+#  7. I CANCELLI, CONGELATI PRIMA. Si citano come R<n> [R266].
+# =====================================================================
+#  R0  -SoloControllo: 2 celle per finestra in ogni file (asse = solo
+#      InpMagic, gemelle a passo 50). Altrimenti STOP.
+#  D0  STORICO: la gamba IS deve partire davvero dal 2015. [CORRETTO dal
+#      cancello del 27/09: la v1 diceva "il primo deal della gamba IS
+#      cade entro il 2015.01.15", ma il per-trade dell'IS NON SOPRAVVIVE
+#      (par. 9: la gamba OOS, stesso magic, lo sovrascrive) e il CSV _IS
+#      non porta date: quel numero non lo legge nessuno.] Si legge nel
+#      giornale dell'agente del tester della gamba IS (riga "history
+#      synchronized from ..." / "history cache ... bars from ..." di
+#      GBPUSD/EURUSD M1) [NON VERIFICATO che l'agente la scriva anche in
+#      ottimizzazione]; se non c'e', D0 resta [NON VERIFICATO] e lo si
+#      scrive nel referto PRIMA del merito IS. In ogni caso: posizioni
+#      IS derivate (par. 9) sotto il limite basso della banda (par. 6.2)
+#      -> prima si sospetta lo storico corto, poi il resto. La prova
+#      pulita e' la corsa singola della gamba IS del par. 11.
+#  D1  CIFRE: un file con Trades IS < 20 NON si legge come "niente
+#      edge": prima si verifica Digits del simbolo nel terminale del PC
+#      (par. 5, contro-esempio del 4 cifre).
+#  G1  Le due gemelle identiche al centesimo (Profit, PF, DD, Trades) e i
+#      due per-trade identici riga per riga tranne il magic. Se no, quel
+#      file e' NULLO.
+#  L0  LATO: nel per-trade dei file solo long (b, e) TUTTE le chiusure
+#      hanno deal_type 1 (chiudono un long); dei solo short (c, f) tutte
+#      0. Un'eccezione = pin di lato non arrivato -> NULLO. Piu' il
+#      controllo di struttura del par. 6.2.
+#  C0  PER-TRADE CONTRO CSV (classe 844, R264): ExportTrades scrive solo
+#      i deal d'USCITA e il tester addebita la meta' della commissione
+#      sull'INGRESSO. (somma net_profit - Profit del CSV _OOS: il per-
+#      trade che sopravvive e' quello dell'OOS, par. 9) / lotti = k,
+#      atteso in
+#      [1,00 ; 3,00] EUR/lotto (misurato sui per-trade di R39: GBPUSD
+#      2,305, EURAUD/EURCAD 2,000; EURUSD [NON MISURATO]) e UGUALE fra
+#      gemelle. Fuori -> si indaga, non si legge.
+#  K1  COSTO: per costruzione (par. 5): stop = W + 2 x max(30,
+#      STOPS_LEVEL) punti >= 337 (GBPUSD) / 266 (EURUSD); EffBuffer
+#      (r.727) puo' solo ALLARGARE lo stop, e l'unica via per cui il
+#      cancello cade e' _Point diverso da 0,00001 (-> D1).
+#      [CORRETTO dal cancello del 27/09: la v1 lo verificava "a campione
+#      nel log" su "BUY STOP @ x SL y". NON si puo', per due ragioni
+#      indipendenti: (a) Log() stampa i prezzi con %.2f (r.356, r.368):
+#      su un 5 cifre la riga e' "BUY STOP @ 1.27 SL 1.27", |x - y| esce
+#      0 o 100 pip, e la regola "una sola riga sotto -> COSTO NON
+#      GARANTITO" avrebbe annullato il merito di OGNI file; (b) il driver
+#      gira Optimization=1 e in ottimizzazione Print() non viene eseguito
+#      (classe 526): quelle righe non esistono proprio.]
+#      VERIFICA A CAMPIONE, SUL PER-TRADE OOS (formula della classe 846,
+#      come R264 K1): per ogni position_id, vol = somma dei volumi
+#      d'uscita; saldo = 10000 + somma dei net delle posizioni chiuse
+#      prima - k x i loro volumi (k del C0); R = saldo x 0,010 EUR;
+#      LotByRisk fa il floor al passo 0,01 (r.757), quindi
+#          stop <= R / (vol x C x q)     (unita' di prezzo, USD)
+#      con C = ContractSize (100000 atteso [NON VERIFICATO sul PC]) e
+#      q = EUR per USD. Per non condannare a torto si usa q_min = 0,80
+#      [STIMA: EURUSD mai sopra ~1,25 nel 2015-2026] (su EURUSD si puo'
+#      usare q = 1 / price della riga, a meno dello stop). Se per UNA
+#      posizione R / (vol x C x 0,80) < 0,00337 (GBPUSD) / 0,00266
+#      (EURUSD), lo stop era sotto il cancello -> "COSTO NON GARANTITO",
+#      il merito non si legge. Controprova numerica: GBPUSD, saldo
+#      10000, stop 33,7 pip, q 0,86 -> lot = floor(100/(0,00337 x 86000))
+#      = 0,34 -> limite 100/(0,34 x 80000) = 0,00368 >= 0,00337: PASSA;
+#      stop 20 pip -> lot 0,58 -> limite 100/(0,58 x 80000) = 0,00216 <
+#      0,00337: CADE. Il test vede uno stop sotto ~0,93 x il cancello,
+#      non uno appena sotto: e' un campione, il cancello e' la costruzione.
+#  R2  MERITO, letto sul per-trade in POSIZIONI (position_id distinti)
+#      e sul CSV per il PF: la partizione del par. 6.3. Si riporta anche
+#      il conto anno per anno, senza soglia (la spina dorsale; SOLO per
+#      l'OOS: il per-trade dell'IS non sopravvive, par. 9), e lo
+#      spezzato OOS mesi allineati / sfasati (par. 3), senza soglia.
+#  R3  RISCHIO (a qualunque n): DD equity a 1,0%. Traduzione a 2,00%
+#      (la taglia FTMO firmata il 20/09) con le due formule di R193b B3:
+#      DD(2%) in [1-(1-d)^2 ; 2d], d = DD misurato a 1,0%. Soglia di
+#      casa S3 di R193b (8,0% a 2,00%) -> d > 4,00% (lineare) / 4,08%
+#      (moltiplicativo): la configurazione NON sta sotto S3 a 2,00% con
+#      nessuna delle due. [DERIVATO: il DD a 2,00% lo da' solo una corsa
+#      a 2,00%, e il DD OHLC e' gia' il caso migliore.]
+#  R4  NESSUNA CELLA SI PROMUOVE. Non c'e' un altopiano da leggere: sei
+#      configurazioni FISSE, zero manopole d'ingresso mosse. Il round
+#      risponde "edge si'/no per simbolo e lato, e con quale DD". Se un
+#      file esce HE, il passo dopo e' un round d'ALTOPIANO (buffer 20/30/
+#      40 col cancello del costo ricalcolato, cutoff 10/11/12) con la
+#      regola del CENTRO e il confronto col DEFAULT (questa cella), piu'
+#      la riprova a TICK. Cosa farne e' una firma di Claudio.
+#
+# =====================================================================
+#  8. LA FINESTRA: IS = GLI ANNI DELLA SONDA, OOS = QUELLO CHE NESSUNO
+#     HA VISTO
+# =====================================================================
+#  @DAQUANDO 2015.01.01, @FINOA 2026.06.30, @FRAZIONEIS 0.4348.
+#  Il driver taglia a Inizio + floor(giorni x frazione) (r.934):
+#  4198 giorni x 0,4348 = 1825,29 -> 1825 giorni -> 2019.12.31.
+#  (Intervallo valido della frazione [0,434731 ; 0,434969): 0,4348 sta
+#  dentro con margine; conto rifatto in python, non a mano.)
+#     IS  2015.01.01 -> 2019.12.31  (5,0 anni)
+#     OOS 2020.01.01 -> 2026.06.30  (6,5 anni)
+#  PERCHE' 5 ANNI DI IS E NON 2 (il conto chiesto, fatto): a ~77
+#  posizioni long/anno (sonda) 2 anni danno ~154: una MONETA sul muro
+#  dei 150, e sull'euro compresso del 2017-2019 sotto. 5 anni danno il
+#  limite basso della banda sopra 150 anche per EURUSD (par. 6.2). La
+#  regola di casa (Emendamento A) dimensiona l'IS sulle operazioni:
+#  >= 150 e' un pavimento, non un bersaglio.
+#  REGIMI DICHIARATI (Emendamento A/C):
+#   IS  2015-2019: QE della BCE e dollaro forte (2015), shock Brexit
+#       (giugno 2016, flash crash del cavo 07/10/2016), poi la
+#       compressione 2017-2019 (volatilita' dell'euro ai minimi della
+#       serie nel 2019). -> SHOCK + LATERALE/COMPRESSO. Sono gli anni
+#       della sonda (2015-01 -> 2020-05).
+#   OOS 2020-2026.06: crollo Covid (marzo 2020), trend del dollaro e
+#       rialzo dei tassi 2021-2022 (crollo del cavo del mini-budget,
+#       settembre 2022), laterale 2023-2024, dollaro debole 2025, e il
+#       cambio d'orologio BCM (par. 3). -> CROLLO + TREND + LATERALE.
+#  rc 0 atteso (le due gambe operano). Si leggono tutti e due i CSV,
+#  _IS e _OOS.
+#
+# =====================================================================
+#  9. MAGIC -- VERGINI, CERCATI IL 27/09/2026
+# =====================================================================
+#  Blocco 7966xx, cercato su tutto il disco e su tutti i rami:
+#     grep -rIE --exclude-dir=.git "\b7966[0-9]{2}\b" /home/user -> 0
+#     git grep -E "\b7966[0-9]{2}\b" $(git for-each-ref --format=
+#        '%(refname)' refs/heads refs/remotes)                  -> 0
+#  Esclusi per mandato: 7953xx (R260), 7954xx (R261), 7958xx, 7965xx
+#  (R264), 7985xx (R265), 7931xx (R255), 7704xx (sedie). "R266" non
+#  compariva in nessun file prova prima di questi.
+#     R266a GBPUSD due lati    796601/796651
+#     R266b GBPUSD solo long   796602/796652
+#     R266c GBPUSD solo short  796603/796653
+#     R266d EURUSD due lati    796604/796654
+#     R266e EURUSD solo long   796605/796655
+#     R266f EURUSD solo short  796606/796656
+#  Per-trade attesi in Common\Files (ExportTrades r.846):
+#     abtg_trades_ABTG_MaxMinNotte_<SIMBOLO>_<magic>.csv  (12 file)
+#  ATTENZIONE: il per-trade che sopravvive e' quello della gamba che
+#  gira PER SECONDA con lo stesso magic (RIEPILOGO_R246.txt) = la gamba
+#  OOS. Il merito IS in POSIZIONI si legge quindi dal CSV _IS (Trades =
+#  deal) diviso k del per-trade OOS [DERIVATO], oppure, meglio, con UNA
+#  corsa singola della gamba IS che conservi il suo per-trade: buco
+#  dichiarato (par. 11). Il PF IS si legge dal CSV, che non ha questo
+#  problema.
+#
+# =====================================================================
+#  10. COSTO IN TEMPO MACCHINA, E LA CELLA FACOLTATIVA
+# =====================================================================
+#  Base MISURATA sullo stesso EA in OHLC M1: r151a (oro) ~20,4 s per
+#  finestra di 6,5 anni sul banco VPS (REFERTO_RUNNER_20260915_033005.txt
+#  r.465-470) = ~3,1 s/anno. Velocita' del PC di backtest su OHLC forex
+#  [NON MISURATA] (R264: un solo agente, ~135 s/passata a TICK).
+#  Per file: 2 gemelle x 11,5 anni (IS + OOS) = 23 anni-passata ->
+#  ~70 s di tester + avvio/compilazione del driver (~1 min).
+#  6 file: ~12-30 MINUTI [STIMA], tetto 60 minuti.
+#  Ordine: R266a -> R266d (due lati: danno n e DD della famiglia) ->
+#  R266b, R266c, R266e, R266f.
+#
+#  CELLA FACOLTATIVA R266g (NON SCRITTA, NON IN CODA): GBPUSD due lati
+#  con InpBufferPoints=20 (il valore di P1) e InpMinBoxPts=297 (il
+#  cancello RICALCOLATO: 337 - 2 x 20 = 297, altrimenti lo stop scende
+#  sotto 40x). Sono due pin che si muovono INSIEME per tenere fermo il
+#  costo: e' UNA variabile (il buffer) a costo costante. Si scrive solo
+#  se R266a esce HE, come primo vicino dell'altopiano (R4).
+#  E il box 00:00-06:59 / piazzo 07:00 di P1: NON in questo round, prior
+#  negativo sull'euro (par. 2 a). Resta una casella libera, scritta qui.
+#
+# =====================================================================
+#  11. I BUCHI, PER NOME
+# =====================================================================
+#  - Modello OHLC: DD limite inferiore; nessuna riprova a tick reali.
+#  - Storico M1 GBPUSD/EURUSD dal 2015 SUL PC DI BACKTEST: [NON
+#    VERIFICATO] (R102 ha girato dal 1999 altrove). Lo scopre D0.
+#  - STOPS_LEVEL del BCM su GBPUSD/EURUSD: [NON MISURATO] (se > 30 punti
+#    il buffer effettivo cresce, r.727).
+#  - LO SPREAD: [NON PINNATO DA QUESTA CORSIA] (classe 394):
+#    RIGA_ROUND_VPS.ps1 non ha -Spread e senza -Spread il driver NON
+#    scrive la riga (walkforward_generico.ps1 r.969-973: MT5 usa il valore
+#    che ha in memoria). In OHLC M1 lo spread entra nel riempimento del
+#    BuyStop (ask) e nelle uscite. -SoloControllo stampa "nessuna riga
+#    Spread nell'.ini": si scrive nel referto PRIMA dei numeri.
+#  - La COMMISSIONE nel tester forex: R258 C-COMM la dava [NON
+#    VERIFICATA]; C0 qui la vede (k in [1 ; 3]). Se k = 0 i PF di R266
+#    sono LORDI di ~0,5 pip a operazione: nessun HE si legge.
+#  - La gestione e' il DEFAULT dell'EA, MAI messa ad asse sul forex:
+#    per il certificato del 09/09 la casella 3 (uscita) resta VUOTA
+#    anche dopo R266. Un H0 di R266 NON e' un certificato di morte.
+#  - TF: la casella 5 (TF cambiato) resta vuota (InpMgmtTF=M15 fisso).
+#  - Il merito IS in POSIZIONI: il per-trade dell'IS viene sovrascritto
+#    dalla gamba OOS (par. 9).
+#  - L'orologio negli inverni 2024/25 e 2025/26: la cella misura un'ora
+#    diversa (par. 3). Il giorno del cambio: [NON MISURATO].
+#  - Il deposito 10000 a 1,0%: lotti ~0,10-0,35 (stop 34-120 pip),
+#    parziale al 50% arrotondato a 0,01 -> errore sul mezzo lotto fino
+#    a ~10% sui box piu' larghi [DERIVATO]; nessun pavimento del lotto
+#    (0,01) in vista, a differenza dell'oro di R264.
+# =====================================================================
+@SIMBOLO    GBPUSD
+@PERIODO    H1
+@DAQUANDO   2015.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.4348
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=0||0||0||0||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=7||7||0||7||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=277||277||0||277||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=8||8||0||8||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=11||11||0||11||N
+InpEntryCutoffMin=0||0||0||0||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=0||0||0||0||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=180||180||0||180||N
+InpBufferPoints=30||30||0||30||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMINR266A
+InpMagic=796601||796601||50||796651||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
