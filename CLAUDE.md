@@ -397,6 +397,17 @@ disciplina — un nome nuovo non deve far pensare a un processo parallelo.
   se non serve; si mostra cosa è stato controllato e l'esito, non tutto il
   ragionamento.
 
+## 💸 IL MODELLO GIUSTO PER OGNI LAVORO (Claudio, 28/09/2026: "ALTERNA I TUOI MODELLI IN BASE A QUELLO CHE DEVI FARE")
+Per non finire i crediti prima del reset settimanale. Si paga il modello grande solo dove l'errore costa la challenge.
+- **Opus (resta)**: `controllo-preventivo` e `verificatore-stringhe` (il cancello: zero errori), `mql5-ea-developer`
+  (codice che gira sui conti), `collaudatore-prop` (misure di rischio che decidono le sedie).
+- **Sonnet**: `cacciatore-strategie`, `cacciatore-config-prop`, `analista-trascrizioni`, `controllo-caccia`,
+  `architetto-prop`, `cercatore-parametri` (ricerca, lettura, sintesi: un errore qui lo prende il cancello dopo).
+- **Haiku** (passato con `model: "haiku"` alla chiamata): lavori meccanici senza giudizio — leggere e riassumere log e
+  referti, grep larghi, rigirare un autotest e riportare l'esito, spacchettare uno zip e contare i file.
+- La sessione principale la sceglie Claudio con `/model`: Sonnet nei turni tranquilli, Opus quando arrivano zip o decisioni.
+- 🔴 **Il cancello non si declassa mai**: il PASS che manda qualcosa a Claudio o al VPS resta su Opus.
+
 ## 🔁 REGOLA DELLA SECONDA CACCIA (richiesta di Claudio, 19/08)
 **Quando un round dichiara un motore SENZA EDGE, gli agenti partono DA SOLI
 a cercare soluzioni sul web** (Code Base, TradingView, GitHub, paper, forum)
