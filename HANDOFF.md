@@ -61,6 +61,17 @@ PC di backtest `DESKTOP-H4D7CAJ` (regola del 21/09).
 - Le uscite esentate stanno FUORI dalla curva in fase (0 in tutte le configurazioni): la firma decide SE le curve si leggono,
   non QUANTO valgono (classe 772). `mc_challenge_ftmo_v2.py --r255` NON lanciato: la 770212 e' nulla (A) o bocciata (B).
 
+🔴 **28/09 sera (~19:25-19:46 FTMO) — DUE TRADE MANUALI SULL'ORO SUL CONTO FTMO 541452707: −2.499,5 EUR netti.**
+Foto dello Storico: buy 1,00 @4137,62 → sl 4141,13 (+298,39) · buy 2,00 @4146,49 → sl 4130,92 (−2.785,17), commissioni −12,73.
+Saldo derivato ≈ **73.470** (da 75.971; il numero esatto lo stampa la sonda delle 03:30). Conti, dal codice del Guardian
+(`ABTG_Guardian.mq5` r.737-752, preset FTMO: start 80.000, totale 9,3% STATICO, pausa giornaliera 3,5%, cap C1 4,0%, reset 01:00 server):
+- pavimento del Guardian = 72.560 equity → **room ≈ 911 EUR**; muro FTMO 72.000 → room ≈ 1.470.
+- una sedia a 2,00% = ~1.469 EUR di stop > 911: **il prossimo trade che va a −911 fa scattare FlattenAll + FAILED (pausa 30 gg)**.
+  Il Guardian NON controlla la room prima di un ingresso: lascia entrare a 2% con 911 di spazio.
+- perdita di oggi ≈ 2.370 < pausa 2.800: **NESSUN BLOCCO ATTIVO**. 770511 SuperWave (0-24h) puo' entrare stanotte; 770411 alle 09:00
+  FTMO, DAX alle 10:00, USA alle 16:30.
+Decisione di Claudio (taglie/conto = sua): congelare (Algo Trading OFF su `C:\FTMO`), ridurre il rischio, o lasciare. Niente eseguito.
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 risposta di Jonas (FTMO) alle tre domande; orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
