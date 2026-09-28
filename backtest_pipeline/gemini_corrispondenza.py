@@ -81,7 +81,7 @@ def costruisci_richiesta(files, domanda):
     return {
         "system_instruction": {"parts": [{"text": istruzione_di_sistema()}]},
         "contents": [{"role": "user", "parts": parti}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 8192},
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 32768},
     }
 
 def invia(richiesta, modello, chiave):
