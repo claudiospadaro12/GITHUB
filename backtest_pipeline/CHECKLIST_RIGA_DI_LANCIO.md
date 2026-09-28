@@ -36346,3 +36346,25 @@ com'e'). Regressione vecchio/nuovo sulle 46 righe in `righe/` e su 32 script: so
 Lezione: **"il controllo esiste" non vuol dire "il controllo gira su questo oggetto"**. Quando si aggiunge una classe alla
 lista nera, si costruisce SUBITO il contro-esempio che la fa scattare: se non scatta, la lista e' un'illusione (qui lo
 era da quando esiste `controlla_pwsh7` per le righe).
+
+### CLASSE 911 — il LETTORE INLINE ricopiato dalla riga modello con UN carattere diverso (il delimitatore del per-trade, `,` al posto di `;`), mai eseguito sull'output VERO del modello che sta in archivio; e il suo guasto totale e' invisibile perche' il cancello e' "informativo" (28/09/2026, controllo preventivo su `RIGA_ROUND_R270_USCITA_DAX.txt` @ `80383afc`, figlia della 186 e della 455)
+**Il caso.** La riga R270 dichiara come modello `RIGA_ROUND_CORTI_D_R268_R269.txt` (girata davvero il 28/09). Il suo
+`$ptRead` legge `abtg_trades_<EA>_<SIMB>_<magic>.csv` con `.Split(',')`; il modello usava `.Split(';')`, e il file lo
+scrive `ExportTrades` con `FileOpen(...,FILE_CSV|...,';')` (`ABTG_DAX_Apertura_EU.mq5` r.2763). Eseguito con `pwsh` sul
+per-trade VERO dell'archivio (`ROUND_CORTI_D_2026-09-28/PERTRADE/..._797202.csv`, 119 righe): con la virgola
+`nDate=0 nMg=0 sum=0 bad=True`, cioe' **"C0 NON BUONO" su un file buono, in tutti e quattro i job**, e il controllo L0
+del LATO (`deal_type` contro `sd`) **non gira mai** (e' condizionato a `-not $po.bad`). Con `;`: 119 righe, somma 5848,64
+= quella del riepilogo della riga D; su `797212` (short) `sd='0'` -> L0=0, `sd='1'` -> L0=257 (il contro-esempio scatta);
+magic sbagliato -> `bad=True`. Il cancello deterministico era verde: il parser non sa quale delimitatore usa l'EA.
+**Perche' e' passato fino al cancello**: il per-trade e' "informativo, classe 455, non nullifica". Un controllo che non
+puo' annullare il file stampa il proprio guasto in GIALLO accanto a un "file NON nullo" in verde, e chi legge lo zip lo
+prende per il solito avviso della 455. L'unico controllo sul LATO della riga era morto e nessuno se ne sarebbe accorto.
+**Regola.** (1) Ogni blocco di lettura inline di una riga (per-trade, CSV, referto) che deriva da una riga modello si
+ESEGUE con `pwsh` sull'OUTPUT VERO di quel modello in `risultati_archivio/` PRIMA del PASS, e il numero che ne esce si
+confronta col riepilogo del modello (qui: la somma 5848,64). (2) Un lettore di file scritti da un EA si confronta col
+`FileOpen` di QUELL'EA (delimitatore, colonne), non con la riga da cui e' copiato. (3) Un controllo "informativo" va
+comunque provato contro il contro-esempio che deve farlo scattare: informativo vuol dire che non annulla, non che puo'
+essere rotto. Candidato per lo strato 1: `abtg_trades_` + `Split(',')` nella stessa riga = FAIL.
+Nello stesso cancello, recidiva della **455/226** nei quattro file prova R270b-e: la regola di fermo S1B ("posizioni
+costanti in ogni cella, se no NULLO") non era misurabile per cella (per-trade unico per magic pinnato; `Trades` = deal),
+e il G0 citava 132/193 POSIZIONI dove il CSV porta 175/270 DEAL. Corretta nei commenti prima dei numeri.
