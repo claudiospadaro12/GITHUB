@@ -96,6 +96,14 @@ riscritte in `docs/RISPOSTA_A_GEMINI_R270_2026-09-28.md`: (1) `ClosePct=0` contr
 (stesse 132/193 posizioni); (2) short 770105: quanti giorni rotti al ribasso SENZA retest e il loro P/L virtuale. Referto atteso
 per le 06:30. Campo FTMO: tutto aperto a 2,00% per decisione di Claudio; sonda 03:30 = saldo esatto.
 
+**29/09 ~00:30 — MISURE A COSTO ZERO DAX lette** (PASS `d697b631`, classe 916): (1) long 770101, cella senza parziale: +4,83 R sul vivo,
+tutto nei 77 giorni con TP1 colpito, ma mediana NEGATIVA (51/77) e le 5 giornate migliori = 141% del totale -> **NON SEPARABILE**
+(esposizione vs selezione non decidibile su un anno piatto); con ClosePct 0 il pareggio a TP1 non scatta mai (21% del vantaggio da 2
+giorni); il REALE gira gia' questa cella dal 14/09; **la misura che decide e' R207b (`InpBEatR=1.0`), mai girata, ~17 min, riga da
+ripassare dal cancello**. (2) short 770105: il retest manca ~1 rottura su 8-12 in ENTRAMBE le direzioni -> tesi dei "crolli" NON
+MISURABILE; proposta S0/S1/S2 (~3 min). Referto `report/MISURE_COSTO_ZERO_DAX_2026-09-29.md`. Gemini: canale API vivo, primo
+scambio in `docs/gemini/RISPOSTA_GEMINI_2026-09-28_2207.md` (da verificare); dossier EA fuori gioco in costruzione.
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 risposta di Jonas (FTMO) alle tre domande; orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
