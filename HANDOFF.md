@@ -104,9 +104,14 @@ ripassare dal cancello**. (2) short 770105: il retest manca ~1 rottura su 8-12 i
 MISURABILE; proposta S0/S1/S2 (~3 min). Referto `report/MISURE_COSTO_ZERO_DAX_2026-09-29.md`. Gemini: canale API vivo, primo
 scambio in `docs/gemini/RISPOSTA_GEMINI_2026-09-28_2207.md` (da verificare); dossier EA fuori gioco in costruzione.
 
+**29/09 notte — RISPOSTA FTMO (Eduardo)**: conto Standard; in Evaluation overnight/weekend ok; **hedging nello stesso conto PERMESSO**
+(770101+770105 leciti); **hedging fra conti VIETATO** (conferma la pausa oro demo prima dell'oro long FTMO); da FUNDED: chiusura
+weekend/pause >2h obbligatoria e finestra news 2+2 min senza esecuzioni (serve un filtro a livello conto: da progettare prima del
+passaggio). `docs/RISPOSTA_SUPPORTO_FTMO_2026-09-29.md`.
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
-risposta di Jonas (FTMO) alle tre domande; orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
+orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
 
 ## 🗓️ 07/09 — GIORNATA DI VERDETTI: due piste CHIUSE con numeri nostri
 
