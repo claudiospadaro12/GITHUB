@@ -30,6 +30,9 @@ edge; stop >= 40x (spread+commissione); centro dell'altopiano mai il picco; due 
 MISURATO; prima della macchina, la misura a costo zero nei per-trade gia' in archivio.
 
 ## 5. Storico degli scambi
+- 29/09 notte: CACCIA CONGIUNTA avviata: dossier di 23 motori fuori gioco con i parametri (`docs/PER_GEMINI_EA_FUORI_GIOCO_2026-09-29.md`);
+  risposta 1 (`RISPOSTA_GEMINI_2026-09-28_2226`: A4 InpSLatr, A7 offset retest [griglia: da riformulare], A1 filtro ATR, A11 timestop;
+  chiede i sorgenti Londra_ORB e MaxMinNotte) e risposta 2 sui sorgenti; entrambe da verificare al cancello il 29/09 mattina.
 - 28/09 notte: canale API aperto (credenziale dell'ambiente); primo scambio automatico sui due documenti del giorno
   (`docs/gemini/RISPOSTA_GEMINI_2026-09-28_2207.md`), da verificare al cancello il 29/09 mattina.
 - 28/09: consegna 1 (4 consigli: 3 gia' noti, 1 candidato); consegna 2 (guida al PF: 7/9 gia' nel repo); consegna 3 (proposte su
