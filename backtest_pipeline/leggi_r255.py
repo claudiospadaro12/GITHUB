@@ -78,7 +78,11 @@ tp15, trail0, stH4, stH6, stH8, stH12, stD1, long) x 2 orologi (14:30 /
 
 USO:
   python3 backtest_pipeline/leggi_r255.py --raccolta <cartella ROUND_R255_SHORT_DOW_INFASE_AAAA-MM-GG>
-        [--out referto.txt]
+        [--out referto.txt] [--s1-festivi]
+     --s1-festivi (DEFAULT SPENTA): LETTURA B, S1 EMENDATA DOPO I NUMERI, IN ATTESA DELLA FIRMA DI CLAUDIO
+       (classe 900). Esenta per nome le uscite fuori finestra alla riapertura CME dopo un festivo USA
+       ELENCATO (FESTIVI_ESENTI), al massimo 2 per per-trade; tutto il resto resta NULLO. Senza l opzione
+       l output e IDENTICO AL BYTE alla lettura A.
   python3 backtest_pipeline/leggi_r255.py --autotest   [--fixture-dir DIR]
      (fixture dagli archivi VERI 794603/794601: long = R246 al centesimo,
       short = righe invertite di segno e date spostate; casi: pulito,
@@ -197,6 +201,65 @@ def era_di(d):
         if a <= d <= b:
             return k
     return None
+
+
+# ---------------------------------------------------------------- LETTURA B (--s1-festivi): S1 EMENDATA DOPO I NUMERI
+# Classe 900: questo emendamento e' stato scritto DOPO aver visto i numeri di R255 (19 file NULLI per S1, ognuno per UNA
+# uscita alla riapertura CME dopo un festivo USA). Il criterio congelato (testa par. 8) NON cambia: senza --s1-festivi
+# il lettore produce la lettura A, identica al byte. La B vale solo con la firma di Claudio.
+# Festivi che ESENTANO: solo quelli osservati nei per-trade di R255 come uscite fuori finestra, PER NOME.
+FESTIVI_ESENTI = collections.OrderedDict([
+    (dt.date(2025, 1, 9), 'lutto nazionale USA (J. Carter), borse chiuse'),
+    (dt.date(2025, 6, 19), 'Juneteenth'),
+    (dt.date(2026, 5, 25), 'Memorial Day')])
+# Festivi CME previsti nella finestra 2024.09.27-2026.06.30 e NON osservati come uscite fuori finestra: si ELENCANO e si
+# controllano, ma NON esentano (se uno comparisse, resta NULLO e lo si scrive: va aggiunto per nome con la firma).
+FESTIVI_PREVISTI = collections.OrderedDict([
+    (dt.date(2024, 11, 28), 'Thanksgiving'), (dt.date(2024, 12, 25), 'Natale'), (dt.date(2025, 1, 1), 'Capodanno'),
+    (dt.date(2025, 1, 20), 'Martin Luther King Day'), (dt.date(2025, 2, 17), 'Presidents Day'), (dt.date(2025, 4, 18), 'Venerdi Santo'),
+    (dt.date(2025, 5, 26), 'Memorial Day'), (dt.date(2025, 7, 4), 'Independence Day'), (dt.date(2025, 9, 1), 'Labor Day'),
+    (dt.date(2025, 11, 27), 'Thanksgiving'), (dt.date(2025, 12, 25), 'Natale'), (dt.date(2026, 1, 1), 'Capodanno'),
+    (dt.date(2026, 1, 19), 'Martin Luther King Day'), (dt.date(2026, 2, 16), 'Presidents Day'), (dt.date(2026, 4, 3), 'Venerdi Santo'),
+    (dt.date(2026, 6, 19), 'Juneteenth')])
+S1B_FINESTRA = dt.timedelta(minutes=90)     # (b) prima ora e mezza dalla riapertura CME
+S1B_MAX = 2                                 # (c) massimo 2 uscite esenti per per-trade
+
+
+def riapertura_cme(festivo):
+    """la riapertura del Globex dopo la chiusura festiva, in ORA SERVER BCM (UTC+1 fisso, report/OROLOGIO_BCM_2026-09-24.md):
+    18:00 ET del giorno festivo (di venerdi: la domenica). Estate USA (EDT, UTC-4) = 23:00 BCM dello STESSO giorno;
+    inverno USA (EST, UTC-5) = 00:00 BCM del giorno DOPO."""
+    d = festivo + dt.timedelta(days=2) if festivo.weekday() == 4 else festivo
+    if inverno_usa(d):
+        return dt.datetime.combine(d + dt.timedelta(days=1), dt.time(0, 0))
+    return dt.datetime.combine(d, dt.time(23, 0))
+
+
+def s1_esenzioni(deals, fuori, festivi=None):
+    """(esenti, restanti, nota). esenti = [(deal, data festivo, nome, condizione b)]. Una uscita fuori finestra e ESENTE
+    solo se: (a) cade nella sessione di riapertura CME dopo un festivo ELENCATO (t >= riapertura e stesso giorno di
+    calendario BCM della riapertura); (b) t <= riapertura + 1h30, oppure e la PRIMA uscita del per-trade dopo la
+    riapertura; (c) le candidate del per-trade sono al massimo 2 (oltre: nessuna esente)."""
+    festivi = FESTIVI_ESENTI if festivi is None else festivi
+    cand, resto = [], []
+    for d in fuori:
+        hit = None
+        for fd, nome in festivi.items():
+            r0 = riapertura_cme(fd)
+            if d['t'] >= r0 and d['t'].date() == r0.date():
+                primo = min((q['t'] for q in deals if q['t'] >= r0), default=None)
+                if d['t'] <= r0 + S1B_FINESTRA:
+                    hit = (d, fd, nome, 'b: entro 1h30 dalla riapertura CME %s' % ds(r0))
+                elif d['t'] == primo:
+                    hit = (d, fd, nome, 'b: prima uscita del per-trade dopo la riapertura CME %s' % ds(r0))
+                break
+        if hit:
+            cand.append(hit)
+        else:
+            resto.append(d)
+    if len(cand) > S1B_MAX:
+        return [], list(fuori), 'c: %d uscite candidate all esenzione > %d: NESSUNA esente' % (len(cand), S1B_MAX)
+    return cand, resto, ''
 
 
 def feriali_da(inizio, n):
@@ -394,10 +457,12 @@ class Raccolta:
         return os.path.join(QUI, 'prove', FILE[f]['prova'])
 
 
-def pre_lettura_file(rc, f):
-    """E0, P0, G1, C0, L0, S1 e il moncone IS per un file. Ritorna il dict del file."""
+def pre_lettura_file(rc, f, s1_festivi=False):
+    """E0, P0, G1, C0, L0, S1 e il moncone IS per un file. Ritorna il dict del file.
+    s1_festivi=True: LETTURA B (S1 emendata dopo i numeri, classe 900), vedi s1_esenzioni."""
     x = FILE[f]
-    o = dict(nullo=[], note=[], oos=None, pt={}, is_txt='', p0_n=0, tetto='tetto barre NON LETTO dal REFERTO')
+    o = dict(nullo=[], note=[], oos=None, pt={}, is_txt='', p0_n=0, tetto='tetto barre NON LETTO dal REFERTO',
+             esenti=[], s1_tot=0, s1_note=[])
     # REFERTO_ROUND: solo la riga del tetto barre (informativa)
     ref = rc.path_round(f, 'REFERTO_ROUND_%s.txt' % f)
     if os.path.exists(ref):
@@ -501,7 +566,16 @@ def pre_lettura_file(rc, f):
         if l0:
             o['nullo'].append('L0 per-trade %d: %d deal con deal_type %d (atteso %d; primo %s)' % (mg, len(l0), l0[0]['type'], x['sd'], ds(l0[0]['t'])))
         s1 = [d for d in deals if not (x['lo'] <= d['t'].strftime('%H:%M:%S') <= x['hi'])]
-        if s1:
+        o['s1_tot'] += len(s1)
+        if s1 and s1_festivi:
+            es, s1, nota = s1_esenzioni(deals, s1)
+            o['esenti'].extend((mg,) + e for e in es)
+            if nota:
+                o['s1_note'].append('per-trade %d: %s' % (mg, nota))
+            if s1:
+                o['nullo'].append('S1 per-trade %d: %d uscite fuori da [%s, %s] NON ESENTI con la S1 emendata%s (prima %s: %s)'
+                                  % (mg, len(s1), x['lo'], x['hi'], ' [%s]' % nota if nota else '', ds(s1[0]['t']), ', '.join(ds(d['t']) for d in s1[:6])))
+        elif s1:
             o['nullo'].append('S1 per-trade %d: %d uscite fuori da [%s, %s] (prima %s)' % (mg, len(s1), x['lo'], x['hi'], ds(s1[0]['t'])))
     if len(per_magic) == 2:
         d1, d2 = per_magic[x['g1']], per_magic[x['g2']]
@@ -886,16 +960,125 @@ def m4_altopiano(ris):
     return out
 
 
+# ---------------------------------------------------------------- LETTURA B: testa, esenzioni per nome, peso nelle curve
+def testa_lettura_b():
+    return [
+        'LETTURA B -- S1 EMENDATA DOPO I NUMERI, IN ATTESA DELLA FIRMA DI CLAUDIO',
+        '  CLASSE 900: criterio cambiato A NUMERO VISTO. La S1 della testa (par. 8, congelata prima dei numeri) ha annullato 19 file su 24,',
+        '  ognuno per UNA uscita (due nel trail0 14:30) alla riapertura CME dopo un festivo USA. Questa lettura applica una S1 emendata',
+        '  scritta DOPO aver visto quei numeri: e uno strumento tarato sul caso, NON una prova indipendente. La lettura valida senza firma',
+        '  resta la A (stesso lettore senza --s1-festivi: report/LETTURA_R255_2026-09-28.md, 19 file NULLI).',
+        '  EMENDAMENTO: una uscita fuori finestra e ESENTE solo se TUTTE: (a) cade nella sessione di riapertura CME dopo una chiusura festiva',
+        '  USA ELENCATA PER NOME (t >= riapertura e stesso giorno di calendario BCM della riapertura; riapertura = 18:00 ET del festivo,',
+        '  di venerdi la domenica = 23:00 BCM stesso giorno in estate USA, 00:00 BCM del giorno dopo in inverno USA; BCM = UTC+1 fisso);',
+        '  (b) entro 1h30 dalla riapertura, oppure prima uscita del per-trade dopo la riapertura; (c) al massimo %d esenti per per-trade' % S1B_MAX,
+        '  (oltre: nessuna). Tutto il resto resta NULLO come in A. Il NULLO della riga si toglie solo se il suo UNICO motivo e S1, col',
+        '  conteggio uguale a quello del lettore e tutte le uscite esentate.',
+        '  DEVIAZIONE DICHIARATA dalla stesura del 28/09: la condizione (a) era "giorno di calendario SUCCESSIVO al festivo". Misurato: in',
+        '  estate USA la riapertura (18:00 ET) cade alle 23:00 BCM DELLO STESSO GIORNO (Juneteenth 2025.06.19 23:05, Memorial Day 2026.05.25',
+        '  23:05): alla lettera quelle due NON sarebbero esenti. La (a) qui e la sessione di riapertura, piu STRETTA di "23:00-01:30 di un',
+        '  giorno qualunque": ogni esenzione sotto riporta anche se soddisfa la stesura letterale.',
+        '']
+
+
+def sezione_esenzioni(rc, F, riga_s1_tolte):
+    L = ['', '1-bis. S1 EMENDATA (LETTURA B): ESENZIONI PER NOME (file, magic, data, ora, festivo, condizione, P/L della posizione)']
+    n = 0
+    visti = collections.Counter()
+    for f in FILE:
+        o = F[f]
+        for mg, d, fd, nome, cond in o['esenti']:
+            n += 1
+            visti[fd] += 1
+            pos = [q for q in o['pt'].get(mg, []) if q['pid'] == d['pid']]
+            lett_a = (d['t'].date() == fd + dt.timedelta(days=1))
+            hh = d['t'].strftime('%H:%M:%S')
+            lett_b = (hh >= '23:00:00' or hh <= '01:30:00')
+            L.append('  ESENTE %s %-6s %s magic %d: uscita %s dopo %s %s (%s); posizione %d: %d deal, P/L %+.2f; stesura letterale: (a) giorno successivo %s, 23:00-01:30 %s'
+                     % (f, FILE[f]['cf'], FILE[f]['ora'], mg, ds(d['t']), ds(fd), nome, cond, d['pid'], len(pos), sum(q['net'] for q in pos),
+                        'SI' if lett_a else 'NO', 'SI' if lett_b else 'NO'))
+        for t in o['s1_note']:
+            L.append('  NOTA %s: %s' % (f, t))
+    if not n:
+        L.append('  nessuna esenzione')
+    rimasti = [f for f in FILE if any(s.startswith('S1 ') for s in F[f]['nullo'])]
+    L.append('  uscite esentate: %d; file che restano NULLI per S1 anche con l emendamento: %s' % (n, ', '.join(rimasti) if rimasti else 'nessuno'))
+    for f in rimasti:
+        L.append('    %s: %s' % (f, ' | '.join(s for s in F[f]['nullo'] if s.startswith('S1 '))))
+    L.append('  NULLI DELLA RIGA TOLTI (unico motivo S1, conteggio uguale, tutte esentate): %s' % (', '.join(riga_s1_tolte) if riga_s1_tolte else 'nessuno'))
+    for fd, nome in FESTIVI_ESENTI.items():
+        L.append('  festivo in elenco %s %s: riapertura CME %s BCM -> %s' % (ds(fd), nome, ds(riapertura_cme(fd)), ('osservato: %d uscite esentate' % visti[fd]) if visti[fd] else 'NON osservato in questa raccolta'))
+    # i previsti: controllati su TUTTE le uscite fuori finestra dei 48 per-trade, ma non esentano
+    for fd, nome in FESTIVI_PREVISTI.items():
+        r0 = riapertura_cme(fd)
+        oss = []
+        for f in FILE:
+            x = FILE[f]
+            for mg, deals in F[f]['pt'].items():
+                oss += ['%s/%d %s' % (f, mg, ds(d['t'])) for d in deals
+                        if not (x['lo'] <= d['t'].strftime('%H:%M:%S') <= x['hi']) and d['t'] >= r0 and d['t'].date() == r0.date()]
+        L.append('  festivo previsto %s %s (riapertura CME %s BCM): %s' % (ds(fd), nome, ds(r0), ('OSSERVATO ma NON in elenco -> resta NULLO, va aggiunto per nome con la firma: ' + ', '.join(oss[:6])) if oss else 'previsto, non osservato'))
+    L.append('  CONTRO-ESEMPIO DELLA B: "pin dell ora non arrivato" (corsa a ora 14 nel file 15:30) sposta TUTTE le uscite di un ora: finirebbero prima di lo')
+    L.append('  in giorni feriali qualunque e nessuna sarebbe esente -> NULLO anche qui (autotest). Lo misura anche G2 L OROLOGIO sotto: righe d inverno')
+    L.append('  15:30 IDENTICHE a quelle 14:30 = l ora 15 non e arrivata. Il peso delle esenzioni nelle curve e stampato per configurazione (riga S1-B).')
+    return L
+
+
+def esenti_nelle_curve(F, cf, cv):
+    """quante posizioni ESENTATE entrano in ogni curva (g1: la curva si fa dalla gemella g1) e con che P/L"""
+    f4, f5 = CONF[cf]
+    es = {f: {d['pid'] for mg, d, fd, nome, cond in F[f]['esenti'] if mg == FILE[f]['g1']} for f in (f4, f5)}
+    parti, conta = [], {}
+    for nome in ('IN FASE', 'CONTROLLO', 'FTMO-DOC'):
+        c = cv.get(nome)
+        if c is None:
+            parti.append('%s n.d.' % nome)
+            continue
+        dentro = []
+        for era in ERE:
+            for p in c[era]['pos']:
+                src = f4 if any(p is q for q in (cv['p4'] or [])) else f5
+                if p['pid'] in es[src]:
+                    dentro.append((src, era, p))
+        parti.append('%s %d (%s)' % (nome, len(dentro), ', '.join('%s era %s %s P/L %+.2f' % (s_, e_, ds(p['data']), p['net']) for s_, e_, p in dentro) or 'nessuna'))
+        conta[nome] = len(dentro)
+    return ('S1-B posizioni ESENTATE dentro le curve (gemella g1): ' + '; '.join(parti) + (' [esentate nei file: %s]' % ', '.join('%s %d' % (f, len(es[f])) for f in (f4, f5))), conta)
+
+
+def composizione_in_fase(cf, cv):
+    """da dove viene la curva IN FASE: per file e per era, la parte PRESA (14:30 d estate USA, 15:30 d inverno USA) e la
+    parte LASCIATA FUORI (14:30 d inverno = un ora prima della cash, 15:30 d estate = un ora dopo), in denaro (metodo B)"""
+    f4, f5 = CONF[cf]
+    out = []
+    for f, pp, presa_inv in ((f4, cv['p4'], False), (f5, cv['p5'], True)):
+        if pp is None:
+            continue
+        pezzi = []
+        for era in ERE:
+            pe = [p for p in pp if era_di(p['data']) == era]
+            dentro = [p for p in pe if inverno_usa(p['data']) == presa_inv]
+            fuori = [p for p in pe if inverno_usa(p['data']) != presa_inv]
+            for lbl, q in (('PRESA', dentro), ('fuori', fuori)):
+                g = sum(p['net'] for p in q if p['net'] > 0)
+                l_ = -sum(p['net'] for p in q if p['net'] < 0)
+                pezzi.append('%s %s n %d P/L %+.2f PF %s' % (era, lbl, len(q), g - l_, pf_txt(g / l_) if l_ > 0 else ('inf' if g > 0 else '-')))
+        out.append('  S1-B COMPOSIZIONE IN FASE, %s %s (%s USA PRESO nella curva che decide, l altra stagione fuori): %s'
+                   % (f, FILE[f]['ora'], 'INVERNO' if presa_inv else 'ESTATE', ' | '.join(pezzi)))
+    return out
+
+
 # ---------------------------------------------------------------- il referto
 def riga_curva(lbl, c):
     return ('  %-8s %3d pos (%3d deal) Profit %9.2f  PF pos %s / deal %s  EP %+7.2f  vinte %d  DD chiuso %7.2f EUR = %6.3f%%  pegg. giorno %+.3f%% (%s)  serie %d  scarto saldo max %.2f%%'
             % (lbl, c['n'], c['deal'], c['profit'], pf_txt(c['pf_pos']), pf_txt(c['pf_deal']), c['ep'], c['vinte'], c['dd_eur'], c['dd_pct'], c['pegg_pct'], ds(c['pegg_data']), c['serie'], c['scarto_max'] * 100))
 
 
-def referto(base):
+def referto(base, s1_festivi=False):
     base, nota_base = trova_raccolta(base)
     rc = Raccolta(base)
     L = []
+    if s1_festivi:
+        L.extend(testa_lettura_b())
     L.append('LETTURA R255 -- IL LATO SHORT DELL APERTURA DOW A DUE OROLOGI (criteri: prove/R255a_short_DOW_ancora_1430.txt par. 7-17, congelati prima dei numeri)')
     L.append('raccolta: %s' % base)
     if nota_base:
@@ -932,7 +1115,7 @@ def referto(base):
     L.append('1. PRE-LETTURA PER FILE (E0, P0, G1, C0, L0, S1; moncone IS; classe 772: un file KO = NULLO, la sua configurazione = NULLA)')
     F = collections.OrderedDict()
     for f in FILE:
-        F[f] = pre_lettura_file(rc, f)
+        F[f] = pre_lettura_file(rc, f, s1_festivi)
         o = F[f]
         st_ = 'NULLO: ' + ' | '.join(o['nullo']) if o['nullo'] else 'ok'
         r = riga_g1(F, f)
@@ -946,7 +1129,16 @@ def referto(base):
         L.append('  ATTENZIONE: RIEPILOGO assente -> classe 166 (motore = pin), rc e freschezza dei file NON VERIFICATI: ogni esito sotto vale SOLO se il motore e quello del pin')
     elif len(nr) != 24:
         L.append('  ATTENZIONE: nel RIEPILOGO %d righe di ESITO su 24 (mancano: %s): per quei file classe 166 e rc NON VERIFICATI' % (len(nr), ', '.join(f for f in FILE if f not in nr)))
+    riga_s1_tolte = collections.OrderedDict()
     for f in FILE:
+        if nr.get(f) and s1_festivi:
+            # LETTURA B: il NULLO della riga si toglie SOLO se il suo unico motivo e S1 (S1 e l ultimo motivo della riga:
+            # se la stringa comincia con S1 non ce ne sono altri), il conteggio della riga = quello del lettore (g1 + g2)
+            # e il lettore ha ESENTATO tutte quelle uscite. Ogni altro motivo della riga resta NULLO come in A.
+            m = re.match(r'^S1 KO: (\d+) uscite fuori ', nr[f])
+            if m and int(m.group(1)) == F[f]['s1_tot'] and len(F[f]['esenti']) == F[f]['s1_tot'] and F[f]['s1_tot'] > 0:
+                riga_s1_tolte[f] = nr[f]
+                continue
         if nr.get(f):
             F[f]['nullo'].append('RIGA (RIEPILOGO): ' + nr[f][:300])
         elif f in nr and F[f]['nullo']:
@@ -957,6 +1149,8 @@ def referto(base):
         L.append('  DIVERGENZA: NULLI per il lettore ma NON per la riga: %s (si legge il motivo sopra: o la riga o il lettore sbaglia)' % ', '.join(solo_qui))
     if 'FILE NULLI' in riep:
         L.append('  [riga] ' + riep['FILE NULLI'][:600])
+    if s1_festivi:
+        L.extend(sezione_esenzioni(rc, F, riga_s1_tolte))
     conf_nulle = {cf for cf, (a, b) in CONF.items() if F[a]['nullo'] or F[b]['nullo']}
     L.append('')
     L.append('2. G0 E G2 (ricalcolati dai per-trade e dai CSV; accanto, quello che ha stampato la riga)')
@@ -1028,6 +1222,10 @@ def referto(base):
                 L.append(riga_curva('A ribas.', ce['A']))
                 L.append(riga_curva('B denaro', ce['B']))
                 L.append('  scarto di saldo a curva CONTINUA (classe 876, solo errore di lotto): %.2f%%' % (ce.get('scarto_cont', 0.0) * 100))
+        if s1_festivi:
+            t_es, r['s1b'] = esenti_nelle_curve(F, cf, cv)
+            L.append('  ' + t_es)
+            L.extend(composizione_in_fase(cf, cv))
         # gambe intere e k
         for f, pp in ((f4, cv['p4']), (f5, cv['p5'])):
             if pp is None:
@@ -1180,6 +1378,14 @@ def referto(base):
     batte = [cf for cf, r in ris.items() if cf != 'long' and r.get('m', {}).get('M2') is True]
     L.append('   LA MANOPOLA BATTE IL RIFERIMENTO (M2, oltre il rumore, calcolato anche sotto 150 ma allora e un INDIZIO): %s'
              % (', '.join(batte) if batte else 'NESSUNA MANOPOLA BATTE LO SHORT COME IL LONG OLTRE IL RUMORE'))
+    if s1_festivi:
+        L.append('   [LETTURA B: esiti con la S1 EMENDATA DOPO I NUMERI (classe 900), in attesa della firma di Claudio; la lettura valida senza firma e la A]')
+        tot_if = {cf: r['s1b'].get('IN FASE', 0) for cf, r in ris.items() if r.get('s1b')}
+        L.append('   CONTRO-ESEMPIO DELLA B (se le esenzioni fossero sbagliate): posizioni esentate dentro la curva IN FASE = %d in tutte le %d configurazioni lette (%s); '
+                 'sbagliate, i numeri IN FASE non cambierebbero di un centesimo: cambierebbe SOLO se esistono (file NULLO -> configurazione NULLA, come in A). '
+                 'L alternativa "ora 15 non arrivata" la misura G2 L OROLOGIO: righe d inverno 15:30 contro 14:30 DIVERSE in %d coppie su %d leggibili.'
+                 % (sum(tot_if.values()), len(tot_if), ', '.join('%s %d' % kv for kv in tot_if.items()),
+                    sum(1 for t in g2o if 'DIVERSE = ok' in t), sum(1 for t in g2o if 'NON VERIFICABILE' not in t)))
     L.append('   CERTIFICATO (09/09, par. 13): NON ANCORA MISURATO, MAI morto -- mancano i gemelli NASUSD/SPXUSD (punto 4) e il TF del grafico (punto 5); PF, n e DD e uscita ad asse: SI da questo round')
     # -------- 770212
     L.append('')
@@ -1542,9 +1748,97 @@ def autotest(fixture_dir):
     m4_altopiano(ris)
     assert ris['stH8']['esito'].startswith('PROMOSSA AL PASSO DOPO (centro') and ris['stH12']['esito'].startswith('NON PROMOSSA'), (ris['stH8']['esito'], ris['stH12']['esito'])
     assert not any('salvo M4' in r['esito'] for r in ris.values())
+    # ---- LETTURA B (--s1-festivi): contro-esempi della S1 emendata dopo i numeri (classe 900)
+    # calendario: riapertura CME in ora BCM (UTC+1 fisso), estate = 23:00 stesso giorno, inverno = 00:00 del giorno dopo, venerdi -> domenica
+    assert riapertura_cme(dt.date(2025, 1, 9)) == dt.datetime(2025, 1, 10, 0, 0) and riapertura_cme(dt.date(2025, 6, 19)) == dt.datetime(2025, 6, 19, 23, 0)
+    assert riapertura_cme(dt.date(2026, 5, 25)) == dt.datetime(2026, 5, 25, 23, 0) and riapertura_cme(dt.date(2025, 4, 18)) == dt.datetime(2025, 4, 20, 23, 0)
+    assert all(fd.weekday() < 5 for fd in list(FESTIVI_ESENTI) + list(FESTIVI_PREVISTI)) and not set(FESTIVI_ESENTI) & set(FESTIVI_PREVISTI)
+    base = genera_fixture(fixture_dir, 's1b', a603, a601)
+
+    def _ritocca(f, cambi):
+        """cambia il close_time di alcuni deal (indice nel per-trade, nuovo datetime o funzione) in g1 E g2: C0 e G1 restano ok"""
+        for mg in (FILE[f]['g1'], FILE[f]['g2']):
+            pth = os.path.join(base, 'PERTRADE', 'abtg_trades_%s_%s_%d.csv' % (EA, SIMB, mg))
+            rr = open(pth).read().splitlines()
+            for i, nuovo in cambi:
+                c = rr[1 + i].split(';')
+                t = dt.datetime.strptime(c[0], '%Y.%m.%d %H:%M:%S')
+                c[0] = (nuovo(t) if callable(nuovo) else nuovo).strftime('%Y.%m.%d %H:%M:%S')
+                rr[1 + i] = ';'.join(c)
+            open(pth, 'w').write('\n'.join(rr) + '\n')
+
+    def _riga_s1(f, n):
+        """la riga dice FILE NULLO per S1 (come nel RIEPILOGO vero di R255)"""
+        rp = os.path.join(base, 'RIEPILOGO_R255.txt')
+        rr = [ln.replace('file NON nullo', 'FILE NULLO: S1 KO: %d uscite fuori %s-%s (fixture)' % (n, FILE[f]['lo'], FILE[f]['hi'])) if ln.startswith(f + ' ') else ln
+              for ln in open(rp).read().splitlines()]
+        open(rp, 'w').write('\n'.join(rr) + '\n')
+    # i tre casi VERI di R255 (come stanno nei per-trade dello zip): devono diventare ESENTI
+    _ritocca('R255a', [(5, dt.datetime(2025, 1, 10, 0, 25, 27))])
+    _riga_s1('R255a', 2)
+    _ritocca('R255b', [(5, dt.datetime(2025, 6, 19, 23, 5, 0))])
+    _riga_s1('R255b', 2)
+    _ritocca('R255x', [(5, dt.datetime(2026, 5, 25, 23, 5, 0))])
+    _riga_s1('R255x', 2)
+    # il trail0 14:30 vero: due deal della stessa corsa, 01:19:52 (entro 1h30) e 03:26:04 (ne entro 1h30 ne prima uscita): resta NULLO
+    _ritocca('R255k', [(5, dt.datetime(2025, 1, 10, 1, 19, 52)), (6, dt.datetime(2025, 1, 10, 3, 26, 4))])
+    _riga_s1('R255k', 4)
+    # contro-esempio 1: pin dell ora NON arrivato (file 15:30 corso a ora 14): il 60% delle uscite prima delle 16:05 -> NULLO anche in B
+    nd = len(open(os.path.join(base, 'PERTRADE', 'abtg_trades_%s_%s_%d.csv' % (EA, SIMB, FILE['R255d']['g1']))).read().splitlines()) - 1
+    idx = list(range(0, nd, 5)) + list(range(1, nd, 5)) + list(range(2, nd, 5))
+    _ritocca('R255d', [(i, (lambda t: t.replace(hour=15, minute=30, second=0))) for i in idx])
+    _riga_s1('R255d', 2 * len(idx))
+    # contro-esempio 2: 23:05 in un giorno NON festivo (mercoledi 2025.07.09), 23:05 del giorno DOPO Juneteenth (la stesura letterale
+    # "giorno successivo" in estate), 23:05 del 2025.01.09 (il festivo d inverno PRIMA della riapertura delle 00:00): tutti NULLI
+    _ritocca('R255f', [(5, dt.datetime(2025, 7, 9, 23, 5, 0))])
+    _riga_s1('R255f', 2)
+    _ritocca('R255h', [(5, dt.datetime(2025, 6, 20, 23, 5, 0))])
+    _ritocca('R255j', [(5, dt.datetime(2025, 1, 9, 23, 5, 0))])
+    # contro-esempio 3: TRE uscite post-festivo nello stesso per-trade (tutte entro 1h30 da Juneteenth): (c) -> nessuna esente, NULLO
+    _ritocca('R255l', [(5, dt.datetime(2025, 6, 19, 23, 5, 0)), (6, dt.datetime(2025, 6, 19, 23, 10, 0)), (7, dt.datetime(2025, 6, 19, 23, 15, 0))])
+    # contro-esempio 4: un festivo PREVISTO ma non in elenco (Presidents Day 2025, riapertura 2025.02.18 00:00): resta NULLO, e si scrive
+    _ritocca('R255n', [(5, dt.datetime(2025, 2, 18, 0, 20, 0))])
+    txtA, oA = referto(base)
+    txtB, oB = referto(base, s1_festivi=True)
+    FA, FB = oA['F'], oB['F']
+    # A: la S1 alla lettera annulla tutti i file toccati (e la riga li annulla anche lei)
+    for f in ('R255a', 'R255b', 'R255x', 'R255k', 'R255d', 'R255f', 'R255h', 'R255j', 'R255l', 'R255n'):
+        assert any(x_.startswith('S1 ') for x_ in FA[f]['nullo']), (f, FA[f]['nullo'])
+    assert 'LETTURA B' not in txtA and 'S1-B' not in txtA and '1-bis' not in txtA
+    # B: i tre casi veri ESENTI, e il NULLO della riga tolto; stampati per nome
+    for f, fest in (('R255a', 'lutto nazionale'), ('R255b', 'Juneteenth'), ('R255x', 'Memorial Day')):
+        assert not FB[f]['nullo'], (f, FB[f]['nullo'])
+        assert len(FB[f]['esenti']) == 2 and all(e[2] in FESTIVI_ESENTI for e in FB[f]['esenti']), FB[f]['esenti']
+        assert any(ln.startswith('  ESENTE %s ' % f) and fest in ln for ln in txtB.splitlines()), f
+    assert txtB.startswith('LETTURA B -- S1 EMENDATA DOPO I NUMERI, IN ATTESA DELLA FIRMA DI CLAUDIO') and 'CLASSE 900' in txtB
+    assert 'NULLI DELLA RIGA TOLTI (unico motivo S1, conteggio uguale, tutte esentate): R255a, R255b, R255x' in txtB, [ln for ln in txtB.splitlines() if 'RIGA TOLTI' in ln]
+    # trail0: 01:19:52 esente, 03:26:04 no -> NULLO, e la riga resta
+    assert len(FB['R255k']['esenti']) == 2 and any('03:26:04' in x_ for x_ in FB['R255k']['nullo']) and any(x_.startswith('RIGA') for x_ in FB['R255k']['nullo']), FB['R255k']['nullo']
+    # contro-esempio 1: pin non arrivato
+    d5 = leggi_pertrade(os.path.join(base, 'PERTRADE', 'abtg_trades_%s_%s_%d.csv' % (EA, SIMB, FILE['R255d']['g1'])))
+    quota = sum(1 for d in d5 if d['t'].strftime('%H:%M:%S') < FILE['R255d']['lo']) / float(len(d5))
+    assert quota >= 0.60 and not FB['R255d']['esenti'] and any(x_.startswith('S1 ') for x_ in FB['R255d']['nullo']), (quota, FB['R255d']['nullo'])
+    # contro-esempio 2: 23:05 non festivo, giorno DOPO Juneteenth, festivo d inverno prima della riapertura
+    for f in ('R255f', 'R255h', 'R255j'):
+        assert not FB[f]['esenti'] and any(x_.startswith('S1 ') for x_ in FB[f]['nullo']), (f, FB[f]['nullo'])
+    # contro-esempio 3: tre post-festivo -> (c)
+    assert not FB['R255l']['esenti'] and any('c: 3 uscite candidate' in x_ for x_ in FB['R255l']['nullo']), FB['R255l']['nullo']
+    # contro-esempio 4: festivo previsto non in elenco -> NULLO e OSSERVATO scritto
+    assert not FB['R255n']['esenti'] and any(x_.startswith('S1 ') for x_ in FB['R255n']['nullo'])
+    assert any('Presidents Day' in ln and 'OSSERVATO ma NON in elenco' in ln and '2025.02.18' in ln for ln in txtB.splitlines())
+    # nessun file sano diventa nullo in B, e B non tocca gli altri cancelli: fuori dai file toccati i NULLI sono gli stessi di A
+    toccati = {'R255a', 'R255b', 'R255x', 'R255k', 'R255d', 'R255f', 'R255h', 'R255j', 'R255l', 'R255n'}
+    assert all(bool(FA[f]['nullo']) == bool(FB[f]['nullo']) == False for f in FILE if f not in toccati), [f for f in FILE if f not in toccati and (FA[f]['nullo'] or FB[f]['nullo'])]
+    # B sul fixture pulito: nessuna esenzione, stessi esiti di A
+    txtP, oP = referto(os.path.join(fixture_dir, 'ROUND_R255_SHORT_DOW_INFASE_pulito'), s1_festivi=True)
+    assert 'nessuna esenzione' in txtP and {cf: r.get('esito') for cf, r in oP['ris'].items()} == {cf: r.get('esito') for cf, r in esiti['pulito'][1]['ris'].items()}
+    # il deal esentato dentro la curva: la riga S1-B lo conta dove sta (R255a 2025.01.10 = inverno USA: CONTROLLO si, IN FASE no)
+    assert oB['ris']['ancora']['s1b'] == {'IN FASE': 0, 'CONTROLLO': 1, 'FTMO-DOC': 0}, oB['ris']['ancora']['s1b']
     print('AUTOTEST OK: tetti dagli archivi (4.693,54 / 4.271,61; -1,0062 / -1,0227), calendario USA, classe 833, R1/R2 con e_eff, '
           'fixture pulito (G0-LONG VERDE, G0-ANCORA 73/73, e_eff = 0,1266, NON VIOLATO su n, R2 RISPETTATO su n>=40 ma NON "rischio passato", SOSPESA), R2 violato, R3 solo B, moncone operato, guasti L0/G1/P0; '
-          'contro-esempi 872 (cartella sbagliata), 873 (NULLO della riga per classe 166, prova diversa dal pin), 874 (M4 e parole finali), 875 (G1 PF, regola d ufficio), 876 (scarto a curva continua accanto alla lettera)')
+          'contro-esempi 872 (cartella sbagliata), 873 (NULLO della riga per classe 166, prova diversa dal pin), 874 (M4 e parole finali), 875 (G1 PF, regola d ufficio), 876 (scarto a curva continua accanto alla lettera); '
+          'LETTURA B --s1-festivi (classe 900): tre festivi veri ESENTI e NULLO della riga tolto, trail0 03:26:04 resta NULLO, pin non arrivato (>= 60 per cento prima delle 16:05) NULLO, '
+          '23:05 non festivo / giorno dopo Juneteenth / festivo d inverno prima delle 00:00 NULLI, 3 post-festivo NULLO (c), festivo previsto non in elenco NULLO e scritto, fixture pulito identico ad A')
     print('fixture e referti in %s' % fixture_dir)
 
 
@@ -1553,6 +1847,8 @@ if __name__ == '__main__':
     ap.add_argument('--raccolta', help='cartella ROUND_R255_SHORT_DOW_INFASE_AAAA-MM-GG (lo zip scompattato)')
     ap.add_argument('--out', help='scrive il referto anche in questo file')
     ap.add_argument('--autotest', action='store_true')
+    ap.add_argument('--s1-festivi', action='store_true',
+                    help='LETTURA B: S1 EMENDATA DOPO I NUMERI (classe 900), in attesa della firma di Claudio. Default SPENTA = lettura A, identica al byte')
     ap.add_argument('--fixture-dir', default=_fixture_dir_default())
     a = ap.parse_args()
     if a.autotest:
@@ -1561,7 +1857,7 @@ if __name__ == '__main__':
         sys.exit(0)
     if not a.raccolta or not os.path.isdir(a.raccolta):
         ap.error('serve --raccolta <cartella> (oppure --autotest)')
-    txt, _ = referto(a.raccolta)
+    txt, _ = referto(a.raccolta, s1_festivi=a.s1_festivi)
     print(txt)
     if a.out:
         with open(a.out, 'w') as fh:
