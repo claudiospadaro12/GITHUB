@@ -3,7 +3,8 @@
 #  EA: ABTG_DAX_Apertura_EU   (sedia 770101, simbolo D30EUR)
 #
 #  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
-#  Si lancia con: -Deposito 80000 -Modello 4
+#  Si lancia con: -Deposito 100000 -Modello 4  (RIVISTO il 29/09/2026: NON 80000,
+#  vedi il blocco "PRE-LANCIO 29/09/2026" qui sotto)
 #
 #  QUESTO FILE NON SI LEGGE DA SOLO.
 #  E' la meta' alta della tabella 2x2 aperta da
@@ -15,7 +16,133 @@
 #  legge meta' misura.
 # =====================================================================
 #
-#  L'UNICA DIFFERENZA: InpBEatR e' pinnato a 1,0 invece che a 0,0.
+# =====================================================================
+#  PRE-LANCIO 29/09/2026 -- COSA E' STATO VERIFICATO E CAMBIATO
+#  (scritto PRIMA dei numeri: i criteri si congelano prima, non dopo)
+# =====================================================================
+#  1. PIN: 90 input su 91 dell'EA (controlla_prova.py: 0 problemi). Manca
+#     SOLO InpNewsCurrencies, stringa vuota di default: inerte con
+#     InpUseNewsFilter=false, e un pin a valore vuoto MT5 lo ignora e usa
+#     il default compilato ("" = il valore del CSV di R47a).
+#  2. CONFRONTO INPUT PER INPUT con la cella di contratto R246e
+#     (prove/R246e_orologio_DAX_D30EUR_d0_B.txt, a sua volta = R47a al
+#     centesimo sul binario di oggi: IS 175 / OOS 270 deal, PF 1,12634 /
+#     1,39709, DD 5,4362 / 7,2328, misurato il 24/09). Le chiavi diverse
+#     sono QUATTRO, tutte volute:
+#       InpMagic         789630 pinnato (in R246e e' l'asse, 794611/794661)
+#       InpTP1_ClosePct  ASSE 0/50 (in R246e pinnato a 50)
+#       InpBEatR         1,0 (in R246e 0)
+#       InpUsaGuardian   false (prima true, vedi 3)
+#     Tutto il resto e' identico (i numeri "1" e "1.0" sono lo stesso
+#     valore).
+#  3. InpUsaGuardian: era true, ora FALSE. Nel tester il Guardian non
+#     morde (fail-open: senza Guardian ABTG_GuardiaIngresso ritorna true,
+#     vedi il commento di ABTG_PausaGuardian.mqh r.1580-1585), quindi il
+#     numero non cambia; ma R47a, R246e e R270 sono a false, e una cella
+#     che deve poter essere letta contro R47a non deve dipendere da un
+#     fail-open. E' l'UNICO input toccato in questa revisione.
+#     >>> R207a ha ancora true: inerte sui numeri, ma va allineato prima
+#         di lanciare R207a.
+#  4. DEPOSITO 100000, non 80000. Il confronto che si fa DAVVERO e' contro
+#     R47a e R46a (archivio, deposito 100000); con 80000 il Profit scala
+#     di x0,80 e il G0 non torna piu' (R246a par. 2: R201A a 80000, stessi
+#     Trades, PF 1,12733 / 1,3952 invece di 1,12634 / 1,39709). R207a e la
+#     sua ancora R202B stanno a 80000: le due meta' della 2x2 NON sono
+#     nella stessa unita' finche' R207a non si rilancia a 100000 (Profit
+#     e DD in euro non si incrociano fra depositi diversi; conteggi si').
+#  5. "1R" NON E' IL RISCHIO INIZIALE (classe 793). riskDist e' ingresso->
+#     STOP CORRENTE (r.2355; InitialSL torna curSL se non c'e' stata la
+#     parziale) e con InpTrailMode=1 (PREVBAR, il vivo) il trailing
+#     avvicina lo stop PRIMA del primo obiettivo: misurato su R246e, la
+#     parziale scatta a mediana 0,57R iniziali. Lo stesso riskDist vale
+#     per il BE a InpBEatR: BE a 1,0 = 1 x distanza CORRENTE. Resta vero
+#     che i due BE puntano allo STESSO prezzo (stessa variabile, stessa
+#     forma) e che la cella (50 , 1,0) deve uscire identica a (50 , 0);
+#     ma "a +1R" in questo file vuol dire "a +1 distanza corrente", non
+#     "a +1R dell'ingresso".
+#     >>> La frase di R207a par. 3 "il trailing pinnato e' FIXED a 410"
+#         NON descrive questo file: InpTrailMode=1 (PREVBAR),
+#         InpTrailFixedPts e' inerte (vedi la NOTA sul pin).
+#  6. LA 2x2, coi numeri d'ARCHIVIO (R207a non e' girato: non esiste un
+#     suo numero). Righe = InpTP1_ClosePct, colonne = InpBEatR:
+#       ( 50 , 0   ) = R47a, riprodotto da R246e sul binario di oggi:
+#           IS  175 deal  PF 1,12634  DD 5,4362  Profit  3789,36
+#           OOS 270 deal  PF 1,39709  DD 7,2328  Profit 18029,58
+#           (270 deal = 193 posizioni)
+#       (  0 , 0   ) = R46a / R137c (ClosePct 0, nessun BE):
+#           IS  132 pos.  PF 1,18323  DD 4,9576  Profit  5569,37
+#           OOS 193 pos.  PF 1,49140  DD 6,2719  Profit 23607,28
+#           [NON RIPRODOTTO sul binario di oggi: R46a e' precedente alle
+#            modifiche del 21/09 (R246a par. 2.1). Le entrate non dipendono
+#            dalle due manopole, quindi 132/193 posizioni si attendono
+#            uguali; il resto e' un riferimento, non un G0.]
+#       ( 50 , 1,0 ) = cella di controllo di questo file: identica a
+#           (50 , 0) su ogni colonna (vedi "LE DUE CELLE").
+#       (  0 , 1,0 ) = LA PROPOSTA, l'unica cella nuova.
+#     Il controllo interno della 2x2 e' (50 , 1,0) letta contro R47a e
+#     (0 , 1,0) letta contro R46a: la cella di controllo dice se la
+#     lettura del codice regge. R207b da sola NON chiude il quadrato:
+#     manca R207a a 100000 sul binario di oggi.
+#  7. CRITERI CONGELATI ORA (per il resto rimandano a R207a; qui i numeri
+#     per leggere QUESTO file, riferimento = R47a):
+#     M1 (merito)  PF OOS cella >= 1,39709 + 0,10 = 1,49709, con n OOS
+#         >= 150 POSIZIONI (per ClosePct=0 posizioni = Trades = 193
+#         attese; per ClosePct=50 il Trades e' in DEAL e non si
+#         dichiara n).
+#     R1 (rischio, classe 804)  Equity DD % IS o OOS > 9,00% (a taglia
+#         1,0%) = VIOLATO, fatto a qualunque n. Sotto: "R1 NON VIOLATO
+#         su n = X posizioni", MAI "rischio passato".
+#     A3 (rumore d'esecuzione)  un vantaggio < 10,5% RELATIVO sul
+#         controllo e' dentro il rumore e non si dichiara vantaggio:
+#         PF 1,39709 x 1,105 = 1,54378 ; Profit OOS 18029,58 x 1,105 =
+#         19922,69 e x 0,895 = 16136,47. Sotto A3, M1 si scrive "sopra la
+#         soglia di casa, DENTRO il rumore", non promozione.
+#     Classe 804  IS = 9,4 mesi, un regime solo; OOS 12,7 mesi,
+#         rialzista (regola C non soddisfatta: storico BCM dal
+#         2024.09.26). Nessun verdetto di rischio oltre "non violato".
+#     Classe 844  k = 0 atteso: D30EUR ha commissione 0,00 misurata, la
+#         somma dei net del per-trade deve coincidere col Profit del CSV
+#         al centesimo (R270c: 2430,08 = 2430,08).
+#     Nessuna promozione, nessuna taglia, nessuna sedia toccata: una
+#         cella che passasse va a Claudio come PROPOSTA coi numeri.
+#     Il PF fra ClosePct=0 e ClosePct=50 non e' confrontabile secco
+#         (cambia il numero di deal, R207a par. 7): si legge SEMPRE col
+#         Profit e col Recovery Factor accanto.
+#  8. ATTESA, DICHIARATA PRIMA DEI NUMERI. Se il BE a 1R e' l'ingrediente
+#     che manca, la cella ( 0 , 1,0 ) deve stare FRA le due celle senza
+#     BE indipendente: Profit OOS fra 18029,58 (R47a) e 23607,28 (R46a),
+#     DD OOS fra 6,2719 e 7,2328, e SOPRA la fascia di rumore di R47a
+#     (Profit OOS > 19922,69) per contare come "fra". Letture:
+#       > 23607,28            oltre l'attesa: si spiega prima di credere
+#                             (non e' un guasto, l'archivio non lo prevede)
+#       19922,69 - 23607,28   attesa confermata, coi limiti del par. 7
+#       16136,47 - 19922,69   DENTRO IL RUMORE DI R47a: scatta il
+#                             contro-esempio del par. 9
+#       < 16136,47            il BE a 1R senza parziale PEGGIORA la cella
+#                             viva
+#  9. CONTRO-ESEMPIO, quello che mi farebbe sbagliare. Se (0 , 1,0)
+#     eguaglia (50 , 1,0) [dentro +-10,5% di R47a su PF e su Profit OOS],
+#     allora il vantaggio di ClosePct=0 misurato in R46a veniva dal BE che
+#     li' NON scattava, non dalla parziale: la parziale e' inerte e il BE
+#     a TP1 e' l'ingrediente. Si scrive cosi', non "ClosePct=0 e' meglio".
+#     All'opposto, se (0 , 1,0) resta uguale a (0 , 0) di R46a, il BE a 1R
+#     non ha morso: Profit, PF, RF e DD devono DIFFERIRE dal riferimento,
+#     e il log della cella deve avere la riga "BE indipendente @ ... stop
+#     a pari" (nei .log di LOG_TESTER; se l'ottimizzatore non li scrive,
+#     "NON VERIFICABILE", non un guasto). Trades(0 , 1,0) deve restare
+#     132 IS / 193 OOS (stesse entrate): se cambia, il ragionamento sulle
+#     entrate e' rotto e le expectancy per posizione non si calcolano.
+#  10. TEMPO: 4 passate a tick reali D30EUR M5 (2 celle x 2 finestre),
+#     ~65-85 s per un job di questa taglia (R270, 28/09, stessa
+#     macchina): dichiarati 6-10 minuti con avvio e compilazione, TETTO 17.
+#  11. PER-TRADE (789630): UNO SOLO per tutto il file (magic pinnato, ogni
+#     passata sovrascrive la precedente, classe 455): ne sopravvive una
+#     passata, informativa; si identifica con la somma dei net contro il
+#     Profit del CSV. Non e' evidenza sulle altre celle.
+# =====================================================================
+#
+#  L'UNICA DIFFERENZA DI GESTIONE: InpBEatR e' pinnato a 1,0 invece che a 0,0.
+#  (piu' InpUsaGuardian=false, inerte nel tester: vedi PRE-LANCIO par. 3)
 #  (e il magic, 789630 invece di 789620, inerte sui risultati -- la
 #   dimostrazione sta in R207a, sezione 6A.)
 #
@@ -89,7 +216,7 @@
 @FINOA    2026.06.30
 @FRAZIONEIS 0.40
 
-InpUsaGuardian=true||true||0||true||N
+InpUsaGuardian=false||false||0||false||N
 InpSessionHour=8||8||0||8||N
 InpSessionMin=0||0||0||0||N
 InpRangeMinutes=35||35||0||35||N
