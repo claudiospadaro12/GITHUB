@@ -972,7 +972,7 @@ def blocco_lato(cfg, out, evs, lato_nome, N):
         tm = [e["fill"][o]["min"] for e in fil]
         out.append("     minuti dalla rottura al riempimento: q25/50/75 = %s   (n=%d)" %
                    (" / ".join(AA.f(AA.quantile(tm, q), 0) for q in (0.25, 0.5, 0.75)), len(fil)))
-        out.append("     dopo il riempimento (stop bordo opposto; A = stessa barra):")
+        out.append("     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):")
         out.append("     %-10s %8s %8s %8s %8s   n" % ("bersaglio", "T%", "S%", "A%", "N%"))
         for t in cfg.bersagli:
             sq = [e["fill"][o]["seq"][t] for e in fil]
@@ -983,6 +983,38 @@ def blocco_lato(cfg, out, evs, lato_nome, N):
             out.append("     corsa massima dopo il riempimento (fino allo stop) [%s]" % nome_u)
             out.append(riga_q("MFE post-riempimento", v, cifre))
     out.append("")
+
+
+def _sezione_parametri(add, cfg):
+    """Guida di LETTURA verso gli input dell'EA (Nasdaq). Non decide niente.
+    Geometria dell'EA (ABTG_*_Apertura_*.mq5, ramo RETEST): ingresso limit a
+    RH - InpRetestOffsetPts, stop = RL - InpBufferPoints (sellPx), TP1 =
+    ingresso + InpTP1_R * (ingresso - stop). Qui: ingresso = livello - o*A,
+    stop = RL - b, bersaglio = ingresso + t*A."""
+    add("--- DA QUESTE MISURE AI PARAMETRI (lettura, non decisione) ---")
+    add("  Feed esterno (D-C SOLO_PROVA_REGIME): ogni valore letto qui e' un'IPOTESI da misurare nel")
+    add("  tester BCM a tick reali, MAI un valore da scrivere in un preset.")
+    add("  InpRangeMinutes     : il range per cui la frequenza dei falsi breakout (falso15%) e' minore e")
+    add("                        la corsa (MFE240R) maggiore, letto SOLO sull'addestramento.")
+    add("  InpBufferPoints     : un buffer b filtra le rotture con MFE15 < b: leggi q25/q50 di MFE 15 min (pt).")
+    add("  InpRetestOffsetPts  : la profondita' g (R) con riempimento ~X% (griglia sopra) per l'ampiezza")
+    add("                        mediana del range in punti: offset_pt = g * ampiezza_pt. Meglio il g dove")
+    add("                        la corsa post-riempimento resta buona (tabelle offset).")
+    add("  InpTP1_R            : qui R = AMPIEZZA del range (A) e il bersaglio t si conta dal prezzo")
+    add("                        d'ingresso; nell'EA InpTP1_R e' in multipli del RISCHIO = ingresso-stop,")
+    add("                        e lo stop dell'EA e' il bordo opposto MENO il suo buffer b_EA (sellPx).")
+    add("                        Quindi: retest  InpTP1_R = t*A / ((1-o)*A + b_EA)")
+    add("                                breakout InpTP1_R = t*A / (A + 2*b_EA)")
+    add("                        (= t/(1-o) SOLO con b_EA = 0). Questa corsa misura con buffer %g punti:"
+        % cfg.buffer)
+    add("                        con un b_EA diverso anche T%/S% cambiano (lo stop si sposta).")
+    add("                        ATTENZIONE: T% SCENDE col bersaglio PER COSTRUZIONE (chi tocca 2R ha")
+    add("                        toccato 1R prima): il 'T% massimo' e' sempre il bersaglio piu' corto e")
+    add("                        NON e' un criterio. Il confronto lordo e' T% contro il pareggio")
+    add("                        (1-o)/(t+1-o) (buffer 0; solo T e S; senza costi): frequenza, non edge.")
+    add("                        La scelta la fa SOLO il tester BCM.")
+    add("  InpPendingExpiryMin : la scadenza in cui la griglia di riempimento smette di crescere (colonne <N min).")
+    add("")
 
 
 def costruisci_referto(cfg, righe, tagli, diag, percorso, titolo, nota_fase, simbolo,
@@ -1009,7 +1041,10 @@ def costruisci_referto(cfg, righe, tagli, diag, percorso, titolo, nota_fase, sim
     add("  4. R = ampiezza del range d'apertura. Long e short sempre separati. Solo la PRIMA")
     add("     rottura del giorno conta come evento; l'altro lato e' registrato come 2LATI.")
     add("  5. Ogni percentuale porta il suo n. * = n < %d: non e' una distribuzione." % SOGLIA_N)
-    add("  6. Le IPOTESI si scrivono solo sull'addestramento; la cassaforte le VALIDA.")
+    if cfg.mercato == "DAX":
+        add("  6. DAX: USO = SOLO_PROVA_REGIME (D-C), nessuna cassaforte: NESSUNA ipotesi di motore da qui.")
+    else:
+        add("  6. Le IPOTESI si scrivono solo sull'addestramento; la cassaforte le VALIDA.")
     if cfg.buffer:
         add("  7. buffer = %g punti oltre il range (trigger e stop)." % cfg.buffer)
     add("")
@@ -1129,18 +1164,14 @@ def costruisci_referto(cfg, righe, tagli, diag, percorso, titolo, nota_fase, sim
                 else:
                     add(riga_cond(cfg, str(a), sub) if sub else "  %-22s %7s" % (str(a), "0"))
         add("")
-    add("--- DA QUESTE MISURE AI PARAMETRI (lettura, non decisione) ---")
-    add("  InpRangeMinutes     : il range per cui la frequenza dei falsi breakout (falso15%) e' minore e")
-    add("                        la corsa (MFE240R) maggiore, letto SOLO sull'addestramento.")
-    add("  InpBufferPoints     : un buffer b filtra le rotture con MFE15 < b: leggi q25/q50 di MFE 15 min (pt).")
-    add("  InpRetestOffsetPts  : la profondita' g (R) con riempimento ~X% (griglia sopra) per l'ampiezza")
-    add("                        mediana del range in punti: offset_pt = g * ampiezza_pt. Meglio il g dove")
-    add("                        la corsa post-riempimento resta buona (tabelle offset).")
-    add("  InpTP1_R            : il bersaglio con T% massimo. ATTENZIONE: qui R = AMPIEZZA del range, nell'EA")
-    add("                        InpTP1_R e' in multipli del RISCHIO (ingresso-stop) = (1-o)*ampiezza per il")
-    add("                        retest -> InpTP1_R = t / (1 - o); breakout (o=0): identici.")
-    add("  InpPendingExpiryMin : la scadenza in cui la griglia di riempimento smette di crescere (colonne <N min).")
-    add("")
+    if cfg.mercato == "DAX":
+        add("--- DA QUESTE MISURE AI PARAMETRI: NON SI APPLICA AL DAX ---")
+        add("  USO = SOLO_PROVA_REGIME (D-C firmata il 25/08): feed esterno, pulito solo 2010-2018,")
+        add("  NESSUNA cassaforte. Da questo file NON si scrivono ipotesi di motore e NON si tarano")
+        add("  parametri: e' una descrizione del mercato, contesto e basta.")
+        add("")
+    else:
+        _sezione_parametri(add, cfg)
     add("--- RILIEVI DI QUESTA CORSA ---")
     if not rilievi:
         add("  nessuno")
@@ -1418,6 +1449,21 @@ def esegui_casi(cfg, v):
     rw = analizza_giorno(cfg, giorno_sint(cfg, "2015.03.17", stop_dopo))
     v.uguale("riempito e stoppato subito: MFE post-riempimento 0", rw["ev"][5]["fill"][0.0]["mfe"], 0.0)
     v.uguale("riempito e stoppato subito: sequenza S", rw["ev"][5]["fill"][0.0]["seq"][1.0], "S")
+    # -- 8c. (cancello 29/09) la profondita' del retest esclude la barra di rottura: nel giorno
+    #    'stessa' il minimo della barra di rottura (995) NON conta, dopo il prezzo resta a 1020
+    v.uguale("barra di rottura esclusa dalla profondita': prof30 = 1010-1020 = -10",
+             rz["ev"][5]["prof"][30], -10.0)
+    # -- 8d. (cancello 29/09) il bersaglio del retest si conta dal PREZZO DI RIEMPIMENTO
+    #    (Fp + t*A), non dal livello: e' la base della conversione InpTP1_R = t*A/((1-o)*A + b).
+    #    Limit 0,5R = 1000 riempito alla barra 2; la barra 3 tocca 1022 (>= 1000+20, < 1010+20);
+    #    la barra 4 tocca lo stop 990. Contato dal livello uscirebbe S.
+    rtg = {0: (1000.0, 1010.0, 990.0, 1000.0), 1: (1000.0, 1015.0, 1002.0, 1012.0),
+           2: (1012.0, 1012.0, 1000.0, 1001.0), 3: (1001.0, 1022.0, 1001.0, 1020.0),
+           4: (1020.0, 1020.0, 985.0, 985.0)}
+    rt = analizza_giorno(cfg, giorno_sint(cfg, "2015.03.18", rtg))
+    v.uguale("retest 0,5R: riempito dopo 5 min", rt["ev"][5]["fill"][0.5]["min"], 5)
+    v.uguale("retest 0,5R: +1R contato dal riempimento (1020) = T", rt["ev"][5]["fill"][0.5]["seq"][1.0], "T")
+    v.uguale("retest 0: +1R dal riempimento 1010 (1030) mai toccato, stop = S", rt["ev"][5]["fill"][0.0]["seq"][1.0], "S")
     # -- 9. banda di prezzo di guardia (feed di un altro strumento)
     cfg_b = _cfg_test(["--banda-prezzo", "1500,2500"])
     rbnd = analizza_giorno(cfg_b, giorno_sint(cfg_b, "2015.03.16", BARRE_LONG))
@@ -1562,6 +1608,13 @@ def autotest():
     z.check("referto: solo ASCII", all(all(ord(ch) < 128 for ch in x) for x in testo))
     z.check("referto: la tabella LONG e la SHORT ci sono separate",
             any("LONG, range 5" in x for x in testo) and any("SHORT, range 5" in x for x in testo))
+    z.check("referto: dichiara la stima PER DIFETTO del retest", any("PER DIFETTO" in x for x in testo))
+    z.check("referto Nasdaq: conversione InpTP1_R col buffer dell'EA", any("b_EA" in x for x in testo))
+    z.check("referto Nasdaq: 'T% massimo' dichiarato NON criterio", any("NON e' un criterio" in x for x in testo))
+    testo_dax = costruisci_referto(dax, ev_gg, tagli, {"prima": "", "ultima": ""}, "SINTETICO", "TITOLO", "NOTA",
+                                   "TEST", ["fuso"], ["cal"], [])
+    z.check("referto DAX: dichiara SOLO_PROVA_REGIME", any("SOLO_PROVA_REGIME" in x for x in testo_dax))
+    z.check("referto DAX: nessuna guida ai parametri", not any("InpTP1_R" in x for x in testo_dax))
     csv_r = riga_csv(cfg, ev_gg[0])
     z.uguale("csv: numero di campi = numero di colonne", len(csv_r.split(",")), len(colonne_csv(cfg)))
     z.check("csv: nessuna virgola nel motivo", "," not in ev_gg[0]["motivo"])
@@ -1695,7 +1748,11 @@ def main():
     blocchi = []
     if cfg.per_is:
         blocchi.append(("IS", cfg.per_is,
-                        "QUESTO E' IL FILE DELL'ADDESTRAMENTO (%d-%d): le ipotesi di motore si scrivono QUI e SOLO QUI."
+                        ("QUESTO E' IL FILE %d-%d DEL DAX. USO = SOLO_PROVA_REGIME (D-C firmata il 25/08): feed "
+                         "esterno, NESSUNA cassaforte. Qui NON si scrivono ipotesi di motore e NON si tarano "
+                         "parametri: e' una descrizione del mercato." if cfg.mercato == "DAX" else
+                         "QUESTO E' IL FILE DELL'ADDESTRAMENTO (%d-%d): le ipotesi di motore si scrivono QUI e SOLO "
+                         "QUI (feed esterno: sono IPOTESI da misurare nel tester BCM, mai valori da preset).")
                         % cfg.per_is,
                         "ANATOMIA MOVIMENTI M5 -- %s -- ADDESTRAMENTO %d-%d" % (args.simbolo, cfg.per_is[0], cfg.per_is[1])))
     if cfg.per_cs:
