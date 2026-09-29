@@ -1,0 +1,180 @@
+#  EA: ABTG_DAX_Apertura_EU
+# ==========================================================================
+#  R246o -- CASELLA d+1 -- TESTA DEL BLOCCO DAX (sedia 770101)
+#  ABTG_DAX_Apertura_EU su D30EUR M5 -- TICK REALI -- deposito 100000
+#  OROLOGIO +1h (TUTTO l'orario spostato): armo 09:00, flat 18:30 BCM
+#  FINESTRA B (= R246e): 2024.09.26 -> 2026.06.30, taglio 0.40
+#  magic gemelli 794615 / 794665
+#  @ORARIO_INVERNALE casella d+1 di R246: armo 09:00 BCM = Xetra in ora solare UE (BCM UTC+1 fisso), come la sedia FTMO 770101 dal 26/10; d'estate arma 1h DOPO la cash
+#  Il ragionamento della casella d+1 sta in R246m (quello del round in
+#  R246a, quello del DAX in R246e). Qui SOLO quello che e' del DAX.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400 (C:\MT5_Backtest), NON su nessun terminale di conto (50503392,
+#  50504263, 10105439, 541452707). Non tocca taglie, preset, sedie.
+# ==========================================================================
+#  RILIEVO DEL CANCELLO DETERMINISTICO (controlla_riga.py --oggetto prova,
+#  classe 763), riportato testuale:
+#   ~ [FUSO] r.92: InpSessionHour=9 DICHIARATO invernale
+#   (@ORARIO_INVERNALE r.8: 'casella d+1 di R246: armo 09:00 BCM = Xetra
+#   in ora solare UE (BCM UTC+1 fisso), come la sedia FTMO 770101 dal
+#   26/10; d'estate arma 1h DOPO la cash'). finestra 2024.09.26 ->
+#   2026.06.30 (@DAQUANDO/@FINOA), giorni lun-ven con la cash DAX alle 9
+#   server: 220, alle 8: 239, prima del 2024.09.26 (orologio indici BCM
+#   non misurato): 0. Nei 239 giorni d'estate l'EA arma UN'ORA DOPO la
+#   cash. Il cancello NON giudica se e' voluto: lo legge lo strato 2
+#   (classe 763)
+# ==========================================================================
+#  PIN: identico a R246e input per input, TRANNE InpSessionHour (9),
+#  InpCloseHour (18) e il magic (diff eseguito: 3 righe). Filtro EMA,
+#  Supertrend, correlazione e filtro spazio SPENTI: nessun residuo di
+#  griglia (il residuo H4 di R246m par. 1.4 e' SOLO del Dow). Rispetto al
+#  preset FTMO 770101: diversi solo ore (+1 d'inverno), magic, rischio
+#  (2.00 contro 1), Guardian (true contro false), nome del simbolo di
+#  correlazione (spenta). InpSpace* assenti nel preset FTMO = default
+#  ABTG_SPACE_OFF (r.395 del sorgente a HEAD).
+#  ORARI: 09:00 BCM d'inverno = 09:00 CET = Xetra; flat 18:30 BCM = 18:30
+#  CET come la d0 d'estate (17:30 BCM = 18:30 CEST). D'estate: 09:00 BCM =
+#  10:00 CEST, un'ora DOPO Xetra: la parte estiva NON descrive niente di
+#  vivo (nessuna sedia BCM o FTMO arma cosi' d'estate) e si usa solo per
+#  G1/G2/S1.
+#  CALENDARIO: UE -- INVERNO 2024.10.27 <= g < 2025.03.30 e 2025.10.26 <=
+#  g < 2026.03.29, per data di chiusura. Feriali d'inverno A+B: 220.
+#
+#  G0: non c'e'. Le soglie qui sotto valgono se G0 di R246e e' VERDE/
+#     GIALLO; se no [NON CONFRONTABILI] e si rifanno sul per-trade d0 B del
+#     round prima di aprire i d+1 (classe 750).
+#  G1: gemelle 794615/794665 identiche (CSV e per-trade tranne magic).
+#  G2: la gamba IS del CSV di questo file e' il riferimento di R246p.
+#  S1 SENTINELLA: nessuna uscita prima delle 09:35 BCM (range 09:00-09:35)
+#     e nessuna dopo le 18:31. Contro-esempio: se il pin non arriva (d0),
+#     134 uscite su 270 (50%) cadono prima delle 09:35 (misurato su
+#     772501). Per-trade identico a R246e -> NULLO.
+#
+#  ATTESA DICHIARATA (r246_bande_attese.py sez. 5; giorni d'inverno UE
+#  della d+1, finestre A+B, cioe' R246o + R246p). Ancora B: estate 0,648
+#  pos/feriale PF 1,274; inverno 0,782 pos/feriale PF 1,481.
+#  >>> PF: NON DISCRIMINANTE PER COSTRUZIONE (classe 178). H_STAGIONE n~172
+#      [1,16 ; 1,88], H_OROLOGIO n~143 [0,93 ; 1,81]: sovrapposte quasi per
+#      intero. Regola com'e' scritta (sez. 5b): P(pre) 0,655 / 0,651,
+#      verdetto sbagliato 29,5% (se H_STAGIONE) e 31,1% (se H_OROLOGIO).
+#      Il PF per stagione si SCRIVE, non decide.
+#  >>> DECIDE LA FREQUENZA. Posizioni della d+1 sui 220 feriali d'inverno
+#      A+B: H_STAGIONE [164,1 ; 179,9], H_OROLOGIO [133,6 ; 151,7]:
+#      DISGIUNTE. Soglie all'ancora: OROLOGIO se <= 151,5, STAGIONE se >=
+#      163,2 (nel round dai riferimenti d0 A+B). Qf2 = (r_I0 - r_I+1)/
+#      (r_I0 - r_E0), zone 0,30/0,70, precondizione Df >= 0,067 pos/
+#      feriale. Regola com'e' scritta: se H_STAGIONE P(pre) 0,993 (0,896 ;
+#      0,102 ; 0,002), se H_OROLOGIO P(pre) 0,993 (0,006 ; 0,122 ; 0,872).
+#  n: d+1 inverno ~143 (H_O) / ~172 (H_S), proiezione: a cavallo del
+#     pavimento dei 150; il merito si legge solo sul n CONTATO. Rischio
+#     (DD) a qualunque n.
+#  COSTO 40x: alla cash come la d0 d'estate, gia' AMMESSA: D30EUR 49,1x
+#     (spread prudente 1,70, MAPPA_COSTO par. 4.2). Quel 15' e' misurato a
+#     08:00 BCM su tutto l'anno (d'inverno pre-Xetra): il range alla cash
+#     d'inverno (09:00 BCM) come tale e' [NON MISURATO], direzione attesa
+#     favorevole. Spread mediano dell'ora 09 BCM 1,70 (ora 08 1,70, ora 07
+#     2,80; spread_orario_D30EUR.csv, tutto l'anno).
+#  CONSEGUENZE PER IL CAMPO: nessuna misurata oggi (classe 765); mappa in
+#     R246m par. 9, [INFERITA] anche a round girato (feed BCM).
+#  Tempo: [NON MISURATO] su questa macchina; tetto al ritmo del Dow,
+#     1,9 - 2,5 min per R246o + R246p (R246m par. 8).
+#  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794615.csv
+#  e abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_794665.csv (ultima gamba = OOS).
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpSessionHour=9
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=18
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpSpaceMode=0
+InpSpaceTF=16388
+InpSpaceMinR=0.0
+InpSpaceMaxR=0.0
+InpSpaceEma1=14
+InpSpaceEma2=50
+InpSpaceEma3=100
+InpSpaceEma4=200
+InpSpaceUseST=false
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794615||794615||50||794665||Y

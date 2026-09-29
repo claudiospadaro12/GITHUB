@@ -1,0 +1,47 @@
+RIEPILOGO R246 INVERNO -- LA CASELLA d+1 (6 file: Dow/DAX/MaxMin x orologio +1h x finestra B/A, TICK REALI, letti sui giorni d INVERNO)
+data: 2026-09-29 17:41:11
+fine: 2026-09-29 17:47:53   durata minuti: 7   (dichiarato 4,4-6,0; tetto largo 35,8; non fermarla prima di 40, oltre e BLOCCATA)
+pc  : DESKTOP-H4D7CAJ   (PC di backtest; VPS VMI3047753 e TUTTE le sue cartelle dati NON toccati)
+pin : 782d7280c115f1cd7e656a594d22f2ba35036c3e
+deposito 100000 passato (= R246, R47 e R16); modello 4; etichette R246m ... R246r, una per file; ordine m, o, q, n, p, r
+FINESTRE A (R246n, R246p, R246r): CSV _IS di un giorno vuoto e rc 2 = FALSO ALLARME ATTESO SOLO se _OOS ha 2 righe con Trades>0. Si legge il CSV _OOS e il suo per-trade.
+
+R246m  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R246o  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R246q  fin B   rc 0   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2
+R246n  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+R246p  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+R246r  fin A   rc 2   motore = pin (SHA256, 2 file)   _OOS fresco 2 righe, Trades>0 su 2   (finestra A: rc 2 dal CSV _IS di un giorno = FALSO ALLARME ATTESO)
+
+rc 0 = ROUND GIRATO | 2 = NON MISURATO | 3 = GIRATO CON RILIEVI | 1 = non e partito. Guasto vero = rc 1, rc 2 su una finestra B, o _OOS mancante o senza 2 righe con Trades>0.
+_OOS NON BUONI (mancanti, vuoti o senza 2 righe con Trades>0): 0 su 6
+rc 2 SU FINESTRA B (R246m, R246o, R246q: GUASTO VERO): 0
+ROUND PARTITI (rc diverso da 1): 6 su 6
+CLASSE 166 (EA e include arrivano dal RAMO lavoro, non dal pin; SHA256 dopo ogni job, EA del job + ABTG_PausaGuardian.mqh, unico include nostro dei tre EA): MOTORE = PIN in tutti i 6 round partiti
+CARTELLE ATTESE: 6   TROVATE: 6   -> CATENA COMPLETA
+PERTRADE (Common Files, abtg_trades_<EA>_<SIMBOLO>_<magic>.csv, magic 794605/06/15/16/25/26 e +50, scritti DOPO l avvio): 12 su 12
+Il per-trade che resta e quello della gamba OOS (gira per seconda con lo stesso magic): sulle B 2025.06.10-2026.06.30 (contiene l inverno 2025/26), sulle A 2024.09.27-2025.06.09 (il primo inverno 2024/25).
+LOG_TESTER: 15 file .log scritti DOPO l avvio, dalle radici MetaQuotes di AppData, compresi i log degli AGENT del tester. Servono se un round esce NON MISURATO. NON contengono le righe RETEST armato ... bias (classe 526: Print spento in ottimizzazione), quindi NON misurano il residuo della candela H4 del Dow (vedi RESIDUI).
+
+I CANCELLI, CONGELATI PRIMA (R246m par. 3, R246o, R246q). PRIMA di qualunque numero:
+G0: NON c e (nessuna ancora d archivio ha mai girato la d+1). Ma la d+1 si LEGGE contro le d0 di R246: se il G0 di R246a (Dow), R246e (DAX), R246i (MaxMin) non e VERDE/GIALLO, bande, soglie e probabilita qui sotto sono [NON CONFRONTABILI] e si rifanno con r246_bande_attese.py sul per-trade d0 B di QUEL round PRIMA di aprire i per-trade d+1 (classe 750). Se le d0 di R246 non sono girate o sono NULLE, Q2 e Qf2 non si calcolano: la d+1 resta lettura descrittiva.
+G1 DETERMINISMO (ogni file): le due gemelle (magic m e m+50) identiche in Profit, PF, DD, Trades in tutti e due i CSV, e i due per-trade identici RIGA PER RIGA tranne la colonna magic. Se no -> quel file e NULLO.
+G2 COERENZA FRA FINESTRE (stesso orologio d+1): somma net_profit e numero di deal del per-trade A contro Profit e Trades della gamba IS del CSV B. Coppie: R246n-R246m, R246p-R246o, R246r-R246q. Attesi IDENTICI; unica causa ammessa di scarto il 26/09/2024.
+S1 SENTINELLA DELL OROLOGIO (la manopola deve MORDERE, classe 156):
+   Dow  d+1: nessuna uscita prima delle 16:05 BCM ne dopo le 18:31 (se il pin non arriva e l EA gira a d0, 77 uscite su 130 di 772505, il 59%, cadono prima delle 16:05). Per-trade identico a R246a/R246c -> NULLO.
+   DAX  d+1: nessuna uscita prima delle 09:35 BCM ne dopo le 18:31 (a d0 134 uscite su 270 di 772501, il 50%, prima delle 09:35). Per-trade identico a R246e/R246g -> NULLO.
+   MaxMin d+1: per-trade NON identico a R246i/R246k; nessuna uscita prima delle 08:59 BCM ne dopo le 18:31 (a d0 8 uscite su 21 di 770413 prima delle 08:59); con meno di 3 uscite nel file S1 e GIALLA, non ROSSA.
+   S1 ROSSA o per-trade identico al d0 -> il pin d orario non e arrivato all EA: file NULLO, non nessun effetto.
+VERDETTO (R246m par. 5, congelato): riferimenti DENTRO il round, dalle d0 di R246 (A+B unite): PF_E0, PF_I0, D = PF_I0 - PF_E0. Q2 = (PF_I0 - PF_I+1)/D. Precondizione D >= 0,44 (Dow; se fallisce -> DIVARIO NON RIPRODOTTO). Q2 >= 0,70 OROLOGIO, Q2 <= 0,30 STAGIONE, in mezzo MISTO / NON SEPARATO. Il PF decide SOLO sul Dow: su DAX e MaxMin e NON DISCRIMINANTE per costruzione (classe 178), si scrive e non decide. Sul Dow verdetto sbagliato 5,5% / 6,9%, MISTO fino al 25%, ~8% di divario non riprodotto anche se vero.
+FREQUENZA, per tutti e tre: Qf2 = (r_I0 - r_I+1)/(r_I0 - r_E0), r = posizioni per feriale d inverno, stesse zone 0,30 / 0,70. Precondizione Df >= 0,054 Dow, 0,067 DAX, 0,018 MaxMin. Sul DAX DECIDE la frequenza; sul MaxMin e un indizio debole. I due verdetti (PF e frequenza) si scrivono tutti e due.
+SOGLIE ALL ANCORA (nel round si RICALCOLANO dai riferimenti d0 A+B), sui feriali d inverno A+B:
+   Dow (180 feriali, calendario USA): PF OROLOGIO se X2 <= 1,046, STAGIONE se X2 >= 1,398; posizioni OROLOGIO se <= 62,3, STAGIONE se >= 70,1.
+   DAX (220 feriali, calendario UE): posizioni OROLOGIO se <= 151,5, STAGIONE se >= 163,2. PF non discriminante.
+   MaxMin (220 feriali, calendario UE): posizioni OROLOGIO se <= 10,4, STAGIONE se >= 13,6 (indizio debole: bande sovrapposte per 0,5). PF non discriminante.
+LETTURA CONGIUNTA CON R246 (R246m par. 5.1): Q e Q2 >= 0,70 -> OROLOGIO in tutte e due le stagioni; Q e Q2 <= 0,30 -> STAGIONE in tutte e due; uno OROLOGIO e l altro STAGIONE -> INTERAZIONE; ogni altra combinazione -> MISTO. Q e Q2 condividono D: NON sono due misure indipendenti. Per FTMO d inverno conta Q2, MAI Q da solo.
+RESIDUI DICHIARATI IN R246m/o/q, da scrivere accanto a OGNI verdetto:
+   CANDELA H4 DEL DOW (classe 768): la d+1 legge la H4 chiusa 12-16 BCM, che contiene l apertura cash; la d0 legge la 08-12. L EA e SOLO LONG e il bias fa da CANCELLO del giorno (MonitorRetest r.1308), quindi sul Dow Q2 E Qf2, cioe il PF E la FREQUENZA, misurano OROLOGIO + CANDELA H4 insieme, in OGNI zona: un OROLOGIO puo venire in parte dalla candela; uno STAGIONE o un MISTO possono venire da una candela che COMPENSA l orologio (uno STAGIONE sul Dow NON assolve l orologio); una INTERAZIONE Q/Q2 puo venire dalla candela. DAX (filtro EMA spento) e MaxMin (correlazione H1 allineata) non hanno questo residuo.
+   QUANTI GIORNI HANNO IL BIAS H4 DIVERSO fra d0 e d+1: [NON MISURATO] da questa riga, e NON si conta dai log (classe 526): il driver gira in Optimization=1 (asse gemello sul magic) e in ottimizzazione MT5 NON esegue Print(), quindi le righe RETEST armato ... bias di ABTGLog NON sono nei log degli AGENT della cartella LOG_TESTER (ne in quelli di R246). ZERO righe RETEST nei log NON vuol dire zero giorni con bias diverso: vuol dire nessuna misura. La quota si scrive [NON MISURATO] accanto a Q2 e Qf2 del Dow; la via per misurarla e un TEST SINGOLO (Optimization=0) di R246m e R246a, oppure lo storico H4 U30USD.
+   40 FERIALI DISALLINEATI UE/USA (solo Dow, finestre A+B): fine ottobre - primo novembre e marzo, UE gia/ancora in ora solare e USA in ora legale. Il calendario USA li mette in ESTATE: sono FUORI dal verdetto d inverno, ma sono VIVI per FTMO (SE FTMO segue il calendario UE, premessa di OROLOGIO par. 5.3: la sedia 770202 arma a 15:30 BCM = 10:30 NY, cioe fa la d+1). La serie come FTMO del Dow e d0 nei giorni d estate UE e d+1 nei 220 feriali d inverno UE (180 inverno USA + 40 sfasati): calendario UE per FTMO, calendario USA per il verdetto. La settimana 26-30/10/2026 su FTMO resta [NON MISURATA].
+   Feed e spread FTMO, Guardian acceso su FTMO e spento qui, rischio 2,00 contro 1, correlazione del MaxMin su SPXUSD contro US500.cash: ogni conseguenza per FTMO resta [INFERITA] anche a round girato (classe 765). La parte ESTIVA delle celle d+1 non descrive niente di vivo: serve solo a G1, G2, S1.
+n: Dow e MaxMin sotto 150 (INDIZIO, merito SOSPESO); DAX a cavallo dei 150 (il merito si legge solo sul n CONTATO). Il DD si legge sempre (Emendamento B). Bande e soglie: python3 backtest_pipeline/r246_bande_attese.py (sez. 5, seme fisso).

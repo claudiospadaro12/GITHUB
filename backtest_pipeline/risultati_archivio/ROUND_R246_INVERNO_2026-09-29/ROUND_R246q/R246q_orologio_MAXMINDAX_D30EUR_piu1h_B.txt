@@ -1,0 +1,146 @@
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+# ==========================================================================
+#  R246q -- CASELLA d+1 -- TESTA DEL BLOCCO MAXMIN (sedia 770411)
+#  ABTG_MaxMinNotte_DAX_Short_Ottimizzato su D30EUR M15 -- TICK REALI --
+#  deposito 100000
+#  OROLOGIO +1h (TUTTO l'orario spostato): box 00:00-05:59, piazzamento
+#  08:59, cutoff 09:30, flat 18:30 BCM
+#  FINESTRA B (= R246i): 2024.09.26 -> 2026.06.30, taglio 0.40
+#  magic gemelli 794625 / 794675
+#  @ORARIO_INVERNALE casella d+1 di R246: piazzamento 08:59 BCM = 1' prima di Xetra in ora solare UE (BCM UTC+1 fisso), come la sedia FTMO 770411 dal 26/10; d'estate 1h DOPO
+#  Il ragionamento della casella d+1 sta in R246m (quello del round in
+#  R246a, quello del MaxMin in R246i). Qui SOLO quello che e' del MaxMin.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400 (C:\MT5_Backtest), NON su nessun terminale di conto (50503392,
+#  50504263, 10105439, 541452707). Non tocca taglie, preset, sedie.
+# ==========================================================================
+#  RILIEVO DEL CANCELLO DETERMINISTICO (controlla_riga.py --oggetto prova,
+#  classe 763), riportato testuale:
+#   ~ [FUSO] '@ORARIO_INVERNALE' dichiarato (r.10) ma nessun
+#   InpSessionHour/InpIbInizioOra vale 9 o 15: dichiarazione ORFANA
+#   (classe 763)
+#  Perche' ORFANA: il cancello [FUSO] legge solo InpSessionHour e
+#  InpIbInizioOra, e questo EA ha altri nomi (InpBoxStartHour, InpPlace-
+#  Hour, InpEntryCutoffHour, InpCloseHour). Il calendario per questo file
+#  (UE, come il DAX): i giorni lun-ven della finestra con Xetra alle 09:00
+#  BCM (ora solare UE) sono gli stessi 220 feriali d'inverno A+B del DAX
+#  (B 110, A 110); il conto giorno per giorno lo fa il cancello sul DAX
+#  (R246o/R246p, stessa finestra, stesso simbolo). La dichiarazione resta:
+#  serve a chi legge, ed e' la stessa regola di R246m.
+# ==========================================================================
+#  PIN: identico a R246i input per input, TRANNE i 5 input d'orologio e il
+#  magic (diff eseguito: 6 righe):
+#    d0 : box 23:00-04:59, piazzamento 07:59, cutoff 08:30, flat 17:30
+#    d+1: box 00:00-05:59, piazzamento 08:59, cutoff 09:30, flat 18:30
+#  InpPendingExpiryMin=90 e' una DURATA: non si sposta.
+#  ComputeBox (r.200-205): "if(tStart>=tEnd) tStart-=86400"; 00:00 < 05:59,
+#  quindi il box d+1 comincia lo STESSO giorno alle 00:00 (a d0 cominciava
+#  il giorno prima alle 23:00): stessa finestra di mercato spostata di
+#  un'ora. Box del LUNEDI': comincia alle 00:00 di lunedi'; se D30EUR non
+#  quota ancora, iBarShift(...,false) prende l'ultima barra del venerdi'
+#  come a d0 (classe 727): [NON MISURATO] se la prima barra del lunedi'
+#  cade prima o dopo le 00:00 BCM.
+#  Rispetto al preset FTMO 770411 (box 01-06:59, piazza 09:59, cutoff
+#  10:30, flat 19:30 ora FTMO = BCM + 1 d'inverno): gli stessi orari. Diversi
+#  solo magic, rischio (2.00 contro 1), Guardian (true contro false) e il
+#  simbolo di correlazione (US500.cash contro SPXUSD: correlazione ACCESA
+#  in questo EA, InpUseCorrelation=true, quindi e' un residuo di FEED).
+#  Correlazione su H1 e EMA200/ATR su M15: si spostano allineati con
+#  l'orologio, nessun residuo di griglia.
+#  CALENDARIO: UE, come il DAX (R246o). Feriali d'inverno A+B: 220.
+#  D'ESTATE la d+1 piazza alle 08:59 BCM = 09:59 CEST, un'ora DOPO Xetra:
+#  la parte estiva NON descrive niente di vivo (R246m par. 1.3).
+#
+#  G0: non c'e'. Soglie valide se G0 di R246i e' VERDE/GIALLO; se no [NON
+#     CONFRONTABILI], si rifanno sul per-trade d0 B del round (classe 750).
+#  G1: gemelle 794625/794675 identiche.
+#  G2: la gamba IS del CSV di questo file e' il riferimento di R246r.
+#  S1 SENTINELLA: per-trade NON identico a R246i; nessuna uscita prima
+#     delle 08:59 BCM (piazzamento) e nessuna dopo le 18:31. Contro-
+#     esempio: se il pin non arriva (d0), 8 uscite su 21 (38%) cadono prima
+#     delle 08:59 (misurato su 770413: 08:02:28 ... 08:58:01). Con meno di
+#     3 uscite nel file la sentinella e' GIALLA (non leggibile), non ROSSA.
+#
+#  ATTESA DICHIARATA (r246_bande_attese.py sez. 5; giorni d'inverno UE
+#  della d+1, A+B = R246q + R246r). Ancora B: estate 6 pos, 0,036 pos/
+#  feriale, PF 2,032; inverno 8 pos, 0,073 pos/feriale, PF 2,245.
+#  >>> PF: NON DISCRIMINANTE PER COSTRUZIONE (classe 178). H_STAGIONE n~16
+#      [1,14 ; 4,76], H_OROLOGIO n~8 [0,60 ; 7,68]; regola com'e' scritta:
+#      P(pre) 0,533 / 0,542, sbagliato 39,7% / 43,1%. Non si legge per
+#      nessuna decisione.
+#  >>> FREQUENZA, INDIZIO DEBOLE: posizioni d+1 sui 220 feriali d'inverno
+#      A+B, H_STAGIONE [11,1 ; 20,9], H_OROLOGIO [4,4 ; 11,6]: le bande si
+#      SOVRAPPONGONO per 0,5 (11,1-11,6). Soglie all'ancora: OROLOGIO se
+#      <= 10,4, STAGIONE se >= 13,6. Precondizione Df >= 0,018 pos/feriale.
+#      Regola com'e' scritta: se H_STAGIONE P(pre) 0,900 (0,679 ; 0,243 ;
+#      0,078), se H_OROLOGIO P(pre) 0,894 (0,042 ; 0,182 ; 0,776).
+#  n: 8-16 posizioni: NON e' un campione. Merito SOSPESO; rischio (DD) si
+#     legge ma su una manciata di operazioni.
+#  COSTO 40x: stop ATR (InpSLMode=1, ATR M15 x 2,5): [NON MISURATO]. Spread
+#     mediano D30EUR alle ore del piazzamento d+1 (08-09 BCM): 1,70 / 1,70,
+#     contro 2,80 / 1,70 delle ore 07-08 della d0 (spread_orario_D30EUR.csv,
+#     tutto l'anno).
+#  Tempo: 12,8 s/passata e' di R242 (EA SORELLA, classe 712): per questo
+#     binario [NON MISURATO]. R246q + R246r: 0,6 - 1,0 min (R246m par. 8).
+#  CONSEGUENZE PER IL CAMPO: nessuna misurata oggi (classe 765).
+#  PER-TRADE atteso in Common\Files: abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_794625.csv
+#  e abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_794675.csv (ultima gamba = OOS).
+# ==========================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpBoxStartHour=0
+InpBoxStartMin=0
+InpBoxEndHour=5
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=8
+InpPlaceMin=59
+InpEntryCutoffHour=9
+InpEntryCutoffMin=30
+InpCloseHour=18
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000
+InpTP1_R=1
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=3
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=794625||794625||50||794675||Y
