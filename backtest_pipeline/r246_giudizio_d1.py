@@ -15,6 +15,11 @@ Q2 (PF, solo Dow) e Qf2 (frequenza, tutti e tre).
 Il PF decide SOLO sul Dow; su DAX e MaxMin non discrimina (classe 178).
 In piu' (DESCRITTIVO, [INFERITA] per FTMO): la serie ricostruita come la
 vedrebbe FTMO = d0 nei giorni d'estate UE + d+1 nei giorni d'inverno UE.
+Strato 2 (29/09): un EA con file NULLI (S1 qui, o G1 dei riferimenti d0 in
+R246) NON si salta: si stampa come LETTURA SOSPESA con la prova di
+invarianza (gemella m+50; e, se S1, senza le uscite fuori finestra), come fa
+r246_giudizio.py. Aggiunte: bande congelate X2/Y2, lettura congiunta del
+par. 5.1 (Q di R246 + Q2), DD della serie FTMO contro il d0 tutto l'anno.
 
 USO:  python3 backtest_pipeline/r246_giudizio_d1.py
       python3 backtest_pipeline/r246_giudizio_d1.py --autotest
@@ -125,17 +130,60 @@ def serie_ftmo(k, d0A, d0B, m1A, m1B):
     for et, pt0, pt1 in (('A', d0A, m1A), ('B', d0B, m1B)):
         for r in pt0:
             if not rb.inverno(g.giorno(r), 'UE'):
-                tutti.append((et, r))
+                tutti.append((et + '-d0', r))
         for r in pt1:
             if rb.inverno(g.giorno(r), 'UE'):
-                tutti.append((et, r))
+                tutti.append((et + '-d1', r))
     deal = [g.cent(r['net_profit']) / 100.0 for _, r in tutti]
+    # (strato 2, 29/09) la chiave porta ANCHE la sorgente: position_id d0 e d+1
+    # vengono da due corse diverse e possono coincidere (oggi 0 collisioni).
     pos = {(et, r['position_id']) for et, r in tutti}
     seq = sorted([r for _, r in tutti], key=lambda r: r['close_time'])
     dd, ddp = g.dd_saldo(seq)
+    # dove sta il DD: picco, fondo e quota di d0 / d+1 dentro la finestra
+    sal = picco = 100000.0
+    t_picco, fin = None, (0.0, None, None)
+    for r in seq:
+        sal += g.cent(r['net_profit']) / 100.0
+        if sal > picco:
+            picco, t_picco = sal, r['close_time']
+        if (picco - sal) / picco > fin[0]:
+            fin = ((picco - sal) / picco, t_picco, r['close_time'])
+    quota = {s: round(sum(g.cent(r['net_profit']) / 100.0 for et, r in tutti
+                          if et.endswith(s) and fin[1] and fin[1] < r['close_time'] <= fin[2]), 2)
+             for s in ('d0', 'd1')}
     fer = g.feriali_AB('UE')
     return dict(pf=rb.pf(deal), pos=len(pos), deal=len(deal), netto=sum(deal), dd=dd, ddp=ddp,
-                fer=fer['E'] + fer['I'], per_g=len(pos) / (fer['E'] + fer['I']))
+                fer=fer['E'] + fer['I'], per_g=len(pos) / (fer['E'] + fer['I']),
+                dd_picco=fin[1], dd_fondo=fin[2], dd_quota=quota)
+
+
+def congiunta(z_est, z_inv):
+    """R246m par. 5.1: lettura congiunta di Q (estate, R246) e Q2 (inverno, d+1)"""
+    ok = ('OROLOGIO', 'STAGIONE')
+    if z_est not in ok and not z_est.startswith('MISTO') or z_inv not in ok and not z_inv.startswith('MISTO'):
+        return 'NON APPLICABILE (un verdetto non discrimina o divario non riprodotto)'
+    if z_est == z_inv == 'OROLOGIO':
+        return 'OROLOGIO in tutte e due le stagioni'
+    if z_est == z_inv == 'STAGIONE':
+        return 'STAGIONE in tutte e due le stagioni'
+    if {z_est, z_inv} == set(ok):
+        return "INTERAZIONE (l'effetto dell'orologio NON e' lo stesso d'estate e d'inverno)"
+    return 'MISTO'
+
+
+def fuori_s1(k, pt):
+    """position_id delle uscite fuori dalla finestra S1 d+1 (per la prova di invarianza)"""
+    lo, hi = S1_D1[k]
+    return {r['position_id'] for r in pt if g.ora(r) < lo or g.ora(r) > hi}
+
+
+# bande p10-p90 CONGELATE della d+1 d'inverno A+B (R246m par. 4, R246o, R246q;
+# r246_bande_attese.py sez. 5a): (H_STAGIONE, H_OROLOGIO)
+BANDE2_PF = {'DOW': ((1.19, 2.35), (0.50, 1.26)), 'DAX': ((1.16, 1.88), (0.93, 1.81)),
+             'MM': ((1.14, 4.76), (0.60, 7.68))}
+BANDE2_POS = {'DOW': ((67.5, 84.5), (48.5, 64.4)), 'DAX': ((164.1, 179.9), (133.6, 151.7)),
+              'MM': ((11.1, 20.9), (4.4, 11.6))}
 
 
 def sfasati_dow(m1A, m1B):
@@ -193,14 +241,22 @@ def main():
 
     print("\n### 4. VERDETTI (aperti SOLO ora) -- n = posizioni, PF sui deal, per stagione di CHIUSURA")
     out = {}
+    # (strato 2, 29/09) i riferimenti d0 vengono da R246: se quei file sono NULLI
+    # per G1 il verdetto d+1 che li usa e' SOSPESO anche per quello (R246 par. 5).
+    g1_d0 = g.cancello_g1(p0)
     for k in g.EA:
         L0 = {v[1] + v[2]: l for l, v in FILES_D0.items() if v[0] == k}
         L1 = {v[2]: l for l, v in FILES_D1.items() if v[0] == k}
-        if nullo[k]:
-            print(f"  {k}: ROUND NULLO (S1)")
-            continue
+        rif_nulli = sorted(L0[x] for x in ('d0A', 'd0B') if g1_d0[L0[x]][0] != 'PASS')
+        motivi = (['S1 ROSSO su ' + ', '.join('R246' + l for l, v in FILES_D1.items()
+                                               if v[0] == k and s1[l][0] == 'ROSSO')] if nullo[k] else []) + \
+                 (['riferimenti d0 NULLI per G1 in R246: ' + ', '.join('R246' + l for l in rif_nulli)] if rif_nulli else [])
+        if motivi:
+            print(f"\n  == {k}: LETTURA SOSPESA -- " + ' ; '.join(motivi) +
+                  " -- si scrive con la prova di invarianza, la decisione e' di Claudio")
         varianti = [0, 50]
-        print(f"\n  == {k} ({g.EA[k][0]}, calendario {g.EA[k][2]})  [varianti: gemella m e gemella m+50]")
+        print(f"\n  == {k} ({g.EA[k][0]}, calendario {g.EA[k][2]})  [varianti: gemella m e gemella m+50]"
+              + ('  [SOSPESO]' if motivi else '  [PRONUNCIATO]'))
         for off in varianti:
             celle = [p0[(L0['d0A'], FILES_D0[L0['d0A']][3] + off)], p0[(L0['d0B'], FILES_D0[L0['d0B']][3] + off)],
                      p1[(L1['A'], FILES_D1[L1['A']][3] + off)], p1[(L1['B'], FILES_D1[L1['B']][3] + off)]]
@@ -228,17 +284,41 @@ def main():
                 fr = jackknife(k, celle)
                 print(f"     fragilita' (jackknife, {fr['n']} posizioni): Q2 [{fr['qmin']:.3f} ; {fr['qmax']:.3f}] verdetto PF cambia in {fr['qcam']};"
                       f" Qf2 [{fr['fmin']:.3f} ; {fr['fmax']:.3f}] verdetto FREQ cambia in {fr['fcam']}")
+                print(f"     bande congelate X2/Y2 (R246m par. 4, R246o, R246q): PF d+1 inverno {r['p1']['I']['pf']:.3f} -> "
+                      f"{g.dove_cade(r['p1']['I']['pf'], BANDE2_PF[k])} {BANDE2_PF[k]}; posizioni {r['p1']['I']['pos']} -> "
+                      f"{g.dove_cade(r['p1']['I']['pos'], BANDE2_POS[k])} {BANDE2_POS[k]}")
+                # par. 5.1: lettura congiunta con R246 (Q d'estate dalle celle -1h)
+                Lm = {v[2]: l for l, v in FILES_D0.items() if v[0] == k and v[1] == '-1h'}
+                v0 = g.verdetti(k, celle[0], celle[1], p0[(Lm['A'], FILES_D0[Lm['A']][3])],
+                                p0[(Lm['B'], FILES_D0[Lm['B']][3])])
+                print(f"     par. 5.1 CONGIUNTA PF:   Q estate {v0['Q']:.3f} ({v0['pf_verdetto'][:24]}) + Q2 inverno {r['Q2']:.3f}"
+                      f" ({r['pf_v'][:24]}) -> {congiunta(v0['pf_verdetto'], r['pf_v'])}")
+                print(f"     (per analogia, 5.1 e' scritto per Q/Q2) FREQ: Qf estate {v0['Qf']:.3f} ({v0['f_verdetto']}) + Qf2 inverno"
+                      f" {r['Qf2']:.3f} ({r['f_v']}) -> {congiunta(v0['f_verdetto'], r['f_v'])}")
+                if k == 'DOW':
+                    print("     >>> sul Dow OGNI zona si scrive 'orologio + candela H4' (R246m par. 5.1)")
                 seq = [x for c in celle[2:] for x in sorted(c, key=lambda y: y['close_time'])
                        if g.stagione(g.giorno(x), g.EA[k][2]) == 'I']
                 print(f"     DD saldo d+1 inverno [DERIVATO]: {g.dd_saldo(seq)[1]:.2%}")
                 sf = serie_ftmo(k, *celle)
+                seq0 = [x for c in celle[:2] for x in sorted(c, key=lambda y: y['close_time'])]
                 print(f"     SERIE COME LA VEDREBBE FTMO [INFERITA] (d0 estate UE + d+1 inverno UE, calendario UE, {sf['fer']} feriali):"
-                      f" PF {sf['pf']:.3f}  posizioni {sf['pos']} ({sf['per_g']:.3f}/feriale)  netto {sf['netto']:.2f}  DD saldo {sf['ddp']:.2%}")
+                      f" PF {sf['pf']:.3f}  posizioni {sf['pos']} ({sf['per_g']:.3f}/feriale)  netto {sf['netto']:.2f}  DD saldo {sf['ddp']:.2%}"
+                      f"  (d0 tutto l'anno A+B, stesso metodo: DD saldo {g.dd_saldo(seq0)[1]:.2%})")
+                print(f"       DD serie FTMO: picco {sf['dd_picco']} fondo {sf['dd_fondo']}; netto nella finestra da d0 {sf['dd_quota']['d0']:.2f},"
+                      f" da d+1 {sf['dd_quota']['d1']:.2f}")
                 if k == 'DOW':
                     n, npos, net = sfasati_dow(celle[2], celle[3])
                     print(f"     40 feriali sfasati (UE inverno / USA estate) d+1 Dow: deal {n}, posizioni {npos}, netto {net:.2f}  [DESCRITTIVO]")
             else:
                 print(f"     invarianza gemella m+50: Q2 {r['Q2']:.6f} -> {r['pf_v']} | Qf2 {r['Qf2']:.6f} -> {r['f_v']}")
+            if nullo[k]:
+                via = [fuori_s1(k, c) for c in celle[2:]]
+                c2 = celle[:2] + [[x for x in c if x['position_id'] not in v] for c, v in zip(celle[2:], via)]
+                r2 = q2(k, *c2)
+                print(f"     INVARIANZA S1 (gemella +{off}): tolte le posizioni fuori finestra S1 {[sorted(v) for v in via]} (A, B)"
+                      f" -> PF_I+1 {r2['p1']['I']['pf']:.3f} pos {r2['p1']['I']['pos']} Q2 {r2['Q2']:.6f} Qf2 {r2['Qf2']:.6f}"
+                      f" -> {'INVARIATO' if (r2['Q2'], r2['Qf2'], r2['p1']['I']['pos']) == (r['Q2'], r['Qf2'], r['p1']['I']['pos']) else 'CAMBIA'}")
     print("\n### 5. RISCHIO (Emendamento B) -- CSV gemella m e per-trade")
     g.FILES, g.ARCH, g.PT = FILES_D1, ARCH_D1, PT_D1
     try:
@@ -268,6 +348,19 @@ def autotest():
     # contro-esempio 3: Q2 = 1 se d+1 inverno == d0 estate (OROLOGIO puro), 0 se d+1 inverno == d0 inverno
     q = lambda pfI0, pfE0, pfI1: (pfI0 - pfI1) / (pfI0 - pfE0)
     assert abs(q(1.5, 0.9, 0.9) - 1) < 1e-9 and abs(q(1.5, 0.9, 1.5)) < 1e-9
+    # contro-esempio 4 (strato 2, 29/09): position_id UGUALI in d0 (estate) e d+1
+    # (inverno) della stessa finestra sono DUE posizioni, non una
+    e = [{'close_time': '2025.07.01 10:00:00', 'position_id': '7', 'net_profit': '10.00'}]
+    i = [{'close_time': '2025.01.15 10:00:00', 'position_id': '7', 'net_profit': '-5.00'}]
+    assert serie_ftmo('DAX', e, [], i, [])['pos'] == 2
+    # contro-esempio 5: lettura congiunta par. 5.1
+    assert congiunta('STAGIONE', 'OROLOGIO').startswith('INTERAZIONE')
+    assert congiunta('OROLOGIO', 'OROLOGIO').startswith('OROLOGIO')
+    assert congiunta('MISTO / NON SEPARATO', 'OROLOGIO') == 'MISTO'
+    assert congiunta('NON DISCRIMINANTE PER COSTRUZIONE (classe 178)', 'OROLOGIO').startswith('NON APPLICABILE')
+    # contro-esempio 6: l'uscita delle 23:05 (Memorial Day) e' fuori S1, quella delle 18:30 no
+    assert fuori_s1('DOW', [{'close_time': '2026.05.25 23:05:00', 'position_id': '188'},
+                            {'close_time': '2026.05.26 18:30:00', 'position_id': '189'}]) == {'188'}
     print("autotest r246_giudizio_d1: OK")
 
 
