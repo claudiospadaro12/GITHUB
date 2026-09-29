@@ -1,0 +1,535 @@
+#  EA: ABTG_EMA200
+# =====================================================================
+#  R271 -- EMA200 H4 EURUSD, SOLO LATO CORTO: LA LARGHEZZA DELLO STOP
+#          (InpSLatr 1,0 / 1,25 / 1,5). L'UNICO ASSE. Tutto il resto e'
+#          PINNATO alla cella di R265a (O1 0,30 / O2 0,5 / TP 1,5).
+#  Candidato A4 della caccia congiunta con Gemini (28-29/09), verificato
+#  a costo minimo in docs/RISPOSTA_A_GEMINI_CACCIA_2026-09-29.md; scrittura
+#  del file approvata da Claudio il 29/09/2026 ("Va bene").
+#  Scritto il 29/09/2026. ATTESE E SOGLIE CONGELATE PRIMA DEI NUMERI.
+#  NUMERO E MAGIC (grep del 29/09 su disco e su tutti i rami locali e
+#  remoti): "R271" compare SOLO in docs/gemini/RISPOSTA_GEMINI_2026-09-28_
+#  2207.md come etichetta che Gemini dava a un ALTRO round (DAX, uscita a
+#  tempo, InpExitMinutes): non e' un file prova ne' una coda, ma la
+#  collisione di nome va sciolta prima che quel round nasca. Magic 798503:
+#  ZERO occorrenze (la famiglia R265 usa 798501 / 798551 / 798502).
+#
+#  GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. MAI SUL VPS (firma del
+#  21/09/2026). NE' sul banco 50504400 (C:\MT5_Backtest), NE' su nessun
+#  terminale di conto (50503392, 50504263, 10105439, 541452707 FTMO).
+#  Prima si controlla che il terminale di quel PC (loggato sul demo
+#  50503392) non abbia SEDIE attaccate.
+#  VINCOLI DI BANCO (nella RIGA, classe 692; QUESTO FILE NON CONTIENE E
+#  NON AUTORIZZA NESSUNA RIGA DI LANCIO): -Modello 1 (OHLC M1) e
+#  -Deposito 100000. NIENTE -Spread / -Ritardo / -FrazioneIS. Il deposito
+#  NON e' una taglia: nessuna e' proposta. Non tocca EA, preset, sedie,
+#  conti, forward. Non promuove niente: ogni esito e' materiale per Claudio.
+#
+# =====================================================================
+#  0. LA RISPOSTA CORTA
+# =====================================================================
+#  (1) R265a ha escluso EURUSD H4 solo corto PER COSTO a InpSLatr 1,0:
+#      stop mediano della gamba 2 = 23,40-24,40 pip = 35,3-36,8 volte il
+#      pedaggio all-in 0,6636 pip, contro 40 volte = 26,54 pip (letto dal
+#      lotto, lettura C del 28/09, par. 4). Il candidato NON e' morto: e'
+#      NON ANCORA MISURATO, perche' la leva del costo nominata dalla testa
+#      R264 par. 11 e' InpSLatr e non e' mai stata messa ad asse su EURUSD
+#      (i 136 CSV della scansione H4 EURUSD hanno InpSLatr = 1 in tutte le
+#      righe, ricontato il 29/09; l'unico asse InpSLatr dell'archivio su
+#      questo motore e' R136a, sul DOW H1: prove/R136a_slatr_U30USD.txt).
+#  (2) Questo file mette la leva ad asse SOLO nei valori che il cancello
+#      del costo ammette: 1,25 e 1,5 (par. 2). La cella 1,0 e' il
+#      CONTROLLO (= la cella viva, e' il default compilato r.74), NON un
+#      candidato: e' ESCLUSA PER COSTO col numero accanto e serve a tre
+#      cose sole (G0 di deposito, forma dell'asse, riferimento per M1/M2).
+#  (3) Il numero che discrimina e' l'IS 2017-2023 (par. 3): il G0 di R265a
+#      e' ROSSO (par. 7) e l'OOS 2024-2026 e' NON CONFRONTABILE col
+#      genetico. L'OOS ha ~100 posizioni: merito OOS SOSPESO, dichiarato ORA.
+#  (4) Previsione, contro di me: H_NIENTE e' piu' probabile di H_EDGE
+#      (tasso di base del motore fuori dal Dow: ZERO su CINQUE, R264 testa
+#      par. 1f; e sull'asse InpSLatr del Dow l'esito fu "il default va
+#      bene", R136a). Se esce cosi', e' un risultato: chiude il punto (3)
+#      del certificato su questa leva.
+#
+# =====================================================================
+#  1. COSA E' GIA' MISURATO (classe 411, fonti a mano)
+# =====================================================================
+#  (a) LA SCANSIONE (il "genetico"): risultati_archivio/EMA200/H4_OHLC/
+#      scan_ABTG_EMA200_H4_EURUSD.csv, commit 00fe47bf (31/07/2026), 136
+#      righe. InpSLatr = 1 in TUTTE (ricontato). Solo corto: 26 celle,
+#      26 in utile, PF 1,184-1,565, mediana 1,3206. Cella ancora = Pass 94
+#      (O1 0,30 / O2 0,5 / TP 1,5): PF 1,32379, n 180, DD 4,3273, Profit
+#      441,21. Banco [NON VERIFICATO] (testa R265 par. 1a).
+#  (b) R265a (28/09, PC di backtest, OHLC M1, deposito 10000, moncone
+#      OOS 2024.01.01 -> 2026.06.30, magic 798501/798551): risultati_
+#      archivio/ROUND_CORTI_C_2026-09-28/ROUND_R265a/ABTG_EMA200_EURUSD_
+#      OOS_ohlc_R265a.csv: Trades 206, Profit 396,42, PF 1,27239, Equity
+#      DD 5,1117 (le due gemelle identiche: G1 ok). Per-trade:
+#      risultati_archivio/ROUND_CORTI_C_2026-09-28/PERTRADE/abtg_trades_
+#      ABTG_EMA200_EURUSD_798501.csv: 104 posizioni, 1,981 deal/posizione,
+#      volume minimo 0,05 lotti [MISURATO, ricontato il 29/09].
+#      G0 CONTRO IL GENETICO: ROSSO (n 206 contro 180, PF 1,27239 contro
+#      1,32379, DD 5,1117 contro 4,3273 = +18,1% relativo). Stesso segno
+#      dei ROSSI dei simboli gemelli (R264a GBPUSD, R264b AUDJPY, R264c
+#      GBPJPY, R264d XAUUSD: n del banco piu' alto, PF piu' basso). Causa
+#      NON DIMOSTRATA (H_BINARIO / H_STORICO / H_SPEC, lettura C par. 1).
+#  (c) K1 di R265a: FAIL, stop mediano gamba 2 [23,40 ; 24,40] pip
+#      (35,3-36,8x), gamba 1 ~43,72 pip. Lettura C del 28/09, par. 1 e 4.
+#      Il numero e' [DERIVATO dal lotto], non letto dal Giornale.
+#  (d) EURUSD H1 (R29a/R140a): ESCLUSO PER COSTO a 20,8x (numero di R140a,
+#      derivato dall'ancora B: ATR H1 7,37 pip da UNA sedia, n = 1, poi
+#      x2 per H4 = 14,7 pip). LA MISURA DI R265a SMENTISCE QUELL'ANCORA A
+#      H4: 14,7 pip attesi, ~23,2-24,4 misurati (x1,6). Se lo stesso
+#      errore vale a H1, il 20,8x e' sottostimato di un fattore simile
+#      (~33x) e H1 potrebbe rientrare con SLatr ~1,25 [DERIVATO su DUE
+#      ipotesi non verificate: NON e' un numero]. Va RIMISURATO con la
+#      stessa lettura dal lotto prima di dire alcunche' (par. 9, TF).
+#
+#  (e) Il solo precedente dell'asse SLatr su questo motore: R136a, DOW H1
+#      (771531), 7 celle 0,4-1,6 (risultati_archivio/R136_R137_LA_NOTTE_
+#      CHE_I_CSV_SONO_ARRIVATI_2026-09-13.md par. 2.1): PF IS 1,07-1,26,
+#      OOS 1,26-1,61, altopiano largo, verdetto "IL DEFAULT VA BENE".
+#      E il contro-esempio della taglia visto la' (CELLE_MIGLIORI_GIA_
+#      MISURATE_2026-09-21.md par. D, SLatr 1,0 -> 1,4): profitto -12%
+#      IS / -16% OOS mentre il DD scende -25% / -29%: "e' una riduzione
+#      del rischio, non un guadagno di merito". E' la ragione di M2 e R1
+#      (par. 6). Non si trasferisce a EURUSD: e' un altro simbolo, un
+#      altro TF e un altro lato.
+#
+# =====================================================================
+#  2. LA FORMULA DELLO STOP, LA SCALA, E K1 PER CELLA (40x)
+# =====================================================================
+#  SORGENTE (mql5/Experts/ABTG_EMA200.mq5, SHA256 228bb295...7a0c a HEAD
+#  b45dd009, lo stesso di R264/R265), PlaceOrders r.354-367, lato corto:
+#      o1 = ema - InpOrder1Atr * atr          (r.356)
+#      o2 = ema + InpOrder2Atr * atr          (r.357)
+#      sl = o2  + InpSLatr    * atr          (r.358, UNICO SL, comune)
+#      atr = iATR(EURUSD, H4, 14), buffer 0, SHIFT 1 (r.260, r.306): la
+#      barra CHIUSA, letta al primo tick della barra nuova (OnNewBar,
+#      r.319) = ATR "a apertura barra"; NON cambia con gli input.
+#      TP (r.375) = px - risk * InpTP_RR, con risk = sl - px (r.372).
+#  InpSLatr compare SOLO alle r.74 (input) e r.358 (uso): ricontato.
+#  QUINDI, con O1 0,30 / O2 0,5:
+#      GAMBA 2 (px = o2):  risk2 = InpSLatr * atr                 -> PARTE FISSA: NESSUNA
+#      GAMBA 1 (px = o1):  risk1 = (O1 + O2 + InpSLatr) * atr = (0,8 + S) * atr -> PARTE FISSA 0,8 ATR
+#  La gamba 2 (lo stop PIU' CORTO del motore, quella che decide il 40x)
+#  e' PROPORZIONALE A InpSLatr fino all'arrotondamento al tick (0,1 pip).
+#  La gamba 1 NO: ha una parte fissa (O1 + O2 = 0,8 ATR) e scala meno.
+#      S       gamba 2 (x ATR)   gamba 1 (x ATR)   g2 / g2(1,0)   g1 / g1(1,0)   g1 / g2
+#      1,00    1,00              1,80              1,000          1,000          1,800
+#      1,25    1,25              2,05              1,250          1,139          1,640
+#      1,50    1,50              2,30              1,500          1,278          1,533
+#  ATTENZIONE AL LETTORE (classe da registrare): il cancello interno di
+#  R265a "vol2/vol1 deve stare in [1,5 ; 2,2], atteso 1,8" vale SOLO a
+#  S = 1,0. Sul per-trade di R271 (ultima passata = cella 1,5, par. 4) il
+#  rapporto atteso e' 1,533 e la banda va ricentrata: [1,30 ; 1,85]. Con
+#  la banda di R265a il lettore marcherebbe NULLO un per-trade BUONO. E
+#  l'ATR per candidata si stima da s1/(0,8+S) e da s2/S, non da s1/1,8.
+#  ANCHE IL TP SCALA (r.375: TP = risk x TP_RR): l'asse muove stop E
+#  bersaglio insieme, non lo stop da solo; il 1o bersaglio della parziale
+#  invece e' la EMA14 = un PREZZO, non un multiplo dello stop (r.410-433):
+#  allargando lo stop, la parziale vale MENO R. Effetto sul PF/EP [NON
+#  STIMATO]: e' il motivo di M2 (par. 6).
+#  CONTRO-ESEMPIO ESEGUITO (29/09, python sul per-trade di R265a, 104
+#  posizioni, 36 coppie gamba1/gamba2, saldo ricostruito con k = 2,000
+#  EUR/lotto, R = saldo x 0,5%, formula del lotto di R264 par. 5):
+#    - stop gamba 2 a S = 1,0: mediana [23,35 ; 24,35] pip (la lettura C:
+#      [23,40 ; 24,40]: scarto 0,05 pip, il saldo qui e' preso alla prima
+#      uscita e non al piazzamento); vol2/vol1 mediano 1,857; ATR da
+#      gamba 1 (s1/1,8) 24,36 pip contro ATR da gamba 2 23,85: la
+#      struttura a due gambe e' identificata bene.
+#    - popolazione: ATR stimato su TUTTE le 68 gamba-1 (non solo le
+#      coppie): mediana 23,18 pip; per anno 2024 21,42 (23 pos.), 2025
+#      26,33 (29), 2026 24,66 (16). La mediana dipende dalla popolazione
+#      di +-5%: e' per questo che il lettore ricalcola K1 dal per-trade
+#      VERO e non usa questa tabella.
+#  K1 PER CELLA [DERIVATO: S x ATR di R265a; soglia 40 x 0,6636 = 26,54
+#  pip, metro del logger, testa R265 par. 2; col metro della sonda 17/08
+#  0,864 pip la soglia e' 34,56; al P95 dello spread 38,54]:
+#      S       stop g2 mediano (pip)   x pedaggio   verdetto al metro del logger
+#      1,00    23,35-24,35 (da tutte: 23,2)   35,2-36,7   ESCLUSA PER COSTO (< 26,54): SOLO CONTROLLO
+#      1,25    29,19-30,44             44,0-45,9    AMMESSA: PASS al metro del logger, SOTTO il metro della sonda (34,56)
+#      1,50    35,03-36,53             52,8-55,0    AMMESSA a tutti e due i metri, sotto il P95 (38,54)
+#  MARGINE DI 1,25: +10% sulla soglia 26,54 alla mediana; sul solo 2024
+#  (ATR 21,4) lo stop g2 sarebbe 26,8 pip = 40,4x, a filo. Il cancello e'
+#  sulla MEDIANA (regola di casa), ma la fragilita' si scrive.
+#  K1 DIRETTO nel file: la passata che sopravvive e' l'ULTIMA (classe 455):
+#  OOS della cella 1,5, magic 798503, a 100000: il lotto e' ~10 volte
+#  piu' grande e l'intervallo [R/((vol+0,01) C q) ; R/(vol C q)] ~10 volte
+#  piu' stretto. Per 1,0 e 1,25 il per-trade NON sopravvive: il loro K1 e'
+#  solo DERIVATO dalla scala (gamba 2 lineare, verificata al sorgente).
+#  CONTROLLO DI SCALA, congelato: stop g2 mediano MISURATO a 1,5 diviso il
+#  23,35-24,35 di R265a deve stare in [1,35 ; 1,65]. Fuori: la scala non
+#  e' lineare sulla popolazione (piu' o meno candidate a seconda dello
+#  stop) e il K1 di 1,25 resta [NON VERIFICATO]. Se K1(1,5) < 26,54: la
+#  formula e' sbagliata e il file e' NULLO.
+#  Il pedaggio e' BCM; su FTMO spread e commissioni EURUSD [NON MISURATI].
+#  L'ATR dell'IS 2017-2023 non e' misurato: nel 2017-2021 EURUSD H4 era
+#  con ogni probabilita' meno volatile [qualitativo, NON MISURATO], quindi
+#  su quegli anni lo stop di 1,25 sarebbe SOTTO 26,54 al pedaggio di oggi.
+#  Il cancello 40x si legge sull'ERA SCHIERABILE (2024-26, dove l'ATR e'
+#  misurato); l'IS legge il MERITO, non il costo (par. 10).
+#
+# =====================================================================
+#  3. BANCO E FINESTRA (Emendamento A: unita' = OPERAZIONE)
+# =====================================================================
+#  MODELLO 1 (OHLC M1) = SCREENING: puo' BOCCIARE, non PROMUOVERE. Il
+#  campione pieno a tick non esiste (tick BCM forex dal 2024.07.05, ~2
+#  anni = ~80 posizioni: impossibile arrivare a 150 per finestra; testa
+#  R264 par. 3). Il driver appende "_ohlc" ai CSV. Come le griglie R264.
+#  DEPOSITO 100000, e la scelta e' DICHIARATA: R265a girava a 10000 perche'
+#  doveva rifare il banco della scansione; i walk-forward (R264a-d, R265b)
+#  girano a 100000. Qui il motivo e' SPECIFICO ALL'ASSE: il lotto e'
+#  funzione dello stop, quindi l'asse stesso cambia la QUANTIZZAZIONE del
+#  lotto (passo 0,01). A 10000 il lotto minimo osservato e' 0,05 a S = 1,0
+#  e scenderebbe a ~0,03-0,04 a S = 1,5 [DERIVATO: 0,05 x 1,8/2,3]: un
+#  errore di arrotondamento del 20-30% sulle gambe piccole che CAMBIA CON
+#  LA CELLA sarebbe confuso con l'effetto dello stop. A 100000 i lotti
+#  stanno ~10x sopra e l'errore scende a ~2-3%. Senza pavimento (0,01) PF,
+#  RF e DD% sono invarianti alla taglia; il Profit no. Non e' una taglia.
+#  FINESTRA: @DAQUANDO 2017.01.01, @FRAZIONEIS 0.7371 -> 3467 giorni,
+#  floor(2555,5) = 2555 -> IS 2017.01.01 -> 2023.12.31 (7 anni), OOS
+#  2024.01.01 -> 2026.06.30 (912 giorni = la finestra del genetico). Stessa
+#  finestra di R265b (mai girato) e delle griglie R264d.
+#  REGIMI CONTENUTI (Emendamento A, qualitativi dalla storia di mercato
+#  nota, NON misurati qui): l'IS contiene PIU' DI UN REGIME -- euro in
+#  salita 2017 e 2020, in discesa 2018 e 2021-2022, laterale-rialzista
+#  2023, piu' il crollo di marzo 2020. L'OOS ne contiene UNO (dollaro in
+#  discesa dopo il 2024, R221a par. 8). La finestra M1 dei server BCM
+#  scende al 1999 (pavimento MISURATO, R102); sul PC di backtest dal 2017
+#  e' [NON VERIFICATO] e lo prende D0 (par. 6, S0).
+#  OROLOGIO: BCM ha cambiato ora sul forex fra il 26/12/2024 e il
+#  02/02/2025 (CLAUDE.md 24/09): la griglia H4, ancorata alla mezzanotte
+#  server, e' tagliata diversamente prima e dopo. Tocca l'IS (orologio
+#  vecchio) e divide l'OOS a meta'. Effetto sul segnale [NON MISURATO].
+#  POSIZIONI ATTESE (dal tasso di R265a: 104 posizioni in 912 giorni =
+#  41,65/anno, 1,981 deal/posizione [MISURATO]):
+#     OOS: ~104 posizioni (~206 deal) alla cella 1,0; 90-115 (185-230 deal)
+#          a 1,25 e 1,5 [DERIVATO; il segno del cambio di n con S NON si
+#          prevede: sul Dow H1 l'n OOS SALE con SLatr (473 -> 529) e la
+#          previsione meccanica "cala" e' stata SMENTITA, R136a].
+#          SOTTO 150 -> MERITO OOS SOSPESO. Dichiarato ORA.
+#     IS:  ~291 posizioni (~577 deal) al tasso OOS; banda larga 217-353
+#          posizioni (430-700 deal) perche' l'IS e' un'epoca diversa; il
+#          test D0 (tasso IS/OOS fra 0,5 e 2,0) e' il cancello.
+#     S1 CAMPIONE: 150 posizioni x 1,981 deal/pos = 297 -> SOGLIA 300 DEAL
+#          IS per cella (la 1,838 di R264 e' del GBPUSD/AUDJPY; qui e'
+#          misurato 1,981 su questo simbolo e a 10000; a 100000 la parziale
+#          parte sempre e puo' salire verso 2,0).
+#
+# =====================================================================
+#  4. LA GRIGLIA, IL PER-TRADE, IL MAGIC
+# =====================================================================
+#  UNA VARIABILE: InpSLatr 1,0 / 1,25 / 1,5 (v||start||step||stop||Y =
+#  1.0||1.0||0.25||1.51||Y: 1,0 + 0,25 k, 1,75 > 1,51 taglia fuori;
+#  3 celle x 2 finestre = 6 passate, controlla_prova la conta). TUTTO IL
+#  RESTO e' copiato riga per riga dal file prova R265a (43 input, diff
+#  contro R265a eseguito il 29/09: cambiano SOLO @DAQUANDO, @FRAZIONEIS,
+#  InpSLatr (da pin N a asse Y), InpComment (R271) e InpMagic (798503,
+#  senza asse: qui non serve la gemella)). SOLO CORTO: InpAllowLong=0,
+#  InpAllowShort=1. O1 0,30 / O2 0,5 / TP 1,5 (la cella ancora del
+#  genetico, NON la 0,20 / 2,0 di R265b che non e' mai girato).
+#  Rischio: InpRiskPercent 1,0 (totale) diviso due gambe = 0,5% per gamba
+#  (r.361), come R265a [verificato riga per riga]. Nessun input di rischio
+#  e' cambiato: questa non e' una prova di taglia.
+#  Per-trade in Common\Files (sovrascritto a ogni passata: resta l'ULTIMA
+#  = OOS della cella 1,5, classe 455): abtg_trades_ABTG_EMA200_EURUSD_
+#  798503.csv. Il per-trade dell'IS non esiste: la lettura per anno
+#  dell'IS (H_DERIVA, par. 5) NON e' fattibile da questo round.
+#
+# =====================================================================
+#  5. L'ATTESA, DICHIARATA PRIMA DEI NUMERI -- LE TRE IPOTESI
+# =====================================================================
+#  Le tre ipotesi NON si sovrappongono; l'ordine di lettura e' fisso:
+#  prima H_CAMPIONE (riguarda l'n, non il PF), poi le due sul PF.
+#  H_CAMPIONE  n IS < 300 deal (= 150 posizioni) in una cella ammessa
+#              (1,25 o 1,5): merito di QUELLA cella SOSPESO. Il rischio si
+#              legge lo stesso (Emendamento B). Idem OOS: sotto 150
+#              posizioni (300 deal), cioe' SEMPRE qui, merito OOS sospeso.
+#  H_EDGE      (edge SOPRA il costo) PF IS >= 1,10 in ENTRAMBE le celle
+#              ammesse, con n IS >= 300 deal in entrambe; conferma DEBOLE
+#              dall'OOS: PF OOS >= 1,10 (sospeso il merito, n < 150).
+#              Se e' vero: PF IS 1,10-1,30, PF OOS 1,20-1,50, DD IS 6-14%.
+#  H_NIENTE    PF IS < 1,08 in ENTRAMBE le celle ammesse (PF ~ 1: banda
+#              0,90-1,08, previsione puntuale ~1,05 come R265b). L'OOS
+#              puo' essere alto lo stesso (regime 2024-26, S4).
+#  ZONA GRIGIA tutto il resto (una cella >= 1,10 e l'altra < 1,10; o PF
+#              IS fra 1,08 e 1,10): NON CONCLUDENTE / NESSUN ALTOPIANO.
+#  NUMERI ATTESI, con la ragione:
+#   cella 1,0 (controllo): OOS = R265a al deposito 100000: n 206 deal,
+#     PF 1,27 +-0,03, DD 5,1 +-10% relativo, Profit ~10 x 396 = ~3.960
+#     EUR (ragione: stessi ingressi e uscite, cambia solo l'arrotondamento
+#     del lotto). IS: 430-700 deal, PF 0,95-1,25 (puntuale ~1,05), DD
+#     6-15% (come R265b: l'IS non e' mai stato visto dal genetico).
+#   celle 1,25 e 1,5: PF IS entro +-0,06 dal PF IS(1,0): asse QUASI
+#     PIATTO, come l'altopiano del Dow (R136a: IS 1,145-1,255 su 0,6-1,4).
+#     DD OOS 3,5-6,5 (<= del controllo, per lo stesso fatto che sul Dow
+#     il DD scendeva -25%/-29%); DD IS 5-14. n OOS 185-230, n IS 380-700.
+#   EP in R per posizione (M2): stessa banda di segno del PF; sotto per
+#     costruzione a S alti (parziale su prezzo fisso, par. 2).
+#  QUALE NUMERO PRODUCE L'ALTRA SPIEGAZIONE (classe 178). Le due letture
+#  di un PF che sale allargando lo stop sono: (i) SELEZIONE / COSTO
+#  (meno stop-out per rumore + il pedaggio pesa meno R: e' l'effetto che
+#  l'asse vuole misurare); (ii) ESPOSIZIONE (il lotto scala, il DD in
+#  valuta scende, il PF cambia per la ripesatura delle operazioni: e'
+#  quello che Gemini e noi temiamo). Il numero che le separa: la (i)
+#  lascia EP in R per posizione INVARIATO O PIU' ALTO e il numero di
+#  posizioni stabile; la (ii) lo lascia PIU' BASSO mentre PF sale e/o
+#  Profit/DD sale. Se EP_R scende piu' del 10% relativo rispetto al
+#  controllo mentre il PF sale: NON E' UN GUADAGNO DI MERITO.
+#
+# =====================================================================
+#  6. LE SOGLIE, CONGELATE ORA, COL NUMERO ACCANTO
+# =====================================================================
+#  S0 CATENA (ogni passata): E0 IS e OOS con 3 righe e Trades > 0 (niente
+#     moncone: qui il CSV _IS NON e' vuoto); P0 pin dal CSV (classe 780):
+#     ogni colonna Inp del CSV uguale al file (bool 0/1), InpSLatr =
+#     {1, 1.25, 1.5}, InpMagic 798503; C0 per-trade dell'ultima passata:
+#     scritto dopo l'avvio del job, righe = Trades OOS della cella 1,5,
+#     prima chiusura >= 2024.01.01, k = (somma net - Profit)/lotti in
+#     [1,00 ; 3,00] EUR/lotto (commissione d'ingresso non nel per-trade,
+#     R264 par. 5, classe 844), e vol2/vol1 nella banda RICENTRATA
+#     [1,30 ; 1,85] (par. 2). D0 DATI: tasso IS (deal/anno) fra 0,5 e 2,0
+#     volte il tasso OOS, per ogni cella, altrimenti lo storico M1 del PC
+#     e' sospetto -> file NULLO. Sono le stesse cifre di R264 par. 8 S0.
+#  K1 COSTO PER CELLA (40x, par. 2): una cella con stop g2 mediano
+#     < 26,54 pip e' ESCLUSA DAL VERDETTO DI MERITO anche con un bel PF.
+#     Alla 1,0 questo vale per costruzione: il PF di 1,0 si riporta come
+#     controllo e NON come candidato. K1(1,5) misurato dal per-trade con
+#     la banda del par. 2; K1(1,25) DERIVATO + controllo di scala.
+#  M1 MERITO (screening, sull'IS, cella per cella): CENTRO = 1,25, la sola
+#     cella ammessa con un vicino per parte, MAI il picco. PASSA LO
+#     SCREENING se PF IS(1,25) >= 1,10 E PF IS(1,5) >= 1,10 E PF IS(1,0)
+#     >= 1,00 (il vicino escluso non e' un dirupo) E n IS >= 300 deal in
+#     tutte e due le ammesse E non BORDO E non INSOSTENIBILE E DD nei
+#     limiti (R1). SOLIDO se in piu' PF IS(1,25) >= 1,27 (= 1,10 + lo
+#     scarto OHLC-tick massimo misurato 0,167, R264 par. 1d). L'OOS e'
+#     conferma DEBOLE (PF OOS >= 1,10, n < 150).
+#  M2 PER OPERAZIONE (non solo Profit/DD, richiesta di Gemini e nostra):
+#     per ogni cella si riportano, dai CSV, (a) EP per deal (colonna
+#     Expected Payoff), (b) EP_R per posizione = Profit / (n_pos x 1% x
+#     100000) con n_pos = Trades / 1,98 [scarto atteso < 10%: il saldo si
+#     muove attorno a 100000; il rapporto deal/pos esatto e' misurabile
+#     SOLO per la cella 1,5 dal per-trade], (c) Profit/DD e Recovery
+#     Factor (colonna del CSV) come CONTORNO, mai come unica misura.
+#     REGOLA: una cella con PF IS > PF IS(1,0) ma EP_R IS < EP_R IS(1,0) x
+#     0,90 e' "ESPOSIZIONE, non merito": NON conta per PASSA.
+#  R1 RISCHIO (classe 804 + 886 + Emendamento B): Equity DD % IS o OOS
+#     > 10,0% a rischio 1% (il muro statico della taglia piu' piccola
+#     sensata, R264 par. 8 S3) e' una VIOLAZIONE a QUALUNQUE n, si scrive
+#     cosi'. Il rispetto si scrive "R1 NON VIOLATO su n = X posizioni",
+#     MAI "rischio passato": il DD OHLC e' un LIMITE INFERIORE (sottostima
+#     le escursioni intra-barra) e la probabilita' che un motore senza
+#     edge rispetti il tetto a quell'n e' [NON MISURATA per questo
+#     simbolo]. Accanto il derivato a 2,00% (x 1,956-1,990, R221a par. 7):
+#     informazione per la firma della taglia, non un cancello mio.
+#  DD_FISSO (contro-esempio "PF sale, DD sale di piu'"): INSOSTENIBILE se,
+#     per una cella ammessa c contro il controllo 1,0 sulla stessa
+#     finestra, PF_c > PF_1,0 E (DD_c / DD_1,0 - 1) > (PF_c / PF_1,0 - 1):
+#     il DD % (a rischio fisso 1%) cresce piu' del PF. Un motore cosi'
+#     non e' sostenibile per una prop, qualunque sia il PF. Letto in IS e
+#     in OOS, DD_1,0 di ogni finestra = quello della sua passata.
+#  BORDO (si legge PER PRIMO tra i verdetti di forma): PF IS(1,5) >= PF
+#     IS(1,25) + 0,08 -> il merito SALE verso lo stop largo: nessuna
+#     promozione, 1,75+ e' un round nuovo. Falso allarme su celle piatte
+#     [NON SIMULATO qui; in R264 par. 8 il valore 0,08 dava 0,2%-8,8%].
+#  COSTO E MERITO SI ESCLUDONO: PF IS(1,0) >= PF IS(1,25) + 0,08 -> il
+#     merito sta nello stop STRETTO, che il costo esclude: EURUSD H4 non
+#     ha una cella che regga insieme costo e merito.
+#  S4 REGIME: PF IS(1,25) < 1,00 e PF OOS(1,25) >= 1,10 -> "REGIME, non
+#     edge" (schema R139b/R32b).
+#  S6 DEFAULT: il default compilato (S = 1,0) E' la cella di controllo,
+#     ESCLUSA PER COSTO: non e' una risposta operativa, quindi la frase
+#     "il default va bene" NON si scrive qui (il default e' fuori costo).
+#     Si dichiara invece il PREZZO dello spostamento nella zona ammessa:
+#     dPF IS = PF IS(1,25) - PF IS(1,0), idem OOS, e dEP_R. Se |dPF| < 0,05
+#     in IS e in OOS e |dEP_R| < 10%: "allargare lo stop NON cambia il
+#     motore e lo porta dentro il cancello del costo". Se PF e EP_R cadono
+#     (COSTO E MERITO SI ESCLUDONO): si scrive cosi'. Il VANTAGGIO di una
+#     cella sul controllo si dichiara SOLO se PF OOS(c) >= PF OOS(1,0) +
+#     0,10 (banda di rumore: A9 di R270b, 10,5% relativo) E EP_R non peggiore.
+#  S7 BANCO: Modello 1 BOCCIA e non PROMUOVE: il massimo e' "PASSA LO
+#     SCREENING: serve il tick" (2024.07.05-2026.06.30 o tick esterno).
+#  VERDETTI, PER NOME (classe 180), in ordine di lettura: NULLO (S0) |
+#     COSTO NON RISOLTO (K1(1,5) < 26,54 o controllo di scala fuori) |
+#     SOSPESO (H_CAMPIONE) | INSOSTENIBILE (R1 violato o DD_FISSO) |
+#     ESPOSIZIONE (M2) | COSTO E MERITO SI ESCLUDONO | BORDO | REGIME
+#     (S4) | NO PER MERITO (H_NIENTE) | NON CONCLUDENTE (zona grigia) |
+#     PASSA LO SCREENING (SOLIDO o no). Nessun altro verdetto.
+#
+# =====================================================================
+#  7. G0 (PONTE DI DEPOSITO) -- ROSSO ANCHE QUI, E COSA SI PUO' DIRE
+# =====================================================================
+#  La cella 1,0, finestra OOS, e' IDENTICA per input a R265a (stessi 43
+#  input, magic a parte) salvo il DEPOSITO (100000 contro 10000) e
+#  l'esistenza di una finestra IS. Ancore: (i) R265a OOS (CSV del par. 1b:
+#  n 206, PF 1,27239, DD 5,1117, Profit 396,42); (ii) il genetico Pass 94
+#  (n 180, PF 1,32379, DD 4,3273, Profit 441,21).
+#  IL G0 DI R265a ERA ROSSO contro il genetico (par. 1b) e la causa non e'
+#  dimostrata. Conseguenza congelata ORA: l'OOS di R271 contro il genetico
+#  e' NON CONFRONTABILE (come i simboli gemelli); l'attesa perde l'ancora
+#  del genetico; la lettura e' IS-DA-SOLO e di REGIME.
+#  Il confronto di R271 e' con R265a (ponte di deposito), bande scelte
+#  PRIMA [DERIVATO, non calibrate]:
+#    VERDE   Trades 206 identici E |PF - 1,27239| <= 0,030 E DD entro
+#            +-10% relativo E |Profit/10 - 396,42| <= 8%.
+#    GIALLO  |dn| <= 3 E |PF - 1,27239| <= 0,060.
+#    ROSSO   il resto: il deposito NON e' neutro (arrotondamento del lotto
+#            o saldo che cresce). Allora le celle si confrontano SOLO fra
+#            loro (stesso banco) e nessun numero di R271 si confronta con
+#            R265a o col genetico.
+#  Atteso VERDE (ingressi e uscite non dipendono dal lotto; cambia
+#  l'arrotondamento e il saldo cresce di ~4% in OOS).
+#  G1 (gemelle) n.a.: il determinismo del motore e' gia' misurato da R265a
+#  (gemelle 798501/798551 identiche). C0 per-trade: par. 6 S0.
+#
+# =====================================================================
+#  8. REGOLA DEI DUE LATI (25/08) -- IL LATO LUNGO NON E' MISURATO QUI
+# =====================================================================
+#  La regola e' scritta per Nasdaq/DAX/Dow; EURUSD e' forex, dove vale
+#  come buona pratica. R271 e' SOLO CORTO come R265a, e il lato LUNGO non
+#  e' rimisurato: nella scansione era 0 celle in utile su 28 (R140a) al
+#  default SLatr 1,0, e a 1,0 il lato lungo e' fuori costo come il corto.
+#  Costo di misurarlo: UN file gemello (InpAllowLong=1, InpAllowShort=0,
+#  stesso asse, altro magic) = altre 6 passate ~1,2-1,4 min [DERIVATO dal
+#  metro, par. 10]. NON scritto qui: e' una decisione di ordine dei round.
+#  Da segnalare a Claudio se il corto passa lo screening.
+#
+# =====================================================================
+#  9. CERTIFICATO DI MORTE (09/09) -- COSA CHIUDE QUESTO ASSE
+# =====================================================================
+#  Candidato: EMA200 EURUSD H4 solo corto. Punti del certificato:
+#   (1) PF misurato          -- G0 R265a OOS (PF 1,27239, n 206): c'e'. IS: da qui.
+#   (2) n e DD               -- R265a: c'e' (n 206, DD 5,1117). IS: da qui.
+#   (3) USCITA AD ASSE       -- QUESTO FILE la chiude, sulla leva del
+#       COSTO (InpSLatr, la larghezza dello stop). RISERVA scritta:
+#       InpTP1Pct (la parziale, la manopola che MORDE sul Dow, R136c e
+#       R264 par. 2.1) resta MAI MISURATA su EURUSD (R264d4/c4/a4 la
+#       mettono ad asse su altri simboli). Se qualcuno chiama "uscita"
+#       solo quella, il punto (3) resta aperto a meta'.
+#   (4) SIMBOLI GEMELLI      -- resta: le griglie R264 sui gemelli sono
+#       state SALTATE per G0 ROSSO (GBPJPY, GBPUSD; XAUUSD rilanciata in
+#       R264d1-d4, verdetto NO PER RISCHIO). La lettura C del 28/09 par. 4
+#       li segna "coperti" (1,2,4,5): la formulazione e' della lettura e
+#       qui si dichiara solo che non e' di questo file.
+#   (5) TF CAMBIATO          -- resta: H1 escluso per costo a 20,8x (par.
+#       1d) e la lettura C lo prende dall'archivio (R29a/R140a), non da un
+#       round; quel 20,8x poggia su un'ancora che a H4 e' stata smentita
+#       (par. 1d): H1 e' "escluso per un numero da rifare", non "provato
+#       fuori costo". TF piu' bassi di H1 (M30/M15): [NON MISURATI], piu'
+#       vicini al pedaggio. Frontiera 40x per EURUSD: stop g2 mediano >=
+#       26,54 pip; H4 la passa solo con SLatr >= ~1,1 (26,54 / 23,2-24,35
+#       = 1,09-1,14, DERIVATO). PROPOSTA per Claudio, NON scritta: lo
+#       stesso file a H1 (asse SLatr piu' largo), dopo che il K1 di H1 e'
+#       stato letto dal lotto con la stessa formula.
+#  VERDETTO SU QUESTO CANDIDATO DOPO R271: non e' MORTO neanche se l'esito
+#  e' NO PER MERITO: restano (4) e (5) da confermare/chiudere con un
+#  round vero. Il certificato completo lo firma Claudio.
+#
+# =====================================================================
+#  10. COSTO IN TEMPO MACCHINA
+# =====================================================================
+#  6 passate (3 celle x IS 7 anni + OOS 2,5), OHLC M1, un solo agente
+#  sul PC DESKTOP-H4D7CAJ (classe 751). Metro MISURATO in casa,
+#  stesso EA, stesso modello, stesso PC, stessa forma 3 celle x 2 finestre:
+#  RIEPILOGO_ROUND_CORTI_C2.txt (28/09): R264d1 1,4 min, R264d2 1,2 min,
+#  R264d3 1,3 min (6 passate ciascuno, XAUUSD 2017-2026); l'intero C2 = 4
+#  job / 26 passate in 5 minuti (~11,5 s a passata). R265a (2 passate
+#  912 giorni): 0,8 min (riepilogo C). STIMA R271: 1,2-1,5 minuti piu'
+#  compilazione, dichiarata come DERIVATA; forex M1 non e' oro ma il
+#  numero di barre e' lo stesso (stesse date, M1). TETTO LARGO 135 s x 6
+#  = 13,5 min (135 s a passata e' la stima a TICK di R214f, qui pessimista
+#  perche' OHLC). Il numero vero lo scrive il riepilogo della riga.
+#
+# =====================================================================
+#  11. I BUCHI DICHIARATI
+# =====================================================================
+#  - LATO LUNGO non misurato (par. 8).
+#  - InpTP1Pct e altre uscite (BE, trailing, cutoff, venerdi') MAI ad asse
+#    su EURUSD: R271 chiude UNA leva d'uscita, non tutte (par. 9 (3)).
+#  - L'asse muove stop E TP insieme (TP = risk x TP_RR): non isola lo
+#    stop; per isolarlo servirebbe un input nuovo (una modifica all'EA:
+#    non qui, e non e' un lavoro da farsi senza firma).
+#  - Il primo bersaglio (EMA14) e' un prezzo: EP_R scende meccanicamente
+#    a S alti, e questo puo' far leggere ESPOSIZIONE dove c'e' merito
+#    vero. La regola M2 e' un filtro CONSERVATIVO dichiarato.
+#  - K1(1,25) solo DERIVATO (il per-trade sopravvive per la sola cella
+#    1,5); la popolazione dell'ATR cambia con la cella [NON MISURATO].
+#  - ATR dell'IS 2017-2023 [NON MISURATO]: il cancello 40x si legge sull'era
+#    2024-26; l'IS puo' avere stop sotto 26,54 pip al pedaggio di oggi.
+#  - Un regime per finestra? L'OOS e' UNO (dollaro in discesa dopo il 2024,
+#    R221a par. 8), diviso a meta' dal cambio d'orologio BCM; l'IS ne
+#    contiene piu' di uno ma NON si scompone per anno (per-trade dell'IS
+#    assente): H_DERIVA di R265 par. 4 non e' testabile qui.
+#  - Storico M1 EURUSD del PC dal 2017 [NON VERIFICATO] (pavimento BCM
+#    1999, R102): lo prende D0.
+#  - G0 ROSSO contro il genetico, causa NON DIMOSTRATA: il vicinato del
+#    genetico non e' un'ancora. R271 legge l'IS e il confronto interno.
+#  - SWAP: il tester applica gli swap CORRENTI a tutta la storia, un
+#    motore corto multi-giorno su EURUSD li incassa o li paga a seconda
+#    del differenziale dei tassi, che dal 2017 al 2026 ha cambiato di
+#    segno: effetto sul PF [NON MISURATO]. Pedaggio, commissioni e griglia
+#    H4 di FTMO [NON MISURATI].
+#  - OHLC: riempimenti ideali dei limiti, DD sottostimato (R1 puo' solo
+#    bocciare, classe 886), spread corrente su 9,5 anni, niente slippage.
+#  - La probabilita' che un motore SENZA edge rispetti R1 a n ~100-300
+#    posizioni su EURUSD [NON MISURATA] (classe 804).
+#
+# =====================================================================
+#  12. QUESTA CELLA
+# =====================================================================
+#  R271: asse InpSLatr 1,0 / 1,25 / 1,5, EURUSD H4 solo corto, magic 798503,
+#  Modello 1, Deposito 100000, IS 2017.01.01-2023.12.31 / OOS 2024.01.01-
+#  2026.06.30. Attesa: H_NIENTE piu' probabile di H_EDGE, asse quasi piatto,
+#  controllo VERDE sul ponte di deposito, K1(1,5) PASS. Nessuna riga di
+#  lancio qui: la scrive la sessione, dopo il cancello.
+# =====================================================================
+@SIMBOLO    EURUSD
+@PERIODO    H4
+@DAQUANDO   2017.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.7371
+
+InpUsaGuardian=1||1||0||1||N
+InpTF=16388||16388||0||16388||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=1||1||0||1||N
+InpAllowLong=0||0||0||0||N
+InpAllowShort=1||1||0||1||N
+InpUseAdrFilter=0||0||0||0||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpUseOrder2=1||1||0||1||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0.25||1.51||Y
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpUseCutoff=0||0||0||0||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpLogImbuto=1||1||0||1||N
+InpComment=R271
+InpMagic=798503||798503||0||798503||N
+InpTP_RR=1.5||1.5||0||1.5||N
+InpOrder2Atr=0.5||0.5||0||0.5||N
+InpOrder1Atr=0.30||0.30||0||0.30||N
