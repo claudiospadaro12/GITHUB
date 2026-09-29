@@ -1,0 +1,17 @@
+=====================================================================
+ ANATOMIA DEI MOVIMENTI M5 -- ANATOMIA_MOVIMENTI_M5_v1 (FASE 1b: DESCRITTIVA)
+=====================================================================
+ NON e' un backtest: niente PF, niente equity, niente costi, niente motori.
+
+=== AUTOTEST ANATOMIA_MOVIMENTI_M5_v1 (offline, dati SINTETICI) ===
+1. casi a risposta nota (numeri esatti a mano, simmetria, 2LATI, sospetti): 86/86
+2. calibrazione del fuso, contro-esempio dell'orologio spostato, lettura file: 23/23
+3. referto e CSV sui giorni sintetici: 13/13
+   mutazione: min_barre_ora 55 -> 0 (il giorno sospetto non si esclude piu')           -> CATTURATA
+   mutazione: buffer 0 -> 3 punti (la rottura scatta piu' tardi, i numeri cambiano)    -> CATTURATA
+   mutazione: bersagli 0.5,1,1.5,2 -> 3,4 (le sequenze attese non esistono piu')       -> CATTURATA
+   mutazione: offset-retest 0,0.25,0.5 -> 0.75 (i riempimenti attesi non esistono piu') -> CATTURATA
+4. mutazioni catturate: 4/4
+
+AUTOTEST: 126/126
+ESITO: OK

@@ -1,0 +1,39 @@
+=====================================================================
+ ANATOMIA DEI MOVIMENTI M5 -- ANATOMIA_MOVIMENTI_M5_v1 (FASE 1b: DESCRITTIVA)
+=====================================================================
+ NON e' un backtest: niente PF, niente equity, niente costi, niente motori.
+
+ file      : C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv
+ mercato   : NASDAQ (apertura cash Nasdaq 09:30 New York)
+ periodi   : addestramento (2010, 2020)   cassaforte (2021, 2026)
+ range     : [15, 30, 35, 45] min   scadenze [30, 60, 120]   riferimento 120   offset [0.0, 0.25, 0.5]   bersagli [0.5, 1.0, 1.5, 2.0]
+ buffer    : 0 punti   banda di prezzo: nessuna
+
+ prima passata: calibrazione dell'ora d'apertura ...
+CALIBRAZIONE DELL'ORA D'APERTURA -- ipotesi dal calendario, poi MISURA
+  Misura: ampiezza media (H-L)/C in % di ogni minuto-del-giorno, giorni
+  feriali, entro +/-90 minuti dall'ipotesi; il picco su minuti multipli di 5
+  e' l'apertura MISURATA (il primo minuto dopo un buco >= 15 min non conta: e' il salto
+  del feed). Decisiva se >= 1,5 volte la mediana della finestra e con >= 30 giorni;
+  usata solo se a <= 60 minuti dall'ipotesi, altrimenti si tiene l'ipotesi e si dichiara.
+  gruppo NY-FISSO   giorni  4047  attesa 09:30  misurata 09:30  ->  CONFERMATA
+      primi tre minuti: 09:30(0.1385%)  10:00(0.1173%)  09:35(0.1149%)   separazione dalla mediana x2.24
+
+ seconda passata: lettura in streaming ...
+    ... 1 milioni di righe lette
+    ... 2 milioni di righe lette
+    ... 3 milioni di righe lette
+    ... 4 milioni di righe lette
+    ... 5 milioni di righe lette
+ barre lette 5233590   giorni analizzati 4071: BUONI 3764   SOSPETTI 209   SENZA APERTURA 98   fuori periodo 0
+ CSV per-giorno: C:\Users\Master\Desktop\ANATOMIA_MOVIMENTI_M5_20260929_1734\NASUSD\ANATOMIA_MOVIMENTI_M5_PERGIORNO_NASUSD.csv (4071 righe)
+ referto: C:\Users\Master\Desktop\ANATOMIA_MOVIMENTI_M5_20260929_1734\NASUSD\ANATOMIA_MOVIMENTI_M5_NASUSD_IS_2010_2020.txt
+ referto: C:\Users\Master\Desktop\ANATOMIA_MOVIMENTI_M5_20260929_1734\NASUSD\ANATOMIA_MOVIMENTI_M5_NASUSD_CASSAFORTE_2021_2026.txt
+ RAM di picco: non misurabile
+
+ FILE PRODOTTI:
+   ANATOMIA_MOVIMENTI_M5_PERGIORNO_NASUSD.csv
+   ANATOMIA_MOVIMENTI_M5_NASUSD_IS_2010_2020.txt
+   ANATOMIA_MOVIMENTI_M5_NASUSD_CASSAFORTE_2021_2026.txt
+ ESITO: MISURATO CON RILIEVI -- 1
+   - anno 2023: 33.2% di giorni sospetti (soglia 20.0%)

@@ -1,0 +1,1536 @@
+==============================================================================
+ANATOMIA MOVIMENTI M5 -- NASUSD -- CASSAFORTE 2021-2026  [NON PER LE IPOTESI]
+==============================================================================
+versione strumento : ANATOMIA_MOVIMENTI_M5_v1
+file dati          : C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv
+mercato            : NASDAQ (apertura cash Nasdaq 09:30 New York)
+
+QUESTA E' LA CASSAFORTE (2021-2026). NON SI GUARDA per costruire ipotesi: serve a validarle DOPO che sono state congelate. I terzili sono quelli dell'addestramento.
+
+--- LEGGERE PRIMA DI CITARE UN NUMERO ---
+  1. Sono MISURE DI ANATOMIA (una frequenza NON e' un edge): niente PF, niente
+     equity, niente spread, niente costi, niente slippage. Non promuovono niente.
+  2. Il feed e' HistData (non BCM), ora di NEW YORK, con il cancello qualita' del
+     feed IN VERIFICA: i giorni con copertura anomala sono ESCLUSI e CONTATI sotto.
+  3. Barre M5 costruite dalle M1. L'ordine dentro una barra M5 NON e' osservabile:
+     ritracciamento/riempimento si guardano dalla barra SUCCESSIVA alla rottura ->
+     la frequenza dei retest e' una stima PER DIFETTO. Barra con bersaglio E stop = A.
+  4. R = ampiezza del range d'apertura. Long e short sempre separati. Solo la PRIMA
+     rottura del giorno conta come evento; l'altro lato e' registrato come 2LATI.
+  5. Ogni percentuale porta il suo n. * = n < 30: non e' una distribuzione.
+  6. Le IPOTESI si scrivono solo sull'addestramento; la cassaforte le VALIDA.
+
+--- FUSO E APERTURA ---
+CALIBRAZIONE DELL'ORA D'APERTURA -- ipotesi dal calendario, poi MISURA
+  Misura: ampiezza media (H-L)/C in % di ogni minuto-del-giorno, giorni
+  feriali, entro +/-90 minuti dall'ipotesi; il picco su minuti multipli di 5
+  e' l'apertura MISURATA (il primo minuto dopo un buco >= 15 min non conta: e' il salto
+  del feed). Decisiva se >= 1,5 volte la mediana della finestra e con >= 30 giorni;
+  usata solo se a <= 60 minuti dall'ipotesi, altrimenti si tiene l'ipotesi e si dichiara.
+  gruppo NY-FISSO   giorni  4047  attesa 09:30  misurata 09:30  ->  CONFERMATA
+      primi tre minuti: 09:30(0.1385%)  10:00(0.1173%)  09:35(0.1149%)   separazione dalla mediana x2.24
+
+CANARINO DEL FUSO -- il feed segue il DST americano?
+  Si guarda, mese per mese, (a) l'ora d'inizio della PAUSA piu' larga
+  della giornata (la manutenzione del feed, ~17:00-18:00 New York) e
+  (b) l'ora della RIAPERTURA DI SETTIMANA, cioe' la prima barra dopo
+  un silenzio di almeno 12 ore. Se GENNAIO e LUGLIO danno la
+  STESSA ora -> il feed segue il DST = ORA LOCALE DI NEW YORK, e allora
+  l'apertura cash sta alle 09:30 del file TUTTO L'ANNO.
+  Se LUGLIO e' un'ora PRIMA -> feed a EST FISSO: meta' anno verrebbe
+  misurato un'ora fuori bersaglio. In quel caso lo studio NON e' valido
+  cosi' com'e' e va rifatto con l'ora corretta mese per mese.
+  Le due misure sono INDIPENDENTI: guardano due transizioni diverse
+  del feed (la pausa di ogni giorno e la riapertura della domenica
+  sera). Se una sola delle due si muove, non e' il fuso: e' quella
+  transizione, e va guardata a parte.
+  pausa giornaliera   mese per mese: 01=16:14 02=16:14 03=15:14 04=16:14 05=16:14 06=16:14
+                                     07=16:14 08=16:14 09=16:14 10=16:14 11=16:14 12=16:14
+  pausa giornaliera   INVERNO 16:14   ESTATE 16:14   differenza +0 min
+      -> coerente col DST: ora locale di NEW YORK.
+  apertura settimana  mese per mese: 01=18:00 02=18:00 03=17:00 04=18:00 05=18:00 06=18:00
+                                     07=18:00 08=18:00 09=18:00 10=18:00 11=18:00 12=18:00
+  apertura settimana  INVERNO 18:00   ESTATE 18:00   differenza +0 min
+      -> coerente col DST: ora locale di NEW YORK.
+
+--- GIORNI: BUONI / SOSPETTI / SENZA APERTURA, PER ANNO (cancello G1 >= 150 giorni buoni) ---
+  ANNO    GIORNI   BUONI  SOSPETTI  NO-APERT   G1
+  2021       259     250         7         2   ok
+  2022       259     250         8         1   ok
+  2023       259     137        68        54   NON LEGGIBILE
+  2024       261     245        14         2   ok
+  2025       260     245        12         3   ok
+  2026       151     139        11         1   NON LEGGIBILE
+  famiglie di sospetto (cifre sostituite da #):
+         1  apertura non osservata (prima barra a +# min)
+         8  buco di # minuti nella prima ora
+         2  buco di ## minuti nella prima ora
+       108  copertura di seduta ##% sotto ##%
+        50  copertura oraria ## barre su ## attese
+
+--- MOVIMENTO DI SEDUTA (giorni buoni, n=1266) ---
+                                           q10       q25       q50       q75       q90
+  range di seduta H-L pt   n= 1266       129.4     172.0     237.5     329.9     472.0
+  range di seduta H-L %    n= 1266       0.737     0.981     1.378     1.942     2.712
+  close-open di seduta pt  n= 1266      -224.8    -108.2      18.4     124.4     213.1
+  |close-open| pt          n= 1266        22.7      57.4     117.9     198.2     292.8
+  ampiezza media M5, 1a ora n= 1266       23.33     29.91     38.65     51.72     70.04
+  ampiezza media M5, resto n= 1266       13.37     17.19     22.48     30.94     41.77
+  gap d'apertura %         n= 1266      -0.958    -0.396     0.062     0.462     0.969
+
+##############################################################################
+# RANGE D'APERTURA DI 15 MINUTI (InpRangeMinutes = 15)
+##############################################################################
+giorni buoni 1266; range valido 1266 (MANCANTE 0, PIATTO 0)
+prima rottura: LONG 662  SHORT 596  AMBIGUA(una barra tocca i due lati) 8  NESSUNA 0
+giorni in cui ANCHE l'altro lato rompe dopo (2LATI): 665 (52.9% dei giorni con rottura)
+
+                                           q10       q25       q50       q75       q90
+  ampiezza range pt        n= 1266        44.1      56.4      79.0     111.9     152.4
+  ampiezza range % prezzo  n= 1266       0.247     0.327     0.455     0.649     0.889
+  terzili dell'ampiezza % (tarati SOLO sull'addestramento): <= 0.294 | <= 0.441 | oltre
+
+  ---- LONG, range 15 minuti: 662 prime rotture ----
+  minuto della rottura (dall'apertura): q10/25/50/75/90 = 15 / 15 / 15 / 20 / 30
+  la barra di rottura chiude DENTRO il livello: 45.6% (n=662)
+  l'altro lato rompe DOPO (2LATI): 51.8% (n=662); minuto mediano dell'altra rottura 60
+
+  == BREAKOUT: quanto corre dopo la rottura (MFE dal livello+buffer, barra di rottura inclusa) ==
+  (solo eventi con orizzonte completo dentro la seduta: n per riga)
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  662         4.8      11.8      25.0      45.3      66.8
+  MFE 30 min               n=  662         7.0      18.3      35.6      60.9      92.4
+  MFE 60 min               n=  662         8.6      23.3      50.7      81.8     123.4
+  MFE 120 min              n=  662        10.5      29.3      63.1     108.3     156.3
+  MFE 240 min              n=  662        13.8      37.4      77.1     134.3     191.6
+  MFE fine seduta          n=  662        16.4      46.8      96.1     161.4     232.9
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  662        0.07      0.16      0.31      0.56      0.82
+  MFE 30 min               n=  662        0.10      0.22      0.47      0.74      1.09
+  MFE 60 min               n=  662        0.12      0.30      0.60      1.02      1.49
+  MFE 120 min              n=  662        0.15      0.39      0.79      1.29      1.95
+  MFE 240 min              n=  662        0.18      0.52      0.98      1.62      2.48
+  MFE fine seduta          n=  662        0.20      0.61      1.15      2.01      3.02
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  662       0.029     0.069     0.151     0.258     0.397
+  MFE 30 min               n=  662       0.042     0.102     0.211     0.359     0.548
+  MFE 60 min               n=  662       0.050     0.132     0.279     0.472     0.741
+  MFE 120 min              n=  662       0.063     0.182     0.359     0.609     0.924
+  MFE 240 min              n=  662       0.077     0.232     0.449     0.773     1.158
+  MFE fine seduta          n=  662       0.093     0.277     0.528     0.951     1.373
+
+  escursione avversa MASSIMA prima di toccare +1R (solo eventi che toccano +1R):
+  tocca +1R: 55.9% (n=662)
+
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  370         0.0       2.1      23.5      57.6      96.7
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  370        0.00      0.02      0.35      0.80      1.24
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  370       0.000     0.014     0.143     0.336     0.581
+
+  falso breakout (una CHIUSURA M5 torna dentro il livello, barra di rottura inclusa):
+    entro 15 min: 64.7% (n=662)
+    entro 30 min: 72.7% (n=662)
+  di quanto rientra (profondita' della chiusura sotto il livello, solo i falsi):
+  [punti]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  428         4.3       8.7      21.1      40.1      62.7
+  falso entro 30 min       n=  481         5.1      14.7      33.2      65.4      96.1
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  428        0.05      0.12      0.29      0.51      0.76
+  falso entro 30 min       n=  481        0.08      0.19      0.44      0.77      1.19
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  428       0.024     0.048     0.124     0.232     0.383
+  falso entro 30 min       n=  481       0.033     0.086     0.194     0.371     0.585
+
+  sequenza target/stop (ingresso al livello+buffer, stop bordo opposto; A = stessa barra):
+  bersaglio        T%       S%       A%       N%   n
+  +0.5R          69.0     28.5      0.2      2.3   662
+  +1R            47.0     42.6      0.2     10.3   662
+  +1.5R          32.5     47.6      0.0     19.9   662
+  +2R            21.0     49.8      0.0     29.2   662
+  (T = bersaglio prima dello stop, S = stop prima, N = nessuno dei due entro fine
+   seduta. Frequenze di ordine di tocco, NON un PF: niente costi.)
+
+  == RETEST: quanto ritraccia verso il livello rotto ==
+  profondita' del minimo dopo la rottura (POSITIVA = dentro il livello; negativa = il prezzo non e' tornato: min. sopra il livello). La barra di rottura e' esclusa.
+  [punti]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  662        -5.7       9.7      31.7      62.9     104.5
+  ritr. minimo 60 min      n=  662        -1.9      14.3      42.9      92.6     142.3
+  ritr. minimo 120 min     n=  662        -0.0      20.2      57.4     121.6     189.6
+  ritr. minimo fine        n=  662         5.9      32.0      81.4     174.2     277.1
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  662       -0.08      0.13      0.42      0.81      1.23
+  ritr. minimo 60 min      n=  662       -0.03      0.19      0.58      1.16      1.76
+  ritr. minimo 120 min     n=  662       -0.00      0.30      0.73      1.43      2.24
+  ritr. minimo fine        n=  662        0.07      0.45      1.07      2.03      3.75
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  662      -0.037     0.050     0.184     0.386     0.604
+  ritr. minimo 60 min      n=  662      -0.014     0.086     0.255     0.535     0.865
+  ritr. minimo 120 min     n=  662      -0.000     0.123     0.337     0.688     1.112
+  ritr. minimo fine        n=  662       0.031     0.186     0.492     0.976     1.756
+
+  frequenza con cui il ritracciamento raggiunge la profondita' g (in R) = frequenza di
+  riempimento di un LIMIT a livello - g*R, per scadenza dal momento della rottura. %(n)
+     g (R)        <30 min        <60 min       <120 min    fine seduta
+     -0.50      99.7(662)      99.7(662)      99.7(662)      99.8(662)
+     -0.25      96.2(662)      96.7(662)      97.6(662)      98.0(662)
+     +0.00      83.2(662)      87.8(662)      89.7(662)      92.0(662)
+     +0.25      63.4(662)      70.7(662)      76.4(662)      82.3(662)
+     +0.50      45.2(662)      55.4(662)      63.0(662)      73.0(662)
+     +0.75      28.5(662)      40.6(662)      49.5(662)      62.1(662)
+     +1.00      16.5(662)      29.2(662)      38.2(662)      51.8(662)
+  (g=0: il livello; g=+0,50: meta' range dentro; g=+1,00: il bordo opposto = lo stop.)
+
+  == RETEST: LIMIT a livello - o*R (retest a offset o), scadenza di riferimento 120 min, poi corsa ==
+  eventi con scadenza di riferimento completa dentro la seduta: 662 su 662
+  -- offset 0.00R: riempito 89.7% (n=662)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 5 / 5   (n=594)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          59.3     34.2      4.0      2.5   594
+     +1R            39.7     45.5      4.0     10.8   594
+     +1.5R          26.6     49.3      3.9     20.2   594
+     +2R            16.5     51.7      3.9     27.9   594
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  571         0.0      13.8      64.2     132.6     190.9
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  571        0.00      0.18      0.80      1.61      2.41
+  -- offset 0.25R: riempito 76.4% (n=662)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 10 / 15   (n=506)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          54.5     37.9      5.5      2.0   506
+     +1R            38.5     50.2      5.3      5.9   506
+     +1.5R          27.5     54.7      5.1     12.6   506
+     +2R            16.2     56.9      5.1     21.7   506
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  480         0.0      14.1      55.1     132.6     201.3
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  480        0.00      0.18      0.73      1.63      2.51
+  -- offset 0.50R: riempito 63.0% (n=662)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 15 / 30   (n=417)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          49.2     40.0     10.3      0.5   417
+     +1R            32.6     53.7     10.1      3.6   417
+     +1.5R          21.1     59.5     10.1      9.4   417
+     +2R            14.1     61.9      9.8     14.1   417
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  376         0.0      13.4      45.3     113.8     211.4
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  376        0.00      0.19      0.62      1.40      2.50
+
+  ---- SHORT, range 15 minuti: 596 prime rotture ----
+  minuto della rottura (dall'apertura): q10/25/50/75/90 = 15 / 15 / 15 / 20 / 30
+  la barra di rottura chiude DENTRO il livello: 42.8% (n=596)
+  l'altro lato rompe DOPO (2LATI): 54.0% (n=596); minuto mediano dell'altra rottura 75
+
+  == BREAKOUT: quanto corre dopo la rottura (MFE dal livello+buffer, barra di rottura inclusa) ==
+  (solo eventi con orizzonte completo dentro la seduta: n per riga)
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  596         5.8      15.2      29.4      50.7      79.8
+  MFE 30 min               n=  596         8.4      19.3      41.9      73.2     125.9
+  MFE 60 min               n=  596        11.1      24.8      54.1     104.6     172.3
+  MFE 120 min              n=  596        12.3      30.5      67.7     134.5     227.3
+  MFE 240 min              n=  596        15.2      37.0      88.5     168.0     265.4
+  MFE fine seduta          n=  596        17.2      42.8     105.7     192.6     315.3
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  596        0.08      0.18      0.34      0.63      0.95
+  MFE 30 min               n=  596        0.10      0.25      0.50      0.89      1.42
+  MFE 60 min               n=  596        0.15      0.31      0.65      1.18      1.95
+  MFE 120 min              n=  596        0.16      0.36      0.86      1.56      2.54
+  MFE 240 min              n=  596        0.18      0.46      1.09      1.93      3.11
+  MFE fine seduta          n=  596        0.22      0.49      1.30      2.27      3.53
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  596       0.034     0.084     0.165     0.294     0.478
+  MFE 30 min               n=  596       0.048     0.116     0.234     0.466     0.715
+  MFE 60 min               n=  596       0.063     0.146     0.311     0.634     0.992
+  MFE 120 min              n=  596       0.073     0.168     0.402     0.800     1.239
+  MFE 240 min              n=  596       0.086     0.201     0.527     0.952     1.497
+  MFE fine seduta          n=  596       0.101     0.231     0.606     1.112     1.815
+
+  escursione avversa MASSIMA prima di toccare +1R (solo eventi che toccano +1R):
+  tocca +1R: 58.6% (n=596)
+
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  349         0.0       3.6      25.7      53.7     101.7
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  349        0.00      0.05      0.32      0.73      1.27
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  349       0.000     0.018     0.143     0.311     0.531
+
+  falso breakout (una CHIUSURA M5 torna dentro il livello, barra di rottura inclusa):
+    entro 15 min: 68.0% (n=596)
+    entro 30 min: 77.5% (n=596)
+  di quanto rientra (profondita' della chiusura sotto il livello, solo i falsi):
+  [punti]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  405         5.8      12.0      23.8      47.1      82.1
+  falso entro 30 min       n=  462         7.7      16.1      34.9      67.3     107.1
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  405        0.07      0.15      0.31      0.57      0.83
+  falso entro 30 min       n=  462        0.09      0.21      0.47      0.78      1.20
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  405       0.032     0.070     0.137     0.263     0.445
+  falso entro 30 min       n=  462       0.045     0.094     0.196     0.376     0.644
+
+  sequenza target/stop (ingresso al livello+buffer, stop bordo opposto; A = stessa barra):
+  bersaglio        T%       S%       A%       N%   n
+  +0.5R          66.1     31.0      0.0      2.9   596
+  +1R            50.3     42.4      0.0      7.2   596
+  +1.5R          35.9     48.8      0.0     15.3   596
+  +2R            25.8     51.0      0.0     23.2   596
+  (T = bersaglio prima dello stop, S = stop prima, N = nessuno dei due entro fine
+   seduta. Frequenze di ordine di tocco, NON un PF: niente costi.)
+
+  == RETEST: quanto ritraccia verso il livello rotto ==
+  profondita' del minimo dopo la rottura (POSITIVA = dentro il livello; negativa = il prezzo non e' tornato: min. sopra il livello). La barra di rottura e' esclusa.
+  [punti]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  596        -0.9      14.0      34.5      69.8     112.8
+  ritr. minimo 60 min      n=  596         2.4      20.1      46.6      89.7     149.8
+  ritr. minimo 120 min     n=  596         5.3      25.0      58.5     113.9     185.0
+  ritr. minimo fine        n=  596        10.7      34.6      90.8     175.1     254.4
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  596       -0.01      0.16      0.45      0.81      1.26
+  ritr. minimo 60 min      n=  596        0.02      0.23      0.60      1.12      1.62
+  ritr. minimo 120 min     n=  596        0.06      0.32      0.75      1.37      1.98
+  ritr. minimo fine        n=  596        0.12      0.43      1.15      1.95      2.86
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  596      -0.006     0.076     0.197     0.378     0.681
+  ritr. minimo 60 min      n=  596       0.013     0.112     0.264     0.511     0.868
+  ritr. minimo 120 min     n=  596       0.032     0.147     0.342     0.682     1.067
+  ritr. minimo fine        n=  596       0.065     0.212     0.485     0.969     1.574
+
+  frequenza con cui il ritracciamento raggiunge la profondita' g (in R) = frequenza di
+  riempimento di un LIMIT a livello - g*R, per scadenza dal momento della rottura. %(n)
+     g (R)        <30 min        <60 min       <120 min    fine seduta
+     -0.50      99.2(596)      99.3(596)      99.3(596)      99.7(596)
+     -0.25      97.5(596)      98.2(596)      98.3(596)      99.0(596)
+     +0.00      88.8(596)      91.9(596)      93.5(596)      95.3(596)
+     +0.25      66.9(596)      73.7(596)      77.7(596)      83.9(596)
+     +0.50      46.6(596)      56.4(596)      64.9(596)      71.8(596)
+     +0.75      29.5(596)      40.6(596)      49.8(596)      62.2(596)
+     +1.00      16.8(596)      28.2(596)      37.1(596)      54.0(596)
+  (g=0: il livello; g=+0,50: meta' range dentro; g=+1,00: il bordo opposto = lo stop.)
+
+  == RETEST: LIMIT a livello - o*R (retest a offset o), scadenza di riferimento 120 min, poi corsa ==
+  eventi con scadenza di riferimento completa dentro la seduta: 596 su 596
+  -- offset 0.00R: riempito 93.5% (n=596)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 5 / 5   (n=557)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          57.6     35.5      3.6      3.2   557
+     +1R            44.3     44.0      3.6      8.1   557
+     +1.5R          31.2     49.2      3.6     16.0   557
+     +2R            22.3     50.6      3.6     23.5   557
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  537         0.0      14.3      68.8     167.0     280.3
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  537        0.00      0.18      0.83      1.89      3.00
+  -- offset 0.25R: riempito 77.7% (n=596)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 5 / 15   (n=463)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          55.5     38.2      4.5      1.7   463
+     +1R            37.1     51.8      4.5      6.5   463
+     +1.5R          28.3     55.3      4.5     11.9   463
+     +2R            18.6     59.0      4.5     17.9   463
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  442         0.0      15.3      53.8     141.4     249.2
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  442        0.00      0.20      0.66      1.67      2.66
+  -- offset 0.50R: riempito 64.9% (n=596)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 15 / 30   (n=387)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          51.2     41.1      7.0      0.8   387
+     +1R            31.3     57.6      6.7      4.4   387
+     +1.5R          22.7     63.0      6.7      7.5   387
+     +2R            14.0     66.9      6.7     12.4   387
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  361         0.0      12.2      43.2     121.8     207.7
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  361        0.00      0.14      0.57      1.45      2.42
+
+  ==== CONDIZIONATI (colonne: falso15% = falso breakout entro 15 min; MFE in R dal livello;
+       ritr120R = mediana profondita' del retest entro 120 min in R; retest0% = il LIMIT sul
+       livello (offset 0) si riempie entro 120 min; T+1R% e S<T% = sequenza dopo il breakout) ====
+
+  -- LONG, range 15, per AMPIEZZA del range (terzili dell'addestramento) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  stretto                    122     69.7      1.22      1.58      0.95      92.6      50.8      48.4
+  medio                      199     61.3      1.10      1.33      0.70      89.9      49.7      41.7
+  largo                      341     64.8      0.88      1.02      0.66      88.6      44.0      41.1
+  -- LONG, range 15, per GAP d'apertura --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  gap < -0,25%               206     61.7      1.05      1.19      0.70      91.3      48.5      43.7
+  gap dentro                 222     70.3      0.87      1.11      0.78      91.0      44.1      43.2
+  gap > +0,25%               234     62.0      0.97      1.19      0.77      87.2      48.3      41.0
+  gap n/d                      0
+  -- LONG, range 15, per GIORNO della settimana --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  lun                        141     63.8      0.83      1.01      0.66      87.2      41.1      43.3
+  mar                        129     64.3      0.95      1.15      0.75      88.4      48.8      38.0
+  mer                        134     69.4      1.01      1.31      0.81      93.3      47.0      48.5
+  gio                        119     62.2      0.96      1.09      0.73      89.1      42.0      46.2
+  ven                        139     63.3      1.10      1.37      0.74      90.6      55.4      37.4
+  -- LONG, range 15, per ANNO (G1: >= 150 giorni buoni nell'anno) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  2021                       143     65.0      0.84      1.03      0.63      87.4      44.1      39.9
+  2022                       125     65.6      0.91      1.21      0.87      92.0      47.2      46.4
+  2023                   NON LEGGIBILE (giorni buoni 137 < 150; eventi 78)
+  2024                       120     65.8      1.07      1.25      0.79      90.8      50.0      45.8
+  2025                       118     55.9      1.10      1.34      0.76      89.0      52.5      39.8
+  2026                   NON LEGGIBILE (giorni buoni 139 < 150; eventi 78)
+
+  -- SHORT, range 15, per AMPIEZZA del range (terzili dell'addestramento) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  stretto                    110     70.9      1.51      1.89      1.01      90.9      52.7      46.4
+  medio                      165     66.7      1.25      1.54      0.80      90.3      52.7      44.2
+  largo                      321     67.6      0.95      1.07      0.64      96.0      48.3      40.2
+  -- SHORT, range 15, per GAP d'apertura --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  gap < -0,25%               194     66.0      0.97      1.20      0.87      93.8      49.0      44.8
+  gap dentro                 177     69.5      1.13      1.33      0.73      94.4      53.1      41.2
+  gap > +0,25%               225     68.4      1.15      1.35      0.70      92.4      49.3      41.3
+  gap n/d                      0
+  -- SHORT, range 15, per GIORNO della settimana --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  lun                         95     74.7      0.82      1.02      0.74      95.8      44.2      43.2
+  mar                        134     59.0      1.16      1.32      0.72      90.3      53.7      40.3
+  mer                        123     71.5      1.03      1.24      0.76      95.1      50.4      43.9
+  gio                        133     69.9      1.06      1.42      0.77      94.7      49.6      42.9
+  ven                        111     66.7      1.26      1.43      0.73      91.9      52.3      42.3
+  -- SHORT, range 15, per ANNO (G1: >= 150 giorni buoni nell'anno) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  2021                       105     65.7      1.13      1.38      0.70      90.5      47.6      41.0
+  2022                       125     61.6      1.07      1.29      0.62      93.6      50.4      43.2
+  2023                   NON LEGGIBILE (giorni buoni 137 < 150; eventi 57)
+  2024                       125     69.6      1.16      1.33      0.87      94.4      51.2      42.4
+  2025                       125     72.0      1.06      1.36      0.79      92.0      51.2      43.2
+  2026                   NON LEGGIBILE (giorni buoni 139 < 150; eventi 59)
+
+##############################################################################
+# RANGE D'APERTURA DI 30 MINUTI (InpRangeMinutes = 30)
+##############################################################################
+giorni buoni 1266; range valido 1266 (MANCANTE 0, PIATTO 0)
+prima rottura: LONG 663  SHORT 596  AMBIGUA(una barra tocca i due lati) 3  NESSUNA 4
+giorni in cui ANCHE l'altro lato rompe dopo (2LATI): 485 (38.5% dei giorni con rottura)
+
+                                           q10       q25       q50       q75       q90
+  ampiezza range pt        n= 1266        56.5      75.1     103.6     146.2     201.1
+  ampiezza range % prezzo  n= 1266       0.318     0.427     0.603     0.849     1.145
+  terzili dell'ampiezza % (tarati SOLO sull'addestramento): <= 0.383 | <= 0.574 | oltre
+
+  ---- LONG, range 30 minuti: 663 prime rotture ----
+  minuto della rottura (dall'apertura): q10/25/50/75/90 = 30 / 30 / 30 / 45 / 60
+  la barra di rottura chiude DENTRO il livello: 47.4% (n=663)
+  l'altro lato rompe DOPO (2LATI): 37.6% (n=663); minuto mediano dell'altra rottura 130
+
+  == BREAKOUT: quanto corre dopo la rottura (MFE dal livello+buffer, barra di rottura inclusa) ==
+  (solo eventi con orizzonte completo dentro la seduta: n per riga)
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  663         4.8      11.1      21.8      37.3      58.8
+  MFE 30 min               n=  662         7.5      14.8      30.6      51.0      81.6
+  MFE 60 min               n=  662         8.8      21.2      41.9      70.2     100.5
+  MFE 120 min              n=  658        11.7      26.5      52.8      93.2     131.0
+  MFE 240 min              n=  653        14.1      35.1      71.2     120.1     174.4
+  MFE fine seduta          n=  663        16.2      42.6      85.5     141.7     211.8
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  663        0.05      0.11      0.21      0.35      0.50
+  MFE 30 min               n=  662        0.07      0.16      0.31      0.49      0.73
+  MFE 60 min               n=  662        0.09      0.20      0.41      0.69      0.98
+  MFE 120 min              n=  658        0.11      0.27      0.53      0.89      1.29
+  MFE 240 min              n=  653        0.14      0.36      0.71      1.14      1.71
+  MFE fine seduta          n=  663        0.16      0.41      0.82      1.38      2.05
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  663       0.028     0.062     0.125     0.221     0.342
+  MFE 30 min               n=  662       0.039     0.082     0.176     0.309     0.490
+  MFE 60 min               n=  662       0.050     0.124     0.243     0.402     0.628
+  MFE 120 min              n=  658       0.062     0.148     0.320     0.537     0.802
+  MFE 240 min              n=  653       0.078     0.199     0.409     0.700     1.030
+  MFE fine seduta          n=  663       0.095     0.235     0.491     0.835     1.303
+
+  escursione avversa MASSIMA prima di toccare +1R (solo eventi che toccano +1R):
+  tocca +1R: 40.1% (n=663)
+
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  266         0.0       5.8      23.8      52.2      93.2
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  266        0.00      0.06      0.27      0.59      0.96
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  266       0.000     0.033     0.140     0.298     0.586
+
+  falso breakout (una CHIUSURA M5 torna dentro il livello, barra di rottura inclusa):
+    entro 15 min: 67.6% (n=663)
+    entro 30 min: 76.1% (n=662)
+  di quanto rientra (profondita' della chiusura sotto il livello, solo i falsi):
+  [punti]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  448         2.6       8.0      18.5      35.8      63.5
+  falso entro 30 min       n=  504         4.5      10.9      25.7      55.5      89.6
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  448        0.04      0.09      0.18      0.32      0.59
+  falso entro 30 min       n=  504        0.04      0.11      0.26      0.53      0.85
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  448       0.017     0.048     0.106     0.196     0.361
+  falso entro 30 min       n=  504       0.023     0.066     0.146     0.320     0.560
+
+  sequenza target/stop (ingresso al livello+buffer, stop bordo opposto; A = stessa barra):
+  bersaglio        T%       S%       A%       N%   n
+  +0.5R          63.7     25.9      0.2     10.3   663
+  +1R            36.3     33.8      0.2     29.7   663
+  +1.5R          19.6     36.5      0.0     43.9   663
+  +2R             9.4     37.4      0.0     53.2   663
+  (T = bersaglio prima dello stop, S = stop prima, N = nessuno dei due entro fine
+   seduta. Frequenze di ordine di tocco, NON un PF: niente costi.)
+
+  == RETEST: quanto ritraccia verso il livello rotto ==
+  profondita' del minimo dopo la rottura (POSITIVA = dentro il livello; negativa = il prezzo non e' tornato: min. sopra il livello). La barra di rottura e' esclusa.
+  [punti]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  662        -2.7       9.2      26.9      55.7      96.1
+  ritr. minimo 60 min      n=  662        -0.4      14.2      36.9      80.7     136.2
+  ritr. minimo 120 min     n=  658         3.3      19.7      50.3      97.9     168.6
+  ritr. minimo fine        n=  663         8.5      31.1      76.3     149.9     251.5
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  662       -0.03      0.09      0.26      0.57      0.91
+  ritr. minimo 60 min      n=  662       -0.01      0.14      0.38      0.74      1.18
+  ritr. minimo 120 min     n=  658        0.03      0.21      0.51      0.93      1.43
+  ritr. minimo fine        n=  663        0.09      0.32      0.72      1.37      2.51
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  662      -0.014     0.053     0.153     0.325     0.576
+  ritr. minimo 60 min      n=  662      -0.002     0.080     0.213     0.454     0.767
+  ritr. minimo 120 min     n=  658       0.022     0.113     0.281     0.595     0.996
+  ritr. minimo fine        n=  663       0.053     0.181     0.426     0.870     1.510
+
+  frequenza con cui il ritracciamento raggiunge la profondita' g (in R) = frequenza di
+  riempimento di un LIMIT a livello - g*R, per scadenza dal momento della rottura. %(n)
+     g (R)        <30 min        <60 min       <120 min    fine seduta
+     -0.50      99.5(662)      99.7(662)      99.7(658)      99.8(663)
+     -0.25      98.5(662)      98.9(662)      99.2(658)      99.4(663)
+     +0.00      86.3(662)      89.3(662)      92.1(658)      94.3(663)
+     +0.25      51.7(662)      62.7(662)      71.6(658)      78.6(663)
+     +0.50      28.5(662)      41.1(662)      50.3(658)      62.3(663)
+     +0.75      14.4(662)      24.0(662)      33.1(658)      48.7(663)
+     +1.00       7.4(662)      13.7(662)      21.1(658)      37.6(663)
+  (g=0: il livello; g=+0,50: meta' range dentro; g=+1,00: il bordo opposto = lo stop.)
+
+  == RETEST: LIMIT a livello - o*R (retest a offset o), scadenza di riferimento 120 min, poi corsa ==
+  eventi con scadenza di riferimento completa dentro la seduta: 658 su 663
+  -- offset 0.00R: riempito 92.1% (n=658)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 5 / 5   (n=606)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          58.1     29.4      1.5     11.1   606
+     +1R            32.0     36.3      1.5     30.2   606
+     +1.5R          17.5     38.3      1.3     42.9   606
+     +2R             8.4     39.1      1.3     51.2   606
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  598         0.0      23.7      69.9     129.2     195.8
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  598        0.00      0.22      0.65      1.26      1.82
+  -- offset 0.25R: riempito 71.6% (n=658)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 10 / 30   (n=471)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          57.1     35.7      1.7      5.5   471
+     +1R            34.2     41.6      1.9     22.3   471
+     +1.5R          18.9     45.2      1.7     34.2   471
+     +2R             7.9     46.1      1.7     44.4   471
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  463         0.0      20.7      67.1     130.5     196.7
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  463        0.00      0.23      0.65      1.24      1.86
+  -- offset 0.50R: riempito 50.3% (n=658)
+     minuti dalla rottura al riempimento: q25/50/75 = 10 / 20 / 45   (n=331)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          50.2     45.0      3.9      0.9   331
+     +1R            31.1     54.1      3.9     10.9   331
+     +1.5R          16.9     56.5      3.9     22.7   331
+     +2R             8.2     58.6      3.6     29.6   331
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  319         0.0      13.8      53.8     126.0     198.2
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  319        0.00      0.14      0.55      1.24      1.91
+
+  ---- SHORT, range 30 minuti: 596 prime rotture ----
+  minuto della rottura (dall'apertura): q10/25/50/75/90 = 30 / 30 / 35 / 45 / 70
+  la barra di rottura chiude DENTRO il livello: 45.0% (n=596)
+  l'altro lato rompe DOPO (2LATI): 39.6% (n=596); minuto mediano dell'altra rottura 145
+
+  == BREAKOUT: quanto corre dopo la rottura (MFE dal livello+buffer, barra di rottura inclusa) ==
+  (solo eventi con orizzonte completo dentro la seduta: n per riga)
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  596         6.2      13.0      28.2      51.7      82.3
+  MFE 30 min               n=  595         8.3      18.2      37.7      73.5     118.0
+  MFE 60 min               n=  594        11.0      26.0      54.3      98.5     160.0
+  MFE 120 min              n=  590        12.3      31.3      66.9     128.7     201.4
+  MFE 240 min              n=  581        16.3      41.4      89.8     156.8     263.5
+  MFE fine seduta          n=  596        17.1      43.3     102.5     179.7     307.3
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  596        0.06      0.14      0.24      0.43      0.76
+  MFE 30 min               n=  595        0.08      0.19      0.34      0.65      1.02
+  MFE 60 min               n=  594        0.12      0.24      0.50      0.89      1.41
+  MFE 120 min              n=  590        0.14      0.29      0.63      1.16      1.83
+  MFE 240 min              n=  581        0.17      0.36      0.82      1.47      2.49
+  MFE fine seduta          n=  596        0.18      0.41      0.94      1.72      2.79
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  596       0.037     0.078     0.163     0.307     0.477
+  MFE 30 min               n=  595       0.045     0.103     0.223     0.434     0.681
+  MFE 60 min               n=  594       0.064     0.146     0.318     0.577     0.905
+  MFE 120 min              n=  590       0.073     0.174     0.402     0.729     1.156
+  MFE 240 min              n=  581       0.092     0.225     0.524     0.930     1.413
+  MFE fine seduta          n=  596       0.096     0.256     0.578     1.060     1.725
+
+  escursione avversa MASSIMA prima di toccare +1R (solo eventi che toccano +1R):
+  tocca +1R: 46.6% (n=596)
+
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  278         0.0       4.2      24.2      50.8      90.4
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  278        0.00      0.04      0.25      0.53      0.88
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  278       0.000     0.024     0.138     0.286     0.516
+
+  falso breakout (una CHIUSURA M5 torna dentro il livello, barra di rottura inclusa):
+    entro 15 min: 69.3% (n=596)
+    entro 30 min: 77.5% (n=595)
+  di quanto rientra (profondita' della chiusura sotto il livello, solo i falsi):
+  [punti]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  413         4.3      10.5      21.8      38.7      70.7
+  falso entro 30 min       n=  461         6.2      14.3      29.7      57.0      95.4
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  413        0.04      0.10      0.22      0.40      0.58
+  falso entro 30 min       n=  461        0.07      0.14      0.30      0.53      0.78
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  413       0.025     0.059     0.128     0.227     0.368
+  falso entro 30 min       n=  461       0.036     0.084     0.172     0.330     0.523
+
+  sequenza target/stop (ingresso al livello+buffer, stop bordo opposto; A = stessa barra):
+  bersaglio        T%       S%       A%       N%   n
+  +0.5R          66.1     24.3      0.0      9.6   596
+  +1R            43.3     34.4      0.0     22.3   596
+  +1.5R          27.5     37.6      0.0     34.9   596
+  +2R            16.4     38.6      0.0     45.0   596
+  (T = bersaglio prima dello stop, S = stop prima, N = nessuno dei due entro fine
+   seduta. Frequenze di ordine di tocco, NON un PF: niente costi.)
+
+  == RETEST: quanto ritraccia verso il livello rotto ==
+  profondita' del minimo dopo la rottura (POSITIVA = dentro il livello; negativa = il prezzo non e' tornato: min. sopra il livello). La barra di rottura e' esclusa.
+  [punti]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  595        -6.3      12.0      30.6      59.1     102.8
+  ritr. minimo 60 min      n=  594        -0.9      16.9      39.7      79.0     127.3
+  ritr. minimo 120 min     n=  590         3.5      22.2      51.7     106.7     171.7
+  ritr. minimo fine        n=  596         6.7      31.2      80.3     158.7     269.0
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  595       -0.05      0.10      0.31      0.55      0.82
+  ritr. minimo 60 min      n=  594       -0.01      0.16      0.40      0.73      1.09
+  ritr. minimo 120 min     n=  590        0.03      0.20      0.52      0.95      1.41
+  ritr. minimo fine        n=  596        0.07      0.31      0.74      1.41      2.23
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  595      -0.038     0.067     0.179     0.341     0.540
+  ritr. minimo 60 min      n=  594      -0.005     0.097     0.229     0.448     0.763
+  ritr. minimo 120 min     n=  590       0.018     0.124     0.296     0.573     1.014
+  ritr. minimo fine        n=  596       0.041     0.186     0.455     0.913     1.492
+
+  frequenza con cui il ritracciamento raggiunge la profondita' g (in R) = frequenza di
+  riempimento di un LIMIT a livello - g*R, per scadenza dal momento della rottura. %(n)
+     g (R)        <30 min        <60 min       <120 min    fine seduta
+     -0.50      99.5(595)      99.5(594)      99.5(590)      99.5(596)
+     -0.25      97.1(595)      97.8(594)      98.5(590)      98.5(596)
+     +0.00      86.2(595)      89.6(594)      90.8(590)      93.6(596)
+     +0.25      58.0(595)      65.5(594)      70.7(590)      78.7(596)
+     +0.50      29.9(595)      42.4(594)      52.7(590)      63.8(596)
+     +0.75      14.1(595)      24.2(594)      35.3(590)      49.3(596)
+     +1.00       5.4(595)      12.6(594)      22.5(590)      39.6(596)
+  (g=0: il livello; g=+0,50: meta' range dentro; g=+1,00: il bordo opposto = lo stop.)
+
+  == RETEST: LIMIT a livello - o*R (retest a offset o), scadenza di riferimento 120 min, poi corsa ==
+  eventi con scadenza di riferimento completa dentro la seduta: 590 su 596
+  -- offset 0.00R: riempito 90.8% (n=590)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 5 / 5   (n=536)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          59.5     29.3      0.7     10.4   536
+     +1R            37.5     38.6      0.7     23.1   536
+     +1.5R          22.6     40.9      0.7     35.8   536
+     +2R            13.2     41.4      0.7     44.6   536
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  532         0.0      22.4      78.0     156.6     259.8
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  532        0.00      0.19      0.72      1.38      2.20
+  -- offset 0.25R: riempito 70.7% (n=590)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 10 / 20   (n=417)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          56.6     34.5      1.0      7.9   417
+     +1R            36.2     45.6      1.0     17.3   417
+     +1.5R          20.9     49.6      1.0     28.5   417
+     +2R            13.2     51.1      1.0     34.8   417
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  413         1.4      22.2      66.2     147.2     238.3
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  413        0.02      0.22      0.64      1.36      2.25
+  -- offset 0.50R: riempito 52.7% (n=590)
+     minuti dalla rottura al riempimento: q25/50/75 = 10 / 25 / 50   (n=311)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          49.5     44.7      2.6      3.2   311
+     +1R            28.3     58.2      2.3     11.3   311
+     +1.5R          18.0     60.8      2.3     19.0   311
+     +2R            11.3     63.0      2.3     23.5   311
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  304         2.4      23.1      51.4     123.3     211.4
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  304        0.03      0.18      0.52      1.25      2.13
+
+  ==== CONDIZIONATI (colonne: falso15% = falso breakout entro 15 min; MFE in R dal livello;
+       ritr120R = mediana profondita' del retest entro 120 min in R; retest0% = il LIMIT sul
+       livello (offset 0) si riempie entro 120 min; T+1R% e S<T% = sequenza dopo il breakout) ====
+
+  -- LONG, range 30, per AMPIEZZA del range (terzili dell'addestramento) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  stretto                    112     71.4      0.93      1.11      0.52      91.1      49.1      38.4
+  medio                      203     70.0      0.78      0.90      0.59      92.6      37.9      40.4
+  largo                      348     64.9      0.63      0.70      0.46      92.1      31.3      28.4
+  -- LONG, range 30, per GAP d'apertura --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  gap < -0,25%               213     65.3      0.72      0.78      0.52      92.9      37.1      33.8
+  gap dentro                 209     73.7      0.64      0.70      0.51      93.2      31.6      34.9
+  gap > +0,25%               241     64.3      0.73      0.92      0.48      90.4      39.8      32.8
+  gap n/d                      0
+  -- LONG, range 30, per GIORNO della settimana --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  lun                        141     69.5      0.65      0.69      0.47      92.1      33.3      33.3
+  mar                        136     64.7      0.66      0.80      0.54      91.9      34.6      33.1
+  mer                        127     70.1      0.72      0.88      0.55      88.8      35.4      40.9
+  gio                        125     68.8      0.68      0.74      0.47      94.4      35.2      35.2
+  ven                        134     64.9      0.85      0.94      0.49      93.2      43.3      26.9
+  -- LONG, range 30, per ANNO (G1: >= 150 giorni buoni nell'anno) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  2021                       135     67.4      0.67      0.73      0.48      88.1      36.3      32.6
+  2022                       123     60.2      0.68      0.82      0.59      92.4      37.4      34.1
+  2023                   NON LEGGIBILE (giorni buoni 137 < 150; eventi 75)
+  2024                       127     67.7      0.91      0.99      0.46      95.3      45.7      30.7
+  2025                       128     68.8      0.68      0.85      0.52      89.8      30.5      39.1
+  2026                   NON LEGGIBILE (giorni buoni 139 < 150; eventi 75)
+
+  -- SHORT, range 30, per AMPIEZZA del range (terzili dell'addestramento) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  stretto                    109     72.5      1.31      1.45      0.76      89.0      54.1      39.4
+  medio                      151     73.5      0.91      1.13      0.53      91.3      49.7      33.8
+  largo                      336     66.4      0.71      0.81      0.50      91.3      36.9      33.0
+  -- SHORT, range 30, per GAP d'apertura --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  gap < -0,25%               188     66.5      0.76      0.80      0.54      90.9      39.4      37.2
+  gap dentro                 190     71.6      0.78      0.95      0.59      90.4      44.2      36.3
+  gap > +0,25%               218     69.7      0.92      1.02      0.44      91.2      45.9      30.3
+  gap n/d                      0
+  -- SHORT, range 30, per GIORNO della settimana --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  lun                         96     76.0      0.68      0.87      0.54      92.5      44.8      28.1
+  mar                        128     70.3      0.76      0.82      0.53      95.3      39.1      33.6
+  mer                        129     64.3      0.85      0.99      0.52      87.4      44.2      38.8
+  gio                        125     65.6      0.87      0.99      0.58      91.1      43.2      36.8
+  ven                        118     72.0      0.89      0.94      0.44      88.1      45.8      33.1
+  -- SHORT, range 30, per ANNO (G1: >= 150 giorni buoni nell'anno) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  2021                       113     73.5      0.79      0.83      0.51      91.9      38.9      34.5
+  2022                       126     60.3      0.78      0.97      0.41      85.6      46.0      33.3
+  2023                   NON LEGGIBILE (giorni buoni 137 < 150; eventi 62)
+  2024                       117     69.2      1.02      1.03      0.57      92.2      47.9      32.5
+  2025                       116     74.1      0.79      0.93      0.54      94.0      43.1      34.5
+  2026                   NON LEGGIBILE (giorni buoni 139 < 150; eventi 62)
+
+##############################################################################
+# RANGE D'APERTURA DI 35 MINUTI (InpRangeMinutes = 35)
+##############################################################################
+giorni buoni 1266; range valido 1266 (MANCANTE 0, PIATTO 0)
+prima rottura: LONG 654  SHORT 597  AMBIGUA(una barra tocca i due lati) 1  NESSUNA 14
+giorni in cui ANCHE l'altro lato rompe dopo (2LATI): 431 (34.5% dei giorni con rottura)
+
+                                           q10       q25       q50       q75       q90
+  ampiezza range pt        n= 1266        60.2      81.5     113.5     156.9     217.7
+  ampiezza range % prezzo  n= 1266       0.345     0.466     0.648     0.928     1.267
+  terzili dell'ampiezza % (tarati SOLO sull'addestramento): <= 0.409 | <= 0.625 | oltre
+
+  ---- LONG, range 35 minuti: 654 prime rotture ----
+  minuto della rottura (dall'apertura): q10/25/50/75/90 = 35 / 35 / 40 / 55 / 90
+  la barra di rottura chiude DENTRO il livello: 44.5% (n=654)
+  l'altro lato rompe DOPO (2LATI): 32.7% (n=654); minuto mediano dell'altra rottura 165
+
+  == BREAKOUT: quanto corre dopo la rottura (MFE dal livello+buffer, barra di rottura inclusa) ==
+  (solo eventi con orizzonte completo dentro la seduta: n per riga)
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  653         4.1      10.2      19.2      36.4      55.5
+  MFE 30 min               n=  652         7.1      14.2      28.8      51.0      75.9
+  MFE 60 min               n=  652         8.4      20.6      41.0      69.6      99.0
+  MFE 120 min              n=  646        10.6      25.7      52.8      90.5     132.9
+  MFE 240 min              n=  631        14.1      34.8      70.1     118.7     169.2
+  MFE fine seduta          n=  654        16.2      40.2      81.4     135.9     199.8
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  653        0.04      0.09      0.18      0.30      0.44
+  MFE 30 min               n=  652        0.06      0.14      0.27      0.45      0.66
+  MFE 60 min               n=  652        0.08      0.19      0.38      0.62      0.89
+  MFE 120 min              n=  646        0.10      0.25      0.48      0.79      1.16
+  MFE 240 min              n=  631        0.13      0.33      0.65      1.03      1.50
+  MFE fine seduta          n=  654        0.14      0.36      0.73      1.23      1.81
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  653       0.025     0.056     0.116     0.212     0.325
+  MFE 30 min               n=  652       0.038     0.079     0.170     0.300     0.452
+  MFE 60 min               n=  652       0.049     0.119     0.235     0.392     0.592
+  MFE 120 min              n=  646       0.061     0.148     0.310     0.521     0.780
+  MFE 240 min              n=  631       0.089     0.195     0.392     0.671     1.028
+  MFE fine seduta          n=  654       0.093     0.226     0.455     0.790     1.259
+
+  escursione avversa MASSIMA prima di toccare +1R (solo eventi che toccano +1R):
+  tocca +1R: 34.7% (n=654)
+
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  227         0.0       8.1      23.2      45.7      86.3
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  227        0.00      0.07      0.25      0.55      0.90
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  227       0.000     0.045     0.134     0.289     0.532
+
+  falso breakout (una CHIUSURA M5 torna dentro il livello, barra di rottura inclusa):
+    entro 15 min: 66.5% (n=653)
+    entro 30 min: 77.0% (n=652)
+  di quanto rientra (profondita' della chiusura sotto il livello, solo i falsi):
+  [punti]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  434         2.5       6.5      16.2      29.8      53.1
+  falso entro 30 min       n=  502         3.7       9.3      21.6      45.8      79.2
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  434        0.02      0.07      0.15      0.28      0.45
+  falso entro 30 min       n=  502        0.03      0.09      0.21      0.41      0.65
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  434       0.015     0.038     0.091     0.180     0.303
+  falso entro 30 min       n=  502       0.022     0.053     0.121     0.267     0.458
+
+  sequenza target/stop (ingresso al livello+buffer, stop bordo opposto; A = stessa barra):
+  bersaglio        T%       S%       A%       N%   n
+  +0.5R          62.4     23.1      0.2     14.4   654
+  +1R            32.1     30.4      0.0     37.5   654
+  +1.5R          14.2     32.1      0.0     53.7   654
+  +2R             6.4     32.7      0.0     60.9   654
+  (T = bersaglio prima dello stop, S = stop prima, N = nessuno dei due entro fine
+   seduta. Frequenze di ordine di tocco, NON un PF: niente costi.)
+
+  == RETEST: quanto ritraccia verso il livello rotto ==
+  profondita' del minimo dopo la rottura (POSITIVA = dentro il livello; negativa = il prezzo non e' tornato: min. sopra il livello). La barra di rottura e' esclusa.
+  [punti]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  652        -2.1       8.9      24.3      49.3      85.0
+  ritr. minimo 60 min      n=  652        -0.1      13.1      32.7      70.3     122.7
+  ritr. minimo 120 min     n=  646         5.7      19.0      45.0      92.8     155.6
+  ritr. minimo fine        n=  654         9.4      27.7      70.3     141.8     238.7
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  652       -0.02      0.08      0.22      0.45      0.72
+  ritr. minimo 60 min      n=  652       -0.00      0.12      0.30      0.65      0.93
+  ritr. minimo 120 min     n=  646        0.05      0.18      0.40      0.82      1.25
+  ritr. minimo fine        n=  654        0.08      0.25      0.61      1.23      2.24
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  652      -0.012     0.053     0.131     0.289     0.488
+  ritr. minimo 60 min      n=  652      -0.000     0.078     0.185     0.407     0.696
+  ritr. minimo 120 min     n=  646       0.032     0.108     0.255     0.536     0.914
+  ritr. minimo fine        n=  654       0.061     0.149     0.403     0.831     1.423
+
+  frequenza con cui il ritracciamento raggiunge la profondita' g (in R) = frequenza di
+  riempimento di un LIMIT a livello - g*R, per scadenza dal momento della rottura. %(n)
+     g (R)        <30 min        <60 min       <120 min    fine seduta
+     -0.50      99.8(652)      99.8(652)      99.8(646)      99.8(654)
+     -0.25      99.2(652)      99.4(652)      99.7(646)      99.8(654)
+     +0.00      87.3(652)      89.7(652)      92.6(646)      94.8(654)
+     +0.25      44.8(652)      56.9(652)      66.3(646)      74.9(654)
+     +0.50      22.1(652)      34.2(652)      43.3(646)      56.9(654)
+     +0.75       8.9(652)      18.3(652)      27.6(646)      42.8(654)
+     +1.00       3.8(652)       8.6(652)      16.3(646)      32.7(654)
+  (g=0: il livello; g=+0,50: meta' range dentro; g=+1,00: il bordo opposto = lo stop.)
+
+  == RETEST: LIMIT a livello - o*R (retest a offset o), scadenza di riferimento 120 min, poi corsa ==
+  eventi con scadenza di riferimento completa dentro la seduta: 646 su 654
+  -- offset 0.00R: riempito 92.6% (n=646)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 5 / 5   (n=598)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          58.0     25.9      0.8     15.2   598
+     +1R            28.9     32.6      0.7     37.8   598
+     +1.5R          12.4     33.8      0.7     53.2   598
+     +2R             5.7     34.4      0.7     59.2   598
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  594         2.2      24.6      70.0     125.3     188.9
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  594        0.03      0.23      0.62      1.13      1.60
+  -- offset 0.25R: riempito 66.3% (n=646)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 15 / 35   (n=428)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          57.0     33.6      0.9      8.4   428
+     +1R            31.3     40.7      1.2     26.9   428
+     +1.5R          13.6     42.8      0.9     42.8   428
+     +2R             5.4     43.0      0.9     50.7   428
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  424         4.7      26.9      66.1     132.1     200.0
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  424        0.04      0.25      0.64      1.17      1.66
+  -- offset 0.50R: riempito 43.3% (n=646)
+     minuti dalla rottura al riempimento: q25/50/75 = 15 / 25 / 50   (n=280)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          51.1     42.9      2.5      3.6   280
+     +1R            29.3     53.2      2.5     15.0   280
+     +1.5R          13.2     57.1      2.1     27.5   280
+     +2R             4.6     57.9      2.1     35.4   280
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  274         0.0      19.7      56.2     114.4     185.0
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  274        0.00      0.19      0.55      1.17      1.70
+
+  ---- SHORT, range 35 minuti: 597 prime rotture ----
+  minuto della rottura (dall'apertura): q10/25/50/75/90 = 35 / 35 / 40 / 55 / 90
+  la barra di rottura chiude DENTRO il livello: 46.1% (n=597)
+  l'altro lato rompe DOPO (2LATI): 36.3% (n=597); minuto mediano dell'altra rottura 170
+
+  == BREAKOUT: quanto corre dopo la rottura (MFE dal livello+buffer, barra di rottura inclusa) ==
+  (solo eventi con orizzonte completo dentro la seduta: n per riga)
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  597         6.2      11.9      25.3      44.5      74.4
+  MFE 30 min               n=  596         7.3      16.9      37.1      67.8     109.8
+  MFE 60 min               n=  595        10.1      24.1      51.5      93.9     153.3
+  MFE 120 min              n=  588        12.3      31.0      66.5     122.5     193.9
+  MFE 240 min              n=  573        15.7      41.7      86.2     150.1     245.7
+  MFE fine seduta          n=  597        15.9      43.3      99.4     176.7     277.8
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  597        0.05      0.11      0.21      0.36      0.67
+  MFE 30 min               n=  596        0.07      0.16      0.29      0.56      0.95
+  MFE 60 min               n=  595        0.10      0.20      0.42      0.82      1.26
+  MFE 120 min              n=  588        0.13      0.25      0.57      1.02      1.70
+  MFE 240 min              n=  573        0.14      0.33      0.75      1.31      2.17
+  MFE fine seduta          n=  597        0.15      0.35      0.83      1.51      2.34
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  597       0.032     0.068     0.146     0.268     0.435
+  MFE 30 min               n=  596       0.044     0.094     0.212     0.391     0.621
+  MFE 60 min               n=  595       0.062     0.137     0.292     0.559     0.874
+  MFE 120 min              n=  588       0.068     0.163     0.397     0.720     1.054
+  MFE 240 min              n=  573       0.087     0.222     0.505     0.884     1.316
+  MFE fine seduta          n=  597       0.089     0.243     0.554     1.022     1.655
+
+  escursione avversa MASSIMA prima di toccare +1R (solo eventi che toccano +1R):
+  tocca +1R: 41.7% (n=597)
+
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  249         0.0       3.1      23.6      54.0      86.6
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  249        0.00      0.02      0.23      0.51      0.88
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  249       0.000     0.018     0.128     0.297     0.539
+
+  falso breakout (una CHIUSURA M5 torna dentro il livello, barra di rottura inclusa):
+    entro 15 min: 73.5% (n=597)
+    entro 30 min: 81.2% (n=596)
+  di quanto rientra (profondita' della chiusura sotto il livello, solo i falsi):
+  [punti]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  439         4.0       9.0      20.4      38.2      62.6
+  falso entro 30 min       n=  484         5.0      12.9      30.6      56.4      90.5
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  439        0.03      0.09      0.19      0.34      0.50
+  falso entro 30 min       n=  484        0.04      0.12      0.27      0.47      0.69
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  439       0.023     0.055     0.119     0.224     0.359
+  falso entro 30 min       n=  484       0.029     0.074     0.169     0.317     0.492
+
+  sequenza target/stop (ingresso al livello+buffer, stop bordo opposto; A = stessa barra):
+  bersaglio        T%       S%       A%       N%   n
+  +0.5R          62.5     24.1      0.0     13.4   597
+  +1R            38.9     32.7      0.0     28.5   597
+  +1.5R          23.8     34.8      0.0     41.4   597
+  +2R            12.9     35.5      0.0     51.6   597
+  (T = bersaglio prima dello stop, S = stop prima, N = nessuno dei due entro fine
+   seduta. Frequenze di ordine di tocco, NON un PF: niente costi.)
+
+  == RETEST: quanto ritraccia verso il livello rotto ==
+  profondita' del minimo dopo la rottura (POSITIVA = dentro il livello; negativa = il prezzo non e' tornato: min. sopra il livello). La barra di rottura e' esclusa.
+  [punti]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  596        -4.3      12.5      31.7      59.3      98.7
+  ritr. minimo 60 min      n=  595         1.3      17.5      41.7      79.9     127.3
+  ritr. minimo 120 min     n=  588         4.0      22.3      51.9     101.5     167.4
+  ritr. minimo fine        n=  597         6.7      34.2      82.0     154.9     269.9
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  596       -0.05      0.11      0.29      0.51      0.75
+  ritr. minimo 60 min      n=  595        0.01      0.16      0.37      0.69      0.97
+  ritr. minimo 120 min     n=  588        0.03      0.19      0.50      0.85      1.33
+  ritr. minimo fine        n=  597        0.07      0.31      0.67      1.30      2.06
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  596      -0.026     0.071     0.181     0.335     0.534
+  ritr. minimo 60 min      n=  595       0.007     0.099     0.247     0.433     0.711
+  ritr. minimo 120 min     n=  588       0.024     0.127     0.302     0.543     0.981
+  ritr. minimo fine        n=  597       0.048     0.194     0.450     0.862     1.519
+
+  frequenza con cui il ritracciamento raggiunge la profondita' g (in R) = frequenza di
+  riempimento di un LIMIT a livello - g*R, per scadenza dal momento della rottura. %(n)
+     g (R)        <30 min        <60 min       <120 min    fine seduta
+     -0.50      99.7(596)      99.7(595)      99.7(588)      99.7(597)
+     -0.25      97.7(596)      98.2(595)      99.0(588)      99.2(597)
+     +0.00      88.3(596)      90.3(595)      91.8(588)      93.6(597)
+     +0.25      55.7(596)      64.0(595)      69.4(588)      78.2(597)
+     +0.50      26.0(596)      38.8(595)      49.7(588)      62.3(597)
+     +0.75      10.1(596)      21.3(595)      31.5(588)      46.9(597)
+     +1.00       3.5(596)       8.9(595)      18.7(588)      36.3(597)
+  (g=0: il livello; g=+0,50: meta' range dentro; g=+1,00: il bordo opposto = lo stop.)
+
+  == RETEST: LIMIT a livello - o*R (retest a offset o), scadenza di riferimento 120 min, poi corsa ==
+  eventi con scadenza di riferimento completa dentro la seduta: 588 su 597
+  -- offset 0.00R: riempito 91.8% (n=588)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 5 / 5   (n=540)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          57.2     28.1      0.6     14.1   540
+     +1R            33.0     36.1      0.6     30.4   540
+     +1.5R          19.4     37.8      0.6     42.2   540
+     +2R            10.0     38.1      0.6     51.3   540
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  537         0.0      22.4      76.2     152.0     244.5
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  537        0.00      0.19      0.62      1.26      2.00
+  -- offset 0.25R: riempito 69.4% (n=588)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 10 / 21   (n=408)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          55.9     34.3      0.7      9.1   408
+     +1R            32.8     44.1      0.7     22.3   408
+     +1.5R          18.6     47.8      0.7     32.8   408
+     +2R            11.5     48.5      0.7     39.2   408
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  405         5.0      24.6      71.6     147.2     232.6
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  405        0.05      0.23      0.60      1.25      2.10
+  -- offset 0.50R: riempito 49.7% (n=588)
+     minuti dalla rottura al riempimento: q25/50/75 = 15 / 25 / 50   (n=292)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          47.6     46.6      1.7      4.1   292
+     +1R            27.4     57.2      1.4     14.0   292
+     +1.5R          15.4     59.2      1.4     24.0   292
+     +2R             8.9     60.6      1.4     29.1   292
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  288         2.6      20.6      49.4     130.1     220.8
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  288        0.03      0.16      0.47      1.10      1.93
+
+  ==== CONDIZIONATI (colonne: falso15% = falso breakout entro 15 min; MFE in R dal livello;
+       ritr120R = mediana profondita' del retest entro 120 min in R; retest0% = il LIMIT sul
+       livello (offset 0) si riempie entro 120 min; T+1R% e S<T% = sequenza dopo il breakout) ====
+
+  -- LONG, range 35, per AMPIEZZA del range (terzili dell'addestramento) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  stretto                    116     74.1      0.85      0.97      0.57      93.1      44.0      39.7
+  medio                      204     66.7      0.68      0.77      0.41      91.6      33.8      30.4
+  largo                      334     63.7      0.58      0.66      0.37      93.0      26.9      27.2
+  -- LONG, range 35, per GAP d'apertura --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  gap < -0,25%               213     60.4      0.67      0.73      0.42      91.5      33.8      30.5
+  gap dentro                 210     68.1      0.59      0.65      0.46      94.7      28.1      32.4
+  gap > +0,25%               231     70.6      0.68      0.83      0.36      91.7      34.2      28.6
+  gap n/d                      0
+  -- LONG, range 35, per GIORNO della settimana --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  lun                        142     69.0      0.59      0.67      0.39      94.3      29.6      30.3
+  mar                        135     64.2      0.60      0.69      0.47      91.0      31.1      29.6
+  mer                        127     65.4      0.68      0.80      0.40      90.3      32.3      37.0
+  gio                        124     63.7      0.64      0.74      0.38      96.0      31.5      30.6
+  ven                        126     69.8      0.69      0.79      0.42      91.2      36.5      24.6
+  -- LONG, range 35, per ANNO (G1: >= 150 giorni buoni nell'anno) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  2021                       133     70.7      0.63      0.69      0.38      91.6      30.8      28.6
+  2022                       120     58.3      0.67      0.76      0.45      94.8      35.0      30.0
+  2023                   NON LEGGIBILE (giorni buoni 137 < 150; eventi 74)
+  2024                       128     69.5      0.77      0.85      0.39      95.3      40.6      29.7
+  2025                       128     66.1      0.62      0.71      0.41      88.2      25.8      35.9
+  2026                   NON LEGGIBILE (giorni buoni 139 < 150; eventi 71)
+
+  -- SHORT, range 35, per AMPIEZZA del range (terzili dell'addestramento) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  stretto                    110     75.5      1.24      1.33      0.57      89.1      53.6      37.3
+  medio                      159     74.2      0.75      0.91      0.56      89.7      41.5      37.1
+  largo                      328     72.6      0.64      0.70      0.41      93.8      32.6      29.0
+  -- SHORT, range 35, per GAP d'apertura --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  gap < -0,25%               185     71.9      0.73      0.79      0.50      92.3      37.3      35.7
+  gap dentro                 184     73.4      0.75      0.87      0.51      91.8      39.1      35.3
+  gap > +0,25%               228     75.0      0.78      0.84      0.46      91.5      39.9      28.1
+  gap n/d                      0
+  -- SHORT, range 35, per GIORNO della settimana --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  lun                         94     75.5      0.67      0.84      0.50      87.9      42.6      22.3
+  mar                        126     74.6      0.68      0.76      0.54      95.2      34.1      34.9
+  mer                        130     70.8      0.79      0.92      0.44      91.4      39.2      36.9
+  gio                        124     74.2      0.85      0.92      0.55      93.4      39.5      33.1
+  ven                        123     73.2      0.71      0.75      0.41      90.2      39.8      33.3
+  -- SHORT, range 35, per ANNO (G1: >= 150 giorni buoni nell'anno) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  2021                       114     74.6      0.74      0.78      0.48      91.1      36.0      31.6
+  2022                       125     67.2      0.74      0.89      0.37      89.4      40.8      32.0
+  2023                   NON LEGGIBILE (giorni buoni 137 < 150; eventi 63)
+  2024                       116     72.4      0.80      0.93      0.55      88.6      44.8      31.0
+  2025                       114     81.6      0.77      0.82      0.49      95.5      37.7      34.2
+  2026                   NON LEGGIBILE (giorni buoni 139 < 150; eventi 65)
+
+##############################################################################
+# RANGE D'APERTURA DI 45 MINUTI (InpRangeMinutes = 45)
+##############################################################################
+giorni buoni 1266; range valido 1266 (MANCANTE 0, PIATTO 0)
+prima rottura: LONG 657  SHORT 584  AMBIGUA(una barra tocca i due lati) 0  NESSUNA 25
+giorni in cui ANCHE l'altro lato rompe dopo (2LATI): 378 (30.5% dei giorni con rottura)
+
+                                           q10       q25       q50       q75       q90
+  ampiezza range pt        n= 1266        66.1      90.2     122.9     173.3     237.0
+  ampiezza range % prezzo  n= 1266       0.382     0.507     0.721     1.016     1.384
+  terzili dell'ampiezza % (tarati SOLO sull'addestramento): <= 0.446 | <= 0.687 | oltre
+
+  ---- LONG, range 45 minuti: 657 prime rotture ----
+  minuto della rottura (dall'apertura): q10/25/50/75/90 = 45 / 45 / 55 / 75 / 115
+  la barra di rottura chiude DENTRO il livello: 44.4% (n=657)
+  l'altro lato rompe DOPO (2LATI): 28.8% (n=657); minuto mediano dell'altra rottura 185
+
+  == BREAKOUT: quanto corre dopo la rottura (MFE dal livello+buffer, barra di rottura inclusa) ==
+  (solo eventi con orizzonte completo dentro la seduta: n per riga)
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  654         3.8       8.4      18.9      34.2      54.5
+  MFE 30 min               n=  653         5.6      13.1      27.5      48.5      73.1
+  MFE 60 min               n=  651         7.7      18.0      36.4      66.7      94.6
+  MFE 120 min              n=  645         8.8      23.9      47.2      86.9     126.8
+  MFE 240 min              n=  621        10.4      31.0      65.1     112.7     163.0
+  MFE fine seduta          n=  657        10.7      34.2      74.8     125.0     187.2
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  654        0.04      0.07      0.16      0.28      0.40
+  MFE 30 min               n=  653        0.05      0.11      0.23      0.39      0.59
+  MFE 60 min               n=  651        0.07      0.15      0.31      0.54      0.75
+  MFE 120 min              n=  645        0.08      0.20      0.42      0.68      1.02
+  MFE 240 min              n=  621        0.10      0.27      0.55      0.89      1.28
+  MFE fine seduta          n=  657        0.10      0.30      0.61      1.03      1.55
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  654       0.021     0.052     0.109     0.195     0.319
+  MFE 30 min               n=  653       0.031     0.073     0.156     0.288     0.443
+  MFE 60 min               n=  651       0.042     0.102     0.216     0.363     0.559
+  MFE 120 min              n=  645       0.050     0.137     0.285     0.497     0.782
+  MFE 240 min              n=  621       0.064     0.176     0.374     0.657     0.997
+  MFE fine seduta          n=  657       0.067     0.195     0.421     0.758     1.195
+
+  escursione avversa MASSIMA prima di toccare +1R (solo eventi che toccano +1R):
+  tocca +1R: 26.3% (n=657)
+
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  173         0.0       4.9      20.1      39.0      72.6
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  173        0.00      0.05      0.19      0.40      0.70
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  173       0.000     0.031     0.115     0.255     0.484
+
+  falso breakout (una CHIUSURA M5 torna dentro il livello, barra di rottura inclusa):
+    entro 15 min: 65.7% (n=654)
+    entro 30 min: 76.4% (n=653)
+  di quanto rientra (profondita' della chiusura sotto il livello, solo i falsi):
+  [punti]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  430         2.4       6.9      15.7      29.8      49.3
+  falso entro 30 min       n=  499         3.8       9.4      23.6      43.6      77.0
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  430        0.02      0.05      0.13      0.25      0.43
+  falso entro 30 min       n=  499        0.03      0.08      0.18      0.38      0.59
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  430       0.014     0.039     0.085     0.176     0.292
+  falso entro 30 min       n=  499       0.021     0.053     0.133     0.256     0.434
+
+  sequenza target/stop (ingresso al livello+buffer, stop bordo opposto; A = stessa barra):
+  bersaglio        T%       S%       A%       N%   n
+  +0.5R          57.2     22.5      0.2     20.1   657
+  +1R            25.1     27.4      0.0     47.5   657
+  +1.5R          10.5     28.2      0.0     61.3   657
+  +2R             4.1     28.6      0.0     67.3   657
+  (T = bersaglio prima dello stop, S = stop prima, N = nessuno dei due entro fine
+   seduta. Frequenze di ordine di tocco, NON un PF: niente costi.)
+
+  == RETEST: quanto ritraccia verso il livello rotto ==
+  profondita' del minimo dopo la rottura (POSITIVA = dentro il livello; negativa = il prezzo non e' tornato: min. sopra il livello). La barra di rottura e' esclusa.
+  [punti]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  653        -2.1       7.5      23.4      48.3      79.7
+  ritr. minimo 60 min      n=  651        -0.6      11.8      33.1      65.4     121.7
+  ritr. minimo 120 min     n=  645         4.0      19.5      44.2      86.9     157.1
+  ritr. minimo fine        n=  656         7.3      27.2      65.5     138.2     243.7
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  653       -0.02      0.06      0.18      0.40      0.64
+  ritr. minimo 60 min      n=  651       -0.00      0.11      0.27      0.58      0.88
+  ritr. minimo 120 min     n=  645        0.03      0.16      0.36      0.72      1.15
+  ritr. minimo fine        n=  656        0.05      0.23      0.56      1.10      2.06
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  653      -0.012     0.047     0.130     0.273     0.463
+  ritr. minimo 60 min      n=  651      -0.004     0.070     0.196     0.365     0.693
+  ritr. minimo 120 min     n=  645       0.022     0.112     0.253     0.512     0.916
+  ritr. minimo fine        n=  656       0.043     0.153     0.384     0.802     1.425
+
+  frequenza con cui il ritracciamento raggiunge la profondita' g (in R) = frequenza di
+  riempimento di un LIMIT a livello - g*R, per scadenza dal momento della rottura. %(n)
+     g (R)        <30 min        <60 min       <120 min    fine seduta
+     -0.50     100.0(653)     100.0(651)     100.0(645)     100.0(656)
+     -0.25      99.5(653)      99.5(651)      99.8(645)      99.8(656)
+     +0.00      85.9(653)      88.6(651)      92.1(645)      94.1(656)
+     +0.25      39.5(653)      52.8(651)      63.9(645)      72.6(656)
+     +0.50      17.6(653)      29.2(651)      38.6(645)      52.9(656)
+     +0.75       6.6(653)      14.7(651)      23.1(645)      38.7(656)
+     +1.00       3.1(653)       7.7(651)      14.0(645)      28.8(656)
+  (g=0: il livello; g=+0,50: meta' range dentro; g=+1,00: il bordo opposto = lo stop.)
+
+  == RETEST: LIMIT a livello - o*R (retest a offset o), scadenza di riferimento 120 min, poi corsa ==
+  eventi con scadenza di riferimento completa dentro la seduta: 645 su 657
+  -- offset 0.00R: riempito 92.1% (n=645)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 5 / 5   (n=594)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          51.9     25.9      0.3     21.9   594
+     +1R            22.2     29.6      0.3     47.8   594
+     +1.5R           8.8     30.0      0.3     60.9   594
+     +2R             3.5     30.5      0.3     65.7   594
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  592         0.6      23.4      63.5     116.5     177.2
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  592        0.00      0.20      0.53      0.94      1.40
+  -- offset 0.25R: riempito 63.9% (n=645)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 20 / 40   (n=412)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          51.5     34.2      0.7     13.6   412
+     +1R            24.0     39.1      0.7     36.2   412
+     +1.5R           9.0     39.6      0.7     50.7   412
+     +2R             2.9     39.6      0.7     56.8   412
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  409         5.4      23.2      58.7     119.4     184.8
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  409        0.04      0.20      0.52      0.97      1.47
+  -- offset 0.50R: riempito 38.6% (n=645)
+     minuti dalla rottura al riempimento: q25/50/75 = 15 / 30 / 55   (n=249)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          46.6     47.4      1.6      4.4   249
+     +1R            23.7     55.8      1.6     18.9   249
+     +1.5R           8.0     57.0      1.6     33.3   249
+     +2R             3.2     57.0      1.6     38.2   249
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  245         0.0      18.9      47.4     102.7     170.9
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  245        0.00      0.19      0.45      0.93      1.43
+
+  ---- SHORT, range 45 minuti: 584 prime rotture ----
+  minuto della rottura (dall'apertura): q10/25/50/75/90 = 45 / 45 / 55 / 75 / 124
+  la barra di rottura chiude DENTRO il livello: 47.1% (n=584)
+  l'altro lato rompe DOPO (2LATI): 32.4% (n=584); minuto mediano dell'altra rottura 205
+
+  == BREAKOUT: quanto corre dopo la rottura (MFE dal livello+buffer, barra di rottura inclusa) ==
+  (solo eventi con orizzonte completo dentro la seduta: n per riga)
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  582         6.0      11.0      23.4      43.8      68.8
+  MFE 30 min               n=  581         7.4      15.4      33.8      64.0     110.1
+  MFE 60 min               n=  579         9.1      21.9      46.5      85.9     146.8
+  MFE 120 min              n=  570        11.4      27.3      60.6     115.2     178.7
+  MFE 240 min              n=  542        13.5      38.3      78.1     147.0     238.1
+  MFE fine seduta          n=  584        12.9      39.9      87.3     165.1     275.7
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  582        0.05      0.09      0.19      0.33      0.53
+  MFE 30 min               n=  581        0.06      0.13      0.27      0.48      0.76
+  MFE 60 min               n=  579        0.08      0.19      0.35      0.68      1.07
+  MFE 120 min              n=  570        0.10      0.22      0.48      0.88      1.39
+  MFE 240 min              n=  542        0.13      0.29      0.66      1.14      1.87
+  MFE fine seduta          n=  584        0.12      0.30      0.71      1.26      1.99
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MFE 15 min               n=  582       0.031     0.065     0.138     0.258     0.402
+  MFE 30 min               n=  581       0.043     0.088     0.198     0.366     0.591
+  MFE 60 min               n=  579       0.059     0.126     0.265     0.516     0.840
+  MFE 120 min              n=  570       0.065     0.159     0.358     0.660     1.058
+  MFE 240 min              n=  542       0.085     0.208     0.470     0.855     1.291
+  MFE fine seduta          n=  584       0.082     0.212     0.513     0.985     1.557
+
+  escursione avversa MASSIMA prima di toccare +1R (solo eventi che toccano +1R):
+  tocca +1R: 35.6% (n=584)
+
+  [punti]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  208         0.0       4.3      23.4      47.6      88.7
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  208        0.00      0.04      0.23      0.43      0.78
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  MAE prima di +1R         n=  208       0.000     0.022     0.135     0.259     0.513
+
+  falso breakout (una CHIUSURA M5 torna dentro il livello, barra di rottura inclusa):
+    entro 15 min: 74.4% (n=582)
+    entro 30 min: 80.2% (n=581)
+  di quanto rientra (profondita' della chiusura sotto il livello, solo i falsi):
+  [punti]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  433         3.5       9.0      20.5      36.5      67.4
+  falso entro 30 min       n=  466         5.2      14.7      30.0      56.1      91.7
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  433        0.03      0.08      0.17      0.29      0.46
+  falso entro 30 min       n=  466        0.05      0.12      0.24      0.45      0.63
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  falso entro 15 min       n=  433       0.020     0.055     0.119     0.208     0.349
+  falso entro 30 min       n=  466       0.030     0.084     0.172     0.325     0.500
+
+  sequenza target/stop (ingresso al livello+buffer, stop bordo opposto; A = stessa barra):
+  bersaglio        T%       S%       A%       N%   n
+  +0.5R          58.4     24.3      0.0     17.3   584
+  +1R            34.2     30.3      0.0     35.4   584
+  +1.5R          18.5     31.5      0.0     50.0   584
+  +2R             9.4     31.8      0.0     58.7   584
+  (T = bersaglio prima dello stop, S = stop prima, N = nessuno dei due entro fine
+   seduta. Frequenze di ordine di tocco, NON un PF: niente costi.)
+
+  == RETEST: quanto ritraccia verso il livello rotto ==
+  profondita' del minimo dopo la rottura (POSITIVA = dentro il livello; negativa = il prezzo non e' tornato: min. sopra il livello). La barra di rottura e' esclusa.
+  [punti]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  581        -3.9      12.4      30.5      57.5      92.5
+  ritr. minimo 60 min      n=  579         0.3      16.6      39.9      77.1     127.1
+  ritr. minimo 120 min     n=  570         5.8      21.9      51.0      95.7     171.6
+  ritr. minimo fine        n=  583        11.3      31.5      76.9     146.2     274.0
+  [multipli di R]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  581       -0.03      0.10      0.26      0.47      0.68
+  ritr. minimo 60 min      n=  579        0.00      0.14      0.33      0.60      0.87
+  ritr. minimo 120 min     n=  570        0.05      0.19      0.41      0.78      1.22
+  ritr. minimo fine        n=  583        0.08      0.26      0.62      1.21      1.94
+  [% del prezzo]
+                                           q10       q25       q50       q75       q90
+  ritr. minimo 30 min      n=  581      -0.021     0.067     0.179     0.341     0.533
+  ritr. minimo 60 min      n=  579       0.003     0.092     0.236     0.438     0.701
+  ritr. minimo 120 min     n=  570       0.030     0.131     0.298     0.537     0.954
+  ritr. minimo fine        n=  583       0.062     0.188     0.431     0.855     1.483
+
+  frequenza con cui il ritracciamento raggiunge la profondita' g (in R) = frequenza di
+  riempimento di un LIMIT a livello - g*R, per scadenza dal momento della rottura. %(n)
+     g (R)        <30 min        <60 min       <120 min    fine seduta
+     -0.50      99.8(581)      99.8(579)      99.8(570)      99.8(583)
+     -0.25      98.5(581)      99.1(579)      99.3(570)      99.5(583)
+     +0.00      87.1(581)      90.0(579)      92.3(570)      93.7(583)
+     +0.25      52.5(581)      61.1(579)      68.8(570)      75.8(583)
+     +0.50      22.0(581)      34.0(579)      43.7(570)      59.0(583)
+     +0.75       7.9(581)      17.1(579)      26.7(570)      41.2(583)
+     +1.00       2.8(581)       6.4(579)      14.9(570)      32.4(583)
+  (g=0: il livello; g=+0,50: meta' range dentro; g=+1,00: il bordo opposto = lo stop.)
+
+  == RETEST: LIMIT a livello - o*R (retest a offset o), scadenza di riferimento 120 min, poi corsa ==
+  eventi con scadenza di riferimento completa dentro la seduta: 570 su 584
+  -- offset 0.00R: riempito 92.3% (n=570)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 5 / 5   (n=526)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          53.6     28.5      0.2     17.7   526
+     +1R            29.1     34.0      0.2     36.7   526
+     +1.5R          15.2     35.0      0.2     49.6   526
+     +2R             7.8     35.0      0.2     57.0   526
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  525         0.0      20.7      68.5     144.1     234.3
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  525        0.00      0.16      0.57      1.11      1.87
+  -- offset 0.25R: riempito 68.8% (n=570)
+     minuti dalla rottura al riempimento: q25/50/75 = 5 / 10 / 25   (n=392)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          52.0     34.9      0.3     12.8   392
+     +1R            29.8     41.6      0.3     28.3   392
+     +1.5R          15.1     45.2      0.3     39.5   392
+     +2R            10.2     45.2      0.3     44.4   392
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  391         0.0      21.2      68.0     141.2     230.9
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  391        0.00      0.17      0.55      1.14      2.00
+  -- offset 0.50R: riempito 43.7% (n=570)
+     minuti dalla rottura al riempimento: q25/50/75 = 15 / 25 / 50   (n=249)
+     dopo il riempimento (bersaglio = prezzo di riempimento + t*R; stop bordo opposto; A = stessa barra):
+     bersaglio        T%       S%       A%       N%   n
+     +0.5R          45.8     49.0      1.2      4.0   249
+     +1R            25.3     59.0      0.4     15.3   249
+     +1.5R          12.9     60.6      0.4     26.1   249
+     +2R             7.2     61.4      0.4     30.9   249
+     corsa massima dopo il riempimento (fino allo stop) [punti]
+  MFE post-riempimento     n=  248         1.6      17.1      48.5     121.7     223.7
+     corsa massima dopo il riempimento (fino allo stop) [R]
+  MFE post-riempimento     n=  248        0.01      0.13      0.41      1.01      1.76
+
+  ==== CONDIZIONATI (colonne: falso15% = falso breakout entro 15 min; MFE in R dal livello;
+       ritr120R = mediana profondita' del retest entro 120 min in R; retest0% = il LIMIT sul
+       livello (offset 0) si riempie entro 120 min; T+1R% e S<T% = sequenza dopo il breakout) ====
+
+  -- LONG, range 45, per AMPIEZZA del range (terzili dell'addestramento) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  stretto                    118     68.6      0.64      0.75      0.51      93.2      38.1      36.4
+  medio                      209     63.6      0.61      0.64      0.37      88.9      26.3      27.3
+  largo                      330     66.1      0.48      0.55      0.33      93.8      19.7      24.2
+  -- LONG, range 45, per GAP d'apertura --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  gap < -0,25%               217     60.2      0.55      0.61      0.37      92.1      25.3      28.1
+  gap dentro                 212     69.3      0.54      0.56      0.42      92.8      23.6      28.8
+  gap > +0,25%               228     67.7      0.56      0.67      0.32      91.4      26.3      25.4
+  gap n/d                      0
+  -- LONG, range 45, per GIORNO della settimana --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  lun                        130     62.3      0.52      0.57      0.31      89.8      23.8      23.1
+  mar                        136     66.7      0.55      0.57      0.37      93.2      26.5      27.2
+  mer                        134     63.4      0.59      0.70      0.36      90.8      26.1      31.3
+  gio                        128     64.1      0.56      0.60      0.36      96.9      22.7      30.5
+  ven                        129     72.4      0.55      0.61      0.42      89.7      26.4      24.8
+  -- LONG, range 45, per ANNO (G1: >= 150 giorni buoni nell'anno) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  2021                       129     74.4      0.54      0.56      0.37      92.9      28.7      24.8
+  2022                       124     59.3      0.53      0.63      0.40      96.6      25.0      28.2
+  2023                   NON LEGGIBILE (giorni buoni 137 < 150; eventi 70)
+  2024                       136     65.2      0.62      0.69      0.39      94.0      29.4      28.7
+  2025                       127     66.7      0.45      0.55      0.36      89.6      16.5      30.7
+  2026                   NON LEGGIBILE (giorni buoni 139 < 150; eventi 71)
+
+  -- SHORT, range 45, per AMPIEZZA del range (terzili dell'addestramento) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  stretto                    104     82.7      0.95      0.99      0.49      94.2      48.1      35.6
+  medio                      150     77.3      0.70      0.69      0.52      93.8      33.3      38.0
+  largo                      330     70.4      0.60      0.64      0.34      91.0      30.3      25.2
+  -- SHORT, range 45, per GAP d'apertura --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  gap < -0,25%               177     75.0      0.63      0.69      0.44      94.8      29.9      32.8
+  gap dentro                 180     75.6      0.62      0.69      0.45      92.6      35.6      33.3
+  gap > +0,25%               227     73.0      0.71      0.74      0.39      90.0      36.6      26.0
+  gap n/d                      0
+  -- SHORT, range 45, per GIORNO della settimana --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  lun                        105     62.5      0.61      0.64      0.37      90.1      35.2      24.8
+  mar                        121     78.5      0.56      0.59      0.45      94.1      31.4      29.8
+  mer                        123     77.2      0.64      0.75      0.40      91.7      30.9      35.0
+  gio                        117     73.3      0.80      0.80      0.49      94.7      35.9      29.1
+  ven                        118     78.8      0.69      0.72      0.36      90.5      38.1      32.2
+  -- SHORT, range 45, per ANNO (G1: >= 150 giorni buoni nell'anno) --
+                               n falso15%   MFE240R  MFEfineR  ritr120R  retest0%     T+1R%      S<T%
+  2021                       115     73.9      0.57      0.59      0.46      92.9      27.8      33.0
+  2022                       121     73.6      0.67      0.78      0.31      93.3      38.0      26.4
+  2023                   NON LEGGIBILE (giorni buoni 137 < 150; eventi 64)
+  2024                       107     70.1      0.72      0.85      0.48      88.5      41.1      28.0
+  2025                       113     81.2      0.57      0.67      0.45      93.6      34.5      31.9
+  2026                   NON LEGGIBILE (giorni buoni 139 < 150; eventi 64)
+
+--- DA QUESTE MISURE AI PARAMETRI (lettura, non decisione) ---
+  Feed esterno (D-C SOLO_PROVA_REGIME): ogni valore letto qui e' un'IPOTESI da misurare nel
+  tester BCM a tick reali, MAI un valore da scrivere in un preset.
+  InpRangeMinutes     : il range per cui la frequenza dei falsi breakout (falso15%) e' minore e
+                        la corsa (MFE240R) maggiore, letto SOLO sull'addestramento.
+  InpBufferPoints     : un buffer b filtra le rotture con MFE15 < b: leggi q25/q50 di MFE 15 min (pt).
+  InpRetestOffsetPts  : la profondita' g (R) con riempimento ~X% (griglia sopra) per l'ampiezza
+                        mediana del range in punti: offset_pt = g * ampiezza_pt. Meglio il g dove
+                        la corsa post-riempimento resta buona (tabelle offset).
+  InpTP1_R            : qui R = AMPIEZZA del range (A) e il bersaglio t si conta dal prezzo
+                        d'ingresso; nell'EA InpTP1_R e' in multipli del RISCHIO = ingresso-stop,
+                        e lo stop dell'EA e' il bordo opposto MENO il suo buffer b_EA (sellPx).
+                        Quindi: retest  InpTP1_R = t*A / ((1-o)*A + b_EA)
+                                breakout InpTP1_R = t*A / (A + 2*b_EA)
+                        (= t/(1-o) SOLO con b_EA = 0). Questa corsa misura con buffer 0 punti:
+                        con un b_EA diverso anche T%/S% cambiano (lo stop si sposta).
+                        ATTENZIONE: T% SCENDE col bersaglio PER COSTRUZIONE (chi tocca 2R ha
+                        toccato 1R prima): il 'T% massimo' e' sempre il bersaglio piu' corto e
+                        NON e' un criterio. Il confronto lordo e' T% contro il pareggio
+                        (1-o)/(t+1-o) (buffer 0; solo T e S; senza costi): frequenza, non edge.
+                        La scelta la fa SOLO il tester BCM.
+  InpPendingExpiryMin : la scadenza in cui la griglia di riempimento smette di crescere (colonne <N min).
+
+--- RILIEVI DI QUESTA CORSA ---
+  - anno 2023: 33.2% di giorni sospetti (soglia 20.0%)
+
+--- QUELLO CHE QUESTO STUDIO NON PUO' DIRE ---
+  Non dice se un motore guadagnerebbe: niente spread, fill, costi, posizione.
+  Non vede il retest dentro la stessa barra M5 della rottura (stima per difetto).
+  Non sostituisce il cancello qualita' del feed, che e' in verifica.
+
+ESITO: MISURATO CON RILIEVI (1)

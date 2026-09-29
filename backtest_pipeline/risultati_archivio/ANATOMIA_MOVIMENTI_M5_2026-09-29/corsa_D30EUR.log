@@ -1,0 +1,20 @@
+=====================================================================
+ ANATOMIA DEI MOVIMENTI M5 -- ANATOMIA_MOVIMENTI_M5_v1 (FASE 1b: DESCRITTIVA)
+=====================================================================
+ NON e' un backtest: niente PF, niente equity, niente costi, niente motori.
+
+ file      : C:\Users\Master\histdata_m1\D30EUR_M1.csv
+ mercato   : DAX (apertura cash DAX 09:00 CET (03:00/04:00 New York))
+ periodi   : addestramento (2010, 2018)   cassaforte NESSUNA
+ range     : [15, 30, 35, 45] min   scadenze [30, 60, 120]   riferimento 120   offset [0.0, 0.25, 0.5]   bersagli [0.5, 1.0, 1.5, 2.0]
+ buffer    : 0 punti   banda di prezzo: (4500.0, 14500.0)
+
+ prima passata: calibrazione dell'ora d'apertura ...
+CALIBRAZIONE DELL'ORA D'APERTURA -- ipotesi dal calendario, poi MISURA
+  Misura: ampiezza media (H-L)/C in % di ogni minuto-del-giorno, giorni
+  feriali, entro +/-90 minuti dall'ipotesi; il picco su minuti multipli di 5
+  e' l'apertura MISURATA (il primo minuto dopo un buco >= 15 min non conta: e' il salto
+  del feed). Decisiva se >= 1,5 volte la mediana della finestra e con >= 30 giorni;
+  usata solo se a <= 60 minuti dall'ipotesi, altrimenti si tiene l'ipotesi e si dichiara.
+  NESSUN DATO nelle finestre attese.
+!!! CALIBRAZIONE IMPOSSIBILE: nessun dato nelle finestre attese. Si ferma.
