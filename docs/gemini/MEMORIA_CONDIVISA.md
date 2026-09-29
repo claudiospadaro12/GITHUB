@@ -29,6 +29,11 @@ Finestre solo dallo storico esistente (indici BCM dal 2024.09.26); «passate» =
 edge; stop >= 40x (spread+commissione); centro dell'altopiano mai il picco; due lati sugli indici; ogni numero con la fonte o NON
 MISURATO; prima della macchina, la misura a costo zero nei per-trade gia' in archivio.
 
+## 4-bis. Regola nata dai primi due giri (29/09)
+Cita il NOME dell'input o della funzione, NON il numero di riga: i numeri di riga citati nei giri 1-2 erano sbagliati 3 volte su 3
+(InpMgmtTF r.146/218-219 non 105/154; InpSLatr sta in ABTG_EMA200.mq5 r.74/358, non in Guardian; una 'riga 412' del dossier era di un altro motore).
+Il contenuto tecnico era utile: la manopola InpSLatr e' viva e mai messa ad asse (candidato A4).
+
 ## 5. Storico degli scambi
 - 29/09 notte: CACCIA CONGIUNTA avviata: dossier di 23 motori fuori gioco con i parametri (`docs/PER_GEMINI_EA_FUORI_GIOCO_2026-09-29.md`);
   risposta 1 (`RISPOSTA_GEMINI_2026-09-28_2226`: A4 InpSLatr, A7 offset retest [griglia: da riformulare], A1 filtro ATR, A11 timestop;
