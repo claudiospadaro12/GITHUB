@@ -36487,3 +36487,20 @@ per farlo scattare** sui dati veri (non sui sintetici): se sta fuori da ogni val
 il suo "no" non si scrive come prova. (2) La mutazione dell'autotest si rigira anche sui dati VERI con i parametri VERI: se cambia
 casella, il sintetico stava dimostrando un'altra cosa. (3) Una conferma "di riserva" (regime, stagione, tratto) si rilegge **senza le
 code** che il verdetto stesso dichiara decisive; se il segno cade con loro, non e' una seconda prova, e' la stessa.
+
+### CLASSE 917 — il file prova dichiara "cella NUOVA" e predice una FASCIA per un numero che l'archivio ha GIA' al centesimo (e il criterio "se coincide, il pin non e' arrivato" scatta falso sulla gamba dove l'archivio mostra coincidenza)
+Caso (29/09/2026, cancello su `RIGA_ROUND_R207B_DAX.txt` pin `0f3782fb`): `prove/R207b_parziale_e_breakeven_DAX_D30EUR.txt`
+chiamava la cella (`InpTP1_ClosePct` 0, `InpBEatR` 1,0) sul DAX `770101` *"LA PROPOSTA, l'unica cella nuova"* e il prezzo del
+breakeven *"numero che al 22/09/2026 in repo non esiste"*, e prediceva per lei una fascia di Profit OOS 19922,69-23607,28. Ma
+`risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/..._{IS,OOS}_q770be.csv` (13/09, asse `InpBEatR` 0/0,5/1,0/1,5 a ClosePct 0) l'aveva
+gia': Pass 2 IS 132 · 5569,37 · PF 1,18323 · DD 4,9576 (IDENTICA a ClosePct 0/BEatR 0) · OOS 193 · 21163,84 · PF 1,45723 · DD 6,2584.
+Ne' R207a ne' R207b nominavano `q770be`, citato in sette report (`I_QUARANTOTTO`, `CELLE_MIGLIORI_GIA_MISURATE`, `PIANO_PROP` L5,
+`FIRME_2026-09-12` r.95 lo dava "in misura stanotte" proprio per la firma ClosePct 50 -> 0). E il file scriveva, senza distinguere le
+gambe, *"Profit, PF, RF e DD devono DIFFERIRE da (0,0): se coincidessero, InpBEatR non e' arrivato all'EA"*: sulla gamba IS, dove
+q770be mostra coincidenza esatta, quel criterio avrebbe dichiarato guasto un round sano. E' la stessa radice della classe 915 (cercare
+per nome di file invece che per manopola) applicata alla PREPARAZIONE invece che alla lettura.
+Regola: (1) prima di scrivere "cella nuova" / "numero che non esiste" si cerca la MANOPOLA con il suo valore sui CSV della stessa
+sedia (`python3` su `risultati_prove/**/<EA>_<SIMBOLO>_*_*.csv`: colonne `InpX`=valore con le altre manopole di contratto uguali),
+non il nome del round. (2) Se il numero c'e', l'attesa e' un G0 AL CENTESIMO contro quel CSV, non una fascia, e il round si dichiara
+RIPRODUZIONE (sul binario di oggi), non misura nuova. (3) Un criterio "se coincide, il pin non e' arrivato" si scrive PER GAMBA, dopo
+aver guardato se l'archivio mostra gia' coincidenza su una delle due. Correzione: pin nuovo (sola testa commentata, 0 input toccati).

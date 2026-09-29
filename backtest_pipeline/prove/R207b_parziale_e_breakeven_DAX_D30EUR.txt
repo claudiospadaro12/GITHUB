@@ -28,13 +28,15 @@
 #     (prove/R246e_orologio_DAX_D30EUR_d0_B.txt, a sua volta = R47a al
 #     centesimo sul binario di oggi: IS 175 / OOS 270 deal, PF 1,12634 /
 #     1,39709, DD 5,4362 / 7,2328, misurato il 24/09). Le chiavi diverse
-#     sono QUATTRO, tutte volute:
+#     sono TRE, tutte volute (CORRETTO dal cancello il 29/09: qui c'era
+#     scritto QUATTRO, contando InpUsaGuardian; ma R246e r.71 e' GIA'
+#     false, quindi dopo la revisione del par. 3 non e' piu' una
+#     differenza -- verificato chiave per chiave, 90 su 90):
 #       InpMagic         789630 pinnato (in R246e e' l'asse, 794611/794661)
 #       InpTP1_ClosePct  ASSE 0/50 (in R246e pinnato a 50)
 #       InpBEatR         1,0 (in R246e 0)
-#       InpUsaGuardian   false (prima true, vedi 3)
-#     Tutto il resto e' identico (i numeri "1" e "1.0" sono lo stesso
-#     valore).
+#     Tutto il resto e' identico, InpUsaGuardian=false compreso (i numeri
+#     "1" e "1.0" sono lo stesso valore).
 #  3. InpUsaGuardian: era true, ora FALSE. Nel tester il Guardian non
 #     morde (fail-open: senza Guardian ABTG_GuardiaIngresso ritorna true,
 #     vedi il commento di ABTG_PausaGuardian.mqh r.1580-1585), quindi il
@@ -78,11 +80,26 @@
 #            uguali; il resto e' un riferimento, non un G0.]
 #       ( 50 , 1,0 ) = cella di controllo di questo file: identica a
 #           (50 , 0) su ogni colonna (vedi "LE DUE CELLE").
-#       (  0 , 1,0 ) = LA PROPOSTA, l'unica cella nuova.
-#     Il controllo interno della 2x2 e' (50 , 1,0) letta contro R47a e
-#     (0 , 1,0) letta contro R46a: la cella di controllo dice se la
-#     lettura del codice regge. R207b da sola NON chiude il quadrato:
-#     manca R207a a 100000 sul binario di oggi.
+#       (  0 , 1,0 ) = LA PROPOSTA. NON E' UNA CELLA NUOVA (CORRETTO dal
+#           cancello il 29/09, classe 917): e' GIA' MISURATA in archivio,
+#           round q770be del 13/09 (asse InpBEatR 0/0,5/1,0/1,5 a
+#           ClosePct 0, magic 788201, Guardian true, binario del 13/09),
+#           risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/
+#           ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_q770be.csv, Pass 2:
+#           IS  132 pos.  PF 1,18323  DD 4,9576  Profit  5569,37  RF 1,02362
+#               = IDENTICA a (0 , 0) su ogni colonna: in IS il BE a 1,0
+#               non cambia l'esito di nessuna posizione
+#           OOS 193 pos.  PF 1,45723  DD 6,2584  Profit 21163,84  RF 2,71386
+#           Nello stesso round la cella (0 , 0) esce = R46a al centesimo
+#           (IS 5569,37 / OOS 23607,28): stessa unita' (deposito 100000).
+#           E InpBEatR=1,5 esce IDENTICO a 0 in tutte e due le gambe.
+#     QUINDI LA 2x2 E' GIA' COMPLETA IN ARCHIVIO (tre celle misurate, la
+#     quarta = (50 , 0) per costruzione del codice). R207b NON misura una
+#     cella nuova: e' la RIPRODUZIONE di q770be e di R47a sul binario di
+#     OGGI (dopo le modifiche del 21/09) e con Guardian false. Il suo
+#     valore e' il G0 di tutte e due le celle, non una scoperta.
+#     Il controllo interno e' (50 , 1,0) letta contro R47a/R270c e
+#     (0 , 1,0) letta contro q770be Pass 2.
 #  7. CRITERI CONGELATI ORA (per il resto rimandano a R207a; qui i numeri
 #     per leggere QUESTO file, riferimento = R47a):
 #     M1 (merito)  PF OOS cella >= 1,39709 + 0,10 = 1,49709, con n OOS
@@ -108,30 +125,55 @@
 #     Il PF fra ClosePct=0 e ClosePct=50 non e' confrontabile secco
 #         (cambia il numero di deal, R207a par. 7): si legge SEMPRE col
 #         Profit e col Recovery Factor accanto.
-#  8. ATTESA, DICHIARATA PRIMA DEI NUMERI. Se il BE a 1R e' l'ingrediente
-#     che manca, la cella ( 0 , 1,0 ) deve stare FRA le due celle senza
-#     BE indipendente: Profit OOS fra 18029,58 (R47a) e 23607,28 (R46a),
-#     DD OOS fra 6,2719 e 7,2328, e SOPRA la fascia di rumore di R47a
-#     (Profit OOS > 19922,69) per contare come "fra". Letture:
-#       > 23607,28            oltre l'attesa: si spiega prima di credere
-#                             (non e' un guasto, l'archivio non lo prevede)
-#       19922,69 - 23607,28   attesa confermata, coi limiti del par. 7
-#       16136,47 - 19922,69   DENTRO IL RUMORE DI R47a: scatta il
-#                             contro-esempio del par. 9
-#       < 16136,47            il BE a 1R senza parziale PEGGIORA la cella
-#                             viva
-#  9. CONTRO-ESEMPIO, quello che mi farebbe sbagliare. Se (0 , 1,0)
-#     eguaglia (50 , 1,0) [dentro +-10,5% di R47a su PF e su Profit OOS],
-#     allora il vantaggio di ClosePct=0 misurato in R46a veniva dal BE che
-#     li' NON scattava, non dalla parziale: la parziale e' inerte e il BE
-#     a TP1 e' l'ingrediente. Si scrive cosi', non "ClosePct=0 e' meglio".
-#     All'opposto, se (0 , 1,0) resta uguale a (0 , 0) di R46a, il BE a 1R
-#     non ha morso: Profit, PF, RF e DD devono DIFFERIRE dal riferimento,
-#     e il log della cella deve avere la riga "BE indipendente @ ... stop
-#     a pari" (nei .log di LOG_TESTER; se l'ottimizzatore non li scrive,
-#     "NON VERIFICABILE", non un guasto). Trades(0 , 1,0) deve restare
-#     132 IS / 193 OOS (stesse entrate): se cambia, il ragionamento sulle
-#     entrate e' rotto e le expectancy per posizione non si calcolano.
+#  8. ATTESA -- RISCRITTA DAL CANCELLO il 29/09, PRIMA del lancio (classe
+#     917). La prima stesura prediceva una FASCIA per (0 , 1,0) senza aver
+#     aperto q770be, che quel numero lo aveva gia'. Con il numero in
+#     archivio l'attesa giusta non e' una fascia: e' un G0 AL CENTESIMO.
+#       (50 , 1,0)  = R47a / R270c Pass 1, su ogni colonna di risultato:
+#           IS  175  Profit  3789,36  PF 1,12634  DD 5,4362
+#           OOS 270  Profit 18029,58  PF 1,39709  DD 7,2328  RF 2,02903
+#       (0 , 1,0)   = q770be Pass 2, su ogni colonna di risultato:
+#           IS  132  Profit  5569,37  PF 1,18323  DD 4,9576  RF 1,02362
+#           OOS 193  Profit 21163,84  PF 1,45723  DD 6,2584  RF 2,71386
+#     Letture:
+#       tutte e due uguali   il binario di oggi e Guardian false non
+#                            toccano ne' il ramo con parziale ne' quello
+#                            senza: la 2x2 d'archivio vale OGGI, e la
+#                            firma si legge sui suoi numeri
+#       (50,1,0) diversa     la lettura del codice (i due BE allo stesso
+#                            prezzo, guardia gBETk) e' SBAGLIATA: ci si
+#                            ferma e si torna al sorgente, nessun altro
+#                            confronto vale
+#       (0,1,0) diversa e    le modifiche del 21/09 (o il Guardian)
+#       (50,1,0) uguale      toccano il ramo SENZA parziale: q770be, R46a
+#                            e r47b NON sono piu' riferimenti sul binario
+#                            di oggi; va rimisurata anche (0 , 0) prima
+#                            di qualunque firma su ClosePct
+#     PRE-LETTURA D'ARCHIVIO coi criteri del par. 7 (aritmetica sui numeri
+#     di q770be, NON verdetto, NON promozione): PF OOS 1,45723 SOTTO M1
+#     (1,49709) e SOTTO A3 (1,54378); Profit OOS 21163,84 SOPRA la fascia
+#     di rumore di R47a (19922,69); R1 NON VIOLATO su n = 132 IS / 193 OOS
+#     posizioni (DD 4,9576 / 6,2584 < 9,00).
+#  9. CONTRO-ESEMPIO, quello che mi farebbe sbagliare. Il G0 del par. 8
+#     E' il contro-esempio: due celle con un numero atteso al centesimo
+#     scritto da un altro round. In piu':
+#     - InpBEatR arrivato all'EA si prova SOLO sulla gamba OOS: in IS
+#       (0 , 1,0) = (0 , 0) e' ATTESO (q770be), e NON e' un segno che il
+#       pin non sia arrivato. OOS: 21163,84 contro 23607,28 di (0 , 0).
+#     - Il log della cella (0 , 1,0) deve avere la riga "BE indipendente
+#       @ ... stop a pari" (nei .log di LOG_TESTER; se l'ottimizzatore non
+#       li scrive, "NON VERIFICABILE", non un guasto). La riga si scrive
+#       anche quando lo stop NON si sposta (r.2412-2418: TkMark e log sono
+#       fuori dal "mai arretrare"), quindi prova che il blocco 2b gira,
+#       non che abbia cambiato un esito.
+#     - Trades(0 , 1,0) deve restare 132 IS / 193 OOS (stesse entrate): se
+#       cambia, il ragionamento sulle entrate e' rotto e le expectancy per
+#       posizione non si calcolano.
+#     - Se (0 , 1,0) eguaglia (50 , 1,0) [dentro +-10,5% di R47a su PF e su
+#       Profit OOS], il vantaggio di ClosePct=0 misurato in R46a veniva dal
+#       BE che li' NON scattava, non dalla parziale. q770be dice gia' che
+#       NON e' cosi' sul Profit (21163,84 contro 18029,58, +17,4%): se il
+#       G0 regge, questo ramo e' chiuso dall'archivio.
 #  10. TEMPO: 4 passate a tick reali D30EUR M5 (2 celle x 2 finestre),
 #     ~65-85 s per un job di questa taglia (R270, 28/09, stessa
 #     macchina): dichiarati 6-10 minuti con avvio e compilazione, TETTO 17.
@@ -160,8 +202,9 @@
 #       expectancy sul DAX.
 #
 #   (50 , 1,0)  ClosePct=50  BEatR=1,0  >>> CELLA DI CONTROLLO <<<
-#       DEVE uscire IDENTICA alla cella (50 , 0) di R207a, su ogni
-#       colonna. I due breakeven puntano allo stesso prezzo e
+#       DEVE uscire IDENTICA alla cella (50 , 0) -- cioe' a R47a / R270c
+#       Pass 1 a 100000 (NON a R207a, che sta a 80000: PRE-LANCIO par. 4)
+#       -- su ogni colonna di risultato. I due breakeven puntano allo stesso prezzo e
 #       condividono la guardia !TkDone(ticket, gBETk) (r.2391 e
 #       r.2405): il blocco di TP1 gira prima nella stessa chiamata di
 #       ManageOneTicket, timbra, e il blocco 2b trova la guardia gia'
@@ -179,8 +222,12 @@
 #                                 E' il confronto che decide.
 #   (0 , 1,0) contro (0 , 0)    = IL PREZZO DEL BREAKEVEN, in euro.
 #                                 Se e' positivo, il breakeven vale, e
-#                                 sappiamo DI QUANTO -- numero che al
-#                                 22/09/2026 in repo non esiste.
+#                                 sappiamo DI QUANTO. (CORRETTO dal
+#                                 cancello il 29/09: qui c'era "numero
+#                                 che al 22/09/2026 in repo non esiste".
+#                                 FALSO: q770be del 13/09 lo ha, OOS
+#                                 21163,84 - 23607,28 = -2443,44, IS 0,00.
+#                                 R207b lo RIPRODUCE sul binario di oggi.)
 #   (0 , 0)   contro (50 , 0)   = QUANTO COSTA IL DIFETTO, cioe' cosa
 #                                 succederebbe a chi togliesse il
 #                                 parziale senza sapere che sta
@@ -195,10 +242,13 @@
 #     Trades = P in tutte e due. Se i due numeri differiscono, il
 #     ragionamento sul denominatore comune e' rotto e le expectancy
 #     per posizione NON si calcolano: si dichiara e ci si ferma.
-#     ATTENZIONE: e' l'UNICA colonna che deve coincidere. Profit, PF,
-#     RF e DD devono DIFFERIRE -- e' esattamente il breakeven che
-#     lavora. Se coincidessero anche quelli, InpBEatR non e' arrivato
-#     all'EA.
+#     ATTENZIONE: e' l'UNICA colonna che deve coincidere NELLA GAMBA OOS.
+#     Profit, PF, RF e DD OOS devono DIFFERIRE -- e' esattamente il
+#     breakeven che lavora. (CORRETTO dal cancello il 29/09: qui c'era
+#     scritto senza distinguere le gambe "se coincidessero anche quelli,
+#     InpBEatR non e' arrivato all'EA". Sulla gamba IS e' FALSO: q770be
+#     mostra (0 , 1,0) = (0 , 0) su ogni colonna IS. Il criterio vale
+#     solo sulla OOS; vedi PRE-LANCIO par. 8 e 9.)
 #   - Il log di questa cella deve contenere la riga "BE indipendente
 #     @ ... R=1.00: stop a pari" (EA r.2418). Su (50 , 1,0) NON deve
 #     comparire mai: la guardia gBETk e' gia' consumata dal BE di TP1.
