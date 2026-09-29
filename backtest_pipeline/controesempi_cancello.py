@@ -333,6 +333,12 @@ def main():
     casi.append(("RIGA classe 339: mshta/javascript: dentro Set-Content -Value di una 'raccolta'",
                  ["--riga", p], "BLOCCA"))
 
+    # --- classe 920: il file della riga VUOTO usciva verde (29/09/2026) -------
+    p = scrivi(tmp, "vuota_920.txt", "")
+    casi.append(("RIGA classe 920: file VUOTO (0 byte)", ["--riga", p], "BLOCCA"))
+    p = scrivi(tmp, "bianca_920.txt", "  \n\n")
+    casi.append(("RIGA classe 920: file di soli spazi/a capo", ["--riga", p], "BLOCCA"))
+
     # --- classi 536/537: la coppia MACCHINA + PERCORSO ----------------------
     for etichetta, testo, atteso in CASI_MACCHINA:
         q = scrivi(tmp, "mac_" + str(len(casi)) + ".txt", testo)

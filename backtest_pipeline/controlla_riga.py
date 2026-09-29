@@ -1752,6 +1752,17 @@ def esamina(tipo, percorso):
 
     if tipo == "riga":
         riga = testo.strip()
+        # CLASSE 920 (29/09/2026) -- IL FILE VUOTO USCIVA VERDE. Misurato su
+        # RIGA_LETTURA_PICCOLO_2026-09-29.txt, 0 byte (scrittura fallita a monte):
+        # "ASCII puro", "0 errori dal parser", "riga di SOLA LETTURA" ed EXIT 0.
+        # Ogni controllo era VERO sul niente: il niente e' ASCII, compila, non
+        # scrive. Un cancello che certifica un oggetto che non esiste e' la
+        # classe 175 alla radice. Il vuoto non si controlla: si BLOCCA.
+        if not riga:
+            blocca("920", "il file della riga e' VUOTO (" + str(len(dati)) + " byte): non c'e'"
+                   " niente da certificare. Ogni controllo qui sotto sarebbe VERO sul niente"
+                   " (ASCII, compila, sola lettura). Riscrivere il file e rilanciare")
+            return
         try:
             riga.encode("ascii")
             passa("la riga di lancio e' ASCII puro")
