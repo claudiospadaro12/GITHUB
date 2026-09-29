@@ -132,6 +132,12 @@ fanno insieme alla prossima consegna, quando Claudio e' al PC. Cautela per il le
 Pista nuova: EURUSD a H1 potrebbe rientrare nel costo con SLatr ~1,25 (derivazione su due ipotesi, NON misura). Collisione di nome: 'R271'
 e' anche l'etichetta di un round ipotetico nella risposta di Gemini 2207 (nessun file).
 
+**29/09 13:00 — CENSIMENTO ORB** (`report/CENSIMENTO_ORB_2026-09-29.md`, commit 4d3ed6fe; 26 righe su 19 EA, 12 contraddizioni fra referti, 12 gruppi di numeri
+ricontrollati ai CSV; NON passato dal cancello di giudizio: e' un censimento di sola lettura, nessun verdetto nuovo). Pacchetto per Gemini
+`docs/PER_GEMINI_ORB_2026-09-29.md` PRONTO; invio del 29/09 12:40 fallito con 503 (Gemini in sovraccarico, due modelli): RIPROVARE alla caccia
+delle 08:07 del 01/10 o quando Claudio lo chiede. Novita': la durata del range 35-45 min "8/8" e' vero SOLO sul DAX e in OOS (in IS il breakout DAX
+a 5-15 min e' positivo 7/8); Emiliano (15 min) e' contraddetto sul DAX OOS, non sul Dow retest OOS (PF 1,42, IS 0,82). Oro: ORB_GOLD_FIBONACCI mai misurato.
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
