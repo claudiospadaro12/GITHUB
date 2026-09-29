@@ -124,6 +124,14 @@ migliore resta `ClosePct=0` a BE spento (+0,094 PF OOS sul vivo, dentro il rumor
 75e4bca3, SHA 33CC7F2F...) e' pronta ma sarebbe una RIPRODUZIONE sul binario di oggi (6-10 min): NON mandata, opzionale; se si manda serve
 un secondo cancello (chi ha corretto non puo' essere chi controlla). Firma pendente su ClosePct=0: decisione di Claudio, con questo dato.
 
+**29/09 mezzogiorno — R271 (candidato A4 di Gemini) SCRITTO**: `prove/R271_slatr_EMA200_EURUSD_H4.txt` (commit 10b4b46b, SHA 5EFF62D2...):
+asse `InpSLatr` 1,0/1,25/1,5, EMA200 EURUSD H4 solo corto, OHLC M1, deposito 100000, IS 2017-23 / OOS 2024-26, 6 passate ~1,5 min. Stop gamba 2 =
+S x ATR (lineare): a 1,25 -> 29-30 pip (44-46x), a 1,5 -> 35-37 pip (53-55x) contro 26,54; a 1,0 = controllo ESCLUSO PER COSTO. Attesa contro di noi:
+H_NIENTE piu' probabile (asse quasi piatto +-0,06 PF). Passa i due controlli deterministici; **manca il cancello di giudizio (Opus) e la riga**: si
+fanno insieme alla prossima consegna, quando Claudio e' al PC. Cautela per il lettore: la banda vol2/vol1 di R265a non vale a S != 1,0.
+Pista nuova: EURUSD a H1 potrebbe rientrare nel costo con SLatr ~1,25 (derivazione su due ipotesi, NON misura). Collisione di nome: 'R271'
+e' anche l'etichetta di un round ipotetico nella risposta di Gemini 2207 (nessun file).
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
