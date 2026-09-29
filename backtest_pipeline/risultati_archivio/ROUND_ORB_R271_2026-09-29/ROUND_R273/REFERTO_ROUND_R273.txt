@@ -1,0 +1,53 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : ebfca0d870de8264316d2665fd6b736c92a473bc
+data            : 2026-09-29 17:30:22   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_DAX_Apertura_EU
+file prova      : R273_trailTF_DAX_770101.txt   (12021 byte, dal pin)
+etichetta       : R273
+simbolo         : D30EUR
+periodo         : M5
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_IS_R273.csv
+  righe : 7
+    Pass 0    Profit 3789.36      PF 1.12634    Equity DD % 5.4362     Trades 175
+    Pass 1    Profit -180.43      PF 0.99492    Equity DD % 7.9954     Trades 179
+    Pass 2    Profit 884.09       PF 1.02066    Equity DD % 9.576      Trades 188
+    Pass 3    Profit 4720.43      PF 1.11028    Equity DD % 9.0015     Trades 188
+    Pass 4    Profit 6754.47      PF 1.15367    Equity DD % 7.6169     Trades 198
+    Pass 5    Profit 8508.21      PF 1.18393    Equity DD % 7.7101     Trades 203
+    Pass 6    Profit 13538.25     PF 1.2588     Equity DD % 7.4169     Trades 201
+  ESITO : LETTO -- 7 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_OOS_R273.csv
+  righe : 7
+    Pass 0    Profit 18029.58     PF 1.39709    Equity DD % 7.2328     Trades 270
+    Pass 1    Profit 13334.63     PF 1.26487    Equity DD % 8.0348     Trades 277
+    Pass 2    Profit 19906.35     PF 1.37029    Equity DD % 7.1192     Trades 284
+    Pass 3    Profit 15294.01     PF 1.26311    Equity DD % 7.0734     Trades 287
+    Pass 4    Profit 17778.15     PF 1.29188    Equity DD % 9.614      Trades 291
+    Pass 5    Profit 8452.7       PF 1.12021    Equity DD % 10.6604    Trades 296
+    Pass 6    Profit 6223.6       PF 1.08456    Equity DD % 10.8826    Trades 297
+  ESITO : LETTO -- 7 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO

@@ -1,0 +1,261 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU          (sedia 770101 LONG, IN CAMPO su FTMO)
+#  R273 -- asse InpTrailTF da M5 a M30 sul LATO LONG (7 celle ENUM),
+#  con InpTrailMode = 1 (PREVBAR, il valore VIVO) e InpTrailStartR = 0
+#  fissati ai valori vivi. D30EUR M5 -- TICK REALI -- deposito 100000 --
+#  rischio 1,00 (di banco, NON 2,00: NESSUNA TAGLIA SI PROPONE).
+#  Scritto il 29/09/2026 sul modello di R270c. Criteri, attesa e
+#  contro-esempio congelati PRIMA dei numeri.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400, NON su nessun conto (regola 21/09).
+#  NOME E MAGIC (grep del 29/09 su disco e su tutti i 23 rami locali e
+#  remoti): "R273" compare SOLO in docs/gemini/RISPOSTA_GEMINI_2026-09-28_
+#  2207.md come etichetta che Gemini dava a un ALTRO round (G0 del
+#  binario 0953846c): non e' un file prova ne' una coda; la collisione
+#  di nome e' sciolta QUI e va segnalata. Magic 786326: ZERO occorrenze
+#  (R270 usa 786322-786325).
+# =====================================================================
+#
+#  COSA E' GIA' MISURATO E COSA NO (scavo fatto PRIMA, classe 917: si
+#  cerca la MANOPOLA col suo valore sui CSV, non il nome del round)
+#  ------------------------------------------------------------------
+#  Scansione del 29/09 di TUTTI i CSV di risultati_prove/ e
+#  risultati_archivio/ che portano la colonna InpTrailTF su DAX/Apertura:
+#  valori 5 (1778 righe), 1 (903), 2, 3, 4 (28 ciascuno) e 6 (16 righe,
+#  TUTTE nel file DAX_trailing.csv, motore BREAKOUT vecchio, InpEntryMode=0,
+#  due lati: NON e' la cella viva RETEST LONG). Quindi:
+#   - M1..M5 sulla cella RETEST LONG a InpTrailStartR = 0 sono GIA'
+#     MISURATI: griglia 5x5 dell'08/08 (risultati_archivio/Walkforward_
+#     Aperture/REFERTO_TRAILING_SOGLIA.md, OOS a soglia 0: M1 +1139,64,
+#     M2 +1865,70, M3 +1861,04, M4 +2155,58, M5 +1810,72; PF OOS 1,58 /
+#     1,69 / 1,58 / 1,57 / 1,42). Quella meta' NON SI RIFA: qui M1-M4 non
+#     ci sono.
+#   - SOPRA M5 sulla cella viva NON ESISTE NESSUN NUMERO. R128a (stesso
+#     asse M5-M30, 7 celle, deposito 10000, magic 779510) e' SCRITTO
+#     dall'11/09 e MAI LANCIATO (zero CSV r128 in repo, ricontato il
+#     29/09; report/ALZARE_IL_PF_2026-09-22.md B7). R273 e' la STESSA
+#     manopola sulla cella di contratto R246e a deposito 100000, con G0
+#     AL CENTESIMO contro R270c (par. G0). R128a resta com'e' (non si
+#     tocca): se R273 gira, R128a diventa ridondante.
+#   - Il censimento ORB del 29/09 (M2 di report/CENSIMENTO_ORB_2026-09-29.md
+#     par. 6) la nomina "M5 -> M15/M30, 4 passate, PF OOS ~1,40 +- 0,15,
+#     DD ~7%". Qui le celle sono 7 e non 3 perche' un asse ENUM non si
+#     salta: il driver enumera i MEMBRI di ENUM_TIMEFRAMES fra 5 e 30
+#     (M5, M6, M10, M12, M15, M20, M30; controlla_prova: "celle = membri
+#     fra 5 e 30 = 7", classe 287). Costo: 14 passate, non 6, ~2,5 min.
+#
+#  PERCHE' QUESTA MANOPOLA
+#  ------------------------------------------------------------------
+#  Nel ramo vivo InpTrailMode=1 (ABTG_TRAIL_PREVBAR) il trailing porta lo
+#  stop sul minimo/massimo della candela PRECEDENTE del TF scelto
+#  (ABTG_DAX_Apertura_EU.mq5 r.2464 iLow / r.2477 iHigh su InpTrailTF).
+#  Salire di TF = trailing PIU' LARGO. InpTrailTF compare solo alle r.336
+#  (input), r.548 (log) e r.2464/r.2477 (uso): ricontato il 29/09.
+#
+#  S1B INVARIANTE DEL CAMPIONE (stessa dizione di R270c, gia' corretta
+#  dal cancello il 28/09, classi 455 e 226)
+#  ------------------------------------------------------------------
+#  InpTrailTF e' letto SOLO in gestione di posizioni gia' aperte: non
+#  tocca l'ingresso ne' il "un ciclo al giorno". Le POSIZIONI sono le
+#  stesse in tutte le 7 celle (132 IS / 193 OOS del controllo). PER CELLA
+#  NON SI POSSONO CONTARE: il CSV porta Trades = DEAL (175 IS / 270 OOS
+#  sul controllo), e il per-trade e' UNO SOLO (magic pinnato, ogni passata
+#  sovrascrive: sopravvive l'ULTIMA = OOS della cella M30). Quindi:
+#   (a) le posizioni si contano SOLO sulla passata che il per-trade ha
+#       conservato (identificata con somma net_profit contro Profit, k
+#       atteso 0 su D30EUR, classi 630/844/855, tutte le righe che tornano,
+#       stretta prima); se hanno un numero diverso da 193, il file e' NULLO;
+#   (b) Trades [deal] NON e' un invariante (la parziale scatta o no a
+#       seconda dell'uscita): se cambia NON annulla il file, si scrive
+#       [deal] accanto al PF, mai come n;
+#   (c) sulle celle non identificate n [posizioni] e' "per costruzione,
+#       NON MISURATO".
+#
+#  FINESTRA E DEPOSITO -- come R270c (= R246e)
+#  @DAQUANDO 2024.09.26  @FINOA 2026.06.30  @FRAZIONEIS 0.40  Deposito
+#  100000 in riga di lancio. Nessun G1 (un solo asse ammesso; determinismo
+#  gia' stabilito da R246e/R208b/R270c su questa esatta geometria).
+#
+#  G0 -- LA CELLA InpTrailTF = 5 (il controllo), AL CENTESIMO
+#  ------------------------------------------------------------------
+#  Le celle M5 di R273 e la cella InpTrailMode=1 di R270c hanno gli
+#  stessi 90 input (diff eseguito il 29/09: cambiano SOLO InpMagic e il
+#  ruolo di asse fra InpTrailMode e InpTrailTF). Il numero c'e' GIA' nel
+#  CSV d'archivio (classe 917: non e' una fascia):
+#  risultati_archivio/ROUND_R270_USCITA_DAX_2026-09-28/ROUND_R270c/
+#  ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_R270c.csv, riga InpTrailMode=1:
+#    IS  Trades 175 | Profit 3789,36 | PF 1,12634 | RF 0,64484 | DD 5,4362
+#    OOS Trades 270 | Profit 18029,58 | PF 1,39709 | RF 2,02903 | DD 7,2328
+#  (e = R47a/R208b: 132/193 posizioni). Tolleranza: ZERO su Trades,
+#  quarta cifra su PF e DD, Profit al centesimo. Se non torna, il binario
+#  di oggi non e' quello di R270c: si scrive in cima al referto e le
+#  altre sei celle NON si leggono.
+#
+#  CRITERI CONGELATI ORA (formato R270c, riscritti per questo asse)
+#  ------------------------------------------------------------------
+#  M1 (merito): PF OOS della cella >= 1,39709 + 0,10 = 1,49709, con n
+#      [posizioni] >= 150 (193 bloccato per S1B). Il vicino della cella
+#      conta se e' contiguo (A1).
+#  M2 (MFE): [NON MISURABILE] (export senza prezzo d'ingresso ne' traccia
+#      intra-trade), come R270b/c.
+#  R1 (rischio, classe 804): ogni cella con Equity DD % IS o OOS > 9,00%
+#      (a rischio 1%) e' VIOLATA, a qualunque n; le celle sotto si scrivono
+#      "R1 NON VIOLATO su n = X posizioni", mai "rischio passato".
+#  DD_FISSO: una cella con PF OOS > controllo E (DD_c/7,2328 - 1) >
+#      (PF_c/1,39709 - 1) e' "PF SALE, DD SALE DI PIU'": non conta.
+#  X1 (IS-OOS, R24 ha misurato l'ottavo ribaltamento IS->OOS su questo
+#      asse): una cella che vince in OOS ma ha PF IS < 1,00 (il controllo
+#      IS e' 1,12634) e' "RIBALTO IS/OOS, non selezione": NON conta per A1.
+#  A1 (altopiano): serve un tratto CONTIGUO sull'asse ordinato (M5, M6,
+#      M10, M12, M15, M20, M30) di >= 3 celle che passano M1, X1, R1 e
+#      DD_FISSO; CENTRO del tratto, MAI il picco. Con 7 celle, 2 vicine
+#      sono una coincidenza.
+#  A3: banda di rumore 10,5% relativo sul controllo (1,39709 -> soglia
+#      1,54438; A9 di R208b/R270b, stessa sedia, riuso deliberato).
+#  A5: se nessuna cella supera il controllo di A3 -> "manopola INERTE,
+#      MISURATA: il default va bene", con quelle parole.
+#  A6: "esiste una configurazione migliore" solo se A1 passa E il centro
+#      e' DIVERSO da M5 E il vantaggio supera A3.
+#  A10: nessuna promozione, nessuna taglia, nessuna sedia toccata.
+#  FRONTIERA DEL COSTO 40x: [NON CALCOLABILE PRIMA]: la distanza del
+#      trailing PREVBAR e' l'ampiezza di una candela, non un parametro;
+#      la mediana della candela M15/M30 del DAX alle 8 e' [NON MISURATA]
+#      in repo. Se una cella supera A1, quella misura va fatta PRIMA di
+#      ogni proposta (come R128a).
+#  Emendamento della finestra: IS 9,4 mesi (regime misto), OOS 12,7 mesi
+#      (un regime rialzista); regola C non soddisfatta (storico tick BCM
+#      insufficiente), dichiarato e non risolto qui.
+#
+#  ATTESA, SCRITTA PRIMA DEI NUMERI (e va scritta anche se sbaglia)
+#  ------------------------------------------------------------------
+#  NON MI ASPETTO UN MIGLIORAMENTO. Da M2 a M5 il PF OOS gia' SCENDE
+#  (1,691 -> 1,415, 08/08) mentre il TF sale: la tendenza sul lato
+#  misurato e' "piu' largo = peggio". Previsione: M6-M12 PF OOS
+#  1,25-1,45; M15-M30 PF OOS 1,10-1,40, DD OOS 7-13% (un trailing largo
+#  restituisce di piu' prima di chiudere), n [deal] OOS in salita da 270
+#  verso 280-340 (piu' trade arrivano a 1R). Esito piu' probabile: A5,
+#  "il default va bene". La previsione SCOMODA, dichiarata: la superficie
+#  sul bordo M4-M5 si stava ancora muovendo e M5 e' la piu' bassa delle
+#  cinque; M6-M10 potrebbero salire. E' quello che la griglia deve dire.
+#  CONTRO-ESEMPIO (classe 178, quale numero produce l'ALTRA spiegazione):
+#  un PF che sale col TF si legge (i) SELEZIONE: il trailing largo lascia
+#  correre i vincenti (Profit per posizione su, DD invariato o giu') oppure
+#  (ii) MENO USCITE, non piu' edge: meno chiusure per trailing = piu'
+#  posizioni che finiscono a fine sessione, DD su. Il numero che le separa:
+#  la (i) porta Profit e RF (Recovery Factor) SU insieme; la (ii) porta
+#  PF su con DD su piu' del PF (DD_FISSO) o con Profit giu'. Se una cella
+#  vince solo in una delle due finestre, e' X1, non selezione.
+#  MFE non misurabile: le uscite realizzate sono un limite inferiore.
+#
+#  OROLOGIO (report/OROLOGIO_BCM_2026-09-24.md): BCM sugli indici e'
+#  UTC+1 FISSO; InpSessionHour=8 nei mesi d'INVERNO (2024.10.27 ->
+#  2025.03.30 e 2025.10.26 -> 2026.03.29) arma UN'ORA PRIMA della cash.
+#  La finestra MESCOLA le due tempistiche, come il contratto R47a/R246e:
+#  dichiarato, non separato qui.
+#
+#  BUCHI DICHIARATI
+#  - MFE vera: NON MISURABILE. Prova di regime: assente.
+#  - M1-M4 non rimisurati (gia' in R24, 08/08, binario e finestra diversi).
+#  - Nessun G1 (gemelle): un solo asse ammesso dal cancello.
+#  - Costo 40x su PREVBAR M15/M30: non calcolabile prima (vedi sopra).
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailMode=1
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpTrailStartR=0
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpSpaceMode=0
+InpSpaceTF=16388
+InpSpaceMinR=0.0
+InpSpaceMaxR=0.0
+InpSpaceEma1=14
+InpSpaceEma2=50
+InpSpaceEma3=100
+InpSpaceEma4=200
+InpSpaceUseST=false
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=786326
+#
+#
+# --- L'UNICO ASSE (ENUM_TIMEFRAMES: 7 membri fra 5 e 30, passo ignorato)
+InpTrailTF=5||5||1||30||Y
+# ======================================================================
