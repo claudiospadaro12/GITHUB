@@ -7,6 +7,14 @@
 
 ---
 
+## 🗓️ 29/09 sera — R246 INVERNO (casella d+1) LETTO, PASS strato 2 dopo un FAIL
+- Zip `ROUND_R246_INVERNO_2026-09-29` archiviato (`risultati_archivio/`), giudizio con `backtest_pipeline/r246_giudizio_d1.py`, referto `report/LETTURA_R246_INVERNO_2026-09-29.md` (corretto dal cancello: classe 919).
+- G1/G2 PASS su 6 file; S1 DAX/MaxMin VERDI, **Dow S1 ROSSO** (1 uscita 25/05/2026 23:05, Memorial Day). **Firma F1 di Claudio: sblocca SOLO S1** (`report/FIRME_2026-09-29.md`); il Dow resta SOSPESO per il G1 aperto di R246a/c (strade a/b/c in `REFERTO_R246` par. 1.5).
+- Numeri d'inverno, arma alla cash (d+1) contro 1h prima (d0): DAX PF 1,18 contro 1,39 (freq 0,63 contro 0,76/g; OROLOGIO); Dow PF 0,92 contro 1,49 su 40 pos (INTERAZIONE, merito sospeso); MaxMin PF 1,00 contro 2,56 su 17 pos. "Armare prima rende di piu'" e' pulito solo sul DAX e per i due inverni misurati (d'estate al contrario: 0,77 contro 1,11).
+- 🔴 Errore mio: la firma F1 e' partita prima del PASS; riga "Effetto" corretta. Non si ripete.
+- **Aperto (Claudio)**: strada a/b/c per il G1 del Dow; orologio d'inverno entro 25/10 (proposta da riscrivere coi numeri corretti, nessuna sedia toccata).
+- **Prossimo**: round di sabato (altri simboli DAX F40EUR/E50EUR/E35EUR + DAX short BREAKOUT/RETEST + EURUSD long H1), un cancello per riga; Gemini: rimandare `docs/PER_GEMINI_ORB_2026-09-29.md`; anatomia: CSV DAX corretto.
+
 ## 🗓️ 28/09 notte — LA MACCHINA PER LEGGERE GLI ZIP E' PRONTA (challenge FTMO viva dal 22/09)
 
 🔴 **I blocchi di codice PowerShell dentro questo file sono STORIA, non righe da incollare**: il cancello
