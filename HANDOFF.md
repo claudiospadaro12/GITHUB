@@ -117,6 +117,13 @@ la riformulazione A7 (filtro ATR H1 sul Dow short: e' un meccanismo o una grigli
 EMA200 EURUSD (citata "ABTG_Guardian.mq5 riga 105": file sbagliato), A11 timestop su MaxMinNotte. Poi: riga R207b
 (`righe/RIGA_R207B_DA_MANDARE.md`, pin da rifare) dai cancelli, e proposta a Claudio dell'ordine dei round.
 
+**29/09 mattina — R207b: LA RISPOSTA ESISTEVA GIA' IN ARCHIVIO (q770be, 13/09)**, trovata preparando la riga (classe 917). Cella `ClosePct=0`
+con pareggio indipendente a 1R: OOS 193 pos PF **1,45723** DD 6,2584 (IS identica a BE spento: 132 pos PF 1,18323 DD 4,9576); con BE spento
+PF 1,49140 DD 6,2719; con BE a 0,5R PF 1,44637; il vivo (parziale 50%) PF 1,39709 DD 7,2328. **Il pareggio indipendente NON aiuta: la cella
+migliore resta `ClosePct=0` a BE spento (+0,094 PF OOS sul vivo, dentro il rumore A3 0,147).** La riga `righe/RIGA_ROUND_R207B_DAX.txt` (pin
+75e4bca3, SHA 33CC7F2F...) e' pronta ma sarebbe una RIPRODUZIONE sul binario di oggi (6-10 min): NON mandata, opzionale; se si manda serve
+un secondo cancello (chi ha corretto non puo' essere chi controlla). Firma pendente su ClosePct=0: decisione di Claudio, con questo dato.
+
 **Cosa aspetta Claudio** (solo lui): 1 o 2 sulla `770212`; lo zip C (riga 4 mandata il 28/09 ~15:00), poi C2, poi R270 (una riga alla volta, MT5
 chiuso in mezzo); firma taglia+sedia oro long dopo R268 (catena in BOZZA: `report/SEDIA_ORO_LONG_FTMO_BOZZA_2026-09-27.md`);
 orologio delle sedie a ora fissa entro il 25/10 (preset oro scade il 24/10).
