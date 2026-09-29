@@ -13,7 +13,8 @@
 - Numeri d'inverno, arma alla cash (d+1) contro 1h prima (d0): DAX PF 1,18 contro 1,39 (freq 0,63 contro 0,76/g; OROLOGIO); Dow PF 0,92 contro 1,49 su 40 pos (INTERAZIONE, merito sospeso); MaxMin PF 1,00 contro 2,56 su 17 pos. "Armare prima rende di piu'" e' pulito solo sul DAX e per i due inverni misurati (d'estate al contrario: 0,77 contro 1,11).
 - 🔴 Errore mio: la firma F1 e' partita prima del PASS; riga "Effetto" corretta. Non si ripete.
 - **Aperto (Claudio)**: strada a/b/c per il G1 del Dow; orologio d'inverno entro 25/10 (proposta da riscrivere coi numeri corretti, nessuna sedia toccata).
-- **Prossimo**: round di sabato (altri simboli DAX F40EUR/E50EUR/E35EUR + DAX short BREAKOUT/RETEST + EURUSD long H1), un cancello per riga; Gemini: rimandare `docs/PER_GEMINI_ORB_2026-09-29.md`; anatomia: CSV DAX corretto.
+- **DECISIONE CLAUDIO 29/09 sera ("A")**: round di sabato **NON si prepara**. Motivo misurato: CAC con motore DAX gia' girato (R138a PF OOS 0,77), MaxMinNotte gemelli indici PF max 0,999/0,840/0,672, E35EUR/E50EUR screening negativo, DAX short provato piu' volte (R107, R118b/c, R43d, R51). Si spendono i crediti solo su cancello + Gemini fino a domenica 08:00.
+- **Gemini**: `PER_GEMINI_ORB_2026-09-29.md` rimandato 29/09 sera: ancora HTTP 503 (sovraccarico). Da riprovare domani mattina (una sola volta, poi cancello Opus sulla risposta).
 
 ## 🗓️ 28/09 notte — LA MACCHINA PER LEGGERE GLI ZIP E' PRONTA (challenge FTMO viva dal 22/09)
 
