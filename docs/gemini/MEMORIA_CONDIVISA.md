@@ -5,7 +5,7 @@ corrispondenza automatica usa l'API, che non ha memoria: la memoria gliela diamo
 Regola: qui stanno SOLO fatti misurati e decisioni prese, con la fonte nel repo. Niente ipotesi non etichettate.
 
 ## 1. Chi siamo e cosa vogliamo (28/09/2026)
-- Progetto ABTG: EA MQL5 per passare le challenge prop. Challenge FTMO 2-Step 80k `541452707` viva dal 22/09; sette sedie a 2,00%.
+- Progetto ABTG: EA MQL5 per passare le challenge prop. Challenge FTMO 2-Step da 80k viva dal 22/09 (numero di conto omesso di proposito); sette sedie in campo.
 - Obiettivo dichiarato da Claudio: PIU' SEDIE SCHIERABILI. Metodo: imbuto (file prova -> cancello -> riga -> referto -> firma).
 - Ruoli: Claude = sviluppatore + cancello (misura, verifica, propone); Gemini = Agente 1-4 (legge, audita, propone, contro-esempio);
   Claudio = firma taglie/rischio/conti/spese. Nessuna proposta si esegue senza cancello.
@@ -42,3 +42,18 @@ Il contenuto tecnico era utile: la manopola InpSLatr e' viva e mai messa ad asse
   (`docs/gemini/RISPOSTA_GEMINI_2026-09-28_2207.md`), da verificare al cancello il 29/09 mattina.
 - 28/09: consegna 1 (4 consigli: 3 gia' noti, 1 candidato); consegna 2 (guida al PF: 7/9 gia' nel repo); consegna 3 (proposte su
   R270: formato giusto, 3 correzioni di metodo). Risposte in `docs/RISPOSTA_A_GEMINI_*.md`.
+
+## 6. COSA FACCIAMO ADESSO (aggiornata dalla sessione a ogni scambio; Gemini la legge per sapere dove aiutare)
+- **Regime della settimana (29/09-04/10)**: risparmio di crediti. Turno ogni 6 ore, caccia ogni 2 giorni (1 cacciatore + Gemini), misure a costo zero
+  prima di quelle a macchina. Il cancello (verifica) non si declassa.
+- **In coda, in ordine**: (1) R207b: la cella pulita del long DAX (senza parziale ma con pareggio a 1R), ~17 min di macchina: e' la misura che decide
+  sulla cella `ClosePct=0`; (2) A4: asse `InpSLatr` (1,0/1,25/1,5) su EMA200 EURUSD H4, motore non ancora misurato; (3) G0 dell'EMA200 col binario
+  del genetico (separa binario/storico/specifiche); (4) short DAX: 3 celle BREAKOUT vs RETEST (S0/S1/S2, ~3 min); (5) tokenizer PowerShell nel cancello.
+- **Dove ci serve Gemini**: (a) errori di configurazione nei parametri dei motori fuori gioco (dossier `PER_GEMINI_EA_FUORI_GIOCO_2026-09-29.md`);
+  (b) UN meccanismo alternativo per motore con attesa+contro-esempio; (c) rilettura critica dei nostri referti ("dove il metodo puo' ingannarci");
+  (d) idee di uscita/gestione per i motori vivi (long DAX: cella senza parziale; short: nessuna tesi).
+- **Vincoli operativi che Gemini deve conoscere**: challenge in corso, campo NON toccabile da proposte; storico indici BCM dal 2024.09.26; ogni round gira sul
+  PC di backtest (~2 min per file a tick); una riga di lancio la produce solo la sessione dopo il cancello.
+- **Ultimi esiti (29/09)**: R270 letto (long: il vivo e' il centro, ClosePct=0 non separabile; short: bocciato), C2 oro EMA200 H4: NO per rischio,
+  R255 short Dow: 770212 bocciata (stH8/stH12 indizi), misure a costo zero DAX: NON SEPARABILE / NON MISURABILE. Risposta FTMO: conto Standard,
+  hedging nello stesso conto ok, fra conti no; da funded serve filtro news 2+2 min e chiusura weekend.

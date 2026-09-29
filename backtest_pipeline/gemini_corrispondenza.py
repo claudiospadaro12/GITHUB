@@ -145,10 +145,14 @@ def autotest():
     r = costruisci_richiesta([COMANDO], "d")
     testi = [x["text"] for x in r["contents"][0]["parts"]]
     assert r["system_instruction"]["parts"][0]["text"] == s and any("FILE: " + COMANDO in t for t in testi)
+    # (7) nessun numero di conto nella memoria che esce
+    if os.path.exists(MEMORIA):
+        m = open(MEMORIA, encoding="utf-8").read()
+        assert not re.search(r"\b(541452707|10105439|50503392|50504263|50504400|50503635)\b", m), "numero di conto nella memoria condivisa"
     # (6) la memoria condivisa va SEMPRE in testa, prima di ogni documento
     if os.path.exists(MEMORIA):
         assert "FILE: " + MEMORIA in testi[1], "la memoria condivisa deve essere il primo documento"
-    print("AUTOTEST OK (6 controlli: lista nera, fuori repo, istruzione, chiave assente, richiesta)")
+    print("AUTOTEST OK (7 controlli: lista nera, fuori repo, istruzione, chiave assente, richiesta)")
 
 def main():
     ap = argparse.ArgumentParser(description="corrispondenza automatica con Gemini (documenti .md del repo -> risposta in docs/gemini/)")
