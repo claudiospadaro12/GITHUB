@@ -1,0 +1,190 @@
+# =====================================================================
+#  EA: ABTG_ORB_Fibo
+#  R272 -- ORB_Fibo NASUSD M5 A TICK REALI, LA CELLA GIA' MISURATA A OHLC
+#  (nessun input cambia: cambia SOLO il modello, 1 -> 4). L'asse e' il
+#  magic (2 celle gemelle, G1). Deposito 10000 (quello della cella
+#  d'archivio), rischio 1,00 nominale: NESSUNA TAGLIA SI PROPONE.
+#  Scritto il 29/09/2026. Attesa, soglie e contro-esempio congelati
+#  PRIMA dei numeri. Fonte della lacuna: report/CENSIMENTO_ORB_2026-09-29.md
+#  riga 16 e lacuna M1 ("ORB_Fibo a tick: 2 passate, zero oggi").
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ: NON sul VPS, NON su
+#  50504400, NON su nessun conto (regola 21/09). QUESTO FILE NON CONTIENE
+#  E NON AUTORIZZA NESSUNA RIGA DI LANCIO.
+#  NOME E MAGIC (grep del 29/09 su disco e su tutti i 23 rami): "R272"
+#  compare SOLO in docs/gemini/RISPOSTA_GEMINI_2026-09-28_2207.md come
+#  etichetta che Gemini dava a un ALTRO round (filtro ATR D1 su EMA200,
+#  non nato, non e' un file): collisione sciolta QUI, da segnalare.
+#  Magic 798601/798651: ZERO occorrenze.
+# =====================================================================
+#
+#  LA CELLA E COSA E' GIA' MISURATO (classe 917: si cerca il NUMERO, non
+#  il nome del round)
+#  ------------------------------------------------------------------
+#  CSV d'archivio, 2 righe ciascuno (asse = InpMagic 770602/770603, identiche):
+#    risultati_prove/ABTG_ORB_Fibo/ABTG_ORB_Fibo_NASUSD_IS_ohlc.csv
+#      Trades 91 | Profit -156,61 | PF 0,83507 | DD 3,0160 | RF -0,51183
+#    risultati_prove/ABTG_ORB_Fibo/ABTG_ORB_Fibo_NASUSD_OOS_ohlc.csv
+#      Trades 75 | Profit -27,92 | PF 0,96816 | DD 3,1016 | RF -0,08835
+#  Le 41 colonne Inp di quei CSV sono state riportate qui RIGA PER RIGA
+#  dal CSV OOS (script del 29/09; i valori IS e OOS sono uguali, salvo il
+#  magic); per ogni colonna il DEFAULT DEL SORGENTE DI OGGI (HEAD, SHA256
+#  5c7536ce...f8ab) e' uguale al valore del CSV: quella corsa d'agosto
+#  (che precede l'input InpUsaGuardian) e' cioe' anche la cella di default
+#  di oggi. ORB_Fibo non ha input di timeframe di grafico: InpExecTF=5
+#  (M5) e InpORMinutes=30 valgono cosi' in TUTTE le passate d'archivio.
+#  InpUsaGuardian=false e' pinnato (unico input nuovo): con true il
+#  Guardian nel tester e' un no-op fail-open (mq5 r.26-36), false e' il
+#  comportamento identico alla corsa d'agosto senza dipendere da esso.
+#  Deposito: il CSV non lo porta; il .ini della corsa (ini/ABTG_ORB_Fibo.ini)
+#  dice 10000 e il Recovery Factor lo conferma (-156,61 / -0,51183 = 306
+#  = 3,016% di ~10.150): la cella e' a 10000 e qui si resta a 10000. NON
+#  E' UNA TAGLIA; la conseguenza (lotto quantizzato, rischio realizzato
+#  [NON MISURATO], mq5 r.414-419) e' nei buchi.
+#  Finestra: 2024.09.26 -> 2026.06.30 (censimento riga O2); il taglio
+#  IS/OOS della corsa d'agosto NON E' VERIFICATO dai file. Qui
+#  @FRAZIONEIS 0.40 (IS 2024.09.26-2025.06.09, OOS 2025.06.10-2026.06.30,
+#  come R270c). Conseguenza dichiarata: il confronto con l'OHLC NON e'
+#  esatto sulla finestra e NON e' un G0: cambiano modello, motore
+#  compilato e forse taglio. Le ancore OHLC sono un ORDINE DI GRANDEZZA.
+#
+#  L'ASSE (dichiarato): il censimento (lacuna M1) NON indica nessuna
+#  variante per questa misura: la riga e' "cella viva, IS+OOS (+ gemelle
+#  G1)". L'asse e' quindi il MODELLO, cioe' UNA sola cella a tick con
+#  due finestre; l'input a due valori richiesto dal cancello e' InpMagic
+#  (798601 / 798651, passo 50, stesso schema di R265a): asse TECNICO, due
+#  passate per finestra che DEVONO essere identiche al centesimo = G1
+#  (determinismo del tick). Non e' una griglia. 4 passate in tutto.
+#  TF (InpExecTF), OR (InpORMinutes), simboli gemelli e gestione
+#  dell'uscita NON sono in questo file: restano APERTI (par. buchi).
+#
+#  PER-TRADE: ABTG_ORB_Fibo.mq5 NON ha ExportTrades (grep del 29/09: zero
+#  occorrenze; ha solo l'OptFrame): il per-trade e' ASSENTE PER
+#  COSTRUZIONE. Niente somma-net contro Profit, niente L0 sul lato, niente
+#  n in posizioni: Trades e' in DEAL e il rapporto deal/posizione e' [NON
+#  MISURATO] su questo EA. Il controllo per-trade e' tolto da questo job.
+#
+#  CRITERI CONGELATI ORA
+#  ------------------------------------------------------------------
+#  S0 CATENA: CSV _IS e _OOS con 2 righe, Trades > 0; P0 pin dal CSV
+#     (ogni colonna Inp uguale al file, bool 0/1, asse InpMagic
+#     798601/798651); G1: le due righe di ogni CSV IDENTICHE su Profit,
+#     PF, DD e Trades al centesimo, altrimenti il file e' NULLO.
+#  S1 CAMPIONE: n OOS [deal] < 150 e' atteso (OHLC 75 < 95 di R125-G4 e
+#     < 150 dell'Emendamento A): MERITO SOSPESO A PRESCINDERE, dichiarato
+#     ORA. Il RISCHIO si legge lo stesso (Emendamento B).
+#  R1 (rischio, classe 804): DD OOS o IS > 10,00% a rischio 1% nominale
+#     e' VIOLATO a qualunque n (soglia della testa di ABTG_ORB_Fibo.txt:
+#     "DD OOS < 10% all'1%"); sotto: "R1 NON VIOLATO su n = X [deal]",
+#     mai "rischio passato". Il DD e' quello del CSV, NON confrontabile
+#     con il 3,0-3,1% OHLC se il lotto e' a pavimento (vedi buchi).
+#  VERDETTI, PER NOME (classe 180), in ordine di lettura: NULLO (S0/G1) |
+#     NEGATIVO A TICK, MERITO SOSPESO (PF OOS < 1,00) | INTERMEDIO,
+#     MERITO SOSPESO (PF OOS 1,00-1,09) | INDIZIO (PF OOS >= 1,10 con
+#     n < 150: NON promuove, va a una misura in piu') | INSOSTENIBILE
+#     (R1 violato). Nessun altro verdetto; nessuna promozione.
+#
+#  ATTESA, SCRITTA PRIMA DEI NUMERI (e va scritta anche se sbaglia)
+#  ------------------------------------------------------------------
+#  Dal censimento M1: PF OOS a tick <= 0,97 (l'OHLC dava 0,968), n OOS
+#  [deal] 55-95, PF IS <= 0,84 (banda 0,65-0,90), n IS [deal] 65-115,
+#  DD 2-6% (non confrontabile). Ragione: un LIMIT nella Golden Zone
+#  riempito su barra OHLC e' riempimento IDEALE; a tick il riempimento e'
+#  quello vero e il PF non puo' che scendere o restare uguale. Il
+#  fattore OHLC -> tick misurato sul Nasdaq Live5m e' 2,25 (censimento
+#  M16): e' su un'ALTRA famiglia, non si trasferisce come numero.
+#  PREVISIONE PIU' PROBABILE: NEGATIVO A TICK, MERITO SOSPESO.
+#  CONTRO-ESEMPIO (classe 178, quale numero produce l'ALTRA spiegazione):
+#  la lettura "il motore ha un edge che l'OHLC nascondeva" produrrebbe PF
+#  OOS >= 1,10 E PF IS >= 1,00 (entrambe le finestre sopra 1) a tick; la
+#  lettura "rumore su 75-90 deal" produrrebbe un PF che cambia segno fra
+#  IS e OOS (come 0,835 -> 0,968 gia' in OHLC). Se esce >= 1,10 con
+#  n < 150 e' un INDIZIO e basta, e si scrive quale delle due finestre
+#  lo porta. Se il PF OOS tick e' PIU' ALTO dell'OHLC (0,968) la
+#  ragione da cercare e' il riempimento, non l'edge.
+#
+#  CERTIFICATO DI MORTE (09/09) -- COSA CHIUDE E COSA NO
+#  Punti: (1) PF a tick: QUESTO FILE; (2) n e DD: QUESTO FILE; (3)
+#  gestione dell'uscita ad asse (InpExitOnEmaClose, InpUseTrailEMA,
+#  InpTP1Pct, mai messe ad asse; prove/R15_ORB_gestione_DD.txt la
+#  annuncia e non e' mai girata): APERTO; (4) simboli gemelli: APERTO
+#  (solo NASUSD); (5) TF (InpExecTF, InpORMinutes mai mossi): APERTO.
+#  Quindi anche un esito NEGATIVO qui NON e' "MORTO": e' "NEGATIVO A TICK
+#  sulla cella di default, punti 3-5 aperti". Il certificato lo firma
+#  Claudio. Regola del 19/08: NON si allarga sui parametri di ingresso
+#  di un motore senza edge; si allarga su meccanismo, simboli, TF, uscita.
+#
+#  OROLOGIO (report/OROLOGIO_BCM_2026-09-24.md): BCM sugli indici e'
+#  UTC+1 FISSO; InpORStartHour=14 / InpORStartMin=30 e' l'apertura cash
+#  USA d'ESTATE; d'inverno (2024.10.27 -> 2025.03.30 e 2025.10.26 ->
+#  2026.03.29, e con le date USA diverse a marzo/novembre) l'OR e'
+#  UN'ORA PRIMA della cash. La finestra MESCOLA le due tempistiche:
+#  dichiarato, non separato qui.
+#
+#  BUCHI DICHIARATI
+#  - Per-trade assente (nessun ExportTrades): n in posizioni, lato e
+#    somma-net NON verificabili.
+#  - Rischio realizzato [NON MISURATO]: LotByRisk quantizza il lotto e
+#    applica il pavimento volume_min (mq5 r.414-419); a 10000 e con lo
+#    stop di un OR di 30 minuti il lotto puo' stare sul pavimento, e
+#    allora il DD non e' "a rischio 1%". Il PF non ne risente.
+#  - Nessun G0 contro l'OHLC (modello, motore e taglio diversi).
+#  - Storico tick NASUSD dalla sonda del 17/08: 2024.09.26 (riga ORB_Fibo
+#    NASUSD di risultati_archivio/REFERTO_SONDA_STORICO_17-08.md): due
+#    finestre reali ma un solo regime per parte, ~21 mesi (Emendamento A:
+#    non soddisfatto, n < 150).
+#  - Spread e commissioni del banco: a tick reali lo spread viaggia coi
+#    tick; le commissioni NASUSD del banco non sono pinnate da questa
+#    corsia (classe 394): dichiarato, non aggirato.
+#  - Gestione dell'uscita, TF, simboli gemelli: MAI misurati (par. sopra).
+# =====================================================================
+@SIMBOLO    NASUSD
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpORStartHour=14
+InpORStartMin=30
+InpORMinutes=30
+InpBreakCutoffMin=120
+InpEndHour=22
+InpEndMin=59
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpExecTF=5
+InpUseVolume=true
+InpVolMult=1.5
+InpVolAvgBars=20
+InpBodyMinRatio=0.5
+InpFibGZ1=0.5
+InpFibGZ2=0.618
+InpFibSL=0.786
+InpUseEMAFilter=true
+InpEmaFast=9
+InpEmaSlow=21
+InpUseMACD=false
+InpAllowLong=true
+InpAllowShort=true
+InpRiskPercent=1
+InpMinRR=0
+InpSLBufferPts=0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailEMA=true
+InpExitOnEmaClose=true
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpComment=ORB FIBO
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'UNICO ASSE: il magic (asse TECNICO, 2 celle identiche = G1 gemelle)
+InpMagic=798601||798601||50||798651||Y
+# ======================================================================
