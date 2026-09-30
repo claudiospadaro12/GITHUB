@@ -1,0 +1,114 @@
+# =====================================================================
+#  EA: ABTG_Bulge
+#  R92ba -- asse ATR filter {1 = acceso (controllo, cella P), 0 = spento}
+#  Round R92b, primo di ABTG_Bulge v5.20 (SHA256 ED4E88B1CFBA36AD..., NON modificato).
+#  Scritto il 30/09/2026. CRITERI: report/R92b_CRITERI.md, firmati PRIMA dei numeri.
+#  H1, GBPUSD come grafico, Symbols_List = i 22 cross. Modello 1 (OHLC M1):
+#  SOLO SCREENING, nessun verdetto di merito a tick reali (R57). Deposito 10000
+#  e Modello 1 vanno passati ESPLICITI dalla riga di lancio (default del driver 10000/4).
+#  Rischio 0,80%, Max_Trades 4, kill switch acceso, gestione NUDA, Guardian inerte.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (regola 21/09): NON sul VPS, NON su
+#  50504400, NON su nessuna sedia. Non promuove niente, non propone nessuna taglia.
+#
+#  FINESTRA: 2010.01.01 - 2026.06.30, @FRAZIONEIS 0.7275 -> IS 2010.01.01-2021.12.31 (4383 gg), OOS 2022.01.01-2026.06.30.
+#  IS = piu' regimi (euro 2010-12, calma 2013-14, SNB 2015, Brexit 2016, COVID 2020): giudica il RISCHIO.
+#  OOS = 2022-26: giudica il MERITO. GBPNZD ha il muro al 2010.05.10: nell'IS gira su finestra piu' corta.
+#  MAGIC: 799211 (pinnato: un solo magic, per-trade sovrascritto ad ogni passata)
+#
+#  PERCHE' QUESTO FILE ESISTE
+#  Quanti segnali costa il filtro ATR (AtrOk: ATR di barra 1 fuori da [0,5 ; 1,8] x la sua media a 20
+#  barre blocca l'ingresso, su TUTTI e tre i segnali)? Domanda unica di R92b, un asse alla volta.
+#  Il valore 1 e' la cella di partenza P: compare identica nei lavori b, c, d (attesa E3 esatta).
+#  Per il driver un asse bool e' start=0 stop=1 step=1 (2 celle). Primo job a finestra lunga: mostra
+#  anche se il tester regge 22 simboli x 12 anni e il simbolo con il muro (GBPNZD).
+#
+#  COSA SI ATTENDE (dichiarato prima, controesempi in report/R92b_CRITERI.md par. 4-5)
+#  Direzione: n(ATR spento) >= n(ATR acceso), in IS e in OOS (E4). L'AMPIEZZA non e' prevista: e' la misura.
+#  Cella ATR=1 identica a P negli altri tre lavori (E3). P0: Use_ATR_Filter ha i due valori {0,1} nel CSV.
+#
+#  DIFFERENZE DA prove/R92_scan_BULGE.txt (v5.10), TUTTE:
+#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 1; nel solo controllo 0)
+#   - Symbols_List: i 22 cross invece di UN simbolo (R92 era un cross per passata)
+#   - InpMagic: blocco 7992xx invece di 772700/772710; asse Use_Purple_PineReaction
+#     TOLTO (qui il Viola e' solo EA, fisso a 0); un asse solo per file, per il driver
+#   - @DAQUANDO/@FINOA/@FRAZIONEIS: due finestre, vedi sopra (R92 aveva 2024.07.05 TODO)
+#   - News_Block_Hours pinnata esplicita (in R92 restava al default blindato dal driver)
+# =====================================================================
+@SIMBOLO    GBPUSD
+@PERIODO    H1
+@DAQUANDO   2010.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.7275
+
+# Bollinger, cuore del motore: NON si tocca
+BB_Period=20
+BB_Deviation=2.0
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+# soglia del bulge (x la media della larghezza delle bande)
+Bulge_Multi=1.1
+Lookback_Bars=20
+# Arancio: SPENTO nella cella P (lo ha spento Claudio: piu' rischioso)
+Use_Orange=0
+Use_Blue=1
+Use_Purple=1
+# VIOLA-EA (0): non e' un asse di R92b
+Use_Purple_PineReaction=0
+# v5.20: 1 = barre CHIUSE. Il controllo (R92b0) e' l'unico a 0
+Signal_Bar_Offset=1
+# --- L'UNICO ASSE DI QUESTO FILE: Use_ATR_Filter
+#     1 = filtro acceso (controllo, valore di P) ; 0 = spento. Bool: start 0, step 1, stop 1 -> 2 celle.
+Use_ATR_Filter=1||0||1||1||Y
+ATR_MA_Len=20
+ATR_Max_Mult=1.8
+ATR_Min_Mult=0.5
+# filtro ADX: sul solo BLU (ADX_Apply_On_Blue=1; Purple e Orange a 0)
+Use_ADX_Filter=1
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=1
+ADX_Apply_On_Purple=0
+ADX_Apply_On_Orange=0
+Use_News_Filter=0
+# stringa con virgole: inerte (Use_News_Filter=0); gia' pin del driver
+News_Block_Hours=7,9,11,12,15,22
+# gestione NUDA: nessun parziale, nessun BE, nessun trailing (1 posizione = 1 deal di uscita)
+Enable_Partial_Close=0
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+# kill switch ACCESO, come in origine (parte del motore di Claudio)
+Use_Kill_Switch=1
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+# 0 = RISK_PER_TRADE
+Risk_Mode=0
+# 0,80% (firma 21/08): 0,80 x Max_Trades 4 = 3,20% <= cap C1 3,25%
+Risk_Percent=0.8
+Total_Risk_Percent=2.0
+# tetto UNICO sul cesto (in R92 era per simbolo)
+Max_Trades=4
+# spento: nel tester non esistono ordini manuali
+Manage_Manual_Orders=0
+Manual_SL_ATR_Mult=3.0
+Enable_BE_1R=0
+BE_At_R=1.0
+BE_Offset_Points=2
+Enable_Trailing_R=0
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+# identita' delle operazioni del job (blocco 7992xx, libero in tutto il repo)
+InpMagic=799211
+# prefisso del commento ordini
+InpComment=BULGE
+# i 22 cross del cesto, stessa lista di ABTG_Bulge e di R92_scan_BULGE.txt
+Symbols_List=EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY
+# acceso come in campo; nel tester e' INERTE (fail-open)
+InpUsaGuardian=1
+# spento nelle corse lunghe (in ottimizzazione le Print non escono comunque)
+InpVerbose=0
+# spento: l'autotest si legge in una passata singola, non qui
+InpAutoTest=0
+# =====================================================================
