@@ -69,6 +69,9 @@
 #   H_CHIUSURA (meccanismo): la chiusura M5 FILTRA i falsi breakout: fra le
 #     entrate di B c'e' una quota di falsi minore che fra quelle di A.
 #   H_NIENTE   (pagamento) : B paga solo il ritardo: R lordo B <= R lordo A.
+#  [Cancello 30/09: il verdetto decide SOLO il pagamento, fra le politiche,
+#   sul grezzo. La quota di falsi e' stampata come descrizione: non separa
+#   il filtro dalla deriva, vedi la correzione piu' sotto.]
 #
 #  IL CONTRO-ESEMPIO CHE HA DETTATO IL METODO (classe 178). Il confronto
 #  GREZZO "falso% di B < falso% di A di X punti" e' GARANTITO anche in un
@@ -90,53 +93,74 @@
 #  giorno, seme fisso 20260930). ECCESSO = osservato - media del nullo.
 #
 #  DUE CONFRONTI, perche' UNO SOLO SBAGLIA (dichiarato prima):
-#   - COPPIE (quello chiesto: stessi giorni, A e B dello stesso lato). Non
-#     vede il filtro: i giorni in cui B non entra NON sono nelle coppie.
+#   - COPPIE (stessi giorni, A e B dello stesso lato). Non vede il filtro:
+#     i giorni in cui B non entra NON sono nelle coppie. DESCRITTIVO.
 #   - ENTRATE (le due politiche sugli stessi giorni validi: tutte le
 #     entrate di A contro tutte quelle di B, per lato). Qui il filtro si
 #     vede. Errore standard per giorno (metodo delta), giorni sovrapposti.
-#  MECCANISMO si giudica sulle ENTRATE. PAGAMENTO deve valere SU TUTTE E DUE
-#  (coppie e entrate), altrimenti INCONCLUSIVO.
+#
+#  ###################################################################
+#  CORRETTO DAL CANCELLO DI GIUDIZIO (30/09/2026, PRIMA di ogni numero
+#  vero; classe 929 della checklist). La prima stesura decideva il
+#  PAGAMENTO sull'ECCESSO sul nullo e lo chiedeva SU COPPIE E ENTRATE, e il
+#  MECCANISMO sull'eccesso del falso. Tre contro-esempi ESEGUITI (script
+#  collaudo_riga_confronto_tocco/mondi_controesempio.py):
+#   (1) nel MONDO POSITIVO dell'autotest stesso, sulle coppie B-A GREZZO e'
+#       -0,13..-0,19 (6 errori standard SOTTO zero) e il verdetto diceva
+#       "PAGA" = "B batte A al lordo": il nullo di quel mondo vale -0,54 e
+#       l'eccesso lo scavalca. L'etichetta diceva il FALSO;
+#   (2) in un mondo dove la chiusura fuori PORTA davvero l'informazione
+#       (dopo una chiusura fuori il prezzo prosegue, dopo un tocco che
+#       richiude dentro torna indietro) B batte A di +0,29..+0,36 R' sulle
+#       entrate (10 errori standard) e il verdetto era INCONCLUSIVA 6 celle
+#       su 6, meccanismo NON_FILTRA 6 su 6: le coppie non vedono il filtro
+#       (lo diceva gia' il par. 5.2) ma il verdetto le RICHIEDEVA;
+#   (3) il falso di A CONTIENE la chiusura della barra del tocco, cioe' il
+#       segnale stesso di B, e il nullo la riproduce (forme conservate):
+#       l'eccesso del falso misura solo la deriva nelle 3 barre dopo
+#       l'entrata. Nel mondo (2) esce -3,9..+1,1 (filtro vero, "NON
+#       FILTRA"); in un mondo dove l'informazione e' nel TOCCO e la chiusura
+#       non aggiunge niente esce +4,7..+10,0 (FILTRA in 1 cella su 6).
+#  QUINDI, da qui: il VERDETTO e' UNO, sul PAGAMENTO, ed e' sul confronto
+#  fra le POLITICHE (ENTRATE), sul valore GREZZO (R lordo e R a mercato,
+#  B meno A): e' la risposta diretta a "meglio o peggio". Il nullo, le
+#  coppie e l'eccesso del falso restano STAMPATI come DESCRIZIONE: non
+#  decidono niente.
+#  ###################################################################
 #
 #  SOGLIE (congelate qui e in report/CONFRONTO_TOCCO_CHIUSURA_M5_CRITERI.md):
-#   X_F = 10 punti percentuali di ECCESSO sul falso.  X_R = 0,08 R' di
-#   ECCESSO sull'R lordo (e sull'R a mercato).  n minimo 150 (coppie, e
-#   min(entrate A, entrate B)) per cella: Emendamento A, l'unita' e'
-#   l'operazione-giorno.
-#   Zona di una misura: SI se eccesso >= X e il limite basso dell'IC 95% > 0;
+#   X_R = 0,08 R' sulla differenza GREZZA B-A fra le politiche (R lordo e
+#   R a mercato). n minimo 150 = min(entrate A, entrate B) per cella:
+#   Emendamento A, l'unita' e' l'operazione-giorno. X_F = 10 punti resta
+#   SOLO come riferimento della riga descrittiva del falso (non decide).
+#   Zona di una misura: SI se valore >= X e il limite basso dell'IC 95% > 0;
 #   NO se il limite alto dell'IC 95% < X; INCERTO negli altri casi.
-#   MECCANISMO: FILTRA = ECCESSO_F in zona SI. NON_FILTRA = zona NO.
-#   PAGAMENTO : PAGA = ECCESSO_R e ECCESSO_R a mercato in zona SI su coppie
-#     E entrate. NON_PAGA = zona NO su tutte. Altrimenti INCONCLUSIVO.
-#   Lettura: FILTRA+PAGA = H_CHIUSURA sostenuta; NON_FILTRA+NON_PAGA =
-#     H_NIENTE sostenuta; FILTRA+NON_PAGA = filtra ma il ritardo se lo
-#     mangia; NON_FILTRA+PAGA = ANOMALIA da guardare a mano; il resto =
-#     INCONCLUSIVA. Un RANGE (15 o 30) ha una lettura solo se LONG e SHORT
-#     dicono la STESSA cosa. Sono verdetti su una DESCRIZIONE, non promozioni.
-#  PERCHE' X_F = 10: l'errore standard dell'eccesso sul falso e' ~2 punti
-#   (IC95 ~4): 10 sta oltre 2 IC, ed e' l'ordine di grandezza a cui un filtro
-#   cambierebbe il mix di trade (il falso% di A e' ~67-70% nell'anatomia).
-#   CONTRO-ESEMPIO: il nullo produce da solo un divario grezzo di ~20 punti
-#   (sopra): la soglia vale SOLO sull'eccesso; nel mondo senza memoria
-#   l'eccesso misurato sta fra -3,2 e +5,2 (24 celle): mai vicino a 10.
-#  PERCHE' X_R = 0,08 e non 0,05: l'errore standard dell'eccesso R e' 0,033
-#   a n ~750 entrate per lato (MISURATO nell'autotest; ~0,025 attesi a n
-#   ~1250, stima 1/radice(n), NON misurata). Con X_R = 0,05 il "NO" richiede
-#   eccesso <= +0,001: nel mondo senza memoria il test riesce a CONFERMARE
-#   H_NIENTE solo 4 celle su 24 (misurato). Con 0,08: 15 su 24, e ZERO falsi
-#   "PAGA" su 24 (con tutte e due le soglie). Una banda che non puo' cadere
-#   dove cade l'ipotesi vera non e' un test (classe 178). 0,08 R' e' dello
-#   stesso ordine del costo di 1 punto di spread su un R' di 15 punti (0,067
-#   R; spread NON MISURATO): un eccesso minore non pagherebbe un costo di
-#   quell'ordine nemmeno se fosse vero.
-#  CONTROLLO CON UN MONDO CHE HA LA RISPOSTA (autotest, 12 semi x 2 lati):
-#   mondo positivo (la chiusura porta informazione: 45% rotture vere, 45%
-#   trappole a stoppino, 10% rumore) -> PAGA 24/24, FILTRA 22/24 (gli altri
-#   2 INCONCLUSIVO, eccesso 9,0 e 9,4: sotto la soglia, non sopra).
+#   PAGAMENTO: PAGA = R lordo e R a mercato in zona SI; NON_PAGA = tutte e
+#     due in zona NO; altrimenti INCONCLUSIVO.
+#   Lettura: PAGA = "B MEGLIO al lordo"; NON_PAGA = "B NON MEGLIO" (H_NIENTE
+#     sul pagamento); il resto = INCONCLUSIVA. Un RANGE (15 o 30) ha una
+#     lettura solo se LONG e SHORT dicono la STESSA cosa. Sono verdetti su
+#     una DESCRIZIONE, non promozioni.
+#  PERCHE' X_R = 0,08 (scelta del costruttore, tenuta): l'errore standard
+#   della differenza per giorno e' ~0,025 a n ~650 entrate per lato (mondi
+#   sintetici) e scende con 1/radice(n) [a n ~1250: stima, NON misurata];
+#   0,08 R' e' dello stesso ordine del costo di 1 punto di spread su un R'
+#   di 15 punti (0,067 R; spread NON MISURATO): un vantaggio minore non
+#   pagherebbe un costo di quell'ordine nemmeno se fosse vero.
+#  CONTRO-ESEMPI ESEGUITI (mondi_controesempio.py, 12 semi x 2 lati = 24
+#   celle per mondo, 1400 giorni, range 15; regola VECCHIA -> NUOVA):
+#   senza memoria : PAGA 0 -> 0;  NON_PAGA 13 -> 20;  B-A grezzo -0,11..+0,05
+#   positivo      : PAGA 24 -> 24 (ma sulle COPPIE B-A grezzo -0,19..-0,11)
+#   FILTRO        : PAGA 0 -> 24; meccanismo vecchio NON_FILTRA 24/24;
+#                   B-A grezzo sulle entrate +0,25..+0,37
+#   TOCCO         : PAGA 0 -> 0;  NON_PAGA 0 -> 23; meccanismo vecchio
+#                   FILTRA 4/24 (falso positivo del falso)
+#  X_F = 10 punti resta solo come riferimento della riga DESCRITTIVA del
+#   falso (divario grezzo A-B senza memoria ~20 punti: vedi sopra).
 #  Attesa di chi scrive (NON un criterio): NON_PAGA o INCONCLUSIVO in quasi
 #   tutte le celle (l'R lordo di A e' gia' ~0, quello di B non ha motivo di
-#   stare sopra); il meccanismo puo' mostrare un eccesso piccolo. Se esce il
-#   contrario e' una notizia e va ricontrollata a mano prima di crederci.
+#   stare sopra). Se esce il contrario e' una notizia e va ricontrollata a
+#   mano prima di crederci.
 #
 #  COSA NON SI POTRA CONCLUDERE (dichiarato prima dei numeri)
 #   - Nessun PF, nessuna equity, NESSUN COSTO: "PAGA" vuol dire "B batte A
@@ -159,10 +183,11 @@
 #     per questo la soglia e' un ECCESSO con IC e un range vale solo se LONG
 #     e SHORT concordano; i verdetti dell'addestramento decidono, la cassaforte
 #     conferma o no.
-#   - Il nullo e' UN modello di H_NIENTE (segni casuali barra per barra):
-#     non copre memoria di volatilita' ne' code: se la misura sta vicino
-#     alla soglia, e' INCERTO, non SI. Se l'IC95 dell'eccesso e' piu' largo
-#     della soglia la cella e' dichiarata "non risolvibile" (rilievo).
+#   - Il verdetto dice SE la chiusura M5 rende di piu' del primo tocco, non
+#     PERCHE': il falso non separa il filtro dalla deriva (il falso di A
+#     contiene il segnale di B) e il nullo a segni casuali e' descrizione.
+#     Vicino alla soglia e' INCERTO, non SI. Se l'IC95 della differenza e'
+#     piu' largo della soglia la cella e' "non risolvibile" (rilievo).
 #   - Non dice NIENTE sul DAX (feed non misurabile) ne' sul retest, ne' su
 #     uscite diverse da +1R'.
 #
@@ -634,7 +659,9 @@ def zona(ex, se, X):
 
 
 def giudica_cella(obs, nullo, n_min=None, x_f=None, x_r=None):
-    """Il verdetto MECCANICO di una cella (funzione pura, testata).
+    """DESCRITTIVO dal cancello del 30/09: eccessi sul NULLO (falso e R) per le righe
+    'DESCRIZIONE contro il NULLO' del referto; la sua 'lettura' NON esce nel referto e NON
+    decide (il verdetto e' giudica_politica). Funzione pura, testata.
     obs = stat_cella osservata; nullo = sintesi_nullo. Le soglie sono quelle
     congelate in testa al file (argomenti solo per i test di mutazione)."""
     n_min = N_MIN_CELLA if n_min is None else n_min
@@ -682,31 +709,61 @@ def giudica_cella(obs, nullo, n_min=None, x_f=None, x_r=None):
     return res
 
 
-def combina(vp, ve):
-    """Il verdetto di una cella dai due confronti. MECCANISMO dal confronto
-    fra ENTRATE (il filtro si vede nei giorni in cui B non entra: nelle
-    coppie quei giorni non ci sono). PAGAMENTO: deve valere sulle COPPIE (stessi
-    giorni) E sulle ENTRATE, altrimenti INCONCLUSIVO."""
-    if ve["meccanismo"] == "NON_GIUDICABILE" or vp["pagamento"] == "NON_GIUDICABILE" \
-            or ve["pagamento"] == "NON_GIUDICABILE":
-        return {"meccanismo": "NON_GIUDICABILE", "pagamento": "NON_GIUDICABILE",
-                "lettura": "NON GIUDICABILE (coppie o entrate < %d, Emendamento A)" % N_MIN_CELLA}
-    mech = ve["meccanismo"]
-    if vp["pagamento"] == ve["pagamento"] and vp["pagamento"] in ("PAGA", "NON_PAGA"):
-        pay = vp["pagamento"]
+def giudica_politica(obsE, n_min=None, x_r=None):
+    """IL VERDETTO (correzione del cancello, 30/09): la politica B contro la
+    politica A sulle ENTRATE (stessi giorni validi), sul valore GREZZO della
+    differenza B-A dell'R lordo e dell'R a mercato, con l'errore standard per
+    giorno. Nessun nullo: l'R e' gia' l'esito, non un indicatore che il
+    ritardo sposta per costruzione (quello era il falso)."""
+    n_min = N_MIN_CELLA if n_min is None else n_min
+    x_r = X_R if x_r is None else x_r
+    res = {"n": obsE["n"], "dR": obsE.get("dR"), "seR": obsE.get("seR"), "dRm": obsE.get("dRm"),
+           "seRm": obsE.get("seRm"), "zR": "INCERTO", "zRm": "INCERTO", "pagamento": "NON_GIUDICABILE",
+           "peggio": False}
+    if obsE["n"] < n_min:
+        return res
+    res["zR"] = zona(res["dR"], res["seR"], x_r)
+    res["zRm"] = zona(res["dRm"], res["seRm"], x_r)
+    if res["zR"] == "SI" and res["zRm"] == "SI":
+        res["pagamento"] = "PAGA"
+    elif res["zR"] == "NO" and res["zRm"] == "NO":
+        res["pagamento"] = "NON_PAGA"
     else:
-        pay = "INCONCLUSIVO"
-    if mech == "FILTRA" and pay == "PAGA":
-        lett = "H_CHIUSURA sostenuta (filtra e paga, AL LORDO)"
-    elif mech == "NON_FILTRA" and pay == "NON_PAGA":
-        lett = "H_NIENTE sostenuta (la chiusura non filtra e non paga)"
-    elif mech == "FILTRA" and pay == "NON_PAGA":
-        lett = "filtra MA non paga: il ritardo si mangia il filtro (H_NIENTE sul pagamento)"
-    elif mech == "NON_FILTRA" and pay == "PAGA":
-        lett = "ANOMALIA: paga senza filtrare, da guardare a mano (NON e' H_CHIUSURA)"
+        res["pagamento"] = "INCONCLUSIVO"
+    # descrittivo: B PEGGIO di A su tutto l'IC (tutte e due le letture)
+    if None not in (res["dR"], res["seR"], res["dRm"], res["seRm"]):
+        res["peggio"] = (res["dR"] + Z95 * res["seR"] < 0) and (res["dRm"] + Z95 * res["seRm"] < 0)
+    return res
+
+
+LETTURA_PAGA = "B MEGLIO: la chiusura M5 batte il primo tocco AL LORDO sulle entrate (>= %.2f R')" % X_R
+LETTURA_NON_PAGA = "B NON MEGLIO: nessun vantaggio della chiusura M5 >= %.2f R' al lordo (H_NIENTE sul pagamento)" % X_R
+
+
+def combina(vp, ve, obsE):
+    """Il verdetto di una cella. Decide SOLO il pagamento fra le POLITICHE
+    (entrate, valore grezzo): giudica_politica. Il 'meccanismo' (eccesso del
+    falso sul nullo, entrate) e il pagamento sulle COPPIE restano campi
+    DESCRITTIVI: non entrano nella lettura (correzione del cancello, 30/09:
+    le coppie non vedono il filtro e il falso di A contiene il segnale di B)."""
+    pol = giudica_politica(obsE)
+    pay = pol["pagamento"]
+    if _m("pagamento_su_eccesso"):            # mutazione: la regola vecchia (eccesso sul nullo)
+        pay = ve["pagamento"]
+    if _m("pagamento_coppie") and pay != "NON_GIUDICABILE":   # mutazione: coppie obbligatorie
+        if vp["pagamento"] == "NON_GIUDICABILE":
+            pay = "NON_GIUDICABILE"
+        elif vp["pagamento"] != pay:
+            pay = "INCONCLUSIVO"
+    if pay == "NON_GIUDICABILE":
+        lett = "NON GIUDICABILE (entrate < %d, Emendamento A)" % N_MIN_CELLA
+    elif pay == "PAGA":
+        lett = LETTURA_PAGA
+    elif pay == "NON_PAGA":
+        lett = LETTURA_NON_PAGA
     else:
         lett = "INCONCLUSIVA"
-    return {"meccanismo": mech, "pagamento": pay, "lettura": lett}
+    return {"meccanismo": ve["meccanismo"], "pagamento": pay, "lettura": lett, "pol": pol}
 
 
 def lettura_range(cl, cs):
@@ -927,7 +984,7 @@ def aggrega(ctx, righe, N):
         vP = giudica_cella(obsP, sP)
         vE = giudica_cella(obsE, sE)
         res["celle"][lato] = {"obsP": obsP, "obsE": obsE, "nullP": sP, "nullE": sE,
-                              "vP": vP, "vE": vE, "comb": combina(vP, vE)}
+                              "vP": vP, "vE": vE, "comb": combina(vP, vE, obsE)}
     return res
 
 
@@ -994,8 +1051,19 @@ def riga_zona(nome, ex, se, X, unita, cifre):
              ("%.*f" % (cifre, X)), unita, zona(ex, se, X)))
 
 
+def blocco_politica(out, pol):
+    """Il VERDETTO della cella: politica B contro politica A (entrate), GREZZO."""
+    out.append("  -- VERDETTO (DECIDE): politica B contro politica A sulle ENTRATE, differenza GREZZA B-A, n=min(nA,nB)=%d --"
+               % pol["n"])
+    out.append(riga_zona("R lordo B-A (timeout 0)", pol["dR"], pol["seR"], X_R, " R", 3).replace("eccesso", "valore "))
+    out.append(riga_zona("R a mercato B-A", pol["dRm"], pol["seRm"], X_R, " R", 3).replace("eccesso", "valore "))
+    out.append("    -> pagamento %s%s" % (pol["pagamento"],
+                                       "   [descrittivo: B PEGGIO di A su tutto l'IC, tutte e due le letture]"
+                                       if pol["peggio"] else ""))
+
+
 def blocco_verdetto(out, etich, obs, nullo, v, frame):
-    out.append("  -- %s [%s] --" % (etich, frame))
+    out.append("  -- DESCRIZIONE contro il NULLO, NON decide: %s [%s] --" % (etich, frame))
     dF0, sF0 = nullo["dF"]
     dR0, sR0 = nullo["dR"]
     dM0, sM0 = nullo["dRm"]
@@ -1006,7 +1074,7 @@ def blocco_verdetto(out, etich, obs, nullo, v, frame):
     out.append(riga_zona("ECCESSO falso (A-B) [meccanismo]", v["exF"], v["seF"], X_FALSO_PP, " pt", 1))
     out.append(riga_zona("ECCESSO R lordo (B-A)", v["exR"], v["seR"], X_R, " R", 3))
     out.append(riga_zona("ECCESSO R a mercato (B-A)", v["exRm"], v["seRm"], X_R, " R", 3))
-    out.append("    -> meccanismo %s | pagamento %s" % (v["meccanismo"], v["pagamento"]))
+    out.append("    -> (descrittivo) segnale del falso %s | eccesso R %s" % (v["meccanismo"], v["pagamento"]))
 
 
 def _lato_txt(lato):
@@ -1102,12 +1170,17 @@ def blocco_range(out, cfg, res):
                    (nome, sb_["n"], "*" if sb_["n"] < AM.SOGLIA_N else "", _sgn(sb_["R"])))
         out.append("")
         out.append("  == VERDETTO MECCANICO DELLA CELLA (soglie congelate in testa al file) ==")
-        blocco_verdetto(out, "sulle ENTRATE (meccanismo + pagamento)", cella["obsE"], cella["nullE"],
-                        cella["vE"], "n=min(nA,nB)")
-        blocco_verdetto(out, "sulle COPPIE (pagamento a parita' di giorno)", cella["obsP"], cella["nullP"],
-                        cella["vP"], "n=coppie")
         c = cella["comb"]
-        out.append("  >>> CELLA %s range %d: MECCANISMO %s | PAGAMENTO %s" % (nome, N, c["meccanismo"], c["pagamento"]))
+        blocco_politica(out, c["pol"])
+        out.append("  (sotto: il NULLO a segni casuali, le COPPIE e l'eccesso del FALSO sono DESCRIZIONE e non decidono:")
+        out.append("   le coppie non vedono il filtro e il falso di A contiene la chiusura che B usa come segnale;")
+        out.append("   vedi report/CONFRONTO_TOCCO_CHIUSURA_M5_CRITERI.md par. 12)")
+        blocco_verdetto(out, "sulle ENTRATE", cella["obsE"], cella["nullE"],
+                        cella["vE"], "n=min(nA,nB)")
+        blocco_verdetto(out, "sulle COPPIE", cella["obsP"], cella["nullP"],
+                        cella["vP"], "n=coppie")
+        out.append("  >>> CELLA %s range %d: PAGAMENTO %s (decide) | segnale del falso sul nullo %s (descrittivo)" %
+                   (nome, N, c["pagamento"], c["meccanismo"]))
         out.append("  >>> LETTURA: %s" % c["lettura"])
         out.append("")
     if res["opposti"]:
@@ -1149,11 +1222,17 @@ def costruisci_referto(cfg, righe, res_per_range, diag, percorso, titolo, nota_f
     add("  4. FALSO = una delle prime 3 chiusure M5 dopo l'entrata e' <= al livello (A: barre kA..kA+2;")
     add("     B: kB+1..kB+3). NON confrontare il falso di A con quello di B a occhio: B entra OLTRE il")
     add("     livello e A SUL livello, quindi anche in un mercato SENZA memoria B ha meno falsi. Il numero che")
-    add("     conta e' l'ECCESSO sul NULLO (giorni surrogati con i segni delle barre tirati a sorte, K=%d per" % ctx.K)
-    add("     giorno, seme fisso): stesso confronto, stesse regole, direzione senza memoria.")
-    add("  5. Soglie CONGELATE prima dei numeri: eccesso falso >= %.0f pt, eccesso R >= %.2f R', n >= %d" %
-        (X_FALSO_PP, X_R, N_MIN_CELLA))
-    add("     per cella, IC 95%. Vedi report/CONFRONTO_TOCCO_CHIUSURA_M5_CRITERI.md.")
+    add("     si stampa e' l'ECCESSO sul NULLO (giorni surrogati con i segni delle barre tirati a sorte, K=%d per" % ctx.K)
+    add("     giorno, seme fisso), ed e' DESCRITTIVO: il falso di A contiene la chiusura della barra del tocco,")
+    add("     cioe' il segnale stesso di B, quindi NON misura il filtro. Non decide niente.")
+    add("  5. IL VERDETTO e' UNO: la politica B contro la politica A sulle ENTRATE (tutte le entrate di A contro")
+    add("     tutte quelle di B, stessi giorni validi), differenza GREZZA dell'R lordo e dell'R a mercato:")
+    add("     PAGA se tutte e due >= %.2f R' con IC 95%% sopra zero; NON_PAGA se tutte e due con IC sotto %.2f;" %
+        (X_R, X_R))
+    add("     n >= %d entrate per politica. Le COPPIE (stessi giorni) sono DESCRIZIONE: sono selezionate da un" %
+        N_MIN_CELLA)
+    add("     evento che avviene dopo A e prima di B, e non vedono i giorni che la chiusura filtra.")
+    add("     Vedi report/CONFRONTO_TOCCO_CHIUSURA_M5_CRITERI.md par. 6 e 12.")
     add("  6. Ogni percentuale porta il suo n. * = n < %d. Le COPPIE sono i giorni con A e B dello stesso lato." % AM.SOGLIA_N)
     add("")
     add("--- FUSO E APERTURA ---")
@@ -1180,8 +1259,8 @@ def costruisci_referto(cfg, righe, res_per_range, diag, percorso, titolo, nota_f
         r = res_per_range[N]
         for lato in (1, -1):
             c = r["celle"][lato]["comb"]
-            add("  range %2d %-5s: meccanismo %-15s pagamento %-15s | %s" %
-                (N, _lato_txt(lato), c["meccanismo"], c["pagamento"], c["lettura"]))
+            add("  range %2d %-5s: pagamento %-15s | %s   [falso sul nullo, descrittivo: %s]" %
+                (N, _lato_txt(lato), c["pagamento"], c["lettura"], c["meccanismo"]))
         add("  range %2d      : %s" % (N, lettura_range(r["celle"][1]["comb"], r["celle"][-1]["comb"])))
     if verd_is is not None:
         add("")
@@ -1199,8 +1278,9 @@ def costruisci_referto(cfg, righe, res_per_range, diag, percorso, titolo, nota_f
     add("  spread e' sotto l'R' tipico se lo spread supera 0,375 punti [spread Nasdaq BCM: NON MISURATO qui].")
     add("  Vale per il regime di questa fase (addestramento 2010-2020: UN SOLO REGIME; cassaforte 2021-2026:")
     add("  un altro, con 2023 a poca copertura buona). Il close come prezzo d'entrata ignora slippage e gap.")
-    add("  Il NULLO e' un modello di H_NIENTE (segni casuali barra per barra): non copre memoria di")
-    add("  volatilita' ne' code; vicino alla soglia la risposta e' INCERTO, non SI.")
+    add("  Il NULLO e' un modello di H_NIENTE (segni casuali barra per barra): e' DESCRIZIONE, non decide.")
+    add("  Il verdetto dice SE la chiusura M5 rende di piu' del primo tocco, non PERCHE': il falso non separa")
+    add("  il filtro dalla deriva (il falso di A contiene il segnale di B). Vicino alla soglia: INCERTO, non SI.")
     add("  L'entrata A e' AL LIVELLO (fill ideale di un pendente, anche se la barra del tocco lo ha attraversato")
     add("  con un salto); B paga il close reale: un B <= A puo' dipendere in parte dal fill ideale di A.")
     add("")
@@ -1284,22 +1364,42 @@ def config_anatomia(args):
 
 
 def _rilievi_potere(res_per_range, fase, cfg):
-    """Le celle in cui l'errore e' troppo largo per decidere alla soglia."""
+    """Le celle in cui il VERDETTO (politiche, grezzo) non si puo' dare o non si
+    puo' risolvere alla soglia. Le coppie e il falso sono descrittivi: niente rilievo."""
     out = []
     for N in cfg.ranges:
         for lato in (1, -1):
-            c = res_per_range[N]["celle"][lato]
-            for frame, v in (("entrate", c["vE"]), ("coppie", c["vP"])):
-                if v["n"] < N_MIN_CELLA:
-                    out.append("%s range %d %s (%s): n=%d < %d, NON GIUDICABILE" %
-                               (fase, N, _lato_txt(lato), frame, v["n"], N_MIN_CELLA))
-                    continue
-                if frame == "entrate" and v["seF"] is not None and Z95 * v["seF"] >= X_FALSO_PP:
-                    out.append("%s range %d %s: IC95 dell'eccesso falso (%.1f pt) >= soglia %.0f: non risolvibile" %
-                               (fase, N, _lato_txt(lato), Z95 * v["seF"], X_FALSO_PP))
-                if v["seR"] is not None and Z95 * v["seR"] >= X_R:
-                    out.append("%s range %d %s (%s): IC95 dell'eccesso R (%.3f) >= soglia %.2f: pagamento "
-                               "non risolvibile" % (fase, N, _lato_txt(lato), frame, Z95 * v["seR"], X_R))
+            pol = res_per_range[N]["celle"][lato]["comb"]["pol"]
+            if pol["n"] < N_MIN_CELLA:
+                out.append("%s range %d %s (entrate): n=%d < %d, NON GIUDICABILE" %
+                           (fase, N, _lato_txt(lato), pol["n"], N_MIN_CELLA))
+                continue
+            for nome, se in (("R lordo", pol["seR"]), ("R a mercato", pol["seRm"])):
+                if se is not None and Z95 * se >= X_R:
+                    out.append("%s range %d %s (entrate): IC95 della differenza %s (%.3f) >= soglia %.2f: "
+                               "pagamento non risolvibile" % (fase, N, _lato_txt(lato), nome, Z95 * se, X_R))
+    return out
+
+
+# Bersagli di riproduzione dell'entrata A: 'prima rottura' dell'anatomia, ADDESTRAMENTO Nasdaq 2010-2020
+# (risultati_archivio/ANATOMIA_MOVIMENTI_M5_2026-09-29/NASUSD/..._IS_2010_2020.txt, righe 91 e 457).
+BERSAGLI_A_IS = {(15, 1): 1267, (15, -1): 1214, (30, 1): 1348, (30, -1): 1135}
+
+
+def controlla_bersagli(res_per_range, cfg, simbolo):
+    """Il feed e' quello dell'anatomia del 29/09? Confronta n di A (LONG/SHORT) con i
+    numeri in archivio. Torna la lista dei rilievi (vuota = coincide o non applicabile)."""
+    if simbolo != "NASUSD" or tuple(cfg.per_is or ()) != (2010, 2020):
+        return []
+    out = []
+    for (N, lato), atteso in sorted(BERSAGLI_A_IS.items()):
+        if N not in res_per_range:
+            continue
+        visto = res_per_range[N]["A"][_lato_txt(lato)]
+        if visto != atteso:
+            out.append("RIPRODUZIONE: range %d %s entrata A n=%d, l'anatomia del 29/09 ne ha %d: il CSV non e' "
+                       "quello dell'anatomia (o il pin e' un altro). I numeri si leggono SOLO dopo aver capito "
+                       "perche'" % (N, _lato_txt(lato), visto, atteso))
     return out
 
 
@@ -1344,8 +1444,8 @@ def esegui(args):
     log(" periodi   : addestramento %s   cassaforte %s" %
         (cfg.per_is, cfg.per_cs if cfg.per_cs else "NESSUNA"))
     log(" range     : %s min   surrogati per giorno %d   seme %d" % (cfg.ranges, args.surrogati, args.seme))
-    log(" soglie    : eccesso falso >= %.0f pt, eccesso R >= %.2f, coppie/entrate >= %d, IC 95%%" %
-        (X_FALSO_PP, X_R, N_MIN_CELLA))
+    log(" verdetto  : politica B - politica A sulle entrate, GREZZO, R lordo e a mercato >= %.2f, entrate >= %d, "
+        "IC 95%% (nullo, coppie e falso: descrittivi)" % (X_R, N_MIN_CELLA))
     log("")
     rilievi = []
     aperture = {}
@@ -1428,6 +1528,8 @@ def esegui(args):
             rilievi.append("nessun giorno nel periodo %s: referto non prodotto" % fase)
             continue
         res = dict((N, aggrega(ctx, sotto, N)) for N in cfg.ranges)
+        if fase == "IS":
+            rilievi += controlla_bersagli(res, cfg, args.simbolo)
         ril_fase = rilievi + _rilievi_potere(res, fase, cfg)
         testo = costruisci_referto(cfg, sotto, res, diag, percorso, titolo, nota, args.simbolo,
                                    righe_fuso, righe_cal, ril_fase, ctx, fase,
@@ -1883,34 +1985,56 @@ def prove_verdetto(v):
     v.uguale("verdetto: 149 coppie -> NON GIUDICABILE", g["meccanismo"], "NON_GIUDICABILE")
     g = giudica_cella(_obs_fisso(150, 25.0, 1.5, 0.15, 0.02, 0.15, 0.02), nul0)
     v.uguale("verdetto: 150 coppie -> si pronuncia", g["meccanismo"], "FILTRA")
-    # combinazione coppie + entrate
-    vp = giudica_cella(_obs_fisso(1000, 0.0, 1.5, 0.15, 0.02, 0.15, 0.02), nul0)
-    ve_no = giudica_cella(_obs_fisso(1000, 25.0, 1.5, 0.0, 0.02, 0.0, 0.02), nul0)
-    c = combina(vp, ve_no)
-    v.uguale("combina: pagamento sulle coppie SI e sulle entrate NO -> INCONCLUSIVO", c["pagamento"], "INCONCLUSIVO")
-    ve_si = giudica_cella(_obs_fisso(1000, 25.0, 1.5, 0.15, 0.02, 0.15, 0.02), nul0)
-    c = combina(vp, ve_si)
-    v.uguale("combina: coppie e entrate concordi, filtra -> H_CHIUSURA", c["lettura"].split(" ")[0], "H_CHIUSURA")
-    vp0 = giudica_cella(_obs_fisso(1000, 0.0, 1.5, 0.0, 0.02, 0.0, 0.02), nul0)
-    ve0 = giudica_cella(_obs_fisso(1000, 1.0, 1.5, 0.0, 0.02, 0.0, 0.02), nul0)
-    v.uguale("combina: niente e niente -> H_NIENTE", combina(vp0, ve0)["lettura"].split(" ")[0], "H_NIENTE")
-    v.check("combina: filtra ma non paga e' un verdetto SUO, non H_CHIUSURA",
-            "filtra MA non paga" in combina(vp0, ve_si_nopaga())["lettura"])
+    # IL VERDETTO (correzione del cancello, 30/09): politica B contro politica A, entrate, GREZZO
+    o_si = _obs_fisso(1000, 0.0, 1.5, 0.15, 0.02, 0.15, 0.02)
+    o_no = _obs_fisso(1000, 0.0, 1.5, 0.0, 0.02, 0.0, 0.02)
+    v.uguale("politica: B-A +0,15 (se 0,02) su R e a mercato -> PAGA", giudica_politica(o_si)["pagamento"], "PAGA")
+    v.uguale("politica: B-A 0 (se 0,02) -> NON_PAGA", giudica_politica(o_no)["pagamento"], "NON_PAGA")
+    v.uguale("politica: esattamente 0,08 con IC sopra zero -> PAGA",
+             giudica_politica(_obs_fisso(1000, 0.0, 1.5, 0.08, 0.01, 0.08, 0.01))["pagamento"], "PAGA")
+    v.check("politica: 0,079 -> non PAGA",
+            giudica_politica(_obs_fisso(1000, 0.0, 1.5, 0.079, 0.01, 0.079, 0.01))["pagamento"] != "PAGA")
+    v.uguale("politica: R lordo paga, a mercato no -> INCONCLUSIVO",
+             giudica_politica(_obs_fisso(1000, 0.0, 1.5, 0.12, 0.01, 0.0, 0.01))["pagamento"], "INCONCLUSIVO")
+    v.uguale("politica: 149 entrate -> NON_GIUDICABILE",
+             giudica_politica(_obs_fisso(149, 0.0, 1.5, 0.15, 0.02, 0.15, 0.02))["pagamento"], "NON_GIUDICABILE")
+    v.uguale("politica: 150 entrate -> si pronuncia",
+             giudica_politica(_obs_fisso(150, 0.0, 1.5, 0.15, 0.02, 0.15, 0.02))["pagamento"], "PAGA")
+    v.check("politica: B-A -0,10 (se 0,02) -> NON_PAGA e 'peggio' descrittivo",
+            giudica_politica(_obs_fisso(1000, 0.0, 1.5, -0.10, 0.02, -0.10, 0.02))["peggio"] is True)
+    # IL CONTRO-ESEMPIO DEL CANCELLO (1): B GREZZO PEGGIO di A (-0,02), nullo -0,12 -> eccesso +0,10.
+    # La regola vecchia (eccesso sul nullo) diceva PAGA = "B batte A al lordo": FALSO. Ora: NON_PAGA.
+    o_neg = _obs_fisso(1000, 0.0, 1.5, -0.02, 0.01, -0.02, 0.01)
+    n_neg = _nullo_fisso(dR=-0.12, dRm=-0.12)
+    ve_neg = giudica_cella(o_neg, n_neg)
+    v.uguale("contro-esempio: l'eccesso sul nullo direbbe PAGA (+0,10)", ve_neg["pagamento"], "PAGA")
+    c = combina(ve_neg, ve_neg, o_neg)
+    v.uguale("contro-esempio: B grezzo PEGGIO di A -> il verdetto NON e' PAGA (NON_PAGA)", c["pagamento"], "NON_PAGA")
+    # IL CONTRO-ESEMPIO DEL CANCELLO (2): le coppie non vedono il filtro -> non possono bloccare il verdetto
+    vp_no = giudica_cella(o_no, nul0)
+    c = combina(vp_no, giudica_cella(o_si, nul0), o_si)
+    v.uguale("combina: entrate PAGA e coppie NON_PAGA -> PAGA (le coppie sono descrizione)", c["pagamento"], "PAGA")
+    v.check("combina: la lettura PAGA dice B MEGLIO", c["lettura"].startswith("B MEGLIO"))
+    c0 = combina(vp_no, giudica_cella(o_no, nul0), o_no)
+    v.check("combina: niente -> B NON MEGLIO", c0["lettura"].startswith("B NON MEGLIO"))
+    v.check("combina: il meccanismo (falso) non entra nella lettura",
+            combina(vp_no, giudica_cella(_obs_fisso(1000, 25.0, 1.5, 0.0, 0.02, 0.0, 0.02), nul0), o_no)["lettura"]
+            == c0["lettura"])
     # un range vale solo se LONG e SHORT concordano
-    cl = combina(vp, ve_si)
-    cs = combina(vp0, ve0)
-    v.check("range: LONG e SHORT discordi -> INCONCLUSIVA", lettura_range(cl, cs).startswith("INCONCLUSIVA"))
-    v.check("range: concordi -> la lettura comune", lettura_range(cl, cl).startswith("H_CHIUSURA"))
-
-
-def ve_si_nopaga():
-    return giudica_cella(_obs_fisso(1000, 25.0, 1.5, 0.0, 0.02, 0.0, 0.02), _nullo_fisso())
+    v.check("range: LONG e SHORT discordi -> INCONCLUSIVA", lettura_range(c, c0).startswith("INCONCLUSIVA"))
+    v.check("range: concordi -> la lettura comune", lettura_range(c, c).startswith("B MEGLIO"))
 
 
 def mondo_sintetico(rng, mondo, K=78, s=3.0):
     """M5 di un giorno. mondo 'neg': random walk (H_NIENTE vero). mondo 'pos':
     la chiusura porta informazione: 45% rotture VERE (chiude fuori e prosegue), 45% TRAPPOLE (il
-    tocco e' solo uno stoppino, poi il prezzo va dall'altra parte), 10% rumore."""
+    tocco e' solo uno stoppino, poi il prezzo va dall'altra parte), 10% rumore.
+    Aggiunti dal cancello di giudizio (30/09), barre ORDINARIE (nessuna barra costruita apposta):
+    'filtro': dopo la PRIMA barra che CHIUDE fuori il prezzo deriva a favore (+0,2 s per barra),
+    dopo la prima barra che TOCCA e richiude dentro deriva contro (trappola): l'informazione e'
+    nella CHIUSURA, B deve risultare MEGLIO. 'tocco': dal primo TOCCO il prezzo deriva nella
+    direzione del tocco, qualunque sia la chiusura: l'informazione e' nel tocco, la chiusura non
+    aggiunge niente, B NON deve risultare meglio (paga solo il ritardo)."""
     def barra(o, drift):
         c = o + rng.gauss(drift, s)
         h = max(o, c) + abs(rng.gauss(0, s * 0.5))
@@ -1918,6 +2042,35 @@ def mondo_sintetico(rng, mondo, K=78, s=3.0):
         return (o, h, l, c, 5)
     bars = []
     p = 1000.0
+    if mondo in ("filtro", "tocco"):
+        for _ in range(3):
+            b = barra(p, 0.0)
+            b = (b[0], b[0] + 2.0 * (b[1] - b[0]), b[0] + 2.0 * (b[2] - b[0]), b[0] + 2.0 * (b[3] - b[0]), 5)
+            bars.append(b)
+            p = b[3]
+        RH = max(b[1] for b in bars)
+        RL = min(b[2] for b in bars)
+        drift = 0.0
+        deciso = False
+        while len(bars) < K:
+            b = barra(p, drift)
+            bars.append(b)
+            p = b[3]
+            if deciso:
+                continue
+            su, giu = b[1] >= RH, b[2] <= RL
+            if mondo == "tocco":
+                if su or giu:
+                    deciso = True
+                    drift = 0.0 if (su and giu) else (1 if su else -1) * 0.2 * s
+            else:
+                if b[3] > RH or b[3] < RL:
+                    deciso = True
+                    drift = (1 if b[3] > RH else -1) * 0.2 * s
+                elif su != giu:
+                    deciso = True
+                    drift = (-1 if su else 1) * 0.2 * s
+        return bars
     for _ in range(3):
         b = barra(p, 0.0)
         bars.append(b)
@@ -1992,7 +2145,8 @@ def simula_mondo(cfg, mondo, giorni, K, seme, N=15, x_f=None, x_r=None):
         nP = sintesi_nullo([stat_cella(c) for c in npp[lato]])
         vE = giudica_cella(obsE, nE, x_f=x_f, x_r=x_r)
         vP = giudica_cella(obsP, nP, x_f=x_f, x_r=x_r)
-        out[lato] = {"comb": combina(vP, vE), "vE": vE, "vP": vP, "obsE": obsE, "nE": nE}
+        out[lato] = {"comb": combina(vP, vE, obsE), "vE": vE, "vP": vP, "obsE": obsE, "nE": nE,
+                     "obsP": obsP, "nP": nP}
     return out
 
 
@@ -2114,15 +2268,36 @@ def autotest():
                  no["comb"]["pagamento"] != "PAGA", str(no["comb"]))
         mm.check("mondo NEGATIVO %s: H_CHIUSURA NON sostenuta" % nome,
                  not no["comb"]["lettura"].startswith("H_CHIUSURA"), no["comb"]["lettura"])
-        mm.check("mondo POSITIVO %s: paga (eccesso R %s) e le coppie concordano" % (nome, _sgn(po["vE"]["exR"])),
-                 po["comb"]["pagamento"] == "PAGA", str(po["comb"]) + str(po["vE"]["exR"]))
+        mm.check("mondo NEGATIVO %s: il verdetto non dice B MEGLIO (B-A grezzo %s)" % (nome, _sgn(no["obsE"]["dR"])),
+                 not no["comb"]["lettura"].startswith("B MEGLIO"), no["comb"]["lettura"])
+        mm.check("mondo POSITIVO %s: paga (B-A grezzo sulle entrate %s)" % (nome, _sgn(po["obsE"]["dR"])),
+                 po["comb"]["pagamento"] == "PAGA", str(po["comb"]["pol"]))
         mm.check("mondo POSITIVO %s: l'eccesso sul falso (%.1f pt) e' positivo e vicino/oltre la soglia" %
                  (nome, po["vE"]["exF"]), po["vE"]["exF"] is not None and po["vE"]["exF"] >= X_FALSO_PP * 0.8,
                  str(po["vE"]["exF"]))
+    # i due mondi del cancello di giudizio (barre ordinarie): FILTRO (l'informazione e' nella chiusura)
+    # e TOCCO (l'informazione e' nel tocco, la chiusura non aggiunge niente)
+    fil = simula_mondo(cfg15, "filtro", 1400, 4, 7)
+    toc = simula_mondo(cfg15, "tocco", 1400, 4, 7)
+    for lato in (1, -1):
+        nome = _lato_txt(lato)
+        fi, to = fil[lato], toc[lato]
+        mm.check("mondo FILTRO %s: B MEGLIO (B-A grezzo %s, coppie %s): il verdetto lo vede" %
+                 (nome, _sgn(fi["obsE"]["dR"]), _sgn(fi["obsP"]["dR"])),
+                 fi["comb"]["pagamento"] == "PAGA", str(fi["comb"]["pol"]))
+        mm.check("mondo TOCCO %s: B NON meglio (B-A grezzo %s): nessun PAGA" % (nome, _sgn(to["obsE"]["dR"])),
+                 to["comb"]["pagamento"] != "PAGA", str(to["comb"]["pol"]))
+        mm.check("mondo POSITIVO %s: sulle COPPIE B e' grezzo PEGGIO di A (%s) mentre l'eccesso sul nullo e' %s: "
+                 "per questo l'eccesso NON decide" % (nome, _sgn(pos[lato]["obsP"]["dR"]), _sgn(pos[lato]["vP"]["exR"])),
+                 pos[lato]["obsP"]["dR"] < 0 < pos[lato]["vP"]["exR"])
     totale += mm.n
     giusti += mm.ok
-    log("6. due MONDI sintetici (senza memoria / con memoria): il nullo toglie il divario meccanico, il "
-        "verdetto vede l'informazione vera: %d/%d" % (mm.ok, mm.n))
+    log("6. quattro MONDI sintetici (senza memoria / positivo / FILTRO nella chiusura / informazione nel TOCCO): "
+        "il divario grezzo del falso cade anche senza memoria, il verdetto sulle politiche vede FILTRO e "
+        "non vede TOCCO: %d/%d" % (mm.ok, mm.n))
+    log("   FILTRO B-A grezzo entrate LONG %s SHORT %s | TOCCO LONG %s SHORT %s | POSITIVO coppie grezzo %s / %s" %
+        (_sgn(fil[1]["obsE"]["dR"]), _sgn(fil[-1]["obsE"]["dR"]), _sgn(toc[1]["obsE"]["dR"]),
+         _sgn(toc[-1]["obsE"]["dR"]), _sgn(pos[1]["obsP"]["dR"]), _sgn(pos[-1]["obsP"]["dR"])))
     log("   nullo (mondo senza memoria, range 15): divario grezzo falso A-B LONG %s pt, SHORT %s pt; eccesso %s / %s" %
         (_sgn(neg[1]["obsE"]["dF"], 1), _sgn(neg[-1]["obsE"]["dF"], 1),
          _sgn(neg[1]["vE"]["exF"], 1), _sgn(neg[-1]["vE"]["exF"], 1)))
@@ -2186,6 +2361,17 @@ def autotest():
         ee.check("corsa: il CSV ha lo stesso numero di campi per riga",
                  len(set(len(x.split(",")) for x in righe_csv)) == 1, str(set(len(x.split(",")) for x in righe_csv)))
         ee.uguale("corsa: una riga per giorno + intestazione", len(righe_csv), 51, 0)
+    # bersagli di riproduzione dell'anatomia (29/09): coincidono -> niente; uno diverso -> un rilievo
+    class _CfgB(object):
+        per_is = (2010, 2020)
+    rb = {15: {"A": {"LONG": 1267, "SHORT": 1214}}, 30: {"A": {"LONG": 1348, "SHORT": 1135}}}
+    ee.uguale("bersagli: n di A uguali all'anatomia -> nessun rilievo", controlla_bersagli(rb, _CfgB, "NASUSD"), [])
+    rb[30]["A"]["SHORT"] = 1134
+    ee.uguale("bersagli: un n diverso (30 SHORT 1134) -> un rilievo RIPRODUZIONE",
+              len([x for x in controlla_bersagli(rb, _CfgB, "NASUSD") if x.startswith("RIPRODUZIONE")]), 1)
+    ee.uguale("bersagli: non applicabili a un altro simbolo", controlla_bersagli(rb, _CfgB, "D30EUR"), [])
+    _CfgB.per_is = (2011, 2020)
+    ee.uguale("bersagli: non applicabili a un altro addestramento", controlla_bersagli(rb, _CfgB, "NASUSD"), [])
     # file NON in Formato 1: rifiuto (rc 2), non un referto vuoto
     f_brutto = os.path.join(tmpd, "storto.csv")
     with open(f_brutto, "w") as fh:
@@ -2250,18 +2436,31 @@ def autotest():
     catturate += 1 if fallito else 0
     log("   mutazione: %-80s -> %s" % ("il surrogato non tira i segni (= il giorno vero: nullo senza senso)",
                                         "CATTURATA" if fallito else "*** NON CATTURATA ***"))
+    # le due regole VECCHIE del verdetto (corrette dal cancello): devono far fallire le prove del verdetto
+    for chiave, nome in (("pagamento_su_eccesso", "il pagamento deciso sull'ECCESSO sul nullo (B grezzo peggio -> PAGA)"),
+                         ("pagamento_coppie", "il pagamento che chiede anche le COPPIE (non vedono il filtro)")):
+        _MUT[chiave] = True
+        try:
+            vm = _Verifiche()
+            prove_verdetto(vm)
+            fallito = len(vm.falliti) > 0
+        finally:
+            _MUT.pop(chiave, None)
+        catturate += 1 if fallito else 0
+        log("   mutazione: %-80s -> %s" % (nome, "CATTURATA" if fallito else "*** NON CATTURATA ***"))
     # soglie mutate: la stessa cella cambia verdetto
     nul0 = _nullo_fisso()
     base = giudica_cella(_obs_fisso(1000, 12.0, 1.0, 0.09, 0.01, 0.09, 0.01), nul0)
     mut_f = giudica_cella(_obs_fisso(1000, 12.0, 1.0, 0.09, 0.01, 0.09, 0.01), nul0, x_f=15.0)
-    mut_r = giudica_cella(_obs_fisso(1000, 12.0, 1.0, 0.09, 0.01, 0.09, 0.01), nul0, x_r=0.12)
-    mut_n = giudica_cella(_obs_fisso(140, 12.0, 1.0, 0.09, 0.01, 0.09, 0.01), nul0)
-    for nome, cambia in (("soglia falso 10 -> 15", mut_f["meccanismo"] != base["meccanismo"]),
-                         ("soglia R 0,08 -> 0,12", mut_r["pagamento"] != base["pagamento"]),
-                         ("n minimo 150 -> 140 coppie", mut_n["meccanismo"] != base["meccanismo"])):
+    o_b = _obs_fisso(1000, 12.0, 1.0, 0.09, 0.01, 0.09, 0.01)
+    mut_r = giudica_politica(o_b, x_r=0.12)
+    mut_n = giudica_politica(_obs_fisso(140, 12.0, 1.0, 0.09, 0.01, 0.09, 0.01))
+    for nome, cambia in (("soglia falso (descrittiva) 10 -> 15", mut_f["meccanismo"] != base["meccanismo"]),
+                         ("soglia R del verdetto 0,08 -> 0,12", mut_r["pagamento"] != giudica_politica(o_b)["pagamento"]),
+                         ("n minimo 150 -> 140 entrate", mut_n["pagamento"] != giudica_politica(o_b)["pagamento"])):
         catturate += 1 if cambia else 0
         log("   mutazione: %-80s -> %s" % (nome, "CATTURATA" if cambia else "*** NON CATTURATA ***"))
-    n_mut = len(mutazioni) + 1 + 3
+    n_mut = len(mutazioni) + 1 + 2 + 3
     log("8. mutazioni catturate: %d/%d" % (catturate, n_mut))
     totale += n_mut
     giusti += catturate
