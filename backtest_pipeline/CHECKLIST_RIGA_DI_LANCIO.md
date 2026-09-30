@@ -36768,3 +36768,12 @@ aver guardato se l'archivio mostra gia' coincidenza su una delle due. Correzione
 ### CLASSE 991 -- "F7 sul grafico dell'EA" su un terminale che ha PIU' grafici identici dello stesso simbolo/TF: F7 apre le proprieta' dell'EA del grafico ATTIVO, e sul piccolo i GBPUSD H1 sono tre (30/09/2026, stesso passaggio della 990, parente della 922 e della regola dei terminali multipli del 06/09)
 - **Caso**: `ABTG_Bulge` v5.20 gira su un grafico GBPUSD H1 del piccolo 50503392 (HANDOFF 29/09 ~22:55), dove il censimento del 29/09 (`RIGA_SEDIE_PICCOLO_2026-09-29.txt`) conta anche `ABTG_PTE GBPUSD H1 x2` (magic 771332 e 771322). Tre finestre con la stessa etichetta `GBPUSD,H1`: un'istruzione "clicca il grafico GBPUSD H1 e premi F7" ha due probabilita' su tre di aprire le proprieta' di una PTE. La regola dei terminali multipli (numero di conto + cartella) identifica il TERMINALE, non il GRAFICO dentro il terminale.
 - **Regola**: un'istruzione manuale che cambia gli input di un EA identifica il grafico con un fatto LETTO dentro la finestra delle proprieta' PRIMA di toccare qualcosa: titolo della finestra (`Expert - ABTG_Bulge`) + scheda Input con `InpMagic` e `InpComment` attesi (qui `772700` / `BULGE_V520`). Se uno dei due non torna: Annulla, non OK. E si dice anche cosa NON premere: `Ripristina`/`Reset` nella scheda Input riporta TUTTI gli input ai default del sorgente (qui `InpComment="BULGE"`, ADX acceso): con il commento cambiato `HasOpenTrade` non riconosce piu' le posizioni aperte e il doppione diventa possibile.
+
+### CLASSE 992 (30/09/2026) -- la data di fine dichiarata non e' la data di fine girata: il tester si e' fermato un giorno prima
+**Caso reale.** RFWD dichiarava `@FINOA 2026.10.01` per includere il 30/09; il giornale del tester dice `from 2026.09.21 00:00 to 2026.09.30 00:00`.
+Il 30/09 non e' stato simulato: lo stop del 770411 di quel giorno e' uscito nel confronto come `F_SOLO`. Il cancello (due passaggi
+indipendenti) aveva scritto che il 30/09 "rientra nella finestra", ma era una LETTURA del codice, non una MISURA.
+**Regola.** Una finestra si verifica sul LOG del tester (riga `Experts\... on SIMBOLO,TF from ... to ...`), non sulla data scritta nel
+file. La riga di lancio deve leggere quella riga dal giornale e scrivere a schermo `FINE GIRATA = ...` confrontandola con la data
+dichiarata; se differisce, il riepilogo lo dice in rosso e il confronto non attribuisce al forward le posizioni dei giorni non girati.
+

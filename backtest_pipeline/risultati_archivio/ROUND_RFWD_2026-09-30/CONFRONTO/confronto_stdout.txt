@@ -1,0 +1,209 @@
+CONFRONTO FORWARD FTMO 541452707 CONTRO TESTER BCM -- MARCATORE_CONFRONTO_FORWARD_TESTER_v1
+Domanda: le sedie FTMO, rigiocate nel tester sui dati BCM negli stessi giorni, fanno le STESSE operazioni?
+NON e' un backtest: nessun PF, nessuna promozione, nessuna taglia. Il tester non e' FTMO (feed, spread, slippage, rifiuti di modify).
+Tutte le ore di questo referto sono ORA BCM (forward FTMO meno 2 ore). Ultimo evento noto del forward: 2026.09.30 10:03:09 FTMO = 2026.09.30 08:03:09 BCM.
+Il per-trade del tester ha SOLO uscite: gli abbinamenti sono sulle USCITE; i pendenti del tester sono NON OSSERVABILI.
+Tolleranze dichiarate PRIMA dei numeri: uscita entro 15 min, prezzo medio entro DAX 10 / US30 25 / US100 15 punti, R entro 0.25.
+Forward: 11 posizioni di sedia + 2 senza commento (manuali, fuori confronto). Note di parsing forward: nessuna
+   manuale (escluso): pos 171125175 XAUUSD L 1.00 lotti, uscita 2026.09.28 17:30:56 BCM, netto 293.29
+   manuale (escluso): pos 171128483 XAUUSD L 2.00 lotti, uscita 2026.09.28 17:46:00 BCM, netto -2795.35
+
+==============================================================================
+SEDIA 770411  MaxMin DAX short   tester: ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR magic 793411 (gemello 793461)   forward: GER40.cash
+  per-trade: abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_793411.csv  (3 righe di uscita, 2 posizioni)  G1 gemello 793461: ok (3 righe identiche)
+  finestra viva: dal 2026.09.21 ; giorni feriali confrontati: 7 (2026-09-22 .. 2026-09-30)
+  forward 3 posizioni | tester 2 posizioni (dentro finestra e cutoff) | tester per giorno 0.29 | forward per giorno 0.43
+  ABBINATE: L1 (uscita stretta) 2 | L2 (stesso giorno, non L1) 0 | forward SENZA gemello 1 | tester SENZA gemello 0
+  ETICHETTA DI SEDIA: PARZIALE: 2 forward su 3 hanno un gemello (L1 2)
+  frequenza del contratto 0.051 pos/giorno: attese su 7 giorni 0.4 posizioni; probabilita' di ZERO per pura sorte (Poisson) 0.700; osservate: forward 3, tester 2
+  GIORNI con posizione: forward 3, tester 2, in comune 2 su 7 feriali; probabilita' che la sovrapposizione sia >= 2 per pura sorte (giorni tester a caso, ipergeometrica): 0.143
+  Se il tester fosse INDIPENDENTE, in media si sovrapporrebbero 0.86 giorni (=3 x 2 / 7).
+  PER GIORNO (data BCM; F=forward, T=tester; pendenti forward: piazzati/scaduti/cancellati/attivi; nel tester NON OSSERVABILI):
+    data        F  T  L1 L2 Fsolo Tsolo | pendenti forward
+    2026-09-22  0  0  0  0  0     0    | -
+    2026-09-23  0  0  0  0  0     0    | -
+    2026-09-24  1  1  1  0  0     0    | sell stop 25288.64 07:59->filled
+    2026-09-25  0  0  0  0  0     0    | sell stop 25324.24 07:59->canceled
+    2026-09-28  0  0  0  0  0     0    | -
+    2026-09-29  1  1  1  0  0     0    | sell stop 25409.24 07:59->filled
+    2026-09-30  1  0  0  0  1     0    | sell stop 25443.21 07:59->filled
+  COPPIE (forward vs tester):
+    L1 fw 2026.09.24 08:14:49 S p=25352.52 v=25.23 R=-1.07 STOP | ts 2026.09.24 08:14:29 p=25350.10 v=26.20 R=-1.03 STOP | dt -0.3 min, dprezzo -2.42, dR +0.03, esito UGUALE
+    L1 fw 2026.09.29 08:22:29 S p=25368.81 v=24.59 R=0.66 PARZ+RESTO_BASSO | ts 2026.09.29 08:22:29 p=25361.64 v=26.30 R=0.67 PARZ+RESTO_BASSO | dt +0.0 min, dprezzo -7.17, dR +0.01, esito UGUALE
+    F_SOLO fw 2026.09.30 08:03:09 S p=25506.32 v=23.95 R=-1.03 STOP  (nessun gemello nel tester)
+  PENDENTI del forward per questa sedia (nel tester NON OSSERVABILI, il per-trade non ha i pendenti):
+    170052086 sell stop GER40.cash prezzo 25288.64 piazzato 2026.09.24 07:59:01 BCM, filled 2026.09.24 08:02:04   [attribuzione: commento]
+    170449111 sell stop GER40.cash prezzo 25324.24 piazzato 2026.09.25 07:59:00 BCM, canceled 2026.09.25 08:30:00   [attribuzione: commento]
+    171266836 sell stop GER40.cash prezzo 25409.24 piazzato 2026.09.29 07:59:00 BCM, filled 2026.09.29 07:59:36   [attribuzione: commento]
+    171645260 sell stop GER40.cash prezzo 25443.21 piazzato 2026.09.30 07:59:00 BCM, filled 2026.09.30 07:59:13   [attribuzione: commento]
+  >>> 770411, CASO GUIDA: posizioni forward 3, riprodotte a L1: 2, a L2 (stesso giorno): 2.
+  >>> 2 riprodotte: in gran parte fedele; le 2 esatte non bastano da sole a escludere il caso (par. 5), si guarda la terza.
+
+==============================================================================
+SEDIA 770101  DAX Apertura EU RETEST long   tester: ABTG_DAX_Apertura_EU_Pin9fca D30EUR magic 793601 (gemello 793651)   forward: GER40.cash
+  per-trade: abtg_trades_ABTG_DAX_Apertura_EU_Pin9fca_D30EUR_793601.csv  (6 righe di uscita, 5 posizioni)  G1 gemello 793651: ok (6 righe identiche)
+  finestra viva: dal 2026.09.21 ; giorni feriali confrontati: 7 (2026-09-22 .. 2026-09-30)
+  forward 4 posizioni | tester 5 posizioni (dentro finestra e cutoff) | tester per giorno 0.71 | forward per giorno 0.57
+  ABBINATE: L1 (uscita stretta) 3 | L2 (stesso giorno, non L1) 1 | forward SENZA gemello 0 | tester SENZA gemello 1
+  ETICHETTA DI SEDIA: RIPRODOTTA: ogni forward ha il gemello (L1 3 su 4), nessuna operazione del tester senza ordine forward
+  frequenza del contratto 0.699 pos/giorno: attese su 7 giorni 4.9 posizioni; probabilita' di ZERO per pura sorte (Poisson) 0.007; osservate: forward 4, tester 5
+  GIORNI con posizione: forward 4, tester 5, in comune 4 su 7 feriali; probabilita' che la sovrapposizione sia >= 4 per pura sorte (giorni tester a caso, ipergeometrica): 0.143
+  Se il tester fosse INDIPENDENTE, in media si sovrapporrebbero 2.86 giorni (=4 x 5 / 7).
+  PER GIORNO (data BCM; F=forward, T=tester; pendenti forward: piazzati/scaduti/cancellati/attivi; nel tester NON OSSERVABILI):
+    data        F  T  L1 L2 Fsolo Tsolo | pendenti forward
+    2026-09-22  0  1  0  0  0     1    | buy limit 25630.54 10:43->expired [INFERITA:]
+    2026-09-23  0  0  0  0  0     0    | -
+    2026-09-24  1  1  1  0  0     0    | buy limit 25392.54 14:17->filled
+    2026-09-25  1  1  0  1  0     0    | buy limit 25468.24 09:28->filled
+    2026-09-28  1  1  1  0  0     0    | buy limit 25490.94 09:11->filled
+    2026-09-29  1  1  1  0  0     0    | buy limit 25484.14 08:39->filled
+    2026-09-30  0  0  0  0  0     0    | -
+  COPPIE (forward vs tester):
+    L1 fw 2026.09.24 14:36:01 L p=25399.06 v=10.70 R=0.05 TRAIL_STRETTO | ts 2026.09.24 14:35:00 p=25395.30 v=11.30 R=0.03 TRAIL_STRETTO | dt -1.0 min, dprezzo -3.76, dR -0.02, esito UGUALE
+    L2 fw 2026.09.25 15:02:18 L p=25390.59 v=19.90 R=-1.01 STOP | ts 2026.09.25 11:03:42 p=25468.60 v=21.00 R=0.05 TRAIL_STRETTO | dt -238.6 min, dprezzo +78.01, dR +1.06, esito DIVERSO
+    L1 fw 2026.09.28 09:21:07 L p=25492.89 v=15.55 R=0.03 TRAIL_STRETTO | ts 2026.09.28 09:21:08 p=25485.80 v=16.60 R=0.03 TRAIL_STRETTO | dt +0.0 min, dprezzo -7.09, dR +0.00, esito UGUALE
+    L1 fw 2026.09.29 10:10:40 L p=25493.66 v=9.92 R=0.06 TRAIL_STRETTO | ts 2026.09.29 10:10:53 p=25492.40 v=10.80 R=0.11 TRAIL_STRETTO | dt +0.2 min, dprezzo -1.26, dR +0.05, esito UGUALE
+    T_SOLO ts 2026.09.22 11:13:45 L p=25701.30 v=9.50 R=0.47 PARZ+RESTO_BASSO  (nessun gemello nel forward; quel giorno il forward ha piazzato un pendente non riempito)
+  GIORNO DI AVVIO (prima del 2026.09.22, fuori dal confronto): forward posizioni 0, pendenti: buy limit 25517.84 09.21 09:05->expired
+  PENDENTI del forward per questa sedia (nel tester NON OSSERVABILI, il per-trade non ha i pendenti):
+    169352736 buy limit GER40.cash prezzo 25630.54 piazzato 2026.09.22 10:43:05 BCM, expired 2026.09.22 12:43:00   [attribuzione: INFERITA: unica sedia DAX con limit BUY (770105 e' short, 770411 usa stop)]
+    170199888 buy limit GER40.cash prezzo 25392.54 piazzato 2026.09.24 14:17:03 BCM, filled 2026.09.24 14:35:18   [attribuzione: commento]
+    170476374 buy limit GER40.cash prezzo 25468.24 piazzato 2026.09.25 09:28:40 BCM, filled 2026.09.25 10:27:10   [attribuzione: commento]
+    170915902 buy limit GER40.cash prezzo 25490.94 piazzato 2026.09.28 09:11:51 BCM, filled 2026.09.28 09:12:17   [attribuzione: commento]
+    171282381 buy limit GER40.cash prezzo 25484.14 piazzato 2026.09.29 08:39:27 BCM, filled 2026.09.29 08:39:49   [attribuzione: commento]
+
+==============================================================================
+SEDIA 770105  DAX Apertura EU RETEST short   tester: ABTG_DAX_Apertura_EU_Pin9fca D30EUR magic 793605 (gemello 793655)   forward: GER40.cash
+  per-trade: abtg_trades_ABTG_DAX_Apertura_EU_Pin9fca_D30EUR_793605.csv  (6 righe di uscita, 6 posizioni)  G1 gemello 793655: ok (6 righe identiche)
+  finestra viva: dal 2026.09.28 ; giorni feriali confrontati: 3 (2026-09-28 .. 2026-09-30)
+  ESCLUSA dal confronto: tester pos 2 S uscita 2026.09.21 09:05:30 BCM netto -1594.78 -- sedia NON ancora attaccata al forward (viva da 2026.09.28)
+  ESCLUSA dal confronto: tester pos 4 S uscita 2026.09.22 09:25:24 BCM netto 11.16 -- sedia NON ancora attaccata al forward (viva da 2026.09.28)
+  ESCLUSA dal confronto: tester pos 6 S uscita 2026.09.23 09:12:34 BCM netto 51.15 -- sedia NON ancora attaccata al forward (viva da 2026.09.28)
+  ESCLUSA dal confronto: tester pos 8 S uscita 2026.09.24 14:17:39 BCM netto -1553.25 -- sedia NON ancora attaccata al forward (viva da 2026.09.28)
+  ESCLUSA dal confronto: tester pos 10 S uscita 2026.09.25 09:28:26 BCM netto -1532.00 -- sedia NON ancora attaccata al forward (viva da 2026.09.28)
+  forward 1 posizioni | tester 1 posizioni (dentro finestra e cutoff) | tester per giorno 0.33 | forward per giorno 0.33
+  ABBINATE: L1 (uscita stretta) 1 | L2 (stesso giorno, non L1) 0 | forward SENZA gemello 0 | tester SENZA gemello 0
+  ETICHETTA DI SEDIA: RIPRODOTTA: ogni forward ha il gemello (L1 1 su 1), nessuna operazione del tester senza ordine forward
+  GIORNI con posizione: forward 1, tester 1, in comune 1 su 3 feriali; probabilita' che la sovrapposizione sia >= 1 per pura sorte (giorni tester a caso, ipergeometrica): 0.333
+  Se il tester fosse INDIPENDENTE, in media si sovrapporrebbero 0.33 giorni (=1 x 1 / 3).
+  PER GIORNO (data BCM; F=forward, T=tester; pendenti forward: piazzati/scaduti/cancellati/attivi; nel tester NON OSSERVABILI):
+    data        F  T  L1 L2 Fsolo Tsolo | pendenti forward
+    2026-09-28  1  1  1  0  0     0    | sell limit 25400.44 10:09->filled
+    2026-09-29  0  0  0  0  0     0    | -
+    2026-09-30  0  0  0  0  0     0    | -
+  COPPIE (forward vs tester):
+    L1 fw 2026.09.28 10:40:00 S p=25394.42 v=15.56 R=0.06 TRAIL_STRETTO | ts 2026.09.28 10:40:00 p=25387.60 v=15.40 R=0.08 TRAIL_STRETTO | dt +0.0 min, dprezzo -6.82, dR +0.03, esito UGUALE
+  PENDENTI del forward per questa sedia (nel tester NON OSSERVABILI, il per-trade non ha i pendenti):
+    170938393 sell limit GER40.cash prezzo 25400.44 piazzato 2026.09.28 10:09:01 BCM, filled 2026.09.28 10:19:03   [attribuzione: commento]
+
+==============================================================================
+SEDIA 771531  EMA200 Dow H1   tester: ABTG_EMA200 U30USD magic 793531 (gemello 793581)   forward: US30.cash
+  per-trade: abtg_trades_ABTG_EMA200_U30USD_793531.csv  (4 righe di uscita, 3 posizioni)  G1 gemello 793581: ok (4 righe identiche)
+  finestra viva: dal 2026.09.21 ; giorni feriali confrontati: 7 (2026-09-22 .. 2026-09-30)
+  forward 3 posizioni | tester 3 posizioni (dentro finestra e cutoff) | tester per giorno 0.43 | forward per giorno 0.43
+  ABBINATE: L1 (uscita stretta) 2 | L2 (stesso giorno, non L1) 1 | forward SENZA gemello 0 | tester SENZA gemello 0
+  ETICHETTA DI SEDIA: RIPRODOTTA: ogni forward ha il gemello (L1 2 su 3), nessuna operazione del tester senza ordine forward
+  frequenza del contratto 0.931 pos/giorno: attese su 7 giorni 6.5 posizioni; probabilita' di ZERO per pura sorte (Poisson) 0.001; osservate: forward 3, tester 3
+  GIORNI con posizione: forward 2, tester 2, in comune 2 su 7 feriali; probabilita' che la sovrapposizione sia >= 2 per pura sorte (giorni tester a caso, ipergeometrica): 0.048
+  Se il tester fosse INDIPENDENTE, in media si sovrapporrebbero 0.57 giorni (=2 x 2 / 7).
+  PER GIORNO (data BCM; F=forward, T=tester; pendenti forward: piazzati/scaduti/cancellati/attivi; nel tester NON OSSERVABILI):
+    data        F  T  L1 L2 Fsolo Tsolo | pendenti forward
+    2026-09-22  2  2  2  0  0     0    | sell limit 52157.36 07:00->filled; sell limit 52190.90 07:00->filled
+    2026-09-23  0  0  0  0  0     0    | -
+    2026-09-24  0  0  0  0  0     0    | -
+    2026-09-25  0  0  0  0  0     0    | sell limit 51817.34 18:00->filled; sell limit 51876.16 18:00->expired [INFERITA:]
+    2026-09-28  1  1  0  1  0     0    | sell limit 51807.04 03:00->expired [INFERITA:]; sell limit 51869.22 03:00->expired [INFERITA:]; sell limit 51770.46 19:00->expired [INFERITA:]; sell limit 51834.83 19:00->expired [INFERITA:]
+    2026-09-29  0  0  0  0  0     0    | -
+    2026-09-30  0  0  0  0  0     0    | sell limit 51675.95 05:00->attivo; sell limit 51723.69 05:00->attivo
+  COPPIE (forward vs tester):
+    L1 fw 2026.09.22 12:45:51 S p=52265.82 v=9.11 R=-1.06 STOP | ts 2026.09.22 12:45:51 p=52261.50 v=9.00 R=-1.01 STOP | dt +0.0 min, dprezzo -4.32, dR +0.04, esito UGUALE [ambiguita' sciolta per rango di volume]
+    L1 fw 2026.09.22 12:45:51 S p=52265.82 v=13.67 R=-1.14 STOP | ts 2026.09.22 12:45:51 p=52261.50 v=13.50 R=-1.04 STOP | dt +0.0 min, dprezzo -4.32, dR +0.10, esito UGUALE [ambiguita' sciolta per rango di volume]
+    L2 fw 2026.09.28 00:37:34 S p=51643.29 v=4.84 R=1.00 PARZ+RESTO_BASSO | ts 2026.09.28 00:05:00 p=51644.00 v=5.00 R=0.98 PARZ+RESTO_BASSO | dt -32.6 min, dprezzo +0.71, dR -0.02, esito UGUALE
+  GIORNO DI AVVIO (prima del 2026.09.22, fuori dal confronto): forward posizioni 0, pendenti: sell limit 52188.99 09.21 13:00->expired; sell limit 52217.93 09.21 13:00->expired; sell limit 52163.05 09.21 20:00->expired; sell limit 52218.93 09.21 20:00->expired
+  PENDENTI del forward per questa sedia (nel tester NON OSSERVABILI, il per-trade non ha i pendenti):
+    169258062 sell limit US30.cash prezzo 52157.36 piazzato 2026.09.22 07:00:00 BCM, filled 2026.09.22 10:52:01   [attribuzione: commento]
+    169258082 sell limit US30.cash prezzo 52190.90 piazzato 2026.09.22 07:00:00 BCM, filled 2026.09.22 10:52:31   [attribuzione: commento]
+    170709416 sell limit US30.cash prezzo 51817.34 piazzato 2026.09.25 18:00:00 BCM, filled 2026.09.25 20:38:03   [attribuzione: commento]
+    170709478 sell limit US30.cash prezzo 51876.16 piazzato 2026.09.25 18:00:00 BCM, expired 2026.09.27 23:05:00   [attribuzione: INFERITA: EMA200 piazza coppie di limit S1/S2 all'apertura di ogni H1; 770202 e' long-only, SuperWave entra a mercato]
+    170820298 sell limit US30.cash prezzo 51807.04 piazzato 2026.09.28 03:00:00 BCM, expired 2026.09.28 09:00:00   [attribuzione: INFERITA: EMA200 piazza coppie di limit S1/S2 all'apertura di ogni H1; 770202 e' long-only, SuperWave entra a mercato]
+    170820345 sell limit US30.cash prezzo 51869.22 piazzato 2026.09.28 03:00:00 BCM, expired 2026.09.28 09:00:00   [attribuzione: INFERITA: EMA200 piazza coppie di limit S1/S2 all'apertura di ogni H1; 770202 e' long-only, SuperWave entra a mercato]
+    171150857 sell limit US30.cash prezzo 51770.46 piazzato 2026.09.28 19:00:00 BCM, expired 2026.09.29 01:00:00   [attribuzione: INFERITA: EMA200 piazza coppie di limit S1/S2 all'apertura di ogni H1; 770202 e' long-only, SuperWave entra a mercato]
+    171150893 sell limit US30.cash prezzo 51834.83 piazzato 2026.09.28 19:00:00 BCM, expired 2026.09.29 01:00:00   [attribuzione: INFERITA: EMA200 piazza coppie di limit S1/S2 all'apertura di ogni H1; 770202 e' long-only, SuperWave entra a mercato]
+    171604528 sell limit US30.cash prezzo 51675.95 piazzato 2026.09.30 05:00:01 BCM, attivo   [attribuzione: commento]
+    171604530 sell limit US30.cash prezzo 51723.69 piazzato 2026.09.30 05:00:01 BCM, attivo   [attribuzione: commento]
+
+==============================================================================
+SEDIA 770202  Dow Apertura US   tester: ABTG_Dow_Apertura_US_Pin9fca U30USD magic 793202 (gemello 793252)   forward: US30.cash
+  per-trade: abtg_trades_ABTG_Dow_Apertura_US_Pin9fca_U30USD_793202.csv  (0 righe di uscita, 0 posizioni)  G1 gemello 793252: ok (0 righe identiche)
+  finestra viva: dal 2026.09.21 ; giorni feriali confrontati: 7 (2026-09-22 .. 2026-09-30)
+  forward 0 posizioni | tester 0 posizioni (dentro finestra e cutoff) | tester per giorno 0.00 | forward per giorno 0.00
+  ABBINATE: L1 (uscita stretta) 0 | L2 (stesso giorno, non L1) 0 | forward SENZA gemello 0 | tester SENZA gemello 0
+  ETICHETTA DI SEDIA: ZERO CONTRO ZERO: coerente, ma NON falsificabile (senza operazioni non c'e' niente da riprodurre)
+  frequenza del contratto 0.348 pos/giorno: attese su 7 giorni 2.4 posizioni; probabilita' di ZERO per pura sorte (Poisson) 0.088; osservate: forward 0, tester 0
+  GIORNI con posizione: forward 0, tester 0, in comune 0 su 7 feriali; probabilita' che la sovrapposizione sia >= 0 per pura sorte (giorni tester a caso, ipergeometrica): 1.000
+  PER GIORNO (data BCM; F=forward, T=tester; pendenti forward: piazzati/scaduti/cancellati/attivi; nel tester NON OSSERVABILI):
+    data        F  T  L1 L2 Fsolo Tsolo | pendenti forward
+    2026-09-22  0  0  0  0  0     0    | -
+    2026-09-23  0  0  0  0  0     0    | -
+    2026-09-24  0  0  0  0  0     0    | -
+    2026-09-25  0  0  0  0  0     0    | -
+    2026-09-28  0  0  0  0  0     0    | -
+    2026-09-29  0  0  0  0  0     0    | -
+    2026-09-30  0  0  0  0  0     0    | -
+  COPPIE (forward vs tester):
+
+==============================================================================
+SEDIA 770260  Nasdaq Apertura US RETEST   tester: ABTG_Nasdaq_Apertura_US_Pin9fca NASUSD magic 793260 (gemello 793310)   forward: US100.cash
+  per-trade: abtg_trades_ABTG_Nasdaq_Apertura_US_Pin9fca_NASUSD_793260.csv  (0 righe di uscita, 0 posizioni)  G1 gemello 793310: ok (0 righe identiche)
+  finestra viva: dal 2026.09.21 ; giorni feriali confrontati: 7 (2026-09-22 .. 2026-09-30)
+  forward 0 posizioni | tester 0 posizioni (dentro finestra e cutoff) | tester per giorno 0.00 | forward per giorno 0.00
+  ABBINATE: L1 (uscita stretta) 0 | L2 (stesso giorno, non L1) 0 | forward SENZA gemello 0 | tester SENZA gemello 0
+  ETICHETTA DI SEDIA: ZERO CONTRO ZERO: coerente, ma NON falsificabile (senza operazioni non c'e' niente da riprodurre)
+  frequenza del contratto 0.360 pos/giorno: attese su 7 giorni 2.5 posizioni; probabilita' di ZERO per pura sorte (Poisson) 0.080; osservate: forward 0, tester 0
+  GIORNI con posizione: forward 0, tester 0, in comune 0 su 7 feriali; probabilita' che la sovrapposizione sia >= 0 per pura sorte (giorni tester a caso, ipergeometrica): 1.000
+  PER GIORNO (data BCM; F=forward, T=tester; pendenti forward: piazzati/scaduti/cancellati/attivi; nel tester NON OSSERVABILI):
+    data        F  T  L1 L2 Fsolo Tsolo | pendenti forward
+    2026-09-22  0  0  0  0  0     0    | -
+    2026-09-23  0  0  0  0  0     0    | -
+    2026-09-24  0  0  0  0  0     0    | -
+    2026-09-25  0  0  0  0  0     0    | -
+    2026-09-28  0  0  0  0  0     0    | -
+    2026-09-29  0  0  0  0  0     0    | -
+    2026-09-30  0  0  0  0  0     0    | -
+  COPPIE (forward vs tester):
+
+==============================================================================
+SEDIA 770511  SuperWave DOW H1   tester: ABTG_SuperWave_DOW_H1_Ottimizzato U30USD magic 793511 (gemello 793561)   forward: US30.cash
+  per-trade: abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_793511.csv  (0 righe di uscita, 0 posizioni)  G1 gemello 793561: ok (0 righe identiche)
+  finestra viva: dal 2026.09.21 ; giorni feriali confrontati: 7 (2026-09-22 .. 2026-09-30)
+  forward 0 posizioni | tester 0 posizioni (dentro finestra e cutoff) | tester per giorno 0.00 | forward per giorno 0.00
+  ABBINATE: L1 (uscita stretta) 0 | L2 (stesso giorno, non L1) 0 | forward SENZA gemello 0 | tester SENZA gemello 0
+  ETICHETTA DI SEDIA: ZERO CONTRO ZERO: coerente, ma NON falsificabile (senza operazioni non c'e' niente da riprodurre)
+  frequenza del contratto 0.294 pos/giorno: attese su 7 giorni 2.1 posizioni; probabilita' di ZERO per pura sorte (Poisson) 0.128; osservate: forward 0, tester 0
+  GIORNI con posizione: forward 0, tester 0, in comune 0 su 7 feriali; probabilita' che la sovrapposizione sia >= 0 per pura sorte (giorni tester a caso, ipergeometrica): 1.000
+  PER GIORNO (data BCM; F=forward, T=tester; pendenti forward: piazzati/scaduti/cancellati/attivi; nel tester NON OSSERVABILI):
+    data        F  T  L1 L2 Fsolo Tsolo | pendenti forward
+    2026-09-22  0  0  0  0  0     0    | -
+    2026-09-23  0  0  0  0  0     0    | -
+    2026-09-24  0  0  0  0  0     0    | -
+    2026-09-25  0  0  0  0  0     0    | -
+    2026-09-28  0  0  0  0  0     0    | -
+    2026-09-29  0  0  0  0  0     0    | -
+    2026-09-30  0  0  0  0  0     0    | -
+  COPPIE (forward vs tester):
+
+==============================================================================
+SINTESI (solo sedie con tester leggibile e G1 ok)
+  posizioni forward nel confronto: 11 | tester: 11 | L1 8 (73%) | L1+L2 10 (91%) | T_SOLO con pendente forward non riempito quel giorno 1 | T_SOLO senza nessun ordine forward 0
+  scarto orario mediano delle coppie L2 (non L1): 135.6 min
+  su 10 coppie (L1+L2): stessa classe di uscita 9 ; R entro 0.25 9 ; ENTRAMBE 9 ; almeno una diversa 1
+  CONTROESEMPIO (tester INDIPENDENTE dal forward, 2000 permutazioni, seme 20260930, stesso numero di posizioni tester): L1 attesa 2% (p95 9%), L1+L2 attesa 38% (p95 55%).
+  Soglie H_FEDELI: L1 >= 50% (SOPRA il p95 del nullo), L1+L2 >= 70% (SOPRA il p95 del nullo)
+  LETTURA MECCANICA (soglie in RFWD_CRITERI, congelate prima dei numeri; e' una descrizione, non un verdetto):
+    H_FEDELI  (L1+L2 >= 70%, L1 >= 50%, T_SOLO senza ordine forward <= 25%): SI
+    H_DIVERSI, ORARI (L1+L2 >= 50%, L1 <= 20%, mediana scarto >= 45 min): no
+    H_DIVERSI, FREQUENZA (L1+L2 <= 30% oppure T_SOLO senza ordine forward >= 100% dei forward): no
+    ESITO: H_FEDELI
+
+NON SI PUO' CONCLUDERE: cosa fa FTMO con i suoi feed, spread, slippage e rifiuti di modify; cosa farebbe il tester con un altro regime; niente sul merito. Campione: 13 giorni-sedia al massimo, un solo regime (estate, ora legale).
+

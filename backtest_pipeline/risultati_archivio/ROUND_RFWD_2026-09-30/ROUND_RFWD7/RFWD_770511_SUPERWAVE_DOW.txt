@@ -1,0 +1,105 @@
+#  EA: ABTG_SuperWave_DOW_H1_Ottimizzato
+# =====================================================================
+#  RFWD 770511 -- SuperWave DOW H1: le operazioni del FORWARD FTMO 541452707 rigiocate nel TESTER BCM
+#  Una sola domanda: nei giorni 21/09-30/09/2026 il tester fa le STESSE operazioni che la sedia ha fatto sul forward FTMO?
+#  NON misura il merito, NON promuove, NON propone nessuna taglia, NON tocca preset, EA, sedie, conti. Nessun PF: il numero che
+#  interessa e' quante posizioni escono, quando, a che prezzo (backtest_pipeline/confronto_forward_tester.py, criteri congelati in
+#  report/RFWD_CRITERI.md PRIMA dei numeri).
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (firma del 21/09/2026). MAI sul VPS, MAI su un terminale di conto.
+#
+#  DA DOVE VENGONO I VALORI
+#   - la FOTO dei grafici vivi di C:\FTMO (CODA_08 del 30/09/2026 03:30, .chr del 28/09 07:43, 44 input, sedia 770511 magic 770511 su US30.cash):
+#     e' quello che gira davvero. Coincide col .set FTMO del repo (verifica V2 di genera_prove.py).
+#   - sorgente in campo: CLAU12_* compilati da ABTG_* ai pin di mql5/Experts (righe/SCHIERA_FTMO.ps1, tavola $SORGENTI); i pin e le
+#     impronte sono nel report RFWD_CRITERI par. 3. Qui l'EA compilato e' ABTG_SuperWave_DOW_H1_Ottimizzato.
+#
+#  QUATTRO TRASFORMAZIONI, e nient'altro (tutte dichiarate):
+#   1. OROLOGIO: FTMO (UTC+3 d'estate) = BCM + 2 ore (report/OROLOGIO_BCM_2026-09-24.md; BCM = UTC+1 fisso). Input orari spostati di -2:
+#        nessuno: la sedia non ha finestra oraria (InpUseTimeWindow=false; InpStartHour=0 / InpEndHour=24 = tutto il giorno, invariante).
+#      Le griglie H1 e M15 sono identiche fra i due server (sfasamento 2h = multiplo del passo). La griglia H4 NO (vedi sotto).
+#   2. InpUsaGuardian true -> false: nel tester il Guardian non gira (precedente prove/TRAILFIX_*_pin.txt). Nel forward il Guardian c'era:
+#      puo' aver RIFIUTATO ingressi che il tester fa. Non e' misurabile da qui: e' un limite dichiarato.
+#   3. InpCorrSymbol US500.cash -> SPXUSD (nome BCM); inerte (InpUseCorrelation=false).
+#   4. InpMagic = ASSE TECNICO a 2 celle (793511 e 793561): le due gemelle servono per G1 (identiche al centesimo) e perche' con Optimization=1
+#      e zero assi il driver non esegue nessuna passata (classe 134). Il per-trade della gamba OOS resta in Common\Files.
+#   RISCHIO: InpRiskPercent=2.0 come nel campo (2,00%), deposito 80000 EUR in riga di lancio (= il conto FTMO da 80k). NON e' una taglia
+#   proposta: replica il forward. Il tester non ha lo stesso saldo corrente, quindi R e' 'nominale' (netto / (rischio% x saldo)).
+#
+#  CONTROLLI GIA' FATTI SU QUESTA PROVA (genera_prove.py, esito in RFWD_CRITERI par. 4):
+#   V1 (foto - 2h) contro l'originale BCM del repo: differenze SOLO: InpPendingAtr, InpRiskPercent, InpSLBufferAtr, InpUsaGuardian.
+#   V2 .set FTMO del repo contro la foto: 0 discordanze salvo InpPendingAtr, InpSLBufferAtr, InpUsaGuardian.
+#
+#  FINESTRA (il tester tratta la data di fine come ESCLUSIVA: 'fine esclusiva' in TRAILFIX_*_pin.txt, R250: '2026.06.30 = ultima 06.29')
+#   @DAQUANDO 2026.09.14 @FINOA 2026.10.01 @FRAZIONEIS 0.38 -> Meta = 2026.09.14 + floor(17 x 0.38) giorni = 2026.09.20:
+#     gamba IS  2026.09.14 -> 2026.09.20 (fine esclusiva): 'riscaldamento', e' la settimana PRIMA della challenge;
+#     gamba OOS 2026.09.21 -> 2026.10.01 (fine esclusiva) = i giorni del forward 21/09-30/09 COMPRESO il 30/09 intero.
+#   Il per-trade e' UNO SOLO per magic e la gamba OOS (seconda) sovrascrive la IS: cio' che resta in Common\Files e' la finestra del forward.
+#   DEVIAZIONE DAL COMPITO, dichiarata: il compito diceva @DAQUANDO 2026.09.22 @FINOA 2026.09.30. Con FINOA esclusivo il 30/09 non ci sarebbe
+#   (e il 30/09 ha il caso piu' importante: -1.535,91 della 770411); DAQUANDO 21/09 aggiunge il primo giorno vivo del forward (ordini 21/09).
+#   Il confronto ufficiale resta 22-30/09; il 21/09 e' riportato a parte. Modello 4 (tick reali): i tick BCM degli indici partono dal 2024.09.26.
+#   [NON MISURATO] che il PC di backtest abbia i tick BCM fino al 30/09: R248 (25/09) ha girato fino al 18/09; il tester li scarica dal
+#   server BCM se il terminale e' collegato (giornale del tester: 'ticks synchronization completed').
+#   L'ultimo evento del forward xlsx e' il 30/09 10:03:09 FTMO = 08:03:09 BCM: le uscite del tester oltre quell'ora + 15 minuti NON si confrontano.
+#
+#  DIFFERENZE FEED / MERCATO CHE IL TESTER NON PUO' TOGLIERE (RFWD_CRITERI par. 6): simbolo (US30.cash FTMO contro U30USD BCM), spread,
+#  slippage, rifiuti di modify di FTMO (report/MODIFY_A_RAFFICA_FTMO_2026-09-25.md), volumi dei tick, Guardian, saldo corrente.
+#
+#  Forward 770511 (SuperWave DOW H1, ingresso a mercato + pendenti 2/3): NESSUNA operazione. Sorgente in campo al pin 872dba82
+#  (645 righe); il ramo lavoro (774) = pin + contatori IMBUTO (SOLO diagnostica, riletto sul diff). Equivalenza LETTA, non misurata.
+#
+#  ATTESE, SCRITTE PRIMA DEI NUMERI: in report/RFWD_CRITERI.md par. 5 (H_FEDELI contro H_DIVERSI, soglie e controesempio).
+# =====================================================================
+@SIMBOLO    U30USD
+@PERIODO    H1
+@DAQUANDO   2026.09.14
+@FINOA      2026.10.01
+@FRAZIONEIS 0.38
+
+# --- input della foto del campo (ordine del campo), con le trasformazioni sopra ---
+InpUsaGuardian=false
+InpTF=16385
+InpStMult=2.5
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=false
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingAtr=0.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpSLBufferAtr=0.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=2.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=SUPERWAVE DOW H1
+InpMaxSpread=0
+InpVerbose=true
+# (valori vuoti NON scritti, il driver li salta e il default compilato e' vuoto: InpNewsCurrencies)
+#
+# --- L'UNICO ASSE: magic tecnico a due celle (gemelle) ---
+InpMagic=793511||793511||50||793561||Y
+# ======================================================================

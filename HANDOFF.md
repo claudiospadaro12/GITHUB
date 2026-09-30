@@ -7,6 +7,14 @@
 
 ---
 
+## 🗓️ 30/09 sera — RFWD LETTO (`report/LETTURA_RFWD_2026-09-30.md`, archivio `risultati_archivio/ROUND_RFWD_2026-09-30/`)
+- Round sul PC di backtest 21:01-21:07, 7 job su 7, nessun nullo. **H_FEDELI: SI**: 11 forward, 11 tester, L1 73%, L1+L2 91%, stessa classe di uscita 9/10. Controesempio nullo: L1 2%, L1+L2 38%.
+- 3 dei 5 stop pieni della flotta si riproducono nel tester (770411 24/09; 771531 22/09 x2); 1 diverso (770101 25/09: tester +0,05 R, forward -1,01 R); 1 NON simulabile: **il tester si e' fermato al 30/09 00:00 (classe 992)**.
+- Conclusione: nessun orologio/feed/codice che cambi le decisioni; quello che e' successo e' il comportamento delle sedie su questi giorni. 770411 fa 2 posizioni anche nel tester (contratto 0,051/giorno): frequenza alta = regime o contratto basso, non artefatto FTMO.
+- 770202/770260/770511: zero contro zero, NON falsificabile. Nessuna sedia archiviata come morta.
+
+---
+
 ## 🗓️ 30/09 sera — PICCOLO 50503392, cronistorico del giorno (`data/statements/CronistoricoPiccolo50503392_2026-09-30.xlsx`)
 - Report MT5 20:55: bilancio 5.430,99, equity 5.404,27, flottante -26,72; 10 posizioni chiuse, netto -9,57 (report), PF 0,85. **9 sono Bulge v5.20** (aperture a ore tonde) + 1 XAUUSD 0,01 di un altro EA (-22,17).
 - **Bulge chiuso oggi (9 posizioni)**: 7 a TP, 2 perse; vincite +53,17, perdite -40,00 (GBPAUD SL -39,86; USDJPY chiuso a TP ma **-0,14 netto**: TP di 0,4 pip = 0,22 contro 0,36 di commissione, rapporto SL/TP 181 a 1), PF **1,33** su 9 (campione minuscolo). Rapporti SL/TP: 0,7 | 181 | 9,8 | 4,2 | 10,6 | 5,3 | 2,8 | 11,4 | 19,3.
