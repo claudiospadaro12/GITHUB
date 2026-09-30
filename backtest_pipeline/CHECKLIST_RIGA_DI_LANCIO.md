@@ -36777,3 +36777,27 @@ indipendenti) aveva scritto che il 30/09 "rientra nella finestra", ma era una LE
 file. La riga di lancio deve leggere quella riga dal giornale e scrivere a schermo `FINE GIRATA = ...` confrontandola con la data
 dichiarata; se differisce, il riepilogo lo dice in rosso e il confronto non attribuisce al forward le posizioni dei giorni non girati.
 
+### CLASSE 993 (30/09/2026) -- "il tester e' PARTITO" non dice che l'input e' ARRIVATO: un input `string` in ottimizzazione puo' essere troncato a 63 caratteri, e il job esce verde col cesto tagliato
+**Caso reale.** Diagnosi di R92b (riga R92BAB): `ABTG_Bulge` passa il cesto dei 22 cross in `Symbols_List` (153 caratteri). Il forum MQL5
+(<https://www.mql5.com/en/forum/310992>, aprile 2019, risposta di uno sviluppatore MetaQuotes) dice che in OTTIMIZZAZIONE un input `string` e' troncato a
+63 caratteri (in un backtest singolo no). Nei nostri archivi e checklist **non c'era nessuna misura** di questo limite. Se il troncamento vale sul build 6230,
+il tester puo' partire con `...EURNZD,GBPJP` (ultimo simbolo invalido) e R92b girerebbe su un cesto diverso dal dichiarato senza una riga di errore.
+**Regola.** Ogni round che passa una stringa lunga (liste di simboli, file, commenti) a un'ottimizzazione legge dal CSV di OptFrame la colonna di quell'input
+(`FrameInputs` restituisce cio' che il tester ha DAVVERO passato) e ne confronta la **lunghezza** con la dichiarata; la riga scrive `OK_TRONCATO` se e' piu' corta
+e `NV` se e' piu' lunga o la colonna manca. "Partito" e "partito col banco giusto" sono due stati diversi. Una lista lunga si passa in input da <=63 caratteri o dal codice.
+
+### CLASSE 994 (30/09/2026) -- la diagnosi che cambia DUE cose per volta, senza controllo positivo e senza replica: "tutti falliscono" e "uno fallisce" non si leggono
+**Caso reale.** Il disegno chiesto per sbloccare R92b era A (22 cross, 153 caratteri), B (un simbolo), C (8 cross, 55 caratteri): **A contro C cambia due
+variabili** (numero di simboli e lunghezza della stringa), quindi "limite di stringa o di numero" non si separa. Inoltre la stessa famiglia di guasto e' gia
+capitata a una gamba di un EA a UN simbolo (R258k e R258s, 28/09): un guasto isolato di un job a inizio giro puo' essere il tester, non l'ipotesi.
+**Regola.** Una diagnosi si disegna cosi': (a) una variabile per salto e la scala scritta (qui D = stessi simboli di C con la stringa di 153 caratteri);
+(b) un **controllo positivo** dello stesso giorno che deve passare, altrimenti nessun verdetto (qui P = il file prova di 770101); (c) una **replica** del caso che
+ha fallito, a fine giro (qui A2); (d) una gamba IS e una OOS per job come replica interna (MISTO = guasto non deterministico); (e) le letture scritte PRIMA, con
+le combinazioni che non hanno lettura dichiarate `NON PREVISTO` (report/R92B_DIAGNOSI_CRITERI.md).
+
+### CLASSE 995 (30/09/2026) -- il giornale del tester si legge per GAMBA, non per riga: una riga `Tester cannot be initialized` contata sul giornale intero non dice QUALE job
+**Caso reale.** Il giornale del 30/09 porta quattro morti (due lanci x IS/OOS) da sei righe ciascuna; la 940 gia' vietava di contare le corse precedenti. Per una
+diagnosi serve di piu': lo stato di un job e' "2 gambe partite / 2 morte / una e una", e serve che giornale e CSV **non si contraddicano**.
+**Regola.** Una gamba comincia alla riga `"<EA>.ex5" X64` ed e' PARTITA se segue `Experts\<EA>.ex5 on SIMBOLO,TF from ... to ...`, MORTA se segue
+`Tester cannot be initialized`; si attribuisce al job in corso con l'ora ai millisecondi; il numero di gambe attribuite deve essere 2 (altrimenti NV), il nome dell'EA
+della gamba deve essere quello del job, e una gamba "partita" con CSV assente o "morta" con CSV fresco e una **contraddizione** scritta come NV, mai risolta a favore di uno dei due.
