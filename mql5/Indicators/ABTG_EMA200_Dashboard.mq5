@@ -2,6 +2,9 @@
 //|                                     ABTG_EMA200_Dashboard.mq5    |
 //|  Dashboard di SOLA LETTURA: per ogni cross elencato mostra quanto|
 //|  il prezzo e' lontano dalla EMA (default 200) sui TF scelti.     |
+//|  v3: nelle celle i PIPS (forex) o PUNTI (indici, metalli) che    |
+//|  mancano perche' il prezzo tocchi la EMA, e il LIVELLO della EMA |
+//|  (utile per piazzare ordini pendenti). Modo cella a scelta.      |
 //|  v2: liste Forex / Indici / Metalli accendibili e modificabili;  |
 //|  TF a scelta con interruttori (M5, M15, M30, H1, H4, D1).        |
 //|                                                                  |
@@ -14,6 +17,9 @@
 //|  - Avviso opzionale (Alert / notifica push) quando un cross      |
 //|    entra nella fascia "vicinissimo" sul TF principale.           |
 //|                                                                  |
+//|  Segno: + = prezzo SOPRA la EMA (deve scendere per toccarla),    |
+//|  - = prezzo SOTTO la EMA (deve salire).                          |
+//|                                                                  |
 //|  NON apre, NON modifica, NON chiude ordini. Non e' un EA.        |
 //|  Unico effetto sul terminale: SymbolSelect() aggiunge al Market  |
 //|  Watch i simboli della lista (serve per avere i prezzi).         |
@@ -21,12 +27,22 @@
 //|  si apre un grafico nuovo (ChartOpen) del simbolo cliccato.      |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
-#property version   "2.00"
+#property version   "3.00"
 #property strict
 #property indicator_chart_window
 #property indicator_buffers 0
 #property indicator_plots   0
 
+enum ENUM_CELLA
+  {
+   CELLA_PIPS_ATR = 0,   // Pips/punti + ATR
+   CELLA_PIPS     = 1,   // Solo pips/punti
+   CELLA_ATR      = 2,   // Solo ATR
+   CELLA_PCT      = 3,   // ATR + % del prezzo
+   CELLA_LIVELLO  = 4    // Prezzo della EMA (livello dove piazzare il pendente)
+  };
+
+input ENUM_CELLA      InpCellMode     = CELLA_PIPS_ATR; // Cosa mostrare nelle celle
 input bool            InpForex        = true;      // Mostra FOREX
 input string          InpSymForex     = "EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY"; // Lista forex (virgola)
 input bool            InpIndici       = true;      // Mostra INDICI
@@ -66,6 +82,8 @@ int    gHMa[];                  // handle EMA  [s*gNT+t]
 int    gHAtr[];                 // handle ATR  [s*gNT+t]
 double gDist[];                 // distanza in ATR, EMPTY_VALUE se non pronta
 double gPct[];                  // distanza in % del prezzo
+double gPips[];                 // distanza in pips (forex) o punti di prezzo (indici, metalli), col segno
+double gEma[];                  // valore della EMA (livello)
 bool   gHotPrev[];              // era gia' "vicinissimo" al giro prima?
 int    gIdx[];                  // ordine di visualizzazione
 bool   gSeen[];                 // il TF principale del simbolo e' gia' stato misurato? (prima misura = muta)
@@ -173,6 +191,8 @@ int OnInit()
    ArrayResize(gHAtr, gN * gNT);
    ArrayResize(gDist, gN * gNT);
    ArrayResize(gPct, gN * gNT);
+   ArrayResize(gPips, gN * gNT);
+   ArrayResize(gEma, gN * gNT);
    ArrayResize(gHotPrev, gN);
    ArrayResize(gSeen, gN);
    ArrayResize(gIdx, gN);
@@ -188,6 +208,8 @@ int OnInit()
          gHAtr[k] = iATR(gSym[s], gTf[t], InpAtrPeriod);
          gDist[k] = EMPTY_VALUE;
          gPct[k]  = EMPTY_VALUE;
+         gPips[k] = EMPTY_VALUE;
+         gEma[k]  = EMPTY_VALUE;
         }
      }
 
@@ -252,6 +274,67 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
   }
 
 //+------------------------------------------------------------------+
+//| Dimensione di 1 "pip": forex = 10 point sui simboli a 3/5 cifre; |
+//| indici e metalli = 1,0 di prezzo (1 "punto" dell'indice, 1 dollaro|
+//| sull'oro). Serve solo a mostrare la distanza in unita' comode.   |
+//+------------------------------------------------------------------+
+double PipSize(const string sym)
+  {
+   double pt = SymbolInfoDouble(sym, SYMBOL_POINT);
+   if(pt <= 0.0)
+      return 0.0;
+   if(SymbolInfoInteger(sym, SYMBOL_TRADE_CALC_MODE) == SYMBOL_CALC_MODE_FOREX)
+     {
+      int dg = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+      return (dg == 3 || dg == 5) ? pt * 10.0 : pt;
+     }
+   return 1.0;
+  }
+
+bool IsForex(const string sym)
+  {
+   return SymbolInfoInteger(sym, SYMBOL_TRADE_CALC_MODE) == SYMBOL_CALC_MODE_FOREX;
+  }
+
+//+------------------------------------------------------------------+
+//| Testo di una cella secondo il modo scelto                         |
+//+------------------------------------------------------------------+
+string CellText(const int s, const int k)
+  {
+   if(gDist[k] == EMPTY_VALUE)
+      return "...";
+   string u = IsForex(gSym[s]) ? "p" : "pt";
+   switch(InpCellMode)
+     {
+      case CELLA_PIPS:
+         return StringFormat("%+.1f %s", gPips[k], u);
+      case CELLA_ATR:
+         return StringFormat("%+.2f ATR", gDist[k]);
+      case CELLA_PCT:
+         return StringFormat("%+.2f  %+.2f%%", gDist[k], gPct[k]);
+      case CELLA_LIVELLO:
+        {
+         int dg = (int)SymbolInfoInteger(gSym[s], SYMBOL_DIGITS);
+         return DoubleToString(gEma[k], dg);
+        }
+      default:
+         return StringFormat("%+.1f%s %+.2fA", gPips[k], u, gDist[k]);
+     }
+  }
+
+string HeaderSuffix()
+  {
+   switch(InpCellMode)
+     {
+      case CELLA_PIPS:    return "  pips/pt";
+      case CELLA_ATR:     return "  ATR";
+      case CELLA_PCT:     return "  ATR   %";
+      case CELLA_LIVELLO: return "  livello EMA";
+      default:            return "  pips ATR";
+     }
+  }
+
+//+------------------------------------------------------------------+
 //| Legge EMA/ATR/prezzo e calcola le distanze                       |
 //+------------------------------------------------------------------+
 void Measure()
@@ -264,6 +347,8 @@ void Measure()
          int k = s * gNT + t;
          gDist[k] = EMPTY_VALUE;
          gPct[k]  = EMPTY_VALUE;
+         gPips[k] = EMPTY_VALUE;
+         gEma[k]  = EMPTY_VALUE;
          if(gHMa[k] == INVALID_HANDLE || gHAtr[k] == INVALID_HANDLE || px <= 0.0)
             continue;
          // con meno barre del periodo la "EMA200" e' solo un riscaldamento: non si mostra
@@ -279,6 +364,10 @@ void Measure()
             continue;
          gDist[k] = (px - ema[0]) / atr[0];
          gPct[k]  = (px - ema[0]) / ema[0] * 100.0;
+         gEma[k]  = ema[0];
+         double ps = PipSize(gSym[s]);
+         if(ps > 0.0)
+            gPips[k] = (px - ema[0]) / ps;
         }
      }
   }
@@ -380,7 +469,7 @@ void Refresh()
    Lbl(PFX + "H_S", x0, yh, "Simbolo", C'150,170,210');
    for(int t = 0; t < gNT; t++)
       Lbl(PFX + "H_" + IntegerToString(t), x0 + gColSym + t * gColW, yh,
-          gTfName[t] + (t == gMain ? " *" : "") + "  ATR   %", C'150,170,210');
+          gTfName[t] + (t == gMain ? " *" : "") + HeaderSuffix(), C'150,170,210');
 
    for(int r = 0; r < gN; r++)
      {
@@ -391,9 +480,7 @@ void Refresh()
       for(int t = 0; t < gNT; t++)
         {
          int k = s * gNT + t;
-         string txt = "...";
-         if(gDist[k] != EMPTY_VALUE)
-            txt = StringFormat("%+6.2f  %+6.2f%%", gDist[k], gPct[k]);
+         string txt = CellText(s, k);
          Lbl(PFX + "C_" + IntegerToString(r) + "_" + IntegerToString(t),
              x0 + gColSym + t * gColW, y, txt, ColorFor(gDist[k]));
         }
