@@ -36781,9 +36781,9 @@ dichiarata; se differisce, il riepilogo lo dice in rosso e il confronto non attr
 **Caso reale.** Diagnosi di R92b (riga R92BAB): `ABTG_Bulge` passa il cesto dei 22 cross in `Symbols_List` (153 caratteri). Il forum MQL5
 (<https://www.mql5.com/en/forum/310992>, aprile 2019, risposta di uno sviluppatore MetaQuotes) dice che in OTTIMIZZAZIONE un input `string` e' troncato a
 63 caratteri (in un backtest singolo no). Nei nostri archivi e checklist **non c'era nessuna misura** di questo limite. Se il troncamento vale sul build 6230,
-il tester puo' partire con `...EURNZD,GBPJP` (ultimo simbolo invalido) e R92b girerebbe su un cesto diverso dal dichiarato senza una riga di errore.
+il tester puo' partire con `EURUSD,...,EURNZD,` (9 simboli piu' un elemento vuoto: il 63esimo carattere e' la virgola; il `GBPJP` scritto qui all'inizio era un conto sbagliato, corretto dal cancello, classe 997) e R92b girerebbe su un cesto diverso dal dichiarato senza una riga di errore.
 **Regola.** Ogni round che passa una stringa lunga (liste di simboli, file, commenti) a un'ottimizzazione legge dal CSV di OptFrame la colonna di quell'input
-(`FrameInputs` restituisce cio' che il tester ha DAVVERO passato) e ne confronta la **lunghezza** con la dichiarata; la riga scrive `OK_TRONCATO` se e' piu' corta
+(`FrameInputs` restituisce il valore di cui il TERMINALE ha costruito la passata: che sia quello visto dagli AGENTI e' **[NON VERIFICATO]**, classe 997, quindi la colonna da sola NON basta) e ne confronta la **lunghezza** con la dichiarata; la riga scrive `OK_TRONCATO` se e' piu' corta
 e `NV` se e' piu' lunga o la colonna manca. "Partito" e "partito col banco giusto" sono due stati diversi. Una lista lunga si passa in input da <=63 caratteri o dal codice.
 
 ### CLASSE 994 (30/09/2026) -- la diagnosi che cambia DUE cose per volta, senza controllo positivo e senza replica: "tutti falliscono" e "uno fallisce" non si leggono
@@ -36801,3 +36801,26 @@ diagnosi serve di piu': lo stato di un job e' "2 gambe partite / 2 morte / una e
 **Regola.** Una gamba comincia alla riga `"<EA>.ex5" X64` ed e' PARTITA se segue `Experts\<EA>.ex5 on SIMBOLO,TF from ... to ...`, MORTA se segue
 `Tester cannot be initialized`; si attribuisce al job in corso con l'ora ai millisecondi; il numero di gambe attribuite deve essere 2 (altrimenti NV), il nome dell'EA
 della gamba deve essere quello del job, e una gamba "partita" con CSV assente o "morta" con CSV fresco e una **contraddizione** scritta come NV, mai risolta a favore di uno dei due.
+
+### CLASSE 996 (30/09/2026) -- la "replica del caso che ha fallito" che NON e' il caso che ha fallito: cambia finestra e cella, e il "tutti OK" viene letto come "transitorio"
+**Caso reale.** Riga diagnostica R92BAB (controllo-preventivo sul pin `1eafed56`). Il disegno chiamava il job A "il caso che e' morto il 30/09" e A2 "la sua
+replica"; la lettura scritta prima diceva: tutti OK = "stato transitorio del terminale/tester", rilancio di R92b. Ma il job morto e' **R92b0**
+(`prove/R92b0_controllo_offset0.txt`, finestra 2022.01.01-2026.06.30, `@FRAZIONEIS 0.7275`), e A prende da R92be la cella AMPIA e una finestra di **4 mesi**:
+rispetto al caso morto cambia **la finestra e cinque input** (`Bulge_Multi`, `Use_Orange`, `Signal_Bar_Offset`, `Use_ATR_Filter`, `Use_ADX_Filter`).
+A2 replica A, non R92b0: nella riga **non c'era nessuna replica del guasto**, proprio mentre la classe 994 (stessa sera) chiedeva "(c) una replica del caso che ha fallito".
+**Controesempio.** Se il guasto dipende dalla finestra lunga (il precedente del 28/09, R258s, e' morto su 2008-2024), tutti i job a 4 mesi partono, la lettura
+dice "transitorio", si rilancia R92b e rimuore: una sera persa e una causa scritta sbagliata.
+**Regola.** Il job che si chiama "replica" si verifica con `diff` contro il file prova **che e' morto davvero** (non contro il file della cella che si vuole
+girare dopo); ogni riga diversa oltre al magic si elenca nel criterio. Se il banco cambia finestra o cella, un "non si riproduce" si scrive **"non si
+riproduce NEL BANCO"** con le spiegazioni che restano aperte, e la replica vera diventa il primo job del round successivo.
+
+### CLASSE 997 (30/09/2026) -- una colonna scritta dal TERMINALE presa per la misura di cio' che hanno visto gli AGENTI (e un conto di caratteri fatto a occhio)
+**Caso reale.** Stessa riga R92BAB. Lo stato `OK_TRONCATO` (classe 993) si decideva dalla colonna `Symbols_List` del CSV di OptFrame, e la checklist
+scriveva "`FrameInputs` restituisce cio' che il tester ha DAVVERO passato". Ma quel CSV lo scrive `OnTesterDeinit`, **nel terminale**; il taglio a 63 del
+forum, se esiste, colpisce la stringa spedita **agli agenti**. Nessuno l'aveva misurato. Nello stesso punto, il cesto tagliato era scritto `...EURNZD,GBPJP`:
+ricontato a macchina, il 63esimo carattere e' la **virgola** dopo EURNZD (9 simboli x 7).
+**Controesempio.** Taglio lato agente + colonna intera nel CSV del terminale: A esce **OK**, il criterio legge "cesto intero", R92b gira su 9 simboli.
+**Regola.** Quando uno stato poggia su un **proxy** (un valore riportato da un lato diverso da quello che conta), il proxy si dichiara `[NON VERIFICATO]`
+e si cerca nel disegno **la misura indipendente** che lo puo' smentire: qui C e D hanno gli stessi 8 simboli e senza taglio devono dare **righe CSV
+identiche**; con il taglio D ne vede 3 e deve differire (report/R92B_DIAGNOSI_CRITERI.md par. 4-bis). E ogni conto di caratteri, righe o giorni
+scritto in un criterio si rifa' **a macchina** prima del cancello.

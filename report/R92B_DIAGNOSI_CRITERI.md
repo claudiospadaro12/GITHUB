@@ -2,6 +2,8 @@
 
 Stato di questo file: **scritto prima di qualunque corsa della riga R92BAB**. Nessun numero di R92BAB esiste.
 Se un numero uscito suggerisse un criterio migliore, vale dal round dopo.
+**EMENDATO dal cancello (controllo-preventivo) il 30/09/2026, sempre PRIMA di qualunque numero** (classi 996-997): par. 2 (cosa A NON e'),
+par. 4 righe 5 e 8, nuovo par. 4-bis (il troncamento si decide dal confronto C/D), par. 7. Le parti emendate sono marcate `[EMENDATO]`.
 
 ## 1. IL PROBLEMA, con i fatti letti (non inferiti)
 
@@ -20,7 +22,10 @@ Se un numero uscito suggerisse un criterio migliore, vale dal round dopo.
   63 caratteri** (in un backtest singolo no: `StringLen` 200 contro 63). Comportamento dichiarato: **troncamento silenzioso**, non errore ne' blocco.
   La documentazione (<https://www.mql5.com/en/docs/basis/variables/inputvariables>) da' per la stringa 254 meno la lunghezza del nome (191-253), e dice che gli input
   di tipo string non partecipano all'ottimizzazione come assi. **[DICHIARATO da fonte esterna, NON misurato su questo build 6230]**; il build del 2019 non e' il nostro.
-  `Symbols_List` ha il default di **153 caratteri**: se il troncamento vale, nel tester arriva `...EURNZD,GBPJP` (63 caratteri, ultimo simbolo INVALIDO).
+  `Symbols_List` ha il default di **153 caratteri**: se il troncamento vale, nel tester arriva `EURUSD,...,EURNZD,` (63 caratteri = 9 simboli x 7, virgola finale compresa).
+  `[EMENDATO]` Qui c'era scritto `...EURNZD,GBPJP` con "ultimo simbolo INVALIDO": **conto sbagliato** (ricontato a macchina: il 63esimo carattere e' la
+  virgola dopo EURNZD). Quindi 9 simboli validi **piu' un elemento VUOTO** dopo `StringSplit`; che `iBands("")` lo tratti come il simbolo del grafico
+  (GBPUSD due volte) e' **[NON VERIFICATO]**. Con un limite a 64 arriverebbe `...EURNZD,G` (simbolo invalido). Nessuno dei due casi da' un errore.
   Il troncamento da solo **non spiega** il guasto (non blocca nessuno): e' una seconda cosa da misurare, e riguarda la VALIDITA' di R92b anche se il tester parte.
 
 ## 2. IL DISEGNO: sei lavori, un solo cambiamento alla volta
@@ -33,8 +38,8 @@ Lo scopo e' vedere se il tester PARTE, non misurare il merito: Trades>0 e' **inf
 
 | job | file prova | `Symbols_List` | simboli | caratteri | cambia rispetto al precedente |
 |---|---|---|---|---|---|
-| **P** | `R92BAB_P_controllo_positivo.txt` | (EA diverso) | 1 | - | CONTROLLO POSITIVO: il file di 770101 che oggi ha girato 28 passate, finestra agosto, tick reali, magic nuovi |
-| **A** | `R92BAB_A_cross22.txt` | i 22 cross | 22 | 153 | il caso che e' morto il 30/09 |
+| **P** | `R92BAB_P_controllo_positivo.txt` | (EA diverso) | 1 | - | CONTROLLO POSITIVO: il file di 770101 che oggi ha girato dentro RFWD (4 passate: 2 x 2 gambe, delle 28 di RFWD), finestra agosto, tick reali, magic nuovi. Ha `OnTesterInit`/`OnTesterDeinit` (r.2356/2365): esercita lo STESSO avvio del frame expert su cui muore Bulge |
+| **A** | `R92BAB_A_cross22.txt` | i 22 cross | 22 | 153 | `[EMENDATO]` il **cesto** del caso morto il 30/09, **non il caso**: vedi sotto |
 | **B** | `R92BAB_B_GBPUSD.txt` | `GBPUSD` | 1 | 6 | numero e lunghezza scendono insieme (precedente R92: funzionava) |
 | **C** | `R92BAB_C_cross8.txt` | 8 cross | 8 | 55 | sotto il limite dei 63 caratteri |
 | **D** | `R92BAB_D_cross8_largo.txt` | **gli stessi 8 cross di C**, 14 spazi dopo ogni virgola | 8 | **153** | SOLO la lunghezza (come A); l'EA toglie gli spazi di ogni simbolo |
@@ -44,6 +49,13 @@ Perche' D e A2, che non erano nella richiesta a tre (B, C, A): **senza D, A cont
 "limite di stringa o di numero" non si separa; con D, C contro D cambia solo la lunghezza e D contro A solo il numero. **Senza A2 un guasto di A a inizio
 giro e' indistinguibile da un avviamento difficile del terminale.** Senza P, "tutti falliscono" e' indistinguibile da "il tester di questo PC e' rotto adesso".
 Magic nuovi e diversi per ogni job (7994xx, 7995xx): nessuna passata ripescata dalla cache del tester.
+
+`[EMENDATO]` **COSA A NON E'.** Il job morto il 30/09 e' **R92b0** (`prove/R92b0_controllo_offset0.txt`), non R92be. A ne prende il **cesto** (stessa
+`Symbols_List` di 153 caratteri) ma cambia, rispetto a R92b0, **due cose in piu'**: (1) la **finestra**, 2022.01.01-2026.06.30 con `@FRAZIONEIS 0.7275`
+(4,5 anni) contro 2026.03.02-2026.06.30 (4 mesi); (2) **cinque input di cella** (verificato con diff: `Bulge_Multi` 1.1->1.0, `Use_Orange` 0->1,
+`Signal_Bar_Offset` 0->1, `Use_ATR_Filter` 1->0, `Use_ADX_Filter` 1->0, piu' `InpComment` BULGE->BULGE_V520A). Quindi **A2 replica A, non R92b0**:
+in questa riga **non c'e' nessuna replica del caso che ha fallito**. Conseguenza sulla lettura: un A che MUORE riproduce il guasto nel banco corto
+(e le righe 1-4 valgono, "nel banco corto"); un A che PARTE **non dice** che il guasto fosse transitorio (riga 5).
 
 ## 3. COSA LEGGE LA RIGA (per job) e COME DECIDE lo stato
 
@@ -73,12 +85,39 @@ La riga stampa anche un vettore compatto `STATI: P=.. A=.. B=.. C=.. D=.. A2=..`
 | 2 | B OK, C OK, **D OK**, A KO (A2 KO) | **H_N**: conta il NUMERO dei simboli (22 handle/storici), non la lunghezza | spezzare il cesto in sotto-cesti (cambia il tetto unico Max_Trades/kill switch: decisione di Claudio) e misurare la soglia fra 8 e 22 |
 | 3 | B OK, **C KO** (D KO, A KO) | soglia del numero **<= 8** | misurare 2 e 4 simboli; poi come riga 2 |
 | 4 | **B KO** (P OK) | **H_ALTRO**: l'EA e' morto anche a un simbolo: il cesto e la stringa non c'entrano | ispezione dell'EA/ex5: ricompilare, confronto col R92 (v5.10) che girava, un lavoro suo |
-| 5 | tutti OK (A e A2 compresi) | il guasto del 30/09 **non si riproduce**: stato transitorio del terminale/tester. **NON e' provato che fosse la cache**: la riga non la svuota | rilancio di R92b; cache da svuotare a mano (solo `Tester\cache`, mai `bases`) e' una scelta di Claudio |
+| 5 | tutti OK (A e A2 compresi) | `[EMENDATO]` il guasto del 30/09 **non si riproduce NEL BANCO CORTO**. Tre spiegazioni restano aperte e questa riga **non le separa**: stato transitorio del terminale/tester, oppure la **finestra lunga** di R92b0 (4,5 anni), oppure i **cinque input** della cella R92b0. **NON e' "transitorio", NON e' "R92b sbloccato"**, e NON e' provato che fosse la cache (la riga non la svuota). E vale solo se il par. 4-bis dice "cesto intero" | rilancio di R92b con R92b0 **tal quale** per primo: e' lui la replica che qui manca. Se rimuore, il colpevole e' finestra o cella (un job a finestra lunga con la cella AMPIA li separa). Cache da svuotare a mano (solo `Tester\cache`, mai `bases`): scelta di Claudio |
 | 6 | A o A2 OK, l'altro KO/MISTO, o D KO con A OK, o C KO con D OK | **non monotono**: un guasto non deterministico, non un limite | piu repliche prima di qualunque modifica; nessuna ipotesi H_ regge |
 | 7 | **P KO o MISTO** | il tester di questo PC e' guasto ADESSO: **nessun verdetto su A/B/C/D** (sono uscite dallo stesso stato) | rilancio a freddo (terminale e cache: decide Claudio); non si tocca l'EA |
-| 8 | qualunque job OK_TRONCATO | partito **ma** col cesto tagliato: per R92b il numero sarebbe su meno simboli (e uno invalido) | vale anche se A parte: il cesto da 22 NON puo' viaggiare cosi' |
+| 8 | qualunque job OK_TRONCATO | `[EMENDATO]` partito, con la colonna `Symbols_List` del CSV piu' corta: **da sola NON e' una prova di troncamento** (su D a 55 caratteri e' il collasso degli spazi, non un taglio). Si decide col par. 4-bis | se il par. 4-bis conferma il taglio: il cesto da 22 NON puo' viaggiare cosi', anche se A parte |
 
 Gli stati possibili sono piu delle righe (6 job x 5 stati): quelle non elencate **non hanno lettura**, si scrive `NON PREVISTO` e si guardano i log.
+
+## 4-bis. `[EMENDATO]` IL TRONCAMENTO SI DECIDE DAL CONFRONTO C/D, NON DALLA SOLA COLONNA
+
+La colonna `Symbols_List` del CSV la scrive l'EA in `OnTesterDeinit` (`ABTG_Bulge.mq5` r.2164-2226) con `FrameInputs(pass, ...)`, **nel terminale**, non
+negli agenti. Che `FrameInputs` restituisca il valore **visto dagli agenti** (e quindi l'eventuale taglio a 63) e' **[NON VERIFICATO]**: se il terminale
+tiene la stringa intera e taglia solo quella spedita agli agenti, la colonna direbbe 153 su un cesto tagliato e la riga scriverebbe **OK** (falso OK).
+**Controesempio che rompe la sola colonna**: taglio lato agente + colonna intera = A "OK", riga 5, rilancio di R92b su 9 simboli, senza una riga d'errore.
+
+La misura che non dipende da `FrameInputs` e' **gia' nel disegno**: C e D hanno **gli stessi 8 simboli nello stesso ordine** e l'EA toglie gli spazi
+(r.598-599); il magic non entra nelle decisioni (lo garantisce il gemello G1 dentro ogni job: le due passate devono essere identiche al centesimo).
+Quindi, senza taglio, **C e D devono dare le STESSE righe** (Trades, Profit, Profit Factor, Equity DD %) in `_IS` e in `_OOS`. Con il taglio a 63,
+D arriva con 3 simboli (EURUSD, GBPUSD, AUDUSD) piu' un elemento vuoto (par. 5.5) e **deve** differire da C.
+
+| C | D | confronto C/D (CSV) | colonna di D | lettura |
+|---|---|---|---|---|
+| OK | OK | identici | 153 | **cesto intero a 153 caratteri**: vale anche per A e A2 (stessa lunghezza). Colonna e confronto concordano |
+| OK | OK | **diversi** | 153 | **la colonna e' SMENTITA** (`FrameInputs` non vede il taglio): gli OK di A e A2 **non certificano** il cesto. Riga 5 non si applica |
+| OK | OK_TRONCATO | identici | 55 | **collasso degli spazi** (parser dell'ini), non un taglio: D non e' un test di lunghezza (par. 5.4); righe 1-2 non si decidono |
+| OK | OK_TRONCATO | diversi | 63 | **taglio confermato da due misure indipendenti**: riga 8 |
+| altro | altro | - | - | la domanda del taglio resta **[NON MISURATO]**: nessun OK di A o A2 certifica il cesto |
+
+Limite del confronto, dichiarato: "identici" prova il cesto intero **solo se in C ha operato almeno uno dei 5 simboli in coda** (NZDUSD, USDCAD,
+USDCHF, USDJPY, EURGBP); il CSV di OptFrame non ha la colonna del simbolo. Se C ha pochi Trades (sotto 10) il confronto si dichiara **debole**. La terza
+misura, a mano e non raccolta da questa riga, sono i per-trade `abtg_trades_ABTG_Bulge_GBPUSD_<magic>_violaEA.csv` in `Common\Files` del PC di
+backtest (colonna `symbol`, scritti dagli AGENTI; sopravvive la gamba OOS): un deal su un simbolo oltre il 63esimo carattere esclude il taglio.
+Prerequisito: in C e in D le due passate gemelle sono identiche fra loro (G1); se non lo sono, il confronto C/D non vale. Stesso controllo, gratis,
+su A contro A2 (stessi input, magic diverso): se partono tutti e due devono essere identici, altrimenti il banco non e' deterministico.
 
 ## 5. CONTROESEMPI E LIMITI, dichiarati
 
@@ -100,4 +139,7 @@ tutto KO fino a ~27 minuti. Tetto dichiarato **45 minuti**: i job non lanciati s
 ## 7. COSA NON PUO' VERIFICARE CHI HA SCRITTO LA RIGA
 
 Windows PowerShell 5.1 reale, MT5, il tester, i tempi, il comportamento del parser dell'ini sugli spazi interni (punto 5.4), se il troncamento a 63 esiste nel build 6230.
+`[EMENDATO]` Piu': se `FrameInputs` restituisce il valore visto dagli agenti (par. 4-bis); se la finestra lunga o la cella di R92b0 c'entrano (par. 2, riga 5):
+nessun job di questa riga le prova. Il tetto dei 45 minuti si controlla **fra** un job e l'altro: un tester appeso dentro un job non viene interrotto
+(il driver aspetta `WaitForExit()` senza tempo massimo, e la riga per scelta non chiude processi).
 Il collaudo a macchina (`backtest_pipeline/collaudo_riga_R92BAB/`) gira sotto PowerShell 7 con un driver finto.
