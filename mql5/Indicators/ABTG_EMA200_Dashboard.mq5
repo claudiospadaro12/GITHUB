@@ -6,7 +6,8 @@
 //|  (come ABTG_EMA200): prezzi di ingresso, SL, TP e LOTTI al rischio|
 //|  scelto da Claudio (default 1% del saldo di QUESTO terminale, in |
 //|  2 ordini da meta'). Solo CALCOLO: gli ordini li piazza Claudio. |
-//|  Piano meccanico, vantaggio misurato SOLO su U30USD H1 (771531). |
+//|  Cella misurata: SOLO U30USD H1 con O1 0,20 / O2 0,30 (771531),  |
+//|  NON i default qui sotto (0,10/0,35 = default dell'EA).          |
 //|  v3: nelle celle i PIPS (forex) o PUNTI (indici, metalli) che    |
 //|  mancano perche' il prezzo tocchi la EMA, e il LIVELLO della EMA |
 //|  (utile per piazzare ordini pendenti). Modo cella a scelta.      |
@@ -75,8 +76,8 @@ input int             InpY            = 20;        // Posizione Y
 input int             InpFontSize     = 9;         // Dimensione carattere
 input bool            InpPiano        = true;      // Clic sulla casella del TF = piano dei 2 limit
 input double          InpRiskPct      = 1.0;       // Piano: rischio % TOTALE del saldo (scelta di Claudio), diviso in 2 ordini
-input double          InpOrder1Atr    = 0.10;      // Piano, limit 1: dalla EMA verso il prezzo di N ATR (default di ABTG_EMA200)
-input double          InpOrder2Atr    = 0.35;      // Piano, limit 2: oltre la EMA (overshoot) di N ATR
+input double          InpOrder1Atr    = 0.10;      // Piano, limit 1: dalla EMA verso il prezzo di N ATR (default EA; la sedia 771531 usa 0.20)
+input double          InpOrder2Atr    = 0.35;      // Piano, limit 2: oltre la EMA (overshoot) di N ATR (la sedia 771531 usa 0.30)
 input double          InpSLatr        = 1.0;       // Piano: SL a N ATR oltre il limit 2
 input double          InpTpRR         = 2.0;       // Piano: TP finale in multipli di R (dal rispettivo limit)
 input int             InpExpiryBars   = 6;         // Piano: scadenza consigliata dei pendenti (barre del TF)
@@ -237,6 +238,15 @@ int OnInit()
    gColSym = 90 + (InpFontSize - 9) * 8;
    gColW   = 130 + (InpFontSize - 9) * 10;
 
+   // stato del piano azzerato a ogni init: gli indici gSelS/gSelT valgono solo per QUESTA
+   // lista di simboli/TF (con input cambiati puntarebbero fuori dagli array)
+   if(gHE14 != INVALID_HANDLE)
+      IndicatorRelease(gHE14);
+   gHE14      = INVALID_HANDLE;
+   gSelS      = -1;
+   gSelT      = -1;
+   gPlanDrawn = false;
+
    ObjectsDeleteAll(0, PFX);
    Refresh();
    EventSetTimer(MathMax(1, InpRefreshSec));
@@ -256,6 +266,10 @@ void OnDeinit(const int reason)
      }
    if(gHE14 != INVALID_HANDLE)
       IndicatorRelease(gHE14);
+   gHE14      = INVALID_HANDLE;
+   gSelS      = -1;
+   gSelT      = -1;
+   gPlanDrawn = false;
    ObjectsDeleteAll(0, PFX);
    ChartRedraw(0);
   }
@@ -482,11 +496,12 @@ color ColorFor(const double d)
 //| sul tick value). Arrotonda PER DIFETTO al passo; 0 = non fattibile|
 //+------------------------------------------------------------------+
 double LotForRisk(const string sym, const bool isLong, const double entry, const double sl,
-                  const double riskMoney)
+                  const double riskMoney, double &lossPerLot)
   {
+   lossPerLot = 0.0;
    if(riskMoney <= 0.0)
       return 0.0;
-   double profit = 0.0, lossPerLot = 0.0;
+   double profit = 0.0;
    if(OrderCalcProfit(isLong ? ORDER_TYPE_BUY : ORDER_TYPE_SELL, sym, 1.0, entry, sl, profit) && profit < 0.0)
       lossPerLot = -profit;
    if(lossPerLot <= 0.0)
@@ -512,15 +527,36 @@ double LotForRisk(const string sym, const bool isLong, const double entry, const
    return lot;
   }
 
-string LotText(const string sym, const double lot)
+// Lotto come testo. Sotto il minimo NON si propone il minimo (sarebbe piu' rischio di quello
+// scelto): si dice quanto rischierebbe. NB: ABTG_EMA200 (LotByRisk) in quel caso mette il MINIMO.
+string LotText(const string sym, const double lot, const double lossPerLot)
   {
-   if(lot <= 0.0)
-      return "n/d (sotto il lotto minimo)";
    double step = SymbolInfoDouble(sym, SYMBOL_VOLUME_STEP);
    int dec = 2;
    if(step > 0.0)
       dec = (int)MathMin(8.0, MathMax(0.0, MathCeil(-MathLog10(step) - 1e-9)));
-   return DoubleToString(lot, dec);
+   if(lot > 0.0)
+      return DoubleToString(lot, dec);
+   double mn = SymbolInfoDouble(sym, SYMBOL_VOLUME_MIN);
+   if(lossPerLot > 0.0 && mn > 0.0)
+      return StringFormat("n/d: il minimo %s rischia %.2f", DoubleToString(mn, dec), mn * lossPerLot);
+   return "n/d (perdita per lotto non calcolabile)";
+  }
+
+// Prezzo arrotondato al TICK del simbolo, come NormalizePrice() di ABTG_EMA200: sugli indici il
+// tick puo' essere piu' grosso del point, e un prezzo solo "a cifre" non sarebbe piazzabile.
+double NormPx(const string sym, const double price)
+  {
+   int    dg = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+   double ts = SymbolInfoDouble(sym, SYMBOL_TRADE_TICK_SIZE);
+   if(ts <= 0.0)
+      return NormalizeDouble(price, dg);
+   return NormalizeDouble(MathRound(price / ts) * ts, dg);
+  }
+
+bool Eq(const double a, const double b)
+  {
+   return (MathAbs(a - b) < 1e-9);
   }
 
 //+------------------------------------------------------------------+
@@ -560,7 +596,7 @@ void SelectCell(const string tip)
 //+------------------------------------------------------------------+
 //| Disegna il piano dei 2 limit sotto la tabella                     |
 //+------------------------------------------------------------------+
-void DrawPlan(const int xBox, const int yTop, const int wMin)
+void DrawPlan(int xBox, int yTop, const int wMin)   // xBox/yTop NON const: si spostano se il piano non ci sta sotto
   {
    if(!InpPiano || gSelS < 0 || gSelT < 0)
      {
@@ -574,8 +610,8 @@ void DrawPlan(const int xBox, const int yTop, const int wMin)
    string sym = gSym[gSelS];
    int    k   = gSelS * gNT + gSelT;
    int    dg  = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
-   string lines[8];
-   color  cols[8];
+   string lines[10];                     // caso peggiore 9 righe (ramo dati pronti); 1 riga se non pronti
+   color  cols[10];
    int    n = 0;
 
    double e[1], a[1], e14[1];
@@ -603,20 +639,24 @@ void DrawPlan(const int xBox, const int yTop, const int wMin)
          e14Known = true;
          e14Ok = !((up && e14[0] < ema) || (!up && e14[0] > ema));
         }
-      double o1 = NormalizeDouble(up ? ema + InpOrder1Atr * atr : ema - InpOrder1Atr * atr, dg);
-      double o2 = NormalizeDouble(up ? ema - InpOrder2Atr * atr : ema + InpOrder2Atr * atr, dg);
-      double sl = NormalizeDouble(up ? o2 - InpSLatr * atr : o2 + InpSLatr * atr, dg);
+      // prezzi arrotondati al TICK come NormalizePrice() dell'EA (r.459-465), non solo alle cifre
+      double o1 = NormPx(sym, up ? ema + InpOrder1Atr * atr : ema - InpOrder1Atr * atr);
+      double o2 = NormPx(sym, up ? ema - InpOrder2Atr * atr : ema + InpOrder2Atr * atr);
+      double sl = NormPx(sym, up ? o2 - InpSLatr * atr : o2 + InpSLatr * atr);
       double bal = AccountInfoDouble(ACCOUNT_BALANCE);
       double riskEach = bal * (InpRiskPct / 2.0) / 100.0;
       string side = up ? "BUY" : "SELL";
       color  cs   = up ? C'60,220,110' : C'255,90,90';
+      double ask  = SymbolInfoDouble(sym, SYMBOL_ASK);
+      double bid  = SymbolInfoDouble(sym, SYMBOL_BID);
 
       lines[n] = StringFormat("PIANO %s %s: %s LIMIT  (ultima chiusura %s la EMA%d = %s, ATR %s)",
                               sym, gTfName[gSelT], side, up ? "SOPRA" : "SOTTO", InpEmaPeriod,
                               DoubleToString(ema, dg), DoubleToString(atr, dg));
       cols[n++] = C'235,235,235';
-      lines[n] = StringFormat("Rischio %.2f%% del saldo %.2f = %.2f, in 2 ordini da %.2f%% (%.2f ciascuno)",
-                              InpRiskPct, bal, bal * InpRiskPct / 100.0, InpRiskPct / 2.0, riskEach);
+      lines[n] = StringFormat("Rischio %.2f%% del saldo %.2f %s = %.2f, in 2 ordini da %.2f%% (%.2f ciascuno)",
+                              InpRiskPct, bal, AccountInfoString(ACCOUNT_CURRENCY), bal * InpRiskPct / 100.0,
+                              InpRiskPct / 2.0, riskEach);
       cols[n++] = C'190,190,190';
       double os[2];
       os[0] = o1;
@@ -631,23 +671,41 @@ void DrawPlan(const int xBox, const int yTop, const int wMin)
             cols[n++] = C'255,140,0';
             continue;
            }
-         double tp  = NormalizeDouble(up ? os[i] + risk * InpTpRR : os[i] - risk * InpTpRR, dg);
-         double lot = LotForRisk(sym, up, os[i], sl, riskEach);
-         lines[n] = StringFormat("%s LIMIT %d:  %s    SL %s    TP %s (%.1fR)    lotti %s", side, i + 1,
+         double tp  = NormPx(sym, up ? os[i] + risk * InpTpRR : os[i] - risk * InpTpRR);
+         double lpl = 0.0;
+         double lot = LotForRisk(sym, up, os[i], sl, riskEach, lpl);
+         // il piano e' calcolato sulla barra CHIUSA, ma il prezzo si muove dentro la barra: un
+         // BUY LIMIT sopra l'Ask (o un SELL LIMIT sotto il Bid) il server lo RIFIUTA
+         bool oltre = up ? (ask > 0.0 && os[i] >= ask) : (bid > 0.0 && os[i] <= bid);
+         lines[n] = StringFormat("%s LIMIT %d:  %s    SL %s    TP %s (%.1fR)    lotti %s%s", side, i + 1,
                                  DoubleToString(os[i], dg), DoubleToString(sl, dg),
-                                 DoubleToString(tp, dg), InpTpRR, LotText(sym, lot));
-         cols[n++] = cs;
+                                 DoubleToString(tp, dg), InpTpRR, LotText(sym, lot, lpl),
+                                 oltre ? "  [gia' oltre: NON piazzabile ora]" : "");
+         cols[n++] = oltre ? C'255,140,0' : cs;
         }
-      lines[n] = StringFormat("Filtri dell'EA: distanza %.2f ATR (fascia %.2f-%.2f) %s | EMA14 dal lato giusto: %s",
+      bool   ema14No = (InpUseEma14Bias && e14Known && !e14Ok);
+      string verd    = (!fasciaOk || ema14No) ? "l'EA NON li piazzerebbe"
+                       : ((InpUseEma14Bias && !e14Known) ? "EMA14 non pronta" : "l'EA li piazzerebbe");
+      lines[n] = StringFormat("Filtri dell'EA: distanza %.2f ATR (fascia %.2f-%.2f) %s | EMA14 dal lato giusto: %s -> %s",
                               dist / atr, InpMinDistAtr, InpMaxDistAtr, fasciaOk ? "OK" : "FUORI",
-                              !InpUseEma14Bias ? "non richiesto" : (e14Known ? (e14Ok ? "OK" : "NO") : "n/d"));
+                              !InpUseEma14Bias ? "non richiesto" : (e14Known ? (e14Ok ? "OK" : "NO") : "n/d"), verd);
       cols[n++] = (fasciaOk && (!InpUseEma14Bias || (e14Known && e14Ok))) ? C'60,220,110' : C'255,140,0';
       lines[n] = StringFormat("Scadenza consigliata: %d barre %s; poi cancella i pendenti non eseguiti.",
                               InpExpiryBars, gTfName[gSelT]);
       cols[n++] = C'190,190,190';
-      lines[n] = "Piano MECCANICO di ABTG_EMA200: vantaggio misurato SOLO su U30USD H1 (771531). Altrove NON validato.";
+      // la cella MISURATA di 771531 (preset ABTG_EMA200_U30USD_H1_771531_VIVA.set, CSV R112 OOS):
+      // O1 0,20 / O2 0,30 / SL 1,0 / TP 2R / fascia 0,3-1,5 / EMA14 / EMA200 / ATR14, NON i default dell'EA
+      bool cella = (StringFind(sym, "U30USD") == 0 && gTf[gSelT] == PERIOD_H1 &&
+                    Eq(InpOrder1Atr, 0.20) && Eq(InpOrder2Atr, 0.30) && Eq(InpSLatr, 1.0) && Eq(InpTpRR, 2.0) &&
+                    Eq(InpMinDistAtr, 0.3) && Eq(InpMaxDistAtr, 1.5) && InpUseEma14Bias &&
+                    InpEmaPeriod == 200 && InpAtrPeriod == 14);
+      lines[n] = cella
+                 ? "Questa e' la cella di 771531 (U30USD H1, O1 0.20 O2 0.30 SL 1.0 TP 2R): backtest OOS PF 1.52 su 517 deal."
+                 : "NON e' la cella della sedia 771531 (U30USD H1, O1 0.20 O2 0.30 SL 1.0 TP 2R): qui NON validato.";
       cols[n++] = C'255,140,0';
-      lines[n] = StringFormat("Solo calcolo (conto %I64d di QUESTO terminale): gli ordini li metti tu. Il rischio % e' scelta tua.",
+      lines[n] = "L'EA gestisce anche parziale 50% su EMA14 + pareggio + trailing: solo SL/TP a mano NON e' la stessa cosa.";
+      cols[n++] = C'255,140,0';
+      lines[n] = StringFormat("Solo calcolo (conto %I64d di QUESTO terminale): gli ordini li metti tu. Il rischio %% e' scelta tua.",
                               AccountInfoInteger(ACCOUNT_LOGIN));
       cols[n++] = C'150,150,150';
      }
@@ -655,7 +713,17 @@ void DrawPlan(const int xBox, const int yTop, const int wMin)
    int maxLen = 0;
    for(int i = 0; i < n; i++)
       maxLen = (int)MathMax(maxLen, StringLen(lines[i]));
-   int w = (int)MathMax(wMin, 16 + (int)MathCeil(maxLen * InpFontSize * 0.75));
+   int wPlan = 16 + (int)MathCeil(maxLen * InpFontSize * 0.75);
+   int w     = (int)MathMax(wMin, wPlan);
+   // con la lista di default (30 simboli, font 9) la tabella e' alta ~760 px: "sotto" il piano
+   // finirebbe fuori dal grafico. Se non ci sta in altezza, va a DESTRA della tabella.
+   int chH = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS, 0);
+   if(chH > 0 && yTop + n * gRowH + 12 > chH)
+     {
+      xBox = InpX + wMin + 8;
+      yTop = InpY;
+      w    = wPlan;
+     }
    string bg = PFX + "P_BG";
    if(ObjectFind(0, bg) < 0)
      {
@@ -673,7 +741,7 @@ void DrawPlan(const int xBox, const int yTop, const int wMin)
    ObjectSetInteger(0, bg, OBJPROP_YDISTANCE, yTop);
    ObjectSetInteger(0, bg, OBJPROP_XSIZE, w);
    ObjectSetInteger(0, bg, OBJPROP_YSIZE, n * gRowH + 12);
-   for(int i = 0; i < 8; i++)
+   for(int i = 0; i < 10; i++)
      {
       string nm = PFX + "P_" + IntegerToString(i);
       if(i < n)
