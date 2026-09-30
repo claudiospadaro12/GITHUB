@@ -222,7 +222,11 @@ Sull'evoluzione: se il tester rifa il forward -> il gap forward/contratto della 
   E' un guasto del TESTER, non dell'EA, e **puo' capitare qui**. Il driver in quel caso esce **rc 2**, come uno zero-operazioni: la riga non si
   fida del codice d'uscita (CSV `_IS`/`_OOS` non fresco o per-trade non piu' recente del CSV `_IS` = FILE NULLO), conta le righe
   `Tester cannot be initialized` nel giornale del tester, le **attribuisce al job per nome** e scrive il rimedio (svuotare `Tester\cache`, rilanciare).
-  Frequenza del guasto su questa macchina **[NON MISURATA]**.
+  Frequenza del guasto su questa macchina **[NON MISURATA]**, ma **non e' zero**: su DESKTOP-H4D7CAJ e' capitato anche il **30/09 alle
+  08:52:26 e 08:54:27** (R92B, `ABTG_Bulge`: `risultati_archivio/ROUND_R92B_2026-09-30/LOG_TESTER/0006_Tester_logs_20260930.log`).
+  ✏️ *Secondo passaggio del controllo preventivo, 30/09 (classe 940)*: il giornale del tester e' **uno per giorno** e porta anche le corse
+  **precedenti** dello stesso giorno, quindi la riga conta solo le righe **dopo il suo avvio** (data dal nome del file, ora ai millisecondi),
+  scrive a parte quelle di prima, e con giornale assente o vuoto dice **NON VERIFICABILE**, mai "nessuna riga".
 - **Cache del tester**: un rilancio con gli stessi magic puo' ripescare passate gia' calcolate e non riscrivere il per-trade; la riga cancella i suoi file propri prima di ogni job e il per-trade mancante rende il job NULLO. Rilanciando, svuotare `Tester\cache`.
 - **Python** sul PC: serve 3.8+; se manca la riga lo dice e raccoglie tutto (il confronto si puo' fare altrove). Il confronto legge l'xlsx **senza librerie esterne**.
 - **Il terminale di quel PC e' loggato sul demo 50503392** e con `/config` carica il suo ultimo profilo, EA compresi (14/08/2026, ordini veri): la riga ha la guardia MT5 aperto e la guardia EA sui `.chr`.

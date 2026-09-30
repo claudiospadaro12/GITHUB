@@ -88,10 +88,21 @@ T = [
  # classe 938 (controllo preventivo 30/09): gamba OOS morta per "Tester cannot be initialized" (R258k, 28/09): rc 2 come uno zero-operazioni,
  # la riga deve dire NULLO, attribuire il guasto al job per nome e dare il rimedio (cache + rilancio), e la sintesi deve nominare chi ne resta fuori
  ("guasto_tester_init_OOS", scen({"RFWD2": {"init_fail": True, "no_OOS": True, "pt_old_mtime": True, "rc": 2}}), "", "ok", PIN, "DESKTOP-H4D7CAJ", "si", "",
-  ["E0: CSV _OOS NON FRESCO (ASSENTE)", "GUASTO DEL TESTER (classe 909), Tester cannot be initialized: 1 volte -> RFWD2 alle", "PRIMA DI RILANCIARE",
-   "Tester\\cache", "RFWD2 ("], ["FILE NULLI: nessuno", "job non attribuito"]),
+  ["E0: CSV _OOS NON FRESCO (ASSENTE)", "GUASTO DEL TESTER (classe 909), Tester cannot be initialized: 1 volte in QUESTA corsa -> RFWD2 alle", "PRIMA DI RILANCIARE",
+   "Tester\\cache", "RFWD2 ("], ["FILE NULLI: nessuno", "job non attribuito", "incoerenza"]),
  ("sintesi_per_nome", scen({"RFWD1": {"pt_missing_main": True}}), "", "ok", PIN, "DESKTOP-H4D7CAJ", "si", "",
   ["NON MISURATA", "E0 PER-TRADE del magic 793411 MANCANTE"], ["FILE NULLI: nessuno"]),
+ # classe 940 (secondo passaggio del controllo preventivo, 30/09): il giornale del tester e UNO PER GIORNO e porta anche le corse PRECEDENTI
+ # dello stesso giorno (R92B del 30/09, 08:52 e 08:54, su questo PC). Una riga di prima dell avvio NON e un guasto di questa corsa;
+ # e un giornale vuoto o assente NON e "nessuna riga": e NON VERIFICABILE.
+ ("guasto_corsa_precedente", scen({"RFWD1": {"init_prima": True}}), "", "ok", PIN, "DESKTOP-H4D7CAJ", "si", "",
+  ["FILE NULLI: nessuno", "nessuna riga in QUESTA corsa", "PRIMA dell avvio"], ["volte in QUESTA corsa", "job non attribuito", "PRIMA DI RILANCIARE"]),
+ ("guasto_precedente_e_attuale", scen({"RFWD1": {"init_prima": True}, "RFWD2": {"init_fail": True, "no_OOS": True, "pt_old_mtime": True, "rc": 2}}), "", "ok", PIN, "DESKTOP-H4D7CAJ", "si", "",
+  ["1 volte in QUESTA corsa -> RFWD2 alle", "altre 1 righe dello stesso guasto sono PRIMA dell avvio", "PRIMA DI RILANCIARE"], ["FILE NULLI: nessuno", "job non attribuito", "2 volte", "incoerenza"]),
+ ("giornale_tester_vuoto", scen({l: {"tlog_vuoto": True} for l in SID}), "", "ok", PIN, "DESKTOP-H4D7CAJ", "si", "",
+  ["GUASTO DEL TESTER (classe 909): NON VERIFICABILE: nessun giornale del tester"], ["nessuna riga in QUESTA corsa"]),
+ ("giornali_assenti", scen({l: {"no_logs": True} for l in SID}), "", "ok", PIN, "DESKTOP-H4D7CAJ", "si", "",
+  ["GUASTO DEL TESTER (classe 909): NON VERIFICABILE: nessun giornale del tester", "(file trovati 0)"], ["nessuna riga in QUESTA corsa"]),
 ]
 
 def run(nome, sc, sed, ch, pin, pc, py, mut):

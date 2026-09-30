@@ -122,16 +122,25 @@ def _w16(path, lines):
 if not sc.get('no_logs'):
     _n = _dt.datetime.now()
     _hh = _n.strftime('%H:%M:%S')
-    _w16(os.path.join(AP, 'MetaQuotes', 'Tester', 'H1', 'Agent-127.0.0.1-3000', 'logs', '20260930.log'),
+    _w16(os.path.join(AP, 'MetaQuotes', 'Tester', 'H1', 'Agent-127.0.0.1-3000', 'logs', _n.strftime('%Y%m%d') + '.log'),
          ['CS\t0\t%s.100\tTester\t%d OnTester result 0.3128 : passed in 0:00:04.592' % (_hh, i) for i in range(4)])
-    _w16(os.path.join(AP, 'MetaQuotes', 'Tester', 'logs', '20260930.log'),
-         ['MI\t0\t%s.353\tTester\t%s: preliminary downloading of history ticks completed' % (_hh, SIM),
-          'QI\t0\t%s.306\tCore 1\t%s: ticks synchronization completed [3851 Kb]' % (_hh, SIM)])
+    if sc.get('tlog_vuoto'):
+        # giornale del tester presente ma VUOTO (0 byte): la riga deve dire NON VERIFICABILE, mai "nessuna riga" (classe 940)
+        _tv = os.path.join(AP, 'MetaQuotes', 'Tester', 'logs', _n.strftime('%Y%m%d') + '.log'); os.makedirs(os.path.dirname(_tv), exist_ok=True); open(_tv, 'wb').close()
+    else:
+        _w16(os.path.join(AP, 'MetaQuotes', 'Tester', 'logs', _n.strftime('%Y%m%d') + '.log'),
+             ['MI\t0\t%s.353\tTester\t%s: preliminary downloading of history ticks completed' % (_hh, SIM),
+              'QI\t0\t%s.306\tCore 1\t%s: ticks synchronization completed [3851 Kb]' % (_hh, SIM)])
 # guasto del tester (classe 909): la riga definitiva del giornale del tester, formato vero (ROUND_CORTI_C2 del 28/09)
+if sc.get('init_prima'):
+    # classe 940: lo stesso guasto scritto da una corsa PRECEDENTE dello stesso giorno (10 minuti prima dell avvio), nello stesso giornale giornaliero
+    _p = _dt.datetime.now() - _dt.timedelta(minutes=10)
+    _w16(os.path.join(AP, 'MetaQuotes', 'Tester', 'logs', _p.strftime('%Y%m%d') + '.log'),
+         ['RI\t3\t%s.006\tTester\tOnTesterInit works too long. Tester cannot be initialized.' % _p.strftime('%H:%M:%S')])
 if sc.get('init_fail'):
-    _w16(os.path.join(AP, 'MetaQuotes', 'Tester', 'logs', '20260930.log'),
-         ['GM\t3\t%s.660\tTester\tOnTesterInit works too long...' % _dt.datetime.now().strftime('%H:%M:%S'),
-          'FM\t3\t%s.787\tTester\tOnTesterInit works too long. Tester cannot be initialized.' % _dt.datetime.now().strftime('%H:%M:%S')])
+    _w16(os.path.join(AP, 'MetaQuotes', 'Tester', 'logs', _dt.datetime.now().strftime('%Y%m%d') + '.log'),
+         ['GM\t3\t%s\tTester\tOnTesterInit works too long...' % _dt.datetime.now().strftime('%H:%M:%S.%f')[:-3],
+          'FM\t3\t%s\tTester\tOnTesterInit works too long. Tester cannot be initialized.' % _dt.datetime.now().strftime('%H:%M:%S.%f')[:-3]])
 if sc.get('pt_old_mtime') and f1:
     _t = os.path.getmtime(f1) - 0.02
     for mg in [str(vals[0]), str(vals[1])]:
