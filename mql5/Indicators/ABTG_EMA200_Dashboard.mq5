@@ -274,6 +274,25 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
   }
 
 //+------------------------------------------------------------------+
+//| Forex = BASE e PROFITTO sono due VALUTE vere e diverse.          |
+//| NON si usa SYMBOL_TRADE_CALC_MODE: su BCM XAUUSD e' in modo       |
+//| FOREX (misurato, R114: GSPEC;XAUUSD;TRADE_CALC_MODE;0, 2 cifre)   |
+//| e l'oro finiva in "pips" da 0,01 (x100). XAU/XAG non sono nella   |
+//| lista -> punti di prezzo; un forex servito come CFD resta forex.  |
+//+------------------------------------------------------------------+
+bool IsForex(const string sym)
+  {
+   string valute = ",AUD,CAD,CHF,CNH,CNY,CZK,DKK,EUR,GBP,HKD,HUF,ILS,INR,JPY,MXN,NOK,NZD,PLN,RUB,SEK,SGD,THB,TRY,USD,ZAR,";
+   string b = SymbolInfoString(sym, SYMBOL_CURRENCY_BASE);
+   string p = SymbolInfoString(sym, SYMBOL_CURRENCY_PROFIT);
+   StringToUpper(b);
+   StringToUpper(p);
+   if(StringLen(b) != 3 || StringLen(p) != 3 || b == p)
+      return false;
+   return (StringFind(valute, "," + b + ",") >= 0 && StringFind(valute, "," + p + ",") >= 0);
+  }
+
+//+------------------------------------------------------------------+
 //| Dimensione di 1 "pip": forex = 10 point sui simboli a 3/5 cifre; |
 //| indici e metalli = 1,0 di prezzo (1 "punto" dell'indice, 1 dollaro|
 //| sull'oro). Serve solo a mostrare la distanza in unita' comode.   |
@@ -283,7 +302,7 @@ double PipSize(const string sym)
    double pt = SymbolInfoDouble(sym, SYMBOL_POINT);
    if(pt <= 0.0)
       return 0.0;
-   if(SymbolInfoInteger(sym, SYMBOL_TRADE_CALC_MODE) == SYMBOL_CALC_MODE_FOREX)
+   if(IsForex(sym))
      {
       int dg = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
       return (dg == 3 || dg == 5) ? pt * 10.0 : pt;
@@ -291,9 +310,21 @@ double PipSize(const string sym)
    return 1.0;
   }
 
-bool IsForex(const string sym)
+//+------------------------------------------------------------------+
+//| Distanza in pips/punti come testo. Punti con 2 decimali se il     |
+//| simbolo ha 3+ cifre (argento: 0,1 di prezzo sarebbe troppo        |
+//| grossolano per un pendente), altrimenti 1. Non pronta = "n/d".    |
+//+------------------------------------------------------------------+
+string PipsText(const int s, const int k)
   {
-   return SymbolInfoInteger(sym, SYMBOL_TRADE_CALC_MODE) == SYMBOL_CALC_MODE_FOREX;
+   if(gPips[k] == EMPTY_VALUE)
+      return "n/d";
+   if(IsForex(gSym[s]))
+      return StringFormat("%+.1fp", gPips[k]);
+   int dg = (int)SymbolInfoInteger(gSym[s], SYMBOL_DIGITS);
+   if(dg >= 3)
+      return StringFormat("%+.2fpt", gPips[k]);
+   return StringFormat("%+.1fpt", gPips[k]);
   }
 
 //+------------------------------------------------------------------+
@@ -303,22 +334,21 @@ string CellText(const int s, const int k)
   {
    if(gDist[k] == EMPTY_VALUE)
       return "...";
-   string u = IsForex(gSym[s]) ? "p" : "pt";
    switch(InpCellMode)
      {
       case CELLA_PIPS:
-         return StringFormat("%+.1f %s", gPips[k], u);
+         return PipsText(s, k);
       case CELLA_ATR:
          return StringFormat("%+.2f ATR", gDist[k]);
       case CELLA_PCT:
-         return StringFormat("%+.2f  %+.2f%%", gDist[k], gPct[k]);
+         return StringFormat("%+6.2f  %+6.2f%%", gDist[k], gPct[k]);   // identica alla v2
       case CELLA_LIVELLO:
         {
          int dg = (int)SymbolInfoInteger(gSym[s], SYMBOL_DIGITS);
          return DoubleToString(gEma[k], dg);
         }
       default:
-         return StringFormat("%+.1f%s %+.2fA", gPips[k], u, gDist[k]);
+         return PipsText(s, k) + StringFormat(" %+.2fA", gDist[k]);
      }
   }
 
