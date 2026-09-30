@@ -1,7 +1,7 @@
 # Confronto tocco / chiusura M5 (Nasdaq) — criteri congelati PRIMA dei numeri
 
-**Stato: costruito, NON lanciato, NON mandato a Claudio (30/09/2026).** Aspetta il cancello di giudizio.
-Strumento: `backtest_pipeline/confronto_tocco_chiusura_m5.py` (marcatore `MARCATORE_CONFRONTO_TOCCO_CHIUSURA_M5_v1`, commit pin `747856b1413c5a575038f127ffb4bd0c3d2f19de`, SHA256 `2B7272820CCBA86C9012DE94BF8E6783008A4EB91AD4F201D8A3077653F30CB0`).
+**Stato: costruito, corretto dal cancello di giudizio (par. 12), NON lanciato, NON mandato a Claudio (30/09/2026).**
+Strumento: `backtest_pipeline/confronto_tocco_chiusura_m5.py` (marcatore `MARCATORE_CONFRONTO_TOCCO_CHIUSURA_M5_v1`, commit pin `217a64123c32bd76a3a4cc8e282459151fe001d1`, SHA256 `93181247874B2B31286397E9BCC882B5EF867FA32454F85B6D8E7536CA3D3D83`). Pin precedente, superato: `747856b1` (SHA256 `2B727282...`), verdetto sull'eccesso sul nullo.
 Riga di lancio: `backtest_pipeline/righe/RIGA_CONFRONTO_TOCCO_CHIUSURA_M5.txt` (bersaglio: **finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ**, nessun terminale MT5 toccato).
 Fonte della domanda: `report/ANALISI_LIVE_PAOLO_2026-09-29.md` par. 2 punto 1 (righe 57 e 91 della trascrizione: «si entra quando una candela M5 chiude oltre la linea del box»).
 
@@ -51,6 +51,8 @@ L'ultima colonna e' l'**identita'**: B sta sulla stessa barra del tocco se e sol
 
 ## 4. Le due ipotesi (NON esaustive, NON esclusive)
 
+> **Corretto dal cancello di giudizio (30/09, prima di ogni numero vero, par. 12):** il verdetto decide **solo il pagamento**, fra le **politiche** (entrate), sul valore **grezzo**. La quota di falsi resta stampata come descrizione: non separa il filtro dalla deriva.
+
 - **H_CHIUSURA (meccanismo)**: la chiusura M5 filtra i falsi breakout: fra le entrate di B c'e' una quota di falsi minore che fra quelle di A.
 - **H_NIENTE (pagamento)**: B paga solo il ritardo: R lordo B <= R lordo A.
 
@@ -68,36 +70,37 @@ Possono valere insieme: la combinazione «filtra ma non paga» e' un esito, non 
 
 **Il nullo.** Giorni surrogati: il range e' quello vero; ogni barra successiva ha il **segno tirato a sorte** (barra specchiata attorno alla sua apertura), con la stessa ampiezza, la stessa forma, lo stesso profilo orario e gli stessi buchi. Direzione senza memoria = H_NIENTE per costruzione. K = 30 surrogati per giorno-range, seme fisso 20260930. **ECCESSO = osservato - media del nullo**, per il falso e per l'R.
 
-**Due confronti.** COPPIE (quello chiesto: stessi giorni; errore standard di coppia) e ENTRATE (tutte le entrate di A contro tutte quelle di B per lato, sugli stessi giorni validi; errore standard per giorno con il metodo delta, giorni sovrapposti). Il **meccanismo** si giudica sulle ENTRATE (dove il filtro si vede). Il **pagamento** deve valere su tutti e due, altrimenti INCONCLUSIVO. Il nullo e' calcolato con le stesse regole per tutti e due.
+**Due confronti.** COPPIE (stessi giorni; errore standard di coppia) e ENTRATE (tutte le entrate di A contro tutte quelle di B per lato, sugli stessi giorni validi; errore standard per giorno con il metodo delta, giorni sovrapposti).
 
-**Soglie (congelate):**
+> ~~Il meccanismo si giudica sulle ENTRATE; il pagamento deve valere su tutti e due (coppie e entrate), sull'ECCESSO sul nullo.~~ **Sostituito dal cancello di giudizio il 30/09, prima di ogni numero vero: vedi par. 12.** La stesura originale e' nel commit `8a16fc86`.
+
+**IL VERDETTO (dopo il cancello): uno solo, sul PAGAMENTO, sul confronto fra le POLITICHE (ENTRATE), sul valore GREZZO.** La differenza B-A dell'R lordo (timeout 0) e dell'R a mercato, tutte le entrate di B contro tutte le entrate di A dello stesso lato sugli stessi giorni validi, con l'errore standard per giorno. E' la risposta diretta a «entrare alla chiusura e' meglio o peggio che al primo tocco?». Il **nullo**, le **coppie** e l'**eccesso del falso** si stampano come **DESCRIZIONE** e non decidono niente.
+
+**Soglie (congelate prima dei numeri):**
 
 | Soglia | Valore | Perche' |
 |---|---|---|
-| X_F, eccesso sul falso | **10 punti percentuali** | errore standard dell'eccesso ~2 punti (IC95 ~4): 10 sta oltre 2 IC; ordine di grandezza a cui un filtro cambia il mix di trade. Contro-esempio: nel mondo senza memoria l'eccesso misurato sta in [-3,2 ; +5,2] su 24 celle, mai vicino a 10, mentre il divario grezzo (5.1) lo supera sempre |
-| X_R, eccesso sull'R lordo e a mercato | **0,08 R'** | errore standard ~0,033 a n ~750 (misurato), ~0,025 attesi a n ~1250 (stima 1/radice(n), non misurata). A 0,08 il test conferma H_NIENTE in **15 celle su 24** (contro 4 a 0,05) con **0 falsi «PAGA» su 24** (con tutte e due le soglie). E' dello stesso ordine di 1 punto di spread su un R' di 15 punti (0,067 R; spread NON MISURATO): un eccesso minore non pagherebbe un costo di quell'ordine |
-| n minimo per cella | **150** (coppie; min(entrate A, entrate B)) | Emendamento A: l'unita' e' l'operazione-giorno, >= 150 |
-| Intervallo | IC 95% (1,96 errori standard; l'errore dell'eccesso somma quello osservato e quello della media del nullo) | |
+| X_R, differenza GREZZA B-A dell'R lordo e dell'R a mercato (entrate) | **0,08 R'** | errore standard per giorno ~0,025 a n ~650 entrate per lato (mondi sintetici; a n ~1250 ~0,018 per 1/radice(n), stima NON misurata). Nel mondo senza memoria conferma «B NON MEGLIO» in **20 celle su 24** con **0 PAGA** (par. 12). Dello stesso ordine di 1 punto di spread su un R' di 15 punti (0,067 R; spread NON MISURATO): un vantaggio minore non pagherebbe un costo di quell'ordine |
+| n minimo per cella | **150** = min(entrate A, entrate B) | Emendamento A: l'unita' e' l'operazione-giorno, >= 150 |
+| Intervallo | IC 95% (1,96 errori standard per giorno) | |
+| X_F (solo descrittivo) | 10 punti | riferimento della riga DESCRITTIVA dell'eccesso del falso; non decide |
 
-**Zona di una misura:** SI se eccesso >= soglia e limite basso dell'IC > 0; NO se il limite alto dell'IC < soglia; INCERTO negli altri casi.
-- MECCANISMO: FILTRA = eccesso sul falso in zona SI (entrate); NON_FILTRA = zona NO.
-- PAGAMENTO: PAGA = eccesso R e eccesso R a mercato in zona SI, su coppie **e** entrate; NON_PAGA = zona NO su tutte; altrimenti INCONCLUSIVO.
+**Zona di una misura:** SI se valore >= soglia e limite basso dell'IC > 0; NO se il limite alto dell'IC < soglia; INCERTO negli altri casi.
+- PAGAMENTO: PAGA = R lordo e R a mercato in zona SI; NON_PAGA = tutte e due in zona NO; altrimenti INCONCLUSIVO.
 
 **Lettura di una cella** (LONG o SHORT di un range):
 
-| Meccanismo | Pagamento | Lettura |
-|---|---|---|
-| FILTRA | PAGA | H_CHIUSURA sostenuta (filtra e paga, AL LORDO) |
-| NON_FILTRA | NON_PAGA | H_NIENTE sostenuta |
-| FILTRA | NON_PAGA | filtra ma il ritardo se lo mangia |
-| NON_FILTRA | PAGA | ANOMALIA da guardare a mano (non e' H_CHIUSURA) |
-| qualsiasi altro / n < 150 | | INCONCLUSIVA / NON GIUDICABILE |
+| Pagamento | Lettura |
+|---|---|
+| PAGA | **B MEGLIO**: la chiusura M5 batte il primo tocco AL LORDO sulle entrate (>= 0,08 R') |
+| NON_PAGA | **B NON MEGLIO**: nessun vantaggio della chiusura M5 >= 0,08 R' al lordo (H_NIENTE sul pagamento). Se tutto l'IC sta sotto zero il referto aggiunge, descrittivo, «B PEGGIO» |
+| INCONCLUSIVO / n < 150 | INCONCLUSIVA / NON GIUDICABILE |
 
-Un **range** (15 o 30) ha una lettura **solo se LONG e SHORT dicono la stessa cosa**; altrimenti INCONCLUSIVA. I verdetti dell'addestramento decidono; la cassaforte li conferma o no (il referto della cassaforte stampa cella per cella CONCORDE / DISCORDE). Sono verdetti su una **descrizione**, non promozioni. «NON_PAGA» non vuol dire «B strettamente <= A»: vuol dire «nessuna evidenza di un vantaggio >= 0,08 R'». La stima puntuale e' sempre stampata.
+Un **range** (15 o 30) ha una lettura **solo se LONG e SHORT dicono la stessa cosa**; altrimenti INCONCLUSIVA (protegge anche dalla deriva di fondo del Nasdaq, che sposterebbe LONG e SHORT in versi opposti). I verdetti dell'addestramento decidono; la cassaforte li conferma o no (CONCORDE / DISCORDE cella per cella). Sono verdetti su una **descrizione**, non promozioni. La stima puntuale e' sempre stampata.
 
-**Il mondo con la risposta** (controllo dell'autotest, 12 semi x 2 lati): mondo in cui la chiusura porta informazione (45% rotture vere, 45% trappole a stoppino, 10% rumore) -> PAGA 24/24, FILTRA 22/24 (gli altri due INCONCLUSIVO, con eccesso 9,0 e 9,4: sotto la soglia, non oltre).
+**Il verdetto dice SE, non PERCHE'.** Se esce «B MEGLIO», il referto mostra dove sta il vantaggio (decomposizione S/L, giorni SOLO A, lati opposti), ma **non** puo' dire se e' un filtro dei falsi o altro: la quota di falsi non lo separa (par. 12, punto 3).
 
-**Attesa di chi scrive (NON un criterio, scritta prima dei numeri):** NON_PAGA o INCONCLUSIVO in quasi tutte le celle (l'R lordo di A e' gia' ~0, quello di B non ha motivo di stare sopra); il meccanismo puo' mostrare un eccesso piccolo. Se esce il contrario e' una notizia da ricontrollare a mano prima di crederci. Chi legge dovrebbe gia' aspettarsi molti «INCONCLUSIVA»: con eccessi vicini a zero e errore ~0,025 la soglia 0,08 non si conferma ne' si smentisce sempre.
+**Attesa di chi scrive (NON un criterio, scritta prima dei numeri):** NON_PAGA o INCONCLUSIVO in quasi tutte le celle (l'R lordo di A e' gia' ~0, quello di B non ha motivo di stare sopra). Se esce il contrario e' una notizia da ricontrollare a mano prima di crederci.
 
 ## 7. Cosa NON si potra concludere (dichiarato prima)
 
@@ -107,7 +110,7 @@ Un **range** (15 o 30) ha una lettura **solo se LONG e SHORT dicono la stessa co
 - **Asimmetria a favore di A**: l'entrata A e' «al livello» (fill ideale di un pendente, anche se la barra del tocco lo ha attraversato con un salto); B paga il close reale. Un B <= A puo' dipendere in parte da questo, non solo dal ritardo.
 - Il close come prezzo d'entrata ignora slippage e gap fra close e open successivo; l'ordine dentro una barra M5 non e' osservabile.
 - Otto celle (2 range x 2 lati x 2 fasi) = otto occasioni di rumore: per questo la soglia e' un eccesso con IC, un range vale solo se LONG e SHORT concordano, e decide l'addestramento.
-- Il nullo e' UN modello di H_NIENTE (segni casuali barra per barra): non copre memoria di volatilita' ne' code. Vicino alla soglia la risposta e' INCERTO, non SI. Se l'IC95 dell'eccesso e' piu' largo della soglia, la cella e' dichiarata «non risolvibile» (rilievo, rc 1).
+- Il verdetto dice **SE** la chiusura M5 rende di piu' del primo tocco, **non PERCHE'**: il falso non separa il filtro dalla deriva e il nullo a segni casuali e' descrizione (par. 12). Vicino alla soglia la risposta e' INCERTO, non SI. Se l'IC95 della differenza e' piu' largo della soglia, la cella e' dichiarata «non risolvibile» (rilievo, rc 1).
 - Niente sul DAX, sul retest, o su uscite diverse da +1R'.
 
 ## 8. Come leggere il referto (5 passi)
@@ -116,23 +119,48 @@ Un **range** (15 o 30) ha una lettura **solo se LONG e SHORT dicono la stessa co
 2. «RIPRODUZIONE DELL'ANATOMIA» di ogni range: A deve tornare alla tabella del par. 3; l'identita' X = Y deve tornare.
 3. Contabilita' dei giorni: quanti SOLO A (le entrate che la chiusura filtra), quanti lati opposti.
 4. Per ogni lato: tabelle coppie e entrate, decomposizione S (stessa barra: pura perdita di prezzo) / L (barra dopo: il filtro).
-5. «VERDETTO MECCANICO DELLA CELLA»: eccessi con IC, zona, lettura. **Non citare mai il divario grezzo del falso.**
+5. «VERDETTO MECCANICO DELLA CELLA»: la riga «VERDETTO (DECIDE)» con la differenza GREZZA B-A e il suo IC; sotto, le righe «DESCRIZIONE contro il NULLO» **non decidono**. **Non citare mai il divario grezzo del falso** e non leggere l'eccesso sulle coppie come «B batte A» (par. 12, punto 1).
+6. Se compare un rilievo «RIPRODUZIONE»: il CSV non e' quello dell'anatomia del 29/09 (n di A diverso dai bersagli del par. 3). I numeri si leggono solo dopo averne capito il perche'.
 
 ## 9. Controlli fatti (30/09/2026)
 
-- `python3 backtest_pipeline/confronto_tocco_chiusura_m5.py --autotest` -> **AUTOTEST: 210/210**: (0) SHA256 dell'anatomia = pin, file non cambiati, gancio reversibile anche dopo eccezione, nessuna funzione dell'anatomia copiata; (1) casi a risposta calcolata a mano: tocca senza chiudere fuori, chiusura fuori sulla stessa barra del tocco, chiusura una barra dopo (A vince prima, B stoppata), specchio long/short, barra ambigua a due lati (con e senza chiusura fuori dopo), giorno senza rottura, range degenere, lati opposti, bersaglio e stop nella stessa barra, entrata sull'ultima barra, chiusura esattamente sul livello, falso visibile solo alla terza chiusura, bersaglio di B toccato nella barra d'entrata (non conta), bersaglio a +1 R' e non a +1 ampiezza, buchi, range di 15 minuti; invarianti A/B su tutti i casi; (2) surrogato; (3) statistiche a mano e confini delle zone; (4) verdetto ai confini esatti; (5) **fuzz**: 1400 giorni-range casuali (con buchi) attraverso l'anatomia **vera**, differenze 0; (6) i due mondi sintetici; (7) corsa vera su un CSV sintetico (due referti distinti, ASCII, niente PF, rifiuti rc 2, incoerenza con l'anatomia -> rc 2 e nessun referto); (8) **9 mutazioni catturate su 9** (`>=` al posto di `>`, falso di B dalla barra d'entrata, sequenza di B dalla barra d'entrata, bersaglio a +1 ampiezza, falso di A spostato, surrogato senza segni, tre soglie).
+- (dopo il cancello di giudizio, par. 12) `--autotest` -> **AUTOTEST: 230/230**: in piu' le prove del verdetto sulle politiche, i mondi FILTRO e TOCCO, il controllo «POSITIVO: coppie grezzo < 0 mentre l'eccesso > 0», e **2 mutazioni nuove** catturate (pagamento sull'eccesso; coppie obbligatorie): **11/11**.
+- (stesura originale) `python3 backtest_pipeline/confronto_tocco_chiusura_m5.py --autotest` -> **AUTOTEST: 210/210**: (0) SHA256 dell'anatomia = pin, file non cambiati, gancio reversibile anche dopo eccezione, nessuna funzione dell'anatomia copiata; (1) casi a risposta calcolata a mano: tocca senza chiudere fuori, chiusura fuori sulla stessa barra del tocco, chiusura una barra dopo (A vince prima, B stoppata), specchio long/short, barra ambigua a due lati (con e senza chiusura fuori dopo), giorno senza rottura, range degenere, lati opposti, bersaglio e stop nella stessa barra, entrata sull'ultima barra, chiusura esattamente sul livello, falso visibile solo alla terza chiusura, bersaglio di B toccato nella barra d'entrata (non conta), bersaglio a +1 R' e non a +1 ampiezza, buchi, range di 15 minuti; invarianti A/B su tutti i casi; (2) surrogato; (3) statistiche a mano e confini delle zone; (4) verdetto ai confini esatti; (5) **fuzz**: 1400 giorni-range casuali (con buchi) attraverso l'anatomia **vera**, differenze 0; (6) i due mondi sintetici; (7) corsa vera su un CSV sintetico (due referti distinti, ASCII, niente PF, rifiuti rc 2, incoerenza con l'anatomia -> rc 2 e nessun referto); (8) **9 mutazioni catturate su 9** (`>=` al posto di `>`, falso di B dalla barra d'entrata, sequenza di B dalla barra d'entrata, bersaglio a +1 ampiezza, falso di A spostato, surrogato senza segni, tre soglie).
 - `python3 backtest_pipeline/controlla_riga.py --oggetto riga backtest_pipeline/righe/RIGA_CONFRONTO_TOCCO_CHIUSURA_M5.txt` -> vedi par. 10.
 - **Collaudo della riga eseguita** sotto pwsh con ambiente finto (`backtest_pipeline/collaudo_riga_confronto_tocco/collaudo.py`, classe 926: la riga si esegue, non si legge): 10 scenari (sano; macchina sbagliata; marcatore mancante; SHA256 diverso su anatomia e su confronto; CSV assente; CSV nel formato sbagliato; autotest del confronto che fallisce; autotest dell'anatomia che fallisce; misura che esce 2 con file mancanti ma zip creato).
+- (cancello di giudizio, pin `217a6412`) riga rigenerata con `assembla.py` (`--verifica`: IDENTICA byte per byte, 9064 byte, una riga fisica), strato 1 verde (7 passati, 4 rilievi di sola menzione nella lista dei NON TOCCATI), **collaudo 10/10** sotto pwsh, piu' una mutazione non prevista dal collaudo: CSV solo in `%USERPROFILE%\histdata_m1` (secondo candidato) e solo con giorni dell'addestramento -> la riga lo trova, lo strumento esce rc 1 senza il referto della cassaforte, la riga dice `FALLITO rc 1, file mancanti 1` e crea lo zip.
 - Il gancio, il file dell'anatomia e la riga sono committati e pushati su `lavoro`.
 
 ## 10. Tempo
 
 **[NON MISURATO]** su questo CSV con questo script. Riferimenti, entrambi indiretti: (a) la corsa dell'anatomia sullo stesso CSV (Nasdaq 5,23 milioni di righe piu' DAX piu' autotest) parte dal nome della cartella (`..._20260929_1734`, ora locale) e il suo archivio e' committato alle 15:40:57 UTC del 29/09: al massimo circa 7 minuti in tutto (inferenza sugli orologi, non un tempo misurato); (b) su un CSV sintetico di 700 giorni (273.000 righe) l'anatomia da sola impiega ~1,4 s e questo script ~4,2 s con K = 30: il costo in piu' e' ~4 ms per giorno, ~20 s su 4000 giorni. Sul PC di backtest, piu' lento di questa macchina, ci si aspetta una corsa in **pochi minuti**; RAM ~28 MB sul sintetico [sul CSV vero NON misurata].
 
-## 11. Punti aperti per il cancello di giudizio
+## 11. Punti aperti per il cancello di giudizio (con la risposta del cancello)
 
-1. Le soglie X_F = 10 e X_R = 0,08 sono un **giudizio** (con i contro-esempi sopra), non una legge: vanno lette col loro ragionamento.
-2. Il nullo a segni casuali e' un solo modello di H_NIENTE.
-3. Il verdetto sul pagamento chiede coppie **e** entrate: e' piu' severo di quanto chiesto («stessi giorni»), scelto perche' le sole coppie non vedono il filtro (5.2).
-4. Timeout a 0 come lettura primaria (come da richiesta), con la lettura a mercato a fianco e l'obbligo di concordanza.
-5. Non so quanti saranno i giorni SOLO A sul feed vero: se pochi, il «filtro» sara' quasi tutto nella sottoclasse L.
+1. Le soglie sono un **giudizio**, non una legge. **Cancello:** X_R = 0,08 tenuta, ora sulla differenza grezza fra politiche (par. 12, tabella); X_F declassata a riferimento descrittivo.
+2. Il nullo a segni casuali e' un solo modello di H_NIENTE. **Cancello:** declassato a descrizione; non decide.
+3. Il verdetto sul pagamento chiedeva coppie **e** entrate. **Cancello: NON era piu' severo, era cieco** (par. 12, punto 2): tolto.
+4. Timeout a 0 come lettura primaria, con la lettura a mercato a fianco e l'obbligo di concordanza. **Cancello:** tenuto.
+5. Non so quanti saranno i giorni SOLO A sul feed vero. **Cancello:** resta aperto; e' descrizione, non cambia il verdetto.
+
+## 12. Correzione del cancello di giudizio (30/09/2026, strato 2, PRIMA di ogni numero vero) — classe 929
+
+Nessun numero vero di questo studio esiste: la riga non e' mai stata lanciata. I criteri si cambiano **prima** dei numeri, e qui la correzione e' dettata da contro-esempi **eseguiti** su mondi sintetici, riproducibili con `python3 backtest_pipeline/collaudo_riga_confronto_tocco/mondi_controesempio.py` (12 semi x 2 lati = 24 celle per mondo, 1400 giorni, range 15, K = 12; ~1 minuto).
+
+| Mondo (24 celle) | Cosa e' vero | B-A grezzo entrate | B-A grezzo coppie | Regola VECCHIA (eccesso, coppie E entrate) | Regola NUOVA (politiche, grezzo) |
+|---|---|---|---|---|---|
+| senza memoria | B paga solo il ritardo | -0,106 .. +0,053 | -0,301 .. -0,144 | NON_PAGA 13, INCONCLUSIVO 11; meccanismo NON_FILTRA 24 | **NON_PAGA 20**, INCONCLUSIVO 4, **PAGA 0** |
+| positivo dell'autotest | barre costruite: B vince | +0,330 .. +0,470 | **-0,194 .. -0,108** | PAGA 24 (eccesso coppie +0,35..+0,45) | PAGA 24 |
+| **FILTRO** (l'informazione e' nella CHIUSURA) | B deve essere MEGLIO | **+0,247 .. +0,366** | -0,073 .. -0,033 | **INCONCLUSIVO 24**; meccanismo **NON_FILTRA 24** | **PAGA 24** |
+| **TOCCO** (l'informazione e' nel TOCCO) | B NON deve essere meglio | -0,074 .. +0,042 | -0,054 .. +0,008 | INCONCLUSIVO 24; meccanismo **FILTRA 4**, INCONCLUSIVO 13 | **NON_PAGA 23**, INCONCLUSIVO 1, PAGA 0 |
+
+I tre difetti, ognuno col suo contro-esempio:
+1. **L'etichetta diceva il falso.** «PAGA = B batte A al lordo» era deciso sull'**eccesso sul nullo**. Nel mondo positivo dell'autotest stesso, sulle coppie B e' **grezzo peggio** di A (-0,11..-0,19, circa 6 errori standard) e la regola dava PAGA sulle coppie: il nullo di quel mondo vale circa -0,54 e l'eccesso lo scavalca. Quando il nullo non e' zero, «eccesso positivo» e «B meglio» sono due cose diverse.
+2. **Le coppie obbligatorie rendevano il test cieco.** Il par. 5.2 dice gia' che le coppie non vedono il filtro; il verdetto le richiedeva comunque. Nel mondo FILTRO B batte A di +0,25..+0,37 R' sulle entrate (10 errori standard) e la regola vecchia dava **INCONCLUSIVA 24 volte su 24**: una banda che non puo' cadere dove cade l'ipotesi vera (classe 178, rovesciata).
+3. **Il falso non misura il filtro.** Il falso di A comprende la chiusura della barra del tocco, cioe' **il segnale stesso di B**, e il nullo la riproduce (forme conservate): l'eccesso del falso misura solo la deriva nelle tre barre dopo l'entrata. Nel mondo FILTRO esce NON_FILTRA 24/24 con il filtro vero; nel mondo TOCCO, dove la chiusura non aggiunge niente, esce **FILTRA 4 volte**.
+
+**La regola che ne esce:** il verdetto e' **uno**, sul **pagamento**, fra le **politiche** (entrate), sul valore **grezzo**, con la stessa soglia 0,08 e lo stesso n >= 150. L'R e' gia' l'esito, non un indicatore che il ritardo sposta per costruzione: non ha bisogno di nullo. Nel mondo senza memoria la differenza grezza sta sotto la soglia (max +0,053) e la regola conferma «B NON MEGLIO» 20 volte su 24, contro 13 della regola vecchia. Le asimmetrie dichiarate (fill ideale di A al livello; bersaglio di A contato anche nella barra del tocco) vanno tutte **a favore di A**: rendono «B MEGLIO» piu' difficile, non piu' facile.
+
+**Cosa si perde, detto chiaro:** lo studio non pronuncia piu' un verdetto sul **meccanismo** (filtro dei falsi). Lo descrive (decomposizione S/L, giorni SOLO A, eccesso del falso sul nullo) ma non lo decide. Una misura valida del meccanismo servirebbe un indicatore che **non** contenga il segnale di B (per esempio l'R di A condizionato alla chiusura della barra del tocco, contro il nullo): **non costruita qui**, e va proposta come misura a parte se il verdetto esce «B MEGLIO».
+
+**Controllo automatico in piu':** se l'n di A dell'addestramento non coincide con i bersagli del par. 3 (1267/1214/1348/1135), il referto porta il rilievo «RIPRODUZIONE» (rc 1): il CSV non e' quello dell'anatomia del 29/09.
