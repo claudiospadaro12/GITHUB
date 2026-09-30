@@ -1,0 +1,40 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 7dc1bec4894bb6118c13b4afe7c7a1f524cb6b44
+data            : 2026-09-30 08:58:44   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_Bulge
+file prova      : R92b0_controllo_offset0.txt   (5619 byte, dal pin)
+etichetta       : R92b0
+simbolo         : GBPUSD
+periodo         : H1
+da quando       : 2022.01.01
+modello         : 1  (NON tick reali: screening, non verdetto)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Bulge\ABTG_Bulge_GBPUSD_IS_ohlc_R92b0.csv
+  ESITO : NON MISURATO -- CSV ASSENTE
+  >>> Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: guardare il log
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Bulge\ABTG_Bulge_GBPUSD_OOS_ohlc_R92b0.csv
+  ESITO : NON MISURATO -- CSV ASSENTE
+  >>> Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: guardare il log
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 1
+  - round girato a Modello 1 (non tick reali): screening, non verdetto
+
+ESITO: NON MISURATO -- CSV mancanti o vuoti: IS, OOS
