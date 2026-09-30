@@ -1,7 +1,7 @@
 # Confronto tocco / chiusura M5 (Nasdaq) — criteri congelati PRIMA dei numeri
 
-**Stato: costruito, corretto dal cancello di giudizio (par. 12), NON lanciato, NON mandato a Claudio (30/09/2026).**
-Strumento: `backtest_pipeline/confronto_tocco_chiusura_m5.py` (marcatore `MARCATORE_CONFRONTO_TOCCO_CHIUSURA_M5_v1`, commit pin `217a64123c32bd76a3a4cc8e282459151fe001d1`, SHA256 `93181247874B2B31286397E9BCC882B5EF867FA32454F85B6D8E7536CA3D3D83`). Pin precedente, superato: `747856b1` (SHA256 `2B727282...`), verdetto sull'eccesso sul nullo.
+**Stato: costruito, corretto dal cancello di giudizio (par. 12) e ripassato dal secondo giudice (par. 13), NON lanciato, NON mandato a Claudio (30/09/2026).**
+Strumento: `backtest_pipeline/confronto_tocco_chiusura_m5.py` (marcatore `MARCATORE_CONFRONTO_TOCCO_CHIUSURA_M5_v1`, commit pin `246bf4242befdad4fe637aaa29b044ae2e3301de`, SHA256 `5F7D261CD5099160160244747E7D2E64B32598838E68CDA1D12F250996F4E763`). Pin precedenti, superati: `217a6412` (SHA256 `93181247...`, residui della regola vecchia nel referto, par. 13) e `747856b1` (SHA256 `2B727282...`), verdetto sull'eccesso sul nullo.
 Riga di lancio: `backtest_pipeline/righe/RIGA_CONFRONTO_TOCCO_CHIUSURA_M5.txt` (bersaglio: **finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ**, nessun terminale MT5 toccato).
 Fonte della domanda: `report/ANALISI_LIVE_PAOLO_2026-09-29.md` par. 2 punto 1 (righe 57 e 91 della trascrizione: «si entra quando una candela M5 chiude oltre la linea del box»).
 
@@ -92,7 +92,7 @@ Possono valere insieme: la combinazione «filtra ma non paga» e' un esito, non 
 
 | Pagamento | Lettura |
 |---|---|
-| PAGA | **B MEGLIO**: la chiusura M5 batte il primo tocco AL LORDO sulle entrate (>= 0,08 R') |
+| PAGA | **B MEGLIO**: la chiusura M5 batte il primo tocco AL LORDO, **per operazione** (>= 0,08 R') |
 | NON_PAGA | **B NON MEGLIO**: nessun vantaggio della chiusura M5 >= 0,08 R' al lordo (H_NIENTE sul pagamento). Se tutto l'IC sta sotto zero il referto aggiunge, descrittivo, «B PEGGIO» |
 | INCONCLUSIVO / n < 150 | INCONCLUSIVA / NON GIUDICABILE |
 
@@ -109,7 +109,8 @@ Un **range** (15 o 30) ha una lettura **solo se LONG e SHORT dicono la stessa co
 - **Un solo regime nell'addestramento** (2010-2020, lunga salita con tassi a zero): la lettura vale per quel regime (Emendamento A: regime dichiarato). La cassaforte 2021-2026 contiene un altro regime, ma 2023 ha il 33,2% di giorni sospetti nel feed (log dell'anatomia): ha meno giorni buoni.
 - **Asimmetria a favore di A**: l'entrata A e' «al livello» (fill ideale di un pendente, anche se la barra del tocco lo ha attraversato con un salto); B paga il close reale. Un B <= A puo' dipendere in parte da questo, non solo dal ritardo.
 - Il close come prezzo d'entrata ignora slippage e gap fra close e open successivo; l'ordine dentro una barra M5 non e' osservabile.
-- Otto celle (2 range x 2 lati x 2 fasi) = otto occasioni di rumore: per questo la soglia e' un eccesso con IC, un range vale solo se LONG e SHORT concordano, e decide l'addestramento.
+- **Il verdetto e' PER OPERAZIONE** (R medio per entrata, ciascuna nel proprio R'): B entra in meno giorni (i SOLO A) e con R' piu' largo, quindi «B MEGLIO» **non** vuol dire piu' R in totale ne' piu' punti. Il numero di operazioni di ciascuna politica e' stampato accanto e si legge insieme al verdetto (la frequenza e' il requisito principale della challenge).
+- Otto celle (2 range x 2 lati x 2 fasi) = otto occasioni di rumore: per questo la soglia e' una differenza con IC, un range vale solo se LONG e SHORT concordano, e decide l'addestramento.
 - Il verdetto dice **SE** la chiusura M5 rende di piu' del primo tocco, **non PERCHE'**: il falso non separa il filtro dalla deriva e il nullo a segni casuali e' descrizione (par. 12). Vicino alla soglia la risposta e' INCERTO, non SI. Se l'IC95 della differenza e' piu' largo della soglia, la cella e' dichiarata «non risolvibile» (rilievo, rc 1).
 - Niente sul DAX, sul retest, o su uscite diverse da +1R'.
 
@@ -124,7 +125,8 @@ Un **range** (15 o 30) ha una lettura **solo se LONG e SHORT dicono la stessa co
 
 ## 9. Controlli fatti (30/09/2026)
 
-- (dopo il cancello di giudizio, par. 12) `--autotest` -> **AUTOTEST: 230/230**: in piu' le prove del verdetto sulle politiche, i mondi FILTRO e TOCCO, il controllo «POSITIVO: coppie grezzo < 0 mentre l'eccesso > 0», e **2 mutazioni nuove** catturate (pagamento sull'eccesso; coppie obbligatorie): **11/11**.
+- (secondo giudice, par. 13, pin `246bf424`) `--autotest` -> **AUTOTEST: 236/236** (2 controlli nuovi: il referto non dice piu' che decide l'eccesso; dichiara PER OPERAZIONE; tutti e due ROSSI sulla mutazione); collaudo **10/10** sotto pwsh; strato 1 verde; `assembla.py --verifica` IDENTICA (9064 byte, una riga fisica).
+- (dopo il cancello di giudizio, par. 12) `--autotest` -> **AUTOTEST: 234/234** (qui c'era scritto 230/230: il pin `217a6412` ne stampa 234): in piu' le prove del verdetto sulle politiche, i mondi FILTRO e TOCCO, il controllo «POSITIVO: coppie grezzo < 0 mentre l'eccesso > 0», e **2 mutazioni nuove** catturate (pagamento sull'eccesso; coppie obbligatorie): **11/11**.
 - (stesura originale) `python3 backtest_pipeline/confronto_tocco_chiusura_m5.py --autotest` -> **AUTOTEST: 210/210**: (0) SHA256 dell'anatomia = pin, file non cambiati, gancio reversibile anche dopo eccezione, nessuna funzione dell'anatomia copiata; (1) casi a risposta calcolata a mano: tocca senza chiudere fuori, chiusura fuori sulla stessa barra del tocco, chiusura una barra dopo (A vince prima, B stoppata), specchio long/short, barra ambigua a due lati (con e senza chiusura fuori dopo), giorno senza rottura, range degenere, lati opposti, bersaglio e stop nella stessa barra, entrata sull'ultima barra, chiusura esattamente sul livello, falso visibile solo alla terza chiusura, bersaglio di B toccato nella barra d'entrata (non conta), bersaglio a +1 R' e non a +1 ampiezza, buchi, range di 15 minuti; invarianti A/B su tutti i casi; (2) surrogato; (3) statistiche a mano e confini delle zone; (4) verdetto ai confini esatti; (5) **fuzz**: 1400 giorni-range casuali (con buchi) attraverso l'anatomia **vera**, differenze 0; (6) i due mondi sintetici; (7) corsa vera su un CSV sintetico (due referti distinti, ASCII, niente PF, rifiuti rc 2, incoerenza con l'anatomia -> rc 2 e nessun referto); (8) **9 mutazioni catturate su 9** (`>=` al posto di `>`, falso di B dalla barra d'entrata, sequenza di B dalla barra d'entrata, bersaglio a +1 ampiezza, falso di A spostato, surrogato senza segni, tre soglie).
 - `python3 backtest_pipeline/controlla_riga.py --oggetto riga backtest_pipeline/righe/RIGA_CONFRONTO_TOCCO_CHIUSURA_M5.txt` -> vedi par. 10.
 - **Collaudo della riga eseguita** sotto pwsh con ambiente finto (`backtest_pipeline/collaudo_riga_confronto_tocco/collaudo.py`, classe 926: la riga si esegue, non si legge): 10 scenari (sano; macchina sbagliata; marcatore mancante; SHA256 diverso su anatomia e su confronto; CSV assente; CSV nel formato sbagliato; autotest del confronto che fallisce; autotest dell'anatomia che fallisce; misura che esce 2 con file mancanti ma zip creato).
@@ -164,3 +166,31 @@ I tre difetti, ognuno col suo contro-esempio:
 **Cosa si perde, detto chiaro:** lo studio non pronuncia piu' un verdetto sul **meccanismo** (filtro dei falsi). Lo descrive (decomposizione S/L, giorni SOLO A, eccesso del falso sul nullo) ma non lo decide. Una misura valida del meccanismo servirebbe un indicatore che **non** contenga il segnale di B (per esempio l'R di A condizionato alla chiusura della barra del tocco, contro il nullo): **non costruita qui**, e va proposta come misura a parte se il verdetto esce «B MEGLIO».
 
 **Controllo automatico in piu':** se l'n di A dell'addestramento non coincide con i bersagli del par. 3 (1267/1214/1348/1135), il referto porta il rilievo «RIPRODUZIONE» (rc 1): il CSV non e' quello dell'anatomia del 29/09.
+
+## 13. Secondo passaggio indipendente (verificatore stringhe, 30/09/2026, PRIMA di ogni numero vero)
+
+Chi ha scritto la regola del par. 12 l'ha anche giudicata: serviva un occhio diverso. Mondi **nuovi**, costruiti dal secondo giudice e non presi da `mondi_controesempio.py`, riproducibili con `python3 backtest_pipeline/collaudo_riga_confronto_tocco/mondi_secondo_giudice.py` (~1,5 minuti; 12 semi x 2600 giorni, n ~ 1100-1300 entrate per lato come il feed vero; solo il verdetto).
+
+| Mondo | Cosa e' vero | B-A grezzo (entrate) | Verdetto del RANGE (LONG e SHORT concordi) |
+|---|---|---|---|
+| regime nascosto, deriva 0,25 s | la chiusura informa sul regime, effetto sotto soglia | +0,01 .. +0,08 | INCONCLUSIVA 12/12, **PAGA 0** |
+| regime nascosto, deriva 0,4 s | idem, effetto ~ soglia | +0,01 .. +0,14 | **PAGA 10/12**, INCONCLUSIVA 2 |
+| regime nascosto, deriva 0,6 s | idem, effetto sopra soglia | +0,09 .. +0,19 | **PAGA 12/12** |
+| impulso al tocco (0,5 e 0,2 ampiezze) | informazione nel TOCCO, il ritardo costa | -0,54 .. -0,21 | **NON_PAGA 12/12** (tutti e due) |
+| deriva di fondo 0,02 .. 0,4 s per barra, sempre al rialzo | nessuna informazione nella chiusura | LONG -0,03..+0,10, SHORT -0,13..+0,02 | **PAGA 0** in tutte e 5 le derive (LONG da solo PAGA fino a 4/12 a 0,2 s: la concordanza lo ferma) |
+| ambiguita' (range quieto, barre grandi) | random walk | -1,39 .. -0,66 | NON_PAGA / NON GIUDICABILE, **PAGA 0** |
+| esplosione di volatilita' | random walk | -0,63 .. -0,27 | NON_PAGA 32/32, **PAGA 0** |
+
+Cosa dice, e cosa no:
+- **La regola distingue** il mondo dove la chiusura porta informazione da quello dove paga solo il ritardo, e diventa «B MEGLIO» solo quando l'effetto vero supera la soglia (0,25 s: mai; 0,6 s: sempre).
+- **Selezione pura:** B esiste solo nei giorni che chiudono fuori (piu' direzionali), ma la scelta usa solo barre gia' chiuse: e' una politica eseguibile, e su un cammino senza memoria nessuna entrata a un tempo d'arresto ha valore atteso diverso da zero. Nei mondi senza informazione (deriva, ambiguita', esplosione) **PAGA 0** sul range. Se il feed vero dice «B MEGLIO», e' un vantaggio vero **della politica**, non un artefatto della selezione — ma resta vero che il verdetto dice SE, non PERCHE' (par. 6).
+- **Deriva di fondo:** sposta LONG e SHORT in versi opposti; una sola cella LONG arriva a PAGA (4/12 a 0,2 s per barra), il range mai. La deriva vera del Nasdaq su M5 e' dell'ordine di 0,01 s per barra: sotto il piu' piccolo mondo provato.
+- **Le convenzioni vanno contro B**, provato cercando di romperle: nei mondi con molte barre ambigue B ha **piu'** ambigue di A (bersaglio di A contato nella barra del tocco, A risolve prima) e B-A esce fortemente negativo. Nell'addestramento vero dell'anatomia le ambigue di A sono 0,0% (par. 3).
+- **Look-ahead:** caso a mano eseguito (tocco alla barra 3 che chiude dentro, chiusura fuori alla barra 4 con massimo oltre il bersaglio di B, stop alla barra 5): A = T (R' 20), B = S (R' 21), la barra d'entrata di B NON conta; con il bersaglio toccato solo alla barra 4 B = N con R a mercato (1015-1011)/21 = 0,1905, identico.
+
+**Difetti trovati e corretti (pin `246bf424`)** — residui della correzione del par. 12 (classe 45 della checklist: la regola vecchia sopravvissuta dove nessuno aveva rigrepato):
+1. il **referto** (sezione COPPIE, a ogni cella) stampava ancora *«I divari grezzi qui sotto NON sono il verdetto: conta l'ECCESSO sul NULLO»*, cioe' la regola abrogata, nello stesso file che poche righe sotto dice «VERDETTO (DECIDE): differenza GREZZA»;
+2. commenti della testa: `X_R` «R' di ECCESSO sul nullo», `N_MIN_CELLA` «coppie minime», definizione delle COPPIE «il confronto si fa SOLO su questi [le celle del verdetto]», «la soglia e' un ECCESSO con IC» (anche qui al par. 7), e i numeri (1)-(3) di una corsa da 6 celle accanto a quelli da 24 (ricontati: +0,25..+0,37; falso -3,8..+2,9 e +3,1..+12,8, FILTRA 4/24);
+3. par. 9 diceva AUTOTEST 230/230, il pin ne stampava 234;
+4. il verdetto non diceva di essere **per operazione**: ora lo dicono la lettura PAGA, il referto e il par. 7.
+Nessuno dei quattro cambia un verdetto: cambiano cosa legge chi apre il referto.
