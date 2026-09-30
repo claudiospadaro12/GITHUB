@@ -79,6 +79,14 @@ T = [
  ("grafico_illeggibile", {}, "", "rotto", "DESKTOP-H4D7CAJ", "", ["ILLEGGIBILE", "GUARDIA EA: nel profilo del terminale 50503392"], ["ROUND LANCIATI"]),
  ("zero_grafici", {}, "", "zero", "DESKTOP-H4D7CAJ", "", ["GUARDIA EA: ho letto ZERO grafici salvati"], ["ROUND LANCIATI"]),
  ("driver_mutato_sha", {}, "", "ok", "DESKTOP-H4D7CAJ", "drv", ["RIGA_ROUND_VPS.ps1 scaricata con SHA256 DIVERSO"], ["ROUND LANCIATI"]),
+ # classe 998 (secondo cancello): il per-trade degli AGENTI e la misura del taglio che non passa da FrameInputs; informativo, non cambia gli stati
+ ("pertrade_A_oltre_63", {A: {"pertrade": ["EURUSD", "CHFJPY"]}}, "", "ok", "DESKTOP-H4D7CAJ", "",
+  [st(), "PERTRADE R92BAB_A magic 799401: 2 deal di uscita (gamba OOS) su CHFJPY 1, EURUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: 13, deal su di loro 1 -> taglio a 63 ESCLUSO per questo job",
+   "PERTRADE R92BAB_A magic 799451: 2 deal", "PERTRADE R92BAB_A2 magic 799441: file assente o scritto prima del job"], ["NV", "NON escluso"]),
+ ("pertrade_D_solo_testa_C_coda", {D: {"pertrade": ["EURUSD", "GBPUSD"]}, C: {"pertrade": ["NZDUSD"]}, B: {"pertrade": []}}, "", "ok", "DESKTOP-H4D7CAJ", "",
+  [st(), "PERTRADE R92BAB_D magic 799431: 2 deal di uscita (gamba OOS) su EURUSD 1, GBPUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: 5, deal su di loro 0 -> taglio a 63 NON escluso da qui",
+   "PERTRADE R92BAB_C magic 799471: 1 deal di uscita (gamba OOS) su NZDUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: nessuno (stringa dichiarata di 55 caratteri)",
+   "PERTRADE R92BAB_B magic 799411: 0 deal di uscita (gamba OOS) | simboli OLTRE il 63esimo carattere della stringa dichiarata: nessuno (stringa dichiarata di 6 caratteri)"], ["NV", "ESCLUSO per"]),
 ]
 
 def run(nome, sc, sed, ch, pc, mut):

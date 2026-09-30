@@ -4,6 +4,9 @@ Stato di questo file: **scritto prima di qualunque corsa della riga R92BAB**. Ne
 Se un numero uscito suggerisse un criterio migliore, vale dal round dopo.
 **EMENDATO dal cancello (controllo-preventivo) il 30/09/2026, sempre PRIMA di qualunque numero** (classi 996-997): par. 2 (cosa A NON e'),
 par. 4 righe 5 e 8, nuovo par. 4-bis (il troncamento si decide dal confronto C/D), par. 7. Le parti emendate sono marcate `[EMENDATO]`.
+**EMENDATO dal SECONDO cancello (controllo-preventivo, passaggio indipendente) il 30/09/2026, sempre PRIMA di qualunque numero** (classi 998-1000):
+par. 3 (la riga raccoglie il PER-TRADE degli agenti), par. 4 righe 1, 2, 4, 5, 6, 8, nuovo par. 4-ter (ordine di applicazione: ogni vettore ha UNA lettura),
+par. 4-bis (niente limbo "debole": o certifica o NON MISURATO; gerarchia delle misure del taglio), par. 5.2, par. 7. Le parti sono marcate `[EMENDATO-2]`.
 
 ## 1. IL PROBLEMA, con i fatti letti (non inferiti)
 
@@ -77,20 +80,45 @@ La finestra girata si legge dalla riga `from ... to ...` e si confronta con la d
 P: `2026.08.03-2026.08.17` e `2026.08.18-2026.09.01`): se differisce la riga lo scrive, la gamba resta comunque "partita" e il lettore ne tiene conto (classe 992).
 La riga stampa anche un vettore compatto `STATI: P=.. A=.. B=.. C=.. D=.. A2=..` e **non emette nessun verdetto**: l'applicazione della tabella qui sotto e' lettura.
 
+`[EMENDATO-2]` **PER-TRADE DEGLI AGENTI (informativo, non cambia nessuno stato).** Per ogni job Bulge lanciato la riga copia in `PERTRADE\` della raccolta i file
+`abtg_trades_ABTG_Bulge_GBPUSD_<magic>_violaEA.csv` di `Common\Files` scritti dopo l'avvio del job (i due magic dell'asse, es. A: 799401 e 799451) e stampa, per file:
+deal di uscita, simboli con il loro conteggio, e quanti deal cadono su simboli **OLTRE il 63esimo carattere della stringa DICHIARATA** (A e A2: i 13 da GBPJPY a
+CHFJPY; D: NZDUSD, USDCAD, USDCHF, USDJPY, EURGBP; B e C: nessuno, stringhe corte). Questi file li scrivono **gli AGENTI** in `OnTester` (`ABTG_Bulge.mq5`
+r.2047-2100): e' la sola misura del taglio che NON passa da `FrameInputs`. IS e OOS hanno lo stesso magic: **sopravvive la gamba OOS** (2026.05.02-2026.06.30).
+Che gli agenti locali scrivano davvero li' e' **[MISURATO]** il 28/09 (R250: 12 per-trade su 12, `report/LETTURA_ROUND_CORTI_A_2026-09-28.md`).
+
 ## 4. LA LETTURA, scritta prima. Condizione di validita': **P = OK** (altrimenti il banco non vale: vedi riga 7).
 
 | # | osservazione | lettura | che cosa succede dopo (NON fatto da questa riga, ognuno vuole una firma) |
 |---|---|---|---|
-| 1 | B OK, C OK, **D KO**, A KO (A2 KO) | **H_STR**: conta la LUNGHEZZA (oltre ~63 c.), non il numero: D ha gli stessi 8 simboli di C e muore solo perche' e' lunga | `Symbols_List` non puo' viaggiare come unica stringa lunga: EA v5.21 con il cesto in tre input da <=63 c. o nel codice (mql5-developer, collaudatore, firma di Claudio); poi R92b |
-| 2 | B OK, C OK, **D OK**, A KO (A2 KO) | **H_N**: conta il NUMERO dei simboli (22 handle/storici), non la lunghezza | spezzare il cesto in sotto-cesti (cambia il tetto unico Max_Trades/kill switch: decisione di Claudio) e misurare la soglia fra 8 e 22 |
+| 1 | B OK, C OK, **D KO**, A KO (A2 KO) | **H_STR**: conta la LUNGHEZZA, non il numero: D ha gli stessi 8 simboli di C e muore solo perche' e' lunga. `[EMENDATO-2]` La soglia sta fra **56 e 153** caratteri e **non e' misurata**: il 63 del forum riguarda il TAGLIO silenzioso, non un blocco. Resta aperta una seconda spiegazione che questa riga non separa: **gli spazi di D** (contenuto, non lunghezza) + un limite di numero su A | EA v5.21 con il cesto in input da **<=55 caratteri** (la lunghezza MISURATA che parte, C: 8+8+6 simboli = tre input) o nel codice (mql5-developer, collaudatore, firma di Claudio); **prima di R92b un job di collaudo della v5.21** col cesto intero, perche' se la spiegazione vera e' la seconda la v5.21 rimuore |
+| 2 | B OK, C OK, **D OK**, A KO (A2 KO) | **H_N**: conta il NUMERO dei nomi nella stringa, non la lunghezza. `[EMENDATO-2]` Il meccanismo "22 handle/storici" e' **[NON VERIFICATO] e poco compatibile col guasto**: gli handle si creano in `OnInit` (r.605-607) sugli AGENTI, DOPO che il tester e' inizializzato, mentre il guasto e' nel terminale prima che parta (`OnTesterInit` e' vuoto). La riga 2 dice COSA cambia, non PERCHE' | spezzare il cesto in sotto-cesti (cambia il tetto unico Max_Trades/kill switch: decisione di Claudio) e misurare la soglia fra 8 e 22 |
 | 3 | B OK, **C KO** (D KO, A KO) | soglia del numero **<= 8** | misurare 2 e 4 simboli; poi come riga 2 |
-| 4 | **B KO** (P OK) | **H_ALTRO**: l'EA e' morto anche a un simbolo: il cesto e la stringa non c'entrano | ispezione dell'EA/ex5: ricompilare, confronto col R92 (v5.10) che girava, un lavoro suo |
-| 5 | tutti OK (A e A2 compresi) | `[EMENDATO]` il guasto del 30/09 **non si riproduce NEL BANCO CORTO**. Tre spiegazioni restano aperte e questa riga **non le separa**: stato transitorio del terminale/tester, oppure la **finestra lunga** di R92b0 (4,5 anni), oppure i **cinque input** della cella R92b0. **NON e' "transitorio", NON e' "R92b sbloccato"**, e NON e' provato che fosse la cache (la riga non la svuota). E vale solo se il par. 4-bis dice "cesto intero" | rilancio di R92b con R92b0 **tal quale** per primo: e' lui la replica che qui manca. Se rimuore, il colpevole e' finestra o cella (un job a finestra lunga con la cella AMPIA li separa). Cache da svuotare a mano (solo `Tester\cache`, mai `bases`): scelta di Claudio |
-| 6 | A o A2 OK, l'altro KO/MISTO, o D KO con A OK, o C KO con D OK | **non monotono**: un guasto non deterministico, non un limite | piu repliche prima di qualunque modifica; nessuna ipotesi H_ regge |
+| 4 | **B KO** (P OK) `[EMENDATO-2]` **e nessun altro job Bulge partito** (A, C, D, A2 tutti KO) | **H_ALTRO**: l'EA e' morto anche a un simbolo: il cesto e la stringa non c'entrano. Alternativa residua: stato guastato dal primo KO (A gira prima di B); contro, [MISURATO] il 28/09: dopo il guasto di R258k alle 09:02 le gambe successive sono partite fino alle 09:51 | ispezione dell'EA/ex5: ricompilare, confronto col R92 (v5.10) che girava, un lavoro suo |
+| 5 | tutti OK (A e A2 compresi) `[EMENDATO-2]` **e A e A2 con Trades>0 in almeno una gamba** (attesi ~8 deal in 4 mesi anche alla frequenza bassa di R92: zero su 22 cross vuol dire che il tester parte ma il cesto non opera -> NON PREVISTO, si leggono i log degli agenti) | `[EMENDATO]` il guasto del 30/09 **non si riproduce NEL BANCO CORTO**. Tre spiegazioni restano aperte e questa riga **non le separa**: stato transitorio del terminale/tester, oppure la **finestra lunga** di R92b0 (4,5 anni), oppure i **cinque input** della cella R92b0. **NON e' "transitorio", NON e' "R92b sbloccato"**, e NON e' provato che fosse la cache (la riga non la svuota). E vale solo se il par. 4-bis dice "cesto intero" | rilancio di R92b con R92b0 **tal quale** per primo: e' lui la replica che qui manca. Se rimuore, il colpevole e' finestra o cella (un job a finestra lunga con la cella AMPIA li separa). Cache da svuotare a mano (solo `Tester\cache`, mai `bases`): scelta di Claudio |
+| 6 | A o A2 OK, l'altro KO/MISTO, o D KO con A OK, o C KO con D OK. `[EMENDATO-2]` Anche: **B KO con un qualunque altro job Bulge partito**; **qualunque MISTO** | **non monotono**: nessuna ipotesi H_ regge. `[EMENDATO-2]` NON sempre rumore: **D KO con A OK** ha una spiegazione deterministica (gli SPAZI di D, che A non ha); un **MISTO** puo' essere la FINESTRA (IS e OOS hanno date diverse) | piu repliche prima di qualunque modifica; con D KO e A OK un job D' con un altro riempimento (nessuno spazio) prima di dire "rumore" |
 | 7 | **P KO o MISTO** | il tester di questo PC e' guasto ADESSO: **nessun verdetto su A/B/C/D** (sono uscite dallo stesso stato) | rilancio a freddo (terminale e cache: decide Claudio); non si tocca l'EA |
-| 8 | qualunque job OK_TRONCATO | `[EMENDATO]` partito, con la colonna `Symbols_List` del CSV piu' corta: **da sola NON e' una prova di troncamento** (su D a 55 caratteri e' il collasso degli spazi, non un taglio). Si decide col par. 4-bis | se il par. 4-bis conferma il taglio: il cesto da 22 NON puo' viaggiare cosi', anche se A parte |
+| 8 | qualunque job OK_TRONCATO | `[EMENDATO]` partito, con la colonna `Symbols_List` del CSV piu' corta: **da sola NON e' una prova di troncamento** (su D a 55 caratteri e' il collasso degli spazi, non un taglio). Si decide col par. 4-bis. `[EMENDATO-2]` Su **A e A2** (nessuno spazio) una colonna piu' corta E' un taglio: il terminale tiene gia' il valore tagliato, e gli agenti non possono riceverne di piu' | se il par. 4-bis conferma il taglio: il cesto da 22 NON puo' viaggiare cosi', anche se A parte |
 
 Gli stati possibili sono piu delle righe (6 job x 5 stati): quelle non elencate **non hanno lettura**, si scrive `NON PREVISTO` e si guardano i log.
+
+## 4-ter. `[EMENDATO-2]` ORDINE DI APPLICAZIONE: ogni vettore STATI ha UNA lettura sola
+
+Senza un ordine le righe si sovrapponevano: `B KO` con A, C, D, A2 partiti cadeva nella riga 4 ("l'EA e' morto anche a un simbolo") mentre 22 cross
+erano partiti. Si applica **in quest'ordine, e ci si ferma alla prima che scatta** ("partito" = OK o OK_TRONCATO):
+1. P diverso da OK -> **riga 7**.
+2. un job Bulge NV o NON LANCIATO -> **NON PREVISTO** (si leggono i log; nessuna H_).
+3. un job Bulge MISTO -> **riga 6**.
+4. B KO -> **riga 4** se A, C, D, A2 sono tutti KO, altrimenti **riga 6**.
+5. A e A2 discordi -> **riga 6**.
+6. C KO -> **riga 3** se D, A (e A2) sono KO, altrimenti **riga 6**.
+7. D KO -> **riga 1** se A (e A2) sono KO, altrimenti **riga 6**.
+8. D OK_TRONCATO -> la causa (righe 1-2) **NON e' decidibile** (par. 5.4), si applica la riga 8.
+9. A (e A2) KO -> **riga 2**. Altrimenti: tutti partiti -> **riga 5** alle sue condizioni (A/A2 OK e non OK_TRONCATO, Trades>0, par. 4-bis "cesto intero").
+In ogni caso, se c'e' un OK_TRONCATO, **si aggiunge la riga 8**, che su A/A2 prevale sulla 5.
+Contato a macchina su tutti i **7.776 vettori con P = OK** (6 stati x 5 job): ognuno riceve **una e una sola** lettura; 6.752 sono `NON PREVISTO`
+(un NV o un NON LANCIATO), 977 riga 6, 20 "causa non decidibile", 15 riga 8 prevalente, e le righe 1, 2, 3, 4, 5 scattano ciascuna su un solo vettore
+pulito (piu' le varianti con un OK_TRONCATO).
 
 ## 4-bis. `[EMENDATO]` IL TRONCAMENTO SI DECIDE DAL CONFRONTO C/D, NON DALLA SOLA COLONNA
 
@@ -102,27 +130,44 @@ tiene la stringa intera e taglia solo quella spedita agli agenti, la colonna dir
 La misura che non dipende da `FrameInputs` e' **gia' nel disegno**: C e D hanno **gli stessi 8 simboli nello stesso ordine** e l'EA toglie gli spazi
 (r.598-599); il magic non entra nelle decisioni (lo garantisce il gemello G1 dentro ogni job: le due passate devono essere identiche al centesimo).
 Quindi, senza taglio, **C e D devono dare le STESSE righe** (Trades, Profit, Profit Factor, Equity DD %) in `_IS` e in `_OOS`. Con il taglio a 63,
-D arriva con 3 simboli (EURUSD, GBPUSD, AUDUSD) piu' un elemento vuoto (par. 5.5) e **deve** differire da C.
+D arriva con 3 simboli (EURUSD, GBPUSD, AUDUSD) piu' un elemento vuoto (par. 5.5) e `[EMENDATO-2]` differisce da C **solo se C ha operato su almeno uno
+dei 5 simboli in coda** (o se il tetto `Max_Trades`/kill switch ha legato i simboli fra loro): un C che ha operato solo su EURUSD/GBPUSD/AUDUSD, o che non
+ha operato affatto, da' "identici" **anche col taglio**.
+`[EMENDATO-2]` **Come si confronta**: la riga del Pass 0 di C contro la riga del Pass 0 di D, in `_IS` e in `_OOS`, colonne `Trades`, `Profit`, `Profit Factor`,
+`Equity DD %`, **esatto sulle cifre stampate** (nessuna tolleranza: stesso motore, stessi dati, determinismo gia' preteso da G1).
 
 | C | D | confronto C/D (CSV) | colonna di D | lettura |
 |---|---|---|---|---|
-| OK | OK | identici | 153 | **cesto intero a 153 caratteri**: vale anche per A e A2 (stessa lunghezza). Colonna e confronto concordano |
+| OK | OK | identici | 153 | `[EMENDATO-2]` **cesto intero a 153 caratteri SOLO SE il PER-TRADE di C mostra almeno un deal su NZDUSD, USDCAD, USDCHF, USDJPY o EURGBP** (oppure quello di D, riga PERTRADE "taglio ESCLUSO"). Altrimenti **[NON MISURATO]**: "identici" senza deal in coda non distingue niente |
 | OK | OK | **diversi** | 153 | **la colonna e' SMENTITA** (`FrameInputs` non vede il taglio): gli OK di A e A2 **non certificano** il cesto. Riga 5 non si applica |
 | OK | OK_TRONCATO | identici | 55 | **collasso degli spazi** (parser dell'ini), non un taglio: D non e' un test di lunghezza (par. 5.4); righe 1-2 non si decidono |
 | OK | OK_TRONCATO | diversi | 63 | **taglio confermato da due misure indipendenti**: riga 8 |
-| altro | altro | - | - | la domanda del taglio resta **[NON MISURATO]**: nessun OK di A o A2 certifica il cesto |
+| altro | altro | - | - | la domanda del taglio resta **[NON MISURATO]**: nessun OK di A o A2 certifica il cesto `[EMENDATO-2]` salvo la misura 1 della gerarchia qui sotto (per-trade di A/A2). Rientra qui anche una colonna di D lunga **ne' 153 ne' 55 ne' 63** (es. 62 = spazi ridotti a uno): D non e' stato un test di lunghezza |
 
 Limite del confronto, dichiarato: "identici" prova il cesto intero **solo se in C ha operato almeno uno dei 5 simboli in coda** (NZDUSD, USDCAD,
-USDCHF, USDJPY, EURGBP); il CSV di OptFrame non ha la colonna del simbolo. Se C ha pochi Trades (sotto 10) il confronto si dichiara **debole**. La terza
-misura, a mano e non raccolta da questa riga, sono i per-trade `abtg_trades_ABTG_Bulge_GBPUSD_<magic>_violaEA.csv` in `Common\Files` del PC di
-backtest (colonna `symbol`, scritti dagli AGENTI; sopravvive la gamba OOS): un deal su un simbolo oltre il 63esimo carattere esclude il taglio.
+USDCHF, USDJPY, EURGBP); il CSV di OptFrame non ha la colonna del simbolo. `[EMENDATO-2]` Qui c'era scritto "se C ha pochi Trades (sotto 10) il
+confronto si dichiara **debole**": uno stato "debole" non aveva una lettura, e con Trades = 0 "identici" sarebbe passato per "cesto intero". **Tolto**:
+o la condizione del deal in coda e' soddisfatta, o il taglio e' **[NON MISURATO]**.
+`[EMENDATO-2]` **LA GERARCHIA DELLE MISURE DEL TAGLIO** (la riga ora raccoglie il per-trade, par. 3):
+1. **PER-TRADE di A o A2** con un deal su un simbolo oltre il 63esimo carattere (GBPJPY...CHFJPY) -> il cesto di A e' arrivato **intero agli agenti**. E' la misura
+   diretta della domanda che conta per R92b, e prevale su tutte le altre;
+2. **PER-TRADE di D** con un deal su NZDUSD...EURGBP -> nessun taglio a 63 per una stringa di 153 caratteri (vale per A per stessa lunghezza, con la riserva
+   del contenuto diverso);
+3. **CSV C/D identici + PER-TRADE di C con un deal in coda** -> nessun taglio (la tabella qui sopra);
+4. **taglio confermato**: colonna di A/A2 piu' corta (riga 8), oppure C/D diversi con C che ha operato in coda e D che nel per-trade ha SOLO
+   EURUSD/GBPUSD/AUDUSD;
+5. nessuna delle quattro -> **[NON MISURATO]**, e la riga 5 non si applica.
+`[EMENDATO-2]` **Quanto e' probabile restare a [NON MISURATO]** (stima, non misura): alla sola frequenza misurata del motore, R92 = 106 operazioni sui 22
+cross in 4,5 anni = **~1,07 per simbolo per anno** (cella base, v5.10; l'AMPIA non e' MAI girata: R92be e' morto con R92b), la gamba OOS di 2 mesi da'
+~3,9 deal su A (di cui ~2,3 in coda: probabilita' di zero ~10%) e ~1,4 su C (di cui ~0,9 in coda: zero ~40%). Con l'ipotesi di Claudio (~10,5 per simbolo
+per anno) il dubbio sparisce. Se esce [NON MISURATO], la via piu' corta e' **un job A a finestra lunga** (che serve comunque alla riga 5).
 Prerequisito: in C e in D le due passate gemelle sono identiche fra loro (G1); se non lo sono, il confronto C/D non vale. Stesso controllo, gratis,
 su A contro A2 (stessi input, magic diverso): se partono tutti e due devono essere identici, altrimenti il banco non e' deterministico.
 
 ## 5. CONTROESEMPI E LIMITI, dichiarati
 
 1. **A parte ma C no** (riga 3 o 6): ne' H_STR (C e' corta) ne' H_N a soglia alta: o soglia bassa o rumore. Si sceglie guardando B e A2, non a occhio.
-2. **D parte, A no, C ok**: e' H_N, NON H_STR. **D KO, C OK**: e' H_STR. **C e D hanno gli stessi simboli**: se differiscono e' la lunghezza (o rumore: A2 lo dice).
+2. **D parte, A no, C ok**: e' H_N, NON H_STR. **D KO, C OK**: e' H_STR `[EMENDATO-2]` o gli SPAZI di D (riga 1). **C e D hanno gli stessi simboli**: se differiscono e' la lunghezza, il riempimento (o rumore: A2 lo dice).
 3. **Tutti OK non dimostra niente sulla causa**: A e' morto 4 volte su 4 in 12 minuti alle 08:50-09:02; che oggi passi significa che lo stato e' cambiato, non perche'.
 4. **Il padding di D puo' essere alterato da MT5** (spazi collassati dal parser dell'ini). Lo si vede subito: `Symbols_List` nel CSV di D deve essere lunga 153; se e' 55 **D non e' un test di lunghezza** e la riga 1/2 non si decide (si scrive NV sulla distinzione, si propone un D' con un altro riempimento).
 5. **Se il limite di 63 tronca a 63**, D (14 spazi dopo ogni virgola) diventa `EURUSD,<14 sp>GBPUSD,<14 sp>AUDUSD,<14 sp>`: tre simboli piu uno vuoto. Non e' un difetto del disegno: e' quello che il CSV mostrera' come lunghezza 63, ed e' l'informazione voluta.
@@ -143,3 +188,6 @@ Windows PowerShell 5.1 reale, MT5, il tester, i tempi, il comportamento del pars
 nessun job di questa riga le prova. Il tetto dei 45 minuti si controlla **fra** un job e l'altro: un tester appeso dentro un job non viene interrotto
 (il driver aspetta `WaitForExit()` senza tempo massimo, e la riga per scelta non chiude processi).
 Il collaudo a macchina (`backtest_pipeline/collaudo_riga_R92BAB/`) gira sotto PowerShell 7 con un driver finto.
+`[EMENDATO-2]` Piu': che il per-trade venga scritto anche da una passata di ottimizzazione di un EA multi-simbolo su questo build (misurato solo su EA a un
+simbolo, R250); che `""` (l'elemento vuoto dopo un taglio) sia risolto da `iBands`/`SymbolSelect` come il simbolo del grafico; la frequenza vera della cella AMPIA
+(mai girata), da cui dipende se il per-trade avra' deal in coda (par. 4-bis, stima).

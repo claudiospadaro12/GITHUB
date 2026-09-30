@@ -36824,3 +36824,30 @@ ricontato a macchina, il 63esimo carattere e' la **virgola** dopo EURNZD (9 simb
 e si cerca nel disegno **la misura indipendente** che lo puo' smentire: qui C e D hanno gli stessi 8 simboli e senza taglio devono dare **righe CSV
 identiche**; con il taglio D ne vede 3 e deve differire (report/R92B_DIAGNOSI_CRITERI.md par. 4-bis). E ogni conto di caratteri, righe o giorni
 scritto in un criterio si rifa' **a macchina** prima del cancello.
+
+### CLASSE 998 (30/09/2026) -- la misura DIRETTA gia' prodotta dalla corsa, lasciata "a mano": il criterio la cita come terza prova e la raccolta non la prende
+**Caso reale.** Riga R92BAB, secondo cancello. Il par. 4-bis dei criteri decideva il taglio a 63 dal confronto dei CSV di C e D (misura INDIRETTA: vale solo
+se C ha operato su uno dei 5 simboli in coda, e alla frequenza misurata di R92, ~1,07 op/simbolo/anno, C ne fa ~0,9 nella gamba OOS: zero con probabilita'
+~40%) e citava "a mano, non raccolta da questa riga" i per-trade `abtg_trades_ABTG_Bulge_GBPUSD_<magic>_violaEA.csv` di `Common\Files`, che scrivono
+gli AGENTI e portano la colonna `symbol`: la sola misura del taglio che non passa dal terminale. Il per-trade di **A** risponde DIRETTAMENTE alla domanda che
+conta (un deal su GBPJPY...CHFJPY = il cesto e' arrivato intero agli agenti), e la corsa lo produce comunque. La raccolta copiava solo CSV e `.log`.
+**Controesempio.** Tutti OK, C con zero deal in coda, CSV C/D "identici": il criterio leggeva "cesto intero" (o un "debole" senza lettura) mentre il file che
+lo decideva restava sul PC di backtest, e sarebbe stato sovrascritto al primo rilancio con gli stessi magic.
+**Regola.** Se un criterio nomina una misura che la corsa PRODUCE, la riga la RACCOGLIE (nella cartella dello zip) e ne stampa il numero che il criterio usa;
+"a mano" si scrive solo per cio' che la corsa non produce. E fra due misure della stessa cosa si dichiara la GERARCHIA (diretta prima dell'indiretta).
+
+### CLASSE 999 (30/09/2026) -- una tabella di letture le cui righe si SOVRAPPONGONO: il vettore osservato cade in due righe e la prima letta vince
+**Caso reale.** Stessa riga. La riga 4 ("B KO -> H_ALTRO, l'EA e' morto anche a un simbolo") scattava anche con A, C, D, A2 PARTITI: 22 cross partiti e
+"l'EA e' morto" nello stesso vettore. La riga 6 (non monotono) non elencava quel caso. E la riga 6 chiamava "guasto non deterministico" anche `D KO con A OK`,
+che ha una spiegazione deterministica (gli spazi di D, che A non ha).
+**Regola.** Una tabella di letture scritta prima dei numeri porta un **ORDINE DI APPLICAZIONE** ("ci si ferma alla prima che scatta") e si **conta a macchina**
+su tutti i vettori possibili che ognuno riceva una e una sola lettura (qui 7.776 vettori con P = OK). Un "non monotono" si scrive con le spiegazioni
+deterministiche che restano, non come "rumore" per definizione.
+
+### CLASSE 1000 (30/09/2026) -- un QUALIFICATORE senza lettura ("debole") e un NUMERO preso da un fenomeno diverso (63 = taglio, usato come soglia di un blocco)
+**Caso reale.** Stessa riga. (a) "Se C ha pochi Trades (sotto 10) il confronto si dichiara debole": nessuna riga diceva cosa fa un confronto debole, e con
+Trades = 0 i CSV sono identici per costruzione. (b) La riga H_STR diceva "oltre ~63 caratteri" e proponeva input da <=63: ma il 63 del forum e' il TAGLIO
+silenzioso, non il BLOCCO del tester; la riga misura solo 55 (parte) e 153 (D), quindi la soglia del blocco sta fra 56 e 153, e l'unica lunghezza MISURATA
+sicura e' 55.
+**Regola.** Ogni qualificatore di un criterio ("debole", "sospetto", "da rivedere") si traduce in una delle letture della tabella (tipicamente
+[NON MISURATO]), mai in uno stato a parte. E un rimedio si dimensiona sul numero MISURATO sullo stesso fenomeno, non su quello di un fenomeno vicino.

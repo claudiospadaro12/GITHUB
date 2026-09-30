@@ -136,6 +136,14 @@ for i, fase in enumerate(['IS', 'OOS']):
         _w16(TL, leg_lines(stato, fase, sc.get('ea_other', EA) if i == 0 else EA))
     files.append(write_csv(fase, stato))
     time.sleep(0.15)
+# per-trade degli AGENTI in Common\Files (classe 998): una riga per deal di uscita, colonna symbol; stesso formato di ExportTrades (';')
+if sc.get('pertrade') is not None:
+    cf = os.path.join(AP, 'MetaQuotes', 'Terminal', 'Common', 'Files'); os.makedirs(cf, exist_ok=True)
+    for v in vals:
+        with open(os.path.join(cf, 'abtg_trades_%s_%s_%d_violaEA.csv' % (EA, SIM, v)), 'w', newline='', encoding='ascii') as f:
+            f.write('close_time;symbol;magic;position_id;deal_type;volume;price;net_profit;signal;entry_comment;exit_comment\r\n')
+            for i, s_ in enumerate(sc['pertrade']):
+                f.write('2026.05.10 10:00:00;%s;%d;%d;1;0.10;1.00000;-5.00;BLU;BULGE_V520A_BLU_L;sl\r\n' % (s_, v, 1000 + i))
 if sc.get('extra_leg') and not sc.get('tlog'):
     _w16(TL, leg_lines('ok', 'OOS', EA))
 d = os.path.join(DSK, 'ROUND_' + LBL); os.makedirs(d, exist_ok=True)
