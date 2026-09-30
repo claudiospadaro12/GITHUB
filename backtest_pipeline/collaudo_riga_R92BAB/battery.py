@@ -81,12 +81,22 @@ T = [
  ("driver_mutato_sha", {}, "", "ok", "DESKTOP-H4D7CAJ", "drv", ["RIGA_ROUND_VPS.ps1 scaricata con SHA256 DIVERSO"], ["ROUND LANCIATI"]),
  # classe 998 (secondo cancello): il per-trade degli AGENTI e la misura del taglio che non passa da FrameInputs; informativo, non cambia gli stati
  ("pertrade_A_oltre_63", {A: {"pertrade": ["EURUSD", "CHFJPY"]}}, "", "ok", "DESKTOP-H4D7CAJ", "",
-  [st(), "PERTRADE R92BAB_A magic 799401: 2 deal di uscita (gamba OOS) su CHFJPY 1, EURUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: 13, deal su di loro 1 -> taglio a 63 ESCLUSO per questo job",
+  [st(), "PERTRADE R92BAB_A magic 799401: 2 deal di uscita (gamba OOS, chiusure dal 2026.05.10 10:00:00 al 2026.05.10 10:00:00) su CHFJPY 1, EURUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: 13, deal su di loro 1 -> taglio a 63 ESCLUSO per questo job",
    "PERTRADE R92BAB_A magic 799451: 2 deal", "PERTRADE R92BAB_A2 magic 799441: file assente o scritto prima del job"], ["NV", "NON escluso"]),
  ("pertrade_D_solo_testa_C_coda", {D: {"pertrade": ["EURUSD", "GBPUSD"]}, C: {"pertrade": ["NZDUSD"]}, B: {"pertrade": []}}, "", "ok", "DESKTOP-H4D7CAJ", "",
-  [st(), "PERTRADE R92BAB_D magic 799431: 2 deal di uscita (gamba OOS) su EURUSD 1, GBPUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: 5, deal su di loro 0 -> taglio a 63 NON escluso da qui",
-   "PERTRADE R92BAB_C magic 799471: 1 deal di uscita (gamba OOS) su NZDUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: nessuno (stringa dichiarata di 55 caratteri)",
-   "PERTRADE R92BAB_B magic 799411: 0 deal di uscita (gamba OOS) | simboli OLTRE il 63esimo carattere della stringa dichiarata: nessuno (stringa dichiarata di 6 caratteri)"], ["NV", "ESCLUSO per"]),
+  [st(), "PERTRADE R92BAB_D magic 799431: 2 deal di uscita (gamba OOS, chiusure dal 2026.05.10 10:00:00 al 2026.05.10 10:00:00) su EURUSD 1, GBPUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: 5, deal su di loro 0 -> taglio a 63 NON escluso da qui",
+   "PERTRADE R92BAB_C magic 799471: 1 deal di uscita (gamba OOS, chiusure dal 2026.05.10 10:00:00 al 2026.05.10 10:00:00) su NZDUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: nessuno (stringa dichiarata di 55 caratteri)",
+   "PERTRADE R92BAB_B magic 799411: 0 deal di uscita (nessuna chiusura: la gamba che ha scritto il file per ultima non si ricava dal file, ed e la OOS solo se la OOS e partita) | simboli OLTRE il 63esimo carattere della stringa dichiarata: nessuno (stringa dichiarata di 6 caratteri)"], ["NV", "ESCLUSO per"]),
+ # classe 1004 (terzo cancello): un deal su un simbolo FUORI dalla stringa dichiarata = gli agenti non hanno girato quella stringa (default dell EA = 22 cross): niente "ESCLUSO"
+ ("pertrade_D_simbolo_estraneo", {D: {"pertrade": ["NZDUSD", "GBPJPY"]}}, "", "ok", "DESKTOP-H4D7CAJ", "",
+  [st(), "PERTRADE R92BAB_D magic 799431: 2 deal di uscita (gamba OOS, chiusure dal 2026.05.10 10:00:00 al 2026.05.10 10:00:00) su GBPJPY 1, NZDUSD 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: NESSUNA LETTURA DEL TAGLIO: 1 deal su simboli che NON sono nella stringa dichiarata"],
+  ["NV", "ESCLUSO per"]),
+ # classe 1005 (terzo cancello): per-trade di una corsa PRECEDENTE con lo stesso magic -> non si legge; e se la OOS muore il file e della IS, non "gamba OOS"
+ ("pertrade_A_di_corsa_precedente", {A: {"pertrade": ["CHFJPY"], "pertrade_stale": True}}, "", "ok", "DESKTOP-H4D7CAJ", "",
+  [st(), "PERTRADE R92BAB_A magic 799401: file assente o scritto prima del job", "PERTRADE R92BAB_A magic 799451: file assente o scritto prima del job"], ["NV", "ESCLUSO per"]),
+ ("pertrade_A_solo_IS_OOS_morta", {A: {"legs": ["ok", "ko"], "rc": 2, "pertrade": ["GBPJPY"], "pertrade_ct": "2026.04.20 10:00:00"}}, "", "ok", "DESKTOP-H4D7CAJ", "",
+  [st(A="MISTO"), "PERTRADE R92BAB_A magic 799401: 1 deal di uscita (gamba IS: ultima chiusura 2026.04.20 10:00:00, la OOS NON ha riscritto il file) su GBPJPY 1 | simboli OLTRE il 63esimo carattere della stringa dichiarata: 13, deal su di loro 1 -> taglio a 63 ESCLUSO per questo job"],
+  ["gamba OOS"]),
 ]
 
 def run(nome, sc, sed, ch, pc, mut):

@@ -7,6 +7,9 @@ par. 4 righe 5 e 8, nuovo par. 4-bis (il troncamento si decide dal confronto C/D
 **EMENDATO dal SECONDO cancello (controllo-preventivo, passaggio indipendente) il 30/09/2026, sempre PRIMA di qualunque numero** (classi 998-1000):
 par. 3 (la riga raccoglie il PER-TRADE degli agenti), par. 4 righe 1, 2, 4, 5, 6, 8, nuovo par. 4-ter (ordine di applicazione: ogni vettore ha UNA lettura),
 par. 4-bis (niente limbo "debole": o certifica o NON MISURATO; gerarchia delle misure del taglio), par. 5.2, par. 7. Le parti sono marcate `[EMENDATO-2]`.
+**EMENDATO dal TERZO cancello (controllo-preventivo) il 30/09/2026, sempre PRIMA di qualunque numero** (classi 1004-1005): par. 3 (simboli ESTRANEI
+alla stringa dichiarata e gamba ricavata dalle date), par. 4-ter punto 5 (che cosa vuol dire "discordi") e conteggio, par. 4-bis gerarchia punti 1-3.
+Le parti sono marcate `[EMENDATO-3]`.
 
 ## 1. IL PROBLEMA, con i fatti letti (non inferiti)
 
@@ -86,6 +89,14 @@ deal di uscita, simboli con il loro conteggio, e quanti deal cadono su simboli *
 CHFJPY; D: NZDUSD, USDCAD, USDCHF, USDJPY, EURGBP; B e C: nessuno, stringhe corte). Questi file li scrivono **gli AGENTI** in `OnTester` (`ABTG_Bulge.mq5`
 r.2047-2100): e' la sola misura del taglio che NON passa da `FrameInputs`. IS e OOS hanno lo stesso magic: **sopravvive la gamba OOS** (2026.05.02-2026.06.30).
 Che gli agenti locali scrivano davvero li' e' **[MISURATO]** il 28/09 (R250: 12 per-trade su 12, `report/LETTURA_ROUND_CORTI_A_2026-09-28.md`).
+`[EMENDATO-3]` **Simboli ESTRANEI (classe 1004).** Il default di `Symbols_List` nell'EA (r.463) e' **proprio il cesto dei 22 cross**. Se l'input non arrivasse
+agli agenti e l'EA girasse il default, D (o C, o B) mostrerebbe deal su simboli che **non sono nella sua stringa** e, fra questi, anche su NZDUSD...EURGBP: la
+versione precedente della riga avrebbe stampato "taglio a 63 ESCLUSO" per D **proprio mentre D non riceveva la sua stringa**. Ora la riga conta anche i deal
+su simboli fuori dalla stringa dichiarata e, se ce n'e' uno, stampa **NESSUNA LETTURA DEL TAGLIO** per quel file. **Su A e A2 questo controllo e' CIECO**
+(stringa dichiarata = default): un deal di A oltre il 63esimo carattere prova che gli agenti hanno girato i 22 cross, **non** che li abbiano ricevuti
+dall'input. **La gamba (classe 1005)** non si presume: il file lo riscrive ogni gamba (`FILE_WRITE`), e se la OOS muore resta quello della IS; la riga la
+ricava dalle date di chiusura (ultima chiusura prima dell'inizio OOS = gamba IS) e, senza chiusure, dichiara che non si ricava. Un file **di una corsa
+precedente** con lo stesso magic (scritto prima dell'avvio del job) non si legge.
 
 ## 4. LA LETTURA, scritta prima. Condizione di validita': **P = OK** (altrimenti il banco non vale: vedi riga 7).
 
@@ -110,14 +121,16 @@ erano partiti. Si applica **in quest'ordine, e ci si ferma alla prima che scatta
 2. un job Bulge NV o NON LANCIATO -> **NON PREVISTO** (si leggono i log; nessuna H_).
 3. un job Bulge MISTO -> **riga 6**.
 4. B KO -> **riga 4** se A, C, D, A2 sono tutti KO, altrimenti **riga 6**.
-5. A e A2 discordi -> **riga 6**.
+5. A e A2 discordi -> **riga 6**. `[EMENDATO-3]` "Discordi" = **uno partito (OK o OK_TRONCATO) e l'altro KO**; A OK con A2 OK_TRONCATO (o viceversa) NON e'
+   "discorde" qui: passa avanti e prende la riga 8 (e il confronto A contro A2 del par. 4-bis dice che il banco non e' deterministico).
 6. C KO -> **riga 3** se D, A (e A2) sono KO, altrimenti **riga 6**.
 7. D KO -> **riga 1** se A (e A2) sono KO, altrimenti **riga 6**.
 8. D OK_TRONCATO -> la causa (righe 1-2) **NON e' decidibile** (par. 5.4), si applica la riga 8.
 9. A (e A2) KO -> **riga 2**. Altrimenti: tutti partiti -> **riga 5** alle sue condizioni (A/A2 OK e non OK_TRONCATO, Trades>0, par. 4-bis "cesto intero").
 In ogni caso, se c'e' un OK_TRONCATO, **si aggiunge la riga 8**, che su A/A2 prevale sulla 5.
 Contato a macchina su tutti i **7.776 vettori con P = OK** (6 stati x 5 job): ognuno riceve **una e una sola** lettura; 6.752 sono `NON PREVISTO`
-(un NV o un NON LANCIATO), 977 riga 6, 20 "causa non decidibile", 15 riga 8 prevalente, e le righe 1, 2, 3, 4, 5 scattano ciascuna su un solo vettore
+(un NV o un NON LANCIATO), 977 riga 6, 20 "causa non decidibile", 15 con la riga 8 (`[EMENDATO-3]` ricontato: **12** con OK_TRONCATO su A o A2, dove la riga 8 prevale sulla 5, e **3** con OK_TRONCATO solo su B o C, dove
+la riga 5 resta con la riga 8 aggiunta), e le righe 1, 2, 3, 4, 5 scattano ciascuna su un solo vettore
 pulito (piu' le varianti con un OK_TRONCATO).
 
 ## 4-bis. `[EMENDATO]` IL TRONCAMENTO SI DECIDE DAL CONFRONTO C/D, NON DALLA SOLA COLONNA
@@ -149,11 +162,13 @@ USDCHF, USDJPY, EURGBP); il CSV di OptFrame non ha la colonna del simbolo. `[EME
 confronto si dichiara **debole**": uno stato "debole" non aveva una lettura, e con Trades = 0 "identici" sarebbe passato per "cesto intero". **Tolto**:
 o la condizione del deal in coda e' soddisfatta, o il taglio e' **[NON MISURATO]**.
 `[EMENDATO-2]` **LA GERARCHIA DELLE MISURE DEL TAGLIO** (la riga ora raccoglie il per-trade, par. 3):
-1. **PER-TRADE di A o A2** con un deal su un simbolo oltre il 63esimo carattere (GBPJPY...CHFJPY) -> il cesto di A e' arrivato **intero agli agenti**. E' la misura
+1. **PER-TRADE di A o A2** con un deal su un simbolo oltre il 63esimo carattere (GBPJPY...CHFJPY) -> il cesto di A e' arrivato **intero agli agenti**
+   (`[EMENDATO-3]` intero = gli agenti hanno girato i 22 cross; che venissero dall'input e non dal default, identico, A non lo puo' dire: lo dicono 2 e 3). E' la misura
    diretta della domanda che conta per R92b, e prevale su tutte le altre;
-2. **PER-TRADE di D** con un deal su NZDUSD...EURGBP -> nessun taglio a 63 per una stringa di 153 caratteri (vale per A per stessa lunghezza, con la riserva
+2. **PER-TRADE di D** con un deal su NZDUSD...EURGBP `[EMENDATO-3]` **e nessun deal su simboli fuori dalla sua stringa** (riga PERTRADE senza
+   "NESSUNA LETTURA DEL TAGLIO") -> nessun taglio a 63 per una stringa di 153 caratteri (vale per A per stessa lunghezza, con la riserva
    del contenuto diverso);
-3. **CSV C/D identici + PER-TRADE di C con un deal in coda** -> nessun taglio (la tabella qui sopra);
+3. **CSV C/D identici + PER-TRADE di C con un deal in coda** `[EMENDATO-3]` (e nessun deal di C o di D fuori dalla stringa dichiarata) -> nessun taglio (la tabella qui sopra);
 4. **taglio confermato**: colonna di A/A2 piu' corta (riga 8), oppure C/D diversi con C che ha operato in coda e D che nel per-trade ha SOLO
    EURUSD/GBPUSD/AUDUSD;
 5. nessuna delle quattro -> **[NON MISURATO]**, e la riga 5 non si applica.

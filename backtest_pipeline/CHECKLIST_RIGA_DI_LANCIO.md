@@ -36851,3 +36851,58 @@ silenzioso, non il BLOCCO del tester; la riga misura solo 55 (parte) e 153 (D), 
 sicura e' 55.
 **Regola.** Ogni qualificatore di un criterio ("debole", "sospetto", "da rivedere") si traduce in una delle letture della tabella (tipicamente
 [NON MISURATO]), mai in uno stato a parte. E un rimedio si dimensiona sul numero MISURATO sullo stesso fenomeno, non su quello di un fenomeno vicino.
+
+### CLASSE 1001 (30/09/2026) -- il CAMBIO DI CONTO su un terminale vivo trattato come "si fa login e basta": un EA che scrive un file a NOME FISSO lo sovrascrive col conto nuovo
+**Caso reale.** Procedura a mano per passare `C:\FTMO` dal conto `541452707` (challenge finita, sola lettura 5 giorni) a una free trial FTMO. Il P1 della
+bozza esportava lo storico dalla scheda Storico, ma sul terminale gira anche `ABTG_TradeExporter` (CODA_01 del 30/09: `Default\chart07.chr`, NZDUSD H1) con
+`InpFile=ABTG_Trades_FTMO.csv` in `Common\Files`: `OnInit()` chiama subito `ExportAll()` (`ABTG_TradeExporter.mq5` r.99-106, anche `OnDeinit` riesporta) e il file si apre con
+`FILE_WRITE` (r.173-175), cioe' **troncato**. Al cambio di conto MT5 re-inizializza gli EA (`REASON_ACCOUNT`): il CSV con tutta la challenge viene
+**riscritto con lo storico VUOTO del conto nuovo**, entro un secondo dal login, anche con Algo Trading spento (scrivere un file non e' trading).
+**Controesempio.** Export a mano dimenticato o fallito -> l'unico CSV completo della challenge e' gia' sparito quando ce ne si accorge, e le sonde notturne
+che leggono `ABTG_Trades_FTMO.csv` riportano la trial col nome della challenge.
+**Regola.** Prima di OGNI cambio di conto su un terminale con EA attaccati: (a) si elencano gli EA che SCRIVONO file (TradeExporter, SpreadLogger, logger) e
+per ognuno si legge se il nome del file contiene il numero di conto; (b) quelli a nome fisso si COPIANO fuori prima del login; (c) si dichiara che da li' in
+poi quel file descrive il conto NUOVO, e le sonde che lo leggono vanno rietichettate.
+
+### CLASSE 1002 (30/09/2026) -- un input in VALUTA ASSOLUTA dimenticato al cambio di conto: le percentuali scalano da sole, l'ANCORA no, e il muro diventa fail-open
+**Caso reale.** Stessa procedura. Il Guardian del campo (`CLAU12_Guardian`, v1.12 al pin `d884f7e1`) calcola TUTTE le soglie come percentuale di
+`gStart`, e `gStart = InpStartBalance` se >0 (r.294). Preset FTMO: `InpStartBalance=80000`. Sul conto da 160.000 con l'ancora vecchia: DD totale 9,3% di
+80.000 = 7.440 dall'ancora 80.000 -> scatterebbe a equity **72.560**, mentre il muro FTMO e' a **144.000**: **protezione totale ASSENTE**; e insieme la
+giornaliera scatterebbe a -3.600 (2,25% del conto vero): troppo stretta. Nessun errore a schermo: il Guardian "gira".
+Aggravante: cambiato l'input da F7, se il terminale cade prima di salvare il profilo, al riavvio il grafico puo' ricaricare l'80.000 dal `.chr`.
+**Controesempio.** "Il Guardian e' attaccato e il log dice avviato" e' vero in tutti e due i casi: la riga che distingue e' `Saldo iniziale=160000.00`.
+**Regola.** Al cambio di conto si elencano, dal SORGENTE DEL BINARIO IN CAMPO (non da HEAD), tutti gli input in valuta assoluta o legati al conto; si
+cambiano con Algo Trading SPENTO; si verifica la riga di giornale che stampa il valore; si salva il profilo; la sonda notturna (CODA_08) lo rilegge.
+
+### CLASSE 1003 (30/09/2026) -- due famiglie di TAGLIA DIVERSA sotto lo stesso cap C1: il cap e' un cancello d'ingresso, il tetto vero e' `cap - epsilon + ingresso piu' grande` (+ pendenti), e sta sopra il muro del giorno
+**Caso reale.** Trial FTMO da 160.000 con le sette sedie indice a 2,00% e il Bulge viola a 0,80% x `Max_Trades=4`, cap `InpMaxOpenRiskPct=4.00`. Il
+Guardian alza la bandiera solo a `riskPct >= 4.00` (v1.12, stesso test di HEAD r.789) e l'EA la legge prima di inviare (`ABTG_Bulge.mq5` r.1268/1286):
+nessuno somma il rischio dell'ingresso NUOVO. Sequenze possibili: Bulge x4 = 3,20% -> passa una sedia indice -> **5,20%**; Bulge, Bulge, indice =
+3,60% -> passa un altro indice -> **5,60%**; due indici arrotondati per difetto (3,98%) -> passa il terzo -> **~5,98%**. Il muro giornaliero FTMO e'
+5% (8.000): la rete vera e' l'emergenza del Guardian a 4,5% (7.200), non il cap. E i pendenti (EMA200 O1/O2, Aperture, quota pendente SuperWave)
+non si contano affatto (classe 645). Stessa forma della classe 819 (freno a lotto chiuso).
+**Regola.** Quando un cap di conto copre famiglie con taglie diverse, il referto dichiara il tetto RAGGIUNGIBILE (`cap + ingresso massimo`, piu' i
+pendenti gia' piazzati), lo confronta coi muri della prop in EUR e in stop pieni, e dice quale meccanismo ferma davvero la perdita. "Il cap e' 4%"
+da solo non e' una misura del rischio aperto massimo.
+
+### CLASSE 1004 (30/09/2026) -- una misura di APPARTENENZA che conta solo i membri ATTESI e ignora gli ESTRANEI: se l'EA ricade sul DEFAULT, la prova diretta certifica il falso
+**Caso reale.** Riga R92BAB, terzo cancello, blocco PER-TRADE (classe 998). Per ogni file `abtg_trades_ABTG_Bulge_GBPUSD_<magic>_violaEA.csv` la riga contava
+i deal sui simboli OLTRE il 63esimo carattere della stringa DICHIARATA e, se >0, stampava "taglio a 63 ESCLUSO per questo job". Ma il default di
+`Symbols_List` in `ABTG_Bulge.mq5` r.463 e' **proprio il cesto dei 22 cross**. **Controesempio costruito e girato** (batteria, scenario
+`pertrade_D_simbolo_estraneo`): D con deal su NZDUSD e GBPJPY -- GBPJPY non e' nella stringa di D, quindi gli agenti NON hanno girato la stringa di D -- e la
+riga 48AE39F6 stampava `5, deal su di loro 1 -> taglio a 63 ESCLUSO per questo job`: la misura "diretta" certificava che la stringa di D era arrivata intera
+proprio nel caso in cui non era arrivata affatto. Il simbolo estraneo finiva solo nell'elenco, senza effetto sul verdetto.
+**Regola.** Ogni misura che dice "l'insieme X e' arrivato" conta ANCHE gli elementi fuori da X: un elemento estraneo e' la firma che il valore NON e'
+quello dichiarato (default, valore di un'altra corsa, input caduto) e **annulla** la lettura, non la rafforza. E si dichiara dove il controllo e' cieco
+(qui A e A2: stringa dichiarata = default, un deal oltre il 63esimo carattere non distingue input da default). Mutante di prova: togliere il conteggio
+degli estranei deve far fallire la batteria.
+
+### CLASSE 1005 (30/09/2026) -- un'etichetta PRESUNTA su un file che la corsa riscrive ("gamba OOS"), e un controllo di FRESCHEZZA che nessun test esercita
+**Caso reale.** Stessa riga. (a) La riga stampava "(gamba OOS)" per ogni per-trade fresco: ma `ExportTrades` apre con `FILE_WRITE` e ogni gamba lo riscrive;
+se la OOS muore (job MISTO) il file fresco e' quello della **IS**, e l'etichetta era falsa. Ora la gamba si ricava dalle date di chiusura (ultima chiusura
+prima dell'inizio OOS = IS; nessuna chiusura = non si ricava, detto). (b) Il filtro "scritto dopo l'avvio del job" c'era, ma **il mutante che lo toglie
+passava la batteria 2/2**: nessuno scenario metteva in `Common\Files` un file di una corsa precedente con lo stesso magic. Aggiunto
+`pertrade_A_di_corsa_precedente` (mtime -1 ora): il mutante ora cade.
+**Regola.** Un'etichetta che dipende da quale passo ha scritto per ULTIMO un file riscritto si RICAVA dal contenuto, non si presume dall'ordine atteso. E
+ogni guardia della riga (freschezza, magic, soglia) ha nella batteria lo scenario che la fa scattare: si prova col mutante che la toglie, e se la batteria
+resta verde la guardia non e' collaudata.

@@ -140,10 +140,15 @@ for i, fase in enumerate(['IS', 'OOS']):
 if sc.get('pertrade') is not None:
     cf = os.path.join(AP, 'MetaQuotes', 'Terminal', 'Common', 'Files'); os.makedirs(cf, exist_ok=True)
     for v in vals:
-        with open(os.path.join(cf, 'abtg_trades_%s_%s_%d_violaEA.csv' % (EA, SIM, v)), 'w', newline='', encoding='ascii') as f:
+        pf = os.path.join(cf, 'abtg_trades_%s_%s_%d_violaEA.csv' % (EA, SIM, v))
+        with open(pf, 'w', newline='', encoding='ascii') as f:
             f.write('close_time;symbol;magic;position_id;deal_type;volume;price;net_profit;signal;entry_comment;exit_comment\r\n')
             for i, s_ in enumerate(sc['pertrade']):
-                f.write('2026.05.10 10:00:00;%s;%d;%d;1;0.10;1.00000;-5.00;BLU;BULGE_V520A_BLU_L;sl\r\n' % (s_, v, 1000 + i))
+                f.write('%s;%s;%d;%d;1;0.10;1.00000;-5.00;BLU;BULGE_V520A_BLU_L;sl\r\n' % (sc.get('pertrade_ct', '2026.05.10 10:00:00'), s_, v, 1000 + i))
+        # classe 1005 (terzo cancello): un per-trade di una corsa PRECEDENTE con lo stesso magic (scritto prima dell avvio del job) NON si legge
+        if sc.get('pertrade_stale'):
+            _t = time.time() - 3600
+            os.utime(pf, (_t, _t))
 if sc.get('extra_leg') and not sc.get('tlog'):
     _w16(TL, leg_lines('ok', 'OOS', EA))
 d = os.path.join(DSK, 'ROUND_' + LBL); os.makedirs(d, exist_ok=True)
