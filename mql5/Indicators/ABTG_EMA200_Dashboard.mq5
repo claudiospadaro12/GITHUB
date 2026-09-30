@@ -6,7 +6,8 @@
 //|  (come ABTG_EMA200): prezzi di ingresso, SL, TP e LOTTI al rischio|
 //|  scelto da Claudio (default 1% del saldo di QUESTO terminale, in |
 //|  2 ordini da meta'). Solo CALCOLO: gli ordini li piazza Claudio. |
-//|  Cella misurata: SOLO U30USD H1 con O1 0,20 / O2 0,30 (771531),  |
+//|  Cella misurata: SOLO U30USD H1 con O1 0,20 / O2 0,30 (771531;   |
+//|  OOS PF 1,52 su 257 POSIZIONI = 517 righe-deal, un solo regime), |
 //|  NON i default qui sotto (0,10/0,35 = default dell'EA).          |
 //|  v3: nelle celle i PIPS (forex) o PUNTI (indici, metalli) che    |
 //|  mancano perche' il prezzo tocchi la EMA, e il LIVELLO della EMA |
@@ -694,14 +695,16 @@ void DrawPlan(int xBox, int yTop, const int wMin)   // xBox/yTop NON const: si s
                               InpExpiryBars, gTfName[gSelT]);
       cols[n++] = C'190,190,190';
       // la cella MISURATA di 771531 (preset ABTG_EMA200_U30USD_H1_771531_VIVA.set, CSV R112 OOS):
-      // O1 0,20 / O2 0,30 / SL 1,0 / TP 2R / fascia 0,3-1,5 / EMA14 / EMA200 / ATR14, NON i default dell'EA
+      // O1 0,20 / O2 0,30 / SL 1,0 / TP 2R / fascia 0,3-1,5 / EMA14 / EMA200 / ATR14 / scadenza 6 barre,
+      // NON i default dell'EA. n = 257 POSIZIONI (517 sono le righe-deal: con parziale+trailing ogni
+      // posizione ne fa ~2; REFERTO_R112 r.83). Finestra OOS 2025.06.10-2026.06.30: un solo regime.
       bool cella = (StringFind(sym, "U30USD") == 0 && gTf[gSelT] == PERIOD_H1 &&
                     Eq(InpOrder1Atr, 0.20) && Eq(InpOrder2Atr, 0.30) && Eq(InpSLatr, 1.0) && Eq(InpTpRR, 2.0) &&
                     Eq(InpMinDistAtr, 0.3) && Eq(InpMaxDistAtr, 1.5) && InpUseEma14Bias &&
-                    InpEmaPeriod == 200 && InpAtrPeriod == 14);
+                    InpEmaPeriod == 200 && InpAtrPeriod == 14 && InpExpiryBars == 6);
       lines[n] = cella
-                 ? "Questa e' la cella di 771531 (U30USD H1, O1 0.20 O2 0.30 SL 1.0 TP 2R): backtest OOS PF 1.52 su 517 deal."
-                 : "NON e' la cella della sedia 771531 (U30USD H1, O1 0.20 O2 0.30 SL 1.0 TP 2R): qui NON validato.";
+                 ? "E' la cella di 771531 (U30USD H1, parametri del preset tranne il rischio): OOS PF 1.52 su 257 posizioni, un solo regime."
+                 : "NON e' la cella di 771531 (U30USD H1, O1 0.20 O2 0.30 SL 1.0 TP 2R, fascia 0.3-1.5, EMA14, scad. 6): NON validato.";
       cols[n++] = C'255,140,0';
       lines[n] = "L'EA gestisce anche parziale 50% su EMA14 + pareggio + trailing: solo SL/TP a mano NON e' la stessa cosa.";
       cols[n++] = C'255,140,0';
