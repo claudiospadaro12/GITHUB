@@ -151,6 +151,10 @@
 #     nel feed (33,2% nel log dell'anatomia): i suoi giorni buoni sono meno.
 #   - Il close della barra come prezzo d'entrata B ignora slippage e gap fra
 #     close e open successivo; l'ordine DENTRO una barra M5 non e' osservabile.
+#   - ASIMMETRIA A FAVORE DI A, dichiarata: l'entrata A e' "AL LIVELLO" (fill
+#     perfetto di un pendente, anche se la barra del tocco lo ha attraversato
+#     con un salto) mentre B paga il close reale della barra. Un B <= A puo'
+#     dipendere in parte da questo fill ideale di A, non solo dal ritardo.
 #   - Otto celle (2 range x 2 lati x 2 fasi) sono otto occasioni di rumore:
 #     per questo la soglia e' un ECCESSO con IC e un range vale solo se LONG
 #     e SHORT concordano; i verdetti dell'addestramento decidono, la cassaforte
@@ -1197,6 +1201,8 @@ def costruisci_referto(cfg, righe, res_per_range, diag, percorso, titolo, nota_f
     add("  un altro, con 2023 a poca copertura buona). Il close come prezzo d'entrata ignora slippage e gap.")
     add("  Il NULLO e' un modello di H_NIENTE (segni casuali barra per barra): non copre memoria di")
     add("  volatilita' ne' code; vicino alla soglia la risposta e' INCERTO, non SI.")
+    add("  L'entrata A e' AL LIVELLO (fill ideale di un pendente, anche se la barra del tocco lo ha attraversato")
+    add("  con un salto); B paga il close reale: un B <= A puo' dipendere in parte dal fill ideale di A.")
     add("")
     add("--- RILIEVI DI QUESTA CORSA ---")
     if not rilievi:
