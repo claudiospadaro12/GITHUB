@@ -771,6 +771,34 @@ def controlla_coerenza(rec, ev):
     return d
 
 
+def invarianti(rec):
+    """Identita' che valgono PER COSTRUZIONE fra le due entrate (nessuna dipende
+    dall'anatomia): se cadono, il confronto e' guasto. Torna la lista dei problemi.
+      1. B non viene mai prima di A (chiudere fuori = aver toccato).
+      2. B sta sulla STESSA barra di A se e solo se la barra del tocco chiude
+         FUORI dal livello (e allora ha lo stesso lato); altrimenti B e' dopo
+         o non c'e'.
+      3. R' di B > R' di A (si entra oltre il livello: B ha sempre piu' rischio)."""
+    d = []
+    a, b = rec.get("A"), rec.get("B")
+    if a is None or b is None:
+        if a is not None and not a["chiude_dentro"]:
+            d.append("la barra del tocco chiude fuori ma B non c'e'")
+        return d
+    if b["k"] < a["k"]:
+        d.append("B (barra %d) prima di A (barra %d)" % (b["k"], a["k"]))
+    stessa = (b["k"] == a["k"])
+    if stessa and a["chiude_dentro"]:
+        d.append("B sulla barra del tocco ma la barra chiude dentro")
+    if (not stessa) and (not a["chiude_dentro"]):
+        d.append("la barra del tocco chiude fuori ma B e' su un'altra barra")
+    if stessa and a["lato"] != b["lato"]:
+        d.append("B sulla barra del tocco con lato diverso")
+    if not (b["Rp"] > a["Rp"]) and not _m("b_rprime_range"):
+        d.append("R' di B (%s) non maggiore di quello di A (%s)" % (b["Rp"], a["Rp"]))
+    return d
+
+
 def processa_giorno(ctx, g, r):
     """Chiamata per ogni giorno dal gancio. Aggiunge r['cmp'][N] = misura
     delle due entrate e accumula il NULLO (K surrogati per range)."""
@@ -783,7 +811,7 @@ def processa_giorno(ctx, g, r):
     for N in cfg.ranges:
         rec = misura_range(cfg, m5, N)
         r["cmp"][N] = rec
-        diff = controlla_coerenza(rec, r["ev"].get(N))
+        diff = controlla_coerenza(rec, r["ev"].get(N)) + invarianti(rec)
         if diff:
             ctx.incoerenze += 1
             if len(ctx.esempi) < 5:
@@ -1010,6 +1038,8 @@ def blocco_range(out, cfg, res):
                    (_lato_txt(lato), c["n"], "*" if c["n"] < AM.SOGLIA_N else "",
                     AA.pct(c["T"], c["n"], 1), AA.pct(c["S"], c["n"], 1), AA.pct(c["A"], c["n"], 1),
                     AA.pct(c["N"], c["n"], 1), AA.pct(dentro, c["n"], 1), AA.pct(c["kf"], c["nf"], 1), c["nf"]))
+        out.append("        identita': A con la barra del tocco che chiude FUORI = %d;  B sulla STESSA barra del tocco = %d"
+                   % (c["n"] - dentro, len(res["sub"][_lato_txt(lato)]["S"])))
     out.append("")
     for lato in (1, -1):
         cella = res["celle"][lato]
@@ -1032,6 +1062,9 @@ def blocco_range(out, cfg, res):
                    _q3([x[1]["Rp"] / x[0]["Rp"] for x in coppie], 3))
         out.append("  ritardo di B dall'inizio della barra del tocco, minuti q25/q50/q75 : %s" %
                    _q3([(x[1]["k"] + 1 - x[0]["k"]) * 5 for x in coppie], 0))
+        out.append("  ATTENZIONE: sulle coppie A e' AVVANTAGGIATA per costruzione (i giorni in cui B esiste sono quelli in cui il")
+        out.append("  prezzo ha poi chiuso fuori: dopo l'entrata di A, prima di quella di B) e B ha meno falsi anche senza")
+        out.append("  memoria (entra oltre il livello). I divari grezzi qui sotto NON sono il verdetto: conta l'ECCESSO sul NULLO.")
         sp = cella["obsP"]
         out.append("  scarto sulle coppie: R lordo B-A %s (+-%s, 1 SE)  | falso A-B %s pt (+-%s)  | a mercato B-A %s" %
                    (_sgn(sp["dR"]), _f(sp["seR"]), _sgn(sp["dF"], 1), _f(sp["seF"], 1), _sgn(sp["dRm"])))
@@ -1648,6 +1681,18 @@ def esegui_casi(cfg, v):
     v.uguale("C17: A sequenza T (1033 >= 1030)", r["A"]["seq"], "T")
     v.uguale("C17: B sequenza N (1033 < 1034)", r["B"]["seq"], "N")
     v.uguale("C17: B a mercato (1020-1012)/22", r["B"]["Rm"], 8.0 / 22.0)
+    # ---- invarianti per costruzione, su tutti i casi a mano
+    for nome_c in casi:
+        for N_c in (5, 15):
+            rc_ = misura_range(cfg, m5_da_barre(cfg, casi[nome_c]), N_c)
+            v.check("invarianti A/B nel caso %s (range %d)" % (nome_c, N_c), invarianti(rc_) == [], str(invarianti(rc_)))
+    # un guasto costruito a mano: B PRIMA di A viene visto
+    guasto = {"A": {"k": 4, "chiude_dentro": True, "lato": 1, "Rp": 20.0},
+              "B": {"k": 3, "lato": 1, "Rp": 22.0}}
+    v.check("invarianti: B prima di A e' un guasto", any("prima di A" in x for x in invarianti(guasto)))
+    guasto["B"]["k"] = 4
+    v.check("invarianti: B sulla barra del tocco che chiude DENTRO e' un guasto",
+            any("chiude dentro" in x for x in invarianti(guasto)))
     # ---- barre vuote: il falso di B senza nessuna chiusura in finestra non e' un dato
     r = rec_di("C2_chiusura_fuori_stessa_barra_del_tocco", buchi=(2, 3, 4))
     v.check("buchi: nessuna chiusura in finestra -> falso B non valutabile", r["B"]["falso"] is None)
@@ -1696,14 +1741,11 @@ def fuzz_contro_anatomia(cfg, giorni, seme):
         m5 = AM.m5_da_m1(g["m1"], cfg.K)
         for N in cfg.ranges:
             rec = misura_range(cfg, m5, N)
-            d = controlla_coerenza(rec, r["ev"].get(N))
+            d = controlla_coerenza(rec, r["ev"].get(N)) + invarianti(rec)
             n += 1
             lati[rec["A_txt"]] = lati.get(rec["A_txt"], 0) + 1
             if d:
                 diffs.append("giorno %d range %d: %s" % (i, N, "; ".join(d)))
-            # invarianti del confronto: B mai prima di A quando A esiste (chiudere fuori = aver toccato)
-            if rec["A"] is not None and rec["B"] is not None and rec["B"]["k"] < rec["A"]["k"]:
-                diffs.append("giorno %d range %d: B prima di A" % (i, N))
     return n, diffs, lati
 
 
