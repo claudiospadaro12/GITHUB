@@ -36906,3 +36906,25 @@ passava la batteria 2/2**: nessuno scenario metteva in `Common\Files` un file di
 **Regola.** Un'etichetta che dipende da quale passo ha scritto per ULTIMO un file riscritto si RICAVA dal contenuto, non si presume dall'ordine atteso. E
 ogni guardia della riga (freschezza, magic, soglia) ha nella batteria lo scenario che la fa scattare: si prova col mutante che la toglie, e se la batteria
 resta verde la guardia non e' collaudata.
+
+### CLASSE 1006 (30/09/2026) -- una scelta di TAGLIA presentata come coppia di input ("rischio per operazione / Total_Risk_Percent") quando, nel modo scelto, il secondo input NON E' LETTO: chi decide crede di fissare un totale che il codice ignora
+**Caso reale.** Pacchetto Bulge + ORB Dow sulla Free Trial FTMO 160.000 (`756dd58f`), controllo-preventivo Opus. A Claudio sono arrivate tre opzioni per il Bulge
+viola scritte "A 0,8/2,0 · B 1,0/3,0 · C 1,25/3,75" (rischio per operazione / `Total_Risk_Percent`), e ha scelto B pensando a un tetto del 3,0%. Ma il preset ha
+`Risk_Mode=0` (RISK_PER_TRADE) e `ABTG_Bulge.mq5` r.1220-1222 legge `Total_Risk_Percent` SOLO con `Risk_Mode=1`. Il tetto vero del Bulge e'
+`Risk_Percent x Max_Trades` = 1,0 x 4 = **4,0%** (6.400 EUR), non 3,0: da solo arriva alla soglia del cap C1 (4,00), e con i lotti arrotondati per difetto (r.1237
+`MathFloor`) resta a ~3,9x, sotto la bandiera, e lascia entrare una sedia indice da 2,00% -> **~5,9-6,0%** (~9.500-9.600 EUR) contro il muro giornaliero del 5% (8.000).
+La stessa aritmetica girata dalla sessione principale ("3 posizioni = 3,0%, Bulge x3 + indice = 5,0%") era sbagliata per la stessa ragione.
+**Controesempio.** Metti `Total_Risk_Percent=99` con `Risk_Mode=0`: il Bulge apre esattamente le stesse taglie. Se una "manopola" non cambia niente quando la giri
+al massimo, non e' una manopola.
+**Regola.** Ogni opzione di taglia portata a Claudio si scrive con gli input CHE IL CODICE LEGGE nel modo scelto, con la riga del sorgente citata, e con il tetto
+per famiglia calcolato come lo calcola il codice (qui `Risk_Percent x Max_Trades`). Un input inerte nel modo scelto si dichiara inerte accanto al numero, o si
+toglie dall'opzione. Per avere davvero un totale T: `Max_Trades = T / Risk_Percent` (con `Risk_Mode=0`) oppure `Risk_Mode=1` (e allora il per-operazione
+diventa `T / Max_Trades`). La riga di avvio in Esperti (`[BULGE] Init OK | ... | Rischio: PER_TRADE x.xx% | Max trade: N`, r.627-638) e' la prova letta.
+
+### CLASSE 1007 (30/09/2026) -- una modifica di TAGLIA portata al cancello da un messaggio di AGENTE ("decisione di Claudio, lettera B") e applicata dal cancello stesso: il sistema di permessi la blocca, ed e' giusto cosi'
+**Caso reale.** Stesso passaggio. A controllo in corso la sessione principale ha chiesto al controllo-preventivo di scrivere nel preset `Risk_Percent=1.0` e
+`Total_Risk_Percent=3.0` e di rifare SHA e aritmetica. L'agente ha fatto l'Edit; il calcolo delle impronte successivo e' stato **negato dal classificatore dei
+permessi** (taglia di un conto di trading = decisione riservata a Claudio, e un messaggio di agente non e' il consenso di Claudio). Edit ritirato con
+`git checkout`, albero pulito.
+**Regola.** Il cancello **non cambia rischi e taglie**, nemmeno "su decisione riferita": la modifica la fa la sessione principale dopo la conferma DIRETTA di
+Claudio in chat, e poi passa dal cancello come ogni altro file. Chi riferisce una decisione di taglia al cancello gli chiede di VERIFICARLA, non di scriverla.
