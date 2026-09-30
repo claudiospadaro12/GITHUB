@@ -8,7 +8,7 @@ CSV e per-trade nel formato di OptFrame/ExportTrades di ABTG_Bulge, e verifica c
 cancello dichiarato dalla riga scatti quando deve e NON scatti quando non deve.
 NON prova: Windows PowerShell 5.1, MT5, il tester, il tempo, la memoria.
 
-Uso:  python3 backtest_pipeline/collaudo_riga_R92b/battery.py      (esce 0 se tutto come atteso)
+Uso:  python3 backtest_pipeline/collaudo_riga_R92b/battery.py      (esce 0 se tutto come atteso; 25 scenari dal 30/09, 3 aggiunti dal cancello di giudizio)
 Serve: pwsh, python3, iconv. Scrive in $HARNESS_OUT (default /tmp/r92b_harness).
 """
 import os, subprocess, sys, glob
@@ -17,7 +17,7 @@ OUT = os.environ.get("HARNESS_OUT", "/tmp/r92b_harness")
 
 # (nome, scenario, modifica sed alla riga, grafici, [stringhe che DEVONO esserci], [stringhe che NON devono esserci])
 T = [
- ("ok", "scen_ok.json", "", "ok", ["FILE NULLI: nessuno", "ROUND LANCIATI: 6 su 6", "n = Trades IS 77 + Trades OOS 29 = 106", "E3 cella P identica a quella di R92ba", "G1 gemelle identiche"], ["RIGA FERMATA"]),
+ ("ok", "scen_ok.json", "", "ok", ["FILE NULLI: nessuno", "ROUND LANCIATI: 6 su 6", "n = Trades IS 77 + Trades OOS 29 = 106", "E3 cella P identica a quella di R92ba", "G1 gemelle identiche", "NON MISURATI DA QUESTO ROUND, PER COSTRUZIONE", "NESSUNA cella lo supera", "GUARDIA EA: grafici salvati letti 2, con un EA attaccato o illeggibili 0"], ["RIGA FERMATA", "ILLEGGIBILE"]),
  ("n01_ctl_low", "scen_n01_ctl_low.json", "", "ok", ["RIGA FERMATA"], ["ROUND LANCIATI: 6 su 6"]),
  ("n02_ctl_130", "scen_n02_ctl_high.json", "", "ok", ["= 130", "FUORI", "RIGA FERMATA", "NON LANCIATI: 5"], []),
  ("n03_ctl_90_dentro", "scen_n03_ctl_90.json", "", "ok", ["= 90, banda", "DENTRO", "FILE NULLI: nessuno"], ["RIGA FERMATA"]),
@@ -37,8 +37,12 @@ T = [
  ("n17_rc2_con_csv_buoni", "scen_n17_rc2_job_d.json", "", "ok", ["rc 2 (NON ATTESO qui"], []),
  ("n18_csv_OOS_assente", "scen_n18_no_OOS_job_d.json", "", "ok", ["R92bd (E0: CSV _OOS NON BUONO (ASSENTE))"], ["RIGA FERMATA"]),
  ("n19_finestra_riga_diversa_dal_file", "scen_ok.json", r"s/fz='0.7275'; ct='Signal_Bar_Offset=0/fz='0.7274'; ct='Signal_Bar_Offset=0/", "ok", ["FINESTRA/SIMBOLO/TF DEL FILE PROVA DIVERSI", "RIGA FERMATA"], []),
- ("n20_grafico_con_EA", "scen_ok.json", "", "ea", ["GUARDIA EA: grafici salvati letti 3, con un EA attaccato 1", "GUARDIA EA: nel profilo del terminale 50503392"], ["ROUND LANCIATI"]),
+ ("n20_grafico_con_EA", "scen_ok.json", "", "ea", ["GUARDIA EA: grafici salvati letti 3, con un EA attaccato o illeggibili 1", "GUARDIA EA: nel profilo del terminale 50503392"], ["ROUND LANCIATI"]),
  ("n21_zero_grafici", "scen_ok.json", "", "zero", ["GUARDIA EA: ho letto ZERO grafici salvati"], ["ROUND LANCIATI"]),
+ # aggiunti dal cancello di giudizio (controllo-preventivo, 30/09): contro-esempi che la riga a7942b98 NON fermava
+ ("n22_grafico_illeggibile", "scen_ok.json", "", "rotto", ["chart09.chr  ILLEGGIBILE", "con un EA attaccato o illeggibili 1", "GUARDIA EA: nel profilo del terminale 50503392"], ["ROUND LANCIATI"]),
+ ("n23_R92ba_Trades0_su_una_cella", "scen_n22_R92ba_trades0.json", "", "ok", ["RIGA FERMATA: il primo job a finestra lunga (R92ba) non ha prodotto una misura completa", "NON LANCIATI: 4"], ["ROUND LANCIATI: 6 su 6"]),
+ ("n24_R92ba_una_riga_su_due", "scen_n23_R92ba_una_riga.json", "", "ok", ["RIGA FERMATA: il primo job a finestra lunga (R92ba) non ha prodotto una misura completa", "NON LANCIATI: 4"], ["ROUND LANCIATI: 6 su 6"]),
 ]
 fails = 0
 for nome, scen, mod, ch, deve, non in T:

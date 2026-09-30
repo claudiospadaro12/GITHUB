@@ -78,7 +78,8 @@ Regole: (a) si scrive accanto a ogni numero IS ("GBPNZD dal 2010.05.10"); (b) **
 rilancia** (perderebbe l'unico banco a 22 cross per recuperare lo 0,14%); (c) la gamba
 **OOS e' completa** per tutti e 22 (il muro e' nel 2010); (d) [NON MISURATO] come si
 comporta il tester con un simbolo del cesto senza barre all'inizio della finestra: il primo
-job a finestra lunga (R92ba) lo mostra, e se esce senza CSV la riga si ferma (par. 4.3).
+job a finestra lunga (R92ba) lo mostra, e se esce senza una misura completa (CSV assente o vuoto,
+righe mancanti, o una cella con `Trades=0`, in una qualunque delle due gambe) la riga si ferma (par. 4.5).
 
 ## 3. I LAVORI (nell'ordine in cui girano: il controllo per primo)
 
@@ -163,9 +164,11 @@ Un intervallo che non separa il vero dal falso non e' un test (classe 178). Ipot
 | **`Signal_Bar_Offset=1` arrivato al posto di 0** | **non noto** (e' quello che R92b misura: se la frequenza di Claudio tornasse, sarebbe ~1000; se no, ~100-200) | **puo' cadere DENTRO** | **NO, da n non si vede** |
 | gemelle diverse (banco non deterministico) | qualunque | qualunque | no da n; **si' da G1** |
 | EA diverso da quello del pin | qualunque | qualunque | no da n; **si' da SHA256** |
+| **il tester carica solo PARTE del cesto** (qualche cross non sincronizzato) | 3 cross persi a n medio di R92: 106 x 19/22 = **~92**; se i persi sono quelli a n=1, anche di piu' | **puo' cadere DENTRO** | **NO, da n non si vede; P0 non lo vede** (le stringhe come `Symbols_List` non si confrontano). Si legge a mano: righe `symbol synchronized` nei log dell'agente (`LOG_TESTER`), e colonna `symbol` del per-trade. [Aggiunta dal cancello di giudizio il 30/09, prima dei numeri] |
 
-Le righe 5, 6, 7 sono il punto: **la banda di n, da sola, non separa "offset 0 arrivato" da
-"offset 1 arrivato".** Per questo il controllo passa SOLO se valgono **tutte e quattro** le condizioni:
+Le righe 5, 6, 7 e 8 sono il punto: **la banda di n, da sola, non separa "offset 0 arrivato" da
+"offset 1 arrivato"**, e non separa "cesto intero" da "cesto meno qualche cross" (riga 8: quella
+resta una lettura a mano dei log, dichiarata qui e nel riepilogo della riga, non un cancello). Per questo il controllo passa SOLO se valgono **tutte e quattro** le condizioni:
 (i) n in [90;122]; (ii) **P0**: la colonna `Signal_Bar_Offset` del CSV vale **0** in tutte le righe di
 tutte e due le gambe; (iii) **G1**: le due gemelle identiche in Profit, PF, DD, Trades, in IS e OOS;
 (iv) SHA256 di EA e include = pin. La (ii) e' la sola che separa 0 da 1; senza di lei la (i) non
@@ -321,8 +324,10 @@ numero misurato** e non ne scrivo uno. Quello che si puo' dire con onesta':
 - tetto per job = **3 x** la sua proporzione dal controllo; oltre non e' lento, e' bloccato. Con T = minuti del
   controllo: a, c, d, e = 3 x 3,67 x T = **11,0 x T**; b = 3 x 5,51 x T = **16,5 x T** (esempio T = 20 min:
   220 min per a/c/d/e, 330 min per b). La riga stampa il tetto all'inizio di ogni job.
-- rischio [NON MISURATO]: memoria del tester (22 simboli x 12 anni di M1). Se un job a finestra lunga esce
-  senza CSV la riga si ferma (par. 4.5 esteso a R92ba).
+- rischio [NON MISURATO]: memoria del tester (22 simboli x 12 anni di M1). Il PC ha 16 GB (log dell'agente
+  di R271: `16218 MB`, 3-4 GB occupati all'avvio) e UN agente locale (`Core 1`, `Agent-127.0.0.1-3000`).
+  Se il primo job a finestra lunga (R92ba) esce senza una misura completa (CSV assente o vuoto, righe
+  mancanti, una cella con `Trades=0`, in una delle due gambe) la riga si ferma (par. 4.5 esteso a R92ba).
 
 ## 10. COSA CHIUDE QUESTO FILE
 
@@ -331,7 +336,9 @@ Il round e' pronto a girare quando: (1) i file prova passano `controlla_prova.py
 2/2/3/2/2/2 = 26 passate e le date IS/OOS); (2) la riga di lancio passa `controlla_riga.py --oggetto riga`
 (fatto) **e** il collaudo a macchina `python3 backtest_pipeline/collaudo_riga_R92b/battery.py` (riga vera
 sotto pwsh con driver finto, 22 scenari: banda a 89/90/122/123, P0, G1, E3, SHA256, asse, guardia EA,
-stop; le mutazioni della riga vengono catturate) (fatto), e poi il cancello di giudizio
+stop; le mutazioni della riga vengono catturate) (fatto; **25 scenari dal cancello di giudizio del 30/09**:
++ grafico salvato ILLEGGIBILE, che la riga a7942b98 contava come pulito, + R92ba con una cella a `Trades=0`
+e + R92ba con una riga su due, che la riga a7942b98 lasciava proseguire), e poi il cancello di giudizio
 (`controllo-preventivo`); (3) Claudio la manda. Il collaudo NON prova Windows PowerShell 5.1, MT5, il
 tester, il tempo, la memoria. Niente di questo
 e' stato lanciato o mandato al momento in cui questo file e' scritto.

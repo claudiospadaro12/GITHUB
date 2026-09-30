@@ -1,5 +1,5 @@
 #!/bin/bash
-# uso: run.sh NOME scenario.json [modifica_sed] [charts=ok|ea|zero]
+# uso: run.sh NOME scenario.json [modifica_sed] [charts=ok|ea|zero|rotto]
 QD="$(cd "$(dirname "$0")" && pwd)"; REPO_ROOT="$(cd "$QD/../.." && pwd)"; OUT=${HARNESS_OUT:-/tmp/r92b_harness}; mkdir -p $OUT
 N=$1; SCEN=$(readlink -f $2); MOD=$3; CH=${4:-ok}
 H=$OUT/run_$N; rm -rf $H; mkdir -p $H/user/Desktop $H/appdata/MetaQuotes/Terminal/ABC123 $H/appdata/MetaQuotes/Terminal/Common
@@ -9,6 +9,8 @@ mkdir -p $H/appdata/MetaQuotes/Terminal/ZZZ999; printf 'C:\\MT5_MANUALE' > $H/ap
 CD="$H/appdata/MetaQuotes/Terminal/ABC123/MQL5/Profiles/Charts"
 if [ "$CH" != "zero" ]; then mkdir -p "$CD/Default" "$CD/SQUADRA"; printf '\xff\xfe' > "$CD/Default/chart01.chr"; printf '<chart>\nsymbol=EURUSD\n</chart>\n' | iconv -f ascii -t utf-16le >> "$CD/Default/chart01.chr"; cp "$CD/Default/chart01.chr" "$CD/SQUADRA/chart02.chr"; fi
 if [ "$CH" = "ea" ]; then printf '\xff\xfe' > "$CD/SQUADRA/chart03.chr"; printf '<chart>\nsymbol=GBPUSD\n<window>\n<expert>\nname=ABTG_Bulge\n</expert>\n</window>\n</chart>\n' | iconv -f ascii -t utf-16le >> "$CD/SQUADRA/chart03.chr"; fi
+# rotto: un .chr che la guardia NON riesce a leggere (link rotto): deve contare come EA attaccato, non come pulito
+if [ "$CH" = "rotto" ]; then ln -s /nonexistent/x.chr "$CD/SQUADRA/chart09.chr"; fi
 cp $REPO_ROOT/backtest_pipeline/righe/RIGA_ROUND_R92B.txt $H/riga.txt
 if [ -n "$MOD" ]; then sed -i "$MOD" $H/riga.txt; fi
 export COMPUTERNAME=DESKTOP-H4D7CAJ USERPROFILE=$H/user APPDATA=$H/appdata HOME=$H/user DESKTOP_DIR=$H/user/Desktop SCENARIO=$SCEN HARNESS_LOG=$H/stub.log STUB=$QD/stub_driver.py REPO_ROOT=$REPO_ROOT PATH=$OUT/bin:$PATH
