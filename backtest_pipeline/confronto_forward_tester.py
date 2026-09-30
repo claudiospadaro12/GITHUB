@@ -62,7 +62,7 @@ COSTANTI = {
     "TOL_R": 0.25,
     "SOGLIA_STOP_R": -0.70,
     "SOGLIA_TRAIL_R": 0.30,
-    "SOGLIA_ALTO_R": 1.00,
+    "SOGLIA_ALTO_R": 1.50,
     "FINESTRA_ORARIO_MIN": 10,
     "DELTA_ORE": 2,
     "SALDO_INIZIALE": 80000.0,
@@ -86,28 +86,32 @@ FAMIGLIA_TOL = {"DAX": "TOL_PREZZO_DAX_PT", "US30": "TOL_PREZZO_US30_PT", "US100
 # (InpCloseHour/Min del preset FTMO meno 2 ore), None se la sedia non ne ha una.
 SEDIE = [
     dict(id="770411", nome="MaxMin DAX short", ea="ABTG_MaxMinNotte_DAX_Short_Ottimizzato", sim_t="D30EUR",
-         sim_f="GER40.cash", fam="DAX", dir="S", magic=793411, twin=793461, commento=r"^MAXMIN DAX SHORT",
+         freq_contratto=0.051, sim_f="GER40.cash", fam="DAX", dir="S", magic=793411, twin=793461, commento=r"^MAXMIN DAX SHORT",
          chiusura_bcm=(17, 30), viva_da="2026.09.21", rischio=2.0),
     dict(id="770101", nome="DAX Apertura EU RETEST long", ea="ABTG_DAX_Apertura_EU_Pin9fca", sim_t="D30EUR",
-         sim_f="GER40.cash", fam="DAX", dir="L", magic=793601, twin=793651, commento=r"^DAX Apertura EU RETEST BUY",
+         freq_contratto=0.699, sim_f="GER40.cash", fam="DAX", dir="L", magic=793601, twin=793651, commento=r"^DAX Apertura EU RETEST BUY",
          chiusura_bcm=(17, 30), viva_da="2026.09.21", rischio=2.0),
     dict(id="770105", nome="DAX Apertura EU RETEST short", ea="ABTG_DAX_Apertura_EU_Pin9fca", sim_t="D30EUR",
-         sim_f="GER40.cash", fam="DAX", dir="S", magic=793605, twin=793655, commento=r"^DAX Apertura EU RETEST SELL",
+         freq_contratto=None, sim_f="GER40.cash", fam="DAX", dir="S", magic=793605, twin=793655, commento=r"^DAX Apertura EU RETEST SELL",
          chiusura_bcm=(17, 30), viva_da="2026.09.28", rischio=2.0),
-    dict(id="771531", nome="EMA200 Dow H1", ea="ABTG_EMA200", sim_t="U30USD", sim_f="US30.cash", fam="US30",
-         dir="LS", magic=793531, twin=793581, commento=r"^EMA200", chiusura_bcm=None, viva_da="2026.09.21", rischio=2.0),
-    dict(id="770202", nome="Dow Apertura US", ea="ABTG_Dow_Apertura_US_Pin9fca", sim_t="U30USD", sim_f="US30.cash",
+    dict(id="771531", nome="EMA200 Dow H1", ea="ABTG_EMA200", sim_t="U30USD", sim_f="US30.cash", fam="US30", freq_contratto=0.931,
+         dir="LS", magic=793531, twin=793581, commento=r"^EMA200", chiusura_bcm=None, viva_da="2026.09.21", rischio=2.0,
+         quota_rischio=0.5),
+    dict(id="770202", nome="Dow Apertura US", ea="ABTG_Dow_Apertura_US_Pin9fca", sim_t="U30USD", sim_f="US30.cash", freq_contratto=0.348,
          fam="US30", dir="L", magic=793202, twin=793252, commento=r"^Dow Apertura US", chiusura_bcm=(17, 30),
          viva_da="2026.09.21", rischio=2.0),
     dict(id="770260", nome="Nasdaq Apertura US RETEST", ea="ABTG_Nasdaq_Apertura_US_Pin9fca", sim_t="NASUSD",
-         sim_f="US100.cash", fam="US100", dir="LS", magic=793260, twin=793310, commento=r"^Nasdaq Apertura US",
+         sim_f="US100.cash", fam="US100", freq_contratto=0.360, dir="LS", magic=793260, twin=793310, commento=r"^Nasdaq Apertura US",
          chiusura_bcm=(17, 30), viva_da="2026.09.21", rischio=2.0),
     dict(id="770511", nome="SuperWave DOW H1", ea="ABTG_SuperWave_DOW_H1_Ottimizzato", sim_t="U30USD",
-         sim_f="US30.cash", fam="US30", dir="LS", magic=793511, twin=793561, commento=r"^SUPERWAVE DOW H1",
+         sim_f="US30.cash", fam="US30", freq_contratto=0.294, dir="LS", magic=793511, twin=793561, commento=r"^SUPERWAVE DOW H1",
          chiusura_bcm=None, viva_da="2026.09.21", rischio=2.0),
 ]
 SEDIA_PER_ID = {s["id"]: s for s in SEDIE}
 
+# 'quota_rischio': EMA200 divide InpRiskPercent fra i suoi DUE ordini (riskPct = InpRiskPercent/nOrders, EA r.361), quindi
+# il rischio di UNA posizione e' meta': R nominale = netto / (2% x 0,5 x saldo). Le altre sedie: una posizione = tutto il rischio.
+# (SuperWave divide la size in 1/3 mercato + 2/3 pendente: R nominale sull'intera size, dichiarato, nessuna operazione forward.)
 # Ordini pendenti che scadono perdono il commento della sedia ("expired [..]"): l'attribuzione
 # si INFERISCE da (simbolo FTMO, tipo). E' una regola, non un fatto: ogni riga inferita si stampa
 # come INFERITA. Motivo per riga: chi altro puo' produrre quel tipo su quel simbolo.
@@ -296,7 +300,7 @@ def posizioni_forward(fw, delta_ore, saldo0):
         saldo = saldo0 + sum(q["profit"] + (q["comm"] or 0) + (q["swap"] or 0) for q in pos_ord if q["t_close"] < p["t_open"])
         net = p["profit"] + (p["comm"] or 0) + (p["swap"] or 0)
         sd = SEDIA_PER_ID.get(sid)
-        rk = (sd["rischio"] if sd else 2.0)
+        rk = (sd["rischio"] * sd.get("quota_rischio", 1.0) if sd else 2.0)
         legs = [dict(t=d["t"] - dh, p=d["prezzo"], v=d["vol"], net=d["profit"]) for d in g]
         if not legs:
             legs = [dict(t=p["t_close"] - dh, p=p["p_close"], v=p["vol"], net=net)]
@@ -369,7 +373,7 @@ def posizioni_tester(righe, sedia, saldo0):
     saldo = saldo0
     for x in res:
         x["saldo"] = saldo
-        x["R"] = x["net"] / (sedia["rischio"] / 100.0 * saldo)
+        x["R"] = x["net"] / (sedia["rischio"] * sedia.get("quota_rischio", 1.0) / 100.0 * saldo)
         saldo += x["net"]
     return res, note
 
@@ -622,6 +626,23 @@ def sintesi_pooled(conf, C=COSTANTI):
     return dict(nF=nF, nT=nT, L1=L1, L2=L2, T_solo_a=Ta, T_solo_b=Tb, mediana_delta_min=med, fedeli=fed, orari=ori, freq=fre)
 
 
+def etichetta_sedia(nF, nT, l1, l2, t_solo_b):
+    """Etichetta per sedia (RFWD_CRITERI par. 5.4). Nessun verdetto: dice che cosa e' successo, non perche'."""
+    if nF == 0 and nT == 0:
+        return "ZERO CONTRO ZERO: coerente, ma NON falsificabile (senza operazioni non c'e' niente da riprodurre)"
+    if nF == 0:
+        return "FORWARD MUTO: il tester apre %d posizioni dove FTMO non ne ha aperta nessuna -> la differenza sta nel FORWARD (feed, Guardian, filtri, orari), non nel mercato" % nT
+    if nT == 0:
+        return "TESTER MUTO: FTMO ha aperto %d posizioni, il tester nessuna -> la differenza sta nel TESTER (feed BCM, dati, filtro) o nella sedia che li' non scatta" % nF
+    if l2 == nF and l1 >= 0.5 * nF and t_solo_b == 0:
+        return "RIPRODOTTA: ogni forward ha il gemello (L1 %d su %d), nessuna operazione del tester senza ordine forward" % (l1, nF)
+    if l2 == nF and l1 >= 0.5 * nF:
+        return "RIPRODOTTA CON ECCEDENZA: ogni forward ha il gemello (L1 %d su %d) ma il tester ha %d posizioni in giorni senza nessun ordine forward" % (l1, nF, t_solo_b)
+    if l2 >= 0.5 * nF:
+        return "PARZIALE: %d forward su %d hanno un gemello (L1 %d)" % (l2, nF, l1)
+    return "DIVERSA: solo %d forward su %d hanno un gemello" % (l2, nF)
+
+
 def lettura_770411(k1, k2, nF):
     """Cosa significano 0,1,2,3 riproduzioni per la 770411, come scritto in RFWD_CRITERI par. 5."""
     tab = {
@@ -696,8 +717,15 @@ def scrivi_report(conf, C, n_nullo, seed=20260930):
         l2 = [c for c in ab["coppie"] if c[2] == "L2"]
         W("  ABBINATE: L1 (uscita stretta) %d | L2 (stesso giorno, non L1) %d | forward SENZA gemello %d | tester SENZA gemello %d" %
           (len(l1), len(l2), len(ab["f_solo"]), len(ab["t_solo"])))
-        # giorni e ipergeometrica
+        # etichetta di sedia (RFWD_CRITERI par. 5.4) e frequenza attesa dal contratto
         D = len(r["giorni"])
+        fc = s.get("freq_contratto")
+        etich = etichetta_sedia(len(F), len(T), len(l1), len(l1) + len(l2), sum(1 for j in ab["t_solo"] if not any(p["t_piazz"].date() == T[j]["t"].date() and p["stato"] in ("expired", "canceled") for p in r["P"])))
+        W("  ETICHETTA DI SEDIA: %s" % etich)
+        if fc is not None:
+            W("  frequenza del contratto %.3f pos/giorno: attese su %d giorni %.1f posizioni; probabilita' di ZERO per pura sorte (Poisson) %.3f; osservate: forward %d, tester %d" %
+              (fc, D, fc * D, math.exp(-fc * D), len(F), len(T)))
+        # giorni e ipergeometrica
         dF = {f["t"].date() for f in F}
         dT = {t["t"].date() for t in T}
         ov = len(dF & dT)
@@ -762,17 +790,21 @@ def scrivi_report(conf, C, n_nullo, seed=20260930):
       (S["nF"], S["nT"], S["L1"], 100.0 * S["L1"] / max(1, S["nF"]), S["L2"], 100.0 * S["L2"] / max(1, S["nF"]), S["T_solo_a"], S["T_solo_b"]))
     W("  scarto orario mediano delle coppie L2 (non L1): %s min" % ("n/d" if S["mediana_delta_min"] is None else _f(S["mediana_delta_min"], 1)))
     # esiti e R sulle coppie
-    ug = di = 0
+    ug = di = sc = sr = 0
     for r in conf["risultati"]:
         if r["ab"] is None or not r["tester"].get("g1_ok", True):
             continue
         for (i, j, lv, nota) in r["ab"]["coppie"]:
             f, t = r["F"][i], r["T"][j]
-            if f["tipo_u"] == t["tipo_u"] and abs(t["R"] - f["R"]) <= C["TOL_R"]:
+            a = f["tipo_u"] == t["tipo_u"]
+            b = abs(t["R"] - f["R"]) <= C["TOL_R"]
+            sc += 1 if a else 0
+            sr += 1 if b else 0
+            if a and b:
                 ug += 1
             else:
                 di += 1
-    W("  su %d coppie (L1+L2): stessa classe di uscita e R entro %.2f: %d ; diverse: %d" % (ug + di, C["TOL_R"], ug, di))
+    W("  su %d coppie (L1+L2): stessa classe di uscita %d ; R entro %.2f %d ; ENTRAMBE %d ; almeno una diversa %d" % (ug + di, sc, C["TOL_R"], sr, ug, di))
     # nullo
     dati = []
     for r in conf["risultati"]:
@@ -938,6 +970,14 @@ def autotest(forward_path=None, criteri_path=None):
                  giorni=giorni_feriali(datetime.date(2026, 9, 22), datetime.date(2026, 9, 30)), orario=(8, 17))]
     nul = simula_nullo(dati, 400, 1, 15)
     T.check(nul is not None and nul[1] < COSTANTI["H_FEDELI_L1_MIN"] and nul[3] < 1.0 + 1e-9, "15 nullo: p95 di L1 sotto la soglia L1 di H_FEDELI")
+    # 15b etichette di sedia: ogni ramo
+    T.check(etichetta_sedia(0, 0, 0, 0, 0).startswith("ZERO CONTRO ZERO"), "15b1 etichetta 0 contro 0")
+    T.check(etichetta_sedia(0, 2, 0, 0, 2).startswith("FORWARD MUTO"), "15b2 etichetta forward muto")
+    T.check(etichetta_sedia(3, 0, 0, 0, 0).startswith("TESTER MUTO"), "15b3 etichetta tester muto")
+    T.check(etichetta_sedia(3, 3, 3, 3, 0).startswith("RIPRODOTTA:"), "15b4 etichetta riprodotta")
+    T.check(etichetta_sedia(3, 4, 2, 3, 1).startswith("RIPRODOTTA CON ECCEDENZA"), "15b5 etichetta riprodotta con eccedenza")
+    T.check(etichetta_sedia(4, 4, 1, 2, 0).startswith("PARZIALE"), "15b6 etichetta parziale")
+    T.check(etichetta_sedia(4, 4, 0, 1, 0).startswith("DIVERSA"), "15b7 etichetta diversa")
     # 16 il xlsx vero, se dato: numeri GIA' scritti da altri (report/FTMO_PRIMI_OTTO_GIORNI_2026-09-30.md)
     if forward_path:
         fw = parse_forward(leggi_xlsx(forward_path))
@@ -957,6 +997,9 @@ def autotest(forward_path=None, criteri_path=None):
         T.check(sum(len(v) for v in per.values()) == 11, "16g flotta: 11 posizioni")
         T.check(len(per.get("770105", [])) == 1 and per["770105"][0]["t"].date() == datetime.date(2026, 9, 28), "16h 770105: una sola posizione, il 28/09")
         T.check(all(p["legs"] for p in Fp) and not note, "16i gambe di uscita quadrano con volume e profitto (nessuna nota)")
+        e2 = sorted([p for p in per["771531"]], key=lambda p: p["t"])
+        T.check(all(p["tipo_u"] == "STOP" for p in e2[:2]) if all("tipo_u" in p for p in e2) else all(p["R"] <= -0.7 for p in e2[:2]),
+                "16i2 EMA200 del 22/09: due stop pieni (R nominale con rischio 1%% per ordine: %s)" % ["%.2f" % p["R"] for p in e2[:2]])
         pm = [p for p in per["770411"] if p["t"].date() == datetime.date(2026, 9, 29)][0]
         T.check(len(pm["legs"]) == 2 and abs(pm["R"] - 0.65) < 0.06, "16j 770411 del 29/09: 2 gambe, R nominale ~ +0,65 (report: +0,65 R)")
         pmn = [p for p in per["770411"] if p["t"].date() == datetime.date(2026, 9, 24)][0]
