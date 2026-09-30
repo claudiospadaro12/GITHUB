@@ -23,7 +23,7 @@ Fonti: trascrizione `LIVE_PAOLO_29.09.26_2026-09-29_21-30-00-396.txt` (numeri di
 - Il VWAP come sostituto di quello che abbiamo: R101 resta valido per il VWAP di sessione.
 
 ## 4. Nota d'orario (utile per FTMO)
-Lui ripete: box alle 15:30 **ora italiana**, "da tramutare in ora broker" (r.91). Nelle settimane di sfasamento dell'ora legale (marzo, fine ottobre) rollover e apertura US slittano di un'ora (PDF pag. 7). E' lo stesso tema dell'orologio d'inverno in R246: per FTMO (ora italiana + 1 tutto l'anno) l'apertura US cade alle 16:30 ora FTMO sempre.
+Lui ripete: box alle 15:30 **ora italiana**, "da tramutare in ora broker" (r.91). Nelle settimane di sfasamento dell'ora legale (marzo, fine ottobre) rollover e apertura US slittano di un'ora (PDF pag. 7). E' lo stesso tema dell'orologio d'inverno in R246: per FTMO (ora italiana + 1 tutto l'anno) l'apertura US cade alle 16:30 ora FTMO nella maggior parte dell'anno; nelle settimane di sfasamento (USA in ora legale, Europa ancora solare, o viceversa) slitta di un'ora [DA VERIFICARE col calendario].
 
 ## 5. Nessuna azione sul campo
 Nessuna sedia, preset, taglia o conto toccati. Nessun round lanciato.
