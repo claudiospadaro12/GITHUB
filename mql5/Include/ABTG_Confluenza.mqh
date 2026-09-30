@@ -36,8 +36,14 @@
 //|            atrWilder=false usa la SMA del true range (e' quello  |
 //|            che fa iATR di MT5, cioe' ABTG_Supertrend.mq5).        |
 //|   Supertrend  hl2 +/- mult*ATR con bande che si stringono e      |
-//|            flip a chiusura oltre la banda: identico a             |
-//|            ABTG_Supertrend.mq5 (definizione di casa).             |
+//|            flip a chiusura oltre la banda: STESSE REGOLE di       |
+//|            ABTG_Supertrend.mq5 (definizione di casa). ATTENZIONE: |
+//|            e' IDENTICO a quel file (dopo il riscaldamento) SOLO   |
+//|            con atrWilder=false (ATR = SMA del TR, come iATR). Col |
+//|            default atrWilder=true (ATR di Wilder, come il         |
+//|            Supertrend di TradingView) i flip possono cadere su    |
+//|            barre diverse da ABTG_Supertrend.mq5 messo sullo       |
+//|            stesso grafico.                                        |
 //|                                                                   |
 //|   (a) ESPANSIONE  w[i] > w[i-K]*(1+pct/100), K=bbExpandBars.     |
 //|   (b) INCROCIO    EMA veloce/lenta: un incrocio (prev<=, ora >)   |
@@ -67,8 +73,10 @@
 //|  DIAGNOSTICA: maskL/maskS = bit delle condizioni SODDISFATTE      |
 //|  sulla barra (ABTGC_F_*). Cio' che manca = ABTGC_F_ALL & ~mask.   |
 //|                                                                   |
-//|  LIMITI DICHIARATI: parametri clampati in Init (periodi 1..120,   |
-//|  lookback 0..100) perche' lo storico e' un anello di 128 barre.   |
+//|  LIMITI DICHIARATI: parametri clampati in Init (periodi BB/ATR/   |
+//|  volume 1..120, EMA 1..5000, lookback 0..100) perche' lo storico  |
+//|  e' un anello di 128 barre (le EMA sono ricorsive, non usano      |
+//|  l'anello oltre la barra precedente).                             |
 //|  Il Supertrend e' path-dipendente: due alimentazioni con partenza |
 //|  diversa (es. storico intero vs ultime 600 barre) convergono ma   |
 //|  non sono garantite identiche nelle PRIME barre: per questo i     |
@@ -188,6 +196,34 @@ struct SConfl
    int    lastDir[2];               // direzione dell'ultimo segnale per variante
 
    //+---------------------------------------------------------------+
+   //| Azzera lo STATO (non i parametri): si riparte da zero barre    |
+   //+---------------------------------------------------------------+
+   void Reset()
+     {
+      n = 0;  idx = -1;
+      e1 = 0.0; e2 = 0.0; e3 = 0.0; e4 = 0.0;
+      atr = 0.0; atrSum = 0.0; prevClose = 0.0;
+      stUp = 0.0; stDn = 0.0; stDir = 0;
+      ArrayInitialize(closeR, 0.0);
+      ArrayInitialize(trR, 0.0);
+      ArrayInitialize(volR, 0.0);
+      ArrayInitialize(bbwR, 0.0);
+      ArrayInitialize(e1R, 0.0);
+      ArrayInitialize(e2R, 0.0);
+      ArrayInitialize(dirR, 0);
+      ArrayInitialize(condL, 0);
+      ArrayInitialize(condS, 0);
+      ArrayInitialize(sigR, 0);
+      okE1 = false; okE2 = false; okE3 = false; okE4 = false;
+      okBB = false; okATR = false; okST = false;
+      bbUp = 0.0; bbMid = 0.0; bbLo = 0.0; bbw = 0.0;
+      stVal = 0.0; volMa = 0.0; volPass = false;
+      maskL = 0; maskS = 0; sigA = 0; sigB = 0;
+      lastNo[0] = -1;  lastNo[1] = -1;
+      lastDir[0] = 0;  lastDir[1] = 0;
+     }
+
+   //+---------------------------------------------------------------+
    //| Parametri + azzeramento. Ritorna false se ha dovuto CORREGGERE |
    //| qualche parametro (i valori usati sono comunque quelli clampati)|
    //+---------------------------------------------------------------+
@@ -239,34 +275,6 @@ struct SConfl
       a4 = 2.0 / (pEma4 + 1.0);
       Reset();
       return !ch;
-     }
-
-   //+---------------------------------------------------------------+
-   //| Azzera lo STATO (non i parametri): si riparte da zero barre    |
-   //+---------------------------------------------------------------+
-   void Reset()
-     {
-      n = 0;  idx = -1;
-      e1 = 0.0; e2 = 0.0; e3 = 0.0; e4 = 0.0;
-      atr = 0.0; atrSum = 0.0; prevClose = 0.0;
-      stUp = 0.0; stDn = 0.0; stDir = 0;
-      ArrayInitialize(closeR, 0.0);
-      ArrayInitialize(trR, 0.0);
-      ArrayInitialize(volR, 0.0);
-      ArrayInitialize(bbwR, 0.0);
-      ArrayInitialize(e1R, 0.0);
-      ArrayInitialize(e2R, 0.0);
-      ArrayInitialize(dirR, 0);
-      ArrayInitialize(condL, 0);
-      ArrayInitialize(condS, 0);
-      ArrayInitialize(sigR, 0);
-      okE1 = false; okE2 = false; okE3 = false; okE4 = false;
-      okBB = false; okATR = false; okST = false;
-      bbUp = 0.0; bbMid = 0.0; bbLo = 0.0; bbw = 0.0;
-      stVal = 0.0; volMa = 0.0; volPass = false;
-      maskL = 0; maskS = 0; sigA = 0; sigB = 0;
-      lastNo[0] = -1;  lastNo[1] = -1;
-      lastDir[0] = 0;  lastDir[1] = 0;
      }
 
    //--- (a) espansione delle bande sulla barra i

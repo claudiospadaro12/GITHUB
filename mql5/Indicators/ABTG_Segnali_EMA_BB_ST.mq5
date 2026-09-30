@@ -34,7 +34,16 @@
 //|   accende/spegne il FILTRO VOLUMI (e) dentro il segnale (default  |
 //|   SPENTO, cosi' il segnale e' esattamente l'elenco (a)-(d)).      |
 //|   Lo stato dei tasti sopravvive al cambio di TF (GlobalVariable   |
-//|   del terminale) ma NON al riavvio del terminale.                 |
+//|   del terminale con la ChartID nella chiave); al riavvio del      |
+//|   terminale sopravvive solo se la ChartID resta la stessa         |
+//|   [NON VERIFICATO sul terminale].                                 |
+//|   SE LE CANDELE SPARISCONO (terminale chiuso o in crash con       |
+//|   HEIKIN ASHI acceso: il grafico puo' essere salvato coi colori   |
+//|   nascosti): rimettere l'indicatore sul grafico le fa tornare da  |
+//|   solo (OnInit ripara i colori trovati a clrNONE); a mano:        |
+//|   tasto destro sul grafico > Proprieta' (F8) > Colori > scegliere |
+//|   uno schema colori, oppure i colori di Barra su/giu' e Candela   |
+//|   rialzista/ribassista.                                           |
 //|   Il tasto VOLUME non ricalcola nulla: il motore calcola le due   |
 //|   varianti (con/senza volume) insieme e il tasto sceglie quale     |
 //|   mostrare, quindi funziona anche a mercato chiuso.               |
@@ -49,8 +58,12 @@
 //|  PANNELLO VOLUMI SOTTO: se InpAutoPannelloVolumi=true (default)   |
 //|   dopo ~1 s dal caricamento aggiunge ABTG_Volume_Filtro in una    |
 //|   sottofinestra (iCustom + ChartIndicatorAdd) SOLO se non c'e'    |
-//|   gia' (scansione per nome). Non lo cancella al cambio TF: solo   |
-//|   se rimuovi QUESTO indicatore dal grafico (REASON_REMOVE).       |
+//|   gia' (scansione per nome). Se ne trova uno con periodo/fattore  |
+//|   DIVERSI da quelli del segnale (es. input cambiati), lo toglie e |
+//|   lo rimette con quelli giusti. Gli passa i parametri del motore  |
+//|   (gia' corretti), non gli input grezzi. Non lo cancella al       |
+//|   cambio TF: solo se rimuovi QUESTO indicatore (REASON_REMOVE),   |
+//|   e allora toglie anche un pannello messo a mano.                 |
 //|   Se l'aggiunta fallisce: Print nel Journal, l'indicatore         |
 //|   principale funziona lo stesso (trascina il file a mano).        |
 //|   VOLUME TICK MT5 != VOLUME REALE: il volume tick e' il NUMERO DI |
@@ -132,10 +145,10 @@ input int    InpBBPeriod     = ABTGC_D_BB_PERIOD;    // periodo
 input double InpBBDev        = ABTGC_D_BB_DEV;       // deviazioni
 input int    InpBBExpandBars = ABTGC_D_BB_EXP_BARS;  // (a) espansione: confronto con N barre prima
 input double InpBBExpandPct  = ABTGC_D_BB_EXP_PCT;   // (a) crescita minima % (0 = basta che cresca)
-input group "=== Supertrend (definizione di casa: ABTG_Supertrend) ==="
+input group "=== Supertrend (regole di ABTG_Supertrend; identico solo con ATR SMA) ==="
 input int    InpAtrPeriod = ABTGC_D_ATR_PERIOD;  // periodo ATR
 input double InpStMult    = ABTGC_D_ST_MULT;     // moltiplicatore
-input bool   InpAtrWilder = true;                // ATR di Wilder (false = SMA del TR come iATR)
+input bool   InpAtrWilder = true;                // ATR di Wilder (false = SMA del TR come iATR = ABTG_Supertrend)
 input group "=== Condizioni del segnale ==="
 input int    InpCrossLookback = ABTGC_D_CROSS_LB;   // (b) incrocio 9/21 sulla barra o entro N barre
 input int    InpSlopeBars     = ABTGC_D_SLOPE_BARS; // (c) barre di pendenza concorde
@@ -186,6 +199,8 @@ bool     gDirty = true;        // i segnali vanno ridisegnati?
 int      gRatesTotal = 0;
 datetime gLastAlertTime = 0;
 datetime gLastBarTime = 0;
+datetime gLastFedTime = 0;     // ora dell'ultima barra chiusa data al motore (guardia contro lo storico spostato)
+int      gHealCount = 0;       // quante volte il timer ha dovuto rinascondere le candele native
 
 //--- colori nativi del grafico (per ripristino)
 color    gColBull = clrLime, gColBear = clrRed, gColUp = clrLime, gColDown = clrRed, gColLine = clrLime;
@@ -261,6 +276,30 @@ void ColsRestore()
    ChartSetInteger(0, CHART_COLOR_CHART_DOWN,  gColDown);
    ChartSetInteger(0, CHART_COLOR_CHART_LINE,  gColLine);
    gColsHidden = false;
+  }
+
+bool IsNone(const ENUM_CHART_PROPERTY_INTEGER prop)
+  {
+   return ((color)ChartGetInteger(0, prop) == clrNONE);
+  }
+
+// Modalita' NORMALI ma candele native INVISIBILI: e' la firma di una modalita' HEIKIN ASHI
+// finita senza OnDeinit (crash, terminale chiuso che ha salvato il grafico coi colori nascosti,
+// template salvato in HA). Senza questa riparazione il grafico resta senza candele e il tasto
+// NORMALI non fa niente (e' gia' "normale"). Si ripara SOLO se sono nascoste tutte e quattro.
+void RepairInvisibleNative()
+  {
+   if(!(IsNone(CHART_COLOR_CANDLE_BULL) && IsNone(CHART_COLOR_CANDLE_BEAR) &&
+        IsNone(CHART_COLOR_CHART_UP) && IsNone(CHART_COLOR_CHART_DOWN)))
+      return;
+   ChartSetInteger(0, CHART_COLOR_CANDLE_BULL, clrLime);
+   ChartSetInteger(0, CHART_COLOR_CANDLE_BEAR, clrRed);
+   ChartSetInteger(0, CHART_COLOR_CHART_UP,    clrLime);
+   ChartSetInteger(0, CHART_COLOR_CHART_DOWN,  clrRed);
+   if(IsNone(CHART_COLOR_CHART_LINE))
+      ChartSetInteger(0, CHART_COLOR_CHART_LINE, clrLime);
+   Print("ABTG_Segnali: candele native trovate INVISIBILI (residuo di HEIKIN ASHI chiuso male): ",
+         "rimesse visibili con colori di ripiego verde/rosso (F8 > Colori per i tuoi).");
   }
 
 //+------------------------------------------------------------------+
@@ -485,6 +524,13 @@ string VolFilePath()
    return sub + VOL_FILE;
   }
 
+// Nome breve che il pannello si da' con i parametri usati dal MOTORE (gia' clampati):
+// stesso formato di IndicatorSetString in ABTG_Volume_Filtro.mq5 (il test lo confronta).
+string VolPanelName()
+  {
+   return StringFormat("ABTG Volume Filtro (%d, %.2f)", gEng.pVolPeriod, gEng.pVolFactor);
+  }
+
 void TryAddVolumePanel()
   {
    if(!InpAutoPannelloVolumi || MQLInfoInteger(MQL_TESTER))
@@ -493,16 +539,34 @@ void TryAddVolumePanel()
       return;
      }
    string nm;
-   if(FindVolPane(nm) >= 0)
+   int wFound = FindVolPane(nm);
+   if(wFound >= 0)
      {
-      gPanelDone = true;   // gia' presente: non si duplica
+      if(nm == VolPanelName())
+        {
+         gPanelDone = true;   // gia' presente con gli stessi parametri: non si duplica
+         return;
+        }
+      // presente ma con periodo/fattore DIVERSI da quelli del segnale (input cambiati, o
+      // parametri corretti dal motore): mostrerebbe un filtro che non e' quello del segnale.
+      if(wFound > 0 && ChartIndicatorDelete(0, wFound, nm))
+        {
+         Print("ABTG_Segnali: pannello volumi con parametri diversi (", nm, ") tolto: lo rimetto con ",
+               VolPanelName(), ".");
+         return;              // si aggiunge al prossimo giro del timer (sottofinestre aggiornate)
+        }
+      Print("ABTG_Segnali: pannello volumi con parametri diversi dal segnale (", nm, " invece di ",
+            VolPanelName(), ") e non sostituibile (errore ", GetLastError(), "): correggilo a mano.");
+      gPanelDone = true;
       return;
      }
    int wt = (int)ChartGetInteger(0, CHART_WINDOWS_TOTAL);
    if(wt < 1)
       return;              // grafico non ancora pronto: si riprova
    ResetLastError();
-   int h = iCustom(_Symbol, _Period, VolFilePath(), InpVolMaPeriod, InpVolFactor);
+   // si passano i parametri del MOTORE (clampati), non gli input grezzi: pannello e segnale
+   // devono colorare le stesse barre (es. periodo 200 -> il motore usa 120).
+   int h = iCustom(_Symbol, _Period, VolFilePath(), gEng.pVolPeriod, gEng.pVolFactor);
    if(h == INVALID_HANDLE)
      {
       Print("ABTG_Segnali: pannello volumi NON aggiunto: iCustom(", VolFilePath(),
@@ -582,6 +646,8 @@ int OnInit()
    gHVol = INVALID_HANDLE;
    gLastAlertTime = 0;
    gLastBarTime = 0;
+   gLastFedTime = 0;
+   gHealCount = 0;
    gRatesTotal = 0;
    gDirty = true;
 
@@ -590,7 +656,7 @@ int OnInit()
                  InpAtrPeriod, InpStMult, InpAtrWilder,
                  InpCrossLookback, InpSlopeBars, InpBreakLookback, InpCooldownBars,
                  InpVolMaPeriod, InpVolFactor))
-      Print("ABTG_Segnali: alcuni parametri fuori intervallo sono stati corretti (periodi 1-120, lookback 0-100, dev/moltiplicatore > 0).");
+      Print("ABTG_Segnali: alcuni parametri fuori intervallo sono stati corretti (EMA 1-5000, BB/ATR/volumi 1-120, lookback 0-100, dev/moltiplicatore/fattore > 0).");
 
    bool ok = true;
    ok = SetIndexBuffer(0,  bHAo,   INDICATOR_DATA)         && ok;
@@ -651,8 +717,14 @@ int OnInit()
    gInitOk = true;
    if(gHA)
       ColsHide();     // ultimo passo: da qui OnDeinit ripristina sempre
-   if(InpAutoPannelloVolumi)
-      EventSetTimer(1);   // aggiunta del pannello DIFFERITA: mai chiamare ChartIndicatorAdd dentro OnInit
+   else
+      RepairInvisibleNative();
+   // timer SEMPRE acceso: (1) aggiunta del pannello DIFFERITA (mai ChartIndicatorAdd dentro OnInit);
+   // (2) autoriparazione di tasti/segnali/colori se l'OnDeinit dell'istanza precedente (cambio TF)
+   //     arriva DOPO questo OnInit e cancella/ripristina cio' che questa istanza ha appena fatto.
+   if(!EventSetTimer(1))
+      Print("ABTG_Segnali: EventSetTimer fallito (errore ", GetLastError(),
+            "): niente pannello volumi automatico ne' autoriparazione.");
    return INIT_SUCCEEDED;
   }
 
@@ -675,22 +747,49 @@ void OnDeinit(const int reason)
   }
 
 //+------------------------------------------------------------------+
+void SelfHeal()
+  {
+   if(!gInitOk)
+      return;
+   bool redraw = false;
+   // tasti (e con loro i segnali: lo stesso ObjectsDeleteAll li ha tolti tutti)
+   if(ObjectFind(0, BTN_N) < 0 || ObjectFind(0, BTN_H) < 0 || ObjectFind(0, BTN_V) < 0)
+     {
+      UpdateButtons();
+      if(gRatesTotal > 0)
+         DrawSignals(gRatesTotal);
+      gDirty = true;              // e si rifanno anche al prossimo OnCalculate (indici allineati)
+      redraw = true;
+     }
+   // modalita' HA ma candele native di nuovo visibili: qualcuno le ha ripristinate dopo di noi
+   if(gHA && gHealCount < 3 &&
+      !(IsNone(CHART_COLOR_CANDLE_BULL) && IsNone(CHART_COLOR_CANDLE_BEAR) &&
+        IsNone(CHART_COLOR_CHART_UP) && IsNone(CHART_COLOR_CHART_DOWN)))
+     {
+      gHealCount++;
+      gColsHidden = false;        // si ricatturano i colori ATTUALI (quelli veri) e si rinascondono
+      ColsHide();
+      if(gHealCount >= 3)
+         Print("ABTG_Segnali: le candele native continuano a riapparire in HEIKIN ASHI: smetto di nasconderle.");
+      redraw = true;
+     }
+   if(redraw)
+      ChartRedraw(0);
+  }
+
 void OnTimer()
   {
-   if(gPanelDone)
+   if(!gPanelDone)
      {
-      EventKillTimer();
-      return;
+      gPanelTries++;
+      TryAddVolumePanel();
+      if(!gPanelDone && gPanelTries >= 5)
+        {
+         Print("ABTG_Segnali: pannello volumi non aggiunto dopo 5 tentativi (grafico non pronto?).");
+         gPanelDone = true;
+        }
      }
-   gPanelTries++;
-   TryAddVolumePanel();
-   if(!gPanelDone && gPanelTries >= 5)
-     {
-      Print("ABTG_Segnali: pannello volumi non aggiunto dopo 5 tentativi (grafico non pronto?).");
-      gPanelDone = true;
-     }
-   if(gPanelDone)
-      EventKillTimer();
+   SelfHeal();
   }
 
 //+------------------------------------------------------------------+
@@ -716,7 +815,13 @@ void SetVol(const bool on)
      {
       gVolOn = on;
       GvSave("VOL", on ? 1.0 : 0.0);
+      // niente Alert "vecchio": la barra chiusa prima del click non e' un segnale NUOVO
+      datetime t1 = iTime(_Symbol, _Period, 1);
+      if(t1 > gLastAlertTime)
+         gLastAlertTime = t1;
       DrawSignals(gRatesTotal);    // nessun ricalcolo: le due varianti sono gia' nei buffer
+      gDirty = true;               // e di nuovo al prossimo OnCalculate: se una barra nuova e' arrivata
+                                   // fra l'ultimo calcolo e il click, iTime(shift) qui e' sfasato di uno
      }
    UpdateButtons();
    ChartRedraw(0);
@@ -761,6 +866,14 @@ int OnCalculate(const int rates_total, const int prev_calculated,
       gEng.Reset();          // ricalcolo completo: storico ricaricato o cambiato
       reset = true;
      }
+   // guardia: l'ultima barra data al motore deve essere ANCORA allo stesso indice. Se lo storico
+   // si e' spostato (barre vecchie tolte dal limite "max barre" senza prev_calculated = 0), gli
+   // indici non corrispondono piu' e la barra appena chiusa non verrebbe mai alimentata.
+   if(!reset && gEng.n > 0 && time[gEng.n - 1] != gLastFedTime)
+     {
+      gEng.Reset();
+      reset = true;
+     }
 
    //--- barre CHIUSE: si alimentano una volta sola, in ordine
    bool newSig = false;
@@ -771,6 +884,8 @@ int OnCalculate(const int rates_total, const int prev_calculated,
       if(gEng.sigA != 0 || gEng.sigB != 0)
          newSig = true;
      }
+   if(gEng.n > 0)
+      gLastFedTime = time[gEng.n - 1];
 
    //--- barra IN FORMAZIONE: anteprima su una copia, il motore resta intatto e senza segnale
    const int f = rates_total - 1;
@@ -779,7 +894,7 @@ int OnCalculate(const int rates_total, const int prev_calculated,
    WriteBar(f, gTmp, false);
 
    //--- Heikin Ashi interno (solo display): sempre calcolato, mostrato solo in modalita' HA
-   int haStart = reset ? 0 : MathMax(0, prev_calculated - 1);
+   int haStart = reset ? 0 : (prev_calculated > 0 ? prev_calculated - 1 : 0);
    for(int i = haStart; i < rates_total; i++)
      {
       double hc = (open[i] + high[i] + low[i] + close[i]) / 4.0;

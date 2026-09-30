@@ -93,6 +93,7 @@ int OnInit()
       PlotIndexSetInteger(2, PLOT_DRAW_TYPE, DRAW_NONE);
    IndicatorSetInteger(INDICATOR_DIGITS, 0);
    // il nome inizia SEMPRE con "ABTG Volume Filtro": il file principale lo cerca per prefisso
+   // e confronta il nome INTERO con VolPanelName() (stesso formato: non cambiarne uno solo)
    IndicatorSetString(INDICATOR_SHORTNAME,
                       StringFormat("ABTG Volume Filtro (%d, %.2f)", InpVolMaPeriod, InpVolFactor));
    return INIT_SUCCEEDED;

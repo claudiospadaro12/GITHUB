@@ -548,15 +548,109 @@ def test_defaults(root):
     m = re.search(r"input\s+double\s+InpVolFactor\s*=\s*([0-9.]+)", vol)
     if not m or float(m.group(1)) != float(macros.get("ABTGC_D_VOL_FACTOR", "nan")):
         problems.append("fattore volumi del pannello diverso dalla macro")
-    # ordine degli input passati a iCustom: (periodo, fattore)
-    if "iCustom(_Symbol, _Period, VolFilePath(), InpVolMaPeriod, InpVolFactor)" not in ind:
-        problems.append("iCustom del pannello non passa (periodo, fattore)")
+    # ordine degli input passati a iCustom: (periodo, fattore), presi dal MOTORE (clampati)
+    if "iCustom(_Symbol, _Period, VolFilePath(), gEng.pVolPeriod, gEng.pVolFactor)" not in ind:
+        problems.append("iCustom del pannello non passa (periodo, fattore) del motore")
+    # il nome del pannello costruito dall'indicatore = quello che il pannello si da' (confronto per nome intero)
+    fmt_vol = re.findall(r'StringFormat\("(ABTG Volume Filtro \([^"]*)"', vol)
+    fmt_ind = re.findall(r'StringFormat\("(ABTG Volume Filtro \([^"]*)"', ind)
+    if not fmt_vol or not fmt_ind or set(fmt_vol) != set(fmt_ind):
+        problems.append("formato del nome del pannello diverso: pannello %r, indicatore %r" % (fmt_vol, fmt_ind))
+    # stessa macro sullo STESSO input (non basta che la macro compaia da qualche parte)
+    rx = r"input\s+\w+\s+(Inp\w+)\s*=\s*(ABTGC_D_\w+)"
+    map_ind, map_dash = dict(re.findall(rx, ind)), dict(re.findall(rx, dash))
+    for k in sorted(set(map_ind) | set(map_dash)):
+        if k in map_ind and k in map_dash and map_ind[k] != map_dash[k]:
+            problems.append("input %s: indicatore %s, dashboard %s" % (k, map_ind[k], map_dash[k]))
+    # default SENZA macro che decidono il segnale: devono coincidere letteralmente
+    for inp in ("InpAtrWilder",):
+        rl = r"input\s+\w+\s+%s\s*=\s*([^;]+);" % inp
+        a, b = re.findall(rl, ind), re.findall(rl, dash)
+        if not a or not b or a[0].strip() != b[0].strip():
+            problems.append("default di %s diverso: indicatore %r, dashboard %r" % (inp, a, b))
     # niente non-ASCII nei sorgenti
     for nm, txt in (("mqh", mqh), ("ind", ind), ("dash", dash), ("vol", vol)):
         bad = [c for c in txt if ord(c) > 127]
         if bad:
             problems.append("non-ASCII in %s: %r" % (nm, bad[:5]))
     return problems
+
+
+# ---------------------------------------------------------------------------
+# 7) Il .mqh VERO compilato come C++ (shim minimo delle funzioni MQL5 usate)
+#    contro lo specchio Python, bit per bit. Senza questo passo il test prova
+#    solo lo specchio: una divergenza fra .mqh e specchio passerebbe muta.
+# ---------------------------------------------------------------------------
+SHIM = r'''
+#include <cmath>
+#include <string>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+typedef std::string string;
+template<typename T, std::size_t N, typename V> void ArrayInitialize(T (&a)[N], V v){ for(std::size_t k=0;k<N;k++) a[k]=(T)v; }
+inline double MathMax(double a,double b){ return a>b?a:b; }
+inline double MathAbs(double a){ return std::fabs(a); }
+inline double MathSqrt(double a){ return std::sqrt(a); }
+inline int StringLen(const string &s){ return (int)s.size(); }
+'''
+
+DRIVER = r'''
+#include "shim.h"
+#include "conf.mqh"
+int main(int argc,char**argv){
+  SConfl e;
+  int wild = argc>1 ? atoi(argv[1]) : 1;
+  e.Init(ABTGC_D_EMA_FAST,ABTGC_D_EMA_SLOW,ABTGC_D_EMA_3,ABTGC_D_EMA_4,ABTGC_D_BB_PERIOD,ABTGC_D_BB_DEV,
+         ABTGC_D_BB_EXP_BARS,ABTGC_D_BB_EXP_PCT,ABTGC_D_ATR_PERIOD,ABTGC_D_ST_MULT,wild!=0,ABTGC_D_CROSS_LB,
+         ABTGC_D_SLOPE_BARS,ABTGC_D_BREAK_LB,ABTGC_D_COOLDOWN,ABTGC_D_VOL_PERIOD,ABTGC_D_VOL_FACTOR);
+  double o,h,l,c,v;
+  while(scanf("%lf %lf %lf %lf %lf",&o,&h,&l,&c,&v)==5){
+    SConfl t = e;  t.Feed(o,h,l,c,v);          /* anteprima su COPIA: tmp = e */
+    e.Feed(o,h,l,c,v);
+    if(t.sigA!=e.sigA || t.sigB!=e.sigB || t.maskL!=e.maskL || t.maskS!=e.maskS || t.stVal!=e.stVal) return 3;
+    printf("%d %d %d %d %a %a %a %a %a %a %d\n", e.sigA,e.sigB,e.maskL,e.maskS,e.e1,e.e2,e.bbw,e.atr,e.stVal,e.volMa,e.stDir);
+  }
+  return 0;
+}
+'''
+
+
+def cxx_identity(root, mqh_text, seeds=(11, 23, 37, 5), n=4000):
+    """Ritorna (barre, segnali, differenze) oppure None se non c'e' un compilatore C++."""
+    import shutil
+    import subprocess
+    import tempfile
+    cxx = shutil.which("g++") or shutil.which("clang++")
+    if not cxx:
+        return None
+    with tempfile.TemporaryDirectory() as d:
+        for nm, txt in (("shim.h", SHIM), ("drv.cpp", DRIVER), ("conf.mqh", mqh_text)):
+            with open(os.path.join(d, nm), "w") as f:
+                f.write(txt)
+        exe = os.path.join(d, "drv")
+        subprocess.run([cxx, "-std=c++17", "-O0", "-ffp-contract=off", "-o", exe, os.path.join(d, "drv.cpp")],
+                       check=True, capture_output=True, text=True)
+        tot = sig = bad = 0
+        for seed in seeds:
+            for wild in (1, 0):
+                bars = make_bars(n, seed)
+                inp = "\n".join("%r %r %r %r %r" % b for b in bars)
+                r = subprocess.run([exe, str(wild)], input=inp, capture_output=True, text=True)
+                if r.returncode != 0:
+                    return (tot, sig, -1)          # la copia di struct ha cambiato il risultato
+                out = r.stdout.split("\n")
+                e = Confl(atrWilder=bool(wild))
+                for i, b in enumerate(bars):
+                    e.feed(*b)
+                    p = out[i].split()
+                    got = tuple(int(x) for x in p[:4]) + tuple(float.fromhex(x) for x in p[4:10]) + (int(p[10]),)
+                    want = (e.sigA, e.sigB, e.maskL, e.maskS, e.e1, e.e2, e.bbw, e.atr, e.stVal, e.volMa, e.stDir)
+                    tot += 1
+                    sig += 1 if e.sigA != 0 else 0
+                    if got != want:
+                        bad += 1
+        return (tot, sig, bad)
 
 
 def main():
@@ -633,6 +727,31 @@ def main():
     if not probs:
         print("  ok: macro usate da indicatore e dashboard, pannello volumi coerente, ASCII puro")
     fails += probs
+
+    print("== 7) .mqh VERO (compilato come C++ con shim) == specchio Python, bit per bit ==")
+    mqh_text = read(os.path.join(root, "mql5/Include/ABTG_Confluenza.mqh"))
+    res = cxx_identity(root, mqh_text)
+    if res is None:
+        print("  SALTATO: nessun compilatore C++ (g++/clang++) su questa macchina -> il test prova SOLO lo specchio")
+    else:
+        tot, sig, bad = res
+        print("  %d barre (4 serie x Wilder/SMA), %d segnali, differenze %d" % (tot, sig, bad))
+        if bad != 0:
+            fails.append("il .mqh compilato NON coincide con lo specchio Python (%d differenze)" % bad)
+        if sig < 50:
+            fails.append("troppo pochi segnali nel confronto C++ (%d)" % sig)
+        # contro-esempio: una mutazione di un carattere nel .mqh deve essere vista
+        # (mutazioni STRUTTURALI: un "<" -> "<=" fra double e' un mutante equivalente, i pareggi esatti non capitano)
+        for label, old, new in (("banda alta ST senza riarmo (prevClose > pu)", "(up < pu || prevClose > pu) ? up : pu", "(up < pu) ? up : pu"),
+                                ("finestra incrocio senza la barra i", "for(int j = i - pCrossLB; j <= i; j++)", "for(int j = i - pCrossLB; j < i; j++)")):
+            if old not in mqh_text:
+                fails.append("contro-esempio C++ non applicabile (testo cambiato): " + label)
+                continue
+            _, _, mb = cxx_identity(root, mqh_text.replace(old, new, 1))
+            verdict = "RILEVATO" if mb != 0 else "NON RILEVATO (confronto cieco!)"
+            print("  mutazione %-40s -> differenze %d : %s" % (label, mb, verdict))
+            if mb == 0:
+                fails.append("mutazione del .mqh non rilevata: " + label)
 
     print()
     if fails:
