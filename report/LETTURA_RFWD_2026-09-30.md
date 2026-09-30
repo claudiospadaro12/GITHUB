@@ -48,3 +48,10 @@ diverso per il feed (il riempimento dei limit del retest diverge anche tra due f
 Spread, slippage e rifiuti di modify di FTMO; il Guardian del forward (nel tester non c'e'); gli ingressi e i pendenti del
 tester (il per-trade ha solo le uscite); il 30/09 (par. 3); qualunque regime diverso da quello di queste due settimane.
 Nessuna sedia e' archiviata come MORTA: nessuna ha il certificato (PF, n, DD, uscita ad asse, gemelli, TF). Stato: NON ANCORA MISURATO.
+
+## 7. Riproducibilita' (secondo lancio, 30/09 21:26-21:32)
+Claudio ha rilanciato la stessa riga alle 21:26, ancora il 30/09 sul PC. Il confronto e' IDENTICO al primo (stesse 11 posizioni forward,
+stessa sintesi L1 8 / L1+L2 10, stesso esito H_FEDELI) e il giornale dice ancora `to 2026.09.30 00:00` in tutti i job: il tester e'
+deterministico e il taglio del 30/09 non dipende dal caso. L'ipotesi "il tester non simula il giorno in corso" resta da provare con un
+lancio dal 01/10 in poi (il giornale dovra' dire `to 2026.10.01 00:00`).
+
