@@ -33,23 +33,38 @@
 //|  Il nome di ogni oggetto porta riga/colonna (es. ABTGC_A_3_1); il |
 //|  simbolo si legge da gIdx[riga] AL MOMENTO del click, quindi il   |
 //|  riordino delle righe non puo' mandare al simbolo sbagliato.      |
-//|  InpTemplate (vuoto di default): nome di un .tpl (cartella        |
-//|  MQL5\Profiles\Templates) applicato SOLO al grafico appena        |
-//|  aperto, cosi' trovi li' l'indicatore dei segnali. Non tocca       |
-//|  template esistenti.                                              |
+//|  InpTemplate (vuoto di default): nome di un .tpl (".tpl" aggiunto |
+//|  se manca) applicato SOLO al grafico appena aperto, cosi' trovi   |
+//|  li' l'indicatore dei segnali. Non tocca template esistenti.       |
+//|  ATTENZIONE: un grafico nuovo prende default.tpl; se quel         |
+//|  template (o InpTemplate) contiene un EA, il grafico nasce con un |
+//|  EA ACCESO. La dashboard lo controlla per 10 s dopo l'apertura e  |
+//|  lancia un Alert se lo trova (classe 951). Il grafico della       |
+//|  dashboard non e' mai un bersaglio: se il click chiede lo stesso  |
+//|  simbolo/TF se ne apre uno separato.                              |
 //|                                                                   |
 //|  CARICO: a regime ZERO CopyRates per giro del timer (ogni giro    |
 //|  controlla solo iTime della barra chiusa di ogni cella: 1 iTime    |
 //|  per simbolo x TF). Quando la barra chiusa di una cella cambia:    |
 //|  1 CopyRates di InpBars barre (default 600) + ~600 Feed. Caso      |
-//|  peggiore (chiusura oraria con M5+M15+H1 insieme): 3 x simboli    |
+//|  peggiore (chiusura di H4 con M5+M15+H1+H4 insieme): 4 x simboli   |
 //|  CopyRates, una tantum. Con 30 simboli x 4 TF a regime: ~120       |
 //|  iTime ogni 2 s. Serve almeno pWarm+3 barre di storico per cella: |
 //|  finche' mancano (download) la cella mostra "...".                 |
+//|  IDENTITA' BIT PER BIT (classe 950): EMA e ATR di Wilder sono      |
+//|  ricorsivi, lo stato dipende dalla barra di partenza finche' il   |
+//|  suo peso non scende sotto la precisione del double. Con i default |
+//|  bastano ~400 barre (600 date); se alzi i periodi del segnale le   |
+//|  barre per cella si ALZANO da sole (tetto 5000, Print nel Journal).|
+//|                                                                   |
+//|  PANNELLO: righe in blocchi affiancati che stanno nell'altezza del |
+//|  grafico (InpMaxRows = 0) o InpMaxRows righe per blocco; misure   |
+//|  scalate coi DPI dello schermo.                                   |
 //|                                                                   |
 //|  Avvisi opzionali (spenti): Alert/push solo sul NUOVO segnale di   |
 //|  una cella, mai sul primo giro e mai sulla prima misura valida    |
-//|  della cella (che si limita a memorizzare).                       |
+//|  della cella (che si limita a memorizzare). Tutti i nuovi segnali |
+//|  di un giro vanno in UN solo Alert e UNA sola notifica push.      |
 //|                                                                   |
 //|  NON apre, NON modifica, NON chiude ordini. Non e' un EA.         |
 //|  Unico effetto sul terminale: SymbolSelect() (Market Watch) e     |
@@ -113,14 +128,15 @@ input int    InpX             = 10;        // posizione X
 input int    InpY             = 20;        // posizione Y
 input int    InpFontSize      = 9;         // dimensione carattere
 input int    InpArrowSize     = 16;        // dimensione della freccia
+input int    InpMaxRows       = 0;         // righe per colonna del pannello (0 = auto: quante ne stanno nel grafico)
 
 #define PFX "ABTGC_"
+#define ABTGC_MAXBARS 5000                 // tetto delle barre per cella (carico)
 
 //--- TF accesi
 int             gNT = 0;
 ENUM_TIMEFRAMES gTf[];
 string          gTfName[];
-int             gMain = 0;
 
 //--- simboli
 string gSym[];
@@ -143,11 +159,24 @@ int    gDom[];          // +1 / -1 / 0 (conflitto o nessuno)
 int    gMinAge[];       // eta' minima tra i TF concordi
 int    gNBuy[], gNSell[];
 
+int      gLAge[];       // eta' dell'ultimo segnale anche se NON attivo (-1 = nessuno), per il tooltip
+int      gLDir[];       // direzione dell'ultimo segnale (tooltip)
+
 SConfl gE;              // motore di lavoro (scratch)
 bool   gFirstRender = true;
 int    gRowH = 0, gColSym = 0, gColW = 0, gColConf = 0;
 string gLastKey = "";
 ulong  gLastMs = 0;
+int    gBars = 0;       // barre per CopyRates: InpBars, alzate se servono per la CONVERGENZA (vedi OnInit)
+double gK = 1.0;        // scala DPI (TERMINAL_SCREEN_DPI / 96)
+int    gRows = 1;       // righe per blocco (colonna) del pannello
+int    gBlocks = 1;     // blocchi affiancati
+int    gBlockW = 0;     // larghezza di un blocco in px
+string gAlertBuf = "";  // avvisi del giro, spediti in UN solo Alert/push (niente raffica)
+int    gAlertN = 0;
+long   gNewId[8];       // grafici appena aperti da controllare (EA arrivato col template?)
+ulong  gNewMs[8];
+int    gNewN = 0;
 
 //+------------------------------------------------------------------+
 //| Oggetti                                                          |
@@ -170,7 +199,7 @@ void Lbl(const string name, const int x, const int y, const string txt, const co
    ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
    ObjectSetString(0, name, OBJPROP_TEXT, txt);
    ObjectSetInteger(0, name, OBJPROP_COLOR, c);
-   ObjectSetString(0, name, OBJPROP_TOOLTIP, tip);
+   ObjectSetString(0, name, OBJPROP_TOOLTIP, StringLen(tip) > 0 ? tip : "\n");   // "\n" = nessun tooltip automatico
   }
 
 void Rect(const string name, const int x, const int y, const int w, const int h,
@@ -185,6 +214,7 @@ void Rect(const string name, const int x, const int y, const int w, const int h,
       ObjectSetInteger(0, name, OBJPROP_BORDER_TYPE, BORDER_FLAT);
       ObjectSetInteger(0, name, OBJPROP_BACK, false);
       ObjectSetInteger(0, name, OBJPROP_ZORDER, z);
+      ObjectSetString(0, name, OBJPROP_TOOLTIP, "\n");   // le celle K lo riscrivono in Render
      }
    ObjectSetInteger(0, name, OBJPROP_XDISTANCE, x);
    ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
@@ -220,11 +250,6 @@ int OnInit()
       Print("ABTG_Confluenza_Dashboard: nessun TF acceso, accendine almeno uno.");
       return INIT_FAILED;
      }
-   gMain = 0;
-   for(int t = 0; t < gNT; t++)
-      if(gTf[t] == InpTfMain)
-         gMain = t;
-
    if(!gE.Init(InpEmaFast, InpEmaSlow, InpEma3, InpEma4,
                InpBBPeriod, InpBBDev, InpBBExpandBars, InpBBExpandPct,
                InpAtrPeriod, InpStMult, InpAtrWilder,
@@ -237,6 +262,25 @@ int OnInit()
             gE.pWarm + 20, " barre (warm-up del motore + margine).");
       return INIT_PARAMETERS_INCORRECT;
      }
+   // CONVERGENZA (classe 950): lo stato ricorsivo del motore (EMA del segnale, ATR di Wilder, bande del
+   // Supertrend) dipende dalla barra di PARTENZA. L'indicatore parte dalla prima barra dello storico, la
+   // dashboard da gBars barre fa: i due stati coincidono BIT PER BIT solo quando il contributo della
+   // partenza, che decade come dec^N, e' sotto la precisione del double (1e-17). Misurato sullo specchio
+   // Python: default (EMA 21, ATR 10) identico da ~400 barre, NON a 300; con EMA 50 / ATR 30 NON identico a
+   // 600 barre (0/20), identico a 1400. Quindi le barre si ALZANO da sole se i periodi lo chiedono.
+   double dec = 1.0 - MathMin(gE.a1, gE.a2);                    // la EMA del segnale piu' lenta
+   if(gE.pAtrWilder && gE.pAtrPeriod > 1)
+      dec = MathMax(dec, 1.0 - 1.0 / gE.pAtrPeriod);
+   int need = gE.pWarm + 20;
+   if(dec > 0.0 && dec < 1.0)
+      need = (int)MathCeil(MathLog(1e-17) / MathLog(dec)) + gE.pWarm;
+   gBars = MathMax(InpBars, MathMin(need, ABTGC_MAXBARS));
+   if(gBars > InpBars)
+      Print("ABTG_Confluenza_Dashboard: InpBars ", InpBars, " alzato a ", gBars,
+            " perche' lo stato del motore coincida con quello dell'indicatore (periodi del segnale).");
+   if(need > ABTGC_MAXBARS && InpBars < need)
+      Print("ABTG_Confluenza_Dashboard: ATTENZIONE, con questi periodi servirebbero ", need,
+            " barre per cella (tetto ", ABTGC_MAXBARS, "): il segnale puo' differire da quello dell'indicatore.");
 
    string lista = "";
    if(InpForex)
@@ -287,8 +331,12 @@ int OnInit()
    ArrayResize(gSeen, nc);
    ArrayResize(gMissL, nc);
    ArrayResize(gMissS, nc);
+   ArrayResize(gLAge, nc);
+   ArrayResize(gLDir, nc);
    for(int k = 0; k < nc; k++)
      {
+      gLAge[k] = -1;
+      gLDir[k] = 0;
       gDir[k] = 0;
       gAge[k] = -1;
       gOk[k] = false;
@@ -307,10 +355,21 @@ int OnInit()
    for(int s2 = 0; s2 < gN; s2++)
       gIdx[s2] = s2;
 
-   gRowH    = MathMax(InpFontSize * 2 + 4, InpArrowSize + 12);
-   gColSym  = 90 + (InpFontSize - 9) * 8;
-   gColW    = 60 + (InpFontSize - 9) * 6 + (InpArrowSize - 16);
-   gColConf = 86 + (InpFontSize - 9) * 6;
+   // i caratteri sono in PUNTI e il terminale li scala coi DPI dello schermo, le distanze sono in PIXEL:
+   // senza questa scala a 120/144 DPI il testo esce dalle celle e si sovrappone (doc. TERMINAL_SCREEN_DPI)
+   gK = TerminalInfoInteger(TERMINAL_SCREEN_DPI) / 96.0;
+   if(gK < 1.0)
+      gK = 1.0;
+   gRowH    = (int)MathRound(MathMax(InpFontSize * 2 + 4, InpArrowSize + 12) * gK);
+   gColSym  = (int)MathRound((90 + (InpFontSize - 9) * 8) * gK);
+   gColW    = (int)MathRound((60 + (InpFontSize - 9) * 6 + (InpArrowSize - 16)) * gK);
+   gColConf = (int)MathRound((86 + (InpFontSize - 9) * 6) * gK);
+   gRows    = gN;
+   gBlocks  = 1;
+   gBlockW  = 0;
+   gAlertBuf = "";
+   gAlertN   = 0;
+   gNewN     = 0;
 
    gFirstRender = true;
    gLastKey = "";
@@ -340,6 +399,7 @@ int OnCalculate(const int rates_total, const int prev_calculated, const int begi
 void OnTimer()
   {
    Update();
+   CheckNewCharts();
   }
 
 //+------------------------------------------------------------------+
@@ -351,7 +411,7 @@ bool Measure(const int s, const int t, const datetime tLast)
    int k = s * gNT + t;
    MqlRates r[];
    ArraySetAsSeries(r, false);
-   int got = CopyRates(gSym[s], gTf[t], 1, InpBars, r);   // start=1: la barra in formazione e' esclusa
+   int got = CopyRates(gSym[s], gTf[t], 1, gBars, r);     // start=1: la barra in formazione e' esclusa
    if(got < gE.pWarm + 3)
      {
       gOk[k] = false;             // storico non pronto/insufficiente: "..."
@@ -366,21 +426,21 @@ bool Measure(const int s, const int t, const datetime tLast)
 
    int v = InpUseVolFilter ? 1 : 0;
    int no = gE.lastNo[v];
-   datetime sigTime = (no >= 0) ? r[no].time : 0;
+   datetime sigTime = (no >= 0) ? r[no].time : (datetime)0;
    int age = (no >= 0) ? (got - 1) - no : -1;
    bool active = (no >= 0 && age <= InpMaxAgeBars);
 
-   // avviso: solo su un segnale NUOVO e solo dopo la prima misura valida di QUESTA cella
+   // avviso: solo su un segnale NUOVO e solo dopo la prima misura valida di QUESTA cella.
+   // Non si spedisce qui: si accoda e Update() manda UN solo Alert/push per giro (alla chiusura
+   // di H4 possono scattare molte celle insieme; il push ha un limite di frequenza del terminale).
    if(gSeen[k])
      {
       if(active && sigTime > gNotified[k])
         {
-         string msg = StringFormat("%s %s: %s (confluenza EMA/BB/ST, %db fa)", gSym[s], gTfName[t],
-                                   gE.lastDir[v] > 0 ? "BUY" : "SELL", age);
-         if(InpAlert)
-            Alert(msg);
-         if(InpPush)
-            SendNotification(msg);
+         string line = StringFormat("%s %s %s %db", gSym[s], gTfName[t],
+                                    gE.lastDir[v] > 0 ? "BUY" : "SELL", age);
+         gAlertBuf += (gAlertN > 0 ? "; " : "") + line;
+         gAlertN++;
         }
      }
    gSeen[k] = true;
@@ -391,6 +451,8 @@ bool Measure(const int s, const int t, const datetime tLast)
    gAge[k]   = active ? age : -1;
    gMissL[k] = gE.Missing(1, InpUseVolFilter);
    gMissS[k] = gE.Missing(-1, InpUseVolFilter);
+   gLAge[k]  = age;
+   gLDir[k]  = (no >= 0) ? gE.lastDir[v] : 0;
    gKey[k]   = tLast;
    gOk[k]    = true;
    return true;
@@ -422,6 +484,24 @@ void Update()
      {
       Render();
       gFirstRender = false;
+     }
+   if(gAlertN > 0)
+     {
+      string msg = "ABTG confluenza EMA/BB/ST: " + gAlertBuf;
+      if(gAlertN > 1)
+         msg = "ABTG confluenza EMA/BB/ST, " + IntegerToString(gAlertN) + " nuovi: " + gAlertBuf;
+      if(InpAlert)
+         Alert(msg);
+      if(InpPush)
+        {
+         string p = msg;
+         if(StringLen(p) > 250)                       // la notifica push tronca oltre 255 caratteri
+            p = StringSubstr(p, 0, 246) + " ...";
+         if(!SendNotification(p))
+            Print("ABTG_Confluenza_Dashboard: notifica push non inviata (errore ", GetLastError(), ").");
+        }
+      gAlertBuf = "";
+      gAlertN = 0;
      }
   }
 
@@ -482,9 +562,51 @@ void ScoreAndSort()
   }
 
 //+------------------------------------------------------------------+
+//| Impaginazione: con 30 simboli una colonna sola e' alta ~930 px e   |
+//| su uno schermo 1080p le ultime righe finiscono FUORI dal grafico.  |
+//| Le righe si dividono in blocchi affiancati che stanno nell'altezza |
+//| del grafico (InpMaxRows = 0) o in InpMaxRows righe per blocco.     |
+//| I NOMI degli oggetti restano per riga r: il click non cambia.      |
+//+------------------------------------------------------------------+
+bool Layout()
+  {
+   int rows = gN;
+   if(InpMaxRows > 0)
+      rows = InpMaxRows;
+   else
+     {
+      long hpx = ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS, 0);
+      if(hpx > 0 && gRowH > 0)
+         rows = ((int)hpx - InpY - 3 * gRowH - 16) / gRowH;   // titolo + intestazione + riga di margine
+     }
+   if(rows < 5)
+      rows = 5;
+   if(rows > gN)
+      rows = gN;
+   int blocks = (gN + rows - 1) / rows;
+   int bw = gColSym + gNT * gColW + gColConf + (int)MathRound(12 * gK);
+   bool ch = (rows != gRows || blocks != gBlocks || bw != gBlockW);
+   if(blocks != gBlocks)
+      ObjectsDeleteAll(0, PFX + "H_");                          // intestazioni dei blocchi che non ci sono piu'
+   gRows = rows;
+   gBlocks = blocks;
+   gBlockW = bw;
+   return ch;
+  }
+
+// cosa manca a una direzione, con il caso "niente": condizioni tutte vere ma nessuna freccia
+string MissText(const int m)
+  {
+   if(m == 0)
+      return "niente (condizioni gia' vere da prima: il segnale scatta solo al fronte, o e' in pausa) ";
+   return AbtgcMaskText(m);
+  }
+
+//+------------------------------------------------------------------+
 void Render()
   {
    ScoreAndSort();
+   Layout();
 
    int nAct = 0;
    for(int s = 0; s < gN; s++)
@@ -493,42 +615,52 @@ void Render()
    string title = StringFormat("CONFLUENZA EMA/BB/ST | attivi (<=%db): %d simboli | volumi %s",
                                InpMaxAgeBars, nAct, InpUseVolFilter ? "ON" : "OFF");
 
-   int W = gColSym + gNT * gColW + gColConf + 20;
-   W = (int)MathMax(W, 16 + (int)MathCeil(StringLen(title) * InpFontSize * 0.75));
-   int H = (gN + 3) * gRowH + 10;
+   int m8 = (int)MathRound(8 * gK);
+   int W = m8 + gBlocks * gBlockW;
+   W = (int)MathMax(W, 2 * m8 + (int)MathCeil(StringLen(title) * InpFontSize * 0.75 * gK));
+   int H = (gRows + 3) * gRowH + (int)MathRound(10 * gK);
 
    Rect(PFX + "BG", InpX, InpY, W, H, C'18,22,30', C'70,78,95', 0);
 
-   int x0 = InpX + 8;
-   int y0 = InpY + 6;
+   int x0 = InpX + m8;
+   int y0 = InpY + (int)MathRound(6 * gK);
    Lbl(PFX + "T", x0, y0, title, C'230,230,230', "Consolas", InpFontSize, 10);
 
    int yh = y0 + gRowH;
-   Lbl(PFX + "H_S", x0, yh, "Simbolo", C'150,170,210', "Consolas", InpFontSize, 10);
-   for(int t = 0; t < gNT; t++)
-      Lbl(PFX + "H_" + IntegerToString(t), x0 + gColSym + t * gColW, yh,
-          gTfName[t], C'150,170,210', "Consolas", InpFontSize, 10);
-   Lbl(PFX + "H_C", x0 + gColSym + gNT * gColW, yh, "Concordi", C'150,170,210', "Consolas", InpFontSize, 10);
+   for(int b = 0; b < gBlocks; b++)
+     {
+      int bx = x0 + b * gBlockW;
+      string bs = IntegerToString(b);
+      Lbl(PFX + "H_S_" + bs, bx, yh, "Simbolo", C'150,170,210', "Consolas", InpFontSize, 10);
+      for(int t = 0; t < gNT; t++)
+         Lbl(PFX + "H_" + IntegerToString(t) + "_" + bs, bx + gColSym + t * gColW, yh,
+             gTfName[t], C'150,170,210', "Consolas", InpFontSize, 10);
+      Lbl(PFX + "H_C_" + bs, bx + gColSym + gNT * gColW, yh, "Concordi", C'150,170,210', "Consolas", InpFontSize, 10);
+     }
 
-   int fontPx = (int)MathCeil(InpFontSize * 1.4);
+   int fontPx = (int)MathCeil(InpFontSize * 1.4 * gK);
+   int a4 = (int)MathRound(4 * gK);
+   int gx = (int)MathRound((8 + InpArrowSize) * gK);
+   int c3 = (int)MathRound(3 * gK);
    for(int r = 0; r < gN; r++)
      {
       int s = gIdx[r];
-      int y = yh + (r + 1) * gRowH;
+      int bx = x0 + (r / gRows) * gBlockW;
+      int y = yh + (r % gRows + 1) * gRowH;
       string rs = IntegerToString(r);
 
       // nome simbolo (colore = direzione dominante)
       color cs = C'190,190,190';
       if(gDom[s] > 0) cs = clrLimeGreen;
       if(gDom[s] < 0) cs = clrTomato;
-      Lbl(PFX + "S_" + rs, x0, y + (gRowH - fontPx) / 2, gSym[s], cs, "Consolas", InpFontSize, 10,
+      Lbl(PFX + "S_" + rs, bx, y + (gRowH - fontPx) / 2, gSym[s], cs, "Consolas", InpFontSize, 10,
           "Click: apre " + gSym[s] + " sul TF del segnale piu' recente");
 
       for(int t = 0; t < gNT; t++)
         {
          int k = s * gNT + t;
          string ts = IntegerToString(t);
-         int cx = x0 + gColSym + t * gColW;
+         int cx = bx + gColSym + t * gColW;
          color bgc = C'26,31,42';
          string arrow = " ";
          string ages = "";
@@ -555,14 +687,22 @@ void Render()
                   tip += "SELL, segnale di " + IntegerToString(gAge[k]) + " barre chiuse fa";
                  }
                else
-                  tip += "nessuna confluenza | LONG manca: " + AbtgcMaskText(gMissL[k]) +
-                         "| SHORT manca: " + AbtgcMaskText(gMissS[k]);
+                 {
+                  tip += "nessuna confluenza | LONG manca: " + MissText(gMissL[k]) +
+                         "| SHORT manca: " + MissText(gMissS[k]);
+                  if(gLDir[k] != 0)
+                     tip += "| ultimo segnale: " + (gLDir[k] > 0 ? "BUY " : "SELL ") +
+                            IntegerToString(gLAge[k]) + " barre fa";
+                  else
+                     tip += "| nessun segnale nelle " + IntegerToString(gBars) + " barre lette";
+                 }
            }
+         tip += " | click: apre il grafico " + gSym[s] + " " + gTfName[t];
          // cella (cliccabile anche se vuota) + freccia + eta'
-         Rect(PFX + "K_" + rs + "_" + ts, cx, y, gColW - 3, gRowH - 2, bgc, bgc, 1);
+         Rect(PFX + "K_" + rs + "_" + ts, cx, y, gColW - c3, gRowH - 2, bgc, bgc, 1);
          ObjectSetString(0, PFX + "K_" + rs + "_" + ts, OBJPROP_TOOLTIP, tip);
-         Lbl(PFX + "A_" + rs + "_" + ts, cx + 4, y + 1, arrow, ca, "Wingdings 3", InpArrowSize, 10, tip);
-         Lbl(PFX + "G_" + rs + "_" + ts, cx + 8 + InpArrowSize, y + (gRowH - fontPx) / 2, ages,
+         Lbl(PFX + "A_" + rs + "_" + ts, cx + a4, y + 1, arrow, ca, "Wingdings 3", InpArrowSize, 10, tip);
+         Lbl(PFX + "G_" + rs + "_" + ts, cx + gx, y + (gRowH - fontPx) / 2, ages,
              gOk[k] ? C'230,230,230' : C'110,110,110', "Consolas", InpFontSize, 10, tip);
         }
 
@@ -577,7 +717,7 @@ void Render()
          else
             if(gNBuy[s] > 0)
               { ctxt = "conflitto"; cc = C'255,165,0'; }
-      Lbl(PFX + "C_" + rs, x0 + gColSym + gNT * gColW, y + (gRowH - fontPx) / 2, ctxt, cc,
+      Lbl(PFX + "C_" + rs, bx + gColSym + gNT * gColW, y + (gRowH - fontPx) / 2, ctxt, cc,
           "Consolas", InpFontSize, 10, "Click: apre " + gSym[s] + " sul TF del segnale piu' recente");
      }
    ChartRedraw(0);
@@ -631,6 +771,7 @@ bool DecodeClick(const string name, string &kind, int &row, int &col)
   }
 
 // TF da aprire cliccando il NOME: segnale piu' recente (a parita' il TF piu' alto), altrimenti InpTfMain
+// (InpTfMain anche se NON e' una colonna accesa: prima si ripiegava in silenzio sulla prima colonna)
 ENUM_TIMEFRAMES SymbolClickTf(const int s)
   {
    int best = -1;
@@ -646,9 +787,73 @@ ENUM_TIMEFRAMES SymbolClickTf(const int s)
          best = t;
         }
      }
-   if(best < 0)
-      best = gMain;
-   return gTf[best];
+   if(best >= 0)
+      return gTf[best];
+   if(InpTfMain == PERIOD_CURRENT)
+      return (ENUM_TIMEFRAMES)_Period;
+   return InpTfMain;
+  }
+
+//+------------------------------------------------------------------+
+//| Grafici appena aperti: il terminale applica default.tpl (e qui    |
+//| eventualmente InpTemplate). Se quel template contiene un EA, il   |
+//| grafico nuovo nasce con un EA ACCESO: la dashboard non lo puo'    |
+//| sapere prima (i .tpl stanno fuori dalla sandbox) e il template si |
+//| applica in modo asincrono, quindi si controlla CHART_EXPERT_NAME  |
+//| per 10 s dopo l'apertura e si avvisa a voce alta (classe 951).    |
+//+------------------------------------------------------------------+
+void WatchNewChart(const long id)
+  {
+   if(gNewN >= 8)
+     {
+      for(int i = 1; i < 8; i++)
+        {
+         gNewId[i - 1] = gNewId[i];
+         gNewMs[i - 1] = gNewMs[i];
+        }
+      gNewN = 7;
+     }
+   gNewId[gNewN] = id;
+   gNewMs[gNewN] = GetTickCount64();
+   gNewN++;
+  }
+
+void CheckNewCharts()
+  {
+   if(gNewN <= 0)
+      return;
+   ulong now = GetTickCount64();
+   int keep = 0;
+   for(int i = 0; i < gNewN; i++)
+     {
+      long id = gNewId[i];
+      bool drop = false;
+      ResetLastError();
+      string sym = ChartSymbol(id);
+      if(StringLen(sym) == 0)
+         drop = true;                                   // grafico gia' chiuso
+      else
+        {
+         string ea = ChartGetString(id, CHART_EXPERT_NAME);
+         if(StringLen(ea) > 0)
+           {
+            Alert("ABTG_Confluenza_Dashboard: ATTENZIONE, il grafico ", sym, " ",
+                  EnumToString(ChartPeriod(id)), " appena aperto dal click ha un EA ACCESO: '", ea,
+                  "' (arriva da default.tpl o da InpTemplate). Se non lo volevi, toglilo SUBITO.");
+            drop = true;
+           }
+         else
+            if(now - gNewMs[i] > 10000)
+               drop = true;                             // 10 s senza EA: a posto
+        }
+      if(!drop)
+        {
+         gNewId[keep] = id;
+         gNewMs[keep] = gNewMs[i];
+         keep++;
+        }
+     }
+   gNewN = keep;
   }
 
 //+------------------------------------------------------------------+
@@ -663,12 +868,15 @@ void OpenChartFor(const string sym, const ENUM_TIMEFRAMES tf)
    gLastKey = key;
    gLastMs = now;
 
-   // (3) un grafico con quel simbolo e quel TF esiste gia'? allora in primo piano
+   // (3) un ALTRO grafico con quel simbolo e quel TF esiste gia'? allora in primo piano.
+   // Il grafico della dashboard si salta: "portarlo in primo piano" non mostrerebbe niente
+   // (e' gia' davanti, coperto dal pannello) e il click sembrerebbe rotto.
+   long self = ChartID();
    long cid = ChartFirst();
    int guard = 0;
    while(cid >= 0 && guard < 1000)
      {
-      if(ChartSymbol(cid) == sym && ChartPeriod(cid) == tf)
+      if(cid != self && ChartSymbol(cid) == sym && ChartPeriod(cid) == tf)
         {
          ChartSetInteger(cid, CHART_BRING_TO_TOP, true);
          return;
@@ -697,16 +905,28 @@ void OpenChartFor(const string sym, const ENUM_TIMEFRAMES tf)
    ChartSetInteger(nid, CHART_BRING_TO_TOP, true);
    if(StringLen(InpTemplate) > 0)               // (5) template opzionale, solo sul grafico nuovo
      {
+      string tpl = InpTemplate;
+      string low = tpl;
+      StringToLower(low);
+      if(StringFind(low, ".tpl") < 0)
+         tpl += ".tpl";                          // "segnali" -> "segnali.tpl"
       ResetLastError();
-      if(!ChartApplyTemplate(nid, InpTemplate))
-         Print("ABTG_Confluenza_Dashboard: template '", InpTemplate, "' non applicato (errore ",
-               GetLastError(), "). Va salvato in MQL5\\Profiles\\Templates.");
+      if(!ChartApplyTemplate(nid, tpl))
+         Print("ABTG_Confluenza_Dashboard: template '", tpl, "' non applicato (errore ",
+               GetLastError(), "). Va salvato nella cartella dei template del terminale (Grafici > Modelli > Salva).");
      }
+   WatchNewChart(nid);
   }
 
 //+------------------------------------------------------------------+
 void OnChartEvent(const int id, const long &lparam, const double &dparam, const string &sparam)
   {
+   if(id == CHARTEVENT_CHART_CHANGE)            // grafico ridimensionato: le righe per blocco cambiano?
+     {
+      if(InpMaxRows <= 0 && !gFirstRender && Layout())
+         Render();
+      return;
+     }
    if(!InpClickOpen || id != CHARTEVENT_OBJECT_CLICK)
       return;
    string kind;
