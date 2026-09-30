@@ -96,6 +96,13 @@ Perche' due lavori con l'asse tecnico sul magic (0 ed e): il driver, con **zero 
 non esegue nessuna passata e lascia i CSV da 0 byte (classe 134); l'asse sul magic fa
 due passate identiche per costruzione, che sono anche il **gemello di determinismo** (G1).
 
+**Le due celle che esistono davvero come preset del piccolo (verificato a macchina, input per input).**
+In campo sul piccolo dal 29/09 sera c'e' `ABTG_Bulge` v5.20 col preset
+`ABTG_Bulge_v520_piccolo_ADX_spento.set` (magic 772700): e' **il lato ADX=0 dell'asse c** (R92bc),
+salvo `InpMagic`, `InpComment` (`BULGE_V520`), `InpVerbose`, `InpAutoTest`. Il preset AMPIO e' pronto
+nel repo e **non ancora caricato** (`HANDOFF.md` r.25). Nessuna delle due e' validata o bocciata da
+questo round (par. 7).
+
 La cella **AMPIA** e' identica, input per input, al preset
 `mql5/Presets/sedie_piccolo/ABTG_Bulge_v520_piccolo_AMPIO.set`, salvo **tre** differenze
 dichiarate: `InpMagic` (799261/799311 al posto di 772701), `InpVerbose=0` e `InpAutoTest=0`
@@ -283,8 +290,9 @@ rate >= 65% e profitto > 0**. Bocciatura secca invariata: n < 20, profitto <= 0,
 4. Il DD e' quello del tester OHLC: **sottostima** il movimento intrabarra (dichiarato, non quantificato).
 5. "Il filtro X non serve" non si dice da un asse a due celle: si dice quanti segnali costa e con che PF.
 6. Niente per singolo cross: il disegno non produce una riga per simbolo (par. 8).
-7. La sedia `BULGE V520 AMPIO` del piccolo 50503392 NON e' validata ne' bocciata da questo round: gira
-   in campo con altri dati, altro spread, altro orologio (BCM UTC+1 fisso).
+7. Le sedie `ABTG_Bulge` del piccolo 50503392 (preset ADX_spento in campo dal 29/09, magic 772700; preset
+   AMPIO pronto e non caricato) NON sono validate ne' bocciate da questo round: in campo hanno altri dati,
+   altro spread, altro orologio (BCM UTC+1 fisso), tick veri.
 8. "La frequenza e' tornata" non si dice senza la lettura E5 e senza i limiti di E5.
 
 ## 8. COSA IL DISEGNO NON MISURA (limiti gia' noti, scritti prima dei numeri)
