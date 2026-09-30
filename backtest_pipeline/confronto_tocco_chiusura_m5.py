@@ -54,10 +54,10 @@
 #      d'entrata e' <= al livello. A: chiusure delle barre kA, kA+1, kA+2
 #      (e' la definizione "falso entro 15 min" dell'anatomia, riprodotta).
 #      B: chiusure delle barre kB+1, kB+2, kB+3. Tre chiusure per parte.
-#    COPPIE = i giorni in cui esistono TUTTE E DUE le entrate. Il confronto
-#      A contro B si fa SOLO su questi (stessi giorni). Si separano: stesso
-#      lato (LONG, SHORT) [le celle del verdetto], lati opposti (A long e B
-#      short o viceversa), e si CONTANO i giorni con solo A o solo B.
+#    COPPIE = i giorni in cui esistono TUTTE E DUE le entrate. Si separano:
+#      stesso lato (LONG, SHORT), lati opposti (A long e B short o viceversa),
+#      e si CONTANO i giorni con solo A o solo B. [Cancello 30/09: le coppie
+#      sono DESCRIZIONE; il verdetto e' sulle ENTRATE, le due politiche.]
 #
 #  ###################################################################
 #  ATTESE, SCRITTE PRIMA DEI NUMERI (mai visti i numeri di questo studio;
@@ -84,8 +84,9 @@
 #  IDENTICA sotto H_NIENTE. Idem per l'R: sulle coppie, A e' avvantaggiata
 #  dalla selezione (i giorni in cui B esiste sono i giorni in cui il prezzo ha
 #  chiuso fuori, DOPO l'entrata di A ma PRIMA di quella di B): B-A e'
-#  negativo anche a mercato senza memoria. Quindi il numero che decide
-#  e' l'ECCESSO SUL NULLO: lo stesso confronto, con le stesse regole, su
+#  negativo anche a mercato senza memoria. Quindi (STESURA ORIGINALE,
+#  SUPERATA dal cancello qui sotto: oggi l'eccesso e' solo DESCRIZIONE)
+#  il numero che decideva era l'ECCESSO SUL NULLO: lo stesso confronto, su
 #  giorni SURROGATI in cui il range e' quello vero e ogni barra successiva
 #  ha il SEGNO tirato a sorte (stessa ampiezza, stessa forma, stesso profilo
 #  orario, stessi buchi; direzione senza memoria = H_NIENTE per costruzione).
@@ -106,21 +107,23 @@
 #  MECCANISMO sull'eccesso del falso. Tre contro-esempi ESEGUITI (script
 #  collaudo_riga_confronto_tocco/mondi_controesempio.py):
 #   (1) nel MONDO POSITIVO dell'autotest stesso, sulle coppie B-A GREZZO e'
-#       -0,13..-0,19 (6 errori standard SOTTO zero) e il verdetto diceva
+#       -0,11..-0,19 (6 errori standard SOTTO zero) e il verdetto diceva
 #       "PAGA" = "B batte A al lordo": il nullo di quel mondo vale -0,54 e
 #       l'eccesso lo scavalca. L'etichetta diceva il FALSO;
 #   (2) in un mondo dove la chiusura fuori PORTA davvero l'informazione
 #       (dopo una chiusura fuori il prezzo prosegue, dopo un tocco che
-#       richiude dentro torna indietro) B batte A di +0,29..+0,36 R' sulle
-#       entrate (10 errori standard) e il verdetto era INCONCLUSIVA 6 celle
-#       su 6, meccanismo NON_FILTRA 6 su 6: le coppie non vedono il filtro
+#       richiude dentro torna indietro) B batte A di +0,25..+0,37 R' sulle
+#       entrate (10 errori standard) e il verdetto era INCONCLUSIVA 24 celle
+#       su 24, meccanismo NON_FILTRA 24 su 24: le coppie non vedono il filtro
 #       (lo diceva gia' il par. 5.2) ma il verdetto le RICHIEDEVA;
 #   (3) il falso di A CONTIENE la chiusura della barra del tocco, cioe' il
 #       segnale stesso di B, e il nullo la riproduce (forme conservate):
 #       l'eccesso del falso misura solo la deriva nelle 3 barre dopo
-#       l'entrata. Nel mondo (2) esce -3,9..+1,1 (filtro vero, "NON
-#       FILTRA"); in un mondo dove l'informazione e' nel TOCCO e la chiusura
-#       non aggiunge niente esce +4,7..+10,0 (FILTRA in 1 cella su 6).
+#       l'entrata. Nel mondo (2) esce -3,8..+2,9 (filtro vero, "NON
+#       FILTRA" 24 su 24); in un mondo dove l'informazione e' nel TOCCO e la
+#       chiusura non aggiunge niente esce +3,1..+12,8 (FILTRA in 4 celle su 24).
+#   [24 celle per mondo, ricontate dal secondo giudice il 30/09; la prima
+#    stesura di questo blocco riportava una corsa da 6 celle.]
 #  QUINDI, da qui: il VERDETTO e' UNO, sul PAGAMENTO, ed e' sul confronto
 #  fra le POLITICHE (ENTRATE), sul valore GREZZO (R lordo e R a mercato,
 #  B meno A): e' la risposta diretta a "meglio o peggio". Il nullo, le
@@ -180,7 +183,7 @@
 #     con un salto) mentre B paga il close reale della barra. Un B <= A puo'
 #     dipendere in parte da questo fill ideale di A, non solo dal ritardo.
 #   - Otto celle (2 range x 2 lati x 2 fasi) sono otto occasioni di rumore:
-#     per questo la soglia e' un ECCESSO con IC e un range vale solo se LONG
+#     per questo la soglia e' una DIFFERENZA con IC e un range vale solo se LONG
 #     e SHORT concordano; i verdetti dell'addestramento decidono, la cassaforte
 #     conferma o no.
 #   - Il verdetto dice SE la chiusura M5 rende di piu' del primo tocco, non
@@ -228,9 +231,10 @@ SHA_ANATOMIA_M5 = "EFD839E232F348DED01208BF421FA3EE07E4FDCA664E7789D9D1FEDEE8721
 SHA_ANATOMIA_APERTURE = "446D2D18B1C5281A16C01704C23844D9333087393D5EC48F0DA7883D2ECA0183"
 
 # ---- soglie CONGELATE (vedi la testa del file e il file dei criteri)
-X_FALSO_PP = 10.0          # punti percentuali di ECCESSO sul nullo
-X_R = 0.08                 # R' di ECCESSO sul nullo
-N_MIN_CELLA = 150          # coppie minime per pronunciarsi (Emendamento A)
+X_FALSO_PP = 10.0          # punti percentuali di ECCESSO sul nullo (SOLO descrittivo)
+X_R = 0.08                 # R': soglia del VERDETTO sulla differenza GREZZA B-A fra le politiche
+                           # (usata anche, solo descrittiva, sulle righe dell'eccesso sul nullo)
+N_MIN_CELLA = 150          # entrate minime per politica, min(nA, nB), per pronunciarsi (Emendamento A)
 Z95 = 1.96
 K_SURR_DEFAULT = 30
 SEME_DEFAULT = 20260930
@@ -736,7 +740,7 @@ def giudica_politica(obsE, n_min=None, x_r=None):
     return res
 
 
-LETTURA_PAGA = "B MEGLIO: la chiusura M5 batte il primo tocco AL LORDO sulle entrate (>= %.2f R')" % X_R
+LETTURA_PAGA = "B MEGLIO: la chiusura M5 batte il primo tocco AL LORDO, per operazione (>= %.2f R')" % X_R
 LETTURA_NON_PAGA = "B NON MEGLIO: nessun vantaggio della chiusura M5 >= %.2f R' al lordo (H_NIENTE sul pagamento)" % X_R
 
 
@@ -1136,7 +1140,8 @@ def blocco_range(out, cfg, res):
                    _q3([(x[1]["k"] + 1 - x[0]["k"]) * 5 for x in coppie], 0))
         out.append("  ATTENZIONE: sulle coppie A e' AVVANTAGGIATA per costruzione (i giorni in cui B esiste sono quelli in cui il")
         out.append("  prezzo ha poi chiuso fuori: dopo l'entrata di A, prima di quella di B) e B ha meno falsi anche senza")
-        out.append("  memoria (entra oltre il livello). I divari grezzi qui sotto NON sono il verdetto: conta l'ECCESSO sul NULLO.")
+        out.append("  memoria (entra oltre il livello). I divari sulle COPPIE qui sotto NON sono il verdetto: il verdetto e' la")
+        out.append("  differenza GREZZA fra le POLITICHE (tutte le entrate), piu' sotto. L'eccesso sul nullo e' solo DESCRIZIONE.")
         sp = cella["obsP"]
         out.append("  scarto sulle coppie: R lordo B-A %s (+-%s, 1 SE)  | falso A-B %s pt (+-%s)  | a mercato B-A %s" %
                    (_sgn(sp["dR"]), _f(sp["seR"]), _sgn(sp["dF"], 1), _f(sp["seF"], 1), _sgn(sp["dRm"])))
@@ -1283,6 +1288,9 @@ def costruisci_referto(cfg, righe, res_per_range, diag, percorso, titolo, nota_f
     add("  il filtro dalla deriva (il falso di A contiene il segnale di B). Vicino alla soglia: INCERTO, non SI.")
     add("  L'entrata A e' AL LIVELLO (fill ideale di un pendente, anche se la barra del tocco lo ha attraversato")
     add("  con un salto); B paga il close reale: un B <= A puo' dipendere in parte dal fill ideale di A.")
+    add("  Il verdetto e' PER OPERAZIONE (R medio per entrata, in unita' del proprio R'): B entra in meno giorni")
+    add("  (i SOLO A) e con R' piu' largo, quindi 'B MEGLIO' NON vuol dire piu' R in totale ne' piu' punti: il")
+    add("  numero di operazioni di ciascuna politica e' stampato accanto e va letto insieme al verdetto.")
     add("")
     add("--- RILIEVI DI QUESTA CORSA ---")
     if not rilievi:
@@ -2355,6 +2363,10 @@ def autotest():
         ee.check("corsa: la cassaforte confronta con l'addestramento", "CONFRONTO CON L'ADDESTRAMENTO" in t_cs[0])
         ee.check("corsa: il referto IS non ha il confronto con l'addestramento", "CONFRONTO CON L'ADDESTRAMENTO" not in t_is[0])
         ee.check("corsa: il referto termina con ESITO", t_is[0].rstrip().split("\n")[-1].startswith("ESITO:"))
+        # classe 45 (residuo della correzione): la regola VECCHIA non deve comparire come affermazione nel referto
+        ee.check("corsa: il referto non dice piu' che decide l'ECCESSO sul nullo (residuo del cancello)",
+                 not any("conta l'ECCESSO" in t or "numero che decide" in t for t in testi.values()))
+        ee.check("corsa: il referto dichiara che il verdetto e' PER OPERAZIONE", "PER OPERAZIONE" in t_is[0])
     csv_t = [t for nm, t in testi.items() if nm.endswith(".csv")]
     if csv_t:
         righe_csv = csv_t[0].strip().split("\n")
