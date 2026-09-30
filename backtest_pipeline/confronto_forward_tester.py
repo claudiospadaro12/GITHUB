@@ -73,6 +73,9 @@ COSTANTI = {
     "H_ORARI_L1_MAX": 0.20,
     "H_ORARI_MEDIANA_MIN": 45,
 }
+# Finestra UFFICIALE del confronto (il compito: 22-30/09). Il tester gira dal 21/09 (giorno di avvio della
+# challenge, con ordini pendenti gia' nel forward): il 21/09 si RIPORTA a parte, non entra in nessun conteggio.
+FINESTRA_UFFICIALE_DA = "2026.09.22"
 FAMIGLIA_TOL = {"DAX": "TOL_PREZZO_DAX_PT", "US30": "TOL_PREZZO_US30_PT", "US100": "TOL_PREZZO_US100_PT"}
 
 # Una riga per sedia in scope. 'viva_da' e' la prima data BCM in cui la sedia era
@@ -548,11 +551,15 @@ def esegui_confronto(fw, tester_per_sedia, delta_ore, cutoff_fw, C=COSTANTI, n_n
     d1 = cutoff_bcm.date()
     giorni_tutti = giorni_feriali(d0, d1)
     risultati = []
+    uff = d_parse(FINESTRA_UFFICIALE_DA)
     for s in SEDIE:
         tol_pt = C[FAMIGLIA_TOL[s["fam"]]]
-        viva = d_parse(s["viva_da"])
+        viva_sedia = d_parse(s["viva_da"])
+        viva = max(viva_sedia, uff)
         giorni = [g for g in giorni_tutti if g >= viva]
-        F = sorted([p for p in Fpos if p["sedia"] == s["id"]], key=lambda x: x["t"])
+        Fall = sorted([p for p in Fpos if p["sedia"] == s["id"]], key=lambda x: x["t"])
+        F = [f for f in Fall if f["t"].date() >= viva]
+        F_avvio = [f for f in Fall if f["t"].date() < viva]
         for f in F:
             f["tipo_u"] = tipo_uscita(f, s["chiusura_bcm"], C)
         td = tester_per_sedia.get(s["id"])
@@ -564,8 +571,10 @@ def esegui_confronto(fw, tester_per_sedia, delta_ore, cutoff_fw, C=COSTANTI, n_n
                 x["tipo_u"] = tipo_uscita(x, s["chiusura_bcm"], C)
                 if x["t"].date() < d0:
                     esclusi.append((x, "prima della finestra del forward"))
-                elif x["t"].date() < viva:
+                elif x["t"].date() < viva_sedia:
                     esclusi.append((x, "sedia NON ancora attaccata al forward (viva da %s)" % s["viva_da"]))
+                elif x["t"].date() < uff:
+                    esclusi.append((x, "GIORNO DI AVVIO (prima del %s): fuori dal confronto ufficiale, riportato e non contato" % FINESTRA_UFFICIALE_DA))
                 elif x["t"] > cutoff_bcm:
                     esclusi.append((x, "oltre l'ultimo evento noto del forward (%s BCM): non confrontabile" % fmt_dt(cutoff_bcm)))
                 else:
@@ -573,7 +582,10 @@ def esegui_confronto(fw, tester_per_sedia, delta_ore, cutoff_fw, C=COSTANTI, n_n
         ab = abbina(F, T, C["TOL_TEMPO_STRETTA_MIN"], tol_pt) if td and td.get("righe") is not None else None
         # pendenti forward della sedia
         P = sorted([p for p in pend if p["sedia"] == s["id"]], key=lambda x: x["t_piazz"])
-        risultati.append(dict(sedia=s, F=F, T=T, esclusi=esclusi, ab=ab, P=P, giorni=giorni, tester=td, note_t=note_t))
+        P_avvio = [p for p in P if p["t_piazz"].date() < viva]
+        P = [p for p in P if p["t_piazz"].date() >= viva]
+        risultati.append(dict(sedia=s, F=F, T=T, esclusi=esclusi, ab=ab, P=P, giorni=giorni, tester=td, note_t=note_t,
+                              F_avvio=F_avvio, P_avvio=P_avvio))
     return dict(risultati=risultati, manuali=manuali, note_fw=note_fw, giorni_tutti=giorni_tutti, cutoff_bcm=cutoff_bcm,
                 cutoff_fw=cutoff_fw, pendenti=pend, Fpos=Fpos)
 
@@ -725,6 +737,9 @@ def scrivi_report(conf, C, n_nullo, seed=20260930):
             W("    T_SOLO ts %s %s p=%s v=%.2f R=%s %s  (nessun gemello nel forward%s)" % (fmt_dt(t["t"]), t["dir"], _f(t["p"]), t["vol"], _f(t["R"]), t["tipo_u"],
               "; quel giorno il forward ha piazzato un pendente non riempito" if any(p["t_piazz"].date() == t["t"].date() and p["stato"] in ("expired", "canceled") for p in r["P"]) else ""))
             righe_coppie.append([s["id"], "T_SOLO", "", fmt_dt(t["t"]), "", "", "", _f(t["R"]), "", t["tipo_u"], ""])
+        if r["P_avvio"] or r["F_avvio"]:
+            W("  GIORNO DI AVVIO (prima del %s, fuori dal confronto): forward posizioni %d, pendenti: %s" % (FINESTRA_UFFICIALE_DA, len(r["F_avvio"]),
+              "; ".join("%s %s %s->%s" % (p["tipo"], _f(p["prezzo"]), p["t_piazz"].strftime("%m.%d %H:%M"), p["stato"]) for p in r["P_avvio"]) or "nessuno"))
         if r["P"]:
             W("  PENDENTI del forward per questa sedia (nel tester NON OSSERVABILI, il per-trade non ha i pendenti):")
             for p in r["P"]:
