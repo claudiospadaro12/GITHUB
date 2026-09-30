@@ -15,6 +15,8 @@
 //|  NON apre, NON modifica, NON chiude ordini. Non e' un EA.        |
 //|  Unico effetto sul terminale: SymbolSelect() aggiunge al Market  |
 //|  Watch i simboli della lista (serve per avere i prezzi).         |
+//|  Click: se sul grafico gira un EA il grafico NON cambia simbolo, |
+//|  si apre un grafico nuovo (ChartOpen) del simbolo cliccato.      |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
 #property version   "1.00"
@@ -67,6 +69,7 @@ void Lbl(const string name, const int x, const int y, const string txt, const co
       ObjectSetInteger(0, name, OBJPROP_ANCHOR, ANCHOR_LEFT_UPPER);
       ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
       ObjectSetInteger(0, name, OBJPROP_HIDDEN, true);
+      ObjectSetInteger(0, name, OBJPROP_ZORDER, 10);   // sopra lo sfondo: il click arriva all'etichetta
       ObjectSetString(0, name, OBJPROP_FONT, "Consolas");
       ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpFontSize);
      }
@@ -79,6 +82,7 @@ void Lbl(const string name, const int x, const int y, const string txt, const co
 //+------------------------------------------------------------------+
 int OnInit()
   {
+   gPrimed = false;   // anche dopo un cambio di simbolo: primo giro sempre muto
    gMain = -1;
    for(int t = 0; t < NTF; t++)
       if(gTf[t] == InpTfMain)
@@ -182,8 +186,18 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
    if(StringFind(sparam, PFX + "S_") != 0)
       return;
    string sym = ObjectGetString(0, sparam, OBJPROP_TEXT);
-   if(StringLen(sym) > 0 && SymbolInfoInteger(sym, SYMBOL_EXIST))
-      ChartSetSymbolPeriod(0, sym, _Period);
+   if(StringLen(sym) == 0 || !SymbolInfoInteger(sym, SYMBOL_EXIST))
+      return;
+   // Se su QUESTO grafico gira un EA, cambiargli simbolo lo reinizializzerebbe su un
+   // altro strumento (una sedia che passa a operare su un altro cross). In quel caso
+   // il grafico NON si tocca: si apre un grafico nuovo del simbolo cliccato.
+   if(StringLen(ChartGetString(0, CHART_EXPERT_NAME)) > 0)
+     {
+      if(ChartOpen(sym, _Period) == 0)
+         Print("ABTG_EMA200_Dashboard: EA sul grafico, non cambio simbolo; ChartOpen fallito per ", sym);
+      return;
+     }
+   ChartSetSymbolPeriod(0, sym, _Period);
   }
 
 //+------------------------------------------------------------------+
@@ -201,10 +215,14 @@ void Measure()
          gPct[k]  = EMPTY_VALUE;
          if(gHMa[k] == INVALID_HANDLE || gHAtr[k] == INVALID_HANDLE || px <= 0.0)
             continue;
+         // con meno barre del periodo la "EMA200" e' solo un riscaldamento: non si mostra
+         if(BarsCalculated(gHMa[k]) < InpEmaPeriod || BarsCalculated(gHAtr[k]) < InpAtrPeriod + 1)
+            continue;
          double ema[1], atr[1];
          if(CopyBuffer(gHMa[k], 0, 0, 1, ema) != 1)
             continue;
-         if(CopyBuffer(gHAtr[k], 0, 0, 1, atr) != 1)
+         // ATR della barra CHIUSA (shift 1): l'unita' di misura non oscilla a inizio barra
+         if(CopyBuffer(gHAtr[k], 0, 1, 1, atr) != 1)
             continue;
          if(atr[0] <= 0.0 || ema[0] <= 0.0 || ema[0] == EMPTY_VALUE || atr[0] == EMPTY_VALUE)
             continue;
@@ -276,6 +294,7 @@ void Refresh()
       ObjectSetInteger(0, bg, OBJPROP_BGCOLOR, C'18,22,30');
       ObjectSetInteger(0, bg, OBJPROP_COLOR, C'70,78,95');
       ObjectSetInteger(0, bg, OBJPROP_BACK, false);
+      ObjectSetInteger(0, bg, OBJPROP_ZORDER, 0);
      }
    ObjectSetInteger(0, bg, OBJPROP_XDISTANCE, InpX);
    ObjectSetInteger(0, bg, OBJPROP_YDISTANCE, InpY);
@@ -299,7 +318,7 @@ void Refresh()
             nNear++;
      }
    Lbl(PFX + "T", x0, y0,
-       StringFormat("EMA %d - distanza in ATR (e %% del prezzo) | ordine: %s | vicinissimi %d, vicini %d",
+       StringFormat("EMA%d | ordine %s | vicinissimi %d, vicini %d",
                     InpEmaPeriod, gTfName[gMain], nHot, nNear),
        C'230,230,230');
 
@@ -307,7 +326,7 @@ void Refresh()
    Lbl(PFX + "H_S", x0, yh, "Simbolo", C'150,170,210');
    for(int t = 0; t < NTF; t++)
       Lbl(PFX + "H_" + IntegerToString(t), x0 + gColSym + t * gColW, yh,
-          gTfName[t] + (t == gMain ? " *" : ""), C'150,170,210');
+          gTfName[t] + (t == gMain ? " *" : "") + "  ATR   %", C'150,170,210');
 
    for(int r = 0; r < gN; r++)
      {
