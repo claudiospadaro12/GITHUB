@@ -7,6 +7,15 @@
 
 ---
 
+## 🗓️ 30/09 ~13:30 — CHALLENGE FTMO 541452707 FINITA (comunicato da Claudio, screenshot mobile)
+- Claudio: **"Siamo fuori dalla challenge. Era difficile recuperare ed ho tentato il tutto per tutto con dei trade manuali ma niente."** Storico del 30/09 (mobile): GER40.cash sell 23,95 chiuso 10:03:09 **-1.535,91** (stop pieno 770411, gia' noto) + **3 trade manuali XAUUSD** 14:21-14:26: sell 5,00 **-572,05**, buy 5,00 **-301,47**, buy 2,00 **-125,91** (**-999,43** lordi; commissioni totali giornata -61,85). Il margine misurato prima di oggi verso la linea 72.000 era **997**: i tre trade manuali lo superano di poco (inferenza dai numeri, **da confermare sul pannello FTMO**: stato conto/DD massimo).
+- Attribuzione complessiva (aggiornare `report/FTMO_PRIMI_OTTO_GIORNI_2026-09-30.md`): oro manuale = -2.502,06 (prima) -999,43 (oggi) circa -3.501,49; flotta = -4.500,93. **La flotta da sola NON avrebbe superato la linea** (conti da rifare sul cronistorico finale).
+- **Non tocca la misura**: la riproduzione RFWD (`RIGA_ROUND_RFWD.txt`, SHA 919c2d73, PASS al terzo passaggio) resta valida e risponde ancora a "gli EA sono cambiati o e' campione corto?" sui giorni 22-30/09. Da lanciare sul PC di backtest quando Claudio e' davanti al PC.
+- Decisioni di Claudio ancora aperte: seconda challenge (dopo la misura, **sue** la scelta e i soldi); lotti (uniformi o dopo perdita); soglie EMA200 H1/H2/H3; orologio d'inverno entro 25/10.
+- Nuovi file oggi: `mql5/Indicators/ABTG_EMA200_Dashboard.mq5` (v2, gate PASS, 37016af6) e `ABTG_EMAs_MT.mq5` (558641af); `report/EMA200_RIMBALZO_STATO_DELLARTE_2026-09-30.md` (c7dfe7fc).
+
+---
+
 ## 🗓️ 29/09 sera — R246 INVERNO (casella d+1) LETTO, PASS strato 2 dopo un FAIL
 - Zip `ROUND_R246_INVERNO_2026-09-29` archiviato (`risultati_archivio/`), giudizio con `backtest_pipeline/r246_giudizio_d1.py`, referto `report/LETTURA_R246_INVERNO_2026-09-29.md` (corretto dal cancello: classe 919).
 - G1/G2 PASS su 6 file; S1 DAX/MaxMin VERDI, **Dow S1 ROSSO** (1 uscita 25/05/2026 23:05, Memorial Day). **Firma F1 di Claudio: sblocca SOLO S1** (`report/FIRME_2026-09-29.md`); il Dow resta SOSPESO per il G1 aperto di R246a/c (strade a/b/c in `REFERTO_R246` par. 1.5).
