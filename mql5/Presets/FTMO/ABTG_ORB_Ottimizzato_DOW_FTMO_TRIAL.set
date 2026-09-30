@@ -1,0 +1,109 @@
+; ==========================================================================
+; ABTG_ORB_Ottimizzato v1.04 -- "ORB DOW" -- PRESET PER LA FREE TRIAL FTMO (160.000 EUR)
+; Simbolo: US30.cash   Timeframe del grafico: M5   (solo LONG)
+; Generato il 30/09/2026. ASCII PURO (regola 17/08). NON usarlo su BCM.
+; ==========================================================================
+; BERSAGLIO ....: terminale MT5 NUOVO e DEDICATO della Free Trial FTMO
+;                 (es. C:\FTMO_TRIAL sul VPS VMI3047753). NON C:\FTMO (541452707),
+;                 NON 50503392, NON 50504263, NON 10105439, NON 50504400.
+; BASE .........: mql5/Presets/ABTG_ORB_Ottimizzato_U30USD_M5_770611_100K.set
+;                 = la cella che GIRA sul 100k 50504263 (foto .chr del 06/09):
+;                 range 15 min (14:30-14:45 server BCM), stop HALFRANGE
+;                 (InpSLMode=3), TP 1,5 x range, solo long, EMA200, trailing EMA9.
+;                 E' la cella del censimento ORB 29/09 riga 13: HALFRANGE
+;                 IS PF 1,250 (n 71) / OOS PF 1,674 (n 119), DD 7,89 / 9,76%
+;                 a rischio 1%, un solo regime.
+;                 TUTTI i valori sono copiati dal base, TAGLIA COMPRESA:
+;                 InpRiskPercent=0.3 (quello del 100k). *** IL RISCHIO PER
+;                 OPERAZIONE LO SCEGLIE CLAUDIO: qui non e' stato deciso. ***
+;                 Altri valori esistenti in repo per la stessa cella:
+;                 0.65 (conto_reale/...770611_REALE.set), 1.0 (sedie_piccolo/
+;                 recupero2/...), 2.00 (la taglia uniforme delle sedie FTMO).
+; COSA DIFFERISCE DAL BASE (6 righe, tutte dichiarate, NIENT'ALTRO):
+;   input                  BCM    FTMO   regola
+;   InpRangeStartHour      14     16     +2 (orologio FTMO = BCM + 2, come le
+;                                          altre sedie: rimappa_preset_ftmo.py,
+;                                          report/OROLOGIO_BCM_2026-09-24.md)
+;   InpRangeEndHour        14     16     +2   (i minuti 30 e 45 NON cambiano:
+;                                          range 16:30-16:45 server FTMO =
+;                                          15:30-15:45 ora italiana)
+;   InpEndHour             21     23     +2   (chiusura di fine giornata,
+;                                          21:00 BCM = 23:00 FTMO = 22:00 IT)
+;   InpMagic               770611 770621 libero nel repo (0 occorrenze); 770611
+;                                          resta del 100k e del reale
+;   InpComment             "ORB OTT" "ORB OTT FT"  solo etichetta
+;   InpAutoTest            (assente) true  = il default compilato: lo scrivo
+;                                          come fa il preset REALE, per non
+;                                          lasciare un default silenzioso. NON
+;                                          spegnerlo: stampa in Esperti che
+;                                          gira la v1.04 hedge-safe.
+; NON RIMAPPATI, per scelta dichiarata:
+;   InpPendingExpiryMin=600   e' una DURATA (minuti), non un'ora del giorno.
+;   InpRangeStartMin=30 e InpRangeEndMin=45 sono minuti dell'ora: invarianti per fuso.
+;   InpEntryPoints=10 x InpK=1.0 = 10 punti indice in PREZZO (r.614 del
+;   sorgente): non dipende dalle cifre del simbolo. InpSLBufferPts=0 e
+;   InpSlippagePts=0 sono spenti: l'unita' "punti" non entra in gioco.
+;   InpExecTF=5 (M5) e InpEma200Period=200: indicatori sul TF del grafico.
+; DA SAPERE:
+;   - il simbolo FTMO deve chiamarsi US30.cash (nome usato dai preset delle
+;     sedie 770202/771531 sul conto FTMO): controllarlo al login.
+;   - la cella e' stata misurata sul feed BCM (U30USD), non sul feed FTMO.
+;   - il giro d'ora di fine ottobre (DST europeo 25/10) rimette in gioco
+;     questo file come gli altri FTMO: vedi il pacchetto.
+;   - InpUsaGuardian=true: senza il Guardian 779001 sul terminale trial
+;     (InpStartBalance=160000) la guardia e' fail-open e non c'e' nessun cap C1.
+; ==========================================================================
+InpUsaGuardian=true
+InpRangeStartHour=16
+InpRangeStartMin=30
+InpRangeEndHour=16
+InpRangeEndMin=45
+InpEndHour=23
+InpEndMin=0
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=600
+InpEntryPoints=10.0
+InpK=1.0
+InpAllowLong=true
+InpAllowShort=false
+InpSLMode=3
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000.0
+InpTP_R=1.0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP1Pct=0.0
+InpBreakeven=true
+InpUseTrailEMA=true
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=false
+InpSLBufferPts=0.0
+InpUseCloseConfirm=false
+InpMinBodyPct=50.0
+InpUseEmaFilter=false
+InpUseEma200Filter=true
+InpEma200Period=200
+InpMinRangePct=0.0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpRiskPercent=0.3
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpComment=ORB OTT FT
+InpMagic=770621
+InpMaxSpread=0
+InpVerbose=true
+InpSlippagePts=0.0
+InpAutoTest=true

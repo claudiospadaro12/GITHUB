@@ -1,0 +1,84 @@
+; ==========================================================================
+; ABTG_Bulge v5.20 -- SOLO VIOLA -- PRESET PER LA FREE TRIAL FTMO (160.000 EUR)
+; Generato il 30/09/2026. ASCII PURO (regola 17/08). NON usarlo su BCM.
+; ==========================================================================
+; BERSAGLIO ....: terminale MT5 NUOVO e DEDICATO della Free Trial FTMO
+;                 (es. C:\FTMO_TRIAL sul VPS VMI3047753). NON C:\FTMO (541452707),
+;                 NON 50503392, NON 50504263, NON 10105439, NON 50504400.
+; BASE .........: mql5/Presets/sedie_piccolo/ABTG_Bulge_v520_piccolo_SOLO_VIOLA.set
+;                 (commit a3f358ce). TUTTI i valori sono copiati da quel file,
+;                 compresa la TAGLIA: Risk_Percent=0.8, Max_Trades=4, kill switch.
+;                 *** IL RISCHIO PER OPERAZIONE LO SCEGLIE CLAUDIO: qui non e'
+;                 stato deciso, e' il valore del preset base. ***
+; COSA DIFFERISCE DAL BASE, e NIENTE ALTRO (3 righe):
+;   InpMagic     772700 -> 772720   (772720 libero nel repo; 772700 resta del piccolo)
+;   InpComment   BULGE_V520 -> BULGE_V520_FT   (i commenti ordine diventano
+;                BULGE_V520_FT_VIOLA_L / _S: 21 caratteri, sotto il limite di 31)
+;   Symbols_List i 22 cross -> i 15 che NON hanno altre sedie sul piccolo BCM
+;                (scelta per evitare l'hedging fra conti, piano 30/09 opzione C):
+;                restano sul piccolo EURUSD, GBPUSD, AUDUSD, USDJPY, GBPJPY,
+;                GBPCAD, CHFJPY.
+;   Use_Blue=false c'e' GIA' nel base (SOLO_VIOLA): nessuna modifica.
+; GLI ORARI: nessun input orario va rimappato.
+;   News_Block_Hours="7,9,11,12,15,22" e' in ORE UTC (il sorgente usa TimeGMT(),
+;   r.1040-1042): invariante per fuso. In piu' Use_News_Filter=false: INERTE.
+;   Max_SL_PerDay / Max_Daily_Loss_Pct contano dalla mezzanotte del SERVER:
+;   su FTMO (UTC+3 estate) il giorno del kill switch parte alle 21:00 UTC,
+;   su BCM (UTC+1) alle 23:00 UTC. Non e' un input: e' un fatto da sapere.
+; DA CONTROLLARE AL LOGIN PRIMA DI ATTACCARE: i 15 nomi simboli della trial sono
+;   [NON MISURATO] (il solo forex letto su FTMO e' USDJPY, nome semplice).
+;   Un nome assente NON da' errore: il giornale stampa "[BULGE] Simbolo non
+;   trovato: XXX" e quel cross viene saltato in silenzio. Vedi il pacchetto.
+; GUARDIAN: InpUsaGuardian=true, ma se sul terminale trial NON gira il Guardian
+;   779001 (con InpStartBalance=160000) la guardia e' fail-open: nessun cap C1.
+; ==========================================================================
+BB_Period=20
+BB_Deviation=2.0
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+Bulge_Multi=1.1
+Lookback_Bars=20
+Use_Orange=false
+Use_Blue=false
+Use_Purple=true
+Use_Purple_PineReaction=false
+Signal_Bar_Offset=1
+Use_ATR_Filter=true
+ATR_MA_Len=20
+ATR_Max_Mult=1.8
+ATR_Min_Mult=0.5
+Use_ADX_Filter=false
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=true
+ADX_Apply_On_Purple=false
+ADX_Apply_On_Orange=false
+Use_News_Filter=false
+News_Block_Hours=7,9,11,12,15,22
+Enable_Partial_Close=false
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+Use_Kill_Switch=true
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+Risk_Mode=0
+Risk_Percent=0.8
+Total_Risk_Percent=2.0
+Max_Trades=4
+Manage_Manual_Orders=false
+Manual_SL_ATR_Mult=3.0
+Enable_BE_1R=false
+BE_At_R=1.0
+BE_Offset_Points=2
+Enable_Trailing_R=false
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+InpMagic=772720
+InpComment=BULGE_V520_FT
+Symbols_List=NZDUSD,USDCAD,USDCHF,EURGBP,EURNZD,GBPAUD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true

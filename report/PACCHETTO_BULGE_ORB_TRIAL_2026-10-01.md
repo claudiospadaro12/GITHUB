@@ -1,0 +1,167 @@
+# Pacchetto Bulge + ORB Dow sulla Free Trial FTMO (160.000 EUR)
+
+_Preparato la sera del 30/09/2026 per il gate Opus. **Niente e' stato lanciato, nessun EA sorgente/conto/VPS toccato, nessun rischio deciso.**_
+Etichette: **[MISURATO]** letto/calcolato da me su file o su un test in questa sessione · **[LETTO]** riportato da un documento del repo · **[DERIVATO]** calcolato da numeri scritti · **[NON MISURATO]** il dato non c'e'.
+
+## 0. Stato reale (aggiornato 30/09 22:57) e cosa consegno
+
+- **Strada A e' lo stato reale** [LETTO, P0 di Claudio]: la trial e' gia' loggata **dentro `C:\FTMO`** (processo 9236, `C:\FTMO\terminal64.exe`), login **`1514806751`**, server `FTMO-Demo`, conto Hedge, Algo Trading SPENTO, le 10 vecchie attaccate (770101, 770105, 770202, 770260, 771531, 770511, 770411, Guardian 779001, Exporter, SpreadLogger). **Strada B** (terminale dedicato, es. `C:\FTMO_TRIAL`) resta valida: lo stesso script la trova con le stesse serrature (§4).
+- **Consegna**: 2 preset nuovi + 1 script nuovo + questo file. `SCHIERA_FTMO.ps1` **NON e' stato modificato** (file nuovo e separato, come chiesto).
+
+| file | righe | SHA256 (byte del file come sta su GitHub) |
+|---|---:|---|
+| `mql5/Presets/FTMO/ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set` | 84 | `23ABE87893F602A2685681DB00735D97C20C67E82E4F7D0EE699DBABDD414DB5` |
+| `mql5/Presets/FTMO/ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set` | 109 | `2D9E3A9440DF7A30D677D22E35BE617A44E9F21885A76013D727CE949F942130` |
+| `backtest_pipeline/righe/SCHIERA_BULGE_ORB_TRIAL.ps1` | 453 `C189F90DDB49ACD96818E20E583ECD940DAAAC4D99D21E4B34805E15171F1553` |
+
+## 1. I sorgenti da copiare (pin, impronte)
+
+| file | commit pin | righe | SHA256 raw (= `Get-FileHash` del file scaricato) | impronta normalizzata dello script (CRLF/non-ASCII tolti) |
+|---|---|---:|---|---|
+| `ABTG_Bulge.mq5` (v5.20) | `c4426c53a3977ba99ab997ad3d3ceb426a1a4fce` (21/08; **e' anche HEAD**: nessun commit dopo) | 2234 | `ED4E88B1CFBA36AD81658935E8920FE31462AE3202DD61C9C50A039ACEF57BBD` | `6540A22C...F70A` |
+| `ABTG_ORB_Ottimizzato.mq5` (v1.04 hedge-safe) | `19312c8bb745e954c5456f9dba382416502d5bc6` (03/09) | 1463 | `C14D85DD889BFD66F94F23C64B0B15FEC2F09CAE6C03111518C92E369496FA44` | `19B596E3...BE3C` |
+| `ABTG_PausaGuardian.mqh` (include v1.20) | `26a185661c120de6fa0a33b79279595740e264e8` (19/08) | 398 | `83F19640CC21C0C9AB5AB6E7BF108F0190A12995E67FBA0F38D8C5A8A98DD5E2` | `D179846B...C8BC` |
+
+Perche' questi pin [MISURATO]:
+- **Include a v1.20, NON a HEAD**: e' lo stesso pin di `SCHIERA_FTMO.ps1` (impronta `D179846B...` identica al suo: la mia funzione di impronta riproduce anche il suo 398/`D179846B` e il 498/`A457F2CD` del Guardian d884f7e1, quindi e' la stessa misura). L'include a HEAD (2461 righe, commit "LAVORO IN CORSO -- tetto cluster C2 collegato") e' un'altra versione, diversa da quella su cui sono compilate le sedie FTMO: **non si usa**. Verificato **per simbolo**: tutto cio' che Bulge e ORB chiamano dell'include (`ABTG_GuardiaIngresso` con due argomenti, `ABTG_AutotestGuardia`) **esiste nel v1.20**. Compilare poi con MetaEditor resta l'unica prova vera [NON MISURATO: nessun MetaEditor qui].
+- **ORB a 19312c8b e non a HEAD (a66dcb07)**: la differenza (22 righe) e' solo una funzione `OptFrame_CsvField` nel ramo `OnTester` (CSV del tester, classe 883): **zero righe di trading** [MISURATO con `git diff`]. Ho preferito il file senza codice nuovo non compilato. Il fix hedge-safe (selezione per simbolo+magic) e' gia' in 19312c8b.
+- **Hedge-safe per la convivenza sul Dow** [MISURATO]: nel terminale ci sono 770202 (pin 9fca63d9) e 771531 (pin 26a18566). Nei due sorgenti ai pin non resta nessun `PositionSelect(_Symbol)` (grep: zero) e la selezione passa da `PositionsTotal()`/`PositionGetTicket` (770202 lo dichiara a r.1948); l'ORB v1.04 fa lo stesso per simbolo+magic. Atteso: l'ORB sullo stesso `US30.cash` **non acceca** le altre due [letto, non provato in campo]. Attenzione: il binario ORB in campo sul 100k era **v1.02** (11/09, non hedge-safe) — i numeri forward dell'ORB sono di quel binario, non di questo.
+
+## 2. I due preset
+
+**Regola unica: stessi valori dei preset base; il rischio non l'ho deciso.** Differenze **dichiarate riga per riga** dentro l'intestazione di ogni `.set`; qui il riassunto.
+
+**Bulge** — base `mql5/Presets/sedie_piccolo/ABTG_Bulge_v520_piccolo_SOLO_VIOLA.set` (a3f358ce, = preset vivo ADX_spento con solo `Use_Blue=false`). Differisce in **3 righe** [MISURATO con `diff`]: `InpMagic` 772700→**772720** · `InpComment` BULGE_V520→**BULGE_V520_FT** (commenti ordine `BULGE_V520_FT_VIOLA_L/S`, 21 caratteri < 31) · `Symbols_List` 22→**15 cross** (quelli senza altre sedie sul piccolo: `NZDUSD,USDCAD,USDCHF,EURGBP,EURNZD,GBPAUD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF`). Taglia invariata: `Risk_Percent=0.8`, `Max_Trades=4`, `Risk_Mode=0`, kill switch 4 SL/3 consecutivi/-2,0%, `InpUsaGuardian=true`.
+- Magic 772720: **libero** [MISURATO: `git grep -w`: l'unico riscontro e' una cifra dentro `regime_r59/COST_GBPCAD_LATERALE_r59.csv`, dato numerico, nessuna sedia].
+- Orari: **nessun input orario da rimappare**. `News_Block_Hours` e' in **ore UTC** (il sorgente usa `TimeGMT()`, r.1040) e `Use_News_Filter=false`. Fatto da sapere, non un input: il kill switch conta i giorni dalla mezzanotte del server (FTMO UTC+3 estate = 21:00 UTC; BCM UTC+1 = 23:00 UTC).
+- **Nomi simboli FTMO dei 15 cross: [NON MISURATO]** (il solo forex letto su FTMO e' `USDJPY`, nome semplice). Un nome assente **non da' errore**: il Giornale scrive `[BULGE] Simbolo non trovato: XXX` e il cross viene saltato in silenzio.
+
+**ORB Dow** — base `mql5/Presets/ABTG_ORB_Ottimizzato_U30USD_M5_770611_100K.set` (la cella che GIRA sul 100k 50504263, foto `.chr` del 06/09). E' la cella del censimento ORB 29/09 riga 13 [LETTO]: HALFRANGE, range 15 min, solo long, EMA200, trailing EMA9, IS PF 1,250 (n 71) / OOS PF 1,674 (n 119), DD 7,89 / 9,76% **a rischio 1%**; variante OPPRANGE OOS 1,68 · n 119 · DD 4,30% (non applicata: e' la firma "A4" ancora aperta, `InpSLMode` resta **3**). Differisce in **6 righe**:
+
+| input | BCM base | FTMO | regola (la stessa delle altre sedie FTMO, `rimappa_preset_ftmo.py`: ogni input **ora-del-giorno** +2; FTMO = BCM + 2) |
+|---|---:|---:|---|
+| `InpRangeStartHour` | 14 | **16** | +2 (range 14:30-14:45 BCM = 15:30-15:45 IT = **16:30-16:45 FTMO**) |
+| `InpRangeEndHour` | 14 | **16** | +2 (i minuti 30 e 45 **non cambiano**) |
+| `InpEndHour` | 21 | **23** | +2 (chiusura di fine giornata; 23:00 FTMO = 22:00 IT, prima della chiusura venerdi' 23:59) |
+| `InpMagic` | 770611 | **770621** | libero [MISURATO: 0 occorrenze; 770611 resta di 100k e reale; 7706xx e' la famiglia ORB] |
+| `InpComment` | `ORB OTT` | `ORB OTT FT` | solo etichetta |
+| `InpAutoTest` | assente | `true` | = default compilato, scritto come fa il preset REALE (niente default silenzioso). Non spegnerlo: e' la riga in Esperti che prova la v1.04 |
+
+**Non rimappati, per scelta dichiarata**: `InpPendingExpiryMin=600` (durata, non ora), i minuti, `InpEntryPoints=10 x InpK=1.0` (10 punti indice **in prezzo**, r.614: indipendente dalle cifre del simbolo), `InpSLBufferPts=0`/`InpSlippagePts=0` (spenti), `InpExecTF=5`/EMA200 sul TF del grafico (M5: griglia identica fra i due server).
+- **Guardian nell'ORB: SI'** [MISURATO]: `InpUsaGuardian` esiste (r.118) e `ABTG_GuardiaIngresso(...)` e' chiamato a r.444 e r.603. Quindi la sedia ha il cap C1 **se** il Guardian gira (§5).
+- Simbolo: **`US30.cash`** (e' il nome che i preset FTMO di 770202/771531 prevedono: `InpCorrSymbol=US500.cash` nello stesso formato, `docs/ABTG_StopManuale_ISTRUZIONI.md` r.137 lo riporta con 2 cifre). Da riconfermare al login.
+- **Il rischio `InpRiskPercent=0.3`** e' quello del base (100k, "mezzo peso" del 09/08). Esistono nel repo per la stessa cella 0,65 (REALE), 1,0 (recupero2/piccolo) e 2,00 (taglia uniforme FTMO del 20/09). **Non ho scelto.** DD OOS **lineare** (convenzione di casa, **[DERIVATO] non misurato** a quelle taglie): 0,3% → ~2,9% · 0,65% → ~6,3% · 1,0% → 9,76% · 2,0% → ~19,5% (**da solo oltre il muro 10%**).
+
+## 3. Controlli meccanici fatti [MISURATO]
+
+- **Nomi input = nomi nel sorgente** (script Python: estrae le dichiarazioni `input` dal `.mq5` al pin, esclude `input group`): Bulge **50/50**, nessun nome in piu' o in meno, nessun duplicato (anche il preset base SOLO_VIOLA: 50/50); ORB **54/54**, stesso esito. Attesa scritta prima: sorgente ORB = 54 input (lo dice gia' il preset 100k: "sorgente dichiara 54, .chr ne porta 53").
+- **`diff` preset nuovo contro base** (righe non-commento): Bulge = esattamente le 3 righe sopra; ORB = esattamente le 6 sopra.
+- `.set` e `.ps1` ASCII puro (0 byte fuori 0x09/0x0A/0x20-0x7E).
+- `controlla_riga.py --ps1`: **0 difetti meccanici**, parser PowerShell vero 0 errori; 5 rilievi [457] sono i nomi dei conti **nella lista nera** (uso voluto, letti a mano).
+- `controlla_prova.py`: **non applicabile** (riguarda i file prova dei round; qui non ce n'e').
+- **Prova dello script su albero finto** (PowerShell 7 su Linux, `APPDATA` finto, sorgenti da `file://`, i percorsi con `\` adattati in una copia di prova): **8 scenari**, attesa scritta prima di ogni scenario:
+  1. giornale `541452707` poi `1514806751` (ordine giusto) → CONFERMATA, 3 sorgenti + 2 preset copiati e **riletti con le impronte congelate in Python**: le impronte del PowerShell coincidono con quelle calcolate da Python (due implementazioni indipendenti) ✔;
+  2. ordine **invertito** (trial poi challenge) → RIFIUTA, nulla scritto ✔;
+  3. **due** candidate con lo stesso conto → RIFIUTA ✔;
+  4. include gia' presente e **diverso** → RIFIUTA ("sette sedie compilate contro di lui"), nulla scritto ✔;
+  5. secondo lancio → tutto `GIA GIUSTO/IDENTICO`; preset **modificato a mano** → NON sovrascritto, repo accanto come `_DAL_REPO.set` ✔;
+  6. cartella di casa (hash 50504263, origin BCM) col login trial nel giornale → ESCLUSA prima di leggere il giornale ✔;
+  7. preset manomesso sul "raw" (rischio 0,3 → 3,0) → RIFIUTA per impronta, nulla scritto ✔ (**questo e' il controesempio che il solo controllo di merito sul magic NON avrebbe preso**);
+  8. `-ContoAtteso 541452707` (challenge) e `50503392` (casa) → RIFIUTATI ✔.
+- **Le serrature accettano `C:\FTMO` ora che il giornale nomina la trial?** [MISURATO sul codice e sulla prova 1]: SI' per il mio script (hash `46C9F8E9...` non e' piu' in lista nera, serratura 5 = l'ultima comparsa di `1514806751` deve venire DOPO l'ultima di `541452707`). Anche il vecchio `SCHIERA_FTMO.ps1` la accetterebbe (la sua lista nera ha 7 hash e non ha `46C9...`), ma **senza** la serratura sull'ordine: per questo non l'ho riusato. **[NON MISURATO]**: il formato esatto delle righe di login nei giornali veri del VPS; la serratura 5 cerca solo il numero di conto, non la frase. Se un EA stampasse `541452707` dopo il login trial (es. un nome di variabile globale del Guardian), la riga **rifiuta** (chiude sul lato sicuro) e lo stampa.
+
+## 4. COME COPIARE (il gate decide quale)
+
+### 4.1 Riga di copia (DRAFT: NON e' da inviare prima del PASS; `<COMMIT>` si riempie dopo il commit del pacchetto)
+
+> # 🖥️ **BERSAGLIO: finestra PowerShell sul VPS VMI3047753.** Nessun MT5 da aprire o chiudere. Scrive SOLO nella cartella dati del terminale `C:\FTMO` (login trial `1514806751`): **NON** tocca 50503392 (`BCM Markets MT5 Terminal`), 50504263 (`...-V3`), 10105439 (`C:\BCM_Reale`), 50504400 (`C:\MT5_Backtest`), 50503635 (`C:\MT5_MANUALE`), Pepperstone, Tickmill. Non compila, non attacca EA, non accende Algo Trading.
+
+```powershell
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    $pin='<COMMIT>'; $conto='1514806751'; $p="$env:USERPROFILE\SCHIERA_BULGE_ORB_TRIAL.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/SCHIERA_BULGE_ORB_TRIAL.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_BULGE_ORB_TRIAL_v1' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore.' };
+    $global:LASTEXITCODE = 0; & $p -ContoAtteso $conto -Pin $pin;
+    if($LASTEXITCODE -ne 0){ Write-Host ('FERMATO (uscita ' + $LASTEXITCODE + '): NON premere F7. Manda tutto l output qui sopra.') -ForegroundColor Red }
+    else { Write-Host 'FATTO (uscita 0). Sul Desktop: cartella SCHIERA_TRIAL_<data> e lo zip con referto e file scaricati.' -ForegroundColor Green } }
+```
+
+- Prima, **solo lettura**, per fissare il bersaglio come **fatto stampato** (regola dei terminali multipli): `Get-Process terminal64 | Select-Object Id, MainWindowTitle, Path` — deve comparire la riga `C:\FTMO\terminal64.exe` con titolo che inizia per `1514806751 - FTMO-Demo`. Se non compare, **non si lancia**.
+- Con `-SoloDiagnosi` in coda la stessa riga fa la scoperta e stampa cosa copierebbe senza scrivere niente.
+- Dura pochi secondi. Risultato sul Desktop del VPS: `SCHIERA_TRIAL_<data>\` + `.zip` (referto e file scaricati).
+
+### 4.2 Alternativa manuale minima (se il gate boccia lo script)
+**Bersaglio: finestra PowerShell sul VPS** (legge/scrive solo dentro la cartella dati di `C:\FTMO`). Cartella dati censita da CODA_01 il 30/09: `46C9F8E9FF0C747B2B5E09BCC13D5237`.
+```powershell
+$pin='<COMMIT>'; $d="$env:APPDATA\MetaQuotes\Terminal\46C9F8E9FF0C747B2B5E09BCC13D5237"; (Get-Content "$d\origin.txt") ; Select-String -Path "$d\logs\*.log" -Pattern '1514806751' | Select-Object -Last 2
+# origin.txt deve dire C:\FTMO e il giornale nominare 1514806751. Se no: STOP.
+$u='https://raw.githubusercontent.com/claudiospadaro12/GITHUB'; $t="$env:USERPROFILE\Desktop\TRIAL_SCARICATI"; New-Item -ItemType Directory -Force $t | Out-Null
+irm "$u/c4426c53a3977ba99ab997ad3d3ceb426a1a4fce/mql5/Experts/ABTG_Bulge.mq5" -OutFile "$t\ABTG_Bulge.mq5"
+irm "$u/19312c8bb745e954c5456f9dba382416502d5bc6/mql5/Experts/ABTG_ORB_Ottimizzato.mq5" -OutFile "$t\ABTG_ORB_Ottimizzato.mq5"
+irm "$u/26a185661c120de6fa0a33b79279595740e264e8/mql5/Include/ABTG_PausaGuardian.mqh" -OutFile "$t\ABTG_PausaGuardian.mqh"
+irm "$u/$pin/mql5/Presets/FTMO/ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set" -OutFile "$t\ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set"
+irm "$u/$pin/mql5/Presets/FTMO/ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set" -OutFile "$t\ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set"
+Get-ChildItem $t | Get-FileHash -Algorithm SHA256 | Select-Object Hash, @{n='File';e={Split-Path $_.Path -Leaf}}
+```
+Confronta con le tabelle §0 e §1: **devono coincidere TUTTE e cinque**, altrimenti non si copia niente. Poi: i due `.mq5` in `...\MQL5\Experts\`, i due `.set` in `...\MQL5\Presets\`; **`ABTG_PausaGuardian.mqh` solo se manca** in `...\MQL5\Include\` o ha lo SHA `83F19640...` (se c'e' ed e' diverso: STOP, non si sovrascrive, e' compilato dentro sette sedie). Poi **F7 (MetaEditor) su ciascun `.mq5`: 0 errori**. Non si compilano altri file.
+
+### 4.3 Strada B (terminale dedicato, es. `C:\FTMO_TRIAL`)
+Stessa riga 4.1: la scoperta trova la cartella con le stesse serrature; se l'hash non e' `46C9...` lo script stampa "strada B, controlla che sia quello che credi" e prosegue. In B **non** c'e' il problema delle 10 vecchie sedie attaccate col Guardian a 80000, e il TradeExporter parte pulito con un `InpFile` proprio.
+
+## 5. ATTACCARE I DUE EA (a mano, Claudio) — bersaglio: terminale MT5 `C:\FTMO`, login 1514806751
+
+Tutte le operazioni sono **dentro MT5 `C:\FTMO`** (titolo `1514806751 - FTMO-Demo ...`; se la barra del titolo dice `541452707`, **si ferma tutto**). Nella finestra sono **gia'** occupati 10 grafici (un EA per grafico): Guardian su `NZDJPY H1`, Exporter su `NZDUSD`, SpreadLogger su `US500.cash`, le sette sedie su GER40.cash / US30.cash / US100.cash. Quindi **due grafici NUOVI**, non si ri-usa nessuno dei dieci.
+
+**Prima di toccare i grafici (Algo Trading resta SPENTO):**
+1. `Ctrl+U` (Simboli) → cerca uno a uno i 15 nomi del Bulge e `US30.cash`: **devono esistere con quel nome esatto**. Quelli assenti: si segnano, e si decide (il Bulge li salta da solo, ma sono cross persi). Controlla anche le **cifre** di `US30.cash` (attese 2): [NON MISURATO sulla trial].
+2. Orologio: l'ultima candela M1 di un simbolo aperto deve essere **ora italiana + 1** (estate). **[NON MISURATO sulla trial]** (l'ultima misura, 28/08 su una trial precedente, dava +1). Se e' diverso, **i due `.set` sono sbagliati** e non si accende niente. Lo script `ABTG_PrevoloFTMO_Specifiche` misura saldo, valuta, leva, `DeltaServerGMT`, `VOLUME_MAX`.
+3. **Prerequisito NON coperto da questo pacchetto**: Guardian 779001 con **`InpStartBalance=160000`** (nel `.chr` e' 80000) e profilo salvato **prima** di accendere Algo. Con 80000 su 160.000 il pavimento totale e' a 72.560 (-54,6% del conto: nessuna protezione) e il giornaliero scatta a 3.600 = 2,25% (troppo presto) [LETTO, `PIANO_FREE_TRIAL` §1]. Senza il Guardian funzionante **Bulge e ORB sono fail-open** (nessuna pausa B1, nessun cap C1).
+
+**Grafico 1 — ORB Dow:** `File > Nuovo grafico > US30.cash`, periodo **M5**. Trascina `ABTG_ORB_Ottimizzato` sul grafico (Navigator > Expert Advisors). Scheda **Input > Carica** → `ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set`. **Prima di premere OK leggi** (e se non coincide, Annulla): `InpMagic = 770621` · `InpComment = ORB OTT FT` · `InpRangeStartHour = 16` · `InpRangeStartMin = 30` · `InpRangeEndHour = 16` · `InpRangeEndMin = 45` · `InpEndHour = 23` · `InpAllowLong = true` · `InpAllowShort = false` · `InpSLMode = 3` · `InpRiskPercent` = il numero che Claudio ha scelto · `InpUsaGuardian = true` · `InpAutoTest = true`. Scheda **Comune**: *Consenti trading algoritmico* spuntato. OK. Sul grafico deve comparire la faccina 🙂.
+**Grafico 2 — Bulge:** `File > Nuovo grafico > USDCAD`, periodo **H1** (un simbolo liquido della lista; il Bulge opera su tutti e 15 da qualunque grafico, ma agisce sui tick del simbolo del grafico: non un cross illiquido e **non** `NZDJPY`, che e' gia' del Guardian). Trascina `ABTG_Bulge`. **Input > Carica** → `ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set`. **Prima di OK**: `InpMagic = 772720` · `InpComment = BULGE_V520_FT` · `Use_Blue = false` · `Use_Purple = true` · `Use_Orange = false` · `Risk_Percent` = il numero scelto da Claudio · `Max_Trades = 4` · `Symbols_List` = i 15 (ultimo `CADCHF`, **senza** `EURUSD`, `GBPUSD`, `AUDUSD`, `USDJPY`, `GBPJPY`, `GBPCAD`, `CHFJPY`) · `InpUsaGuardian = true`. Comune: trading algoritmico spuntato. OK.
+**Dopo:** scheda **Esperti**: ORB → la riga di autotest `ORB ...` "Nucleo di selezione hedge-safe VERIFICATO a tavolino"; Bulge → la riga di avvio con magic 772720 e **nessuna** `[BULGE] Simbolo non trovato`. (Ricorda: le schede Esperti/Giornale sono in **ora locale del PC**, il grafico in ora server.) Poi **salvare il profilo** (`File > Profili > Salva come...` con lo stesso nome del profilo attivo, `Default`) **prima** di accendere Algo: senza, un riavvio del VPS perde i due grafici nuovi. **Algo Trading si accende UNA volta sola**, dopo il Guardian a 160000 e il profilo salvato. Poi i tre controlli post-riavvio di sempre: terminale connesso · sedie attaccate (faccina) · Algo Trading **verde**.
+
+## 6. L'ARITMETICA DEL CAP (decisione di rischio di Claudio: qui NON si tocca)
+
+**Cosa c'e' in campo e cosa NON c'e'** [LETTO preset `ABTG_Guardian_FTMO_2Step.set`, e dati del gate]: Guardian v1.12; `InpMaxOpenRiskPct=4.00` (C1, `InpRiskMode=0`: rischio misurato ingresso→SL), pausa giornaliera `InpDailyPausePct=3.5`, emergenza giorno `InpDailyLossPct=4.5`, totale `InpTotalDDPct=9.3`, `InpAction=0` (chiude tutto). **Come morde il C1** [dal gate, classe 1003]: la bandiera si alza **solo** se il rischio aperto **gia'** e' ≥ 4,00%; **nessun EA somma il rischio del nuovo ingresso** prima di entrare. Quindi **non e' un tetto a 4,00: e' "dopo 4,00 non si entra piu'"** — con rischio aperto 3,99% un nuovo ingresso passa intero.
+
+Unita' (su 160.000 EUR, rischio sul saldo corrente, stop pieni): sedia indice **2,00% = 3.200 EUR** · Bulge **0,80% = 1.280 EUR** ×4 = **3,2% = 5.120** · ORB al suo preset **0,30% = 480 EUR** (una posizione al giorno).
+
+| sequenza di ingressi (ogni ingresso passa se il rischio aperto **prima** e' < 4,00) | rischio aperto finale | EUR | cosa lo ferma |
+|---|---:|---:|---|
+| Bulge 4 posizioni da solo | 3,2% | 5.120 | `Max_Trades=4` (per magic, su tutti i simboli) — il C1 **non** scatta |
+| Bulge 4 + **1** sedia indice | **5,2%** | 8.320 | il C1 (ora 5,2 ≥ 4,00): **da qui** blocca tutti. **Ma** l'indice e' entrato a 3,2 |
+| Bulge 4 + ORB + 1 indice | **5,5%** | 8.800 | idem (3,5 < 4,00 al momento dell'indice) |
+| **2** indici (nominale 4,00%) | 4,0% → **blocca il Bulge** | 6.400 | C1 **se** la somma e' ≥ 4,00; con lotti arrotondati **per difetto** ogni 2,00% vale ~1,97-1,99 e la somma puo' stare **sotto** 4,00 → il terzo ingresso passa |
+| 2 indici a ~3,95% + 1 indice | fino a **~6,0%** | 9.600 | massimo raggiungibile per un ingresso alla volta (4,00 − ε + 2,00) |
+| ingressi nello **stesso secondo** di timer | oltre | | il C1 si legge ogni secondo: due ingressi simultanei non se ne accorgono |
+
+**Quale limite vale [NON MISURATO per la trial]**: sul 2-Step il limite giornaliero e' 5% dell'iniziale = **8.000 EUR** su 160.000. **5,2-6,0% = 8.320-9.600 EUR lo supera** se tutte le posizioni chiudono a SL insieme. La rete che resta e' **l'emergenza del Guardian al 4,5% (7.200 EUR)** che chiude tutto, ma agisce **dopo** la perdita (equity) e **non chiude attraverso un gap** [LETTO preset]: con stop piazzati su piu' posizioni che scattano insieme la perdita puo' superare il 4,5% prima del giro di timer. I numeri sono ragioneria pura (senza slippage/gap/commissioni) [DERIVATO].
+
+**Chi blocca cosa, in una riga ciascuno:** *Bulge*: `Max_Trades=4` · una posizione per simbolo-segnale · kill switch (4 SL nel giorno, 3 consecutivi, -2,0% di P/L chiuso: ferma i nuovi ingressi del giorno, **non chiude** le aperte). *ORB*: una posizione al giorno (`InpOneTradePerDay`), solo long. *Guardian*: C1 (condiviso da tutti gli EA che leggono la guardia: **anche il Bulge viene bloccato dalle sedie indice e viceversa**), pausa 3,5%, emergenza 4,5%/9,3% che chiude tutto. **Effetto da non dimenticare**: due indici aperti a 2,00% consumano tutto il budget di 4,00 e **spengono il Bulge** per quelle ore; il Bulge misurato al piccolo gira **senza** guardia di cluster, quindi la sua frequenza sulla trial sara' **piu' bassa** di quella del piccolo [NON MISURATO di quanto].
+
+**Correlazione sul Dow — il C1 e' il solo freno** [MISURATO sul preset e sul codice]: ORB Dow **long** (range 16:30-16:45) + **770202 Dow Apertura long** (apre alle 16:30, range 35') + **771531 EMA200 Dow** (H1, long e short, stessa istanza `US30.cash`) sono **lo stesso strumento e la stessa apertura**. Il tetto per cluster (C2) e' **spento in quattro modi** (default 0 · nessun preset lo valorizza · il binario in campo non ha la manopola · nessun EA lo legge) [LETTO, CLAUDE.md 12/09]: **non esiste nessun limite per strumento**. Esposizione sul solo `US30.cash` raggiungibile: ORB 0,3 + 770202 2,0 + 771531 2,0 = **4,3%** (6.880 EUR) in un colpo contro un gap avverso, e 770511 (SuperWave Dow, 2,00%) parte solo se al suo ingresso il rischio aperto e' < 4,00. Se 771531 apre anche il lato short mentre l'ORB e' long, l'hedge **dentro lo stesso conto e' consentito** [LETTO, supporto FTMO 24-29/09 punto 6], ma il C1 conta **tutte e due** le gambe come rischio aperto.
+
+## 7. NON MISURATO e decisioni che restano a CLAUDIO
+
+**Non misurato (nulla di questo e' stato riempito):**
+1. nomi dei 15 cross e di `US30.cash` sulla trial; cifre del simbolo; `VOLUME_MAX`, leva, margine della trial; regole della trial (Max Loss, Daily Loss, statico/trailing, Standard/Swing);
+2. orologio del server della trial (+2 rispetto a BCM, non verificato) e cosa succede al **cambio d'ora del 25/10** (DST europeo; BCM e FTMO cambiano insieme? **non verificato**: i due `.set` hanno una scadenza);
+3. che `ABTG_Bulge.mq5` a c4426c53 e `ABTG_ORB_Ottimizzato.mq5` a 19312c8b **compilino** contro l'include v1.20: verificato per simboli, **non compilato** (serve MetaEditor);
+4. merito: **Bulge** — nessun IS/OOS, 268 operazioni con rischio 3% e dati al 40% (il dichiarato del sorgente); R92b non chiuso; sul piccolo 9 chiuse il 30/09 PF 1,33 = campione minuscolo [LETTO]. **ORB** — n 71/119 in **un solo regime**, il certificato di morte a 5 punti **non e' pieno** (TF mai cambiato: `InpExecTF=M5` in tutte le passate; gemelli provati **negativi**: NASUSD 0/4, D30EUR altra ricetta morta), quindi il verdetto giusto e' **"non ancora misurato"**, non "morto"; forward sul 100k **3 vinte su 15, -295,58** (binario v1.02), fuori dalla rosa il 18/09 e sospesa il 24/09 [LETTO, censimento 29/09]. Sulla trial si misura la **meccanica** (fill, orari, lotto reale, Guardian), **non** il merito;
+5. quanto il C1 tagli la frequenza del Bulge; se i pendenti dell'ORB contano nel rischio aperto del Guardian;
+6. la riga di login nel giornale (formato) e se l'ordine delle comparse e' sempre leggibile (§3).
+
+**Decisioni di Claudio:**
+1. **Rischio per operazione** di **Bulge** (preset 0,80%) e di **ORB Dow** (preset 0,3%; alternative in repo 0,65 / 1,0 / 2,00; DD lineare a fianco in §2). Nota: le sette sedie sono a 2,00% uniforme "perche' FTMO vieta le size erratiche" (firma 20/09): 0,3% e 0,8% accanto a 2,00% e' una diversita' di taglia da confermare con la regola del supporto, non da assumere.
+2. **ORB Dow si', no, o dopo**: l'ORB e' fuori rosa dal 18/09 e sospeso dal 24/09; metterlo sulla trial e' una scelta di "prova meccanica", non di merito. Variante `InpSLMode=0` (OPPRANGE, DD OOS 4,30% contro 9,76%) e' la firma "A4" ancora aperta: il `.set` resta a 3.
+3. **Bulge sul piccolo BCM 50503392**: il piano (opzione C) funziona **solo se** il Bulge del piccolo smette di operare i 15 cross della trial. Oggi il piccolo ha `Symbols_List` a 22 cross (inclusi i 15): o **si riduce sul piccolo a 7** (`EURUSD,GBPUSD,AUDUSD,USDJPY,GBPJPY,GBPCAD,CHFJPY`) o **si tiene in pausa**; altrimenti Bulge-piccolo e Bulge-trial aprono gli stessi cross su due conti (segnali quasi identici: non campioni indipendenti, e coppie opposte possibili per le candele H1 leggermente diverse ai bordi di BB/ATR/ADX). Non e' nel perimetro di questo pacchetto e **non l'ho toccato**.
+4. **Guardian `InpStartBalance=160000` e salvataggio del profilo** prima di accendere Algo (§5): e' un parametro di rischio.
+5. **TradeExporter** (Common\Files\ABTG_Trades_FTMO.csv): l'Exporter esporta a `OnInit`, a `OnDeinit` e ogni 30 min e **riscrive** il file: al login trial **quel file contiene ora lo storico della trial (dal 2026), non piu' quello di 541452707** [DERIVATO dal sorgente, **non verificato sul disco**: controllare data e righe del file]. L'archivio di chiusura della challenge e' **salvo in repo** (`data/statements/FTMO_541452707_cronistorico_2026-09-30.xlsx` e cartella `FTMO_541452707_chiusura_2026-09-30/`). Scelta: lasciarlo cosi' (il file ora descrive la trial, ed e' coerente con `pubblica_trades.ps1`) **oppure** rinominare `InpFile` a `ABTG_Trades_FTMO_TRIAL.csv` (e di conseguenza `-CsvNameFtmo` di `pubblica_trades.ps1`). Il danno gia' fatto non si recupera dal CSV.
+6. Risposta del supporto FTMO su Free Trial e hedging (domanda pronta in `PIANO_FREE_TRIAL_FTMO` §3) e la data del **25/10**.
+
+## 8. Cosa NON ho fatto
+Non ho lanciato niente, non ho toccato `C:\FTMO`, i conti, i sorgenti degli EA, `SCHIERA_FTMO.ps1` ne' il Guardian; non ho scelto nessun rischio; non ho scritto a Claudio. Il commit contiene **solo** i 4 file nominati sopra.
+
+## 9. Impronta finale dello script
+`backtest_pipeline/righe/SCHIERA_BULGE_ORB_TRIAL.ps1` — SHA256 al momento del commit: `C189F90DDB49ACD96818E20E583ECD940DAAAC4D99D21E4B34805E15171F1553`
