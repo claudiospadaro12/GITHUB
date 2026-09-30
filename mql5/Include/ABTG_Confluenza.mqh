@@ -77,10 +77,17 @@
 //|  volume 1..120, EMA 1..5000, lookback 0..100) perche' lo storico  |
 //|  e' un anello di 128 barre (le EMA sono ricorsive, non usano      |
 //|  l'anello oltre la barra precedente).                             |
-//|  Il Supertrend e' path-dipendente: due alimentazioni con partenza |
-//|  diversa (es. storico intero vs ultime 600 barre) convergono ma   |
-//|  non sono garantite identiche nelle PRIME barre: per questo i     |
-//|  segnali partono solo dopo pWarm barre (>=120) dalla partenza.    |
+//|  CONVERGENZA (classe 950): EMA, ATR di Wilder e bande del         |
+//|  Supertrend sono ricorsivi, quindi lo stato dipende dalla barra   |
+//|  di PARTENZA. Due alimentazioni con partenza diversa (storico     |
+//|  intero vs ultime N barre) danno lo STESSO stato solo quando il   |
+//|  peso della partenza, dec^N con dec = max(1 - alpha EMA lenta,     |
+//|  1 - 1/periodo ATR di Wilder), e' sotto la precisione del double  |
+//|  (1e-17): la LUNGHEZZA minima della finestra la dettano i periodi |
+//|  (default ~400 barre, EMA 50 / ATR 30 ~1360) e la deve calcolare  |
+//|  CHI alimenta (dashboard: gBars = ceil(ln 1e-17 / ln dec) + pWarm).|
+//|  pWarm (>=120) NON protegge da questo: protegge solo l'INIZIO della |
+//|  finestra (nessun segnale finche' medie e bande non sono pronte).  |
 //|                                                                   |
 //|  Installazione: copia in MQL5\Include\ (NON in Indicators).       |
 //+------------------------------------------------------------------+

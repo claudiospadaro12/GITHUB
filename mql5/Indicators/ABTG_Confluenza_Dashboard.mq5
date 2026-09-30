@@ -10,7 +10,7 @@
 //|                                                                   |
 //|  IDENTITA' CON L'INDICATORE: la logica sta in UN SOLO posto,       |
 //|  MQL5\Include\ABTG_Confluenza.mqh (struct SConfl). La dashboard   |
-//|  la alimenta con le ultime InpBars barre CHIUSE (CopyRates) e     |
+//|  la alimenta con le ultime gBars barre CHIUSE (CopyRates) e       |
 //|  legge lo stato dell'ultima barra chiusa. Nessuna formula          |
 //|  duplicata qui dentro. Gli input di default sono le stesse         |
 //|  macro ABTGC_D_* dell'indicatore: se cambi un parametro           |
@@ -46,11 +46,14 @@
 //|  CARICO: a regime ZERO CopyRates per giro del timer (ogni giro    |
 //|  controlla solo iTime della barra chiusa di ogni cella: 1 iTime    |
 //|  per simbolo x TF). Quando la barra chiusa di una cella cambia:    |
-//|  1 CopyRates di InpBars barre (default 600) + ~600 Feed. Caso      |
-//|  peggiore (chiusura di H4 con M5+M15+H1+H4 insieme): 4 x simboli   |
-//|  CopyRates, una tantum. Con 30 simboli x 4 TF a regime: ~120       |
-//|  iTime ogni 2 s. Serve almeno pWarm+3 barre di storico per cella: |
-//|  finche' mancano (download) la cella mostra "...".                 |
+//|  1 CopyRates di gBars barre (InpBars = 600, alzate se i periodi   |
+//|  lo chiedono) + altrettanti Feed. Caso peggiore (chiusura di H4   |
+//|  con M5+M15+H1+H4 insieme): 4 x simboli CopyRates, una tantum.    |
+//|  Con 42 simboli x 4 TF a regime: ~168 iTime ogni 2 s. Serve almeno |
+//|  pWarm+3 barre di storico per cella: finche' mancano (download) la |
+//|  cella mostra "...". Se CopyRates rende meno di gBars barre e la   |
+//|  serie non e' ancora sincronizzata, la misura e' PROVVISORIA (lo  |
+//|  dice il tooltip) e si rifa' a ogni giro finche' lo diventa.       |
 //|  IDENTITA' BIT PER BIT (classe 950): EMA e ATR di Wilder sono      |
 //|  ricorsivi, lo stato dipende dalla barra di partenza finche' il   |
 //|  suo peso non scende sotto la precisione del double. Con i default |
@@ -83,11 +86,15 @@
 
 input group "=== Simboli ==="
 input bool            InpForex        = true;      // Mostra FOREX
-input string          InpSymForex     = "EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY"; // Lista forex (virgola)
+// Liste di default = i 28 cambi fra le 8 valute principali + i 10 indici + i 4 metalli che il server
+// BCM elenca davvero (sonda ABTG_InfoBroker, conto 50503392, BCMMarkets-Server, 17/08/2026, 59 simboli:
+// backtest_pipeline/risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv). Esclusi apposta:
+// esotici (NOK/SEK/PLN), petrolio, gas, cloni *_EXT. Un simbolo che il broker non ha viene saltato (Journal).
+input string          InpSymForex     = "EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY,EURJPY,EURAUD,EURCAD,EURCHF,GBPCHF,AUDCHF"; // Lista forex (virgola)
 input bool            InpIndici       = true;      // Mostra INDICI
-input string          InpSymIndici    = "D30EUR,U30USD,NASUSD,SPXUSD,200AUD,225JPY"; // Lista indici (nomi BCM; su altri broker riscrivili)
+input string          InpSymIndici    = "D30EUR,U30USD,NASUSD,SPXUSD,200AUD,225JPY,F40EUR,E50EUR,100GBP,E35EUR"; // Lista indici (nomi BCM; su altri broker riscrivili)
 input bool            InpMetalli      = true;      // Mostra METALLI
-input string          InpSymMetalli   = "XAUUSD,XAGUSD"; // Lista metalli
+input string          InpSymMetalli   = "XAUUSD,XAGUSD,XPTUSD,XPDUSD"; // Lista metalli
 input string          InpSuffix       = "";        // Suffisso broker (se serve)
 input group "=== Timeframe ==="
 input bool            InpTfM5         = true;      // Colonna M5
@@ -256,12 +263,6 @@ int OnInit()
                InpCrossLookback, InpSlopeBars, InpBreakLookback, InpCooldownBars,
                InpVolMaPeriod, InpVolFactor))
       Print("ABTG_Confluenza_Dashboard: alcuni parametri fuori intervallo sono stati corretti dal motore.");
-   if(InpBars < gE.pWarm + 20)
-     {
-      Print("ABTG_Confluenza_Dashboard: InpBars (", InpBars, ") troppo basso: servono almeno ",
-            gE.pWarm + 20, " barre (warm-up del motore + margine).");
-      return INIT_PARAMETERS_INCORRECT;
-     }
    // CONVERGENZA (classe 950): lo stato ricorsivo del motore (EMA del segnale, ATR di Wilder, bande del
    // Supertrend) dipende dalla barra di PARTENZA. L'indicatore parte dalla prima barra dello storico, la
    // dashboard da gBars barre fa: i due stati coincidono BIT PER BIT solo quando il contributo della
@@ -281,6 +282,15 @@ int OnInit()
    if(need > ABTGC_MAXBARS && InpBars < need)
       Print("ABTG_Confluenza_Dashboard: ATTENZIONE, con questi periodi servirebbero ", need,
             " barre per cella (tetto ", ABTGC_MAXBARS, "): il segnale puo' differire da quello dell'indicatore.");
+   // guardia del riscaldamento DOPO l'alzata automatica (classe 980): prima stava sopra e con EMA lenta
+   // >= 145 (pWarm = 4 x EMA lenta + 3) rifiutava l'avvio con InpBars 600 mentre qui sotto le barre si
+   // sarebbero alzate da sole a need. Ora scatta solo se nemmeno il tetto basta (EMA lenta > ~1244).
+   if(gBars < gE.pWarm + 20)
+     {
+      Print("ABTG_Confluenza_Dashboard: barre per cella (", gBars, ") sotto il riscaldamento del motore: servono almeno ",
+            gE.pWarm + 20, ". Alza InpBars.");
+      return INIT_PARAMETERS_INCORRECT;
+     }
 
    string lista = "";
    if(InpForex)
@@ -403,7 +413,7 @@ void OnTimer()
   }
 
 //+------------------------------------------------------------------+
-//| Misura una cella: ricostruisce lo stato dalle ultime InpBars      |
+//| Misura una cella: ricostruisce lo stato dalle ultime gBars        |
 //| barre CHIUSE e legge l'ultima. Un CopyRates per chiamata.         |
 //+------------------------------------------------------------------+
 bool Measure(const int s, const int t, const datetime tLast)
@@ -419,6 +429,14 @@ bool Measure(const int s, const int t, const datetime tLast)
      }
    if(r[got - 1].time != tLast)   // i dati si stanno muovendo: si riprova al giro dopo
       return false;
+   // meno barre di quelle chieste: o lo storico e' davvero cosi' corto (allora la finestra parte dalla
+   // prima barra, come l'indicatore, e lo stato coincide), o si sta ancora scaricando (classe 981): in
+   // quel caso la misura e' PROVVISORIA e la cella si rimisura a ogni giro (gKey = 0) finche' la serie
+   // non e' sincronizzata, invece di restare congelata fino alla chiusura della barra dopo (H4 = 4 ore).
+   bool prov = (got < gBars && SeriesInfoInteger(gSym[s], gTf[t], SERIES_SYNCHRONIZED) == 0);
+   bool oOk = gOk[k];
+   int  oDir = gDir[k], oAge = gAge[k], oML = gMissL[k], oMS = gMissS[k], oLA = gLAge[k], oLD = gLDir[k];
+   bool oProv = (gOk[k] && gKey[k] == 0);
 
    gE.Reset();
    for(int i = 0; i < got; i++)
@@ -453,9 +471,12 @@ bool Measure(const int s, const int t, const datetime tLast)
    gMissS[k] = gE.Missing(-1, InpUseVolFilter);
    gLAge[k]  = age;
    gLDir[k]  = (no >= 0) ? gE.lastDir[v] : 0;
-   gKey[k]   = tLast;
+   gKey[k]   = prov ? 0 : tLast;
    gOk[k]    = true;
-   return true;
+   // true solo se cambia qualcosa che il pannello MOSTRA (una cella provvisoria rimisurata a ogni giro
+   // non deve ridisegnare 160 celle ogni 2 secondi se non e' cambiato niente)
+   return (!oOk || oDir != gDir[k] || oAge != gAge[k] || oML != gMissL[k] || oMS != gMissS[k] ||
+           oLA != gLAge[k] || oLD != gLDir[k] || oProv != prov);
   }
 
 //+------------------------------------------------------------------+
@@ -577,7 +598,7 @@ bool Layout()
      {
       long hpx = ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS, 0);
       if(hpx > 0 && gRowH > 0)
-         rows = ((int)hpx - InpY - 3 * gRowH - 16) / gRowH;   // titolo + intestazione + riga di margine
+         rows = ((int)hpx - InpY - 3 * gRowH - (int)MathMax(16, MathRound(10 * gK))) / gRowH;   // titolo + intestazione + riga di margine + bordo (10 px scalati, come H in Render)
      }
    if(rows < 5)
       rows = 5;
@@ -663,7 +684,7 @@ void Render()
          int cx = bx + gColSym + t * gColW;
          color bgc = C'26,31,42';
          string arrow = " ";
-         string ages = "";
+         string ages = " ";          // MAI "": un OBJ_LABEL col testo vuoto puo' mostrare la scritta "Label" (classe 982)
          color ca = C'110,110,110';
          string tip = gSym[s] + " " + gTfName[t] + ": ";
          if(!gOk[k])
@@ -694,8 +715,10 @@ void Render()
                      tip += "| ultimo segnale: " + (gLDir[k] > 0 ? "BUY " : "SELL ") +
                             IntegerToString(gLAge[k]) + " barre fa";
                   else
-                     tip += "| nessun segnale nelle " + IntegerToString(gBars) + " barre lette";
+                     tip += "| nessun segnale nelle ultime " + IntegerToString(gBars) + " barre (o nello storico, se piu' corto)";
                  }
+            if(gKey[k] == 0)
+               tip += " | PROVVISORIO: storico ancora in download, si rimisura";
            }
          tip += " | click: apre il grafico " + gSym[s] + " " + gTfName[t];
          // cella (cliccabile anche se vuota) + freccia + eta'

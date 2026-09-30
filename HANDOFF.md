@@ -7,6 +7,14 @@
 
 ---
 
+## 🗓️ 30/09 sera — INDICATORI/DASHBOARD PER CLAUDIO (tutti passati da 2 cancelli Opus; MAI compilati: serve F7)
+- `mql5/Indicators/ABTG_EMA200_Dashboard.mq5` v4 (distanza dalla EMA200 in pips/punti/ATR/livello, click su casella TF = piano dei 2 limit al rischio scelto da Claudio; oro/argento a PUNTI, classe 941; cella misurata 771531 = O1 0,20/O2 0,30, OOS PF 1,52 su **257 posizioni**, classi 946-948, 960-961).
+- Pacchetto segnali: `mql5/Include/ABTG_Confluenza.mqh` (motore unico), `ABTG_Segnali_EMA_BB_ST.mq5` (EMA 9/21/50 + EMA200 rossa, BB, Supertrend, triangolo BUY/SELL, tasti NORMALI/HEIKIN ASHI/VOLUME), `ABTG_Volume_Filtro.mq5`, `ABTG_Confluenza_Dashboard.mq5` (28 forex + 10 indici + 4 metalli, M5/M15/H1/H4, click apre il grafico senza mai toccare quello della dashboard). Test `backtest_pipeline/test_abtg_confluenza.py` (compila il .mqh vero in C++: 0 differenze). Classi 942-945, 950-953, 962-965, 970-972, 980-984.
+- Installazione: `.mqh` in MQL5\Include\, gli altri in MQL5\Indicators\, terminale BCM sul PC di backtest (mai FTMO). Non usare insieme a ABTG_SuperWave_Dashboard (nasconde le candele anche lui).
+- Tutto senza compilazione reale ne' prova sul terminale: frequenza segnali sul mercato vero NON misurata.
+
+---
+
 ## 🗓️ 30/09 ~13:30 — CHALLENGE FTMO 541452707 FINITA (comunicato da Claudio, screenshot mobile)
 - Claudio: **"Siamo fuori dalla challenge. Era difficile recuperare ed ho tentato il tutto per tutto con dei trade manuali ma niente."** Storico del 30/09 (mobile): GER40.cash sell 23,95 chiuso 10:03:09 **-1.535,91** (stop pieno 770411, gia' noto) + **3 trade manuali XAUUSD** 14:21-14:26: sell 5,00 **-572,05**, buy 5,00 **-301,47**, buy 2,00 **-125,91** (**-999,43** lordi; commissioni totali giornata -61,85). Il margine misurato prima di oggi verso la linea 72.000 era **997**: i tre trade manuali lo superano di poco **CONFERMATO DALL'EMAIL FTMO (30/09)**: Max Loss violato il **30/09/2026 13:26:29 CE(S)T**; saldo a mezzanotte **74.532,92**; saldo alla violazione **72.066,80**; **equity alla violazione 71.968,19** (linea 72.000: sfondata di **31,81 EUR sull'equity**). Conto: 74.532,92 - 1.535,91 (GER40 770411) = 72.997,01 -> margine **997,01** verso 72.000 prima dei tre trade manuali (torna col 997 misurato). Il terzo trade manuale (buy 2,00, 14:26:29 ora server FTMO = 13:26:29 CEST) coincide con l'istante della violazione. Conto in SOLA LETTURA per **5 giorni** (~fino al 05/10): **esportare lo storico completo finale** (serve alla riproduzione RFWD: l'xlsx attuale arriva a 10:03). FTMO offre Free Trial gratuita (stesso ambiente): possibile forward senza spese, decisione di Claudio.
 - Attribuzione complessiva (aggiornare `report/FTMO_PRIMI_OTTO_GIORNI_2026-09-30.md`): oro manuale = -2.502,06 (prima) -999,43 (oggi) circa -3.501,49; flotta = -4.500,93. **La flotta da sola NON avrebbe superato la linea** (conti da rifare sul cronistorico finale).

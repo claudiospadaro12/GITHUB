@@ -21,7 +21,14 @@ Cosa fa (in Python, perche' qui non c'e' MetaEditor: NON compila nulla):
      mostra che il test se ne accorge): un parametro cambiato di poco nel
      percorso dashboard (breakLB 3 -> 2, o volFactor) DEVE produrre
      differenze; se non ne produce, il confronto non misura niente.
-  5. Mappatura click -> (simbolo, TF) dopo il riordino delle righe.
+  4b. STATO interno (non solo i segnali) fra storico intero e finestra gBars
+     della dashboard, con la formula di OnInit cercata testualmente nel .mq5,
+     anche con periodi NON di default (EMA 50 / ATR 30, ATR 60...), col
+     contro-esempio al 60% di need e a 600 barre fisse (classe 950/983).
+  5. Click: IsUInt/DecodeClick/SymbolClickTf VERI estratti dal .mq5 e compilati
+     come C++ (shim minimo), nomi degli oggetti generati con l'espressione di
+     riga letta dal Render VERO, a blocchi; contro-esempio "nomi per riga del
+     blocco" preteso (classe 984).
   6. Coerenza dei default tra .mqh, indicatore, dashboard e pannello volumi.
 
 Uso:  python3 backtest_pipeline/test_abtg_confluenza.py
@@ -432,6 +439,65 @@ def compare_dashboard(bars, sigs, params, window, max_age, step=1, e_from=None):
 
 
 # ---------------------------------------------------------------------------
+# 4b) STATO del motore a finestra gBars (classe 950): la formula di OnInit della
+#     dashboard, rifatta qui e cercata TESTUALMENTE nel .mq5 (se cambia la', il
+#     test lo dice), provata confrontando lo STATO interno (non solo i segnali)
+#     con periodi NON di default.
+# ---------------------------------------------------------------------------
+NEED_LINES = ("double dec = 1.0 - MathMin(gE.a1, gE.a2);",
+              "if(gE.pAtrWilder && gE.pAtrPeriod > 1)",
+              "dec = MathMax(dec, 1.0 - 1.0 / gE.pAtrPeriod);",
+              "int need = gE.pWarm + 20;",
+              "if(dec > 0.0 && dec < 1.0)",
+              "need = (int)MathCeil(MathLog(1e-17) / MathLog(dec)) + gE.pWarm;",
+              "gBars = MathMax(InpBars, MathMin(need, ABTGC_MAXBARS));",
+              "#define ABTGC_MAXBARS 5000",
+              "input int    InpBars          = 600;",
+              "if(gBars < gE.pWarm + 20)")
+
+
+def dash_gbars(eng, inp_bars=600, cap=5000):
+    dec = 1.0 - min(eng.a1, eng.a2)
+    if eng.pAtrWilder and eng.pAtrPeriod > 1:
+        dec = max(dec, 1.0 - 1.0 / eng.pAtrPeriod)
+    need = eng.pWarm + 20
+    if 0.0 < dec < 1.0:
+        need = int(math.ceil(math.log(1e-17) / math.log(dec))) + eng.pWarm
+    return need, max(inp_bars, min(need, cap))
+
+
+def engine_state(eng):
+    """Stato ricorsivo + anelli allineati per BARRA (non per posizione) sulle ultime RING barre."""
+    sc = (eng.e1, eng.e2, eng.atr, eng.stUp, eng.stDn, eng.stDir, eng.bbw, eng.volMa, eng.prevClose,
+          eng.maskL, eng.maskS, eng.sigA, eng.sigB)
+    rings = []
+    for j in range(min(RING, eng.n)):
+        p = (eng.n - 1 - j) % RING
+        rings.append((eng.e1R[p], eng.e2R[p], eng.bbwR[p], eng.dirR[p],
+                      eng.condL[p], eng.condL[RING + p], eng.condS[p], eng.condS[RING + p],
+                      eng.sigR[p], eng.sigR[RING + p]))
+    return sc, tuple(rings)
+
+
+def state_diffs(bars, params, window, ends):
+    full = Confl(**params)
+    snaps = {}
+    want = set(ends)
+    for i in range(max(ends) + 1):
+        full.feed(*bars[i])
+        if i in want:
+            snaps[i] = engine_state(full)
+    bad = 0
+    for e in ends:
+        w = Confl(**params)
+        for i in range(e - window + 1, e + 1):
+            w.feed(*bars[i])
+        if engine_state(w) != snaps[e]:
+            bad += 1
+    return bad
+
+
+# ---------------------------------------------------------------------------
 # Mappatura click -> (simbolo, TF): stessa logica di DecodeClick / OnChartEvent
 # ---------------------------------------------------------------------------
 PFX = "ABTGC_"
@@ -458,62 +524,193 @@ def decode_click(name):
     return None
 
 
-def test_click_map(rounds=200, seed=7):
+CLICK_SHIM = r'''
+#include <string>
+#include <vector>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
+#include <cstdlib>
+typedef std::string string;
+typedef unsigned short ushort;
+typedef int ENUM_TIMEFRAMES;
+#define PFX "ABTGC_"
+#define PERIOD_CURRENT 0
+inline int StringLen(const string &s){ return (int)s.size(); }
+inline int StringFind(const string &s, const string &f){ std::size_t p = s.find(f); return p == string::npos ? -1 : (int)p; }
+inline string StringSubstr(const string &s, int st, int len = -1){ if(st < 0 || st >= (int)s.size()) return string(); return len < 0 ? s.substr(st) : s.substr(st, len); }
+inline int StringSplit(const string &s, ushort sep, std::vector<string> &out){
+  out.clear(); if(s.empty()) return 0; string cur;
+  for(char c : s){ if((ushort)(unsigned char)c == sep){ out.push_back(cur); cur.clear(); } else cur += c; }
+  out.push_back(cur); return (int)out.size(); }
+inline ushort StringGetCharacter(const string &s, int i){ return (ushort)(unsigned char)s[i]; }
+inline long long StringToInteger(const string &s){ return atoll(s.c_str()); }
+int gNT = 0; bool gOk[64]; int gDir[64]; int gAge[64]; ENUM_TIMEFRAMES gTf[8]; ENUM_TIMEFRAMES InpTfMain = 60; int _Period = 15;
+'''
+
+CLICK_MAIN = r'''
+int main(){
+  std::string line;
+  while(std::getline(std::cin, line)){
+    if(line.rfind("TF ", 0) == 0){          /* TF main period nt  ok dir age  ok dir age ... */
+      std::istringstream is(line.substr(3)); int m, p; is >> m >> p >> gNT; InpTfMain = m; _Period = p;
+      for(int t = 0; t < gNT; t++){ int ok, d, a; is >> ok >> d >> a; gOk[t] = ok != 0; gDir[t] = d; gAge[t] = a; gTf[t] = 1000 + t; }
+      printf("%d\n", (int)SymbolClickTf(0));
+      continue;
+    }
+    string kind; int row = -1, col = -1;
+    if(DecodeClick(line, kind, row, col)) printf("%s %d %d\n", kind.c_str(), row, col); else printf("NONE\n");
+  }
+  return 0;
+}
+'''
+
+
+def _dash_functions(dash):
+    """Estrae dal .mq5 VERO IsUInt+DecodeClick e SymbolClickTf (testo sorgente, non una copia)."""
+    i0 = dash.index("bool IsUInt(const string s)")
+    i1 = dash.index("// TF da aprire cliccando il NOME")
+    dec = dash[i0:i1]
+    if dec.count("string p[];") != 1:
+        raise ValueError("DecodeClick: 'string p[];' non trovato una volta sola")
+    dec = dec.replace("string p[];", "std::vector<string> p;")      # unico adattamento MQL5 -> C++
+    j0 = dash.index("ENUM_TIMEFRAMES SymbolClickTf(const int s)")
+    j1 = dash.index("//+", j0)
+    return dec, dash[j0:j1]
+
+
+def click_exe(dash, tmpdir):
+    """Compila le funzioni VERE del click (shim C++). None se non c'e' un compilatore."""
+    import shutil
+    import subprocess
+    cxx = shutil.which("g++") or shutil.which("clang++")
+    if not cxx:
+        return None
+    dec, sct = _dash_functions(dash)
+    src = os.path.join(tmpdir, "click.cpp")
+    with open(src, "w") as f:
+        f.write(CLICK_SHIM + dec + "\n" + sct + "\n" + CLICK_MAIN)
+    exe = os.path.join(tmpdir, "click")
+    subprocess.run([cxx, "-std=c++17", "-O0", "-o", exe, src], check=True, capture_output=True, text=True)
+    return exe
+
+
+def run_click(exe, lines):
+    import subprocess
+    r = subprocess.run([exe], input="\n".join(lines) + "\n", capture_output=True, text=True, check=True)
+    return r.stdout.split("\n")[:len(lines)]
+
+
+def render_names(dash):
+    """Dal Render VERO: espressione della riga nei nomi, e i nomi delle celle/intestazioni."""
+    r0 = dash.index("void Render()")
+    r1 = dash.index("ChartRedraw(0);", r0)
+    rend = dash[r0:r1]
+    probs = []
+    m = re.search(r"string rs = IntegerToString\(([^;]+)\);", rend)
+    row_expr = m.group(1).strip() if m else None
+    if row_expr is None:
+        probs.append("Render: 'string rs = IntegerToString(...)' non trovato")
+    for need in ('int s = gIdx[r];', 'string ts = IntegerToString(t);',
+                 'PFX + "S_" + rs', 'PFX + "C_" + rs', 'PFX + "K_" + rs + "_" + ts',
+                 'PFX + "A_" + rs + "_" + ts', 'PFX + "G_" + rs + "_" + ts', 'gSym[s] + " " + gTfName[t]',
+                 'PFX + "H_S_" + bs', 'PFX + "H_" + IntegerToString(t) + "_" + bs', 'PFX + "H_C_" + bs'):
+        if need not in rend:
+            probs.append("Render: manca %r" % need)
+    e0 = dash.index("void OnChartEvent(")
+    ev = dash[e0:]
+    for need in ("int s = gIdx[row];", "tf = gTf[col];", "if(col >= gNT)", "if(row < 0 || row >= gN)",
+                 "OpenChartFor(gSym[s], tf);"):
+        if need not in ev:
+            probs.append("OnChartEvent: manca %r" % need)
+    if "ChartSetSymbolPeriod" in dash:
+        probs.append("la dashboard chiama ChartSetSymbolPeriod (classe 930)")
+    return row_expr, probs
+
+
+def simulate_clicks(exe, row_expr, n_sym=42, n_tf=4, rows_per_block=(5, 13, 42), rounds=40, seed=7):
+    """Nomi generati con l'espressione di riga del Render VERO, decodificati dal DecodeClick VERO,
+    riga -> simbolo con gIdx AL MOMENTO del click (dopo un secondo riordino)."""
     rnd = random.Random(seed)
-    syms = ["EURUSD", "GBPUSD", "XAUUSD", "NASUSD", "D30EUR", "225JPY", "USDJPY", "XAGUSD"]
-    tfs = ["M5", "M15", "H1", "H4"]
-    bad = 0
-    n_checked = 0
-    for _ in range(rounds):
-        order = syms[:]
-        rnd.shuffle(order)                      # gIdx dopo ScoreAndSort: riga -> simbolo
-        displayed = {}
-        for r, s in enumerate(order):           # Render(): nome oggetto -> (simbolo, TF) mostrato
-            displayed[PFX + "S_%d" % r] = (s, None)
-            displayed[PFX + "C_%d" % r] = (s, None)
-            for t, tf in enumerate(tfs):
-                for kind in ("K", "A", "G"):
-                    displayed[PFX + "%s_%d_%d" % (kind, r, t)] = (s, tf)
-        # secondo riordino (dopo il quale i nomi restano ma il contenuto cambia)
-        order2 = syms[:]
-        rnd.shuffle(order2)
-        displayed2 = {}
-        for r, s in enumerate(order2):
-            displayed2[PFX + "S_%d" % r] = (s, None)
-            displayed2[PFX + "C_%d" % r] = (s, None)
-            for t, tf in enumerate(tfs):
-                for kind in ("K", "A", "G"):
-                    displayed2[PFX + "%s_%d_%d" % (kind, r, t)] = (s, tf)
-        for name, (s_disp, tf_disp) in displayed2.items():
-            dec = decode_click(name)
-            assert dec is not None, name
-            kind, row, col = dec
-            s_click = order2[row]               # gIdx[row] al momento del click
-            tf_click = tfs[col] if col >= 0 else None
-            n_checked += 1
-            if s_click != s_disp or tf_click != tf_disp:
-                bad += 1
-        # oggetti NON cliccabili
-        for name in (PFX + "BG", PFX + "T", PFX + "H_S", PFX + "H_2", PFX + "H_C", "ALTRO_S_1", PFX + "S_", PFX + "K_1", PFX + "K_1_", PFX + "A_x_1", PFX + "S_1_2"):
-            if decode_click(name) is not None:
-                bad += 1
-    return n_checked, bad
+    syms = ["S%02d" % i for i in range(n_sym)]
+    tfs = ["TF%d" % t for t in range(n_tf)]
+    expr = row_expr.replace("/", "//")
+    bad = checked = 0
+    for gRows in rows_per_block:
+        for _ in range(rounds):
+            order = syms[:]
+            rnd.shuffle(order)                  # gIdx dopo ScoreAndSort (quello mostrato E quello letto al click)
+            names, want = [], []
+            for r, s in enumerate(order):
+                rs = str(eval(expr, {}, {"r": r, "gRows": gRows}))
+                names.append(PFX + "S_" + rs); want.append((s, None))
+                names.append(PFX + "C_" + rs); want.append((s, None))
+                for t in range(n_tf):
+                    for kind in ("K", "A", "G"):
+                        names.append(PFX + "%s_%s_%d" % (kind, rs, t)); want.append((s, tfs[t]))
+            out = run_click(exe, names)
+            for got, w in zip(out, want):
+                checked += 1
+                if got == "NONE":
+                    bad += 1
+                    continue
+                _, row, col = got.split()
+                row, col = int(row), int(col)
+                if row < 0 or row >= n_sym or col >= n_tf:
+                    bad += 1
+                    continue
+                if (order[row], tfs[col] if col >= 0 else None) != w:
+                    bad += 1
+    return checked, bad
 
 
-def test_symbol_click_tf():
-    """SymbolClickTf: segnale piu' recente, a parita' TF piu' alto, altrimenti TF principale."""
-    def pick(cells, main):
-        best, best_age = -1, 10 ** 6
-        for t, (ok, d, age) in enumerate(cells):
-            if not ok or d == 0:
-                continue
-            if age <= best_age:
-                best_age, best = age, t
-        return main if best < 0 else best
-    assert pick([(True, 1, 2), (True, -1, 0), (True, 1, 0), (True, 0, -1)], 2) == 2      # pari eta' 0: vince il piu' alto
-    assert pick([(True, 1, 3), (True, 0, -1), (False, 0, -1), (True, 0, -1)], 2) == 0
-    assert pick([(True, 0, -1), (False, 0, -1), (True, 0, -1), (True, 0, -1)], 2) == 2   # nessun segnale: TF principale
-    return True
+NOT_CLICKABLE = ("BG", "T", "H_S_0", "H_S_3", "H_0_0", "H_3_2", "H_C_1", "H_S", "H_2", "H_C", "S_", "K_1", "K_1_",
+                 "A_x_1", "S_1_2", "S_-1", "K_1_-2", "S_1234567", "G_12_1234567", "", "_", "S__1", "Z_1_1")
+ADVERSARIAL = ["S_0", "C_41", "K_3_0", "A_0_3", "G_999999_5", "S_007", "K_01_02"] + list(NOT_CLICKABLE)
+
+
+def test_click_map(root):
+    """Ritorna (n, bad, note, probs). Non tautologico: DecodeClick e SymbolClickTf sono quelli
+    del .mq5 compilati, e i nomi degli oggetti usano l'espressione di riga letta dal Render."""
+    import tempfile
+    dash = read(os.path.join(root, "mql5/Indicators/ABTG_Confluenza_Dashboard.mq5"))
+    row_expr, probs = render_names(dash)
+    with tempfile.TemporaryDirectory() as d:
+        exe = click_exe(dash, d)
+        if exe is None:
+            return 0, 0, "SALTATO: nessun compilatore C++, provato solo lo specchio Python", probs
+        n, bad = simulate_clicks(exe, row_expr) if row_expr else (0, 1)
+        # contro-esempio: nomi per riga DEL BLOCCO (r % gRows) invece che globale -> deve sbagliare
+        _, bad_mut = simulate_clicks(exe, "r % gRows", rows_per_block=(13,), rounds=5)
+        if bad_mut == 0:
+            probs.append("contro-esempio 'nomi per riga del blocco' NON rilevato: la simulazione e' cieca")
+        # non cliccabili + coerenza DecodeClick vero / specchio Python
+        full = [PFX + x for x in ADVERSARIAL] + ["ALTRO_S_1", "abtgc_S_1", "ABTGCS_1"]
+        out = run_click(exe, full)
+        for nm, got in zip(full, out):
+            py = decode_click(nm)
+            pys = "NONE" if py is None else "%s %d %d" % py
+            if got != pys:
+                probs.append("DecodeClick vero %r != specchio %r per %r" % (got, pys, nm))
+            if nm[len(PFX):] in NOT_CLICKABLE and got != "NONE":
+                probs.append("oggetto NON cliccabile decodificato: %r -> %r" % (nm, got))
+        # SymbolClickTf VERO: piu' recente, a pari eta' il TF piu' alto, altrimenti InpTfMain (anche fuori colonna)
+        cases = [  # (main, period, celle (ok, dir, age), atteso)
+            (60, 15, [(1, 1, 2), (1, -1, 0), (1, 1, 0), (1, 0, -1)], 1002),
+            (60, 15, [(1, 1, 3), (1, 0, -1), (0, 0, -1), (1, 0, -1)], 1000),
+            (1440, 15, [(1, 0, -1), (0, 0, -1), (1, 0, -1), (1, 0, -1)], 1440),   # TF principale NON acceso
+            (0, 15, [(1, 0, -1), (1, 0, -1)], 15),                               # PERIOD_CURRENT -> _Period
+            (60, 15, [(0, 1, 0), (1, -1, 2)], 1001),                             # cella non valida ignorata
+        ]
+        lines = []
+        for main, per, cells, _ in cases:
+            lines.append("TF %d %d %d " % (main, per, len(cells)) + " ".join("%d %d %d" % c for c in cells))
+        out = run_click(exe, lines)
+        for (main, per, cells, want), got in zip(cases, out):
+            if int(got) != want:
+                probs.append("SymbolClickTf vero: %r -> %s, atteso %d" % (cells, got, want))
+        n += len(full) + len(cases)
+        return n, bad, "DecodeClick/SymbolClickTf VERI compilati; mutante 'r %% gRows' -> %d errori" % bad_mut, probs
 
 
 # ---------------------------------------------------------------------------
@@ -742,15 +939,72 @@ def main():
     print("== 4) Convergenza: finestra corta vs lunga (limite dichiarato del Supertrend path-dipendente) ==")
     for w in (150, 250, 400, 600):
         checked, active, mism = compare_dashboard(bars, p2, base, w, 3, step=5, e_from=700)
-        print("  finestra %4d barre: differenze %d/%d" % (w, mism, checked))
+        print("  finestra %4d barre (SEGNALI, default): differenze %d/%d" % (w, mism, checked))
 
-    print("== 5) Mappatura click -> (simbolo, TF) dopo il riordino ==")
-    n, bad = test_click_map()
-    print("  %d oggetti decodificati dopo riordino, errori %d" % (n, bad))
+    # 4b) STATO a finestra gBars, anche con periodi NON di default (classe 950/983).
+    # ATTESA dichiarata prima dei numeri: a gBars lo stato coincide 20/20 per ogni insieme; al 60% di need
+    # NON coincide (se coincidesse, il confronto non misurerebbe niente); EMA 50 / ATR 30 a 600 barre (il
+    # vecchio InpBars fisso) NON coincide; i SEGNALI con EMA 50 / ATR 30 a gBars: 0 differenze.
+    print("== 4b) STATO del motore a finestra gBars (formula di OnInit della dashboard) ==")
+    dash_src = read(os.path.join(root, "mql5/Indicators/ABTG_Confluenza_Dashboard.mq5"))
+    for ln in NEED_LINES:
+        if ln not in dash_src:
+            fails.append("formula di gBars nella dashboard cambiata: manca %r (aggiorna dash_gbars)" % ln)
+    sets = (("default (EMA 21, ATR 10 Wilder)", {}, 534),
+            ("EMA 50 / ATR 30", dict(emaSlow=50, atrPeriod=30), 1358),
+            ("ATR SMA (iATR), default", dict(atrWilder=False), 534),
+            ("EMA 9/34, ATR 60, BB 30", dict(emaSlow=34, atrPeriod=60, bbPeriod=30), None))
+    sbars = make_bars(6000, 23)
+    for label, prm, need_exp in sets:
+        eng = Confl(**prm)
+        need, gb = dash_gbars(eng)
+        if need_exp is not None and need != need_exp:
+            fails.append("need %s = %d, atteso %d" % (label, need, need_exp))
+        ends = list(range(len(sbars) - 1 - 19 * 40, len(sbars), 40))
+        b_ok = state_diffs(sbars, prm, gb, ends)
+        short = int(0.6 * need)
+        b_short = state_diffs(sbars, prm, short, ends)
+        print("  %-32s pWarm %4d need %4d gBars %4d: stato diverso %d/%d | al 60%% (%d barre) %d/%d"
+              % (label, eng.pWarm, need, gb, b_ok, len(ends), short, b_short, len(ends)))
+        if b_ok != 0:
+            fails.append("STATO a gBars diverso dallo storico intero (%s): %d/%d" % (label, b_ok, len(ends)))
+        if b_short == 0:
+            fails.append("contro-esempio al 60%% di need NON rilevato (%s): il confronto dello stato e' cieco" % label)
+    prm = dict(emaSlow=50, atrPeriod=30)
+    b600 = state_diffs(sbars, prm, 600, ends)
+    print("  EMA 50 / ATR 30 a 600 barre (vecchio InpBars fisso): stato diverso %d/%d" % (b600, len(ends)))
+    if b600 == 0:
+        fails.append("EMA 50 / ATR 30 a 600 barre: lo stato coincide, la classe 950 non e' riprodotta")
+    need, gb = dash_gbars(Confl(**prm))
+    tot_c = tot_a = tot_m = 0
+    for seed in (11, 37):
+        b2 = make_bars(3200, seed)
+        p2x, _ = run_batch(b2, prm)
+        c, a, m = compare_dashboard(b2, p2x, prm, gb, 3, step=6, e_from=gb + 50)
+        tot_c += c
+        tot_a += a
+        tot_m += m
+    print("  SEGNALI EMA 50 / ATR 30 a gBars %d: confronti %d, frecce attese %d, differenze %d" % (gb, tot_c, tot_a, tot_m))
+    if tot_m:
+        fails.append("SEGNALI EMA 50 / ATR 30 a gBars: %d differenze" % tot_m)
+    if tot_a < 10:
+        fails.append("SEGNALI EMA 50 / ATR 30: troppo poche frecce attese (%d), il confronto non misura" % tot_a)
+    # la guardia del riscaldamento: con EMA lenta 200 (pWarm 803) la dashboard deve PARTIRE con InpBars 600
+    e200 = Confl(emaSlow=200)
+    n200, g200 = dash_gbars(e200)
+    print("  EMA lenta 200: pWarm %d, need %d, gBars %d -> %s" % (e200.pWarm, n200, g200,
+          "parte" if g200 >= e200.pWarm + 20 else "RIFIUTATA"))
+    if g200 < e200.pWarm + 20:
+        fails.append("EMA lenta 200: gBars %d sotto pWarm+20 %d" % (g200, e200.pWarm + 20))
+
+    print("== 5) Click -> (simbolo, TF): DecodeClick/SymbolClickTf VERI + nomi del Render VERO ==")
+    n, bad, note, cprobs = test_click_map(root)
+    print("  %d decodifiche, errori %d | %s" % (n, bad, note))
+    for p in cprobs:
+        print("  PROBLEMA:", p)
     if bad:
         fails.append("mappatura click errata (%d)" % bad)
-    test_symbol_click_tf()
-    print("  SymbolClickTf: ok (piu' recente / pari eta' il piu' alto / nessuno -> TF principale)")
+    fails += cprobs
 
     print("== 6) Default e sorgenti ==")
     probs = test_defaults(root)
