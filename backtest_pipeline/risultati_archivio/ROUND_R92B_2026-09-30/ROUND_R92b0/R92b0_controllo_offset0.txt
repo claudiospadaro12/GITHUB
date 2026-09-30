@@ -1,0 +1,119 @@
+# =====================================================================
+#  EA: ABTG_Bulge
+#  R92b0 -- IL CONTROLLO. Signal_Bar_Offset=0 sulla cella di partenza
+#  Round R92b, primo di ABTG_Bulge v5.20 (SHA256 ED4E88B1CFBA36AD..., NON modificato).
+#  Scritto il 30/09/2026. CRITERI: report/R92b_CRITERI.md, firmati PRIMA dei numeri.
+#  H1, GBPUSD come grafico, Symbols_List = i 22 cross. Modello 1 (OHLC M1):
+#  SOLO SCREENING, nessun verdetto di merito a tick reali (R57). Deposito 10000
+#  e Modello 1 vanno passati ESPLICITI dalla riga di lancio (default del driver 10000/4).
+#  Rischio 0,80%, Max_Trades 4, kill switch acceso, gestione NUDA, Guardian inerte.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (regola 21/09): NON sul VPS, NON su
+#  50504400, NON su nessuna sedia. Non promuove niente, non propone nessuna taglia.
+#
+#  FINESTRA: 2022.01.01 - 2026.06.30 = la finestra di R92. @FRAZIONEIS 0.7275 -> IS 2022.01.01-2025.04.08 (1194 gg),
+#  OOS 2025.04.09-2026.06.30. Le DUE GAMBE SI SOMMANO (n = Trades IS + Trades OOS). Regime: 2022 dollaro forte,
+#  2023-24 disinflazione, 2025-26 (lo stesso di R92).
+#  MAGIC: 799201 / 799251 (gemelli: due celle IDENTICHE per costruzione)
+#
+#  PERCHE' QUESTO FILE ESISTE
+#  Il banco nuovo (22 cross in UNA passata) deve saper RIPRODURRE R92 prima che un suo numero valga:
+#  Signal_Bar_Offset=0 = v5.10 esatta (sorgente, changelog 13). R92 conto' n = 106 sul totale dei 22 cross.
+#  Se qui il totale non cade in [90 ; 122] il banco e' rotto e NESSUN altro numero di R92b vale.
+#  E' il lavoro che parte PER PRIMO: se il banco e' rotto lo si scopre subito, non dopo ore.
+#  Asse tecnico: InpMagic m / m+50 (due passate identiche = gemello di determinismo G1). Senza
+#  asse Y il driver non esegue passate e lascia i CSV da 0 byte (classe 134).
+#
+#  COSA SI ATTENDE (dichiarato prima, controesempi in report/R92b_CRITERI.md par. 4-5)
+#  n = Trades(gamba IS) + Trades(gamba OOS) di UNA cella, in [90 ; 122] (106 +-15%).
+#  Non basta: P0 (Signal_Bar_Offset=0 in ogni riga dei CSV), G1 (gemelle identiche in Profit, PF, DD,
+#  Trades) e SHA256 di EA e include = pin devono valere TUTTI. La banda da sola NON separa 'offset 0
+#  arrivato' da 'offset 1 arrivato' (par. 4.4 dei criteri).
+#  Se il controllo non passa la riga si ferma: i lavori a-e NON partono.
+#
+#  DIFFERENZE DA prove/R92_scan_BULGE.txt (v5.10), TUTTE:
+#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 0: e' il controllo)
+#   - Symbols_List: i 22 cross invece di UN simbolo (R92 era un cross per passata)
+#   - InpMagic: blocco 7992xx invece di 772700/772710; asse Use_Purple_PineReaction
+#     TOLTO (qui il Viola e' solo EA, fisso a 0); un asse solo per file, per il driver
+#   - @DAQUANDO/@FINOA/@FRAZIONEIS: due finestre, vedi sopra (R92 aveva 2024.07.05 TODO)
+#   - News_Block_Hours pinnata esplicita (in R92 restava al default blindato dal driver)
+# =====================================================================
+@SIMBOLO    GBPUSD
+@PERIODO    H1
+@DAQUANDO   2022.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.7275
+
+# Bollinger, cuore del motore: NON si tocca
+BB_Period=20
+BB_Deviation=2.0
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+# soglia del bulge (x la media della larghezza delle bande)
+Bulge_Multi=1.1
+Lookback_Bars=20
+# Arancio: SPENTO nella cella P (lo ha spento Claudio: piu' rischioso)
+Use_Orange=0
+Use_Blue=1
+Use_Purple=1
+# VIOLA-EA (0): non e' un asse di R92b
+Use_Purple_PineReaction=0
+# >>> CAMBIATO rispetto alla cella P (P = 1, qui 0): IL CONTROLLO: 0 = comportamento della v5.10 (barra in formazione), per riprodurre R92
+Signal_Bar_Offset=0
+# filtro ATR: agisce su TUTTI i segnali (AtrOk in cima a CheckSignal)
+Use_ATR_Filter=1
+ATR_MA_Len=20
+ATR_Max_Mult=1.8
+ATR_Min_Mult=0.5
+# filtro ADX: sul solo BLU (ADX_Apply_On_Blue=1; Purple e Orange a 0)
+Use_ADX_Filter=1
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=1
+ADX_Apply_On_Purple=0
+ADX_Apply_On_Orange=0
+Use_News_Filter=0
+# stringa con virgole: inerte (Use_News_Filter=0); gia' pin del driver
+News_Block_Hours=7,9,11,12,15,22
+# gestione NUDA: nessun parziale, nessun BE, nessun trailing (1 posizione = 1 deal di uscita)
+Enable_Partial_Close=0
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+# kill switch ACCESO, come in origine (parte del motore di Claudio)
+Use_Kill_Switch=1
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+# 0 = RISK_PER_TRADE
+Risk_Mode=0
+# 0,80% (firma 21/08): 0,80 x Max_Trades 4 = 3,20% <= cap C1 3,25%
+Risk_Percent=0.8
+Total_Risk_Percent=2.0
+# tetto UNICO sul cesto (in R92 era per simbolo)
+Max_Trades=4
+# spento: nel tester non esistono ordini manuali
+Manage_Manual_Orders=0
+Manual_SL_ATR_Mult=3.0
+Enable_BE_1R=0
+BE_At_R=1.0
+BE_Offset_Points=2
+Enable_Trailing_R=0
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+# --- L'UNICO ASSE DI QUESTO FILE: InpMagic
+#     magic m / m+50: due passate identiche, cioe' il gemello di determinismo G1 (R246, R271/R272).
+#     InpMagic=<valore vivo del job>||<start>||<step>||<stop>||Y ; qui 2 celle.
+InpMagic=799201||799201||50||799251||Y
+# prefisso del commento ordini
+InpComment=BULGE
+# i 22 cross del cesto, stessa lista di ABTG_Bulge e di R92_scan_BULGE.txt
+Symbols_List=EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY
+# acceso come in campo; nel tester e' INERTE (fail-open)
+InpUsaGuardian=1
+# spento nelle corse lunghe (in ottimizzazione le Print non escono comunque)
+InpVerbose=0
+# spento: l'autotest si legge in una passata singola, non qui
+InpAutoTest=0
+# =====================================================================
