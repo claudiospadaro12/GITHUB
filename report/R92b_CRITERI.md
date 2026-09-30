@@ -97,10 +97,11 @@ non esegue nessuna passata e lascia i CSV da 0 byte (classe 134); l'asse sul mag
 due passate identiche per costruzione, che sono anche il **gemello di determinismo** (G1).
 
 La cella **AMPIA** e' identica, input per input, al preset
-`mql5/Presets/sedie_piccolo/ABTG_Bulge_v520_piccolo_AMPIO.set`, salvo quattro differenze
-dichiarate: `InpMagic` (799261/799311 al posto di 772701), `InpComment` (`R92BE` al posto di
-`BULGE_V520A`), `InpVerbose=0` e `InpAutoTest=0` (nel preset sono a `true`: stampano soltanto,
-nessun effetto sugli ordini). Verificato con un confronto riga per riga, non a occhio.
+`mql5/Presets/sedie_piccolo/ABTG_Bulge_v520_piccolo_AMPIO.set`, salvo **tre** differenze
+dichiarate: `InpMagic` (799261/799311 al posto di 772701), `InpVerbose=0` e `InpAutoTest=0`
+(nel preset sono a `true`: stampano soltanto, nessun effetto sugli ordini). `InpComment` resta
+`BULGE_V520A`. Verificato con un confronto riga per riga eseguito a macchina (47 input uguali,
+3 diversi), non a occhio.
 
 La cella P compare in **quattro lavori** (a, b, c, d) con quattro magic diversi: e' un
 controllo di determinismo gratis (attesa E3, sotto).
@@ -198,8 +199,9 @@ uscite diverse).
 puo' che aggiungere segnali candidati; percio':
 - ATR (a): `n(ATR spento) >= n(ATR acceso)`, in IS e in OOS.
 - Multi (b): `n(1.0) >= n(1.1) >= n(1.2)` (bulge piu' esigente = meno segnali).
-- ADX (c): `n(ADX spento) >= n(ADX acceso)`, e **la differenza e' tutta BLU** (l'ADX e' applicato solo
-  al BLU: `ADX_Apply_On_Purple=0`, `ADX_Apply_On_Orange=0`).
+- ADX (c): `n(ADX spento) >= n(ADX acceso)`, e **lo scarto DIRETTO e' tutto BLU** (l'ADX e' applicato
+  solo al BLU: `ADX_Apply_On_Purple=0`, `ADX_Apply_On_Orange=0`); per effetto di percorso (tetto,
+  posizione gia' aperta, kill switch) anche VIOLA e ARANCIO possono spostarsi di poco.
 - Arancio (d): `n(Arancio acceso) >= n(Arancio spento)`.
 - AMPIA (e): `n(AMPIA) >= ` ciascuna delle quattro celle "un asse allargato" (ATR spento, Multi 1.0, ADX
   spento, Arancio acceso).
