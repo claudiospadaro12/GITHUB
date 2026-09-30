@@ -1,0 +1,349 @@
+//+------------------------------------------------------------------+
+//|                                     ABTG_EMA200_Dashboard.mq5    |
+//|  Dashboard di SOLA LETTURA: per ogni cross elencato mostra quanto|
+//|  il prezzo e' lontano dalla EMA (default 200) su M15/H1/H4/D1.   |
+//|                                                                  |
+//|  - Distanza in ATR (segno + = prezzo SOPRA la EMA, - = SOTTO)    |
+//|    e in % del prezzo. In ATR i cross sono confrontabili tra loro.|
+//|  - Righe ORDINATE per vicinanza sul TF principale (il piu'       |
+//|    vicino alla EMA sta in cima).                                 |
+//|  - Colori: arancione = vicinissimo, giallo = vicino, grigio = no.|
+//|  - Click sul nome del simbolo = il grafico passa a quel simbolo. |
+//|  - Avviso opzionale (Alert / notifica push) quando un cross      |
+//|    entra nella fascia "vicinissimo" sul TF principale.           |
+//|                                                                  |
+//|  NON apre, NON modifica, NON chiude ordini. Non e' un EA.        |
+//|  Unico effetto sul terminale: SymbolSelect() aggiunge al Market  |
+//|  Watch i simboli della lista (serve per avere i prezzi).         |
+//+------------------------------------------------------------------+
+#property copyright "ABTG - progetto Claudio"
+#property version   "1.00"
+#property strict
+#property indicator_chart_window
+#property indicator_buffers 0
+#property indicator_plots   0
+
+input string          InpSymbols      = "EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY"; // Simboli (virgola)
+input string          InpSuffix       = "";        // Suffisso broker (se serve)
+input int             InpEmaPeriod    = 200;       // Periodo EMA
+input int             InpAtrPeriod    = 14;        // Periodo ATR (unita' di distanza)
+input ENUM_TIMEFRAMES InpTfMain       = PERIOD_H4; // TF principale (ordinamento): M15, H1, H4 o D1
+input double          InpNearAtr      = 1.00;      // "Vicino": distanza <= questi ATR (giallo)
+input double          InpHotAtr       = 0.30;      // "Vicinissimo": distanza <= questi ATR (arancione)
+input int             InpRefreshSec   = 2;         // Aggiornamento (secondi)
+input bool            InpClickSymbol  = true;      // Click sul simbolo = cambia grafico
+input bool            InpAlert        = false;     // Avviso Alert quando entra in "vicinissimo"
+input bool            InpPush         = false;     // Avviso push al telefono (serve MetaQuotes ID)
+input int             InpX            = 10;        // Posizione X
+input int             InpY            = 20;        // Posizione Y
+input int             InpFontSize     = 9;         // Dimensione carattere
+
+#define NTF 4
+#define PFX "ABTGD_"
+
+ENUM_TIMEFRAMES gTf[NTF] = {PERIOD_M15, PERIOD_H1, PERIOD_H4, PERIOD_D1};
+string          gTfName[NTF] = {"M15", "H1", "H4", "D1"};
+
+string gSym[];
+int    gN     = 0;
+int    gMain  = 2;              // indice di gTf usato per ordinare
+int    gHMa[];                  // handle EMA  [s*NTF+t]
+int    gHAtr[];                 // handle ATR  [s*NTF+t]
+double gDist[];                 // distanza in ATR, EMPTY_VALUE se non pronta
+double gPct[];                  // distanza in % del prezzo
+bool   gHotPrev[];              // era gia' "vicinissimo" al giro prima?
+int    gIdx[];                  // ordine di visualizzazione
+bool   gPrimed = false;         // primo giro: memorizza lo stato senza avvisare
+
+int    gRowH = 0, gColSym = 0, gColW = 0;
+
+//+------------------------------------------------------------------+
+void Lbl(const string name, const int x, const int y, const string txt, const color c)
+  {
+   if(ObjectFind(0, name) < 0)
+     {
+      ObjectCreate(0, name, OBJ_LABEL, 0, 0, 0);
+      ObjectSetInteger(0, name, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+      ObjectSetInteger(0, name, OBJPROP_ANCHOR, ANCHOR_LEFT_UPPER);
+      ObjectSetInteger(0, name, OBJPROP_SELECTABLE, false);
+      ObjectSetInteger(0, name, OBJPROP_HIDDEN, true);
+      ObjectSetString(0, name, OBJPROP_FONT, "Consolas");
+      ObjectSetInteger(0, name, OBJPROP_FONTSIZE, InpFontSize);
+     }
+   ObjectSetInteger(0, name, OBJPROP_XDISTANCE, x);
+   ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
+   ObjectSetString(0, name, OBJPROP_TEXT, txt);
+   ObjectSetInteger(0, name, OBJPROP_COLOR, c);
+  }
+
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   gMain = -1;
+   for(int t = 0; t < NTF; t++)
+      if(gTf[t] == InpTfMain)
+         gMain = t;
+   if(gMain < 0)
+     {
+      gMain = 2;
+      Print("ABTG_EMA200_Dashboard: TF principale non valido, uso H4 (validi: M15, H1, H4, D1).");
+     }
+
+   string parts[];
+   int np = StringSplit(InpSymbols, ',', parts);
+   ArrayResize(gSym, 0);
+   gN = 0;
+   for(int i = 0; i < np; i++)
+     {
+      string s = parts[i];
+      StringTrimLeft(s);
+      StringTrimRight(s);
+      if(StringLen(s) == 0)
+         continue;
+      s = s + InpSuffix;
+      if(!SymbolSelect(s, true))
+        {
+         Print("ABTG_EMA200_Dashboard: simbolo non trovato sul broker, saltato: ", s);
+         continue;
+        }
+      ArrayResize(gSym, gN + 1);
+      gSym[gN] = s;
+      gN++;
+     }
+   if(gN == 0)
+     {
+      Print("ABTG_EMA200_Dashboard: nessun simbolo valido.");
+      return INIT_FAILED;
+     }
+
+   ArrayResize(gHMa, gN * NTF);
+   ArrayResize(gHAtr, gN * NTF);
+   ArrayResize(gDist, gN * NTF);
+   ArrayResize(gPct, gN * NTF);
+   ArrayResize(gHotPrev, gN);
+   ArrayResize(gIdx, gN);
+   for(int s = 0; s < gN; s++)
+     {
+      gHotPrev[s] = false;
+      gIdx[s] = s;
+      for(int t = 0; t < NTF; t++)
+        {
+         int k = s * NTF + t;
+         gHMa[k]  = iMA(gSym[s], gTf[t], InpEmaPeriod, 0, MODE_EMA, PRICE_CLOSE);
+         gHAtr[k] = iATR(gSym[s], gTf[t], InpAtrPeriod);
+         gDist[k] = EMPTY_VALUE;
+         gPct[k]  = EMPTY_VALUE;
+        }
+     }
+
+   gRowH   = InpFontSize * 2 + 4;
+   gColSym = 90 + (InpFontSize - 9) * 8;
+   gColW   = 130 + (InpFontSize - 9) * 10;
+
+   ObjectsDeleteAll(0, PFX);
+   Refresh();
+   EventSetTimer(MathMax(1, InpRefreshSec));
+   return INIT_SUCCEEDED;
+  }
+
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+   EventKillTimer();
+   for(int k = 0; k < ArraySize(gHMa); k++)
+     {
+      if(gHMa[k] != INVALID_HANDLE)
+         IndicatorRelease(gHMa[k]);
+      if(gHAtr[k] != INVALID_HANDLE)
+         IndicatorRelease(gHAtr[k]);
+     }
+   ObjectsDeleteAll(0, PFX);
+   ChartRedraw(0);
+  }
+
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total, const int prev_calculated, const int begin,
+                const double &price[])
+  {
+   return rates_total;
+  }
+
+//+------------------------------------------------------------------+
+void OnTimer()
+  {
+   Refresh();
+  }
+
+//+------------------------------------------------------------------+
+void OnChartEvent(const int id, const long &lparam, const double &dparam, const string &sparam)
+  {
+   if(!InpClickSymbol || id != CHARTEVENT_OBJECT_CLICK)
+      return;
+   if(StringFind(sparam, PFX + "S_") != 0)
+      return;
+   string sym = ObjectGetString(0, sparam, OBJPROP_TEXT);
+   if(StringLen(sym) > 0 && SymbolInfoInteger(sym, SYMBOL_EXIST))
+      ChartSetSymbolPeriod(0, sym, _Period);
+  }
+
+//+------------------------------------------------------------------+
+//| Legge EMA/ATR/prezzo e calcola le distanze                       |
+//+------------------------------------------------------------------+
+void Measure()
+  {
+   for(int s = 0; s < gN; s++)
+     {
+      double px = SymbolInfoDouble(gSym[s], SYMBOL_BID);
+      for(int t = 0; t < NTF; t++)
+        {
+         int k = s * NTF + t;
+         gDist[k] = EMPTY_VALUE;
+         gPct[k]  = EMPTY_VALUE;
+         if(gHMa[k] == INVALID_HANDLE || gHAtr[k] == INVALID_HANDLE || px <= 0.0)
+            continue;
+         double ema[1], atr[1];
+         if(CopyBuffer(gHMa[k], 0, 0, 1, ema) != 1)
+            continue;
+         if(CopyBuffer(gHAtr[k], 0, 0, 1, atr) != 1)
+            continue;
+         if(atr[0] <= 0.0 || ema[0] <= 0.0 || ema[0] == EMPTY_VALUE || atr[0] == EMPTY_VALUE)
+            continue;
+         gDist[k] = (px - ema[0]) / atr[0];
+         gPct[k]  = (px - ema[0]) / ema[0] * 100.0;
+        }
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Ordina gIdx per |distanza| crescente sul TF principale          |
+//+------------------------------------------------------------------+
+double KeyOf(const int s)
+  {
+   double d = gDist[s * NTF + gMain];
+   if(d == EMPTY_VALUE)
+      return DBL_MAX;
+   return MathAbs(d);
+  }
+
+void SortRows()
+  {
+   for(int i = 0; i < gN; i++)
+      gIdx[i] = i;
+   for(int i = 1; i < gN; i++)
+     {
+      int cur = gIdx[i];
+      double kc = KeyOf(cur);
+      int j = i - 1;
+      while(j >= 0 && KeyOf(gIdx[j]) > kc)
+        {
+         gIdx[j + 1] = gIdx[j];
+         j--;
+        }
+      gIdx[j + 1] = cur;
+     }
+  }
+
+//+------------------------------------------------------------------+
+color ColorFor(const double d)
+  {
+   if(d == EMPTY_VALUE)
+      return C'110,110,110';
+   double a = MathAbs(d);
+   if(a <= InpHotAtr)
+      return C'255,140,0';
+   if(a <= InpNearAtr)
+      return C'255,220,60';
+   return C'190,190,190';
+  }
+
+//+------------------------------------------------------------------+
+void Refresh()
+  {
+   Measure();
+   SortRows();
+
+   int W = gColSym + NTF * gColW + 20;
+   int H = (gN + 3) * gRowH + 10;
+
+   string bg = PFX + "BG";
+   if(ObjectFind(0, bg) < 0)
+     {
+      ObjectCreate(0, bg, OBJ_RECTANGLE_LABEL, 0, 0, 0);
+      ObjectSetInteger(0, bg, OBJPROP_CORNER, CORNER_LEFT_UPPER);
+      ObjectSetInteger(0, bg, OBJPROP_SELECTABLE, false);
+      ObjectSetInteger(0, bg, OBJPROP_HIDDEN, true);
+      ObjectSetInteger(0, bg, OBJPROP_BORDER_TYPE, BORDER_FLAT);
+      ObjectSetInteger(0, bg, OBJPROP_BGCOLOR, C'18,22,30');
+      ObjectSetInteger(0, bg, OBJPROP_COLOR, C'70,78,95');
+      ObjectSetInteger(0, bg, OBJPROP_BACK, false);
+     }
+   ObjectSetInteger(0, bg, OBJPROP_XDISTANCE, InpX);
+   ObjectSetInteger(0, bg, OBJPROP_YDISTANCE, InpY);
+   ObjectSetInteger(0, bg, OBJPROP_XSIZE, W);
+   ObjectSetInteger(0, bg, OBJPROP_YSIZE, H);
+
+   int x0 = InpX + 8;
+   int y0 = InpY + 6;
+
+   // conta i vicini sul TF principale
+   int nHot = 0, nNear = 0;
+   for(int s = 0; s < gN; s++)
+     {
+      double d = gDist[s * NTF + gMain];
+      if(d == EMPTY_VALUE)
+         continue;
+      if(MathAbs(d) <= InpHotAtr)
+         nHot++;
+      else
+         if(MathAbs(d) <= InpNearAtr)
+            nNear++;
+     }
+   Lbl(PFX + "T", x0, y0,
+       StringFormat("EMA %d - distanza in ATR (e %% del prezzo) | ordine: %s | vicinissimi %d, vicini %d",
+                    InpEmaPeriod, gTfName[gMain], nHot, nNear),
+       C'230,230,230');
+
+   int yh = y0 + gRowH;
+   Lbl(PFX + "H_S", x0, yh, "Simbolo", C'150,170,210');
+   for(int t = 0; t < NTF; t++)
+      Lbl(PFX + "H_" + IntegerToString(t), x0 + gColSym + t * gColW, yh,
+          gTfName[t] + (t == gMain ? " *" : ""), C'150,170,210');
+
+   for(int r = 0; r < gN; r++)
+     {
+      int s = gIdx[r];
+      int y = yh + (r + 1) * gRowH;
+      color cm = ColorFor(gDist[s * NTF + gMain]);
+      Lbl(PFX + "S_" + IntegerToString(r), x0, y, gSym[s], cm);
+      for(int t = 0; t < NTF; t++)
+        {
+         int k = s * NTF + t;
+         string txt = "...";
+         if(gDist[k] != EMPTY_VALUE)
+            txt = StringFormat("%+6.2f  %+6.2f%%", gDist[k], gPct[k]);
+         Lbl(PFX + "C_" + IntegerToString(r) + "_" + IntegerToString(t),
+             x0 + gColSym + t * gColW, y, txt, ColorFor(gDist[k]));
+        }
+     }
+
+   // avvisi: solo all'ingresso nella fascia "vicinissimo" sul TF principale
+   for(int s = 0; s < gN; s++)
+     {
+      double d = gDist[s * NTF + gMain];
+      bool hot = (d != EMPTY_VALUE && MathAbs(d) <= InpHotAtr);
+      if(hot && !gHotPrev[s] && gPrimed)
+        {
+         string msg = StringFormat("%s vicino alla EMA%d su %s (%+.2f ATR)",
+                                   gSym[s], InpEmaPeriod, gTfName[gMain], d);
+         if(InpAlert)
+            Alert(msg);
+         if(InpPush)
+            SendNotification(msg);
+        }
+      gHotPrev[s] = hot;
+     }
+   gPrimed = true;
+
+   ChartRedraw(0);
+  }
+//+------------------------------------------------------------------+
