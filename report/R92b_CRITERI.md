@@ -318,13 +318,20 @@ numero misurato** e non ne scrivo uno. Quello che si puo' dire con onesta':
   21 invece che per 6]. Se il controllo dura <= ~28 min il round sta in circa una notte (<= ~10 h);
   28-60 min = piu' di una notte; **> 60 min = la riga si ferma da sola** dopo il controllo (troppo pesante:
   si riscrive il disegno, non si insiste).
-- tetto per job = **3 x** la sua proporzione dal controllo; oltre non e' lento, e' bloccato.
+- tetto per job = **3 x** la sua proporzione dal controllo; oltre non e' lento, e' bloccato. Con T = minuti del
+  controllo: a, c, d, e = 3 x 3,67 x T = **11,0 x T**; b = 3 x 5,51 x T = **16,5 x T** (esempio T = 20 min:
+  220 min per a/c/d/e, 330 min per b). La riga stampa il tetto all'inizio di ogni job.
 - rischio [NON MISURATO]: memoria del tester (22 simboli x 12 anni di M1). Se un job a finestra lunga esce
   senza CSV la riga si ferma (par. 4.5 esteso a R92ba).
 
 ## 10. COSA CHIUDE QUESTO FILE
 
 Il round e' pronto a girare quando: (1) i file prova passano `controlla_prova.py` e
-`controlla_riga.py --oggetto prova`; (2) la riga di lancio passa `controlla_riga.py --oggetto riga`,
-e poi il cancello di giudizio (`controllo-preventivo`); (3) Claudio la manda. Niente di questo
+`controlla_riga.py --oggetto prova` (fatto, e il driver vero in `-SoloControllo` ha confermato celle
+2/2/3/2/2/2 = 26 passate e le date IS/OOS); (2) la riga di lancio passa `controlla_riga.py --oggetto riga`
+(fatto) **e** il collaudo a macchina `python3 backtest_pipeline/collaudo_riga_R92b/battery.py` (riga vera
+sotto pwsh con driver finto, 22 scenari: banda a 89/90/122/123, P0, G1, E3, SHA256, asse, guardia EA,
+stop; le mutazioni della riga vengono catturate) (fatto), e poi il cancello di giudizio
+(`controllo-preventivo`); (3) Claudio la manda. Il collaudo NON prova Windows PowerShell 5.1, MT5, il
+tester, il tempo, la memoria. Niente di questo
 e' stato lanciato o mandato al momento in cui questo file e' scritto.
