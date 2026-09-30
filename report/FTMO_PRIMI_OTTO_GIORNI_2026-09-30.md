@@ -5,7 +5,7 @@ Fonte: Report Cronistorico dei Trade di Metrix (`data/statements/FTMO_541452707_
 ## 1. Per sedia
 | origine | n | somma EUR | note |
 |---|---:|---:|---|
-| **XAUUSD, nessun commento, ordini a mercato** | 2 | **-2.502,06** | 28/09 19:25 buy 1,0 lotto (+293,29) e 19:28 buy 2,0 lotti (-2.795,35, chiuso a SL). Nessuna sedia oro esiste su FTMO e tutte le sedie ABTG scrivono un commento: sono ordini **non della flotta** [DA CONFERMARE da Claudio] |
+| **XAUUSD, nessun commento, ordini a mercato** | 2 | **-2.502,06** | 28/09 19:25 buy 1,0 lotto (+293,29) e 19:28 buy 2,0 lotti (-2.795,35, chiuso a SL). Nessuna sedia oro esiste su FTMO e tutte le sedie ABTG scrivono un commento: **CONFERMATO da Claudio il 30/09: le ha aperte lui a mano** (non sono della flotta) |
 | `770411` MaxMin DAX short | 3 | -2.236,00 | 24/09 -1.668,46 (-1,03 R) · 29/09 +968,37 (+0,65 R) · 30/09 -1.535,91 (-1,01 R) |
 | DAX Apertura EU (`770101` buy, `770105` sell) | 5 | -1.258,07 | 4 su 5 escono a +0,03/+0,06 R in pochi minuti; 1 stop pieno -1,01 R (25/09) |
 | EMA200 Dow (`771531`, ordini S1/S2) | 3 | -1.006,86 | 22/09 due stop pieni (-0,95 e -0,98 R) · 25/09 +0,89 R |
@@ -20,7 +20,10 @@ Fonte: Report Cronistorico dei Trade di Metrix (`data/statements/FTMO_541452707_
 ## 3. Cosa NON si puo' concludere
 - Nessun verdetto sulle sedie: 11 posizioni sono un campione minuscolo (soglia della casa: 20 operazioni per famiglia).
 - La sfortuna e il difetto non si separano con questi numeri.
-- Che le operazioni sull'oro siano manuali e' una deduzione dall'assenza di commento, non un fatto.
+- (Le due operazioni sull'oro: manuali, confermato da Claudio il 30/09.)
 
-## 4. Da decidere (di Claudio)
+## 4. Conseguenza delle operazioni a mano (nota)
+La risposta di FTMO del 28/29-09 (`docs/RISPOSTA_SUPPORTO_FTMO_2026-09-29.md`, punto 8) vieta l'hedging FRA CONTI DIVERSI, e vale anche per le operazioni manuali: un oro long su FTMO con una sedia oro SHORT viva sul piccolo `50503392` (per esempio la `770402` MaxMin oro a due lati) sarebbe copertura fra conti. Il 28/09 19:25-19:46 il piccolo non era acceso in modo verificabile [NON MISURATO]. Regola pratica: prima di operare a mano su FTMO su un simbolo che il piccolo tratta (oro, forex), si controlla che il piccolo non abbia posizioni opposte.
+
+## 5. Da decidere (di Claudio)
 Taglia, fermo o continuazione: **decisione "A" del 30/09** (nessuna modifica). Nessuna sedia toccata.
