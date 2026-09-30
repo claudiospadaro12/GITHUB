@@ -7,6 +7,14 @@
 
 ---
 
+## 🗓️ 30/09 sera — PICCOLO 50503392, cronistorico del giorno (`data/statements/CronistoricoPiccolo50503392_2026-09-30.xlsx`)
+- Report MT5 20:55: bilancio 5.430,99, equity 5.404,27, flottante -26,72; 10 posizioni chiuse, netto -9,57 (report), PF 0,85. **9 sono Bulge v5.20** (aperture a ore tonde) + 1 XAUUSD 0,01 di un altro EA (-22,17).
+- **Bulge chiuso oggi (9 posizioni)**: 7 a TP, 2 perse; vincite +53,17, perdite -40,00 (GBPAUD SL -39,86; USDJPY chiuso a TP ma **-0,14 netto**: TP di 0,4 pip = 0,22 contro 0,36 di commissione, rapporto SL/TP 181 a 1), PF **1,33** su 9 (campione minuscolo). Rapporti SL/TP: 0,7 | 181 | 9,8 | 4,2 | 10,6 | 5,3 | 2,8 | 11,4 | 19,3.
+- **Bulge aperto**: AUDJPY -14,81, AUDUSD -11,49, EURNZD +1,48 (flottante -24,82): **marcato al mercato la giornata del Bulge e' circa -12**, non positiva. "Fantastico" e' prematuro: frequenza e win rate veri restano R92b (bloccato dal tester).
+- **Da misurare in R92b**: filtro sul COSTO (TP minimo vs spread+commissione: alcune celle hanno TP sotto il costo).
+
+---
+
 ## 🗓️ 30/09 sera — INDICATORI/DASHBOARD PER CLAUDIO (tutti passati da 2 cancelli Opus; MAI compilati: serve F7)
 - `mql5/Indicators/ABTG_EMA200_Dashboard.mq5` v4 (distanza dalla EMA200 in pips/punti/ATR/livello, click su casella TF = piano dei 2 limit al rischio scelto da Claudio; oro/argento a PUNTI, classe 941; cella misurata 771531 = O1 0,20/O2 0,30, OOS PF 1,52 su **257 posizioni**, classi 946-948, 960-961).
 - Pacchetto segnali: `mql5/Include/ABTG_Confluenza.mqh` (motore unico), `ABTG_Segnali_EMA_BB_ST.mq5` (EMA 9/21/50 + EMA200 rossa, BB, Supertrend, triangolo BUY/SELL, tasti NORMALI/HEIKIN ASHI/VOLUME), `ABTG_Volume_Filtro.mq5`, `ABTG_Confluenza_Dashboard.mq5` (28 forex + 10 indici + 4 metalli, M5/M15/H1/H4, click apre il grafico senza mai toccare quello della dashboard). Test `backtest_pipeline/test_abtg_confluenza.py` (compila il .mqh vero in C++: 0 differenze). Classi 942-945, 950-953, 962-965, 970-972, 980-984.
