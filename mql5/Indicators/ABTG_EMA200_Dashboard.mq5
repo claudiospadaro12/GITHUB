@@ -68,7 +68,7 @@ double gDist[];                 // distanza in ATR, EMPTY_VALUE se non pronta
 double gPct[];                  // distanza in % del prezzo
 bool   gHotPrev[];              // era gia' "vicinissimo" al giro prima?
 int    gIdx[];                  // ordine di visualizzazione
-bool   gPrimed = false;         // primo giro: memorizza lo stato senza avvisare
+bool   gSeen[];                 // il TF principale del simbolo e' gia' stato misurato? (prima misura = muta)
 
 int    gRowH = 0, gColSym = 0, gColW = 0;
 
@@ -95,7 +95,6 @@ void Lbl(const string name, const int x, const int y, const string txt, const co
 //+------------------------------------------------------------------+
 int OnInit()
   {
-   gPrimed = false;   // anche dopo un cambio di simbolo: primo giro sempre muto
    // TF accesi, dal piu' basso al piu' alto
    ENUM_TIMEFRAMES allTf[6]  = {PERIOD_M5, PERIOD_M15, PERIOD_M30, PERIOD_H1, PERIOD_H4, PERIOD_D1};
    string          allNm[6]  = {"M5", "M15", "M30", "H1", "H4", "D1"};
@@ -175,10 +174,12 @@ int OnInit()
    ArrayResize(gDist, gN * gNT);
    ArrayResize(gPct, gN * gNT);
    ArrayResize(gHotPrev, gN);
+   ArrayResize(gSeen, gN);
    ArrayResize(gIdx, gN);
    for(int s = 0; s < gN; s++)
      {
       gHotPrev[s] = false;
+      gSeen[s]    = false;
       gIdx[s] = s;
       for(int t = 0; t < gNT; t++)
         {
@@ -330,7 +331,26 @@ void Refresh()
    Measure();
    SortRows();
 
+   // conta i vicini sul TF principale (serve PRIMA dello sfondo: il titolo ne fissa la larghezza minima)
+   int nHot = 0, nNear = 0;
+   for(int s = 0; s < gN; s++)
+     {
+      double d = gDist[s * gNT + gMain];
+      if(d == EMPTY_VALUE)
+         continue;
+      if(MathAbs(d) <= InpHotAtr)
+         nHot++;
+      else
+         if(MathAbs(d) <= InpNearAtr)
+            nNear++;
+     }
+   string title = StringFormat("EMA%d | ordine %s | vicinissimi %d, vicini %d",
+                               InpEmaPeriod, gTfName[gMain], nHot, nNear);
+
    int W = gColSym + gNT * gColW + 20;
+   // con UN solo TF acceso il pannello (240 px a font 9) e' piu' stretto del titolo (~47 car.
+   // x ~6,6 px Consolas 9pt = ~310 px): la larghezza minima la da' il titolo (stima 0,75 px/pt/car.)
+   W = (int)MathMax(W, 16 + (int)MathCeil(StringLen(title) * InpFontSize * 0.75));
    int H = (gN + 3) * gRowH + 10;
 
    string bg = PFX + "BG";
@@ -354,23 +374,7 @@ void Refresh()
    int x0 = InpX + 8;
    int y0 = InpY + 6;
 
-   // conta i vicini sul TF principale
-   int nHot = 0, nNear = 0;
-   for(int s = 0; s < gN; s++)
-     {
-      double d = gDist[s * gNT + gMain];
-      if(d == EMPTY_VALUE)
-         continue;
-      if(MathAbs(d) <= InpHotAtr)
-         nHot++;
-      else
-         if(MathAbs(d) <= InpNearAtr)
-            nNear++;
-     }
-   Lbl(PFX + "T", x0, y0,
-       StringFormat("EMA%d | ordine %s | vicinissimi %d, vicini %d",
-                    InpEmaPeriod, gTfName[gMain], nHot, nNear),
-       C'230,230,230');
+   Lbl(PFX + "T", x0, y0, title, C'230,230,230');
 
    int yh = y0 + gRowH;
    Lbl(PFX + "H_S", x0, yh, "Simbolo", C'150,170,210');
@@ -399,8 +403,14 @@ void Refresh()
    for(int s = 0; s < gN; s++)
      {
       double d = gDist[s * gNT + gMain];
-      bool hot = (d != EMPTY_VALUE && MathAbs(d) <= InpHotAtr);
-      if(hot && !gHotPrev[s] && gPrimed)
+      // misura non pronta (handle appena creati, dati in download, CopyBuffer fallito):
+      // lo stato e' IGNOTO, non "lontano" -> la memoria non si tocca e non si avvisa
+      if(d == EMPTY_VALUE)
+         continue;
+      bool hot = (MathAbs(d) <= InpHotAtr);
+      // si avvisa solo di un INGRESSO visto: la prima misura valida del simbolo memorizza
+      // e basta (il primo Refresh gira in OnInit, quando nessun handle e' ancora calcolato)
+      if(hot && !gHotPrev[s] && gSeen[s])
         {
          string msg = StringFormat("%s vicino alla EMA%d su %s (%+.2f ATR)",
                                    gSym[s], InpEmaPeriod, gTfName[gMain], d);
@@ -410,8 +420,8 @@ void Refresh()
             SendNotification(msg);
         }
       gHotPrev[s] = hot;
+      gSeen[s]    = true;
      }
-   gPrimed = true;
 
    ChartRedraw(0);
   }
