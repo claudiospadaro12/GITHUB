@@ -198,6 +198,15 @@ Sull'evoluzione: se il tester rifa il forward -> il gap forward/contratto della 
 - **Un solo regime** (estate, ora legale, una sola settimana), **11 posizioni forward**, 7 sedie: nessuna significativita' statistica vera; le probabilita' del par. 5.3 sono descrittive.
 - **Saldo**: il tester ha il suo saldo per sedia; il forward ha quello di conto (con -2.502 dell'oro manuale del 28/09 dentro): R nominale, tolleranza 0,25.
 - **Ora dell'ultimo dato**: il 30/09 e' parziale (ultimo evento 10:03:09 FTMO): il DAX del pomeriggio del 30/09 non e' confrontabile.
+- **Il taglio e la 770411 del 30/09 (asimmetria dichiarata dal controllo preventivo, 30/09, prima dei numeri)**: una posizione del tester che esce
+  **dopo** l'ultimo evento + 15 min (dopo le 08:18:09 BCM del 30/09) e' ESCLUSA prima dell'abbinamento, quindi non puo' fare nemmeno da **L2**.
+  Per le sedie il cui forward del 30/09 e' ignoto dopo le 08:03 e' giusto; per la **770411** no: la sua posizione forward del 30/09 e' COMPLETA
+  (07:59:13 -> 08:03:09 BCM, stop pieno). Se il tester riempie lo stesso sell stop ma esce piu' tardi, la forward diventa **F_SOLO** invece di **L2**
+  e la riga del tester finisce fra le ESCLUSE (stampata con la sua ora). Direzione: **spinge verso "non riprodotta"**; cambia L1+L2 di 1 su 11
+  (puo' spostare la soglia 70% di H_FEDELI al bordo), **non** cambia il conteggio L1 della 770411 (par. 5.5). Chi legge: una ESCLUSA della 770411
+  il 30/09 nella stessa direzione si legge come L2 mancato, non come assenza. La correzione nel codice (ammettere le escluse come candidate L2 per un
+  forward COMPLETO e scoperto dello stesso giorno, mai come T_SOLO) cambia la logica di `confronto_forward_tester.py` e chiede un pin nuovo e un
+  secondo passaggio del cancello: **non fatta in questo pin**.
 - **Clock d'inverno**: NON rilevante qui (il 25/10 e' dopo); il delta e' +2 in tutto il periodo.
 
 ## 7. Rischi operativi della corsa [NON MISURATO], dichiarati
@@ -206,7 +215,14 @@ Sull'evoluzione: se il tester rifa il forward -> il gap forward/contratto della 
 - **Tick BCM fino al 30/09**: il terminale deve scaricarli; R248 (25/09) arrivava al 18/09. Se non li ha il per-trade esce vuoto: un per-trade a zero righe **non e' dimostrato** "zero operazioni" senza la prova che la passata OOS ha girato:
   la riga richiede che il per-trade principale sia **piu' recente del CSV `_IS`** (scritto a fine gamba IS) e che il CSV `_OOS` sia fresco, altrimenti il job e' NULLO.
 - **Passate a zero operazioni**: se MT5 non le elenca nel CSV (0 righe / 0 byte), l'unica prova che hanno girato e' il per-trade fresco e piu' recente dell'IS + le righe `OnTester result` del giornale dell'agente (informativo, attese 28). [NON MISURATO] come MT5 tratta le passate a zero operazioni.
-- **`OnTesterInit works too long`** (R92b): questi round sono a UN simbolo e gli EA hanno un `OnTesterInit` banale; non dovrebbero avere quel problema, **[NON MISURATO]**.
+- **`OnTesterInit works too long`** (classe 909). ✏️ *Corretto dal controllo preventivo del 30/09, prima dei numeri*: qui c'era scritto
+  che "questi round sono a UN simbolo e gli EA hanno un `OnTesterInit` banale: non dovrebbero avere quel problema". **L'archivio lo smentisce**:
+  il 28/09 la gamba OOS di **R258k** (`ABTG_Londra_ORB`, UN simbolo, `OnTesterInit() { return(INIT_SUCCEEDED); }` identico a questi) e' morta con
+  `OnTesterInit works too long. Tester cannot be initialized.` (`risultati_archivio/ROUND_CORTI_C2_2026-09-28/LOG_TESTER/0002_Tester_logs_20260928.log`).
+  E' un guasto del TESTER, non dell'EA, e **puo' capitare qui**. Il driver in quel caso esce **rc 2**, come uno zero-operazioni: la riga non si
+  fida del codice d'uscita (CSV `_IS`/`_OOS` non fresco o per-trade non piu' recente del CSV `_IS` = FILE NULLO), conta le righe
+  `Tester cannot be initialized` nel giornale del tester, le **attribuisce al job per nome** e scrive il rimedio (svuotare `Tester\cache`, rilanciare).
+  Frequenza del guasto su questa macchina **[NON MISURATA]**.
 - **Cache del tester**: un rilancio con gli stessi magic puo' ripescare passate gia' calcolate e non riscrivere il per-trade; la riga cancella i suoi file propri prima di ogni job e il per-trade mancante rende il job NULLO. Rilanciando, svuotare `Tester\cache`.
 - **Python** sul PC: serve 3.8+; se manca la riga lo dice e raccoglie tutto (il confronto si puo' fare altrove). Il confronto legge l'xlsx **senza librerie esterne**.
 - **Il terminale di quel PC e' loggato sul demo 50503392** e con `/config` carica il suo ultimo profilo, EA compresi (14/08/2026, ordini veri): la riga ha la guardia MT5 aperto e la guardia EA sui `.chr`.

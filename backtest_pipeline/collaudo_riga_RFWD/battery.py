@@ -85,6 +85,13 @@ T = [
   ["NON PIU RECENTE del CSV _IS", "zero operazioni NON dimostrate"], ["FILE NULLI: nessuno"]),
  ("nessun_log_agente", scen({"RFWD1": {"no_logs": True}}), "", "ok", PIN, "DESKTOP-H4D7CAJ", "si", "",
   ["FILE NULLI: nessuno"], ["RIGA FERMATA"]),
+ # classe 938 (controllo preventivo 30/09): gamba OOS morta per "Tester cannot be initialized" (R258k, 28/09): rc 2 come uno zero-operazioni,
+ # la riga deve dire NULLO, attribuire il guasto al job per nome e dare il rimedio (cache + rilancio), e la sintesi deve nominare chi ne resta fuori
+ ("guasto_tester_init_OOS", scen({"RFWD2": {"init_fail": True, "no_OOS": True, "pt_old_mtime": True, "rc": 2}}), "", "ok", PIN, "DESKTOP-H4D7CAJ", "si", "",
+  ["E0: CSV _OOS NON FRESCO (ASSENTE)", "GUASTO DEL TESTER (classe 909), Tester cannot be initialized: 1 volte -> RFWD2 alle", "PRIMA DI RILANCIARE",
+   "Tester\\cache", "RFWD2 ("], ["FILE NULLI: nessuno", "job non attribuito"]),
+ ("sintesi_per_nome", scen({"RFWD1": {"pt_missing_main": True}}), "", "ok", PIN, "DESKTOP-H4D7CAJ", "si", "",
+  ["NON MISURATA", "E0 PER-TRADE del magic 793411 MANCANTE"], ["FILE NULLI: nessuno"]),
 ]
 
 def run(nome, sc, sed, ch, pin, pc, py, mut):

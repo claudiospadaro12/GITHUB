@@ -127,6 +127,11 @@ if not sc.get('no_logs'):
     _w16(os.path.join(AP, 'MetaQuotes', 'Tester', 'logs', '20260930.log'),
          ['MI\t0\t%s.353\tTester\t%s: preliminary downloading of history ticks completed' % (_hh, SIM),
           'QI\t0\t%s.306\tCore 1\t%s: ticks synchronization completed [3851 Kb]' % (_hh, SIM)])
+# guasto del tester (classe 909): la riga definitiva del giornale del tester, formato vero (ROUND_CORTI_C2 del 28/09)
+if sc.get('init_fail'):
+    _w16(os.path.join(AP, 'MetaQuotes', 'Tester', 'logs', '20260930.log'),
+         ['GM\t3\t%s.660\tTester\tOnTesterInit works too long...' % _dt.datetime.now().strftime('%H:%M:%S'),
+          'FM\t3\t%s.787\tTester\tOnTesterInit works too long. Tester cannot be initialized.' % _dt.datetime.now().strftime('%H:%M:%S')])
 if sc.get('pt_old_mtime') and f1:
     _t = os.path.getmtime(f1) - 0.02
     for mg in [str(vals[0]), str(vals[1])]:
