@@ -45,7 +45,7 @@
 #   Il confronto ufficiale resta 22-30/09; il 21/09 e' riportato a parte. Modello 4 (tick reali): i tick BCM degli indici partono dal 2024.09.26.
 #   [NON MISURATO] che il PC di backtest abbia i tick BCM fino al 30/09: R248 (25/09) ha girato fino al 18/09; il tester li scarica dal
 #   server BCM se il terminale e' collegato (giornale del tester: 'ticks synchronization completed').
-#   Il forward xlsx e' l'ultimo evento 30/09 10:03:09 FTMO = 08:03:09 BCM: le operazioni del tester dopo quell'ora NON si confrontano.
+#   L'ultimo evento del forward xlsx e' il 30/09 10:03:09 FTMO = 08:03:09 BCM: le uscite del tester oltre quell'ora + 15 minuti NON si confrontano.
 #
 #  DIFFERENZE FEED / MERCATO CHE IL TESTER NON PUO' TOGLIERE (RFWD_CRITERI par. 6): simbolo (GER40.cash FTMO contro D30EUR BCM), spread,
 #  slippage, rifiuti di modify di FTMO (report/MODIFY_A_RAFFICA_FTMO_2026-09-25.md), volumi dei tick, Guardian, saldo corrente.

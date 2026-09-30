@@ -308,7 +308,7 @@ def scrivi(m, chr_all, comp):
     W("#   Il confronto ufficiale resta 22-30/09; il 21/09 e' riportato a parte. Modello 4 (tick reali): i tick BCM degli indici partono dal 2024.09.26.")
     W("#   [NON MISURATO] che il PC di backtest abbia i tick BCM fino al 30/09: R248 (25/09) ha girato fino al 18/09; il tester li scarica dal")
     W("#   server BCM se il terminale e' collegato (giornale del tester: 'ticks synchronization completed').")
-    W("#   Il forward xlsx e' l'ultimo evento 30/09 10:03:09 FTMO = 08:03:09 BCM: le operazioni del tester dopo quell'ora NON si confrontano.")
+    W("#   L'ultimo evento del forward xlsx e' il 30/09 10:03:09 FTMO = 08:03:09 BCM: le uscite del tester oltre quell'ora + 15 minuti NON si confrontano.")
     W("#")
     W("#  DIFFERENZE FEED / MERCATO CHE IL TESTER NON PUO' TOGLIERE (RFWD_CRITERI par. 6): simbolo (%s FTMO contro %s BCM), spread,"
       % (sd["sim_f"], sd["sim_t"]))

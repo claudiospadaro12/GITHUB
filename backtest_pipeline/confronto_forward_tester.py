@@ -34,7 +34,9 @@ LIVELLI DI ABBINAMENTO (soglie in COSTANTI, congelate in report/RFWD_CRITERI.md)
       ma non L1. E' cieco all'orologio: mostra lo scarto orario, non lo giudica;
   F_SOLO  operazione forward senza gemello nel tester;
   T_SOLO  operazione del tester senza gemello nel forward (dentro la finestra viva
-          della sedia e prima dell'ultimo evento noto del forward).
+          della sedia e non oltre l'ultimo evento noto del forward + TOL_TEMPO_STRETTA_MIN:
+          il margine serve perche' il tester puo' chiudere la STESSA operazione qualche
+          minuto dopo il forward, e con un taglio secco sarebbe scambiata per "oltre").
 
 USO
   python3 confronto_forward_tester.py --autotest [--forward FILE.xlsx]
@@ -54,9 +56,9 @@ MARCATORE = "MARCATORE_CONFRONTO_FORWARD_TESTER_v1"
 # =====================================================================
 COSTANTI = {
     "TOL_TEMPO_STRETTA_MIN": 15,
-    "TOL_PREZZO_DAX_PT": 20.0,
-    "TOL_PREZZO_US30_PT": 60.0,
-    "TOL_PREZZO_US100_PT": 40.0,
+    "TOL_PREZZO_DAX_PT": 10.0,
+    "TOL_PREZZO_US30_PT": 25.0,
+    "TOL_PREZZO_US100_PT": 15.0,
     "TOL_R": 0.25,
     "SOGLIA_STOP_R": -0.70,
     "SOGLIA_TRAIL_R": 0.30,
@@ -575,8 +577,9 @@ def esegui_confronto(fw, tester_per_sedia, delta_ore, cutoff_fw, C=COSTANTI, n_n
                     esclusi.append((x, "sedia NON ancora attaccata al forward (viva da %s)" % s["viva_da"]))
                 elif x["t"].date() < uff:
                     esclusi.append((x, "GIORNO DI AVVIO (prima del %s): fuori dal confronto ufficiale, riportato e non contato" % FINESTRA_UFFICIALE_DA))
-                elif x["t"] > cutoff_bcm:
-                    esclusi.append((x, "oltre l'ultimo evento noto del forward (%s BCM): non confrontabile" % fmt_dt(cutoff_bcm)))
+                elif x["t"] > cutoff_bcm + datetime.timedelta(minutes=C["TOL_TEMPO_STRETTA_MIN"]):
+                    esclusi.append((x, "oltre l'ultimo evento noto del forward + tolleranza (%s BCM + %d min): non confrontabile" %
+                                    (fmt_dt(cutoff_bcm), C["TOL_TEMPO_STRETTA_MIN"])))
                 else:
                     T.append(x)
         ab = abbina(F, T, C["TOL_TEMPO_STRETTA_MIN"], tol_pt) if td and td.get("righe") is not None else None

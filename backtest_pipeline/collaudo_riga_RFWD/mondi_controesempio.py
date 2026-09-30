@@ -101,10 +101,15 @@ def main():
                 di += 1
     check(ug == 11 and di == 0, "A2 esito e R uguali su tutte le coppie (uguali=%d diverse=%d): il saldo per-sedia del tester non rompe la tolleranza" % (ug, di))
 
+    # A3: uscite del tester +5 minuti (dentro la tolleranza, e la 770411 del 30/09 cade DOPO il taglio secco del forward ma dentro il margine)
+    rg = {s["id"]: righe_da_forward(per.get(s["id"], []), s, 5, 0.0) for s in CF.SEDIE}
+    conf, S, _t = mondo("A3", fw, cutoff, rg)
+    check(S["L1"] == 11 and S["fedeli"], "A3 uscite +5 min (30/09 770411 a 08:08 BCM, oltre il taglio secco 08:03:09 ma dentro il margine di 15 min): 11/11 L1 (L1=%d)" % S["L1"])
+
     # B orologio +60
     rg = {s["id"]: righe_da_forward(per.get(s["id"], []), s, 60, 0.0) for s in CF.SEDIE}
     conf, S, _t = mondo("B", fw, cutoff, rg)
-    # attenzione: uscite spostate di +60 min possono finire dopo l'ultimo evento del forward (30/09 10:03 FTMO = 08:03 BCM): la 770411 del 30/09 esce alle 08:03 BCM
+    # attenzione: uscite spostate di +60 min finiscono oltre l'ultimo evento del forward + 15 min (30/09 10:03 FTMO = 08:03 BCM): la 770411 del 30/09 esce alle 09:03 BCM, ESCLUSA
     check(S["L1"] == 0 and not S["fedeli"], "B orologio +60: nessuna L1 e NON H_FEDELI (L1=%d L2=%d)" % (S["L1"], S["L2"]))
     check(S["orari"] or S["L2"] < 0.5 * S["nF"], "B orologio +60: H_DIVERSI_ORARI oppure (uscite spostate oltre il taglio del forward) L2 bassa: orari=%s L2=%d/%d mediana=%s" %
           (S["orari"], S["L2"], S["nF"], S["mediana_delta_min"]))
