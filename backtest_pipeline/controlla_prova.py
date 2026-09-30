@@ -334,7 +334,7 @@ def controlla(prova: str, ea: str, tetto: int = 0) -> tuple[int, int]:
                         # start e stop -- come fa il driver.
                         lo, hi = min(start, stop), max(start, stop)
                         celle = len([v for v in membri[tipo_asse] if lo <= v <= hi])
-                        aritm = int(abs(stop - start) / step) + 1
+                        aritm = int(abs(stop - start) / abs(step) + 1e-9) + 1
                         nota_enum = f"asse ENUM ({tipo_asse}): il passo e' IGNORATO, celle = membri fra {lo:.0f} e {hi:.0f} = {celle}"
                         if celle == 0:
                             problemi.append(
@@ -345,7 +345,7 @@ def controlla(prova: str, ea: str, tetto: int = 0) -> tuple[int, int]:
                             nota_enum += f"  [il conto aritmetico direbbe {aritm}: NON guardarlo]"
                         note.append(nota_enum)
                     else:
-                        celle = int(abs(stop - start) / step) + 1
+                        celle = int(abs(stop - start) / abs(step) + 1e-9) + 1   # +1e-9 come il driver (walkforward_generico r.805): 1.0->1.2 passo 0.1 e' 1.9999999999999996 e int() lo mangiava (3 celle contate 2, 30/09/2026)
             except ValueError:
                 problemi.append(f"asse non numerico: {assi[0]}")
 
