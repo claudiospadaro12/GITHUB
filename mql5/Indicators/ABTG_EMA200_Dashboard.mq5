@@ -1,7 +1,9 @@
 //+------------------------------------------------------------------+
 //|                                     ABTG_EMA200_Dashboard.mq5    |
 //|  Dashboard di SOLA LETTURA: per ogni cross elencato mostra quanto|
-//|  il prezzo e' lontano dalla EMA (default 200) su M15/H1/H4/D1.   |
+//|  il prezzo e' lontano dalla EMA (default 200) sui TF scelti.     |
+//|  v2: liste Forex / Indici / Metalli accendibili e modificabili;  |
+//|  TF a scelta con interruttori (M5, M15, M30, H1, H4, D1).        |
 //|                                                                  |
 //|  - Distanza in ATR (segno + = prezzo SOPRA la EMA, - = SOTTO)    |
 //|    e in % del prezzo. In ATR i cross sono confrontabili tra loro.|
@@ -19,17 +21,28 @@
 //|  si apre un grafico nuovo (ChartOpen) del simbolo cliccato.      |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
-#property version   "1.00"
+#property version   "2.00"
 #property strict
 #property indicator_chart_window
 #property indicator_buffers 0
 #property indicator_plots   0
 
-input string          InpSymbols      = "EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY"; // Simboli (virgola)
+input bool            InpForex        = true;      // Mostra FOREX
+input string          InpSymForex     = "EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY"; // Lista forex (virgola)
+input bool            InpIndici       = true;      // Mostra INDICI
+input string          InpSymIndici    = "D30EUR,U30USD,NASUSD,SPXUSD,200AUD,225JPY"; // Lista indici (nomi BCM; su altri broker riscrivili)
+input bool            InpMetalli      = true;      // Mostra METALLI
+input string          InpSymMetalli   = "XAUUSD,XAGUSD"; // Lista metalli
 input string          InpSuffix       = "";        // Suffisso broker (se serve)
 input int             InpEmaPeriod    = 200;       // Periodo EMA
 input int             InpAtrPeriod    = 14;        // Periodo ATR (unita' di distanza)
-input ENUM_TIMEFRAMES InpTfMain       = PERIOD_H4; // TF principale (ordinamento): M15, H1, H4 o D1
+input bool            InpTfM5         = false;     // Colonna M5
+input bool            InpTfM15        = true;      // Colonna M15
+input bool            InpTfM30        = false;     // Colonna M30
+input bool            InpTfH1         = true;      // Colonna H1
+input bool            InpTfH4         = true;      // Colonna H4
+input bool            InpTfD1         = true;      // Colonna D1
+input ENUM_TIMEFRAMES InpTfMain       = PERIOD_H4; // TF di ordinamento (deve essere uno dei TF accesi)
 input double          InpNearAtr      = 1.00;      // "Vicino": distanza <= questi ATR (giallo)
 input double          InpHotAtr       = 0.30;      // "Vicinissimo": distanza <= questi ATR (arancione)
 input int             InpRefreshSec   = 2;         // Aggiornamento (secondi)
@@ -40,17 +53,17 @@ input int             InpX            = 10;        // Posizione X
 input int             InpY            = 20;        // Posizione Y
 input int             InpFontSize     = 9;         // Dimensione carattere
 
-#define NTF 4
 #define PFX "ABTGD_"
 
-ENUM_TIMEFRAMES gTf[NTF] = {PERIOD_M15, PERIOD_H1, PERIOD_H4, PERIOD_D1};
-string          gTfName[NTF] = {"M15", "H1", "H4", "D1"};
+int             gNT = 0;         // numero di TF accesi
+ENUM_TIMEFRAMES gTf[];           // TF accesi
+string          gTfName[];
 
 string gSym[];
 int    gN     = 0;
 int    gMain  = 2;              // indice di gTf usato per ordinare
-int    gHMa[];                  // handle EMA  [s*NTF+t]
-int    gHAtr[];                 // handle ATR  [s*NTF+t]
+int    gHMa[];                  // handle EMA  [s*gNT+t]
+int    gHAtr[];                 // handle ATR  [s*gNT+t]
 double gDist[];                 // distanza in ATR, EMPTY_VALUE se non pronta
 double gPct[];                  // distanza in % del prezzo
 bool   gHotPrev[];              // era gia' "vicinissimo" al giro prima?
@@ -83,18 +96,49 @@ void Lbl(const string name, const int x, const int y, const string txt, const co
 int OnInit()
   {
    gPrimed = false;   // anche dopo un cambio di simbolo: primo giro sempre muto
+   // TF accesi, dal piu' basso al piu' alto
+   ENUM_TIMEFRAMES allTf[6]  = {PERIOD_M5, PERIOD_M15, PERIOD_M30, PERIOD_H1, PERIOD_H4, PERIOD_D1};
+   string          allNm[6]  = {"M5", "M15", "M30", "H1", "H4", "D1"};
+   bool            allOn[6];
+   allOn[0] = InpTfM5;  allOn[1] = InpTfM15; allOn[2] = InpTfM30;
+   allOn[3] = InpTfH1;  allOn[4] = InpTfH4;  allOn[5] = InpTfD1;
+   gNT = 0;
+   ArrayResize(gTf, 0);
+   ArrayResize(gTfName, 0);
+   for(int i = 0; i < 6; i++)
+     {
+      if(!allOn[i])
+         continue;
+      ArrayResize(gTf, gNT + 1);
+      ArrayResize(gTfName, gNT + 1);
+      gTf[gNT] = allTf[i];
+      gTfName[gNT] = allNm[i];
+      gNT++;
+     }
+   if(gNT == 0)
+     {
+      Print("ABTG_EMA200_Dashboard: nessun TF acceso, accendine almeno uno.");
+      return INIT_FAILED;
+     }
    gMain = -1;
-   for(int t = 0; t < NTF; t++)
+   for(int t = 0; t < gNT; t++)
       if(gTf[t] == InpTfMain)
          gMain = t;
    if(gMain < 0)
      {
-      gMain = 2;
-      Print("ABTG_EMA200_Dashboard: TF principale non valido, uso H4 (validi: M15, H1, H4, D1).");
+      gMain = 0;
+      Print("ABTG_EMA200_Dashboard: TF di ordinamento non tra quelli accesi, uso ", gTfName[0]);
      }
 
+   string lista = "";
+   if(InpForex)
+      lista += InpSymForex + ",";
+   if(InpIndici)
+      lista += InpSymIndici + ",";
+   if(InpMetalli)
+      lista += InpSymMetalli + ",";
    string parts[];
-   int np = StringSplit(InpSymbols, ',', parts);
+   int np = StringSplit(lista, ',', parts);
    ArrayResize(gSym, 0);
    gN = 0;
    for(int i = 0; i < np; i++)
@@ -105,6 +149,12 @@ int OnInit()
       if(StringLen(s) == 0)
          continue;
       s = s + InpSuffix;
+      bool dup = false;
+      for(int q = 0; q < gN; q++)
+         if(gSym[q] == s)
+            dup = true;
+      if(dup)
+         continue;
       if(!SymbolSelect(s, true))
         {
          Print("ABTG_EMA200_Dashboard: simbolo non trovato sul broker, saltato: ", s);
@@ -120,19 +170,19 @@ int OnInit()
       return INIT_FAILED;
      }
 
-   ArrayResize(gHMa, gN * NTF);
-   ArrayResize(gHAtr, gN * NTF);
-   ArrayResize(gDist, gN * NTF);
-   ArrayResize(gPct, gN * NTF);
+   ArrayResize(gHMa, gN * gNT);
+   ArrayResize(gHAtr, gN * gNT);
+   ArrayResize(gDist, gN * gNT);
+   ArrayResize(gPct, gN * gNT);
    ArrayResize(gHotPrev, gN);
    ArrayResize(gIdx, gN);
    for(int s = 0; s < gN; s++)
      {
       gHotPrev[s] = false;
       gIdx[s] = s;
-      for(int t = 0; t < NTF; t++)
+      for(int t = 0; t < gNT; t++)
         {
-         int k = s * NTF + t;
+         int k = s * gNT + t;
          gHMa[k]  = iMA(gSym[s], gTf[t], InpEmaPeriod, 0, MODE_EMA, PRICE_CLOSE);
          gHAtr[k] = iATR(gSym[s], gTf[t], InpAtrPeriod);
          gDist[k] = EMPTY_VALUE;
@@ -208,9 +258,9 @@ void Measure()
    for(int s = 0; s < gN; s++)
      {
       double px = SymbolInfoDouble(gSym[s], SYMBOL_BID);
-      for(int t = 0; t < NTF; t++)
+      for(int t = 0; t < gNT; t++)
         {
-         int k = s * NTF + t;
+         int k = s * gNT + t;
          gDist[k] = EMPTY_VALUE;
          gPct[k]  = EMPTY_VALUE;
          if(gHMa[k] == INVALID_HANDLE || gHAtr[k] == INVALID_HANDLE || px <= 0.0)
@@ -237,7 +287,7 @@ void Measure()
 //+------------------------------------------------------------------+
 double KeyOf(const int s)
   {
-   double d = gDist[s * NTF + gMain];
+   double d = gDist[s * gNT + gMain];
    if(d == EMPTY_VALUE)
       return DBL_MAX;
    return MathAbs(d);
@@ -280,7 +330,7 @@ void Refresh()
    Measure();
    SortRows();
 
-   int W = gColSym + NTF * gColW + 20;
+   int W = gColSym + gNT * gColW + 20;
    int H = (gN + 3) * gRowH + 10;
 
    string bg = PFX + "BG";
@@ -308,7 +358,7 @@ void Refresh()
    int nHot = 0, nNear = 0;
    for(int s = 0; s < gN; s++)
      {
-      double d = gDist[s * NTF + gMain];
+      double d = gDist[s * gNT + gMain];
       if(d == EMPTY_VALUE)
          continue;
       if(MathAbs(d) <= InpHotAtr)
@@ -324,7 +374,7 @@ void Refresh()
 
    int yh = y0 + gRowH;
    Lbl(PFX + "H_S", x0, yh, "Simbolo", C'150,170,210');
-   for(int t = 0; t < NTF; t++)
+   for(int t = 0; t < gNT; t++)
       Lbl(PFX + "H_" + IntegerToString(t), x0 + gColSym + t * gColW, yh,
           gTfName[t] + (t == gMain ? " *" : "") + "  ATR   %", C'150,170,210');
 
@@ -332,11 +382,11 @@ void Refresh()
      {
       int s = gIdx[r];
       int y = yh + (r + 1) * gRowH;
-      color cm = ColorFor(gDist[s * NTF + gMain]);
+      color cm = ColorFor(gDist[s * gNT + gMain]);
       Lbl(PFX + "S_" + IntegerToString(r), x0, y, gSym[s], cm);
-      for(int t = 0; t < NTF; t++)
+      for(int t = 0; t < gNT; t++)
         {
-         int k = s * NTF + t;
+         int k = s * gNT + t;
          string txt = "...";
          if(gDist[k] != EMPTY_VALUE)
             txt = StringFormat("%+6.2f  %+6.2f%%", gDist[k], gPct[k]);
@@ -348,7 +398,7 @@ void Refresh()
    // avvisi: solo all'ingresso nella fascia "vicinissimo" sul TF principale
    for(int s = 0; s < gN; s++)
      {
-      double d = gDist[s * NTF + gMain];
+      double d = gDist[s * gNT + gMain];
       bool hot = (d != EMPTY_VALUE && MathAbs(d) <= InpHotAtr);
       if(hot && !gHotPrev[s] && gPrimed)
         {
