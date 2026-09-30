@@ -31,7 +31,7 @@
 #  Se il controllo non passa la riga si ferma: i lavori a-e NON partono.
 #
 #  DIFFERENZE DA prove/R92_scan_BULGE.txt (v5.10), TUTTE:
-#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 1; nel solo controllo 0)
+#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 0: e' il controllo)
 #   - Symbols_List: i 22 cross invece di UN simbolo (R92 era un cross per passata)
 #   - InpMagic: blocco 7992xx invece di 772700/772710; asse Use_Purple_PineReaction
 #     TOLTO (qui il Viola e' solo EA, fisso a 0); un asse solo per file, per il driver

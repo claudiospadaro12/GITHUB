@@ -18,6 +18,9 @@
 #  SOLO al BLU (ADX_Apply_On_Blue=1, ADX_Apply_On_Purple=0, ADX_Apply_On_Orange=0): il suo effetto
 #  DIRETTO e' quindi confinato ai segnali BLU. Se in un mercato non c'e' BLU l'asse esce inerte.
 #  Il valore 1 e' la cella P (identica nei lavori a, b, d).
+#  Il lato ADX=0 e' la cella del preset ABTG_Bulge_v520_piccolo_ADX_spento.set (la sedia BULGE V520 in campo
+#  sul piccolo dal 29/09 sera, magic 772700) salvo InpMagic, InpComment, InpVerbose, InpAutoTest (verificato a
+#  macchina input per input). Questo round non valida ne' boccia quella sedia: e' Modello 1, altro spread.
 #
 #  COSA SI ATTENDE (dichiarato prima, controesempi in report/R92b_CRITERI.md par. 4-5)
 #  Direzione: n(ADX spento) >= n(ADX acceso) (E4); lo scarto diretto e' tutto BLU (effetti di percorso a parte).
@@ -25,7 +28,7 @@
 #  BLU del per-trade dell'AMPIA prima di dire 'asse morto' o 'niente da filtrare' (criteri E4).
 #
 #  DIFFERENZE DA prove/R92_scan_BULGE.txt (v5.10), TUTTE:
-#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 1; nel solo controllo 0)
+#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 1; nel solo controllo R92b0 e' 0)
 #   - Symbols_List: i 22 cross invece di UN simbolo (R92 era un cross per passata)
 #   - InpMagic: blocco 7992xx invece di 772700/772710; asse Use_Purple_PineReaction
 #     TOLTO (qui il Viola e' solo EA, fisso a 0); un asse solo per file, per il driver

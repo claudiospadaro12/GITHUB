@@ -25,7 +25,7 @@
 #  P0: Bulge_Multi = {1.0, 1.1, 1.2} nel CSV, tolleranza 1e-6.
 #
 #  DIFFERENZE DA prove/R92_scan_BULGE.txt (v5.10), TUTTE:
-#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 1; nel solo controllo 0)
+#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 1; nel solo controllo R92b0 e' 0)
 #   - Symbols_List: i 22 cross invece di UN simbolo (R92 era un cross per passata)
 #   - InpMagic: blocco 7992xx invece di 772700/772710; asse Use_Purple_PineReaction
 #     TOLTO (qui il Viola e' solo EA, fisso a 0); un asse solo per file, per il driver

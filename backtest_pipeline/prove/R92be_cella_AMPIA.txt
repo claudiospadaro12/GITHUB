@@ -14,8 +14,9 @@
 #  MAGIC: 799261 / 799311 (gemelli: due celle IDENTICHE per costruzione)
 #
 #  PERCHE' QUESTO FILE ESISTE
-#  E' la cella del preset mql5/Presets/sedie_piccolo/ABTG_Bulge_v520_piccolo_AMPIO.set: la stessa che una
-#  sedia del piccolo usa in campo (la sedia e' un'ALTRA decisione: questo round non la valida ne' la boccia).
+#  E' la cella del preset mql5/Presets/sedie_piccolo/ABTG_Bulge_v520_piccolo_AMPIO.set, pronto nel repo e NON
+#  ancora caricato sul piccolo (in campo dal 29/09 c'e' il preset ADX_spento, magic 772700: vedi R92bc).
+#  Se e quando una sedia AMPIA andra' in campo e' un'ALTRA decisione: questo round non la valida ne' la boccia.
 #  Differenze dal preset, TUTTE E TRE: InpMagic (799261/799311 al posto di 772701), InpVerbose=0,
 #  InpAutoTest=0 (nel preset sono a true: stampano soltanto, nessun effetto sugli ordini).
 #  InpComment resta BULGE_V520A, come nel preset. Il resto e' identico input per input (verificato a macchina).
@@ -28,7 +29,7 @@
 #  Il BLU del per-trade dell'AMPIA (ADX spento) serve a leggere l'asse ADX di R92bc (E4).
 #
 #  DIFFERENZE DA prove/R92_scan_BULGE.txt (v5.10), TUTTE:
-#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 1; nel solo controllo 0)
+#   - Signal_Bar_Offset: input NUOVO della v5.20 (qui 1; nel solo controllo R92b0 e' 0)
 #   - Symbols_List: i 22 cross invece di UN simbolo (R92 era un cross per passata)
 #   - InpMagic: blocco 7992xx invece di 772700/772710; asse Use_Purple_PineReaction
 #     TOLTO (qui il Viola e' solo EA, fisso a 0); un asse solo per file, per il driver
