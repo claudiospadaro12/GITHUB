@@ -600,10 +600,16 @@ DRIVER = r'''
 #include "conf.mqh"
 int main(int argc,char**argv){
   SConfl e;
-  int wild = argc>1 ? atoi(argv[1]) : 1;
-  e.Init(ABTGC_D_EMA_FAST,ABTGC_D_EMA_SLOW,ABTGC_D_EMA_3,ABTGC_D_EMA_4,ABTGC_D_BB_PERIOD,ABTGC_D_BB_DEV,
-         ABTGC_D_BB_EXP_BARS,ABTGC_D_BB_EXP_PCT,ABTGC_D_ATR_PERIOD,ABTGC_D_ST_MULT,wild!=0,ABTGC_D_CROSS_LB,
-         ABTGC_D_SLOPE_BARS,ABTGC_D_BREAK_LB,ABTGC_D_COOLDOWN,ABTGC_D_VOL_PERIOD,ABTGC_D_VOL_FACTOR);
+  if(argc == 18)   /* 17 parametri espliciti, nell'ordine di Init (CXX_KEYS) */
+    e.Init(atoi(argv[1]),atoi(argv[2]),atoi(argv[3]),atoi(argv[4]),atoi(argv[5]),atof(argv[6]),atoi(argv[7]),
+           atof(argv[8]),atoi(argv[9]),atof(argv[10]),atoi(argv[11])!=0,atoi(argv[12]),atoi(argv[13]),
+           atoi(argv[14]),atoi(argv[15]),atoi(argv[16]),atof(argv[17]));
+  else {
+    int wild = argc>1 ? atoi(argv[1]) : 1;
+    e.Init(ABTGC_D_EMA_FAST,ABTGC_D_EMA_SLOW,ABTGC_D_EMA_3,ABTGC_D_EMA_4,ABTGC_D_BB_PERIOD,ABTGC_D_BB_DEV,
+           ABTGC_D_BB_EXP_BARS,ABTGC_D_BB_EXP_PCT,ABTGC_D_ATR_PERIOD,ABTGC_D_ST_MULT,wild!=0,ABTGC_D_CROSS_LB,
+           ABTGC_D_SLOPE_BARS,ABTGC_D_BREAK_LB,ABTGC_D_COOLDOWN,ABTGC_D_VOL_PERIOD,ABTGC_D_VOL_FACTOR);
+  }
   double o,h,l,c,v;
   while(scanf("%lf %lf %lf %lf %lf",&o,&h,&l,&c,&v)==5){
     SConfl t = e;  t.Feed(o,h,l,c,v);          /* anteprima su COPIA: tmp = e */
@@ -616,8 +622,26 @@ int main(int argc,char**argv){
 '''
 
 
-def cxx_identity(root, mqh_text, seeds=(11, 23, 37, 5), n=4000):
-    """Ritorna (barre, segnali, differenze) oppure None se non c'e' un compilatore C++."""
+# ordine degli argomenti di SConfl::Init (e del driver con 17 parametri)
+CXX_KEYS = ("emaFast", "emaSlow", "ema3", "ema4", "bbPeriod", "bbDev", "bbExpandBars", "bbExpandPct",
+            "atrPeriod", "stMult", "atrWilder", "crossLB", "slopeBars", "breakLB", "cooldown",
+            "volPeriod", "volFactor")
+
+# Default = i soli valori che i contro-esempi di sezione 7 vedevano: una mutazione che tocca SOLO un
+# parametro a zero/uno nei default (scala di pBBExpandPct con pct=0, "k <= pCooldown" contro "k <")
+# passava muta. Due insiemi in piu': valori NON di default (tutti i rami attivi) e valori FUORI
+# intervallo (i clamp di Init contro quelli dello specchio).
+CXX_ALT = dict(emaFast=5, emaSlow=13, ema3=34, ema4=100, bbPeriod=14, bbDev=1.5, bbExpandBars=2,
+               bbExpandPct=2.5, atrPeriod=7, stMult=1.5, atrWilder=True, crossLB=6, slopeBars=1,
+               breakLB=6, cooldown=8, volPeriod=10, volFactor=1.2)
+CXX_CLAMP = dict(emaFast=0, emaSlow=21, ema3=-4, ema4=9999, bbPeriod=1, bbDev=0.0, bbExpandBars=0,
+                 bbExpandPct=-5.0, atrPeriod=0, stMult=-1.0, atrWilder=False, crossLB=-2, slopeBars=0,
+                 breakLB=150, cooldown=-1, volPeriod=300, volFactor=0.0)
+
+
+def cxx_identity(root, mqh_text, seeds=(11, 23, 37, 5), n=4000, params=None):
+    """Ritorna (barre, segnali, differenze) oppure None se non c'e' un compilatore C++.
+    params=None: default, Wilder e SMA; params=dict: quei 17 parametri (chiavi CXX_KEYS)."""
     import shutil
     import subprocess
     import tempfile
@@ -632,15 +656,23 @@ def cxx_identity(root, mqh_text, seeds=(11, 23, 37, 5), n=4000):
         subprocess.run([cxx, "-std=c++17", "-O0", "-ffp-contract=off", "-o", exe, os.path.join(d, "drv.cpp")],
                        check=True, capture_output=True, text=True)
         tot = sig = bad = 0
+        if params is None:
+            runs = [([str(w)], dict(atrWilder=bool(w))) for w in (1, 0)]
+        else:
+            args = []
+            for k in CXX_KEYS:
+                v = params[k]
+                args.append(str(int(v)) if isinstance(v, (bool, int)) else repr(float(v)))
+            runs = [(args, dict(params))]
         for seed in seeds:
-            for wild in (1, 0):
+            for argv, kw in runs:
                 bars = make_bars(n, seed)
                 inp = "\n".join("%r %r %r %r %r" % b for b in bars)
-                r = subprocess.run([exe, str(wild)], input=inp, capture_output=True, text=True)
+                r = subprocess.run([exe] + argv, input=inp, capture_output=True, text=True)
                 if r.returncode != 0:
                     return (tot, sig, -1)          # la copia di struct ha cambiato il risultato
                 out = r.stdout.split("\n")
-                e = Confl(atrWilder=bool(wild))
+                e = Confl(**kw)
                 for i, b in enumerate(bars):
                     e.feed(*b)
                     p = out[i].split()
@@ -740,14 +772,26 @@ def main():
             fails.append("il .mqh compilato NON coincide con lo specchio Python (%d differenze)" % bad)
         if sig < 50:
             fails.append("troppo pochi segnali nel confronto C++ (%d)" % sig)
+        for label, prm in (("parametri NON di default", CXX_ALT), ("parametri FUORI intervallo (clamp)", CXX_CLAMP)):
+            t2, s2, b2 = cxx_identity(root, mqh_text, params=prm)
+            print("  %-36s: %d barre, %d segnali, differenze %d" % (label, t2, s2, b2))
+            if b2 != 0:
+                fails.append("il .mqh compilato NON coincide con lo specchio con %s (%d)" % (label, b2))
+            if s2 < 50:
+                fails.append("troppo pochi segnali nel confronto C++ con %s (%d)" % (label, s2))
         # contro-esempio: una mutazione di un carattere nel .mqh deve essere vista
         # (mutazioni STRUTTURALI: un "<" -> "<=" fra double e' un mutante equivalente, i pareggi esatti non capitano)
-        for label, old, new in (("banda alta ST senza riarmo (prevClose > pu)", "(up < pu || prevClose > pu) ? up : pu", "(up < pu) ? up : pu"),
-                                ("finestra incrocio senza la barra i", "for(int j = i - pCrossLB; j <= i; j++)", "for(int j = i - pCrossLB; j < i; j++)")):
+        # Le ultime due sono CIECHE ai default (pct=0; nessun ri-segnale a esattamente 5 barre): le vede
+        # solo l'insieme CXX_ALT, e il test lo pretende (e' la prova che quell'insieme serve).
+        for label, old, new, prm in (("banda alta ST senza riarmo (prevClose > pu)", "(up < pu || prevClose > pu) ? up : pu", "(up < pu) ? up : pu", None),
+                                     ("finestra incrocio senza la barra i", "for(int j = i - pCrossLB; j <= i; j++)", "for(int j = i - pCrossLB; j < i; j++)", None),
+                                     ("incrocio SHORT a direzione invertita", "if(dir < 0 && e1R[rp] >= e2R[rp] && e1R[rj] < e2R[rj]) return true;", "if(dir < 0 && e1R[rp] <= e2R[rp] && e1R[rj] > e2R[rj]) return true;", None),
+                                     ("scala espansione pct/100 -> pct/10", "pBBExpandPct / 100.0", "pBBExpandPct / 10.0", CXX_ALT),
+                                     ("raffreddamento k < invece di k <=", "for(int k = 1; k <= pCooldown; k++)", "for(int k = 1; k < pCooldown; k++)", CXX_ALT)):
             if old not in mqh_text:
                 fails.append("contro-esempio C++ non applicabile (testo cambiato): " + label)
                 continue
-            _, _, mb = cxx_identity(root, mqh_text.replace(old, new, 1))
+            _, _, mb = cxx_identity(root, mqh_text.replace(old, new, 1), params=prm)
             verdict = "RILEVATO" if mb != 0 else "NON RILEVATO (confronto cieco!)"
             print("  mutazione %-40s -> differenze %d : %s" % (label, mb, verdict))
             if mb == 0:

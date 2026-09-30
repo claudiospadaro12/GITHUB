@@ -286,18 +286,21 @@ bool IsNone(const ENUM_CHART_PROPERTY_INTEGER prop)
 // Modalita' NORMALI ma candele native INVISIBILI: e' la firma di una modalita' HEIKIN ASHI
 // finita senza OnDeinit (crash, terminale chiuso che ha salvato il grafico coi colori nascosti,
 // template salvato in HA). Senza questa riparazione il grafico resta senza candele e il tasto
-// NORMALI non fa niente (e' gia' "normale"). Si ripara SOLO se sono nascoste tutte e quattro.
+// NORMALI non fa niente (e' gia' "normale"). Si ripara SOLO sulla firma COMPLETA del nostro
+// residuo: tutte e CINQUE le proprieta' che ColsHide mette a clrNONE (candele, barre E linea).
+// Chi nasconde apposta solo candele/barre per usare altre candele disegnate (linea visibile)
+// non viene toccato.
 void RepairInvisibleNative()
   {
    if(!(IsNone(CHART_COLOR_CANDLE_BULL) && IsNone(CHART_COLOR_CANDLE_BEAR) &&
-        IsNone(CHART_COLOR_CHART_UP) && IsNone(CHART_COLOR_CHART_DOWN)))
+        IsNone(CHART_COLOR_CHART_UP) && IsNone(CHART_COLOR_CHART_DOWN) &&
+        IsNone(CHART_COLOR_CHART_LINE)))
       return;
    ChartSetInteger(0, CHART_COLOR_CANDLE_BULL, clrLime);
    ChartSetInteger(0, CHART_COLOR_CANDLE_BEAR, clrRed);
    ChartSetInteger(0, CHART_COLOR_CHART_UP,    clrLime);
    ChartSetInteger(0, CHART_COLOR_CHART_DOWN,  clrRed);
-   if(IsNone(CHART_COLOR_CHART_LINE))
-      ChartSetInteger(0, CHART_COLOR_CHART_LINE, clrLime);
+   ChartSetInteger(0, CHART_COLOR_CHART_LINE,  clrLime);
    Print("ABTG_Segnali: candele native trovate INVISIBILI (residuo di HEIKIN ASHI chiuso male): ",
          "rimesse visibili con colori di ripiego verde/rosso (F8 > Colori per i tuoi).");
   }
@@ -426,7 +429,8 @@ void DrawSignals(const int total)
       string key = IntegerToString((long)t);
       color  col = buy ? clrLime : clrRed;
 
-      // triangolo: Wingdings 3 'p' (su) / 'q' (giu'); ancorato col lato piatto verso la candela
+      // triangolo: Wingdings 3 'p' (su) / 'q' (giu'); ancorato per il lato della PUNTA (ANCHOR_UPPER
+      // sotto il minimo per BUY, ANCHOR_LOWER sopra il massimo per SELL): la punta indica la candela
       string nt = PFX + "T_" + key;
       if(ObjectCreate(0, nt, OBJ_TEXT, 0, t, y))
         {
@@ -917,19 +921,19 @@ int OnCalculate(const int rates_total, const int prev_calculated,
       gDirty = false;
      }
 
-   //--- avvisi: solo sulla barra chiusa appena finita, mai sul primo giro/ricarico
+   //--- avvisi: solo sulla barra chiusa APPENA finita. "Appena finita" = era la barra in formazione
+   //    alla chiamata precedente (gLastBarTime), NON "non c'e' stato un reset": la guardia
+   //    dell'ancora puo' resettare a OGNI barra nuova (storico che scorre) e il vecchio
+   //    "if(reset) niente avviso" avrebbe zittito gli avvisi per sempre. Primo giro dopo OnInit
+   //    (gLastBarTime = 0) e click su VOLUME a meta' barra: nessun avviso.
    const int lc = rates_total - 2;
-   if(reset)
-      gLastAlertTime = time[lc];
-   else
+   double sgLc = SelSig(lc);
+   bool justClosed = (gLastBarTime > 0 && time[lc] >= gLastBarTime);
+   if(justClosed && sgLc != 0.0 && time[lc] > gLastAlertTime)
      {
-      double sg = SelSig(lc);
-      if(sg != 0.0 && time[lc] > gLastAlertTime)
-        {
-         gLastAlertTime = time[lc];
-         if(InpAlert || InpPush)
-            SendSignalAlert(sg > 0.0, time[lc]);
-        }
+      gLastAlertTime = time[lc];
+      if(InpAlert || InpPush)
+         SendSignalAlert(sgLc > 0.0, time[lc]);
      }
 
    //--- se qualcuno ha cancellato i tasti, si rifanno a ogni nuova barra
