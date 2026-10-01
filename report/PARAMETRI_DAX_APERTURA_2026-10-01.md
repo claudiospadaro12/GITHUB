@@ -18,8 +18,12 @@ nessun preset/EA/conto toccato, nessuna riga di lancio scritta** · HEAD di part
 >    l'unica ipotesi testabile oggi (gap) sul Nasdaq 2010-2020, **la mia ipotesi di partenza è stata smentita nel verso** (-5,8 punti, IC95 [-10,0; -1,4]).
 > 5. **4 file prova nuovi** (`PRV_DAXAP_01, 02, 03a, 03b`, 34 passate, ~7-14 min di tester sul PC di backtest) + **1 sonda** (zero tester). **Attesa
 >    onesta: "il default va bene" su quasi tutto.** Nessun file è promuovibile per costruzione sul `770411` (14 posizioni OOS).
-> 6. **Un rilievo di costo nuovo**: il `770411` arma e riempie nell'**ora 09 server FTMO**, il cui spread P95 è **2,33 idx** (non l'1,33 dell'ora 10 con cui
+>    **[CANCELLO 01/10, `controllo-preventivo`]: `PRV_DAXAP_01` è BLOCCATO** (recidiva della classe 294: con l'EA di oggi `InpMaxRangePts` acceso
+>    **non salta la giornata**, la arma con buffer 0). Lanciabili dopo correzione: `02, 03a, 03b` = **22 passate, ~4,5-11 min**.
+> 6. **Un rilievo di costo nuovo**: il `770411` **arma** nell'**ora 09 server FTMO** (09:59), il cui spread P95 è **2,33 idx** (non l'1,33 dell'ora 10 con cui
 >    si è calcolato il pavimento 40×): `67,75 / 2,33 = 29×`, **sotto 40×** a quel minuto. `[DERIVATO]`: la tabella è per ora, non per il minuto 09:59.
+>    **[CANCELLO 01/10]** *riempie* nell'ora 09 **solo quando la rottura arriva prima della cash** (il 01/10, fill 09:59:01): i 5 fill del forward BCM sono
+>    **tutti** fra le 08:01 e le 08:27 BCM = 10:01-10:27 FTMO (`SEDIA_770411_IL_RIENTRO` par. 5), cioè nell'ora 10. Il 29× vale per quella coda, non per la sedia.
 
 ---
 
@@ -117,7 +121,7 @@ MISURATA** (certificato 09/09: manca TF e il filtro su U30USD/NASUSD) ma **non p
   (≥ 78,5 idx) `E[R]` = **+0,125** contro -0,018 / +0,009 / -0,013 degli altri tre. **Errore standard ~0,13 per cella: dentro il rumore.**
   Sul Dow il quartile più largo è -0,069, sul Nasdaq -0,069: **nessuna coerenza fra indici**. *Non è un segnale; è la ragione per cui non lo propongo
   come ipotesi.* La manopola `InpMaxRangePts` **non è mai stata mossa** (vale 0 in tutti i 99 CSV leggibili su 132 candidati della famiglia, e `InpMinRangePts` idem):
-  vedi `PRV_DAXAP_01`.
+  vedi `PRV_DAXAP_01`. **[Cancello 01/10]: e con l'EA di oggi, acceso, NON salta la giornata (classe 294): `PRV_DAXAP_01` è bloccato finché l'EA non è tappato.**
 - **Gap**: "gap-fill" come motore è **chiuso per aritmetica** (un gap al giorno, `REGISTRO_TEST` r.1229) **ma come filtro non è mai stato misurato sul DAX**. Sul
   Nasdaq 2010-2020 (addestramento, sole righe `IS`/`OK`, **cassaforte non letta**) ho misurato **una** ipotesi scritta prima: i primi tocchi *lontani* dal
   riempimento del gap falliscono di più. **Smentita nel verso**: verso il riempimento 70,0% (n=927) contro lontano 64,2% (n=881), **-5,8 punti, IC95
@@ -167,8 +171,8 @@ Ordine = quanto avvicina una sedia schierabile al costo di tempo macchina. **Nes
 | # | prova | tester | cosa decide | attesa (PRIMA) | contro-esempio (PRIMA) |
 |---|---|---|---|---|---|
 | **0** | **`PRV_DAXAP_00` sonda** (prezzi, M1) | **0 min** · python sul PC | stop contro rumore d'apertura; segnale ex-ante; `P(S10)`, `P(S30)`, `P(Rv)` su centinaia di eventi | `P(S30\|fill)` a k=2,5 in 10-30%, dimezzata a k=4,0; `rho_s(A_pre,R15) <= 0,60`; gap: stesso segno del Nasdaq (-5,8) | **C1**: controllo a orario casuale (07:00): se il rapporto apertura/07:00 <1,5, la spazzata d'apertura non è speciale. **C2**: `A_pre` permutato → `rho_s`~0 |
-| **1** | **`PRV_DAXAP_03a`** (`InpPlaceMin` 59/60/61) | 6 passate × 0,214-0,700 min = **1,3-4,2 min** | quanti fill sono nel minuto **prima** della cash (il caso del 01/10) | `Trades(60) ∈ [Trades(59)-3, Trades(59)]` | `Trades(60) < 0,75 x Trades(59)`: un minuto vale il 25% dei fill |
-| **2** | **`PRV_DAXAP_01`** (`InpMaxRangePts` 0/50/100/150/200/250 idx) sul `770101` LONG | 12 passate × ~11 s = **~2,2 min** (base R270: 28 passate in 5 min) | filtro ex-ante già nel codice, mai mosso | **"il default va bene"** (A5); `cap150` taglia 10 pos OOS (netto **-1.544**) e 8 IS (netto **+1.094**): **segni opposti** = ribaltamento atteso | **H-TAIL**: PF IS e OOS salgono di ≥0,05 in **tutte e due le gambe** a 150 **e** 200 |
+| **1** | **`PRV_DAXAP_03a`** (`InpPlaceMin` 59/60/61) | 6 passate × 0,214-0,700 min = **1,3-4,2 min** | quanto conta il minuto **prima** della cash (il caso del 01/10); **[cancello 01/10]** è un SALDO in deal, non il numero dei fill delle 07:59 (alle 08:00 cambiano anche la barra ATR e la barra H1 del filtro S&P) | `\|Trades(60) - Trades(59)\| <= 3` deal | `\|Trades(60) - Trades(59)\| >= 0,25 x Trades(59)`: il minuto sposta un quarto del campione |
+| **2** | **`PRV_DAXAP_01`** (`InpMaxRangePts` 0/50/100/150/200/250 idx) sul `770101` LONG — **BLOCCATO dal cancello 01/10: classe 294, serve prima la toppa (firma di Claudio o copia di banco dell'EA)** | 12 passate × ~11 s = **~2,2 min** (base R270: 28 passate in 5 min) | filtro ex-ante già nel codice, mai mosso | **"il default va bene"** (A5); `cap150` taglia 10 pos OOS (netto **-1.544**) e 8 IS (netto **+1.094**): **segni opposti** = ribaltamento atteso | **H-TAIL**: PF IS e OOS salgono di ≥0,05 in **tutte e due le gambe** a 150 **e** 200 |
 | **3** | **`R206a` già scritto** (`InpAtrSLmult` 1,5→4,0, 12 passate) | 12 × 0,214-0,700 = **2,6-8,4 min** | frontiera dello stop sul `770411` (già validato da `controlla_prova`) | `R206a` r.140+ (H0/H1 scritte lì) | in `R206a` (lotto che si rimpicciolisce) |
 | **4** | **`PRV_DAXAP_03b`** (`InpPlaceMin` 0/5/10/15) | 8 passate = **1,7-5,6 min** | il ritardo VERO: "salta se già rotto" | posizioni non crescenti col ritardo; PF **non direzionato** | **H-FILTRO** (DD scende ≥10%, PF non scende) contro **H-TAGLIO** (PF OOS(+15) ≤ 0,85 x PF(+0)) |
 | **5** | **`PRV_DAXAP_02`** (`InpCloseHour` 11/13/15/17) sul `770101` | 8 passate = **~1,5 min** | tempo massimo sulla cella viva (sostituisce R128e, su geometria vecchia) | **H-RUNNER**: PF OOS(11:30) ≤ 1,257; IS e OOS discordi a 13:30 | **H-LATEFADE**: PF(13:30 o 15:30) ≥ 1,397 e ≥ 1,126 in entrambe |
@@ -231,6 +235,10 @@ letti con WebFetch il 01/10/2026); arXiv 2605.04004 (solo abstract, **vedi buco 
 
 Primo strato: `controlla_prova.py` **ESITO OK** (4 file, 17 celle, 34 passate); `controlla_riga.py --oggetto prova` **nessun difetto meccanico**, ASCII puro.
 **Secondo strato (`controllo-preventivo`) NON ancora fatto: non è un PASS completo. Nessuno di questi file esce senza.**
+**[AGGIORNATO 01/10, secondo strato fatto]**: `PRV_DAXAP_01` **FAIL, BLOCCATO** (classe 294: `ArmRetest` r.1577-1578 `return(true)` -> `PH_ARMED` con
+`gBuffer=0`; il tappo non toglie giornate, toglie 5 idx di buffer; la toppa è un EA in forward = firma di Claudio o copia di banco). `PRV_DAXAP_03a` e
+`03b` **corretti prima dei numeri** (la monotonia di `Trades` non è un cancello di NULLO: classi 662 e 1018; orologio per cella: "dalla cash" vale solo
+d'estate). `PRV_DAXAP_02` **PASS** con tre correzioni di testo non bloccanti. Ogni file porta in testa il blocco `[CANCELLO 01/10/2026]`.
 Magic `798101-798104`: **zero occorrenze nel working tree e in tutti i rami remoti al 01/10/2026** (`git grep`).
 **Gemelle G1**: non scritte (un asse per file); il determinismo di questi pin è già stabilito da R246 (`794611/794661` e `794621/794671`, identici al centesimo). Il **G2
 incrociato** `03a cella 60 ≡ 03b cella 0` (stesso istante `nowMin >= 480`) è dentro i file.
@@ -256,5 +264,8 @@ incrociato** `03a cella 60 ≡ 03b cella 0` (stesso istante `nowMin >= 480`) è 
 ## COSA CHIEDO A CLAUDIO (il resto è già deciso dal repo)
 1. **Prima di tutto, una cosa a costo zero**: diagnosticare perché la FASE 1b del DAX è fallita il 29/09 (buco 2): senza, la sonda non parte.
 2. **Dare il via** ai 4 file (34 passate, ~7-14 min sul PC di backtest `DESKTOP-H4D7CAJ`, **mai sul VPS**) e a `R206a`: passano comunque dal cancello della sessione principale.
+   **[Cancello 01/10]**: oggi i lanciabili sono **3** (`02, 03a, 03b`, 22 passate). `PRV_DAXAP_01` aspetta una **decisione di Claudio**: toppa di una riga
+   della classe 294 sul sorgente vivo di `ABTG_DAX_Apertura_EU` (no-op in campo: le tre guardie valgono 0 in tutti i preset) **oppure** una copia di
+   banco dell'EA con la toppa, mai in campo.
 3. Una **firma sull'`open_time` nel per-trade** (modifica a `ExportTrades` di tutti gli EA): sblocca la durata ingresso→stop sui 5 EA della famiglia a costo zero in tester.
 4. Se vuole **un meccanismo nuovo**: "stop come % del range d'apertura" è l'unico che dà una frontiera `stop >= k x rumore` **ex-ante** (nessun EA nostro lo ha). Dipende da cosa dice la sonda.

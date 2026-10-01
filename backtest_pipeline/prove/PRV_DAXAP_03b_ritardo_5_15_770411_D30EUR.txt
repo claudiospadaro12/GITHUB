@@ -9,6 +9,19 @@
 #  riga di lancio NON e' scritta qui (cancello della sessione principale).
 # =====================================================================
 #
+#  [CANCELLO 01/10/2026, controllo-preventivo] CORRETTO PRIMA DEI NUMERI,
+#  nessun input toccato (asse, pin e magic identici). Riscritti S1/S1m e
+#  la lettura "celle identiche"; aggiunti OROLOGIO PER CELLA e REGIME.
+#  Il difetto che pesava: il vecchio S1 diceva "quattro celle IDENTICHE
+#  + G2 verde = nessuna rottura precoce in 21 mesi". Ma se il pin NON
+#  arriva, le quattro celle girano tutte a InpPlaceHour=8/InpPlaceMin=0,
+#  cioe' ESATTAMENTE la cella 60 di 03a: G2 verde lo stesso. Il G2 non
+#  separa "pin perso" da "nessuna rottura precoce", e un guasto di banco
+#  sarebbe diventato una scoperta ("il 01/10 e' un evento unico").
+#  E per costruzione la cella 15 NON puo' essere identica alla 0 se il
+#  pin arriva: alle 08:15 l'ATR (AtrVal r.412, M15 shift 1) passa dalla
+#  barra 07:45 alla barra 08:00-08:15, cioe' la barra d'apertura.
+#
 #  IL CASO CHE LO MOTIVA (01/10/2026, ora SERVER FTMO, report/TRIAL_
 #  GIORNO1_ANALISI_2026-10-01.md r.25-27): sell stop piazzato 09:59:00,
 #  fill 09:59:01 a 24.998,25 (UN MINUTO PRIMA della cash), SL a 67 punti,
@@ -87,13 +100,23 @@
 #  La cella 0 e' lo STESSO istante della cella 60 di PRV_DAXAP_03a: e' il
 #  G2 incrociato (identiche al centesimo) e il ponte con l'ancora (il
 #  confronto con la cella viva 07:59 si fa su 03a, non qui).
-#  S1 (la manopola deve mordere): Trades(15) < Trades(0) in OOS oppure in
-#  IS. Se le quattro celle sono IDENTICHE al centesimo, il pin non e'
-#  arrivato oppure nessun giorno della sedia rompe il box nei primi 15
-#  minuti: i due casi si separano controllando il G2 con 03a; se G2 e'
-#  verde il risultato e' "nessuna rottura precoce in 21 mesi" (e allora il
-#  caso del 01/10 e' un evento unico). S1m: Trades non cresce col ritardo
-#  (0 >= 5 >= 10 >= 15).
+#  S1 (la manopola deve mordere) [RISCRITTO DAL CANCELLO 01/10]: il pin
+#  e' arrivato se il CSV _OOS ha 4 righe con InpPlaceMin 0/5/10/15 (P0
+#  del driver) E Profit(15) != Profit(0) al centesimo in almeno una gamba
+#  (barra ATR diversa = stop diverso su ogni giornata giocata). Quattro
+#  celle identiche al centesimo = pin NON arrivato = NULLO, MAI "nessuna
+#  rottura precoce". Il confronto PULITO del ritardo e' fra le celle
+#  0/5/10: condividono la stessa barra M15 chiusa (07:45) per l'ATR e la
+#  stessa barra H1 chiusa (07:00) di SPXUSD per il filtro S&P; fra loro
+#  cambiano SOLO il minuto di piazzamento e la finestra di fill (cutoff
+#  08:30 fisso). Se 0, 5 e 10 sono identiche al centesimo (e 15 no): "nei
+#  primi 10 minuti nessuna rottura gia' avvenuta ha cambiato un giorno"
+#  -> il caso del 01/10 non ha precedenti in 21 mesi DI QUESTO BANCO.
+#  S1m: Trades non cresce col ritardo (0 >= 5 >= 10 >= 15) e' l'attesa
+#  nel verso, NON un cancello: le giornate non sono annidate (un giorno
+#  sotto il livello alle 08:00 e tornato sopra alle 08:05 e' saltato
+#  dalla 0 e giocato dalla 5), Trades conta deal (1-3 per posizione) e
+#  la 15 cambia anche lo stop. Un'eccezione si RIPORTA e si spiega.
 #  DOMANDA: quanto vale la quota di fill (e di stop) delle rotture che
 #  avvengono nei primi 5/10/15 minuti dopo la cash? Confonde: arma-dopo =
 #  filtro "salta se gia' rotto" + finestra di fill piu' corta (cutoff 08:30
@@ -115,6 +138,19 @@
 #  Con ~14 posizioni OOS nessuna delle due e' confermabile: l'esito
 #  atteso e' "NON MISURABILE SUL MERITO, DIREZIONE DEL CONTEGGIO E DD
 #  LETTI". Il valore del file e' dire se la CODA dei fill precoci esiste.
+#  OROLOGIO PER CELLA [AGGIUNTO DAL CANCELLO 01/10]: "+0/+5/+10/+15 dalla
+#  cash" e' vero SOLO nei giorni d'ESTATE (BCM = IT-1). Nei giorni
+#  d'INVERNO (2024.10.27-2025.03.30 e 2025.10.26-2026.03.29, BCM = IT)
+#  le stesse celle piazzano a -60/-55/-50/-45 minuti dalla cash, in
+#  PRE-MERCATO, e il cutoff 08:30 BCM chiude la finestra 30 minuti PRIMA
+#  della cash: d'inverno il file misura "piazzare piu' tardi nel
+#  pre-mercato", non "ritardare dopo la cash". Il CSV non separa le
+#  stagioni: la risposta cash-relativa e' DILUITA (inverno ~60% dei
+#  giorni IS, ~40% OOS [STIMA dal calendario]). Per FTMO d'inverno serve
+#  la casella d+1 (come R246q/R246r): NON scritta qui, [NON MISURATO].
+#  REGIME [AGGIUNTO DAL CANCELLO 01/10]: un regime solo (rialzo, storico
+#  indici BCM 2024.09.26-2026.06.30) col crollo di aprile 2025 nella
+#  gamba IS (taglio 40% ~2025.06.10).
 #  COSTO: 8 passate x 0,214-0,700 min/passata = 1,7-5,6 minuti.
 #  Magic vergine 798104.
 

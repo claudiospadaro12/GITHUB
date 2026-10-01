@@ -9,6 +9,23 @@
 #  riga di lancio NON e' scritta qui (cancello della sessione principale).
 # =====================================================================
 #
+#  [CANCELLO 01/10/2026, controllo-preventivo] CORRETTO PRIMA DEI NUMERI,
+#  nessun input toccato (asse, pin e magic identici). Riscritti: S1 (la
+#  monotonia NON e' un cancello di NULLO: classe 662 recidiva + classe
+#  1018), DOMANDA, ATTESA e CONTRO-ESEMPIO (a due code, in deal), e
+#  aggiunti OROLOGIO PER CELLA e REGIME. Il perche', in breve:
+#   (a) fra 07:59 e 08:00 BCM cambiano TRE cose, non una: il minuto di
+#       piazzamento, la barra M15 chiusa letta dall'ATR (AtrVal r.412,
+#       shift 1: 07:30 -> 07:45) e la barra H1 chiusa del filtro S&P
+#       (CorrBias r.396-406, SPXUSD H1 shift 1: 06:00 -> 07:00). Stop,
+#       lotto, TP e perfino il permesso di shortare possono cambiare;
+#   (b) le giornate NON sono annidate: un giorno rotto fra le 05:00 e le
+#       07:58 e tornato sopra il livello alle 08:00 e' SALTATO dalla
+#       cella 59 (sell stop sopra il bid = rifiutato) e GIOCATO dalla 60;
+#   (c) Trades conta DEAL (1-3 per posizione: 21 deal = 14 posizioni).
+#  Quindi Trades(60) > Trades(59) e' un esito LEGITTIMO, e la vecchia
+#  regola "un'eccezione = NULLO" avrebbe buttato una corsa valida.
+#
 #  IL CASO CHE LO MOTIVA (01/10/2026, ora SERVER FTMO, report/TRIAL_
 #  GIORNO1_ANALISI_2026-10-01.md r.25-27): sell stop piazzato 09:59:00,
 #  fill 09:59:01 a 24.998,25 (UN MINUTO PRIMA della cash), SL a 67 punti,
@@ -94,23 +111,54 @@
 #  0 di PRV_DAXAP_03b (stessa condizione nowMin >= 480): deve dare gli
 #  STESSI Trades/Profit/PF/DD al centesimo in tutte e due le gambe. Se non
 #  coincidono, uno dei due file non ha applicato il pin: round NULLO.
-#  S1 (conteggio, la manopola deve mordere): Trades(61) <= Trades(60) <=
-#  Trades(59) in tutte e due le gambe. Un'eccezione = NULLO.
-#  DOMANDA: quanta parte dei fill della sedia avviene nel minuto PRIMA
-#  della cash (come il 01/10 alle 09:59:01)? La risposta e' Trades(59) -
-#  Trades(60). [NON MISURATO: nessun per-trade ha l'ora d'ingresso.]
+#  S1 (la manopola deve mordere) [RISCRITTO DAL CANCELLO 01/10]: il pin
+#  e' arrivato se il CSV _OOS ha 3 righe con InpPlaceMin 59/60/61 (P0 del
+#  driver) E Profit(60) != Profit(59) al centesimo in almeno una gamba
+#  (alle 08:00 cambia la barra dell'ATR: lo stop cambia su OGNI giornata
+#  giocata, quindi tre celle identiche al centesimo = pin NON arrivato =
+#  NULLO). La MONOTONIA Trades(61) <= Trades(60) <= Trades(59) NON e' un
+#  cancello: e' attesa nel verso ma puo' rompersi per (a)-(b)-(c) in
+#  testa. Un'eccezione si RIPORTA e si spiega, non annulla il file.
+#  DOMANDA: quanto conta il minuto PRIMA della cash per questa sedia (il
+#  01/10 il fill e' stato alle 09:59:01 FTMO)? [RISCRITTO DAL CANCELLO
+#  01/10] Trades(59) - Trades(60) NON e' "il numero di fill nel minuto
+#  07:59": e' un SALDO in deal di (1) giornate riempite alle 07:59 e gia'
+#  sotto il livello alle 08:00 (perse dalla 60), (2) giornate rotte prima
+#  delle 07:59 e tornate sopra alle 08:00 (guadagnate dalla 60), (3) lo
+#  stop/lotto/TP diversi per la barra M15 nuova, (4) il filtro S&P letto
+#  su una barra H1 diversa. Il numero dei fill delle 07:59 resta [NON
+#  MISURABILE] con questo per-trade (niente open_time, e sopravvive solo
+#  l'ultima passata, classe 455).
 #  ATTESA DICHIARATA PRIMA DEI NUMERI: dai fill osservati in forward
 #  (08:01-08:27 BCM, SEDIA_770411_IL_RIENTRO par. 5: nessun fill prima
 #  delle 08:00 su 5) e dallo spread che si stringe di 2,5x alla cash
 #  (SPREAD_APERTURA_FTMO par. 2), l'attesa e' che il minuto 07:59 pesi
-#  POCO: Trades(60) in [Trades(59) - 3, Trades(59)] (i fill pre-apertura
-#  sono rari ma il caso del 01/10 dice che esistono). PF NON DIREZIONATO:
-#  non so se il pre-apertura e' la parte buona o cattiva dei fill.
-#  CONTRO-ESEMPIO: se Trades(60) < 0,75 x Trades(59) allora UN MINUTO
-#  vale il 25% dei fill e la mia attesa e' falsa: il pre-apertura e' una
-#  quota grossa dell'edge (o del rischio) di questa sedia e va letto cosi'.
-#  Se Trades(60) = Trades(59) in tutte e due le gambe, i fill pre-apertura
-#  sono zero in 21 mesi e il caso del 01/10 e' un evento fuori campione.
+#  POCO: |Trades(60) - Trades(59)| <= 3 deal (~2 posizioni) in tutte e
+#  due le gambe. PF NON DIREZIONATO: non so se il pre-apertura e' la
+#  parte buona o cattiva dei fill.
+#  CONTRO-ESEMPIO (a due code): |Trades(60) - Trades(59)| >= 0,25 x
+#  Trades(59) (>= 5 deal su ~20) in una gamba qualunque: allora spostare
+#  il piazzamento di UN minuto attraverso la cash muove un quarto del
+#  campione e la mia attesa e' falsa; si legge cosi': la sedia e'
+#  SENSIBILE al minuto di piazzamento (fill pre-apertura o barra nuova
+#  dell'ATR/del filtro, il file non li separa). Se le tre celle hanno
+#  Trades identici ma Profit diversi, il minuto non sposta il CAMPIONE
+#  ma solo la geometria (stop/lotto): il caso del 01/10 resta un evento
+#  che questo banco non distingue.
+#  OROLOGIO PER CELLA [AGGIUNTO DAL CANCELLO 01/10]: "-1/+0/+1 dalla
+#  cash" e' vero SOLO nei giorni d'ESTATE (BCM = IT-1). Nei giorni
+#  d'INVERNO (2024.10.27-2025.03.30 e 2025.10.26-2026.03.29, BCM = IT)
+#  le stesse celle stanno a -61/-60/-59 minuti dalla cash: misurano un
+#  minuto di PRE-MERCATO, non la spazzata d'apertura. Il CSV non separa
+#  le stagioni: la risposta "cash-relativa" e' DILUITA (inverno ~60%
+#  dei giorni dell'IS, ~40% dell'OOS [STIMA dal calendario]). La lettura
+#  per FTMO d'inverno (cash-allineato tutto l'anno) richiede la casella
+#  d+1 (InpPlaceHour=8 sui soli giorni d'inverno, come R246q/R246r):
+#  NON scritta qui, [NON MISURATO].
+#  REGIME [AGGIUNTO DAL CANCELLO 01/10]: un regime solo (rialzo, storico
+#  indici BCM 2024.09.26-2026.06.30) col crollo di aprile 2025 nella
+#  gamba IS (taglio 40% ~2025.06.10). Gia' detto sopra: 14 posizioni
+#  OOS, merito SOSPESO per costruzione.
 #  COSTO: 6 passate x 0,214-0,700 min/passata (0,214 = R242 su EA sorella;
 #  0,700 = R104 su copia MFE dello stesso EA, REGISTRO r.3956; [NON
 #  MISURATO] su questo binario, classe 712) = 1,3-4,2 minuti.

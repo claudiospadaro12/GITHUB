@@ -10,6 +10,15 @@
 #  riga di lancio NON e' scritta qui (cancello della sessione principale).
 # =====================================================================
 #
+#  [CANCELLO 01/10/2026, controllo-preventivo] Tre correzioni NON
+#  bloccanti, nessun input toccato: (1) S1 riscritto col suo perche'
+#  vero (vedi S1); (2) dichiarati IS sotto 150 posizioni e regime
+#  (vedi BUCHI); (3) commento di coda ereditato da R270e corretto.
+#  Verificato e NON toccato: EndOfSession (r.811 -> r.2556) chiude e
+#  mette PH_DONE: nessuna guardia a return(true) che arma (classe 294
+#  NON si applica a questa manopola); S1m monotono per costruzione
+#  (flat prima = mai piu' deal, mai piu' ingressi; giorni indipendenti).
+#
 #  PERCHE' QUESTO FILE E NON R128e (misurato alla fonte il 01/10)
 #  ------------------------------------------------------------------
 #  prove/R128e_orologio_D30EUR.txt mette ad asse InpCloseHour ma sulla
@@ -69,9 +78,15 @@
 #    OOS Trades 270  Profit 18029,58 PF 1,39709  DD 7,2328
 #  Se non torna il round e' NULLO.
 #  S1 SENTINELLA (la manopola deve mordere): Trades OOS della cella 11 <
-#  Trades OOS della cella 17 (270): 42 posizioni OOS chiudono dopo le
-#  11:30, quindi qualcosa deve cambiare. Uguale = pin non arrivato =
-#  NULLO. S1m: Trades OOS non decresce al crescere dell'ora
+#  Trades OOS della cella 17 (270). [PRECISATO DAL CANCELLO 01/10: "42
+#  posizioni chiudono dopo le 11:30" NON basta da solo: 26 di quelle 42
+#  hanno UN deal solo, e un flat anticipato le chiude con UN deal lo
+#  stesso (Trades invariato, cambia solo il Profit). La garanzia viene
+#  dalle 16 posizioni OOS (8 IS) con PIU' deal il cui PRIMO deal cade
+#  dopo le 11:30 (ricontato sui per-trade 794611/794613): a 11:30 o
+#  perdono la parziale o non esistono -> Trades(11) <= 254 OOS.]
+#  Uguale = pin non arrivato = NULLO. Controllo in piu', piu' forte:
+#  Profit(11) != Profit(17) al centesimo in tutte e due le gambe. S1m: Trades OOS non decresce al crescere dell'ora
 #  (11 <= 13 <= 15 <= 17). Un'eccezione = NULLO.
 #
 #  CRITERI CONGELATI ORA (stile R270c/e)
@@ -109,6 +124,15 @@
 #  BUCHI: un regime; MFE vera non misurabile; il campione e' 193
 #  posizioni: sopra la soglia 150 solo se il taglio degli ingressi non
 #  ne toglie piu' di 43.
+#  [AGGIUNTO DAL CANCELLO 01/10] L'IS ha 132 posizioni: SOTTO le 150
+#  dell'Emendamento A. La frazione 0,40 e' tenuta per poter fare il G0
+#  contro R47a/R246e/R270; quindi la CONCORDANZA IS/OOS si legge su un
+#  IS sottile e vale come indizio, non come conferma. REGIME dichiarato:
+#  storico indici BCM 2024.09.26-2026.06.30, un regime solo (rialzo), con
+#  il crollo dei dazi di APRILE 2025 che cade nella gamba IS (taglio 40%
+#  ~2025.06.10; primo deal OOS dei per-trade R270 = 2025.06.11): la
+#  gamba OOS NON contiene un episodio di crollo. Orari FTMO citati sopra:
+#  +2h vale D'ESTATE; d'inverno FTMO-BCM = +1h (OROLOGIO_BCM_2026-09-24).
 #  TEMPO MACCHINA: 8 passate, base MISURATA ~11 s/passata (R270: 28
 #  passate in 5 minuti) -> ~1,5 minuti + avvio. Magic vergine 798102.
 # =====================================================================
@@ -209,7 +233,8 @@ InpVerbose=true
 InpMagic=798102
 #
 # --- InpTrailMode PINNATO al valore vivo (1 = PREVBAR). NON e' l'asse:
-#     l'unico asse di questo file e' InpTP1_R, piu' sopra (4 celle x 2
-#     finestre = 8 passate). Commento corretto dal cancello il 28/09.
+#     l'unico asse di questo file e' InpCloseHour, piu' sopra (4 celle x
+#     2 finestre = 8 passate). [Corretto dal cancello il 01/10: la copia
+#     verbatim di R270e si era portata dietro "InpTP1_R".]
 InpTrailMode=1
 # ======================================================================

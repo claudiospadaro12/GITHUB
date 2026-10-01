@@ -11,6 +11,36 @@
 #  passa dal cancello (controlla_riga.py + controllo-preventivo).
 # =====================================================================
 #
+#  !!! [CANCELLO 01/10/2026, controllo-preventivo] FILE BLOCCATO: NON
+#  !!! LANCIARE. RECIDIVA DELLA CLASSE 294 (CHECKLIST_RIGA_DI_LANCIO).
+#  Con l'EA di oggi il tappo NON salta la giornata. La catena, riletta
+#  nel sorgente a HEAD (ABTG_DAX_Apertura_EU.mq5):
+#   1. ArmRetest r.1571 ComputeLevels(gRangeHigh,gRangeLow): i livelli
+#      sono GIA' calcolati;
+#   2. r.1577-1578 range > InpMaxRangePts -> return(true) PRIMA di
+#      r.1581 gBuffer=EffectiveBuffer() e r.1582 gBias=TrendBias();
+#   3. dispatch r.856 if(ArmRetest()) gPhase = PH_ARMED;  true = ARMATO;
+#   4. switch r.887-890 case PH_ARMED -> MonitorRetest() gira lo stesso;
+#   5. ResetDay r.1086 gBuffer = 0 ogni mattina.
+#  Quindi nelle giornate "tagliate" la sedia ENTRA LO STESSO, col
+#  grilletto a range_high + 0 (non +5 idx) e lo stop a range_low - 0:
+#  stop = range - 2 idx invece di range + 3. Ogni cella diversa da 0
+#  e' contaminata; il sentinella S1 (Trades(5000) <= 162) fallira' e il
+#  file lo leggerebbe come "pin non arrivato": DIAGNOSI SBAGLIATA SUL
+#  SINTOMO GIUSTO (esattamente il caso previsto dalla classe 294).
+#  Le stesse tre guardie a return(true) esistono in _TrailFix e _Pin9fca.
+#  COSA SERVE PRIMA DI RILANCIARE: la toppa di una riga della classe 294
+#  (sul rifiuto delle guardie di ArmRetest/ArmOpenConfirm: gPhase =
+#  PH_DONE, non PH_ARMED). E' un EA con sedie in forward (770101/770105
+#  sulla challenge FTMO): FIRMA DI CLAUDIO, oppure una COPIA DI BANCO
+#  dell'EA (nome nuovo, mai in campo) scritta da mql5-ea-developer e
+#  passata dal cancello. In campo la toppa e' un no-op: InpMaxSpread,
+#  InpMinRangePts, InpMaxRangePts valgono 0 in TUTTI i preset di questo
+#  EA (verificato 01/10). Il resto del file (disegno, G0, criteri,
+#  ricostruzione dello stop, ricontata al numero: 85/23/8/5/4 IS e
+#  143/49/10/4/0 OOS, netti +1.094 / -1.544 a 150 idx) resta valido per
+#  il giorno in cui l'EA e' tappato.
+#
 #  PERCHE' QUESTO FILE (domanda 4 del mandato 01/10: "c'e' un segnale
 #  ex-ante nei giorni di spazzata?")
 #  ------------------------------------------------------------------
@@ -27,15 +57,18 @@
 #     ABTG_DAX_Apertura_EU / D30EUR Apertura: InpMaxRangePts vale 0 in
 #     TUTTE le righe di TUTTI i file (zero file con due valori), e anche
 #     InpMinRangePts. Mai ad asse, mai provata.
-#   - VIVA nel ramo RETEST: ABTG_DAX_Apertura_EU.mq5 r.1574-1578
+#   - LETTA nel ramo RETEST: ABTG_DAX_Apertura_EU.mq5 r.1574-1578
 #     (ArmRetest: "if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
-#     ... return(true)" = niente trade quel giorno, la fase passa
-#     avanti). MonitorRetest (r.1907 e segg.) NON la legge: il filtro e'
+#     ... return(true)"). [CORRETTO DAL CANCELLO 01/10: qui c'era scritto
+#     "= niente trade quel giorno". FALSO: return(true) ARMA (dispatch
+#     r.856 -> PH_ARMED) con gBuffer=0, vedi il blocco in testa, classe
+#     294.] MonitorRetest (r.1907 e segg.) NON la legge: il filtro e'
 #     tutto in ArmRetest, che gira UNA volta a fine range.
 #   - unita': punti MT5 (100 punti = 1 punto indice su D30EUR: lo studio
 #     Studio_D30EUR.csv scrive 5465 per 54,65 idx).
-#  >>> QUINDI NON e' una manopola inerte (classe 156): morde, e il
-#      sentinella S1 qui sotto lo VERIFICA sulla cella piu' stretta.
+#  >>> NON e' una manopola inerte (classe 156), ma con l'EA di oggi
+#      morde nel modo SBAGLIATO (classe 294): non toglie giornate, toglie
+#      5 idx di buffer alle giornate larghe.
 #
 #  PERCHE' SOLO IL LATO LONG, e perche' NON lo short (regola del 19/08)
 #  ------------------------------------------------------------------
@@ -276,7 +309,8 @@ InpVerbose=true
 InpMagic=798101
 #
 # --- InpTrailMode PINNATO al valore vivo (1 = PREVBAR). NON e' l'asse:
-#     l'unico asse di questo file e' InpTP1_R, piu' sopra (4 celle x 2
-#     finestre = 8 passate). Commento corretto dal cancello il 28/09.
+#     l'unico asse di questo file e' InpMaxRangePts, piu' sopra (6 celle x
+#     2 finestre = 12 passate). [Corretto dal cancello il 01/10: la copia
+#     verbatim di R270e si era portata dietro "InpTP1_R, 8 passate".]
 InpTrailMode=1
 # ======================================================================
