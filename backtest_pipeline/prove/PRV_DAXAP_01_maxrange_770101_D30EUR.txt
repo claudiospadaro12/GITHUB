@@ -1,0 +1,282 @@
+#  EA: ABTG_DAX_Apertura_EU
+# =====================================================================
+#  PRV_DAXAP_01 -- asse InpMaxRangePts (TAPPO ALL'AMPIEZZA DEL RANGE DI
+#  APERTURA) sulla sedia 770101 LONG, SULLA CELLA DI CONTRATTO.
+#  D30EUR M5 -- TICK REALI -- deposito 100000 -- rischio 1,00 (di banco,
+#  NON 2,00: NESSUNA TAGLIA SI PROPONE).
+#  Scritto il 01/10/2026 dal cercatore-parametri. Criteri congelati PRIMA
+#  dei numeri. NON ESEGUITO. Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ:
+#  NON sul VPS, NON su 50504400, NON su nessun conto (regola 21/09). La
+#  riga di lancio NON e' scritta qui: la scrive la sessione principale e
+#  passa dal cancello (controlla_riga.py + controllo-preventivo).
+# =====================================================================
+#
+#  PERCHE' QUESTO FILE (domanda 4 del mandato 01/10: "c'e' un segnale
+#  ex-ante nei giorni di spazzata?")
+#  ------------------------------------------------------------------
+#  Il 01/10 la sedia gemella 770105 (stessa riga di codice, lato opposto)
+#  ha preso uno stop da 257,49 punti indice = 2,00% del conto (-3.110,48
+#  EUR) in un giorno il cui range di apertura valeva ~254 idx: il range
+#  35' mediano e' ~71 idx [DERIVATO, vedi sotto]. L'ampiezza del range e'
+#  l'unico segnale ex-ante GIA' DENTRO l'EA e NOTO prima dell'ingresso:
+#  il retest arma a fine range (08:35 BCM d'estate), quindi chi decide e'
+#  il range completo, non un dato futuro.
+#
+#  LA MANOPOLA E' LIBERA E VIVA, verificato (non ricordato):
+#   - censimento 01/10 su 99 CSV con colonne Inp* della famiglia
+#     ABTG_DAX_Apertura_EU / D30EUR Apertura: InpMaxRangePts vale 0 in
+#     TUTTE le righe di TUTTI i file (zero file con due valori), e anche
+#     InpMinRangePts. Mai ad asse, mai provata.
+#   - VIVA nel ramo RETEST: ABTG_DAX_Apertura_EU.mq5 r.1574-1578
+#     (ArmRetest: "if(InpMaxRangePts > 0 && rangePts > InpMaxRangePts)
+#     ... return(true)" = niente trade quel giorno, la fase passa
+#     avanti). MonitorRetest (r.1907 e segg.) NON la legge: il filtro e'
+#     tutto in ArmRetest, che gira UNA volta a fine range.
+#   - unita': punti MT5 (100 punti = 1 punto indice su D30EUR: lo studio
+#     Studio_D30EUR.csv scrive 5465 per 54,65 idx).
+#  >>> QUINDI NON e' una manopola inerte (classe 156): morde, e il
+#      sentinella S1 qui sotto lo VERIFICA sulla cella piu' stretta.
+#
+#  PERCHE' SOLO IL LATO LONG, e perche' NON lo short (regola del 19/08)
+#  ------------------------------------------------------------------
+#  Il tappo e' un filtro d'INGRESSO. La regola di casa (19/08, e il mandato
+#  del 01/10) vieta di allargare i parametri d'ingresso di un motore con
+#  PF < 1,10 su campione pieno. Lo SHORT 770105 alla cella in campo ha
+#  PF OOS 0,957 (194 posizioni) e DD 12,31% a 1% (LETTURA_R270 par. 3): e'
+#  GIA' dichiarato senza merito. Una griglia di tappi sullo short
+#  troverebbe un picco di rumore. NON si scrive. Il LONG ha PF OOS 1,397
+#  e PF IS 1,126 (>= 1,10 in tutte e due): l'asse e' ammesso.
+#  Gemelli Dow 770202 (96 posizioni OOS) e Nasdaq 770260: sotto 150
+#  posizioni il MERITO e' sospeso in partenza: sul Dow/Nasdaq il tappo si
+#  leggerebbe solo sul rischio. Non si scrive un file per loro.
+#
+#  IL DISEGNO -- una sola variabile
+#  ------------------------------------------------------------------
+#  Cella VIVA = R246e = R47a = R270c/R270e input per input (copia
+#  verbatim di R270e), cambia SOLO l'asse. Asse: InpMaxRangePts =
+#  0 (spento = controllo) / 5000 / 10000 / 15000 / 20000 / 25000, cioe'
+#  tappo a 50 / 100 / 150 / 200 / 250 punti indice sull'ampiezza del
+#  range di 35 minuti. 6 celle x 2 finestre = 12 passate.
+#  FINESTRA B come R270e: 2024.09.26 -> 2026.06.30, IS 40%, deposito
+#  100000, rischio 1,00, Modello 4.
+#
+#  RICOSTRUZIONE DELLO STOP, per dichiarare PRIMA quanti giorni cade il
+#  tappo [DERIVATO, NON MISURATO]
+#  ------------------------------------------------------------------
+#  Dai per-trade di R246 (794611 = gamba OOS, 193 posizioni; 794613 =
+#  gamba IS, 132 posizioni): stop_idx = 0,01 x saldo_all'ingresso /
+#  lotti dell'ingresso (rischio 1%; D30EUR = 1,0000 EUR per punto per
+#  lotto, report/DUE_GESTI_2026-09-11.md r.52). La formula e' VERIFICATA
+#  contro numeri di altri: somma dei net_profit = Profit del CSV (IS
+#  3789,36 / OOS 18029,58, al centesimo) e la serie "come FTMO" conta 295
+#  posizioni = report/LETTURA_R246_INVERNO_2026-09-29.md r.37 (DAX 295
+#  pos). Il range 35' e' stop - 3 idx (stop = range + buffer 5 - offset
+#  2, ABTG_DAX_Apertura_EU.mq5 MonitorRetest r.1929-1933 BUY, r.1972-1976 SELL).
+#    posizioni che il tappo TAGLIEREBBE (range > tappo), IS 132 / OOS 193:
+#      tappo  50 idx :  85 / 143    (SENTINELLA: deve mordere forte)
+#      tappo 100 idx :  23 /  49
+#      tappo 150 idx :   8 /  10
+#      tappo 200 idx :   5 /   4
+#      tappo 250 idx :   4 /   0
+#    -> posizioni OOS rimaste: 50 / 144 / 183 / 189 / 193 (+-5%, lotti
+#       arrotondati). Tre cose da sapere: (1) a 100 idx l'OOS scende SOTTO
+#       150 posizioni: merito SOSPESO in quella cella; (2) 6 delle 18
+#       posizioni con stop > 153 cadono in APRILE 2025 (crollo dei dazi):
+#       il tappo e' provato in sostanza su UN episodio; (3) il netto
+#       delle posizioni tagliate a 150 idx e' +1.094 EUR in IS e -1.544 EUR
+#       in OOS: SEGNI OPPOSTI, che e' esattamente il ribaltamento IS/OOS
+#       che il progetto ha gia' visto 19 volte.
+#
+#  G0 -- LA CELLA InpMaxRangePts=0 (il controllo)
+#  Deve ridare R47a/R246e/R270c (stessa finestra B), ZERO scarto su
+#  Trades, quarta cifra su PF e DD:
+#    IS  Trades 175  Profit 3789,36  PF 1,12634  DD 5,4362
+#    OOS Trades 270  Profit 18029,58 PF 1,39709  DD 7,2328
+#  (fonte: risultati_prove/aperture_r47/ABTG_DAX_Apertura_EU_D30EUR_
+#  {IS,OOS}_r47a.csv). Se non torna il round e' NULLO: si cerca la causa,
+#  non si legge l'asse.
+#
+#  S1 SENTINELLA (classe 156: la manopola deve MORDERE)
+#  Cella 5000 (tappo 50 idx): Trades OOS <= 0,60 x 270 = 162 deal. Atteso
+#  ~50 posizioni x 1,399 = ~70 deal. Se Trades(5000) > 162 il pin non e'
+#  arrivato all'EA: round NULLO, non "tappo inerte".
+#  S1m MONOTONIA: al crescere del tappo Trades non decresce
+#  (5000 <= 10000 <= ... <= 25000 <= cella 0). Un'eccezione = file NULLO.
+#  S1b: [deal] != posizioni. k = 1,399 (270/193, R47a): serve SOLO a
+#  stimare; il numero di posizioni per cella non si copia: sulle celle
+#  non identificate dal per-trade e' "per costruzione, NON MISURATO"
+#  (il per-trade e' uno solo per magic: sopravvive l'ultima passata,
+#  classe 455). Il merito si legge solo dove Trades OOS >= 210 deal
+#  (= 150 posizioni x 1,399 [DERIVATO]): attese le celle 15000, 20000,
+#  25000.
+#
+#  CRITERI CONGELATI ORA (stile R270c/e)
+#  M1 (merito): PF OOS cella >= 1,39709 + 0,10 = 1,497, con Trades OOS >=
+#     210 deal. Una cella sotto 210 deal NON e' candidabile a nessun PF.
+#  CONCORDANZA: un effetto e' un effetto solo se PF IS e PF OOS si
+#     muovono NELLO STESSO VERSO rispetto al controllo. Discordi =
+#     ribaltamento = rumore (precedente R270b).
+#  R1 (rischio, a qualunque n, Emendamento B): Equity DD% IS o OOS > 9,00
+#     -> VIOLATO. Sotto soglia: "R1 NON VIOLATO su n = X", mai "rischio
+#     passato". DD della cella <= DD controllo x 1,10 (IS 5,98 / OOS
+#     7,96) per essere candidabile.
+#  A1 (altopiano): si propone una cella SOLO se batte M1 E le due vicine
+#     sull'asse non sono peggiori del controllo (centro dell'altopiano,
+#     MAI il picco). Le celle leggibili sono tre (15000/20000/25000):
+#     l'unico centro possibile e' 20000. Se sporge una cella sola il
+#     risultato e' "NON C'E' UNA CONFIGURAZIONE ROBUSTA".
+#  A5 (inerzia): se tutte le celle leggibili stanno entro il 10,5%
+#     relativo del PF OOS di controllo (1,250-1,544): "manopola inerte
+#     sul merito, il default va bene". E' un RISULTATO, non un fallimento.
+#  A10: nessuna promozione, nessuna taglia, nessuna sedia toccata. Una
+#     cella che passasse va a Claudio come PROPOSTA coi numeri.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#  ------------------------------------------------------------------
+#  Le celle 15000/20000/25000 tagliano 10/4/0 posizioni OOS (8/5/4 IS):
+#  PF OOS atteso 1,40 +-0,05 e PF IS atteso 1,13 +-0,03 -> A5 "inerte".
+#  La cella 10000 taglia 49 OOS / 23 IS: n OOS ~144 posizioni (~201
+#  deal), merito SOSPESO per costruzione; PF in 1,2-1,6, INDIZIO.
+#  La cella 5000 e' il sentinella: ~50 posizioni OOS, nessun giudizio.
+#  Attesa direzionale sul tappo 150: da una stima rozza dei vincenti/
+#  perdenti tagliati (netto -1.544 OOS, +1.094 IS) il PF OOS salirebbe di
+#  ~+0,05 e quello IS scenderebbe: DISCORDE. Previsione complessiva:
+#  "IL DEFAULT VA BENE", con probabilita' alta. Sarebbe una SORPRESA
+#  (e andrebbe trattata come picco fino a prova di regime) se M1 passasse
+#  in una cella sola, o se 15000 e 20000 migliorassero ENTRAMBE in IS e
+#  in OOS.
+#
+#  CONTRO-ESEMPIO, scritto prima (classe 178: l'alternativa deve poter
+#  produrre un numero DIVERSO dalla mia)
+#  H-TAIL (l'alternativa a "inerte"): "i giorni di range eccezionale sono
+#  quelli in cui il retest perde, quindi il tappo migliora sia l'IS sia
+#  l'OOS". H-TAIL produce questo numero preciso: PF IS(15000) >= 1,126 +
+#  0,05 E PF OOS(15000) >= 1,397 + 0,05 E lo stesso a 20000. La mia
+#  ipotesi produce il contrario (IS giu', OOS su, o tutto fermo). Le due
+#  si separano con le STESSE sei celle. Un H-TAIL vero andrebbe poi
+#  PAGATO con una prova di regime: la sola finestra disponibile e' un
+#  regime unico (storico indici BCM dal 2024.09.26, un episodio di crollo
+#  ad aprile 2025), e questo si dichiara come limite, non si aggira.
+#
+#  OROLOGIO (report/OROLOGIO_BCM_2026-09-24.md): BCM indici = UTC+1 fisso.
+#  InpSessionHour=8 e' la cash d'estate; d'inverno (2024.10.27 ->
+#  2025.03.30 e 2025.10.26 -> 2026.03.29) il range 35' parte UN'ORA PRIMA
+#  della cash (pre-mercato). La finestra MESCOLA le due tempistiche, come
+#  R47a/R246e/R270 che fanno da ancora; sulle sedie FTMO d'inverno la
+#  tempistica e' quella della casella d+1 di R246 (LETTURA_R246_INVERNO).
+#  L'ampiezza del range d'inverno-d0 contiene quindi 35' di PRE-MERCATO:
+#  il tappo si calibra sull'ampiezza di UN ALTRO oggetto. Dichiarato, non
+#  separato in questo file.
+#
+#  BUCHI DICHIARATI: un regime solo; ricostruzione dello stop = [DERIVATO]
+#  (non c'e' l'ora d'ingresso nei per-trade: solo close_time); MFE vera
+#  non misurabile; ampiezza del range del 01/10 (254 idx) ricavata da
+#  stop + offset dal report TRIAL_GIORNO1_ANALISI, non dal grafico;
+#  costo 40x: l'asse non tocca lo stop dei giorni che restano.
+#  TEMPO MACCHINA: 12 passate tick reali D30EUR M5. Base MISURATA: R270
+#  ha fatto 28 passate in 5 minuti (RIEPILOGO_ROUND_R270_USCITA_DAX:
+#  65-83 s per job da 6-8 passate, ~11 s/passata) -> ~2,2 minuti + avvio.
+#  Magic vergine 798101 (zero occorrenze nel working tree e in tutti i
+#  rami remoti al 01/10/2026).
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0||0||5000||25000||Y
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpTrailStartR=0
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpSpaceMode=0
+InpSpaceTF=16388
+InpSpaceMinR=0.0
+InpSpaceMaxR=0.0
+InpSpaceEma1=14
+InpSpaceEma2=50
+InpSpaceEma3=100
+InpSpaceEma4=200
+InpSpaceUseST=false
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=798101
+#
+# --- InpTrailMode PINNATO al valore vivo (1 = PREVBAR). NON e' l'asse:
+#     l'unico asse di questo file e' InpTP1_R, piu' sopra (4 celle x 2
+#     finestre = 8 passate). Commento corretto dal cancello il 28/09.
+InpTrailMode=1
+# ======================================================================

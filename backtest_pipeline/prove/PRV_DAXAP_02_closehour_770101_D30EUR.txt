@@ -1,0 +1,215 @@
+#  EA: ABTG_DAX_Apertura_EU
+# =====================================================================
+#  PRV_DAXAP_02 -- asse InpCloseHour (IL TEMPO MASSIMO: flat di fine
+#  sessione) sulla sedia 770101 LONG, SULLA CELLA DI CONTRATTO.
+#  D30EUR M5 -- TICK REALI -- deposito 100000 -- rischio 1,00 (di banco,
+#  NON 2,00: NESSUNA TAGLIA SI PROPONE).
+#  Scritto il 01/10/2026 dal cercatore-parametri. Criteri congelati PRIMA
+#  dei numeri. NON ESEGUITO. Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ:
+#  NON sul VPS, NON su 50504400, NON su nessun conto (regola 21/09). La
+#  riga di lancio NON e' scritta qui (cancello della sessione principale).
+# =====================================================================
+#
+#  PERCHE' QUESTO FILE E NON R128e (misurato alla fonte il 01/10)
+#  ------------------------------------------------------------------
+#  prove/R128e_orologio_D30EUR.txt mette ad asse InpCloseHour ma sulla
+#  geometria VECCHIA dell'11/09: InpTP1_ClosePct=0 (nessuna parziale),
+#  FrazioneIS 0,50, deposito 10000, 81 pin (nessun InpSpace*). La cella
+#  di contratto (R246e = R47a = preset FTMO rimappato) ha ClosePct=50,
+#  BreakevenAtTP1=true, FrazioneIS 0,40, deposito 100000, 90 pin. Per di
+#  piu' di R128e NON esiste nessun CSV nel repo (git ls-files: solo il
+#  file prova): "la manopola d'uscita mai mossa" resta mai mossa.
+#  La domanda e' quella del mandato 01/10 (gestione dell'uscita ad asse,
+#  voce "tempo massimo") sulla cella VIVA. R128e resta valido per la sua.
+#
+#  COSA SI SA GIA' (misurato nel repo, 01/10)
+#  - Durata (report/MFE_E_DURATA_APERTURE_2026-09-22.md, Studio_D30EUR):
+#    vincenti mediana 165 min, perdenti 60 min (rapporto 2,8x): un tempo
+#    massimo accorcia soprattutto i VINCENTI, le perdenti se ne sono gia'
+#    andate. Riserva: lo studio e' a range 15', breakout cieco, TP 2R.
+#  - Dai per-trade di R246 (794611 OOS 193 pos, 794613 IS 132 pos; ora di
+#    chiusura nell'orologio BCM d0, che d'inverno e' +1h dalla cash):
+#    posizioni che CHIUDONO dopo le 11:30 / 13:30 / 15:30 BCM e loro netto
+#      OOS: 42 (+1.108) / 27 (+3.163) / 14 (-418)
+#      IS : 23 (-528)   / 13 (-873)   /  5 (+188)
+#    e chiuse proprio dal flat 17:30: 3 OOS (-402) e 1 IS (-124).
+#    Sono un TETTO di cio' che un flat anticipato tocca (la posizione
+#    tagliata non perde il suo netto: lo realizza al prezzo di quel
+#    momento). Segni OPPOSTI fra IS e OOS a 13:30: ancora ribaltamento.
+#  - Forward FTMO/piccolo: l'unica perdita della sedia viva (R128 par. 3)
+#    era un ingresso tardivo del 28/08 16:56:41 chiuso dal flat 17:30. Un
+#    solo caso: non e' una misura.
+#
+#  >>> CONFUSIONE DA DICHIARARE (sorgente r.811-815 e EndOfSession
+#      r.2556-2570): al raggiungimento di InpCloseHour:InpCloseMin l'EA
+#      CANCELLA i pendenti, chiude le posizioni (InpCloseAtEnd=true) e
+#      mette la fase a DONE. Quindi l'asse mescola DUE effetti: il
+#      TEMPO MASSIMO sulle posizioni aperte E il TAGLIO DEGLI INGRESSI
+#      tardivi (retest che si arma/fill dopo quell'ora). Si separano solo
+#      cosi': se le POSIZIONI scendono fra le celle, e' (anche) il taglio
+#      degli ingressi; se scendono solo i DEAL a posizioni costanti, e'
+#      il tempo massimo (meno parziali/uscite dopo l'ora). Il per-trade e'
+#      uno solo per magic (classe 455): le posizioni per cella restano
+#      "per costruzione, NON MISURATO" salvo la cella che sopravvive.
+#
+#  IL DISEGNO -- una sola variabile
+#  ------------------------------------------------------------------
+#  Cella VIVA = R246e = R47a = R270e input per input (copia verbatim di
+#  R270e, InpTP1_R pinnato 1). Asse: InpCloseHour = 11 / 13 / 15 / 17
+#  (17 = controllo vivo), InpCloseMin=30 PINNATO: flat alle 11:30 / 13:30
+#  / 15:30 / 17:30 BCM d'estate = +3,5 / +5,5 / +7,5 / +9,5 ore dalla
+#  cash; sul preset FTMO (+2h) 13:30 / 15:30 / 17:30 / 19:30. 4 celle x
+#  2 finestre = 8 passate. FINESTRA B come R270e (2024.09.26 -> 2026.06.30,
+#  IS 40%, deposito 100000, Modello 4).
+#
+#  G0 -- LA CELLA InpCloseHour=17 (il controllo)
+#  Deve ridare R47a/R246e/R270c (stessa finestra B), ZERO scarto su
+#  Trades, quarta cifra su PF e DD:
+#    IS  Trades 175  Profit 3789,36  PF 1,12634  DD 5,4362
+#    OOS Trades 270  Profit 18029,58 PF 1,39709  DD 7,2328
+#  Se non torna il round e' NULLO.
+#  S1 SENTINELLA (la manopola deve mordere): Trades OOS della cella 11 <
+#  Trades OOS della cella 17 (270): 42 posizioni OOS chiudono dopo le
+#  11:30, quindi qualcosa deve cambiare. Uguale = pin non arrivato =
+#  NULLO. S1m: Trades OOS non decresce al crescere dell'ora
+#  (11 <= 13 <= 15 <= 17). Un'eccezione = NULLO.
+#
+#  CRITERI CONGELATI ORA (stile R270c/e)
+#  M1: PF OOS cella >= 1,39709 + 0,10 = 1,497 (posizioni OOS >= 150: la
+#     cella 17 ne ha 193; una cella che le abbassa sotto 150 e' sospesa).
+#  CONCORDANZA: IS e OOS nello stesso verso, altrimenti rumore.
+#  R1: Equity DD% IS o OOS > 9,00 -> VIOLATO (fatto, a qualunque n). DD
+#     cella <= DD controllo x 1,10 (IS 5,98 / OOS 7,96) per candidarsi.
+#  A1: altopiano. Le celle sono 4: l'unico "centro" possibile e' un
+#     blocco di 3 contigue; una cella sola che sporge = "NON C'E' UNA
+#     CONFIGURAZIONE ROBUSTA". A5: tutte entro il 10,5% relativo del PF
+#     OOS di controllo (1,250-1,544) -> "manopola inerte, il default va
+#     bene" (e' un RISULTATO). A10: nessuna promozione/taglia/sedia.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#  ------------------------------------------------------------------
+#  Due ipotesi che producono numeri DIVERSI:
+#  H-RUNNER (la mia, dalla durata 165 vs 60 min): le ore tarde portano
+#     profitto -> PF e Profit OOS CRESCONO con l'ora del flat; cella 11
+#     (flat a +3,5h) PF OOS <= 1,397 x 0,90 = 1,257, cella 13 <= 1,32.
+#  H-LATEFADE (l'alternativa): le ore tarde restituiscono -> la cella 13
+#     o 15 ha PF >= 1,397 IN TUTTE E DUE le gambe (IS >= 1,126 e OOS >=
+#     1,397). Il segno opposto fra IS e OOS dei netti delle posizioni
+#     tardive (-873 IS / +3.163 OOS a 13:30) fa PREVEDERE discordanza:
+#     previsione complessiva "IL DEFAULT VA BENE" (A5) o "H-RUNNER in
+#     OOS, discorde in IS". Sarebbe una sorpresa un'uscita anticipata
+#     che batte il vivo in entrambe le gambe.
+#  Posizioni OOS: cella 17 = 193; celle 15/13/11: 190-193 / 185-193 /
+#  170-193 (i ritardatari tagliati sono una minoranza) [STIMA].
+#
+#  OROLOGIO: BCM indici UTC+1 fisso (OROLOGIO_BCM_2026-09-24). InpSession
+#  Hour=8 e' la cash d'estate; d'inverno arma 1h PRIMA della cash e il
+#  flat a 11:30 BCM e' a +4,5h dalla cash. La finestra mescola le due
+#  tempistiche (come l'ancora R47a): dichiarato, non separato.
+#  BUCHI: un regime; MFE vera non misurabile; il campione e' 193
+#  posizioni: sopra la soglia 150 solo se il taglio degli ingressi non
+#  ne toglie piu' di 43.
+#  TEMPO MACCHINA: 8 passate, base MISURATA ~11 s/passata (R270: 28
+#  passate in 5 minuti) -> ~1,5 minuti + avvio. Magic vergine 798102.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17||11||2||17||Y
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=410
+InpTrailStartR=0
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=0
+InpSpaceMode=0
+InpSpaceTF=16388
+InpSpaceMinR=0.0
+InpSpaceMaxR=0.0
+InpSpaceEma1=14
+InpSpaceEma2=50
+InpSpaceEma3=100
+InpSpaceEma4=200
+InpSpaceUseST=false
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=798102
+#
+# --- InpTrailMode PINNATO al valore vivo (1 = PREVBAR). NON e' l'asse:
+#     l'unico asse di questo file e' InpTP1_R, piu' sopra (4 celle x 2
+#     finestre = 8 passate). Commento corretto dal cancello il 28/09.
+InpTrailMode=1
+# ======================================================================

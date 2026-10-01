@@ -1,0 +1,176 @@
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+# =====================================================================
+#  PRV_DAXAP_03a -- asse InpPlaceMin: L'ORA DI PIAZZAMENTO a -1/+0/+1 minuti dalla cash
+#  Sedia 770411 (MAXMIN DAX SHORT) -- D30EUR M15 -- TICK REALI --
+#  deposito 100000 -- rischio 1,00 (di banco, NON 2,00: NESSUNA TAGLIA).
+#  Scritto il 01/10/2026 dal cercatore-parametri. Criteri congelati PRIMA
+#  dei numeri. NON ESEGUITO. Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ:
+#  NON sul VPS, NON su 50504400, NON su nessun conto (regola 21/09). La
+#  riga di lancio NON e' scritta qui (cancello della sessione principale).
+# =====================================================================
+#
+#  IL CASO CHE LO MOTIVA (01/10/2026, ora SERVER FTMO, report/TRIAL_
+#  GIORNO1_ANALISI_2026-10-01.md r.25-27): sell stop piazzato 09:59:00,
+#  fill 09:59:01 a 24.998,25 (UN MINUTO PRIMA della cash), SL a 67 punti,
+#  stoppato 10:06:32 dalla spazzata d'apertura; poi il DAX e' sceso di
+#  ~145 punti. Il report stesso lascia il buco: "quanto spesso succede
+#  nel backtest del 770411 [NON MISURATO]".
+#
+#  COSA E' GIA' MISURATO su quanto spesso succede (01/10, dai per-trade
+#  di R246 / R246-inverno, 794621+794623 e 794625+794626, 28 posizioni
+#  "come FTMO" = d0 nei giorni d'estate + casella d+1 nei giorni d'inverno):
+#   - 12 posizioni chiudono a perdita piena (1 deal, ~-1R); minuti dalla
+#     cash alla chiusura: 1, 11, 25, 26, 26, 56, 56, 60, 75, 91, 116, 383.
+#     Entro 10 min dalla cash: 1/12. Entro 30 min: 5/12. Mediana 58 min.
+#   - sul d0 grezzo (27 pos, orologio BCM che d'inverno arma 1h PRIMA
+#     della cash): 10 stop pieni, 3 PRIMA della cash (-45, -5, -2 min):
+#     artefatto d'inverno del banco, che su FTMO non esiste.
+#   - n = 12 stop: INDIZIO, non misura. Merito SOSPESO (14 posizioni OOS).
+#  QUELLO CHE NESSUN FILE HA MAI MISURATO: InpPlaceHour/InpPlaceMin non
+#  sono ad asse in NESSUN file prova ne' CSV (LE_MANOPOLE_INERTI_2026-09-
+#  23 par. 4.4; riconfermato il 01/10 con grep su prove/ per '||Y'). Sono
+#  stati mossi SOLO IN BLOCCO con tutto l'orario, di +-1 ora (R246): una
+#  forchetta di 60 minuti. Qui si scende a 1-15 minuti, una variabile sola.
+#
+#  >>> NON E' UN PARAMETRO COME GLI ALTRI -- LEGGERE (sorgente
+#      ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5):
+#   r.188  if(gPhase==MMP_WAIT && nowMin >= InpPlaceHour*60+InpPlaceMin)
+#          -> TryPlace(): piazza un SELL STOP a (minimo del box - buffer).
+#   r.266-270  if(lot>0 && gTrade.SellStop(...)) Log(...);  return(true);
+#          Se il prezzo e' GIA' sotto il livello, un sell stop sopra il
+#          bid e' NON VALIDO: l'ordine fallisce in silenzio (nessun Log)
+#          e TryPlace torna comunque true -> fase PLACED senza ordine ->
+#          niente trade fino a domani. QUINDI RITARDARE IL PIAZZAMENTO
+#          NON "ENTRA PIU' TARDI": E' UN FILTRO "SALTA IL GIORNO SE LA
+#          ROTTURA E' GIA' AVVENUTA". Misura il valore dei giorni di
+#          rottura precoce (compresi quelli come il 01/10), non
+#          l'ingresso a mercato +N minuti, che e' un altro meccanismo
+#          (esiste nella famiglia: ABTG_DAX_Apertura_EU modo DELAYED/
+#          OPENCONFIRM; R27 sul DAX: bocciato, ma su un altro motore).
+#   r.412  AtrVal() = ATR(14) M15 della barra CHIUSA PRECEDENTE (shift 1):
+#          piazzando piu' tardi la base dell'ATR entra poco (+15 min =
+#          una barra M15 d'apertura nella media di 14: ~+7%). Trascurabile,
+#          ma dichiarato: lo stop non e' piu' esattamente quello dell'ancora.
+#  Il cutoff resta PINNATO a 08:30 (r.172): ritardare accorcia anche la
+#  FINESTRA di fill (30 -> 15 minuti a +15). E' una seconda confusione,
+#  dichiarata, che pesa nello stesso verso (meno trade).
+#
+#  GLI ORARI sono ORA SERVER BCM (= ora italiana - 1 d'estate, = ora
+#  italiana d'inverno, OROLOGIO_BCM_2026-09-24): 08:00 BCM = cash DAX
+#  d'estate. Sul preset FTMO +2h: piazzamento 09:59 -> 10:00 / 10:01 /...
+#  D'INVERNO il banco BCM arma 1h PRIMA della cash e la finestra mescola
+#  le due tempistiche (come l'ancora r81a/R246i). Sulle sedie FTMO la
+#  tempistica d'inverno e' quella della casella d+1 (R246q/R246r).
+#
+#  PIN: copia verbatim di prove/R246i_orologio_MAXMINDAX_D30EUR_d0_B.txt
+#  (= cella viva r81a = preset FTMO rimappato: ora BCM, rischio 1,
+#  Guardian spento, correlazione S&P su SPXUSD) tranne l'ora di
+#  piazzamento e il magic. FINESTRA B: 2024.09.26 -> 2026.06.30, IS 40%.
+#
+#  ANCORA ESTERNA (la cella 07:59 vive in R246i/r81a, non in questo asse):
+#    IS  Profit 4766,96  PF 1,87803  DD 3,0977  Trades 20
+#    OOS Profit 6143,38  PF 2,15985  DD 1,9213  Trades 21 (14 posizioni)
+#  G1: determinismo gia' stabilito da R246i (gemelle 794621/794671
+#  identiche al centesimo): non si ripete qui (un asse per file).
+#
+#  n: 14 posizioni OOS, ~13 IS. NESSUNA CELLA E' PROMUOVIBILE A NESSUN PF
+#  (merito SOSPESO per costruzione, valvola R59): si leggono la DIREZIONE
+#  del conteggio e il RISCHIO (Emendamento B), mai il PF come verdetto.
+#  R1 (a qualunque n): Equity DD% IS o OOS > 5,00 -> INCOMPATIBILE con la
+#  challenge a 2,00% (soglia gia' usata da R194a/R206a su questa sedia).
+#  A10: nessuna promozione, nessuna taglia, nessuna sedia toccata.
+#
+#  FILE 03a -- LE TRE CELLE VICINE ALL'APERTURA: -1 / +0 / +1 minuto
+#  ------------------------------------------------------------------
+#  InpPlaceHour=7 PINNATO, asse InpPlaceMin = 59 / 60 / 61 -> piazzamento
+#  07:59 (VIVO) / 08:00 / 08:01 BCM, cioe' 1 minuto PRIMA della cash / ALLA
+#  cash / 1 minuto DOPO. (nowMin >= 7*60+60 = 480 = 08:00: l'aritmetica
+#  dell'EA accetta minuti >= 60.) 3 celle x 2 finestre = 6 passate.
+#  G0 INTERNO: la cella 59 e' la cella viva: deve ridare r81a/R246i:
+#  IS 20 deal PF 1,87803 DD 3,0977 Profit 4766,96; OOS 21 deal PF 2,15985
+#  DD 1,9213 Profit 6143,38. Zero scarto su Trades, quarta cifra su PF/DD.
+#  Se non torna il round e' NULLO.
+#  G2 INCROCIATO CON 03b: la cella 60 di questo file e' IDENTICA alla cella
+#  0 di PRV_DAXAP_03b (stessa condizione nowMin >= 480): deve dare gli
+#  STESSI Trades/Profit/PF/DD al centesimo in tutte e due le gambe. Se non
+#  coincidono, uno dei due file non ha applicato il pin: round NULLO.
+#  S1 (conteggio, la manopola deve mordere): Trades(61) <= Trades(60) <=
+#  Trades(59) in tutte e due le gambe. Un'eccezione = NULLO.
+#  DOMANDA: quanta parte dei fill della sedia avviene nel minuto PRIMA
+#  della cash (come il 01/10 alle 09:59:01)? La risposta e' Trades(59) -
+#  Trades(60). [NON MISURATO: nessun per-trade ha l'ora d'ingresso.]
+#  ATTESA DICHIARATA PRIMA DEI NUMERI: dai fill osservati in forward
+#  (08:01-08:27 BCM, SEDIA_770411_IL_RIENTRO par. 5: nessun fill prima
+#  delle 08:00 su 5) e dallo spread che si stringe di 2,5x alla cash
+#  (SPREAD_APERTURA_FTMO par. 2), l'attesa e' che il minuto 07:59 pesi
+#  POCO: Trades(60) in [Trades(59) - 3, Trades(59)] (i fill pre-apertura
+#  sono rari ma il caso del 01/10 dice che esistono). PF NON DIREZIONATO:
+#  non so se il pre-apertura e' la parte buona o cattiva dei fill.
+#  CONTRO-ESEMPIO: se Trades(60) < 0,75 x Trades(59) allora UN MINUTO
+#  vale il 25% dei fill e la mia attesa e' falsa: il pre-apertura e' una
+#  quota grossa dell'edge (o del rischio) di questa sedia e va letto cosi'.
+#  Se Trades(60) = Trades(59) in tutte e due le gambe, i fill pre-apertura
+#  sono zero in 21 mesi e il caso del 01/10 e' un evento fuori campione.
+#  COSTO: 6 passate x 0,214-0,700 min/passata (0,214 = R242 su EA sorella;
+#  0,700 = R104 su copia MFE dello stesso EA, REGISTRO r.3956; [NON
+#  MISURATO] su questo binario, classe 712) = 1,3-4,2 minuti.
+#  Magic vergine 798103 (zero occorrenze nel working tree e nei rami remoti).
+
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=59||59||1||61||Y
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000
+InpTP1_R=1
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=3
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=798103
