@@ -29,7 +29,7 @@ Avevo scritto che i due short DAX valevano "quasi 4% di rischio correlato" e che
 ## 6. Esecuzione e costi [MISURATO]
 - Slippage di uscita: DAX 1,16 e 0,41 punti; NZDCHF SL 0,46869 -> 0,46865 (0,4 pip, ~31 EUR); TP: GBPNZD 0,4 pip, AUDUSD 0,1 pip. Entrate: tutte entro 0,8 punti. **Esecuzione ottima: i costi del giorno sono il rischio, non lo slippage.**
 - **Commissioni**: forex 2,21 EUR/lotto/lato (GBPNZD 9,95 su 4,49; AUDUSD 17,69 su 7,99; NZDCHF 15,96 su 7,23 = 2,21); **indici 0**. Totale giorno 93,45.
-- **Cancello costo sul Bulge**: NZDCHF A ha TP 2,9 pip contro SL 17,2: payoff 1:6, **break-even 86% di vittorie** (senza costi); TP lordo ~231 EUR contro 31,95 di commissioni = **14%**, piu' lo spread (`NON MISURATO`). AUDUSD B: TP 9,6 -> 8,4 pip contro SL 22 pip (break-even ~72%), commissioni 5,9% del lordo.
+- **Cancello costo sul Bulge**: NZDCHF A ha TP 2,9 pip contro SL 17,2: payoff 1:6, **break-even 86% di vittorie** (senza costi); TP lordo ~224 EUR contro 31,95 di commissioni = **14%**, piu' lo spread (`NON MISURATO`). AUDUSD B: TP 9,6 -> 8,4 pip contro SL 22 pip (break-even ~72%), commissioni 5,9% del lordo.
 
 ## 7. Guardian e margini [DEDOTTO, righe del Guardian NON ancora lette]
 Pausa 3,5% (5.600), emergenza 4,5% (7.200), perdita totale 9,3%; reset giornaliero ore 1 server. Al minimo (13:36) il bilancio era a 4,27% di perdita (**375 EUR dall'emergenza**); ora equity 153.977 = -3,76% (**1.177 EUR dall'emergenza**, ~2.000 dal 5% presunto). **Pausa superata dalle 13:36**: nessun nuovo ingresso dalle 13:42 a oggi pomeriggio, coerente con la pausa ma `NON PROVATO` finche' non si leggono le righe del Guardian in Esperti.
