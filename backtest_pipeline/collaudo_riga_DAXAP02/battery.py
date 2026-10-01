@@ -33,7 +33,7 @@ T = [
    "[from 2024.09.26 00:00 to 2025.06.09 00:00 su D30EUR: = IS dichiarata] [from 2025.06.10 00:00 to 2026.06.30 00:00 su D30EUR: = OOS dichiarata]",
    "terminale C:\\Program Files\\BCM Markets MT5 Terminal\\terminal64.exe, deposito 100000, modello 4 = riga", "GUARDIA EA: grafici salvati letti 2, con un EA attaccato o illeggibili 0",
    "asse InpCloseHour [11/13/15/17] ok", "FILE ATTESI TROVATI: 6 su 6   NELLO ZIP: 6 su 6", "ZIP PRONTO DA MANDARE", "gamba OOS, chiusure dal 2025.06.11 10:23:12 al 2026.06.25 09:19:38",
-   "IS   InpCloseHour  11", "OOS  InpCloseHour  17", "motore = pin (SHA256, EA + include + driver di walk-forward)", "NON ha svuotato Tester\\cache", "MARCATORE_RIGA_ROUND_DAXAP02_v1"],
+   "IS   InpCloseHour  11", "OOS  InpCloseHour  17", "motore = pin (SHA256, EA + include + driver di walk-forward)", "NON ha svuotato Tester\\cache", "MARCATORE_RIGA_ROUND_DAXAP02_v2"],
   ["MOTIVO", "MANCA ", "DIVERSO", "DIVERSA", NV_, KO_, "GAMBE MORTE"]),
  # i CSV VERI di R270e portati alla forma attesa: il parser regge l intestazione vera (101 colonne, InpNewsCurrencies vuota, 0.0 scritto 0)
  ("csv_veri_R270e_corretti", {"real_csv": "patch"}, "", "ok", PC, "", "ok", {}, [OK_, "pin numerici confrontati: _IS 348 _OOS 348", "Profit    3789.36   PF  1.12634"], ["MOTIVO", NV_]),
@@ -42,7 +42,7 @@ T = [
  ("ko_due_gambe_morte", {"legs": ["ko", "ko"], "rc": 2, "pertrade": False}, "", "ok", PC, "", "ok", {},
   [KO_, "gambe viste 2 partite 0 morte 2", "OnTesterInit works too long: 12 righe", "MANCA ROUND_DAXAP02\\ABTG_DAX_Apertura_EU_D30EUR_IS_DAXAP02.csv", "MANCA PERTRADE\\abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_798102.csv",
    "OK    ROUND_DAXAP02\\REFERTO_ROUND_DAXAP02.txt", "GAMBE MORTE: 2 su 2 (Tester cannot be initialized)", "NON rilanciare di tua iniziativa"], [OK_, NV_]),
- ("misto", {"legs": ["ok", "ko"], "rc": 2}, "", "ok", PC, "", "ok", {}, [NV_, "gambe ne partite ne morte in modo leggibile (viste 2, partite 1, morte 1)", "GAMBE MORTE: 1 su 2", "RIPESCA dalla cache"], [OK_, KO_]),
+ ("misto", {"legs": ["ok", "ko"], "rc": 2}, "", "ok", PC, "", "ok", {}, [NV_, "gambe ne partite ne morte in modo leggibile (viste 2, partite 1, morte 1)", "GAMBE MORTE: 1 su 2", "NON e una replica", "RIPESCATE dalla cache", "Rigirerebbe davvero SOLO la gamba morta"], [OK_, KO_]),
  ("ko_ma_csv_fresco", {"legs": ["ko", "ko"], "csv_anyway": True, "rc": 2}, "", "ok", PC, "", "ok", {}, [NV_, "il giornale dice 2 gambe morte ma esiste un CSV fresco"], [OK_, KO_]),
  ("trades_zero_in_una_cella", {"trades0": True, "rc": 3}, "", "ok", PC, "", "ok", {}, [NV_, "NON BUONO: righe 4 (attese 4), Trades>0 su 3"], [OK_]),
  ("tre_righe", {"una_riga": True}, "", "ok", PC, "", "ok", {}, [NV_, "righe 3 (attese 4)"], [OK_]),
@@ -61,7 +61,7 @@ T = [
  ("giornale_vuoto", {"tlog": "vuoto"}, "", "ok", PC, "", "ok", {}, [NV_, "giornale del tester NON VERIFICABILE", "leggibili 0"], [OK_]),
  ("terza_gamba", {"extra_leg": True}, "", "ok", PC, "", "ok", {}, [NV_, "gambe attribuite a questo job: 3 (attese 2)"], [OK_]),
  ("gamba_di_altro_EA", {"ea_other": "ABTG_EMA200"}, "", "ok", PC, "", "ok", {}, [NV_, "porta il nome di un ALTRO EA"], [OK_]),
- ("rc1", {"rc1": True}, "", "ok", PC, "", "ok", {}, [NV_, "rc 1: il driver non e partito", "motore NON VERIFICATO", "MANCA ROUND_DAXAP02\\REFERTO_ROUND_DAXAP02.txt"], [OK_]),
+ ("rc1", {"rc1": True}, "", "ok", PC, "", "ok", {}, [NV_, "rc 1: il driver si e fermato con un ERRORE", "motore NON VERIFICATO (driver uscito con rc 1)", "MANCA ROUND_DAXAP02\\REFERTO_ROUND_DAXAP02.txt"], [OK_]),
  ("ea_mutato", {"mut_ea": True}, "", "ok", PC, "", "ok", {}, [NV_, "ABTG_DAX_Apertura_EU.mq5 SHA256 DIVERSO DAL PIN"], [OK_]),
  ("ea_assente", {"no_ea": True}, "", "ok", PC, "", "ok", {}, [NV_, "ABTG_DAX_Apertura_EU.mq5 ASSENTE"], [OK_]),
  ("include_mutato", {"mut_inc": True}, "", "ok", PC, "", "ok", {}, [NV_, "ABTG_PausaGuardian.mqh SHA256 DIVERSO DAL PIN"], [OK_]),
@@ -71,6 +71,12 @@ T = [
  # il referto del driver: e la sola prova, a corsa fatta, di QUALE terminale, deposito e modello hanno girato
  ("referto_assente", {"ref_absent": True}, "", "ok", PC, "", "ok", {}, [NV_, "REFERTO DEL DRIVER ASSENTE", "MANCA ROUND_DAXAP02\\REFERTO_ROUND_DAXAP02.txt"], [OK_]),
  ("referto_vecchio_sul_desktop", {"ref_absent": True}, "", "ok", PC, "", "ok", {"PRE_OLD": "1"}, [NV_, "tolta la cartella di una corsa PRECEDENTE: ROUND_DAXAP02", "REFERTO DEL DRIVER ASSENTE"], [OK_]),
+ # [cancello 01/10, secondo passaggio] il referto che QUESTA corsa non ha scritto (data prima del job) non conferma niente, anche se dice pin/deposito giusti
+ ("referto_non_riscritto", {"ref_stale": True}, "", "ok", PC, "", "ok", {}, [NV_, "REFERTO DEL DRIVER VECCHIO (scritto prima del job: NON e di questa corsa)"], [OK_, "deposito 100000, modello 4 = riga"]),
+ # la cartella vecchia che NON si lascia togliere: la riga si ferma PRIMA di aprire MT5 (punto 46: un Remove-Item -EA SilentlyContinue non dice se ha tolto)
+ ("cartella_vecchia_non_rimovibile", {}, "", "ok", PC, "", "ok", {"PRE_OLD": "1", "NO_RM": "1"}, ["NON riesco a togliere la cartella di una corsa PRECEDENTE", NOSTUB], FERMA + ["tolta la cartella"]),
+ # lo zip che perde una voce: la cartella e completa, il pacco no (classe 1021). Senza questo caso la mutazione $inZ=$true restava verde
+ ("zip_senza_un_file", {}, "", "ok", PC, "", "ok", {"ZIP_DROP": "abtg_trades"}, [OK_, "FILE ATTESI TROVATI: 6 su 6   NELLO ZIP: 5 su 6", "nello zip: NO"], ["NELLO ZIP: 6 su 6"]),
  ("referto_terminale_banco_VPS", {"ref_term": "C:\\MT5_Backtest\\terminal64.exe"}, "", "ok", PC, "", "ok", {}, [NV_, "terminale C:\\MT5_Backtest\\terminal64.exe", "DIVERSO DALLA RIGA"], [OK_]),
  ("deposito_non_passato", {}, r"s/ -Deposito \$jb.dp;/;/", "ok", PC, "", "ok", {}, [NV_, "deposito 10000, modello 4 DIVERSO DALLA RIGA"], [OK_]),
  ("modello_1_passato", {}, r"s/-Modello \$jb.m /-Modello 1 /", "ok", PC, "", "ok", {}, [NV_, "modello 1 DIVERSO DALLA RIGA"], [OK_]),

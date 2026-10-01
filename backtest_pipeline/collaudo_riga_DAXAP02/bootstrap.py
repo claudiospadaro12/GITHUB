@@ -15,7 +15,7 @@ r = subprocess.run(["git", "merge-base", "--is-ancestor", C, "origin/lavoro"], c
 assert r.returncode == 0, "il commit %s NON e' raggiungibile da origin/lavoro: prima push, poi bootstrap" % C[:8]
 riga = subprocess.run(["git", "show", "%s:backtest_pipeline/righe/RIGA_ROUND_DAXAP02.txt" % C], cwd=REPO, capture_output=True, check=True).stdout
 H = hashlib.sha256(riga).hexdigest().upper()
-MARC = "MARCATORE_RIGA_ROUND_DAXAP02_v1"
+MARC = "MARCATORE_RIGA_ROUND_DAXAP02_v2"
 assert riga.count(MARC.encode()) == 1 and b"MARCATORE_RIGA_ROUND_VPS_v2" in riga
 msg = ("BERSAGLIO: SOLO una finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\\Program Files\\BCM Markets MT5 Terminal, demo 50503392). "
        "NON e il VPS VMI3047753; NON FTMO trial 1514806751 (C:\\FTMO, ex challenge 541452707), NON REALE 10105439 (C:\\BCM_Reale), NON il piccolo 50503392 sul VPS "

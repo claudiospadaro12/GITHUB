@@ -189,6 +189,10 @@ if not sc.get('ref_absent'):
          'modello         : ' + str(MOD) + ('  (tick reali)' if str(MOD) == '4' else '  (NON tick reali: screening, non verdetto)'), 'deposito        : ' + str(DEP),
          'rc del driver   : 0   (informativo)', '', 'ESITO: ROUND GIRATO']
     open(os.path.join(d, 'REFERTO_ROUND_' + LBL + '.txt'), 'w', newline='').write('\r\n'.join(R))
+    if sc.get('ref_stale'):
+        # un referto che QUESTA corsa non ha riscritto (cartella vecchia non tolta + driver che non arriva a scriverlo): data di un'ora fa
+        _t = time.time() - 3600
+        os.utime(os.path.join(d, 'REFERTO_ROUND_' + LBL + '.txt'), (_t, _t))
 for f_ in files:
     if f_ and os.path.exists(f_):
         shutil.copy(f_, os.path.join(d, os.path.basename(f_)))
