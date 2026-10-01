@@ -57,12 +57,12 @@ Ripetuto dal dossier del 13/09, gia' acquisito: 3,0% di rischio aggregato in tre
   - **N7**: tetto per simbolo su tutti i magic, ma conta solo le posizioni **aperte** (non gli stop gia' presi oggi).
   - **N6/N15/N19-AAPL**: `MaximumTradesPerDay`, `InpMaxTradesPerSession=1`, `MAX_TRADES_PER_DAY=2` (Code Base 76333, **rischio 5% per trade: bandiera rossa, non usato per valori**).
   - **N16**: `close_all=-2500` su 100k = **-2,5% di giornata, aperto+chiuso**, uguale in 11 preset ORB indici.
-- **Nostro stato [VERIFICATO nel repo oggi]**: `ABTG_DAX_Apertura_EU.mq5` (r.1194 e altre 6) e `ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5` (r.245) chiamano `ABTG_GuardiaIngresso(InpUsaGuardian,"nome")` **con i soli due argomenti**: pausa B1 e cap C1, e basta. **P1** (perdite consecutive, `ABTG_TroppePerditeConsecutive`) esiste nell'include ma e' **per magic** (`DEAL_MAGIC==magic`) e a soglia 0 e' spento; **P0** (tetto simbolo+lato) conta aperte+pendenti di tutti i magic ma non la storia di oggi. **Il 01/10 il 770411 (stop 10:06) e il 770105 (ingresso 11:13) sono due magic diversi sullo stesso indice**: nessun meccanismo nostro li lega. `InpOneTradePerDay=true` del 770411 e' per EA.
-- Il Bulge ha i suoi (`Max_SL_PerDay=4`, `Max_Consecutive_SL=3`, `Max_Daily_Loss_Pct=2.0`, ABTG_Bulge.mq5 r.394-395), ma sono **per istanza**, e il 01/10 le istanze erano due.
+- **Nostro stato [VERIFICATO nel repo oggi]**: `ABTG_DAX_Apertura_EU.mq5` (r.1194 e altre 6) e `ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5` (r.245) chiamano `ABTG_GuardiaIngresso(InpUsaGuardian,"nome")` **con i soli due argomenti**: pausa B1 e cap C1, e basta. **P1** (perdite consecutive, `ABTG_TroppePerditeConsecutive`) esiste nell'include ma e' **per magic** (`DEAL_MAGIC==magic`) e a soglia 0 e' spento; **P0** (tetto simbolo+lato) conta aperte+pendenti di tutti i magic ma non la storia di oggi. **Il 01/10 il 770411 (stop 10:06) e il 770105 (ingresso 11:13, magic [INFERITO dal commento SELL], `TRIAL_GIORNO1_STOP_DAX_2026-10-01.md`) sono due magic diversi sullo stesso indice**: nessun meccanismo nostro li lega. `InpOneTradePerDay=true` del 770411 e' per EA.
+- Il Bulge ha i suoi (`Max_SL_PerDay=4` r.394, `Max_Consecutive_SL=3` r.395 di ABTG_Bulge.mq5; `Max_Daily_Loss_Pct=2.0` dal preset, `PIANO_FREE_TRIAL_FTMO_2026-09-30.md`), ma sono **per istanza**, e il 01/10 le istanze erano due.
 
 **Calcolo sul nostro caso [CALCOLATO, controfattuale, non proposta]** con i numeri di `TRIAL_GIORNO1_ANALISI_2026-10-01.md`:
 - Perdita realizzata alle 11:11 = 3.292,52 + 1.357,14 = **4.649,66 (2,91%)**: sotto la pausa 3,5% (5.600), quindi il secondo DAX (rischio 2% = 3.200) e' passato.
-- Con la formula N2 su un budget giornaliero del 4,0% (6.400): `4.649,66 + 3.200 = 7.850 > 6.400` -> **rifiutato**. Con N1 e limite 4,5% (7.200): allowance = 7.200 - 4.649,66 - rischio aperto GBPNZD A+B (1.277+1.596 = 2.873) = **-323** -> rifiutato.
+- Con la formula N2 su un budget giornaliero del 4,0% (6.400): `4.649,66 + 3.200 = 7.850 > 6.400` -> **rifiutato** (a maggior ragione se N2 conta anche il rischio ancora aperto delle GBPNZD). Con N1 e limite 4,5% (7.200): allowance = 7.200 - 4.649,66 - rischio aperto GBPNZD A+B (1.277+1.596 = 2.873) = **-323** -> rifiutato.
 
 ## 3. TEMA (2): SOMMARE IL RISCHIO DELL'INGRESSO NUOVO NEL CAP
 
@@ -87,7 +87,7 @@ Ripetuto dal dossier del 13/09, gia' acquisito: 3,0% di rischio aggregato in tre
 | rischio per trade in set ORB indici | $500/100k = **0,5%** · $1000 = 1,0% · $100 = 0,1% | N16 |
 | ORB indici desk | `RiskPercent=0.5`, budget giornata 2,0% | N2 |
 
-**Nostro stato**: 0,65% fisso per sedia sul forex e **2,00% per sedia sugli indici DAX** (preset `ABTG_MaxMinNotte_DAX_Short_770411_FTMO.set`: `InpRiskPercent=2.00`; il Bulge del trial a 0,80% / 1,00%, `Max_Trades=3`). Nel Guardian **non esiste ne' sizing dinamico in funzione del buffer residuo ne' throttle dopo drawdown**: la risposta e' binaria (pausa 3,5% sul preset FTMO, emergenza 4,5%, preset FTMO `InpDailyLossPct=4.5`, `InpTotalDDPct=9.3`: **buffer 0,5 e 0,7, gia' alle cifre di F1**; il buco del 13/09 e' chiuso su questo preset). Il rischio 2,00% per trade sugli indici sta **sopra ogni riferimento esterno letto** (massimo 1,0% nei default, 1,5% il massimo prudente del manuale N5).
+**Nostro stato**: 0,65% fisso per sedia sul forex e **2,00% per sedia sugli indici DAX** (preset `ABTG_MaxMinNotte_DAX_Short_770411_FTMO.set`: `InpRiskPercent=2.00`; il Bulge del trial a 0,80% / 1,00%, `Max_Trades=3`). Fra gli input del Guardian (`ABTG_Guardian.mq5` r.129-174) **non c'e' ne' sizing dinamico in funzione del buffer residuo ne' throttle dopo drawdown**: la risposta e' binaria (pausa 3,5%, emergenza). Il preset in repo `ABTG_Guardian_FTMO_2Step.set` ha `InpDailyLossPct=4.5`, `InpTotalDDPct=9.3` (**buffer 0,5 e 0,7, alle cifre di F1**; il buco del buffer del 13/09 risulta chiuso **su questo preset**, [NON VERIFICATO] cio' che gira in campo sul 160K, dove `TRIAL_GIORNO1_ANALISI` riporta pausa 3,5% ed emergenza 4,5%). Il rischio 2,00% per trade sugli indici sta **sopra ogni riferimento esterno letto** (massimo 1,0% nei default, 1,5% il massimo prudente del manuale N5).
 - Il numero del buffer 50% sul 01/10 [CALCOLATO]: residuo giornaliero 5% (8.000) - 4.649,66 = 3.350,34 -> 50% = **1.675 (1,05%)** contro i 3.200 (2,00%) del DAX preso alle 11:13: lotto **~6,3 invece di 12,08**; a stop pieno la perdita sarebbe stata ~1.630 invece di 3.110 (flottante ignorato; DD totale non binding).
 - Prop **FTMO Free Trial**: [SNIPPET] sulle pagine ufficiali e [MANUALE VENDOR] N5 convergono su **14 giorni, target dimezzato (5%), 5% giornaliero, 10% massimo statico, reset a mezzanotte CE(S)T, 2 giorni minimi** per il 2-Step; un altro riassunto di terze parti cita anche una versione 1-Step con 3% giornaliero e 10% trailing EOD [SNIPPET, non aperta]. **Quale dei due e' il 160K di Claudio NON e' verificato**: lo decide la pagina Trading Objectives del suo cruscotto. Formula giornaliera [SNIPPET dell'academy FTMO]: **limite = saldo a mezzanotte CE(S)T - % del capitale iniziale**, misurato su **equity (flottante, commissioni e swap inclusi)** -> il nostro `InpDailyBaseline=1 (SALDO)` e' la modalita' coerente (il preset FTMO attuale non la valorizza: **da verificare in campo**, [NON VERIFICATO]).
 
@@ -97,12 +97,12 @@ Ripetuto dal dossier del 13/09, gia' acquisito: 3,0% di rischio aggregato in tre
 
 | set | rischio | range -> ingressi | stop | TP | trail / BE | chiusura ordini |
 |---|---|---|---|---|---|---|
-| DAX 2 Percent | $500 | 10:00 -> 10:05, 10:10, 10:15 | 400 | nessuno (10000) | trail 300, BE spento | 11:30 |
+| DAX 2 Percent | $500 | 10:00 -> 10:05, 10:10, 10:15 | 400 | nessuno (10000); **auto-uscita a +3% del saldo** | trail 300, BE spento | 11:30 |
 | DAX 3 "5 and 15 TP" | $500 | -> 10:05, 10:15 | 400 | 50 / 1000 / 250 | trail 300 | 11:30 |
-| DAX 6 "15 Min Pre" | $500 | **09:45 -> 10:00, 10:05** | 250 | 1000 | trail 450 | 11:30 |
+| DAX 6 "15 Min Pre" | $500 | **09:45 -> 10:00, 10:05** | **110% del range** (`use_money=1`, `OR_stp_pct=110`; `pip_stp=250` non attivo) | 1000 | trail 450 | 11:30 |
 | DAX 7 "5 Min Only" | $600 | 10:05, 10:10, 10:15 | 500 | 1000 | trail 300 | 11:30 |
 | NAS 2 "5 and 15 Tight" | **$1000** | 16:30 -> 16:35, 16:45 | **300** | nessuno | trail 400, **BE 100** | 18:00 |
-| NAS 5 Percent | $500 | -> 16:35 .. 16:45 | 400 | nessuno | trail 1000 | 18:00 |
+| NAS 5 Percent | $500 | -> 16:35, 16:40, 16:45 | 400 | nessuno; auto-uscita a +4% del saldo | trail 1000 | 18:00 |
 | tutti e 11 | | `offset=0` (nessun buffer sul livello), `per_bar=1` (BE/trail su chiusura barra), `max_rng=5000`, `min_rng=1`, **`close_all=-2500`** (-2,5% di giornata) | | | | |
 
 Altri valori per ingresso/stop all'apertura: N15 (buffer 20 punti, SL 30 punti oltre il range, 1 trade per sessione), N2 (range accettato solo se tra 0,10 e 0,40 x ATR giornaliero; conferma a CHIUSURA di barra), N17 (pavimento rischio >= 2x costo di round-trip; costo DAX 2,5 punti, Dow 4,0), N18 (grace di 5 minuti prima di qualunque uscita a mercato).
@@ -138,7 +138,7 @@ Altri valori per ingresso/stop all'apertura: N15 (buffer 20 punti, SL 30 punti o
 ## 7. SE DOVESSI ORDINARE PER RESA/COSTO (NESSUNA DECISIONE)
 
 1. **Somma del rischio nuovo nel cap C1** (N1, N2, N3): nuovo argomento in coda a `ABTG_GuardiaIngresso` + GV del cap; ~mezza giornata + autotest sul nucleo + ricompilazione di ogni EA; [FIRMA DI CLAUDIO] perche' tocca il rischio. Misurato 01/10, 4,62% contro 4,00%.
-2. **Budget di giornata (aperto + realizzato) con rifiuto o riduzione del lotto** (N1/N2): stesso punto di ingresso, stessa unita' `rischio_nuovo`; **e' la sola regola trovata che avrebbe bloccato il secondo DAX dell'01/10 senza una regola sul simbolo**.
+2. **Budget di giornata (aperto + realizzato) con rifiuto o riduzione del lotto** (N1/N2): stesso punto di ingresso, stessa unita' `rischio_nuovo`; **fra le regole trovate e' quella che avrebbe bloccato il secondo DAX dell'01/10 senza richiedere una regola sul simbolo** (calcolo in sezione 2).
 3. **Sizing a frazione del buffer residuo (50%)** (N3, N4): un secondo parametro nello stesso calcolo del lotto; [FIRMA DI CLAUDIO].
 4. Adottare P0/P1 gia' scritti negli EA DAX: costo di un parametro e una chiamata, **ma sono tetti di rischio = firma**.
 5. Ingresso dopo l'apertura cash: **non c'e' una sorgente pubblica che dia il valore**; sarebbe una misura da fare in casa (cella da testare nel tester su 770411), non una copia.
