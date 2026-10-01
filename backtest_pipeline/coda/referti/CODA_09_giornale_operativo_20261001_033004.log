@@ -1,0 +1,158 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-10-01 03:32:11  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 8
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20260930   (69.1 KB, ultima scrittura 2026-09-30 23:58) ---
+    righe totali: 263
+    RIGHE DI ORDINE / DEAL: 5
+      DQ008:00:00.628ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] BUY STOP @ 4190.00 SL 4164.88 TP 4290.48 lot 0.01
+      PR008:00:00.719ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] SELL STOP @ 4164.88 SL 4190.00 TP 4064.40 lot 0.01
+      HN012:00:00.389ABTG_EasyTrend (CHFJPY,H1)[EZ] SEGNALE LONG alle 10:00: livello d'ingresso 188.420 (chiusura candela segnale), estremo figura 187.601, SL 187.571. Candela linreg O=188.187 H=188.387 L=188.106 C=188.291, plot 188.207.
+      MM013:00:00.208ABTG_EMA200_Ottimizzato (AUDCHF,H4)[EMA200] BUY LIMIT 1 @ 0.58036 SL 0.57769 TP 0.58570 lot 0.02
+      DL013:00:00.271ABTG_EMA200_Ottimizzato (AUDCHF,H4)[EMA200] BUY LIMIT 2 @ 0.57931 SL 0.57769 TP 0.58255 lot 0.03
+    GUARDIAN, ultima riga del giorno:
+      ID021:22:16.916ABTG_Bulge (GBPUSD,H4)[AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.
+
+--- GIORNO 20261001   (7.1 KB, ultima scrittura 2026-10-01 03:29) ---
+    righe totali: 23
+    RIGHE DI ORDINE / DEAL: 5
+      PE001:00:01.123ABTG_PunteLarry (GBPJPY,H1)[LARRY] SETUP LONG [SMASH punta] del 2026.10.01: ingresso STOP @ 208.905 (punta/gap 0.988 = 0.76 x ATR D1).
+      QE001:00:01.145ABTG_PunteLarry (GBPUSD,H1)[LARRY] SETUP SHORT [SMASH libro] del 2026.10.01: ingresso STOP @ 1.32224 (punta/gap 0.00553 = 0.90 x ATR D1).
+      PL001:00:01.146ABTG_Bulge (GBPUSD,H4)CTrade::OrderSend: market buy 0.10 U30USD sl: 50580.93 tp: 51363.15 [invalid stops]
+      GD001:00:01.164ABTG_PunteLarry (GBPJPY,H1)[LARRY] PENDENTE BUY STOP @ 208.905  SL 206.745  TP 212.145  lot 0.04  (pattern SMASH punta, punta/gap 0.76 x ATR, scadenza 2026.10.01 23:59, ordine 3521986)
+      DO001:00:01.183ABTG_PunteLarry (GBPUSD,H1)[LARRY] PENDENTE SELL STOP @ 1.32224  SL 1.33171  TP -  lot 0.06  (pattern SMASH libro, punta/gap 0.90 x ATR, scadenza 2026.10.01 23:59, ordine 3521987)
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1514806751, 541452707
+=====================================================================
+
+--- GIORNO 20260930   (156.3 KB, ultima scrittura 2026-09-30 23:55) ---
+    righe totali: 534
+    RIGHE DI ORDINE / DEAL: 7
+      LN006:00:01.847CLAU12_EMA200 (US30.cash,H1)[EMA200] SELL LIMIT 1 @ 51675.95 SL 51819.16 TP 51389.53 lot 5.89
+      LH006:00:01.870CLAU12_EMA200 (US30.cash,H1)[EMA200] SELL LIMIT 2 @ 51723.69 SL 51819.16 TP 51532.75 lot 8.84
+      GG008:59:00.532CLAU12_MaxMinNotte_DAX_Short_Ottimizzato (GER40.cash,M15)[MaxMinNotte] SELL STOP @ 25443.21 SL 25505.44 TP 25194.29 lot 23.95
+      DS010:40:03.673CLAU12_DAX_Apertura_EU (GER40.cash,M5)[DAX Apertura EU] SELL LIMIT (retest) @ 25439.34000  SL 25586.84000  lot 9.89
+      MJ016:05:20.737CLAU12_Nasdaq_Apertura_US (US100.cash,M5)[Nasdaq Apertura US] RETEST BUY: rottura con volumi insufficienti, salto (regola Emiliano).
+      RP022:53:19.973CLAU12_Nasdaq_Apertura_US (US100.cash,M5)[Nasdaq Apertura US] CONFIG FASE 2 -> F1 forza rottura=0.00 x ATR [spento: pendente nudo] | runner TP=0.00R (storico 3R) | EMA HTF (F3)=spento
+      RK022:54:22.628CLAU12_Nasdaq_Apertura_US (US100.cash,M5)[Nasdaq Apertura US] CONFIG FASE 2 -> F1 forza rottura=0.00 x ATR [spento: pendente nudo] | runner TP=0.00R (storico 3R) | EMA HTF (F3)=spento
+    GUARDIAN, ultima riga del giorno:
+      QR023:55:02.461CLAU12_Guardian (NZDJPY,M1)[GUARDIAN] eq=160000.00  dayLoss=0.00%  totDD=0.00%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261001   (15.4 KB, ultima scrittura 2026-10-01 03:25) ---
+    righe totali: 56
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      KJ003:30:04.329CLAU12_Guardian (NZDJPY,M1)[GUARDIAN] eq=160000.00  dayLoss=0.00%  totDD=0.00%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20260927   (15.2 KB, ultima scrittura 2026-09-27 23:56) ---
+    righe totali: 59
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      LF023:55:02.528ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=100081.32  dayLoss=0.00%  totDD=-0.08%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20260928   (38.4 KB, ultima scrittura 2026-09-28 09:07) ---
+    righe totali: 135
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      MM009:04:56.881ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=100081.32  dayLoss=0.00%  totDD=-0.08%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+
+--- GIORNO 20260928   (0.7 KB, ultima scrittura 2026-09-28 07:44) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 2
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260930   (6.8 KB, ultima scrittura 2026-09-30 07:23) ---
+    righe totali: 20
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20260930   (83 KB, ultima scrittura 2026-09-30 23:55) ---
+    righe totali: 290
+    RIGHE DI ORDINE / DEAL: 1
+      ID015:45:00.285ABTG_ORB_Ottimizzato (EURAUD,H1)[ORB_OTT] BUY STOP @ 11.63247 SL 11.63186 TP 11.63430 lot 1.35
+    GUARDIAN, ultima riga del giorno:
+      OF023:55:03.134ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7551.34  dayLoss=0.00%  totDD=-0.68%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261001   (12.4 KB, ultima scrittura 2026-10-01 03:25) ---
+    righe totali: 45
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      JG003:30:04.984ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7551.34  dayLoss=0.00%  totDD=-0.68%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
