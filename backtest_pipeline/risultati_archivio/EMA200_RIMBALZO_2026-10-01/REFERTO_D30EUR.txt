@@ -1,0 +1,202 @@
+==============================================================================
+ EMA200_RIMBALZO_v1 -- D30EUR -- feed HistData GRXEUR (FutureSharks)
+ criteri: report/EMA200_RIMBALZO_CRITERI_2026-10-01.md (congelati, commit c23bfe61)
+==============================================================================
+ barre M1: 1,718,805   da 2010-11-15 07:00:00 a 2018-12-28 21:13:00 (UTC)
+ G-OROLOGIO: picco inverno 07:00 (n 274508)  estate 06:00 (n 438753)  ancore 07:00,08:00,13:30,14:30 -> PASSA
+ regimi per anno (rendimento close-to-close): 2010 LATERALE +3.3%  2011 ORSO -15.8%  2012 TORO +29.3%  2013 TORO +26.1%  2014 LATERALE +1.7%  2015 LATERALE +9.2%  2016 LATERALE +9.1%  2017 TORO +12.6%  2018 ORSO -18.2%
+    M5 long  primaria: P (sfondamenti) 830, di cui GIA' nel minuto del tocco 194 (23%)
+    M5 short primaria: P (sfondamenti) 790, di cui GIA' nel minuto del tocco 157 (20%)
+ M5: barre 345467, eventi H1 2951, H2 2637, surrogati 40 (33 s)
+    M15 long  primaria: P (sfondamenti) 290, di cui GIA' nel minuto del tocco 51 (18%)
+    M15 short primaria: P (sfondamenti) 292, di cui GIA' nel minuto del tocco 47 (16%)
+ M15: barre 115602, eventi H1 1041, H2 910, surrogati 40 (16 s)
+    H1 long  primaria: P (sfondamenti) 84, di cui GIA' nel minuto del tocco 9 (11%)
+    H1 short primaria: P (sfondamenti) 76, di cui GIA' nel minuto del tocco 4 (5%)
+ H1: barre 29365, eventi H1 269, H2 246, surrogati 100 (26 s)
+    H4 long  primaria: P (sfondamenti) 26, di cui GIA' nel minuto del tocco 1 (4%)
+    H4 short primaria: P (sfondamenti) 22, di cui GIA' nel minuto del tocco 1 (5%)
+ H4: barre 9419, eventi H1 75, H2 78, surrogati 100 (27 s)
+    D1 long  primaria: P (sfondamenti) 4, di cui GIA' nel minuto del tocco 0 (0%)
+    D1 short primaria: P (sfondamenti) 3, di cui GIA' nel minuto del tocco 0 (0%)
+ D1: barre 2057, eventi H1 14, H2 11, surrogati 100 (27 s)
+
+ COSTO (non entra nella P): ATR mediano del TF in prezzo e rapporto X*ATR/spread
+   M5   ATR 8.6786   0,25 ATR / spread = 1.2x   1,0 ATR / spread = 4.9x
+   M15  ATR 15.8750   0,25 ATR / spread = 2.2x   1,0 ATR / spread = 9.0x
+   H1   ATR 33.2143   0,25 ATR / spread = 4.7x   1,0 ATR / spread = 18.8x
+   H4   ATR 59.0000   0,25 ATR / spread = 8.3x   1,0 ATR / spread = 33.4x
+   D1   ATR 149.2321   0,25 ATR / spread = 21.1x   1,0 ATR / spread = 84.4x
+
+ TABELLA (primaria H1 X=Y=1,0; cella collega X=0,25 Y=1,0; H2 b=0,5 tol=0,10 Z=1,5)
+  ip  tf   lato  cella          regime      n     P     IC95          N0    surr med [p2.5;p97.5]  eff    verdetto
+  H1  M5   long  X0.25_Y1.00    TUTTO      1554  0.676  [0.652;0.698]  0.800  0.659 [0.642;0.684]  +0.017  NULLO
+  H1  M5   long  X1.00_Y1.00    TUTTO      1571  0.472  [0.447;0.496]  0.500  0.452 [0.438;0.473]  +0.020  NULLO
+  H1  M5   long  X1.00_Y1.00    TORO        596  0.475  [0.435;0.515]  0.500  0.453 [0.414;0.503]  +0.021  NULLO
+  H1  M5   long  X1.00_Y1.00    LATERALE    588  0.473  [0.433;0.513]  0.500  0.462 [0.439;0.488]  +0.010  NULLO
+  H1  M5   long  X1.00_Y1.00    ORSO        387  0.465  [0.416;0.515]  0.500  0.440 [0.403;0.487]  +0.025  NULLO
+  PL1 M5   long  EMA100         TUTTO      1974  0.449  [0.427;0.471]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M5   long  EMA150         TUTTO      1726  0.451  [0.427;0.474]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M5   long  EMA250         TUTTO      1423  0.475  [0.449;0.501]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M5   long  SMA200         TUTTO      1453  0.467  [0.442;0.493]  0.500  nan [nan;nan]  +nan  placebo
+  H1  M5   short X0.25_Y1.00    TUTTO      1369  0.649  [0.624;0.674]  0.800  0.650 [0.620;0.672]  -0.001  NULLO
+  H1  M5   short X1.00_Y1.00    TUTTO      1373  0.425  [0.399;0.451]  0.500  0.438 [0.405;0.456]  -0.014  NULLO
+  H1  M5   short X1.00_Y1.00    TORO        499  0.433  [0.390;0.477]  0.500  0.427 [0.378;0.461]  +0.006  NULLO
+  H1  M5   short X1.00_Y1.00    LATERALE    528  0.428  [0.386;0.471]  0.500  0.439 [0.403;0.473]  -0.011  NULLO
+  H1  M5   short X1.00_Y1.00    ORSO        346  0.408  [0.357;0.460]  0.500  0.449 [0.382;0.494]  -0.041  ZONA GRIGIA
+  PL1 M5   short EMA100         TUTTO      1744  0.434  [0.411;0.457]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M5   short EMA150         TUTTO      1513  0.433  [0.408;0.458]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M5   short EMA250         TUTTO      1241  0.432  [0.405;0.460]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M5   short SMA200         TUTTO      1307  0.443  [0.416;0.470]  0.500  nan [nan;nan]  +nan  placebo
+  H2  M5   giu   b0.5_tol0.10_Z1.5 TUTTO      1359  0.380  [0.355;0.407]  0.364  0.362 [0.336;0.384]  +0.018  NULLO
+  H2  M5   giu   b0.5_tol0.10_Z1.5 TORO        501  0.361  [0.320;0.404]  0.368  0.363 [0.326;0.420]  -0.001  NULLO
+  H2  M5   giu   b0.5_tol0.10_Z1.5 LATERALE    514  0.407  [0.365;0.450]  0.352  0.367 [0.329;0.402]  +0.040  ZONA GRIGIA
+  H2  M5   giu   b0.5_tol0.10_Z1.5 ORSO        344  0.369  [0.320;0.421]  0.376  0.353 [0.319;0.386]  +0.016  NULLO
+  PL2 M5   giu   EMA100         TUTTO      1809  0.369  [0.347;0.392]  0.372  nan [nan;nan]  +nan  placebo
+  PL2 M5   giu   EMA150         TUTTO      1578  0.378  [0.355;0.403]  0.371  nan [nan;nan]  +nan  placebo
+  PL2 M5   giu   EMA250         TUTTO      1228  0.375  [0.349;0.403]  0.362  nan [nan;nan]  +nan  placebo
+  PL2 M5   giu   SMA200         TUTTO      1286  0.386  [0.360;0.413]  0.374  nan [nan;nan]  +nan  placebo
+  H2  M5   su    b0.5_tol0.10_Z1.5 TUTTO      1273  0.389  [0.362;0.416]  0.378  0.365 [0.347;0.396]  +0.024  NULLO
+  H2  M5   su    b0.5_tol0.10_Z1.5 TORO        456  0.366  [0.323;0.411]  0.372  0.362 [0.328;0.404]  +0.005  NULLO
+  H2  M5   su    b0.5_tol0.10_Z1.5 LATERALE    489  0.405  [0.362;0.449]  0.373  0.363 [0.330;0.395]  +0.041  ZONA GRIGIA
+  H2  M5   su    b0.5_tol0.10_Z1.5 ORSO        328  0.396  [0.345;0.450]  0.394  0.371 [0.331;0.426]  +0.025  NULLO
+  PL2 M5   su    EMA100         TUTTO      1697  0.389  [0.366;0.412]  0.391  nan [nan;nan]  +nan  placebo
+  PL2 M5   su    EMA150         TUTTO      1430  0.375  [0.350;0.400]  0.388  nan [nan;nan]  +nan  placebo
+  PL2 M5   su    EMA250         TUTTO      1110  0.363  [0.335;0.392]  0.369  nan [nan;nan]  +nan  placebo
+  PL2 M5   su    SMA200         TUTTO      1194  0.375  [0.348;0.403]  0.376  nan [nan;nan]  +nan  placebo
+  H1  M15  long  X0.25_Y1.00    TUTTO       543  0.685  [0.645;0.723]  0.800  0.690 [0.656;0.722]  -0.005  NULLO
+  H1  M15  long  X1.00_Y1.00    TUTTO       545  0.468  [0.426;0.510]  0.500  0.453 [0.421;0.497]  +0.015  NULLO
+  H1  M15  long  X1.00_Y1.00    TORO        215  0.447  [0.382;0.513]  0.500  0.465 [0.349;0.552]  -0.018  ZONA GRIGIA
+  H1  M15  long  X1.00_Y1.00    LATERALE    201  0.502  [0.434;0.571]  0.500  0.465 [0.397;0.533]  +0.038  ZONA GRIGIA
+  H1  M15  long  X1.00_Y1.00    ORSO        129  0.450  [0.366;0.536]  0.500  0.440 [0.376;0.527]  +0.010  NON ANCORA MISURATO
+  PL1 M15  long  EMA100         TUTTO       688  0.455  [0.418;0.492]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M15  long  EMA150         TUTTO       607  0.474  [0.435;0.514]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M15  long  EMA250         TUTTO       482  0.427  [0.384;0.472]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M15  long  SMA200         TUTTO       490  0.431  [0.387;0.475]  0.500  nan [nan;nan]  +nan  placebo
+  H1  M15  short X0.25_Y1.00    TUTTO       493  0.661  [0.618;0.702]  0.800  0.664 [0.628;0.704]  -0.003  NULLO
+  H1  M15  short X1.00_Y1.00    TUTTO       489  0.403  [0.360;0.447]  0.500  0.432 [0.381;0.479]  -0.029  NULLO
+  H1  M15  short X1.00_Y1.00    TORO        184  0.413  [0.344;0.485]  0.500  0.421 [0.355;0.491]  -0.008  ZONA GRIGIA
+  H1  M15  short X1.00_Y1.00    LATERALE    174  0.391  [0.321;0.465]  0.500  0.434 [0.341;0.503]  -0.043  ZONA GRIGIA
+  H1  M15  short X1.00_Y1.00    ORSO        131  0.405  [0.324;0.490]  0.500  0.439 [0.360;0.540]  -0.035  NON ANCORA MISURATO
+  PL1 M15  short EMA100         TUTTO       592  0.438  [0.398;0.478]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M15  short EMA150         TUTTO       545  0.389  [0.349;0.431]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M15  short EMA250         TUTTO       449  0.428  [0.383;0.474]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 M15  short SMA200         TUTTO       465  0.396  [0.352;0.441]  0.500  nan [nan;nan]  +nan  placebo
+  H2  M15  giu   b0.5_tol0.10_Z1.5 TUTTO       460  0.357  [0.314;0.401]  0.322  0.351 [0.312;0.390]  +0.006  NULLO
+  H2  M15  giu   b0.5_tol0.10_Z1.5 TORO        186  0.366  [0.300;0.437]  0.335  0.348 [0.259;0.417]  +0.017  ZONA GRIGIA
+  H2  M15  giu   b0.5_tol0.10_Z1.5 LATERALE    166  0.367  [0.298;0.443]  0.311  0.357 [0.289;0.407]  +0.010  ZONA GRIGIA
+  H2  M15  giu   b0.5_tol0.10_Z1.5 ORSO        108  0.324  [0.243;0.417]  0.316  0.345 [0.268;0.421]  -0.021  NON ANCORA MISURATO
+  PL2 M15  giu   EMA100         TUTTO       637  0.386  [0.349;0.425]  0.351  nan [nan;nan]  +nan  placebo
+  PL2 M15  giu   EMA150         TUTTO       548  0.323  [0.285;0.363]  0.325  nan [nan;nan]  +nan  placebo
+  PL2 M15  giu   EMA250         TUTTO       411  0.307  [0.264;0.353]  0.314  nan [nan;nan]  +nan  placebo
+  PL2 M15  giu   SMA200         TUTTO       422  0.360  [0.316;0.407]  0.347  nan [nan;nan]  +nan  placebo
+  H2  M15  su    b0.5_tol0.10_Z1.5 TUTTO       450  0.344  [0.302;0.389]  0.349  0.366 [0.312;0.390]  -0.022  NULLO
+  H2  M15  su    b0.5_tol0.10_Z1.5 TORO        161  0.304  [0.239;0.379]  0.333  0.355 [0.310;0.423]  -0.050  ZONA GRIGIA
+  H2  M15  su    b0.5_tol0.10_Z1.5 LATERALE    165  0.333  [0.266;0.408]  0.344  0.348 [0.305;0.418]  -0.014  ZONA GRIGIA
+  H2  M15  su    b0.5_tol0.10_Z1.5 ORSO        124  0.411  [0.329;0.499]  0.377  0.374 [0.294;0.466]  +0.037  NON ANCORA MISURATO
+  PL2 M15  su    EMA100         TUTTO       563  0.332  [0.294;0.372]  0.372  nan [nan;nan]  +nan  placebo
+  PL2 M15  su    EMA150         TUTTO       498  0.359  [0.319;0.403]  0.368  nan [nan;nan]  +nan  placebo
+  PL2 M15  su    EMA250         TUTTO       402  0.333  [0.289;0.381]  0.347  nan [nan;nan]  +nan  placebo
+  PL2 M15  su    SMA200         TUTTO       413  0.341  [0.297;0.388]  0.371  nan [nan;nan]  +nan  placebo
+  H1  H1   long  X0.25_Y1.00    TUTTO       149  0.698  [0.620;0.766]  0.800  0.733 [0.658;0.788]  -0.035  NON ANCORA MISURATO
+  H1  H1   long  X1.00_Y1.00    TUTTO       149  0.436  [0.359;0.516]  0.500  0.461 [0.380;0.530]  -0.025  NON ANCORA MISURATO
+  H1  H1   long  X1.00_Y1.00    TORO         55  0.418  [0.297;0.550]  0.500  0.470 [0.353;0.635]  -0.052  NON ANCORA MISURATO
+  H1  H1   long  X1.00_Y1.00    LATERALE     60  0.517  [0.393;0.638]  0.500  0.457 [0.330;0.569]  +0.059  NON ANCORA MISURATO
+  H1  H1   long  X1.00_Y1.00    ORSO         34  0.324  [0.191;0.492]  0.500  0.450 [0.286;0.589]  -0.126  NON ANCORA MISURATO
+  PL1 H1   long  EMA100         TUTTO       182  0.412  [0.343;0.485]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H1   long  EMA150         TUTTO       159  0.421  [0.347;0.499]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H1   long  EMA250         TUTTO       128  0.445  [0.362;0.532]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H1   long  SMA200         TUTTO       137  0.416  [0.337;0.500]  0.500  nan [nan;nan]  +nan  placebo
+  H1  H1   short X0.25_Y1.00    TUTTO       120  0.692  [0.604;0.767]  0.800  0.701 [0.628;0.765]  -0.009  NON ANCORA MISURATO
+  H1  H1   short X1.00_Y1.00    TUTTO       120  0.367  [0.286;0.456]  0.500  0.424 [0.355;0.512]  -0.058  NON ANCORA MISURATO
+  H1  H1   short X1.00_Y1.00    TORO         45  0.422  [0.290;0.567]  0.500  0.406 [0.248;0.531]  +0.016  NON ANCORA MISURATO
+  H1  H1   short X1.00_Y1.00    LATERALE     41  0.366  [0.236;0.519]  0.500  0.437 [0.296;0.595]  -0.071  NON ANCORA MISURATO
+  H1  H1   short X1.00_Y1.00    ORSO         34  0.294  [0.168;0.462]  0.500  0.441 [0.298;0.616]  -0.147  NON ANCORA MISURATO
+  PL1 H1   short EMA100         TUTTO       141  0.383  [0.307;0.465]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H1   short EMA150         TUTTO       124  0.363  [0.284;0.450]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H1   short EMA250         TUTTO       114  0.465  [0.376;0.556]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H1   short SMA200         TUTTO       115  0.365  [0.283;0.456]  0.500  nan [nan;nan]  +nan  placebo
+  H2  H1   giu   b0.5_tol0.10_Z1.5 TUTTO       127  0.354  [0.277;0.441]  0.365  0.358 [0.266;0.444]  -0.004  NON ANCORA MISURATO
+  H2  H1   giu   b0.5_tol0.10_Z1.5 TORO         47  0.383  [0.258;0.526]  0.385  0.351 [0.192;0.545]  +0.032  NON ANCORA MISURATO
+  H2  H1   giu   b0.5_tol0.10_Z1.5 LATERALE     46  0.391  [0.264;0.535]  0.373  0.366 [0.197;0.496]  +0.025  NON ANCORA MISURATO
+  H2  H1   giu   b0.5_tol0.10_Z1.5 ORSO         34  0.265  [0.146;0.431]  0.326  0.342 [0.203;0.515]  -0.077  NON ANCORA MISURATO
+  PL2 H1   giu   EMA100         TUTTO       164  0.317  [0.251;0.392]  0.356  nan [nan;nan]  +nan  placebo
+  PL2 H1   giu   EMA150         TUTTO       140  0.307  [0.237;0.388]  0.309  nan [nan;nan]  +nan  placebo
+  PL2 H1   giu   EMA250         TUTTO       109  0.312  [0.233;0.404]  0.351  nan [nan;nan]  +nan  placebo
+  PL2 H1   giu   SMA200         TUTTO       122  0.336  [0.258;0.424]  0.344  nan [nan;nan]  +nan  placebo
+  H2  H1   su    b0.5_tol0.10_Z1.5 TUTTO       119  0.294  [0.220;0.381]  0.416  0.368 [0.294;0.431]  -0.074  NON ANCORA MISURATO
+  H2  H1   su    b0.5_tol0.10_Z1.5 TORO         40  0.250  [0.142;0.402]  0.402  0.342 [0.226;0.522]  -0.092  NON ANCORA MISURATO
+  H2  H1   su    b0.5_tol0.10_Z1.5 LATERALE     42  0.357  [0.230;0.508]  0.407  0.385 [0.273;0.507]  -0.027  NON ANCORA MISURATO
+  H2  H1   su    b0.5_tol0.10_Z1.5 ORSO         37  0.270  [0.154;0.430]  0.441  0.370 [0.211;0.536]  -0.100  NON ANCORA MISURATO
+  PL2 H1   su    EMA100         TUTTO       142  0.408  [0.331;0.491]  0.362  nan [nan;nan]  +nan  placebo
+  PL2 H1   su    EMA150         TUTTO       131  0.359  [0.282;0.444]  0.391  nan [nan;nan]  +nan  placebo
+  PL2 H1   su    EMA250         TUTTO       106  0.358  [0.274;0.453]  0.387  nan [nan;nan]  +nan  placebo
+  PL2 H1   su    SMA200         TUTTO       105  0.410  [0.320;0.505]  0.404  nan [nan;nan]  +nan  placebo
+  H1  H4   long  X0.25_Y1.00    TUTTO        42  0.667  [0.516;0.790]  0.800  0.758 [0.651;0.848]  -0.091  NON ANCORA MISURATO
+  H1  H4   long  X1.00_Y1.00    TUTTO        42  0.381  [0.250;0.532]  0.500  0.463 [0.349;0.624]  -0.082  NON ANCORA MISURATO
+  H1  H4   long  X1.00_Y1.00    TORO         14  0.500  [0.268;0.732]  0.500  0.500 [0.222;0.776]  +0.000  NON ANCORA MISURATO
+  H1  H4   long  X1.00_Y1.00    LATERALE     20  0.350  [0.181;0.567]  0.500  0.447 [0.242;0.659]  -0.097  NON ANCORA MISURATO
+  H1  H4   long  X1.00_Y1.00    ORSO          8  0.250  [0.071;0.591]  0.500  0.467 [0.200;0.655]  -0.217  NON ANCORA MISURATO
+  PL1 H4   long  EMA100         TUTTO        58  0.466  [0.343;0.592]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H4   long  EMA150         TUTTO        50  0.480  [0.348;0.615]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H4   long  EMA250         TUTTO        44  0.318  [0.200;0.466]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H4   long  SMA200         TUTTO        39  0.487  [0.339;0.638]  0.500  nan [nan;nan]  +nan  placebo
+  H1  H4   short X0.25_Y1.00    TUTTO        33  0.788  [0.622;0.893]  0.800  0.681 [0.500;0.848]  +0.107  NON ANCORA MISURATO
+  H1  H4   short X1.00_Y1.00    TUTTO        33  0.333  [0.198;0.504]  0.500  0.429 [0.257;0.563]  -0.095  NON ANCORA MISURATO
+  H1  H4   short X1.00_Y1.00    TORO          9  0.222  [0.063;0.547]  0.500  0.385 [0.154;0.667]  -0.162  NON ANCORA MISURATO
+  H1  H4   short X1.00_Y1.00    LATERALE     15  0.267  [0.109;0.520]  0.500  0.438 [0.185;0.678]  -0.171  NON ANCORA MISURATO
+  H1  H4   short X1.00_Y1.00    ORSO          9  0.556  [0.267;0.811]  0.500  0.449 [0.048;0.833]  +0.106  NON ANCORA MISURATO
+  PL1 H4   short EMA100         TUTTO        53  0.547  [0.415;0.673]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H4   short EMA150         TUTTO        40  0.425  [0.285;0.578]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H4   short EMA250         TUTTO        29  0.276  [0.147;0.457]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 H4   short SMA200         TUTTO        34  0.353  [0.215;0.521]  0.500  nan [nan;nan]  +nan  placebo
+  H2  H4   giu   b0.5_tol0.10_Z1.5 TUTTO        41  0.293  [0.176;0.445]  0.353  0.382 [0.220;0.476]  -0.090  NON ANCORA MISURATO
+  H2  H4   giu   b0.5_tol0.10_Z1.5 TORO         13  0.308  [0.127;0.576]  0.384  0.429 [0.133;0.704]  -0.121  NON ANCORA MISURATO
+  H2  H4   giu   b0.5_tol0.10_Z1.5 LATERALE     19  0.263  [0.118;0.488]  0.353  0.353 [0.138;0.571]  -0.090  NON ANCORA MISURATO
+  H2  H4   giu   b0.5_tol0.10_Z1.5 ORSO          9  0.333  [0.121;0.646]  0.307  0.355 [0.122;0.600]  -0.022  NON ANCORA MISURATO
+  PL2 H4   giu   EMA100         TUTTO        50  0.440  [0.312;0.577]  0.373  nan [nan;nan]  +nan  placebo
+  PL2 H4   giu   EMA150         TUTTO        44  0.250  [0.146;0.394]  0.323  nan [nan;nan]  +nan  placebo
+  PL2 H4   giu   EMA250         TUTTO        38  0.263  [0.150;0.420]  0.379  nan [nan;nan]  +nan  placebo
+  PL2 H4   giu   SMA200         TUTTO        36  0.278  [0.158;0.440]  0.324  nan [nan;nan]  +nan  placebo
+  H2  H4   su    b0.5_tol0.10_Z1.5 TUTTO        37  0.324  [0.196;0.485]  0.430  0.382 [0.253;0.556]  -0.058  NON ANCORA MISURATO
+  H2  H4   su    b0.5_tol0.10_Z1.5 TORO          9  0.222  [0.063;0.547]  0.460  0.385 [0.125;0.626]  -0.162  NON ANCORA MISURATO
+  H2  H4   su    b0.5_tol0.10_Z1.5 LATERALE     18  0.333  [0.163;0.563]  0.442  0.375 [0.112;0.625]  -0.042  NON ANCORA MISURATO
+  H2  H4   su    b0.5_tol0.10_Z1.5 ORSO         10  0.400  [0.168;0.687]  0.382  0.429 [0.000;0.833]  -0.029  NON ANCORA MISURATO
+  PL2 H4   su    EMA100         TUTTO        49  0.347  [0.229;0.487]  0.445  nan [nan;nan]  +nan  placebo
+  PL2 H4   su    EMA150         TUTTO        41  0.268  [0.157;0.419]  0.463  nan [nan;nan]  +nan  placebo
+  PL2 H4   su    EMA250         TUTTO        32  0.312  [0.180;0.486]  0.335  nan [nan;nan]  +nan  placebo
+  PL2 H4   su    SMA200         TUTTO        35  0.514  [0.356;0.670]  0.435  nan [nan;nan]  +nan  placebo
+  H1  D1   long  X0.25_Y1.00    TUTTO        10  0.900  [0.596;0.982]  0.800  0.750 [0.333;1.000]  +0.150  NON ANCORA MISURATO
+  H1  D1   long  X1.00_Y1.00    TUTTO        10  0.600  [0.313;0.832]  0.500  0.500 [0.000;0.800]  +0.100  NON ANCORA MISURATO
+  H1  D1   long  X1.00_Y1.00    TORO          2  1.000  [0.342;1.000]  0.500  0.500 [0.000;1.000]  +0.500  NON ANCORA MISURATO
+  H1  D1   long  X1.00_Y1.00    LATERALE      6  0.500  [0.188;0.812]  0.500  0.500 [0.000;1.000]  +0.000  NON ANCORA MISURATO
+  H1  D1   long  X1.00_Y1.00    ORSO          2  0.500  [0.095;0.905]  0.500  0.500 [0.000;1.000]  +0.000  NON ANCORA MISURATO
+  PL1 D1   long  EMA100         TUTTO        12  0.417  [0.193;0.680]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 D1   long  EMA150         TUTTO        10  0.600  [0.313;0.832]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 D1   long  EMA250         TUTTO         7  0.286  [0.082;0.641]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 D1   long  SMA200         TUTTO         6  0.667  [0.300;0.903]  0.500  nan [nan;nan]  +nan  placebo
+  H1  D1   short X0.25_Y1.00    TUTTO         4  0.500  [0.150;0.850]  0.800  0.750 [0.290;1.000]  -0.250  NON ANCORA MISURATO
+  H1  D1   short X1.00_Y1.00    TUTTO         4  0.250  [0.046;0.699]  0.500  0.500 [0.000;1.000]  -0.250  NON ANCORA MISURATO
+  H1  D1   short X1.00_Y1.00    TORO          0  nan  [nan;nan]  0.500  0.500 [0.000;1.000]  +nan  NON ANCORA MISURATO
+  H1  D1   short X1.00_Y1.00    LATERALE      3  0.333  [0.061;0.792]  0.500  0.500 [0.000;1.000]  -0.167  NON ANCORA MISURATO
+  H1  D1   short X1.00_Y1.00    ORSO          1  0.000  [0.000;0.793]  0.500  0.500 [0.000;1.000]  -0.500  NON ANCORA MISURATO
+  PL1 D1   short EMA100         TUTTO         4  0.750  [0.301;0.954]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 D1   short EMA150         TUTTO         4  0.750  [0.301;0.954]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 D1   short EMA250         TUTTO         3  0.000  [0.000;0.562]  0.500  nan [nan;nan]  +nan  placebo
+  PL1 D1   short SMA200         TUTTO         5  0.400  [0.118;0.769]  0.500  nan [nan;nan]  +nan  placebo
+  H2  D1   giu   b0.5_tol0.10_Z1.5 TUTTO         7  0.143  [0.026;0.513]  0.325  0.333 [0.000;0.800]  -0.190  NON ANCORA MISURATO
+  H2  D1   giu   b0.5_tol0.10_Z1.5 TORO          0  nan  [nan;nan]  nan  0.500 [0.000;1.000]  +nan  NON ANCORA MISURATO
+  H2  D1   giu   b0.5_tol0.10_Z1.5 LATERALE      5  0.200  [0.036;0.624]  0.354  0.333 [0.000;1.000]  -0.133  NON ANCORA MISURATO
+  H2  D1   giu   b0.5_tol0.10_Z1.5 ORSO          2  0.000  [0.000;0.658]  0.252  0.200 [0.000;1.000]  -0.200  NON ANCORA MISURATO
+  PL2 D1   giu   EMA100         TUTTO         9  0.111  [0.020;0.435]  0.414  nan [nan;nan]  +nan  placebo
+  PL2 D1   giu   EMA150         TUTTO         8  0.625  [0.306;0.863]  0.449  nan [nan;nan]  +nan  placebo
+  PL2 D1   giu   EMA250         TUTTO         7  0.571  [0.250;0.842]  0.512  nan [nan;nan]  +nan  placebo
+  PL2 D1   giu   SMA200         TUTTO         3  0.000  [0.000;0.562]  0.198  nan [nan;nan]  +nan  placebo
+  H2  D1   su    b0.5_tol0.10_Z1.5 TUTTO         4  0.000  [0.000;0.490]  0.235  0.400 [0.000;1.000]  -0.400  NON ANCORA MISURATO
+  H2  D1   su    b0.5_tol0.10_Z1.5 TORO          0  nan  [nan;nan]  nan  0.333 [0.000;1.000]  +nan  NON ANCORA MISURATO
+  H2  D1   su    b0.5_tol0.10_Z1.5 LATERALE      3  0.000  [0.000;0.562]  0.313  0.500 [0.000;1.000]  -0.500  NON ANCORA MISURATO
+  H2  D1   su    b0.5_tol0.10_Z1.5 ORSO          1  0.000  [0.000;0.793]  0.000  0.500 [0.000;1.000]  -0.500  NON ANCORA MISURATO
+  PL2 D1   su    EMA100         TUTTO         7  0.429  [0.158;0.750]  0.325  nan [nan;nan]  +nan  placebo
+  PL2 D1   su    EMA150         TUTTO         4  0.250  [0.046;0.699]  0.212  nan [nan;nan]  +nan  placebo
+  PL2 D1   su    EMA250         TUTTO         3  0.333  [0.061;0.792]  0.317  nan [nan;nan]  +nan  placebo
+  PL2 D1   su    SMA200         TUTTO         4  0.500  [0.150;0.850]  0.385  nan [nan;nan]  +nan  placebo

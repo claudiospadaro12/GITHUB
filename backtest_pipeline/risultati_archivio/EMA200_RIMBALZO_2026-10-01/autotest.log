@@ -1,0 +1,30 @@
+======================================================================
+ AUTOTEST EMA200_RIMBALZO_v1
+======================================================================
+ [PASS] RW H1 long primaria ~0,500 -- P=0.516 n=944
+ [PASS] RW H1 long collega ~0,800 -- P=0.823 n=944
+ [PASS] RW H1 long niente falso positivo contro N1 -- verdetto NULLO eff +0.010 banda [0.467;0.530]
+ [PASS] RW H1 short primaria ~0,500 -- P=0.502 n=906
+ [PASS] RW H1 short collega ~0,800 -- P=0.785 n=906
+ [PASS] RW H1 short niente falso positivo contro N1 -- verdetto NULLO eff -0.008 banda [0.475;0.532]
+ [PASS] RW H1 n totale primaria >= 1000 -- n=1850
+ [PASS] RW H2 giu ~ null per evento -- P_RT=0.465 null=0.468 n=848 TO=0
+ [PASS] RW H2 giu niente falso positivo -- verdetto NULLO
+ [PASS] RW H2 su ~ null per evento -- P_RT=0.482 null=0.468 n=834 TO=0
+ [PASS] RW H2 su niente falso positivo -- verdetto NULLO
+   (131 s)
+ [PASS] PIANTATO rimbalzo long: P>=0,70 e EFFETTO -- P=0.926 n=215 surr med 0.521 verdetto EFFETTO
+ [PASS] PIANTATO rimbalzo short: P>=0,70 e EFFETTO -- P=0.921 n=152 surr med 0.528 verdetto EFFETTO
+ [PASS] PIANTATO rottura giu: P_RT<0,30 e CONTRARIO -- P_RT=0.180 n=172 surr med 0.435 verdetto CONTRARIO
+ [PASS] PIANTATO rottura su: P_RT<0,30 e CONTRARIO -- P_RT=0.195 n=185 surr med 0.429 verdetto CONTRARIO
+   (172 s)
+ [PASS] OROLOGIO H4: +1h cambia gli eventi -- eventi H1/H2/barre (448, 398, 50001) -> (446, 401, 50001)
+ [PASS] OROLOGIO D1: +1h cambia gli eventi -- eventi H1/H2/barre (65, 62, 8334) -> (65, 61, 8334)
+ [PASS] G-OROLOGIO passa sul file NY corretto -- inverno 13:30 estate 12:30
+ [PASS] G-OROLOGIO boccia il file in EST fisso -- inverno 13:30 estate 11:30
+ [PASS] LETTURA per nome: open/close giusti -- O=[1199.47] C=[1200.304]
+ [PASS] MUTAZIONE X sposta P -- 0.516 -> 0.823
+   [INFO] RW a M5 X1.00_Y1.00: long 0.497 (n 1343) short 0.503 (n 1355) contro N0 0.500
+   [INFO] RW a M5 X0.25_Y1.00: long 0.789 (n 1343) short 0.792 (n 1355) contro N0 0.800
+AUTOTEST: 21/21  (177 s)
+rc=0

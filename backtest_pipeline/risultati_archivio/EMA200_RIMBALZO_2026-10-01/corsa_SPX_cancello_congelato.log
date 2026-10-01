@@ -1,0 +1,9 @@
+   SPX: file letti 9, righe 2,117,667
+==============================================================================
+ EMA200_RIMBALZO_v1 -- SPXUSD -- feed HistData SPXUSD (FutureSharks)
+ criteri: report/EMA200_RIMBALZO_CRITERI_2026-10-01.md (congelati, commit c23bfe61)
+==============================================================================
+ barre M1: 2,117,667   da 2010-11-14 23:00:00 a 2018-12-31 21:13:00 (UTC)
+ G-OROLOGIO: picco inverno 15:00 (n 323596)  estate 14:00 (n 528888)  ancore 13:30,14:30 -> FALLISCE
+ !!! orologio non confermato: nessun numero (codice 2)
+rc=2 durata_s=15
