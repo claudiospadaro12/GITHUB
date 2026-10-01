@@ -4,14 +4,25 @@ Scritta la notte del 01/02-10-2026, a mandato ("pensateci voi stanotte"). **Sola
 Etichette: [MISURATO] letto in un file del repo (con fonte) · [DERIVATO] calcolo mio da numeri scritti · [INFERITO] dedotto, dico da cosa · [NON MISURATO] il dato non c'e' · [DA VERIFICARE A VISTA] serve un occhio su MT5.
 Ore: **server FTMO = ora italiana + 1** (misurato sul trial il 30/09 notte, 00:12 contro 23:12, `HANDOFF.md` blocco 01/10; regola in `CLAUDE.md`). Il 02/10 nessun cambio d'ora (Europa 25/10, USA 01/11): **IT = UTC+2, server FTMO = UTC+3**.
 
+✏️ **Cancello indipendente (notte 01/02-10): PASS dopo sei correzioni chirurgiche, tutte gia' dentro il testo qui sotto.** (1) sez. 0: il rinvio del dato ha un meccanismo concreto (shutdown federale all'inizio dell'anno fiscale USA, 01/10) e va guardato; (2) sez. 0: la sonda `CODA_01` di stanotte **non decide** se 770101 e 771531 ci sono (rilegge il profilo salvato), decide la faccina; (3) sez. 0 e 6: prima del muro FTMO del 10% scattano **due soglie nostre** (allarme della regola 4 dei 14 giorni a 148.000, pavimento del Guardian a 145.120 con 30 giorni di pausa): ora sono in tabella; (4) sez. 6: "meno di uno stop" era contato con lo stop di oggi, il giorno dopo lo stop e' piu' piccolo; (5) sez. 5.2: al NFP del 04/09 **una** posizione dello stesso motore SuperWave (Dow **H2**, non sul trial) era aperta e ha chiuso a stop; (6) sez. 3.3: la guardia di `news-export.yml` descritta come nel commento del workflow, non come nel codice. Aggiunte senza cambiare nessuna conclusione: il riquadro "in sei righe", la riga di coerenza con la D7 della scheda Paolo, l'allarme 148.000 nella lettura dell'opzione (a). Nessuna opzione e' stata spinta o tolta. Classi 1057-1058 in `CHECKLIST_RIGA_DI_LANCIO.md`.
+
 ---
 
 ## 0. LA PAGINA DELLE 07:00
 
+> **In sei righe** (il dettaglio e' sotto):
+> 1. NFP **venerdi' 02/10, 14:30 italiane = 15:30 server FTMO** (12:30 UTC). Prima cosa: che esca davvero (shutdown USA possibile dal 01/10: se salta, giornata normale).
+> 2. **Esposte al rilascio**: DAX 770105 e 770411 (piu' 770101 se e' attaccata), Dow H1 770511 (piu' 771531 se e' attaccata), Bulge (3 cross col dollaro). **Non esposte**: Dow 770202, Nasdaq 770260, ORB 770621, che partono 60' dopo.
+> 3. **A vista su `1514806751` (`C:\FTMO`)**: 770101 e 771531 ci sono? Il profilo salvato dice no, il registro dice si'. Decide la faccina.
+> 4. **Il filtro news non e' una leva pronta**: file assente in `C:\FTMO`, serve lo shift +60, si legge solo all'avvio, mai misurato.
+> 5. **Budget** (partenza ~154.184): pausa a -5.600, allarme della regola 4 a 148.000 (-6.184), emergenza a -7.200. Due stop DAX come il 01/10 portano **sotto 148.000**.
+> 6. **Quattro opzioni** (a niente, b staccare sedie piatte, c Algo spento 14-16 IT, d filtro news): **decidi tu**. Scadenze: DAX entro 08:55 IT, Algo entro 14:00, USA entro 15:25.
+
 **Il dato.** NFP (Non-Farm Employment Change + Unemployment Rate + Average Hourly Earnings), **venerdi' 02/10 alle 14:30 italiane = 15:30 server FTMO = 12:30 UTC**.
 - Fonte [MISURATO]: `data/abtg_news.csv` al commit `47c46a6a` (28/09, generato dal feed Forex Factory in ora `Europe/Rome`, `agent/news_export.py`): tre righe `2026.10.02 14:30;High;USD;...`. Concordano `report/PACCHETTO_POSTNEWS_TRE_GRAFICI_2026-09-19.md` r.200 ("venerdi' 02/10/2026") e Paolo nella live del 01/10 ("alle due e mezza", scheda r.65).
 - ✏️ **Correzione al mandato**: 14:30 italiane d'estate sono **12:30 UTC**, non 13:30 UTC. Ora server FTMO 15:30 confermata.
-- 🔴 Limite: il file in repo e' **vuoto (0 byte) dal 29/09** (commit `fa8a0153`): non ho una conferma piu' fresca del 28/09. Un rinvio del dato all'ultimo momento [NON VERIFICATO]: va guardato sul calendario stamattina.
+- 🔴 Limite: il file in repo e' **vuoto (0 byte) dal 29/09** (commit `fa8a0153`): non ho una conferma piu' fresca del 28/09. Un rinvio del dato all'ultimo momento [NON VERIFICATO]: va guardato sul calendario stamattina. **Il meccanismo concreto c'e'**: il 01/10 comincia l'anno fiscale federale USA, e se i fondi non sono stati approvati il BLS **non pubblica** (precedente: ottobre 2025, il NFP del 03/10/2025 non e' uscito per lo shutdown [memoria del modello, NON in repo]). Il feed del 28/09 non lo puo' sapere. **Se il dato salta, domani e' un venerdi' normale e questa nota non serve.** Controllo: Forex Factory (calendario del giorno) o la pagina del BLS, stamattina.
+- Data ricalcolata [DERIVATO]: settimana di riferimento di settembre = 06-12/09 (il 12 e' sabato); terzo venerdi' dopo = **02/10**; 08:30 New York (EDT, UTC-4) = 12:30 UTC = 14:30 Roma (CEST) = 15:30 server FTMO (UTC+3).
 
 **Chi e' esposto alle 15:30 server (14:30 IT)** (dettaglio sez. 2):
 | gruppo | sedie | rispetto al dato |
@@ -21,11 +32,13 @@ Ore: **server FTMO = ora italiana + 1** (misurato sul trial il 30/09 notte, 00:1
 | 🟠 Forex | Bulge viola 772720 (15 cross, 3 con USD) | ingressi alle ore tonde H1: una posizione delle 15:00 e' aperta al rilascio |
 | 🟢 USA apertura | 770202 Dow, 770260 Nasdaq, 770621 ORB Dow | il range parte alle **16:30** server: **tutto DOPO** il dato, nella volatilita' che lascia |
 
+Nota di coerenza: la domanda **D7** della scheda Paolo (`SCHEDA_LIVE_PAOLO_2026-10-01.md` r.348) chiede se devono saltare la giornata **le sedie USA**: sono proprio le **meno** esposte (flat al rilascio, partono 60' dopo). Le esposte al rilascio sono le DAX, le due Dow H1 e il Bulge.
+
 **Il filtro news, oggi, non e' una leva pronta.** E' spento in tutti i preset (`InpUseNewsFilter=false`, confermato nei `.chr` in campo, sonda `CODA_08` 01/10). E se lo si accendesse cosi' com'e', **non proteggerebbe**: (1) nessuna attivita' scrive il file news dentro `C:\FTMO` (la 07:20 scrive solo nel piccolo BCM); (2) il calendario e' in ora italiana e su FTMO serve `InpNewsShiftMinutes=60`, altrimenti la finestra si chiude **30 minuti prima** del dato; (3) l'EA legge il file **solo all'avvio** (`OnInit`); (4) con la finestra di default 30/30 le tre sedie USA non verrebbero toccate (operano dalle 16:30); EMA200 e SuperWave bloccano solo i nuovi ingressi e **non chiudono** le posizioni aperte.
 
 **La sedia NFP (PostNews 771203)**: **non** e' sul trial. Sul piccolo BCM e' attaccata ma **cieca** (il suo file e' stato svuotato il 07/09): domani non opera da nessuna parte [INFERITO dal codice e dalla foto di `Common\Files`, sez. 4].
 
-**Misurato sui NFP passati: troppo poco per dire qualcosa sul merito.** FTMO: zero NFP nel periodo vissuto. Piccolo BCM, NFP del 07/08 e del 04/09: **nessuna** posizione delle famiglie del trial aperta all'istante del dato (n=2 giorni). Contratto in backtest, 4 NFP del calendario in repo: 7 posizioni (6 ingressi), somma circa -2,2 R [DERIVATO, n=7]. Verdetto: **[NON MISURATO]**. Le celle del contratto sono state misurate **col filtro spento, quindi con dentro i giorni di NFP** (~12/anno).
+**Misurato sui NFP passati: troppo poco per dire qualcosa sul merito.** FTMO: zero NFP nel periodo vissuto. Piccolo BCM, NFP del 07/08 e del 04/09: **nessuna** posizione delle sedie del trial aperta all'istante del dato (n=2 giorni; una SuperWave Dow **H2**, stesso motore ma non sul trial, si': chiusa a stop, sez. 5.2). Contratto in backtest, 4 NFP del calendario in repo: 7 posizioni (6 ingressi), somma circa -2,2 R [DERIVATO, n=7]. Verdetto: **[NON MISURATO]**. Le celle del contratto sono state misurate **col filtro spento, quindi con dentro i giorni di NFP** (~12/anno).
 
 **Il budget del giorno** (Guardian v1.12, reset 01:00 server = mezzanotte IT; equity di partenza ~154.184 [MISURATO, riga Guardian 22:23 server del 01/10, tutto piatto]):
 | soglia | in EUR | equity a cui scatta | in stop pieni da 2,00% (~3.084) |
@@ -33,8 +46,10 @@ Ore: **server FTMO = ora italiana + 1** (misurato sul trial il 30/09 notte, 00:1
 | pausa nuovi ingressi 3,5% x 160.000 | 5.600 | ~148.584 | 1,8 |
 | emergenza 4,5%: chiude TUTTO e blocca il giorno | 7.200 | ~146.984 | 2,3 |
 | muro giornaliero FTMO 5% (regola 2-Step; per la trial [NON MISURATO]) | 8.000 | ~146.184 | 2,6 |
-| muro 10% FTMO (2-Step; trial [NON MISURATO]) | - | 144.000 | 3,3 dall'equity attuale |
-Fra l'emergenza del Guardian e il muro giornaliero restano **800 EUR = 0,26 stop**: uno slittamento da NFP sulla chiusura forzata li puo' mangiare [NON MISURATO lo slittamento FTMO su un NFP].
+| 🟠 allarme della **regola 4 dei 14 giorni** (`TRIAL_14_GIORNI_CRITERI`): "si spegne Algo e si guarda" | 6.184 | 148.000 | 2,0 |
+| 🔴 pavimento del **Guardian** 9,3%: chiude tutto e **30 giorni di pausa** (= trial finita per noi) | 9.064 | 145.120 | 2,9 |
+| muro 10% FTMO (2-Step; trial [NON MISURATO]) | 10.184 | 144.000 | 3,3 |
+Fra l'emergenza del Guardian e il muro giornaliero restano **800 EUR = 0,26 stop**: uno slittamento da NFP sulla chiusura forzata li puo' mangiare [NON MISURATO lo slittamento FTMO su un NFP]. Gli 800 valgono **a conto piatto all'01:00 server** (stanotte lo e', Guardian in pausa): il Guardian prende come base l'**equita'** al reset (codice r.378), la base FTMO del giorno per la trial e' [NON MISURATO].
 
 **Le quattro opzioni (decide Claudio; dettaglio sez. 7)**:
 | | cosa | rischio residuo al dato | costo |
@@ -44,7 +59,7 @@ Fra l'emergenza del Guardian e il muro giornaliero restano **800 EUR = 0,26 stop
 | **c** | Algo Trading spento 14:00-16:00 IT (15:00-17:00 server) | posizioni e **pendenti gia' sul server restano e possono riempirsi**; BE/trailing/parziali fermi; **la chiusura d'emergenza del Guardian non parte finche' Algo e' spento** | ORB perde la giornata (piazza alle 16:45 server, dentro la finestra); le RETEST DAX che rompono nella finestra perdono quel lato; riaccendere entro le 16:05 IT o si perdono anche Dow/Nasdaq |
 | **d** | filtro news acceso su una sedia via preset | dipende dalla sedia (sez. 3): chiude i DAX alle 15:00 server; con 30/30 non tocca gli USA | file news da portare in `C:\FTMO` + shift 60 + riavvio dell'EA + **firma** + cancello; configurazione **mai misurata**; viola la regola 2 dei 14 giorni ("se serve si spegne la sedia, non si ritocca") |
 
-**Da guardare stamattina, prima di tutto il resto** [DA VERIFICARE A VISTA]: la sonda `CODA_01` del 01/10 03:30 legge il profilo salvato di `C:\FTMO` (file `.chr` del **30/09 23:24**): **12 grafici, 10 EA, e fra questi NON ci sono 770101 (DAX long) ne' 771531 (EMA200)**, che il 30/09 c'erano (chart01, chart04). Il registro del trial dice che ci sono. Se davvero non ci sono, la loro esposizione e' zero e l'opzione b per loro e' gia' fatta. Il giornale e la sonda `CODA_01` delle 03:30 di stanotte lo dicono; altrimenti la faccina sui grafici GER40.cash M5 e US30.cash H1 del terminale **`1514806751` (`C:\FTMO`)**. Per riconoscere la finestra vale la regola dei terminali multipli (`CLAUDE.md`, punto 2: la stringa di sola lettura PID + titolo + cartella).
+**Da guardare stamattina, prima di tutto il resto** [DA VERIFICARE A VISTA]: la sonda `CODA_01` del 01/10 03:30 legge il profilo salvato di `C:\FTMO` (file `.chr` del **30/09 23:24**): **12 grafici, 10 EA, e fra questi NON ci sono 770101 (DAX long) ne' 771531 (EMA200)**, che il 30/09 c'erano (chart01, chart04). Il registro del trial dice che ci sono. Se davvero non ci sono, la loro esposizione e' zero e l'opzione b per loro e' gia' fatta. 🔴 La sonda `CODA_01` delle 03:30 di stanotte **non lo decide**: rilegge lo stesso profilo salvato, e se nessuno lo ha risalvato ripete la foto del 30/09 23:24 (la sonda stessa la chiama "TIEPIDA"); le fonti si contraddicono gia' (`HANDOFF.md` r.11: Algo acceso alle ~00:30 con le sette vecchie e Bulge/ORB "non ancora attaccati", mentre il profilo delle 23:24 ha gia' Bulge e ORB e non ha 770101/771531). Il giornale del 01/10 (`CODA_09` di stanotte) lo prova **solo se** c'e' una riga di quelle sedie (un LIMIT `EMA200` o un `RETEST BUY` DAX); l'assenza non prova niente (alla rottura al rialzo delle 13:36 server, quella che ha fermato lo short 770105, la pausa del Guardian era gia' accesa: equita' ~153.900, perdita del giorno ~3,8% [DERIVATO dal cronistorico], quindi un 770101 attaccato avrebbe consumato il lato senza piazzare). **Decide la faccina** sui grafici GER40.cash M5 e US30.cash H1 del terminale **`1514806751` (`C:\FTMO`)**. Per riconoscere la finestra vale la regola dei terminali multipli (`CLAUDE.md`, punto 2: la stringa di sola lettura PID + titolo + cartella).
 
 **Orologio delle decisioni (ora italiana)**: DAX entro le **08:55** (770411 piazza alle 08:59, il range DAX parte alle 09:00) · opzione c entro le **14:00** · sedie USA entro le **15:25** (range alle 15:30) · se si spegne Algo, riaccenderlo **entro le 16:05** (le RETEST USA armano alle 16:05).
 
@@ -81,7 +96,7 @@ Fonte dell'elenco in campo: sonda `CODA_01_sedie_attaccate_20261001_033004.log` 
 | Dow Apertura long RETEST (770202) | si (`chart02`) | 2,00% | range 16:30-17:05, limit da 17:05 | fino alle 19:30 | **DOPO** (60' dopo il dato il range e' ancora da cominciare) |
 | Dow Apertura short (770212) | no (non in `CODA_01`) | - | - | - | non in campo |
 | Nasdaq RETEST L+S (770260) | si (`chart03`) | 2,00% | come 770202 | fino alle 19:30 | **DOPO** |
-| EMA200 Dow H1 L+S (771531) | 🔴 **[DA VERIFICARE A VISTA]**: assente dal profilo del 30/09 23:24 | 2,00% **totale** sulle due gambe | due LIMIT a ogni barra H1 se il prezzo e' nella fascia, scadono dopo 6 barre; `InpUseCutoff=false` | senza orario; **`InpFridayClose=false`**: anche nel weekend | **PRIMA, DURANTE e DOPO**; puo' entrare con un limit piazzato fino a 6 ore prima |
+| EMA200 Dow H1 L+S (771531) | 🔴 **[DA VERIFICARE A VISTA]**: assente dal profilo del 30/09 23:24 | 2,00% **totale** sulle due gambe | due LIMIT a nuova barra H1 se il prezzo e' nella fascia **e non ha gia' posizioni o pendenti** (pin r.186), scadono dopo 6 barre; `InpUseCutoff=false` | senza orario; **`InpFridayClose=false`**: anche nel weekend | **PRIMA, DURANTE e DOPO**; puo' entrare con un limit piazzato fino a 6 ore prima |
 | SuperWave Dow H1 (770511) | si (`chart05`) | 2,00% | segnale a barra chiusa H1, pendente 3 barre, `InpUseTimeWindow=false` (0-24) | pareggio, trailing sul Supertrend, uscita al cambio; **nessuna chiusura del venerdi'** nel sorgente al pin `872dba82` (grep: zero) | **PRIMA, DURANTE e DOPO**, anche nel weekend |
 | ORB Ottimizzato Dow long (770621) | si (`chart11`) | 0,3% | range 16:30-16:45, BUY STOP alle 16:45, valido fino alle 23:00 | fino alle 23:00 | **DOPO** (Paolo: "su NFP l'ORB non si fa", [DICHIARATO], scheda 01/10 V17) |
 | Bulge viola (772720) | si (`chart12`, profilo 30/09; ripristinato a preset il 01/10 sera con commento "BULGE VIOLA") | 0,8% x 4 (preset) **oppure** 1,0% x 3: **[NON NOTO]** dopo il ripristino (`TRIAL_14_GIORNI_CRITERI_2026-10-01.md`, registro) | alle ore tonde H1 (barra chiusa), 24 ore, 15 cross (NZDUSD, USDCAD, USDCHF con USD) | fino a TP/SL; kill switch: 4 SL/giorno, 3 di fila, -2% di bilancio chiuso | **PRIMA e DURANTE**: un ingresso delle 15:00 e' aperto al rilascio. Tetto proprio 3,2% (0,8x4) o 3,0% (1,0x3) |
@@ -124,7 +139,7 @@ Il calendario di casa e' in **ora italiana** (`report/PRESET_FTMO_OROLOGIO_2026-
 | `2026.10.02 15:30` (gia' in ora server) | 0 | 15:00-16:00 | ✅ copre, ma il file non segue piu' la convenzione di casa |
 
 ### 3.3 Chi aggiorna il file news, e dove arriva (stato misurato)
-1. **Sorgente**: `data/abtg_news.csv` sul branch `lavoro`, scritto da GitHub Actions: `news-export.yml` (04:40 UTC, con la guardia "nessun evento futuro = esci 1", classe 460) **e** `daily-report.yml` via `run_report.py` r.113-123, che chiama `write_abtg_news` **senza quella guardia**. [MISURATO]
+1. **Sorgente**: `data/abtg_news.csv` sul branch `lavoro`, scritto da GitHub Actions: `news-export.yml` (cron 04:40 UTC; la guardia nel **codice** `agent/news_export.py` r.239-249 esce 1 solo se cade il feed obbligatorio, mentre "zero eventi futuri" e' solo un avviso dalla classe 461: il commento del workflow descrive ancora la 460) **e** `daily-report.yml` via `run_report.py` r.113-123, che chiama `write_abtg_news` **senza nessuna guardia** e poi committa il file com'e', anche vuoto. [MISURATO] E `news-export.yml` **non ha prodotto nessun commit dopo quello a mano del 19/09** (`git log --grep "news EA: aggiorna"`): dal 21/09 l'unico scrittore effettivo e' `daily-report` (commit "snapshot + news EA del giorno").
 2. **Stato della sorgente**: dimensione per commit: 717 byte (19/09) · 331 (24/09) · 438 (28/09, **contiene il NFP del 02/10**) · **0 byte dal 29/09** (`fa8a0153`, "snapshot + news EA del giorno", cioe' `daily-report`). Da allora nessun commit sul file: e' ancora vuoto [MISURATO, `git log`].
 3. **Il ponte sul VPS**: attivita' `ABTG_AggiornaNews` alle 07:20, che oggi esegue **`C:\ABTG\aggiorna_news.ps1`** (non piu' la copia sul Desktop del vecchio branch che `CLAUDE.md` descrive al 12/09: superata dalla sonda `CODA_11` del 01/10 [MISURATO]). Esito: **0 il 28/09, 1 il 29/09 e il 30/09** [MISURATO, `CODA_11` del 29/09, 30/09, 01/10]. Coerente con la versione v2 dello script, che rifiuta un file vuoto e lascia in campo quello di prima [INFERITO: che sul VPS giri proprio la v2 non e' stampato dalla sonda]. Esito del 01/10 07:20: non ancora in nessuna sonda.
 4. **Dove scrive**: **solo** nella cartella dati del terminale `BCM Markets MT5 Terminal` (piccolo 50503392); il 100k `-V3` e il reale sono vietati per nome (`aggiorna_news.ps1` r.55 e r.88). **`C:\FTMO` non e' mai un bersaglio** dell'attivita' [MISURATO sul codice]: lo script accetta `-TerminaleDati` per nominare un altro terminale, ma l'attivita' non lo passa (argomenti in `CODA_11` del 01/10). Quindi il piccolo ha con ogni probabilita' ancora la copia del 28/09, con il NFP del 02/10 [INFERITO, non letto].
@@ -171,7 +186,8 @@ Fonte: `data/statements/ReportHistory_50503392_2026-10-01.xlsx` (Affari, comment
 | 04/09 | DAX Apertura EU RETEST BUY | 08:40 -> 11:30 (pareggio) | +2,16 (+30,78 la gemella sul 100k) | no, prima |
 | 04/09 | SUPERWAVE DOW H1 L 1/3 + 2/3 | 03/09 17:00 -> 04/09 11:33 (SL) | -16,97 | no, chiusa 2 ore prima |
 | 04/09 | EMA200 DOW L1 + L2 | 21:30 -> 21:31 (SL) | -40,30 | no, 8 ore dopo |
-**Nessuna posizione delle famiglie del trial aperta all'istante del dato in 2 NFP su 2.** n=2 giorni, 8 posizioni: [NON MISURATO] per qualunque giudizio.
+**Nessuna posizione delle sedie del trial aperta all'istante del dato in 2 NFP su 2.** n=2 giorni, 8 posizioni: [NON MISURATO] per qualunque giudizio.
+✏️ Contro-esempio cercato e trovato (cancello): il 04/09 **una** posizione dello **stesso motore SuperWave sul Dow ma in H2** (`SW DOW H2 L 1/3` e `2/3`, posizioni 3311232/3311234, aperte il 03/09 23:05-23:15 BCM, **non e' una sedia del trial**) era aperta al rilascio delle 13:30 BCM e ha chiuso **a stop alle 15:13 BCM**, -26,04 -26,06 = **-52,10** [MISURATO, stesso file]. Uno su uno, nessun giudizio: ma "nessuna famiglia esposta" sarebbe stato falso.
 
 ### 5.3 Contratto in backtest (per-trade OOS 2025.06.10-2026.06.30, file in `AUDIT_RISCHIO_FLOTTA_2026-10-01.md` par. 0.1)
 Date NFP prese **solo** dal repo: 03/07/2025 (`abtg_news_postnews_2010_2025_UTC.csv`), 09/01, 06/02, 06/03/2026 (`mql5/Files/abtg_news.csv`). 🔴 Il repo **non ha** le date NFP di agosto-dicembre 2025 e aprile-giugno 2026 (lo stesso buco e' gia' scritto in `R245_IL_DD_DELLA_FINESTRA_VERGINE_2026-09-25.md` par. 3): non le scrivo a memoria. Le date del repo non sono verificate contro il calendario ufficiale [NON VERIFICATO].
@@ -203,7 +219,7 @@ Totale 7 posizioni (6 ingressi), ~-2,2 R. R medi del contratto da `AUDIT_RISCHIO
 | pavimento totale Guardian (9,3%) | equity <= 145.120: chiude tutto e mette **30 giorni di pausa** | codice r.404-413, 436 |
 | distanza dal muro 10% FTMO (144.000) | 10.184 = 6,4% di 160.000 = 3,3 stop da 2% | [DERIVATO]; regola trial [NON MISURATO] |
 
-Lettura [DERIVATO]: due stop pieni da 2% (6.167) accendono la pausa; il terzo porta oltre l'emergenza, che chiude tutto a ~-7.200. Dopo una giornata d'emergenza l'equity sarebbe ~146.984: **2.984 sopra il muro 10%, cioe' meno di uno stop pieno**. Il trial non muore domani per un NFP se il Guardian chiude in tempo; ne esce con un margine di un solo stop.
+Lettura [DERIVATO]: due stop pieni da 2% in fila (3.084 + 3.022 = **6.106**: il secondo si calcola sul bilancio gia' sceso) accendono la pausa **e portano l'equity a ~148.079, 79 EUR sopra l'allarme della regola 4 dei 14 giorni (148.000: "si spegne Algo e si guarda")**; il terzo porta oltre l'emergenza, che chiude tutto a ~-7.200. Dopo una giornata d'emergenza l'equity sarebbe ~146.984: **1.864 sopra il pavimento del Guardian (145.120, 30 giorni di pausa)** e 2.984 sopra il muro 10% FTMO. Lo stop del giorno dopo si calcola sul bilancio piu' basso (2% di ~146.984 = **~2.940**): il pavimento del Guardian sarebbe a **0,63 stop**, il muro FTMO a ~1,0 stop. Il trial non muore domani per un NFP se il Guardian chiude in tempo; ne esce con **meno di uno stop** prima del nostro stesso pavimento.
 
 ---
 
@@ -213,7 +229,7 @@ Lettura [DERIVATO]: due stop pieni da 2% (6.167) accendono la pausa; il terzo po
 - **Rischio**: sez. 2 e 6. Al rilascio possono essere aperte le DAX, EMA200, SuperWave e il Bulge; ordine di grandezza fino a ~4,6-6% del conto se tutto va a stop insieme, piu' lo slittamento da NFP [NON MISURATO]. Il Guardian chiude tutto a -7.200.
 - **Costo**: zero. E' la configurazione che il contratto ha misurato (celle col filtro spento, quindi con i NFP dentro: `PRESET_FTMO_OROLOGIO_2026-09-20.md` par. 5 punto 1).
 - **A favore** [INFERITO]: la trial esiste per misurare la meccanica (`TRIAL_14_GIORNI_CRITERI`); esecuzione e slittamento su un NFP sul feed FTMO sono proprio un dato che non abbiamo, e che una challenge vera incontrera' (in Evaluation non ci sono restrizioni news: `docs/RISPOSTA_SUPPORTO_FTMO_2026-09-29.md` punti 2-4).
-- **Contro**: il margine dal muro 10% e' di 3,3 stop; una giornata come il 01/10 (due stop DAX, -6.403) su un NFP lo porta a ~1 stop.
+- **Contro**: il margine dal muro 10% e' di 3,3 stop (dal pavimento del Guardian 2,9); una giornata come il 01/10 (due stop DAX, -6.403) su un NFP porta l'equity a ~147.781: **sotto l'allarme 148.000 della regola 4** (Algo spento per regola gia' scritta), a ~0,9 stop dal pavimento del Guardian e ~1,3 dal muro FTMO [DERIVATO].
 
 ### (b) Staccare a mano l'EA di una o piu' sedie
 - **Cosa toglie**: l'esposizione di quella sedia per la giornata.
@@ -249,7 +265,7 @@ Il canale del Guardian (variabili globali `ABTG_PAUSA_GIORNO_1514806751` e `ABTG
 ---
 
 ## 8. Che cosa NON ho fatto, e i limiti
-- Non ho verificato la data del NFP contro una fonte ufficiale fuori dal repo: le fonti sono il feed del 28/09, il referto PostNews e Paolo.
+- Non ho verificato la data del NFP contro una fonte ufficiale fuori dal repo: le fonti sono il feed del 28/09, il referto PostNews e Paolo. Lo stato dei fondi federali USA al 01/10/2026 (shutdown si' o no) **non e' noto** da qui.
 - Non ho letto il contenuto di `C:\FTMO\...\MQL5\Files` (nessuna sonda lo legge), ne' l'esito della 07:20 del 01/10.
 - La presenza di 770101 e 771531 sul trial e' contraddetta dal profilo salvato del 30/09 23:24: [DA VERIFICARE A VISTA].
 - Gli input del Bulge dopo il ripristino della sera del 01/10 (0,8x4 o 1,0x3) non sono noti.
