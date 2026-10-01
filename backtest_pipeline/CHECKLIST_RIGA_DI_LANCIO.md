@@ -36990,3 +36990,37 @@ entra nelle letture come DOSE, non resta solo a schermo. Riparato in `[EMENDATO-
 **Caso reale.** `PRV_DAXAP_03a` (`ABTG_MaxMinNotte_DAX_Short_Ottimizzato`, `770411`, asse `InpPlaceMin` 59/60/61 = 07:59/08:00/08:01 BCM) congelava "S1: `Trades(61) <= Trades(60) <= Trades(59)`, un'eccezione = NULLO" e "la risposta e' `Trades(59) - Trades(60)` = fill nel minuto prima della cash". Ma fra 07:59 e 08:00 cambiano tre cose: il minuto, la barra M15 chiusa dell'ATR (`AtrVal` r.412, `CopyBuffer(hAtr,0,1,1,..)`: 07:30 -> 07:45) e la barra H1 chiusa del filtro S&P (`CorrBias` r.396-406, SPXUSD H1 shift 1: 06:00 -> 07:00). Stop, lotto, TP e permesso di shortare cambiano; le giornate non sono annidate (rottura alle 06:30 tornata sopra alle 08:00 = saltata dalla 59, giocata dalla 60: sell stop sopra il bid rifiutato, `TryPlace` r.266-270 torna true lo stesso); e `Trades` conta deal (1-3 per posizione). `Trades(60) > Trades(59)` era un esito legittimo che il file avrebbe dichiarato NULLO. Gemello in `03b`: "quattro celle identiche + G2 verde = nessuna rottura precoce" scambiava un pin perso (che gira proprio alla cella `08:00` del G2) per una scoperta. Trovato dal `controllo-preventivo` prima di qualunque numero; recidiva anche della classe 662 (monotonia congelata senza elencare i rami che CREANO un ingresso).
 **Controesempio.** Un giorno in cui il prezzo rompe il livello alle 06:30 e risale alle 07:59:30: la cella 59 lo salta, la 60 lo gioca. Oppure uno stop che con l'ATR delle 07:30 viene preso e con quello delle 07:45 arriva al TP1 (1 deal contro 2).
 **Regola.** Per un asse d'orario, prima di congelare letture: si elencano TUTTE le barre lette a shift 1 dall'EA (ATR, filtri MTF, EMA di altri simboli) e per ogni cella si scrive quale barra legge; un salto di cella che attraversa un confine di barra si dichiara come salto di PIU' variabili (classe 1013). La prova che il pin e' arrivato e' la colonna dell'asse nel CSV piu' una grandezza che DEVE cambiare (Profit al centesimo), mai la monotonia di un conteggio. E un controllo incrociato (G2) che coincide con lo stato "pin perso" non separa niente: si scrive cosi'.
+
+### CLASSE 1019 (01/10/2026) -- un argomento passato al driver (deposito, modello, pin, terminale) dato per ARRIVATO perche' e' scritto nella riga: nessuno lo rilegge da cio' che il driver dice di aver usato
+**Caso reale.** Riga `RIGA_ROUND_DAXAP02.txt` (PRV_DAXAP_02, nata dal modello R92BAB). Il secondo strato aveva segnato che il file prova non ha `@DEPOSITO`
+e che senza `-Deposito 100000` il driver gira a 10000 (default di `RIGA_ROUND_VPS.ps1`) e il G0 contro R47a/R246e/R270 fallisce. Le righe collaudate
+(R92BAB, R270) passano `-Deposito $jb.dp` e controllano la coerenza della TABELLA dei job, ma non leggono mai il `REFERTO_ROUND_<etichetta>.txt` del
+driver, che stampa `deposito`, `modello`, `pin`, `macchina` e `terminale` effettivamente usati. Controesempio costruito nella batteria: tolto
+`-Deposito $jb.dp` dalla chiamata (un ritocco a mano, un copia-incolla da una riga che non lo passava), la tabella resta coerente, i CSV escono freschi
+con 4 righe e asse giusto, e una riga modello R92BAB direbbe la catena integra; il round finirebbe NULLO al G0 per una ragione che non e' il motore.
+Stesso discorso per il terminale: il divieto del VPS sta nella riga, ma quale `terminal64.exe` abbia girato lo dice solo il referto.
+**Regola.** Ogni argomento che decide l'identita' della corsa (deposito, modello, pin, terminale/macchina) si rilegge DOPO il job dal referto del driver
+e si confronta con la riga; se il referto manca o differisce, lo stato e' NV col motivo, mai OK. La cartella `ROUND_<etichetta>` di una corsa
+precedente si toglie PRIMA del job, altrimenti il referto vecchio certifica la corsa nuova. Collaudo: `collaudo_riga_DAXAP02/battery.py`
+(`deposito_non_passato`, `modello_1_passato`, `pin_diverso_passato`, `referto_terminale_banco_VPS`, `referto_vecchio_sul_desktop`).
+
+### CLASSE 1020 (01/10/2026) -- il controllo "il pin e' arrivato" collaudato SOLO su CSV scritti dallo stesso stub che legge il file prova: il test non puo' fallire per la ragione per cui esiste
+**Caso reale.** Nella prima stesura del banco DAXAP02 lo stub scriveva i CSV `_IS/_OOS` partendo dal file prova: colonne e valori pinnati erano per
+costruzione quelli attesi, e il controllo dell'asse e degli 87 pin numerici passava sempre (parente della 984: costruire e decodificare con la stessa
+struttura). Il caso vero da intercettare (classe 1018) e' il pin PERSO: MT5 gira la cella vecchia. Si e' preso il CSV VERO del gemello gia' girato
+(`R270e`, 28/09, stesso EA, stessa finestra, asse `InpTP1_R`, `InpCloseHour=17` pinnato) e lo si e' dato alla riga come se fosse l'uscita di DAXAP02:
+deve uscire NV con `asse InpCloseHour [17/17/17/17] DIVERSO`; e lo stesso CSV vero portato alla forma attesa (TP1_R=1, CloseHour 11/13/15/17, magic
+798102) deve uscire OK, provando che il parser regge l'intestazione vera (101 colonne, `InpNewsCurrencies` vuota, `0.0` scritto `0`).
+**Regola.** Un controllo di identita' fra cio' che si e' chiesto e cio' che e' girato si collauda anche su un ARTEFATTO VERO di una corsa che ha girato
+un'altra cosa (il controesempio) e sullo stesso artefatto vero corretto a mano (il positivo). Se il solo materiale di prova esce dal generatore che
+conosce la risposta, il test misura il generatore. E il collaudo della batteria si prova con mutazioni della riga (togliere il controllo dell'asse,
+della finestra, del deposito): una batteria che resta verde con il controllo tolto non collauda quel controllo.
+
+### CLASSE 1021 (01/10/2026) -- la raccolta che controlla i file attesi nella CARTELLA e consegna lo ZIP: lo zip non e' mai aperto
+**Caso reale.** R92BAB (e prima R270) stampano `FILE ATTESI TROVATI: n su n` contando i file nella cartella `ROUND_..._<data>` e poi dicono `ZIP PRONTO
+DA MANDARE`. Claudio manda lo zip, non la cartella. `[NON MISURATO in casa, e' il rischio da coprire]` `Compress-Archive` su Windows PowerShell 5.1 con
+`$ErrorActionPreference='Continue'` puo' saltare un file tenuto aperto (un `.log` ancora scritto da un agente del tester) e chiudere lo stesso, oppure lasciare lo zip di una corsa precedente se
+fallisce dopo il `Remove-Item`: la cartella e' completa, il pacco no. **Regola.** La lista dei file attesi si controlla DUE volte, nella cartella e
+fra le voci dello zip (`[IO.Compression.ZipFile]::OpenRead`, separatori normalizzati: 5.1 scrive `\`, pwsh 7 `/`), e la riga stampa i due conti
+separati (`FILE ATTESI TROVATI: x su n   NELLO ZIP: y su n`). In `RIGA_ROUND_DAXAP02.txt`. NON collaudato: il caso del file bloccato su Windows (il
+banco Linux non lo riproduce); collaudata solo la lettura delle voci.
