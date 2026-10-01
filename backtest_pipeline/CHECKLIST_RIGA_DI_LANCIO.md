@@ -36948,3 +36948,23 @@ Claudio in chat, e poi passa dal cancello come ogni altro file. Chi riferisce un
 ## CLASSE 1012 — **una "buona notizia" dichiarata RECORD senza interrogare lo storico dello STESSO motore sullo STESSO conto**
 - **Caso (30/09, mia pagella, prima stesura)**: *"otto operazioni in un giorno da una sedia ... la prima cosa in mesi che sfonda il pavimento di otto volte, **portata mai vista in casa**"*. 🔴 **Falso, e la smentita era nello stesso CSV che stavo leggendo**: magic **20250001** (`BULGE_MULTI_SIGNAL`, la versione precedente dello stesso motore sullo stesso conto piccolo) ha fatto **5,82 operazioni/giorno su 51 giorni** (per data d'apertura; **5,94 su 50** per data di chiusura), con **15 giornate da >=8** e picco **15** — **mentre perdeva 1.145,60 con PF 0,8268 su n=288**. Piu' grave: **avevo omesso quel forward del tutto**, e nello stesso referto accusavo un altro documento di citare solo l'evidenza favorevole. L'errore **opposto** a quello che cerco di solito, e nella colonna delle buone notizie.
 - **Regola**: prima di scrivere *"mai visto"*, *"record"*, *"la prima volta"*, si interroga **lo storico dello stesso motore sullo stesso conto** — per magic, non per nome — e si scrive il numero trovato accanto. E quando si elenca cio' che **resta in mano**, la ricerca dell'evidenza **contraria** va fatta con la stessa cura di quando si accusa qualcun altro: una buona notizia non verificata costa come un allarme falso, e la si scopre piu' tardi.
+
+### CLASSE 1013 (01/10/2026) -- una lettura che nomina UNA ipotesi su un salto del disegno che ne cambia PIU' d'una, e un controllo positivo che differisce dai casi in esame anche dove il disegno non guarda
+**Caso reale.** Riga diagnostica R92BAB (`RIGA_ROUND_R92BAB.txt` `C30EED9C`, quarto passaggio del cancello). Tre letture di `report/R92B_DIAGNOSI_CRITERI.md`
+erano scritte su un'ipotesi sola dove il disegno ne lasciava aperte almeno due:
+(a) **riga 3** "B OK, C KO -> soglia del NUMERO <= 8": da B a C cambiano **insieme** il numero (1 -> 8), la lunghezza (6 -> 55) e l'identita' (7 simboli
+nuovi). D separa la lunghezza da C solo SOPRA gli 8 simboli; sotto, niente. E il seguito proposto ("misurare 2 e 4 simboli") cambiava di nuovo numero e
+lunghezza insieme;
+(b) **riga 4** "B KO e tutti i Bulge KO, P OK -> l'EA e' morto anche a un simbolo": P (il controllo positivo) e' un altro EA **su un altro grafico** (D30EUR
+M5, tick reali, contro GBPUSD H1, Modello 1). P OK assolve il tester, non il grafico; e i precedenti dello stesso messaggio (R258k GBPUSD, R258s EURUSD)
+erano un ALTRO EA su grafici forex;
+(c) le letture che poggiano su un job PARTITO come prova di innocuita' ignoravano il precursore che la riga stampa gia' (`OnTesterInit works too long: N
+righe`): il 30/09 ogni gamba morta ne ha scritti 5 prima della sesta fatale; un job che parte dopo 3-5 avvisi ha mostrato il guasto.
+**Controesempi.** (a) Limite di LUNGHEZZA a 32 caratteri: B parte, C/D/A muoiono, la lettura dice "numero", si spezza il cesto in sotto-cesti da 4 simboli
+(27 caratteri) e "funziona" per la ragione sbagliata. (b) Guasto legato al grafico forex: tutti i Bulge muoiono, P parte, si va a "ispezionare l'EA" che
+non c'entra. (c) D parte dopo 5 avvisi, A muore: la riga 2 dichiara "la lunghezza e' innocua" sul job che la lunghezza ha portato a un passo dal guasto.
+**Regola.** Ogni lettura scritta prima si controlla **salto per salto**: per il salto fra i due job che la lettura confronta si elencano TUTTE le variabili
+che cambiano (non solo quella che il job vuole cambiare: numero, lunghezza, identita', grafico, modello, finestra) e la lettura nomina **tutte** le ipotesi
+che quel salto lascia aperte, col job che le separerebbe. Il controllo positivo si confronta coi casi in esame **variabile per variabile**, e ogni
+variabile in cui differisce si scrive come cosa che il controllo NON assolve. E un segnale graduato che la corsa gia' produce (avvisi, tempi, tentativi)
+entra nelle letture come DOSE, non resta solo a schermo. Riparato in `[EMENDATO-4]` (righe 2, 3, 4, 7, par. 4-quater, par. 5.10-5.11), prima di qualunque numero.
