@@ -27,3 +27,12 @@ Conto `[NON LETTO DALL'IMMAGINE]`: da confermare col report xlsx della sera (`le
 ## Lettura (e cosa NON dice)
 - Un unico stop non giudica il motore: i criteri dei 14 giorni valutano meccanica e frequenza, non il merito. Il fatto che il prezzo sia poi sceso a 24.853 e' un controfattuale: il motore ha stop stretto contro target largo, e questi episodi stanno nella sua forma (vincite rare grosse / stop frequenti).
 - Resta da misurare a fine giornata: i due stop di oggi rientrano nel rischio promesso (DD forward contro DD del backtest)? Serve il report xlsx completo.
+
+## 10:50 - DUE istanze Bulge sul trial (screenshot Posizioni, GBPNZD short)
+- Posizione 554388449: sell 2,83 lotti, 06:00, commento `BULGE_V520_FT_VIOLA_S` = il nostro preset del trial (`InpComment=BULGE_V520_FT`, magic 772720).
+- Posizione 554501148: sell 4,49 lotti, 10:00, commento `BULGE_VIOLA_S` = `InpComment` **di default ("BULGE")** + `_VIOLA_S` (ABTG_Bulge.mq5 r.458, r.678).
+  Il commento si costruisce da `InpComment` (input fisso per istanza): **due prefissi = due istanze diverse** di ABTG_Bulge sul terminale.
+- Rischio ricostruito dagli SL e dai P/L aperti (EUR/NZD 0,4964, ricavato da -235,99 e +374,41 su 16,8 pip): 
+  #A 91,4 pip x 2,83 lotti = 1.284 EUR = **0,80%**; #B 72,0 pip x 4,49 lotti = 1.605 EUR = **1,00%** (su 160K). Il rischio di #A e' quello del file preset, #B e' 1,0 (digitato a mano?).
+- Ipotesi (NON distinte da qui): (1) Bulge attaccato una seconda volta con input di DEFAULT (Use_Blue=true, ADX acceso, 22 cross, Max_Trades 4, magic 772700) e solo il rischio ritoccato; (2) istanza ereditata da una copia di grafico. Serve la scheda Esperti `[BULGE] Init OK` (una riga per istanza) e Proprieta' > Input di ciascuna.
+- Conseguenza se (1): ingressi Blu (storicamente perdenti sul piccolo), sovrapposizione sui 7 cross che il preset lascia ad altre sedie, tetto reale = 4 + 4 posizioni, non 3. Guardian: cap C1 4,00% solo bandiera.
