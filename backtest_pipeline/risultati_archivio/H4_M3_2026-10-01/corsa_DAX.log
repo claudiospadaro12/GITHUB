@@ -1,0 +1,48 @@
+==============================================================================
+ H4_M3_CONFLUENZA_v1 -- D30EUR (DAX) -- feed HistData GRXEUR (FutureSharks) -- ruolo primario
+ criteri: report/H4_M3_CONFLUENZA_CRITERI_2026-10-01.md (commit 0523b049, emendamento prima dei dati e122978a)
+==============================================================================
+ barre M1: 1,718,805   da 2010-11-15 07:00:00 a 2018-12-28 21:13:00 (UTC)
+ G-OROLOGIO: picco inverno 07:00 (n 274508)  estate 06:00 (n 438753)  ancore 07:00,08:00,13:30,14:30 -> PASSA
+ regimi per anno: 2010 LATERALE +3.3%  2011 ORSO -15.8%  2012 TORO +29.3%  2013 TORO +26.1%  2014 LATERALE +1.7%  2015 LATERALE +9.2%  2016 LATERALE +9.1%  2017 TORO +12.6%  2018 ORSO -18.2%
+ costo: spread mediano per ORA SERVER BCM (UTC+1) da spread_orario_D30EUR.csv: 0:3.8 1:3.9 2:3.7 3:3.6 4:3.5 5:3.5 6:3.7 7:2.8 8:1.7 9:1.7 10:1.7 11:1.6 12:1.6 13:1.6 14:1.7 15:1.7 16:1.7 17:2.6 18:2.7 19:2.7 20:2.7 21:2.8 22:4.0 23:2.8
+ IDENTITA' st_fast == py_stcore (collaudo v4.1) sulle prime 20000 barre M3 vere: SI
+ ST10x3.5: eventi M3 (inversioni valide) 12490 = ALLINEATO 5758 + CONTRO 5830 + H4 INSTABILE 902; ALLINEATO per giorno di mercato 2.80 (giorni 2056) (1 s)
+ FILTRO FEED: chiusure M3 escluse per ATR H1 < 0.1 x mediana (32.8929): 0 su 554094
+ FINESTRA 1000 barre (come la dashboard) contro storico intero: 0 discordanze su 300 eventi campionati
+ SW_Confl (py_confl del collaudo) == classificazione ALLINEATO su 12490 eventi: SI
+ variante orologio H4+60 min: ALLINEATO 5734 (BCM 5758)
+ ST10x2.5: eventi M3 (inversioni valide) 20422 = ALLINEATO 9076 + CONTRO 9173 + H4 INSTABILE 2173; ALLINEATO per giorno di mercato 4.41 (giorni 2056) (1 s)
+ ST10x3.0: eventi M3 (inversioni valide) 15612 = ALLINEATO 7087 + CONTRO 7169 + H4 INSTABILE 1356; ALLINEATO per giorno di mercato 3.45 (giorni 2056) (1 s)
+ ST14x3.5: eventi M3 (inversioni valide) 12386 = ALLINEATO 5717 + CONTRO 5787 + H4 INSTABILE 882; ALLINEATO per giorno di mercato 2.78 (giorni 2056) (1 s)
+
+ ATR(14) H1 mediano 33.5179, spread mediano agli eventi ALLINEATO 1.7000 -> spread = 0.051 ATR H1
+ CELLA CHE DECIDE (R_60 lordo, ATR H1): ALLINEATO - CASUALE B, IC bootstrap giorni, banda 20 estrazioni
+  ST10x3.5  BCM  long  n  2820  ALL -0.020  B -0.002  CON -0.007 (n 2662)  eff -0.018 [-0.043;+0.008] banda B [-0.037;+0.020]  ALL-CON -0.012 [-0.053;+0.028]  incrALL-incrCON -0.012  netto ALL -0.093  -> NULLO
+  ST10x3.5  BCM  short n  2638  ALL +0.018  B +0.003  CON -0.002 (n 2856)  eff +0.015 [-0.010;+0.041] banda B [-0.022;+0.028]  ALL-CON +0.020 [-0.022;+0.061]  incrALL-incrCON +0.017  netto ALL -0.036  -> NULLO
+  ST10x3.5  FTMO long  n  2729  ALL -0.021  B -0.009  CON -0.002 (n 2723)  eff -0.012 [-0.037;+0.015] banda B [-0.040;+0.014]  ALL-CON -0.019 [-0.059;+0.024]  incrALL-incrCON -0.010  netto ALL -0.094  -> NULLO
+  ST10x3.5  FTMO short n  2701  ALL +0.009  B +0.007  CON +0.003 (n 2767)  eff +0.002 [-0.022;+0.028] banda B [-0.013;+0.027]  ALL-CON +0.006 [-0.035;+0.045]  incrALL-incrCON +0.004  netto ALL -0.045  -> NULLO
+  ST10x2.5  BCM  long  n  4745  ALL -0.018  B +0.008  CON -0.005 (n 3926)  eff -0.025 [-0.043;-0.007] banda B [-0.011;+0.024]  ALL-CON -0.013 [-0.045;+0.019]  incrALL-incrCON -0.027  netto ALL -0.089  -> ZONA GRIGIA
+  ST10x2.5  BCM  short n  3882  ALL +0.010  B +0.011  CON +0.002 (n 4793)  eff -0.001 [-0.019;+0.017] banda B [-0.003;+0.027]  ALL-CON +0.008 [-0.024;+0.040]  incrALL-incrCON -0.007  netto ALL -0.043  -> NULLO
+  ST10x3.0  BCM  long  n  3437  ALL -0.021  B +0.006  CON -0.007 (n 3315)  eff -0.027 [-0.051;-0.006] banda B [-0.014;+0.030]  ALL-CON -0.014 [-0.051;+0.023]  incrALL-incrCON -0.026  netto ALL -0.094  -> ZONA GRIGIA
+  ST10x3.0  BCM  short n  3271  ALL +0.022  B +0.008  CON +0.010 (n 3479)  eff +0.014 [-0.010;+0.037] banda B [-0.011;+0.023]  ALL-CON +0.011 [-0.026;+0.046]  incrALL-incrCON +0.004  netto ALL -0.033  -> NULLO
+  ST14x3.5  BCM  long  n  2832  ALL -0.029  B -0.004  CON -0.014 (n 2609)  eff -0.025 [-0.053;+0.001] banda B [-0.022;+0.015]  ALL-CON -0.015 [-0.057;+0.027]  incrALL-incrCON -0.016  netto ALL -0.102  -> ZONA GRIGIA
+  ST14x3.5  BCM  short n  2587  ALL +0.021  B +0.004  CON +0.011 (n 2865)  eff +0.017 [-0.010;+0.043] banda B [-0.016;+0.025]  ALL-CON +0.010 [-0.031;+0.050]  incrALL-incrCON +0.011  netto ALL -0.033  -> NULLO
+
+ STOP (primo passaggio +1R/-1R entro 240 min; AMB = SL nell'aspettativa; TO chiuso a mercato)
+  long  ALLINEATO  a_ST_M3    n  2506 escl  478  D/A 0.86  D 24.66 pt  D/spread med 13.7x [p10 6.1 p90 27.9] >=40x  2.2%  P1R 0.491 [0.469;0.513] TO 566  E lordo -0.009 R  netto -0.100 [-0.135;-0.064]  netto(sens) -0.091
+  long  ALLINEATO  b_1ATR_H1  n  2506 escl  478  D/A 1.00  D 28.68 pt  D/spread med 15.5x [p10 9.1 p90 26.6] >=40x  1.0%  P1R 0.474 [0.451;0.497] TO 733  E lordo -0.023 R  netto -0.092 [-0.128;-0.056]  netto(sens) -0.088
+  long  ALLINEATO  c_ST_H4    n  2486 escl  498  D/A 5.38  D 142.76 pt  D/spread med 77.0x [p10 32.6 p90 152.3] >=40x 86.2%  P1R 0.495 [0.426;0.564] TO 2290  E lordo +0.005 R  netto -0.014 [-0.030;+0.001]  netto(sens) -0.013
+  long  CASUALE_B  a_ST_M3    n 50120 escl 9420  D/A 0.86  D 24.97 pt  D/spread med 13.8x [p10 5.9 p90 28.8] >=40x  3.2%  P1R 0.505 [0.500;0.510] TO 11724  E lordo +0.022 R  netto -0.070 [-0.092;-0.046]  netto(sens) -0.060
+  long  CASUALE_B  b_1ATR_H1  n 50120 escl 9420  D/A 1.00  D 28.96 pt  D/spread med 15.7x [p10 9.2 p90 27.1] >=40x  1.0%  P1R 0.499 [0.494;0.504] TO 14567  E lordo +0.021 R  netto -0.048 [-0.074;-0.023]  netto(sens) -0.044
+  long  CASUALE_B  c_ST_H4    n 49087 escl 10453  D/A 5.28  D 141.50 pt  D/spread med 76.4x [p10 30.4 p90 153.8] >=40x 84.1%  P1R 0.455 [0.441;0.469] TO 44358  E lordo +0.007 R  netto -0.021 [-0.036;-0.007]  netto(sens) -0.019
+  long  CONTRO     a_ST_M3    n  2391 escl  415  D/A 0.83  D 32.76 pt  D/spread med 18.3x [p10 7.6 p90 36.4] >=40x  7.4%  P1R 0.493 [0.470;0.515] TO 483  E lordo -0.013 R  netto -0.084 [-0.121;-0.047]  netto(sens) -0.076
+  long  CONTRO     b_1ATR_H1  n  2391 escl  415  D/A 1.00  D 38.39 pt  D/spread med 20.7x [p10 11.9 p90 38.4] >=40x  8.5%  P1R 0.480 [0.457;0.504] TO 681  E lordo -0.018 R  netto -0.070 [-0.107;-0.032]  netto(sens) -0.066
+  short ALLINEATO  a_ST_M3    n  2365 escl  409  D/A 0.79  D 31.39 pt  D/spread med 17.5x [p10 7.6 p90 34.3] >=40x  5.8%  P1R 0.534 [0.513;0.556] TO 363  E lordo +0.038 R  netto -0.035 [-0.073;+0.003]  netto(sens) -0.028
+  short ALLINEATO  b_1ATR_H1  n  2365 escl  409  D/A 1.00  D 38.45 pt  D/spread med 20.9x [p10 12.4 p90 38.2] >=40x  8.6%  P1R 0.543 [0.520;0.566] TO 590  E lordo +0.046 R  netto -0.006 [-0.042;+0.032]  netto(sens) -0.002
+  short ALLINEATO  c_ST_H4    n  2345 escl  429  D/A 4.63  D 173.42 pt  D/spread med 93.3x [p10 33.8 p90 196.8] >=40x 86.5%  P1R 0.622 [0.557;0.683] TO 2118  E lordo +0.022 R  netto -0.042 [-0.157;+0.016]  netto(sens) -0.027
+  short CASUALE_B  a_ST_M3    n 47445 escl 7915  D/A 0.79  D 30.61 pt  D/spread med 17.1x [p10 7.3 p90 36.6] >=40x  7.6%  P1R 0.514 [0.509;0.519] TO 8977  E lordo +0.010 R  netto -0.064 [-0.088;-0.041]  netto(sens) -0.057
+  short CASUALE_B  b_1ATR_H1  n 47445 escl 7915  D/A 1.00  D 38.55 pt  D/spread med 20.9x [p10 12.3 p90 37.8] >=40x  8.1%  P1R 0.524 [0.519;0.529] TO 12777  E lordo +0.016 R  netto -0.036 [-0.064;-0.010]  netto(sens) -0.032
+  short CASUALE_B  c_ST_H4    n 46404 escl 8956  D/A 4.51  D 171.24 pt  D/spread med 92.1x [p10 29.7 p90 200.1] >=40x 84.2%  P1R 0.554 [0.540;0.568] TO 41313  E lordo +0.007 R  netto -0.019 [-0.036;-0.003]  netto(sens) -0.017
+  short CONTRO     a_ST_M3    n  2525 escl  499  D/A 0.83  D 24.20 pt  D/spread med 13.6x [p10 5.7 p90 27.0] >=40x  2.3%  P1R 0.503 [0.482;0.525] TO 470  E lordo -0.015 R  netto -0.108 [-0.144;-0.071]  netto(sens) -0.099
+  short CONTRO     b_1ATR_H1  n  2525 escl  499  D/A 1.00  D 28.75 pt  D/spread med 15.6x [p10 9.2 p90 26.9] >=40x  1.0%  P1R 0.511 [0.489;0.534] TO 661  E lordo -0.013 R  netto -0.083 [-0.119;-0.045]  netto(sens) -0.078

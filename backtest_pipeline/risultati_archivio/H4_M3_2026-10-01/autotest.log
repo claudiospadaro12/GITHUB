@@ -1,0 +1,37 @@
+======================================================================
+ AUTOTEST H4_M3_CONFLUENZA_v1
+======================================================================
+ [PASS] IDENTITA' st_fast/STInc == py_stcore (10; 3.5) -- inversioni 87
+ [PASS] IDENTITA' st_fast/STInc == py_stcore (10; 2.5) -- inversioni 151
+ [PASS] IDENTITA' st_fast/STInc == py_stcore (14; 3.5) -- inversioni 88
+ [PASS] IDENTITA' st_fast/STInc == py_stcore (1; 3.0) -- inversioni 225
+ [PASS] SORGENTE v4.1: righe chiave di SW_STCore/SW_Confl e default presenti -- mancano []
+ [PASS] SW_Confl vettoriale == py_confl (modo 1, 270 casi) -- 
+ [PASS] PRIMO PASSAGGIO: TP / SL-short / AMB / TO -- codici [0, 1, 2, 3]
+   (0 s)
+ [PASS] RW long: ALL, B, CON entro +/-0,03 -- ALL +0.014 B +0.005 CON +0.006 n 5692
+ [PASS] RW long: B entro +/-0,02 -- B +0.005
+ [PASS] RW long: niente falso positivo -- NULLO eff +0.009 [-0.014;+0.029]
+ [PASS] RW short: ALL, B, CON entro +/-0,03 -- ALL +0.014 B -0.004 CON +0.007 n 6119
+ [PASS] RW short: B entro +/-0,02 -- B -0.004
+ [PASS] RW short: niente falso positivo -- NULLO eff +0.018 [-0.004;+0.037]
+   RW: ALLINEATO 11853, CONTRO 11999, INSTABILE 1842 su 2600 giorni (16 s)
+ [PASS] CONTROLLO appaiato per MESE distorto (contro-esempio): B(mese) - B(ora) > +0,01 -- B per ora +0.001, B per anno-mese+ora +0.021
+ [PASS] H4 = ultima barra CHIUSA per ogni chiusura M3 (guardia deterministica) -- 1247921 chiusure M3, di cui 15600 esattamente su un bordo H4
+ [PASS] LOOK-AHEAD mutante (H4 in formazione): B si sposta verso l'alto (> +0,008, media dei lati) -- spostamento +0.018 (B long +0.005 -> +0.021, short -0.004 -> +0.015)
+ [PASS] OROLOGIO: H4 +1h cambia il numero di ALLINEATO -- 11853 -> 11870
+ [PASS] G-OROLOGIO boccia il file in EST fisso -- 
+ [PASS] G-OROLOGIO passa il file NY corretto -- 
+ [PASS] MANOPOLA: mult 3,5 -> 2,5 cambia gli eventi >= 20% -- 25694 -> 42860
+   (34 s)
+ [PASS] PIANTATO long: EFFETTO -- EFFETTO eff +0.250 [+0.230;+0.271] ALL +0.316 B +0.066 n 5852
+ [PASS] PIANTATO short: EFFETTO -- EFFETTO eff +0.212 [+0.193;+0.233] ALL +0.276 B +0.064 n 5871
+ [PASS] PIANTATO: ALL - CON > +0,05 -- +0.341
+ [PASS] DERIVA (A2): B long > +0,03 -- B +0.121 ALL +0.109
+ [PASS] DERIVA (A2): cella long NON EFFETTO -- NULLO eff -0.012 [-0.025;+0.004] n 11601
+ [PASS] MOMENTUM (A3): ALL - B >= +0,05 -- +0.261
+ [PASS] MOMENTUM (A3): |ALL - CON| < 0,03 -- +0.006 (CON long +0.240 short +0.263)
+ [PASS] MOMENTUM (A3): |(ALL-B) - (CON-B_con)| < 0,03 -- +0.017
+ [PASS] PIANTATO: (ALL-B) - (CON-B_con) > +0,05 -- +0.217
+AUTOTEST: 29/29  (82 s)
+codice 0

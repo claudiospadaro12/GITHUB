@@ -1,0 +1,9 @@
+RICONTO INDIPENDENTE a cicli espliciti (barre, py_stcore dello specchio v4.1, mappa H4 con bisect, esiti R_60): conteggi e medie ALLINEATO/CONTRO
+DAX ALL_long 2820 -0.0196
+DAX ALL_short 2638 0.0185
+DAX CON_long 2662 -0.0073
+DAX CON_short 2856 -0.0017
+XAU_B ALL_long 3312 0.0220
+XAU_B ALL_short 3245 0.0053
+XAU_B CON_long 3269 -0.0162
+XAU_B CON_short 3324 -0.0258
