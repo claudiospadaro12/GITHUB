@@ -18,7 +18,7 @@ Etichette: [MISURATO] dai file del repo · [CODICE] letto nel sorgente al pin in
    aperti. La **perdita potenziale del giorno** (realizzato + aperto) era **6,68% alle 11:13 e 7,66% alle 12:00**, sopra il
    5% (8.000): la sola rete era l'emergenza del Guardian a 4,5%. Per costruzione il C1 tiene sotto **6,00%** solo con
    ingressi uno alla volta e nessun pendente in attesa; con pendenti o raffiche nello stesso secondo **non ha tetto**
-   (somma teorica delle taglie in campo: 20,5%). [MISURATO + CODICE]
+   (somma teorica delle taglie in campo: 17,3-17,5%). [MISURATO + CODICE]
 3. **Il Monte Carlo di casa da' il segno del campione che gli si da'.** Contratto (4 sedie su 9, pavimento), Guardian ideale:
    **PASS 92,3%** da capitale pieno e **80,0% dallo stato del trial**; senza Guardian il **muro giornaliero 15,6%**.
    Forward FTMO (7 giornate, media **-1,355%/giornata**): **muro statico nel 100%**, mediana 8 giornate attive (5 dallo
@@ -91,7 +91,7 @@ Deviazioni dai criteri, dichiarate: (1) nella storia dei doppi stop le gambe del
 (EMA200 S1/S2, SuperWave 1/3-2/3, parziali del piccolo) contano come **un setup solo**: il conteggio per coppie di gambe
 gonfiava gli episodi (21 coppie = 10 episodi sul piccolo); (2) in (b2) la 770260 e' **esclusa**: sul piccolo i suoi
 commenti non sono `RETEST` (modo diverso dalla sedia FTMO); l'ORB (0,30%) e' incluso come sedia della flotta trial;
-(3) la posizione GBPNZD del Bulge A ancora aperta alle 16:45 entra nel rischio aperto (par. B) ma non nei conti realizzati;
+(3) "Bulge A" e "Bulge B" sono le DUE CONFIGURAZIONI della stessa istanza riconfigurata il 01/10 (A = preset `BULGE_V520_FT_`, 0,80%, magic 772720; B = default `BULGE_VIOLA_`, 1,00%, magic 772700: registro in `TRIAL_14_GIORNI_CRITERI_2026-10-01.md`, letto dopo il commit dei criteri), non due istanze vive insieme; i rischi per posizione non cambiano; (3b) la posizione GBPNZD del Bulge A ancora aperta alle 16:45 entra nel rischio aperto (par. B) ma non nei conti realizzati;
 (4) il netto chiuso del trial qui e' -6.239,43: manca la commissione d'ingresso (-6,25) della GBPNZD A ancora aperta
 (-6.245,68 del report MT5 = -6.239,43 - 6,25).
 
@@ -157,14 +157,14 @@ coppia del 01/10 (770411 short + 770105 short) e' **fuori dal campo di misura de
   `BuyLimit`/`SellLimit`; EMA200 r.243; SuperWave r.267; Bulge r.1268/1286 prima di `trade.Buy/Sell`): **un pendente gia'
   piazzato si riempie senza nessun controllo**.
 
-**Il massimo che la regola ammette** (taglie del trial: 7 sedie indice 2,00%; Bulge A 0,80% x 4; Bulge B 1,00% x 3; ORB 0,30%):
+**Il massimo che la regola ammette** (taglie del trial: 7 sedie indice 2,00%; Bulge UNA istanza, preset 0,80% x 4 = 3,2% oppure 1,00% x 3 = 3,0%, valori dopo il ripristino della sera [NON NOTI], `TRIAL_14_GIORNI_CRITERI` registro; ORB 0,30%):
 
 | situazione | rischio aperto massimo | che cosa lo ferma |
 |---|---:|---|
 | ingressi uno alla volta, a mercato, nessun pendente in attesa | **< 4,00 + 2,00 = 6,00%** (< 5,00% se l'ultimo e' Bulge) | il C1, dal successivo |
 | pendenti piazzati quando il rischio era < 4,00 | 4,00 + somma dei pendenti vivi (indici: fino a ~14%) | nessuno: il C1 non li vede ne' al piazzamento ne' al riempimento |
-| ingressi nello stesso secondo (raffica Bulge sulla stessa barra H1) | + fino a 3,2% (A) + 3,0% (B) | `Max_Trades` per magic, non il C1 |
-| tutte le sedie piene insieme (teorico) | **20,5%** | margine e orari (a 80k sei sedie a 2% chiedevano il 105% del conto, `QUANTE_SEDIE_CI_STANNO_2026-09-23.md`; leva del trial [NON MISURATO]) |
+| ingressi nello stesso secondo (raffica Bulge sulla stessa barra H1) | + fino a 3,0-3,2% (misurato: 2 ingressi alle 06:00:00) | `Max_Trades` per magic, non il C1. Nota: `Max_Trades` conta per MAGIC, quindi il 01/10 la configurazione di default (magic 772700) non contava la GBPNZD ancora aperta della configurazione preset (magic 772720): durante una riconfigurazione il tetto del Bulge raddoppia |
+| tutte le sedie piene insieme (teorico) | **17,3-17,5%** (14,0 indici + 3,0-3,2 Bulge + 0,3 ORB) | margine e orari (a 80k sei sedie a 2% chiedevano il 105% del conto, `QUANTE_SEDIE_CI_STANNO_2026-09-23.md`; leva del trial [NON MISURATO]) |
 
 Sono gia' classi di casa (645, 1003): qui c'e' la **misura in campo**.
 
