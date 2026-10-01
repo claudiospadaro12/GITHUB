@@ -17,6 +17,9 @@
 //|   - su un conto REALE l'EA RIFIUTA di partire (INIT_FAILED);     |
 //|   - fuori dal tester parte solo su conto DEMO e solo se          |
 //|     InpConsentiDemo=true (default false);                        |
+//|   - RIFIUTA comunque i conti di CAMPO anche se DEMO: server FTMO  |
+//|     (la challenge e' in trade mode DEMO), 541452707, 50503392,   |
+//|     50504263, 10105439 (cancello del 01/10/2026);                |
 //|   - niente martingala, griglia, recovery, hedging fra conti;    |
 //|   - nessuna chiamata di rete (niente WebRequest).                |
 //|                                                                  |
@@ -417,6 +420,14 @@ int OnInit()
       long modo=AccountInfoInteger(ACCOUNT_TRADE_MODE);
       if(modo==ACCOUNT_TRADE_MODE_REAL)
         { Print("[EMA200M] RIFIUTO: conto REALE. Questo e' un EA di BANCO, non una sedia."); return(INIT_FAILED); }
+      //--- CANCELLO 01/10/2026: "solo DEMO" NON basta. La challenge FTMO gira
+      //    in trade mode DEMO, e i demo BCM 50503392/50504263 hanno sedie in
+      //    FORWARD: il banco li rifiuta anche con InpConsentiDemo=true.
+      long   login=AccountInfoInteger(ACCOUNT_LOGIN);
+      string server=AccountInfoString(ACCOUNT_SERVER);
+      string serverU=server; StringToUpper(serverU);
+      if(login==541452707 || login==50503392 || login==50504263 || login==10105439 || StringFind(serverU,"FTMO")>=0)
+        { Print("[EMA200M] RIFIUTO: conto "+IntegerToString(login)+" @ "+server+" e' un conto di CAMPO (challenge prop o sedie in forward). Il BANCO qui non parte."); return(INIT_FAILED); }
       if(modo!=ACCOUNT_TRADE_MODE_DEMO || !InpConsentiDemo)
         { Print("[EMA200M] RIFIUTO: fuori dal tester serve un conto DEMO e InpConsentiDemo=true."); return(INIT_FAILED); }
      }

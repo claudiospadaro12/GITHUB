@@ -18,10 +18,12 @@
 ;  MAGIC: base 785100 -> 785100..785199 (verificato libero il 01/10).
 ;  Simboli: nomi BCM. Su FTMO: GER40.cash US30.cash US100.cash US500.cash XAUUSD.
 ;  Grafico consigliato nel tester: XAUUSD (orario piu' largo).
+;  InpSymbols con la VIRGOLA (cancello 01/10): in un .set il ';' e' il
+;  carattere dei commenti; l'EA accetta ',' e ';' allo stesso modo.
 ; =====================================================================
 InpUsaGuardian=true
 InpConsentiDemo=false
-InpSymbols=D30EUR;U30USD;NASUSD;SPXUSD;XAUUSD
+InpSymbols=D30EUR,U30USD,NASUSD,SPXUSD,XAUUSD
 InpTFs=H1,H4
 InpNoOverlapTF=true
 InpTimerSec=30
