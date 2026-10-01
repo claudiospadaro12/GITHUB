@@ -36,3 +36,10 @@ Conto `[NON LETTO DALL'IMMAGINE]`: da confermare col report xlsx della sera (`le
   #A 91,4 pip x 2,83 lotti = 1.284 EUR = **0,80%**; #B 72,0 pip x 4,49 lotti = 1.605 EUR = **1,00%** (su 160K). Il rischio di #A e' quello del file preset, #B e' 1,0 (digitato a mano?).
 - Ipotesi (NON distinte da qui): (1) Bulge attaccato una seconda volta con input di DEFAULT (Use_Blue=true, ADX acceso, 22 cross, Max_Trades 4, magic 772700) e solo il rischio ritoccato; (2) istanza ereditata da una copia di grafico. Serve la scheda Esperti `[BULGE] Init OK` (una riga per istanza) e Proprieta' > Input di ciascuna.
 - Conseguenza se (1): ingressi Blu (storicamente perdenti sul piccolo), sovrapposizione sui 7 cross che il preset lascia ad altre sedie, tetto reale = 4 + 4 posizioni, non 3. Guardian: cap C1 4,00% solo bandiera.
+
+## 14:00 - secondo screenshot dello storico (ora server FTMO)
+- 11:13:13 GER40.cash **sell 12,08 lotti a 24.834,96**, stop a 25.092,04, chiuso 13:36:02 a 25.092,45: **-3.110,48** (257,49 punti x 12,08; = 2,00% del bilancio di quel momento ~155.4K: lotto coerente col rischio 2,00% dei preset DAX Apertura 770101/770105). Chair `[NON VISIBILE: commento dell'ingresso non espanso]`, candidato 770105 SHORT (InpSessionHour=10, InpRiskPercent=2.00).
+- 12:00:00 AUDUSD buy 7,99 lotti a 0,69377, chiuso 13:42:13 a 0,69462: **+597,17**. AUDUSD **non e' nella lista dei 15 cross del preset trial** -> l'ingresso viene probabilmente dalla seconda istanza Bulge (22 cross di default) `[INFERITO: commento non espanso]`.
+- 13:25:11 GBPNZD 4,49 lotti (la #B del commento `BULGE_VIOLA_S`) chiusa a TP 2,35534: **+1.010,74**, commissione -9,95.
+- Stima del giorno dal bilancio 155.302,22 (09:50) + i deal visibili: bilancio ~153.790, equity ~153.780 (flottante -9,85): **perdita giornaliera ~6.220 = 3,89% di 160K**. Pausa Guardian 3,5% (5.600) superata; emergenza 4,5% (7.200) a ~980; 5% presunto FTMO (8.000, NON misurato) a ~1.780. Linea di perdita massima 144.000 a ~9.780.
+- **Allarme dei criteri scattato**: 3 stop pieni nello stesso giorno (DAX 770411, NZDCHF, DAX 11:13). Par. 4: "si spegne Algo e si guarda prima di riaccendere".
