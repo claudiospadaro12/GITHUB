@@ -43,3 +43,9 @@ Conto `[NON LETTO DALL'IMMAGINE]`: da confermare col report xlsx della sera (`le
 - 13:25:11 GBPNZD 4,49 lotti (la #B del commento `BULGE_VIOLA_S`) chiusa a TP 2,35534: **+1.010,74**, commissione -9,95.
 - Stima del giorno dal bilancio 155.302,22 (09:50) + i deal visibili: bilancio ~153.790, equity ~153.780 (flottante -9,85): **perdita giornaliera ~6.220 = 3,89% di 160K**. Pausa Guardian 3,5% (5.600) superata; emergenza 4,5% (7.200) a ~980; 5% presunto FTMO (8.000, NON misurato) a ~1.780. Linea di perdita massima 144.000 a ~9.780.
 - **Allarme dei criteri scattato**: 3 stop pieni nello stesso giorno (DAX 770411, NZDCHF, DAX 11:13). Par. 4: "si spegne Algo e si guarda prima di riaccendere".
+
+## 14:52 - commento dell'AUDUSD letto (screenshot di Claudio)
+- AUDUSD buy 7,99 lotti, 12:00:00 a 0,69377: commento **`BULGE_VIOLA_L`** (prefisso di default). Chiuso a TP 0,69461 (fill 0,69462): +597,17.
+  **AUDUSD non e' nella `Symbols_List` del preset trial (15 cross)**: l'istanza B ha dunque una lista piu' larga (verosimilmente i 22 di default). Resta da leggere `InpMagic`, `Use_Blue`, `Max_Trades` di B.
+- Istanza B oggi: GBPNZD +1.010,74 e AUDUSD +597,17, **due TP su due trade viola**; non si sa ancora se B ha preso anche trade Blu (lo stop NZDCHF 10:43 e' senza commento letto).
+- **Commissioni FTMO (dato nuovo)**: 17,69 EUR per lato su 7,99 lotti = 2,21 EUR/lotto/lato (GBPNZD 9,95 su 4,49 lotti = 2,22): **~4,43 EUR/lotto a giro**. Sull'AUDUSD: 35,38 EUR di commissioni contro 597,17 di profitto lordo (5,9%).
