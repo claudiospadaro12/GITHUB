@@ -23,7 +23,9 @@ la fonte o NON MISURATO. Nessun PF di questo documento e' un criterio di merito 
   Il cap C1 e' una bandiera sul rischio GIA' aperto: non somma il rischio dell'ingresso nuovo.
 - Guardian (DEDOTTO, righe NON ancora lette): pausa 3,5%, emergenza 4,5%, perdita totale 9,3%, reset giornaliero ore 1 server. Al minimo il bilancio era a 4,27% di perdita
   (375 EUR dall'emergenza) (`TRIAL_GIORNO1_ANALISI` §7).
-- Bulge: due istanze sullo stesso terminale (A preset trial `BULGE_V520_FT`, rischio 0,80%, 15 cross; B commento di default `BULGE_VIOLA`, rischio 1,00%, AUDUSD fuori dai 15 cross). Perche' due istanze: NON SI SA (Esperti e Input da leggere).
+- Bulge: sul terminale c'e' UN solo grafico con l'EA (letto da Claudio). Con ogni probabilita' e' stato RICONFIGURATO nella mattina: alle 06:00 il preset del trial (commento `BULGE_V520_FT`, rischio 0,80%, 15 cross, Viola),
+  poi valori di default dell'EA con rischio 1,00% e Max_Trades 3 (commento `BULGE_VIOLA`, Blu e filtro ADX accesi, 22 cross; AUDUSD, fuori dai 15 cross) fino alla sera; in serata Claudio ha ripristinato il preset (ipotesi [INFERITO]: la prova sono due righe `Init OK` nell'Esperti, non ancora lette).
+  Nel seguito 'A' = configurazione preset, 'B' = configurazione a default.
   NZDCHF A: SL 17,2 pip, TP 2,9 pip (payoff 1:6, break-even 86% di vittorie senza costi); stop -1.389,09 con commissioni. Commissioni forex 2,21 EUR/lotto/lato (~4,43 a giro), indici 0;
   sul TP lordo di NZDCHF (~231 EUR) 31,95 di commissioni = 14%, piu' lo spread NON MISURATO. AUDUSD B: TP 8,4-9,6 pip contro SL 22 pip (break-even ~72%), commissioni 5,9% del lordo (`TRIAL_GIORNO1_ANALISI` §2, §6).
 - Backtest del 770411: quante volte entra un minuto prima dell'apertura con stop dentro il rumore: NON MISURATO.
