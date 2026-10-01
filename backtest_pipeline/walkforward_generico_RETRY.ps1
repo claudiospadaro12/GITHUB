@@ -28,8 +28,11 @@
 #  COSA CAMBIA (e NIENT'ALTRO -- tutto il resto e' identico riga per riga):
 #   1. tre parametri nuovi: -MaxRiprove (default 1; 0 = nessuna riprova,
 #      come l'originale; >1 si RIFIUTA: max UNA per gamba), -RiprovaEntro
-#      (scadenza "aaaa-MM-gg HH:mm:ss": oltre, la riprova NON parte, cosi'
-#      il tetto di tempo della riga che chiama non si allunga) e
+#      (scadenza "aaaa-MM-gg HH:mm:ss": oltre, la riprova NON parte. E' un
+#      controllo sull'AVVIO, non sulla fine: una riprova decisa un attimo
+#      prima della scadenza finisce DOPO, di al piu' attesa + UNA gamba
+#      intera (classe 1038); chi vuole un tetto rigido passa T0 + tetto
+#      meno quel margine) e
 #      -AttesaRiprovaSec (default 20, ammessi 5..300);
 #   2. dopo OGNI lancio del terminale il driver LEGGE il giornale del
 #      tester (<cartella dati>\Tester\logs\AAAAMMGG.log, UTF-16) e
@@ -340,7 +343,8 @@ param(
                                      #   >1 si RIFIUTA: il mandato e' UNA volta per gamba.
   [string]$RiprovaEntro  = "",       # "aaaa-MM-gg HH:mm:ss" (ora del PC): oltre, la riprova NON
                                      #   parte e la gamba resta morta, dichiarato. Serve alla riga che
-                                     #   chiama per non sforare il SUO tetto. Vuoto = nessuna scadenza.
+                                     #   chiama per non PARTIRE oltre il SUO tetto (la fine puo' sforarlo
+                                     #   di attesa + una gamba: classe 1038). Vuoto = nessuna scadenza.
   [int]$AttesaRiprovaSec = 20        # attesa fra i due tentativi (5..300 s)
 )
 $ErrorActionPreference="Stop"

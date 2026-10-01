@@ -21,7 +21,9 @@
 #   2. tre parametri passati al driver: -MaxRiprove (default 1; 0 = come
 #      l'originale), -RiprovaEntro "aaaa-MM-gg HH:mm:ss" (la scadenza delle
 #      riprove: la riga che ha un tetto ci mette il SUO tetto, cosi' una
-#      riprova non lo sfora) e -AttesaRiprovaSec (default 20);
+#      riprova non PARTE oltre il tetto; la sua FINE puo' sforarlo di al
+#      piu' attesa + una gamba intera, classe 1038) e -AttesaRiprovaSec
+#      (default 20);
 #   3. legge il file RIPROVE_<EA>_<SIM>[_ohlc]_<etichetta>.txt del driver
 #      (solo se FRESCO), lo stampa, lo mette nel referto e nello zip; ogni
 #      gamba RIPROVATA diventa un RILIEVO, quindi un round con una gamba

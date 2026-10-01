@@ -82,6 +82,9 @@ Il file finisce nel referto (sezione `RIPROVE DEL DRIVER`) e nello zip.
 
 1. Scaricare `backtest_pipeline/righe/RIGA_ROUND_VPS_RETRY.ps1` dal pin. Controllare il marcatore
    `MARCATORE_RIGA_ROUND_VPS_RETRY_v1` e lo **SHA256 al pin** di questo file (non quello di `RIGA_ROUND_VPS.ps1`).
+   **E le passa `-Pin <commit>`** (classe 164), come R92BAB fa con l'originale (`-Pin $PIN`): il default dello script
+   e' il branch `lavoro`, e senza `-Pin` il driver si scaricherebbe dalla testa del branch (lo fermerebbe solo il
+   controllo SHA del punto 2). Aggiunto dal cancello indipendente del 01/10.
 2. **Classi 166/892:** dopo ogni job, nella cartella di lavoro si controlla lo SHA256 di
    **`walkforward_generico_RETRY.ps1`** contro il pin. Il file `walkforward_generico.ps1` che sta nella stessa cartella
    e' quello delle righe vecchie: non va confuso con questo.
@@ -89,6 +92,12 @@ Il file finisce nel referto (sezione `RIPROVE DEL DRIVER`) e nello zip.
    riprova allunga il job dall'interno (R92BAB: un job con una gamba morta e' durato 163-196 s, contro 68-95 s; a questo si
    aggiungono l'attesa e un altro giro). La riga deve passare `-RiprovaEntro` uguale a `T0 + TETTO`, in ora del PC e nel
    formato `aaaa-MM-gg HH:mm:ss`. Oltre il tetto la riprova non parte; i job non ancora iniziati restano `NON LANCIATO`, come oggi.
+   🔴 **Ma la scadenza si controlla all'AVVIO della riprova, non alla sua fine** (classe 1038, trovato dal cancello
+   indipendente del 01/10): il controllo cade subito dopo il tentativo morto, poi ci sono l'attesa (20 s) e un giro
+   intero della gamba. Una riprova decisa a `T0 + TETTO - 1 s` finisce dopo il tetto, di **al massimo attesa + una gamba
+   intera** (R92BAB: una gamba morta ~95-125 s, una viva 30-60 s su OHLC; a tick reali con molte celle una gamba puo'
+   durare decine di minuti). Se il tetto deve essere RIGIDO, la riga passa `T0 + TETTO - (attesa + durata massima
+   attesa di una gamba)` e lo dichiara.
 4. **Classificazione OK/KO/MISTO:** un job con una gamba riprovata ha nel giornale del tester **3 gambe, non 2**. Un
    classificatore come quello di R92BAB (`$nLg -ne 2` porta a NV) lo leggerebbe come NV. La riga nuova deve leggere il
    file `RIPROVE_...` del job, oppure contare i tentativi per gamba (classe 1030).
@@ -115,6 +124,8 @@ Il file finisce nel referto (sezione `RIPROVE DEL DRIVER`) e nello zip.
 
 **Esiti del 01/10/2026 (`run.sh`, pwsh 7.4.6 su Linux):** `controlla_riga` rc 0 su tutti e due i file (0 bloccanti,
 parser vero 0 errori); guardia 195/195 su 5 copie; giornali **26/26**; batteria **147 controlli passati, 0 falliti**.
+**Rifatto dal cancello indipendente (01/10 sera), dopo le sue correzioni:** controlla_riga rc 0 x2, guardia 195/195,
+giornali **27/27** (caso `MISTA` aggiunto), batteria **147/147**.
 **Contro-esempio sui test stessi:** tre mutazioni del codice nuovo, fatte apposta, sono state prese tutte e tre da
 `giornali_veri.py`:
 - fatale senza causa letta come `MORTA_INIT`: il test va a 25/26;
@@ -144,3 +155,30 @@ parser vero 0 errori); guardia 195/195 su 5 copie; giornali **26/26**; batteria 
    `Get-Process` non sono collaudati: su Linux non ci sono processi `terminal64`.
 7. **Le righe di lancio che useranno questa copia non esistono ancora** (il mandato dice di non scriverne). Sono da
    collaudare quando nasceranno: punti 1-4 della sezione "Come si usa".
+
+## Cancello indipendente del 01/10/2026 (sera) -- cosa ha aggiunto
+
+- **Percorso del giornale: confermato, non piu' solo dedotto.** `risultati_archivio/REFERTO_DRIVER_R109_20260825.txt`
+  riporta il percorso assoluto sul PC di backtest:
+  `C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\Tester\logs\20260825.log`;
+  e il raccoglitore di R92BAB nomina i file `<nonno>_<padre>_<file>`, quindi `0002_Tester_logs_20261001.log` = `...\Tester\logs\20261001.log`.
+- **Nome del file = data LOCALE del PC.** `ROUND_R92B_2026-09-30/LOG_TESTER/0000_..._logs_20260930.log` comincia alle
+  `00:20:29` e `0001_MQL5_logs_20260930.log` alle `00:03:58`: con un nome in ora UTC quelle righe starebbero nel file del 29/09.
+- **Ora legale (punto 4 qui sopra), il conto dei due versi.** Il caso pericoloso e' uno solo: dopo il ritorno all'ora
+  solare, un tentativo MUTO (nessuna riga sua) nell'ora ripetuta, con nel giornale le righe di una gamba dello STESSO EA
+  morta nella prima 02:xx. Il cancello lo ha costruito (`CE8`): esce `MORTA_INIT` e la gamba si riprova **una volta in
+  piu' del dovuto**, con lo stesso `.ini` (costo: un giro; nessun dato sbagliato, il CSV resta l'unica prova della gamba).
+  Un tentativo a cavallo del cambio ha la finestra rovesciata (fine prima dell'avvio): zero righe, `NON_VERIFICABILE`,
+  nessuna riprova. Anche `-RiprovaEntro` e' in ora locale "nuda": nell'ora ripetuta la scadenza si allunga di un'ora.
+  Che il PC di backtest applichi l'ora legale **non e' misurato** (MT5 scrive `GMT+1` all'avvio, il 01/10).
+- **Un EA con un `OnTesterInit` davvero lento** scrive la STESSA firma della morte misurata: il giornale non li
+  distingue, quindi quella gamba verrebbe riprovata una volta (e morirebbe di nuovo). Costo limitato a un giro; in
+  R92BAB/R92B/RFWD l'EA morto (`ABTG_Bulge`, r.2162: `int OnTesterInit() { return(INIT_SUCCEEDED); }`) torna subito,
+  quindi la morte misurata e' dell'ambiente, non dell'EA.
+- **Cache, contato sui giornali veri:** R92BAB 12 intestazioni, 10 partite tutte con `saved to cache file`, 2 morte
+  senza; R92B 2 morte senza; RFWD 18 intestazioni, 14 partite tutte con la riga, 4 morte senza.
+- **`-MaxRiprove 0` contro l'ORIGINALE, stesso terminale finto:** tre scenari (morta+viva, tutto vivo, causa diversa +
+  morta): codice d'uscita, numero di lanci e SHA dei CSV **identici**; l'unica differenza e' il file `RIPROVE_` in piu'.
+- **Mutazione non presa dal collaudo, ora presa:** invertire la precedenza fra `MORTA_ALTRO` e `MORTA_INIT` (una fatale
+  con la causa E una senza nello stesso tentativo) restava verde su 26/26 e su D3. Aggiunto il caso `MISTA` a
+  `giornali_veri.py` (classe 1033: ogni controllo ha uno scenario in cui e' il solo a scattare).

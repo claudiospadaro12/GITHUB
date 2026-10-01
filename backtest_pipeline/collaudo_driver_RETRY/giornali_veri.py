@@ -104,6 +104,10 @@ ps.append("$lg3=LeggiGiornaleTester %s $t0 $t1; 'ASSENTE|'+$lg3.Ok+'|'+$lg3.Prob
 # riga QUASI uguale: 'works too long' + 'cannot be initialized' su righe DIVERSE, e la fatale senza la causa -> MORTA_ALTRO
 ps.append("$g=[datetime]'2026-10-01'; $q=@(RigaGiornaleTester ('LL'+[char]9+'0'+[char]9+'10:00:00.000'+[char]9+'Tester'+[char]9+[char]34+'ABTG_Bulge.ex5'+[char]34+' X64') $g; RigaGiornaleTester ('PD'+[char]9+'3'+[char]9+'10:00:15.000'+[char]9+'Tester'+[char]9+'OnTesterInit works too long...') $g; RigaGiornaleTester ('JO'+[char]9+'3'+[char]9+'10:00:30.000'+[char]9+'Tester'+[char]9+'Tester cannot be initialized.') $g)")
 ps.append("$c=ClassificaTentativo $q 'ABTG_Bulge' $g.AddHours(9) $g.AddHours(11) '2026.03.02' '2026.05.01'; 'QUASI|'+$c.Esito+'|'+$c.NAvvisi")
+# MISTA (cancello indipendente 01/10): nello STESSO tentativo una fatale SENZA causa e una CON causa -> MORTA_ALTRO
+# (vince il caso dubbio: nessuna riprova). Prima di questo caso, invertire la precedenza restava verde (classe 1033).
+ps.append("$q2=@(RigaGiornaleTester ('LL'+[char]9+'0'+[char]9+'10:00:00.000'+[char]9+'Tester'+[char]9+[char]34+'ABTG_Bulge.ex5'+[char]34+' X64') $g; RigaGiornaleTester ('JO'+[char]9+'3'+[char]9+'10:01:00.000'+[char]9+'Tester'+[char]9+'Tester cannot be initialized.') $g; RigaGiornaleTester ('JO'+[char]9+'3'+[char]9+'10:01:30.000'+[char]9+'Tester'+[char]9+'OnTesterInit works too long. Tester cannot be initialized.') $g)")
+ps.append("$c=ClassificaTentativo $q2 'ABTG_Bulge' $g.AddHours(9) $g.AddHours(11) '2026.03.02' '2026.05.01'; 'MISTA|'+$c.Esito+'|'+$c.NAvvisi")
 # riga SENZA ora (formato rotto) -> ignorata, mai un'eccezione
 ps.append("'SENZAORA|'+($null -eq (RigaGiornaleTester 'testo senza ora' $g))+'|'+($null -eq (RigaGiornaleTester ('XX'+[char]9+'0'+[char]9+'25:00:00.000'+[char]9+'Tester'+[char]9+'x') $g))")
 p = os.path.join(td, 't.ps1')
@@ -146,6 +150,8 @@ v = out.get('ASSENTE', ['?'] * 2)
 verdetto(v[0] == 'False' and 'nessun giornale' in v[1], 'cartella dei giornali assente -> NON letto, motivo scritto: ' + '|'.join(v))
 v = out.get('QUASI', ['?'] * 2)
 verdetto(v[0] == 'MORTA_ALTRO', 'fatale SENZA la causa sulla stessa riga -> MORTA_ALTRO (non si riprova): ' + '|'.join(v))
+v = out.get('MISTA', ['?'] * 2)
+verdetto(v[0] == 'MORTA_ALTRO', 'fatale SENZA causa e fatale CON causa nello stesso tentativo -> MORTA_ALTRO (non si riprova): ' + '|'.join(v))
 v = out.get('SENZAORA', ['?'] * 2)
 verdetto(v == ['True', 'True'], 'riga senza ora / ora 25 -> ignorate: ' + '|'.join(v))
 print('GIORNALI VERI E COSTRUITI: %d/%d' % (ok, tot))
