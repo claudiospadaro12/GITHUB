@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# MARCATORE_LETTURA_TRIAL_v1 -- legge il report MT5 (xlsx 'Report Cronistorico') di un conto e stampa, PER GIORNO e PER SEDIA (commento
+# MARCATORE_LETTURA_TRIAL_v2 -- legge il report MT5 (xlsx 'Report Cronistorico') di un conto e stampa, PER GIORNO e PER SEDIA (commento
 # dal deal di ingresso): posizioni chiuse, vinte, stop (uscita a prezzo di SL), netto; poi le SOGLIE DI ALLARME scritte prima in
 # report/TRIAL_14_GIORNI_CRITERI_2026-10-01.md (equity <= 148.000, >= 3 stop nello stesso giorno). SOLA LETTURA: non tocca niente.
 # Uso: python3 backtest_pipeline/lettura_trial.py <report.xlsx> [AAAA.MM.GG da]   NON e' un backtest: nessun PF come criterio di merito.
@@ -27,9 +27,12 @@ def main():
     p0 = sez['Posizioni'] + 2; p1 = sez['Ordini']
     a0 = sez['Affari'] + 2; a1 = sez['Posizioni aperte']
     com = {}
+    usc = {}   # (simbolo, ora uscita, volume) -> commento del deal di uscita: '[sl ...]' = stop, '[tp ...]' = take profit
     for r in rows[a0:a1]:
         if r[4] == 'in' and r[7]:
             com[str(r[7])] = r[13] or ''
+        elif r[4] == 'out':
+            usc[(r[2], str(r[0]), round(num(r[5]), 2))] = str(r[13] or '')
     pos = []
     for r in rows[p0:p1]:
         if not r[1] or not str(r[1]).isdigit():
@@ -37,8 +40,10 @@ def main():
         t1 = str(r[8]); 
         if t1[:10] < da: continue
         sl = num(r[6]); pc = num(r[9]); tp = num(r[7])
+        uc = usc.get((r[2], t1, round(num(r[4]), 2)), '').strip().lower()
         pos.append(dict(id=str(r[1]), sim=r[2], vol=num(r[4]), t1=t1, net=num(r[12]) + num(r[10]) + num(r[11]),
-                        stop=(sl > 0 and abs(pc - sl) < 1e-9 and num(r[12]) < 0), tp=(tp > 0 and abs(pc - tp) < 1e-9),
+                        stop=(uc.startswith('[sl') if uc else (sl > 0 and abs(pc - sl) < 1e-9 and num(r[12]) < 0)),
+                        tp=(uc.startswith('[tp') if uc else (tp > 0 and abs(pc - tp) < 1e-9)),
                         com=famiglia(com.get(str(r[1]), ''))))
     print('posizioni chiuse dal', da, ':', len(pos))
     g = collections.defaultdict(lambda: collections.defaultdict(list))

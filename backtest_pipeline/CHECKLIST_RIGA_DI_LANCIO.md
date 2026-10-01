@@ -36968,3 +36968,7 @@ che cambiano (non solo quella che il job vuole cambiare: numero, lunghezza, iden
 che quel salto lascia aperte, col job che le separerebbe. Il controllo positivo si confronta coi casi in esame **variabile per variabile**, e ogni
 variabile in cui differisce si scrive come cosa che il controllo NON assolve. E un segnale graduato che la corsa gia' produce (avvisi, tempi, tentativi)
 entra nelle letture come DOSE, non resta solo a schermo. Riparato in `[EMENDATO-4]` (righe 2, 3, 4, 7, par. 4-quater, par. 5.10-5.11), prima di qualunque numero.
+
+### CLASSE 1014 (01/10/2026) -- uno strumento di ALLARME che dice "nessun allarme" perche' cerca l'evento con un test che il mondo vero non soddisfa mai
+**Caso reale.** `lettura_trial.py` v1 riconosceva uno stop con `prezzo di uscita == SL` (uguaglianza stretta). Sul report vero del trial (3 stop il 01/10, tutti con slippage 0,4-1,2 punti) dava `stop a SL: 0` e **`ALLARMI: nessuno`** con l'allarme "3 stop nello stesso giorno" scattato. L'avevo provato solo sul report del piccolo, dove i pochi stop riempivano per caso a prezzo esatto. Trovato leggendo il primo report del trial, prima di consegnare la lettura.
+**Controesempio.** Un qualunque stop con slippage (cioe' tutti) esce dal test. **Regola.** Uno strumento che deve ALLARMARE si prova con un caso che DEVE allarmare, preso dai dati veri, prima di fidarsi del suo silenzio; l'evento si legge da quello che il broker scrive (commento di uscita `[sl ...]` / `[tp ...]`), non da un confronto di prezzi in virgola mobile. Riparato in v2.
