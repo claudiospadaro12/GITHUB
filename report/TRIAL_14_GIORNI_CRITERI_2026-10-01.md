@@ -3,7 +3,7 @@
 Decisione di Claudio, 01/10/2026: **nessuna sedia aggiunta** oltre alla flotta della challenge (770101, 770105, 770202, 770260, 771531,
 770511, 770411 + Guardian 779001) piu' **ABTG_Bulge v5.20 solo viola** (magic 772720) e **ABTG_ORB_Ottimizzato Dow** (magic 770621).
 Presto caricati da Claudio, Algo Trading acceso il 01/10 mattina. Il rischio per operazione e' quello dei preset, tranne quanto Claudio
-ha cambiato a mano nella finestra Input (da dichiarare: [DA CONFERMARE] Risk_Percent e Max_Trades del Bulge).
+ha cambiato a mano nella finestra Input (da dichiarare: Bulge: **Risk_Percent=1.0, Max_Trades=3** dichiarati da Claudio il 01/10; Total_Risk_Percent=2.0 lasciato nel preset ma INERTE con Risk_Mode=0: il tetto del Bulge e' 1,0 x 3 = 3,0%).
 
 ## Cosa si misura (e cosa NO)
 - **SI: meccanica.** esecuzione, ordini rifiutati, lotto reale contro atteso (lotto massimo FTMO), orari/orologio (server = IT+1), comportamento
