@@ -1,0 +1,183 @@
+== S) STATICO sul sorgente v4.1 ==
+  ok   sorgente ASCII puro (0 caratteri non ASCII)
+  ok   parentesi () bilanciate (1273/1273)
+  ok   parentesi {} bilanciate (176/176)
+  ok   parentesi [] bilanciate (537/537)
+  ok   SetIndexBuffer 0..33 tutti presenti una volta (34 chiamate)
+  ok   indicator_plots=7 coincide con i tipi dichiarati
+  ok   i buffer di calcolo stanno DOPO quelli disegnati
+  ok   nessun 'OrderSend' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'OrderSendAsync' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'CTrade' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'PositionOpen' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'PositionClose' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'OrderCalcMargin' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'WebRequest' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'SocketCreate' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'SendFTP' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'SendMail' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'StringFormat' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'PrintFormat' (sola visione, niente rete, niente StringFormat)
+  ok   nessun '#include <Trade' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'FileOpen' (sola visione, niente rete, niente StringFormat)
+  ok   nessun 'DLL' (sola visione, niente rete, niente StringFormat)
+  ok   nessun '#import' (sola visione, niente rete, niente StringFormat)
+  ok   nessun ChartSetSymbolPeriod(0,NULL,...) per ricalcolare (i tasti non ricaricano)
+  ok   ChartSetSymbolPeriod chiamato in un solo punto (GoTo), trovati 1
+  ok   input InpSymbols del ricevuto invariato (string = "D30EUR,NASUSD,SPXUSD,XAUUSD,EURUSD,EURGBP,EURJPY,EURCHF,EURAUD,EURCAD,EURNZD,GBPUSD,GBPAUD,GBPCAD,GBPCHF,GBPJPY,GBPNZD,CHFJPY,CADCHF,CADJPY,USDJPY,USDCHF,USDCAD,AUDCAD,AUDCHF,AUDJPY,AUDNZD,AUDUSD,BTCUSD")
+  ok   input InpAtrPeriod del ricevuto invariato (int = 10)
+  ok   input InpMult1 del ricevuto invariato (double = 3.5)
+  ok   input InpMult2 del ricevuto invariato (double = 3.0)
+  ok   input InpMult3 del ricevuto invariato (double = 2.5)
+  ok   input InpShowST2 del ricevuto invariato (bool = true)
+  ok   input InpShowST3 del ricevuto invariato (bool = true)
+  ok   input InpMA1 del ricevuto invariato (int = 14)
+  ok   input InpMA2 del ricevuto invariato (int = 100)
+  ok   input InpMA3 del ricevuto invariato (int = 200)
+  ok   input InpMAmethod del ricevuto invariato (ENUM_MA_METHOD = MODE_SMA)
+  ok   input InpFlipBars del ricevuto invariato (int = 1)
+  ok   input InpBlink del ricevuto invariato (bool = true)
+  ok   input InpShowTrade del ricevuto invariato (bool = true)
+  ok   input InpRiskPct del ricevuto invariato (double = 1.0)
+  ok   input InpTP1_R del ricevuto invariato (double = 1.0)
+  ok   input InpTP2_R del ricevuto invariato (double = 2.0)
+  ok   input InpTP3_R del ricevuto invariato (double = 3.0)
+  ok   input InpSize1 del ricevuto invariato (double = 40)
+  ok   input InpSize2 del ricevuto invariato (double = 30)
+  ok   input InpSize3 del ricevuto invariato (double = 30)
+  ok   input InpShowLevels del ricevuto invariato (bool = false)
+  ok   input InpShowSTstart del ricevuto invariato (bool = true)
+  ok   input InpLevelsLook del ricevuto invariato (int = 300)
+  ok   input InpFractal del ricevuto invariato (int = 2)
+  ok   input InpMaxLevels del ricevuto invariato (int = 3)
+  ok   input InpX del ricevuto invariato (int = 6)
+  ok   input InpY del ricevuto invariato (int = 44)
+  ok   input InpSymW del ricevuto invariato (int = 64)
+  ok   input InpCellW del ricevuto invariato (int = 50)
+  ok   input InpCellH del ricevuto invariato (int = 19)
+  ok   input InpFont del ricevuto invariato (int = 8)
+  ok   input InpBuyCol del ricevuto invariato (color = C'38,166,91')
+  ok   input InpSellCol del ricevuto invariato (color = C'200,55,50')
+  ok   input InpEmptyCol del ricevuto invariato (color = C'24,26,32')
+  ok   input InpPanelCol del ricevuto invariato (color = C'16,18,22')
+  ok   input InpGridCol del ricevuto invariato (color = C'55,58,66')
+  ok   input InpTextCol del ricevuto invariato (color = C'205,208,214')
+  ok   input InpHeadCol del ricevuto invariato (color = clrWhite)
+  ok   input InpStopCol del ricevuto invariato (color = clrRed)
+  ok   input InpTargetCol del ricevuto invariato (color = clrLime)
+  ok   input InpResCol del ricevuto invariato (color = C'230,120,120')
+  ok   input InpSupCol del ricevuto invariato (color = C'120,180,230')
+  ok   input nuovo InpConflMode = CONFL_INVERSIONE_M3
+  ok   input nuovo InpConflFlipBars = 3
+  ok   input nuovo InpConflH4Stable = 3
+  ok   input nuovo InpBlinkSeconds = 20
+  ok   input nuovo InpBatch = 6
+  ok   input nuovo InpGridBars = 1000
+  ok   input nuovo InpClickCambiaTF = true
+  ok   input nuovo InpDiagnosi = false
+  ok   identificatori g*/k*/w*/Inp*/SW_* tutti dichiarati (non dichiarati: [])
+  ok   ogni costante MQL5 usata e' nell'elenco delle costanti note (sconosciute: [])
+  ok   ogni funzione chiamata e' definita o nota a MQL5 (sconosciute: [])
+  ok   nessuna funzione definita due volte ([])
+  ok   contro-esempio: il refuso 'gShST' viene trovato dal controllo (['gShST'])
+== C) funzioni PURE vere (estratte dal .mq5, compilate C++) == specchio Python ==
+  ok   C++ del blocco vero == specchio Python, bit per bit, batch e incrementale (0 differenze)
+  ok   mutante RILEVATO: confluenza M3: >= flipM3 -> > flipM3 (208 differenze)
+  ok   mutante RILEVATO: H4 stabile: < stableH4 -> <= stableH4 (54 differenze)
+  ok   mutante RILEVATO: verso M3 contro H4 non controllato (468 differenze)
+  ok   mutante RILEVATO: modo 0 senza confronto (2304 differenze)
+  ok   mutante RILEVATO: lotti senza tolleranza (61 differenze)
+  ok   mutante RILEVATO: lotti senza tetto massimo (676 differenze)
+  ok   mutante RILEVATO: banda alta con c[i] invece di c[i-1] (4378 differenze)
+  ok   mutante RILEVATO: ATR con un TR in meno (20660 differenze)
+  ok   mutante RILEVATO: seme: >= mid -> > mid (175 differenze)
+  ok   mutante RILEVATO: gate: non sincronizzata sempre provvisoria (3 differenze)
+  ok   mutante RILEVATO: gate: chiave ignora ok (2 differenze)
+  ok   mutante RILEVATO: lampeggio: >= -> > (138 differenze)
+  ok   mutante RILEVATO: inversioni: include il seme (4 differenze)
+  ok   mutante RILEVATO: tocchi: stop con < invece di <= (204 differenze)
+  ok   mutante RILEVATO: stato: TP1 nella barra dello stop contato come prima (403 differenze)
+  ok   mutante RILEVATO: cella: bs < flipBars -> <= (8 differenze)
+== L1) confluenza: casi costruiti con risposta NOTA (classe 1014: un caso DEVE scattare) ==
+  ok   H4 costruito: SU e stabile (dir 1, inv -1 barre fa)
+  ok   M3 costruito: inversione SU esattamente sulla barra di rottura (150 == 150)
+  ok   DEVE scattare: confluenza BUY per 3 barre M3 dall'inversione, poi spenta ([0, 0, 1, 1, 1, 0, 0, 0, 0])
+  ok   H4 girato 1 barra fa (non stabile): niente confluenza
+  ok   stessa situazione con stabilita' H4 non richiesta (0): confluenza
+  ok   M3 gira SU con H4 GIU': niente confluenza
+  ok   modo 0 (v4.00): stessa direzione da 40 barre = confluenza (il 'sempre acceso')
+  ok   modo 1: stessa situazione = nessuna confluenza (nessuna inversione recente)
+== L4) stato del setup dai tocchi: casi noti ==
+  ok   BUY niente toccato -> stato 0, TP 0 (atteso (0, 0))
+  ok   BUY TP1 poi TP2 -> stato 2, TP 2 (atteso (2, 2))
+  ok   BUY stop esatto prima di tutto -> stato 4, TP 0 (atteso (4, 0))
+  ok   BUY TP1 poi stop -> stato 5, TP 1 (atteso (5, 1))
+  ok   BUY stop e TP1 nella stessa barra -> stato 6, TP 0 (atteso (6, 0))
+  ok   SELL: TP1 toccato poi stop toccato esatto -> stato 5, TP1 (5,1)
+== L3) cache + rotazione + dati non pronti (specchio del flusso di UpdateSlot/ProcessSymbol) ==
+  CopyRates al minuto: v4.1 47.5 (da 1000 barre) contro v4.00 4060 (da 90 barre, ogni 3 s)
+  ritardo fra chiusura della barra e ricalcolo della cella: massimo 4 s (rotazione 6 simboli/s su 29)
+  ok   v4.1 fa almeno 50 volte meno CopyRates della v4.00 (47.5 contro 4060 al minuto)
+  ok   ogni cella si aggiorna entro un giro di rotazione (4 s <= 6 s)
+  ok   dati non pronti: nessuna cella con stato e' mai tornata vuota
+  ok   il simbolo con dati mancanti ha tenuto lo stato precedente 988 volte (caso che DEVE capitare)
+== M1) v4.00 ricevuta: griglia (Wilder, 90 barre) contro grafico (iATR SMA, storico intero) su XAUUSD reale ==
+  M1  barre  19699 | direzione griglia != grafico:  1026 (5.21%) | inversioni grafico  458, griglia  448, solo grafico  162, solo griglia  152
+  M3  barre 149699 | direzione griglia != grafico:  8661 (5.79%) | inversioni grafico 3298, griglia 3157, solo grafico 1329, solo griglia 1188
+  M5  barre  29699 | direzione griglia != grafico:  1883 (6.34%) | inversioni grafico  684, griglia  631, solo grafico  293, solo griglia  240
+  M15 barre  29699 | direzione griglia != grafico:  1854 (6.24%) | inversioni grafico  612, griglia  555, solo grafico  304, solo griglia  247
+  H1  barre  32732 | direzione griglia != grafico:  2181 (6.66%) | inversioni grafico  752, griglia  659, solo grafico  353, solo griglia  260
+  H4  barre   8800 | direzione griglia != grafico:   386 (4.39%) | inversioni grafico  190, griglia  187, solo grafico   66, solo griglia   63
+  D1  barre   1471 | direzione griglia != grafico:   114 (7.75%) | inversioni grafico   38, griglia   35, solo grafico   16, solo griglia   13
+  ok   difetto 5 CONFERMATO: la griglia v4.00 e il grafico divergono su ogni TF
+  confluenza v4.00 (stessa direzione) su 149599 barre M3 (462 giorni): griglia 49.9% del tempo, grafico 50.1%
+  LAMPEGGIA ma sul grafico H4 e M3 NON concordano: 5750 barre M3 = 3.84% del tempo, 7.7% dei lampeggi
+  ok   segnalazione di Claudio RIPRODOTTA: simboli che lampeggiano con H4/M3 discordi sul grafico
+  ok   difetto 1 MISURATO: in modo 0 il simbolo e' in confluenza ~meta' del tempo (49.9%)
+== M2) v4.1: barre perche' la finestra agganci lo stato dello storico intero (classe 950) ==
+  M1  mult 3.5: 1500 partenze, lag mediano  29, p99  80, MASSIMO 104, mai agganciate entro 1000: 0
+  M1  mult 5.0: 1500 partenze, lag mediano  41, p99 128, MASSIMO 207, mai agganciate entro 1000: 0
+  M3  mult 3.5: 1500 partenze, lag mediano  30, p99  85, MASSIMO 146, mai agganciate entro 1000: 0
+  M3  mult 5.0: 1500 partenze, lag mediano  42, p99 140, MASSIMO 209, mai agganciate entro 1000: 0
+  M5  mult 3.5: 1500 partenze, lag mediano  30, p99  91, MASSIMO 114, mai agganciate entro 1000: 0
+  M5  mult 5.0: 1500 partenze, lag mediano  43, p99 131, MASSIMO 170, mai agganciate entro 1000: 0
+  M15 mult 3.5: 1500 partenze, lag mediano  28, p99  82, MASSIMO 105, mai agganciate entro 1000: 0
+  M15 mult 5.0: 1500 partenze, lag mediano  37, p99 122, MASSIMO 236, mai agganciate entro 1000: 0
+  H1  mult 3.5: 1500 partenze, lag mediano  26, p99  75, MASSIMO 110, mai agganciate entro 1000: 0
+  H1  mult 5.0: 1500 partenze, lag mediano  36, p99 108, MASSIMO 150, mai agganciate entro 1000: 0
+  H4  mult 3.5: 1500 partenze, lag mediano  27, p99  77, MASSIMO 101, mai agganciate entro 1000: 0
+  H4  mult 5.0: 1500 partenze, lag mediano  37, p99 134, MASSIMO 173, mai agganciate entro 1000: 0
+  D1  mult 3.5:  172 partenze, lag mediano  24, p99  70, MASSIMO  71, mai agganciate entro 1000: 0
+  D1  mult 5.0:  172 partenze, lag mediano  37, p99  94, MASSIMO  97, mai agganciate entro 1000: 0
+  ok   ogni partenza aggancia lo stato entro 1000 barre
+  ok   massimo aggancio (3,5: 146; 5,0: 236) sotto SW_TRUST_BARS=300
+  ok   finestra di default 1000 = zona affidabile 300 + almeno 100 barre
+  ok   contro-esempio: a 60 barre lo stato della finestra NON coincide (18/400 diversi)
+  ok   a 1000 barre lo stato della finestra coincide con lo storico intero (0/150 diversi)
+== M3) v4.1: setup dalla finestra (zona affidabile) == setup dallo storico intero ==
+  M1  300 punti: setup diverso dallo storico intero 0 | rifiutati (zona non affidabile) 0 | SENZA la regola: diversi 0
+  M3  300 punti: setup diverso dallo storico intero 0 | rifiutati (zona non affidabile) 0 | SENZA la regola: diversi 0
+  M15 300 punti: setup diverso dallo storico intero 0 | rifiutati (zona non affidabile) 0 | SENZA la regola: diversi 0
+  H1  300 punti: setup diverso dallo storico intero 0 | rifiutati (zona non affidabile) 0 | SENZA la regola: diversi 0
+  H4  300 punti: setup diverso dallo storico intero 0 | rifiutati (zona non affidabile) 0 | SENZA la regola: diversi 0
+  ok   con la zona affidabile nessun setup sbagliato (0 su 1500)
+  ok   costruito: nello storico intero l'ultima inversione e' PRIMA della finestra (-1 < 1200)
+  ok   costruito: SENZA la regola la finestra fissa un setup FALSO ((1214, 1, 586.0940377401183, 584.0106833945349))
+  ok   costruito: CON la regola quel setup e' rifiutato (NON_AFFIDABILE)
+  casi REALI di inversione che esiste solo nella finestra (senza la regola = setup falso): 0
+== M4) confluenza su XAUUSD reale: modo 0 (v4.00) contro modo 1 (v4.1), stesso algoritmo v4.1 ==
+  modo 0 M3<3 H4stab 3: in confluenza  50.2% del tempo, eventi (accensioni) 3.6 al giorno
+  modo 1 M3<3 H4stab 0: in confluenza   3.3% del tempo, eventi (accensioni) 3.5 al giorno
+  modo 1 M3<3 H4stab 1: in confluenza   3.2% del tempo, eventi (accensioni) 3.5 al giorno
+  modo 1 M3<3 H4stab 3: in confluenza   3.1% del tempo, eventi (accensioni) 3.4 al giorno
+  modo 1 M3<3 H4stab 6: in confluenza   3.0% del tempo, eventi (accensioni) 3.2 al giorno
+  modo 1 M3<1 H4stab 3: in confluenza   1.1% del tempo, eventi (accensioni) 3.4 al giorno
+  modo 1 M3<5 H4stab 3: in confluenza   5.2% del tempo, eventi (accensioni) 3.4 al giorno
+  ok   modo 1 accende il simbolo molto meno del modo 0 (3.1% contro 50.2%)
+== L2) ingresso FISSO tick per tick (M1 reale -> barre M5 in formazione) ==
+  ok   v4.1: dentro ogni barra l'ingresso non cambia mai (0 barre M5 con piu' ingressi)
+  ok   v4.1: l'ingresso cambia SOLO alla chiusura di una barra di inversione (0 eccezioni su 264 cambi)
+  ok   il test ha visto davvero delle inversioni (264)
+  ok   contro-esempio v4.00: l'ingresso cambia a ogni tick (11079 barre M5 su 11091 con piu' ingressi)
+
+ESITO: TUTTO OK (logica e funzioni pure; NON prova la compilazione MQL5 ne' il comportamento nel terminale)
