@@ -15,6 +15,9 @@
 # Lo scenario JSON ha le chiavi globali e, per job, un sotto-dizionario con il nome dell'etichetta (DAXAP03a / DAXAP03b) che le sovrascrive.
 # Gambe: 'ok' | 'ko' (morta, nessuna riprova: oltre la scadenza) | 'ko_ok' (morta e salvata al tentativo 2) | 'ko_ko' (morta due volte)
 #        | 'altro' (Tester cannot be initialized con una causa diversa: MORTA_ALTRO, nessuna riprova).
+# Manopole aggiunte dal cancello indipendente del 01/10 (classe 1051): 'pin_over' {input: valore} (CSV di un'altra cella), 'retry_win_is'
+#   (la riprova della OOS gira la finestra IS), 'dead_nocause' <fase> (giornale: fatale SENZA causa, RIPROVE dice MORTA_INIT),
+#   'rp_fake_retry' <fase> (RIPROVE dichiara un tentativo morto che il giornale non ha), 'rp_no_rip' <fase> (due tentativi senza '| RIPROVATA').
 import sys, os, re, csv, json, shutil, time, datetime as dt
 REPO = os.environ.get('REPO_ROOT', '/home/user/GITHUB')
 a = sys.argv[1:]
@@ -132,7 +135,9 @@ def write_csv(fase):
             ntr = 0 if (sc.get('trades0') and i == 1) else 18 + i
             row = [str(i), '%.2f' % (4000.0 + 37.11 * v), '238.34800', '%.5f' % (1.8 + 0.001 * v), '1.52059', '16.05348', '%.4f' % (3.0 + 0.01 * v), str(ntr), str(v)]
             for k, pv in pins_w:
-                if k == sc.get('pin_bad'):
+                if k in sc.get('pin_over', {}):
+                    row.append(sc['pin_over'][k])
+                elif k == sc.get('pin_bad'):
                     row.append('0' if norm(pv) != '0' else '1')
                 else:
                     row.append(norm(pv))
@@ -157,12 +162,18 @@ def attempt(esito, fase, ea_name):
     L = ['RP\t0\t%s\tTester\t"%s.ex5" X64' % (hms(), ea_name), 'DF\t0\t%s\tTester\tregister MQL5.community account and use MQL5 Cloud Network to speed up optimizations' % hms()]
     if esito == 'PARTITA':
         a_, b_ = (ISA, ISB) if fase == 'IS' else (OOA, OOB)
+        if sc.get('retry_win_is') and fase == 'OOS' and RETRY_N[0] == 2:
+            a_, b_ = ISA, ISB
         if sc.get('win_bad') and fase == 'OOS':
             b_ = (dt.datetime.strptime(b_, '%Y.%m.%d') - dt.timedelta(days=1)).strftime('%Y.%m.%d')
         L.append('GD\t0\t%s\tTester\tExperts\\%s.ex5 on %s,%s from %s 00:00 to %s 00:00' % (hms(), ea_name, SIM, TF, a_, b_))
         L.append('JS\t0\t%s\tTester\tcomplete optimization started' % hms())
         L.append('RR\t0\t%s\tTester\toptimization finished, total passes %d' % (hms(), len(vals)))
         s = "PARTITA (from %s to %s su %s: finestra = dichiarata); CSV: presente (%d righe)" % (a_, b_, SIM, len(vals))
+    elif esito == 'MORTA_INIT' and sc.get('dead_nocause') == fase:
+        hm = hms()
+        L.append('RI\t3\t%s\tTester\tTester cannot be initialized.' % hm)
+        s = "MORTA_INIT (5 righe 'OnTesterInit works too long', fatale alle %s); CSV: assente" % hm
     elif esito == 'MORTA_INIT':
         for i in range(5):
             L.append('DJ\t3\t%s\tTester\tOnTesterInit works too long...' % hms())
@@ -179,15 +190,16 @@ if sc.get('prima'):
     # due gambe di una corsa PRECEDENTE dello stesso giorno (00:00:01, prima dell avvio di qualunque riga): una morta e una partita
     _w16(TL, ['NS\t0\t00:00:01.000\tTester\t"%s.ex5" X64' % EA] + ['RI\t3\t00:00:27.000\tTester\tOnTesterInit works too long. Tester cannot be initialized.'] +
          ['NS\t0\t00:01:01.000\tTester\t"%s.ex5" X64' % EA, 'GD\t0\t00:01:03.000\tTester\tExperts\\%s.ex5 on D30EUR,M15 from 2024.09.26 00:00 to 2025.06.09 00:00' % EA])
-files = []; RR = []; riprovate = []
+files = []; RR = []; riprovate = []; RETRY_N = [0]
 SEQ = {'ok': ['PARTITA'], 'ko': ['MORTA_INIT'], 'ko_ok': ['MORTA_INIT', 'PARTITA'], 'ko_ko': ['MORTA_INIT', 'MORTA_INIT'], 'altro': ['MORTA_ALTRO']}
 for i, fase in enumerate(['IS', 'OOS']):
     seq = SEQ[legs[i]]
     tt = []
     for n, es in enumerate(seq):
+        RETRY_N[0] = n + 1
         time.sleep(float(sc.get('sleep', 0.1)))
         Lg, s = attempt(es, fase, sc.get('ea_other', EA) if (i == 0 and n == 0) else EA)
-        if not sc.get('tlog') and not sc.get('no_logs'):
+        if not sc.get('tlog') and not sc.get('no_logs') and not (sc.get('rp_fake_retry') == fase and n == 0):
             _w16(TL, Lg)
         tt.append('tentativo %d -> %s' % (n + 1, s))
         time.sleep(0.15)
@@ -199,7 +211,7 @@ for i, fase in enumerate(['IS', 'OOS']):
     eg = 'CSV PRODOTTO' if (seq[-1] == 'PARTITA' and f_ and os.path.exists(f_)) else 'CSV NON PRODOTTO'
     if sc.get('rp_dice_prodotto') == fase:
         eg = 'CSV PRODOTTO'
-    rip = ' | RIPROVATA' if len(seq) > 1 else ''
+    rip = ' | RIPROVATA' if (len(seq) > 1 and sc.get('rp_no_rip') != fase) else ''
     RR.append('GAMBA %s | %s%s | ESITO GAMBA: %s%s' % (fase.ljust(3), ' | '.join(tt), rip, eg, (' AL TENTATIVO %d' % len(seq)) if (len(seq) > 1 and eg == 'CSV PRODOTTO') else ''))
     if len(seq) > 1:
         riprovate.append(fase)

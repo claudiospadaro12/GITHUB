@@ -45,6 +45,9 @@ M = [
  ("macchina", "if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){", "if($false){", ["macchina_VPS"]),
  ("guardia EA sui grafici", "if($conEA.Count -gt 0){ foreach($xE", "if($false){ foreach($xE", ["grafico_con_EA", "grafico_illeggibile"]),
  ("coerenza della tabella", "-or $MAXRIP -ne 1 -or", "-or", ["riga_incoerente_maxriprove"]),
+ # cancello indipendente 01/10/2026 (classe 1051): queste due restavano VERDI su 80/80
+ ("giornale contro RIPROVE: SOLO il conto delle morte", " -or $nK -ne $tK){", "){", ["CE4_morte_senza_causa_ma_riprove_dice_INIT"]),
+ ("RIPROVE: due tentativi senza il flag RIPROVATA", " -or ($gg.n -eq 2) -ne $gg.rip){", "){", ["CE10_riprove_senza_flag_RIPROVATA"]),
 ]
 riga = open(RIGA, encoding="ascii").read()
 tot = 0; prese = 0

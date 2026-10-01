@@ -121,7 +121,7 @@ resid = re.findall(r"__[A-Z0-9_]+__", t)
 assert not resid, "segnaposto rimasti: %s" % resid
 t.encode("ascii")
 assert "\n" not in t and "\r" not in t and "\t" not in t
-assert t.count("MARCATORE_RIGA_ROUND_DAXAP03_v1") == 1
+assert t.count("MARCATORE_RIGA_ROUND_DAXAP03_v2") == 1
 dest = os.path.join(REPO, "backtest_pipeline", "righe", "RIGA_ROUND_DAXAP03.txt")
 if "--dest" in sys.argv:
     dest = sys.argv[sys.argv.index("--dest") + 1]

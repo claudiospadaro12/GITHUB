@@ -41,7 +41,7 @@ T = [
    "GUARDIA EA: grafici salvati letti 2, con un EA attaccato o illeggibili 0", "asse InpPlaceMin [59/60/61] ok", "asse InpPlaceMin [0/5/10/15] ok",
    "FILE ATTESI TROVATI: 13 su 13   NELLO ZIP: 13 su 13", "ZIP PRONTO DA MANDARE", "OK    " + RPA, "OK    " + RPB,
    "DAXAP03a IS   InpPlaceHour  7  InpPlaceMin 59", "DAXAP03b OOS  InpPlaceHour  8  InpPlaceMin 15", "CATENA COMPLETA: 2 cartelle del driver su 2 job lanciati",
-   "motore = pin (SHA256, EA + include + walkforward_generico_RETRY + RIGA_ROUND_VPS_RETRY)", "NON ha svuotato Tester\\cache", "MARCATORE_RIGA_ROUND_DAXAP03_v1",
+   "motore = pin (SHA256, EA + include + walkforward_generico_RETRY + RIGA_ROUND_VPS_RETRY)", "NON ha svuotato Tester\\cache", "MARCATORE_RIGA_ROUND_DAXAP03_v2",
    "righe con magic diverso da 798103: 0", "righe con magic diverso da 798104: 0",
    "ROUND LANCIATI: 2 su 2   NON LANCIATI (tetto): 0   PARTITI (rc diverso da 1): 2 su 2   MOTORE DIVERSO DAL PIN in 0 job", "=== RIEPILOGO ===",
    "direttive, input, magic e InpPlaceHour: = riga (51 input, asse InpPlaceMin, nessuna @DEPOSITO)"],
@@ -157,6 +157,19 @@ T = [
  ("zero_grafici", {}, "", "zero", PC, "", "ok", {}, ["GUARDIA EA: ho letto ZERO grafici salvati", NOSTUB], FERMA),
  ("driver_mutato", {}, "", "ok", PC, "drv", "ok", {}, ["RIGA_ROUND_VPS_RETRY.ps1 scaricata con SHA256 DIVERSO", NOSTUB], FERMA),
  ("driver_originale_col_nome_RETRY", {}, "", "ok", PC, "orig", "ok", {}, ["scaricata SENZA il marcatore RETRY_v1", NOSTUB], FERMA),
+ # --- aggiunti dal cancello indipendente del 01/10/2026 (classe 1051): ogni componente del confronto giornale/RIPROVE e della coerenza del RIPROVE
+ # ha ora uno scenario in cui e' il SOLO a scattare (prima le mutazioni 'morte giornale contro RIPROVE' e 'flag RIPROVATA' restavano verdi su 80/80)
+ ("CE1_riprove_dichiara_riprova_che_il_giornale_non_ha", {A: {"legs": ["ko_ok", "ok"], "rp_fake_retry": "IS"}}, "", "ok", PC, "", "ok", {}, [ST("NV", "OK"), "NON TORNANO: giornale 2 intestazioni, 2 partite, 0 morte"], ["DAXAP03a OK"]),
+ ("CE2_riprova_OOS_gira_la_finestra_IS", {B: {"legs": ["ok", "ko_ok"], "retry_win_is": True}}, "", "ok", PC, "", "ok", {}, [ST("OK", "NV"), "FINESTRA GIRATA DIVERSA DALLA DICHIARATA"], ["DAXAP03b OK"]),
+ ("CE3_csv_di_un_altra_cella", {A: {"ax_vals": [0, 5, 10], "pin_over": {"InpPlaceHour": "8", "InpMagic": "798104"}}}, "", "ok", PC, "", "ok", {}, [ST("NV", "OK"), "DIVERSO dall atteso 59/60/61"], ["DAXAP03a OK"]),
+ ("CE3b_csv_altra_cella_asse_giusto", {A: {"pin_over": {"InpPlaceHour": "8"}}}, "", "ok", PC, "", "ok", {}, [ST("NV", "OK"), "InpPlaceHour=[8] atteso 7"], ["DAXAP03a OK"]),
+ ("CE4_morte_senza_causa_ma_riprove_dice_INIT", {A: {"legs": ["ko_ok", "ok"], "dead_nocause": "IS"}}, "", "ok", PC, "", "ok", {}, [ST("NV", "OK"), "NON TORNANO: giornale 3 intestazioni, 2 partite, 0 morte"], ["DAXAP03a OK"]),
+ ("CE8_una_salvata_una_morta_due_volte", {A: {"legs": ["ko_ok", "ko_ko"]}}, "", "ok", PC, "", "ok", {}, [ST("MISTO", "OK"), "GAMBE RIPROVATE DAL DRIVER: 2 (DAXAP03a IS,OOS)", "giornale: intestazioni 4 partite 1 morte 3"], ["DAXAP03a OK", "DAXAP03a NV"]),
+ ("CE10_riprove_senza_flag_RIPROVATA", {B: {"legs": ["ko_ok", "ok"], "rp_no_rip": "IS"}}, "", "ok", PC, "", "ok", {}, [ST("OK", "NV"), "file RIPROVE INCOERENTE"], ["DAXAP03b OK"]),
+ ("CE11_zip_senza_riepilogo", {}, "", "ok", PC, "", "ok", {"ZIP_DROP": "RIEPILOGO_ROUND_DAXAP03"}, [OK2, "NELLO ZIP: 12 su 13"], ["NELLO ZIP: 13 su 13"]),
+ ("CE12_due_job_entrambi_riprovati", {A: {"legs": ["ok", "ko_ok"]}, B: {"legs": ["ko_ok", "ok"]}}, "", "ok", PC, "", "ok", {}, [ST("OK_RIPROVATO", "OK_RIPROVATO"), "GAMBE RIPROVATE DAL DRIVER: 2 (DAXAP03a OOS, DAXAP03b IS)", "FILE ATTESI TROVATI: 13 su 13"], ["=NV", "GAMBE SENZA CSV"]),
+ # la stima dei tempi: console e RIEPILOGO dicono lo STESSO numero (classe 1050)
+ ("stima_tempi_console_uguale_riepilogo", {}, "", "ok", PC, "", "ok", {}, [OK2, "circa 2,5 minuti in piu per ogni gamba che muore e viene riprovata", "circa 2,5 in piu per gamba riprovata"], ["circa 1,5 in piu", "circa 80 s"]),
 ]
 
 def run(nome, sc, sed, ch, pc, mut, term, envx):
