@@ -259,3 +259,40 @@ Tre numeri insieme: **ALL** = media ALLINEATO, **B** = media CASUALE, **CON** = 
    EST fisso (riuso del test di `ema200_rimbalzo.py`).
 8. **Mutazione della manopola**: moltiplicatore 3,5 -> 2,5 cambia il numero di eventi di almeno il 20%.
 9. **Primo passaggio**: su un percorso costruito a mano, TP/SL/AMB/TO escono quelli attesi.
+
+---
+
+## 10. EMENDAMENTO PRIMA DEI DATI (01/10/2026 sera, dopo l'autotest su dati SINTETICI, prima di caricare un solo dato vero)
+
+Quello che segue cambia i criteri qui sopra. E' scritto **dopo** l'autotest sintetico e **prima** della prima
+corsa su dati veri (nessun file M1 vero e' stato aperto da questo strumento fino al push di questa sezione).
+
+1. **Controllo B: appaiato per sola ORA, non per (anno-mese, ora)** -- cioe' la definizione del mandato.
+   La mia aggiunta del mese era SBAGLIATA, ed e' misurato: su **6 random walk** (2.600 giorni ciascuno) il B
+   appaiato per (anno-mese, ora) esce **+0,011 / +0,034** (media +0,024 ATR H1, su tutti e due i lati, tutti i
+   semi), mentre la media su tutti i candidati e' **-0,008 / +0,009**. Causa: ogni mese pesa quanto i suoi eventi
+   ALLINEATO, e quel numero dipende dal percorso INTERO del mese, quindi anche dal **futuro** dell'istante
+   estratto (un mese con un rialzo nella seconda meta' ha piu' tempo "H4 su", piu' eventi long, e pesa di piu'
+   proprio sugli istanti prima del rialzo). E' un look-ahead nella **costruzione del controllo**, non nei dati.
+   L'evento ALLINEATO non ha questo difetto (somma di differenze di martingala a tempi d'arresto). Appaiato per
+   sola ora: **+0,005 / -0,004** sullo stesso random walk. Resta nell'autotest come contro-esempio che DEVE
+   accendersi (B(mese) - B(ora) > +0,01: misurato +0,020).
+   Conseguenza sul contro-esempio "trend persistente": resta coperto dal test A2 (deriva costante: B +0,121,
+   ALL +0,109, cella NULLO) e dalle righe per regime; **non** e' piu' coperto un trend che dura settimane e
+   cambia segno [limite dichiarato].
+2. **B' (stesso giorno) TOLTO dalla misura**: stesso difetto, piu' forte (il peso del giorno dipende dal giorno).
+3. **Aggiunto CASUALE_CON (descrittivo)**: istanti con H4 stabile OPPOSTO al segnale, appaiati per ora agli
+   eventi CONTRO, segnati nel verso del segnale. Da qui la lettura D2 a incrementi:
+   `(ALL - B) - (CON - B_con)` = il filtro H4 cambia l'INCREMENTO dell'inversione M3 sopra la sua base?
+   `ALL - CON` grezzo si riporta accanto. Nell'autotest A3 restano tutti e due i controlli (|ALL - CON| < 0,03
+   come congelato, e |incremento| < 0,03).
+4. **Test 6 (look-ahead) riscritto**: il mutante "barra H4 in formazione" sposta B di **solo +0,018** (long
+   +0,005 -> +0,021, short -0,004 -> +0,015), non > +0,03 come avevo scritto: il filtro di stabilita' della
+   dashboard (`bsH4 >= 3`) scarta proprio gli istanti in cui la barra in formazione si gira. **Quindi il test
+   del random walk (B entro +/-0,02) da solo NON basterebbe a escludere quel look-ahead.** La guardia vera
+   diventa **deterministica**: per ognuna delle 1.247.921 chiusure M3 sintetiche la barra H4 usata ha
+   `fine <= tE` ed e' l'ultima chiusa (15.600 casi esattamente sul bordo H4). Il mutante resta, misurato, con
+   soglia **> +0,008** (meta' dello spostamento misurato: soglia scelta DOPO averlo visto, su dati sintetici).
+5. **Test 9**: l'atteso scritto a mano nel mio test era sbagliato (lo short con stop a 2 punti tocca 102,1 PRIMA
+   del 97,9: e' SL, non TP); lo strumento era giusto. Nessun cambio ai criteri.
+6. Stato dell'autotest al momento di questo emendamento: **29/29**.
