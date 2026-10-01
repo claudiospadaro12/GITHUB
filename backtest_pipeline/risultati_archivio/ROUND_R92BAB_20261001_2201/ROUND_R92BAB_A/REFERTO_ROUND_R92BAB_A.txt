@@ -1,0 +1,44 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 1eafed563e50b0d66e4b6980ce6506ef35460e41
+data            : 2026-10-01 22:04:27   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_Bulge
+file prova      : R92BAB_A_cross22.txt   (4029 byte, dal pin)
+etichetta       : R92BAB_A
+simbolo         : GBPUSD
+periodo         : H1
+da quando       : 2026.03.02
+modello         : 1  (NON tick reali: screening, non verdetto)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Bulge\ABTG_Bulge_GBPUSD_IS_ohlc_R92BAB_A.csv
+  righe : 2
+    Pass 0    Profit -860.62      PF 0.87115    Equity DD % 13.6661    Trades 410
+    Pass 1    Profit -860.67      PF 0.87114    Equity DD % 13.6662    Trades 410
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Bulge\ABTG_Bulge_GBPUSD_OOS_ohlc_R92BAB_A.csv
+  righe : 2
+    Pass 0    Profit -1149.43     PF 0.81608    Equity DD % 22.7752    Trades 363
+    Pass 1    Profit -1149.43     PF 0.81608    Equity DD % 22.7752    Trades 363
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 1
+  - round girato a Modello 1 (non tick reali): screening, non verdetto
+
+ESITO: ROUND GIRATO CON RILIEVI (1)

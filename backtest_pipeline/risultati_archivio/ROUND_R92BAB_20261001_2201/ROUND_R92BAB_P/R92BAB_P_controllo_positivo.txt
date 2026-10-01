@@ -1,0 +1,103 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU_Pin9fca
+#  R92BAB_P -- CONTROLLO POSITIVO della riga diagnostica R92BAB: il file prova di 770101 (prove/RFWD_770101_DAX_RETEST_long.txt),
+#  che il 30/09/2026 alle 21:03 ha girato in questo tester (2 passate x 2 gambe) senza il guasto OnTesterInit.
+#  Serve a una cosa sola: se P non parte, il tester di questo PC e' guasto ADESSO e nessun verdetto su A/B/C/D vale.
+#  NON e' un confronto col forward FTMO e NON misura il merito. Tick reali (Modello 4), deposito 80000 (lo passa la riga).
+#  DIFFERENZE DA RFWD_770101_DAX_RETEST_long.txt, TUTTE (verificate da genera_prove.py): @DAQUANDO/@FINOA/@FRAZIONEIS (finestra tutta nel
+#  passato, cosi' il tester non la taglia a 'oggi') e il magic (asse tecnico 799501||799501||50||799551||Y: magic nuovi = nessuna passata ripescata
+#  dalla cache del tester). I 82 input della foto del campo sono identici.
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2026.08.03
+@FINOA      2026.09.01
+@FRAZIONEIS 0.5
+
+# --- input della foto del campo (ordine del campo), con le trasformazioni sopra ---
+InpUsaGuardian=false
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=2.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMaxSpread=0
+InpVerbose=true
+# (valori vuoti NON scritti, il driver li salta e il default compilato e' vuoto: InpNewsCurrencies)
+#
+# --- L'UNICO ASSE: magic tecnico a due celle (gemelle) ---
+InpMagic=799501||799501||50||799551||Y
+# ======================================================================
+
