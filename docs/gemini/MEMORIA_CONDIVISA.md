@@ -35,6 +35,9 @@ Cita il NOME dell'input o della funzione, NON il numero di riga: i numeri di rig
 Il contenuto tecnico era utile: la manopola InpSLatr e' viva e mai messa ad asse (candidato A4).
 
 ## 5. Storico degli scambi
+- 01/10: pacchetto sul TRIAL FTMO giorno 1 (`docs/PER_GEMINI_TRIAL_GIORNO1_2026-10-01.md`): sizing DAX 2,00% su flotta correlata, cap di rischio aperto che non somma
+  l'ingresso nuovo (4,62% contro 4,00%), ingresso a un minuto dall'apertura cash, frontiera di costo del Bulge (payoff 1:6). Chiave $GEMINI_API_KEY ASSENTE nell'ambiente
+  della routine: pacchetto pronto in repo, risposta NON ricevuta.
 - 29/09 notte: CACCIA CONGIUNTA avviata: dossier di 23 motori fuori gioco con i parametri (`docs/PER_GEMINI_EA_FUORI_GIOCO_2026-09-29.md`);
   risposta 1 (`RISPOSTA_GEMINI_2026-09-28_2226`: A4 InpSLatr, A7 offset retest [griglia: da riformulare], A1 filtro ATR, A11 timestop;
   chiede i sorgenti Londra_ORB e MaxMinNotte) e risposta 2 sui sorgenti; entrambe da verificare al cancello il 29/09 mattina.
@@ -57,3 +60,8 @@ Il contenuto tecnico era utile: la manopola InpSLatr e' viva e mai messa ad asse
 - **Ultimi esiti (29/09)**: R270 letto (long: il vivo e' il centro, ClosePct=0 non separabile; short: bocciato), C2 oro EMA200 H4: NO per rischio,
   R255 short Dow: 770212 bocciata (stH8/stH12 indizi), misure a costo zero DAX: NON SEPARABILE / NON MISURABILE. Risposta FTMO: conto Standard,
   hedging nello stesso conto ok, fra conti no; da funded serve filtro news 2+2 min e chiusura weekend.
+- **Aggiornamento 01/10**: la challenge FTMO 2-Step 80k e' CHIUSA (Max Loss violato il 30/09: equity 71.968,19 contro linea 72.000; flotta 11 posizioni, 5 stop pieni, PF 0,31;
+  `report/FTMO_CHALLENGE_CHIUSURA_2026-09-30.md`). RFWD: forward e tester BCM fanno le stesse operazioni (L1 8/11, L1+L2 10/11, `report/LETTURA_RFWD_2026-09-30.md`);
+  difetto trovato: il tester si ferma al 30/09 00:00 escluso (causa NON DIMOSTRATA). Ora gira una Free Trial FTMO 160k: giorno 1 netto -6.245,68, DD di bilancio 4,27%,
+  3 stop in un giorno, rischio aperto simultaneo 4,62% contro cap 4,00% (`report/TRIAL_GIORNO1_ANALISI_2026-10-01.md`). Il vincolo «i round non girano sul VPS» decade con la chiusura.
+  Gemini non ha ancora risposto sul trial: vedi §5.
