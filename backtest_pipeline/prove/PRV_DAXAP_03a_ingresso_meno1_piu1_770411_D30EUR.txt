@@ -19,6 +19,10 @@
 #       shift 1: 07:30 -> 07:45) e la barra H1 chiusa del filtro S&P
 #       (CorrBias r.396-406, SPXUSD H1 shift 1: 06:00 -> 07:00). Stop,
 #       lotto, TP e perfino il permesso di shortare possono cambiare;
+#       [RIPASSATA 01/10] il salto H1 e' [PROBABILE, NON VERIFICATO]: la
+#       barra SPXUSD delle 08:00 nasce col PRIMO TICK SPXUSD dell'ora; se
+#       il primo tick D30EUR delle 08:00 lo precede, la cella 60 legge
+#       ancora la 06:00 come la 59. Il salto ATR (stesso simbolo) e' certo;
 #   (b) le giornate NON sono annidate: un giorno rotto fra le 05:00 e le
 #       07:58 e tornato sopra il livello alle 08:00 e' SALTATO dalla
 #       cella 59 (sell stop sopra il bid = rifiutato) e GIOCATO dalla 60;
@@ -66,8 +70,12 @@
 #          OPENCONFIRM; R27 sul DAX: bocciato, ma su un altro motore).
 #   r.412  AtrVal() = ATR(14) M15 della barra CHIUSA PRECEDENTE (shift 1):
 #          piazzando piu' tardi la base dell'ATR entra poco (+15 min =
-#          una barra M15 d'apertura nella media di 14: ~+7%). Trascurabile,
-#          ma dichiarato: lo stop non e' piu' esattamente quello dell'ancora.
+#          una barra M15 d'apertura nella media di 14: ~+7%). [RIPASSATA
+#          01/10: ~+7% e' una STIMA, non misurata -- la barra d'apertura
+#          pesa 1/14 ma il suo TR puo' valere piu' ATR; NON "trascurabile".
+#          In QUESTO file il salto e' un altro: 07:30 -> 07:45, due barre
+#          di pre-mercato, vedi (a) in testa.] Lo stop non e' piu'
+#          esattamente quello dell'ancora.
 #  Il cutoff resta PINNATO a 08:30 (r.172): ritardare accorcia anche la
 #  FINESTRA di fill (30 -> 15 minuti a +15). E' una seconda confusione,
 #  dichiarata, che pesa nello stesso verso (meno trade).
@@ -112,8 +120,10 @@
 #  STESSI Trades/Profit/PF/DD al centesimo in tutte e due le gambe. Se non
 #  coincidono, uno dei due file non ha applicato il pin: round NULLO.
 #  S1 (la manopola deve mordere) [RISCRITTO DAL CANCELLO 01/10]: il pin
-#  e' arrivato se il CSV _OOS ha 3 righe con InpPlaceMin 59/60/61 (P0 del
-#  driver) E Profit(60) != Profit(59) al centesimo in almeno una gamba
+#  e' arrivato se i CSV _IS e _OOS hanno 3 righe ciascuno con InpPlaceMin
+#  59/60/61 (P0 = pin letto dalla colonna del CSV, classe 780; anche la
+#  colonna InpPlaceHour = 7 su tutte le righe) E Profit(60) != Profit(59)
+#  al centesimo in almeno una gamba
 #  (alle 08:00 cambia la barra dell'ATR: lo stop cambia su OGNI giornata
 #  giocata, quindi tre celle identiche al centesimo = pin NON arrivato =
 #  NULLO). La MONOTONIA Trades(61) <= Trades(60) <= Trades(59) NON e' un
@@ -141,10 +151,18 @@
 #  il piazzamento di UN minuto attraverso la cash muove un quarto del
 #  campione e la mia attesa e' falsa; si legge cosi': la sedia e'
 #  SENSIBILE al minuto di piazzamento (fill pre-apertura o barra nuova
-#  dell'ATR/del filtro, il file non li separa). Se le tre celle hanno
-#  Trades identici ma Profit diversi, il minuto non sposta il CAMPIONE
-#  ma solo la geometria (stop/lotto): il caso del 01/10 resta un evento
-#  che questo banco non distingue.
+#  dell'ATR/del filtro, il file non li separa).
+#  ZONA GRIGIA [RIPASSATA 01/10, classe 655]: fra le due bande (4 deal
+#  nell'IS, 4-5 nell'OOS) nessun ramo e' scritto: si RIPORTA il numero,
+#  senza lettura ne' di "pesa poco" ne' di "sensibile".
+#  [RIPASSATA 01/10, classi 357/1018] Trades identici fra le celle NON
+#  dice che il CAMPIONE e' lo stesso: un giorno perso dalla 60 e uno
+#  guadagnato possono compensarsi in deal, e la geometria nuova cambia
+#  i deal per posizione (stop -> TP1 = 1 -> 2 deal). Con Trades identici
+#  e Profit diversi si legge solo "il SALDO in deal non si muove"; se il
+#  campione sia lo stesso resta [NON MISURABILE] con questo file (per-
+#  trade di una sola passata, classe 455): il caso del 01/10 resta un
+#  evento che questo banco non distingue.
 #  OROLOGIO PER CELLA [AGGIUNTO DAL CANCELLO 01/10]: "-1/+0/+1 dalla
 #  cash" e' vero SOLO nei giorni d'ESTATE (BCM = IT-1). Nei giorni
 #  d'INVERNO (2024.10.27-2025.03.30 e 2025.10.26-2026.03.29, BCM = IT)

@@ -62,8 +62,11 @@
 #          OPENCONFIRM; R27 sul DAX: bocciato, ma su un altro motore).
 #   r.412  AtrVal() = ATR(14) M15 della barra CHIUSA PRECEDENTE (shift 1):
 #          piazzando piu' tardi la base dell'ATR entra poco (+15 min =
-#          una barra M15 d'apertura nella media di 14: ~+7%). Trascurabile,
-#          ma dichiarato: lo stop non e' piu' esattamente quello dell'ancora.
+#          una barra M15 d'apertura nella media di 14: ~+7%). [RIPASSATA
+#          01/10: ~+7% e' una STIMA, non misurata -- la barra d'apertura
+#          pesa 1/14 ma il suo TR puo' valere piu' ATR; NON "trascurabile":
+#          e' il motivo per cui la cella 15 esce dal confronto pulito.]
+#          Lo stop non e' piu' esattamente quello dell'ancora.
 #  Il cutoff resta PINNATO a 08:30 (r.172): ritardare accorcia anche la
 #  FINESTRA di fill (30 -> 15 minuti a +15). E' una seconda confusione,
 #  dichiarata, che pesa nello stesso verso (meno trade).
@@ -101,17 +104,28 @@
 #  G2 incrociato (identiche al centesimo) e il ponte con l'ancora (il
 #  confronto con la cella viva 07:59 si fa su 03a, non qui).
 #  S1 (la manopola deve mordere) [RISCRITTO DAL CANCELLO 01/10]: il pin
-#  e' arrivato se il CSV _OOS ha 4 righe con InpPlaceMin 0/5/10/15 (P0
-#  del driver) E Profit(15) != Profit(0) al centesimo in almeno una gamba
+#  e' arrivato se i CSV _IS e _OOS hanno 4 righe ciascuno con InpPlaceMin
+#  0/5/10/15 (P0 = pin letto dalla colonna del CSV, classe 780) e colonna
+#  InpPlaceHour = 8 su TUTTE le righe (se vale 7 il pin dell'ora e' perso:
+#  le celle sarebbero 07:00-07:15: NULLO, e lo prende anche il G2)
+#  E Profit(15) != Profit(0) al centesimo in almeno una gamba
 #  (barra ATR diversa = stop diverso su ogni giornata giocata). Quattro
 #  celle identiche al centesimo = pin NON arrivato = NULLO, MAI "nessuna
 #  rottura precoce". Il confronto PULITO del ritardo e' fra le celle
 #  0/5/10: condividono la stessa barra M15 chiusa (07:45) per l'ATR e la
 #  stessa barra H1 chiusa (07:00) di SPXUSD per il filtro S&P; fra loro
 #  cambiano SOLO il minuto di piazzamento e la finestra di fill (cutoff
-#  08:30 fisso). Se 0, 5 e 10 sono identiche al centesimo (e 15 no): "nei
-#  primi 10 minuti nessuna rottura gia' avvenuta ha cambiato un giorno"
-#  -> il caso del 01/10 non ha precedenti in 21 mesi DI QUESTO BANCO.
+#  08:30 fisso). [RIPASSATA 01/10] Sull'ATR e' certo (stesso simbolo);
+#  sul filtro S&P e' [PROBABILE, NON VERIFICATO] per la cella 0: la barra
+#  SPXUSD delle 08:00 nasce col primo tick SPXUSD dell'ora, e se il primo
+#  tick D30EUR delle 08:00 lo precede la cella 0 legge ancora la H1 06:00.
+#  (La 15 legge M15 08:00 e H1 07:00.) Se 0, 5 e 10 sono identiche al
+#  centesimo (e 15 no): "nessuna rottura nei primi 10 minuti dopo le
+#  08:00 BCM ha cambiato un giorno" (d'estate = primi 10 minuti dopo la
+#  cash; d'inverno = pre-mercato, vedi OROLOGIO). [RIPASSATA 01/10] NON
+#  si legge "il caso del 01/10 non ha precedenti": quello e' un fill a
+#  -1 minuto dalla cash, e il minuto prima della cash e' materia di
+#  PRV_DAXAP_03a (celle 59/60), non di questo file.
 #  S1m: Trades non cresce col ritardo (0 >= 5 >= 10 >= 15) e' l'attesa
 #  nel verso, NON un cancello: le giornate non sono annidate (un giorno
 #  sotto il livello alle 08:00 e tornato sopra alle 08:05 e' saltato
@@ -121,20 +135,34 @@
 #  avvengono nei primi 5/10/15 minuti dopo la cash? Confonde: arma-dopo =
 #  filtro "salta se gia' rotto" + finestra di fill piu' corta (cutoff 08:30
 #  fisso) + base ATR leggermente diversa (vedi sopra).
-#  ATTESA DICHIARATA PRIMA DEI NUMERI: posizioni OOS non crescenti col
-#  ritardo; a +15 fra 40% e 100% di quelle a +0 (la forbice e' larga:
-#  mancano le ore d'ingresso). Il PF e' NON DIREZIONATO: due ipotesi che
-#  producono numeri diversi.
+#  ATTESA DICHIARATA PRIMA DEI NUMERI: [RIPASSATA 01/10: in DEAL, non in
+#  posizioni -- le posizioni per cella NON si contano, il per-trade
+#  sopravvive per una sola passata, classe 455; e sul confronto PULITO
+#  +10 contro +0, non +15] Trades OOS non crescente col ritardo; Trades
+#  OOS(+10) fra 0,40 e 1,00 x Trades OOS(+0) (la forbice e' larga:
+#  mancano le ore d'ingresso). Il bordo 1,00 e' proprio il numero
+#  dell'ipotesi NULLA (ritardo inerte): la banda NON la separa (classe
+#  178); la separa la lettura d'identita' 0/5/10 qui sopra.
+#  Il PF e' NON DIREZIONATO: due ipotesi che producono numeri diversi.
+#  [RIPASSATA 01/10, classe 1013] Le due ipotesi si leggono su +10 contro
+#  +0, NON su +15: alla +15 lo stop si allarga con la barra d'apertura
+#  nell'ATR, e uno stop piu' largo che sopravvive alla spazzata produce
+#  da solo la firma di H-FILTRO (DD giu', PF su) senza saltare nessun
+#  giorno. La +15 si RIPORTA, non si attribuisce.
 #  H-FILTRO: ritardare toglie le rotture-spazzata (stop presto): Trades
-#     scende E il DD scende E il PF sale. Numero: DD OOS(+15) <= DD OOS(+0)
-#     x 0,90 e PF OOS(+15) >= PF OOS(+0).
+#     scende E il DD scende E il PF sale. Numero: DD OOS(+10) <= DD OOS(+0)
+#     x 0,90 e PF OOS(+10) >= PF OOS(+0).
 #  H-TAGLIO: ritardare toglie le rotture precoci, che sono il motore
 #     dell'edge. Indizio a scala di ORE, non di minuti, su un motore PADRE
 #     e un'altra geometria (R244a: i fill dopo le 12:00 BCM hanno PF
 #     marginale 0,588 su 48 deal; i fill fino alle 12:00 hanno cumulato
 #     1,409 e il blocco 9->12 marginale 1,212):
-#     Trades scende e il PF SCENDE. Numero: PF OOS(+15) <= PF OOS(+0) x
+#     Trades scende e il PF SCENDE. Numero: PF OOS(+10) <= PF OOS(+0) x
 #     0,85. Il passaggio dalle ORE ai MINUTI e' un salto non misurato.
+#  ZONA GRIGIA [RIPASSATA 01/10, classe 655]: PF OOS(+10) fra 0,85 e
+#     1,00 x PF OOS(+0), oppure PF su con DD non sceso del 10%: NEUTRO,
+#     nessuna delle due, si riporta. Se 0/5/10 sono identiche le due
+#     ipotesi non si pongono (nessun giorno cambiato).
 #  Con ~14 posizioni OOS nessuna delle due e' confermabile: l'esito
 #  atteso e' "NON MISURABILE SUL MERITO, DIREZIONE DEL CONTEGGIO E DD
 #  LETTI". Il valore del file e' dire se la CODA dei fill precoci esiste.
