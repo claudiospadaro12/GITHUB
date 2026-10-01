@@ -1,0 +1,76 @@
+; =====================================================================
+;  PRESET DI BANCO -- ABTG_EMA200_Multi_BANCO (01/10/2026)
+;  >>> DEMO/TESTER, NON E' UNA SEDIA, NON HA TAGLIA APPROVATA. <<<
+;  Solo Strategy Tester. L'EA rifiuta da solo il conto REALE e, fuori
+;  dal tester, parte solo su DEMO con InpConsentiDemo=true.
+;
+;  DA DOVE VENGONO I VALORI:
+;   - geometria (InpOrder1Atr=0.2, InpOrder2Atr=0.3, SL 1 ATR, TP 2R,
+;     fascia 0.3-1.5 ATR, bias EMA14, due lati): quella della sedia
+;     viva 771531 (mql5/Presets/ABTG_EMA200_U30USD_H1_771531_VIVA.set),
+;     cosi' il banco parte dalla stessa cella. NON e' una cella validata
+;     sugli altri simboli: su D30EUR/NASUSD/SPXUSD/XAUUSD e' da misurare.
+;   - dimensionamento: DEFAULT PRUDENTI, NON firmati. InpRiskPercent 0.5
+;     per setup (la sedia viva e' a 0.65); lotti fissi 0 = lotto MINIMO
+;     del simbolo. I valori veri dei lotti li sceglie Claudio.
+;   - tetti: 1.0% per setup, 3.0% di rischio aperto totale dell'EA
+;     (sotto il C1 firmato del 3.25%). Il totale SOMMA l'ingresso nuovo.
+;  MAGIC: base 785100 -> 785100..785199 (verificato libero il 01/10).
+;  Simboli: nomi BCM. Su FTMO: GER40.cash US30.cash US100.cash US500.cash XAUUSD.
+;  Grafico consigliato nel tester: XAUUSD (orario piu' largo).
+; =====================================================================
+InpUsaGuardian=true
+InpConsentiDemo=false
+InpSymbols=D30EUR;U30USD;NASUSD;SPXUSD;XAUUSD
+InpTFs=H1,H4
+InpNoOverlapTF=true
+InpTimerSec=30
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpLotMode=0
+InpRiskPercent=0.5
+InpLotOrder1=0.0
+InpLotOrder2=0.0
+InpMaxRiskPctPerSetup=1.0
+InpMaxOpenRiskPctTotale=3.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=EMA200M
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMagicBase=785100
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+InpLogCsvOrdini=true
+InpCsvLivello=2
