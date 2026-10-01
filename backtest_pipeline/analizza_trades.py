@@ -419,6 +419,35 @@ def main():
     # e la "frazione del giorno" per loro non vogliono dire niente.
     ereditate = [r for r in oggi if r["_ot"].strftime("%Y-%m-%d") != giorno]
 
+    # ---------- IL BUCO DELLE 22:45 (misurato il 01/10/2026) ----------
+    #
+    # `pubblica_trades.ps1` gira alle 22:45 (ora VPS) e la pagella alle 23:00:
+    # una posizione che chiude fra le 22:45 e le 23:59 NON e' nel CSV quando
+    # la sua pagella viene scritta. Arriva nel CSV del giorno DOPO, portando
+    # la data di chiusura del giorno PRIMA -- e la pagella del giorno dopo si
+    # aggancia alla PROPRIA data, quindi non la vede nemmeno lei.
+    # 🔴 Quelle righe cadono in un buco che NESSUNA pagella copre.
+    #
+    # Misurato su tutto l'archivio del piccolo il 01/10: **28 operazioni su
+    # 1.365 (2,1%), su 16 giornate, netto -262,41**; la piu' grossa -147,78
+    # (oro manuale, 28/06 23:40). E il caso che l'ha fatto scoprire: il 30/09
+    # una nona posizione del Bulge ha chiuso alle **22:54:20**, nove minuti
+    # dopo la pubblicazione, e la pagella del 30/09 ha contato 8 operazioni
+    # invece di 9 (netto del Bulge +0,14 invece di -5,78).
+    #
+    # Qui non si inventa niente e non si tocca il totale del giorno: si
+    # AVVISA, elencando le righe del giorno precedente che hanno chiuso dopo
+    # le 22:45, perche' sono esattamente quelle che la loro pagella non
+    # poteva avere.
+    precedenti = sorted({r["_ct"].strftime("%Y-%m-%d") for r in righe
+                         if r["_ct"].strftime("%Y-%m-%d") < giorno})
+    in_ritardo = []
+    if precedenti:
+        ultimo = precedenti[-1]
+        in_ritardo = [r for r in righe
+                      if r["_ct"].strftime("%Y-%m-%d") == ultimo
+                      and r["_ct"].strftime("%H:%M:%S") >= "22:45:00"]
+
     out = ["# 📅 Giornata %s — pagella automatica" % giorno, "",
            "_Generato da `analizza_trades.py` sul CSV del TradeExporter. "
            "Posizioni **chiuse** in giornata._", ""]
@@ -575,6 +604,30 @@ def main():
             "**fermo dal 23/09 19:35** (il **conto**, loggato anche sul PC di "
             "backtest, resta [NON MISURATO]) — vedi "
             "`report/giornata_2026-09-25.md` §1.", ""]
+
+    if in_ritardo:
+        netto_rit = sum(num(r, "profit") + num(r, "swap") + num(r, "commission")
+                        for r in in_ritardo)
+        out += ["> 🔴 **IL BUCO DELLE 22:45: %d posizion%s del %s %s chius%s DOPO la "
+                "pubblicazione**, quindi la pagella di quel giorno **non poteva "
+                "averl%s** (`pubblica_trades.ps1` gira alle 22:45, la pagella alle "
+                "23:00). Netto non contato li': **%+.2f**. %s"
+                % (len(in_ritardo), "i" if len(in_ritardo) > 1 else "e",
+                   in_ritardo[0]["_ct"].strftime("%d/%m"),
+                   "si sono" if len(in_ritardo) > 1 else "si e'",
+                   "e" if len(in_ritardo) > 1 else "a",
+                   "e" if len(in_ritardo) > 1 else "a",
+                   netto_rit,
+                   " · ".join("`%s` %s %+.2f (%s)" % (
+                       r.get("strategy") or "manuale", r.get("symbol"),
+                       num(r, "profit") + num(r, "swap") + num(r, "commission"),
+                       r["_ct"].strftime("%H:%M:%S")) for r in in_ritardo)),
+                "",
+                "> 👉 Il totale di **oggi** qui sotto **non le include** (la loro data "
+                "di chiusura e' di ieri) ed e' giusto cosi': servono per **correggere "
+                "la pagella di ieri**, non per gonfiare questa. Misurato il 01/10 su "
+                "tutto l'archivio: **28 operazioni su 1.365 (2,1%), 16 giornate, "
+                "netto −262,41**.", ""]
 
     if ereditate:
         out += ["> ⚠️ %d posizion%s apert%s in giorni precedenti e chius%s oggi "
