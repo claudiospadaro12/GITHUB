@@ -1,0 +1,38 @@
+==============================================================================
+ EMA200_D1_SU_M5_v1 -- D30EUR -- feed HistData GRXEUR (FutureSharks) -- giorno NYCLOSE
+ criteri: report/EMA200_D1_SU_M5_CRITERI_2026-10-02.md (congelati)
+==============================================================================
+ barre M1: 1,718,805   da 2010-11-15 07:00:00 a 2018-12-28 21:13:00 (UTC)
+ G-OROLOGIO: picco inverno 07:00 (n 274508)  estate 06:00 (n 438753)  ancore 07:00,08:00,13:30,14:30 -> PASSA
+ regimi per anno: 2010 LATERALE +3.3%  2011 ORSO -15.8%  2012 TORO +29.3%  2013 TORO +26.1%  2014 LATERALE +1.7%  2015 LATERALE +9.2%  2016 LATERALE +9.1%  2017 TORO +12.6%  2018 ORSO -18.2%
+   passata vera: 2058 giorni, 0 s
+   surrogati 20/200 (7 s)
+   surrogati 40/200 (14 s)
+   surrogati 60/200 (21 s)
+   surrogati 80/200 (27 s)
+   surrogati 100/200 (34 s)
+   surrogati 120/200 (42 s)
+   surrogati 140/200 (48 s)
+   surrogati 160/200 (55 s)
+   surrogati 180/200 (62 s)
+   surrogati 200/200 (69 s)
+ giorni D1: 2058; eventi dal giorno 600 = 2013-03-21 (riscaldamento EMA D1); anni utili 5.77
+   FERMA     M5  eventi H1  129 (22.3/anno) in  85 giorni; tocchi in gap d'apertura 15; linea a <=0,25 ATR da un tondo 7; sfondamenti primaria 72, nel minuto del tocco 22; eventi H2 113
+   FERMA     M15 eventi H1   80 (13.9/anno) in  77 giorni; tocchi in gap d'apertura 12; linea a <=0,25 ATR da un tondo 10; sfondamenti primaria 49, nel minuto del tocco 12; eventi H2 73
+   FERMA     H1  eventi H1   48 (8.3/anno) in  48 giorni; tocchi in gap d'apertura 6; linea a <=0,25 ATR da un tondo 18; sfondamenti primaria 30, nel minuto del tocco 3; eventi H2 40
+ ATR mediano (dal giorno 600): M5 9.2679  M15 17.0000  H1 35.4286; filtro feed: evento scartato se ATR < 0.1 x mediana
+ COSTO (costo pieno 1.7676, fonte sonda_supertrend_segnali.py; NON entra nella P): M5 1 ATR = 5.2x  M15 1 ATR = 9.6x  H1 1 ATR = 20.0x
+
+ PRIMARIA H1 (X=Y=1) e H2, sottoinsieme TUTTO:
+  H1 FERMA     M5  long  n   71 ( 57 g)  P 0.423  IC [0.309;0.538]  N0 0.500  surr 0.442 [0.338;0.538]  eff -0.020  NON ANCORA MISURATO
+  H2 FERMA     M5  giu   n   60 ( 53 g)  P 0.350  IC [0.241;0.476]  N0 0.338  surr 0.356 [0.250;0.483]  eff -0.006  NON ANCORA MISURATO
+  H1 FERMA     M5  short n   56 ( 44 g)  P 0.446  IC [0.324;0.576]  N0 0.500  surr 0.424 [0.296;0.544]  eff +0.022  NON ANCORA MISURATO
+  H2 FERMA     M5  su    n   53 ( 44 g)  P 0.396  IC [0.254;0.532]  N0 0.367  surr 0.356 [0.243;0.471]  eff +0.040  NON ANCORA MISURATO
+  H1 FERMA     M15 long  n   50 ( 49 g)  P 0.360  IC [0.231;0.500]  N0 0.500  surr 0.442 [0.321;0.563]  eff -0.082  NON ANCORA MISURATO
+  H2 FERMA     M15 giu   n   43 ( 42 g)  P 0.326  IC [0.190;0.475]  N0 0.362  surr 0.341 [0.185;0.491]  eff -0.016  NON ANCORA MISURATO
+  H1 FERMA     M15 short n   30 ( 30 g)  P 0.433  IC [0.267;0.633]  N0 0.500  surr 0.413 [0.277;0.572]  eff +0.020  NON ANCORA MISURATO
+  H2 FERMA     M15 su    n   30 ( 29 g)  P 0.267  IC [0.133;0.444]  N0 0.339  surr 0.346 [0.200;0.478]  eff -0.079  NON ANCORA MISURATO
+  H1 FERMA     H1  long  n   30 ( 30 g)  P 0.400  IC [0.233;0.577]  N0 0.500  surr 0.440 [0.250;0.641]  eff -0.040  NON ANCORA MISURATO
+  H2 FERMA     H1  giu   n   23 ( 23 g)  P 0.304  IC [0.130;0.509]  N0 0.303  surr 0.364 [0.166;0.560]  eff -0.059  NON ANCORA MISURATO
+  H1 FERMA     H1  short n   18 ( 18 g)  P 0.333  IC [0.111;0.563]  N0 0.500  surr 0.444 [0.263;0.616]  eff -0.111  NON ANCORA MISURATO
+  H2 FERMA     H1  su    n   17 ( 17 g)  P 0.235  IC [0.059;0.473]  N0 0.369  surr 0.353 [0.158;0.566]  eff -0.118  NON ANCORA MISURATO

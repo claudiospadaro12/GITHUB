@@ -1,0 +1,50 @@
+======================================================================
+ AUTOTEST EMA200_D1_SU_M5_v1
+======================================================================
+ [PASS] T12 sabato e domenica sera -> lunedi' -- etichette [16594, 16594, 16594]
+ [PASS] T12b giorno NYCLOSE cambia alle 17:00 NY (21:00 UTC d'estate) -- [16594, 16595]
+   [INFO] RW M5 long: primaria P 0.498 n 560 (396 giorni)  collega 0.779  surr 0.489 [0.455;0.536] -> NULLO
+   [INFO] RW M5 short: primaria P 0.484 n 570 (383 giorni)  collega 0.782  surr 0.508 [0.462;0.536] -> NULLO
+   [INFO] RW M15 long: primaria P 0.494 n 338 (308 giorni)  collega 0.775  surr 0.493 [0.447;0.550] -> NULLO
+   [INFO] RW M15 short: primaria P 0.506 n 318 (282 giorni)  collega 0.805  surr 0.497 [0.467;0.541] -> NULLO
+ [PASS] T1 RW M5 n primaria (due lati) >= 1000 -- n=1130
+ [PASS] T1 RW M5 long primaria ~0,500 (+/-0,04) -- P=0.498 n=560
+ [PASS] T1 RW M5 short primaria ~0,500 (+/-0,04) -- P=0.484 n=570
+ [PASS] T2 RW M5 long niente falso positivo contro N1 giorni -- P 0.498 n 560 surr 0.489 [0.455;0.536] NULLO
+ [PASS] T2 RW M5 short niente falso positivo contro N1 giorni -- P 0.484 n 570 surr 0.508 [0.462;0.536] NULLO
+ [PASS] T2 RW H2 M5 giu niente falso positivo -- P_RT 0.465 null 0.449 n 503 NULLO
+ [PASS] T2 RW H2 M5 su niente falso positivo -- P_RT 0.452 null 0.453 n 502 NULLO
+ [PASS] T2 RW M15 long niente falso positivo contro N1 giorni -- P 0.494 n 338 surr 0.493 [0.447;0.550] NULLO
+ [PASS] T2 RW M15 short niente falso positivo contro N1 giorni -- P 0.506 n 318 surr 0.497 [0.467;0.541] NULLO
+ [PASS] T2 RW H2 M15 giu niente falso positivo -- P_RT 0.488 null 0.467 n 293 NULLO
+ [PASS] T2 RW H2 M15 su niente falso positivo -- P_RT 0.442 null 0.466 n 285 NULLO
+ [PASS] T2 RW H1 long niente falso positivo contro N1 giorni -- P 0.523 n 176 surr 0.503 [0.427;0.560] ZONA GRIGIA
+ [PASS] T2 RW H1 short niente falso positivo contro N1 giorni -- P 0.508 n 132 surr 0.500 [0.442;0.576] NON ANCORA MISURATO
+ [PASS] T2 RW H2 H1 giu niente falso positivo -- P_RT 0.471 null 0.488 n 153 ZONA GRIGIA
+ [PASS] T2 RW H2 H1 su niente falso positivo -- P_RT 0.460 null 0.473 n 124 NON ANCORA MISURATO
+ [PASS] T6 FERMA~VIVA M5: eventi comuni fra 85% e 100% esclusi (vicine ma non identiche) -- comuni 0.946, P long 0.498 vs 0.494 (dP senza soglia)
+ [PASS] T6 FERMA~VIVA M15: eventi comuni fra 85% e 100% esclusi (vicine ma non identiche) -- comuni 0.945, P long 0.494 vs 0.494 (dP senza soglia)
+ [PASS] T6 FERMA~VIVA H1: eventi comuni fra 85% e 100% esclusi (vicine ma non identiche) -- comuni 0.953, P long 0.523 vs 0.534 (dP senza soglia)
+   (145 s)
+ [PASS] T3 PIANTATO M5 long: effetto >= +0,10 e EFFETTO contro N1 giorni -- P 0.627 n 561 surr 0.503 [0.469;0.537] EFFETTO
+   [INFO] piantato sulla 200, letto con la EMA100 D1 (placebo) long: P 0.495 n 836 -> NULLO
+ [PASS] T3 PIANTATO M5 short: effetto >= +0,10 e EFFETTO contro N1 giorni -- P 0.656 n 573 surr 0.495 [0.446;0.542] EFFETTO
+   [INFO] piantato sulla 200, letto con la EMA100 D1 (placebo) short: P 0.504 n 819 -> NULLO
+   (232 s)
+ [PASS] T5 TREND+GAP M5 long: niente EFFETTO/CONTRARIO contro N1 giorni -- P 0.456 (N0 0,500, scarto -0.044) n 283 surr 0.479 [0.427;0.529] ZONA GRIGIA
+ [PASS] T5 TREND+GAP M5 short: niente EFFETTO/CONTRARIO contro N1 giorni -- P 0.425 (N0 0,500, scarto -0.075) n 261 surr 0.469 [0.415;0.527] ZONA GRIGIA
+ [PASS] T5 TREND+GAP M15 long: niente EFFETTO/CONTRARIO contro N1 giorni -- P 0.455 (N0 0,500, scarto -0.045) n 178 surr 0.449 [0.383;0.515] ZONA GRIGIA
+ [PASS] T5 TREND+GAP M15 short: niente EFFETTO/CONTRARIO contro N1 giorni -- P 0.406 (N0 0,500, scarto -0.094) n 175 surr 0.451 [0.380;0.506] ZONA GRIGIA
+   [INFO] TREND+GAP M5: tocchi in gap d'apertura 12 su 544
+   (300 s)
+ [PASS] T7 FERMA: cambiare il giorno i non tocca la linea dei giorni <= i -- giorno 700
+ [PASS] T7 FERMA: la linea del giorno i+1 invece cambia (lo strumento non e' cieco) -- 
+ [PASS] T7 VIVA: la linea di contatto della barra k non dipende dalla barra k -- k=201610
+ [PASS] T8 OROLOGIO: feed spostato di 1 h cambia gli eventi FERMA M5 -- eventi 1130 -> 1135
+ [PASS] T9 H2 a salti == H2 a ciclo di ema200_rimbalzo -- eventi 402 vs 402
+ [PASS] T10 H1 == ema200_rimbalzo (stessi esiti su tutte le 6 celle) -- eventi 435 vs 435
+ [PASS] T11 surrogato a giorni: escursione di ogni giorno conservata -- giorni 7000
+ [PASS] T11b surrogato: minuto del giorno conservato -- 
+ [PASS] T13 MUTAZIONE X 1,0 -> 0,25 sposta P di > 0,15 -- 0.498 -> 0.779
+ [PASS] T14 FEED PIATTO: nessun evento con ATR sotto il filtro -- eventi 27, ATR min 2.965, soglia 0.355
+AUTOTEST: 36/36  (310 s)

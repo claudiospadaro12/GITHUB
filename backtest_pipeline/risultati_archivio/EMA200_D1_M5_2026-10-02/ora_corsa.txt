@@ -1,0 +1,7 @@
+strumento: ultimo commit e2655661, sha256 b8a75d35512128fe, diff dal commit: nessuno; HEAD 71b936c3
+autotest inizio: Thu Oct  1 22:50:29 UTC 2026
+autotest fine: Thu Oct  1 22:55:41 UTC 2026 codice 0
+primo caricamento dati veri (questa corsa): Thu Oct  1 22:55:41 UTC 2026
+UTC1 fine: Thu Oct  1 23:09:04 UTC 2026
+NYCLOSE fine: Thu Oct  1 23:13:56 UTC 2026
+aggregato fine: Thu Oct  1 23:14:05 UTC 2026 codice 0

@@ -1,0 +1,119 @@
+==============================================================================
+ EMA200_D1_SU_M5_v1 -- SPXUSD -- feed HistData SPXUSD (FutureSharks) -- giorno UTC1
+ criteri: report/EMA200_D1_SU_M5_CRITERI_2026-10-02.md (congelati)
+==============================================================================
+ barre M1: 2,117,667   da 2010-11-14 23:00:00 a 2018-12-31 21:13:00 (UTC)
+ G-OROLOGIO: picco inverno 15:00 (n 323596)  estate 14:00 (n 528888)  ancore 13:30,14:30,15:00 -> PASSA  [S&P: ancora 15:00 dichiarata nei criteri; lettura SECONDARIA]
+ minuti di sabato/domenica (UTC+1) attribuiti al lunedi': 10121 su 2117667
+ regimi per anno: 2010 LATERALE +4.9%  2011 LATERALE -0.2%  2012 TORO +11.5%  2013 TORO +29.5%  2014 TORO +11.1%  2015 LATERALE -0.9%  2016 LATERALE +9.6%  2017 TORO +19.1%  2018 ORSO -5.9%
+   passata vera: 2096 giorni, 2 s
+   surrogati 20/200 (34 s)
+   surrogati 40/200 (66 s)
+   surrogati 60/200 (103 s)
+   surrogati 80/200 (137 s)
+   surrogati 100/200 (169 s)
+   surrogati 120/200 (201 s)
+   surrogati 140/200 (232 s)
+   surrogati 160/200 (262 s)
+   surrogati 180/200 (291 s)
+   surrogati 200/200 (320 s)
+ giorni D1: 2096; eventi dal giorno 600 = 2013-03-11 (riscaldamento EMA D1); anni utili 5.81
+   FERMA     M5  eventi H1  119 (20.5/anno) in  68 giorni; tocchi in gap d'apertura 2; linea a <=0,25 ATR da un tondo 10; sfondamenti primaria 70, nel minuto del tocco 9; eventi H2 107
+   FERMA     M15 eventi H1   69 (11.9/anno) in  64 giorni; tocchi in gap d'apertura 2; linea a <=0,25 ATR da un tondo 14; sfondamenti primaria 37, nel minuto del tocco 5; eventi H2 65
+   FERMA     H1  eventi H1   43 (7.4/anno) in  43 giorni; tocchi in gap d'apertura 2; linea a <=0,25 ATR da un tondo 10; sfondamenti primaria 26, nel minuto del tocco 2; eventi H2 36
+   VIVA      M5  eventi H1  118 (20.3/anno) in  68 giorni; tocchi in gap d'apertura 2; linea a <=0,25 ATR da un tondo 10; sfondamenti primaria 69, nel minuto del tocco 9; eventi H2 107
+   VIVA      M15 eventi H1   69 (11.9/anno) in  64 giorni; tocchi in gap d'apertura 2; linea a <=0,25 ATR da un tondo 14; sfondamenti primaria 38, nel minuto del tocco 5; eventi H2 65
+   VIVA      H1  eventi H1   43 (7.4/anno) in  43 giorni; tocchi in gap d'apertura 2; linea a <=0,25 ATR da un tondo 10; sfondamenti primaria 27, nel minuto del tocco 2; eventi H2 36
+   RIDIPINTA M5  eventi H1  120 (20.7/anno) in  68 giorni; tocchi in gap d'apertura 2; linea a <=0,25 ATR da un tondo 12; sfondamenti primaria 69, nel minuto del tocco 12; eventi H2 106
+   RIDIPINTA M15 eventi H1   69 (11.9/anno) in  64 giorni; tocchi in gap d'apertura 2; linea a <=0,25 ATR da un tondo 13; sfondamenti primaria 35, nel minuto del tocco 4; eventi H2 64
+   RIDIPINTA H1  eventi H1   43 (7.4/anno) in  43 giorni; tocchi in gap d'apertura 2; linea a <=0,25 ATR da un tondo 8; sfondamenti primaria 25, nel minuto del tocco 2; eventi H2 36
+   FERMA vs VIVA M5: eventi comuni 117, solo FERMA 2, solo VIVA 1
+   FERMA vs VIVA M15: eventi comuni 69, solo FERMA 0, solo VIVA 0
+   FERMA vs VIVA H1: eventi comuni 43, solo FERMA 0, solo VIVA 0
+ ATR mediano (dal giorno 600): M5 0.8750  M15 1.5893  H1 3.4643; filtro feed: evento scartato se ATR < 0.1 x mediana
+
+ PRIMARIA H1 (X=Y=1) e H2, sottoinsieme TUTTO:
+  H1 FERMA     M5  long  n   61 ( 47 g)  P 0.459  IC [0.328;0.583]  N0 0.500  surr 0.466 [0.371;0.558]  eff -0.007  NON ANCORA MISURATO
+  H2 FERMA     M5  giu   n   51 ( 41 g)  P 0.431  IC [0.296;0.577]  N0 0.387  surr 0.401 [0.290;0.500]  eff +0.030  NON ANCORA MISURATO
+  H1 FERMA     M5  short n   57 ( 40 g)  P 0.351  IC [0.236;0.481]  N0 0.500  surr 0.449 [0.347;0.575]  eff -0.098  NON ANCORA MISURATO
+  H2 FERMA     M5  su    n   56 ( 41 g)  P 0.339  IC [0.229;0.470]  N0 0.351  surr 0.409 [0.290;0.511]  eff -0.070  NON ANCORA MISURATO
+  H1 FERMA     M15 long  n   37 ( 36 g)  P 0.514  IC [0.359;0.667]  N0 0.500  surr 0.489 [0.370;0.607]  eff +0.025  NON ANCORA MISURATO
+  H2 FERMA     M15 giu   n   34 ( 31 g)  P 0.353  IC [0.206;0.521]  N0 0.379  surr 0.382 [0.268;0.519]  eff -0.029  NON ANCORA MISURATO
+  H1 FERMA     M15 short n   32 ( 31 g)  P 0.406  IC [0.250;0.577]  N0 0.500  surr 0.462 [0.302;0.600]  eff -0.055  NON ANCORA MISURATO
+  H2 FERMA     M15 su    n   31 ( 30 g)  P 0.484  IC [0.320;0.656]  N0 0.417  surr 0.415 [0.273;0.568]  eff +0.069  NON ANCORA MISURATO
+  H1 FERMA     H1  long  n   28 ( 28 g)  P 0.357  IC [0.179;0.542]  N0 0.500  surr 0.485 [0.347;0.653]  eff -0.128  NON ANCORA MISURATO
+  H2 FERMA     H1  giu   n   22 ( 22 g)  P 0.364  IC [0.182;0.570]  N0 0.344  surr 0.355 [0.167;0.559]  eff +0.009  NON ANCORA MISURATO
+  H1 FERMA     H1  short n   15 ( 15 g)  P 0.467  IC [0.200;0.733]  N0 0.500  surr 0.474 [0.292;0.647]  eff -0.007  NON ANCORA MISURATO
+  H2 FERMA     H1  su    n   14 ( 14 g)  P 0.357  IC [0.143;0.612]  N0 0.430  surr 0.385 [0.200;0.601]  eff -0.028  NON ANCORA MISURATO
+  H1 VIVA      M5  long  n   61 ( 47 g)  P 0.459  IC [0.333;0.586]  N0 0.500  surr 0.466 [0.372;0.557]  eff -0.007  NON ANCORA MISURATO
+  H2 VIVA      M5  giu   n   51 ( 41 g)  P 0.431  IC [0.292;0.574]  N0 0.393  surr 0.402 [0.284;0.500]  eff +0.029  NON ANCORA MISURATO
+  H1 VIVA      M5  short n   56 ( 40 g)  P 0.357  IC [0.241;0.488]  N0 0.500  surr 0.450 [0.333;0.561]  eff -0.092  NON ANCORA MISURATO
+  H2 VIVA      M5  su    n   56 ( 41 g)  P 0.339  IC [0.229;0.470]  N0 0.357  surr 0.411 [0.298;0.511]  eff -0.072  NON ANCORA MISURATO
+  H1 VIVA      M15 long  n   37 ( 36 g)  P 0.486  IC [0.324;0.649]  N0 0.500  surr 0.489 [0.370;0.607]  eff -0.002  NON ANCORA MISURATO
+  H2 VIVA      M15 giu   n   34 ( 31 g)  P 0.353  IC [0.200;0.529]  N0 0.385  surr 0.387 [0.256;0.531]  eff -0.034  NON ANCORA MISURATO
+  H1 VIVA      M15 short n   32 ( 31 g)  P 0.406  IC [0.250;0.577]  N0 0.500  surr 0.464 [0.307;0.600]  eff -0.058  NON ANCORA MISURATO
+  H2 VIVA      M15 su    n   31 ( 30 g)  P 0.484  IC [0.320;0.652]  N0 0.422  surr 0.417 [0.273;0.568]  eff +0.067  NON ANCORA MISURATO
+  H1 VIVA      H1  long  n   28 ( 28 g)  P 0.321  IC [0.143;0.507]  N0 0.500  surr 0.486 [0.347;0.667]  eff -0.165  NON ANCORA MISURATO
+  H2 VIVA      H1  giu   n   22 ( 22 g)  P 0.364  IC [0.182;0.591]  N0 0.349  surr 0.358 [0.167;0.556]  eff +0.006  NON ANCORA MISURATO
+  H1 VIVA      H1  short n   15 ( 15 g)  P 0.467  IC [0.200;0.733]  N0 0.500  surr 0.475 [0.291;0.653]  eff -0.008  NON ANCORA MISURATO
+  H2 VIVA      H1  su    n   14 ( 14 g)  P 0.357  IC [0.143;0.643]  N0 0.434  surr 0.389 [0.206;0.601]  eff -0.032  NON ANCORA MISURATO
+  H1 RIDIPINTA M5  long  n   62 ( 47 g)  P 0.468  IC [0.343;0.593]  N0 0.500  surr 0.468 [0.373;0.563]  eff -0.001  NON ANCORA MISURATO
+  H2 RIDIPINTA M5  giu   n   50 ( 41 g)  P 0.420  IC [0.277;0.569]  N0 0.392  surr 0.400 [0.283;0.530]  eff +0.020  NON ANCORA MISURATO
+  H1 RIDIPINTA M5  short n   57 ( 41 g)  P 0.368  IC [0.250;0.498]  N0 0.500  surr 0.450 [0.338;0.574]  eff -0.081  NON ANCORA MISURATO
+  H2 RIDIPINTA M5  su    n   56 ( 41 g)  P 0.339  IC [0.229;0.470]  N0 0.370  surr 0.412 [0.303;0.509]  eff -0.073  NON ANCORA MISURATO
+  H1 RIDIPINTA M15 long  n   37 ( 36 g)  P 0.541  IC [0.384;0.694]  N0 0.500  surr 0.489 [0.379;0.614]  eff +0.052  NON ANCORA MISURATO
+  H2 RIDIPINTA M15 giu   n   33 ( 30 g)  P 0.364  IC [0.212;0.534]  N0 0.360  surr 0.387 [0.256;0.512]  eff -0.023  NON ANCORA MISURATO
+  H1 RIDIPINTA M15 short n   32 ( 31 g)  P 0.438  IC [0.258;0.613]  N0 0.500  surr 0.466 [0.326;0.623]  eff -0.029  NON ANCORA MISURATO
+  H2 RIDIPINTA M15 su    n   31 ( 30 g)  P 0.452  IC [0.281;0.622]  N0 0.408  surr 0.417 [0.285;0.572]  eff +0.035  NON ANCORA MISURATO
+  H1 RIDIPINTA H1  long  n   28 ( 28 g)  P 0.357  IC [0.179;0.542]  N0 0.500  surr 0.487 [0.348;0.667]  eff -0.130  NON ANCORA MISURATO
+  H2 RIDIPINTA H1  giu   n   22 ( 22 g)  P 0.364  IC [0.182;0.591]  N0 0.350  surr 0.354 [0.167;0.534]  eff +0.010  NON ANCORA MISURATO
+  H1 RIDIPINTA H1  short n   15 ( 15 g)  P 0.533  IC [0.267;0.800]  N0 0.500  surr 0.475 [0.292;0.667]  eff +0.058  NON ANCORA MISURATO
+  H2 RIDIPINTA H1  su    n   14 ( 14 g)  P 0.357  IC [0.143;0.612]  N0 0.440  surr 0.397 [0.222;0.589]  eff -0.040  NON ANCORA MISURATO
+  H1 EMA100    M5  long  n  173 (118 g)  P 0.532  IC [0.458;0.605]  N0 0.500  surr 0.464 [0.395;0.543]  eff +0.068  ZONA GRIGIA
+  H2 EMA100    M5  giu   n  140 (106 g)  P 0.421  IC [0.338;0.507]  N0 0.389  surr 0.406 [0.325;0.500]  eff +0.015  NON ANCORA MISURATO
+  H1 EMA100    M5  short n  122 ( 97 g)  P 0.352  IC [0.273;0.441]  N0 0.500  surr 0.451 [0.369;0.549]  eff -0.099  NON ANCORA MISURATO
+  H2 EMA100    M5  su    n  115 ( 96 g)  P 0.409  IC [0.319;0.500]  N0 0.393  surr 0.404 [0.304;0.505]  eff +0.005  NON ANCORA MISURATO
+  H1 EMA100    M15 long  n  106 ( 98 g)  P 0.538  IC [0.438;0.630]  N0 0.500  surr 0.485 [0.383;0.591]  eff +0.052  NON ANCORA MISURATO
+  H2 EMA100    M15 giu   n   93 ( 89 g)  P 0.473  IC [0.370;0.574]  N0 0.408  surr 0.394 [0.269;0.490]  eff +0.079  NON ANCORA MISURATO
+  H1 EMA100    M15 short n   58 ( 54 g)  P 0.379  IC [0.259;0.508]  N0 0.500  surr 0.459 [0.324;0.581]  eff -0.080  NON ANCORA MISURATO
+  H2 EMA100    M15 su    n   62 ( 59 g)  P 0.484  IC [0.364;0.607]  N0 0.440  surr 0.400 [0.285;0.519]  eff +0.084  NON ANCORA MISURATO
+  H1 EMA100    H1  long  n   59 ( 59 g)  P 0.542  IC [0.417;0.663]  N0 0.500  surr 0.500 [0.356;0.638]  eff +0.042  NON ANCORA MISURATO
+  H2 EMA100    H1  giu   n   52 ( 52 g)  P 0.423  IC [0.288;0.558]  N0 0.354  surr 0.354 [0.243;0.500]  eff +0.070  NON ANCORA MISURATO
+  H1 EMA100    H1  short n   29 ( 29 g)  P 0.310  IC [0.138;0.492]  N0 0.500  surr 0.479 [0.318;0.617]  eff -0.168  NON ANCORA MISURATO
+  H2 EMA100    H1  su    n   30 ( 30 g)  P 0.300  IC [0.133;0.479]  N0 0.379  surr 0.390 [0.222;0.567]  eff -0.090  NON ANCORA MISURATO
+  H1 EMA150    M5  long  n   96 ( 73 g)  P 0.490  IC [0.392;0.588]  N0 0.500  surr 0.456 [0.356;0.559]  eff +0.034  NON ANCORA MISURATO
+  H2 EMA150    M5  giu   n   80 ( 62 g)  P 0.425  IC [0.300;0.539]  N0 0.397  surr 0.395 [0.302;0.504]  eff +0.030  NON ANCORA MISURATO
+  H1 EMA150    M5  short n   76 ( 54 g)  P 0.382  IC [0.272;0.494]  N0 0.500  surr 0.453 [0.357;0.549]  eff -0.072  NON ANCORA MISURATO
+  H2 EMA150    M5  su    n   73 ( 52 g)  P 0.384  IC [0.264;0.507]  N0 0.399  surr 0.419 [0.298;0.514]  eff -0.035  NON ANCORA MISURATO
+  H1 EMA150    M15 long  n   63 ( 58 g)  P 0.524  IC [0.391;0.651]  N0 0.500  surr 0.475 [0.328;0.604]  eff +0.048  NON ANCORA MISURATO
+  H2 EMA150    M15 giu   n   53 ( 52 g)  P 0.415  IC [0.288;0.549]  N0 0.424  surr 0.395 [0.266;0.511]  eff +0.021  NON ANCORA MISURATO
+  H1 EMA150    M15 short n   44 ( 41 g)  P 0.409  IC [0.273;0.556]  N0 0.500  surr 0.453 [0.318;0.596]  eff -0.044  NON ANCORA MISURATO
+  H2 EMA150    M15 su    n   45 ( 41 g)  P 0.311  IC [0.178;0.457]  N0 0.390  surr 0.404 [0.273;0.550]  eff -0.093  NON ANCORA MISURATO
+  H1 EMA150    H1  long  n   40 ( 40 g)  P 0.550  IC [0.398;0.700]  N0 0.500  surr 0.487 [0.327;0.622]  eff +0.063  NON ANCORA MISURATO
+  H2 EMA150    H1  giu   n   31 ( 31 g)  P 0.323  IC [0.161;0.499]  N0 0.352  surr 0.371 [0.242;0.528]  eff -0.048  NON ANCORA MISURATO
+  H1 EMA150    H1  short n   22 ( 22 g)  P 0.273  IC [0.091;0.482]  N0 0.500  surr 0.464 [0.278;0.639]  eff -0.192  NON ANCORA MISURATO
+  H2 EMA150    H1  su    n   21 ( 21 g)  P 0.333  IC [0.143;0.546]  N0 0.446  surr 0.390 [0.200;0.556]  eff -0.057  NON ANCORA MISURATO
+  H1 EMA250    M5  long  n   55 ( 37 g)  P 0.364  IC [0.228;0.509]  N0 0.500  surr 0.464 [0.365;0.600]  eff -0.100  NON ANCORA MISURATO
+  H2 EMA250    M5  giu   n   52 ( 36 g)  P 0.346  IC [0.218;0.482]  N0 0.397  surr 0.409 [0.270;0.510]  eff -0.062  NON ANCORA MISURATO
+  H1 EMA250    M5  short n   39 ( 30 g)  P 0.487  IC [0.302;0.659]  N0 0.500  surr 0.451 [0.324;0.562]  eff +0.036  NON ANCORA MISURATO
+  H2 EMA250    M5  su    n   35 ( 30 g)  P 0.257  IC [0.111;0.421]  N0 0.399  surr 0.412 [0.266;0.537]  eff -0.155  NON ANCORA MISURATO
+  H1 EMA250    M15 long  n   26 ( 25 g)  P 0.423  IC [0.240;0.615]  N0 0.500  surr 0.489 [0.342;0.625]  eff -0.066  NON ANCORA MISURATO
+  H2 EMA250    M15 giu   n   25 ( 22 g)  P 0.400  IC [0.217;0.593]  N0 0.350  surr 0.391 [0.224;0.560]  eff +0.009  NON ANCORA MISURATO
+  H1 EMA250    M15 short n   24 ( 23 g)  P 0.542  IC [0.348;0.721]  N0 0.500  surr 0.470 [0.299;0.609]  eff +0.071  NON ANCORA MISURATO
+  H2 EMA250    M15 su    n   22 ( 22 g)  P 0.545  IC [0.318;0.773]  N0 0.415  surr 0.400 [0.230;0.583]  eff +0.145  NON ANCORA MISURATO
+  H1 EMA250    H1  long  n   16 ( 16 g)  P 0.500  IC [0.250;0.750]  N0 0.500  surr 0.500 [0.318;0.647]  eff +0.000  NON ANCORA MISURATO
+  H2 EMA250    H1  giu   n   14 ( 14 g)  P 0.500  IC [0.214;0.732]  N0 0.453  surr 0.363 [0.176;0.563]  eff +0.137  NON ANCORA MISURATO
+  H1 EMA250    H1  short n   11 ( 11 g)  P 0.364  IC [0.091;0.646]  N0 0.500  surr 0.475 [0.267;0.693]  eff -0.111  NON ANCORA MISURATO
+  H2 EMA250    H1  su    n   13 ( 13 g)  P 0.462  IC [0.231;0.769]  N0 0.453  surr 0.381 [0.199;0.610]  eff +0.081  NON ANCORA MISURATO
+  H1 SMA200    M5  long  n   66 ( 50 g)  P 0.530  IC [0.391;0.662]  N0 0.500  surr 0.451 [0.325;0.571]  eff +0.080  NON ANCORA MISURATO
+  H2 SMA200    M5  giu   n   48 ( 41 g)  P 0.375  IC [0.250;0.516]  N0 0.341  surr 0.397 [0.281;0.514]  eff -0.022  NON ANCORA MISURATO
+  H1 SMA200    M5  short n   56 ( 41 g)  P 0.446  IC [0.324;0.576]  N0 0.500  surr 0.453 [0.338;0.577]  eff -0.006  NON ANCORA MISURATO
+  H2 SMA200    M5  su    n   51 ( 40 g)  P 0.392  IC [0.250;0.542]  N0 0.387  surr 0.414 [0.286;0.547]  eff -0.022  NON ANCORA MISURATO
+  H1 SMA200    M15 long  n   46 ( 44 g)  P 0.543  IC [0.386;0.694]  N0 0.500  surr 0.471 [0.323;0.581]  eff +0.073  NON ANCORA MISURATO
+  H2 SMA200    M15 giu   n   35 ( 34 g)  P 0.314  IC [0.167;0.480]  N0 0.295  surr 0.391 [0.240;0.529]  eff -0.076  NON ANCORA MISURATO
+  H1 SMA200    M15 short n   29 ( 29 g)  P 0.517  IC [0.344;0.690]  N0 0.500  surr 0.456 [0.300;0.615]  eff +0.061  NON ANCORA MISURATO
+  H2 SMA200    M15 su    n   26 ( 26 g)  P 0.385  IC [0.192;0.577]  N0 0.429  surr 0.408 [0.231;0.563]  eff -0.024  NON ANCORA MISURATO
+  H1 SMA200    H1  long  n   29 ( 29 g)  P 0.517  IC [0.344;0.690]  N0 0.500  surr 0.483 [0.267;0.649]  eff +0.034  NON ANCORA MISURATO
+  H2 SMA200    H1  giu   n   23 ( 23 g)  P 0.435  IC [0.256;0.652]  N0 0.361  surr 0.375 [0.174;0.609]  eff +0.060  NON ANCORA MISURATO
+  H1 SMA200    H1  short n   12 ( 12 g)  P 0.583  IC [0.320;0.833]  N0 0.500  surr 0.455 [0.260;0.645]  eff +0.129  NON ANCORA MISURATO
+  H2 SMA200    H1  su    n   11 ( 11 g)  P 0.364  IC [0.091;0.646]  N0 0.303  surr 0.375 [0.172;0.591]  eff -0.011  NON ANCORA MISURATO
