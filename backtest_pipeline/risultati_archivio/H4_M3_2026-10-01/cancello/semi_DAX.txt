@@ -1,0 +1,2 @@
+DAX    long  semi 40  eff media -0.0200 [min -0.0256 max -0.0096]  lo min -0.051 hi max +0.015  verdetti: {ZONA GRIGIA: 21, NULLO: 19}
+DAX    short semi 40  eff media +0.0114 [min +0.0044 max +0.0178]  lo min -0.020 hi max +0.045  verdetti: {NULLO: 40}

@@ -1,0 +1,7 @@
+DAX: M1 1718805  M3 575159  H1 29365  H4 9419  ATR H1 mediano 32.8929
+DAX    0.1    blocco 1 long  n  2820 ALL -0.0196 B +0.0019 (attesa esatta -0.0000) CON -0.0073 eff -0.0215 (vs attesa -0.0196) IC [-0.046;+0.005] banda [-0.020;+0.025] -> ZONA GRIGIA
+DAX    0.1    blocco 1 short n  2638 ALL +0.0185 B +0.0034 (attesa esatta +0.0070) CON -0.0017 eff +0.0151 (vs attesa +0.0115) IC [-0.012;+0.043] banda [-0.017;+0.026] -> NULLO
+DAX    0.1    blocco 7 long  n  2820 ALL -0.0196 B +0.0019 (attesa esatta -0.0000) CON -0.0073 eff -0.0215 (vs attesa -0.0196) IC [-0.046;+0.004] banda [-0.020;+0.025] -> ZONA GRIGIA
+DAX    0.1    blocco 7 short n  2638 ALL +0.0185 B +0.0034 (attesa esatta +0.0070) CON -0.0017 eff +0.0151 (vs attesa +0.0115) IC [-0.011;+0.043] banda [-0.017;+0.026] -> NULLO
+   STOP a long  n  2506 TP 952 SL 988 AMB 0 TO 566 P1R 0.491 E lordo -0.009 netto -0.100 D/costo med 13.7x >=40x 2.2%
+   STOP a short n  2365 TP 1070 SL 932 AMB 0 TO 363 P1R 0.534 E lordo +0.038 netto -0.035 D/costo med 17.5x >=40x 5.8%

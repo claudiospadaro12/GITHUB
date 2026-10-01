@@ -1,0 +1,5 @@
+SPX: M1 2117667  M3 860698  H1 48997  H4 12769  ATR H1 mediano 3.3571
+SPX    0.1    blocco 1 long  n  4600 ALL -0.0079 B +0.0053 (attesa esatta +0.0060) CON +0.0235 eff -0.0132 (vs attesa -0.0139) IC [-0.040;+0.014] banda [-0.009;+0.025] -> NULLO
+SPX    0.1    blocco 1 short n  4417 ALL -0.0199 B -0.0004 (attesa esatta -0.0040) CON -0.0162 eff -0.0195 (vs attesa -0.0159) IC [-0.047;+0.007] banda [-0.028;+0.029] -> NULLO
+SPX    0.1    blocco 7 long  n  4600 ALL -0.0079 B +0.0053 (attesa esatta +0.0060) CON +0.0235 eff -0.0132 (vs attesa -0.0139) IC [-0.039;+0.012] banda [-0.009;+0.025] -> NULLO
+SPX    0.1    blocco 7 short n  4417 ALL -0.0199 B -0.0004 (attesa esatta -0.0040) CON -0.0162 eff -0.0195 (vs attesa -0.0159) IC [-0.046;+0.008] banda [-0.028;+0.029] -> NULLO

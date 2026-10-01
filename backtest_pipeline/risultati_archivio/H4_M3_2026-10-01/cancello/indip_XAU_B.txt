@@ -1,0 +1,7 @@
+XAU_B: M1 1979587  M3 660240  H1 33033  H4 9008  ATR H1 mediano 5.5733
+XAU_B  0.1    blocco 1 long  n  3312 ALL +0.0220 B +0.0193 (attesa esatta +0.0185) CON -0.0162 eff +0.0027 (vs attesa +0.0035) IC [-0.022;+0.026] banda [-0.001;+0.044] -> NULLO
+XAU_B  0.1    blocco 1 short n  3245 ALL +0.0053 B -0.0077 (attesa esatta -0.0042) CON -0.0258 eff +0.0130 (vs attesa +0.0095) IC [-0.015;+0.043] banda [-0.027;+0.014] -> NULLO
+XAU_B  0.1    blocco 7 long  n  3312 ALL +0.0220 B +0.0193 (attesa esatta +0.0185) CON -0.0162 eff +0.0027 (vs attesa +0.0035) IC [-0.020;+0.026] banda [-0.001;+0.044] -> NULLO
+XAU_B  0.1    blocco 7 short n  3245 ALL +0.0053 B -0.0077 (attesa esatta -0.0042) CON -0.0258 eff +0.0130 (vs attesa +0.0095) IC [-0.015;+0.042] banda [-0.027;+0.014] -> NULLO
+   STOP a long  n  3315 TP 1430 SL 1377 AMB 0 TO 508 P1R 0.509 E lordo +0.017 netto -0.038 D/costo med 21.3x >=40x 25.9%
+   STOP a short n  3256 TP 1397 SL 1412 AMB 3 TO 444 P1R 0.497 E lordo -0.007 netto -0.065 D/costo med 20.4x >=40x 25.0%

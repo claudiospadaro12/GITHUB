@@ -1,0 +1,6 @@
+XAU_B  long  semi 20  eff media +0.0045 [min -0.0018 max +0.0071]  lo min -0.026 hi max +0.032  verdetti: {'NULLO': 20}
+XAU_B  short semi 20  eff media +0.0101 [min +0.0045 max +0.0142]  lo min -0.023 hi max +0.043  verdetti: {'NULLO': 20}
+SPX    long  semi 20  eff media -0.0131 [min -0.0168 max -0.0089]  lo min -0.045 hi max +0.018  verdetti: {'NULLO': 20}
+SPX    short semi 20  eff media -0.0150 [min -0.0235 max -0.0103]  lo min -0.051 hi max +0.020  verdetti: {'ZONA GRIGIA': 1, 'NULLO': 19}
+XAU_A  long  semi 20  eff media -0.0044 [min -0.0078 max -0.0014]  lo min -0.024 hi max +0.016  verdetti: {'NULLO': 20}
+XAU_A  short semi 20  eff media -0.0097 [min -0.0127 max -0.0066]  lo min -0.032 hi max +0.012  verdetti: {'NULLO': 20}
