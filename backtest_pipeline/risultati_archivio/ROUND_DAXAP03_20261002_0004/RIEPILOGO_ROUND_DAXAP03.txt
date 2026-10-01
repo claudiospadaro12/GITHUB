@@ -1,0 +1,51 @@
+RIEPILOGO ROUND DAXAP03 -- PRV_DAXAP_03a (InpPlaceHour 7, asse InpPlaceMin 59/60/61, magic 798103) e PRV_DAXAP_03b (InpPlaceHour 8, asse InpPlaceMin 0/5/10/15, magic 798104) sulla sedia 770411 MAXMIN DAX SHORT di ABTG_MaxMinNotte_DAX_Short_Ottimizzato. D30EUR M15, Modello 4 (tick reali), deposito 100000, rischio 1,00 di banco, finestra 2024.09.26-2026.06.30, IS fino al 2025.06.09, OOS dal 2025.06.10. Driver con la riprova (RIGA_ROUND_VPS_RETRY.ps1 + walkforward_generico_RETRY.ps1, MaxRiprove 1, attesa 20 s, scadenza 2026-10-02 00:21:30).
+data: 2026-10-02 00:04:30
+fine: 2026-10-02 00:07:51   durata minuti: 3   (dichiarato [STIMA] 3-5 minuti, circa 2,5 in piu per gamba riprovata, tetto 20)
+durata per job (secondi, driver compreso): DAXAP03a 91 | DAXAP03b 108
+pc  : DESKTOP-H4D7CAJ   terminale ammesso: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392). VPS VMI3047753 e tutte le sue cartelle dati NON toccati; nessun processo chiuso, nessuna cache svuotata.
+pin : d949f705a1eda1f3358106ee97dac430afae9e43
+GUARDIA EA sui grafici salvati: 103 letti, zero EA attaccati (altrimenti la riga non partiva)
+
+STATO: DAXAP03a=OK DAXAP03b=OK
+(OK = catena integra: motore e prova = pin, referto fresco = riga, CSV completi, asse, InpPlaceHour, magic e pin arrivati, finestre = dichiarate | OK_RIPROVATO = come OK ma con una gamba salvata al secondo tentativo dal driver, RILIEVO | KO = 2 gambe senza CSV a fine job (morte due volte, o riprova non partita per la scadenza) | MISTO = una con il CSV e una senza, NON e un risultato | NV = non verificabile o contraddittorio, col MOTIVO | NON LANCIATO = tetto)
+
+DAXAP03a OK   rc 0   durata 91 s   giornale: intestazioni 2 partite 2 morte 0   RIPROVE: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;   OnTesterInit works too long: 0 righe   pin numerici confrontati: _IS 141 _OOS 141 (attesi 141 per gamba, piu 3 stringhe NON confrontate e l asse)   finestra girata: [from 2024.09.26 00:00 to 2025.06.09 00:00 su D30EUR: = IS dichiarata] [from 2025.06.10 00:00 to 2026.06.30 00:00 su D30EUR: = OOS dichiarata]
+   CLASSE 166/892: motore = pin (SHA256, EA + include + walkforward_generico_RETRY + RIGA_ROUND_VPS_RETRY)
+   prova = pin (SHA256)   direttive, input, magic e InpPlaceHour: = riga (51 input, asse InpPlaceMin, nessuna @DEPOSITO)
+   referto: pin d949f705a1eda1f3358106ee97dac430afae9e43, macchina DESKTOP-H4D7CAJ, terminale C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe, deposito 100000, modello 4, driver walkforward_generico_RETRY.ps1, riprova [MaxRiprove 1   attesa 20 s   scadenza 2026-10-02 00:21:30] = riga
+   RIPROVE del driver: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;
+   _IS: fresco 3 righe, Trades>0 su 3; asse InpPlaceMin [59/60/61] ok
+   _OOS: fresco 3 righe, Trades>0 su 3; asse InpPlaceMin [59/60/61] ok
+
+DAXAP03b OK   rc 0   durata 108 s   giornale: intestazioni 2 partite 2 morte 0   RIPROVE: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;   OnTesterInit works too long: 0 righe   pin numerici confrontati: _IS 188 _OOS 188 (attesi 188 per gamba, piu 3 stringhe NON confrontate e l asse)   finestra girata: [from 2024.09.26 00:00 to 2025.06.09 00:00 su D30EUR: = IS dichiarata] [from 2025.06.10 00:00 to 2026.06.30 00:00 su D30EUR: = OOS dichiarata]
+   CLASSE 166/892: motore = pin (SHA256, EA + include + walkforward_generico_RETRY + RIGA_ROUND_VPS_RETRY)
+   prova = pin (SHA256)   direttive, input, magic e InpPlaceHour: = riga (51 input, asse InpPlaceMin, nessuna @DEPOSITO)
+   referto: pin d949f705a1eda1f3358106ee97dac430afae9e43, macchina DESKTOP-H4D7CAJ, terminale C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe, deposito 100000, modello 4, driver walkforward_generico_RETRY.ps1, riprova [MaxRiprove 1   attesa 20 s   scadenza 2026-10-02 00:21:30] = riga
+   RIPROVE del driver: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;
+   _IS: fresco 4 righe, Trades>0 su 4; asse InpPlaceMin [0/5/10/15] ok
+   _OOS: fresco 4 righe, Trades>0 su 4; asse InpPlaceMin [0/5/10/15] ok
+
+NUMERI DAI CSV, cella per cella (NESSUN confronto qui):
+   DAXAP03a IS   InpPlaceHour  7  InpPlaceMin 59   Trades    20   Profit    4766.96   PF  1.87803   Equity DD % 3.0977
+   DAXAP03a IS   InpPlaceHour  7  InpPlaceMin 60   Trades    22   Profit    5422.69   PF  2.00248   Equity DD % 2.5877
+   DAXAP03a IS   InpPlaceHour  7  InpPlaceMin 61   Trades    18   Profit    5664.73   PF  2.34163   Equity DD % 3.1948
+   DAXAP03a OOS  InpPlaceHour  7  InpPlaceMin 59   Trades    21   Profit    6143.38   PF  2.15985   Equity DD % 1.9213
+   DAXAP03a OOS  InpPlaceHour  7  InpPlaceMin 60   Trades    21   Profit    5277.40   PF  1.82721   Equity DD % 3.1624
+   DAXAP03a OOS  InpPlaceHour  7  InpPlaceMin 61   Trades    18   Profit    5197.49   PF  1.98528   Equity DD % 2.2961
+   DAXAP03b IS   InpPlaceHour  8  InpPlaceMin  0   Trades    22   Profit    5422.69   PF  2.00248   Equity DD % 2.5877
+   DAXAP03b IS   InpPlaceHour  8  InpPlaceMin  5   Trades    13   Profit    5067.92   PF  2.59928   Equity DD % 2.2910
+   DAXAP03b IS   InpPlaceHour  8  InpPlaceMin 10   Trades    13   Profit    6428.36   PF  4.03428   Equity DD % 1.7862
+   DAXAP03b IS   InpPlaceHour  8  InpPlaceMin 15   Trades     8   Profit    3677.72   PF  4.65749   Equity DD % 1.6410
+   DAXAP03b OOS  InpPlaceHour  8  InpPlaceMin  0   Trades    21   Profit    5277.40   PF  1.82721   Equity DD % 3.1624
+   DAXAP03b OOS  InpPlaceHour  8  InpPlaceMin  5   Trades    18   Profit     934.37   PF  1.12961   Equity DD % 2.9112
+   DAXAP03b OOS  InpPlaceHour  8  InpPlaceMin 10   Trades    15   Profit   -3490.88   PF  0.56774   Equity DD % 4.9583
+   DAXAP03b OOS  InpPlaceHour  8  InpPlaceMin 15   Trades     9   Profit   -4028.81   PF  0.32491   Equity DD % 4.7451
+PERTRADE DAXAP03a abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_798103.csv: 18 deal di uscita, gamba OOS, chiusure dal 2025.07.16 08:13:41 al 2026.03.26 11:15:07, righe con magic diverso da 798103: 0. Cella NON identificabile dal file (classe 455): informativo, mai motivo di NULLO da solo.
+PERTRADE DAXAP03b abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_798104.csv: 9 deal di uscita, gamba OOS, chiusure dal 2025.07.14 16:02:47 al 2026.03.23 10:20:09, righe con magic diverso da 798104: 0. Cella NON identificabile dal file (classe 455): informativo, mai motivo di NULLO da solo.
+
+ROUND LANCIATI: 2 su 2   NON LANCIATI (tetto): 0   PARTITI (rc diverso da 1): 2 su 2   MOTORE DIVERSO DAL PIN in 0 job
+CARTELLE DEL DRIVER ATTESE: 2   TROVATE: 2   -> CATENA COMPLETA
+LOG_TESTER: 13 file .log scritti DOPO l avvio (giornali del tester leggibili: 1 su 1). Gambe viste dopo l avvio: 4 (non attribuite: 0); prima dell avvio: 0.
+
+LETTURA: questa riga NON emette un verdetto e NON applica G0, G2, S1, P0, R1 e le altre letture: sono nei file prova prove/PRV_DAXAP_03a_ingresso_meno1_piu1_770411_D30EUR.txt e prove/PRV_DAXAP_03b_ritardo_5_15_770411_D30EUR.txt (al pin), scritte PRIMA dei numeri, e si leggono sui CSV qui raccolti, e solo sui job con STATO OK o OK_RIPROVATO. Il G2 incrocia la cella 60 di 03a con la cella 0 di 03b: vale solo se TUTTI E DUE i job sono OK o OK_RIPROVATO. Niente si promuove, nessuna taglia si propone.
+NON MISURATI DA QUESTA RIGA, PER COSTRUZIONE: il merito; quale cella ha scritto il per-trade (classe 455); il numero dei fill nel minuto 07:59 (dichiarato NON MISURABILE nel file 03a); la separazione estate/inverno delle celle (OROLOGIO PER CELLA, nei file prova); Windows PowerShell 5.1 e MT5 sono quelli di questa macchina.

@@ -1,0 +1,60 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_RETRY_v1
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v7_RETRY
+pin             : d949f705a1eda1f3358106ee97dac430afae9e43
+data            : 2026-10-02 00:04:31   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+file prova      : PRV_DAXAP_03a_ingresso_meno1_piu1_770411_D30EUR.txt   (13151 byte, dal pin)
+etichetta       : DAXAP03a
+simbolo         : D30EUR
+periodo         : M15
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+driver          : walkforward_generico_RETRY.ps1   (con la riprova; Tester\cache NON toccata)
+riprova         : MaxRiprove 1   attesa 20 s   scadenza 2026-10-02 00:21:30
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte_DAX_Short_Ottimizzato\ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_IS_DAXAP03a.csv
+  righe : 3
+    Pass 0    Profit 4766.96      PF 1.87803    Equity DD % 3.0977     Trades 20
+    Pass 1    Profit 5422.69      PF 2.00248    Equity DD % 2.5877     Trades 22
+    Pass 2    Profit 5664.73      PF 2.34163    Equity DD % 3.1948     Trades 18
+  ESITO : LETTO -- 3 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_MaxMinNotte_DAX_Short_Ottimizzato\ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_OOS_DAXAP03a.csv
+  righe : 3
+    Pass 0    Profit 6143.38      PF 2.15985    Equity DD % 1.9213     Trades 21
+    Pass 1    Profit 5277.4       PF 1.82721    Equity DD % 3.1624     Trades 21
+    Pass 2    Profit 5197.49      PF 1.98528    Equity DD % 2.2961     Trades 18
+  ESITO : LETTO -- 3 righe, tutte con Trades > 0
+
+--- RIPROVE DEL DRIVER (gambe RIPROVATE: 0) ---
+  RIPROVE DEL DRIVER -- MARCATORE_WALKFORWARD_GENERICO_v7_RETRY
+  data       : 2026-10-02 00:04:39 -> 2026-10-02 00:06:00   (ora del PC)
+  pc         : DESKTOP-H4D7CAJ
+  EA         : ABTG_MaxMinNotte_DAX_Short_Ottimizzato   simbolo D30EUR   suffisso '_DAXAP03a'
+  MaxRiprove : 1   attesa fra i tentativi 20 s   scadenza 2026-10-02 00:21:30
+  giornale   : C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\Tester\logs\AAAAMMGG.log, letto per finestra di tentativo (millisecondi; data dal nome del file)
+  cache      : Tester\cache NON toccata da questo driver (mai svuotata, mai letta). La riga 'cache' di ogni tentativo e' quella del GIORNALE.
+  si riprova : SOLO 'OnTesterInit works too long. Tester cannot be initialized.' senza CSV, una volta per gamba
+  GAMBA IS  | tentativo 1 -> PARTITA (from 2024.09.26 00:00 to 2025.06.09 00:00 su D30EUR: finestra = dichiarata); CSV: presente (3 righe); giornale: 29 righe in questo tentativo, 0 di prima ignorate; cache: riga 'saved to cache file' presente | ESITO GAMBA: CSV PRODOTTO
+  GAMBA OOS | tentativo 1 -> PARTITA (from 2025.06.10 00:00 to 2026.06.30 00:00 su D30EUR: finestra = dichiarata); CSV: presente (3 righe); giornale: 28 righe in questo tentativo, 29 di prima ignorate; cache: riga 'saved to cache file' presente | ESITO GAMBA: CSV PRODOTTO
+  RIPROVATE  : 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO

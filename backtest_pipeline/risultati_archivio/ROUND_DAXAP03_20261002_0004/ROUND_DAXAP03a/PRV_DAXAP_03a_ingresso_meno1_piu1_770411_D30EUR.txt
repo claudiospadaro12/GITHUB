@@ -1,0 +1,242 @@
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+# =====================================================================
+#  PRV_DAXAP_03a -- asse InpPlaceMin: L'ORA DI PIAZZAMENTO a -1/+0/+1 minuti dalla cash
+#  Sedia 770411 (MAXMIN DAX SHORT) -- D30EUR M15 -- TICK REALI --
+#  deposito 100000 -- rischio 1,00 (di banco, NON 2,00: NESSUNA TAGLIA).
+#  Scritto il 01/10/2026 dal cercatore-parametri. Criteri congelati PRIMA
+#  dei numeri. NON ESEGUITO. Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ:
+#  NON sul VPS, NON su 50504400, NON su nessun conto (regola 21/09). La
+#  riga di lancio NON e' scritta qui (cancello della sessione principale).
+# =====================================================================
+#
+#  [CANCELLO 01/10/2026, controllo-preventivo] CORRETTO PRIMA DEI NUMERI,
+#  nessun input toccato (asse, pin e magic identici). Riscritti: S1 (la
+#  monotonia NON e' un cancello di NULLO: classe 662 recidiva + classe
+#  1018), DOMANDA, ATTESA e CONTRO-ESEMPIO (a due code, in deal), e
+#  aggiunti OROLOGIO PER CELLA e REGIME. Il perche', in breve:
+#   (a) fra 07:59 e 08:00 BCM cambiano TRE cose, non una: il minuto di
+#       piazzamento, la barra M15 chiusa letta dall'ATR (AtrVal r.412,
+#       shift 1: 07:30 -> 07:45) e la barra H1 chiusa del filtro S&P
+#       (CorrBias r.396-406, SPXUSD H1 shift 1: 06:00 -> 07:00). Stop,
+#       lotto, TP e perfino il permesso di shortare possono cambiare;
+#       [RIPASSATA 01/10] il salto H1 e' [PROBABILE, NON VERIFICATO]: la
+#       barra SPXUSD delle 08:00 nasce col PRIMO TICK SPXUSD dell'ora; se
+#       il primo tick D30EUR delle 08:00 lo precede, la cella 60 legge
+#       ancora la 06:00 come la 59. Il salto ATR (stesso simbolo) e' certo;
+#   (b) le giornate NON sono annidate: un giorno rotto fra le 05:00 e le
+#       07:58 e tornato sopra il livello alle 08:00 e' SALTATO dalla
+#       cella 59 (sell stop sopra il bid = rifiutato) e GIOCATO dalla 60;
+#   (c) Trades conta DEAL (1-3 per posizione: 21 deal = 14 posizioni).
+#  Quindi Trades(60) > Trades(59) e' un esito LEGITTIMO, e la vecchia
+#  regola "un'eccezione = NULLO" avrebbe buttato una corsa valida.
+#
+#  IL CASO CHE LO MOTIVA (01/10/2026, ora SERVER FTMO, report/TRIAL_
+#  GIORNO1_ANALISI_2026-10-01.md r.25-27): sell stop piazzato 09:59:00,
+#  fill 09:59:01 a 24.998,25 (UN MINUTO PRIMA della cash), SL a 67 punti,
+#  stoppato 10:06:32 dalla spazzata d'apertura; poi il DAX e' sceso di
+#  ~145 punti. Il report stesso lascia il buco: "quanto spesso succede
+#  nel backtest del 770411 [NON MISURATO]".
+#
+#  COSA E' GIA' MISURATO su quanto spesso succede (01/10, dai per-trade
+#  di R246 / R246-inverno, 794621+794623 e 794625+794626, 28 posizioni
+#  "come FTMO" = d0 nei giorni d'estate + casella d+1 nei giorni d'inverno):
+#   - 12 posizioni chiudono a perdita piena (1 deal, ~-1R); minuti dalla
+#     cash alla chiusura: 1, 11, 25, 26, 26, 56, 56, 60, 75, 91, 116, 383.
+#     Entro 10 min dalla cash: 1/12. Entro 30 min: 5/12. Mediana 58 min.
+#   - sul d0 grezzo (27 pos, orologio BCM che d'inverno arma 1h PRIMA
+#     della cash): 10 stop pieni, 3 PRIMA della cash (-45, -5, -2 min):
+#     artefatto d'inverno del banco, che su FTMO non esiste.
+#   - n = 12 stop: INDIZIO, non misura. Merito SOSPESO (14 posizioni OOS).
+#  QUELLO CHE NESSUN FILE HA MAI MISURATO: InpPlaceHour/InpPlaceMin non
+#  sono ad asse in NESSUN file prova ne' CSV (LE_MANOPOLE_INERTI_2026-09-
+#  23 par. 4.4; riconfermato il 01/10 con grep su prove/ per '||Y'). Sono
+#  stati mossi SOLO IN BLOCCO con tutto l'orario, di +-1 ora (R246): una
+#  forchetta di 60 minuti. Qui si scende a 1-15 minuti, una variabile sola.
+#
+#  >>> NON E' UN PARAMETRO COME GLI ALTRI -- LEGGERE (sorgente
+#      ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5):
+#   r.188  if(gPhase==MMP_WAIT && nowMin >= InpPlaceHour*60+InpPlaceMin)
+#          -> TryPlace(): piazza un SELL STOP a (minimo del box - buffer).
+#   r.266-270  if(lot>0 && gTrade.SellStop(...)) Log(...);  return(true);
+#          Se il prezzo e' GIA' sotto il livello, un sell stop sopra il
+#          bid e' NON VALIDO: l'ordine fallisce in silenzio (nessun Log)
+#          e TryPlace torna comunque true -> fase PLACED senza ordine ->
+#          niente trade fino a domani. QUINDI RITARDARE IL PIAZZAMENTO
+#          NON "ENTRA PIU' TARDI": E' UN FILTRO "SALTA IL GIORNO SE LA
+#          ROTTURA E' GIA' AVVENUTA". Misura il valore dei giorni di
+#          rottura precoce (compresi quelli come il 01/10), non
+#          l'ingresso a mercato +N minuti, che e' un altro meccanismo
+#          (esiste nella famiglia: ABTG_DAX_Apertura_EU modo DELAYED/
+#          OPENCONFIRM; R27 sul DAX: bocciato, ma su un altro motore).
+#   r.412  AtrVal() = ATR(14) M15 della barra CHIUSA PRECEDENTE (shift 1):
+#          piazzando piu' tardi la base dell'ATR entra poco (+15 min =
+#          una barra M15 d'apertura nella media di 14: ~+7%). [RIPASSATA
+#          01/10: ~+7% e' una STIMA, non misurata -- la barra d'apertura
+#          pesa 1/14 ma il suo TR puo' valere piu' ATR; NON "trascurabile".
+#          In QUESTO file il salto e' un altro: 07:30 -> 07:45, due barre
+#          di pre-mercato, vedi (a) in testa.] Lo stop non e' piu'
+#          esattamente quello dell'ancora.
+#  Il cutoff resta PINNATO a 08:30 (r.172): ritardare accorcia anche la
+#  FINESTRA di fill (30 -> 15 minuti a +15). E' una seconda confusione,
+#  dichiarata, che pesa nello stesso verso (meno trade).
+#
+#  GLI ORARI sono ORA SERVER BCM (= ora italiana - 1 d'estate, = ora
+#  italiana d'inverno, OROLOGIO_BCM_2026-09-24): 08:00 BCM = cash DAX
+#  d'estate. Sul preset FTMO +2h: piazzamento 09:59 -> 10:00 / 10:01 /...
+#  D'INVERNO il banco BCM arma 1h PRIMA della cash e la finestra mescola
+#  le due tempistiche (come l'ancora r81a/R246i). Sulle sedie FTMO la
+#  tempistica d'inverno e' quella della casella d+1 (R246q/R246r).
+#
+#  PIN: copia verbatim di prove/R246i_orologio_MAXMINDAX_D30EUR_d0_B.txt
+#  (= cella viva r81a = preset FTMO rimappato: ora BCM, rischio 1,
+#  Guardian spento, correlazione S&P su SPXUSD) tranne l'ora di
+#  piazzamento e il magic. FINESTRA B: 2024.09.26 -> 2026.06.30, IS 40%.
+#
+#  ANCORA ESTERNA (la cella 07:59 vive in R246i/r81a, non in questo asse):
+#    IS  Profit 4766,96  PF 1,87803  DD 3,0977  Trades 20
+#    OOS Profit 6143,38  PF 2,15985  DD 1,9213  Trades 21 (14 posizioni)
+#  G1: determinismo gia' stabilito da R246i (gemelle 794621/794671
+#  identiche al centesimo): non si ripete qui (un asse per file).
+#
+#  n: 14 posizioni OOS, ~13 IS. NESSUNA CELLA E' PROMUOVIBILE A NESSUN PF
+#  (merito SOSPESO per costruzione, valvola R59): si leggono la DIREZIONE
+#  del conteggio e il RISCHIO (Emendamento B), mai il PF come verdetto.
+#  R1 (a qualunque n): Equity DD% IS o OOS > 5,00 -> INCOMPATIBILE con la
+#  challenge a 2,00% (soglia gia' usata da R194a/R206a su questa sedia).
+#  A10: nessuna promozione, nessuna taglia, nessuna sedia toccata.
+#
+#  FILE 03a -- LE TRE CELLE VICINE ALL'APERTURA: -1 / +0 / +1 minuto
+#  ------------------------------------------------------------------
+#  InpPlaceHour=7 PINNATO, asse InpPlaceMin = 59 / 60 / 61 -> piazzamento
+#  07:59 (VIVO) / 08:00 / 08:01 BCM, cioe' 1 minuto PRIMA della cash / ALLA
+#  cash / 1 minuto DOPO. (nowMin >= 7*60+60 = 480 = 08:00: l'aritmetica
+#  dell'EA accetta minuti >= 60.) 3 celle x 2 finestre = 6 passate.
+#  G0 INTERNO: la cella 59 e' la cella viva: deve ridare r81a/R246i:
+#  IS 20 deal PF 1,87803 DD 3,0977 Profit 4766,96; OOS 21 deal PF 2,15985
+#  DD 1,9213 Profit 6143,38. Zero scarto su Trades, quarta cifra su PF/DD.
+#  Se non torna il round e' NULLO.
+#  G2 INCROCIATO CON 03b: la cella 60 di questo file e' IDENTICA alla cella
+#  0 di PRV_DAXAP_03b (stessa condizione nowMin >= 480): deve dare gli
+#  STESSI Trades/Profit/PF/DD al centesimo in tutte e due le gambe. Se non
+#  coincidono, uno dei due file non ha applicato il pin: round NULLO.
+#  S1 (la manopola deve mordere) [RISCRITTO DAL CANCELLO 01/10]: il pin
+#  e' arrivato se i CSV _IS e _OOS hanno 3 righe ciascuno con InpPlaceMin
+#  59/60/61 (P0 = pin letto dalla colonna del CSV, classe 780; anche la
+#  colonna InpPlaceHour = 7 su tutte le righe) E Profit(60) != Profit(59)
+#  al centesimo in almeno una gamba
+#  (alle 08:00 cambia la barra dell'ATR: lo stop cambia su OGNI giornata
+#  giocata, quindi tre celle identiche al centesimo = pin NON arrivato =
+#  NULLO). La MONOTONIA Trades(61) <= Trades(60) <= Trades(59) NON e' un
+#  cancello: e' attesa nel verso ma puo' rompersi per (a)-(b)-(c) in
+#  testa. Un'eccezione si RIPORTA e si spiega, non annulla il file.
+#  DOMANDA: quanto conta il minuto PRIMA della cash per questa sedia (il
+#  01/10 il fill e' stato alle 09:59:01 FTMO)? [RISCRITTO DAL CANCELLO
+#  01/10] Trades(59) - Trades(60) NON e' "il numero di fill nel minuto
+#  07:59": e' un SALDO in deal di (1) giornate riempite alle 07:59 e gia'
+#  sotto il livello alle 08:00 (perse dalla 60), (2) giornate rotte prima
+#  delle 07:59 e tornate sopra alle 08:00 (guadagnate dalla 60), (3) lo
+#  stop/lotto/TP diversi per la barra M15 nuova, (4) il filtro S&P letto
+#  su una barra H1 diversa. Il numero dei fill delle 07:59 resta [NON
+#  MISURABILE] con questo per-trade (niente open_time, e sopravvive solo
+#  l'ultima passata, classe 455).
+#  ATTESA DICHIARATA PRIMA DEI NUMERI: dai fill osservati in forward
+#  (08:01-08:27 BCM, SEDIA_770411_IL_RIENTRO par. 5: nessun fill prima
+#  delle 08:00 su 5) e dallo spread che si stringe di 2,5x alla cash
+#  (SPREAD_APERTURA_FTMO par. 2), l'attesa e' che il minuto 07:59 pesi
+#  POCO: |Trades(60) - Trades(59)| <= 3 deal (~2 posizioni) in tutte e
+#  due le gambe. PF NON DIREZIONATO: non so se il pre-apertura e' la
+#  parte buona o cattiva dei fill.
+#  CONTRO-ESEMPIO (a due code): |Trades(60) - Trades(59)| >= 0,25 x
+#  Trades(59) (>= 5 deal su ~20) in una gamba qualunque: allora spostare
+#  il piazzamento di UN minuto attraverso la cash muove un quarto del
+#  campione e la mia attesa e' falsa; si legge cosi': la sedia e'
+#  SENSIBILE al minuto di piazzamento (fill pre-apertura o barra nuova
+#  dell'ATR/del filtro, il file non li separa).
+#  ZONA GRIGIA [RIPASSATA 01/10, classe 655]: fra le due bande (4 deal
+#  nell'IS, 4-5 nell'OOS) nessun ramo e' scritto: si RIPORTA il numero,
+#  senza lettura ne' di "pesa poco" ne' di "sensibile".
+#  [RIPASSATA 01/10, classi 357/1018] Trades identici fra le celle NON
+#  dice che il CAMPIONE e' lo stesso: un giorno perso dalla 60 e uno
+#  guadagnato possono compensarsi in deal, e la geometria nuova cambia
+#  i deal per posizione (stop -> TP1 = 1 -> 2 deal). Con Trades identici
+#  e Profit diversi si legge solo "il SALDO in deal non si muove"; se il
+#  campione sia lo stesso resta [NON MISURABILE] con questo file (per-
+#  trade di una sola passata, classe 455): il caso del 01/10 resta un
+#  evento che questo banco non distingue.
+#  OROLOGIO PER CELLA [AGGIUNTO DAL CANCELLO 01/10]: "-1/+0/+1 dalla
+#  cash" e' vero SOLO nei giorni d'ESTATE (BCM = IT-1). Nei giorni
+#  d'INVERNO (2024.10.27-2025.03.30 e 2025.10.26-2026.03.29, BCM = IT)
+#  le stesse celle stanno a -61/-60/-59 minuti dalla cash: misurano un
+#  minuto di PRE-MERCATO, non la spazzata d'apertura. Il CSV non separa
+#  le stagioni: la risposta "cash-relativa" e' DILUITA (inverno ~60%
+#  dei giorni dell'IS, ~40% dell'OOS [STIMA dal calendario]). La lettura
+#  per FTMO d'inverno (cash-allineato tutto l'anno) richiede la casella
+#  d+1 (InpPlaceHour=8 sui soli giorni d'inverno, come R246q/R246r):
+#  NON scritta qui, [NON MISURATO].
+#  REGIME [AGGIUNTO DAL CANCELLO 01/10]: un regime solo (rialzo, storico
+#  indici BCM 2024.09.26-2026.06.30) col crollo di aprile 2025 nella
+#  gamba IS (taglio 40% ~2025.06.10). Gia' detto sopra: 14 posizioni
+#  OOS, merito SOSPESO per costruzione.
+#  COSTO: 6 passate x 0,214-0,700 min/passata (0,214 = R242 su EA sorella;
+#  0,700 = R104 su copia MFE dello stesso EA, REGISTRO r.3956; [NON
+#  MISURATO] su questo binario, classe 712) = 1,3-4,2 minuti.
+#  Magic vergine 798103 (zero occorrenze nel working tree e nei rami remoti).
+
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=false
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=59||59||1||61||Y
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000
+InpTP1_R=1
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=3
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=798103
