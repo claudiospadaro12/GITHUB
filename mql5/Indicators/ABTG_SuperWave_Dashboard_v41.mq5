@@ -51,8 +51,8 @@
 //|  l'indicatore (le ripara da solo) o F8 > Colori.                  |
 //|  Un solo indicatore per grafico che nasconde le candele.          |
 //|                                                                  |
-//|  DIAGNOSI (InpDiagnosi=true): tooltip completi e righe nel        |
-//|  Journal (Esperti): direzione H4/M3, ora della barra letta,       |
+//|  DIAGNOSI (InpDiagnosi=true): tooltip completi e righe nella      |
+//|  scheda Esperti: direzione H4/M3, ora (SERVER) della barra letta, |
 //|  barre usate, esito di CopyRates, a ogni cambio di confluenza.    |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
@@ -115,7 +115,7 @@ input int    InpBlinkSeconds  = 20; // secondi di lampeggio dall'evento, poi col
 input int    InpBatch         = 6;  // simboli controllati per secondo (rotazione)
 input int    InpGridBars      = 1000; // barre CHIUSE lette per cella (minimo 400)
 input bool   InpClickCambiaTF = true; // clic su cella: il grafico passa anche a quel TF (false = resta sul TF attuale)
-input bool   InpDiagnosi      = false; // DIAGNOSI: tooltip completi + righe nel Journal
+input bool   InpDiagnosi      = false; // DIAGNOSI: tooltip completi + righe nella scheda Esperti
 //--- OPERAZIONE (ingresso/stop/target + size) ---
 input bool   InpShowTrade = true;  // mostra operazione (grafico + pannello dx)
 input double InpRiskPct   = 1.0;   // Rischio per operazione, in % del conto
@@ -531,13 +531,14 @@ void SetupSave(const string sym,const ENUM_TIMEFRAMES tf,const int d,const doubl
    GlobalVariableSet(SuKey(sym,tf,"D"),(double)d);
    GlobalVariableSet(kt,(double)(long)t);
   }
-bool SetupLoad(const int k,const string sym,const ENUM_TIMEFRAMES tf,const datetime firstT)
+bool SetupLoad(const int k,const string sym,const ENUM_TIMEFRAMES tf,const datetime firstT,const int curDir)
   {
    string kt=SuKey(sym,tf,"T");
    if(!GlobalVariableCheck(kt)) return false;
    datetime t=(datetime)(long)GlobalVariableGet(kt);
    if(t<=0 || t>=firstT) return false;      // vale solo per un'inversione PRIMA della finestra letta
    int d=(int)GlobalVariableGet(SuKey(sym,tf,"D"));
+   if(d!=curDir) return false;              // memoria superata: lo ST oggi va nell'altro verso
    double e=GlobalVariableGet(SuKey(sym,tf,"E"));
    double s=GlobalVariableGet(SuKey(sym,tf,"S"));
    if(!SW_SetupOk(d,e,s)) return false;
@@ -905,14 +906,16 @@ bool UpdateSlot(const int k,const string sym,const ENUM_TIMEFRAMES tf,const bool
    else
      {
       datetime tb=(trustFrom<got) ? r[trustFrom].time : r[last].time;
-      if(oldOk && oldT>0 && oldT<tb)
+      //    il setup tenuto o ricaricato deve avere la direzione ATTUALE del Supertrend: mai un BUY
+      //    mostrato mentre lo ST e' gia' girato SELL (inversione nuova non vista da questo slot)
+      if(oldOk && oldT>0 && oldT<tb && gCSuDir[k]==d)
         {
          gCSuMem[k]=oldMem;          // stesso setup gia' fissato in questa sessione: resta
         }
       else
         {
          gCSuOk[k]=false; gCSuMem[k]=false;
-         if(SetupLoad(k,sym,tf,tb))  // memoria (GlobalVariable) di un'inversione piu' vecchia della zona affidabile
+         if(SetupLoad(k,sym,tf,tb,d))  // memoria (GlobalVariable) di un'inversione piu' vecchia della zona affidabile
             gCSuWhy[k]="";
          else
             if(got<=trustFrom)
@@ -925,7 +928,7 @@ bool UpdateSlot(const int k,const string sym,const ENUM_TIMEFRAMES tf,const bool
    if(InpDiagnosi && sym==_Symbol && tf==_Period) CheckVsChart(k);
    return chg;
   }
-//--- identita' griglia/grafico sul simbolo e TF del grafico (solo in diagnosi, scrive nel Journal)
+//--- identita' griglia/grafico sul simbolo e TF del grafico (solo in diagnosi, scrive nella scheda Esperti)
 void CheckVsChart(const int k)
   {
    if(gChartLcT!=gCBarT[k]) return;           // non stanno leggendo la stessa barra
@@ -1437,7 +1440,7 @@ void DrawTradePanel(const int dir,const double entry,const double stop,const dou
    if(f1==2 || f2==2 || f3==2 || ft==2) lotNote+=" | lotto tagliato al MASSIMO del simbolo";
    string sig=sDir+sIn+sSl+s1+s2+s3+sR+sN+sFix+sSt+sSt2+lotNote;
    if(sig==gPanelSig && ObjectFind(0,q+"bg")>=0) return;
-   if(StringFind(gPanelSig,"WAIT|")==0) ObjectsDeleteAll(0,q);
+   if(StringFind(gPanelSig,"WAIT|")==0 || ObjectFind(0,q+"why")>=0) ObjectsDeleteAll(0,q);   // niente righe orfane del pannello d'attesa
    //--- larghezza dal testo piu' lungo (Consolas: ~6 px per carattere a 8 pt, ~7 px a 9 pt)
    int wmax=StringLen(sDir)*7;
    string rows[11];
@@ -1639,11 +1642,22 @@ int SymIndexFromObj(string name)
       return (int)StringToInteger(parts[1]);
    return -1;
   }
-//--- cambia simbolo/TF solo se cambia davvero (stesso simbolo e TF = nessuna chiamata)
+//--- cambia simbolo/TF solo se cambia davvero (stesso simbolo e TF = nessuna chiamata).
+//    Classe 930: se su QUESTO grafico gira un EA, cambiargli simbolo o TF lo reinizializza
+//    (opererebbe su un altro strumento/TF): il grafico NON si tocca. Stesso simbolo = il setup
+//    selezionato si vede gia' qui; altro simbolo = si apre un grafico nuovo (ChartOpen).
 void GoTo(const string sym,const ENUM_TIMEFRAMES tf)
   {
    ENUM_TIMEFRAMES t=(tf==PERIOD_CURRENT) ? _Period : tf;
    if(sym==_Symbol && t==_Period) return;
+   if(StringLen(ChartGetString(0,CHART_EXPERT_NAME))>0)
+     {
+      if(sym==_Symbol) return;
+      if(ChartOpen(sym,t)==0)
+         Print("[SuperWave 4.1] EA su questo grafico: simbolo/TF NON cambiati; ChartOpen fallito per ",sym,
+               " (errore ",GetLastError(),").");
+      return;
+     }
    ChartSetSymbolPeriod(0,sym,t);
   }
 //+------------------------------------------------------------------+

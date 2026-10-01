@@ -329,6 +329,7 @@ SetIndexBuffer PlotIndexSetDouble PlotIndexSetInteger PlotIndexSetString Indicat
 iMA iATR iTime iBarShift CopyRates CopyBuffer BarsCalculated IndicatorRelease SeriesInfoInteger
 ObjectCreate ObjectDelete ObjectsDeleteAll ObjectFind ObjectSetInteger ObjectSetDouble ObjectSetString
 ObjectGetString ObjectGetInteger ObjectsTotal ObjectName ChartRedraw ChartSetSymbolPeriod ChartGetInteger
+ChartGetString ChartOpen
 ChartSetInteger ChartID EventSetTimer EventKillTimer GetTickCount GetLastError ResetLastError Print
 StringSplit StringTrimLeft StringTrimRight StringLen StringFind StringSubstr StringToInteger StringGetCharacter
 IntegerToString DoubleToString TimeToString EnumToString TimeLocal SymbolSelect SymbolInfoDouble
@@ -338,7 +339,7 @@ GlobalVariableName GlobalVariableDel MathMax MathMin MathAbs MathFloor MathRound
 if for while return switch sizeof
 """.split())
 MQL_CONSTANTS = set("""
-ACCOUNT_BALANCE ANCHOR_BOTTOM ANCHOR_LEFT ANCHOR_RIGHT_UPPER ANCHOR_TOP BORDER_FLAT CHARTEVENT_OBJECT_CLICK
+ACCOUNT_BALANCE CHART_EXPERT_NAME ANCHOR_BOTTOM ANCHOR_LEFT ANCHOR_RIGHT_UPPER ANCHOR_TOP BORDER_FLAT CHARTEVENT_OBJECT_CLICK
 CHART_COLOR_CANDLE_BEAR CHART_COLOR_CANDLE_BULL CHART_COLOR_CHART_DOWN CHART_COLOR_CHART_LINE CHART_COLOR_CHART_UP
 CORNER_LEFT_UPPER CORNER_RIGHT_UPPER DRAW_COLOR_CANDLES DRAW_COLOR_LINE DRAW_LINE EMPTY_VALUE ENUM_CHART_PROPERTY_INTEGER
 ENUM_MA_METHOD ENUM_TIMEFRAMES INDICATOR_CALCULATIONS INDICATOR_COLOR_INDEX INDICATOR_DATA INDICATOR_DIGITS
@@ -356,6 +357,40 @@ FORBIDDEN = ["OrderSend", "OrderSendAsync", "CTrade", "PositionOpen", "PositionC
              "WebRequest", "SocketCreate", "SendFTP", "SendMail", "StringFormat", "PrintFormat",
              "#include <Trade", "FileOpen", "DLL", "#import"]
 TYPES = r"(?:int|double|bool|string|color|datetime|uint|long|ulong|ushort|short|char|void|MqlRates|ENUM_[A-Z_]+)"
+
+
+# regole che vivono FUORI dal blocco puro: righe ancorate (spazi tolti, sul codice senza commenti/stringhe)
+ANCHORS = [
+    ("griglia: CopyRates a barre CHIUSE", "CopyRates(sym,tf,1,gGridBars,r)", 1),
+    ("seme escluso dalle inversioni", "intfirst=InpAtrPeriod+1;", 1),
+    ("zona affidabile", "inttrustFrom=first+SW_TRUST_BARS;", 1),
+    ("setup solo dentro la zona affidabile", "if(fi>=trustFrom)", 1),
+    ("setup: direzione della barra di inversione", "gCSuDir[k]=(int)wDir[fi];", 1),
+    ("setup: ingresso = chiusura della barra di inversione", "gCSuE[k]=wC[fi];", 1),
+    ("setup: stop = Supertrend sulla barra di inversione", "gCSuS[k]=wV[fi];", 1),
+    ("setup: ora = barra di inversione", "gCSuT[k]=r[fi].time;", 1),
+    ("setup tenuto solo nel verso attuale", "if(oldOk&&oldT>0&&oldT<tb&&gCSuDir[k]==d)", 1),
+    ("memoria solo nel verso attuale", "if(d!=curDir)returnfalse;", 1),
+    ("indice H4", "if(TFS[c]==PERIOD_H4)gIdxH4=c;", 1),
+    ("indice M3", "if(TFS[c]==PERIOD_M3)gIdxM3=c;", 1),
+    ("confluenza: H4 primo, M3 secondo", "SW_Confl((int)InpConflMode,gCDir[kH],gCBs[kH],gCDir[kM],gCBs[kM],InpConflFlipBars,InpConflH4Stable)", 1),
+    ("cella accesa con InpFlipBars (disegno e clic)", "SW_CellLit(gCDir[k],gCBs[k],InpFlipBars)", 2),
+    ("setup selezionato indipendente dal TF del grafico", "ENUM_TIMEFRAMEStf=sel?gSelTf:_Period;", 1),
+    ("OnDeinit ripristina sempre le candele", "voidOnDeinit(constintreason){EventKillTimer();ColsRestore();", 1),
+    ("stato dei tasti tolto solo alla rimozione", "if(reason==REASON_REMOVE||reason==REASON_CHARTCLOSE)GvClear();", 1),
+    ("lotti: perdita per lotto = R/tick size x tick value", "doublelossPerLot=(tickSz>0)?(risk/tickSz)*tickVal:0;", 1),
+    ("classe 930: EA sul grafico -> il grafico non si tocca", "if(StringLen(ChartGetString(0,CHART_EXPERT_NAME))>0)", 1),
+]
+ANCHOR_MUTANTS = [
+    ("ingresso = chiusura dell'ULTIMA barra (regola v4.00)", "gCSuE[k]=wC[fi];", "gCSuE[k]=wC[last];"),
+    ("H4 e M3 scambiati", "gCDir[kH],gCBs[kH],gCDir[kM],gCBs[kM]", "gCDir[kM],gCBs[kM],gCDir[kH],gCBs[kH]"),
+    ("selezione ignorata", "ENUM_TIMEFRAMES tf=sel ? gSelTf : _Period;", "ENUM_TIMEFRAMES tf=_Period;"),
+]
+
+
+def missing_anchors(code):
+    flat = re.sub(r"\s+", "", code)
+    return [lab for lab, a, n in ANCHORS if flat.count(a) != n]
 
 
 def strip_code(src):
@@ -488,6 +523,16 @@ def static_checks(src, recv):
     bad = code.replace("gShowST &&", "gShST &&", 1)
     und2 = sorted(i for i in set(re.findall(r"\b((?:g|k|w)[A-Z]\w*|Inp\w+|SW_\w+)\b", bad)) if i not in declared_names(bad))
     check(und2 == ["gShST"], "contro-esempio: il refuso 'gShST' viene trovato dal controllo (%s)" % und2)
+    # ANCORE delle regole che vivono FUORI dal blocco puro (classe 1042, cancello del 01/10):
+    # un mutante su queste righe (es. ingresso = chiusura dell'ULTIMA barra, la regola v4.00) NON
+    # cambia nessuna funzione pura e passava tutto il collaudo. L'ancora prende la riga CAMBIATA;
+    # NON prova che la riga sia giusta (quello lo dice lo specchio della sezione L, che e' Python).
+    miss = missing_anchors(code)
+    check(not miss, "ancore delle regole fuori dal blocco puro presenti (%d/%d; mancanti: %s)"
+          % (len(ANCHORS) - len(miss), len(ANCHORS), miss))
+    for lab, old_t, new_t in ANCHOR_MUTANTS:
+        m2 = missing_anchors(code.replace(old_t, new_t, 1)) if code.count(old_t) >= 1 else ["(testo non trovato)"]
+        check(len(m2) > 0, "contro-esempio ancore: '%s' viene preso (%s)" % (lab, m2))
 
 
 # ===========================================================================
@@ -619,6 +664,20 @@ def series_cases():
     for k in range(per + 1, per + 4):                # tre barre di rottura enorme al rialzo
         c[k] = c[k - 1] + 80.0; h[k] = c[k] + 0.5; l[k] = c[k - 1] - 0.1
     cases.append(("sintetica inversione sulla barra dopo il seme", h, l, c))
+    # PAREGGI ESATTI con le bande (cancello indipendente 01/10): chiusura == banda alta della barra
+    # prima con ST giu', == banda bassa con ST su. Senza questo caso il mutante 'c[i]>upF[i-1] -> >='
+    # passava tutto il collaudo: nei dati reali il pareggio esatto non capita mai.
+    h, l, c = synth(600, 17)
+    j = 40
+    for want_dir, band in ((-1, "u"), (1, "d")) * 3:
+        a, u, d, r, v = st_full(h, l, c, per, 3.5)
+        while j < len(c) - 5 and r[j - 1] != want_dir:
+            j += 1
+        if j >= len(c) - 5:
+            break
+        c[j] = u[j - 1] if band == "u" else d[j - 1]
+        j += 30
+    cases.append(("sintetica pareggi esatti con le bande", h, l, c))
     if load_real():
         for nm, mins, last in (("XAUUSD M3 reale", 3, 2500), ("XAUUSD H4 reale", 240, 2500), ("XAUUSD M1 reale", 1, 2500)):
             t, h, l, c = resample(mins, last)
@@ -736,6 +795,8 @@ MUTANTS = [
     ("tocchi: stop con < invece di <=", "if(iStop<0 && l[i]<=stop) iStop=i;", "if(iStop<0 && l[i]<stop) iStop=i;"),
     ("stato: TP1 nella barra dello stop contato come prima", "if(i1>=0 && (iStop<0 || i1<iStop)) best=1;", "if(i1>=0 && (iStop<0 || i1<=iStop)) best=1;"),
     ("cella: bs < flipBars -> <=", "return (d!=0 && bs>=0 && bs<flipBars);", "return (d!=0 && bs>=0 && bs<=flipBars);"),
+    ("ST: pareggio con la banda alta conta come rottura", "         if(c[i]>upF[i-1])\n", "         if(c[i]>=upF[i-1])\n"),
+    ("ST: pareggio con la banda bassa conta come rottura", "            if(c[i]<dnF[i-1])\n", "            if(c[i]<=dnF[i-1])\n"),
 ]
 
 
@@ -752,7 +813,7 @@ def section_c(src):
             return
         d = run_identity(cx)
         check(d == 0, "C++ del blocco vero == specchio Python, bit per bit, batch e incrementale (%d differenze)" % d)
-        quick = series_cases()[:5]
+        quick = series_cases()[:6]
         for label, old, new in MUTANTS:
             if block.count(old) != 1:
                 check(False, "mutante '%s': testo da mutare non trovato una volta sola" % label)

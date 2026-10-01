@@ -1,8 +1,8 @@
 == S) STATICO sul sorgente v4.1 ==
   ok   sorgente ASCII puro (0 caratteri non ASCII)
-  ok   parentesi () bilanciate (1273/1273)
-  ok   parentesi {} bilanciate (176/176)
-  ok   parentesi [] bilanciate (537/537)
+  ok   parentesi () bilanciate (1283/1283)
+  ok   parentesi {} bilanciate (177/177)
+  ok   parentesi [] bilanciate (538/538)
   ok   SetIndexBuffer 0..33 tutti presenti una volta (34 chiamate)
   ok   indicator_plots=7 coincide con i tipi dichiarati
   ok   i buffer di calcolo stanno DOPO quelli disegnati
@@ -80,6 +80,10 @@
   ok   ogni funzione chiamata e' definita o nota a MQL5 (sconosciute: [])
   ok   nessuna funzione definita due volte ([])
   ok   contro-esempio: il refuso 'gShST' viene trovato dal controllo (['gShST'])
+  ok   ancore delle regole fuori dal blocco puro presenti (19/19; mancanti: [])
+  ok   contro-esempio ancore: 'ingresso = chiusura dell'ULTIMA barra (regola v4.00)' viene preso (['setup: ingresso = chiusura della barra di inversione'])
+  ok   contro-esempio ancore: 'H4 e M3 scambiati' viene preso (['confluenza: H4 primo, M3 secondo'])
+  ok   contro-esempio ancore: 'selezione ignorata' viene preso (['setup selezionato indipendente dal TF del grafico'])
 == C) funzioni PURE vere (estratte dal .mq5, compilate C++) == specchio Python ==
   ok   C++ del blocco vero == specchio Python, bit per bit, batch e incrementale (0 differenze)
   ok   mutante RILEVATO: confluenza M3: >= flipM3 -> > flipM3 (208 differenze)
@@ -88,8 +92,8 @@
   ok   mutante RILEVATO: modo 0 senza confronto (2304 differenze)
   ok   mutante RILEVATO: lotti senza tolleranza (61 differenze)
   ok   mutante RILEVATO: lotti senza tetto massimo (676 differenze)
-  ok   mutante RILEVATO: banda alta con c[i] invece di c[i-1] (4378 differenze)
-  ok   mutante RILEVATO: ATR con un TR in meno (20660 differenze)
+  ok   mutante RILEVATO: banda alta con c[i] invece di c[i-1] (4844 differenze)
+  ok   mutante RILEVATO: ATR con un TR in meno (23032 differenze)
   ok   mutante RILEVATO: seme: >= mid -> > mid (175 differenze)
   ok   mutante RILEVATO: gate: non sincronizzata sempre provvisoria (3 differenze)
   ok   mutante RILEVATO: gate: chiave ignora ok (2 differenze)
@@ -98,6 +102,8 @@
   ok   mutante RILEVATO: tocchi: stop con < invece di <= (204 differenze)
   ok   mutante RILEVATO: stato: TP1 nella barra dello stop contato come prima (403 differenze)
   ok   mutante RILEVATO: cella: bs < flipBars -> <= (8 differenze)
+  ok   mutante RILEVATO: ST: pareggio con la banda alta conta come rottura (359 differenze)
+  ok   mutante RILEVATO: ST: pareggio con la banda bassa conta come rottura (504 differenze)
 == L1) confluenza: casi costruiti con risposta NOTA (classe 1014: un caso DEVE scattare) ==
   ok   H4 costruito: SU e stabile (dir 1, inv -1 barre fa)
   ok   M3 costruito: inversione SU esattamente sulla barra di rottura (150 == 150)

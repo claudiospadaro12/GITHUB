@@ -24,7 +24,7 @@ Stessa etichetta `#property version "4.00"`, due file diversi. Diff fra il ricev
 | Nascondi | lascia a galla le scritte BUY/SELL e il titolo | cancella e ricrea la griglia | PORTATA la correzione (tutto nascosto, stato ridisegnato al Mostra) |
 | Stop assurdo | nessun controllo | `MathAbs(entry-stop) > entry*0.5` -> niente operazione | PORTATO come controllo di lato (`SW_SetupOk`: stop sotto l'ingresso per BUY, sopra per SELL) |
 
-**Quale gira sul grafico di Claudio: NON lo sappiamo.** Si riconosce dalla finestra Input: se ci sono `InpMA4` e `InpShowCross` e' quella del repo. La 4.1 parte dal ricevuto.
+**Quale gira sul grafico di Claudio: il RICEVUTO** (confermato il 01/10 dalla sua schermata della finestra Input: niente `InpMA4` ne' `InpShowCross`). La 4.1 parte da quello.
 
 ## 2. Cosa cambia nella 4.1 (in ordine di peso)
 
@@ -37,7 +37,7 @@ Stessa etichetta `#property version "4.00"`, due file diversi. Diff fra il ricev
 7. **Zona affidabile del setup.** Un setup si fissa solo su un'inversione ad almeno `SW_TRUST_BARS`=300 barre dall'inizio della finestra: prima, la finestra puo' "inventare" un'inversione che lo storico intero non ha (costruito nel collaudo: senza la regola esce un setup FALSO, con la regola viene rifiutato). Per inversioni piu' vecchie: il setup gia' fissato nella sessione resta; al riavvio vale la memoria in GlobalVariable (solo per il setup mostrato) e il pannello scrive "da memoria".
 8. **Tasti senza ricarica** (difetto 7). HA, ST, LIVELLI, Nascondi non chiamano piu' `ChartSetSymbolPeriod`: i buffer mostrati si riempiono dai buffer di calcolo (tecnica di `ABTG_Segnali`), i livelli si ridisegnano da soli. Stato dei tasti e selezione del setup in **GlobalVariable con la ChartID nel nome** (`SW41_<ChartID>_HA/LIV/ST/HIDE/SEL_...`): sopravvivono al cambio simbolo/TF (il clic su una cella ricarica l'indicatore), si cancellano quando l'indicatore viene tolto.
 9. **Heikin Ashi** (difetto 8). Candele native nascoste (`clrNONE` su 5 colori) e ripristinate su CANDELE e a ogni uscita; riparazione all'avvio se trova il residuo completo di un HA chiuso male; autoriparazione (max 3 volte) se qualcuno le rimette.
-10. **Diagnosi** (`InpDiagnosi=false`). Accesa: tooltip completi e righe nel Journal a ogni cambio di confluenza (direzione H4 e M3, barre dall'inversione, ora della barra letta, barre usate, esito di CopyRates), a ogni `n/d` di M3/H4, un riepilogo al minuto (CopyRates, celle ricalcolate, ridisegni, oggetti), e il confronto **griglia contro grafico** sul simbolo/TF del grafico (riga `DIVERGENZA` se non coincidono). Ogni lampeggio si spiega con due numeri.
+10. **Diagnosi** (`InpDiagnosi=false`). Accesa: tooltip completi e righe nella scheda Esperti a ogni cambio di confluenza (direzione H4 e M3, barre dall'inversione, ora della barra letta, barre usate, esito di CopyRates), a ogni `n/d` di M3/H4, un riepilogo al minuto (CopyRates, celle ricalcolate, ridisegni, oggetti), e il confronto **griglia contro grafico** sul simbolo/TF del grafico (riga `DIVERGENZA` se non coincidono). Ogni lampeggio si spiega con due numeri.
 11. Minori: simboli vuoti e doppi tolti dall'elenco (prima: riga vuota con etichetta `""`, classe 982); livelli aggiornati sul posto invece di cancellati e ricreati a ogni tick; nessun calcolo pesante in `OnInit`; lotti con tetto `SYMBOL_VOLUME_MAX` e cifre del passo; valore del tick in perdita `SYMBOL_TRADE_TICK_VALUE_LOSS` (ripiego su `SYMBOL_TRADE_TICK_VALUE`).
 
 ## 3. Cosa NON cambia
@@ -58,19 +58,19 @@ Stessa etichetta `#property version "4.00"`, due file diversi. Diff fra il ricev
 | `InpBatch` | 6 | simboli controllati al secondo |
 | `InpGridBars` | 1000 | barre chiuse lette per cella (minimo 400) |
 | `InpClickCambiaTF` | true | clic su cella: anche il TF passa a quello della cella (comportamento v4.00) |
-| `InpDiagnosi` | false | tooltip completi + righe nel Journal |
+| `InpDiagnosi` | false | tooltip completi + righe nella scheda Esperti |
 
 ## 5. Come provarla (quando il cancello avra' dato PASS)
 
-Bersaglio: **un terminale MT5 DEMO sul PC di Claudio**, mai sul VPS mentre la challenge opera, mai sul reale `10105439` (`C:\BCM_Reale`) ne' sul FTMO `541452707` (`C:\FTMO`). Per riconoscere la finestra senza "occhio" (finestra PowerShell sullo stesso PC, sola lettura): `Get-Process terminal64 | select Id, MainWindowTitle, Path`.
+Bersaglio: **un terminale MT5 DEMO sul PC di Claudio**, su un grafico **SENZA EA**; mai sul VPS mentre la challenge opera, mai sul reale `10105439` (`C:\BCM_Reale`) ne' sul FTMO `541452707` (`C:\FTMO`). Il numero di conto del terminale scelto va **scritto** prima di cominciare: lo stampa (finestra PowerShell sullo stesso PC, sola lettura) `Get-Process terminal64 | select Id, MainWindowTitle, Path` (il titolo della finestra porta il numero di conto).
 
 1. Copiare il `.mq5` in `MQL5\Indicators\` del terminale scelto, aprirlo in MetaEditor, F7: **0 errori** (e annotare gli avvisi).
 2. Metterlo su UN grafico (es. EURUSD M15) con `InpDiagnosi=true`. Entro ~5 s la griglia e' piena.
-3. Tasti: HA / ST / LIVELLI / Nascondi devono rispondere subito; nel Journal **nessuna** riga `AVVIATO` a ogni clic.
-4. Simbolo acceso: passarci sopra col mouse -> tooltip con H4 e M3 (direzione e barre dall'inversione). Nel Journal la riga `confluenza nessuna -> BUY` con gli stessi numeri.
+3. Tasti: HA / ST / LIVELLI / Nascondi devono rispondere subito; nella scheda Esperti **nessuna** riga `AVVIATO` a ogni clic.
+4. Simbolo acceso: passarci sopra col mouse -> tooltip con H4 e M3 (direzione e barre dall'inversione). Nella scheda Esperti la riga `confluenza nessuna -> BUY` con gli stessi numeri.
 5. Cella accesa M3 di EURUSD: clic -> il pannello dice "Setup M3 BUY/SELL, fissato alle ..."; passare il grafico a H1: il pannello resta su M3 con gli stessi prezzi. Clic sul titolo del pannello -> torna al setup del TF del grafico.
 6. Ogni minuto, riga di riepilogo: CopyRates nell'ordine di qualche decina; `confronti griglia/grafico ... divergenti 0`. Una riga `DIVERGENZA` va riportata (con il numero di barre del grafico).
-7. Confronto col vecchio: sul grafico con la v4.00, cliccare LIVELLI e guardare il Journal: se a ogni clic compare `[SuperWave] AVVIATO` il tasto ricaricava l'indicatore; se no, era solo un ricalcolo (vedi checklist, difetto 7).
+7. Confronto col vecchio: sul grafico con la v4.00, cliccare LIVELLI e guardare la scheda Esperti: se a ogni clic compare `[SuperWave] AVVIATO` il tasto ricaricava l'indicatore; se no, era solo un ricalcolo (vedi checklist, difetto 7).
 
 ## 6. Rischi residui e cose NON verificate
 
@@ -79,16 +79,25 @@ Bersaglio: **un terminale MT5 DEMO sul PC di Claudio**, mai sul VPS mentre la ch
 - Scrittura dei buffer da `OnChartEvent` (tasti), `clrNONE` per nascondere le candele, tooltip con a capo: tecniche gia' usate in `ABTG_Segnali_EMA_BB_ST.mq5`, non provate in questo file nel terminale.
 - Identita' griglia/grafico **dentro MT5**: stessa funzione, ma se il compilatore MQL5 fondesse le operazioni (FMA) in modo diverso nei due punti, potrebbe nascere uno scarto all'ultima cifra. La diagnosi lo scrive (`DIVERGENZA`).
 - Grafico con meno di ~150 barre ("Max barre nel grafico" basso): il grafico puo' non aver agganciato lo stato; la diagnosi lo segnala.
-- Selezione con nomi simbolo molto lunghi: la GlobalVariable ha un limite di 63 caratteri; se il salvataggio fallisce, Print nel Journal e la selezione non sopravvive al cambio simbolo.
+- Selezione con nomi simbolo molto lunghi: la GlobalVariable ha un limite di 63 caratteri; se il salvataggio fallisce, Print nella scheda Esperti e la selezione non sopravvive al cambio simbolo.
 - La memoria del setup (GlobalVariable `SW41S_...`) si salva solo per il setup mostrato; un'inversione piu' vecchia di ~700 barre, mai mostrata, al riavvio da' "in attesa".
 - Lo stato dei tocchi usa massimo/minimo delle barre: se stop e TP cadono nella stessa barra l'ordine non si conosce (scritto "ordine non noto").
 - Il lampeggio di 20 s riparte a ogni ricarica dell'indicatore (per le confluenze gia' accese).
 - Un solo indicatore per grafico che nasconde le candele: con `ABTG_Segnali_EMA_BB_ST` in HA sullo stesso grafico i due si disturbano.
 - **Non e' una strategia validata**: sono strumenti di lettura. I lotti sono indicativi.
-- Classi nuove nate qui: **1040** (finestra con lo stesso stato ma una storia diversa: la zona affidabile del setup) e **1041** (controllo statico collaudato col refuso vero `gShST`), in `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`.
+- **Correzioni del cancello indipendente (01/10, sera)**, tutte in questo file e nel collaudo:
+  1. **Clic con un EA sul grafico (classe 930, gia' pagata con l'`EMA200_Dashboard`)**: la 4.1 chiamava `ChartSetSymbolPeriod` anche se sul grafico girava un EA, che si sarebbe reinizializzato su un altro simbolo/TF. Ora: EA presente -> il grafico NON si tocca (stesso simbolo: si seleziona solo il setup; altro simbolo: si apre un grafico nuovo). Resta la regola: **mettila su un grafico SENZA EA**.
+  2. **Setup tenuto o ricaricato dalla memoria**: ora deve avere la **direzione attuale** del Supertrend; prima un setup di memoria poteva restare BUY mentre lo ST era gia' SELL (caso raro: inversione nuova mai mostrata e poi piu' vecchia di ~700 barre). Se due inversioni nello stesso verso sfuggono alla memoria, il pannello puo' ancora mostrare la PENULTIMA: rarissimo, **non coperto dal collaudo**.
+  3. **Collaudo**: i miei mutanti sulle righe FUORI dal blocco puro (ingresso = chiusura dell'ULTIMA barra, cioe' la regola v4.00; stop dell'ultima barra; H4/M3 scambiati; selezione ignorata) **passavano tutto il collaudo**: la sezione L prova lo SPECCHIO Python, non il `.mq5`. Aggiunte 19 **ancore** testuali su quelle righe (piu' 3 contro-esempi che devono scattare). Un'ancora prende la riga CAMBIATA; non dimostra che la riga sia giusta. Passava anche un mutante DENTRO il blocco puro (`c[i]>upF[i-1]` -> `>=`: un pareggio esatto con la banda conta come rottura), perche' nei dati il pareggio esatto non capita: aggiunto un caso costruito con pareggi esatti e i due mutanti (banda alta e bassa). Ora i mutanti del blocco puro presi sono 18 su 18. Su 13 mutanti del cancello, prima ne prendeva 1; ora 13.
+- **Le ore nel pannello e nei tooltip sono ORA SERVER** (ora delle candele): d'estate BCM = ora italiana - 1, d'inverno BCM = ora italiana (vedi `report/OROLOGIO_BCM_2026-09-24.md`). Le righe nella scheda Esperti hanno invece l'ora del PC.
+- **Il pannello di destra e' piu' largo della v4.00**: la v4.00 aveva uno sfondo fisso di 178 px (il testo piu' lungo ci usciva gia'); la 4.1 lo allarga al testo, ~380 px con le righe nuove. Stesse righe, stesso ordine, 3 righe in piu' in fondo: se lo vuoi stretto come prima va accorciato il testo (domanda 4).
+- **Memoria del setup condivisa fra grafici**: le GlobalVariable `SW41S_...` hanno simbolo e TF nel nome ma NON i parametri: due istanze con `InpAtrPeriod`/`InpMult1` diversi si scambiano la memoria (il controllo di direzione limita il danno).
+- **ChartID dopo un riavvio del terminale [NON VERIFICATO]**: se cambia, lo stato dei tasti torna ai valori degli input e le vecchie GlobalVariable restano orfane (il terminale le cancella da solo dopo 4 settimane senza accesso).
+- Classi nuove nate qui: **1040** (finestra con lo stesso stato ma una storia diversa: la zona affidabile del setup) **1041** (controllo statico collaudato col refuso vero `gShST`) e **1042** (dal cancello: la regola scritta FUORI dal blocco puro non era collaudata da nessuno), in `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`.
 
 ## 7. Domande per Claudio (solo lui puo' decidere)
 
 1. `InpConflH4Stable`: 3 barre H4 (12 ore) senza inversioni ti va bene, o preferisci 0 (basta la direzione)?
 2. Un setup **invalidato** (stop toccato) va ancora mostrato col suo stato (cosi' e' ora) o va nascosto finche' non c'e' una nuova inversione?
 3. `InpClickCambiaTF`: il clic su una cella deve continuare a cambiare anche il TF (default attuale) o restare sul TF che stai guardando?
+4. Il pannello di destra ora e' largo ~380 px (prima 178): va bene cosi' o lo vuoi stretto come prima (testo delle righe nuove piu' corto)?
