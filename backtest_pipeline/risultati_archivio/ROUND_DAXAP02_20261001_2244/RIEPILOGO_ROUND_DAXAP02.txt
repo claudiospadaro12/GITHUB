@@ -1,0 +1,32 @@
+RIEPILOGO ROUND DAXAP02 -- PRV_DAXAP_02: asse InpCloseHour 11/13/15/17 (InpCloseMin 30) sulla cella viva 770101 LONG di ABTG_DAX_Apertura_EU. D30EUR M5, Modello 4 (tick reali), deposito 100000, rischio 1,00 di banco, magic 798102, finestra 2024.09.26-2026.06.30, IS fino al 2025.06.09, OOS dal 2025.06.10.
+data: 2026-10-01 22:44:21
+fine: 2026-10-01 22:46:55   durata del job secondi: 151   (dichiarato [STIMA] 1-3 minuti)
+pc  : DESKTOP-H4D7CAJ   terminale ammesso: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392). VPS VMI3047753 e tutte le sue cartelle dati NON toccati; nessun processo chiuso, nessuna cache svuotata.
+pin : cc49a21ea36d44374f90d668420d48a163909df3
+GUARDIA EA sui grafici salvati: 103 letti, zero EA attaccati (altrimenti la riga non partiva)
+
+STATO: DAXAP02=OK   (OK = catena integra: motore e prova = pin, referto = riga, CSV completi, asse e pin arrivati, finestre = dichiarate | KO = 2 gambe morte | NV = non verificabile o contraddittorio, col MOTIVO)
+DAXAP02 OK   rc 0   durata 151 s   gambe viste 2 partite 2 morte 0   OnTesterInit works too long: 0 righe   pin numerici confrontati: _IS 348 _OOS 348 (attesi 348 per gamba, piu 2 stringhe NON confrontate e l asse)   finestra girata: [from 2024.09.26 00:00 to 2025.06.09 00:00 su D30EUR: = IS dichiarata] [from 2025.06.10 00:00 to 2026.06.30 00:00 su D30EUR: = OOS dichiarata]
+
+CLASSE 166/892: motore = pin (SHA256, EA + include + driver di walk-forward)
+prova = pin (SHA256)   direttive e input: = riga (90 input, asse InpCloseHour, nessuna @DEPOSITO)
+referto: pin cc49a21ea36d44374f90d668420d48a163909df3, macchina DESKTOP-H4D7CAJ, terminale C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe, deposito 100000, modello 4 = riga
+_IS: fresco 4 righe, Trades>0 su 4; asse InpCloseHour [11/13/15/17] ok
+_OOS: fresco 4 righe, Trades>0 su 4; asse InpCloseHour [11/13/15/17] ok
+
+NUMERI DAI CSV, cella per cella (NESSUN confronto qui):
+   IS   InpCloseHour  11   Trades   150   Profit    2678.69   PF  1.09975   Equity DD % 4.0755
+   IS   InpCloseHour  13   Trades   163   Profit    3416.06   PF  1.11849   Equity DD % 4.3854
+   IS   InpCloseHour  15   Trades   171   Profit    3196.27   PF  1.10555   Equity DD % 5.9173
+   IS   InpCloseHour  17   Trades   175   Profit    3789.36   PF  1.12634   Equity DD % 5.4362
+   OOS  InpCloseHour  11   Trades   220   Profit   13107.51   PF  1.35406   Equity DD % 4.5115
+   OOS  InpCloseHour  13   Trades   236   Profit   11830.38   PF  1.29262   Equity DD % 4.4788
+   OOS  InpCloseHour  15   Trades   257   Profit   15907.16   PF  1.36956   Equity DD % 5.7417
+   OOS  InpCloseHour  17   Trades   270   Profit   18029.58   PF  1.39709   Equity DD % 7.2328
+PERTRADE abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_798102.csv: 270 deal di uscita, gamba OOS, chiusure dal 2025.06.11 10:23:12 al 2026.06.25 09:19:38, righe con magic diverso da 798102: 0. Cella NON identificabile dal file (classe 455): informativo, mai motivo di NULLO da solo.
+
+LOG_TESTER: 13 file .log scritti DOPO l avvio (giornali del tester leggibili: 1 su 1). Gambe viste dopo l avvio: 2 (non attribuite: 0); prima dell avvio: 12.
+CARTELLA DEL DRIVER ROUND_DAXAP02: copiata
+
+LETTURA: questa riga NON emette un verdetto e NON applica G0, S1, S1m, M1, R1, A1, A5: sono nel file prova prove/PRV_DAXAP_02_closehour_770101_D30EUR.txt (al pin), scritte PRIMA dei numeri, e si leggono sui CSV qui raccolti. Il G0 (cella 17 = R47a/R246e/R270c) vale solo se lo STATO e OK. Niente si promuove, nessuna taglia si propone.
+NON MISURATI DA QUESTA RIGA, PER COSTRUZIONE: il merito; quale cella ha scritto il per-trade (classe 455); la separazione fra tempo massimo e taglio degli ingressi tardivi (dichiarata nel file prova); Windows PowerShell 5.1 e MT5 sono quelli di questa macchina.
