@@ -1,0 +1,241 @@
+== S) STATICO sul sorgente ==
+  ok   sorgente ASCII puro (0 caratteri non ASCII)
+  ok   parentesi () bilanciate (979/979)
+  ok   parentesi {} bilanciate (163/163)
+  ok   parentesi [] bilanciate (485/485)
+  ok   SetIndexBuffer 0..33 tutti presenti una volta (34 chiamate)
+  ok   indicator_plots=10 coincide con i tipi
+  ok   buffer disegnati = somma dei plot (14 contro 14)
+  ok   i buffer di calcolo stanno DOPO quelli disegnati
+  ok   nessun 'OrderSend' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'OrderSendAsync' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'CTrade' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'PositionOpen' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'PositionClose' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'OrderCalcMargin' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'OrderSelect' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'PositionSelect' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'WebRequest' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'SocketCreate' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'SendFTP' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'SendMail' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'SendNotification' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'StringFormat' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'PrintFormat' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun '#include' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'FileOpen' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun '#import' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'ChartSetSymbolPeriod' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'ChartOpen' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'iCustom' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'ChartIndicatorAdd' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'ChartApplyTemplate' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'Alert(' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'TerminalClose' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   nessun 'ExpertRemove' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)
+  ok   EMA 200: plot 10, clrRed, spessore 3
+  ok   EMA 50: plot 9, clrWhite, spessore 2
+  ok   EMA 9: plot 7, clrHotPink, spessore 1
+  ok   EMA 21: plot 8, clrGold, spessore 1
+  ok   input InpBarraX = 4 (trovato 4)
+  ok   input InpBarraY = 20 (trovato 20)
+  ok   input InpTastoH = 19 (trovato 19)
+  ok   input InpTastoFont = 7 (trovato 7)
+  ok   input InpDefaultAccesoEma200 = false (trovato false)
+  ok   input InpDefaultAccesoEma50 = false (trovato false)
+  ok   input InpDefaultAccesoEma921 = false (trovato false)
+  ok   input InpDefaultAccesoBB = false (trovato false)
+  ok   input InpDefaultAccesoST = false (trovato false)
+  ok   input InpDefaultAccesoLivelli = false (trovato false)
+  ok   input InpDefaultAccesoHA = false (trovato false)
+  ok   input InpDefaultAccesoOrdine = false (trovato false)
+  ok   input InpEma200 = 200 (trovato 200)
+  ok   input InpEma50 = 50 (trovato 50)
+  ok   input InpEma9 = 9 (trovato 9)
+  ok   input InpEma21 = 21 (trovato 21)
+  ok   input InpColEma200 = clrRed (trovato clrRed)
+  ok   input InpColEma50 = clrWhite (trovato clrWhite)
+  ok   input InpColEma9 = clrHotPink (trovato clrHotPink)
+  ok   input InpColEma21 = clrGold (trovato clrGold)
+  ok   input InpBBPeriodo = 20 (trovato 20)
+  ok   input InpBBDev = 2.0 (trovato 2.0)
+  ok   input InpStPeriodo = 10 (trovato 10)
+  ok   input InpStMolt = 3.0 (trovato 3.0)
+  ok   input InpLiv_GiornoPrecMax = true (trovato true)
+  ok   input InpLiv_GiornoPrecMin = true (trovato true)
+  ok   input InpLiv_GiornoPrecChiusura = true (trovato true)
+  ok   input InpLiv_OggiApertura = true (trovato true)
+  ok   input InpLiv_OggiMax = true (trovato true)
+  ok   input InpLiv_OggiMin = true (trovato true)
+  ok   input InpLiv_SettPrecMax = true (trovato true)
+  ok   input InpLiv_SettPrecMin = true (trovato true)
+  ok   input InpLiv_MesePrecMax = false (trovato false)
+  ok   input InpLiv_MesePrecMin = false (trovato false)
+  ok   input InpLiv_NotteMax = true (trovato true)
+  ok   input InpLiv_NotteMin = true (trovato true)
+  ok   input InpLiv_TondoSopra = false (trovato false)
+  ok   input InpLiv_TondoSotto = false (trovato false)
+  ok   input InpLiv_H4Max = false (trovato false)
+  ok   input InpLiv_H4Min = false (trovato false)
+  ok   input InpNotteDaOra = 23 (trovato 23)
+  ok   input InpNotteDaMin = 0 (trovato 0)
+  ok   input InpNotteAOra = 4 (trovato 4)
+  ok   input InpNotteAMin = 59 (trovato 59)
+  ok   input InpTondoPasso = 0.0 (trovato 0.0)
+  ok   input InpH4Ampiezza = 2 (trovato 2)
+  ok   input InpSetupMolt = 3.5 (trovato 3.5)
+  ok   input InpRiskPct = 1.0 (trovato 1.0)
+  ok   input InpTP1_R = 1.0 (trovato 1.0)
+  ok   input InpTP2_R = 2.0 (trovato 2.0)
+  ok   input InpTP3_R = 3.0 (trovato 3.0)
+  ok   input InpSize1 = 40 (trovato 40)
+  ok   input InpSize2 = 30 (trovato 30)
+  ok   input InpSize3 = 30 (trovato 30)
+  ok   input InpStopCol = clrRed (trovato clrRed)
+  ok   input InpColTP = C'57,255,20' (trovato C'57,255,20')
+  ok   input InpFont = 8 (trovato 8)
+  ok   input InpBuyCol = C'38,166,91' (trovato C'38,166,91')
+  ok   input InpSellCol = C'200,55,50' (trovato C'200,55,50')
+  ok   input InpPanelCol = C'16,18,22' (trovato C'16,18,22')
+  ok   input InpGridCol = C'55,58,66' (trovato C'55,58,66')
+  ok   input InpTextCol = C'205,208,214' (trovato C'205,208,214')
+  ok   input InpHeadCol = clrWhite (trovato clrWhite)
+  ok   testi dei tasti nell'ordine chiesto (['EMA 200', 'EMA 50', 'EMA 9', 'EMA 21', 'BOLLINGER', 'SUPERTREND', 'LIVELLI', 'HEIKIN ASHI', 'ORDINE CONSIGLIATO'])
+  ok   le due meta' di EMA 9/21 accendono LO STESSO tasto, gli altri il proprio
+  ok   16 livelli nominati (16)
+  ok   nomi dei livelli SOLO in italiano (parole inglesi: [])
+  ok   livello 'MAX GIORNO PRECEDENTE' presente
+  ok   livello 'MIN GIORNO PRECEDENTE' presente
+  ok   livello 'CHIUSURA GIORNO PRECEDENTE' presente
+  ok   livello 'APERTURA DI OGGI' presente
+  ok   livello 'MAX DI OGGI' presente
+  ok   livello 'MIN DI OGGI' presente
+  ok   livello 'MAX SETTIMANA PRECEDENTE' presente
+  ok   livello 'MIN SETTIMANA PRECEDENTE' presente
+  ok   livello 'MAX MESE PRECEDENTE' presente
+  ok   livello 'MIN MESE PRECEDENTE' presente
+  ok   livello 'MAX NOTTE' presente
+  ok   livello 'MIN NOTTE' presente
+  ok   livello 'NUMERO TONDO SOPRA' presente
+  ok   livello 'NUMERO TONDO SOTTO' presente
+  ok   livello 'ULTIMO MASSIMO H4' presente
+  ok   livello 'ULTIMO MINIMO H4' presente
+  ok   testo "INGRESSO " presente
+  ok   testo "STOP LOSS " presente
+  ok   testo "TP1 " presente
+  ok   testo "TP2 " presente
+  ok   testo "TP3 " presente
+  ok   testo "SETUP INDICATIVO - NON VALIDATO: i lotti sono indicativi" presente
+  ok   testo "OPERAZIONE  " presente
+  ok   identificatori g*/k*/b*/Inp*/SW_*/PG_* tutti dichiarati (non dichiarati: [])
+  ok   ogni costante MQL5 usata e' nell'elenco delle costanti note (sconosciute: [])
+  ok   ogni funzione chiamata e' definita o nota a MQL5 (sconosciute: [])
+  ok   nessuna funzione definita due volte ([])
+  ok   contro-esempio: un refuso di identificatore viene trovato (['gItDrawnn'])
+  ok   rilevatore: globali lette (202)
+  ok   nessuna variabile locale o parametro con il nome di una globale (trovate: [])
+  ok   contro-esempio VERO: sul sorgente v4.1 il rilevatore trova l'avviso 'c2' ([('OnChartEvent', 'c2')])
+  ok   contro-esempio costruito: una locale 'gItN' in DrawItems viene trovata
+  ok   SW_STCore IDENTICA a quella della SuperWave v4.1
+  ok   SW_BarsSinceFlip IDENTICA a quella della SuperWave v4.1
+  ok   SW_LastFlip IDENTICA a quella della SuperWave v4.1
+  ok   SW_Dim IDENTICA a quella della SuperWave v4.1
+  ok   SW_NormLots IDENTICA a quella della SuperWave v4.1
+  ok   SW_SetupOk IDENTICA a quella della SuperWave v4.1
+  ok   SW_Hits IDENTICA a quella della SuperWave v4.1
+  ok   SW_SetupState IDENTICA a quella della SuperWave v4.1
+  ok   ColOrDefault IDENTICA a quella di ABTG_Segnali_EMA_BB_ST (testi delle Print a parte)
+  ok   ColsHide IDENTICA a quella di ABTG_Segnali_EMA_BB_ST (testi delle Print a parte)
+  ok   ColsRestore IDENTICA a quella di ABTG_Segnali_EMA_BB_ST (testi delle Print a parte)
+  ok   IsNone IDENTICA a quella di ABTG_Segnali_EMA_BB_ST (testi delle Print a parte)
+  ok   RepairInvisibleNative IDENTICA a quella di ABTG_Segnali_EMA_BB_ST (testi delle Print a parte)
+  ok   contro-esempio: il confronto di identita' vede un solo carattere cambiato
+  ok   ancore delle regole fuori dal blocco puro presenti una volta (48/48; mancanti: [])
+  ok   mutante sul sorgente vero PRESO dalle ancore: EMA 50 mostra il calcolo della 200 (['EMA 50 mostrata dal suo calcolo'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: EMA 9/21 legata al tasto EMA 50 (['EMA 9 col tasto 9/21'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: ST giu' disegna il verso su (['ST giu = verso -1'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: INGRESSO MOBILE: setup sulla barra in formazione (['setup sulle barre CHIUSE (rt-2)'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: setup col moltiplicatore della linea (3,0) (['ST del setup: STESSO periodo, moltiplicatore del setup'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: TP1 alla distanza del TP2 (['TP1 a InpTP1_R'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: LOTTO INVERTITO: argomenti scambiati (['lotti totali (argomenti in ordine)'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: tocchi contati anche sulla barra di inversione (["tocchi dalla barra DOPO l'inversione"])
+  ok   mutante sul sorgente vero PRESO dalle ancore: giorno precedente = penultima barra (domenica compresa) (['giorno precedente con la regola lun-ven (sabato: cripto)'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: giorno precedente: weekend sempre contato (['giorno precedente con la regola lun-ven (sabato: cripto)'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: settimana e mese scambiati (['settimana: W1 su 6/7'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: resistenza/supporto invertiti (['resistenza = sopra il prezzo'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: OnDeinit senza ripristino delle candele (['OnDeinit ripristina sempre le candele'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: stato dei tasti cancellato a ogni uscita (['stato dei tasti tolto solo alla rimozione'])
+  ok   mutante sul sorgente vero PRESO dalle ancore: colore EMA 200 sul plot sbagliato (['colore EMA 200 sul suo plot'])
+  ok   OnCalculate ridisegna SOLO se livelli/ordine/pannello sono cambiati
+  ok   OnTimer ridisegna solo se ha riparato o cambiato qualcosa
+  ok   scorrimento/zoom: ridisegno solo se un'etichetta si e' spostata
+  ok   nessun CopyRates diretto in OnCalculate/OnTimer (solo tramite RefreshLevels)
+== C) funzioni PURE vere (estratte dal .mq5, compilate C++) == specchio Python ==
+  ok   il blocco PURE compila con -Wall -Wshadow SENZA avvisi ([])
+  ok   EMA/BB/Supertrend(x2)/HA: C++ del blocco vero == specchio, bit per bit, 7 serie x 3 insiemi di parametri (0 barre diverse)
+  ok   calcolo INCREMENTALE come OnCalculate (barra in formazione prima falsa poi vera) == calcolo intero (0 differenze)
+  ok   funzioni dei livelli, del pannello, dei tasti e del setup == specchio (0 differenze)
+  ok   swing H4 non superato == forza bruta INDIPENDENTE su 462 casi (sintetici + XAUUSD H4 reale) (0 differenze)
+  ok   risposta nota: ultimo swing 120 non superato -> indice 7 (7)
+  ok   caso che DEVE scattare: 120 SUPERATO da 121 della barra in formazione -> torna lo swing 130 (indice 2) (2)
+  ok   Bollinger == media e pstdev (popolazione) di Python, scarto relativo massimo 1.13e-16
+  ok   ATR del Supertrend == iATR di MT5 (ATR.mq5, somma che scorre), scarto relativo massimo 1.10e-14
+  ok   EMA == forma chiusa 1-(1-a)^i sul gradino (scarto 2.3e-15)
+  ok   serie costante: EMA, bande e Heikin Ashi = 100 (risposta nota; scarto 9.9e-14: l'EMA ricorsiva non e' esatta all'ultimo bit)
+  ok   caso che DEVE scattare: discesa poi salita -> UNA inversione SU nella salita (inversioni dopo il seme a [61])
+  -- setup ORDINE CONSIGLIATO tick per tick --
+  ok   sintetica: ingresso FISSO (barre CHIUSE): 0 cambi dentro la barra, 0 cambi fra barre senza inversione su 4186 stati (cambi: 0 / 0; inversioni 11; barre con setup 1050)
+  ok   sintetica: il caso misura qualcosa (inversioni 11, setup 1050)
+  ok   sintetica: setup a fine barra == setup dal calcolo intero (0 differenze)
+  ok   sintetica: contro-esempio: setup sulla barra IN FORMAZIONE = ingresso mobile, cambia 23 volte dentro la barra
+  ok   XAUUSD M5 reale (stati = ogni minuto M1): ingresso FISSO (barre CHIUSE): 0 cambi dentro la barra, 0 cambi fra barre senza inversione su 19689 stati (cambi: 0 / 0; inversioni 92; barre con setup 3932)
+  ok   XAUUSD M5 reale (stati = ogni minuto M1): il caso misura qualcosa (inversioni 92, setup 3932)
+  ok   XAUUSD M5 reale (stati = ogni minuto M1): setup a fine barra == setup dal calcolo intero (0 differenze)
+  ok   XAUUSD M5 reale (stati = ogni minuto M1): contro-esempio: setup sulla barra IN FORMAZIONE = ingresso mobile, cambia 367 volte dentro la barra
+  ok   mutante sul sorgente vero PRESO: EMA: alfa 2/(per+2) (serie 6152, incr 0, varie 0, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: EMA: seme dimezzato (serie 5173, incr 0, varie 0, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: BB: deviazione campionaria (per-1) (serie 5931, incr 0, varie 0, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: BB: banda bassa sopra (serie 5931, incr 0, varie 0, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: BB: una barra di riscaldamento in piu' (serie 8, incr 0, varie 0, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: ST: pareggio con la banda alta conta come rottura (serie 59, incr 0, varie 0, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: ST: ATR diviso per+1 (serie 5949, incr 0, varie 0, swing 0, tick 385)
+  ok   mutante sul sorgente vero PRESO: HA: apertura della prima barra = open (come la v4.1) (serie 262, incr 0, varie 0, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: HA: massimo senza apertura/chiusura HA (serie 1574, incr 0, varie 0, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: mostra: riscaldamento EMA > invece di >= (serie 0, incr 0, varie 6, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: linea ST: anche il verso opposto (serie 0, incr 0, varie 4, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: stato iniziale: ignora l'input cambiato (serie 0, incr 0, varie 2, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: contrasto: soglia rovesciata (serie 0, incr 0, varie 9, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: giorno precedente: domenica/sabato compresi (serie 0, incr 0, varie 46, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: giorno precedente: cripto come il forex (serie 0, incr 0, varie 50, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: giorno della settimana sfasato (serie 0, incr 0, varie 58, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: notte: niente scavalco della mezzanotte (serie 0, incr 0, varie 107, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: tondi: prezzo sul multiplo = se stesso (serie 0, incr 0, varie 156, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: passo: forex JPY come gli altri (serie 0, incr 0, varie 21, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: swing H4: pari NON conta (serie 0, incr 0, varie 0, swing 2, tick 0)
+  ok   mutante sul sorgente vero PRESO: swing H4: usa la barra in formazione come vicina (serie 0, incr 0, varie 0, swing 92, tick 0)
+  ok   mutante sul sorgente vero PRESO: swing H4: superato anche a pari (serie 0, incr 0, varie 0, swing 6, tick 0)
+  ok   mutante sul sorgente vero PRESO: impila: distanza gap-1 (serie 0, incr 0, varie 174, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: migliaia: separatore ogni 4 cifre (serie 0, incr 0, varie 6, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: TP al segno sbagliato (serie 0, incr 0, varie 72, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: LOTTO INVERTITO (serie 0, incr 0, varie 3, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: lotti: arrotondamento senza tolleranza (MathFloor nudo) (serie 0, incr 0, varie 5, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: INGRESSO MOBILE: chiusura dell'ultima barra chiusa (serie 0, incr 0, varie 100, swing 0, tick 1082)
+  ok   mutante sul sorgente vero PRESO: STOP SBAGLIATO: banda dell'ultima barra (serie 0, incr 0, varie 100, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: setup: zona affidabile ignorata (serie 0, incr 0, varie 58, swing 0, tick 0)
+  ok   mutante sul sorgente vero PRESO: tocchi: TP1 con > invece di >= (serie 0, incr 0, varie 97, swing 0, tick 0)
+== L) LIVELLI su dati reali con risposta nota ==
+  ok   GIORNO PRECEDENTE == ultimo giorno lun-ven con dati (calendario) su 1771 giorni reali (0 diversi)
+  ok   caso che DEVE scattare (classe 1014): 289 lunedi' con la candela della DOMENICA; la regola ingenua 'barra prima' sbaglia in 289, la nostra in 0
+  ok   MAX/MIN/CHIUSURA GIORNO PRECEDENTE == massimo/minimo/ultima chiusura dei minuti di quel giorno (0 diversi)
+  ok   MAX/MIN SETTIMANA PRECEDENTE (settimana MT5 da domenica) == minuti della settimana prima (0 diverse su 297)
+  ok   MAX/MIN MESE PRECEDENTE == minuti del mese prima (0 diversi su 68)
+  ok   NOTTE: finestra == calendario (23:00 del giorno prima -> 04:59) su 410 istanti, sempre trovata una notte con dati (0 errori)
+  ok   NOTTE: caso che DEVE scattare: istanti di weekend/festivi in cui la notte di oggi e' vuota e si usa quella prima (12)
+== P) pannello ORDINE: lotti e formato con risposta nota ==
+  ok   lotti totali: 100 / ((5,00/0,01) x 1) = 0,20 (0.2)
+  ok   quote 40/30/30 di 0,20 al passo 0,01 = 0,08 / 0,06 / 0,06; totale 0,20 ([0.08, 0.06, 0.2])
+  ok   TP: BUY 1R = 2655, 3R = 2665; SELL 2R = 2640 ([2655.0, 2665.0, 2640.0])
+  ok   formato italiano: 24.998,25 e 0,20 (24.998,25 / 0,20)
+
+ESITO: TUTTO OK (logica e funzioni pure; NON prova la compilazione MQL5 ne' il comportamento nel terminale)
+EXIT=0
