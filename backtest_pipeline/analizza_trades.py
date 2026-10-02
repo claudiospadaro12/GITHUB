@@ -419,45 +419,74 @@ def main():
     # e la "frazione del giorno" per loro non vogliono dire niente.
     ereditate = [r for r in oggi if r["_ot"].strftime("%Y-%m-%d") != giorno]
 
-    # ---------- IL BUCO DELLE 22:45 (misurato il 01/10/2026) ----------
+    # ---------- IL BUCO DELLA PUBBLICAZIONE (misurato il 01/10, CORRETTO il 02/10) ----------
     #
-    # `pubblica_trades.ps1` gira alle 22:45 (ora VPS) e la pagella alle 23:00:
-    # una posizione che chiude fra le 22:45 e le 23:59 NON e' nel CSV quando
-    # la sua pagella viene scritta. Arriva nel CSV del giorno DOPO, portando
-    # la data di chiusura del giorno PRIMA -- e la pagella del giorno dopo si
-    # aggancia alla PROPRIA data, quindi non la vede nemmeno lei.
-    # 🔴 Quelle righe cadono in un buco che NESSUNA pagella copre.
+    # `pubblica_trades.ps1` gira alle 22:45 e la pagella alle 23:00: una
+    # posizione che chiude in mezzo NON e' nel CSV quando la sua pagella viene
+    # scritta. Arriva nel CSV del giorno dopo portando la data di chiusura del
+    # giorno prima, e la pagella del giorno dopo si aggancia alla PROPRIA
+    # data: quelle righe cadono in un buco che nessuna pagella copre.
     #
-    # Misurato su tutto l'archivio del piccolo il 01/10: **28 operazioni su
-    # 1.365 (2,1%), su 16 giornate, netto -262,41**; la piu' grossa -147,78
-    # (oro manuale, 28/06 23:40). E il caso che l'ha fatto scoprire: il 30/09
-    # una nona posizione del Bulge ha chiuso alle **22:54:20**, nove minuti
-    # dopo la pubblicazione, e la pagella del 30/09 ha contato 8 operazioni
-    # invece di 9 (netto del Bulge +0,14 invece di -5,78).
+    # 🔴 CORREZIONE DEL 02/10, E SPOSTA IL CONFINE DI UN'ORA INTERA.
+    # La prima stesura tagliava a `>= "22:45:00"`. Sbagliato: **22:45 e' ora
+    # VPS, cioe' ITALIANA** (provato: `pubblica_trades.ps1` r.169 scrive il
+    # messaggio di commit con `Get-Date` locale e GitHub lo timbra in UTC ->
+    # 36 commit di fila dicono 22:45 contro 20:45 UTC = UTC+2 = CEST), mentre
+    # la colonna `close_time` e' **ora SERVER** (`ABTG_TradeExporter.mq5`
+    # r.165: `HistoryDealGetInteger(tk, DEAL_TIME)`, provato sui dati: le
+    # `DAX Apertura` aprono all'ora 08 e le `Nasdaq Apertura`/`ORB` all'ora
+    # 14, cioe' 09:00 e 15:00 italiane). Server = IT - 1, quindi **la
+    # pubblicazione cade alle 21:45 in QUESTA colonna**, e il buco e'
+    # [21:45 ; 23:59] di ora server = **2h15m, non 15 minuti**.
+    # Effetto della correzione sull'archivio: da 28 righe misurate a **60**.
+    # Classe 1078.
     #
-    # Qui non si inventa niente e non si tocca il totale del giorno: si
-    # AVVISA, elencando le righe del giorno precedente che hanno chiuso dopo
-    # le 22:45, perche' sono esattamente quelle che la loro pagella non
-    # poteva avere.
-    # 🔴 SI GUARDANO ANCHE LE MANUALI, e non e' un dettaglio (corretto il
-    # 02/10, misurando invece di fidarsi): `righe` a questo punto ha gia'
-    # perso le operazioni senza commento (r.395), quindi la prima stesura di
-    # questo avviso ne vedeva **una su due**. Il 01/10 le righe tardive erano
-    # DUE (`SUPERWAVE SELL ` EURCHF -118,46 alle 23:01:30 e una CADCHF +4,94
-    # alle 23:01:39): l'avviso ne segnalava una. E la piu' grossa di tutto
-    # l'archivio e' proprio una manuale (oro, -147,78, 28/06 23:40): un
-    # avviso sul buco che non guarda le manuali manca il caso peggiore.
+    # 🔴 E DUE ALTRE CORREZIONI DELLO STESSO GIRO:
+    # - si guardano ANCHE le manuali: `righe` a questo punto le ha gia' perse
+    #   (r.395), e la riga piu' grossa del buco in tutto l'archivio e' proprio
+    #   una manuale (oro, -147,78, 28/06 23:40). Classe 1079.
+    # - NON si guarda solo l'ultimo giorno con dati: se la consegna si rompe
+    #   per piu' giorni (succede: 23->29/09) arrivano piu' giornate in blocco
+    #   e le precedenti verrebbero saltate. Si guardano TUTTI i giorni
+    #   precedenti che hanno una pagella scritta. Classe 1081.
+    #
+    # ⚠️ E l'avviso non afferma piu' "la pagella non poteva averla" senza
+    # guardare se quella pagella ESISTE: se il file non c'e', lo dice.
+    ORA_PUBBLICAZIONE_SERVER = "21:45:00"   # 22:45 IT - 1 = ora della colonna
     tutte = righe + manuali_tutte
-    precedenti = sorted({r["_ct"].strftime("%Y-%m-%d") for r in tutte
-                         if r["_ct"].strftime("%Y-%m-%d") < giorno})
     in_ritardo = []
-    if precedenti:
-        ultimo = precedenti[-1]
-        in_ritardo = sorted(
-            [r for r in tutte
-             if r["_ct"].strftime("%Y-%m-%d") == ultimo
-             and r["_ct"].strftime("%H:%M:%S") >= "22:45:00"],
-            key=lambda r: r["_ct"])
+    for g in sorted({r["_ct"].strftime("%Y-%m-%d") for r in tutte
+                     if r["_ct"].strftime("%Y-%m-%d") < giorno}):
+        tardive = sorted([r for r in tutte
+                          if r["_ct"].strftime("%Y-%m-%d") == g
+                          and r["_ct"].strftime("%H:%M:%S") >= ORA_PUBBLICAZIONE_SERVER],
+                         key=lambda r: r["_ct"])
+        if not tardive:
+            continue
+        # La pagella di quel giorno esiste? Se no, non si puo' dire che "non
+        # poteva averle": non e' mai stata scritta, ed e' un fatto diverso.
+        esiste = os.path.exists(os.path.join(OUT_DIR, "giornata_%s.md" % g))
+        in_ritardo.append((g, tardive, esiste))
+    # Si avvisa solo sul giorno precedente piu' recente: i piu' vecchi sono
+    # storia, e l'avviso serve a correggere la pagella di IERI. Gli altri
+    # restano contati qui sotto, dichiarati.
+    # 🔴 E i giorni piu' vecchi si contano SOLO se hanno una pagella: dove la
+    # pagella non esiste non c'e' nessun numero da correggere, e metterli
+    # insieme gonfia l'avviso con storia. Misurato il 02/10: 33 giornate
+    # hanno righe oltre le 21:45, ma solo **4** hanno anche una pagella
+    # (15/09, 16/09, 30/09, 01/10) -- la pagella e' nata il 03/08. Classe 1080.
+    # 🔴 CORREZIONE TROVATA DALLA PROVA NEGATIVA (02/10): l'avviso principale
+    # deve parlare del giorno IMMEDIATAMENTE PRECEDENTE CON DATI -- quello la
+    # cui pagella e' stata scritta poco prima di questa -- non dell'ultimo
+    # giorno che *ha* righe tardive. Prendendo `in_ritardo[-1]` la pagella del
+    # 22/09 avvisava sul **16/09**, sei giorni prima: un allarme stantio, che
+    # e' il modo in cui un allarme smette di essere guardato.
+    # Gli altri giorni restano nella nota di coda, e solo se hanno una pagella.
+    giorni_con_dati = sorted({r["_ct"].strftime("%Y-%m-%d") for r in tutte
+                              if r["_ct"].strftime("%Y-%m-%d") < giorno})
+    prec = giorni_con_dati[-1] if giorni_con_dati else None
+    piu_vecchi = [x for x in in_ritardo if x[0] != prec and x[2]]
+    in_ritardo = [x for x in in_ritardo if x[0] == prec]
 
     out = ["# 📅 Giornata %s — pagella automatica" % giorno, "",
            "_Generato da `analizza_trades.py` sul CSV del TradeExporter. "
@@ -617,28 +646,51 @@ def main():
             "`report/giornata_2026-09-25.md` §1.", ""]
 
     if in_ritardo:
+        g, tardive, esiste = in_ritardo[0]
         netto_rit = sum(num(r, "profit") + num(r, "swap") + num(r, "commission")
-                        for r in in_ritardo)
-        out += ["> 🔴 **IL BUCO DELLE 22:45: %d posizion%s del %s %s chius%s DOPO la "
-                "pubblicazione**, quindi la pagella di quel giorno **non poteva "
-                "averl%s** (`pubblica_trades.ps1` gira alle 22:45, la pagella alle "
-                "23:00). Netto non contato li': **%+.2f**. %s"
-                % (len(in_ritardo), "i" if len(in_ritardo) > 1 else "e",
-                   in_ritardo[0]["_ct"].strftime("%d/%m"),
-                   "si sono" if len(in_ritardo) > 1 else "si e'",
-                   "e" if len(in_ritardo) > 1 else "a",
-                   "e" if len(in_ritardo) > 1 else "a",
-                   netto_rit,
+                        for r in tardive)
+        gg = "/".join(reversed(g.split("-")[1:]))
+        if esiste:
+            testa = ("**IL BUCO DELLA PUBBLICAZIONE: %d posizion%s del %s %s chius%s "
+                     "DOPO le 21:45 ora server**, cioe' dopo che "
+                     "`pubblica_trades.ps1` aveva gia' pubblicato (gira alle **22:45 "
+                     "italiane = 21:45 server**): la pagella di quel giorno, scritta "
+                     "alle 23:00 italiane, **non poteva averl%s**."
+                     % (len(tardive), "i" if len(tardive) > 1 else "e", gg,
+                        "si sono" if len(tardive) > 1 else "si e'",
+                        "e" if len(tardive) > 1 else "a",
+                        "e" if len(tardive) > 1 else "a"))
+        else:
+            testa = ("**IL BUCO DELLA PUBBLICAZIONE: %d posizion%s del %s %s chius%s "
+                     "dopo le 21:45 ora server**, e per quel giorno **non esiste "
+                     "nessuna pagella**: non ci sono numeri da correggere, si "
+                     "segnalano perche' nessun referto le ha mai contate."
+                     % (len(tardive), "i" if len(tardive) > 1 else "e", gg,
+                        "si sono" if len(tardive) > 1 else "si e'",
+                        "e" if len(tardive) > 1 else "a"))
+        out += ["> 🔴 " + testa + " Netto non contato li': **%+.2f**. %s"
+                % (netto_rit,
                    " · ".join("`%s` %s %+.2f (%s)" % (
                        r.get("strategy") or "manuale", r.get("symbol"),
                        num(r, "profit") + num(r, "swap") + num(r, "commission"),
-                       r["_ct"].strftime("%H:%M:%S")) for r in in_ritardo)),
+                       r["_ct"].strftime("%H:%M:%S")) for r in tardive)),
                 "",
                 "> 👉 Il totale di **oggi** qui sotto **non le include** (la loro data "
-                "di chiusura e' di ieri) ed e' giusto cosi': servono per **correggere "
-                "la pagella di ieri**, non per gonfiare questa. Misurato il 01/10 su "
-                "tutto l'archivio: **28 operazioni su 1.365 (2,1%), 16 giornate, "
-                "netto −262,41**.", ""]
+                "di chiusura e' di un altro giorno) ed e' giusto cosi': servono per "
+                "**correggere quella pagella**, non per gonfiare questa. Misura "
+                "dell'archivio, 02/10, **tre denominatori che non vanno confusi**: tasso "
+                "strutturale **4,21% della flotta** (30 righe su 713); "
+                "controfattuale d'archivio **-683,55** su 62 righe e 33 giornate; "
+                "**danno effettivo sulle pagelle che esistono: 5 righe su 4 "
+                "giornate, -116,24** (la pagella e' nata il 03/08). Dettaglio in "
+                "`report/giornata_2026-10-02.md`.", ""]
+        if piu_vecchi:
+            out += ["> ⚠️ E ci sono **altre %d giornate** piu' vecchie con righe oltre "
+                    "le 21:45 server (%s): non le riporto qui perche' l'avviso serve a "
+                    "correggere la pagella **piu' recente**, ma sono contate."
+                    % (len(piu_vecchi),
+                       ", ".join("/".join(reversed(x[0].split("-")[1:])) for x in piu_vecchi[-6:])),
+                    ""]
 
     if ereditate:
         out += ["> ⚠️ %d posizion%s apert%s in giorni precedenti e chius%s oggi "
