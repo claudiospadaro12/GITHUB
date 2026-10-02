@@ -14,10 +14,14 @@
 #    FOMC 2026-10-28 e 2026-12-09 | ECB 2026-10-29 e 2026-12-17
 #    NFP  2026-11-06 e 2026-12-04
 #
-#  PERCHE' UN FILE NUOVO e non abtg_news.csv: abtg_news.csv e' letto da
-#  altre 15 sedie (BreakingBand, PTE, ORB, Dow/Nasdaq/DAX Apertura...) fra
-#  cui sedie sul conto REALE. Aggiungere li' FOMC/ECB cambierebbe il
-#  comportamento di quelle sedie: non e' compito di questa riga.
+#  PERCHE' UN FILE NUOVO e non abtg_news.csv: in Common\Files il file
+#  abtg_news.csv lo aprono SOLO 771201/771202 (PostNews usa FILE_COMMON).
+#  Le altre 15 sedie con InpNewsFile=abtg_news.csv (BreakingBand, PTE, ORB,
+#  Aperture..., anche REALE e FTMO) lo aprono SENZA FILE_COMMON, cioe' dalla
+#  sandbox MQL5\Files del PROPRIO terminale: un file OMONIMO e diverso.
+#  Un nome dedicato toglie l'omonimia (nessuno "allinea" per sbaglio i due
+#  abtg_news.csv) e mette le tre PostNews su un file solo.
+#  Le ore del file sono UTC e solo informative: l'EA confronta la sola DATA.
 #
 #  NON FA NIENTE DA SOLA: le tre sedie leggono il file nuovo solo dopo
 #  che Claudio cambia InpNewsFile con F7 sul grafico (a mano, vedi
