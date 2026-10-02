@@ -439,14 +439,25 @@ def main():
     # AVVISA, elencando le righe del giorno precedente che hanno chiuso dopo
     # le 22:45, perche' sono esattamente quelle che la loro pagella non
     # poteva avere.
-    precedenti = sorted({r["_ct"].strftime("%Y-%m-%d") for r in righe
+    # 🔴 SI GUARDANO ANCHE LE MANUALI, e non e' un dettaglio (corretto il
+    # 02/10, misurando invece di fidarsi): `righe` a questo punto ha gia'
+    # perso le operazioni senza commento (r.395), quindi la prima stesura di
+    # questo avviso ne vedeva **una su due**. Il 01/10 le righe tardive erano
+    # DUE (`SUPERWAVE SELL ` EURCHF -118,46 alle 23:01:30 e una CADCHF +4,94
+    # alle 23:01:39): l'avviso ne segnalava una. E la piu' grossa di tutto
+    # l'archivio e' proprio una manuale (oro, -147,78, 28/06 23:40): un
+    # avviso sul buco che non guarda le manuali manca il caso peggiore.
+    tutte = righe + manuali_tutte
+    precedenti = sorted({r["_ct"].strftime("%Y-%m-%d") for r in tutte
                          if r["_ct"].strftime("%Y-%m-%d") < giorno})
     in_ritardo = []
     if precedenti:
         ultimo = precedenti[-1]
-        in_ritardo = [r for r in righe
-                      if r["_ct"].strftime("%Y-%m-%d") == ultimo
-                      and r["_ct"].strftime("%H:%M:%S") >= "22:45:00"]
+        in_ritardo = sorted(
+            [r for r in tutte
+             if r["_ct"].strftime("%Y-%m-%d") == ultimo
+             and r["_ct"].strftime("%H:%M:%S") >= "22:45:00"],
+            key=lambda r: r["_ct"])
 
     out = ["# 📅 Giornata %s — pagella automatica" % giorno, "",
            "_Generato da `analizza_trades.py` sul CSV del TradeExporter. "
