@@ -29,7 +29,11 @@ fare onestamente senza terminale (stesso impianto di collaudo_pulsanti_grafico.p
      scattare, classe 1014) e CON la correzione tornano giusti a ogni chiusura; (c) tetto di
      caricamento basso + serie in ritardo: nessuna cella si azzera; (d) D1 del lunedi' con la
      candela della domenica (classe 1065): precedente = venerdi'; la regola ingenua sbaglia.
-  M) MUTANTI applicati al SORGENTE VERO (classe 1033): ognuno deve essere preso.
+  M) MUTANTI applicati al SORGENTE VERO (classe 1033): ognuno deve essere preso. Comprende i
+     mutanti CIECHI del cancello indipendente (02/10, giri 1-4, etichetta [cieco]) sul codice di
+     raccordo, presi da 5 controlli di COMPORTAMENTO (nessuna cella azzerata, campi MqlRates,
+     indici di cella, livelli dalla locale omonima, pannello forza per valuta) e da ancore; il
+     residuo verde (testi/tooltip/impaginazione + 2 equivalenti) e' contato e dichiarato.
 
 Uso:   python3 backtest_pipeline/collaudo_forza_fx.py [--rapido]
        python3 backtest_pipeline/collaudo_forza_fx.py --diag file_journal.txt
@@ -794,6 +798,39 @@ def static_checks(src):
     flat_c = re.sub(r"//[^\n]*", "", src).replace(" ", "").replace("\n", "")
     for lab, a in ANCHORS:
         check(a in (flat_c if "C'" in a else flat), "ancora: " + lab)
+    # --- cancello indipendente 02/10 (classe 1068, giro cieco): controlli di COMPORTAMENTO sul raccordo
+    # (1) nessuna cella si azzera fuori da OnInit: l'unica scrittura di gSt[] e' lo stato ricalcolato
+    #     in AggiornaStato, e gCar[] fuori da OnInit si scrive solo a true (caricamento riuscito)
+    oi_ = func_body(code, "OnInit")
+    rest_ = code.replace(oi_, "", 1) if oi_ else code
+    w_st = [x.strip() for x in re.findall(r"\bgSt\s*\[[^\]]*\]\s*=(?!=)\s*([^;]*);", rest_)]
+    w_car = [x.strip() for x in re.findall(r"\bgCar\s*\[[^\]]*\]\s*=(?!=)\s*([^;]*);", rest_)]
+    check(w_st == ["st"] and all(x == "true" for x in w_car) and not re.search(r"Array(Initialize|Fill)\s*\(\s*g(St|Car)\b", rest_),
+          "NESSUNA cella azzerata fuori da OnInit: gSt[] scritto solo da AggiornaStato (%s), gCar[] solo a true (%s)" % (w_st, w_car))
+    # (2) i campi di MqlRates finiscono ognuno nel suo array (il percorso dei dati non e' nel blocco puro)
+    mp_c = dict(re.findall(r"\b(\w+)\[i\]\s*=\s*r\[i\]\.(\w+)", func_body(code, "CaricaCella")))
+    mp_m = dict(re.findall(r"\b(\w+)\[i\]\s*=\s*r\[i\]\.(\w+)", func_body(code, "CorreggiSimbolo")))
+    check(mp_c == {"t": "time", "o": "open", "h": "high", "l": "low", "cc": "close"} and mp_m == {"mt": "time", "mh": "high", "ml": "low"},
+          "MqlRates -> array: time/open/high/low/close al loro posto in CaricaCella (%s) e CorreggiSimbolo (%s)" % (mp_c, mp_m))
+    # (3) il pannello forza scrive la valuta della RIGA r (v=gOrd[r]), mai l'indice di riga come valuta
+    dfz = func_body(code, "DisegnaForza").replace(" ", "")
+    check(not re.search(r"(gForza|gNum|gDen|FFX_VAL)\[r\]", dfz), "pannello forza: numero, nome e tooltip della valuta v=gOrd[r], mai [r]")
+    # (4) aritmetica degli indici di cella in TUTTO il raccordo: k = s*FFX_NTF + c, s = k/FFX_NTF,
+    #     c = k%FFX_NTF, e il TF di una cella e' FFX_TF[c] (giro cieco 3: indici scambiati erano VERDI)
+    fl4 = strip_code(src[src.find("//@@FFX_PURE_END"):]).replace(" ", "").replace("\n", "")   # solo il raccordo
+    ks = re.findall(r"(?<!\()\bintk=([^;]*);", fl4)
+    dec = re.findall(r"\bints=([^;,]*),c=([^;]*);", fl4)
+    tfs = re.findall(r"ENUM_TIMEFRAMEStf=([^;]*);", fl4)
+    check(len(ks) >= 4 and all(x == "s*FFX_NTF+c" for x in ks) and len(dec) >= 2 and all(d == ("k/FFX_NTF", "k%FFX_NTF") for d in dec)
+          and fl4.count("k/FFX_NTF") == len(dec) and fl4.count("k%FFX_NTF") == len(dec) and tfs == ["FFX_TF[c]"],
+          "indici di cella: k=s*FFX_NTF+c ovunque (%d), s=k/FFX_NTF e c=k%%FFX_NTF (%d), TF della cella = FFX_TF[c] (%s)" % (len(ks), len(dec), tfs))
+    # (5) i livelli di una cella, fuori da OnInit, si scrivono SOLO dalla locale omonima (giro cieco 4:
+    #     estremi riscritti scambiati dopo la correzione M1 erano VERDI)
+    rf_ = rest_.replace(" ", "").replace("\n", "")
+    lv = {"gH0": "h0", "gL0": "l0", "gO0": "o0", "gCl": "cl", "gH1": "h1", "gL1": "l1", "gT0": "t0", "gNext": "tn"}
+    w_lv = [(g, x) for g, loc in lv.items() for x in re.findall(r"\b%s\[k\]=(?!=)([^;]*);" % g, rf_) if x != loc]
+    n_lv = sum(len(re.findall(r"\b%s\[k\]=(?!=)" % g, rf_)) for g in lv)
+    check(not w_lv and n_lv >= 10, "livelli di cella scritti solo dalla locale omonima (gH0<-h0, gL0<-l0, ... %d scritture; difformi: %s)" % (n_lv, w_lv))
 
 
 ANCHORS = [
@@ -851,6 +888,20 @@ ANCHORS = [
     ("EA sul grafico di lettura: non si tocca", "if(StringLen(ea)>0){Print("),
     ("riga 'celle' della diagnosi dalla funzione pura", "FFX_RigaCoppia(gNome[s],gSt,s*FFX_NTF)"),
     ("riga 'forze' della diagnosi", "FFX_VAL[v]+\"\"+FFX_Segnato(gNum[v],2)+\"\"+DoubleToString(gDen[v],2)+\"\"+FFX_Segnato(gForza[v],4);"),
+    # --- aggiunte dal cancello indipendente del 02/10 (giro cieco: erano righe NON ancorate e verdi)
+    ("correzione M1: massimi coi massimi, minimi coi minimi, nella candela della cella", "FFX_CorreggiDaM1(mt,mh,ml,got,gT0[k],gNext[k],h0,l0)"),
+    ("prezzo del giro riscritto nei livelli giusti", "if(r==1){gH0[k]=h0;gL0[k]=l0;gCl[k]=cl;AggiornaStato(k);}"),
+    ("riempimento dallo STATO, bordo dal BORDO (guida p.10)", "colorcf=ColoreStato(gSt[k]);colorcb=ColoreBordo(gBo[k],gSt[k]);"),
+    ("pannello forza: il numero della valuta di quella riga", "doublef=gForza[v];"),
+    ("click sul simbolo -> D1 (guida p.9)", "if(a>=0&&a<gNS)ApriGrafico(gSym[a],PERIOD_D1);"),
+    ("correlazione a video: cella dello strumento e cella della SUA coppia", "intks=(gNS+i)*FFX_NTF+gSanTF;intkc=sc*FFX_NTF+gSanTF;"),
+    ("correlazioni spente se il loro TF e' spento", "if(gSanTF<0||gOn[gSanTF]==0)"),
+    ("TOP: verde se positivo, rosso se negativo", "col=(e>0)?C'22,130,60':C'185,28,28';"),
+    ("click sulla correlazione: apre lo STRUMENTO al TF della correlazione", "ApriGrafico(gSym[gNS+a],FFX_TF[gSanTF]);"),
+    ("grafico nuovo al TF chiesto dal click", "longnid=ChartOpen(sym,tf);"),
+    ("segnale '...' finche' mancano dati (mai un numero su celle mancanti)", "if(gScOk[s]==0){t=\"\";"),
+    ("doppioni della lista tenuti una volta sola", "for(intj=0;j<gNS;j++)if(nomi[j]==n)dup=true;"),
+    ("ogni cella col tick del SUO simbolo", "intr=FFX_PassoTick(gTick[s],gBid[s],gCar[k],gT0[k],gNext[k],h0,l0,cl);"),
 ]
 
 # mutanti delle ancore (classe 1042): ognuno DEVE far cadere un controllo statico
@@ -866,6 +917,43 @@ ANCHOR_MUTANTS = [
     ("funzione di notifica", "      gCompleta=true;\n", "      gCompleta=true; SendNotification(\"x\");\n"),
     ("parentesi spezzata come quella trovata il 02/10", "(2 x somma pesi usati), in [-1,+1]\",2)) ch=true;", "(2 x somma pesi usati)) ch=true; in [-1,+1]\",2);"),
     ("CopyRates fuori dai caricatori", "   ControllaGraficoNuovo(now);\n", "   ControllaGraficoNuovo(now); MqlRates zz[]; CopyRates(_Symbol,PERIOD_M1,0,2,zz);\n"),
+    # --- giro CIECO del cancello indipendente (02/10): 16 mutanti scritti senza guardare le ancore,
+    #     su righe di raccordo che decidono dati o cio' che si vede; prima delle aggiunte qui sopra
+    #     erano VERDI tutti e 16. Ora ognuno deve far cadere un controllo statico.
+    ("[cieco] cella azzerata a caricamento fallito", "      gDopo[k]=now+((e==FFX_C_INDIETRO) ? 1000 : 5000);\n      return;",
+     "      gDopo[k]=now+((e==FFX_C_INDIETRO) ? 1000 : 5000);\n      gSt[k]=FFX_S_ND;\n      return;"),
+    ("[cieco] cella azzerata a candela nuova", "         gServe[k]=(r==2) ? 1 : 0;\n", "         gServe[k]=(r==2) ? 1 : 0;\n         if(r==2) gSt[k]=FFX_S_ND;\n"),
+    ("[cieco] cella dimenticata a candela nuova", "         gServe[k]=(r==2) ? 1 : 0;\n", "         gServe[k]=(r==2) ? 1 : 0;\n         if(r==2) gCar[k]=false;\n"),
+    ("[cieco] correzione M1 con massimi e minimi scambiati", "FFX_CorreggiDaM1(mt,mh,ml,got,", "FFX_CorreggiDaM1(mt,ml,mh,got,"),
+    ("[cieco] CaricaCella: high e low scambiati", "h[i]=r[i].high; l[i]=r[i].low;", "h[i]=r[i].low; l[i]=r[i].high;"),
+    ("[cieco] CorreggiSimbolo: high e low scambiati", "mh[i]=r[i].high; ml[i]=r[i].low;", "mh[i]=r[i].low; ml[i]=r[i].high;"),
+    ("[cieco] CaricaCella: open al posto di close", "cc[i]=r[i].close;", "cc[i]=r[i].open;"),
+    ("[cieco] click sul simbolo -> H1 invece di D1", "      if(a>=0 && a<gNS) ApriGrafico(gSym[a],PERIOD_D1);", "      if(a>=0 && a<gNS) ApriGrafico(gSym[a],PERIOD_H1);"),
+    ("[cieco] bordo invertito a video", "         color cb=ColoreBordo(gBo[k],gSt[k]);", "         color cb=ColoreBordo(-gBo[k],gSt[k]);"),
+    ("[cieco] riempimento dal bordo", "         color cf=ColoreStato(gSt[k]);", "         color cf=ColoreStato(gBo[k]>0 ? FFX_S_UP : FFX_S_DN);"),
+    ("[cieco] pannello forza: numero della riga e non della valuta", "      double f=gForza[v];", "      double f=gForza[r];"),
+    ("[cieco] pannello forza: nome della riga e non della valuta", "      string lab=(v==gFiltro) ? \"[\"+FFX_VAL[v]+\"]\" : FFX_VAL[v];",
+     "      string lab=(v==gFiltro) ? \"[\"+FFX_VAL[r]+\"]\" : FFX_VAL[r];"),
+    ("[cieco] massimo e minimo del giro scambiati", "            gH0[k]=h0; gL0[k]=l0; gCl[k]=cl;", "            gH0[k]=l0; gL0[k]=h0; gCl[k]=cl;"),
+    ("[cieco] TOP: colore invertito", "         col=(e>0) ? C'22,130,60' : C'185,28,28';", "         col=(e<0) ? C'22,130,60' : C'185,28,28';"),
+    ("[cieco] correlazione a video: cella della coppia sbagliata", "      int kc=sc*FFX_NTF+gSanTF;", "      int kc=gSanTF;"),
+    ("[cieco] correlazioni accese su un TF spento", "      if(gSanTF<0 || gOn[gSanTF]==0)", "      if(gSanTF<0)"),
+    # giro cieco 3 del cancello (10 righe fresche, 10/10 VERDI prima dei controlli (4) e delle ancore sopra)
+    ("[cieco3] CaricaCella: TF della colonna sbagliata", "   ENUM_TIMEFRAMES tf=FFX_TF[c];", "   ENUM_TIMEFRAMES tf=FFX_TF[c>0 ? c-1 : c];"),
+    ("[cieco3] CorreggiSimbolo: celle del simbolo sbagliato", "      int k=s*FFX_NTF+c;\n      if(gAttiva[k]==0 || !gCar[k] || gServe[k]!=0) continue;",
+     "      int k=c;\n      if(gAttiva[k]==0 || !gCar[k] || gServe[k]!=0) continue;"),
+    ("[cieco3] CaricaCella: simbolo e TF scambiati nell'indice", "   int s=k/FFX_NTF, c=k%FFX_NTF;\n   ENUM_TIMEFRAMES", "   int s=k%FFX_NTF, c=k/FFX_NTF;\n   ENUM_TIMEFRAMES"),
+    ("[cieco3] click correlazione: apre la coppia e non lo strumento", "ApriGrafico(gSym[gNS+a],FFX_TF[gSanTF]);", "ApriGrafico(gSym[a],FFX_TF[gSanTF]);"),
+    ("[cieco3] segnale mostrato anche senza tutti i dati", "      if(gScOk[s]==0)\n        {\n         t=\"...\";", "      if(false)\n        {\n         t=\"...\";"),
+    ("[cieco3] doppioni della lista tenuti", "      for(int j=0;j<gNS;j++) if(nomi[j]==n) dup=true;", "      for(int j=0;j<gNS;j++) if(false) dup=true;"),
+    ("[cieco3] grafico nuovo sempre in D1", "   long nid=ChartOpen(sym,tf);", "   long nid=ChartOpen(sym,PERIOD_D1);"),
+    # giro cieco 4 (10 righe fresche: 7/10 VERDI prima del controllo (5) e dell'ancora sul tick; i 5 verdi
+    # rimasti sono di testo/tooltip e stanno nel RESIDUO dichiarato)
+    ("[cieco4] OnTimer: tick del simbolo sbagliato nelle celle", "int r=FFX_PassoTick(gTick[s],gBid[s],", "int r=FFX_PassoTick(gTick[0],gBid[s],"),
+    ("[cieco4] CaricaCella: livelli precedenti scritti scambiati", "gH1[k]=h1; gL1[k]=l1;", "gH1[k]=l1; gL1[k]=h1;"),
+    ("[cieco4] CorreggiSimbolo: estremi riscritti scambiati", "         gH0[k]=h0; gL0[k]=l0;\n         AggiornaStato(k);", "         gH0[k]=l0; gL0[k]=h0;\n         AggiornaStato(k);"),
+    ("[cieco4] filtro valuta: il click ignora la riga", "      gFiltro=FFX_FiltroDopoClick(gFiltro,gOrd,a);", "      gFiltro=FFX_FiltroDopoClick(gFiltro,gOrd,0);"),
+    ("[cieco4] colore del riempimento scritto nel bordo", "ObjectSetInteger(0,n,OBJPROP_COLOR,cb); gCB[k]=cb;", "ObjectSetInteger(0,n,OBJPROP_COLOR,cf); gCB[k]=cb;"),
 ]
 
 
@@ -1599,6 +1687,13 @@ def battery(cx, rng, quick, verbose=True):
     os_ = cx.run("SEGN 0.1234567 4\nSEGN -0.5 2\nSEGN 0 2\nSEGN 868 2\nSEGN -0.0 0\nSEGN %r 0\n" % mround(-0.3))
     ck(os_ == ["+0.1235", "-0.50", "+0.00", "+868.00", "+0", "+0"],
        "numeri con segno della diagnosi e del SEGNALE; lo zero negativo di MathRound(-0,3) esce '+0', non '+-0' (%s)" % os_)
+
+    # --- cancello indipendente 02/10: una coppia con base == quotata (es. "EUREUR" scritta a mano)
+    #     non deve toccare NE' il numeratore NE' il denominatore (altrimenti la forza di EUR si diluisce)
+    st28 = [rnd_state(rng) for _ in range(28 * NTF)]
+    o28 = parse_forza(cx.run(forza_cmd(COPPIE28, st28, pesi))[0])
+    o29 = parse_forza(cx.run(forza_cmd(COPPIE28 + ["EUREUR"], st28 + [UPBRK] * NTF, pesi))[0])
+    ck(o28 == o29, "FORZA: una coppia con base == quotata (EUREUR) resta FUORI da numeratore e denominatore")
     return bad
 
 
@@ -1915,6 +2010,10 @@ MUTANTS = [
     ("diagnosi: ultime coppie perse", "   return (nr>=perRiga || s==ns-1);", "   return (nr>=perRiga);"),
     ("zero negativo stampato '+-0'", "   double y=x+0.0;\n   string s=DoubleToString(y,dg);\n   if(StringSubstr(s,0,1)!=\"-\") s=\"+\"+s;",
      "   string s=DoubleToString(x,dg);\n   if(x>=0.0) s=\"+\"+s;"),
+    # cancello indipendente 02/10 (giro cieco, era VERDE): guardia base == quotata nella forza
+    ("[cieco] forza: coppia con base == quotata accettata", "      if(b<0 || q<0 || b==q) continue;", "      if(b<0 || q<0) continue;"),
+    ("[cieco] ordine stati: fail su prima della rottura giu'", "   if(c<l1) return FFX_S_DNBRK;\n   bool fu=(h0>h1);",
+     "   if(h0>h1 && c<l1) return FFX_S_FAILUP;\n   if(c<l1) return FFX_S_DNBRK;\n   bool fu=(h0>h1);"),
 ]
 
 
@@ -1989,6 +2088,16 @@ RESIDUO = [
     ("grafico di lettura non portato davanti", "      ChartSetInteger(id,CHART_BRING_TO_TOP,true);", ""),
     ("grafico con EA ancora ricordato come grafico di lettura (lo protegge comunque il controllo prima del riuso)",
      "      if(gVisore==gWatchId) { gVisore=0; SalvaVisore(); }", ""),
+    # residuo dei giri ciechi 3 e 4 del cancello indipendente (02/10): equivalenti o di solo testo/tooltip
+    ("[cancello, equivalente] tick senza controllo del bid (lo filtra FFX_PassoTick)", "      if(SymbolInfoTick(gSym[s],tk) && tk.bid>0.0)", "      if(SymbolInfoTick(gSym[s],tk))"),
+    ("[cancello, equivalente] visore ripreso anche se e' il grafico stesso (lo esclude ApriGrafico)",
+     "   if(!GraficoEsiste(gVisore) || gVisore==ChartID()) gVisore=0;", "   if(!GraficoEsiste(gVisore)) gVisore=0;"),
+    ("[cancello] righe filtrate lasciano un buco", "      if(v) row++;", "      row++;"),
+    ("[cancello] click sul titolo senza diagnosi", "   if(azione==6) { DiagStampa(\"click sul titolo\"); return; }", "   if(azione==6) { return; }"),
+    ("[cancello] testo della correlazione col segno atteso invertito", "(gSanSegno[i]>0 ? \"(+)\" : \"(-)\")", "(gSanSegno[i]<0 ? \"(+)\" : \"(-)\")"),
+    ("[cancello] tooltip: apertura presa dal massimo", "l'apertura \"+Px(s,gO0[k])+", "l'apertura \"+Px(s,gH0[k])+"),
+    ("[cancello] colore del segnale invertito", "         col=ColoreEtichetta(e);", "         col=ColoreEtichetta(-e);"),
+    ("[cancello] tooltip D1 'salto weekend' anche a input spento", "      if(c==FFX_IDX_D1 && InpD1SaltaWeekend) t+=", "      if(c==FFX_IDX_D1) t+="),
 ]
 
 

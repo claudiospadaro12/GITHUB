@@ -103,8 +103,8 @@ domenica: e' una candela vera di quel TF, la lasciamo.
   piu' una colonna **SEGNALE** (in inglese nella guida: SIGNAL) col testo del punteggio di
   confluenza (sez. 5).
 - [GUIDA] Testi del segnale: **STRONG BUY / BUY / WEAK + / (vuoto) / WEAK - / SELL /
-  STRONG SELL** (p.15). Colori dal pptx: STRONG BUY `#16A34A`, BUY `#22C55E`, WEAK
-  grigio `#8B949E`, STRONG SELL `#B91C1C`; [SCELTA] SELL `#EF4444`.
+  STRONG SELL** (p.15). Colori dal pptx (slide 15): STRONG BUY `#16A34A`, BUY `#22C55E`, WEAK
+  grigio `#8B949E`, SELL `#EF4444`, STRONG SELL `#B91C1C`.
 - [GUIDA] Click (p.9, p.19, p.39): **simbolo -> grafico D1** di quel simbolo; **cella ->
   grafico di quel TF**; **valuta nel pannello forza -> filtra la matrice** alle sue 7
   coppie; riga delle Top Opportunities -> grafico D1.
@@ -118,7 +118,7 @@ domenica: e' una candela vera di quel TF, la lasciamo.
 
 ## 4. Forza delle valute (p.12-14)
 
-### 4.1 Pesi per TF — estratti ed **verificati**
+### 4.1 Pesi per TF — estratti e **verificati** (scritti nella guida, NON dedotti)
 [GUIDA] p.13 (algoritmo) e p.11 (grafico a barre) danno gli stessi numeri:
 
 | TF | M1 | M5 | M15 | M30 | H1 | H4 | D1 | W1 | MN | **somma** |
@@ -232,10 +232,11 @@ Esiti: ALIGN (rispettata), DIVERGE (violata), MIXED (almeno uno neutro o in fail
 - ALIGN se `dir(coppia) == segno x dir(strumento)`, DIVERGE se opposto, MIXED se uno e' 0;
 - **solo le 5 correlazioni che toccano una delle 28 coppie entrano nel punteggio**:
   EURUSD (DAX `D30EUR`, +), GBPUSD (FTSE `100GBP`, -), USDJPY (Nikkei `225JPY`, +), AUDUSD
-  (ASX `200AUD`, +), USDCAD (WTI, -). Nomi BCM dei primi quattro letti nel repo; **il nome del
-  WTI su BCM `[NON VERIFICATO]`** (default `USOIL`: se non esiste, la riga resta MIXED e la
-  diagnosi lo scrive). Oro-DXY e DAX-WTI **non entrano** (nessuna delle 28 coppie; il DXY su
-  BCM `[NON VERIFICATO]`). Elenco modificabile dall'input `InpSanityMappa`.
+  (ASX `200AUD`, +), USDCAD (WTI `USOIL`, -). Tutti e cinque i nomi BCM sono nel repo
+  (`docs/BROKER_ESTERNO_MAPPA.md`, colonna BCM: `USOIL` = WTI; ordini su `USOIL` sul conto
+  `50503392` in `report/CENSIMENTO_ORDINI_PC.md`). Su un altro broker un nome assente lascia la
+  riga MIXED e la diagnosi lo scrive. Oro-DXY e DAX-WTI **non entrano** (nessuna delle 28
+  coppie; il DXY su BCM `[NON VERIFICATO]`). Elenco modificabile dall'input `InpSanityMappa`.
 - un simbolo correlato assente o senza dati = MIXED (0), mai inventato.
 
 ## 7. Top Opportunities (p.19)

@@ -56,11 +56,13 @@ Se manca una coppia (o una cella non ha dati), non fa piu' zero: la dashboard lo
 
 ## 2. Cosa copiare e dove (2 minuti)
 
-🪟 **Bersaglio: un terminale MT5 sul PC di BACKTEST — NON il VPS.** Non va su nessun
-terminale del VPS (`50503392`, `50504263`, il reale `10105439` in `C:\BCM_Reale`, FTMO): e' di
-sola visione, ma su quei terminali girano le sedie e non c'e' ragione di aggiungere grafici li'.
+🪟 **Bersaglio: un terminale MT5 DEMO sul PC di BACKTEST, su un grafico SENZA EA — NON il VPS.**
+Non va su nessun terminale del VPS (`50503392` in `BCM Markets MT5 Terminal`, `50504263` in
+`... MT5 Terminal -V3`, il reale `10105439` in `C:\BCM_Reale`, il FTMO `541452707` in `C:\FTMO`):
+e' di sola visione, ma su quei terminali girano le sedie e non c'e' ragione di aggiungere grafici li'.
 ✋ Prima di toccare MT5, in una 🖥️ **finestra PowerShell sul PC di backtest** stampa quale
-terminale e' aperto (riga di sola lettura, non modifica niente):
+terminale e' aperto (riga di sola lettura, non modifica niente) e **annota il numero di conto**
+che compare nel titolo del terminale scelto:
 
 ```
 Get-Process terminal64 | select Id, MainWindowTitle, Path
@@ -79,8 +81,10 @@ Poi, nel terminale che hai riconosciuto dalla cartella stampata:
    valori di default.
 3. Scheda **Esperti**: deve comparire
    `[ForzaFX] avvio: 28 coppie, 5 strumenti di correlazione, TF accesi 9, pesi M1=1 ... (somma 62)`.
-   Se compare `USOIL non trovato`, e' atteso (il nome del petrolio su BCM non lo conosciamo):
-   quella correlazione resta MIXED, il resto funziona.
+   Su un terminale BCM i 5 strumenti delle correlazioni esistono tutti (`USOIL` e' il WTI di BCM:
+   sul conto BCM `50503392` ci sono gia' stati piazzati ordini su `USOIL`,
+   `report/CENSIMENTO_ORDINI_PC.md`). Su un altro broker puo'
+   comparire `... non trovato`: quella correlazione resta MIXED, il resto funziona.
 4. In **5-10 secondi** le celle passano da **giallo pallido** (nessun dato) ai colori. Quando
    tutte hanno dati compare nel Journal il blocco `[ForzaFX diag] motivo=prima copertura
    completa` (una riga di intestazione, 4 righe "celle", una riga "forze", la somma, 4 righe
@@ -92,7 +96,9 @@ Poi, nel terminale che hai riconosciuto dalla cartella stampata:
 6. **Click** su una valuta nel pannello FORZA -> restano solo le sue 7 coppie; di nuovo -> tutte.
    **Click** su una cella -> si apre un grafico **separato** di quella coppia a quel TF; il
    grafico della dashboard **non cambia** (e un grafico con un EA non viene mai toccato).
-7. **Click sul titolo** -> stampa la diagnosi. Selezionala nella scheda Esperti (tasto destro
+7. **Click sul titolo** -> stampa la diagnosi. Prima di tutto confronta a occhio **2 valute** del
+   pannello FORZA con la riga `forze` della diagnosi (es. `EUR ... forza=+0.1234` deve comparire
+   nel pannello come `EUR +0,12`, sulla riga di EUR). Poi selezionala nella scheda Esperti (tasto destro
    -> Copia), incollala in un `.txt` e mandacela: con
    `python3 backtest_pipeline/collaudo_forza_fx.py --diag file.txt` ricalcoliamo le 8 forze
    dalle 28 righe e diciamo se tornano al centesimo.
@@ -108,17 +114,24 @@ simbolo che non esiste lo dice nel Journal e la sua riga resta gialla: niente si
 ## 5. Cosa NON e' coperto (detto chiaro)
 
 - 🔴 **Non compilato**: il collaudo prova la logica (le funzioni vere estratte dal file e
-  compilate in C++, 2,5 mesi di oro M1 veri tick per tick, 52 mutanti del blocco puro presi) ma
+  compilate in C++, 2,5 mesi di oro M1 veri tick per tick, 54 mutanti del blocco puro presi) ma
   non MetaEditor ne' il disegno a schermo. Il primo F7 e' tuo.
 - 🟠 **Il codice di "raccordo"** (quello fra le funzioni pure e lo schermo) e' provato solo in
-  parte, e lo dico col numero (classe 1068): in un primo giro di 20 mutanti su righe non
-  ancorate ne restavano **20 verdi**; dopo aver spostato nel blocco puro tutto cio' che decide un
-  numero o un testo (valute dal nome, filtro, barre, segnale, TOP, correlazioni, copertura,
-  diagnosi, ID del grafico) **0 su 20**. Un secondo giro di 20 mutanti NUOVI: **10 restano
-  verdi**, e sono tutti di **resa a video**: decimali nel tooltip, valuta filtrata fra parentesi,
-  celle che si rimpiccioliscono su un grafico basso, DPI, ridisegno allo scorrimento, grafico di
-  lettura portato davanti. Nessuno di questi puo' aprire un ordine o cambiare il grafico della
-  dashboard. **Li copre solo la prova a mano del par. 3.**
+  parte, e lo dico col numero (classi 1068, 1074, 1076). Dopo i due giri dell'autore, il
+  **cancello indipendente** ha scritto 4 giri di mutanti CIECHI su righe nuove e ne ha trovati
+  verdi **4 su 37, 14 su 16, 10 su 10, 7 su 10**. Fra i verdi non c'era solo "resa a video": c'erano
+  righe che decidono i **dati** (massimo e minimo di `CopyRates` scambiati, TF della colonna
+  sbagliato, indici simbolo/TF, una cella azzerata quando i dati non sono pronti) e il **numero**
+  del pannello forza preso dalla riga invece che dalla valuta. Il codice su quelle righe e' giusto
+  (letto riga per riga); mancava la prova. Ora il collaudo ha **5 controlli di comportamento** sul
+  raccordo (nessuna cella si azzera fuori dall'avvio; ogni campo di `CopyRates` al suo posto;
+  indici di cella sempre `k = simbolo x 9 + TF`; ogni livello scritto dalla sua variabile; pannello
+  forza sempre per valuta) piu' 67 ancore, e **39 mutanti di raccordo presi**. Restano **18 verdi
+  dichiarati**: decimali e testi dei tooltip, colori e impaginazione, ridisegno, il click sul titolo
+  senza diagnosi, piu' 2 equivalenti. Nessuno di questi puo' aprire un ordine o cambiare il grafico
+  della dashboard. **Li copre solo la prova a mano del par. 3.** E vale la lezione del giro 4: su
+  righe mai toccate ~7 mutanti su 10 restano verdi, quindi il **controllo a mano di una cella**
+  (punto 5) e il confronto del **pannello con la diagnosi** (punto 7) non sono facoltativi.
 - **Nessuna misura di performance**: ne' della forza, ne' del punteggio, ne' delle correlazioni.
 - **Il punteggio di confluenza** (colonna SEGNALE) e' definito in modo vago dalla guida: le
   quattro formule sono **scelte nostre** dichiarate in spec. sez. 5. E i casi studio della guida
@@ -126,7 +139,8 @@ simbolo che non esiste lo dice nel Journal e la sua riga resta gialla: niente si
 - **Gli esempi della guida escono dalla sua formula**: "GBP +1,82", "distanza > 2" sono
   impossibili con la formula scritta (massimo 1, distanza massima 2,0). Seguiamo la formula.
 - **Le correlazioni** (DAX-EURUSD ecc.) sono quelle **dichiarate dalla guida, mai misurate**;
-  il nome BCM del WTI e' `[NON VERIFICATO]`; Oro-DXY e DAX-WTI non entrano (nessuna delle 28).
+  i nomi BCM sono quelli del repo (`D30EUR`, `100GBP`, `225JPY`, `200AUD`, `USOIL` = WTI,
+  `docs/BROKER_ESTERNO_MAPPA.md`); Oro-DXY e DAX-WTI non entrano (nessuna delle 28).
 - **Le 4 strategie, il protocollo, stop/target/size della guida: NON implementati.** Sono
   regole discrezionali senza un numero di operazioni dietro.
 - Il **lunedi'** H4/H1 confrontano con la candela corta della domenica sera (solo il D1 la salta;
@@ -147,8 +161,9 @@ simbolo che non esiste lo dice nel Journal e la sua riga resta gialla: niente si
    senza correlazione (manca il 10% della correlazione): STRONG BUY quasi impossibile.
    Lasciamo cosi' (fedeli alla guida) o **rinormalizziamo** a 100 quando la correlazione non
    esiste?
-3. Su BCM, come si chiama il **petrolio WTI** (e c'e' un **indice del dollaro**)? Market Watch
-   -> cerca "oil" / "dx". Basta il nome.
+3. Su BCM c'e' un **indice del dollaro** (DXY)? Market Watch -> cerca "dx" o "usdx". Basta il
+   nome: servirebbe solo per la correlazione Oro-DXY, che oggi resta fuori. (Il petrolio WTI non
+   serve chiederlo: su BCM e' `USOIL`, gia' nel repo.)
 4. Il corso da' anche il **sorgente** o i **valori esatti** del Confluence Score (come
    contano Allineamento e Rotture)? Con una schermata della loro dashboard in cui si vedono
    **insieme** matrice e forze, possiamo dire se usano davvero la formula scritta.

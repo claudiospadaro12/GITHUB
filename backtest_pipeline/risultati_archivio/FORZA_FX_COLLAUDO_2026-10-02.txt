@@ -1,0 +1,315 @@
+
+== S) statico sul sorgente
+  ok   sorgente in ASCII puro (niente accenti/emoji: MetaEditor e ANSI)
+  ok   parentesi bilanciate (graffe 220/220, tonde 1093/1093, quadre 537/537)
+  ok   nessuna funzione di trading/rete/file/notifica/template (trovate: [])
+  ok   una sola chiamata a ChartSetSymbolPeriod (1)
+  ok   ChartSetSymbolPeriod MAI sul grafico della dashboard (0 / ChartID)
+  ok   ApriGrafico: CHART_EXPERT_NAME letto PRIMA di ChartSetSymbolPeriod (classe 930)
+  ok   ApriGrafico: il grafico di lettura non puo' essere il grafico della dashboard
+  ok   ApriGrafico: dopo ChartOpen parte la sorveglianza del template (classe 951)
+  ok   ControllaGraficoNuovo: EA trovato sul grafico nuovo -> Alert
+  ok   la sorveglianza gira nel timer
+  ok   CopyRates solo in CaricaCella e CorreggiSimbolo (['CaricaCella', 'CorreggiSimbolo'])
+  ok   OnTimer ridisegna SOLO se qualcosa e' cambiato
+  ok   CaricaCella solo sulle celle scelte da FFX_Pianifica (tetto per secondo)
+  ok   CaricaCella chiamata in un solo punto (oltre alla definizione)
+  ok   ricalcolo e disegno solo con gDirty
+  ok   OnCalculate non fa niente (niente CopyRates/ChartRedraw a ogni tick)
+  ok   i click non cambiano il grafico della dashboard (nessuna ricarica)
+  ok   #define di stati/pesi/esiti uguali allo specchio ({})
+  ok   default InpSimboli = le 28 combinazioni di EUR GBP USD AUD NZD CAD CHF JPY, senza doppioni (28)
+  ok   ogni valuta compare in ESATTAMENTE 7 coppie ({'EUR': 7, 'GBP': 7, 'AUD': 7, 'NZD': 7, 'USD': 7, 'CAD': 7, 'CHF': 7, 'JPY': 7}): la frase della guida 'CHF/AUD/NZD/CAD in meno' e' falsa sulle 28
+  ok   pesi di default = guida p.11/p.13: [1.0, 1.0, 2.0, 3.0, 4.0, 6.0, 10.0, 15.0, 20.0]
+  ok   somma pesi 62, D1+W1+MN = 45, quota 72.58% (la guida dice 73%: torna)
+  ok   default InpSogliaForte = 90
+  ok   default InpSogliaNormale = 70
+  ok   default InpSogliaDebole = 40
+  ok   default InpTopOpp = 5
+  ok   default InpCellaPx = 18
+  ok   default InpCorrezioneSec = 60
+  ok   InpSuffisso vuoto di default (BCM senza suffissi)
+  ok   D1: salto del weekend acceso di default (classe 1065)
+  ok   ogni funzione chiamata e' definita nel file o nota a MQL5 (ignote: [])
+  ok   nessuna variabile locale/parametro nasconde una globale (85 globali; ombre: [])
+  ok   COLORI degli stati = pptx della guida (verde scuro/chiaro, rosso chiaro/scuro, nero, grigio) ({})
+  ok   TESTI del segnale: 3 STRONG BUY ... -3 STRONG SELL ({'3': '"STRONG BUY"', '2': '"BUY"', '1': '"WEAK +"', '-1': '"WEAK -"', '-2': '"SELL"', '-3': '"STRONG SELL"'})
+  ok   COLORI del segnale = pptx (STRONG BUY #16A34A, BUY #22C55E, WEAK #8B949E, STRONG SELL #B91C1C)
+  ok   TOOLTIP: ogni stato dichiara il valore usato nella forza
+  ok   BORDO: verde sopra l'apertura, rosso sotto
+  ok   ancora: cella da caricare quando FFX_PassoTick dice 2
+  ok   ancora: ricalcolo completo con gli argomenti nell'ordine giusto
+  ok   ancora: TF accesi: ogni input al suo TF
+  ok   ancora: pesi: ogni input al suo TF
+  ok   ancora: valute dal nome SENZA suffisso
+  ok   ancora: base e quotata nell'ordine giusto
+  ok   ancora: suffisso aggiunto al nome usato col terminale
+  ok   ancora: correlazione: indici di coppia e segno
+  ok   ancora: pannello forza in ordine dalla piu' forte
+  ok   ancora: click sulla cella: coppia e TF giusti
+  ok   ancora: click su TOP: la coppia in quella posizione
+  ok   ancora: caricamento con il prezzo e l'ora del giro
+  ok   ancora: stato della cella dai suoi livelli
+  ok   ancora: cella attiva: TF acceso o TF della correlazione
+  ok   ancora: ID del grafico di lettura dalle due meta'
+  ok   ancora: diagnosi periodica: prossima fra InpDiagMinuti
+  ok   ancora: diagnosi 'copertura completa' una volta, a copertura PIENA
+  ok   ancora: GlobalVariable legate al grafico (ChartID)
+  ok   ancora: strumenti di correlazione col nome esatto (senza suffisso)
+  ok   ancora: nessun TF acceso: parametri rifiutati
+  ok   ancora: oggetti tolti alla rimozione
+  ok   ancora: colore della cella riscritto quando CAMBIA
+  ok   ancora: cella caricata: non piu' in coda
+  ok   ancora: filtro della matrice dalla funzione pura
+  ok   ancora: barra dalla funzione pura, colore dal verso
+  ok   ancora: segnale a video dalla funzione pura
+  ok   ancora: TOP: la coppia in posizione i
+  ok   ancora: correlazione a video dalla funzione pura
+  ok   ancora: copertura dalla funzione pura
+  ok   ancora: riga 'somma' della diagnosi dalla funzione pura
+  ok   ancora: filtro dal click sulla valuta
+  ok   ancora: correlazioni collegate alle coppie
+  ok   ancora: ora del tick dal TICK (non dal server)
+  ok   ancora: correzione M1 solo quando e' dovuta, poi fra InpCorrezioneSec
+  ok   ancora: sorveglianza del template per 10 s
+  ok   ancora: sorveglianza chiusa solo dopo la scadenza
+  ok   ancora: tooltip: massimo e minimo precedenti al loro posto
+  ok   ancora: cambio di stato -> ridisegno
+  ok   ancora: tetto dei caricamenti dall'input
+  ok   ancora: simbolo assente ritentato una volta al minuto
+  ok   ancora: intestazioni: un TF spento non occupa colonna
+  ok   ancora: celle dei TF spenti nascoste
+  ok   ancora: un TF spento pesa 0 nella forza
+  ok   ancora: TF strategici = H4, D1, W1, MN
+  ok   ancora: D1 con salto del weekend copia 7 candele (un sabato si vede sempre, classe 1069)
+  ok   ancora: caricamento fallito: livelli NON toccati e ritento
+  ok   ancora: i livelli si scrivono solo dopo l'esito OK
+  ok   ancora: serie in ritardo: si ritenta dopo 1 s, altrimenti dopo 5 s
+  ok   ancora: correzione M1: 3 candele, celle caricate e non in attesa
+  ok   ancora: correzione M1 solo su celle caricate
+  ok   ancora: etichetta decisa sul numero arrotondato mostrato
+  ok   ancora: EA sul grafico di lettura: non si tocca
+  ok   ancora: riga 'celle' della diagnosi dalla funzione pura
+  ok   ancora: riga 'forze' della diagnosi
+  ok   ancora: correzione M1: massimi coi massimi, minimi coi minimi, nella candela della cella
+  ok   ancora: prezzo del giro riscritto nei livelli giusti
+  ok   ancora: riempimento dallo STATO, bordo dal BORDO (guida p.10)
+  ok   ancora: pannello forza: il numero della valuta di quella riga
+  ok   ancora: click sul simbolo -> D1 (guida p.9)
+  ok   ancora: correlazione a video: cella dello strumento e cella della SUA coppia
+  ok   ancora: correlazioni spente se il loro TF e' spento
+  ok   ancora: TOP: verde se positivo, rosso se negativo
+  ok   ancora: click sulla correlazione: apre lo STRUMENTO al TF della correlazione
+  ok   ancora: grafico nuovo al TF chiesto dal click
+  ok   ancora: segnale '...' finche' mancano dati (mai un numero su celle mancanti)
+  ok   ancora: doppioni della lista tenuti una volta sola
+  ok   ancora: ogni cella col tick del SUO simbolo
+  ok   NESSUNA cella azzerata fuori da OnInit: gSt[] scritto solo da AggiornaStato (['st']), gCar[] solo a true (['true'])
+  ok   MqlRates -> array: time/open/high/low/close al loro posto in CaricaCella ({'t': 'time', 'o': 'open', 'h': 'high', 'l': 'low', 'cc': 'close'}) e CorreggiSimbolo ({'mt': 'time', 'mh': 'high', 'ml': 'low'})
+  ok   pannello forza: numero, nome e tooltip della valuta v=gOrd[r], mai [r]
+  ok   indici di cella: k=s*FFX_NTF+c ovunque (4), s=k/FFX_NTF e c=k%FFX_NTF (2), TF della cella = FFX_TF[c] (['FFX_TF[c]'])
+  ok   livelli di cella scritti solo dalla locale omonima (gH0<-h0, gL0<-l0, ... 13 scritture; difformi: [])
+
+== C) funzioni pure vere compilate in C++ contro specchio e riferimenti
+  ok   blocco puro estratto dal .mq5 compila in C++ con -Wall -Wshadow
+  ok   nessun avviso del compilatore C++ sul blocco puro ()
+  ok   STATO su 1575 casi (tutte le relazioni fra C,O0,H0,L0,H1,L1): C++ == specchio (0 diff) == riferimento dalle condizioni della guida (0 diff)
+  ok   ognuna delle 6 condizioni della guida, presa da sola, da' il suo stato
+  ok   sopra l'apertura con rottura respinta = FAIL_UP con bordo +1; pari = NEUTRO; doppio = FAIL2
+  ok   BORDO: C++ == specchio
+  ok   valore/direzione/rottura/direzione-correlazione dei 9 stati: C++ == specchio
+  ok   valori della guida p.13: +2 +1 +0,5 -0,5 -1 -2
+  ok   FORZA su 600 matrici casuali: C++ == specchio bit per bit (num, den, forza, ordine) (0 diff)
+  ok   FORZA == formula della guida alla lettera Somma(stato x peso x segno)/(n_coppie x 62 x 2) (0 diff)
+  ok   IDENTITA': somma dei numeratori = 0 ESATTO su tutte le matrici (0 eccezioni)
+  ok   IDENTITA': con le 28 coppie complete (denominatori tutti 868) somma delle forze ~ 0 (max |somma| 8.3e-17)
+  ok   ANTISIMMETRIA: rovesciando ogni stato tutte le forze cambiano segno esatto (0 eccezioni)
+  ok   |forza| <= 1 su tutte le matrici (max 0.3525)
+  ok   CONTROESEMPIO (DEVE scattare): senza EURUSD i denominatori di EUR e USD scendono a 744, la somma delle forze NON e' zero in 40 casi su 40
+  ok   copertura PARZIALE (20% celle senza dati): forza == riferimento a denominatore per cella, numeratori sempre a somma 0 (0 diff)
+  ok   SEGNI: solo USDJPY in rottura su: USD = +0.142857 (base), JPY = -0.142857 (quotata), le altre 0
+  ok   SEGNI: EURUSD D1 in ribasso -> EUR negativo, USD positivo (-0.0115 / +0.0115)
+  ok   ESTREMI: GBP = +1 e USD = -1 nello stesso istante, distanza 2,0 = il MASSIMO: 'top > +1', 'GBP +1,82' e 'distanza > 2,0' della guida sono impossibili con la sua formula
+  ok   ORDINE: decrescente e stabile a pari forza (vale l'ordine EUR..JPY)
+  ok   PUNTEGGIO su 400 casi: C++ == specchio (0) == riferimento dalle scelte della spec. 5 (0)
+  ok   PUNTEGGIO massimo: tutto UP_BREAK, forza base +1 / quotata -1, correlazione ALIGN = +100
+  ok   senza correlazione il massimo e' 90 (formula letterale, nessuna rinormalizzazione: dichiarato)
+  ok   correlazione DIVERGE su una coppia rialzista: contributo -10 (allineamento 40 + rotture 0 + diff 0 - 10 = 30)
+  ok   PUNTEGGIO non calcolato se manca una cella accesa (si mostra '...')
+  ok   ETICHETTA: soglie 90/70/40 sul numero arrotondato, simmetriche (89,6 -> STRONG BUY; -89,5 -> STRONG SELL; 39,4 -> niente)
+  ok   TOP su 300 casi: C++ == specchio == riferimento (sorted) (0 diff)
+  ok   TOP sull'esempio della guida (+94 +87 +73 -81 -91, piu' un 60): stesso ordine della guida
+  ok   CALENDARIO su 600 istanti 1970-2106: giorno della settimana e primo del mese dopo == Python datetime (0 diff)
+  ok   MN: dicembre -> 1 gennaio dell'anno dopo; febbraio bisestile e non
+  ok   PRECEDENTE D1: [gio, ven, dom, lun] -> venerdi'; senza salto -> domenica; solo [dom, lun] -> nessuna
+  ok   ESTENDI: solo prezzi della candela in corso [t0, tNext) e > 0
+  ok   CORREZIONE M1: usa solo le M1 dentro [t0, tNext) (quella prima e quella dopo no)
+  ok   PASSO: mai caricata -> 2; candela finita -> 2 (stato vecchio tenuto); prezzo nuovo -> 1; uguale -> 0; tick di prima -> 0
+  ok   CARICAMENTO: candela in corso + precedente; prossima apertura t0+60
+  ok   CARICAMENTO: serie in ritardo sull'ultimo tick -> esito 2 e livelli NON toccati
+  ok   CARICAMENTO: una sola candela -> esito 1, livelli non toccati
+  ok   CARICAMENTO D1 lunedi': precedente = venerdi' (la domenica, max 9 min 0,1, saltata)
+  ok   PIANIFICA: al massimo 'budget' celle, a rotazione
+  ok   PIANIFICA: 13 celle in attesa servite tutte in 5 giri da 3 (nessuna affamata)
+  ok   PIANIFICA: una cella in attesa di un nuovo tentativo non si carica prima del tempo
+  ok   PIANIFICA su 100 casi casuali: C++ == specchio (0 diff)
+  ok   VALUTE dal nome: EURUSD -> EUR base/USD quotata, il suffisso non conta, XAUUSD/EUREUR/minuscole fuori dalla forza
+  ok   CORRELAZIONI: 'STRUMENTO>COPPIA:segno' letto giusto (spazi ignorati), 6 forme sbagliate rifiutate
+  ok   CLICK: simbolo/segnale -> D1, cella c_5_6 -> coppia 5 TF 6, TOP, correlazione, valuta; sfondo e intestazioni -> niente
+  ok   pannello: forza a 2 decimali con la virgola (['+0,33', '-0,18', '-0,00'])
+  ok   STATO CELLA: cambio segnalato quando cambia lo stato O il solo bordo, non altrimenti
+  ok   CARICAMENTO completo (livelli + prezzo del giro) su 150 casi: C++ == specchio, e a esito non OK i livelli restano intatti (0 diff)
+  ok   D1 cripto (sabato fra le candele lette): il lunedi' il precedente e' la DOMENICA (indice 4); forex senza sabato, martedi': il lunedi' (indice 4) (classe 1069)
+  ok   D1 forex con la candela della domenica (nessun sabato): il lunedi' il precedente e' il VENERDI'
+  ok   RICALCOLO COMPLETO (forza, ordine, 5 correlazioni, 28 punteggi, TOP): C++ == specchio (0 diff)
+  ok   RICALCOLO COMPLETO == riferimento indipendente scritto dalla spec (0 diff; TOP non vuoto in 211 giri; esiti visti [-1, 0, 1])
+  ok   FILTRO valuta: la coppia si vede se la valuta e' la base O la quotata; senza filtro tutte (['1', '1', '1', '0', '0', '1'])
+  ok   BARRE: positive a destra dell'asse in verde, negative a sinistra in rosso, lunghezza |forza| x 90 px (['1 200 30', '0 184 16', '1 200 1', '0 110 90', '1 200 90', '0 199 1'])
+  ok   SEGNALE a video: etichetta e numero arrotondato coerenti (['[STRONG BUY +94]', '[SELL -81]', '[+23]', '[+0]', '[WEAK + +40]', '[STRONG SELL -90]'])
+  ok   CORRELAZIONE a video: +1 ALIGN, -1 DIVERGE, 0 MIXED
+  ok   COPERTURA: celle con dati sulle celle attive delle sole coppie (['19', '23'])
+  ok   DIAGNOSI 'somma': 27 coppie -> denominatori uguali=no; 28 -> si e somma 0 (somma forze=-0.015841 denominatori uguali=no (somma zero att | somma forze=+0.000000 denominatori uguali=si (somma zero att)
+  ok   CLICK sulla valuta: filtra la valuta che sta in QUELLA riga (ordine per forza); di nuovo = tutte (['3', '-1', '7', '5'])
+  ok   CORRELAZIONI collegate alle loro coppie (EURUSD<-DAX ... USDCAD<-WTI), le altre 23 senza
+  ok   ID del grafico di lettura (oltre 2^53) salvato in due meta' e ricostruito ESATTO (7 ID, compresi 2^53+1 e 2^32)
+  ok   controesempio: lo stesso ID in UN double si perde (2^53+1 -> 2^53): per questo le due meta'
+  ok   DIAGNOSI: riga stampata quando ha 7 coppie O all'ultima coppia (lista di 30: le ultime 2 non si perdono)
+  ok   RIGA della diagnosi: C++ == specchio
+  ok   numeri con segno della diagnosi e del SEGNALE; lo zero negativo di MathRound(-0,3) esce '+0', non '+-0' (['+0.1235', '-0.50', '+0.00', '+868.00', '+0', '+0'])
+  ok   FORZA: una coppia con base == quotata (EUREUR) resta FUORI da numeratore e denominatore
+  ok   --diag: righe generate con le funzioni vere, rilette e RICALCOLATE: forze ricalcolate dalle 28 coppie: TUTTE uguali alle stampate; somma -0.016061, denominatori diversi
+  ok   --diag: una forza stampata ALTERATA viene segnalata (caso che deve scattare)
+
+== R) dati reali XAUUSD M1 2024 (UTC+1), timer simulato con le funzioni VERE
+  (finestra 2024-04-24 -> 2024-07-12, 79517 candele M1, 318068 tick)
+  ok   (a) simulazione C++ == specchio Python passo per passo (318068 passi, 0 diff)
+  ok   (a) TUTTI i tick: stato dei 9 TF == riferimento indipendente a OGNI passo (318068 passi, 0 diversi; celle n/d iniziali 50844)
+  ok   (a) sui dati veri compaiono tutti e 6 gli stati della guida ({'UP': 518267, 'UPBRK': 530705, 'DN': 517451, 'DNBRK': 376360, 'FAILUP': 310565, 'FAILDN': 352717, 'FAIL2': 87167, 'NEUTRO': 118536})
+  ok   (a) UNA sola CopyRates riuscita per candela nuova, nessuna saltata, nessuna doppia (M1 79516/79517, M5 15905/15906, M15 5301/5302, M30 2650/2651, H1 1326/1327, H4 358/359, D1 68/69, W1 11/12, MN 3/4)
+  info: 155982 CopyRates su 1918 ore di mercato = 1.4 al minuto per simbolo (28 coppie: ~38/min, piu' 33/min di correzione M1)
+  ok   (b) CASO CHE DEVE SCATTARE: campionando solo apertura e chiusura, SENZA correzione M1 44645 chiusure su 79517 hanno stati sbagliati (72083 fail invisibili)
+  ok   (b) CON la correzione M1 (3 candele) a ogni chiusura del minuto lo stato == riferimento (0 diversi su 79517)
+  ok   (b) simulazione con correzione: C++ == specchio Python (0 diff)
+  ok   (c) tetto 2 CopyRates/passo e serie in ritardo: nessuna cella si azzera dopo il primo stato (0)
+  ok   (c) 109095 passi con caricamenti in coda o serie in ritardo (137793 tentativi falliti): nei 208973 passi senza code lo stato == riferimento (0 diversi)
+  ok   (d) 11 lunedi' preceduti da una candela D1 della DOMENICA: max/min precedenti == venerdi' a ogni passo (60112 passi, 0 diversi)
+  ok   (d) CONTROESEMPIO: la regola ingenua (precedente = candela prima) usa la domenica il lunedi': 60112 passi con livelli sbagliati, 45703 con lo stato D1 sbagliato
+
+== M) mutanti sul sorgente vero (devono essere TUTTI presi)
+  ok   mutante PRESO: segno della quotata (batteria 12, simulazione 0)
+  ok   mutante PRESO: denominatore senza il x2 (batteria 10, simulazione 0)
+  ok   mutante PRESO: rottura su con >= (batteria 1, simulazione 4804)
+  ok   mutante PRESO: rottura giu' con <= (batteria 1, simulazione 4795)
+  ok   mutante PRESO: fail su solo sotto l'apertura (batteria 3, simulazione 80926)
+  ok   mutante PRESO: doppio fail tolto (batteria 2, simulazione 75577)
+  ok   mutante PRESO: valore FAIL_DN col segno sbagliato (batteria 8, simulazione 0)
+  ok   mutante PRESO: i fail NON contano come inversi nell'allineamento (batteria 4, simulazione 0)
+  ok   mutante PRESO: nessuna penalita' per il fail su (batteria 4, simulazione 0)
+  ok   mutante PRESO: correlazione senza segno atteso (batteria 3, simulazione 0)
+  ok   mutante PRESO: etichetta sul numero non arrotondato (batteria 2, simulazione 0)
+  ok   mutante PRESO: differenza di forza senza /2 (batteria 5, simulazione 0)
+  ok   mutante PRESO: domenica valida come giorno precedente (batteria 3, simulazione 37024)
+  ok   mutante PRESO: dicembre -> gennaio dello stesso anno (batteria 2, simulazione 0)
+  ok   mutante PRESO: estremi estesi anche con tick di altre candele (batteria 1, simulazione 0)
+  ok   mutante PRESO: candela finita non ricaricata (batteria 1, simulazione 274451)
+  ok   mutante PRESO: correzione M1 con candele precedenti (batteria 1, simulazione 16268)
+  ok   mutante PRESO: serie in ritardo accettata (batteria 2, simulazione 0)
+  ok   mutante PRESO: tetto dei caricamenti ignorato (batteria 3, simulazione 0)
+  ok   mutante PRESO: rotazione ferma (batteria 2, simulazione 0)
+  ok   mutante PRESO: TOP senza valore assoluto (batteria 4, simulazione 0)
+  ok   mutante PRESO: ordine non stabile (batteria 3, simulazione 0)
+  ok   mutante PRESO: punteggio calcolato con celle mancanti (batteria 4, simulazione 0)
+  ok   mutante PRESO: cella senza dati nel denominatore (batteria 3, simulazione 0)
+  ok   mutante PRESO: bordo verde anche a prezzo pari (batteria 2, simulazione 0)
+  ok   mutante PRESO: giorno della settimana sfasato (batteria 4, simulazione 37024)
+  ok   mutante PRESO: prezzo uguale non e' un cambio (batteria 0, simulazione 258175)
+  ok   mutante PRESO: ricalcolo: forza base e quotata scambiate (batteria 2, simulazione 0)
+  ok   mutante PRESO: ricalcolo: esito correlazione sulla coppia sbagliata (batteria 2, simulazione 0)
+  ok   mutante PRESO: ricalcolo: TOP oltre la soglia ignorata (batteria 2, simulazione 0)
+  ok   mutante PRESO: valute: base e quotata scambiate (batteria 1, simulazione 0)
+  ok   mutante PRESO: valute: la stessa due volte accettata (batteria 1, simulazione 0)
+  ok   mutante PRESO: correlazione: segno - letto come + (batteria 1, simulazione 0)
+  ok   mutante PRESO: correlazione: spazi non tolti (batteria 1, simulazione 0)
+  ok   mutante PRESO: click: cella senza TF accettata (batteria 1, simulazione 0)
+  ok   mutante PRESO: click: TF letto al posto della coppia (batteria 1, simulazione 0)
+  ok   mutante PRESO: caricamento: prezzo del giro ignorato (batteria 1, simulazione 0)
+  ok   mutante PRESO: stato cella: cambio di bordo non segnalato (batteria 1, simulazione 0)
+  ok   mutante PRESO: cripto: sabato non riconosciuto (batteria 3, simulazione 37024)
+  ok   mutante PRESO: pannello: punto al posto della virgola (batteria 1, simulazione 0)
+  ok   mutante PRESO: filtro solo sulla base (batteria 1, simulazione 0)
+  ok   mutante PRESO: barre negative a destra (batteria 1, simulazione 0)
+  ok   mutante PRESO: segnale senza etichetta (batteria 1, simulazione 0)
+  ok   mutante PRESO: segnale col numero non arrotondato (batteria 1, simulazione 0)
+  ok   mutante PRESO: ALIGN e DIVERGE scambiati (batteria 1, simulazione 0)
+  ok   mutante PRESO: copertura sempre piena (batteria 1, simulazione 0)
+  ok   mutante PRESO: denominatori sempre uguali (batteria 1, simulazione 0)
+  ok   mutante PRESO: filtro sulla riga invece che sulla valuta (batteria 1, simulazione 0)
+  ok   mutante PRESO: correlazioni non collegate (batteria 1, simulazione 0)
+  ok   mutante PRESO: ID: meta' scambiate (batteria 1, simulazione 0)
+  ok   mutante PRESO: diagnosi: ultime coppie perse (batteria 1, simulazione 0)
+  ok   mutante PRESO: zero negativo stampato '+-0' (batteria 2, simulazione 0)
+  ok   mutante PRESO: [cieco] forza: coppia con base == quotata accettata (batteria 1, simulazione 0)
+  ok   mutante PRESO: [cieco] ordine stati: fail su prima della rottura giu' (batteria 1, simulazione 25736)
+  ok   mutante d'ancora PRESO dallo statico: cella caricata anche quando PassoTick dice 1 (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: TF spento che pesa lo stesso (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: H1 contato fra gli strategici (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: ChartSetSymbolPeriod sul grafico della dashboard (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: ridisegno a ogni secondo (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: etichetta sul numero NON arrotondato (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: locale che nasconde una globale (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: funzione chiamata ma non definita (2 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: funzione di notifica (2 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: parentesi spezzata come quella trovata il 02/10 (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: CopyRates fuori dai caricatori (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] cella azzerata a caricamento fallito (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] cella azzerata a candela nuova (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] cella dimenticata a candela nuova (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] correzione M1 con massimi e minimi scambiati (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] CaricaCella: high e low scambiati (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] CorreggiSimbolo: high e low scambiati (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] CaricaCella: open al posto di close (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] click sul simbolo -> H1 invece di D1 (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] bordo invertito a video (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] riempimento dal bordo (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] pannello forza: numero della riga e non della valuta (2 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] pannello forza: nome della riga e non della valuta (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] massimo e minimo del giro scambiati (2 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] TOP: colore invertito (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] correlazione a video: cella della coppia sbagliata (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco] correlazioni accese su un TF spento (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco3] CaricaCella: TF della colonna sbagliata (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco3] CorreggiSimbolo: celle del simbolo sbagliato (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco3] CaricaCella: simbolo e TF scambiati nell'indice (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco3] click correlazione: apre la coppia e non lo strumento (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco3] segnale mostrato anche senza tutti i dati (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco3] doppioni della lista tenuti (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco3] grafico nuovo sempre in D1 (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco4] OnTimer: tick del simbolo sbagliato nelle celle (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco4] CaricaCella: livelli precedenti scritti scambiati (2 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco4] CorreggiSimbolo: estremi riscritti scambiati (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco4] filtro valuta: il click ignora la riga (1 controlli caduti)
+  ok   mutante d'ancora PRESO dallo statico: [cieco4] colore del riempimento scritto nel bordo (1 controlli caduti)
+  (54/54 mutanti del blocco puro presi)
+
+== RESIDUO dichiarato del raccordo (classe 1068): resa a video / UX, NON PROVATO fuori dal terminale
+  verde decimali dei prezzi nel tooltip fissi
+  verde correzioni M1 tutte nello stesso secondo all'avvio
+  verde tooltip non riscritto dopo il caricamento
+  verde valuta filtrata non evidenziata
+  verde celle mai rimpicciolite su un grafico basso
+  verde DPI sotto 96 accettati
+  verde ridisegno a ogni scorrimento del grafico
+  verde grafico di lettura cambiato anche se gia' giusto
+  verde grafico di lettura non portato davanti
+  verde grafico con EA ancora ricordato come grafico di lettura (lo protegge comunque il controllo prima del riuso)
+  verde [cancello, equivalente] tick senza controllo del bid (lo filtra FFX_PassoTick)
+  verde [cancello, equivalente] visore ripreso anche se e' il grafico stesso (lo esclude ApriGrafico)
+  verde [cancello] righe filtrate lasciano un buco
+  verde [cancello] click sul titolo senza diagnosi
+  verde [cancello] testo della correlazione col segno atteso invertito
+  verde [cancello] tooltip: apertura presa dal massimo
+  verde [cancello] colore del segnale invertito
+  verde [cancello] tooltip D1 'salto weekend' anche a input spento
+  info: 18/18 verdi -> coperti SOLO dalla prova a mano (nota par. 3)
+
+== ESITO: PASS (0 controlli falliti)
