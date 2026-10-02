@@ -46,7 +46,8 @@
 //|  la MN1. Il giorno PRECEDENTE e' l'ultima barra D1 prima di oggi  |
 //|  che cade da lunedi' a venerdi' (lunedi' -> venerdi', anche se il |
 //|  broker ha una candela di un'ora la domenica sera); per i simboli |
-//|  che quotano il sabato (cripto) conta ogni barra D1.              |
+//|  che quotano il sabato (cripto: c'e' una D1 di sabato fra le      |
+//|  ultime 10) conta ogni barra D1.                                  |
 //|                                                                   |
 //|  STATO DEI TASTI: GlobalVariable con la ChartID nel nome; resta   |
 //|  al cambio di simbolo/TF e di parametri, si cancella quando togli |
@@ -412,7 +413,8 @@ color SW_Dim(const color c,const color toward,const double f)
    return (color)((B<<16)|(G<<8)|R);
   }
 //--- lotto al passo del simbolo, per DIFETTO, con tolleranza di 1e-7 passi
-//    (0.3/0.01 = 29.999999999999996 deve dare 30 passi, non 29).
+//    (0.29/0.01 = 28.999999999999996 deve dare 29 passi, non 28; idem 0.57 e 0.58.
+//    NB: il commento della v4.1 cita 0.3/0.01, che in double fa 30.0 esatto: classe 1066).
 //    flag: 0 ok, 1 sotto il minimo (-> 0), 2 tagliato al massimo
 double SW_NormLots(const double v,const double step,const double vmin,const double vmax,int &flag)
   {
@@ -1099,7 +1101,7 @@ bool RefreshDay()
    gLvOk[3]=true;
    gLvOk[4]=true;
    gLvOk[5]=true;
-   int p=PG_GiornoPrec(tt,got,QuotaSabato());
+   int p=PG_GiornoPrec(tt,got,QuotaSabato(tt,got));
    if(p<0)
      {
       gLvOk[0]=false;
@@ -1116,11 +1118,16 @@ bool RefreshDay()
    return true;
   }
 
-// il simbolo ha una sessione di contrattazione il SABATO (cripto)? Allora ogni barra D1 e' un giorno.
-bool QuotaSabato()
+// il simbolo quota il SABATO (cripto)? Allora ogni barra D1 e' un giorno. Si guarda nei DATI, non nella
+// sessione dichiarata dal broker (non verificabile qui, classe 1069): fra le ultime D1 lette (10 = almeno
+// un sabato per chi quota 7 giorni su 7) ce n'e' una di sabato? Il forex, che al massimo ha la candela
+// della DOMENICA sera, non ne ha mai.
+bool QuotaSabato(const datetime &t[],const int n)
   {
-   datetime da=0, a=0;
-   return SymbolInfoSessionTrade(_Symbol,SATURDAY,0,da,a);
+   for(int i=0;i<n;i++)
+      if(PG_Dow(t[i])==6)
+         return true;
+   return false;
   }
 
 bool RefreshPrev(const ENUM_TIMEFRAMES tf,const int iMax,const int iMin)
