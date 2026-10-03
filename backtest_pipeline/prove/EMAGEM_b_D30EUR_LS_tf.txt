@@ -23,8 +23,12 @@
 #      H1 L+S, cella ESATTA (O1 0,2 / O2 0,3 / TP_RR 2,0), risultati_prove/risultati_scan_ABTG_EMA200_H1/
 #         scan_ABTG_EMA200_H1_D30EUR.csv : PF 0,84842 | n 777 deal | DD 14,5326% | profit -1229,12
 #      stessa cella solo long : PF 0,81733 | n 408 | DD 10,0029% (stesso file); archivio H1_OHLC solo long: 0,79020 | n 371 | DD 11,0470%
-#      griglia H1 L+S: 0 celle positive su 28; PF migliore 0,81, n 659, DD 11,4% (STATO_DELLARTE_2026-09-30 sez. 2.2)
-#      H4 (screening): solo long 30/30 celle positive, PF 1,44, n 118, DD 3,89% (cella esatta); L+S 23/28, PF 1,16, n 180, DD 4,7%
+#      griglia H1 L+S (archivio H1_OHLC, ricontata il 03/10): 0/28 positive; PF MEDIANO 0,811; cella di PF MASSIMO
+#         0,90445 | n 659 | DD 11,4261%. Scan di risultati_prove: 0/26, massimo 0,91709 | n 738 | DD 12,5261%.
+#         (STATO_DELLARTE_2026-09-30 sez. 2.2 scrive il PF MEDIANO accanto a n/DD della cella MIGLIORE:
+#         sono due celle diverse, non "PF migliore 0,81". Classe 1086.)
+#      H4 (screening): solo long 30/30 positive, cella esatta 1,44341 | n 118 | DD 3,8949%;
+#         L+S 23/28 positive, PF mediano 1,156, cella di PF massimo 1,37227 | n 180 | DD 4,6822%
 #         -> 59-90 posizioni circa (rapporto 2,0): SOTTO 150, merito non leggibile.
 #    TICK, corto puro (R234b, REFERTO_13_ROUND_2026-09-23.md sez. 2; i CSV R234 NON sono in repo):
 #      OOS PF M30 0,950 | H1 0,724 | H2 0,540 | H3 0,758 | H4 0,662 -> morto a tutti e cinque.
@@ -66,8 +70,8 @@
 #        barre: una cella H1 vede le stesse barre prima e dopo. (Ragionamento dal sorgente,
 #        non una misura: lo dico.)
 #    >>> A H2/H3/H4 la griglia e' ancorata alla mezzanotte server: d'inverno una barra H4
-#        08:00-12:00 server contiene l'apertura DAX a meta' barra (09:00 IT = 09:00 BCM),
-#        d'estate all'inizio (08:00 BCM). Quindi a H2-H4 la COMPOSIZIONE della barra rispetto
+#        08:00-12:00 server contiene l'apertura DAX un'ora dopo il suo inizio (09:00 IT =
+#        09:00 BCM), d'estate proprio all'inizio (08:00 BCM). Quindi a H2-H4 la COMPOSIZIONE della barra rispetto
 #        alla cassa cambia con la stagione. Il banco contiene gia' due inverni a UTC+1 fisso,
 #        ma questo file NON isola l'effetto: [NON MISURATO] per H2-H4.
 #    >>> CONTRO-ESEMPIO (OROLOGIO sez. 5.1.3): 771531 passa da PF 2,05 a 0,87 fra due meta'
@@ -76,12 +80,17 @@
 #        nessuna differenza fra stagioni si attribuisce all'orologio.
 #
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI
-#    H1: OOS PF 0,70-0,95 (centro 0,82). Evidenze: OHLC L+S 0,848 e 0,81 (migliore della griglia),
-#        corto tick OOS 0,724, long OHLC 0,79-0,82: nessuna evidenza sopra 1,0 a H1 su L+S.
+#    H1: OOS PF 0,70-0,95 (centro 0,82). Evidenze: OHLC L+S cella esatta 0,848; griglia L+S
+#        mediana 0,811, massimi 0,904 e 0,917 (0 celle sopra 1,00 nei due scan); corto tick OOS
+#        0,724; long OHLC cella esatta 0,79-0,82: nessuna evidenza sopra 1,0 a H1 su L+S.
+#        (Corretto il 03/10 dal cancello PRIMA di ogni numero tick: la prima stesura chiamava
+#        "migliore" la MEDIANA 0,81. La banda non cambia: contiene mediane e massimi.)
 #        DD OOS 9-16% (OHLC L+S 14,5% e 11,4%): attesa SOPRA il muro del 10% (T3 fallisce).
 #    n: OHLC L+S 777 deal in 30 mesi sulla cella esatta. Sul Dow la cella a tick fa 754 deal in 21
 #        mesi contro 547 dell'OHLC in 30 mesi (x1,97 per mese): scalando, D30EUR H1 fa 450-1.100 deal,
-#        IS (40%) 180-440, OOS 270-660. [DERIVATO, banda larga di proposito.]
+#        IS (40%) 180-440, OOS 270-660. [DERIVATO, banda larga di proposito.] NB: il 777 viene dallo
+#        scan di risultati_prove, dove la stessa cella sul Dow fa 648 (non 547): stesso scan = x1,66,
+#        ~900 deal. Dentro la banda; il rapporto fra scan diversi non e' una grandezza sola.
 #    M30: PF < 1,00 e DD > 15% (sul Dow, stessa cella: OOS 0,90713 con DD 15,87%; IS 1,03404).
 #    H2/H3/H4: n IS sotto ~130/40/30 deal (Dow IS: 127/36/26): niente merito; PF non previsto
 #        nel segno. Letti solo per rischio e forma della curva.
@@ -114,6 +123,13 @@
 #        col per-trade a contare le posizioni, e T2 decide se e' promovibile o solo FRAGILE.
 #        Se NESSUNA cella ha OOS n >= 300, il round NON ha falsificato niente: dice
 #        "NON ANCORA MISURATO PER IL MERITO" e si scrive cosi'.
+#    T5+T6, deciso ORA (aggiunto dal cancello il 03/10, prima dei numeri): T6 manda in coda
+#        SOLO se vale anche T5. Per T5 una cella ADIACENTE e' "sopra i cancelli" se ha OOS PF
+#        >= 1,00 e DD OOS <= 10% (T3), ANCHE se ESCLUSA PER COSTO o sotto 300 deal: per
+#        l'adiacenza conta la forma, non il merito. Contro-esempio che fissa la scelta: con
+#        T2+T4 sull'adiacente la sedia stessa sul Dow fallirebbe T5 (M30 OOS 0,907; H2 OOS
+#        1,173 ma n 266 < 300) = criterio insoddisfacibile. T6 senza T5 = "T6 ISOLATA": si
+#        scrive, NON entra in coda come candidata e NON si archivia; resta una domanda aperta.
 #    T7  NIENTE PROMOZIONI DA QUESTO ROUND. Nessuna taglia, nessuna sedia, nessun forward.
 #
 #  BUCHI DICHIARATI

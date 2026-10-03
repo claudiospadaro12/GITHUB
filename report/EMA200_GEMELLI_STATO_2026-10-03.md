@@ -25,17 +25,17 @@ Sorgenti delle tabelle sotto: `risultati_archivio/EMA200/{H1_OHLC,H4_OHLC,realti
 | TF | misurato (PF / n deal / DD%, banco, fonte) | non misurato |
 |---|---|---|
 | M30 | corto puro tick: OOS PF 0,950 (R234b, referto) | **L+S tick**; long; IS/n/DD del corto (non nel referto) |
-| **H1** | L+S cella esatta, OHLC: **0,84842 / 777 / 14,53** (`risultati_scan_ABTG_EMA200_H1/scan_..._D30EUR.csv`); solo long OHLC 0,81733 / 408 / 10,00 e 0,79020 / 371 / 11,05; griglia L+S 0/28 positive, migliore 0,81 / n659 / DD 11,4; corto tick OOS **0,724** (R234b) | **L+S a tick reali IS/OOS** |
+| **H1** | L+S cella esatta, OHLC: **0,84842 / 777 / 14,53** (`risultati_scan_ABTG_EMA200_H1/scan_..._D30EUR.csv`); solo long OHLC 0,81733 / 408 / 10,00 e 0,79020 / 371 / 11,05; griglia L+S 0/28 positive, PF **mediano** 0,811, cella di PF **massimo** 0,90445 / n659 / DD 11,43 (secondo scan: 0/26, massimo 0,91709 / n738 / DD 12,53); corto tick OOS **0,724** (R234b) | **L+S a tick reali IS/OOS** |
 | H2 | corto tick OOS 0,540 | L+S |
 | H3 | corto tick OOS 0,758 | L+S |
-| H4 | solo long OHLC cella esatta 1,44341 / 118 / 3,89 (30/30 celle positive); L+S OHLC 23/28, 1,16 / 180 / 4,7 (cella di PF massimo); corto tick OOS 0,662 | **L+S tick**; n=59-90 posizioni [DERIVATO, rapporto 2,0]: sotto 150 comunque |
+| H4 | solo long OHLC cella esatta 1,44341 / 118 / 3,89 (30/30 celle positive); L+S OHLC 23/28, PF mediano 1,156; cella di PF massimo 1,37227 / 180 / 4,68; corto tick OOS 0,662 | **L+S tick**; n=59-90 posizioni [DERIVATO, rapporto 2,0]: sotto 150 comunque |
 | uscita | -- | **ad asse su D30EUR: [NON MISURATO]** (solo sul Dow, R136a-d) |
 
 ### NASUSD
 | TF | misurato | non misurato |
 |---|---|---|
 | M30 | corto tick OOS **1,230 / 569** (R234c), ESCLUSA PER COSTO (23,7x) | **L+S tick** |
-| **H1** | cella esatta **assente** dalle griglie OHLC (compare solo come cella spenta, n 0); griglia L+S 0/26 positive, migliore 0,75 / n550 / DD 10,6; solo long 1/29 (0,83), solo short 0/30 (0,77); altro scan H1: 2/83 positive, migliore 1,0285 | **L+S tick IS/OOS** |
+| **H1** | cella esatta **assente** dalle griglie OHLC (compare solo come cella spenta, n 0); griglia L+S 0/26 positive, PF **mediano** 0,753, cella di PF **massimo** 0,91642 / n550 / DD 10,59 (secondo scan: 0/26, massimo 0,90226 / n681 / DD 13,31); solo long 1/29 (mediano 0,835, massimo 1,01974 / n255) e 2/25 (massimo 1,02854 / n286): **le sole celle sopra 1,00 sono solo long**; solo short 0/30 (mediano 0,771, massimo 0,94958) e 0/32 | **L+S tick IS/OOS** |
 | H2 / H3 | -- | tutto |
 | H4 | corto tick: OOS 1,166 ma **IS 0,318 su n=15** (R234c); `scan_ABTG_EMA200_H4_NASUSD.csv` **NON ESISTE** | **tutto il resto a H4** (unico buco della matrice dei gemelli, REGISTRO 12/09) |
 | uscita | -- | [NON MISURATO]; nessun ATR(14) di NASUSD e' misurato (ANCORA_ADR sez. 4) |
@@ -44,7 +44,7 @@ Sorgenti delle tabelle sotto: `risultati_archivio/EMA200/{H1_OHLC,H4_OHLC,realti
 | TF | misurato | note |
 |---|---|---|
 | M30 | L+S cella di DEFAULT (O1 0,10 / O2 0,35 / TP_RR 2): IS 0,51920 / 415 / 29,75; OOS 0,93270 / 920 / 15,29 (tick) | finestra non dichiarata nel CSV [NON VERIFICABILE] |
-| H1 | default: IS 0,54644 / 223 / 17,18; OOS 0,82598 / 423 / 9,83 (tick); cella esatta assente; griglia OHLC L+S 0/27, migliore 0,76 | -- |
+| H1 | default: IS 0,54644 / 223 / 17,18; OOS 0,82598 / 423 / 9,83 (tick); cella esatta assente; griglia OHLC L+S 0/27, PF mediano 0,759, massimo 0,92048 / n528 / DD 12,44 (secondo scan 0/30, massimo 0,83138) | -- |
 | H4 | cella esatta OHLC L+S **1,40060 / 138 / 2,27**; tick (valid, genetico, senza split) L 31/31 positive, PF 1,59, n74 | n basso (21-74 pos) |
 | costo | **ESCLUSO PER COSTO a ogni TF**: ATR H1 10,4 (ADR ~49,9 [INFERITO, n=2] x radice(60/1380)), spread 1,40: H1 **7,4x**, H4 **14,9x** [DERIVATO]; MAPPA_COSTO sez. 5: "esclusa in modo DEFINITIVO su BCM" | |
 
@@ -89,6 +89,8 @@ Stessa cella della sedia, **nessuna griglia nuova**: l'unico asse e' il TF (stes
 **Attese scritte nei file prima dei numeri**: H1 su DAX e Nasdaq OOS PF 0,70-0,95 (centro 0,82 e 0,80), DD OOS 8-16% (sopra il muro del 10%), n totale 450-1.100 (DAX) e 400-800 (Nasdaq) deal, scalato dal rapporto tick/OHLC misurato sul Dow (x1,97 per mese); M30 PF < 1; H2-H4 non letti per il merito (n IS atteso ~130/40/30 come sul Dow).
 **Cosa smentisce l'attesa (T6, congelato)**: H1 o H2 con OOS PF >= 1,10, OOS n >= 300 deal, IS PF >= 1,00 e DD OOS <= 10% -> "la cella e' del Dow" e' falsa per quel simbolo; la cella entra in coda come CANDIDATA gemella (mai in campo in automatico), col per-trade a contare le posizioni e T2 a dire se e' FRAGILE o promovibile. Se nessuna cella ha OOS n >= 300 il round **non ha falsificato niente** e si scrive "NON ANCORA MISURATO PER IL MERITO".
 **Altre soglie**: T3 rischio a qualunque n (DD <= 10% a rischio 1,0); T4 merito solo con OOS n >= 300 deal (proxy di 150 posizioni; rapporto deal/posizione 2,0117 misurato sul Dow, [NON MISURATO] su DAX/Nasdaq); T5 altopiano, non picco; T7 nessuna promozione.
+**T5+T6 (aggiunto dal cancello il 03/10, prima dei numeri)**: T6 manda in coda solo se vale anche T5; per T5 la cella adiacente conta se ha OOS PF >= 1,00 e DD OOS <= 10%, anche se esclusa per costo o sotto 300 deal (con T2+T4 sull'adiacente la sedia stessa sul Dow fallirebbe T5: M30 OOS 0,907, H2 n 266). T6 senza T5 = "T6 ISOLATA": scritta, non in coda, non archiviata.
+**Correzione del cancello (03/10, prima dei numeri)**: la prima stesura di sez. 2 e dei file b/c chiamava "migliore" il PF **mediano** della tabella di `EMA200_RIMBALZO_STATO_DELLARTE_2026-09-30.md` sez. 2.2 (che mette la mediana accanto a n/DD della cella migliore). Numeri ricontati dai CSV; le bande d'attesa non cambiano (contengono mediane e massimi). Classe 1086.
 **Finestra e regime**: 642 giorni, 91,7 settimane, ~10.500 barre H1 (M30 ~21.000, H4 ~2.600: tutte sotto il tetto di ~100.000). **Un solo regime** (indici BCM a tick dal 2024.09.26, toro con una discesa breve): Emendamento C non soddisfatto e non soddisfabile su BCM. IS 256 giorni e OOS 385: l'IS a posizioni sara' sotto 150 quasi certamente; si legge come segno.
 
 ## 5. Orologio (dal 26/10 DAX, dal 02/11 USA)

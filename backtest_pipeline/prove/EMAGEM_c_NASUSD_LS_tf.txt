@@ -22,9 +22,11 @@
 #    OHLC (Modello 1, finestra 2024.01.01-2026.06.30 dichiarata dal driver scan_market.ps1):
 #      H1 L+S, cella ESATTA (O1 0,2 / O2 0,3 / TP_RR 2,0): ASSENTE dalle griglie (nei due scan H1 la combinazione
 #         compare solo come cella 'motore spento' AllowLong=0/AllowShort=0, n 0): [NON MISURATO].
-#      griglia H1 L+S: 0 celle positive su 26, PF migliore 0,75, n 550, DD 10,6% (archivio H1_OHLC); l'altro scan H1 di
-#         risultati_prove: 2 celle positive su 83, PF migliore 1,0285 (REGISTRO_TEST 12/09). Solo long: 1/29, 0,83;
-#         solo short: 0/30, 0,77.
+#      griglia H1 L+S (archivio H1_OHLC, ricontata il 03/10): 0/26 positive, PF MEDIANO 0,753, cella di PF MASSIMO
+#         0,91642 | n 550 | DD 10,5886%; scan di risultati_prove: L+S 0/26, massimo 0,90226 | n 681 | DD 13,3054%.
+#         Le sole celle sopra 1,00 (1/85 archivio, 2/83 risultati_prove) sono TUTTE solo long: long 1/29 (mediano
+#         0,835, massimo 1,01974 n 255) e 2/25 (massimo 1,02854 n 286); short 0/30 (mediano 0,771, massimo 0,94958)
+#         e 0/32. (STATO_DELLARTE sez. 2.2 scrive il PF MEDIANO accanto a n/DD della cella MIGLIORE: classe 1086.)
 #      H4 (qualunque lato): il file scan_ABTG_EMA200_H4_NASUSD.csv NON ESISTE: [NON MISURATO]. E' l'unico buco della
 #         matrice dei gemelli (REGISTRO_TEST 12/09).
 #    TICK, corto puro (R234c, REFERTO_13_ROUND_2026-09-23.md sez. 2; i CSV R234 NON sono in repo): l'unica cella OOS
@@ -67,9 +69,10 @@
 #        02/11 (USA) cambia il rapporto fra ora server e apertura cash, NON la griglia delle
 #        barre: una cella H1 vede le stesse barre prima e dopo. (Ragionamento dal sorgente,
 #        non una misura: lo dico.)
-#    >>> A H2/H3/H4 la griglia e' ancorata alla mezzanotte server: d'inverno una barra H4
-#        08:00-12:00 server contiene l'apertura DAX a meta' barra (09:00 IT = 09:00 BCM),
-#        d'estate all'inizio (08:00 BCM). Quindi a H2-H4 la COMPOSIZIONE della barra rispetto
+#    >>> A H2/H3/H4 la griglia e' ancorata alla mezzanotte server: l'apertura cash USA
+#        (09:30 New York) cade alle 14:30 BCM d'estate e alle 15:30 BCM d'inverno, quindi una
+#        barra H2 14:00-16:00 server la contiene a 30 minuti dall'inizio d'estate e a 90 minuti
+#        d'inverno. Quindi a H2-H4 la COMPOSIZIONE della barra rispetto
 #        alla cassa cambia con la stagione. Il banco contiene gia' due inverni a UTC+1 fisso,
 #        ma questo file NON isola l'effetto: [NON MISURATO] per H2-H4.
 #    >>> CONTRO-ESEMPIO (OROLOGIO sez. 5.1.3): 771531 passa da PF 2,05 a 0,87 fra due meta'
@@ -78,8 +81,11 @@
 #        nessuna differenza fra stagioni si attribuisce all'orologio.
 #
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI
-#    H1: OOS PF 0,70-0,95 (centro 0,80). Evidenze: griglia OHLC L+S migliore 0,75 (0/26 positive), long 0,83, short 0,77;
-#        nessuna evidenza di cella L+S sopra 1,0 a H1. DD OOS 8-14% (OHLC L+S 10,6%).
+#    H1: OOS PF 0,70-0,95 (centro 0,80). Evidenze: griglia OHLC L+S 0/26 e 0/26 positive, mediana 0,753, massimi 0,916
+#        e 0,902; long mediano 0,835 (massimi 1,020-1,029: le sole celle sopra 1,00), short mediano 0,771 (massimo 0,950);
+#        nessuna cella L+S sopra 1,0 a H1. DD OOS 8-14% (OHLC L+S, cella di PF massimo, 10,6%).
+#        (Corretto il 03/10 dal cancello PRIMA di ogni numero tick: la prima stesura chiamava "migliore" la MEDIANA.
+#        La banda non cambia: contiene mediane e massimi.)
 #    n: OHLC L+S 550 deal sulla migliore cella in 30 mesi; stessa scala del DAX (x0,7 mesi, x1,4-2,0 per tick):
 #        NASUSD H1 fa 400-800 deal, IS 160-320, OOS 240-480. [DERIVATO, banda larga di proposito.]
 #    M30: informativa (ESCLUSA PER COSTO). Il corto da solo fa OOS 1,230 a M30 (R234c) e L+S puo' stare sopra 1,0:
@@ -114,6 +120,13 @@
 #        col per-trade a contare le posizioni, e T2 decide se e' promovibile o solo FRAGILE.
 #        Se NESSUNA cella ha OOS n >= 300, il round NON ha falsificato niente: dice
 #        "NON ANCORA MISURATO PER IL MERITO" e si scrive cosi'.
+#    T5+T6, deciso ORA (aggiunto dal cancello il 03/10, prima dei numeri): T6 manda in coda
+#        SOLO se vale anche T5. Per T5 una cella ADIACENTE e' "sopra i cancelli" se ha OOS PF
+#        >= 1,00 e DD OOS <= 10% (T3), ANCHE se ESCLUSA PER COSTO o sotto 300 deal: per
+#        l'adiacenza conta la forma, non il merito. Contro-esempio che fissa la scelta: con
+#        T2+T4 sull'adiacente la sedia stessa sul Dow fallirebbe T5 (M30 OOS 0,907; H2 OOS
+#        1,173 ma n 266 < 300) = criterio insoddisfacibile. T6 senza T5 = "T6 ISOLATA": si
+#        scrive, NON entra in coda come candidata e NON si archivia; resta una domanda aperta.
 #    T7  NIENTE PROMOZIONI DA QUESTO ROUND. Nessuna taglia, nessuna sedia, nessun forward.
 #
 #  BUCHI DICHIARATI
