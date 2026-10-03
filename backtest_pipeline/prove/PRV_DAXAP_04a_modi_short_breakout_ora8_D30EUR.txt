@@ -103,9 +103,17 @@
 #  G2 il pin del MODO e' arrivato: Profit OOS di 04a != Profit OOS di
 #     R252a (e cosi' a coppie); uguali = pin non arrivato = corsa a RETEST
 #     (MT5 ignora un pin non riconosciuto: la classe che ha fatto 874 CSV
-#     identici). Solo se R252 e' tornato; altrimenti G2 si fa sul per-trade:
-#     BREAKOUT entra a ordine STOP al livello -/+ buffer, prezzo d'ingresso
-#     = livello +/- 5,0 idx; RETEST a LIMIT al livello -/+ 2,0 idx.
+#     identici). Solo se R252 e' tornato. Altrimenti NON si legge il prezzo
+#     d'ingresso: il per-trade esporta SOLO i deal di USCITA (sorgente
+#     r.2772, ExportTrades) e non ha il livello. G2 senza R252, in due modi:
+#     (i) a coppie stesso lato x ora, BREAKOUT != OPENCONFIRM (Profit e
+#     Trades del CSV _OOS, e per-trade): uguali = tutti e due caduti sul
+#     default RETEST (InpEntryMode = ABTG_RETEST, r.273) = NULLI;
+#     (ii) ancora assoluta sui file a ora 8, struttura come R252a par. 6
+#     (close_time, deal_type, price; volume e net_profit no): righe
+#     >= 2025.07.01 di 04a/04c contro 792520 (R251), righe >= 2025.06.10
+#     di 04e/04g contro 794611 (R246e). IDENTICHE = pin del modo non
+#     arrivato = NULLO.
 #  G0: NON C'E' (celle nuove). Il legame col banco lo da' R252a/e SE tornano
 #     con G0 VERDE (stessi pin tranne il modo). Se R252 non e' tornato, i
 #     controlli retest mancano: le celle si leggono per R1/R2/R3 e M1, NON
@@ -235,6 +243,14 @@
 #     posizione puo' non fare la parziale (R252a par. 6): nelle celle breakout
 #     lo stop piu' largo abbassa il lotto, quindi l'eccezione scatta piu'
 #     spesso che nel retest [INFERITO]. Si conta, non si assume.
+#  g) il MODO cambia anche la FINESTRA d'ingresso (letto nel sorgente):
+#     BREAKOUT = pendente STOP con scadenza InpPendingExpiryMin=120, cioe'
+#     ingressi solo fino a ~10:35 (ora 8) / ~11:35 (ora 9); RETEST e
+#     OPENCONFIRM restano ARMATI fino al flat (nessuna scadenza sull'arma,
+#     r.885-890, uscita solo a InpCloseHour r.811). M2/E3 confrontano
+#     quindi "modo + finestra come codificati", non il solo modo: un
+#     BREAKOUT senza scadenza e' [NON MISURATO] e la frase "il retest e' il
+#     modo giusto" vale a scadenza 120.
 #
 #  11. TEMPO MACCHINA (retta di R252a par. 14: ~37 s fissi per file +
 #      0,013 s per giorno-cella, controprova R251: previsti 249 s, misurati
