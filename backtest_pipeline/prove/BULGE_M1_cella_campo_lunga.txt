@@ -1,6 +1,6 @@
 # =====================================================================
 #  EA: ABTG_Bulge
-#  BULGE_M1 -- LA CELLA CHE E' IN CAMPO SULLA TRIAL, MISURATA A LUNGO (prima misura del dossier
+#  BULGE_M1 -- IL PRESET TRIAL (ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set) MISURATO A LUNGO; uguale al campo [NON VERIFICATO] (vedi CONTROLLO PREVENTIVO sotto). Prima misura del dossier
 #  report/BULGE_COME_MIGLIORARLO_2026-10-03.md). Scritto il 03/10/2026, PRIMA di qualunque numero.
 #  ABTG_Bulge v5.20 (commit c4426c53, SHA256 ED4E88B1CFBA36AD..., NON modificato). H1, Modello 1 (OHLC M1):
 #  SOLO SCREENING, nessun verdetto a tick reali (R57). Deposito 10000 e Modello 1 vanno passati ESPLICITI
@@ -9,7 +9,7 @@
 #  copiati cosi' come sono, non una scelta fatta qui (la taglia e' di Claudio).
 #
 #  PERCHE' QUESTO FILE ESISTE
-#  Nessuna misura del repo copre la cella che sta in campo sulla trial (VIOLA solo, Blu spento, ADX spento,
+#  Nessuna misura del repo copre il preset trial (VIOLA solo, Blu spento, ADX spento,
 #  15 cross, ATR 0,5-1,8, Multi 1,1, nuda):
 #   - R92b (firmata 29-30/09) ha come cella di partenza P col BLU acceso e l'ADX acceso: non e' la cella del campo;
 #   - R92BAB (01/10) ha girato l'AMPIA (Arancio e Blu accesi, ATR spento, Multi 1,0) su 4 mesi 2026 e NON misura merito.
@@ -79,6 +79,7 @@
 #  COSTO IN TEMPO MACCHINA: [NON MISURATO]. Riferimenti: R92BAB_A (4 passate, finestra 4 mesi, 22 cross) = 95 s;
 #  R92b proiettava 94,98 minuti per 26 passate di 16,5 anni su 22 cross (cioe' ~3,7 minuti a passata). Questo lavoro:
 #  4 passate, 15 cross -> [DERIVATO] 15-60 minuti. Una gamba su 6 muore con 'OnTesterInit works too long' (R92BAB: 2 su 12)
+#  Quel 1 su 6 e' misurato su finestre di 4 MESI: su 12 anni M1 x 15 simboli frequenza del guasto e memoria del tester sono [NON MISURATE].
 #  e walkforward_generico.ps1 NON riprova (walkforward_generico_RETRY.ps1 riprova UNA volta): senza RETRY va messo
 #  in conto un possibile rilancio dello stesso lavoro. I 94,98 min di R92b sono una proiezione da un controllo FALLITO.
 # =====================================================================
