@@ -1,0 +1,143 @@
+# =====================================================================
+#  EA: ABTG_Bulge
+#  BULGE_M1 -- LA CELLA CHE E' IN CAMPO SULLA TRIAL, MISURATA A LUNGO (prima misura del dossier
+#  report/BULGE_COME_MIGLIORARLO_2026-10-03.md). Scritto il 03/10/2026, PRIMA di qualunque numero.
+#  ABTG_Bulge v5.20 (commit c4426c53, SHA256 ED4E88B1CFBA36AD..., NON modificato). H1, Modello 1 (OHLC M1):
+#  SOLO SCREENING, nessun verdetto a tick reali (R57). Deposito 10000 e Modello 1 vanno passati ESPLICITI
+#  dalla riga di lancio. Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (regola 21/09). Non tocca nessuna sedia,
+#  nessun conto, nessun preset, nessuna taglia: il Risk_Percent 0,80 e Max_Trades 4 sono QUELLI DEL PRESET TRIAL
+#  copiati cosi' come sono, non una scelta fatta qui (la taglia e' di Claudio).
+#
+#  PERCHE' QUESTO FILE ESISTE
+#  Nessuna misura del repo copre la cella che sta in campo sulla trial (VIOLA solo, Blu spento, ADX spento,
+#  15 cross, ATR 0,5-1,8, Multi 1,1, nuda):
+#   - R92b (firmata 29-30/09) ha come cella di partenza P col BLU acceso e l'ADX acceso: non e' la cella del campo;
+#   - R92BAB (01/10) ha girato l'AMPIA (Arancio e Blu accesi, ATR spento, Multi 1,0) su 4 mesi 2026 e NON misura merito.
+#  Confronto riga per riga con mql5/Presets/FTMO/ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set, fatto a macchina il 03/10:
+#  TRE differenze e basta: InpMagic (asse tecnico), InpVerbose=0, InpAutoTest=0 (nel preset sono a true: stampano e basta).
+#  Questo e' UN lavoro a cella sola (come R92b0): 2 celle identiche per costruzione (asse tecnico sul magic = gemello
+#  di determinismo G1) x 2 finestre = 4 passate. UNA variabile per file: InpMagic, asse tecnico, non di strategia.
+#
+#  FINESTRA (come R92b, firmata): 2010.01.01 - 2026.06.30, @FRAZIONEIS 0.7275 -> IS 2010.01.01-2021.12.31 (12,0 anni),
+#  OOS 2022.01.01-2026.06.30 (4,5 anni). Il per-trade (CSV con signal e cella) sopravvive SOLO per la gamba OOS
+#  (R92BAB_LETTURA: ogni file e' la gamba dell'ULTIMA passata scritta per quel magic); la gamba IS dara' i totali
+#  del CSV (Profit, PF, DD, Trades), non la distribuzione. GBPNZD nell'IS parte dal 2010.05.10 (muro misurato,
+#  R92b_CRITERI par. 2.1): si scrive accanto a ogni numero IS, non si rilancia. Le altre 14 coprono dal 2010.01.01.
+#  GRAFICO: NZDCHF, che e' il grafico su cui il Bulge gira in campo ed e' DENTRO i 15 (nessun caso 'grafico fuori
+#  lista' non provato).
+#  REGIME che contiene. IS 2010-2021: piu' regimi in una finestra sola (crisi del debito euro 2010-12, calma 2013-14,
+#  shock SNB del 15/01/2015 -- tocca NZDCHF, USDCHF, CADCHF che sono dentro i 15 --, Brexit 2016, crollo COVID 2020)
+#  [DICHIARATO da calendario, non misurato su questi dati]. OOS 2022-2026: dollaro forte 2022, disinflazione 2023-24,
+#  2025-26 (lo stesso regime di R92 e di R92b). Il solo anno 2026 e' dove vive tutto il forward e tutto R92BAB:
+#  il lavoro lo estende a 16,5 anni.
+#
+#  COSA SI ATTENDE (dichiarato PRIMA dei numeri; i perche' e i controesempi sono nel dossier, par. 5)
+#   n    : nessun n atteso e' una soglia. Stima [DERIVATA]: R92BAB_A (AMPIA, Modello 1) ha 128 VIOLA su questi 15 cross
+#          in 2 mesi (4/05-29/06/2026) = 64 al mese; i due filtri in piu' (Multi 1,1 e ATR) ne tolgono il 30-70%
+#          -> OOS circa 1.000-2.500 operazioni. n OOS sotto 150 o sopra 5.000 = banco sospetto, non un risultato.
+#   PF OOS: banda 0,80-1,05; WR 70-77%; vincita media / perdita media 0,28-0,40 (win rate di pareggio 71-78%).
+#          Perche': le tre misure 2026 su questa famiglia stanno tutte sotto 1 -- Modello 1 VIOLA 15 cross PF 0,79
+#          (n 128), AMPIA 22 cross PF 0,87 IS e 0,82 OOS (n 410 e 363), forward antenato PF 0,83 (n 297, lordo di commissioni
+#          e swap 0,92) -- e il PF 1,599 di Claudio (n 268, 6 cross scelti, rischio 3%, dati 40%) non e' una misura nostra.
+#   DD OOS alla taglia 0,80%: atteso 8-25% (AMPIA: 22,8% OOS e 13,7% IS in 2 mesi ciascuna). Il cancello del 10% e' un
+#          cancello di RISCHIO e si legge a qualunque n (Emendamento B): e' probabile che NON passi.
+#  IL CONTROESEMPIO (cosa produce l'ALTRA ipotesi): se il motore e' quello di Claudio (PF 1,60, WR 80%), la banda
+#   0,80-1,05 e' falsa: PF OOS >= 1,30. Le due bande sono disgiunte, quindi la misura le separa.
+#
+#  SOGLIE CONGELATE (non si cambiano dopo i numeri; valgono dal round dopo)
+#   S1 n >= 150 per gamba (sotto: il MERITO e' sospeso, il rischio si legge lo stesso) ;
+#   S2 PF OOS >= 1,30 ; S3 WR OOS >= 65% e profitto OOS > 0 (le tre sono R92_CRITERI, invariate) ;
+#   PF OOS < 1,05 = nessun edge in screening: NIENTE griglie sui parametri d'ingresso (regola 19/08) ;
+#   1,05 <= PF OOS < 1,30 = ZONA GRIGIA: si apre solo la gestione dell'uscita, mai l'ingresso ;
+#   rumore A3 10,5% relativo: due PF che differiscono meno del 10,5% non si distinguono ;
+#   P0: nel CSV Use_Blue=0, Use_Orange=0, Use_Purple=1, Use_ADX_Filter=0, Signal_Bar_Offset=1, InpComment=BULGE_V520_FT ;
+#   G1: Trades IDENTICI in tutte e due le gambe; in OOS Profit, PF, DD identici al centesimo; in IS |dProfit| <= 0,10 e
+#       |dPF| <= 0,0001. Perche' la tolleranza in IS e' scritta ORA, prima dei numeri di questo lavoro: nei dati di R92BAB
+#       (01/10) la gemella +50 ha in IS un Profit piu' basso di 0,02-0,06 (A -860,62/-860,67; B -92,23/-92,29; C -1.014,25/
+#       -1.014,27), con Trades uguali e PF a 5 decimali, mentre in OOS e' identica. Un confronto esatto a 1e-6 (R92b_CRITERI
+#       E2) avrebbe bocciato quei file: la CAUSA dello scarto e' [NON MISURATA], e il valore qui sopra non la spiega. ;
+#       SHA256 EA + include = pin ;
+#   somma del per-trade OOS = Profit del CSV OOS (in R92BAB_A erano 945,78 contro 1.149,43: -203,65 NON SPIEGATI,
+#   da spiegare PRIMA di leggere un PF: se il per-trade non include commissioni/swap, il PF del CSV e' quello che vale).
+#  NON BASTA PER UN CERTIFICATO DI MORTE (CLAUDIO 09/09): questo lavoro e' UNO dei cinque punti. Mancano ancora la
+#  gestione dell'uscita ad asse, i gemelli (i 7 cross fuori dalla lista dei 15) e un TF diverso da H1.
+#
+#  COSTO IN TEMPO MACCHINA: [NON MISURATO]. Riferimenti: R92BAB_A (4 passate, finestra 4 mesi, 22 cross) = 95 s;
+#  R92b proiettava 94,98 minuti per 26 passate di 16,5 anni su 22 cross (cioe' ~3,7 minuti a passata). Questo lavoro:
+#  4 passate, 15 cross -> [DERIVATO] 15-60 minuti. Una gamba su 6 muore con 'OnTesterInit works too long' (R92BAB: 2 su 12)
+#  e il driver NON riprova: va messo in conto un possibile rilancio dello stesso lavoro.
+# =====================================================================
+@SIMBOLO    NZDCHF
+@PERIODO    H1
+@DAQUANDO   2010.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.7275
+
+# Bollinger, cuore del motore: NON si tocca
+BB_Period=20
+BB_Deviation=2.0
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+Bulge_Multi=1.1
+Lookback_Bars=20
+# SOLO VIOLA, come il preset trial
+Use_Orange=0
+Use_Blue=0
+Use_Purple=1
+# VIOLA-EA (0): non e' un asse di questo lavoro
+Use_Purple_PineReaction=0
+# v5.20: 1 = barre CHIUSE
+Signal_Bar_Offset=1
+# filtro ATR ACCESO, come il preset trial
+Use_ATR_Filter=1
+ATR_MA_Len=20
+ATR_Max_Mult=1.8
+ATR_Min_Mult=0.5
+# ADX spento, come il preset trial (ADX_Apply_On_Purple=0 comunque)
+Use_ADX_Filter=0
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=1
+ADX_Apply_On_Purple=0
+ADX_Apply_On_Orange=0
+Use_News_Filter=0
+# stringa con virgole: inerte (Use_News_Filter=0); gia' pin del driver
+News_Block_Hours=7,9,11,12,15,22
+# gestione NUDA: nessun parziale, nessun BE, nessun trailing (1 posizione = 1 deal di uscita)
+Enable_Partial_Close=0
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+# kill switch ACCESO, come in origine e nel preset trial
+Use_Kill_Switch=1
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+# 0 = RISK_PER_TRADE. Valori del preset trial copiati cosi' come sono: NON e' una taglia scelta qui
+Risk_Mode=0
+Risk_Percent=0.8
+Total_Risk_Percent=2.0
+Max_Trades=4
+# spento: nel tester non esistono ordini manuali
+Manage_Manual_Orders=0
+Manual_SL_ATR_Mult=3.0
+Enable_BE_1R=0
+BE_At_R=1.0
+BE_Offset_Points=2
+Enable_Trailing_R=0
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+# --- L'UNICO ASSE DI QUESTO FILE: InpMagic (asse tecnico, non di strategia)
+#     magic m / m+50: due passate identiche (G1). Blocco 7996xx libero (grep su tutto il repo: zero occorrenze).
+InpMagic=799601||799601||50||799651||Y
+InpComment=BULGE_V520_FT
+# i 15 cross del preset trial (104 caratteri), stessa lista di ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set
+Symbols_List=NZDUSD,USDCAD,USDCHF,EURGBP,EURNZD,GBPAUD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF
+# acceso come in campo; nel tester e' INERTE (fail-open)
+InpUsaGuardian=1
+# spento nelle corse lunghe (in ottimizzazione le Print non escono comunque)
+InpVerbose=0
+# spento: l'autotest si legge in una passata singola, non qui
+InpAutoTest=0
+# =====================================================================
