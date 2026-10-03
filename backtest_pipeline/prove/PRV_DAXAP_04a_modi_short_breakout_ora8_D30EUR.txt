@@ -1,0 +1,346 @@
+#  EA: ABTG_DAX_Apertura_EU
+# =====================================================================
+#  PRV_DAXAP_04a -- TESTA DELLA FAMIGLIA 04a..04h
+#  LATO x MODO D'INGRESSO DELL'APERTURA DAX, CON L'OROLOGIO IN FASE
+#  Questa cella: SHORT, BREAKOUT (InpEntryMode=0), ora 8 / flat 17:30.
+#  ABTG_DAX_Apertura_EU su D30EUR M5 -- TICK REALI -- deposito 10000.
+#  Scritto il 03/10/2026 dal cercatore-parametri. Criteri congelati PRIMA
+#  dei numeri. NON ESEGUITO. Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ:
+#  NON sul VPS, NON su 50504400 (C:\MT5_Backtest), NON su nessun conto.
+#  Nessuna riga di lancio qui (passa dal cancello della sessione
+#  principale). Nessuna taglia, nessun preset, nessuna sedia, nessun EA
+#  toccato. Rischio 1,00 DI BANCO (NON 2,00): nessuna taglia si propone.
+# =====================================================================
+#
+#  1. LA DOMANDA, E COSA E' GIA' MISURATO (sorgenti riga per riga)
+#  ------------------------------------------------------------------
+#  Mandato di Claudio (03/10/2026): le APERTURE DAX in breakout E in
+#  retest, LONG E SHORT sempre entrambi (regola dei due lati 25/08).
+#  - RETEST long (770101), mescolato: IS 175 deal PF 1,12634 DD 5,4362 /
+#    OOS 270 deal PF 1,39709 DD 7,2328 (R270c, 193 pos OOS).
+#    In fase (R246, report/LETTURA_R246_INVERNO_2026-09-29.md): d0 estate
+#    PF 1,108 (157 pos), d0 inverno 1h prima della cash 1,389 (168),
+#    d+1 inverno alla cash 1,184 (138), serie "come FTMO" 1,143 su 295
+#    pos con DD saldo 9,50% a rischio 1.
+#  - RETEST short (770105), mescolato: R270d IS 138 deal PF 0,96513 DD
+#    7,4732 / OOS 257 deal PF 0,95734 DD 12,3052 (194 pos OOS). Per
+#    stagione (R251 par. 4, per-trade 792520, solo gamba OOS): estate 96
+#    pos PF 1,390, inverno ora 8 (pre-mercato) 85 pos PF 0,899.
+#    LO SHORT IN FASE CON LA CASH (R252a..f) E' SCRITTO DAL 25/09 E IL
+#    SUO ZIP NON E' IN ARCHIVIO: [NON ARRIVATO]. Questo file NON lo
+#    sostituisce: lo ESTENDE ai due modi d'ingresso che il retest non copre.
+#  - BREAKOUT e OPENCONFIRM, DUE LATI INSIEME (non per lato), geometria
+#    vecchia (buffer 200, TP1_R 0,5, parziale 0, trailing PREVBAR, ora 8
+#    mista): backtest_pipeline/risultati_archivio/Walkforward_Aperture/
+#    DAX_B_motore_{IS,OOS}.csv (FASE B, 06/08): BREAKOUT IS PF 1,271 n 179
+#    DD 7,86 / OOS 0,966 n 243 DD 14,54; OPENCONFIRM (volumi OFF) IS 0,935
+#    n 186 / OOS 1,035 n 250 DD 13,52. PER LATO: [NON MISURATO] su nessuna
+#    delle due, ne' a ora in fase, ne' con la gestione di oggi
+#    (parziale 50 + BE + PREVBAR). Questa e' la casella che il round copre.
+#  - Il TF del grafico e' INERTE su breakout e retest a tick (range su
+#    PERIOD_M1 cablato: report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par.
+#    1.1-1.2). Sul MODO 5 il TF e' invece il meccanismo (InpOCTimeframe=0
+#    = PERIOD_CURRENT = M5): qui resta M5. L'asse TF di OPENCONFIRM e'
+#    la misura 3 del dossier report/APERTURE_DAX_MAPPA_2026-10-03.md e si
+#    fa SOLO se questa famiglia lascia un'evidenza (par. 9).
+#
+#  2. LA FAMIGLIA (UN solo cambiamento per file rispetto a R252a/b/e/f:
+#     il MODO; tutto il resto e' identico, diff eseguito)
+#  ------------------------------------------------------------------
+#    04a  SHORT  BREAKOUT     ora 8 / 17:30   magic 798301 / 798351
+#    04b  SHORT  BREAKOUT     ora 9 / 18:30   magic 798302 / 798352
+#    04c  SHORT  OPENCONFIRM  ora 8 / 17:30   magic 798303 / 798353
+#    04d  SHORT  OPENCONFIRM  ora 9 / 18:30   magic 798304 / 798354
+#    04e  LONG   BREAKOUT     ora 8 / 17:30   magic 798305 / 798355
+#    04f  LONG   BREAKOUT     ora 9 / 18:30   magic 798306 / 798356
+#    04g  LONG   OPENCONFIRM  ora 8 / 17:30   magic 798307 / 798357
+#    04h  LONG   OPENCONFIRM  ora 9 / 18:30   magic 798308 / 798358
+#  8 file x 2 celle (gemelle di magic, a passo 50 = cancello G1) x 2 gambe
+#  (moncone di 1 giorno + gamba continua) = 32 passate. Magic 7983xx:
+#  zero occorrenze nel working tree e in tutti i rami (git grep, 03/10).
+#  Controllo di ogni cella = il RETEST dello stesso lato e della stessa
+#  ora: 04a/c -> R252a, 04b/d -> R252b, 04e/g -> R252e, 04f/h -> R252f.
+#  ORDINE DI LANCIO se si vuole spendere poco: prima 04a-04d (lato SHORT,
+#  il lato dove il retest perde), poi 04e-04h.
+#
+#  3. FINESTRA, METODO, CAP BARRE (= R252a par. 4-5, NON RIPETUTI QUI)
+#  ------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26 @FINOA 2026.06.30 @FRAZIONEIS 0.001: gamba IS =
+#  moncone di un giorno, gamba OOS = corsa CONTINUA 2024.09.27 ->
+#  2026.06.30 (458 feriali: IS-era 197, OOS-era 261; estate 238, inverno
+#  220). Il per-trade sopravvive SOLO per l'ultima gamba (classe 455) ed
+#  e' quello continuo: la curva IN FASE si ricompone come R252a par. 5
+#  (righe d'ESTATE della corsa a ora 8 + righe d'INVERNO della corsa a
+#  ora 9; metodi A e B, k, e_eff, D). Le righe d'estate della corsa a ora
+#  9 (un'ora DOPO la cash) NON entrano in nessuna curva.
+#  CAP BARRE: 641 giorni di M5 sono ~132.000 barre (EMA200_I_DUE_REQUISITI
+#  sez. 4.3) contro il tetto ~100.000 del tester (regola 25/08): NON si
+#  spezza in tranche perche' la STESSA finestra continua (FRAZIONEIS 0.001,
+#  641 giorni in una passata) sullo stesso simbolo, TF e macchina HA GIA'
+#  GIRATO: R253a/b del 25/09 (ABTG_GapContinuation, MaxBars=100000000,
+#  catena verde, nessun avviso di storico troncato: RIEPILOGO_R253). Con
+#  QUESTO EA la finestra e' quella di R252 (non tornato): precedente su
+#  altro EA, [NON VERIFICATO] su questo. Se il tester la troncasse, il
+#  per-trade comincerebbe piu' tardi: lo prende S2 qui sotto.
+#  REGIME: storico BCM indici dal 2024.09.26, UN regime (rialzo; il crollo
+#  dei dazi di aprile 2025 sta nell'IS-era). Prova di regime sul DAX
+#  apertura: NON DISPONIBILE (HistData DAX 2010-2018 non importato, uso
+#  SOLO_PROVA_REGIME, ZERO giorni in comune col nativo: cancello ZERO
+#  inapplicabile). Dichiarato, non aggirato.
+#
+#  4. CANCELLI PRELIMINARI (se uno cade il FILE e' NULLO e non vota)
+#  ------------------------------------------------------------------
+#  G1 determinismo: in ogni file le due gemelle hanno CSV _OOS e per-trade
+#     identici (Profit, PF, Equity DD, Trades; per-trade riga per riga
+#     tranne il magic).
+#  S1 sentinella dell'orologio: file a ora 8: zero uscite prima delle
+#     08:35 BCM e dopo le 17:31; file a ora 9: zero prima delle 09:35 e
+#     dopo le 18:31. (Contro-esempio: se il pin dell'ora 9 non arriva la
+#     corsa e' a ora 8 e ~44% delle uscite cade prima delle 09:35, R252b.)
+#  S2 sentinella della finestra: la PRIMA chiusura del per-trade cade fra
+#     il 2024.09.27 e il 2024.10.03. Piu' tardi = il tester ha troncato le
+#     barre (cap) e la corsa e' NULLA.
+#  G2 il pin del MODO e' arrivato: Profit OOS di 04a != Profit OOS di
+#     R252a (e cosi' a coppie); uguali = pin non arrivato = corsa a RETEST
+#     (MT5 ignora un pin non riconosciuto: la classe che ha fatto 874 CSV
+#     identici). Solo se R252 e' tornato; altrimenti G2 si fa sul per-trade:
+#     BREAKOUT entra a ordine STOP al livello -/+ buffer, prezzo d'ingresso
+#     = livello +/- 5,0 idx; RETEST a LIMIT al livello -/+ 2,0 idx.
+#  G0: NON C'E' (celle nuove). Il legame col banco lo da' R252a/e SE tornano
+#     con G0 VERDE (stessi pin tranne il modo). Se R252 non e' tornato, i
+#     controlli retest mancano: le celle si leggono per R1/R2/R3 e M1, NON
+#     per M2/M3 (par. 5).
+#
+#  5. CRITERI CONGELATI ORA (= R252a par. 9, stessi numeri, stesso metodo)
+#  ------------------------------------------------------------------
+#  Tetti del rischio (rischio 1, deposito 10000, quelli di R251/R252): R1
+#  IS-era 5,79% e R2 OOS-era 8,21% di DD a saldo chiuso della curva IN FASE
+#  (metodi A e B, k 1,0380, e_eff, D come R252a par. 9); R3 peggior giornata
+#  >= -1,10%. PASSA / FALLISCE / NON RISOLTO come R252a. Il rischio si legge
+#  a QUALUNQUE n (Emendamento B).
+#  MERITO solo se POSIZIONI OOS-era in fase >= 150 (contate dal per-trade).
+#    M1  PF per posizione OOS-era in fase >= 1,10 (metodi A e B)
+#    M2  PF OOS-era in fase >= PF OOS-era del CONTROLLO RETEST + 0,10 E EP
+#        per posizione in fase > EP del controllo (classe 795)
+#    M3  concordanza: PF IS-era in fase > PF IS-era controllo E PF OOS-era
+#        in fase > PF OOS-era controllo
+#  ESITI nell'ordine di R252a (NULLO / NON CONFRONTABILE / BOCCIATA PER
+#  RISCHIO / RISCHIO NON RISOLTO / SOSPESA / BOCCIATA PER MERITO / PROMOSSA
+#  AL PASSO DOPO). "PROMOSSA AL PASSO DOPO" vuol dire SOLO: merita un asse
+#  proprio e una prova di regime, NON una sedia. Nessun asse sui parametri
+#  di una cella senza edge (regola 19/08): qui si confrontano MECCANISMI
+#  (modo x lato x orologio), mai valori di un parametro.
+#  Nessun "centro dell'altopiano" si puo' dichiarare da questa famiglia: i
+#  modi non sono ordinati. Una cella che sporge = "NON C'E' UNA
+#  CONFIGURAZIONE ROBUSTA", e si scrive cosi'.
+#  Regola per la frase "il retest e' il modo giusto": si scrive SOLO se
+#  M2 fallisce per BREAKOUT e per OPENCONFIRM sullo stesso lato; se uno dei
+#  due passa M2 il retest NON e' il modo giusto per quel lato.
+#
+#  6. ATTESE, SCRITTE PRIMA DEI NUMERI (STIME, non cancelli)
+#  ------------------------------------------------------------------
+#  E1 posizioni per era, per cella: 65-90% dei feriali (IS-era 197 ->
+#     128-177; OOS-era 261 -> 170-235). Base: BREAKOUT a due lati riempie
+#     il 90% (179/198) e il 93% (243/261) dei feriali (FASE B), il RETEST
+#     per lato il 70-74% (194 pos su 268-276 feriali: R270d, MISURE_COSTO_
+#     ZERO_DAX par. 3); un lato solo di breakout sta fra i due. Sotto 100 posizioni OOS-era o sopra 261 = qualcosa non torna.
+#  E2 PF per posizione IN FASE, OOS-era: 0,85-1,30 su tutte e quattro le
+#     celle breakout/OC x lato (banda larga: nessuna misura per lato da cui
+#     partire). Centro atteso 1,05.
+#  E3 (la direzione, che e' la vera attesa): a parita' di lato e di era,
+#     PF(BREAKOUT) <= PF(RETEST) - 0,05 in almeno 3 confronti su 4
+#     (lato x era). Motivo: entra 7 idx peggio del retest (livello -/+ 5
+#     contro limite a +/-2) con lo stop piu' largo di 7 idx (range + 10
+#     contro range + 3), e prende anche le rotture che non tornano.
+#  E4 DD a saldo chiuso OOS-era in fase: 4-12%. Sotto 8,21 per meta' delle
+#     celle al piu' (R2). Stop piu' larghi = lotti piu' piccoli (rischio
+#     fisso in %), quindi P/L per posizione piu' piccolo e DD NON piu' alto
+#     per forza: [INCERTO].
+#  H_SHORT_V (l'ipotesi che dovrebbe far vincere il breakout sullo short:
+#     "il retest lascia a secco le discese a V") dice: 04b/04a OOS-era PF
+#     >= PF retest + 0,10 e posizioni piu' alte del retest. NON la
+#     aspetto. REFERTO_R251 par. 3 aveva gia' trovato che le manopole
+#     predette da quell'ipotesi (parziale, TP1 corto) vanno nel verso
+#     opposto; MISURE_COSTO_ZERO_DAX par. 3: il retest manca ~1 rottura su
+#     8-12 in tutte e due le direzioni (non solo sulle discese), ma quel
+#     conteggio e' FUORI dal verdetto (il controllo della premessa e'
+#     caduto: 8 su 13 entro 1 punto).
+#  CONTRO-ESEMPIO (cosa mi smentirebbe, scritto adesso): E3 e' smentita se
+#     breakout batte retest di >= 0,10 in OOS-era E in IS-era sullo stesso
+#     lato con >= 150 posizioni OOS-era: allora il retest non e' il modo
+#     giusto per quel lato, e lo si scrive anche se e' il lato long vivo.
+#     E2 e' smentita da un PF sopra 1,30 in una cella breakout/OC su 150+
+#     posizioni: va letta contro l'altopiano (R2, DD) prima di crederci.
+#     Un PF alto con IS-era e OOS-era di segno opposto (ribaltamento) e'
+#     rumore, come R270b e R273 (ribaltamenti IS/OOS gia' documentati).
+#
+#  7. IL COSTO (stop >= 40 x spread) E IL TF
+#  ------------------------------------------------------------------
+#  Stop BREAKOUT = range + 2 x buffer + slippage = range + 10,0 idx
+#  (InpBufferPoints=500 = 5,0 idx; slippage 0). Range 35' mediano 83,5 idx
+#  [INFERITO: 54,65 x sqrt(35/15), n=440]. Stop mediano ~93,5 idx:
+#    spread BCM ora 8 mediana 1,70 -> 55x ; P95 2,70 -> 35x
+#    spread FTMO GER40.cash ora 10 (cash) 1,23 -> 76x ; P95 1,33 -> 70x
+#  Quota di giornate sotto il pavimento 40x al P95 FTMO (53,2 idx) / alla
+#  mediana BCM (68,0 idx), da R15 per giorno x 1,5275 [INFERITO]: BREAKOUT
+#  14,5% / 28,9% (RETEST 23,4% / 33,4%). OPENCONFIRM >= BREAKOUT (entra a
+#  mercato sull'apertura di una candela oltre il livello: [NON MISURATO]
+#  l'overshoot). IL TF DEL GRAFICO NON ENTRA NELLO STOP di questi due modi
+#  (M5 NON e' escluso per costo qui). D'INVERNO a ora 8 il costo cambia:
+#  l'apertura e' nel pre-mercato (spread ~2,8 idx come l'ora 7 d'estate,
+#  [INFERITO], spread_orario_D30EUR.csv ora 7 mediana 2,80 P95 4,10): 93,5 /
+#  2,8 = 33x, SOTTO 40. E' un motivo in piu' per la curva in fase.
+#  Fonti: report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md par. 3-4,
+#  report/SPREAD_APERTURA_FTMO_2026-09-21.md par. 1-3 (GG=1: sottile).
+#
+#  8. OROLOGIO
+#  ------------------------------------------------------------------
+#  BCM indici = UTC+1 FISSO (report/OROLOGIO_BCM_2026-09-24.md). La cash
+#  Xetra (09:00 ora tedesca) e' alle 8 server d'ESTATE e alle 9 server
+#  d'INVERNO. Un file a ora 8 e' in fase solo d'estate (238 feriali); un
+#  file a ora 9 solo d'inverno (220). Calendario d'inverno UE per data
+#  d'uscita: 2024.10.27 <= d < 2025.03.30 e 2025.10.26 <= d < 2026.03.29.
+#  FTMO e' IT+1 tutto l'anno: la sua sedia e' in fase con la cash per
+#  costruzione (cambio d'ora FTMO: [NON MISURATO], 25/10). Questa famiglia
+#  misura "il modo alla cash tutto l'anno", e "= FTMO" vale sotto
+#  quell'ipotesi.
+#
+#  9. COSA FA IL RISULTATO (e cosa NO)
+#  ------------------------------------------------------------------
+#  - Se NESSUNA cella breakout/OC passa M2 su nessun lato: "IL RETEST E' IL
+#    MODO GIUSTO SU TUTTI E DUE I LATI (in fase)" e la casella "modo" del
+#    certificato si chiude per DAX apertura. E' un risultato.
+#  - Se una cella passa M1+M2+R1/R2: "PROMOSSA AL PASSO DOPO": asse proprio
+#    (buffer, scadenza), prova di regime (non disponibile oggi: [NON
+#    MISURATO]), lettura per stagione, e SOLO ALLORA si parla di sedia.
+#  - Se OPENCONFIRM lascia evidenza (PF >= 1,00 in fase su 150+ posizioni
+#    OOS-era su un lato): scatta la misura 3 del dossier (asse InpOCTimeframe
+#    M5..H1, 16 passate per lato). Altrimenti NON si fa: nessun asse TF su
+#    un motore senza evidenza.
+#  - Nessuna promozione, nessuna taglia, nessuna sedia, nessun preset.
+#
+#  10. BUCHI DICHIARATI
+#  ------------------------------------------------------------------
+#  a) R252 (retest in fase, i controlli) NON e' in archivio: M2/M3 non si
+#     leggono finche' non torna (o si rifa': 24 passate, 5-8 min dichiarati).
+#  b) IL LETTORE (giudizio) di questa famiglia NON ESISTE: r252_attese.py
+#     contiene le attese di R252, non il lettore delle caselle; il modello e'
+#     r246_giudizio_d1.py. Scriverlo e' lavoro, non macchina.
+#  c) UN regime, ~21 mesi; IS-era 197 feriali = sotto 150 posizioni quasi
+#     certo: l'IS-era giudica il RISCHIO, non il merito.
+#  d) il per-trade non ha l'ora d'ingresso (solo close_time): la durata
+#     ingresso->uscita non e' misurabile.
+#  e) spread FTMO: GG=1 (una giornata). Commissioni/swap FTMO: [NON MISURATO].
+#  f) i deal di parziale: col lotto a passi di 0,10 e deposito 10000 una
+#     posizione puo' non fare la parziale (R252a par. 6): nelle celle breakout
+#     lo stop piu' largo abbassa il lotto, quindi l'eccezione scatta piu'
+#     spesso che nel retest [INFERITO]. Si conta, non si assume.
+#
+#  11. TEMPO MACCHINA (retta di R252a par. 14: ~37 s fissi per file +
+#      0,013 s per giorno-cella, controprova R251: previsti 249 s, misurati
+#      270 s)
+#  ------------------------------------------------------------------
+#  Per file: 37 + (2 celle x 641 giorni) x 0,013 = ~54 s. 04a-04d: ~3,6
+#  min; 04a-04h: ~7,2 min [DERIVATO]. Con R252a-f (324 s dichiarati): ~12,6
+#  min in tutto. TETTO: oltre 25 minuti ci si ferma e si guarda. UN SOLO
+#  agente nel tester (classe 751): passate in serie.
+#  Banco: -Deposito 10000, -Modello 4, niente -Spread / -Ritardo /
+#  -FrazioneIS (un -FrazioneIS diverso fa MORIRE il driver). Il VPS e'
+#  escluso (firma del 21/09).
+# =====================================================================
+@SIMBOLO    D30EUR
+@PERIODO    M5
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.001
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=0||0||0||0||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=798301||798301||50||798351||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
