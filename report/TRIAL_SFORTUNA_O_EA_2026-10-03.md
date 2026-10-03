@@ -5,6 +5,9 @@ Stato: **la sezione 0 (criteri, metodi, soglie, attese, contro-esempi) e' scritt
 probabilita'.** I risultati arrivano dopo, nelle sezioni A-F, e la sezione 0 non si tocca.
 Sola lettura: nessun EA, preset, forward, conto o VPS toccato. **Nessuna taglia proposta: le taglie sono di Claudio.**
 Etichette: [MISURATO] letto/calcolato da file del repo · [DERIVATO] calcolato da numeri scritti · [NON MISURATO] il dato non c'e'.
+✏️ **Cancello (controllo-preventivo, 03/10): FAIL al primo passaggio, correzioni di parole dentro il testo (marcate ✏️), numeri del
+modello riprodotti da un'implementazione indipendente. Serve un secondo passaggio prima di consegnare a Claudio.** La sezione 0 non
+e' toccata.
 
 ---
 
@@ -150,9 +153,16 @@ bande per sedia). Seme 20261003 ovunque.
   mediana degli stop (143,65 EUR) [DERIVATO].
 - **D3 - presenza delle sedie**: la sezione 0 dava `770101` e `771531` come [NON VERIFICATE] sul trial. Il **profilo salvato** di
   `C:\FTMO` letto dalla sonda notturna (`backtest_pipeline/coda/referti/CODA_08_preset_dai_chr_20261003_033003.log`, 03/10 03:30)
-  porta 770202, 770260, 770511, 770411, 770105, 770621, 772720 + Guardian/Exporter/SpreadLogger, **e NON 770101 ne' 771531**
-  [MISURATO sul profilo salvato; il grafico vivo puo' differire]. La definizione congelata di P6 era "le sedie **del trial** con
-  per-trade": applicata alla presenza misurata e' **P4 = 770105, 770202, 770411, 770621**. Scrivo **P6 e P4 tutti e due**.
+  porta 770202, 770260, 770511, 770411, 770105, 770621, 772720 + Guardian/Exporter/SpreadLogger, **e NON 770101 ne' 771531**.
+  ✏️ *Corretto dal cancello (03/10), classe 1057 recidiva*: quella sonda **rilegge i `.chr` modificati il 30/09 23:24**, cioe' la
+  **stessa foto, scattata PRIMA del trial**, che `NFP_2026-10-02_SEDIE_TRIAL.md` sez. 0 punto 3 aveva gia' dichiarato "non decide"
+  (e `HANDOFF.md` r.11 dice il contrario: Algo acceso con 770101 e 771531 dentro). Era nota **prima** del commit dei criteri (la sezione
+  0.8 la cita): non e' un'informazione nuova. E la foto **non descrive il trial**: il Bulge B (`BULGE_VIOLA_`, 772700) ha operato il
+  01/10 alle 10:00 e **non e' nel profilo**. Gli ordini del trial non decidono neanche loro: nessun ordine da 770101/771531, ma
+  nessuno anche da 770202, 770260, 770511 che nel profilo ci sono. Quindi la presenza e' **[INFERITA], NON VERIFICATA** (si chiude
+  solo con la faccina a schermo, `PIANO_SEDIE_VIA_PIU_CORTA_2026-10-03.md` riga 3 della tabella delle verifiche). **P4 =
+  770105, 770202, 770411, 770621 e' una SENSIBILITA' aggiunta dopo i numeri; il verdetto del portafoglio resta quello congelato,
+  su P6.** Scrivo P6 e P4 tutti e due.
 - **D4 - sensibilita' aggiunte** (non decidono): Guardian approssimato; stop del banco portati a -1,0; due "sedie-ombra" per
   770260/770511 (serie della 770202 permutata: PROXY, non contratto).
 
@@ -224,7 +234,7 @@ ricampionamenti del contratto.
 Calendario 2025.07.01 -> 2026.06.29, **260 giorni lavorativi, 259 coppie consecutive**; P/L **realizzato** alle taglie di campo;
 "osservato P6" = 770411 + 770105 + ORB nel trial = **-4,338%** in 2 giorni. Intervalli = Clopper-Pearson 95% sul conteggio.
 
-| statistica | **P6** (6 sedie, sezione 0) | **P4** (presenza misurata, D3) | P4 + 2 ombre (proxy) | P6 col Guardian appross. | P4 col Guardian appross. |
+| statistica | **P6** (6 sedie, sezione 0: DECIDE) | **P4** (presenza INFERITA dal profilo del 30/09, D3: sensibilita') | P4 + 2 ombre (proxy) | P6 col Guardian appross. | P4 col Guardian appross. |
 |---|---|---|---:|---:|---:|
 | S1 un giorno <= -4,36% | **6/260 = 2,3%** [0,9-5,0] | 1/260 = 0,4% [0,0-2,1] | 0,9% | 0,0% | 0,0% |
 | S1 un giorno <= -3,635% (realizzato del 01/10) | 12/260 = 4,6% [2,4-7,9] | 5/260 = 1,9% [0,6-4,4] | 3,9% | 7,3% | 2,3% |
@@ -232,7 +242,15 @@ Calendario 2025.07.01 -> 2026.06.29, **260 giorni lavorativi, 259 coppie consecu
 | S3 almeno uno dei 2 giorni <= -4,36% | 12/259 = 4,6% [2,4-8,0] | 2/259 = 0,8% [0,1-2,8] | 1,8% | 0,0% | 0,0% |
 | **S4 (PRIMARIA) 2 giorni <= -4,338%** | **15/259 = 5,8%** [3,3-9,4] | **5/259 = 1,9%** [0,6-4,5] | **4,2%** | 5,0% | 1,5% |
 | bootstrap 2 giorni i.i.d. (S2 / S3 / S4) | 3,3% / 4,6% / 5,9% | 1,2% / 0,8% / 1,7% | | | |
-| **verdetto su S4** | **ZONA GRIGIA** | **EFFETTO** | EFFETTO al bordo | ZONA GRIGIA al bordo | EFFETTO |
+| **verdetto su S4** | **ZONA GRIGIA** (congelato) | EFFETTO *se* 770101 e 771531 non c'erano [NON VERIFICATO] | EFFETTO al bordo | ZONA GRIGIA al bordo | EFFETTO |
+
+✏️ *Ricostruzione indipendente del cancello (03/10)*: `backtest_pipeline/trial_sfortuna_controllo_indipendente.py` (cicli espliciti,
+solo libreria standard, nessun import dagli strumenti di sopra; uscita in
+`backtest_pipeline/risultati_archivio/TRIAL_SFORTUNA_CONTROLLO_INDIPENDENTE_2026-10-03_console.txt`) ritrova **S1-S4 identici** per P6
+(15/259) e P4 (5/259). Due scelte di implementazione muovono i numeri, nessuna il verdetto: (a) R sul **deposito fisso** invece che
+sul saldo composto -> P6 S4 **18/259 = 6,9%** (ZONA GRIGIA), S2 10/259; P4 invariato; (b) lo strumento **scarta in silenzio 4
+posizioni EMA200 chiuse di domenica** (07/09/2025 due vinte, 21/06/2026 due stop da ~-1 R): portate al lunedi', P6 S2 6 -> 7, S4
+invariato.
 
 - **CE5 (il risultato che avrebbe girato il verdetto)**: il 5o percentile delle coppie di giorni e' **-4,51% per P6** e **-3,10%
   per P4**. L'osservato **-4,34%** sta 0,17 punti SOPRA la soglia di P6 (quindi ZONA GRIGIA per un soffio) e 1,24 punti SOTTO quella
@@ -254,14 +272,27 @@ Calendario 2025.07.01 -> 2026.06.29, **260 giorni lavorativi, 259 coppie consecu
 | P6, S3 (2 giorni, uno <= -4,36%) | 4,63% | 3,36% | 2,03% | **+1,33** | +1,28 |
 | P6, S4 (primaria) | 5,79% | 5,50% | 4,26% | **+1,25** | +0,29 |
 | P6, S2 (2 giorni <= -5,51%) | 2,32% | 2,96% | 2,09% | +0,88 | -0,65 |
-| P4, S4 | 1,93% | -- | 0,97% | totale **+0,96** (P4 ha un solo indice con due sedie: il DAX) | |
+| P4, S4 ✏️ | 1,93% | 1,25% | 0,99% | **+0,27** (DAX +0,28 · Dow ~0) | **+0,68** |
+
+✏️ *Riga P4 corretta dal cancello (03/10)*: qui c'era "P4 ha un solo indice con due sedie: il DAX" e il solo totale +0,96. **Falso**:
+in P4 il Dow ha due sedie (770202 e ORB 770621). Scomposta (2.000 permutazioni, seme 20261003, strumento indipendente sopra): **due
+terzi della correlazione di P4 vengono dagli indici DIVERSI**, non dallo stesso indice.
 
 - **La correlazione piu' che raddoppia la probabilita' di un giorno <= -4,36%** (1,0% -> 2,3% su P6) e **raddoppia** quella del
   risultato di 2 giorni su P4 (1,0% -> 1,9%). Sui giorni singoli pesano in parti simili lo stesso indice e gli indici diversi; sul
-  risultato di 2 giorni pesa quasi tutto **lo stesso indice**.
+  risultato di 2 giorni di **P6** pesa quasi tutto **lo stesso indice**; su **P4 no** (+0,27 stesso indice, +0,68 fra indici).
+- ✏️ **Le 5 coppie di P4 sotto l'osservato, sedia per sedia** [MISURATO, strumento indipendente]: due contengono il **15/10/2025**,
+  giorno in cui **tutte e quattro** le sedie di P4 prendono stop (le due short DAX **e** le due Dow: e' un giorno di mercato, non
+  "di DAX"); le altre tre **non contengono la 770411**: 770105 stoppata due giorni di fila (21+24/11/2025, 16+19/01/2026, con
+  770202 nel secondo) e 770202 da sola a -4,06% (09+12/01/2026). Le due short DAX stoppate lo stesso giorno sono quindi **una
+  giornata su cinque** delle rare, non "la" causa.
 - **Il DAX**: giorni con stop di **due** sedie DAX (770101, 770105, 770411) **14 su 260, contro 7,45 attesi se fossero indipendenti:
-  lift 1,88**. 770411 e 770105 hanno operato insieme in 11 giorni del contratto e preso stop **insieme in 2** (atteso se indipendenti
-  ~0,9 [DERIVATO: 11 x 0,227 x 0,357]). Il 01/10 e' esattamente quella giornata: le due short DAX in sequenza.
+  lift 1,88**. ✏️ *Ma per coppia*: **11 dei 14 sono 770101 long + 770105 short** (lo stesso motore nei due versi, frustato nella
+  stessa mattina), 1 e' 770101 + 770411, e **solo 2 sono le due short 770105 + 770411**; e la 770101 sul trial non risulta nel
+  profilo salvato (D3). Per le due short: stop insieme in 2 degli 11 giorni di compresenza contro ~0,8-0,9 attesi
+  [DERIVATO: 11 x 0,227 x 0,357; oppure 260 x 0,158 x 0,019]: **P(>=2) ~0,19-0,22 sotto indipendenza (Poisson)**, cioe' il
+  contratto **non distingue** una correlazione fra le due short dal caso. Il 01/10 e' una giornata con le due short DAX stoppate
+  in sequenza; il lift 1,88 **non** e' una misura di quella coppia.
 - Il contributo "fra indici" su S2 e' negativo (-0,65): sulle perdite piu' grandi DAX e Dow nel contratto si compensano un poco.
   Un anno solo: [INCERTO] come segno.
 
@@ -288,25 +319,41 @@ Calendario 2025.07.01 -> 2026.06.29, **260 giorni lavorativi, 259 coppie consecu
 | Bulge Rif-1 | p_win 0,10-0,15 | 0,117 | presa |
 | Bulge Rif-2 | p 0,3-0,6 | 0,225 | un poco sotto |
 | P6, S1 | 0,5-2% per giorno | **2,3%** | appena sopra: il contratto a 2% fa piu' giornate rosse di quanto pensassi |
-| P6, S4 | 1-5%, grigia/effetto al bordo | 5,8% grigia (P6) · 1,9% effetto (P4) | presa, con la presenza che decide |
+| P6, S4 | 1-5%, grigia/effetto al bordo | 5,8% grigia (P6) · 1,9% effetto (P4) | presa; ✏️ decide P6 (congelato), P4 e' condizionato a una presenza NON VERIFICATA |
 | correlazione | positiva, piccola per giorno; lift DAX > 1 | **piu' che raddoppia** S1; lift 1,88 | **smentita sul "piccola"** |
 
 ## G. Che cosa NON copre (oltre alla sezione 0.8)
 - Le regole vere della Free Trial; l'equity intragiornaliera (tutto e' realizzato); gli ingressi bloccati dal Guardian nel trial.
 - 770260, 770511 e Bulge nel portafoglio (solo ombre e riferimenti, mai contratti); la 770411 alla sua frequenza di campo.
 - Un anno solo di contratto (2025-26, un regime) e due giorni di trial: le probabilita' sono descrittive.
-- Il grafico vivo di `C:\FTMO` (la presenza viene dal profilo salvato delle 03:30 del 03/10).
+- Il grafico vivo di `C:\FTMO`: la presenza viene da un profilo salvato il **30/09 23:24** (prima del trial), riletto dalle sonde
+  del 01, 02 e 03/10 (classe 1057: una sonda che rilegge la stessa foto non e' una seconda misura). **P4 e' condizionato a questo.**
+- ✏️ *Aggiunte del cancello (03/10)*: (i) la regola di potenza e' applicata dallo strumento come **max** fra il p_min binomiale e
+  quello del netto: e' una lettura della sezione 0.4 (che li elenca tutti e due senza dire come si combinano), fissata nel codice
+  **dopo** il commit dei criteri. Con il solo p_min del netto (statistica primaria), a n = 1 sarebbe 1/181 = 0,0055 per la 770105
+  e 1/119 per l'ORB: la 770105 e l'ORB uscirebbero **EFFETTO** (l'artefatto di CE6). Il "nessun verdetto cambia" di D1 vale **sotto
+  questa lettura**, che e' la prudente, e va detto. (ii) Il p_min del netto stampato in console (`netto 0.0000` per 770105 e ORB) e'
+  un difetto di arrotondamento di `p_net_esatto` (valori a 1e-6, soglia non arrotondata): il valore vero e' 1/m; non entra in
+  nessun verdetto perche' domina il binomiale. (iii) La 770411 ha un **secondo contratto** aperto (`CONTRATTI_DELLE_SEDIE` B8:
+  promozione 26/07, n 41 deal ~27 posizioni, PF 2,05): qui si usa quello da 14 posizioni; l'eccesso di frequenza si vede anche sul
+  campo BCM (0,50 sul piccolo, 0,57 sul 100k: `CONTRATTI_DELLE_SEDIE` par. 6), quindi non e' un fatto del solo FTMO. (iv) I "9 giorni"
+  della 770411 su FTMO contano 22-30/09 + 01-02/10 senza verificare da quando la sedia fosse accesa sulla challenge: se meno, P(>=4)
+  scende ancora.
 
 ## H. LA RISPOSTA ALLA DOMANDA DI CLAUDIO
 1. **Esecuzione: sana.** Il tester BCM rifa le operazioni di FTMO (RFWD 30/09); gli slittamenti sono entro ~1 punto sul DAX e
    frazioni di pip sul forex, salvo lo stop dell'ORB (11 punti, 0,14 R). Non e' un guasto.
 2. **Sedia per sedia, in due giorni: NON ANCORA MISURATO.** Una operazione ciascuna; ogni stop, preso da solo, capitava il 23-36%
    delle volte. Due giorni non bocciano e non assolvono nessuna sedia.
-3. **Il conto nel suo insieme: non solo sfortuna.** Con le sedie davvero attaccate (P4) un risultato cosi' in 2 giorni capita **~2
-   volte su 100** (EFFETTO, limite basso); con tutte e sei ~6 su 100 (ZONA GRIGIA). La rarita' viene da **due stop DAX short nello
-   stesso giorno**: la correlazione dello stesso indice raddoppia quella probabilita'.
+3. ✏️ *(riscritto dal cancello, 03/10)* **Il conto nel suo insieme: ZONA GRIGIA** sulla misura congelata (P6): un risultato cosi'
+   in 2 giorni il contratto lo fa **~6 volte su 100** (15 coppie su 259). Non e' "solo sfortuna" ordinaria, ma non e' nemmeno
+   un effetto dimostrato. **Se** 770101 e 771531 non erano attaccate (lo dice solo una foto del profilo del 30/09, **NON
+   VERIFICATA**: decide la faccina), sarebbe ~2 su 100 (EFFETTO, limite basso). La correlazione **raddoppia** quella probabilita'
+   (P4: 1,0% -> 1,9%), ma per due terzi e' **DAX e Dow che perdono lo stesso giorno**, non le due short DAX fra loro: nel contratto
+   le due short stoppate insieme sono 2 giorni, compatibili col caso.
 4. **Tre pezzi vanno "male" per contratto, non per sorte**: 770105 ha un contratto senza edge (PF 0,957, in campo per firma);
-   il Bulge non ha contratto e coi suoi payoff chiede ~75% di vincite (ne ha fatte 60%, come il suo antenato che perde); la 770411
+   il Bulge non ha contratto e coi suoi payoff chiede ~75% di vincite (ne ha fatte 60%; il trial somiglia al suo antenato in
+   forward che perde, PF 0,69, non al backtest dichiarato che vince); la 770411
    su FTMO opera ~9 volte il contratto (0,44 contro 0,051 posizioni al giorno) e perde piu' del contratto (EFFETTO al bordo): **il suo contratto da 14 operazioni non la descrive**.
 5. **E un fatto di struttura**: alle taglie di oggi il contratto stesso delle sei sedie produce un giorno realizzato <= -4,36%
    **6 volte su 260** (una ogni ~43 giorni di borsa). Le taglie sono di Claudio: qui nessuna proposta.
