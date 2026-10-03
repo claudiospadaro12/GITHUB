@@ -118,8 +118,12 @@
 #     PF 1,24027 / 1,24023, n e DD IDENTICI (REFERTO_13_ROUND_2026-09-23
 #     T2). Quindi "identico" qui sotto vuol dire: Trades ed Equity DD %
 #     ESATTI; Profit |diff| <= 1,00 EUR; PF e RF |diff| <= 0,0002; nel
-#     per-trade stessi deal (numero, ora, tipo, volume) e netto per riga
-#     |diff| <= 0,01. Contro-esempio: deposito, binario o pin sbagliati
+#     per-trade stessi deal (numero, ora, tipo, volume); le righe con
+#     |diff| netto > 0,01 si ELENCANO e la somma dei |diff| deve stare
+#     entro 1,00 EUR (il residuo R235 e' letto solo in aggregato e su
+#     ABTG_IntradayMomentum, non su questo EA: se sta su una riga sola, una
+#     soglia per riga di 0,01 annullerebbe il rumore di banco che qui si
+#     dichiara di accettare). Contro-esempio: deposito, binario o pin sbagliati
 #     spostano Trades/DD o il Profit di centinaia di EUR, non di 1.
 #  G0 (solo R274a, la d0 e' la cella d'archivio): le righe IS e OOS devono
 #     riprodurre R199B Pass=2 sopra entro la TOLLERANZA DI BANCO. Se NO: il
