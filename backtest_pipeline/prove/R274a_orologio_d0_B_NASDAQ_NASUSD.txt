@@ -1,0 +1,340 @@
+#  EA: ABTG_Nasdaq_Apertura_US
+# ==========================================================================
+#  R274a -- L'OROLOGIO DELLA SEDIA 770260 (NASDAQ RETEST): LA CELLA VIVA, d0
+#  NASUSD M5 -- TICK REALI -- deposito 80000 -- rischio 2,00 (= taglia di campo)
+#  d0 = l'orologio del preset BCM: armo 14:30, flat 17:30 BCM (invariato).
+#  FINESTRA B: 2024.09.26 -> 2026.06.30, taglio 0.40 (come R199B)
+#  magic gemelli 798201 / 798251 (vergini: zero occorrenze in tutto il repo,
+#  git grep su lavoro e su tutti i rami remoti, 03/10/2026; il nome R274 idem)
+#  Scritto il 03/10/2026. Attesa, soglie e contro-esempi CONGELATI PRIMA dei
+#  numeri, dentro questo file. Famiglia: R274a (d0,B) R274b (d+1,B)
+#  R274c (d0,A) R274d (d+1,A). QUESTO E' IL FILE DI TESTA: il ragionamento
+#  sta qui, gli altri tre dicono solo le differenze.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (regola del 21/09):
+#  NON sul VPS, NON sul banco C:\MT5_Backtest (50504400), NON su nessun
+#  terminale di conto (50503392, 50504263, 10105439, 541452707).
+#  QUESTO FILE NON CONTIENE E NON AUTORIZZA NESSUNA RIGA DI LANCIO.
+#  Deposito e modello non stanno nel file: li passa la riga di lancio
+#  (deposito 80000 e modello 4 = tick reali, come R199B che e' la base
+#  di confronto: con un deposito diverso il confronto DECADE).
+#  Non promuove niente. Non tocca taglie, preset, sedie, forward.
+# ==========================================================================
+#  0. LA DOMANDA, E PERCHE' NON E' MAI STATA FATTA SUL NASDAQ
+# ==========================================================================
+#  BCM e' UTC+1 FISSO (report/OROLOGIO_BCM_2026-09-24.md, 4 ancore su 4):
+#  la cash USA (9:30 New York) cade alle 14:30 BCM con gli USA in ora legale
+#  (2a domenica di marzo -> 1a di novembre) e alle 15:30 BCM d'inverno. Il
+#  preset BCM arma sempre alle 14:30 e il preset FTMO sempre alle 16:30
+#  FTMO (= 15:30 italiane = la cash tutto l'anno, tranne le settimane in cui
+#  gli USA sono gia'/ancora in ora legale e l'Europa no: 20 feriali in A e 20
+#  in B, dove FTMO arma UN'ORA DOPO la cash).
+#  Il contratto della 770260 (R199B Pass=2: IS PF 1,22116 DD 7,3069% / OOS PF
+#  1,21546 DD 7,8576% a rischio 2,00) poggia su una finestra in cui l'EA ha
+#  armato 14:30 BCM in TUTTI i giorni: nei giorni d'inverno USA (90 su 183
+#  nell'IS = 49,2%; 90 su 276 nell'OOS = 32,6%) 14:30 BCM = 8:30 NEW YORK,
+#  UN'ORA PRIMA DELLA CASH: il range di 35 minuti si e' formato sul PRE-MERCATO
+#  e l'ingresso ha cercato il retest con la cash gia' alle spalle o in arrivo.
+#  Dal 02/11/2026 la sedia FTMO d'inverno armera' ALLA CASH: il suo contratto
+#  d'inverno NON ESISTE (per-trade della cella RETEST non in repo: OROLOGIO
+#  par. 5.1.1 [NON MISURATO]).
+#  Per DAX, Dow e MaxMin la casella e' stata fatta (R246 e R246 inverno, DAX
+#  d0 inverno PF 1,389 con 0,764 pos/g contro d+1 inverno PF 1,184 con
+#  0,627 pos/g; Dow sospeso; d'estate il DAX 1h prima della cash fa PF 0,774
+#  contro 1,108). Per il NASDAQ NO: la ricerca per geometria di questa
+#  sessione (03/10) non trova nessun file prova che muova InpSessionHour sul
+#  Nasdaq_Apertura_US (0 CSV su 2.376 della famiglia lo avevano ad asse:
+#  RIESAME_MORTI_APERTURE par. 3 / REGISTRO A4 punto 5).
+#  Unico indizio sul Nasdaq, su un'ALTRA cella (r84a_776010, EntryMode=0):
+#  PF 0,70 nei mesi allineati contro 1,39 nei mesi sfasati (OROLOGIO 5.1.1).
+#
+#  DOMANDA: quante posizioni e che PF fa la cella viva quando arma ALLA cash
+#  d'inverno (d+1, R274b/d) rispetto a quando arma 1h PRIMA (d0, questo file)?
+#  E che cosa fara' la sedia FTMO "come e' nel calendario" (d0 nei giorni UE
+#  d'estate, d+1 nei giorni UE d'inverno) contro il suo contratto?
+#
+# ==========================================================================
+#  1. IL DISEGNO: 4 FILE = {d0, d+1} x {finestra B, finestra A}
+# ==========================================================================
+#   file   orologio              finestra  magic gemelli   per-trade (ultima gamba)
+#   R274a  d0  14:30 / 17:30     B         798201/798251   OOS 2025.06.10 -> 2026.06.30
+#   R274b  d+1 15:30 / 18:30     B         798211/798261   idem
+#   R274c  d0  14:30 / 17:30     A         798202/798252   OOS 2024.09.27 -> 2025.06.09
+#   R274d  d+1 15:30 / 18:30     A         798212/798262   idem
+#  Perche' servono le A: il per-trade e' scritto dall'ULTIMA passata (classe
+#  455), cioe' l'OOS. Con la sola B si vedono 90 feriali d'inverno USA e
+#  ~60 posizioni: nessuna lettura. Con A+B 180 feriali d'inverno e 458 feriali
+#  in tutto (stesso metodo e stesse finestre di R246a/c, che hanno gia'
+#  passato i cancelli).
+#  UNA VARIABILE PER FILE: contro l'altro orologio cambia SOLO lo
+#  spostamento d = +1h applicato in blocco a SessionHour e CloseHour (un solo
+#  orologio, non due manopole: tutti i tempi interni sono relativi a questi
+#  due input: grep del 03/10 sul sorgente a HEAD, SessionHour/Min e CloseHour/
+#  Min compaiono solo a r.701 (flat), 708, 917, 1129, 1201-1206, 1633
+#  (openMin e flat); nessuna ora scritta a numero nel percorso d'ingresso
+#  (l'unico d.hour = 0 e' la mezzanotte, r.829); come in R246a par. 1.2);
+#  contro l'altra finestra cambia SOLO la finestra.
+#  CALENDARIO (giorni lun-ven, per data di CHIUSURA; conteggio ricalcolato a
+#  mano e confrontato con quello stampato dal cancello). Finestra B INTERA
+#  (IS+OOS, 2024.09.26 -> 2026.06.30) = 459 feriali: 180 d'inverno USA e 279
+#  d'estate (il cancello stampa 180/279). Il PER-TRADE copre pero' solo la
+#  gamba OOS: B-OOS = 276 feriali (USA estate 186, inverno 90; UE estate 166,
+#  inverno 110; USA estate + UE inverno 20); A-OOS = 182 feriali (92 / 90;
+#  72 / 110; 20). A+B per-trade = 458 feriali: 278 estate / 180 inverno USA;
+#  238 estate / 220 inverno UE; 40 giorni USA estate + UE inverno.
+#  USA inverno = 2024-11-03/2025-03-09 e 2025-11-02/2026-03-08 (feriali).
+#  Due calendari per due domande: USA per "che cosa fa il mercato" (verdetto
+#  orologio/stagione), UE per "che cosa fara' FTMO" (serie FTMO).
+#
+# ==========================================================================
+#  2. L'ANCORA E I PIN
+# ==========================================================================
+#  ANCORA: R199B Pass=2 (InpTP1_ClosePct=50), file in repo
+#  backtest_pipeline/risultati_prove/R199B/ABTG_Nasdaq_Apertura_US_NASUSD_
+#  {IS,OOS}_R199B.csv. IS Profit 7014.20 PF 1.22116 RF 1.14977 Equity DD%
+#  7.3069 Trades 135 (82 posizioni); OOS Profit 8496.74 PF 1.21546 RF
+#  1.29687 Equity DD% 7.8576 Trades 172 (102 posizioni). Le POSIZIONI sono
+#  quelle di Pass=0 (ClosePct=0, 1 uscita per posizione): 82 e 102, sotto
+#  il pavimento di 150 (classe 550: la colonna Trades conta USCITE).
+#  PIN: i 96 input pinnati sono COPIATI riga per riga da R231a (le sue
+#  intestazioni 1-bis e 1-ter dimostrano che coincidono con il preset FTMO
+#  tranne ore/magic/CorrSymbol, e che il binario a HEAD riproduce R199B:
+#  nessuna riga di codice cambiata dal pin 9fa84716; riverificato il
+#  03/10: ultimo commit del sorgente 58e3314b del 21/09, solo commenti).
+#  InpAllowShort=1, InpAllowLong=1 (la cella viva e' a due lati).
+#  NON pinnato: InpNewsCurrencies (stringa vuota = default, equivalente).
+#  Un CSV che torna con InpSessionHour diverso da 14 (qui) o da 15 (R274b/d)
+#  si CESTINA: la colonna del CSV dice quello che MT5 ha davvero usato.
+#
+# ==========================================================================
+#  3. I CANCELLI, CONGELATI PRIMA
+# ==========================================================================
+#  G0 (solo R274a, la d0 e' la cella d'archivio): le righe IS e OOS devono
+#     riprodurre R199B Pass=2 sopra: Profit entro 0,01, Trades ESATTI, PF/RF/
+#     DD alla quinta cifra. Se NO: il round e' NON CONFRONTABILE, ci si
+#     ferma (si cerca cio' che balla: binario, deposito, magic). Il magic
+#     diverso da 770260 e' l'unica differenza di input.
+#  G1 DETERMINISMO: le due gemelle di OGNI file identiche in Profit, PF, DD,
+#     Trades e per-trade riga per riga tranne il magic. Se no: file NULLO.
+#  G2 COERENZA FRA FINESTRE: per-trade di R274c (A, d0) contro la gamba IS di
+#     R274a: stessi deal e stesso netto, salvo il 26/09/2024 (l'IS di R274a
+#     parte un giorno prima); idem R274d contro la gamba IS di R274b. In piu',
+#     per OGNI file: somma net_profit e numero di deal del per-trade contro
+#     Profit e Trades della gamba OOS del suo CSV: IDENTICI.
+#  S1 SENTINELLA DELL'OROLOGIO (contro-esempio della classe 156: input
+#     ignorato): d0: NESSUNA uscita prima delle 15:05 BCM (range 14:30-15:05)
+#     ne' dopo le 17:31; d+1: nessuna prima delle 16:05 ne' dopo le 18:31.
+#     Una uscita nell'intervallo [flat+1 minuto ; 22:59] = ROSSO, file NULLO.
+#     Una uscita a 23:00 o dopo (riapertura dopo una pausa di sessione: la
+#     lezione del Dow, 25/05/2026 Memorial Day, uscita alle 23:05 su una
+#     posizione rimasta aperta nella pausa del future) = GIALLO: si elenca
+#     per data e si legge a mano, NON annulla il file. Regola scritta ORA,
+#     prima dei numeri, per non ripetere il caso del Dow.
+#     E il per-trade di R274b NON deve essere identico a quello di R274a:
+#     se lo e', il pin d'orario non e' arrivato -> NULLO.
+#
+# ==========================================================================
+#  4. L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+# ==========================================================================
+#  FREQUENZA (e' quella che decide; il PF a n piccolo non discrimina:
+#  classe 178). Dalle POSIZIONI di R199B: IS 82 su 183 feriali (90 d'inverno
+#  USA + 93 d'estate), OOS 102 su 276 (90 + 186). Due equazioni, due
+#  incognite (tasso invernale w e tasso estivo s della cella d0):
+#      90 w + 93 s = 82   ;   90 w + 186 s = 102
+#      s = 0,215 +- 0,146   w = 0,689 +- 0,230   (1 sigma, Poisson su 82 e 102)
+#      w - s = 0,474 +- 0,371  --> 1,3 sigma: un INDIZIO, non una misura.
+#  [DERIVATO, esattamente determinato, assume lo stesso tasso stagionale in
+#   IS e OOS: l'unica cosa che lo rende testabile e' che il per-trade di
+#   R274a/c da' il tasso VERO per stagione sugli stessi giorni]
+#  Se il pre-mercato (d0 d'inverno) produce piu' posizioni dell'allineato
+#  (d0 d'estate), la frequenza promessa dalla sedia (0,36-0,37 pos/g,
+#  RFWD_CRITERI e PIANO_OTTO_GIORNI) e' una media di due tassi diversi e
+#  in campo FTMO d'inverno (d+1, allineato) scendera' verso il tasso estivo.
+#  IPOTESI (sulle posizioni d'inverno USA, 180 feriali A+B):
+#   H_ORA     (conta l'orologio): d+1 inverno ~ d0 ESTATE = s*180 = 38,7 pos,
+#             banda 1 sigma [12 ; 65]
+#   H_STAGIONE (conta la stagione): d+1 inverno ~ d0 INVERNO = w*180 = 124 pos,
+#             banda 1 sigma [83 ; 166]
+#   Disgiunte; la zona 65-83 e' MISTO. Nel round si ricalcolano dai tassi
+#   VERI di d0 (r_w0, r_s0, per feriale), non da quelli derivati.
+#  PF: si scrive, NON decide (n < 150 per costruzione: ~180 feriali x 0,2-0,7).
+#
+#  CRITERIO DI VERDETTO (zone 0,30 / 0,70, come R246a par. 7):
+#   precondizione  Df = r_w0 - r_s0 >= 0,15 pos/feriale (circa un terzo del
+#                  divario derivato 0,474). Se Df < 0,15: "DIVARIO NON
+#                  RIPRODOTTO", la d+1 resta lettura descrittiva.
+#   Qf2 = (r_w0 - r_w1) / (r_w0 - r_s0)    r_w1 = tasso d+1 d'inverno
+#                  Qf2 >= 0,70 OROLOGIO ; Qf2 <= 0,30 STAGIONE ; in mezzo MISTO.
+#  SERIE "COME FTMO" (calendario UE, 458 feriali A+B): posizioni di d0 nei
+#  238 giorni UE d'estate + posizioni di d+1 nei 220 giorni UE d'inverno
+#  (dentro ci sono i 40 giorni USA estate/UE inverno in cui FTMO arma 1h
+#  DOPO la cash: stanno nella serie perche' sono vivi per FTMO).
+#   R2 (FREQUENZA, tagliando): r_FTMO < 0,25 pos/feriale = meno di due terzi
+#      del promesso 0,37 -> "frequenza sotto il promesso: revisione di Claudio"
+#      (criterio di uscita firmato il 18/08, corsia TAGLIANDO). Soglia
+#      scritta qui, mia, congelata PRIMA: non e' ereditata da nessun round.
+#   R1 (RISCHIO, Emendamento B, vale a QUALUNQUE n): DD di saldo della serie
+#      FTMO (somma cumulata dei net_profit per data di chiusura, su deposito
+#      80000, lotti NON ricalcolati: [DERIVATO], errore atteso < 10% perche'
+#      il saldo si muove di +-10%) > 10% -> "la sedia come operera' d'inverno
+#      viola il muro misurato": revisione IMMEDIATA. Confronto: contratto
+#      7,31% IS / 7,86% OOS (Equity DD%, rischio 2,00, tutta la finestra).
+#  E' dichiarato che il bootstrap che R246 aveva (r246_bande_attese.py) per
+#  il Nasdaq NON ESISTE: le bande sopra sono Poisson a 1 sigma, piu' larghe
+#  e piu' oneste; lo script di lettura per questa famiglia va scritto PRIMA
+#  di aprire i per-trade, con questi criteri come specifica (e con un
+#  --autotest, come r246_giudizio_d1.py). [NON FATTO in questa sessione]
+#
+# ==========================================================================
+#  5. IL CONTRO-ESEMPIO, COSTRUITO PRIMA
+# ==========================================================================
+#  (a) Se l'orologio NON morde (pin non arrivato): per-trade di R274b
+#      identico a R274a e CSV con InpSessionHour=14 -> S1 e colonna lo
+#      vedono, NULLO. Se il pin e' arrivato ma d0 e d+1 danno lo stesso
+#      tasso: l'orologio e' INERTE per questa cella (informativo).
+#  (b) Che numero produce l'ALTRA ipotesi? Sotto H_ORA 12-65 posizioni
+#      d'inverno, sotto H_STAGIONE 83-166: nessuna sovrapposizione al 1
+#      sigma, quindi la banda MISURA qualcosa (classe 178). La zona di
+#      mezzo non decide e lo si dice.
+#  (c) Se il divario d0 inverno/estate NON si riproduce (Df < 0,15) la mia
+#      derivazione era rumore (1,3 sigma): nessun verdetto, e il registro
+#      lo scrive cosi'.
+#  (d) Una causa che l'orologio non spiega: d'inverno il volume M5 del
+#      pre-mercato e' basso e il filtro volumi (ultima barra M5 >= 1,5 x
+#      la media delle 20 precedenti, r.2513-2527) passa piu' facilmente
+#      all'apertura cash. Questa E' parte dell'orologio (cambia cosa
+#      contengono le barre), non un confondente: se la d+1 arma alla cash il
+#      filtro vede la barra della cash. Un confondente VERO resta fuori
+#      dagli input: lo spread del pre-mercato [NON MISURATO per stagione].
+#
+# ==========================================================================
+#  6. QUELLO CHE NON MISURA -- per nome
+# ==========================================================================
+#  - spread e feed FTMO US100.cash all'ora 16:30 server FTMO: [NON MISURATO]
+#    (il logger FTMO si e' fermato alle 10:50, SPREAD_APERTURA_FTMO 5.2);
+#  - il Guardian (pinnato acceso come nel preset FTMO, ma il tester non lo
+#    esercita come il campo), la commissione FTMO [NON MISURATA];
+#  - gli inverni 2010-2024: la finestra tick BCM indici parte il 2024.09.26.
+#    Il numero e' DUE inverni, uno per finestra, e un SOLO regime di mercato
+#    (Nasdaq al rialzo): merito SOSPESO, si legge il RISCHIO (Emendamento B);
+#  - quale lato fa la frequenza: lato corto/lungo restano in R231a;
+#  - se la sedia FTMO seguira' il calendario UE all'ora legale, da verificare
+#    il 25/10 (OROLOGIO par. 6.3): la settimana 26-30/10/2026 e' [NON MISURATA].
+#  COSTO IN TEMPO MACCHINA: 4 file x 4 passate = 16 passate. Metro misurato
+#  sulla famiglia: 20,1 s/passata (R202A, Dow M5 tick, 8 passate in 2 min 41
+#  s, tetto superiore); bordo alto del coordinatore 89,6 s/passata;
+#  il Nasdaq ha 156,1 M tick contro 64,7 M del Dow nella stessa finestra
+#  (REFERTO_SPREAD_FLOTTA): ~48 s [DERIVATO lineare]. 16 passate = 5 - 24 min
+#  (centro ~13 min). Le A costano meno (182 feriali).
+# ==========================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpTP1_ClosePct=50||50||0||50||N
+InpUsaGuardian=1||1||0||1||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=200||200||0||200||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpMinRangePts=0||0||0||0||N
+InpMaxRangePts=0||0||0||0||N
+InpRetestOffsetPts=0||0||0||0||N
+InpFadeOffsetPts=0||0||0||0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=1||1||0||1||N
+InpGapMinPoints=150||150||0||150||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=2||2||0||2||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=0.5||0.5||0||0.5||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0||0||0||0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2||2||0||2||N
+InpTrailFixedPts=410||410||0||410||N
+InpRunnerTP_R=0||0||0||0||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100||100||0||100||N
+InpRoundMinDistPts=50||50||0||50||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0||0||0||0||N
+InpMinStopPts=500||500||0||500||N
+InpSkipIfTight=0||0||0||0||N
+InpMinBreakoutRangeATR=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpUseVolRegime=0||0||0||0||N
+InpVolAtrPeriod=14||14||0||14||N
+InpVolLookback=100||100||0||100||N
+InpVolLowPct=20||20||0||20||N
+InpVolHighPct=80||80||0||80||N
+InpVolLowOffMult=0.7||0.7||0||0.7||N
+InpVolHighOffMult=1.5||1.5||0||1.5||N
+InpVolLowSlMult=0.75||0.75||0||0.75||N
+InpVolHighSlMult=1.5||1.5||0||1.5||N
+InpVolHighSizeMult=0.5||0.5||0||0.5||N
+InpUseSRFilter=0||0||0||0||N
+InpSRProximityPts=1500||1500||0||1500||N
+InpSRUsePrevDay=1||1||0||1||N
+InpSRUseRoundNumbers=1||1||0||1||N
+InpSRRoundInterval=10000||10000||0||10000||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+
+
+# --- ASSE UNICO: IL MAGIC (asse TECNICO, cancello G1 di determinismo) ---
+#  Due celle GEMELLE, identiche in tutto tranne il magic: devono dare
+#  lo stesso identico CSV e lo stesso per-trade (classe 455: il file
+#  per-trade si chiama col MAGIC, quindi due magic = due file, ognuno
+#  l'ultima gamba, cioe' l'OOS). Il magic NON e' 770260: e' vergine.
+InpMagic=798201||798201||50||798251||Y
+# 2 celle -> 4 passate (2 celle x 2 finestre)
