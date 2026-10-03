@@ -1,6 +1,9 @@
 # EMA200 a H4 e D1 sulle coppie forex: la MISURA (03/10/2026)
 
-> **Stato: NON ancora passato dal cancello (`controllo-preventivo`). Nulla di questo e' stato mandato a Claudio.**
+> **Stato: primo passaggio del cancello (`controllo-preventivo`) = FAIL per parole e un numero, correzioni applicate in
+> questo file (eventi short 679, "non si distingue" al posto di "non fa nulla di piu'", asse D1 non "per definizione",
+> riscaldamento W1, F6 a D1 piu' debole del promesso, ora della prima lettura). Serve un SECONDO passaggio. Nulla di questo
+> e' stato mandato a Claudio.**
 > Misura del fenomeno "al primo tocco la EMA200 respinge il prezzo" (convinzione di Claudio, Piano B, trading manuale)
 > a **H4 e D1**, sul forex. **Non e' un backtest**: niente PF, niente stop in pip, niente costo dentro la P, nessuna
 > taglia. Zero tester, zero VPS, nessun EA/preset/conto toccato.
@@ -15,8 +18,10 @@
 
 1. **H4, cella che decide (rimbalzo di 1 ATR prima di uno sfondamento di 1 ATR): NULLO su tutti e due i lati.**
    P = **0,487 long / 0,470 short** contro i surrogati **0,478 / 0,491** (effetto **+0,009 / -0,021**), IC95 **0,448-0,526 /
-   0,431-0,512**, `n_cluster` **634 / 591** (eventi 725 / 678) [MISURATO]. Dopo il primo tocco la EMA200 del H4 respinge
-   il prezzo **quanto prevede il null (prezzo con la stessa deriva e volatilita' ma senza il legame con la EMA200), non di piu'**.
+   0,431-0,512**, `n_cluster` **634 / 591** (eventi risolti B+P 725 / 678; primi tocchi 725 / **679**, uno short e' TO)
+   [MISURATO]. Dopo il primo tocco la EMA200 del H4 respinge il prezzo **in misura non distinguibile dal null (prezzo con la
+   stessa deriva e volatilita' ma senza il legame con la EMA200)**: escluso un effetto grande, **non escluso uno piccolo**
+   (IC dell'effetto long fino a +0,048, sez. 7).
    (I placebo EMA100/150/250/SMA200 non sono stati rifatti: la regola li chiede solo se la primaria e' EFFETTO o ZONA GRIGIA con
    |effetto| >= 0,03, e non e' successo; quindi qui **non si afferma niente sulle "altre medie"**.)
 2. **La forma forte ("quasi sempre rimbalza", P >= 0,75) e' ESCLUSA a H4 su queste sei coppie**: l'estremo alto dell'IC
@@ -32,9 +37,10 @@
    (+/-0,10): non dicono niente. Era previsto (attesa E2: 55-135 eventi per lato). **Serve piu' storia e piu' coppie.**
 5. **Asse "allineamento" (EMA200 del TF di contesto dal lato giusto del prezzo, SENZA filtro):** a H4 (contesto D1)
    **Delta -0,040 / +0,012, ZONA GRIGIA**, dentro la banda dei surrogati: nessun effetto leggibile. **A D1 l'asse non
-   e' misurabile, e per un motivo strutturale, non di mercato**: la mappa D1 -> H4 del mandato mette come contesto una
-   EMA200 piu' VELOCE (33 giorni contro 200), che dopo una separazione di 20 barre sta sempre dal lato del prezzo:
-   **0 eventi allineati su 181**, verificato a mano su tutte e sei le coppie (sez. 5).
+   e' misurabile, e per un motivo strutturale, non di mercato**: la mappa D1 -> H4 congelata nei criteri (sez. 8, presa
+   alla lettera dal mandato) mette come contesto una EMA200 piu' VELOCE (33 giorni contro 200), che dopo una separazione
+   di 20 barre sta quasi sempre dal lato del prezzo: **0 eventi allineati su 181** sul vero, verificato a mano su tutte e
+   sei le coppie (sez. 5). E' un difetto del DISEGNO, non dello strumento (etichette 12/12 identiche al ricalcolo).
 6. **M30 e H1 (riferimento, mai decisivi)**: stesso quadro, NULLO su 3 righe su 4 (M30 short ZONA GRIGIA, effetto
    -0,013): P 0,48-0,50 con `n_cluster` 1.956-3.203. Coerente con le misure del 01/10 su oro e DAX.
 7. **Per chiudere D1 e allargare a CHF e NZD servono le altre 22 coppie** (HistData dal PC di backtest, solo dal 2007):
@@ -44,8 +50,9 @@
    tutti i primi tocchi H4 e D1 delle sei coppie (**24 verifiche su 24 identiche** al minuto del tocco e alle sei celle,
    con e senza filtro ATR; **12 su 12** etichette di allineamento identiche) + un mutante che DEVE e VIENE visto.
 
-Per Claudio, in una riga e senza tono di condanna: **su sei coppie e quindici anni, la EMA200 a H4 al primo tocco non fa
-nulla di piu' di quanto farebbe il caso (null dei surrogati); a D1 non si sa ancora, e il numero per saperlo costa tempo del PC di backtest (download
+Per Claudio, in una riga e senza tono di condanna: **su sei coppie e quindici anni, la EMA200 a H4 al primo tocco non si
+distingue dal caso (null dei surrogati): il "quasi sempre" e' escluso, un effetto piccolo no, e il verdetto sul fenomeno
+a H4 resta NON ANCORA MISURATO perche' dentro i regimi il campione e' corto; a D1 non si sa ancora, e il numero per saperlo costa tempo del PC di backtest (download
 HistData [NON MISURATO] e circa un'ora di calcolo [DERIVATO]) e nessun euro.** Quello che questa misura NON dice e' sotto, sez. 8: non misura la SUA regola (limite, parziali, stop in pip,
 contesto a occhio).
 
@@ -57,7 +64,7 @@ contesto a occhio).
 | errata 1 (G-DATI per coppia-mese) | **10:01:07** (`0205a221`) | trovata rileggendo la sez. 2.4, prima di aprire un prezzo |
 | 1.110 file del mirror scaricati | 10:05:38 - 10:06:27 | **non aperti** da nessun codice fino al 11:49 |
 | errata 2 + involucro + autotest 40/40 pushati | **11:40:08** (`85262ed9`) | solo dati sintetici |
-| **primo file di prezzi veri letto** (conversione in `.npz`) | **11:49:41 - 11:50:00** | dopo l'autotest dentro la stessa corsa |
+| **primo file di prezzi veri delle sei coppie letto** (conversione in `.npz`) | **11:49:23 - 11:50:00** | dopo l'autotest dentro la stessa corsa. Verificato dal cancello sull'ora di ACCESSO dei 1.110 CSV: la prima e' 11:49:23 per tutti (nessuna lettura fra lo scarico delle 10:06 e le 11:49). Unico prezzo vero letto prima: un file HistData **XAUUSD 2021** (oro, fuori campione) alle 10:07, per provare il lettore della fonte B |
 | tentativo 1 della corsa | 11:40:16 -> **crash al D1** | una guardia mancante per un sottoinsieme vuoto (`boot_mesi_delta`, 0 eventi allineati); H4 era gia' uscito |
 | corsa definitiva (autotest 40/40 in 547 s + dati 538 s) | 11:56 -> 12:13 | H4 **identico al decimale** fra i due tentativi (diff dei log vuoto) |
 
@@ -288,13 +295,17 @@ giusto del livello toccato (long: contesto sotto; short: contesto sopra; uguale 
 - **H4 (contesto D1)**: Delta **-0,040 long / +0,012 short**, IC95 a blocchi di mese **-0,120/+0,041 e -0,066/+0,085**, tutti dentro la
   banda dei surrogati (+/-0,07): **nessun effetto**. Eventi NA (contesto D1 con meno di 600 barre al tocco): 98 / 84.
 - **M30 (contesto H1) NULLO, H1 (contesto H4) NULLO long e ZONA GRIGIA short (+0,034)**: indizi non rimisurabili qui.
-- **D1 (contesto H4): NON MISURABILE, per costruzione.** Il verificatore indipendente stampa, per ogni coppia, la distanza fra
-  la EMA200 di contesto e il livello toccato: EURUSD, **long: mediana +2,46 ATR (min +1,81, max +3,78); short: mediana -2,33
-  (min -5,03, max -1,00)**: la EMA200 del H4 (33 giorni) sta SEMPRE oltre il livello D1 dal lato del prezzo, a 1-5 ATR. Per
-  definizione ogni tocco D1 e' CONTRO: **allineati 0 su 181**, in tutte le sei coppie. Le righe "surrogati" del D1 in tabella
-  non hanno significato (calcolate sui pochissimi surrogati con entrambi i gruppi). **E' un difetto della mappa D1 -> H4 del mandato, non un risultato**: il contesto giusto sarebbe un TF
-  PIU' LENTO (W1), la cui EMA200 chiede ~3,85 anni di riscaldamento. Una variante "D1 -> W1" e' una misura nuova con criteri
-  nuovi, da congelare prima.
+- **D1 (contesto H4): NON MISURABILE, per struttura della mappa (non "per definizione").** Il verificatore indipendente stampa,
+  per ogni coppia, la distanza fra la EMA200 di contesto e il livello toccato: EURUSD, **long: mediana +2,46 ATR (min +1,81, max
+  +3,78); short: mediana -2,33 (min -5,03, max -1,00)**: sul vero la EMA200 del H4 (33 giorni) sta oltre il livello D1 dal lato
+  del prezzo, a 1-5 ATR, in ogni evento: **allineati 0 su 181**, in tutte le sei coppie. Non e' un'identita': 20 barre pulite
+  coprono 20 dei ~33 giorni di memoria della EMA200 H4, e infatti **nei surrogati qualche tocco allineato capita** (le righe
+  "surrogati" del D1 in tabella esistono per questo, ma sono calcolate sui pochi surrogati con entrambi i gruppi e non hanno
+  significato). **E' un difetto della mappa D1 -> H4 congelata nei criteri sez. 8 (presa alla lettera dal mandato, scelta
+  dichiarata e segnalata li'), non dello strumento (12/12 etichette identiche al ricalcolo) e non un risultato**: il contesto
+  giusto sarebbe un TF PIU' LENTO (W1). 🔴 Con la regola di casa dei **600 barre** di riscaldamento (criteri 2.2 e 8) la EMA200
+  W1 chiede **~11,5 anni**; i ~3,85 anni corrispondono a 200 barre (peso del seme e^-2 = 13,5%, contro e^-6 della regola), cioe'
+  a una regola NUOVA. Una variante "D1 -> W1" e' una misura nuova con criteri nuovi, da congelare prima.
 
 ## 6. Controlli (lo Sviluppatore e l'Agente dei Controlli)
 
@@ -303,7 +314,11 @@ giusto del livello toccato (long: contesto sotto; short: contesto sopra; uguale 
    1.159 / 1.203, e con fattore comune `n_cluster` 990 contro 1.178 eventi; **F3 rimbalzo PIANTATO a H4: P 0,984 / 0,989,
    EFFETTO** (surrogati 0,537 / 0,557), **F4 sfondamento piantato: P 0,096 / 0,093, CONTRARIO**; F5 asse (piantato solo se allineato
    Delta +0,274 / +0,294 EFFETTO; piantato sempre +0,007 / +0,041 ZONA GRIGIA) e F5a etichetta ricalcolata a mano 100% uguale;
-   F6 orologio (+1 h cambia gli eventi; il cancello boccia EST fisso a -120 e un feed UTC letto come NY); F7 domenica (D1 = 50
+   F6 orologio (+1 h cambia gli eventi a **H4** (124 -> 130); **a D1 no**: eventi 14 -> 14, cambia solo il numero di barre
+   2500 -> 2501, e la prova passa perche' il codice chiede "barre O eventi" mentre i criteri sez. 11 scrivevano "cambia gli
+   eventi H4 e D1": **deviazione dalla premessa scritta, NON coperta dall'errata 2** (presa prima dei prezzi veri, ma va
+   dichiarata: la prova D1 e' piu' debole di quella promessa; il D1 qui e' comunque NON ANCORA MISURATO); il cancello boccia
+   EST fisso a -120 e un feed UTC letto come NY); F7 domenica (D1 = 50
    barre in 10 settimane); F8 cluster a mano; F9 IC di mese 3,3 volte Wilson sui mesi tutti-B/tutti-P; F10 `n_cluster` < 150 ->
    NON ANCORA MISURATO; F11 mutazione X 1,0 -> 0,25 sposta P di +0,30; F12 placebo (EMA100 non EFFETTO; **EMA150 gemella
    LEGGE l'effetto**, vedi errata 2); F13 look-ahead del contesto.
@@ -311,6 +326,12 @@ giusto del livello toccato (long: contesto sotto; short: contesto sopra; uguale 
    strumenti): per le **sei coppie a H4 e D1**, con e senza filtro, **24 su 24 liste di eventi identiche** (lato, minuto del tocco,
    sei celle B/P/AMB/TO) e **12 su 12 etichette di allineamento identiche** (`verifica_indipendente.log`). **Mutante** (EMA con
    alpha 2/211 invece di 2/201): 231 eventi contro 234, **DIFFERENZE**: la verifica non e' cieca.
+   Limite: quel ricalcolo legge la cache `.npz` scritta dallo strumento (lettura e pulizia NON indipendenti).
+2b. **Ricalcolo del cancello (`controllo-preventivo`, 03/10)**: implementazione terza, dai **1.110 CSV grezzi** del mirror (lettura,
+   pulizia OHLC, barre H4 UTC+1, EMA/ATR, macchina a stati dell'armamento, esiti minuto per minuto, G-DATI 2020-05), H4 cella
+   per cella sulle **sei** coppie: **1.404 primi tocchi su 1.404 identici** (lato, minuto, sei celle); pooled **long n 725 B 353 P 372
+   P 0,4869 `n_cluster` 634; short n 678 B 319 P 359 P 0,4705 `n_cluster` 591** (cluster rifatti a mano), Wilson su `n_cluster`
+   identico al CSV. EURUSD: 116 / 118 tocchi, P 0,448 / 0,444. Non rifatti: surrogati, bootstrap, regimi, D1, asse.
 3. **Contro-esempio costruito prima di consegnare**: (a) *"la banda dei surrogati e' troppo stretta perche' le coppie sono
    permutate indipendentemente"* -> l'EFFETTO richiede anche l'IC a blocchi di mese sopra la mediana, e il test F2 con fattore
    comune non lo vede; qui nessuna riga e' EFFETTO, quindi la banda stretta non puo' aver fabbricato un falso positivo;
@@ -378,7 +399,9 @@ Ordine di grandezza [DERIVATO da questa corsa]: D1 fa **1,17 / 1,13 primi tocchi
 | **costo** | nessun euro; tempo macchina del PC di backtest (non del VPS) |
 | **cosa NON fa** | non apre MT5, non scrive nei dati dei terminali, non tocca preset/EA/taglie; **se HistData cambia il sito non si insiste** |
 
-Alternative per D1 gia' congelabili: (a) **mappa D1 -> W1** per l'asse (warm-up ~3,85 anni: usabile solo dal 2009 in poi sulla fonte A);
+Alternative per D1 gia' congelabili: (a) **mappa D1 -> W1** per l'asse: con la regola delle 600 barre (~11,5 anni) sulla fonte A
+resterebbero solo i tocchi D1 da ~2016-07 a 2020-04 (~3,8 anni x 6 coppie, ~25 eventi per lato [DERIVATO]: non misurabile); con
+200 barre (~3,85 anni, dal ~2009) e' una regola di riscaldamento NUOVA, da congelare prima e da dichiarare (seme al 13,5%);
 (b) **piu' anni sulle stesse sei** (BCM nativo dal 1993-1999, ma senza esportatore in repo: nuovo MQL5, fuori perimetro).
 
 ## 10. File prodotti
