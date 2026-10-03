@@ -35,6 +35,10 @@ Cita il NOME dell'input o della funzione, NON il numero di riga: i numeri di rig
 Il contenuto tecnico era utile: la manopola InpSLatr e' viva e mai messa ad asse (candidato A4).
 
 ## 5. Storico degli scambi
+- 03/10: pacchetto TRIAL al 03/10 (`docs/PER_GEMINI_TRIAL_GIORNO3_2026-10-03.md`: 13 posizioni, netto -8.811,59 = -5,51%, due DAX = 72,7% della perdita, pannello: peggior giorno -4,36% contro 5%, PostNews riparate, EMA200 H4/D1, piano manuale). Risposta RICEVUTA
+  (`docs/gemini/RISPOSTA_GEMINI_2026-10-03_0949.md`), verificata in `docs/RISPOSTA_A_GEMINI_2026-10-03.md`: ricopia bene i nostri numeri, ma attribuisce al Bulge il payoff atteso del trial intero (-677,81), propone un filtro di 300 s fra ingressi che non
+  avrebbe agito (gli stop del 02/10 sono a 6 secondi ma gli ingressi a 2 ore: 13:00 e 15:00), usa soglie inventate (PF 1,2, p-value 0,05, 60% in pari, 10% commissioni), mette 'Firma Claudio NO' su un input che cambia gli ingressi (e' SI'), non risponde a meta' di (b).
+  Utile: il tocco di CORPO come asse separato per H4/D1 (buco dichiarato) e il rischio per FATTORE comune (EURNZD e GBPAUD non hanno valute in comune: un cap per valuta non li lega). Misure proposte M1-M4 NON eseguite.
 - 01/10: pacchetto sul TRIAL FTMO giorno 1 (`docs/PER_GEMINI_TRIAL_GIORNO1_2026-10-01.md`): sizing DAX 2,00% su flotta correlata, cap di rischio aperto che non somma
   l'ingresso nuovo (4,62% contro 4,00%), ingresso a un minuto dall'apertura cash, frontiera di costo del Bulge (payoff 1:6). Chiave $GEMINI_API_KEY ASSENTE nell'ambiente
   della routine: pacchetto pronto in repo, risposta NON ricevuta.
