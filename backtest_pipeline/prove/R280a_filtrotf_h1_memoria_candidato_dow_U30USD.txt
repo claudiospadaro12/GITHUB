@@ -1,0 +1,318 @@
+# ======================================================================
+#  EA: ABTG_Nasdaq_Apertura_US
+#  R280a -- IL FILTRO DEL CANDIDATO #1 DEL DOW SU UNA GRIGLIA CHE BCM E
+#  FTMO CONDIVIDONO. Asse unico: InpEmaSlow, con InpFilterTF = H1 (16385).
+#  U30USD M5, TICK REALI, DUE LATI, breakout 15 minuti, EMA(1) contro
+#  EMA(lenta) sul TF del filtro. Cella-centro di R262: TP1_R 0.50.
+#  Scritto il 03/10/2026 dal cercatore-parametri. SOLA PREPARAZIONE: niente
+#  e' girato, e qui NON c'e' nessuna riga di lancio (la scrive la sessione
+#  principale e passa dai cancelli).
+#  Gira SOLO sul PC DI BACKTEST DESKTOP-H4D7CAJ (firma del 21/09): mai sul
+#  VPS, mai sul banco 50504400, mai su un terminale di conto.
+#  NON promuove, NON archivia, NON tocca taglie, sedie, preset o conti.
+# ======================================================================
+#
+#  0. LA DOMANDA, UNA SOLA
+#  --------------------------------------------------------------------
+#  Il candidato #1 (R245/R262: breakout a due lati, range 15, EMA H4) e'
+#  l'unica cella ORB/apertura del Dow che passa PF >= 1,10 in IS e OOS con
+#  n >= 150 in tutte e due (R262b cella 220/0.50: IS 1,25920 su 157, OOS
+#  1,48133 su 199). Il suo contro-esempio piu' grave e' CE-4
+#  (report/DOW_BREAKOUT_DUE_LATI_IL_BUCO_2026-09-22.md par. 4): il filtro
+#  legge candele H4, e la griglia H4 di FTMO NON e' quella di BCM.
+#  DOMANDA: il merito del candidato regge se il filtro legge un TF la cui
+#  griglia e' IDENTICA sui due server, cioe' H1?
+#
+#  1. PERCHE' H1 E' L'UNICO TF "PORTABILE" (aritmetica, [DERIVATO])
+#  --------------------------------------------------------------------
+#  BCM = UTC+1 fisso (report/OROLOGIO_BCM_2026-09-24.md). FTMO = UTC+3 oggi
+#  [MISURATO 20/09, report/IL_MERITO_E_D_INVERNO_2026-09-25.md par. 4];
+#  dal 25/10 [NON MISURATO], tre ipotesi (UTC+2 calendario UE, UTC+2
+#  calendario USA, UTC+3 fisso). Le barre di un TF sono ancorate alla
+#  mezzanotte del SERVER:
+#     H1: apre a ogni ora piena su qualunque server con scarto di ore
+#         intere -> griglia IDENTICA su BCM e FTMO, sempre.
+#     H2: identica d'estate (scarto 2h), sfasata di 1h con FTMO UTC+2.
+#     H4: BCM apre a 00,04,08.. (ora BCM); FTMO UTC+3 a 22,02,06.. (ora
+#         BCM): sfasata di 2h (1h con UTC+2). E' il difetto gia' scritto
+#         in prove/R215a_filtrotf_DOW_U30USD.txt par. 3 e nel preset FTMO
+#         770202 (blocco "RILIEVO CHE L'ORA NON RISOLVE").
+#  Quindi un filtro H1 e' l'unico che il backtest BCM misura ESATTAMENTE
+#  come girerebbe su FTMO. Questo file NON propone di cambiare nessuna
+#  sedia: misura se la strada esiste.
+#
+#  2. IL DISEGNO: UNA VARIABILE, LA MEMORIA DEL FILTRO
+#  --------------------------------------------------------------------
+#  InpFilterTF e' PINNATO a H1. Asse: InpEmaSlow 220 -> 1320 di 220 in 220
+#  = SEI celle. EMA di periodo N su H1 = memoria di N ORE; su H4 = 4N ore.
+#     H1 EmaSlow:      220   440   660   880  1100  1320
+#     memoria (ore):   220   440   660   880  1100  1320
+#     equivale a H4:    55   110   165   220   275   330
+#  La cella 880 ha la STESSA memoria in ore della cella viva H4/220: e'
+#  l'unica che separa la GRIGLIA dalla MEMORIA (par. 4). Perche' non tenere
+#  EmaSlow pinnato e muovere il TF (come R215a): perche' H1/220 (9 giorni)
+#  non e' confrontabile con H4/220 (37 giorni): cambierebbero due cose
+#  insieme. Qui cambia una cosa sola, e il TF e' fermo.
+#  UNA VARIABILE PER FILE: l'ancora H4/220 e il G1 stanno in R280e.
+#  Pin: copia riga per riga di prove/R262b_emaslow_oltre260_TP050_
+#  U30USD.txt (EA, deposito, finestre, 102 righe). Cambiano SOLO: (1)
+#  InpFilterTF 16388 -> 16385, (2) InpEmaSlow da asse 160-320 a asse
+#  220-1320, (3) InpMagic 766302 -> 798701. Il resto e' identico (diff
+#  eseguito 03/10).
+#  Magic 7987xx: ZERO occorrenze nel working tree (comprese le 8 worktree
+#  .claude/worktrees) e ZERO commit su tutti i rami (git log --all -G),
+#  verificato il 03/10/2026. Sigla R280: zero occorrenze, idem.
+#
+#  3. L'ANCORA, dai CSV GREZZI (non da un referto)
+#  --------------------------------------------------------------------
+#  risultati_archivio/ROUND_CORTI_B_2026-09-27/ROUND_R262b/
+#  ABTG_Nasdaq_Apertura_US_U30USD_{IS,OOS}_R262b.csv, riga InpEmaSlow=220
+#  (stesso pin, deposito 10000, rischio 1,0, ora fissa 14:30):
+#     IS   2024.09.26-2025.06.30  Trades 157  Profit 1249.94  PF 1.25920
+#          RF 1.70352  EqDD 7.1736  PegGio -1.1175
+#     OOS  2025.07.01-2026.06.30  Trades 199  Profit 2974.09  PF 1.48133
+#          RF 4.42850  EqDD 6.6241  PegGio -1.1958
+#  Il sorgente ABTG_Nasdaq_Apertura_US.mq5 e' IDENTICO a quello del pin di
+#  R262 (git diff 02c70e17..HEAD sull'EA: vuoto; l'unica novita' in
+#  mql5/Include e' ABTG_Confluenza.mqh, non incluso da questo EA) -- 03/10.
+#
+#  4. COME SI LEGGE (le soglie sono congelate al par. 6, PRIMA dei numeri)
+#  --------------------------------------------------------------------
+#  Cella 880 contro l'ancora H4/220 (stessa memoria in ore, griglia
+#  diversa): se coincidono entro il rumore, la GRIGLIA non conta e il
+#  rischio del fuso e' piccolo; se divergono, la griglia conta. Le altre
+#  cinque celle dicono se esiste un ALTOPIANO di memoria su H1 (centro
+#  dell'altopiano, mai il picco).
+#
+#  5. ATTESA DICHIARATA PRIMA DEI NUMERI -- e perche'
+#  --------------------------------------------------------------------
+#  Ipotesi di partenza H_MEMORIA: conta la memoria in ore, non la griglia.
+#  Fonti dell'attesa, dalla stessa famiglia di numeri:
+#   - asse EmaSlow su H4, binario di oggi (R262b, 640-1280 ore): n IS
+#     153-158, n OOS 197-201, PF IS 1,168-1,313, PF OOS 1,315-1,531, DD IS
+#     6,83-8,24, DD OOS 4,98-8,07;
+#   - asse EmaSlow su H4, binario d'agosto (Dow_Apertura/dow_walkforward_
+#     {IS,OOS}.csv, 80-800 ore, TP 0.50): n IS 138-154 (CRESCE con la
+#     memoria), PF IS 1,26-1,55, PF OOS 1,31-1,51, DD 4,3-6,8. Il binario
+#     d'agosto da' PF un po' piu' alti e DD piu' bassi (R245 G0: PF
+#     -0,0005..-0,023, DD +0,4..+1,7 sul binario di oggi): e' indicativo.
+#  Attesa per cella (H_MEMORIA), n e PF e DD, IS / OOS:
+#     220  (H4 55):  n 138-146 / 186-194 ; PF 1,25-1,55 / 1,30-1,40 ; DD 6-8 / 4,5-7
+#     440  (H4 110): n 143-150 / 195-199 ; PF 1,25-1,40 / 1,30-1,40 ; DD 6-8 / 5-7
+#     660  (H4 165): n 150-155 / 196-199 ; PF 1,25-1,35 / 1,30-1,40 ; DD 6-8 / 6-8,2
+#     880  (H4 220): n 152-162 / 195-203 ; PF 1,15-1,40 / 1,35-1,60 ; DD 6-8 / 5-8
+#     1100 (H4 275): n 153-160 / 197-203 ; PF 1,15-1,40 / 1,35-1,60 ; DD 6-8 / 5-8
+#     1320 (H4 330): n 152-160 / 197-203 ; PF 1,10-1,35 / 1,35-1,60 ; DD 6-9 / 4-7
+#  In una riga: l'altopiano di memoria su H1 coincide con quello gia'
+#  misurato su H4, e la parte corta (220, 440) cade SOLO sul campione IS
+#  (n < 150), non sul merito. n IS cresce con la memoria: e' in parte il
+#  SEME dell'EMA (primi giorni senza EMA => bias 0 => due pendenti; R245
+#  par. 4: 5-14 posizioni, cresce col periodo), non solo qualita'.
+#  Frequenza attesa: ~0,78 posizioni/giorno (157/198 feriali IS, 199/261
+#  OOS) = tetto strutturale 1 per giorno (InpOneTradePerDay=1): il
+#  pavimento 1,00 e' di FAMIGLIA, un'apertura Dow da sola non ci arriva.
+#  Sull'alternativa H_GRIGLIA (la griglia conta): la cella 880 si scosta
+#  dall'ancora H4/220 di oltre 0,15 di PF in una finestra, o di oltre 8
+#  posizioni in IS.
+#
+#  6. SOGLIE CONGELATE PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  Cancelli di casa (letti a rischio 1,0 del banco, deposito 10000):
+#   C-a PF >= 1,10 in IS E in OOS.   C-b n >= 150 in IS E in OOS.
+#   C-c Equity DD % <= 10,00 in IS E in OOS (si legge a qualunque n).
+#  Una cella che cade SOLO su C-b e' "MERITO SOSPESO" (indizio), non
+#  bocciata. Un ALTOPIANO = almeno 3 celle CONTIGUE che passano C-a e C-c
+#  (C-b passata o sospesa); il centro e' la cella di mezzo, se sono in
+#  numero pari vince la memoria piu' bassa (regola di R245). Se passano
+#  1-2 celle: "NON C'E' UNA CONFIGURAZIONE ROBUSTA".
+#  RUMORE: |dPF| <= 0,15 e |dn| <= 8 posizioni (0,15 = 3 volte la
+#  scomposizione fra celle vicine sull'asse H4 di R262b, 0,03-0,07).
+#  MEGLIO DEL DEFAULT (default = ancora H4/220, R280e): solo se batte
+#  l'ancora di piu' di 0,15 di PF in TUTTE E DUE le finestre senza DD
+#  peggiore. Altrimenti il verdetto e' "IL DEFAULT VA BENE" (e' un
+#  risultato, non un fallimento).
+#  Zone di verdetto:
+#   V1 FILTRO PORTABILE: altopiano su H1 E cella 880 entro il rumore
+#      dall'ancora.
+#   V2 SOLO CAMPIONE: le celle passano C-a e C-c ma cadono su C-b.
+#   V3 GRIGLIA LEGATA: la cella 880 fuori dal rumore dall'ancora, o nessuna
+#      cella H1 passa C-a mentre l'ancora passa => CE-4 CONFERMATO.
+#   V4 NULLO: S2 scatta, o R280e non riproduce l'ancora (G0).
+#  NESSUNA CELLA VIENE PROMOSSA DA QUESTO ROUND, qualunque numero esca.
+#
+#  7. CONTRO-ESEMPIO, costruito contro l'ipotesi alternativa
+#  --------------------------------------------------------------------
+#  La mia lettura: "se la 880 coincide con l'ancora, la griglia non conta".
+#  L'alternativa che da' lo stesso numero: "le due coincidono perche' il
+#  filtro, a quella memoria, da' lo STESSO bias nel 95% dei giorni: la
+#  manopola e' quasi muta". Questo file non puo' separarle del tutto: il
+#  numero che le distingue e' la colonna Trades (se i bias coincidessero
+#  quasi sempre, Trades sarebbe uguale all'ancora al +-2 e il PF alla
+#  seconda cifra). BUCO DICHIARATO: manca la cella "filtro SPENTO" in
+#  questa configurazione (InpUseEmaFilter e' un altro file, un asse per
+#  volta): se la 880 e' uguale all'ancora, quel file dira' se il filtro
+#  porta davvero informazione.
+#  L'altro rovescio: se TUTTE le celle H1 falliscono, il file NON dice se
+#  e' la memoria o la griglia (H1/220 e' un filtro a 9 giorni, molto piu'
+#  reattivo): la separazione e' la 880 (stessa memoria). Se anche la 880
+#  fallisce, la colpa e' della griglia/fase; se passa, della memoria.
+#
+#  8. SENTINELLE (si guardano PRIMA dei PF)
+#  --------------------------------------------------------------------
+#  S0 la riga "data" del referto deve essere di OGGI.
+#  G0/G1 stanno in R280e: se non passano, questo file e' NULLO.
+#  S2 MANOPOLA MUTA: se le 6 celle sono identiche alla quinta cifra in
+#     tutte e due le finestre, l'asse non ha morso: "misura nulla", non
+#     "memoria indifferente".
+#  S3 RISCALDAMENTO: l'EMA(1320) su H1 chiede 1320 barre H1 (circa 58
+#     feriali a ~23 barre/giorno [DERIVATO]) e BCM ha la storia M1/H1 SOLO dal 2024.09.26: nessuna
+#     barra prima dell'inizio. Per le celle lunghe una parte dell'IS e' a
+#     bias 0 (due lati). Vale anche per l'ancora (880 ore). E' il seme del
+#     par. 5, dichiarato: non si legge un n IS alto come merito.
+#  S4 una cella con Trades < 20 in una finestra e' un guasto, non una cella.
+#
+#  9. L'OROLOGIO E LE DUE TEMPISTICHE
+#  --------------------------------------------------------------------
+#  Ora fissa 14:30 BCM tutto l'anno: d'estate = 9:30 NY (cash), d'inverno
+#  = 8:30 NY (un'ora PRIMA della cash) -- BCM e' UTC+1 fisso. Il file
+#  MESCOLA le due tempistiche, come l'ancora R262b: i confronti sono fra
+#  celle con lo stesso orologio, quindi puliti. La separazione per stagione
+#  non si fa qui (serve il per-trade: R250, e la S1 dei festivi USA).
+#
+# 10. COSTO: questo asse NON muove la frontiera
+#  --------------------------------------------------------------------
+#  @PERIODO resta M5; il TF del filtro non entra nello stop (range d'
+#  apertura letto su PERIOD_M1 cablato: mappa MAPPA_COSTO_SIMBOLI_TF
+#  par. 1). Stop del breakout = range 15' + 2 x buffer: 119,75 + 4,00 =
+#  123,75 punti indice [MISURATO n=446 + LETTO], contro spread U30USD ora
+#  14: 2,00 (tick d'archivio) / 3,00 (logger vivo, GG=5) => 61,9x / 41,3x
+#  contro il pavimento 40x. 41,3x e' AL PELO e il 47,5% delle giornate sta
+#  sotto 40x (R245 par. 6): nessuna cella di questo file e' "esclusa per
+#  costo" ne' "ammessa per costo" da questa misura.
+#
+# 11. TETTO DELLE 100.000 BARRE E TEMPO MACCHINA
+#  --------------------------------------------------------------------
+#  U30USD M5 sull'intera finestra: 130.126 barre [MISURATO,
+#  misura_tick/REFERTO_MISURA_TICK_U30USD.txt] = oltre il tetto di una
+#  corsa; il walk-forward la spezza in IS 2024.09.26-2025.06.30 (277 giorni
+#  su 642 = 43,1% = ~56.000 barre) e OOS (~74.000): sotto il tetto tutte e
+#  due [DERIVATO]. Il banco ha comunque MaxBars molto piu' alto.
+#  Passate: 6 celle x 2 finestre = 12 (+ 4 in R280e). Tempo per passata
+#  MISURATO sullo stesso EA, simbolo, TF, tick: R245 = 84 passate in 28
+#  minuti = 20 s/passata. Bordo basso 5,1 s (STIMA di CHI_ALTRO_PUO_
+#  SCHIERARSI r.64: 80 passate in 6,8 min, base misurata non ritrovata),
+#  tetto 135 s (R240, altro EA).
+#  12 passate: 4 min centrale (1,0-27 min). Con R280e: 5,3 min (1,4-36).
+#
+# 12. BUCHI DICHIARATI
+#  --------------------------------------------------------------------
+#  - un regime solo (toro 2024-2026, un episodio di crollo ad aprile
+#    2025), un broker: l'Emendamento C resta NON soddisfatto;
+#  - il merito dell'IS corto (n 140-158) e' sospeso per le celle sotto 150;
+#  - il DD alla taglia 2,00% non si legge qui: R263 ha misurato 0/48 celle
+#    sotto il muro del 10% a 2% sull'ancora (muro fra 1,25% e 1,50%);
+#  - la sovrapposizione col Dow long 770202 (96% dei giorni) non cambia;
+#  - nessuna misura sul feed FTMO (spread, commissioni, apertura USA).
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.4322
+InpTP1_R=0.50
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16385
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMagic=798701
+InpMaxSpread=0
+InpVerbose=1
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+InpEmaSlow=880||220||220||1320||Y

@@ -1,0 +1,134 @@
+# ======================================================================
+#  EA: ABTG_Nasdaq_Apertura_US
+#  R280e -- ANCORA DI REGRESSIONE E CANCELLO G1 PER R280a.
+#  Cella viva del candidato: InpFilterTF = H4 (16388), InpEmaSlow = 220,
+#  TP1_R 0.50, breakout 15', due lati, U30USD M5 tick reali.
+#  Asse TECNICO: InpMagic 798711 -> 798721 = DUE celle gemelle, stessa
+#  configurazione girata due volte (il magic non entra nel segnale e nel
+#  tester gira un EA solo): serve al G1 di determinismo e alla G0.
+#  Scritto il 03/10/2026. SOLA PREPARAZIONE, nessuna riga di lancio qui.
+#  Va girato PER PRIMO: se G1 o G0 falliscono, R280a e' NULLO.
+#  Gira SOLO sul PC DI BACKTEST (firma del 21/09).
+# ======================================================================
+#
+#  G0 ANCORA -- risultati_archivio/ROUND_CORTI_B_2026-09-27/ROUND_R262b/
+#  ABTG_Nasdaq_Apertura_US_U30USD_{IS,OOS}_R262b.csv, riga InpEmaSlow=220
+#  (stesso binario: git diff 02c70e17..HEAD sull'EA vuoto, 03/10; stesso
+#  deposito 10000, stesse finestre, stessi pin):
+#     IS   Trades 157  Profit 1249.94  PF 1.25920  RF 1.70352  EqDD 7.1736
+#     OOS  Trades 199  Profit 2974.09  PF 1.48133  RF 4.42850  EqDD 6.6241
+#  TOLLERANZA CONGELATA PRIMA (la stessa di R250 par. 5.2): Trades
+#  IDENTICO alla cifra; PF alla quarta decimale; |dProfit| <= 0,05;
+#  |dEqDD| <= 0,01. Fuori: R280a NULLO, non si leggono le altre celle.
+#  G1: le due celle gemelle devono dare Trades, PF, Profit, DD identici in
+#  IS e in OOS. Attenzione al precedente R246: sul Dow, simbolo in USD su
+#  conto EUR, una gemella ha differito di UN centesimo su UN deal
+#  (REFERTO_R246 par. 1). Qui la tolleranza e' scritta PRIMA: Trades e PF
+#  identici, |dProfit| <= 0,05, e il centesimo di conversione NON annulla.
+#  ATTESA: G0 VERDE, G1 PASS: e' la riproduzione di una corsa del 27/09 con
+#  lo stesso EA. Se uno dei due esce ROSSO il banco non e' quello di R262.
+#  COSTO: 4 passate, 1,4 min centrale (5,1 s-135 s per passata).
+#  Magic 798711/798721: blocco 7987xx vergine (par. 2 di R280a).
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.4322
+InpTP1_R=0.50
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpEntryMode=0
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=1
+InpEmaFast=1
+InpFilterTF=16388
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpRiskPercent=1
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=0
+InpBEatR=0
+InpUseTrailing=1
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2
+InpTrailFixedPts=12532
+InpUseRoundLevels=0
+InpRoundStep=100
+InpRoundMinDistPts=50
+InpUseNewsFilter=0
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpSlippagePts=0
+InpMinStopPts=500
+InpSkipIfTight=0
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1
+InpConfirmMode=1
+InpMaxSpread=0
+InpVerbose=1
+InpUsaGuardian=0
+InpMaxPosSimbolo=0
+InpOCTimeframe=0
+InpTrailStartR=0
+InpRunnerTP_R=0
+InpMinBreakoutRangeATR=0
+InpUseVolRegime=0
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20
+InpVolHighPct=80
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=0
+InpSRProximityPts=1500
+InpSRUsePrevDay=1
+InpSRUseRoundNumbers=1
+InpSRRoundInterval=10000
+InpEmaSlow=220
+InpMagic=798711||798711||10||798721||Y
