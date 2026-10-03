@@ -1,0 +1,95 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  EMAGEM_a -- L'ANCORA. U30USD H1 a DUE LATI, la cella della sedia 771531, TICK REALI.
+#  Scritto il 03/10/2026. Soglie congelate PRIMA dei numeri.
+# ==========================================================================
+#
+#  A CHE COSA SERVE, ed e' una cosa sola: il CANCELLO CROCIATO (T1) dei due file fratelli
+#  EMAGEM_b (D30EUR) ed EMAGEM_c (NASUSD). Non misura niente di nuovo: se questo file non
+#  riproduce al centesimo un numero GIA' NOTO, il banco non e' quello che crediamo e NESSUN
+#  numero di b e c si legge (regola gia' pagata in R234a / R235).
+#
+#  CIO' CHE DEVE USCIRE (dai CSV grezzi, non da un referto):
+#    prove/R110_CSV_EMADOW/ABTG_EMA200_U30USD_{IS,OOS}_00_metro.csv  (= R112 00_metro,
+#    = r136a cella SLatr 1,0, = cemad05 cella H1: quattro corse indipendenti, stessi numeri)
+#      IS  2024.09.26 -> 2025.06.09 : PF 1,20110 | DD 5,7325% | 237 deal | profit 4585,40
+#      OOS 2025.06.10 -> 2026.06.30 : PF 1,52365 | DD 7,8323% | 517 deal | profit 23321,47
+#
+#  L'ASSE E' TECNICO: InpMagic con DUE celle gemelle (766801 e 766802). Il magic non entra in
+#  nessuna decisione del motore: le due celle devono dare lo STESSO risultato riga per riga a
+#  parte la colonna InpMagic. Se differiscono, il banco non e' deterministico (cancello G1) e
+#  nessun numero dei fratelli si legge. 2 celle x 2 gambe = 4 passate.
+#
+#  SOGLIE CONGELATE
+#    T1  le due celle ricalcano i numeri sopra AL CENTESIMO (PF a 5 decimali, DD a 4, n intero,
+#        profit a 2). Una differenza qualsiasi = round NULLO per a, b e c.
+#    G1  le due celle gemelle hanno profit/PF/DD/n identici. Se no = round NULLO.
+#    IL DEPOSITO NON SI DICHIARA QUI (walkforward_generico.ps1 non ha @DEPOSITO, default
+#    10000): LA RIGA DI LANCIO DEVE PASSARE -Deposito 100000. A 10000 MathFloor taglia il
+#    lotto e T1 non puo' uscire: e' il modo in cui il cancello se ne accorge.
+#
+#  ATTESA: PF/DD/n = quelli di T1. Costo: 4 passate x 11-34 s (R112: 16 passate in 0,1 ore,
+#  arrotondato a un decimale) = 0,7-2,3 min piu' avvio/compilazione; tetto alto 4 x 1,41 =
+#  ~5,6 min (media misurata dei 13 round del 23/09: 133 min / 94 passate).
+#
+#  BANCO: Modello 4 (TICK REALI), @FRAZIONEIS 0.40 DICHIARATO QUI (la riga di lancio non lo
+#  inoltra), @PERIODO H1 = TF del grafico = InpTF (qui coincidono).
+#  OROLOGIO: H1, motore senza filtro d'ora; il Dow e' lo stesso banco di R110 (vedi b/c).
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+#
+InpTF=16385
+# --- I FISSI: la CELLA DELLA SEDIA 771531 (mql5/Presets/ABTG_EMA200_U30USD_H1_771531_VIVA.set)
+#     = copia esatta di prove/R110_EMADOW_00_metro.txt, tranne il magic. Rischio 1,0 come
+#     R110 (il preset vivo e' 0,65: i DD si confrontano a 1,0 e si moltiplicano per 0,65).
+InpUsaGuardian=true
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito: pin di stringa vuota = ignorato da MT5
+# (controlla_prova.py controllo 3). Default = "".
+InpComment=EMAGEM a ancora
+InpMaxSpread=0
+InpVerbose=true
+InpFridayClose=false
+InpFridayCloseHour=20
+#
+# --- L'UNICO ASSE (tecnico): 2 celle gemelle sul magic. Magic VERGINE 766801/766802:
+#     verificato repo-wide il 03/10/2026 (grep -rIE "\b7668[0-9][0-9]\b" --exclude-dir=.git -> 0 file).
+#     VIETATI: 771531 (sedia viva), 771501, 7633xx (R110), 7634xx (R112), 7666xx, 764201 (R234).
+InpMagic=766801||766801||1||766802||Y
+# ==========================================================================

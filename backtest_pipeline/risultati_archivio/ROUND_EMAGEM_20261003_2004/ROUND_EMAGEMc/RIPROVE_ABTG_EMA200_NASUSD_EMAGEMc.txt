@@ -1,0 +1,11 @@
+RIPROVE DEL DRIVER -- MARCATORE_WALKFORWARD_GENERICO_v7_RETRY
+data       : 2026-10-03 20:08:30 -> 2026-10-03 20:14:51   (ora del PC)
+pc         : DESKTOP-H4D7CAJ
+EA         : ABTG_EMA200   simbolo NASUSD   suffisso '_EMAGEMc'
+MaxRiprove : 1   attesa fra i tentativi 20 s   scadenza 2026-10-03 20:34:31
+giornale   : C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\Tester\logs\AAAAMMGG.log, letto per finestra di tentativo (millisecondi; data dal nome del file)
+cache      : Tester\cache NON toccata da questo driver (mai svuotata, mai letta). La riga 'cache' di ogni tentativo e' quella del GIORNALE.
+si riprova : SOLO 'OnTesterInit works too long. Tester cannot be initialized.' senza CSV, una volta per gamba
+GAMBA IS  | tentativo 1 -> PARTITA (from 2024.09.26 00:00 to 2025.06.09 00:00 su NASUSD: finestra = dichiarata); CSV: presente (5 righe); giornale: 31 righe in questo tentativo, 118 di prima ignorate; cache: riga 'saved to cache file' presente | ESITO GAMBA: CSV PRODOTTO
+GAMBA OOS | tentativo 1 -> PARTITA (from 2025.06.10 00:00 to 2026.06.30 00:00 su NASUSD: finestra = dichiarata); CSV: presente (5 righe); giornale: 31 righe in questo tentativo, 149 di prima ignorate; cache: riga 'saved to cache file' presente | ESITO GAMBA: CSV PRODOTTO
+RIPROVATE  : 0

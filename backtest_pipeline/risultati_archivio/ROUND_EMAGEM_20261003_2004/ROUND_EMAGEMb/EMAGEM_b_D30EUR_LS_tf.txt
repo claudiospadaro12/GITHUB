@@ -1,0 +1,230 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  EMAGEM_b -- GEMELLO D30EUR. La CELLA della sedia 771531 (due lati), asse TF, TICK REALI.
+#  Scritto il 03/10/2026. Soglie congelate PRIMA dei numeri.
+# ==========================================================================
+#
+#  A CHE DOMANDA RISPONDE, ed e' una sola
+#    La cella a due lati della sedia 771531 (U30USD H1: OOS PF 1,52365, 517 deal, DD 7,83%)
+#    e' una proprieta' del DOW o del MOTORE? Il corto da solo e' gia' misurato su D30EUR
+#    a cinque TF (R234, a tick) ed e' MORTO; qui si misura la cella INTERA (long + short).
+#    ATTENZIONE: L+S NON e' la somma di L e S in questo motore (r.322 HasPosition() ||
+#    HasPending() -> un long aperto impedisce uno short: i lati si ESCLUDONO fra loro),
+#    quindi l'additivita' n(L)+n(S)=n(L+S) di R235 NON vale e NON si usa come cancello.
+#
+#  PERCHE' E' AMMESSO ALLARGARE QUI, e va detto prima
+#    Regola del 19/08: si allarga su MOTORI / SIMBOLI / TF / USCITA, non sui parametri
+#    d'ingresso di un motore senza edge. Qui la CELLA E' LA STESSA della sedia, NESSUN
+#    parametro d'ingresso si muove: cambia il simbolo (pin) e l'asse e' il TF (stesso asse
+#    di COLLAUDO_EMADOW_05 sul Dow). Non e' una griglia: e' una domanda di generalizzazione.
+#
+#  CIO' CHE E' GIA' MISURATO su D30EUR con questo motore (ricontato il 03/10/2026 dai CSV)
+#    OHLC (Modello 1, finestra 2024.01.01-2026.06.30 dichiarata dal driver scan_market.ps1; il CSV non la porta):
+#      H1 L+S, cella ESATTA (O1 0,2 / O2 0,3 / TP_RR 2,0), risultati_prove/risultati_scan_ABTG_EMA200_H1/
+#         scan_ABTG_EMA200_H1_D30EUR.csv : PF 0,84842 | n 777 deal | DD 14,5326% | profit -1229,12
+#      stessa cella solo long : PF 0,81733 | n 408 | DD 10,0029% (stesso file); archivio H1_OHLC solo long: 0,79020 | n 371 | DD 11,0470%
+#      griglia H1 L+S (archivio H1_OHLC, ricontata il 03/10): 0/28 positive; PF MEDIANO 0,811; cella di PF MASSIMO
+#         0,90445 | n 659 | DD 11,4261%. Scan di risultati_prove: 0/26, massimo 0,91709 | n 738 | DD 12,5261%.
+#         (STATO_DELLARTE_2026-09-30 sez. 2.2 scrive il PF MEDIANO accanto a n/DD della cella MIGLIORE:
+#         sono due celle diverse, non "PF migliore 0,81". Classe 1086.)
+#      H4 (screening): solo long 30/30 positive, cella esatta 1,44341 | n 118 | DD 3,8949%;
+#         L+S 23/28 positive, PF mediano 1,156, cella di PF massimo 1,37227 | n 180 | DD 4,6822%
+#         -> 59-90 posizioni circa (rapporto 2,0): SOTTO 150, merito non leggibile.
+#    TICK, corto puro (R234b, REFERTO_13_ROUND_2026-09-23.md sez. 2; i CSV R234 NON sono in repo):
+#      OOS PF M30 0,950 | H1 0,724 | H2 0,540 | H3 0,758 | H4 0,662 -> morto a tutti e cinque.
+#    TICK, L+S (la cella intera) e long da solo: [NON MISURATO] a nessun TF. Questo file chiude quella casella.
+#    Uscita ad asse su D30EUR: [NON MISURATO] (solo sul Dow: R136a-d).
+#
+#  IL CANCELLO DEL COSTO, compilato PRIMA di lanciare. Stop della gamba debole = InpSLatr x
+#  ATR(TF) = 1,0 x ATR(TF); legge ATR(T) = ATR(H1) x radice(T/60) con l'ancora di
+#  report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md; frontiera di casa: stop >= 40 x spread.
+#  Il motore NON ha filtro d'ora: lo spread che decide e' la MEDIANA DELLE 24 MEDIANE ORARIE
+#  (classe 650), quello di sessione e' il bordo ottimista.
+#    Spread D30EUR da risultati_archivio/spread_flotta/spread_orario_D30EUR.csv, RICALCOLATO il 03/10:
+#      mediana ore 08-16 = 1,70 idx; MEDIANA DELLE 24 MEDIANE ORARIE = 2,70 (di notte 3,5-4,1).
+#    ATR(14) H1 DAX = 70,0 idx [DERIVATO]: W=780, legge validata sul simbolo a H4 (+0,3% su 139,7
+#      misurato, n=3). NB: R234b scrive 51,5-58,6 (legge W=1440 del 17/09), SMENTITA il 18/09
+#      (-26,2% a H4): qui 70,0 e si dichiara la banda bassa 51,5.
+#    TF    ATR(TF)  stop      /1,70 (sessione)  /2,70 (24 mediane)  verdetto T2
+#    M30    49,5     49,5      29,1x             18,3x              ESCLUSA PER COSTO
+#    H1     70,0     70,0      41,2x             25,9x              FRAGILE (passa solo a spread di sessione), come la sedia sul Dow
+#    H2     99,0     99,0      58,2x             36,7x              FRAGILE
+#    H3    121,2    121,2      71,3x             44,9x              passa
+#    H4    140,0    140,0      82,4x             51,9x              passa
+#    A ATR basso (H1 51,5): H1 30,3x/19,1x (ESCLUSA) | H2 42,8x/27,0x | H3 52,5x/33,0x | H4 60,6x/38,1x:
+#    H3 e H4 restano sopra 40 solo a spread di sessione. Quindi la banda dell'ancora decide fra FRAGILE ed ESCLUSA.
+#
+#  FREQUENZA E CAMPIONE. Finestra 2024.09.26 -> 2026.06.30 = 642 giorni = 91,7 settimane
+#  = ~10.500 barre H1 (conv. 115 h/settimana, [DERIVATO]); M30 ~21.000, H2 ~5.300, H3 ~3.500,
+#  H4 ~2.600: tutte sotto il tetto di ~100.000 barre del tester. IS = 40% = 256 giorni,
+#  OOS = 60% = 385 giorni.
+#
+#  L'OROLOGIO, dichiarato (report/OROLOGIO_BCM_2026-09-24.md; sorgente mql5/Experts/ABTG_EMA200.mq5)
+#    Il motore NON ha filtro d'ora ne' di sessione: InpUseCutoff=false (r.449 esce subito),
+#    InpFridayClose=false (r.279), InpUseNewsFilter=false, InpMaxTradesPerDay=0.
+#    L'ora entra SOLO in due modi: (a) la barra nuova si riconosce da iTime(InpTF,0) (r.294),
+#    (b) la scadenza dei pendenti = 6 barre del TF in secondi (r.378).
+#    >>> A H1 la CELLA NON E' SENSIBILE ALL'ORA: i bordi delle barre H1 sono ore piene e il
+#        server BCM e' UTC+1 FISSO su tutto l'arco dei tick indici. Dal 26/10 (DAX) e dal
+#        02/11 (USA) cambia il rapporto fra ora server e apertura cash, NON la griglia delle
+#        barre: una cella H1 vede le stesse barre prima e dopo. (Ragionamento dal sorgente,
+#        non una misura: lo dico.)
+#    >>> A H2/H3/H4 la griglia e' ancorata alla mezzanotte server: d'inverno una barra H4
+#        08:00-12:00 server contiene l'apertura DAX un'ora dopo il suo inizio (09:00 IT =
+#        09:00 BCM), d'estate proprio all'inizio (08:00 BCM). Quindi a H2-H4 la COMPOSIZIONE della barra rispetto
+#        alla cassa cambia con la stagione. Il banco contiene gia' due inverni a UTC+1 fisso,
+#        ma questo file NON isola l'effetto: [NON MISURATO] per H2-H4.
+#    >>> CONTRO-ESEMPIO (OROLOGIO sez. 5.1.3): 771531 passa da PF 2,05 a 0,87 fra due meta'
+#        dell'anno SENZA essere sensibile all'ora: l'oscillazione stagionale di questa
+#        famiglia e' regime di mercato. Nessun PF di questo file si legge per stagione e
+#        nessuna differenza fra stagioni si attribuisce all'orologio.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    H1: OOS PF 0,70-0,95 (centro 0,82). Evidenze: OHLC L+S cella esatta 0,848; griglia L+S
+#        mediana 0,811, massimi 0,904 e 0,917 (0 celle sopra 1,00 nei due scan); corto tick OOS
+#        0,724; long OHLC cella esatta 0,79-0,82: nessuna evidenza sopra 1,0 a H1 su L+S.
+#        (Corretto il 03/10 dal cancello PRIMA di ogni numero tick: la prima stesura chiamava
+#        "migliore" la MEDIANA 0,81. La banda non cambia: contiene mediane e massimi.)
+#        DD OOS 9-16% (OHLC L+S 14,5% e 11,4%): attesa SOPRA il muro del 10% (T3 fallisce).
+#    n: OHLC L+S 777 deal in 30 mesi sulla cella esatta. Sul Dow la cella a tick fa 754 deal in 21
+#        mesi contro 547 dell'OHLC in 30 mesi (x1,97 per mese): scalando, D30EUR H1 fa 450-1.100 deal,
+#        IS (40%) 180-440, OOS 270-660. [DERIVATO, banda larga di proposito.] NB: il 777 viene dallo
+#        scan di risultati_prove, dove la stessa cella sul Dow fa 648 (non 547): stesso scan = x1,66,
+#        ~900 deal. Dentro la banda; il rapporto fra scan diversi non e' una grandezza sola.
+#    M30: PF < 1,00 e DD > 15% (sul Dow, stessa cella: OOS 0,90713 con DD 15,87%; IS 1,03404).
+#    H2/H3/H4: n IS sotto ~130/40/30 deal (Dow IS: 127/36/26): niente merito; PF non previsto
+#        nel segno. Letti solo per rischio e forma della curva.
+#    Cio' che mi smentirebbe: T6. L'attesa e' che T6 NON si verifichi.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    T1  CANCELLO CROCIATO: EMAGEM_a (U30USD H1 L+S, 4 passate) deve riprodurre al centesimo
+#        IS PF 1,20110 / DD 5,7325 / 237 deal e OOS PF 1,52365 / DD 7,8323 / 517 deal, con le
+#        due celle gemelle sul magic identiche. Se no, questo file NON si legge. Va lanciato
+#        NELLA STESSA RIGA di a.
+#    T2  COSTO. Una cella sotto 40x allo spread MEDIANO DELLE 24 ORE e' ESCLUSA PER COSTO se
+#        sotto 40x anche a spread di sessione; e' FRAGILE se passa solo a quello di sessione
+#        (come la sedia sul Dow: 39,0-44,1x a 2,00 e 26,0-29,4x a 3,00). Le ESCLUSE si
+#        leggono per la forma della curva e NON si promuovono, qualunque PF facciano; le
+#        FRAGILI si promuovono solo come tali, dichiarandolo.
+#    T3  RISCHIO, a QUALUNQUE n (Emendamento B): DD <= 10,00% a rischio 1,0% (colonna
+#        'Equity DD %'). Sopra: si scrive nel referto. La peggior giornata NON esiste per
+#        questo motore (stats[7], classe 80): se serve, dal report .htm, come misura SEPARATA.
+#    T4  MERITO. Si legge SOLO su celle con OOS n >= 300 deal (proxy di 150 POSIZIONI al
+#        rapporto deal/posizione 2,0117 MISURATO sul Dow, [NON MISURATO] su D30EUR: una
+#        cella candidata si conta in POSIZIONI da un per-trade prima di qualsiasi verdetto).
+#        Sotto: [NON MISURATO PER IL MERITO], non "brutta". L'IS sotto 150 posizioni e' gia'
+#        atteso: il suo PF si legge come SEGNO, non come merito.
+#    T5  ALTOPIANO, non picco: una cella si propone solo se almeno UNA cella ADIACENTE
+#        sull'asse TF e' anch'essa sopra i cancelli. Una cella sola fra due sotto 1,00 e'
+#        rumore e si dichiara tale.
+#    T6  SMENTITA DELL'ATTESA (scritta prima): se H1 o H2 danno OOS PF >= 1,10 con OOS n >=
+#        300 deal E IS PF >= 1,00 E DD OOS <= 10%, allora "la cella e' del Dow" e' FALSA per
+#        D30EUR: la cella va in coda come CANDIDATA gemella (mai in campo in automatico),
+#        col per-trade a contare le posizioni, e T2 decide se e' promovibile o solo FRAGILE.
+#        Se NESSUNA cella ha OOS n >= 300, il round NON ha falsificato niente: dice
+#        "NON ANCORA MISURATO PER IL MERITO" e si scrive cosi'.
+#    T5+T6, deciso ORA (aggiunto dal cancello il 03/10, prima dei numeri): T6 manda in coda
+#        SOLO se vale anche T5. Per T5 una cella ADIACENTE e' "sopra i cancelli" se ha OOS PF
+#        >= 1,00 e DD OOS <= 10% (T3), ANCHE se ESCLUSA PER COSTO o sotto 300 deal: per
+#        l'adiacenza conta la forma, non il merito. Contro-esempio che fissa la scelta: con
+#        T2+T4 sull'adiacente la sedia stessa sul Dow fallirebbe T5 (M30 OOS 0,907; H2 OOS
+#        1,173 ma n 266 < 300) = criterio insoddisfacibile. T6 senza T5 = "T6 ISOLATA": si
+#        scrive, NON entra in coda come candidata e NON si archivia; resta una domanda aperta.
+#    T7  NIENTE PROMOZIONI DA QUESTO ROUND. Nessuna taglia, nessuna sedia, nessun forward.
+#
+#  BUCHI DICHIARATI
+#    - UNA FINESTRA, UN REGIME: indici BCM a tick reali dal 2024.09.26 (pavimento misurato,
+#      sonda 17/08). Mercato in rialzo con una discesa di poche settimane: Emendamento C
+#      (prova di regime) NON soddisfatto e NON soddisfabile su BCM. Un DAX esterno
+#      2010-2018 (HistData) esiste, feed diverso e orologio vecchio: mai concatenato (R80),
+#      sarebbe un ALTRO file.
+#    - LA SCALA CAMBIA TUTTA INSIEME: InpTF muove EMA200, EMA14, ATR, distanze, stop, target
+#      e scadenza dei pendenti (6 barre). Misura "il motore a quella scala", non "il TF".
+#    - RISCALDAMENTO: l'EMA200 non esiste per le prime 200 barre del TF; @DAQUANDO 2024.09.26
+#      e' il pavimento dei dati. Giorni persi sull'IS (256): M30 ~6, H1 ~12, H2 ~24, H3 ~37,
+#      H4 ~49. Il crollo di n ai TF alti e' IN PARTE impalcatura (classe 653).
+#    - GUARDIAN: nel tester le GlobalVariable non esistono, fail-open: identico a R110.
+#    - RISCHIO 1,0% qui, 0,65% in campo: DD x 0,65 per il confronto col forward.
+#    - IL DEPOSITO NON SI DICHIARA QUI: LA RIGA DI LANCIO DEVE PASSARE -Deposito 100000
+#      (walkforward_generico.ps1 non ha @DEPOSITO, default 10000; a 10000 MathFloor taglia il
+#      lotto, classe 646). Il cancello T1 su EMAGEM_a lo intercetta, se la riga e' la stessa.
+#    - L'ENUM: InpTF spazzola i MEMBRI fra 30 e 16388 = 5 celle (M30 H1 H2 H3 H4); H3 e' li'
+#      perche' su un enum non si puo' saltare un membro. 5 celle x 2 gambe = 10 passate.
+#      controlla_prova.py lo conta giusto; il conto aritmetico (16359) NON si guarda.
+#    - USCITA (TP1Pct, BE, trailing, SLatr) su D30EUR: NON ad asse in questo file (stessa
+#      cella): la casella 3 del certificato su questo simbolo resta [NON MISURATO].
+#    - TICK: 35.408.137 tick totali dal 2024.09.26 al 30/08/2026 (REFERTO_MISURA_TICK_D30EUR.txt),
+#      "TICK REALI PARZIALI": prima del 2024.09.26 non esiste storico. Il DAX ha 0,52 volte i tick del Dow.
+#
+#  COSTO IN TEMPO MACCHINA (PC di backtest, mai il VPS), [DERIVATO]: R112 = 16 passate in
+#  0,1 ore (arrotondato) = 11-34 s/passata sul Dow (67,6 M tick). Se il tempo e' ~
+#  proporzionale ai tick [ASSUNZIONE, non provata]: ~6-18 s/passata
+#  (0,52 x 11-34) => 10 passate = 1-3 min piu' avvio/compilazione del round (M30 ha il doppio delle
+#  barre e piu' ordini: piu' lento, [NON MISURATO]). Tetto alto 10 x 1,41 = ~14 min. Il tetto alto e' la media
+#  MISURATA dei 13 round del 23/09: 133 min / 94 passate = 1,41 min/passata tutto compreso.
+#
+#  BANCO: Modello 4 (TICK REALI), @FRAZIONEIS 0.40 DICHIARATO QUI. @PERIODO H1 e' il TF del
+#  grafico; InpTF e' il TF che LEGGE IL MOTORE (ABTG_EMA200.mq5 r.258-260 iMA/iATR, r.294
+#  iTime, r.329 iClose, r.378 PeriodSeconds: nessun _Period nel sorgente): il grafico resta
+#  fermo, l'unica cosa che cambia fra le celle e' il motore.
+@SIMBOLO  D30EUR
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+#
+# --- I FISSI: la CELLA DELLA SEDIA 771531 (mql5/Presets/ABTG_EMA200_U30USD_H1_771531_VIVA.set)
+#     = copia esatta di prove/R110_EMADOW_00_metro.txt, tranne il magic. Rischio 1,0 come
+#     R110 (il preset vivo e' 0,65: i DD si confrontano a 1,0 e si moltiplicano per 0,65).
+InpUsaGuardian=true
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito: pin di stringa vuota = ignorato da MT5
+# (controlla_prova.py controllo 3). Default = "".
+InpComment=EMAGEM b D30EUR L+S tf
+InpMaxSpread=0
+InpVerbose=true
+InpFridayClose=false
+InpFridayCloseHour=20
+#
+# --- MAGIC VERGINE 766811: verificato repo-wide il 03/10/2026
+#     (grep -rIE "\b7668[0-9][0-9]\b" --exclude-dir=.git -> 0 file prima di questi tre).
+#     VIETATI: 771531 (sedia viva), 771501, 7633xx (R110), 7634xx (R112), 7666xx, 764201 (R234).
+InpMagic=766811
+#
+# --- L'UNICO ASSE (5 celle x 2 gambe = 10 passate): membri enum fra 30 e 16388 =
+#     M30(30) H1(16385) H2(16386) H3(16387) H4(16388). Il PASSO 1 e' IGNORATO sugli enum.
+InpTF=16385||30||1||16388||Y
+# ==========================================================================
