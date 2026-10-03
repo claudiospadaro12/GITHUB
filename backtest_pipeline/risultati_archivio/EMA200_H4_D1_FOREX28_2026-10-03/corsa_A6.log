@@ -1,0 +1,152 @@
+======================================================================
+ AUTOTEST EMA200_FOREX28_v1
+======================================================================
+   [blocco F0 finito in 87 s]
+   [blocco F2 finito in 351 s]
+   [INFO] F12 placebo EMA250 su rimbalzo piantato long: P=0.478 n=23 n_cluster=23 NON ANCORA MISURATO (nessuna soglia: n < 150)
+   [INFO] F12 placebo EMA250 su rimbalzo piantato short: P=0.458 n=24 n_cluster=24 NON ANCORA MISURATO (nessuna soglia: n < 150)
+   [blocco F3 finito in 428 s]
+   [blocco F1 finito in 2 s]
+   [blocco MISC finito in 3 s]
+   [blocco F2 finito in 347 s]
+   [blocco F5 finito in 445 s]
+   [blocco F4 finito in 165 s]
+ [PASS] F0 autotest ema200_rimbalzo.py (21/21) -- importato e rieseguito tale e quale; ultime righe:    [INFO] RW a M5 X1.00_Y1.00: long 0.497 (n 1343) short 0.503 (n 1355) contro N0 0.500 |    [INFO] RW a M5 X0.25_Y1.00: long 0.789 (n 1343) short 0.792 (n 1355) contro N0 0.800 | AUTOTEST: 21/21  (87 s)
+ [PASS] F1 identita' con R.eventi_h1 a H1 (6 celle, filtro spento) -- eventi 1075 / 1075
+ [PASS] F1 identita' con R.eventi_h1 a H4 (6 celle, filtro spento) -- eventi 250 / 250
+ [PASS] F1 identita' con R.eventi_h1 a D1 (6 celle, filtro spento) -- eventi 36 / 36
+ [PASS] F2 RW H4 pooled rho=0.0 long: P ~0,500 (+/-0,04), non EFFETTO/CONTRARIO -- P=0.519 n=1195 n_cluster=1159 surr 0.511 [0.487;0.525] NULLO
+ [PASS] F2 RW H4 pooled rho=0.0 short: P ~0,500 (+/-0,04), non EFFETTO/CONTRARIO -- P=0.526 n=1251 n_cluster=1203 surr 0.495 [0.473;0.544] ZONA GRIGIA
+ [PASS] F2c RW indipendenti: n totale primaria >= 2.000 (>= 1.000 per lato circa) -- n=2446
+ [PASS] F11 MUTAZIONE X sposta P di > 0,15 -- 0.519 -> 0.819
+ [PASS] F2 RW H4 pooled rho=0.7 long: P ~0,500 (+/-0,04), non EFFETTO/CONTRARIO -- P=0.488 n=1178 n_cluster=990 surr 0.498 [0.469;0.524] NULLO
+ [PASS] F2 RW H4 pooled rho=0.7 short: P ~0,500 (+/-0,04), non EFFETTO/CONTRARIO -- P=0.490 n=1239 n_cluster=1049 surr 0.505 [0.480;0.525] NULLO
+ [PASS] F2b RW con fattore comune long: n_cluster < n di almeno il 10% -- n=1178 n_cluster=990
+ [PASS] F2b RW con fattore comune short: n_cluster < n di almeno il 10% -- n=1239 n_cluster=1049
+ [PASS] F3 PIANTATO rimbalzo H4 long: EFFETTO e effetto >= +0,10 -- P=0.984 n=488 n_cluster=472 surr 0.537 [0.509;0.575] EFFETTO
+ [PASS] F3 PIANTATO rimbalzo H4 short: EFFETTO e effetto >= +0,10 -- P=0.989 n=531 n_cluster=509 surr 0.557 [0.527;0.588] EFFETTO
+ [PASS] F12 placebo EMA100 su rimbalzo piantato long: non EFFETTO, P entro 0,500 +/- 0,05 -- P=0.530 n=526 n_cluster=509 NULLO
+ [PASS] F12 placebo EMA100 su rimbalzo piantato short: non EFFETTO, P entro 0,500 +/- 0,05 -- P=0.508 n=579 n_cluster=547 CONTRARIO
+ [PASS] F12 placebo EMA150 (linea GEMELLA) su rimbalzo piantato long: LEGGE l'effetto (P >= 0,70, EFFETTO) -- P=0.840 n=495 n_cluster=473 EFFETTO
+ [PASS] F12 placebo EMA150 (linea GEMELLA) su rimbalzo piantato short: LEGGE l'effetto (P >= 0,70, EFFETTO) -- P=0.829 n=519 n_cluster=502 EFFETTO
+ [PASS] F12 placebo EMA250 long: non EFFETTO -- P=0.478 n=23 n_cluster=23 NON ANCORA MISURATO
+ [PASS] F12 placebo EMA250 short: non EFFETTO -- P=0.458 n=24 n_cluster=24 NON ANCORA MISURATO
+ [PASS] F10 n_cluster < 150 -> NON ANCORA MISURATO (e con n_cluster >= 150 no) -- piccolo: n 32 n_cluster 29 NON ANCORA MISURATO | pieno: n 488 n_cluster 472 EFFETTO
+ [PASS] F10 etichetta di copertura -- 6 coppie su 28, Oanda, 2005-2020
+ [PASS] F4 PIANTATO sfondamento H4 long: CONTRARIO -- P=0.096 n=560 n_cluster=530 surr 0.404 [0.364;0.442] CONTRARIO
+ [PASS] F4 PIANTATO sfondamento H4 short: CONTRARIO -- P=0.093 n=560 n_cluster=534 surr 0.402 [0.353;0.444] CONTRARIO
+ [PASS] F5a etichetta di allineamento = ricalcolo a mano (cicli espliciti) -- eventi 331, allineati 181, contro 122, NA 28
+ [PASS] F5 asse: piantato SOLO se allineato -> Delta EFFETTO (long) -- P_ali 0.680 (ncl 542) P_co 0.406 (ncl 175) Delta +0.274 surr 0.013 [-0.062;0.101] EFFETTO
+ [PASS] F5 asse: piantato SOLO se allineato -> Delta EFFETTO (short) -- P_ali 0.679 (ncl 411) P_co 0.385 (ncl 224) Delta +0.294 surr 0.002 [-0.052;0.077] EFFETTO
+ [PASS] F5b asse: piantato SEMPRE -> Delta non EFFETTO (long) -- P_ali 0.598 (ncl 456) P_co 0.591 (ncl 233) Delta +0.007 surr 0.011 [-0.071;0.080] ZONA GRIGIA
+ [PASS] F5b asse: piantato SEMPRE -> Delta non EFFETTO (short) -- P_ali 0.588 (ncl 422) P_co 0.548 (ncl 260) Delta +0.041 surr -0.013 [-0.092;0.050] ZONA GRIGIA
+ [PASS] F6 OROLOGIO H4: +1h cambia barre o eventi -- barre 15000 -> 15500, eventi 124 -> 130
+ [PASS] F6 OROLOGIO D1: +1h cambia barre o eventi -- barre 2500 -> 2501, eventi 14 -> 14
+ [PASS] F6 G-OROLOGIO (ancore forex) passa sul file NY corretto -- inverno 13:30 estate 12:30
+ [PASS] F6 G-OROLOGIO boccia il file in EST fisso -- inverno 13:30 estate 11:30
+ [PASS] F6 G-OROLOGIO boccia un feed UTC letto come NY -- inverno 18:30 estate 16:30
+ [PASS] F7 D1 = 5 barre a settimana (domenica sera nel lunedi') -- barre D1 50 (attese 50)
+ [PASS] F7 H4: 6 barre x 5 giorni + 1 stub domenicale = 31 a settimana, mai unite al lunedi' -- barre H4 310 (attese 310)
+ [PASS] F8 cluster a mano -- ottenuti (1, 2, 3, 2, 1, 1) attesi (1, 2, 3, 2, 1, 1)
+ [PASS] F9 IC di mese >= 3 x Wilson con mesi tutti-B / tutti-P -- IC mese 0.417 contro Wilson 0.126
+ [PASS] F9b IC di mese entro +/-30% di Wilson con eventi i.i.d. -- IC mese 0.112 contro Wilson 0.124
+ [PASS] F13 look-ahead del contesto -- dopo il tocco: etichette invariate; barra chiusa subito prima: evento 14 cambia
+AUTOTEST FOREX28: 40/40  (516 s)
+==============================================================================
+ EMA200_FOREX28_v1 -- tranche A6 -- criteri report/EMA200_H4_D1_FOREX28_CRITERI_2026-10-03.md
+==============================================================================
+ file mensili richiesti 1110, non raggiunti 0
+
+ DATI (barre M1 UTC): primo e ultimo minuto REALI per coppia
+   AUDJPY  5,715,036 barre  2005-01-02 18:47:00 -> 2020-05-14 07:59:00
+   AUDUSD  5,386,026 barre  2005-01-02 18:47:00 -> 2020-05-14 07:59:00
+   EURJPY  5,678,821 barre  2005-01-02 18:47:00 -> 2020-05-14 07:59:00
+   EURUSD  5,583,561 barre  2005-01-02 18:38:00 -> 2020-05-14 07:59:00
+   GBPUSD  5,458,319 barre  2005-01-02 19:29:00 -> 2020-05-14 07:59:00
+   USDCAD  5,396,427 barre  2005-01-02 18:53:00 -> 2020-05-14 07:59:00
+ G-OROLOGIO (pooled, feed Oanda): picco inverno 13:30 (n 5612734)  estate 12:30 (n 8206871)  ancore 07:00,08:00,13:15,13:30,15:00,16:00,19:00 -> PASSA
+   (informativo) AUDJPY  picco inverno 00:30 estate 01:30 [fuori dalle ancore]
+   (informativo) AUDUSD  picco inverno 00:30 estate 01:30 [fuori dalle ancore]
+   (informativo) EURJPY  picco inverno 13:30 estate 12:30 
+   (informativo) EURUSD  picco inverno 13:30 estate 12:30 
+   (informativo) GBPUSD  picco inverno 09:30 estate 08:30 [fuori dalle ancore]
+   (informativo) USDCAD  picco inverno 13:30 estate 12:30 
+
+ G-DATI (errata 1): mesi con barre M1 < 50% della mediana dei mesi della coppia
+   AUDJPY  mediana mensile 31099 barre; mesi esclusi: 2020-05
+   AUDUSD  mediana mensile 29448 barre; mesi esclusi: 2020-05
+   EURJPY  mediana mensile 30868 barre; mesi esclusi: 2020-05
+   EURUSD  mediana mensile 30483 barre; mesi esclusi: 2020-05
+   GBPUSD  mediana mensile 29673 barre; mesi esclusi: 2020-05
+   USDCAD  mediana mensile 29308 barre; mesi esclusi: 2020-05
+
+ REGIMI per coppia-anno (rendimento close-to-close; TORO >= +5%, ORSO <= -5%):
+   AUDJPY  2005 TOR  2006 TOR  2007 LAT  2008 ORS  2009 TOR  2010 LAT  2011 ORS  2012 TOR  2013 LAT  2014 LAT  2015 ORS  2016 LAT  2017 LAT  2018 ORS  2019 LAT  2020 ORS
+   AUDUSD  2005 ORS  2006 TOR  2007 TOR  2008 ORS  2009 TOR  2010 TOR  2011 LAT  2012 LAT  2013 ORS  2014 ORS  2015 ORS  2016 LAT  2017 TOR  2018 ORS  2019 LAT  2020 ORS
+   EURJPY  2005 LAT  2006 TOR  2007 LAT  2008 ORS  2009 TOR  2010 ORS  2011 ORS  2012 TOR  2013 TOR  2014 LAT  2015 ORS  2016 ORS  2017 TOR  2018 ORS  2019 LAT  2020 ORS
+   EURUSD  2005 ORS  2006 TOR  2007 TOR  2008 LAT  2009 LAT  2010 ORS  2011 LAT  2012 LAT  2013 LAT  2014 ORS  2015 ORS  2016 LAT  2017 TOR  2018 LAT  2019 LAT  2020 LAT
+   GBPUSD  2005 ORS  2006 TOR  2007 LAT  2008 ORS  2009 TOR  2010 LAT  2011 LAT  2012 LAT  2013 LAT  2014 ORS  2015 ORS  2016 ORS  2017 TOR  2018 ORS  2019 LAT  2020 ORS
+   USDCAD  2005 LAT  2006 LAT  2007 ORS  2008 TOR  2009 ORS  2010 ORS  2011 LAT  2012 LAT  2013 TOR  2014 TOR  2015 TOR  2016 LAT  2017 ORS  2018 TOR  2019 LAT  2020 TOR
+
+ === TF H4 (primario) ===
+   AUDJPY  barre 25461, ATR mediano 0.360857 (36.1 pip), eventi PRIM 229, NOFILT 229
+   AUDUSD  barre 25486, ATR mediano 0.003055 (30.5 pip), eventi PRIM 249, NOFILT 249
+   EURJPY  barre 25485, ATR mediano 0.433000 (43.3 pip), eventi PRIM 228, NOFILT 228
+   EURUSD  barre 25499, ATR mediano 0.003548 (35.5 pip), eventi PRIM 234, NOFILT 234
+   GBPUSD  barre 25443, ATR mediano 0.004459 (44.6 pip), eventi PRIM 228, NOFILT 228
+   USDCAD  barre 25406, ATR mediano 0.003264 (32.6 pip), eventi PRIM 236, NOFILT 236
+   H4  long  X0.25_Y1.00  n   725 n_cl   634 P 0.781 IC [0.747;0.811] surr 0.780 [0.752;0.816] eff +0.001 NULLO
+   H4  long  X1.00_Y1.00  n   725 n_cl   634 P 0.487 IC [0.448;0.526] surr 0.478 [0.438;0.510] eff +0.009 NULLO
+   H4  short X0.25_Y1.00  n   678 n_cl   591 P 0.794 IC [0.759;0.825] surr 0.786 [0.761;0.823] eff +0.007 NULLO
+   H4  short X1.00_Y1.00  n   678 n_cl   591 P 0.471 IC [0.431;0.512] surr 0.491 [0.450;0.532] eff -0.021 NULLO
+   H4: verdetto sul fenomeno: NON ANCORA MISURATO [6 coppie su 28, Oanda, 2005-2020]
+   (189 s)
+
+ === TF D1 (primario) ===
+   AUDJPY  barre 4002, ATR mediano 1.024536 (102.5 pip), eventi PRIM 41, NOFILT 41
+   AUDUSD  barre 4002, ATR mediano 0.009062 (90.6 pip), eventi PRIM 31, NOFILT 31
+   EURJPY  barre 4002, ATR mediano 1.232964 (123.3 pip), eventi PRIM 23, NOFILT 23
+   EURUSD  barre 4002, ATR mediano 0.010356 (103.6 pip), eventi PRIM 26, NOFILT 26
+   GBPUSD  barre 4002, ATR mediano 0.012243 (122.4 pip), eventi PRIM 31, NOFILT 31
+   USDCAD  barre 4002, ATR mediano 0.009017 (90.2 pip), eventi PRIM 29, NOFILT 29
+   D1  long  X0.25_Y1.00  n    92 n_cl    86 P 0.761 IC [0.661;0.849] surr 0.778 [0.708;0.860] eff -0.017 NON ANCORA MISURATO
+   D1  long  X1.00_Y1.00  n    92 n_cl    86 P 0.413 IC [0.315;0.519] surr 0.490 [0.393;0.594] eff -0.077 NON ANCORA MISURATO
+   D1  short X0.25_Y1.00  n    89 n_cl    84 P 0.775 IC [0.675;0.857] surr 0.788 [0.713;0.865] eff -0.013 NON ANCORA MISURATO
+   D1  short X1.00_Y1.00  n    89 n_cl    84 P 0.494 IC [0.390;0.600] surr 0.485 [0.389;0.566] eff +0.010 NON ANCORA MISURATO
+   D1: verdetto sul fenomeno: NON ANCORA MISURATO [6 coppie su 28, Oanda, 2005-2020]
+   (169 s)
+
+ === TF H1 (riferimento) ===
+   AUDJPY  barre 98080, ATR mediano 0.182143 (18.2 pip), eventi PRIM 866, NOFILT 869
+   AUDUSD  barre 98079, ATR mediano 0.001506 (15.1 pip), eventi PRIM 883, NOFILT 885
+   EURJPY  barre 98168, ATR mediano 0.216571 (21.7 pip), eventi PRIM 905, NOFILT 907
+   EURUSD  barre 98151, ATR mediano 0.001745 (17.5 pip), eventi PRIM 913, NOFILT 915
+   GBPUSD  barre 98043, ATR mediano 0.002205 (22.1 pip), eventi PRIM 942, NOFILT 943
+   USDCAD  barre 97955, ATR mediano 0.001609 (16.1 pip), eventi PRIM 950, NOFILT 951
+   H1  long  X0.25_Y1.00  n  2760 n_cl  2024 P 0.759 IC [0.740;0.777] surr 0.763 [0.752;0.781] eff -0.004 NULLO
+   H1  long  X1.00_Y1.00  n  2758 n_cl  2023 P 0.493 IC [0.471;0.515] surr 0.487 [0.467;0.502] eff +0.006 NULLO
+   H1  short X0.25_Y1.00  n  2690 n_cl  1955 P 0.763 IC [0.743;0.781] surr 0.769 [0.753;0.782] eff -0.006 NULLO
+   H1  short X1.00_Y1.00  n  2685 n_cl  1956 P 0.484 IC [0.462;0.506] surr 0.496 [0.478;0.510] eff -0.012 NULLO
+   H1: verdetto sul fenomeno: SENZA CONTENUTO (dentro il null) [6 coppie su 28, Oanda, 2005-2020]
+   (76 s)
+
+ === TF M30 (riferimento) ===
+   AUDJPY  barre 194789, ATR mediano 0.129143 (12.9 pip), eventi PRIM 1698, NOFILT 1702
+   AUDUSD  barre 194754, ATR mediano 0.001044 (10.4 pip), eventi PRIM 1740, NOFILT 1742
+   EURJPY  barre 194936, ATR mediano 0.153000 (15.3 pip), eventi PRIM 1700, NOFILT 1706
+   EURUSD  barre 194914, ATR mediano 0.001201 (12.0 pip), eventi PRIM 1768, NOFILT 1768
+   GBPUSD  barre 194692, ATR mediano 0.001517 (15.2 pip), eventi PRIM 1765, NOFILT 1766
+   USDCAD  barre 194469, ATR mediano 0.001082 (10.8 pip), eventi PRIM 1737, NOFILT 1738
+   M30 long  X0.25_Y1.00  n  5341 n_cl  3216 P 0.755 IC [0.740;0.769] surr 0.749 [0.739;0.761] eff +0.006 NULLO
+   M30 long  X1.00_Y1.00  n  5311 n_cl  3203 P 0.500 IC [0.482;0.517] surr 0.491 [0.475;0.503] eff +0.009 NULLO
+   M30 short X0.25_Y1.00  n  5028 n_cl  3041 P 0.747 IC [0.731;0.762] surr 0.754 [0.743;0.763] eff -0.007 NULLO
+   M30 short X1.00_Y1.00  n  5004 n_cl  3023 P 0.480 IC [0.462;0.498] surr 0.493 [0.482;0.503] eff -0.013 ZONA GRIGIA
+   M30: verdetto sul fenomeno: NON ANCORA MISURATO [6 coppie su 28, Oanda, 2005-2020]
+   (86 s)
+
+ VERDETTI SUL FENOMENO (con l'etichetta di copertura):
+   H4: NON ANCORA MISURATO [6 coppie su 28, Oanda, 2005-2020] -- regime TORO long non NULLO (ZONA GRIGIA); regime ORSO long non NULLO (ZONA GRIGIA); regime LATERALE short non NULLO (ZONA GRIGIA); regime ORSO short non NULLO (ZONA GRIGIA); long: NULLO (n_cluster 634); short: NULLO (n_cluster 591)
+   D1: NON ANCORA MISURATO [6 coppie su 28, Oanda, 2005-2020] -- long: NON ANCORA MISURATO (n_cluster 86); short: NON ANCORA MISURATO (n_cluster 84)
+   H1: SENZA CONTENUTO (dentro il null) [6 coppie su 28, Oanda, 2005-2020] -- 
+   M30: NON ANCORA MISURATO [6 coppie su 28, Oanda, 2005-2020] -- long: NULLO (n_cluster 3203); short: ZONA GRIGIA (n_cluster 3023)
+ tempo totale 538 s

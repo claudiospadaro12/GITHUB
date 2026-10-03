@@ -1,0 +1,51 @@
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente AUDJPY H4 (PRIM, soglia 0.1 x mediana ATR = 0.036086): eventi indipendente 229, strumento 229 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto D1): indipendente [76, 124, 29], strumento [76, 124, 29] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente AUDJPY D1 (PRIM, soglia 0.1 x mediana ATR = 0.102454): eventi indipendente 41, strumento 41 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto H4): indipendente [41, 0, 0], strumento [41, 0, 0] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente AUDUSD H4 (PRIM, soglia 0.1 x mediana ATR = 0.000305): eventi indipendente 249, strumento 249 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto D1): indipendente [81, 131, 37], strumento [81, 131, 37] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente AUDUSD D1 (PRIM, soglia 0.1 x mediana ATR = 0.000906): eventi indipendente 31, strumento 31 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto H4): indipendente [31, 0, 0], strumento [31, 0, 0] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente EURJPY H4 (PRIM, soglia 0.1 x mediana ATR = 0.043300): eventi indipendente 228, strumento 228 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto D1): indipendente [69, 128, 31], strumento [69, 128, 31] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente EURJPY D1 (PRIM, soglia 0.1 x mediana ATR = 0.123296): eventi indipendente 23, strumento 23 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto H4): indipendente [23, 0, 0], strumento [23, 0, 0] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente EURUSD H4 (PRIM, soglia 0.1 x mediana ATR = 0.000355): eventi indipendente 234, strumento 234 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto D1): indipendente [64, 139, 31], strumento [64, 139, 31] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente EURUSD D1 (PRIM, soglia 0.1 x mediana ATR = 0.001036): eventi indipendente 26, strumento 26 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto H4): indipendente [26, 0, 0], strumento [26, 0, 0] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente GBPUSD H4 (PRIM, soglia 0.1 x mediana ATR = 0.000446): eventi indipendente 228, strumento 228 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto D1): indipendente [71, 132, 25], strumento [71, 132, 25] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente GBPUSD D1 (PRIM, soglia 0.1 x mediana ATR = 0.001224): eventi indipendente 31, strumento 31 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto H4): indipendente [31, 0, 0], strumento [31, 0, 0] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente USDCAD H4 (PRIM, soglia 0.1 x mediana ATR = 0.000326): eventi indipendente 236, strumento 236 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto D1): indipendente [83, 124, 29], strumento [83, 124, 29] -> IDENTICA
+mesi esclusi (G-DATI): 2020-05
+verifica indipendente USDCAD D1 (PRIM, soglia 0.1 x mediana ATR = 0.000902): eventi indipendente 29, strumento 29 -> IDENTICI (lato, minuto del tocco, 6 celle)
+   etichetta di allineamento (contesto H4): indipendente [29, 0, 0], strumento [29, 0, 0] -> IDENTICA
+--- senza filtro (soglia 0), H4 e D1, tutte e sei ---
+verifica indipendente AUDJPY H4 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 229, strumento 229 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente AUDJPY D1 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 41, strumento 41 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente AUDUSD H4 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 249, strumento 249 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente AUDUSD D1 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 31, strumento 31 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente EURJPY H4 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 228, strumento 228 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente EURJPY D1 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 23, strumento 23 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente EURUSD H4 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 234, strumento 234 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente EURUSD D1 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 26, strumento 26 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente GBPUSD H4 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 228, strumento 228 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente GBPUSD D1 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 31, strumento 31 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente USDCAD H4 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 236, strumento 236 -> IDENTICI (lato, minuto del tocco, 6 celle)
+verifica indipendente USDCAD D1 (NOFILT, soglia 0.0 x mediana ATR = 0.000000): eventi indipendente 29, strumento 29 -> IDENTICI (lato, minuto del tocco, 6 celle)
+--- MUTANTE (ALPHA 2/211 invece di 2/201): deve dare DIFFERENZE ---
+verifica indipendente EURUSD H4 (PRIM, soglia 0.1 x mediana ATR = 0.000355): eventi indipendente 231, strumento 234 -> DIFFERENZE

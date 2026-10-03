@@ -503,6 +503,8 @@ def boot_mesi_delta(mese, bind, ali, rng, nb=N_BOOT):
     d1 = W @ n1; d0 = W @ n0
     ok = (d1 > 0) & (d0 > 0)
     ds = (W @ b1)[ok] / d1[ok] - (W @ b0)[ok] / d0[ok]
+    if ds.size == 0:                       # un sottoinsieme senza eventi: nessun IC (il verdetto sara' NON ANCORA MISURATO)
+        return float("nan"), float("nan")
     return float(np.quantile(ds, 0.025)), float(np.quantile(ds, 0.975))
 
 
