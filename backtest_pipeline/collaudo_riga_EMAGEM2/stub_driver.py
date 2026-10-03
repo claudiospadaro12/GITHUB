@@ -286,5 +286,6 @@ for f_ in files:
 shutil.copy(J(wdir, 'prove\\' + PROVA), os.path.join(d, PROVA))
 if os.path.exists(rpf) and not sc.get('rp_stale') and not sc.get('rp_nocopy'):
     shutil.copy(rpf, os.path.join(d, os.path.basename(rpf)))
+print("--- I NUMERI, COSI' COME SONO USCITI ---"); print('    Pass 0    Profit 1.00    STUBNUM ' + LBL); sys.stdout.flush()
 rcdef = 0 if all(x == 'ok' for x in legs) else (3 if all(SEQ[x][-1] == 'PARTITA' for x in legs) else 2)
 sys.exit(int(sc.get('rc', rcdef)))

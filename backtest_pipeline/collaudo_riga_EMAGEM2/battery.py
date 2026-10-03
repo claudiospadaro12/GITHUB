@@ -46,7 +46,7 @@ def CLOCK(lbl):
 CAN = "CANCELLO INCROCIATO (T1 + G1 di EMAGEM2a): "
 PASSTXT = "T1 PASS (IS 4585.40 / 1.20110 / 5.7325 / 237 e OOS 23321.47 / 1.52365 / 7.8323 / 517 riprodotti DENTRO LA TOLLERANZA DI BANCO su tutte e due le celle gemelle: Trades e DD esatti, Profit entro 1,00 EUR, PF entro 0,0002) e G1 PASS (le due celle gemelle uguali dentro la tolleranza su Profit, Expected Payoff, PF, Recovery Factor, Sharpe, DD e Trades)."
 # I NUMERI di b e c non devono comparire quando il cancello non e' PASS: ne' la tabella (console e RIEPILOGO) ne' le righe del per-trade
-NOBC = ["EMAGEM2b IS   InpTF", "EMAGEM2b OOS  InpTF", "EMAGEM2c IS   InpTF", "EMAGEM2c OOS  InpTF", "PERTRADE EMAGEM2b ", "PERTRADE EMAGEM2c "]
+NOBC = ["EMAGEM2b IS   InpTF", "EMAGEM2b OOS  InpTF", "EMAGEM2c IS   InpTF", "EMAGEM2c OOS  InpTF", "PERTRADE EMAGEM2b ", "PERTRADE EMAGEM2c ", "STUBNUM EMAGEM2b", "STUBNUM EMAGEM2c"]
 NSL = "NON SI LEGGE (cancello incrociato %s)"
 def FAIL3(extra):
     """a e' girato bene (STATO OK per i tre), il cancello da FAIL, b e c NON SI LEGGONO."""
@@ -64,7 +64,7 @@ T = [
    "[from 2024.09.26 00:00 to 2025.06.09 00:00 su D30EUR: = IS dichiarata]", "[from 2025.06.10 00:00 to 2026.06.30 00:00 su NASUSD: = OOS dichiarata]",
    "terminale C:\\Program Files\\BCM Markets MT5 Terminal\\terminal64.exe" + ", deposito 100000, modello 4, driver walkforward_generico_RETRY.ps1, riprova [MaxRiprove 1   attesa 20 s   scadenza ",
    "GUARDIA EA: grafici salvati letti 2, con un EA attaccato o illeggibili 0", "asse InpMagic [766901/766902] ok", "asse InpTF [30/16385/16386/16387/16388] ok",
-   "FILE ATTESI TROVATI: 20 su 20   NELLO ZIP: 20 su 20", "ZIP PRONTO DA MANDARE", "OK    " + RPA, "OK    " + RPB, "OK    " + RPC,
+   "FILE ATTESI TROVATI: 22 su 22   NELLO ZIP: 22 su 22", "ZIP PRONTO DA MANDARE", "OK    " + RPA, "OK    " + RPB, "OK    " + RPC,
    "EMAGEM2a OOS  InpMagic 766901  InpMagic 766901   Trades   517   Profit   23321.47   PF  1.52365   Equity DD % 7.8323",
    "EMAGEM2a IS   InpMagic 766902  InpMagic 766902   Trades   237   Profit    4585.40   PF  1.20110   Equity DD % 5.7325",
    "EMAGEM2b OOS  InpTF  16388  InpMagic 766911", "EMAGEM2c IS   InpTF     30  InpMagic 766921", "CATENA COMPLETA: 3 cartelle del driver su 3 job lanciati",
@@ -103,10 +103,10 @@ T = [
   [ST("OK", "OK", "MISTO"), "EMAGEM2c MISTO   rc 2", "giornale: intestazioni 2 partite 1 morte 1   RIPROVE: IS: PARTITA, CSV PRODOTTO; OOS: MORTA_INIT, CSV NON PRODOTTO;",
    "gamba OOS MORTA in OnTesterInit e non salvata dalla riprova", "GAMBE SENZA CSV A FINE JOB (morte due volte, o non riprovate perche oltre la scadenza: lo dice il RIPROVE): 1 (EMAGEM2c 1 su 2", "NON e una replica", "RIPESCATE dalla cache",
    "FrameAdd r.655 in OnTester r.643", "ExportTrades r.616 chiamata in OnTester r.645", "magic 766901/766902/766911/766921",
-   "MANCA ROUND_EMAGEM2c\\%s_NASUSD_OOS_EMAGEM2c.csv" % EA, "OK    " + RPC, "FILE ATTESI TROVATI: 19 su 20   NELLO ZIP: 19 su 20", CAN + "PASS"], ["EMAGEM2a NV", "EMAGEM2c OK", "GAMBE RIPROVATE", "ABTG_MaxMinNotte"]),
+   "MANCA ROUND_EMAGEM2c\\%s_NASUSD_OOS_EMAGEM2c.csv" % EA, "OK    " + RPC, "FILE ATTESI TROVATI: 21 su 22   NELLO ZIP: 21 su 22", CAN + "PASS"], ["EMAGEM2a NV", "EMAGEM2c OK", "GAMBE RIPROVATE", "ABTG_MaxMinNotte"]),
  ("job_b_gamba_riprovata_e_salvata", {B: {"legs": ["ko_ok", "ok"]}}, "", "ok", PC, "", "ok", {},
   [ST("OK", "OK_RIPROVATO", "OK"), "EMAGEM2b OK_RIPROVATO   rc 3", "giornale: intestazioni 3 partite 2 morte 1", "RIPROVE: IS: MORTA_INIT poi PARTITA RIPROVATA, CSV PRODOTTO;",
-   "GAMBE RIPROVATE DAL DRIVER: 1 (EMAGEM2b IS)", "RILIEVO, non un difetto: gamba IS", "FILE ATTESI TROVATI: 20 su 20   NELLO ZIP: 20 su 20", "asse InpTF [30/16385/16386/16387/16388] ok", CAN + "PASS"],
+   "GAMBE RIPROVATE DAL DRIVER: 1 (EMAGEM2b IS)", "RILIEVO, non un difetto: gamba IS", "FILE ATTESI TROVATI: 22 su 22   NELLO ZIP: 22 su 22", "asse InpTF [30/16385/16386/16387/16388] ok", CAN + "PASS"],
   ["EMAGEM2b NV", "GAMBE SENZA CSV", "MANCA ", "NON SI LEGGE"]),
  ("job_a_due_gambe_riprovate_e_salvate", {A: {"legs": ["ko_ok", "ko_ok"]}}, "", "ok", PC, "", "ok", {},
   [ST("OK_RIPROVATO", "OK", "OK"), "giornale: intestazioni 4 partite 2 morte 2", "GAMBE RIPROVATE DAL DRIVER: 2 (EMAGEM2a IS,OOS)", "gamba IS e OOS morta in OnTesterInit", CAN + "PASS"], ["EMAGEM2a NV", "GAMBE SENZA CSV", "NON SI LEGGE"]),
@@ -115,7 +115,7 @@ T = [
    "GAMBE SENZA CSV A FINE JOB (morte due volte, o non riprovate perche oltre la scadenza: lo dice il RIPROVE): 1 (EMAGEM2c 1 su 2"], ["EMAGEM2c NV", "EMAGEM2c OK"]),
  ("ko_quattro_tentativi_morti_su_c", {C: {"legs": ["ko_ko", "ko_ko"]}}, "", "ok", PC, "", "ok", {},
   [ST("OK", "OK", "KO"), "EMAGEM2c KO   rc 2", "giornale: intestazioni 4 partite 0 morte 4", "GAMBE SENZA CSV A FINE JOB (morte due volte, o non riprovate perche oltre la scadenza: lo dice il RIPROVE): 2 (EMAGEM2c 2 su 2",
-   "MANCA PERTRADE\\abtg_trades_%s_NASUSD_766921.csv" % EA, "OK    ROUND_EMAGEM2c\\REFERTO_ROUND_EMAGEM2c.txt", "OK    " + RPC, "FILE ATTESI TROVATI: 17 su 20"], ["EMAGEM2c NV", "EMAGEM2c OK"]),
+   "MANCA PERTRADE\\abtg_trades_%s_NASUSD_766921.csv" % EA, "OK    ROUND_EMAGEM2c\\REFERTO_ROUND_EMAGEM2c.txt", "OK    " + RPC, "FILE ATTESI TROVATI: 19 su 22"], ["EMAGEM2c NV", "EMAGEM2c OK"]),
  ("ko_ma_csv_fresco", {C: {"legs": ["ko", "ko"], "csv_anyway": True}}, "", "ok", PC, "", "ok", {}, [ST("OK", "OK", "NV"), "il driver dice CSV NON PRODOTTO per IS e OOS ma esiste un CSV fresco"], ["EMAGEM2c KO"]),
  ("misto_ma_csv_morto_fresco", {B: {"legs": ["ok", "ko"], "csv_anyway": True}}, "", "ok", PC, "", "ok", {}, [ST("OK", "NV", "OK"), "il driver dice CSV NON PRODOTTO per la gamba OOS ma il suo CSV e fresco"], ["EMAGEM2b MISTO"]),
  ("riprove_assente_con_gamba_riprovata", {B: {"legs": ["ko_ok", "ok"], "rp_absent": True}}, "", "ok", PC, "", "ok", {},
@@ -126,7 +126,7 @@ T = [
  ("giornale_e_riprove_non_tornano", {B: {"extra_leg": True}}, "", "ok", PC, "", "ok", {},
   [ST("OK", "NV", "OK"), "il giornale del tester e il file RIPROVE NON TORNANO: giornale 3 intestazioni, 3 partite, 0 morte; RIPROVE 2 tentativi, 2 PARTITA, 0 MORTA_INIT"], ["EMAGEM2b OK"]),
  ("morta_con_altra_causa", {C: {"legs": ["altro", "ok"]}}, "", "ok", PC, "", "ok", {}, [ST("OK", "OK", "NV"), "un tentativo con esito diverso da PARTITA o MORTA_INIT", "MORTA_ALTRO"], ["EMAGEM2c MISTO", "EMAGEM2c KO"]),
- ("rp_copia_mancante_in_raccolta", {B: {"rp_nocopy": True}}, "", "ok", PC, "", "ok", {}, [OK3, "MANCA " + RPB, "FILE ATTESI TROVATI: 19 su 20   NELLO ZIP: 19 su 20"], ["MANCA " + RPA]),
+ ("rp_copia_mancante_in_raccolta", {B: {"rp_nocopy": True}}, "", "ok", PC, "", "ok", {}, [OK3, "MANCA " + RPB, "FILE ATTESI TROVATI: 21 su 22   NELLO ZIP: 21 su 22"], ["MANCA " + RPA]),
  ("trades_zero_in_una_cella_di_a", {A: {"trades0": True}}, "", "ok", PC, "", "ok", {},
   [ST("NV", "OK", "OK"), "NON BUONO: righe 2 (attese 2), Trades>0 su 1", CAN + "NON VERIFICABILE   EMAGEM2a ha STATO NV"], ["EMAGEM2a OK"]),
  ("una_riga_in_meno_su_c", {C: {"una_riga": True}}, "", "ok", PC, "", "ok", {}, [ST("OK", "OK", "NV"), "righe 4 (attese 5)"], ["EMAGEM2c OK"]),
@@ -170,28 +170,28 @@ T = [
  # la cartella vecchia che NON si lascia togliere: la riga si ferma PRIMA di aprire MT5 (classe 1032)
  ("cartella_vecchia_non_rimovibile", {}, "", "ok", PC, "", "ok", {"PRE_OLD": B, "NO_RM": B}, ["NON riesco a togliere la cartella di una corsa PRECEDENTE", "ROUND_EMAGEM2b", NOSTUB], FERMA + ["tolta la cartella"]),
  # lo zip che perde una voce: la cartella e completa, il pacco no (classi 1021/1033)
- ("zip_senza_un_file", {}, "", "ok", PC, "", "ok", {"ZIP_DROP": "RIPROVE_%s_D30EUR_EMAGEM2b" % EA}, [OK3, "FILE ATTESI TROVATI: 20 su 20   NELLO ZIP: 19 su 20", "nello zip: NO"], ["NELLO ZIP: 20 su 20"]),
- ("zip_vecchio", {}, "", "ok", PC, "", "ok", {"ZIP_STALE": "1"}, [OK3, "ZIP VECCHIO (scritto prima di questa raccolta, NON e di questa corsa)", "FILE ATTESI TROVATI: 20 su 20   NELLO ZIP: 0 su 20"], ["ZIP PRONTO DA MANDARE"]),
- ("CE11_zip_senza_riepilogo", {}, "", "ok", PC, "", "ok", {"ZIP_DROP": "RIEPILOGO_ROUND_EMAGEM2"}, [OK3, "NELLO ZIP: 19 su 20"], ["NELLO ZIP: 20 su 20"]),
+ ("zip_senza_un_file", {}, "", "ok", PC, "", "ok", {"ZIP_DROP": "RIPROVE_%s_D30EUR_EMAGEM2b" % EA}, [OK3, "FILE ATTESI TROVATI: 22 su 22   NELLO ZIP: 21 su 22", "nello zip: NO"], ["NELLO ZIP: 22 su 22"]),
+ ("zip_vecchio", {}, "", "ok", PC, "", "ok", {"ZIP_STALE": "1"}, [OK3, "ZIP VECCHIO (scritto prima di questa raccolta, NON e di questa corsa)", "FILE ATTESI TROVATI: 22 su 22   NELLO ZIP: 0 su 22"], ["ZIP PRONTO DA MANDARE"]),
+ ("CE11_zip_senza_riepilogo", {}, "", "ok", PC, "", "ok", {"ZIP_DROP": "RIEPILOGO_ROUND_EMAGEM2"}, [OK3, "NELLO ZIP: 21 su 22"], ["NELLO ZIP: 22 su 22"]),
  # magic del file prova contro la riga (difesa in profondita': il file e' gia' pinnato per SHA). Per raggiungerla si cambiano INSIEME la tabella dei job
  # e il suo controllo di coerenza: il file scaricato dice 766911, la riga dice 766912.
  ("riga_magic_diverso_dal_file", {}, r"s/mg='766911';/mg='766912';/; s/\$jobs\[1\].mg -ne '766911'/$jobs[1].mg -ne '766912'/", "ok", PC, "", "ok", {},
   [ST("OK", "NV", "OK"), "(magic atteso 766912, due lati e rischio 1 attesi)"], ["EMAGEM2b OK"]),
  # gli argomenti passati al driver (classe 1019): li dice il referto, non la riga
- ("deposito_non_passato", {}, r"s/ -Deposito \$jb.dp / /", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "deposito 10000, modello 4", CAN + "NON VERIFICABILE"], ["EMAGEM2a OK"]),
- ("modello_1_passato", {}, r"s/-Modello \$jb.m /-Modello 1 /", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "modello 1, driver"], ["EMAGEM2a OK"]),
- ("pin_diverso_passato", {}, r"s/-Pin \$PIN /-Pin lavoro /", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "referto: pin lavoro,"], ["EMAGEM2a OK"]),
- ("maxriprove_0_passato", {}, r"s/-MaxRiprove \$MAXRIP /-MaxRiprove 0 /", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "riprova [MaxRiprove 0   attesa 20 s"], ["EMAGEM2a OK"]),
- ("scadenza_non_passata", {}, r"s/ -RiprovaEntro \$scadTxt;/;/", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "scadenza nessuna] DIVERSO DALLA RIGA"], ["EMAGEM2a OK"]),
+ ("deposito_non_passato", {}, r"s/ -Deposito \$jb.dp / /g", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "deposito 10000, modello 4", CAN + "NON VERIFICABILE"], ["EMAGEM2a OK"]),
+ ("modello_1_passato", {}, r"s/-Modello \$jb.m /-Modello 1 /g", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "modello 1, driver"], ["EMAGEM2a OK"]),
+ ("pin_diverso_passato", {}, r"s/-Pin \$PIN /-Pin lavoro /g", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "referto: pin lavoro,"], ["EMAGEM2a OK"]),
+ ("maxriprove_0_passato", {}, r"s/-MaxRiprove \$MAXRIP /-MaxRiprove 0 /g", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "riprova [MaxRiprove 0   attesa 20 s"], ["EMAGEM2a OK"]),
+ ("scadenza_non_passata", {}, r"s/ -RiprovaEntro \$scadTxt\( }\| 1>\)/\1/g", "ok", PC, "", "ok", {}, [ST("NV", "NV", "NV"), "scadenza nessuna] DIVERSO DALLA RIGA"], ["EMAGEM2a OK"]),
  # il tetto fra i job: orologio spostato di 45 minuti per UN solo job (modifica di banco, non della riga vera)
  ("tetto_secondo_job_non_lanciato", {}, CLOCK(B), "ok", PC, "", "ok", {},
-  [ST("OK", "NON LANCIATO", "OK"), "=== EMAGEM2b: NON LANCIATO (tetto di 40 minuti", "FILE ATTESI TROVATI: 14 su 14   NELLO ZIP: 14 su 14", "ROUND LANCIATI: 2 su 3   NON LANCIATI (tetto): 1", CAN + "PASS"], ["EMAGEM2b OK", "EMAGEM2b NV"]),
+  [ST("OK", "NON LANCIATO", "OK"), "=== EMAGEM2b: NON LANCIATO (tetto di 40 minuti", "FILE ATTESI TROVATI: 15 su 15   NELLO ZIP: 15 su 15", "ROUND LANCIATI: 2 su 3   NON LANCIATI (tetto): 1", CAN + "PASS"], ["EMAGEM2b OK", "EMAGEM2b NV"]),
  ("tetto_terzo_job_non_lanciato", {}, CLOCK(C), "ok", PC, "", "ok", {},
-  [ST("OK", "OK", "NON LANCIATO"), "=== EMAGEM2c: NON LANCIATO (tetto di 40 minuti", "FILE ATTESI TROVATI: 14 su 14   NELLO ZIP: 14 su 14", "ROUND LANCIATI: 2 su 3   NON LANCIATI (tetto): 1"], ["EMAGEM2c OK", "EMAGEM2c NV"]),
+  [ST("OK", "OK", "NON LANCIATO"), "=== EMAGEM2c: NON LANCIATO (tetto di 40 minuti", "FILE ATTESI TROVATI: 15 su 15   NELLO ZIP: 15 su 15", "ROUND LANCIATI: 2 su 3   NON LANCIATI (tetto): 1"], ["EMAGEM2c OK", "EMAGEM2c NV"]),
  # il per-trade e INFORMATIVO (classe 455): non cambia lo stato, ma si dice cosa e (a ne ha DUE, uno per magic)
  ("pertrade_vecchio_su_a", {A: {"pertrade_stale": True}}, "", "ok", PC, "", "ok", {},
   [OK3, "PERTRADE EMAGEM2a abtg_trades_%s_U30USD_766901.csv: assente in Common\\Files o scritto prima del job" % EA, "PERTRADE EMAGEM2a abtg_trades_%s_U30USD_766902.csv: assente in Common\\Files o scritto prima del job" % EA,
-   "MANCA PERTRADE\\abtg_trades_%s_U30USD_766901.csv" % EA, "MANCA PERTRADE\\abtg_trades_%s_U30USD_766902.csv" % EA, "FILE ATTESI TROVATI: 18 su 20"], ["=NV"]),
+   "MANCA PERTRADE\\abtg_trades_%s_U30USD_766901.csv" % EA, "MANCA PERTRADE\\abtg_trades_%s_U30USD_766902.csv" % EA, "FILE ATTESI TROVATI: 20 su 22"], ["=NV"]),
  ("pertrade_solo_IS_su_b", {B: {"pertrade_ct": ["2024.10.01 08:10:00", "2025.06.09 08:40:00"]}}, "", "ok", PC, "", "ok", {}, [OK3, "2 deal di uscita, gamba IS (ultima chiusura 2025.06.09 08:40:00)"], ["=NV"]),
  ("pertrade_magic_estraneo_su_a", {A: {"pertrade_mg": "763300"}}, "", "ok", PC, "", "ok", {}, [OK3, "righe con magic diverso da 766901: 3", "righe con magic diverso da 766902: 3"], ["=NV"]),
  # i cancelli PRIMA del job: la riga si ferma, lo stub NON viene chiamato
@@ -227,7 +227,7 @@ T = [
   [ST("OK", "OK", "MISTO"), "GAMBE RIPROVATE DAL DRIVER: 2 (EMAGEM2c IS,OOS)", "giornale: intestazioni 4 partite 1 morte 3"], ["EMAGEM2c OK", "EMAGEM2c NV"]),
  ("CE10_riprove_senza_flag_RIPROVATA", {B: {"legs": ["ko_ok", "ok"], "rp_no_rip": "IS"}}, "", "ok", PC, "", "ok", {}, [ST("OK", "NV", "OK"), "file RIPROVE INCOERENTE"], ["EMAGEM2b OK"]),
  ("CE12_tre_job_riprovati", {A: {"legs": ["ok", "ko_ok"]}, B: {"legs": ["ko_ok", "ok"]}, C: {"legs": ["ko_ok", "ko_ok"]}}, "", "ok", PC, "", "ok", {},
-  [ST("OK_RIPROVATO", "OK_RIPROVATO", "OK_RIPROVATO"), "GAMBE RIPROVATE DAL DRIVER: 4 (EMAGEM2a OOS, EMAGEM2b IS, EMAGEM2c IS,OOS)", "FILE ATTESI TROVATI: 20 su 20", CAN + "PASS"], ["=NV", "GAMBE SENZA CSV", "NON SI LEGGE"]),
+  [ST("OK_RIPROVATO", "OK_RIPROVATO", "OK_RIPROVATO"), "GAMBE RIPROVATE DAL DRIVER: 4 (EMAGEM2a OOS, EMAGEM2b IS, EMAGEM2c IS,OOS)", "FILE ATTESI TROVATI: 22 su 22", CAN + "PASS"], ["=NV", "GAMBE SENZA CSV", "NON SI LEGGE"]),
  # la stima dei tempi: console e RIEPILOGO dicono lo STESSO numero (classe 1050)
  ("stima_tempi_console_uguale_riepilogo", {}, "", "ok", PC, "", "ok", {},
   [OK3, "TEMPO: [STIMA] circa 10-34 minuti in tutto se nessuna gamba muore", "RIEP:dichiarato [STIMA] circa 10-34 minuti, circa 2,5 in piu per gamba riprovata, tetto 40",
