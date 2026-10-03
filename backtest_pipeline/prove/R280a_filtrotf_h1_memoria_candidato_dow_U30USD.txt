@@ -23,7 +23,7 @@
 #  DOMANDA: il merito del candidato regge se il filtro legge un TF la cui
 #  griglia e' IDENTICA sui due server, cioe' H1?
 #
-#  1. PERCHE' H1 E' L'UNICO TF "PORTABILE" (aritmetica, [DERIVATO])
+#  1. PERCHE' H1: IL TF PIU' ALTO CON GRIGLIA "PORTABILE" ([DERIVATO])
 #  --------------------------------------------------------------------
 #  BCM = UTC+1 fisso (report/OROLOGIO_BCM_2026-09-24.md). FTMO = UTC+3 oggi
 #  [MISURATO 20/09, report/IL_MERITO_E_D_INVERNO_2026-09-25.md par. 4];
@@ -37,9 +37,13 @@
 #         BCM): sfasata di 2h (1h con UTC+2). E' il difetto gia' scritto
 #         in prove/R215a_filtrotf_DOW_U30USD.txt par. 3 e nel preset FTMO
 #         770202 (blocco "RILIEVO CHE L'ORA NON RISOLVE").
-#  Quindi un filtro H1 e' l'unico che il backtest BCM misura ESATTAMENTE
-#  come girerebbe su FTMO. Questo file NON propone di cambiare nessuna
-#  sedia: misura se la strada esiste.
+#  Quindi H1 e' il TF PIU' ALTO con la griglia identica sui due server
+#  (lo sono anche M30/M15/M5, ma per la stessa memoria chiedono periodi
+#  2-12 volte piu' lunghi e piu' riscaldamento: par. 8 S3). Identica e'
+#  la GRIGLIA, non il FEED (par. 12). Questo file NON propone di cambiare
+#  nessuna sedia: misura se la strada esiste.
+#  [Corretto dal controllo-preventivo il 03/10: la prima stesura diceva
+#  "H1 e' l'unico TF portabile" e "misura ESATTAMENTE come su FTMO".]
 #
 #  2. IL DISEGNO: UNA VARIABILE, LA MEMORIA DEL FILTRO
 #  --------------------------------------------------------------------
@@ -83,6 +87,14 @@
 #  rischio del fuso e' piccolo; se divergono, la griglia conta. Le altre
 #  cinque celle dicono se esiste un ALTOPIANO di memoria su H1 (centro
 #  dell'altopiano, mai il picco).
+#  Perche' la 880 parla di FTMO, e non solo di BCM [DERIVATO dal sorgente,
+#  controllo-preventivo 03/10]: il filtro legge la barra CHIUSA (shift 1,
+#  ABTG_Nasdaq_Apertura_US.mq5 r.1752) alla posa degli ordini, dopo il
+#  range (~14:45 BCM). In quel momento l'ultima H4 chiusa di BCM chiude
+#  alle 12:00 BCM; l'ultima H1 alle 14:00; l'ultima H4 chiusa di FTMO
+#  UTC+3 chiude anch'essa alle 14:00 BCM (con FTMO UTC+2: alle 11:00).
+#  Quindi d'estate la 880 H1 confronta lo STESSO prezzo veloce che
+#  vedrebbe FTMO H4/220; resta diverso solo il campionamento della lenta.
 #
 #  5. ATTESA DICHIARATA PRIMA DEI NUMERI -- e perche'
 #  --------------------------------------------------------------------
@@ -125,8 +137,13 @@
 #  (C-b passata o sospesa); il centro e' la cella di mezzo, se sono in
 #  numero pari vince la memoria piu' bassa (regola di R245). Se passano
 #  1-2 celle: "NON C'E' UNA CONFIGURAZIONE ROBUSTA".
-#  RUMORE: |dPF| <= 0,15 e |dn| <= 8 posizioni (0,15 = 3 volte la
-#  scomposizione fra celle vicine sull'asse H4 di R262b, 0,03-0,07).
+#  RUMORE: |dPF| <= 0,15 e |dn| <= 8 posizioni. Base, ricontata dai CSV
+#  di R262b (TP 0.50, celle vicine a passo 20 su H4) dal controllo-
+#  preventivo il 03/10: |dPF| fra vicine 0,000-0,146, mediana ~0,02; il
+#  passo piu' grande e' OOS 180->200 = 0,146. Quindi 0,15 = il passo
+#  vicino PIU' GRANDE gia' visto, non "3 volte 0,03-0,07" come diceva la
+#  prima stesura (numero sbagliato, soglia invariata, nessun numero R280
+#  esiste). |dn| fra vicine: 0-3.
 #  MEGLIO DEL DEFAULT (default = ancora H4/220, R280e): solo se batte
 #  l'ancora di piu' di 0,15 di PF in TUTTE E DUE le finestre senza DD
 #  peggiore. Altrimenti il verdetto e' "IL DEFAULT VA BENE" (e' un
@@ -213,6 +230,19 @@
 #    sotto il muro del 10% a 2% sull'ancora (muro fra 1,25% e 1,50%);
 #  - la sovrapposizione col Dow long 770202 (96% dei giorni) non cambia;
 #  - nessuna misura sul feed FTMO (spread, commissioni, apertura USA).
+#  - [aggiunti dal controllo-preventivo, 03/10] I DUE LATI NON SI
+#    SEPARANO QUI: il CSV d'ottimizzazione da' solo il totale, e sul
+#    candidato i lati si scambiano i ruoli fra IS e OOS (REFERTO_R245
+#    par. 5: lungo IS 0,92-1,01 / OOS 1,46-1,59; corto IS 1,58-1,84 / OOS
+#    0,79-1,20). Un filtro piu' reattivo cambia proprio il mix dei lati:
+#    la lettura per lato chiede i due gemelli AllowShort=0 / AllowLong=0
+#    sulla cella che esce (come R245e/f). Senza, nessun verdetto per lato.
+#  - V1 e' un verdetto di PORTABILITA' del filtro su UN regime: non e' un
+#    altopiano di MERITO (Emendamento C, regola del 19/08) e non sposta
+#    nessuno dei quattro blocchi del candidato (dossier par. 0 punto 3).
+#  - per-trade: l'EA li scrive da OnTester col magic nel nome (r.2567): le
+#    6 celle condividono 798701 e IS/OOS si sovrascrivono (classe 41).
+#    Questo verdetto non li usa: non si leggono.
 
 @SIMBOLO  U30USD
 @PERIODO  M5
