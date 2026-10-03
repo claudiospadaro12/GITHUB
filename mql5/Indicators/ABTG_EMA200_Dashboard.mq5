@@ -31,10 +31,13 @@
 //|  Unico effetto sul terminale: SymbolSelect() aggiunge al Market  |
 //|  Watch i simboli della lista (serve per avere i prezzi).         |
 //|  Click: se sul grafico gira un EA il grafico NON cambia simbolo, |
-//|  si apre un grafico nuovo (ChartOpen) del simbolo cliccato.      |
+//|  si apre un grafico nuovo (ChartOpen) del simbolo cliccato; per  |
+//|  10 s si controlla che default.tpl non ci abbia messo un EA       |
+//|  (se si': Alert). Il piano scrive nel Journal, una volta per      |
+//|  casella, da dove viene la perdita per lotto.                     |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
-#property version   "4.00"
+#property version   "4.01"
 #property strict
 #property indicator_chart_window
 #property indicator_buffers 0
@@ -111,6 +114,11 @@ int    gSelS = -1;              // simbolo scelto per il piano (indice in gSym),
 int    gSelT = -1;              // TF scelto per il piano (indice in gTf)
 int    gHE14 = INVALID_HANDLE;  // EMA14 del solo TF scelto (filtro dell'EA)
 bool   gPlanDrawn = false;
+bool   gLotSrcLogged = false;   // fonte della perdita per lotto gia' scritta nel Journal per questa casella?
+
+long   gNewId[8];               // grafici appena aperti da ChartOpen da controllare (EA arrivato col template?)
+ulong  gNewMs[8];
+int    gNewN = 0;
 
 //+------------------------------------------------------------------+
 void Lbl(const string name, const int x, const int y, const string txt, const color c)
@@ -247,6 +255,8 @@ int OnInit()
    gSelS      = -1;
    gSelT      = -1;
    gPlanDrawn = false;
+   gLotSrcLogged = false;
+   gNewN      = 0;
 
    ObjectsDeleteAll(0, PFX);
    Refresh();
@@ -286,6 +296,68 @@ int OnCalculate(const int rates_total, const int prev_calculated, const int begi
 void OnTimer()
   {
    Refresh();
+   CheckNewCharts();
+  }
+
+//+------------------------------------------------------------------+
+//| Grafico aperto da ChartOpen (clic sul simbolo con un EA sul       |
+//| grafico): il terminale ci applica default.tpl, e se quel template |
+//| contiene un EA il grafico nuovo nasce con un EA ACCESO. Il .tpl   |
+//| sta fuori dalla sandbox e si applica in modo asincrono: si legge  |
+//| CHART_EXPERT_NAME del grafico nuovo per 10 s e si avvisa con un   |
+//| Alert (classe 951, stessa correzione di ABTG_Confluenza_Dashboard)|
+//+------------------------------------------------------------------+
+void WatchNewChart(const long id)
+  {
+   if(gNewN >= 8)
+     {
+      for(int i = 1; i < 8; i++)
+        {
+         gNewId[i - 1] = gNewId[i];
+         gNewMs[i - 1] = gNewMs[i];
+        }
+      gNewN = 7;
+     }
+   gNewId[gNewN] = id;
+   gNewMs[gNewN] = GetTickCount64();
+   gNewN++;
+  }
+
+void CheckNewCharts()
+  {
+   if(gNewN <= 0)
+      return;
+   ulong now = GetTickCount64();
+   int keep = 0;
+   for(int i = 0; i < gNewN; i++)
+     {
+      long id = gNewId[i];
+      bool drop = false;
+      string sym = ChartSymbol(id);
+      if(StringLen(sym) == 0)
+         drop = true;                                   // grafico gia' chiuso
+      else
+        {
+         string ea = ChartGetString(id, CHART_EXPERT_NAME);
+         if(StringLen(ea) > 0)
+           {
+            Alert("ABTG_EMA200_Dashboard: ATTENZIONE, il grafico ", sym, " ",
+                  EnumToString(ChartPeriod(id)), " appena aperto dal click ha un EA ACCESO: '", ea,
+                  "' (arriva da default.tpl). Se non lo volevi, toglilo SUBITO.");
+            drop = true;
+           }
+         else
+            if(now - gNewMs[i] > 10000)
+               drop = true;                             // 10 s senza EA: a posto
+        }
+      if(!drop)
+        {
+         gNewId[keep] = id;
+         gNewMs[keep] = gNewMs[i];
+         keep++;
+        }
+     }
+   gNewN = keep;
   }
 
 //+------------------------------------------------------------------+
@@ -312,8 +384,11 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
    // il grafico NON si tocca: si apre un grafico nuovo del simbolo cliccato.
    if(StringLen(ChartGetString(0, CHART_EXPERT_NAME)) > 0)
      {
-      if(ChartOpen(sym, _Period) == 0)
+      long nid = ChartOpen(sym, _Period);
+      if(nid == 0)
          Print("ABTG_EMA200_Dashboard: EA sul grafico, non cambio simbolo; ChartOpen fallito per ", sym);
+      else
+         WatchNewChart(nid);   // il grafico nuovo nasce da default.tpl: c'e' un EA dentro? (classe 951)
       return;
      }
    ChartSetSymbolPeriod(0, sym, _Period);
@@ -492,9 +567,12 @@ color ColorFor(const double d)
 
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
-//| Lotti per rischiare 'riskMoney' tra ingresso e SL (perdita per   |
-//| lotto dal broker con OrderCalcProfit, come ABTG_EMA200; ripiego  |
-//| sul tick value). Arrotonda PER DIFETTO al passo; 0 = non fattibile|
+//| Lotti per rischiare 'riskMoney' tra ingresso e SL. Prima scelta  |
+//| OrderCalcProfit (come ABTG_EMA200), MA la documentazione MQL5 la  |
+//| mette fra le funzioni VIETATE negli indicatori: se il terminale la|
+//| rifiuta, la perdita per lotto viene dal tick value IN PERDITA     |
+//| (ripiego su quello generico). Quale ramo gira lo scrive il Journal|
+//| una volta per casella. Arrotonda PER DIFETTO al passo; 0 = no.    |
 //+------------------------------------------------------------------+
 double LotForRisk(const string sym, const bool isLong, const double entry, const double sl,
                   const double riskMoney, double &lossPerLot)
@@ -503,15 +581,27 @@ double LotForRisk(const string sym, const bool isLong, const double entry, const
    if(riskMoney <= 0.0)
       return 0.0;
    double profit = 0.0;
+   bool   fromBroker = false;
    if(OrderCalcProfit(isLong ? ORDER_TYPE_BUY : ORDER_TYPE_SELL, sym, 1.0, entry, sl, profit) && profit < 0.0)
+     {
       lossPerLot = -profit;
+      fromBroker = true;
+     }
    if(lossPerLot <= 0.0)
      {
-      double tv  = SymbolInfoDouble(sym, SYMBOL_TRADE_TICK_VALUE);
+      double tv  = SymbolInfoDouble(sym, SYMBOL_TRADE_TICK_VALUE_LOSS);
+      if(tv <= 0.0)
+         tv = SymbolInfoDouble(sym, SYMBOL_TRADE_TICK_VALUE);
       double tsz = SymbolInfoDouble(sym, SYMBOL_TRADE_TICK_SIZE);
       if(tv <= 0.0 || tsz <= 0.0)
          return 0.0;
       lossPerLot = MathAbs(entry - sl) / tsz * tv;
+     }
+   if(!gLotSrcLogged)
+     {
+      Print("ABTG_EMA200_Dashboard: piano ", sym, ": perdita per lotto ", DoubleToString(lossPerLot, 2), " ",
+            AccountInfoString(ACCOUNT_CURRENCY), (fromBroker ? " da OrderCalcProfit" : " dal tick value (OrderCalcProfit non disponibile)"));
+      gLotSrcLogged = true;
      }
    if(lossPerLot <= 0.0)
       return 0.0;
@@ -591,6 +681,7 @@ void SelectCell(const string tip)
       gSelT = t;
       gHE14 = iMA(gSym[s], gTf[t], 14, 0, MODE_EMA, PRICE_CLOSE);
      }
+   gLotSrcLogged = false;            // casella nuova: la fonte della perdita per lotto si riscrive una volta
    Refresh();
   }
 
