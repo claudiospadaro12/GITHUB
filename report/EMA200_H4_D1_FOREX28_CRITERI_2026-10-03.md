@@ -385,7 +385,7 @@ in piu' EUR_JPY).
 
 ---
 
-## ERRATA 1 (03/10/2026, ore ~10:10 UTC, PRIMA di aprire qualunque file di prezzi): unita' del G-DATI
+## ERRATA 1 (03/10/2026, pushata 10:01 UTC, PRIMA di aprire qualunque file di prezzi): unita' del G-DATI
 
 **Difetto trovato rileggendo la sez. 2.4 prima di scrivere il codice, non dopo aver visto numeri.** La sez. 2.4 dice
 "coppia-ANNO con meno del 50% della mediana delle barre M1". Il mirror finisce a **2020-05**: l'anno 2020 ha 5 mesi
@@ -399,3 +399,39 @@ momento della pubblicazione): sul mirror nessuno, perche' 2005-01 e 2020-05 hann
 estensione dichiarata (il file 2020-05 e' comunque soggetto alla regola se ha < 50%). **Vale per gli eventi
 della serie vera; i surrogati sono costruiti dall'intera serie e non sono toccati** (dichiarato: se il G-DATI non
 esclude nulla, la cosa e' nulla). Nessun'altra regola cambia.
+
+---
+
+## ERRATA 2 (03/10/2026, ~11:35 UTC, PRIMA di leggere qualunque prezzo vero): quattro premesse sbagliate degli autotest, trovate dagli autotest stessi
+
+Scritta quando l'autotest dell'involucro (solo dati SINTETICI) ha dato **38/40**. Nessun file di prezzi veri e' stato
+aperto (i 1.110 file del mirror sono stati scaricati alle ~10:06 UTC e non sono stati letti da nessun codice).
+Nessuna soglia di lettura, nessuna definizione, nessuna cella, nessun criterio di verdetto cambia. Cambiano le
+**premesse di quattro prove**, ognuna con il numero che l'ha mostrata sbagliata:
+
+1. **F12, placebo EMA150: la premessa era falsa.** La sez. 11 pretendeva che "EMA100/150/250 diano P entro 0,500 +/- 0,05"
+   su dati con rimbalzo piantato alla EMA200. Misurato (H4, 4 coppie pooled, 20 surrogati): **EMA100 P 0,530 / 0,508**
+   (NON EFFETTO, giusto); **EMA250 n = 23 / 24** (il mondo piantato non da' eventi a quella linea: NON ANCORA MISURATO,
+   nessuna conclusione); **EMA150 P 0,840 / 0,829 EFFETTO con n 495 / 519**, cioe' quasi gli STESSI eventi della EMA200
+   (526 / 579): la EMA150 e' una **linea gemella** (dentro 0,15 ATR dalla 200 per gran parte del tempo) e un effetto
+   piantato alla 200 trapela li'. **Congelato:** F12 richiede solo che **EMA100 NON sia EFFETTO**; per la **EMA150**
+   richiede che **LEGGA l'effetto piantato (P >= 0,70 e EFFETTO)**, perche' e' la prova che il meccanismo dei
+   placebo non e' cieco; per la **EMA250** nessuna soglia (n < 150). **La regola di sez. 7.2 NON cambia**: un
+   placebo EFFETTO impedisce "VERO" (verdetto "NON ANCORA MISURATO", motivo "non separabile da una linea vicina"),
+   e la lettura "effetto di una linea lenta qualsiasi" vale anche per le gemelle vicine.
+2. **F5 (asse): il mondo piantato con forza 0,6 era degenere.** Con `forza = 0,6` tutti i tocchi sono rimbalzi
+   (P ~ 1,0) e **nessun tocco e' CONTRO** (0 su 109, 85 allineati, 24 NA): non esiste il gruppo di confronto. Con
+   `forza = 0,05` i due gruppi esistono (aggregato 4 coppie, 7.000 giorni). **Congelato:** F5 e F5b usano
+   `forza = 0,05`, stesse soglie di lettura scritte nella sez. 11 (Delta EFFETTO nel "solo se allineato", non
+   EFFETTO/CONTRARIO nel "sempre"). In piu' si aggiunge **F5a**, una prova PIU' severa non prevista prima: l'etichetta
+   di allineamento ricalcolata a mano con cicli espliciti (D1 per giorno, EMA a mano) deve coincidere al 100% con
+   quella dello strumento.
+3. **F13: il confronto era troppo largo.** Perturbando la EMA di contesto dalla barra del tocco in poi cambiano
+   anche le etichette degli eventi SUCCESSIVI (legittimo). **Congelato:** si confrontano solo l'evento e quelli che
+   lo precedono.
+4. **I generatori sintetici partivano da 20.000 e un mondo piantato e' sceso sotto zero** (prezzo -120 con seme 22: i
+   surrogati erano NaN). Congelato: prezzo iniziale 1.000.000 (invariante per traslazione).
+
+Per il resto l'autotest e' stato riorganizzato in blocchi indipendenti eseguiti in parallelo (ognuno con i suoi semi
+fissi: il risultato non dipende dall'ordine); la prova **F11** gira sugli stessi dati di **F2** (rho 0) e **F10** sugli
+stessi di **F3**.
