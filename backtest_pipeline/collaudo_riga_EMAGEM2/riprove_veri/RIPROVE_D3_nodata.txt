@@ -1,0 +1,11 @@
+RIPROVE DEL DRIVER -- MARCATORE_WALKFORWARD_GENERICO_v7_RETRY
+data       : 2026-10-01 21:25:00 -> 2026-10-01 21:25:01   (ora del PC)
+pc         : DESKTOP-H4D7CAJ
+EA         : ABTG_Bulge   simbolo GBPUSD   suffisso '_ohlc_T'
+MaxRiprove : 1   attesa fra i tentativi 5 s   scadenza nessuna
+giornale   : <banco_collaudo_driver_RETRY>/run_D3_nodata/appdata/MetaQuotes/Terminal/DRV000/Tester/logs\AAAAMMGG.log, letto per finestra di tentativo (millisecondi; data dal nome del file)
+cache      : Tester\cache NON toccata da questo driver (mai svuotata, mai letta). La riga 'cache' di ogni tentativo e' quella del GIORNALE.
+si riprova : SOLO 'OnTesterInit works too long. Tester cannot be initialized.' senza CSV, una volta per gamba
+GAMBA IS  | tentativo 1 -> NON_VERIFICABILE (intestazione della gamba presente, ma ne' 'from ... to ...' ne' 'Tester cannot be initialized': fine non leggibile (errore di dati, di .ini o dell'EA?)); CSV: assente; giornale: 4 righe in questo tentativo, 0 di prima ignorate; cache: nessuna riga 'saved to cache file' | ESITO GAMBA: CSV NON PRODOTTO
+GAMBA OOS | tentativo 1 -> PARTITA (from 2026.05.02 00:00 to 2026.06.30 00:00 su GBPUSD: finestra = dichiarata); CSV: presente (2 righe); giornale: 8 righe in questo tentativo, 4 di prima ignorate; cache: riga 'saved to cache file' presente | ESITO GAMBA: CSV PRODOTTO
+RIPROVATE  : 0
