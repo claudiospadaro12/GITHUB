@@ -23,8 +23,18 @@
 #  (R92BAB_LETTURA: ogni file e' la gamba dell'ULTIMA passata scritta per quel magic); la gamba IS dara' i totali
 #  del CSV (Profit, PF, DD, Trades), non la distribuzione. GBPNZD nell'IS parte dal 2010.05.10 (muro misurato,
 #  R92b_CRITERI par. 2.1): si scrive accanto a ogni numero IS, non si rilancia. Le altre 14 coprono dal 2010.01.01.
-#  GRAFICO: NZDCHF, che e' il grafico su cui il Bulge gira in campo ed e' DENTRO i 15 (nessun caso 'grafico fuori
-#  lista' non provato).
+#  GRAFICO: NZDCHF, che e' il grafico del Bulge in campo SECONDO IL REGISTRO (TRIAL_14_GIORNI_CRITERI r.35, ripristino
+#  del 01/10 sera) ed e' DENTRO i 15 (nessun caso 'grafico fuori lista' non provato).
+#  CONTROLLO PREVENTIVO 03/10 -- COSA QUESTO FILE MISURA DAVVERO: il PRESET trial, NON una cella in campo verificata.
+#   - Dopo il ripristino del 01/10 sera il campo ha InpComment "BULGE VIOLA" (inerte nel tester) e Risk_Percent /
+#     Max_Trades [NON NOTI]: 0,8/4 del preset oppure 1,0/3 dichiarati da Claudio il 01/10 mattina. NON sono inerti:
+#     Max_Trades cambia l'insieme delle operazioni, Risk_Percent cambia quando scatta Max_Daily_Loss_Pct 2,0 (a 1,0
+#     bastano 2 SL, a 0,8 ne servono 3). Se il campo e' 1,0/3, questo lavoro misura il preset e NON il campo.
+#   - CODA_08 del 03/10 NON lo chiude: stampa solo gli input 'Inp*' (5 su 50 del Bulge: magic 772720, commento
+#     BULGE_V520_FT, Guardian/Verbose/AutoTest true) e legge un .chr del 30/09 23:24, PRIMA delle due riconfigurazioni
+#     del 01/10, su un grafico NZDJPY (chart12) e non NZDCHF. Si chiude con UNA foto della finestra Input (Claudio).
+#   - Kill switch: il giorno parte dalla mezzanotte SERVER; qui e' BCM, sul trial e' FTMO (UTC+2/+3): confine diverso
+#     dal campo, effetto [NON MISURATO].
 #  REGIME che contiene. IS 2010-2021: piu' regimi in una finestra sola (crisi del debito euro 2010-12, calma 2013-14,
 #  shock SNB del 15/01/2015 -- tocca NZDCHF, USDCHF, CADCHF che sono dentro i 15 --, Brexit 2016, crollo COVID 2020)
 #  [DICHIARATO da calendario, non misurato su questi dati]. OOS 2022-2026: dollaro forte 2022, disinflazione 2023-24,
@@ -56,8 +66,12 @@
 #       (01/10) la gemella +50 ha in IS un Profit piu' basso di 0,02-0,06 (A -860,62/-860,67; B -92,23/-92,29; C -1.014,25/
 #       -1.014,27), con Trades uguali e PF a 5 decimali, mentre in OOS e' identica. Un confronto esatto a 1e-6 (R92b_CRITERI
 #       E2) avrebbe bocciato quei file: la CAUSA dello scarto e' [NON MISURATA], e il valore qui sopra non la spiega. ;
+#       CONSEGUENZA DI G1 (scritta prima dei numeri, 03/10): Trades diversi fra le gemelle = determinismo rotto, la
+#       gamba non si legge. Trades identici ma scarto IS oltre la tolleranza qui sopra (la gamba IS e' ~70 volte piu'
+#       lunga dei 2 mesi su cui lo scarto e' stato visto: puo' crescere, causa ignota) = lo scarto si SCRIVE accanto al
+#       numero IS e la gamba si legge lo stesso se |dPF|/PF <= 0,001 (cento volte sotto il rumore A3 10,5%) ;
 #       SHA256 EA + include = pin ;
-#   somma del per-trade OOS = Profit del CSV OOS (in R92BAB_A erano 945,78 contro 1.149,43: -203,65 NON SPIEGATI,
+#   somma del per-trade OOS = Profit del CSV OOS (in R92BAB_A erano -945,78 contro -1.149,43: -203,65 NON SPIEGATI,
 #   da spiegare PRIMA di leggere un PF: se il per-trade non include commissioni/swap, il PF del CSV e' quello che vale).
 #  NON BASTA PER UN CERTIFICATO DI MORTE (CLAUDIO 09/09): questo lavoro e' UNO dei cinque punti. Mancano ancora la
 #  gestione dell'uscita ad asse, i gemelli (i 7 cross fuori dalla lista dei 15) e un TF diverso da H1.
@@ -65,7 +79,8 @@
 #  COSTO IN TEMPO MACCHINA: [NON MISURATO]. Riferimenti: R92BAB_A (4 passate, finestra 4 mesi, 22 cross) = 95 s;
 #  R92b proiettava 94,98 minuti per 26 passate di 16,5 anni su 22 cross (cioe' ~3,7 minuti a passata). Questo lavoro:
 #  4 passate, 15 cross -> [DERIVATO] 15-60 minuti. Una gamba su 6 muore con 'OnTesterInit works too long' (R92BAB: 2 su 12)
-#  e il driver NON riprova: va messo in conto un possibile rilancio dello stesso lavoro.
+#  e walkforward_generico.ps1 NON riprova (walkforward_generico_RETRY.ps1 riprova UNA volta): senza RETRY va messo
+#  in conto un possibile rilancio dello stesso lavoro. I 94,98 min di R92b sono una proiezione da un controllo FALLITO.
 # =====================================================================
 @SIMBOLO    NZDCHF
 @PERIODO    H1
