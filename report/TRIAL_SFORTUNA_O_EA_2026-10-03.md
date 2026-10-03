@@ -226,7 +226,7 @@ ricampionamenti del contratto.
   - **se** il Bulge fosse il backtest dichiarato da Claudio (Rif-1, WR 80,22%, modello a due punti): p_win 0,117, **p_net 0,031**
     [0,026-0,038] -> il trial sarebbe raro;
   - **se** il Bulge fosse il suo antenato in forward solo viola (Rif-2, n 50, PF 0,6949): p_win 0,201, **p_net 0,225** [0,050-0,510]
-    -> il trial e' ordinario. Cioe': **il trial del Bulge assomiglia al forward che perde, non al backtest che vince.** Non e' un
+    -> il trial e' ordinario. Cioe': **il trial del Bulge assomiglia, sul netto, al forward che perde, non al backtest che vince.** Non e' un
     verdetto (R92b non e' chiuso): e' il verso in cui puntano i due soli riferimenti che abbiamo.
 
 ## D. Portafoglio (punto 5 del mandato)
@@ -346,14 +346,14 @@ terzi della correlazione di P4 vengono dagli indici DIVERSI**, non dallo stesso 
 2. **Sedia per sedia, in due giorni: NON ANCORA MISURATO.** Una operazione ciascuna; ogni stop, preso da solo, capitava il 23-36%
    delle volte. Due giorni non bocciano e non assolvono nessuna sedia.
 3. ✏️ *(riscritto dal cancello, 03/10)* **Il conto nel suo insieme: ZONA GRIGIA** sulla misura congelata (P6): un risultato cosi'
-   in 2 giorni il contratto lo fa **~6 volte su 100** (15 coppie su 259). Non e' "solo sfortuna" ordinaria, ma non e' nemmeno
-   un effetto dimostrato. **Se** 770101 e 771531 non erano attaccate (lo dice solo una foto del profilo del 30/09, **NON
+   in 2 giorni il contratto lo fa **~6 volte su 100** (15 coppie su 259). Non e' un esito ordinario (NULLO, p >= 0,20), ma non e' nemmeno
+   un effetto dimostrato (EFFETTO, p < 0,05). **Se** 770101 e 771531 non erano attaccate (lo dice solo una foto del profilo del 30/09, **NON
    VERIFICATA**: decide la faccina), sarebbe ~2 su 100 (EFFETTO, limite basso). La correlazione **raddoppia** quella probabilita'
    (P4: 1,0% -> 1,9%), ma per due terzi e' **DAX e Dow che perdono lo stesso giorno**, non le due short DAX fra loro: nel contratto
    le due short stoppate insieme sono 2 giorni, compatibili col caso.
 4. **Tre pezzi vanno "male" per contratto, non per sorte**: 770105 ha un contratto senza edge (PF 0,957, in campo per firma);
-   il Bulge non ha contratto e coi suoi payoff chiede ~75% di vincite (ne ha fatte 60%; il trial somiglia al suo antenato in
-   forward che perde, PF 0,69, non al backtest dichiarato che vince); la 770411
+   il Bulge non ha contratto e coi suoi payoff chiede ~75% di vincite (ne ha fatte 60%, contro il 76% del suo antenato in forward;
+   somiglia all'antenato che perde, PF 0,69, sul netto (p 0,23), non sulle vincite); la 770411
    su FTMO opera ~9 volte il contratto (0,44 contro 0,051 posizioni al giorno) e perde piu' del contratto (EFFETTO al bordo): **il suo contratto da 14 operazioni non la descrive**.
 5. **E un fatto di struttura**: alle taglie di oggi il contratto stesso delle sei sedie produce un giorno realizzato <= -4,36%
    **6 volte su 260** (una ogni ~43 giorni di borsa). Le taglie sono di Claudio: qui nessuna proposta.
