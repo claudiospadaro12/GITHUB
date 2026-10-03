@@ -35,9 +35,14 @@
 //|  10 s si controlla che default.tpl non ci abbia messo un EA       |
 //|  (se si': Alert). Il piano scrive nel Journal, una volta per      |
 //|  casella, da dove viene la perdita per lotto.                     |
+//|  v4.02: se la perdita per lotto viene dal tick value di un indice |
+//|  (non forex) in valuta diversa dal conto, il PIANO lo dice a      |
+//|  schermo: su BCM quel tick value NON e' convertito (classe 1078)  |
+//|  e il lotto esce piu' piccolo di quello dell'EA (U30USD ~-14%,    |
+//|  225JPY ~1/180). Il ramo ChartOpen e' invariato dalla v4.01.      |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
-#property version   "4.01"
+#property version   "4.02"
 #property strict
 #property indicator_chart_window
 #property indicator_buffers 0
@@ -115,6 +120,8 @@ int    gSelT = -1;              // TF scelto per il piano (indice in gTf)
 int    gHE14 = INVALID_HANDLE;  // EMA14 del solo TF scelto (filtro dell'EA)
 bool   gPlanDrawn = false;
 bool   gLotSrcLogged = false;   // fonte della perdita per lotto gia' scritta nel Journal per questa casella?
+bool   gLotTvRaw = false;       // il piano usa il tick value di un CFD in valuta diversa dal conto (classe 1078)?
+double gLotPtVal = 0.0;         // valore di 1,0 di prezzo x 1 lotto usato dal piano, in valuta conto
 
 long   gNewId[8];               // grafici appena aperti da ChartOpen da controllare (EA arrivato col template?)
 ulong  gNewMs[8];
@@ -565,6 +572,25 @@ color ColorFor(const double d)
    return C'190,190,190';
   }
 
+// Simbolo NON in modo di calcolo forex (gli indici BCM sono in modo 1 = FUTURES, sonda GSPEC
+// "TRADE_CALC_MODE;1": NON in modo CFD, quindi il filtro e' "non forex", non "CFD") con valuta di
+// profitto diversa da quella del conto. XAUUSD su BCM e' in modo FOREX (0) e il suo tick value E'
+// convertito (0,86289 per 0,01 = 86,29 EUR per dollaro; statement 85,0): escluso, giustamente.
+// Su BCM il tick value di questi simboli arriva NON convertito (InfoBroker 17/08: U30USD/NASUSD/
+// SPXUSD/200AUD 0,10 per tick 0,10, 225JPY 10 per tick 1; statement: U30USD 0,865 EUR per punto
+// per lotto, 225JPY 0,055). Classe 1078.
+bool CfdOtherCcy(const string sym)
+  {
+   ENUM_SYMBOL_CALC_MODE cm = (ENUM_SYMBOL_CALC_MODE)SymbolInfoInteger(sym, SYMBOL_TRADE_CALC_MODE);
+   if(cm == SYMBOL_CALC_MODE_FOREX || cm == SYMBOL_CALC_MODE_FOREX_NO_LEVERAGE)
+      return false;
+   string p = SymbolInfoString(sym, SYMBOL_CURRENCY_PROFIT);
+   string a = AccountInfoString(ACCOUNT_CURRENCY);
+   StringToUpper(p);
+   StringToUpper(a);
+   return (StringLen(p) > 0 && p != a);
+  }
+
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
 //| Lotti per rischiare 'riskMoney' tra ingresso e SL. Prima scelta  |
@@ -596,6 +622,11 @@ double LotForRisk(const string sym, const bool isLong, const double entry, const
       if(tv <= 0.0 || tsz <= 0.0)
          return 0.0;
       lossPerLot = MathAbs(entry - sl) / tsz * tv;
+      if(CfdOtherCcy(sym))
+        {
+         gLotTvRaw = true;              // il piano lo dice a schermo (DrawPlan)
+         gLotPtVal = tv / tsz;
+        }
      }
    if(!gLotSrcLogged)
      {
@@ -702,8 +733,8 @@ void DrawPlan(int xBox, int yTop, const int wMin)   // xBox/yTop NON const: si s
    string sym = gSym[gSelS];
    int    k   = gSelS * gNT + gSelT;
    int    dg  = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
-   string lines[10];                     // caso peggiore 9 righe (ramo dati pronti); 1 riga se non pronti
-   color  cols[10];
+   string lines[12];                     // caso peggiore 11 righe (ramo dati pronti + avviso 1078); 1 riga se non pronti
+   color  cols[12];
    int    n = 0;
 
    double e[1], a[1], e14[1];
@@ -750,6 +781,8 @@ void DrawPlan(int xBox, int yTop, const int wMin)   // xBox/yTop NON const: si s
                               InpRiskPct, bal, AccountInfoString(ACCOUNT_CURRENCY), bal * InpRiskPct / 100.0,
                               InpRiskPct / 2.0, riskEach);
       cols[n++] = C'190,190,190';
+      gLotTvRaw = false;                 // lo rimette LotForRisk se il tick value e' quello di un CFD in altra valuta
+      gLotPtVal = 0.0;
       double os[2];
       os[0] = o1;
       os[1] = o2;
@@ -774,6 +807,15 @@ void DrawPlan(int xBox, int yTop, const int wMin)   // xBox/yTop NON const: si s
                                  DoubleToString(tp, dg), InpTpRR, LotText(sym, lot, lpl),
                                  oltre ? "  [gia' oltre: NON piazzabile ora]" : "");
          cols[n++] = oltre ? C'255,140,0' : cs;
+        }
+      if(gLotTvRaw)
+        {
+         lines[n] = StringFormat("ATTENZIONE LOTTI: 1,0 di prezzo x 1 lotto = %s %s, dal TICK VALUE (un indicatore non puo' usare OrderCalcProfit).",
+                                 DoubleToString(gLotPtVal, 4), AccountInfoString(ACCOUNT_CURRENCY));
+         cols[n++] = C'255,140,0';
+         lines[n] = StringFormat("Misurato su BCM: per gli indici in %s NON e' convertito (U30USD 1.00 contro 0.865 EUR veri) -> lotti PIU' PICCOLI dell'EA.",
+                                 SymbolInfoString(sym, SYMBOL_CURRENCY_PROFIT));
+         cols[n++] = C'255,140,0';
         }
       bool   ema14No = (InpUseEma14Bias && e14Known && !e14Ok);
       string verd    = (!fasciaOk || ema14No) ? "l'EA NON li piazzerebbe"
@@ -835,7 +877,7 @@ void DrawPlan(int xBox, int yTop, const int wMin)   // xBox/yTop NON const: si s
    ObjectSetInteger(0, bg, OBJPROP_YDISTANCE, yTop);
    ObjectSetInteger(0, bg, OBJPROP_XSIZE, w);
    ObjectSetInteger(0, bg, OBJPROP_YSIZE, n * gRowH + 12);
-   for(int i = 0; i < 10; i++)
+   for(int i = 0; i < 12; i++)
      {
       string nm = PFX + "P_" + IntegerToString(i);
       if(i < n)
