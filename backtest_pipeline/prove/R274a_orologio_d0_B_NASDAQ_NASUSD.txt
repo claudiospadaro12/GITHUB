@@ -100,6 +100,10 @@
 #  tranne ore/magic/CorrSymbol, e che il binario a HEAD riproduce R199B:
 #  nessuna riga di codice cambiata dal pin 9fa84716; riverificato il
 #  03/10: ultimo commit del sorgente 58e3314b del 21/09, solo commenti).
+#  Il REFERTO di R199B porta pin 28c18463 (driver v5_INCLUDE; oggi v6):
+#  anche da 28c18463 a HEAD zero righe di codice nel sorgente dell'EA
+#  (secondo strato, 03/10). Verificati a macchina contro la riga Pass=2:
+#  97 pin, differenze = magic e InpNewsCurrencies (vuoto, non pinnato).
 #  InpAllowShort=1, InpAllowLong=1 (la cella viva e' a due lati).
 #  NON pinnato: InpNewsCurrencies (stringa vuota = default, equivalente).
 #  Un CSV che torna con InpSessionHour diverso da 14 (qui) o da 15 (R274b/d)
@@ -108,16 +112,32 @@
 # ==========================================================================
 #  3. I CANCELLI, CONGELATI PRIMA
 # ==========================================================================
+#  TOLLERANZA DI BANCO, SCRITTA ORA (secondo strato, 03/10): su NASUSD il
+#     banco ha gia' dato un residuo NON SPIEGATO fra due corse della stessa
+#     cella con magic diversi: R235, 6587,43 contro 6586,46 (0,97 EUR),
+#     PF 1,24027 / 1,24023, n e DD IDENTICI (REFERTO_13_ROUND_2026-09-23
+#     T2). Quindi "identico" qui sotto vuol dire: Trades ed Equity DD %
+#     ESATTI; Profit |diff| <= 1,00 EUR; PF e RF |diff| <= 0,0002; nel
+#     per-trade stessi deal (numero, ora, tipo, volume) e netto per riga
+#     |diff| <= 0,01. Contro-esempio: deposito, binario o pin sbagliati
+#     spostano Trades/DD o il Profit di centinaia di EUR, non di 1.
 #  G0 (solo R274a, la d0 e' la cella d'archivio): le righe IS e OOS devono
-#     riprodurre R199B Pass=2 sopra: Profit entro 0,01, Trades ESATTI, PF/RF/
-#     DD alla quinta cifra. Se NO: il round e' NON CONFRONTABILE, ci si
+#     riprodurre R199B Pass=2 sopra entro la TOLLERANZA DI BANCO. Se NO: il
+#     round e' NON CONFRONTABILE, ci si
 #     ferma (si cerca cio' che balla: binario, deposito, magic). Il magic
 #     diverso da 770260 e' l'unica differenza di input.
-#  G1 DETERMINISMO: le due gemelle di OGNI file identiche in Profit, PF, DD,
-#     Trades e per-trade riga per riga tranne il magic. Se no: file NULLO.
-#  G2 COERENZA FRA FINESTRE: per-trade di R274c (A, d0) contro la gamba IS di
-#     R274a: stessi deal e stesso netto, salvo il 26/09/2024 (l'IS di R274a
-#     parte un giorno prima); idem R274d contro la gamba IS di R274b. In piu',
+#  G1 DETERMINISMO: le due gemelle di OGNI file identiche (TOLLERANZA DI
+#     BANCO) in Profit, PF, DD, Trades e per-trade riga per riga tranne il
+#     magic. Se no: file NULLO.
+#  G2 COERENZA FRA FINESTRE: numero di deal e somma net_profit del
+#     per-trade di R274c (A, d0) contro Trades e Profit della gamba IS del
+#     CSV di R274a (dell'IS non esiste per-trade: classe 455); idem R274d
+#     contro la gamba IS di R274b. Attesi IDENTICI. Se differiscono,
+#     l'unica causa ammessa e' il 26/09/2024 (l'IS di R274a parte un
+#     giorno prima): un'operazione quel giorno sposta il saldo e quindi,
+#     a rischio 2% del saldo, TUTTI i lotti dopo; si dichiara lo scarto,
+#     il numero di deal deve differire al massimo di quelli del 26/09, e
+#     si usa il per-trade A. In piu',
 #     per OGNI file: somma net_profit e numero di deal del per-trade contro
 #     Profit e Trades della gamba OOS del suo CSV: IDENTICI.
 #  S1 SENTINELLA DELL'OROLOGIO (contro-esempio della classe 156: input
@@ -178,6 +198,11 @@
 #      il saldo si muove di +-10%) > 10% -> "la sedia come operera' d'inverno
 #      viola il muro misurato": revisione IMMEDIATA. Confronto: contratto
 #      7,31% IS / 7,86% OOS (Equity DD%, rischio 2,00, tutta la finestra).
+#      ZONA GRIGIA, scritta ORA (secondo strato, 03/10): 7,86% < DD <= 10%
+#      = "SOPRA IL CONTRATTO": va in TESTA al verdetto e a Claudio come
+#      revisione (corsia RISCHIO firmata il 18/08, per analogia). E il DD
+#      di saldo e' un PAVIMENTO dell'Equity DD (ignora il flottante), quindi
+#      un 9% di saldo non e' un 9% di equity: si scrive cosi'.
 #  E' dichiarato che il bootstrap che R246 aveva (r246_bande_attese.py) per
 #  il Nasdaq NON ESISTE: le bande sopra sono Poisson a 1 sigma, piu' larghe
 #  e piu' oneste; lo script di lettura per questa famiglia va scritto PRIMA
@@ -216,7 +241,11 @@
 #  - gli inverni 2010-2024: la finestra tick BCM indici parte il 2024.09.26.
 #    Il numero e' DUE inverni, uno per finestra, e un SOLO regime di mercato
 #    (Nasdaq al rialzo): merito SOSPESO, si legge il RISCHIO (Emendamento B);
-#  - quale lato fa la frequenza: lato corto/lungo restano in R231a;
+#  - quale lato fa la frequenza COME VERDETTO: resta a R231a. MA la regola
+#    dei due lati (25/08) si applica gia' qui a costo zero: il per-trade
+#    porta il tipo del deal, e lo script di lettura conta posizioni e
+#    netto PER LATO, per stagione e per orologio (~15-60 posizioni per
+#    casella: DESCRITTIVO, nessun verdetto di lato);
 #  - se la sedia FTMO seguira' il calendario UE all'ora legale, da verificare
 #    il 25/10 (OROLOGIO par. 6.3): la settimana 26-30/10/2026 e' [NON MISURATA].
 #  COSTO IN TEMPO MACCHINA: 4 file x 4 passate = 16 passate. Metro misurato

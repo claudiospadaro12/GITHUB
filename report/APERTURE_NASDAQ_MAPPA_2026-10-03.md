@@ -27,7 +27,8 @@ Non ho cercato sul web: il mandato di questa sessione e' sola lettura del repo; 
    contro ~0,22 d'estate** (1,3 sigma). Se fosse vero, la frequenza promessa (0,36-0,37) e' una media di due tassi e la sedia FTMO d'inverno, che
    arma alla cash, farebbe meno.
 5. **Costo**: il TF del grafico NON entra nello stop per i meccanismi a range (stop = range, calcolato su M1): 63,9x lo spread a mediana su
-   35' `[DERIVATO]`, **nessun TF sfonda il 40x**. Lo sfondano solo i motori con stop da ATR o da candela: RANGE_FADE a M5 (19,3x) e M15 (33,4x),
+   35' `[DERIVATO]` (42,6x al P95 2,70), **nessun TF sfonda il 40x**; ma sullo stop STIMATO della sedia viva (83,2) il P95 da' **30,8x, sotto il 40x**
+   (ricostruzione B 117,0: 43,3x), e lo spread FTMO `US100.cash` alle 16:30 e' `[NON MISURATO]`. Lo sfondano solo i motori con stop da ATR o da candela: RANGE_FADE a M5 (19,3x) e M15 (33,4x),
    AtrExhaustVol M5 (10,9x), ORB 5' (26,5x), SupRev H1 (28,7x). Par. 4.
 6. **Manopole mai mosse sulla cella viva** (verificato a macchina su tutti i CSV Nasdaq, par. 3): `InpSessionHour/Min`, `InpRangeMinutes`,
    `InpVolMult`, `InpVolAvgBars`, `InpBufferPoints`, `InpTP1_R`, `InpPendingExpiryMin`, `InpCloseHour/Min/AtEnd`, il TF del grafico, il lato.
@@ -241,7 +242,7 @@ Nessuna si lancia da qui: servono la riga di lancio, il cancello e la firma di C
 
 ### Misura 1 - R274: l'orologio della cella viva (retest due lati) - FILE PROVA PRONTI
 
-`backtest_pipeline/prove/R274a_orologio_d0_B_NASDAQ_NASUSD.txt` (testa, 340 righe) · `R274b_orologio_d1_B_*` · `R274c_orologio_d0_A_*` · `R274d_orologio_d1_A_*`.
+`backtest_pipeline/prove/R274a_orologio_d0_B_NASDAQ_NASUSD.txt` (testa, 369 righe dopo il secondo strato) · `R274b_orologio_d1_B_*` · `R274c_orologio_d0_A_*` · `R274d_orologio_d1_A_*`.
 **4 file x 2 celle gemelle (asse = magic, G1) x 2 finestre = 16 passate; 5-24 min (centro ~13), le A costano meno.** Magic `798201/798251 · 798211/798261 · 798202/798252 · 798212/798262`,
 vergini (zero occorrenze in repo e su tutti i rami remoti).
 
@@ -253,7 +254,7 @@ vergini (zero occorrenze in repo e su tutti i rami remoti).
   (sennò "divario non riprodotto" e nessun verdetto). PF: si scrive, **non decide** (n < 150).
 - **Soglie congelate**: **R2 frequenza** della serie "come FTMO" (d0 nei 238 giorni UE d'estate + d+1 nei 220 giorni UE d'inverno) < 0,25 pos/g = meno di due terzi del promesso 0,37 ->
   revisione di Claudio (corsia TAGLIANDO, firma 18/08); **R1 rischio** (Emendamento B, a qualunque n): DD di saldo della serie > 10% -> revisione immediata (confronto: contratto 7,31% / 7,86%).
-- **Cancelli**: G0 (R274a riproduce R199B Pass 2 alla quinta cifra, Trades esatti), G1 (gemelle identiche), G2 (A e B coerenti fra loro e col CSV), S1 sentinella dell'orologio (nessuna uscita
+- **Cancelli**: G0 (R274a riproduce R199B Pass 2: Trades e DD esatti, Profit entro 1,00 EUR, PF/RF entro 0,0002 -- tolleranza di banco scritta prima, dal residuo NASUSD di R235: 0,97 EUR), G1 (gemelle identiche, stessa tolleranza), G2 (A e B coerenti fra loro e col CSV; il 26/09/2024 puo' spostare tutti i lotti dopo, si dichiara), S1 sentinella dell'orologio (nessuna uscita
   prima di 16:05 / 15:05 ne' dopo flat+1'; uscite >= 23:00 = GIALLO da leggere per data, regola scritta ora dopo il caso Memorial Day del Dow).
 - **Contro-esempio** (nel file, par. 5): pin non arrivato -> per-trade di d+1 identico a d0 e colonna `InpSessionHour` = 14 -> NULLO; le due ipotesi producono bande disgiunte (nessuna
   sovrapposizione al 1 sigma, quindi la banda MISURA qualcosa: classe 178); se il divario d'inverno/estate non si riproduce la mia derivazione era rumore (1,3 sigma) e il registro lo scrive.
