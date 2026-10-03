@@ -152,6 +152,7 @@
 #      cella): la casella 3 del certificato su questo simbolo resta [NON MISURATO].
 #    - TICK: 166.509.474 tick totali dal 2024.09.26 al 30/08/2026 (REFERTO_MISURA_TICK_NASUSD.txt),
 #      "TICK REALI PARZIALI": prima del 2024.09.26 non esiste storico. NASUSD ha 2,46 volte i tick del Dow.
+#    - DETERMINISMO NASUSD: R235 ha misurato un residuo fra gemelli (0,97 EUR, PF +-0,00004); G1 di a lo prova solo sul Dow.
 #
 #  COSTO IN TEMPO MACCHINA (PC di backtest, mai il VPS), [DERIVATO]: R112 = 16 passate in
 #  0,1 ore (arrotondato) = 11-34 s/passata sul Dow (67,6 M tick). Se il tempo e' ~
