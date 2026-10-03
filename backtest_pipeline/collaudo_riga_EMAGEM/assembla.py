@@ -122,7 +122,7 @@ for fase, (p_, pf, dd_, n_) in ATTESO.items():
     for x in (p_, pf, dd_, n_):
         assert x in src_, "numero atteso %s (%s) non scritto nel sorgente della riga" % (x, fase)
 # magic vergini: parola intera, al pin e su ogni ramo remoto, fuori dai file di questa riga e dai dossier che li hanno scelti
-MIEI = re.compile(r"^(backtest_pipeline/collaudo_riga_EMAGEM/|backtest_pipeline/righe/RIGA_(ROUND|LANCIA)_EMAGEM\.txt$|backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO\.md$)")
+MIEI = re.compile(r"^(backtest_pipeline/collaudo_riga_EMAGEM/|backtest_pipeline/righe/RIGA_(ROUND|LANCIA)_EMAGEM\.txt$|backtest_pipeline/leggi_emagem\.py$|backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO\.md$)")
 DOSSIER = ("report/EMA200_GEMELLI_STATO_2026-10-03.md", "report/PIANO_SEDIE_VIA_PIU_CORTA_2026-10-03.md")
 rami = [x.strip() for x in git("branch", "-r").stdout.decode().splitlines() if "->" not in x]
 for mg, propria in (("766801", PROVE["A"]), ("766802", PROVE["A"]), ("766811", PROVE["B"]), ("766821", PROVE["C"])):
