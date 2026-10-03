@@ -1,0 +1,118 @@
+==============================================================================================================
+TRIAL 1514806751 -- sfortuna o EA (criteri: report/TRIAL_SFORTUNA_O_EA_2026-10-03.md sez. 0, commit 15d9bc23)
+==============================================================================================================
+CE4 parser: posizioni 13 (attese 13) | netto -8811.59 (atteso -8811.59) | commissioni -204.04 (attese -204.04) | saldo 151188.41 (atteso 151188.41)
+   2026.10.01 06:00:00 BULGE_A  GBPNZD     sell vol   2.83 rischio   1282.4 EUR (0.80% del saldo) netto    423.79 R +0.330 uscita tp
+   2026.10.01 06:00:00 BULGE_A  NZDCHF     buy  vol   7.23 rischio   1326.3 EUR (0.83% del saldo) netto  -1389.09 R -1.047 uscita sl
+   2026.10.01 09:59:01 770411   GER40.cash sell vol  47.78 rischio   3237.1 EUR (2.02% del saldo) netto  -3292.52 R -1.017 uscita sl
+   2026.10.01 10:00:00 BULGE_B  GBPNZD     sell vol   4.49 rischio   1595.9 EUR (1.00% del saldo) netto    990.87 R +0.621 uscita tp
+   2026.10.01 11:13:13 770105   GER40.cash sell vol  12.08 rischio   3105.5 EUR (2.00% del saldo) netto  -3110.48 R -1.002 uscita sl
+   2026.10.01 12:00:00 BULGE_B  AUDUSD     buy  vol   7.99 rischio   1545.6 EUR (1.00% del saldo) netto    561.79 R +0.363 uscita tp
+   2026.10.02 10:00:00 BULGE_C  GBPNZD     buy  vol   2.83 rischio   1231.0 EUR (0.80% del saldo) netto     22.48 R +0.018 uscita tp
+   2026.10.02 13:00:00 BULGE_C  EURNZD     buy  vol   3.23 rischio   1252.5 EUR (0.81% del saldo) netto  -1204.96 R -0.962 uscita sl
+   2026.10.02 15:00:00 BULGE_C  GBPAUD     buy  vol   4.30 rischio   1255.1 EUR (0.81% del saldo) netto  -1177.70 R -0.938 uscita sl
+   2026.10.02 16:00:00 BULGE_C  GBPNZD     buy  vol   2.67 rischio   1195.1 EUR (0.79% del saldo) netto    373.27 R +0.312 uscita tp
+   2026.10.02 16:00:00 BULGE_C  NZDJPY     buy  vol   5.53 rischio   1218.9 EUR (0.80% del saldo) netto    115.00 R +0.094 uscita tp
+   2026.10.02 16:46:22 770621   US30.cash  buy  vol   6.43 rischio    473.3 EUR (0.31% del saldo) netto   -537.86 R -1.136 uscita sl
+   2026.10.02 20:00:00 BULGE_C  EURGBP     buy  vol   4.91 rischio   1227.7 EUR (0.81% del saldo) netto   -586.18 R -0.477 uscita mercato_senza_commento
+CE4 rischio: 770411 3237 (banda 3199-3237) | 770105 3106 (~3106)
+giorni (realizzato, % di 160.000): {'2026.10.01': -3.635, '2026.10.02': -1.872}
+
+--- CONTRATTI (ricalcolati dal per-trade) ---
+  770411: n 14 | WR 0.5714 | R medio vinte +1.401 perse -0.853 payoff 1.641 | stop-rate 0.357 | R medio +0.435 | R min -1.050 | PF 2.160 | mediana R +0.759
+  770105: n 181 | WR 0.7348 | R medio vinte +0.318 perse -0.822 payoff 0.387 | stop-rate 0.227 | R medio +0.016 | R min -1.004 | PF 1.065 | mediana R +0.084
+  770621: n 119 | WR 0.4034 | R medio vinte +1.801 perse -0.714 payoff 2.521 | stop-rate 0.353 | R medio +0.300 | R min -1.405 | PF 1.674 | mediana R -0.285
+
+--- PROVE PER SEDIA (trial 01-02/10) ---
+  770411: n=1 vinte=0 sommaR=-1.017 | p_win=0.4286 | p_net(MC)=0.1426 +-0.0015 | p_net(esatto)=0.1429 | banda5-95 contratto [0.0000, 0.2943] | p_min binom 0.4286 netto 0.0714 | VERDETTO: NON ANCORA MISURATO (senza potenza: p_min 0.429 >= 0,05)
+      ROBUSTO (stop=-1): sommaR -1.000 p_net 0.3571 banda [0.1437, 0.5733] -> NON ANCORA MISURATO (senza potenza: p_min 0.429 >= 0,05)
+  770105: n=1 vinte=0 sommaR=-1.002 | p_win=0.2652 | p_net(MC)=0.0057 +-0.0003 | p_net(esatto)=0.0055 | banda5-95 contratto [0.0000, 0.0160] | p_min binom 0.2652 netto 0.0000 | VERDETTO: NON ANCORA MISURATO (senza potenza: p_min 0.265 >= 0,05)
+      ROBUSTO (stop=-1): sommaR -1.000 p_net 0.2265 banda [0.1770, 0.2807] -> NON ANCORA MISURATO (senza potenza: p_min 0.265 >= 0,05)
+  770621: n=1 vinte=0 sommaR=-1.136 | p_win=0.5966 | p_net(MC)=0.0250 +-0.0007 | p_net(esatto)=0.0252 | banda5-95 contratto [0.0043, 0.0512] | p_min binom 0.5966 netto 0.0000 | VERDETTO: NON ANCORA MISURATO (senza potenza: p_min 0.597 >= 0,05)
+      ROBUSTO (stop=-1): sommaR -1.000 p_net 0.3529 banda [0.2818, 0.4313] -> NON ANCORA MISURATO (senza potenza: p_min 0.597 >= 0,05)
+
+--- ESTENSIONE SECONDARIA: challenge 541452707 (22-30/09) + trial ---
+  770411: challenge R = [-1.029, 0.648, -1.014]
+  770411 challenge+trial: n=4 vinte=1 sommaR=-2.413 | p_win=0.2137 | p_net(MC)=0.0399 +-0.0009 | p_net(esatto)=0.0396 | banda5-95 contratto [0.0020, 0.1752] | p_min binom 0.0337 netto 0.0000 | VERDETTO: EFFETTO
+      ROBUSTO (stop=-1): sommaR -2.352 p_net 0.0423 banda [0.0022, 0.1785] -> EFFETTO
+  770105: challenge R = [0.055]
+  770105 challenge+trial: n=2 vinte=1 sommaR=-0.947 | p_win=0.4601 | p_net(MC)=0.0993 +-0.0013 | p_net(esatto)=0.1003 | banda5-95 contratto [0.0673, 0.1368] | p_min binom 0.0703 netto 0.0000 | VERDETTO: NON ANCORA MISURATO (senza potenza: p_min 0.070 >= 0,05)
+      ROBUSTO (stop=-1): sommaR -0.945 p_net 0.1489 banda [0.1055, 0.1963] -> NON ANCORA MISURATO (senza potenza: p_min 0.070 >= 0,05)
+
+  frequenza 770411: trial 1 posizione in 2 g (attese 0.102, P(>=1)=0.0970); FTMO 4 posizioni in 9 g (attese 0.459, P(>=4)=0.001285)
+
+--- BULGE (contratto [NON MISURATO]) ---
+   BULGE_A GBPNZD R +0.330 taglia misurata 0.80% uscita tp
+   BULGE_A NZDCHF R -1.047 taglia misurata 0.83% uscita sl
+   BULGE_B GBPNZD R +0.621 taglia misurata 1.00% uscita tp
+   BULGE_B AUDUSD R +0.363 taglia misurata 1.00% uscita tp
+   BULGE_C GBPNZD R +0.018 taglia misurata 0.80% uscita tp
+   BULGE_C EURNZD R -0.962 taglia misurata 0.81% uscita sl
+   BULGE_C GBPAUD R -0.938 taglia misurata 0.81% uscita sl
+   BULGE_C GBPNZD R +0.312 taglia misurata 0.79% uscita tp
+   BULGE_C NZDJPY R +0.094 taglia misurata 0.80% uscita tp
+   BULGE_C EURGBP R -0.477 taglia misurata 0.81% uscita mercato_senza_commento
+  osservato: n 10 vinte 6 sommaR -1.685 netto -1870.73 | R medio vinte +0.290 perse -0.856 -> WR di pareggio coi payoff del trial 0.747
+  TP/SL all'ingresso (ordine): [0.395, 0.169, 0.733, 0.436, 0.058, 0.159, 0.432, 0.326, 0.125, 0.37] -> WR di pareggio all'ingresso (senza costi) media 0.773
+  Rif-1 (backtest dichiarato di Claudio, modello a 2 punti, NON contratto):
+  Bulge sotto Rif-1: n=10 vinte=6 sommaR=-1.685 | p_win=0.1170 | p_net(MC)=0.0311 +-0.0008 | p_net(esatto)=n/d | banda5-95 contratto [0.0255, 0.0380] | p_min binom 0.0000 netto 0.0000 | VERDETTO: NON ANCORA MISURATO (contratto assente)
+      ROBUSTO (stop=-1): sommaR -1.738 p_net 0.0311 banda [0.0255, 0.0377] -> NON ANCORA MISURATO (contratto assente)
+  Rif-2 antenato solo VIOLA (trades_auto.csv): n 50 (atteso 50) PF 0.6949 (atteso 0,6949) netto -438.04 (atteso -438,04) | WR 0.7600 | R = netto / mediana degli stop (143.65 EUR) [DERIVATO] | R medio vinte +0.183
+  Bulge sotto Rif-2: n=10 vinte=6 sommaR=-1.685 | p_win=0.2012 | p_net(MC)=0.2248 +-0.0018 | p_net(esatto)=0.2265 | banda5-95 contratto [0.0503, 0.5102] | p_min binom 0.0000 netto 0.0000 | VERDETTO: NON ANCORA MISURATO (contratto assente)
+      ROBUSTO (stop=-1): sommaR -1.738 p_net 0.2371 banda [0.0573, 0.4960] -> NON ANCORA MISURATO (contratto assente)
+
+--- CONTRO-ESEMPI ---
+  CE1 10 stop pieni 770411: p_net 0.00002 -> EFFETTO, ok
+  CE2 3 posizioni alla mediana (+0.759) 770411: p_net 0.6556 -> NULLO, ok
+
+--- PORTAFOGLIO P6 (calendario 2025-07-01 -> 2026-06-29, giorni lavorativi) ---
+  osservato P6 nel trial (2 g): -4.338% | realizzato giorno 1 tutto il conto -3.635%
+   770411: giorni con posizioni 14 | peggior giorno -2.100% | somma 12.17%
+   770105: giorni con posizioni 181 | peggior giorno -2.008% | somma 5.70%
+   770621: giorni con posizioni 110 | peggior giorno -0.422% | somma 9.64%
+   770101: giorni con posizioni 180 | peggior giorno -2.156% | somma 33.65%
+   770202: giorni con posizioni 90 | peggior giorno -2.045% | somma 11.56%
+   771531: giorni con posizioni 93 | peggior giorno -3.980% | somma 37.66%
+  giorni 260 | giorni attivi 253 | peggiori 6: [np.float64(-8.26), np.float64(-6.109), np.float64(-5.776), np.float64(-5.742), np.float64(-5.698), np.float64(-5.017)]
+  peggiori 6 coppie consecutive: [np.float64(-8.941), np.float64(-8.04), np.float64(-8.032), np.float64(-7.305), np.float64(-6.533), np.float64(-6.442)] | 5o percentile coppie -4.510%
+  CALENDARIO: {'S1_436': 0.02308, 'S1_real': 0.04615, 'S2': 0.02317, 'S3': 0.04633, 'S4': 0.05792, 'n_g': 260, 'n_2': 259, 'c_S1_436': 6, 'c_S1_real': 12, 'c_S2': 6, 'c_S3': 12, 'c_S4': 15}
+  BOOTSTRAP 2 giorni i.i.d. (200000, seme 20261003): S2 0.03266 | S3 0.04601 | S4 0.05937
+  PERMUTATO (sedie indipendenti, 2000 perm.): {'S1_436': 0.01021, 'S1_real': 0.04123, 'S2': 0.02086, 'S3': 0.02031, 'S4': 0.04257}
+  CONTRIBUTO CORRELAZIONE (cal - indip): {'S1_436': 0.01286, 'S1_real': 0.00493, 'S2': 0.00231, 'S3': 0.02602, 'S4': 0.01534}
+  DAX: frequenza giornaliera di stop {'770101': 0.15, '770105': 0.1577, '770411': 0.0192} | giorni con >=2 sedie DAX in stop: 14 su 260 | atteso se indipendenti 7.452 | lift 1.88
+  770411 e 770105: giorni con posizioni di entrambe 11, con stop di entrambe 2
+  CP95 S1 <=-4,36%: 6/260 = 0.0231 [0.0085, 0.0495]
+  CP95 S1 <=realizzato g1: 12/260 = 0.0462 [0.0241, 0.0792]
+  CP95 S2: 6/259 = 0.0232 [0.0085, 0.0497]
+  CP95 S3: 12/259 = 0.0463 [0.0242, 0.0795]
+  CP95 S4: 15/259 = 0.0579 [0.0328, 0.0937]
+  BLOCCHI PER INDICE (stesso indice allineato, indici diversi indipendenti): {'S1_436': 0.01693, 'S1_real': 0.05823, 'S2': 0.02961, 'S3': 0.03358, 'S4': 0.05504}
+  -> contributo STESSO INDICE (blocchi - indip): {'S1_436': 0.00671, 'S1_real': 0.017, 'S2': 0.00875, 'S3': 0.01326, 'S4': 0.01247} | contributo FRA INDICI (cal - blocchi): {'S1_436': 0.00615, 'S1_real': -0.01208, 'S2': -0.00645, 'S3': 0.01275, 'S4': 0.00287}
+  PRESENZA: P4 senza 770101 e 771531: {'S1_436': 0.00385, 'S1_real': 0.01923, 'S2': 0.01158, 'S3': 0.00772, 'S4': 0.01931, 'n_g': 260, 'n_2': 259, 'c_S1_436': 1, 'c_S1_real': 5, 'c_S2': 3, 'c_S3': 2, 'c_S4': 5}
+  PRESENZA: P3 solo le tre che hanno operato: {'S1_436': 0.00385, 'S1_real': 0.00769, 'S2': 0.00386, 'S3': 0.00772, 'S4': 0.00772, 'n_g': 260, 'n_2': 259, 'c_S1_436': 1, 'c_S1_real': 2, 'c_S2': 1, 'c_S3': 2, 'c_S4': 2}
+
+--- P4 = 770105, 770202, 770411, 770621 (presenza dal profilo salvato; 770260 e 770511 senza per-trade) ---
+  P4 CP95 S1 <=-4,36%: 1/260 = 0.0038 [0.0001, 0.0212]
+  P4 CP95 S1 <=realizzato g1: 5/260 = 0.0192 [0.0063, 0.0443]
+  P4 CP95 S2: 3/259 = 0.0116 [0.0024, 0.0335]
+  P4 CP95 S3: 2/259 = 0.0077 [0.0009, 0.0276]
+  P4 CP95 S4: 5/259 = 0.0193 [0.0063, 0.0445]
+  P4 peggiori 6 giorni [np.float64(-6.348), np.float64(-4.001), np.float64(-3.983), np.float64(-3.884), np.float64(-3.703), np.float64(-3.595)] | peggiori 6 coppie [np.float64(-8.079), np.float64(-6.029), np.float64(-5.758), np.float64(-5.449), np.float64(-4.59), np.float64(-4.013)] | 5o percentile coppie -3.100%
+  P4 BOOTSTRAP i.i.d.: S2 0.01158 | S3 0.00782 | S4 0.01702
+  P4 PERMUTATO: {'S1_436': 0.00043, 'S1_real': 0.01389, 'S2': 0.00473, 'S3': 0.00086, 'S4': 0.00969} | CONTRIBUTO CORRELAZIONE: {'S1_436': 0.00342, 'S1_real': 0.00534, 'S2': 0.00686, 'S3': 0.00686, 'S4': 0.00961}
+  P4 + 2 SEDIE-OMBRA per 770260/770511 (serie 770202 permutata, indipendente; PROXY [DERIVATO], non contratto): {'S1_436': 0.00917, 'S1_real': 0.03891, 'S2': 0.02079, 'S3': 0.01831, 'S4': 0.04205}
+  SENS. (a) fattori stop->-1,0: {'770411': 0.9854, '770105': 1.0315, '770621': 0.9907, '770101': 1.002, '770202': 1.0012, '771531': 1.0092}
+  SENS. (a) CALENDARIO scalato: {'S1_436': 0.02308, 'S1_real': 0.05, 'S2': 0.02317, 'S3': 0.04633, 'S4': 0.05792}
+  SENS. (b) P6 Guardian approssimato (dopo -3,5% realizzato nel giorno nessuna posizione che chiude dopo; per eccesso): posizioni tolte 36
+  SENS. (b) P6 CALENDARIO col Guardian: {'S1_436': 0.0, 'S1_real': 0.07308, 'S2': 0.01544, 'S3': 0.0, 'S4': 0.05019, 'n_g': 260, 'n_2': 259, 'c_S1_436': 0, 'c_S1_real': 19, 'c_S2': 4, 'c_S3': 0, 'c_S4': 13}
+  SENS. (b) P6 peggiori 6 giorni col Guardian: [np.float64(-4.205), np.float64(-4.124), np.float64(-4.0), np.float64(-3.98), np.float64(-3.973), np.float64(-3.962)]
+  SENS. (b) P4 Guardian approssimato (dopo -3,5% realizzato nel giorno nessuna posizione che chiude dopo; per eccesso): posizioni tolte 4
+  SENS. (b) P4 CALENDARIO col Guardian: {'S1_436': 0.0, 'S1_real': 0.02308, 'S2': 0.01158, 'S3': 0.0, 'S4': 0.01544, 'n_g': 260, 'n_2': 259, 'c_S1_436': 0, 'c_S1_real': 6, 'c_S2': 3, 'c_S3': 0, 'c_S4': 4}
+  SENS. (b) P4 peggiori 6 giorni col Guardian: [np.float64(-4.063), np.float64(-4.001), np.float64(-3.983), np.float64(-3.946), np.float64(-3.884), np.float64(-3.703)]
+
+--- CE3 (la correlazione si vede) ---
+  gemelle sincrone (770411 x2) P(g<=-3,5%): calendario 0.01923 permutato 0.00036 contributo +0.01887
+  coppia 770411+770202 (gia' indip.) : calendario 0.00385 permutato 0.00152 contributo +0.00233
+
+--- CE5 --- 5o percentile delle coppie consecutive P6: -4.510% (sotto questa perdita in 2 g, S4 < 0,05)
+  osservato P6 -4.338% -> quantile empirico 0.05792
