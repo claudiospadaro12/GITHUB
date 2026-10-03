@@ -30,19 +30,20 @@
 //|  NON apre, NON modifica, NON chiude ordini. Non e' un EA.        |
 //|  Unico effetto sul terminale: SymbolSelect() aggiunge al Market  |
 //|  Watch i simboli della lista (serve per avere i prezzi).         |
-//|  Click: se sul grafico gira un EA il grafico NON cambia simbolo, |
-//|  si apre un grafico nuovo (ChartOpen) del simbolo cliccato; per  |
-//|  10 s si controlla che default.tpl non ci abbia messo un EA       |
-//|  (se si': Alert). Il piano scrive nel Journal, una volta per      |
-//|  casella, da dove viene la perdita per lotto.                     |
+//|  Click sul simbolo: se sul grafico gira un EA NON succede niente  |
+//|  (il grafico non cambia simbolo e NON se ne apre un altro: un     |
+//|  grafico nuovo nasce da default.tpl e potrebbe accendere un EA);  |
+//|  il Journal dice di aprire il simbolo A MANO (v4.03).             |
+//|  Il piano scrive nel Journal, una volta per casella, da dove      |
+//|  viene la perdita per lotto.                                      |
 //|  v4.02: se la perdita per lotto viene dal tick value di un indice |
 //|  (non forex) in valuta diversa dal conto, il PIANO lo dice a      |
 //|  schermo: su BCM quel tick value NON e' convertito (classe 1078)  |
 //|  e il lotto esce piu' piccolo di quello dell'EA (U30USD ~-14%,    |
-//|  225JPY ~1/180). Il ramo ChartOpen e' invariato dalla v4.01.      |
+//|  225JPY ~1/180).                                                  |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
-#property version   "4.02"
+#property version   "4.03"
 #property strict
 #property indicator_chart_window
 #property indicator_buffers 0
@@ -122,10 +123,6 @@ bool   gPlanDrawn = false;
 bool   gLotSrcLogged = false;   // fonte della perdita per lotto gia' scritta nel Journal per questa casella?
 bool   gLotTvRaw = false;       // il piano usa il tick value di un CFD in valuta diversa dal conto (classe 1078)?
 double gLotPtVal = 0.0;         // valore di 1,0 di prezzo x 1 lotto usato dal piano, in valuta conto
-
-long   gNewId[8];               // grafici appena aperti da ChartOpen da controllare (EA arrivato col template?)
-ulong  gNewMs[8];
-int    gNewN = 0;
 
 //+------------------------------------------------------------------+
 void Lbl(const string name, const int x, const int y, const string txt, const color c)
@@ -263,7 +260,6 @@ int OnInit()
    gSelT      = -1;
    gPlanDrawn = false;
    gLotSrcLogged = false;
-   gNewN      = 0;
 
    ObjectsDeleteAll(0, PFX);
    Refresh();
@@ -303,68 +299,6 @@ int OnCalculate(const int rates_total, const int prev_calculated, const int begi
 void OnTimer()
   {
    Refresh();
-   CheckNewCharts();
-  }
-
-//+------------------------------------------------------------------+
-//| Grafico aperto da ChartOpen (clic sul simbolo con un EA sul       |
-//| grafico): il terminale ci applica default.tpl, e se quel template |
-//| contiene un EA il grafico nuovo nasce con un EA ACCESO. Il .tpl   |
-//| sta fuori dalla sandbox e si applica in modo asincrono: si legge  |
-//| CHART_EXPERT_NAME del grafico nuovo per 10 s e si avvisa con un   |
-//| Alert (classe 951, stessa correzione di ABTG_Confluenza_Dashboard)|
-//+------------------------------------------------------------------+
-void WatchNewChart(const long id)
-  {
-   if(gNewN >= 8)
-     {
-      for(int i = 1; i < 8; i++)
-        {
-         gNewId[i - 1] = gNewId[i];
-         gNewMs[i - 1] = gNewMs[i];
-        }
-      gNewN = 7;
-     }
-   gNewId[gNewN] = id;
-   gNewMs[gNewN] = GetTickCount64();
-   gNewN++;
-  }
-
-void CheckNewCharts()
-  {
-   if(gNewN <= 0)
-      return;
-   ulong now = GetTickCount64();
-   int keep = 0;
-   for(int i = 0; i < gNewN; i++)
-     {
-      long id = gNewId[i];
-      bool drop = false;
-      string sym = ChartSymbol(id);
-      if(StringLen(sym) == 0)
-         drop = true;                                   // grafico gia' chiuso
-      else
-        {
-         string ea = ChartGetString(id, CHART_EXPERT_NAME);
-         if(StringLen(ea) > 0)
-           {
-            Alert("ABTG_EMA200_Dashboard: ATTENZIONE, il grafico ", sym, " ",
-                  EnumToString(ChartPeriod(id)), " appena aperto dal click ha un EA ACCESO: '", ea,
-                  "' (arriva da default.tpl). Se non lo volevi, toglilo SUBITO.");
-            drop = true;
-           }
-         else
-            if(now - gNewMs[i] > 10000)
-               drop = true;                             // 10 s senza EA: a posto
-        }
-      if(!drop)
-        {
-         gNewId[keep] = id;
-         gNewMs[keep] = gNewMs[i];
-         keep++;
-        }
-     }
-   gNewN = keep;
   }
 
 //+------------------------------------------------------------------+
@@ -388,14 +322,11 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
       return;
    // Se su QUESTO grafico gira un EA, cambiargli simbolo lo reinizializzerebbe su un
    // altro strumento (una sedia che passa a operare su un altro cross). In quel caso
-   // il grafico NON si tocca: si apre un grafico nuovo del simbolo cliccato.
+   // NON si fa niente: ne' si cambia il grafico, ne' se ne apre uno nuovo (un grafico
+   // nuovo nasce da default.tpl e se il template contiene un EA lo accende: classe 951).
    if(StringLen(ChartGetString(0, CHART_EXPERT_NAME)) > 0)
      {
-      long nid = ChartOpen(sym, _Period);
-      if(nid == 0)
-         Print("ABTG_EMA200_Dashboard: EA sul grafico, non cambio simbolo; ChartOpen fallito per ", sym);
-      else
-         WatchNewChart(nid);   // il grafico nuovo nasce da default.tpl: c'e' un EA dentro? (classe 951)
+      Print("ABTG_EMA200_Dashboard: su questo grafico gira un EA: non cambio simbolo e non apro altri grafici. Apri ", sym, " a mano su un grafico vuoto.");
       return;
      }
    ChartSetSymbolPeriod(0, sym, _Period);
