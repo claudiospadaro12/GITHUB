@@ -1,0 +1,180 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  EMAGEM2_a -- L'ANCORA. U30USD H1 a DUE LATI, la cella della sedia 771531, TICK REALI.
+#  Scritto il 03/10/2026. Soglie di merito congelate PRIMA dei numeri (quelle di EMAGEM_a/b/c);
+#  la TOLLERANZA DI BANCO qui sotto e' scritta DOPO il cancello di a del 03/10, PRIMA di ogni cella nuova.
+# ==========================================================================
+#
+#  PERCHE' ESISTE EMAGEM2, e che cosa cambia rispetto a EMAGEM (03/10/2026, scelta di Claudio:
+#  "la strada rigorosa")
+#    Il round EMAGEM delle 20:04 ha dato CANCELLO INCROCIATO FAIL al centesimo: OOS gemella 766802
+#    Profit 23321,46 contro 23321,47 (Expected Payoff 45,10921 contro 45,10923, Sharpe 8,16764
+#    contro 8,16765; Trades, PF 1,52365 e DD 7,8323 esatti; IS identico). Per i criteri congelati
+#    di b e c i loro numeri NON si leggono. Per leggerli non si cambia il verdetto di quel round:
+#    si rifa' il round con file NUOVI (magic nuovi, mai usati) e con una tolleranza di banco
+#    DICHIARATA PRIMA dei numeri nuovi. Tre cose cambiano, e solo queste:
+#      1. MAGIC: 766901/766902 (a), 766911 (b), 766921 (c). Blocco 7669xx VERGINE: zero
+#         occorrenze a parola intera in tutti i rami (git grep su refs/heads e refs/remotes), nella
+#         storia (git log --all -G) e nell'albero di lavoro, verificato il 03/10/2026. I 7668xx sono
+#         bruciati (round del 03/10). Con magic nuovi nessuna passata puo' essere ripescata dalla
+#         cache del tester del round precedente: e' un round NUOVO, non una replica.
+#      2. T1 e G1: la TOLLERANZA DI BANCO qui sotto, al posto di "al centesimo, una differenza
+#         qualsiasi = NULLO". E' l'unico criterio che cambia, e cambia in questo file PRIMA di
+#         qualunque numero nuovo.
+#      3. Le etichette del round (EMAGEM2a, EMAGEM2b, EMAGEM2c) nella riga di lancio.
+#    NON cambiano: le righe ATTIVE (pin, celle, asse, due lati, rischio, finestra, banco) sono
+#    quelle di EMAGEM_a/b/c tranne il magic (si dimostra con diff dei contenuti non-commento), ne'
+#    le attese, T2-T7, BUCHI e soglie di merito di b e c (ritocchi di sola dicitura: vedi sotto).
+#
+#  TOLLERANZA DI BANCO (T1 e G1) -- SCRITTA ORA, DICHIARO QUANDO
+#    Scritta il 03/10/2026 DOPO aver visto il cancello di a del round delle 20:04 (archivio
+#    risultati_archivio/ROUND_EMAGEM_20261003_2004, commit 71936294) e PRIMA di qualunque cella
+#    NUOVA di b e c: questo round non e' ancora girato. Nasce SOLO da due fonti, la prima sulla
+#    cella di a e la seconda su un altro EA, e NON dalle celle di b e c del 03/10:
+#      (1) il cancello del 03/10, a, gamba OOS, due gemelle 766801/766802 (RIEPILOGO): Profit
+#          23321,47 contro 23321,46 (0,01 EUR, relativo 4,3e-7); Expected Payoff 45,10923 contro
+#          45,10921 (2e-5); Sharpe 8,16765 contro 8,16764 (1e-5, relativo 1,2e-6); Trades, PF
+#          1,52365, Recovery Factor e Equity DD % ESATTI; la gamba IS identica su 7 colonne. Una
+#          gemella ha riprodotto R110/R112 al centesimo, l'altra e' a 0,01 EUR.
+#      (2) R235 (REFERTO_13_ROUND_2026-09-23, T2; ABTG_IntradayMomentum su NASUSD, OOS: la stessa
+#          cella in due corse con magic diversi; e' un ALTRO EA, stesso banco e stesso simbolo di
+#          c, NON misurato su ABTG_EMA200): Profit 6587,43 contro 6586,46 (0,97 EUR, relativo
+#          1,5e-4), PF 1,24027 contro 1,24023 (4e-5), Trades e DD IDENTICI. Il residuo e' NON
+#          SPIEGATO (cosi' sta agli atti). E' la base della tolleranza che ha gia' passato il
+#          cancello in prove/R274a_orologio_d0_B_NASDAQ_NASUSD.txt sez. 3.
+#    LA REGOLA. Profit 1,00 EUR e PF/RF 0,0002 sono quelli di R274a (gia' passati dal cancello);
+#    Expected Payoff e Sharpe sono DERIVATI dal Profit; ogni colonna porta qui sotto la sua
+#    derivazione e il suo margine sul numero misurato. Il confronto e' fra due numeri della stessa
+#    cella: T1 = ogni gemella contro il numero noto di R110/R112; G1 = le due gemelle fra loro. In
+#    Decimal, il bordo e' DENTRO (<=):
+#      Trades                ESATTO (intero).
+#      Equity DD %           ESATTO (4 decimali). E' PIU' severo del Profit (1,00 EUR sono 0,0010 di
+#                            DD su 100.000): se un FAIL viene SOLO dal DD, e' un FAIL, non si salva.
+#      Profit                |diff| <= 1,00 EUR. Il residuo R235 (0,97) ci sta, con 0,03 di margine.
+#      Profit Factor         |diff| <= 0,0002. Con 1,00 EUR spostati su un deal, sulla cella di a il PF
+#                            si muove al massimo di 0,000097 (IS) e 0,000057 (OOS) [DERIVATO da PF
+#                            e Profit: perdita lorda 22.802 e 44.536 EUR]; R235 ha misurato 0,00004.
+#      Recovery Factor       |diff| <= 0,0002. 1,00 EUR sul massimo DD in EUR della cella di a (5.819 IS,
+#                            9.193 OOS) muove il RF di 0,000172 e 0,000109 [DERIVATO]: il margine e' piu'
+#                            stretto (1,16 volte) ed e' dichiarato: se il RF fosse l'unica colonna a
+#                            sforare, e' un FAIL.
+#      Expected Payoff       |diff| x Trades <= 1,00 (EP = Profit / Trades: stessa soglia del Profit
+#                            scritta per trade: 0,0042 IS, 0,0019 OOS). Misurato il 03/10: 2e-5.
+#      Sharpe Ratio          |diff| x |Profit| <= |Sharpe| x 1,00 (relativo = 1,00 EUR / Profit: 2,2e-4
+#                            IS, 4,3e-5 OOS, cioe' +-0,0008 e +-0,00035) [DERIVATO sotto l'ipotesi che lo
+#                            Sharpe di MT5 sia media/deviazione dei risultati per operazione: e' una
+#                            IPOTESI, NON MISURATA; l'unico scarto misurato sullo Sharpe e' 1e-5].
+#    COSA NON E': non e' tarata sullo scarto visto: 0,01 EUR passerebbe con una soglia 100 volte piu'
+#    stretta. E' quella di R274a, gia' passata dal cancello, estesa alle altre colonne con la
+#    derivazione scritta qui sopra; il margine sul numero misurato e' dichiarato colonna per colonna.
+#    Contro-esempio che deve ROMPERLA: un deposito sbagliato (10000 invece di 100000: il lotto si
+#    tronca), un binario o un pin diversi spostano il Profit di CENTINAIA di EUR e di norma i Trades o
+#    il DD, non di 1 EUR. 1,01 EUR sul Profit, un deal in piu' o in meno, o 0,0001 di DD = FAIL.
+#    UN LIMITE DICHIARATO: una tolleranza che accetta 1,00 EUR non distingue un residuo di banco da un
+#    errore vero di meno di 1,00 EUR su una cella da 4.585 o 23.321. Non importa: sotto quel valore
+#    nessuna soglia di merito di b e c si muove (sono PF, DD, n a 2-4 decimali, vedi T2-T7).
+#    CHI HA GIA' VISTO CHE COSA, onesto: il RIEPILOGO_ROUND_EMAGEM.txt del 03/10 stampava le celle IS
+#    e OOS di b e c ANCHE col cancello FAIL (difetto di quella riga, corretto qui: la riga EMAGEM2 non
+#    stampa b e c se il cancello non e' PASS). Chi ha scritto questo file ha letto quel RIEPILOGO e
+#    dunque HA VISTO i numeri di b e c del 03/10, NON dai CSV (mai aperti). Quei numeri non hanno
+#    mosso nessuna soglia: ATTESA, T2-T7 e BUCHI di b e c sono quelli scritti il 03/10 prima di
+#    qualunque numero b/c; i soli ritocchi di dicitura rispetto a EMAGEM_b/c si vedono con diff e
+#    sono tre: il testo di T1 (la tolleranza), i rimandi EMAGEM_a -> EMAGEM2_a, e in c due righe
+#    sul determinismo NASUSD nei BUCHI. La tolleranza qui sopra nasce dalle sole fonti (1) e (2).
+#    Il "prima dei numeri" vale quindi per i CRITERI, NON piu' per chi li legge: lo si dichiara,
+#    e la protezione che resta e' che nessun criterio di merito e' cambiato.
+#
+#  A CHE COSA SERVE, ed e' una cosa sola: il CANCELLO CROCIATO (T1) dei due file fratelli
+#  EMAGEM2_b (D30EUR) ed EMAGEM2_c (NASUSD). Non misura niente di nuovo: se questo file non
+#  riproduce DENTRO LA TOLLERANZA DI BANCO un numero GIA' NOTO, il banco non e' quello che crediamo e NESSUN
+#  numero di b e c si legge (regola gia' pagata in R234a / R235).
+#
+#  CIO' CHE DEVE USCIRE (dai CSV grezzi, non da un referto), dentro la TOLLERANZA DI BANCO:
+#    prove/R110_CSV_EMADOW/ABTG_EMA200_U30USD_{IS,OOS}_00_metro.csv  (= R112 00_metro,
+#    = r136a cella SLatr 1,0, = cemad05 cella H1: quattro corse indipendenti, stessi numeri)
+#      IS  2024.09.26 -> 2025.06.09 : PF 1,20110 | DD 5,7325% | 237 deal | profit 4585,40
+#      OOS 2025.06.10 -> 2026.06.30 : PF 1,52365 | DD 7,8323% | 517 deal | profit 23321,47
+#
+#  L'ASSE E' TECNICO: InpMagic con DUE celle gemelle (766901 e 766902). Il magic non entra in
+#  nessuna decisione del motore: le due celle devono dare lo STESSO risultato riga per riga a
+#  parte la colonna InpMagic. Se differiscono, il banco non e' deterministico (cancello G1) e
+#  nessun numero dei fratelli si legge. 2 celle x 2 gambe = 4 passate. (Magic 766901/766902.)
+#
+#  SOGLIE CONGELATE
+#    T1  ognuna delle due celle riproduce i numeri sopra (Profit, PF, DD, Trades) DENTRO LA
+#        TOLLERANZA DI BANCO (sez. sopra): Trades e DD ESATTI, Profit |diff| <= 1,00 EUR, PF |diff| <=
+#        0,0002. Fuori = round NULLO per a, b e c. (Sostituisce "al centesimo" di EMAGEM_a.)
+#    G1  le due celle gemelle sono uguali DENTRO LA TOLLERANZA su Profit, Expected Payoff, PF, Recovery
+#        Factor, Sharpe, DD e Trades (sette colonne, ciascuna con la sua regola della sez. sopra). Se no =
+#        round NULLO. (Sostituisce "identici" di EMAGEM_a.) I residui entro tolleranza NON si
+#        nascondono: la riga e il lettore li ELENCANO (colonna, due valori, scarto).
+#    IL DEPOSITO NON SI DICHIARA QUI (walkforward_generico.ps1 non ha @DEPOSITO, default
+#    10000): LA RIGA DI LANCIO DEVE PASSARE -Deposito 100000. A 10000 MathFloor taglia il
+#    lotto e T1 non puo' uscire: e' il modo in cui il cancello se ne accorge.
+#
+#  ATTESA: PF/DD/n = quelli di T1. Costo: 4 passate x 11-34 s (R112: 16 passate in 0,1 ore,
+#  arrotondato a un decimale) = 0,7-2,3 min piu' avvio/compilazione; tetto alto 4 x 1,41 =
+#  ~5,6 min (media misurata dei 13 round del 23/09: 133 min / 94 passate).
+#
+#  BANCO: Modello 4 (TICK REALI), @FRAZIONEIS 0.40 DICHIARATO QUI (la riga di lancio non lo
+#  inoltra), @PERIODO H1 = TF del grafico = InpTF (qui coincidono).
+#  OROLOGIO: H1, motore senza filtro d'ora; il Dow e' lo stesso banco di R110 (vedi b/c).
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+#
+InpTF=16385
+# --- I FISSI: la CELLA DELLA SEDIA 771531 (mql5/Presets/ABTG_EMA200_U30USD_H1_771531_VIVA.set)
+#     = copia esatta di prove/R110_EMADOW_00_metro.txt, tranne il magic. Rischio 1,0 come
+#     R110 (il preset vivo e' 0,65: i DD si confrontano a 1,0 e si moltiplicano per 0,65).
+InpUsaGuardian=true
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito: pin di stringa vuota = ignorato da MT5
+# (controlla_prova.py controllo 3). Default = "".
+InpComment=EMAGEM a ancora
+InpMaxSpread=0
+InpVerbose=true
+InpFridayClose=false
+InpFridayCloseHour=20
+#
+# --- L'UNICO ASSE (tecnico): 2 celle gemelle sul magic. Magic VERGINE 766901/766902:
+#     verificato il 03/10/2026 a parola intera su tutti i rami, nella storia git e nell'albero di
+#     lavoro (git grep -w su refs/heads e refs/remotes; git log --all -G; grep -rIE): 0 occorrenze di 7669xx.
+#     VIETATI: 771531 (sedia viva), 771501, 7633xx (R110), 7634xx (R112), 7666xx, 7668xx (EMAGEM, bruciati), 764201 (R234).
+InpMagic=766901||766901||1||766902||Y
+# ==========================================================================
