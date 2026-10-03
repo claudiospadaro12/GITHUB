@@ -38,7 +38,7 @@
 //|  viene la perdita per lotto.                                      |
 //|  v4.02: se la perdita per lotto viene dal tick value di un indice |
 //|  (non forex) in valuta diversa dal conto, il PIANO lo dice a      |
-//|  schermo: su BCM quel tick value NON e' convertito (classe 1078)  |
+//|  schermo: su BCM quel tick value NON e' convertito (classe 1084)  |
 //|  e il lotto esce piu' piccolo di quello dell'EA (U30USD ~-14%,    |
 //|  225JPY ~1/180).                                                  |
 //+------------------------------------------------------------------+
@@ -121,7 +121,7 @@ int    gSelT = -1;              // TF scelto per il piano (indice in gTf)
 int    gHE14 = INVALID_HANDLE;  // EMA14 del solo TF scelto (filtro dell'EA)
 bool   gPlanDrawn = false;
 bool   gLotSrcLogged = false;   // fonte della perdita per lotto gia' scritta nel Journal per questa casella?
-bool   gLotTvRaw = false;       // il piano usa il tick value di un CFD in valuta diversa dal conto (classe 1078)?
+bool   gLotTvRaw = false;       // il piano usa il tick value di un CFD in valuta diversa dal conto (classe 1084)?
 double gLotPtVal = 0.0;         // valore di 1,0 di prezzo x 1 lotto usato dal piano, in valuta conto
 
 //+------------------------------------------------------------------+
@@ -509,7 +509,7 @@ color ColorFor(const double d)
 // convertito (0,86289 per 0,01 = 86,29 EUR per dollaro; statement 85,0): escluso, giustamente.
 // Su BCM il tick value di questi simboli arriva NON convertito (InfoBroker 17/08: U30USD/NASUSD/
 // SPXUSD/200AUD 0,10 per tick 0,10, 225JPY 10 per tick 1; statement: U30USD 0,865 EUR per punto
-// per lotto, 225JPY 0,055). Classe 1078.
+// per lotto, 225JPY 0,055). Classe 1084.
 bool CfdOtherCcy(const string sym)
   {
    ENUM_SYMBOL_CALC_MODE cm = (ENUM_SYMBOL_CALC_MODE)SymbolInfoInteger(sym, SYMBOL_TRADE_CALC_MODE);
@@ -664,7 +664,7 @@ void DrawPlan(int xBox, int yTop, const int wMin)   // xBox/yTop NON const: si s
    string sym = gSym[gSelS];
    int    k   = gSelS * gNT + gSelT;
    int    dg  = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
-   string lines[12];                     // caso peggiore 11 righe (ramo dati pronti + avviso 1078); 1 riga se non pronti
+   string lines[12];                     // caso peggiore 11 righe (ramo dati pronti + avviso 1084); 1 riga se non pronti
    color  cols[12];
    int    n = 0;
 
