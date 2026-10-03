@@ -382,3 +382,20 @@ nel referto con il numero.
 `backtest_pipeline/ema200_rimbalzo.py`, `backtest_pipeline/ema200_d1_su_m5.py`, `backtest_pipeline/oro_m1_histdata.ps1`,
 `README` del mirror FutureSharks (elenco dichiarato: AUD_JPY, AUD_USD, EUR_USD, GBP_USD, USD_CAD; la sonda ha trovato
 in piu' EUR_JPY).
+
+---
+
+## ERRATA 1 (03/10/2026, ore ~10:10 UTC, PRIMA di aprire qualunque file di prezzi): unita' del G-DATI
+
+**Difetto trovato rileggendo la sez. 2.4 prima di scrivere il codice, non dopo aver visto numeri.** La sez. 2.4 dice
+"coppia-ANNO con meno del 50% della mediana delle barre M1". Il mirror finisce a **2020-05**: l'anno 2020 ha 5 mesi
+(~40% di un anno pieno) e per sei coppie su sei verrebbe **escluso alla lettera**, buttando 5 mesi di dati
+completi. Non e' l'intento (l'intento e' scartare i tratti con dati dimezzati).
+**Correzione congelata:** l'unita' del G-DATI e' la **coppia-MESE di calendario UTC**. Un mese con **meno del 50%
+della mediana dei mesi della stessa coppia** (barre M1) e' un mese **ESCLUSO dagli eventi** (si scartano i primi
+tocchi il cui minuto cade in quel mese), con elenco per nome nel referto. Il mese di ESTREMO della serie (primo e
+ultimo mese del feed) e' escluso dal confronto solo se parziale per costruzione di calendario (mese in corso al
+momento della pubblicazione): sul mirror nessuno, perche' 2005-01 e 2020-05 hanno file completi per la loro
+estensione dichiarata (il file 2020-05 e' comunque soggetto alla regola se ha < 50%). **Vale per gli eventi
+della serie vera; i surrogati sono costruiti dall'intera serie e non sono toccati** (dichiarato: se il G-DATI non
+esclude nulla, la cosa e' nulla). Nessun'altra regola cambia.
