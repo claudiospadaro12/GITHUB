@@ -5,6 +5,72 @@
 #  Criteri congelati PRIMA dei numeri.
 # ==========================================================================
 #
+# ==========================================================================
+#  EMENDAMENTO DEL 04/10/2026 -- SOLO COMMENTI. Nessuna riga ATTIVA (direttive, input, asse) e' cambiata:
+#  il confronto riga per riga dei contenuti non-commento col commit beb6671f e' vuoto (lo rifa assembla.py della riga di lancio).
+#  Scritto PRIMA di qualunque numero di questo round: in repo non esiste nessun CSV, referto o per-trade con le etichette LATI
+#  (grep -rl "LATIA1\|LATIA2" fuori dai quattro file prova, su HEAD e su ogni origin/*: zero) e chi scrive NON ha aperto nessun risultato di questi quattro file.
+# ==========================================================================
+#  (1) CONTROLLI RIFATTI IL 04/10/2026 (il piano del 03/10, azione 1, li dichiarava [NON VERIFICATO]):
+#      - controlla_prova.py sui quattro file: OK (42 input, 2 celle ciascuno) contro l'EA di oggi (mql5/Experts/ABTG_EMA200.mq5, ultima modifica
+#        b45dd009 dell'11/09; compilato sul PC di backtest il 21/09). controlla_riga.py --oggetto prova: nessun difetto meccanico.
+#      - LA CELLA: le righe attive coincidono col preset della sedia (mql5/Presets/ABTG_EMA200_U30USD_H1_771531_VIVA.set) tranne: InpRiskPercent
+#        1.0 (preset 0.65, dichiarato sotto), InpMagic, InpComment, l'asse del lato, InpNewsCurrencies (stringa vuota = default, non pinnata) e
+#        InpLogImbuto (il preset lo porta a true = default dell'EA: non pinnato qui, solo log) [MISURATO con confronto automatico il 04/10].
+#      - MAGIC 764100-764103: riletti a parola intera su HEAD e su ogni origin/* (git grep -w) e nella storia (git log --all -G): compaiono SOLO
+#        nei quattro file LATI A1/A2 e nelle menzioni di RISERVA dei file COLLAUDO_EMADOW_* ("764102/764103 (LATI)": commenti, mai un InpMagic che
+#        gira). Zero CSV, zero per-trade, zero referti. La frase "0 occorrenze" scritta piu' sotto il 09/09 era vera allora: la forma esatta di
+#        oggi e' questa. NON coperta: la cache del tester sul PC di backtest (non sta in repo); con magic mai girati nessuna passata dovrebbe
+#        essere ripescata.
+#  (2) N E' IN DEAL, NON IN POSIZIONI. La colonna Trades del CSV conta i DEAL di uscita: la cella L+S del Dow in R110/OOS ha 517 deal e 257
+#      posizioni (preset, riga "PF OOS 1,52365 ... 517 deal / 257 posizioni"), perche' TP1Pct 50 chiude meta' e il resto dopo. Le attese di n
+#      scritte in questo file sono in DEAL; le posizioni sono circa la meta'. Il muro dei 150 e' in operazioni: la distanza e' ancora MAGGIORE
+#      di come la dice il testo.
+#  (3) T3 PEGGIOR GIORNATA: la colonna NON esiste nel CSV (OptFrame scrive sette statistiche: Profit, Expected Payoff, Profit Factor, Recovery
+#      Factor, Sharpe Ratio, Equity DD %, Trades). Il testo di T3 piu' sotto dice "colonna del CSV": e' sbagliato e si legge cosi': T3 si calcola
+#      SOLO dal per-trade (abtg_trades_ABTG_EMA200_U30USD_<magic>.csv, un file per magic). In questo round ogni file ha DUE celle con lo STESSO
+#      magic e il per-trade e' quello dell'ULTIMA passata scritta: la cella si riconosce solo se numero di deal e somma dei net_profit tornano
+#      con UNA cella del CSV (la somma e' Profit meno la commissione d'ingresso: classe 844); se non tornano, o tornano con due, T3 resta
+#      [NON MISURATO] e si scrive cosi'. Non si stima. (Criterio non cambiato: cambia solo la dicitura sulla fonte.)
+#  (4) REGIME CONTENUTO DALLA FINESTRA (dichiarato: Emendamento A, "si DICHIARA quale REGIME contiene"). 2025.02.01 -> 2025.04.30, 88 giorni
+#      di differenza (89 contando entrambi gli estremi, come dice il testo sopra), UNA tranche (@FRAZIONEIS 1.0), tick reali. Secondo la fonte esterna gia' citata sopra [FONTE ESTERNA, a memoria, NON verificata da
+#      qui: massimo dell'S&P 500 il 19/02, minimo di chiusura l'08/04, risalita dal 09/04] la finestra contiene TRE fasi: circa tre settimane
+#      sui massimi (01/02-19/02), circa sette di discesa (19/02-08/04), circa tre di RIMBALZO (09/04-30/04). Quindi e' DISCESA E RIMBALZO, non
+#      una discesa monotona: un risultato del lato SHORT qui mescola la caduta e la risalita, e NON si legge come "lo short regge nell'orso".
+#      Il verdetto massimo possibile resta quello gia' scritto nel piano: "il RISCHIO regge in una discesa", mai "il regime e' provato"
+#      (Emendamento C non soddisfabile sugli indici BCM: storico dal 2024.09.26). La serie dei prezzi di U30USD su questa finestra NON e' in
+#      repo (il per-trade IS e' sovrascritto dall'OOS, nessun D1 salvato): la forma della discesa SUL DOW BCM e' [NON MISURATA]; il per-trade di
+#      questo round ne da' un'ombra (prezzi di uscita), non di piu'.
+#  (5) T1 -- LA TOLLERANZA DI BANCO (era "IDENTICA AL CENTESIMO"). SCRITTA IL 04/10/2026, DOPO il cancello rosso di EMAGEM del 03/10 e PRIMA di
+#      qualunque numero di questo round. NON e' una soglia nuova: e' LA STESSA di prove/EMAGEM2_a_ancora_U30USD_H1_LS.txt (sezione "TOLLERANZA DI
+#      BANCO", gia' passata dal cancello), che nasce da due fonti che NON sono questo round: (a) il cancello di EMAGEM a (03/10, la STESSA cella
+#      L+S, lo STESSO EA e lo STESSO PC): gemella 766802 Profit 23321,46 contro 23321,47 (0,01 EUR), Expected Payoff 45,10921 contro 45,10923,
+#      Sharpe 8,16764 contro 8,16765; Trades, PF, Recovery Factor e DD esatti; (b) R235 (ABTG_IntradayMomentum su NASUSD: Profit 6587,43 contro
+#      6586,46, 0,97 EUR; PF 1,24027 contro 1,24023; Trades e DD identici) e R274a sez. 3 (Profit 1,00 EUR, PF/RF 0,0002). Scritta, quindi,
+#      DOPO aver visto lo scarto dell'altra cella: lo dichiaro (classe 1091). Il confronto e' fra le due celle L+S dei due file gemelli (T1 =
+#      questo file contro LATI_A1_..._short.txt), in Decimal, il bordo e' DENTRO:
+#        Trades                 ESATTO.                          Equity DD %        ESATTO (4 decimali).
+#        Profit                 |diff| <= 1,00 EUR.              Profit Factor      |diff| <= 0,0002.
+#        Recovery Factor        |diff| <= 0,0002.                Expected Payoff    |diff| x Trades <= 1,00.
+#        Sharpe Ratio           |diff| x |Profit| <= |Sharpe| x 1,00.
+#      Derivazione sulle celle di QUESTO round (attese di n scritte sopra, a rischio 1% = circa 1.000 EUR per posizione): 1,00 EUR spostato su un
+#      deal muove il PF di al piu' 1/(perdita lorda) = circa 0,00005 se la perdita lorda e' 20.000 EUR (0,0001 a 10.000): margine 2-4 volte sul
+#      0,0002 [DERIVATO]. Recovery Factor: 1,00 EUR sul DD massimo IN DENARO muove il RF di 1/DD: 0,00033 se il DD e' 3.000 EUR, 0,00007 se e'
+#      14.000. Il margine del RF e' quindi il PIU' STRETTO e SOTTO 1 per DD sotto 5.000 EUR (attesa 3-14% = 3.000-14.000 EUR): se un FAIL viene
+#      SOLO dal RF con uno scarto di Profit <= 1,00 EUR, e' un FAIL (si scrive, non si salva): lo dichiaro invece di nasconderlo. Scarto
+#      MISURATO sul banco: 0,01 EUR, cioe' 60 volte meno del bordo del RF nel caso peggiore (DD 3.000 EUR: il bordo 0,0002 vale 0,60 EUR di Profit).
+#      Contro-esempio che deve ROMPERLA: un deposito sbagliato (10000 invece di 100000, il lotto si tronca), un binario o un pin diversi spostano
+#      Profit e Trades di CENTINAIA di EUR e di deal. I due gemelli girano allo STESSO deposito, quindi questo cancello e' CIECO al deposito
+#      sbagliato: lo prende la sentinella di LATI-A2 (stessa riga di lancio, stesso -Deposito) e il referto del driver di ogni job (deposito
+#      100000). Se la sentinella di A2 non e' PASS, NESSUN numero di A1 si legge.
+#      CHI HA GIA' VISTO CHE COSA: chi scrive ha letto i numeri di EMAGEM a (cella L+S del Dow, 03/10) e la tolleranza di EMAGEM2; NESSUN
+#      numero di LATI. Il "prima dei numeri" vale per i criteri di QUESTO round; non per chi li scrive rispetto a EMAGEM.
+#  (6) ORDINE E CANCELLO DELLA RIGA DI LANCIO. La riga gira PRIMA i due file LATI-A2 (sentinella + metro: numeri GIA' NOTI), POI i due LATI-A1.
+#      I numeri di A1 NON compaiono in console, ne' nel RIEPILOGO, ne' nelle righe del per-trade della riga se i tre cancelli (T1 di A1, e T1 e
+#      T2 di A2) non sono tutti PASS; la console del driver dei due job A1 va su file (classe 1092). Il file nello zip resta, per la diagnosi.
+#      Con @FRAZIONEIS 1.0 la gamba OOS e' degenere: il referto del driver chiude "NON MISURATO -- CSV mancanti o vuoti: OOS" ed e' ATTESO.
+# ==========================================================================
+#
 #  A CHE DOMANDA RISPONDE, e non e' "lo short funziona?"
 #    Claudio, 09/09/2026: "ricontrollate anche i long ... expert che
 #    reggano". La domanda vera e': COSA FA IL LATO LONG QUANDO L'INDICE
@@ -100,7 +166,7 @@
 #
 #  SOGLIE CONGELATE (decise ORA, col numero accanto)
 #    T1  CANCELLO CROCIATO. La cella L+S di QUESTO file deve uscire
-#        IDENTICA AL CENTESIMO alla cella L+S del file gemello
+#        IDENTICA (DENTRO LA TOLLERANZA DI BANCO, EMENDAMENTO (5) del 04/10) alla cella L+S del file gemello
 #        LATI_A1_EMA200_U30USD_DISCESA_long.txt (stessa finestra, stesso
 #        modello, stessi pin, solo l'asse cambia). Se non lo e', il banco
 #        non e' deterministico e NESSUN numero dei due file si legge.
@@ -112,7 +178,7 @@
 #        scrive nel dossier di schieramento
 #        (report/DOSSIER_SCHIERAMENTO_EMA200_DOW_2026-09-09.md).
 #        Il numero 10.00 e' il muro prop TOTALE; a 0.65% diventa 6.5%.
-#    T3  PEGGIOR GIORNATA (colonna del CSV, misurata): allarme a -3.00%
+#    T3  PEGGIOR GIORNATA (dal PER-TRADE, non dal CSV: vedi EMENDAMENTO (3) del 04/10): allarme a -3.00%
 #        a rischio 1.0% contro un muro prop giornaliero del 5%.
 #        Sopra: revisione della taglia prima di accendere.
 #    T4  SIMMETRIA. Se PF(SHORT, DISCESA) >= 1.10 E PF(SHORT, TORO) = 1.89
@@ -239,7 +305,7 @@ InpNewsShiftMinutes=0
 # ignorato da MT5 (controlla_prova.py controllo 3). Default = "".
 InpComment=LATIA1 EMADOW DISC S
 # MAGIC FISSO E VERGINE 764101 -- verificato repo-wide il 09/09/2026:
-# grep -rn "764101" . --exclude-dir=.git -> 0 occorrenze.
+# grep -rn "764101" . --exclude-dir=.git -> 0 occorrenze [09/09; RILETTO il 04/10: vedi EMENDAMENTO (1), solo menzioni di riserva].
 # VIETATO il 771531 della sedia viva e i 7633xx di R110.
 InpMagic=764101
 InpMaxSpread=0
