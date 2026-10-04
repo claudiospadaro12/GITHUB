@@ -88,7 +88,7 @@ d0 = dirs['DAQUANDO']; d1 = dirs['FINOA']; fz = float(dirs['FRAZIONEIS'])
 D0 = dt.datetime.strptime(d0, '%Y.%m.%d'); D1 = dt.datetime.strptime(d1, '%Y.%m.%d')
 META = D0 + dt.timedelta(days=int((D1 - D0).days * fz))
 ISA, ISB = d0, META.strftime('%Y.%m.%d'); OOA, OOB = (META + dt.timedelta(days=1)).strftime('%Y.%m.%d'), d1
-sfx = '' if str(MOD) == '4' else '_ohlc'
+sfx = '' if (str(MOD) == '4' or sc.get('no_ohlc_sfx')) else '_ohlc'     # 'no_ohlc_sfx': i file escono col nome di Modello 4 anche se il modello passato e un altro (per isolare il controllo del REFERTO)
 def norm(v):
     if v == 'true':
         return '1'
@@ -181,7 +181,8 @@ def attempt(esito, fase, ea_name):
         L.append('RR\t0\t%s\tTester\toptimization finished, total passes %d' % (hms(), len(vals)))
         s = "PARTITA (from %s 00:00 to %s 00:00 su %s: finestra = dichiarata); CSV: presente (%d righe)" % (a_, b_, SIM, len(vals))
     elif esito == 'DEGENERE':
-        L.append('JQ\t2\t%s\tTester\tset mode to math calculations or adjust testing dates' % hms())
+        if not sc.get('no_setmode'):
+            L.append('JQ\t2\t%s\tTester\tset mode to math calculations or adjust testing dates' % hms())
         L.append('MJ\t0\t%s\tExperts\toptimization frame expert %s (%s,%s) processing started' % (hms(), ea_name, SIM, TF))
         L.append('EG\t0\t%s\tExperts\toptimization frame expert %s (%s,%s) processing stopped' % (hms(), ea_name, SIM, TF))
         s = "NON_VERIFICABILE (intestazione della gamba presente, ma ne' 'from ... to ...' ne' 'Tester cannot be initialized': fine non leggibile (errore di dati, di .ini o dell'EA?)); CSV: %s" % ('presente (-1 righe)' if sc.get('oos_csv', 'zero') != 'none' else 'assente')
@@ -266,6 +267,8 @@ if sc.get('pertrade', True) and f_is:
         if sc.get('pertrade_stale'):
             _t = time.time() - 3600
             os.utime(pf, (_t, _t))
+if sc.get('extra_header') and not sc.get('tlog'):
+    _w16(TL, ['XH\t0\t%s\tTester\t"%s.ex5" X64' % (hms(), EA)])      # una intestazione SENZA from/to, senza morte e senza set mode: conta SOLO come intestazione in piu
 if sc.get('extra_leg') and not sc.get('tlog'):
     _w16(TL, attempt('PARTITA', 'IS', EA)[0])
 rpf = J(wdir, 'risultati_prove\\' + EA + '\\RIPROVE_' + EA + '_' + SIM + sfx + '_' + LBL + '.txt')
