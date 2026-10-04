@@ -5,7 +5,7 @@ corrispondenza automatica usa l'API, che non ha memoria: la memoria gliela diamo
 Regola: qui stanno SOLO fatti misurati e decisioni prese, con la fonte nel repo. Niente ipotesi non etichettate.
 
 ## 1. Chi siamo e cosa vogliamo (28/09/2026)
-- Progetto ABTG: EA MQL5 per passare le challenge prop. Challenge FTMO 2-Step da 80k viva dal 22/09 (numero di conto omesso di proposito); sette sedie in campo.
+- Progetto ABTG: EA MQL5 per passare le challenge prop. La challenge FTMO 2-Step da 80k (22/09) e' CHIUSA: Max Loss violato il 30/09 (`report/FTMO_CHALLENGE_CHIUSURA_2026-09-30.md`). Banco di prova attuale: una Free Trial FTMO 2-Step da 160k (14 giorni, dal 30/09-01/10) con le sedie e il Guardian (numero di conto omesso di proposito).
 - Obiettivo dichiarato da Claudio: PIU' SEDIE SCHIERABILI. Metodo: imbuto (file prova -> cancello -> riga -> referto -> firma).
 - Ruoli: Claude = sviluppatore + cancello (misura, verifica, propone); Gemini = Agente 1-4 (legge, audita, propone, contro-esempio);
   Claudio = firma taglie/rischio/conti/spese. Nessuna proposta si esegue senza cancello.
@@ -26,7 +26,7 @@ Regola: qui stanno SOLO fatti misurati e decisioni prese, con la fonte nel repo.
 
 ## 4. Regole che Gemini deve rispettare in ogni risposta
 Finestre solo dallo storico esistente (indici BCM dal 2024.09.26); «passate» = celle x 2 finestre; niente griglie su motori senza
-edge; stop >= 40x (spread+commissione); centro dell'altopiano mai il picco; due lati sugli indici; ogni numero con la fonte o NON
+edge; stop >= 40x lo spread (sull'oro il costo pieno = spread + commissione); centro dell'altopiano mai il picco; due lati sugli indici; ogni numero con la fonte o NON
 MISURATO; prima della macchina, la misura a costo zero nei per-trade gia' in archivio.
 
 ## 4-bis. Regola nata dai primi due giri (29/09)
@@ -66,5 +66,5 @@ Il contenuto tecnico era utile: la manopola InpSLatr e' viva e mai messa ad asse
 - **Aggiornamento 01/10**: la challenge FTMO 2-Step 80k e' CHIUSA (Max Loss violato il 30/09: equity 71.968,19 contro linea 72.000; flotta 11 posizioni, 5 stop pieni, PF 0,31;
   `report/FTMO_CHALLENGE_CHIUSURA_2026-09-30.md`). RFWD: forward e tester BCM fanno le stesse operazioni (L1 8/11, L1+L2 10/11, `report/LETTURA_RFWD_2026-09-30.md`);
   difetto trovato: il tester si ferma al 30/09 00:00 escluso (causa NON DIMOSTRATA). Ora gira una Free Trial FTMO 160k: giorno 1 netto -6.245,68, DD di bilancio 4,27%,
-  3 stop in un giorno, rischio aperto simultaneo 4,62% contro cap 4,00% (`report/TRIAL_GIORNO1_ANALISI_2026-10-01.md`). Il vincolo «i round non girano sul VPS» decade con la chiusura.
+  3 stop in un giorno, rischio aperto simultaneo 4,62% contro cap 4,00% (`report/TRIAL_GIORNO1_ANALISI_2026-10-01.md`). Il vincolo «i round non girano sul VPS» NON decade: i round girano sul PC di backtest anche con la Free Trial (pratica del 03/10); sul VPS stanno i terminali delle sedie.
   Gemini ha risposto sul trial (01/10 sera, verificata in `docs/RISPOSTA_A_GEMINI_2026-10-01.md`): formula di break-even smentita, autore D3 sbagliato (Crabel, non Williams), 'Firma Claudio' = SI', blocco per sottostante gia' misurato (O3, segno instabile). Il picco del rischio aperto del 01/10 e' 4,85% (12:00-13:25), non 4,62% (audit `report/AUDIT_RISCHIO_FLOTTA_2026-10-01.md`). Bulge del trial = una istanza riconfigurata (preset 06:00, default 10:00-sera, preset ripristinato in serata). La chiave NON serve nell'ambiente: il proxy aggiunge la credenziale.

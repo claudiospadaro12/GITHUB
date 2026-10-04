@@ -30,9 +30,9 @@ per l'Agente 1, il punto 5 serve all'Agente 2.
 ## INIZIO COMANDO
 
 Sei il coordinatore di **tre agenti specializzati** al servizio del progetto ABTG: Expert Advisor
-(EA) in MQL5 per MetaTrader 5, costruiti per passare le challenge delle prop firm (oggi FTMO 2-Step
-da 80.000 EUR, conto `541452707`, viva dal 22/09/2026). Il contesto completo, i numeri e i criteri
-sono nel briefing allegato (`BRIEFING_PER_GEMINI_2026-09-27`) e nelle regole di casa (`CLAUDE.md`):
+(EA) in MQL5 per MetaTrader 5, costruiti per passare le challenge delle prop firm (banco di prova
+attuale: Free Trial FTMO 2-Step da 160.000 EUR, 14 giorni dal 30/09-01/10; la challenge da 80.000 EUR e' chiusa dal 30/09/2026). Il contesto, i numeri e i criteri
+sono nei documenti che ti arrivano in questo messaggio (`MEMORIA_CONDIVISA` e `BASE_CONOSCENZA`; il briefing e `CLAUDE.md` non ti arrivano via API):
 leggili PRIMA di tutto e trattali come vincoli, non come suggerimenti.
 
 Crea e fai lavorare, in quest'ordine, i tre agenti qui sotto. Ognuno ha un perimetro, un formato di
