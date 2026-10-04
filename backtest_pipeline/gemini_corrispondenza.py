@@ -74,14 +74,31 @@ def controlla_allegati(files):
 
 MEMORIA = "docs/gemini/MEMORIA_CONDIVISA.md"
 
+def _norm(p):
+    """stesso file = stesso nome: './docs/x.md' e '/repo/docs/x.md' diventano 'docs/x.md' (niente doppioni nel pacchetto)"""
+    return os.path.normpath(os.path.relpath(os.path.abspath(p)))
+
 def con_contesto(files):
-    """memoria in testa, poi la base di conoscenza (se esiste), poi i documenti del giorno"""
-    files = [f for f in files if f not in (MEMORIA, BASE)]
+    """memoria in testa, poi la base di conoscenza (se esiste), poi i documenti del giorno, senza doppioni"""
+    visti, out = {_norm(MEMORIA), _norm(BASE)}, []
+    for f in files:
+        n = _norm(f)
+        if n not in visti:
+            visti.add(n); out.append(n)
     if os.path.exists(BASE):
-        files = [BASE] + files
+        out = [BASE] + out
     if os.path.exists(MEMORIA):
-        files = [MEMORIA] + files  # la memoria va SEMPRE in testa: l'API non ricorda nulla fra uno scambio e l'altro
-    return files
+        out = [MEMORIA] + out  # la memoria va SEMPRE in testa: l'API non ricorda nulla fra uno scambio e l'altro
+    return out
+
+def prepara(files, modalita="completa", domanda=""):
+    """il pacchetto COMPLETO (memoria + base + documenti) e i problemi: lista nera e 'in repo e committato'
+    si applicano a OGNI file che esce, compresi quelli aggiunti in automatico (classe 1095)."""
+    pacchetto = con_contesto(files)
+    problemi = controlla_allegati(pacchetto)
+    if modalita == "routine" and not domanda.strip():
+        problemi.append("modalita routine senza --domanda: il comando dice 'rispondi SOLO alle domande', senza domanda Gemini improvvisa")
+    return pacchetto, problemi
 
 def costruisci_richiesta(files, domanda, modalita="completa"):
     files = con_contesto(files)
@@ -141,6 +158,7 @@ def scrivi_risposta(files, modello, testo, domanda, modalita="completa"):
     return out
 
 def autotest():
+    global BASE  # il controllo (9)-(10) sostituisce la base per un momento e la rimette
     import tempfile
     # (1) lista nera: un .set non parte
     d = tempfile.mkdtemp()
@@ -176,7 +194,25 @@ def autotest():
     for q in (BASE, COMANDO_ROUTINE):
         if os.path.exists(q):
             assert not re.search(r"\b(541452707|1514806751|10105439|50503392|50504263|50504400|50503635)\b", open(q, encoding="utf-8").read()), "numero di conto in " + q
-    print("AUTOTEST OK (11 controlli: lista nera, fuori repo, istruzione, chiave assente, richiesta, modalita routine, ordine memoria-base, nessun conto)")
+    # (9) classe 1095: i file aggiunti in automatico passano dagli stessi controlli (base fuori repo -> rifiuto)
+    vera_base = BASE
+    try:
+        BASE = os.path.join(d, "BASE_FINTA.md"); open(BASE, "w").write("x")
+        _, pr = prepara([], "completa")
+        assert any("BASE_FINTA" in x and "NON tracciato" in x for x in pr), "la base aggiunta in automatico deve passare dal controllo in repo"
+        # (10) base assente: niente errori, la base semplicemente non c'e'
+        BASE = os.path.join(d, "NON_ESISTE.md")
+        rb = costruisci_richiesta([], "d", "routine")
+        assert not any("NON_ESISTE" in x["text"] for x in rb["contents"][0]["parts"])
+    finally:
+        BASE = vera_base
+    # (11) niente doppioni: lo stesso file con un altro nome ('./', percorso assoluto) entra una volta sola
+    pk = con_contesto(["./" + MEMORIA, os.path.abspath(BASE), "./" + COMANDO, os.path.abspath(COMANDO)])
+    assert len(pk) == len(set(pk)) == sum(os.path.exists(q) for q in (MEMORIA, BASE)) + 1, "doppioni nel pacchetto: %r" % pk
+    # (12) la chiave dell'esame non esce (nome con 'chiave') e la routine senza domanda non parte
+    assert any("NERA" in x for x in controlla_allegati(["docs/gemini/ESAME_LIBRO_CHIUSO_CHIAVE_2026-10-04.md"]))
+    assert any("senza --domanda" in x for x in prepara([], "routine", "")[1])
+    print("AUTOTEST OK (15 controlli: lista nera, fuori repo, istruzione, chiave assente, richiesta, modalita routine, ordine memoria-base, nessun conto, contesto controllato, base assente, doppioni, chiave esame, routine senza domanda)")
 
 def main():
     ap = argparse.ArgumentParser(description="corrispondenza automatica con Gemini (documenti .md del repo -> risposta in docs/gemini/)")
@@ -191,10 +227,13 @@ def main():
         return autotest()
     if not a.files:
         raise SystemExit("nessun documento: passa uno o piu' .md del repo")
-    problemi = controlla_allegati(a.files)
+    a.files, problemi = prepara(a.files, a.modalita, a.domanda)
     if problemi:
         print("RIFIUTATO -- non si manda niente:"); [print("  X " + x) for x in problemi]; sys.exit(2)
-    a.files = con_contesto(a.files)
+    for q in (MEMORIA, BASE):
+        if not os.path.exists(q):
+            print("ATTENZIONE: %s assente (eseguire dalla radice del repo?): il pacchetto parte SENZA questo contesto" % q)
+    print("modalita %s, istruzione di sistema: %s" % (a.modalita, COMANDO_ROUTINE if a.modalita == "routine" else COMANDO))
     richiesta = costruisci_richiesta(a.files, a.domanda, a.modalita)
     n = sum(len(p["text"]) for p in richiesta["contents"][0]["parts"])
     print("manifesto: %d documenti, %d caratteri, modello %s" % (len(a.files), n, a.modello))
