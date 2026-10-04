@@ -71,6 +71,22 @@ diversi: TP 12, SL 36, costo 2; l'esempio della base e' un altro, TP 8 / SL 24 /
 - 🔴 **B1 non dimostra che il ragionamento sia migliorato**: la base contiene la FORMULA del break-even; Gemini l'ha applicata bene, con numeri diversi dall'esempio. Capacita' di ricavarla da solo: **non testata**. Per testarla serve una domanda a libro CHIUSO (formula assente dalla base).
 - 🟡 Nella stessa risposta ha riempito anche tre "schede agente" che non gli erano state chieste (il comando lo spinge a farlo): alcune cose sono plausibili, altre da verificare (cita un file `ABTG_Dow_Apertura_US.mq5` che io non ho verificato esista). Va tolto questo rumore dai pacchetti giornalieri (v. §4).
 
+## 1-ter. ESAME A LIBRO CHIUSO e RIPETIBILITA' (04/10, sera)
+
+**Libro chiuso** (`ESAME_LIBRO_CHIUSO_2026-10-04.md`, chiave non mandata, risposta `RISPOSTA_GEMINI_2026-10-04_2000.md`): 10 domande le cui risposte NON stanno nei documenti che Gemini riceve
+(6 di ragionamento, 4 su cose che non puo' sapere). Punteggio mio: **19 / 20**. Ragionamento 11/12 (C1 valore atteso +1 pip, C2 12,25%, C3 3,12 lotti arrotondando per difetto, C5, C6 91,5% giusti;
+C4 binomiale stimata 1-2% invece di circa 5%: errore di stima, giusto l'ordine "basso"). **"NON LO SO" 4 volte su 4** dove non poteva sapere (nel primo esame mai).
+
+**Ripetibilita' del break-even** (`ESAME_B1_RIPETUTO_2026-10-04.md`, 5 chiamate a distanza di un minuto, **senza** la base, con la formula da ricavare da solo): **5 risposte su 5 giuste (79,17%)**,
+con la formula ricavata correttamente (vincite x TP - perdite x SL - costo = 0). Il file di ogni risposta e' in `docs/gemini/ripetizioni_B1/`.
+
+**Cosa significa, con onesta':**
+- 🟢 **Il break-even invertito del primo esame (23,68%) NON e' un errore sistematico**: su questa domanda isolata non si e' ripetuto in 5 su 5, anche senza la base.
+- 🟡 **Ma e' successo una volta nel contesto lungo** (15 domande insieme). Ipotesi mia, [NON PROVATA]: con molte domande in un solo messaggio un modello piccolo sbaglia di piu'.
+  Cautela pratica: **una domanda numerica = una chiamata**, e ogni numero di Gemini passa dal nostro calcolo.
+- 🟡 5 prove sono poche: dicono "l'errore non e' frequente su questa formula", non "non sbaglia mai". Il binomiale a mente (C4) e' piu' debole.
+- 🟢 Quindi: **non serve un modello piu' costoso per ora**. Si riconsidera solo se, con la base, gli errori di ragionamento tornano a comparire nelle risposte di routine.
+
 ## 2. LO STORICO CONFERMA IL QUADRO (gli scambi dal 28/09 al 04/10)
 
 Dalle verifiche in `docs/RISPOSTA_A_GEMINI_*.md`:
