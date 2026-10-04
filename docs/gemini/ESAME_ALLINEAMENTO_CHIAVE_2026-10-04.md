@@ -19,3 +19,9 @@ B2. No, il merito resta sospeso: n < 150 per la finestra fuori campione (102 e I
 B3. ZONA GRIGIA: non e' un esito ordinario ma non e' un effetto dimostrato; la sfortuna non si esclude (5,8% sta sopra la soglia di EFFETTO p < 0,05). Fonte: report/TRIAL_SFORTUNA_O_EA_2026-10-03.md.
 B4. Il suo NOME esatto (input/funzione che esiste nel codice), l'attesa scritta prima, un contro-esempio, il dato necessario, il costo di misura e se serve la firma di Claudio; una misura, non una decisione. Fonte: CLAUDE.md (cancello, motto, contro-esempio).
 B5. Abbassare una soglia dopo aver visto un numero (i criteri si cambiano prima dei dati, non dopo); "non lo so" e' accettabile e preferito a un numero inventato. Fonte: CLAUDE.md "EMENDAMENTO DELLA FINESTRA" e "IL CONTRO-ESEMPIO".
+
+## Note del cancello (04/10/2026) -- la chiave regge; tre precisazioni
+- A2: "40 x spread" e' la definizione di CLAUDE.md; sull'oro la convenzione e' 40 x costo pieno (spread + commissione). Una risposta "spread + commissione" vale 2.
+- A10: la 771531 ha anche due limiti scritti nel repo oltre al regime: costo FRAGILE (40x solo allo spread di sessione, `report/EMA200_GEMELLI_STATO_2026-10-03.md`) e IS 132 posizioni (237 deal).
+- B3: la domanda e' imprecisa. Il 5,8% [3,3-9,4] e' la probabilita' di -4,34% in 2 giorni sulle sedie CON contratto (P6, senza Bulge), non del -5,5% del conto intero (`report/TRIAL_SFORTUNA_O_EA_2026-10-03.md` sez. D). La risposta attesa ZONA GRIGIA regge (soglie congelate: EFFETTO p < 0,05; ZONA GRIGIA 0,05-0,20); la domanda resta identica all'esame ripetuto per confrontare i punteggi.
+- A4: vale 2 solo se la regola e' "su un motore GIA' DICHIARATO senza edge"; "su motori che non hanno dimostrato un edge" rovescia l'onere (vieterebbe le griglie sui NON ANCORA MISURATI) e vale 1.

@@ -22,38 +22,39 @@ una Free Trial FTMO 2-Step da 160k (14 giorni dal 30/09-01/10), non e' una chall
 - **Sedia** = EA con magic su un simbolo/TF. **Cella** = una combinazione di input. **Passata** = cella x finestra (IS/OOS). **Round** = serie di passate nel tester (si fa solo sul PC di backtest).
 - **IS/OOS** = dentro/fuori campione. **PF** = profit factor. **DD** = drawdown. **n** = numero di operazioni o posizioni (dichiara l'unita').
 - **Gemella** = la stessa cella su un altro simbolo. **Cancello** = verifica indipendente prima che qualcosa esca.
-- **Parole di verdetto (solo queste quattro)**: **NULLO** (nessun effetto entro l'intervallo), **ZONA GRIGIA** (effetto possibile ma non distinguibile dal caso/impreciso), **EFFETTO** (distinguibile dal caso), **NON ANCORA MISURATO** (manca il numero o il campione: e' la piu' prudente, NON e' un numero brutto). Non usare "promosso/bocciato".
+- **Parole di verdetto di una MISURA (solo queste quattro)**: **NULLO** (nessun effetto entro l'intervallo), **ZONA GRIGIA** (effetto possibile ma non distinguibile dal caso/impreciso), **EFFETTO** (distinguibile dal caso), **NON ANCORA MISURATO** (manca il numero o il campione: e' la piu' prudente, NON e' un numero brutto). Le soglie le fissa ogni misura PRIMA dei dati (esempio, trial del 03/10: EFFETTO p < 0,05, ZONA GRIGIA 0,05-0,20, NULLO >= 0,20): non inventarle. Non usare "promosso/bocciato".
+- **Parole dei cancelli** (si scrivono sempre col numero accanto): **ESCLUSO PER COSTO** (stop sotto la frontiera), **FRAGILE** (la frontiera cade dentro la banda misurata), **NO PER RISCHIO** (DD sopra il limite), **MORTO** (solo col certificato completo, sez. 3).
 
 ## 3. REGOLE DI CASA (firmate)
-- **Orologio**: il server BCM e' UTC+1 FISSO. D'estate = ora italiana - 1; d'inverno = ora italiana. Un orario fisso nel server arma un'ora prima dell'apertura cash d'inverno (DAX dal 26/10, USA dal 02/11). FTMO segue l'ora italiana + 1 tutto l'anno.
-- **Costo**: lo stop deve valere almeno 40 x il costo (spread + commissione); pavimento duro 13,3x. Dipende dal motore: i motori a range (breakout/retest) con stop = range passano anche a M5; quelli con stop da ATR/candela spesso no.
-- **Campione**: IS di almeno 150 operazioni; si dichiara il regime di mercato della finestra; "dove" collocarlo non e' deciso. Il merito si sospende sotto 150, il rischio si giudica sempre.
+- **Orologio**: il server BCM e' UTC+1 FISSO. D'estate = ora italiana - 1; d'inverno = ora italiana. Un orario fisso nel server arma un'ora prima dell'apertura cash d'inverno (DAX dal 26/10, USA dal 02/11). FTMO = ora italiana + 1 tutto l'anno (regolamento FTMO: GMT+2/+3); che cambi l'ora nello stesso giorno dell'Europa e' [NON MISURATO] (settimana 26-30/10/2026).
+- **Costo**: lo stop deve valere almeno 40 x lo spread (sull'oro la convenzione e' 40 x il costo pieno = spread + commissione); pavimento duro 13,3x. Dipende dal motore: i motori d'apertura con stop = range di 35' passano anche a M5 su DAX, Dow e Nasdaq (49-64x; cinque indici su dieci restano esclusi per costo); quelli con stop da ATR/candela spesso no.
+- **Campione**: IS di almeno 150 operazioni e una finestra che lasci un OOS di almeno 150; si dichiara il regime di mercato della finestra; "dove" collocarlo non e' deciso. Il merito si sospende sotto 150, il rischio si giudica sempre.
 - **Due lati**: sugli indici si misurano SEMPRE long e short.
 - **Regola del 19/08**: niente griglie larghe su un motore gia' dichiarato senza edge (trovano solo rumore). Si allarga su motori, meccanismi, simboli, TF, uscita; ogni allargamento si paga con una prova fuori campione. Si sceglie il CENTRO dell'altopiano, mai il picco.
 - **Certificato di morte**: un candidato non e' MORTO se manca anche solo uno di: PF; n e DD; gestione dell'uscita messa ad asse; simboli gemelli; TF cambiato. Altrimenti: NON ANCORA MISURATO.
 - **Frequenza**: pavimento di 1,00 operazione/giorno per FAMIGLIA di sedie (non per sedia).
 - **Criteri prima dei numeri**: si cambiano prima dei dati, mai dopo.
-- **Dove si gira**: i round sul PC di backtest, mai sul VPS mentre una challenge e' viva. Il runner del VPS e' in sola lettura.
+- **Dove si gira**: i round sul PC di backtest, mai sul VPS mentre un conto prop opera (vale anche per la Free Trial). Il runner notturno del VPS fa solo letture; la sua corsia dei round resta vuota.
 - **Verifica**: ogni numero con la fonte o "NON MISURATO"; un contro-esempio costruito prima di consegnare una misura.
 
 ## 4. IL GUARDIAN (protezione del conto) -- fatti
 - Pausa giornaliera (soglia 3,5% nel preset FTMO): blocca gli INGRESSI nuovi; **non chiude** le posizioni gia' aperte.
-- Cap sul rischio aperto (C1) vivo. **Tetto per cluster**: input `InpMaxClusterRiskPct` (default 0 = spento); la lista dei cluster e' `InpClusterMappa`; **nessun EA oggi la legge**, quindi non protegge. Una funzione di "rischio netto per valuta" non esiste.
-- La sedia PostNews: `InpRestrictToNews`, `InpNewsFile`, `InpNewsTitleMatch`, `InpActionHour/Min`, `InpExpiryHour/Min` (ore server, vanno spostate di +1 h d'inverno).
+- Cap sul rischio aperto (C1): acceso (4,00% nel preset FTMO), ma **non somma l'ingresso nuovo**: il 01/10 e' stato superato due volte (picco 4,85%), `report/AUDIT_RISCHIO_FLOTTA_2026-10-01.md`. **Tetto per cluster**: input `InpMaxClusterRiskPct` (default 0 = spento); la lista dei cluster e' `InpClusterMappa`; **nessun EA oggi la legge**, quindi non protegge. Una funzione di "rischio netto per valuta" non esiste.
+- La sedia PostNews: `InpRestrictToNews`, `InpNewsFile`, `InpNewsTitleMatch`, `InpActionHour/Min`, `InpExpiryHour/Min` (ore server BCM: d'inverno vanno spostate di +1 h, evento per evento secondo il calendario USA/UE, `report/POSTNEWS_TRE_SEDIE_2026-10-02.md`).
 
 ## 5. FATTI MISURATI (con fonte nel repo)
 | Fatto | Valore | Fonte |
 |---|---|---|
-| Sedia EMA200 su U30USD H1 (magic 771531) | PF 1,52 OOS su 257 posizioni (517 deal), UN solo regime; l'unica sedia che passa i cancelli alla lettera | CLAUDE.md, report/EMA200_GEMELLI_STATO_2026-10-03.md |
+| Sedia EMA200 su U30USD H1 (magic 771531) | PF 1,52 OOS su 257 posizioni (517 deal), IS 1,20 su 132 posizioni (237 deal); UN solo regime; costo FRAGILE (40x solo allo spread di sessione). Il repo la indica come l'unica sedia che passa i cancelli alla lettera | CLAUDE.md, report/EMA200_GEMELLI_STATO_2026-10-03.md |
 | EMA200, rimbalzo al primo tocco M5-H1 | piatto e sotto il random walk (0,649-0,786 contro 0,800) | report/EMA200_RIMBALZO_MISURA_2026-10-01.md |
 | EMA200 a H4, 6 coppie forex 2005-2020 | NULLO (P 0,487/0,470 contro 0,478/0,491); rimbalzo forte escluso, effetto piccolo non escluso; D1 NON ANCORA MISURATO | report/EMA200_H4_D1_FOREX28_MISURA_2026-10-03.md |
-| Confluenza H4/M3 (SuperWave) come timing | NULLO su DAX e oro; costo 2-4x l'effetto | report/H4_M3_CONFLUENZA_MISURA_2026-10-01.md |
+| Confluenza H4/M3 (SuperWave) come timing | NULLO su DAX e oro (DAX long al filo della soglia); il costo pesa 2-4 volte piu' di qualunque effetto | report/H4_M3_CONFLUENZA_MISURA_2026-10-01.md |
 | Storico tick sugli indici BCM | dal 26/09/2024 (22 mesi), UN solo regime | report/APERTURE_*_MAPPA_2026-10-03.md |
-| Breakout/retest di apertura | il TF del grafico e' inerte (range letto su M1) | report/APERTURE_DAX_MAPPA_2026-10-03.md |
-| Dow 770202 in fase con la cash | PF 0,886 / 0,916 / 0,836 | report/APERTURE_DOW_MAPPA_2026-10-03.md |
+| Breakout/retest di apertura | il TF del grafico e' inerte su 4 modi d'ingresso su 6 coi default (range letto su M1 cablato) | report/APERTURE_DAX_MAPPA_2026-10-03.md |
+| Dow 770202 in fase con la cash | estate PF 0,886 su 84 pos. / inverno alla cash 0,916 su 40 / serie "come FTMO" 0,836 su 123 (sospeso) | report/APERTURE_DOW_MAPPA_2026-10-03.md |
 | Nasdaq 770260 | IS 1,221 / OOS 1,215 su 82 / 102 posizioni (merito sospeso sotto 150) | report/APERTURE_NASDAQ_MAPPA_2026-10-03.md |
 | Bulge (forex) | edge NON dimostrato: backtest PF 0,87/0,82; antenato forward 0,83 su 297; commissioni+swap 56% della perdita forward | report/BULGE_COME_MIGLIORARLO_2026-10-03.md |
-| Trial 01-02/10 | 13 posizioni, netto -8.811,59 (-5,51%); due DAX = 72,7% della perdita; probabilita' sotto i contratti 5,8% = ZONA GRIGIA | report/TRIAL_SFORTUNA_O_EA_2026-10-03.md |
+| Trial 01-02/10 | 13 posizioni, netto -8.811,59 (-5,51%); due DAX = 72,7% della perdita. Sulle sedie con contratto (senza Bulge, che non ne ha; osservato -4,34% in 2 giorni) un esito cosi' capita nel 5,8% delle coppie di giorni [IC 3,3-9,4] = ZONA GRIGIA; ogni sedia presa da sola: NON ANCORA MISURATO | report/TRIAL_SFORTUNA_O_EA_2026-10-03.md |
 
 ## 6. CHIUSO (non si riapre senza una tesi nuova)
 Vedi `docs/gemini/MEMORIA_CONDIVISA.md` sezione 2 (uscite del long DAX 770101, short DAX alla cella specchio, EMA200 oro H4 per rischio, ecc.).
