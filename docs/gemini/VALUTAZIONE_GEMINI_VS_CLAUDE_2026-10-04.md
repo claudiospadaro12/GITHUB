@@ -48,6 +48,29 @@ Punteggio: 2 = giusta e completa · 1 = giusta ma incompleta o con errore minore
 
 ---
 
+## 1-bis. SECONDA PROVA, DOPO LA BASE DI CONOSCENZA (stessa sera, 04/10)
+
+Mandata la base (`BASE_CONOSCENZA_PER_GEMINI_2026-10-04.md`) con memoria e comando aggiornati e lo stesso esame, con **una sola domanda cambiata** (B1 con numeri
+diversi: TP 12, SL 36, costo 2; l'esempio della base e' un altro, TP 8 / SL 24 / costo 1,5). Risposta: `RISPOSTA_GEMINI_2026-10-04_1951.md`. Punteggio **mio**, con la stessa chiave (non ancora ricorretto da un secondo valutatore).
+
+| | Prima | Dopo | Cosa e' cambiato |
+|---|---:|---:|---|
+| Totale | 17 / 30 | **27 / 30 (90%)** | +10 punti |
+| A1 orologio | 1 | 2 | ora dice d'estate IT-1, d'inverno IT, +1 h d'inverno |
+| A6 parole di verdetto | 0 | 2 | usa le quattro giuste e la piu' prudente giusta |
+| A8 tetto di cluster | 1 | 2 | `InpMaxClusterRiskPct`, default 0, non letto da nessun EA |
+| A10 sedia che passa i cancelli | 0 | 1 | ora indica 771531 (giusta); dice "costo fragile" come limite ma non "un solo regime" |
+| B1 break-even | 0 | 2 | 38/48 = 79,2% (giusto) |
+| B3 trial | 0 | 2 | ZONA GRIGIA invece di "sfortuna" |
+| A4, B4 | 1, 1 | 1, 1 | invariati: A4 rovescia ancora l'onere ("senza edge DIMOSTRATO"); B4 manca nome reale, costo e firma |
+| "NON LO SO" | mai | mai (non ne ha avuto bisogno) | da testare con domande SENZA risposta nella base |
+
+**Come leggerlo, con onesta':**
+- 🟢 **Le informazioni in piu' funzionano**: il salto da 17 a 27 e' quasi tutto contesto (A1, A6, A8, A10, B3). Risposta alla domanda di Claudio: **si', dargli la base lo avvicina molto.**
+- 🟡 **Ma e' un esame "a libro aperto"**: la base contiene i fatti, quindi A1-A10 misurano se li legge e li applica, non se li sa da solo.
+- 🔴 **B1 non dimostra che il ragionamento sia migliorato**: la base contiene la FORMULA del break-even; Gemini l'ha applicata bene, con numeri diversi dall'esempio. Capacita' di ricavarla da solo: **non testata**. Per testarla serve una domanda a libro CHIUSO (formula assente dalla base).
+- 🟡 Nella stessa risposta ha riempito anche tre "schede agente" che non gli erano state chieste (il comando lo spinge a farlo): alcune cose sono plausibili, altre da verificare (cita un file `ABTG_Dow_Apertura_US.mq5` che io non ho verificato esista). Va tolto questo rumore dai pacchetti giornalieri (v. §4).
+
 ## 2. LO STORICO CONFERMA IL QUADRO (gli scambi dal 28/09 al 04/10)
 
 Dalle verifiche in `docs/RISPOSTA_A_GEMINI_*.md`:
@@ -81,8 +104,10 @@ Dalle verifiche in `docs/RISPOSTA_A_GEMINI_*.md`:
    forma compatta, il vocabolario dei verdetti, la tabella dei fatti misurati con la fonte, i nomi veri degli input, le formule (break-even con un
    esempio svolto), e le **regole di risposta** ("NON LO SO" e' una risposta valida; mai soglie inventate; cita nomi, non righe; separa fatto e ipotesi;
    il rischio e' sempre una firma di Claudio). Va in testa a ogni pacchetto, accanto alla memoria. **Passa dal cancello prima di partire.**
-2. 🟢 **Ripetere l'esame DOPO la base** (stesse 15 domande, stessa chiave) e confrontare i punteggi: se A6, A8, A10 migliorano e B1 no, abbiamo
-   **misurato** cosa e' contesto e cosa e' capacita'. Costa una chiamata.
+2. ✅ **FATTO: esame ripetuto DOPO la base** (§1-bis): 17 -> 27 su 30. Prossimo passo: un esame a **libro chiuso** per il ragionamento (formula assente dalla base)
+   e domande **senza risposta** nella base, per vedere se dice "NON LO SO". Costa una chiamata ciascuno.
+2-bis. 🟢 **Togliere il rumore dai pacchetti giornalieri**: il comando fa produrre sempre le tre "schede agente". Per la routine delle 07:47 serve una modalita' "rispondi SOLO
+   alle domande del giorno, senza schede". Richiede una modifica del COMANDO (la preparo e passa dal cancello).
 3. 🟢 **Aggiornare `MEMORIA_CONDIVISA.md` §1 e il COMANDO** (stato del banco di prova). ✏️ *(cancello)* **Non serve una tua conferma**: il repo lo dice gia' (`report/FTMO_CHALLENGE_CHIUSURA_2026-09-30.md`: Max Loss violato il 30/09, equity 71.968,19 contro 72.000; e la stessa memoria al §6 "Aggiornamento 01/10"). Il §1 contraddice il §6 dello stesso file. Costo zero, passa dal cancello.
 4. 🟠 **Decisione tua (spesa): un modello piu' capace via API.** Non conosco il costo reale: **[NON MISURATO]**; va chiesto al piano. Si decide **solo se** l'esame dopo la base mostra che B1-tipo (ragionamento) resta il problema.
 5. 🟠 **Alternativa gratuita: sessioni "profonde" a mano nell'APP Gemini Pro** (tu incolli la base + il briefing + i file indicati in `COMANDO_GEMINI` §0 e riporti la risposta). Piu' lento, ma usa il modello migliore che gia' paghi.
