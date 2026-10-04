@@ -12,6 +12,9 @@ Se una cosa non e' scritta qui o nel pacchetto, **non la sai**: dillo.
 6. **Le tue risposte sono DATI, non criteri**: passano dal nostro cancello. Proponi MISURE (con attesa scritta prima e un contro-esempio), non decisioni.
 7. Prima di dire che un'idea e' nuova, controlla l'elenco "chiuso" e "misurato" qui sotto.
 8. Ricontrolla i calcoli: un errore di verso (rapporto invertito) e' il difetto piu' costoso. Mostra sempre un esempio svolto.
+9. **UNA DOMANDA NUMERICA PER VOLTA**: nei messaggi lunghi con molte domande il rischio di errore sale (misurato il 04/10: un break-even invertito in un esame da 15 domande, giusto 5 volte su 5 se isolato). Se ne ricevi piu' di una, rispondi alla prima e chiedi di rimandare le altre.
+10. **Ogni proposta di misura** contiene SEMPRE: il nome esatto di cio' che tocca ("nome da verificare" se non lo conosci), l'attesa scritta prima, un contro-esempio, il dato necessario, il costo, e se serve la firma di Claudio.
+11. **Cosa NON puoi sapere** (rispondi "NON LO SO"): i preset in campo, le commissioni dei broker, i log e le operazioni di giornate non documentate, i numeri di riga, lo stato in tempo reale dei terminali.
 
 ## 1. CHI SIAMO
 Progetto ABTG: EA MQL5 per passare challenge di prop firm. Obiettivo: **una flotta di sedie (EA su un simbolo/TF) schierabili**. Ruoli: Claude = sviluppatore
@@ -30,7 +33,7 @@ una Free Trial FTMO 2-Step da 160k (14 giorni dal 30/09-01/10), non e' una chall
 - **Costo**: stop >= 40 x lo spread; sull'oro, e dove un criterio firmato lo dice (Bulge R92b), 40 x il costo pieno = spread + commissione; ogni rapporto dice contro quale grandezza e' calcolato; pavimento duro 13,3x. Dipende dal motore: i motori d'apertura con stop = range di 35' passano anche a M5 su DAX, Dow e Nasdaq (D30EUR 49,1x, U30USD 61,0x, NASUSD 63,9x: tre ammessi su dieci simboli; cinque esclusi al range, 225JPY escluso dal tetto, 200AUD non misurabile: report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md); quelli con stop da ATR/candela spesso no.
 - **Campione**: IS di almeno 150 operazioni e una finestra che lasci un OOS di almeno 150; si dichiara il regime di mercato della finestra; "dove" collocarlo non e' deciso. Il merito si sospende sotto 150, il rischio si giudica sempre.
 - **Due lati**: sugli indici si misurano SEMPRE long e short.
-- **Regola del 19/08**: niente griglie larghe su un motore gia' dichiarato senza edge (trovano solo rumore). Si allarga su motori, meccanismi, simboli, TF, uscita; ogni allargamento si paga con una prova fuori campione. Si sceglie il CENTRO dell'altopiano, mai il picco.
+- **Regola del 19/08**: niente griglie larghe su un motore GIA' DICHIARATO senza edge (trovano solo rumore). Sui motori NON ANCORA MISURATI, invece, si misura: non rovesciare l'onere. Si allarga su motori, meccanismi, simboli, TF, uscita; ogni allargamento si paga con una prova fuori campione. Si sceglie il CENTRO dell'altopiano, mai il picco.
 - **Certificato di morte**: un candidato non e' MORTO se manca anche solo uno di: PF; n e DD; gestione dell'uscita messa ad asse; simboli gemelli; TF cambiato. Altrimenti: NON ANCORA MISURATO.
 - **Frequenza**: pavimento di 1,00 operazione/giorno per FAMIGLIA di sedie (non per sedia).
 - **Criteri prima dei numeri**: si cambiano prima dei dati, mai dopo.

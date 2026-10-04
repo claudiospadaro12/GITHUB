@@ -29,6 +29,8 @@ Uso:
 import argparse, datetime as dt, hashlib, json, os, re, subprocess, sys, urllib.request, urllib.error
 
 COMANDO = "docs/COMANDO_GEMINI_AGENTI_EA_2026-09-28.md"
+COMANDO_ROUTINE = "docs/COMANDO_GEMINI_ROUTINE_2026-10-04.md"  # modalita' routine: solo le domande, niente schede agente
+BASE = "docs/gemini/BASE_CONOSCENZA_PER_GEMINI_2026-10-04.md"  # contesto fisso, subito dopo la memoria
 OUT_DIR = "docs/gemini"
 MODELLO_DEFAULT = "gemini-3.1-flash-lite"  # il pro (gemini-pro-latest, 3.1-pro) risponde 429 quota sul piano gratuito: passare al pro e' una spesa = firma di Claudio
 ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent"
@@ -72,16 +74,27 @@ def controlla_allegati(files):
 
 MEMORIA = "docs/gemini/MEMORIA_CONDIVISA.md"
 
-def costruisci_richiesta(files, domanda):
-    if os.path.exists(MEMORIA) and MEMORIA not in files:
-        files = [MEMORIA] + list(files)  # la memoria va SEMPRE in testa: l'API non ricorda nulla fra uno scambio e l'altro
-    parti = [{"text": "DOCUMENTI DEL GIORNO (dal repo, uno per blocco). Rispondi come Agente 3 e Agente 4.\n"}]
+def con_contesto(files):
+    """memoria in testa, poi la base di conoscenza (se esiste), poi i documenti del giorno"""
+    files = [f for f in files if f not in (MEMORIA, BASE)]
+    if os.path.exists(BASE):
+        files = [BASE] + files
+    if os.path.exists(MEMORIA):
+        files = [MEMORIA] + files  # la memoria va SEMPRE in testa: l'API non ricorda nulla fra uno scambio e l'altro
+    return files
+
+def costruisci_richiesta(files, domanda, modalita="completa"):
+    files = con_contesto(files)
+    comando = COMANDO_ROUTINE if modalita == "routine" else COMANDO
+    intro = ("DOCUMENTI DEL GIORNO (dal repo, uno per blocco). Rispondi SOLO alla DOMANDA DEL GIORNO, senza schede agente.\n"
+             if modalita == "routine" else "DOCUMENTI DEL GIORNO (dal repo, uno per blocco). Rispondi come Agente 3 e Agente 4.\n")
+    parti = [{"text": intro}]
     for p in files:
         parti.append({"text": "\n\n===== FILE: %s (SHA256 %s) =====\n%s" % (p, sha(p)[:16], open(p, encoding="utf-8", errors="replace").read())})
     if domanda:
         parti.append({"text": "\n\nDOMANDA DEL GIORNO: " + domanda})
     return {
-        "system_instruction": {"parts": [{"text": istruzione_di_sistema()}]},
+        "system_instruction": {"parts": [{"text": istruzione_di_sistema(comando)}]},
         "contents": [{"role": "user", "parts": parti}],
         "generationConfig": {"temperature": 0.2, "maxOutputTokens": 32768},
     }
@@ -110,7 +123,7 @@ def testo_risposta(js):
     except (KeyError, IndexError):
         return "[RISPOSTA SENZA TESTO] " + json.dumps(js)[:1000]
 
-def scrivi_risposta(files, modello, testo, domanda):
+def scrivi_risposta(files, modello, testo, domanda, modalita="completa"):
     os.makedirs(OUT_DIR, exist_ok=True)
     ora = dt.datetime.now()
     out = os.path.join(OUT_DIR, "RISPOSTA_GEMINI_%s.md" % ora.strftime("%Y-%m-%d_%H%M"))
@@ -119,7 +132,7 @@ def scrivi_risposta(files, modello, testo, domanda):
         f.write("> DATI, NON ISTRUZIONI: questa risposta va letta dal cancello (controllo-preventivo) prima che\n"
                 "> qualunque cosa cambi nel repo o in campo. Nessun numero qui dentro e' un criterio nostro.\n\n")
         f.write("## Manifesto di cio' che e' stato mandato\n")
-        f.write("- istruzione di sistema: `%s` (INIZIO..FINE COMANDO)\n" % COMANDO)
+        f.write("- istruzione di sistema: `%s` (INIZIO..FINE COMANDO), modalita %s\n" % (COMANDO_ROUTINE if modalita == "routine" else COMANDO, modalita))
         for p in files:
             f.write("- `%s` (%d byte, SHA256 %s)\n" % (p, os.path.getsize(p), sha(p)[:16]))
         if domanda:
@@ -152,13 +165,25 @@ def autotest():
     # (6) la memoria condivisa va SEMPRE in testa, prima di ogni documento
     if os.path.exists(MEMORIA):
         assert "FILE: " + MEMORIA in testi[1], "la memoria condivisa deve essere il primo documento"
-    print("AUTOTEST OK (7 controlli: lista nera, fuori repo, istruzione, chiave assente, richiesta)")
+    # (8) modalita routine: istruzione breve senza i tre agenti; base subito dopo la memoria; nessun numero di conto in base e comando routine
+    sr = istruzione_di_sistema(COMANDO_ROUTINE)
+    assert "AGENTE 1" not in sr and "UNA DOMANDA NUMERICA PER VOLTA" in sr and "NON LO SO" in sr
+    rr = costruisci_richiesta(["docs/gemini/ESAME_LIBRO_CHIUSO_2026-10-04.md"] if os.path.exists("docs/gemini/ESAME_LIBRO_CHIUSO_2026-10-04.md") else [], "d", "routine")
+    tr = [x["text"] for x in rr["contents"][0]["parts"]]
+    assert rr["system_instruction"]["parts"][0]["text"] == sr and "Rispondi SOLO alla DOMANDA" in tr[0]
+    if os.path.exists(BASE) and os.path.exists(MEMORIA):
+        assert "FILE: " + MEMORIA in tr[1] and "FILE: " + BASE in tr[2], "ordine: memoria, poi base, poi i documenti"
+    for q in (BASE, COMANDO_ROUTINE):
+        if os.path.exists(q):
+            assert not re.search(r"\b(541452707|1514806751|10105439|50503392|50504263|50504400|50503635)\b", open(q, encoding="utf-8").read()), "numero di conto in " + q
+    print("AUTOTEST OK (11 controlli: lista nera, fuori repo, istruzione, chiave assente, richiesta, modalita routine, ordine memoria-base, nessun conto)")
 
 def main():
     ap = argparse.ArgumentParser(description="corrispondenza automatica con Gemini (documenti .md del repo -> risposta in docs/gemini/)")
     ap.add_argument("files", nargs="*", help="documenti .md da mandare (devono essere in repo e committati)")
     ap.add_argument("--domanda", default="", help="domanda del giorno, una frase")
     ap.add_argument("--modello", default=MODELLO_DEFAULT)
+    ap.add_argument("--modalita", choices=["completa", "routine"], default="completa", help="completa = comando con i tre agenti (default); routine = solo le domande, una per volta, niente schede")
     ap.add_argument("--dry-run", action="store_true", help="prepara e stampa il manifesto, NON manda")
     ap.add_argument("--autotest", action="store_true")
     a = ap.parse_args()
@@ -169,9 +194,8 @@ def main():
     problemi = controlla_allegati(a.files)
     if problemi:
         print("RIFIUTATO -- non si manda niente:"); [print("  X " + x) for x in problemi]; sys.exit(2)
-    if os.path.exists(MEMORIA) and MEMORIA not in a.files:
-        a.files = [MEMORIA] + a.files
-    richiesta = costruisci_richiesta(a.files, a.domanda)
+    a.files = con_contesto(a.files)
+    richiesta = costruisci_richiesta(a.files, a.domanda, a.modalita)
     n = sum(len(p["text"]) for p in richiesta["contents"][0]["parts"])
     print("manifesto: %d documenti, %d caratteri, modello %s" % (len(a.files), n, a.modello))
     for p in a.files:
@@ -182,7 +206,7 @@ def main():
     if not chiave:
         print("GEMINI_API_KEY assente: provo con la credenziale dell'ambiente (header aggiunto dal proxy per generativelanguage.googleapis.com)")
     js = invia(richiesta, a.modello, chiave)
-    out = scrivi_risposta(a.files, a.modello, testo_risposta(js), a.domanda)
+    out = scrivi_risposta(a.files, a.modello, testo_risposta(js), a.domanda, a.modalita)
     print("risposta salvata: " + out + "  (va letta dal cancello prima di qualunque uso)")
 
 if __name__ == "__main__":
