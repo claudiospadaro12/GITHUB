@@ -1,0 +1,64 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_RETRY_v1
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v7_RETRY
+pin             : bda3c3641c9c61ff5d1499eff601ab80c62a6fd8
+data            : 2026-10-04 22:21:22   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_EMA200
+file prova      : EMAGEM2_c_NASUSD_LS_tf.txt   (22506 byte, dal pin)
+etichetta       : EMAGEM2c
+simbolo         : NASUSD
+periodo         : H1
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+driver          : walkforward_generico_RETRY.ps1   (con la riprova; Tester\cache NON toccata)
+riprova         : MaxRiprove 1   attesa 20 s   scadenza 2026-10-04 22:47:36
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_EMA200\ABTG_EMA200_NASUSD_IS_EMAGEM2c.csv
+  righe : 5
+    Pass 0    Profit -15586.68    PF 0.72771    Equity DD % 17.4535    Trades 518
+    Pass 1    Profit -8360.66     PF 0.75461    Equity DD % 15.3474    Trades 244
+    Pass 2    Profit -2773.33     PF 0.73491    Equity DD % 5.6396     Trades 143
+    Pass 3    Profit -1442.46     PF 0.74166    Equity DD % 3.8007     Trades 57
+    Pass 4    Profit -5729.04     PF 0.32068    Equity DD % 5.9358     Trades 41
+  ESITO : LETTO -- 5 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_EMA200\ABTG_EMA200_NASUSD_OOS_EMAGEM2c.csv
+  righe : 5
+    Pass 0    Profit 8553.06      PF 1.09227    Equity DD % 5.9869     Trades 1043
+    Pass 1    Profit -15472.42    PF 0.69317    Equity DD % 20.9728    Trades 508
+    Pass 2    Profit -6815.94     PF 0.77086    Equity DD % 11.7607    Trades 285
+    Pass 3    Profit -10220.07    PF 0.48831    Equity DD % 10.6069    Trades 133
+    Pass 4    Profit -3867.23     PF 0.73427    Equity DD % 8.4984     Trades 113
+  ESITO : LETTO -- 5 righe, tutte con Trades > 0
+
+--- RIPROVE DEL DRIVER (gambe RIPROVATE: 0) ---
+  RIPROVE DEL DRIVER -- MARCATORE_WALKFORWARD_GENERICO_v7_RETRY
+  data       : 2026-10-04 22:21:27 -> 2026-10-04 22:27:46   (ora del PC)
+  pc         : DESKTOP-H4D7CAJ
+  EA         : ABTG_EMA200   simbolo NASUSD   suffisso '_EMAGEM2c'
+  MaxRiprove : 1   attesa fra i tentativi 20 s   scadenza 2026-10-04 22:47:36
+  giornale   : C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\Tester\logs\AAAAMMGG.log, letto per finestra di tentativo (millisecondi; data dal nome del file)
+  cache      : Tester\cache NON toccata da questo driver (mai svuotata, mai letta). La riga 'cache' di ogni tentativo e' quella del GIORNALE.
+  si riprova : SOLO 'OnTesterInit works too long. Tester cannot be initialized.' senza CSV, una volta per gamba
+  GAMBA IS  | tentativo 1 -> PARTITA (from 2024.09.26 00:00 to 2025.06.09 00:00 su NASUSD: finestra = dichiarata); CSV: presente (5 righe); giornale: 32 righe in questo tentativo, 119 di prima ignorate; cache: riga 'saved to cache file' presente | ESITO GAMBA: CSV PRODOTTO
+  GAMBA OOS | tentativo 1 -> PARTITA (from 2025.06.10 00:00 to 2026.06.30 00:00 su NASUSD: finestra = dichiarata); CSV: presente (5 righe); giornale: 31 righe in questo tentativo, 151 di prima ignorate; cache: riga 'saved to cache file' presente | ESITO GAMBA: CSV PRODOTTO
+  RIPROVATE  : 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO

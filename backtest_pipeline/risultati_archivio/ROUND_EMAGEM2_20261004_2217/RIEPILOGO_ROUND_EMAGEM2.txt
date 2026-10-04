@@ -1,0 +1,72 @@
+RIEPILOGO ROUND EMAGEM2 (round NUOVO con magic 7669xx e tolleranza di banco dichiarata prima dei numeri, dopo il cancello incrociato rosso al centesimo del round EMAGEM del 03/10) -- EMAGEM2_a (ANCORA U30USD H1, asse InpMagic 766901/766902), EMAGEM2_b (D30EUR, asse InpTF, magic 766911) ed EMAGEM2_c (NASUSD, asse InpTF, magic 766921): la cella a due lati della sedia 771531 di ABTG_EMA200. Grafico H1, Modello 4 (tick reali), deposito 100000, rischio 1,00 di banco, finestra 2024.09.26-2026.06.30, IS fino al 2025.06.09, OOS dal 2025.06.10. Driver con la riprova (RIGA_ROUND_VPS_RETRY.ps1 + walkforward_generico_RETRY.ps1, MaxRiprove 1, attesa 20 s, scadenza 2026-10-04 22:47:36).
+data: 2026-10-04 22:17:36
+fine: 2026-10-04 22:27:50   durata minuti: 10   (dichiarato [STIMA] circa 10-34 minuti, circa 2,5 in piu per gamba riprovata, tetto 40)
+durata per job (secondi, driver compreso): EMAGEM2a 122 | EMAGEM2b 102 | EMAGEM2c 386
+pc  : DESKTOP-H4D7CAJ   terminale ammesso: C:\Program Files\BCM Markets MT5 Terminal (demo 50503392). VPS VMI3047753 e tutte le sue cartelle dati NON toccati; nessun processo chiuso, nessuna cache svuotata.
+pin : bda3c3641c9c61ff5d1499eff601ab80c62a6fd8
+GUARDIA EA sui grafici salvati: 103 letti, zero EA attaccati (altrimenti la riga non partiva)
+
+STATO: EMAGEM2a=OK EMAGEM2b=OK EMAGEM2c=OK
+CANCELLO INCROCIATO (T1 + G1 di EMAGEM2a): PASS   T1 PASS (IS 4585.40 / 1.20110 / 5.7325 / 237 e OOS 23321.47 / 1.52365 / 7.8323 / 517 riprodotti DENTRO LA TOLLERANZA DI BANCO su tutte e due le celle gemelle: Trades e DD esatti, Profit entro 1,00 EUR, PF entro 0,0002) e G1 PASS (le due celle gemelle uguali dentro la tolleranza su Profit, Expected Payoff, PF, Recovery Factor, Sharpe, DD e Trades). RESIDUI DENTRO LA TOLLERANZA (4, si scrivono, nessun giudizio): OOS magic 766902 Profit [23321.46] contro noto [23321.47] (scarto 0.01) ; OOS gemelle Profit [23321.47] contro [23321.46] (scarto 0.01) ; OOS gemelle Expected Payoff [45.10923] contro [45.10921] (scarto 0.00002) ; OOS gemelle Sharpe Ratio [8.16765] contro [8.16764] (scarto 0.00001)
+(OK = catena integra: motore e prova = pin, referto fresco = riga, CSV completi, asse, magic e pin arrivati, finestre = dichiarate | OK_RIPROVATO = come OK ma con una gamba salvata al secondo tentativo dal driver, RILIEVO | KO = 2 gambe senza CSV a fine job (morte due volte, o riprova non partita per la scadenza) | MISTO = una con il CSV e una senza, NON e un risultato | NV = non verificabile o contraddittorio, col MOTIVO | NON LANCIATO = tetto)
+
+EMAGEM2a OK   rc 0   durata 122 s   giornale: intestazioni 2 partite 2 morte 0   RIPROVE: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;   OnTesterInit works too long: 0 righe   pin numerici confrontati: _IS 78 _OOS 78 (attesi 78 per gamba, piu 2 stringhe NON confrontate e l asse)   finestra girata: [from 2024.09.26 00:00 to 2025.06.09 00:00 su U30USD: = IS dichiarata] [from 2025.06.10 00:00 to 2026.06.30 00:00 su U30USD: = OOS dichiarata]
+   CLASSE 166/892: motore = pin (SHA256, EA + include + walkforward_generico_RETRY + RIGA_ROUND_VPS_RETRY)
+   prova = pin (SHA256)   direttive, input, asse, due lati, rischio e magic: = riga (42 input, asse InpMagic, due lati e rischio 1, nessuna @DEPOSITO)
+   referto: pin bda3c3641c9c61ff5d1499eff601ab80c62a6fd8, macchina DESKTOP-H4D7CAJ, terminale C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe, deposito 100000, modello 4, driver walkforward_generico_RETRY.ps1, riprova [MaxRiprove 1   attesa 20 s   scadenza 2026-10-04 22:47:36] = riga
+   RIPROVE del driver: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;
+   _IS: fresco 2 righe, Trades>0 su 2; asse InpMagic [766901/766902] ok
+   _OOS: fresco 2 righe, Trades>0 su 2; asse InpMagic [766901/766902] ok
+
+EMAGEM2b OK   rc 0   durata 102 s   giornale: intestazioni 2 partite 2 morte 0   RIPROVE: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;   OnTesterInit works too long: 0 righe   pin numerici confrontati: _IS 195 _OOS 195 (attesi 195 per gamba, piu 2 stringhe NON confrontate e l asse)   finestra girata: [from 2024.09.26 00:00 to 2025.06.09 00:00 su D30EUR: = IS dichiarata] [from 2025.06.10 00:00 to 2026.06.30 00:00 su D30EUR: = OOS dichiarata]
+   CLASSE 166/892: motore = pin (SHA256, EA + include + walkforward_generico_RETRY + RIGA_ROUND_VPS_RETRY)
+   prova = pin (SHA256)   direttive, input, asse, due lati, rischio e magic: = riga (42 input, asse InpTF, due lati e rischio 1, nessuna @DEPOSITO)
+   referto: pin bda3c3641c9c61ff5d1499eff601ab80c62a6fd8, macchina DESKTOP-H4D7CAJ, terminale C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe, deposito 100000, modello 4, driver walkforward_generico_RETRY.ps1, riprova [MaxRiprove 1   attesa 20 s   scadenza 2026-10-04 22:47:36] = riga
+   RIPROVE del driver: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;
+   _IS: fresco 5 righe, Trades>0 su 5; asse InpTF [30/16385/16386/16387/16388] ok
+   _OOS: fresco 5 righe, Trades>0 su 5; asse InpTF [30/16385/16386/16387/16388] ok
+
+EMAGEM2c OK   rc 0   durata 386 s   giornale: intestazioni 2 partite 2 morte 0   RIPROVE: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;   OnTesterInit works too long: 0 righe   pin numerici confrontati: _IS 195 _OOS 195 (attesi 195 per gamba, piu 2 stringhe NON confrontate e l asse)   finestra girata: [from 2024.09.26 00:00 to 2025.06.09 00:00 su NASUSD: = IS dichiarata] [from 2025.06.10 00:00 to 2026.06.30 00:00 su NASUSD: = OOS dichiarata]
+   CLASSE 166/892: motore = pin (SHA256, EA + include + walkforward_generico_RETRY + RIGA_ROUND_VPS_RETRY)
+   prova = pin (SHA256)   direttive, input, asse, due lati, rischio e magic: = riga (42 input, asse InpTF, due lati e rischio 1, nessuna @DEPOSITO)
+   referto: pin bda3c3641c9c61ff5d1499eff601ab80c62a6fd8, macchina DESKTOP-H4D7CAJ, terminale C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe, deposito 100000, modello 4, driver walkforward_generico_RETRY.ps1, riprova [MaxRiprove 1   attesa 20 s   scadenza 2026-10-04 22:47:36] = riga
+   RIPROVE del driver: IS: PARTITA, CSV PRODOTTO; OOS: PARTITA, CSV PRODOTTO;
+   _IS: fresco 5 righe, Trades>0 su 5; asse InpTF [30/16385/16386/16387/16388] ok
+   _OOS: fresco 5 righe, Trades>0 su 5; asse InpTF [30/16385/16386/16387/16388] ok
+
+NUMERI DAI CSV, cella per cella (NESSUN confronto qui, a parte il cancello T1 + G1 sopra; quelli di b e c si scrivono SOLO se il cancello e PASS):
+   EMAGEM2a IS   InpMagic 766901  InpMagic 766901   Trades   237   Profit    4585.40   PF  1.20110   Equity DD % 5.7325
+   EMAGEM2a IS   InpMagic 766902  InpMagic 766902   Trades   237   Profit    4585.40   PF  1.20110   Equity DD % 5.7325
+   EMAGEM2a OOS  InpMagic 766901  InpMagic 766901   Trades   517   Profit   23321.47   PF  1.52365   Equity DD % 7.8323
+   EMAGEM2a OOS  InpMagic 766902  InpMagic 766902   Trades   517   Profit   23321.46   PF  1.52365   Equity DD % 7.8323
+   EMAGEM2b IS   InpTF     30  InpMagic 766911   Trades   507   Profit  -17192.69   PF  0.65696   Equity DD % 19.7560
+   EMAGEM2b IS   InpTF  16385  InpMagic 766911   Trades   295   Profit   -1820.57   PF  0.92758   Equity DD % 11.4973
+   EMAGEM2b IS   InpTF  16386  InpMagic 766911   Trades   149   Profit    4590.41   PF  1.40662   Equity DD % 6.4038
+   EMAGEM2b IS   InpTF  16387  InpMagic 766911   Trades    83   Profit    -468.63   PF  0.94130   Equity DD % 4.1162
+   EMAGEM2b IS   InpTF  16388  InpMagic 766911   Trades    40   Profit     565.41   PF  1.13306   Equity DD % 2.3390
+   EMAGEM2b OOS  InpTF     30  InpMagic 766911   Trades  1210   Profit   -4984.91   PF  0.95382   Equity DD % 14.7708
+   EMAGEM2b OOS  InpTF  16385  InpMagic 766911   Trades   568   Profit  -13800.93   PF  0.78258   Equity DD % 15.1785
+   EMAGEM2b OOS  InpTF  16386  InpMagic 766911   Trades   361   Profit   -7421.01   PF  0.79816   Equity DD % 12.6163
+   EMAGEM2b OOS  InpTF  16387  InpMagic 766911   Trades   209   Profit   -6381.24   PF  0.75344   Equity DD % 7.0008
+   EMAGEM2b OOS  InpTF  16388  InpMagic 766911   Trades   156   Profit     902.24   PF  1.05221   Equity DD % 5.5350
+   EMAGEM2c IS   InpTF     30  InpMagic 766921   Trades   518   Profit  -15586.68   PF  0.72771   Equity DD % 17.4535
+   EMAGEM2c IS   InpTF  16385  InpMagic 766921   Trades   244   Profit   -8360.66   PF  0.75461   Equity DD % 15.3474
+   EMAGEM2c IS   InpTF  16386  InpMagic 766921   Trades   143   Profit   -2773.33   PF  0.73491   Equity DD % 5.6396
+   EMAGEM2c IS   InpTF  16387  InpMagic 766921   Trades    57   Profit   -1442.46   PF  0.74166   Equity DD % 3.8007
+   EMAGEM2c IS   InpTF  16388  InpMagic 766921   Trades    41   Profit   -5729.04   PF  0.32068   Equity DD % 5.9358
+   EMAGEM2c OOS  InpTF     30  InpMagic 766921   Trades  1043   Profit    8553.06   PF  1.09227   Equity DD % 5.9869
+   EMAGEM2c OOS  InpTF  16385  InpMagic 766921   Trades   508   Profit  -15472.42   PF  0.69317   Equity DD % 20.9728
+   EMAGEM2c OOS  InpTF  16386  InpMagic 766921   Trades   285   Profit   -6815.94   PF  0.77086   Equity DD % 11.7607
+   EMAGEM2c OOS  InpTF  16387  InpMagic 766921   Trades   133   Profit  -10220.07   PF  0.48831   Equity DD % 10.6069
+   EMAGEM2c OOS  InpTF  16388  InpMagic 766921   Trades   113   Profit   -3867.23   PF  0.73427   Equity DD % 8.4984
+PERTRADE EMAGEM2a abtg_trades_ABTG_EMA200_U30USD_766901.csv: 517 deal di uscita, gamba OOS, chiusure dal 2025.06.12 13:44:51 al 2026.06.26 15:07:28, righe con magic diverso da 766901: 0. Cella NON identificabile dal file (classe 455): informativo, mai motivo di NULLO da solo.
+PERTRADE EMAGEM2a abtg_trades_ABTG_EMA200_U30USD_766902.csv: 517 deal di uscita, gamba OOS, chiusure dal 2025.06.12 13:44:51 al 2026.06.26 15:07:28, righe con magic diverso da 766902: 0. Cella NON identificabile dal file (classe 455): informativo, mai motivo di NULLO da solo.
+PERTRADE EMAGEM2b abtg_trades_ABTG_EMA200_D30EUR_766911.csv: 156 deal di uscita, gamba OOS, chiusure dal 2025.06.13 01:18:38 al 2026.06.29 00:09:28, righe con magic diverso da 766911: 0. Cella NON identificabile dal file (classe 455): informativo, mai motivo di NULLO da solo.
+PERTRADE EMAGEM2c abtg_trades_ABTG_EMA200_NASUSD_766921.csv: 113 deal di uscita, gamba OOS, chiusure dal 2025.08.04 14:30:13 al 2026.06.29 14:57:24, righe con magic diverso da 766921: 0. Cella NON identificabile dal file (classe 455): informativo, mai motivo di NULLO da solo.
+
+ROUND LANCIATI: 3 su 3   NON LANCIATI (tetto): 0   PARTITI (rc diverso da 1): 3 su 3   MOTORE DIVERSO DAL PIN in 0 job
+CARTELLE DEL DRIVER ATTESE: 3   TROVATE: 3   -> CATENA COMPLETA
+LOG_TESTER: 13 file .log scritti DOPO l avvio (giornali del tester leggibili: 1 su 1). Gambe viste dopo l avvio: 6 (non attribuite: 0); prima dell avvio: 0.
+
+LETTURA: questa riga NON emette un verdetto sul merito e NON applica T2, T3, T4, T5, T6 e le altre letture: sono nei file prova prove/EMAGEM2_a_ancora_U30USD_H1_LS.txt, prove/EMAGEM2_b_D30EUR_LS_tf.txt e prove/EMAGEM2_c_NASUSD_LS_tf.txt (al pin), scritte PRIMA dei numeri, e si leggono sui CSV qui raccolti, e solo sui job con STATO OK o OK_RIPROVATO. Fa UNA lettura: il cancello incrociato T1 + G1 di EMAGEM2a con la tolleranza di banco (riga CANCELLO INCROCIATO qui sopra, residui compresi). Se non e PASS, b e c NON si leggono e NON si stampano. Niente si promuove, nessuna taglia si propone.
+NON MISURATI DA QUESTA RIGA, PER COSTRUZIONE: il merito; il costo T2 (stop contro spread); il DD contro il muro T3; le posizioni (il per-trade conta i deal di uscita, non le posizioni: T4 le conta da li); quale cella ha scritto il per-trade (classe 455: per b e c le 5 celle TF sovrascrivono lo stesso file); la separazione estate/inverno (OROLOGIO, nei file prova); il determinismo di NASUSD (R235: residuo fra corse di 0,97 EUR su un altro EA; G1 di a lo prova solo sul Dow, e la tolleranza lo copre ma NON lo misura); Windows PowerShell 5.1 e MT5 sono quelli di questa macchina.

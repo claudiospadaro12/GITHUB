@@ -1,0 +1,33 @@
+PRE-LETTURA DEL ROUND EMAGEM2 -- backtest_pipeline/risultati_archivio/ROUND_EMAGEM2_20261004_2217
+(cancello T1 + G1 rifatto qui da CSV grezzi, in modo indipendente dalla riga; i criteri sono nei file prova, scritti prima dei numeri)
+
+STATO dalla riga (catena): EMAGEM2a=OK EMAGEM2b=OK EMAGEM2c=OK   (si leggono solo OK e OK_RIPROVATO; il giudizio sui NV/KO/MISTO e' del referto della riga)
+
+CANCELLO INCROCIATO (T1 + G1 di EMAGEM2a): PASS
+   T1 PASS: IS 4585.40 / 1.20110 / 5.7325 / 237 e OOS 23321.47 / 1.52365 / 7.8323 / 517 dentro la TOLLERANZA DI BANCO su tutte e due le gemelle (766901, 766902): Trades e DD esatti, Profit entro 1,00 EUR, PF entro 0,0002; G1 PASS: gemelle uguali dentro la tolleranza su 7 colonne.
+   RESIDUI DENTRO LA TOLLERANZA (4, si scrivono, nessun giudizio): OOS magic 766902 Profit [23321.46] contro noto [23321.47] (scarto 0.01) ; OOS gemelle Profit [23321.47] contro [23321.46] (scarto 0.01) ; OOS gemelle Expected Payoff [45.10923] contro [45.10921] (scarto 0.00002) ; OOS gemelle Sharpe Ratio [8.16765] contro [8.16764] (scarto 0.00001)
+
+EMAGEM2b  (D30EUR)  stato catena OK
+   D30EUR   [IS = 40% 2024.09.26-2025.06.09, OOS = 60% 2025.06.10-2026.06.30; rischio 1,0, DD x 0,65 per il confronto col campo]
+   TF    IS n    IS PF    IS DD    IS profit    OOS n   OOS PF   OOS DD   OOS profit   T3(DD<=10)  T4(n>=300)  attesa H1
+   M30     507  0.65696  19.7560    -17192.69     1210  0.95382  14.7708     -4984.91   NO (>10)    si          
+   H1      295  0.92758  11.4973     -1820.57      568  0.78258  15.1785    -13800.93   NO (>10)    si          PF dentro 0,70-0,95, DD dentro, n IS dentro / OOS dentro
+   H2      149  1.40662   6.4038      4590.41      361  0.79816  12.6163     -7421.01   NO (>10)    si          
+   H3       83  0.94130   4.1162      -468.63      209  0.75344   7.0008     -6381.24   si          no (<300)   
+   H4       40  1.13306   2.3390       565.41      156  1.05221   5.5350       902.24   si          no (<300)   
+   T6 NON scatta (H1 e H2 non hanno OOS PF >= 1,10 con n >= 300, IS PF >= 1,00 e DD <= 10): l'attesa REGGE per questo simbolo. T7: nessuna promozione.
+   T3: celle con DD OOS sopra 10,00: M30, H1, H2 (si scrive nel referto)
+
+EMAGEM2c  (NASUSD)  stato catena OK
+   NASUSD   [IS = 40% 2024.09.26-2025.06.09, OOS = 60% 2025.06.10-2026.06.30; rischio 1,0, DD x 0,65 per il confronto col campo]
+   TF    IS n    IS PF    IS DD    IS profit    OOS n   OOS PF   OOS DD   OOS profit   T3(DD<=10)  T4(n>=300)  attesa H1
+   M30     518  0.72771  17.4535    -15586.68     1043  1.09227   5.9869      8553.06   si          si          
+   H1      244  0.75461  15.3474     -8360.66      508  0.69317  20.9728    -15472.42   NO (>10)    si          PF FUORI 0,70-0,95, DD FUORI, n IS dentro / OOS FUORI
+   H2      143  0.73491   5.6396     -2773.33      285  0.77086  11.7607     -6815.94   NO (>10)    no (<300)   
+   H3       57  0.74166   3.8007     -1442.46      133  0.48831  10.6069    -10220.07   NO (>10)    no (<300)   
+   H4       41  0.32068   5.9358     -5729.04      113  0.73427   8.4984     -3867.23   si          no (<300)   
+   T6 NON scatta (H1 e H2 non hanno OOS PF >= 1,10 con n >= 300, IS PF >= 1,00 e DD <= 10): l'attesa REGGE per questo simbolo. T7: nessuna promozione.
+   T3: celle con DD OOS sopra 10,00: H1, H2, H3 (si scrive nel referto)
+
+NON FATTO QUI: T2 (costo, tabella nel file prova), conta delle POSIZIONI (per-trade: per b e c le 5 celle TF sovrascrivono lo stesso file), lettura per stagione (OROLOGIO).
+NESSUNA CELLA SI PROMUOVE, NESSUNA TAGLIA SI PROPONE (T7).
