@@ -27,7 +27,7 @@ una Free Trial FTMO 2-Step da 160k (14 giorni dal 30/09-01/10), non e' una chall
 
 ## 3. REGOLE DI CASA (firmate)
 - **Orologio**: il server BCM e' UTC+1 FISSO. D'estate = ora italiana - 1; d'inverno = ora italiana. Un orario fisso nel server arma un'ora prima dell'apertura cash d'inverno (DAX dal 26/10, USA dal 02/11). FTMO = ora italiana + 1 tutto l'anno (regolamento FTMO: GMT+2/+3); che cambi l'ora nello stesso giorno dell'Europa e' [NON MISURATO] (settimana 26-30/10/2026).
-- **Costo**: lo stop deve valere almeno 40 x lo spread (sull'oro la convenzione e' 40 x il costo pieno = spread + commissione); pavimento duro 13,3x. Dipende dal motore: i motori d'apertura con stop = range di 35' passano anche a M5 su DAX, Dow e Nasdaq (49-64x; cinque indici su dieci restano esclusi per costo); quelli con stop da ATR/candela spesso no.
+- **Costo**: stop >= 40 x lo spread; sull'oro, e dove un criterio firmato lo dice (Bulge R92b), 40 x il costo pieno = spread + commissione; ogni rapporto dice contro quale grandezza e' calcolato; pavimento duro 13,3x. Dipende dal motore: i motori d'apertura con stop = range di 35' passano anche a M5 su DAX, Dow e Nasdaq (D30EUR 49,1x, U30USD 61,0x, NASUSD 63,9x: tre ammessi su dieci simboli; cinque esclusi al range, 225JPY escluso dal tetto, 200AUD non misurabile: report/MAPPA_COSTO_SIMBOLI_TF_2026-09-24.md); quelli con stop da ATR/candela spesso no.
 - **Campione**: IS di almeno 150 operazioni e una finestra che lasci un OOS di almeno 150; si dichiara il regime di mercato della finestra; "dove" collocarlo non e' deciso. Il merito si sospende sotto 150, il rischio si giudica sempre.
 - **Due lati**: sugli indici si misurano SEMPRE long e short.
 - **Regola del 19/08**: niente griglie larghe su un motore gia' dichiarato senza edge (trovano solo rumore). Si allarga su motori, meccanismi, simboli, TF, uscita; ogni allargamento si paga con una prova fuori campione. Si sceglie il CENTRO dell'altopiano, mai il picco.
@@ -45,7 +45,7 @@ una Free Trial FTMO 2-Step da 160k (14 giorni dal 30/09-01/10), non e' una chall
 ## 5. FATTI MISURATI (con fonte nel repo)
 | Fatto | Valore | Fonte |
 |---|---|---|
-| Sedia EMA200 su U30USD H1 (magic 771531) | PF 1,52 OOS su 257 posizioni (517 deal), IS 1,20 su 132 posizioni (237 deal); UN solo regime; costo FRAGILE (40x solo allo spread di sessione). Il repo la indica come l'unica sedia che passa i cancelli alla lettera | CLAUDE.md, report/EMA200_GEMELLI_STATO_2026-10-03.md |
+| Sedia EMA200 su U30USD H1 (magic 771531) | PF 1,52 OOS su 257 posizioni (517 deal), IS 1,20 su 132 posizioni (237 deal); UN solo regime; costo FRAGILE (40x solo allo spread di sessione). Il repo (CLAUDE.md, 09/09) la indicava come l'unica sedia che passa i cancelli alla lettera, poi con costo FRAGILE | CLAUDE.md, report/EMA200_GEMELLI_STATO_2026-10-03.md |
 | EMA200, rimbalzo al primo tocco M5-H1 | piatto e sotto il random walk (0,649-0,786 contro 0,800) | report/EMA200_RIMBALZO_MISURA_2026-10-01.md |
 | EMA200 a H4, 6 coppie forex 2005-2020 | NULLO (P 0,487/0,470 contro 0,478/0,491); rimbalzo forte escluso, effetto piccolo non escluso; D1 NON ANCORA MISURATO | report/EMA200_H4_D1_FOREX28_MISURA_2026-10-03.md |
 | Confluenza H4/M3 (SuperWave) come timing | NULLO su DAX e oro (DAX long al filo della soglia); il costo pesa 2-4 volte piu' di qualunque effetto | report/H4_M3_CONFLUENZA_MISURA_2026-10-01.md |
@@ -54,12 +54,12 @@ una Free Trial FTMO 2-Step da 160k (14 giorni dal 30/09-01/10), non e' una chall
 | Dow 770202 in fase con la cash | estate PF 0,886 su 84 pos. / inverno alla cash 0,916 su 40 / serie "come FTMO" 0,836 su 123 (sospeso) | report/APERTURE_DOW_MAPPA_2026-10-03.md |
 | Nasdaq 770260 | IS 1,221 / OOS 1,215 su 82 / 102 posizioni (merito sospeso sotto 150) | report/APERTURE_NASDAQ_MAPPA_2026-10-03.md |
 | Bulge (forex) | edge NON dimostrato: backtest PF 0,87/0,82; antenato forward 0,83 su 297; commissioni+swap 56% della perdita forward | report/BULGE_COME_MIGLIORARLO_2026-10-03.md |
-| Trial 01-02/10 | 13 posizioni, netto -8.811,59 (-5,51%); due DAX = 72,7% della perdita. Sulle sedie con contratto (senza Bulge, che non ne ha; osservato -4,34% in 2 giorni) un esito cosi' capita nel 5,8% delle coppie di giorni [IC 3,3-9,4] = ZONA GRIGIA; ogni sedia presa da sola: NON ANCORA MISURATO | report/TRIAL_SFORTUNA_O_EA_2026-10-03.md |
+| Trial 01-02/10 | 13 posizioni, netto -8.811,59 (-5,51%); due DAX = 72,7% della perdita. Sulle sei sedie con contratto (P6, la riga che decide; senza Bulge, che non ne ha; osservato -4,34% in 2 giorni) un esito cosi' capita nel 5,8% delle coppie di giorni [IC 3,3-9,4] = ZONA GRIGIA, per soli 0,17 punti sopra la soglia di EFFETTO; con la presenza inferita di quattro sedie (P4) sarebbe 1,9% = EFFETTO [NON VERIFICATO]; ogni sedia presa da sola: NON ANCORA MISURATO | report/TRIAL_SFORTUNA_O_EA_2026-10-03.md |
 
 ## 6. CHIUSO (non si riapre senza una tesi nuova)
 Vedi `docs/gemini/MEMORIA_CONDIVISA.md` sezione 2 (uscite del long DAX 770101, short DAX alla cella specchio, EMA200 oro H4 per rischio, ecc.).
 
 ## 7. FORMULE (con esempio svolto)
-- **Break-even (win rate minimo)** con TP e SL in pip e costo c per operazione: p = (SL + c) / (SL + TP). Esempio: TP 10, SL 30, c = 1 -> p = 31/40 = **77,5%**.
+- **Break-even (win rate minimo)** con TP e SL in pip e costo c per operazione: p = (SL + c) / (SL + TP). Esempio: TP 8, SL 24, c = 1,5 -> p = 25,5/32 = **79,7%**.
   Senza costo: p = SL / (SL + TP) = 75%. (Un TP piu' piccolo dello SL richiede un win rate ALTO: il rapporto non si inverte.)
 - **Numero di operazioni** per distinguere un win rate osservato p da un break-even b con IC 95%: n >= 1,96^2 x p(1-p) / (p-b)^2.

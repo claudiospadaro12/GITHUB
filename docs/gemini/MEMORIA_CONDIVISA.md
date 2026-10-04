@@ -15,7 +15,7 @@ Regola: qui stanno SOLO fatti misurati e decisioni prese, con la fonte nel repo.
   inerte 1-2R). APERTA: `InpTP1_ClosePct=0` (migliore in 4/4 misure ma dentro il rumore; firma di Claudio pendente).
 - Short DAX 770105 alla cella specchio del long: senza merito, DD sopra il muro (R251, R270). Motore short NON ANCORA MISURATO.
 - Oro EMA200 H4 (griglia C2): NO PER RISCHIO su 2017-23 con certificato completo; 2024-26 buono ma non confrontabile (G0 rosso,
-  causa non dimostrata). Short Dow 770212: bocciata per rischio (R255 con S1 emendata); stH8/stH12 indizi (n < 150).
+  causa non dimostrata). Short Dow 770212: NO PER RISCHIO (R255 con S1 emendata); stH8/stH12 indizi (n < 150).
 - EURUSD EMA200 H4: escluso per costo (35-37x < 40x), NON ANCORA MISURATO (`InpSLatr` mai ad asse).
 
 ## 3. Cosa e' in coda (proposte di Gemini accolte come candidati, in ordine)
@@ -26,7 +26,7 @@ Regola: qui stanno SOLO fatti misurati e decisioni prese, con la fonte nel repo.
 
 ## 4. Regole che Gemini deve rispettare in ogni risposta
 Finestre solo dallo storico esistente (indici BCM dal 2024.09.26); «passate» = celle x 2 finestre; niente griglie su motori senza
-edge; stop >= 40x lo spread (sull'oro il costo pieno = spread + commissione); centro dell'altopiano mai il picco; due lati sugli indici; ogni numero con la fonte o NON
+edge; stop >= 40 x lo spread; sull'oro, e dove un criterio firmato lo dice (Bulge R92b), 40 x il costo pieno = spread + commissione; ogni rapporto dice contro quale grandezza e' calcolato; centro dell'altopiano mai il picco; due lati sugli indici; ogni numero con la fonte o NON
 MISURATO; prima della macchina, la misura a costo zero nei per-trade gia' in archivio.
 
 ## 4-bis. Regola nata dai primi due giri (29/09)
@@ -50,7 +50,7 @@ Il contenuto tecnico era utile: la manopola InpSLatr e' viva e mai messa ad asse
   R270: formato giusto, 3 correzioni di metodo). Risposte in `docs/RISPOSTA_A_GEMINI_*.md`.
 
 ## 6. COSA FACCIAMO ADESSO (aggiornata dalla sessione a ogni scambio; Gemini la legge per sapere dove aiutare)
-- **Regime della settimana (29/09-04/10)**: risparmio di crediti. Turno ogni 6 ore, caccia ogni 2 giorni (1 cacciatore + Gemini), misure a costo zero
+- **Regime della settimana (29/09-04/10, periodo scaduto: da riconfermare)**: risparmio di crediti. Turno ogni 6 ore, caccia ogni 2 giorni (1 cacciatore + Gemini), misure a costo zero
   prima di quelle a macchina. Il cancello (verifica) non si declassa.
 - **In coda, in ordine**: (1) R207b: la cella pulita del long DAX (senza parziale ma con pareggio a 1R), ~17 min di macchina: e' la misura che decide
   sulla cella `ClosePct=0`; (2) A4: asse `InpSLatr` (1,0/1,25/1,5) su EMA200 EURUSD H4, motore non ancora misurato; (3) G0 dell'EMA200 col binario
@@ -58,10 +58,10 @@ Il contenuto tecnico era utile: la manopola InpSLatr e' viva e mai messa ad asse
 - **Dove ci serve Gemini**: (a) errori di configurazione nei parametri dei motori fuori gioco (dossier `PER_GEMINI_EA_FUORI_GIOCO_2026-09-29.md`);
   (b) UN meccanismo alternativo per motore con attesa+contro-esempio; (c) rilettura critica dei nostri referti ("dove il metodo puo' ingannarci");
   (d) idee di uscita/gestione per i motori vivi (long DAX: cella senza parziale; short: nessuna tesi).
-- **Vincoli operativi che Gemini deve conoscere**: challenge in corso, campo NON toccabile da proposte; storico indici BCM dal 2024.09.26; ogni round gira sul
+- **Vincoli operativi che Gemini deve conoscere**: Free Trial in corso (challenge 80k chiusa il 30/09), campo NON toccabile da proposte; storico indici BCM dal 2024.09.26; ogni round gira sul
   PC di backtest (~2 min per file a tick); una riga di lancio la produce solo la sessione dopo il cancello.
-- **Ultimi esiti (29/09)**: R270 letto (long: il vivo e' il centro, ClosePct=0 non separabile; short: bocciato), C2 oro EMA200 H4: NO per rischio,
-  R255 short Dow: 770212 bocciata (stH8/stH12 indizi), misure a costo zero DAX: NON SEPARABILE / NON MISURABILE. Risposta FTMO: conto Standard,
+- **Ultimi esiti (29/09)**: R270 letto (long: il vivo e' il centro, ClosePct=0 non separabile; short: NO PER RISCHIO), C2 oro EMA200 H4: NO per rischio,
+  R255 short Dow: 770212 NO PER RISCHIO (stH8/stH12 indizi), misure a costo zero DAX: NON SEPARABILE / NON MISURABILE. Risposta FTMO: conto Standard,
   hedging nello stesso conto ok, fra conti no; da funded serve filtro news 2+2 min e chiusura weekend.
 - **Aggiornamento 01/10**: la challenge FTMO 2-Step 80k e' CHIUSA (Max Loss violato il 30/09: equity 71.968,19 contro linea 72.000; flotta 11 posizioni, 5 stop pieni, PF 0,31;
   `report/FTMO_CHALLENGE_CHIUSURA_2026-09-30.md`). RFWD: forward e tester BCM fanno le stesse operazioni (L1 8/11, L1+L2 10/11, `report/LETTURA_RFWD_2026-09-30.md`);

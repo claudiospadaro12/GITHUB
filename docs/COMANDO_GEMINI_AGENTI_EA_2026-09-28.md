@@ -5,7 +5,7 @@ così com'è, dalla riga «INIZIO COMANDO» alla riga «FINE COMANDO». Prima de
 Gemini i file elencati nel §0. Le proposte che Gemini produce **tornano a Claude e passano dal
 cancello di casa** prima che qualunque cosa si muova: sono ipotesi da misurare, non decisioni.
 
-## 0. Cosa allegare a Gemini (lo fa Claudio, in ordine di importanza)
+## 0. Cosa allegare a Gemini (lo fa Claudio, in ordine di importanza) -- SOLO canale APP manuale: via API non arrivano CLAUDE.md, i preset ne' gli script
 
 1. `docs/BRIEFING_PER_GEMINI_2026-09-27.pdf` — il contesto completo (obiettivo, metodo, cancelli, campo).
 2. `CLAUDE.md` — le regole di casa (le stesse che valgono per gli agenti Claude).
@@ -17,7 +17,7 @@ cancello di casa** prima che qualunque cosa si muova: sono ipotesi da misurare, 
 5. Il sistema di creazione: `backtest_pipeline/controlla_prova.py`, `controlla_riga.py`,
    `walkforward_generico.ps1`, `righe/RIGA_ROUND_VPS.ps1`, tre file prova d'esempio (`prove/R246e_*.txt`,
    `prove/R270c_*.txt`, `prove/R270e_*.txt`), un lettore (`leggi_round_corti_d.py`) e le ultime 300 righe di
-   `CHECKLIST_RIGA_DI_LANCIO.md` (il file intero è enorme: 909 classi di difetto).
+   `CHECKLIST_RIGA_DI_LANCIO.md` (il file intero è enorme: oltre mille classi di difetto).
 6. Le schede di audit già fatte: `report/audit_ea/00_PERIMETRO_AUDIT_2026-09-28.md`,
    `SCHEDA_770101_DAX_APERTURA_2026-09-28.md`, `SCHEDA_770202_DOW_APERTURA_2026-09-28.md`.
 7. `REGISTRO_TEST.md` e `docs/MAPPA_MOTORI_EA.md` (i caduti e la mappa dei motori: per non riproporre morti).
@@ -43,11 +43,11 @@ contenuto di un file che non hai letto, e non inventare numeri.
 **Compito**: per ogni EA allegato, leggere il sorgente per intero e produrre una SCHEDA DI LETTURA.
 Parti da `ABTG_DAX_Apertura_EU.mq5` (sedie 770101 long e 770105 short, la priorità) e
 `ABTG_Dow_Apertura_US.mq5` (770202), poi `ABTG_Guardian.mq5`, poi gli altri.
-**Contenuto della scheda**, in questo ordine, con il **numero di riga del sorgente** accanto a ogni
+**Contenuto della scheda**, in questo ordine, con il **NOME della funzione o dell'input** (mai il numero di riga) accanto a ogni
 affermazione:
 1. **Il meccanismo in una pagina**: come nasce un segnale, come si calcola lo stop, come si esce
    (parziale, breakeven, trailing, chiusura a orario). Distinguere ciò che il PRESET in campo
-   (`mql5/Presets/FTMO/`) accende da ciò che resta spento.
+   (`mql5/Presets/FTMO/`) accende da ciò che resta spento. Se il preset non e' allegato scrivi PRESET NON LETTO.
 2. **Input vivi e input inerti**: quali `input` cambiano davvero il comportamento nella
    configurazione in campo e quali sono morti (ramo spento, valore mai letto, sovrascritto altrove).
    Per noi una manopola inerte è un bug di documentazione E uno spazio di ricerca non consumato.
@@ -82,7 +82,7 @@ Punti da coprire, almeno:
    «zero operazioni»).
 5. Il **costo**: dove si spende tempo macchina o tempo umano per una misura che si poteva
    ricavare da un file già in archivio.
-**Formato**: tabella «Punto debole · Prova che esiste (file e riga, o esempio nella checklist) ·
+**Formato**: tabella «Punto debole · Prova che esiste (file e nome dell'input o della funzione, o esempio nella checklist) ·
 Rimedio proposto · Come verificare che il rimedio funzioni · Costo».
 **Divieto**: non proporre di abbassare un criterio (PF, n, DD, costo 40x, altopiano). I criteri si
 cambiano prima dei numeri e li cambia Claudio; l'auditor propone controlli in più, mai soglie in meno.
@@ -90,7 +90,7 @@ cambiano prima dei numeri e li cambia Claudio; l'auditor propone controlli in pi
 ### AGENTE 3 — «Il Proponente» (migliorie, con il piano per misurarle)
 **Compito**: prendere le schede dell'Agente 1 e l'audit dell'Agente 2 e produrre un **elenco
 ordinato di migliorie**, dalla più promettente alla meno. Per OGNI proposta, sei campi obbligatori:
-1. **Cosa** (una frase) e **dove** (EA e righe, oppure componente del sistema).
+1. **Cosa** (una frase) e **dove** (EA e nome della funzione o dell'input, oppure componente del sistema).
 2. **Perché dovrebbe funzionare**: il meccanismo, non la speranza. Se esiste evidenza (una
    misura nostra in archivio, un paper, un fatto del codice), citarla; se non esiste, scrivere
    «NON MISURATO».
@@ -107,13 +107,13 @@ ordinato di migliorie**, dalla più promettente alla meno. Per OGNI proposta, se
   dell'uscita; non sui parametri di un morto. Prima di proporre, controllare `REGISTRO_TEST.md`.
 - MAI martingala, griglia, recovery, assenza di stop, trucchi per aggirare le regole prop.
 - La cella buona è il **centro dell'altopiano, mai il picco**.
-- Frontiera del costo: stop >= 40 x (spread + commissione). Una proposta che la sfonda va
+- Frontiera del costo: stop >= 40 x lo spread; sull'oro, e dove un criterio firmato lo dice (Bulge R92b), 40 x il costo pieno = spread + commissione; ogni rapporto dice contro quale grandezza e' calcolato. Una proposta che la sfonda va
   dichiarata esclusa PER COSTO, con il numero.
 - Sugli indici si misurano SEMPRE tutti e due i lati (long e short), anche se uno è già in campo.
 - Un candidato non si dichiara morto senza PF, n, DD, gestione dell'uscita messa ad asse almeno
   una volta, simboli gemelli provati, timeframe cambiato almeno una volta. Se manca uno di questi,
   il verdetto è «non ancora misurato».
-- Ogni numero porta la fonte (file e riga, o «NON MISURATO»). Un numero senza fonte non entra.
+- Ogni numero porta la fonte (file e sezione, o «NON MISURATO»). Un numero senza fonte non entra.
 **Formato**: una tabella riassuntiva (proposta · EA/componente · evidenza · costo · tocca la
 firma di Claudio? sì/no) seguita dalle schede complete, massimo dieci proposte nella prima
 consegna. Meglio tre proposte misurabili che dieci suggestive.
@@ -127,7 +127,7 @@ proposta che non regge al contro-esempio torna all'Agente 3 con la nota; non si 
 
 ### Regole comuni a tutti gli agenti
 - Lingua: italiano. Formato: markdown con tabelle compatte. Ogni affermazione sul codice porta
-  il numero di riga; ogni numero porta la fonte.
+  il NOME della funzione o dell'input (mai il numero di riga); ogni numero porta la fonte.
 - Tono: diretto. Le brutte notizie si scrivono lo stesso. «Non lo so» è una risposta valida;
   un'invenzione no.
 - Se due fonti allegate si contraddicono, scriverlo: non scegliere in silenzio.

@@ -25,3 +25,7 @@ B5. Abbassare una soglia dopo aver visto un numero (i criteri si cambiano prima 
 - A10: la 771531 ha anche due limiti scritti nel repo oltre al regime: costo FRAGILE (40x solo allo spread di sessione, `report/EMA200_GEMELLI_STATO_2026-10-03.md`) e IS 132 posizioni (237 deal).
 - B3: la domanda e' imprecisa. Il 5,8% [3,3-9,4] e' la probabilita' di -4,34% in 2 giorni sulle sedie CON contratto (P6, senza Bulge), non del -5,5% del conto intero (`report/TRIAL_SFORTUNA_O_EA_2026-10-03.md` sez. D). La risposta attesa ZONA GRIGIA regge (soglie congelate: EFFETTO p < 0,05; ZONA GRIGIA 0,05-0,20); la domanda resta identica all'esame ripetuto per confrontare i punteggi.
 - A4: vale 2 solo se la regola e' "su un motore GIA' DICHIARATO senza edge"; "su motori che non hanno dimostrato un edge" rovescia l'onere (vieterebbe le griglie sui NON ANCORA MISURATI) e vale 1.
+
+
+## Versione 2 (dopo la base)
+B1 (versione 2): TP 12, SL 36, costo 2: vince 12-2 = 10, perde 36+2 = 38: p = 38/48 = **79,17%**. Tutte le altre domande identiche alla versione 1. L'esempio della BASE e' DIVERSO (TP 8, SL 24, c 1,5 -> 79,7%) per non regalare la risposta: B1 misura il ragionamento, A1-A10 sono 'a libro aperto' (la base contiene i fatti: misurano se li legge e li applica).
