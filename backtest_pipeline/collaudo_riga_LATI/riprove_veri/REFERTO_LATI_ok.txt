@@ -1,0 +1,56 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_RETRY_v1
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v7_RETRY
+pin             : lavoro
+data            : 2026-10-04 20:28:56   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:/Program Files/BCM Markets MT5 Terminal/terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_EMA200
+file prova      : LATI_A1_EMA200_U30USD_DISCESA_long.txt   (13554 byte, dal pin)
+etichetta       : LATIA1L
+simbolo         : U30USD
+periodo         : H1
+da quando       : 2025.02.01
+modello         : 4  (tick reali)
+deposito        : 100000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+driver          : walkforward_generico_RETRY.ps1   (con la riprova; Tester\cache NON toccata)
+riprova         : MaxRiprove 1   attesa 5 s   scadenza nessuna
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : <banco_collaudo_riga_LATI>/user/abtg_round/risultati_prove/ABTG_EMA200/ABTG_EMA200_U30USD_IS_LATIA1L.csv
+  righe : 2
+    Pass 0    Profit 100          PF 1.3        Equity DD % 2          Trades 5
+    Pass 1    Profit 101          PF 1.31       Equity DD % 2          Trades 5
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : <banco_collaudo_riga_LATI>/user/abtg_round/risultati_prove/ABTG_EMA200/ABTG_EMA200_U30USD_OOS_LATIA1L.csv
+  ESITO : NON MISURATO -- CSV DA 0 BYTE
+  >>> Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: guardare il log
+
+--- RIPROVE DEL DRIVER (gambe RIPROVATE: 0) ---
+  RIPROVE DEL DRIVER -- MARCATORE_WALKFORWARD_GENERICO_v7_RETRY
+  data       : 2026-10-04 20:28:57 -> 2026-10-04 20:28:58   (ora del PC)
+  pc         : DESKTOP-H4D7CAJ
+  EA         : ABTG_EMA200   simbolo U30USD   suffisso '_LATIA1L'
+  MaxRiprove : 1   attesa fra i tentativi 5 s   scadenza nessuna
+  giornale   : <banco_collaudo_riga_LATI>/appdata/MetaQuotes/Terminal/DRV000/Tester/logs\AAAAMMGG.log, letto per finestra di tentativo (millisecondi; data dal nome del file)
+  cache      : Tester\cache NON toccata da questo driver (mai svuotata, mai letta). La riga 'cache' di ogni tentativo e' quella del GIORNALE.
+  si riprova : SOLO 'OnTesterInit works too long. Tester cannot be initialized.' senza CSV, una volta per gamba
+  GAMBA IS  | tentativo 1 -> PARTITA (from 2025.02.01 00:00 to 2025.04.30 00:00 su U30USD: finestra = dichiarata); CSV: presente (2 righe); giornale: 8 righe in questo tentativo, 0 di prima ignorate; cache: riga 'saved to cache file' presente | ESITO GAMBA: CSV PRODOTTO
+  GAMBA OOS | tentativo 1 -> NON_VERIFICABILE (intestazione della gamba presente, ma ne' 'from ... to ...' ne' 'Tester cannot be initialized': fine non leggibile (errore di dati, di .ini o dell'EA?)); CSV: presente (-1 righe); giornale: 6 righe in questo tentativo, 8 di prima ignorate; cache: nessuna riga 'saved to cache file' | ESITO GAMBA: CSV PRODOTTO
+  RIPROVATE  : 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: NON MISURATO -- CSV mancanti o vuoti: OOS
