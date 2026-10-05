@@ -1492,8 +1492,11 @@ def verifica_mese_python_puro(percorso, fuso, mese, orologio="utc1"):
                     o, h, l, c = float(p[0]), float(p[1]), float(p[2]), float(p[3])
                 except Exception:
                     continue
+            if not (l <= o <= h and l <= c <= h and l > 0):
+                continue                                    # OHLC incoerente: scartata come nella procedura
             righe.append((dtl, h, l))
     gio = {}
+    visti = set()
     for dtl, h, l in righe:
         # fuso -> UTC con le regole di calendario in python puro
         if fuso == "NY":
@@ -1510,6 +1513,9 @@ def verifica_mese_python_puro(percorso, fuso, mese, orologio="utc1"):
             raise ValueError("verifica: fuso non gestito %s" % fuso)
         if orologio != "utc1":
             raise ValueError("verifica: solo orologio utc1")
+        if utc in visti:
+            continue                                        # doppio sullo stesso minuto UTC: vale il primo, come nella procedura
+        visti.add(utc)
         srv = utc + dt.timedelta(hours=1)
         giorno = srv.date()
         wd = giorno.weekday()
