@@ -1,12 +1,2 @@
 UCCISO       DST NY ignorata                                      AUTOTEST FALLITO: 09:30 New York = 13:30 UTC d'estate e 14:30 UTC d'inverno
 UCCISO       giorno della settimana sfasato                       AUTOTEST FALLITO: ADR medio piantato = 30.0, misurato 35.0000
-UCCISO       true range senza gap                                 AUTOTEST FALLITO: true range con gap: [2, 11] (misurato [np.float64(2.0), np.float64(2.0)]
-UCCISO       server UTC+2                                         AUTOTEST FALLITO: server BCM nuovo: UTC+1 fisso
-UCCISO       zigzag senza soglia                                  AUTOTEST FALLITO: ritracci di 0,4 (sotto la soglia 1,0) non creano pivot: pivot trovati [0
-UCCISO       soglia weekend sbagliata                             AUTOTEST FALLITO: gap 'pausa': 0 eventi trovati, 5 attesi
-UCCISO       ER non normalizzato                                  AUTOTEST FALLITO: linea retta -> ER = 1
-UCCISO       doppi non tolti                                      AUTOTEST FALLITO: pulizia: 1 OHLC incoerente, 1 doppio, fuori ordine contato, 2 barre vali
-UCCISO       sessione NY d'estate = inverno                       AUTOTEST FALLITO: sessione NY d'estate = 10 con la finestra d'estate (misurato 8.487)
-UCCISO       correlazione per posizione                           AUTOTEST FALLITO: CONTRO-ESEMPIO: serie identiche sfasate di 5 chiavi NON danno rho=1 (all
-UCCISO       ancora assoluta ignorata                             AUTOTEST FALLITO: qualita(): feed giusto -> orologio_ok; feed spostato di un'ora -> relati
-UCCISO       campione corto non indeciso                          AUTOTEST FALLITO: campione di soli gen-feb: orologio INDECISO (giorni inverno 66, estate 0

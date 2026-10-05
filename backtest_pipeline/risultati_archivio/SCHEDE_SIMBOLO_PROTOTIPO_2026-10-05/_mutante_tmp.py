@@ -448,8 +448,7 @@ def ema(x, n):
 
 
 def true_range(o, h, l, c):
-    pc = np.insert(c[:-1], 0, o[0])
-    return np.maximum(h - l, np.maximum(np.abs(h - pc), np.abs(l - pc)))
+    return h - l
 
 
 def atr_sma(o, h, l, c, n=ATR_N):

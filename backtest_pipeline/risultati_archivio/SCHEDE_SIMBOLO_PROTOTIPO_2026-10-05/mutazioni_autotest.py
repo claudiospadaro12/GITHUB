@@ -24,6 +24,7 @@ MUT = [
     ("finestra dubbia del cambio orologio non scartata", "        tf_, a = tf_[~dubbia], a[:, ~dubbia]", "        pass"),
     ("cluster a catena (collegamento singolo)", "                v = float(np.mean([M[a, b] for a in gruppi[i] for b in gruppi[j]]))", "                v = float(np.max([M[a, b] for a in gruppi[i] for b in gruppi[j]]))"),
     ("Tokyo trattato come evento con ora legale", "(abs(w - e) <= 5) if ancora_senza_dst(q[\"ancora_inverno\"]) else (abs((w - 60) - e) <= 5)", "(abs((w - 60) - e) <= 5)"),
+    ("banda di prezzo ignorata", "        ok = ok & inb", "        ok = ok"),
     ("percentile sbagliato", "        d[\"p%d\" % q] = float(np.percentile(x, q))", "        d[\"p%d\" % q] = float(np.percentile(x, 100 - q))"),
     ("quota di rimbalzo invertita", "rimbalzo_quota=(B / (B + P) if (B + P) else float(\"nan\"))", "rimbalzo_quota=(P / (B + P) if (B + P) else float(\"nan\"))"),
 ]

@@ -1,0 +1,19 @@
+SCHEDE_SIMBOLO_PROTOTIPO_2026-10-05 -- uscite della PROVA del prototipo backtest_pipeline/scheda_simbolo.py
+(piano e specifica: report/SCHEDE_SIMBOLO_PIANO_2026-10-05.md)
+
+NON sono le schede definitive dei simboli: sono la prova che lo strumento legge, calcola e si riproduce.
+Nessuna di queste serie e' un feed BCM, tranne dove scritto. Nessun numero qui informa una decisione di campo.
+
+A_oro_repo/            XAUUSD, HistData M1 2021-01-03 -> 2026-09-18, 14 zip TRACCIATI IN GIT in
+                       backtest_pipeline/risultati_prove/oro_m1_histdata_zip/ (fuso NY con DST USA). Con lo spread vivo
+                       del 12/09 (data/spread_vivo). E' l'UNICA serie profonda che sta fisicamente nel repo.
+B_esterno_2018/        11 serie su finestra comune 2018 (ranking, correlazioni, cluster): HistData GRXEUR/SPXUSD/JPXJPY
+                       (mirror FutureSharks, 2010-2018 / 2013-2018) + Oanda M1 2018 (EUR_USD, GBP_USD, AUD_USD, AUD_JPY,
+                       XAU_USD, NAS100_USD, SPX500_USD, JP225_USD). FEED ESTERNI, scaricati dal cloud: servono a provare
+                       lo strumento su piu' simboli e a controllare la coerenza fra feed gemelli, non a conoscere BCM.
+                       Il manifest usato e' manifest_B_esterno_2018.csv (i percorsi <scratch> erano cartelle temporanee).
+autotest.log           autotest del prototipo (69 controlli, tutti ok)
+mutazioni_autotest.*   prova di potenza dell'autotest: 18 mutanti, 18 uccisi, 0 sopravvissuti
+controllo_atr_vs_casa.*  ATR(14) mediano di M5/M15/H1 su 3 feed contro i numeri stampati dai referti EMA200_D1_M5 (01/10)
+verifica_mese_python_puro.log  ADR mediano di 8 mesi dell'oro ricalcolato in python puro (senza numpy) = procedura
+ispeziona_repo_U30USD_prove.log  le due prove M1 del Dow trovate nel repo (781 e 1.335 righe: troppo corte per una scheda)
