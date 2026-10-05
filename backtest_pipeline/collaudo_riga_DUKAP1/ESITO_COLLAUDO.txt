@@ -57,3 +57,17 @@ NON COPERTO (dichiarato):
   - il simbolo custom U30USD_DKNEG resta nel terminale dopo P1 (dichiarato nel BERSAGLIO della riga; si toglie a mano).
 Serve dal cancello: verificatore-stringhe + controllo-preventivo (Opus) su righe/RIGA_DUKA_P1_OROLOGIO.ps1, RIGA_DUKA_IMPORT_SONDA.ps1 (v2), mql5/Scripts/ABTG_ImportaTickEsterno.mq5 (v1), dukascopy/dukascopy_tick.py (v3), dukascopy/leggi_f2_dk.py,
 righe/RIGA_LANCIA_DUKA_P1.txt e collaudo_riga_DUKAP1/; e il confronto del TESTO F2 incorporato con quello che Claudio firmera'.
+
+=== CONTROLLO PREVENTIVO (Opus, 05/10/2026 sera): FAIL CON CORREZIONE APPLICATA -- SERVE UNA PASSATA INDIPENDENTE ===
+Difetto (classe 938 ricorrente): la fase K leggeva rc 1 di leggi_f2_dk.py come "NON PASSA", ma rc 1 e' ANCHE un'eccezione python non gestita (traceback).
+Contro-esempio a macchina (scenario 37: un byte non ASCII nel file per giorno -> UnicodeDecodeError): il driver al pin 2c618f73 stampava "ESITO F2: NON PASSA",
+usciva 0 e lo zip NON conteneva F2_VALUTAZIONE.txt (nessuno lo segnalava): un "frigo" senza certificato. Ora: l'esito vale solo se F2_VALUTAZIONE.txt esiste e la sua
+riga di verdetto dice la stessa cosa del codice; altrimenti "ERRORE DEL VALUTATORE", nessun verdetto, rc 1.
+In piu': se cadono SOLO la (3) (negativo debole/non misurato/attribuzione) la riga stampa "CANCELLO NON PASSATO SOLO PER LA (3) ... SERVE K0b ... NON e' un verdetto di morte";
+non lo stampa se cade la (1) o la (2) (scenario 38). Durata dichiarata onesta nel bootstrap e nell'intestazione (riconversione ~12 min misurati il 03/09; import NON cronometrato, tetto 240 min).
+Nuovo pin: 980042adf3c87750338698e0fb27346f28d91839 (il driver e' identico a quello entrato nel WIP 0bd6aaf4 di un altro agente). Impronta del driver 432158337648BEC5...;
+gli altri 4 file pinnati sono INVARIATI rispetto a 2c618f73 (stesse impronte). Bootstrap rigenerato dal generatore, 3559 byte, SHA256 FB4CAC0C...; bootstrap_test 5+4 OK;
+controlla_riga verde; GitHub raw al pin == git show.
+Banco: battery 52 scenari (50 + 37 + 38), verdi; 3 mutanti nuovi (drv_rc1_senza_file_del_verdetto, drv_k0b_messaggio_tolto, drv_k0b_messaggio_senza_la_1) PRESI; mutazioni_ps1 64/64 sul driver nuovo.
+RILIEVO SUL BANCO: sotto carico il banco da' rossi INTERMITTENTI (con --jobs 8: 14 rossi; con 4 job: 1 rosso per corsa, su scenari diversi -- 05, 35 -- verdi ripetuti da soli,
+anche sul driver vecchio). Non e' la riga: e' il banco; ma un rosso intermittente nasconde un rosso vero, va capito.
