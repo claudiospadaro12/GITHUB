@@ -4,10 +4,14 @@
 fixture.py -- costruisce un finto disco C: del PC di backtest (cartella vera su Linux, vista da pwsh come PSDrive C:) e calcola le ATTESE
 dalla stessa specifica, in Python, SENZA leggere l'uscita dello script. Usato da battery.py e mutazioni.py (collaudo di RIGA_DUKA_P0_CENSIMENTO.ps1).
 Le attese sono scritte PRIMA di guardare l'uscita: contano gli slot, i byte e le righe che la specifica ha messo, non quelli che lo script dice.
-Il MESE nel percorso della cache e' ZERO-BASED (ottobre = 09): il generatore lo fa, e i byte di ogni file codificano il giorno, cosi' una lettura
-del mese sbagliato (1-based: ottobre -> cartella di novembre) NON torna per caso su una cache completa (contro-esempio costruito prima).
+Il PERCORSO della cache lo costruisce dukascopy_tick.percorso_cache (la funzione che lo scrive davvero: mese di CALENDARIO, ottobre = 10; solo l'URL e' zero-based).
+La prima stesura di questo banco aveva il mese zero-based "a memoria", come lo script: i due sbagliavano INSIEME e il banco era verde (trovato dall'autotest 15 di dukascopy_tick.py, classe 1114).
+I byte di ogni file codificano il giorno, cosi' una lettura del mese sbagliato NON torna per caso su una cache completa.
 """
-import datetime, hashlib, os, shutil
+import datetime, hashlib, os, shutil, sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dukascopy")))
+import dukascopy_tick as DT      # il LAYOUT della cache lo decide il codice che la scrive, non la memoria di chi scrive il banco (classe 1114)
 
 D0, D1 = datetime.date(2024, 10, 1), datetime.date(2025, 6, 16)
 SONDA = ["2024.11.20", "2025.06.10", "2024.10.29", "2024.10.31", "2025.03.12", "2025.03.25", "2024.12.10", "2025.01.14", "2025.02.11"]
@@ -78,36 +82,38 @@ def costruisci(base, spec):
         raw = os.path.join(lavoro, "raw")
         os.makedirs(raw, exist_ok=True)
         for s in spec["altri_simboli"]:
-            os.makedirs(os.path.join(raw, s, "2025", "05", "16"), exist_ok=True)
-            open(os.path.join(raw, s, "2025", "05", "16", "15h_ticks.bi5"), "wb").write(b"x" * 50)
+            dd, f_ok, _ = DT.percorso_cache(raw, s, datetime.datetime(2025, 6, 16, 15, tzinfo=datetime.timezone.utc))
+            os.makedirs(dd, exist_ok=True)
+            open(f_ok, "wb").write(b"x" * 50)
     if spec["cache"] == "completa":
         rs = os.path.join(lavoro, "raw", "USA30IDXUSD")
         for d in giorni():
             k = chiave(d)
             if k in spec["giorno_senza_cartella"]:
                 continue
-            dd = os.path.join(rs, "%04d" % d.year, "%02d" % (d.month - 1), "%02d" % d.day)   # MESE ZERO-BASED
+            raw_dir = os.path.join(lavoro, "raw")
+            dd, _, _ = DT.percorso_cache(raw_dir, "USA30IDXUSD", datetime.datetime(d.year, d.month, d.day, 0, tzinfo=datetime.timezone.utc))
             os.makedirs(dd, exist_ok=True)
             for h in range(24):
                 if h in spec["buchi"].get(k, []):
                     continue
-                nome = "%02dh_ticks.bi5" % h
+                _, f_ok, f_no = DT.percorso_cache(raw_dir, "USA30IDXUSD", datetime.datetime(d.year, d.month, d.day, h, tzinfo=datetime.timezone.utc))
                 if h in spec["zeri"].get(k, []):
-                    open(os.path.join(dd, nome), "wb").close()
+                    open(f_ok, "wb").close()
                 elif slot_tipo(h) == "bi5" or h in spec["doppi"].get(k, []):
-                    open(os.path.join(dd, nome), "wb").write(b"b" * size_bi5(d, h))
+                    open(f_ok, "wb").write(b"b" * size_bi5(d, h))
                     if h in spec["doppi"].get(k, []):
-                        open(os.path.join(dd, nome + ".assente"), "wb").close()
+                        open(f_no, "wb").close()
                 else:
-                    open(os.path.join(dd, nome + ".assente"), "wb").close()
+                    open(f_no, "wb").close()
             for h in spec["tmp"].get(k, []):
-                open(os.path.join(dd, "%02dh_ticks.bi5.tmp" % h), "wb").write(b"t")
+                open(f_ok.replace("%02dh_" % h, "%02dh_" % h) if False else os.path.join(dd, "%02dh_ticks.bi5.tmp" % h), "wb").write(b"t")
         if spec["fuori_finestra"]:
             for (y, m, g) in ((2024, 9, 30), (2025, 6, 17)):
-                dd = os.path.join(rs, "%04d" % y, "%02d" % (m - 1), "%02d" % g)
-                os.makedirs(dd)
                 for h in (1, 2):
-                    open(os.path.join(dd, "%02dh_ticks.bi5" % h), "wb").write(b"f" * 11)
+                    dd, f_ok, _ = DT.percorso_cache(os.path.join(lavoro, "raw"), "USA30IDXUSD", datetime.datetime(y, m, g, h, tzinfo=datetime.timezone.utc))
+                    os.makedirs(dd, exist_ok=True)
+                    open(f_ok, "wb").write(b"f" * 11)
     # --- csv tick
     tick = os.path.join(lavoro, "tick")
     if spec["cache"] != "nessuna_lavoro" and spec["csv_mesi"] is not None:

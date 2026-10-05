@@ -213,8 +213,9 @@ try{
     $conBuchi = New-Object System.Collections.ArrayList
     $finestra = @{}
     foreach($d in $giorni){
-      # ATTENZIONE: nel path il MESE e' ZERO-BASED (gennaio = 00; ottobre = 09)
-      $dir = Join-Path $rawS ($d.Year.ToString('0000', $INV) + '\' + ($d.Month - 1).ToString('00', $INV) + '\' + $d.Day.ToString('00', $INV))
+      # LAYOUT della cache come lo scrive dukascopy_tick.py (percorso_cache): raw\<SIMBOLO>\AAAA\MM\GG\HHh_ticks.bi5 con MM = mese di CALENDARIO
+      # (ottobre = 10). Il mese ZERO-BASED e' solo nell'URL di Dukascopy, NON nella cartella (errore preso e corretto il 05/10: classe 1114).
+      $dir = Join-Path $rawS ($d.Year.ToString('0000', $INV) + '\' + $d.Month.ToString('00', $INV) + '\' + $d.Day.ToString('00', $INV))
       $nomi = @{}
       $esisteDir = Test-Path -LiteralPath $dir
       if($esisteDir){

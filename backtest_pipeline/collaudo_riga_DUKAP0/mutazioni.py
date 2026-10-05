@@ -18,7 +18,7 @@ TMP = os.environ.get("HARNESS_TMP") or tempfile.mkdtemp(prefix="p0mut_")
 
 M = [
  # --- il percorso e la finestra della cache
- ("mese_1_based", "($d.Month - 1).ToString('00', $INV)", "($d.Month).ToString('00', $INV)", ["01"]),
+ ("mese_zero_based_dell_url", "$d.Month.ToString('00', $INV) + '\\' + $d.Day", "($d.Month - 1).ToString('00', $INV) + '\\' + $d.Day", ["01"]),
  ("sabato_non_saltato", "if($d.DayOfWeek -ne [DayOfWeek]::Saturday){", "if($true){", ["01"]),
  ("fine_finestra_15", "$Giorno2 = '2025-06-16'", "$Giorno2 = '2025-06-15'", ["01"]),
  ("inizio_finestra_02", "$Giorno1 = '2024-10-01'", "$Giorno1 = '2024-10-02'", ["01"]),

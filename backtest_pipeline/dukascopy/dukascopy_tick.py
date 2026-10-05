@@ -74,6 +74,24 @@
 #    sfasate della sovrapposizione 2024.10+. Se vince "europa", si
 #    rilancia con --solo-cache --dst europa: zero riscarichi.
 #
+#  v3 (05/10/2026, piano report/PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md
+#  par. 3.1 P1): --dst fisso = UTC+1 SEMPRE, senza ora legale. Motivo
+#  MISURATO il 24/09 (report/OROLOGIO_BCM_2026-09-24.md par. 3.2): BCM sugli
+#  indici e' UTC+1 FISSO su tutto l'arco 2024.09.26+, mentre 'usa' da'
+#  UTC+0 d'inverno: 108 giorni su 222 hanno un'ora di meno. Opt-in: il
+#  default resta 'usa' (i CSV del 03/09 sono stati scritti con quello).
+#  --nome-uscita NOME  cambia il nome base dei CSV (default <BCM>_DK): serve
+#                      al controllo negativo U30USD_DKNEG, che non deve mai
+#                      avere lo stesso nome del marzo buono.
+#  --senza-raccolta    non scrive su Desktop (cartella dukascopy_tick e zip
+#                      dello stesso nome ad ogni corsa: una seconda corsa
+#                      cancellerebbe la raccolta della prima).
+#  --confronta-giorni VECCHIA NUOVA --giorni G1,G2 [--csv-out FILE]
+#                      confronto BYTE PER BYTE delle righe dei giorni
+#                      nominati fra due cartelle di CSV (condizione (2) della
+#                      F2): conta le righe e ne fa lo SHA256, per giorno.
+#                      Estende DUKA-TICK-v2: il marcatore v2 resta qui.
+#
 #  USO (PC di backtest; python 3.8+, come dukascopy_m1.py)
 #    --autotest              round-trip + fusi + CSV + motore curl su
 #                            server HTTP locale (niente rete esterna)
@@ -81,7 +99,7 @@
 #                            curl = il motore misurato-passante 31/08)
 #    --simboli USA30IDXUSD   nomi Dukascopy, virgole
 #    --da/--a YYYY-MM-DD     finestra DICHIARATA (obbligatoria in corsa)
-#    --dst usa|europa        calendario del server (default usa)
+#    --dst usa|europa|fisso  calendario del server (default usa; fisso = UTC+1 sempre)
 #    --fuso server|utc       default server
 #    --pausa-ms 250          respiro fra richieste (503 = rate limit)
 #    --divisore N            forza il divisore (0 = misuralo)
@@ -107,7 +125,9 @@
 import argparse
 import io
 import lzma
+import hashlib
 import os
+import re
 import shutil
 import struct
 import subprocess
@@ -120,7 +140,7 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 
 BASE = "https://datafeed.dukascopy.com/datafeed"
-VERSIONE = "DUKA-TICK-v2"          # marcatore: la riga di lancio lo cerchera' PRIMA di eseguire
+VERSIONE = "DUKA-TICK-v3"          # marcatore (v3 estende DUKA-TICK-v2): la riga di lancio lo cerchera' PRIMA di eseguire
 RECORD = struct.Struct(">IIIff")   # ms-offset, p1, p2, vol1, vol2 (big-endian)
 ATTESE_RETRY = [2, 5, 15, 30]      # secondi, come sonda_dukascopy.ps1
 MAX_ERR_CONSEC = 20                # 15/08: quando Dukascopy bandisce risponde 503 a TUTTO
@@ -187,6 +207,8 @@ def dst_eu_attivo(dt_utc):
 
 
 def offset_server(dt_utc, dst):
+    if dst == "fisso":
+        return timedelta(hours=1)           # BCM indici: UTC+1 fisso, niente ora legale (OROLOGIO_BCM 24/09 par. 3.2)
     if dst == "usa":
         return timedelta(hours=1) if dst_usa_attivo(dt_utc) else timedelta(0)
     return timedelta(hours=1) if dst_eu_attivo(dt_utc) else timedelta(0)
@@ -320,12 +342,19 @@ def decodificabile(dati):
         return False
 
 
-def scarica_ora_con_cache(sym, dt_utc, cartella_raw, pausa_ms, contatori, solo_cache):
-    """Torna i byte .bi5 dell'ora (b'' se assente/vuota), usando la cache."""
+def percorso_cache(cartella_raw, sym, dt_utc):
+    """(cartella del giorno, file .bi5, file .assente) di UN'ora nella cache. UNICA definizione del layout:
+    il MESE della cartella e' il mese di CALENDARIO (ottobre = 10); e' solo l'URL (url_ora) che lo vuole zero-based.
+    I banchi di prova che costruiscono una cache finta DEVONO chiamare questa funzione, non rifare il percorso a memoria."""
     d = os.path.join(cartella_raw, sym, "%04d" % dt_utc.year,
                      "%02d" % dt_utc.month, "%02d" % dt_utc.day)
     f_ok = os.path.join(d, "%02dh_ticks.bi5" % dt_utc.hour)
-    f_no = f_ok + ".assente"
+    return d, f_ok, f_ok + ".assente"
+
+
+def scarica_ora_con_cache(sym, dt_utc, cartella_raw, pausa_ms, contatori, solo_cache):
+    """Torna i byte .bi5 dell'ora (b'' se assente/vuota), usando la cache."""
+    d, f_ok, f_no = percorso_cache(cartella_raw, sym, dt_utc)
     if os.path.exists(f_ok):
         with open(f_ok, "rb") as fh:
             dati = fh.read()
@@ -556,6 +585,92 @@ def raccogli_desktop(file_da_copiare, nome_zip):
 
 
 # ---------------------------------------------------------------------
+#  CONFRONTO BYTE PER BYTE delle righe di GIORNI NOMINATI fra due
+#  cartelle di CSV mensili (F2, condizione (2): i 5 giorni in ora legale
+#  USA devono avere righe IDENTICHE nei CSV del 03/09 e in quelli
+#  riconvertiti con --dst fisso). Una "riga del giorno G" e' una riga del
+#  CSV il cui timestamp (primi 10 caratteri, AAAA.MM.GG, ORA SERVER) e' G.
+#  Si contano le righe e si fa lo SHA256 dei BYTE delle righe cosi' come
+#  stanno nel file (terminatore compreso). Un giorno senza righe da una
+#  parte (n = 0) NON e' identico: due insiemi vuoti non certificano niente.
+# ---------------------------------------------------------------------
+GIORNO_RE = re.compile(r"^\d{4}\.\d{2}\.\d{2}$")
+
+
+def _csv_mensili(cartella):
+    nomi = {}
+    for n in sorted(os.listdir(cartella)):
+        m = re.match(r"^(.+)_ticks_(\d{4})-(\d{2})\.csv$", n)
+        if m:
+            nomi.setdefault(m.group(1), []).append((m.group(2) + "." + m.group(3), n))
+    return nomi
+
+
+def hash_giorni(cartella, giorni):
+    """Torna (prefisso, {giorno: (n_righe, sha256 esadecimale)}). Un solo prefisso di file per cartella."""
+    nomi = _csv_mensili(cartella)
+    if len(nomi) != 1:
+        raise ValueError("in %s servono CSV di UN solo simbolo, trovati: %s" % (cartella, sorted(nomi) or "nessuno"))
+    prefisso = list(nomi)[0]
+    out = {g: [0, hashlib.sha256()] for g in giorni}
+    mesi = set(g[:7] for g in giorni)
+    for mese, n in nomi[prefisso]:
+        if mese not in mesi:
+            continue
+        with open(os.path.join(cartella, n), "rb") as fh:
+            for riga in fh:
+                s = out.get(riga[:10].decode("ascii", "replace"))
+                if s is not None:
+                    s[0] += 1
+                    s[1].update(riga)
+    return prefisso, {g: (v[0], v[1].hexdigest()) for g, v in out.items()}
+
+
+def confronta_giorni(vecchia, nuova, giorni):
+    for g in giorni:
+        if not GIORNO_RE.match(g):
+            raise ValueError("giorno '%s' non e' AAAA.MM.GG" % g)
+    if len(set(giorni)) != len(giorni):
+        raise ValueError("giorni ripetuti nella lista")
+    pv, hv = hash_giorni(vecchia, giorni)
+    pn, hn = hash_giorni(nuova, giorni)
+    if pv != pn:
+        raise ValueError("prefissi dei CSV diversi: %s contro %s" % (pv, pn))
+    righe = []
+    for g in giorni:
+        (nv, sv), (nn, sn) = hv[g], hn[g]
+        righe.append((g, nv, nn, sv if nv else "-", sn if nn else "-", bool(nv > 0 and nv == nn and sv == sn)))
+    return righe
+
+
+def confronta_cmd(args):
+    giorni = [g.strip() for g in args.giorni.split(",") if g.strip()]
+    if not giorni:
+        log("ERRORE: --confronta-giorni vuole --giorni AAAA.MM.GG,AAAA.MM.GG,...")
+        return 2
+    try:
+        for d in args.confronta_giorni:
+            if not os.path.isdir(d):
+                raise ValueError("cartella inesistente: " + d)
+        righe = confronta_giorni(args.confronta_giorni[0], args.confronta_giorni[1], giorni)
+    except (ValueError, OSError) as e:
+        log("ERRORE: %s" % e)
+        return 2
+    log("=== CONFRONTO BYTE PER BYTE (%s) ===" % VERSIONE)
+    log("vecchia: " + args.confronta_giorni[0])
+    log("nuova  : " + args.confronta_giorni[1])
+    testo = ["Giorno,RigheVecchie,RigheNuove,ShaVecchie,ShaNuove,Identico"]
+    for (g, nv, nn, sv, sn, ok) in righe:
+        testo.append("%s,%d,%d,%s,%s,%s" % (g, nv, nn, sv, sn, "SI" if ok else "NO"))
+        log("  %s  righe vecchie %d  nuove %d  -> %s" % (g, nv, nn, "IDENTICHE" if ok else "DIVERSE (o vuote)"))
+    log("CONFRONTO: %d/%d giorni identici" % (sum(1 for r in righe if r[5]), len(righe)))
+    if args.csv_out:
+        scrivi_atomico(args.csv_out, "\n".join(testo) + "\n")
+        log("scritto " + args.csv_out)
+    return 0
+
+
+# ---------------------------------------------------------------------
 #  AUTOTEST: senza rete. Non dimostra il formato Dukascopy (quello lo
 #  misura la corsa vera): dimostra che QUESTO codice non si morde la coda.
 # ---------------------------------------------------------------------
@@ -718,6 +833,146 @@ def autotest():
             srv.shutdown()
             srv.server_close()
 
+    # 11. --dst fisso: UTC+1 SEMPRE. Ai quattro confini al minuto (USA e EU, 2025) e a meta' giornata
+    for dt in (datetime(2025, 3, 9, 6, 59, tzinfo=timezone.utc), datetime(2025, 3, 9, 7, 0, tzinfo=timezone.utc),
+               datetime(2025, 11, 2, 5, 59, tzinfo=timezone.utc), datetime(2025, 11, 2, 6, 0, tzinfo=timezone.utc),
+               datetime(2025, 3, 30, 0, 59, tzinfo=timezone.utc), datetime(2025, 3, 30, 1, 0, tzinfo=timezone.utc),
+               datetime(2025, 10, 26, 0, 59, tzinfo=timezone.utc), datetime(2025, 10, 26, 1, 0, tzinfo=timezone.utc),
+               datetime(2025, 1, 15, 12, 0, tzinfo=timezone.utc), datetime(2025, 7, 15, 12, 0, tzinfo=timezone.utc)):
+        assert converti_fuso(dt, "server", "fisso") == dt + timedelta(hours=1), "fisso: non e' +1h a " + str(dt)
+    assert converti_fuso(datetime(2025, 1, 15, 12, 0, tzinfo=timezone.utc), "utc", "fisso").hour == 12, "--fuso utc deve vincere su fisso"
+    log("11. --dst fisso = UTC+1 sempre (4 confini al minuto USA/EU + inverno + estate + --fuso utc): OK")
+
+    # 12. 'fisso' == 'usa' OVUNQUE il DST USA e' attivo, e DIVERSO di esattamente 1 h dove non lo e'
+    #     (ora per ora, 2012-2026: non e' un alias di 'usa' e non e' una costante sbagliata)
+    n_uguali = n_diversi = 0
+    dt = datetime(2012, 1, 1, tzinfo=timezone.utc)
+    fine = datetime(2027, 1, 1, tzinfo=timezone.utc)
+    while dt < fine:
+        f = offset_server(dt, "fisso")
+        u = offset_server(dt, "usa")
+        if dst_usa_attivo(dt):
+            assert f == u, "fisso != usa con DST USA attivo a " + str(dt)
+            n_uguali += 1
+        else:
+            assert f - u == timedelta(hours=1), "fisso - usa != 1h fuori dal DST USA a " + str(dt)
+            n_diversi += 1
+        dt += timedelta(hours=1)
+    assert n_uguali > 50000 and n_diversi > 40000, "campione sbilanciato: %d / %d" % (n_uguali, n_diversi)
+    log("12. fisso == usa con DST USA attivo (%d ore) e fisso = usa + 1h fuori (%d ore), 2012-2026: OK" % (n_uguali, n_diversi))
+
+    # 13. i NOVE giorni della sonda F2, per NOME: i 5 in ora legale USA identici ('usa' = 'fisso'), i 4 invernali
+    #     (2024.11.20 e i tre nuovi) diversi di esattamente 1 h. Ogni ora UTC del giorno e di quello prima.
+    estivi = ["2024-10-29", "2024-10-31", "2025-03-12", "2025-03-25", "2025-06-10"]
+    inverno = ["2024-11-20", "2024-12-10", "2025-01-14", "2025-02-11"]
+    for g in estivi + inverno:
+        base = datetime.strptime(g, "%Y-%m-%d").replace(tzinfo=timezone.utc) - timedelta(days=1)
+        for h in range(48):
+            x = base + timedelta(hours=h)
+            if g in estivi:
+                assert converti_fuso(x, "server", "fisso") == converti_fuso(x, "server", "usa"), "giorno estivo: fisso != usa: " + str(x)
+            else:
+                assert converti_fuso(x, "server", "fisso") - converti_fuso(x, "server", "usa") == timedelta(hours=1), "giorno invernale: differenza != 1h: " + str(x)
+    log("13. 9 giorni nominati: 5 estivi identici fra usa e fisso, 4 invernali diversi di 1 h (ogni ora): OK")
+
+    # 14. confronto byte per byte dei giorni (F2 punto 2): identici / un byte diverso / giorno vuoto / conteggio diverso / giorno a cavallo di due file
+    with tempfile.TemporaryDirectory() as td:
+        va, nu = os.path.join(td, "vecchia"), os.path.join(td, "nuova")
+        os.makedirs(va); os.makedirs(nu)
+        base_righe = ["Time,Msec,Bid,Ask\n"]
+        base_righe += ["2024.10.29 10:00:0%d,%03d,32000.5,32002.5\n" % (i, i) for i in range(5)]
+        base_righe += ["2024.10.30 11:00:00,001,32100.5,32102.5\n"]
+        for cart in (va, nu):
+            with open(os.path.join(cart, "U30USD_DK_ticks_2024-10.csv"), "w", newline="") as f:
+                f.write("".join(base_righe))
+        r = confronta_giorni(va, nu, ["2024.10.29", "2024.10.30"])
+        assert [x[5] for x in r] == [True, True] and r[0][1] == 5 and r[1][1] == 1, "identici: %s" % (r,)
+        # un solo byte diverso nella quarta riga del 29: quel giorno NON e' identico, il 30 si'
+        with open(os.path.join(nu, "U30USD_DK_ticks_2024-10.csv"), "w", newline="") as f:
+            f.write("".join(base_righe).replace("32000.5,32002.5\n2024.10.29 10:00:04", "32000.5,32002.6\n2024.10.29 10:00:04"))
+        r = confronta_giorni(va, nu, ["2024.10.29", "2024.10.30"])
+        assert [x[5] for x in r] == [False, True], "un byte diverso: %s" % (r,)
+        # giorno senza righe da NESSUNA delle due parti: NON identico (due insiemi vuoti non certificano)
+        r = confronta_giorni(va, nu, ["2024.10.31"])
+        assert r[0][5] is False and r[0][1] == 0 and r[0][2] == 0, "giorno vuoto: %s" % (r,)
+        # conteggio diverso (una riga in piu' nella nuova)
+        with open(os.path.join(nu, "U30USD_DK_ticks_2024-10.csv"), "a", newline="") as f:
+            f.write("2024.10.30 11:00:01,002,32100.5,32102.5\n")
+        r = confronta_giorni(va, nu, ["2024.10.30"])
+        assert r[0][5] is False and (r[0][1], r[0][2]) == (1, 2), "conteggio: %s" % (r,)
+        # mese mancante nella nuova: giorno non identico, non eccezione
+        os.remove(os.path.join(nu, "U30USD_DK_ticks_2024-10.csv"))
+        with open(os.path.join(nu, "U30USD_DK_ticks_2024-11.csv"), "w", newline="") as f:
+            f.write("Time,Msec,Bid,Ask\n")
+        r = confronta_giorni(va, nu, ["2024.10.29"])
+        assert r[0][5] is False and r[0][2] == 0, "mese mancante: %s" % (r,)
+        # simboli diversi nelle due cartelle: errore, non confronto
+        os.rename(os.path.join(nu, "U30USD_DK_ticks_2024-11.csv"), os.path.join(nu, "U30USD_DKNEG_ticks_2024-11.csv"))
+        try:
+            confronta_giorni(va, nu, ["2024.10.29"])
+            assert False, "prefissi diversi: doveva alzare ValueError"
+        except ValueError:
+            pass
+        # giorno malformato / ripetuto: errore
+        for brutti in (["2024-10-29"], ["2024.10.29", "2024.10.29"]):
+            try:
+                confronta_giorni(va, va, brutti)
+                assert False, "lista brutta accettata: %s" % (brutti,)
+            except ValueError:
+                pass
+    log("14. confronto byte per byte (identici / 1 byte diverso / vuoto / conteggio / mese mancante / prefissi / lista brutta): OK")
+
+    # 15. CORSA VERA offline (--solo-cache) su una cache SINTETICA: --dst fisso scrive UTC+1, --dst usa scrive UTC+0 d'inverno;
+    #     --nome-uscita e --cartella separati NON toccano il CSV buono; --senza-raccolta non scrive nulla sul Desktop.
+    with tempfile.TemporaryDirectory() as td:
+        casa = os.path.join(td, "casa")
+        os.makedirs(casa)
+        vecchi = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
+        os.environ["HOME"] = casa; os.environ["USERPROFILE"] = casa
+        try:
+            def costruisci_cache(lavoro, giorno_utc):
+                # 24 slot orari: ore 10 e 11 con 2 tick veri, le altre .assente (mercato chiuso). Percorso dalla funzione VERA.
+                for h in range(24):
+                    d, f, f_no = percorso_cache(os.path.join(lavoro, "raw"), "USA30IDXUSD", giorno_utc.replace(hour=h))
+                    os.makedirs(d, exist_ok=True)
+                    if h in (10, 11):
+                        rec = b"".join(RECORD.pack(ms, ask, bid, 1.0, 1.0) for (ms, ask, bid) in ((250, 3294400, 3294150), (59000, 3294500, 3294300)))
+                        with open(f, "wb") as fh:
+                            fh.write(lzma.compress(rec, format=lzma.FORMAT_ALONE))
+                    else:
+                        open(f_no, "wb").close()
+            lavoro = os.path.join(td, "lavoro")
+            gg = datetime(2025, 1, 15, tzinfo=timezone.utc)           # inverno: usa = +0, fisso = +1
+            costruisci_cache(lavoro, gg)
+            giorni_a = ["--simboli", "USA30IDXUSD", "--da", "2025-01-15", "--a", "2025-01-15", "--solo-cache", "--cartella", lavoro, "--senza-raccolta"]
+            assert corri(giorni_a + ["--dst", "fisso"]) == 0, "corsa fisso"
+            csv_f = os.path.join(lavoro, "tick", "U30USD_DK_ticks_2025-01.csv")
+            righe_f = open(csv_f).read().splitlines()
+            assert righe_f[0] == "Time,Msec,Bid,Ask", "intestazione"
+            assert righe_f[1] == "2025.01.15 11:00:00,250,32941.50,32944.00", "fisso, riga 1: " + righe_f[1]
+            assert righe_f[2].startswith("2025.01.15 11:00:59,000,") and righe_f[3].startswith("2025.01.15 12:00:00,250,") and len(righe_f) == 5, "fisso, righe 2-3: " + str(righe_f)
+            assert corri(giorni_a + ["--dst", "usa"]) == 0, "corsa usa"
+            righe_u = open(csv_f).read().splitlines()
+            assert righe_u[1].startswith("2025.01.15 10:00:00,250,"), "usa d'inverno e' UTC+0: " + righe_u[1]
+            buono = open(csv_f, "rb").read()
+            # il controllo negativo: cartella E nome separati; il CSV buono NON cambia di un byte
+            neg = os.path.join(td, "neg")
+            costruisci_cache(neg, gg)
+            assert corri(["--simboli", "USA30IDXUSD", "--da", "2025-01-15", "--a", "2025-01-15", "--solo-cache", "--cartella", neg, "--senza-raccolta",
+                          "--fuso", "utc", "--nome-uscita", "U30USD_DKNEG"]) == 0, "corsa negativo"
+            csv_n = os.path.join(neg, "tick", "U30USD_DKNEG_ticks_2025-01.csv")
+            assert os.path.exists(csv_n) and not os.path.exists(os.path.join(neg, "tick", "U30USD_DK_ticks_2025-01.csv")), "nome uscita"
+            assert open(csv_n).read().splitlines()[1].startswith("2025.01.15 10:00:00,250,"), "negativo = UTC puro"
+            assert open(csv_f, "rb").read() == buono, "il CSV buono e' cambiato dopo il negativo"
+            assert not os.path.exists(os.path.join(casa, "Desktop")) and not os.path.exists(os.path.join(casa, "dukascopy_tick.zip")), "--senza-raccolta ha scritto sul Desktop"
+            # nome uscita non valido / con piu' simboli: rifiutato prima di scrivere
+            assert corri(giorni_a + ["--nome-uscita", "a/b"]) == 2 and corri(["--simboli", "USA30IDXUSD,EURUSD", "--da", "2025-01-15", "--a", "2025-01-15", "--nome-uscita", "X"]) == 2
+        finally:
+            for k, v in vecchi.items():
+                if v is None: os.environ.pop(k, None)
+                else: os.environ[k] = v
+    log("15. corsa offline su cache sintetica: fisso=UTC+1, usa=UTC+0 d'inverno, negativo separato (cartella+nome), CSV buono intatto, niente Desktop: OK")
+
     log("")
     log("AUTOTEST: TUTTO OK.")
     return 0
@@ -741,18 +996,25 @@ def corri(argv):
     ap.add_argument("--simboli", default="")
     ap.add_argument("--da", default="")
     ap.add_argument("--a", default="")
-    ap.add_argument("--dst", choices=["usa", "europa"], default="usa")
+    ap.add_argument("--dst", choices=["usa", "europa", "fisso"], default="usa")
     ap.add_argument("--fuso", choices=["server", "utc"], default="server")
     ap.add_argument("--motore", choices=["urllib", "curl"], default="urllib")
     ap.add_argument("--pausa-ms", type=int, default=250)
     ap.add_argument("--divisore", type=int, default=0)
     ap.add_argument("--solo-cache", action="store_true")
     ap.add_argument("--cartella", default="")
+    ap.add_argument("--nome-uscita", default="")
+    ap.add_argument("--senza-raccolta", action="store_true")
+    ap.add_argument("--confronta-giorni", nargs=2, metavar=("VECCHIA", "NUOVA"))
+    ap.add_argument("--giorni", default="")
+    ap.add_argument("--csv-out", default="")
     ap.add_argument("--salta-controllo", action="store_true")
     args = ap.parse_args(argv)
 
     if args.autotest:
         return autotest()
+    if args.confronta_giorni:
+        return confronta_cmd(args)
 
     # PASSO 0: la finestra e' DICHIARATA, mai implicita (il muro del
     # ritmo misurato il 18/08 vieta i "tutto dal 2012" per sbaglio).
@@ -761,6 +1023,13 @@ def corri(argv):
         log("Esempio: --simboli USA30IDXUSD --da 2019-09-01 --a 2024-09-26")
         return 2
 
+    if args.nome_uscita:
+        if not re.match(r"^[A-Za-z0-9_]+$", args.nome_uscita):
+            log("ERRORE: --nome-uscita '%s' non valido (solo lettere, cifre, _)." % args.nome_uscita)
+            return 2
+        if len([s for s in args.simboli.split(",") if s.strip()]) != 1:
+            log("ERRORE: --nome-uscita vale per UN solo simbolo (--simboli ne ha altri).")
+            return 2
     lavoro = args.cartella or os.path.join(os.path.expanduser("~"), "dukascopy_lavoro")
     raw = os.path.join(lavoro, "raw")      # STESSA cache di dukascopy_m1.py
     out = os.path.join(lavoro, "tick")
@@ -796,6 +1065,9 @@ def corri(argv):
         log("motore di rete    : urllib (storico; se il server strozza, --motore curl)")
     if args.fuso == "utc":
         log("fuso in uscita    : UTC (solo per confronti: l'import usa 'server')")
+    elif args.dst == "fisso":
+        log("fuso in uscita    : ORA SERVER BCM = UTC+1 FISSO (niente ora legale;")
+        log("                    misurato 24/09 in report/OROLOGIO_BCM_2026-09-24.md par. 3.2)")
     else:
         log("fuso in uscita    : ORA SERVER BCM, calendario DST '%s'" % args.dst)
         log("                    (usa = ipotesi meglio supportata; la SONDA decide,")
@@ -841,7 +1113,8 @@ def corri(argv):
             continue
         bcm, banda_min, banda_max = STRUMENTI[sym]
         log("")
-        log("--- %s -> %s_DK (finestra %s -> %s) ---" % (sym, bcm, args.da, args.a))
+        nome_out = args.nome_uscita or (bcm + "_DK")
+        log("--- %s -> %s (finestra %s -> %s) ---" % (sym, nome_out, args.da, args.a))
         contatori = {"scaricate": 0, "assenti": 0, "errori": 0, "cache": 0,
                      "buchi_cache": 0, "byte": 0, "ultimo_errore": "", "consecutivi": 0}
         stat = Statistiche()
@@ -912,7 +1185,7 @@ def corri(argv):
                 decimali = {1: 0, 10: 1, 100: 2, 1000: 3, 10000: 4}.get(divisore_deciso, 5)
                 # i prezzi indice hanno 1-2 decimali veri: col divisore 100
                 # si scrive %.2f, con 1000 %.3f -- il formato segue la misura
-                scrittore = ScrittoreMensile(out, bcm + "_DK", "%%.%df" % decimali)
+                scrittore = ScrittoreMensile(out, nome_out, "%%.%df" % decimali)
             idx_ask = 1 if ordine_deciso == "p1_ask" else 2
             idx_bid = 2 if ordine_deciso == "p1_ask" else 1
             for ora, ticks in ticks_del_giorno:
@@ -933,11 +1206,12 @@ def corri(argv):
                        contatori["byte"] / 1e6, trascorso, proiezione))
         if scrittore is not None:
             scrittore.chiudi()
-        righe = stat.righe(bcm + "_DK")
+        righe = stat.righe(nome_out)
         righe.append("  divisore usato %s, ordine campi %s  <-- CONTROLLA L'ORDINE DI GRANDEZZA"
                      % (divisore_deciso, ordine_deciso))
         righe.append("  fuso: %s%s" % (args.fuso,
                      "" if args.fuso == "utc" else " (calendario DST %s)" % args.dst))
+        righe.append("  nome uscita: %s" % nome_out)
         righe.append("  scaricate %d ore (%.1f MB .bi5), %d cache, %d assenti (404), %d errori, %d buchi cache"
                      % (contatori["scaricate"], contatori["byte"] / 1e6,
                         contatori["cache"], contatori["assenti"], contatori["errori"],
@@ -971,12 +1245,14 @@ def corri(argv):
     testa.write("data: %s (ora del PC)  =  %s UTC\n" % (
         datetime.now().strftime("%Y-%m-%d %H:%M"),
         datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")))
-    testa.write("fuso timestamp: %s%s\n\n" % (args.fuso,
+    testa.write("fuso timestamp: %s%s\n" % (args.fuso,
                 "" if args.fuso == "utc" else " (calendario DST %s -- la sonda decide, criterio congelato)" % args.dst))
+    testa.write("DST: %s\n\n" % args.dst)
     testa.write("\n".join(righe_referto))
     scrivi_atomico(ref_path, testa.getvalue())
     file_referto.append(ref_path)
-    raccogli_desktop(file_referto, "dukascopy_tick.zip")
+    if not args.senza_raccolta:
+        raccogli_desktop(file_referto, "dukascopy_tick.zip")
     log("")
     log("ESITO: " + esito)
     if falliti:
