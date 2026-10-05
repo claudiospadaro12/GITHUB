@@ -26,6 +26,17 @@ OUT_DIR = "report"
 #     (InpFile=ABTG_Trades_100k.csv) e lo pubblica pubblica_trades.ps1.
 CSV_100K  = "data/statements/trades_100k.csv"
 DEP_100K  = 100000.0
+# --- 05/10/2026: la FONTE VIVA per separare "non ha operato" da "il dato non e'
+#     arrivato", senza toccare il .chr (che e' una foto al salvataggio del
+#     profilo, non lo stato corrente -- classe 834).
+#     Il runner delle 03:30 scrive ogni notte CODA_09, il "giornale operativo":
+#     per ogni terminale elenca i GIORNI in cui MT5 ha scritto un log Esperti
+#     (MT5 ne scrive uno solo per i giorni in cui gira con EA attaccati) e
+#     quante righe di ordine/deal c'erano. Se per un conto l'ultimo giorno di
+#     log e' vecchio, su quel terminale NESSUN EA ha operato da allora.
+#     🔴 E il limite va detto con il numero: la sonda delle 03:30 di oggi NON
+#     puo' coprire la seduta di oggi (la vedra' la corsa di domani notte).
+CODA_REFERTI = os.path.join("backtest_pipeline", "coda", "referti")
 FTMO_PAV_TOTALE = 90000.0   # pavimento statico -10%
 FTMO_LIM_GIORNO = 5000.0    # perdita massima giornaliera -5%
 
@@ -148,6 +159,79 @@ def senza_commento(r):
     vuoto = not (r.get("strategy") or "").strip()
     magic0 = (str(r.get("magic", "0")) or "0").strip() in ("", "0")
     return vuoto and magic0
+
+
+_CACHE_GIORNALE = {}
+
+
+def giornale_runner(conto):
+    """Dal piu' recente CODA_09 del runner: per `conto`, l'ultimo giorno in cui
+    MT5 ha scritto un log Esperti su quel terminale e quante righe di ordine
+    aveva. Ritorna un dizionario oppure **None quando non si puo' dire** --
+    cartella assente, nessun CODA_09, blocco del conto assente, formato diverso.
+    Non indovina mai: senza una riga letta, torna None e chi chiama tace.
+    Memoizzata: la pagella la interroga in quattro punti e il referto non cambia
+    mentre lo script gira."""
+    if conto in _CACHE_GIORNALE:
+        return _CACHE_GIORNALE[conto]
+    _CACHE_GIORNALE[conto] = _leggi_giornale_runner(conto)
+    return _CACHE_GIORNALE[conto]
+
+
+def _leggi_giornale_runner(conto):
+    try:
+        files = [f for f in os.listdir(CODA_REFERTI)
+                 if f.startswith("CODA_09_") and f.endswith(".log")]
+    except OSError:
+        return None
+    if not files:
+        return None
+    ultimo = sorted(files)[-1]
+    try:
+        with open(os.path.join(CODA_REFERTI, ultimo), encoding="utf-8",
+                  errors="replace") as f:
+            righe = f.read().split("\n")
+    except OSError:
+        return None
+    # la data della SONDA sta nel nome: CODA_09_giornale_operativo_AAAAMMGG_hhmmss.log
+    parti = ultimo.replace(".log", "").split("_")
+    sonda = None
+    for p in parti:
+        if len(p) == 8 and p.isdigit():
+            sonda = "%s-%s-%s" % (p[:4], p[4:6], p[6:])
+    # il blocco del conto va da "=== conto: N" fino al prossimo "=== conto:"
+    inizio = None
+    for i, r in enumerate(righe):
+        if r.strip() == "=== conto: %s" % conto:
+            inizio = i
+            break
+    if inizio is None:
+        return None
+    fine = len(righe)
+    for i in range(inizio + 1, len(righe)):
+        if righe[i].strip().startswith("=== conto:"):
+            fine = i
+            break
+    giorni = []
+    g = None
+    for r in righe[inizio:fine]:
+        s = r.strip()
+        if s.startswith("--- GIORNO "):
+            tok = s.split()
+            g = tok[2] if len(tok) > 2 and tok[2].isdigit() else None
+        elif g and s.startswith("RIGHE DI ORDINE / DEAL:"):
+            try:
+                giorni.append((g, int(s.split(":")[-1].strip())))
+            except ValueError:
+                pass
+            g = None
+    if not giorni:
+        return None
+    giorni.sort()
+    ultimo_g, ordini = giorni[-1]
+    return {"sonda": sonda, "referto": ultimo,
+            "giorno": "%s-%s-%s" % (ultimo_g[:4], ultimo_g[4:6], ultimo_g[6:]),
+            "ordini": ordini, "giorni": len(giorni)}
 
 
 def discordi(righe):
@@ -621,6 +705,17 @@ def main():
                 "arrivato** — e da qui non si distinguono. Nessuna gemella "
                 "risulta mancante, quindi **con ogni probabilita' e' la prima**."
                 % " · ".join(fermi), ""]
+        # 05/10: se per il 100k il giornale del runner SCIOGLIE il dubbio, il
+        # banner generico qui sopra non deve restare l'ultima parola: lo dice e
+        # rimanda alla sezione, dove il fatto e' misurato (classe 1136).
+        _gr100 = giornale_runner("50504263")
+        if (any("50504263" in x for x in fermi) and _gr100
+                and _gr100["giorno"] < giorno and _gr100["ordini"] == 0):
+            out += ["> 🟠 **Per il 100k `50504263` il dubbio e' SCIOLTO piu' "
+                    "sotto, e la risposta e' \"non ha operato\"**: il giornale "
+                    "del runner non trova **nessun log Esperti** su quel "
+                    "terminale dopo il **%s**. Vedi la sezione 🛡️ — li' c'e' "
+                    "anche il limite della sonda." % _gr100["giorno"], ""]
     if fermi:
         out += ["> 🚧 **Attenzione a cosa e' gia' implementato:** la soppressione "
                 "del netto di giornata vale per il **100k `50504263`** e per il "
@@ -794,13 +889,22 @@ def main():
     # contenuto. Senza manuali di giornata la sezione conteneva SOLO i discordi,
     # che il commento CE L'HANNO e che stanno DENTRO il totale della loro
     # giornata: l'opposto di "senza commento" e di "fuori dal totale".
+    CAPPELLO_DISCORDI = ("_Qui sotto non c'e' nessuna operazione \"senza "
+                         "commento\" di oggi: i **discordi** hanno il commento "
+                         "pieno e stanno **dentro** il totale della giornata in "
+                         "cui si sono chiusi._")
     if manuali_oggi:
         out += ["", "## 🚫 Fuori dal totale — operazioni SENZA COMMENTO", ""]
+        # caso MISTO: il titolo parla di "senza commento" e sotto ci sono anche
+        # i discordi, che il commento CE L'HANNO. Il cappello lo dice.
+        if amb_oggi or amb_prima:
+            out += ["_⚠️ Nel blocco in fondo ci sono anche i **discordi**, che "
+                    "il commento **ce l'hanno** e che stanno **dentro** il "
+                    "totale della loro giornata: il titolo qui sopra vale per "
+                    "le manuali, non per loro._", ""]
     elif amb_oggi or amb_prima:
         out += ["", "## 🚫 Fuori dal totale, e i casi da capire", "",
-                "_Qui sotto non c'e' nessuna operazione \"senza commento\" di "
-                "oggi: i **discordi** hanno il commento pieno e stanno **dentro** "
-                "il totale della giornata in cui si sono chiusi._"]
+                CAPPELLO_DISCORDI]
     if manuali_oggi:
         netto_man = sum(num(r, "profit") + num(r, "swap") + num(r, "commission")
                         for r in manuali_oggi)
@@ -990,11 +1094,53 @@ def main():
             # qui NON si scrive "nessuna posizione chiusa" e NON si scrive
             # "+0,00". Non lo sappiamo, e si dice.
             d100 = quando[CSV_100K]
-            out += ["> 🔴 **DATO NON ARRIVATO.** Il CSV del 100k ha contenuto "
-                    "fermo al **%s**: non posso dire ne' che il conto abbia "
-                    "operato, ne' che non l'abbia fatto. **Nessun netto di "
-                    "giornata per questo conto.**" % d100, "",
-                    "_Cosa guardare sul VPS: terminale **100k, conto `50504263`, "
+            # 05/10/2026: prima di dare l'allarme si guarda la FONTE VIVA. Il
+            # giornale del runner (CODA_09) dice se su quel terminale un EA ha
+            # scritto un log: se l'ultimo giorno di log e' vecchio, il conto NON
+            # ha operato, e l'allarme rosso diventa una constatazione.
+            # Nato da un difetto misurato: il banner rosso e' uscito CINQUE
+            # pagelle di fila su un conto da cui l'ultima sedia l'avevamo tolta
+            # NOI il 25/09 (classe 1136).
+            gr = giornale_runner("50504263")
+            if gr and gr["giorno"] < giorno and gr["ordini"] == 0:
+                out += ["> 🟠 **IL CONTO NON HA OPERATO — e stavolta non e' un "
+                        "\"non lo so\": e' MISURATO.** Il CSV del 100k ha "
+                        "contenuto fermo al **%s**, e il giornale del runner "
+                        "(`%s`, sonda delle 03:30 del **%s**) dice che "
+                        "sull'ultimo giorno in cui MT5 ha scritto un log "
+                        "Esperti su quel terminale — il **%s** — le righe di "
+                        "ordine erano **0**, e **dopo quel giorno non esiste "
+                        "nessun log**: MT5 ne scrive uno per ogni giorno in cui "
+                        "gira con EA attaccati, quindi da allora **nessun EA ha "
+                        "operato** su `50504263`. 🟢 Ed e' voluto: l'ultima "
+                        "sedia l'abbiamo **tolta noi** il 25/09 "
+                        "(`ABTG_SupertrendReversal` 225JPY H2, magic `770901`, "
+                        "ore 13:14:47 — `report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`)."
+                        % (d100, gr["referto"], gr["sonda"], gr["giorno"]), "",
+                        "> ⚠️ **Il limite, col suo numero**: la sonda delle "
+                        "03:30 di oggi **non puo' coprire la seduta di oggi** "
+                        "(la vedra' la corsa di domani notte). Quindi "
+                        "\"non ha operato\" vale **fino alle 03:30 del %s**; "
+                        "da li' a stasera e' **[NON ANCORA COPERTO]** — e "
+                        "resta comunque **nessun netto di giornata** per questo "
+                        "conto." % (gr["sonda"] or giorno), ""]
+            else:
+                out += ["> 🔴 **DATO NON ARRIVATO.** Il CSV del 100k ha contenuto "
+                        "fermo al **%s**: non posso dire ne' che il conto abbia "
+                        "operato, ne' che non l'abbia fatto. **Nessun netto di "
+                        "giornata per questo conto.**" % d100, ""]
+                if gr:
+                    out += ["> ℹ️ Il giornale del runner (`%s`) c'e' ma **non "
+                            "scioglie il dubbio**: ultimo giorno di log "
+                            "**%s** con **%d** righe di ordine. L'allarme "
+                            "resta rosso." % (gr["referto"], gr["giorno"],
+                                              gr["ordini"]), ""]
+                else:
+                    out += ["> ℹ️ Il giornale del runner (`CODA_09`) **non e' "
+                            "leggibile da qui** (referto assente o formato "
+                            "diverso): senza quella fonte il dubbio non si "
+                            "scioglie, e l'allarme resta rosso.", ""]
+            out += ["_Cosa guardare sul VPS: terminale **100k, conto `50504263`, "
                     "cartella `... -V3`** (NON il piccolo `50503392` in "
                     "`BCM Markets MT5 Terminal`, NON il reale `10105439` in "
                     "`C:\\BCM_Reale`) — l'`ABTG_TradeExporter` gira? e "
@@ -1026,7 +1172,13 @@ def main():
                     "" if fresco[CSV_100K] else " _(all'ultima consegna)_"),
                 ("| Perdita giornaliera (-5%%) | -5.000/giorno | oggi usati %.2f -> restano **%.2f** |" % (
                     usato_oggi, margine_giorno)) if fresco[CSV_100K] else
-                "| Perdita giornaliera (-5%) | -5.000/giorno | 🔴 **NON CALCOLABILE**: dato non arrivato |",
+                ("| Perdita giornaliera (-5%%) | -5.000/giorno | 🟠 **NON CALCOLABILE**: "
+                 "il conto non ha operato (giornale del runner, nessun log Esperti dopo il %s) |"
+                 % giornale_runner("50504263")["giorno"])
+                if (giornale_runner("50504263")
+                    and giornale_runner("50504263")["giorno"] < giorno
+                    and giornale_runner("50504263")["ordini"] == 0)
+                else "| Perdita giornaliera (-5%) | -5.000/giorno | 🔴 **NON CALCOLABILE**: dato non arrivato |",
                 "",
                 "Peggior giornata dal via: **%+.2f**. _Numeri dal solo REALIZZATO " % peggior_g +
                 "(il CSV non vede il floating): l'arbitro vero dei pavimenti resta "
