@@ -47,3 +47,15 @@ Difetti trovati dal cancello (counter-esempio costruito PRIMA della correzione: 
   battery.py 32/32 (4 scenari nuovi: 16c, 16d, 17, 17b) | mutazioni.py 63/63 prese (4 nuove) | statico OK | controlla_riga ps1+riga: nessun difetto meccanico
   bootstrap_test.py 61df70a2: 4 scenari + 4 mutazioni prese | GitHub raw al pin: HTTP 200, SHA256 identico a git show.
   NON rifatto: l'esecuzione del bootstrap VERO contro GitHub raw dentro pwsh (fatta su 97fe5be8; qui verificati separatamente HTTP 200 + impronta).
+
+=== TERZA LETTURA (verificatore-stringhe, 05/10): pin c8cad0c3, impronta DB6AA548, marcatore v3 ===
+Diff 61df70a2 -> 0bd6aaf4 (.tkc a zero byte): corretto, nessun effetto collaterale. Contro-esempio NUOVO (checklist punto 10 su un ciclo di LETTURA):
+  - un CSV di tick\ tenuto aperto in esclusiva da un altro processo: Leggi-CsvTick lanciava, il passo "csv tick" moriva a META' (i CSV dopo quello
+    bloccato, referto DST, DKNEG e backup NON letti) e la sintesi stampava "CSV U30USD_DK in tick\ : 2 file, 7 righe [MISURATO]" su 9 file
+    (backup F2 punto 2 sottostimato). Riprodotto su 0bd6aaf4 con flock LOCK_EX (pwsh/.NET lo rispetta come la condivisione di Windows).
+  Ora: try per file (tick\ e MQL5\Files): il file si conta coi suoi byte, le righe "NON MISURATE", gli altri si contano, Problemi registra, la sintesi dice
+  [PARZIALE ...]; [MISURATO] solo se il passo arriva in fondo (csv_completo).
+  battery.py 34/34 (scenario nuovo 18_csv_bloccato: ROSSO sul ps1 di 0bd6aaf4) | mutazioni.py 68/68 prese (5 nuove) | statico OK | controlla_riga ps1+riga OK
+  bootstrap_test.py c8cad0c3: 4+4 | GitHub raw al pin: SHA256 = git show = DB6AA548...0C20.
+  NON coperto dal banco: il ramo "[PARZIALE: passo csv tick interrotto a meta]" (nessun input lo fa piu' morire a meta'; difensivo, verificato a lettura).
+  NON rilevato (limite): un CSV troncato DENTRO l'ultimo campo dell'ultima riga conta come riga intera; il primo/ultimo tick e' stampato, la validita' la fa P1.

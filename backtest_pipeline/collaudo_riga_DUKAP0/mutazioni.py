@@ -90,6 +90,14 @@ M = [
  # --- MaxBars (piano par. 3.1 P0, classe 160)
  ("maxbars_soglia_tolta", "$(if($S.maxbars -lt 200000){", "$(if($S.maxbars -lt 0){", ["17_"]),
  ("maxbars_non_letto", "if($mB.Count -gt 0){", "if($false){", ["17b"]),
+ # --- CSV bloccato da un altro processo (terza lettura del verificatore-stringhe, 05/10): il passo NON muore a meta', la sintesi NON dice [MISURATO]
+ ("csv_bloccato_uccide_il_passo", "        try{ $i = Leggi-CsvTick $f.FullName } catch { $err = Pulisci ('' + $_.Exception.Message) }\n        if($null -eq $i){\n          $S.csv_nonlette++",
+  "        $i = Leggi-CsvTick $f.FullName\n        if($null -eq $i){\n          $S.csv_nonlette++", ["18"]),
+ ("files_bloccato_uccide_il_passo", "          try{ $i = Leggi-CsvTick $f.FullName } catch { $err = Pulisci ('' + $_.Exception.Message) }\n          if($null -eq $i){\n            $righe",
+  "          $i = Leggi-CsvTick $f.FullName\n          if($null -eq $i){\n            $righe", ["18"]),
+ ("csv_parziale_detto_misurato", "}elseif($S.csv_nonlette -gt 0){ '[PARZIALE: righe di '", "}elseif($false){ '[PARZIALE: righe di '", ["18"]),
+ ("csv_non_letto_non_e_problema", "          [void]$Problemi.Add('csv tick, ' + $f.Name", "          $null = ('csv tick, ' + $f.Name", ["18"]),
+ ("csv_completo_mai_scritto", "    $S.csv_completo = $true", "", ["01"]),
 ]
 
 

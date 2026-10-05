@@ -275,7 +275,8 @@ def attese(spec):
     for k, m in enumerate(spec["csv_mesi"] or []):
         n = spec["csv_righe_base"] + k
         csv.append((m, n))
-        tot_r += n
+        if m not in spec.get("csv_bloccati", []):      # csv_bloccati: CSV di tick\ tenuti aperti in esclusiva da un altro processo (righe NON contate)
+            tot_r += n
     a["csv"] = csv
     a["csv_righe"] = tot_r
     a["csv_n"] = len(csv)

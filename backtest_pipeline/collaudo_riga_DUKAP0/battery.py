@@ -6,7 +6,7 @@ contro le ATTESE CALCOLATE DALLA SPECIFICA (fixture.attese), mai contro un'uscit
 dentro Invoke-Expression), il finto disco e' IDENTICO prima e dopo fuori dal Desktop (SOLA LETTURA provata, non promessa), nessuna riga di lancio scrive altro, ASCII puro.
 Uso: python3 battery.py [--riga FILE] [--solo NOME] [--jobs N] [--primo-rosso]   -> ultima riga "BATTERIA: n/m scenari verdi"
 """
-import copy, os, re, shutil, sys, tempfile, zipfile
+import copy, fcntl, os, re, shutil, sys, tempfile, zipfile
 from multiprocessing import Pool
 import fixture as F
 import run_one as R
@@ -60,6 +60,9 @@ def scenari():
     sc.append(("16e_tkc_zero_byte", S(nativi_zero=["202411", "202503"]), {}))
     # MaxBars: tetto basso (classe 160 / checklist 36) e chiave assente
     sc.append(("17_maxbars_basso", S(common_ini="Login=50503392\r\nServer=BCMMarkets-Demo\r\n[Charts]\r\nMaxBars=100000\r\n"), {}))
+    # CSV bloccato da un altro processo (contro-esempio del verificatore-stringhe, 05/10, terza lettura): prima il passo moriva a meta' e la sintesi diceva
+    # "2 file, 7 righe [MISURATO]" su 9 file. Ora: il file si conta, le righe no, gli altri si contano, la sintesi dice PARZIALE. Anche la copia in MQL5\Files.
+    sc.append(("18_csv_bloccato", S(csv_bloccati=["2024-12"], files_bloccati=["2024-10"]), {}))
     sc.append(("17b_maxbars_alto", S(common_ini="Login=50503392\r\nServer=BCMMarkets-Demo\r\n[Charts]\r\nMaxBars=2000000000\r\n"), {}))
     return sc
 
@@ -69,7 +72,19 @@ def runna(nome, spec, opz, riga):
     try:
         c = F.costruisci(b, spec)
         prima = F.snapshot(c)
-        r = R.esegui(spec, c, riga=riga, **opz)
+        # file tenuti aperti in ESCLUSIVA durante la corsa (flock LOCK_EX: .NET su Linux lo rispetta e FileShare.ReadWrite fallisce come su Windows)
+        blocchi = []
+        for m in spec.get("csv_bloccati", []):
+            blocchi.append(os.open(os.path.join(c, "Users", "Master", "dukascopy_lavoro", "tick", "U30USD_DK_ticks_%s.csv" % m), os.O_RDONLY))
+        for m in spec.get("files_bloccati", []):
+            blocchi.append(os.open(os.path.join(c, "Users", "Master", "AppData", "Roaming", "MetaQuotes", "Terminal", "ABC123", "MQL5", "Files", "U30USD_DK_ticks_%s.csv" % m), os.O_RDONLY))
+        for fd in blocchi:
+            fcntl.flock(fd, fcntl.LOCK_EX)
+        try:
+            r = R.esegui(spec, c, riga=riga, **opz)
+        finally:
+            for fd in blocchi:
+                os.close(fd)
         dopo = F.snapshot(c)
         z = []
         for zz in r["zips"]:
@@ -240,13 +255,25 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
     bcm_n = 2 if spec["doppio_dati"] else (1 if spec["origin_testo"] == F.TERM else 0)
     if spec["cache"] != "nessuna_lavoro":
         must("CSV in tick\\ : %d" % a["csv_n"])
+        blo = spec.get("csv_bloccati", [])
         for (m, n) in a["csv"]:
             giorno_ult = 1 + n - 1
             primo = m.replace("-", ".") + ".01 10:00:00"
             ult = "%s.%02d 10:%02d:00" % (m.replace("-", "."), giorno_ult, n - 1)
+            if m in blo:
+                rx(r"U30USD_DK_ticks_%s\.csv  \d+ byte \([\d.]+ MB\)  scritto [\d\- :]+  righe NON MISURATE \(file non apribile: " % re.escape(m), "CSV bloccato %s: contato, righe NON MISURATE" % m)
+                must("csv tick, U30USD_DK_ticks_%s.csv: righe NON MISURATE (file non apribile)" % m)
+                continue
             rx(r"U30USD_DK_ticks_%s\.csv  \d+ byte \([\d.]+ MB\)  scritto [\d\- :]+  righe %d  primo %s  ultimo %s" % (re.escape(m), n, re.escape(primo), re.escape(ult)), "righe/primo/ultimo del CSV %s" % m)
-        must("totale tick\\ : %d file, %d righe" % (a["csv_n"], a["csv_righe"]))
-        must("CSV U30USD_DK in tick\\ : %d file, %d righe [MISURATO]" % (a["csv_n"], a["csv_righe"]))
+        if blo:
+            must("totale tick\\ : %d file, %d righe (SENZA le righe di %d file non apribili), " % (a["csv_n"], a["csv_righe"], len(blo)))
+            must("CSV U30USD_DK in tick\\ : %d file, %d righe [PARZIALE: righe di %d file NON contate, file non apribili]" % (a["csv_n"], a["csv_righe"], len(blo)))
+            mustnot("CSV U30USD_DK in tick\\ : %d file, %d righe [MISURATO]" % (a["csv_n"], a["csv_righe"]), None, "un CSV non letto NON e' una misura completa")
+            # i CSV DOPO quello bloccato sono stati contati (il passo non muore a meta')
+            mustnot('passo "csv tick" FALLITO')
+        else:
+            must("totale tick\\ : %d file, %d righe, " % (a["csv_n"], a["csv_righe"]))
+            must("CSV U30USD_DK in tick\\ : %d file, %d righe [MISURATO]" % (a["csv_n"], a["csv_righe"]))
         if spec["referto_py"] and spec["csv_mesi"] is not None:
             must("   | comando : --dst usa")
         if spec["csv_mesi"] is not None and not spec["referto_py"]:
@@ -266,7 +293,8 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
             err.append("P0_CSV_TICK.csv: %d righe invece di %d" % (len(rr), 1 + a["csv_n"] + n_f))
         else:
             for k, (m, n) in enumerate(a["csv"]):
-                if not rr[1 + k].startswith("tick,U30USD_DK_ticks_%s.csv," % m) or ("," + str(n) + ",") not in rr[1 + k]:
+                atteso_r = "NON_MISURATO" if m in spec.get("csv_bloccati", []) else str(n)
+                if not rr[1 + k].startswith("tick,U30USD_DK_ticks_%s.csv," % m) or ("," + atteso_r + ",") not in rr[1 + k]:
                     err.append("riga CSV tick %s: %s" % (m, rr[1 + k])); break
     else:
         must("cartella " )
@@ -353,6 +381,15 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
         # MQL5\Files
         nff = (min(spec["csv_in_files"], len(spec["csv_mesi"])) if (spec["csv_mesi"] and spec["cache"] != "nessuna_lavoro") else 0) + (1 if spec["referto_import"] else 0)
         must("MQL5\\Files: %d file U30USD_DK* / ABTG_ImportTick*" % nff)
+        for m in spec.get("files_bloccati", []):
+            must("MQL5 Files, U30USD_DK_ticks_%s.csv: righe NON MISURATE (file non apribile)" % m)
+            rx(r"U30USD_DK_ticks_%s\.csv  \d+ byte  scritto [\d\- :]+  righe NON MISURATE \(file non apribile: " % re.escape(m), "copia in MQL5\\Files bloccata")
+            if "MQL5Files,U30USD_DK_ticks_%s.csv," % m not in tick_csv or ",NON_MISURATO," not in tick_csv:
+                err.append("P0_CSV_TICK.csv: manca la riga NON_MISURATO della copia bloccata %s" % m)
+        for m in [x for x in (spec["csv_mesi"] or [])[:spec["csv_in_files"]] if x not in spec.get("files_bloccati", [])]:
+            if spec.get("files_bloccati"):
+                rx(r"U30USD_DK_ticks_%s\.csv  \d+ byte  scritto [\d\- :]+  righe \d+\n" % re.escape(m), "le copie NON bloccate in MQL5\\Files si contano lo stesso")
+        mustnot('passo "MQL5 Files" FALLITO')
     # processi
     if spec["mt5_vivo"]:
         must("MT5 (terminal64) APERTO: True")
@@ -370,7 +407,11 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
         must("python / py: NON trovati nel PATH")
     must("curl.exe in System32: %s" % ("True" if spec.get("curl", True) else "False"))
     # esito
-    if nome != "05c_cim_fallisce":
+    nblo = len(spec.get("csv_bloccati", [])) + len(spec.get("files_bloccati", []))
+    if nblo:
+        must("ESITO P0: CENSIMENTO PARZIALE (%d passi falliti, vedi sopra)" % nblo)
+        must("PASSI FALLITI: %d" % nblo)
+    elif nome != "05c_cim_fallisce":
         must("ESITO P0: CENSIMENTO COMPLETO (solo lettura)")
         mustnot("PASSI FALLITI")
     return err
