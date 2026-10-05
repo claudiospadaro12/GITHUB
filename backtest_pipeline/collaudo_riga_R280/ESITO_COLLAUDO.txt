@@ -1,0 +1,22 @@
+ESITO DEL COLLAUDO DELLA RIGA R280 -- 05/10/2026 (Sviluppatore; il giudizio e' dell'Agente dei Controlli: verificatore-stringhe + controllo-preventivo, NON ancora fatti)
+Pin della riga (contiene i due file prova, i criteri, l EA, l include, il driver con la riprova): 86ab2144f8fba632503b258b1c5d345dec8939d2
+Riga: backtest_pipeline/righe/RIGA_ROUND_R280.txt  (1 riga fisica, 61555 byte, SHA256 875909B51291B1BB7DF567AF3C1B7DBA519341F9DD36AA452FCB17E8E9D65B9A, marcatore MARCATORE_RIGA_ROUND_R280_v1)
+
+FATTO (a macchina, su Linux con pwsh 7.4.6 e uno STUB del driver, cioe NON su Windows PowerShell 5.1 ne con MT5):
+  assembla.py --verifica ..................... IDENTICA byte per byte (la riga e' rigenerata dal sorgente riga_src.txt al pin; 9 asserzioni sui file prova, i CSV veri di R262b/R245b,
+                                               il referto di R262b, le tolleranze, i magic, EA/include byte per byte = 02c70e17, driver e walkforward con le impronte del PASS d949f705)
+  controlla_riga.py --oggetto riga ........... nessun difetto meccanico (ASCII puro, 0 errori dal parser PowerShell, nessun costrutto pwsh-7-only); 5 rilievi gia presenti in EMAGEM2 (stringhe con i nomi dei terminali vietati)
+  controlla_prova.py (R280a, R280e) .......... ESITO OK, 8 celle, 16 passate, 0 problemi
+  leggi_r280.py --autotest ................... 108/108 (30 casi al bordo del cancello, 16 mutanti delle soglie del cancello, 26 verdetti con attese scritte a mano, 16 mutanti delle soglie del verdetto)
+  giornali_veri.py ........................... 4/4 (giornale VERO del tester del 27/09: stesso EA, simbolo U30USD M5, stesse finestre IS/OOS di R280)
+  riprove_veri.py ............................ 11/11 (file RIPROVE scritti dal driver vero)
+  battery.py ................................. 155/155 scenari (cancello G0 + G1 con 33 casi al bordo derivati a mano dalla tolleranza congelata, gambe morte e riprove, CSV, pin, giornale, 166/892,
+                                               referto, zip, cancelli prima del job, tetto, macchina/terminale/guardia EA). Lo stub STAMPA in console il blocco "I NUMERI" come il driver vero (classe 1092).
+  mutazioni.py ............................... 139 mutazioni testuali, 139 PRESE (ognuna spegne UN controllo e almeno uno scenario diventa rosso); EQUIVALENTI dichiarati nel docstring del file (6, col conto),
+                                               fra cui uno tolto perche irraggiungibile ("G1: gemelle non due").
+  bootstrap: rigenerato col generatore e confrontato byte per byte con cmp (classe 1093); scaricato DAVVERO da GitHub raw (HTTP 200): impronta OK arriva alla riga, che si ferma al controllo macchina
+             (Linux); con l impronta alterata si ferma prima ("IMPRONTA DIVERSA").
+
+NON COPERTO (dichiarato): Windows PowerShell 5.1 e MT5 reali; il driver vero (c e uno stub; le fixture RIPROVE e il giornale sono veri); il tempo vero; la cache del tester del PC (non sta nel repo);
+  la distribuzione reale dei numeri di R280a (nessun numero R280 esiste: i CSV dello stub per R280a sono SINTETICI, quelli di R280e sono la riga vera di R262b).
+CLASSI NUOVE trovate durante il lavoro: 1105 (clausola di un criterio implicata da quella che la precede) e 1106 (attese copiate dal modello con contatori/default legati al modello) in CHECKLIST_RIGA_DI_LANCIO.md.

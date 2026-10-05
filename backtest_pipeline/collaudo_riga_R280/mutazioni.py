@@ -14,6 +14,8 @@ MUTANTI EQUIVALENTI dichiarati (NON presi per costruzione, col conto; la scelta 
  (3) $nomeWf, $shaDrv.Length: il driver e il walkforward si fermano PRIMA (SHA diverso dal pin: scenari driver_mutato e walkforward_*).
  (5) $nS -ne 2 nell ultimo elseif dello stato (finestra girata): ridondante con $nWis -ne 1 e $nWoos -ne 1 piu i controlli che lo precedono (giornale contro RIPROVE: nLg = tentativi,
      eaKo, tX, rpCoh): con nWis = nWoos = 1 e nLg = tA = 2 le gambe partite sono gia 2 (una gamba riprovata ha 3 intestazioni ma solo 2 con la riga from..to).
+ (6) il ramo "else { $t1Gem += ... righe N invece di 2 }" del G1: irraggiungibile, perche il cancello gira SOLO se R280e ha STATO OK/OK_RIPROVATO e quello stato richiede un CSV con
+     esattamente 2 righe per gamba (csvRead: $co.n -eq $nrAtt): con $trw.Count diverso da 2 lo stato e NV e il cancello non parte (scenario una_riga_in_meno / trades_zero_in_una_cella_di_e).
  (4) i due controlli sul conteggio dell asse (@($_.av).Count -ne $_.nr e la lista dei nr '2,6') si coprono a vicenda: ognuno e' preso solo se spenti INSIEME (mutazione combinata).
 NON equivalente (e PRESA): [double] al posto di [decimal] nel parser dei numeri ($decF): in double 2974.09-2974.04 = 0.0500000000001819, 1.48133-1.48128 = 5.0000000000105516e-05 e
 6.6241-6.6141 = 0.010000000000000675 stanno OLTRE le soglie 0,05 / 0,00005 / 0,01 e i tre casi "bordo: PASS" diventano rossi (calcolato a mano il 05/10).
@@ -44,7 +46,7 @@ M = [
  ("referto: deposito", " -and $refV['deposito'] -eq ('' + $jb.dp)", "", ["deposito_100000_passato"]),
  ("referto: modello", " -and $refV['modello'] -eq ('' + $jb.m)", "", ["modello_1_passato"]),
  ("referto: pin", "$refOk=($refFr -and $refV['pin'] -eq $PIN", "$refOk=($refFr", ["pin_diverso_passato"]),
- ("referto: macchina", " -and $refV['macchina'] -eq 'DESKTOP-H4D7CAJ'", "", ["referto_terminale_banco_VPS"]),
+ ("referto: macchina", " -and $refV['macchina'] -eq 'DESKTOP-H4D7CAJ'", "", ["referto_macchina_diversa"]),
  ("referto: terminale", " -and $refTerm -eq ($TB + '\\terminal64.exe')", "", ["referto_terminale_banco_VPS"]),
  ("cartella vecchia: rimozione non verificata", "Remove-Item -LiteralPath $vec -Recurse -Force -ErrorAction SilentlyContinue; if(Test-Path -LiteralPath $vec){ throw", "Remove-Item -LiteralPath $vec -Recurse -Force -ErrorAction SilentlyContinue; if($false){ throw", ["cartella_vecchia_non_rimovibile"]),
  ("166/892: walkforward_generico_RETRY", "-Algorithm SHA256).Hash -ne $shaWf){", "-Algorithm SHA256).Hash -eq 'X'){", ["walkforward_retry_mutato", "walkforward_originale_col_nome_RETRY"]),
@@ -129,7 +131,6 @@ M = [
  ("G1: PF fuori dalle colonne", "@('Profit','Profit Factor','Equity DD %','Trades')){ $g0=", "@('Profit','Equity DD %','Trades')){ $g0=", CAN),
  ("G1: DD fuori dalle colonne", "@('Profit','Profit Factor','Equity DD %','Trades')){ $g0=", "@('Profit','Profit Factor','Trades')){ $g0=", CAN),
  ("G1: Trades fuori dalle colonne", "@('Profit','Profit Factor','Equity DD %','Trades')){ $g0=", "@('Profit','Profit Factor','Equity DD %')){ $g0=", CAN),
- ("G1: gemelle non due", "} else { $t1Gem += ($tg + ' righe ' + $trw.Count + ' invece di 2') }", "}", CAN),
  # le soglie (una per volta, di un passo)
  ("soglia Profit 0 (esatto)", "$tolP=& $decF '0.05';", "$tolP=& $decF '0';", CAN),
  ("soglia Profit 0,04", "$tolP=& $decF '0.05';", "$tolP=& $decF '0.04';", CAN),
