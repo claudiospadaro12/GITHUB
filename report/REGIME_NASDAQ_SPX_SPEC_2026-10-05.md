@@ -23,7 +23,7 @@ Stato del cancello: **`controllo-preventivo` 05/10: FAIL corretto in loco** (qua
 8. **Il fattore OHLC -> tick "1,7-1,85" e' del DAX, non del Nasdaq.** Misurato in casa: DAX Live5m 1,72 e 1,85; **Nasdaq Live5m 2,25**; Dow H4 3,51; per la cella a limite RETEST **[NON MISURATO]**. Regola: **le barre possono solo BOCCIARE, mai promuovere** (§5).
 9. **S&P 500: non si lancia niente adesso, per tre ostacoli indipendenti.** `SPXUSD_EXT` e' ancora in frigo (rapporto 0,203 contro 0,20); l'unica sedia S&P (`771514`) sta sotto la frontiera del costo anche a BCM oggi (~13-39x, centrale ~25x [DERIVATO], spread 1,40 istantanea del 17/08); il suo campione e' 27-40 posizioni/anno, quindi il merito per regime e' non misurabile (§6.4).
 10. **Costo in tempo di tester: nucleo `770260` 34 passate = ~8-20 minuti; tutta la rosa nucleo (`770260` + `770250` + SupRev) 63 passate = ~14-36 minuti.** Il costo vero e' di orologio e di firme, non di CPU (§8). La strada con i volumi veri e' 62-244 ore di PC acceso.
-11. **Firme nuove: una necessaria, tre opzionali** (§9). Gia' firmato e sufficiente: D-A, D-B (NASUSD,SPXUSD,D30EUR), D-C (solo prova di regime), D-D, D-H, "FIRMO FRIGO NASUSD", la regola del 21/09 (round sul PC di backtest).
+11. **Firme nuove: una necessaria, quattro opzionali** (§9). Gia' firmato e sufficiente: D-A, D-B (NASUSD,SPXUSD,D30EUR), D-C (solo prova di regime), D-D, D-H, "FIRMO FRIGO NASUSD", la regola del 21/09 (round sul PC di backtest).
 12. **Se la prova passa la riga "anni/dati" del dossier passa da NO a PARZIALE, mai a SI** (3 finestre 2020-22 = 34 mesi di barre + 21 mesi di tick). Solo con la traslazione di scala delle finestre 2011-2018 (firma F-B) si arriverebbe a ~11 anni, ma sarebbero barre di una cella traslata (§10).
 
 ---
