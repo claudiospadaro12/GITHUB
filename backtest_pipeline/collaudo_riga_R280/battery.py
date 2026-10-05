@@ -181,6 +181,7 @@ T = [
  ("referto_vecchio_sul_desktop", {E: {"ref_absent": True}}, "", "ok", PC, "", "ok", {"PRE_OLD": E}, [ST("NV", "OK"), "tolta la cartella di una corsa PRECEDENTE: ROUND_R280e", "REFERTO DEL DRIVER ASSENTE"], ["R280e OK"]),
  ("referto_non_riscritto", {A: {"ref_stale": True}}, "", "ok", PC, "", "ok", {}, [ST("OK", "NV"), "REFERTO DEL DRIVER VECCHIO (scritto prima del job: NON e di questa corsa)"], ["R280a OK"]),
  ("referto_terminale_banco_VPS", {E: {"ref_term": "C:\\MT5_Backtest\\terminal64.exe"}}, "", "ok", PC, "", "ok", {}, [ST("NV", "OK"), "terminale C:\\MT5_Backtest\\terminal64.exe", "DIVERSO DALLA RIGA"], ["R280e OK"]),
+ ("referto_macchina_diversa", {E: {"ref_mac": "VMI3047753"}}, "", "ok", PC, "", "ok", {}, [ST("NV", "OK"), "macchina VMI3047753, terminale", "DIVERSO DALLA RIGA"], ["R280e OK"]),
  ("referto_driver_originale", {E: {"ref_driver": "walkforward_generico.ps1"}}, "", "ok", PC, "", "ok", {}, [ST("NV", "OK"), "driver walkforward_generico.ps1, riprova", "DIVERSO DALLA RIGA (attesi deposito 10000"], ["R280e OK"]),
  # la cartella vecchia che NON si lascia togliere: la riga si ferma PRIMA di aprire MT5 (classe 1032)
  ("cartella_vecchia_non_rimovibile", {}, "", "ok", PC, "", "ok", {"PRE_OLD": A, "NO_RM": A}, ["NON riesco a togliere la cartella di una corsa PRECEDENTE", "ROUND_R280a", NOSTUB], FERMA + ["tolta la cartella"]),
@@ -231,6 +232,7 @@ T = [
  ("riga_incoerente_d1", {}, r"s/d1='2026.06.30';/d1='2026.06.29';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
  ("riga_incoerente_modello", {}, r"s/m=4;/m=1;/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
  ("riga_incoerente_righe_attese", {}, r"s/nr=2;/nr=3;/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_asse_nome", {}, r"s/ax='InpMagic'/ax='InpMagik'/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
  ("riga_incoerente_pm_di_e", {}, r"s/pm=@('798711','798721')/pm=@('798711','798722')/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
  ("riga_incoerente_pm_di_a", {}, r"s/pm=@('798701')/pm=@('798702')/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
  ("riga_incoerente_impronta_prova_corta", {}, r"s/hp='\([0-9A-F]\{60\}\)[0-9A-F]\{4\}';/hp='\1';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),

@@ -30,14 +30,15 @@ La variabile e' una sola: la **memoria in ore** del filtro (EMA N su H1 = N ore;
 
 Modello 4 (tick reali), **deposito 10000** (non e' il default per caso: e' quello di R262b da cui la cella deriva; i file prova non hanno `@DEPOSITO`), rischio 1,0 pinnato,
 IS 2024.09.26-2025.06.30 (277 giorni, `@FRAZIONEIS 0.4322` su 2024.09.26-2026.06.30), OOS 2025.07.01-2026.06.30. 97 input per file. Magic `7987xx`: `git grep -w` su HEAD e su ogni
-`origin/*` il 05/10 li trova SOLO nei due file prova e come menzione di riserva in `report/APERTURE_DOW_MAPPA_2026-10-03.md` (classe 1096: la verginita' e' DATATA, e
-non copre la cache del tester del PC, che non sta nel repo).
+`origin/*` il 05/10, PRIMA di scrivere questo documento e i file di questa riga, li trovava SOLO nei due file prova e come menzione di riserva in
+`report/APERTURE_DOW_MAPPA_2026-10-03.md`; `collaudo_riga_R280/assembla.py` lo ricontrolla al pin CLASSIFICANDO ogni occorrenza (classe 1096: la verginita' e' DATATA, e non copre la
+cache del tester del PC, che non sta nel repo).
 
 ## 3. CLASSE 1102 -- dichiarazione: la finestra R280 NON cade dentro un IS gia' misurato di QUESTA cella, tranne la riproduzione voluta
 
 Scansione dei CSV del repo (`python3 backtest_pipeline/collaudo_riga_R280/scan_1102.py`, 05/10, 367 CSV con le colonne `InpFilterTF` e `InpEmaSlow`):
 - **(a) le sei celle H1 di R280a: 0 righe** con `InpFilterTF=16385`, `InpEmaFast=1`, `TP1_R=0.5`, due lati, rischio 1 su `U30USD`. Nessuna e' stata misurata, su nessuna finestra. Le sole
-  righe H1 del repo (24, in quattro file) sono `EmaFast=14`, `TP1_R=1`, altri simboli (NASUSD/D30EUR) o altri EA: **non sono la stessa cella**.
+  righe H1 del repo (24, in quattro file) sono `EmaFast=14`, `TP1_R=1` e altri simboli (NASUSD, D30EUR): **non sono la stessa cella**.
 - **(b) la cella di R280e (H4/220): 4 righe, due corse indipendenti** (R245b, R262b del 27/09) x IS e OOS, **alla cifra uguali**: IS 157 / PF 1,25920 / DD 7,1736 / Profit 1249,94;
   OOS 199 / PF 1,48133 / DD 6,6241 / Profit 2974,09. Le finestre di R280 sono **le stesse** di quelle due corse (identiche, non una sottofinestra): R280e e' per costruzione una
   **RIPRODUZIONE** (G0), non una misura nuova. Informazione di merito nuova da R280e: **zero, voluta**. Serve solo a dire se il banco e' quello di R262b.

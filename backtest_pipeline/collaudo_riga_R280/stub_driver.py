@@ -250,7 +250,7 @@ if not sc.get('rp_absent'):
         os.utime(rpf, (_t, _t))
 d = os.path.join(DSK, 'ROUND_' + LBL); os.makedirs(d, exist_ok=True)
 if not sc.get('ref_absent'):
-    mac = os.environ.get('COMPUTERNAME', '')
+    mac = sc.get('ref_mac', os.environ.get('COMPUTERNAME', ''))
     term = sc.get('ref_term', 'C:\\Program Files\\BCM Markets MT5 Terminal\\terminal64.exe')
     R = ['REFERTO ROUND SUL TERMINALE DA BACKTEST', 'marcatore riga  : MARCATORE_RIGA_ROUND_VPS_RETRY_v1', 'marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v7_RETRY',
          'pin             : ' + PIN, 'data            : ' + dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO",

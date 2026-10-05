@@ -8,8 +8,12 @@ Uso: python3 backtest_pipeline/collaudo_riga_R280/mutazioni.py [PIN] [filtro ...
 
 MUTANTI EQUIVALENTI dichiarati (NON presi per costruzione, col conto; la scelta resta "per principio", non "collaudata"):
  (1) il ramo "else { $false }" di tolOk: irraggiungibile (si chiama solo con le quattro colonne gate).
- (2) -not $cohOk nella coerenza: ridondante con i confronti espliciti di d0, me, oa, d1 e fz (tutti pinnati); assembla.py verifica in Python che 0.4322 su 2024.09.26-2026.06.30 dia 2025.06.30.
+ (2) i confronti espliciti di d0, me, oa e fz e il controllo -not $cohOk si COPRONO A VICENDA (la finestra IS e' d0 + floor(giorni x fz)): ognuno spento da solo e' equivalente; spenti INSIEME
+     sono presi (mutazione combinata). d1 NON e' coperto da cohOk (641 o 642 giorni danno lo stesso floor): il suo confronto esplicito e' una mutazione a se', presa.
+     assembla.py verifica in Python che 0.4322 su 2024.09.26-2026.06.30 dia 2025.06.30.
  (3) $nomeWf, $shaDrv.Length: il driver e il walkforward si fermano PRIMA (SHA diverso dal pin: scenari driver_mutato e walkforward_*).
+ (5) $nS -ne 2 nell ultimo elseif dello stato (finestra girata): ridondante con $nWis -ne 1 e $nWoos -ne 1 piu i controlli che lo precedono (giornale contro RIPROVE: nLg = tentativi,
+     eaKo, tX, rpCoh): con nWis = nWoos = 1 e nLg = tA = 2 le gambe partite sono gia 2 (una gamba riprovata ha 3 intestazioni ma solo 2 con la riga from..to).
  (4) i due controlli sul conteggio dell asse (@($_.av).Count -ne $_.nr e la lista dei nr '2,6') si coprono a vicenda: ognuno e' preso solo se spenti INSIEME (mutazione combinata).
 NON equivalente (e PRESA): [double] al posto di [decimal] nel parser dei numeri ($decF): in double 2974.09-2974.04 = 0.0500000000001819, 1.48133-1.48128 = 5.0000000000105516e-05 e
 6.6241-6.6141 = 0.010000000000000675 stanno OLTRE le soglie 0,05 / 0,00005 / 0,01 e i tre casi "bordo: PASS" diventano rossi (calcolato a mano il 05/10).
@@ -65,7 +69,6 @@ M = [
  ("MISTO con il CSV della morta fresco", "if($crMo.fresco){", "if($false){", ["misto_ma_csv_morto_fresco"]),
  ("PRODOTTO ma CSV non buoni", "if(-not ($crI.ok -and $crO.ok)){ $why=('contraddizione: il driver dice CSV PRODOTTO", "if($false){ $why=('contraddizione: il driver dice CSV PRODOTTO", ["csv_0_byte", "una_riga_in_meno_su_a", "csv_vecchio", "oos_assente"]),
  ("finestra girata", " -or $nWis -ne 1 -or $nWoos -ne 1", "", ["finestra_oos_un_giorno_prima_su_a", "CE2_riprova_OOS_gira_la_finestra_IS"]),
- ("finestra: due gambe partite", "elseif($nS -ne 2", "elseif($false", ["finestra_oos_un_giorno_prima_su_a"]),
  ("magic del file prova", " -and $idOk);", ");", ["riga_magic_diverso_dal_file"]),
  ("tetto fra i job", "if($minAvv -ge $TETTO){", "if($false){", ["tetto_secondo_job_non_lanciato", "G_e_non_lanciato"]),
  ("RIPROVE fra i file attesi", "[void]$fAtt.Add('ROUND_' + $jb.t + '\\RIPROVE_' + $jb.e + '_' + $jb.s + '_' + $jb.t + '.txt');", "", ["ok", "rp_copia_mancante_in_raccolta"]),
@@ -85,14 +88,12 @@ M = [
  ("coerenza della tabella: TF del grafico", " -or $_.tf -ne 'M5'", "", ["riga_incoerente_TF_grafico"]),
  ("coerenza della tabella: modello", " -or $_.m -ne 4", "", ["riga_incoerente_modello"]),
  ("coerenza della tabella: deposito", " -or $_.dp -ne 10000", "", ["riga_incoerente_deposito"]),
- ("coerenza della tabella: inizio", " -or $_.d0 -ne '2024.09.26'", "", ["riga_incoerente_d0"]),
- ("coerenza della tabella: fine IS", " -or $_.me -ne '2025.06.30'", "", ["riga_incoerente_fine_IS"]),
- ("coerenza della tabella: inizio OOS", " -or $_.oa -ne '2025.07.01'", "", ["riga_incoerente_inizio_OOS"]),
  ("coerenza della tabella: fine", " -or $_.d1 -ne '2026.06.30'", "", ["riga_incoerente_d1"]),
- ("coerenza della tabella: frazione", " -or $_.fz -ne '0.4322'", "", ["riga_incoerente_frazione"]),
+ ("coerenza della finestra: d0, me, oa, fz E $cohOk spenti INSIEME", " -or $_.d0 -ne '2024.09.26'", "", ["riga_incoerente_d0", "riga_incoerente_inizio_OOS", "riga_incoerente_fine_IS", "riga_incoerente_frazione"],
+  [" -or $_.me -ne '2025.06.30'", " -or $_.oa -ne '2025.07.01'", " -or $_.fz -ne '0.4322'", " -or -not $cohOk"]),
  ("coerenza della tabella: righe di input", " -or $_.np -ne 97", "", ["riga_incoerente_input"]),
  ("coerenza della tabella: impronta di prova lunga 64", " -or $_.hp.Length -ne 64", "", ["riga_incoerente_impronta_prova_corta"]),
- ("coerenza della tabella: asse (nomi)", " -or ((@($jobs | ForEach-Object { $_.ax })) -join ',') -ne 'InpMagic,InpEmaSlow'", "", ["riga_incoerente_asse_e"]),
+ ("coerenza della tabella: asse (nomi)", " -or ((@($jobs | ForEach-Object { $_.ax })) -join ',') -ne 'InpMagic,InpEmaSlow'", "", ["riga_incoerente_asse_nome"]),
  ("coerenza della tabella: conteggio dell asse E righe attese 2,6 (spenti insieme)", "@($_.av).Count -ne $_.nr -or $_.np -ne 97", "$_.np -ne 97", ["riga_incoerente_righe_attese"], " -or ((@($jobs | ForEach-Object { $_.nr })) -join ',') -ne '2,6'"),
  ("coerenza della tabella: asse di e", " -or ((@($jobs[0].av)) -join ',') -ne '798711,798721'", "", ["riga_incoerente_asse_e"]),
  ("coerenza della tabella: asse EmaSlow di a", " -or ((@($jobs[1].av)) -join ',') -ne '220,440,660,880,1100,1320'", "", ["riga_incoerente_asse_EmaSlow_di_a"]),
@@ -185,16 +186,17 @@ tot = 0; prese = 0
 FILTRO = sys.argv[2:]          # opzionale: sottostringhe del nome della mutazione (per rigirarne solo alcune)
 for entry in M:
     nome, vero, mut, scen = entry[:4]
-    extra = entry[4] if len(entry) > 4 else None          # un SECONDO testo da togliere (mutazione combinata)
+    extra = entry[4] if len(entry) > 4 else None          # altri testi da TOGLIERE (mutazione combinata): una stringa o una lista
     if FILTRO and not any(f in nome for f in FILTRO):
         continue
     tot += 1
     n = riga.count(vero)
-    if n != 1 or (extra is not None and riga.count(extra) != 1):
+    extras = [] if extra is None else ([extra] if isinstance(extra, str) else list(extra))
+    if n != 1 or any(riga.count(x) != 1 for x in extras):
         print("NON APPLICABILE (%d occorrenze del testo vero): %s" % (n, nome)); continue
     mutata = riga.replace(vero, mut)
-    if extra is not None:
-        mutata = mutata.replace(extra, "")
+    for x in extras:
+        mutata = mutata.replace(x, "")
     f = tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="ascii"); f.write(mutata); f.close()
     r = subprocess.run([sys.executable, os.path.join(QD, "battery.py"), PIN, f.name] + scen, capture_output=True, text=True,
                        env=dict(os.environ, HARNESS_OUT=os.environ.get("HARNESS_OUT", "/tmp/r280_mut")))
