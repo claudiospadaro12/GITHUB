@@ -7,7 +7,7 @@
 
 Ciao Emiliano,
 
-ti scrivo perche' mi serve il parere di chi il mercato lo vive ogni giorno. Sto costruendo una **flotta di expert (MQL5), possibilmente scorrelati fra loro**, con l'obiettivo di arrivare a expert profittevoli per le prop firm **oppure** per un conto personale. Ho fatto un sacco di controlli (walk-forward, mercati toro, orso, laterale, piu' anni, costi) e ora voglio sapere da te se il lavoro sta in piedi.
+ti scrivo perche' mi serve il parere di chi il mercato lo vive ogni giorno. Sto costruendo una **flotta di expert (MQL5), possibilmente scorrelati fra loro**, con l'obiettivo di arrivare a expert profittevoli per le prop firm **oppure** per un conto personale. Ho fatto un sacco di controlli (walk-forward, costi, e dove ho lo storico mercati toro, orso, laterale su piu' anni) e ora voglio sapere da te se il lavoro sta in piedi.
 
 Nel PDF allegato trovi tutto, senza abbellire: per ogni expert il motore, le poche manopole che contano, PF, numero di operazioni e drawdown (in-sample e out-of-sample), le prove per regime dove le ho, i risultati in forward e, soprattutto, i **punti deboli**. Ti chiedo di rispondermi, anche a voce o a punti:
 
