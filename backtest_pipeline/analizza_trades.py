@@ -790,8 +790,17 @@ def main():
     #     non esiste ancora), non lo tocco di nascosto.
     amb_oggi  = [r for r in ambigue if r["_ct"].strftime("%Y-%m-%d") == giorno]
     amb_prima = [r for r in ambigue if r["_ct"].strftime("%Y-%m-%d") < giorno]
-    if manuali_oggi or amb_oggi or amb_prima:
+    # 05/10 (seconda limatura, dal cancello): il titolo contraddiceva il suo
+    # contenuto. Senza manuali di giornata la sezione conteneva SOLO i discordi,
+    # che il commento CE L'HANNO e che stanno DENTRO il totale della loro
+    # giornata: l'opposto di "senza commento" e di "fuori dal totale".
+    if manuali_oggi:
         out += ["", "## 🚫 Fuori dal totale — operazioni SENZA COMMENTO", ""]
+    elif amb_oggi or amb_prima:
+        out += ["", "## 🚫 Fuori dal totale, e i casi da capire", "",
+                "_Qui sotto non c'e' nessuna operazione \"senza commento\" di "
+                "oggi: i **discordi** hanno il commento pieno e stanno **dentro** "
+                "il totale della giornata in cui si sono chiusi._"]
     if manuali_oggi:
         netto_man = sum(num(r, "profit") + num(r, "swap") + num(r, "commission")
                         for r in manuali_oggi)
@@ -813,12 +822,19 @@ def main():
                 "qualcuno ha operato a mano. **Va guardato, non ignorato.**"
                 % CAMBIO_SOLO_EA]
     if amb_oggi:
-        out += ["", "> 🔴 **%d operazion%s DI OGGI con commento e magic DISCORDI** "
-                "(una delle due cose dice EA e l'altra no). Il filtro pretende "
-                "entrambi i criteri e queste **restano nel totale di oggi**: "
-                "vanno capite prima di decidere da che parte stanno. pid: %s"
-                % (len(amb_oggi), "i" if len(amb_oggi) > 1 else "e",
-                   ", ".join(str(r.get("pid", "?")) for r in amb_oggi[:10]))]
+        _pid_oggi = ", ".join(str(r.get("pid", "?")) for r in amb_oggi[:10])
+        if len(amb_oggi) > 1:
+            out += ["", "> 🔴 **%d operazioni DI OGGI con commento e magic "
+                    "DISCORDI** (una delle due cose dice EA e l'altra no). Il "
+                    "filtro pretende entrambi i criteri e queste **restano nel "
+                    "totale di oggi**: vanno capite prima di decidere da che "
+                    "parte stanno. pid: %s" % (len(amb_oggi), _pid_oggi)]
+        else:
+            out += ["", "> 🔴 **1 operazione DI OGGI con commento e magic "
+                    "DISCORDI** (una delle due cose dice EA e l'altra no). Il "
+                    "filtro pretende entrambi i criteri e questa **resta nel "
+                    "totale di oggi**: va capita prima di decidere da che parte "
+                    "sta. pid: %s" % _pid_oggi]
     if amb_prima:
         _ult = max(r["_ct"] for r in amb_prima).strftime("%Y-%m-%d")
         _pid_prima = ", ".join(str(r.get("pid", "?")) for r in amb_prima[:10])
