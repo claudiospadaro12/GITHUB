@@ -84,6 +84,12 @@ M = [
  # --- SOLA LETTURA: una scrittura infilata nel censimento
  ("scrive_nel_lavoro", "  Titolo '2. SPAZIO LIBERO SUI DISCHI'", "  Set-Content -LiteralPath (Join-Path $Lavoro 'x.txt') -Value 1\n  Titolo '2. SPAZIO LIBERO SUI DISCHI'", ["01"]),
  ("cancella_residuo", "      $negs = @(", "      Get-ChildItem -LiteralPath $tick -Filter '*DKNEG*' | Remove-Item\n      $negs = @(", ["12"]),
+ # --- classe 1119 (controllo preventivo 05/10): history\U30USD (barre M1) contata come cartella dei tick
+ ("nativi_anche_history", "$_.Name -eq 'U30USD' -and $_.Parent.Name -ieq 'ticks' })", "$_.Name -eq 'U30USD' })", ["16c"]),
+ ("custom_anche_history", "$_.Name -eq 'U30USD_DK' -and $_.Parent.Name -ieq 'ticks' }).Count\n", "$_.Name -eq 'U30USD_DK' }).Count\n", ["16d"]),
+ # --- MaxBars (piano par. 3.1 P0, classe 160)
+ ("maxbars_soglia_tolta", "$(if($S.maxbars -lt 200000){", "$(if($S.maxbars -lt 0){", ["17_"]),
+ ("maxbars_non_letto", "if($mB.Count -gt 0){", "if($false){", ["17b"]),
 ]
 
 
