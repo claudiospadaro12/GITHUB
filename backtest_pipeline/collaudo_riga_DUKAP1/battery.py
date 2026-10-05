@@ -55,6 +55,8 @@ def scenari():
     sc.append(("17d_py_senza_marcatore", S(muta_py="py_senza_marcatore"), dict(exit=1, fermata="B", prima_di_toccare=True, msg='SENZA il marcatore')))
     sc.append(("17e_autotest_py_rosso", S(muta_py="py_autotest_rosso"), dict(exit=1, fermata="B", prima_di_toccare=True, msg="autotest di dukascopy_tick.py FALLITO")))
     sc.append(("17f_autotest_f2_rosso", S(muta_f2="f2_autotest_rosso"), dict(exit=1, fermata="B", prima_di_toccare=True, msg="autotest di leggi_f2_dk.py FALLITO")))
+    sc.append(("17g_pin_non_valido", S(pin="abc"), dict(exit=1, fermata="A", prima_di_toccare=True, msg="-Pin obbligatorio e di 40 caratteri")))
+    sc.append(("17h_impronta_malformata", S(sha_sbagliato="py!"), dict(exit=1, fermata="A", prima_di_toccare=True, msg="-ShaPy obbligatorio (SHA256 di 64 caratteri")))
     sc.append(("18_cache_con_un_buco", S(buchi=[("2025.03.12", 5)]), dict(exit=1, fermata="C", prima_di_toccare=True, msg='la cache ha buchi o file illeggibili')))
     sc.append(("19_senza_cache", S(senza_cache_raw=True), dict(exit=1, fermata="C", prima_di_toccare=True, senza_tick=True, msg="la cache del 03/09 non c'e'")))
     sc.append(("20_manca_un_csv", S(tick_mancante="2025-02"), dict(exit=1, fermata="D", prima_di_toccare=True, msg='NON sono esattamente i 9 attesi')))
@@ -67,6 +69,7 @@ def scenari():
     sc.append(("26_backup_alterato", S(backup="alterato"), dict(exit=1, fermata="E", tick_intatti=True, msg="NON ha piu' la sua impronta")))
     sc.append(("27_backup_senza_manifest", S(backup="senza_manifest"), dict(exit=1, fermata="E", tick_intatti=True, msg='senza MANIFEST_SHA256.txt')))
     sc.append(("28_riconversione_fallisce", S(muta_py="py_riconversione_fallisce"), dict(exit=1, fermata="F", backup_fatto=True, msg="la riconversione e' uscita con rc 1")))
+    sc.append(("28e_py_non_riscrive_il_referto", S(muta_py="py_senza_referto"), dict(exit=1, fermata="F", backup_fatto=True, msg="il .py non ha riscritto referto_dukascopy_tick.txt")))
     sc.append(("28b_py_scrive_solo_un_referto_fresco", S(muta_py="py_solo_referto_fresco"), dict(exit=1, fermata="F", backup_fatto=True, msg="NON e' stato riscritto da questa corsa")))
     sc.append(("28c_py_referto_dice_usa", S(muta_py="py_referto_dst_usa"), dict(exit=1, fermata="F", backup_fatto=True, msg="non dice 'DST: fisso'")))
     sc.append(("28d_copia_di_sicurezza_corrotta", S(copia_corrotta=True), dict(exit=1, fermata="E", tick_intatti=True, msg="NON ha la stessa impronta dell'originale")))
@@ -95,7 +98,10 @@ def runna(nome, spec, att, riga=None):
         sha = dict(py=srv.sha(h1.FILE_PY), f2=srv.sha(h1.FILE_F2), imp=srv.sha(h1.FILE_IMP), mq5=srv.sha(h1.FILE_MQ5))
         shaatt = dict(sha)
         if spec["sha_sbagliato"]:
-            shaatt[spec["sha_sbagliato"]] = "0" * 64
+            if spec["sha_sbagliato"].endswith("!"):
+                shaatt[spec["sha_sbagliato"][:-1]] = "xyz"          # malformata: non e' nemmeno esadecimale di 64
+            else:
+                shaatt[spec["sha_sbagliato"]] = "0" * 64
         args = "-Pin %s -ShaPy %s -ShaF2 %s -ShaImp %s -ShaMq5 %s%s" % (spec["pin"], shaatt["py"], shaatt["f2"], shaatt["imp"], shaatt["mq5"], " -SoloControllo" if spec["solo_controllo"] else "")
         lavoro = os.path.join(c, "Users", "Master", "dukascopy_lavoro")
         tick = os.path.join(lavoro, "tick")

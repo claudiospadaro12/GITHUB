@@ -39,6 +39,7 @@ MUTAZIONI_FILE = {
     "py_negativo_scrive_in_tick": lambda b: b.replace(b'    if args.copia_cache_giorno:\n        return copia_cache_cmd(args)\n', b'    if args.copia_cache_giorno:\n        if "dukascopy_neg" in args.copia_cache_giorno:\n            open(os.path.join(os.path.dirname(args.copia_cache_giorno), "tick", "U30USD_DK_ticks_2025-03.csv"), "a").write("x")\n        return copia_cache_cmd(args)\n'),
     "py_autotest_rosso": lambda b: b.replace(b'    log("AUTOTEST: TUTTO OK.")\n    return 0', b'    log("AUTOTEST: FALLITO")\n    return 1'),
     "f2_autotest_rosso": lambda b: b.replace(b'    if "--autotest" in argv:\n        return autotest()', b'    if "--autotest" in argv:\n        print("AUTOTEST ROSSO")\n        return 1'),
+    "py_senza_referto": lambda b: b.replace(b'    scrivi_atomico(ref_path, testa.getvalue())\n    file_referto.append(ref_path)', b'    if "dukascopy_lavoro" not in args.cartella:\n        scrivi_atomico(ref_path, testa.getvalue())\n    file_referto.append(ref_path)'),
     "py_copia_cache_fallisce": lambda b: b.replace(b'    if args.copia_cache_giorno:\n        return copia_cache_cmd(args)\n', b'    if args.copia_cache_giorno and "dukascopy_neg" in args.copia_cache_giorno:\n        return 3\n    if args.copia_cache_giorno:\n        return copia_cache_cmd(args)\n'),
 }
 

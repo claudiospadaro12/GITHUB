@@ -29,7 +29,7 @@ M = [
  ("drv_cartelle_dati_ge1", "drv", 'Gate ($dati.Count -eq 1) "A"', 'Gate ($dati.Count -ge 1) "A"', ["14"]),
  ("drv_python_store_accettato", "drv", '| Where-Object { $_.Source -notlike "*\\WindowsApps\\*" }', '', ["15"]),
  ("drv_python_assente_ignorato", "drv", 'Gate ([bool]$Python) "A"', 'Gate $true "A"', ["16"]),
- ("drv_pin_non_validato", "drv", 'Gate ($Pin -match \'^[0-9a-fA-F]{40}$\') "A"', 'Gate $true "A"', ["17"]),
+ ("drv_pin_non_validato", "drv", 'Gate ($Pin -match \'^[0-9a-fA-F]{40}$\') "A"', 'Gate $true "A"', ["17g"]),
  # --- driver: file al pin
  ("drv_impronta_non_verificata", "drv", 'Gate ($h -ieq $shaAtteso) "B"', 'Gate $true "B"', ["17_", "17b", "17c"]),
  ("drv_marcatore_non_verificato", "drv", 'Gate ([bool](Select-String -LiteralPath $dest -SimpleMatch -Quiet -Pattern $marcatore)) "B"', 'Gate $true "B"', ["17d"]),
@@ -51,7 +51,7 @@ M = [
  ("drv_backup_riscritto_sempre", "drv", 'if(Test-Path -LiteralPath $Backup){\n    Dico ("la copia esiste gia', 'if($false){\n    Dico ("la copia esiste gia', ["25"]),
  # --- driver: riconversione
  ("drv_rc_riconversione_ignorato", "drv", 'Gate ($rcF -eq 0) "F"', 'Gate $true "F"', ["28_"]),
- ("drv_referto_py_non_riscritto", "drv", 'Gate (Test-Path -LiteralPath $refOld) "F" "il .py non ha riscritto', 'Gate $true "F" "il .py non ha riscritto', ["28_"]),
+ ("drv_referto_py_non_riscritto", "drv", 'Gate (Test-Path -LiteralPath $refOld) "F" "il .py non ha riscritto', 'Gate $true "F" "il .py non ha riscritto', ["28e"]),
  ("drv_dst_fisso_non_verificato", "drv", 'Gate ($refNew -match \'(?m)^DST:\\s*fisso\') "F"', 'Gate $true "F"', ["28c"]),
  ("drv_csv_non_riscritti_ignorato", "drv", 'Gate ($f.LastWriteTime -ge $t0F) "F"', 'Gate $true "F"', ["28b"]),
  # --- driver: negativo e figlie
@@ -177,6 +177,10 @@ def parse_ok(muts):
 
 def main():
     jobs = int(sys.argv[sys.argv.index("--jobs") + 1]) if "--jobs" in sys.argv else 4
+    global M
+    if "--solo" in sys.argv:
+        solo = sys.argv[sys.argv.index("--solo") + 1].split(",")
+        M = [x for x in M if x[0] in solo]
     B.EXP_USA = B.hashes_tool("usa"); B.EXP_FISSO = B.hashes_tool("fisso")      # prima del Pool: i worker ereditano
     pr = parse_ok(M)
     print("parse dei mutanti:", pr.strip().splitlines()[-1])
