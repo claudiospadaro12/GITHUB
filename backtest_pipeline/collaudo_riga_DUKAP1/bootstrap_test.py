@@ -29,7 +29,7 @@ def esegui(line_tpl, spec, drv_serv, macchina=None):
     line = line_tpl(shas, srv)
     f = os.path.join(b, "boot.txt")
     open(f, "w", newline="").write(line)
-    p = h1.esegui(spec, c, f, "", srv, b, timeout=900)
+    p = h1.esegui(spec, c, f, "", srv, b, timeout=900, iex=True)
     desk = os.path.join(c, "Users", "Master", "Desktop")
     r = dict(out=p.stdout + p.stderr, hits=list(srv.hits), desk=sorted(os.listdir(desk)), c=c, work=os.path.exists(os.path.join(c, "Users", "Master", "abtg_duka_p1")))
     srv.chiudi()

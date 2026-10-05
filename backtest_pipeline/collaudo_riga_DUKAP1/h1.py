@@ -247,7 +247,7 @@ function Start-Process { [CmdletBinding()] param([string]$FilePath, [string[]]$A
 '''
 
 
-def esegui(spec, c, riga, argv_ps, srv, scen_dir, timeout=900, extra_env=None):
+def esegui(spec, c, riga, argv_ps, srv, scen_dir, timeout=900, extra_env=None, iex=False):
     """riga = file .ps1 gia' con URL locale; argv_ps = stringa di argomenti PowerShell dopo il file."""
     env = dict(os.environ)
     shim = os.path.join(scen_dir, "python.exe")
@@ -269,7 +269,10 @@ def esegui(spec, c, riga, argv_ps, srv, scen_dir, timeout=900, extra_env=None):
         shutil.copy(shutil.which("sleep"), os.path.join(bindir, "terminal64"))
         pid = subprocess.Popen([os.path.join(bindir, "terminal64"), "300"])
         time_sleep = __import__("time").sleep; time_sleep(0.3)
-    cmd = SETUP + "\n$ErrorActionPreference='Stop'; & '" + riga + "' " + argv_ps + "; 'FINE-HARNESS rc=' + $LASTEXITCODE\n"
+    if iex:     # il bootstrap e' una RIGA da incollare: Invoke-Expression sul testo, come fa Claudio
+        cmd = SETUP + "\n$ErrorActionPreference='Stop'; $t = Get-Content -Raw -LiteralPath '" + riga + "'; Invoke-Expression $t; 'FINE-HARNESS rc=' + $LASTEXITCODE\n"
+    else:
+        cmd = SETUP + "\n$ErrorActionPreference='Stop'; & '" + riga + "' " + argv_ps + "; 'FINE-HARNESS rc=' + $LASTEXITCODE\n"
     try:
         p = subprocess.run(["pwsh", "-NoProfile", "-Command", cmd], env=env, capture_output=True, text=True, timeout=timeout)
     finally:

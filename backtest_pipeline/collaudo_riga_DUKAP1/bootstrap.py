@@ -47,7 +47,7 @@ def genera(commit, shas=None, raw=RAW):
          "if($h -ne '" + shas["drv"] + "'){ Write-Host ('IMPRONTA DIVERSA ('+$h+'): mi fermo, non lancio niente.') -ForegroundColor Red; return }; "
          "Write-Host ('Riga P1 scaricata, impronta OK: '+$h.Substring(0,8)); $t=[Text.Encoding]::ASCII.GetString($b); "
          "if(-not ($t | Select-String -SimpleMatch -Quiet -Pattern '" + MARC + "')){ Write-Host 'Marcatore della riga P1 assente nella riga scaricata: mi fermo.' -ForegroundColor Red; return }; "
-         "$d=Join-Path $env:USERPROFILE 'abtg_duka_p1'; New-Item -ItemType Directory -Force -Path $d | Out-Null; $p=Join-Path $d 'RIGA_DUKA_P1_OROLOGIO.ps1'; Remove-Item -LiteralPath $p -Force -ErrorAction SilentlyContinue; "
+         "$d=Join-Path $env:USERPROFILE 'abtg_duka_p1'; New-Item -ItemType Directory -Force -Path $d | Out-Null; $p=Join-Path (Convert-Path -LiteralPath $d) 'RIGA_DUKA_P1_OROLOGIO.ps1'; Remove-Item -LiteralPath $p -Force -ErrorAction SilentlyContinue; "
          "[IO.File]::WriteAllBytes($p,$b); $global:LASTEXITCODE=0; "
          "& $p -Pin '" + commit + "' -ShaPy '" + shas["py"] + "' -ShaF2 '" + shas["f2"] + "' -ShaImp '" + shas["imp"] + "' -ShaMq5 '" + shas["mq5"] + "'; "
          "Write-Host ('codice d uscita della riga P1: '+$LASTEXITCODE) }")

@@ -1,0 +1,59 @@
+ESITO DEL COLLAUDO DI P1 (cancello zero di U30USD_DK con orologio UTC+1 fisso) -- 05/10/2026
+Sviluppatore; il giudizio e' dell'Agente dei Controlli (verificatore-stringhe + controllo-preventivo, Opus): NON ancora fatti. NIENTE e' stato consegnato a Claudio, eseguito su una macchina vera o scaricato.
+Piano: report/PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md par. 3.1 P1 e F2. La firma F2 di Claudio NON e' ancora scritta nel suo testo preciso: il valutatore incorpora l'appendice del piano (impronta nel suo output) e va rifatto se il testo firmato differisce.
+Commit dei file di P1: 2c618f73d50269567b7c1406e1b5cc087eb28e0e (raggiungibile da origin/lavoro). SHA256 al commit (git show):
+  righe/RIGA_DUKA_P1_OROLOGIO.ps1 ........ 59A7A80B632DD4678E9D07ABC818BA8302A0A24112B6C49E4B52EA4A53875913  (marcatore MARCATORE_RIGA_DUKA_P1_v1)
+  dukascopy/dukascopy_tick.py ............ 20C0FA2801AD76FE7B223CCCC0A817A4B78EA007987E969EFF613078D8E5D705  (DUKA-TICK-v3)
+  dukascopy/leggi_f2_dk.py ............... 7C9529D252D08A6F430F0B5B1B7D8CBB13532AF00B7AA15F8E62F771FF24FCE6  (MARCATORE_LEGGI_F2_DK_v1)
+  righe/RIGA_DUKA_IMPORT_SONDA.ps1 ....... B2A52A865597DEF2F83F294DB49D30ED93E633CE6F64F984C45CA7726A7BE58F  (v2)
+  mql5/Scripts/ABTG_ImportaTickEsterno.mq5  019159777131FED7979C9E78D436365171C72DF3F68E061886DF83C73DE5AC06  (IMP-TICK-v1-GIORNI)
+Bootstrap: righe/RIGA_LANCIA_DUKA_P1.txt (3275 byte, 1 riga, SHA256 22D3D5D1EBB8AA78831DDD83C885E5F378D6E44D689E07A5B3C04E04130EE797), generato dal generatore al commit sopra e confrontato byte per byte.
+
+COSA FA P1 (dopo F2 + cancello): guardie (macchina DESKTOP-H4D7CAJ, MT5 chiuso, ZERO EA sui grafici salvati del terminale BCM, python vero, pin e impronte dei 4 file) -> i 3 file al pin + autotest -> verifica-cache dei 222 giorni (zero rete) ->
+spazio e stato di tick\ -> copia di sicurezza dei 9 CSV del 03/09 + referto + MANIFEST SHA256 (mai sovrascritta; se i CSV sono gia' 'fisso' e la copia non c'e': STOP) -> riconversione --dst fisso --solo-cache -> confronto byte per byte dei giorni ->
+import+sonda U30USD_DK sui 9 giorni NOMINATI (figlia v2) -> negativo: la sola giornata 2025.03.12 copiata e convertita in UTC+0 in cartella E nome separati -> import+sonda U30USD_DKNEG (-PulisciFiles) con tick\ ricontrollato per SHA ->
+valutazione meccanica della F2 (leggi_f2_dk.py) -> zip sul Desktop (file letti DALLO ZIP). K0b NON e' costruito: "serve dopo", solo se il negativo risulta debole (il valutatore accetta gia' il suo file, formato dichiarato).
+Il 5.1 che gira sul PC: nessun exit nel bootstrap; la riga P1 e' un file con param ed exit (come le righe DUKA esistenti).
+
+ATTESE SCRITTE PRIMA: gli HASH dei CSV 'fisso' e 'usa' attesi da ogni scenario sono prodotti da un'esecuzione SEPARATA del tool vero su una copia della cache (mai riletti dall'uscita della riga); i CSV del 03/09 del banco sono prodotti dal tool vero con --dst usa;
+il layout della cache e' dukascopy_tick.percorso_cache (classe 1114); lo stato per nome di alcuni giorni e' scritto a mano nei casi della figlia, oltre al confronto con il valutatore python.
+
+FATTO (pwsh 7.4.6 su Linux, finto C: come PSDrive; python3 vero per i tre strumenti python; terminale finto = sim_mt5.py + metaeditor64.exe finto; server HTTP locale per i file al pin):
+  dukascopy_tick.py --autotest ........... 17/17: round-trip, confini DST USA/EU, --dst fisso (4 confini al minuto, ora per ora 2012-2026: == usa con DST USA attivo (85.665 ore) e usa+1h fuori (45.831), i 5 giorni estivi identici e i 4 invernali
+                                           diversi di 1 h), confronto byte per byte (identici / 1 byte / vuoto / mese mancante / prefissi / lista brutta), corsa offline su cache sintetica (fisso=UTC+1, usa=UTC+0 d'inverno, negativo in cartella
+                                           e nome separati con il CSV buono INTATTO, niente sul Desktop), --verifica-cache (buco / illeggibile / solo illeggibile / vuoto non e' buco / simbolo assente), --copia-cache-giorno, layout letterale
+  leggi_f2_dk.py --autotest .............. 45/45: tutti i controesempi delle sei passate del cancello sul piano (8/8 con 2024.11.20 non confrontabile, giorno ripetuto, copertura 79,99, bordi 0,05/80 e 0,05000001, giusto 0,020 e neg 0,045,
+                                           giusto 0,04 e neg 0,07/0,08, 0>=2x0, K0b 5 estivi lag 0 + 4 invernali lag 60, simboli scambiati, SHA di insieme vuoto, importer v0...), costanti ricalcolate con dst_usa_attivo, e il TESTO F2 incorporato
+                                           identico a quello del piano (SHA256 0CBE7FE5...)
+  mutazioni_py.py ........................ 53 mutazioni dei due moduli python: 51 PRESE + 2 EQUIVALENTI dichiarati col perche' (conteggio ignorato nel confronto: SHA diversi comunque; validazione del giorno: strptime solleva lo stesso)
+  mql5_sanity.py (--autotest, 9 mutazioni) STATICO sull'importer: parentesi/graffe/virgolette bilanciate, 13 colonne dell'intestazione == COL_GIORNI del valutatore, 3 chiamate RigaGiorno a 11 argomenti, valori Esito/SI/NO,
+                                           VERSIONE == marcatore che la figlia cerca, nome del file per giorno uguale in importer e figlia. NON prova che compili (v. NON COPERTO)
+  controlla_riga.py (3 .ps1 + 2 bootstrap)  nessun difetto meccanico (ASCII, parser PowerShell vero 0 errori, nessun costrutto pwsh-7-only, cultura invariante); 1 rilievo PRE-ESISTENTE nella figlia (r.434 Stop-Process del solo terminale avviato, v1 del 12/09)
+  battery.py (driver) .................... 50/50 scenari: F2 PASSA; importer "8/8 OK" con 2024.11.20 non confrontabile; negativo cieco 0,045; negativo non confrontabile; giorno fuori; copertura 79,99; negativo scritto col simbolo DK; giro a vuoto (nessun backup, tick\ intatto,
+                                           figlia mai lanciata); macchina VPS (zero richieste, zero scritto); MT5 vivo; EA attaccato; zero grafici; grafico illeggibile; due cartelle dati; python Store FUNZIONANTE (il filtro per percorso e' provato) / assente;
+                                           pin non valido, impronta sbagliata di ciascun file, impronta malformata, marcatore assente, autotest rosso (py e f2); cache con un buco / senza cache; tick\ senza un mese / con un CSV in piu' / gia' 'fisso' senza copia / senza referto;
+                                           disco pieno / senza C:; copia di sicurezza valida (non riscritta) / alterata / senza manifest / corrotta in copia; riconversione che fallisce / che scrive solo un referto fresco / che dice 'usa' / che non riscrive il referto;
+                                           copia della cache del negativo che fallisce; .py che ignora --nome-uscita; .py che tocca tick\ durante il negativo; import DK/DKNEG che non partono; compilazione che fallisce; SHA dell'mq5 sbagliato; CSV estraneo in MQL5\Files (DK e DKNEG);
+                                           negativo gia' in MQL5\Files con lo stesso nome. In OGNI scenario: codice d'uscita atteso, MOTIVO della fermata asserito (due gate in fila non si coprono), nulla scritto fuori da Desktop / abtg_duka_p1 / dukascopy_lavoro / MQL5 del terminale BCM
+                                           (altri terminali, Program Files, altre cartelle dati identici per hash), uscita ASCII, cartella DUKA_P1 + zip SEMPRE presenti col referto, zip == cartella; nella corsa completa: tick\ == hash del tool vero con --dst fisso,
+                                           copia di sicurezza == stato 'usa', manifest corretto, confronto 5 estivi SI / 4 invernali NO, negativo UTC puro, import DKNEG legge SOLO file DKNEG, DKNEG tolti da MQL5\Files, DK restano, AllowLiveTrading=false nel config.
+  battery_figlia.py (differenziale) ...... 22/22 casi: la condizione (1) per nome nella figlia PowerShell == leggi_f2_dk.stato_giorno sugli STESSI file per giorno, piu' lo stato atteso scritto a mano (assente saltato in silenzio, ripetuto, copertura 79,99, bordo 0,05/80,
+                                           0,05000001, discordanza, soglie diverse, mediana non numerica, data malformata, esito vuoto, altro simbolo, simbolo scambiato), codici d'uscita (0 solo se verdetto OK E tutti dentro; 4 se verdetto OK ma no), maschera larga ferma
+                                           PRIMA di copiare, giorni vuoti, file estraneo ferma PRIMA di copiare, -PulisciFiles toglie SOLO i copiati, file per giorno stale di una corsa precedente non finisce nello zip.
+  mutazioni_ps1.py ....................... 65 mutazioni dei due .ps1 (parse-valide col parser vero): 64 PRESE + 1 EQUIVALENTE dichiarato (la guardia sulla forma della cartella del negativo prima di una cancellazione: nessun input la tocca, difesa dichiarata, classe 1113)
+  bootstrap_test.py ...................... bootstrap rigenerato == committato; eseguito nel banco con server locale: ok / driver manomesso / marcatore assente / macchina sbagliata (zero richieste) / impronta alterata nella chiamata (ferma alla fase B), + 4 mutazioni prese.
+  GitHub raw ............................. driver al commit: HTTP 200, 34450 byte, SHA256 identico a git show (scaricato davvero dal cloud).
+  Difetti trovati DAL banco e corretti prima di consegnare: percorso della cache dedotto dall'URL (1114, in P0); gate di freschezza vacuo tolto (1113); due implementazioni dello stesso stato con etichette diverse (1115); `$n + " su "` con n intero (1116);
+  classe 125 ricorrente nella figlia v1 (DataFolder nullo in raccolta: 1117); mutanti del banco che rompono anche l'autotest (1118); .NET con percorso PSDrive; un file python rimasto VUOTO per un errore di scrittura (ricostruito, ora committato).
+
+NON COPERTO (dichiarato):
+  - Windows PowerShell 5.1 e un Windows vero (Get-CimInstance, Compress-Archive, Get-FileHash, Convert-Path, WebClient da raw.githubusercontent.com con TLS 1.2 per i 4 file di P1: provato dal cloud con curl, non da Windows);
+  - ABTG_ImportaTickEsterno.mq5 v1 NON e' stato COMPILATO (non c'e' MetaEditor): l'analisi statica non prova la compilazione. La riga figlia compila con metaeditor64 e SI FERMA se l'.ex5 non nasce (scenario 32);
+    il comportamento REALE dell'importer (CopyTicksRange, scrittura del file per giorno, tempi) e' sostituito da sim_mt5.py: il banco prova cio' che la riga OSSERVA dall'esterno, non l'importer;
+  - il selettore del terminale della figlia (invariato dal v1 girato il 03/09) e' forzato nel banco al percorso Windows con una riga aggiunta alla copia servita: unica differenza dal testo vero;
+  - i TEMPI veri (riconversione di 222 giorni, conteggio righe di ~870 MB, import di ~20 milioni di tick: 10-20 minuti secondo il piano, non misurati);
+  - la validita' del contenuto dei .bi5 della cache vera (qui sintetici);
+  - K0b (lag per giorno): NON costruito, "serve dopo"; il formato del suo file e' dichiarato in leggi_f2_dk.py e coperto dai suoi casi;
+  - il simbolo custom U30USD_DKNEG resta nel terminale dopo P1 (dichiarato nel BERSAGLIO della riga; si toglie a mano).
+Serve dal cancello: verificatore-stringhe + controllo-preventivo (Opus) su righe/RIGA_DUKA_P1_OROLOGIO.ps1, RIGA_DUKA_IMPORT_SONDA.ps1 (v2), mql5/Scripts/ABTG_ImportaTickEsterno.mq5 (v1), dukascopy/dukascopy_tick.py (v3), dukascopy/leggi_f2_dk.py,
+righe/RIGA_LANCIA_DUKA_P1.txt e collaudo_riga_DUKAP1/; e il confronto del TESTO F2 incorporato con quello che Claudio firmera'.
