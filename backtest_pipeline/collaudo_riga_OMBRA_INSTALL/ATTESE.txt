@@ -1,0 +1,44 @@
+ATTESE E CONTRO-ESEMPI DEL COLLAUDO DI RIGA_OMBRA_INSTALL.ps1  -- scritti il 05/10/2026 PRIMA di scrivere lo script e PRIMA di vedere un solo numero.
+Sviluppatore; il giudizio e' dell'Agente dei Controlli (verificatore-stringhe + controllo-preventivo, Opus): NON ancora fatti.
+
+COSA DEVE FARE LA RIGA (e solo questo): sul VPS VMI3047753, sul terminale piccolo 50503392 (C:\Program Files\BCM Markets MT5 Terminal), COPIARE UN FILE
+(mql5/Experts/ABTG_EMA200_Ombra.mq5, v1.03, commit 81b4329fbc33af87957d89198a2a4af127693ecc, SHA256 FD7AACD694E3CE9E7D4F95C7A4C9881464A89B376AE1919B0A05C5241E0596F4)
+in <dati>\MQL5\Experts\. Non compila, non attacca, non apre/chiude/riavvia nulla, non tocca grafici, profili, .chr, preset, EA esistenti, Guardian.
+
+LE ATTESE SI CALCOLANO DALLA SPECIFICA DEL FINTO VPS (fixture.py), MAI DALL'USCITA DELLO SCRIPT:
+ A1. scenario base (nessun file preesistente): il finto disco, fuori dal Desktop, differisce da prima per UN file aggiunto, <dati piccolo>\MQL5\Experts\ABTG_EMA200_Ombra.mq5,
+     con SHA256 uguale a quello che il server del banco serve. Nessun .ex5 nato, nessun file in nessun altro terminale (REALE, FTMO, 100k -V3, manuale, banco, Pepperstone, Tickmill).
+ A2. in OGNI scenario di STOP il finto disco fuori dal Desktop e' IDENTICO prima e dopo (hash di ogni file): "STOP senza scrivere" si PROVA, non si promette.
+ A3. in OGNI scenario, tranne la guardia macchina (che deve morire PRIMA di tutto), la riga arriva in fondo (nessun exit) e lascia sul Desktop il referto .txt e lo zip
+     con i file attesi LETTI DALLO ZIP; la coda "PROSSIMO PASSO" compare SOLO se il file e' installato o gia' presente uguale (classe 22).
+ A4. il numero delle sedie e' quello del PROFILO ATTIVO (ProfileLast di config\common.ini), non di tutti i .chr: il banco mette N=5 grafici con EA nel profilo attivo, 1 grafico senza EA,
+     e 3 grafici con EA in un profilo residuo: attesa 5 (contarli tutti darebbe 8).
+ A5. il RAM libero stampato e' Free/1024 arrotondato (FreePhysicalMemory in KB: 1900000 KB -> 1855 MB); il banco lo imposta, non lo legge dall'uscita.
+
+CONTRO-ESEMPI COSTRUITI PRIMA (ciascuno e' uno scenario che una selezione NAIVE sbaglierebbe):
+ CE1 (-V3): la cartella del 100k ha origin "...Terminal -V3" ma nei giornali compare il login 50503392 ed e' fresca. Un selettore "conto uguale" o "origin con like" la sceglierebbe. Attesa: scartata, 0 scritture.
+ CE2 (copia morta): sotto un altro profilo utente esiste una copia con STESSO origin e STESSO login ma giornali vecchi di 700 ore. Un selettore "primo con quell'origin" o "profilo della sessione" scrive nella copia morta
+     (e' l'incidente reale del 03/09: la cartella viva del piccolo e' sotto Administrator, la copia morta sotto Master). Attesa: scrive solo nella viva e dichiara l'altra come NON toccata.
+     Variante: la copia morta sta sotto il profilo della SESSIONE e la viva sotto l'altro: attesa uguale, scrive nella viva.
+ CE3 (due vive): due cartelle con origin giusto, login giusto, giornali freschi -> attesa STOP, 0 scritture, l'elenco di tutte e due.
+ CE4 (ordine dei login): giornale vecchio con 50503392 e giornale nuovo con 10105439 -> l'ULTIMO login vale: STOP. Il caso inverso (vecchio 10105439, nuovo 50503392) -> OK.
+ CE5 (conto non trovato): giornali senza nessuna riga di login -> STOP (non si indovina dal common.ini); logs\ assente -> STOP; common.ini con un altro Login -> STOP (discordanza).
+ CE6 (freschezza): giornali di 60 ore -> OK; 200 ore -> STOP. (Soglia 72 ore: un weekend senza apertura sta sotto; un terminale spento da giorni no.) Il mutante con soglia 720 deve essere preso dallo scenario 200 h,
+     quello con soglia 24 dallo scenario 60 h.
+ CE7 (BOM): origin.txt UTF-16 con BOM, UTF-8 con BOM, senza BOM, con barra finale e maiuscole diverse -> TUTTI riconosciuti (classe 1110): un BOM rimasto nella stringa farebbe sparire il terminale vivo.
+ CE8 (file gia' presente): uguale -> "GIA' PRESENTE UGUALE", nessuna riscrittura (stessa data di modifica), esito OK; DIVERSO -> STOP, il vecchio intatto per hash, NESSUNA copia con altro nome;
+     una CARTELLA con quel nome -> STOP (classe 27-ter: Test-Path la darebbe per "file presente").
+ CE9 (download): sha diverso -> STOP; sha COERENTE ma file con una chiamata di trading (OrderSend) -> STOP dal secondo strato (grep sulle chiamate di trading, come la sez. 1.2 del documento dell'EA);
+     versione diversa da 1.03 con sha coerente -> STOP; server giu' / 404 -> STOP; in tutti i casi 0 scritture nel terminale.
+ CE10 (corsa fra controllo e scrittura): iniezione di testo nello script che crea il file un istante prima della scrittura: CreateNew deve fallire, il file altrui NON viene sovrascritto ne' CANCELLATO
+     (si cancella solo cio' che questa corsa ha creato e non ha verificato). Scrittura troncata iniettata: verifica fallisce, il file parziale creato da questa corsa viene tolto, diff vuoto.
+ CE11 (tabella dei processi): il terminale -V3 ha percorso "C:\Program Files\BCM Markets MT5 Terminal -V3\terminal64.exe": inizia con il percorso del piccolo, ma NON e' il piccolo. Il marcatore "IL NOSTRO"
+     compare su UNA riga, quella del percorso esatto (confronto sulla CARTELLA intera, non sul prefisso). Percorso negato (null) -> '?', nessun crash. Nessun terminale in esecuzione -> RAM del terminale "NON MISURATO", non zero.
+ CE12 (CIM): Get-CimInstance che fallisce -> "NON MISURATO" per RAM, la riga va avanti.
+
+MUTANTI (il collaudo del collaudo, classe 1068/1074/1101): ogni controllo sopra viene spento o sbagliato con una mutazione TESTUALE dello script; almeno uno scenario deve diventare ROSSO e UNO SOLO e' la causa
+prevista (classe 1101). Un controllo che nessun input puo' far scattare si toglie e si dichiara (classe 1113).
+
+NON COPERTO DAL BANCO (dichiarato prima): Windows PowerShell 5.1 e un Windows vero (Get-Process .Path puo' essere negato, Get-CimInstance, Compress-Archive, console), il layout reale di un profilo MT5 oltre a quello
+misurato in coda/referti (CODA_01/03/04/05 del 05/10), permessi NTFS (profilo di un altro utente non leggibile), un MT5 vivo che scrive nei log durante la corsa, un disco pieno vero, la rete vera di GitHub raw
+(verificata a parte con HTTP 200 + impronta al pin).
