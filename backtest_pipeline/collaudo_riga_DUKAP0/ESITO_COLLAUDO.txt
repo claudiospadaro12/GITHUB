@@ -1,0 +1,35 @@
+ESITO DEL COLLAUDO DI P0 (RIGA_DUKA_P0_CENSIMENTO.ps1 + bootstrap RIGA_LANCIA_DUKA_P0.txt) -- 05/10/2026
+Sviluppatore; il giudizio e' dell'Agente dei Controlli (verificatore-stringhe + controllo-preventivo, Opus): NON ancora fatti. NIENTE e' stato consegnato a Claudio ne' eseguito su una macchina vera.
+Piano: report/PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md par. 3.1 P0. Firma F2 di Claudio: NON ancora scritta nel testo preciso.
+Commit della riga: d9209710a774864b2454c0ff931fab432575eb5b (SHA256 della riga E65A80E588DE591853829B1E54D96F6B6C3E5BE10708C94EE33BC2115FBEE350, marcatore MARCATORE_RIGA_DUKA_P0_v1)
+Bootstrap: backtest_pipeline/righe/RIGA_LANCIA_DUKA_P0.txt (2279 byte, 1 riga, SHA256 D9C6B3DE7E80983D0954FC87203532E8A9FF45857CA63FF9C6C7A6B1188C2254), rigenerato dal generatore al commit sopra e confrontato byte per byte.
+
+ATTESE SCRITTE PRIMA (fixture.py, docstring): i conteggi (slot, byte, righe, primo/ultimo tick) si calcolano DALLA SPECIFICA del finto disco, mai dall'uscita dello script. I byte di ogni .bi5
+codificano il giorno: una lettura del MESE sbagliato (percorso 1-based, ottobre -> cartella di novembre) NON torna per caso su una cache completa (contro-esempio costruito prima).
+
+FATTO (pwsh 7.4.6 su Linux, finto C: come PSDrive, Invoke-Expression come il bootstrap; cmdlet assenti sostituiti da funzioni del banco: Get-CimInstance, Get-Command):
+  statico.py --autotest + statico.py ......... OK (5 righe cattive viste, 4 buone non segnalate; nel codice, tolti commenti e stringhe: nessun Remove/Copy/Move/Start-Process/Stop-Process/download/exit/param;
+                                               le sole scritture sono Set-Content / New-Item / Compress-Archive con bersaglio $Cart o $Zip)
+  controlla_riga.py --oggetto ps1 ............ nessun difetto meccanico (ASCII, parser PowerShell vero 0 errori, nessun costrutto pwsh-7-only, formati .NET, cultura invariante)
+  controlla_riga.py --oggetto riga (bootstrap) .. nessun difetto meccanico, 8 passati (pin commit vero, marcatore presente al pin, macchina dichiarata e inchiodata); 4 rilievi "nomina il conto X dentro una stringa" = il BERSAGLIO che elenca i terminali NON toccati
+  battery.py ................................. 28/28 scenari (macchina VPS / minuscola / quasi-uguale, cache assente / senza simbolo / senza cartella lavoro, buchi+zeri+doppi+tmp+giorno senza cartella con i 9 giorni della sonda per nome,
+                                               disco pieno / senza C: / CIM che fallisce, MT5 vivo, sedie attaccate (EA, grafico senza EA, illeggibile, nome non-ASCII), terminale -V3 e MANUALE con EA (non contano),
+                                               due cartelle dati, origin di un altro terminale, senza ini/log, conti discordanti, residuo DKNEG + cartella di backup, python Store/assente, curl assente, senza Desktop,
+                                               CSV CRLF / senza riga finale / zero CSV, senza bases\ / nativi parziali). In OGNI scenario: la riga arriva in fondo (nessun exit), il finto disco e' IDENTICO prima e dopo
+                                               fuori dal Desktop (SOLA LETTURA provata con l'hash di ogni file), uscita ASCII, zip con i 3 file attesi letti DALLO ZIP.
+  mutazioni.py ............................... 55 mutazioni testuali, 55 PRESE (tutte parse-valide, controllato con il parser vero), ognuna presa dallo scenario sentinella previsto
+  bootstrap_test.py .......................... 4 scenari (ok / file manomesso -> IMPRONTA DIVERSA / marcatore assente con impronta coerente / macchina sbagliata con ZERO richieste al server) + 4 mutazioni del bootstrap
+                                               (guardia macchina, controllo impronta, controllo marcatore, pin non passato) tutte prese; server HTTP locale.
+  GitHub raw .................................. scaricato DAVVERO (HTTP 200, 35245 byte, SHA256 identico a git show) e eseguito l'intero bootstrap vero nel banco: impronta OK -> pin e sha nel referto -> ESITO COMPLETO.
+  Difetti trovati DAL collaudo e corretti prima di consegnare: BOM nella stringa di origin.txt (1110), sonda MQL5\Files saltata da un continue (1111), banco con scenari in parallelo (1112), controllo di freschezza vacuo tolto (1113),
+  .NET con percorso PSDrive (Convert-Path), disco C: preso dal primo disco invece che dalla lettera di dukascopy_lavoro (mutante), "ZERO grafici" etichettato [MISURATO].
+
+NON COPERTO (dichiarato):
+  - Windows PowerShell 5.1 e un Windows vero: Get-CimInstance Win32_LogicalDisk, Get-Process (.Path puo' essere negato), Compress-Archive e Get-ChildItem -Depth su 5.1, la console;
+  - se su 5.1 il confronto -ieq passa anche con un BOM nella stringa (qui e' tolto, quindi indifferente);
+  - il LAYOUT REALE di MT5: i tick nativi sotto bases\<server>\ticks\U30USD\AAAAMM.tkc e i custom sotto bases\Custom\ticks\U30USD_DK sono l'assunto del piano (INFERITO), il finto disco lo riproduce, non lo prova;
+    la riga cerca per NOME di cartella (U30USD*) a profondita 3 e dice "NON TROVATA" se non c'e'. Un file mensile nativo presente NON prova il giorno 2024.11.20 (dichiarato nel referto);
+  - il TEMPO vero del conteggio righe sui ~870 MB (x2: tick\ e le copie in MQL5\Files): la riga avvisa "puo volerci qualche minuto";
+  - il ramo "_2" quando la cartella DUKA_P0_<ora> esiste gia' (stesso secondo);  OneDrive: il Desktop e' USERPROFILE\Desktop come nelle altre righe di casa (ripiego USERPROFILE provato);
+  - la validita' dei .bi5 (qui non si decodifica lzma: lo fa dukascopy_tick.py --solo-cache in P1).
+Serve dal cancello: verificatore-stringhe + controllo-preventivo (Opus) su righe/RIGA_DUKA_P0_CENSIMENTO.ps1, righe/RIGA_LANCIA_DUKA_P0.txt e collaudo_riga_DUKAP0/; poi la firma F2 di Claudio.
