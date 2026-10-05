@@ -193,6 +193,33 @@ def rendimento_h0(ev, p, k, ore=24):
     return out.mean(), out.std(ddof=1) / math.sqrt(out.size), out.size
 
 
+def deff_giorno(ev, p, k, ore=24):
+    """effetto di disegno sotto H0: DEFF = somma_giorni(S_g^2) / somma_eventi(r^2), con S_g = somma dei rendimenti
+    firmati (+ore) degli eventi del giorno g. n_eff = n / DEFF. Se gli eventi fossero indipendenti DEFF ~ 1."""
+    pt = ore * 12
+    per_giorno = {}
+    r2 = 0.0
+    n = 0
+    for (pr, s, v) in ev:
+        j = int(k[s]) + pt
+        if j >= p.shape[1]:
+            continue
+        r = v * (p[pr, j] - p[pr, int(k[s])]) / (SIGMA_GIORNO * math.sqrt(2.0))
+        per_giorno[int(k[s]) // PTS_GIORNO] = per_giorno.get(int(k[s]) // PTS_GIORNO, 0.0) + r
+        r2 += r * r
+        n += 1
+    return n, sum(x * x for x in per_giorno.values()) / r2, len(per_giorno)
+
+
+def per_slot(ev, k, passo):
+    """quota degli eventi per fascia del giorno (lettura 1 = chiusura 00:00-04:00 ... 6 = chiusura 20:00-24:00)."""
+    per = 24 * 12 // passo
+    c = np.zeros(per)
+    for (pr, s, v) in ev:
+        c[(int(k[s]) // passo) % per] += 1
+    return c / c.sum()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--semi", type=int, default=5)
@@ -202,6 +229,9 @@ def main():
     a = ap.parse_args()
     tot = {"anni": 0.0, "lett": 0, "ge70": 0, "ge40": 0, "A40": 0, "A70": 0, "B": 0, "clA": 0, "clB": 0, "clA2": 0, "clB2": 0}
     rend = []
+    dfA = []
+    slotA = []
+    dfB = []
     somma_max = 0.0
     maxabs = 0.0
     for sem in range(a.semi):
@@ -226,7 +256,10 @@ def main():
         tot["clB"] += cluster_giorno_valuta(eB, k)
         tot["clA2"] += cluster_giorno_valuta(eA40, k, 2)
         tot["clB2"] += cluster_giorno_valuta(eB, k, 2)
+        slotA.append(per_slot(eA40, k, a.passo))
         rend.append((rendimento_h0(eA40, p, k), rendimento_h0(eB, p, k)))
+        dfA.append(deff_giorno(eA40, p, k))
+        dfB.append(deff_giorno(eB, p, k))
     y = tot["anni"]
     print("anni simulati (settimane da 5 giorni, 260 gg/anno): %.1f" % y)
     print("controllo identita': max |somma delle 8 forze| = %.2e (atteso ~0)" % somma_max)
@@ -239,6 +272,14 @@ def main():
     print("A (cross 70, riarmo sotto 70): %.1f eventi/anno" % (tot["A70"] / y))
     print("B (top contro bottom, >=70):   %.1f eventi/anno, %.1f cluster giorno-valuta/anno"
           % (tot["B"] / y, tot["clB"] / y))
+    print("A: quota eventi per fascia del giorno (1a = lettura che chiude alle 04:00 server ... ultima = 00:00): "
+          + " ".join("%.1f%%" % (100 * x) for x in np.mean(slotA, axis=0)))
+    for nome, d in (("A", dfA), ("B", dfB)):
+        n = sum(x[0] for x in d)
+        ng = sum(x[2] for x in d)
+        de = sum(x[1] * x[0] for x in d) / n
+        print("%s: effetto di disegno (rendimenti a +24h, H0): DEFF = %.1f -> n_eff = n/DEFF = %.1f%% di n; giorni con eventi %d (n %d)"
+              % (nome, de, 100.0 / de, ng, n))
     print("B: cluster con finestra di 2 giorni: %.1f /anno" % (tot["clB2"] / y))
     for i, ((mA, seA, nA), (mB, seB, nB)) in enumerate(rend):
         print("  seme %d: rendimento +24h in sigma-giorno (H0 = 0): A %+0.3f +- %0.3f (n %d) | B %+0.3f +- %0.3f (n %d)"
