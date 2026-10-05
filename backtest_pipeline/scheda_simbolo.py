@@ -458,18 +458,27 @@ def barre_tf(s, tfm):
 # ---------------------------------------------------------------------
 # 4. QUALITA' E OROLOGIO (i cancelli prima dei numeri)
 # ---------------------------------------------------------------------
-def picco_minuto(t, o, c, mesi):
+def picco_minuto(t, o, c, mesi, finestra=5):
+    """Minuto-del-giorno (UTC) di massima ampiezza media |c-o|/c nei mesi dati, su un profilo LISCIATO su
+    `finestra` minuti (circolare): su un campione corto il singolo minuto piu' alto e' rumore.
+    Ritorna (minuto, giorni_distinti, decisivita) con decisivita = picco / mediana del profilo."""
     dd = np.array(t // 1440, dtype="datetime64[D]")
     mm = (dd.astype("datetime64[M]").astype(np.int64) % 12) + 1
     sel = np.isin(mm, mesi)
     if not sel.any():
-        return None, 0
+        return None, 0, 0.0
     mod = (t[sel] % 1440).astype(np.int64)
     amp = np.abs(c[sel] - o[sel]) / np.maximum(c[sel], 1e-12)
     ssum = np.bincount(mod, weights=amp, minlength=1440)
     nn = np.bincount(mod, minlength=1440)
     mean = np.where(nn >= 30, ssum / np.maximum(nn, 1), 0.0)
-    return int(np.argmax(mean)), int(nn.sum())
+    sm = np.zeros(1440)
+    for k in range(-(finestra // 2), finestra // 2 + 1):
+        sm += np.roll(mean, k)
+    sm /= finestra
+    valido = sm[sm > 0]
+    dec = float(sm.max() / np.median(valido)) if len(valido) else 0.0
+    return int(np.argmax(sm)), int(len(np.unique(t[sel] // 1440))), dec
 
 
 # ancore ASSOLUTE dell'orologio (minuti UTC d'INVERNO, ora solare). Un controllo solo relativo
@@ -500,8 +509,8 @@ def qualita(s):
     dif = np.diff(t)
     buchi_int = int(np.count_nonzero((dif > 1) & (dif < SOGLIA_BUCO_NOTTE)))
     minuti_mancanti = int(dif[(dif > 1) & (dif < SOGLIA_BUCO_NOTTE)].sum() - np.count_nonzero((dif > 1) & (dif < SOGLIA_BUCO_NOTTE)))
-    w, nw = picco_minuto(t, s["o"], s["c"], (1, 2))
-    e, ne = picco_minuto(t, s["o"], s["c"], (6, 7, 8))
+    w, nw, dw = picco_minuto(t, s["o"], s["c"], (1, 2))
+    e, ne, de = picco_minuto(t, s["o"], s["c"], (6, 7, 8))
     d1 = s["d1"]
     q = dict(
         n_m1=len(t),
@@ -515,13 +524,16 @@ def qualita(s):
         buchi_interni_1_59min=buchi_int, minuti_mancanti_interni=minuti_mancanti,
         giorni=len(d1["st"]), giorni_pieni=int(d1["pieno"].sum()),
         m1_per_giorno_mediana=float(np.median(d1["n"])),
-        picco_inverno_utc=w, picco_estate_utc=e, n_inverno=nw, n_estate=ne,
+        picco_inverno_utc=w, picco_estate_utc=e, giorni_inverno=nw, giorni_estate=ne, decisivita_inverno=dw, decisivita_estate=de,
     )
     anni_d = anno_da_giorni(d1["giorno"])
     q["m1_giorno_per_anno"] = {int(y): float(np.median(d1["n"][anni_d == y])) for y in sorted(set(anni_d.tolist()))}
     q["orologio_dst_ok"] = (w is not None and e is not None and abs((w - 60) - e) <= 2)
     q["ancora_inverno"] = ancora_vicina(w)
-    q["orologio_ok"] = bool(q["orologio_dst_ok"] and q["ancora_inverno"])
+    # il verdetto: INDECISO se il campione e' corto (< 40 giorni per stagione) o il picco non spicca (< 1,5 x mediana)
+    q["orologio_indeciso"] = bool(nw < 40 or ne < 40 or dw < 1.5 or de < 1.5)
+    q["orologio_ok"] = bool(q["orologio_dst_ok"] and q["ancora_inverno"] and not q["orologio_indeciso"])
+    q["orologio_verdetto"] = "ok" if q["orologio_ok"] else ("INDECISO (campione corto o picco poco netto: il singolo minuto e' rumore)" if q["orologio_indeciso"] else "DA GUARDARE (fuso o feed)")
     return q
 
 
@@ -1131,10 +1143,10 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("| M1 mediane per giorno, per anno (copertura: un anno molto sotto gli altri ha buchi, e l'ATR di quell'anno e' leggermente per difetto) | %s |" % " ; ".join("%d: %d" % (y, v) for y, v in q["m1_giorno_per_anno"].items()))
     w("| barre a range zero | %s%% |" % f(q["barre_range_zero_pct"], 2))
     w("| prezzo min / max | %s / %s |" % (f(q["prezzo_min"], 4), f(q["prezzo_max"], 4)))
-    w("| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | %s / %s ; differenza %s min (attesa 60 +/- 2 se segue l'ora legale) ; ancora assoluta d'inverno: %s -> **%s** |" % (
+    w("| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | %s / %s ; differenza %s min (attesa 60 +/- 2 se segue l'ora legale) ; ancora assoluta d'inverno: %s ; giorni inverno/estate %d/%d, nettezza del picco %.1f/%.1f volte la mediana -> **%s** |" % (
         hhmm(q["picco_inverno_utc"]), hhmm(q["picco_estate_utc"]),
         (str(q["picco_inverno_utc"] - q["picco_estate_utc"]) if q["picco_inverno_utc"] is not None and q["picco_estate_utc"] is not None else "n.d."),
-        q["ancora_inverno"] or "NESSUNA", "ok" if q["orologio_ok"] else "DA GUARDARE (fuso o feed)"))
+        q["ancora_inverno"] or "NESSUNA", q["giorni_inverno"], q["giorni_estate"], q["decisivita_inverno"], q["decisivita_estate"], q["orologio_verdetto"]))
     w("")
     w("_Cosa dice_: se il picco non cade su un'ancora nota (apertura cash, dati USA 8:30 ET) il fuso dichiarato e' sbagliato e **tutte** le etichette orarie sotto sono sbagliate. _Decisione informata_: fidarsi o no delle sezioni 3-4. Limite del controllo: non separa 13:30 da 14:30 UTC (dati USA 8:30 contro apertura cash 9:30), quindi un errore di esattamente un'ora fra questi due non si vede.")
     if finestra_nota:
@@ -1792,7 +1804,7 @@ def autotest():
         T.append(gg * 1440 + base)
         Oo.append(np.full(1440, 100.0)); C.append(100.0 + amp * np.where(rng.random(1440) < 0.5, 1, -1))
     T = np.concatenate(T); Oo = np.concatenate(Oo); C = np.concatenate(C)
-    w, nw = picco_minuto(T, Oo, C, (1, 2)); e, ne = picco_minuto(T, Oo, C, (6, 7, 8))
+    w, nw, dw_ = picco_minuto(T, Oo, C, (1, 2)); e, ne, de_ = picco_minuto(T, Oo, C, (6, 7, 8))
     _check(w in (869, 870, 871) and e in (809, 810, 811) and abs((w - 60) - e) <= 2, "picco invernale %s e estivo %s UTC -> differenza 60" % (hhmm(w), hhmm(e)))
     # CONTRO-ESEMPIO (10/09): un feed spostato di UN'ORA (picco 09:00 d'inverno, 08:00 d'estate) supera il
     # controllo relativo (differenza 60) ma NON l'ancora assoluta: la scheda deve dire 'DA GUARDARE'.
@@ -1807,7 +1819,7 @@ def autotest():
         am2 = np.where(np.abs(b2 - sp2) <= 1, 5.0, 0.1)
         T2_.append(gg * 1440 + b2); O2_.append(np.full(1440, 100.0)); C2_.append(100.0 + am2 * np.where(rng2.random(1440) < 0.5, 1, -1))
     T2_ = np.concatenate(T2_); O2_ = np.concatenate(O2_); C2_ = np.concatenate(C2_)
-    w3, _ = picco_minuto(T2_, O2_, C2_, (1, 2)); e3, _ = picco_minuto(T2_, O2_, C2_, (6, 7, 8))
+    w3, _, _ = picco_minuto(T2_, O2_, C2_, (1, 2)); e3, _, _ = picco_minuto(T2_, O2_, C2_, (6, 7, 8))
     _check(abs((w3 - 60) - e3) <= 2 and ancora_vicina(w3) is None, "CONTRO-ESEMPIO: feed spostato di un'ora: relativo ok (%s/%s) ma NESSUNA ancora assoluta" % (hhmm(w3), hhmm(e3)))
     _check(ancora_vicina(w) is not None and ancora_vicina(870) == "14:30 apertura cash NY 9:30 ET", "il feed corretto cade su un'ancora nota (%s)" % ancora_vicina(w))
     # sessione NY d'ESTATE: finestra server 14:30-21:00 (810-1200 UTC = 870-1260 server); l'onda e' li'
@@ -1834,8 +1846,8 @@ def autotest():
     _check(q_ok["orologio_ok"] and q_ko["orologio_dst_ok"] and not q_ko["orologio_ok"],
            "qualita(): feed giusto -> orologio_ok; feed spostato di un'ora -> relativo ok ma orologio_ok=False")
     # contro-esempio: gli stessi dati trattati come ora di New York (fuso sbagliato) NON danno la coppia 14:30/13:30
-    w2, _ = picco_minuto(ny_to_utc(T), Oo, C, (1, 2))
-    e2, _ = picco_minuto(ny_to_utc(T), Oo, C, (6, 7, 8))
+    w2, _, _ = picco_minuto(ny_to_utc(T), Oo, C, (1, 2))
+    e2, _, _ = picco_minuto(ny_to_utc(T), Oo, C, (6, 7, 8))
     _check(abs((w2 - 60) - e2) > 2 or w2 not in (869, 870, 871), "CONTRO-ESEMPIO: un fuso sbagliato sposta i picchi a %s/%s e il cancello non passa" % (hhmm(w2), hhmm(e2)))
     # --- gap piantato
     log("7. gap di apertura")
