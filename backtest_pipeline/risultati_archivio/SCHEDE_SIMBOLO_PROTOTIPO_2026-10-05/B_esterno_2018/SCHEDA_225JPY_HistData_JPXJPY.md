@@ -14,7 +14,7 @@ Unita': **punti** = 1.0000 di prezzo. Giorno: **giorno server BCM (mezzanotte se
 | M1 mediane per giorno, per anno (copertura: un anno molto sotto gli altri ha buchi, e l'ATR di quell'anno e' leggermente per difetto) | 2013: 996 ; 2014: 969 ; 2015: 1051 ; 2016: 1135 ; 2017: 879 ; 2018: 1159 |
 | barre a range zero | 17.30% |
 | prezzo min / max | 10363.0000 / 24475.0000 |
-| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | 00:00 / 00:00 ; differenza 0 min (attesa 60 +/- 2 se segue l'ora legale) ; ancora assoluta d'inverno: 00:00 apertura Tokyo 09:00 JST -> **DA GUARDARE (fuso o feed)** |
+| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | 00:00 / 00:00 ; differenza 0 min (attesa: 60 +/- 5 per un evento USA/Europa, 0 +/- 5 per un evento di Tokyo; la tolleranza di 5 minuti serve a non confondere un picco largo con un errore, il controllo cerca errori di ORE) ; ancora assoluta d'inverno: 00:00 apertura Tokyo 09:00 JST ; giorni inverno/estate 295/472, nettezza del picco 2.2/2.4 volte la mediana -> **ok** |
 
 _Cosa dice_: se il picco non cade su un'ancora nota (apertura cash, dati USA 8:30 ET) il fuso dichiarato e' sbagliato e **tutte** le etichette orarie sotto sono sbagliate. _Decisione informata_: fidarsi o no delle sezioni 3-4. Limite del controllo: non separa 13:30 da 14:30 UTC (dati USA 8:30 contro apertura cash 9:30), quindi un errore di esattamente un'ora fra questi due non si vede.
 

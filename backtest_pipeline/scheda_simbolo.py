@@ -478,7 +478,12 @@ def picco_minuto(t, o, c, mesi, finestra=5):
     sm /= finestra
     valido = sm[sm > 0]
     dec = float(sm.max() / np.median(valido)) if len(valido) else 0.0
-    return int(np.argmax(sm)), int(len(np.unique(t[sel] // 1440))), dec
+    k0 = int(np.argmax(sm))
+    # il profilo liscio trova DOVE sta il picco; il minuto esatto si rilegge sul profilo grezzo (+-3 minuti):
+    # lisciare una coda che decade sposta il massimo in avanti di 1-2 minuti (misurato sul S&P: 14:33 invece di 14:30)
+    cand = [(k0 + j) % 1440 for j in range(-3, 4)]
+    kk = max(cand, key=lambda x: mean[x])
+    return int(kk), int(len(np.unique(t[sel] // 1440))), dec
 
 
 # ancore ASSOLUTE dell'orologio (minuti UTC d'INVERNO, ora solare). Un controllo solo relativo
@@ -490,13 +495,17 @@ ANCORE_UTC = ((420, "07:00 apertura Europa pre-cash"), (480, "08:00 apertura Lon
 ANCORE_SENZA_DST = ((0, "00:00 apertura Tokyo 09:00 JST"), (360, "06:00 chiusura Tokyo 15:00 JST"))
 
 
-def ancora_vicina(minuto, tol=2):
+def ancora_vicina(minuto, tol=5):
     if minuto is None:
         return None
     for m, nome in ANCORE_UTC + ANCORE_SENZA_DST:
         if abs(minuto - m) <= tol:
             return nome
     return None
+
+
+def ancora_senza_dst(nome):
+    return nome is not None and nome in [n for _, n in ANCORE_SENZA_DST]
 
 
 def hhmm(x):
@@ -528,12 +537,17 @@ def qualita(s):
     )
     anni_d = anno_da_giorni(d1["giorno"])
     q["m1_giorno_per_anno"] = {int(y): float(np.median(d1["n"][anni_d == y])) for y in sorted(set(anni_d.tolist()))}
-    q["orologio_dst_ok"] = (w is not None and e is not None and abs((w - 60) - e) <= 2)
     q["ancora_inverno"] = ancora_vicina(w)
+    # coerenza inverno/estate: un evento a ora fissa USA/Europa si sposta di 60 minuti (UTC) con l'ora legale;
+    # un evento di Tokyo (niente ora legale) NON si sposta
+    if w is not None and e is not None:
+        q["orologio_dst_ok"] = (abs(w - e) <= 5) if ancora_senza_dst(q["ancora_inverno"]) else (abs((w - 60) - e) <= 5)
+    else:
+        q["orologio_dst_ok"] = False
     # il verdetto: INDECISO se il campione e' corto (< 40 giorni per stagione) o il picco non spicca (< 1,5 x mediana)
     q["orologio_indeciso"] = bool(nw < 40 or ne < 40 or dw < 1.5 or de < 1.5)
     q["orologio_ok"] = bool(q["orologio_dst_ok"] and q["ancora_inverno"] and not q["orologio_indeciso"])
-    q["orologio_verdetto"] = "ok" if q["orologio_ok"] else ("INDECISO (campione corto o picco poco netto: il singolo minuto e' rumore)" if q["orologio_indeciso"] else "DA GUARDARE (fuso o feed)")
+    q["orologio_verdetto"] = "ok" if q["orologio_ok"] else ("INDECISO (campione corto o picco poco netto: il singolo minuto e' rumore)" if q["orologio_indeciso"] else "DA GUARDARE (fuso, feed, o picco dominato da un evento locale con ora legale propria, es. Australia: in quel caso il controllo non si applica a questo simbolo)")
     return q
 
 
@@ -1143,7 +1157,7 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("| M1 mediane per giorno, per anno (copertura: un anno molto sotto gli altri ha buchi, e l'ATR di quell'anno e' leggermente per difetto) | %s |" % " ; ".join("%d: %d" % (y, v) for y, v in q["m1_giorno_per_anno"].items()))
     w("| barre a range zero | %s%% |" % f(q["barre_range_zero_pct"], 2))
     w("| prezzo min / max | %s / %s |" % (f(q["prezzo_min"], 4), f(q["prezzo_max"], 4)))
-    w("| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | %s / %s ; differenza %s min (attesa 60 +/- 2 se segue l'ora legale) ; ancora assoluta d'inverno: %s ; giorni inverno/estate %d/%d, nettezza del picco %.1f/%.1f volte la mediana -> **%s** |" % (
+    w("| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | %s / %s ; differenza %s min (attesa: 60 +/- 5 per un evento USA/Europa, 0 +/- 5 per un evento di Tokyo; la tolleranza di 5 minuti serve a non confondere un picco largo con un errore, il controllo cerca errori di ORE) ; ancora assoluta d'inverno: %s ; giorni inverno/estate %d/%d, nettezza del picco %.1f/%.1f volte la mediana -> **%s** |" % (
         hhmm(q["picco_inverno_utc"]), hhmm(q["picco_estate_utc"]),
         (str(q["picco_inverno_utc"] - q["picco_estate_utc"]) if q["picco_inverno_utc"] is not None and q["picco_estate_utc"] is not None else "n.d."),
         q["ancora_inverno"] or "NESSUNA", q["giorni_inverno"], q["giorni_estate"], q["decisivita_inverno"], q["decisivita_estate"], q["orologio_verdetto"]))
@@ -1845,6 +1859,23 @@ def autotest():
     q_ko = _q_da(T2_, O2_, C2_)
     _check(q_ok["orologio_ok"] and q_ko["orologio_dst_ok"] and not q_ko["orologio_ok"],
            "qualita(): feed giusto -> orologio_ok; feed spostato di un'ora -> relativo ok ma orologio_ok=False")
+    # evento di Tokyo (09:00 JST = 00:00 UTC tutto l'anno, niente ora legale): picco identico d'inverno e d'estate -> ok
+    rj = np.random.default_rng(21)
+    Cj = np.concatenate([100.0 + np.where(np.abs(np.arange(1440) - 0) <= 1, 5.0, 0.1) * np.where(rj.random(1440) < 0.5, 1, -1) for g_ in giorni])
+    Tj = np.concatenate([np.arange(g_ * 1440, g_ * 1440 + 1440) for g_ in giorni])
+    q_j = _q_da(Tj, np.full(len(Tj), 100.0), Cj)
+    _check(q_j["orologio_ok"] and q_j["ancora_inverno"].startswith("00:00"), "evento di Tokyo senza ora legale (differenza 0): orologio ok (%s)" % q_j["ancora_inverno"])
+    # campione corto (solo gen-feb): il verdetto e' INDECISO, non un "ok" per caso
+    ddm = np.array(T // 1440, dtype="datetime64[D]").astype("datetime64[M]").astype(np.int64) % 12 + 1
+    msk = np.isin(ddm, (1, 2)) & (T < T[0] + 400 * 1440)
+    q_corto = _q_da(T[msk], Oo[msk], C[msk])
+    _check(q_corto["orologio_indeciso"] and not q_corto["orologio_ok"], "campione di soli gen-feb: orologio INDECISO (giorni inverno %d, estate %d)" % (q_corto["giorni_inverno"], q_corto["giorni_estate"]))
+    # rumore puro: picco poco netto -> INDECISO
+    rr_ = np.random.default_rng(3)
+    Tn = np.concatenate([np.arange(g_ * 1440, g_ * 1440 + 1440) for g_ in giorni])
+    Cn = 100.0 + 0.1 * rr_.standard_normal(len(Tn))
+    q_rum = _q_da(Tn, np.full(len(Tn), 100.0), Cn)
+    _check(q_rum["orologio_indeciso"] and not q_rum["orologio_ok"], "rumore puro: nettezza del picco %.2f/%.2f -> INDECISO" % (q_rum["decisivita_inverno"], q_rum["decisivita_estate"]))
     # contro-esempio: gli stessi dati trattati come ora di New York (fuso sbagliato) NON danno la coppia 14:30/13:30
     w2, _, _ = picco_minuto(ny_to_utc(T), Oo, C, (1, 2))
     e2, _, _ = picco_minuto(ny_to_utc(T), Oo, C, (6, 7, 8))

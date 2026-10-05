@@ -31,6 +31,9 @@ AUTOTEST SCHEDA_SIMBOLO_v1
    ok: il feed corretto cade su un'ancora nota (14:30 apertura cash NY 9:30 ET)
    ok: sessione NY d'estate = 10 con la finestra d'estate (misurato 9.974)
    ok: qualita(): feed giusto -> orologio_ok; feed spostato di un'ora -> relativo ok ma orologio_ok=False
+   ok: evento di Tokyo senza ora legale (differenza 0): orologio ok (00:00 apertura Tokyo 09:00 JST)
+   ok: campione di soli gen-feb: orologio INDECISO (giorni inverno 66, estate 0)
+   ok: rumore puro: nettezza del picco 1.06/1.06 -> INDECISO
    ok: CONTRO-ESEMPIO: un fuso sbagliato sposta i picchi a 19:31/17:29 e il cancello non passa
 7. gap di apertura
    ok: gap 'pausa': 5 eventi trovati, 5 attesi

@@ -14,7 +14,7 @@ Unita': **pip** = 0.0001 di prezzo. Giorno: **giorno server BCM (mezzanotte serv
 | M1 mediane per giorno, per anno (copertura: un anno molto sotto gli altri ha buchi, e l'ATR di quell'anno e' leggermente per difetto) | 2018: 1394 |
 | barre a range zero | 2.50% |
 | prezzo min / max | 1.2476 / 1.4377 |
-| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | 15:57 / 08:30 ; differenza 447 min (attesa 60 +/- 2 se segue l'ora legale) ; ancora assoluta d'inverno: NESSUNA -> **DA GUARDARE (fuso o feed)** |
+| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | 13:30 / 08:30 ; differenza 300 min (attesa: 60 +/- 5 per un evento USA/Europa, 0 +/- 5 per un evento di Tokyo; la tolleranza di 5 minuti serve a non confondere un picco largo con un errore, il controllo cerca errori di ORE) ; ancora assoluta d'inverno: 13:30 dati USA 8:30 ET ; giorni inverno/estate 51/79, nettezza del picco 2.2/2.7 volte la mediana -> **DA GUARDARE (fuso, feed, o picco dominato da un evento locale con ora legale propria, es. Australia: in quel caso il controllo non si applica a questo simbolo)** |
 
 _Cosa dice_: se il picco non cade su un'ancora nota (apertura cash, dati USA 8:30 ET) il fuso dichiarato e' sbagliato e **tutte** le etichette orarie sotto sono sbagliate. _Decisione informata_: fidarsi o no delle sezioni 3-4. Limite del controllo: non separa 13:30 da 14:30 UTC (dati USA 8:30 contro apertura cash 9:30), quindi un errore di esattamente un'ora fra questi due non si vede.
 
