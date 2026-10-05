@@ -1,0 +1,450 @@
+**********************
+Inizio trascrizione Windows PowerShell
+Ora di inizio: 20261005215947
+Nome utente: VMI3047753\Administrator
+Esegui come utente: VMI3047753\Administrator
+Nome configurazione: 
+Computer VMI3047753 (Microsoft Windows NT 10.0.20348.0)
+Applicazione host: C:\windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -Command Start-Transcript -LiteralPath 'C:\Users\Administrator\Desktop\TRASPORTO_CSV_20261005_215946.txt' | Out-Null; try { & 'C:\Users\ADMINI~1\AppData\Local\Temp\2\carica_risultati_c459a7f0.ps1' } finally { Stop-Transcript | Out-Null }
+ID processo: 11968
+PSVersion: 5.1.20348.4294
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.20348.4294
+BuildVersion: 10.0.20348.4294
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+token letto da : C:\Users\Administrator\.gh_report_token.txt   (il token non viene MAI stampato ne' scritto)
+
+SORGENTE     : C:\Users\Administrator\abtg_round\risultati_prove
+DESTINAZIONE : backtest_pipeline/risultati_prove/dal_vps/   (ramo lavoro) -- sottoalbero dedicato: l'archivio curato non viene toccato
+DA CARICARE  : 254 CSV, su 254 trovati sotto la sorgente
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_AtrExhaustVol/ABTG_AtrExhaustVol_NASUSD_IS_r141c.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_AtrExhaustVol/ABTG_AtrExhaustVol_NASUSD_OOS_r141c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_EURUSD_IS_ohlc_r161b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_EURUSD_OOS_ohlc_r161b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_GBPUSD_IS_ohlc_r161a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_GBPUSD_IS_ohlc_r174a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_GBPUSD_IS_ohlc_r176a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_GBPUSD_IS_ohlc_r177a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_GBPUSD_OOS_ohlc_r161a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_GBPUSD_OOS_ohlc_r174a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_GBPUSD_OOS_ohlc_r176a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_BreakingBand/ABTG_BreakingBand_GBPUSD_OOS_ohlc_r177a.csv
+  AGGIORNATO: ABTG_CostToCost/ABTG_CostToCost_EURJPY_IS_ohlc_r127c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_CostToCost/ABTG_CostToCost_EURJPY_IS_r146a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_CostToCost/ABTG_CostToCost_EURJPY_OOS_ohlc_r127c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_CostToCost/ABTG_CostToCost_EURJPY_OOS_r146a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_CostToCost/ABTG_CostToCost_GBPCAD_IS_r146c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_CostToCost/ABTG_CostToCost_GBPCAD_OOS_r146c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Cycle/ABTG_Cycle_NASUSD_IS_r148a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Cycle/ABTG_Cycle_NASUSD_IS_r148bl.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Cycle/ABTG_Cycle_NASUSD_IS_r148bs.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Cycle/ABTG_Cycle_NASUSD_OOS_r148a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Cycle/ABTG_Cycle_NASUSD_OOS_r148bl.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Cycle/ABTG_Cycle_NASUSD_OOS_r148bs.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_DaxValueArea/ABTG_DaxValueArea_D30EUR_IS_r141e.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_DaxValueArea/ABTG_DaxValueArea_D30EUR_OOS_r141e.csv
+  AGGIORNATO: ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_IS_q770be.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_IS_r137a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_IS_r137b.csv
+  AGGIORNATO: ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_IS_r137c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_IS_r147c.csv
+  AGGIORNATO: ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_OOS_q770be.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_OOS_r137a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_OOS_r137b.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_OOS_r137c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_OOS_r147c.csv
+  AGGIORNATO: ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_F40EUR_IS_r138a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_F40EUR_OOS_r138a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r152a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172e.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172f.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172g.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172h.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172i.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_IS_r172j.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r152a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172e.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172f.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172g.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172h.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172i.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Dow_Apertura_US/ABTG_Dow_Apertura_US_U30USD_OOS_r172j.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_EasyTrend/ABTG_EasyTrend_CHFJPY_IS_ohlc_r171a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_EasyTrend/ABTG_EasyTrend_CHFJPY_OOS_ohlc_r171a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_EasyTrend/ABTG_EasyTrend_GBPUSD_IS_ohlc_r171b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_EasyTrend/ABTG_EasyTrend_GBPUSD_OOS_ohlc_r171b.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_AUDJPY_IS_ohlc_r139a.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_AUDJPY_OOS_ohlc_r139a.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_GBPUSD_IS_ohlc_r139b.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_GBPUSD_OOS_ohlc_r139b.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_EMA200/ABTG_EMA200_U30USD_IS_cemad02.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_U30USD_IS_cemad05.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_U30USD_IS_r136a.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_U30USD_IS_r136b.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_EMA200/ABTG_EMA200_U30USD_IS_r136c.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_EMA200/ABTG_EMA200_U30USD_IS_r136d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_EMA200/ABTG_EMA200_U30USD_IS_r146b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_EMA200/ABTG_EMA200_U30USD_IS_r147a.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_U30USD_OOS_cemad02.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_U30USD_OOS_cemad05.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r136a.csv
+  AGGIORNATO: ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r136b.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r136c.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r136d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r146b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r147a.csv
+  AGGIORNATO: ABTG_FiboH4_Multi/ABTG_FiboH4_Multi_GBPUSD_IS_ohlc_r139c.csv
+  AGGIORNATO: ABTG_FiboH4_Multi/ABTG_FiboH4_Multi_GBPUSD_OOS_ohlc_r139c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapContinuation/ABTG_GapContinuation_225JPY_IS_r162a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapContinuation/ABTG_GapContinuation_225JPY_OOS_r162a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_225JPY_IS_r167d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_225JPY_IS_r168d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_225JPY_IS_r178a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_225JPY_OOS_r167d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_225JPY_OOS_r168d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_225JPY_OOS_r178a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_AUDUSD_IS_ohlc_r167c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_AUDUSD_IS_ohlc_r168c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_AUDUSD_OOS_ohlc_r167c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_AUDUSD_OOS_ohlc_r168c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_EURUSD_IS_ohlc_r167b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_EURUSD_IS_ohlc_r168b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_EURUSD_OOS_ohlc_r167b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_EURUSD_OOS_ohlc_r168b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_GBPUSD_IS_ohlc_r167a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_GBPUSD_IS_ohlc_r168a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_GBPUSD_OOS_ohlc_r167a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_GBPUSD_OOS_ohlc_r168a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_U30USD_IS_r157a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_U30USD_IS_r159a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_U30USD_IS_r175a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_U30USD_OOS_r157a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_U30USD_OOS_r159a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_GapFill/ABTG_GapFill_U30USD_OOS_r175a.csv
+  AGGIORNATO: ABTG_HVAncora/ABTG_HVAncora_U30USD_IS_r141d.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_HVAncora/ABTG_HVAncora_U30USD_OOS_r141d.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_IBRetest/ABTG_IBRetest_D30EUR_IS_P0IBRTDAX.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_IBRetest/ABTG_IBRetest_D30EUR_OOS_P0IBRTDAX.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_IBRetest/ABTG_IBRetest_NASUSD_IS_P0IBRTNAS.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_IBRetest/ABTG_IBRetest_NASUSD_OOS_P0IBRTNAS.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_IBRetest/ABTG_IBRetest_U30USD_IS_P0_IBRETEST.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_IBRetest/ABTG_IBRetest_U30USD_OOS_P0_IBRETEST.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_IntradayMomentum/ABTG_IntradayMomentum_NASUSD_IS_r141a.csv
+  AGGIORNATO: ABTG_IntradayMomentum/ABTG_IntradayMomentum_NASUSD_OOS_r141a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_IntradayMomentum/ABTG_IntradayMomentum_U30USD_IS_r141b.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_IntradayMomentum/ABTG_IntradayMomentum_U30USD_OOS_r141b.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_LVNArbitro/ABTG_LVNArbitro_U30USD_IS_P0CONTA.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_LVNArbitro/ABTG_LVNArbitro_U30USD_IS_P0_100K.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_LVNArbitro/ABTG_LVNArbitro_U30USD_OOS_P0CONTA.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_LVNArbitro/ABTG_LVNArbitro_U30USD_OOS_P0_100K.csv
+  AGGIORNATO: ABTG_MaxMinNotte/ABTG_MaxMinNotte_D30EUR_IS_r133c.csv
+  AGGIORNATO: ABTG_MaxMinNotte/ABTG_MaxMinNotte_D30EUR_OOS_r133c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_MaxMinNotte/ABTG_MaxMinNotte_XAUUSD_IS_ohlc_r151a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_MaxMinNotte/ABTG_MaxMinNotte_XAUUSD_IS_ohlc_r170b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_MaxMinNotte/ABTG_MaxMinNotte_XAUUSD_OOS_ohlc_r151a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_MaxMinNotte/ABTG_MaxMinNotte_XAUUSD_OOS_ohlc_r170b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_MaxMinNotte_DAX_Short_Ottimizzato/ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_IS_r170c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_MaxMinNotte_DAX_Short_Ottimizzato/ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_OOS_r170c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Nasdaq_Apertura_US/ABTG_Nasdaq_Apertura_US_NASUSD_IS_r170a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Nasdaq_Apertura_US/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r170a.csv
+  AGGIORNATO: ABTG_Nasdaq_Live5m/ABTG_Nasdaq_Live5m_NASUSD_IS_r142a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_Nasdaq_Live5m/ABTG_Nasdaq_Live5m_NASUSD_IS_r142b.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_Nasdaq_Live5m/ABTG_Nasdaq_Live5m_NASUSD_IS_r142c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Nasdaq_Live5m/ABTG_Nasdaq_Live5m_NASUSD_IS_r150a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_Nasdaq_Live5m/ABTG_Nasdaq_Live5m_NASUSD_OOS_r142a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_Nasdaq_Live5m/ABTG_Nasdaq_Live5m_NASUSD_OOS_r142b.csv
+  AGGIORNATO: ABTG_Nasdaq_Live5m/ABTG_Nasdaq_Live5m_NASUSD_OOS_r142c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_Nasdaq_Live5m/ABTG_Nasdaq_Live5m_NASUSD_OOS_r150a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_Nightly/ABTG_Nightly_EURCHF_IS_P0_EURCHF.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_Nightly/ABTG_Nightly_EURCHF_OOS_P0_EURCHF.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_OpeningReversalB/ABTG_OpeningReversalB_U30USD_IS_P0A_FAIL.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_OpeningReversalB/ABTG_OpeningReversalB_U30USD_IS_P0B_SIGNAL.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_OpeningReversalB/ABTG_OpeningReversalB_U30USD_IS_P0CONTA.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_OpeningReversalB/ABTG_OpeningReversalB_U30USD_IS_P0C_FT.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_OpeningReversalB/ABTG_OpeningReversalB_U30USD_OOS_P0A_FAIL.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_OpeningReversalB/ABTG_OpeningReversalB_U30USD_OOS_P0B_SIGNAL.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_OpeningReversalB/ABTG_OpeningReversalB_U30USD_OOS_P0CONTA.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_OpeningReversalB/ABTG_OpeningReversalB_U30USD_OOS_P0C_FT.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_D30EUR_IS_r125c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_D30EUR_IS_r125d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_D30EUR_IS_r125e.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_D30EUR_OOS_r125c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_D30EUR_OOS_r125d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_D30EUR_OOS_r125e.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_IS_r125f.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_OOS_r125f.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_IS_r125a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_IS_r125b.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_IS_r133b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_IS_r147b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_OOS_r125a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_OOS_r125b.csv
+  AGGIORNATO: ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_OOS_r133b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_OOS_r147b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PTE/ABTG_PTE_GBPUSD_IS_ohlc_r153a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PTE/ABTG_PTE_GBPUSD_IS_ohlc_r164a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PTE/ABTG_PTE_GBPUSD_OOS_ohlc_r153a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PTE/ABTG_PTE_GBPUSD_OOS_ohlc_r164a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PTE/ABTG_PTE_U30USD_IS_r158a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PTE/ABTG_PTE_U30USD_OOS_r158a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_EURAUD_IS_ohlc_r160a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_EURAUD_IS_ohlc_r169b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_EURAUD_OOS_ohlc_r160a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_EURAUD_OOS_ohlc_r169b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_EURCAD_IS_ohlc_r160b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_EURCAD_IS_ohlc_r169f.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_EURCAD_OOS_ohlc_r160b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_EURCAD_OOS_ohlc_r169f.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_GBPJPY_IS_ohlc_r160c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_GBPJPY_IS_ohlc_r169d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_GBPJPY_OOS_ohlc_r160c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_GBPJPY_OOS_ohlc_r169d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_GBPUSD_IS_ohlc_r160d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_GBPUSD_IS_ohlc_r169e.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_GBPUSD_OOS_ohlc_r160d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_GBPUSD_OOS_ohlc_r169e.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_U30USD_IS_r156a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_U30USD_IS_r169a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_U30USD_OOS_r156a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_U30USD_OOS_r169a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_XAUUSD_IS_ohlc_r160e.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_XAUUSD_IS_ohlc_r169c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_XAUUSD_OOS_ohlc_r160e.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_PunteLarry/ABTG_PunteLarry_XAUUSD_OOS_ohlc_r169c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SupertrendReversal/ABTG_SupertrendReversal_225JPY_IS_r166a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SupertrendReversal/ABTG_SupertrendReversal_225JPY_OOS_r166a.csv
+  AGGIORNATO: ABTG_SupertrendReversal_Ottimizzato/ABTG_SupertrendReversal_Ottimizzato_XAUUSD_IS_ohlc_r127b.csv
+  AGGIORNATO: ABTG_SupertrendReversal_Ottimizzato/ABTG_SupertrendReversal_Ottimizzato_XAUUSD_OOS_ohlc_r127b.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave/ABTG_SuperWave_NASUSD_IS_r126d.csv
+  AGGIORNATO: ABTG_SuperWave/ABTG_SuperWave_NASUSD_OOS_r126d.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave/ABTG_SuperWave_U30USD_IS_r154a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave/ABTG_SuperWave_U30USD_OOS_r154a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r120b00.csv
+  AGGIORNATO: ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r120b01.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r120b10.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r120b11.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r120e00.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r120e11.csv
+  AGGIORNATO: ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r126a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r126b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r155a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r165a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r173a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r173b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r173c.csv
+  AGGIORNATO: ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r120b00.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r120b01.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r120b10.csv
+  AGGIORNATO: ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r120b11.csv
+  AGGIORNATO: ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r120e00.csv
+  AGGIORNATO: ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r120e11.csv
+  AGGIORNATO: ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r126a.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r126b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r155a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r165a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r173a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r173b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r173c.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_IS_R123AGATE.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_IS_R123BSTMULT.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_IS_R123CATRP.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_IS_R123DNEARATR.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_IS_r132c.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS_R123AGATE.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS_R123BSTMULT.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS_R123CATRP.csv
+  IDENTICO (gia' nel repo, non riscrivo): ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS_R123DNEARATR.csv
+  AGGIORNATO: ABTG_SupRev_DOW_H1_Ottimizzato/ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS_r132c.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SupRev_NAS_H1_Ottimizzato/ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_IS_r127a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SupRev_NAS_H1_Ottimizzato/ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_IS_r163a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SupRev_NAS_H1_Ottimizzato/ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_OOS_r127a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_SupRev_NAS_H1_Ottimizzato/ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_OOS_r163a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_VolExpBreak/ABTG_VolExpBreak_NASUSD_IS_r145a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_VolExpBreak/ABTG_VolExpBreak_NASUSD_OOS_r145a.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_VolExpBreak/ABTG_VolExpBreak_U30USD_IS_r145b.csv
+PS>Errore fatale (Invoke-RestMethod): "{"message":"Not Found","documentation_url":"https://docs.github.com/rest/repos/contents#get-repository-content","status":"404"}"
+  NUOVO     : ABTG_VolExpBreak/ABTG_VolExpBreak_U30USD_OOS_r145b.csv
+
+===== RIEPILOGO =====
+CSV TROVATI sotto la sorgente : 254
+  NON guardati, piu' vecchi di 30 giorni : 0
+  NON guardati, piu' grandi di 20 MB        : 0
+  NON guardati, oltre il tetto di 300 file    : 0
+ESAMINATI                     : 254
+  NUOVI                       : 156
+  AGGIORNATI                  : 35
+  IDENTICI (nessuna scrittura): 63
+  FALLITI                     : 0
+  SALTATI                     : 0
+SCRITTI DAVVERO NEL REPO      : 191
+**********************
+Fine trascrizione Windows PowerShell
+Ora di fine: 20261005220534
+**********************
