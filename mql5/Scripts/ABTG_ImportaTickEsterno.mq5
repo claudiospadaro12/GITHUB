@@ -63,7 +63,7 @@
 #property script_show_inputs
 #property strict
 
-#define VERSIONE "IMP-TICK-v0-BOZZA"
+#define VERSIONE "IMP-TICK-v1-GIORNI"       // v1 (05/10/2026): in piu' ABTG_ImportTick_giorni.csv, una riga per giorno con il SIMBOLO. v0 = IMP-TICK-v0-BOZZA
 
 input string InpSimboloSorgente   = "U30USD";                 // simbolo BCM da CLONARE (proprieta' e sonda)
 input string InpSimboloNuovo      = "";                       // nome custom (vuoto = sorgente + "_DK")
@@ -76,6 +76,7 @@ input double InpSogliaDiffPct     = 0.05;                     // cancello: media
 input double InpSogliaCopertura   = 80.0;                     // cancello: % minuti coperti da entrambi i feed
 
 #define REFERTO "ABTG_ImportTick_referto.csv"
+#define REFERTO_GIORNI "ABTG_ImportTick_giorni.csv"   // UNA riga per giorno della sonda, col SIMBOLO su ogni riga (condizione (1) della F2, piano Dow Dukascopy 05/10/2026)
 
 //--- giorni campione di default della SONDA, scelti PRIMA di misurare:
 //    2 giorni "normali" (allineamento base), i 4 gruppi delle settimane
@@ -411,6 +412,44 @@ void ScriviReferto(string dst, string src, long scritti, long scartate, long fuo
   }
 
 //+------------------------------------------------------------------+
+//| FILE PER GIORNO (v1): la riga per giorno che la sonda stampa nel  |
+//| giornale NON porta il simbolo, e il 03/09 si e' persa dentro lo   |
+//| zip. Qui ogni riga e' scritta in un CSV con il simbolo DK della   |
+//| corsa, l'esito (MISURATO / NON_CONFRONTABILE / DATA_MALFORMATA),  |
+//| i numeri a 8 decimali, le soglie usate e il verdetto del giorno.  |
+//| Il file si TRONCA ad ogni corsa (una corsa = un file = un simbolo).|
+//+------------------------------------------------------------------+
+int ApriGiorni()
+  {
+   int fh = FileOpen(REFERTO_GIORNI, FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_SHARE_READ, ",");
+   if(fh == INVALID_HANDLE)
+     {
+      PrintFormat("ATTENZIONE: non scrivo %s (errore %d): la condizione (1) della F2 non sara' valutabile.", REFERTO_GIORNI, GetLastError());
+      return INVALID_HANDLE;
+     }
+   FileWrite(fh, "Versione","Simbolo","Giorno","Esito","MedianaDiffPct","CoperturaPct","TickNat","TickDK",
+                 "SpreadNat","SpreadDK","SogliaDiffPct","SogliaCoperturaPct","PassaImportatore");
+   FileFlush(fh);
+   return fh;
+  }
+
+void RigaGiorno(int fh, string dst, string giorno, string esito,
+                double diff, double cop, long nN, long nD, double sN, double sD, bool passa)
+  {
+   if(fh == INVALID_HANDLE) return;
+   bool misurato = (esito == "MISURATO");
+   FileWrite(fh, VERSIONE, dst, giorno, esito,
+             (misurato ? DoubleToString(diff, 8) : "-"),
+             (misurato ? DoubleToString(cop, 4) : "-"),
+             (string)nN, (string)nD,
+             (misurato ? DoubleToString(sN, 4) : "-"),
+             (misurato ? DoubleToString(sD, 4) : "-"),
+             DoubleToString(InpSogliaDiffPct, 8), DoubleToString(InpSogliaCopertura, 4),
+             (misurato ? (passa ? "SI" : "NO") : "-"));
+   FileFlush(fh);
+  }
+
+//+------------------------------------------------------------------+
 void OnStart()
   {
    string src = Pulisci(InpSimboloSorgente);
@@ -487,23 +526,37 @@ void OnStart()
    int    giorniOk = 0, giorniMisurati = 0;
    double peggioreDiff = 0;
    string peggioreGiorno = "-";
+   int    fhGiorni = ApriGiorni();
    for(int i = 0; i < ng; i++)
      {
-      datetime g = StringToTime(Pulisci(gg[i]));
-      if(g <= 0) continue;
+      string gTxt = Pulisci(gg[i]);
+      if(StringLen(gTxt) == 0) continue;
+      datetime g = StringToTime(gTxt);
+      if(g <= 0)
+        {
+         RigaGiorno(fhGiorni, dst, gTxt, "DATA_MALFORMATA", 0, 0, 0, 0, 0, 0, false);
+         continue;
+        }
       double diffPct, copPct, sprN, sprD;
       long   nN, nD;
       bool   valido;
       SondaGiorno(src, dst, g, diffPct, copPct, nN, nD, sprN, sprD, valido);
-      if(!valido) continue;
+      if(!valido)
+        {
+         RigaGiorno(fhGiorni, dst, TimeToString(g, TIME_DATE), "NON_CONFRONTABILE", 0, 0, nN, nD, 0, 0, false);
+         continue;
+        }
       giorniMisurati++;
       bool passa = (diffPct <= InpSogliaDiffPct && copPct >= InpSogliaCopertura);
+      RigaGiorno(fhGiorni, dst, TimeToString(g, TIME_DATE), "MISURATO", diffPct, copPct, nN, nD, sprN, sprD, passa);
       if(passa) giorniOk++;
       if(diffPct > peggioreDiff) { peggioreDiff = diffPct; peggioreGiorno = TimeToString(g, TIME_DATE); }
       PrintFormat("   %s: diff mediana %.4f%%  copertura %5.1f%%  tick nat/DK %I64d/%I64d  spread medio nat/DK %.2f/%.2f  %s",
                   TimeToString(g, TIME_DATE), diffPct, copPct, nN, nD, sprN, sprD,
                   (passa ? "OK" : "<<< FUORI SOGLIA"));
      }
+
+   if(fhGiorni != INVALID_HANDLE) FileClose(fhGiorni);
 
    string esitoSonda;
    if(giorniMisurati == 0)

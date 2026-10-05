@@ -1,5 +1,20 @@
 # =====================================================================
-#  MARCATORE_RIGA_DUKA_IMPORT_SONDA_v1
+#  MARCATORE_RIGA_DUKA_IMPORT_SONDA_v2
+#  v2 (05/10/2026, piano report/PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md par. 3.1 P1):
+#   - PARAMETRI: -CartellaSorgente, -Maschera (default <SimboloDK>_ticks_*.csv), -GiorniSonda
+#     (default i 9 giorni NOMINATI della F2), -PulisciFiles. Prima erano cablati: la cartella
+#     dukascopy_lavoro\tick, la maschera U30USD_DK_ticks_*.csv, i 6 giorni del 03/09, e il CSV
+#     copiato in MQL5\Files col STESSO nome (un negativo avrebbe sovrascritto il marzo buono).
+#   - la condizione (1) della F2 si controlla PER NOME: ciascuno dei giorni di -GiorniSonda deve
+#     avere la sua riga MISURATA e DENTRO (mediana <= 0.05, copertura >= 80) nel file per giorno
+#     scritto da ABTG_ImportaTickEsterno v1 (col SIMBOLO su ogni riga). Il verdetto "OK: CANCELLO
+#     PASSATO" dell'importer NON basta: salta in silenzio i giorni non confrontabili (r.498).
+#     Se il verdetto e' OK ma un giorno nominato non e' dentro, il codice d'uscita e' 4, non 0.
+#   - il file per giorno e il referto si copiano in Work CON IL NOME DEL SIMBOLO e si cancellano
+#     all'inizio (una corsa che muore non spaccia i file della corsa precedente).
+#   - GUARDIA "chi LEGGE": l'importer legge TUTTI i file di MQL5\Files che combaciano con la
+#     maschera, non solo quelli copiati ora: un file estraneo che combacia fa FERMARE la riga.
+#   - -PulisciFiles: a fine corsa toglie da MQL5\Files SOLO i CSV copiati da questa corsa.
 #  RIGA_DUKA_IMPORT_SONDA.ps1 -- PASSO 4-5 di DUKASCOPY_PASSO0.md:
 #  IMPORTA i tick Dukascopy (CSV mensili U30USD_DK_ticks_*.csv) dentro MT5
 #  come CUSTOM SYMBOL U30USD_DK (CustomTicksReplace a blocchi) e poi fa la
@@ -40,7 +55,8 @@
 #  <PIN> = l'hash del commit che contiene QUESTO pacchetto (dato in chat).
 #
 #  CODICI D'USCITA:
-#    0 = OK: cancello sonda PASSATO (o -SoloControllo passato)
+#    0 = OK: cancello sonda PASSATO E tutti i giorni NOMINATI dentro per nome (o -SoloControllo passato)
+#    4 = verdetto OK ma almeno un giorno NOMINATO non e' dentro per nome (non confrontabile, assente, ripetuto, fuori)
 #    3 = QUASI: 1-2 giorni fuori soglia -> leggere QUALI (DST?) nel referto
 #    2 = SONDA NON MISURABILE / referto non fresco / timeout (parziale)
 #    1 = FERMATA (gate) o CANCELLO CHIUSO (i _DK vanno in frigo)
@@ -51,6 +67,12 @@ param(
   [switch]$SoloSonda,
   [string]$SimboloSorgente = "U30USD",
   [string]$SimboloDK       = "U30USD_DK",
+  [string]$CartellaSorgente = "",
+  [string]$Maschera        = "",
+  [string]$GiorniSonda     = "2024.11.20;2025.06.10;2024.10.29;2024.10.31;2025.03.12;2025.03.25;2024.12.10;2025.01.14;2025.02.11",
+  [switch]$PulisciFiles,
+  [string]$WorkDir         = "",
+  [string]$ShaMq5          = "",
   [int]$TimeoutMin         = 240
 )
 $ErrorActionPreference = "Stop"
@@ -61,23 +83,37 @@ $INV = [Globalization.CultureInfo]::InvariantCulture
 
 $Script    = "ABTG_ImportaTickEsterno"
 $RefertoCsv= "ABTG_ImportTick_referto.csv"
+$GiorniCsv = "ABTG_ImportTick_giorni.csv"
+$SogliaDiff = 0.05
+$SogliaCop  = 80.0
 $Avvio     = Get-Date
-$Stamp     = $Avvio.ToString("yyyyMMdd_HHmm", $INV)
+$Stamp     = $Avvio.ToString("yyyyMMdd_HHmmss", $INV)
 $Dsk       = Join-Path $env:USERPROFILE "Desktop"
 if(-not (Test-Path -LiteralPath $Dsk)){ $Dsk = $env:USERPROFILE }
 $Work      = Join-Path $env:USERPROFILE "abtg_duka_import"
+if($WorkDir -ne ""){ $Work = $WorkDir }
 $TickSrc   = Join-Path $env:USERPROFILE "dukascopy_lavoro\tick"
+if($CartellaSorgente -ne ""){ $TickSrc = $CartellaSorgente }
+$MascheraCsv = $SimboloDK + "_ticks_*.csv"
+if($Maschera -ne ""){ $MascheraCsv = $Maschera }
 $RawPin    = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 
-# I giorni campione della SONDA, DENTRO la tranche-sonda 2024-10-01 -> 2025-06-16.
-#  2 normali (allineamento base) + 4 nelle DUE settimane DST sfasate che
-#  cadono dentro la tranche (27/10-03/11/2024 e 09/03-30/03/2025). Le altre
-#  due finestre sfasate del par. 3b (ott-2025, mar-2026) sono FUORI dalla
-#  tranche-sonda: si misureranno sulla tranche storica, non qui. Tutti feriali.
-$GiorniSonda = "2024.11.20;2025.06.10;2024.10.29;2024.10.31;2025.03.12;2025.03.25"
+# I giorni campione della SONDA arrivano dal parametro -GiorniSonda (default: i 9 NOMINATI della F2:
+#  i 6 del 03/09 = 2 normali + 4 nelle DUE settimane DST sfasate dentro la tranche 2024-10-01 -> 2025-06-16,
+#  piu' i 3 invernali nuovi 2024.12.10, 2025.01.14, 2025.02.11). Tutti feriali.
+$ListaGiorni = @(($GiorniSonda -split ';') | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
 
 $Problemi  = New-Object System.Collections.ArrayList
 $Rilievi   = New-Object System.Collections.ArrayList
+$PerNome   = New-Object System.Collections.ArrayList     # una riga per giorno NOMINATO: giorno|stato|mediana|copertura
+$PerNomeOk = $false
+$PerNomeNote = "NON VALUTATO (la corsa non e' arrivata al file per giorno)"
+$AltroSimbolo = 0
+$filesDir  = ""
+$DataFolder = ""      # nasce QUI: la RACCOLTA lo usa anche quando il terminale non e' stato trovato (v1: Join-Path su $null, classe 125)
+$RefertoWork = ""
+$GiorniWork  = ""
+$Copiati   = New-Object System.Collections.ArrayList     # i CSV copiati in MQL5\Files da QUESTA corsa (e solo quelli: -PulisciFiles)
 $Fatale    = ""
 $Terminale = "n/d"
 $Compilato = "NON TENTATA"
@@ -115,6 +151,59 @@ function Battito-Basi([string]$dataFolder){
   return $tot
 }
 
+# La condizione (1) della F2, PER NOME. Una riga per ciascun giorno nominato, letta nel file per giorno dell'importer
+# (che porta il SIMBOLO su ogni riga). Stati: DENTRO | FUORI (misurato ma non dentro) | NON_CONFRONTABILE | ASSENTE | RIPETUTO |
+# NON_VALIDO | SOGLIA_DIVERSA | DISCORDANZA. DENTRO solo se mediana <= 0.05 E copertura >= 80 (copertura sotto 80 e' fuori anche
+# con la mediana bassa), soglie della riga = soglie congelate, e il PassaImportatore della riga concorda coi numeri.
+# Il verdetto "OK: CANCELLO PASSATO" e il conteggio "9/9" NON entrano: un giorno saltato in silenzio dall'importer qui risulta ASSENTE.
+function Valuta-GiorniPerNome($righe, [string]$simbolo, $giorni){
+  $res = New-Object System.Collections.ArrayList
+  foreach($g in $giorni){
+    $r = @($righe | Where-Object { ("" + $_.Giorno) -eq $g -and ("" + $_.Simbolo) -eq $simbolo })
+    $stato = ""; $med = "-"; $cop = "-"
+    if($r.Count -eq 0){ $stato = "ASSENTE" }
+    elseif($r.Count -gt 1){ $stato = "RIPETUTO" }
+    else {
+      $x = $r[0]
+      $med = "" + $x.MedianaDiffPct; $cop = "" + $x.CoperturaPct
+      if(("" + $x.Esito).Trim() -ne "MISURATO"){ $stato = ("" + $x.Esito).Trim(); if($stato -eq ""){ $stato = "ESITO_VUOTO" } }
+      else {
+        $d = 0.0; $c = 0.0; $sd = 0.0; $sc = 0.0
+        $st = [Globalization.NumberStyles]::Float
+        $okn = ([double]::TryParse(("" + $x.MedianaDiffPct), $st, $INV, [ref]$d) -and [double]::TryParse(("" + $x.CoperturaPct), $st, $INV, [ref]$c) -and
+                [double]::TryParse(("" + $x.SogliaDiffPct), $st, $INV, [ref]$sd) -and [double]::TryParse(("" + $x.SogliaCoperturaPct), $st, $INV, [ref]$sc))
+        if(-not $okn){ $stato = "NON_VALIDO" }
+        elseif($sd -ne $SogliaDiff -or $sc -ne $SogliaCop){ $stato = "SOGLIA_DIVERSA" }
+        else {
+          $dentro = ($d -le $SogliaDiff -and $c -ge $SogliaCop)
+          $imp = (("" + $x.PassaImportatore) -eq "SI")
+          if($dentro -ne $imp){ $stato = "DISCORDANZA" }
+          elseif($dentro){ $stato = "DENTRO" }
+          else { $stato = "FUORI" }
+        }
+      }
+    }
+    [void]$res.Add($g + "|" + $stato + "|" + $med + "|" + $cop)
+  }
+  return $res
+}
+
+# -PulisciFiles: toglie da MQL5\Files SOLO i CSV che QUESTA corsa ha copiato (nomi registrati in $Copiati) E che combaciano con la maschera.
+# Mai il referto, mai file di altri simboli, mai un nome che la corsa non ha copiato.
+function Pulisci-Copiati(){
+  $n = 0
+  if(-not $PulisciFiles){ return "non richiesta" }
+  if($filesDir -eq "" -or $Copiati.Count -eq 0){ return "nessun CSV copiato da questa corsa: niente da togliere" }
+  foreach($nome in $Copiati){
+    if($nome -like $MascheraCsv){
+      $pp = Join-Path $filesDir $nome
+      Remove-Item -LiteralPath $pp -Force -ErrorAction SilentlyContinue
+      if(-not (Test-Path -LiteralPath $pp)){ $n++ }
+    }
+  }
+  return ("rimossi " + $n + " di " + $Copiati.Count + " CSV copiati da questa corsa")
+}
+
 try{
   Titolo ("DUKA IMPORT + SONDA -- " + $SimboloSorgente + " -> " + $SimboloDK + " -- modo " + $Modo)
 
@@ -136,7 +225,10 @@ try{
   Dico ("modo ........ " + $Modo)
   Dico ("simboli ..... " + $SimboloSorgente + " (nativo BCM) -> " + $SimboloDK + " (custom, tick Dukascopy)")
   Dico ("sonda ....... mediana<=0.05%, copertura>=80%, discriminante DST; verdetto par.4a")
-  Dico ("giorni sonda: " + $GiorniSonda)
+  Dico ("giorni sonda: " + ($ListaGiorni -join ";") + "  (" + $ListaGiorni.Count + ", NOMINATI: ciascuno deve essere DENTRO per nome)")
+  Dico ("sorgente CSV: " + $TickSrc + "   maschera: " + $MascheraCsv)
+  if($ListaGiorni.Count -eq 0){ throw "-GiorniSonda vuoto: nessun giorno da misurare." }
+  if($MascheraCsv -notlike ($SimboloDK + "_ticks_*")){ throw ("MASCHERA '" + $MascheraCsv + "' non comincia con '" + $SimboloDK + "_ticks_': il nome del CSV deve portare il simbolo, e' l'unica cosa che impedisce a un negativo di sovrascrivere un CSV buono.") }
 
   Titolo "1. TERMINALE BCM + CARTELLA DATI (stesso selettore di scarica_storico / CRT_TICK_G)"
   $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
@@ -174,10 +266,20 @@ if(-not $cand){
 
   Titolo "2. SCRIPT AL PIN + COMPILAZIONE (metaeditor64 diretto, lezione 22/08)"
   New-Item -ItemType Directory -Force -Path $Work | Out-Null
+  # i file di Work portano il SIMBOLO e si cancellano ADESSO: una corsa che muore prima di scriverli non puo' spacciare quelli di un'altra
+  $RefertoWork = Join-Path $Work ("ABTG_ImportTick_referto_" + $SimboloDK + ".csv")
+  $GiorniWork  = Join-Path $Work ("ABTG_ImportTick_giorni_" + $SimboloDK + ".csv")
+  Remove-Item -LiteralPath $RefertoWork -Force -ErrorAction SilentlyContinue
+  Remove-Item -LiteralPath $GiorniWork -Force -ErrorAction SilentlyContinue
   $dstScr = Join-Path $DataFolder "MQL5\Scripts"
   New-Item -ItemType Directory -Force -Path $dstScr | Out-Null
   $mq5 = Join-Path $dstScr ($Script + ".mq5")
-  Scarica ($RawPin + "/mql5/Scripts/" + $Script + ".mq5") $mq5 "IMP-TICK-v0-BOZZA"
+  Scarica ($RawPin + "/mql5/Scripts/" + $Script + ".mq5") $mq5 "IMP-TICK-v1-GIORNI"
+  if($ShaMq5 -ne ""){
+    $shaMq5Letto = (Get-FileHash -LiteralPath $mq5 -Algorithm SHA256).Hash
+    if($shaMq5Letto -ine $ShaMq5){ throw ("IMPRONTA DIVERSA dello script MQL5 scaricato: letta " + $shaMq5Letto + ", attesa " + $ShaMq5 + ". Non compilo niente.") }
+    Dico ("script MQL5 al pin, impronta OK: " + $shaMq5Letto.Substring(0,8)) "Green"
+  }
   $ex5 = Join-Path $dstScr ($Script + ".ex5")
   Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
   $tc0 = Get-Date
@@ -203,11 +305,18 @@ if(-not $cand){
     if(-not (Test-Path -LiteralPath $TickSrc)){
       throw ("CSV NON TROVATI: manca la cartella " + $TickSrc + ". Prima va fatta la corsa DUKA (RIGA_DUKA_A): scarica i tick e produce i CSV mensili.")
     }
-    $csvSrc = @(Get-ChildItem -LiteralPath $TickSrc -Filter "U30USD_DK_ticks_*.csv" -ErrorAction SilentlyContinue | Sort-Object Name)
+    $csvSrc = @(Get-ChildItem -LiteralPath $TickSrc -Filter $MascheraCsv -ErrorAction SilentlyContinue | Sort-Object Name)
     if($csvSrc.Count -eq 0){
-      throw ("ZERO CSV in " + $TickSrc + " (maschera U30USD_DK_ticks_*.csv). La corsa DUKA non ha ancora prodotto mesi: import impossibile.")
+      throw ("ZERO CSV in " + $TickSrc + " (maschera " + $MascheraCsv + "). La corsa DUKA non ha ancora prodotto mesi: import impossibile.")
     }
-    foreach($f in $csvSrc){ Copy-Item -LiteralPath $f.FullName -Destination $filesDir -Force }
+    # GUARDIA "chi LEGGE": l'importer legge da MQL5\Files TUTTO cio' che combacia con la maschera, non solo quello che copio io.
+    # Un file che combacia e NON e' nella sorgente verrebbe importato in silenzio: ci si ferma.
+    $nomiSrc = @($csvSrc | ForEach-Object { $_.Name })
+    $estranei = @(Get-ChildItem -LiteralPath $filesDir -Filter $MascheraCsv -ErrorAction SilentlyContinue | Where-Object { $nomiSrc -notcontains $_.Name } | ForEach-Object { $_.Name })
+    if($estranei.Count -gt 0){
+      throw ("FILE ESTRANEI in MQL5\Files che combaciano con la maschera " + $MascheraCsv + " e NON stanno in " + $TickSrc + ": " + ($estranei -join ", ") + ". L'importer li leggerebbe. Non li cancello io: tolgili a mano e rilancia.")
+    }
+    foreach($f in $csvSrc){ Copy-Item -LiteralPath $f.FullName -Destination $filesDir -Force; [void]$Copiati.Add($f.Name) }
     $CsvCopiati = $csvSrc.Count
     $primo = $csvSrc[0].Name; $ultimo = $csvSrc[$csvSrc.Count-1].Name
     Dico ("copiati " + $CsvCopiati + " CSV mensili in MQL5\Files (" + $primo + " ... " + $ultimo + ")") "Green"
@@ -222,7 +331,7 @@ if(-not $cand){
   @"
 InpSimboloSorgente=$SimboloSorgente
 InpSimboloNuovo=$SimboloDK
-InpMascheraCsv=U30USD_DK_ticks_*.csv
+InpMascheraCsv=$MascheraCsv
 InpCancellaEsistente=$cancellaVal
 InpBloccoTick=100000
 InpSoloSonda=$soloSondaVal
@@ -234,6 +343,8 @@ InpSogliaCopertura=80.0
 
   if($SoloControllo){
     Dico "CONTROLLO: script compilato, CSV pronti, preset scritto. NON apro MT5. La corsa vera e' la riga senza -SoloControllo." "Green"
+    $pul = Pulisci-Copiati
+    Dico ("pulizia MQL5\Files: " + $pul) "DarkGray"
     $Verdetto = "CONTROLLO OK (nessun import, nessuna sonda)"
     $EsitoSonda = "-"
     exit 0
@@ -242,7 +353,9 @@ InpSogliaCopertura=80.0
   Titolo "5. LANCIO MT5 (startup script, MT5 era CHIUSO) -- timeout $TimeoutMin min"
   # referto CANCELLATO prima e preteso FRESCO dopo (checklist 23)
   $RefPath = Join-Path $filesDir $RefertoCsv
+  $GiorniPath = Join-Path $filesDir $GiorniCsv
   Remove-Item -LiteralPath $RefPath -Force -ErrorAction SilentlyContinue
+  Remove-Item -LiteralPath $GiorniPath -Force -ErrorAction SilentlyContinue
   $t0 = Get-Date
 
   $Ini = Join-Path $env:TEMP "abtg_duka_import.ini"
@@ -332,7 +445,7 @@ Period=H1
     [void]$Problemi.Add("Il referto " + $RefertoCsv + " NON e' fresco (o assente): la corsa non e' arrivata a scriverlo. Referto PARZIALE.")
     $Verdetto = "SONDA NON MISURABILE (referto non fresco)"
   }else{
-    Copy-Item -LiteralPath $RefPath -Destination (Join-Path $Work $RefertoCsv) -Force -ErrorAction SilentlyContinue
+    Copy-Item -LiteralPath $RefPath -Destination $RefertoWork -Force -ErrorAction SilentlyContinue
     $righe = @()
     try{ $righe = @(Import-Csv -LiteralPath $RefPath) }catch{ $righe = @() }
     if($righe.Count -eq 0){
@@ -347,6 +460,33 @@ Period=H1
       if($ult.PSObject.Properties.Name -contains "TickScritti"){ Dico ("tick scritti ... " + $ult.TickScritti) "Gray" }
     }
   }
+
+  # --- LA CONDIZIONE (1) DELLA F2, PER NOME (classe 1104): dal file per giorno, non dal verdetto ---
+  Titolo ("6b. I " + $ListaGiorni.Count + " GIORNI NOMINATI, PER NOME, dal file per giorno col simbolo " + $SimboloDK)
+  $gFresco = $false
+  if(Test-Path -LiteralPath $GiorniPath){ $gFresco = ((Get-Item -LiteralPath $GiorniPath).LastWriteTime -ge $t0) }
+  if(-not $gFresco){
+    $PerNomeNote = "NON VALUTABILE: file per giorno " + $GiorniCsv + " assente o non fresco (l'importer in uso non e' IMP-TICK-v1-GIORNI, o la corsa non e' arrivata alla sonda)"
+    [void]$Problemi.Add($PerNomeNote)
+    Dico $PerNomeNote "Yellow"
+  }else{
+    Copy-Item -LiteralPath $GiorniPath -Destination $GiorniWork -Force -ErrorAction SilentlyContinue
+    $gr = @()
+    try{ $gr = @(Import-Csv -LiteralPath $GiorniPath) }catch{ $gr = @() }
+    if($gr.Count -eq 0){
+      $PerNomeNote = "NON VALUTABILE: il file per giorno e' vuoto o illeggibile"
+      [void]$Problemi.Add($PerNomeNote)
+    }else{
+      $AltroSimbolo = @($gr | Where-Object { ("" + $_.Simbolo) -ne $SimboloDK }).Count
+      $PerNome = Valuta-GiorniPerNome $gr $SimboloDK $ListaGiorni
+      $nDentro = @($PerNome | Where-Object { $_ -like "*|DENTRO|*" }).Count
+      foreach($pn in $PerNome){ Dico ("   " + $pn.Replace("|", "   ")) $(if($pn -like "*|DENTRO|*"){ "Green" }else{ "Yellow" }) }
+      if($AltroSimbolo -gt 0){ [void]$Problemi.Add("ATTRIBUZIONE INCOERENTE: " + $AltroSimbolo + " righe del file per giorno hanno un simbolo diverso da " + $SimboloDK) }
+      $PerNomeOk = ($nDentro -eq $ListaGiorni.Count -and $AltroSimbolo -eq 0)
+      $PerNomeNote = ("" + $nDentro) + " su " + $ListaGiorni.Count + " giorni NOMINATI dentro per nome" + $(if($AltroSimbolo -gt 0){ "; ATTRIBUZIONE INCOERENTE (" + $AltroSimbolo + " righe di un altro simbolo)" }else{ "" })
+      Dico ("PER NOME: " + $PerNomeNote) $(if($PerNomeOk){ "Green" }else{ "Yellow" })
+    }
+  }
 }
 catch{
   $Fatale = ("" + $_.Exception.Message)
@@ -358,14 +498,14 @@ catch{
 #  RACCOLTA SUL DESKTOP + ZIP (regola righe di lancio, punto 2)
 # =====================================================================
 Titolo "RACCOLTA"
-$Cart = Join-Path $Dsk ("DUKA_IMPORT_SONDA_" + $Stamp)
+$Cart = Join-Path $Dsk ("DUKA_IMPORT_SONDA_" + $SimboloDK + "_" + $Stamp)
 New-Item -ItemType Directory -Force -Path $Cart | Out-Null
 
 # mappa verdetto -> codice d'uscita
 $Codice = 1
 $vU = $Verdetto.ToUpper()
 if($Fatale -ne ""){ $Codice = 1 }
-elseif($vU -like "*OK*CANCELLO PASSATO*" -or $vU -like "*OK: CANCELLO*"){ $Codice = 0 }
+elseif($vU -like "*OK*CANCELLO PASSATO*" -or $vU -like "*OK: CANCELLO*"){ if($PerNomeOk){ $Codice = 0 }else{ $Codice = 4 } }
 elseif($vU -like "*QUASI*"){ $Codice = 3 }
 elseif($vU -like "*NON MISURABILE*" -or $vU -like "*MANCANTE*"){ $Codice = 2 }
 elseif($vU -like "*CANCELLO CHIUSO*" -or $vU -like "*NON USARE*"){ $Codice = 1 }
@@ -380,10 +520,14 @@ $R = New-Object System.Collections.ArrayList
 [void]$R.Add("terminale: " + $Terminale)
 [void]$R.Add("compilazione: " + $Compilato)
 [void]$R.Add("CSV copiati in MQL5\Files: " + $CsvCopiati)
-[void]$R.Add("giorni sonda: " + $GiorniSonda)
+[void]$R.Add("giorni sonda (NOMINATI): " + ($ListaGiorni -join ";"))
+[void]$R.Add("sorgente CSV: " + $TickSrc + "   maschera: " + $MascheraCsv + "   simbolo: " + $SimboloDK)
 [void]$R.Add("")
 [void]$R.Add("ESITO SONDA: " + $EsitoSonda)
 [void]$R.Add("VERDETTO:    " + $Verdetto)
+[void]$R.Add("PER NOME:    " + $PerNomeNote + "   (il verdetto OK da solo NON basta: classe 1104)")
+foreach($pn in $PerNome){ [void]$R.Add("   " + $pn.Replace("|", "   ")) }
+[void]$R.Add("CODICE D USCITA: " + $Codice + "   (0 = verdetto OK e tutti i nominati dentro; 4 = verdetto OK ma non tutti dentro per nome)")
 [void]$R.Add("")
 [void]$R.Add("CRITERI CONGELATI (par. 4a): mediana |diff bid| <= 0.05%, copertura >= 80%.")
 [void]$R.Add("  - tutti i giorni dentro          -> OK: il custom U30USD_DK e' usabile")
@@ -415,14 +559,20 @@ Set-Content -LiteralPath $RefTxt -Value ($R -join "`r`n") -Encoding ASCII
 Write-Host ($R -join "`r`n")
 
 # copio referto CSV dello script + ultimi log + preset + eventuale log compilazione
-$srcRefCsv = Join-Path $Work $RefertoCsv
-if(Test-Path -LiteralPath $srcRefCsv){ Copy-Item -LiteralPath $srcRefCsv -Destination $Cart -Force }
+$srcRefCsv = $RefertoWork
+if($srcRefCsv -ne "" -and (Test-Path -LiteralPath $srcRefCsv)){ Copy-Item -LiteralPath $srcRefCsv -Destination $Cart -Force }
+if($GiorniWork -ne "" -and (Test-Path -LiteralPath $GiorniWork)){ Copy-Item -LiteralPath $GiorniWork -Destination $Cart -Force }
+$Pul = Pulisci-Copiati
+[void]$R.Add("PULIZIA MQL5\Files (-PulisciFiles): " + $Pul)
+Write-Host ("pulizia MQL5\Files: " + $Pul)
+Set-Content -LiteralPath $RefTxt -Value ($R -join "`r`n") -Encoding ASCII
 foreach($f in @("COMPILAZIONE_FALLITA.log")){
   $s = Join-Path $Work $f
   if(Test-Path -LiteralPath $s){ Copy-Item -LiteralPath $s -Destination $Cart -Force }
 }
-$logDir2 = Join-Path $DataFolder "MQL5\Logs"
-if(Test-Path -LiteralPath $logDir2){
+$logDir2 = ""
+if($DataFolder -ne ""){ $logDir2 = Join-Path $DataFolder "MQL5\Logs" }
+if($logDir2 -ne "" -and (Test-Path -LiteralPath $logDir2)){
   Get-ChildItem -LiteralPath $logDir2 -Filter "*.log" -ErrorAction SilentlyContinue |
     Sort-Object LastWriteTime -Descending | Select-Object -First 2 |
     ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $Cart -Force -ErrorAction SilentlyContinue }
@@ -430,12 +580,17 @@ if(Test-Path -LiteralPath $logDir2){
 
 $Zip = $Cart + ".zip"
 Remove-Item -LiteralPath $Zip -Force -ErrorAction SilentlyContinue
-try{ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $Zip -Force }catch{}
+try{ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $Zip -Force }catch{ Write-Host ("ZIP FALLITO: " + $_.Exception.Message) -ForegroundColor Red }
+$ZipPresenti = "(zip non creato)"
+if(Test-Path -LiteralPath $Zip){
+  try{ Add-Type -AssemblyName System.IO.Compression.FileSystem; $zz = [IO.Compression.ZipFile]::OpenRead((Convert-Path -LiteralPath $Zip)); $ZipPresenti = (@($zz.Entries | ForEach-Object { $_.Name }) -join ", "); $zz.Dispose() }catch{ $ZipPresenti = "(zip illeggibile)" }
+}
 
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $Zip) -ForegroundColor Green
-Write-Host "FILE ATTESI: REFERTO_DUKA_IMPORT_SONDA.txt + ABTG_ImportTick_referto.csv + ultimi 2 *.log" -ForegroundColor Gray
+Write-Host "FILE ATTESI: REFERTO_DUKA_IMPORT_SONDA.txt + ABTG_ImportTick_referto_<simbolo>.csv + ABTG_ImportTick_giorni_<simbolo>.csv + ultimi 2 *.log" -ForegroundColor Gray
+Write-Host ("FILE PRESENTI NELLO ZIP (letti dallo zip, non dal piano): " + $ZipPresenti) -ForegroundColor Gray
 
 # FRESCHEZZA senza metro che invecchia (checklist 110): l'atteso lo calcola
 # la riga stessa dal suo avvio, NON 'adesso'.

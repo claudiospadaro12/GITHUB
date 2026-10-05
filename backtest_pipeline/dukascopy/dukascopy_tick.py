@@ -86,6 +86,16 @@
 #  --senza-raccolta    non scrive su Desktop (cartella dukascopy_tick e zip
 #                      dello stesso nome ad ogni corsa: una seconda corsa
 #                      cancellerebbe la raccolta della prima).
+#  --verifica-cache    SOLA LETTURA: per ogni giorno e ora della finestra dice se la
+#                      cache ha il suo file (.bi5 decodificabile, anche vuoto: e' un'ora
+#                      senza tick; oppure .assente), se manca (BUCO) o se non si decodifica
+#                      (ILLEGGIBILE). Usa percorso_cache, cioe' il layout VERO. rc 0 = nessun
+#                      buco e nessun illeggibile, rc 3 altrimenti. Non scrive niente.
+#  --copia-cache-giorno DEST_LAVORO --giorni G1,G2 --simboli SIM [--cartella SRC_LAVORO]
+#                      copia SENZA RETE le 24 ore di ciascun giorno dalla cache di SRC (raw\) in DEST (raw\),
+#                      col layout VERO (percorso_cache). Serve al controllo negativo: la giornata
+#                      va convertita in una cartella SEPARATA. rc 3 se manca un'ora in SRC (non
+#                      si riscarica niente) o se DEST coincide con SRC.
 #  --confronta-giorni VECCHIA NUOVA --giorni G1,G2 [--csv-out FILE]
 #                      confronto BYTE PER BYTE delle righe dei giorni
 #                      nominati fra due cartelle di CSV (condizione (2) della
@@ -643,6 +653,118 @@ def confronta_giorni(vecchia, nuova, giorni):
     return righe
 
 
+def verifica_cache(cartella_raw, sym, da, a, nominati=()):
+    """SOLA LETTURA. Torna dict: giorni, slot, bi5, vuoti, assenti, doppi, buchi (lista 'AAAA.MM.GG HHh'), illeggibili (lista), per_giorno {giorno: (bi5, vuoti, assenti, buchi, illeggibili)}.
+    Stessa semantica di scarica_ora_con_cache in modo --solo-cache: un .bi5 vuoto e' un'ora senza tick (come lo conta quel codice), un .assente e' un 404."""
+    r = dict(giorni=0, slot=0, bi5=0, vuoti=0, assenti=0, doppi=0, buchi=[], illeggibili=[], per_giorno={})
+    for g in giorni(da, a):
+        k = g.strftime("%Y.%m.%d")
+        c = dict(bi5=0, vuoti=0, assenti=0, buchi=0, illeggibili=0)
+        for h in range(24):
+            _, f_ok, f_no = percorso_cache(cartella_raw, sym, g.replace(hour=h))
+            r["slot"] += 1
+            ha, hs = os.path.exists(f_ok), os.path.exists(f_no)
+            if ha and hs:
+                r["doppi"] += 1
+            if ha:
+                with open(f_ok, "rb") as fh:
+                    dati = fh.read()
+                if not decodificabile(dati):
+                    c["illeggibili"] += 1; r["illeggibili"].append("%s %02dh" % (k, h))
+                elif not dati:
+                    c["vuoti"] += 1
+                else:
+                    c["bi5"] += 1
+            elif hs:
+                c["assenti"] += 1
+            else:
+                c["buchi"] += 1; r["buchi"].append("%s %02dh" % (k, h))
+        r["giorni"] += 1
+        for x in ("bi5", "vuoti", "assenti"):
+            r[x] += c[x]
+        r["per_giorno"][k] = (c["bi5"], c["vuoti"], c["assenti"], c["buchi"], c["illeggibili"])
+    return r
+
+
+def verifica_cache_cmd(args):
+    if not args.simboli or not args.da or not args.a:
+        log("ERRORE: --verifica-cache vuole --simboli, --da e --a.")
+        return 2
+    lavoro = args.cartella or os.path.join(os.path.expanduser("~"), "dukascopy_lavoro")
+    raw = os.path.join(lavoro, "raw")
+    da = datetime.strptime(args.da, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    a = datetime.strptime(args.a, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    nominati = [g.strip() for g in args.giorni.split(",") if g.strip()]
+    rc = 0
+    log("=== VERIFICA CACHE (%s, sola lettura) ===" % VERSIONE)
+    for sym in [s.strip() for s in args.simboli.split(",") if s.strip()]:
+        if not os.path.isdir(os.path.join(raw, sym)):
+            log("%s: cartella %s ASSENTE" % (sym, os.path.join(raw, sym)))
+            rc = 3
+            continue
+        r = verifica_cache(raw, sym, da, a, nominati)
+        log("VERIFICA CACHE %s %s -> %s: giorni %d, slot %d, bi5 con tick %d, bi5 vuoti %d, assenti %d, doppi %d, BUCHI %d, ILLEGGIBILI %d"
+            % (sym, args.da, args.a, r["giorni"], r["slot"], r["bi5"], r["vuoti"], r["assenti"], r["doppi"], len(r["buchi"]), len(r["illeggibili"])))
+        for g in nominati:
+            x = r["per_giorno"].get(g)
+            log("   %s: %s" % (g, "FUORI dalla finestra o sabato" if x is None else "bi5 %d vuoti %d assenti %d BUCHI %d ILLEGGIBILI %d" % x))
+        for b in r["buchi"][:20]:
+            log("   BUCO: " + b)
+        for b in r["illeggibili"][:20]:
+            log("   ILLEGGIBILE: " + b)
+        if r["buchi"] or r["illeggibili"]:
+            rc = 3
+    log("VERIFICA CACHE: " + ("ESITO OK" if rc == 0 else "ESITO CON BUCHI O ILLEGGIBILI (la riconversione --solo-cache perderebbe quelle ore)"))
+    return rc
+
+
+def copia_cache_giorni(lavoro_src, lavoro_dst, sym, giorni_txt):
+    """Copia, senza rete, le 24 ore dei giorni nominati da <src>\\raw a <dst>\\raw. Torna (copiati, mancanti[lista 'AAAA.MM.GG HHh'])."""
+    if os.path.abspath(lavoro_src) == os.path.abspath(lavoro_dst):
+        raise ValueError("sorgente e destinazione coincidono")
+    for g in giorni_txt:
+        if not GIORNO_RE.match(g):
+            raise ValueError("giorno '%s' non e' AAAA.MM.GG" % g)
+    copiati, mancanti = 0, []
+    for g in giorni_txt:
+        dt = datetime.strptime(g, "%Y.%m.%d").replace(tzinfo=timezone.utc)
+        for h in range(24):
+            _, s_ok, s_no = percorso_cache(os.path.join(lavoro_src, "raw"), sym, dt.replace(hour=h))
+            d_dir, d_ok, d_no = percorso_cache(os.path.join(lavoro_dst, "raw"), sym, dt.replace(hour=h))
+            trovato = False
+            for (s, d) in ((s_ok, d_ok), (s_no, d_no)):
+                if os.path.exists(s):
+                    os.makedirs(d_dir, exist_ok=True)
+                    shutil.copyfile(s, d)
+                    copiati += 1
+                    trovato = True
+            if not trovato:
+                mancanti.append("%s %02dh" % (g, h))
+    return copiati, mancanti
+
+
+def copia_cache_cmd(args):
+    giorni_txt = [g.strip() for g in args.giorni.split(",") if g.strip()]
+    sim = [s.strip() for s in args.simboli.split(",") if s.strip()]
+    if not giorni_txt or len(sim) != 1:
+        log("ERRORE: --copia-cache-giorno vuole --giorni e UN solo --simboli.")
+        return 2
+    src = args.cartella or os.path.join(os.path.expanduser("~"), "dukascopy_lavoro")
+    try:
+        copiati, mancanti = copia_cache_giorni(src, args.copia_cache_giorno, sim[0], giorni_txt)
+    except ValueError as e:
+        log("ERRORE: %s" % e)
+        return 2
+    log("COPIA CACHE: %d file copiati da %s a %s (%s, giorni %s)" % (copiati, os.path.join(src, "raw"), os.path.join(args.copia_cache_giorno, "raw"), sim[0], ",".join(giorni_txt)))
+    for m in mancanti[:30]:
+        log("   MANCA in sorgente: " + m)
+    if mancanti:
+        log("COPIA CACHE: INCOMPLETA (%d ore mancanti nella sorgente: niente si riscarica qui)" % len(mancanti))
+        return 3
+    log("COPIA CACHE: COMPLETA")
+    return 0
+
+
 def confronta_cmd(args):
     giorni = [g.strip() for g in args.giorni.split(",") if g.strip()]
     if not giorni:
@@ -924,9 +1046,18 @@ def autotest():
 
     # 15. CORSA VERA offline (--solo-cache) su una cache SINTETICA: --dst fisso scrive UTC+1, --dst usa scrive UTC+0 d'inverno;
     #     --nome-uscita e --cartella separati NON toccano il CSV buono; --senza-raccolta non scrive nulla sul Desktop.
+    # il LAYOUT della cache, scritto in LETTERALE (non rifatto con la stessa funzione): mese di CALENDARIO, ottobre = 10; l'URL invece e' zero-based
+    d_, f_, n_ = percorso_cache(os.path.join("R", "raw"), "USA30IDXUSD", datetime(2025, 10, 3, 5, tzinfo=timezone.utc))
+    assert (d_, f_, n_) == (os.path.join("R", "raw", "USA30IDXUSD", "2025", "10", "03"), os.path.join("R", "raw", "USA30IDXUSD", "2025", "10", "03", "05h_ticks.bi5"),
+                            os.path.join("R", "raw", "USA30IDXUSD", "2025", "10", "03", "05h_ticks.bi5.assente")), "layout della cache"
+    assert url_ora("USA30IDXUSD", datetime(2025, 10, 3, 5, tzinfo=timezone.utc)).endswith("/USA30IDXUSD/2025/09/03/05h_ticks.bi5"), "l'URL e' zero-based"
     with tempfile.TemporaryDirectory() as td:
         casa = os.path.join(td, "casa")
         os.makedirs(casa)
+        cwd_vuota = os.path.join(td, "cwd")
+        os.makedirs(cwd_vuota)
+        cwd_prima = os.getcwd()
+        os.chdir(cwd_vuota)
         vecchi = {k: os.environ.get(k) for k in ("HOME", "USERPROFILE")}
         os.environ["HOME"] = casa; os.environ["USERPROFILE"] = casa
         try:
@@ -964,14 +1095,75 @@ def autotest():
             assert os.path.exists(csv_n) and not os.path.exists(os.path.join(neg, "tick", "U30USD_DK_ticks_2025-01.csv")), "nome uscita"
             assert open(csv_n).read().splitlines()[1].startswith("2025.01.15 10:00:00,250,"), "negativo = UTC puro"
             assert open(csv_f, "rb").read() == buono, "il CSV buono e' cambiato dopo il negativo"
-            assert not os.path.exists(os.path.join(casa, "Desktop")) and not os.path.exists(os.path.join(casa, "dukascopy_tick.zip")), "--senza-raccolta ha scritto sul Desktop"
+            assert os.listdir(cwd_vuota) == [] and not os.path.exists(os.path.join(casa, "Desktop")) and not os.path.exists(os.path.join(casa, "dukascopy_tick.zip")), \
+                "--senza-raccolta ha scritto sul Desktop o nella cartella corrente: %s" % os.listdir(cwd_vuota)
             # nome uscita non valido / con piu' simboli: rifiutato prima di scrivere
             assert corri(giorni_a + ["--nome-uscita", "a/b"]) == 2 and corri(["--simboli", "USA30IDXUSD,EURUSD", "--da", "2025-01-15", "--a", "2025-01-15", "--nome-uscita", "X"]) == 2
         finally:
+            os.chdir(cwd_prima)
             for k, v in vecchi.items():
                 if v is None: os.environ.pop(k, None)
                 else: os.environ[k] = v
     log("15. corsa offline su cache sintetica: fisso=UTC+1, usa=UTC+0 d'inverno, negativo separato (cartella+nome), CSV buono intatto, niente Desktop: OK")
+
+    # 16. --verifica-cache: una cache sintetica COMPLETA da' rc 0; con un BUCO e un .bi5 non decodificabile da' rc 3 e li nomina; un .bi5 vuoto e' un'ora senza tick (non e' un buco)
+    with tempfile.TemporaryDirectory() as td:
+        lavoro = os.path.join(td, "lavoro")
+        raw = os.path.join(lavoro, "raw")
+        g1 = datetime(2025, 1, 15, tzinfo=timezone.utc)
+        for h in range(24):
+            d, f, f_no = percorso_cache(raw, "USA30IDXUSD", g1.replace(hour=h))
+            os.makedirs(d, exist_ok=True)
+            if h == 10:
+                open(f, "wb").write(lzma.compress(RECORD.pack(250, 3294400, 3294150, 1.0, 1.0), format=lzma.FORMAT_ALONE))
+            elif h == 3:
+                open(f, "wb").close()                      # 200 di lunghezza zero: ora senza tick, NON un buco
+            else:
+                open(f_no, "wb").close()
+        r = verifica_cache(raw, "USA30IDXUSD", g1, g1)
+        assert (r["slot"], r["bi5"], r["vuoti"], r["assenti"], r["buchi"], r["illeggibili"]) == (24, 1, 1, 22, [], []), "cache completa: %s" % (r,)
+        base_a = ["--verifica-cache", "--simboli", "USA30IDXUSD", "--da", "2025-01-15", "--a", "2025-01-15", "--cartella", lavoro, "--giorni", "2025.01.15"]
+        assert corri(base_a) == 0, "verifica cache completa: rc"
+        _, f_buco, f_no_buco = percorso_cache(raw, "USA30IDXUSD", g1.replace(hour=7))
+        os.remove(f_no_buco)                                # il BUCO: ne' bi5 ne' .assente
+        d_, f_rot, _ = percorso_cache(raw, "USA30IDXUSD", g1.replace(hour=10))
+        open(f_rot, "wb").write(lzma.compress(RECORD.pack(250, 3294400, 3294150, 1.0, 1.0), format=lzma.FORMAT_ALONE)[:9])   # troncato: ILLEGGIBILE
+        r = verifica_cache(raw, "USA30IDXUSD", g1, g1)
+        assert r["buchi"] == ["2025.01.15 07h"] and r["illeggibili"] == ["2025.01.15 10h"], "buco/illeggibile: %s" % (r,)
+        assert corri(base_a) == 3, "verifica cache con buchi: rc"
+        # una cartella simbolo assente: rc 3, non eccezione
+        assert corri(["--verifica-cache", "--simboli", "EURUSD", "--da", "2025-01-15", "--a", "2025-01-15", "--cartella", lavoro]) == 3, "simbolo assente"
+        # sola lettura: nessun file nuovo nella cache
+        n_prima = sum(len(f) for _, _, f in os.walk(raw))
+        corri(base_a)
+        assert sum(len(f) for _, _, f in os.walk(raw)) == n_prima, "--verifica-cache ha scritto"
+    log("16. --verifica-cache: completa rc 0, buco + illeggibile rc 3 e nominati, vuoto non e' buco, simbolo assente rc 3, nessuna scrittura: OK")
+
+    # 17. --copia-cache-giorno: copia le 24 ore (bi5 e .assente) col layout vero in una cartella SEPARATA; rc 3 se manca un'ora; mai src == dst
+    with tempfile.TemporaryDirectory() as td:
+        src, dst = os.path.join(td, "src"), os.path.join(td, "dst")
+        g1 = datetime(2025, 3, 12, tzinfo=timezone.utc)
+        for h in range(24):
+            d, f, f_no = percorso_cache(os.path.join(src, "raw"), "USA30IDXUSD", g1.replace(hour=h))
+            os.makedirs(d, exist_ok=True)
+            if h in (10, 11):
+                open(f, "wb").write(b"B%d" % h)
+            else:
+                open(f_no, "wb").close()
+        a_ = ["--copia-cache-giorno", dst, "--giorni", "2025.03.12", "--simboli", "USA30IDXUSD", "--cartella", src]
+        assert corri(a_) == 0, "copia completa"
+        for h in range(24):
+            _, f2, f2_no = percorso_cache(os.path.join(dst, "raw"), "USA30IDXUSD", g1.replace(hour=h))
+            assert os.path.exists(f2 if h in (10, 11) else f2_no), "copia: manca l'ora %d" % h
+        assert open(percorso_cache(os.path.join(dst, "raw"), "USA30IDXUSD", g1.replace(hour=10))[1], "rb").read() == b"B10", "contenuto copiato"
+        n_dst = sum(len(f) for _, _, f in os.walk(dst))
+        assert n_dst == 24, "attesi 24 file nella destinazione, %d" % n_dst
+        assert corri(["--copia-cache-giorno", src, "--giorni", "2025.03.12", "--simboli", "USA30IDXUSD", "--cartella", src]) == 2, "src == dst rifiutato"
+        _, f_x, f_x_no = percorso_cache(os.path.join(src, "raw"), "USA30IDXUSD", g1.replace(hour=4))
+        os.remove(f_x_no)
+        assert corri(a_) == 3, "ora mancante in sorgente: rc 3"
+        assert corri(["--copia-cache-giorno", dst, "--giorni", "2025-03-12", "--simboli", "USA30IDXUSD", "--cartella", src]) == 2, "giorno malformato"
+    log("17. --copia-cache-giorno: 24 file col layout vero in cartella separata, ora mancante rc 3, src==dst rifiutato, giorno malformato rifiutato: OK")
 
     log("")
     log("AUTOTEST: TUTTO OK.")
@@ -1008,6 +1200,8 @@ def corri(argv):
     ap.add_argument("--confronta-giorni", nargs=2, metavar=("VECCHIA", "NUOVA"))
     ap.add_argument("--giorni", default="")
     ap.add_argument("--csv-out", default="")
+    ap.add_argument("--verifica-cache", action="store_true")
+    ap.add_argument("--copia-cache-giorno", default="")
     ap.add_argument("--salta-controllo", action="store_true")
     args = ap.parse_args(argv)
 
@@ -1015,6 +1209,10 @@ def corri(argv):
         return autotest()
     if args.confronta_giorni:
         return confronta_cmd(args)
+    if args.verifica_cache:
+        return verifica_cache_cmd(args)
+    if args.copia_cache_giorno:
+        return copia_cache_cmd(args)
 
     # PASSO 0: la finestra e' DICHIARATA, mai implicita (il muro del
     # ritmo misurato il 18/08 vieta i "tutto dal 2012" per sbaglio).

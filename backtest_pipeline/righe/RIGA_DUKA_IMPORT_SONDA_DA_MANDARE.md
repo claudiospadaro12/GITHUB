@@ -1,5 +1,11 @@
 # 🎫 DUKASCOPY IMPORT + SONDA — U30USD_DK dentro MT5 + cancello — DA MANDARE
 
+> 🔴 **05/10/2026 -- QUESTA PAGINA E' LA v1 (6 giorni cablati, 03/09).** Lo script `RIGA_DUKA_IMPORT_SONDA.ps1` e' stato esteso a **v2** (marcatore
+> `MARCATORE_RIGA_DUKA_IMPORT_SONDA_v2`: cartella sorgente / maschera / giorni sonda come parametri, condizione (1) della F2 **per nome**, file per giorno col
+> simbolo, `-PulisciFiles`) per il **P1 del piano Dow Dukascopy** (`report/PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md`). I blocchi qui sotto cercano il marcatore **v1**
+> con un pin FISSO al commit del 03/09: restano validi solo a quel pin. **Non** cambiare il pin senza riscrivere pagina e marcatore: la v2 si lancia solo dalla riga
+> P1 (`RIGA_DUKA_P1_OROLOGIO.ps1`) o con i suoi parametri nuovi, dopo i cancelli e la firma F2.
+
 **Che cos'e'.** Il **PASSO 4-5** di `DUKASCOPY_PASSO0.md`: prende i **CSV
 mensili** prodotti dalla corsa DUKA (`U30USD_DK_ticks_AAAA-MM.csv` in
 `%USERPROFILE%\dukascopy_lavoro\tick`), li **importa in MT5** come **custom
