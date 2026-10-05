@@ -62,10 +62,12 @@ ATTESA = {"220": ((138, 146), (186, 194), ("1.25", "1.55"), ("1.30", "1.40"), (6
           "1320": ((152, 160), (197, 203), ("1.10", "1.35"), ("1.35", "1.60"), (6, 9), (4, 7))}
 
 def D(x):
+    """Decimal, o None se il testo non e' un numero FINITO (come [decimal]::TryParse della riga: 'nan' e 'inf' non si leggono)."""
     try:
-        return Decimal(str(x).strip())
+        d = Decimal(str(x).strip())
     except InvalidOperation:
         return None
+    return d if d.is_finite() else None
 
 def entro(col, va, vb):
     """True se va e vb (Decimal) stanno dentro la TOLLERANZA per la colonna col (bordo DENTRO). vb = riferimento (il numero noto in G0; la gemella col magic piu basso in G1)."""
@@ -101,28 +103,30 @@ def cancello_e(base):
         rows = sorted(rows, key=lambda r: D(r["InpMagic"]) or Decimal(0))
         if [r["InpMagic"].strip() for r in rows] != ["798711", "798721"]:
             return "NON VERIFICABILE", [], [], "%s: asse InpMagic %s invece di 798711/798721" % (fase, [r["InpMagic"] for r in rows]), []
-        for r in rows:
-            vals = {c: D(r[c]) for c in COL_GATE + COL_INFO}
-            if any(v is None for v in vals.values()):
-                return "NON VERIFICABILE", [], [], "%s magic %s: colonna non numerica" % (fase, r["InpMagic"]), []
         if USA_G0:
             att = G0_ATTESO[fase]
             for r in rows:
                 for col in COL_GATE:
                     v = D(r[col]); e = Decimal(att[col])
-                    if not entro(col, v, e):
+                    if v is None:
+                        dif.append("%s magic %s %s non numerico" % (fase, r["InpMagic"], col))      # come la riga: una colonna illeggibile e' una differenza, non una cella da saltare
+                    elif not entro(col, v, e):
                         dif.append("%s magic %s %s scarto %s" % (fase, r["InpMagic"], col, abs(v - e)))
                     elif v != e:
                         res.append("%s magic %s %s scarto %s" % (fase, r["InpMagic"], col, abs(v - e)))
                 for col in COL_INFO:
                     v = D(r[col]); e = Decimal(att[col])
-                    if v != e:
+                    if v is None:
+                        dif.append("%s magic %s %s non numerico" % (fase, r["InpMagic"], col))
+                    elif v != e:
                         res.append("%s magic %s %s scarto %s (colonna senza tolleranza congelata: si elenca, non blocca)" % (fase, r["InpMagic"], col, abs(v - e)))
         if USA_G1:
             rif = rows[0]
             for col in COL_GATE:
                 v0 = D(rif[col]); v1 = D(rows[1][col])
-                if not entro(col, v1, v0):
+                if v0 is None or v1 is None:
+                    gem.append("%s gemelle %s non numerico" % (fase, col))
+                elif not entro(col, v1, v0):
                     gem.append("%s gemelle %s scarto %s" % (fase, col, abs(v1 - v0)))
                 elif v1 != v0:
                     res.append("%s gemelle %s scarto %s" % (fase, col, abs(v1 - v0)))
@@ -462,6 +466,9 @@ def _casi_cancello():
         ("gamba IS: PF +0,00005 (bordo): PASS", I(**{"Profit__Factor": "1.25925"}), "PASS"),
         ("gamba IS: PF +0,00006: G0 e G1", I(**{"Profit__Factor": "1.25926"}), "G0+G1"),
         ("Recovery Factor +0,01 su una gemella: PASS (colonna senza tolleranza congelata, derivata dal Profit e dal DD: si elenca, non blocca)", O(**{"Recovery__Factor": "4.43850"}), "PASS"),
+        ("Profit non numerico su una gemella: G0 e G1 (una colonna illeggibile e' una differenza)", O(Profit="abc"), "G0+G1"),
+        ("Profit nan su una gemella: G0 e G1 (un nan non e' un numero finito)", O(Profit="nan"), "G0+G1"),
+        ("Recovery Factor non numerico su una gemella: solo G0 (G1 non guarda il RF)", O(**{"Recovery__Factor": "abc"}), "G0"),
         ("banco con deposito sbagliato (100000 invece di 10000), gemelle uguali: solo G0", _unisci(
             _p("OOS", 0, Profit="29740.90", Trades="199"), _p("OOS", 1, Profit="29740.90", Trades="199"), _p("IS", 0, Profit="12499.40", Trades="157"), _p("IS", 1, Profit="12499.40", Trades="157")), "G0"),
         ("EA o dati diversi: IS Trades 150 e OOS 190 su entrambe le gemelle, uguali fra loro: solo G0", _unisci(
