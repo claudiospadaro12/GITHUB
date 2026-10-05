@@ -2039,6 +2039,54 @@ def autotest():
     # con atr ~ costante, la sinusoide oscilla attorno alla EMA: tocchi regolari, incroci regolari
     ces = comportamento_ema(o_s, h_s, l_s, c_s, sep=5)
     _check(ces["n"] > 5000 and ces["incroci_per_100"] > 0.5, "sinusoide: incroci regolari (%.2f per 100 barre)" % ces["incroci_per_100"])
+    # oracolo indipendente (python puro, ricodificato dalla descrizione del piano) contro la funzione vettoriale
+    def oracolo(o_, h_, l_, c_, n_, warm_, sep_, hor_):
+        N_ = len(c_); al = 2.0 / (n_ + 1.0)
+        E_ = []; e_ = c_[0]
+        for v in c_:
+            e_ = e_ + al * (v - e_); E_.append(e_)
+        tr_ = []
+        for i in range(N_):
+            pc_ = o_[0] if i == 0 else c_[i - 1]
+            tr_.append(max(h_[i] - l_[i], abs(h_[i] - pc_), abs(l_[i] - pc_)))
+        A_ = [None] * N_
+        for i in range(ATR_N - 1, N_):
+            A_[i] = sum(tr_[i - ATR_N + 1:i + 1]) / ATR_N
+        B_ = P_ = X_ = 0
+        j = warm_ + sep_
+        while j < N_ - hor_ - 1:
+            if not (A_[j] and A_[j] > 0 and l_[j] <= E_[j] <= h_[j]):
+                j += 1; continue
+            sd = [(1 if c_[q] - E_[q] > 0 else (-1 if c_[q] - E_[q] < 0 else 0)) for q in range(j - sep_, j)]
+            if len(set(sd)) != 1 or sd[0] == 0:
+                j += 1; continue
+            far = False
+            for q in range(j - sep_, j):
+                if A_[q] and abs(c_[q] - E_[q]) / A_[q] >= 1.0:
+                    far = True
+            if not far:
+                j += 1; continue
+            s0 = sd[0]; esito = 0
+            for q in range(j + 1, j + hor_ + 1):
+                away = s0 * ((h_[q] if s0 > 0 else l_[q]) - E_[q]) / A_[j]
+                beyond = -s0 * (c_[q] - E_[q]) / A_[j]
+                if away >= 1.0 and not (beyond >= 0.5):
+                    esito = 1; break
+                if beyond >= 0.5:
+                    esito = 2; break
+            if esito == 1: B_ += 1
+            elif esito == 2: P_ += 1
+            else: X_ += 1
+            j += hor_
+        return B_, P_, X_
+    o_, h_, l_, c_ = rw_barre(3000, seme=17)
+    cm = comportamento_ema(o_, h_, l_, c_, n=20, warm=50, sep=5, hor=10)
+    orc = oracolo(o_.tolist(), h_.tolist(), l_.tolist(), c_.tolist(), 20, 50, 5, 10)
+    _check((cm["B"], cm["P"], cm["AMB"]) == orc and cm["B"] + cm["P"] > 10, "EMA: eventi (rimbalzo/rottura/ambiguo) = oracolo python puro %s" % (orc,))
+    _check(abs(cm["rimbalzo_quota"] - orc[0] / (orc[0] + orc[1])) < 1e-12, "EMA: quota di rimbalzo = B/(B+P) dell'oracolo")
+    # percentili
+    st_ = stat(np.arange(1, 101))
+    _check(abs(st_["p50"] - 50.5) < 1e-9 and abs(st_["p10"] - 10.9) < 1e-9 and abs(st_["p90"] - 90.1) < 1e-9 and st_["n"] == 100, "stat(): percentili di 1..100 = 10,9 / 50,5 / 90,1")
     # --- correlazioni
     log("12. correlazioni")
     r1 = np.random.default_rng(1).standard_normal(500)
