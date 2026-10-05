@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_DUKA_P0_v2
+#  MARCATORE_RIGA_DUKA_P0_v3
 #  RIGA_DUKA_P0_CENSIMENTO.ps1 -- P0 di report/PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md
 #  (par. 3.1): CENSIMENTO DI SOLA LETTURA del PC di backtest prima di
 #  toccare il Dow Dukascopy. NESSUN download, NESSUN MT5 aperto, NESSUN
@@ -302,19 +302,29 @@ try{
     $S.tick_esiste = (Test-Path -LiteralPath $tick)
     Dico ('cartella ' + $tick + '  esiste: ' + $S.tick_esiste)
     [void]$CsvTick.Add('Posto,Nome,Byte,UltimaScrittura,Righe,Primo,Ultimo')
-    $S.csv_n = 0; $S.csv_righe = [long]0; $S.csv_byte = [long]0
+    $S.csv_n = 0; $S.csv_righe = [long]0; $S.csv_byte = [long]0; $S.csv_nonlette = 0
     if($S.tick_esiste){
       Dico '(conto le righe di ogni CSV: sono centinaia di MB, puo volerci qualche minuto; non scrive niente)' 'DarkGray'
       $fs = @(Get-ChildItem -LiteralPath $tick -Filter 'U30USD_DK_ticks_*.csv' -File -ErrorAction SilentlyContinue | Sort-Object Name)
       Dico ('CSV in tick\ : ' + $fs.Count)
       foreach($f in $fs){
-        $i = Leggi-CsvTick $f.FullName
-        $S.csv_n++; $S.csv_righe += $i.Righe; $S.csv_byte += [long]$f.Length
+        $S.csv_n++; $S.csv_byte += [long]$f.Length
         $dt = $f.LastWriteTime.ToString('yyyy-MM-dd HH:mm', $INV)
+        # un CSV che non si apre (bloccato da un altro processo) NON ferma il conteggio degli altri: il file si conta, le sue righe NO (e la sintesi dice PARZIALE)
+        $i = $null; $err = ''
+        try{ $i = Leggi-CsvTick $f.FullName } catch { $err = Pulisci ('' + $_.Exception.Message) }
+        if($null -eq $i){
+          $S.csv_nonlette++
+          [void]$Problemi.Add('csv tick, ' + $f.Name + ': righe NON MISURATE (file non apribile): ' + $err)
+          Dico ('   ' + $f.Name + '  ' + $f.Length + ' byte (' + (Mb ([double]$f.Length)) + ' MB)  scritto ' + $dt + '  righe NON MISURATE (file non apribile: ' + $err + ')') 'Yellow'
+          [void]$CsvTick.Add('tick,' + $f.Name + ',' + $f.Length + ',' + $dt + ',NON_MISURATO,-,-')
+          continue
+        }
+        $S.csv_righe += $i.Righe
         Dico ('   ' + $f.Name + '  ' + $f.Length + ' byte (' + (Mb ([double]$f.Length)) + ' MB)  scritto ' + $dt + '  righe ' + $i.Righe + '  primo ' + $i.Primo + '  ultimo ' + $i.Ultimo)
         [void]$CsvTick.Add('tick,' + $f.Name + ',' + $f.Length + ',' + $dt + ',' + $i.Righe + ',' + $i.Primo + ',' + $i.Ultimo)
       }
-      Dico ('totale tick\ : ' + $S.csv_n + ' file, ' + $S.csv_righe + ' righe, ' + $S.csv_byte + ' byte (' + (Gb ([double]$S.csv_byte)) + ' GB)  -- il backup dei CSV del 03/09 per la F2 punto 2 pesa questo')
+      Dico ('totale tick\ : ' + $S.csv_n + ' file, ' + $S.csv_righe + ' righe' + $(if($S.csv_nonlette -gt 0){ ' (SENZA le righe di ' + $S.csv_nonlette + ' file non apribili)' }else{ '' }) + ', ' + $S.csv_byte + ' byte (' + (Gb ([double]$S.csv_byte)) + ' GB)  -- il backup dei CSV del 03/09 per la F2 punto 2 pesa questo')
       $altriNomi = @(Get-ChildItem -LiteralPath $tick -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike 'U30USD_DK_ticks_*.csv' } | ForEach-Object { $_.Name })
       if($altriNomi.Count -gt 0){ Dico ('altri file in tick\ : ' + ($altriNomi -join ', ')) }
       $negs = @(Get-ChildItem -LiteralPath $tick -Filter '*DKNEG*' -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
@@ -327,6 +337,7 @@ try{
     }
     $bak = @(Get-ChildItem -LiteralPath $Lavoro -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like 'tick_*' -or $_.Name -like '*backup*' } | ForEach-Object { $_.Name })
     Dico ('cartelle di backup / tick_* in dukascopy_lavoro : ' + $(if($bak.Count -gt 0){ ($bak -join ', ') }else{ 'nessuna' }))
+    $S.csv_completo = $true      # solo se il passo arriva in fondo: un passo morto a meta' NON e' [MISURATO] nella sintesi
   }
 
   # -------------------------------------------------------------------
@@ -476,8 +487,16 @@ try{
         $dt = $f.LastWriteTime.ToString('yyyy-MM-dd HH:mm', $INV)
         $righe = '-'
         if($f.Name -like 'U30USD_DK_ticks_*.csv'){
-          $i = Leggi-CsvTick $f.FullName; $righe = '' + $i.Righe
-          [void]$CsvTick.Add('MQL5Files,' + $f.Name + ',' + $f.Length + ',' + $dt + ',' + $i.Righe + ',' + $i.Primo + ',' + $i.Ultimo)
+          $i = $null; $err = ''
+          try{ $i = Leggi-CsvTick $f.FullName } catch { $err = Pulisci ('' + $_.Exception.Message) }
+          if($null -eq $i){
+            $righe = 'NON MISURATE (file non apribile: ' + $err + ')'
+            [void]$Problemi.Add('MQL5 Files, ' + $f.Name + ': righe NON MISURATE (file non apribile): ' + $err)
+            [void]$CsvTick.Add('MQL5Files,' + $f.Name + ',' + $f.Length + ',' + $dt + ',NON_MISURATO,-,-')
+          } else {
+            $righe = '' + $i.Righe
+            [void]$CsvTick.Add('MQL5Files,' + $f.Name + ',' + $f.Length + ',' + $dt + ',' + $i.Righe + ',' + $i.Primo + ',' + $i.Ultimo)
+          }
         }
         Dico ('        ' + $f.Name + '  ' + $f.Length + ' byte  scritto ' + $dt + '  righe ' + $righe)
       }
@@ -526,7 +545,10 @@ try{
     Dico ('   -> per P1: ' + $(if($sonda.Count -eq $GiorniSonda.Count -and $S.cache_completi -eq $S.cache_giorni_attesi){ 'la riconversione --solo-cache dei 222 giorni e la sonda sui 9 giorni partono senza scaricare un byte (validita dei bi5 da confermare con dukascopy_tick.py --solo-cache)' }else{ 'un giorno non completo in cache NON si riscarica sotto F2 (zero download): per quel giorno P1 si ferma e si ridiscute; se e un giorno della sonda, la condizione per nome della F2 non si puo verificare' }))
   } elseif($S.ContainsKey('cache_esiste') -and (-not $S.cache_esiste)){ Dico ('cache raw\USA30IDXUSD : ASSENTE ' + $mis + '  -> STOP di P0: P1 sarebbe un riscarico, si ridiscute') }
   else { Dico ('cache 222 giorni : ' + $nonm) }
-  if($S.ContainsKey('csv_n')){ Dico ('CSV U30USD_DK in tick\ : ' + $S.csv_n + ' file, ' + $S.csv_righe + ' righe ' + $mis) } else { Dico ('CSV U30USD_DK in tick\ : ' + $nonm) }
+  if($S.ContainsKey('csv_n')){
+    $etCsv = $(if(-not $S.ContainsKey('csv_completo')){ '[PARZIALE: passo csv tick interrotto a meta, vedi PASSI FALLITI]' }elseif($S.csv_nonlette -gt 0){ '[PARZIALE: righe di ' + $S.csv_nonlette + ' file NON contate, file non apribili]' }else{ $mis })
+    Dico ('CSV U30USD_DK in tick\ : ' + $S.csv_n + ' file, ' + $S.csv_righe + ' righe ' + $etCsv)
+  } else { Dico ('CSV U30USD_DK in tick\ : ' + $nonm) }
   if($S.ContainsKey('csv_n')){ Dico ('   -> per P1: il backup dei CSV del 03/09 (F2 punto 2) occupa ' + (Gb ([double]$S.csv_byte)) + ' GB in piu sul disco di dukascopy_lavoro, e va fatto PRIMA di riconvertire') }
   if($S.ContainsKey('mt5_aperto')){ Dico ('MT5 aperto : ' + $S.mt5_aperto + ' ' + $mis + $(if($S.mt5_aperto){ '   -> per P1: va CHIUSO prima dell import (stampa PID + titolo + cartella, mai a occhio)' }else{ '' })) } else { Dico ('MT5 aperto : ' + $nonm) }
   if($S.ContainsKey('chr_letti')){
