@@ -89,6 +89,11 @@ for k, i in (("e", ie), ("a", ia)):
     assert b"#  EA: ABTG_Nasdaq_Apertura_US" in (pe if k == "e" else pa)
 # l asse di a: 880 e' il valore di partenza scritto, ma l asse va da 220 a 1320 di 220 (sei valori)
 assert [int(x) for x in range(220, 1321, 220)] == [220, 440, 660, 880, 1100, 1320]
+# la finestra IS/OOS che la riga pinna (me, oa) e' quella che il driver ricava da @FRAZIONEIS: lo ricalcolo in Python (il controllo $cohOk della riga e' ridondante, mutante equivalente dichiarato)
+import datetime as _dt
+_d0 = _dt.date(2024, 9, 26); _d1 = _dt.date(2026, 6, 30)
+_me = _d0 + _dt.timedelta(days=int((_d1 - _d0).days * 0.4322))
+assert _me.strftime("%Y.%m.%d") == "2025.06.30" and (_me + _dt.timedelta(days=1)).strftime("%Y.%m.%d") == "2025.07.01", _me
 # (2) i numeri attesi del cancello G0: i CSV VERI di R262b e di R245b (due corse indipendenti), riga EmaSlow=220, e il lettore e la riga
 sys.path.insert(0, os.path.join(REPO, "backtest_pipeline"))
 import leggi_r280 as LG

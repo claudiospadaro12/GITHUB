@@ -56,6 +56,9 @@ NSL = "NON SI LEGGE (cancello G0 + G1 %s)"
 NUMA = ["1264.00", "1044.00"]
 def patch2(col, val, fase="OOS"):
     return [{"fase": fase, "riga": 0, "col": col, "val": val}, {"fase": fase, "riga": 1, "col": col, "val": val}]
+_hp = re.findall(r"hp='([0-9A-F]{64})'", open(RIGA, encoding="ascii").read())
+assert len(_hp) == 2 and _hp[0] != _hp[1], _hp
+_SED_HP_UGUALI = "s/hp='%s'/hp='%s'/" % (_hp[1], _hp[0])      # le due impronte di prova uguali: due job sullo stesso file
 # (nome, scenario, sed, grafici, macchina, mutazione servita, terminale, env extra, [DEVE esserci], [NON deve esserci])
 T = [
  ("ok", {}, "", "ok", PC, "", "ok", {},
@@ -220,6 +223,21 @@ T = [
  ("riga_incoerente_tetto", {}, r"s/\$TETTO=30;/$TETTO=45;/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
  ("riga_incoerente_margine", {}, r"s/\$MARGINE=10;/$MARGINE=0;/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
  ("riga_incoerente_maxriprove", {}, r"s/\$MAXRIP=1;/$MAXRIP=2;/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+
+ ("riga_incoerente_EA", {}, r"s/e='ABTG_Nasdaq_Apertura_US'; s='U30USD'/e='ABTG_Londra_ORB'; s='U30USD'/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_sigle", {}, r"s/k='e';/k='x';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_inizio_OOS", {}, r"s/oa='2025.07.01';/oa='2025.07.02';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_d0", {}, r"s/d0='2024.09.26';/d0='2024.09.25';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_d1", {}, r"s/d1='2026.06.30';/d1='2026.06.29';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_modello", {}, r"s/m=4;/m=1;/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_righe_attese", {}, r"s/nr=2;/nr=3;/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_pm_di_e", {}, r"s/pm=@('798711','798721')/pm=@('798711','798722')/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_pm_di_a", {}, r"s/pm=@('798701')/pm=@('798702')/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_impronta_prova_corta", {}, r"s/hp='\([0-9A-F]\{60\}\)[0-9A-F]\{4\}';/hp='\1';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_impronte_prova_uguali", {}, _SED_HP_UGUALI, "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_impronta_EA_corta", {}, r"s/\$shaEa='\([0-9A-F]\{60\}\)[0-9A-F]\{4\}';/$shaEa='\1';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_impronta_include_corta", {}, r"s/\$shaInc='\([0-9A-F]\{60\}\)[0-9A-F]\{4\}';/$shaInc='\1';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
+ ("riga_incoerente_impronta_walkforward_corta", {}, r"s/\$shaWf='\([0-9A-F]\{60\}\)[0-9A-F]\{4\}';/$shaWf='\1';/", "ok", PC, "", "ok", {}, ["RIGA R280 INCOERENTE", NOSTUB], FERMA),
  ("macchina_VPS", {}, "", "ok", "VMI3047753", "", "ok", {}, ["QUESTA RIGA GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. Qui la macchina si chiama: VMI3047753", NOSTUB], FERMA + ["GUARDIA EA"]),
  ("macchina_vuota", {}, "", "ok", "", "", "ok", {}, ["QUESTA RIGA GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ", NOSTUB], FERMA),
  ("mt5_aperto", {}, "", "ok", PC, "", "ok", {"PRE_MT5": "1"}, ["MT5 risulta APERTO su questo PC", "Questo round gira ABTG_Nasdaq_Apertura_US", NOSTUB], FERMA + ["GUARDIA EA"]),
