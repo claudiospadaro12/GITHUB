@@ -37,7 +37,7 @@ Regimi: toro / orso / laterale / crollo, **solo dove l'ho misurato** (altrimenti
 | *Oro, 11 motori* (non nella tabella principale) | 22 anni | barre M1 del broker | regimi non isolati; tre revisioni di rischio (DD a 22 anni 19,7%, 29,7%, 45,9% contro 3,5-5,3% promessi) | **PARZIALE** (anni si'; regimi non isolati) |
 | *Nasdaq, un motore Supertrend* (non nella tabella principale) | ~16 anni | barre M1 esterne | orso 2022: lo short non ha fatto nessuna operazione; laterale 2015-16 PF 0,66 su 55: **non conclusivo** | **PARZIALE** (anni si'; regimi provati ma senza esito leggibile) |
 
-**Come lo leggo, onestamente.** Su 12 expert della tabella principale, **10 hanno NO e 2 PARZIALE** (oro long e EMA200 H4 EURUSD corto, entrambi a barre). **Nessuno ha SI.** Per tutti gli expert sugli indici (DAX, Dow, Nasdaq) la validazione a tick reali copre circa 21 mesi e un solo regime, perche' il broker ha i dati indici solo da settembre 2024: per il DAX esistono ~8 anni di dati esterni (2010-18) scaricati ma non importati, per il Nasdaq 15,7 anni esterni a barre M1 usati solo come prova di regime su altri motori, per il **Dow nessuno storico lungo**. Per molti expert quindi la risposta e' NO o PARZIALE, e **questa e' la ragione per cui ti chiedo il giudizio**: voglio sapere se, con questi anni e questi regimi, si puo' dire qualcosa o se bisogna prima allungare lo storico.
+**Come lo leggo, onestamente.** Su 12 expert della tabella principale, **10 hanno NO e 2 PARZIALE** (oro long e EMA200 H4 EURUSD corto, entrambi a barre). **Nessuno ha SI.** Per tutti gli expert sugli indici (DAX, Dow, Nasdaq) la validazione a tick reali copre circa 21 mesi e un solo regime, perche' il broker ha i dati indici solo da settembre 2024: per il DAX esistono ~8 anni di dati esterni (2010-18) scaricati ma non importati, per il Nasdaq 15,7 anni esterni a barre M1 usati solo come prova di regime su altri motori, per il **Dow nessuno storico lungo**. Per tutti gli expert quindi la risposta e' NO o PARZIALE, e **questa e' la ragione per cui ti chiedo il giudizio**: voglio sapere se, con questi anni e questi regimi, si puo' dire qualcosa o se bisogna prima allungare lo storico.
 
 ---
 
@@ -85,7 +85,7 @@ Valori **a rischio 1%, tick reali del broker, finestra 2024.09.26 - 2026.06.30**
 | Bulge, versione "viola" | mean-reversion H1 su 15 cross forex | nessun IS/OOS nostro (versione ampia, 4 mesi: 0,87 / 0,82) | versione ampia 410 / 363 operazioni | 13,7% / 22,8% (0,8%) | 4 mesi (mio, a barre; rischio 0,8%); backtest di partenza della versione originale 2022-26, mai rifatto con IS/OOS | **NON MISURATO** (contratto assente) |
 | *Candidato: MaxMin oro, solo long* | box notturno sull'oro, H2 | tick OOS 1,45; 22 anni a barre 1,10 | 93 (tick) | tick 2,3%; 22 anni 10,3% (entrambi a rischio 0,5%) | tick 2024-26 + barre 2004-26 | con riserva |
 | *Candidato: EMA200 H4 GBPJPY* | stesso motore, H4, due lati | 1,22 su finestra unica (nessun IS/OOS) | 144 | 4,1% | tick 2024-26, finestra unica | con riserva |
-| *Candidato: EMA200 H4 EURUSD, corto* | stesso motore, H4, solo short | IS 1,11 / OOS 1,31 | ~104 OOS | 2,8% | barre M1 IS 2017-23, OOS 2024-26 | con riserva (barre, non tick) |
+| *Candidato: EMA200 H4 EURUSD, corto* | stesso motore, H4, solo short | IS 1,11 / OOS 1,31 | ~104 OOS | 5,4% / 2,8% | barre M1 IS 2017-23, OOS 2024-26 | con riserva (barre, non tick) |
 
 Fonti della tabella: contratti delle sedie del 20/09 per le sei sedie indice (PF, posizioni, DD) [MISURATO]; contratto del 20/09 per la cella Nasdaq (a rischio 1%, banco 10.000 EUR); la mappa delle aperture Nasdaq del 03/10 ne da' una seconda misura (PF 1,22 / 1,22 su 82 / 102 posizioni, banco diverso): **le due misure non sono riconciliate**, riporto quella a 1% e lo dichiaro; mappa aperture DAX 03/10 per lo short DAX [MISURATO]; censimento ORB del 29/09 per l'ORB [MISURATO; le 119 posizioni OOS ricontate dal file per operazione, le 71 IS dedotte dall'assenza di chiusure parziali]; analisi del Bulge del 03/10 [MISURATO]; candidati del 01/10 [MISURATO].
 
@@ -213,7 +213,7 @@ Sulle **sedie indice non esiste nessuna prova di regime lunga**. Ho prove di reg
 
 ## F. Il confronto fra due AI
 
-Da circa una settimana lavoro anche con **Gemini**, un secondo modello AI, accanto a Claude. L'ho istruito con una **memoria condivisa** e una **base di conoscenza** del progetto (regole di casa, vocabolario dei verdetti, fatti misurati, formule), cosi' da averlo pronto quando c'e' da confrontarsi con Claude. Gli ho fatto fare un esame (punteggi dati da noi, non da un valutatore terzo):
+Sviluppo il progetto con **Claude**, un modello AI; da circa una settimana lavoro anche con **Gemini**, un secondo modello AI, accanto a Claude. L'ho istruito con una **memoria condivisa** e una **base di conoscenza** del progetto (regole di casa, vocabolario dei verdetti, fatti misurati, formule), cosi' da averlo pronto quando c'e' da confrontarsi con Claude. Gli ho fatto fare un esame (punteggi dati da noi, non da un valutatore terzo):
 
 | prova | che cosa misura | punteggio |
 |---|---|---|
