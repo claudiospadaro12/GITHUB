@@ -22,7 +22,7 @@
 2. Invece di un motore solo, tanti motori **scorrelati**: aperture di Francoforte e di Wall Street, un incrocio di medie sul Dow, un motore su Supertrend, un mean-reversion su cross forex. Ogni combinazione expert + simbolo + orario la chiamo "sedia".
 3. Ogni sedia ha un **contratto scritto**: il drawdown e la frequenza promessi dal backtest della configurazione scelta. Se in forward il DD supera il promesso, la sedia va in revisione.
 4. Sopra le sedie c'e' **un solo modulo di rischio** sul conto: pausa giornaliera (3,5% sulla prova in corso), chiusura d'emergenza (4,5% giornaliero, 9,3% totale) e tetto sul rischio aperto simultaneo (4,00%) [configurazione della prova in corso, MISURATO].
-5. Il rischio per operazione nei backtest e' **1%**; in campo sulla prova in corso le sette sedie sugli indici girano al **2,00%**, l'ORB allo 0,3%, il Bulge allo 0,8-1,0% con 3-4 posizioni [DICHIARATO; la taglia esatta del Bulge dopo il ripristino del 01/10 non e' nota]. Questo scarto e' un punto debole (sezione E).
+5. Il rischio per operazione nei backtest e' **1%**; in campo sulla prova in corso le sette sedie sugli indici girano al **2,00%** (l'EMA200 1,00% per ciascuno dei suoi due ordini), l'ORB allo 0,3%, il Bulge allo 0,8-1,0% con 3-4 posizioni: il primo giorno ha girato con due configurazioni (0,8% x 4 e 1,0% x 3); dopo il ripristino della sera del 01/10 la taglia letta dai lotti e' 0,80%, il numero massimo di posizioni non l'ho letto [MISURATO dai lotti / NON MISURATO]. Che DAX long ed EMA200 siano davvero attaccate sul conto della prova **non e' verificato** (due mie fonti si contraddicono). Questo scarto di taglia e' un punto debole (sezione E).
 6. Regola costante: **i criteri di promozione si scrivono prima di vedere i numeri**; la configurazione si sceglie al **centro di un altopiano** di parametri, mai sul picco.
 7. Il **costo** e' un cancello: lo stop deve valere almeno **40 volte lo spread** (pavimento duro 13,3x). Su M5 gli indici sfondano questo limite, quindi i time frame bassi sugli indici sono esclusi *per costo*, con il numero accanto.
 8. **Long e short si misurano sempre entrambi** sugli indici, anche se uno solo e' in campo.
@@ -45,14 +45,14 @@ Valori **a rischio 1%, tick reali del broker, finestra 2024.09.26 - 2026.06.30**
 | Apertura Dow, ritest, solo long | ritest, M5, filtro EMA | 1,22 / 1,27 | 56 / 96 | 5,7% / 4,4% | tick 21 mesi | candidata, merito sospeso (96) |
 | Apertura Nasdaq, ritest, due lati | ritest con filtro volumi, M5 | 1,22 / 1,22 (a 2%) | 82 / 102 | 7,3% / 7,9% (a 2%) | tick 21 mesi | candidata, merito sospeso (102) |
 | SuperWave Dow H1, due lati | rimbalzo sul Supertrend, H1 | 1,85 / 1,33 (conteso: 1,48 / 1,24) | NON MISURATO (84 / 143 uscite) | 3,7% / 3,9% | tick 21 mesi | **non ancora misurato** (contratto conteso) |
-| **EMA200 Dow H1, due lati** | ordini limite sulla media a 200, H1 | 1,20 / **1,52** | 132 / **257** | 5,7% / 7,8% | tick 21 mesi, un regime | **la piu' avanzata**, un regime |
-| ORB Dow, solo long | breakout del primo quarto d'ora, M5 | 1,25 / 1,67 | n 71 / 119 (unita' non verificata) | 7,9% / 9,8% | tick 21 mesi | merito sospeso |
-| Bulge, versione "viola" | mean-reversion H1 su 15 cross forex | nessun IS/OOS nostro (versione ampia, 4 mesi: 0,87 / 0,82) | versione ampia 410 / 363 operazioni | 13,7% / 22,8% (0,8%) | 4 mesi (mio); prova dell'autore 2022-26 | **NON MISURATO** (contratto assente) |
+| **EMA200 Dow H1, due lati** | ordini limite sulla media a 200, H1 | 1,20 / **1,52** | 132 (dichiarato, non ricontabile dai miei file) / **257** | 5,7% / 7,8% | tick 21 mesi, un regime | **la piu' avanzata**, un regime |
+| ORB Dow, solo long | breakout del primo quarto d'ora, M5 | 1,25 / 1,67 | 71 / 119 (nessuna chiusura parziale: OOS contate, 119 posizioni) | 7,9% / 9,8% | tick 21 mesi | merito sospeso |
+| Bulge, versione "viola" | mean-reversion H1 su 15 cross forex | nessun IS/OOS nostro (versione ampia, 4 mesi: 0,87 / 0,82) | versione ampia 410 / 363 operazioni | 13,7% / 22,8% (0,8%) | 4 mesi (mio, a barre); backtest di partenza della versione originale 2022-26, mai rifatto con IS/OOS | **NON MISURATO** (contratto assente) |
 | *Candidato: MaxMin oro, solo long* | box notturno sull'oro, H2 | tick OOS 1,45; 22 anni a barre 1,10 | 93 (tick) | tick 2,3%; 22 anni 10,3% (a 0,5%) | tick 2024-26 + barre 2004-26 | con riserva |
-| *Candidato: EMA200 H4 GBPJPY* | stesso motore, H4, due lati | OOS 1,22 | 144 | 4,1% | tick 2024-26, finestra unica | con riserva |
+| *Candidato: EMA200 H4 GBPJPY* | stesso motore, H4, due lati | 1,22 su finestra unica (nessun IS/OOS) | 144 | 4,1% | tick 2024-26, finestra unica | con riserva |
 | *Candidato: EMA200 H4 EURUSD, corto* | stesso motore, H4, solo short | IS 1,11 / OOS 1,31 | ~104 OOS | 2,8% | barre M1 IS 2017-23, OOS 2024-26 | con riserva (barre, non tick) |
 
-Fonti della tabella: contratti delle sedie del 20/09 per le sei sedie indice (PF, posizioni, DD) [MISURATO]; mappa delle aperture Nasdaq del 03/10 per la cella Nasdaq a 2% (il contratto del 20/09 dava 1,15 / 1,11 su un banco diverso: **le due misure non sono riconciliate**, uso la piu' recente e lo dichiaro); mappa aperture DAX 03/10 per lo short DAX [MISURATO]; censimento ORB del 29/09 per l'ORB [MISURATO, n sul lato "uscite o posizioni" non verificato]; analisi del Bulge del 03/10 [MISURATO]; candidati del 01/10 [MISURATO].
+Fonti della tabella: contratti delle sedie del 20/09 per le sei sedie indice (PF, posizioni, DD) [MISURATO]; mappa delle aperture Nasdaq del 03/10 per la cella Nasdaq a 2% (il contratto del 20/09 dava 1,14 / 1,11 su 91 / 94 posizioni, a 1% su un banco diverso: **le due misure non sono riconciliate**, uso la piu' recente e lo dichiaro); mappa aperture DAX 03/10 per lo short DAX [MISURATO]; censimento ORB del 29/09 per l'ORB [MISURATO; le 119 posizioni OOS ricontate dal file per operazione, le 71 IS dedotte dall'assenza di chiusure parziali]; analisi del Bulge del 03/10 [MISURATO]; candidati del 01/10 [MISURATO].
 
 ### B2. Le schede: motore, manopole che contano, regimi, forward
 
@@ -90,18 +90,18 @@ Per ogni expert: **manopole** con il valore del contratto (non le incollo da fil
 - Manopole: periodo EMA **200**; ordini a **0,2 / 0,3 ATR**; **stop 1 ATR** (mediana ~104 punti); **TP 2R** con **TP1 al 50%**, pareggio e trailing; scadenza dei pendenti 6 barre.
 - Numeri: IS PF 1,20 su 132 posizioni, DD 5,73%; **OOS PF 1,52 su 257 posizioni, DD 7,83%** (riprodotto da quattro corse indipendenti). Con spread della prop e slippage il PF scende a **1,43-1,46** e il profitto del ~12% [MISURATO, stima prudente]. Il DD della discesa di feb-apr 2025 cade dentro l'IS: **al massimo 5,73%** (solo long 2,64%, solo short 4,51%), salvo effetti di confine [MISURATO]; il PF per lato in quella discesa e' NON MISURATO.
 - Regimi: **NON MISURATO fuori dal rialzo 2024-26**; il PF a meta' anno oscilla da 2,05 a 0,87 fra due meta' dell'anno [MISURATO]. Stop a ~104 punti = costo al limite del 40x (fragile).
-- Forward: prima challenge 3 posizioni (2 stop pieni dello stesso setup il 22/09, 1 vinta), netto -1.006,86; sul demo di prova 21 posizioni in 16 giorni (1,31 al giorno, sopra le 0,93 promesse) [MISURATO, esito netto del demo non riletto].
-- Gemelli: sullo stesso Dow, cambiando time frame, OOS M30 0,91 e H3 0,91 (no), H2 1,17 e H4 1,42 (positivi ma su pochi dati: 116 uscite a H4); su altri simboli il motore non regge a H1 (DAX 0,85 a barre, 0/28 celle positive; Nasdaq PF mediano 0,75; oro tick IS 0,56; S&P escluso per costo): l'edge misurato e' specifico del **Dow H1** [MISURATO].
+- Forward: prima challenge 3 posizioni (2 stop pieni dello stesso setup il 22/09, 1 vinta), netto -1.006,86 (il primo stop riempito 7,83 punti oltre il livello: +10,5% di perdita sul previsto, n=1); sul demo 21 posizioni dal 14/08 all'11/09, cioe' **1,00 al giorno feriale** contro le 0,93 promesse (con 21 eventi non si distingue: sul pavimento, ne' sopra ne' sotto), netto -1,13 R, DD 2,72% a rischio 0,5% [MISURATO]. Un mio referto successivo scrive 1,31 al giorno, ma divide per i soli giorni fra il primo e l'ultimo ingresso: **le due fonti non concordano**, e il numero corretto per la finestra e' 1,00.
+- Gemelli: sullo stesso Dow, cambiando time frame, OOS M30 0,91 e H3 0,91 (no), H2 1,17 e H4 1,42 (positivi ma su pochi dati: 116 uscite a H4); su altri simboli il motore non regge a H1 (DAX 0,85 a barre, 0/28 celle positive; Nasdaq PF mediano 0,75; oro a tick IS 0,56 e OOS 1,10, con tutte e 30 le celle IS in perdita; S&P escluso per costo): l'edge misurato e' specifico del **Dow H1** [MISURATO].
 
 #### 7. ORB Dow, solo long
-- Meccanismo: breakout del primo quarto d'ora di Wall Street, solo long, filtro EMA200, trailing su EMA 9. Manopole: range **15 min**, stop a meta' range (variante "mezzo range"), ingresso a pochi punti oltre il range, **filtro EMA200**, trailing EMA 9, rischio 0,3% in prova.
+- Meccanismo: breakout del primo quarto d'ora di Wall Street, solo long, filtro EMA200, trailing su EMA 9. Manopole: range **15 min**, stop a mezzo range di distanza dall'ingresso (variante "mezzo range", quella in campo), ingresso a pochi punti oltre il range, **filtro EMA200**, trailing EMA 9, rischio 0,3% in prova.
 - Numeri: IS 1,25 (n 71), OOS 1,67 (n 119), DD 7,9% / 9,8% a rischio 1%; la variante con stop all'estremo opposto dimezza il DD (OOS 1,68, DD 4,3%). Il numero di operazioni **non cambia** in 48 celle di parametri: il buffer sposta lo stop ma non decide se si entra. Slippage: con 1,5 punti il DD sfonda il 10% [DICHIARATO]. Mai provato su altri time frame. Il gemello Nasdaq fallisce (PF 0,84-0,91).
-- Forward: prova in corso 1 stop (-537,86, slittamento di 11,2 punti = 0,14 R); nei miei dati un forward demo di 15 posizioni con 3 vinte (-295,58) e 8 posizioni PF 0,27 su un altro demo [DICHIARATO, non ricontrollati].
+- Forward: prova in corso 1 stop (-537,86, slittamento di 11,2 punti = 0,14 R); nei miei dati un forward demo di 15 posizioni con 3 vinte (-295,58) e 8 posizioni con 1 vinta, PF 0,27 (-209,18) su un altro demo [DICHIARATO, non ricontrollati].
 
 #### 8. Bulge versione "viola"
 - Meccanismo: mean-reversion su **15 cross forex, H1**, con bande di volatilita' e ATR, fino a 3-4 posizioni, kill switch (4 stop o 3 consecutivi o -2% nel giorno).
 - Manopole: famiglia di segnale (viola, blu e arancio), filtro ADX, **numero massimo di posizioni**, rischio per operazione, filtro ATR, TP riscritto dinamicamente.
-- Stato: **l'edge non e' dimostrato da nessuna misura nostra**. L'unico numero buono (PF 1,60, WR 80%, n 268) e' un backtest dell'autore su 6 cross, dati al 40%, nessun IS/OOS. Le misure nostre stanno **sotto 1**: AMPIA a 4 mesi 0,87 / 0,82; forward del predecessore PF 0,83 su 297 operazioni; PF 0,92 anche **al lordo dei costi**. Forma del motore: vince poco (media ~19) e perde tanto (~64): serve circa il 77% di vincite per pareggiare.
+- Stato: **l'edge non e' dimostrato da nessuna misura nostra**. L'unico numero buono (PF 1,60, WR 80%, n 268) e' il backtest di partenza della versione originale, che ho portato io: pochi cross scelti (5 o 6: le mie due note non concordano), rischio 3%, tick reali solo per il 40% dei dati, nessun IS/OOS. Le misure nostre stanno **sotto 1**: AMPIA a 4 mesi 0,87 / 0,82; forward del predecessore PF 0,83 su 297 operazioni; PF 0,92 anche **al lordo dei costi**. Forma del motore: vince poco (media ~19) e perde tanto (~64): serve circa il 77% di vincite per pareggiare.
 - Forward: prova in corso 10 posizioni, 6 vinte, netto -1.870,73 (campione sottile) [MISURATO].
 
 #### 9. I tre candidati (non in campo)
@@ -118,6 +118,7 @@ Sulle **sedie indice in prova non esiste nessuna prova di regime lunga**. Ho pro
 | SuperWave GBPUSD H2 | 0,96 su 51 | 0,86 su 69 | **0,56 su 65** | 0,80 su 61 |
 | Cost-to-cost EURJPY | 2,65 su 43 | 1,69 su 67 | 1,05 su 46 | 1,38 su 54 |
 
+- La colonna "crollo" e' l'anno 2020 intero, in cui il crollo pesa un quarto. Sul **solo crollo feb-apr 2020** il Cost-to-cost EURJPY fa **PF 0,02 su 23 (-12.711, DD 14,8%)** e nell'orso 2022 ha DD 14,3%: per il rischio quei due numeri contano piu' del PF dell'anno.
 - PTE USDJPY funziona **solo nel laterale**; SuperWave GBPUSD fa +3.560 (PF 1,84) fuori campione in rialzo e **-3.187 (PF 0,56) nel toro 2021**: stesso numero di operazioni, segno opposto. La promozione di PTE GBPUSD e' stata **ritirata** quando il tester e' passato da barre a tick.
 - Sul Nasdaq, un motore Supertrend (non in prova) su 16 anni di barre: lo short **non ha fatto nemmeno un'operazione nell'orso 2022**; nel laterale 2015-16 e' in perdita con campione pieno (PF 0,66 su 55). Verdetto: non conclusivo.
 - Oro, 11 motori su 22 anni a barre: **tre revisioni di rischio** (DD a 22 anni 19,7%, 29,7%, 45,9% contro promessi 3,5-5,3%).
@@ -136,7 +137,7 @@ Sulle **sedie indice in prova non esiste nessuna prova di regime lunga**. Ho pro
 | **Dow** | come sopra | idem | **NON ESISTE.** HistData non ha il Dow; il Dow di un secondo fornitore (dal 2012) **non e' stato scaricato**; il pezzo gia' importato (2024-10 / 2025-06) cade *dentro* il nativo: zero anni in piu'. Esiste un **piano** (circa 1.300 giorni di dati, 90-348 ore di calcolo), **non eseguito** |
 | **DAX** | tick reali nativi, ~21 mesi | idem | dati esterni 2010-2018 (**9 anni**, 1,72 milioni di barre M1, prezzi verificati) **scaricati ma mai importati**: zero giorni in comune col nativo, quindi il confronto di qualita' non si puo' fare. La prova di regime sulle aperture DAX e' **non disponibile** |
 | **Nasdaq** | tick reali nativi ~21 mesi (celle d'apertura) | idem | dati esterni a barre M1 **2010-11 -> 2026-07 (~15,7 anni, 5,23 milioni di barre)**, ammessi *solo* come prova di regime con mia firma e gia' usati (18 celle su 16 anni, altro motore). **Non usati sulla cella d'apertura in campo** |
-| **S&P 500, Nikkei** | esterni S&P 2010-2026, Nikkei 2019-2026 | S&P ~15,7 anni, Nikkei ~7,5 | "in frigo" (qualita' del feed al limite: rapporto 0,203 contro soglia 0,20) |
+| **S&P 500, Nikkei** | esterni S&P 2010-2026, Nikkei 2019-2026 | S&P ~15,7 anni, Nikkei ~7,5 | "in frigo" (qualita' del feed sopra la soglia di 0,20: S&P 0,203, Nikkei 0,232) |
 | **Forex** | tick reali solo dal ~07/2024; il lungo e' a barre M1 | dati nativi del broker dal 1971 (EURUSD, USDJPY), dal 1993 (GBPUSD, AUDUSD); le sedie testate **operano dal gennaio 1999**: **~27 anni a barre** | regimi 2019-2022 su barre esterne 2018-2024 (7 anni); i due feed **divergono** (quattro cambi di segno, cause non chiuse) |
 | **Oro** | dati nativi del broker dal 2004 (22,1 anni, a barre); esterni 2018-2024 (7 anni) importati | **22 anni a barre** per 11 motori; i tick sono 2024-26 | storico esterno 2006-2020 e 2021-26 scaricato, **non importato e non concatenabile** (due feed, buco di 7 mesi) |
 
@@ -144,19 +145,19 @@ Sulle **sedie indice in prova non esiste nessuna prova di regime lunga**. Ho pro
 
 **Quali expert indici hanno avuto una prova di regime lunga:** **nessuno** fra quelli in prova (tre DAX, tre Dow piu' ORB, un Nasdaq). Ce l'hanno altri motori Nasdaq e forex/oro non in prova.
 
-[fonti: mappa aperture Dow e DAX del 03/10; lo storico esterno, mappa del 23/09; storico indici scaricato il 10/09; referti R50, R56, R59, R80, R100, R102, R113; piano regime Dow del 05/10. Da ricontrollare: i "~15,7 anni" del Nasdaq e la data di inizio dei tick forex.]
+[fonti: mappa aperture Dow e DAX del 03/10; lo storico esterno, mappa del 23/09; storico indici scaricato il 10/09; referti R50, R56, R59, R80, R100, R102, R113; piano regime Dow del 05/10. Ricontrollati: Nasdaq esterno 5.233.590 barre M1 dal 14/11/2010 al 31/07/2026; tick reali forex dal 05/07/2024 (prima, il tester li genera dalle barre). Una mia nota piu' vecchia lo da' ancora "in frigo": vale la firma del 26/08.]
 
 ---
 
 ## D. I controlli che ho fatto (10 righe)
 
-1. **Walk-forward in-sample / out-of-sample** (IS ~40%, OOS ~60% della finestra), a **tick reali**; le barre OHLC sono solo screening (misurato sul Nasdaq: un fattore 1,7-1,85 in eccesso rispetto al tick [DICHIARATO]).
+1. **Walk-forward in-sample / out-of-sample** (IS ~40%, OOS ~60% della finestra), a **tick reali**; le barre OHLC sono solo screening: il PF a barre supera quello a tick di 1,72 e 1,85 volte su due motori DAX, 2,25 su un Nasdaq e **3,51 volte** su un Dow H4 [MISURATO in casa]; il fattore non e' uno solo.
 2. **Criteri congelati prima dei numeri**, datati e versionati; il difetto che ho pagato: scegliere la cella migliore invece del **centro dell'altopiano** ha ribaltato un verdetto.
 3. **n minimo 150 posizioni**: con n 75-159 la superficie dei parametri e' frastagliata; con 190-256 l'altopiano si legge.
 4. **Cancello del costo**: stop >= 40 x spread; i time frame bassi sugli indici sono esclusi per costo con il numero accanto.
-5. **Stress di costi ed esecuzione**: spread della prop piu' slippage misurato sul mio conto (il tester a tick reali paga gia' lo slippage sugli stop: media 0,91 punti contro 0,42 sul vero); nessuna sedia scende sotto PF 1,20 per i costi, una ci era gia'.
+5. **Stress di costi ed esecuzione**: spread della prop piu' slippage misurato sul mio conto (il tester a tick reali paga gia' lo slippage sugli stop: media 0,91 punti contro 0,42 sul vero, ma su sole 5 uscite); nessuna sedia scende sotto PF 1,20 per i costi, una ci era gia'.
 6. **Quattro regimi**: toro, orso, laterale, crollo, uno per uno invece di una media di sedici anni (quando posso, vedi C).
-7. **Monte Carlo sull'ordine dei giorni** (giorni interi, correlazione conservata): su portafoglio allora, a rischio 0,65%, p99 del drawdown 8,5% contro un muro statico del 10%; su muro trailing 12,1% [DICHIARATO, 06/09].
+7. **Monte Carlo sull'ordine dei giorni** (giorni interi, correlazione conservata): su portafoglio allora, a rischio 0,65%, p99 del drawdown 8,5% contro un muro statico del 10%; su muro trailing 12,1% [DICHIARATO, 06/09]. **Quel numero e' a 0,65%: alle taglie di oggi (2%) non vale**, vedi E3.
 8. **Rischio aperto simultaneo**: una mattina avevo 9 posizioni aperte insieme (5,85% di rischio); da li' il tetto sul rischio aperto (3,25% allora, 4,00% sulla prova in corso) e il modulo unico.
 9. **Contro-esempio prima di consegnare**: ogni misura la provo a rompere con l'ipotesi alternativa; piu' volte ha trovato errori miei (un conteggio doppio dello spread, una finestra dentro l'IS).
 10. **Criterio di uscita** scritto: DD forward oltre il promesso = revisione; famiglia in perdita a 20 operazioni = si spegne la sedia colpevole; i "morti" hanno un certificato a 5 punti.
