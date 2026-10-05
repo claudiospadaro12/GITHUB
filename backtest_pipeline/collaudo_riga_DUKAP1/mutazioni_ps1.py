@@ -69,6 +69,9 @@ M = [
  ("drv_giorni_sonda_otto", "drv", '-GiorniSonda ($Giorni9 -join ";") -WorkDir $ImpWork', '-GiorniSonda (($Giorni9 | Select-Object -First 8) -join ";") -WorkDir $ImpWork', ["01"]),
  ("drv_giro_a_vuoto_ignorato", "drv", "if($SoloControllo){\n    Titolo", "if($false){\n    Titolo", ["08"]),
  ("drv_esito_f2_sbagliato", "drv", 'if($RcF2 -eq 0){ $EsitoF2 = "PASSA" } elseif($RcF2 -eq 1){ $EsitoF2 = "NON PASSA" }', 'if($RcF2 -eq 0){ $EsitoF2 = "PASSA" } elseif($RcF2 -eq 1){ $EsitoF2 = "PASSA" }', ["02"]),
+ ("drv_rc1_senza_file_del_verdetto", "drv", 'if(($RcF2 -ge 0) -and ($RcF2 -le 2) -and ($f2Riga -ne $EsitoF2)){', 'if($false){', ["37"]),
+ ("drv_k0b_messaggio_tolto", "drv", '($f2Txt -match \'(?m)^\\(3\\) .*: FAIL\\s\')){', '($f2Txt -match \'(?m)^\\(3\\) .*: FAIL\\s\') -and $false){', ["03"]),
+ ("drv_k0b_messaggio_senza_la_1", "drv", "($EsitoF2 -eq \"NON PASSA\") -and ($f2Txt -match '(?m)^\\(1\\) .*: PASS\\s*$') -and ", "($EsitoF2 -eq \"NON PASSA\") -and ", ["38"]),
  ("drv_raccolta_non_sempre", "drv", "catch{\n  $Fatale = Pulisci", "catch{\n  throw\n  $Fatale = Pulisci", ["10"]),
  # --- figlia
  ("imp_maschera_larga", "imp", 'if($MascheraCsv -notlike ($SimboloDK + "_ticks_*")){', 'if($false){', ["17"]),

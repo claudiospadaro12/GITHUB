@@ -38,7 +38,9 @@ def genera(commit, shas=None, raw=RAW):
            "NON tocca preset, EA, taglie, rischio, conti. NON TOCCATI, per nome: il VPS VMI3047753 e tutte le sue cartelle dati -- FTMO trial 1514806751 (C:\\FTMO, ex challenge 541452707), "
            "REALE 10105439 (C:\\BCM_Reale), piccolo 50503392 sul VPS (BCM Markets MT5 Terminal), 100k 50504263 (BCM Markets MT5 Terminal -V3), manuale 50503635 (C:\\MT5_MANUALE), "
            "banco 50504400 (C:\\MT5_Backtest), Pepperstone, Tickmill. Esegue la riga solo se impronta e marcatore tornano; la riga verifica poi le impronte di tutti i file che usa. "
-           "NON lanciarla se MT5 o una riga di round e aperta su questo PC (la riga si ferma da sola). Se la console mostra >>, Ctrl+C prima di incollare." % commit[:8])
+           "NON lanciarla se MT5 o una riga di round e aperta su questo PC (la riga si ferma da sola). DURATA NON MISURATA nel suo insieme: la riconversione dei 222 giorni ha preso ~12 minuti il 03/09, "
+           "la importazione di ~20,75 milioni di tick non e mai stata cronometrata (la riga figlia aspetta al massimo 240 minuti per import): lascia il PC acceso finche la console stampa ESITO P1. "
+           "Se la console mostra >>, Ctrl+C prima di incollare." % commit[:8])
     assert "'" not in msg
     t = ("& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Write-Host '" + msg + "' -ForegroundColor Yellow; "
          "if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ('QUESTA RIGA GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. Qui la macchina si chiama: ' + $env:COMPUTERNAME + '. Sul VPS VMI3047753 non si lancia mai. Nessun download e stato fatto.') }; "

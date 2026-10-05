@@ -88,6 +88,9 @@ def scenari():
     rg = [["IMP-TICK-v1-GIORNI", "U30USD_DK", g, "MISURATO", "0.03000000", "99.0000", "1000", "1000", "2.5000", "2.5000", "0.05000000", "80.0000", "SI"] for g in h1.GIORNI9]
     rg[1][8] = "2.5\u00e9"
     sc.append(("37_valutatore_muore_rc1", S(righe_grezze={"U30USD_DK": rg}), dict(exit=1, esito=None, errore_valutatore=True)))
+    # (1) cade E la (3) cade: il messaggio "solo per la (3) / serve K0b" NON deve uscire (K0b non sostituisce la (1))
+    sc.append(("38_cade_la_1_e_la_3", S(scen_dk={**{g: ["MISURATO", "0.03", "99.0"] for g in h1.GIORNI9}, "2024.12.10": ["MISURATO", "0.07", "99.0"]},
+                                        scen_neg={"2025.03.12": ["MISURATO", "0.045", "95.0"]}), dict(exit=0, esito="NON PASSA")))
     return sc
 
 
