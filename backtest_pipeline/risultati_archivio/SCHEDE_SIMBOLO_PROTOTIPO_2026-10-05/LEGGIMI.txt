@@ -12,8 +12,8 @@ B_esterno_2018/        11 serie su finestra comune 2018 (ranking, correlazioni, 
                        XAU_USD, NAS100_USD, SPX500_USD, JP225_USD). FEED ESTERNI, scaricati dal cloud: servono a provare
                        lo strumento su piu' simboli e a controllare la coerenza fra feed gemelli, non a conoscere BCM.
                        Il manifest usato e' manifest_B_esterno_2018.csv (i percorsi <scratch> erano cartelle temporanee).
-autotest.log           autotest del prototipo (69 controlli, tutti ok)
-mutazioni_autotest.*   prova di potenza dell'autotest: 18 mutanti, 18 uccisi, 0 sopravvissuti
+autotest.log           autotest del prototipo (71 controlli, tutti ok)
+mutazioni_autotest.*   prova di potenza dell'autotest: 19 mutanti, 19 uccisi, 0 sopravvissuti
 controllo_atr_vs_casa.*  ATR(14) mediano di M5/M15/H1 su 3 feed contro i numeri stampati dai referti EMA200_D1_M5 (01/10)
 verifica_mese_python_puro.log  ADR mediano di 8 mesi dell'oro ricalcolato in python puro (senza numpy) = procedura
 ispeziona_repo_U30USD_prove.log  le due prove M1 del Dow trovate nel repo (781 e 1.335 righe: troppo corte per una scheda)

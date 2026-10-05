@@ -16,6 +16,8 @@ AUTOTEST SCHEDA_SIMBOLO_v1
    ok: BCM_MISTO: la riga del 10/01/2025 (finestra dubbia) e' scartata e contata
 3. pulizia
    ok: pulizia: 1 OHLC incoerente, 1 doppio, fuori ordine contato, 2 barre valide
+   ok: banda 50-200: la riga a 4000 (altro strumento) e' scartata e contata
+   ok: senza banda la riga a 4000 passerebbe: la banda e' una scelta dichiarata, non un effetto nascosto
 4. ADR e giorno della settimana su dati con la risposta nota
    ok: ADR medio piantato = 30.0, misurato 30.0000
    ok: ADR mediano piantato 30, misurato 30.0000
