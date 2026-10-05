@@ -49,7 +49,7 @@ def main():
         err.append("il bootstrap non e' UNA riga ASCII")
     for fr in ("BERSAGLIO: SOLO una finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ", "10105439", "50504263", "50503392", "1514806751", "VMI3047753", "NON tocca EA, preset di EA, taglie, rischio, conti",
                "PERIMETRO COMPLETO DI SCRITTURA", "MQL5\\Scripts", "MQL5\\Files", "MQL5\\Presets\\abtg_duka_import.set", "abtg_duka_import.ini", "dukascopy_neg", "abtg_duka_p1",
-               "NON incollarla una seconda volta"):
+               "NON incollarla una seconda volta", "PRIMA SU QUESTO PC", "C:\\FundedNext_Manuale", "C:\\MT5_Backtest (cartella dati 04C7A32B", "NON aprire nessun MT5 su questo PC"):
         if fr not in gen:
             err.append("manca nel BERSAGLIO: " + fr)
     for k, f in (("drv", BS.FILE_DRV), ("py", BS.FILE_PY), ("f2", BS.FILE_F2), ("imp", BS.FILE_IMP), ("mq5", BS.FILE_MQ5)):
