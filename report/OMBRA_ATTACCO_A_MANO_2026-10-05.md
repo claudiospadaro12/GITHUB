@@ -31,13 +31,31 @@ Dopo la riga d'installazione trovi sul **Desktop del VPS** `ABTG_OMBRA_INSTALL_<
 2. `CARTELLA DATI SCELTA: ...` e il **nome della cartella** (l'ultima misura, 29/09 e 05/10, e' `215D85D767A1C39E22D242C8114BF9F5` per il 50503392 [MISURATO]; se il referto dice un'altra, ti fermi).
 3. `PID del terminal64 del piccolo da guardare nella Gestione attivita ...: <numero>`. **Scrivilo**: serve al passo 5.
 4. I numeri di **partenza** (la foto "prima", servono per le soglie del passo 5): RAM libera del VPS, working set e CPU del terminal64 del piccolo, numero di sedie.
+   ✏️ *(corretto dal cancello `controllo-preventivo`, 05/10)* La "RAM libera" del referto e' `Win32_OperatingSystem.FreePhysicalMemory`, che per Windows e' la memoria **DISPONIBILE**
+   (libera + standby), **non** la voce "Libera" del Monitoraggio risorse, che e' molto piu' piccola [DERIVATO dalla definizione del contatore; NON VERIFICATO a schermo sul VPS].
+   Per non dover riconoscere voci di Windows, i numeri del passo 5 si leggono con **la riga di sola lettura qui sotto**, che stampa **gli stessi contatori del referto**.
+
+### 🔎 La riga di sola lettura per il passo 5 (🖥️ finestra PowerShell sul VPS `VMI3047753`; NON tocca nessun terminale: legge e stampa)
+Bersaglio: finestra PowerShell sul VPS. Non tocca REALE `10105439` (`C:\BCM_Reale`), FTMO `1514806751` (`C:\FTMO`), 100k `50504263` (`-V3`), manuale `50503635`, banco `50504400`, Pepperstone, Tickmill: li **elenca** soltanto (riga `Get-Process`).
+Stampa: RAM **disponibile** del VPS in MB, PID + working set (MB) + secondi di CPU + cartella di **ogni** `terminal64` (il tuo e' quello col PID del passo 0 e cartella `C:\Program Files\BCM Markets MT5 Terminal`), e la riga `MaxBars` del piccolo.
+
+```powershell
+& { if($env:COMPUTERNAME -ne 'VMI3047753'){ Write-Host 'SOLO sul VPS VMI3047753: qui non leggo niente.' -ForegroundColor Red; return }; $o = Get-CimInstance Win32_OperatingSystem; Write-Host ('RAM DISPONIBILE del VPS (stesso numero che il referto chiama libera): ' + [math]::Round($o.FreePhysicalMemory / 1024) + ' MB') -ForegroundColor Cyan; Get-Process terminal64 | Select-Object Id, @{n='WorkingSet_MB';e={[math]::Round($_.WorkingSet64 / 1MB)}}, @{n='CPU_secondi';e={[math]::Round($_.CPU)}}, Path | Format-Table -AutoSize; $c = Join-Path $env:APPDATA 'MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\config\common.ini'; if(Test-Path -LiteralPath $c){ Select-String -LiteralPath $c -Pattern '^MaxBars' } else { Write-Host 'common.ini del piccolo 50503392 non trovato' }; Write-Host ('ora locale ' + (Get-Date).ToString('HH:mm:ss') + ' -- SOLA LETTURA: non ho scritto ne toccato niente.') }
+```
+
+### 🚦 Il via libera, PRIMA di trascinare (si lancia la riga qui sopra subito prima del passo 3)
+- ✅ **Si attacca solo se**: RAM disponibile **>= 1800 MB** **e** la riga stampa `MaxBars=100000` (o meno).
+- 🛑 **Non si attacca, e mi mandi l'output**, se: RAM disponibile sotto 1800 MB, oppure `MaxBars` piu' grande di 100000, oppure nessuna riga `MaxBars`.
+  Perche': la stima 200-500 MB vale **solo** con 100.000 barre (ultima misura: 100000 su tutti i terminali del VPS l'08/09, checklist classe 160); il caso peggiore senza serie
+  gia' caricate e' **~600-700 MB** [DERIVATO: 30 simboli, M15+H1 a 100k barre, H4, D1, 3 indicatori]; con "Illimitato" M15 da solo puo' superare **1 GB**. 1800 - 700 = 1100 MB: sopra il pavimento di 1024.
+- 📸 Il numero di working set e la RAM disponibile di questa lettura sono il tuo **"prima"** (piu' fresco di quello del referto d'installazione).
 
 Prova incrociata (fatto, non occhio): **nel terminale 50503392** menu **File > Apri cartella dati**. Il nome della cartella che si apre deve essere **uguale** a quello del referto, e in `MQL5\Experts\` deve esserci `ABTG_EMA200_Ombra.mq5`. Se il nome e' diverso: stop, screenshot, non attaccare niente.
 Seconda prova: Gestione attivita' > scheda **Dettagli** > riga con quel PID > tasto destro > **Apri percorso file**: deve aprirsi `C:\Program Files\BCM Markets MT5 Terminal`.
 
 ## Passo 1 -- quando farlo
 In un momento **tranquillo**: evita i dieci minuti attorno alle aperture (09:00 e 15:30 ora italiana) e quando sai che una sedia sta per aprire. Il peso e' alto solo all'avvio (calcolo iniziale degli indicatori: secondi di un core, una volta [STIMA]).
-Nota onesta: nel 50503392 ci sono 26 sedie con orari diversi [MISURATO, CODA_01 del 05/10], quindi un'ora "senza nessuna apertura" non e' garantita: l'ho scelta tranquilla, non sicura.
+Nota onesta: nel 50503392 ci sono 26 sedie con orari diversi [MISURATO, CODA_01 del 05/10 -- ma e' una **FOTO VECCHIA di 54 ore** (CODA_05), e i log dello stesso terminale mostrano anche 4 `ABTG_ForzaFX_Dashboard` che la foto non ha], quindi un'ora "senza nessuna apertura" non e' garantita: l'ho scelta tranquilla, non sicura.
 
 ## Passo 2 -- compilare (🪟 terminale 50503392)
 1. Nel terminale **50503392** premi **F4**: si apre MetaEditor *di quel terminale*.
@@ -54,7 +72,7 @@ Nota onesta: nel 50503392 ci sono 26 sedie con orari diversi [MISURATO, CODA_01 
 3. **Navigatore (Ctrl+N) > Expert Advisors > `ABTG_EMA200_Ombra`** (se non c'e': tasto destro > Aggiorna) e **trascinalo su quel grafico nuovo**.
 4. Nella finestra che si apre lascia **tutto di default** e premi OK. (Tab "Input": non cambiare niente. In particolare `InpAggiungiMW` resta **false**: e' l'unica manopola che toccherebbe il terminale, aggiungendo simboli al Market Watch.)
 5. **Algo Trading e' gia' verde per le sedie: lascialo com'e'.** All'ombra non serve, e spegnerlo fermerebbe le sedie, non lei.
-6. Nota: il grafico entra nel **profilo ORO** del 50503392. Dal primo salvataggio del profilo CODA_01 contera' **27** "sedie" invece di 26: **la 27a e' l'ombra, non una sedia**. Lo segno io nei report.
+6. Nota: il grafico entra nel **profilo ORO** del 50503392. Dal primo salvataggio del profilo CODA_01 contera' **una "sedia" in piu'** (riga `ABTG_EMA200_Ombra ... magic - rischio -`, come gia' `ABTG_TradeExporter` e `ABTG_SpreadLogger`): **non e' una sedia**. Il totale NON sara' per forza 27: la foto di oggi (26) e' vecchia di 54 ore e non contiene i 4 `ABTG_ForzaFX_Dashboard` che i log vedono girare. Lo segno io nei report.
 
 ## Passo 4 -- cosa devi vedere (nei primi 2 minuti)
 **Scheda Esperti** (Ctrl+T > Esperti; l'ora qui e' **ora locale del PC**, non ora grafico):
@@ -69,22 +87,23 @@ Nota onesta: nel 50503392 ci sono 26 sedie con orari diversi [MISURATO, CODA_01 
 - `ombra_log.txt`: le stesse righe di Esperti, ma restano.
 
 ## Passo 5 -- la prima ora (🖥️ Gestione attivita' sul VPS, guardando il PID del referto)
-Gestione attivita' > scheda **Dettagli**, riga con **il PID del passo 0** (non un altro `terminal64.exe`: ce ne sono sei e non si distinguono a occhio). Colonne: **CPU** e **Working set (memoria)**. Se manca, tasto destro sull'intestazione > Seleziona colonne.
+La fonte dei numeri e' la **riga di sola lettura del passo 0**: nella tabella che stampa guardi **solo la riga col PID del passo 0** (non un altro `terminal64.exe`: ce ne sono sei e non si distinguono a occhio), colonne `WorkingSet_MB` e `CPU_secondi`. (Gestione attivita' > Dettagli, colonna **Working set (memoria)**, resta un controllo d'occhio facoltativo.)
 🔴 **Non usare la colonna "Memoria (working set privato)"**: e' un'altra misura, piu' bassa, e confonderebbe il confronto col referto (che misura il working set totale).
-Controlli a **minuto 2, 10, 30 e 60** (poi un colpo d'occhio la sera e uno la mattina dopo). Per la RAM libera del VPS: **Monitoraggio risorse > Memoria**, voce **Libera** (non "Disponibile": e' un altro numero, piu' grande). [NON VERIFICATO: il nome esatto della voce su questo Windows.] Se non la trovi, la leggo io dal referto delle 03:30 (`CODA_04`).
+Controlli a **minuto 2, 5, 10, 15, 30 e 60** (poi un colpo d'occhio la sera e uno la mattina dopo): a ogni controllo **lanci la riga di sola lettura del passo 0** e mi mandi l'output. La RAM si muove soprattutto nei primi minuti (calcolo degli indicatori e storia), per questo i controlli sono fitti all'inizio.
+✏️ *(corretto dal cancello, 05/10)* Qui c'era scritto di leggere la voce **"Libera"** del Monitoraggio risorse: **sbagliato**, e' un altro numero (piu' piccolo) di quello del referto, e ti avrebbe dato un ROSSO falso. Il numero giusto e' la **RAM DISPONIBILE** che stampa la riga (in Gestione attivita' > Prestazioni > Memoria e' la voce **"Disponibile"** [NON VERIFICATO a schermo]).
 
 ### Le soglie, scritte PRIMA di attaccare (proposta: le puoi cambiare tu, prima di partire, non dopo aver visto i numeri)
 Tutte rispetto al valore **"prima"** del referto della riga d'installazione. Sono le stesse che la riga stampa nella sezione 5 del referto.
 
 | Cosa | Dove si legge | GIALLO (guarda ogni 10 minuti e dimmelo) | ROSSO (chiudi il grafico dell'ombra + screenshot) |
 |---|---|---|---|
-| **RAM** del `terminal64` del 50503392 (working set) | Dettagli, PID del passo 0 | **prima + 500 MB** (e' gia' oltre la stima peggiore del documento: 200-500 MB [STIMA]) | **prima + 800 MB** |
-| **RAM libera del VPS** | Monitoraggio risorse, "Libera" | -- | sotto **max(1024 MB; prima - 800 MB)** |
-| **CPU** del `terminal64` | Dettagli, PID del passo 0 | -- | **prima + 5,0 punti percentuali** (= 30% di UN core su 6: e' il tetto dichiarato dall'EA) **per 5 minuti di fila, contando dal minuto 10** (i primi 10 minuti sono il calcolo iniziale: un picco una tantum e' atteso) |
+| **RAM** del `terminal64` del 50503392 (working set) | riga di sola lettura, `WorkingSet_MB` del PID del passo 0 | **prima + 500 MB** (e' gia' oltre la stima peggiore del documento: 200-500 MB [STIMA]) | **prima + 800 MB** |
+| **RAM DISPONIBILE del VPS** | riga di sola lettura (passo 0), prima riga azzurra | -- | sotto **max(1024 MB; prima - 800 MB)** |
+| **CPU** del `terminal64` | riga di sola lettura a **minuto 10 e minuto 15**, colonna `CPU_secondi` del PID | -- | **prima + 5,0 punti percentuali** (= 30% di UN core su 6: e' il tetto dichiarato dall'EA) **per 5 minuti di fila, contando dal minuto 10**. In secondi: ROSSO se `CPU_secondi` al minuto 15 meno quello al minuto 10 supera **18 x (CPU di partenza in % + 5)** (es. partenza 2% -> oltre 126 secondi). Se non vuoi fare il conto, mandami le due letture e lo faccio io. |
 | **Giro dell'EA** | `ombra_battito.txt`, `giro_ultimo_ms` | -- | **oltre 1000 ms in due battiti di fila**, dal minuto 10 |
 
-- **Durata**: il picco e' ammesso **solo nei primi 10 minuti**. Dal minuto 10 valgono i tetti sopra. Se a minuto 60 il working set e' ancora sopra "prima + 500 MB", il giallo resta giallo: me lo scrivi, non lo lasci stare.
-- **Contesto, per non spaventarsi e per non illudersi**: il 05/10 alle 03:30 la RAM libera del VPS era **1,81 GB su 12 GB** [MISURATO, CODA_04]. Con 200-500 MB in piu' restano 1,3-1,6 GB: sopra il pavimento di 1024 MB, ma **con poco margine**. Se la riga d'installazione scrive `la RAM libera e GIA sotto il pavimento`, **non si attacca**.
+- **Durata**: 🔴 **le due righe di RAM valgono DA SUBITO (minuto 0)**: la RAM che manca la paga tutto il processo delle sedie, e non e' un picco che passa. Il "picco ammesso nei primi 10 minuti" vale **solo** per CPU e giro dell'EA. Se a minuto 60 il working set e' ancora sopra "prima + 500 MB", il giallo resta giallo: me lo scrivi, non lo lasci stare.
+- **Contesto, per non spaventarsi e per non illudersi**: il 05/10 alle 03:30 la RAM **disponibile** del VPS (che il referto chiama "libera") era **1,81 GB su 12 GB** [MISURATO, CODA_04, letta alle 03:30 mentre girava il runner]. Con 200-500 MB in piu' restano 1,3-1,6 GB (con il caso peggiore ~700 MB: ~1,1 GB): sopra il pavimento di 1024 MB, ma **con poco margine**. Se la riga d'installazione scrive `la RAM libera e GIA sotto il pavimento`, **non si attacca**.
 - Il carico dell'ombra e' una **STIMA** (nessuno l'ha mai misurato girare): i numeri veri li da' la prima ora.
 
 ## Passo 6 -- come si ferma (🪟 terminale 50503392)
@@ -93,6 +112,7 @@ Tutte rispetto al valore **"prima"** del referto della riga d'installazione. Son
 - Lo stato si salva da solo alla chiusura; un riavvio la riprende senza doppioni. I file in `MQL5\Files\ABTG_Ombra\` restano: non vanno cancellati.
 - Chiudere il grafico toglie l'ombra anche dal profilo ORO al prossimo salvataggio: dopo un riavvio di MT5 non torna.
 - In ogni dubbio: **chiudi il grafico e mandami lo screenshot**. Nessuna sedia ne soffre.
+- Se l'ombra va in **errore** (es. `array out of range`, `zero divide` nella scheda Esperti): MT5 **ferma solo l'ombra** e la toglie dal grafico; le sedie e il terminale continuano [comportamento documentato di MQL5; NON VERIFICATO su questo EA]. 🔴 **L'unica eccezione e' la memoria**: se il processo resta senza RAM, ne soffrono tutti gli EA del terminale. E' per questo che le soglie di RAM valgono da subito.
 
 ## La regola e la riserva (una riga neutra ciascuna)
 - **Regola**: il terminale lo sceglie Claudio. Ha scelto il **50503392**.
