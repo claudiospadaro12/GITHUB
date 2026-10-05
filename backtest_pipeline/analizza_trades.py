@@ -1144,6 +1144,12 @@ def main():
             gr = giornale_runner("50504263")
             if (gr and gr["giorno"] < giorno and gr["ordini"] == 0
                     and (gr["righe"] or 0) >= SOGLIA_LOG_PIENO):
+                # Il fallback va DENTRO la guardia: `("[ora non letta]").split()[-1]`
+                # stampava "letta]" dentro un banner rosso (famiglia 1144: fa
+                # spazzatura visibile, non certifica il falso). Trovato dal
+                # cancello alla 5a passata con un referto senza `ultima scrittura`.
+                _ora_log = (gr["ultima_scrittura"].split()[-1]
+                            if gr["ultima_scrittura"] else "[ora non letta]")
                 out += ["> 🔴 **NESSUN EA HA POTUTO OPERARE su `50504263` — ma "
                         "il fatto MISURATO e' un altro, e va detto per primo: "
                         "l'ultimo log Esperti del TERMINALE del 100k e' quello "
@@ -1152,9 +1158,8 @@ def main():
                         "giornale del runner (`%s`, sonda delle 03:30 del "
                         "**%s**) su quell'ultimo giorno con log da' **0** righe "
                         "di ordine su **%s** righe totali."
-                        % (gr["giorno"],
-                           (gr["ultima_scrittura"] or "[ora non letta]").split()[-1],
-                           d100, gr["referto"], gr["sonda"], gr["righe"]), "",
+                        % (gr["giorno"], _ora_log, d100, gr["referto"],
+                           gr["sonda"], gr["righe"]), "",
                         "> 🔴 **E qui il salto NON si fa**: MT5 scrive un log "
                         "per ogni giorno in cui gira **con EA attaccati**, "
                         "quindi *nessun log* dice che quel **TERMINALE era "
