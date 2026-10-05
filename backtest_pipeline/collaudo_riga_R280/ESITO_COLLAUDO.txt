@@ -3,11 +3,11 @@ Pin della riga (contiene i due file prova, i criteri, l EA, l include, il driver
 Riga: backtest_pipeline/righe/RIGA_ROUND_R280.txt  (1 riga fisica, 61555 byte, SHA256 875909B51291B1BB7DF567AF3C1B7DBA519341F9DD36AA452FCB17E8E9D65B9A, marcatore MARCATORE_RIGA_ROUND_R280_v1)
 
 FATTO (a macchina, su Linux con pwsh 7.4.6 e uno STUB del driver, cioe NON su Windows PowerShell 5.1 ne con MT5):
-  assembla.py --verifica ..................... IDENTICA byte per byte (la riga e' rigenerata dal sorgente riga_src.txt al pin; 9 asserzioni sui file prova, i CSV veri di R262b/R245b,
+  assembla.py --verifica ..................... IDENTICA byte per byte (la riga e' rigenerata dal sorgente riga_src.txt al pin; asserzioni sui file prova, i CSV veri di R262b/R245b,
                                                il referto di R262b, le tolleranze, i magic, EA/include byte per byte = 02c70e17, driver e walkforward con le impronte del PASS d949f705)
   controlla_riga.py --oggetto riga ........... nessun difetto meccanico (ASCII puro, 0 errori dal parser PowerShell, nessun costrutto pwsh-7-only); 5 rilievi gia presenti in EMAGEM2 (stringhe con i nomi dei terminali vietati)
   controlla_prova.py (R280a, R280e) .......... ESITO OK, 8 celle, 16 passate, 0 problemi
-  leggi_r280.py --autotest ................... 108/108 (30 casi al bordo del cancello, 16 mutanti delle soglie del cancello, 26 verdetti con attese scritte a mano, 16 mutanti delle soglie del verdetto)
+  leggi_r280.py --autotest ................... 108/108 (33 casi al bordo del cancello + 4 controlli di residui e funzioni, 18 mutanti della tolleranza, 29 verdetti con attese scritte a mano, 16 mutanti delle soglie del verdetto, 8 casi di stato/S0/asse/raccolta)
   giornali_veri.py ........................... 4/4 (giornale VERO del tester del 27/09: stesso EA, simbolo U30USD M5, stesse finestre IS/OOS di R280)
   riprove_veri.py ............................ 11/11 (file RIPROVE scritti dal driver vero)
   battery.py ................................. 155/155 scenari (cancello G0 + G1 con 33 casi al bordo derivati a mano dalla tolleranza congelata, gambe morte e riprove, CSV, pin, giornale, 166/892,
