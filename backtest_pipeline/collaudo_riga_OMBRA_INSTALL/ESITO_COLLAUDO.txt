@@ -1,0 +1,11 @@
+AUTOTEST STATICO: OK
+STATICO: OK
+    OK   compila: 0 errori dal parser PowerShell vero (RIGA_OMBRA_INSTALL.ps1)
+ESITO: nessun difetto meccanico.
+BATTERIA: 53/53 scenari verdi
+  mutazione ram_poco_margine_muta              -> PRESA da 12c_ram_poco_margine
+MUTAZIONI: 56/56 PRESE dalla sentinella (0 prese solo da altro scenario)
+  mutazione bootstrap pin_non_passato      -> PRESA da a
+BOOTSTRAP: OK (4 scenari + 4 mutazioni)
+    OK   compila: 0 errori dal parser PowerShell vero (RIGA_LANCIA_OMBRA_INSTALL.txt)
+ESITO: nessun difetto meccanico.
