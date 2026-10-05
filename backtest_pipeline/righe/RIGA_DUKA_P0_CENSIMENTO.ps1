@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_DUKA_P0_v1
+#  MARCATORE_RIGA_DUKA_P0_v2
 #  RIGA_DUKA_P0_CENSIMENTO.ps1 -- P0 di report/PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md
 #  (par. 3.1): CENSIMENTO DI SOLA LETTURA del PC di backtest prima di
 #  toccare il Dow Dukascopy. NESSUN download, NESSUN MT5 aperto, NESSUN
@@ -430,6 +430,7 @@ try{
         continue
       }
       $S.nativi_mesi = @{}
+      $S.nativi_zero = @{}
       $basesR = (Convert-Path -LiteralPath $bases)
       $cartU = @(Get-ChildItem -LiteralPath $bases -Directory -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object { $_.Name -like 'U30USD*' })
       Dico ('   cartelle U30USD* sotto bases\ (profondita 3): ' + $cartU.Count)
@@ -444,7 +445,11 @@ try{
         foreach($f in $files){
           $mese = ''; if($f.Name -match '^(\d{6})\.'){ $mese = $Matches[1] }
           $nota = ''
-          if($mese -ne '' -and ($MesiNativi -contains $mese) -and $c.Name -eq 'U30USD' -and $tipo -eq 'TICK'){ $nota = '   <-- mese di un giorno della sonda'; $S.nativi_mesi[$mese] = [long]$f.Length }
+          # un .tkc a ZERO BYTE e' vuoto o troncato (checklist 16): si elenca, ma NON conta come mese presente nella sintesi
+          if($mese -ne '' -and ($MesiNativi -contains $mese) -and $c.Name -eq 'U30USD' -and $tipo -eq 'TICK'){
+            if([long]$f.Length -gt 0){ $nota = '   <-- mese di un giorno della sonda'; $S.nativi_mesi[$mese] = [long]$f.Length }
+            else { $nota = '   <-- mese di un giorno della sonda, file a ZERO BYTE (vuoto o troncato): NON contato come presente'; $S.nativi_zero[$mese] = 0 }
+          }
           Dico ('        ' + $f.Name + '  ' + $f.Length + ' byte  ' + $f.LastWriteTime.ToString('yyyy-MM-dd HH:mm', $INV) + $nota)
         }
       }
@@ -531,7 +536,7 @@ try{
   } else { Dico ('sedie attaccate : ' + $nonm) }
   if($S.ContainsKey('maxbars')){ Dico ('MaxBars (config\common.ini) : ' + $S.maxbars + ' ' + $mis + $(if($S.maxbars -lt 200000){ '   -> per P2/P6: tetto BASSO, il tester girerebbe su meno storico senza dirlo (classe 160): va alzato prima dei round' }else{ '' })) } else { Dico ('MaxBars : ' + $nonm + '   -> per P2/P6: da verificare prima dei round (classe 160)') }
   if($S.ContainsKey('custom_dk')){ Dico ('custom U30USD_DK con tick (bases\Custom\ticks) : ' + ($S.custom_dk -gt 0) + ', residui DKNEG: ' + $S.custom_neg + ' ' + $mis) } else { Dico ('custom U30USD_DK : ' + $nonm) }
-  if($S.ContainsKey('nativi_cartelle')){ Dico ('tick nativi U30USD sotto bases\ : cartelle ' + $S.nativi_cartelle + ', mesi della sonda con file ' + $S.nativi_mesi.Count + ' su ' + $MesiNativi.Count + ' (presenza del mese, NON del giorno 2024.11.20) ' + $mis) } else { Dico ('tick nativi U30USD : ' + $nonm) }
+  if($S.ContainsKey('nativi_cartelle')){ Dico ('tick nativi U30USD sotto bases\ : cartelle ' + $S.nativi_cartelle + ', mesi della sonda con file ' + $S.nativi_mesi.Count + ' su ' + $MesiNativi.Count + ' (presenza del mese, NON del giorno 2024.11.20; file a zero byte NON contati: ' + $S.nativi_zero.Count + ') ' + $mis) } else { Dico ('tick nativi U30USD : ' + $nonm) }
   Dico 'tetto di 250 ore di F1 : NON lo misura P0 (e il RITMO di download: lo misura il canarino P3, oggi 4,1-16,0 min/giorno = 90-348 h per il nucleo, piano par. 3.4)'
   if($Problemi.Count -gt 0){ Dico ('PASSI FALLITI: ' + $Problemi.Count); foreach($p in $Problemi){ Dico ('  - ' + $p) } }
   Dico 'Questa riga ha LETTO e basta: oltre al Desktop (cartella DUKA_P0_* e zip) non ha scritto, copiato, cancellato, chiuso o lanciato niente.'

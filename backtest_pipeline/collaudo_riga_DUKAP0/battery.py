@@ -56,6 +56,8 @@ def scenari():
     # classe 1119: history\U30USD (barre M1) c'e' sempre su un MT5 vero; non deve passare per la cartella dei tick nativi, ne' history\U30USD_DK per il custom con tick
     sc.append(("16c_solo_history_nativa", S(nativi_cartella=False, custom_dk=True), {}))
     sc.append(("16d_custom_solo_history", S(custom_dk=False, custom_solo_history=True), {}))
+    # .tkc a ZERO BYTE (vuoto o troncato, checklist 16): elencato ma NON contato come mese presente (contro-esempio del verificatore-stringhe, 05/10)
+    sc.append(("16e_tkc_zero_byte", S(nativi_zero=["202411", "202503"]), {}))
     # MaxBars: tetto basso (classe 160 / checklist 36) e chiave assente
     sc.append(("17_maxbars_basso", S(common_ini="Login=50503392\r\nServer=BCMMarkets-Demo\r\n[Charts]\r\nMaxBars=100000\r\n"), {}))
     sc.append(("17b_maxbars_alto", S(common_ini="Login=50503392\r\nServer=BCMMarkets-Demo\r\n[Charts]\r\nMaxBars=2000000000\r\n"), {}))
@@ -325,11 +327,16 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
     # nativi
     if bcm == 1:
         if spec["nativi_cartella"]:
-            gi = [m for m in spec["nativi_mesi"] if m in ("202410", "202411", "202412", "202501", "202502", "202503", "202506")]
-            must("tick nativi U30USD sotto bases\\ : cartelle 1, mesi della sonda con file %d su 7" % len(gi))
+            zz = [m for m in spec["nativi_mesi"] if m in ("202410", "202411", "202412", "202501", "202502", "202503", "202506") and m in spec.get("nativi_zero", [])]
+            gi = [m for m in spec["nativi_mesi"] if m in ("202410", "202411", "202412", "202501", "202502", "202503", "202506") and m not in zz]
+            must("tick nativi U30USD sotto bases\\ : cartelle 1, mesi della sonda con file %d su 7 (presenza del mese, NON del giorno 2024.11.20; file a zero byte NON contati: %d)" % (len(gi), len(zz)))
             for m in gi:
                 must("        %s.tkc  %d byte" % (m, 100 + int(m[-2:])))
-            n_marc = out.count("<-- mese di un giorno della sonda")
+            for m in zz:
+                must("        %s.tkc  0 byte" % m)
+            if out.count("file a ZERO BYTE (vuoto o troncato): NON contato come presente") != len(zz):
+                err.append("mesi a zero byte marcati %d invece di %d" % (out.count("file a ZERO BYTE (vuoto o troncato): NON contato come presente"), len(zz)))
+            n_marc = len(re.findall(r"<-- mese di un giorno della sonda\r?$", out, re.M))
             if n_marc != len(gi):
                 err.append("mesi marcati %d invece di %d" % (n_marc, len(gi)))
         elif spec["custom_dk"] or spec["residuo_neg"]:

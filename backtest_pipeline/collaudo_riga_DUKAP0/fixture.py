@@ -180,7 +180,7 @@ def costruisci(base, spec):
         nd = os.path.join(dati, "bases", "BCMMarkets-Demo", "ticks", "U30USD")
         os.makedirs(nd)
         for m in spec["nativi_mesi"]:
-            open(os.path.join(nd, m + ".tkc"), "wb").write(b"n" * (100 + int(m[-2:])))
+            open(os.path.join(nd, m + ".tkc"), "wb").write(b"" if m in spec.get("nativi_zero", []) else b"n" * (100 + int(m[-2:])))   # nativi_zero: .tkc a ZERO BYTE (vuoto o troncato)
     if spec["custom_dk"]:
         cdk = os.path.join(dati, "bases", "Custom", "ticks", "U30USD_DK")
         os.makedirs(cdk)

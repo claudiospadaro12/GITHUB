@@ -18,7 +18,7 @@ assert r.returncode == 0, "il commit %s NON e' raggiungibile da origin/lavoro: p
 riga = subprocess.run(["git", "show", "%s:backtest_pipeline/righe/RIGA_DUKA_P0_CENSIMENTO.ps1" % C], cwd=REPO, capture_output=True, check=True).stdout
 riga.decode("ascii")
 H = hashlib.sha256(riga).hexdigest().upper()
-MARC = "MARCATORE_RIGA_DUKA_P0_v1"
+MARC = "MARCATORE_RIGA_DUKA_P0_v2"
 assert riga.count(MARC.encode()) == 1
 msg = ("BERSAGLIO: SOLO una finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\\Program Files\\BCM Markets MT5 Terminal, demo 50503392). "
        "Questa e la riga P0 di SOLA LETTURA del piano Dow Dukascopy (commit %s): NON apre MT5, NON scarica dati Dukascopy, NON lancia python ne curl, NON chiude nessun processo, "

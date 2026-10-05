@@ -37,6 +37,8 @@
 #   K valutazione con leggi_f2_dk.py (PASSA / NON PASSA / NON VALUTABILE) -- lo stampa e lo salva, NON decide altro
 #   L raccolta sul Desktop (cartella + zip, elenco dei file letto DALLO ZIP)
 #  K0b (lag di correlazione per giorno) NON e' in questa riga: "serve dopo", solo se il negativo risulta debole.
+#  DURATA: NON misurata nel suo insieme. Misurato: la riconversione dei 222 giorni dalla cache ~12 min (03/09 22:16, 0.2 h);
+#  NON misurato: l'import di ~20,75 milioni di tick (la figlia aspetta al massimo 240 min per import). Il "10-20 min" del piano e' ottimista.
 #  Codici d'uscita: 0 = tutte le fasi eseguite (il verdetto F2 e' stampato, e puo' essere NON PASSA); 1 = FERMATA da un gate;
 #  2 = fasi eseguite ma l'esito F2 e' NON VALUTABILE. ASCII PURO (Windows PowerShell 5.1 legge i .ps1 come ANSI).
 # =====================================================================
@@ -396,7 +398,21 @@ try{
   $logK = Join-Path $P1Work "valutazione_f2.txt"
   $RcF2 = Esegui-Nativo $Python @("-u", (Reale $LeggiF2), "--cartella", (Reale $ResDir), "--out", (Join-Path (Reale $ResDir) "F2_VALUTAZIONE.txt")) $logK
   if($RcF2 -eq 0){ $EsitoF2 = "PASSA" } elseif($RcF2 -eq 1){ $EsitoF2 = "NON PASSA" } elseif($RcF2 -eq 2){ $EsitoF2 = "NON VALUTABILE" } else { $EsitoF2 = "ERRORE DEL VALUTATORE (rc " + $RcF2 + ")" }
+  # classe 938: rc 1 e' ANCHE il codice di un'eccezione python non gestita (traceback), non solo "NON PASSA". L'esito si accetta
+  # SOLO se F2_VALUTAZIONE.txt esiste e la sua riga di verdetto dice la STESSA cosa del codice; altrimenti nessun verdetto F2.
+  $f2Txt = ""; if(Test-Path -LiteralPath $f2Out){ $f2Txt = Leggi-Condiviso $f2Out }
+  $f2Riga = "(nessuna riga di verdetto)"
+  if($f2Txt -match '(?m)^CANCELLO ZERO DEI _DK \(serve \(1\) E \(2\) E \(3\)\): (PASSA|NON PASSA)\s*$'){ $f2Riga = $Matches[1] }
+  elseif($f2Txt -match '(?m)^NON VALUTABILE:'){ $f2Riga = "NON VALUTABILE" }
+  if(($RcF2 -ge 0) -and ($RcF2 -le 2) -and ($f2Riga -ne $EsitoF2)){
+    $EsitoF2 = "ERRORE DEL VALUTATORE (rc " + $RcF2 + " ma F2_VALUTAZIONE.txt " + $(if($f2Txt -eq ""){ "assente o vuoto" }else{ "dice: " + $f2Riga }) + "): NESSUN verdetto F2, ne PASSA ne NON PASSA. Leggi " + $logK
+    $RcF2 = 9
+  }
   Dico ("ESITO F2: " + $EsitoF2) $(if($RcF2 -eq 0){ "Green" }else{ "Yellow" })
+  # K0b non esiste ancora: se manca SOLO la (3), il cancello non e' passato ma il feed NON e' morto (certificato di morte, 09/09)
+  if(($EsitoF2 -eq "NON PASSA") -and ($f2Txt -match '(?m)^\(1\) .*: PASS\s*$') -and ($f2Txt -match '(?m)^\(2\) .*: PASS\s*$') -and ($f2Txt -match '(?m)^\(3\) .*: FAIL\s')){
+    Dico "CANCELLO NON PASSATO SOLO PER LA (3): controllo negativo debole o non misurato. SERVE K0b (lag di correlazione per giorno sui 9 giorni): lo script NON esiste ancora, va costruito e passato dal cancello. U30USD_DK resta in frigo FINO A K0b: NON e' un verdetto di morte del feed." "Yellow"
+  }
   if(Test-Path -LiteralPath $f2Out){ [void]$CartFiles.Add($f2Out) }
   [void]$CartFiles.Add($logK)
   Fase "K" ("valutazione F2: " + $EsitoF2)

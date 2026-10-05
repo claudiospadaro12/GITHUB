@@ -35,11 +35,11 @@ def scenari():
     sc = []
     sc.append(("01_F2_passa", S(), dict(exit=0, esito="PASSA")))
     sc.append(("02_importer_8su8_con_2024_11_20_non_confrontabile", S(scen_dk={**{g: ["MISURATO", "0.03", "99.0"] for g in h1.GIORNI9}, "2024.11.20": ["NON_CONFRONTABILE"]}), dict(exit=0, esito="NON PASSA", figlia_dk_rc=4)))
-    sc.append(("03_negativo_cieco_0_045", S(scen_neg={"2025.03.12": ["MISURATO", "0.045", "95.0"]}), dict(exit=0, esito="NON PASSA")))
-    sc.append(("04_negativo_non_confrontabile", S(scen_neg={"2025.03.12": ["NON_CONFRONTABILE"]}), dict(exit=0, esito="NON PASSA")))
+    sc.append(("03_negativo_cieco_0_045", S(scen_neg={"2025.03.12": ["MISURATO", "0.045", "95.0"]}), dict(exit=0, esito="NON PASSA", k0b=True)))
+    sc.append(("04_negativo_non_confrontabile", S(scen_neg={"2025.03.12": ["NON_CONFRONTABILE"]}), dict(exit=0, esito="NON PASSA", k0b=True)))
     sc.append(("05_giorno_fuori_soglia", S(scen_dk={**{g: ["MISURATO", "0.03", "99.0"] for g in h1.GIORNI9}, "2024.12.10": ["MISURATO", "0.07", "99.0"]}), dict(exit=0, esito="NON PASSA")))
     sc.append(("06_copertura_79_99", S(scen_dk={**{g: ["MISURATO", "0.03", "99.0"] for g in h1.GIORNI9}, "2024.10.31": ["MISURATO", "0.01", "79.99"]}), dict(exit=0, esito="NON PASSA")))
-    sc.append(("07_neg_scritto_col_simbolo_DK", S(righe_grezze={"U30USD_DKNEG": [["IMP-TICK-v1-GIORNI", "U30USD_DK", "2025.03.12", "MISURATO", "0.09000000", "95.0000", "1", "1", "1", "1", "0.05000000", "80.0000", "NO"]]}), dict(exit=0, esito="NON PASSA")))
+    sc.append(("07_neg_scritto_col_simbolo_DK", S(righe_grezze={"U30USD_DKNEG": [["IMP-TICK-v1-GIORNI", "U30USD_DK", "2025.03.12", "MISURATO", "0.09000000", "95.0000", "1", "1", "1", "1", "0.05000000", "80.0000", "NO"]]}), dict(exit=0, esito="NON PASSA", k0b=True)))
     sc.append(("08_giro_a_vuoto", S(solo_controllo=True), dict(exit=0, esito=None, vuoto=True)))
     sc.append(("09_macchina_vps", S(macchina="VMI3047753"), dict(exit=None, macchina=True)))
     sc.append(("10_mt5_vivo", S(mt5_vivo=True), dict(exit=1, fermata="A", prima_di_toccare=True, msg='MT5 O METAEDITOR APERTO')))
@@ -83,6 +83,11 @@ def scenari():
     sc.append(("34_file_stale_DK_in_MQL5_Files", S(files_stale=["U30USD_DK_ticks_2025-07.csv"]), dict(exit=1, fermata="H", backup_fatto=True, msg="non e' arrivata a scrivere il file per giorno di U30USD_DK:")))
     sc.append(("35_file_stale_DKNEG_in_MQL5_Files", S(files_stale=["U30USD_DKNEG_ticks_2024-12.csv"]), dict(exit=1, fermata="J", backup_fatto=True, dk_fatto=True, msg="non e' arrivata a scrivere il file per giorno di U30USD_DKNEG")))
     sc.append(("36_neg_gia_in_MQL5_Files_stesso_nome", S(files_stale=["U30USD_DKNEG_ticks_2025-03.csv"]), dict(exit=0, esito="PASSA")))
+    # classe 938 (controllo preventivo 05/10): rc 1 del valutatore e' ANCHE un traceback python; un byte non ASCII nel file per giorno lo fa morire.
+    # Prima: "ESITO F2: NON PASSA" senza F2_VALUTAZIONE.txt (un morto senza certificato). Ora: ERRORE DEL VALUTATORE, nessun verdetto, rc 1.
+    rg = [["IMP-TICK-v1-GIORNI", "U30USD_DK", g, "MISURATO", "0.03000000", "99.0000", "1000", "1000", "2.5000", "2.5000", "0.05000000", "80.0000", "SI"] for g in h1.GIORNI9]
+    rg[1][8] = "2.5\u00e9"
+    sc.append(("37_valutatore_muore_rc1", S(righe_grezze={"U30USD_DK": rg}), dict(exit=1, esito=None, errore_valutatore=True)))
     return sc
 
 
@@ -210,7 +215,22 @@ def valuta(nome, spec, att, c, b, p, out, fuori0, fuori1, tick0, tick1, srv):
     # --- corsa completa
     for f in "ABCDEFGHIJK":
         must("FASE %s:" % f)
+    if att.get("errore_valutatore"):
+        must("ESITO F2: ERRORE DEL VALUTATORE (rc 1 ma F2_VALUTAZIONE.txt assente o vuoto)")
+        must("ESITO P1: fasi eseguite, ESITO F2 = ERRORE DEL VALUTATORE")
+        mustnot("ESITO F2: NON PASSA", None, "un traceback non e' un verdetto")
+        mustnot("ESITO F2: PASSA")
+        mustnot("SERVE K0b")
+        return err
     must("ESITO F2: %s" % att["esito"])
+    # la sola (3) che manca: il valutatore NON PASSA ma il feed non e' morto, serve K0b; se cade la (1) o la (2) quel messaggio NON deve uscire
+    if att["esito"] == "NON PASSA":
+        if att.get("k0b"):
+            must("CANCELLO NON PASSATO SOLO PER LA (3)", None, "serve K0b, non e' un verdetto di morte")
+        else:
+            mustnot("CANCELLO NON PASSATO SOLO PER LA (3)", None, "cade la (1) o la (2): K0b non basterebbe")
+    else:
+        mustnot("CANCELLO NON PASSATO SOLO PER LA (3)")
     must("ESITO P1: fasi eseguite, ESITO F2 = %s" % att["esito"])
     # i CSV nuovi sono ESATTAMENTE quelli del tool vero con --dst fisso (esecuzione separata); il backup e' ESATTAMENTE lo stato "usa"
     global EXP_USA, EXP_FISSO

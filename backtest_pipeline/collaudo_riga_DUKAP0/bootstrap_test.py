@@ -86,7 +86,7 @@ def main():
     if "IMPRONTA DIVERSA" not in r["stdout"] or "DUKA P0 -- CENSIMENTO" in r["stdout"] or r["cartelle"] or r["zips"]:
         err.append("(b) il file manomesso NON e' stato fermato dall'impronta")
     # (c) marcatore assente (con impronta COERENTE col file senza marcatore: il solo controllo del marcatore deve fermarlo)
-    senza = GIT.replace(b"MARCATORE_RIGA_DUKA_P0_v1", b"MARCATORE_RIGA_DUKA_P0_vX")
+    senza = GIT.replace(b"MARCATORE_RIGA_DUKA_P0_v2", b"MARCATORE_RIGA_DUKA_P0_vX")
     line_c = line.replace(H, hashlib.sha256(senza).hexdigest().upper())
     r = esegui(line_c, senza)
     if "Marcatore della riga P0 assente" not in r["stdout"] or "DUKA P0 -- CENSIMENTO" in r["stdout"] or r["cartelle"]:
@@ -110,7 +110,7 @@ def main():
     muts = [
         ("guardia_macchina", "if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){", "if($false){"),
         ("controllo_impronta", "if($h -ne '" + H + "'){", "if($false){"),
-        ("controllo_marcatore", "if(-not ($t | Select-String -SimpleMatch -Quiet -Pattern 'MARCATORE_RIGA_DUKA_P0_v1')){", "if($false){"),
+        ("controllo_marcatore", "if(-not ($t | Select-String -SimpleMatch -Quiet -Pattern 'MARCATORE_RIGA_DUKA_P0_v2')){", "if($false){"),
         ("pin_non_passato", "$DUKA_P0_PIN='" + C + "'; ", ""),
     ]
     for nome, old, new in muts:
