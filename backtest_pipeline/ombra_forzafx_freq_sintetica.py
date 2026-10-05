@@ -158,25 +158,27 @@ def eventi_B(score, forza):
     return ev
 
 
-def cluster_giorno_valuta(ev, k):
-    """componenti connesse: eventi dello stesso giorno server che condividono una valuta (union-find)."""
-    per_giorno = {}
-    for (pr, s, v) in ev:
-        per_giorno.setdefault(int(k[s]) // PTS_GIORNO, []).append(pr)
-    ncl = 0
-    for g, lst in per_giorno.items():
-        padre = list(range(len(lst)))
+def cluster_giorno_valuta(ev, k, finestra=0):
+    """componenti connesse: due eventi sono collegati se i loro giorni server distano <= 'finestra' giorni
+    (0 = stesso giorno, la regola di casa di EMA200_H4_D1_FOREX28 sez. 6) E le coppie condividono una valuta.
+    Per ogni valuta basta collegare gli eventi CONSECUTIVI di quella valuta (stessa connettivita', costo lineare)."""
+    n = len(ev)
+    padre = list(range(n))
 
-        def trova(a):
-            while padre[a] != a:
-                padre[a] = padre[padre[a]]
-                a = padre[a]
-            return a
-        for i, j in itertools.combinations(range(len(lst)), 2):
-            if {BASE[lst[i]], QUOT[lst[i]]} & {BASE[lst[j]], QUOT[lst[j]]}:
-                padre[trova(i)] = trova(j)
-        ncl += len({trova(i) for i in range(len(lst))})
-    return ncl
+    def trova(a):
+        while padre[a] != a:
+            padre[a] = padre[padre[a]]
+            a = padre[a]
+        return a
+    ordine = sorted(range(n), key=lambda i: int(k[ev[i][1]]))
+    ultimo = {}
+    for i in ordine:
+        g = int(k[ev[i][1]]) // PTS_GIORNO
+        for v in (int(BASE[ev[i][0]]), int(QUOT[ev[i][0]])):
+            if v in ultimo and g - ultimo[v][1] <= finestra:
+                padre[trova(i)] = trova(ultimo[v][0])
+            ultimo[v] = (i, g)
+    return len({trova(i) for i in range(n)})
 
 
 def rendimento_h0(ev, p, k, ore=24):
@@ -198,7 +200,7 @@ def main():
     ap.add_argument("--passo", type=int, default=12, help="punti da 5 minuti fra due letture: 12 = ogni H1, 48 = ogni H4")
     ap.add_argument("--persist", type=int, default=1, help="letture consecutive con |punteggio|>=70 per l'evento A")
     a = ap.parse_args()
-    tot = {"anni": 0.0, "lett": 0, "ge70": 0, "ge40": 0, "A40": 0, "A70": 0, "B": 0, "clA": 0, "clB": 0}
+    tot = {"anni": 0.0, "lett": 0, "ge70": 0, "ge40": 0, "A40": 0, "A70": 0, "B": 0, "clA": 0, "clB": 0, "clA2": 0, "clB2": 0}
     rend = []
     somma_max = 0.0
     maxabs = 0.0
@@ -222,6 +224,8 @@ def main():
         tot["B"] += len(eB)
         tot["clA"] += cluster_giorno_valuta(eA40, k)
         tot["clB"] += cluster_giorno_valuta(eB, k)
+        tot["clA2"] += cluster_giorno_valuta(eA40, k, 2)
+        tot["clB2"] += cluster_giorno_valuta(eB, k, 2)
         rend.append((rendimento_h0(eA40, p, k), rendimento_h0(eB, p, k)))
     y = tot["anni"]
     print("anni simulati (settimane da 5 giorni, 260 gg/anno): %.1f" % y)
@@ -231,9 +235,11 @@ def main():
           % (100.0 * tot["ge70"] / tot["lett"], 100.0 * tot["ge40"] / tot["lett"]))
     print("A (cross 70, riarmo sotto 40): %.1f eventi/anno su 28 coppie, %.1f cluster giorno-valuta/anno"
           % (tot["A40"] / y, tot["clA"] / y))
+    print("A: cluster con finestra di 2 giorni (vita 48h): %.1f /anno" % (tot["clA2"] / y))
     print("A (cross 70, riarmo sotto 70): %.1f eventi/anno" % (tot["A70"] / y))
     print("B (top contro bottom, >=70):   %.1f eventi/anno, %.1f cluster giorno-valuta/anno"
           % (tot["B"] / y, tot["clB"] / y))
+    print("B: cluster con finestra di 2 giorni: %.1f /anno" % (tot["clB2"] / y))
     for i, ((mA, seA, nA), (mB, seB, nB)) in enumerate(rend):
         print("  seme %d: rendimento +24h in sigma-giorno (H0 = 0): A %+0.3f +- %0.3f (n %d) | B %+0.3f +- %0.3f (n %d)"
               % (i, mA, seA, nA, mB, seB, nB))
