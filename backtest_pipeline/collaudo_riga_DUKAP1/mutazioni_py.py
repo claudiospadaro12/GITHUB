@@ -5,6 +5,8 @@ mutazioni_py.py -- il collaudo del collaudo per i DUE strumenti python di P1: du
 --senza-raccolta, --confronta-giorni). Ogni mutazione TESTUALE spegne UN controllo o sbaglia UNA regola; il --autotest del modulo mutato deve uscire con codice diverso da 0.
 EQUIVALENTE dichiarato (1, col conto): confronto_conteggio_ignorato -- togliere "nv == nn" dal confronto dei giorni non cambia nessun esito, perche' due insiemi di righe di
 conteggio diverso hanno SHA256 diversi (salvo collisione); il controllo del conteggio resta come difesa in profondita' e per il messaggio ("righe vecchie N nuove M").
+EQUIVALENTE dichiarato (2): copia_giorno_non_validato -- senza la validazione esplicita del formato, strptime("%Y.%m.%d") solleva comunque ValueError su "2025-03-12" e copia_cache_cmd lo trasforma
+nello stesso rc 2: la validazione resta per dare il messaggio giusto.
 Uso: python3 mutazioni_py.py   -> ultima riga "MUTAZIONI PY: p/n PRESE (+ equivalenti dichiarati)"
 """
 import os, shutil, subprocess, sys, tempfile
@@ -45,6 +47,14 @@ F2 = [
  ("intestazione_non_controllata", "    if [c.strip() for c in righe[0]] != colonne:", "    if False:"),
 ]
 DT = [
+ ("verifica_vuoto_e_buco", "                elif not dati:\n                    c[\"vuoti\"] += 1", "                elif False:\n                    c[\"vuoti\"] += 1"),
+ ("verifica_buchi_ignorati", "        if r[\"buchi\"] or r[\"illeggibili\"]:\n            rc = 3", "        if False:\n            rc = 3"),
+ ("verifica_illeggibili_ignorati", "        if r[\"buchi\"] or r[\"illeggibili\"]:\n            rc = 3", "        if r[\"buchi\"]:\n            rc = 3"),
+ ("verifica_simbolo_assente_ok", "            log(\"%s: cartella %s ASSENTE\" % (sym, os.path.join(raw, sym)))\n            rc = 3", "            log(\"%s: cartella %s ASSENTE\" % (sym, os.path.join(raw, sym)))\n            rc = 0"),
+ ("copia_src_dst_ammessi", "    if os.path.abspath(lavoro_src) == os.path.abspath(lavoro_dst):\n        raise ValueError", "    if False:\n        raise ValueError"),
+ ("copia_solo_bi5", "            for (s, d) in ((s_ok, d_ok), (s_no, d_no)):", "            for (s, d) in ((s_ok, d_ok),):"),
+ ("copia_mancanti_ignorati", "    if mancanti:\n        log(\"COPIA CACHE: INCOMPLETA", "    if False:\n        log(\"COPIA CACHE: INCOMPLETA"),
+ ("copia_giorno_non_validato", "    for g in giorni_txt:\n        if not GIORNO_RE.match(g):\n            raise ValueError(\"giorno '%s' non e' AAAA.MM.GG\" % g)\n    copiati, mancanti", "    copiati, mancanti"),
  ("fisso_zero", "    if dst == \"fisso\":\n        return timedelta(hours=1)", "    if dst == \"fisso\":\n        return timedelta(0)"),
  ("fisso_alias_usa", "    if dst == \"fisso\":\n        return timedelta(hours=1)           # BCM indici", "    if dst == \"fisso\":\n        return timedelta(hours=1) if dst_usa_attivo(dt_utc) else timedelta(0)           # BCM indici"),
  ("fisso_alias_europa", "    if dst == \"fisso\":\n        return timedelta(hours=1)           # BCM indici", "    if dst == \"fisso\":\n        return timedelta(hours=1) if dst_eu_attivo(dt_utc) else timedelta(0)           # BCM indici"),
@@ -62,7 +72,7 @@ DT = [
 ]
 
 
-EQUIVALENTI = {"confronto_conteggio_ignorato"}
+EQUIVALENTI = {"confronto_conteggio_ignorato", "copia_giorno_non_validato"}
 
 
 def prova(nome, old, new, modulo):

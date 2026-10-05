@@ -1131,6 +1131,14 @@ def autotest():
         r = verifica_cache(raw, "USA30IDXUSD", g1, g1)
         assert r["buchi"] == ["2025.01.15 07h"] and r["illeggibili"] == ["2025.01.15 10h"], "buco/illeggibile: %s" % (r,)
         assert corri(base_a) == 3, "verifica cache con buchi: rc"
+        open(f_no_buco, "wb").close()                       # rimesso l'.assente dell'ora 7: resta SOLO l'illeggibile (10h) -> rc 3 lo stesso
+        r = verifica_cache(raw, "USA30IDXUSD", g1, g1)
+        assert r["buchi"] == [] and r["illeggibili"] == ["2025.01.15 10h"], "solo illeggibile: %s" % (r,)
+        assert corri(base_a) == 3, "verifica cache con il solo illeggibile: rc 3"
+        open(f_rot, "wb").write(lzma.compress(RECORD.pack(250, 3294400, 3294150, 1.0, 1.0), format=lzma.FORMAT_ALONE))     # riparato
+        assert corri(base_a) == 0, "verifica cache riparata: rc 0"
+        os.remove(f_no_buco)                                # di nuovo il BUCO per i controlli che seguono
+        open(f_rot, "wb").write(lzma.compress(RECORD.pack(250, 3294400, 3294150, 1.0, 1.0), format=lzma.FORMAT_ALONE)[:9])
         # una cartella simbolo assente: rc 3, non eccezione
         assert corri(["--verifica-cache", "--simboli", "EURUSD", "--da", "2025-01-15", "--a", "2025-01-15", "--cartella", lavoro]) == 3, "simbolo assente"
         # sola lettura: nessun file nuovo nella cache
