@@ -12,6 +12,8 @@ AUTOTEST SCHEDA_SIMBOLO_v1
    ok: Oanda con intestazione e colonne in ordine diverso
    ok: export MT5 con data a punti e senza secondi
    ok: righe malformate CONTATE (2), non sparite
+   ok: BCM_MISTO: 2024-07 estate vecchio -60, 2024-12 inverno vecchio 0, 2025 UTC+1 fisso -60/-60
+   ok: BCM_MISTO: la riga del 10/01/2025 (finestra dubbia) e' scartata e contata
 3. pulizia
    ok: pulizia: 1 OHLC incoerente, 1 doppio, fuori ordine contato, 2 barre valide
 4. ADR e giorno della settimana su dati con la risposta nota

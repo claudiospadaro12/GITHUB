@@ -1099,23 +1099,25 @@ def matrici_correlazione(serie, finestra=None):
     return nomi, Rg, Ng, Rh, Nh
 
 
-def cluster_connessi(nomi, R, soglia):
+def cluster_media(nomi, R, soglia):
+    """Cluster per COLLEGAMENTO MEDIO sulla correlazione assoluta: si fondono i due gruppi con la correlazione
+    media piu' alta finche' resta >= soglia. (Il collegamento singolo, a catena, fondeva tutto in un blocco
+    solo: A-B 0,9 e B-C 0,55 mettevano insieme A e C anche con A-C 0,1.) NaN conta come 0."""
     n = len(nomi)
-    padre = list(range(n))
-
-    def trova(x):
-        while padre[x] != x:
-            padre[x] = padre[padre[x]]
-            x = padre[x]
-        return x
-    for i in range(n):
-        for j in range(i + 1, n):
-            if np.isfinite(R[i, j]) and abs(R[i, j]) >= soglia:
-                padre[trova(i)] = trova(j)
-    gr = {}
-    for i in range(n):
-        gr.setdefault(trova(i), []).append(nomi[i])
-    return [sorted(v) for v in gr.values()]
+    M = np.abs(np.nan_to_num(np.asarray(R, dtype=float), nan=0.0))
+    gruppi = [[i] for i in range(n)]
+    while len(gruppi) > 1:
+        best, bi, bj = -1.0, -1, -1
+        for i in range(len(gruppi)):
+            for j in range(i + 1, len(gruppi)):
+                v = float(np.mean([M[a, b] for a in gruppi[i] for b in gruppi[j]]))
+                if v > best:
+                    best, bi, bj = v, i, j
+        if best < soglia:
+            break
+        gruppi[bi] = gruppi[bi] + gruppi[bj]
+        del gruppi[bj]
+    return sorted([sorted(nomi[i] for i in g) for g in gruppi], key=lambda g: (-len(g), g[0]))
 
 
 CLUSTER_NOMINALI = {
@@ -1543,9 +1545,9 @@ def esegui(specs, uscita, spread_path=None, modo_giorno="utc1", orologio="utc1",
         nomi_e = ["%s|%s" % (s["simbolo"], s["feed"]) for s in serie]
         scrivi_matrice(os.path.join(uscita, "correlazioni_giornaliere.csv"), nomi_e, Rg, Ng)
         scrivi_matrice(os.path.join(uscita, "correlazioni_orarie.csv"), nomi_e, Rh, Nh)
-        cl = cluster_connessi(nomi_e, Rg, soglia_cluster)
+        cl = cluster_media(nomi_e, Rg, soglia_cluster)
         with open(os.path.join(uscita, "cluster.txt"), "w") as fh:
-            fh.write("cluster per correlazione giornaliera |rho| >= %.2f (componenti connesse), finestra %s\n" % (
+            fh.write("cluster per correlazione giornaliera, collegamento MEDIO, correlazione media assoluta >= %.2f, finestra %s\n" % (
                 soglia_cluster, ("%s -> %s" % (data_da_giorno(fin[0]), data_da_giorno(fin[1]))) if fin else "tutta"))
             for c in cl:
                 fh.write("  " + ", ".join(c) + "\n")
@@ -2045,8 +2047,13 @@ def autotest():
     # il campione si interseca per CHIAVE, non per posizione: spostare una serie di 5 giorni cambia il risultato
     kk = k + 5
     _check(abs(corr_su((k, r1), (kk, r1), 60)[0] - 1.0) > 0.05, "CONTRO-ESEMPIO: serie identiche sfasate di 5 chiavi NON danno rho=1 (allineamento per chiave)")
-    cl = cluster_connessi(["A", "B", "C"], np.array([[1, .9, .1], [.9, 1, .2], [.1, .2, 1]]), 0.5)
+    cl = cluster_media(["A", "B", "C"], np.array([[1, .9, .1], [.9, 1, .2], [.1, .2, 1]]), 0.5)
     _check(sorted(map(tuple, cl)) == [("A", "B"), ("C",)], "cluster per soglia: {A,B},{C}")
+    # CONTRO-ESEMPIO della catena: A-B 0,9, B-C 0,55, A-C 0,1: a collegamento singolo diventerebbe {A,B,C}
+    cl = cluster_media(["A", "B", "C"], np.array([[1, .9, .1], [.9, 1, .55], [.1, .55, 1]]), 0.5)
+    _check(sorted(map(tuple, cl)) == [("A", "B"), ("C",)], "CONTRO-ESEMPIO catena: A-C 0,1 NON finiscono nello stesso cluster solo perche' B-C vale 0,55")
+    cl = cluster_media(["A", "B"], np.array([[1, np.nan], [np.nan, 1]]), 0.5)
+    _check(sorted(map(tuple, cl)) == [("A",), ("B",)], "correlazione NaN (campione troppo corto) non fonde nessun gruppo")
     # --- ranking: senza finestra comune NON si fa
     log("12b. ranking e finestra comune")
     sa = _mk_serie(*_serie_sintetica(100, tri), sim="A")

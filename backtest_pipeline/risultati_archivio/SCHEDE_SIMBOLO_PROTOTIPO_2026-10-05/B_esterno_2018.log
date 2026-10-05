@@ -3,3 +3,24 @@ lettura D30EUR (HistData-GRXEUR, fuso NY): /tmp/claude-0/-home-user-GITHUB/c2d73
 lettura SPXUSD (HistData-SPXUSD, fuso NY): /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/hd_SPX
    M1 2,117,667, file 9
 lettura 225JPY (HistData-JPXJPY, fuso NY): /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/hd_JPX
+   M1 1,568,018, file 6
+lettura XAUUSD (Oanda-2018, fuso UTC): /tmp/sonda_st_cache/oanda-XAU_USD-2018-*.csv
+   M1 349,971, file 12
+lettura EURUSD (Oanda-2018, fuso UTC): /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/cache/oanda/oanda-EUR_USD-2018-*.csv
+   M1 359,807, file 12
+lettura GBPUSD (Oanda-2018, fuso UTC): /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/cache/oanda/oanda-GBP_USD-2018-*.csv
+   M1 360,776, file 12
+lettura AUDUSD (Oanda-2018, fuso UTC): /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/cache/oanda/oanda-AUD_USD-2018-*.csv
+   M1 333,213, file 12
+lettura AUDJPY (Oanda-2018, fuso UTC): /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/cache/oanda/oanda-AUD_JPY-2018-*.csv
+   M1 366,112, file 12
+lettura NASUSD (Oanda-NAS100-2018, fuso UTC): /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/cache/oanda/oanda-NAS100_USD-2018-*.csv
+   M1 347,349, file 12
+lettura SPXUSD (Oanda-SPX500-2018, fuso UTC): /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/cache/oanda/oanda-SPX500_USD-2018-*.csv
+   M1 296,223, file 12
+lettura 225JPY (Oanda-JP225-2018, fuso UTC): /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/cache/oanda/oanda-JP225_USD-2018-*.csv
+   M1 300,680, file 12
+analisi D30EUR|HistData-GRXEUR
+analisi SPXUSD|HistData-SPXUSD
+analisi 225JPY|HistData-JPXJPY
+analisi XAUUSD|Oanda-2018
