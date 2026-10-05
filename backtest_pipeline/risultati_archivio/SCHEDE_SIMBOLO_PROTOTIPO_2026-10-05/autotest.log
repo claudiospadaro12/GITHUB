@@ -1,0 +1,76 @@
+AUTOTEST SCHEDA_SIMBOLO_v1
+1. calendario e fusi
+   ok: ora legale USA 2015: 8 marzo 07:00 UTC -> 1 novembre 06:00 UTC
+   ok: ora legale EU 2015: 29 marzo 01:00 UTC -> 25 ottobre 01:00 UTC
+   ok: ora legale USA 2005 (regola vecchia): 3 aprile -> 30 ottobre
+   ok: 09:30 New York = 13:30 UTC d'estate e 14:30 UTC d'inverno
+   ok: bordi del cambio ora (EST/EDT) nei minuti locali: [np.int64(300), np.int64(240), np.int64(240), np.int64(300)]
+   ok: server BCM nuovo: UTC+1 fisso
+   ok: server BCM vecchio: UTC+0 inverno, UTC+1 estate
+2. lettura dei formati
+   ok: HistData senza intestazione
+   ok: Oanda con intestazione e colonne in ordine diverso
+   ok: export MT5 con data a punti e senza secondi
+   ok: righe malformate CONTATE (2), non sparite
+3. pulizia
+   ok: pulizia: 1 OHLC incoerente, 1 doppio, fuori ordine contato, 2 barre valide
+4. ADR e giorno della settimana su dati con la risposta nota
+   ok: ADR medio piantato = 30.0, misurato 30.0000
+   ok: ADR mediano piantato 30, misurato 30.0000
+   ok: range per giorno della settimana: {0: 10.0, 1: 20.0, 2: 30.0, 3: 40.0, 4: 50.0}
+   ok: indice del venerdi' = 50/30
+   ok: ADR numpy = ADR python puro (media)
+   ok: conversione in pip: 30 punti / 1000 / 0,0001 = 300 pip? (misurato 300.00, atteso 300.00)
+5. sessioni e ore: un'onda solo nella finestra NY invernale
+   ok: sessione NY = 10 (tutta la salita), ASIA = 0 (misurato NY 9.974, ASIA 0.000)
+   ok: ora 16 server = 10 x 60/390 = 1.538 (misurato 1.538)
+   ok: CONTRO-ESEMPIO: con il fuso sbagliato la sessione NY non misura piu' 10 (misurato 0.744)
+6. cancello dell'orologio (picco di volatilita' inverno/estate)
+   ok: picco invernale 14:31 e estivo 13:29 UTC -> differenza 60
+   ok: CONTRO-ESEMPIO: feed spostato di un'ora: relativo ok (09:00/08:00) ma NESSUNA ancora assoluta
+   ok: il feed corretto cade su un'ancora nota (14:30 apertura cash NY 9:30 ET)
+   ok: sessione NY d'estate = 10 con la finestra d'estate (misurato 9.974)
+   ok: qualita(): feed giusto -> orologio_ok; feed spostato di un'ora -> relativo ok ma orologio_ok=False
+   ok: CONTRO-ESEMPIO: un fuso sbagliato sposta i picchi a 19:31/17:29 e il cancello non passa
+7. gap di apertura
+   ok: gap 'pausa': 5 eventi trovati, 5 attesi
+   ok: gap 'pausa' medio = 9.3833 (atteso dalla formula 9.3833)
+   ok: buco notturno mediano 14 ore (misurato 14.02)
+   ok: true range con gap: [2, 11] (misurato [np.float64(2.0), np.float64(11.0)])
+   ok: ATR(2) = 6,5
+8. zigzag e ritracciamento con la risposta nota
+   ok: pivot confermati [0.0, 10.0, 5.0, 20.0, 12.0, 22.0] (attesi 0,10,5,20,12 prima del tratto finale)
+   ok: impulsi >= 4 ATR trovati: 4
+   ok: rapporti di ritracciamento 0,5 / 3,0 / 0,5333 (misurati [0.5, 3.0, 0.5333])
+   ok: livelli <= rho/k (0,25) mostrati come troncati per costruzione
+   ok: ritracci di 0,4 (sotto la soglia 1,0) non creano pivot: pivot trovati [0.0]
+   ok: con soglia 0,2 gli stessi ritracci diventano pivot (7 contro 1)
+9. random walk di riferimento
+   ok: il RW a seme fisso e' identico ad ogni lancio
+   ok: semi diversi -> serie diverse (il seme conta)
+   ok: barre RW coerenti (H>=max(O,C), L<=min(O,C))
+10. efficiency ratio
+   ok: linea retta -> ER = 1
+   ok: andata e ritorno -> ER = 0
+   ok: RW: ER medio 0.2174 vicino a 1/radice(20) = 0.2236 (entro 15%)
+   ok: CONTRO-ESEMPIO: un trend piantato (deriva 0,3) ha ER 0.406 > RW
+11. comportamento alla EMA200
+   ok: EMA200 su RW: 7379 barre, 50.6% sopra
+   ok: sinusoide: incroci regolari (0.80 per 100 barre)
+12. correlazioni
+   ok: serie identica -> rho = 1
+   ok: serie opposta -> rho = -1
+   ok: serie indipendenti -> |rho| piccolo
+   ok: campione sotto il minimo -> NaN, non un numero
+   ok: CONTRO-ESEMPIO: serie identiche sfasate di 5 chiavi NON danno rho=1 (allineamento per chiave)
+   ok: cluster per soglia: {A,B},{C}
+12b. ranking e finestra comune
+   ok: serie sovrapposte: ranking fatto
+   ok: CONTRO-ESEMPIO: serie di periodi diversi -> nessuna finestra comune (None), non una classifica fra mele e pere
+   ok: ranking vuoto e marcato finestra_comune=NO
+   ok: finestra esplicita 2015-01-05:2015-02-05 = 31 giorni
+13. frontiera del costo
+   ok: con spread 0,30 e ATR 6 / 12 / 24: M15 fuori costo (6 < 40x0,30=12), H1 al confine, H4 dentro
+14. riproducibilita'
+   ok: stessi dati -> stesse misure
+AUTOTEST OK

@@ -1,0 +1,14 @@
+cluster per correlazione giornaliera |rho| >= 0.50 (componenti connesse), finestra 2018-01-02 -> 2018-12-28
+  225JPY|HistData-JPXJPY, 225JPY|Oanda-JP225-2018, AUDJPY|Oanda-2018, AUDUSD|Oanda-2018, D30EUR|HistData-GRXEUR, EURUSD|Oanda-2018, GBPUSD|Oanda-2018, NASUSD|Oanda-NAS100-2018, SPXUSD|HistData-SPXUSD, SPXUSD|Oanda-SPX500-2018, XAUUSD|Oanda-2018
+etichette nominali (proposta 07/09, NON firmata):
+  D30EUR: AZ_EU
+  SPXUSD: AZ_US
+  225JPY: AZ_APAC
+  XAUUSD: METALLI
+  EURUSD: USD,EUR
+  GBPUSD: USD,GBP
+  AUDUSD: USD,AUD
+  AUDJPY: JPY,AUD
+  NASUSD: AZ_US
+  SPXUSD: AZ_US
+  225JPY: AZ_APAC

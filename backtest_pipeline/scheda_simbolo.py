@@ -517,6 +517,8 @@ def qualita(s):
         m1_per_giorno_mediana=float(np.median(d1["n"])),
         picco_inverno_utc=w, picco_estate_utc=e, n_inverno=nw, n_estate=ne,
     )
+    anni_d = anno_da_giorni(d1["giorno"])
+    q["m1_giorno_per_anno"] = {int(y): float(np.median(d1["n"][anni_d == y])) for y in sorted(set(anni_d.tolist()))}
     q["orologio_dst_ok"] = (w is not None and e is not None and abs((w - 60) - e) <= 2)
     q["ancora_inverno"] = ancora_vicina(w)
     q["orologio_ok"] = bool(q["orologio_dst_ok"] and q["ancora_inverno"])
@@ -1126,6 +1128,7 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("| giorni / giorni pieni (>= %d%% della mediana di M1) | %d / %d (mediana %d M1 al giorno) |" % (
         int(FRAZ_GIORNO_PIENO * 100), q["giorni"], q["giorni_pieni"], q["m1_per_giorno_mediana"]))
     w("| buchi interni 2-59 min | %d eventi, %d minuti mancanti |" % (q["buchi_interni_1_59min"], q["minuti_mancanti_interni"]))
+    w("| M1 mediane per giorno, per anno (copertura: un anno molto sotto gli altri ha buchi, e l'ATR di quell'anno e' leggermente per difetto) | %s |" % " ; ".join("%d: %d" % (y, v) for y, v in q["m1_giorno_per_anno"].items()))
     w("| barre a range zero | %s%% |" % f(q["barre_range_zero_pct"], 2))
     w("| prezzo min / max | %s / %s |" % (f(q["prezzo_min"], 4), f(q["prezzo_max"], 4)))
     w("| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | %s / %s ; differenza %s min (attesa 60 +/- 2 se segue l'ora legale) ; ancora assoluta d'inverno: %s -> **%s** |" % (
@@ -1396,8 +1399,8 @@ def riga_ranking(serie, ris, finestra):
             adr_pct_med=float(np.median(rp[p])) if p.any() else float("nan"),
             adr_pct_media=float(rp[p].mean()) if p.any() else float("nan"),
             rv_ann_pct=float(100.0 * cc.std(ddof=1) * math.sqrt(252.0)) if len(cc) > 2 else float("nan"),
-            atr_h1_pct=float(ris[s["simbolo"] + "|" + s["feed"]]["A"]["H1"]["atr_pct_med"]),
-            er_d1_20=float(ris[s["simbolo"] + "|" + s["feed"]]["E"].get("D1", {}).get("med", float("nan"))),
+            atr_h1_pct_serie_intera=float(ris[s["simbolo"] + "|" + s["feed"]]["A"]["H1"]["atr_pct_med"]),
+            er_d1_20_serie_intera=float(ris[s["simbolo"] + "|" + s["feed"]]["E"].get("D1", {}).get("med", float("nan"))),
             adr_pct_med_serie_intera=float(M["adr_pct"]["p50"]), giorni_serie_intera=int(M["adr_pt"]["n"]), unita=u))
     for r in righe:
         r["finestra_comune"] = "SI" if finestra else "NO"
@@ -1414,7 +1417,7 @@ def riga_ranking(serie, ris, finestra):
 
 
 CAMPI_RANK = ["simbolo", "feed", "unita", "finestra_comune", "da", "a", "giorni_finestra", "adr_pt_med", "adr_pct_med", "adr_pct_media", "rv_ann_pct",
-              "atr_h1_pct", "er_d1_20", "rank_adr_pct", "rank_rv", "adr_pct_med_serie_intera", "giorni_serie_intera"]
+              "atr_h1_pct_serie_intera", "er_d1_20_serie_intera", "rank_adr_pct", "rank_rv", "adr_pct_med_serie_intera", "giorni_serie_intera"]
 
 
 def scrivi_csv(path, campi, righe):
@@ -1600,6 +1603,32 @@ def verifica_mese(sim, feed, fuso, perc, mese):
     return ok, ref, ours, med_puro, med_proc
 
 
+def ispeziona(percorso, log_=log):
+    """Inventario veloce di file M1: per ogni file/membro di zip, righe, periodo (come scritto nel file,
+    SENZA convertire il fuso), M1 mediani per giorno di calendario, buchi, prezzo min/max. Nessuna misura."""
+    out = []
+    for nome, b in _membri(percorso):
+        try:
+            t, o, h, l, c, i = leggi_bytes(b)
+        except Exception as e:
+            log_("  %s: NON LEGGIBILE (%s)" % (nome, e))
+            continue
+        if len(t) == 0:
+            log_("  %s: vuoto" % nome)
+            continue
+        d = t // 1440
+        _, cnt = np.unique(d, return_counts=True)
+        dif = np.diff(t)
+        r = dict(nome=nome, righe=i["righe"], scartate=i["scartate"], da=(EPOCH + dt.timedelta(minutes=int(t.min()))).strftime("%Y-%m-%d %H:%M"),
+                 a=(EPOCH + dt.timedelta(minutes=int(t.max()))).strftime("%Y-%m-%d %H:%M"), m1_giorno_med=float(np.median(cnt)),
+                 giorni=len(cnt), buchi_gt_5min=int(np.count_nonzero(dif > 5)), pmin=float(l.min()), pmax=float(h.max()),
+                 secondi_non_zero=i["secondi_non_zero"])
+        out.append(r)
+        log_("  %s: %s righe (scartate %d), dal %s al %s (ora del file), %d giorni, M1/giorno mediano %d, buchi > 5 min %d, prezzo %.4f-%.4f, secondi diversi da zero %d" % (
+            nome, format(r["righe"], ","), r["scartate"], r["da"], r["a"], r["giorni"], r["m1_giorno_med"], r["buchi_gt_5min"], r["pmin"], r["pmax"], r["secondi_non_zero"]))
+    return out
+
+
 # ---------------------------------------------------------------------
 # 16. AUTOTEST
 # ---------------------------------------------------------------------
@@ -1781,6 +1810,29 @@ def autotest():
     w3, _ = picco_minuto(T2_, O2_, C2_, (1, 2)); e3, _ = picco_minuto(T2_, O2_, C2_, (6, 7, 8))
     _check(abs((w3 - 60) - e3) <= 2 and ancora_vicina(w3) is None, "CONTRO-ESEMPIO: feed spostato di un'ora: relativo ok (%s/%s) ma NESSUNA ancora assoluta" % (hhmm(w3), hhmm(e3)))
     _check(ancora_vicina(w) is not None and ancora_vicina(870) == "14:30 apertura cash NY 9:30 ET", "il feed corretto cade su un'ancora nota (%s)" % ancora_vicina(w))
+    # sessione NY d'ESTATE: finestra server 14:30-21:00 (810-1200 UTC = 870-1260 server); l'onda e' li'
+    def onda_estate(k, m):
+        if 870 <= m < 1260:
+            return 100.0 + 10.0 * ((m - 870) / 390.0)
+        if m >= 1260:
+            return 110.0
+        return 100.0
+    Te_, Pe_ = _serie_sintetica(20, onda_estate, t0_giorno=16436 + 175)    # luglio 2015 (176 = 7 x 25 + 1: stessa regola feriale)
+    se_ = _mk_serie(Te_, Pe_)
+    costruisci(se_)
+    Se_ = misure_sessioni(se_)
+    nye_ = [x for x in Se_ if x["nome"] == "NY"][0]
+    _check(abs(nye_["med"] - 10.0) < 0.1, "sessione NY d'estate = 10 con la finestra d'estate (misurato %.3f)" % nye_["med"])
+    # il verdetto della SCHEDA (qualita) segue lo stesso criterio: feed giusto ok, feed spostato 'DA GUARDARE'
+    def _q_da(Tx, Ox, Cx):
+        sx = _mk_serie(Tx, Cx)
+        sx["o"] = Ox.copy(); sx["h"] = np.maximum(Ox, Cx); sx["l"] = np.minimum(Ox, Cx)
+        costruisci(sx)
+        return qualita(sx)
+    q_ok = _q_da(T, Oo, C)
+    q_ko = _q_da(T2_, O2_, C2_)
+    _check(q_ok["orologio_ok"] and q_ko["orologio_dst_ok"] and not q_ko["orologio_ok"],
+           "qualita(): feed giusto -> orologio_ok; feed spostato di un'ora -> relativo ok ma orologio_ok=False")
     # contro-esempio: gli stessi dati trattati come ora di New York (fuso sbagliato) NON danno la coppia 14:30/13:30
     w2, _ = picco_minuto(ny_to_utc(T), Oo, C, (1, 2))
     e2, _ = picco_minuto(ny_to_utc(T), Oo, C, (6, 7, 8))
@@ -1822,6 +1874,10 @@ def autotest():
     if attesi_w and "media_pt" in G.get("weekend", {}):
         _check(abs(G["weekend"]["media_pt"] - sum(attesi_w) / len(attesi_w)) < 1e-9, "gap 'weekend' medio = atteso")
     _check(G["pausa"]["buco_med_ore"] == 14.0 or abs(G["pausa"]["buco_med_ore"] - 14.0) < 0.05, "buco notturno mediano 14 ore (misurato %.2f)" % G["pausa"]["buco_med_ore"])
+    # --- true range: il gap entra nell'ATR
+    tr_ = true_range(np.array([100.0, 110.0]), np.array([101.0, 111.0]), np.array([99.0, 109.0]), np.array([100.0, 110.0]))
+    _check(list(tr_) == [2.0, 11.0], "true range con gap: [2, 11] (misurato %s)" % list(tr_))
+    _check(abs(atr_sma(np.array([100.0, 110.0]), np.array([101.0, 111.0]), np.array([99.0, 109.0]), np.array([100.0, 110.0]), 2)[1] - 6.5) < 1e-12, "ATR(2) = 6,5")
     # --- zigzag e ritracciamento piantati
     log("8. zigzag e ritracciamento con la risposta nota")
     path = [0.0]
@@ -1852,6 +1908,19 @@ def autotest():
     rat = leg[1:] / leg[:-1]
     _check(np.allclose(rat[:3], [0.5, 3.0, 8.0 / 15.0]), "rapporti di ritracciamento 0,5 / 3,0 / 0,5333 (misurati %s)" % np.round(rat[:3], 4).tolist())
     _check(x["tocco"][0.236] is None and x["tocco"][0.382] is not None, "livelli <= rho/k (0,25) mostrati come troncati per costruzione")
+    # il rumore SOTTO soglia non crea pivot: salita 0 -> 10 con ritracci di 0,4 (< soglia 1,0) in mezzo
+    w_ = [0.0]
+    for q_ in range(10):
+        w_.append(w_[-1] + 1.0)
+        if q_ % 3 == 2:
+            w_.append(w_[-1] - 0.4)
+    w_ = np.array(w_)
+    pv = zigzag(w_, w_, np.full(len(w_), 2.0), 0.5)
+    _check(len(pv) == 0 or all(abs(x_[1]) >= 0 for x_ in pv) and not any(abs(pv[i_ + 1][1] - pv[i_][1]) < 1.0 for i_ in range(len(pv) - 1)),
+           "ritracci di 0,4 (sotto la soglia 1,0) non creano pivot: pivot trovati %s" % [round(x_[1], 2) for x_ in pv])
+    # con una soglia piu' bassa (0,2) gli stessi ritracci DIVENTANO pivot: la soglia conta
+    pv2 = zigzag(w_, w_, np.full(len(w_), 0.4), 0.5)
+    _check(len(pv2) > len(pv), "con soglia 0,2 gli stessi ritracci diventano pivot (%d contro %d)" % (len(pv2), len(pv)))
     # RW di riferimento: riproducibile
     log("9. random walk di riferimento")
     o, h, l, c = rw_barre(2000, seme=SEME)
@@ -1974,12 +2043,16 @@ def main():
     ap.add_argument("--giorno", default="utc1", choices=["utc1", "nyclose"])
     ap.add_argument("--orologio", default="utc1", choices=["utc1", "vecchio"])
     ap.add_argument("--verifica-mese", help="SIMBOLO:FEED:FUSO:PERCORSO:AAAA-MM")
+    ap.add_argument("--ispeziona", help="PERCORSO: inventario veloce dei file M1 (righe, periodo, buchi), senza misure")
     ap.add_argument("--finestra", help="AAAA-MM-GG:AAAA-MM-GG, finestra di confronto per ranking e correlazioni (default: intersezione delle serie)")
     ap.add_argument("--tf-ritr", default="H1", choices=["M15", "H1", "H4"], help="TF dello zigzag del ritracciamento")
     a = ap.parse_args()
     if a.autotest:
         autotest()
         return 0
+    if a.ispeziona:
+        r = ispeziona(a.ispeziona)
+        return 0 if r else 2
     if a.verifica_mese:
         p = a.verifica_mese.rsplit(":", 1)
         sp = _parse_serie(p[0])
