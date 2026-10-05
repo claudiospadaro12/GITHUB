@@ -44,10 +44,10 @@
 //|  si vedono solo con ordini veri.                                 |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 
-#define OMBRA_VER     "1.01"
+#define OMBRA_VER     "1.02"
 #define NTF7          7
 #define NCNT          11
 #define W_GAMBA       0.5       // peso di ogni gamba nell'R del setup (2 ordini da 0,5)
@@ -241,7 +241,8 @@ long     gLastMsc[];
 int      gNAt[];
 int      gErr[];
 int      gZero[];
-int      gHE[];          // EMA lenta   [s*NTF7+k]
+int      gE14Wait[];     // [REV 05/10] giri consecutivi in attesa della EMA14 di gestione
+int      gHE[];         // EMA lenta   [s*NTF7+k]
 int      gHA[];          // ATR         [s*NTF7+k]
 int      gH14[];         // EMA14       [s*NTF7+k] (solo TF d'ingresso)
 
@@ -250,7 +251,7 @@ int      gNSl = 0;
 int      gSlS[];
 int      gSlK[];
 datetime gSlLastBar[];
-datetime gSlSeen[];      // ora LOCALE dell'ultima volta che si e' vista la barra vecchia
+long     gSlSeen[];      // orologio MONOTONO (MonoSec) dell'ultima volta che si e' vista la barra vecchia
 long     gCnt[][NCNT];
 
 //--- setup simulati: indice = slot*2 + (InpUnoPerLato ? lato : 0)
@@ -266,12 +267,13 @@ int      gNQ = 0;
 Segnale  gSg;
 string   gDir = "";
 bool     gDirty = false;
-datetime gLastSave = 0;
+bool     gInitOk = false;  // [REV 05/10] false = OnInit fallita: OnDeinit NON riscrive lo stato su disco
+long     gLastSave = 0;    // MonoSec
 int      gRRt = 0;
 int      gRRb = 0;
 long     gDayKey = 0;
 datetime gDayDate = 0;
-datetime gLastBeat = 0;
+long     gLastBeat = 0;    // MonoSec
 ulong    gGiroMaxUs = 0;
 ulong    gGiroLastUs = 0;
 long     gNTick = 0;
@@ -283,6 +285,11 @@ int      gNSkip = 0;
 //  UTILITA'
 //==================================================================
 int IMax(const int a, const int b) { return (a > b) ? a : b; }
+
+// [REV 05/10] orologio MONOTONO in secondi per gli INTERVALLI interni (salvataggio, battito,
+// tolleranza di ritardo). TimeLocal() salta di -1h al cambio d'ora legale del PC (25/10/2026):
+// TimeLocal()-gLastSave restava negativo per un'ora = niente salvataggio periodico ne' battito.
+long MonoSec() { return (long)(GetTickCount64() / 1000); }
 int IMin(const int a, const int b) { return (a < b) ? a : b; }
 
 string D(const double x)  { return DoubleToString(x, 10); }
@@ -629,6 +636,7 @@ int OnInit()
    ArrayResize(gNAt, gN);
    ArrayResize(gErr, gN);
    ArrayResize(gZero, gN);
+   ArrayResize(gE14Wait, gN);
    ArrayResize(gHE, gN * NTF7);
    ArrayResize(gHA, gN * NTF7);
    ArrayResize(gH14, gN * NTF7);
@@ -649,6 +657,7 @@ int OnInit()
       gNAt[s] = 0;
       gErr[s] = 0;
       gZero[s] = 0;
+      gE14Wait[s] = 0;
       for(int u = 0; u < nk; u++)
         {
          int k  = ks[u];
@@ -724,14 +733,21 @@ int OnInit()
       Print("[OMBRA] timer non impostato.");
       return INIT_FAILED;
      }
+   gInitOk = true;
    return INIT_SUCCEEDED;
   }
 
 void OnDeinit(const int reason)
   {
    EventKillTimer();
-   FlushQueue();
-   SaveState();
+   // [REV 05/10] MT5 chiama OnDeinit anche dopo INIT_FAILED (es. al riavvio nessun simbolo nel
+   // Market Watch): senza questa guardia SaveState riscriveva uno stato VUOTO sopra quello buono
+   // e i setup aperti erano persi per sempre.
+   if(gInitOk)
+     {
+      FlushQueue();
+      SaveState();
+     }
    for(int q = 0; q < ArraySize(gHE); q++)
      {
       if(gHE[q] != INVALID_HANDLE)
@@ -761,18 +777,18 @@ void OnTimer()
    ProcessTicksAll(t0);
    ulong t1 = GetMicrosecondCount();
    ScanBars(t1);
-   if(gDirty && TimeLocal() - gLastSave >= IMax(1, InpStatoSec))
+   if(gDirty && MonoSec() - gLastSave >= IMax(1, InpStatoSec))
       SaveState();
    gGiroLastUs = GetMicrosecondCount() - t0;
    if(gGiroLastUs > gGiroMaxUs)
       gGiroMaxUs = gGiroLastUs;
-   if(TimeLocal() - gLastBeat >= 60)
+   if(MonoSec() - gLastBeat >= 60)
       Battito();
   }
 
 void Battito()
   {
-   gLastBeat = TimeLocal();
+   gLastBeat = MonoSec();
    int att = 0;
    for(int i = 0; i < ArraySize(gSU); i++)
       if(gSU[i].act)
@@ -992,13 +1008,13 @@ void ScanBars(const ulong t1)
         {
          // primissimo avvio (nessuno stato): la barra in corso NON si valuta a posteriori
          gSlLastBar[j] = b0;
-         gSlSeen[j] = TimeLocal();
+         gSlSeen[j] = MonoSec();
          gDirty = true;
          continue;
         }
       if(b0 == gSlLastBar[j])
         {
-         gSlSeen[j] = TimeLocal();
+         gSlSeen[j] = MonoSec();
          continue;
         }
       if(b0 < gSlLastBar[j])
@@ -1010,7 +1026,7 @@ void ScanBars(const ulong t1)
       if(!SymbolInfoTick(sym, tk) || tk.bid <= 0.0 || tk.ask <= 0.0)
          continue;
       long lag = (long)tk.time - (long)b0;
-      bool prompt = (gSlSeen[j] > 0 && TimeLocal() - gSlSeen[j] <= InpGraceSec);
+      bool prompt = (gSlSeen[j] > 0 && MonoSec() - gSlSeen[j] <= InpGraceSec);
       bool late = (!prompt && lag > InpGraceSec);
       bool fatto = EvalLive(j, b0, late, tk);
       if(!fatto)
@@ -1030,7 +1046,7 @@ void ScanBars(const ulong t1)
             EvalRetro(j, q);
         }
       gSlLastBar[j] = b0;
-      gSlSeen[j] = TimeLocal();
+      gSlSeen[j] = MonoSec();
       gDirty = true;
      }
   }
@@ -1673,6 +1689,20 @@ void ProcessSym(const int s)
       gNAt[s] = 1000000;
       gPtrOk[s] = true;
      }
+   // [REV 05/10] dalla v1.01 E14For restituisce 0 finche' l'indicatore EMA14 non ha calcolato tutta
+   // la serie: i tick letti in quel momento sarebbero CONSUMATI senza parziale/pareggio/trailing,
+   // e non si rileggono piu'. Si aspetta l'indicatore SENZA avanzare il puntatore; dopo 120 giri
+   // di attesa si procede lo stesso e lo si scrive nel log.
+   if(!E14Pronta(s, lst, nl))
+     {
+      gE14Wait[s]++;
+      if(gE14Wait[s] < 120)
+         return;
+      if(gE14Wait[s] == 120)
+         LogEv(gSym[s] + ": EMA14 non pronta da 120 giri: simulo lo stesso (senza gestione finche' manca)");
+     }
+   else
+      gE14Wait[s] = 0;
    long nowMsc = (long)TimeTradeServer() * 1000;
    long from = gLastMsc[s];
    long win = (long)IMax(1, InpFinestraMin) * 60000;
@@ -1681,12 +1711,16 @@ void ProcessSym(const int s)
    MqlTick tk[];
    ResetLastError();
    int n = CopyTicksRange(gSym[s], tk, COPY_TICKS_INFO, (ulong)from, (ulong)to);
-   if(n < 0)
+   int errCT = GetLastError();
+   // [REV 05/10] con ERR_HISTORY_TIMEOUT CopyTicksRange restituisce n>=0 ma solo i tick che aveva
+   // (storia non ancora sincronizzata): consumarli avanzerebbe il puntatore oltre un tratto mai
+   // letto = buco MUTO. Si tratta come un errore: si riprova, e in recupero dopo 3 volte si va su M1.
+   if(n < 0 || errCT == ERR_HISTORY_TIMEOUT)
      {
       gErr[s]++;
       if(catchUp && gErr[s] >= 3)
         {
-         LogEv(gSym[s] + ": tick non leggibili (errore " + IntegerToString(GetLastError()) + ") fra " +
+         LogEv(gSym[s] + ": tick non leggibili (errore " + IntegerToString(errCT) + ") fra " +
                TsMsc(from) + " e " + TsMsc(to) + ": ripiego su barre M1");
          FallbackM1(s, lst, nl, from, to);
          gErr[s] = 0;
@@ -1753,6 +1787,22 @@ void ProcessSym(const int s)
    FinisciChiusi(lst, nl);
   }
 
+//--- [REV 05/10] EMA14 di gestione calcolata su tutta la serie per ogni setup attivo del simbolo
+bool E14Pronta(const int s, const int &lst[], const int nl)
+  {
+   for(int u = 0; u < nl; u++)
+     {
+      int k = gSlK[gSU[lst[u]].slot];
+      int h = gH14[s * NTF7 + k];
+      if(h == INVALID_HANDLE)
+         continue;                  // senza handle E14For da' sempre 0: aspettare non serve
+      int nb = Bars(gSym[s], gTF7[k]);
+      if(nb <= 0 || BarsCalculated(h) < nb)
+         return false;
+     }
+   return true;
+  }
+
 void FinisciChiusi(const int &lst[], const int nl)
   {
    for(int u = 0; u < nl; u++)
@@ -1767,8 +1817,22 @@ void FallbackM1(const int s, const int &lst[], const int nl, const long fromMsc,
   {
    datetime a = (datetime)((fromMsc / 1000) - ((fromMsc / 1000) % 60) + 60);   // dal minuto intero DOPO l'ultimo tick letto
    datetime b = (datetime)(toMsc / 1000 - 1);
+   // [REV 05/10] la barra M1 ANCORA IN FORMAZIONE non si simula: il puntatore andrebbe a fine
+   // minuto e i tick che devono ancora arrivare in quel minuto verrebbero saltati.
+   datetime adesso = TimeTradeServer();
+   datetime lim = (datetime)((long)adesso - ((long)adesso % 60) - 1);
+   long fineMsc = toMsc;
+   bool tagliato = false;
+   if(b > lim)
+     {
+      b = lim;
+      fineMsc = (long)(lim + 1) * 1000;
+      tagliato = true;
+     }
    if(b < a)
      {
+      if(tagliato)
+         return;                    // tutto nel minuto in corso: si riprova al giro dopo
       gLastMsc[s] = toMsc;
       gNAt[s] = 0;
       gDirty = true;
@@ -1781,7 +1845,7 @@ void FallbackM1(const int s, const int &lst[], const int nl, const long fromMsc,
       LogEv(gSym[s] + ": BUCO senza tick e senza M1 fra " + Ts(a) + " e " + Ts(b) + ": setup marcati BUCO");
       for(int u = 0; u < nl; u++)
          gSU[lst[u]].fonte |= F_BUCO;
-      gLastMsc[s] = toMsc;
+      gLastMsc[s] = fineMsc;
       gNAt[s] = 0;
       gDirty = true;
       return;
@@ -1909,13 +1973,13 @@ void SaveState()
    if(!ok)
      {
       Print("[OMBRA] stato NON salvato (scrittura fallita, disco pieno?): resta valido quello precedente");
-      gLastSave = TimeLocal();      // si riprova fra InpStatoSec, non a ogni giro
+      gLastSave = MonoSec();        // si riprova fra InpStatoSec, non a ogni giro
       return;                       // gDirty resta true
      }
    if(!FileMove(tmp, 0, fin, FILE_REWRITE))
       Print("[OMBRA] stato: rinomina fallita, errore ", GetLastError());
    gDirty = false;
-   gLastSave = TimeLocal();
+   gLastSave = MonoSec();
   }
 
 void LoadState()
