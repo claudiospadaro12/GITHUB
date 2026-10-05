@@ -4,7 +4,10 @@
 ombra_sw_h0_e_struttura.py -- PONTEGGIO della specifica report/OMBRA_SUPERWAVE_SPEC_2026-10-05.md.
 NON e' una misura di merito: serve a scrivere le ATTESE (H0) e la FREQUENZA prima che l'ombra giri.
 
-Due sottocomandi:
+Tre sottocomandi:
+  identita   prova che il segnale di mql5/Indicators/ABTG_Pulsanti_Grafico.mq5 (ORDINE CONSIGLIATO) e quello della
+             SuperWave v4.1 sono la STESSA funzione: confronta (senza spazi ne' commenti) le funzioni pure
+             SW_STCore, SW_BarsSinceFlip, SW_LastFlip, SW_SetupOk, SW_Hits, SW_SetupState e TpPrice/PG_Tp.
   h0         passeggiata aleatoria + il Supertrend ESATTO della SuperWave v4.1 (st_full del collaudo,
              specchio Python collaudato bit per bit col C++): flip per barra, stop in ATR, e l'esito in R
              di un setup col setup della dashboard (ingresso = chiusura della barra di inversione,
@@ -20,6 +23,7 @@ Due sottocomandi:
              stop / costo di casa). NESSUN esito in R sui dati veri: il merito lo misura l'ombra.
 
 Uso:
+  python3 backtest_pipeline/ombra_sw_h0_e_struttura.py identita
   python3 backtest_pipeline/ombra_sw_h0_e_struttura.py h0 [N_barre]        (default 600000)
   python3 backtest_pipeline/ombra_sw_h0_e_struttura.py struttura           (scarica ~45 MB da GitHub)
 Dipende da numpy. ASCII puro. Semi fissi: stesso comando = stessi numeri.
@@ -242,10 +246,54 @@ def cmd_struttura():
                      float(np.median(R / atr[flips])), float(np.median(rap)), float((rap >= 40).mean()), float(ok.mean())))
 
 
+def funzioni(testo, inizio, fine):
+    import re
+    blocco = testo[testo.index(inizio):testo.index(fine)]
+    out = {}
+    for m in re.finditer(r"^(int|bool|double|color|void|string)\s+(\w+)\(", blocco, re.M):
+        k = blocco.index("{", m.start())
+        prof, j = 0, k
+        while True:
+            if blocco[j] == "{":
+                prof += 1
+            elif blocco[j] == "}":
+                prof -= 1
+                if prof == 0:
+                    break
+            j += 1
+        out[m.group(2)] = re.sub(r"\s+", "", re.sub(r"//.*", "", blocco[m.start():j + 1]))
+    return out
+
+
+def cmd_identita():
+    rd = lambda f: open(os.path.join(AQUI, "..", "mql5", "Indicators", f), encoding="utf-8", errors="replace").read()
+    sw = funzioni(rd("ABTG_SuperWave_Dashboard_v41.mq5"), "//@@SW41_PURE_BEGIN", "//@@SW41_PURE_END")
+    pg = funzioni(rd("ABTG_Pulsanti_Grafico.mq5"), "//@@PG_PURE_BEGIN", "//@@PG_PURE_END")
+    ko = 0
+    for nome in ("SW_STCore", "SW_BarsSinceFlip", "SW_LastFlip", "SW_SetupOk", "SW_Hits", "SW_SetupState"):
+        ok = nome in sw and nome in pg and sw[nome] == pg[nome]
+        ko += 0 if ok else 1
+        print("%-18s %s" % (nome, "IDENTICA" if ok else "DIVERSA"))
+    # TpPrice (SuperWave, nel corpo del file) contro PG_Tp (nel blocco puro di Pulsanti)
+    import re
+    src_sw = rd("ABTG_SuperWave_Dashboard_v41.mq5")
+    m = re.search(r"double\s+TpPrice\(.*?\)\s*\{(.*?)\}", src_sw, re.S)
+    tp_sw = re.sub(r"\s+", "", m.group(1)) if m else None
+    m2 = re.search(r"double\s+PG_Tp\(.*?\)\s*\{(.*?)\}", rd("ABTG_Pulsanti_Grafico.mq5"), re.S)
+    tp_pg = re.sub(r"\s+", "", m2.group(1)) if m2 else None
+    ok = tp_sw is not None and tp_sw == tp_pg
+    ko += 0 if ok else 1
+    print("%-18s %s" % ("TpPrice/PG_Tp", "IDENTICA" if ok else "DIVERSA"))
+    print("ESITO: %s" % ("SEGNALE IDENTICO" if ko == 0 else "%d FUNZIONI DIVERSE" % ko))
+    return ko
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or sys.argv[1] not in ("h0", "struttura"):
+    if len(sys.argv) < 2 or sys.argv[1] not in ("h0", "struttura", "identita"):
         print(__doc__)
         sys.exit(2)
+    if sys.argv[1] == "identita":
+        sys.exit(cmd_identita())
     if sys.argv[1] == "h0":
         cmd_h0(int(sys.argv[2]) if len(sys.argv) > 2 else 600000)
     else:
