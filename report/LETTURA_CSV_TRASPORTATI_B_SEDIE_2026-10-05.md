@@ -32,8 +32,8 @@ Stato git dei 134: **68 nuovi** (entrati il 05/10), **28 aggiornati** (esistevan
 3. **Round che i resoconti davano "mai girati / NM" e che ora hanno i numeri**: Dow 770202 `r172a-j` (69 celle, 10 assi d'uscita; l'ancora riproduce il contratto al centesimo in 9 round su 10),
    ORB_Ott `r125a-f` (64 righe; G2 ne attendeva 66, scarto non verificato), SupRev NAS `r163a` (7 celle su 7 sopra 1 in IS e OOS), EMA200 `r146b`/`r147a`, Live5m `r150a`, MaxMinNotte `r133c`/`r151a`/`r170b`/`r170c`, SuperWave `r154a`.
    **Attenzione sulla provenienza**: per 54 dei 134 CSV la tabella Pass / Profit / PF / DD / Trades era **gia' stampata** nei log `coda/referti/CODA_07_desktop_*.log` committati il giorno stesso
-   (10-20/09): l'ho confrontata riga per riga con i CSV, **0 differenze**. I numeri di `r172a-e,i,j`, `r173a-c`, `r147b`, `r150a`, `r151a`, `r125f`, `r146b`/`r147a` erano quindi leggibili da meta' settembre;
-   per gli altri 80 la tabella non e' in nessun log (confronto referto/CSV: NON POSSIBILE).
+   (10-20/09): l'ho confrontata riga per riga con i CSV, **0 differenze**. I numeri di `r172a-e,i,j`, `r173a-c`, `r147b`, `r150a`, `r151a`, `r125f`, `r146b`/`r147a` risultano quindi leggibili nei log dal giorno della corsa;
+   per gli altri 80 (3 sono vuoti) la tabella non e' in nessun log (confronto referto/CSV: NON POSSIBILE).
 
 **Dubbi principali** (sez. 8): la colonna `Trades` conta **deal**, non posizioni (le posizioni NON sono leggibili dai CSV); finestra, deposito, rischio e modello **non stanno nel CSV** (li ho presi dai file prova e da `CODA.txt`);
 alcune "ancore" di round non sono la sedia (OPPRANGE di `r125a/c/e/f`, MinStopPts pinnato di `r172j`); un solo regime per tutti i round indici (21 mesi).
@@ -45,7 +45,7 @@ alcune "ancore" di round non sono la sedia (OPPRANGE di `r125a/c/e/f`, MinStopPt
 ### 1.1 Cosa contiene un CSV, e cosa no
 Colonne (da 50 a 93 a seconda dell'EA): `Pass`, `Profit`, `Expected Payoff`, `Profit Factor`, `Recovery Factor`, `Sharpe Ratio`, `Equity DD %`, `Trades`, in alcuni EA
 `Peggior Giornata %`, `Perdite Consecutive Max`, `Serie Perdente Peggiore`, poi **tutti gli input** `Inp*` della passata. **Non c'e'**: la finestra, il deposito, il rischio dichiarato, il modello di tick,
-il per-trade, il numero di **posizioni**, il lato (long/short) se non e' un input variato.
+il per-trade, il numero di **posizioni**. Il **lato** si legge dagli input `InpAllowLong` / `InpAllowShort` (letti in tutti i 67 round): solo long DAX_Apertura, Dow_Apertura e ORB_Ott (tranne `r125d`, solo short); solo short `r133c`, `r170a`, `r170c`; due lati tutti gli altri.
 
 ### 1.2 Da dove vengono finestra, deposito, rischio, modello
 - **Finestra**: dal file prova del round (`backtest_pipeline/prove/<prova>.txt`: `@DAQUANDO`, `@FINOA` (default driver 2026.06.30), `@FRAZIONEIS`), con la formula del driver
@@ -73,7 +73,7 @@ I totali per EA contano **righe-cella**: la stessa cella ancora ricompare in mol
 ### 1.5 Controlli che ho fatto sulla mia lettura (contro-esempi, prima di scrivere)
 1. **Riproduzione dell'ancora contro il contratto**: dove un contratto esiste (`CONTRATTI_DELLE_SEDIE_FTMO` §2-§5, `CENSIMENTO_CONTRATTI_v2`), la cella ancora deve ridare **PF, n, DD** del contratto. Risultato (sez. 5 c): 770101, 770202, 771531, 770611, 770411 riprodotti
    **al centesimo** in 4, 9, 7, 3 e 1 round; 770511 riprodotto per due letture su tre.
-2. **CSV contro tabella stampata nei log del runner**: 54 CSV confrontati (Pass, Profit, PF, DD, Trades): **54 su 54 uguali**. Gli altri 77 non erano stampati (3 sono vuoti): non confrontabili.
+2. **CSV contro tabella stampata nei log del runner**: 54 CSV confrontati (Pass, Profit, PF, DD, Trades): **54 su 54 uguali**. Gli altri 80 (77 non stampati, 3 vuoti) non sono confrontabili.
 3. **Somma IS + OOS = finestra piena**: `r170a` 57+47 = 104 (= n del `REFERTO_SHORTGATE`); `r151a`/`r170b` 265+428 = 693 (= n di G3 riga 1a); `r154a` 120 = 32+88 (= IS+OOS di G2 per 770531).
 4. **Determinismo fra round diversi**: la stessa cella in round diversi da' lo stesso numero (es. `r125c` buffer 2000 = `r125e` MinRangePct 0,00/0,05: 3186,22 e -80,03; `r126a` buffer 0 = `r126b` lookback 5 = `r120b11`). 26 su 28 CSV rimessi dal runner il 05/10 sono numericamente identici alla versione del 13/09.
 5. **Deposito**: stima dal CSV contro la coda, vedi 1.2.
@@ -115,38 +115,38 @@ derivato dal CSV, non scritto in coda). La seconda tabella confronta con quanto 
 ### 3.1 Numeri
 | # | round | EA | simb. TF | banco | finestra | asse (celle) | cella di riferimento IS -> OOS (PF/n deal/DD%) | OOS sopra / sotto 1 | IS sopra, OOS sotto | IS sotto, OOS sopra | git |
 |---:|---|---|---|---|---|---|---|---|---:|---:|---|
-| 1 | `q770be` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | BEatR: 0,0,0,5,1,0,1,5 | 1,183/132/4,96 -> 1,491/193/6,27 | 4 / 0 | 0 | 0 | A/A |
-| 2 | `r137a` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | MinStopPts: 800,2800,4800,6800,8800,10800,12800 | 1,126/175/5,44 -> 1,397/270/7,23 | 7 / 0 | 0 | 2 | P/P |
-| 3 | `r137b` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | MinStopPts: 800,2800,4800,6800,8800,10800,12800 | 1,126/175/5,44 -> 1,397/270/7,23 | 5 / 2 | 0 | 2 | P/P |
-| 4 | `r137c` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_ClosePct: 0,50 | 1,126/175/5,44 -> 1,397/270/7,23 | 2 / 0 | 0 | 0 | A/P |
+| 1 | `q770be` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | BEatR: 0,0; 0,5; 1,0; 1,5 | 1,183/132/4,96 -> 1,491/193/6,27 | 4 / 0 | 0 | 0 | A/A |
+| 2 | `r137a` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | MinStopPts: 800; 2800; 4800; 6800; 8800; 10800; 12800 | 1,126/175/5,44 -> 1,397/270/7,23 | 7 / 0 | 0 | 2 | P/P |
+| 3 | `r137b` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | MinStopPts: 800; 2800; 4800; 6800; 8800; 10800; 12800 | 1,126/175/5,44 -> 1,397/270/7,23 | 5 / 2 | 0 | 2 | P/P |
+| 4 | `r137c` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_ClosePct: 0; 50 | 1,126/175/5,44 -> 1,397/270/7,23 | 2 / 0 | 0 | 0 | A/P |
 | 5 | `r138a` | DAX_Apertura_EU | F40EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 1,440/130/7,36 -> 0,770/195/11,82 | 0 / 1 | 1 | 0 | A/P |
-| 6 | `r147c` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0,1 | 1,126/175/5,44 -> 1,397/270/7,23 | 2 / 0 | 0 | 0 | N/N |
+| 6 | `r147c` | DAX_Apertura_EU | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0; 1 | 1,126/175/5,44 -> 1,397/270/7,23 | 2 / 0 | 0 | 0 | N/N |
 | 7 | `r152a` | Dow_Apertura_US | U30USD M5 | T 100k 0,65% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 1,227/74/3,71 -> 1,278/130/2,85 | 1 / 0 | 0 | 0 | N/N |
-| 8 | `r172a` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TrailStartR: 0,00,0,25,0,50,0,75,1,00,1,25,1,50 | 1,222/74/5,67 -> 1,270/130/4,39 | 7 / 0 | 0 | 0 | N/N |
-| 9 | `r172b` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseHour: 15,16,17,18,19,20,21 | 1,223/74/5,67 -> 1,270/130/4,39 | 6 / 1 | 0 | 3 | N/N |
-| 10 | `r172c` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | BreakevenAtTP1: 0,1 | 1,222/74/5,67 -> 1,270/130/4,39 | 2 / 0 | 0 | 0 | N/N |
-| 11 | `r172d` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | BEatR: 0,00,0,15,0,30,0,45,0,60,0,75,0,90 | 1,222/74/5,67 -> 1,270/130/4,39 | 5 / 2 | 2 | 1 | N/N |
-| 12 | `r172e` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_R: 0,50,0,75,1,00,1,25,1,50,1,75,2,00 | 1,222/74/5,67 -> 1,270/130/4,39 | 7 / 0 | 0 | 0 | N/N |
+| 8 | `r172a` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TrailStartR: 0,00; 0,25; 0,50; 0,75; 1,00; 1,25; 1,50 | 1,222/74/5,67 -> 1,270/130/4,39 | 7 / 0 | 0 | 0 | N/N |
+| 9 | `r172b` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseHour: 15; 16; 17; 18; 19; 20; 21 | 1,223/74/5,67 -> 1,270/130/4,39 | 6 / 1 | 0 | 3 | N/N |
+| 10 | `r172c` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | BreakevenAtTP1: 0; 1 | 1,222/74/5,67 -> 1,270/130/4,39 | 2 / 0 | 0 | 0 | N/N |
+| 11 | `r172d` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | BEatR: 0,00; 0,15; 0,30; 0,45; 0,60; 0,75; 0,90 | 1,222/74/5,67 -> 1,270/130/4,39 | 5 / 2 | 2 | 1 | N/N |
+| 12 | `r172e` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_R: 0,50; 0,75; 1,00; 1,25; 1,50; 1,75; 2,00 | 1,222/74/5,67 -> 1,270/130/4,39 | 7 / 0 | 0 | 0 | N/N |
 | 13 | `r172f` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TrailTF: 1..30 (11) | 1,222/74/5,67 -> 1,270/130/4,39 | 10 / 1 | 0 | 3 | N/N |
-| 14 | `r172g` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0,1 | 1,222/74/5,67 -> 1,270/130/4,39 | 2 / 0 | 0 | 1 | N/N |
-| 15 | `r172h` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLMode: 0,1 | 1,222/74/5,67 -> 1,270/130/4,39 | 2 / 0 | 0 | 1 | N/N |
+| 14 | `r172g` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0; 1 | 1,222/74/5,67 -> 1,270/130/4,39 | 2 / 0 | 0 | 1 | N/N |
+| 15 | `r172h` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLMode: 0; 1 | 1,222/74/5,67 -> 1,270/130/4,39 | 2 / 0 | 0 | 1 | N/N |
 | 16 | `r172i` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | MinStopPts: 0..10500 (22) | 1,222/74/5,67 -> 1,270/130/4,39 | 17 / 5 | 5 | 0 | N/N |
-| 17 | `r172j` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SkipIfTight: 0,1 | 1,159/74/4,51 -> 1,010/128/5,04 | 1 / 1 | 1 | 0 | N/N |
-| 18 | `r170a` | Nasdaq_Apertura_US | NASUSD M15 | T 100k 0,65% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0,1 | 1,257/57/4,54 -> 0,948/47/3,63 | 0 / 2 | 2 | 0 | N/N |
-| 19 | `r142a` | Nasdaq_Live5m | NASUSD M5 | T 10k 2% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_ClosePct: 0,25,50,75 | 1,015/116/12,28 -> 0,956/175/22,47 | 0 / 4 | 3 | 0 | A/P |
-| 20 | `r142b` | Nasdaq_Live5m | NASUSD M5 | T 10k 2% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TrailTF: 1,2,3,4,5 | 1,015/116/12,28 -> 0,956/175/22,47 | 4 / 1 | 1 | 0 | P/P |
-| 21 | `r142c` | Nasdaq_Live5m | NASUSD M5 | T 10k 2% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | UseTrailing: 0,1 | 1,015/116/12,28 -> 0,956/175/22,47 | 0 / 2 | 2 | 0 | P/A |
-| 22 | `r150a` | Nasdaq_Live5m | NASUSD M5 | T 10k 2% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TrailStartR: 0,0,0,5,1,0,1,5,2,0,2,5,3,0 | 1,015/116/12,28 -> 0,956/175/22,47 | 2 / 5 | 5 | 0 | N/N |
+| 17 | `r172j` | Dow_Apertura_US | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SkipIfTight: 0; 1 | 1,159/74/4,51 -> 1,010/128/5,04 | 1 / 1 | 1 | 0 | N/N |
+| 18 | `r170a` | Nasdaq_Apertura_US | NASUSD M15 | T 100k 0,65% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0; 1 | 1,257/57/4,54 -> 0,948/47/3,63 | 0 / 2 | 2 | 0 | N/N |
+| 19 | `r142a` | Nasdaq_Live5m | NASUSD M5 | T 10k 2% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_ClosePct: 0; 25; 50; 75 | 1,015/116/12,28 -> 0,956/175/22,47 | 0 / 4 | 3 | 0 | A/P |
+| 20 | `r142b` | Nasdaq_Live5m | NASUSD M5 | T 10k 2% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TrailTF: 1; 2; 3; 4; 5 | 1,015/116/12,28 -> 0,956/175/22,47 | 4 / 1 | 1 | 0 | P/P |
+| 21 | `r142c` | Nasdaq_Live5m | NASUSD M5 | T 10k 2% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | UseTrailing: 0; 1 | 1,015/116/12,28 -> 0,956/175/22,47 | 0 / 2 | 2 | 0 | P/A |
+| 22 | `r150a` | Nasdaq_Live5m | NASUSD M5 | T 10k 2% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TrailStartR: 0,0; 0,5; 1,0; 1,5; 2,0; 2,5; 3,0 | 1,015/116/12,28 -> 0,956/175/22,47 | 2 / 5 | 5 | 0 | N/N |
 | 23 | `cemad02` | EMA200 | U30USD H1 | T 100k 1,0% | 2024.09.27-2025.06.09 (il file '_OOS_' contiene la finestra IS; IS di 1 giorno, vuoto) | solo InpMagic (cella unica) | n/d -> 1,201/237/5,73 | n/d | - | - | P/A |
-| 24 | `cemad05` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TF: M15,M20,M30,H1,H2,H3,H4 | 1,201/237/5,73 -> 1,524/517/7,83 | 3 / 4 | 3 | 0 | A/A |
-| 25 | `r136a` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLatr: 0,4,0,6,0,8,1,0,1,2,1,4,1,6 | 1,201/237/5,73 -> 1,524/517/7,83 | 7 / 0 | 0 | 0 | A/P |
-| 26 | `r136b` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_ATRmult: 0,00,0,25,0,50,0,75,1,00,1,25,1,50 | 1,201/237/5,73 -> 1,524/517/7,83 | 7 / 0 | 0 | 5 | A/A |
-| 27 | `r136c` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1Pct: 0,25,50,75 | 1,201/237/5,73 -> 1,524/517/7,83 | 4 / 0 | 0 | 1 | P/P |
-| 28 | `r136d` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | UseTrailing: 0,1 | 1,201/237/5,73 -> 1,524/517/7,83 | 2 / 0 | 0 | 0 | P/P |
-| 29 | `r146b` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | FridayClose: 0,1 | 1,201/237/5,73 -> 1,524/517/7,83 | 2 / 0 | 0 | 0 | N/N |
-| 30 | `r147a` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | Breakeven: 0,1 | 1,201/237/5,73 -> 1,524/517/7,83 | 2 / 0 | 0 | 0 | N/N |
-| 31 | `r139a` | EMA200 | AUDJPY H4 | B 10k 1,0% | IS 2010.01.01-2016.08.06 / OOS 2016.08.07-2026.06.30 | TP_RR: 1,5,2,0,2,5,3,0 | 0,780/757/16,94 -> 1,008/1322/16,89 | 1 / 3 | 0 | 1 | A/A |
-| 32 | `r139b` | EMA200 | GBPUSD H4 | B 10k 1,0% | IS 2010.01.01-2016.08.06 / OOS 2016.08.07-2026.06.30 | TP_RR: 1,5,2,0,2,5,3,0 | 0,802/856/20,41 -> 1,122/1292/10,65 | 4 / 0 | 0 | 4 | A/A |
+| 24 | `cemad05` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TF: M15; M20; M30; H1; H2; H3; H4 | 1,201/237/5,73 -> 1,524/517/7,83 | 3 / 4 | 3 | 0 | A/A |
+| 25 | `r136a` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLatr: 0,4; 0,6; 0,8; 1,0; 1,2; 1,4; 1,6 | 1,201/237/5,73 -> 1,524/517/7,83 | 7 / 0 | 0 | 0 | A/P |
+| 26 | `r136b` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_ATRmult: 0,00; 0,25; 0,50; 0,75; 1,00; 1,25; 1,50 | 1,201/237/5,73 -> 1,524/517/7,83 | 7 / 0 | 0 | 5 | A/A |
+| 27 | `r136c` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1Pct: 0; 25; 50; 75 | 1,201/237/5,73 -> 1,524/517/7,83 | 4 / 0 | 0 | 1 | P/P |
+| 28 | `r136d` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | UseTrailing: 0; 1 | 1,201/237/5,73 -> 1,524/517/7,83 | 2 / 0 | 0 | 0 | P/P |
+| 29 | `r146b` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | FridayClose: 0; 1 | 1,201/237/5,73 -> 1,524/517/7,83 | 2 / 0 | 0 | 0 | N/N |
+| 30 | `r147a` | EMA200 | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | Breakeven: 0; 1 | 1,201/237/5,73 -> 1,524/517/7,83 | 2 / 0 | 0 | 0 | N/N |
+| 31 | `r139a` | EMA200 | AUDJPY H4 | B 10k 1,0% | IS 2010.01.01-2016.08.06 / OOS 2016.08.07-2026.06.30 | TP_RR: 1,5; 2,0; 2,5; 3,0 | 0,780/757/16,94 -> 1,008/1322/16,89 | 1 / 3 | 0 | 1 | A/A |
+| 32 | `r139b` | EMA200 | GBPUSD H4 | B 10k 1,0% | IS 2010.01.01-2016.08.06 / OOS 2016.08.07-2026.06.30 | TP_RR: 1,5; 2,0; 2,5; 3,0 | 0,802/856/20,41 -> 1,122/1292/10,65 | 4 / 0 | 0 | 4 | A/A |
 | 33 | `r120b00` | SuperWave_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 0,903/46/6,04 -> 1,187/90/6,23 | 1 / 0 | 0 | 1 | P/A |
 | 34 | `r120b01` | SuperWave_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 1,406/71/4,45 -> 0,983/125/5,11 | 0 / 1 | 1 | 0 | A/P |
 | 35 | `r120b10` | SuperWave_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 1,489/72/3,80 -> 1,243/131/4,17 | 1 / 0 | 0 | 0 | P/P |
@@ -154,33 +154,33 @@ derivato dal CSV, non scritto in coda). La seconda tabella confronta con quanto 
 | 37 | `r120e00` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 0,978/74/5,07 -> 1,284/130/6,53 | 1 / 0 | 0 | 1 | P/A |
 | 38 | `r120e11` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 1,397/106/3,48 -> 1,220/184/4,21 | 1 / 0 | 0 | 0 | P/A |
 | 39 | `r126a` | SuperWave_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferAtr: 0,000..1,000 (9) | 1,482/72/4,04 -> 1,243/131/4,17 | 9 / 0 | 0 | 0 | A/A |
-| 40 | `r126b` | SuperWave_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLLookback: 1,3,5,7,9,11,13 | 1,482/72/4,04 -> 1,243/131/4,17 | 7 / 0 | 0 | 0 | P/P |
-| 41 | `r155a` | SuperWave_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | unica 2024.09.26-2026.06.30 (nessun OOS) | TP_RR: 2,0,2,5,3,0,3,5,4,0 | 1,331/204/4,64 -> n/d | n/d | - | - | N/N |
-| 42 | `r165a` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPips: 3,1003,2003,3003,4003,5003 | 1,397/106/3,48 -> 1,220/184/4,21 | 6 / 0 | 0 | 0 | N/N |
-| 43 | `r173a` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1Pct: 0,25,50,75 | 1,397/106/3,48 -> 1,220/184/4,21 | 4 / 0 | 0 | 0 | N/N |
-| 44 | `r173b` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_R: 0,5,1,0,1,5,2,0 | 1,397/106/3,48 -> 1,220/184/4,21 | 4 / 0 | 0 | 0 | N/N |
-| 45 | `r173c` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | Breakeven: 0,1 | 1,397/106/3,48 -> 1,220/184/4,21 | 2 / 0 | 0 | 1 | N/N |
+| 40 | `r126b` | SuperWave_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLLookback: 1; 3; 5; 7; 9; 11; 13 | 1,482/72/4,04 -> 1,243/131/4,17 | 7 / 0 | 0 | 0 | P/P |
+| 41 | `r155a` | SuperWave_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | unica 2024.09.26-2026.06.30 (nessun OOS) | TP_RR: 2,0; 2,5; 3,0; 3,5; 4,0 | 1,331/204/4,64 -> n/d | n/d | - | - | N/N |
+| 42 | `r165a` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPips: 3; 1003; 2003; 3003; 4003; 5003 | 1,397/106/3,48 -> 1,220/184/4,21 | 6 / 0 | 0 | 0 | N/N |
+| 43 | `r173a` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1Pct: 0; 25; 50; 75 | 1,397/106/3,48 -> 1,220/184/4,21 | 4 / 0 | 0 | 0 | N/N |
+| 44 | `r173b` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1_R: 0,5; 1,0; 1,5; 2,0 | 1,397/106/3,48 -> 1,220/184/4,21 | 4 / 0 | 0 | 0 | N/N |
+| 45 | `r173c` | SuperWave_DOW_H1_Ott | U30USD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | Breakeven: 0; 1 | 1,397/106/3,48 -> 1,220/184/4,21 | 2 / 0 | 0 | 1 | N/N |
 | 46 | `r126d` | SuperWave | NASUSD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferAtr: 0,000..1,000 (9) | 1,126/38/1,72 -> 0,778/63/3,09 | 0 / 9 | 1 | 0 | P/A |
-| 47 | `r154a` | SuperWave | U30USD H4 | T 100k 1,0% | unica 2024.09.26-2026.06.30 (nessun OOS) | SLLookback: 1,3,5,7,9,11,13 | 2,407/120/4,24 -> n/d | n/d | - | - | N/N |
-| 48 | `r125a` | ORB_Ott | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPts: 0,500,1000,1500,2000,2500,3000 | 1,061/71/4,43 -> 1,762/119/4,20 | 7 / 0 | 0 | 3 | N/N |
-| 49 | `r125b` | ORB_Ott | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1Pct: 0,25,50,75 | 1,250/71/7,89 -> 1,674/119/9,76 | 4 / 0 | 0 | 0 | N/N |
-| 50 | `r125c` | ORB_Ott | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPts: 0,500,1000,1500,2000,2500,3000 | 1,130/84/5,93 -> 0,997/128/9,80 | 5 / 2 | 2 | 0 | N/N |
+| 47 | `r154a` | SuperWave | U30USD H4 | T 100k 1,0% | unica 2024.09.26-2026.06.30 (nessun OOS) | SLLookback: 1; 3; 5; 7; 9; 11; 13 | 2,407/120/4,24 -> n/d | n/d | - | - | N/N |
+| 48 | `r125a` | ORB_Ott | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPts: 0; 500; 1000; 1500; 2000; 2500; 3000 | 1,061/71/4,43 -> 1,762/119/4,20 | 7 / 0 | 0 | 3 | N/N |
+| 49 | `r125b` | ORB_Ott | U30USD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | TP1Pct: 0; 25; 50; 75 | 1,250/71/7,89 -> 1,674/119/9,76 | 4 / 0 | 0 | 0 | N/N |
+| 50 | `r125c` | ORB_Ott | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPts: 0; 500; 1000; 1500; 2000; 2500; 3000 | 1,130/84/5,93 -> 0,997/128/9,80 | 5 / 2 | 2 | 0 | N/N |
 | 51 | `r125d` | ORB_Ott | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 0,858/56/6,08 -> 0,650/97/8,88 | 0 / 1 | 0 | 0 | N/N |
-| 52 | `r125e` | ORB_Ott | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | MinRangePct: 0,00,0,05,0,10,0,15,0,20 | 1,256/84/4,01 -> 0,997/128/7,49 | 2 / 3 | 3 | 0 | N/N |
-| 53 | `r125f` | ORB_Ott | NASUSD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPts: 0,500,1000,1500,2000,2500,3000 | 1,200/74/6,67 -> 0,864/135/8,01 | 0 / 7 | 7 | 0 | N/N |
-| 54 | `r133b` | ORB_Ott | U30USD M5 | T 100k 1% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | UseCloseConfirm: 0,1 | 1,250/71/7,89 -> 1,674/119/9,76 | 2 / 0 | 0 | 1 | P/A |
-| 55 | `r147b` | ORB_Ott | U30USD M5 | T 10k 0,65% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0,1 | 1,231/71/5,65 -> 1,675/119/6,54 | 2 / 0 | 0 | 0 | N/N |
+| 52 | `r125e` | ORB_Ott | D30EUR M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | MinRangePct: 0,00; 0,05; 0,10; 0,15; 0,20 | 1,256/84/4,01 -> 0,997/128/7,49 | 2 / 3 | 3 | 0 | N/N |
+| 53 | `r125f` | ORB_Ott | NASUSD M5 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPts: 0; 500; 1000; 1500; 2000; 2500; 3000 | 1,200/74/6,67 -> 0,864/135/8,01 | 0 / 7 | 7 | 0 | N/N |
+| 54 | `r133b` | ORB_Ott | U30USD M5 | T 100k 1% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | UseCloseConfirm: 0; 1 | 1,250/71/7,89 -> 1,674/119/9,76 | 2 / 0 | 0 | 1 | P/A |
+| 55 | `r147b` | ORB_Ott | U30USD M5 | T 10k 0,65% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0; 1 | 1,231/71/5,65 -> 1,675/119/6,54 | 2 / 0 | 0 | 0 | N/N |
 | 56 | `r133c` | MaxMinNotte | D30EUR M15 | T 10k 1% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | MinBoxPts: 0..12000 (9) | 1,997/38/4,89 -> 1,016/65/9,05 | 4 / 5 | 5 | 0 | A/A |
-| 57 | `r151a` | MaxMinNotte | XAUUSD H2 | B 100k 0,5% | IS 2020.01.01-2022.08.06 / OOS 2022.08.07-2026.06.30 | TrailAtrMult: 0,8,1,2,1,6,2,0,2,4,2,8,3,2 | 1,108/265/5,27 -> 1,438/428/5,30 | 7 / 0 | 0 | 1 | N/N |
-| 58 | `r170b` | MaxMinNotte | XAUUSD H2 | B 100k 0,5% | IS 2020.01.01-2022.08.06 / OOS 2022.08.07-2026.06.30 | CloseAtEnd: 0,1 | 1,108/265/5,27 -> 1,438/428/5,30 | 2 / 0 | 0 | 0 | N/N |
-| 59 | `r170c` | MaxMinNotte_DAX_Short_Ott | D30EUR M15 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0,1 | 1,878/20/3,10 -> 2,160/21/1,92 | 2 / 0 | 0 | 0 | N/N |
+| 57 | `r151a` | MaxMinNotte | XAUUSD H2 | B 100k 0,5% | IS 2020.01.01-2022.08.06 / OOS 2022.08.07-2026.06.30 | TrailAtrMult: 0,8; 1,2; 1,6; 2,0; 2,4; 2,8; 3,2 | 1,108/265/5,27 -> 1,438/428/5,30 | 7 / 0 | 0 | 1 | N/N |
+| 58 | `r170b` | MaxMinNotte | XAUUSD H2 | B 100k 0,5% | IS 2020.01.01-2022.08.06 / OOS 2022.08.07-2026.06.30 | CloseAtEnd: 0; 1 | 1,108/265/5,27 -> 1,438/428/5,30 | 2 / 0 | 0 | 0 | N/N |
+| 59 | `r170c` | MaxMinNotte_DAX_Short_Ott | D30EUR M15 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | CloseAtEnd: 0; 1 | 1,878/20/3,10 -> 2,160/21/1,92 | 2 / 0 | 0 | 0 | N/N |
 | 60 | `R123AGATE` | SupRev_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 0,988/117/6,17 -> 1,389/152/5,91 | 1 / 0 | 0 | 1 | P/P |
-| 61 | `R123BSTMULT` | SupRev_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | StMult: 2,5,3,0,3,5,4,0,4,5 | 0,988/117/6,17 -> 1,389/152/5,91 | 3 / 2 | 1 | 2 | P/P |
-| 62 | `R123CATRP` | SupRev_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | StAtrPeriod: 6,7,8,9,10,11,12 | 0,988/117/6,17 -> 1,389/152/5,91 | 3 / 4 | 0 | 2 | P/P |
-| 63 | `R123DNEARATR` | SupRev_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | NearAtr: 0,50,0,75,1,00,1,25,1,50 | 0,988/117/6,17 -> 1,389/152/5,91 | 4 / 1 | 0 | 3 | P/P |
-| 64 | `r132c` | SupRev_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | NearAtr: 0,25,0,50,0,75,1,00,1,25,1,50,1,75,2,00 | 0,988/117/6,17 -> 1,389/152/5,91 | 7 / 1 | 0 | 6 | P/A |
+| 61 | `R123BSTMULT` | SupRev_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | StMult: 2,5; 3,0; 3,5; 4,0; 4,5 | 0,988/117/6,17 -> 1,389/152/5,91 | 3 / 2 | 1 | 2 | P/P |
+| 62 | `R123CATRP` | SupRev_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | StAtrPeriod: 6; 7; 8; 9; 10; 11; 12 | 0,988/117/6,17 -> 1,389/152/5,91 | 3 / 4 | 0 | 2 | P/P |
+| 63 | `R123DNEARATR` | SupRev_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | NearAtr: 0,50; 0,75; 1,00; 1,25; 1,50 | 0,988/117/6,17 -> 1,389/152/5,91 | 4 / 1 | 0 | 3 | P/P |
+| 64 | `r132c` | SupRev_DOW_H1_Ott | U30USD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | NearAtr: 0,25; 0,50; 0,75; 1,00; 1,25; 1,50; 1,75; 2,00 | 0,988/117/6,17 -> 1,389/152/5,91 | 7 / 1 | 0 | 6 | P/A |
 | 65 | `r127a` | SupRev_NAS_H1_Ott | NASUSD H1 | T 10k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPips: 3..3003 (9) | 1,298/71/0,99 -> 1,613/87/1,09 | 9 / 0 | 0 | 0 | N/N |
-| 66 | `r163a` | SupRev_NAS_H1_Ott | NASUSD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPips: 2253,2628,3003,3378,3753,4128,4503 | 1,540/76/0,81 -> 1,591/96/1,34 | 7 / 0 | 0 | 0 | N/N |
+| 66 | `r163a` | SupRev_NAS_H1_Ott | NASUSD H1 | T 100k 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | SLBufferPips: 2253; 2628; 3003; 3378; 3753; 4128; 4503 | 1,540/76/0,81 -> 1,591/96/1,34 | 7 / 0 | 0 | 0 | N/N |
 | 67 | `P0_EURCHF` | Nightly | EURCHF M5 | T? 10k* 1,0% | IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30 | solo InpMagic (cella unica) | 0,891/63/11,10 -> 0,814/85/15,39 | 0 / 1 | 0 | 0 | P/P |
 
 ### 3.2 Cosa dichiarava il resoconto e cosa dicono i CSV (stesso ordine)
@@ -295,7 +295,7 @@ Ogni scheda: round letti, cella di riferimento e contratto, misure, segni invert
 - **Cambia?** Si': riga 14d di G1 ("SOPRA C (PF ~1), ZONA GRIGIA, OOS 1,097 su 104") - sez. 6 V1. La sedia e' ferma dal 25/09 (G1): nessuna azione qui.
 
 ### 4.4 `ABTG_Nasdaq_Live5m` - 770203 (spenta) - 4 round, 8 CSV (`r142a/b/c`, `r150a`)
-- **Perimetro**: NASUSD M5, pre-apertura 15', due lati, `[T]`, **10k, rischio 2%**, finestre standard. Assi: ClosePct (r142a), TrailTF (r142b), trailing on/off (r142c), TrailStartR (r150a).
+- **Perimetro**: NASUSD M5, ingresso pre-apertura, due lati, `[T]`, **10k, rischio 2%**, finestre standard. Assi: ClosePct (r142a), TrailTF (r142b), trailing on/off (r142c), TrailStartR (r150a).
 - **Ancora**: **1,015 / 116 / 12,28 -> 0,956 / 175 / 22,47** (IS 98 / OOS -448 in profitto), riprodotta in 4 round = G1 sc.23 (r142).
 - **Celle** (18): IS sopra in 17 su 18, **OOS sopra in 6 su 18**; 11 celle IS sopra -> OOS sotto; **nessuna cella arriva a 1,10 in OOS** (max 1,070 a TrailTF M2). DD OOS **17,6-34,3%** su tutte le 18 celle (al 2%, sopra il muro 10% citato dai resoconti).
   Senza trailing: IS 1,322 -> OOS 0,999, DD 33,62. `r150a` (TrailStartR 0-3 R): IS 1,015-1,283, OOS 0,912-1,014 (2 su 7 sopra 1).
@@ -323,7 +323,7 @@ Ogni scheda: round letti, cella di riferimento e contratto, misure, segni invert
 - **Uscite messe ad asse** (100k, finestre standard): TP1Pct 0 / 25 / **50 (sedia)** / 75: IS 1,674 / 1,653 / 1,397 / 1,106, OOS 1,455 / 1,318 / 1,220 / 1,140 (deal OOS 116 / 184 / 184 / 184; DD OOS 4,64 / 4,43 / 4,21 / 4,02). TP1_R 0,5 / **1,0** / 1,5 / 2,0: IS 1,569 / 1,397 / 1,309 / 1,342, OOS **1,928** / 1,220 / 1,323 / 1,366 (deal OOS 208 / 184 / 182 / 180; DD OOS 3,56 / 4,21 / 4,14 / 4,10).
   Breakeven spento: IS 0,879 / 207 -> OOS 1,050 / 418 (DD 4,06). SLBufferPips 3-5003: IS 1,373-1,419, OOS 1,209-1,258, **n 106 / 184 invariante**, DD OOS 4,02-4,48. Con la regola scritta nel file `r173a` (B2: celle sopra il DD piu' alto misurato a 100k, 4,2149%): `r173a` 2 su 4 (parziale 0: 4,639; 25: 4,428), nessuna sopra l'8%.
 - **Uscite a 10k**: SLBufferAtr 0-1,0 (`r126a`): IS 1,482-1,879, OOS 1,234-1,402, 9 su 9 sopra in entrambe; SLLookback 1-13 (`r126b`): IS 1,369-1,638, OOS 1,135-1,305, 7 su 7; **TP_RR 2,0-4,0 (`r155a`, finestra piena, 10k)**: PF 1,263-1,344, n 203-205, DD 4,41-4,88.
-- **Celle che battono la sedia in IS e OOS**: TP1Pct 0 e 25; TP1_R 0,5; SLBufferPips 1003, 4003, 5003; a 10k SLBufferAtr 0,125 e 0,375-1,0 (7 celle, non 0,25) e SLLookback 3, 7, 9. Sono dati, non una scelta: la regola di casa e' il centro dell'altopiano, mai il picco; qualunque cambio della sedia e' **decisione di Claudio**.
+- **Celle che battono la sedia in IS e OOS**: TP1Pct 0 e 25; TP1_R 0,5; SLBufferPips 1003 e 5003 (4003 solo di 0,0003 in IS); a 10k SLBufferAtr 0,125 e 0,375-1,0 (7 celle, non 0,25) e SLLookback 3, 7, 9. Sono dati, non una scelta: la regola di casa e' il centro dell'altopiano, mai il picco; qualunque cambio della sedia e' **decisione di Claudio**.
 - **Classe (lettura)**: cella di contratto **CONTESA -> NON MISURATO** per il piano §5.2.6 (e' G2); entrambe le letture riproducibili sono **SOPRA** (OOS >= 1,22); aff. C (131 deal a 10k) / B o C provvisoria (184 deal a 100k); un solo regime.
 - **Caselle**: (3) uscita: R120 + TP1Pct, TP1_R, BE, TP_RR, SLBuffer, SLLookback ora **con CSV** (G2: "7 file, 30 celle, 60 passate, mai lanciati": qui hanno CSV 5 file, `r155a`, `r165a`, `r173a/b/c`, 21 celle; il TF M30 `R190b` e gli altri file NON hanno CSV in questa cartella); (4) gemelli: NASUSD (`r126d`); (5) TF: **NON chiusa** (R190b mai girato).
 - **Cambia?** Si' (sez. 6 V2): aggiornare "mai lanciati"; la CONTESA si riduce a una lettura non riproducibile; aggiungere la cella `r120b01`; la frase "il trailing OFF non va provato (misurato: vince acceso)" vale per (0,0) in IS, non per (0,1).
@@ -457,7 +457,7 @@ DD = `Equity DD %` al banco del contratto. n dei CSV = deal; frequenza in deal =
 | 771531 (U30USD H1 L+S) | PF 1,20110 / 1,52365; DD 5,7325 / 7,8323; n 237 / 517 deal (257 pos OOS; 132 IS dichiarato); 0,931 op/g (CT §2) | `cemad05`, `r136a-d`, `r146b`, `r147a`: identici; `cemad02` "OOS" = finestra IS (237 deal) | **riproduce, 7 round**; posizioni NON LEGGIBILI; 517 / 276 = 1,873 op/g in deal |
 | 770511 (U30USD H1 L+S) | **CONTESO**: 1,84892 / 1,32770 (84 / 143 deal; DD 3,7267 / 3,9082) **oppure** 1,48166 / 1,24312 (72 / 131; DD 4,0393 / 4,1675); 100k DD OOS 4,2149; ~0,294 op/g stimato (CT §2, §5) | 10k: 1,482 / 1,243, 72 / 131, DD 4,04 / 4,17 (`r120b11`, `r126a`, `r126b`); 100k: 1,397 / 1,220, 106 / 184, DD 3,48 / 4,21 (`r120e11`, `r165a`, `r173a/b/c`) | **2 letture su 3 riprodotte**; **1,849 / 1,328 mai**; 131 / 276 = 0,475 e 184 / 276 = 0,667 op/g in deal |
 | 770611 (U30USD M5 long) | 100k 1%: PF 1,250 / 1,674, DD 7,89 / 9,76, 71 / 119 pos (R88a, G2); 10k 0,65%: DD 5,6530 / 6,5389, ~0,43 op/g (`CENSIMENTO_CONTRATTI_v2` r.216) | `r125b` e `r133b` (100k): identici a R88a; `r147b` (10k, 0,65%): DD 5,6530 / 6,5389 | **riproduce, 3 round**; 119 deal = 119 pos (TP1Pct 0): 119 / 276 = 0,431 op/g |
-| 770411 (D30EUR M15 short + filtro) | PF 1,87803 / 2,15985; DD 3,0977 / 1,9213; n 20 / 21 deal = 14 pos OOS; 0,051 op/g (CT §4) | `r170c`: identico (le due celle CloseAtEnd uguali) | **riproduce, 1 round**; 14 / 276 = 0,051 (pos dal contratto) |
+| 770411 (D30EUR M15 short + filtro) | PF 1,87803 / 2,15985; DD 3,0977 / 1,9213; n OOS 21 deal = 14 pos (IS in pos NON MISURATO, forbice 9-20); 0,051 op/g (CT §4) | `r170c`: identico, IS 20 deal (estremo alto della forbice) e OOS 21 deal (le due celle CloseAtEnd uguali) | **riproduce, 1 round**; 14 / 276 = 0,051 (pos dal contratto) |
 | 770250 (NASUSD M15 gated short) | `REFERTO_SHORTGATE` 30/08: n 104, PF 1,097, DD 4,54, +1951 (finestra piena); G1 14d lo scrive come "OOS" | `r170a`: IS 1,257 / 57 / 4,54, OOS 0,948 / 47 / 3,63; 57 + 47 = 104; PF combinato 1,0996 | **il 1,097 e' la finestra piena**; l'OOS e' 0,948 |
 | 770203 Live5m (spenta) | G1 sc.23: IS 1,015 / OOS 0,956, 116 / 175, DD 12,3 / 22,5 a 2% | `r142a-c`, `r150a` (ancora identica in 4 round) | **riproduce** |
 | 970913 SupRev NAS H1 | G5 Y01: `R127a` ancora 1,298 / 71 -> 1,613 / 87; contratto "PF 1,57, DD 1,17%, 155 deal" = finestra piena | `r127a`: 1,298 / 71 / 0,99 -> 1,613 / 87 / 1,09; 71 + 87 = 158 | **riproduce R127a**; il contratto (155 deal, finestra piena, binario diverso) non e' confrontabile con uno split |
