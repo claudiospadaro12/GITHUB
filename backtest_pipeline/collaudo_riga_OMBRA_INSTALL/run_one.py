@@ -38,12 +38,15 @@ function Start-Sleep { [CmdletBinding()] param([int]$Seconds, [int]$Milliseconds
 
 class Srv:
     def __init__(self, corpo, codice=200):
-        self.corpo = corpo; self.codice = codice; self.hits = 0
+        self.corpo = corpo; self.codice = codice; self.hits = 0; self.rotte = {}
         s = self
         class H_(http.server.BaseHTTPRequestHandler):
             def do_GET(self):
                 s.hits += 1
-                if self.path == "/%s/%s" % (F.EA_PIN, F.EA_REL) and s.codice == 200:
+                if self.path in s.rotte:
+                    b = s.rotte[self.path]
+                    self.send_response(200); self.send_header("Content-Length", str(len(b))); self.end_headers(); self.wfile.write(b)
+                elif self.path == "/%s/%s" % (F.EA_PIN, F.EA_REL) and s.codice == 200:
                     self.send_response(200); self.send_header("Content-Length", str(len(s.corpo))); self.end_headers(); self.wfile.write(s.corpo)
                 else:
                     self.send_response(404); self.send_header("Content-Length", "0"); self.end_headers()
@@ -83,7 +86,7 @@ def corpo_server(modo):
     raise ValueError(modo)
 
 
-def esegui(spec, c, riga=None, patch=None, pin=None, sha=None, timeout=300, testo=None):
+def esegui(spec, c, riga=None, patch=None, pin=None, sha=None, timeout=300, testo=None, testo_fn=None, rotte_fn=None):
     """patch: lista di (vecchio, nuovo) sul testo dello script (mutanti e iniezioni di guasto: DICHIARATI dal chiamante). testo: script gia' pronto (bootstrap_test)."""
     riga = riga or RIGA_DEFAULT
     corpo, nuovo_sha, codice = corpo_server(spec["server"])
@@ -92,9 +95,14 @@ def esegui(spec, c, riga=None, patch=None, pin=None, sha=None, timeout=300, test
         srv.chiudi()
     out = tempfile.mkdtemp(prefix="omrun_", dir=os.environ.get("HARNESS_TMP", None))
     try:
-        t = testo if testo is not None else open(riga, encoding="ascii", newline="").read()
-        assert RAW in t
-        t = t.replace(RAW, "http://127.0.0.1:%d/" % srv.porta)
+        if rotte_fn:
+            srv.rotte = rotte_fn(srv.porta)
+        if testo_fn:
+            t = testo_fn(srv.porta)          # il testo e' gia' pronto per la porta (bootstrap_test)
+        else:
+            t = testo if testo is not None else open(riga, encoding="ascii", newline="").read()
+            assert RAW in t
+            t = t.replace(RAW, "http://127.0.0.1:%d/" % srv.porta)
         if nuovo_sha:
             assert F.EA_SHA in t
             t = t.replace(F.EA_SHA, nuovo_sha)
