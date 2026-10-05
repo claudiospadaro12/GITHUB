@@ -37,6 +37,16 @@ DEP_100K  = 100000.0
 #     🔴 E il limite va detto con il numero: la sonda delle 03:30 di oggi NON
 #     puo' coprire la seduta di oggi (la vedra' la corsa di domani notte).
 CODA_REFERTI = os.path.join("backtest_pipeline", "coda", "referti")
+# La clausola di validita' e' scritta nel referto che leggiamo e va tradotta in
+# un `if`, non lasciata in prosa (classe 1142): "'RIGHE DI ORDINE/DEAL = 0' su un
+# log NON vuoto vuol dire che quel giorno il conto non ha operato. Su un log
+# QUASI VUOTO non vuol dire niente: il giorno e' appena cominciato (classe 162)".
+SOGLIA_LOG_PIENO = 20   # righe totali: sotto questo il log non dice niente
+# 🔴 E l'assenza di un log NON dice che il conto non ha operato: dice che quel
+#    TERMINALE non e' girato con EA attaccati (spento, o senza EA). Le due
+#    ipotesi producono la STESSA evidenza, quindi il silenzio non discrimina
+#    (classe 1141). Per dire che non ha operato servono fonti VIVE in quella
+#    finestra: la sospensione delle sedie e `rischioAperto=0.00%` del Guardian.
 FTMO_PAV_TOTALE = 90000.0   # pavimento statico -10%
 FTMO_LIM_GIORNO = 5000.0    # perdita massima giornaliera -5%
 
@@ -193,6 +203,13 @@ def _leggi_giornale_runner(conto):
             righe = f.read().split("\n")
     except OSError:
         return None
+    # 🔴 CINTURA (classe 1143): tutto il valore dell'ASSENZA di un giorno sta
+    #    nel fatto che la sonda stampa i DUE GIORNI PIU' RECENTI -- cosi' un
+    #    giorno piu' nuovo, se esistesse, sarebbe stampato. Su una sonda che
+    #    stampasse i due piu' VECCHI questo lettore si comporterebbe identico e
+    #    mentirebbe in silenzio. Quindi la premessa si CONTROLLA, non si assume.
+    if not any("ultimi due giorni" in r for r in righe[:5]):
+        return None
     # la data della SONDA sta nel nome: CODA_09_giornale_operativo_AAAAMMGG_hhmmss.log
     parti = ultimo.replace(".log", "").split("_")
     sonda = None
@@ -213,25 +230,38 @@ def _leggi_giornale_runner(conto):
             fine = i
             break
     giorni = []
-    g = None
+    g = scritta = None
+    tot = None
     for r in righe[inizio:fine]:
         s = r.strip()
         if s.startswith("--- GIORNO "):
             tok = s.split()
             g = tok[2] if len(tok) > 2 and tok[2].isdigit() else None
+            tot = None
+            # "--- GIORNO 20260928   (38.4 KB, ultima scrittura 2026-09-28 09:07) ---"
+            scritta = None
+            if "ultima scrittura" in s:
+                scritta = s.split("ultima scrittura", 1)[1]
+                scritta = scritta.split(")")[0].strip()
+        elif g and s.startswith("righe totali:"):
+            try:
+                tot = int(s.split(":")[-1].strip())
+            except ValueError:
+                tot = None
         elif g and s.startswith("RIGHE DI ORDINE / DEAL:"):
             try:
-                giorni.append((g, int(s.split(":")[-1].strip())))
+                giorni.append((g, int(s.split(":")[-1].strip()), tot, scritta))
             except ValueError:
                 pass
             g = None
     if not giorni:
         return None
     giorni.sort()
-    ultimo_g, ordini = giorni[-1]
+    ultimo_g, ordini, tot, scritta = giorni[-1]
     return {"sonda": sonda, "referto": ultimo,
             "giorno": "%s-%s-%s" % (ultimo_g[:4], ultimo_g[4:6], ultimo_g[6:]),
-            "ordini": ordini, "giorni": len(giorni)}
+            "ordini": ordini, "righe": tot, "ultima_scrittura": scritta,
+            "giorni": len(giorni)}
 
 
 def discordi(righe):
@@ -710,12 +740,17 @@ def main():
         # rimanda alla sezione, dove il fatto e' misurato (classe 1136).
         _gr100 = giornale_runner("50504263")
         if (any("50504263" in x for x in fermi) and _gr100
-                and _gr100["giorno"] < giorno and _gr100["ordini"] == 0):
-            out += ["> 🟠 **Per il 100k `50504263` il dubbio e' SCIOLTO piu' "
-                    "sotto, e la risposta e' \"non ha operato\"**: il giornale "
-                    "del runner non trova **nessun log Esperti** su quel "
-                    "terminale dopo il **%s**. Vedi la sezione 🛡️ — li' c'e' "
-                    "anche il limite della sonda." % _gr100["giorno"], ""]
+                and _gr100["giorno"] < giorno and _gr100["ordini"] == 0
+                and (_gr100["righe"] or 0) >= SOGLIA_LOG_PIENO):
+            out += ["> 🟠 **Per il 100k `50504263` la frase qui sopra e' "
+                    "SUPERATA dalla fonte viva, e la risposta non e' una "
+                    "rassicurazione: il TERMINALE di quel conto non scrive un "
+                    "log Esperti dal %s**, mentre nello stesso referto gli "
+                    "altri terminali hanno il log di **ieri e di oggi**. Quindi "
+                    "il CSV **non poteva** arrivare, e li' non girano nemmeno "
+                    "l'esportatore e il Guardian. Vedi la sezione 🛡️ — c'e' "
+                    "anche cosa dimostra davvero che il conto non ha operato, e "
+                    "il limite della sonda." % _gr100["giorno"], ""]
     if fermi:
         out += ["> 🚧 **Attenzione a cosa e' gia' implementato:** la soppressione "
                 "del netto di giornata vale per il **100k `50504263`** e per il "
@@ -1102,39 +1137,67 @@ def main():
             # pagelle di fila su un conto da cui l'ultima sedia l'avevamo tolta
             # NOI il 25/09 (classe 1136).
             gr = giornale_runner("50504263")
-            if gr and gr["giorno"] < giorno and gr["ordini"] == 0:
-                out += ["> 🟠 **IL CONTO NON HA OPERATO — e stavolta non e' un "
-                        "\"non lo so\": e' MISURATO.** Il CSV del 100k ha "
-                        "contenuto fermo al **%s**, e il giornale del runner "
-                        "(`%s`, sonda delle 03:30 del **%s**) dice che "
-                        "sull'ultimo giorno in cui MT5 ha scritto un log "
-                        "Esperti su quel terminale — il **%s** — le righe di "
-                        "ordine erano **0**, e **dopo quel giorno non esiste "
-                        "nessun log**: MT5 ne scrive uno per ogni giorno in cui "
-                        "gira con EA attaccati, quindi da allora **nessun EA ha "
-                        "operato** su `50504263`. 🟢 Ed e' voluto: l'ultima "
-                        "sedia l'abbiamo **tolta noi** il 25/09 "
+            if (gr and gr["giorno"] < giorno and gr["ordini"] == 0
+                    and (gr["righe"] or 0) >= SOGLIA_LOG_PIENO):
+                out += ["> 🟠 **NESSUN EA HA POTUTO OPERARE su `50504263` — ma "
+                        "il fatto MISURATO e' un altro, e va detto per primo: "
+                        "il TERMINALE del 100k non scrive un log Esperti dal "
+                        "%s** (ultima scrittura **%s**). Il CSV ha contenuto "
+                        "fermo al **%s**, e il giornale del runner (`%s`, sonda "
+                        "delle 03:30 del **%s**) sull'ultimo giorno con log — "
+                        "il **%s** — da' **0** righe di ordine su **%s** righe "
+                        "totali, e **dopo non esiste nessun log**."
+                        % (gr["giorno"], gr["ultima_scrittura"] or "[non letta]",
+                           d100, gr["referto"], gr["sonda"], gr["giorno"],
+                           gr["righe"]), "",
+                        "> 🔴 **E qui il salto NON si fa**: MT5 scrive un log "
+                        "per ogni giorno in cui gira **con EA attaccati**, "
+                        "quindi *nessun log* dice che quel **TERMINALE era "
+                        "spento o senza EA** — **non** che il conto sia "
+                        "tranquillo. Le due ipotesi producono **la stessa "
+                        "evidenza**, e nello stesso referto gli **altri** "
+                        "terminali hanno il log di **ieri e di oggi**. "
+                        "🔴 Conseguenze: con quel terminale giu' "
+                        "l'`ABTG_TradeExporter` **non gira** (il CSV **non PUO' "
+                        "aggiornarsi**: *\"dato non arrivato\"* e' letterale) e "
+                        "l'`ABTG_Guardian` **non gira** su quel conto.", "",
+                        "> 🟢 **Che il conto non abbia operato lo dimostrano DUE "
+                        "fatti, non il silenzio del log**: (1) l'ultima sedia "
+                        "operativa l'abbiamo **tolta noi** il 25/09 "
                         "(`ABTG_SupertrendReversal` 225JPY H2, magic `770901`, "
-                        "ore 13:14:47 — `report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`)."
-                        % (d100, gr["referto"], gr["sonda"], gr["giorno"]), "",
-                        "> ⚠️ **Il limite, col suo numero**: la sonda delle "
-                        "03:30 di oggi **non puo' coprire la seduta di oggi** "
-                        "(la vedra' la corsa di domani notte). Quindi "
-                        "\"non ha operato\" vale **fino alle 03:30 del %s**; "
-                        "da li' a stasera e' **[NON ANCORA COPERTO]** — e "
-                        "resta comunque **nessun netto di giornata** per questo "
-                        "conto." % (gr["sonda"] or giorno), ""]
+                        "ore 13:14:47 — `report/SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`), "
+                        "quindi **niente poteva aprire**; (2) l'ultima riga del "
+                        "Guardian nel referto da' **`rischioAperto=0.00%`**, "
+                        "quindi **nessuna posizione restava aperta** che potesse "
+                        "chiudersi a SL/TP sul server col terminale spento.", "",
+                        "> 🔴 **E resta un'AZIONE, non una constatazione**: un "
+                        "terminale fermo da **%s** sul VPS della challenge va "
+                        "**riacceso oppure dichiarato spento di proposito**. "
+                        "⚠️ E la sonda delle 03:30 di oggi **non copre la seduta "
+                        "di oggi** (la vedra' domani notte): da li' a stasera e' "
+                        "**[NON ANCORA COPERTO]**. Resta **nessun netto di "
+                        "giornata** per questo conto."
+                        % (("%d giorni" % giorni_fra(gr["giorno"], giorno))
+                           if giorni_fra(gr["giorno"], giorno) else
+                           "piu' giorni"), ""]
             else:
                 out += ["> 🔴 **DATO NON ARRIVATO.** Il CSV del 100k ha contenuto "
                         "fermo al **%s**: non posso dire ne' che il conto abbia "
                         "operato, ne' che non l'abbia fatto. **Nessun netto di "
                         "giornata per questo conto.**" % d100, ""]
                 if gr:
+                    _perche = ""
+                    if (gr["righe"] or 0) < SOGLIA_LOG_PIENO:
+                        _perche = (" — e **%s righe totali** stanno **sotto la "
+                                   "soglia di %d**: su un log quasi vuoto lo "
+                                   "zero **non vuol dire niente**, lo scrive il "
+                                   "referto stesso (classe 162)"
+                                   % (gr["righe"], SOGLIA_LOG_PIENO))
                     out += ["> ℹ️ Il giornale del runner (`%s`) c'e' ma **non "
                             "scioglie il dubbio**: ultimo giorno di log "
-                            "**%s** con **%d** righe di ordine. L'allarme "
+                            "**%s** con **%d** righe di ordine%s. L'allarme "
                             "resta rosso." % (gr["referto"], gr["giorno"],
-                                              gr["ordini"]), ""]
+                                              gr["ordini"], _perche), ""]
                 else:
                     out += ["> ℹ️ Il giornale del runner (`CODA_09`) **non e' "
                             "leggibile da qui** (referto assente o formato "
@@ -1166,19 +1229,27 @@ def main():
             out += ["**Saldo realizzato AL %s: %.2f**  (dal via: %+.2f) — "
                     "⚠️ **fermo all'ultima consegna, non a stasera; il netto di "
                     "oggi NON e' noto.**" % (d100, saldo, netto_storico), ""]
+        # La riga della perdita giornaliera: tre casi, scritti in chiaro invece
+        # che in un ternario annidato (05/10, seconda limatura del cancello).
+        _g100 = giornale_runner("50504263")
+        if fresco[CSV_100K]:
+            riga_giorno_100k = ("| Perdita giornaliera (-5%%) | -5.000/giorno | "
+                                "oggi usati %.2f -> restano **%.2f** |"
+                                % (usato_oggi, margine_giorno))
+        elif (_g100 and _g100["giorno"] < giorno and _g100["ordini"] == 0
+                and (_g100["righe"] or 0) >= SOGLIA_LOG_PIENO):
+            riga_giorno_100k = ("| Perdita giornaliera (-5%%) | -5.000/giorno | "
+                                "🟠 **NON CALCOLABILE**: nessun EA poteva "
+                                "operare; il **terminale** non scrive log dal "
+                                "%s — vedi il banner |" % _g100["giorno"])
+        else:
+            riga_giorno_100k = ("| Perdita giornaliera (-5%) | -5.000/giorno | "
+                                "🔴 **NON CALCOLABILE**: dato non arrivato |")
         out += ["| Regola FTMO | Pavimento | Margine attuale |", "|---|---|---|",
                 "| Perdita totale (statico -10%%) | 90.000 | **%+.2f** (%.2f%% del conto)%s |" % (
                     margine_tot, 100.0 * margine_tot / DEP_100K,
                     "" if fresco[CSV_100K] else " _(all'ultima consegna)_"),
-                ("| Perdita giornaliera (-5%%) | -5.000/giorno | oggi usati %.2f -> restano **%.2f** |" % (
-                    usato_oggi, margine_giorno)) if fresco[CSV_100K] else
-                ("| Perdita giornaliera (-5%%) | -5.000/giorno | 🟠 **NON CALCOLABILE**: "
-                 "il conto non ha operato (giornale del runner, nessun log Esperti dopo il %s) |"
-                 % giornale_runner("50504263")["giorno"])
-                if (giornale_runner("50504263")
-                    and giornale_runner("50504263")["giorno"] < giorno
-                    and giornale_runner("50504263")["ordini"] == 0)
-                else "| Perdita giornaliera (-5%) | -5.000/giorno | 🔴 **NON CALCOLABILE**: dato non arrivato |",
+                riga_giorno_100k,
                 "",
                 "Peggior giornata dal via: **%+.2f**. _Numeri dal solo REALIZZATO " % peggior_g +
                 "(il CSV non vede il floating): l'arbitro vero dei pavimenti resta "
