@@ -154,7 +154,7 @@ Formato `PF / n / DD% / profitto`. "Viva" = cella viva (sez. 0 punto 3). Il dett
 - **Finestra intera, senza OOS (s.OOS)** in 11 round su 12; solo **r178a** ha IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30. **n per cella: 20-30 sulle finestre intere, 11 (IS) e 15 (OOS) in r178a**; nessuna cella con Trades=0.
 - **Cella viva per simbolo (finestra intera)**: GBPUSD fill100 (**1,763 / 21 / 4,02 / +4.536**, [B] 1999-2026) · EURUSD fill50 (**3,509 / 20 / 1,86 / +5.436**, [B]) · AUDUSD fill100 (**2,369 / 25 / 1,87 / +8.763**, [B]) · 225JPY fill75 (**1,678 / 26 / 4,59 / +5.411**, tick 21 mesi) · U30USD fill100 (**1,376 / 30 / 3,12 / +4.596**, tick 21 mesi). r178a: IS **3,204 / 11 / 1,33 / +4.573**, OOS **1,144 / 15 / 4,36 / +812**.
 - **Asse stop `InpSLGapMult` 0,4-2,2** (5 simboli x 7 = 35 celle): **SOTTO 3 celle, tutte a 0,4** (GBPUSD **0,452**, DD 12,30; EURUSD **0,685**, DD 7,70; 225JPY **0,606**, DD 9,09); EURUSD a 0,7 e' 1,006 (sul filo); AUDUSD e U30USD a 0,4 sono SOPRA (1,618; 1,237). **Da 1,0 in su 25 celle su 25 SOPRA** (5 valori x 5 simboli; minimo 1,329). EURUSD sale da 3,509 (1,0) a 6,29 (2,2) con DD 1,86 -> 0,92.
-- **Asse time-stop `InpMaxHours` 12-84** (35 celle): **solo U30USD a 12 h e' SOTTO (0,837)**; da 24 h in su **30/30 SOPRA** (minimo 1,376). Da 60 h (GBPUSD, 225JPY, U30USD) o da 48 h (EURUSD, AUDUSD) le celle sono **identiche fra loro**: il time-stop non morde oltre. Rispetto alla viva (48 h) **36 h e' migliore su 5/5 simboli**; **24 h su 4/5** (non su EURUSD: 2,906 contro 3,509).
+- **Asse time-stop `InpMaxHours` 12-84** (35 celle): **solo U30USD a 12 h e' SOTTO (0,837)**; da 24 h in su **30/30 SOPRA** (minimo 1,376). Da 60 h (GBPUSD, 225JPY, U30USD) o da 48 h (EURUSD, AUDUSD) le celle sono **identiche fra loro**: il time-stop non morde oltre. Rispetto alla viva (48 h), **sul PF**, **36 h e' migliore su 5/5 simboli**; **24 h su 4/5** (non su EURUSD: 2,906 contro 3,509).
 - **Asse `InpSLMode` 0/1**: U30USD (intera) PF 1,376 -> **1,666**, DD 3,12 -> **1,79**; 225JPY IS 3,204 -> 2,514 e **OOS 1,144 -> 1,002 (profitto +812 -> +5), DD 4,36 -> 2,30**: i due simboli **non vanno nella stessa direzione**.
 - **SOTTO totali: 4 celle su 76** (le tre `SLGapMult` 0,4 e `MaxHours` 12 U30USD). **Tutte le altre sono SOPRA, ma tutte su n 11-30 e (salvo r178a) senza OOS: D** (piano 5.4; U30USD n30 e' C al limite).
 - **Frequenza**: forex 20-25 trade in **27,5 anni** per simbolo (0,73-0,91/anno); sottraendo le operazioni di R103 (2020-2026, G4: AUDUSD 17, GBPUSD 13, EURUSD 14) restano **8 (AUDUSD) / 8 (GBPUSD) / 6 (EURUSD)** prima del 2020 `[DERIVATO]`. Indici 21 mesi: 26-30 (15-17/anno). **n >= 150 non e' raggiungibile con la storia disponibile** (vedi sez. 8 S2).
@@ -162,6 +162,7 @@ Formato `PF / n / DD% / profitto`. "Viva" = cella viva (sez. 0 punto 3). Il dett
 
 ### 4.5 ABTG_GapContinuation (225JPY M1, tick, 100k, 1%) - round r162a
 - Finestra intera 2024.09.26-2026.06.30 (FrazioneIS 1,0), asse `InpPartialTargetR` 0,50-2,50 (9), `InpPartialClosePercent=40`: **9 su 9 SOPRA**, PF 1,269-1,582, **n 84-124 deal** (decresce al crescere dell'asse), DD 6,94-12,78%, profitto +8.928/+13.108. Viva (1,00): **1,385 / 109 / 11,59 / +11.262**, peggior giornata -1,05%. Il massimo (PF 1,582, DD **6,94%**) sta **sul bordo basso dell'asse (0,50)**; DD > 10% in **8 celle su 9**.
+- **Lati**: `InpEnableBuyGaps` e `InpEnableSellGaps` entrambi 1 (gap minimo 1,00 e rischio 1% su entrambi): **la cella include il lato short** che in R65 perdeva (-2.182 su 20 pos, G4); il CSV non separa i lati (NON LEGGIBILE per lato).
 - **Classe**: SOPRA s.OOS, **C** (109 deal -> posizioni NON LEGGIBILI, >= 47 se fattore 2,31). Il numero **IS a tick** che G4 dava "non misurato" **non e' leggibile separatamente** (nessuna gamba IS/OOS): [DERIVATO] ~1,35 / 39 deal sottraendo la passata OOS di R65 (sez. 3 K13).
 - **Certificato**: (3) **PartialTargetR letto** (+ FinalTargetR G4) -> si; **(4) gemelli: nessuno; (5) TF: M1 e basta -> APERTE**.
 
@@ -219,5 +220,205 @@ Vedi 4.1. L'**unico fallimento** e' S7 (nessuna cella con DD > 35,0%): **IS SL 1
 
 ---
 
+## 6. CELLE SOPRA 1 E SOTTO 1 (classe 1127: entrambi i versi) E CASELLE DEL CERTIFICATO
 
-## [IN LAVORAZIONE] sezioni 6-9 (cosa cambia nei verdetti, smentite, NON COPERTO, dubbi) e Appendice A (414 righe) seguono nel commit successivo.
+### 6.1 Conteggio delle 414 righe-cella (PF >= 1 / PF < 1)
+Una riga = una cella (valore di asse x gamba). **La cella viva compare in piu' round dello stesso EA/simbolo** (es. BB GBPUSD 4 volte, EURAUD 2): le righe non sono celle indipendenti.
+
+| EA | righe | SOPRA | SOTTO | dove stanno le SOTTO |
+|---|---:|---:|---:|---|
+| BreakingBand | 47 | 24 | 23 | GBPUSD IS 1999-2012 (20/20), OOS SL 1,5 (1), EURUSD intera SL 1,5 e 2,0 (2) |
+| CostToCost | 52 | 43 | 9 | r146a IS 8/9 (tick); r146c OOS SLBuffer 0,8 (1) |
+| EasyTrend | 28 | 21 | 7 | CHFJPY IS 1999-2019 (7/7) |
+| GapFill | 76 | 72 | 4 | SLGapMult 0,4 su GBPUSD, EURUSD, 225JPY; MaxHours 12 su U30USD |
+| GapContinuation | 9 | 9 | 0 | - |
+| PunteLarry | 140 | 89 | 51 | EURAUD IS (14), EURCAD IS (14), XAUUSD intera (14), EURAUD OOS (6), GBPUSD OOS (2), GBPJPY IS (1) |
+| FiboH4_Multi | 6 | 0 | 6 | IS 3/3 e OOS 3/3 |
+| PTE | 35 | 14 | 21 | r153a IS 7/7 e OOS 1/7; r164a IS 7/7 e OOS 4/7; r158a U30USD 2/7 |
+| SupertrendReversal (225JPY H2) | 7 | 7 | 0 | - |
+| SupertrendReversal_Ottimizzato (XAU H4) | 14 | 7 | 7 | IS 7/7 |
+| **totale** | **414** | **286** | **128** | (controllo: 286 + 128 = 414) |
+
+**Per tipo di dato**: **tick [T] 107 righe (94 SOPRA / 13 SOTTO)**; **barre [B] 307 righe (192 SOPRA / 115 SOTTO)**; 94 + 192 = 286 e 13 + 115 = 128, come in tabella. (Tick: SOPRA = 63 intere + 12 IS + 19 OOS; SOTTO = 4 intere + 8 IS + 1 OOS. Barre: SOPRA = 45 intere + 42 IS + 105 OOS; SOTTO = 18 intere + 80 IS + 17 OOS.)
+
+### 6.2 Le 5 caselle del certificato di morte (regola 09/09), cosa chiudono i CSV
+Per ogni EA con celle SOTTO o NM. "Prima" = come scrivevano G3/G4/G5; "dopo" = con questi CSV. **Non scrivo nessun MORTO**: scrivo quali caselle risultano compilate.
+
+| EA | (1) PF | (2) n e DD | (3) uscita ad asse | (4) gemelli | (5) TF | prima -> dopo |
+|---|---|---|---|---|---|---|
+| BreakingBand | si | si | **prima: "misurata ma illeggibile" -> ora LETTA** (SL ATR x7, BEMode, BEatATR, TPRefreshBars su GBPUSD; SL su EURUSD; AUDUSD NON LEGGIBILE; `InpTPMode=1` e TP mai) | si (7 simboli + 48 scan) | si (M15, M30, H1, H4) | NON ANCORA MISURATO (casella 3) -> **5 caselle compilate** per le celle SOTTO (con riserva AUDUSD) |
+| CostToCost | si | si | **prima parziale -> ora LETTA** (SLBufferATR tick EURJPY e GBPCAD; MaxBarsHold [B]; ExitMode scan G4) | si (48) | si (H1, H4) | NON ANCORA MISURATO (casella 3) -> **5 compilate** per le celle SOTTO di G4 |
+| EasyTrend | si | si | `InpTP_R` (G4) + **SLBufferPts letto** | si (48 + 4) | **H1 e basta: APERTA** | NON ANCORA MISURATO (TF) -> **invariato: resta la casella 5** |
+| GapFill | si | si | **prima solo FillPct -> ora SLGapMult, MaxHours, SLMode letti** | si (10) | **H1 e basta: APERTA** | mancano 3 e 5 -> **manca solo la 5** |
+| GapContinuation | si | si (deal) | FinalTargetR (G4) + **PartialTargetR letto** | **APERTA** (nessun gemello) | **APERTA** (M1) | mancano 3,4,5 -> **mancano 4 e 5** |
+| PunteLarry | si | si | tipo R/FPO (scan G4) + **MaxDaysHold e SLBufferATR letti su 6 simboli** | si (48) | **H1 e basta: APERTA** | mancano 3 e 5 -> **manca solo la 5** |
+| FiboH4_Multi | si | si (deal) | **APERTA** (r139c muove l'ingresso) | solo GBPUSD singolo + basket | **APERTA** (H4) | **invariato** (3 e 5 aperte) |
+| PTE | si | si (deal) | G3: si; **+ AtrExitPeriod su 3 sedie** | si (9) | si (H1-H4) | **invariato** (G3: compilato su dato [B], "NON MORTO") |
+| SupertrendReversal (225JPY H2) | si (r166a) | si (deal) | **+ SLBufferPips su 225JPY H2** (G5: PARZIALE: TrailOnST, ExitOnFlip, FirstFraction, TP1Pct mai) | G5: 10 simboli | G5: 11 TF | NM -> **SOPRA s.OOS C; certificato invariato** |
+| SupertrendReversal_Ottimizzato | si | si (deal) | SLLookback (G5) | solo oro col suo nome | 11 TF | **invariato** |
+
+La casella 3 la leggo alla lettera della regola 09/09 ("la gestione dell'uscita messa ad asse **almeno una volta**"): dove G4 la dava aperta **perche' illeggibile**, ora e' leggibile. Dove G4/G5 la davano "parziale" per **manopole non mosse** (TPMode=1, TrailOnST, ...) **non le ho toccate**: quelle restano non mosse.
+
+---
+
+## 7. VERDETTI DEI RESOCONTI: COSA CAMBIEREBBE E COSA NO (PROPOSTE, NESSUNA APPLICATA)
+
+| # | dove (resoconto, riga/scheda) | verdetto/dato attuale | cambierebbe? | proposta (con il numero) |
+|---|---|---|---|---|
+| V1 | G4 tab. 2a, 2e-2i; scheda 4.2 punto 3; consolidato riga 56 | "dato [B] ovunque" per C2C WF R40/R41 (EURJPY, GBPCAD, XAG, CHFJPY): C-screening | **SI (etichetta)** | **[T]**: provato identico al centesimo per EURJPY e GBPCAD (K2); per XAGUSD e CHFJPY dedotto dal nome del file (D1). Affidabilita' "C-screening" -> **C** (n 64 e 62 pos a tick) |
+| V2 | G4 scheda 4.1 punti 9-11; consolidato riga 55 | BB: "NON ANCORA MISURATO (casella 3 misurata ma illeggibile)", "migliorabile: non so" | **SI** | casella 3 **leggibile e letta**; 5 caselle compilate sulle celle SOTTO (M15, M30, GBPUSD 1999-2012: 20/20 celle IS SOTTO). **MORTO per le celle, non per l'EA** (ha 3 sedie e celle SOPRA). La domanda "e' lo stop?" ha risposta numerica: lo stop sposta il **DD** (OOS 10,31 -> 7,79 a SL 4,0) e **non il segno** (IS SOTTO a 20/20). AUDUSD resta NON LEGGIBILE |
+| V3 | G4 scheda 4.1, riga 1i | "GBPUSD 27 anni 0,897 / n522 / DD 23,43 SOTTO [B]" | **si, scomposto** | IS 1999-2012 **0,714 / 261 / 21,95**; OOS 2012-2026 **1,123 / 260 / 10,31**: il DD della finestra intera (23,43%) e' dello stesso ordine di quello della sola gamba IS (21,95%) [non so dire dove cada nel tempo il massimo: i CSV non lo dicono]; la gamba OOS sta a 10,31, cioe' **sopra il muro 10%** anche nella finestra "buona". Il verdetto "NO PER RISCHIO sul vecchio" **non cambia** |
+| V4 | G4 scheda 4.2 punto 9 | C2C: "NO PER RISCHIO" (r127c: DD 10,99 IS / 12,26 OOS; giornata -8,02%) | **NO** | resta. Si aggiungono i numeri a tick (r146a): DD OOS 9,45 / IS 9,93 alla viva, peggior giornata -4,00 / -3,74: **finestra diversa (13,5 mesi, non 3,8 anni)**; non smentisce r127c. Casella 3 compilata -> certificato 5/5 sulle celle SOTTO |
+| V5 | G4 scheda 4.3 punti 9-10; consolidato 57 | EZ: "MERITO SOSPESO", "NO PER RISCHIO su 6,5 anni", "no sul merito" | **NO (si arricchisce)** | GBPUSD **SOPRA in entrambe le gambe [B]** (IS 1,184 n583; OOS 1,053 n254) ma **DD > 14% in 14/14 celle**; CHFJPY **inverte** (IS 0,824 DD 34,81 -> OOS 1,066). Resta aperta la sola casella 5 (TF). Il DD 6,5 anni 15,77 (G4) e' 15,84 nel CSV |
+| V6 | G4 scheda 4.5 punti 9-11; consolidato 59 | GapFill: "NON ANCORA MISURATO (mancano 3 e 5)"; "migliorabile: si, per il campione: le epoche stanno nel nativo 1999-2026" | **SI** | casella 3 chiusa -> **manca solo la 5**. "Migliorabile per n con lo storico lungo": **NO**: 20-25 trade in 27,5 anni per simbolo forex (sez. 8 S2). La via resta TF/simboli, non storico |
+| V7 | G4 scheda 4.6 punti 5, 9, 11(b); consolidato 60 | GapCont: "IS tick non misurato"; "NO PER RISCHIO a 1%" | **PARZIALE** | r162a da' la finestra intera a tick: **9/9 SOPRA** (1,269-1,582), n 84-124 deal, DD > 10% in 8/9 celle. **NO PER RISCHIO non cambia**. Il "IS tick" separato resta NON LEGGIBILE (solo [DERIVATO] ~1,35 su 39 deal). Casella 3 chiusa, restano 4 e 5 |
+| V8 | G4 scheda 4.7 punti 5-9; consolidato 61 | Larry: "XAU PF non pubblicato", "NO PER RISCHIO XAU a 1% (REVISIONE R100)", "MIGLIORABILE: si, 12 round d'uscita gia' girati" | **SI** | **XAU long = SOTTO [B] su 22 anni, 14/14 celle, PF 0,872, n213, DD 29,74**: la revisione R100 ("taglia 0,3%, se il tagliando non la giustifica spegnere") perde la parte "merito ignoto". EURAUD e EURCAD: **IS vecchio SOTTO 14/14** (DD 40,45 e 18,86), segno invertito sull'OOS; GBPJPY e GBPUSD: SOPRA in entrambe le gambe. "Migliorabile con l'uscita": le uscite lette **non cambiano il segno** (sez. 5.1). Resta la sola casella 5 (TF) |
+| V9 | G4 scheda 4.8 punto 5 e tab. 7b; consolidato 62 | Fibo GBPUSD singolo: OOS 0,942-0,972, IS 0,794-0,831; "NO PER RISCHIO"; "NON ANCORA MORTO" | **SOLO NUMERI** | versione del 05/10: OOS **0,939-0,968**, IS **0,791-0,830** (K10); nessun segno cambia; caselle 3 e 5 invariate |
+| V10 | G3 scheda 4.7 (PTE), 7a/7b | R78: cella viva 0,972 / 17,68 / 447; candidata 1,095 / 9,87 / 477 | **SOLO NUMERI** | r164a **0,966 / 17,91 / 447**; r153a **1,088 / 9,97 / 477** (K12). Nuovo asse `AtrExitPeriod` letto su 3 sedie: OOS massimo a 6-10 (1,297-1,328 su 771332; 1,103-1,135 su 771322), IS sempre SOTTO. Verdetto G3 invariato |
+| V11 | G5 scheda 1.1, riga 226 e D19 | `SupertrendReversal` 225JPY H2 r166a: "scritto/armato, nessun CSV: NM", stato di esecuzione "NON VERIFICATO" | **SI** | **eseguito** (CSV IS, log 14-20/09); **SOPRA s.OOS, C**: 7/7 celle, PF 1,434-1,848, n79-89 deal, DD 0,29-0,77% (scala 225JPY, D7). Certificato invariato |
+| V12 | G4 sez. 3-bis | "35 round GIRATI, CSV non in repo; 17 a uscita 2: presenza di operazioni NON VERIFICATA" | **SI** | **34 su 35 in repo**; in **tutti** i round a uscita 2 la gamba IS ha Trades > 0 (min 11). Unico non leggibile: r161c |
+| V13 | G5 scheda 1.2 / U05; consolidato 277 | SupRev Ott XAU r127b: IS 7/7 SOTTO, OOS 7/7 SOPRA | **NO** | stessi valori (K11) |
+
+**Cosa NON cambia (verificato)**: C2C r127c (K11: identico alla versione 13/09); BB EURUSD 27,5 anni 1,075 / 276 / 8,24; GapFill 225JPY r178a OOS = R65; GapCont "NO PER RISCHIO a 1%" (11,59%); nessuna cella SOPRA con n >= 150 **posizioni a tick con OOS vero** (la frase di G4 sez. 2 punto 1 resta vera: le celle con n >= 150 nei CSV letti sono **tutte [B]**); il conteggio "EA in SOPRA e in SOTTO" di G4 sez. 2 non cambia per nessuna delle 12 righe.
+
+---
+
+## 8. COSA I CSV SMENTISCONO
+
+| # | affermazione nei resoconti | cosa dicono i CSV |
+|---|---|---|
+| S1 | **G4 (tab. 2a, 2e-2i, scheda 4.2) e consolidato riga 56: "C2C WF R40/R41 = dato [B] barre"** | **E' tick.** r146a/r146c (modello 4) riproducono il file `r41` (senza `_ohlc`) **al centesimo** (K2). Il tipo di dato dichiarato era sbagliato |
+| S2 | **G4 scheda 4.5 punto 11(a): "R168a-c sono 27,5 anni a barre e possono dare n e regimi... a una famiglia che oggi ne ha 8-20"** | n = **21 / 20 / 25** (GBPUSD / EURUSD / AUDUSD) su 27,5 anni; r167a-c (da 1993/1971) danno **gli stessi n e profitti** di r168a-c (da 1999): **zero operazioni prima del 1999**. Dei 21-25 trade, **6-8 sono prima del 2020** (derivato da R103). Nessun n >= 150 ne' regime misurabile |
+| S3 | **G4 sez. 3-bis: "GapFill forex fa 0 operazioni 2020-2023: `Trades=0` e' un'ipotesi viva"** per le gambe IS dei round a uscita 2 | **Nessun file/gamba IS ha Trades=0** (min n=11). I CSV a 0 byte sono le gambe OOS di `@FRAZIONEIS 1.0`; il log r162a lo mostra nella finestra stampata: `OOS (2026.07.01 -> 2026.06.30)` = inizio dopo la fine. (Il messaggio "E' la CACHE del tester" del runner e' il testo generico del controllo: **qui non e' la causa**) |
+| S4 | **G4 scheda 4.7 punto 11(c) / consolidato 61: "XAU 22 anni: PF non pubblicato"** | **PF 0,872** (n213, DD 29,74 = R100), **14 celle su 14 SOTTO** (0,756-0,948) |
+| S5 | **G4 scheda 4.1/4.2/4.3/4.4/4.6 punto 9: "casella 3 misurata ma illeggibile / girata ma non leggibile da qui"** | **leggibile**: 34 round su 35; vedi 6.2 |
+| S6 | **G4 scheda 4.8: r139c OOS "0,972 / 0,942 / 0,950", IS "0,798 / 0,794 / 0,831"** | versione 05/10: OOS **0,968 / 0,939 / 0,948**, IS **0,792 / 0,791 / 0,830** (il runner ha rigirato; K10) |
+| S7 | **G5 sez. D19 / riga 226: R166a "stato di esecuzione NON VERIFICATO", "nessun CSV in repo: NM"** | **eseguito**, CSV IS presente (r166a, 7 righe, tick, intera) |
+| S8 | **G4 scheda 4.7 punto 2/6 e tab. 6c: lato long XAU "SOPRA D" come lettura della cella** | su 22 anni la stessa cella e' SOTTO 14/14: la lettura "SOPRA" era un indizio D di 21 mesi, non un'indicazione sulla cella |
+| S9 | **G4 sez. 3-bis (b): per BB, EZ e Larry "esiste gia' sul VPS uno storico lungo [B] con IS/OOS a uscita 3"** (presentato come possibile prova nuova) | per Larry e EZ l'OOS (2020.01.01-2026.06.30) **coincide con la finestra di R103** (K3): quella gamba **non aggiunge un OOS indipendente**; **la gamba nuova e' l'IS 1999-2019** (per BB l'OOS e' 2012-2026, non coincide con R103) |
+
+---
+
+## 9. [NON COPERTO] E PUNTI DUBBI
+
+### 9.1 [NON COPERTO]
+1. **r161c (BreakingBand AUDUSD, asse `InpSL_ATRmult`)**: **NON LEGGIBILE** (solo ARCHIVIO Desktop VPS: IS 3,5 KB, OOS 0 byte). Costo del buco: **0 minuti di macchina** (un trasporto): la sorgente del trasporto (`abtg_round\risultati_prove`) non lo contiene, va preso da `Desktop\ARCHIVIO\2026-09-20\ROUND_r161c\` (o dalle altre due copie sopra).
+2. I **`REFERTO_ROUND_rNNN.txt`** dei 41 round (stanno nello zip/Desktop del VPS): non letti. Solo per r162a e r178a ho il log del runner nel repo.
+3. **Per-trade, per-lato, per-anno, per-regime**: i CSV non li contengono -> **regimi NON MISURATI**, posizioni di GC/PTE/Fibo/SupRev **NON LEGGIBILI**, lato long/short non separabile (BB non ha manopole di lato; G4).
+4. **Costo (stop >= 40 x spread)**: nessuna colonna di stop o spread nei CSV: **nessun numero**, e nessuno ne e' stato scritto.
+5. **Soglie congelate dei file prova** diverse da R161a (S1-S7/B1-B6 di R146a, R162a, R160a-e, R169, R171, R167/R168, R178a...): **non applicate** (non le ho lette per intero). Gli esiti che il referto di ciascun round avrebbe scritto (PASS/FAIL delle sentinelle) **non sono in questo documento**.
+6. **Le altre 22 cartelle `dal_vps/`** (AtrExhaustVol, Cycle, DAX_Apertura_EU, DaxValueArea, Dow_Apertura_US, EMA200, HVAncora, IBRetest, IntradayMomentum, LVNArbitro, MaxMinNotte, MaxMinNotte_DAX_Short_Ottimizzato, Nasdaq_Apertura_US, Nasdaq_Live5m, Nightly, ORB_Ottimizzato, OpeningReversalB, SupRev_DOW_H1_Ottimizzato, SupRev_NAS_H1_Ottimizzato, SuperWave, SuperWave_DOW_H1_Ottimizzato, VolExpBreak): non sono del mio perimetro (G1/G2/G3/G5/G6).
+7. **Sorgenti `.mq5`**: non riletti; l'unita' di n (posizioni/deal) per BB, EZ, C2C, GapFill, Larry poggia sull'assenza di input di parziale nell'intestazione del CSV e su G4 (R1).
+8. **Combinazioni IS+OOS** (BB 27,5 anni ~0,915; GC IS ~1,35): [DERIVATO] con additivita' approssimata (ogni gamba riparte da 100k, i lotti dipendono dal saldo): **non sono misure**.
+
+### 9.2 Punti dubbi
+- **D1** - "R40/R41 = tick": provato per EURJPY e GBPCAD (identita' al centesimo con r146a/c), **dedotto dal nome (nessun `_ohlc`) per XAGUSD e CHFJPY**. Se qualcuno ha un r41 XAG/CHFJPY a barre con nome senza suffisso, S1 va ristretto.
+- **D2** - Le celle vive si ripetono in piu' round: **le 414 righe non sono 414 osservazioni indipendenti**. Il conteggio "69 su 69 / 61 su 69" (sez. 5.1) conta la viva piu' volte.
+- **D3** - Scarti piccoli fra CSV e referto che **non so spiegare**: Larry GBPUSD OOS 1,041 vs 1,05 (G4); EZ GBPUSD OOS 1,053 / 15,84 vs 1,059 / 15,77 (G4); PTE r153a/r164a vs R78 (K12); r139c vs sua versione del 13/09 (K10). Candidati: binario dell'EA preso dalla testa del ramo, deposito, quantizzazione del lotto. **Nessuno provato.**
+- **D4** - r139c e' stato **rigirato** dopo il 13/09 con un binario diverso; r127b e r127c, rigirati anch'essi, tornano **identici**. Non so quali altri round hanno una versione precedente nel repo che e' stata sovrascritta (il transcript dice solo "AGGIORNATO" su 5 dei miei 82 file, 35 su 254).
+- **D5** - **BB: n identico in tutte le celle** (261 IS / 260 OOS su 20 celle per gamba), mentre il file prova R161a si aspettava n diverso lungo l'asse (catena C3). Non l'ho indagato: significa che lo stop piu' largo non ha mai bloccato un setup successivo (`InpMaxPositions=1`) o che l'asse agisce altrove.
+- **D6** - **GapFill "nessuna operazione prima del 1999"**: i CSV non distinguono **"niente dati"** da **"niente gap sopra la soglia"**. G4/R103 dicono che il feed BCM parte dal 1993/1999: non ho riletto la profondita' M1 del feed.
+- **D7** - **SupRev 225JPY (r166a)**: profitti +0,9/+1,5% in 21 mesi con rischio 0,65% e DD < 1%. La scala e' quella dei CSV R5 del Nikkei, ma **perche'** (sizing/valore del punto) **NON VERIFICATO**: DD% e profitto in valuta non confrontabili con altri simboli.
+- **D8** - **C2C: peggior giornata** -8,02% (r127c OOS, 3,8 anni [B]) contro -4,00% (r146a OOS, 13,5 mesi tick): **finestre e dato diversi**, non confrontabili; la lettura "il tappo e' la giornata" di G4 poggia sulla finestra lunga.
+- **D9** - **L'OOS di Larry/EZ (R160/R169/R171) e' la finestra R103**: se la cella viva e' stata scelta guardando R103 (2020-2026), quella gamba **non e' fuori campione rispetto alla scelta**; la gamba IS 1999-2019 lo e'. Non ho verificato come furono scelte le celle vive.
+- **D10** - **GapFill U30USD / 225JPY a 21 mesi con n 26-30**: tutte le righe SOPRA o SOTTO stanno su campioni D/C: **nessuna e' una prova di merito**; le ho riportate perche' G4 le aspettava.
+
+---
+
+## 10. CONTROLLI FATTI PRIMA DI CONSEGNARE (Sviluppatore -> Agente dei Controlli)
+1. **Conti riconciliati**: 82 file = 41 round x 2 gambe, meno r161c (assente); 63 non vuoti + 19 a 0 byte; **414 righe = 286 SOPRA + 128 SOTTO**; per EA le somme tornano (sez. 6.1).
+2. **Contro-esempio alla formula delle finestre**: il calcolo ha **riprodotto da solo** quattro date che il repo scrive in chiaro (IS r178a `2024.09.26-2025.06.09`; OOS r178a `2025.06.10-2026.06.30`; IS BB r161a `1999.01.04-2012.10.01`; inizio OOS BB `2012.10.02`; e l'IS r139c ~1999-2010 come G4). Una formula con "due incognite libere" non l'avrebbe fatto.
+3. **Contro-esempio alla tesi "R41 e' tick"**: se r146a fosse a barre il nome avrebbe `_ohlc` e **non** potrebbe riprodurre r41 al centesimo (lo dice R146a stesso come falsificatore); invece riproduce 4 righe (2 simboli x IS/OOS) su 4.
+4. **Contro-esempio alla tesi "OOS a 0 byte = FrazioneIS 1,0"**: il log r162a stampa la finestra `2026.07.01 -> 2026.06.30` (inizio dopo la fine) e, per tutti i 19 file a 0 byte, il round ha `@FRAZIONEIS 1.0` nel file prova; in nessun round con FrazioneIS < 1 c'e' un file vuoto.
+5. **Confronto programmatico con i log del runner** (r162a, r178a x3): 8 file su 8 identici.
+6. **Cross-check di additivita'**: r178a 11+15 = r167d 26; BB 261+260 = 521 (S1 480-560); Larry U30 54 = 16+38 (G4).
+7. **Cosa non ho potuto rompere**: la causa degli scarti D3 e il motivo del n identico D5: dichiarati, non spiegati.
+
+---
+
+## APPENDICE A - TUTTE LE RIGHE LETTE (82 file, 414 righe-cella)
+
+Formato per riga: `valore asse: PF / n / DD% / profitto` (profitto in valuta del conto; deposito 100k, o 10k per r139c). Gamba `IS` o `OOS` dopo il nome del file; per i round a finestra intera la gamba `IS` e' la finestra intera (sez. 1). Righe ordinate per valore dell'asse. Numeri ricalcolati dal CSV, nessuno copiato da un referto.
+
+- **SupertrendReversal_Ottimizzato_XAUUSD_IS_ohlc_r127b.csv** (IS, 7 righe, asse SLLookback; PF/n/DD%/profitto): 1: 0,792/230/10,24/-5852 | 3: 0,848/230/6,79/-3523 | 5: 0,854/230/6,58/-3322 | 7: 0,855/230/6,57/-3295 | 9: 0,854/230/6,60/-3262 | 11: 0,838/230/6,51/-3518 | 13: 0,835/230/6,50/-3493
+- **SupertrendReversal_Ottimizzato_XAUUSD_OOS_ohlc_r127b.csv** (OOS, 7 righe, asse SLLookback; PF/n/DD%/profitto): 1: 1,053/426/8,43/2171 | 3: 1,075/427/6,86/2494 | 5: 1,125/427/5,91/3967 | 7: 1,125/427/6,18/3874 | 9: 1,112/427/6,79/3416 | 11: 1,112/427/6,69/3374 | 13: 1,101/427/6,11/2855
+- **CostToCost_EURJPY_IS_ohlc_r127c.csv** (IS, 8 righe, asse MaxBarsHold; PF/n/DD%/profitto): 25: 1,220/161/12,17/17448 | 50: 1,148/153/10,99/11230 | 75: 1,177/153/10,99/13369 | 100: 1,177/153/10,99/13369 | 125: 1,177/153/10,99/13369 | 150: 1,177/153/10,99/13369 | 175: 1,177/153/10,99/13369 | 200: 1,177/153/10,99/13369
+- **CostToCost_EURJPY_OOS_ohlc_r127c.csv** (OOS, 8 righe, asse MaxBarsHold; PF/n/DD%/profitto): 25: 1,452/257/12,25/66658 | 50: 1,524/242/12,26/71354 | 75: 1,523/242/12,26/71284 | 100: 1,523/242/12,26/71284 | 125: 1,523/242/12,26/71284 | 150: 1,523/242/12,26/71284 | 175: 1,523/242/12,26/71284 | 200: 1,523/242/12,26/71284
+- **FiboH4_Multi_GBPUSD_IS_ohlc_r139c.csv** (IS, 3 righe, asse EngulfLookback; PF/n/DD%/profitto): 8: 0,792/572/23,67/-1941 | 12: 0,791/548/22,81/-1843 | 16: 0,830/557/20,62/-1514
+- **FiboH4_Multi_GBPUSD_OOS_ohlc_r139c.csv** (OOS, 3 righe, asse EngulfLookback; PF/n/DD%/profitto): 8: 0,968/725/17,52/-382 | 12: 0,939/729/17,87/-730 | 16: 0,948/737/17,39/-629
+- **CostToCost_EURJPY_IS_r146a.csv** (IS, 9 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.0: 0,816/49/14,74/-5372 | 0.1: 0,773/49/14,00/-6064 | 0.2: 1,016/48/9,93/363 | 0.3: 0,940/48/9,35/-1273 | 0.4: 0,914/48/8,91/-1694 | 0.5: 0,934/48/8,65/-1208 | 0.6: 0,886/48/8,48/-2030 | 0.7: 0,975/48/7,11/-376 | 0.8: 0,938/48/6,91/-903
+- **CostToCost_EURJPY_OOS_r146a.csv** (OOS, 9 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.0: 1,876/64/12,11/31628 | 0.1: 1,872/64/9,98/27533 | 0.2: 1,741/64/9,45/22252 | 0.3: 1,772/63/8,47/21320 | 0.4: 1,744/63/7,36/19056 | 0.5: 1,754/63/7,07/18011 | 0.6: 1,777/63/6,80/17389 | 0.7: 2,106/62/5,87/20000 | 0.8: 2,038/62/5,68/18147
+- **CostToCost_GBPCAD_IS_r146c.csv** (IS, 9 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.0: 1,240/47/6,12/6649 | 0.1: 1,184/46/5,83/4934 | 0.2: 1,298/44/5,11/7343 | 0.3: 1,113/41/6,31/2707 | 0.4: 1,015/40/6,97/357 | 0.5: 1,255/40/5,07/5842 | 0.6: 1,262/40/5,09/5949 | 0.7: 1,213/39/5,09/4772 | 0.8: 1,095/39/6,30/2174
+- **CostToCost_GBPCAD_OOS_r146c.csv** (OOS, 9 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.0: 1,460/66/6,93/17201 | 0.1: 1,466/64/6,72/16664 | 0.2: 1,443/62/6,19/15446 | 0.3: 1,382/58/7,24/12331 | 0.4: 1,387/56/8,37/11949 | 0.5: 1,285/56/8,62/9084 | 0.6: 1,271/52/9,00/8032 | 0.7: 1,127/51/8,89/3778 | 0.8: 0,920/47/9,95/-2268
+- **PTE_GBPUSD_IS_ohlc_r153a.csv** (IS, 7 righe, asse AtrExitPeriod; PF/n/DD%/profitto): 2: 0,864/449/9,48/-6023 | 6: 0,822/441/12,80/-8360 | 10: 0,888/442/9,71/-5476 | 14: 0,874/439/11,74/-6452 | 18: 0,826/437/12,83/-9401 | 22: 0,838/438/12,94/-8606 | 26: 0,822/435/12,83/-9559
+- **PTE_GBPUSD_OOS_ohlc_r153a.csv** (OOS, 7 righe, asse AtrExitPeriod; PF/n/DD%/profitto): 2: 1,078/482/7,15/3011 | 6: 1,297/486/6,71/11219 | 10: 1,328/485/7,82/12471 | 14: 1,088/477/9,97/4006 | 18: 1,055/475/9,69/2603 | 22: 1,011/474/11,06/529 | 26: 0,963/472/11,51/-1800
+- **PunteLarry_U30USD_IS_r156a.csv** (IS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 1,760/73/3,55/9608 | 3: 1,494/60/5,05/10184 | 5: 1,784/54/3,96/15042 | 7: 1,634/49/3,66/12626 | 9: 1,204/45/4,13/4439 | 11: 1,319/44/4,08/6431 | 13: 1,192/41/4,13/3685
+- **ABTG_PunteLarry_U30USD_OOS_r156a.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_U30USD_IS_r157a.csv** (IS, 7 righe, asse SLGapMult; PF/n/DD%/profitto): 0.4: 1,237/30/6,85/4616 | 0.7: 1,422/30/4,67/5967 | 1.0: 1,376/30/3,12/4596 | 1.3: 1,947/30/2,86/7610 | 1.6: 1,803/30/2,64/5565 | 1.9: 1,720/30/2,55/4404 | 2.2: 1,628/30/2,48/3470
+- **ABTG_GapFill_U30USD_OOS_r157a.csv** (OOS): 0 byte, nessuna riga.
+- **PTE_U30USD_IS_r158a.csv** (IS, 7 righe, asse AtrExitPeriod; PF/n/DD%/profitto): 2: 0,980/68/3,42/-213 | 6: 1,234/70/3,19/1916 | 10: 1,444/70/3,00/3766 | 14: 1,170/68/3,24/1779 | 18: 0,932/66/3,59/-853 | 22: 1,077/67/3,62/891 | 26: 1,173/67/3,49/2001
+- **ABTG_PTE_U30USD_OOS_r158a.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_U30USD_IS_r159a.csv** (IS, 7 righe, asse MaxHours; PF/n/DD%/profitto): 12: 0,837/30/4,11/-1268 | 24: 1,638/30/3,13/6471 | 36: 1,576/30/3,12/6169 | 48: 1,376/30/3,12/4596 | 60: 1,376/30/3,12/4602 | 72: 1,376/30/3,12/4602 | 84: 1,376/30/3,12/4602
+- **ABTG_GapFill_U30USD_OOS_r159a.csv** (OOS): 0 byte, nessuna riga.
+- **PunteLarry_EURAUD_IS_ohlc_r160a.csv** (IS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 0,748/620/35,62/-34461 | 3: 0,830/525/33,11/-30724 | 5: 0,780/475/40,45/-39925 | 7: 0,823/429/34,09/-32718 | 9: 0,801/412/38,54/-35840 | 11: 0,861/395/34,45/-25593 | 13: 0,895/383/28,09/-20065
+- **PunteLarry_EURAUD_OOS_ohlc_r160a.csv** (OOS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 1,100/306/9,70/7094 | 3: 1,138/251/12,91/12610 | 5: 1,053/216/17,12/4695 | 7: 0,951/200/20,97/-4587 | 9: 1,069/189/12,71/6428 | 11: 0,922/180/18,87/-7064 | 13: 1,013/171/17,18/1165
+- **PunteLarry_EURCAD_IS_ohlc_r160b.csv** (IS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 0,835/244/14,93/-9215 | 3: 0,829/239/18,17/-12523 | 5: 0,816/236/18,86/-13824 | 7: 0,825/235/19,37/-13259 | 9: 0,836/234/19,53/-12436 | 11: 0,831/234/19,51/-12897 | 13: 0,840/234/19,50/-12150
+- **PunteLarry_EURCAD_OOS_ohlc_r160b.csv** (OOS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 1,278/157/6,76/10519 | 3: 1,250/155/6,34/11143 | 5: 1,338/154/6,96/14779 | 7: 1,388/152/7,16/16535 | 9: 1,416/151/7,18/17521 | 11: 1,384/150/7,73/16189 | 13: 1,376/149/7,90/15885
+- **PunteLarry_GBPJPY_IS_ohlc_r160c.csv** (IS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 0,976/402/11,05/-2076 | 3: 1,099/388/18,63/15665 | 5: 1,071/364/19,55/12001 | 7: 1,052/343/19,21/9097 | 9: 1,045/335/15,71/8016 | 11: 1,038/332/15,16/6828 | 13: 1,029/326/17,10/5158
+- **PunteLarry_GBPJPY_OOS_ohlc_r160c.csv** (OOS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 1,177/158/8,31/7007 | 3: 1,170/152/8,37/10506 | 5: 1,288/139/8,95/17221 | 7: 1,223/131/12,38/13255 | 9: 1,252/127/12,02/15489 | 11: 1,292/122/10,53/17407 | 13: 1,289/120/10,64/17416
+- **PunteLarry_GBPUSD_IS_ohlc_r160d.csv** (IS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 1,242/327/7,88/21950 | 3: 1,095/324/12,04/11550 | 5: 1,102/324/12,20/12818 | 7: 1,101/324/11,70/12833 | 9: 1,092/324/12,52/11779 | 11: 1,092/324/12,52/11779 | 13: 1,092/324/12,52/11779
+- **PunteLarry_GBPUSD_OOS_ohlc_r160d.csv** (OOS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 1,083/123/6,73/2213 | 3: 1,068/123/8,46/2186 | 5: 1,041/121/8,53/1364 | 7: 1,041/121/8,53/1364 | 9: 1,041/121/8,53/1364 | 11: 1,041/121/8,53/1364 | 13: 1,041/121/8,53/1364
+- **PunteLarry_XAUUSD_IS_ohlc_r160e.csv** (IS, 7 righe, asse MaxDaysHold; PF/n/DD%/profitto): 1: 0,756/217/25,98/-18355 | 3: 0,883/217/28,28/-10841 | 5: 0,872/213/29,74/-12461 | 7: 0,819/208/34,26/-18795 | 9: 0,808/208/36,30/-20317 | 11: 0,806/206/37,03/-20587 | 13: 0,796/205/37,03/-21942
+- **ABTG_PunteLarry_XAUUSD_OOS_ohlc_r160e.csv** (OOS): 0 byte, nessuna riga.
+- **BreakingBand_GBPUSD_IS_ohlc_r161a.csv** (IS, 7 righe, asse SL_ATRmult; PF/n/DD%/profitto): 1.5: 0,665/261/36,11/-32803 | 2.0: 0,672/261/29,81/-27327 | 2.5: 0,722/261/21,84/-19749 | 3.0: 0,714/261/21,95/-17793 | 3.5: 0,736/261/18,76/-14441 | 4.0: 0,750/261/16,12/-11955 | 4.5: 0,750/261/16,05/-10635
+- **BreakingBand_GBPUSD_OOS_ohlc_r161a.csv** (OOS, 7 righe, asse SL_ATRmult; PF/n/DD%/profitto): 1.5: 0,953/260/20,69/-4858 | 2.0: 1,031/260/18,63/2759 | 2.5: 1,095/260/13,11/6751 | 3.0: 1,123/260/10,31/7415 | 3.5: 1,059/260/9,79/3185 | 4.0: 1,161/260/7,79/7298 | 4.5: 1,152/260/7,91/6156
+- **BreakingBand_EURUSD_IS_ohlc_r161b.csv** (IS, 7 righe, asse SL_ATRmult; PF/n/DD%/profitto): 1.5: 0,822/276/28,44/-17558 | 2.0: 0,942/276/17,05/-4687 | 2.5: 1,072/276/10,21/4651 | 3.0: 1,075/276/8,24/4132 | 3.5: 1,057/276/8,90/2763 | 4.0: 1,070/276/7,32/3004 | 4.5: 1,004/276/8,44/175
+- **ABTG_BreakingBand_EURUSD_OOS_ohlc_r161b.csv** (OOS): 0 byte, nessuna riga.
+- **GapContinuation_225JPY_IS_r162a.csv** (IS, 9 righe, asse PartialTargetR; PF/n/DD%/profitto): 0.50: 1,582/124/6,94/13108 | 0.75: 1,400/115/10,85/10645 | 1.00: 1,385/109/11,59/11262 | 1.25: 1,347/102/12,78/10858 | 1.50: 1,269/97/12,52/8928 | 1.75: 1,313/92/12,27/10540 | 2.00: 1,324/87/12,09/10938 | 2.25: 1,344/85/12,36/11678 | 2.50: 1,330/84/12,28/11304
+- **ABTG_GapContinuation_225JPY_OOS_r162a.csv** (OOS): 0 byte, nessuna riga.
+- **PTE_GBPUSD_IS_ohlc_r164a.csv** (IS, 7 righe, asse AtrExitPeriod; PF/n/DD%/profitto): 2: 0,706/421/22,15/-19399 | 6: 0,806/424/20,75/-11960 | 10: 0,788/419/20,83/-14157 | 14: 0,791/414/20,55/-15077 | 18: 0,747/411/22,92/-18700 | 22: 0,717/408/22,43/-21619 | 26: 0,734/408/22,11/-19949
+- **PTE_GBPUSD_OOS_ohlc_r164a.csv** (OOS, 7 righe, asse AtrExitPeriod; PF/n/DD%/profitto): 2: 1,085/463/11,80/5081 | 6: 1,135/464/9,72/8037 | 10: 1,103/458/10,76/6706 | 14: 0,966/447/17,91/-2522 | 18: 0,980/445/18,15/-1589 | 22: 0,948/443/17,97/-4082 | 26: 0,946/444/19,79/-4206
+- **SupertrendReversal_225JPY_IS_r166a.csv** (IS, 7 righe, asse SLBufferPips; PF/n/DD%/profitto): 3: 1,535/79/0,71/1461 | 73: 1,436/89/0,77/1034 | 143: 1,434/89/0,57/940 | 213: 1,537/89/0,45/1010 | 283: 1,819/89/0,37/1241 | 353: 1,848/89/0,32/1149 | 423: 1,765/88/0,29/937
+- **ABTG_SupertrendReversal_225JPY_OOS_r166a.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_GBPUSD_IS_ohlc_r167a.csv** (IS, 7 righe, asse SLGapMult; PF/n/DD%/profitto): 0.4: 0,452/21/12,30/-7436 | 0.7: 1,135/21/8,04/1221 | 1.0: 1,763/21/4,02/4536 | 1.3: 2,044/21/3,35/4551 | 1.6: 1,783/21/3,08/3205 | 1.9: 1,572/21/2,98/2243 | 2.2: 2,682/21/1,54/3565
+- **ABTG_GapFill_GBPUSD_OOS_ohlc_r167a.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_EURUSD_IS_ohlc_r167b.csv** (IS, 7 righe, asse SLGapMult; PF/n/DD%/profitto): 0.4: 0,685/20/7,70/-3474 | 0.7: 1,006/20/4,89/44 | 1.0: 3,509/20/1,86/5436 | 1.3: 5,697/20/1,65/5162 | 1.6: 6,280/20/1,26/4284 | 1.9: 6,279/20/1,06/3601 | 2.2: 6,294/20/0,92/3111
+- **ABTG_GapFill_EURUSD_OOS_ohlc_r167b.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_AUDUSD_IS_ohlc_r167c.csv** (IS, 7 righe, asse SLGapMult; PF/n/DD%/profitto): 0.4: 1,618/25/3,60/7784 | 0.7: 1,739/25/2,93/6891 | 1.0: 2,369/25/1,87/8763 | 1.3: 2,030/25/1,66/5938 | 1.6: 2,209/25/1,53/5556 | 1.9: 1,916/25/1,45/4096 | 2.2: 2,107/25/1,39/3922
+- **ABTG_GapFill_AUDUSD_OOS_ohlc_r167c.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_225JPY_IS_r167d.csv** (IS, 7 righe, asse SLGapMult; PF/n/DD%/profitto): 0.4: 0,606/21/9,09/-5573 | 0.7: 1,315/26/5,81/3692 | 1.0: 1,678/26/4,59/5411 | 1.3: 1,329/26/4,45/2528 | 1.6: 1,680/26/3,73/3582 | 1.9: 1,725/26/2,90/3128 | 2.2: 1,585/26/2,77/2363
+- **ABTG_GapFill_225JPY_OOS_r167d.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_GBPUSD_IS_ohlc_r168a.csv** (IS, 7 righe, asse MaxHours; PF/n/DD%/profitto): 12: 1,256/21/4,63/1248 | 24: 1,965/21/3,41/4820 | 36: 1,863/21/4,03/4867 | 48: 1,763/21/4,02/4536 | 60: 1,707/21/4,09/4339 | 72: 1,707/21/4,09/4339 | 84: 1,707/21/4,09/4339
+- **ABTG_GapFill_GBPUSD_OOS_ohlc_r168a.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_EURUSD_IS_ohlc_r168b.csv** (IS, 7 righe, asse MaxHours; PF/n/DD%/profitto): 12: 1,885/20/1,55/2263 | 24: 2,906/20/1,55/3755 | 36: 4,117/20/1,55/5258 | 48: 3,509/20/1,86/5436 | 60: 3,509/20/1,86/5436 | 72: 3,509/20/1,86/5436 | 84: 3,509/20/1,86/5436
+- **ABTG_GapFill_EURUSD_OOS_ohlc_r168b.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_AUDUSD_IS_ohlc_r168c.csv** (IS, 7 righe, asse MaxHours; PF/n/DD%/profitto): 12: 2,539/25/1,95/7931 | 24: 2,900/25/1,53/10140 | 36: 2,783/25/1,53/9742 | 48: 2,368/25/1,87/8759 | 60: 2,368/25/1,87/8759 | 72: 2,368/25/1,87/8759 | 84: 2,368/25/1,87/8759
+- **ABTG_GapFill_AUDUSD_OOS_ohlc_r168c.csv** (OOS): 0 byte, nessuna riga.
+- **GapFill_225JPY_IS_r168d.csv** (IS, 7 righe, asse MaxHours; PF/n/DD%/profitto): 12: 1,699/26/3,65/4643 | 24: 1,804/26/3,98/5890 | 36: 1,761/26/4,25/5795 | 48: 1,678/26/4,59/5411 | 60: 1,597/26/4,97/4994 | 72: 1,597/26/4,97/4994 | 84: 1,597/26/4,97/4994
+- **ABTG_GapFill_225JPY_OOS_r168d.csv** (OOS): 0 byte, nessuna riga.
+- **PunteLarry_U30USD_IS_r169a.csv** (IS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 1,549/55/6,71/12546 | 0.05: 1,762/54/4,07/15634 | 0.10: 1,784/54/3,96/15042 | 0.15: 1,438/53/6,71/8762 | 0.20: 1,627/51/6,51/11023 | 0.25: 1,966/50/5,23/14692 | 0.30: 1,810/50/5,10/12079
+- **ABTG_PunteLarry_U30USD_OOS_r169a.csv** (OOS): 0 byte, nessuna riga.
+- **PunteLarry_EURAUD_IS_ohlc_r169b.csv** (IS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 0,834/486/33,70/-33049 | 0.05: 0,843/483/31,99/-31356 | 0.10: 0,780/475/40,45/-39925 | 0.15: 0,840/470/30,25/-29672 | 0.20: 0,832/466/31,13/-30577 | 0.25: 0,828/460/30,44/-29908 | 0.30: 0,817/456/31,58/-31073
+- **PunteLarry_EURAUD_OOS_ohlc_r169b.csv** (OOS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 1,048/221/14,18/4856 | 0.05: 1,051/220/14,29/4890 | 0.10: 1,053/216/17,12/4695 | 0.15: 0,983/215/16,15/-1518 | 0.20: 0,982/212/17,10/-1532 | 0.25: 0,970/211/16,40/-2486 | 0.30: 0,950/209/14,90/-3914
+- **PunteLarry_XAUUSD_IS_ohlc_r169c.csv** (IS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 0,928/214/29,67/-7438 | 0.05: 0,948/213/29,48/-5196 | 0.10: 0,872/213/29,74/-12461 | 0.15: 0,862/213/29,82/-13214 | 0.20: 0,876/213/27,94/-11862 | 0.25: 0,831/213/27,35/-15763 | 0.30: 0,790/213/29,41/-19265
+- **ABTG_PunteLarry_XAUUSD_OOS_ohlc_r169c.csv** (OOS): 0 byte, nessuna riga.
+- **PunteLarry_GBPJPY_IS_ohlc_r169d.csv** (IS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 1,096/369/19,75/18054 | 0.05: 1,103/366/19,02/18909 | 0.10: 1,071/364/19,55/12001 | 0.15: 1,042/362/18,38/6677 | 0.20: 1,043/361/17,17/6617 | 0.25: 1,025/359/18,58/3772 | 0.30: 1,038/358/17,60/5436
+- **PunteLarry_GBPJPY_OOS_ohlc_r169d.csv** (OOS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 1,299/141/9,08/19358 | 0.05: 1,302/139/9,01/18331 | 0.10: 1,288/139/8,95/17221 | 0.15: 1,295/138/8,85/17130 | 0.20: 1,242/138/8,77/14029 | 0.25: 1,192/137/8,65/10993 | 0.30: 1,267/132/7,79/14450
+- **PunteLarry_GBPUSD_IS_ohlc_r169e.csv** (IS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 1,155/324/12,07/21311 | 0.05: 1,129/324/11,52/16917 | 0.10: 1,102/324/12,20/12818 | 0.15: 1,087/324/11,65/10276 | 0.20: 1,097/324/12,22/11088 | 0.25: 1,103/323/10,70/11234 | 0.30: 1,121/322/10,93/12615
+- **PunteLarry_GBPUSD_OOS_ohlc_r169e.csv** (OOS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 1,074/121/9,30/2639 | 0.05: 1,017/121/9,37/607 | 0.10: 1,041/121/8,53/1364 | 0.15: 1,016/121/7,80/524 | 0.20: 0,969/121/7,87/-997 | 0.25: 0,927/121/8,73/-2345 | 0.30: 1,045/119/8,47/1295
+- **PunteLarry_EURCAD_IS_ohlc_r169f.csv** (IS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 0,849/236/19,44/-12224 | 0.05: 0,820/236/19,66/-14179 | 0.10: 0,816/236/18,86/-13824 | 0.15: 0,836/236/19,19/-11969 | 0.20: 0,832/236/17,99/-11749 | 0.25: 0,832/236/17,28/-11317 | 0.30: 0,837/236/17,17/-10721
+- **PunteLarry_EURCAD_OOS_ohlc_r169f.csv** (OOS, 7 righe, asse SLBufferATR; PF/n/DD%/profitto): 0.00: 1,172/154/6,86/8504 | 0.05: 1,176/154/6,89/8208 | 0.10: 1,338/154/6,96/14779 | 0.15: 1,317/154/6,99/13246 | 0.20: 1,285/154/7,02/11459 | 0.25: 1,272/154/6,87/10569 | 0.30: 1,213/154/6,85/8198
+- **EasyTrend_CHFJPY_IS_ohlc_r171a.csv** (IS, 7 righe, asse SLBufferPts; PF/n/DD%/profitto): 0: 0,831/342/34,33/-31015 | 15: 0,817/340/36,19/-32989 | 30: 0,824/338/34,81/-31527 | 45: 0,817/334/34,57/-32191 | 60: 0,811/328/35,91/-32921 | 75: 0,812/328/35,91/-32936 | 90: 0,839/323/31,99/-27638
+- **EasyTrend_CHFJPY_OOS_ohlc_r171a.csv** (OOS, 7 righe, asse SLBufferPts; PF/n/DD%/profitto): 0: 1,002/271/20,43/367 | 15: 1,048/267/19,43/7292 | 30: 1,066/265/21,80/9598 | 45: 1,094/264/21,70/13790 | 60: 1,107/260/20,82/15588 | 75: 1,122/258/18,85/17972 | 90: 1,119/256/19,94/17415
+- **EasyTrend_GBPUSD_IS_ohlc_r171b.csv** (IS, 7 righe, asse SLBufferPts; PF/n/DD%/profitto): 0: 1,224/589/15,69/112089 | 15: 1,205/587/14,77/96339 | 30: 1,184/583/14,68/85195 | 45: 1,158/582/17,48/70102 | 60: 1,179/580/17,66/78024 | 75: 1,196/579/16,57/89086 | 90: 1,188/574/15,72/84906
+- **EasyTrend_GBPUSD_OOS_ohlc_r171b.csv** (OOS, 7 righe, asse SLBufferPts; PF/n/DD%/profitto): 0: 1,071/261/14,76/10670 | 15: 1,073/256/14,68/10784 | 30: 1,053/254/15,84/7640 | 45: 1,065/250/15,80/9393 | 60: 1,085/250/15,75/12258 | 75: 1,090/242/14,69/12882 | 90: 1,081/241/15,19/11251
+- **BreakingBand_GBPUSD_IS_ohlc_r174a.csv** (IS, 2 righe, asse BEMode; PF/n/DD%/profitto): 0: 0,714/261/21,95/-17793 | 1: 0,670/261/22,72/-18660
+- **BreakingBand_GBPUSD_OOS_ohlc_r174a.csv** (OOS, 2 righe, asse BEMode; PF/n/DD%/profitto): 0: 1,123/260/10,31/7415 | 1: 1,167/260/9,25/8356
+- **GapFill_U30USD_IS_r175a.csv** (IS, 2 righe, asse SLMode; PF/n/DD%/profitto): 0: 1,376/30/3,12/4596 | 1: 1,666/30/1,79/3357
+- **ABTG_GapFill_U30USD_OOS_r175a.csv** (OOS): 0 byte, nessuna riga.
+- **BreakingBand_GBPUSD_IS_ohlc_r176a.csv** (IS, 6 righe, asse BEatATR; PF/n/DD%/profitto): 0.0: 0,754/261/20,75/-15145 | 0.5: 0,719/261/21,26/-17118 | 1.0: 0,714/261/21,95/-17793 | 1.5: 0,751/261/20,36/-15399 | 2.0: 0,754/261/20,75/-15145 | 2.5: 0,754/261/20,75/-15145
+- **BreakingBand_GBPUSD_OOS_ohlc_r176a.csv** (OOS, 6 righe, asse BEatATR; PF/n/DD%/profitto): 0.0: 1,131/260/11,41/8124 | 0.5: 1,083/260/11,70/4848 | 1.0: 1,123/260/10,31/7415 | 1.5: 1,089/260/11,40/5633 | 2.0: 1,116/260/11,40/7219 | 2.5: 1,131/260/11,41/8124
+- **BreakingBand_GBPUSD_IS_ohlc_r177a.csv** (IS, 5 righe, asse TPRefreshBars; PF/n/DD%/profitto): 0: 0,755/261/20,85/-17093 | 1: 0,714/261/21,95/-17793 | 2: 0,721/261/21,41/-17341 | 3: 0,716/261/21,73/-17790 | 4: 0,736/261/20,58/-16457
+- **BreakingBand_GBPUSD_OOS_ohlc_r177a.csv** (OOS, 5 righe, asse TPRefreshBars; PF/n/DD%/profitto): 0: 1,142/260/9,07/9438 | 1: 1,123/260/10,31/7415 | 2: 1,102/260/9,89/6266 | 3: 1,162/260/9,44/9882 | 4: 1,149/260/9,01/9177
+- **GapFill_225JPY_IS_r178a.csv** (IS, 2 righe, asse SLMode; PF/n/DD%/profitto): 0: 3,204/11/1,33/4573 | 1: 2,514/11/0,99/1532
+- **GapFill_225JPY_OOS_r178a.csv** (OOS, 2 righe, asse SLMode; PF/n/DD%/profitto): 0: 1,144/15/4,36/812 | 1: 1,002/15/2,30/5
