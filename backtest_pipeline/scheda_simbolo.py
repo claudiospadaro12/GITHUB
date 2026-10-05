@@ -1176,6 +1176,11 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("Unita': **%s** = %s di prezzo. Giorno: **%s**; orologio server: **%s**; fuso del file: **%s**." % (
         un, f(u, 4), "giorno server BCM (mezzanotte server)" if s["modo_giorno"] == "utc1" else "giorno che chiude alle 17:00 New York",
         "UTC+1 fisso" if s["orologio"] == "utc1" else "vecchio (UTC+0 inverno / +1 estate)", s["fuso"]))
+    if str(s["fuso"]).startswith("BCM"):
+        w("Feed: **%s** (fuso dichiarato %s: dato del broker BCM)." % (s["feed"], s["fuso"]))
+    else:
+        w("Feed: **%s -- NON e' il feed BCM** (fuso del file %s): i numeri descrivono QUESTO feed, non i prezzi del conto BCM; le ore sono riportate sull'orologio server BCM solo per confronto." % (s["feed"], s["fuso"]))
+    w("Nessuna conclusione di trading da questa scheda: le righe _Decisione informata_ dicono a quale decisione servira' la misura, non la prendono.")
     w("")
     w("## 0. Chi sono i dati (i cancelli prima dei numeri)")
     w("")

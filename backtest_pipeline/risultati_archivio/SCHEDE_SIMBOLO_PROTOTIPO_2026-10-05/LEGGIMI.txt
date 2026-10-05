@@ -17,3 +17,8 @@ mutazioni_autotest.*   prova di potenza dell'autotest: 19 mutanti, 19 uccisi, 0 
 controllo_atr_vs_casa.*  ATR(14) mediano di M5/M15/H1 su 3 feed contro i numeri stampati dai referti EMA200_D1_M5 (01/10)
 verifica_mese_python_puro.log  ADR mediano di 8 mesi dell'oro ricalcolato in python puro (senza numpy) = procedura
 ispeziona_repo_U30USD_prove.log  le due prove M1 del Dow trovate nel repo (781 e 1.335 righe: troppo corte per una scheda)
+
+AGGIORNAMENTO 05/10 (secondo strato del cancello): ogni scheda dichiara in testa "feed NON BCM" e "nessuna conclusione di
+trading" (2 righe aggiunte; il resto della scheda dell'oro rigenerata e' identico byte per byte, ranking identico).
+La riga 'pausa' della sezione 5 (gap) dell'oro e' CONTAMINATA da ~600 buchi di HistData del 2023: non leggerla
+(report/SCHEDE_SIMBOLO_PIANO_2026-10-05.md, sezione 6 punto 15; classe 1129).
