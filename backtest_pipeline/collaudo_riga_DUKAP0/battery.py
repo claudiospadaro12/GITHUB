@@ -53,6 +53,12 @@ def scenari():
     sc.append(("15c_zero_csv", S(csv_mesi=[]), {}))
     sc.append(("16_senza_nativi_ne_custom", S(nativi_cartella=False, custom_dk=False, referto_py=False, referto_import=False), {}))
     sc.append(("16b_nativi_parziali", S(nativi_mesi=["202411", "202503"]), {}))
+    # classe 1119: history\U30USD (barre M1) c'e' sempre su un MT5 vero; non deve passare per la cartella dei tick nativi, ne' history\U30USD_DK per il custom con tick
+    sc.append(("16c_solo_history_nativa", S(nativi_cartella=False, custom_dk=True), {}))
+    sc.append(("16d_custom_solo_history", S(custom_dk=False, custom_solo_history=True), {}))
+    # MaxBars: tetto basso (classe 160 / checklist 36) e chiave assente
+    sc.append(("17_maxbars_basso", S(common_ini="Login=50503392\r\nServer=BCMMarkets-Demo\r\n[Charts]\r\nMaxBars=100000\r\n"), {}))
+    sc.append(("17b_maxbars_alto", S(common_ini="Login=50503392\r\nServer=BCMMarkets-Demo\r\n[Charts]\r\nMaxBars=2000000000\r\n"), {}))
     return sc
 
 
@@ -221,9 +227,13 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
             g = cdisk[0]["free"] / 2**30
             must("disco di dukascopy_lavoro (C:): LIBERO %.2f GB" % g)
             must("spazio libero su dukascopy_lavoro : %.2f GB [MISURATO]   (soglia F1 non firmata 12 GB: %s)" % (g, "raggiunta" if g >= 12 else "NON raggiunta"))
+            must("-> per F1: la condizione di disco di F1 %s" % ("(almeno 12 GB liberi) e soddisfatta" if g >= 12 else "NON e soddisfatta"))
+            must("disco dei dati MT5 (APPDATA, dove finisce la base tick del custom, ~2,6 GB del nucleo): lo STESSO di dukascopy_lavoro (C:)")
         else:
             must("disco di dukascopy_lavoro: lettera \"C:\" NON trovata fra i dischi letti -> NON MISURATO")
-            must("spazio libero su dukascopy_lavoro : [NON MISURATO]")
+            must("spazio libero su dukascopy_lavoro : [NON MISURATO]   -> per F1: senza questo numero il tetto di 12 GB non si firma")
+            must("disco dei dati MT5 (APPDATA, dove finisce la base tick del custom, ~2,6 GB del nucleo): C: NON trovato fra i dischi letti -> NON MISURATO")
+    must("tetto di 250 ore di F1 : NON lo misura P0")
     # --- csv --------------------------------------------------------------
     bcm_n = 2 if spec["doppio_dati"] else (1 if spec["origin_testo"] == F.TERM else 0)
     if spec["cache"] != "nessuna_lavoro":
@@ -279,6 +289,17 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
         else:
             lg = re.search(r"Login=(\d+)", spec["common_ini"]).group(1)
             must("conto da config\\common.ini : " + lg)
+            mb = re.search(r"MaxBars=(\d+)", spec["common_ini"])
+            if mb:
+                must("MaxBars da config\\common.ini : " + mb.group(1))
+                must("MaxBars (config\\common.ini) : " + mb.group(1) + " [MISURATO]")
+                if int(mb.group(1)) < 200000:
+                    must("tetto BASSO, il tester girerebbe su meno storico")
+                else:
+                    mustnot("tetto BASSO")
+            else:
+                must("MaxBars da config\\common.ini : chiave NON trovata")
+                must("MaxBars : [NON MISURATO]")
         if not spec["logs"]:
             must("logs\\ : assente")
         elif spec["logs_conto"]:
@@ -313,7 +334,7 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
                 err.append("mesi marcati %d invece di %d" % (n_marc, len(gi)))
         elif spec["custom_dk"] or spec["residuo_neg"]:
             must("cartella dei tick NATIVI U30USD: NON TROVATA sotto bases\\")
-        if spec["nativi_cartella"] or spec["custom_dk"] or spec["residuo_neg"]:
+        if spec["nativi_cartella"] or spec["custom_dk"] or spec["residuo_neg"] or spec.get("custom_solo_history"):
             must("custom U30USD_DK presente: %s" % ("True" if spec["custom_dk"] else "False"))
             if spec["residuo_neg"]:
                 must("residui U30USD_DKNEG: PRESENTI")

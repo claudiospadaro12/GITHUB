@@ -189,6 +189,17 @@ def costruisci(base, spec):
         cn = os.path.join(dati, "bases", "Custom", "ticks", "U30USD_DKNEG")
         os.makedirs(cn)
         open(os.path.join(cn, "202503.tkc"), "wb").write(b"z" * 5)
+    # MT5 VERO: accanto a ticks\ c'e' SEMPRE history\<SIMBOLO>\AAAA.hcc (barre M1), con lo STESSO nome di cartella.
+    # Senza questo il banco non vede la cartella omonima che su un PC vero c'e' (controllo preventivo 05/10, classe 1119).
+    if spec.get("history", True) and (spec["nativi_cartella"] or spec["custom_dk"] or spec["residuo_neg"] or spec.get("custom_solo_history")):
+        hn = os.path.join(dati, "bases", "BCMMarkets-Demo", "history", "U30USD")
+        os.makedirs(hn, exist_ok=True)
+        for y in ("2024", "2025"):
+            open(os.path.join(hn, y + ".hcc"), "wb").write(b"h" * 33)
+        if spec["custom_dk"] or spec.get("custom_solo_history"):
+            hc = os.path.join(dati, "bases", "Custom", "history", "U30USD_DK")
+            os.makedirs(hc, exist_ok=True)
+            open(os.path.join(hc, "2024.hcc"), "wb").write(b"k" * 21)
     ff = os.path.join(dati, "MQL5", "Files")
     for m in (spec["csv_mesi"][:spec["csv_in_files"]] if (spec["csv_mesi"] and spec["cache"] != "nessuna_lavoro") else []):
         shutil.copy(os.path.join(tick, "U30USD_DK_ticks_%s.csv" % m), ff)

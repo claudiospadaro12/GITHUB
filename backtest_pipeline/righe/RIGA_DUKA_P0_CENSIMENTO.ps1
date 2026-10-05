@@ -35,6 +35,7 @@
 #      attaccato (lettura dei .chr, come le guardie di R280/DAXAP02), i
 #      file mensili dei tick NATIVI di U30USD (presenza, non contenuto) e
 #      i residui custom U30USD_DK / U30USD_DKNEG
+#   5b. MaxBars di config\common.ini (tetto barre: classe 160)
 #   6. python e curl.exe: SOLO se ci sono (Get-Command / Test-Path), mai
 #      eseguiti (l'alias python.exe dello Store apre il Microsoft Store)
 # ---------------------------------------------------------------------
@@ -181,6 +182,9 @@ try{
     } else {
       Dico ('disco di dukascopy_lavoro: lettera "' + $lettera + '" NON trovata fra i dischi letti -> NON MISURATO') 'Yellow'
     }
+    $lettD = ''
+    if(('' + $env:APPDATA) -match '^([A-Za-z]:)'){ $lettD = $Matches[1].ToUpper() }
+    Dico ('disco dei dati MT5 (APPDATA, dove finisce la base tick del custom, ~2,6 GB del nucleo): ' + $(if($lettD -eq ''){ 'NON MISURATO' }elseif(-not $S.dischi.ContainsKey($lettD)){ $lettD + ' NON trovato fra i dischi letti -> NON MISURATO' }elseif($lettD -eq $lettera){ 'lo STESSO di dukascopy_lavoro (' + $lettD + '): i 12 GB si contano su un disco solo' }else{ $lettD + ' LIBERO ' + (Gb $S.dischi[$lettD]) + ' GB (disco DIVERSO da dukascopy_lavoro)' }))
   }
 
   # -------------------------------------------------------------------
@@ -370,7 +374,11 @@ try{
         $mS = [regex]::Match($ti, '(?im)^[ \t]*Server[ \t]*=[ \t]*(.+?)[ \t\r]*$')
         if($mL.Success){ Dico ('   conto da config\common.ini : ' + $mL.Groups[1].Value + $(if($mS.Success){ '   server ' + $mS.Groups[1].Value }else{ '' })); $S.conto_ini = $mL.Groups[1].Value }
         else { Dico '   conto da config\common.ini : Login NON trovato' }
-      } else { Dico '   config\common.ini : assente' }
+        # MaxBars (piano par. 3.1 P0): un tetto basso fa girare il tester su MENO storico senza dirlo (classe 160, checklist 36)
+        $mB = [regex]::Matches($ti, '(?im)^[ \t]*MaxBars(?:InChart)?[ \t]*=[ \t]*(\d+)')
+        if($mB.Count -gt 0){ $S.maxbars = [int64]$mB[$mB.Count - 1].Groups[1].Value; Dico ('   MaxBars da config\common.ini : ' + $S.maxbars) }
+        else { Dico '   MaxBars da config\common.ini : chiave NON trovata (NON VERIFICATO: il valore in uso non e leggibile da qui)' 'Yellow' }
+      } else { Dico '   config\common.ini : assente (conto e MaxBars NON MISURATI)' }
       $dl = Join-Path $x.Cartella 'logs'
       if(Test-Path -LiteralPath $dl){
         $fl = @(Get-ChildItem -LiteralPath $dl -Filter *.log -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 5)
@@ -425,25 +433,29 @@ try{
       $basesR = (Convert-Path -LiteralPath $bases)
       $cartU = @(Get-ChildItem -LiteralPath $bases -Directory -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object { $_.Name -like 'U30USD*' })
       Dico ('   cartelle U30USD* sotto bases\ (profondita 3): ' + $cartU.Count)
+      # TICK = cartella U30USD* il cui GENITORE si chiama ticks (bases\<server>\ticks\U30USD\AAAAMM.tkc, bases\Custom\ticks\U30USD_DK).
+      # Su un MT5 vero accanto c'e' SEMPRE history\U30USD (barre M1, AAAA.hcc) con lo STESSO nome: contarla come "tick" e' la classe 1119.
       foreach($c in $cartU){
         $rel = $c.FullName.Substring($basesR.Length).TrimStart('\', '/')
         $files = @(Get-ChildItem -LiteralPath $c.FullName -File -ErrorAction SilentlyContinue | Sort-Object Name)
         $b = [long]0; foreach($f in $files){ $b += [long]$f.Length }
-        Dico ('     bases\' + $rel + '   ' + $files.Count + ' file, ' + (Mb ([double]$b)) + ' MB')
+        $tipo = $(if($c.Parent.Name -ieq 'ticks'){ 'TICK' }elseif($c.Parent.Name -ieq 'history'){ 'barre M1' }else{ 'altro' })
+        Dico ('     bases\' + $rel + '   [' + $tipo + ']   ' + $files.Count + ' file, ' + (Mb ([double]$b)) + ' MB')
         foreach($f in $files){
           $mese = ''; if($f.Name -match '^(\d{6})\.'){ $mese = $Matches[1] }
           $nota = ''
-          if($mese -ne '' -and ($MesiNativi -contains $mese) -and $c.Name -eq 'U30USD'){ $nota = '   <-- mese di un giorno della sonda'; $S.nativi_mesi[$mese] = [long]$f.Length }
+          if($mese -ne '' -and ($MesiNativi -contains $mese) -and $c.Name -eq 'U30USD' -and $tipo -eq 'TICK'){ $nota = '   <-- mese di un giorno della sonda'; $S.nativi_mesi[$mese] = [long]$f.Length }
           Dico ('        ' + $f.Name + '  ' + $f.Length + ' byte  ' + $f.LastWriteTime.ToString('yyyy-MM-dd HH:mm', $INV) + $nota)
         }
       }
-      $nat = @($cartU | Where-Object { $_.Name -eq 'U30USD' })
+      $nat = @($cartU | Where-Object { $_.Name -eq 'U30USD' -and $_.Parent.Name -ieq 'ticks' })
       $S.nativi_cartelle = $nat.Count
-      if($nat.Count -eq 0){ Dico '   cartella dei tick NATIVI U30USD: NON TROVATA sotto bases\ -> tick nativi di 2024.11.20 NON MISURATO (non vuol dire che manchino: il percorso e quello noto di MT5, non verificato qui)' 'Yellow' }
-      $dk = @($cartU | Where-Object { $_.Name -eq 'U30USD_DK' }).Count
+      if($nat.Count -eq 0){ Dico '   cartella dei tick NATIVI U30USD: NON TROVATA sotto bases\ (cercata: <server>\ticks\U30USD; una history\U30USD sono barre M1, NON tick) -> tick nativi di 2024.11.20 NON MISURATO (non vuol dire che manchino: il percorso e quello noto di MT5, non verificato qui)' 'Yellow' }
+      $dk = @($cartU | Where-Object { $_.Name -eq 'U30USD_DK' -and $_.Parent.Name -ieq 'ticks' }).Count
+      $dkH = @($cartU | Where-Object { $_.Name -eq 'U30USD_DK' -and $_.Parent.Name -ieq 'history' }).Count
       $neg = @($cartU | Where-Object { $_.Name -like 'U30USD_DKNEG*' }).Count
       $S.custom_dk = $dk; $S.custom_neg = $neg
-      Dico ('   custom U30USD_DK presente: ' + ($dk -gt 0) + '   residui U30USD_DKNEG: ' + $(if($neg -gt 0){ 'PRESENTI (da capire prima di P1)' }else{ 'nessuno' }))
+      Dico ('   custom U30USD_DK presente: ' + ($dk -gt 0) + '  (con TICK, cartella ticks\U30USD_DK; barre M1 history\U30USD_DK: ' + ($dkH -gt 0) + ')   residui U30USD_DKNEG: ' + $(if($neg -gt 0){ 'PRESENTI (da capire prima di P1)' }else{ 'nessuno' }))
     }
     if($S.dati_bcm_n -eq 0){ Dico '   nessuna cartella dati del terminale BCM: tick nativi e custom NON MISURATI' 'Yellow' }
     Dico 'Un file mensile nativo presente NON prova che 2024.11.20 ci sia dentro: lo dice solo la sonda ("tick nativi=0 -> NON confrontabile").'
@@ -499,21 +511,28 @@ try{
   if($S.ContainsKey('liberi_lavoro_gb')){
     $ok = ($S.liberi_lavoro_gb -ge $SogliaLiberiGB)
     Dico ('spazio libero su dukascopy_lavoro : ' + ([math]::Round($S.liberi_lavoro_gb, 2)).ToString('0.00', $INV) + ' GB ' + $mis + '   (soglia F1 non firmata ' + $SogliaLiberiGB + ' GB: ' + $(if($ok){ 'raggiunta' }else{ 'NON raggiunta' }) + ')')
-  } else { Dico ('spazio libero su dukascopy_lavoro : ' + $nonm) }
+    Dico ('   -> per F1: ' + $(if($ok){ 'la condizione di disco di F1 (almeno 12 GB liberi) e soddisfatta; il nucleo stimato e ~8,4 GB (piano par. 3.5)' }else{ 'la condizione di disco di F1 NON e soddisfatta: si riduce il nucleo (W1 da sola ~1,5-2 GB) o si libera disco PRIMA di firmare' }))
+  } else { Dico ('spazio libero su dukascopy_lavoro : ' + $nonm + '   -> per F1: senza questo numero il tetto di 12 GB non si firma') }
   if($S.ContainsKey('cache_completi')){
     Dico ('cache 222 giorni : completi ' + $S.cache_completi + ' su ' + $S.cache_giorni_attesi + '  (buchi ' + $S.cache_buchi + ', doppi ' + $S.cache_doppi + '; ore a zero byte ' + $S.cache_zero + ': vuote o troncate, indistinguibili) ' + $mis)
     $sonda = @()
     foreach($g in $GiorniSonda){ $c = $S.cache_perGiorno[$g]; if($null -ne $c -and $c.buchi -eq 0 -and $c.doppi -eq 0){ $sonda += $g } }
     Dico ('giorni della sonda completi in cache : ' + $sonda.Count + ' su ' + $GiorniSonda.Count + ' ' + $mis + '   mancanti: ' + $(if($sonda.Count -eq $GiorniSonda.Count){ 'nessuno' }else{ (@($GiorniSonda | Where-Object { $sonda -notcontains $_ }) -join ' ') }))
+    Dico ('   -> per P1: ' + $(if($sonda.Count -eq $GiorniSonda.Count -and $S.cache_completi -eq $S.cache_giorni_attesi){ 'la riconversione --solo-cache dei 222 giorni e la sonda sui 9 giorni partono senza scaricare un byte (validita dei bi5 da confermare con dukascopy_tick.py --solo-cache)' }else{ 'un giorno non completo in cache NON si riscarica sotto F2 (zero download): per quel giorno P1 si ferma e si ridiscute; se e un giorno della sonda, la condizione per nome della F2 non si puo verificare' }))
   } elseif($S.ContainsKey('cache_esiste') -and (-not $S.cache_esiste)){ Dico ('cache raw\USA30IDXUSD : ASSENTE ' + $mis + '  -> STOP di P0: P1 sarebbe un riscarico, si ridiscute') }
   else { Dico ('cache 222 giorni : ' + $nonm) }
   if($S.ContainsKey('csv_n')){ Dico ('CSV U30USD_DK in tick\ : ' + $S.csv_n + ' file, ' + $S.csv_righe + ' righe ' + $mis) } else { Dico ('CSV U30USD_DK in tick\ : ' + $nonm) }
-  if($S.ContainsKey('mt5_aperto')){ Dico ('MT5 aperto : ' + $S.mt5_aperto + ' ' + $mis) } else { Dico ('MT5 aperto : ' + $nonm) }
+  if($S.ContainsKey('csv_n')){ Dico ('   -> per P1: il backup dei CSV del 03/09 (F2 punto 2) occupa ' + (Gb ([double]$S.csv_byte)) + ' GB in piu sul disco di dukascopy_lavoro, e va fatto PRIMA di riconvertire') }
+  if($S.ContainsKey('mt5_aperto')){ Dico ('MT5 aperto : ' + $S.mt5_aperto + ' ' + $mis + $(if($S.mt5_aperto){ '   -> per P1: va CHIUSO prima dell import (stampa PID + titolo + cartella, mai a occhio)' }else{ '' })) } else { Dico ('MT5 aperto : ' + $nonm) }
   if($S.ContainsKey('chr_letti')){
     $ver = $(if($S.chr_letti -eq 0){ 'NON VERIFICABILE (zero grafici letti)' }else{ '' + $S.chr_con_ea + ' grafici con EA, ' + $S.chr_illeggibili + ' illeggibili' })
     Dico ('sedie attaccate (dai .chr salvati) : ' + $ver + ' ' + $(if($S.chr_letti -eq 0){ $nonm }else{ $mis }))
+    if($S.chr_letti -eq 0 -or $S.chr_con_ea -gt 0 -or $S.chr_illeggibili -gt 0){ Dico '   -> per P1: sedie attaccate o non verificabili: prima di aprire MT5 per l import si guarda il terminale (piano par. 4 punto 10, ordini veri del 14/08 da questa macchina)' 'Yellow' }
   } else { Dico ('sedie attaccate : ' + $nonm) }
+  if($S.ContainsKey('maxbars')){ Dico ('MaxBars (config\common.ini) : ' + $S.maxbars + ' ' + $mis + $(if($S.maxbars -lt 200000){ '   -> per P2/P6: tetto BASSO, il tester girerebbe su meno storico senza dirlo (classe 160): va alzato prima dei round' }else{ '' })) } else { Dico ('MaxBars : ' + $nonm + '   -> per P2/P6: da verificare prima dei round (classe 160)') }
+  if($S.ContainsKey('custom_dk')){ Dico ('custom U30USD_DK con tick (bases\Custom\ticks) : ' + ($S.custom_dk -gt 0) + ', residui DKNEG: ' + $S.custom_neg + ' ' + $mis) } else { Dico ('custom U30USD_DK : ' + $nonm) }
   if($S.ContainsKey('nativi_cartelle')){ Dico ('tick nativi U30USD sotto bases\ : cartelle ' + $S.nativi_cartelle + ', mesi della sonda con file ' + $S.nativi_mesi.Count + ' su ' + $MesiNativi.Count + ' (presenza del mese, NON del giorno 2024.11.20) ' + $mis) } else { Dico ('tick nativi U30USD : ' + $nonm) }
+  Dico 'tetto di 250 ore di F1 : NON lo misura P0 (e il RITMO di download: lo misura il canarino P3, oggi 4,1-16,0 min/giorno = 90-348 h per il nucleo, piano par. 3.4)'
   if($Problemi.Count -gt 0){ Dico ('PASSI FALLITI: ' + $Problemi.Count); foreach($p in $Problemi){ Dico ('  - ' + $p) } }
   Dico 'Questa riga ha LETTO e basta: oltre al Desktop (cartella DUKA_P0_* e zip) non ha scritto, copiato, cancellato, chiuso o lanciato niente.'
 }
