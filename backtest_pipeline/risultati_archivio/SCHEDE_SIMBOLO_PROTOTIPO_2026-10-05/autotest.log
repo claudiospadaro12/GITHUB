@@ -62,6 +62,9 @@ AUTOTEST SCHEDA_SIMBOLO_v1
 11. comportamento alla EMA200
    ok: EMA200 su RW: 7379 barre, 50.6% sopra
    ok: sinusoide: incroci regolari (0.80 per 100 barre)
+   ok: EMA: eventi (rimbalzo/rottura/ambiguo) = oracolo python puro (69, 78, 1)
+   ok: EMA: quota di rimbalzo = B/(B+P) dell'oracolo
+   ok: stat(): percentili di 1..100 = 10,9 / 50,5 / 90,1
 12. correlazioni
    ok: serie identica -> rho = 1
    ok: serie opposta -> rho = -1
