@@ -19,7 +19,7 @@ Stato del cancello: **il secondo strato (`controllo-preventivo`) NON e' stato in
 7. **Etichette misurate (non a memoria).** Nasdaq: ORSO 2022 (-30,7%, DD -36,6%), CROLLO 2020.02-04 (DD -27,6% in un mese), TORO 2021 (+26,9%, DD -9,2%), **2019 e' TORO (+40,2%) e non "laterale"**, LATERALE_NAS 2015.01-2016.06 confermato (+2,6%). S&P 2018 e' ORSO (-6,8%) mentre il Nasdaq 2018 e' LATERALE (-1,5%): le etichette non si ereditano fra simboli (§4.1).
 8. **Il fattore OHLC -> tick "1,7-1,85" e' del DAX, non del Nasdaq.** Misurato in casa: DAX Live5m 1,72 e 1,85; **Nasdaq Live5m 2,25**; Dow H4 3,51; per la cella a limite RETEST **[NON MISURATO]**. Regola: **le barre possono solo BOCCIARE, mai promuovere** (§5).
 9. **S&P 500: non si lancia niente adesso, per tre ostacoli indipendenti.** `SPXUSD_EXT` e' ancora in frigo (rapporto 0,203 contro 0,20); l'unica sedia S&P (`771514`) sta sotto la frontiera del costo anche a BCM oggi (~13-39x, centrale ~25x [DERIVATO], spread 1,40 istantanea del 17/08); il suo campione e' 27-40 posizioni/anno, quindi il merito per regime e' non misurabile (§6.4).
-10. **Costo in tempo di tester: nucleo `770260` 34 passate = ~6-20 minuti; tutta la rosa nucleo (`770260` + `770250` + SupRev) 63 passate = ~14-35 minuti.** Il costo vero e' di orologio e di firme, non di CPU (§8). La strada con i volumi veri e' 62-244 ore di PC acceso.
+10. **Costo in tempo di tester: nucleo `770260` 34 passate = ~8-20 minuti; tutta la rosa nucleo (`770260` + `770250` + SupRev) 63 passate = ~14-36 minuti.** Il costo vero e' di orologio e di firme, non di CPU (§8). La strada con i volumi veri e' 62-244 ore di PC acceso.
 11. **Firme nuove: una necessaria, tre opzionali** (§9). Gia' firmato e sufficiente: D-A, D-B (NASUSD,SPXUSD,D30EUR), D-C (solo prova di regime), D-D, D-H, "FIRMO FRIGO NASUSD", la regola del 21/09 (round sul PC di backtest).
 12. **Se la prova passa la riga "anni/dati" del dossier passa da NO a PARZIALE, mai a SI** (3 finestre 2020-22 = 34 mesi di barre + 21 mesi di tick). Solo con la traslazione di scala delle finestre 2011-2018 (firma F-B) si arriverebbe a ~11 anni, ma sarebbero barre di una cella traslata (§10).
 
@@ -223,7 +223,7 @@ Il fattore **non e' uno**, e per la cella a ordini limite e filtro volumi non e'
 
 **(7) Attese, controesempi, parole di verdetto: §7.** **Via piu' corta al numero:**
 
-- **Strada A (EXT, barre, vol OFF): ~34 passate, 6-20 minuti di tester** (§8). Risponde a: frequenza e rischio dello scheletro per regime, segno dei due lati, se il feed e' innocente. **Non** risponde al filtro volumi.
+- **Strada A (EXT, barre, vol OFF): ~34 passate, 8-20 minuti di tester** (§8). Risponde a: frequenza e rischio dello scheletro per regime, segno dei due lati, se il feed e' innocente. **Non** risponde al filtro volumi.
 - **Strada B (feed con volumi veri: Dukascopy `USATECHIDXUSD`, tick):** e' l'unica che misura la sedia vera nei regimi. Costo: **62-244 ore di PC acceso** per il nucleo (914 giorni, 2019.12.01 -> 2022.10.31, a 4,1-16,0 min/giorno: ritmo e intervallo da `PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md` §3.4, classe 1103: tempo / ore-file scaricate, non giorni) piu' ~0,2-1 ora di tester a tick [DERIVATO]. **Non si propone adesso**: dipende dall'esito del cancello DK del Dow (F2 firmata il 05/10, P0-P1), dal fatto che il volume-tick di Dukascopy somigli a quello BCM (filtro relativo 1,5 x media di 20 barre: indipendente dalla scala ma **non** dalla distribuzione; si misura con una calibrazione tipo K1 del piano Dow) e da una firma nuova (F-D). `[NON MISURATO]` se i tick Dukascopy dell'indice portano un volume utilizzabile.
 - **Strada A' (sostituto ATR del filtro volumi, calibrato sul nativo):** il filtro `InpUseAtrFilter` (ATR dell'ultima barra >= mult x media a 20 barre) e' il parente piu' vicino disponibile in prezzo. Si puo' misurare la sua **fedelta'** al filtro volumi sul nativo BCM tick (le due celle sulla stessa finestra, trade-match >= 70% con controllo nullo a +1 giorno, come K1 del piano Dow): 4 passate native. **Solo se la fedelta' passa** il sostituto entrerebbe in una gemella X1 su EXT. E' una cella nuova (mai misurata a tick con questo scopo): firma F-A2 separata, opzionale; **non si fa se non c'e' fedelta'**.
 
@@ -326,14 +326,14 @@ Ancore **misurate**: OHLC **2,9-33,0 s/passata, mediana 13,5** (27 round cronome
 |---|---:|---|---|---|
 | **P0c** canarino volumi (2 gemelle) | 2 | OHLC | 13,5-33 | 0,5-1,1 |
 | **P0d** canarino spread | 2 | OHLC | 13,5-33 | 0,5-1,1 |
-| **P1a** calibrazione: C1, C2 x {EXT-M1 con gemella (2), nativo-M1 (1), nativo-M4 (1)} | 8 (6 OHLC + 2 tick) | misto | OHLC 13,5-33 / tick <= 48 | 1,6-4,9 |
+| **P1a** calibrazione: C1, C2 x {EXT-M1 con gemella (2), nativo-M1 (1), nativo-M4 (1)} | 8 (6 OHLC + 2 tick) | misto | OHLC 13,5-33 / tick <= 48 | 1,8-4,9 |
 | **P1b** ancora a tick della gemella X0: IS e OOS x gemelle | 4 | tick | <= 48 | <= 3,2 |
 | **P2** nucleo: 4 finestre x 4 passate (L+S, long, short, L+S duplicata) | 16 | OHLC | 13,5-33 | 3,6-8,8 |
 | **P2s** stress spread 270 su W1 e W2 (solo L+S) | 2 | OHLC | 13,5-33 | 0,5-1,1 |
-| **TOTALE `770260` (strada A)** | **34** | | | **~6-20 min** (0,1-0,34 h) |
+| **TOTALE `770260` (strada A)** | **34** | | | **~8-20 min** (0,13-0,34 h) |
 | `770250`: ora (4) + 4 finestre x 4 | 20 | OHLC | 13,5-33 | 4,5-11 |
 | `970913`: A5 (3 celle x 3) | 9 | OHLC | 9-33 | 1,4-5 |
-| **nucleo NASDAQ complessivo** | **63** | | | **~12-36 min** (0,2-0,6 h) |
+| **nucleo NASDAQ complessivo** | **63** | | | **~14-36 min** (0,23-0,6 h) |
 | estensione F-B (`770260`): W4-W7 x 4 passate | 16 | OHLC | 13,5-33 | 3,6-8,8 |
 | `771514` (se sbloccata: F-C, spread, costo): 4 finestre x 4 + corsa lunga x 4 | 20 | OHLC H4 | 13,5-33 | 4,5-11 |
 | **strada B** (Dukascopy tick, F-D): crawl nucleo + tester | | | | **62-244 ore di PC acceso** + ~0,2-1 h di tester |
