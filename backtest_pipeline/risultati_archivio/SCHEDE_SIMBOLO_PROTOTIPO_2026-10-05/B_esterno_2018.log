@@ -24,3 +24,22 @@ analisi D30EUR|HistData-GRXEUR
 analisi SPXUSD|HistData-SPXUSD
 analisi 225JPY|HistData-JPXJPY
 analisi XAUUSD|Oanda-2018
+analisi EURUSD|Oanda-2018
+analisi GBPUSD|Oanda-2018
+analisi AUDUSD|Oanda-2018
+analisi AUDJPY|Oanda-2018
+analisi NASUSD|Oanda-NAS100-2018
+analisi SPXUSD|Oanda-SPX500-2018
+analisi 225JPY|Oanda-JP225-2018
+   scheda: SCHEDA_D30EUR_HistData_GRXEUR.md
+   scheda: SCHEDA_SPXUSD_HistData_SPXUSD.md
+   scheda: SCHEDA_225JPY_HistData_JPXJPY.md
+   scheda: SCHEDA_XAUUSD_Oanda_2018.md
+   scheda: SCHEDA_EURUSD_Oanda_2018.md
+   scheda: SCHEDA_GBPUSD_Oanda_2018.md
+   scheda: SCHEDA_AUDUSD_Oanda_2018.md
+   scheda: SCHEDA_AUDJPY_Oanda_2018.md
+   scheda: SCHEDA_NASUSD_Oanda_NAS100_2018.md
+   scheda: SCHEDA_SPXUSD_Oanda_SPX500_2018.md
+   scheda: SCHEDA_225JPY_Oanda_JP225_2018.md
+   correlazioni e cluster scritti

@@ -69,6 +69,8 @@ AUTOTEST SCHEDA_SIMBOLO_v1
    ok: campione sotto il minimo -> NaN, non un numero
    ok: CONTRO-ESEMPIO: serie identiche sfasate di 5 chiavi NON danno rho=1 (allineamento per chiave)
    ok: cluster per soglia: {A,B},{C}
+   ok: CONTRO-ESEMPIO catena: A-C 0,1 NON finiscono nello stesso cluster solo perche' B-C vale 0,55
+   ok: correlazione NaN (campione troppo corto) non fonde nessun gruppo
 12b. ranking e finestra comune
    ok: serie sovrapposte: ranking fatto
    ok: CONTRO-ESEMPIO: serie di periodi diversi -> nessuna finestra comune (None), non una classifica fra mele e pere

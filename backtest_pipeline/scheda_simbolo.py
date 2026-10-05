@@ -45,7 +45,7 @@
 #  File ASCII puro. Solo numpy. Nessuna rete, nessun terminale, nessun
 #  file scritto fuori da --uscita.
 # =====================================================================
-import argparse, csv, datetime as dt, glob, io, math, os, re, sys, zipfile
+import argparse, csv, datetime as dt, glob, io, math, os, re, sys, warnings, zipfile
 import numpy as np
 
 VERSIONE = "SCHEDA_SIMBOLO_v1"
@@ -257,7 +257,9 @@ def leggi_bytes(data):
             c2 = _RE_TS.sub(rb"\1 \2 \3 \4 \5 \6", c1)
             c2 = c2.replace(sep, b" ")
             ncol = 6 + (len(nomi) - 1)
-            toks = np.fromstring(c2, dtype=np.float64, sep=" ")
+            with warnings.catch_warnings():
+                warnings.simplefilter("error")          # un dato non letto fino in fondo NON passa in silenzio
+                toks = np.fromstring(c2, dtype=np.float64, sep=" ")
             if toks.size == nrighe * ncol:
                 A = toks.reshape(nrighe, ncol)
                 Y, M, D, hh, mi, ss = (A[:, k] for k in range(6))
@@ -266,7 +268,9 @@ def leggi_bytes(data):
         else:
             primarg = corpo.split(b"\n", 1)[0]
             ncol = primarg.count(sep) + 2
-            toks = np.fromstring(corpo.replace(sep, b" "), dtype=np.float64, sep=" ")
+            with warnings.catch_warnings():
+                warnings.simplefilter("error")
+                toks = np.fromstring(corpo.replace(sep, b" "), dtype=np.float64, sep=" ")
             if toks.size == nrighe * ncol and ncol >= 6:
                 A = toks.reshape(nrighe, ncol)
                 dd = A[:, 0].astype(np.int64)
