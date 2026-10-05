@@ -6,6 +6,7 @@ Dove girerebbe: **solo il PC di backtest `DESKTOP-H4D7CAJ`**, terminale `C:\Prog
 Etichette: [MISURATO] letto da un file con il percorso; [DERIVATO] calcolo su numeri misurati; [INFERITO] ragionamento mio, dichiarato; [NON MISURATO] il dato non c'e'.
 Stato del cancello: **`controllo-preventivo` 05/10: FAIL corretto in loco** (quattro correzioni marcate "[corretto dal cancello 05/10]": meccanismo del filtro volumi su M5 e ramo di fallimento di P0c; residuo di banco del dossier; stop della RETEST = range + buffer; rischio 0,65% e tetto classe 1102 della `770250`). Serve una **passata indipendente** sulle correzioni prima che il file vada a Claudio. Nessun file prova esiste ancora: ognuno passera' dai due cancelli.
 **Passata indipendente 05/10 (secondo `controllo-preventivo`): FAIL corretto in loco**, marcato "[passata indipendente 05/10]": (a) il "residuo di banco" del dossier era in realta' un **taglio IS/OOS diverso** (30/06/2025 contro 09/06/2025); (b) **W1 e' MISTO alla lettera** (CROLLO 26,4% in 2,6 mesi dentro l'ORSO); (c) bande numeriche di P0c e premessa sul volume `nsxusd`; (d) deposito e unita' del tetto 1102 della `770250`; (e) rinvio all'armonizzazione delle regole di etichettatura con DAX e Dow.
+**Terza lettura 05/10 (`controllo-preventivo`): PASS con un'aggiunta di forma**: ricontati dai CSV i numeri toccati (1,14498/1,10936 su 91/94; 1,11621/1,14894 su 82/102; 185/184; taglio 09/06/2025 da 642 giorni x 0,40; -26,4% su 3 mesi mobili 30/03-17/06/2022) e le righe citate (r.2520, r.2530, r.2577, `RIGA_SHORTGATE.ps1` r.120, `walkforward_aperture.ps1` r.131-132, `walkforward_generico.ps1` r.934); aggiunta in §4.1 la tabella **"stessi dati, etichette diverse"** con le tre regole affiancate (emerso: con la regola D-K del DAX **W2 2020 diventa MISTO**), senza scegliere la precedenza.
 
 ---
 
@@ -115,7 +116,26 @@ I file prova `SHORTGATE_NAS_BREAKDOWN.txt` r.62-69 e r.93-94, `FASE2_NAS_00_base
 Metodo [MISURATO in sessione, riproducibile al passo P0a]: serie giornaliera del prezzo **all'apertura 09:30 New York**, dal CSV per-giorno dell'anatomia (`ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv`, 4.877 righe, giorni `OK`) per il Nasdaq; per l'S&P, dal primo minuto >= 09:30 di ogni giorno nei file HistData `SPXUSD` 2010-2018 (stessa fonte di `SPXUSD_EXT`). Rendimento = ultimo/primo - 1; DD = massimo scostamento dal picco **sulla serie delle aperture** (**sottostima il DD infragiornaliero**: il DD sulle chiusure H1 sara' >= a questo e si rimisura in P0a). Sanita': livelli di fine anno e rendimenti annui coerenti con i valori di mercato noti [FONTE ESTERNA, solo per controllo].
 
 Regola di etichettatura, **scritta prima dei numeri di cella** (stessa del piano Dow del 05/10, §1.3; soglie da firmare in F-A): TORO se rendimento >= +10% **e** DD < 15%; ORSO se rendimento <= -5% **e** DD >= 15%; CROLLO se DD >= 25% in <= 3 mesi; LATERALE se |rendimento| <= 5%. Nessuna regola o due regole = **MISTO** (la finestra non entra nella classe AVVERSE senza nuova firma). **Un caso limite emerso misurando:** `CROLLO 2020.02-04` fa scattare insieme CROLLO (DD 27,6% in un mese) e LATERALE (rendimento -0,1%, e' una V): alla lettera sarebbe MISTO. Si propone, **prima di ogni numero di cella**, la **precedenza CROLLO > LATERALE** (il rendimento non cancella un DD >= 25% in <= 3 mesi), da firmare in F-A; la finestra e' comunque la finestra di shock congelata il 14/08 e serve solo al rischio. Se l'etichetta misurata differisce dall'attesa, la finestra si **rinomina**, non si scarta.
-**[Passata indipendente 05/10] Le regole di etichettatura in circolazione sono TRE** (Dow `D-I`, questa `F-A` con la precedenza CROLLO > LATERALE, DAX `D-K` con CROLLO su <= 4 mesi esclusivo: `REGIME_DAX_SPEC_2026-10-05.md` §3.1) e **si armonizzano in una sola prima della prima firma**. Non e' cosmetico: con la regola scritta qui **W1 e' MISTO** (tabella sotto), quindi senza una precedenza firmata il nucleo avverso si riduce a W2/W2r (il solo 2020) e la regola dei due banchi (`PROVA_REGIME_CRITERI` §4D) non ha la sua seconda finestra. Numerazione: se F-A..F-D diventano righe `@DECISIONE` in `STORICO_INDICI_CRITERI.md`, prendono lettere **dopo D-L** (D-I Dow, D-J..D-L DAX gia' proposte).
+**[Passata indipendente 05/10] Le regole di etichettatura in circolazione sono TRE** (Dow `D-I`, questa `F-A` con la precedenza CROLLO > LATERALE, DAX `D-K` con CROLLO su <= 4 mesi esclusivo: `REGIME_DAX_SPEC_2026-10-05.md` §3.1) e **si armonizzano in una sola prima della prima firma**. Non e' cosmetico: con la regola scritta qui **W1 e' MISTO** (tabella sotto), quindi senza una precedenza firmata il nucleo avverso si riduce al solo 2020 (W2, piu' W2r solo se si firma CROLLO > LATERALE; con la regola del DAX resterebbero invece W1 e W2r, e W2 diventerebbe MISTO: tabella qui sotto) e la regola dei due banchi (`PROVA_REGIME_CRITERI` §4D) non ha la sua seconda finestra. Numerazione: se F-A..F-D diventano righe `@DECISIONE` in `STORICO_INDICI_CRITERI.md`, prendono lettere **dopo D-L** (D-I Dow, D-J..D-L DAX gia' proposte).
+
+**[Terza lettura 05/10] Stessi dati, etichette diverse.** Le tre regole affiancate, poi applicate agli **stessi numeri** gia' scritti nelle specifiche (nessun numero nuovo di prezzo; ricontati W1, W2, W2r, W3 Nasdaq dal CSV dell'anatomia). Questo documento **non sceglie**: la precedenza e la regola unica sono una **firma di Claudio**, da dare prima della prima fra D-I, D-K, F-A.
+
+| regola | fonte | prezzo | struttura | TORO | ORSO | CROLLO | LATERALE | due regole / nessuna |
+|---|---|---|---|---|---|---|---|---|
+| **D-I** (Dow) | `PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md` §1.3 | chiusure H1 DK | non esclusiva | r >= +10% e DD < 15% | r <= -5% e DD >= 15% | DD >= 25% in <= 3 mesi | \|r\| <= 5% | MISTO |
+| **F-A** (Nasdaq/S&P) | questo §4.1 | aperture 09:30 NY (DD sottostimato) | non esclusiva + precedenza **proposta** CROLLO > LATERALE | come D-I | come D-I | come D-I | come D-I | MISTO, salvo CROLLO+LATERALE = CROLLO (se firmata) |
+| **D-K** (DAX) | `REGIME_DAX_SPEC_2026-10-05.md` §3.1 | chiusure H1 | **esclusiva per durata**: >= 9 mesi TORO/ORSO/LATERALE; <= 4 mesi solo CROLLO (DD >= 25%); 4-9 mesi MISTO | solo >= 9 mesi | solo >= 9 mesi | solo <= 4 mesi | solo >= 9 mesi | MISTO |
+
+| finestra | durata | rend. / DD max / DD max su 3 mesi mobili | D-I | F-A | D-K |
+|---|---|---|---|---|---|
+| **W1 Nasdaq** 2022.01-10 | 10 mesi | -30,7% / 36,6% / **26,4%** (30/03 -> 17/06) | ORSO+CROLLO = **MISTO** | **MISTO** (la precedenza proposta non copre ORSO+CROLLO) | **ORSO** |
+| **W2 Nasdaq** 2020 anno | 12 mesi | +46,0% / 27,6% / 27,6% (20/02 -> 23/03) | **CROLLO** | **CROLLO** | **MISTO** (finestra lunga: niente CROLLO; non TORO perche' DD >= 15%) |
+| **W2r Nasdaq** 2020.02-04 | 3 mesi | -0,1% / 27,6% / 27,6% | CROLLO+LATERALE = **MISTO** | **CROLLO** (solo se firmata) | **CROLLO** |
+| W3 Nasdaq 2021 | 12 mesi | +26,9% / 9,2% / <= 9,2% | TORO | TORO | TORO |
+| **W1 DAX** 2011.05-2012.04 | 12 mesi | -10,6% / 34,3% / **33,6%** (Q3 2011, 2,2 mesi; DAX §3.1-3.2) | ORSO+CROLLO = **MISTO** | **MISTO** | **ORSO** |
+| **Dow** W1-W3 (stesse date del Nasdaq) | | `[NON MISURATO]`: lo storico DK su disco copre solo 2024.10-2025.06 (piano Dow §1.4); l'etichetta la da' P0 del piano Dow | - | - | - |
+
+Lettura (solo conteggio, non una scelta): **nessuna delle tre regole tiene in classe tutte e tre le finestre avverse del Nasdaq** (W1, W2, W2r): D-I ne tiene una (W2), F-A due (W2, W2r), D-K due (W1, W2r). Fuori dal nucleo la differenza tocca anche le due sotto-finestre corte di §4.1 (2011-07-15 -> 10-04 e 2018-09-20 -> 12-31: ORSO per D-I/F-A, MISTO per D-K perche' DD < 25%). Per il DAX, le finestre W2/W3 non hanno qui il DD su 3 mesi mobili (classe 1124): `[NON MISURATO]` in questa tabella.
 
 | finestra | giorni | Nasdaq: rend. / DD (periodo del DD) | S&P: rend. / DD | etichetta Nasdaq | etichetta S&P |
 |---|---:|---|---|---|---|
@@ -147,7 +167,7 @@ Regola A dell'emendamento: l'unita' e' l'operazione (>= 150 posizioni per il mer
 | sigla | periodo | etichetta | ruolo | classe |
 |---|---|---|---|---|
 | **W1 ORSO** | 2022.01.01 -> 2022.10.31 | ORSO **solo con precedenza firmata** (alla lettera MISTO: CROLLO 26,4% in 2,6 mesi, §4.1) | rischio + merito L+S (al bordo dei 150) | **nucleo** |
-| **W2 CROLLO_ANNO** | 2020.01.01 -> 2020.12.31 | CROLLO | merito (l'anno) | **nucleo** |
+| **W2 CROLLO_ANNO** | 2020.01.01 -> 2020.12.31 | CROLLO (con D-I/F-A; **MISTO** con la regola D-K del DAX, §4.1 tabella delle tre regole) | merito (l'anno) | **nucleo** |
 | **W2r CROLLO** | 2020.02.01 -> 2020.04.30 | CROLLO (con la precedenza CROLLO > LATERALE, §4.1) | **solo rischio** (valvola E.3: a qualunque n) | **nucleo** |
 | **W3 TORO** | 2021.01.01 -> 2021.12.31 | TORO | riferimento sullo stesso feed | **nucleo** |
 | W4 LATERALE | 2015.01.01 -> 2016.06.30 | LATERALE | rischio + merito | estensione (F-B) |
