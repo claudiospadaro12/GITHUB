@@ -77,6 +77,7 @@ $EtaMaxOre = 72
 $PatTrading = 'OrderSend|CTrade|Trade\.mqh|#include|Position(Open|Close|Modify|Select)|Order(Delete|Modify|Select)|OrdersTotal|PositionsTotal|HistorySelect|(Buy|Sell)(Limit|Stop)|GlobalVariable|Guardia|[Mm]agic|WebRequest|SendNotification|SendMail|ObjectCreate|ChartSetSymbolPeriod'
 $RxLogin   = "'(\d{6,12})'\s*:\s*(?:login|authorized|connesso|previous)[^\r\n]*"
 $CampioneSec = 5
+$TettoLetturaMB = 100     # i giornali si leggono dal piu' recente e ci si FERMA al primo con una riga di login: mai tutta la storia (RAM libera ~1,8 GB)
 
 $T0    = Get-Date
 $Stamp = $T0.ToString('yyyyMMdd_HHmmss', $INV)
@@ -129,6 +130,9 @@ function MbDa([double]$b){ return ([math]::Round($b / 1MB, 0)).ToString('0', $IN
 function Norm([string]$p){ if($null -eq $p){ return '' }; return (($p -replace '/', '\').TrimEnd('\')).ToLower() }
 # identita' di una cartella: il percorso RISOLTO (due scritture diverse della stessa cartella non devono contare due volte)
 function Chiave([string]$p){ try{ return (Norm (Convert-Path -LiteralPath $p)) }catch{ return (Norm $p) } }
+# confronti ORDINALI (mai culturali): con la cultura un BOM (U+FEFF) o le maiuscole possono passare o no a seconda della macchina (classe 1110)
+function Uguali([string]$a, [string]$b){ return [string]::Equals((Norm $a), (Norm $b), [StringComparison]::Ordinal) }
+function StessaCartella([string]$a, [string]$b){ return [string]::Equals((Chiave $a), (Chiave $b), [StringComparison]::Ordinal) }
 function Sha256Di([byte[]]$b){ $s = [Security.Cryptography.SHA256]::Create(); return [BitConverter]::ToString($s.ComputeHash($b)).Replace('-', '') }
 
 # lettura CONDIVISA con riconoscimento UTF-16 (origin.txt, log, ini di MT5); il BOM si TOGLIE (classe 1110)
@@ -163,14 +167,17 @@ function Scansiona-Giornali([string]$dati, [datetime]$adesso){
   $limite = $adesso.AddDays(-90)
   $dl = Join-Path $dati 'logs'
   if(Test-Path -LiteralPath $dl){
-    $fl = @(Get-ChildItem -LiteralPath $dl -Filter '*.log' -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $limite -and $_.Length -lt 60000000 } | Sort-Object LastWriteTime -Descending | Select-Object -First 60)
-    $o.NFile = $fl.Count
+    $fl = @(Get-ChildItem -LiteralPath $dl -Filter '*.log' -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $limite -and $_.Length -lt 20000000 } | Sort-Object LastWriteTime -Descending | Select-Object -First 30)
+    $letti = [double]0
     foreach($f in $fl){
+      if(($letti + $f.Length) -gt ($TettoLetturaMB * 1MB)){ $o.Note = 'tetto di lettura di ' + $TettoLetturaMB + ' MB raggiunto dopo ' + $o.NFile + ' giornali'; break }
+      $letti += $f.Length
+      $o.NFile++
       $t = Leggi-Condiviso $f.FullName
       if(-not $t){ continue }
       $mm = [regex]::Matches($t, $RxLogin)
       foreach($m in $mm){ $o.Conti[$m.Groups[1].Value] = 1 }
-      if($o.Ultimo -eq '' -and $mm.Count -gt 0){ $o.Ultimo = $mm[$mm.Count - 1].Groups[1].Value; $o.File = $f.Name }
+      if($mm.Count -gt 0){ $o.Ultimo = $mm[$mm.Count - 1].Groups[1].Value; $o.File = $f.Name; break }
     }
   } else { $o.Note = 'logs\ assente' }
   $nuovo = $null
@@ -210,7 +217,7 @@ try{
     $tit = ''; try{ $tit = [string]$p.MainWindowTitle }catch{}
     $ws = 'NON LETTO'; try{ $ws = (MbDa $p.WorkingSet64) + ' MB' }catch{}
     $pm = 'NON LETTO'; try{ $pm = (MbDa $p.PrivateMemorySize64) + ' MB' }catch{}
-    $mio = ((Norm $cart) -eq (Norm $TermBcm))
+    $mio = (Uguali $cart $TermBcm)
     $marca = ''; if($mio){ $marca = '   <== IL NOSTRO (piccolo, conto ' + $ContoAtt + ')'; [void]$nostri.Add($p) }
     DicoP ('   PID ' + $p.Id + '  | titolo: ' + $tit + '  | cartella: ' + $cart + '  | working set ' + $ws + '  | memoria privata ' + $pm + $marca)
   }
@@ -255,9 +262,8 @@ try{
     }
   }catch{ [void]$Rilievi.Add('elenco dei profili utente (' + $Drive + '\Users) NON leggibile: vedo solo il profilo di questa sessione.') }
   $giaApp = $false
-  foreach($x in $radici){ if((Chiave $x.Root) -eq (Chiave $rApp)){ $giaApp = $true } }
+  foreach($x in $radici){ if(StessaCartella $x.Root $rApp){ $giaApp = $true } }
   if(-not $giaApp){ [void]$radici.Add(@{ Root = $rApp; Utente = ('APPDATA di ' + $env:USERNAME) }) }
-  $visti = @{}
   foreach($x in $radici){
     if(-not (Test-Path -LiteralPath $x.Root)){ continue }
     $dirs = @()
@@ -266,15 +272,12 @@ try{
     foreach($d in $dirs){
       if(@('Common', 'Community', 'Help') -contains $d.Name){ continue }
       if(-not (Test-Path -LiteralPath (Join-Path $d.FullName 'MQL5'))){ continue }
-      $kd = Chiave $d.FullName
-      if($visti.ContainsKey($kd)){ continue }
-      $visti[$kd] = 1
       $o = ''
       $of = Join-Path $d.FullName 'origin.txt'
       if(Test-Path -LiteralPath $of){ $o = (Leggi-Condiviso $of).Trim() }
-      $sess = ((Chiave $x.Root) -eq (Chiave $rApp))
+      $sess = (StessaCartella $x.Root $rApp)
       $c = @{ Cartella = $d.FullName; Nome = $d.Name; Utente = $x.Utente; Sessione = $sess; Origine = $o; Candidata = $false; Eleggibile = $false; Motivi = (New-Object System.Collections.ArrayList); Giorn = $null; IniLogin = '' }
-      if((Norm $o) -eq (Norm $TermBcm)){ $c.Candidata = $true }
+      if(Uguali $o $TermBcm){ $c.Candidata = $true }
       [void]$Cand.Add($c)
       Dico ('   dati ' + $d.Name + '  profilo ' + $x.Utente + $(if($sess){ ' (SESSIONE CORRENTE)' }else{ '' }) + '  programma: ' + $(if($o){ (Pulisci $o) }else{ '(origin.txt assente)' }))
     }
@@ -298,7 +301,7 @@ try{
     elseif($g.Eta -gt $EtaMaxOre){ [void]$c.Motivi.Add('giornali vecchi di ' + $g.Eta.ToString('0.0', $INV) + ' ore (soglia ' + $EtaMaxOre + '): non e il terminale VIVO, e una copia ferma') }
     if($c.Motivi.Count -eq 0){ $c.Eleggibile = $true }
     $cs = ''; foreach($k in ($g.Conti.Keys | Sort-Object)){ $cs = $cs + $k + ' ' }
-    Dico ('   CANDIDATA ' + $c.Nome + ' (profilo ' + $c.Utente + '): ultimo login ' + $(if($g.Ultimo){ $g.Ultimo }else{ '-' }) + ' (giornale ' + $(if($g.File){ $g.File }else{ '-' }) + '); conti visti: ' + $(if($cs){ $cs.Trim() }else{ 'nessuno' }) + '; common.ini Login ' + $(if($c.IniLogin){ $c.IniLogin }else{ '-' }) + '; ultimo giornale di ' + $(if($null -ne $g.Eta){ $g.Eta.ToString('0.0', $INV) + ' ore fa' }else{ 'NESSUNO' }))
+    Dico ('   CANDIDATA ' + $c.Nome + ' (profilo ' + $c.Utente + '): ultimo login ' + $(if($g.Ultimo){ $g.Ultimo }else{ '-' }) + ' (giornale ' + $(if($g.File){ $g.File }else{ '-' }) + '); conti visti nei giornali letti: ' + $(if($cs){ $cs.Trim() }else{ 'nessuno' }) + '; common.ini Login ' + $(if($c.IniLogin){ $c.IniLogin }else{ '-' }) + '; ultimo giornale di ' + $(if($null -ne $g.Eta){ $g.Eta.ToString('0.0', $INV) + ' ore fa' }else{ 'NESSUNO' }))
     if($c.Eleggibile){ Dico '      -> ELEGGIBILE: origin giusto, conto confermato dal giornale, giornali freschi' 'Green' }
     else { Dico ('      -> NON ELEGGIBILE (NON TOCCATA): ' + ($c.Motivi -join ' | ')) 'Yellow' }
   }

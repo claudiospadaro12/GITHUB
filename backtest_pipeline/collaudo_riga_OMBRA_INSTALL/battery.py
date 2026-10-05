@@ -55,6 +55,8 @@ def scenari():
     sc.append(("04d_ultimo_nostro_stesso_file", S(p_logs=[(1.0, ["10105439", ACC])]), {}, A(esito="OK", scrive=pic())))
     sc.append(("04d2_ultimo_nostro_file_diversi", S(p_logs=[(50.0, ["10105439"]), (1.0, [ACC])]), {}, A(esito="OK", scrive=pic())))
     sc.append(("04e_ini_altro_login", S(p_ini="altro_login"), {}, A(esito="STOP", stop="NESSUNA eleggibile", scrive=None, vedi=["conti discordanti"])))
+    # il tetto di lettura dei giornali (RAM libera ~1,8 GB sul VPS): patch DICHIARATA della costante a 0 -> il primo giornale non entra nel tetto
+    sc.append(("04g_tetto_lettura_giornali", S(), dict(patch=[("$TettoLetturaMB = 100 ", "$TettoLetturaMB = 0 ")]), A(esito="STOP", stop="NESSUNA eleggibile", scrive=None, vedi=["tetto di lettura di 0 MB raggiunto dopo 0 giornali"])))
     sc.append(("04f_ini_assente", S(p_ini="assente"), {}, A(esito="OK", scrive=pic(), vedi=["profilo attivo NON determinato"])))
     # --- CE6: freschezza (soglia 72 h)
     sc.append(("05a_giornali_60_ore", S(p_logs=[(60.0, [ACC])], p_mql5logs_eta=60.0), {}, A(esito="OK", scrive=pic())))
@@ -190,6 +192,10 @@ def valuta(nome, spec, opz, att, r, prima, dopo, zips, mtimes):
             i0 = out.find("STOP: ")
             if i0 >= 0 and att["stop"] not in out[i0:]:
                 err.append("MANCA nel motivo dello STOP: " + att["stop"])
+            # il motivo deve stare ANCHE nella riga d'esito (la riga che Claudio legge e manda)
+            m = re.search(r"^ESITO OMBRA INSTALL: FERMATO -- (.*)$", out, re.M)
+            if m is None or (att.get("stop") and att["stop"] != "STOP:" and att["stop"] not in m.group(1)):
+                err.append("la riga ESITO non porta il motivo dello STOP: " + att.get("stop", ""))
     for v in att.get("vedi", []):
         must(v)
     # --- pin/sha del bootstrap

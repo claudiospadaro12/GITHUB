@@ -29,7 +29,8 @@ function Get-Process { [CmdletBinding()] param([string[]]$Name, [int]$Id)
     $n = 0; if($script:chiamate.ContainsKey($k)){ $n = $script:chiamate[$k] }
     $script:chiamate[$k] = $n + 1
     $cpu = [double]$p.Cpu + $(if($n -ge 1){ [double]$p.Delta }else{ 0 })
-    [pscustomobject]@{ Id=[int]$p.Id; ProcessName=$p.Name; MainWindowTitle=$p.Title; Path=$p.Path; WorkingSet64=[int64]$p.Ws; PrivateMemorySize64=[int64]$p.Pm; CPU=$cpu }
+    $o = [pscustomobject]@{ Id=[int]$p.Id; ProcessName=$p.Name; MainWindowTitle=$p.Title; Path=$p.Path; WorkingSet64=[int64]$p.Ws; PrivateMemorySize64=[int64]$p.Pm; CPU=$cpu }
+    $o
   } }
 function Start-Sleep { [CmdletBinding()] param([int]$Seconds, [int]$Milliseconds) }
 '''
