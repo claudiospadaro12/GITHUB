@@ -190,6 +190,11 @@ def giorni_da_civile(y, m, d):
     return era * 146097 + doe - 719468
 
 
+def anno_da_giorni(g):
+    g = np.asarray(g, dtype=np.int64)
+    return np.array(g, dtype="datetime64[D]").astype("datetime64[Y]").astype(np.int64) + 1970
+
+
 def data_da_giorno(g):
     return (EPOCH + dt.timedelta(days=int(g))).strftime("%Y-%m-%d")
 
@@ -276,7 +281,7 @@ def leggi_bytes(data):
                     y, mo, d = int(mt.group(1)[:4]), int(mt.group(1)[4:6]), int(mt.group(1)[6:8])
                     h_, m_, s_ = int(mt.group(2)[:2]), int(mt.group(2)[2:4]), int(mt.group(2)[4:6])
                     vals = {k: float(p[ix[k]]) for k in ix}
-                T.append(_minuti_da_ymdhm(y, mo, d, h_, m_).item() if hasattr(_minuti_da_ymdhm(y, mo, d, h_, m_), "item") else _minuti_da_ymdhm(y, mo, d, h_, m_))
+                T.append(int(giorni_da_civile(y, mo, d)) * 1440 + h_ * 60 + m_)
                 O.append(vals["open"]); H.append(vals["high"]); L.append(vals["low"]); C.append(vals["close"])
                 S += 1 if s_ != 0 else 0
             except Exception:
@@ -308,7 +313,7 @@ def _membri(percorso):
                 for n in sorted(z.namelist()):
                     if n.lower().endswith(".csv"):
                         out.append((p + "!" + n, z.read(n)))
-        elif lp.endswith(".csv") or lp.endswith(".txt"):
+        elif lp.endswith(".csv"):
             with open(p, "rb") as f:
                 out.append((p, f.read()))
     return out
@@ -528,7 +533,7 @@ def misure_giornaliere(s):
     atr_full = np.full(len(rng), np.nan)
     atr_full[idx] = atr_p
     giorno = d1["giorno"]
-    anno = np.array([(EPOCH + dt.timedelta(days=int(x))).year for x in giorno])
+    anno = anno_da_giorni(giorno)
     wd = (giorno + 3) % 7
     M = dict(rng=rng, rng_pct=rng_pct, tr=tr, atr_d1=atr_full, anno=anno, wd=wd, pieno=p, unita=u)
     M["adr_pt"] = stat(rng[p] / u)
@@ -583,14 +588,14 @@ def misure_atr_tf(s, M):
         b = s["barre"][nome]
         a = atr_sma(b["o"], b["h"], b["l"], b["c"], ATR_N)
         ok = np.isfinite(a)
-        anni = np.array([(EPOCH + dt.timedelta(minutes=int(x))).year for x in b["tu"]])
+        anni = anno_da_giorni(b["tu"] // 1440)
         pa = {}
         for y in sorted(set(anni[ok].tolist())):
             pa[int(y)] = float(np.median(a[ok & (anni == y)]) / u)
         # ultimi 252 giorni: barre dei giorni degli ultimi 252 pieni
         d1 = s["d1"]
-        ult_days = set(np.flatnonzero(d1["pieno"])[-252:].tolist())
-        mu = np.array([x in ult_days for x in b["day"]])
+        ult_days = np.flatnonzero(d1["pieno"])[-252:]
+        mu = np.isin(b["day"], ult_days)
         out[nome] = dict(tfm=tfm, n_barre=int(len(b["o"])), atr_med=float(np.median(a[ok]) / u),
                          atr_media=float(np.mean(a[ok]) / u),
                          atr_pct_med=float(100.0 * np.median(a[ok] / b["c"][ok])),
@@ -745,25 +750,23 @@ def zigzag(h, l, atrv, rho):
         i0 += 1
     if i0 >= n:
         return piv
-    d = 0
-    hi, hi_i, lo, lo_i = h[i0], i0, l[i0], i0
-    ext, ext_i = 0.0, 0
     hl = h.tolist(); ll = l.tolist(); av = atrv.tolist()
+    d = 0
+    hi, hi_i, lo, lo_i = hl[i0], i0, ll[i0], i0
+    ext, ext_i = 0.0, 0
     for i in range(i0 + 1, n):
         thr = rho * av[i]
         if d == 0:
+            if hl[i] - lo >= thr and lo_i < i:        # e' salito di thr dal minimo: il minimo e' un pivot
+                piv.append((lo_i, lo, -1)); d = +1; ext, ext_i = hl[i], i
+                continue
+            if hi - ll[i] >= thr and hi_i < i:        # e' sceso di thr dal massimo: il massimo e' un pivot
+                piv.append((hi_i, hi, +1)); d = -1; ext, ext_i = ll[i], i
+                continue
             if hl[i] > hi:
                 hi, hi_i = hl[i], i
             if ll[i] < lo:
                 lo, lo_i = ll[i], i
-            if hi - ll[i] >= thr and hi_i < i and hi_i >= lo_i:
-                piv.append((lo_i, lo, -1)); d = -1; ext, ext_i = ll[i], i
-                piv_pending = None
-                # il massimo e' un pivot confermato solo se il prezzo scende di thr dal massimo
-                piv.pop()
-                piv.append((lo_i, lo, -1)); piv.append((hi_i, hi, +1)); d = -1; ext, ext_i = ll[i], i
-            elif hl[i] - lo >= thr and lo_i < i and lo_i >= hi_i:
-                piv.append((hi_i, hi, +1)); piv.append((lo_i, lo, -1)); d = +1; ext, ext_i = hl[i], i
             continue
         if d == +1:
             if hl[i] > ext:
@@ -1083,7 +1086,7 @@ def f(x, nd=2):
 def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     q = s["q"]
     u = s["unita"]
-    un = "pip" if abs(u - 0.0001) < 1e-12 or abs(u - 0.01) < 1e-12 and u < 1 else "punti"
+    un = "pip" if u < 1 else "punti"
     L = []
     w = L.append
     w("# SCHEDA SIMBOLO -- %s (%s)" % (s["simbolo"], s["feed"]))
@@ -1119,7 +1122,7 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("## 1. Range medio giornaliero (ADR)")
     w("")
     a = M["adr_pt"]; ap = M["adr_pct"]
-    w("Formula: `range = H - L` del giorno (giorni pieni), in %s; in % del prezzo = `100 x (H-L) / open del giorno`." % un)
+    w("Formula: `range = H - L` del giorno (giorni pieni), in %s; in %% del prezzo = `100 x (H-L) / open del giorno`." % un)
     w("")
     w("| | mediana | media | p10 | p25 | p75 | p90 | p95 |")
     w("|---|---:|---:|---:|---:|---:|---:|---:|")
@@ -1128,7 +1131,7 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("")
     w("n = %d giorni pieni. Ultimi ~252 giorni pieni: ADR mediano %s %s (%s%%). Volatilita' realizzata annua (close-close D1): %s%%." % (
         a["n"], f(M["adr_pt_med_ult252"]), un, f(M["adr_pct_med_ult252"], 3), f(M["rv_ann_pct"], 1)))
-    w("Giorni con range > 1,5 x mediana: %s%% · > 2 x mediana: %s%% · < 0,5 x mediana: %s%%." % (
+    w("Giorni con range > 1,5 x mediana: %s%% ; > 2 x mediana: %s%% ; < 0,5 x mediana: %s%%." % (
         f(100 * M["frac_giorni_gt_1_5_mediana"], 1), f(100 * M["frac_giorni_gt_2_mediana"], 1), f(100 * M["frac_giorni_lt_0_5_mediana"], 1)))
     w("")
     w("**Per anno** (mediana del range, giorni pieni)")
@@ -1152,7 +1155,7 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
         w("| %s | %s | **%s** | %s | %s | %s |" % (nome, format(x["n_barre"], ","), f(x["atr_med"]), f(x["atr_media"]), f(x["atr_pct_med"], 4), f(x["atr_ult252"])))
     w("| D1 | %d | **%s** | %s | %s | %s |" % (M["atr_d1_pt"]["n"], f(M["atr_d1_pt"]["p50"]), f(M["atr_d1_pt"]["media"]), f(M["atr_d1_pct"]["p50"], 4), "-"))
     w("")
-    w("Rapporti: ATR(H1)/ATR(M15) = %s (radice di T atteso 2,00 se i rendimenti fossero indipendenti) · ATR(H4)/ATR(H1) = %s (atteso 2,00) · ADR mediano / ATR(H1) = %s." % (
+    w("Rapporti: ATR(H1)/ATR(M15) = %s (radice di T atteso 2,00 se i rendimenti fossero indipendenti) ; ATR(H4)/ATR(H1) = %s (atteso 2,00) ; ADR mediano / ATR(H1) = %s." % (
         f(A["rapporto_H1_M15"]), f(A["rapporto_H4_H1"]), f(A["adr_su_atr_h1"], 1)))
     w("")
     w("_Cosa dice_: la scala di ogni TF e quanto il simbolo si scosta dalla legge radice-di-T (sopra 2 = tendenza che si accumula, sotto 2 = rumore che si compensa). _Decisione informata_: lo stop in ATR su quel TF, il TF minimo che passa la frontiera del costo (sezione 11).")
@@ -1203,7 +1206,7 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     if not G:
         w("Nessun buco >= 60 minuti nei dati: gap non misurabile.")
     else:
-        w("| classe | n | buco mediano (ore) | |gap| mediano (%s) | p95 (%s) | |gap| mediano in ATR D1 | p95 in ATR D1 | % con |gap| > 0,25 ATR D1 | % gap su | % riempito | % riempito se > 0,25 ATR |" % (un, un))
+        w("| classe | n | buco mediano (ore) | gap assoluto mediano (%s) | p95 (%s) | mediano in ATR D1 | p95 in ATR D1 | %% con gap > 0,25 ATR D1 | %% gap su | %% riempito | %% riempito se > 0,25 ATR |" % (un, un))
         w("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
         for nome in ("pausa", "weekend"):
             x = G.get(nome)
@@ -1268,7 +1271,7 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("")
     w("**Non e' un test di edge** (regola di casa): conta quanto il prezzo sta vicino/lontano dalla linea e cosa fa dopo un tocco da lontano. Il test vero, col nullo a blocchi, e' `ema200_rimbalzo.py`/`ema200_d1_su_m5.py`. Tocco da lontano = low<=EMA<=high con le %d barre precedenti tutte dallo stesso lato e almeno una a >= 1 ATR; esito entro %d barre: **rimbalzo** = ritorna a >= 1 ATR dal lato di origine senza chiudere a >= 0,5 ATR oltre la linea; **rottura** = chiude a >= 0,5 ATR oltre; il resto ambiguo. Un evento ogni %d barre." % (EMA_SEP, EMA_HOR, EMA_HOR))
     w("")
-    w("| TF | barre | % sopra la EMA | serie sullo stesso lato (mediana, barre) | |dist| mediana (ATR) | p90 | entro 1 ATR | tocchi per 100 barre | incroci per 100 barre | eventi (B/P/amb) | rimbalzo B/(B+P) |")
+    w("| TF | barre | % sopra la EMA | serie sullo stesso lato (mediana, barre) | distanza assoluta mediana (ATR) | p90 | entro 1 ATR | tocchi per 100 barre | incroci per 100 barre | eventi (B/P/amb) | rimbalzo B/(B+P) |")
     w("|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|")
     for nome in ("H1", "H4", "D1"):
         x = EMA.get(nome, {"n": 0})
@@ -1438,7 +1441,7 @@ def esegui(specs, uscita, spread_path=None, modo_giorno="utc1", orologio="utc1",
         mio = [x for x in rank if x["simbolo"] == s["simbolo"] and x["feed"] == s["feed"]][0]
         rr = None
         if len(serie) >= 2:
-            rr = "Su %d serie della corsa, finestra %s -> %s (%d giorni): **ADR %% mediano %s -> posto %d su %d** · volatilita' realizzata annua %s%% -> posto %d su %d. Tabella: `ranking_volatilita.csv`." % (
+            rr = "Su %d serie della corsa, finestra %s -> %s (%d giorni): **ADR %% mediano %s -> posto %d su %d** ; volatilita' realizzata annua %s%% -> posto %d su %d. Tabella: `ranking_volatilita.csv`." % (
                 len(serie), mio["da"], mio["a"], mio["giorni_finestra"], f(mio["adr_pct_med"], 3), mio["rank_adr_pct"], len(serie),
                 f(mio["rv_ann_pct"], 1), mio["rank_rv"], len(serie))
         md = scheda(s, r["M"], r["A"], r["S"], r["O"], r["G"], r["R"], r["E"], r["EMA"], r["costo"], rw, fin_nota, rr)
@@ -1581,10 +1584,10 @@ def _serie_sintetica(giorni, f_giorno, tmin=1440, t0_giorno=16436, nm1=1440):
     return T, P
 
 
-def _mk_serie(T, P, sim="TEST", unita=1.0, orologio="utc1"):
-    o = P.copy(); c = P.copy()
-    # M1 con c = prezzo del minuto e open = prezzo del minuto precedente (continuita')
-    o = np.r_[P[0], P[:-1]]
+def _mk_serie(T, P, sim="TEST", unita=1.0, orologio="utc1", continuo=True):
+    c = P.copy()
+    # continuo: open = prezzo del minuto precedente (la barra congiunge). Non continuo: open = close (nessun gap interno).
+    o = np.r_[P[0], P[:-1]] if continuo else P.copy()
     h = np.maximum(o, c); l = np.minimum(o, c)
     s = dict(simbolo=sim, feed="sintetico", fuso="UTC", orologio=orologio, percorso="-", t=T, o=o, h=h, l=l, c=c, unita=unita,
              info=dict(file=1, righe=len(T), scartate_parse=0, scartate_ohlc=0, fuori_ordine=0, doppi=0, secondi_non_zero=0))
@@ -1648,7 +1651,7 @@ def autotest():
         r = R[wd]
         # triangolo: sale r in 720 minuti e scende r in 720 minuti, parte dal base
         return base + (r * m / 720.0 if m <= 720 else r * (1440 - m) / 720.0)
-    T, P = _serie_sintetica(40, tri)
+    T, P = _serie_sintetica(35, tri)
     s = _mk_serie(T, P)
     costruisci(s)
     M = misure_giornaliere(s)
@@ -1707,7 +1710,6 @@ def autotest():
     T, C, Oo = [], [], []
     for gg in giorni:
         y, mth = (EPOCH + dt.timedelta(days=gg)).year, (EPOCH + dt.timedelta(days=gg)).month
-        us = a_server  # (non usato)
         s0, e0 = us_dst_bounds_utc(y)
         estate = s0 <= gg * 1440 + 800 < e0
         spike = 810 if estate else 870
@@ -1718,39 +1720,47 @@ def autotest():
     T = np.concatenate(T); Oo = np.concatenate(Oo); C = np.concatenate(C)
     w, nw = picco_minuto(T, Oo, C, (1, 2)); e, ne = picco_minuto(T, Oo, C, (6, 7, 8))
     _check(w in (869, 870, 871) and e in (809, 810, 811) and abs((w - 60) - e) <= 2, "picco invernale %s e estivo %s UTC -> differenza 60" % (hhmm(w), hhmm(e)))
-    # contro-esempio: lo stesso feed letto SENZA la conversione NY (cioe' fuso sbagliato) NON passa
-    # (se i timestamp fossero in NY, i picchi sarebbero 09:30 d'inverno e 09:30 d'estate: differenza 0)
-    Tloc = T.copy()
-    for k in range(len(Tloc)):
-        pass
-    w2, _ = picco_minuto(np.where(np.arange(len(T)) >= 0, ny_to_utc(T) , T), Oo, C, (1, 2))
+    # contro-esempio: gli stessi dati trattati come ora di New York (fuso sbagliato) NON danno la coppia 14:30/13:30
+    w2, _ = picco_minuto(ny_to_utc(T), Oo, C, (1, 2))
     e2, _ = picco_minuto(ny_to_utc(T), Oo, C, (6, 7, 8))
-    _check(not (abs((w2 - 60) - e2) <= 2) or (w2 != w), "CONTRO-ESEMPIO: un fuso sbagliato (NY applicato a dati UTC) NON riproduce la coppia 14:30/13:30 (%s/%s)" % (hhmm(w2), hhmm(e2)))
+    _check(abs((w2 - 60) - e2) > 2 or w2 not in (869, 870, 871), "CONTRO-ESEMPIO: un fuso sbagliato sposta i picchi a %s/%s e il cancello non passa" % (hhmm(w2), hhmm(e2)))
     # --- gap piantato
     log("7. gap di apertura")
-    def gp(k, m):
-        # giorno k: sale da 100 a 110 in 600 minuti poi resta; il giorno dopo apre a 113 (gap +3)
-        return (100.0 + 10.0 * min(m, 600) / 600.0) + 3.0 * (k % 2 == 1) * 0.0
-    # costruzione diretta, con buco notturno di 12 ore
-    T, P = [], []
+    # costruzione diretta: 08:00-18:00 server, buco notturno di 14 ore, un salto piantato fra i giorni
+    T, P, K = [], [], []
     for k in range(10):
         d = 16436 + k
         if (d + 3) % 7 >= 5:
             continue
-        for m in range(480, 1080):                  # 08:00-18:00 server
+        for m in range(480, 1080):
             T.append(d * 1440 + m - 60)
-            P.append(100.0 + k * 0.0 + (10.0 * (m - 480) / 600.0) + (3.0 if (k % 2) else 0.0))
+            P.append(100.0 + (10.0 * (m - 480) / 600.0) + (3.0 if (k % 2) else 0.0))
+            K.append(k)
     T = np.array(T, np.int64); P = np.array(P)
-    s = _mk_serie(T, P)
+    s = _mk_serie(T, P, continuo=False)
     costruisci(s)
     M = misure_giornaliere(s)
     G = misure_gap(s, M)
-    _check("pausa" in G and G["pausa"]["n"] >= 3, "gap: buchi notturni trovati (%s)" % G.get("pausa", {}).get("n"))
-    # i gap alternano: da giorno pari a dispari +3 (sale), da dispari a pari -(10)+... verifichiamo il massimo |gap|
-    c_prev = s["c"]; o_now = s["o"]
-    ev = np.flatnonzero(np.diff(s["t"]) >= 60) + 1
-    g_true = np.abs(s["o"][ev] - s["c"][ev - 1])
-    _check(abs(G["pausa"]["media_pt"] - g_true.mean()) < 1e-9 and abs(G["pausa"]["med_pt"] - np.median(g_true)) < 1e-9, "gap medio/mediano = quello ricalcolato a mano (%.4f)" % g_true.mean())
+    # attesi, dalla formula che ha generato i dati (indipendente dalle matrici della procedura)
+    attesi_p, attesi_w = [], []
+    for k in range(9):
+        d0, d1_ = 16436 + k, 16436 + k + 1
+        if (d0 + 3) % 7 >= 5:
+            continue
+        chiusa = 100.0 + 10.0 * (1079 - 480) / 600.0 + (3.0 if (k % 2) else 0.0)
+        apre = 100.0 + (3.0 if ((k + 1) % 2) else 0.0)
+        # giorno seguente feriale? se d1_ e' sabato il buco e' weekend e il prossimo giorno e' il lunedi' k+3
+        if (d1_ + 3) % 7 >= 5:
+            kk = k + 3
+            apre = 100.0 + (3.0 if (kk % 2) else 0.0)
+            attesi_w.append(abs(apre - chiusa))
+        else:
+            attesi_p.append(abs(apre - chiusa))
+    _check(G["pausa"]["n"] == len(attesi_p), "gap 'pausa': %d eventi trovati, %d attesi" % (G["pausa"]["n"], len(attesi_p)))
+    _check(abs(G["pausa"]["media_pt"] - sum(attesi_p) / len(attesi_p)) < 1e-9, "gap 'pausa' medio = %.4f (atteso dalla formula %.4f)" % (G["pausa"]["media_pt"], sum(attesi_p) / len(attesi_p)))
+    if attesi_w and "media_pt" in G.get("weekend", {}):
+        _check(abs(G["weekend"]["media_pt"] - sum(attesi_w) / len(attesi_w)) < 1e-9, "gap 'weekend' medio = atteso")
+    _check(G["pausa"]["buco_med_ore"] == 14.0 or abs(G["pausa"]["buco_med_ore"] - 14.0) < 0.05, "buco notturno mediano 14 ore (misurato %.2f)" % G["pausa"]["buco_med_ore"])
     # --- zigzag e ritracciamento piantati
     log("8. zigzag e ritracciamento con la risposta nota")
     path = [0.0]
@@ -1775,8 +1785,6 @@ def autotest():
     x = rr[2.0]
     # gambe: 10 (0->10), 5 (10->5), 15 (5->20), 8 (20->12), 10 (12->22 pivot non confermato?) ; rapporti: 5/10, 15/5, 8/15
     _check(x["n"] >= 3, "impulsi >= 4 ATR trovati: %d" % x["n"])
-    attesi = sorted([0.5, 3.0, 8.0 / 15.0])
-    _check(abs(x["media"] - np.mean(attesi)) < 1e-9 or True, "controllo ritracciamento (sotto)")
     # misura diretta dei rapporti
     idx = np.array([q[0] for q in piv]); pr = np.array([q[1] for q in piv])
     leg = np.abs(np.diff(pr))
