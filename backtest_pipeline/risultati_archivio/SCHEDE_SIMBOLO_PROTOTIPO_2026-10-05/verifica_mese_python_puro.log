@@ -1,0 +1,15 @@
+verifica mese 2021-11: giorni (python puro) 22, giorni (procedura) 22
+   ADR mediano mese 2021-11: puro 23.315000  procedura 23.315000  (giorni pieni 22) ; ADR medio puro 24.474636
+   -> COINCIDONO
+verifica mese 2022-03: giorni (python puro) 23, giorni (procedura) 23
+   ADR mediano mese 2022-03: puro 34.380000  procedura 34.380000  (giorni pieni 23) ; ADR medio puro 38.129609
+   -> COINCIDONO
+verifica mese 2023-10: giorni (python puro) 22, giorni (procedura) 22
+   ADR mediano mese 2023-10: puro 21.500000  procedura 21.500000  (giorni pieni 22) ; ADR medio puro 24.145091
+   -> COINCIDONO
+verifica mese 2024-03: giorni (python puro) 20, giorni (procedura) 20
+   ADR mediano mese 2024-03: puro 28.700000  procedura 28.700000  (giorni pieni 20) ; ADR medio puro 31.465400
+   -> COINCIDONO
+verifica mese 2025-03: giorni (python puro) 21, giorni (procedura) 21
+   ADR mediano mese 2025-03: puro 35.603000  procedura 35.603000  (giorni pieni 21) ; ADR medio puro 36.186524
+   -> COINCIDONO

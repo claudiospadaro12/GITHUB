@@ -28,7 +28,9 @@
 #   - FUSO del file, DICHIARATO da chi lancia (mai dedotto):
 #       UTC | NY (ora locale New York, DST USA: HistData) |
 #       BCM_UTC1 (server BCM dal 2025: UTC+1 fisso) |
-#       BCM_VECCHIO (server BCM fino a dic 2024: UTC+0 inverno, +1 estate)
+#       BCM_VECCHIO (server BCM fino a dic 2024: UTC+0 inverno, +1 estate) |
+#       BCM_MISTO (file di FOREX BCM che attraversa il cambio d'orologio: vecchio prima del
+#                  26/12/2024 23:03, UTC+1 fisso dopo il 02/02/2025 23:05, righe in mezzo SCARTATE e contate)
 #
 #  USO
 #    python3 scheda_simbolo.py --autotest
@@ -67,6 +69,10 @@ STOP_X_SPREAD = 40.0          # frontiera del costo di casa: stop >= 40 x spread
 SEME = 12345
 
 FOREX_CCY = ("EUR", "USD", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD")
+# Cambio d'orologio del FOREX BCM (report/OROLOGIO_BCM_2026-09-24.md): dopo il 26/12/2024 23:03 e entro il 02/02/2025 23:05
+# (ora server). Il giorno esatto e' [NON MISURATO]: per un file in ora server che attraversa il cambio, le righe nella
+# finestra dubbia si SCARTANO (e si contano), prima vale il vecchio orologio, dopo l'UTC+1 fisso.
+CAMBIO_OROLOGIO_FOREX = None   # valorizzata sotto, dopo giorni_da_civile()
 
 
 def log(s=""):
@@ -164,6 +170,10 @@ def verso_utc(tfile, fuso):
             m = (t >= s) & (t < e + 60)
             u[m] -= 60
         return u
+    if fuso == "BCM_MISTO":
+        # le righe nella finestra dubbia vanno scartate PRIMA (carica_serie); qui: vecchio prima, UTC+1 dopo
+        lo = CAMBIO_OROLOGIO_FOREX[0]
+        return np.where(t < lo, verso_utc(t, "BCM_VECCHIO"), t - 60)
     raise ValueError("fuso sconosciuto: %s" % fuso)
 
 
@@ -188,6 +198,9 @@ def giorni_da_civile(y, m, d):
     doy = (153 * mp + 2) // 5 + d - 1
     doe = yoe * 365 + yoe // 4 - yoe // 100 + doy
     return era * 146097 + doe - 719468
+
+
+CAMBIO_OROLOGIO_FOREX = (int(giorni_da_civile(2024, 12, 26)) * 1440 + 23 * 60 + 3, int(giorni_da_civile(2025, 2, 2)) * 1440 + 23 * 60 + 5)
 
 
 def anno_da_giorni(g):
@@ -337,8 +350,14 @@ def carica_serie(simbolo, feed, fuso, percorso, orologio="utc1", unita=None, log
         info["secondi_non_zero"] += i["secondi_non_zero"]
     if not T:
         raise ValueError("file vuoti: %s" % percorso)
-    t = verso_utc(np.concatenate(T), fuso)
+    tf_ = np.concatenate(T)
     a = np.array([np.concatenate(O), np.concatenate(H), np.concatenate(L), np.concatenate(C)])
+    info["scartate_cambio_orologio"] = 0
+    if fuso == "BCM_MISTO":
+        dubbia = (tf_ >= CAMBIO_OROLOGIO_FOREX[0]) & (tf_ < CAMBIO_OROLOGIO_FOREX[1])
+        info["scartate_cambio_orologio"] = int(dubbia.sum())
+        tf_, a = tf_[~dubbia], a[:, ~dubbia]
+    t = verso_utc(tf_, fuso)
     ok = (a[2] <= a[0]) & (a[0] <= a[1]) & (a[2] <= a[3]) & (a[3] <= a[1]) & (a[2] > 0)
     info["scartate_ohlc"] = int((~ok).sum())
     t, a = t[ok], a[:, ok]
@@ -527,7 +546,7 @@ def qualita(s):
         a=(EPOCH + dt.timedelta(minutes=int(t[-1]))).strftime("%Y-%m-%d %H:%M"),
         file=inf["file"], righe=inf["righe"], scartate_parse=inf["scartate_parse"],
         scartate_ohlc=inf["scartate_ohlc"], doppi=inf["doppi"], fuori_ordine=inf["fuori_ordine"],
-        secondi_non_zero=inf["secondi_non_zero"],
+        secondi_non_zero=inf["secondi_non_zero"], scartate_cambio_orologio=inf.get("scartate_cambio_orologio", 0),
         barre_range_zero_pct=float(100.0 * np.count_nonzero(s["h"] == s["l"]) / len(t)),
         prezzo_min=float(s["l"].min()), prezzo_max=float(s["h"].max()),
         buchi_interni_1_59min=buchi_int, minuti_mancanti_interni=minuti_mancanti,
@@ -1151,6 +1170,8 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("| barre M1 | **%s** da %s a %s (UTC) |" % (format(q["n_m1"], ","), q["da"], q["a"]))
     w("| file / righe / scartate (parse, OHLC, doppi, fuori ordine) | %d / %s / %d, %d, %d, %d |" % (
         q["file"], format(q["righe"], ","), q["scartate_parse"], q["scartate_ohlc"], q["doppi"], q["fuori_ordine"]))
+    if q["scartate_cambio_orologio"]:
+        w("| righe scartate nella finestra dubbia del cambio d'orologio BCM (26/12/2024 - 02/02/2025) | %d |" % q["scartate_cambio_orologio"])
     w("| giorni / giorni pieni (>= %d%% della mediana di M1) | %d / %d (mediana %d M1 al giorno) |" % (
         int(FRAZ_GIORNO_PIENO * 100), q["giorni"], q["giorni_pieni"], q["m1_per_giorno_mediana"]))
     w("| buchi interni 2-59 min | %d eventi, %d minuti mancanti |" % (q["buchi_interni_1_59min"], q["minuti_mancanti_interni"]))
@@ -1731,6 +1752,16 @@ def autotest():
     sporco = hd + b"RIGA ROTTA\n20150102 023200;1;2\n"
     t4, o4, h4, l4, c4, i4 = leggi_bytes(sporco)
     _check(len(t4) == 2 and i4["scartate"] == 2, "righe malformate CONTATE (%d), non sparite" % i4["scartate"])
+    # fuso BCM_MISTO: vecchio prima del cambio, UTC+1 dopo, finestra dubbia scartata
+    ts_ = np.array([_minuti(dt.datetime(2024, 7, 1, 12, 0)), _minuti(dt.datetime(2024, 12, 1, 12, 0)),
+                    _minuti(dt.datetime(2025, 3, 1, 12, 0)), _minuti(dt.datetime(2025, 7, 1, 12, 0))])
+    _check(list(verso_utc(ts_, "BCM_MISTO") - ts_) == [-60, 0, -60, -60], "BCM_MISTO: 2024-07 estate vecchio -60, 2024-12 inverno vecchio 0, 2025 UTC+1 fisso -60/-60")
+    tmpm = os.path.join(os.environ.get("TMPDIR", "/tmp"), "scheda_misto_%d.csv" % os.getpid())
+    with open(tmpm, "wb") as fh:
+        fh.write(b"Time,Open,High,Low,Close,Volume\n2024.12.20 12:00,1,2,1,1,0\n2025.01.10 12:00,1,2,1,1,0\n2025.02.10 12:00,1,2,1,1,0\n")
+    sm_ = carica_serie("EURUSD", "x", "BCM_MISTO", tmpm)
+    _check(len(sm_["t"]) == 2 and sm_["info"]["scartate_cambio_orologio"] == 1, "BCM_MISTO: la riga del 10/01/2025 (finestra dubbia) e' scartata e contata")
+    os.remove(tmpm)
     # --- pulizia: OHLC incoerente scartata, doppio scartato, fuori ordine contato
     log("3. pulizia")
     tmp = os.path.join(os.environ.get("TMPDIR", "/tmp"), "scheda_autotest_%d" % os.getpid())
@@ -2071,8 +2102,8 @@ def _parse_serie(x):
     p = x.split(":", 3)
     if len(p) != 4:
         raise SystemExit("--serie vuole SIMBOLO:FEED:FUSO:PERCORSO (letto: %s)" % x)
-    if p[2] not in ("UTC", "NY", "BCM_UTC1", "BCM_VECCHIO"):
-        raise SystemExit("fuso non valido: %s (UTC|NY|BCM_UTC1|BCM_VECCHIO)" % p[2])
+    if p[2] not in ("UTC", "NY", "BCM_UTC1", "BCM_VECCHIO", "BCM_MISTO"):
+        raise SystemExit("fuso non valido: %s (UTC|NY|BCM_UTC1|BCM_VECCHIO|BCM_MISTO)" % p[2])
     return (p[0], p[1], p[2], p[3], None)
 
 
