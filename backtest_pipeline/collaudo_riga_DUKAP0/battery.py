@@ -35,7 +35,7 @@ def scenari():
     sc.append(("05b_senza_disco_C", S(dischi=[dict(id="D:", size=900 * 2**30, free=800 * 2**30)]), {}))
     sc.append(("05c_cim_fallisce", S(), dict(extra_env={"CIM_FALLISCE": "1"})))
     sc.append(("06_mt5_vivo", S(mt5_vivo=True), {}))
-    sc.append(("07_sedie_attaccate", S(chr=[dict(ea=True, symbol="U30USD", expert="ABTG_EMA200", magic="771531"), dict(ea=True, symbol="EURUSD", expert="ABTG_PTE", magic="770999"),
+    sc.append(("07_sedie_attaccate", S(chr=[dict(ea=True, symbol="U30USD", expert="ABTG_EMA200_\u00e8", magic="771531"), dict(ea=True, symbol="EURUSD", expert="ABTG_PTE", magic="770999"),
                                               dict(), dict(illeggibile=True)]), {}))
     sc.append(("07b_grafici_senza_ea", S(chr=[dict()]), {}))
     sc.append(("08_decoy_v3", S(decoy_v3=True), {}))
@@ -118,6 +118,10 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
         mustnot("FINE-HARNESS-ARRIVATO")
         return err
     must("FINE-HARNESS-ARRIVATO", None, "la riga e' arrivata in fondo: nessun exit dentro Invoke-Expression")
+    if spec["senza_desktop"] and r["desk"].endswith("Desktop"):
+        err.append("senza Desktop la riga doveva ripiegare su USERPROFILE, non crearsi un Desktop")
+    if not spec["senza_desktop"] and not r["desk"].endswith("Desktop"):
+        err.append("con il Desktop presente l'output doveva stare li'")
     # raccolta
     if len(r["cartelle"]) != 1 or len(r["zips"]) != 1:
         err.append("attesi 1 cartella e 1 zip, trovati %s / %s" % (r["cartelle"], r["zips"]))
@@ -126,7 +130,7 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
         if entries != sorted(["REFERTO_DUKA_P0.txt", "P0_CACHE_PER_GIORNO.csv", "P0_CSV_TICK.csv"]):
             err.append("contenuto dello zip diverso: %s" % entries)
         must("FILE PRESENTI NELLO ZIP (letti dallo zip, non dal piano): P0_CACHE_PER_GIORNO.csv, P0_CSV_TICK.csv, REFERTO_DUKA_P0.txt")
-        must("MANCANTI: nessuno   zip fresco (scritto dopo l avvio): True")
+        must("MANCANTI: nessuno   (lo zip porta nel nome l ora di avvio al secondo")
         if zn != r["cartelle"][0] + ".zip":
             err.append("nome zip != nome cartella")
     if not ref:
@@ -185,12 +189,10 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
             for k in spec["giorno_senza_cartella"]:
                 must(k + " [" + " ".join("%02dh" % h for h in range(24)) + "]")
             for k, ore in spec["doppi"].items():
-                must("DOPPI=%d" % len(ore))
+                must(k + " [" + " ".join("%02dh=DOPPIO" % h for h in ore) + "] DOPPI=%d" % len(ore))
         else:
             mustnot("giorni NON completi")
     else:
-        must("giorni attesi") if False else None
-        must("(%s)" % "") if False else None
         if spec["cache"] in ("senza_sim", "nessuna_lavoro"):
             must("CACHE ASSENTE: se la cache non c e, P1 diventa un RISCARICO")
             must("cache raw\\USA30IDXUSD : ASSENTE [MISURATO]  -> STOP di P0")
@@ -213,6 +215,7 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
             must("disco di dukascopy_lavoro: lettera \"C:\" NON trovata fra i dischi letti -> NON MISURATO")
             must("spazio libero su dukascopy_lavoro : [NON MISURATO]")
     # --- csv --------------------------------------------------------------
+    bcm_n = 2 if spec["doppio_dati"] else (1 if spec["origin_testo"] == F.TERM else 0)
     if spec["cache"] != "nessuna_lavoro":
         must("CSV in tick\\ : %d" % a["csv_n"])
         for (m, n) in a["csv"]:
@@ -236,7 +239,7 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
             must("cartelle di backup / tick_* in dukascopy_lavoro : nessuna")
         # CSV del P0_CSV_TICK: una riga per CSV di tick\ + una per ogni copia in MQL5\Files
         rr = tick_csv.strip().splitlines()
-        n_f = min(spec["csv_in_files"], a["csv_n"])
+        n_f = min(spec["csv_in_files"], a["csv_n"]) if bcm_n >= 1 else 0
         if len(rr) != 1 + a["csv_n"] + n_f:
             err.append("P0_CSV_TICK.csv: %d righe invece di %d" % (len(rr), 1 + a["csv_n"] + n_f))
         else:
@@ -253,6 +256,8 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
     must("cartelle dati del terminale C:\\Program Files\\BCM Markets MT5 Terminal : %d" % bcm)
     if bcm != 1:
         must("ATTESA UNA SOLA cartella dati per il terminale BCM")
+    if bcm >= 1:
+        must("   dati ABC123   programma: C:\\Program Files\\BCM Markets MT5 Terminal\n", None, "senza il BOM (U+FEFF) davanti: Pulisci lo mostrerebbe come ?")
     mustnot("ABTG_MANUALE_X", None, "l'EA del terminale MANUALE non e' del BCM")
     mustnot("ABTG_ORB_V3_DECOY", None, "il 100k -V3 non e' il terminale ammesso")
     if bcm == 0:
@@ -283,7 +288,7 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
             mustnot("ZERO grafici letti")
         for ch in spec["chr"]:
             if ch.get("ea"):
-                rx(r"EA ATTACCATO: Default\\chart\d\d\.chr   %s   %s   magic %s" % (ch["expert"], ch["symbol"], ch["magic"]))
+                rx(r"EA ATTACCATO: Default\\chart\d\d\.chr   %s   %s   magic %s" % (re.escape(ch["expert"].encode("ascii", "replace").decode()), ch["symbol"], ch["magic"]), "il nome non-ASCII esce come ? (Pulisci)")
         if a["chr_illeggibili"]:
             must("ILLEGGIBILE: non verificabile, conta come EA possibile")
     # nativi
@@ -296,17 +301,20 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
             n_marc = out.count("<-- mese di un giorno della sonda")
             if n_marc != len(gi):
                 err.append("mesi marcati %d invece di %d" % (n_marc, len(gi)))
-        else:
+        elif spec["custom_dk"] or spec["residuo_neg"]:
             must("cartella dei tick NATIVI U30USD: NON TROVATA sotto bases\\")
-            must("tick nativi U30USD sotto bases\\ : cartelle 0, mesi della sonda con file 0 su 7") if False else None
-        must("custom U30USD_DK presente: %s" % ("True" if spec["custom_dk"] else "False"))
-        if spec["residuo_neg"]:
-            must("residui U30USD_DKNEG: PRESENTI")
+        if spec["nativi_cartella"] or spec["custom_dk"] or spec["residuo_neg"]:
+            must("custom U30USD_DK presente: %s" % ("True" if spec["custom_dk"] else "False"))
+            if spec["residuo_neg"]:
+                must("residui U30USD_DKNEG: PRESENTI")
+            else:
+                must("residui U30USD_DKNEG: nessuno")
         else:
-            must("residui U30USD_DKNEG: nessuno")
+            must("bases\\ ASSENTE: tick nativi di U30USD e custom U30USD_DK NON MISURATI")
+            must("tick nativi U30USD : [NON MISURATO]")
         # MQL5\Files
-        if spec["csv_mesi"]:
-            must("MQL5\\Files: %d file U30USD_DK* / ABTG_ImportTick*" % (min(spec["csv_in_files"], len(spec["csv_mesi"])) + (1 if spec["referto_import"] else 0)))
+        nff = (min(spec["csv_in_files"], len(spec["csv_mesi"])) if (spec["csv_mesi"] and spec["cache"] != "nessuna_lavoro") else 0) + (1 if spec["referto_import"] else 0)
+        must("MQL5\\Files: %d file U30USD_DK* / ABTG_ImportTick*" % nff)
     # processi
     if spec["mt5_vivo"]:
         must("MT5 (terminal64) APERTO: True")
@@ -326,7 +334,6 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
     # esito
     if nome != "05c_cim_fallisce":
         must("ESITO P0: CENSIMENTO COMPLETO (solo lettura)")
-        must("PASSI FALLITI", None, "") if False else None
         mustnot("PASSI FALLITI")
     return err
 
@@ -339,8 +346,12 @@ def main():
     if "--jobs" in av: jobs = int(av[av.index("--jobs") + 1])
     primo = "--primo-rosso" in av
     sc = [s for s in scenari() if (solo is None or solo in s[0])]
+    par = [(n, s, o, riga) for (n, s, o) in sc if not s["mt5_vivo"]]
+    ser = [(n, s, o, riga) for (n, s, o) in sc if s["mt5_vivo"]]
     with Pool(jobs) as p:
-        res = p.starmap(runna, [(n, s, o, riga) for (n, s, o) in sc])
+        res = p.starmap(runna, par)
+    for x in ser:      # DOPO il pool: il terminal64 finto e' visibile a tutta la macchina
+        res.append(runna(*x))
     verdi = 0
     for nome, err in res:
         if not err:

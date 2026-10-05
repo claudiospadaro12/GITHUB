@@ -31,10 +31,6 @@ def esegui(spec, c, riga=None, extra_env=None, pin=None, sha=None, timeout=300):
                DISCHI_JSON=json.dumps(spec["dischi"]), PYSCEN=spec["python"])
     if extra_env:
         env.update(extra_env)
-    # il curl "vero" di System32 nel finto C:
-    os.makedirs(os.path.join(c, "Windows", "System32"), exist_ok=True)
-    if spec.get("curl", True):
-        open(os.path.join(c, "Windows", "System32", "curl.exe"), "wb").write(b"x")
     bindir = os.path.join(out, "bin")
     os.makedirs(bindir)
     pid = None

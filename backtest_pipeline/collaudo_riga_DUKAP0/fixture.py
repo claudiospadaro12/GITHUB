@@ -188,6 +188,9 @@ def costruisci(base, spec):
         shutil.copy(os.path.join(tick, "U30USD_DK_ticks_%s.csv" % m), ff)
     if spec["referto_import"]:
         open(os.path.join(ff, "ABTG_ImportTick_referto.csv"), "w").write("Versione,SimboloDK\nIMP-TICK-v0-BOZZA,U30USD_DK\n")
+    os.makedirs(os.path.join(c, "Windows", "System32"), exist_ok=True)
+    if spec.get("curl", True):
+        open(os.path.join(c, "Windows", "System32", "curl.exe"), "wb").write(b"x")
     if spec["senza_desktop"]:
         shutil.rmtree(os.path.join(c, "Users", "Master", "Desktop"))
     return c

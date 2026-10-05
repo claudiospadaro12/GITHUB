@@ -226,7 +226,7 @@ try{
         $n  = $h.ToString('00', $INV) + 'h_ticks.bi5'
         $ha = $nomi.ContainsKey($n); $hs = $nomi.ContainsKey($n + '.assente')
         if($nomi.ContainsKey($n + '.tmp')){ $c.tmp++ }
-        if($ha -and $hs){ $c.doppi++ }
+        if($ha -and $hs){ $c.doppi++; [void]$oreBuco.Add($h.ToString('00', $INV) + 'h=DOPPIO') }
         if($ha){
           if($nomi[$n] -gt 0){ $c.bi5++; $c.byte += $nomi[$n] } else { $c.zero++; [void]$oreBuco.Add($h.ToString('00', $INV) + 'h=ZERO BYTE') }
         } elseif($hs){ $c.ass++ }
@@ -281,6 +281,7 @@ try{
     [void]$CsvTick.Add('Posto,Nome,Byte,UltimaScrittura,Righe,Primo,Ultimo')
     $S.csv_n = 0; $S.csv_righe = [long]0; $S.csv_byte = [long]0
     if($S.tick_esiste){
+      Dico '(conto le righe di ogni CSV: sono centinaia di MB, puo volerci qualche minuto; non scrive niente)' 'DarkGray'
       $fs = @(Get-ChildItem -LiteralPath $tick -Filter 'U30USD_DK_ticks_*.csv' -File -ErrorAction SilentlyContinue | Sort-Object Name)
       Dico ('CSV in tick\ : ' + $fs.Count)
       foreach($f in $fs){
@@ -397,7 +398,10 @@ try{
     foreach($x in @($dati | Where-Object { $_.Origine -ieq $TermBcm })){
       $bases = Join-Path $x.Cartella 'bases'
       Dico ('   bases: ' + $bases + '  esiste: ' + (Test-Path -LiteralPath $bases))
-      if(-not (Test-Path -LiteralPath $bases)){ continue }
+      if(-not (Test-Path -LiteralPath $bases)){
+        Dico '   bases\ ASSENTE: tick nativi di U30USD e custom U30USD_DK NON MISURATI (non vuol dire che manchino: il terminale non ha mai scaricato tick?)' 'Yellow'
+        continue
+      }
       $S.nativi_mesi = @{}
       $basesR = (Convert-Path -LiteralPath $bases)
       $cartU = @(Get-ChildItem -LiteralPath $bases -Directory -Recurse -Depth 3 -ErrorAction SilentlyContinue | Where-Object { $_.Name -like 'U30USD*' })
@@ -421,23 +425,27 @@ try{
       $neg = @($cartU | Where-Object { $_.Name -like 'U30USD_DKNEG*' }).Count
       $S.custom_dk = $dk; $S.custom_neg = $neg
       Dico ('   custom U30USD_DK presente: ' + ($dk -gt 0) + '   residui U30USD_DKNEG: ' + $(if($neg -gt 0){ 'PRESENTI (da capire prima di P1)' }else{ 'nessuno' }))
-      $ff = Join-Path $x.Cartella 'MQL5\Files'
-      if(Test-Path -LiteralPath $ff){
-        $cs = @(Get-ChildItem -LiteralPath $ff -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -like 'U30USD_DK*' -or $_.Name -like 'ABTG_ImportTick*' } | Sort-Object Name)
-        Dico ('   MQL5\Files: ' + $cs.Count + ' file U30USD_DK* / ABTG_ImportTick*')
-        foreach($f in $cs){
-          $dt = $f.LastWriteTime.ToString('yyyy-MM-dd HH:mm', $INV)
-          $righe = '-'
-          if($f.Name -like 'U30USD_DK_ticks_*.csv'){
-            $i = Leggi-CsvTick $f.FullName; $righe = '' + $i.Righe
-            [void]$CsvTick.Add('MQL5Files,' + $f.Name + ',' + $f.Length + ',' + $dt + ',' + $i.Righe + ',' + $i.Primo + ',' + $i.Ultimo)
-          }
-          Dico ('        ' + $f.Name + '  ' + $f.Length + ' byte  scritto ' + $dt + '  righe ' + $righe)
-        }
-      } else { Dico '   MQL5\Files: assente' }
     }
     if($S.dati_bcm_n -eq 0){ Dico '   nessuna cartella dati del terminale BCM: tick nativi e custom NON MISURATI' 'Yellow' }
     Dico 'Un file mensile nativo presente NON prova che 2024.11.20 ci sia dentro: lo dice solo la sonda ("tick nativi=0 -> NON confrontabile").'
+  }
+
+  Passo 'MQL5 Files' {
+    foreach($x in @($dati | Where-Object { $_.Origine -ieq $TermBcm })){
+      $ff = Join-Path (Join-Path $x.Cartella 'MQL5') 'Files'
+      if(-not (Test-Path -LiteralPath $ff)){ Dico '   MQL5\Files: assente'; continue }
+      $cs = @(Get-ChildItem -LiteralPath $ff -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -like 'U30USD_DK*' -or $_.Name -like 'ABTG_ImportTick*' } | Sort-Object Name)
+      Dico ('   MQL5\Files: ' + $cs.Count + ' file U30USD_DK* / ABTG_ImportTick*')
+      foreach($f in $cs){
+        $dt = $f.LastWriteTime.ToString('yyyy-MM-dd HH:mm', $INV)
+        $righe = '-'
+        if($f.Name -like 'U30USD_DK_ticks_*.csv'){
+          $i = Leggi-CsvTick $f.FullName; $righe = '' + $i.Righe
+          [void]$CsvTick.Add('MQL5Files,' + $f.Name + ',' + $f.Length + ',' + $dt + ',' + $i.Righe + ',' + $i.Primo + ',' + $i.Ultimo)
+        }
+        Dico ('        ' + $f.Name + '  ' + $f.Length + ' byte  scritto ' + $dt + '  righe ' + $righe)
+      }
+    }
   }
 
   # -------------------------------------------------------------------
@@ -508,7 +516,6 @@ try{
   Set-Content -LiteralPath (Join-Path $Cart 'P0_CACHE_PER_GIORNO.csv') -Value ($CsvCache -join "`r`n") -Encoding ASCII
   Set-Content -LiteralPath (Join-Path $Cart 'P0_CSV_TICK.csv') -Value ($CsvTick -join "`r`n") -Encoding ASCII
   Compress-Archive -Path (Join-Path $Cart '*') -DestinationPath $Zip -Force
-  $fresco = ((Get-Item -LiteralPath $Zip).LastWriteTime -ge $T0)
   Add-Type -AssemblyName System.IO.Compression.FileSystem
   $zz = [IO.Compression.ZipFile]::OpenRead((Convert-Path -LiteralPath $Zip))
   $presenti = @($zz.Entries | ForEach-Object { $_.Name })
@@ -517,13 +524,13 @@ try{
   $mancanti = @($attesi | Where-Object { $presenti -notcontains $_ })
   $ZipPresenti = ($presenti -join ', ')
   $ZipMancanti = $(if($mancanti.Count -gt 0){ ($mancanti -join ', ') }else{ 'nessuno' })
-  $ZipOk = ($fresco -and ($mancanti.Count -eq 0))
+  $ZipOk = ((Test-Path -LiteralPath $Zip) -and ($mancanti.Count -eq 0))
   Write-Host ('CARTELLA: ' + $Cart) -ForegroundColor Green
   Write-Host ('ZIP DA MANDARE: ' + $Zip) -ForegroundColor Green
   Write-Host ('FILE ATTESI: ' + ($attesi -join ', '))
   Write-Host ('FILE PRESENTI NELLO ZIP (letti dallo zip, non dal piano): ' + $ZipPresenti)
-  Write-Host ('MANCANTI: ' + $ZipMancanti + '   zip fresco (scritto dopo l avvio): ' + $fresco)
-  if(-not $ZipOk){ Write-Host 'ZIP NON VALIDO: manca qualcosa o non e fresco. NON mandarlo: rilancia.' -ForegroundColor Red }
+  Write-Host ('MANCANTI: ' + $ZipMancanti + '   (lo zip porta nel nome l ora di avvio al secondo: non puo essere quello di una corsa vecchia)')
+  if(-not $ZipOk){ Write-Host 'ZIP NON VALIDO: manca qualcosa. NON mandarlo: rilancia.' -ForegroundColor Red }
 }
 catch{
   Write-Host ('!!! RACCOLTA FALLITA: ' + (Pulisci ('' + $_.Exception.Message))) -ForegroundColor Red
