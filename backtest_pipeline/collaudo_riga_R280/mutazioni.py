@@ -184,7 +184,10 @@ M = [
 riga = open(RIGA, encoding="ascii").read()
 tot = 0; prese = 0
 FILTRO = sys.argv[2:]          # opzionale: sottostringhe del nome della mutazione (per rigirarne solo alcune)
-for entry in M:
+_parte = os.environ.get("MUT_PART")        # "k/n": solo le mutazioni con indice % n == k (per dividere il lavoro fra piu processi: l esito finale e la somma delle parti)
+for _idx, entry in enumerate(M):
+    if _parte and _idx % int(_parte.split("/")[1]) != int(_parte.split("/")[0]):
+        continue
     nome, vero, mut, scen = entry[:4]
     extra = entry[4] if len(entry) > 4 else None          # altri testi da TOGLIERE (mutazione combinata): una stringa o una lista
     if FILTRO and not any(f in nome for f in FILTRO):
