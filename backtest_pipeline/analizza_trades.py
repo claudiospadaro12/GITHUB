@@ -772,7 +772,25 @@ def main():
     # ---------- FUORI DAL TOTALE: le manuali ----------
     manuali_oggi = [r for r in manuali_tutte
                     if r["_ct"].strftime("%Y-%m-%d") == giorno]
-    if manuali_oggi or ambigue:
+    # --- 05/10/2026: `ambigue` e' calcolato su TUTTO il file (vedi r.394),
+    #     PRIMA che la giornata sia scelta. Stampato cosi' dentro una pagella
+    #     GIORNALIERA dichiarava "restano nel totale" di pid che in quel totale
+    #     non ci sono: la sera del 05/10 i quattro pid elencati (3537169,
+    #     3538850, 3539766, 3545427) erano dell'01 e del 02/10, mentre le righe
+    #     di oggi erano SETTE e tutte con magic != 0 -> discordi di oggi: ZERO.
+    #     Si separa per giornata, con la stessa forma usata per il buco della
+    #     pubblicazione: OGGI -> "restano nel totale (di oggi)"; PRECEDENTI ->
+    #     "sono rimaste nel totale della LORO giornata"; piu' RECENTI della
+    #     giornata in esame -> non si nominano, appartengono a un'altra pagella
+    #     (serve per le rigenerazioni retroattive, dove il file contiene anche
+    #     il futuro di quella data).
+    #     NB: la sezione del REALE (r.~1151) resta cumulativa ed e' coerente
+    #     con se stessa, perche' quella sezione somma tutto il file ignorando
+    #     `giorno`: e' un difetto DICHIARATO e non misurabile oggi (quel CSV
+    #     non esiste ancora), non lo tocco di nascosto.
+    amb_oggi  = [r for r in ambigue if r["_ct"].strftime("%Y-%m-%d") == giorno]
+    amb_prima = [r for r in ambigue if r["_ct"].strftime("%Y-%m-%d") < giorno]
+    if manuali_oggi or amb_oggi or amb_prima:
         out += ["", "## 🚫 Fuori dal totale — operazioni SENZA COMMENTO", ""]
     if manuali_oggi:
         netto_man = sum(num(r, "profit") + num(r, "swap") + num(r, "commission")
@@ -794,13 +812,29 @@ def main():
                 "compare per una data successiva, o il confine e' cambiato o "
                 "qualcuno ha operato a mano. **Va guardato, non ignorato.**"
                 % CAMBIO_SOLO_EA]
-    if ambigue:
-        out += ["", "> 🔴 **%d operazion%s con commento e magic DISCORDI** "
+    if amb_oggi:
+        out += ["", "> 🔴 **%d operazion%s DI OGGI con commento e magic DISCORDI** "
                 "(una delle due cose dice EA e l'altra no). Il filtro pretende "
-                "entrambi i criteri e queste **restano nel totale**: vanno "
-                "capite prima di decidere da che parte stanno. pid: %s"
-                % (len(ambigue), "i" if len(ambigue) > 1 else "e",
-                   ", ".join(str(r.get("pid", "?")) for r in ambigue[:10]))]
+                "entrambi i criteri e queste **restano nel totale di oggi**: "
+                "vanno capite prima di decidere da che parte stanno. pid: %s"
+                % (len(amb_oggi), "i" if len(amb_oggi) > 1 else "e",
+                   ", ".join(str(r.get("pid", "?")) for r in amb_oggi[:10]))]
+    if amb_prima:
+        _ult = max(r["_ct"] for r in amb_prima).strftime("%Y-%m-%d")
+        _pid_prima = ", ".join(str(r.get("pid", "?")) for r in amb_prima[:10])
+        if len(amb_prima) > 1:
+            out += ["", "> ⚠️ **%d operazioni con commento e magic discordi in "
+                    "giornate PRECEDENTI** (la piu' recente il %s). Sono "
+                    "contate nel totale **della giornata in cui si sono "
+                    "chiuse**, non in quello di stasera: si elencano qui "
+                    "perche' il nodo non e' chiuso, non perche' pesino su "
+                    "oggi. pid: %s" % (len(amb_prima), _ult, _pid_prima)]
+        else:
+            out += ["", "> ⚠️ **1 operazione con commento e magic discordi in "
+                    "una giornata PRECEDENTE** (il %s). E' contata nel totale "
+                    "**della giornata in cui si e' chiusa**, non in quello di "
+                    "stasera: si elenca qui perche' il nodo non e' chiuso, non "
+                    "perche' pesi su oggi. pid: %s" % (_ult, _pid_prima)]
 
     # ---------- segnalazioni ----------
     avvisi = []
