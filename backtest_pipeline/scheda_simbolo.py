@@ -472,6 +472,24 @@ def picco_minuto(t, o, c, mesi):
     return int(np.argmax(mean)), int(nn.sum())
 
 
+# ancore ASSOLUTE dell'orologio (minuti UTC d'INVERNO, ora solare). Un controllo solo relativo
+# (inverno - estate = 60) NON vede un offset costante sbagliato (lezione del 10/09): serve un
+# evento del mondo a ora fissa. LIMITE DICHIARATO: 13:30 (dati USA 8:30 ET) e 14:30 (apertura
+# cash NY 9:30 ET) distano esattamente 1 ora, quindi un errore di 1 ora fra questi DUE non e' visto.
+ANCORE_UTC = ((420, "07:00 apertura Europa pre-cash"), (480, "08:00 apertura Londra / Xetra 09:00 CET"),
+              (810, "13:30 dati USA 8:30 ET"), (870, "14:30 apertura cash NY 9:30 ET"), (900, "15:00 dati USA 10:00 ET"))
+ANCORE_SENZA_DST = ((0, "00:00 apertura Tokyo 09:00 JST"), (360, "06:00 chiusura Tokyo 15:00 JST"))
+
+
+def ancora_vicina(minuto, tol=2):
+    if minuto is None:
+        return None
+    for m, nome in ANCORE_UTC + ANCORE_SENZA_DST:
+        if abs(minuto - m) <= tol:
+            return nome
+    return None
+
+
 def hhmm(x):
     return "--:--" if x is None else "%02d:%02d" % (x // 60, x % 60)
 
@@ -500,6 +518,8 @@ def qualita(s):
         picco_inverno_utc=w, picco_estate_utc=e, n_inverno=nw, n_estate=ne,
     )
     q["orologio_dst_ok"] = (w is not None and e is not None and abs((w - 60) - e) <= 2)
+    q["ancora_inverno"] = ancora_vicina(w)
+    q["orologio_ok"] = bool(q["orologio_dst_ok"] and q["ancora_inverno"])
     return q
 
 
@@ -1108,12 +1128,12 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("| buchi interni 2-59 min | %d eventi, %d minuti mancanti |" % (q["buchi_interni_1_59min"], q["minuti_mancanti_interni"]))
     w("| barre a range zero | %s%% |" % f(q["barre_range_zero_pct"], 2))
     w("| prezzo min / max | %s / %s |" % (f(q["prezzo_min"], 4), f(q["prezzo_max"], 4)))
-    w("| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | %s / %s (differenza %s min; attesa 60 +/- 2 per un feed con ora legale) -> **%s** |" % (
+    w("| picco di volatilita' del minuto (UTC): inverno gen-feb / estate giu-ago | %s / %s ; differenza %s min (attesa 60 +/- 2 se segue l'ora legale) ; ancora assoluta d'inverno: %s -> **%s** |" % (
         hhmm(q["picco_inverno_utc"]), hhmm(q["picco_estate_utc"]),
         (str(q["picco_inverno_utc"] - q["picco_estate_utc"]) if q["picco_inverno_utc"] is not None and q["picco_estate_utc"] is not None else "n.d."),
-        "ok" if q["orologio_dst_ok"] else "DA GUARDARE"))
+        q["ancora_inverno"] or "NESSUNA", "ok" if q["orologio_ok"] else "DA GUARDARE (fuso o feed)"))
     w("")
-    w("_Cosa dice_: se il picco non cade su un'ancora nota (apertura cash, dati USA 8:30 ET) il fuso dichiarato e' sbagliato e **tutte** le etichette orarie sotto sono sbagliate. _Decisione informata_: fidarsi o no delle sezioni 4-5.")
+    w("_Cosa dice_: se il picco non cade su un'ancora nota (apertura cash, dati USA 8:30 ET) il fuso dichiarato e' sbagliato e **tutte** le etichette orarie sotto sono sbagliate. _Decisione informata_: fidarsi o no delle sezioni 3-4. Limite del controllo: non separa 13:30 da 14:30 UTC (dati USA 8:30 contro apertura cash 9:30), quindi un errore di esattamente un'ora fra questi due non si vede.")
     if finestra_nota:
         w("")
         w("> %s" % finestra_nota)
@@ -1158,7 +1178,7 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("Rapporti: ATR(H1)/ATR(M15) = %s (radice di T atteso 2,00 se i rendimenti fossero indipendenti) ; ATR(H4)/ATR(H1) = %s (atteso 2,00) ; ADR mediano / ATR(H1) = %s." % (
         f(A["rapporto_H1_M15"]), f(A["rapporto_H4_H1"]), f(A["adr_su_atr_h1"], 1)))
     w("")
-    w("_Cosa dice_: la scala di ogni TF e quanto il simbolo si scosta dalla legge radice-di-T (sopra 2 = tendenza che si accumula, sotto 2 = rumore che si compensa). _Decisione informata_: lo stop in ATR su quel TF, il TF minimo che passa la frontiera del costo (sezione 11).")
+    w("_Cosa dice_: la scala di ogni TF e quanto il simbolo si scosta dalla legge radice-di-T (sopra 2 = tendenza che si accumula, sotto 2 = rumore che si compensa). _Decisione informata_: lo stop in ATR su quel TF, il TF minimo che passa la frontiera del costo (sezione 9).")
     # --- 3 sessioni
     w("")
     w("## 3. Range per sessione (orari reali di borsa, convertiti in ora server UTC+1 fisso)")
@@ -1170,6 +1190,9 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
             m = (m + 60) % 1440
             return "%02d:%02d" % (m // 60, m % 60)
         qd = 100.0 * x["med"] / M["adr_pt"]["p50"] if M["adr_pt"]["p50"] > 0 else float("nan")
+        if x["n"] < 30:
+            w("| %s | %d | n.d. (campione < 30 giorni: il feed non copre questa finestra) | | | | | %s-%s | %s-%s |" % (x["nome"], x["n"], hs(x["ini_inv"]), hs(x["fin_inv"]), hs(x["ini_est"]), hs(x["fin_est"])))
+            continue
         w("| %s | %d | **%s** | %s | %s | %s | %s%% | %s-%s | %s-%s |" % (x["nome"], x["n"], f(x["med"]), f(x["media"]), f(x["p90"]), f(x["med_pct"], 3), f(qd, 0),
                                                                        hs(x["ini_inv"]), hs(x["fin_inv"]), hs(x["ini_est"]), hs(x["fin_est"])))
     w("")
@@ -1220,13 +1243,13 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
     w("_Cosa dice_: quanto salta il prezzo fra una sessione e l'altra e se il salto si ritira. _Decisione informata_: gap-fade o gap-continuation (le sedie GapFill/GapContinuation), il rischio di stop saltato nel weekend, la distanza minima dello stop dall'overnight.")
     # --- 6 ritracciamento
     w("")
-    w("## 6. Ritracciamento dopo un impulso (zigzag a soglia ATR, TF H1)")
+    w("## 6. Ritracciamento dopo un impulso (zigzag a soglia ATR, TF %s)" % s.get("tf_ritr", "H1"))
     w("")
-    w("Procedura: pivot di uno zigzag che inverte quando il prezzo si muove di **%s ATR(14) H1** contro l'ultimo estremo (una barra che fa un nuovo estremo non conferma anche l'inversione). **Impulso k** = gamba tra due pivot lunga >= k ATR al suo termine. **Ritracciamento** = la gamba successiva / l'impulso (il massimo ritracciamento prima che il movimento riprenda per %s ATR). Tocco di un livello = frazione di impulsi con ritracciamento >= livello. Un livello <= %s/k e' troncato per costruzione (la gamba successiva non puo' essere piu' corta della soglia di inversione): mostrato 'n.d.'." % (f(RHO, 1), f(RHO, 1), f(RHO, 1)))
+    w("Procedura: pivot di uno zigzag che inverte quando il prezzo si muove di **%s ATR(14) %s** contro l'ultimo estremo (una barra che fa un nuovo estremo non conferma anche l'inversione). **Impulso k** = gamba tra due pivot lunga >= k ATR al suo termine. **Ritracciamento** = la gamba successiva / l'impulso (il massimo ritracciamento prima che il movimento riprenda per %s ATR). Tocco di un livello = frazione di impulsi con ritracciamento >= livello. Un livello <= %s/k e' troncato per costruzione (la gamba successiva non puo' essere piu' corta della soglia di inversione): mostrato 'n.d.'." % (f(RHO, 1), s.get("tf_ritr", "H1"), f(RHO, 1), f(RHO, 1)))
     w("")
-    w("Misura DESCRITTIVA, i pivot si conoscono in ritardo: **non e' un segnale**. Accanto, il RANDOM WALK passato dalla stessa procedura (seme fisso, 40.000 barre H1): se il simbolo ritraccia come il RW, quel numero non e' una proprieta' del simbolo.")
+    w("Misura DESCRITTIVA, i pivot si conoscono in ritardo: **non e' un segnale**. Accanto, il RANDOM WALK passato dalla stessa procedura (seme fisso, 40.000 barre): se il simbolo ritraccia come il RW, quel numero non e' una proprieta' del simbolo.")
     w("")
-    hd = "| k (ATR) | impulsi (su/giu) | ritr. medio | mediana | p25-p75 | " + " | ".join("tocco %s%%" % f(100 * lv, 1) for lv in LIVELLI_FIBO) + " | inversione (>=100%) | tempo mediano (barre H1) |"
+    hd = "| k (ATR) | impulsi (su/giu) | ritr. medio | mediana | p25-p75 | " + " | ".join("tocco %s%%" % f(100 * lv, 1) for lv in LIVELLI_FIBO) + " | inversione (>=100%) | tempo mediano (barre) |"
     w(hd)
     w("|---|---:|---:|---:|---:|" + "---:|" * len(LIVELLI_FIBO) + "---:|---:|")
     for k in KS:
@@ -1330,7 +1353,7 @@ def scheda(s, M, A, S, O, G, R, E, EMA, costo, rw, finestra_nota, ranking_riga):
 # ---------------------------------------------------------------------
 # 14. ORCHESTRAZIONE
 # ---------------------------------------------------------------------
-def analizza(s, modo_giorno="utc1", spread=None):
+def analizza(s, modo_giorno="utc1", spread=None, tf_ritr="H1"):
     costruisci(s, modo_giorno)
     s["q"] = qualita(s)
     M = misure_giornaliere(s)
@@ -1338,8 +1361,9 @@ def analizza(s, modo_giorno="utc1", spread=None):
     S = misure_sessioni(s)
     O = misure_ore(s)
     G = misure_gap(s, M)
-    b = s["barre"]["H1"]
-    R = ritracciamenti(b["h"], b["l"], A["H1"]["serie"])
+    b = s["barre"][tf_ritr]
+    R = ritracciamenti(b["h"], b["l"], A[tf_ritr]["serie"])
+    s["tf_ritr"] = tf_ritr
     E = misure_er(s)
     EMA = {}
     for nome in ("H1", "H4"):
@@ -1375,16 +1399,21 @@ def riga_ranking(serie, ris, finestra):
             atr_h1_pct=float(ris[s["simbolo"] + "|" + s["feed"]]["A"]["H1"]["atr_pct_med"]),
             er_d1_20=float(ris[s["simbolo"] + "|" + s["feed"]]["E"].get("D1", {}).get("med", float("nan"))),
             adr_pct_med_serie_intera=float(M["adr_pct"]["p50"]), giorni_serie_intera=int(M["adr_pt"]["n"]), unita=u))
-    order = sorted(range(len(righe)), key=lambda i: -righe[i]["adr_pct_med"] if np.isfinite(righe[i]["adr_pct_med"]) else 1e9)
-    for r_, i in enumerate(order, 1):
-        righe[i]["rank_adr_pct"] = r_
-    order = sorted(range(len(righe)), key=lambda i: -righe[i]["rv_ann_pct"] if np.isfinite(righe[i]["rv_ann_pct"]) else 1e9)
-    for r_, i in enumerate(order, 1):
-        righe[i]["rank_rv"] = r_
+    for r in righe:
+        r["finestra_comune"] = "SI" if finestra else "NO"
+        r["rank_adr_pct"] = ""
+        r["rank_rv"] = ""
+    if finestra:
+        order = sorted(range(len(righe)), key=lambda i: -righe[i]["adr_pct_med"] if np.isfinite(righe[i]["adr_pct_med"]) else 1e9)
+        for r_, i in enumerate(order, 1):
+            righe[i]["rank_adr_pct"] = r_
+        order = sorted(range(len(righe)), key=lambda i: -righe[i]["rv_ann_pct"] if np.isfinite(righe[i]["rv_ann_pct"]) else 1e9)
+        for r_, i in enumerate(order, 1):
+            righe[i]["rank_rv"] = r_
     return righe
 
 
-CAMPI_RANK = ["simbolo", "feed", "unita", "da", "a", "giorni_finestra", "adr_pt_med", "adr_pct_med", "adr_pct_media", "rv_ann_pct",
+CAMPI_RANK = ["simbolo", "feed", "unita", "finestra_comune", "da", "a", "giorni_finestra", "adr_pt_med", "adr_pct_med", "adr_pct_media", "rv_ann_pct",
               "atr_h1_pct", "er_d1_20", "rank_adr_pct", "rank_rv", "adr_pct_med_serie_intera", "giorni_serie_intera"]
 
 
@@ -1408,13 +1437,19 @@ def scrivi_matrice(path, nomi, R, N):
             w.writerow([n] + [int(N[i, j]) for j in range(len(nomi))])
 
 
-def finestra_comune(serie):
+def finestra_comune(serie, esplicita=None):
+    """finestra su cui si CONFRONTANO le serie: quella data con --finestra (AAAA-MM-GG:AAAA-MM-GG) oppure
+    l'intersezione delle serie. Se l'intersezione e' vuota (o < 60 giorni) -> None: il ranking NON si fa."""
+    if esplicita:
+        a, b = esplicita.split(":")
+        g = lambda x: int(giorni_da_civile(int(x[:4]), int(x[5:7]), int(x[8:10])))
+        return (g(a), g(b))
     g0 = max(int(s["d1"]["giorno"][s["d1"]["pieno"]][0]) for s in serie)
     g1 = min(int(s["d1"]["giorno"][s["d1"]["pieno"]][-1]) for s in serie)
-    return (g0, g1) if g1 > g0 else None
+    return (g0, g1) if (g1 - g0) >= 60 else None
 
 
-def esegui(specs, uscita, spread_path=None, modo_giorno="utc1", orologio="utc1", soglia_cluster=0.5, log_=log):
+def esegui(specs, uscita, spread_path=None, modo_giorno="utc1", orologio="utc1", soglia_cluster=0.5, log_=log, finestra=None, tf_ritr="H1"):
     os.makedirs(uscita, exist_ok=True)
     spread = leggi_spread(spread_path) if spread_path else None
     serie = []
@@ -1428,19 +1463,23 @@ def esegui(specs, uscita, spread_path=None, modo_giorno="utc1", orologio="utc1",
     for s in serie:
         k = s["simbolo"] + "|" + s["feed"]
         log_("analisi %s" % k)
-        ris[k] = analizza(s, modo_giorno, spread)
-    fin = finestra_comune(serie) if len(serie) >= 2 else None
+        ris[k] = analizza(s, modo_giorno, spread, tf_ritr)
+    fin = finestra_comune(serie, finestra) if len(serie) >= 2 else None
     rank = riga_ranking(serie, ris, fin)
     scrivi_csv(os.path.join(uscita, "ranking_volatilita.csv"), CAMPI_RANK, rank)
     fin_nota = None
     if fin:
-        fin_nota = "Ranking sulla finestra comune a tutte le serie della corsa: %s -> %s." % (data_da_giorno(fin[0]), data_da_giorno(fin[1]))
+        fin_nota = "Ranking e correlazioni sulla finestra %s a tutte le serie della corsa: %s -> %s." % ("indicata" if finestra else "comune", data_da_giorno(fin[0]), data_da_giorno(fin[1]))
+    elif len(serie) >= 2:
+        fin_nota = "Le serie di questa corsa NON hanno una finestra comune di almeno 60 giorni: il ranking e' [NON CONFRONTABILE] e resta vuoto."
     for s in serie:
         k = s["simbolo"] + "|" + s["feed"]
         r = ris[k]
         mio = [x for x in rank if x["simbolo"] == s["simbolo"] and x["feed"] == s["feed"]][0]
         rr = None
-        if len(serie) >= 2:
+        if len(serie) >= 2 and not fin:
+            rr = "[NON CONFRONTABILE] nessuna finestra comune di almeno 60 giorni fra le serie di questa corsa: i numeri di ADR sono di periodi diversi e non si mettono in classifica."
+        elif len(serie) >= 2:
             rr = "Su %d serie della corsa, finestra %s -> %s (%d giorni): **ADR %% mediano %s -> posto %d su %d** ; volatilita' realizzata annua %s%% -> posto %d su %d. Tabella: `ranking_volatilita.csv`." % (
                 len(serie), mio["da"], mio["a"], mio["giorni_finestra"], f(mio["adr_pct_med"], 3), mio["rank_adr_pct"], len(serie),
                 f(mio["rv_ann_pct"], 1), mio["rank_rv"], len(serie))
@@ -1726,6 +1765,22 @@ def autotest():
     T = np.concatenate(T); Oo = np.concatenate(Oo); C = np.concatenate(C)
     w, nw = picco_minuto(T, Oo, C, (1, 2)); e, ne = picco_minuto(T, Oo, C, (6, 7, 8))
     _check(w in (869, 870, 871) and e in (809, 810, 811) and abs((w - 60) - e) <= 2, "picco invernale %s e estivo %s UTC -> differenza 60" % (hhmm(w), hhmm(e)))
+    # CONTRO-ESEMPIO (10/09): un feed spostato di UN'ORA (picco 09:00 d'inverno, 08:00 d'estate) supera il
+    # controllo relativo (differenza 60) ma NON l'ancora assoluta: la scheda deve dire 'DA GUARDARE'.
+    T2_, C2_, O2_ = [], [], []
+    rng2 = np.random.default_rng(9)
+    for gg in giorni:
+        y2 = (EPOCH + dt.timedelta(days=gg)).year
+        s2_, e2_ = us_dst_bounds_utc(y2)
+        est2 = s2_ <= gg * 1440 + 800 < e2_
+        sp2 = 480 if est2 else 540
+        b2 = np.arange(0, 1440, 1)
+        am2 = np.where(np.abs(b2 - sp2) <= 1, 5.0, 0.1)
+        T2_.append(gg * 1440 + b2); O2_.append(np.full(1440, 100.0)); C2_.append(100.0 + am2 * np.where(rng2.random(1440) < 0.5, 1, -1))
+    T2_ = np.concatenate(T2_); O2_ = np.concatenate(O2_); C2_ = np.concatenate(C2_)
+    w3, _ = picco_minuto(T2_, O2_, C2_, (1, 2)); e3, _ = picco_minuto(T2_, O2_, C2_, (6, 7, 8))
+    _check(abs((w3 - 60) - e3) <= 2 and ancora_vicina(w3) is None, "CONTRO-ESEMPIO: feed spostato di un'ora: relativo ok (%s/%s) ma NESSUNA ancora assoluta" % (hhmm(w3), hhmm(e3)))
+    _check(ancora_vicina(w) is not None and ancora_vicina(870) == "14:30 apertura cash NY 9:30 ET", "il feed corretto cade su un'ancora nota (%s)" % ancora_vicina(w))
     # contro-esempio: gli stessi dati trattati come ora di New York (fuso sbagliato) NON danno la coppia 14:30/13:30
     w2, _ = picco_minuto(ny_to_utc(T), Oo, C, (1, 2))
     e2, _ = picco_minuto(ny_to_utc(T), Oo, C, (6, 7, 8))
@@ -1849,6 +1904,32 @@ def autotest():
     _check(abs(corr_su((k, r1), (kk, r1), 60)[0] - 1.0) > 0.05, "CONTRO-ESEMPIO: serie identiche sfasate di 5 chiavi NON danno rho=1 (allineamento per chiave)")
     cl = cluster_connessi(["A", "B", "C"], np.array([[1, .9, .1], [.9, 1, .2], [.1, .2, 1]]), 0.5)
     _check(sorted(map(tuple, cl)) == [("A", "B"), ("C",)], "cluster per soglia: {A,B},{C}")
+    # --- ranking: senza finestra comune NON si fa
+    log("12b. ranking e finestra comune")
+    sa = _mk_serie(*_serie_sintetica(100, tri), sim="A")
+    sb = _mk_serie(*_serie_sintetica(100, lambda k, m: tri(k, m) * 2.0), sim="B")
+    costruisci(sa); costruisci(sb)
+    ris_ = {}
+    for x_ in (sa, sb):
+        x_["q"] = qualita(x_)
+        mm_ = misure_giornaliere(x_)
+        aa_ = misure_atr_tf(x_, mm_)
+        ris_[x_["simbolo"] + "|" + x_["feed"]] = dict(M=mm_, A=aa_, E=misure_er(x_))
+    fin_ = finestra_comune([sa, sb])
+    rk = riga_ranking([sa, sb], ris_, fin_)
+    _check(fin_ is not None and rk[0]["rank_adr_pct"] != "" and rk[1]["rank_adr_pct"] != "", "serie sovrapposte: ranking fatto")
+    # B ha lo stesso % di A? B = 2x prezzo e 2x range => stesso % ; l'ordine puo' essere qualunque ma entrambi hanno un rango
+    # serie NON sovrapposte: ranking vuoto
+    sc = _mk_serie(*_serie_sintetica(100, tri, t0_giorno=16436 + 399), sim="C")
+    costruisci(sc)
+    ris_["C|sintetico"] = dict(M=misure_giornaliere(sc), A=misure_atr_tf(sc, misure_giornaliere(sc)), E=misure_er(sc))
+    ris_["C|sintetico"]["M"]["adr_pct"]["p50"] = ris_["C|sintetico"]["M"]["adr_pct"]["p50"]
+    fin2 = finestra_comune([sa, sc])
+    _check(fin2 is None, "CONTRO-ESEMPIO: serie di periodi diversi -> nessuna finestra comune (None), non una classifica fra mele e pere")
+    rk2 = riga_ranking([sa, sc], ris_, fin2)
+    _check(all(r_["rank_adr_pct"] == "" and r_["finestra_comune"] == "NO" for r_ in rk2), "ranking vuoto e marcato finestra_comune=NO")
+    fin3 = finestra_comune([sa, sc], "2015-01-05:2015-02-05")
+    _check(fin3 is not None and fin3[1] - fin3[0] == 31, "finestra esplicita 2015-01-05:2015-02-05 = 31 giorni")
     # --- costo
     log("13. frontiera del costo")
     sp = [(h_, 0.30, 0.5, 3600, 5) for h_ in range(24)]
@@ -1893,6 +1974,8 @@ def main():
     ap.add_argument("--giorno", default="utc1", choices=["utc1", "nyclose"])
     ap.add_argument("--orologio", default="utc1", choices=["utc1", "vecchio"])
     ap.add_argument("--verifica-mese", help="SIMBOLO:FEED:FUSO:PERCORSO:AAAA-MM")
+    ap.add_argument("--finestra", help="AAAA-MM-GG:AAAA-MM-GG, finestra di confronto per ranking e correlazioni (default: intersezione delle serie)")
+    ap.add_argument("--tf-ritr", default="H1", choices=["M15", "H1", "H4"], help="TF dello zigzag del ritracciamento")
     a = ap.parse_args()
     if a.autotest:
         autotest()
@@ -1909,7 +1992,7 @@ def main():
                 specs.append((r["simbolo"], r["feed"], r["fuso"], r["percorso"], float(r["unita"]) if r.get("unita") else None))
     if not specs or not a.uscita:
         ap.error("servono --serie o --manifest, e --uscita (oppure --autotest)")
-    esegui(specs, a.uscita, a.spread, a.giorno, a.orologio)
+    esegui(specs, a.uscita, a.spread, a.giorno, a.orologio, finestra=a.finestra, tf_ritr=a.tf_ritr)
     return 0
 
 
