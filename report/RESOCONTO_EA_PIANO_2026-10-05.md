@@ -37,8 +37,8 @@
 **Verifica d'integrita' dell'elenco**: ognuno dei 109 EA di trading della root compare **una sola volta** nella sez. 4 (controllo
 fatto per nome con confini di parola, 0 mancanti, 0 doppi). I 16 strumenti stanno nella sez. 2.
 
-**Cose che NON sono nel perimetro e si dichiarano**: (a) `mql5/Indicators/` e `mql5/Scripts/` (non sono EA); (b) i 17 `.mq5` di
-`backtest_pipeline/caccia_strategie/biblioteca/sorgenti/` e di `docs/sorgenti_ricevuti/` (sorgenti di terzi *letti*, non nostri EA);
+**Cose che NON sono nel perimetro e si dichiarano**: (a) `mql5/Indicators/` e `mql5/Scripts/` (non sono EA); (b) i 25 `.mq5` di
+`backtest_pipeline/caccia_strategie/biblioteca/sorgenti/`, 1 in `docs/sorgenti_ricevuti/` e 3 in `backtest_pipeline/toppe_da_applicare/` (sorgenti di terzi *letti* o toppe, non nostri EA);
 (c) `BREAKOUT_EA_JPY_v3` (famiglia citata in `CENSIMENTO_CONTRATTI_v2` §4d: **sorgente non presente** nel repo); (d) i candidati
 cacciati sul web che **non sono mai arrivati a un `.mq5`** (88 righe esterne in `CENSIMENTO_SCARTATI_PROSA` sez. B): non sono "EA creati".
 
@@ -325,7 +325,7 @@ Ogni campo o ha un numero con la sua fonte (file + riga) o dice `NON MISURATO`. 
 ```
 EA: <nome file>            famiglia: <codice>            gruppo: <G1..G6>            ruolo: <sedia magic / candidata / spenta / morta / copia>
 1. MOTORE in una frase:
-2. SIMBOLI / TF su cui e' stato provato (e quale e' la cella di contratto):
+2. SIMBOLI / TF su cui e' stato provato (e quale e' la cella di contratto) + SONDE / STRUMENTI COLLEGATI (sez. 2):
 3. BACKTEST FATTI (uno per riga):  round | tipo di dati ([T] tick / [B] barre / [E] esterno / [G] generati) | deposito | rischio% | finestra IS | finestra OOS | file CSV/referto
 4. ANNI MISURATI e REGIMI: anni esatti (data inizio-fine) | toro | orso | laterale | crollo (ognuno: MISURATO con PF e n, oppure NON MISURATO)
 5. NUMERI per cella:  PF IS | PF OOS | n IS | n OOS (unita') | DD IS | DD OOS (con deposito e rischio) | peggior giornata
@@ -375,7 +375,7 @@ Le tre ondate possono girare **in parallelo** (sono letture); l'ordine indica **
 (vii) commit per path + push su `lavoro` a ogni consegna; (viii) prima di consegnare: contro-esempio sul proprio verdetto e passaggio dal cancello.
 
 
-### GRUPPO G1 - APERTURE e LIVE5M (ONDATA 1 (priorita' massima)) - 26 righe
+### GRUPPO G1 - APERTURE e LIVE5M (ONDATA 1) - 26 righe
 
 - **Sedie / ruoli coperti**: sedie 770101/770105/770202/770260/770250 (+770201 spenta)
 - **Famiglie**: AP-DAX, AP-DOW, AP-NAS, LIVE5, DAXM3
@@ -617,7 +617,7 @@ Le tre ondate possono girare **in parallelo** (sono letture); l'ordine indica **
   - backtest_pipeline/REGISTRO_TEST.md: CRT (r.863), Chaos (r.883), M0PB (r.1058), RSI+EMA V8 (r.1139), VwapRevert (r.1274), Relativo (r.1870-1884), IBRetest (r.2161), sequenza inversione (r.2273), quattro invisibili (r.3124)
   - backtest_pipeline/risultati_prove/{ABTG_AltaVelocita,ABTG_IBRetest,ABTG_LVNArbitro,ABTG_OpeningReversalB,meanrevert_r60,ibretest_p0,R172D}
   - sorgenti `.mq5` (attribuzione/origine in testa a ciascuno)
-- **Cosa guardare per primo**: Punto critico: qui stanno i **conflitti fra date** (IntradayMomentum 09/09 vs 12/09; CrossEma) e gli EA con **zero misure** (VolExpBreak, Cycle, ImpulsoApertura, ScalperDirezionale, HARSI). Ordine interno: **(a) i morti con certificato** (CRT, IBRetest, Chaos, LiquiditySweep, VwapRevert, AltaVelocita, AtrExhaustVol...), **(b) i candidati con n<150 ancora in vita** (NySessionRetest, DaxReEntry long, LVNArbitro, Relativo NASUSD, InvEsaurimento), **(c) i NON MISURATI** (R141a-e, FvgRetest, OutOfNoise, mai-girati).
+- **Cosa guardare per primo**: Punto critico: qui stanno i **conflitti fra date** (IntradayMomentum 09/09 vs 12/09; CrossEma) e gli EA con **zero misure** (VolExpBreak, Cycle, ImpulsoApertura, ScalperDirezionale, HARSI). Ordine interno: **(a) i bocciati con un numero** (CRT, IBRetest, Chaos, LiquiditySweep, VwapRevert, AltaVelocita, AtrExhaustVol...: **verificare per ciascuno se il certificato 5/5 e' completo**, altrimenti sono NON ANCORA MISURATI, non morti), **(b) i candidati con n<150 ancora in vita** (NySessionRetest, DaxReEntry long, LVNArbitro, Relativo NASUSD, InvEsaurimento), **(c) i NON MISURATI** (R141a-e, FvgRetest, OutOfNoise, mai-girati).
 
 ### Riepilogo del fan-out
 | gruppo | ondata | famiglie | righe EA | sedie vive/candidate coperte | modello lettori |
