@@ -309,3 +309,7 @@ Pepperstone. Zip pronto in `Desktop\broker_esterno.zip`.
 - Import esterno di altri simboli forex/metalli oltre EURUSD e GBPUSD.
 - Riordino Desktop sul VPS (lo script c'e' gia', con anteprima e -Annulla).
 - E35EUR: terza volta che resta fuori per mancanza di tick su BCM.
+
+## 6. BACKLOG DEL 05/10/2026 (richiesta di Claudio, NON DA FARE ADESSO)
+- **"ORDINE EDGE DI RIPARAZIONE"** (parole di Claudio: "capire dopo lo stop loss preso quando cambia direzione e su che papabile livello si possa fermare guardando tutti i TF"; "so che e' difficile e complicato"). Domanda di misura: dopo che una sedia e' uscita in stop, quanto spesso il prezzo inverte, dopo quanto tempo, e a quale livello si ferma (livelli multi-TF: EMA/Supertrend/Fibonacci/massimi-minimi precedenti). Primo passo a costo zero: leggere i per-trade gia' esistenti (deal d'uscita in SL) e le barre M1 successive, SOLO descrittivo, attese e contro-esempio scritti prima; attenzione a non confondere con una martingala/recovery (bandiera rossa di casa: nessun raddoppio, rischio fisso). Prerequisito: le schede simbolo (ritracciamenti) e il resoconto EA.
+- **Resoconto EA + schede simbolo** (richiesta del 05/10): in lavorazione, vedi `report/RESOCONTO_EA_PIANO_2026-10-05.md` e `report/SCHEDE_SIMBOLO_PIANO_2026-10-05.md`.
