@@ -51,7 +51,7 @@ def casi():
     c.append(("17_maschera_larga_ferma_prima_di_copiare", {}, "-Maschera '*.csv'", {}, 1, ["MASCHERA '*.csv' non comincia con 'U30USD_DK_ticks_'"]))
     c.append(("18_giorni_vuoti", {}, "-GiorniSonda ''", {}, 1, ["-GiorniSonda vuoto"]))
     c.append(("19_file_estraneo_che_combacia", dict(files_stale=["U30USD_DK_ticks_2025-07.csv"]), "", {}, 1, ["FILE ESTRANEI in MQL5\\Files", "U30USD_DK_ticks_2025-07.csv"]))
-    c.append(("21_work_stale_non_finisce_nello_zip", dict(non_scrive=["U30USD_DK"]), "", {}, 1, ["NON VALUTABILE"]))
+    c.append(("21_work_stale_non_finisce_nello_zip", dict(non_scrive=["U30USD_DK"]), "", {}, 1, ["TIMEOUT: nessun segno di vita"]))
     c.append(("20_pulisci_files_toglie_solo_i_copiati", dict(files_stale=["ALTRO_tieni.csv"]), "-PulisciFiles", {g: "DENTRO" for g in G}, 0, ["pulizia MQL5\\Files: rimossi 9 di 9 CSV copiati da questa corsa"]))
     return c
 
