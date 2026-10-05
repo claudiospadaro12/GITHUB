@@ -8,7 +8,7 @@
 
 ## Il nostro criterio di attendibilita': la prima domanda per te
 
-**Noi pensiamo che un expert, per essere attendibile, debba avere uno storico di almeno circa 10 anni ed aver attraversato vari scenari di mercato (bull, bear, laterale, crolli): e' d'accordo, o servono altri criteri (numero di operazioni, anni, regimi)?**
+**Noi pensiamo che un expert, per essere attendibile, debba avere uno storico di almeno circa 10 anni ed aver attraversato vari scenari di mercato (bull, bear, laterale, crolli): sei d'accordo, o servono altri criteri (numero di operazioni, anni, regimi)?**
 
 Non e' una soglia scritta nelle regole del mio progetto: e' la domanda che faccio a te, e il resto del dossier va letto con questa domanda in testa. Finora ho ragionato soprattutto in numero di operazioni (sezione C e D); qui sotto metto invece **quanti anni sono stati davvero misurati** per ogni expert, con il tipo di dati e i regimi coperti.
 
@@ -16,24 +16,26 @@ Non e' una soglia scritta nelle regole del mio progetto: e' la domanda che facci
 
 Regimi: toro / orso / laterale / crollo, **solo dove l'ho misurato** (altrimenti NON MISURATO). "Barre M1" = dati a barre di un minuto, meno fedeli dei tick reali del broker (screening: il numero puo' cambiare anche di segno). [Fonti: schede B2, B3 e sezione C; date dalle mappe aperture del 03/10 e dai candidati del 01/10.]
 
+**Regola dell'ultima colonna, la stessa per tutte le righe** (e' la tua domanda applicata alla lettera, non un criterio del mio progetto): **SI** = circa 10 anni o piu' **e** piu' regimi misurati uno per uno con un esito leggibile; **PARZIALE** = solo una delle due; **NO** = nessuna delle due. Il tipo di dati (barre o tick) non cambia la colonna: lo scrivo a parte, perche' pesa sull'affidabilita' del numero.
+
 | expert / famiglia | anni misurati | tipo di dati | regimi coperti | raggiunge ~10 anni e piu' regimi? |
 |---|---|---|---|---|
 | Apertura DAX, ritest, long | ~21 mesi (26/09/2024 - 30/06/2026; IS ~8,5 mesi, OOS ~12,7) | tick reali del broker | toro; la discesa feb-apr 2025 e' dentro la finestra; orso / laterale / crollo NON MISURATI | **NO** |
 | Apertura DAX, ritest, short | idem | idem | idem | **NO** |
 | MaxMin DAX short | stessa finestra; **14 posizioni** in OOS (~1 anno) | tick reali | toro; il resto NON MISURATO | **NO** |
 | Apertura Dow, ritest, long | ~21 mesi | tick reali | toro; il resto NON MISURATO | **NO** |
-| Apertura Nasdaq, ritest, due lati | ~21 mesi a tick; esistono 15,7 anni esterni a barre M1, **non usati su questa cella** | tick reali (21 mesi) | toro; il resto NON MISURATO su questa cella | **NO** |
+| Apertura Nasdaq, ritest, due lati | ~21 mesi a tick (IS ~9,1 mesi, OOS ~12,0); esistono 15,7 anni esterni a barre M1, **non usati su questa cella** | tick reali (21 mesi) | toro; il resto NON MISURATO su questa cella | **NO** |
 | SuperWave Dow H1 | ~21 mesi | tick reali | toro; il resto NON MISURATO | **NO** |
 | EMA200 Dow H1 | ~21 mesi | tick reali | toro; solo la discesa feb-apr 2025 dentro la finestra (DD misurato); PF per regime fuori dal rialzo NON MISURATO | **NO** |
 | ORB Dow, long | ~21 mesi | tick reali | toro; il resto NON MISURATO | **NO** |
 | Bulge, versione "viola" | 4 mesi miei (marzo-giugno 2026); il backtest di partenza della versione originale (2022-26, circa 4 anni, tick reali sul 40% dei dati, nessun IS/OOS) l'ho portato io | barre / tick parziali | un solo regime (mio, 4 mesi) | **NO** |
-| Candidato: MaxMin oro, solo long | ~2 anni a tick (dal 10/07/2024); 6,5 anni a barre (2020-26); **22 anni a barre** (dal 17/11/2004) | tick reali + barre M1 | 22 anni a barre: PF 1,10, DD 10,3% (a rischio 0,5%), **11 anni negativi su 22**; PF per singolo regime NON MISURATO; il PF a tick e' del toro 2024-26 | **PARZIALE** (anni si', ma a barre; i tick sono un regime solo) |
+| Candidato: MaxMin oro, solo long | ~2 anni a tick (dal 10/07/2024); 6,5 anni a barre (2020-26); **22 anni a barre** (dal 17/11/2004) | tick reali + barre M1 | 22 anni a barre: PF 1,10, DD 10,3% (a rischio 0,5%), **11 anni solari negativi su 23** (2004 e 2026 parziali; fra i peggiori 2008 PF 0,54 e 2013 PF 0,41); misurato anno per anno, non regime per regime; il PF a tick e' del toro 2024-26 | **PARZIALE** (anni si'; regimi non isolati uno per uno) |
 | Candidato: EMA200 H4 GBPJPY | ~2,5 anni (01/01/2024 - 30/06/2026; i primi ~6 mesi a tick generati), finestra unica, nessun IS/OOS | tick (in parte generati) | un solo regime | **NO** |
-| Candidato: EMA200 H4 EURUSD, corto | ~9,5 anni: IS 2017-23, OOS 2024-26 | barre M1 esterne | l'IS comprende 2020 e 2022 ma il PF per regime NON MISURATO | **PARZIALE** (quasi 10 anni, ma a barre, IS 1,11) |
-| *Altri motori forex* (PTE, SuperWave GBPUSD H2, Cost-to-cost EURJPY; non nella tabella principale) | barre esterne 2018-24 (~7 anni), finestre per regime 2019-2022 | barre M1 esterne | **quattro regimi misurati** (laterale 2019, crollo 2020, toro 2021, orso 2022): PF che cambia segno da un regime all'altro (tabella B3) | **PARZIALE** (regimi si', anni meno di 10, a barre) |
+| Candidato: EMA200 H4 EURUSD, corto | ~9,5 anni: IS 2017-23, OOS 2024-26 | barre M1 del broker (modello OHLC) | l'IS comprende piu' regimi (2018, 2020, 2021-22) ma il PF per regime NON MISURATO | **PARZIALE** (circa 10 anni si'; regimi non isolati) |
+| *Altri motori forex* (PTE, SuperWave GBPUSD H2, Cost-to-cost EURJPY; non nella tabella principale) | barre esterne 2018-24 (~7 anni), finestre per regime 2019-2022 | barre M1 esterne | **quattro regimi misurati** (laterale 2019, crollo 2020, toro 2021, orso 2022): PF che cambia segno da un regime all'altro (tabella B3) | **PARZIALE** (regimi si'; anni ~7, meno di 10) |
 | *Forex, "Breaking Band"* (tre sedie, non nella tabella principale) | ~27 anni dal 1999 | barre M1 del broker | regimi non isolati uno per uno; GBPUSD cambia di segno sull'intero periodo (PF 0,90, DD 23,4%) | **PARZIALE** (anni si', regimi non separati) |
-| *Oro, 11 motori* (non nella tabella principale) | 22 anni | barre M1 del broker | regimi non isolati; tre revisioni di rischio (DD a 22 anni 19,7%, 29,7%, 45,9% contro 3,5-5,3% promessi) | **PARZIALE** (anni si', a barre) |
-| *Nasdaq, un motore Supertrend* (non nella tabella principale) | ~16 anni | barre M1 esterne | orso 2022: lo short non ha fatto nessuna operazione; laterale 2015-16 PF 0,66 su 55: **non conclusivo** | **PARZIALE** |
+| *Oro, 11 motori* (non nella tabella principale) | 22 anni | barre M1 del broker | regimi non isolati; tre revisioni di rischio (DD a 22 anni 19,7%, 29,7%, 45,9% contro 3,5-5,3% promessi) | **PARZIALE** (anni si'; regimi non isolati) |
+| *Nasdaq, un motore Supertrend* (non nella tabella principale) | ~16 anni | barre M1 esterne | orso 2022: lo short non ha fatto nessuna operazione; laterale 2015-16 PF 0,66 su 55: **non conclusivo** | **PARZIALE** (anni si'; regimi provati ma senza esito leggibile) |
 
 **Come lo leggo, onestamente.** Su 12 expert della tabella principale, **10 hanno NO e 2 PARZIALE** (oro long e EMA200 H4 EURUSD corto, entrambi a barre). **Nessuno ha SI.** Per tutti gli expert sugli indici (DAX, Dow, Nasdaq) la validazione a tick reali copre circa 21 mesi e un solo regime, perche' il broker ha i dati indici solo da settembre 2024: per il DAX esistono ~8 anni di dati esterni (2010-18) scaricati ma non importati, per il Nasdaq 15,7 anni esterni a barre M1 usati solo come prova di regime su altri motori, per il **Dow nessuno storico lungo**. Per molti expert quindi la risposta e' NO o PARZIALE, e **questa e' la ragione per cui ti chiedo il giudizio**: voglio sapere se, con questi anni e questi regimi, si puo' dire qualcosa o se bisogna prima allungare lo storico.
 
@@ -81,7 +83,7 @@ Valori **a rischio 1%, tick reali del broker, finestra 2024.09.26 - 2026.06.30**
 | **EMA200 Dow H1, due lati** | ordini limite sulla media a 200, H1 | 1,20 / **1,52** | 132 (dichiarato, non ricontabile dai miei file) / **257** | 5,7% / 7,8% | tick 21 mesi, un regime | **la piu' avanzata**, un regime |
 | ORB Dow, solo long | breakout del primo quarto d'ora, M5 | 1,25 / 1,67 | 71 / 119 (nessuna chiusura parziale: OOS contate, 119 posizioni) | 7,9% / 9,8% | tick 21 mesi | merito sospeso |
 | Bulge, versione "viola" | mean-reversion H1 su 15 cross forex | nessun IS/OOS nostro (versione ampia, 4 mesi: 0,87 / 0,82) | versione ampia 410 / 363 operazioni | 13,7% / 22,8% (0,8%) | 4 mesi (mio, a barre; rischio 0,8%); backtest di partenza della versione originale 2022-26, mai rifatto con IS/OOS | **NON MISURATO** (contratto assente) |
-| *Candidato: MaxMin oro, solo long* | box notturno sull'oro, H2 | tick OOS 1,45; 22 anni a barre 1,10 | 93 (tick) | tick 2,3%; 22 anni 10,3% (a 0,5%) | tick 2024-26 + barre 2004-26 | con riserva |
+| *Candidato: MaxMin oro, solo long* | box notturno sull'oro, H2 | tick OOS 1,45; 22 anni a barre 1,10 | 93 (tick) | tick 2,3%; 22 anni 10,3% (entrambi a rischio 0,5%) | tick 2024-26 + barre 2004-26 | con riserva |
 | *Candidato: EMA200 H4 GBPJPY* | stesso motore, H4, due lati | 1,22 su finestra unica (nessun IS/OOS) | 144 | 4,1% | tick 2024-26, finestra unica | con riserva |
 | *Candidato: EMA200 H4 EURUSD, corto* | stesso motore, H4, solo short | IS 1,11 / OOS 1,31 | ~104 OOS | 2,8% | barre M1 IS 2017-23, OOS 2024-26 | con riserva (barre, non tick) |
 
@@ -95,28 +97,28 @@ Per ogni expert: **manopole** con il valore del contratto (non le incollo da fil
 - Meccanismo: dopo l'apertura del DAX misuro il range dei primi **35 minuti**; se il prezzo rompe il range e **ritorna sul livello** di rottura, entro con un ordine limite (sconto di 2 punti), una sola operazione al giorno.
 - Manopole: durata del range **35 min**; buffer di rottura **5 punti**; stop strutturale legato al range (mediana ~86 punti indice [DERIVATO]); **TP1 a 1R con chiusura del 50%**, poi pareggio e **trailing** su M5; chiusura di fine giornata.
 - Regimi: **NON MISURATO** (un solo regime, rialzo con la discesa di aprile 2025). Nota importante sull'orologio: il server del broker e' UTC+1 fisso, quindi nei mesi invernali la configurazione a ora fissa arma **un'ora prima** dell'apertura cash; il contratto mescola le due tempistiche (sulla gemella short: estate PF 1,39 su 96 posizioni, inverno 0,90 su 85) [MISURATO].
-- Forward su demo: **NON MISURATO** (nessun dato demo riportato qui).
+- Forward su demo: **non riportato** in questo dossier (non l'ho ricontato alla fonte).
 
 #### 2. MaxMin DAX short
 - Meccanismo: ordine di vendita sotto il **minimo della notte**, piazzato poco prima dell'apertura europea, con filtro di correlazione sull'S&P 500.
 - Manopole: box notturno; stop **2,5 x ATR** (mediana ~59 punti); **TP1 1R 50%, TP2 3R, target sulla EMA200, finale 4R**; time frame di gestione M15; ordine pendente per 90 minuti.
 - Contratto: PF OOS 2,16 su **14 posizioni** (frequenza promessa 0,05 al giorno); un secondo contratto piu' vecchio dice PF 2,05 su ~27 posizioni [MISURATO]. Regimi: NON MISURATO.
-- Forward su demo: **NON MISURATO** (nessun dato demo riportato qui). Il contratto da 14 operazioni e' un campione che non decide.
+- Forward su demo: **non riportato** in questo dossier (non l'ho ricontato alla fonte). Il contratto da 14 operazioni e' un campione che non decide.
 
 #### 3. Apertura Dow, ritest, solo long
 - Meccanismo: come il DAX, sul Dow, con **filtro di trend** (EMA su H4). Manopole: range 35 min, buffer 10 punti, offset di ritest 4 punti, TP1 1R 50%, trailing M5, stop minimo 5 punti; una operazione al giorno (stop mediano ~160 punti, ricostruito dai lotti del backtest OOS [DERIVATO]; una stima solo geometrica da' ~189).
 - Regimi: NON MISURATO. Messo in fase con la cash USA il lato long fa PF 0,89 su 84 posizioni in estate, 0,92 su 40 d'inverno e 0,84 su 123 sulla serie con l'orologio di un'altra piattaforma (misura sospesa); il contratto mescola le due tempistiche [MISURATO]. Lo short e' misurato e **non regge** (OOS 0,84 su 73).
-- Forward su demo: **NON MISURATO**.
+- Forward su demo: **non riportato** in questo dossier (non l'ho ricontato alla fonte).
 
 #### 4. Apertura Nasdaq, ritest, due lati
 - Meccanismo: ritest del range d'apertura **con filtro volumi** (1,5 x la media di 20 barre). Manopole: range 35 min, buffer 2 punti, **TP1 0,5R 50%**, trailing M5 (ATR 2,0), volumi ON (stop mediano ~83 punti).
-- Regimi: NON MISURATO; esiste storico esterno del Nasdaq dal 2010 ma la prova di regime su questa cella **non e' mai stata fatta** (sezione C). Prima di muovere qualunque manopola pretendo una prova di regime. Contratto del 20/09: PF 1,14 / 1,11 su 91 / 94 posizioni, DD 6,0% / 3,7% a rischio 1% (un'altra misura piu' recente, su un altro banco: PF 1,22 / 1,22 su 82 / 102; non riconciliate). Forward su demo: **NON MISURATO**.
+- Regimi: NON MISURATO; esiste storico esterno del Nasdaq dal 2010 ma la prova di regime su questa cella **non e' mai stata fatta** (sezione C). Prima di muovere qualunque manopola pretendo una prova di regime. Contratto del 20/09: PF 1,14 / 1,11 su 91 / 94 posizioni, DD 6,0% / 3,7% a rischio 1% (un'altra misura piu' recente, su un altro banco: PF 1,22 / 1,22 su 82 / 102; non riconciliate). Forward su demo: **non riportato** in questo dossier (non l'ho ricontato alla fonte).
 
 #### 5. SuperWave Dow H1
 - Meccanismo: rimbalzo vicino al Supertrend (ATR 10 x 2,5), ingresso frazionato (un terzo subito, il resto a ordini pendenti di 20 pip), stop sull'estremo delle ultime 5 barre piu' buffer.
 - Manopole: moltiplicatore Supertrend **2,5**; **TP1 1R 50% + TP finale 3R**; **trailing sul Supertrend** e uscita sul "flip"; due lati. Il trailing sul Supertrend **paga** (spento: PF IS da 1,49 a 0,90) [MISURATO, banco 10.000].
 - Il contratto e' **conteso**: la stessa configurazione, misurata due volte, da' n 143 / DD 3,91% e n 131 / DD 4,17%; la differenza non sta nei parametri (forse nel binario o nello storico tick) [MISURATO]. Il numero di posizioni e' **NON MISURATO** (stimo ~81).
-- Forward su demo: **NON MISURATO**.
+- Forward su demo: **non riportato** in questo dossier (non l'ho ricontato alla fonte).
 
 #### 6. EMA200 Dow H1 (la piu' avanzata)
 - Meccanismo: due ordini limite a **0,2 e 0,3 ATR** dalla media a 200, con bias della media a 14 e distanza dalla media fra 0,3 e 1,5 ATR; una sola posizione (o pendente) per volta, **long e short si escludono**.
