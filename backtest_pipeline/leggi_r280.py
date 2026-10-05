@@ -352,6 +352,8 @@ def leggi(base, oggi=None):
                 righe.append("   MEGLIO DEL DEFAULT (batte l ancora di piu' di 0,15 di PF in TUTTE E DUE le finestre senza DD peggiore): %s" % (", ".join(mg) if mg else "nessuna cella -> IL DEFAULT VA BENE (e' un risultato, non un fallimento)."))
                 righe.append("")
                 righe.append("ZONA %s   PAROLA: %s.%s" % (zona, parola, SUFFISSO))
+                if zona == "ZG":
+                    righe.append("   (ZG = nessuna delle zone V1-V4 congelate copre questo caso: non si forza una zona, criteri par. 5 punto 8.)")
         righe.append("")
         righe.append("NON FATTO QUI: la separazione dei lati (R245e/f: serve il gemello AllowShort=0/AllowLong=0 sulla cella che esce), le POSIZIONI da un per-trade (le 6 celle condividono il magic 798701: classe 41), la lettura per stagione (OROLOGIO), il merito.")
     righe.append("NESSUNA CELLA SI PROMUOVE, NESSUNA TAGLIA SI PROPONE.")

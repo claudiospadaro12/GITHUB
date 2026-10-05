@@ -102,7 +102,7 @@ default" = oltre 0,15 di PF sull'ancora in TUTTE E DUE le finestre senza DD pegg
 | **V3** (880 fuori dal rumore) | **EFFETTO** | la griglia/TF del filtro **conta**: CE-4 confermato |
 | **V1** (altopiano + 880 nel rumore) | **ZONA GRIGIA** | portabile su UN regime; NON e' un altopiano di merito (Emendamento C, regola del 19/08) |
 | **V2** (solo campione) | **ZONA GRIGIA** | le celle passano C-a e C-c ma cadono su C-b |
-| non coperta | **ZONA GRIGIA** | non si forza |
+| non coperta (il lettore la etichetta `ZG`) | **ZONA GRIGIA** | non si forza |
 | catena non OK, data vecchia, CSV illeggibile | **NON ANCORA MISURATO** | non c'e' una misura da leggere |
 
 **In coda a OGNI parola**: *"MERITO: NON ANCORA MISURATO"* (un regime, un broker, n IS < 150 sulle celle corte). **Nessuna cella viene promossa, nessuna taglia proposta,
