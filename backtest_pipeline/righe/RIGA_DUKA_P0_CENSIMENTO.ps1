@@ -195,6 +195,10 @@ try{
       Dico ('simboli presenti in raw\ : ' + ($altri -join ', '))
     }
     if(-not $S.cache_esiste){
+      if(Test-Path -LiteralPath $Lavoro){
+        $sott = @(Get-ChildItem -LiteralPath $Lavoro -Directory -ErrorAction SilentlyContinue | Sort-Object Name | ForEach-Object { $_.Name })
+        Dico ('cartelle in dukascopy_lavoro (dove sta la cache, se non e qui?): ' + ($sott -join ', '))
+      }
       Dico 'CACHE ASSENTE: se la cache non c e, P1 diventa un RISCARICO di 222 giorni (~15-59 ore, piano par. 3.1): si ridiscute, non si scarica da qui.' 'Yellow'
       $S.cache_giorni_attesi = 0
       return
@@ -211,6 +215,7 @@ try{
     $tot = @{ bi5 = 0; zero = 0; ass = 0; buchi = 0; doppi = 0; tmp = 0; byte = [long]0; completi = 0; senzaCartella = 0 }
     $perGiorno = @{}
     $conBuchi = New-Object System.Collections.ArrayList
+    $conZero  = New-Object System.Collections.ArrayList
     $finestra = @{}
     foreach($d in $giorni){
       # LAYOUT della cache come lo scrive dukascopy_tick.py (percorso_cache): raw\<SIMBOLO>\AAAA\MM\GG\HHh_ticks.bi5 con MM = mese di CALENDARIO
@@ -223,13 +228,14 @@ try{
       } else { $tot.senzaCartella++ }
       $c = @{ bi5 = 0; zero = 0; ass = 0; buchi = 0; doppi = 0; tmp = 0; byte = [long]0 }
       $oreBuco = New-Object System.Collections.ArrayList
+      $oreZero = New-Object System.Collections.ArrayList
       for($h = 0; $h -lt 24; $h++){
         $n  = $h.ToString('00', $INV) + 'h_ticks.bi5'
         $ha = $nomi.ContainsKey($n); $hs = $nomi.ContainsKey($n + '.assente')
         if($nomi.ContainsKey($n + '.tmp')){ $c.tmp++ }
         if($ha -and $hs){ $c.doppi++; [void]$oreBuco.Add($h.ToString('00', $INV) + 'h=DOPPIO') }
         if($ha){
-          if($nomi[$n] -gt 0){ $c.bi5++; $c.byte += $nomi[$n] } else { $c.zero++; [void]$oreBuco.Add($h.ToString('00', $INV) + 'h=ZERO BYTE') }
+          if($nomi[$n] -gt 0){ $c.bi5++; $c.byte += $nomi[$n] } else { $c.zero++; [void]$oreZero.Add($h.ToString('00', $INV) + 'h') }
         } elseif($hs){ $c.ass++ }
         else { $c.buchi++; [void]$oreBuco.Add($h.ToString('00', $INV) + 'h') }
       }
@@ -237,8 +243,11 @@ try{
       $perGiorno[$chiave] = $c
       foreach($k in @('bi5','zero','ass','buchi','doppi','tmp')){ $tot[$k] += $c[$k] }
       $tot.byte += $c.byte
-      $completo = ($c.buchi -eq 0 -and $c.zero -eq 0 -and $c.doppi -eq 0)
+      # ZERO BYTE = ora vuota LEGITTIMA (200 di lunghezza zero) oppure file troncato: da qui sono INDISTINGUIBILI (checklist 16, "vuoto e distrutto hanno la stessa faccia").
+      # Non e' un buco: il giorno e' completo se ogni slot ha il suo file e nessuno e' doppio. Gli zero byte si elencano a parte.
+      $completo = ($c.buchi -eq 0 -and $c.doppi -eq 0)
       if($completo){ $tot.completi++ } else { [void]$conBuchi.Add($chiave + ' [' + ($oreBuco -join ' ') + ']' + $(if($c.doppi -gt 0){ ' DOPPI=' + $c.doppi }else{ '' })) }
+      if($c.zero -gt 0){ [void]$conZero.Add($chiave + ' [' + ($oreZero -join ' ') + ']') }
       [void]$CsvCache.Add($chiave + ',' + $esisteDir + ',' + $c.bi5 + ',' + $c.zero + ',' + $c.ass + ',' + $c.buchi + ',' + $c.doppi + ',' + $c.tmp + ',' + $c.byte)
     }
     $S.cache_completi = $tot.completi
@@ -247,19 +256,28 @@ try{
     $S.cache_doppi = $tot.doppi
     $S.cache_perGiorno = $perGiorno
     Dico ('giorni con cartella: ' + ($giorni.Count - $tot.senzaCartella) + '   senza cartella: ' + $tot.senzaCartella)
-    Dico ('giorni COMPLETI (24 slot, nessun buco, nessuno zero byte, nessun doppio): ' + $tot.completi + ' su ' + $giorni.Count)
-    Dico ('slot: bi5 con byte ' + $tot.bi5 + ' | .assente ' + $tot.ass + ' | bi5 a ZERO BYTE ' + $tot.zero + ' | BUCHI (ne bi5 ne .assente) ' + $tot.buchi + ' | DOPPI (bi5 e .assente) ' + $tot.doppi + ' | .tmp residui ' + $tot.tmp)
+    Dico ('giorni COMPLETI (24 slot ciascuno col suo file, nessun buco, nessun doppio; gli zero byte NON sono buchi): ' + $tot.completi + ' su ' + $giorni.Count)
+    Dico ('slot: bi5 con byte ' + $tot.bi5 + ' | .assente ' + $tot.ass + ' | bi5 a ZERO BYTE (ora vuota o troncata: indistinguibili) ' + $tot.zero + ' | BUCHI (ne bi5 ne .assente) ' + $tot.buchi + ' | DOPPI (bi5 e .assente) ' + $tot.doppi + ' | .tmp residui ' + $tot.tmp)
     Dico ('byte dei .bi5 nella finestra: ' + $tot.byte + '  (' + (Mb $tot.byte) + ' MB)')
     # tutto l'albero di USA30IDXUSD, anche fuori finestra
     $tutti = @(Get-ChildItem -LiteralPath $rawS -Recurse -File -Force -ErrorAction SilentlyContinue)
     $totByte = [long]0; foreach($f in $tutti){ $totByte += [long]$f.Length }
     $fuori = 0; foreach($f in $tutti){ if(-not $finestra.ContainsKey($f.FullName)){ $fuori++ } }
     Dico ('albero USA30IDXUSD: ' + $tutti.Count + ' file, ' + $totByte + ' byte (' + (Mb $totByte) + ' MB); fuori dai 222 giorni: ' + $fuori + ' file')
+    $rawR = (Convert-Path -LiteralPath $rawS)
+    $camp = @($tutti | Select-Object -First 5 | ForEach-Object { $_.FullName.Substring($rawR.Length).TrimStart('\', '/').Replace('/', '\') })
+    Dico ('esempi di percorso nell albero (primi 5, relativi a USA30IDXUSD: AAAA\MM\GG\HHh_ticks.bi5, MM = mese di calendario): ' + ($camp -join ' | '))
     if($conBuchi.Count -gt 0){
       Dico ('giorni NON completi: ' + $conBuchi.Count)
       $k = 0
       foreach($g in $conBuchi){ $k++; if($k -le 40){ Dico ('   ' + $g) 'Yellow' } }
       if($conBuchi.Count -gt 40){ Dico ('   ... e altri ' + ($conBuchi.Count - 40) + ' (tutti in P0_CACHE_PER_GIORNO.csv)') 'Yellow' }
+    }
+    if($conZero.Count -gt 0){
+      Dico ('giorni con ore a ZERO BYTE: ' + $conZero.Count + '  (ora senza quotazioni oppure file troncato: da qui non si distingue; la validita la guarda dukascopy_tick.py)')
+      $k = 0
+      foreach($g in $conZero){ $k++; if($k -le 15){ Dico ('   ' + $g) } }
+      if($conZero.Count -gt 15){ Dico ('   ... e altri ' + ($conZero.Count - 15) + ' (conteggi in P0_CACHE_PER_GIORNO.csv, colonna Zero)') }
     }
     Dico ''
     Dico 'I 9 GIORNI DELLA SONDA, PER NOME (4 nuovi segnati con *):'
@@ -267,7 +285,7 @@ try{
       $c = $perGiorno[$g]
       $mark = $(if($GiorniNuovi -contains $g){ '*' }else{ ' ' })
       if($null -eq $c){ Dico ('  ' + $mark + ' ' + $g + '  FUORI dai giorni attesi (sabato o fuori finestra) -> NON MISURATO') 'Yellow'; continue }
-      $ok = ($c.buchi -eq 0 -and $c.zero -eq 0 -and $c.doppi -eq 0)
+      $ok = ($c.buchi -eq 0 -and $c.doppi -eq 0)
       Dico ('  ' + $mark + ' ' + $g + '  bi5 ' + $c.bi5 + '  assenti ' + $c.ass + '  zero ' + $c.zero + '  buchi ' + $c.buchi + '  doppi ' + $c.doppi + '   -> ' + $(if($ok){ 'COMPLETO in cache' }else{ 'NON COMPLETO' })) $(if($ok){ 'Gray' }else{ 'Yellow' })
     }
     Dico 'Un bi5 "con byte" NON e provato valido (qui non si decodifica lzma): la validita la conta dukascopy_tick.py --solo-cache (buchi_cache, cache illeggibile).'
@@ -483,9 +501,9 @@ try{
     Dico ('spazio libero su dukascopy_lavoro : ' + ([math]::Round($S.liberi_lavoro_gb, 2)).ToString('0.00', $INV) + ' GB ' + $mis + '   (soglia F1 non firmata ' + $SogliaLiberiGB + ' GB: ' + $(if($ok){ 'raggiunta' }else{ 'NON raggiunta' }) + ')')
   } else { Dico ('spazio libero su dukascopy_lavoro : ' + $nonm) }
   if($S.ContainsKey('cache_completi')){
-    Dico ('cache 222 giorni : completi ' + $S.cache_completi + ' su ' + $S.cache_giorni_attesi + '  (buchi ' + $S.cache_buchi + ', zero byte ' + $S.cache_zero + ', doppi ' + $S.cache_doppi + ') ' + $mis)
+    Dico ('cache 222 giorni : completi ' + $S.cache_completi + ' su ' + $S.cache_giorni_attesi + '  (buchi ' + $S.cache_buchi + ', doppi ' + $S.cache_doppi + '; ore a zero byte ' + $S.cache_zero + ': vuote o troncate, indistinguibili) ' + $mis)
     $sonda = @()
-    foreach($g in $GiorniSonda){ $c = $S.cache_perGiorno[$g]; if($null -ne $c -and $c.buchi -eq 0 -and $c.zero -eq 0 -and $c.doppi -eq 0){ $sonda += $g } }
+    foreach($g in $GiorniSonda){ $c = $S.cache_perGiorno[$g]; if($null -ne $c -and $c.buchi -eq 0 -and $c.doppi -eq 0){ $sonda += $g } }
     Dico ('giorni della sonda completi in cache : ' + $sonda.Count + ' su ' + $GiorniSonda.Count + ' ' + $mis + '   mancanti: ' + $(if($sonda.Count -eq $GiorniSonda.Count){ 'nessuno' }else{ (@($GiorniSonda | Where-Object { $sonda -notcontains $_ }) -join ' ') }))
   } elseif($S.ContainsKey('cache_esiste') -and (-not $S.cache_esiste)){ Dico ('cache raw\USA30IDXUSD : ASSENTE ' + $mis + '  -> STOP di P0: P1 sarebbe un riscarico, si ridiscute') }
   else { Dico ('cache 222 giorni : ' + $nonm) }

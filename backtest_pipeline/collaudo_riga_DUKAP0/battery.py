@@ -152,8 +152,8 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
     if spec["cache"] == "completa":
         must("giorni attesi (sabati esclusi): %d   (il piano dice 222)   slot orari attesi: %d" % (a["giorni"], a["slot_attesi"]))
         must("giorni con cartella: %d   senza cartella: %d" % (a["giorni"] - t["senza_cartella"], t["senza_cartella"]))
-        must("giorni COMPLETI (24 slot, nessun buco, nessuno zero byte, nessun doppio): %d su %d" % (t["completi"], a["giorni"]))
-        must("slot: bi5 con byte %d | .assente %d | bi5 a ZERO BYTE %d | BUCHI (ne bi5 ne .assente) %d | DOPPI (bi5 e .assente) %d | .tmp residui %d"
+        must("giorni COMPLETI (24 slot ciascuno col suo file, nessun buco, nessun doppio; gli zero byte NON sono buchi): %d su %d" % (t["completi"], a["giorni"]))
+        must("slot: bi5 con byte %d | .assente %d | bi5 a ZERO BYTE (ora vuota o troncata: indistinguibili) %d | BUCHI (ne bi5 ne .assente) %d | DOPPI (bi5 e .assente) %d | .tmp residui %d"
              % (t["bi5"], t["ass"], t["zero"], t["buchi"], t["doppi"], t["tmp"]))
         must("byte dei .bi5 nella finestra: %d  (" % t["byte"])
         # albero: tutti i file sotto USA30IDXUSD = bi5 + zeri + assenti + .assente dei doppi + tmp + 4 fuori finestra
@@ -161,9 +161,11 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
         b_alb = t["byte"] + (44 if spec["fuori_finestra"] else 0) + t["tmp"]
         must("albero USA30IDXUSD: %d file, %d byte" % (n_alb, b_alb))
         must("fuori dai 222 giorni: %d file" % (4 if spec["fuori_finestra"] else 0))
+        must("cache 222 giorni : completi %d su %d  (buchi %d, doppi %d; ore a zero byte %d: vuote o troncate, indistinguibili) [MISURATO]" % (t["completi"], a["giorni"], t["buchi"], t["doppi"], t["zero"]))
+        rx(r"esempi di percorso nell albero \(primi 5, relativi a USA30IDXUSD[^)]*\): (\d{4}\\\d{2}\\\d{2}\\\d{2}h_ticks\.bi5(\.assente)?( \| )?){5}", "5 percorsi di esempio col layout vero")
         for k in F.SONDA:
             c = a["per"][k]
-            ok = c["buchi"] == 0 and c["zero"] == 0 and c["doppi"] == 0
+            ok = c["buchi"] == 0 and c["doppi"] == 0
             mark = "*" if k in F.NUOVI else " "
             must("  %s %s  bi5 %d  assenti %d  zero %d  buchi %d  doppi %d   -> %s" % (mark, k, c["bi5"], c["ass"], c["zero"], c["buchi"], c["doppi"], "COMPLETO in cache" if ok else "NON COMPLETO"))
         must("giorni della sonda completi in cache : %d su 9 [MISURATO]" % len(a["sonda_completi"]))
@@ -180,12 +182,18 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
                 exp = [k, str(spec["giorno_senza_cartella"].count(k) == 0), str(c["bi5"]), str(c["zero"]), str(c["ass"]), str(c["buchi"]), str(c["doppi"]), str(c["tmp"]), str(c["byte"])]
                 if v != exp:
                     err.append("riga CSV cache %s: %s invece di %s" % (k, v, exp)); break
+        if spec["zeri"]:
+            must("giorni con ore a ZERO BYTE: %d" % len(spec["zeri"]))
+            for k, ore in spec["zeri"].items():
+                must("   " + k + " [" + " ".join("%02dh" % h for h in ore) + "]")
+        else:
+            mustnot("giorni con ore a ZERO BYTE")
         if t["completi"] != a["giorni"]:
             must("giorni NON completi: %d" % (a["giorni"] - t["completi"]))
             for k, ore in list(spec["buchi"].items()):
                 must(k + " [" + " ".join("%02dh" % h for h in ore))
             for k, ore in spec["zeri"].items():
-                must(k + " [" + " ".join("%02dh=ZERO BYTE" % h for h in ore))
+                must(k + " [" + " ".join("%02dh" % h for h in ore) + "]", None, "gli zero byte stanno nella lista a parte")
             for k in spec["giorno_senza_cartella"]:
                 must(k + " [" + " ".join("%02dh" % h for h in range(24)) + "]")
             for k, ore in spec["doppi"].items():
@@ -195,6 +203,8 @@ def valuta(nome, spec, r, prima, dopo, zips, cache_csv, tick_csv):
     else:
         if spec["cache"] in ("senza_sim", "nessuna_lavoro"):
             must("CACHE ASSENTE: se la cache non c e, P1 diventa un RISCARICO")
+            if spec["cache"] == "senza_sim":
+                must("cartelle in dukascopy_lavoro (dove sta la cache, se non e qui?): raw, tick")
             must("cache raw\\USA30IDXUSD : ASSENTE [MISURATO]  -> STOP di P0")
             mustnot("giorni COMPLETI")
     # --- dischi -----------------------------------------------------------

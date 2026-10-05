@@ -254,11 +254,11 @@ def attese(spec):
         per[k] = c
         for x in ("bi5", "ass", "zero", "buchi", "doppi", "tmp", "byte"):
             tot[x] += c[x]
-        if c["buchi"] == 0 and c["zero"] == 0 and c["doppi"] == 0:
+        if c["buchi"] == 0 and c["doppi"] == 0:          # gli zero byte NON sono buchi (ora vuota o troncata: indistinguibili)
             tot["completi"] += 1
     a["per"] = per
     a["tot"] = tot
-    a["sonda_completi"] = [k for k in SONDA if per[k]["buchi"] == 0 and per[k]["zero"] == 0 and per[k]["doppi"] == 0]
+    a["sonda_completi"] = [k for k in SONDA if per[k]["buchi"] == 0 and per[k]["doppi"] == 0]
     csv = []
     tot_r = 0
     for k, m in enumerate(spec["csv_mesi"] or []):
