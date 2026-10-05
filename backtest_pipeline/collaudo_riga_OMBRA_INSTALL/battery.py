@@ -214,6 +214,8 @@ def valuta(nome, spec, opz, att, r, prima, dopo, zips, mtimes):
     if marche != a["nostri"]:
         err.append("marcatori IL NOSTRO: %d, attesi %d (il percorso del -V3 inizia come quello del piccolo: NON e' il piccolo)" % (marche, a["nostri"]))
     must("terminal64 in esecuzione: %d" % nproc)
+    if a["nostri"] == 0:
+        mustnot("PID del terminal64 del piccolo da guardare", None, "senza terminale del piccolo in esecuzione non c'e' nessun PID da indicare")
     must("terminal64 con la cartella del piccolo (confronto sulla cartella INTERA, non sul prefisso): %d" % a["nostri"])
     if a["libera_mb"] is not None:
         must("RAM del VPS: totale %d MB, libera %d MB [MISURATO]" % (a["totale_mb"], a["libera_mb"]))
@@ -221,6 +223,7 @@ def valuta(nome, spec, opz, att, r, prima, dopo, zips, mtimes):
     if a["nostri"] >= 1:
         must("terminal64 del piccolo, working set: %d MB [MISURATO]   memoria privata: %d MB [MISURATO]" % (a["ws_mb"], a["pm_mb"]))
         must("terminal64 del piccolo, CPU media su 5 secondi: %.1f %% di UN core = %.1f %% su 6 core" % (a["cpu_pct"], a["cpu_su_6"]))
+        must("PID del terminal64 del piccolo da guardare nella Gestione attivita (scheda Dettagli, colonna PID): %s   (tasto destro sulla riga -> Apri percorso file: deve aprire C:\\Program Files\\BCM Markets MT5 Terminal)" % a["pids"])
         must("GIALLO oltre %d MB" % a["giallo"])
         must("ROSSO oltre %d MB (+800)" % a["rosso"])
     must("di piu di 5.0 punti percentuali su 6 core (= 30 % di UN core")

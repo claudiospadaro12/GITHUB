@@ -108,6 +108,7 @@ $Rimosso   = $false
 $Bytes     = $null
 $HScaricato = ''
 $NostriN   = 0
+$PidNostri  = ''
 $WsNostro  = $null
 $PmNostro  = $null
 $CpuPct    = $null
@@ -222,6 +223,7 @@ try{
     DicoP ('   PID ' + $p.Id + '  | titolo: ' + $tit + '  | cartella: ' + $cart + '  | working set ' + $ws + '  | memoria privata ' + $pm + $marca)
   }
   $NostriN = $nostri.Count
+  $PidNostri = (($nostri | ForEach-Object { '' + $_.Id }) -join ', ')
   DicoP ('terminal64 con la cartella del piccolo (confronto sulla cartella INTERA, non sul prefisso): ' + $NostriN)
   if($NostriN -eq 0){ [void]$Rilievi.Add('nessun terminal64 col percorso del piccolo (spento, oppure Path illeggibile da questa sessione): RAM e CPU del terminale NON MISURATE.') }
   if($NostriN -gt 1){ [void]$Rilievi.Add('PIU di un terminal64 col percorso del piccolo: due istanze? Riconoscere a mano quale.') }
@@ -248,6 +250,7 @@ catch{ [void]$Problemi.Add('ram: ' + (Pulisci ('' + $_.Exception.Message))) }
 $nCore = 0; [void][int]::TryParse(('' + $env:NUMBER_OF_PROCESSORS), [Globalization.NumberStyles]::Integer, $INV, [ref]$nCore)
 DicoP ('RAM del VPS: ' + $(if($null -ne $TotaleMB){ 'totale ' + $TotaleMB.ToString('0', $INV) + ' MB, libera ' + $LiberaMB.ToString('0', $INV) + ' MB [MISURATO]' }else{ 'NON MISURATO (Get-CimInstance Win32_OperatingSystem non ha risposto)' }))
 DicoP ('terminal64 del piccolo, working set: ' + $(if($null -ne $WsNostro){ ([math]::Round($WsNostro, 0)).ToString('0', $INV) + ' MB [MISURATO]' }else{ 'NON MISURATO' }) + '   memoria privata: ' + $(if($null -ne $PmNostro){ ([math]::Round($PmNostro, 0)).ToString('0', $INV) + ' MB [MISURATO]' }else{ 'NON MISURATO' }))
+if($PidNostri -ne ''){ DicoP ('PID del terminal64 del piccolo da guardare nella Gestione attivita (scheda Dettagli, colonna PID): ' + $PidNostri + '   (tasto destro sulla riga -> Apri percorso file: deve aprire ' + $TermBcm + ')') }
 DicoP ('terminal64 del piccolo, CPU media su ' + $CampioneSec + ' secondi: ' + $(if($null -ne $CpuPct){ $CpuPct.ToString('0.0', $INV) + ' % di UN core' + $(if($nCore -gt 0){ ' = ' + ([math]::Round($CpuPct / $nCore, 1)).ToString('0.0', $INV) + ' % su ' + $nCore + ' core (come la Gestione attivita)' }else{ ' (numero di core NON noto)' }) + ' [MISURATO, campione breve]' }else{ 'NON MISURATO' }))
 
 # =====================================================================

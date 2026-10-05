@@ -237,5 +237,6 @@ def attese(spec):
         a["cpu_su_6"] = round(a["cpu_pct"] / 6.0, 1)
         a["giallo"] = ARROT(n["Ws"] / 1048576.0 + 500)
         a["rosso"] = ARROT(n["Ws"] / 1048576.0 + 800)
+        a["pids"] = ", ".join(str(x["Id"]) for x in nostri)
     a["rosso_libera"] = max(1024, a["libera_mb"] - 800) if a["libera_mb"] is not None else 1024
     return a

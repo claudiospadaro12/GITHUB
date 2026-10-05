@@ -49,6 +49,8 @@ M = [
  ("pavimento_con_min", "[math]::Max(1024, $LiberaMB - 800)", "[math]::Min(1024, $LiberaMB - 800)", ["01_"]),
  ("giallo_400", "([math]::Round($WsNostro + 500, 0))", "([math]::Round($WsNostro + 400, 0))", ["01_"]),
  ("rosso_700", "([math]::Round($WsNostro + 800, 0))", "([math]::Round($WsNostro + 700, 0))", ["01_"]),
+ ("pid_non_stampato", "if($PidNostri -ne ''){ DicoP ('PID del terminal64", "if($false){ DicoP ('PID del terminal64", ["01_"]),
+ ("pid_di_tutti", "$PidNostri = ((" + "$nostri | ForEach-Object", "$PidNostri = ((" + "$procs | ForEach-Object", ["01_"]),
  ("cpu_x10", "($c1 - $c0) / $CampioneSec * 100", "($c1 - $c0) / $CampioneSec * 10", ["01_"]),
  ("zip_senza_prima", "Compress-Archive -LiteralPath $RefTxt, $PriTxt -DestinationPath $Zip -Force", "Compress-Archive -LiteralPath $RefTxt -DestinationPath $Zip -Force", ["01_"]),
  ("prossimo_passo_anche_su_stop", "if($Installato -or $GiaUguale){\n  Dico ''", "if($true){\n  Dico ''", ["03_"]),
