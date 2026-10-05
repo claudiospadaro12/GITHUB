@@ -450,13 +450,13 @@ def autotest():
     if os.path.exists(piano):
         trovato = None
         for riga in open(piano, encoding="utf-8").read().splitlines():
-            if riga.startswith("> **«FIRMO CANCELLO DK DOW»**"):
-                trovato = riga.replace("«", '"').replace("»", '"')
+            if riga.startswith("> **\u00abFIRMO CANCELLO DK DOW\u00bb**"):
+                trovato = riga.replace("\u00ab", '"').replace("\u00bb", '"')
         if trovato is None:
             ko.append("testo F2: l'appendice non e' stata trovata nel piano")
         else:
             # il piano usa +-, il nostro e' ASCII: confronto esatto dopo aver reso ASCII il solo carattere non ASCII del piano
-            piano_txt = trovato.replace("±", "+-")
+            piano_txt = trovato.replace("\u00b1", "+-")
             if piano_txt != TESTO_F2_APPENDICE:
                 # dove differiscono, per la diagnosi
                 i = 0
