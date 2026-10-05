@@ -44,10 +44,10 @@
 //|  si vedono solo con ordini veri.                                 |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
-#property version   "1.02"
+#property version   "1.03"
 #property strict
 
-#define OMBRA_VER     "1.02"
+#define OMBRA_VER     "1.03"
 #define NTF7          7
 #define NCNT          11
 #define W_GAMBA       0.5       // peso di ogni gamba nell'R del setup (2 ordini da 0,5)
@@ -550,6 +550,13 @@ void ResetSetup(const int i)
 //==================================================================
 int OnInit()
   {
+   // [v1.03 05/10, lettura finale] un cambio di input (F7) chiama OnDeinit+OnInit SENZA ricaricare
+   // l'EA: le globali restano quelle di prima (classe gia' pagata, CHECKLIST r.35522). Con la lista
+   // simboli/TF ristretta gRRt/gRRb puntavano oltre i nuovi array (array out of range = EA fermo),
+   // e gInitOk=true rimasto da prima faceva salvare in OnDeinit uno stato da un OnInit fallito.
+   gInitOk = false;
+   gRRt = 0;
+   gRRb = 0;
    gDir = "ABTG_Ombra" + ((StringLen(InpTag) > 0) ? "_" + InpTag : "");
    FolderCreate(gDir);
 
