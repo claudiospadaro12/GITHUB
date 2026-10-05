@@ -44,10 +44,10 @@
 //|  si vedono solo con ordini veri.                                 |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
-#define OMBRA_VER     "1.00"
+#define OMBRA_VER     "1.01"
 #define NTF7          7
 #define NCNT          11
 #define W_GAMBA       0.5       // peso di ogni gamba nell'R del setup (2 ordini da 0,5)
@@ -325,12 +325,16 @@ bool AppendLine(const string fname, const int hdr, const string line)
    int h = FileOpen(fname, FILE_READ | FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
    if(h == INVALID_HANDLE)
       return false;
+   // v1.01 (cancello 05/10): si controlla quanto e' stato scritto. A disco pieno FileOpen riesce
+   // ma la scrittura no: prima la riga risultava scritta ed era PERSA; ora resta in coda.
+   bool ok = true;
    if(FileSize(h) == 0)
-      FileWriteString(h, Hdr(hdr) + "\r\n");
+      ok = (FileWriteString(h, Hdr(hdr) + "\r\n") > 0);
    FileSeek(h, 0, SEEK_END);
-   FileWriteString(h, line + "\r\n");
+   if(ok)
+      ok = (FileWriteString(h, line + "\r\n") > 0);
    FileClose(h);
-   return true;
+   return ok;
   }
 
 void LogEv(const string msg)
@@ -364,9 +368,9 @@ void FlushQueue()
          // ordine preservato: dopo un fallimento le righe dello stesso file restano in coda
          if(StringFind(bloccato, "|" + gQF[q] + "|") < 0)
             bloccato += "|" + gQF[q] + "|";
-         ArrayResize(nf, m + 1);
-         ArrayResize(nh, m + 1);
-         ArrayResize(nl, m + 1);
+         ArrayResize(nf, m + 1, gNQ);   // v1.01: riserva = niente riallocazione a ogni riga
+         ArrayResize(nh, m + 1, gNQ);
+         ArrayResize(nl, m + 1, gNQ);
          nf[m] = gQF[q];
          nh[m] = gQH[q];
          nl[m] = gQL[q];
@@ -400,15 +404,20 @@ void Enqueue(const string fname, const int hdr, const string line)
         }
       gNQ--;
      }
-   ArrayResize(gQF, gNQ + 1);
-   ArrayResize(gQH, gNQ + 1);
-   ArrayResize(gQL, gNQ + 1);
+   bool vuota = (gNQ == 0);
+   ArrayResize(gQF, gNQ + 1, 1024);
+   ArrayResize(gQH, gNQ + 1, 1024);
+   ArrayResize(gQL, gNQ + 1, 1024);
    gQF[gNQ] = fname;
    gQH[gNQ] = hdr;
    gQL[gNQ] = line;
    gNQ++;
    gDirty = true;
-   FlushQueue();
+   // v1.01 (cancello 05/10): si scrive subito SOLO se la coda era vuota. Con righe gia' in attesa
+   // (un CSV bloccato) si riprova una volta per giro in OnTimer: prima ogni riga nuova ripassava
+   // tutta la coda, un costo che cresceva col quadrato e fuori dal tetto di tempo.
+   if(vuota)
+      FlushQueue();
   }
 
 double NormPx(const int s, const double p)
@@ -848,6 +857,16 @@ int EvalSignal(const int j, const int shift)
    int need = shift + 1;
    if(BarsCalculated(gHE[a]) < InpEmaPeriod + need + 1 || BarsCalculated(gHA[a]) < InpAtrPeriod + need + 1)
       return SIG_ND;
+   // v1.01 (cancello 05/10): su un ALTRO simbolo l'indicatore si ricalcola nel suo thread; appena nata
+   // la barra, CopyBuffer a shift 1 puo' dare ancora la barra di PRIMA mentre iClose(...,1) da' gia'
+   // quella appena chiusa (segnale con EMA/ATR di una barra e chiusura di un'altra). Si aspetta che
+   // l'indicatore abbia calcolato tutte le barre della serie; altrimenti "non pronta" e si riprova.
+   int nb = Bars(sym, tf);
+   if(nb <= 0 || BarsCalculated(gHE[a]) < nb || BarsCalculated(gHA[a]) < nb)
+      return SIG_ND;
+   if(InpUseEma14Bias && gH14[a] != INVALID_HANDLE && BarsCalculated(gH14[a]) >= InpEma14Period + need + 1 &&
+      BarsCalculated(gH14[a]) < nb)
+      return SIG_ND;
    double ema = Buf(gHE[a], need);
    double atr = Buf(gHA[a], need);
    double c1  = iClose(sym, tf, need);
@@ -901,6 +920,9 @@ void Concordanza(const int j, const double px, const datetime tRef)
       idx++;
    int prev = idx + 1;            // la barra che contiene tRef e' in corso: si usa la precedente
    if(BarsCalculated(gHE[b]) < InpEmaPeriod + prev + 1)
+      return;
+   int nbH = Bars(sym, tfH);      // v1.01: indicatore del TF superiore gia' allineato alla serie
+   if(nbH <= 0 || BarsCalculated(gHE[b]) < nbH)
       return;
    double e = Buf(gHE[b], prev);
    double a = Buf(gHA[b], prev);
@@ -1293,6 +1315,11 @@ double E14For(const int i, const datetime tt)
    datetime bs = (datetime)((long)tt - ((long)tt % P));   // M5..D1 allineati alla mezzanotte server
    if(gSU[i].e14Bar == bs && gSU[i].e14Cur > 0.0)
       return gSU[i].e14Cur;
+   // v1.01: niente valore (e niente cache) finche' l'indicatore non ha calcolato tutta la serie:
+   // altrimenti l'indice punterebbe alla barra sbagliata per TUTTA la barra in cache.
+   int nb = Bars(gSym[s], tf);
+   if(nb <= 0 || BarsCalculated(h) < nb)
+      return 0.0;
    int idx = iBarShift(gSym[s], tf, bs - 1, false);
    if(idx < 0)
       return 0.0;
@@ -1855,27 +1882,36 @@ void SaveState()
       Print("[OMBRA] stato non salvato: errore ", GetLastError());
       return;
      }
-   FileWriteString(h, "V;1;" + Sig() + "\r\n");
-   FileWriteString(h, "D;" + IntegerToString(gDayKey) + ";" + IntegerToString((long)gDayDate) + "\r\n");
+   // v1.01 (cancello 05/10): ogni scrittura si controlla. A disco pieno il .tmp esce troncato e
+   // prima la rinomina lo metteva AL POSTO dello stato buono (setup aperti persi al riavvio).
+   bool ok = true;
+   ok = ok && (FileWriteString(h, "V;1;" + Sig() + "\r\n") > 0);
+   ok = ok && (FileWriteString(h, "D;" + IntegerToString(gDayKey) + ";" + IntegerToString((long)gDayDate) + "\r\n") > 0);
    for(int s = 0; s < gN; s++)
       if(gPtrOk[s])
-         FileWriteString(h, "P;" + gSym[s] + ";" + IntegerToString(gLastMsc[s]) + ";" + IntegerToString(gNAt[s]) + "\r\n");
+         ok = ok && (FileWriteString(h, "P;" + gSym[s] + ";" + IntegerToString(gLastMsc[s]) + ";" + IntegerToString(gNAt[s]) + "\r\n") > 0);
    for(int j = 0; j < gNSl; j++)
      {
       string r = "B;" + gSym[gSlS[j]] + ";" + gTFN[gSlK[j]] + ";" + IntegerToString((long)gSlLastBar[j]) + ";" +
                  IntegerToString((long)gStClose[j * 2]) + ";" + IntegerToString((long)gStClose[j * 2 + 1]);
       for(int c = 0; c < NCNT; c++)
          r += ";" + IntegerToString(gCnt[j][c]);
-      FileWriteString(h, r + "\r\n");
+      ok = ok && (FileWriteString(h, r + "\r\n") > 0);
      }
    for(int i = 0; i < ArraySize(gSU); i++)
       if(gSU[i].act)
-         FileWriteString(h, "S;" + IntegerToString(i % 2) + ";" + gSym[gSlS[gSU[i].slot]] + ";" +
-                         gTFN[gSlK[gSU[i].slot]] + ";" + SerSetup(i) + "\r\n");
+         ok = ok && (FileWriteString(h, "S;" + IntegerToString(i % 2) + ";" + gSym[gSlS[gSU[i].slot]] + ";" +
+                         gTFN[gSlK[gSU[i].slot]] + ";" + SerSetup(i) + "\r\n") > 0);
    for(int q = 0; q < gNQ; q++)
-      FileWriteString(h, "Q;" + IntegerToString(gQH[q]) + ";" + gQF[q] + ";" + gQL[q] + "\r\n");
-   FileWriteString(h, "FINE\r\n");
+      ok = ok && (FileWriteString(h, "Q;" + IntegerToString(gQH[q]) + ";" + gQF[q] + ";" + gQL[q] + "\r\n") > 0);
+   ok = ok && (FileWriteString(h, "FINE\r\n") > 0);
    FileClose(h);
+   if(!ok)
+     {
+      Print("[OMBRA] stato NON salvato (scrittura fallita, disco pieno?): resta valido quello precedente");
+      gLastSave = TimeLocal();      // si riprova fra InpStatoSec, non a ogni giro
+      return;                       // gDirty resta true
+     }
    if(!FileMove(tmp, 0, fin, FILE_REWRITE))
       Print("[OMBRA] stato: rinomina fallita, errore ", GetLastError());
    gDirty = false;
