@@ -1,11 +1,13 @@
 ESITO DEL COLLAUDO DI P0 (RIGA_DUKA_P0_CENSIMENTO.ps1 + bootstrap RIGA_LANCIA_DUKA_P0.txt) -- 05/10/2026
 Sviluppatore; il giudizio e' dell'Agente dei Controlli (verificatore-stringhe + controllo-preventivo, Opus): NON ancora fatti. NIENTE e' stato consegnato a Claudio ne' eseguito su una macchina vera.
 Piano: report/PIANO_REGIME_DOW_DUKASCOPY_2026-10-05.md par. 3.1 P0. Firma F2 di Claudio: NON ancora scritta nel testo preciso.
-Commit della riga: d9209710a774864b2454c0ff931fab432575eb5b (SHA256 della riga E65A80E588DE591853829B1E54D96F6B6C3E5BE10708C94EE33BC2115FBEE350, marcatore MARCATORE_RIGA_DUKA_P0_v1)
-Bootstrap: backtest_pipeline/righe/RIGA_LANCIA_DUKA_P0.txt (2279 byte, 1 riga, SHA256 D9C6B3DE7E80983D0954FC87203532E8A9FF45857CA63FF9C6C7A6B1188C2254), rigenerato dal generatore al commit sopra e confrontato byte per byte.
+Commit della riga: cf775c32de68cf030501a0a45c0324749f81f315 (SHA256 della riga 05A1800E882A4C2132AE11F76A6EF4091AA025E3F2E32FEF5321E532AA73A0E7, marcatore MARCATORE_RIGA_DUKA_P0_v1)
+SUPERA il commit d9209710 (E65A80E5): quella stesura cercava la cache col mese ZERO-BASED nella cartella (era solo l'URL) e il banco sbagliava insieme: classe 1114.
+Bootstrap: backtest_pipeline/righe/RIGA_LANCIA_DUKA_P0.txt (2279 byte, 1 riga, SHA256 40E9FB2545C049B68D6112B1A397FF33C1A6BACDC2F2CA3367A8B6AA6F8F2C6F), rigenerato dal generatore al commit sopra e confrontato byte per byte.
 
 ATTESE SCRITTE PRIMA (fixture.py, docstring): i conteggi (slot, byte, righe, primo/ultimo tick) si calcolano DALLA SPECIFICA del finto disco, mai dall'uscita dello script. I byte di ogni .bi5
-codificano il giorno: una lettura del MESE sbagliato (percorso 1-based, ottobre -> cartella di novembre) NON torna per caso su una cache completa (contro-esempio costruito prima).
+codificano il giorno: una lettura del MESE sbagliato NON torna per caso su una cache completa. IL PERCORSO DELLA CACHE lo costruisce dukascopy_tick.percorso_cache (la funzione che la scrive davvero),
+non la memoria di chi scrive il banco: la prima stesura aveva il mese zero-based in script E banco (verde insieme, classe 1114), lo ha scoperto l'autotest 15 di dukascopy_tick.py.
 
 FATTO (pwsh 7.4.6 su Linux, finto C: come PSDrive, Invoke-Expression come il bootstrap; cmdlet assenti sostituiti da funzioni del banco: Get-CimInstance, Get-Command):
   statico.py --autotest + statico.py ......... OK (5 righe cattive viste, 4 buone non segnalate; nel codice, tolti commenti e stringhe: nessun Remove/Copy/Move/Start-Process/Stop-Process/download/exit/param;
@@ -20,8 +22,8 @@ FATTO (pwsh 7.4.6 su Linux, finto C: come PSDrive, Invoke-Expression come il boo
   mutazioni.py ............................... 55 mutazioni testuali, 55 PRESE (tutte parse-valide, controllato con il parser vero), ognuna presa dallo scenario sentinella previsto
   bootstrap_test.py .......................... 4 scenari (ok / file manomesso -> IMPRONTA DIVERSA / marcatore assente con impronta coerente / macchina sbagliata con ZERO richieste al server) + 4 mutazioni del bootstrap
                                                (guardia macchina, controllo impronta, controllo marcatore, pin non passato) tutte prese; server HTTP locale.
-  GitHub raw .................................. scaricato DAVVERO (HTTP 200, 35245 byte, SHA256 identico a git show) e eseguito l'intero bootstrap vero nel banco: impronta OK -> pin e sha nel referto -> ESITO COMPLETO.
-  Difetti trovati DAL collaudo e corretti prima di consegnare: BOM nella stringa di origin.txt (1110), sonda MQL5\Files saltata da un continue (1111), banco con scenari in parallelo (1112), controllo di freschezza vacuo tolto (1113),
+  GitHub raw .................................. scaricato DAVVERO (HTTP 200, 35446 byte, SHA256 identico a git show, al commit cf775c32) e eseguito l'intero bootstrap vero nel banco: impronta OK -> pin e sha nel referto -> ESITO COMPLETO.
+  Difetti trovati DAL collaudo (o da un test vicino) e corretti prima di consegnare: LAYOUT DELLA CACHE (1114, il piu' grave: la riga avrebbe dichiarato 'cache assente' su un PC vero), BOM nella stringa di origin.txt (1110), sonda MQL5\Files saltata da un continue (1111), banco con scenari in parallelo (1112), controllo di freschezza vacuo tolto (1113),
   .NET con percorso PSDrive (Convert-Path), disco C: preso dal primo disco invece che dalla lettera di dukascopy_lavoro (mutante), "ZERO grafici" etichettato [MISURATO].
 
 NON COPERTO (dichiarato):
