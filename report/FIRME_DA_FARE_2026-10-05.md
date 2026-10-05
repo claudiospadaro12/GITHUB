@@ -139,6 +139,7 @@ Finestre del nucleo di ogni specifica; fra parentesi gli **episodi distinti** (n
 - **LATERALE "sporco"**: una finestra piatta con un calo grosso ma lento si chiama LATERALE (DAX 2015.01-2016.06: R -1,2%, DD 29,6%, DD3m 23,3%). Non e' una finestra del nucleo; se mai lo diventasse, il suo DD si legge comunque (valvola E.3: il rischio e' un fatto a qualunque n).
 - **Il CROLLO e' "contiene un crollo"**, non "e' un crollo": l'anno 2020 (+46%) e' CROLLO, come l'aveva gia' chiamato la casa (CROLLO_ANNO, `PROVA_REGIME_CRITERI` E.6).
 - **Nasdaq su aperture**: etichette PROVVISORIE finche' P0a non le rifa' su H1.
+- **Una frase della regola tocca un criterio congelato**: la lettura della regola D di `PROVA_REGIME_CRITERI` §4D ("stessa direzione in ORSO e CROLLO") come "in almeno due finestre AVVERSE distinte". Per me e' la generalizzazione dell'intento ("un solo periodo avverso e' un aneddoto"), non un ammorbidimento: dove ci sono un ORSO e un CROLLO le due finestre sono le stesse. Ma e' una lettura, e la dichiaro: **alla lettera il Nasdaq non ha piu' un ORSO (il 2022 si chiama CROLLO +ORSO) e la regola D non sarebbe soddisfabile**. Se preferisci la lettera, dimmelo prima di firmare e si sceglie l'altra precedenza (ORSO > CROLLO, 1.3).
 - **Nessun gate di durata**: una finestra di due settimane con +10% e DD < 15% sarebbe TORO. Le finestre le decidono le specifiche (la piu' corta, W2r, e' di 3 mesi).
 
 ### 1.8 Che cosa cambia nelle altre firme (coordinamento, da fare PRIMA di firmarle)
