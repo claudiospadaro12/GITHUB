@@ -256,7 +256,12 @@ def _leggi_giornale_runner(conto):
             g = None
     if not giorni:
         return None
-    giorni.sort()
+    # ordina sulla SOLA data: le 4-tuple contengono `tot` che puo' essere
+    # None, e su due blocchi con la stessa data e gli stessi ordini il
+    # confronto arriverebbe a `None < int` -> TypeError, cioe' la pagella
+    # non esce affatto. Uno strumento che ha imparato a non certificare
+    # deve anche non morire.
+    giorni.sort(key=lambda x: x[0])
     ultimo_g, ordini, tot, scritta = giorni[-1]
     return {"sonda": sonda, "referto": ultimo,
             "giorno": "%s-%s-%s" % (ultimo_g[:4], ultimo_g[4:6], ultimo_g[6:]),
@@ -742,7 +747,7 @@ def main():
         if (any("50504263" in x for x in fermi) and _gr100
                 and _gr100["giorno"] < giorno and _gr100["ordini"] == 0
                 and (_gr100["righe"] or 0) >= SOGLIA_LOG_PIENO):
-            out += ["> 🟠 **Per il 100k `50504263` la frase qui sopra e' "
+            out += ["> 🔴 **Per il 100k `50504263` la frase qui sopra e' "
                     "SUPERATA dalla fonte viva, e la risposta non e' una "
                     "rassicurazione: il TERMINALE di quel conto non scrive un "
                     "log Esperti dal %s**, mentre nello stesso referto gli "
@@ -1139,17 +1144,17 @@ def main():
             gr = giornale_runner("50504263")
             if (gr and gr["giorno"] < giorno and gr["ordini"] == 0
                     and (gr["righe"] or 0) >= SOGLIA_LOG_PIENO):
-                out += ["> 🟠 **NESSUN EA HA POTUTO OPERARE su `50504263` — ma "
+                out += ["> 🔴 **NESSUN EA HA POTUTO OPERARE su `50504263` — ma "
                         "il fatto MISURATO e' un altro, e va detto per primo: "
-                        "il TERMINALE del 100k non scrive un log Esperti dal "
-                        "%s** (ultima scrittura **%s**). Il CSV ha contenuto "
-                        "fermo al **%s**, e il giornale del runner (`%s`, sonda "
-                        "delle 03:30 del **%s**) sull'ultimo giorno con log — "
-                        "il **%s** — da' **0** righe di ordine su **%s** righe "
-                        "totali, e **dopo non esiste nessun log**."
-                        % (gr["giorno"], gr["ultima_scrittura"] or "[non letta]",
-                           d100, gr["referto"], gr["sonda"], gr["giorno"],
-                           gr["righe"]), "",
+                        "l'ultimo log Esperti del TERMINALE del 100k e' quello "
+                        "del %s e si ferma a %s; dal giorno DOPO non ne esiste "
+                        "nessuno.** Il CSV ha contenuto fermo al **%s**, e il "
+                        "giornale del runner (`%s`, sonda delle 03:30 del "
+                        "**%s**) su quell'ultimo giorno con log da' **0** righe "
+                        "di ordine su **%s** righe totali."
+                        % (gr["giorno"],
+                           (gr["ultima_scrittura"] or "[ora non letta]").split()[-1],
+                           d100, gr["referto"], gr["sonda"], gr["righe"]), "",
                         "> 🔴 **E qui il salto NON si fa**: MT5 scrive un log "
                         "per ogni giorno in cui gira **con EA attaccati**, "
                         "quindi *nessun log* dice che quel **TERMINALE era "
@@ -1239,7 +1244,7 @@ def main():
         elif (_g100 and _g100["giorno"] < giorno and _g100["ordini"] == 0
                 and (_g100["righe"] or 0) >= SOGLIA_LOG_PIENO):
             riga_giorno_100k = ("| Perdita giornaliera (-5%%) | -5.000/giorno | "
-                                "🟠 **NON CALCOLABILE**: nessun EA poteva "
+                                "🔴 **NON CALCOLABILE**: nessun EA poteva "
                                 "operare; il **terminale** non scrive log dal "
                                 "%s — vedi il banner |" % _g100["giorno"])
         else:
