@@ -307,7 +307,8 @@ try{
   $rcF = Esegui-Nativo $Python @("-u", (Reale $DukaPy), "--simboli", "USA30IDXUSD", "--da", $Da, "--a", $A, "--dst", "fisso", "--fuso", "server", "--solo-cache", "--senza-raccolta", "--cartella", (Reale $Lavoro)) $logF
   Gate ($rcF -eq 0) "F" ("la riconversione e' uscita con rc " + $rcF + " (3 = buchi, 1 = fallita): i CSV in tick\ possono essere MISTI vecchi/nuovi. Leggi " + $logF + "; la copia del 03/09 e' in " + $Backup + ".")
   Gate (Test-Path -LiteralPath $refOld) "F" "il .py non ha riscritto referto_dukascopy_tick.txt"
-  Gate ((Get-Item -LiteralPath $refOld).LastWriteTime -ge $t0F) "F" "il referto del .py NON e' fresco (classe 26)"
+  # (nessun gate di "freschezza" del referto: e' stato CANCELLATO prima della corsa, quindi se esiste lo ha scritto questa corsa; un gate che nessun input puo' far scattare sarebbe un finto cancello, classe 1113.
+  #  Quello che conta e' che i CSV siano stati RISCRITTI: gate qui sotto sui 9 file.)
   $refNew = Leggi-Condiviso $refOld
   Gate ($refNew -match '(?m)^ESITO\s*:\s*OK') "F" "il referto del .py non dice 'ESITO : OK'"
   Gate ($refNew -match '(?m)^DST:\s*fisso') "F" "il referto del .py non dice 'DST: fisso': la conversione non e' quella voluta"
@@ -349,8 +350,9 @@ try{
 
   # ===================================================================
   Titolo ("I. IL CONTROLLO NEGATIVO: " + $GiornoNeg + " in UTC+0 (sbagliato apposta), cartella e simbolo SEPARATI")
-  $negOk = ($NegDir -eq (Join-Path $Lavoro "dukascopy_neg"))
-  Gate $negOk "I" "percorso della cartella del negativo non e' quello atteso"
+  # prima di CANCELLARE una cartella (solo se esiste da una corsa precedente MIA) se ne controlla la forma: .../dukascopy_lavoro/dukascopy_neg, mai una radice
+  $negOk = (((Split-Path $NegDir -Leaf) -eq "dukascopy_neg") -and ((Split-Path (Split-Path $NegDir -Parent) -Leaf) -eq "dukascopy_lavoro") -and ((Split-Path $NegDir -Parent) -eq $Lavoro))
+  Gate $negOk "I" "percorso della cartella del negativo non e' .../dukascopy_lavoro/dukascopy_neg: non cancello niente"
   if(Test-Path -LiteralPath $NegDir){
     Dico ("la cartella del negativo esiste gia' (" + $NegDir + "): e' un artefatto di una corsa precedente MIO, la rifaccio da capo.") "Yellow"
     Remove-Item -LiteralPath $NegDir -Recurse -Force

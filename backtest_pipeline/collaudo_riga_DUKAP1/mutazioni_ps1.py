@@ -33,7 +33,9 @@ M = [
  # --- driver: file al pin
  ("drv_impronta_non_verificata", "drv", 'Gate ($h -ieq $shaAtteso) "B"', 'Gate $true "B"', ["17_", "17b", "17c"]),
  ("drv_marcatore_non_verificato", "drv", 'Gate ([bool](Select-String -LiteralPath $dest -SimpleMatch -Quiet -Pattern $marcatore)) "B"', 'Gate $true "B"', ["17d"]),
- ("drv_autotest_py_ignorato", "drv", 'Gate (($rc1 -eq 0) -and (Select-String -LiteralPath $logA1 -SimpleMatch -Quiet -Pattern "AUTOTEST: TUTTO OK.")) "B"', 'Gate $true "B"', ["17d"]),
+ ("drv_autotest_py_ignorato", "drv", 'Gate (($rc1 -eq 0) -and (Select-String -LiteralPath $logA1 -SimpleMatch -Quiet -Pattern "AUTOTEST: TUTTO OK.")) "B"', 'Gate $true "B"', ["17e"]),
+ ("drv_autotest_f2_ignorato", "drv", 'Gate (($rc2 -eq 0) -and (Select-String -LiteralPath $logA2 -SimpleMatch -Quiet -Pattern "TUTTO OK")) "B"', 'Gate $true "B"', ["17f"]),
+ ("drv_negok_guardia_tolta", "drv", 'Gate $negOk "I"', 'Gate $true "I"', ["01"]),
  # --- driver: cache e stato
  ("drv_cache_con_buchi_ignorata", "drv", 'Gate ($rcC -eq 0) "C"', 'Gate $true "C"', ["18"]),
  ("drv_cache_assente_ignorata", "drv", 'Gate (Test-Path -LiteralPath (Join-Path $RawDir "USA30IDXUSD")) "C"', 'Gate $true "C"', ["19"]),
@@ -52,7 +54,6 @@ M = [
  ("drv_referto_py_non_riscritto", "drv", 'Gate (Test-Path -LiteralPath $refOld) "F" "il .py non ha riscritto', 'Gate $true "F" "il .py non ha riscritto', ["28_"]),
  ("drv_dst_fisso_non_verificato", "drv", 'Gate ($refNew -match \'(?m)^DST:\\s*fisso\') "F"', 'Gate $true "F"', ["28c"]),
  ("drv_csv_non_riscritti_ignorato", "drv", 'Gate ($f.LastWriteTime -ge $t0F) "F"', 'Gate $true "F"', ["28b"]),
- ("drv_referto_fresco_ignorato", "drv", 'Gate ((Get-Item -LiteralPath $refOld).LastWriteTime -ge $t0F) "F"', 'Gate $true "F"', ["28b"]),
  # --- driver: negativo e figlie
  ("drv_copia_cache_neg_ignorata", "drv", 'Gate ($rcI1 -eq 0) "I"', 'Gate $true "I"', ["29_"]),
  ("drv_nome_neg_non_verificato", "drv", 'Gate (($negFiles.Count -eq 1) -and ($negFiles[0] -eq ($SimNeg + "_ticks_2025-03.csv"))) "I"', 'Gate $true "I"', ["29b"]),
@@ -82,7 +83,7 @@ M = [
  ("imp_non_valido_non_visto", "imp", 'if(-not $okn){ $stato = "NON_VALIDO" }', 'if($false){ $stato = "NON_VALIDO" }', ["11"]),
  ("imp_esito_non_misurato_ignorato", "imp", 'if(("" + $x.Esito).Trim() -ne "MISURATO"){', 'if($false){', ["02", "12", "15"]),
  ("imp_codice_ok_senza_per_nome", "imp", 'if($PerNomeOk){ $Codice = 0 }else{ $Codice = 4 }', '$Codice = 0', ["02", "03"]),
- ("imp_altro_simbolo_ignorato", "imp", '$PerNomeOk = ($nDentro -eq $ListaGiorni.Count -and $AltroSimbolo -eq 0)', '$PerNomeOk = ($nDentro -eq $ListaGiorni.Count)', ["13", "14"]),
+ ("imp_altro_simbolo_ignorato", "imp", '$PerNomeOk = ($nDentro -eq $ListaGiorni.Count -and $AltroSimbolo -eq 0)', '$PerNomeOk = ($nDentro -eq $ListaGiorni.Count)', ["13b"]),
  ("imp_tutti_i_giorni_serve_uno", "imp", '$PerNomeOk = ($nDentro -eq $ListaGiorni.Count -and $AltroSimbolo -eq 0)', '$PerNomeOk = ($nDentro -ge 1 -and $AltroSimbolo -eq 0)', ["02", "03"]),
  ("imp_pulisci_tutto", "imp", "  foreach($nome in $Copiati){\n    if($nome -like $MascheraCsv){", "  foreach($nome in @(Get-ChildItem -LiteralPath $filesDir | ForEach-Object { $_.Name })){\n    if($nome -like '*.csv'){", ["20"]),
  ("imp_pulisci_non_chiamata", "imp", '$Pul = Pulisci-Copiati\n', '$Pul = "x"\n', ["20"]),
@@ -90,10 +91,12 @@ M = [
  ("imp_copia_senza_registro", "imp", 'Copy-Item -LiteralPath $f.FullName -Destination $filesDir -Force; [void]$Copiati.Add($f.Name)', 'Copy-Item -LiteralPath $f.FullName -Destination $filesDir -Force', ["20"]),
  ("imp_giorni_vuoti_ammessi", "imp", 'if($ListaGiorni.Count -eq 0){ throw', 'if($false){ throw', ["18"]),
  ("imp_preset_maschera_cablata", "imp", 'InpMascheraCsv=$MascheraCsv', 'InpMascheraCsv=U30USD_DK_ticks_*.csv', ["D01"]),
- ("imp_work_non_ripulito", "imp", "  Remove-Item -LiteralPath $GiorniWork -Force -ErrorAction SilentlyContinue\n  $dstScr", "  $dstScr", ["D01"]),
+ ("imp_work_non_ripulito", "imp", "  Remove-Item -LiteralPath $GiorniWork -Force -ErrorAction SilentlyContinue\n  $dstScr", "  $dstScr", ["21"]),
 ]
 # EQUIVALENTI dichiarati: (nome, perche')
-EQUIVALENTI = {}
+EQUIVALENTI = {
+ "drv_negok_guardia_tolta": "non attivabile da nessun input: controlla la FORMA di una cartella costruita da costanti prima di una cancellazione ricorsiva (difesa contro una modifica futura, classe 1113 dichiarata)",
+}
 
 
 def applica(nome, quale, old, new):
@@ -188,6 +191,8 @@ def main():
             prese += 1; print("  presa    %-40s %s" % (nome, esito))
         elif esito.startswith("NON APPLICABILE"):
             non_app += 1; print("  NON APPLICABILE %s %s" % (nome, esito))
+        elif nome in EQUIVALENTI:
+            eq += 1; print("  EQUIVALENTE %-37s %s" % (nome, EQUIVALENTI[nome]))
         else:
             resto.append(byname[nome])
     if resto:

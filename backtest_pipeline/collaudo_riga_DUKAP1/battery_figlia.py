@@ -44,12 +44,14 @@ def casi():
     c.append(("11_mediana_non_numerica", dict(righe_grezze={"U30USD_DK": righe_ok({"2024.12.10": OKR("2024.12.10", "boh", "99.0000", passa="SI")})}), "", {"2024.12.10": "NON_VALIDO"}, 4, []))
     c.append(("12_data_malformata", dict(), "-GiorniSonda '2024.11.20;boh'", {"2024.11.20": "DENTRO", "boh": "DATA_MALFORMATA"}, 4, ["PER NOME: 1 su 2"]))
     c.append(("13_righe_di_altro_simbolo", dict(righe_grezze={"U30USD_DK": righe_ok(extra=(L._riga_g("U30USD_DKNEG", "2025.03.12", "0.09000000", "95.0000"),))}), "", {g: "DENTRO" for g in G}, 3, ["ATTRIBUZIONE INCOERENTE", "QUASI"]))
+    c.append(("13b_altro_simbolo_con_verdetto_OK", dict(righe_grezze={"U30USD_DK": righe_ok(extra=(L._riga_g("U30USD_DKNEG", "2025.03.12", "0.03000000", "99.0000"),))}), "", {g: "DENTRO" for g in G}, 4, ["ATTRIBUZIONE INCOERENTE", "OK: CANCELLO PASSATO"]))
     c.append(("14_simbolo_swap_il_dk_ha_il_simbolo_neg", dict(righe_grezze={"U30USD_DK": righe_ok({"2025.03.12": L._riga_g("U30USD_DKNEG", "2025.03.12", "0.03000000", "99.0000")})}), "", {"2025.03.12": "ASSENTE"}, 4, ["ATTRIBUZIONE INCOERENTE"]))
     c.append(("15_esito_vuoto", dict(righe_grezze={"U30USD_DK": righe_ok({"2024.12.10": L._riga_g("U30USD_DK", "2024.12.10", "-", "-", esito="")})}), "", {"2024.12.10": "ESITO_VUOTO"}, 4, []))
     c.append(("16_verdetto_chiuso", dict(scen_dk={g: ["MISURATO", "0.30", "99.0"] for g in G}), "", {g: "FUORI" for g in G}, 1, ["CANCELLO CHIUSO"]))
     c.append(("17_maschera_larga_ferma_prima_di_copiare", {}, "-Maschera '*.csv'", {}, 1, ["MASCHERA '*.csv' non comincia con 'U30USD_DK_ticks_'"]))
     c.append(("18_giorni_vuoti", {}, "-GiorniSonda ''", {}, 1, ["-GiorniSonda vuoto"]))
     c.append(("19_file_estraneo_che_combacia", dict(files_stale=["U30USD_DK_ticks_2025-07.csv"]), "", {}, 1, ["FILE ESTRANEI in MQL5\\Files", "U30USD_DK_ticks_2025-07.csv"]))
+    c.append(("21_work_stale_non_finisce_nello_zip", dict(non_scrive=["U30USD_DK"]), "", {}, 1, ["NON VALUTABILE"]))
     c.append(("20_pulisci_files_toglie_solo_i_copiati", dict(files_stale=["ALTRO_tieni.csv"]), "-PulisciFiles", {g: "DENTRO" for g in G}, 0, ["pulizia MQL5\\Files: rimossi 9 di 9 CSV copiati da questa corsa"]))
     return c
 
@@ -67,6 +69,9 @@ def runna(nome, kw, extra, attesi, rc_att, frasi):
         args = "-Pin %s -ShaMq5 %s -SimboloDK U30USD_DK -WorkDir '%s' %s" % (spec["pin"], srv.sha(h1.FILE_MQ5), os.path.join(b, "w"), extra)
         if "-GiorniSonda" not in extra:
             args += " -GiorniSonda '%s'" % ";".join(G)
+        if nome.startswith("21_work_stale"):      # un file per giorno di una corsa PRECEDENTE nella cartella di lavoro: non deve finire nello zip di questa
+            os.makedirs(os.path.join(b, "w"))
+            open(os.path.join(b, "w", "ABTG_ImportTick_giorni_U30USD_DK.csv"), "w").write("STALE\n")
         fuori0 = h1.snapshot(c)
         p = h1.esegui(spec, c, rf, args, srv, b)
         fuori1 = h1.snapshot(c)
@@ -99,6 +104,13 @@ def runna(nome, kw, extra, attesi, rc_att, frasi):
                 stp = L.stato_giorno(righe, "U30USD_DK", g)[0]
                 if stp != ps[g]:
                     err.append("DIFFERENZIALE: %s figlia %s, valutatore python %s" % (g, ps[g], stp))
+        if nome.startswith("21_work_stale"):
+            import zipfile
+            zs = [x for x in os.listdir(os.path.join(c, "Users", "Master", "Desktop")) if x.endswith(".zip")]
+            for zz in zs:
+                nomi_z = zipfile.ZipFile(os.path.join(c, "Users", "Master", "Desktop", zz)).namelist()
+                if any("giorni_U30USD_DK" in x for x in nomi_z):
+                    err.append("il file per giorno STALE della cartella di lavoro e' finito nello zip: %s" % nomi_z)
         # pulizia
         files = os.path.join(c, "Users", "Master", "AppData", "Roaming", "MetaQuotes", "Terminal", "ABC123", "MQL5", "Files")
         nomi = sorted(os.listdir(files))

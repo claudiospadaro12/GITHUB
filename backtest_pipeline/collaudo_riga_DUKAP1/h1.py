@@ -37,6 +37,8 @@ MUTAZIONI_FILE = {
     "py_referto_dst_usa": lambda b: b.replace(b'    if args.autotest:\n        return autotest()\n', b'    if args.autotest:\n        return autotest()\n    if args.dst == "fisso" and args.solo_cache and "dukascopy_lavoro" in args.cartella:\n        open(os.path.join(args.cartella, "tick", "referto_dukascopy_tick.txt"), "w").write("ESITO   : OK\\nDST: usa\\n")\n        return 0\n'),
     "py_nome_uscita_ignorato": lambda b: b.replace(b'nome_out = args.nome_uscita or (bcm + "_DK")', b'nome_out = (bcm + "_DK") if "dukascopy_neg" in args.cartella else (args.nome_uscita or (bcm + "_DK"))'),
     "py_negativo_scrive_in_tick": lambda b: b.replace(b'    if args.copia_cache_giorno:\n        return copia_cache_cmd(args)\n', b'    if args.copia_cache_giorno:\n        if "dukascopy_neg" in args.copia_cache_giorno:\n            open(os.path.join(os.path.dirname(args.copia_cache_giorno), "tick", "U30USD_DK_ticks_2025-03.csv"), "a").write("x")\n        return copia_cache_cmd(args)\n'),
+    "py_autotest_rosso": lambda b: b.replace(b'    log("AUTOTEST: TUTTO OK.")\n    return 0', b'    log("AUTOTEST: FALLITO")\n    return 1'),
+    "f2_autotest_rosso": lambda b: b.replace(b'    if "--autotest" in argv:\n        return autotest()', b'    if "--autotest" in argv:\n        print("AUTOTEST ROSSO")\n        return 1'),
     "py_copia_cache_fallisce": lambda b: b.replace(b'    if args.copia_cache_giorno:\n        return copia_cache_cmd(args)\n', b'    if args.copia_cache_giorno and "dukascopy_neg" in args.copia_cache_giorno:\n        return 3\n    if args.copia_cache_giorno:\n        return copia_cache_cmd(args)\n'),
 }
 
@@ -133,7 +135,8 @@ def costruisci(base, spec):
         os.makedirs(os.path.join(dati, "MQL5", sub))
     open(os.path.join(dati, "origin.txt"), "wb").write(utf16(TERM))
     if spec["doppio_dati"]:
-        os.makedirs(os.path.join(ap, "DDD444", "MQL5"))
+        os.makedirs(os.path.join(ap, "DDD444", "MQL5", "Profiles", "Charts", "Default"))     # con un grafico senza EA: la guardia A non si ferma "per caso" sul secondo
+        open(os.path.join(ap, "DDD444", "MQL5", "Profiles", "Charts", "Default", "chart01.chr"), "wb").write(utf16("<chart>\nsymbol=U30USD\n</chart>\n"))
         open(os.path.join(ap, "DDD444", "origin.txt"), "wb").write(utf16(TERM))
     os.makedirs(os.path.join(ap, "ZZZ999", "MQL5"))
     open(os.path.join(ap, "ZZZ999", "origin.txt"), "wb").write(utf16("C:\\MT5_MANUALE"))
@@ -146,6 +149,10 @@ def costruisci(base, spec):
             open(p, "wb").write(utf16("<chart>\nsymbol=U30USD\n<window>\n<expert>\nname=%s\n</expert>\n</window>\n</chart>\n" % ch["ea"]))
         else:
             open(p, "wb").write(utf16("<chart>\nsymbol=U30USD\n</chart>\n"))
+    # l'alias dello Store FUNZIONANTE (percorso con \WindowsApps\, dentro il finto C:): se la riga non lo filtra per percorso, gira; il banco prova il FILTRO, non il fallimento a valle
+    sd = os.path.join(user, "AppData", "Local", "Microsoft", "WindowsApps")
+    os.makedirs(sd)
+    open(os.path.join(sd, "python.exe"), "w").write('#!/bin/sh\nexec python3 "$@"\n'); os.chmod(os.path.join(sd, "python.exe"), 0o755)
     for n in spec["files_stale"]:
         open(os.path.join(dati, "MQL5", "Files", n), "w").write("Time,Msec,Bid,Ask\n")
     return c
@@ -228,7 +235,7 @@ function Get-CimInstance { [CmdletBinding()] param([Parameter(Position=0)][strin
 function Get-Command { [CmdletBinding()] param([Parameter(Position=0)][string[]]$Name)
   if($Name -contains "python.exe"){
     if($env:PYSCEN -eq "real"){ [pscustomobject]@{ Name="python.exe"; Source=$env:PY_SHIM } }
-    if($env:PYSCEN -eq "store"){ [pscustomobject]@{ Name="python.exe"; Source="C:\Users\Master\AppData\Local\Microsoft\WindowsApps\python.exe" } } } }
+    if($env:PYSCEN -eq "store"){ [pscustomobject]@{ Name="python.exe"; Source=$env:PY_STORE_SHIM } } } }
 function Copy-Item { [CmdletBinding()] param([string]$LiteralPath, [string]$Destination, [switch]$Force)
   Microsoft.PowerShell.Management\Copy-Item -LiteralPath $LiteralPath -Destination $Destination -Force:$Force
   if($env:COPY_CORROTTA -eq "1" -and $Destination -like "*tick_0309_backup*" -and $LiteralPath -like "*2025-01.csv"){ Add-Content -LiteralPath $Destination -Value "x" } }
@@ -248,7 +255,7 @@ def esegui(spec, c, riga, argv_ps, srv, scen_dir, timeout=900, extra_env=None):
     json.dump(dict(simboli={"U30USD_DK": spec["scen_dk"], "U30USD_DKNEG": spec["scen_neg"]}, righe_grezze=spec["righe_grezze"], non_scrive=spec["non_scrive"]), open(scen, "w"))
     tmp = os.path.join(scen_dir, "tmp"); os.makedirs(tmp, exist_ok=True)
     env.update(COMPUTERNAME=spec["macchina"], USERNAME="Master", USERPROFILE="C:\\Users\\Master", APPDATA="C:\\Users\\Master\\AppData\\Roaming", TEMP=tmp, TMP=tmp,
-               SystemRoot="C:\\Windows", CDRIVE=c, DISCHI_JSON=json.dumps(spec["dischi"]), PYSCEN=spec["python"], PY_SHIM=shim,
+               SystemRoot="C:\\Windows", CDRIVE=c, DISCHI_JSON=json.dumps(spec["dischi"]), PYSCEN=spec["python"], PY_SHIM=shim, PY_STORE_SHIM="C:\\Users\\Master\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe",
                SIM_DATA=os.path.join(c, "Users", "Master", "AppData", "Roaming", "MetaQuotes", "Terminal", "ABC123"), SIM_SCEN=scen, SIM_LOG=os.path.join(scen_dir, "simlog"),
                SIM_SCRIPT=os.path.join(QD, "sim_mt5.py"))
     if spec.get("copia_corrotta"):
