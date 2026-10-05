@@ -35,11 +35,17 @@ def genera(commit, shas=None, raw=RAW):
            "LO STESSO numero del piccolo del VPS: due macchine, stesso conto) e SI FERMA se un grafico salvato ha un EA attaccato. Questa e la riga P1 del piano Dow Dukascopy (commit %s): "
            "NESSUN download di dati Dukascopy; riconverte dalla cache i CSV di dukascopy_lavoro con orologio UTC+1 fisso DOPO averne fatto una copia di sicurezza (tick_0309_backup), "
            "reimporta il custom U30USD_DK e ne crea uno nuovo U30USD_DKNEG nel terminale, e scrive sul Desktop le cartelle DUKA_P1_data e DUKA_IMPORT_SONDA_simbolo_data con i loro zip. "
-           "NON tocca preset, EA, taglie, rischio, conti. NON TOCCATI, per nome: il VPS VMI3047753 e tutte le sue cartelle dati -- FTMO trial 1514806751 (C:\\FTMO, ex challenge 541452707), "
+           "PERIMETRO COMPLETO DI SCRITTURA: nel profilo utente dukascopy_lavoro (tick riscritti, tick_0309_backup, dukascopy_neg rifatta da capo) e abtg_duka_p1 (file al pin, log, risultati); "
+           "nella cartella dati del SOLO terminale BCM Markets MT5 Terminal: MQL5\\Scripts\\ABTG_ImportaTickEsterno (riscaricato e ricompilato), MQL5\\Files (CSV U30USD_DK e referti della sonda; i CSV del negativo li toglie), "
+           "MQL5\\Presets\\abtg_duka_import.set (parametri dello script di import, NON un preset di EA), bases (i due custom, U30USD_DKNEG resta e si toglie a mano; e lo storico tick nativo U30USD che il terminale puo scaricare da BCM per la sonda); "
+           "in TEMP abtg_duka_import.ini (avvio con AllowLiveTrading=false). Chiude con la forza SOLO i terminal64 di C:\\Program Files\\BCM Markets MT5 Terminal, cioe quello che ha aperto lei. "
+           "NON tocca EA, preset di EA, taglie, rischio, conti. NON TOCCATI, per nome: il VPS VMI3047753 e tutte le sue cartelle dati -- FTMO trial 1514806751 (C:\\FTMO, ex challenge 541452707), "
            "REALE 10105439 (C:\\BCM_Reale), piccolo 50503392 sul VPS (BCM Markets MT5 Terminal), 100k 50504263 (BCM Markets MT5 Terminal -V3), manuale 50503635 (C:\\MT5_MANUALE), "
            "banco 50504400 (C:\\MT5_Backtest), Pepperstone, Tickmill. Esegue la riga solo se impronta e marcatore tornano; la riga verifica poi le impronte di tutti i file che usa. "
            "NON lanciarla se MT5 o una riga di round e aperta su questo PC (la riga si ferma da sola). DURATA NON MISURATA nel suo insieme: la riconversione dei 222 giorni ha preso ~12 minuti il 03/09, "
            "la importazione di ~20,75 milioni di tick non e mai stata cronometrata (la riga figlia aspetta al massimo 240 minuti per import): lascia il PC acceso finche la console stampa ESITO P1. "
+           "Ciascuno dei due import si ferma da solo a 240 minuti (o dopo 25 minuti senza progressi), quindi la riga finisce da sola entro ~8 ore e mezza: se dopo 9 ore non vedi ESITO P1, fotografa la console e mandala, NON chiudere MT5 a mano. "
+           "NON incollarla una seconda volta mentre la prima gira, anche se sembra ferma: la riconversione e la importazione possono stare a lungo senza stampare. "
            "Se la console mostra >>, Ctrl+C prima di incollare." % commit[:8])
     assert "'" not in msg
     t = ("& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Write-Host '" + msg + "' -ForegroundColor Yellow; "
