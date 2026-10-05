@@ -36,3 +36,14 @@ NON COPERTO (dichiarato):
   - il ramo "_2" quando la cartella DUKA_P0_<ora> esiste gia' (stesso secondo);  OneDrive: il Desktop e' USERPROFILE\Desktop come nelle altre righe di casa (ripiego USERPROFILE provato);
   - la validita' dei .bi5 (qui non si decodifica lzma: lo fa dukascopy_tick.py --solo-cache in P1).
 Serve dal cancello: verificatore-stringhe + controllo-preventivo (Opus) su righe/RIGA_DUKA_P0_CENSIMENTO.ps1, righe/RIGA_LANCIA_DUKA_P0.txt e collaudo_riga_DUKAP0/; poi la firma F2 di Claudio.
+
+=== RICOLLAUDO dopo il controllo preventivo del 05/10 (pin 61df70a2, impronta 5CAA3504) ===
+Difetti trovati dal cancello (counter-esempio costruito PRIMA della correzione: sul ps1 di 97fe5be8 gli scenari nuovi 16b/16c/16d sono ROSSI):
+  - classe 1119: history\U30USD (barre M1, sempre presente su un MT5 vero) contata come cartella dei tick nativi; history\U30USD_DK come "custom presente".
+    Ora: TICK = cartella col genitore 'ticks'; il referto etichetta [TICK] / [barre M1]. Fixture: history\ omonima sempre costruita accanto a ticks\.
+  - MaxBars non letto, ma il piano par. 3.1 P0 lo mette fra le misure: ora letto da config\common.ini, soglia 200000 (classe 160) con implicazione per P2/P6.
+  - sintesi senza implicazioni: ora ogni numero porta "-> per F1 / per P1 / per P2-P6"; il tetto di 250 ore e' dichiarato NON misurato da P0 (lo misura P3);
+    disco dei dati MT5 (APPDATA) dichiarato stesso/diverso da dukascopy_lavoro.
+  battery.py 32/32 (4 scenari nuovi: 16c, 16d, 17, 17b) | mutazioni.py 63/63 prese (4 nuove) | statico OK | controlla_riga ps1+riga: nessun difetto meccanico
+  bootstrap_test.py 61df70a2: 4 scenari + 4 mutazioni prese | GitHub raw al pin: HTTP 200, SHA256 identico a git show.
+  NON rifatto: l'esecuzione del bootstrap VERO contro GitHub raw dentro pwsh (fatta su 97fe5be8; qui verificati separatamente HTTP 200 + impronta).
