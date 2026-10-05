@@ -19,11 +19,11 @@
 3. **SOTTO 1**: **65 righe** hanno almeno una cella SOTTO (G1 8 · G2 9 · G3 10 · G4 8 · G5 12 · G6a 9 · G6b 9); **12** hanno **solo** celle SOTTO. **53 righe stanno in tutte e due le liste**: la regola del piano (la classe e' per CELLA, mai una media) fa si' che quasi ogni EA abbia celle da entrambe le parti. Il numero che conta non e' "quanti EA sopra" ma "quali celle, con che n, in che regime".
 4. **NON MISURATO**: **40 righe** (+ **5 EREDITA**: copie e pin che valgono la riga della madre; G1 3, G3 1, G5 1). Dentro il NM c'e' una cosa che pesa: **numeri gia' pagati e non leggibili** (CSV rimasti sul VPS o referti senza CSV): G4 **35 round** (14-20/09), G6a **6 round** (R141e, R145a/b, R148a/bL/bS), G6b **5 round** solo dichiarati. Vedi **sez. 3(a), con la scadenza di calendario (verso il 20/10)**.
 5. **Differenza "con screening" / "solo tick"** (la dichiara G6a con due viste affiancate, gli altri gruppi hanno regole diverse: sez. 0.4): su G6a, **9 SOPRA / 9 SOTTO / 8 entrambe / 7 NM** con le celle a barre o esterne, **7 / 8 / 6 / 8** solo con i tick. Applicando la vista "solo tick" a G6a il totale scende da 59/65/53/40 a **57 SOPRA / 64 SOTTO / 51 entrambe / 41 NM** (sez. 0.2).
-6. **Affidabilita'**: **A = zero** in tutti e sette i gruppi (nessuna cella ha due regimi misurati uno per uno con n OOS >= 150 posizioni). **B "pulita"** (tick, OOS vero, n >= 150 posizioni, IS dalla stessa parte): i gruppi ne nominano **tre**: `771531` EMA200 U30USD H1 (257 pos), `770101` DAX long (193 pos), il candidato Dow breakout su U30USD (199 pos, "NON ANCORA MISURATO come sedia"). Le altre B hanno SEGNO INVERTITO, o n solo in deal, o NO PER RISCHIO / ESCLUSE PER COSTO, o finestra piena senza OOS.
-7. **Regimi**: sui tick BCM il regime e' **uno solo** (rialzo dal 26/09/2024 per gli indici, 05/07/2024 per il forex); orso / laterale / crollo sono **NON MISURATO** su tutte le sedie indice. L'unico posto dove i quattro regimi esistono e' un feed **esterno `_EXT`** (2019-2022) o le barre a n minuscolo (1-67 operazioni): nessuna cella li passa tutti (sez. 2).
-8. **Certificato di morte**: **nessun EA intero e' dichiarato MORTO**. Una sola *cella* ha il 5/5 dichiarato (EMA200 oro H4 base, G2, per rischio). Tutti i SOTTO sono "sotto 1, non ancora morto" con scritto cosa manca.
-9. **Cosa serve, in una frase**: prima **trasportare i CSV gia' girati** (zero macchina, ma con una **scadenza: `carica_risultati.ps1` guarda solo gli ultimi 30 giorni**, quindi i CSV del 14-21/09 escono dalla finestra **verso il 20/10**), poi una trentina di misure da **pochi minuti** sul PC di backtest (costi e fonti in sez. 3b), poi le **decisioni di Claudio** (D2, SEGNO INVERTITO, regola screening, ecc.: sez. 3d). L'unica misura che compra *regime* per le sedie vive costa **90-348 ore di calcolo** e una firma.
-10. **Onesta' sul tono**: e' un archivio molto piu' ricco di quanto sembri (i gruppi hanno trovato celle sopra 1 nascoste dentro EA dati per "morti", e round gia' girati dati per "mai girati"), ma le sedie schierabili sono ancora pochissime e quasi tutte stanno su **un solo regime e n sotto 150**: la distanza fra "PF sopra 1" e "sedia schierabile" e' tutta li'.
+6. **Affidabilita'**: **A = zero** in tutti e sette i gruppi (nessuna cella ha due regimi misurati uno per uno con n OOS >= 150 posizioni). **B "pulita"** (tick, OOS vero, n >= 150 posizioni, IS dalla stessa parte): i gruppi ne nominano **tre**: `771531` EMA200 U30USD H1 (257 pos), `770101` DAX long (193 pos), il candidato Dow breakout su U30USD (199 pos, "NON ANCORA MISURATO come sedia"). Le altre B che i gruppi citano hanno SEGNO INVERTITO, o n solo in deal, o NO PER RISCHIO / ESCLUSE PER COSTO, o finestra piena senza OOS.
+7. **Regimi**: sui tick BCM il regime e' **uno solo** (rialzo dal 26/09/2024 per gli indici, 05/07/2024 per il forex); orso / laterale / crollo sono **NON MISURATO** su tutte le sedie indice. L'unico posto dove i quattro regimi hanno un numero e' un feed **esterno `_EXT`** (finestre dichiarate diverse da gruppo a gruppo, 2011-2024: sez. 2.3) o le barre a n minuscolo (1-67 operazioni): nessuna cella li passa tutti (sez. 2).
+8. **Certificato di morte**: **nessun EA intero e' dichiarato MORTO**. Una sola *cella* ha il 5/5 dichiarato (EMA200 oro H4 base, G2, per rischio). I SOTTO sono "sotto 1, non ancora morto" con scritto la casella che manca; alcuni sono "capitolo chiuso con numero" (G3, regola 19/08: Londra e BreakinBox) ma non MORTI.
+9. **Cosa serve, in una frase**: prima **trasportare i CSV gia' girati** (zero macchina, ma con una **scadenza: `carica_risultati.ps1` guarda solo gli ultimi 30 giorni**, quindi i CSV del 14-21/09 escono dalla finestra **verso il 20/10**), poi circa quaranta misure da **pochi minuti a ~45 minuti** sul PC di backtest (costi e fonti in sez. 3b, costi dei gruppi), poi le **decisioni di Claudio** (D2, SEGNO INVERTITO, regola screening, ecc.: sez. 3d). L'unica misura che compra *regime* per le sedie vive costa **90-348 ore di calcolo** e una firma.
+10. **Lettura d'insieme**: e' un archivio molto piu' ricco di quanto sembri (i gruppi hanno trovato celle sopra 1 nascoste dentro EA dati per "morti", e round gia' girati dati per "mai girati"), ma le sedie schierabili sono ancora pochissime e quasi tutte stanno su **un solo regime e n sotto 150**: la distanza fra "PF sopra 1" e "sedia schierabile" e' tutta li'.
 
 ### 0.1 Conteggi per gruppo (righe del piano) - dichiarati dai gruppi, ritrovati dallo script
 
@@ -90,7 +90,7 @@ Finestra standard G1: tick 2024.09.26 -> 2026.06.30 (~21 mesi); IS ->2025.06.09,
 | 7 | `ABTG_Apertura_Marco` | sedia RITIRATA 06/08 (770301) | ENTRAMBE (7a SOPRA, 7b e 7c SOTTO) | 7a D30EUR M5 solo long buf 600: PF 1,244 - n 309 (finestra unica) - DD 4,69% (10k) | [T?] 2024.01.01-2026.06.30 - D30EUR M5. SOTTO: 7b due lati 0,789-0,858; 7c NASUSD M5 22/22 < 1 (0,502-0,842) | toro | C* | no (doppione di 770101, ritirato per rischio doppio) | G1 7a-7c; scheda 7 |
 | 8 | `ABTG_Apertura_3Ingressi` | laboratorio R83 | ENTRAMBE | 8a D30EUR M15 RETEST a limite: PF 1,078 / 1,188 - 197 / 311 deal - DD 7,03 / 10,60% (1%) | [T] 21 mesi - D30EUR M15. SOTTO: 8c NASUSD M15 3/3 (OOS 0,873 / 0,624 / 0,978; R84: 9/9 celle OOS negative) | toro | B provvisoria (n in deal) | non ancora misurabile ("il retest vince sul DAX") | G1 8a-8c |
 | 9 | `DAX_MASTER_PROP` | esterno (DAXMasterEA v2.0 + 5 protezioni) | NM | nessuna (1,51 dichiarato, esterno - 69 tr - DD 5,45% a 10k: non classifica) | [E,G] DE40 M15 Tickmill demo, 2023-2024, 0% tick reali, solo IS | rialzo | - | non ancora misurabile | G1 9 |
-| 10 | `ABTG_Dow_Apertura_US` | sedia 770202 long | ENTRAMBE (10a SOPRA; 10b short e 10c SOTTO) | 10a U30USD M5 long RETEST range 35', filtro EMA H4: PF 1,222 / 1,270 - 56 / 96 pos - DD 5,67 / 4,39% (100k, 1%) | [T] 21 mesi - U30USD M5. SOTTO: short 1,511 / 0,840 su 73 (INV); breakout/FADE/DELAYED max 0,997 | toro; stagione estate 0,886 (84) / inverno 1,493 (68) (orologio G1 aperto) | C | non ancora misurabile (orologio in fase) | G1 10a-10c; scheda 10 |
+| 10 | `ABTG_Dow_Apertura_US` | sedia 770202 long | ENTRAMBE (10a SOPRA; 10b short e 10c SOTTO) | 10a U30USD M5 long RETEST range 35', filtro EMA H4: PF 1,222 / 1,270 - 56 / 96 pos - DD 5,67 / 4,39% (100k, 1%) | [T] 21 mesi - U30USD M5. SOTTO: short 1,511 / 0,840 su 73 (INV); 10c (SOTTO B) breakout nudo max 0,997 (96 celle) / 1,106-1,214 (143), FADE 0,806, DELAYED max 0,978 | toro; stagione estate 0,886 (84) / inverno 1,493 (68) (orologio G1 aperto) | C | non ancora misurabile (orologio in fase) | G1 10a-10c; scheda 10 |
 | 11 | `ABTG_Dow_Apertura_US_Pin9fca` | copia pin | EREDITA 10a | - (diff 0 vs pin e vs HEAD) | - | - | - | - | G1 11 |
 | 12 | `ABTG_Dow_Apertura_US_TrailFix` | variante di prova non in campo | NM | nessuna | - | - | - | si' | G1 12 |
 | 13 | `trailfix_9fca63d9/CLAU12_Dow_Apertura_US.mq5` | variante di prova non in campo | NM | nessuna | - | - | - | si' | G1 13 |
@@ -139,16 +139,16 @@ Convenzioni G3: dati [T] su oro dal 2024.07.10, forex dal 2024.07.05, indici dal
 | 42 | `ABTG_MaxMinNotte_DAX_Short_Ottimizzato` | sedia 770411 D30EUR M15 short + filtro S&P | ENTRAMBE | 2a: PF 1,878 / 2,160 - **14 pos** (21 deal) - DD OOS 1,92% (1%); n=14 non decide | [T] 2024.09.26-2026.06.30 (IS ~8,5 mesi, OOS ~12,7) - D30EUR M15. SOTTO ~1: 2b cella d+1 inverno 0,996 (17 pos) | toro; stagione, non regime | D | si' (campione e TF) | G3 2a-2b; scheda 4.2 |
 | 43 | `ABTG_MaxMinNotte_DAX_Short_Ottimizzato_MFE` | copia di sola misura (R104) | NM | nessuna (n=29 < 30, non misurabile) | [T] 2024.09.26-2026.08.24, MFE | - | - | no | G3 3; scheda 4.3 |
 | 44 | `ABTG_BreakinBox` | candidato chiuso 31/08 | SOPRA (formale, ~1) | gamba A PF 1,007 (416 deal) / gamba B RR 2,0 PF 1,106 (354 deal) - DD 24,1 / 19,7% = **NO PER RISCHIO** (finestra piena, senza OOS) | [T] 2024.09.26-2026.06.30 - D30EUR M15 (referto, CSV non in repo) | toro | B (s.OOS) | no (capitolo chiuso, regola 19/08) | G3 4; scheda 4.4 |
-| 45 | `ABTG_Nightly` | candidato (fade notturno) | ENTRAMBE | 5c GBPUSD [B]: OOS 1,040 (IS 0,586) INV - 163 deal - DD IS 22,6% (NO PER RISCHIO) | SOTTO: 5a EURCHF [T] M5/M15 0,814 (IS 0,891) - 85 deal - DD 11,1/15,4%; 5b EURUSD/USDCHF [B] 0,861 / 0,970; 5d sei simboli R259 [B] 5 su 5 validi SOTTO | 1 regime (21 mesi); 7,5 anni non separati per regime | C | si' (finestra giusta + uscita; D6: giudicato su 21 mesi per errore di copia) | G3 5a-5d; scheda 4.5 |
+| 45 | `ABTG_Nightly` | candidato (fade notturno) | ENTRAMBE | 5c GBPUSD [B]: OOS 1,040 (IS 0,586) INV - 163 deal - DD IS 22,6% (NO PER RISCHIO) | SOTTO: 5a EURCHF [T] M5/M15 0,814 (IS 0,891) - 85 deal - DD 11,1/15,4%; 5b EURUSD/USDCHF [B] 0,861 / 0,970; 5d sei simboli R259 [B] 5 su 5 validi SOTTO | 1 regime (21 mesi); 7,5 anni non separati per regime | C (n 85-164) / B (AUDUSD, USDJPY n 480-500, ma [B]) | si' (finestra giusta + uscita; D6: giudicato su 21 mesi per errore di copia) | G3 5a-5d; scheda 4.5 |
 | 46 | `ABTG_Nightly_Ottimizzato` | copia (439 righe) | EREDITA (= Nightly) | - | - | - | - | - | G3 6; scheda 4.6 |
 | 47 | `ABTG_PTE` | sedie 771321 U30USD H1; 771322/771332 GBPUSD H1 (duello); 771323 USDJPY spenta 24/08 | ENTRAMBE | 7a GBPUSD H1 tick: OOS 1,378 (IS 40,98 su 20 deal) - 49 deal = 27 pos. 7c U30USD (771321): 1,171 (IS 1,178) - 40 deal = 23 pos - DD CSV 3,22% (contratto 2,18%) | [T] 2024.07.05-2026.06.30. SOTTO: 7d GBPUSD 13 anni [B] viva 0,972 (DD 17,68%), candidata 1,095 (DD 9,87%); 7e USDJPY 0,935 (INV); oro 0/16 celle | tick 1 regime; USDJPY funziona solo nel laterale (R80); GBPUSD orso 2022 con feed generato 0,75 | D | si' (chiudere la divergenza `_EXT` / nativo) | G3 7a-7f; scheda 4.7 |
 | 48 | `ABTG_PTE_Ottimizzato` | variante ottimizzata (R74) | ENTRAMBE | GBPUSD: 14/14 celle sopra 1, PF 1,18-1,98 - n 47-52 deal (celle di griglia, non di contratto) | [T] GBPUSD/USDJPY, [B] U30USD. SOTTO: USDJPY 10/14 sopra (0,86-1,43), U30USD 7/14 (0,77-1,47) | 1 regime | D | si' | G3 8; scheda 4.8 |
 | 49 | `ABTG_WOL` | D1 oro/indici (osservazione) | ENTRAMBE | 9b sweep: 3 celle coerenti IS+OOS su 55 coppie (NASUSD H1, NASUSD H2, SPXUSD H8); profitti +5..+190 su 10.000; DD 0,4-1,3% ("profitti da spread") | [T]+[B] 2024.01.01-2026.06.30. 9a D1 default: n 0-19 deal (non si misura) | 1 regime | D | si' | G3 9a-9c; scheda 4.9 |
 | 50 | `ABTG_PostNews` | sedie 771201 ECB EURJPY / 771202 FOMC EURUSD / 771203 NFP USDJPY (demo piccolo) | SOTTO (candidati) + 3 sedie NM | nessuna SOPRA. **SOTTO:** ISM EURUSD 0,79 (IS 0,76) - 312 / 234 deal; 13:30 USDJPY 0,90 (IS 0,66) - 253 / 151 deal. Sedie: 4 CSV con Trades=0 = nessun PF | [B] SOLO REGISTRO (CSV non in repo), IS 2010-2015, OOS 2015-2023 | non separati | B-screening | non ancora misurabile (primo PF delle 3 sedie) | G3 10a-10c; scheda 4.10 |
-| 51 | `ABTG_Bulge` | "Bulge viola" v5.20, in campo demo | ENTRAMBE | 11b GBPUSD: OOS 1,212 (IS 0,867) INV - 42 deal; 8 cross dollaro 1,096 (IS 0,742) INV - 233 deal | [B] 4 mesi (IS 2026.03.02-04.30, OOS 2026.05.02-06.29) - H1, 22 cross. SOTTO: 11a AMPIA 0,816 (IS 0,871) - 363 / 410 deal - DD 13,7 / 22,8% (0,80%, 10k) | 1 regime; R92BAB e' una riga diagnostica: il merito di una cella NON e' misurato | C-B (SOTTO) / D-C (SOPRA) | si' (M1 lunga sulla cella di campo) | G3 11a-11c; scheda 4.11 |
+| 51 | `ABTG_Bulge` | "Bulge viola" v5.20, in campo demo | ENTRAMBE | 11b GBPUSD: OOS 1,212 (IS 0,867) INV - 42 deal; 8 cross dollaro 1,096 (IS 0,742) INV - 233 deal | [B] 4 mesi (IS 2026.03.02-04.30, OOS 2026.05.02-06.29) - H1, 22 cross. SOTTO: 11a AMPIA 0,816 (IS 0,871) - 363 / 410 deal - DD 13,7 / 22,8% (0,80%, 10k) | 1 regime; R92BAB e' una riga diagnostica: il merito di una cella NON e' misurato | C-D (scheda 4.11) | si' (M1 lunga sulla cella di campo) | G3 11a-11c; scheda 4.11 |
 | 52 | `BULGE_MASTER` | consolidamento esterno di 8 versioni | NM | nessuna | - | - | - | no | G3 12; scheda 4.12 |
 | 53 | `ABTG_LondonFx` | contenitore R116, 3 motori | SOTTO | nessuna SOPRA. **SOTTO:** EURUSD 0,843 / 0,898 / 0,923; GBPUSD 0,763 (IS 0,688) - 1.132-2.253 deal - DD 31-61% | [T] 0,65% 100k, IS 2024.07.05-2025.04.21, OOS 2025.04.22-2026.06.30 - EURUSD/GBPUSD M15 | 1 regime | B | no (NO PER RISCHIO; chiuso 2 volte) | G3 13; scheda 4.13 |
-| 54 | `ABTG_AllineaLondra` | allineamento 5 medie in Londra (P2 28/08) | ENTRAMBE | una cella OHLC ~1,01 (IS 0,89) INV (SOPRA formale) | SOTTO: tick EURUSD M15 0,70-0,88 (4 celle), 248-930 deal; OHLC 0,68-1,01 | 1 regime | B | si', ma prior pessimo | G3 14; scheda 4.14 |
+| 54 | `ABTG_AllineaLondra` | allineamento 5 medie in Londra (P2 28/08) | ENTRAMBE | una cella OHLC ~1,01 (IS 0,89) INV (SOPRA formale) | SOTTO: tick EURUSD M15 0,70-0,88 (4 celle), 248-930 deal; OHLC 0,68-1,01 | 1 regime | B-C | si', ma prior pessimo | G3 14; scheda 4.14 |
 
 ### 1.4 G4 - FOREX "FAMIGLIE DI AGOSTO", FIBO, CORSO-JPY (12 righe, 14 file)
 
@@ -242,4 +242,477 @@ Convenzioni G6b: `[MIS]` letto da CSV in repo e ricalcolato dal gruppo; `[DICH]`
 
 ---
 
-## WIP: sez. 2 (regimi), 3 (cosa serve), 4 (correzioni), 5 (non fatto) e Appendice A in costruzione in questo stesso file.
+## 2. PER TIPOLOGIA DI MERCATO E PER REGIME
+
+Il piano (5.7) fa leggere "tipologie di mercato" in **due modi**; qui li tengo separati.
+
+### 2.1 Per classe di strumento (dove le celle sono SOPRA, secondo i gruppi)
+
+| classe | dove ci sono celle SOPRA (righe della sez. 1) | dove NO / limite |
+|---|---|---|
+| **Indici USA e UE** (U30USD, NASUSD, D30EUR, F40EUR, 225JPY) | aperture DAX long (1, 2, 7, 8), Dow long (10), Nasdaq (14, 15), EMA200 U30USD H1 (27), SuperWave U30USD (31, 32), ORB U30USD (36), MaxMin DAX short (42), BreakinBox (44), SupRev su U30USD/NASUSD/D30EUR/F40EUR (68-76), GapFill/GapCont indici (59, 60), Larry U30USD (61), cacce G6a/G6b su indici (86, 88, 91, 92, 94-96, 110, 115) | gemelli indice dell'EMA200 SOTTO (D30EUR H1 0,783, NASUSD H1 0,693: riga 27); Live5m (21-23) SOTTO; tutte "un solo regime"; costo (frontiera `stop >= 40 x spread`): ESCLUSO PER COSTO nelle righe 22, 23, 72 (28,7x); costo 29,5x nella riga 36; FRAGILE nelle righe 1 e 14 (14k) |
+| **Oro (XAUUSD)** | MaxMin solo long tick (41), EMA200 oro H4 OOS 1,495-1,535 (27, 28: IS invertito), SupRev oro H4 (68-70), GoldenCross oro H1 (78-80), Larry XAU long (61), CrossEma oro H1 (109, `[T nominale]`), Gold_Ichimoku [B] (82), CanaleLento [B] (101) | EMA200 oro H4: **NO PER RISCHIO** (DD 22 anni 45,91% a 1%, riga 28); SupRev Multi_Ott DD 22 anni 16,90% e GoldenCross Ott 25,18% a 1% (righe 70, 79); Gold_Ichimoku DD 21,52% a 0,5% (riga 82); profondita' tick XAUUSD non verificata (G6b-3) |
+| **Forex** | BreakingBand, EasyTrend, Larry, GapFill WF a n 8-53 (55, 57, 59, 61); CostToCost EURJPY [B] (56); GoldenCross H4 (78); PTE tick n 20-27 pos (47); Bulge solo celle INV (51) | BB M15/M30 SOTTO (55); BreakoutCorso 7/7 OOS < 1 (65); LondonFx, AllineaLondra, Londra_ORB (38, 53, 54) SOTTO / NO PER RISCHIO; EZ EURGBP 0/16 (57); Larry GBPJPY short 0,108 (61) |
+| **Argento (XAGUSD)** | SupRev H4 (G5 S06: 7,134 / 2,047 con IS su n=4) e CostToCost WF (SEGNO INVERTITO, G4 2h) | SupRev M15-H12: 8 TF su 8 SOTTO (G5 S07); CostToCost 6,5 anni 0,70 (G4 2h); le sedie 770922 (preset FW long-only) e 772363 (spenta 24/08) |
+| **Energia / altri CFD** | GapFill WF su F40EUR, UKOIL, USOIL, SPXUSD: SOPRA con IS rosso (G4 4c, SEGNO INVERTITO) | "panchina regime", n 15-21 (D) |
+
+### 2.2 Per regime: i NUMERI che esistono (e basta)
+
+Regola dei gruppi: **un regime non misurato si scrive NON MISURATO, mai stimato**. L'unico posto dove i quattro regimi (toro / orso / laterale / crollo) hanno un numero e' un feed **esterno `_EXT`** (2019-2022) o le **barre a n minuscolo**. Su tick BCM il regime e' **uno solo** (il rialzo).
+
+| EA / cella | dato | laterale 2019 | crollo (2020) | toro 2021 | orso 2022 | fonte |
+|---|---|---|---|---|---|---|
+| SuperWave GBPUSD H2 (riga 31) | [B] 6,5 anni | 0,80 (61) | 1,07 (17); anno intero 0,86 su 69 | 0,56 (65) | 0,96 (51) | G2 tab. 0, scheda 2.1 |
+| CostToCost EURJPY H4 (riga 56) | [E] 100k 1% | 1,385 (54) | crollo-anno 1,693 (67); **crollo puro feb-apr 2020 0,025 (23, DD 14,83%)** | 1,053 (46) | 2,654 (43; giornata -10,07%) | G4 2c |
+| CostToCost GBPCAD H4 (riga 56) | [E] | 0,852 (58) | crollo-anno 0,966 (63); crollo 0,497 (16) | 1,238 (61) | 0,611 (48) | G4 2g |
+| EasyTrend GBPUSD (riga 57) | [E] 100k | 1,538 (35) | crollo-anno 0,763 (35); crollo 0,391 (10) | 1,014 (34) | 0,993 (32) | G4 3h |
+| EasyTrend CHFJPY (riga 57) | [E] | - | crollo-anno 0,720 (40) | 1,166 (49) | 0,978 (30) | G4 3h |
+| EasyTrend AUDJPY (riga 57) | [E] | 0,608 (44) | crollo-anno 0,988 (41) | 1,276 (44) | 0,930 (35) | G4 3h |
+| BreakingBand GBPUSD / EURUSD / AUDUSD (riga 55) | [B] nativo (R102), n 1-19 | 1,512 (15) / 0,447 (10) / 0,192 (5) | 0,595 (7) / 163,96 (n=1) / 0,372 (3) | 0,482 (19) / 0,837 (9) / 1,213 (9) | 1,436 (9) / 1,498 (6) / 1,068 (7) | G4 scheda 4.1 §4 |
+| BreakingBand GBPUSD / EURUSD (riga 55) | [E] R59 | 1,263 (12) / 0,369 (9) | crollo 0,998 (6); crollo-anno 1,030 (19) / 1,629 (4) | 0,971 (18) / 0,603 (9) | 0,928 (8) / 1,633 (7) | G4 scheda 4.1 §4 |
+| PunteLarry GBPUSD (riga 61) | [E] R50/R59 | 0,336 (16) | crollo-anno 0,346 (20) | 2,023 (19) | 1,783 (12) | G4 6i |
+| PunteLarry oro (riga 61) | [E] | 4,963 (7) | crollo-anno 3,474 (8) | 3,030 (11) | 0,716 (2) | G4 6i |
+| GapFill EURUSD / GBPUSD (riga 59) | [E] R50/R59 | **9 finestre su 10 a Trades=0, 1 con n=1**: prova di regime non avvenuta | | | | G4 4e, sez. 7 |
+| SupRev NASUSD H1 (riga 72) | [B][E] `NASUSD_EXT` | 0,664 (55) laterale 2015-16 | 2,604 (5) crollo-anno 2020; 0,396 (3) crollo 2020-02..04 | 2,187 (8) | 0,958 (7) | G5 Y09-Y12; vecchia 2011-12: 1,152 (94) |
+| SupRev oro H4, 22 anni (riga 68) | [B] r127b, split ~2013.04 | IS 2004-2013 (toro dell'oro): **7/7 celle sotto 1** (0,792-0,855); OOS 2013-2026: **7/7 sopra** (1,053-1,125) | | | | G5 U05, D14 |
+| EMA200 oro H4 (riga 27) | [B] R264d | IS 2017-23 0,836 contro OOS 2024-26 1,535: PF per regime NM; NON CONFRONTABILE | | | | G2 tab. 0 |
+| EMA200 GBPUSD H4, 16,5 anni (riga 27) | [B] 2010-2026 | AUDJPY 0,78-0,81 / 0,95-1,01; GBPUSD 0,80-0,84 / 1,13: SEGNO INVERTITO su 4 celle su 4 = REGIME | | | | G2 tab. 0 |
+| MaxMinNotte oro (riga 41) | [B] 6,5 anni / 22 anni | per anno, non per regime: toro 2020, laterale 2021-22, toro 2023-26; anni negativi 2021 e 2023; su 22 anni 11 anni negativi su 23 | | | | G3 1a, 1c |
+| InvEsaurimento E3 (riga 106) | [B][E] 2017-2020, s.OOS | 6 regimi nominati sul solo E3, **n 2-59: coprono 100 operazioni su 215**; toro 2017 -5.604 (n 59), Q4-2018 +2.946 (n 18) | | | | G6b I03, G6b-8 |
+| PTE (riga 47) | tick + [E] | USDJPY funziona solo nel laterale (R80); GBPUSD orso 2022 con feed generato 0,75; segno invertito col feed (R80: 4 cambi su 4, G4) | | | | G3 7a, 7b; G4 sez. 0 |
+
+**Lettura onesta** (dei gruppi, G4 sez. 2 punto 4): nessuna sedia passa tutti i regimi; "passa" solo dove n <= 1. Il crollo puro (feb-apr 2020) e' **negativo** su CostToCost EURJPY (0,025, `_EXT`), EasyTrend GBPUSD (0,391) / CHFJPY (0,732) (`_EXT`), BreakingBand GBPUSD (0,595) / AUDUSD (0,372) (nativo R102), Larry GBPUSD (0,288, `_EXT`); i valori 0,732 e 0,288 sono nel testo di G4 e non nella sua tabella 1.
+
+### 2.3 Il buco: dove i regimi esistono solo su feed `_EXT` o non esistono
+
+- **Indici BCM a tick (le sedie su indice citate dai gruppi - 770101, 770105, 770202, 770260, 770250, 771531, 770511, 770611, 770411, 970913 - e le cacce G6a/G6b)**: un regime solo (rialzo con discesa feb-apr 2025). Orso / laterale / crollo = **NON MISURATO**. G1: "storico DAX 2010-2018 scaricato (HistData, 1,72 M barre M1), mai importato"; Nasdaq 2010-2026 a barre **usato, fra le aperture, solo da 770250**; **Dow: 0 byte oltre la validazione** (piano Dukascopy 90-348 ore, P0 fatto, P1 in attesa della mossa di Claudio: `FIRME_DA_FARE`).
+- **Feed `_EXT`** (finestre dichiarate dai gruppi: 2018-2024 per i forex in G4; `NASUSD_EXT` 2011-2022 in G5, 2017-2020 in G6b per InvEsaurimento, 2020-2024 in G6a e G6b per CRT e Chaos; **non ho verificato se sono lo stesso feed**): i regimi 2019-2022 vivono **solo qui**, ma il feed **cambia anche il segno** (R80: 4 cambi su 4, G4 sez. 0), e per SupRev NASUSD H1 G5 segnala che il motore fa 13,3 op/anno su `_EXT` contro 77 sul nativo ("feed o epoca?": R113 coda, ~2 min). Il regime sul Nasdaq puo' essere un artefatto del feed.
+- **Forex nativo BCM**: tick dal 05/07/2024; storico lungo a barre da 1999 per BB, EZ, Larry (R102/R103/R160-R171) ma **i CSV dei round d'uscita a 1999-2026 sono tra i 35 non in repo** (sez. 3a).
+- **Oro**: tick dal 10/07/2024 (G3); **profondita' tick XAUUSD non verificata** (G6b-3: blocca la regola F6 sulle 4 celle oro di CrossEma, `[T nominale]`); PF per regime dell'oro 22 anni **non in repo** (zip R99/R100 fuori: G5 D21).
+- **Prove di regime pronte ma non girate** (richiamo, non ripeto): tre specifiche (Nasdaq/S&P, DAX, Dow) + la regola unica **R-0** nel foglio `FIRME_DA_FARE`. Il foglio dice: sul **DAX** la regola tiene **3 finestre avverse distinte**; sul **Nasdaq 3 etichette avverse ma 2 episodi distinti**; con le firme obbligatorie la colonna "anni/dati" del dossier per Emiliano va da 10 NO / 2 PARZIALE / 0 SI a 6 NO / 6 PARZIALE / 0 SI (mai SI).
+
+---
+
+## 3. COSA SERVE, AGGREGATO E ORDINATO PER COSTO / VALORE
+
+> **Separazione richiesta da Claudio: DECISIONI sue vs LAVORO nostro.**
+> **LAVORO nostro** (nessuna firma sul contenuto, ma ogni riga e ogni script passa dai due cancelli prima di uscire): (a) trasporto dei CSV gia' girati, (b) misure a pochi minuti sul PC di backtest, (c) misure a zero macchina, (e) scrivere i lettori / convertitori / file prova che oggi non esistono. Nota: "lanciare un round" sul PC di backtest richiede comunque **via libera di Claudio per il lancio** (regola del 21/09) e **mai sul VPS** finche' una challenge e' viva.
+> **DECISIONI di Claudio**: (d), piu' le firme del foglio `FIRME_DA_FARE_2026-10-05.md` (richiamate, non ripetute).
+> **Avvertenza sui costi** (G6a R13, G6a-7): le stime dei documenti di caccia sono risultate **~2,5x sottostimate** sul banco VPS (R141a-e: 5,16 min stimati contro 13,2 misurati) e la velocita' del PC di backtest e' **non misurata**: tutte le stime "~N min" qui sotto sono **dei gruppi**, non mie, e vanno moltiplicate per 2-3 per pianificare.
+
+### 3(a) PRIMA DI TUTTO, E CON UNA SCADENZA DI CALENDARIO: portare nel repo i CSV gia' girati
+
+> ## 🔴 SCADENZA: VERSO IL 20/10/2026 (stima G6a) - FINESTRA DI 30 GIORNI DI `carica_risultati.ps1`
+> `backtest_pipeline/carica_risultati.ps1` r.31 (`$GiorniIndietro = 30`) e r.111-112 (`$vivi = ... LastWriteTime -ge $soglia`) **scartano in silenzio i CSV piu' vecchi di 30 giorni** (riga di console: "NON guardati, piu' vecchi di 30 giorni"). Riletto da me sullo script il 05/10: la riga c'e' (r.31, r.111-112, r.210). I CSV dei round del runner sono stati scritti il **14-21/09**: **escono dalla finestra verso il 20-21/10/2026** `[STIMA G6a]`. Dopo quella data serve **alzare la variabile** (modifica di script = passa dal cancello) oppure copiarli a mano. **E' un'urgenza di calendario, non di macchina: costo 0 minuti di tester, ma ~15 giorni di tempo (da oggi 05/10).**
+> **[CONSOLIDATORE]** (aritmetica sulle date dei gruppi, non una misura): G4 dichiara i 35 round "14-20/09" ma **non la data dell'ultima scrittura per singolo round**; se un file fosse stato riscritto l'ultima volta prima del 20/09 uscirebbe prima. Proposta (non decisione): portare tutto **entro ~13/10**, una settimana di margine.
+> **[CONSOLIDATORE]** I 5 round di G6b (corse di agosto / inizio settembre: R96 23/08, INVES 30/08, CHAOS 31/08, passo 0 VwapRevert 03/09, R117 ~04/09) hanno **oggi gia' piu' di 30 giorni**: se i CSV esistono ancora, la riga standard li salterebbe gia' adesso; G6b stesso dice che zip e per-trade non sono in repo e li colloca sul PC di backtest `[INFERITO]` (non sul VPS dei round del runner). Dove stanno davvero e' **da verificare** prima di scrivere la riga.
+
+| gruppo | round da trasportare | quanti | dove / quando | cosa sblocca | costo macchina | fonte |
+|---|---|---:|---|---|---|---|
+| **G4** | **BB** R161a-c, R174a, R176a, R177a · **GapFill** R157a, R159a, R167a-d, R168a-d, R175a, R178a · **Larry** R156a, R160a-e, R169a-f · **EZ** R171a-b · **C2C** (SL buffer) R146a, R146c · **GapCont** R162a | **35** | runner notturno, banco `50504400`, **14-20/09**; uscita 0 (3 round), 3 (14), 2 (18); CSV sul VPS, mai arrivati nel repo | **casella 3 del certificato (uscita)** per 6 EA e **storico lungo [B] con IS/OOS 1999-2026** per BB, EZ, Larry. Per i round a uscita 2 la presenza di operazioni e' **NON VERIFICATA** (17 su 18; R162a verificato: 9 righe, tutte Trades > 0) | **0 min** (i round sono costati 70-817 s l'uno sul banco) | G4 §3-bis, sez. 5 m.1, G4-12 |
+| **G6a** | **R141e** (DaxValueArea) · **R145a, R145b** (VolExpBreak) · **R148a, R148bL, R148bS** (Cycle) | **6** | runner, 5-7 notti ciascuno, tutte uscita 0 (**37 esecuzioni**); CSV sul VPS | trasforma **3 EA NM su 7** (`DaxValueArea`, `VolExpBreak`, `Cycle`) in numeri. All'arrivo: controllare che IS e OOS di ogni round abbiano **la stessa data** e **8 righe** (il giro del 21/09 senza referto potrebbe aver lasciato una coppia mezza riscritta, G6a-1) | **0 min** | G6a sez. 5 m.1, 3-bis, G6a-1 |
+| **G6b** | **passo 0 VwapRevert** (03/09) · **R96** CrossEmaApertura (23/08) · **INVES** InvEsaurimento (30/08, zip + per-trade E3) · **CHAOS + CHAOSABL** ChaosLyapunov (31/08) · **R117** Relativo (~04/09) | **5** | **solo dichiarati**: referti con PF/n/DD, CSV mai nel repo (non sono round del runner) | chiude le caselle 1-2 con un CSV per 5 EA; attribuisce le **115 operazioni** di InvEsaurimento E3 fuori da ogni regime; sblocca F6 sulle celle oro di CrossEma | **0 min** | G6b sez. 5 m.1, 3-bis, G6b-4, G6b-8 |
+| | **totale: 35 + 6 + 5 = 46 sigle di round** | 46 | | | 0 min | |
+
+**Chi lo fa e con che firma** (G4 m.1, G6a m.1, G6b m.1): per G4 e G6a una riga su una **finestra PowerShell sul VPS** (`carica_risultati.ps1`), **nessun terminale MT5 toccato**; per G6b una **sola copia dal PC di backtest** dove le corse di agosto sono nate (`[INFERITO]` dal gruppo). Ogni riga va fatta passare da `controlla_riga.py` e da `controllo-preventivo` **prima** di mandarla, con il bersaglio dichiarato per esteso (finestra PowerShell sul VPS oppure sul PC di backtest: mai "il VPS" e basta). G6a aggiunge che il **perimetro del runner resta sola lettura**: serve una firma. **Non scrivo nessuna riga qui.**
+
+**Altri numeri gia' pagati e non in repo** (stesso difetto, **senza** la finestra dei 30 giorni dei round del runner):
+
+| gruppo | cosa | stato | fonte |
+|---|---|---|---|
+| G1 | **R252** (short DAX in fase, 24 passate) | **zip mai tornato** (5-8 min dichiarati); serve lo zip sul Desktop di `DESKTOP-H4D7CAJ` | G1 §7 m.1, scheda 1 §11 |
+| G1 | R274, R280, PRV_DAXAP_04, R214a-d, R215a, R231a, R275, R183, R180 | **nessun CSV in repo**; scritti, non girati (o girati e non tornati: R252) | G1 sez. 6 |
+| G2 | CSV R234 | non in repo | G2 sez. 6 |
+| G3 | BreakinBox, LondonFx, AllineaLondra, candidati PostNews (4 CSV), R17, forward | solo referti `[SOLO REGISTRO]`, nessun CSV in repo | G3 sez. 7, D22 |
+| G5 | R110 lati, R236/R238, R99/R100 (zip fuori), R120a/c/d, A1 SUPREV_DOW_H1, G1PAOLO_*, R124a, R132a/b, R163a, R166a, R190c, R237a/b, PASSATA_STOP_SUPREV | numeri solo nei referti o stato di esecuzione `[NON VERIFICATO]` | G5 D19, D21 |
+| G6a | R98, R95, R235, R109 (tabelle OPTFRAME), P0 CRT / NY / DaxReEntry | numeri **solo in referto** | G6a sez. 3-bis |
+| G6a | **9 file prova scritti e mai girati**: R148g, R140a, R140b, A1_DAXREENTRY_M1, A1_NYRETEST_NASUSD, NOISE_M30 x2, PASSO0_FVGRET x2 | non in coda, non nei referti runner | G6a sez. 3-bis |
+
+### 3(b) MISURE A POCHI MINUTI SUL PC DI BACKTEST (ordinate per costo, poi per valore dichiarato dal gruppo)
+
+Tutte **solo sul PC di backtest** (`DESKTOP-H4D7CAJ`), mai sul VPS finche' una challenge e' viva. Il costo e' quello **scritto dal gruppo** (con la sua fonte); [STIMA] / [DERIVATO] sono etichette dei gruppi. Ordine **indicativo per l'estremo basso del costo** (poi per valore dichiarato dal gruppo): non e' un ordine di esecuzione. Ogni lancio richiede il via libera di Claudio (regola 21/09), salvo scritto altrimenti.
+
+| costo | misura | gruppo | cosa chiude | fonte del costo |
+|---|---|---|---|---|
+| **~1 min** | G0 di riconciliazione 770105 short a parita' di finestra e banco (2 passate) | G1 | scioglie la CONTESA 0,957 / 1,065 della cella 1b | G1 §7 m.1 `[DERIVATO da R245 0,333 min/passata]`; "nessuna firma" |
+| **~1 min + 2 di avvio** | riconciliare il contratto 770511 (cella 00, binario `872dba82`, export per-trade acceso) | G2 | contesa 1,849 / 1,328 contro 1,482 / 1,243 e le posizioni (forbice 62-143) | G2 §4 m.2 |
+| **~45 s** (o 0 con il per-trade `cemad02` dal VPS) | IS in posizioni di 771531 (gamba IS, magic vergine, 100.000) | G2 | D1: IS 132 pos non ricontabile (forbice 103-237) | G2 §4 m.1 |
+| ~1-2 min | certificato `ABTG_ORB_Fibo` | G2 (fuori classifica) | mancano uscita, gemelli, TF | G2 §4 |
+| ~2 min | R113 coda "feed o epoca?" (3 celle) | G5 | decide se la prova di regime Nasdaq e' possibile | G5 §5 m.4 (firma lampo dei criteri) |
+| ~2 min / ~2-10 min | certificato `TurnaroundTuesday` / `ChaosLyapunov` (2 celle split IS/OOS) | G6b | caselle del certificato; **la scelta se spendere questi minuti e' di Claudio (G6b-7)** | G6b §5 m.5 |
+| ~3 min | uscita + TF di `ABTG_Londra_ORB` | G2 | casella 3 e TF | G2 §4 |
+| ~3-5 + ~3-5 min | `SupRev_NAS_H1`: G0 sul binario in campo + R163a (14 passate) | G5 | binario (3 cifre), costo 28,7x mai misurato direttamente | G5 §5 m.1 `[STIMA da R127a]` |
+| ~3-6 min | `SupertrendInvert`: diagnosi del perche' non opera (sonda a contatori = zero passate, poi G1PAOLO_10/11/12) | G5 | l'unico EA G5 senza un numero leggibile | G5 §5 m.5 |
+| ~2-5 min | `IntradayMomentum`: IS per simbolo con per-trade (2 passate); OOS a 0 min dai per-trade gia' sul VPS | G6a | orologio inverno/estate vs inversione IS/OOS su 4 celle su 4 | G6a §5 m.2 `[STIMA]` |
+| ~4 min | `AtrExhaustVol` gemelli U30USD e D30EUR M30 (4 passate); poi asse d'uscita 18 passate ~17 min | G6a | certificato 4/5, triplica il campione | G6a §5 m.4 |
+| ~3-8 min | `NySessionRetest` gemello NASUSD (2-4 passate) | G6a | campione | G6a §5 m.5 |
+| ~4 min / 3-7 min | Live5m: finestra d'ingresso 15'-60' con split / `DAX_M3` prima corsa a tick con IS/OOS | G1 | due "morti" con 2-5 caselle vuote | G1 §7 m.5 `[STIMA]`; firma sul TF d'ingresso |
+| ~5,3 min (16 passate) | candidato Dow: R280 (+ rilettura R250 B, 0 min, 1 firma) | G1 | l'unica cella di G1 con n >= 150 in IS e OOS: se il merito e' un artefatto della griglia | G1 §7 m.2 |
+| ~6 min (16 passate) | `VwapRevert` passo 0 a M30 e H1 (+ gemelli ~12-25 min) | G6b | M30/H1 mai provati, lo spread pesa meno | G6b §5 m.4 `[DER]` |
+| ~6 min (~2 min a cella) | `PostNews`: primo PF/DD/n delle tre sedie (calendario 2010-2025, 599 eventi) | G3 | contratto NON MISURATO su 3 sedie vive | G3 §5 m.2 `[STIMA]` |
+| ~7 min + sonda | `MaxMinNotte` DAX short: campione e TF (sonda `ABTG_Notte_Study`, `InpPlaceHour`, `InpMgmtTF` M15-H4, R214g) | G3 | se esiste una configurazione >= 150 pos senza sfondare 40x | G3 §5 m.4 |
+| ~8-10 min | G0 dell'oro col binario `0953846c` (G2) = "G0 H4 sul binario attuale" (G5): **stessa misura vista da due gruppi, stesso costo; non l'ho verificato in codice** | G2, G5 | rende confrontabile l'OOS 1,22-1,65 dell'oro; sblocca 12 griglie SALTATE; PF per regime dell'oro con lo zip R99/R100 | G2 §4 m.3 `[STIMA da R264]`; G5 §5 m.3 |
+| ~5-11 min | `Nightly`: 4 coppie native (16 celle, 32 passate) | G3 | D6 (il "morto" su 21 mesi); e' l'unico G3 sopra il pavimento di frequenza (1,937 op/g) | G3 §5 m.1 `[STIME]` |
+| 4,8-11,2 min (32 passate) | C2C `exit 0` su 4 simboli nativi (EURJPY, CHFJPY, USDCHF, GBPCAD) | G4 | se `exit 0/1` tiene la giornata sotto il 5% a tick | G4 §5 m.3 |
+| 0-12,6 min | R252 + PRV_DAXAP_04 (short DAX in fase, modi per lato) | G1 | decide se il DD 12,31 / 12,05% e' un artefatto dell'orologio; **0 se lo zip esiste** | G1 §7 m.1 |
+| ~8-10 min | R125 e TF M10/M15 dell'ORB Dow; PF `SuperWave_EA` a tick ~10 min | G2 (fuori classifica) | | G2 §4 |
+| 5-24 + 2,7-12 min | R274 (orologio 770260, 16 passate) + R214c/d (TF M15/M30, 8 passate) | G1 | frequenza d'inverno del Nasdaq; **serve prima scrivere il lettore (non esiste)** | G1 §7 m.3 |
+| tetto 18 min (12 passate) | C2C R214e (tick, 3 uscite) + R214f (OHLC lungo) | G4 | la sedia con PF OOS 1,52 su n 242 e il suo tappo (giornata -8,02%); **mai messi in coda** | G4 §5 m.3 |
+| ~10-20 min + compilazione | passo 0 `FvgRetest` (D30EUR M15) + `ImpulsoApertura` (D30EUR e U30USD M30), 16 passate | G6a | 2 EA mai misurati (certificato 0/5); `ImpulsoApertura` va compilato (F7) | G6a §5 m.3 |
+| 15-25 min; ~10-60 min | `PASSATA_STOP_SUPREV` (2 passate U30USD H1); R120a/c/d uscita ad asse su 13 EA | G5 | costo 40x del corto indici; prerequisito casella 3 per ogni SOTTO/NM di G5 | G5 §5 m.2 (pronta, PASS 24/09, pin `7e255a82`, non risulta girata) |
+| ~15-20 min | `HARSI`: scan EURUSD M5 (prima: misura dello spread, 0 min) | G6b | NM | G6b §5 |
+| ~15 min | `MeanRevert` (6 celle x EURUSD/USDJPY/XAUUSD H1 + GBPUSD H4) | G6b | certificato 5/5 oppure candidato; vedi D-4 | G6b §5 m.5 |
+| ~10-20 + fino a ~29 min | `Nightly` R220a-d + stadio 2 R259 | G3 | uscita ad asse | G3 §5 m.1 `[STIME]` |
+| ~15 min (GapFill ~10 passate); ~3-5 min a file (EZ, Larry) | casella 5 (TF) di GapFill / EasyTrend / Larry | G4 | "H1 e basta" su 3 EA | G4 §5 m.4 `[STIMA]` |
+| ~18-24 min (12-16 passate) | `InvEsaurimento` E3 e baseline a tick su D30EUR/U30USD M30-H1 | G6b | previsione scritta prima: rosso/piatto nel toro | G6b §5 m.4 |
+| ~25-35 min | `CrossEma` K03 (XAUUSD H1 + filtro EMA200): TF H2/H4/M30, gemelli, un asse d'uscita | G6b | l'unica cella del gruppo con IS e OOS sopra 1 e DD sotto il muro | G6b §5 m.2 `[MIS]` su XAU H1 1,6-2,2 min/file |
+| 3-11 min (+ 2-4 conv.) | prova di regime **DAX 2010-2018** (32 passate; 56 con variante B 6-19 min) | G1 | regime per DAX long/short | G1 §7 m.4; **il costo vero e' scrivere il convertitore con DST per giorno e il lettore; tre firme D-J/D-K/D-L** |
+| 8-20 min (34 passate) | prova di regime Nasdaq `NASUSD_EXT` (gemella senza volumi; orologio EXT da rileggere); nucleo Nasdaq 63 passate 14-36 min | G1, `FIRME_DA_FARE` | regime per 770260 / 770250 / 970913 | G1 §7 m.4; foglio firme (F-A) |
+| 34,1 min (30 celle / 60 passate; 2,0 min x 7 round di avvio) | `SuperWave` 770511: i 7 file gia' pronti (TP1Pct, TP1_R, BE, TP_RR, SLBuffer, TF M30) | G2 | casella 3 su una sedia SOPRA; sospesi in coda dal 21/09 | G2 §4 m.4 |
+| 15-45 min | `Relativo`: A1 SPXUSD (4 passate) + R117BIS (8 passate), dopo le due letture a costo zero | G6b | campione (n IS 87); la famiglia a 2 simboli centra il pavimento 1,00/giorno (~1,05 `[DER]`) | G6b §5 m.3 |
+| 15-60 min | `Bulge`: M1 sulla cella di campo a 16,5 anni (4 passate) | G3 | decide il ramo (niente griglie / apri l'uscita / tick) | G3 §5 m.3 `[DERIVATO]` |
+| decine di minuti `[NON MISURATO]` | `PTE`: scarico M1 2019-2022 + rifare R80 (40 CSV) | G3 | divergenza `_EXT` / nativo, duello GBPUSD | G3 §5 m.5 (firma da confermare) |
+| **90-348 ore di PC acceso** (CORE-A 63-244 h) + 30-60 min di tester | prova di regime **Dow Dukascopy** (F1) | G1, G2, `FIRME_DA_FARE` | l'unica misura che compra **regime** per le sedie vive (da B ad A) | G2 §4 m.5 `[DICHIARATO]`; **firma F1: spesa/storico** |
+
+**Righe "migliorabile: si" senza stima di costo** (dichiarate dai gruppi, `[COSTO NON STIMATO]`): G3 1g, 1h, 1i, 7f, 9c (F40EUR/E50EUR/100GBP, EURUSD M15, NASUSD MaxMin, PTE DAX H1, WOL oro D1).
+
+### 3(c) MISURE A ZERO MACCHINA (letture, trasferimenti, recuperi)
+
+| misura | gruppo | cosa chiude | fonte |
+|---|---|---|---|
+| **leggere in sola lettura sul VPS i per-trade del 21/09** (`abtg_trades_ABTG_IntradayMomentum_NASUSD_784101.csv` 15,8 KB e `..._U30USD_784102.csv`; in totale **18 file per 9 EA di G6a** in `Common\Files`) e spezzare per orologio e lato: ogni file e' **una passata sola** (di norma l'OOS) | G6a | unita' n, split orologio/regime per gli OOS (G6a-2); per l'IS servono 2 passate (sez. 3b) | G6a §5 m.2, G6a-2 |
+| ricaricare il per-trade `cemad02` (771531) dal VPS | G2 | IS in posizioni (D1) | G2 §4 m.1 |
+| leggere `ReportTester_GapContinuation_225JPY_OOS_TICKREALI.xlsx` (**gia' in repo**, binario non letto da G4) e recuperare: report originali di `EasyTrend_EURUSD` (PF 1,04 n74) e del paniere `BREAKOUT_EA_JPY` (-20.853); PF di `PunteLarry` XAU a 22 anni (R100); la riga mancante del DD 1,9% di BB R34 (CSV dice 3,48%) | G4 | unita' n di GapCont (70 deal contro 30-70 pos); 3 righe NM | G4 §5 m.2 |
+| recuperare lo zip R99/R100 (oro) | G5 | PF per regime dell'oro 22 anni (oggi solo il DD) | G5 §5 m.3, D21 |
+| copiare zip/CSV di R96, R117, INVES (+ per-trade E3), CHAOS/CHAOSABL, per-trade passo 0 VwapRevert; leggere nel giornale del tester `XAUUSD: ticks data begins from` e le specifiche `InpPuntiPerIndice` / spread di SPXUSD | G6b | caselle 1-2 per 5 EA; regola F6 sulle 4 celle oro di CrossEma; 2 pre-condizioni bloccanti di A1 SPXUSD | G6b §5 m.1, G6b-3 |
+| misurare lo spread EURUSD M5 (HARSI) | G6b | pre-condizione dello scan | G6b §5 |
+| leggere i CSV di R141e, R145a/b, R148a/bL/bS appena trasportati | G6a | 3 EA da NM a numeri (sez. 3a) | G6a §5 m.1 |
+| leggere `R141c` per il rischio di AtrExhaustVol: la cella ATR a floor acceso (72 idx) ha DD 4-6%, la PERC 13-19%; il "NO PER RISCHIO" di R109 (floor spento) non va esteso alla config riparata | G6a | due verdetti di rischio su config diverse (G6a-8) | G6a-8 |
+| ricontare le caselle dei motori con referto senza CSV e correggere i documenti (sez. 4): censimento 22/09, giacimento, dossier Emiliano, contratti BB, ecc. | tutti | evita di rilanciare cio' che e' gia' stato fatto | sez. 4 |
+| chiudere i magic dei file Ottimizzati leggendo i `.set` / preset (G1 DN1: 770111 contro 770102; 770211 contro 970201) e la tabella forward (G2-15: magic 971501 su AUDCHF `[NON VERIFICATO]`) | G1, G2 | collisioni di magic | G1 DN1; G2-15 |
+
+### 3(d) CIO' CHE SERVE A CLAUDIO: DECISIONI E FIRME
+
+**Le firme del foglio `report/FIRME_DA_FARE_2026-10-05.md` sono solo richiamate** (12 firme: **R-0 «FIRMO REGOLA REGIMI»** per prima; poi **F-A**, **D-J, D-K, D-L**, **F1** obbligatorie; **F-B** (raccomandata insieme a F-A), **F-A2, F-C, F-D** e due opzioni DAX opzionali; piu' le **domande aperte sue**: taglia 2,00% e muro 10%, **ora d'inverno DAX entro il 25/10** e USA entro il 02/11, sedia `771514`, M1 del DAX "2 su 3" o "tutte", dashboard SuperWave, PC di backtest per giorni). **Non le ripeto.**
+
+**Decisioni NUOVE emerse dai gruppi** (non nel foglio), in ordine di quanto cambiano il resoconto:
+
+| id | decisione | perche' conta (numero) | chi la propone |
+|---|---|---|---|
+| **D-1** | **D2: soglia di ZONA GRIGIA sul PF** (non esiste: "le soglie le fissa ogni misura prima dei dati") | senza soglia "SOPRA 1" per PF 1,00-1,10 e' rumore: G2 la incontra 3 volte (ORB nominale 1,050; ORB R8 1,03; SW Dow 1,243), G5 in S12 (1,073) e W04 (1,07), G1 in 1c / 14d (1,097 su 104). Il piano propone: affidabilita' C/D + nota "indistinguibile da 1" sotto l'errore tipico dichiarato (~0,2 su n=144 `[stima]` del dossier) | piano D2; G2-9; G5 §6 |
+| **D-2** | **classe "NON CONFRONTABILE / REGIME"** per i SEGNO INVERTITO (IS e OOS da parti opposte di 1) | oggi sono SOPRA con etichetta; **G3: 9 EA in SOPRA scenderebbero a 6** (Nightly, Bulge, AllineaLondra); **G5: 19 righe su 105 sono INV** (15 su 66 SOPRA); G6a: IntradayMomentum e LVNArbitro hanno IS 0,60-0,98 con OOS sopra 1. Il piano 5.4 la prevede solo per "OOS sopra 1 ma storia sotto" (EMA200 oro H4) | G3 D20; G5 D14 |
+| **D-3** | **regola di etichetta "con o senza screening"** (le celle `[B]/[E]`: contano in SOPRA/SOTTO o sono NM come merito?) | un lettore che vuole "gli EA sopra 1" ottiene **9 o 7** su G6a; sui sette gruppi 59 contro 57 SOPRA (sez. 0.1); G3/G4 le contano NM, G5/G6b SOPRA/SOTTO con suffisso | G6a-3 |
+| **D-4** | **eccezione "non si spende" sui due morti con caselle vuote**: `RIESAME_MORTI_NOTTURNI` (22/09) scrive "MORTO VERO" per `MeanRevert` e `TurnaroundTuesday` ammettendo "il certificato NON e' pieno: non si spende" (r.75-76, r.492), in contrasto con la regola del 09/09 | o Claudio **firma l'eccezione** o **autorizza la misura** (~15 + ~2 min, OHLC, sez. 3b) | G6b-7 |
+| **D-5** | **regola C0 per famiglia**: la regola C0 dice se si somma il campione fra simboli? `IBRetest`: il C0 e' applicato a un campione ottenuto sommando tre simboli diversi (famiglia n 209 contro n 35-107 per cella, tutte e tre < 150) con IS di segno opposto sul DAX (1,211) | coerente con "il pavimento si misura per famiglia" (firma 07/09), ma l'unita' del merito per cella e' sotto 150 | G6a-6 (cancello / Claudio) |
+| **D-6** | **HARSI**: i numeri esistono solo su TradingView/OANDA: **8 `.xlsx`** (`HARSI_Backtest_-_Claudio_OANDA_XAUUSD_2026-06-26 (1..8).xlsx`) elencati da un log del VPS e mai letti; **se Claudio li ha ancora** | unico numero pre-esistente di HARSI (dato esterno OANDA XAUUSD: non entra in classifica, piano 5.2.5, ma apre la domanda su TF e SL/TP) | G6b-13 |
+| **D-7** | **via libera ai lanci e alla riga di trasporto**: ogni round di sez. 3b e la riga `carica_risultati.ps1` di sez. 3a (perimetro del runner = sola lettura: serve una firma; modifica di `$GiorniIndietro` = modifica di script = cancello) | **scadenza ~20/10** (sez. 3a) | G4 m.1, G6a m.1, G6b m.1 |
+| D-8 | G1: **firma pendente su `ClosePct 0 + BE`** del 770101 (OOS 1,491, +0,094 = dentro il rumore 0,147); decisione sul **TF d'ingresso** di Live5m | cambia la gestione di una sedia in campo | G1 scheda 1 §5; G1 §7 m.5 |
+| D-9 | G3: **doppio contratto del `770411`** (DD OOS 1,9213% contro 3,1% a 1%: misurano finestre diverse, `[INFERITO]`): quale finestra fa il contratto; **oro MaxMin**: taglia (DD 22 anni 10,30% a 0,5% contro il contratto 10,0%), preset a due lati con magic nuovo, allungare lo storico a tick | corsia RISCHIO ambigua | G3 D19, sez. 5 |
+| D-10 | G5: **GoldenCross v1.00 in campo contro v2.00 a HEAD** (ricompilare?), **taglie dell'oro** (DD 22 anni 9,02 / 16,90 / 25,18% a 1% per le sedie 970901 / 971001 / 970301) | le celle del 08/08 vanno lette come v1.00 | G5 D24; G5 §5 |
+| D-11 | G4: **chi ha i report originali** di `EasyTrend_EURUSD` (PF 1,04 n74) e del paniere `BREAKOUT_EA_JPY` (-20.853) in `docs/Portafoglio_Strategie.md`; **taglia di Larry XAU** (DD 22 anni 29,74% a 1%, taglia 0,3% indicata da G4) | due righe NM si chiudono in una conversazione | G4-4; G4 6c, scheda 4.1 §11 |
+| D-12 | G6a: **HVAncora**: scadenza delle ancore e' "di casa" (`InpAncoraBarre` 20, `InpAncoraSoloOggi` true): decidere se misurare la fedelta' alla fonte; **CRT** (tick del range 2022-23 non esistono: spesa); **PointBreak / SuperFilter** (serve un `OnTester` = modifica a un EA = firma + cancello); **ScalperDirezionale** (leggere i suoi CSV con `analizza_scalper.py`: serve Claudio) | | G6a-9, §5; G6b §5 |
+
+### 3(e) LAVORO NOSTRO CHE OGGI NON ESISTE (da scrivere prima delle misure; nessuna firma sul contenuto)
+
+- **lettori dei round** che non esistono: R252 / PRV_DAXAP_04, R274 / R214c-d (G1); i **quattro lettori** e ~15 file prova per la prova di regime Nasdaq (F-A); il **convertitore con DST per giorno** e il lettore per il DAX (D-L); il convertitore dell'orologio del Dow (P1: la riga e' pronta, `backtest_pipeline/righe/RIGA_LANCIA_DUKA_P1.txt`, aspetta la mossa di Claudio).
+- **strato 2 del cancello** (`controllo-preventivo`) ancora da fare su: PRV_DAXAP_04a-h (strato 1 passato, strato 2 NON fatto: G1); **un lettore leggero sulle correzioni della seconda passata di G2** (G2 intestazione).
+- **riallineare le tre specifiche di regime alla regola unica** (circa mezza giornata `[INFERITO]`, `FIRME_DA_FARE`) prima di firmare F-A e D-K.
+- **correggere i documenti sbagliati** (sez. 4): i gruppi **non li hanno toccati**, e nemmeno io.
+- **scrivere nel registro** lo stato vero dei round (G3 D21: R259, R268, R269 fermi a prima della corsa; G2-11: O4 e R258).
+
+---
+
+## 4. LE CORREZIONI A DOCUMENTI PRECEDENTI EMERSE DAI GRUPPI
+
+> **Non ho modificato nessuno di questi file: li segnalo soltanto.** Colonne: il file sbagliato, cosa dice, cosa risulta dal gruppo, dove sta la correzione (gruppo + id: tutto scritto nel documento del gruppo). Prime sei righe = quelle che Claudio ha nominato.
+
+| # | file sbagliato | cosa dice | cosa risulta | correzione |
+|---:|---|---|---|---|
+| 1 | **censimento 22/09 `report/CENSIMENTO_CASELLE_VUOTE_2026-09-22.md`** + **`report/I_FILE_FERMI_2026-09-22.md`** + `CODA.txt` (SOSPESO 21/09) | i file d'uscita di BB / GapFill / Larry / GapCont / EZ / C2C sono "scritti, mai girati" | **girati**: 35 round (14-20/09), CSV mai arrivati nel repo; "R214e/f" invece **non** sono mai stati messi in coda (quelli si' "scritti e mai girati") | G4 R12, G4-12, §3-bis |
+| 2 | stesso censimento, §5.B | BB: "M30 mai provato, 6 passate, 9 min" | R108 (M15, 25/08) e R111 (M30, 26/08) **girati** (referti in repo, CSV no): TF provati M15, M30, H1, H4; casella 5 BB chiusa | G4 R3, G4-1 |
+| 3 | stesso censimento, r.164 / r.168 / r.170 / r.424 | `Relativo` R117 "preparato e mai corso"; `CrossEmaApertura` R96 "non e' mai partito"; `InvEsaurimento` "mai misurato" | **girati**, referti con PF / n / DD (CSV mai in repo) | G6b R-D, G6b-2 |
+| 4 | stesso censimento r.176; `CENSIMENTO_SCARTATI_PROSA_2026-09-09` A109; piano riga 90 | `OutOfNoise`: "passo 0 mai corso", "corretto e mai rigirato" | il passo 0 **e' corso** il 29/08 (v1.00 e v1.01, n=0 su 3 celle su 3); solo la v1.02 non e' mai girata | G6a R5 |
+| 5 | stesso censimento r.162 / r.404 | `LiquiditySweep`: "R95b-e mai lanciati" | R95 = 5 TF x 3 celle x IS/OOS = **30 passate, 0/30** (`R95_REFERTO`) | G6a R9 |
+| 6 | stesso censimento §3 | GapFill regimi: "16 CSV su 16 a Trades=0" | 18 file: **16 a zero e 2 con n=1** (lo stesso trade) | G4-11 |
+| 7 | **"PointBreak R60"**: `report/GIACIMENTO_DI_CASA_2026-09-03.md` r.82 -> `report/CORSIA_DEMO_CANDIDATI.md` r.274 -> `CENSIMENTO_SCARTATI_PROSA` A103 -> piano riga 107 | `PointBreak` "SOTTO, R60 12/12 bocciate" | **R60 e' `ABTG_MeanRevert` GBPUSD H1** (6 `InpLookback`); PointBreak non e' mai stato misurato ("NON testabile come strategia", 0 `OnTester`): **NON MISURATO, non SOTTO** | G6b R-A, G6b-1 |
+| 8 | **CanaleLento "n=20"**: `report/CACCIA_STOP_STRUTTURALE_2026-09-13.md` r.384, `REFERTO_ROUND63_64` ("1.768 trade OOS"), `CENSIMENTO_PF_MISURATI_2026-09-09` r.400, `CACCIA_MECCANISMI_SEI_FAMIGLIE_2026-09-26` r.470; piano riga 101 ("n<100") | "PF IS 0,87 / OOS 1,10 su n=20" | **20 = 20 CELLE**, 1.768 = somma sulle celle, 0,87 / 1,10 = mediane di 20 celle; n per cella 29-112 (IS) e 47-164 (OOS): "n<100" e' sbagliato anche in n | G6a R8, G6a-10 |
+| 9 | `report/CENSIMENTO_CONTRATTI_v2.md` §4c e contratto 772161-63 | BB: n "26 -> NON MIS., forbice 11-26"; DD promesso 1,9% | **26 posizioni** (`InpTPMode=0`, 26 / 13 / 11 `position_id` distinti); il CSV R34 da' DD **3,48%** (R33 10k 3,40%): l'1,9% non e' riproducibile `[NON VERIFICATO]` | G4 R1, R2, G4-2, G4-8 |
+| 10 | `CENSIMENTO_CASELLE_VUOTE` / `CENSIMENTO_LATO_SHORT_2026-09-09` | i lati di Larry (U30USD, EURAUD, XAU, GBPJPY, EURCAD) "mai misurati" | i CSV `wf_larry_*` hanno long / short / L+S per tutti e 8 i simboli di R38: **lati misurati** | G4 R6, G4-6 |
+| 11 | `R102_REFERTO_DRIVER_BLOCCO1_20260824_0005.txt` | "3 finestre positive su 5" per le tre BB | sulle epoche vere: 2/5 GBPUSD, 3/5 EURUSD (due con n <= 6), 2/5 AUDUSD; il "3" conta la finestra COMUNE | G4 R4, G4-7 |
+| 12 | `GIACIMENTO_DI_CASA` §6-7; `CENSIMENTO_SCARTATI_PROSA` A102; piano riga 65 | `BreakoutCorso`: "R12 48/48 OOS negative; R45 0/48" | non riscontrabile e **probabilmente mal attribuito** (R45 0/48 e' di altri EA); l'unica misura primaria in repo e' R82 (7/7 OOS < 1) | G4 R8, G4-5 |
+| 13 | piano righe 58 e 66 (`EasyTrend_EURUSD`, `BREAKOUT_EA_JPY`) | "nessuna riga PF" | numeri **solo in prosa** in `docs/Portafoglio_Strategie.md` r.51-61 (PF 1,04 n74; -20.853): restano NM con indizio | G4 R9, G4-4 |
+| 14 | `report/I_QUATTRO_INVISIBILI_2026-09-12.md` + `CENSIMENTO_SCARTATI_PROSA` A77 | `IntradayMomentum`: "OOS 0/6, COSTO C3" **e** "zero CSV, zero righe di registro" | "0/6" = 0 celle che passano i **cancelli**, non 0 PF >= 1 (5 celle su 6 hanno PF OOS >= 1); R98 ha referto e riga di registro r.1245; R141a/b **girati** con 4 CSV in repo | G6a R1, §3.1 |
+| 15 | `CENSIMENTO_SCARTATI_PROSA` A105; piano riga 93 | `DaxValueArea` "morto su due gambe" | un **argomento per analogia**, nessun numero dell'EA; R141e e' **girato** (16-20/09, CSV non in repo) | G6a §3.1 |
+| 16 | `CENSIMENTO_SCARTATI_PROSA` A59-A64; piano righe 91, 92, 95 | `AtrExhaustVol` "OOS 0,83-0,99 su n 655-927"; `NySessionRetest` "OOS 1,37-1,43"; `DaxReEntry` "OOS 1,69-1,80" | **non sono OOS**: finestra unica (R109 fino al 21/08, non al 30/06); la cella "migliore" e' scelta sullo stesso campione | G6a R6, R7, G6a-5 |
+| 17 | `I_QUATTRO_INVISIBILI` r.25-30 | `HVAncora`: "attesa non raggiungibile, ~zero operazioni a k=1,0" | **22 e 31 operazioni**; il tappo e' un altro: 91 + 165 ancore scadute | G6a R10 |
+| 18 | piano sez. 6 e i piani `LA_BANDA_BASSA`, `CASELLE_VUOTE`, `VIA_PIU_CORTA` | "R141a-e = 5,16 minuti" (formula T = 0,6 + 0,077 N) | **13,2 min misurati** (mediane runner) sul banco VPS: stime sottostimate ~2,5x | G6a R13, G6a-7 |
+| 19 | piano riga 24 (G1) e `CENSIMENTO_SCARTATI_PROSA` A8 / `backtest_pipeline/REGISTRO_TEST.md` / `RISULTATI_OTTIMIZZAZIONE` | `ABTG_DAX_M3`: "33% combo positive" (e "21%, DD 21%") | **zero CSV in storia git**: non verificabile; classe SOTTO -> **NON MISURATO** | G1 §3 r.1, DN3 |
+| 20 | piano riga 7 (G1) | `Apertura_Marco`: "nessun PF proprio" | 4 CSV in `Marco_Emiliano/valid_Marco_*` (44 passate, finestra unica) | G1 §3 r.2, DN2 |
+| 21 | piano righe 6, 20, 26 e D12: "`standalone/` = copie dell'08/09 che EREDITANO" | copie "tutto-in-uno" | sono del **26/07**, **motori diversi** (diff 131-1.944 righe): non ereditano; `Pin9fca` DAX = pin `9fca63d9` ma **non HEAD** (+460 righe); `TrailFix` != `CLAU12` | G1 §3 r.6-8, §5, DN6-7 |
+| 22 | piano riga 14 e `CONTRATTI_DELLE_SEDIE_FTMO_2026-09-20` / dossier | Nasdaq 770260: "1,14 / 1,11 contro 1,22 / 1,22" | **due celle diverse** (ClosePct 0 contro 50, 10k/1% contro 80k/2%, `InpBreakevenAtTP1`): non e' una CONTESA; `Nasdaq_Ott` "0,91" e' del motore base, la Ott fa 1,34 | G1 §3 r.5, r.9, §4.1 |
+| 23 | piano riga 1 / `RB`: 770105 short | "0,97 / 0,96" | **CONTESA**: 0,957 (R270d, 100k, dal 10/06/2025) contro 1,065 (R251b, 10k, dal 01/07/2025) sulla stessa config | G1 §3 r.12 |
+| 24 | piano righe 27, 31, 32, 35, 37, 38 (G2, classi provvisorie) | `SuperWave_DOW_H1_Ott` SOPRA; `ABTG_ORB` SOTTO (R97); `Londra_ORB` NM; `ORB_Fibo` SOTTO (OHLC); gemelli EMA200 `[NON MISURATO]`; oro H4 SOTTO | CONTESA -> NM; ORB **MISTA** (R97 e' di `ORB_Ottimizzato`); Londra_ORB **MISTA** (R258 all'ora giusta); ORB_Fibo SOTTO **a tick** (0,803 / 0,851); gemelli **MISURATI SOTTO** (EMAGEM2 04/10); oro H4 **MISTA** | G2 sez. 0.2; G3 D14 |
+| 25 | `report/DOSSIER_EXPERT_PER_EMILIANO_2026-10-05.md` | "OOS estate 2,05 su 169 uscite, inverno 0,87 su 88" | **posizioni** (169 + 88 = 257), non uscite; il censimento scrive 347 e 170 deal | G2-2 |
+| 26 | tabella forward / contratto 770511 | "16 posizioni" (conteggio per righe) | con l'uscita parziale le righe sovrastimano: 770511 16 righe = 14 pos; 990001 13 righe = 5; 770531 14 = 13 | G2-3 |
+| 27 | console di riga `R258` | "NULLO" su 22 file | artefatto del parser (virgola di `InpNewsCurrencies`, classe 883): i file sono validi; da scrivere nel registro (O4, R258) | G2-11 |
+| 28 | piano riga 38 e D6; `ANALISI_PDF_LONDRA` | `Londra_ORB` "R45 0/48 + fuso sbagliato" | R258 (28/09) ha misurato l'ora giusta; **"R45 0/48" e' di `ORB_Ottimizzato`**, non di Londra_ORB | G3 R8, D14 |
+| 29 | piano riga 41 (G3) | MaxMin: "oro tick OOS 1,45"; "DAX long 0/7" | 1,45 e' il **solo long** a tick (R268a), non il preset a due lati; il DAX long e' 0/41 celle a tick | G3 R1, R2 |
+| 30 | `CONTRATTI_DELLE_SEDIE_FTMO_2026-09-20` §4.2 contro `REGISTRO_TEST` r.666 | `770411`: DD 1,92% contro 3,1% | misurano finestre diverse (3,1% = IS+OOS, `[INFERITO]`): il doppio contratto e' **una decisione** | G3 R3, D19 |
+| 31 | piano riga 50; `REGISTRO_TEST` r.1515+ | PostNews candidati ISM / 13:30 `[T]` | sono **`[B]`** (screening, CSV `[SOLO REGISTRO]`) | G3 R4, D15 |
+| 32 | `CENSIMENTO_CONTRATTI_v2` §4a | PTE 771321 DD 2,18% | il CSV da' **3,22%**; l'origine del 2,18% non verificata | G3 R5, D16 |
+| 33 | piano riga 49; `CENSIMENTO_PF_MISURATI_2026-09-09` | WOL "5 celle OOS n>=100 con PF 0,02-0,46"; colonne `oos_trades_max` < mediana | aggregazione guasta: ricalcolato da 28 CSV, lo sweep ha anche celle sopra 1; **il censimento non va usato per WOL** | G3 R7, D18 |
+| 34 | `backtest_pipeline/REGISTRO_TEST.md` r.686-699, r.4521, r.4590 | R259, R268, R269 "non girati / IN CODA" | **girati il 28/09** (`LETTURA_ROUND_CORTI_A` / `D`); registro indietro | G3 R10, D21 |
+| 35 | piano righe 67-70; `backtest_pipeline/CLASSIFICA_PF.md` | SupRev nativi oro "~2,74 / ~3,17"; "nativi ≈ ottimizzati" | il nativo oro H4 fa **0,337 / 0,765** (Multi 0,709 / 0,686); i 2,74 / 3,17 sono **NON RIPRODOTTI** (nessun CSV) | G5 D4, D15, D17 |
+| 36 | piano righe 68-70, 74, 75; `CLASSIFICHE.md` | "OOS mediano 0,92-0,99", "1,14-1,71", Dow H4 "0,79", CAC "0,96" | sono **mediane TF** (non celle); lo 0,79 e' NON RIPRODOTTO, lo 0,96 e' la mediana di 8 celle | G5 D4, D16, D17 |
+| 37 | piano riga 82; `CLASSIFICA_PF` ("rischio 1%") | `Gold_Ichimoku` "nessun PF"; celle TF-scan oro a rischio 1% | R103: **PF 1,311 su 553**; i TF-scan dell'oro `_Ottimizzato` / `_Multi_Ottimizzato` sono a **rischio 2%** nei CSV | G5 D18, §0 |
+| 38 | `report/LE_QUATTRO_EPOCHE_GIA_MISURATE_2026-09-23.md` r.136 | `SupertrendReversal_Ott`: "4/7 anni negativi" | la tabella del driver R103 ne mostra **3** (2020, 2021, 2023): `[NON RICONCILIATO]` | G5 D22 |
+| 39 | `report/RIESAME_MORTI_NOTTURNI_2026-09-22.md` r.75-76, r.492 | `MeanRevert`, `TurnaroundTuesday`: "MORTO VERO" | certificato non pieno: **NON ANCORA MISURATO** per la regola del 09/09 (decisione D-4) | G6b-7 |
+| 40 | `REFERTO_ROUND63_64`, `CENSIMENTO_SCARTATI_PROSA` A110, `RIESAME_MORTI_NOTTURNI` D2 | `TurnaroundTuesday`: "11.928 operazioni" | = **24 x 497** (somma sulle celle); i martedi' sono 497 OOS + 333 IS | G6b R-C, G6b-6 |
+| 41 | `backtest_pipeline/REGISTRO_TEST.md` r.2042; `TRASFORMAZIONI_CANDIDATE` r.534; `I_BOCCIATI_HANNO_UN_CERTIFICATO` §9.2; censimento 09/09 | `AltaVelocita`: "rosso 8/8 a tick", "numeri non nel registro"; 7 simboli contati due volte | i tick esistono solo per GBPUSD v1 (4 celle); **96 celle-passate = 45 celle distinte**; 0/48 OOS >= 1; i numeri ci sono nei CSV | G6b R-E, G6b-5 |
+| 42 | `CENSIMENTO_SCARTATI_PROSA` A44-A45 | `ChaosLyapunov`: "1/105 in fascia", "gate largo IS 1,25-1,33" | **40 celle sopra 1**; non esiste IS (finestra unica); 1,25 / 1,33 sono PF medi per soglia | G6b R-F, G6b-9 |
+| 43 | `CORSIA_DEMO_CANDIDATI.md` r.244; `CENSIMENTO_SCARTATI_PROSA` A79; header `ABTG_CrossEmaApertura` r.27 | `CrossEma`: "R86 EDGE/PF in blocco" | nessun numero R86 nella lapide; sui 16 CSV OOS >= 1 in 5 celle su 8 e **una cella (K03) con IS e OOS >= 1 e DD <= 15%** | G6b R-B, G6b-11 |
+| 44 | `I_BOCCIATI_HANNO_UN_CERTIFICATO_2026-09-12.md` C.2; `REGISTRO_TEST` r.1274-1285 | `VwapRevert`: "PF [NON SCRITTO]"; "perde piu' dello spread" | il PF c'e' nel referto del passo 0 (OOS 0,73 / 0,80 / 0,64 / 0,73); netto -0,25 punti/trade contro spread 2,26 (11% dello spread): M30/H1 sono una misura legittima | G6b R-G, G6b-10 |
+| 45 | `CLAUDE.md` (21/09) contro `NOTTE_2026-09-22` r.25 | il tester di `IntradayMomentum` che il 21/09 ha inchiodato il VPS era stato lanciato **a mano** (CLAUDE.md) oppure **"da una corsa del runner"** (NOTTE) | fonti discordi, **non risolto**; il `REFERTO_RUNNER` del 21/09 non e' in repo (l'elenco salta dal 20/09 al 23/09) | G6a G6a-1 |
+| 46 | `CENSIMENTO_CASELLE_VUOTE` §4 e R94 | BB R94 (Bollinger 37/1,4): "p37 mai lanciati", `p20` "girato" | nessun CSV R94 in repo: non si sa se `p20` sia girato | G4-9 |
+
+---
+
+## 5. COSA NON E' STATO FATTO, E [NON COPERTO] EREDITATI
+
+### 5.1 Non fatto in questo consolidato (per scelta o per regola)
+
+- **Nessuna misura nuova, nessun CSV rimisurato.** Ho riletto dai file solo le **tabelle** per contare (sez. 0.2) e lo **script di `carica_risultati.ps1`** (r.31, r.111-112, r.210) per la scadenza della sez. 3a. Ogni PF / n / DD della sez. 1 e' copiato dal gruppo; **824 numeri** della tabella principale sono stati controllati uno per uno contro il file del gruppo citato (Appendice B): 0 non trovati.
+- **Nessun verdetto nuovo, nessun "MORTO", nessun "NON CONFRONTABILE / REGIME"** dove il gruppo non l'aveva scritto (D-2 e' una decisione, non l'ho applicata).
+- **L'ordine di riparazione per "edge" e' backlog, non adesso.** Non esiste qui una graduatoria di EA da riparare: l'ordinamento della sez. 3 e' per **costo / valore delle misure**, non una classifica di EA.
+- **Nessuna caccia web nuova** (regola del 19/08: le cacce si fanno per meccanismi alternativi, non su richiesta di un resoconto).
+- **Nessun documento sbagliato e' stato corretto** (sez. 4: solo segnalati).
+- **Nessuna riga di lancio scritta**, nessun script `.ps1`, nessun round, nessun terminale, preset, EA, taglia, conto; VPS non toccato; niente FTMO / challenge / trial.
+- **Cancello**: `controlla_riga.py --oggetto md` (strato 1) **da rilanciare sulla versione finale**; `controllo-preventivo` (strato 2) **non ancora eseguito**: questo file e' una **bozza**.
+
+### 5.2 [NON COPERTO] ereditati dai sette gruppi (dichiarati, non finti)
+
+| gruppo | cosa non e' coperto |
+|---|---|
+| **G1** | rilettura dei CSV di R246 / R251 / R253 / R255 / ROUND_ORB (numeri da mappe 03/10 e referti); il diff `DAX Pin9fca` contro HEAD letto **in parte** (225 righe non-commento: se una riga fuori dal filtro SPAZIO toccasse l'ingresso, "EREDITA" cade; DN10); G0 a parita' di pin e banco per 770260 **NON PROVATO**; avvisi "in fase" e "vergine" del candidato 14k misurati sulla cella vicina `InpEmaSlow=200`, non sulla 220; R252, R274, R280, PRV_DAXAP_04, R214a-d, R215a, R231a, R275, R183, R180 senza CSV |
+| **G2** | R97 e R125 (mai girato) non riaperti; CSV R234 non in repo; specifiche Regime DAX / Nasdaq non riaperte; R97, R10, R11, R23, R264, scan SW nativo **non riletti cella per cella** `[NON VERIFICATO]` (non cambiano i conteggi per EA); `standalone/ABTG_EMA200` logica non diffata |
+| **G3** | CSV non in repo: BreakinBox, LondonFx, AllineaLondra, candidati PostNews, R17, forward (letti dai referti); fattore deal/posizioni dei PTE a 13 anni non misurato (D24: >= 193 pos col fattore massimo); costo non stimato per le righe 1g, 1h, 1i, 7f, 9c; il referto WOL non ha il costo (D23) |
+| **G4** | **i CSV dei 35 round non letti**; nessun ricalcolo oltre le riletture elencate; `ReportTester_GapContinuation_225JPY_OOS_TICKREALI.xlsx` (binario in repo) non letto; nessun diff root/standalone; nessun feed `_EXT` ricontrollato; i PF dei per-trade BB sono sul netto con commissioni (1,81 / 4,42 / 2,89 contro 1,73 / 3,86 / 2,75 del tester) |
+| **G5** | scan OHLC a finestra unica (censimento 09/09: 118 + 113 righe + 10 `SupRevScr`) e TF-scan OHLC di D30EUR / CAC non letti cella per cella; R110 per i lati e R236 / R238 (CSV fuori repo); stato di esecuzione di R163a / R166a / R190c / R237; deposito dei round R123; finestra esatta delle prove FASE 0 del 07/08 (dedotta); fattore deal/posizioni **NON misurato** (nessun per-trade); PF per regime dell'oro 22 anni non in repo |
+| **G6a** | nessun CSV dei round girati e non trasportati letto; tabelle OPTFRAME di R98, R95, R109, R235 solo da referti; sorgenti letti per input / intestazioni / righe citate, non riga per riga; PDF e paper non riaperti (arXiv 2605.04004, 2607.01550, SSRN 4824172, Gao-Han-Li-Zhou); nessun feed `_EXT` ricontrollato; nessuna operazione spezzata per orologio (l'effetto sulle classi e' `[NON MISURATO]`); fattore deal/pos misurato solo per `NySessionRetest` (1,354); `ImpulsoApertura` compilato? non verificabile; il referto runner del 21/09 non e' in repo |
+| **G6b** | CSV di 5 round non in repo (nessun numero ricalcolato, tutti `[DICH]`); per-trade di R86 inesistenti in repo (deal = posizioni verificato solo nel sorgente); profondita' tick XAUUSD non verificata; finestre IS/OOS di R86 prese da `R86_CRITERI` e non dai CSV; versione (v1 / v1.1) dei 7 simboli di AltaVelocita non verificabile; 8 `.xlsx` HARSI / OANDA fuori repo; CSV per-ondata di ScalperDirezionale non in repo; `NASUSD_EXT` montato sul banco? non verificabile; costi `[STIMA]` / `[DER]` per analogia |
+| **consolidatore** | numero di file di G1 non dichiarato dal gruppo (non lo ricavo); le righe marcate **[CONSOLIDATORE]** (finestra dei 30 giorni applicata alle date dei gruppi; "stessa misura" G2 m.3 / G5 m.3; due numeri diversi del crollo di Larry) sono aritmetica o lettura incrociata mia, **da far verificare dal cancello**; i totali 59 / 65 / 40 sommano sette regole non identiche (sez. 0.4) |
+
+---
+
+## APPENDICE A - IL CONTEGGIO, RIFATTO CON UNO SCRIPT CHE RILEGGE LE TABELLE
+
+Script `conta.py` (sola lettura; legge i sette `.md` dalla cartella `report/`, o da `RDIR` per il controesempio). Output sotto.
+
+```
+# Rilegge le tabelle dei sette gruppi e ricontaa EA/righe per classe. Sola lettura.
+import re, sys, os
+R=os.environ.get('RDIR','/home/user/GITHUB/report/')
+F={'G1':'RESOCONTO_EA_G1_APERTURE_2026-10-05.md','G2':'RESOCONTO_EA_G2_EMA200_SW_ORB_2026-10-05.md',
+'G3':'RESOCONTO_EA_G3_NOTTE_EVENTI_BULGE_2026-10-05.md','G4':'RESOCONTO_EA_G4_FOREX_AGOSTO_2026-10-05.md',
+'G5':'RESOCONTO_EA_G5_SUPERTREND_GOLDEN_ORO_2026-10-05.md','G6a':'RESOCONTO_EA_G6A_CACCE_BREAKOUT_2026-10-05.md',
+'G6b':'RESOCONTO_EA_G6B_CACCE_REVERSAL_MEDIE_2026-10-05.md'}
+L={g:open(R+f,encoding='utf-8').read().split('\n') for g,f in F.items()}
+def rows(g,a,b):
+    out=[]
+    for i in range(a-1,b):
+        l=L[g][i]
+        if l.startswith('|') and not l.startswith('|---') and not l.startswith('|:'):
+            out.append([c.strip() for c in l.strip().strip('|').split('|')])
+    return out
+def cls(txt):
+    t=txt.upper()
+    s='SOPRA' in t or 'MISTA' in t
+    o='SOTTO' in t or 'MISTA' in t
+    return s,o
+res={}
+# ---- G6b 1.1: colonna 'celle SOPRA / SOTTO / NM (righe)' e' indice 3
+r=[x for x in rows('G6b',37,50) if x[0].isdigit()]
+ent=so=sb=nm=0
+for x in r:
+    a,b,c=[int(v) for v in re.match(r'(\d+)\s*/\s*(\d+)\s*/\s*(\d+)',x[3]).groups()]
+    if a and b: ent+=1
+    elif a: so+=1
+    elif b: sb+=1
+    else: nm+=1
+res['G6b']=dict(righe=len(r),entrambe=ent,soloSOPRA=so,soloSOTTO=sb,NM=nm,EREDITA=0)
+# ---- G6a 1.1: classe A col 7, classe T col 8
+r=[x for x in rows('G6a',35,51) if x[0].isdigit()]
+for tag,col in (('G6a-A',7),('G6a-T',8)):
+    ent=so=sb=nm=0
+    for x in r:
+        v=x[col].strip().upper()
+        if v=='ENTRAMBE': ent+=1
+        elif v=='SOPRA': so+=1
+        elif v=='SOTTO': sb+=1
+        else: nm+=1
+    res[tag]=dict(righe=len(r),entrambe=ent,soloSOPRA=so,soloSOTTO=sb,NM=nm,EREDITA=0)
+# ---- G5 0.2: colonna 2 'celle SOPRA / SOTTO / NM'
+r=[x for x in rows('G5',40,58) if x[0].isdigit()]
+ent=so=sb=nm=ered=0
+for x in r:
+    m=re.match(r'(\d+)\s*/\s*(\d+)\s*/\s*(\d+)',x[2])
+    if not m:
+        ered+=1; continue
+    a,b,c=[int(v) for v in m.groups()]
+    if a and b: ent+=1
+    elif a: so+=1
+    elif b: sb+=1
+    else: nm+=1
+res['G5']=dict(righe=len(r),entrambe=ent,soloSOPRA=so,soloSOTTO=sb,NM=nm,EREDITA=ered)
+# G5 0.3 per cella: colonna 3 (classe)
+rc=[x for x in rows('G5',66,177) if len(x)>4 and re.match(r'^[A-Z0-9-]+$',x[0])]
+cnt={'SOPRA':0,'SOTTO':0,'NM':0}
+for x in rc:
+    c=x[3].upper()
+    k='NM' if c.startswith('NM') else ('SOPRA' if c.startswith('SOPRA') else ('SOTTO' if c.startswith('SOTTO') else '?'))
+    cnt[k]=cnt.get(k,0)+1
+res['G5-celle']=cnt|{'righe':len(rc)}
+# ---- G4 per riga EA: mappa id -> EA
+def g4ea(i):
+    n=re.match(r'(\d+)([a-z]?)',i); k=int(n.group(1)); s=n.group(2)
+    if k==1:return 'BB'
+    if k==2:return 'C2C'
+    if k==3:return 'EZ_EURUSD' if s=='i' else 'EZ'
+    if k==4:return 'GapFill'
+    if k==5:return 'GapCont'
+    if k==6:return 'Larry'
+    if k==7:return {'a':'FiboH4_Multi','b':'FiboH4_Multi','c':'FiboH4_Corso','d':'standalone_Fibo'}[s]
+    if k==8:return 'BreakoutCorso' if s=='a' else 'JPY_ext'
+def collect(g,a,b,idcol,clscol,eafun,skip=lambda i:False):
+    d={}
+    for x in rows(g,a,b):
+        i=x[idcol]
+        if not re.match(r'^\d+[a-z]?$',i): continue
+        if skip(i): continue
+        t=x[clscol].replace('*','').strip()
+        if t.startswith('NM') or t.startswith('NON MISURATO') or t.startswith('EREDITA'):
+            s=o=False
+        else:
+            s='SOPRA' in t or 'MISTA' in t
+            o='SOTTO' in t or 'MISTA' in t
+        dd=d.setdefault(eafun(i),[False,False,False])
+        dd[0]|=s; dd[1]|=o
+        if not s and not o: dd[2]=True
+    return d
+def summ(d,eredita=()):
+    ent=so=sb=nm=er=0
+    for k,(s,o,n) in d.items():
+        if k in eredita: er+=1
+        elif s and o: ent+=1
+        elif s: so+=1
+        elif o: sb+=1
+        else: nm+=1
+    return dict(righe=len(d),entrambe=ent,soloSOPRA=so,soloSOTTO=sb,NM=nm,EREDITA=er)
+# G4 colonna classe=7
+d4=collect('G4',31,91,0,7,g4ea)
+res['G4']=summ(d4)
+# G3: mappa per numero
+def g3ea(i):
+    k=int(re.match(r'\d+',i).group(0))
+    return {1:'MaxMinNotte',2:'DAX_Short_Ott',3:'MFE',4:'BreakinBox',5:'Nightly',6:'Nightly_Ott',7:'PTE',8:'PTE_Ott',9:'WOL',10:'PostNews',11:'Bulge',12:'BULGE_MASTER',13:'LondonFx',14:'AllineaLondra',15:'Londra_ORB(G2)'}[k]
+d3=collect('G3',28,65,0,7,g3ea)
+d3.pop('Londra_ORB(G2)',None)
+# G3 classe colonna: nella tabella e' col 7 ('classe + affid.'), ma 'EREDITA' non contiene SOPRA/SOTTO
+res['G3']=summ(d3,eredita=('Nightly_Ott',))
+res['G3_dettaglio']={k:v for k,v in d3.items()}
+# G2: per EA nome nella col 0; classe col 2; note: righe senza EA ripetono (usare ultimo)
+d2={}
+for x in rows('G2',23,57):
+    if x[0].startswith('`') :
+        ea=re.sub(r'`','',x[0]).strip()
+        t=x[2].upper()
+        s='SOPRA' in t or 'MISTA' in t
+        o='SOTTO' in t or 'MISTA' in t
+        dd=d2.setdefault(ea,[False,False,False]); dd[0]|=s; dd[1]|=o
+res['G2_dettaglio']=d2
+res['G2']=summ(d2)
+
+# ---- G1 (ricostruito): 50 righe tabella, id -> numero riga EA del piano
+rowsg1=[x for x in rows('G1',33,82) if re.match(r'^\**\d+[a-z]?\**$',x[0])]
+cs=co=cn=ered=0; d1={}
+for x in rowsg1:
+    i=x[0].replace('*',''); t=x[3].replace('*','').strip()
+    k=int(re.match(r'\d+',i).group(0)); dd=d1.setdefault(k,[False,False,False,False])
+    if t.startswith('EREDITA'): dd[3]=True; ered+=1; continue
+    if t.startswith('CONTESA') or t.startswith('NON MISURATO'): s_=o_=False; n_=True
+    else: s_='SOPRA' in t; o_='SOTTO' in t; n_=not(s_ or o_)
+    dd[0]|=s_; dd[1]|=o_; dd[2]|=n_; cs+=int(s_); co+=int(o_); cn+=int(n_)
+ent=so=sb=nm=er=0
+for k,(s_,o_,n_,e_) in d1.items():
+    if e_: er+=1
+    elif s_ and o_: ent+=1
+    elif s_: so+=1
+    elif o_: sb+=1
+    else: nm+=1
+res['G1']=dict(righe=len(d1),entrambe=ent,soloSOPRA=so,soloSOTTO=sb,NM=nm,EREDITA=er)
+res['G1-celle']=dict(righe_tabella=len(rowsg1),celle_SOPRA=cs,celle_SOTTO=co,celle_NM=cn,EREDITA_righe=ered)
+# ---- G3: override esplicito (classe SOPRA scritta senza la parola SOPRA)
+d3['AllineaLondra'][0]=True   # riga 14: 'una cella OHLC ~1,01 (IS 0,89: SEGNO INVERTITO)' = SOPRA formale, G3 sez.2 la conta in SOPRA
+res['G3']=summ(d3,eredita=('Nightly_Ott',))
+# ---- conteggi dichiarati dai gruppi (sezioni dei file)
+DICH={
+ 'G1':dict(righe=26,entrambe=5,soloSOPRA=2,soloSOTTO=3,NM=13,EREDITA=3),
+ 'G2':dict(righe=14,entrambe=8,soloSOPRA=0,soloSOTTO=1,NM=5,EREDITA=0),
+ 'G3':dict(righe=14,entrambe=8,soloSOPRA=1,soloSOTTO=2,NM=2,EREDITA=1),   # G3 sez.2 scrive 'solo NM 3' = MFE, BULGE_MASTER + Nightly_Ottimizzato (EREDITA)
+ 'G4':dict(righe=12,entrambe=7,soloSOPRA=0,soloSOTTO=1,NM=4,EREDITA=0),
+ 'G5':dict(righe=19,entrambe=12,soloSOPRA=2,soloSOTTO=0,NM=4,EREDITA=1),
+ 'G6a-A':dict(righe=17,entrambe=8,soloSOPRA=1,soloSOTTO=1,NM=7,EREDITA=0),
+ 'G6a-T':dict(righe=17,entrambe=6,soloSOPRA=1,soloSOTTO=2,NM=8,EREDITA=0),
+ 'G6b':dict(righe=14,entrambe=5,soloSOPRA=0,soloSOTTO=4,NM=5,EREDITA=0)}
+DICH_CELLE={'G1-celle':dict(righe_tabella=50,celle_SOPRA=17,celle_SOTTO=16,celle_NM=16,EREDITA_righe=3),
+            'G5-celle':dict(SOPRA=66,SOTTO=39,NM=6,righe=111)}
+ordine=['G1','G2','G3','G4','G5','G6a-A','G6a-T','G6b']
+print('gruppo   righe entr soloS soloT   NM EREDITA | esito (riletto dalle tabelle contro dichiarato dal gruppo)')
+tot={k:0 for k in ('righe','entrambe','soloSOPRA','soloSOTTO','NM','EREDITA')}
+for g in ordine:
+    r=res[g]; d=DICH[g]; ok='UGUALE' if r==d else 'DIFFERENTE'
+    print('%-7s  %5d %4d %5d %5d %4d %7d | %s' % (g,r['righe'],r['entrambe'],r['soloSOPRA'],r['soloSOTTO'],r['NM'],r['EREDITA'], ok))
+    if g!='G6a-T':
+        for k in tot: tot[k]+=r[k]
+print('TOTALE (G6a nella vista A, con screening): righe %d | entrambe %d | solo SOPRA %d | solo SOTTO %d | NM %d | EREDITA %d' % tuple(tot[k] for k in ('righe','entrambe','soloSOPRA','soloSOTTO','NM','EREDITA')))
+print('  => almeno una cella SOPRA (righe proprie) = %d ; almeno una cella SOTTO (righe proprie) = %d' % (tot['entrambe']+tot['soloSOPRA'], tot['entrambe']+tot['soloSOTTO']))
+tt=dict(tot); r=res['G6a-T']; 
+t2={k:tot[k]-res['G6a-A'][k]+r[k] for k in tot}
+print('TOTALE (G6a nella vista T, solo tick): entrambe %d | solo SOPRA %d | solo SOTTO %d | NM %d => SOPRA %d, SOTTO %d' % (t2['entrambe'],t2['soloSOPRA'],t2['soloSOTTO'],t2['NM'],t2['entrambe']+t2['soloSOPRA'],t2['entrambe']+t2['soloSOTTO']))
+for k,v in res.items():
+    if k.endswith('celle'): print(k,v,'| dichiarato',DICH_CELLE[k], 'UGUALE' if (k=='G5-celle' and v==DICH_CELLE[k]) or (k=='G1-celle' and v==DICH_CELLE[k]) else 'DIFFERENTE')
+```
+
+**Output** (sul repo a HEAD `df54239b`):
+
+```
+gruppo   righe entr soloS soloT   NM EREDITA | esito (riletto dalle tabelle contro dichiarato dal gruppo)
+G1          26    5     2     3   13       3 | UGUALE
+G2          14    8     0     1    5       0 | UGUALE
+G3          14    8     1     2    2       1 | UGUALE
+G4          12    7     0     1    4       0 | UGUALE
+G5          19   12     2     0    4       1 | UGUALE
+G6a-A       17    8     1     1    7       0 | UGUALE
+G6a-T       17    6     1     2    8       0 | UGUALE
+G6b         14    5     0     4    5       0 | UGUALE
+TOTALE (G6a nella vista A, con screening): righe 116 | entrambe 53 | solo SOPRA 6 | solo SOTTO 12 | NM 40 | EREDITA 5
+  => almeno una cella SOPRA (righe proprie) = 59 ; almeno una cella SOTTO (righe proprie) = 65
+TOTALE (G6a nella vista T, solo tick): entrambe 51 | solo SOPRA 6 | solo SOTTO 13 | NM 41 => SOPRA 57, SOTTO 64
+G5-celle {'SOPRA': 66, 'SOTTO': 39, 'NM': 6, 'righe': 111} | dichiarato {'SOPRA': 66, 'SOTTO': 39, 'NM': 6, 'righe': 111} UGUALE
+G1-celle {'righe_tabella': 50, 'celle_SOPRA': 17, 'celle_SOTTO': 16, 'celle_NM': 16, 'EREDITA_righe': 3} | dichiarato {'righe_tabella': 50, 'celle_SOPRA': 17, 'celle_SOTTO': 16, 'celle_NM': 16, 'EREDITA_righe': 3} UGUALE
+```
+
+**Controesempio** (regola del 10/09: provare a ROMPERE lo strumento prima di fidarsene). Ho copiato i sette file in una cartella a parte, **cambiato due righe** (G4: riga 8b da NM a SOPRA; G6b: una cella NM spostata in SOPRA) e rilanciato lo script con `RDIR` sulla copia: **G4 e G6b risultano DIFFERENTE** (G4: entrambe 7, solo SOPRA 1, solo SOTTO 1, NM 3 contro 7 / 0 / 1 / 4 dichiarato; G6b: entrambe 6, solo SOTTO 3 contro 5 / 4 dichiarato), le altre sei UGUALI, e il totale cambia (SOPRA da 59 a 61). Lo script **non e' un timbro**: vede le differenze.
+
+## APPENDICE B - CONTROLLO "NESSUN NUMERO NUOVO"
+
+`verifica_numeri.py` legge la tabella principale (sez. 1, righe 1-116) e per ogni numero scritto nelle colonne cella / backtest / regimi / aff. / migliorabile (decimali con virgola e interi, escluse date e id di riga; interi di 1-2 cifre senza virgola esclusi per rumore) controlla che compaia **come numero intero, non come parte di un altro** nel file del gruppo citato. Esito sulla versione finale: **824 numeri controllati, 0 non trovati.** Limite dichiarato: la ricerca e' sul file del gruppo, non sulla riga: un numero potrebbe esistere nel file ma in un'altra cella (confusione di cella). Per questo i numeri sono stati copiati dalle tabelle dei gruppi (non dalle schede) e rimandano all'id di riga.
+
+**Secondo controllo, piu' stretto** (stesso metodo ma sulle sole righe citate dal rimando): per G1, G3, G4, G5, G6a, G6b **597 numeri, 19 fuori dalle righe citate**, tutti spiegati (date e magic; i regimi di BB dalla scheda 4.1 §4 di G4; il "DD 15,8-21,8%" di EasyTrend da G4 sez. 2; il DD IS 10,92% di K03 da G6b sez. 5; 2010-2018 dalla scheda 1 di G1). Per G2 (14 righe, senza id di riga) il controllo e' sulle righe della tabella 0 con lo stesso EA: **110 numeri, 0 fuori**. Controllo di tenuta della tabella: 116 righe, ciascun `#` una sola volta, ogni tabella con lo stesso numero di colonne su tutte le righe, nomi degli EA coerenti con le righe del piano. **Dichiarato**: gli script `verifica_numeri.py` e `verifica_righe.py` stanno nella cartella di lavoro della sessione e **non sono in repo** (solo `conta.py` e' riportato qui sopra).
+
+---
+
+## CHANGELOG
+| data | cosa | perche' |
+|---|---|---|
+| 05/10/2026 | creato il consolidato (sez. 0-5, appendici A-B): 116 righe, 7 gruppi; bozza, NON passata dal cancello | richiesta di Claudio del 05/10/2026: resoconto consolidato di tutti gli EA |
