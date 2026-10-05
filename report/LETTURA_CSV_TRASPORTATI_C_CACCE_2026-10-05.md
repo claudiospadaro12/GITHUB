@@ -130,7 +130,7 @@ Per ogni EA: round letti, numeri chiave, classe, affidabilita', cosa dicono i CS
 
 - **Numeri** (CSV, 100k, 0,65%, IS/OOS desunte): NASUSD L+S **IS 0,609 n146 DD 7,76 (-6.446,05) -> OOS 1,243 n261 DD 3,03 (+4.264,01)**; 2o segnale **0,463 n71 DD 5,65 -> 1,486 n133 DD 1,37**. U30USD L+S **0,599 n146 DD 6,42 -> 1,035 n261 DD 4,41 (+660,66)**; 2o segnale **0,461 n76 DD 5,36 -> 1,250 n130 DD 1,79**.
 - **Classe**: OOS **SOPRA 4/4** (U30USD L+S "formale" 1,035); IS **SOTTO 4/4** (0,461-0,609). **INV 4 celle su 4, tutte IS<1 -> OOS>=1.** Affidabilita' OOS **B** (n 261) per L+S, **C** (130-133) per il 2o segnale; n IS 146 = **quattro sotto 150**.
-- **Dicono i CSV vs G6a**: **identico** (8 confronti di cella, 0 diff). Il CSV conferma anche che n OOS e' **261 identico** su NASUSD e U30USD L+S.
+- **Dicono i CSV vs G6a**: **identico** (8 confronti di cella, 0 diff). Il CSV conferma anche che n OOS e' **261 identico** su NASUSD e U30USD L+S (n IS 146 identico su entrambi).
 - **Verdetto proposto**: invariato (**NON ANCORA MISURATO**, G6a 4.11). Le celle **SOTTO** che G6a cita per questo EA (R98 `a`, solo SHORT, R235 short) **non sono in questi CSV**: restano `[DICHIARATO]` dai referti.
 - Colonna `Peggior Giornata %`: **assente** in questi CSV (NON LEGGIBILE).
 
@@ -268,7 +268,7 @@ Scorse **tutte le 98 righe** nei due versi (non la sola riga di default). Per EA
 
 - **Celle SOPRA nascoste dentro EA che G6a vedeva "SOTTO/NM"**: **VolExpBreak U30USD kStop 2,5 (OOS 1,042)** e, in IS, **IBRetest D30EUR (1,211)**; `Cycle` e `DaxValueArea` **non ne hanno nessuna** (Cycle: 0 righe su 6 sopra 1 in OOS e 0 su 6 in IS; DaxValueArea: 0 su 4 in OOS e 0 su 4 in IS).
 - **Celle SOTTO nascoste dentro EA che G6a vedeva "SOPRA"**: **LVNArbitro IS 0,979 / 0,975** (n 392); **IntradayMomentum IS 0,461-0,609 su 4/4** (G6a lo diceva, confermato).
-- **Mai SOPRA in nessuna delle due finestre**: Cycle (IS e OOS), DaxValueArea (IS e OOS), IBRetest in OOS 3/3.
+- **Mai SOPRA in nessuna delle due finestre**: Cycle e DaxValueArea. **Mai SOPRA in OOS**: IBRetest (3 celle su 3; in IS solo D30EUR 1,211).
 - **Una sola cella SOPRA in tutte e due le finestre fra VolExpBreak, Cycle, DaxValueArea**: VolExpBreak U30USD kStop 2,5 (IS 1,123 n78 / OOS 1,042 n111).
 
 ### 5.b Segno invertito IS -> OOS
@@ -321,7 +321,7 @@ Nessun round di queste tre famiglie puo' dichiarare **MORTO**. Un fatto di risch
 ### 5.e Cio' che i CSV smentiscono (o correggono)
 
 1. **"Per `DaxValueArea`, `VolExpBreak`, `Cycle` il numero esiste ed e' irraggiungibile" (G6a 1.1, 3-bis, 5 misura 1)**: ora e' raggiunto. **36 righe, tutte con n > 0**: "uscita 0" del runner = "round girato con operazioni", confermato su 36 su 36.
-2. **G6a 4.11 punto 10: "`IntradayMomentum` e' l'unico dei 17 con n >= 150 in OOS per costruzione"**: **non regge** con i CSV: `Cycle` (n OOS 1036-2072, 3,7-7,5 op/giorno) e `DaxValueArea` (n OOS 350-407, 1,27-1,47 op/giorno) hanno n OOS >= 150 in **tutte** le celle; `LVNArbitro` (618) e `AtrExhaustVol` PERC (224) lo avevano gia' nella stessa G6a (sez. 2 punto 1).
+2. **G6a 4.11 punto 10: "`IntradayMomentum` e' l'unico dei 17 con n >= 150 in OOS per costruzione"**: **non regge** con i CSV: `Cycle` (n OOS 1036-2072, 3,8-7,5 op/giorno) e `DaxValueArea` (n OOS 350-407, 1,27-1,47 op/giorno) hanno n OOS >= 150 in **tutte** le celle; `LVNArbitro` (618) e `AtrExhaustVol` PERC (224) lo avevano gia' nella stessa G6a (sez. 2 punto 1).
 3. **Attesa di frequenza del file prova R141e** (n 180-530): **smentita al rialzo** (561-658). **Previsione "PF decrescente col buffer"**: non si realizza (sez. 4.4).
 4. **L'attesa di durata di Cycle (5,6-8,8 barre)**: l'osservato 5,47-5,55 (verso 0) e 4,28-4,33 (verso 1) sta **sotto** la banda; frequenza e ingressi/giorno invece **dentro**.
 5. **"L'inversione IS/OOS e' tipica degli EA a ora fissa"** (implicita nell'ipotesi dell'orologio, G6a G6a-4): i CSV mostrano inversioni **in entrambe le direzioni**, e **5 celle su 8 di `VolExpBreak`, che ha il filtro orario SPENTO e opera 24 ore, sono invertite nel verso opposto a `IntradayMomentum`**. Questo **non smentisce** l'ipotesi per `IntradayMomentum` (che e' NON VERIFICABILE, sez. 6) ma **smentisce che l'inversione sia un fenomeno proprio degli EA a ora fissa**.
