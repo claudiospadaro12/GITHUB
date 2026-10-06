@@ -431,6 +431,7 @@ EventKillTimer GetTickCount GetLastError Print StringLen StringFind StringSubstr
 DoubleToString TimeToString EnumToString TimeCurrent SymbolInfoDouble SymbolInfoInteger AccountInfoDouble
 AccountInfoString ArrayResize ArraySize ArraySetAsSeries PeriodSeconds TerminalInfoInteger GlobalVariableSet
 GlobalVariableGet GlobalVariableCheck GlobalVariableDel SymbolInfoSessionTrade MathMax MathMin MathAbs MathFloor MathRound MathSqrt
+iMA CopyBuffer BarsCalculated IndicatorRelease MathIsValidNumber
 NormalizeDouble if for while return switch sizeof
 """.split())
 MQL_CONSTANTS = set("""
@@ -448,6 +449,7 @@ SATURDAY STYLE_SOLID SYMBOL_BID SYMBOL_CALC_MODE_FOREX SYMBOL_CALC_MODE_FOREX_NO
 SYMBOL_TRADE_TICK_SIZE SYMBOL_TRADE_TICK_VALUE SYMBOL_TRADE_TICK_VALUE_LOSS SYMBOL_VOLUME_MAX SYMBOL_VOLUME_MIN
 SYMBOL_VOLUME_STEP TERMINAL_SCREEN_DPI TIME_DATE TIME_MINUTES _Digits _Period _Point _Symbol clrBlack clrFireBrick
 clrGold clrHotPink clrLightSlateGray clrLime clrLimeGreen clrNONE clrOrangeRed clrRed clrSeaGreen clrWhite
+INVALID_HANDLE MODE_EMA PRICE_CLOSE PERIOD_M15 PERIOD_M30 PERIOD_H1 PLOT_LINE_WIDTH
 """.split())
 FORBIDDEN = ["OrderSend", "OrderSendAsync", "CTrade", "PositionOpen", "PositionClose", "OrderCalcMargin",
              "OrderSelect", "PositionSelect", "WebRequest", "SocketCreate", "SendFTP", "SendMail",
@@ -671,10 +673,11 @@ ANCHORS = [
     ("tasto HA: nascondi/ripristina", "if(t==PG_T_HA){if(gOn[t]){gHealCount=0;ColsHide();}elseColsRestore();}"),
     ("avvio: HA nasconde, altrimenti ripara", "if(gOn[PG_T_HA])ColsHide();elseRepairInvisibleNative();"),
     ("stato iniziale dei tasti", "gOn[t]=PG_StatoIniziale(has,gvOn,gvIn,inp);"),
-    ("colore EMA 200 sul suo plot", "PlotIndexSetInteger(9,PLOT_LINE_COLOR,InpColEma200);"),
-    ("colore EMA 50 sul suo plot", "PlotIndexSetInteger(8,PLOT_LINE_COLOR,InpColEma50);"),
-    ("colore EMA 9 sul suo plot", "PlotIndexSetInteger(6,PLOT_LINE_COLOR,InpColEma9);"),
-    ("colore EMA 21 sul suo plot", "PlotIndexSetInteger(7,PLOT_LINE_COLOR,InpColEma21);"),
+    # v1.01: le EMA scalano di 4 plot (ST 2,5 e 3,5 inseriti prima, cosi' le EMA restano disegnate sopra a tutto)
+    ("colore EMA 200 sul suo plot", "PlotIndexSetInteger(13,PLOT_LINE_COLOR,InpColEma200);"),
+    ("colore EMA 50 sul suo plot", "PlotIndexSetInteger(12,PLOT_LINE_COLOR,InpColEma50);"),
+    ("colore EMA 9 sul suo plot", "PlotIndexSetInteger(10,PLOT_LINE_COLOR,InpColEma9);"),
+    ("colore EMA 21 sul suo plot", "PlotIndexSetInteger(11,PLOT_LINE_COLOR,InpColEma21);"),
     ("un clic non ricalcola: riscrive solo cio' che si vede", "FillDisplay(0,gRT);"),
     # --- aggiunte dal cancello indipendente del 02/10 (classe 1068): righe di RACCORDO che 20 mutanti su 23
     #     cambiavano restando VERDI (periodi, stato d'avvio, HA da spento, oggi, notte, chiave GV, rischio...)
@@ -746,6 +749,33 @@ ANCHORS = [
     ("pannello: quota sotto il minimo dichiarata", 'if(f1==1||f2==1||f3==1)lotNote+="S";if(f1==2||f2==2||f3==2||ft==2)lotNote+="S";'),
     ("pannello: riga SETUP INDICATIVO - NON VALIDATO disegnata", 'LblR(q+"S",RM+6,y+13*LH,warn,C0,InpFont-1);'),
     ("pannello d'attesa: riga NON VALIDATO disegnata", 'LblR(q+"S",RM+6,y+4*LH,warn,C0,InpFont-1);'),
+    # --- v1.01 (06/10/2026): Supertrend a tre livelli + EMA 200 di altri TF
+    ("ST 2,5 su = verso +1", "bSt1Su[i]=PG_StLinea(on1,kDir1[i],kVal1[i],1.0);"),
+    ("ST 2,5 giu = verso -1", "bSt1Giu[i]=PG_StLinea(on1,kDir1[i],kVal1[i],-1.0);"),
+    ("ST 3,5 su = verso +1", "bSt3Su[i]=PG_StLinea(on3,kDir3[i],kVal3[i],1.0);"),
+    ("ST 3,5 giu = verso -1", "bSt3Giu[i]=PG_StLinea(on3,kDir3[i],kVal3[i],-1.0);"),
+    ("ST 2,5 e 3,5 col tasto SUPERTREND e il LORO input", "boolon1=(gOn[PG_T_ST]&&InpStMostra1);boolon3=(gOn[PG_T_ST]&&InpStMostra3);"),
+    ("ST livello 1: STESSA funzione, STESSO periodo, SUO moltiplicatore", "SW_STCore(high,low,close,rates_total,start,gStP,gSt1M,kAtr,kUp1,kDn1,kDir1,kVal1);"),
+    ("ST livello 3: STESSA funzione, STESSO periodo, SUO moltiplicatore", "SW_STCore(high,low,close,rates_total,start,gStP,gSt3M,kAtr,kUp3,kDn3,kDir3,kVal3);"),
+    ("moltiplicatori 2,5 e 3,5 dai loro input", 'gSt1M=ClampD(InpSTMult1,0.01,20.0,2.5,"S");gSt3M=ClampD(InpSTMult3,0.01,20.0,3.5,"S");'),
+    ("colori ST 2,5 e 3,5 sui loro plot", "PlotIndexSetInteger(6,PLOT_LINE_COLOR,InpColSt1Su);PlotIndexSetInteger(7,PLOT_LINE_COLOR,InpColSt1Giu);"
+     "PlotIndexSetInteger(8,PLOT_LINE_COLOR,InpColSt3Su);PlotIndexSetInteger(9,PLOT_LINE_COLOR,InpColSt3Giu);"),
+    ("spessori ST: 3,0 su 4-5, 2,5 su 6-7, 3,5 su 8-9", "PlotIndexSetInteger(4,PLOT_LINE_WIDTH,w2);PlotIndexSetInteger(5,PLOT_LINE_WIDTH,w2);"
+     "PlotIndexSetInteger(6,PLOT_LINE_WIDTH,w1);PlotIndexSetInteger(7,PLOT_LINE_WIDTH,w1);PlotIndexSetInteger(8,PLOT_LINE_WIDTH,w3);PlotIndexSetInteger(9,PLOT_LINE_WIDTH,w3);"),
+    ("valore vuoto su TUTTI i plot", "for(intp=0;p<PG_NPLOT;p++)PlotIndexSetDouble(p,PLOT_EMPTY_VALUE,PG_VUOTO);"),
+    ("EMA altri TF: elenco dei TF", "ENUM_TIMEFRAMESgEhTf[PG_NEH]={PERIOD_M15,PERIOD_M30,PERIOD_H1,PERIOD_H4,PERIOD_D1,PERIOD_W1};"),
+    ("EMA altri TF: ogni TF dal SUO input",
+     "switch(j){case0:returnInpEmaHtfM15;case1:returnInpEmaHtfM30;case2:returnInpEmaHtfH1;case3:returnInpEmaHtfH4;"
+     "case4:returnInpEmaHtfD1;case5:returnInpEmaHtfW1;}returnfalse;"),
+    ("EMA altri TF: niente riga sul TF del grafico", "if(!EmaHtfInput(j)||gEhTf[j]==(ENUM_TIMEFRAMES)_Period)continue;"),
+    ("EMA altri TF: stesso periodo/tipo/prezzo della EMA 200", "gEhH[j]=iMA(_Symbol,gEhTf[j],gP200,0,MODE_EMA,PRICE_CLOSE);"),
+    ("EMA altri TF: nessuna riga prima di 'periodo' barre calcolate", "if(bc<gP200+gEhShift){pend=true;continue;}"),
+    ("EMA altri TF: copia di UN valore alla barra scelta", "if(CopyBuffer(gEhH[j],0,gEhShift,1,v)!=1){pend=true;continue;}"),
+    ("EMA altri TF: riga rossa TRATTEGGIATA", "AddItem(gEhV[j],t,InpColEmaHtf,STYLE_DASH);"),
+    ("EMA altri TF: tasto scelto", "if(gEhMode==1)returngOn[PG_T_LIV];if(gEhMode==2)return(gOn[PG_T_ST]||gOn[PG_T_LIV]);returngOn[PG_T_ST];"),
+    ("righe/scritte nuove SOLO coi loro tasti", "if(gOn[PG_T_ST])AddStItems();if(EmaHtfVisibile())AddEmaHtfItems();"),
+    ("OnDeinit rilascia gli handle", "ObjectsDeleteAll(0,PFX);EmaHtfRilascia();"),
+    ("firma delle righe col PREZZO (scritte senza prezzo si spostano)", 'DoubleToString(gItP[k],_Digits)+"S"+(gItLine[k]?"S":"S")+"S";'),
 ]
 ANCHOR_MUTANTS = [
     ("EMA 50 mostra il calcolo della 200", "bE50[i] =PG_MostraDa(gOn[PG_T_EMA50],i,gP50-1,kE50[i]);",
@@ -765,7 +795,22 @@ ANCHOR_MUTANTS = [
     ("OnDeinit senza ripristino delle candele", "   EventKillTimer();\n   ColsRestore();", "   EventKillTimer();\n"),
     ("stato dei tasti cancellato a ogni uscita", "if(reason==REASON_REMOVE || reason==REASON_CHARTCLOSE)\n      GvClear();",
      "GvClear();"),
-    ("colore EMA 200 sul plot sbagliato", "PlotIndexSetInteger(9,PLOT_LINE_COLOR,InpColEma200);", "PlotIndexSetInteger(8,PLOT_LINE_COLOR,InpColEma200);"),
+    ("colore EMA 200 sul plot sbagliato", "PlotIndexSetInteger(13,PLOT_LINE_COLOR,InpColEma200);", "PlotIndexSetInteger(12,PLOT_LINE_COLOR,InpColEma200);"),
+    # --- v1.01: mutanti delle regole nuove, ognuno deve essere preso
+    ("ST 2,5 giu' disegna il verso su", "bSt1Giu[i]=PG_StLinea(on1,kDir1[i],kVal1[i],-1.0);", "bSt1Giu[i]=PG_StLinea(on1,kDir1[i],kVal1[i],1.0);"),
+    ("ST 3,5 col moltiplicatore 2,5", "gStP,gSt3M,kAtr,kUp3", "gStP,gSt1M,kAtr,kUp3"),
+    ("ST 3,5 col PERIODO sbagliato", "start,gStP,gSt3M,", "start,gBBP,gSt3M,"),
+    ("livello 1 acceso dall'input del livello 3", "bool on1=(gOn[PG_T_ST] && InpStMostra1);", "bool on1=(gOn[PG_T_ST] && InpStMostra3);"),
+    ("livello 3 visibile a tasto spento", "bool on3=(gOn[PG_T_ST] && InpStMostra3);", "bool on3=(InpStMostra3);"),
+    ("EMA altri TF anche sul TF del grafico", " || gEhTf[j]==(ENUM_TIMEFRAMES)_Period", ""),
+    ("EMA altri TF semplice invece che esponenziale", "MODE_EMA,PRICE_CLOSE", "MODE_SMA,PRICE_CLOSE"),
+    ("EMA altri TF col periodo della 50", "gEhH[j]=iMA(_Symbol,gEhTf[j],gP200,", "gEhH[j]=iMA(_Symbol,gEhTf[j],gP50,"),
+    ("EMA altri TF disegnata senza dati pronti", "if(bc<gP200+gEhShift)", "if(bc<0)"),
+    ("EMA altri TF riga continua", "AddItem(gEhV[j],t,InpColEmaHtf,STYLE_DASH);", "AddItem(gEhV[j],t,InpColEmaHtf,STYLE_SOLID);"),
+    ("EMA altri TF col tasto LIVELLI per default", "   return gOn[PG_T_ST];\n  }", "   return gOn[PG_T_LIV];\n  }"),
+    ("H1 acceso dall'input H4", "case 2: return InpEmaHtfH1;", "case 2: return InpEmaHtfH4;"),
+    ("handle non rilasciati", "   EmaHtfRilascia();", ""),
+    ("firma senza prezzo (riga senza prezzo ferma)", "+\"|\"+\n           DoubleToString(gItP[k],_Digits)", ""),
     # --- mutanti del cancello indipendente del 02/10: prima del rinforzo erano VERDI (classe 1068)
     ("TP invertiti via rischio negativo", "double rk=MathAbs(e-s);", "double rk=-MathAbs(e-s);"),
     ("verso del setup invertito", "      gSuD=d;\n", "      gSuD=-d;\n"),
@@ -825,6 +870,11 @@ EXPECTED_INPUTS = {
     "InpSize1": "40", "InpSize2": "30", "InpSize3": "30", "InpStopCol": "clrRed", "InpColTP": "C'57,255,20'",
     "InpFont": "8", "InpBuyCol": "C'38,166,91'", "InpSellCol": "C'200,55,50'", "InpPanelCol": "C'16,18,22'",
     "InpGridCol": "C'55,58,66'", "InpTextCol": "C'205,208,214'", "InpHeadCol": "clrWhite",
+    # v1.01
+    "InpStSpess2": "2", "InpSTMult1": "2.5", "InpSTMult3": "3.5", "InpStMostra1": "true", "InpStMostra3": "true",
+    "InpStSpess1": "1", "InpStSpess3": "3", "InpStScritte": "true", "InpStScrittePrezzo": "true",
+    "InpEmaHtfTasto": "0", "InpEmaHtfM15": "false", "InpEmaHtfM30": "false", "InpEmaHtfH1": "true", "InpEmaHtfH4": "true",
+    "InpEmaHtfD1": "false", "InpEmaHtfW1": "false", "InpEmaHtfBarra": "0", "InpColEmaHtf": "clrRed", "InpEmaHtfPrezzo": "true",
 }
 ENGLISH = ["HIGH", "LOW", "SUPPORT", "RESISTANCE", "OPEN", "CLOSE", "PREVIOUS", "DAY", "WEEK", "MONTH", "NIGHT",
            "ROUND", "ENTRY", "TARGET ", "SWING"]
@@ -877,8 +927,9 @@ def static_checks(src):
     for f in FORBIDDEN:
         check(f not in code, "nessun '%s' (sola visione: niente ordini, rete, file, cambio grafico, StringFormat)" % f)
     # larghezze e colori delle linee richiesti
-    for plot, w, col, lab in ((10, 3, "clrRed", "EMA 200"), (9, 2, "clrWhite", "EMA 50"), (7, 1, "clrHotPink", "EMA 9"),
-                              (8, 1, "clrGold", "EMA 21")):
+    for plot, w, col, lab in ((14, 3, "clrRed", "EMA 200"), (13, 2, "clrWhite", "EMA 50"), (11, 1, "clrHotPink", "EMA 9"),
+                              (12, 1, "clrGold", "EMA 21"), (5, 2, "clrLimeGreen", "Supertrend su"),
+                              (6, 2, "clrOrangeRed", "Supertrend giu")):
         ok = (re.search(r"#property\s+indicator_width%d\s+%d\b" % (plot, w), src) is not None and
               re.search(r"#property\s+indicator_color%d\s+%s\b" % (plot, col), src) is not None and
               re.search(r'#property\s+indicator_label%d\s+"%s"' % (plot, lab), src) is not None)

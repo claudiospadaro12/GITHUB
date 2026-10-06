@@ -1399,6 +1399,99 @@ color LevelColor(const int i,const double p)
   }
 
 //+------------------------------------------------------------------+
+//| EMA 200 DI ALTRI TIMEFRAME (v1.01): riga orizzontale al valore    |
+//| attuale, letta da un handle iMA per TF                            |
+//+------------------------------------------------------------------+
+// la riga si vede col tasto scelto in InpEmaHtfTasto (0 SUPERTREND, 1 LIVELLI, 2 uno dei due)
+bool EmaHtfVisibile()
+  {
+   if(gEhMode==1) return gOn[PG_T_LIV];
+   if(gEhMode==2) return (gOn[PG_T_ST] || gOn[PG_T_LIV]);
+   return gOn[PG_T_ST];
+  }
+
+bool EmaHtfInput(const int j)
+  {
+   switch(j)
+     {
+      case 0: return InpEmaHtfM15;
+      case 1: return InpEmaHtfM30;
+      case 2: return InpEmaHtfH1;
+      case 3: return InpEmaHtfH4;
+      case 4: return InpEmaHtfD1;
+      case 5: return InpEmaHtfW1;
+     }
+   return false;
+  }
+
+// un handle per TF acceso, con lo STESSO periodo, tipo (esponenziale) e prezzo (chiusura) della EMA 200
+// del grafico (PG_EMA). Sul TF uguale a quello del grafico NESSUN handle: li' resta la EMA 200 nativa
+// del tasto EMA 200, cosi' com'e'. Il cambio di TF reinizializza l'indicatore: gli handle si rifanno.
+void EmaHtfCrea()
+  {
+   for(int j=0;j<PG_NEH;j++)
+     {
+      gEhH[j]=INVALID_HANDLE;
+      gEhV[j]=0.0;
+      gEhOk[j]=false;
+      if(!EmaHtfInput(j) || gEhTf[j]==(ENUM_TIMEFRAMES)_Period)
+         continue;
+      gEhH[j]=iMA(_Symbol,gEhTf[j],gP200,0,MODE_EMA,PRICE_CLOSE);
+      if(gEhH[j]==INVALID_HANDLE)
+         Print("ABTG_Pulsanti: EMA ",gP200," ",TfNameOf(gEhTf[j])," non creata (errore ",GetLastError(),"): quella riga non ci sara'.");
+     }
+   gEhPending=false;
+  }
+
+void EmaHtfRilascia()
+  {
+   for(int j=0;j<PG_NEH;j++)
+     {
+      if(gEhH[j]!=INVALID_HANDLE)
+         IndicatorRelease(gEhH[j]);
+      gEhH[j]=INVALID_HANDLE;
+      gEhOk[j]=false;
+     }
+  }
+
+// legge i valori. Nessuna riga finche' l'handle non ha calcolato abbastanza barre (almeno il periodo,
+// come le prime barre vuote della EMA nativa) o se la copia fallisce: MAI un valore inventato. Una
+// lettura fallita DOPO una buona lascia l'ultimo valore letto (niente righe che lampeggiano). Ogni
+// mancanza = gEhPending, e il timer riprova ogni secondo (anche a mercato chiuso, senza tick).
+void EmaHtfLeggi()
+  {
+   bool pend=false;
+   for(int j=0;j<PG_NEH;j++)
+     {
+      if(gEhH[j]==INVALID_HANDLE)
+        {
+         gEhOk[j]=false;
+         continue;
+        }
+      int bc=BarsCalculated(gEhH[j]);
+      if(bc<gP200+gEhShift)
+        {
+         pend=true;
+         continue;
+        }
+      double v[];
+      if(CopyBuffer(gEhH[j],0,gEhShift,1,v)!=1)
+        {
+         pend=true;
+         continue;
+        }
+      if(v[0]==EMPTY_VALUE || v[0]<=0.0 || !MathIsValidNumber(v[0]))
+        {
+         pend=true;
+         continue;
+        }
+      gEhV[j]=v[0];
+      gEhOk[j]=true;
+     }
+   gEhPending=pend;
+  }
+
+//+------------------------------------------------------------------+
 //| LINEE CON ETICHETTA (livelli + ordine)                            |
 //+------------------------------------------------------------------+
 void AddItem(const double p,const string txt,const color col,const int sty)
@@ -1409,7 +1502,62 @@ void AddItem(const double p,const string txt,const color col,const int sty)
    gItTxt[gItN]=txt;
    gItCol[gItN]=col;
    gItSty[gItN]=sty;
+   gItLine[gItN]=true;
    gItN++;
+  }
+
+// solo SCRITTA (nessuna riga orizzontale): per il Supertrend la linea e' gia' il plot
+void AddText(const double p,const string txt,const color col)
+  {
+   if(gItN>=PG_MAXIT)
+      return;
+   AddItem(p,txt,col,STYLE_SOLID);
+   gItLine[gItN-1]=false;
+  }
+
+// moltiplicatore scritto come nei vocali: 2.5 / 3.0 / 3.5 (due decimali solo se servono, es. 2.25)
+string MoltTxt(const double m)
+  {
+   bool unDec=(MathAbs(m*10.0-MathRound(m*10.0))<1e-9);
+   return DoubleToString(m,unDec ? 1 : 2);
+  }
+
+// scritta di un livello del Supertrend, all'altezza della sua linea sulla barra in corso, del colore
+// del verso in cui e' (su = colore SU, giu' = colore GIU')
+void AddStLabel(const bool show,const double m,const double d,const double v,const color cSu,const color cGiu)
+  {
+   if(!show || d==0.0 || v<=0.0 || v==PG_VUOTO)
+      return;
+   string t="ST "+MoltTxt(m);
+   if(InpStScrittePrezzo)
+      t=t+" "+PrezzoIt(v);
+   AddText(v,t,(d>0.0) ? cSu : cGiu);
+  }
+
+void AddStItems()
+  {
+   if(!InpStScritte || gRT<1)
+      return;
+   int i=gRT-1;
+   if(i>=ArraySize(kDir) || i>=ArraySize(kDir1) || i>=ArraySize(kDir3))
+      return;
+   AddStLabel(InpStMostra1,gSt1M,kDir1[i],kVal1[i],InpColSt1Su,InpColSt1Giu);
+   AddStLabel(true,        gStM, kDir[i], kVal[i], InpColStSu, InpColStGiu);
+   AddStLabel(InpStMostra3,gSt3M,kDir3[i],kVal3[i],InpColSt3Su,InpColSt3Giu);
+  }
+
+// righe EMA 200 degli altri TF pronte: rosse tratteggiate, "EMA200 H1 4.012,35"
+void AddEmaHtfItems()
+  {
+   for(int j=0;j<PG_NEH;j++)
+     {
+      if(!gEhOk[j])
+         continue;
+      string t="EMA"+IntegerToString(gP200)+" "+TfNameOf(gEhTf[j]);
+      if(InpEmaHtfPrezzo)
+         t=t+" "+PrezzoIt(gEhV[j]);
+      AddItem(gEhV[j],t,InpColEmaHtf,STYLE_DASH);
+     }
   }
 
 // livelli accesi e pronti, dal piu' alto; prezzi UGUALI (entro mezzo punto) fusi in una riga sola:
@@ -1470,27 +1618,39 @@ void AddOrderItems()
 bool DrawItems()
   {
    string sig="";
+   // v1.01: nella firma anche il PREZZO (una scritta senza prezzo, es. "EMA200 H1" o "ST 3.0", deve
+   // comunque spostarsi) e il tipo (riga o sola scritta)
    for(int k=0;k<gItN;k++)
-      sig+=gItTxt[k]+"|"+IntegerToString((long)gItCol[k])+"|"+IntegerToString(gItSty[k])+";";
-   bool present=(gItN==0 || ObjectFind(0,PFX+"H0")>=0);
+      sig+=gItTxt[k]+"|"+IntegerToString((long)gItCol[k])+"|"+IntegerToString(gItSty[k])+"|"+
+           DoubleToString(gItP[k],_Digits)+"|"+(gItLine[k] ? "L" : "T")+";";
+   // presenza controllata sulla SCRITTA 0 (c'e' sempre; la riga 0 no, se l'elemento 0 e' una sola scritta)
+   bool present=(gItN==0 || ObjectFind(0,PFX+"T0")>=0);
    if(sig==gItSig && gItDrawn==gItN && present)
       return false;
    int fs=gLivFs;
    for(int k=0;k<gItN;k++)
      {
       string nl=PFX+"H"+IntegerToString(k);
-      if(ObjectFind(0,nl)<0)
+      if(!gItLine[k])
         {
-         ObjectCreate(0,nl,OBJ_HLINE,0,0,gItP[k]);
-         ObjectSetInteger(0,nl,OBJPROP_WIDTH,1);
-         ObjectSetInteger(0,nl,OBJPROP_BACK,true);
-         ObjectSetInteger(0,nl,OBJPROP_SELECTABLE,false);
-         ObjectSetInteger(0,nl,OBJPROP_HIDDEN,true);
+         if(ObjectFind(0,nl)>=0)
+            ObjectDelete(0,nl);
         }
-      ObjectSetDouble(0,nl,OBJPROP_PRICE,gItP[k]);
-      ObjectSetInteger(0,nl,OBJPROP_COLOR,gItCol[k]);
-      ObjectSetInteger(0,nl,OBJPROP_STYLE,gItSty[k]);
-      ObjectSetString(0,nl,OBJPROP_TOOLTIP,gItTxt[k]);
+      else
+        {
+         if(ObjectFind(0,nl)<0)
+           {
+            ObjectCreate(0,nl,OBJ_HLINE,0,0,gItP[k]);
+            ObjectSetInteger(0,nl,OBJPROP_WIDTH,1);
+            ObjectSetInteger(0,nl,OBJPROP_BACK,true);
+            ObjectSetInteger(0,nl,OBJPROP_SELECTABLE,false);
+            ObjectSetInteger(0,nl,OBJPROP_HIDDEN,true);
+           }
+         ObjectSetDouble(0,nl,OBJPROP_PRICE,gItP[k]);
+         ObjectSetInteger(0,nl,OBJPROP_COLOR,gItCol[k]);
+         ObjectSetInteger(0,nl,OBJPROP_STYLE,gItSty[k]);
+         ObjectSetString(0,nl,OBJPROP_TOOLTIP,gItTxt[k]);
+        }
       string nt=PFX+"T"+IntegerToString(k);
       if(ObjectFind(0,nt)<0)
         {
@@ -1765,7 +1925,7 @@ bool DrawTradePanel()
 //+------------------------------------------------------------------+
 bool UpdateOverlay()
   {
-   if(!gOn[PG_T_LIV] && !gOn[PG_T_ORD] && gItDrawn==0 && gPanSig=="")
+   if(!gOn[PG_T_LIV] && !gOn[PG_T_ORD] && !gOn[PG_T_ST] && gItDrawn==0 && gPanSig=="")
       return false;                         // grafico pulito: zero lavoro
    bool chg=false;
    if(gOn[PG_T_ORD])
@@ -1780,6 +1940,10 @@ bool UpdateOverlay()
       AddLevelItems();
    if(gOn[PG_T_ORD])
       AddOrderItems();
+   if(gOn[PG_T_ST])
+      AddStItems();                         // v1.01: scritte ST 2.5 / 3.0 / 3.5
+   if(EmaHtfVisibile())
+      AddEmaHtfItems();                     // v1.01: righe EMA200 H1 / H4 ...
    chg=DrawItems() || chg;
    chg=Reposition() || chg;
    return chg;
@@ -1857,6 +2021,13 @@ int OnInit()
    gH4Stale=false;
    gDayT=0;
    gD1Seen=0;
+   gEhPending=false;
+   for(int j=0;j<PG_NEH;j++)               // prima di ogni 'return': OnDeinit (anche dopo INIT_FAILED) rilascia solo handle veri
+     {
+      gEhH[j]=INVALID_HANDLE;
+      gEhOk[j]=false;
+      gEhV[j]=0.0;
+     }
    for(int i=0;i<PG_NLIV;i++)
      {
       gLv[i]=0.0;
@@ -1873,6 +2044,10 @@ int OnInit()
    gBBD =ClampD(InpBBDev,0.01,10.0,2.0,"InpBBDev");
    gStM =ClampD(InpStMolt,0.01,20.0,3.0,"InpStMolt");
    gSuM =ClampD(InpSetupMolt,0.01,20.0,3.5,"InpSetupMolt");
+   gSt1M=ClampD(InpSTMult1,0.01,20.0,2.5,"InpSTMult1");
+   gSt3M=ClampD(InpSTMult3,0.01,20.0,3.5,"InpSTMult3");
+   gEhMode =ClampI(InpEmaHtfTasto,0,2,"InpEmaHtfTasto");
+   gEhShift=ClampI(InpEmaHtfBarra,0,1,"InpEmaHtfBarra");
    gH4K =ClampI(InpH4Ampiezza,1,20,"InpH4Ampiezza");
    gH4N =ClampI(InpH4Barre,20,5000,"InpH4Barre");
    gLvOn[0]=InpLiv_GiornoPrecMax;  gLvOn[1]=InpLiv_GiornoPrecMin;  gLvOn[2]=InpLiv_GiornoPrecChiusura;
@@ -1890,6 +2065,7 @@ int OnInit()
    ArrayResize(gItTxt,PG_MAXIT);
    ArrayResize(gItCol,PG_MAXIT);
    ArrayResize(gItSty,PG_MAXIT);
+   ArrayResize(gItLine,PG_MAXIT);
    ArrayResize(gLabY,PG_MAXIT);
    ArrayResize(gLabX,PG_MAXIT);
 
@@ -1904,36 +2080,48 @@ int OnInit()
    ok=SetIndexBuffer(7, bBBl,  INDICATOR_DATA)         && ok;
    ok=SetIndexBuffer(8, bStSu, INDICATOR_DATA)         && ok;
    ok=SetIndexBuffer(9, bStGiu,INDICATOR_DATA)         && ok;
-   ok=SetIndexBuffer(10,bE9,   INDICATOR_DATA)         && ok;
-   ok=SetIndexBuffer(11,bE21,  INDICATOR_DATA)         && ok;
-   ok=SetIndexBuffer(12,bE50,  INDICATOR_DATA)         && ok;
-   ok=SetIndexBuffer(13,bE200, INDICATOR_DATA)         && ok;
-   ok=SetIndexBuffer(14,kE9,   INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(15,kE21,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(16,kE50,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(17,kE200, INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(18,kBBu,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(19,kBBm,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(20,kBBl,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(21,kAtr,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(22,kUp,   INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(23,kDn,   INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(24,kDir,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(25,kVal,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(26,kUp2,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(27,kDn2,  INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(28,kDir2, INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(29,kVal2, INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(30,kHo,   INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(31,kHh,   INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(32,kHl,   INDICATOR_CALCULATIONS) && ok;
-   ok=SetIndexBuffer(33,kHc,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(10,bSt1Su, INDICATOR_DATA)        && ok;   // v1.01
+   ok=SetIndexBuffer(11,bSt1Giu,INDICATOR_DATA)        && ok;   // v1.01
+   ok=SetIndexBuffer(12,bSt3Su, INDICATOR_DATA)        && ok;   // v1.01
+   ok=SetIndexBuffer(13,bSt3Giu,INDICATOR_DATA)        && ok;   // v1.01
+   ok=SetIndexBuffer(14,bE9,   INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(15,bE21,  INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(16,bE50,  INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(17,bE200, INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(18,kE9,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(19,kE21,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(20,kE50,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(21,kE200, INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(22,kBBu,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(23,kBBm,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(24,kBBl,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(25,kAtr,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(26,kUp,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(27,kDn,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(28,kDir,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(29,kVal,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(30,kUp2,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(31,kDn2,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(32,kDir2, INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(33,kVal2, INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(34,kHo,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(35,kHh,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(36,kHl,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(37,kHc,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(38,kUp1,  INDICATOR_CALCULATIONS) && ok;   // v1.01
+   ok=SetIndexBuffer(39,kDn1,  INDICATOR_CALCULATIONS) && ok;   // v1.01
+   ok=SetIndexBuffer(40,kDir1, INDICATOR_CALCULATIONS) && ok;   // v1.01
+   ok=SetIndexBuffer(41,kVal1, INDICATOR_CALCULATIONS) && ok;   // v1.01
+   ok=SetIndexBuffer(42,kUp3,  INDICATOR_CALCULATIONS) && ok;   // v1.01
+   ok=SetIndexBuffer(43,kDn3,  INDICATOR_CALCULATIONS) && ok;   // v1.01
+   ok=SetIndexBuffer(44,kDir3, INDICATOR_CALCULATIONS) && ok;   // v1.01
+   ok=SetIndexBuffer(45,kVal3, INDICATOR_CALCULATIONS) && ok;   // v1.01
    if(!ok)
      {
       Print("ABTG_Pulsanti: SetIndexBuffer fallito, errore ",GetLastError());
       return INIT_FAILED;
      }
-   for(int p=0;p<10;p++)
+   for(int p=0;p<PG_NPLOT;p++)
       PlotIndexSetDouble(p,PLOT_EMPTY_VALUE,PG_VUOTO);
    PlotIndexSetInteger(0,PLOT_LINE_COLOR,0,InpColHaSu);
    PlotIndexSetInteger(0,PLOT_LINE_COLOR,1,InpColHaGiu);
@@ -1942,16 +2130,36 @@ int OnInit()
    PlotIndexSetInteger(3,PLOT_LINE_COLOR,InpColBB);
    PlotIndexSetInteger(4,PLOT_LINE_COLOR,InpColStSu);
    PlotIndexSetInteger(5,PLOT_LINE_COLOR,InpColStGiu);
-   PlotIndexSetInteger(6,PLOT_LINE_COLOR,InpColEma9);
-   PlotIndexSetInteger(7,PLOT_LINE_COLOR,InpColEma21);
-   PlotIndexSetInteger(8,PLOT_LINE_COLOR,InpColEma50);
-   PlotIndexSetInteger(9,PLOT_LINE_COLOR,InpColEma200);
-   PlotIndexSetString(6,PLOT_LABEL,"EMA "+IntegerToString(gP9));
-   PlotIndexSetString(7,PLOT_LABEL,"EMA "+IntegerToString(gP21));
-   PlotIndexSetString(8,PLOT_LABEL,"EMA "+IntegerToString(gP50));
-   PlotIndexSetString(9,PLOT_LABEL,"EMA "+IntegerToString(gP200));
+   PlotIndexSetInteger(6,PLOT_LINE_COLOR,InpColSt1Su);          // v1.01: ST livello 1
+   PlotIndexSetInteger(7,PLOT_LINE_COLOR,InpColSt1Giu);
+   PlotIndexSetInteger(8,PLOT_LINE_COLOR,InpColSt3Su);          // v1.01: ST livello 3
+   PlotIndexSetInteger(9,PLOT_LINE_COLOR,InpColSt3Giu);
+   int w1=ClampI(InpStSpess1,1,5,"InpStSpess1");
+   int w2=ClampI(InpStSpess2,1,5,"InpStSpess2");
+   int w3=ClampI(InpStSpess3,1,5,"InpStSpess3");
+   PlotIndexSetInteger(4,PLOT_LINE_WIDTH,w2);
+   PlotIndexSetInteger(5,PLOT_LINE_WIDTH,w2);
+   PlotIndexSetInteger(6,PLOT_LINE_WIDTH,w1);
+   PlotIndexSetInteger(7,PLOT_LINE_WIDTH,w1);
+   PlotIndexSetInteger(8,PLOT_LINE_WIDTH,w3);
+   PlotIndexSetInteger(9,PLOT_LINE_WIDTH,w3);
+   PlotIndexSetString(4,PLOT_LABEL,"Supertrend "+MoltTxt(gStM)+" su");
+   PlotIndexSetString(5,PLOT_LABEL,"Supertrend "+MoltTxt(gStM)+" giu");
+   PlotIndexSetString(6,PLOT_LABEL,"Supertrend "+MoltTxt(gSt1M)+" su");
+   PlotIndexSetString(7,PLOT_LABEL,"Supertrend "+MoltTxt(gSt1M)+" giu");
+   PlotIndexSetString(8,PLOT_LABEL,"Supertrend "+MoltTxt(gSt3M)+" su");
+   PlotIndexSetString(9,PLOT_LABEL,"Supertrend "+MoltTxt(gSt3M)+" giu");
+   PlotIndexSetInteger(10,PLOT_LINE_COLOR,InpColEma9);
+   PlotIndexSetInteger(11,PLOT_LINE_COLOR,InpColEma21);
+   PlotIndexSetInteger(12,PLOT_LINE_COLOR,InpColEma50);
+   PlotIndexSetInteger(13,PLOT_LINE_COLOR,InpColEma200);
+   PlotIndexSetString(10,PLOT_LABEL,"EMA "+IntegerToString(gP9));
+   PlotIndexSetString(11,PLOT_LABEL,"EMA "+IntegerToString(gP21));
+   PlotIndexSetString(12,PLOT_LABEL,"EMA "+IntegerToString(gP50));
+   PlotIndexSetString(13,PLOT_LABEL,"EMA "+IntegerToString(gP200));
    IndicatorSetInteger(INDICATOR_DIGITS,_Digits);
    IndicatorSetString(INDICATOR_SHORTNAME,"ABTG Pulsanti Grafico");
+   EmaHtfCrea();                            // v1.01: handle iMA delle EMA 200 degli altri TF accesi
 
    // oggetti orfani di un'istanza morta male: via, poi si ricreano quelli giusti
    ObjectsDeleteAll(0,PFX);
@@ -1976,6 +2184,7 @@ void OnDeinit(const int reason)
    EventKillTimer();
    ColsRestore();                         // OGNI motivo di uscita: le candele native tornano
    ObjectsDeleteAll(0,PFX);
+   EmaHtfRilascia();                        // v1.01: handle iMA delle EMA degli altri TF
    if(reason==REASON_REMOVE || reason==REASON_CHARTCLOSE)
       GvClear();
    ChartRedraw(0);
@@ -2021,6 +2230,9 @@ void OnTimer()
             LiveLevels();
            }
      }
+   //--- EMA 200 degli altri TF non ancora pronte: riprova ogni secondo (anche senza tick)
+   if(gEhPending && EmaHtfVisibile())
+      EmaHtfLeggi();
    if(UpdateOverlay())
       redraw=true;
    if(redraw)
@@ -2044,6 +2256,8 @@ void Toggle(const int t)
      }
    if(t==PG_T_LIV && gOn[t])
       RefreshLevels();              // un clic = livelli subito, anche a mercato chiuso
+   if((t==PG_T_ST || t==PG_T_LIV) && EmaHtfVisibile())
+      EmaHtfLeggi();                // v1.01: righe EMA degli altri TF subito, anche a mercato chiuso
    if(t!=PG_T_LIV && t!=PG_T_ORD)
       FillDisplay(0,gRT);           // nessun ricalcolo: si riscrive solo cio' che si vede
    UpdateOverlay();
@@ -2105,6 +2319,10 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    PG_BB(close,rates_total,start,gBBP,gBBD,kBBu,kBBm,kBBl);
    SW_STCore(high,low,close,rates_total,start,gStP,gStM,kAtr,kUp,kDn,kDir,kVal);
    SW_STCore(high,low,close,rates_total,start,gStP,gSuM,kAtr,kUp2,kDn2,kDir2,kVal2);
+   // v1.01: livelli 1 e 3 del tasto SUPERTREND: la STESSA funzione, lo STESSO periodo, solo il moltiplicatore
+   // cambia (kAtr riscritto con gli stessi numeri: l'ATR non dipende dal moltiplicatore)
+   SW_STCore(high,low,close,rates_total,start,gStP,gSt1M,kAtr,kUp1,kDn1,kDir1,kVal1);
+   SW_STCore(high,low,close,rates_total,start,gStP,gSt3M,kAtr,kUp3,kDn3,kDir3,kVal3);
    PG_HA(open,high,low,close,rates_total,start,kHo,kHh,kHl,kHc);
    gRT=rates_total;
    FillDisplay(start,rates_total);
@@ -2129,6 +2347,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       else
          LiveLevels();              // a ogni tick: solo confronti col prezzo
      }
+   if(EmaHtfVisibile())
+      EmaHtfLeggi();                // v1.01: un valore per TF acceso (CopyBuffer di 1 dato), a ogni tick
    if(UpdateOverlay())
       ChartRedraw(0);
    return rates_total;
