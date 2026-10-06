@@ -603,6 +603,9 @@ if($affidabile -and $senzaData -eq 0){
       if($m0 -lt 65){ $lett = 'SOTTO 65: l IPOTESI "stop da ATR" e SMENTITA' }
       elseif($m0 -lt 93){ $lett = 'sotto l attesa 93-188 ma >= 65: ipotesi non smentita, fuori attesa' }
       elseif($m0 -gt 188){ $lett = 'SOPRA l attesa 93-188' }
+      $minD = [decimal]$ordBase[0]
+      if($minD -gt [decimal]22.53){ [void]$riepilogo.Add('         COERENZA DELL ALGEBRA (stop = stop di base + buffer, buffer 2253 = 22,53 idx): stop minimo ' + (F2 $minD) + ' > 22,53 OK (condizione NECESSARIA, non sufficiente: la conversione /100 resta del piano).') }
+      else { [void]$riepilogo.Add('         ATTENZIONE COERENZA DELL ALGEBRA: stop minimo ' + (F2 $minD) + ' NON supera 22,53: o la conversione /100 del buffer e sbagliata o uno stop e stato corretto dall EA. I buffer DERIVATI NON SI USANO.') }
       [void]$riepilogo.Add('         LETTURA CONTRO L ATTESA (scritta prima): stop(2253) mediano ' + (F2 $m0) + ' -> ' + $lett + '; ingressi ' + $n + ' contro attesa 75-172.')
     }
   }
@@ -631,6 +634,7 @@ $testa = @(
 (($testa + $riepilogo + @('',
   'COME SI LEGGE: prima ESITO PASSATA (AFFIDABILE o NON MISURATO) e G0. Se NON MISURATO nessun numero di stop si usa.',
   'Se AFFIDABILE: la banda C3 a 2253 e la MISURA; 3003 / 3378 / 4503 sono DERIVATI per algebra.',
+  'Misura la tranche a MERCATO (1/3 del rischio): il pendente (InpUsePending, +20 pip) ha distanza maggiore e non e qui; la tranche piu stretta decide il cancello.',
   'Questo script misura e dice se la misura e affidabile: NON promuove, NON sceglie il buffer.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'RIEPILOGO_PASSATA_NAS.txt') -Encoding ASCII
 $zip = Join-Path $dsk 'PASSATA_STOP_SUPREV_NAS.zip'
 if(Test-Path -LiteralPath $zip){ Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue }

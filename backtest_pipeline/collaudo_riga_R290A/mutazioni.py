@@ -74,6 +74,7 @@ MUT = [
     M("c3_per_lato_sempre_long", "foreach($e in $entr){ if($e.Lato -eq $lat){", "foreach($e in $entr){ if($e.Lato -eq 'LONG'){", ["01_due_lati_insieme_verde"]),
     M("c3_calcolato_anche_se_non_affidabile", "if($affidabile -and $senzaData -eq 0){", "if($senzaData -eq 0){", ["05_ini_ignorata_EA_gira_coi_default", "06_incrocio_somma_imbuto_piu_uno", "02_g0_trades_176", "04_g0_report_assente"]),
     M("c3_senza_controllo_senza_data", "if($affidabile -and $senzaData -eq 0){", "if($affidabile){", ["07b_ingressi_senza_data_simulata"]),
+    M("algebra_soglia_22_53_a_2", "if($minD -gt [decimal]22.53)", "if($minD -gt [decimal]2.53)", ["08j_algebra_stop_minimo_sotto_22_53"]),
     M("attesa_65_a_60", "if($m0 -lt 65)", "if($m0 -lt 60)", ["09_attesa_64_99"]),
     M("attesa_93_a_90", "elseif($m0 -lt 93)", "elseif($m0 -lt 90)", ["09_attesa_92_99"]),
     M("attesa_188_a_190", "elseif($m0 -gt 188)", "elseif($m0 -gt 190)", ["09_attesa_188_01"]),

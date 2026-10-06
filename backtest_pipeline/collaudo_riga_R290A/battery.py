@@ -149,7 +149,7 @@ def scenari():
     A = sc.append
     # ---------------------------------------------------------------- misura: casi verdi e il contro-esempio dei due lati
     A(("01_due_lati_insieme_verde", S(), dict(rc=0, c3=True, zip=["RIEPILOGO_PASSATA_NAS.txt", "STOP_NAS.csv", "passata_NAS.ini", "spread_orario_NASUSD.csv", "PASSATA_STOP_NAS.htm"], ini=True, lati=True,
-                                                                                 testo=["input riletti dal report: 33 su 33 coincidono con l ancora; assenti nel report 0; DIVERSI 0"])))
+                                                                                 testo=["input riletti dal report: 33 su 33 coincidono con l ancora; assenti nel report 0; DIVERSI 0", "stop minimo 85.00 > 22,53 OK"])))
     A(("01b_giornale_duplicato_senza_data", S(giornale_duplicato=True), dict(rc=0, c3=True)))
     A(("01c_log_vecchio_prima_della_fotografia", S(log_vecchio=True), dict(rc=0, c3=True, no_testo=["9.99"])))
     A(("01d_ore_di_confine_0_e_23", S(voci=[("2024.10.01", 0, "LONG", "90.00"), ("2024.10.02", 23, "SHORT", "95.50"), ("2024.10.03", 8, "LONG", "120.25"), ("2024.10.04", 9, "SHORT", "130.10")]), dict(rc=0, c3=True)))
@@ -193,6 +193,7 @@ def scenari():
     A(("08f_c3_pavimento_duro", S(voci=[("2024.10.%02d" % (i + 1), 17, "LONG" if i % 2 else "SHORT", "5.00") for i in range(6)]), dict(rc=0, c3=True, testo=["pavimento duro (mediana stop >= 34,6): NO | ingressi con stop < 34,6: 6 su 6"])))
     for nome, dist, pav in (("32_00", "32.00", "NO"), ("34_59", "34.59", "NO"), ("34_60", "34.60", "SI")):
         A(("08g_c3_pavimento_%s" % nome, S(voci=V17(dist)), dict(rc=0, c3=True, testo=["(mediana stop >= 34,6): %s |" % pav])))
+    A(("08j_algebra_stop_minimo_sotto_22_53", S(voci=V17("10.00")), dict(rc=0, c3=True, testo=["ATTENZIONE COERENZA DELL ALGEBRA: stop minimo 10.00 NON supera 22,53"])))
     # attese scritte prima (piano 4.1): stop(2253) mediano 93-188 dentro l'attesa; sotto 65 l'ipotesi e' SMENTITA; 65-93 fuori attesa ma non smentita; sopra 188 fuori attesa
     for nome, dist, frase in (("64_99", "64.99", "SOTTO 65: l IPOTESI"), ("65_00", "65.00", "sotto l attesa 93-188 ma >= 65"), ("92_99", "92.99", "sotto l attesa 93-188 ma >= 65"),
                               ("93_00", "93.00", "DENTRO l attesa 93-188"), ("188_00", "188.00", "DENTRO l attesa 93-188"), ("188_01", "188.01", "SOPRA l attesa 93-188")):
