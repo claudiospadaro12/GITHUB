@@ -41,8 +41,15 @@ chk("irm " not in riga and "Invoke-RestMethod" not in riga and "DownloadData" in
 
 
 def prova(nome, spec, atteso, no_testo=(), hits_zero=False, dopo=None):
+    n0 = len(bad)
+    _prova(nome, spec, atteso, no_testo, hits_zero, dopo)
+    return len(bad) - n0
+
+
+def _prova(nome, spec, atteso, no_testo=(), hits_zero=False, dopo=None):
     b = tempfile.mkdtemp(prefix="rg_", dir=tmpd)
     srv = None
+    spec = dict(spec); spec["pin"] = C                  # il server serve sotto il PIN della riga (= il commit)
     try:
         c = banco.costruisci(b, spec)
         srv = banco.Srv(spec)
@@ -120,7 +127,43 @@ riga = riga.replace(H, h2)
 prova("B4_marcatore_assente_impronta_rifatta", sp, ["ASSENTE nello script scaricato"], no_testo=["=== 0 - MACCHINA"])
 riga = riga_orig
 prova("B5_macchina_vps", S2(macchina="VMI3047753"), ["QUESTA RIGA GIRA SOLO SUL PC DI BACKTEST"], hits_zero=True, no_testo=["impronta script:"])
+prova("B7_scrittura_su_disco_corrotta", dict(S2(), corrompi=True), ["file scritto sul disco ha un altra impronta"], no_testo=["=== 0 - MACCHINA"])
 prova("B6_mt5_aperto", S2(mt5_vivo="terminal64"), ["MT5 o MetaEditor risulta APERTO"], hits_zero=True, no_testo=["impronta script:"])
+# ---- mutazioni della RIGA: ognuna spegne un controllo; lo scenario che lo prova DEVE diventare rosso
+riga_orig = riga
+H_ = H
+def rm(a, b_=""):
+    assert riga_orig.count(a) == 1, a
+    return riga_orig.replace(a, b_)
+MUTR = [
+    ("riga_senza_controllo_impronta", rm("if($h -ne '" + H_ + "'){ Write-Host ('IMPRONTA DIVERSA (' + $h + '): copia vecchia o cache di GitHub. Mi fermo, non lancio niente.') -ForegroundColor Red; return }; "), "B3_script_con_un_byte_in_piu", serve_alterato(S2()), ["IMPRONTA DIVERSA"], ["=== 0 - MACCHINA"]),
+    ("riga_senza_marcatore", rm("if(-not ($t | Select-String -SimpleMatch -Quiet -Pattern 'MARCATORE_PASSATA_STOP_SUPREV_NAS_v1')){ Write-Host 'Marcatore MARCATORE_PASSATA_STOP_SUPREV_NAS_v1 ASSENTE nello script scaricato: mi fermo.' -ForegroundColor Red; return }; ").replace(H_, h2), "B4_marcatore_assente", sp, ["ASSENTE nello script scaricato"], ["=== 0 - MACCHINA"]),
+    ("riga_senza_guardia_macchina", rm("if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ('QUESTA RIGA GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. Qui la macchina si chiama: ' + $env:COMPUTERNAME + '. Sul VPS VMI3047753 non si lancia: la challenge FTMO 541452707 sta operando.') }; "), "B5_macchina_vps", S2(macchina="VMI3047753"), ["QUESTA RIGA GIRA SOLO SUL PC DI BACKTEST"], ["impronta script:"]),
+    ("riga_senza_guardia_mt5", rm("if((@(Get-Process -Name terminal64,metaeditor64 -ErrorAction SilentlyContinue)).Count -gt 0){ throw "), "B6_mt5_aperto", S2(mt5_vivo="terminal64"), ["MT5 o MetaEditor risulta APERTO"], ["impronta script:"]),
+    ("riga_senza_riverifica_su_disco", rm("$h2=(Get-FileHash -LiteralPath $S -Algorithm SHA256).Hash; if($h2 -ne '" + H_ + "'){ Write-Host ('Il file scritto sul disco ha un altra impronta (' + $h2 + '): mi fermo.') -ForegroundColor Red; return }; "), "B7_scrittura_corrotta", dict(S2(), corrompi=True), ["file scritto sul disco ha un altra impronta"], ["=== 0 - MACCHINA"]),
+]
+def muta_riga(mutata, nome, sp_, att, no):
+    global riga
+    riga = mutata
+    ok0 = ok[0]
+    n = prova("M_" + nome, sp_, att, no_testo=no)
+    riga = riga_orig
+    del bad[len(bad) - n:]
+    ok[0] = ok0
+    return n
+prese = 0
+for (nome, mutata, sn, sp_, att, no) in MUTR:
+    if "--senza-mutazioni" in sys.argv:
+        break
+    if "ASSENTE nello script scaricato" in att:
+        pass
+    n = muta_riga(mutata, nome, sp_, att, no)
+    if n > 0:
+        prese += 1
+        print("   riga mutata PRESA: %s (%d controlli rossi)" % (nome, n))
+    else:
+        bad.append("MUTAZIONE DELLA RIGA SOPRAVVISSUTA: " + nome)
+print("MUTAZIONI DELLA RIGA: %d prese su %d" % (prese, len(MUTR)))
 print("RIGA R290A (bootstrap %s): %d controlli verdi, %d rossi" % (C[:8], ok[0], len(bad)))
 for b in bad:
     print("   ROSSO", b)

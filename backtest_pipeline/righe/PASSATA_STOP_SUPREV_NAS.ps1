@@ -53,6 +53,17 @@
 #      elemento ("/compile:X /log:Y"), non due (misurato in pwsh 7 il 06/10).
 #      La v2 U30USD ha quella forma e funziona solo perche' i percorsi non
 #      hanno spazi; qui la forma e' quella di PASSATA_TRAILFIX.ps1.
+#   9. G0 legge dal report anche l'IDENTITA' (EA, simbolo, periodo: devono essere
+#      quelli della passata, altrimenti NON RAGGIUNTO) e rilegge dal report
+#      i parametri che il tester ha DAVVERO usato, confrontati con l'ancora
+#      (informativo: stampa quanti coincidono, non blocca). Il numero di
+#      operazioni di G0 e' "Numero di Operazioni di Trading Totali" / "Total
+#      Trades" (la colonna Trades del CSV di ottimizzazione di r163a: 76 + 96),
+#      NON "Affari Totali" / "Total Deals" (stampato accanto, non confrontato).
+#  10. origin.txt letto con Leggi-Condiviso (BOM UTF-16 gestito a mano, file
+#      condiviso) invece di Get-Content -Raw; nomi di variabile senza
+#      omonimi a meno delle maiuscole ($DataDa/$DataA al posto di $DA/$A,
+#      $dv al posto di $a nel foreach: classe 757).
 #  INVARIATI: guardia macchina DESKTOP-H4D7CAJ, MT5 chiuso, un solo MT5 su
 #  questo PC, cartella dati risolta per origin.txt, sorgenti scaricati al
 #  pin con firma, compilazione verificata dal .ex5, AllowLiveTrading=false,

@@ -140,6 +140,9 @@ SETUP = r'''
 function Invoke-RestMethod { [CmdletBinding()] param([string]$Uri, [string]$OutFile)
   $u2 = $Uri.Replace('https://raw.githubusercontent.com/claudiospadaro12/GITHUB/', $env:LOCAL_RAW)
   Microsoft.PowerShell.Utility\Invoke-RestMethod -Uri $u2 -OutFile $OutFile }
+if($env:CORROMPI -eq '1'){ function Set-Content { [CmdletBinding()] param([string]$LiteralPath, $Value, $Encoding, [switch]$NoNewline)
+  if($LiteralPath -like '*PASSATA_STOP_SUPREV_NAS.ps1'){ $Value = $Value + '#x' }
+  Microsoft.PowerShell.Management\Set-Content -LiteralPath $LiteralPath -Value $Value -Encoding $Encoding -NoNewline:$NoNewline } }
 function powershell.exe { $a = @($args); $file = $null; $pin = $null
   for($i = 0; $i -lt $a.Count; $i++){ if($a[$i] -eq '-File'){ $file = $a[$i+1] }; if($a[$i] -eq '-Pin'){ $pin = $a[$i+1] } }
   & $file -Pin $pin }
@@ -174,7 +177,7 @@ def esegui(spec, c, srv, scen_dir, timeout=900):
     user = os.path.join(c, "Users", "Master")
     env.update(COMPUTERNAME=spec["macchina"], USERNAME="Master", USERPROFILE="C:\\Users\\Master", APPDATA="C:\\Users\\Master\\AppData\\Roaming", TEMP=tmp, TMP=tmp,
                SystemRoot="C:\\Windows", POWERSHELL_TELEMETRY_OPTOUT="1", POWERSHELL_UPDATECHECK="Off", CDRIVE=c, HOME=user, SIM_SCEN=scen, SIM_LOG=simlog, SIM_CDRIVE=c, SIM_SCRIPT=os.path.join(QD, "sim_mt5.py"),
-               SLEEP_REALE="1" if spec["sleep_reale"] else "0", SIM_NOEXIT="1" if spec["no_exit"] else "0")
+               SLEEP_REALE="1" if spec["sleep_reale"] else "0", CORROMPI="1" if spec.get("corrompi") else "0", SIM_NOEXIT="1" if spec["no_exit"] else "0")
     os.makedirs(simlog, exist_ok=True)
     bindir = os.path.join(scen_dir, "bin"); os.makedirs(bindir, exist_ok=True)
     pid = None
