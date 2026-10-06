@@ -1,7 +1,9 @@
 # Ombra della ForzaFX: SPECIFICA (05/10/2026)
 
-> **Stato: SOLO SPECIFICA. Nessun codice MQL5, nessun file da attaccare, nessun EA/preset/conto toccato. NON passata dal cancello
-> (`controllo-preventivo`): niente di qui va a Claudio ne' al VPS prima di un PASS.**
+> **Stato: SOLO SPECIFICA. Nessun codice MQL5, nessun file da attaccare, nessun EA/preset/conto toccato. Cancello di giudizio
+> (`controllo-preventivo`) del 06/10: PASS CON RISERVE sulla SPECIFICA (correzioni in sez. 0, 3, 4.1, 7, 7.4). 🔴 Regola di Claudio del
+> 05/10: **nessuna seconda ombra sul 50503392 per 48 ore dall'attacco dell'ombra EMA200**; e anche dopo, l'EA NON si compila ne' si
+> attacca prima di (a) una misura NUOVA di RAM/CPU e (b) la firma di Claudio sul codice. Documento interno.**
 > Modello: `report/EA_EMA200_OMBRA_2026-10-05.md` (EA ombra gia' attaccato sul demo 50503392, **non toccato**).
 > Etichette: [MISURATO] letto da un file/sorgente; [DERIVATO] calcolo mio su numeri misurati; [STIMA] ordine di grandezza senza
 > misura; [NON MISURATO]; [NON VERIFICATO] = vero solo dopo compilazione/campo; [SINTETICO] = random walk, vale solo come H0.
@@ -23,7 +25,9 @@
    passa a BUY/SELL (|punteggio| >= 70) a una chiusura H4; **FZ-B** = come FZ-A ma solo sulla coppia *piu' forte contro piu' debole*
    della classifica. Uscita comune: **stop 1 ATR(D1), TP 2R, uscita a tempo dopo 30 barre H4 (~5 giorni)**. Attese scritte prima (sez. 3).
 4. **n si conta in CLUSTER, non in operazioni** (sez. 5): sotto H0 sintetico gli eventi sono ~6,7/giorno su 28 coppie, ma
-   **quasi tutti gli eventi di uno stesso giorno si collegano per una valuta in comune**: gli indipendenti sono **~1 al giorno**. n>=150 *operazioni* arriva in
+   **quasi tutti gli eventi di uno stesso giorno si collegano per una valuta in comune**: gli indipendenti sono **al PIU' ~1 al giorno**
+   (🔴 limite SUPERIORE: il sintetico ha valute indipendenti, e il legame "stesso giorno" non fonde i giorni consecutivi, che con vite
+   di 5 giorni e celle W1/MN quasi costanti sono correlati; per questo il cancello chiede anche >= 26 settimane e il bootstrap a settimane, sez. 5.2). n>=150 *operazioni* arriva in
    ~1 mese e **non vuol dire niente**; n_cluster>=150 arriva in **~6,5 mesi** [DERIVATO, SINTETICO].
 5. **Merito non misurabile prima di ~6-7 mesi** dall'accensione; in tre mesi si misurano rischio, frequenza vera e il fenomeno
    "l'etichetta predice la direzione a +4h/+24h/+5g" *per famiglia*. **Nessuna sedia schierabile il 1 ottobre da questo lavoro**: e'
@@ -102,7 +106,8 @@ colma con **una nostra regola, dichiarata nostra**.
 - ⚠️ **Scostamento dichiarato**: la dashboard puo' mostrare in un istante uno stato leggermente diverso da `CopyRates` (estremi persi
   tra un tick e l'altro). **Controllo contro numeri gia' scritti da altri**: le 4 istanze su 50503392 stampano ogni 15 min le righe
   `[ForzaFX diag]` (28 coppie x 9 stati, 8 forze, punteggi) con **ora server dentro**; una istanza stampa a `xx:58:08` (visto nel
-  CODA_02 del 05/10: `USDJPY H4 ... 23:58:08`). Confronto ombra T-2 s contro quella riga a 110 s di distanza: **atteso >=95% delle 252
+  CODA_02 del 05/10: `USDJPY H4 ... 23:58:08`; 🔴 quella e' l'ora del LOG = ora LOCALE del VPS, non l'ora server: il confronto si fa sull'ora
+server stampata dall'indicatore, r.1731). Confronto ombra T-2 s contro quella riga a 110 s di distanza: **atteso >=95% delle 252
   celle identiche** [STIMA; il 5% e' il cambio di stato in 110 s]. Se meno: l'istantanea non coincide con la dashboard e si
   ferma tutto prima di accendere. [NON VERIFICATO finche' non gira].
 
@@ -183,8 +188,10 @@ colma con **una nostra regola, dichiarata nostra**.
 | **R_allin** a costo_ok=0 (sotto frontiera) | piu' basso che a costo_ok=1 (il costo mangia lo stop) | -- |
 
 **Casualita' (contro-esempio di H0, sintetico)**: sotto random walk il rendimento a +24h firmato da A esce **-0,017 sigma-giorno** (media di 5 semi
-da ~2 anni ciascuno, -0,029..-0,003 per seme, errore standard per seme ~0,03 con l'effetto di disegno) e da B **-0,025**: **nessuna deriva positiva**, quindi
-nessuno sguardo nel futuro nel codice di prova. Se l'ombra vera facesse +0,10 in unita di sigma-giorno, **non** sarebbe H0.
+da ~2 anni ciascuno, -0,029..-0,003 per seme, errore standard per seme ~0,03 con l'effetto di disegno) e da B **-0,025**: |media| piccola e compatibile
+con 0 (A: ~1,5 errori standard a semi riuniti; tutti e 5 i semi negativi, letto come rumore, NON come assenza dimostrata di bias). Uno sguardo nel futuro
+darebbe un |valore| grande **di qualunque segno**: il controllo e' a due lati, non "nessuna deriva positiva". Se l'ombra vera facesse +-0,10 in unita di
+sigma-giorno, **non** sarebbe H0.
 **Potere**: con SD per setup <= 1,41 R (payoff -1/+2) la banda del null (97,5%) a **n_eff=150** e' circa **+-0,23 R**, a 400 **+-0,14 R**
 [DERIVATO come `EA_EMA200_OMBRA` sez. 4]. **NULLO** richiede semi-ampiezza IC <= 0,10 R: **~800 episodi indipendenti**. A n_eff=150 una
 cella senza vantaggio esce **ZONA GRIGIA**, onestamente.
@@ -206,10 +213,10 @@ saranno diversi, e **il log `letture` li sostituisce dopo ~2 settimane** (quota 
 | **cluster giorno x valuta** / anno (regola di casa) | **279** (~1,07/giorno) | **308** |
 | 150 **cluster** | **~140 giorni di mercato (~6,5 mesi)** | **~127 giorni (~5,9 mesi)** |
 | effetto di disegno DEFF (solo dentro il giorno, **limite inferiore**) | 2,4 -> n_eff = 42% di n | 1,5 -> 68% |
-| 150 indipendenti per DEFF | ~54 giorni (~11 settimane) | ~89 giorni (~4,1 mesi) |
+| 150 indipendenti per DEFF | ~54 giorni (~11 settimane) | ~86 giorni (~4,0 mesi) |
 | a letture orarie (invece che H4) | 5212 eventi/anno, 264 cluster, DEFF 4,7 | 2340, 284, DEFF 3,5 |
 Il **numero di cluster non dipende da come si legge**: ~1 al giorno comunque (279 H4, 264 H1). La persistenza 2 lo scende a 166/anno.
-**Lettura**: l'indipendente e' **ordine di 1 al giorno**; fra "11 settimane" (limite inferiore ottimista) e "6,5 mesi" (regola di casa).
+**Lettura**: l'indipendente e' **al piu' ordine di 1 al giorno** (limite superiore, sez. 0 punto 4; sul mercato vero con l'USD fattore comune sara' meno); fra "11 settimane" (limite inferiore ottimista) e "6,5 mesi" (regola di casa).
 Si assume il **cluster di casa** per il cancello: **~6-7 mesi** da quando gira.
 
 ### 4.2 Perche' i cluster non si allungano con la vita del setup
@@ -299,7 +306,11 @@ prima di ~6-7 mesi** e le attese scritte (sez. 3) sono NULLO/ZONA GRIGIA. Le due
    (`collaudo_forza_fx.py`, uguaglianza tick-per-tick provata su 2,5 mesi di XAUUSD M1). **[NON VERIFICATO]** che esista M1 per tutte le 28 coppie (le misure
    forex in casa sono su 6 coppie Oanda 2005-2020). Gira sul **PC di backtest**, mai sul VPS (21/09). Non toccati i file DUKA/dukascopy.
 
-## 7. Costo di risorse (VPS ~2,4 GB di RAM disponibile, margine stretto) -- disegno LEGGERO
+## 7. Costo di risorse (VPS 12282 MB; disponibile 2792 MB il 05/10 14:29 e 1853 MB alle 03:30 col runner [MISURATO, `OMBRA_ATTACCO_A_MANO_2026-10-05.md`]; via libera di casa >= 1800 MB: margine stretto) -- disegno LEGGERO
+
+> 🔴 Ogni numero di questa sezione sul costo dell'ombra ForzaFX e' [DERIVATO]/[INFERITO]/[NON VERIFICATO]. Prima di compilare/attaccare serve
+> una **misura NUOVA** (RAM disponibile del VPS, working set e CPU del `terminal64` del 50503392 **con l'ombra EMA200 gia' viva**, 420 handle),
+> fatta dopo le 48 ore e confrontata con 1978 MB / soglia 1800 MB: i numeri del 05/10 sono il "prima", non il via libera.
 
 ### 7.1 Cosa costa la dashboard [MISURATO sul sorgente / DERIVATO]
 - **Zero handle di indicatore** (`grep iMA|iATR|iBands|CopyBuffer|IndicatorCreate` = nessuna riga) e **nessun `#include`**: la ForzaFX **non dipende dalla
@@ -333,7 +344,8 @@ Una cosa da NON fare: una **seconda scrittura sulla stessa cartella** `ABTG_Ombr
 
 ### 7.4 Dove attaccarla (quando, e se) 🪟
 Bersaglio candidato: il demo **`50503392`** (`C:\Program Files\BCM Markets MT5 Terminal`), dove le serie sono gia' caricate e dove gira l'ombra EMA200: **un
-cambiamento alla volta**, quindi **dopo** le prime 24 ore di numeri dell'ombra EMA200 (RAM, CPU, giro), mai insieme. **Non toccati**, per nome: reale `10105439` (`C:\BCM_Reale`),
+cambiamento alla volta**, quindi **non prima di 48 ore** dall'attacco dell'ombra EMA200 (regola di Claudio del 05/10), **poi** una misura nuova di RAM/CPU
+(sez. 7) **e** la firma di Claudio sul codice; mai insieme. Se la RAM disponibile e' sotto 1800 MB, non si attacca. **Non toccati**, per nome: reale `10105439` (`C:\BCM_Reale`),
 FTMO `541452707`/`1514806751` (`C:\FTMO`), 100k `50504263` (`... MT5 Terminal -V3`), manuale `50503635` (`C:\MT5_MANUALE`), banco `50504400` (`C:\MT5_Backtest`), Pepperstone, Tickmill.
 Grafico **nuovo**, mai uno con un EA. Le righe di lancio, quando serviranno, passano dal cancello come tutto il resto.
 
@@ -349,7 +361,8 @@ Grafico **nuovo**, mai uno con un EA. Le righe di lancio, quando serviranno, pas
 
 ## 9. Cosa NON e' stato fatto / limiti di questo documento
 - Nessun codice MQL5, nessun lettore, nessun EA, nessun file da attaccare. Un solo script Python di sola misura sintetica e questa spec.
-- **Non passato dal cancello** (`controllo-preventivo`, `controlla_riga.py`): niente di qui va a Claudio ne' al VPS prima di un PASS.
+- Cancello del 06/10 sulla **specifica** (`controlla_riga.py --oggetto md`: nessun difetto meccanico; `controllo-preventivo`: PASS CON RISERVE). Il futuro
+  codice MQL5, il lettore e ogni riga di lancio ripassano dal cancello per conto loro.
 - I numeri della sez. 4 sono **H0 su random walk** e valgono solo come ordine di grandezza; il mercato vero li sostituira' dopo ~2 settimane di `letture`.
 - Non ho letto la guida del corso (non e' nel repo): le definizioni dei componenti A/D/R/C sono quelle **nostre** della spec.
 - Il rischio di orologio: BCM e' UTC+1 fisso, quindi la candela D1/W1 non e' ancorata alla chiusura di New York in modo stagionale; l'ombra non ha filtri d'ora e non e' sensibile,
