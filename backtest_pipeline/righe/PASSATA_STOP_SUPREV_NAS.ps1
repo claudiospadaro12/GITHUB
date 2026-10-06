@@ -64,6 +64,10 @@
 #      condiviso) invece di Get-Content -Raw; nomi di variabile senza
 #      omonimi a meno delle maiuscole ($DataDa/$DataA al posto di $DA/$A,
 #      $dv al posto di $a nel foreach: classe 757).
+#  11. TLS 1.2 impostato QUI DENTRO (classe 324, aggiunta del cancello
+#      06/10): la riga lo imposta nel SUO processo, ma questo script gira in
+#      un powershell.exe FIGLIO che non lo eredita, e scarica 4 file da
+#      raw.githubusercontent.com. La v2 U30USD ha lo stesso buco (non toccata).
 #  INVARIATI: guardia macchina DESKTOP-H4D7CAJ, MT5 chiuso, un solo MT5 su
 #  questo PC, cartella dati risolta per origin.txt, sorgenti scaricati al
 #  pin con firma, compilazione verificata dal .ex5, AllowLiveTrading=false,
@@ -97,6 +101,7 @@ $ErrorActionPreference = 'Stop'
 $IC = [Globalization.CultureInfo]::InvariantCulture
 [Threading.Thread]::CurrentThread.CurrentCulture   = $IC
 [Threading.Thread]::CurrentThread.CurrentUICulture = $IC
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
 $EXPERT  = 'ABTG_SupertrendReversal'
 $SIMBOLO = 'NASUSD'
