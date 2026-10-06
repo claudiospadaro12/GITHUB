@@ -313,12 +313,12 @@ input color  InpHeadCol   = clrWhite;        // pannello: titoli
 #define SW_TRUST_BARS  300      // come la v4.1: inversione ad almeno 300 barre dall'inizio dello storico
 
 //--- buffer disegnati (v1.01: ST 2,5 e 3,5 inseriti DOPO il 3,0 e PRIMA delle EMA, che restano sopra a tutto)
-double bHo[], bHh[], bHl[], bHc[], bHcol[];           // 0-4   plot 0
-double bBBu[], bBBm[], bBBl[];                        // 5-7   plot 1-3
-double bStSu[], bStGiu[];                             // 8-9   plot 4-5   Supertrend livello 2 (3,0)
-double bSt1Su[], bSt1Giu[];                           // 10-11 plot 6-7   Supertrend livello 1 (2,5)
-double bSt3Su[], bSt3Giu[];                           // 12-13 plot 8-9   Supertrend livello 3 (3,5)
-double bE9[], bE21[], bE50[], bE200[];                // 14-17 plot 10-13
+double bHo[], bHh[], bHl[], bHc[], bHcol[];           // 0-4   PlotIndex 0  (= #property plot 1)
+double bBBu[], bBBm[], bBBl[];                        // 5-7   PlotIndex 1-3
+double bStSu[], bStGiu[];                             // 8-9   PlotIndex 4-5   Supertrend livello 2 (3,0)
+double bSt1Su[], bSt1Giu[];                           // 10-11 PlotIndex 6-7   Supertrend livello 1 (2,5)
+double bSt3Su[], bSt3Giu[];                           // 12-13 PlotIndex 8-9   Supertrend livello 3 (3,5)
+double bE9[], bE21[], bE50[], bE200[];                // 14-17 PlotIndex 10-13 (= #property plot 11-14)
 //--- buffer di calcolo (sempre pieni: i tasti scelgono solo cosa MOSTRARE)
 double kE9[], kE21[], kE50[], kE200[];                // 18-21
 double kBBu[], kBBm[], kBBl[];                        // 22-24
