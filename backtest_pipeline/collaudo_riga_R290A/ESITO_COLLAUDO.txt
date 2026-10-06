@@ -1,7 +1,7 @@
 ESITO DEL COLLAUDO DI PASSATA_STOP_SUPREV_NAS.ps1 + file prova R290a + RIGA_LANCIA_R290A.txt -- 06/10/2026
 (Sviluppatore; il giudizio e' dell'Agente dei Controlli: controllo-preventivo, strato 2, NON ancora fatto. Strato 1 verde. NON consegnabile finche' lo strato 2 non passa.)
-Pin della riga e dello script: 04422449ab56fba5ecb47acfe31192fe0dfafe8a
-Script SHA256 BB56ACED2835BDBE5E39BFBA42893E13EA80F93154A77C4CE48C8A7738E181ED (scaricato davvero da GitHub raw al pin: stessa impronta, HTTP 200). Marcatore MARCATORE_PASSATA_STOP_SUPREV_NAS_v1 presente al pin (git show | grep -c = 1).
+Pin della riga e dello script: 3b5f8d9ba0a703b9293c3ba9d46f5728419707e9
+Script SHA256 519112082F01685E73BB97EF905D662DFE463C4684A58DC89DE4654F0D546019 (scaricato davvero da GitHub raw al pin: stessa impronta, HTTP 200). Marcatore MARCATORE_PASSATA_STOP_SUPREV_NAS_v1 presente al pin (git show | grep -c = 1).
 
 FATTO (a macchina, Linux con pwsh 7.4.6; terminale e MetaEditor FINTI):
   controlla_riga.py --oggetto ps1 / prova / riga ... nessun difetto meccanico (rilievi 457/671 sui nomi dei terminali vietati nella riga e sul kill di processi = gli stessi della v2 U30USD)
@@ -25,3 +25,8 @@ NON COPERTO (dichiarato):
   - che l'EA base riproduca l'Ottimizzato: lo decide G0 a macchina, non questo collaudo.
 DEVIAZIONI dal driver PASSATA_STOP_SUPREV.ps1: elenco completo nell'intestazione dello script (10 voci). Fra queste, una correzione di un difetto latente della v2: ArgumentList di MetaEditor in un solo elemento (classe 1152).
 CLASSI NUOVE in CHECKLIST_RIGA_DI_LANCIO.md: 1152 (virgola/+ in ArgumentList), 1153 (regex di celle adiacenti che consuma il delimitatore), 1154 ("n deal" = Trades CSV = operazioni di trading del report, non Affari Totali), 1155 (banco in parallelo con finti processi).
+
+AGGIORNAMENTO DEL CANCELLO (controllo-preventivo, strato 2, 06/10/2026): pin 04422449 -> 3b5f8d9b. Unica modifica allo script: riga TLS 1.2 + voce 11 nell'intestazione
+(classe 1156: il powershell.exe figlio non eredita il TLS della riga). Rigirato tutto col pin nuovo: strato 1 verde, statico 197/197, report veri 22/22, batteria 79/79,
+mutazioni 85/85, riga 56/56 + 5/5, impronta scaricata da GitHub raw (HTTP 200) = 519112082F01... . Classe 1154 ora DERIVATA, non inferita: Payoff Atteso del report
+vero R109 = -43608.40/818 (operazioni, non affari) e Expected Payoff del CSV r163a = 1964.39/76 = 25.84724: la colonna Trades e l'etichetta 'Operazioni' hanno lo stesso denominatore.
