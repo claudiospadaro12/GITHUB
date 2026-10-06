@@ -776,6 +776,19 @@ ANCHORS = [
     ("righe/scritte nuove SOLO coi loro tasti", "if(gOn[PG_T_ST])AddStItems();if(EmaHtfVisibile())AddEmaHtfItems();"),
     ("OnDeinit rilascia gli handle", "ObjectsDeleteAll(0,PFX);EmaHtfRilascia();"),
     ("firma delle righe col PREZZO (scritte senza prezzo si spostano)", 'DoubleToString(gItP[k],_Digits)+"S"+(gItLine[k]?"S":"S")+"S";'),
+    # --- cancello indipendente del 06/10 sulla v1.01: 9 mutanti ciechi su 20 erano VERDI (classe 1068)
+    ("scritte ST: ogni livello legge i SUOI buffer e i SUOI colori",
+     "AddStLabel(InpStMostra1,gSt1M,kDir1[i],kVal1[i],InpColSt1Su,InpColSt1Giu);"
+     "AddStLabel(true,gStM,kDir[i],kVal[i],InpColStSu,InpColStGiu);"
+     "AddStLabel(InpStMostra3,gSt3M,kDir3[i],kVal3[i],InpColSt3Su,InpColSt3Giu);"),
+    ("scritta ST col colore del verso", "AddText(v,t,(d>0.0)?cSu:cGiu);"),
+    ("scritta ST SENZA riga orizzontale (la linea e' il plot)", "AddItem(p,txt,col,STYLE_SOLID);gItLine[gItN-1]=false;"),
+    ("sola scritta: la riga H rimasta si cancella", "if(!gItLine[k]){if(ObjectFind(0,nl)>=0)ObjectDelete(0,nl);}"),
+    ("overlay acceso anche col SOLO tasto SUPERTREND", 'if(!gOn[PG_T_LIV]&&!gOn[PG_T_ORD]&&!gOn[PG_T_ST]&&gItDrawn==0&&gPanSig=="S")returnfalse;'),
+    ("clic su SUPERTREND/LIVELLI: EMA altri TF lette subito", "if((t==PG_T_ST||t==PG_T_LIV)&&EmaHtfVisibile())EmaHtfLeggi();"),
+    ("OnCalculate: EMA altri TF lette a ogni tick prima dell'overlay", "if(EmaHtfVisibile())EmaHtfLeggi();if(UpdateOverlay())ChartRedraw(0);returnrates_total;"),
+    ("moltiplicatore scritto 2.5 / 3.0 / 3.5", "boolunDec=(MathAbs(m*10.0-MathRound(m*10.0))<1e-9);returnDoubleToString(m,unDec?1:2);"),
+    ("EMA altri TF: valore vuoto/zero/NaN scartato", "if(v[0]==EMPTY_VALUE||v[0]<=0.0||!MathIsValidNumber(v[0])){pend=true;continue;}"),
 ]
 ANCHOR_MUTANTS = [
     ("EMA 50 mostra il calcolo della 200", "bE50[i] =PG_MostraDa(gOn[PG_T_EMA50],i,gP50-1,kE50[i]);",
@@ -811,6 +824,16 @@ ANCHOR_MUTANTS = [
     ("H1 acceso dall'input H4", "case 2: return InpEmaHtfH1;", "case 2: return InpEmaHtfH4;"),
     ("handle non rilasciati", "   EmaHtfRilascia();", ""),
     ("firma senza prezzo (riga senza prezzo ferma)", "+\"|\"+\n           DoubleToString(gItP[k],_Digits)", ""),
+    # --- cancello indipendente del 06/10: erano VERDI prima di queste ancore
+    ("scritta 2,5 legge i buffer del 3,5", "AddStLabel(InpStMostra1,gSt1M,kDir1[i],kVal1[i]", "AddStLabel(InpStMostra1,gSt1M,kDir3[i],kVal3[i]"),
+    ("scritta ST coi colori su/giu' scambiati", "AddText(v,t,(d>0.0) ? cSu : cGiu);", "AddText(v,t,(d>0.0) ? cGiu : cSu);"),
+    ("scritta ST con riga orizzontale", "gItLine[gItN-1]=false;", "gItLine[gItN-1]=true;"),
+    ("sola scritta: riga H vecchia lasciata", "            ObjectDelete(0,nl);\n        }\n      else", "            ;\n        }\n      else"),
+    ("overlay spento col solo tasto SUPERTREND", "!gOn[PG_T_ORD] && !gOn[PG_T_ST] &&", "!gOn[PG_T_ORD] &&"),
+    ("clic: EMA altri TF non lette", "      EmaHtfLeggi();                // v1.01: righe EMA degli altri TF subito", ""),
+    ("OnCalculate: EMA altri TF mai rilette", "      EmaHtfLeggi();                // v1.01: un valore per TF acceso", ""),
+    ("moltiplicatore sempre a 2 decimali (ST 2.50)", "DoubleToString(m,unDec ? 1 : 2)", "DoubleToString(m,2)"),
+    ("EMA altri TF: valore zero accettato", "v[0]<=0.0 ||", "v[0]<0.0 ||"),
     # --- mutanti del cancello indipendente del 02/10: prima del rinforzo erano VERDI (classe 1068)
     ("TP invertiti via rischio negativo", "double rk=MathAbs(e-s);", "double rk=-MathAbs(e-s);"),
     ("verso del setup invertito", "      gSuD=d;\n", "      gSuD=-d;\n"),
@@ -1022,6 +1045,11 @@ def static_checks(src):
     check(ot.count("ChartRedraw") == 1 and "if(redraw)\n      ChartRedraw(0);" in ot, "OnTimer ridisegna solo se ha riparato o cambiato qualcosa")
     ce = func_body(src, "OnChartEvent")
     check("if(Reposition())" in ce, "scorrimento/zoom: ridisegno solo se un'etichetta si e' spostata")
+    # v1.01 (cancello 06/10): la presenza si controlla sulla SCRITTA 0, che c'e' sempre; la riga H0 manca se
+    # l'elemento 0 e' una sola scritta ST -> con H0 il ridisegno ripartirebbe a ogni tick
+    dri = func_body(src, "DrawItems")
+    check(dri is not None and 'ObjectFind(0,PFX+"T0")>=0' in dri and 'PFX+"H0"' not in dri,
+          "presenza delle righe controllata sulla scritta T0 (non sulla riga H0, che una sola scritta non ha)")
     check("CopyRates" not in oc and "CopyRates" not in ot, "nessun CopyRates diretto in OnCalculate/OnTimer (solo tramite RefreshLevels)")
 
 
