@@ -1,0 +1,167 @@
+# ==========================================================================
+#  EA: ABTG_SupertrendReversal
+#  R290a -- 06/10/2026. File vero costruito dalla bozza del piano
+#  (report/PIANO_MISURE_CANDIDATI_2026-10-06.md, sez. 7.1). Strato 1
+#  verde, strato 2 DA FARE: NON consegnabile finche' il cancello non passa.
+#  SOLO PASSATA SINGOLA (PASSATA_STOP_SUPREV_NAS.ps1): MAI col driver dei round.
+#  LA DISTANZA INGRESSO->SL DELLA SEDIA 970913 (NASUSD H1), MISURATA.
+#  UNA passata singola a tick reali, DUE LATI INSIEME (come gira la sedia).
+#  Finestra 2024.09.26 -> 2026.06.30, deposito 100000.
+# ==========================================================================
+#  CHE COSA MISURA, UNA COSA SOLA
+#    La distanza fra prezzo d'ingresso e SL di ogni ingresso a mercato
+#    (riga "[STReversal] LONG|SHORT mercato <lot> lot @ <entry> SL <sl>"),
+#    con la geometria della cella di r163a a buffer 2253. Il numero dice se
+#    il cancello di costo "stop >= 40 x spread" passa, sulla sedia, con una
+#    MISURA e non con una stima. Le stime in repo sono due LIMITI INFERIORI:
+#    27,10 idx (n=5) e 51,65 idx (n=4), distanze REALIZZATE di gambe chiuse
+#    in stop dopo trailing/pareggio (CANCELLO_COSTO_FLOTTA E1;
+#    R163a r.380-400). Il "28,7x" del 10/09 e' stato rivisto il 18/09 a
+#    15,1x (coda 10,4x); nessuno dei due e' una misura dell'ingresso.
+#
+#  PERCHE' L'EA BASE E NON L'OTTIMIZZATO
+#    ABTG_SupertrendReversal ha il log [STREV-IMBUTO] che il lettore della
+#    passata usa come CONTROLLO INCROCIATO (somma ENTRATE = righe "mercato").
+#    ABTG_SupRev_NAS_H1_Ottimizzato non ce l'ha. Il diff dei due sorgenti
+#    (06/10/2026) mostra, oltre ai contatori IMBUTO e alla chiusura del
+#    venerdi', SOLO i default (TF H4->H1, StMult 3,5->3,0, TP_RR 2,0->3,0,
+#    magic, commento): SL = MathMin(stLine,ext) -/+ buf identico (base
+#    r.386-389, Ott r.244-250). Questa e' un'INFERENZA SUL SORGENTE: la
+#    verifica e' G0 (sotto), non questa frase.
+#
+#  PERCHE' BUFFER 2253 (22,53 idx) E NON 3
+#    (1) e' la cella in comune di r127a e r163a: riproducibile a 100k;
+#    (2) in r163a n resta 76 (IS) e 96 (OOS) su TUTTE e sette le celle
+#        2253..4503: le entrate sono QUASI CERTAMENTE le stesse (non
+#        provato: due entrate scambiate darebbero lo stesso n), quindi lo
+#        stop di ogni ingresso condiviso si sposta di (buf - 2253)/100 idx
+#        (risk = baseStop + buf, sorgente r.248/251). Una passata sola
+#        copre l'asse 2253..4503 per ALGEBRA, etichettata DERIVATO.
+#    Il preset in campo ha buffer 3 (0,03 idx): se la sedia tornasse, il
+#    buffer e' una scelta di Claudio, non di questo file.
+#
+#  G0 -- CONTROLLO DI RIPRODUZIONE, SCRITTO PRIMA DEI NUMERI
+#    r163a cella 2253 (100k, tick): IS 1,5399 / 76 deal / DD 0,8128 /
+#    +1964,39; OOS 1,5905 / 96 deal / DD 1,3380 / +2734,64.
+#    Questa passata e' a finestra intera: il n atteso e' 172 +/- 3 (un
+#    ingresso a cavallo del 2025.06.10 puo' contarsi diverso), il profitto
+#    atteso 4699 +/- 4% (le due finestre di r163a ripartono da 100k, questa
+#    capitalizza). Fuori banda: l'EA base NON riproduce l'Ottimizzato, si
+#    FERMA e nessun numero di stop si usa.
+#
+#  ATTESA, SCRITTA PRIMA DEI NUMERI
+#    Mediana dello stop DI BASE: 70-165 idx, quindi 93-188 a buffer 2253.
+#    Fonte: ATR(14) H1 del Nasdaq 80,2 idx [INFERITO: nessun ATR misurato
+#    su NASUSD, CANCELLO_COSTO par. C]; lo stop e' l'estremo di 5 barre H1 o la
+#    linea Supertrend, quindi attorno a 1 ATR o piu'. Ingressi a mercato
+#    (righe "mercato" = prima tranche; le pendenti eseguite sono posizioni
+#    in piu' e non si contano qui): fra 75 e 172 (rapporto
+#    deal/posizione documentato 1,00-2,31).
+#
+#  SOGLIE CONGELATE ORA
+#    S1 spread di riferimento = mediana oraria dell'ORA SERVER di ogni
+#       ingresso, da spread_flotta/spread_orario_NASUSD.csv (156,1 M tick).
+#    C3 sulla MEDIANA di (stop_i / spread_h(i)): PASSA se >= 44 (sopra
+#       la banda); FRAGILE se fra 36 e 44 (la banda CONTIENE il 40: non
+#       decide e non promuove); NON PASSA sotto 36. Valutata a b=2253
+#       (misura) e a b=3003, 3378 (centro), 4503 (derivata). Pavimento
+#       duro 13,3 x spread di coda 2,60 (mediana dell'ora peggiore):
+#       stop >= 34,6 idx.
+#    Per stress, NON come cancello: spread equipesato 2,40 e P95 di tutte
+#       le ore 2,70.
+#    Soglia equivalente al 40 sul solo stop di base (spread 1,80): 49,5 /
+#    38,2 / 27,0 idx a b = 2253 / 3378 / 4503; (spread 2,40): 73,5 / 62,2
+#    / 51,0.
+#
+#  CONTRO-ESEMPIO, COSTRUITO PRIMA
+#    Ipotesi alternativa = "lo stop vero e' piccolo come le gambe realizzate".
+#    I due limiti inferiori in repo STANNO DALLE DUE PARTI del cancello:
+#    base 27,10 -> stop(2253) 49,6 -> rapporto 27,6 (NON PASSA); base 51,65
+#    -> stop 74,2 -> rapporto 41,2 (FRAGILE alto). La mia ipotesi (stop da
+#    ATR) darebbe stop(2253) 93-188 e rapporto 51-104 (PASSA). Se la mediana
+#    misurata cade sotto 65 la mia ipotesi e' SMENTITA; la zona 65-80 di
+#    stop(2253) (rapporto 36-44) e' dichiarata FRAGILE e NON decide.
+#
+#  BUCHI DICHIARATI
+#    - il lato lungo e il corto vanno riportati SEPARATI (regola dei due
+#      lati, 25/08): il lettore deve tagliare per lato di ogni ingresso;
+#    - lo script che legge questo file e' PASSATA_STOP_SUPREV_NAS.ps1
+#      (marcatore MARCATORE_PASSATA_STOP_SUPREV_NAS_v1), derivato da
+#      PASSATA_STOP_SUPREV.ps1 (U30USD, ancore R243), NUOVO: i due strati
+#      lo devono passare. PASSATA_STOP_SUPREV.ps1 resta com'e';
+#    - velocita' del PC di backtest DESKTOP-H4D7CAJ: [NON MISURATA].
+#  BERSAGLIO: PC DI BACKTEST DESKTOP-H4D7CAJ. NON il VPS, NON il piccolo
+#    50503392, NON il 100k 50504263, NON il reale 10105439, NON FTMO
+#    541452707. Questo file NON LANCIA NIENTE.
+# ==========================================================================
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- DUE LATI INSIEME: e' la sedia com'e'
+InpAllowLong=true
+InpAllowShort=true
+
+InpTF=16385
+
+# --- geometria 970913, stessi valori di r127a/r163a
+InpStMult=3.0
+InpStAtrPeriod=10
+InpTP_RR=3.0
+
+# --- stop: l'unico valore diverso dal preset in campo (buffer 3) e'
+# --- 2253, cella in comune con r127a e r163a
+InpSLLookback=5
+InpSLBufferPips=2253
+
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTrailOnST=true
+InpExitOnFlip=true
+
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+InpStartHour=0
+InpEndHour=24
+
+InpUseNewsFilter=false
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpComment=R290A STOP NAS
+InpFridayClose=false
+InpFridayCloseHour=20
+InpUsaGuardian=true
+InpMagic=799810
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+
+# --- asse unico: l'interruttore della finestra oraria, come in R243. Qui
+# --- si legge SOLO la cella 0 (finestra SPENTA = la sedia com'e'); la cella
+# --- 1 (14-22 server) e' il meccanismo di R238 e NON e' questa domanda.
+# --- QUESTO FILE SI GIRA SOLO CON LA PASSATA (che riduce ogni asse al primo
+# --- valore e ignora @FRAZIONEIS): MAI col driver dei round, che girerebbe
+# --- 4 passate a finestre spezzate e misurerebbe un'altra cosa.
+InpUseTimeWindow=0||0||1||1||Y
