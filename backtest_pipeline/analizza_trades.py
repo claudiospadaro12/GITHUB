@@ -874,7 +874,7 @@ def main():
         perEA[etichetta_ea(r)].append(r)
 
     out += ["## Chi ha operato", "",
-            "| EA | Trade | P&L | Durata media | Come sono usciti | Frazione del giorno (solo vincenti) |",
+            "| EA | Trade | P&L | Durata media | Come sono usciti | Frazione del giorno (solo vincenti) ⬆️ |",
             "|---|---|---|---|---|---|"]
     for ea, tr in sorted(perEA.items(), key=lambda x: -sum(num(r, "profit") for r in x[1])):
         pnl = sum(num(r, "profit") + num(r, "swap") + num(r, "commission") for r in tr)
@@ -889,6 +889,28 @@ def main():
             ea, len(tr), pnl,
             ("%.0f s" % dmed) if dmed < 120 else ("%.1f min" % (dmed / 60)),
             " · ".join("%s×%d" % (k, v) for k, v in sorted(motivi.items())), frm))
+
+    # 06/10/2026: ⬆️ la frazione e' un LIMITE SUPERIORE, e non e' un'opinione.
+    # `ABTG_TradeExporter.mq5` riscrive TUTTO il file a ogni giro di `OnTimer`
+    # (r.106) e RICALCOLA `SessionRange` per ogni riga (r.184), con la finestra
+    # che va dall'ingresso alle 23:59 del giorno d'ingresso (r.79-96). Il CSV
+    # che la pagella legge e' quello pubblicato alle 22:45 italiane = **21:45
+    # ora server**: per ogni riga entrata OGGI la banda e' quindi troncata di
+    # ~2h14m, e le barre che mancano possono solo ALLARGARLA -> la frazione
+    # pubblicata puo' solo SCENDERE. Misurato sull'archivio del piccolo (51
+    # pubblicazioni in git): su 203 righe pubblicate la prima volta nel loro
+    # stesso giorno d'ingresso con banda piena, **30 (14,8%) si sono poi
+    # allargate, ZERO ristrette**, fattore mediano x1,097 e massimo **x7,239**.
+    out += ["", "_⬆️ **La frazione e' un LIMITE SUPERIORE, non una misura "
+            "chiusa.** Il CSV viene pubblicato alle **21:45 ora server** ma la "
+            "banda `session_high/low` arriva alle **23:59 del giorno "
+            "d'ingresso**: le barre che mancano possono solo **allargare** la "
+            "banda, quindi la frazione qui sopra puo' solo **scendere**. "
+            "Misurato in archivio (51 pubblicazioni): su **203** righe "
+            "pubblicate la prima volta nel loro giorno d'ingresso, **30 "
+            "(14,8%) si sono poi allargate e ZERO ristrette** — fattore "
+            "mediano **x1,097**, massimo **x7,239**. 👉 Il pavimento del 30% "
+            "si giudica **il giorno dopo**, non stasera._"]
 
     # ---------- netto per simbolo ----------
     perSym = defaultdict(float)
