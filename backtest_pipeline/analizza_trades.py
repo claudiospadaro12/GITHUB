@@ -16,7 +16,7 @@ Uso:
 """
 import csv, sys, os, subprocess
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 CSV_IN  = "data/statements/trades_auto.csv"
 OUT_DIR = "report"
@@ -37,6 +37,29 @@ DEP_100K  = 100000.0
 #     🔴 E il limite va detto con il numero: la sonda delle 03:30 di oggi NON
 #     puo' coprire la seduta di oggi (la vedra' la corsa di domani notte).
 CODA_REFERTI = os.path.join("backtest_pipeline", "coda", "referti")
+# L'ora a cui il CSV viene pubblicato, DETTA IN ORA SERVER, e NON cablata.
+# BCM e' UTC+1 FISSO (correzione del 24/09), l'Italia fa l'ora legale: quindi
+# d'ESTATE le 22:45 italiane di `pubblica_trades.ps1` sono le 21:45 server,
+# d'INVERNO sono le 22:45. Dal 25/10/2026 una stringa cablata stamperebbe il
+# falso **dentro la challenge**, ed e' il motivo per cui questa funzione esiste.
+# 🔴 L'orologio di QUESTA macchina non serve (il container gira in UTC, il
+# task gira sul VPS): l'ora legale italiana si ricava dalla DATA, con la regola
+# che la fa — dall'ultima domenica di marzo all'ultima domenica di ottobre.
+def _ultima_domenica(anno, mese):
+    d = date(anno, mese, 31) if mese in (3, 10) else None
+    while d.weekday() != 6:
+        d -= timedelta(days=1)
+    return d
+
+
+def _ora_pubblicazione_server(giorno_iso):
+    try:
+        g = datetime.strptime(giorno_iso, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return "22:45 italiane (ora server NON determinata: data non valida)"
+    legale = _ultima_domenica(g.year, 3) <= g < _ultima_domenica(g.year, 10)
+    return ("22:45 italiane = **21:45 ora server** (ora legale)" if legale else
+            "22:45 italiane = **22:45 ora server** (inverno: BCM e' UTC+1 fisso)")
 # La clausola di validita' e' scritta nel referto che leggiamo e va tradotta in
 # un `if`, non lasciata in prosa (classe 1142): "'RIGHE DI ORDINE/DEAL = 0' su un
 # log NON vuoto vuol dire che quel giorno il conto non ha operato. Su un log
@@ -571,14 +594,23 @@ def main():
     #
     # ⚠️ E l'avviso non afferma piu' "la pagella non poteva averla" senza
     # guardare se quella pagella ESISTE: se il file non c'e', lo dice.
-    ORA_PUBBLICAZIONE_SERVER = "21:45:00"   # 22:45 IT - 1 = ora della colonna
+    # 🔴 06/10/2026: la soglia NON e' cablata. Il task gira alle 22:45 ITALIANE,
+    #    la colonna `close_time` e' in ora SERVER, e BCM e' UTC+1 FISSO: d'estate
+    #    la soglia e' 21:45, d'INVERNO e' 22:45. Dal 25/10 un "21:45" cablato
+    #    avrebbe segnalato come "rimaste fuori" tutte le righe fra le 21:45 e le
+    #    22:45 server, che invece la pubblicazione LE PRENDE: un'ora di falsi
+    #    allarmi ogni sera, dentro la challenge. La soglia si ricava dalla DATA
+    #    DI OGNI GIORNATA esaminata, non dalla data di oggi, perche' lo stesso
+    #    file contiene giornate d'estate e d'inverno.
+    def _soglia_server(gg):
+        return "21:45:00" if "21:45" in _ora_pubblicazione_server(gg) else "22:45:00"
     tutte = righe + manuali_tutte
     in_ritardo = []
     for g in sorted({r["_ct"].strftime("%Y-%m-%d") for r in tutte
                      if r["_ct"].strftime("%Y-%m-%d") < giorno}):
         tardive = sorted([r for r in tutte
                           if r["_ct"].strftime("%Y-%m-%d") == g
-                          and r["_ct"].strftime("%H:%M:%S") >= ORA_PUBBLICAZIONE_SERVER],
+                          and r["_ct"].strftime("%H:%M:%S") >= _soglia_server(g)],
                          key=lambda r: r["_ct"])
         if not tardive:
             continue
@@ -874,7 +906,7 @@ def main():
         perEA[etichetta_ea(r)].append(r)
 
     out += ["## Chi ha operato", "",
-            "| EA | Trade | P&L | Durata media | Come sono usciti | Frazione del giorno (solo vincenti) ⬆️ |",
+            "| EA | Trade | P&L | Durata media | Come sono usciti | Frazione dall'ingresso a fine giornata (solo vincenti) ⬆️ |",
             "|---|---|---|---|---|---|"]
     for ea, tr in sorted(perEA.items(), key=lambda x: -sum(num(r, "profit") for r in x[1])):
         pnl = sum(num(r, "profit") + num(r, "swap") + num(r, "commission") for r in tr)
@@ -901,16 +933,26 @@ def main():
     # pubblicazioni in git): su 203 righe pubblicate la prima volta nel loro
     # stesso giorno d'ingresso con banda piena, **30 (14,8%) si sono poi
     # allargate, ZERO ristrette**, fattore mediano x1,097 e massimo **x7,239**.
-    out += ["", "_⬆️ **La frazione e' un LIMITE SUPERIORE, non una misura "
-            "chiusa.** Il CSV viene pubblicato alle **21:45 ora server** ma la "
-            "banda `session_high/low` arriva alle **23:59 del giorno "
-            "d'ingresso**: le barre che mancano possono solo **allargare** la "
-            "banda, quindi la frazione qui sopra puo' solo **scendere**. "
-            "Misurato in archivio (51 pubblicazioni): su **203** righe "
-            "pubblicate la prima volta nel loro giorno d'ingresso, **30 "
-            "(14,8%) si sono poi allargate e ZERO ristrette** — fattore "
-            "mediano **x1,097**, massimo **x7,239**. 👉 Il pavimento del 30% "
-            "si giudica **il giorno dopo**, non stasera._"]
+    out += ["", "_⬆️ **La frazione e' un LIMITE SUPERIORE finche' la "
+            "posizione e' chiusa in un colpo solo.** Il CSV si pubblica alle "
+            "%s (e l'esportatore riscrive ogni 30 minuti) mentre la banda "
+            "`session_high/low` arriva alle **23:59 del giorno d'ingresso**: le "
+            "barre che mancano, a storico invariato o piu' completo, possono "
+            "solo **allargare** la banda, quindi **a numeratore fermo** la "
+            "frazione puo' solo **scendere**. Misurato il **06/10/2026** sul CSV "
+            "del **piccolo 50503392** (47 pubblicazioni con la colonna banda, "
+            "05/08-06/10): su **211** righe pubblicate la prima volta nel loro "
+            "giorno d'ingresso con banda valorizzata, **36 (17,1%%) si sono poi "
+            "allargate e ZERO ristrette** — fattore sull'ampiezza mediano "
+            "**x1,050**, massimo **x7,239**. "
+            "🔴 **MA il verso NON e' garantito sulle posizioni col PARZIALE**: "
+            "una riga pubblicata quando e' uscito solo il primo terzo porta il "
+            "`profit` del parziale, e al giro dopo la frazione **SALE** "
+            "(misurato: `3119062` da **31,8%% a 44,5%%**; 5 righe su 1.406 hanno "
+            "cambiato `profit` dopo la prima pubblicazione). 👉 Un **`expert`** "
+            "nella colonna delle uscite vuol dire **frazione non leggibile in "
+            "nessun verso**; sulle altre il pavimento del 30%% si giudica **il "
+            "giorno dopo**._" % _ora_pubblicazione_server(giorno)]
 
     # ---------- netto per simbolo ----------
     perSym = defaultdict(float)
