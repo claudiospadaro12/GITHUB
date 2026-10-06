@@ -2184,7 +2184,7 @@ void OnDeinit(const int reason)
    EventKillTimer();
    ColsRestore();                         // OGNI motivo di uscita: le candele native tornano
    ObjectsDeleteAll(0,PFX);
-: handle iMA delle EMA degli altri TF
+   EmaHtfRilascia();                        // v1.01: handle iMA delle EMA degli altri TF
    if(reason==REASON_REMOVE || reason==REASON_CHARTCLOSE)
       GvClear();
    ChartRedraw(0);
