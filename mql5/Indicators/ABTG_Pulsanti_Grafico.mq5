@@ -1,5 +1,37 @@
 //+------------------------------------------------------------------+
 //|                                       ABTG_Pulsanti_Grafico.mq5  |
+//|  CRONOLOGIA                                                       |
+//|  1.01 (06/10/2026) tasto SUPERTREND a TRE livelli + EMA 200 di    |
+//|   altri TF come riga orizzontale. Richiesta di Claudio: "mettimi  |
+//|   il super trend a tre livelli ... e aggiungi insieme ai livelli  |
+//|   la ema 200 ... linea tratteggiata rossa con la scritta di fianco|
+//|   ema200 h1 x esempio se mi trovo in h4. in h4 lasci l'ema cosi'  |
+//|   com'e'. negli altri tf la metti orizzontale rossa tratteggiata".|
+//|   - TRE Supertrend 2,5 / 3,0 / 3,5 (i "tre livelli" dei vocali    |
+//|     della collega, report/NATCLA_ANALISI_AUDIO_2026-10-06.md R2). |
+//|     Periodo ATR: NON detto nei vocali -> lo STESSO di prima       |
+//|     (InpStPeriodo = 10) per tutti e tre. Stessa SW_STCore chiamata|
+//|     con moltiplicatori diversi (funzione NON toccata). Il 3,0 e'  |
+//|     IDENTICO alla v1.00 (stessi buffer, colori, spessore); 2,5    |
+//|     sottile e chiaro, 3,5 spesso e scuro. Scritta "ST 2.5" ecc. al|
+//|     bordo destro, all'altezza della linea, come quelle dei LIVELLI.|
+//|   - EMA 200 di un ALTRO TF: riga ORIZZONTALE ROSSA TRATTEGGIATA al |
+//|     suo valore attuale, scritta "EMA200 H1" (+ prezzo). Sul TF     |
+//|     uguale a quello dell'EMA la riga NON c'e': resta la EMA 200    |
+//|     nativa del tasto EMA 200, invariata. Default H1 e H4 accesi    |
+//|     (scelta NOSTRA: i vocali dicono "dall'H1 o H4 in su").         |
+//|   - INTERPRETAZIONE INCERTA, quindi a input: la riga EMA compare   |
+//|     col tasto SUPERTREND (default) o col tasto LIVELLI o con uno  |
+//|     dei due (InpEmaHtfTasto): "insieme ai livelli" puo' voler dire|
+//|     i livelli del Supertrend o il tasto LIVELLI. Da chiedere.     |
+//|   - Input nuovi: InpSTMult1/InpSTMult3 (il 3,0 resta InpStMolt,   |
+//|     nome invariato per non perdere i parametri salvati),          |
+//|     InpStMostra1/3, InpColSt1Su/Giu, InpColSt3Su/Giu, InpStSpess1/ |
+//|     2/3, InpStScritte, InpStScrittePrezzo, InpEmaHtfTasto,        |
+//|     InpEmaHtfM15/M30/H1/H4/D1/W1, InpEmaHtfBarra, InpColEmaHtf,    |
+//|     InpEmaHtfPrezzo. Buffer 34 -> 46, plot 10 -> 14.              |
+//|  1.00 prima versione.                                            |
+//|                                                                   |
 //|  INDICATORE DI SOLA VISIONE (NON e' un EA): non apre, non         |
 //|  modifica e non chiude ordini; nessuna rete; nessun file. Un solo |
 //|  grafico, tutti i TF, tutti i simboli. Legge il SALDO del conto   |
@@ -15,7 +47,9 @@
 //|   EMA 50 ........... EMA 50 BIANCA (2)                            |
 //|   EMA 9 | EMA 21 ... UN tasto diviso in due: 9 ROSA, 21 GIALLA (1)|
 //|   BOLLINGER ........ bande 20 / 2 (media tratteggiata + alta/bassa)|
-//|   SUPERTREND ....... ATR 10 x 3,0: VERDE sotto (su), ROSSO sopra   |
+//|   SUPERTREND ....... TRE livelli ATR 10 x 2,5 / 3,0 / 3,5: VERDE   |
+//|                      sotto (su), ROSSO sopra; scritta ST 2.5 ecc.  |
+//|                      + riga EMA200 H1/H4 (rossa tratteggiata)      |
 //|   LIVELLI .......... livelli NOMINATI per origine, scritta in      |
 //|                      italiano + prezzo (es. MAX GIORNO PRECEDENTE  |
 //|                      24.998,25); elenco e regole negli input       |
@@ -37,9 +71,10 @@
 //|  aspettare) e confronta la chiusura con la banda della barra       |
 //|  STESSA: in rari casi gira una barra prima o dopo. Tasto          |
 //|  SUPERTREND e setup ORDINE usano la stessa funzione e lo stesso   |
-//|  periodo ATR; cambiano solo i moltiplicatori (3,0 linea, 3,5      |
-//|  setup, come nella SuperWave). Il setup si calcola anche a tasto  |
-//|  SUPERTREND spento.                                               |
+//|  periodo ATR; cambiano solo i moltiplicatori (2,5 / 3,0 / 3,5     |
+//|  linee, 3,5 setup, come nella SuperWave: con i default la linea   |
+//|  3,5 e lo stop del setup sono lo STESSO calcolo). Il setup si     |
+//|  calcola anche a tasto SUPERTREND spento e NON dipende dalle linee.|
 //|                                                                   |
 //|  ORE: tutte in ORA SERVER del broker (quella delle candele). Il   |
 //|  "giorno" e' la barra D1 del server, la settimana la W1, il mese  |
@@ -63,11 +98,11 @@
 //|  (ABTG_Segnali_EMA_BB_ST, SuperWave in HA).                       |
 //+------------------------------------------------------------------+
 #property copyright "ABTG - progetto Claudio"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 #property indicator_chart_window
-#property indicator_buffers 34
-#property indicator_plots   10
+#property indicator_buffers 46
+#property indicator_plots   14
 
 //--- plot 1: candele Heikin Ashi (buffer 0-3 OHLC, 4 colore)
 #property indicator_label1  "HA Apertura;HA Massimo;HA Minimo;HA Chiusura"
@@ -99,23 +134,40 @@
 #property indicator_type6   DRAW_LINE
 #property indicator_color6  clrOrangeRed
 #property indicator_width6  2
-//--- plot 7-10: EMA (9 e 21 sottili, 50 media, 200 spessa); disegnate per ultime = sopra a tutto
-#property indicator_label7  "EMA 9"
+//--- plot 7-10 (v1.01): Supertrend 2,5 e 3,5, due linee ciascuno come il 3,0 (colori/spessori dagli input in OnInit)
+#property indicator_label7  "Supertrend 2.5 su"
 #property indicator_type7   DRAW_LINE
-#property indicator_color7  clrHotPink
+#property indicator_color7  C'150,225,150'
 #property indicator_width7  1
-#property indicator_label8  "EMA 21"
+#property indicator_label8  "Supertrend 2.5 giu"
 #property indicator_type8   DRAW_LINE
-#property indicator_color8  clrGold
+#property indicator_color8  C'255,175,130'
 #property indicator_width8  1
-#property indicator_label9  "EMA 50"
+#property indicator_label9  "Supertrend 3.5 su"
 #property indicator_type9   DRAW_LINE
-#property indicator_color9  clrWhite
-#property indicator_width9  2
-#property indicator_label10 "EMA 200"
+#property indicator_color9  C'0,150,80'
+#property indicator_width9  3
+#property indicator_label10 "Supertrend 3.5 giu"
 #property indicator_type10  DRAW_LINE
-#property indicator_color10 clrRed
+#property indicator_color10 C'205,90,0'
 #property indicator_width10 3
+//--- plot 11-14: EMA (9 e 21 sottili, 50 media, 200 spessa); disegnate per ultime = sopra a tutto
+#property indicator_label11 "EMA 9"
+#property indicator_type11  DRAW_LINE
+#property indicator_color11 clrHotPink
+#property indicator_width11 1
+#property indicator_label12 "EMA 21"
+#property indicator_type12  DRAW_LINE
+#property indicator_color12 clrGold
+#property indicator_width12 1
+#property indicator_label13 "EMA 50"
+#property indicator_type13  DRAW_LINE
+#property indicator_color13 clrWhite
+#property indicator_width13 2
+#property indicator_label14 "EMA 200"
+#property indicator_type14  DRAW_LINE
+#property indicator_color14 clrRed
+#property indicator_width14 3
 
 //+------------------------------------------------------------------+
 //| INPUT                                                            |
@@ -150,10 +202,34 @@ input int    InpBBPeriodo = 20;                // periodo
 input double InpBBDev     = 2.0;               // deviazioni standard
 input color  InpColBB     = clrLightSlateGray; // colore delle bande (leggibile su scuro e su chiaro)
 input group "=== Supertrend (stessa funzione anche per ORDINE CONSIGLIATO) ==="
-input int    InpStPeriodo = 10;            // periodo ATR (media semplice del true range, come iATR)
-input double InpStMolt    = 3.0;           // moltiplicatore della linea del tasto SUPERTREND
-input color  InpColStSu   = clrLimeGreen;  // colore trend SU (linea sotto il prezzo)
-input color  InpColStGiu  = clrOrangeRed;  // colore trend GIU' (linea sopra il prezzo)
+input int    InpStPeriodo = 10;            // periodo ATR, UGUALE per i tre livelli (media semplice del true range, come iATR; i vocali non lo dicono)
+input double InpStMolt    = 3.0;           // LIVELLO 2: moltiplicatore della linea centrale (3,0; nome della v1.00, invariato)
+input color  InpColStSu   = clrLimeGreen;  // LIVELLO 2: colore trend SU (linea sotto il prezzo)
+input color  InpColStGiu  = clrOrangeRed;  // LIVELLO 2: colore trend GIU' (linea sopra il prezzo)
+input int    InpStSpess2  = 2;             // LIVELLO 2: spessore (2 come la v1.00)
+input double InpSTMult1   = 2.5;           // LIVELLO 1: moltiplicatore (2,5 dei vocali)
+input bool   InpStMostra1 = true;          // LIVELLO 1: disegnato col tasto SUPERTREND
+input color  InpColSt1Su  = C'150,225,150';// LIVELLO 1: colore trend SU (verde chiaro)
+input color  InpColSt1Giu = C'255,175,130';// LIVELLO 1: colore trend GIU' (salmone chiaro)
+input int    InpStSpess1  = 1;             // LIVELLO 1: spessore (sottile)
+input double InpSTMult3   = 3.5;           // LIVELLO 3: moltiplicatore (3,5 dei vocali; con 3,5 coincide col SETUP)
+input bool   InpStMostra3 = true;          // LIVELLO 3: disegnato col tasto SUPERTREND
+input color  InpColSt3Su  = C'0,150,80';   // LIVELLO 3: colore trend SU (verde scuro)
+input color  InpColSt3Giu = C'205,90,0';   // LIVELLO 3: colore trend GIU' (arancio scuro: non si confonde con la EMA 200 rossa)
+input int    InpStSpess3  = 3;             // LIVELLO 3: spessore (spesso)
+input bool   InpStScritte       = true;    // scritta "ST 2.5 / ST 3.0 / ST 3.5" al bordo destro, all'altezza della linea
+input bool   InpStScrittePrezzo = true;    // ...con il valore della linea (barra in corso)
+input group "=== EMA 200 di ALTRI timeframe: riga orizzontale rossa tratteggiata ==="
+input int    InpEmaHtfTasto  = 0;          // compare con: 0 = tasto SUPERTREND, 1 = tasto LIVELLI, 2 = uno dei due
+input bool   InpEmaHtfM15    = false;      // EMA 200 M15
+input bool   InpEmaHtfM30    = false;      // EMA 200 M30
+input bool   InpEmaHtfH1     = true;       // EMA 200 H1 (default NOSTRO: i vocali dicono "dall'H1 o H4 in su")
+input bool   InpEmaHtfH4     = true;       // EMA 200 H4 (default NOSTRO, idem)
+input bool   InpEmaHtfD1     = false;      // EMA 200 D1
+input bool   InpEmaHtfW1     = false;      // EMA 200 W1
+input int    InpEmaHtfBarra  = 0;          // valore della barra: 0 = in corso (si muove col prezzo), 1 = ultima chiusa
+input color  InpColEmaHtf    = clrRed;     // colore della riga (tratteggiata: spessore 1, MT5 tratteggia solo a 1)
+input bool   InpEmaHtfPrezzo = true;       // scritta "EMA200 H1" con il prezzo accanto
 input group "=== Heikin Ashi ==="
 input color  InpColHaSu   = C'38,166,91';  // candela HA rialzista
 input color  InpColHaGiu  = C'200,55,50';  // candela HA ribassista
@@ -231,20 +307,26 @@ input color  InpHeadCol   = clrWhite;        // pannello: titoli
 #define PG_T_HA        6
 #define PG_T_ORD       7
 #define PG_NLIV        16       // livelli nominati
-#define PG_MAXIT       32       // linee con etichetta al massimo (16 livelli + 5 dell'ordine)
+#define PG_MAXIT       40       // righe/scritte al massimo (16 livelli + 5 dell'ordine + 3 ST + 6 EMA di altri TF = 30)
+#define PG_NPLOT       14       // = indicator_plots
+#define PG_NEH         6        // EMA 200 di altri TF: M15, M30, H1, H4, D1, W1
 #define SW_TRUST_BARS  300      // come la v4.1: inversione ad almeno 300 barre dall'inizio dello storico
 
-//--- buffer disegnati
-double bHo[], bHh[], bHl[], bHc[], bHcol[];           // 0-4
-double bBBu[], bBBm[], bBBl[];                        // 5-7
-double bStSu[], bStGiu[];                             // 8-9
-double bE9[], bE21[], bE50[], bE200[];                // 10-13
+//--- buffer disegnati (v1.01: ST 2,5 e 3,5 inseriti DOPO il 3,0 e PRIMA delle EMA, che restano sopra a tutto)
+double bHo[], bHh[], bHl[], bHc[], bHcol[];           // 0-4   plot 0
+double bBBu[], bBBm[], bBBl[];                        // 5-7   plot 1-3
+double bStSu[], bStGiu[];                             // 8-9   plot 4-5   Supertrend livello 2 (3,0)
+double bSt1Su[], bSt1Giu[];                           // 10-11 plot 6-7   Supertrend livello 1 (2,5)
+double bSt3Su[], bSt3Giu[];                           // 12-13 plot 8-9   Supertrend livello 3 (3,5)
+double bE9[], bE21[], bE50[], bE200[];                // 14-17 plot 10-13
 //--- buffer di calcolo (sempre pieni: i tasti scelgono solo cosa MOSTRARE)
-double kE9[], kE21[], kE50[], kE200[];                // 14-17
-double kBBu[], kBBm[], kBBl[];                        // 18-20
-double kAtr[], kUp[], kDn[], kDir[], kVal[];          // 21-25 Supertrend del tasto
-double kUp2[], kDn2[], kDir2[], kVal2[];              // 26-29 Supertrend del setup
-double kHo[], kHh[], kHl[], kHc[];                    // 30-33 Heikin Ashi
+double kE9[], kE21[], kE50[], kE200[];                // 18-21
+double kBBu[], kBBm[], kBBl[];                        // 22-24
+double kAtr[], kUp[], kDn[], kDir[], kVal[];          // 25-29 Supertrend del tasto, livello 2 (kAtr comune a tutti: non dipende dal moltiplicatore)
+double kUp2[], kDn2[], kDir2[], kVal2[];              // 30-33 Supertrend del setup
+double kHo[], kHh[], kHl[], kHc[];                    // 34-37 Heikin Ashi
+double kUp1[], kDn1[], kDir1[], kVal1[];              // 38-41 Supertrend del tasto, livello 1
+double kUp3[], kDn3[], kDir3[], kVal3[];              // 42-45 Supertrend del tasto, livello 3
 
 //--- tasti
 bool     gOn[PG_NT];
@@ -261,7 +343,17 @@ bool     gInitOk = false;
 //--- parametri effettivi (input corretti se fuori intervallo)
 int      gP200 = 200, gP50 = 50, gP9 = 9, gP21 = 21, gBBP = 20, gStP = 10;
 double   gBBD = 2.0, gStM = 3.0, gSuM = 3.5;
+double   gSt1M = 2.5, gSt3M = 3.5;
 int      gH4K = 2, gH4N = 300;
+
+//--- EMA 200 di altri timeframe (handle iMA creati in OnInit, rilasciati in OnDeinit)
+ENUM_TIMEFRAMES gEhTf[PG_NEH] = {PERIOD_M15,PERIOD_M30,PERIOD_H1,PERIOD_H4,PERIOD_D1,PERIOD_W1};
+int      gEhH[PG_NEH];            // INVALID_HANDLE = TF spento, uguale al grafico o creazione fallita
+double   gEhV[PG_NEH];
+bool     gEhOk[PG_NEH];
+bool     gEhPending = false;      // qualche handle non ancora calcolato: si riprova dal timer
+int      gEhShift = 0;
+int      gEhMode = 0;             // 0 tasto SUPERTREND, 1 tasto LIVELLI, 2 uno dei due
 
 //--- stato del calcolo sul grafico
 int      gRT = 0;
@@ -313,6 +405,7 @@ double   gItP[];
 string   gItTxt[];
 color    gItCol[];
 int      gItSty[];
+bool     gItLine[];               // true = riga orizzontale + scritta; false = solo scritta (Supertrend: la linea e' il plot)
 string   gItSig = "";
 int      gItDrawn = 0;
 int      gLabY[];
@@ -1022,6 +1115,8 @@ void FillDisplay(const int from,const int to)
    if(n>ArraySize(kE200)) n=ArraySize(kE200);
    int i0=(from<0) ? 0 : from;
    bool onHa=gOn[PG_T_HA];
+   bool on1=(gOn[PG_T_ST] && InpStMostra1);
+   bool on3=(gOn[PG_T_ST] && InpStMostra3);
    for(int i=i0;i<n;i++)
      {
       bE200[i]=PG_MostraDa(gOn[PG_T_EMA200],i,gP200-1,kE200[i]);
@@ -1033,6 +1128,10 @@ void FillDisplay(const int from,const int to)
       bBBl[i] =PG_Mostra(gOn[PG_T_BB],kBBl[i]);
       bStSu[i] =PG_StLinea(gOn[PG_T_ST],kDir[i],kVal[i],1.0);
       bStGiu[i]=PG_StLinea(gOn[PG_T_ST],kDir[i],kVal[i],-1.0);
+      bSt1Su[i] =PG_StLinea(on1,kDir1[i],kVal1[i],1.0);
+      bSt1Giu[i]=PG_StLinea(on1,kDir1[i],kVal1[i],-1.0);
+      bSt3Su[i] =PG_StLinea(on3,kDir3[i],kVal3[i],1.0);
+      bSt3Giu[i]=PG_StLinea(on3,kDir3[i],kVal3[i],-1.0);
       if(onHa)
         {
          bHo[i]=kHo[i];
@@ -1074,6 +1173,14 @@ string HM(const datetime t)
 string TfName()
   {
    string s=EnumToString((ENUM_TIMEFRAMES)_Period);
+   StringReplace(s,"PERIOD_","");
+   return s;
+  }
+
+// nome breve di un TF qualsiasi (PERIOD_H1 -> "H1"), per la scritta "EMA200 H1"
+string TfNameOf(const ENUM_TIMEFRAMES tf)
+  {
+   string s=EnumToString(tf);
    StringReplace(s,"PERIOD_","");
    return s;
   }
