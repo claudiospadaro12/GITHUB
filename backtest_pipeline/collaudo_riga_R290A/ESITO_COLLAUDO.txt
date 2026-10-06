@@ -1,0 +1,27 @@
+ESITO DEL COLLAUDO DI PASSATA_STOP_SUPREV_NAS.ps1 + file prova R290a + RIGA_LANCIA_R290A.txt -- 06/10/2026
+(Sviluppatore; il giudizio e' dell'Agente dei Controlli: controllo-preventivo, strato 2, NON ancora fatto. Strato 1 verde. NON consegnabile finche' lo strato 2 non passa.)
+Pin della riga e dello script: 04422449ab56fba5ecb47acfe31192fe0dfafe8a
+Script SHA256 BB56ACED2835BDBE5E39BFBA42893E13EA80F93154A77C4CE48C8A7738E181ED (scaricato davvero da GitHub raw al pin: stessa impronta, HTTP 200). Marcatore MARCATORE_PASSATA_STOP_SUPREV_NAS_v1 presente al pin (git show | grep -c = 1).
+
+FATTO (a macchina, Linux con pwsh 7.4.6; terminale e MetaEditor FINTI):
+  controlla_riga.py --oggetto ps1 / prova / riga ... nessun difetto meccanico (rilievi 457/671 sui nomi dei terminali vietati nella riga e sul kill di processi = gli stessi della v2 U30USD)
+  controlla_prova.py (R290a) ......... OK, 2 celle, 4 passate, 0 problemi (la prova ha un asse finto InpUseTimeWindow=0||0||1||1||Y e si gira SOLO con la passata)
+  statico.py ......................... 197 controlli: ancora e file prova = riga del CSV VERO di r163a a 2253 (IS e OOS); G0 172 / 4699 = somma IS+OOS del CSV; buffer derivati = celle dell'asse, 3378 = centro; soglie = testo del piano
+  report_veri.py ..................... 22 controlli sui DUE report .htm veri di MT5 (R109 D30EUR, R258 GBPUSD): operazioni, affari, profitto con migliaia a spazio, PF, identita', periodo, tutti gli input
+  battery.py --lenti ................. 79/79 scenari (due lati insieme con il vecchio controllo del lato opposto escluso; G0 ai bordi 168/169/175/176 e 4511.03/.04, 4886.96/.97; C3 ai bordi 44,0000 / 43,9941 / 36,0000 / 35,9941 e mediana di due valori a cavallo del 44;
+                                        pavimento 34,59 / 34,60; attese 64,99 / 65 / 92,99 / 93 / 188 / 188,01; report vecchio non usato, assente, illeggibile, altro EA/simbolo/periodo; ini ignorata; incrocio +1/-1; SL storto; senza data;
+                                        log vecchio prima della fotografia; giornale duplicato; guardie macchina/MT5/MetaEditor/EA attaccato/grafici/cartelle dati; sorgenti al pin alterati; prova alterata; timeout con CloseMainWindow)
+                                        attese ricalcolate in Python (Decimal, statistics, csv) dagli ingressi dello scenario, mai dall'uscita dello script
+  mutazioni.py ....................... 85 mutazioni, 85 PRESE (ognuna spegne UN controllo o sposta una soglia e almeno uno scenario scritto prima diventa rosso). Equivalente dichiarato: togliere Remove-Item del vecchio zip (Compress-Archive -Force lo sostituisce comunque).
+  bootstrap_test.py .................. 56 controlli sulla RIGA incollata (Invoke-Expression): verde da cima a fondo, G0 non raggiunto (rc 3), script con un byte in piu' / stessa lunghezza (IMPRONTA DIVERSA, niente scritto), marcatore assente, macchina sbagliata, MT5 aperto,
+                                        scrittura su disco corrotta; 5 mutazioni della riga PRESE su 5.
+
+NON COPERTO (dichiarato):
+  - Windows PowerShell 5.1 (qui pwsh 7; il parser e il controllo dei costrutti pwsh-7-only dello strato 1 coprono la sintassi, non il comportamento);
+  - MT5 vero: dove scrive il report (si cercano le quattro radici di R99), il formato esatto delle righe [STReversal] in una passata singola (preso dal log d'agente VERO di R271 e dal precedente R99), il tempo vero;
+  - che la colonna Trades del CSV di ottimizzazione = "Numero di Operazioni di Trading Totali" del report (standard MT5, [INFERITA]: nessuna coppia CSV+report della stessa configurazione in repo);
+  - che pip di NASUSD = 0,01 (buffer 2253 = 22,53 idx, /100 dell'algebra): e' del piano; lo script stampa solo la condizione necessaria "stop minimo > 22,53";
+  - file di log bloccati da un altro processo; OneDrive sul Desktop;
+  - che l'EA base riproduca l'Ottimizzato: lo decide G0 a macchina, non questo collaudo.
+DEVIAZIONI dal driver PASSATA_STOP_SUPREV.ps1: elenco completo nell'intestazione dello script (10 voci). Fra queste, una correzione di un difetto latente della v2: ArgumentList di MetaEditor in un solo elemento (classe 1152).
+CLASSI NUOVE in CHECKLIST_RIGA_DI_LANCIO.md: 1152 (virgola/+ in ArgumentList), 1153 (regex di celle adiacenti che consuma il delimitatore), 1154 ("n deal" = Trades CSV = operazioni di trading del report, non Affari Totali), 1155 (banco in parallelo con finti processi).
