@@ -30,3 +30,15 @@ AGGIORNAMENTO DEL CANCELLO (controllo-preventivo, strato 2, 06/10/2026): pin 044
 (classe 1156: il powershell.exe figlio non eredita il TLS della riga). Rigirato tutto col pin nuovo: strato 1 verde, statico 197/197, report veri 22/22, batteria 79/79,
 mutazioni 85/85, riga 56/56 + 5/5, impronta scaricata da GitHub raw (HTTP 200) = 519112082F01... . Classe 1154 ora DERIVATA, non inferita: Payoff Atteso del report
 vero R109 = -43608.40/818 (operazioni, non affari) e Expected Payoff del CSV r163a = 1964.39/76 = 25.84724: la colonna Trades e l'etichetta 'Operazioni' hanno lo stesso denominatore.
+
+SECONDA LETTURA DEL CANCELLO (controllo-preventivo, 06/10/2026): pin 3b5f8d9b -> 434499fd. FAIL di SOSTANZA trovato e corretto (classe 1157):
+  il censimento P0 del 05/10 (risultati_archivio/DUKA_P0_20261005_171046/REFERTO_DUKA_P0.txt sez. 5) elenca su DESKTOP-H4D7CAJ TRE cartelle dati (BCM, C:\MT5_Backtest,
+  C:\FundedNext_Manuale): la guardia "un solo MT5" avrebbe fermato la passata al passo 0 a OGNI lancio, e la riga diceva "e l UNICO MT5 installato qui". Ora: le due censite
+  ammesse PER NOME (chiuse, non toccate, dette in console), una non censita ferma ancora; riga con NON TOCCATI "PRIMA SU QUESTO PC" e stampa PID/titolo/cartella degli MT5 aperti.
+  In piu' (deviazione 13): "1 pip=0.01000" nella riga d'avvio attesa (chiude il NON COPERTO "pip di NASUSD").
+  Banco costruito col PC com'e' nel censimento (le due installazioni presenti di default, con un EA sul loro grafico: non fermano e lo snapshot prova che non sono toccate).
+  Rigirato: strato 1 verde (ps1, riga), statico 197/197, batteria 83/83 (+10j/10k/05d/05e), mutazioni 89/89, riga 56/56 + 5/5, script scaricato da GitHub raw al pin (HTTP 200,
+  SHA256 2797E308...), i 4 file dipendenti HTTP 200 e identici al commit. Ricalcolo INDIPENDENTE (fuori dal collaudo dell'autore): C3 8 casi limite / 48 confronti uguali;
+  G0 13 contro-esempi (NBSP e U+202F con virgola decimale, 4.699,03, 4,699.03 -> NON MISURATO; operazioni 86/affari 172 -> NON RAGGIUNTO; report vecchio -> ignorato).
+  Coppia vera CSV+report che prova la classe 1154: R258 (righe IS+OOS Trades 199+296=495, report singola 496 operazioni / 992 affari).
+  RIGA CAMBIATA DI NUOVO: serve un TERZO lettore prima della consegna.
