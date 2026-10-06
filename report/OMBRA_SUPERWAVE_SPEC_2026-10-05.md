@@ -1,7 +1,10 @@
 # OMBRA della SuperWave v4.1 (e di Pulsanti Grafico): SPECIFICA (05/10/2026)
 
-> **Stato: SOLO SPECIFICA.** Nessun codice MQL5, nessun file da attaccare, nulla mandato a Claudio ne' al VPS. Il cancello
-> `controllo-preventivo` **non e' ancora passato su questo documento**: va fatto prima che esca verso Claudio.
+> **Stato: SOLO SPECIFICA.** Nessun codice MQL5, nessun file da attaccare, nulla mandato a Claudio ne' al VPS. Cancello di giudizio
+> `controllo-preventivo` del 06/10: **PASS CON RISERVE** sulla specifica (riserve corrette nel testo: sez. 1.5, 5.1, 6.2, 7).
+> 🔴 **Regola di Claudio del 05/10: nessuna seconda ombra sul `50503392` per 48 ore dall'attacco dell'ombra EMA200** (prudenza su RAM/CPU).
+> Questa specifica puo' esistere, ma il codice **NON si compila ne' si attacca** prima di: (a) le 48 ore; (b) una **misura nuova** di RAM e CPU
+> del VPS e del `terminal64` del `50503392` con l'ombra EMA200 a regime; (c) la **firma di Claudio sul codice**. Nessuna delle tre e' nostra.
 > Modello: `report/EA_EMA200_OMBRA_2026-10-05.md` (stesso schema: EA senza ordini, regole scritte prima dei numeri, CSV, lettore).
 > Fonti lette per intero: `mql5/Indicators/ABTG_SuperWave_Dashboard_v41.mq5` (1826 righe, `#property version "4.10"`, ultimo commit `fd7c958d`,
 > sha256 `7c2d793e4d3d44b7...`) e `mql5/Indicators/ABTG_Pulsanti_Grafico.mq5` (2029 righe, commit `791da022`, sha256 `eeb5b1af66aad642...`).
@@ -73,6 +76,10 @@ Prova (`python3 backtest_pipeline/ombra_sw_h0_e_struttura.py identita`): confron
 `SW_SetupOk`, `SW_Hits`, `SW_SetupState` e `TpPrice` contro `PG_Tp` = **tutte IDENTICHE**; contro-esempio: una copia di Pulsanti con `c[i-1]<dnF[i-1]` cambiato in `<=` dentro `SW_STCore` viene vista come DIVERSA
 (le altre restano uguali). Il setup di Pulsanti (`PG_Setup` r.753-769, `EvalSetup` r.1685-1727) e' riga per riga quello della SuperWave: ultima inversione fra le chiuse, `f >= first + 300`,
 `entry = c[f]`, `stop = val[f]`, `SW_SetupOk`, TP a 1/2/3 R. Default uguali: `InpStPeriodo = 10`, `InpSetupMolt = 3,5`, TP 1/2/3, size 40/30/30, rischio 1%.
+⚠️ **Portata della prova (cancello 06/10)**: lo script confronta le **7 funzioni pure**, NON la composizione del setup. `PG_Setup` (solo in Pulsanti) e il blocco setup della v4.1
+(r.894-904) e il passaggio dei parametri (`SW_STCore(...,gStP,gSuM,...)` r.2000 con `gStP=InpStPeriodo`, `gSuM=InpSetupMolt` r.1765/1768; v4.1 r.879 `InpAtrPeriod, InpMult1`) sono
+uguali **per LETTURA**, riletti dal cancello: un mutante su `f<first+trust` in `PG_Setup` **non viene visto** dallo script (provato). L'identita' e' quindi: funzioni pure [MISURATO dallo script] +
+composizione [LETTO, due letture]. Resta una differenza di DATI: Pulsanti calcola sulla storia intera del grafico, la v4.1 su 1000 barre (aggancio entro 140-146 barre, sez. 1.1).
 
 | | SuperWave v4.1 | Pulsanti Grafico (tasto ORDINE CONSIGLIATO) |
 |---|---|---|
