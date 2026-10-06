@@ -1,6 +1,6 @@
 # Ea Nat&Cla - Analisi fedele dei tre audio della collega (06/10/2026)
 
-**STATO: BOZZA, NON passata dal cancello** (ne' `controlla_riga.py` strato 1 con esito PASS riportato qui sotto, ne' `controllo-preventivo` strato 2). Non va usata per scrivere codice finche' non e' passata.
+**STATO: estrazione verificata dal cancello il 06/10/2026** (strato 1 `controlla_riga.py --oggetto md`: nessun difetto meccanico; strato 2 `controllo-preventivo`: citazioni riscontrate frase per frase sui tre `.txt` TurboScribe, correzioni applicate in questo file, raccordo con il PDF aggiunto al §10). Resta un'**estrazione**, non una specifica: **non autorizza a scrivere codice** finche' le domande bloccanti del §10.2 non hanno risposta.
 
 **Fonti usate, e SOLO queste** (regola ferrea di Claudio):
 - `data/natcla/PTT-20261006-WA0090.txt` (~3 min) - TurboScribe
@@ -41,7 +41,7 @@ Convenzione: tra parentesi quadre le mie aggiunte minime di punteggiatura/artico
 
 ### 1.3 `PTT-20261006-WA0092.txt` (~1,5 min)
 
-> Allora, un'altra cosa importante e' che la EMA 200 non deve essere dritta, ma deve essere abbastanza inclinata. E questo ingresso possiamo farlo sia solo sulla EMA 200, dall'H1 o H4 in su, non sotto, sia sul Supertrend, sempre dall'H1 in su.
+> Allora, un'altra cosa importante e' che la EMA 200 non deve essere dritta, ma deve essere abbastanza inclinata. E questo ingresso possiamo fare sia solo sulla EMA 200, dall'H1 o H4 in su, non sotto, sia sul Supertrend, sempre dall'H1 in su.
 >
 > E le size le metto, diciamo, 5/10 punti sotto: prima size un po' leggera, poi l'altra un po' piu' pesante, proprio sulla EMA o sul Supertrend, e un'altra leggermente sopra, di 5 punti, sempre di Supertrend o media 200.
 >
@@ -51,7 +51,7 @@ Convenzione: tra parentesi quadre le mie aggiunte minime di punteggiatura/artico
 
 | Testo grezzo [TS] | Correzione | Perche' | Conferma `[LOC]` |
 |---|---|---|---|
-| `sides` / `i sides` / `le sides` (WA0090, 4 occorrenze) | `size` | Il contesto e' il dimensionamento ("size ancora piu' grosse", "le size sul terzo Supertrend"); suggerito anche dal committente | `[LOC]` scrive "size" in 3 punti su 4 ("con i size ancora piu' grossi", "le size") e "sides" solo in "anche le sides": **conferma la lettura size** |
+| `sides` / `i sides` / `le sides` (WA0090, **3 occorrenze**: "con i sides ancora piu' grossi", "Tutto qua, le sides", "anche le sides va bene") | `size` | Il contesto e' il dimensionamento ("size ancora piu' grosse"); suggerito anche dal committente | `[LOC]` scrive "size" in **2 punti su 3** ("con i size ancora piu' grossi", "tutto qua le size") e "sides" solo in "anche le sides": **conferma la lettura size** |
 | `size` / `gli size` (WA0092) | `le size` | Genere/numero del parlato; il significato non cambia | `[LOC]`: "l'eSize" / "il sezzo": rumore |
 | `sconda` (WA0090) | `sfonda` | Il contesto e' "rimbalza ... di piu' no perche' poi sfonda" (rompe il livello). Entrambe le trascrizioni hanno "sconda" -> e' proprio quel che e' stato riconosciuto; la correzione e' semantica | `[LOC]` "sconda": stessa forma |
 | `Le ADX` / `Le ad X` | `L'ADX` | Articolo + indicatore | `[LOC]` "Le ad X" |
@@ -60,7 +60,7 @@ Convenzione: tra parentesi quadre le mie aggiunte minime di punteggiatura/artico
 | `Perche' se no, no a 20` | `perche' se no... no, a 20` | E' una autocorrezione a meta' frase; la virgola dopo "no" era punteggiatura | `[LOC]`: "ma a 20" |
 | `Aiuto, allora, provo` | **lasciato `Aiuto`** | Non operativo (probabile intercalare o scherzo della collega). `[LOC]` ha "Alliuto". Non lo uso | `[LOC]`: "Alliuto" -> incerto, ininfluente |
 | `dieci volte tanto` | **lasciato** | Solo `[TS]` ha "tanto"; `[LOC]` ha "in 10 volt" (troncato). Resta ambigua la *portata*, non la parola | vedi §3 |
-| `che a lui lo va a prendere anche le sides` | `che lui te la va a prendere anche, le size` | `[TS]` ha "lui te la va a prendere", `[LOC]` "a lui lo va a prendere": **le due letture differiscono**; ho preso quella `[TS]` perche' e' piu' coerente con "Dimmi se va bene cosi'" (la collega parla a Claudio e "lui" = l'EA/l'automazione). **Questo passaggio e' [AMBIGUO]**, non lo considero un fatto | vedi riga R14 |
+| `che lui te la va a prendere anche le sides` ([TS]; `[LOC]`: "che a lui lo va a prendere anche le sides") | `che lui te la va a prendere anche, le size` | `[TS]` ha "lui te la va a prendere", `[LOC]` "a lui lo va a prendere": **le due letture differiscono**; ho preso quella `[TS]` perche' e' piu' coerente con "Dimmi se va bene cosi'" (la collega parla a Claudio e "lui" = l'EA/l'automazione). **Questo passaggio e' [AMBIGUO]**, non lo considero un fatto | vedi riga R14 |
 | `PAPEROFIT` ([LOC] WA0091) | non usata | e' l'errore del modello locale per "take profit"; `[TS]` ha "take profit" | - |
 
 ### 1.5 Il numero piu' delicato: l'ADX (confronto dichiarato)
@@ -92,7 +92,7 @@ Legenda colonna ultima: **SI** = meccanizzabile cosi' com'e'; **PARZ.** = serve 
 | R14 | **ST 3 (secondo)** | "la stessa cosa" del primo | WA0090: *"la stessa cosa anche sul secondo che entra e poi ritorna"* | **[DICHIARATO]** (per rinvio). Se "stessa cosa" include "solo la prima volta" (= R13) e' **[DEDOTTO]** | PARZ. |
 | R15 | **ST 3.5 (terzo) come "il piu' sicuro"** | puo' avere anche 2 volte | WA0090: *"sul terzo e' quello piu' sicuro. Puo' essere anche due volte"* | **[DICHIARATO]** (coerente con R11). "piu' sicuro" e' un giudizio soggettivo, non una soglia | SI (come R11) |
 | R16 | **Confluenza con EMA 200** | EMA 200 e Supertrend "sulla stessa altezza" = meglio, **size piu' grosse** | WA0090: *"se c'e' la confluenza di media 200 nel senso che e' li' sulla stessa altezza e' ancora meglio quindi entro con i sides ancora piu' grossi perche' il rimbalzo ci sara' di sicuro"* | **[DICHIARATO]**. **Quanto vicine** (tolleranza in punti/ATR) e **quanto piu' grosse** NON dette | PARZ.: tolleranza + moltiplicatore size |
-| R17 | **Moltiplicatore size sul 3o ST** | "in generale, non so, dieci volte tanto" | WA0090: *"le size sul terzo supertrend uso in generale, non so, dieci volte tanto"* | **[AMBIGUO]** (3 letture, §3.1): 10x rispetto a cosa? E "non so" = la collega **non e' sicura** del numero. `[LOC]` ha "in 10 volt" (conferma "10", non "tanto") | **NO** finche' non risponde |
+| R17 | **"Dieci volte tanto" sul 3o ST** (oggetto NON detto: size? altro?) | "in generale, non so, dieci volte tanto" | WA0090 [TS] letterale: *"Tutto qua, le sides Sul terzo super trend uso in generale, non so, dieci volte tanto"* | **[AMBIGUO]** (3 letture, §3.1). In `[TS]` "le sides" **chiude la frase precedente** (maiuscola su "Sul"); solo `[LOC]` le lega ("tutto qua le size sul terzo supertrend usio in generale in 10 volt"). Quindi che il "dieci volte" riguardi la **size** e' una lettura `[LOC]`/contesto, **non** un fatto `[TS]`. E "non so" = la collega **non e' sicura**. `[LOC]` conferma "10", non "tanto" | **NO** finche' non risponde |
 | R18 | **Gestione size = opzionale?** | "se vuoi mettere dentro anche questa cosa ... va bene" | WA0090: *"se vuoi mettere dentro anche questa cosa che lui te la va a prendere anche le sides va bene"* | **[AMBIGUO]**: la lettura piu' naturale e' che le **modulazioni di size (R16/R17) siano un extra opzionale** che l'EA "se vuole" include; `[LOC]` ha una frase diversa ("a lui lo va a prendere") | n/a (decisione di Claudio) |
 | R19 | **EMA 200 inclinata** | "non dritta, abbastanza inclinata" | WA0092: *"la EMA 200 non deve essere dritta, ma deve essere abbastanza inclinata"* | **[DICHIARATO]** la condizione; **soglia di inclinazione NON detta**; **verso** (su per i long, giu' per gli short?) **NON detto** e **non dedotto da me** | PARZ.: serve metrica di pendenza e soglia |
 | R20 | **Tipo di ingresso** | o **solo EMA 200**, oppure Supertrend | WA0092: *"questo ingresso possiamo fare sia solo sulla EMA 200 ... sia sul Supertrend"* | **[DICHIARATO]**. **[AMBIGUO]**: "solo" = "anche da sola, senza Supertrend" (lettura che adotto) oppure "solo e soltanto la EMA" | SI (due triggers separati) |
@@ -163,12 +163,12 @@ Frase: *"con le size ovviamente non come quando fai andare in trend following, m
 
 ## 5. BANDIERE ROSSE (regole di casa, CLAUDE.md)
 
-Premessa: si registrano come **rischi da misurare prima di codificare**, non come giudizio di merito.
+Premessa: si registrano come **rischi da misurare prima di codificare**, non come giudizio di merito. **Nessuna di queste bandiere e' un motivo per scartare l'EA**: se l'EA si fa lo decide Claudio, e il cancello e' sui **numeri** misurati (PF, n, DD), non sulle bandiere.
 
 | # | Bandiera | Prova (citazione) | Gravita' |
 |---|---|---|---|
-| B1 | **Size crescenti sulla scala (grid/martingala-like)**: la prima e' leggera, la seconda "un po' piu' pesante", e un terzo ordine in piu'. Se i livelli sono "contro" il prezzo (fill successivo a prezzo peggiore), e' **media al ribasso/al rialzo con taglia crescente** | WA0092: *"prima size un po' leggera, poi l'altra un po' piu' pesante ... e un'altra leggermente sopra di 5 punti"* | **ALTA se la taglia cresce sui fill peggiori** (lettura B del §3.2 la rende piu' una **piramide a scala**; lettura A e' una **media**). La direzione del riempimento **non e' certa** -> bandiera da confermare |
-| B2 | **"Dieci volte tanto"**: se e' x10 la size sul terzo Supertrend, e' una taglia **10 volte** quella base **per convinzione** | WA0090: *"le size sul terzo supertrend uso in generale, non so, dieci volte tanto"* | **ALTA se confermata** (rischio per singola operazione non limitato dall'audio); **ambigua e dubitata dalla stessa collega ("non so")** |
+| B1 | **Size crescenti sulla scala (grid/martingala-like)**: la prima e' leggera, la seconda "un po' piu' pesante", e un terzo ordine in piu'. Se i livelli sono "contro" il prezzo (fill successivo a prezzo peggiore), e' **media al ribasso/al rialzo con taglia crescente** | WA0092: *"prima size un po' leggera, poi l'altra un po' piu' pesante ... e un'altra leggermente sopra di 5 punti"* **DA CONFERMARE, gravita' dipende da due cose non dette.** In una scala di ordini limit **ogni riempimento successivo avviene contro il precedente** (e' sempre una *media*, mai una piramide in guadagno), in tutte e due le letture del §3.2. Cambia la taglia: con la **lettura B** l'ordine dei riempimenti e' leggera -> piu' pesante -> terza, cioe' **taglia crescente sui riempimenti avversi**; con la **lettura A** l'ordine e' terza (+5) -> pesante (linea) -> leggera (sotto), cioe' taglia **non** crescente sull'ultimo. Diventa ALTA solo se (a) la taglia cresce sui riempimenti avversi **e** (b) non c'e' uno stop comune che fissi in anticipo il rischio totale del setup (WA0091 non lo da' numerico, B4) |
+| B2 | **"Dieci volte tanto"**: SE fosse x10 la size sul terzo Supertrend (lettura non certa, §3.1/R17), sarebbe una taglia **10 volte** quella base **per convinzione** | WA0090 [TS]: *"Tutto qua, le sides Sul terzo super trend uso in generale, non so, dieci volte tanto"* | **ALTA se confermata** (rischio per singola operazione non limitato dall'audio); **ambigua e dubitata dalla stessa collega ("non so")** |
 | B3 | **Sizing per convinzione soggettiva**: "ancora piu' grosse ... perche' il rimbalzo ci sara' di sicuro" | WA0090: *"entro con i sides ancora piu' grossi perche' il rimbalzo ci sara' di sicuro"* | MEDIA-ALTA: nessuna statistica citata; la "certezza" e' un'affermazione, **non misurata** |
 | B4 | **Stop non definito**: nessun valore numerico; "di solito"; "se c'e'" una resistenza. **Cosa succede se non c'e' resistenza non e' detto**: il rischio e' un "nessuno stop" implicito in quel caso | WA0091: *"metto di solito leggermente sopra qualche resistenza se c'e'"* | **ALTA come specifica** (un EA senza stop numerico non e' schierabile); **NON e' "no-SL" dichiarato**: uno stop esiste, ma non e' parametrizzabile |
 | B5 | **Rapporto TP/SL ignoto**: TP ~10 e SL "sopra la resistenza" di ampiezza ignota: puo' essere TP piccolo contro SL largo (**win rate alto richiesto**) | WA0091/92 | MEDIA: da misurare, non da dedurre |
@@ -188,6 +188,8 @@ Premessa: si registrano come **rischi da misurare prima di codificare**, non com
 ---
 
 ## 7. DOMANDE PER CLAUDIO / LA COLLEGA (non invento nulla)
+
+> Elenco di **dettaglio**. La **lista unica**, senza duplicati con il PDF e in ordine di importanza (12 bloccanti + il resto), e' al **§10.2**.
 
 **Strumento e indicatori**
 1. Il **Supertrend 2.5/3/3.5**: sono i **moltiplicatori** dell'ATR? Con **quale periodo** dell'ATR (10? altro)? Lo stesso periodo sui tre livelli? (Il PDF potrebbe dirlo: verifica incrociata dell'altro agente.)
@@ -236,4 +238,51 @@ Nei tre audio **non compaiono**: simboli, orari/sessioni, valore numerico dello 
 - **Letto per intero**: i tre `.txt` TurboScribe (WA0090: 1 paragrafo, WA0091: 1 frase, WA0092: 1 paragrafo) e `/tmp/trascr.json` (che esiste: 3 chiavi, WA0090/91/92). Confronto `[LOC]` dichiarato dove usato (§1.4, §1.5, R6-R17).
 - **Il parlato trascritto sbaglia anche i numeri**: i numeri critici sono "20", "2.5/3/3.5", "5/10", "5", "10", "200", "9", "21", "dieci volte". Tutti **[TRASCRITTO chiaro]** tranne: "20 25" (autocorretta: finale 20, due riconoscitori d'accordo ma **stessa fonte audio**), "5/10" (`[TS]` "5 barra 10", `[LOC]` "5/10": **chiaro come numeri, dubbio sulla semantica**) e "dieci volte" (**ambiguo, non e' il numero a essere dubbio**, ma il significato).
 - **Nessun contro-esempio costruito sul codice**: qui non c'e' codice. Il contro-esempio per le letture del §3.2 e' dichiarato (la lettura A contraddice WA0091; la lettura B contraddice, se "10 sotto", il TP a distanza 0): **non scelgo una lettura**, le tengo aperte e le giro alla collega.
-- **Stato**: BOZZA, NON passata dal cancello. Non e' un'autorizzazione a scrivere codice.
+- **Stato**: estrazione verificata dal cancello il 06/10/2026 (vedi testata). Non e' un'autorizzazione a scrivere codice.
+
+---
+
+## 10. RACCORDO AUDIO <-> PDF (aggiunto dal cancello, 06/10/2026)
+
+Fonti: questo documento (audio, `[TS]`) e `report/NATCLA_ANALISI_PDF_2026-10-06.md` (PDF, pagine `pNN`). Riletti alla fonte: i tre `.txt` TurboScribe e le pagine p05-p08, p10-p12, p14, p17, p20-p22, p25-p26, p28-p30 del PDF. **Nessuna riga qui sotto sceglie una fonte**: dove divergono, decide Claudio/la collega (domanda 1 del §10.2).
+
+### 10.1 Dove audio e PDF dicono cose diverse
+
+| Tema | Audio (collega) | PDF (Supertrend Reversal) |
+|---|---|---|
+| Supertrend | tre livelli **2.5 / 3 / 3.5**, tutti operativi: 2.5 e 3 "solo la prima volta", 3.5 fino a due tocchi (WA0090); **periodo ATR non detto** | **(10, 3.5)** (p07); nei grafici tre linee S/T 2.5/3.0/3.5 (p04, p08) ma **solo la 3.5 entra nelle regole** (p11, p20 fig.1, p25) |
+| TF | ingresso "dall'H1 in su" (WA0090, WA0092); analisi H1/H4/H12/D, W "qualche volta" | **H4 - D1 - W1** consigliati (p05, p06, p25), "D1 e H4" (p22); ma esempi su **H1** (p08, p11) |
+| Medie | EMA 200 + **media 9 e 21** (uso non detto) | **EMA 14 - 89 - 100 - 200** (p07); 9 e 21 **assenti** |
+| EMA 200 | deve essere **"abbastanza inclinata"** (WA0092); ingresso possibile **anche sulla sola EMA 200** (WA0092) | **nessun requisito di inclinazione**; EMA 200 e' **confluenza** (p05, p06, p16, p21 fig.3) o **barriera** (p14 r.7), **mai un ingresso da sola** |
+| Filtro forza | **ADX <= 20** (WA0090, dopo autocorrezione da "20 25") | **ADX assente** dal PDF |
+| Bollinger | "per vedere in che direzione e'" (WA0090) | **opzionale**, "filtri di eccesso, divergenze e volatilita'" (p07) |
+| Conteggio tocchi | 3.5: una volta, al massimo due; 2.5/3: solo la prima violazione | **nessuna regola di conteggio**; p22 disegna "1^ violazione", "2^ violazione", "rimbalzo deciso" senza regola |
+| Conferma | **non citata** | **candela successiva apre all'interno** del ST, altrimenti setup invalidato (p06, p14, p20, p25); corpo chiude **vicino** (p14, p20) |
+| Timing dentro la candela | non citato | p14 "prima meta' valida / seconda meta' no" **contro** p25 "seconda meta' favorevole" (contraddizione interna al PDF) |
+| Confluenza | **bonus di taglia** ("size ancora piu' grosse", WA0090) | **sine qua non** ("se assente e' consigliabile evitare", p21); nessuna modulazione di taglia |
+| Ingresso | **tre ordini a scala**: 5/10 punti sotto (leggera), sulla linea (piu' pesante), 5 punti sopra (WA0092) | **1/3 a mercato + 2/3 pendente a +-20 pip** (p17, p21, p26) o due pendenti se apre lontano (p21); immagine p11 ~10 pip; p12 "2/3 su breakout successivo" |
+| Stop | "leggermente sopra qualche resistenza, se c'e'" (WA0091), nessun numero | sotto/sopra **minimo/massimo recente o Supertrend** (p17, p26); fig. p21: "STOP LOSS a 5 PIP 2^ Ordine pendente" |
+| Take profit | **~10 pip** (WA0091) / **10 punti dal Supertrend o EMA** (WA0092) | livelli tecnici superiori; **EMA 14 primo obiettivo, poi EMA 89** (p17); R/R **>= 1:1** (p17) **contro >= 1:2** (p26); **BE** al primo obiettivo (p17, p18, p26) |
+| Durata | "un'oretta neanche, a volte qualche secondo" (WA0092) | "lascia correre le operazioni su TF ampi" (p18, p26) |
+| Direzione | **mai dichiarata** (§3.2) | **entrambe**, esplicite: "In posizione long ... In posizione short" (p17) |
+| Taglia | "dieci volte tanto" sul terzo ST (oggetto incerto, "non so") | solo frazioni 1/3 e 2/3; rischio "come da money management" (p11, p12), **nessun valore** |
+
+**Aritmetica del cancello del costo** (`stop >= 40 x spread`, CLAUDE.md), ricalcolata: stop 10 pip -> spread max **0,25 pip**; stop 20 pip -> **0,5 pip**. Sull'esempio del PDF (p21 fig.4) il 2^ ordine ha lo stop a **5 pip** -> spread max **0,125 pip** per quell'ordine. Sono conti, non verdetti: lo stop vero non e' ancora definito da nessuna delle due fonti.
+
+### 10.2 Domande aperte per Claudio - lista unica, senza duplicati, in ordine di importanza
+
+**Bloccanti** (senza queste l'EA non si puo' scrivere):
+1. **Quale fonte comanda**: l'EA segue l'operativita' della collega (audio), il PDF, o una combinazione? Se combinazione, **quali pezzi da quale fonte** (tabella 10.1)? (audio Q23)
+2. **Direzione**: long, short o entrambi? Gli ordini "sotto" e lo stop "sopra la resistenza" descrivono lo stesso lato? (audio Q11)
+3. **Supertrend**: periodo ATR (il PDF dice 10) e ruolo dei livelli 2.5 e 3: si entra anche su quelli (audio) o solo sulla 3.5 (PDF)? (audio Q1; PDF Q1)
+4. **Tocco e conteggio**: cosa e' un tocco (ombra che sfiora/perfora, chiusura oltre), da quando si contano "una volta / al massimo due", e serve la conferma "candela successiva apre all'interno" del PDF? (audio Q7-Q8; PDF Q2, Q3, Q6)
+5. **TF e momento della decisione**: su quale TF nasce il segnale e su quale si piazzano gli ordini; segnale a barra chiusa o dentro la candela (timing p14 contro p25)? (audio Q12; PDF Q4, Q26)
+6. **Ingresso**: scala a tre ordini (audio) o 1/3 + 2/3 a +-20 pip (PDF)? "5/10" e' un intervallo o un'alternativa? Pendenti limit o stop, e scadenza? (audio Q12-Q14; PDF Q14-Q17)
+7. **Stop**: dove sta in numeri, cosa succede se non c'e' una resistenza, e se e' **unico** per tutti gli ordini del setup. (audio Q19; PDF Q20)
+8. **Take profit**: 10 pip o 10 punti, misurati dalla linea o dal prezzo di riempimento (audio), oppure EMA 14 / EMA 89 / livelli con R/R minimo 1:1 o 1:2 (PDF)? Break-even e chiusura parziale si usano? (audio Q18, Q20; PDF Q19, Q21, Q22)
+9. **Filtri**: ADX <= 20 (periodo, TF, vale per tutti i livelli?); EMA 200 "inclinata" (soglia e verso); confluenza "stessa altezza" (tolleranza); la confluenza e' obbligatoria (PDF) o solo un bonus di taglia (audio)? (audio Q3, Q9, Q10; PDF Q7)
+10. **Ingresso sulla sola EMA 200** (WA0092): e' un secondo motore separato, con le stesse uscite? (audio R20)
+11. **Simboli e orari**: su quali strumenti e in quali fasce ("punti" fa pensare anche a indici/oro)? (audio Q21; PDF Q24, Q25)
+12. **Taglie e rischio** (decisione di Claudio): rischio per operazione e per setup, massimo di posizioni; "size piu' grosse con confluenza" e "dieci volte tanto": quanto, e se si vogliono davvero. (audio Q15, Q16, Q22; PDF Q13)
+
+**Da definire dopo** (non bloccano la prima versione): media 200 EMA o SMA e prezzo applicato (audio Q2; WA0092 e PDF p07 dicono "EMA"); media 9/21 (audio Q4); Bollinger (audio Q5); weekly "Supertrend vicino" (audio Q6); "non come in trend following" (audio Q17); screenshot di esempio della collega (audio Q24); candela di "indecisione o inversione" (PDF Q5); Fibonacci, pivot/Opposing, Larry Williams, PeakRepairerStrict, PTE, Weekly Open Line (PDF Q8-Q10); EMA 200 confluenza/barriera (PDF Q11); numeri tondi (PDF Q12); ADR p11 e simbolo GBPAUD/GBPCHF (PDF Q18); soglie di volatilita'/gap/news (PDF Q23); versione piu' recente del PDF o prestazioni documentate (PDF Q27).

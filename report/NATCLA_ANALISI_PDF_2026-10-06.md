@@ -1,6 +1,6 @@
 # Ea Nat&Cla - Analisi fresca del PDF "Strategia SUPERTREND REVERSAL"
 
-> BOZZA, NON PASSATA DAL CANCELLO. Non esce verso Claudio/VPS come verdetto: e' una estrazione.
+> Estrazione verificata dal cancello il 06/10/2026 (strato 1 `controlla_riga.py --oggetto md`: nessun difetto meccanico; strato 2 `controllo-preventivo`: pagine chiave rilette in immagine, correzioni applicate). Non e' un verdetto e non autorizza a scrivere codice. Raccordo con l'audio e lista unica delle domande: `report/NATCLA_ANALISI_AUDIO_2026-10-06.md` §10.
 
 **FILE** `data/natcla/ABTG-SUPERTREND_REVERSAL.pdf` (31 pagine, "Realise 04.05.2025", Alfio Bardolla Training Group; la copertina porta il marchio "Trading Forex Diary")
 **FONTE UNICA** il PDF: testo (`ABTG-SUPERTREND_REVERSAL_testo.txt`) + immagini (`data/natcla/pdf_pagine/pNN.png` a 80 dpi; le pagine p08, p10, p11, p12, p20, p21, p22, p25, p26 e i ritagli di intestazione di p04/p08/p22 sono stati riletti a 150-400 dpi con pymupdf). Nessun web, nessun altro file del repo (sorgenti EA e resoconti NON letti), audio della collega NON analizzati qui.
@@ -30,7 +30,7 @@ Pagine rilette una per una: 1-8, 10-12, 14-18, 20-23, 25, 26, 28, 30. Le pagine 
 
 **Contraddizioni principali** (dettaglio al §C): (1) timing della candela: p14 dice "seconda meta' = setup NON valido", p25 dice "seconda meta' = timing favorevole"; (2) R/R >=1:1 (p17) vs >=1:2 (p26); (3) il secondo ingresso e' "su breakout successivo" (p12) vs "pendente +-20 pip" (p17/p21/p26) vs nell'immagine p11 a ~10 pip; (4) TF consigliati H4/D1/W1 ma gli esempi di ingresso (p08, p11) sono su **H1**; (5) EMA 200 e' sia confluenza (p16, p21 fig.3) sia barriera (p14 riga 7); (6) la chiave del quiz p30 (Q3 = C) non coincide con la tabella p14.
 
-**Bandiere rosse (regole di casa):** il frazionamento mette **2/3 della size sul secondo ingresso, piu' lontano dal prezzo e CONTRO il movimento** (media al peggio con size doppia del primo ingresso): bandiera "size crescente / media in perdita". Non ci sono martingala sulle perdite, griglie aperte, recovery, no-SL (lo SL c'e' sempre), ne' trucchi anti-prop. Dettaglio al §D.
+**Bandiere rosse (regole di casa):** il frazionamento mette **2/3 della size sul secondo ingresso, piu' lontano dal prezzo e CONTRO il movimento** (media al peggio con size doppia del primo ingresso): bandiera "size crescente / media in perdita", **attenuata** dal fatto che nell'esempio p21 fig.4 lo stop e' comune e dichiarato (5 pip oltre il 2^ ordine), quindi il rischio totale del setup e' fissato prima di entrare. E' una segnalazione da misurare, **non un motivo per scartare l'EA** (decide Claudio, il cancello e' sui numeri). Non ci sono martingala sulle perdite, griglie aperte, recovery, no-SL (lo SL c'e' sempre), ne' trucchi anti-prop. Dettaglio al §D.
 
 **Numeri di performance nel PDF: ZERO** (nessun win rate, profitto, drawdown). I soli numeri sono esempi di mosse in pip (52 pip, 99 pip, ~100 pip) e non vanno trattati come statistiche.
 
@@ -235,7 +235,7 @@ Immagini `[IMMAGINE p20.png]`: **Fig.1** una serie di candele rosse discendenti 
 
 #### p21 - "Dalla conferma all'esecuzione: ordine market e struttura tecnica" (testo + Figure 3, 4 in `p21.png`, 150 dpi)
 Testo `[TRASCRITTO]`: *"Una condizione sine qua non per confermare l'ingresso e' la presenza di un livello tecnico, nelle immediate vicinanze del rimbalzo, che fa da argine alla potenziale prosecuzione del trend rafforza il segnale. Se assente, e' consigliabile evitare l'operazione. Per tracciare i livelli di supporto e resistenza e' sempre consigliabile usare il metodo di Larry Williams."* *"Ingresso e gestione ordini: Se l'apertura della candela successiva avviene all'interno ed in prossimita' del Supertrend si posiziona: un Ordine a mercato: Entra immediatamente se il prezzo si muove nella direzione prevista. Un Ordine pendente: Piazzato sopra/sotto il Supertrend per evitare falsi segnali a circa 20 PIPO dal primo ordine. Se invece il prezzo apre lontano dal supertrend si posizionano due ordini pendenti con il criterio anzidetto."*
-Immagini `[IMMAGINE p21.png]`: **Fig.3** sequenza discendente verso linea verde (ST) con linea rossa sotto etichettata **"La EMA 200 forma un livello tecnico che ostacola la prosecuzione del TREND"** (cioe' la EMA 200 e' il livello "argine" dietro il ST, dal lato dove il prezzo andrebbe se il trend proseguisse). **Fig.4**: il rimbalzo e la salita; etichette **"Take profit"** (a livello della media blu, in alto), **"1 Ordine a Mercato"** (appena sopra la linea ST verde), **"2 Ordine (pendente)"** (SOTTO la linea ST verde e vicino alla EMA200 rossa), in rosso **"STOP LOSS a 5 PIP 2 Ordine pendente"** (lo SL sta 5 pip oltre il 2 ordine).
+Immagini `[IMMAGINE p21.png]`: **Fig.3** sequenza discendente verso linea verde (ST) con linea rossa sotto etichettata **"La EMA 200 forma un livello tecnico che ostacola la prosecuzione del TREND"** (cioe' la EMA 200 e' il livello "argine" dietro il ST, dal lato dove il prezzo andrebbe se il trend proseguisse). **Fig.4**: il rimbalzo e la salita; etichette **"Take profit"** (a livello della media blu, in alto), **"1 Ordine a Mercato"** (appena sopra la linea ST verde), **"2 Ordine (pendente)"** (SOTTO la linea ST verde e sotto anche la EMA200 rossa; riletto a 300 dpi), in rosso **"STOP LOSS a 5 PIP 2 Ordine pendente"** (lo SL sta 5 pip oltre il 2 ordine).
 
 | regola | valore | pagina | meccanizzabile | ambiguita' |
 |---|---|---|---|---|
@@ -428,7 +428,7 @@ Meccanizzabili solo dopo aver fissato un parametro che il PDF non da' (vedi §F)
 
 | bandiera | evidenza (citazione + pagina) | gravita' |
 |---|---|---|
-| **Size crescente / media in perdita (il 2 ordine, 2/3, e' piu' grande del primo, 1/3, e viene piazzato CONTRO il movimento)** | p10/p11/p17: *"1/3 della posizione entra a mercato ... 2/3 rimanente su ordine pendente +-20 pips"*; immagine p21 fig.4: "2 Ordine (pendente)" SOTTO la linea ST per un long, con SL a 5 pip oltre; immagine p11: OP2 sopra OP1 per uno short; immagine p12: "OP 2 - size 2/3" a "Res D1" sopra l'ingresso market short | ALTA come struttura: raddoppia la size proprio dove la tesi del primo ingresso viene messa alla prova; il rischio totale dipende da un "money management" che il PDF non fornisce. NON e' martingala (nessun raddoppio dopo una perdita) ne' griglia aperta (due ordini, SL dichiarato) |
+| **Size crescente / media in perdita (il 2 ordine, 2/3, e' piu' grande del primo, 1/3, e viene piazzato CONTRO il movimento)** | p10/p11/p17: *"1/3 della posizione entra a mercato ... 2/3 rimanente su ordine pendente +-20 pips"*; immagine p21 fig.4: "2 Ordine (pendente)" SOTTO la linea ST per un long, con SL a 5 pip oltre; immagine p11: OP2 sopra OP1 per uno short; immagine p12: "OP 2 - size 2/3" a "Res D1" sopra l'ingresso market short | DA MISURARE (MEDIA): raddoppia la size proprio dove la tesi del primo ingresso viene messa alla prova; ma nell'esempio p21 fig.4 lo stop e' **comune e dichiarato** (5 pip oltre il 2^ ordine), quindi il rischio massimo del setup e' noto prima di entrare. Diventa ALTA solo se la taglia totale fosse calcolata sul solo 1/3 o lo stop non fosse comune: il "money management" che lo fisserebbe non e' nel PDF. NON e' martingala (nessun raddoppio dopo una perdita) ne' griglia aperta (due ordini, SL dichiarato) |
 | **Rischio per trade indefinito** | p11, p12: *"S/L e T/P come da money manegement"* senza valore | ALTA per la challenge: il PDF non da' ne' risk %, ne' lotti, ne' loss massima per trade |
 | **Ingresso su breakout successivo** (2/3) | p12 | MEDIA: potrebbe essere scaling-in in direzione favorevole, ma l'immagine lo piazza al livello Res D1 sopra l'ingresso short |
 | **Nessuna regola di uscita su flip** del Supertrend e nessun cap su "lascia correre" | p18, p26 | MEDIA: operazioni su TF ampi senza stop/uscita oggettiva oltre lo SL iniziale |
@@ -436,7 +436,7 @@ Meccanizzabili solo dopo aver fissato un parametro che il PDF non da' (vedi §F)
 | Trucchi anti-prop / mascheramento EA | **NON presenti** nel PDF | - |
 | Dichiarazioni di performance | nessuna (solo "il vero vantaggio e' strutturale, non emotivo", p23: DICHIARATO, non verificato) | - |
 
-Nota di casa: le bandiere sono segnalazioni, non decisioni; il confronto con i criteri del progetto si fa dopo, a parte.
+Nota di casa: le bandiere sono segnalazioni, non decisioni, e **nessuna e' un motivo per scartare l'EA**: lo decide Claudio, e il cancello e' sui numeri misurati (PF, n, DD). Il confronto con i criteri del progetto si fa dopo, a parte.
 
 ## 7. (E) COSA IL PDF NON DICE E SERVIREBBE A UN EA (da chiedere, non da inventare)
 
@@ -447,6 +447,7 @@ Nota di casa: le bandiere sono segnalazioni, non decisioni; il confronto con i c
 - **Filtri numerici**: volatilita' minima, gap/spike, news.
 - **Uscite**: frazione da chiudere al primo obiettivo, trailing, uscita su flip, uscita temporale, regola di scelta del TP quando i livelli sono vari.
 - **Simboli e sessioni**: quali coppie/indici, orari (nessuno citato), pip per ogni simbolo, spread massimo accettabile.
+  - *Aritmetica del cancello del costo di casa* (`stop >= 40 x spread`, non un verdetto): nell'esempio p21 fig.4 il 2^ ordine ha lo stop a **5 pip** -> spread max **0,125 pip** per quell'ordine; il 1^ ordine, a circa 20 pip dal 2^, ha uno stop di circa 25 pip -> spread max circa **0,6 pip**. Lo stop vero non e' fissato dal PDF (§C-10): il conto si rifa' quando lo sara'.
 - **Come si comporta con barra in formazione**: i segnali si valutano a barra chiusa (apertura della successiva) o intrabarra (timing dentro la candela)?
 - **Dati degli indicatori**: Multipivot & Opposing, Pivot Fibo, PeakRepairerStrict, metodo Larry Williams, PTE, Weekly Open Line: i file/descrizioni degli indicatori.
 - **Evidenza di prestazione**: nessuna (nessun backtest, nessun forward, nessuna statistica nel PDF).
@@ -467,6 +468,8 @@ Niente "copia": il PDF non da' numeri di performance ne' parametri di rischio. U
 ---
 
 ## F. DOMANDE DA FARE A CLAUDIO / ALLA COLLEGA
+
+> Elenco di **dettaglio**. La **lista unica** (PDF + audio, senza duplicati, 12 bloccanti in ordine di importanza + "da definire dopo") e la **tabella delle divergenze audio/PDF** sono in `report/NATCLA_ANALISI_AUDIO_2026-10-06.md` §10.
 
 **Su Supertrend e candele**
 1. "Supertrend (10, 3.5)": 10 e' il periodo ATR? Il prezzo sorgente e' HL2? E' l'indicatore di Oliver Seban con le tre linee 2.5/3.0/3.5 (p04, p08)? Le linee 2.5 e 3.0 servono a qualcosa?
