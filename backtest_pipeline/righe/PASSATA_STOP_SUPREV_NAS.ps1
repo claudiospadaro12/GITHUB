@@ -172,7 +172,7 @@ function CercaCella([string]$t, [string[]]$etichette){
   return $null
 }
 function LeggiReport($path){
-  $r = @{ Ok = $false; Trades = $null; Deals = $null; Profitto = $null; PF = ''; Motivo = '' }
+  $r = @{ Ok = $false; Trades = $null; Deals = $null; Profitto = $null; PF = ''; Motivo = ''; Expert = $null; Simbolo = $null; Periodo = $null; Inputs = @{} }
   $testo = Leggi-Condiviso $path
   if([string]::IsNullOrEmpty($testo)){ $r.Motivo = 'report vuoto o illeggibile'; return $r }
   $t = [regex]::Replace($testo, '<[^>]+>', '|')
@@ -182,6 +182,10 @@ function LeggiReport($path){
   $vd = CercaCella $t @('Affari Totali', 'Total Deals')
   $vf = CercaCella $t @('Fattore di Profitto', 'Profit Factor')
   if($null -ne $vf){ $r.PF = $vf }
+  $r.Expert  = CercaCella $t @('Expert')
+  $r.Simbolo = CercaCella $t @('Simbolo', 'Symbol')
+  $r.Periodo = CercaCella $t @('Periodo', 'Period')
+  foreach($mi2 in [regex]::Matches($t, '\|(Inp[A-Za-z0-9_]+)=([^|]*)(?=\|)')){ $r.Inputs[$mi2.Groups[1].Value] = $mi2.Groups[2].Value.Trim() }
   if($null -eq $vt){ $r.Motivo = 'etichetta del totale operazioni (Numero di Operazioni di Trading Totali / Total Trades) NON trovata'; return $r }
   if($null -eq $vp){ $r.Motivo = 'etichetta del profitto netto (Profitto Totale Netto / Total Net Profit) NON trovata'; return $r }
   if($vt -notmatch '^[0-9]+$'){ $r.Motivo = 'totale operazioni non numerico: "' + $vt + '"'; return $r }
@@ -512,6 +516,9 @@ if($rep){
   $lr = LeggiReport $rep.FullName
   if(-not $lr.Ok){ [void]$g0Motivi.Add('report illeggibile: ' + $lr.Motivo) }
   else {
+    if($null -ne $lr.Expert -and $lr.Expert -ne $EXPERT){ [void]$g0Motivi.Add('il report e di un altro EA (' + $lr.Expert + ')') }
+    if($null -ne $lr.Simbolo -and $lr.Simbolo -ne $SIMBOLO){ [void]$g0Motivi.Add('il report e di un altro simbolo (' + $lr.Simbolo + ')') }
+    if($null -ne $lr.Periodo -and -not $lr.Periodo.StartsWith($PERIODO + '(' + $DataDa + '-' + $DataA + ')')){ [void]$g0Motivi.Add('il periodo del report e "' + $lr.Periodo + '" invece di ' + $PERIODO + ' (' + $DataDa + ' - ' + $DataA + ')') }
     if([math]::Abs($lr.Trades - $G0_N) -gt $G0_N_TOL){ [void]$g0Motivi.Add('operazioni totali ' + $lr.Trades + ' fuori da ' + $G0_N + ' +/- ' + $G0_N_TOL) }
     if([math]::Abs($lr.Profitto - $G0_PROF) * 100 -gt $G0_PCT * $G0_PROF){ [void]$g0Motivi.Add('profitto netto ' + (F2 $lr.Profitto) + ' fuori da ' + $G0_PROF + ' +/- ' + $G0_PCT + '%') }
   }
@@ -520,6 +527,16 @@ if($rep){
 }
 $g0OK = ($g0Motivi.Count -eq 0)
 if($lr -and $lr.Ok){ [void]$riepilogo.Add('   report MT5: operazioni totali ' + $lr.Trades + ' | affari totali ' + $(if($null -ne $lr.Deals){ $lr.Deals }else{ 'n.d.' }) + ' | profitto netto ' + (F2 $lr.Profitto) + ' | fattore di profitto ' + $(if($lr.PF -ne ''){ $lr.PF }else{ 'n.d.' })) }
+if($lr -and $lr.Ok){
+  # i parametri che il tester ha DAVVERO usato, riletti dal report: seconda conferma della configurazione (informativa, non blocca)
+  $inOk = 0; $inDiv = @(); $inAss = @()
+  foreach($pa in $ANCORA){
+    $kv = $pa -split '=', 2
+    if(-not $lr.Inputs.ContainsKey($kv[0])){ $inAss = $inAss + @($kv[0]); continue }
+    if($lr.Inputs[$kv[0]] -ieq $kv[1]){ $inOk = $inOk + 1 } else { $inDiv = $inDiv + @($kv[0] + ' report=' + $lr.Inputs[$kv[0]] + ' ini=' + $kv[1]) }
+  }
+  [void]$riepilogo.Add('   input riletti dal report: ' + $inOk + ' su ' + $ANCORA.Count + ' coincidono con l ancora; assenti nel report ' + $inAss.Count + '; DIVERSI ' + $inDiv.Count + $(if($inDiv.Count -gt 0){ ' -> ATTENZIONE: ' + ($inDiv -join ' ; ') }else{ '' }))
+}
 if($g0OK){ [void]$riepilogo.Add('   G0 (riproduzione di r163a cella 2253: ' + $G0_N + ' +/- ' + $G0_N_TOL + ' operazioni, profitto ' + $G0_PROF + ' +/- ' + $G0_PCT + '%): VERDE.') }
 else { [void]$riepilogo.Add('   G0 (riproduzione di r163a cella 2253: ' + $G0_N + ' +/- ' + $G0_N_TOL + ' operazioni, profitto ' + $G0_PROF + ' +/- ' + $G0_PCT + '%): NON RAGGIUNTO -- ' + ($g0Motivi -join ' ; ') + '. L EA base NON riproduce l Ottimizzato (o il report manca): NESSUN NUMERO DI STOP SI USA.') }
 
@@ -610,6 +627,6 @@ Compress-Archive -Path (Join-Path $Cart '*') -DestinationPath $zip -Force
 Write-Host ''
 Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
 Write-Host 'FILE ATTESI NELLO ZIP: RIEPILOGO_PASSATA_NAS.txt + STOP_NAS.csv + passata_NAS.ini + spread_orario_NASUSD.csv (+ il per-trade e il report .htm, se trovati)' -ForegroundColor Gray
-if($affidabile){ Write-Host 'ESITO PASSATA: AFFIDABILE (rc 0)' -ForegroundColor Green; exit 0 }
+if($affidabile -and $c3Fatto){ Write-Host 'ESITO PASSATA: AFFIDABILE e C3 CALCOLATO (rc 0)' -ForegroundColor Green; exit 0 }
 Write-Host 'ESITO PASSATA: NON MISURATO (rc 3): nessun numero di stop si usa. Manda comunque lo zip.' -ForegroundColor Red
 exit 3
