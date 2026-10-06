@@ -1,0 +1,40 @@
+PASSATA STOP SUPREV NAS -- la distanza ingresso->SL della sedia 970913 (NASUSD H1, due lati insieme, buffer 2253)
+data: 2026-10-06 20:40:26   pc: DESKTOP-H4D7CAJ   pin: 434499fdff9cb207cbabd568e583efe4b2868eaa
+backtest a tick reali, deposito 100000, AllowLiveTrading=false: nessun ordine, nessun conto toccato
+
+--- passata singola L+S (R290a_stop_SUPREV_NASUSD_LS_ancora970913.txt) --- durata 12 min, log letti 10
+   ingressi letti (righe "mercato")       : 109   (LONG 69 / SHORT 40)
+   somma ENTRATE delle righe IMBUTO        : 109   (giornate IMBUTO: 495, quadratura OK 495 / ROTTA 0)
+   CONTROLLO INCROCIATO: OK -- i due conteggi coincidono.
+   CONTROLLO CONFIGURAZIONE: OK -- l EA ha stampato "avviato su NASUSD PERIOD_H1. Supertrend(10,3.0). 1 pip=0.01000", righe IMBUTO e SL coerenti.
+   righe grezze nei log: "mercato" 109 (lette 109), IMBUTO 495 (lette 495)   <- se diverse, il parser e cieco su una forma della riga
+   report MT5: operazioni totali 172 | affari totali 281 | profitto netto 4848.97 | fattore di profitto 1.58
+   input riletti dal report: 33 su 33 coincidono con l ancora; assenti nel report 0; DIVERSI 0
+   G0 (riproduzione di r163a cella 2253: 172 +/- 3 operazioni, profitto 4699 +/- 4%): VERDE.
+   >>> ESITO PASSATA: AFFIDABILE (lettore, configurazione e G0 verificati).
+   distanza ingresso->SL TUTTI (n 109), punti indice: min 39.70 | p5 49.58 | p25 73.50 | MEDIANA 109.50 | p75 163.90 | p95 320.38 | max 401.50
+   distanza ingresso->SL LONG (n 69), punti indice: min 41.80 | p5 53.12 | p25 81.90 | MEDIANA 122.90 | p75 165.00 | p95 320.38 | max 401.50
+   distanza ingresso->SL SHORT (n 40), punti indice: min 39.70 | p5 49.21 | p25 60.55 | MEDIANA 98.90 | p75 150.75 | p95 223.77 | max 393.10
+
+   C3 -- mediana di (stop_i / spread_h(i)); spread = mediana dell ORA SERVER dell ingresso (spread_orario_NASUSD.csv).
+         Soglie del piano: PASSA >= 44 | FRAGILE 36-44 | NON PASSA < 36. A 2253 e una MISURA; agli altri buffer e DERIVATO: stop + (b-2253)/100, per ALGEBRA sulle stesse entrate (n e invariante lungo l asse in r163a: non provato che le entrate siano le stesse).
+   buffer 2253 (MISURA): stop mediano 109.50 idx | rapporto mediano 56.7059 -> PASSA | pavimento duro (mediana stop >= 34,6): SI | ingressi con stop < 34,6: 0 su 109 | stress (NON cancello): mediana stop/2,40 = 45.63, /2,70 = 40.56
+         lato LONG (n 69): rapporto mediano 64.4118 -> PASSA
+         lato SHORT (n 40): rapporto mediano 48.8900 -> PASSA
+         COERENZA DELL ALGEBRA (stop = stop di base + buffer, buffer 2253 = 22,53 idx): stop minimo 39.70 > 22,53 OK (condizione NECESSARIA, non sufficiente: la conversione /100 resta del piano).
+         LETTURA CONTRO L ATTESA (scritta prima): stop(2253) mediano 109.50 -> DENTRO l attesa 93-188; ingressi 109 contro attesa 75-172.
+   buffer 3003 (DERIVATO): stop mediano 117.00 idx | rapporto mediano 60.5000 -> PASSA | pavimento duro (mediana stop >= 34,6): SI | ingressi con stop < 34,6: 0 su 109 | stress (NON cancello): mediana stop/2,40 = 48.75, /2,70 = 43.33
+         lato LONG (n 69): rapporto mediano 67.9600 -> PASSA
+         lato SHORT (n 40): rapporto mediano 53.2426 -> PASSA
+   buffer 3378 (DERIVATO) (centro dell altopiano di r163a): stop mediano 120.75 idx | rapporto mediano 62.5833 -> PASSA | pavimento duro (mediana stop >= 34,6): SI | ingressi con stop < 34,6: 0 su 109 | stress (NON cancello): mediana stop/2,40 = 50.31, /2,70 = 44.72
+         lato LONG (n 69): rapporto mediano 69.7941 -> PASSA
+         lato SHORT (n 40): rapporto mediano 55.5175 -> PASSA
+   buffer 4503 (DERIVATO) (bordo dell asse): stop mediano 132.00 idx | rapporto mediano 68.8333 -> PASSA | pavimento duro (mediana stop >= 34,6): SI | ingressi con stop < 34,6: 0 su 109 | stress (NON cancello): mediana stop/2,40 = 55.00, /2,70 = 48.89
+         lato LONG (n 69): rapporto mediano 75.1176 -> PASSA
+         lato SHORT (n 40): rapporto mediano 62.3419 -> PASSA
+   Questo script NON promuove: SOPRA / FRAGILE / SOTTO, la regola del CENTRO dell altopiano (mai il bordo 4503) e la riaccensione di 970913 sono del cancello e di Claudio.
+
+COME SI LEGGE: prima ESITO PASSATA (AFFIDABILE o NON MISURATO) e G0. Se NON MISURATO nessun numero di stop si usa.
+Se AFFIDABILE: la banda C3 a 2253 e la MISURA; 3003 / 3378 / 4503 sono DERIVATI per algebra.
+Misura la tranche a MERCATO (1/3 del rischio): il pendente (InpUsePending, +20 pip) ha distanza maggiore e non e qui; la tranche piu stretta decide il cancello.
+Questo script misura e dice se la misura e affidabile: NON promuove, NON sceglie il buffer.
