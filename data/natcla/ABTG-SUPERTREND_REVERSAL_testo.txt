@@ -1,0 +1,674 @@
+=== PAGINA 1 ===
+Strategia 
+SUPERTREND REVERSAL
+Realise 04.05.2025
+
+
+=== PAGINA 2 ===
+DISCLAIMER
+Col presente Disclaimer vi chiediamo di prendere atto, con attenzione e diligenza, che tutte le informazioni da noi pubblicate non devono essere considerate una sollecitazione al pubblico risparmio, o la
+promozione di alcuna forma di investimento né consulenza personalizzata ai sensi del Testo Unico della Finanza, trattandosi unicamente di informazione standardizzata rivolta al pubblico indistinto (Art. 1 Comma
+5 Septies del Decreto Legislativo 58/98, così come modificato dal Decreto Legislativo 167/2007) al fine di offrire un supporto informativo e decisionale agli Utenti mediante l'elaborazione di un flusso informativo di
+dati, notizie e Analisi attraverso il presente sito e servizio.
+Questo sito viene aggiornato senza alcuna periodicità: la frequenza degli aggiornamenti non è prestabilita, in quanto dipendente unicamente dall’andamento dei Mercati Finanziari in esso analizzati, nonché dai
+Sistemi utilizzati per l’Analisi stessa. Questo sito non può pertanto considerarsi un prodotto editoriale o una testata giornalistica ai sensi della Legge 62 del 07/03/2001.
+Alfio Bardolla Training Group SpA non conosce, né potrebbe conoscere, le caratteristiche personali di nessuno degli Utenti, in specie capacità a sostenere perdite, esperienza in materia finanziaria, flussi
+reddituali, consistenza patrimoniale, obiettivi di investimento e orizzonte temporale.
+Le raccomandazioni fornite da Alfio Bardolla Training Group SpA non possono intendersi personalizzate rispetto alle caratteristiche del singolo Utente e potrebbero non essere adeguate rispetto alle conoscenze
+ed esperienze, alla situazione finanziaria e agli obiettivi del singolo Utente. Dovrà essere perciò cura di ogni nostro Utente adattare le Strategie da noi indicate alla specifica situazione personale in corrispondenza
+con il proprio personale profilo di rischio, con importi adeguati all'esposizione desiderata e alla propria esperienza nel campo del Trading sui Mercati Finanziari.
+Le Strategie e i Segnali proposti non possono considerarsi, data la natura non personalizzata, un servizio di consulenza »ad personam» nell'ambito di un rapporto bilaterale con l'Utente. Strategie e Segnali qui
+forniti tengono conto unicamente delle caratteristiche degli Strumenti Finanziari oggetto della raccomandazione e dell'andamento dei relativi Mercati e devono essere, quindi, intesi a titolo di supporto informativo
+e decisionale.
+È importante ricordare che le performance realizzate nel passato con le Strategie divulgate su Alfio Bardolla Training Group SpA, non possono mai costituire alcuna garanzia di eguali rendimenti per il futuro.
+Considerato che quello fornito da Alfio Bardolla Training Group SpA è un servizio informativo e divulgativo, si consiglia quindi all'Utente – prima di utilizzare qualsiasi Segnale, Strategia o indicazione – di
+informarsi accuratamente presso il proprio Intermediario e/o altre fonti sulla natura e i rischi delle operazioni che si accinge a compiere, realizzandole solo se ha ben compreso la loro natura ed il grado di
+esposizione al rischio che comportano.
+Di conseguenza, le informazioni fornite agli Utenti dal sito Alfio Bardolla Training Group SpA (via mail, pop up oppure tramite il sito stesso, le pagine Facebook e Google, il canale Twitter o qualsiasi altra modalità)
+non possono mai considerarsi complete ed esaustive, fornendo contenuto che deve comunque essere rielaborato in modo critico dagli Utenti.
+Per contenuto si intendono i Report, gli Update, le Pagine, le Analisi di Borsa, i Segnali di Trading, i Grafici e altri materiali contenuti nel sito.
+In ogni caso Alfio Bardolla Training Group SpA non si riterrà responsabile (anche in eventuali periodi di Prova Gratuita) nei confronti di alcun Utente o terze parti, di alcun danno diretto o indiretto causato da un
+uso improprio delle informazioni fornite, da eventuali mancanze nella completezza ed esattezza delle informazioni, da qualsiasi ritardo, imprecisione, errore, interruzione o omissione nella fornitura del servizio
+sulla Rete o in altra forma.
+Alfio Bardolla Training Group SpA non risponde per gli eventuali disservizi e/o pregiudizi che derivassero all’Utente per problemi dovuti all'hardware e al software utilizzati dall'Utente e/o dal programma di
+navigazione (browser) utilizzato per la connessione. L'Utente si impegna a non divulgare e/o consentire a terzi a qualsiasi titolo l'apprendimento della propria chiave d'accesso, ad utilizzare il servizio
+esclusivamente per uso proprio e personale e a non diffondere, rivendere o cedere a terzi, persone, clienti e/o enti, gratuitamente o a titolo oneroso, per l'impiego da parte di questi ultimi o a loro profitto, alcuna
+informazione senza il preventivo consenso scritto di Alfio Bardolla Training Group SpA, pena il diritto da parte nostra di risolvere immediatamente il Contratto per fatto e colpa esclusivi dell'Utente, fatta salva la
+richiesta di risarcimento del danno.
+Alfio Bardolla Training Group SpA garantisce che farà del proprio meglio per assicurare l'accuratezza e l'affidabilità del servizio, ponendo la massima diligenza nell’acquisizione ed elaborazione dei dati, ma non
+garantisce l'assoluta completezza ed esattezza né, tanto meno, la rispondenza e l'efficacia dei Segnali e delle Strategie rispetto all'andamento futuro delle quotazioni.
+Alfio Bardolla Training Group SpA non avrà alcuna responsabilità per le eventuali perdite subite dall'Utente per aver utilizzato i dati contenuti nelle informazioni ricevute, per non aver compreso il nostro Metodo di
+Trading e/o per aver fatto affidamento sulle previsioni fornite.
+I risultati realizzati nel passato dai Sistemi di Trading sin qui utilizzati e divulgati non costituiscono alcuna garanzia per il futuro. I rischi di perdite legate all'attività di Trading su Derivati o cambi valutari Forex
+possono essere molto elevati, chi sceglie tale operatività lo fa in totale autonomia e consapevolezza e sotto la propria ed esclusiva responsabilità.
+Ogni decisione di acquisto o vendita degli Strumenti Finanziari oggetto delle nostre Analisi, è pertanto di esclusiva competenza dell'Utente, che può decidere di darvi o meno esecuzione con qualsivoglia
+Intermediario autorizzato; qualsiasi eventuale decisione operativa presa dall'Utente in base ai Segnali e alle Strategie pubblicate sul sito è, infatti, da considerarsi assunta in piena autonomia decisionale e a
+proprio esclusivo rischio.
+Ai sensi e agli effetti dell’Art. 187 Ter della Legge »Draghi», si informa altresì che l'autore delle Analisi non è iscritto all'Ordine dei Giornalisti e che pertanto detiene o potrebbe detenere i valori mobiliari oggetto
+delle sue Analisi.
+In caso di difficoltà tecniche, anche protratte nel tempo, potremmo non riuscire a garantire il regolare invio delle informazioni (Report, Update, Alert, etc.) previste dagli Abbonamenti sottoscritti.
+2
+
+
+=== PAGINA 3 ===
+Strategia 
+SUPERTREND REVERSAL
+Parte I 
+Introduzione
+Discalimer: Tutte le informazioni contenute nei materiali divulgati hanno carattere puramente informativo e non
+costituiscono in alcun modo sollecitazione al pubblico risparmio, consulenza personalizzata né raccomandazione
+operativa ai sensi dell’art. 1, comma 5-septies, D.Lgs. 58/1998.
+Le strategie illustrate sono standardizzate e rivolte a un pubblico indistinto, senza considerazione per le
+caratteristiche individuali degli utenti (profilo di rischio, esperienza, obiettivi di investimento).
+Il trading comporta rischi elevati e può non essere adatto a tutti. Le performance passate non garantiscono risultati
+futuri. Ogni decisione operativa è assunta in piena autonomia e responsabilità da parte dell’utente.**"
+
+
+=== PAGINA 4 ===
+4
+IL SUPERTREND: DALLA DIREZIONE ALLA DECISIONE
+«UN INDICATORE DINAMICO PER LEGGERE IL TREND, GESTIRE IL RISCHIO E COGLIERE I SEGNALI OPERATIVI»
+«Il Supertrend non segue il prezzo lo interpreta»
+Creato da Oliver Seban per riconoscere l’inizio di una nuova fase di mercato.
+Combina direzione del trend e segnali operativi (buy/sell).
+Funziona come livello tecnico dinamico, adattandosi al prezzo.
+Usato in quattro modalità principali:
+Supporto/Resistenza dinamica
+Segnali di ingresso (cross del prezzo)
+Conferma direzione trend
+Impostazione di stop loss dinamici
+S/T 3.5
+S/T 2.5
+S/T 3.0
+
+
+=== PAGINA 5 ===
+5
+IL SUPERTREND: LIVELLO TECNICO E BUSSOLA DEL REVERSAL
+«IL SUPERTREND COME CHIAVE PER LEGGERE E ANTICIPARE LE INVERSIONI DI PREZZO»
+La strategia Supertrend Reversal si basa sui rimbalzi del prezzo sul Supertrend,
+confermati da una candela successiva.
+Il Supertrend agisce come supporto o resistenza dinamica, guidando l’analisi 
+tecnica verso potenziali punti di inversione.
+Particolarmente efficace su timeframe ampi (H4, D1, Weekly), dove riduce il 
+rumore di mercato e aumenta l’affidabilità dei segnali.
+Più potente se combinato:
+Media Mobile 200 periodi
+Livelli di Fibonacci
+Supporti/Resistenze statiche
+«Il Supertrend non prevede il futuro, ma indica con precisione dove il mercato potrebbe cambiare direzione»
+
+
+=== PAGINA 6 ===
+6
+DAL SEGNALE AL CONTESTO: LE REGOLE DEL REVERSAL
+«UNA STRATEGIA BASATA SULLA REAZIONE DEL PREZZO AL SUPERTREND E CONFERMATA DA CONTESTI TECNICI SOLIDI»
+«Non basta toccare il livello: serve ascoltare la risposta del mercato»
+Punti Chiave:
+Timeframe consigliati: H4 – D1 
+– W1
+➤Più affidabilità, meno 
+rumore di mercato
+Rimbalzo sul Supertrend:
+➤Il prezzo tocca o viola il 
+livello, segnale iniziale di 
+possibile inversione
+Conferma della candela 
+successiva:
+➤Deve aprire all’interno del 
+Supertrend per validare il setup
+Confluenza tecnica:
+➤L’ingresso è valido solo se 
+supportato da livelli chiave 
+(Fibonacci, EMA 200, S/R)
+
+
+=== PAGINA 7 ===
+7
+COSTRUIRE IL CONTESTO: IL SETUP CHE GUIDA LA STRATEGIA
+«OGNI DECISIONE PARTE DA UN GRAFICO BEN CONFIGURATO. LA PRECISIONE NELL’ANALISI NASCE DALLA QUALITÀ DEGLI
+STRUMENTI CHE UTILIZZIAMO»
+«Un buon setup non anticipa il mercato, ma lo prepara a parlare chiaro»
+Indicatori 
+essenziali:
+Supertrend (10, 3.5):
+Livello chiave per individuare il 
+rimbalzo
+EMA 14 – 89 – 100 – 200:
+Supporti/resistenze dinamici e 
+direzione macro
+Livelli di Fibonacci:
+Zone di ritracciamento e 
+confluenza
+Multipivot & Opposing:
+Aree di decisione storica e 
+strategica
+Opzionali
+W%R o RSI & Bollinger Bands
+Filtri di eccesso, divergenze e 
+volatilità
+
+
+=== PAGINA 8 ===
+8
+IL SETUP GRAFICO DELLA STRATEGIOA SUPERTREND REVERSAL
+«OGNI ELEMENTO TECNICO HA UNA FUNZIONE: IL SUPERTREND E LE MEDIE MOBILI DISEGNANO LA MAPPA DEL PREZZO»
+EMA 200
+S/T 3.5
+EMA 100
+EMA 89
+EMA 14
+S/T 2.5
+S/T 3.0
+Pivot Fibo
+OPPOSING
+
+
+=== PAGINA 9 ===
+Strategia 
+SUPERTREND REVERSAL
+Parte II
+La strategia
+Discalimer: Tutte le informazioni contenute nei materiali divulgati hanno carattere puramente informativo e non
+costituiscono in alcun modo sollecitazione al pubblico risparmio, consulenza personalizzata né raccomandazione
+operativa ai sensi dell’art. 1, comma 5-septies, D.Lgs. 58/1998.
+Le strategie illustrate sono standardizzate e rivolte a un pubblico indistinto, senza considerazione per le
+caratteristiche individuali degli utenti (profilo di rischio, esperienza, obiettivi di investimento).
+Il trading comporta rischi elevati e può non essere adatto a tutti. Le performance passate non garantiscono risultati
+futuri. Ogni decisione operativa è assunta in piena autonomia e responsabilità da parte dell’utente.**"
+9
+
+
+=== PAGINA 10 ===
+Ingresso con ordini market (Or. attivo)
+10
+«Non esiste un solo modo per entrare nel mercato, ma esiste il modo giusto per ogni contesto»
+LE REGOLE DI INGRESSO. DUE VIE PER LO STESSO OBIETTIVO
+«CHE TU SIA REATTIVO O PRUDENTE, IL SUPERTREND TI OFFRE IL PUNTO DI PARTENZA. STA A TE SCEGLIERE COME E QUANDO ENTRARE»
+Ingresso con ordini pendenti (Or. passivo)
+OP 1 – size 1/3
+OP 2 – size 2/3
+Ingresso Market
+
+
+=== PAGINA 11 ===
+11
+«Il trader paziente lascia che sia il mercato a bussare alla porta»
+REGOLE DI INGRESSO CON ORDINE PENDENTE
+«INGRESSO PASSIVO: LASCIARE CHE SIA IL PREZZO A VENIRE DA NOI»
+1
+Overview dell’operatività: Il prezzo si trova ad 
+una distanza del Supertend 3.5 compatibile 
+con la volatilità media giornaliera
+2
+Presenza di livello tecnico a sostegno del 
+reverse: S/R, Fibonacci o EMA aumentano la 
+validità del segnale
+3
+Posiziono due ordini pendenti:
+▸1° ordine = 1/3 della size
+▸2° ordine = 2/3 della size
+▸S/L e T/P come da money manegement
+Sequenza operativa della strategia:
+GBPCHF.bcm H1
+Volatilità media GBPCHF ≈100 PIP
+OP 1 – size 1/3
+OP 2 – size 2/3
+
+
+=== PAGINA 12 ===
+12
+«Quando il segnale parla chiaro, il tempo dell’attesa è finito»
+REGOLE DI INGRESSO CON ESECUZIONE A MERCATO
+«QUANDO IL BOUNCE È NETTO E LA STRUTTURA TECNICA È FAVOREVOLE, SI ENTRA SUBITO CON SIZE GESTITA»
+1
+Rimbalzo evidente sul Supertrend
+2
+Candela chiude vicino al livello, con struttura di 
+indecisione o inversione
+3
+La candela successiva apre all’interno del 
+Supertrend e conferma la direzione
+4
+Esiste una confluenza tecnica a supporto 
+dell’operazione
+Ingresso Market con size frazionata (es. 1/3 ora, 2/3 su 
+breakout successivo); S/L e T/P come da money manegement
+Sequenza operativa della strategia:
+OP 2 – size 2/3
+Res D1
+Ingresso Market – 1/3 size
+
+
+=== PAGINA 13 ===
+Strategia 
+SUPERTREND REVERSAL
+Parte III
+«Studio Setup e Money management»
+13
+Discalimer: Tutte le informazioni contenute nei materiali divulgati hanno carattere puramente informativo e non
+costituiscono in alcun modo sollecitazione al pubblico risparmio, consulenza personalizzata né raccomandazione
+operativa ai sensi dell’art. 1, comma 5-septies, D.Lgs. 58/1998.
+Le strategie illustrate sono standardizzate e rivolte a un pubblico indistinto, senza considerazione per le
+caratteristiche individuali degli utenti (profilo di rischio, esperienza, obiettivi di investimento).
+Il trading comporta rischi elevati e può non essere adatto a tutti. Le performance passate non garantiscono risultati
+futuri. Ogni decisione operativa è assunta in piena autonomia e responsabilità da parte dell’utente.**"
+
+
+=== PAGINA 14 ===
+14
+«l setup è una porta: aprila solo se la struttura intorno è solida»
+SETUP VALIDO O NON VALIDO? IMPARA A RICONOSCERLI IN 10 SECONDI
+«UNA GUIDA VISIVA PER DISTINGUERE TRA UN'OPPORTUNITÀ REALE E UN SEGNALE DA IGNORARE.»
+Elemento
+Setup Valido
+Setup Non Valido
+1. Interazione con Supertrend
+Il prezzo tocca o viola il Supertrend 
+(con l’ombra)
+Nessun contatto tra prezzo e 
+Supertrend
+2. Chiusura della candela
+Candela chiude vicino al Supertrend
+Chiusura troppo lontana dal livello
+3. Apertura candela successiva
+Apre all’interno del Supertrend
+Apre fuori dal Supertrend (setup 
+invalidato)
+4. Livelli tecnici di supporto
+Presente una confluenza con 
+EMA/Fibo/S&R
+Nessun livello tecnico visibile o troppo 
+distante
+5. Timing della candela
+Il prezzo arriva sul Supertrend nella 
+prima metà della candela
+Il contatto avviene nella seconda 
+metà della candela in particolare 
+ultimi 5 min, rischio di rottura
+6. Contesto generale (volatilità)
+Volatilità normale o favorevole al 
+movimento
+Mercato piatto o con gap/spike 
+irregolari
+7. Barriere dopo l’ingresso
+Nessuna barriera tecnica imminente
+Ostacoli vicinissimi al target (Fibo, 
+EMA200, livelli psicologici)
+
+
+=== PAGINA 15 ===
+Condizioni di non operatività:
+15
+«Il trader esperto non cerca solo segnali d’ingresso, ma riconosce quando è meglio restare fuori»
+BARRIERE TECNICHE: QUANDO LA STRATEGIA VA MESSA IN PAUSA
+«NON TUTTI I SEGNALI MERITANO UN’ENTRATA. RICONOSCERE LE CONDIZIONI NON IDEALI È PARTE INTEGRANTE DEL SUCCESSO»
+→ Nessun rimbalzo = nessun pattern = nessun ingresso
+La candela non tocca né viola il floor 
+del Supertrend
+→ Il prezzo si muove lateralmente, senza direzione
+Presenza di congestione o volatilità 
+insufficiente
+→ I movimenti improvvisi alterano la lettura tecnica
+Presenza di gap o spike irregolari
+• → Rischio di rimbalzo contrario o mancato spazio 
+operativo
+Supporti o resistenze statiche troppo 
+vicine al punto d'ingresso
+
+
+=== PAGINA 16 ===
+16
+«Non tutto ciò che sembra un limite blocca l’operazione: a volte è proprio lì che il segnale si rafforza»
+CONDIZIONI DA MONITORARE, NON DA EVITARE
+«ALCUNI ELEMENTI NON SONO OSTACOLI: SE COMPRESI, POSSONO DIVENTARE PUNTI DI FORZA NELLA STRATEGIA»
+1. Ci sono 
+confluenze con livelli di 
+Fibonacci non ancora 
+superati
+Corretto approccio:
+La coincidenza del rimbalzo sul Supertrend con un livello di 
+Fibonacci (es. 38.2%, 50%, 61.8%) rafforza il segnale.
+Il problema si pone solo se il Fibonacci agisce come ostacolo 
+immediato all’estensione del movimento, ad esempio nel caso di 
+un TP troppo vicino o irraggiungibile a causa di un Fibo forte.
+2. Il Supertrend è a 
+ridosso della EMA 200 
+o di livelli psicologici 
+tondi
+Corretto approccio:
+Se il Supertrend coincide con la EMA 200 o con un numero tondo 
+importante (es. 1.3000, 1.5000), si tratta di una confluenza tecnica 
+molto potente.
+In questi casi, l’affidabilità del pattern aumenta, perché l’inversione è protetta da più 
+livelli difensivi.
+
+
+=== PAGINA 17 ===
+17
+«Non controlli il mercato, ma puoi controllare ogni tua mossa dentro di esso»
+STRATEGIA OK, MA È LA GESTIONE CHE FA IL TRADE
+«UNA BUONA ENTRATA SENZA UN PIANO D’USCITA È SOLO UN’IDEA. È LA GESTIONE A TRASFORMARLA IN STRATEGIA»
+Esecuzione 
+iniziale (size 
+frazionata):
+1/3 della posizione entra a mercato, se il segnale è valido e confermato
+2/3 rimanente su ordine pendente ±20 pips, per evitare ingressi prematuri.
+Gestione dello 
+Stop Loss (SL):
+In posizione long → SL sotto il minimo recente o il Supertrend
+In posizione short → SL sopra il massimo recente o il Supertrend.
+SL dinamico = spazio per respirare, ma senza compromettere il rischio.
+Se presenti livelli tecnici prevalgono i livelli tecnici.
+Gestione del 
+Take Profit (TP):
+Posizionato su livelli tecnici superiori (supporti/resistenze su D1, H4…)
+Quando arrivo al primo obiettivo posso ridurre la size e portare lo stop in pari. 
+La EMA 14 è il primo obiettivo naturale che i prezzi raggiungono. Segue poi, la 
+EMA 89, infine posso valorizzare anche gli altri livelli tecnici o livelli pivot.
+Rischio/Rendimento minimo consigliato: ≥ 1:1).
+
+
+=== PAGINA 18 ===
+18
+«Non è il profitto che fa la differenza, è quanto riesci a non perdere mentre lo insegui»
+LA STRATEGIA PROTEGGE, IL MONEY MANAGEMENT CONSERVA
+«OGNI TRADE INIZIA CON UN’IDEA, MA È LA GESTIONE DEL RISCHIO A DECIDERE SE SARÀ PROFITTEVOLE NEL LUNGO PERIODO»
+Break-even dopo il 
+primo target raggiunto
+➤Sposta lo SL a pari per eliminare il rischio residuo
+Lascia correre le 
+operazioni su 
+timeframe ampi
+➤Più ampio è il TF, più valore ha la pazienza
+Adatta SL e TP alla 
+volatilità attuale
+➤Stop troppo stretti = falsi stop-out | Stop troppo ampi = gestione 
+inefficiente
+Preferisci SL su livelli 
+tecnici e multipivot
+➤La struttura del grafico ti dà zone reali di difesa, non numeri arbitrari
+Obiettivo finale: Conservare il capitale, ridurre l’impatto degli errori, e permettere al metodo di 
+esprimersi nel tempo.
+Regole fondamentali di gestione del rischio:
+
+
+=== PAGINA 19 ===
+Strategia 
+SUPERTREND REVERSAL
+Parte IV 
+Case Study «Esempio Operativo»
+19
+Discalimer: Tutte le informazioni contenute nei materiali divulgati hanno carattere puramente informativo e non
+costituiscono in alcun modo sollecitazione al pubblico risparmio, consulenza personalizzata né raccomandazione
+operativa ai sensi dell’art. 1, comma 5-septies, D.Lgs. 58/1998.
+Le strategie illustrate sono standardizzate e rivolte a un pubblico indistinto, senza considerazione per le
+caratteristiche individuali degli utenti (profilo di rischio, esperienza, obiettivi di investimento).
+Il trading comporta rischi elevati e può non essere adatto a tutti. Le performance passate non garantiscono risultati
+futuri. Ogni decisione operativa è assunta in piena autonomia e responsabilità da parte dell’utente.**"
+
+
+=== PAGINA 20 ===
+20
+CASE STUDY: REVERSAL SU SUPERTREND CON INGRESSO MARKET
+«DALL’ANALISI TECNICA ALLA CONFERMA OPERATIVA: QUANDO PREZZO, CANDELA E CONTESTO PARLANO LA STESSA LINGUA.»
+Rimbalzo sul livello del Supertrend: l prezzo tocca o viola con la sola 
+“ombra” della candela il Supertrend senza chiudere significativamente al di 
+sopra o al di sotto.
+Questo movimento è considerato un potenziale punto di inversione. Il 
+rimbalzo diventa significativo se il corpo della candela chiude vicino al 
+Supertrend, suggerendo una perdita di forza del trend attuale. 
+Apertura della candela successiva: deve avvenire all’interno del “floor” del 
+Supertrend. In caso contrario, il segnale è invalidato.
+Questa condizione convalida il primo requisito di formazione del pattern 
+della strategia. 
+Se il prezzo apre al di fuori del “floor”, nella candela successiva, il segnale 
+viene invalidato. 
+«Il vero segnale non è la candela che tocca il livello, ma quella che decide di rispettarlo»
+Figura n° 1
+Figura n° 2
+
+
+=== PAGINA 21 ===
+21
+DALLA CONFERMA ALL’ESECUZIONE: ORDINE MARKET E STRUTTURA TECNICA
+«IL TIMING, IL LIVELLO E LA DIFESA TECNICA DETERMINANO LA QUALITÀ DELL’INGRESSO»
+Conferma e verifica del livello tecnico a protezione dell’inversione di 
+trend: Una condizione sine qua non per confermare l'ingresso è la 
+presenza di un livello tecnico, nelle immediate vicinanze del rimbalzo, che 
+fa da argine alla potenziale prosecuzione del trend rafforza il segnale. Se 
+assente, è consigliabile evitare l’operazione Per tracciare i livelli di 
+supporto e resistenza è sempre consigliabile usare il metodo di Larry 
+Williams.
+. 
+Ingresso e gestione ordini: Se l’apertura della candela successiva avviene 
+all’interno ed in prossimità del Supertrend si posiziona:
+un Ordine a mercato: Entra immediatamente se il prezzo si muove nella 
+direzione prevista.
+Un Ordine pendente: Piazzato sopra/sotto il Supertrend per evitare falsi 
+segnali a circa 20 PIPO dal primo ordine.
+Se invece il prezzo apre lontano dal supertrend si posizionano due ordini 
+pendenti con il criterio anzidetto. 
+«Quando la struttura sostiene l’idea, il mercato ti sta dando il permesso di entrare»
+Figura n° 3
+Figura n° 4
+
+
+=== PAGINA 22 ===
+22
+D1 E H4: I TIMEFRAME DELL'ECCELLENZA
+«LA SOLIDA BASE DELLA STRATEGIA SUPERTREND REVERSAL»
+«Più è ampio il timeframe, più chiaro il segnale. D1 e H4 non mentono»
+1^ violazione
+2^ violazione
+Rimbalzo deciso
+52 PIP
+Possibile obiettivo se 
+compatibile con ATRh1
+
+
+=== PAGINA 23 ===
+23
+«La strategia non premia chi indovina, ma chi applica ogni regola come fosse l’unica via»
+TAKEAWAY FINALI - OLTRE IL SEGNALE, CONTA IL METODO
+«LA STRATEGIA FUNZIONA SOLO SE APPLICATA CON COERENZA, PAZIENZA E CONTROLLO. IL SUCCESSO È UNA QUESTIONE DI METODO.»
+Strategia adatta a trader tecnici e pazienti
+▸Richiede capacità di lettura e attesa del segnale giusto
+Essenziale la disciplina operativa
+▸Seguire la procedura è più importante che “avere ragione”
+Check-list, confluenze e money management = chiavi del successo
+• ▸Il vero vantaggio è strutturale, non emotivo
+
+
+=== PAGINA 24 ===
+Strategia 
+SUPERTREND REVERSAL
+Parte V 
+Check list operativa
+24
+Discalimer: Tutte le informazioni contenute nei materiali divulgati hanno carattere puramente informativo e non
+costituiscono in alcun modo sollecitazione al pubblico risparmio, consulenza personalizzata né raccomandazione
+operativa ai sensi dell’art. 1, comma 5-septies, D.Lgs. 58/1998.
+Le strategie illustrate sono standardizzate e rivolte a un pubblico indistinto, senza considerazione per le
+caratteristiche individuali degli utenti (profilo di rischio, esperienza, obiettivi di investimento).
+Il trading comporta rischi elevati e può non essere adatto a tutti. Le performance passate non garantiscono risultati
+futuri. Ogni decisione operativa è assunta in piena autonomia e responsabilità da parte dell’utente.**"
+
+
+=== PAGINA 25 ===
+25
+1️⃣Condizioni di contesto
+Timeframe corretto (H4, D1 o 
+Weekly)
+Volatilità sufficiente / assenza di 
+congestione
+No eventi macro imminenti / 
+calendario economico controllato
+2️⃣Segnale tecnico
+Il prezzo tocca o viola con l’ombra il 
+livello del Supertrend (3.5)
+Il corpo della candela chiude vicino
+al Supertrend (non lontano)
+La candela successiva apre 
+all’interno del Supertrend 
+(floor/ceiling)
+Timing favorevole: il contatto 
+avviene nella seconda metà della 
+candela
+3️⃣Confluenze tecniche
+Presenza di livello statico o 
+dinamico (S/R, EMA 200, Fibo) 
+vicino al punto di rimbalzo
+Supporto/resistenza tracciato con 
+metodo (es. Larry Williams o 
+multipivot opposing)
+Nessuna barriera tecnica immediata 
+in direzione del trade (es. Fibo ostile 
+o congestione)
+«Non c'è strategia senza contesto, non c'è ingresso senza coerenza»
+CHECK LIST OPERATIVA. PARTE 1^: PRIMA DI PREMERE BUY« O «SELL»
+«ANALISI, CONTESTO E SEGNALI DEVONO PARLARTI ALL’UNISONO: SE UNO STONA, NON SI ENTRA.»
+
+
+=== PAGINA 26 ===
+26
+4️⃣Confluenze con altre strategie
+EMA 200
+PTE
+WEEKLY OPEN LINE
+5️⃣Piano di ingresso
+Entry a mercato (1/3 size) se il 
+pattern è chiaro
+Entry pendente (2/3 size) ±20 pip 
+dal primo ingresso
+SL dinamico posizionato sotto/sopra 
+il Supertrend o minimo/massimo 
+recente
+TP calcolato su livelli tecnici 
+superiori + RR ≥ 1:2
+6️⃣Gestione del Follow-up
+Porta lo SL a pareggio dopo il primo 
+TP
+Lascia correre le operazioni su TF 
+ampi se il contesto lo consente
+Nessuna modifica impulsiva in 
+corso d’opera (rispetta il piano)
+Documenta il trade nel diario 
+operativo
+«Il miglior setup non ti salverà, se non sai gestirlo quando è in gioco»
+CHECK LIST OPERATIVA. –PARTE 2^: INGRESSO, GESTIONE E MENTALITÀ
+«DOPO L’ANALISI VIENE L’ESECUZIONE. QUI SI GIOCA LA VERA PARTITA TRA DISCIPLINA E REAZIONE»
+
+
+=== PAGINA 27 ===
+Strategia 
+SUPERTREND REVERSAL
+Parte VI
+Questionario di autoverifica
+27
+Discalimer: Tutte le informazioni contenute nei materiali divulgati hanno carattere puramente informativo e non
+costituiscono in alcun modo sollecitazione al pubblico risparmio, consulenza personalizzata né raccomandazione
+operativa ai sensi dell’art. 1, comma 5-septies, D.Lgs. 58/1998.
+Le strategie illustrate sono standardizzate e rivolte a un pubblico indistinto, senza considerazione per le
+caratteristiche individuali degli utenti (profilo di rischio, esperienza, obiettivi di investimento).
+Il trading comporta rischi elevati e può non essere adatto a tutti. Le performance passate non garantiscono risultati
+futuri. Ogni decisione operativa è assunta in piena autonomia e responsabilità da parte dell’utente.**"
+
+
+=== PAGINA 28 ===
+28
+«Nel trading non conta sapere tutto. Conta sapere con onestà… cosa sai davvero»
+QUESTIONARIO DI AUTOVERIFICA
+«RIFLETTI, RISPONDI, MIGLIORA: OGNI RISPOSTA È UN PASSO VERSO LA CONSAPEVOLEZZA OPERATIVA»
+1️⃣In quale delle seguenti condizioni il 
+pattern di reversal è considerato valido?
+A. Quando il prezzo chiude sopra la 
+EMA 14
+B. Quando la candela rimbalza sul 
+Supertrend e chiude lontano dal 
+livello
+C. Quando il prezzo tocca il 
+Supertrend con l’ombra e la candela 
+successiva apre all’interno del livello
+D. Quando il prezzo si muove 
+lateralmente per più candele
+2️⃣Qual è il ruolo della candela 
+successiva nel pattern?
+A. Indicare il target di profitto
+B. Dimostrare continuità nel trend
+C. Validare il rimbalzo aprendo 
+all’interno del Supertrend
+D. Fornire un segnale RSI
+3️⃣. Quando è sconsigliato entrare a 
+mercato secondo la strategia?
+A. Quando c’è una confluenza con 
+EMA 200
+B. Quando il prezzo arriva sul 
+Supertrend nella seconda metà della 
+candela
+C. Quando il prezzo non tocca il 
+Supertrend
+D. Quando il prezzo rimbalza su un 
+Fibonacci 50%
+“Nel trading, come nella formazione, il sapere teorico non basta.
+Serve consapevolezza: capire cosa hai appreso, dove sei forte e dove hai ancora margini di crescita. Questo questionario non è 
+un esame. È uno specchio. Ti aiuta a riconoscere i tuoi automatismi, a correggere le abitudini impulsive e a consolidare il tuo 
+metodo. Rispondi con onestà. Perché solo chi si osserva con sincerità… può migliorare con costanza.”
+
+
+=== PAGINA 29 ===
+29
+«Questo non è un test. È uno specchio: guardati dentro, e il tuo trading si vedrà fuori»
+QUESTIONARIO DI AUTOVERIFICA – STRATEGIE DI APERTURA
+«RISPONDERE NON SERVE A FARE BELLA FIGURA. SERVE A CAPIRE DOVE SEI… E COSA PUOI MIGLIORAR»
+4️⃣Qual è la gestione corretta dello stop 
+loss?
+A. SL sempre fisso a 30 pip
+B. SL posizionato in base alla 
+volatilità media
+C. SL posizionato sotto/sopra il 
+Supertrend o minimo/massimo 
+recente
+D. SL automatico in base al tempo
+5️⃣Qual è il significato del 
+frazionamento dell’ingresso (1/3 + 2/3)?
+A. Aumentare la leva
+B. Ridurre la precisione 
+dell’operazione
+C. Gestire l’incertezza e confermare 
+la direzione
+D. Entrare più velocemente nel 
+mercato
+6️⃣La strategia è adatta a che tipo di 
+trader?
+A. Impulsivi e ad alto rischio
+B. Tecnici e pazienti, con disciplina 
+operativa
+C. Chi opera solo su M1
+D. Chi cerca breakout aggressivi 
+senza conferme
+
+
+=== PAGINA 30 ===
+30
+«Nel trading non si vince rispondendo bene. Si vince imparando da ogni risposta sbagliata»
+SOLUZIONI – VERIFICA LA TUA
+«RISPOSTE CORRETTE A CONFRONTO CON LE TUE: IL VERO VALORE NON È SAPERE TUTTO, MA CAPIRE DOVE MIGLIORARE»
+C
+1
+C
+2
+C
+3
+C
+4
+C
+5
+B
+6
+
+
+=== PAGINA 31 ===
+Grazie per l’attenzione
+«Il metodo è il vero vantaggio. Il resto… è solo rumore»
+31
