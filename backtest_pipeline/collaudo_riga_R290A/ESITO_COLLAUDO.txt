@@ -42,3 +42,17 @@ SECONDA LETTURA DEL CANCELLO (controllo-preventivo, 06/10/2026): pin 3b5f8d9b ->
   G0 13 contro-esempi (NBSP e U+202F con virgola decimale, 4.699,03, 4,699.03 -> NON MISURATO; operazioni 86/affari 172 -> NON RAGGIUNTO; report vecchio -> ignorato).
   Coppia vera CSV+report che prova la classe 1154: R258 (righe IS+OOS Trades 199+296=495, report singola 496 operazioni / 992 affari).
   RIGA CAMBIATA DI NUOVO: serve un TERZO lettore prima della consegna.
+
+TERZA LETTURA DEL CANCELLO (controllo-preventivo, 06/10/2026): pin 434499fd INVARIATO, riga INVARIATA. PASS CON RISERVE.
+  Rifatto da capo: strato 1 verde (riga, ps1, prova; controlla_prova OK); collaudo.sh 434499fd: statico 197/197, report veri 22/22, batteria 83/83, mutazioni 89/89,
+  riga 56/56 + 5/5 (girata da sola: in parallelo con la terza lettura era 54/56, classe 1155 -- i finti terminal64 del lettore). Script + 4 dipendenti riscaricati
+  da GitHub raw al pin: HTTP 200, SHA256 identici al commit, script 2797E308... ASCII puro, marcatore presente.
+  Contro-esempi PROPRI (attese in Python con Fraction, non col codice dell'autore; solo l'harness disco/MT5 finto e' il suo): 41/41 -- C3 12 casi (44 / 43,9941 /
+  36 / 35,9941 / pari a cavallo / dispari a ore miste / pavimento 34,60-34,59 / attese 65-93-188-188,01, quattro buffer, stress /2,40 /2,70); G0 20 casi (NBSP e U+202F,
+  4 699,03 / 4.699,03 / 4,699.03, operazioni 86 affari 172, bordi 168/169/175/176 e 4511.03/.04 / 4886.96/.97, report vecchio, assente, inglese, altro simbolo,
+  nella cartella dati, SOLO in VirtualStore -> NON MISURATO); pip assente o 0,1 -> rc 3 senza C3; 3 installazioni chiuse -> procede e le due censite NON cambiano
+  (snapshot); 4a non censita / terminal64 / metaeditor64 aperto / origin.txt del BCM assente -> si ferma prima del terminale; riga sul banco: verde rc 0, terminale
+  aperto -> tabella PID/titolo/cartella e stop senza rete, macchina VPS -> stop.
+  Riserva (non corretta, rischio basso): origin.txt mancante o illeggibile in un'ALTRA cartella dati la rende invisibile alla guardia delle non censite (procede);
+  il rischio vero e' coperto da Get-Process (nessun MT5 vivo) e dal perimetro di scrittura (solo la cartella dati del BCM).
+  Corretto: la frase "Il PC di backtest ha un solo MT5" in CHECKLIST_RIGA_DI_LANCIO.md (testo, non la riga).

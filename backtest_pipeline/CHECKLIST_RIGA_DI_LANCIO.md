@@ -54,8 +54,17 @@ Se e' piu' nuovo, sto mentendo. Nel dubbio: **HEAD**.
 
 ## ⚙️ E due regole di traffico, sempre valide
 
-**UNA MACCHINA, UN LAVORO.** Il PC di backtest ha **un solo MT5**. Prima di
-mandare una riga che apre MT5, dichiaro cosa deve essere finito prima. Il
+**UNA MACCHINA, UN LAVORO.** Il PC di backtest fa girare **un solo MT5 alla
+volta**. Prima di mandare una riga che apre MT5, dichiaro cosa deve essere
+finito prima.
+✏️ **CORRETTO IL 06/10/2026 (terza lettura di R290a).** Qui c'era scritto *"il
+PC di backtest ha un solo MT5"*: **falso** da quando lo dice il censimento P0
+del 05/10 (`risultati_archivio/DUKA_P0_20261005_171046/REFERTO_DUKA_P0.txt`
+sez. 5). Su DESKTOP-H4D7CAJ ci sono **TRE installazioni MT5**: `C:\Program
+Files\BCM Markets MT5 Terminal` (demo 50503392, cartella dati 215D85D7),
+`C:\MT5_Backtest` (cartella dati 04C7A32B) e `C:\FundedNext_Manuale` (cartella
+dati 2B8180C3). Una guardia scritta su quella frase fermava la passata SEMPRE
+(classe 1157). Le righe che girano li' nominano le altre due fra i NON TOCCATI. Il
 15/08 ho scritto "sono due macchine diverse e non si pestano i piedi": falso,
 ed e' il tipo di frase che fa ammazzare una corsa da tre ore.
 
