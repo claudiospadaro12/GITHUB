@@ -37,14 +37,6 @@ DEP_100K  = 100000.0
 #     🔴 E il limite va detto con il numero: la sonda delle 03:30 di oggi NON
 #     puo' coprire la seduta di oggi (la vedra' la corsa di domani notte).
 CODA_REFERTI = os.path.join("backtest_pipeline", "coda", "referti")
-# L'ora a cui il CSV viene pubblicato, DETTA IN ORA SERVER, e NON cablata.
-# BCM e' UTC+1 FISSO (correzione del 24/09), l'Italia fa l'ora legale: quindi
-# d'ESTATE le 22:45 italiane di `pubblica_trades.ps1` sono le 21:45 server,
-# d'INVERNO sono le 22:45. Dal 25/10/2026 una stringa cablata stamperebbe il
-# falso **dentro la challenge**, ed e' il motivo per cui questa funzione esiste.
-# 🔴 L'orologio di QUESTA macchina non serve (il container gira in UTC, il
-# task gira sul VPS): l'ora legale italiana si ricava dalla DATA, con la regola
-# che la fa — dall'ultima domenica di marzo all'ultima domenica di ottobre.
 # La clausola di validita' e' scritta nel referto che leggiamo e va tradotta in
 # un `if`, non lasciata in prosa (classe 1142): "'RIGHE DI ORDINE/DEAL = 0' su un
 # log NON vuoto vuol dire che quel giorno il conto non ha operato. Su un log
@@ -57,6 +49,14 @@ SOGLIA_LOG_PIENO = 20   # righe totali: sotto questo il log non dice niente
 #    finestra: la sospensione delle sedie e `rischioAperto=0.00%` del Guardian.
 
 
+# L'ora a cui il CSV viene pubblicato, DETTA IN ORA SERVER, e NON cablata.
+# BCM e' UTC+1 FISSO (correzione del 24/09), l'Italia fa l'ora legale: quindi
+# d'ESTATE le 22:45 italiane di `pubblica_trades.ps1` sono le 21:45 server,
+# d'INVERNO sono le 22:45. Dal 25/10/2026 una stringa cablata stamperebbe il
+# falso **dentro la challenge**, ed e' il motivo per cui questa funzione esiste.
+# 🔴 L'orologio di QUESTA macchina non serve (il container gira in UTC, il
+# task gira sul VPS): l'ora legale italiana si ricava dalla DATA, con la regola
+# che la fa — dall'ultima domenica di marzo all'ultima domenica di ottobre.
 def _ultima_domenica(anno, mese):
     """Ultima domenica del mese. Usata solo per marzo e ottobre (ora legale):
     la guardia c'e' perche' un `None` silenzioso qui diventerebbe un orario
@@ -963,7 +963,7 @@ def main():
     # frazione SALE (3119062: 31,8% -> 44,5%; 5 righe su 1.406 hanno cambiato
     # profit). Vedi la docstring di `frazione_catturata` (classe 358) e DIARIO
     # r.14 del 04/09: la casa lo aveva gia' scritto due volte.
-    # Classi 1146 (+ emendamento) e 1147.
+    # Classi 1161 (+ emendamento) e 1162.
     out += ["", "_⬆️ **La frazione e' un LIMITE SUPERIORE finche' la "
             "posizione e' chiusa in un colpo solo.** Il CSV si pubblica alle "
             "%s (e l'esportatore riscrive ogni 30 minuti) mentre la banda "
