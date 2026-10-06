@@ -1,17 +1,19 @@
 # PIANO MISURE CANDIDATI - 06/10/2026
 
-> **BOZZA, NON passata dal cancello.** Strato 1 (`controlla_riga.py --oggetto md`) e `controlla_prova.py` sulle due bozze: esiti in sez. 10. Strato 2 (`controllo-preventivo`): **DA FARE**. Nessun backtest lanciato, nessun VPS / forward / conto toccato, nessuna taglia proposta (il rischio e' di Claudio). Le due bozze di file prova e di riga stanno **qui dentro**, non in `backtest_pipeline/prove/` ne' in `backtest_pipeline/righe/`.
+> **BOZZA, passata dal cancello di giudizio (strato 2) con CORREZIONI applicate il 06/10 (elenco in sez. 10, "Correzioni del cancello").** Strato 1 (`controlla_riga.py --oggetto md`) e `controlla_prova.py` sulle due bozze: esiti in sez. 10. Le bozze R290a/R290b e lo script NAS restano da far passare dai due strati **quando diventano file veri**. Nessun backtest lanciato, nessun VPS / forward / conto toccato, nessuna taglia proposta (il rischio e' di Claudio). Le due bozze di file prova e di riga stanno **qui dentro**, non in `backtest_pipeline/prove/` ne' in `backtest_pipeline/righe/`.
 > **Etichette**: `[MISURATO]` riletto da me su CSV/referto in questa sessione; `[LETTO]` da un documento; `[DERIVATO]` calcolato da numeri scritti; `[INFERITO]`; `[NON MISURATO]`. Le probabilita' sono **priori miei**, non misure: lo dico dove le uso.
 
 ---
 
 ## 0. RISPOSTA IN 20 RIGHE
 
-1. **Ordine** (valore atteso di arrivare a una sedia / ore di PC, sez. 3): **(a) SupRev NAS H1 970913** >> **(d) C2C EURJPY** > **(c) SupRev 225JPY H2** > **(b) ORB_Ott D30EUR** > **(e) CrossEma oro K03**. Dopo il primo, i punteggi stanno entro un fattore 2: valgono come ordine di lancio, non come verdetto.
-2. **Costo totale**: le cinque *prime misure* fanno circa **42-66 minuti di PC piu' la corsa dello spread 225JPY (T1, durata `[NON MISURATO]`, tetto 240 min)**; con tutti i passi opzionali circa **2-2,5 ore**; se la passata singola di (a) e' lenta come nel caso peggiore, +~15-20 min. Tempi presi dai referti runner (sez. 6), quasi tutti misurati sul banco VPS in contesa; **fa eccezione R238** (44 min / 4 celle, misurato sul PC di backtest `DESKTOP-H4D7CAJ`). La velocita' di quel PC e' altrimenti `[NON MISURATA]`.
+**In parole semplici**: c'e' UNA sedia quasi pronta (il SupRev sul Nasdaq, `970913`): le manca un solo numero, quanto e' largo il suo stop rispetto allo spread. Lo si misura con UN backtest di 10-30 minuti sul PC di backtest. Gli altri quattro sono piu' lontani e si misurano dopo, in ordine.
+
+1. **Ordine** (valore atteso di arrivare a una sedia / ore di PC, sez. 3): **(a) SupRev NAS H1 970913** >> **(c) SupRev 225JPY H2** > **(d) C2C EURJPY** > **(b) ORB_Ott D30EUR** > **(e) CrossEma oro K03**. Dopo il primo, i punteggi stanno entro un fattore 2: valgono come ordine di lancio, non come verdetto. *(Corretto dal cancello il 06/10: (d) scende dietro (c) perche' l'effetto del buffer era stato letto dalla cella sbagliata, sez. 2 C7.)*
+2. **Costo totale**: le cinque *prime misure* fanno circa **42-66 minuti di PC per analogia, piu' la corsa dello spread 225JPY (T1, durata `[NON MISURATO]`, tetto 240 min)**; il **tetto** dichiarato dalle righe che gireranno davvero e' **~160 minuti + T1** (la riga `RIGA_R214EF_COSTTOCOST.txt`, con PASS, dichiara da sola tetto 90 per R214e+R214f: sul PC gira **un agente solo** e i tick EURJPY non sono mai stati contati li'). Con tutti i passi opzionali circa **2-2,5 ore** per analogia. Tempi presi dai referti runner (sez. 6), quasi tutti misurati sul banco VPS in contesa; **fa eccezione R238** (44 min / 4 celle, misurato sul PC di backtest `DESKTOP-H4D7CAJ`), l'unico tempo misurato su quel PC.
 3. **Prima misura da lanciare**: una passata singola a tick di `SupertrendReversal` su NASUSD H1 con la geometria 970913, due lati insieme (bozza R290a, sez. 7). Chiude il cancello di costo con una misura e fa da riproduzione (G0). 10-17 minuti (11 min a cella sul PC di backtest, R238; fino a ~30 se la passata singola e' piu' lenta). **Prima serve una versione NAS dello script `PASSATA_STOP_SUPREV.ps1`**, che oggi e' cablato su U30USD: e' codice nuovo e passa dai due strati.
 4. **Correzioni ai numeri di partenza** (sez. 2, nove righe); le quattro che pesano: R163a **e' gia' girato** (CSV in repo; 14 passate in 55-82 minuti, non "3-5"); il "28,7x" **non e' piu' il numero** (rivisto il 18/09 a 15,1x, coda 10,4x; sono due limiti inferiori che stanno ai due lati del 40); r125e **ha gia' fallito il suo stesso criterio scritto prima** (PF OOS sale monotono mentre n crolla); la **profondita' tick dell'oro e' misurata** (dal 10/07/2024) e copre la finestra di K03.
-5. **Una scoperta che cambia (d)**: i CSV r146a (tick, in repo) mostrano che il buffer dello stop abbassa DD e peggior giornata del C2C EURJPY senza toccare il PF OOS (DD OOS 12,11 -> 5,68-7,36; giornata -6,73 -> -2,51/-3,27). Nessuno l'ha mai messo ad asse sulla finestra lunga, che e' quella che boccia la sedia: bozza R290b, 1 minuto di tester.
+5. **Una scoperta che puo' cambiare (d), ma piu' piccola di come sembrava**: i CSV r146a (tick, in repo) mostrano che il buffer dello stop abbassa DD e peggior giornata del C2C EURJPY. **Dalla cella della sedia (buffer 0,2)**, non da 0,0: DD OOS 9,45 -> 5,68-7,36; giornata -4,00 -> -2,51/-3,27 (cioe' -18/-37%). Riportato in proporzione sul -8,02 della finestra lunga da' -5,0/-6,6: **al muro del -5%, non dentro**. E sul gemello GBPCAD (r146c) il buffer fa il **contrario** (DD OOS 6,19 -> 9,95). Nessuno l'ha mai messo ad asse sulla finestra lunga, che e' quella che boccia la sedia: bozza R290b, 1 minuto di tester.
 6. **Nessun candidato e' MORTO**: tutti e cinque restano "NON ANCORA MISURATO" (sez. 5): a ognuno manca almeno una casella del certificato.
 7. **Nessun candidato arriva a n >= 150 con un backtest**: tick veri dal 26/09/2024 (indici), 05/07/2024 (forex), 10/07/2024 (oro). Il merito resta **sospeso** per (a), (b), (c), (e); (d) ha n >= 150 solo a barre. "Sedia candidata al forward demo" vuol dire quindi: **rischio letto, costo misurato, merito dichiarato sospeso** (definizione in sez. 1, **non e' un testo firmato**).
 8. **Dubbi principali**: (i) le probabilita' sono giudizi miei; (ii) l'EA base `SupertrendReversal` e' identico all'Ottimizzato solo per **inferenza sul sorgente**: lo verifica G0, non io; (iii) il buffer 2253 non e' quello del preset in campo (3): la scelta e' di Claudio; (iv) 970913 e' stata tolta dal demo il 25/09 per firma di Claudio: riaccenderla e' una sua decisione.
@@ -46,11 +48,11 @@ SC-FD = 1, 3, 4, 5 **passati**; 2, 6 e 7 **dichiarati** (non passati o non misur
 |---|---|---|---|
 | C1 | (a) G5 propone "G0, R163a, R113, ~10 min"; la passata stop e' per Dow | **R163a e' gia' girato**: 4 notti del runner (17-20/09), uscita 0, **4914 / 4187 / 3357 / 3279 s** per 14 passate (3,9-5,9 min/passata, **55-82 min** in tutto); CSV IS/OOS in `risultati_prove/dal_vps/ABTG_SupRev_NAS_H1_Ottimizzato/`. G5 lo stimava "3-5 min" (sottostima da 11 a 27 volte) | `coda/referti/REFERTO_RUNNER_2026091[7-9]*.txt`, `..._20260920_*.txt` righe `r163a` |
 | C2 | (a) "ferma per costo stimato 28,7x" | il 28,7x (10/09, stop 51,65 idx, n=4) e' stato **rivisto il 18/09**: stop 27,10 idx (n=5) -> **15,1x** a spread 1,80, **10,4x** con la coda 2,60, sotto il pavimento duro 13,3x, **"NON PASSA, da confermare"**. Sono **limiti inferiori** (distanze realizzate dopo trailing/pareggio). I due stanno **dai due lati del 40**: a buffer 2253 danno 27,6x e 41,2x. Il numero vero e' `[NON MISURATO]` | `CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.412 e §E1; `prove/R163a_...txt` r.380-400 |
-| C3 | (a) "tre binari non riconciliati" | a **100k** due round indipendenti danno lo stesso n: **76 / 96** (R110 [LETTO], r163a [MISURATO]); a **10k** n e' 69-71 / 86-87 (R3, r127a). Il divario e' il difetto M45 (n dipende dal deposito), non tre binari indipendenti. Cambia la lettura, non il verdetto | G5 Y01; `LETTURA_CSV_..._B` 4.12 |
+| C3 | (a) "tre binari non riconciliati" | a **100k** due round indipendenti danno lo stesso n: **76 / 96** (R110 [LETTO], r163a [MISURATO]); a **10k** n e' 69-71 / 84-87 (R3, r127a; r127a OOS 84-87 riletto dal CSV dal cancello). Il divario e' il difetto M45 (n dipende dal deposito), non tre binari indipendenti. Cambia la lettura, non il verdetto | G5 Y01; `LETTURA_CSV_..._B` 4.12 |
 | C4 | (a) "28,7x ... misura diretta mai fatta; passata stop SupRev 15-25 min" | `PASSATA_STOP_SUPREV.ps1` misura `ABTG_SupertrendReversal` su **U30USD** con le ancore R243 e **richiede** il log `[STREV-IMBUTO]` (r.142: scarica il sorgente e controlla che lo contenga). L'EA 970913 **non ha** IMBUTO. Per NAS serve una versione nuova | `righe/PASSATA_STOP_SUPREV.ps1` r.60-66, 142 |
 | C5 | (b) "celle scelte DOPO aver visto i numeri" | e' vero per la **scelta di 0,15 / 0,20 fra le 5 celle**, ma la **griglia** (0,15 = soglia derivata dal cancello di costo) era scritta prima. E soprattutto la prova **aveva scritto il proprio falsificatore**: "se il PF sale in modo MONOTONO fino a 0,20 mentre n crolla, NON e' un edge: e' selezione di campione". Il PF OOS fa 0,997 / 0,997 / 0,999 / 1,152 / 1,372 mentre n fa 128 / 128 / 118 / 88 / 71. **Il falsificatore e' scattato.** L'ipotesi alternativa ("le giornate a range basso costano troppo di spread") prevede un rialzo anche in IS: l'IS non lo mostra (0,15 sta sotto 0,00) | `prove/R125e_...txt` r.55-95; CSV `dal_vps/ABTG_ORB_Ottimizzato/..._r125e.csv` |
 | C6 | (e) "profondita' tick dell'oro non verificata" | **misurata**: `XAUUSD: ticks data begins from 2024.07.10` (giornale del tester di R268a, 28/09). R86 parte dal 2024.09.26: **la finestra di K03 e' tutta dentro i tick veri**. Il `[T nominale]` di G6b nasce dal passo 0 di R86, scritto prima di quella misura | `risultati_archivio/ROUND_CORTI_D_2026-09-28/RIEPILOGO_ROUND_CORTI_D.txt` r.33 |
-| C7 | (d) "NO PER RISCHIO" per il C2C | vero **per la cella exit 2 a buffer 0,2**. Ma i CSV r146a (tick) in repo mostrano l'asse `InpSLBufferATR` 0,0-0,8: DD OOS 12,1063 -> 5,6764, giornata OOS -6,7316 -> -2,5110, PF OOS 1,74-2,11, n 62-64. G4 lo dava "CSV non nel repo" | `dal_vps/ABTG_CostToCost/..._r146a.csv` `[MISURATO]` |
+| C7 | (d) "NO PER RISCHIO" per il C2C | vero **per la cella exit 2 a buffer 0,2**. Ma i CSV r146a (tick) in repo mostrano l'asse `InpSLBufferATR` 0,0-0,8. **Letto dalla cella della sedia (0,2)**: DD OOS 9,4547 -> 7,3634 / 5,6764 (a 0,4 / 0,8), giornata OOS -4,0041 -> -3,2700 / -2,5106, PF OOS 1,74-2,11, n 62-64 (il confronto da 0,0, 12,1063 -> 5,6764, parte da una cella che NON e' la sedia e gonfia l'effetto: corretto dal cancello, classe 1148). **Gemello GBPCAD (r146c, tick)**: il buffer fa il contrario, DD OOS 6,19 -> 9,95 e PF OOS 1,44 -> 0,92 da 0,2 a 0,8. G4 lo dava "CSV non nel repo" | `dal_vps/ABTG_CostToCost/..._r146a.csv` `[MISURATO]` |
 | C8 | (c) "scala dei P/L non verificata" | confermato e **peggio**: dei 7 valori di r166a lo stop di 225JPY e' noto da **una gamba** (477 idx, n=1) e lo spread da **una lettura fuori sessione Tokyo** (35 pt): 13,6x. La scala (+1461 su 100k in 21 mesi a 0,65% = 18,5 EUR a deal = 0,03 R) fa pensare a lotto troncato `[IPOTESI]` | `CANCELLO_COSTO_FLOTTA` r.487; `LETTURA_..._A` D7 |
 | C9 | il "5,5 min/passata del mandato" risulta "non in repo" (`MAPPA_COSTO_SIMBOLI_TF` §1) | **ritrovato**: R238 (NASUSD H1, tick, 21 mesi, 8 passate = 2 round x 2 celle x 2 finestre) ha girato sul **PC di backtest `DESKTOP-H4D7CAJ`**, 22:10 -> 22:54, **44 minuti = 5,5 min/passata = 11 min per cella a finestra intera**. E' l'unico tempo di tester misurato **su quella macchina** per questa famiglia | `REFERTO_R238_2026-09-23.md` r.6 |
 
@@ -63,8 +65,8 @@ SC-FD = 1, 3, 4, 5 **passati**; 2, 6 e 7 **dichiarati** (non passati o non misur
 | # | candidato | P(SC-FD) e come la compongo | ore PC (prime misure) | P / ore | nota |
 |---|---|---|---:|---:|---|
 | 1 | **(a) SupRev NAS H1 970913** | 0,5 (cancello di costo passa a un buffer <= 4503) x 0,85 (G0 riproduce, nessun blocco nuovo) x 0,7 (merito sospeso accettato + firma) = **0,30** | 0,17-0,28 | **~1,4** | unico con DD ~1% e 16 celle sopra 1 in IS e OOS |
-| 2 | **(d) C2C EURJPY** | 0,35 (rischio passa sulla finestra lunga) x 0,5 (costo non blocca) x 0,4 (tick: IS 0,89-0,98, un regime) x 0,9 = **0,06** | 0,13-0,20 | ~0,3 | unico con n >= 150 in IS **e** OOS (a barre) |
-| 3 | **(c) SupRev 225JPY H2** | 0,4 (spread orario basso abbastanza) x 0,5 (OOS regge) x 0,6 (scala/R4 ok) x 0,8 = **0,10** | 0,30-0,45 + T1 `[NM]` | ~0,2 | dipende da due misure di costo oggi quasi assenti |
+| 2 | **(c) SupRev 225JPY H2** | 0,4 (spread orario basso abbastanza) x 0,5 (OOS regge) x 0,6 (scala/R4 ok) x 0,8 = **0,10** | 0,30-0,45 + T1 `[NM]` | ~0,2 | dipende da due misure di costo oggi quasi assenti |
+| 3 | **(d) C2C EURJPY** | **0,2** (rischio passa sulla finestra lunga; era 0,35, **corretto dal cancello**: dalla cella 0,2 la proporzione a tick porta la giornata a -5,0/-6,6, al muro, e il gemello GBPCAD va al contrario) x 0,5 (costo non blocca) x 0,4 (tick: IS 0,89-0,98, un regime) x 0,9 = **0,036** (sotto la risoluzione) | 0,13-0,20 per analogia; tetto della riga R214EF 1,5 h | ~0,2 (analogia) / 0,02 (tetto) | unico con n >= 150 in IS **e** OOS (a barre); fra i sotto-soglia passa davanti a (b) per lo spareggio "ha una misura che puo' ribaltare il verdetto" (R290b) |
 | 4 | **(b) ORB_Ott D30EUR** | **0,02** (falsificatore scattato, PF aggregato 1,087) | 0,05-0,08 | 0,3 (sotto la risoluzione) | si chiude la casella TF e basta |
 | 5 | **(e) CrossEma oro K03** | **0,04** (DD OOS 12,30% a 1%; PF dentro il rumore; sorelle d'oro a 22 anni 25-46%) | 0,05-0,08 il primo passo; 0,45-0,67 tutto | 0,07 (percorso intero) | il primo passo e' un interruttore economico |
 
@@ -92,16 +94,16 @@ n = **76 (IS) e 96 (OOS) su tutte e sette le celle**. Escursione PF IS 0,110, OO
 
 **Il numero che MANCA e perche' blocca**: lo **stop iniziale mediano all'ingresso**, in punti indice, e il suo rapporto con lo spread dell'ora. Senza, il cancello C3 e' "sospeso" e la sedia non e' SC-FD. Le due stime in repo (27,10 e 51,65 idx) sono limiti inferiori e a buffer 2253 danno rapporti 27,6 e 41,2: **stanno dalle due parti del 40**, quindi non decidono. Secondari e **non comprabili con un backtest**: n >= 150 posizioni (96 deal in OOS; le posizioni sono `NON LEGGIBILI` nei CSV; tick dal 26/09/2024); regime `NON MISURATO` (laterale 2015-16 su feed esterno: PF 0,664 su 55 uscite; il motore fa 13,3 op/anno su `_EXT` contro 77 sul nativo).
 
-**Via piu' corta**: **una** passata singola a tick, 2024.09.26-2026.06.30, 100k, **due lati insieme**, buffer 2253, che stampa per ogni ingresso `LONG|SHORT mercato <lot> lot @ <entry> SL <sl>`. Poiche' n e' invariante lungo l'asse, le entrate sono **quasi certamente** le stesse (non provato: due entrate scambiate darebbero lo stesso n); per le entrate condivise lo stop a un altro buffer b e' `stop(2253) + (b - 2253)/100` **per algebra** (`risk = baseStop + buf`, sorgente r.248/251): una passata copre le sette celle, etichettate `DERIVATO`. Ingredienti gia' in repo: lo spread orario (`spread_flotta/spread_orario_NASUSD.csv`, 156,1 M tick); il lettore dei log (`PASSATA_STOP_SUPREV.ps1`, da adattare). Bonus: il conteggio delle righe "mercato" da' **le posizioni** (colonna `NON LEGGIBILE` oggi). Non serve ripetere R163a.
+**Via piu' corta**: **una** passata singola a tick, 2024.09.26-2026.06.30, 100k, **due lati insieme**, buffer 2253, che stampa per ogni ingresso `LONG|SHORT mercato <lot> lot @ <entry> SL <sl>`. Poiche' n e' invariante lungo l'asse, le entrate sono **quasi certamente** le stesse (non provato: due entrate scambiate darebbero lo stesso n); per le entrate condivise lo stop a un altro buffer b e' `stop(2253) + (b - 2253)/100` **per algebra** (`risk = baseStop + buf`, sorgente r.248/251): una passata copre le sette celle, etichettate `DERIVATO`. Ingredienti gia' in repo: lo spread orario (`spread_flotta/spread_orario_NASUSD.csv`, 156,1 M tick); il lettore dei log (`PASSATA_STOP_SUPREV.ps1`, da adattare). Bonus: il conteggio delle righe "mercato" da' **gli ingressi a mercato (la prima tranche di ogni segnale)**; le tranche pendenti eseguite (`InpUsePending`, 2/3) sono posizioni in piu' che dal log "mercato" **non** si contano: le posizioni si leggono dal per-trade o dal `.htm` (colonna `NON LEGGIBILE` oggi nei CSV). Non serve ripetere R163a.
 
 **Costo**: tester 7,6-15,3 min per una cella a finestra intera (**R238 sul PC di backtest: 44 min / 4 celle = 11 min**; sul banco VPS r163a: 3279-4914 s / 7 celle = 7,8-11,7 min; r127a: 4120-8245 s / 9 celle = 7,6-15,3 min) + avvio/chiusura ~2 min = **10-17 min**. Una passata **singola** potrebbe costare di piu' di una cella di round (agenti paralleli nell'ottimizzazione): l'autore della passata U30USD stima 7,5-12,5 min a passata, dopo aver sbagliato di 7-12 volte la prima stima (2 min); tetto prudente **~30 min**, timeout dello script 60. Opzionali: R113 coda "feed o epoca?" (3 celle su `NASUSD_EXT`, ~2 min, **stima di G5, non misurata**); R120a NASUSD (4 file, trailing/flip/frazione mai ad asse, ~31-47 min per analogia r163a) **solo se il costo non passa**, per chiudere la casella 3.
 
 **Attesa scritta prima** (dentro la bozza R290a): stop di base mediano 70-165 idx (ATR(14) H1 del Nasdaq 80,2 `[INFERITO]`, mai misurato), quindi 93-188 a buffer 2253; n entrate 75-172; G0: n deal 172 +/- 3, profitto 4699 +/- 4% (r163a cella 2253, IS + OOS). **Contro-esempio**: l'ipotesi alternativa "lo stop vero e' come le gambe realizzate" da' rapporti 27,6 (NON PASSA) o 41,2 (FRAGILE alto); la mia da' 51-104. **Se la mediana di stop(2253) misurata cade sotto 65, la mia ipotesi e' smentita.**
 
-**Soglie congelate**: C3 PASSA se la mediana di `stop_i / spread_h(i)` (spread = mediana dell'ora server dell'ingresso) >= 40; FRAGILE 36-44; NON PASSA < 36. Equivalenti sullo stop di base (spread 1,80): >= 49,5 / 38,2 / 27,0 idx a buffer 2253 / 3378 / 4503; (spread 2,40): 73,5 / 62,2 / 51,0. Pavimento duro: stop >= 34,6 idx (13,3 x 2,60). Per stress, non per cancello: spread equipesato 2,40 e P95.
+**Soglie congelate**: sulla mediana di `stop_i / spread_h(i)` (spread = mediana dell'ora server dell'ingresso): **PASSA se >= 44** (sopra la banda); **FRAGILE se 36-44** (la banda CONTIENE il 40: non decide, non promuove, e non e' SC-FD); **NON PASSA se < 36**. *(Corretto dal cancello: la stesura diceva "PASSA >= 40; FRAGILE 36-44", due bande sovrapposte fra 40 e 44; si tiene la lettura che il piano stesso usa nel contro-esempio, "41,2 = FRAGILE alto", cioe' la piu' severa.)* Equivalenti al **40** sullo stop di base (spread 1,80): 49,5 / 38,2 / 27,0 idx a buffer 2253 / 3378 / 4503; (spread 2,40): 73,5 / 62,2 / 51,0. Pavimento duro: stop >= 34,6 idx (13,3 x 2,60, la mediana dell'ora peggiore, ore 09 e 13). Per stress, non per cancello: spread equipesato 2,40 e P95 di tutte le ore 2,70 (riletto da `spread_orario_NASUSD.csv`).
 
 **Verdetti possibili**
-- **SOPRA** (C3 passa a un buffer <= 4503 con G0 verde): la sedia ha rischio ~1%, PF 1,30-1,72 su 16 passate di cella (a 100k 1,43-1,62), costo misurato. **Diventa SC-FD**: merito sospeso dichiarato (96 deal OOS), regime NM, frequenza di famiglia da misurare; **riaccenderla e il buffer da usare sono firme di Claudio**. Il buffer si sceglie **al centro** dell'altopiano che passa il cancello, mai al bordo: se passa solo a 4503 (bordo; oltre "e' un altro motore", r163a r.514-520) **non e' un centro** e si scrive FRAGILE.
+- **SOPRA** (C3 >= 44 a un buffer <= 4503 con G0 verde): la sedia ha rischio ~1%, PF 1,30-1,72 su 16 passate di cella (a 100k 1,43-1,62), costo misurato. **Diventa SC-FD**: merito sospeso dichiarato (96 deal OOS), regime NM, frequenza di famiglia da misurare; **riaccenderla e il buffer da usare sono firme di Claudio**. Il buffer si sceglie **al centro** dell'altopiano che passa il cancello, mai al bordo: se passa solo a 4503 (bordo; oltre "e' un altro motore", r163a r.514-520) **non e' un centro** e si scrive FRAGILE.
 - **FRAGILE** (36-44): non decide; la via e' lo spread di coda o altre ore, non un'altra griglia.
 - **SOTTO** (< 36 a ogni buffer <= 4503): **ESCLUSA PER COSTO con misura diretta**, ma **non MORTA**: la casella 3 resta aperta (R120a mai girato).
 - **NON MISURATO**: G0 fuori banda (l'EA base non riproduce l'Ottimizzato) o `ESITO LATO: NON AFFIDABILE`: nessun numero di stop si usa.
@@ -110,18 +112,18 @@ n = **76 (IS) e 96 (OOS) su tutte e sette le celle**. Escursione PF IS 0,110, OO
 
 ### 4.2 (d) C2C EURJPY H4, sedia `772361` (`ABTG_CostToCost`)
 
-**Stato `[MISURATO]`**: r127c (OHLC [B], 2020.01.01-2026.06.30, 100k): IS 1,17686 / n 153 / DD 10,9946 / giornata -4,2160; **OOS 1,52341 / n 242 / DD 12,2627 / giornata -8,0159**. r146a (tick, 21 mesi, 100k, asse `InpSLBufferATR`): IS n 48-49 PF 0,77-1,02 (0,89-0,98 a 0,4-0,7), **OOS n 62-64 PF 1,74-2,11**, DD OOS 5,68-12,11, giornata OOS -2,51/-6,73. Regimi `_EXT` `[LETTO]`: crollo 2020 PF 0,025 (n 23, DD 14,83%); orso 2022 PF 2,654 ma **giornata -10,07%**. Forward demo: 7 posizioni, PF 0,19, -134,46 EUR (campione sottile). Costo `[LETTO]`: 73,0x senza commissione, **25,6x con commissione**: la lettura da usare e' una decisione del cancello, non mia.
+**Stato `[MISURATO]`**: r127c (OHLC [B], 2020.01.01-2026.06.30, 100k): IS 1,17686 / n 153 / DD 10,9946 / giornata -4,2160; **OOS 1,52341 / n 242 / DD 12,2627 / giornata -8,0159**. r146a (tick, 21 mesi, 100k, asse `InpSLBufferATR`): IS n 48-49 PF 0,77-1,02 (0,89-0,98 a 0,4-0,7), **OOS n 62-64 PF 1,74-2,11**, DD OOS 5,68-12,11, giornata OOS -2,51/-6,73 su tutto l'asse; **alla cella della sedia (0,2)**: DD OOS 9,45, giornata OOS -4,00, e da li' a 0,4-0,8: DD 7,36-5,68, giornata -3,27/-2,51. **Gemello GBPCAD r146c (tick)**: da 0,2 a 0,8 il DD OOS SALE 6,19 -> 9,95 e il PF OOS scende 1,44 -> 0,92: l'effetto del buffer **non e' generale**. Regimi `_EXT` `[LETTO]`: crollo 2020 PF 0,025 (n 23, DD 14,83%); orso 2022 PF 2,654 ma **giornata -10,07%**. Forward demo: 7 posizioni, PF 0,19, -134,46 EUR (campione sottile). Costo `[LETTO]`: 73,0x senza commissione, **25,6x con commissione**: la lettura da usare e' una decisione del cancello, non mia.
 
 **Il numero che MANCA**: DD e peggior giornata **con il buffer 0,4-0,8 sulla finestra lunga 2020-2026**. E' la finestra che boccia la sedia (il VECCHIO giudica il rischio) e il buffer non ci e' mai stato messo ad asse. Blocca perche' senza quel numero "NO PER RISCHIO" e' vero per una cella (buffer 0,2) e non per il motore.
 
 **Via piu' corta**: **tre file, tutti pronti o quasi**. (1) `R214e` (tick, tre uscite exit 0/1/2) e `R214f` (OHLC lungo, tre uscite): **scritti il 22/09, riga `RIGA_R214EF_COSTTOCOST.txt` con PASS dello strato 2 del 24/09** `[LETTO REGISTRO_TEST.md (radice) r.150]`, **mai girati** (nessun CSV in `dal_vps`, nessuna riga in CODA); attese e soglie gia' congelate dentro i file, compresa "la cella exit 2 e' attesa in bocciatura su C7". (2) **R290b nuovo** (bozza sez. 7): buffer 0,2 / 0,4 / 0,6 / 0,8 sulla finestra di r127c, exit 2 pinnato, 4 celle.
 
-**Costo**: dichiarato tetto 18 min per R214e + R214f (12 passate) `[LETTO CHI_E_PIU_VICINO r.216]`. Analoghi misurati: r146a 9 celle in 228-394 s (25-44 s/cella), r127c 8 celle in 51-99 s (6-12 s/cella): **R214e ~1,3-2,2 min, R214f ~0,3-0,6, R290b ~0,4-0,8 di tester, piu' ~2 min di avvio per job = 8-12 min**.
+**Costo**: `CHI_E_PIU_VICINO` r.216 scrive "tetto 18 min", ma **la riga che gira davvero** (`RIGA_R214EF_COSTTOCOST.txt`, pin `529fefa0`, PASS 24/09) dichiara **tetto TOTALE 90 minuti** (R214f <= 14, R214e 7-76: sul PC gira un agente solo e i tick EURJPY li' non sono mai stati contati) e "non fermarla prima di 120": **vale la riga** (corretto dal cancello, classe 1149). Analoghi misurati sul banco VPS: r146a 9 celle in 228-394 s (25-44 s/cella), r127c 8 celle in 51-99 s (6-12 s/cella): **R214e ~1,3-2,2 min, R214f ~0,3-0,6, R290b ~0,4-0,8 di tester, piu' ~2 min di avvio per job = 8-12 min per analogia; tetto ~93 min**.
 
-**Attese scritte prima** (dentro R290b): n invariante (IS 153 +/- 3, OOS 242 +/- 5); DD OOS in calo 7,0-10,5; giornata OOS da -8,02 a -3,5 / -5,5; PF +/- 0,15; canarino di manopola inerte (< 3% relativo a 0,4 = non ha morso). **Contro-esempio**: se la giornata -8,02 non si muove (resta -7 / -9 a tutte le celle) e' un gap OHLC, non una funzione dello stop: **NO PER RISCHIO confermato con una misura in piu'**. Se si muove solo a 0,8, e' un picco.
+**Attese scritte prima** (dentro R290b; **riscritte dal cancello prima di qualunque numero**, perche' la prima stesura derivava la giornata dalla cella 0,0): n invariante (IS 153 +/- 3, OOS 242 +/- 5); DD OOS in calo 7,0-10,5; giornata OOS (colonna vecchia, quella dell'ancora) da -8,02 a **-5,0 / -6,6** (proporzione -18/-37% misurata a tick dalla cella 0,2); PF +/- 0,15; canarino di manopola inerte (< 3% relativo a 0,4 = non ha morso). **Quindi l'attesa e' che il muro -5,00 NON sia passato su 3 celle contigue.** **Contro-esempi**: (1) se la giornata -8,02 non si muove (resta -7 / -9 a tutte le celle) e' un gap OHLC, non una funzione dello stop: **NO PER RISCHIO confermato con una misura in piu'**; (2) se si muove solo a 0,8, e' un picco; (3) **l'ipotesi alternativa "l'effetto del buffer e' un fatto di EURJPY 2024-26 e non un meccanismo"** (il gemello GBPCAD va al contrario) prevede un IS 2020-2022 (finestra indipendente da r146a) che NON migliora: per questo G-RISCHIO lo chiede in IS **e** in OOS.
 
 **Verdetti possibili**
-- **SOPRA rischio** (DD <= 9,0 e giornata FTMO > -5,00 in IS e OOS su >= 3 celle contigue): il rischio e' assolto sulla finestra lunga. **Non basta**: resta il costo (25,6x o 73,0x), l'IS tick sotto 1 (0,89-0,98, n 48) e il regime. **SC-FD solo se** anche R214e tiene OOS PF >= 1,10 a tick e il cancello di costo e' letto SOPRA; **la taglia e' di Claudio**.
+- **SOPRA rischio** (DD <= 9,0 e peggior giornata > -5,00 **su tutte e due le colonne**, "Peggior Giornata %" e "Peggior Giornata FTMO %", in IS e OOS su >= 3 celle contigue; le due colonne non sono ordinate fra loro, R214f D7-ter): il rischio e' assolto sulla finestra lunga. **Non basta**: resta il costo (25,6x o 73,0x), l'IS tick sotto 1 (0,89-0,98, n 48) e il regime. **SC-FD solo se** anche R214e tiene OOS PF >= 1,10 a tick e il cancello di costo e' letto SOPRA; **la taglia e' di Claudio**.
 - **SOTTO**: giornata ferma a -7/-9: NO PER RISCHIO con misura; si archivia **la cella**, e il motore resta NON ANCORA MISURATO (casella 3: R214e/f).
 - **NON MISURATO**: l'ancora 0,2 non riproduce r127c alla quinta cifra.
 
@@ -130,6 +132,8 @@ n = **76 (IS) e 96 (OOS) su tutte e sette le celle**. Escursione PF IS 0,110, OO
 ---
 
 ### 4.3 (c) SupRev 225JPY H2, sedia `770901` (`ABTG_SupertrendReversal`; la prova r166a la nomina cosi')
+
+**Stato di campo**: `770901` e' stata **tolta dal 100k `50504263` il 25/09** per firma di Claudio (`SOSPENSIONE_SEDIE_DEMO_2026-09-25.md`): riaccenderla e' una sua decisione, come per `970913`.
 
 **Stato `[MISURATO]`**: r166a (tick, 2024.09.26-2026.06.30 **intera, FrazioneIS 1,0: nessun OOS**, 100k, **0,65%**, asse `InpSLBufferPips` 3-423 passo 70 in punti Nikkei):
 
@@ -170,7 +174,7 @@ n = **76 (IS) e 96 (OOS) su tutte e sette le celle**. Escursione PF IS 0,110, OO
 
 **Perche' non si allarga**: (1) il PF **aggregato** della cella senza filtro e' **1,087 < 1,10** su campione pieno: la regola del 19/08 vieta di allargare sui parametri d'ingresso; (2) il **falsificatore scritto nel file prima dei numeri** e' scattato (PF OOS monotono in salita mentre n crolla 128 -> 71; in IS non c'e' monotonia: 1,256 / 1,256 / 1,360 / 1,207 / 1,222); (3) la differenza fra aggregato filtrato e non (1,172 contro 1,087 = 0,085) e' **dentro il rumore di casa A3 = 0,147** `[LETTO R270]`; (4) a spread P95 (2,70) la soglia del costo richiederebbe range >= 0,307%, fuori griglia.
 
-**Il numero che MANCA**: nessuno che un backtest possa comprare per rendere questa cella una sedia: n < 150 in entrambe le finestre e il PF filtrato non e' distinguibile da 1,087. Resta **una casella del certificato**: il **TF** (`InpExecTF` e' sempre 5). **Costo**: 3 celle (1 / 5 / 15) con `MinRangePct` pinnato a **0,15** (la soglia derivata dal cancello, non il picco 0,20): r125e 5 celle in 82-123 s -> circa 16-25 s/cella `[DERIVATO]`, **3-5 min con l'avvio**. **Non ho scritto la bozza** (fuori dai primi 2). **Verdetto atteso**: SOTTO o FRAGILE; **SC-FD: nessun percorso** finche' il PF aggregato e' < 1,10. Con la casella TF chiusa il certificato si compila e il verdetto diventa **MORTO CON CERTIFICATO** o resta NON ANCORA MISURATO se qualche altra casella apre.
+**Il numero che MANCA**: nessuno che un backtest possa comprare per rendere questa cella una sedia: n < 150 in entrambe le finestre e il PF filtrato non e' distinguibile da 1,087. Resta **una casella del certificato**: il **TF** (`InpExecTF` e' sempre 5). **Costo**: 3 celle (1 / 5 / 15) con `MinRangePct` pinnato a **0,15** (la soglia derivata dal cancello, non il picco 0,20): r125e 5 celle in 82-260 s (sette notti; 260 e' la notte del 15/09) -> circa 16-52 s/cella `[DERIVATO]`, **3-5 min con l'avvio**. **Non ho scritto la bozza** (fuori dai primi 2). **Verdetto atteso**: SOTTO o FRAGILE; **SC-FD: nessun percorso** finche' il PF aggregato e' < 1,10. Con la casella TF chiusa il certificato si compila e il verdetto diventa **MORTO CON CERTIFICATO** o resta NON ANCORA MISURATO se qualche altra casella apre.
 
 ---
 
@@ -178,9 +182,9 @@ n = **76 (IS) e 96 (OOS) su tutte e sette le celle**. Escursione PF IS 0,110, OO
 
 **Stato `[MISURATO]`** (`r86_r87_r89_csv/ABTG_CrossEma_XAUUSD_{IS,OOS}_r86coro.csv`, 10k, 1%, EMA 9/21, filtro EMA200, SLatr 1,5, TP_RR 2,0, senza parziale: **deal = posizioni**): **IS PF 1,10689 / n 84 / DD 10,9219 / +619,57; OOS PF 1,18324 / n 119 / DD 12,3006 / +1344,03**. Delle 8 celle CrossEma, **7 sfondano il muro DD 15% di R86** `[LETTO G6b]`; K03 e' l'unica dentro quel muro, ma **sopra il 10% a 1%**: alla taglia 1% fallirebbe il cancello 1 di sez. 1, a taglia ridotta no (**taglia: di Claudio**). Margine PF OOS 0,183 contro il rumore di casa A3 = 0,147 (trattato come scarto tipico, `[INTERPRETAZIONE MIA]`): **z = 1,25**; IS 0,107: z = 0,73.
 
-**I numeri che MANCANO**: (1) **DD sui 22 anni a barre** dell'oro (il VECCHIO giudica il rischio): mai misurato per CrossEma; le sorelle sull'oro li hanno: EMA200_Ott **45,91%** (contro 4,40% promesso), GoldenCross **25,18%** a 1%, MaxMin oro **10,30% a 0,5%**; (2) n >= 150 per finestra: 84 / 119; (3) tre caselle del certificato: uscita (`InpTP_RR`, `InpSLatr`, trailing, parziale, BE mai ad asse), TF (solo H1), gemelli (XAU e D30EUR; D30EUR K07: OOS 1,021, DD IS 18,42).
+**I numeri che MANCANO**: (1) **DD sui 22 anni a barre** dell'oro (il VECCHIO giudica il rischio): mai misurato per CrossEma; le sorelle sull'oro li hanno: EMA200_Ott **45,91%** (contro 4,40% promesso), GoldenCross **25,18%** a 1%, MaxMin oro **10,30% a 0,5%** (R268d: G0d verde, ma il round R268 e' dichiarato "si scrive, NON si legge" per il G0 di R268b rosso: qui vale come priore, non come misura); (2) n >= 150 per finestra: 84 / 119; (3) tre caselle del certificato: uscita (`InpTP_RR`, `InpSLatr`, trailing, parziale, BE mai ad asse), TF (solo H1), gemelli (XAU e D30EUR; D30EUR K07: OOS 1,021, DD IS 18,42).
 
-**Via piu' corta, a due passi**. **Passo 1 (interruttore)**: K03 invariata su **XAUUSD H1 a barre dal 2004.06.11 al 2026.06.30** (M1 gold dal 2004.06.11 per il giornale di R268d): una cella, 2 passate. Costo per analogia **r127b** (XAUUSD H4, 2004-2026, 12 celle in 617-1187 s = 51-99 s/cella): **1-3 min con l'avvio ~3-5 min**. **Passo 2**, solo se DD 22 anni <= 10% a 1%: TF (H2, H4, M30), gemelli e un asse d'uscita alla volta, **~25-35 min** `[LETTO G6b; R86: 1,6-2,2 min/file XAU, 0,5-0,6 D30EUR]`.
+**Via piu' corta, a due passi**. **Passo 1 (interruttore)**: K03 invariata su **XAUUSD H1 a barre dal 2004.06.11 al 2026.06.30** (il giornale di R268d dice "history begins from 2004.06.11", **ma la prima operazione di R268d e' del 2004.11.17**: lo storico M1 del PC non arriva davvero al giugno 2004, e la finestra vera si dichiara dalla prima operazione): una cella, 2 passate. Costo per analogia **r127b** (XAUUSD H4, 2004-2026, **7 celle** (`InpSLLookback` 1-13 passo 2, `controlla_prova`) in 617-1187 s = 88-170 s/cella; corretto dal cancello, la stesura diceva 12): **1,5-3 min, con l'avvio ~3,5-5 min**. **Passo 2**, solo se DD 22 anni <= 10% a 1%: TF (H2, H4, M30), gemelli e un asse d'uscita alla volta, **~25-35 min** `[LETTO G6b; R86: 1,6-2,2 min/file XAU, 0,5-0,6 D30EUR]`; ogni asse con IS/OOS, cella al **centro** dell'altopiano, e la cella scelta riletta sui 22 anni a barre per il rischio (regola 19/08: ogni allargamento si paga con una prova fuori campione o di regime).
 
 **Attesa scritta prima**: DD 22 anni **> 15%** a 1% (le tre sorelle d'oro stanno fra 10,3% a mezzo punto e 45,9%); P(<= 10%) = 0,1. **Contro-esempio**: se il DD 22 anni uscisse <= 10%, la lettura facile sarebbe "rischio assolto": **sarebbe falsa da sola**, perche' le 22 anni a barre hanno PF screening e `[T nominale]` per il solo oro prima del 2024. **Soglie**: DD 22 anni <= 10,0 a 1% e peggior giornata > -5,0.
 
@@ -204,7 +208,7 @@ Nessun candidato e' MORTO. Se una misura di questo piano dice SOTTO, il verdetto
 
 ## 6. COSTO IN TEMPO MACCHINA, CON LA FONTE
 
-Tutti i tempi: `REFERTO_RUNNER_*.txt` (righe `ESEGUITO in N s`), sul **banco VPS `C:\MT5_Backtest`** durante il runner delle 03:30, **macchina in contesa** (le notti piu' recenti sono le piu' veloci). Il **PC `DESKTOP-H4D7CAJ` e' `[NON MISURATO]`**: leggere come +/- 50%.
+Tempi: `REFERTO_RUNNER_*.txt` (righe `ESEGUITO in N s`, riletti dal cancello il 06/10: r163a 4914/4187/3357/3279, r127a 4120-8245, r125e 82-260, r166a 726-1216, r127c 51-99, r146a 228-394, r127b 617-1187), sul **banco VPS `C:\MT5_Backtest`** durante il runner delle 03:30, **macchina in contesa** (le notti piu' recenti sono le piu' veloci). Sul **PC `DESKTOP-H4D7CAJ`** c'e' **una sola misura** (R238, 5,5 min/passata, SupRev NASUSD H1 a tick, un lato) e il PC gira **un agente solo** (dichiarato in `RIGA_R214EF_COSTTOCOST.txt`): per R238 contro r163a il ritmo a passata e' simile (5,5 contro 3,9-5,9), per gli altri EA leggere come +/- 50% e **vale il tetto delle righe**.
 
 | misura | minuti di tester | + avvio (~2 min/job) | fonte dell'analogo |
 |---|---:|---:|---|
@@ -214,15 +218,15 @@ Tutti i tempi: `REFERTO_RUNNER_*.txt` (righe `ESEGUITO in N s`), sul **banco VPS
 | (d) R214e (tick, 3 celle) | 1,3-2,2 | | r146a 9 celle in 228-394 s |
 | (d) R214f (OHLC, 3 celle) | 0,3-0,6 | | r127c 8 celle in 51-99 s |
 | (d) R290b (OHLC, 4 celle) | 0,4-0,8 | | r127c idem |
-| (d) totale | 2-4 | **8-12** (tetto dichiarato 18) | |
+| (d) totale | 2-4 | **8-12** per analogia; **tetto ~93** (90 della riga R214EF con PASS + R290b) | la riga R214EF, non `CHI_E_PIU_VICINO` (che scriveva 18) |
 | (c) T1 spread 225JPY | `[NON MISURATO]` (tetto 240) | | riga `..._TRANCHE_...` |
 | (c) passata stop 225JPY | 2-3 | 4-5 | r166a 726-1216 s / 7 celle |
 | (c) R166b WF 7 celle | 12-20 | 14-22 | r166a |
-| (b) TF 3 celle | ~1 | 3-5 | r125e 82-123 s / 5 celle |
-| (e) passo 1, 22 anni a barre | 1-3 | 3-5 | r127b 617-1187 s / 12 celle |
+| (b) TF 3 celle | ~1-2,6 | 3-5 | r125e 82-260 s / 5 celle |
+| (e) passo 1, 22 anni a barre | 1,5-3 | 3,5-5 | r127b 617-1187 s / 7 celle |
 | (e) passo 2 (opz.) | 25-35 | | `REFERTO_R88.txt`: 1,6-2,2 min/file XAU |
 
-**Totale prime misure**: 10-17 + 8-12 + (4-5 + 14-22) + 3-5 + 3-5 = **42-66 min + T1** (fino a ~85 se la passata singola e' lenta come nel caso peggiore). **Con tutti gli opzionali**: + 2 + 33-49 + 25-35 = circa **100-150 min (1,7-2,5 h) + T1**. Il lancio non e' parallelizzabile: MT5 e' un solo terminale e il tester usa tutte le CPU (incidente del 21/09: **mai sul VPS**).
+**Totale prime misure**: 10-17 + 8-12 + (4-5 + 14-22) + 3-5 + 3,5-5 = **42-66 min + T1 per analogia** (fino a ~85 se la passata singola e' lenta come nel caso peggiore). **Tetto dalle righe**: 32 (a, tetto 30 + avvio) + 93 (d) + 27 (c) + 5 (b) + 5 (e) = **~160 min + T1** (ricalcolato dal cancello). **Con tutti gli opzionali**: + 2 + 33-49 + 25-35 = circa **100-150 min (1,7-2,5 h) + T1**. Il lancio non e' parallelizzabile: MT5 e' un solo terminale e il tester usa tutte le CPU (incidente del 21/09: **mai sul VPS**).
 
 ---
 
@@ -284,21 +288,26 @@ Entrambe sono **bozze, NON passate dal cancello**. Hanno superato `controlla_pro
 #  ATTESA, SCRITTA PRIMA DEI NUMERI
 #    Mediana dello stop DI BASE: 70-165 idx, quindi 93-188 a buffer 2253.
 #    Fonte: ATR(14) H1 del Nasdaq 80,2 idx [INFERITO: nessun ATR misurato
-#    su NASUSD, CANCELLO_COSTO §C]; lo stop e' l'estremo di 5 barre H1 o la
+#    su NASUSD, CANCELLO_COSTO par. C]; lo stop e' l'estremo di 5 barre H1 o la
 #    linea Supertrend, quindi attorno a 1 ATR o piu'. Ingressi a mercato
-#    (posizioni): fra 75 e 172 (rapporto deal/posizione documentato
-#    1,00-2,31).
+#    (righe "mercato" = prima tranche; le pendenti eseguite sono posizioni
+#    in piu' e non si contano qui): fra 75 e 172 (rapporto
+#    deal/posizione documentato 1,00-2,31).
 #
 #  SOGLIE CONGELATE ORA
 #    S1 spread di riferimento = mediana oraria dell'ORA SERVER di ogni
 #       ingresso, da spread_flotta/spread_orario_NASUSD.csv (156,1 M tick).
-#    C3 PASSA se la MEDIANA di (stop_i / spread_h(i)) >= 40; FRAGILE se
-#       cade fra 36 e 44; NON PASSA sotto 36. Valutata a b=2253 (misura) e
-#       a b=3003, 3378 (centro), 4503 (derivata). Pavimento duro 13,3 x
-#       spread di coda 2,60: stop >= 34,6 idx.
-#    Per stress, NON come cancello: spread equipesato 2,40 e P95 2,60.
-#    Soglia equivalente sul solo stop di base (spread 1,80): 49,5 / 38,2 /
-#    27,0 idx a b = 2253 / 3378 / 4503; (spread 2,40): 73,5 / 62,2 / 51,0.
+#    C3 sulla MEDIANA di (stop_i / spread_h(i)): PASSA se >= 44 (sopra
+#       la banda); FRAGILE se fra 36 e 44 (la banda CONTIENE il 40: non
+#       decide e non promuove); NON PASSA sotto 36. Valutata a b=2253
+#       (misura) e a b=3003, 3378 (centro), 4503 (derivata). Pavimento
+#       duro 13,3 x spread di coda 2,60 (mediana dell'ora peggiore):
+#       stop >= 34,6 idx.
+#    Per stress, NON come cancello: spread equipesato 2,40 e P95 di tutte
+#       le ore 2,70.
+#    Soglia equivalente al 40 sul solo stop di base (spread 1,80): 49,5 /
+#    38,2 / 27,0 idx a b = 2253 / 3378 / 4503; (spread 2,40): 73,5 / 62,2
+#    / 51,0.
 #
 #  CONTRO-ESEMPIO, COSTRUITO PRIMA
 #    Ipotesi alternativa = "lo stop vero e' piccolo come le gambe realizzate".
@@ -387,6 +396,9 @@ InpLogImbuto=true
 # --- asse unico: l'interruttore della finestra oraria, come in R243. Qui
 # --- si legge SOLO la cella 0 (finestra SPENTA = la sedia com'e'); la cella
 # --- 1 (14-22 server) e' il meccanismo di R238 e NON e' questa domanda.
+# --- QUESTO FILE SI GIRA SOLO CON LA PASSATA (che riduce ogni asse al primo
+# --- valore e ignora @FRAZIONEIS): MAI col driver dei round, che girerebbe
+# --- 4 passate a finestre spezzate e misurerebbe un'altra cosa.
 InpUseTimeWindow=0||0||1||1||Y
 ```
 
@@ -403,7 +415,16 @@ SCRIPT NUOVO  backtest_pipeline/righe/PASSATA_STOP_SUPREV_NAS.ps1   (marcatore M
    r.67      $AVVIO_ATTESO 'avviato su NASUSD PERIOD_H1. Supertrend(10,3.0).'
    verdetto  mediana di stop_i / spread_h(i) con spread da spread_orario_NASUSD.csv,
              soglie 40 / 36-44 / 36 della prova; per lato; derivata a 3003 / 3378 / 4503
-   G0        legge il report .htm: n deal 172 +/- 3, profitto 4699 +/- 4%; fuori banda = STOP
+   G0        legge il report .htm: n deal 172 +/- 3, profitto 4699 +/- 4%; fuori banda = STOP.
+             CODICE NUOVO: oggi il .htm e' "seconda misura, non blocca"; per G0 deve BLOCCARE
+             (htm assente o illeggibile = NON MISURATO, mai verde)
+   (aggiunte del cancello 06/10, senza queste lo script NAS e' rotto per costruzione:)
+   lati      il controllo "$altroLato" (ingressi del lato opposto = CONFIGURAZIONE ROTTA) va
+             TOLTO per la passata L+S e sostituito dal taglio per lato; altrimenti ogni corsa
+             a due lati esce ROTTA. Il controllo "SL dal lato sbagliato" resta, per lato.
+   $ANCORA   tiene anche InpTF=16385, InpVerbose=true (senza, le righe "mercato" non escono:
+             Log() del sorgente), InpLogImbuto=true, InpUseTimeWindow ridotto a 0
+   testi     RIEPILOGO e "COME SI LEGGE" puntano a spread_orario_NASUSD.csv, non U30USD
   INVARIATI: controllo incrociato IMBUTO, controllo configurazione, AllowLiveTrading=false,
   guardia macchina DESKTOP-H4D7CAJ, guardia MT5 aperto, timeout 60 min.
 RIGA DI LANCIO (bozza di schema, NON eseguibile: manca il pin e manca lo script):
@@ -437,8 +458,12 @@ BERSAGLIO da scrivere in testa alla riga: finestra PowerShell sul PC di backtest
 #    ha ABBASSATO il rischio senza toccare il PF OOS: DD OOS 12,1063 (0,0)
 #    -> 7,3634 / 7,0700 / 6,8018 / 5,8697 / 5,6764 (0,4 / 0,5 / 0,6 / 0,7 /
 #    0,8); peggior giornata -6,7316 -> -3,2700 / -3,0512 / -2,8776 /
-#    -2,6856 / -2,5110; PF OOS 1,74-2,11, n 62-64. MA quella finestra ha un
-#    solo regime e IS 48 operazioni con PF 0,89-0,98 a 0,4-0,7.
+#    -2,6856 / -2,5110; PF OOS 1,74-2,11, n 62-64. MA la cella della
+#    sedia e' 0,2, non 0,0: da 0,2 (DD OOS 9,4547, giornata -4,0041) a
+#    0,4-0,8 il calo e' -22/-40% sul DD e -18/-37% sulla giornata. E
+#    quella finestra ha un solo regime e IS 48 operazioni con PF 0,89-0,98
+#    a 0,4-0,7. E sul gemello GBPCAD (r146c, tick) il buffer fa il
+#    CONTRARIO: DD OOS 6,19 -> 9,95, PF OOS 1,44 -> 0,92 da 0,2 a 0,8.
 #    Il VECCHIO giudica il RISCHIO (Emendamento B): il -8,0159 di r127c
 #    (OOS 2022.08-2026.06) e il -10,07 dell'orso 2022 su feed esterno sono
 #    i numeri che bocciano la sedia. Nessuno ha mai messo il buffer ad asse
@@ -455,8 +480,16 @@ BERSAGLIO da scrivere in testa alla riga: finestra PowerShell sul PC di backtest
 #      OOS 242 +/- 5. Se cambia di piu', l'asse ha cambiato le ENTRATE e il
 #      confronto col tick non vale.
 #    - DD OOS: in calo con il buffer, banda 7,0-10,5 a 0,4-0,8.
-#    - Peggior giornata OOS (colonna FTMO in coda al CSV): da -8,02 a
-#      -3,5 .. -5,5.
+#    - Peggior giornata OOS, colonna VECCHIA "Peggior Giornata %" (e'
+#      quella dell'ancora -8,0159 e quella di r146a): da -8,02 a
+#      -5,0 .. -6,6 (proporzione di r146a DALLA CELLA 0,2). Quindi
+#      l'attesa e' che il muro -5,00 NON sia passato su 3 celle contigue.
+#    - Colonna "Peggior Giornata FTMO %" (in coda): NESSUNA ancora (r127c
+#      e' girata prima che esistesse): il suo numero a 0,2 e' una misura
+#      NUOVA, non un controllo di regressione. Le due colonne non sono
+#      ordinate fra loro (R214f D7-ter).
+#    (Attese riscritte dal cancello il 06/10, PRIMA di qualunque numero:
+#     la prima stesura le derivava dalla cella 0,0.)
 #    - PF: invariato entro +/- 0,15 (rumore di casa A3 = 0,147, LETTO R270).
 #    - CANARINO DI MANOPOLA INERTE: se a 0,4 DD e giornata OOS differiscono
 #      da quelli di 0,2 per meno del 3% relativo, il buffer NON HA MORSO su
@@ -464,17 +497,22 @@ BERSAGLIO da scrivere in testa alla riga: finestra PowerShell sul PC di backtest
 #
 #  SOGLIE CONGELATE ORA
 #    G-RISCHIO (a qualunque n): in IS e in OOS, su almeno 3 celle contigue,
-#      DD <= 9,0 e peggior giornata FTMO > -5,00 (a 1,00% di rischio: la
-#      TAGLIA e' di Claudio, qui non si tocca). Il centro del blocco decide.
+#      DD <= 9,0 e peggior giornata > -5,00 su TUTTE E DUE le colonne
+#      (vecchia e FTMO) (a 1,00% di rischio: la TAGLIA e' di Claudio, qui
+#      non si tocca). Il centro del blocco decide.
 #    G-MERITO: n >= 150 SOLO in IS (153). Il PF e' screening OHLC: non
 #      promuove.
 #    Contro-esempio: se la giornata -8,02 NON si muove (resta -7 .. -9 a
 #      tutte le celle) e' un gap OHLC, non una funzione dello stop: la
 #      sedia resta NO PER RISCHIO con una misura in piu'. Se si muove ma
 #      solo a 0,8 (una cella che sporge) e' un picco, non un altopiano.
+#      Ipotesi alternativa "e' un fatto di EURJPY 2024-26, non un
+#      meccanismo" (il gemello GBPCAD va al contrario): prevede un IS
+#      2020-2022, indipendente da r146a, che NON migliora. Per questo
+#      G-RISCHIO lo chiede in IS E in OOS.
 #
 #  COSTO (cancello stop >= 40 x spread): NON misurato qui. Letture in
-#    repo: 73,0 x senza commissione, 25,6 x con commissione (G4 §4.2 p.5):
+#    repo: 73,0 x senza commissione, 25,6 x con commissione (G4 par. 4.2 p.5):
 #    se la commissione conta, il 40 non passa nemmeno col buffer 0,8 senza
 #    una misura dello stop. Decisione sulla lettura: NON di questo file.
 #  BUCHI: nessun per-trade -> la data della peggior giornata non si legge;
@@ -527,7 +565,9 @@ chiamata del driver (identica a quella dei CORTI):
   RIGA_ROUND_VPS.ps1 -Expert ABTG_CostToCost -Prova R290b_buffer_COSTTOCOST_EURJPY_ohlc_lungo.txt
                      -Etichetta r290b -Pin <pin> -Modello 1 -Deposito 100000
 Prima: -SoloControllo deve stampare 4 CELLE per finestra (non guardare "-> N pass": e' un x2 cablato).
-Da accodare nello stesso lancio, nell'ordine: R214e, R214f (stesso pin 529fefa0, gia' con PASS), poi R290b.
+Ordine: PRIMA la riga R214EF com'e' (pin 529fefa0, PASS 24/09: R214f poi R214e), POI R290b con
+una riga SUA, al pin che conterra' R290b. Metterle "nello stesso lancio" vuol dire una riga NUOVA
+con un pin nuovo: il PASS di R214EF NON si trasferisce (SHA256 dell'EA al pin, classe 166).
 ```
 
 **Hash e pin** non li calcolo: il pin e' il commit che contiene i file, e non esiste finche' i file non sono in repo e passati dal cancello.
@@ -558,7 +598,7 @@ Da accodare nello stesso lancio, nell'ordine: R214e, R214f (stesso pin 529fefa0,
 ## 9. BUCHI, DUBBI E DECISIONI CHE NON SONO MIE
 
 **Buchi dichiarati**
-- Ritmo del PC di backtest `[NON MISURATO]`; tutti i tempi sono del banco VPS in contesa.
+- Ritmo del PC di backtest misurato **una volta** (R238, SupRev NASUSD); tutti gli altri tempi sono del banco VPS in contesa, e il PC gira un agente solo: vale il tetto delle righe (~160 min + T1).
 - T1 (spread 225JPY): durata `[NON MISURATO]`.
 - Posizioni di 970913: `NON LEGGIBILI` nei CSV; la passata R290a le conta.
 - Equivalenza EA base / Ottimizzato: **inferenza sul diff dei sorgenti**, non verificata a tester; la verifica e' G0.
@@ -569,7 +609,7 @@ Da accodare nello stesso lancio, nell'ordine: R214e, R214f (stesso pin 529fefa0,
 
 **Dubbi**: i P di sez. 3 sono giudizi; il costo di (a) puo' ribaltarsi dentro la zona FRAGILE; il buffer 2253 e' una cella di misura, non una scelta.
 
-**Decisioni che servono a Claudio** (non sono mie e non le prendo): (1) se la lettura SC-FD di sez. 1 e' quella giusta; (2) via libera a **lanciare** sul PC di backtest (nessuna riga esiste ancora: passano i due strati); (3) riaccendere 970913 e con quale buffer (e' una scelta sulla gestione dell'uscita che cambia il lotto: la dichiaro come sua); (4) la lettura del costo con o senza commissione per il C2C; (5) la taglia, per (d) ed (e), solo dopo i numeri.
+**Decisioni che servono a Claudio** (non sono mie e non le prendo): (1) se la lettura SC-FD di sez. 1 e' quella giusta; (2) via libera a **lanciare** sul PC di backtest (nessuna riga esiste ancora: passano i due strati); (3) riaccendere 970913 e con quale buffer (e' una scelta sulla gestione dell'uscita che cambia il lotto: la dichiaro come sua); lo stesso per `770901` (225JPY), tolta dal 100k il 25/09; (4) la lettura del costo con o senza commissione per il C2C; (5) la taglia, per (d) ed (e), solo dopo i numeri.
 
 ---
 
@@ -588,4 +628,13 @@ Da accodare nello stesso lancio, nell'ordine: R214e, R214f (stesso pin 529fefa0,
 **Esiti del cancello meccanico** (6/10/2026, strato 1):
 - `python3 backtest_pipeline/controlla_riga.py --oggetto md report/PIANO_MISURE_CANDIDATI_2026-10-06.md` -> **nessun difetto meccanico** (4 blocchi ```text non eseguibili, nessun comando in prosa, prosa senza terminali o conti vietati).
 - `python3 backtest_pipeline/controlla_prova.py --ea mql5/Experts/ABTG_SupertrendReversal.mq5 <R290a estratta da questo file>` -> OK (2 celle, 4 passate, 0 problemi); `--ea mql5/Experts/ABTG_CostToCost.mq5 <R290b estratta>` -> OK (4 celle, 8 passate, 0 problemi).
-- **Strato 2 (`controllo-preventivo`): DA FARE.** Niente di questo file va a Claudio o al PC di backtest senza il suo PASS.
+- **Strato 2 (`controllo-preventivo`), 06/10: PASS CON RISERVE dopo correzioni.** Le bozze R290a/R290b, lo script `PASSATA_STOP_SUPREV_NAS.ps1` e le righe NON sono approvate da questo PASS: diventano file veri e ripassano i due strati.
+
+**Correzioni del cancello (06/10), tutte prima di qualunque numero**
+1. (d) l'effetto del buffer era letto dalla cella 0,0 (DD 12,11, giornata -6,73) invece che dalla cella della sedia 0,2 (9,45 / -4,00): sez. 0, C7, 4.2, R290b corretti; l'attesa di R290b sulla giornata passa da -3,5/-5,5 a **-5,0/-6,6**; P(rischio) 0,35 -> 0,2 e (d) scende dietro (c) (classe 1148).
+2. Gemello GBPCAD r146c (in repo, non citato): il buffer fa il contrario. Aggiunto come contro-esempio di meccanismo in 4.2 e R290b.
+3. Costo di (d): la riga che gira (`RIGA_R214EF_COSTTOCOST.txt`, PASS) dichiara tetto 90 min, non 18; aggiunto il tetto complessivo ~160 min + T1 (classe 1149).
+4. Bande di C3 sovrapposte (PASSA >= 40 e FRAGILE 36-44): PASSA diventa >= 44, la lettura piu' severa gia' usata nel contro-esempio (classe 1150).
+5. R290b: ancora su "Peggior Giornata %" e soglia su "colonna FTMO" mescolate: ora la soglia vale su tutte e due, e la colonna FTMO e' dichiarata senza ancora (classe 1151).
+6. Script NAS: mancavano la rimozione del controllo `$altroLato` (una passata L+S sarebbe uscita ROTTA per costruzione), `InpVerbose=true` nell'ancora e il G0 bloccante.
+7. Minori: r127b 7 celle non 12; r125e 82-260 s non 82-123; r127a OOS n 84-87; P95 NASUSD 2,70 (2,60 e' la mediana dell'ora peggiore); "righe mercato" = ingressi, non posizioni; storico M1 oro dal 2004.11.17 (prima operazione); R268d priore, non misura; `770901` sospesa il 25/09; R290a solo con la passata, mai col driver dei round.
