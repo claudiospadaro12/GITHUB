@@ -28,7 +28,8 @@ assert src.count(MARC.encode()) >= 1 and src.splitlines()[1].decode() == "#  " +
 
 bersaglio = ("BERSAGLIO: SOLO una finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ: terminale C:\\Program Files\\BCM Markets MT5 Terminal (cartella BCM Markets MT5 Terminal), "
              "loggato sul demo 50503392. La passata lo apre e lo chiude da sola (backtest, AllowLiveTrading=false: nessun ordine). "
-             "NON TOCCATI, per nome: il VPS VMI3047753 e TUTTE le sue cartelle dati -- FTMO 541452707 (C:\\FTMO), REALE 10105439 (C:\\BCM_Reale), 100k 50504263 (BCM Markets MT5 Terminal -V3), "
+             "NON TOCCATI, per nome, PRIMA SU QUESTO PC (censimento P0 del 05/10): C:\\MT5_Backtest (cartella dati 04C7A32B, conto non censito) e C:\\FundedNext_Manuale (cartella dati 2B8180C3, conto non censito), che devono restare CHIUSI; "
+             "POI il VPS VMI3047753 e TUTTE le sue cartelle dati -- FTMO 541452707 (C:\\FTMO), REALE 10105439 (C:\\BCM_Reale), 100k 50504263 (BCM Markets MT5 Terminal -V3), "
              "piccolo 50503392 sul VPS (BCM Markets MT5 Terminal), manuale 50503635 (C:\\MT5_MANUALE), banco 50504400 (C:\\MT5_Backtest), Pepperstone, Tickmill. "
              "Scrive SOLO: la cartella abtg_passata nel profilo utente, MQL5\\Experts e MQL5\\Include del terminale BCM di questa macchina, il Desktop (cartella e zip PASSATA_STOP_SUPREV_NAS).")
 cosa = ("PASSATA STOP SUPREV NAS (commit " + C[:8] + ") -- misura la distanza INGRESSO->SL della sedia SupRev NAS 970913: ABTG_SupertrendReversal su NASUSD H1 con la geometria della sedia, "
@@ -46,7 +47,8 @@ for s in (bersaglio, cosa, tempo, guarda, fine):
 t = ("& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $PIN='" + C + "'; $T0=Get-Date; "
      "Write-Host '" + bersaglio + "' -ForegroundColor Yellow; "
      "if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ('QUESTA RIGA GIRA SOLO SUL PC DI BACKTEST DESKTOP-H4D7CAJ. Qui la macchina si chiama: ' + $env:COMPUTERNAME + '. Sul VPS VMI3047753 non si lancia: la challenge FTMO 541452707 sta operando.') }; "
-     "Write-Host 'PRIMA DI CHIUDERE MT5: apri il terminale di QUESTA macchina -- e l UNICO MT5 installato qui, ed e loggato sul DEMO 50503392 -- GUARDA I GRAFICI e stacca eventuali SEDIE. Il 14/08/2026 da questa macchina sono partiti ordini VERI (#3160534/#3160535, -104,60). Poi chiudilo A MANO.' -ForegroundColor Red; "
+     "Write-Host 'QUI CI SONO TRE MT5 (C:\\Program Files\\BCM Markets MT5 Terminal = demo 50503392, C:\\MT5_Backtest, C:\\FundedNext_Manuale): devono essere TUTTI CHIUSI, MetaEditor compreso. NON serve aprirne nessuno: la passata controlla da sola i grafici salvati del terminale BCM e si ferma se trova una SEDIA attaccata (il 14/08/2026 da questa macchina sono partiti ordini VERI, #3160534/#3160535, -104,60). Se uno e aperto, qui sotto compare il suo PID, titolo e cartella: chiudi QUELLO, a mano, e rilancia.' -ForegroundColor Red; "
+     "$mp=@(Get-Process -Name terminal64,metaeditor64 -ErrorAction SilentlyContinue); if($mp.Count -gt 0){ Write-Host 'MT5 / MetaEditor APERTI ORA su questo PC (PID, titolo, cartella):' -ForegroundColor Red; $mp | Select-Object Id, MainWindowTitle, Path | Format-Table -AutoSize | Out-String -Width 300 | Write-Host }; "
      "if((@(Get-Process -Name terminal64,metaeditor64 -ErrorAction SilentlyContinue)).Count -gt 0){ throw 'MT5 o MetaEditor risulta APERTO su questo PC. La passata ne apre una copia sua con /config: col terminale gia aperto il tester non parte. Fai quello che dice la riga rossa qui sopra, poi rilancia.' }; "
      "$W=Join-Path $env:USERPROFILE 'abtg_passata'; New-Item -ItemType Directory -Force -Path $W | Out-Null; $S=Join-Path $W 'PASSATA_STOP_SUPREV_NAS.ps1'; Remove-Item -LiteralPath $S -Force -ErrorAction SilentlyContinue; "
      "$u='https://raw.githubusercontent.com/claudiospadaro12/GITHUB/'+$PIN+'/" + FILE + "?cb='+[Guid]::NewGuid().ToString('N'); "

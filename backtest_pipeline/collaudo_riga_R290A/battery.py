@@ -175,6 +175,8 @@ def scenari():
     A(("04i_g0_input_del_report_diversi_non_blocca", S(report=rep(input_override={"InpStMult": "3.5"})), dict(rc=0, c3=True, testo=["DIVERSI 1 -> ATTENZIONE: InpStMult report=3.5 ini=3.0"])))
     # ---------------------------------------------------------------- configurazione e controllo incrociato
     A(("05_ini_ignorata_EA_gira_coi_default", S(ini_ignorata=True), dict(rc=3, c3=False, testo=["CONTROLLO CONFIGURAZIONE: ROTTO"])))
+    A(("05d_pip_diverso_da_0_01", S(avvio="[STReversal] avviato su NASUSD PERIOD_H1. Supertrend(10,3.0). 1 pip=0.10000"), dict(rc=3, c3=False, testo=["CONTROLLO CONFIGURAZIONE: ROTTO", "1 pip=0.10000"])))
+    A(("05e_avvio_senza_pip", S(avvio="[STReversal] avviato su NASUSD PERIOD_H1. Supertrend(10,3.0)."), dict(rc=3, c3=False, testo=["CONTROLLO CONFIGURAZIONE: ROTTO"])))
     A(("05b_riga_di_avvio_assente", S(avvio="[STReversal] niente di utile"), dict(rc=3, c3=False, testo=["riga di avvio dell EA NON trovata"])))
     A(("05c_imbuto_di_un_altro_simbolo", S(imb_simbolo="U30USD"), dict(rc=3, c3=False, testo=["righe IMBUTO non intestate NASUSD PERIOD_H1"])))
     A(("06_incrocio_somma_imbuto_piu_uno", S(imb_delta=1), dict(rc=3, c3=False, testo=["CONTROLLO INCROCIATO: ROTTO"])))
@@ -206,7 +208,10 @@ def scenari():
     A(("10e_zero_grafici_salvati", S(chr=[]), dict(rc=1, fermata=True, msg="ZERO grafici salvati")))
     A(("10f_grafico_illeggibile", S(chr=[{}, dict(illeggibile=True)]), dict(rc=1, fermata=True, msg="ILLEGGIBILE")))
     A(("10g_due_cartelle_dati", S(doppio_dati=True), dict(rc=1, fermata=True, msg="NON risolta in modo univoco")))
-    A(("10h_altra_installazione_MT5", S(altra_inst=True), dict(rc=1, fermata=True, msg="ALTRE installazioni MT5")))
+    A(("10h_altra_installazione_MT5", S(altra_inst=True), dict(rc=1, fermata=True, msg="installazioni MT5 NON censite")))
+    # seconda lettura del cancello 06/10 (classe 1157): le due installazioni censite il 05/10 sono nel banco di DEFAULT (ogni scenario gira col PC com'e'); qui si pretende che siano dette per nome e non toccate (lo snapshot copre le loro cartelle)
+    A(("10j_censite_presenti_dette_e_non_toccate", S(), dict(rc=0, c3=True, testo=["CHIUSA e NON TOCCATA: C:\\MT5_Backtest", "CHIUSA e NON TOCCATA: C:\\FundedNext_Manuale"])))
+    A(("10k_censite_assenti_va_lo_stesso", S(censite=False), dict(rc=0, c3=True, no_testo=["CHIUSA e NON TOCCATA"])))
     A(("10i_nessuna_cartella_dati", S(senza_origin=True), dict(rc=1, fermata=True, msg="NON risolta in modo univoco")))
     A(("11_pin_malformato", S(pin="abc"), dict(rc=1, fermata=True, msg="-Pin obbligatorio e di 40 caratteri")))
     # ---------------------------------------------------------------- sorgenti al pin

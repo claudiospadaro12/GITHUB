@@ -29,7 +29,7 @@ def utf16(s):
 
 def spec_base(**kw):
     s = dict(macchina="DESKTOP-H4D7CAJ", chr=[{}], mt5_vivo=False, doppio_dati=False, altra_inst=False, pin=PIN, timeout_min=60, args_extra="",
-             scen=dict(entries=[], report={}), muta={}, desktop_vecchio=False, log_vecchio=False, report_vecchio_in_inst=False, sleep_reale=False, no_exit=False, senza_origin=False)
+             scen=dict(entries=[], report={}), muta={}, desktop_vecchio=False, log_vecchio=False, report_vecchio_in_inst=False, sleep_reale=False, no_exit=False, senza_origin=False, censite=True)
     s.update(kw)
     return s
 
@@ -54,7 +54,15 @@ def costruisci(base, spec):
         open(os.path.join(ap, "DDD444", "origin.txt"), "wb").write(utf16(TERM))
     if spec["altra_inst"]:
         os.makedirs(os.path.join(ap, "ZZZ999", "MQL5"))
-        open(os.path.join(ap, "ZZZ999", "origin.txt"), "wb").write(utf16("C:\\MT5_Backtest"))
+        open(os.path.join(ap, "ZZZ999", "origin.txt"), "wb").write(utf16("C:\\MT5_Altro"))
+    if spec["censite"]:
+        # censimento P0 del 05/10/2026 (REFERTO_DUKA_P0.txt sez. 5): sul PC di backtest ci sono ANCHE queste due, chiuse
+        for dd, inst in (("04C7A32B575E40027B4FF8724D14D702", "C:\\MT5_Backtest"), ("2B8180C37317B90DC37E3BF8A8CBE715", "C:\\FundedNext_Manuale")):
+            cc = os.path.join(ap, dd, "MQL5", "Profiles", "Charts", "Default")
+            os.makedirs(cc); os.makedirs(os.path.join(ap, dd, "MQL5", "Experts")); os.makedirs(os.path.join(ap, dd, "logs"))
+            open(os.path.join(ap, dd, "origin.txt"), "wb").write(utf16(inst))
+            open(os.path.join(cc, "chart01.chr"), "wb").write(utf16("<chart>\nsymbol=EURUSD\n<window>\n<expert>\nname=QUALUNQUE\n</expert>\n</window>\n</chart>\n"))
+            open(os.path.join(ap, dd, "MQL5", "Experts", "QUALUNQUE.ex5"), "wb").write(b"x")
     cd = os.path.join(dati, "MQL5", "Profiles", "Charts", "Default")
     for i, ch in enumerate(spec["chr"]):
         p = os.path.join(cd, "chart%02d.chr" % (i + 1))

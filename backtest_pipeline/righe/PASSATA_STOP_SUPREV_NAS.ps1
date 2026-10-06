@@ -68,8 +68,18 @@
 #      06/10): la riga lo imposta nel SUO processo, ma questo script gira in
 #      un powershell.exe FIGLIO che non lo eredita, e scarica 4 file da
 #      raw.githubusercontent.com. La v2 U30USD ha lo stesso buco (non toccata).
-#  INVARIATI: guardia macchina DESKTOP-H4D7CAJ, MT5 chiuso, un solo MT5 su
-#  questo PC, cartella dati risolta per origin.txt, sorgenti scaricati al
+#  12. "UN SOLO MT5 su questo PC" NON e' piu' vero (seconda lettura del
+#      cancello 06/10, classe 1157): il censimento P0 del 05/10 ha trovato
+#      sul PC di backtest anche C:\MT5_Backtest e C:\FundedNext_Manuale, e la
+#      guardia della v2 avrebbe fermato OGNI corsa al passo 0. Qui quelle
+#      due sono AMMESSE PER NOME (chiuse, non toccate); una installazione
+#      non censita ferma ancora la passata. La v2 U30USD resta com'e'.
+#  13. La riga d'avvio attesa comprende "1 pip=0.01000" (stessa lettura del
+#      cancello): i buffer DERIVATI sono stop + (b-2253)/100 solo se il pip
+#      di NASUSD e' 0,01 punti indice. Pip diverso o assente = CONFIGURAZIONE
+#      ROTTA, NON MISURATO.
+#  INVARIATI: guardia macchina DESKTOP-H4D7CAJ, MT5 chiuso, nessuna
+#  installazione MT5 non censita, cartella dati risolta per origin.txt, sorgenti scaricati al
 #  pin con firma, compilazione verificata dal .ex5, AllowLiveTrading=false,
 #  fotografia dei log prima del lancio e lettura della sola coda,
 #  controllo incrociato IMBUTO, controllo della configurazione dall'avvio
@@ -80,7 +90,9 @@
 #  .ini: il terminale del PC di backtest e' loggato sul DEMO 50503392, e il
 #  14/08/2026 da questa macchina sono partiti ordini veri.
 #
-#  NON TOCCA, per nome: il VPS VMI3047753 e TUTTE le sue cartelle dati (FTMO
+#  NON TOCCA, per nome: PRIMA SU QUESTO PC le installazioni C:\MT5_Backtest
+#  (cartella dati 04C7A32B) e C:\FundedNext_Manuale (cartella dati 2B8180C3);
+#  POI il VPS VMI3047753 e TUTTE le sue cartelle dati (FTMO
 #  541452707 in C:\FTMO, REALE 10105439 in C:\BCM_Reale, 100k 50504263,
 #  piccolo 50503392, manuale 50503635 in C:\MT5_MANUALE, banco 50504400 in
 #  C:\MT5_Backtest, Pepperstone, Tickmill). Scrive SOLO: la cartella
@@ -122,7 +134,9 @@ $ANCORA  = @('InpTF=16385','InpStMult=3.0','InpStAtrPeriod=10','InpNearAtr=1.0',
              'InpFirstFraction=0.3333','InpUsePending=true','InpPendingPips=20.0','InpPendingExpiryBars=3',
              'InpRiskPercent=1.0','InpMaxTradesPerDay=0','InpStartHour=0','InpEndHour=24','InpUseNewsFilter=false',
              'InpAllowLong=true','InpAllowShort=true','InpUsaGuardian=true','InpVerbose=true','InpLogImbuto=true')
-$AVVIO_ATTESO = 'avviato su ' + $SIMBOLO + ' PERIOD_' + $PERIODO + '. Supertrend(10,3.0).'
+# con la grandezza del pip (deviazione 13): l'algebra dei buffer DERIVATI
+# (stop + (b-2253)/100) vale solo se 1 pip = 0,01 punti indice (Digits 2)
+$AVVIO_ATTESO = 'avviato su ' + $SIMBOLO + ' PERIOD_' + $PERIODO + '. Supertrend(10,3.0). 1 pip=0.01000'
 # G0 (piano 4.1): r163a cella 2253, IS 76 + OOS 96 operazioni, profitto 1964.39 + 2734.64
 $G0_N      = 172
 $G0_N_TOL  = 3
@@ -242,11 +256,20 @@ foreach($d in @(Get-ChildItem -Path $DataRoot -Directory -ErrorAction SilentlyCo
     if($v -ne ''){ $origini = $origini + @([pscustomobject]@{ Dir = $d.FullName; Inst = $v }) }
   }
 }
+# le ALTRE installazioni MT5 di questo PC: il censimento P0 del 05/10/2026
+# (risultati_archivio/DUKA_P0_20261005_171046/REFERTO_DUKA_P0.txt, sez. 5)
+# ne ha trovate DUE oltre al BCM: C:\MT5_Backtest e C:\FundedNext_Manuale.
+# Sono AMMESSE PER NOME: la guardia qui sopra le ha gia' trovate CHIUSE, e
+# la passata non le apre, non ci scrive e non le chiude. Una installazione
+# NON in elenco ferma la passata (regola dei terminali multipli).
+$Censite = @('C:\MT5_Backtest', 'C:\FundedNext_Manuale')
 $diversi = @($origini | Where-Object { $_.Inst -ne $InstAttesa })
-if($diversi.Count -gt 0){
-  Write-Host '   ATTENZIONE: su questa macchina hanno girato ALTRE installazioni MT5:' -ForegroundColor Red
-  foreach($dv in $diversi){ Write-Host ('     ' + $dv.Inst) -ForegroundColor Red }
-  throw 'La passata si ferma: la riga dichiara che il PC di backtest ha UN SOLO MT5, e qui ce ne sono altri (regola dei terminali multipli).'
+$ignote = @($diversi | Where-Object { $Censite -notcontains $_.Inst.TrimEnd('\') })
+foreach($dv in @($diversi | Where-Object { $Censite -contains $_.Inst.TrimEnd('\') })){ Dico ('altra installazione di questo PC, censita il 05/10, CHIUSA e NON TOCCATA: ' + $dv.Inst + '  (cartella dati ' + (Split-Path -Leaf $dv.Dir) + ')') 'Yellow' }
+if($ignote.Count -gt 0){
+  Write-Host '   ATTENZIONE: su questa macchina hanno girato installazioni MT5 NON censite:' -ForegroundColor Red
+  foreach($dv in $ignote){ Write-Host ('     ' + $dv.Inst) -ForegroundColor Red }
+  throw 'La passata si ferma: oltre al BCM e alle due censite il 05/10 (C:\MT5_Backtest, C:\FundedNext_Manuale) qui ce ne sono ALTRE installazioni MT5 (regola dei terminali multipli).'
 }
 $cands = @($origini | Where-Object { $_.Inst -eq $InstAttesa })
 if($cands.Count -ne 1){
@@ -342,7 +365,7 @@ $LogRoot = Join-Path $env:APPDATA 'MetaQuotes'
 # casa (RIGA_R99_ORO_RISCHIO.ps1 r.966-971, checklist 34-ter e 518).
 $RadiciLog = @($LogRoot, (Join-Path $InstAttesa 'Tester'))
 $reMerGrezza = New-Object Text.RegularExpressions.Regex('\[STReversal\]\s+(LONG|SHORT)\s+mercato\s')
-$reAvvio = New-Object Text.RegularExpressions.Regex('\[STReversal\]\s+(avviato su \S+ \S+\. Supertrend\([0-9]+,[0-9.]+\)\.)')
+$reAvvio = New-Object Text.RegularExpressions.Regex('\[STReversal\]\s+(avviato su \S+ \S+\. Supertrend\([0-9]+,[0-9.]+\)\.(?: 1 pip=[0-9.]+)?)')
 $reEntr = New-Object Text.RegularExpressions.Regex('\[STReversal\]\s+(LONG|SHORT)\s+mercato\s+([0-9]+(?:\.[0-9]+)?)\s+lot\s+@\s+([0-9]+(?:\.[0-9]+)?)\s+SL\s+([0-9]+(?:\.[0-9]+)?)\s+TP\s+([0-9]+(?:\.[0-9]+)?)')
 $reImb  = New-Object Text.RegularExpressions.Regex('\[STREV-IMBUTO\](.*)\|\s*ENTRATE\s+([0-9]+)\s*\|\s*quadratura\s+(\S+)')
 $reData = New-Object Text.RegularExpressions.Regex('(\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}(?::\d{2})?)')
