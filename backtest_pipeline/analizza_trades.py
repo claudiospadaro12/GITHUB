@@ -45,21 +45,6 @@ CODA_REFERTI = os.path.join("backtest_pipeline", "coda", "referti")
 # 🔴 L'orologio di QUESTA macchina non serve (il container gira in UTC, il
 # task gira sul VPS): l'ora legale italiana si ricava dalla DATA, con la regola
 # che la fa — dall'ultima domenica di marzo all'ultima domenica di ottobre.
-def _ultima_domenica(anno, mese):
-    d = date(anno, mese, 31) if mese in (3, 10) else None
-    while d.weekday() != 6:
-        d -= timedelta(days=1)
-    return d
-
-
-def _ora_pubblicazione_server(giorno_iso):
-    try:
-        g = datetime.strptime(giorno_iso, "%Y-%m-%d").date()
-    except (ValueError, TypeError):
-        return "22:45 italiane (ora server NON determinata: data non valida)"
-    legale = _ultima_domenica(g.year, 3) <= g < _ultima_domenica(g.year, 10)
-    return ("22:45 italiane = **21:45 ora server** (ora legale)" if legale else
-            "22:45 italiane = **22:45 ora server** (inverno: BCM e' UTC+1 fisso)")
 # La clausola di validita' e' scritta nel referto che leggiamo e va tradotta in
 # un `if`, non lasciata in prosa (classe 1142): "'RIGHE DI ORDINE/DEAL = 0' su un
 # log NON vuoto vuol dire che quel giorno il conto non ha operato. Su un log
@@ -70,6 +55,43 @@ SOGLIA_LOG_PIENO = 20   # righe totali: sotto questo il log non dice niente
 #    ipotesi producono la STESSA evidenza, quindi il silenzio non discrimina
 #    (classe 1141). Per dire che non ha operato servono fonti VIVE in quella
 #    finestra: la sospensione delle sedie e `rischioAperto=0.00%` del Guardian.
+
+
+def _ultima_domenica(anno, mese):
+    """Ultima domenica del mese. Usata solo per marzo e ottobre (ora legale):
+    la guardia c'e' perche' un `None` silenzioso qui diventerebbe un orario
+    sbagliato in un rilevatore di allarmi."""
+    assert mese in (3, 10), "ora legale: servono solo marzo e ottobre"
+    d = date(anno, mese, 31)
+    while d.weekday() != 6:
+        d -= timedelta(days=1)
+    return d
+
+
+def _ora_pubblicazione_server_hhmm(giorno_iso):
+    """Il DATO, non la frase: '21:45' d'estate, '22:45' d'inverno, None se la
+    data non e' valida. Separato dal testo per umani di proposito: una soglia
+    che si ricava con un substring-match su una frase cambia in silenzio il
+    giorno in cui qualcuno riscrive la frase (e nel verso che fa falsi
+    allarmi)."""
+    try:
+        g = datetime.strptime(giorno_iso, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+    return ("21:45" if _ultima_domenica(g.year, 3) <= g < _ultima_domenica(g.year, 10)
+            else "22:45")
+
+
+def _ora_pubblicazione_server(giorno_iso):
+    """La FRASE, per i referti."""
+    hh = _ora_pubblicazione_server_hhmm(giorno_iso)
+    if hh is None:
+        return "22:45 italiane (ora server NON determinata: data non valida)"
+    return ("22:45 italiane = **%s ora server** %s"
+            % (hh, "(ora legale)" if hh == "21:45"
+               else "(inverno: BCM e' UTC+1 fisso)"))
+
+
 FTMO_PAV_TOTALE = 90000.0   # pavimento statico -10%
 FTMO_LIM_GIORNO = 5000.0    # perdita massima giornaliera -5%
 
@@ -603,7 +625,7 @@ def main():
     #    DI OGNI GIORNATA esaminata, non dalla data di oggi, perche' lo stesso
     #    file contiene giornate d'estate e d'inverno.
     def _soglia_server(gg):
-        return "21:45:00" if "21:45" in _ora_pubblicazione_server(gg) else "22:45:00"
+        return (_ora_pubblicazione_server_hhmm(gg) or "22:45") + ":00"
     tutte = righe + manuali_tutte
     in_ritardo = []
     for g in sorted({r["_ct"].strftime("%Y-%m-%d") for r in tutte
@@ -922,17 +944,26 @@ def main():
             ("%.0f s" % dmed) if dmed < 120 else ("%.1f min" % (dmed / 60)),
             " · ".join("%s×%d" % (k, v) for k, v in sorted(motivi.items())), frm))
 
-    # 06/10/2026: ⬆️ la frazione e' un LIMITE SUPERIORE, e non e' un'opinione.
-    # `ABTG_TradeExporter.mq5` riscrive TUTTO il file a ogni giro di `OnTimer`
-    # (r.106) e RICALCOLA `SessionRange` per ogni riga (r.184), con la finestra
-    # che va dall'ingresso alle 23:59 del giorno d'ingresso (r.79-96). Il CSV
-    # che la pagella legge e' quello pubblicato alle 22:45 italiane = **21:45
-    # ora server**: per ogni riga entrata OGGI la banda e' quindi troncata di
-    # ~2h14m, e le barre che mancano possono solo ALLARGARLA -> la frazione
-    # pubblicata puo' solo SCENDERE. Misurato sull'archivio del piccolo (51
-    # pubblicazioni in git): su 203 righe pubblicate la prima volta nel loro
-    # stesso giorno d'ingresso con banda piena, **30 (14,8%) si sono poi
-    # allargate, ZERO ristrette**, fattore mediano x1,097 e massimo **x7,239**.
+    # 06/10/2026 (riscritto dopo il FAIL del cancello): la frazione e' un limite
+    # SUPERIORE **solo se la posizione e' chiusa in un colpo solo**.
+    # `ABTG_TradeExporter.mq5` riscrive TUTTO il file a ogni `OnTimer` (r.106,
+    # InpExportMinutes=30) e RICALCOLA `SessionRange` per ogni riga (r.184), con
+    # la finestra dall'ingresso alle 23:59 del giorno d'ingresso (r.79-96); il CSV
+    # si pubblica alle 22:45 ITALIANE -> l'ora server la da'
+    # `_ora_pubblicazione_server()`, NON cablata (d'estate 21:45, dal 25/10
+    # 22:45). A numeratore fermo la frazione puo' solo SCENDERE. Misurato il
+    # 06/10/2026 sul CSV del piccolo 50503392 (47 pubblicazioni con la colonna
+    # banda, 05/08-06/10, data di commit convertita in ora SERVER): 211 righe
+    # pubblicate la prima volta nel loro giorno d'ingresso con banda valorizzata
+    # -> 36 (17,1%) poi ALLARGATE, ZERO ristrette, fattore sull'ampiezza mediano
+    # x1,050 e massimo x7,239.
+    # 🔴 MA IL NUMERATORE NON E' SEMPRE FERMO: `ExportAll` scrive la riga appena
+    # esiste un deal in uscita e un PARZIALE basta, quindi una posizione a
+    # scaletta viene pubblicata col profit del solo primo terzo e al giro dopo la
+    # frazione SALE (3119062: 31,8% -> 44,5%; 5 righe su 1.406 hanno cambiato
+    # profit). Vedi la docstring di `frazione_catturata` (classe 358) e DIARIO
+    # r.14 del 04/09: la casa lo aveva gia' scritto due volte.
+    # Classi 1146 (+ emendamento) e 1147.
     out += ["", "_⬆️ **La frazione e' un LIMITE SUPERIORE finche' la "
             "posizione e' chiusa in un colpo solo.** Il CSV si pubblica alle "
             "%s (e l'esportatore riscrive ogni 30 minuti) mentre la banda "
@@ -952,7 +983,9 @@ def main():
             "cambiato `profit` dopo la prima pubblicazione). 👉 Un **`expert`** "
             "nella colonna delle uscite vuol dire **frazione non leggibile in "
             "nessun verso**; sulle altre il pavimento del 30%% si giudica **il "
-            "giorno dopo**._" % _ora_pubblicazione_server(giorno)]
+            "giorno dopo**. 📌 E vale per la pagella scritta **la sera stessa**: "
+            "su una pagella **rigenerata** a giorni di distanza la banda e' gia' "
+            "completa e la frazione e' una misura._" % _ora_pubblicazione_server(giorno)]
 
     # ---------- netto per simbolo ----------
     perSym = defaultdict(float)
