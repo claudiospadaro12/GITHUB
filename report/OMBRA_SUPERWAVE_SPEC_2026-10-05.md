@@ -16,7 +16,7 @@
 1. **Segnale**: il Supertrend (ATR 10 a media semplice, moltiplicatore 3,5) di una cella (simbolo x TF) si **inverte sull'ultima barra chiusa**;
    ingresso = chiusura di quella barra, stop = valore del Supertrend su quella barra, TP1/2/3 = ingresso +- 1/2/3 R, quote 40/30/30.
 2. **`ABTG_Pulsanti_Grafico` e' lo STESSO segnale, non uno indipendente** (funzioni pure identiche, provato con `ombra_sw_h0_e_struttura.py identita`
-   e con un mutante che il confronto vede). **La specifica e' una sola.** Differisce solo l'uso: Pulsanti e' un TF alla volta, a mano (sez. 1.5).
+   e con un mutante che il confronto vede; la composizione del setup e' uguale per LETTURA, non per script: sez. 1.5). **La specifica e' una sola.** Differisce solo l'uso: Pulsanti e' un TF alla volta, a mano (sez. 1.5).
 3. Cosa la dashboard NON definisce e noi dobbiamo scrivere ("regola nostra"): riempimento, **uscita**, vita del setup. Regola primaria **A**: stop fisso,
    residui chiusi a mercato al **flip opposto** della stessa cella (e' esattamente il momento in cui la dashboard sostituisce il setup). B (pareggio dopo TP1)
    e C (stop che segue il Supertrend) **solo descrittive** (sez. 2.3).
@@ -294,8 +294,11 @@ finestra, stessi input, i CSV delle due strade devono coincidere riga per riga p
 | dominio di guasto | lo stesso delle 26 sedie e dell'altra ombra | separato dalle sedie vive del piccolo |
 | pool RAM del VPS | stesso (12.282 MB, 2792 disponibili): **separare il processo non crea RAM** | stesso |
 | note | working set gia' 1978 MB; due ombre nello stesso processo | partenza da zero, nessun precedente misurato |
-**Consiglio**: **50503392**, **dopo 48 ore di battiti dell'ombra EMA200** con working set stabile (cosi' il "prima" e' misurato, non stimato); se la RAM disponibile e' sotto 1800 MB, o il working set dell'ombra EMA200 ha superato il giallo,
-il 100k `50504263` solo se disponibile >= ~2300 MB. 🔴 Ogni istruzione manuale dichiara conto e cartella (`50503392` = `BCM Markets MT5 Terminal`, `50504263` = `... MT5 Terminal -V3`; **mai** `10105439` `C:\BCM_Reale`,
+**Vincolo (regola di Claudio del 05/10, non un consiglio nostro)**: sul **50503392** nessuna seconda ombra **prima di 48 ore** dall'attacco dell'ombra EMA200; poi, comunque, solo dopo una
+**misura nuova** di RAM/CPU (working set stabile, cosi' il "prima" e' misurato, non stimato) e la **firma di Claudio sul codice**. Se la RAM disponibile e' sotto 1800 MB, o il working set dell'ombra EMA200 ha superato il giallo,
+l'alternativa e' il 100k `50504263` solo se disponibile >= ~2300 MB: **la sceglie Claudio**, e il pool RAM del VPS e' lo stesso (spostare non crea RAM).
+**Cosa NON si tocca in nessun caso**: le 26 sedie e il grafico dell'ombra EMA200 sul `50503392`; il reale `10105439` (`C:\BCM_Reale`); FTMO `1514806751` (`C:\FTMO`); il banco `50504400` (`C:\MT5_Backtest`, spento);
+le cartelle Pepperstone e Tickmill; Algo Trading; nessun preset ne' Guardian. 🔴 Ogni istruzione manuale dichiara conto e cartella (`50503392` = `BCM Markets MT5 Terminal`, `50504263` = `... MT5 Terminal -V3`; **mai** `10105439` `C:\BCM_Reale`,
 **mai** FTMO `1514806751` `C:\FTMO`), con la riga di sola lettura che stampa PID + titolo + cartella. Grafico NUOVO senza EA; Algo Trading non serve e non si tocca; per fermarla si chiude solo il suo grafico.
 
 ### 5.2 Come si legge: `backtest_pipeline/leggi_ombra_superwave.py` (da scrivere; fork del nucleo di `leggi_ombra_ema200.py`)
@@ -324,13 +327,15 @@ Autotest del lettore come l'altro (T1: intestazioni == EA, con mutazione; contro
 1. **Lista simboli**: i 29 di default (cosi' com'e' nel codice) o quelli del TUO grafico? Aggiungo `U30USD` come extra? (non e' nella lista della dashboard).
 2. **TF**: M15, H1, H4, D1 su tutti + M1/M3/M5 solo sull'oro (consiglio), oppure tutti e 7 su tutti (+300-500 MB di serie [STIMA], quasi tutto sotto frontiera)?
 3. **Regola d'uscita primaria A** (stop fisso, chiusura al flip opposto) e B/C solo descrittive: ok? E il decisore di costo = **spread + commissione** (la convenzione corretta l'11/09)?
-4. **Dove**: `50503392` dopo 48 ore di battiti dell'ombra EMA200 (consiglio) o `50504263` `-V3`?
+4. **Dove**: `50503392` (`BCM Markets MT5 Terminal`), non prima delle 48 ore della sua regola del 05/10 e di una misura nuova di RAM/CPU, oppure `50504263` (`... MT5 Terminal -V3`)?
+   E la **firma sul codice** prima di compilare (sez. 7).
 5. **Priorita'**: e' ponteggio a rendimento atteso basso (sez. 0, punto 10). Si costruisce adesso (il codice e' ~1 giornata piu' cancelli) o dopo la sedia che oggi pesa di piu' per il 1° ottobre? Decide lui.
 6. Quale **versione** della dashboard gira sul suo grafico (4.00 ricevuta o 4.1)?
 
 ## 7. Cosa serve dal cancello e prossimi passi (nulla e' stato fatto sul codice)
 - **`controllo-preventivo` (Opus)** su questo documento prima di qualunque uscita: identita' del segnale (rilegge `identita`), coerenza delle regole con il sorgente, numeri della sez. 3 (rilancia `h0` e `struttura`, stessi risultati).
 - Poi, **solo dopo le risposte di Claudio**: (1) `ABTG_SuperWave_Ombra.mq5` (ASCII, zero handle, zero `#include`, uscita al prezzo del tick), (2) lettore + autotest, (3) passata MQL5 (`mql5-ea-developer`: `CopyTicksRange`, `CopyRates` a serie non sincronizzata,
-  `FileMove`), (4) compilazione, (5) riga d'installazione con le soglie sopra, (6) parita' con `sw_audit`.
+  `FileMove`), (4) compilazione **solo dopo la firma di Claudio sul codice**, (5) riga d'installazione con le soglie sopra, **solo dopo le 48 ore e una misura nuova di RAM/CPU**
+  (la riga porta in testa il bersaglio: finestra PowerShell sul VPS, terminale `50503392`, e cosa non tocca), (6) parita' con `sw_audit`.
 - **Controlli gia' fatti qui**: `identita` (7 funzioni identiche + mutante visto); `h0` riprodotto 2 volte con gli stessi numeri; `struttura` riprodotto con `st_full` (20 flip in meno dei 11.198 della mia prima versione numpy: la
   versione con lo specchio collaudato e' quella citata); ASCII puro dello script; nessun file `.mq5`, `.ps1` ne' preset toccato; ombra EMA200 e righe DUKA/dukascopy non toccate.
