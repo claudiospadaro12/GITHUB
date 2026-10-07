@@ -33,7 +33,7 @@ quantificano (sempre dichiarata, sempre un input) · **[CASA]** = convenzione de
 3. Le taglie crescenti ("size piu' grosse", "dieci volte tanto", il 2/3 del PDF) sono **spente**: tutti gli ordini dello stesso setup hanno la stessa taglia, e il rischio TOTALE del setup e' fissato prima di entrare.
 4. Il rischio per setup (0,25%) e' un **segnaposto da firmare**, non una nostra proposta. Niente martingala, niente recupero, niente griglia aperta: lo stop c'e' sempre.
 5. **Una misura che pesa gia' oggi (aritmetica, non opinione)**: con i numeri letterali dell'audio (take profit 10, stop a 5-20 di distanza) **su nessuno degli 8 simboli con spread misurato la scala intera passa il cancello del costo di lavoro** (stop >= 40 x pedaggio): su EURUSD servono almeno 26,7 pip di stop, sugli indici 64-80 punti; solo sull'oro, contando 1 punto = 1 dollaro, passano i due ordini piu' lontani. Lo stop "letterale" va quindi misurato anche nella versione agganciata alla volatilita' (manopola gia' prevista).
-6. Contato su un feed esterno dell'oro 2024-26 (NON BCM): il modo AUDIO su H1 fa circa **35-40 setup l'anno per linea** dopo il filtro ADX (ricontato due volte, con due programmi diversi); il modo PDF su H4 circa **26 tocchi l'anno** sulla linea 3.5, prima delle conferme. Per avere 150 operazioni IS + 150 OOS sui tick veri (circa 2 anni) **bisogna sommare piu' simboli della stessa famiglia**.
+6. Contato su un feed esterno dell'oro 2024-26 (NON BCM): il modo AUDIO su H1 fa circa **16-18 setup l'anno per linea** dopo il filtro ADX con l'**ADX standard di MT5** (quello che l'EA usa); **35-40** era il conto con la formula di Wilder, che sta piu' in basso e lascia passare il doppio *(corretto dal cancello sul codice 07/10, §5.4)*; il modo PDF su H4 circa **26 tocchi l'anno** sulla linea 3.5, prima delle conferme. Per avere 150 operazioni IS + 150 OOS sui tick veri (circa 2 anni) **bisogna sommare piu' simboli della stessa famiglia**.
 7. Piano: passo 0 di solo conteggio su 36 simboli (circa 1 ora di PC [STIMA]), poi la base dei due modi sui simboli che passano il costo, poi le manopole una alla volta solo dove c'e' un motore vivo. Tutto sul **PC di backtest**, mai sul VPS.
 8. Le soglie per dire "funziona" sono scritte **prima** dei numeri, ognuna con il numero che produrrebbe il caso "non c'e' niente": per esempio con 150 operazioni una strategia a caso supera PF 1,15 nell'11-13% dei casi (calcolo, §6), quindi la soglia sale.
 9. Restano solo a te: **rischio e taglie**, **su quali simboli e su quale conto** andrebbe, e **se l'EA deve essere fedele alla collega o il meglio misurato** quando le due cose non coincidono.
@@ -159,7 +159,9 @@ Ogni input "ambiguo" ha un valore `DA_MODALITA` (default). In `OnInit` l'EA:
 3. rifiuta l'avvio (`INIT_PARAMETERS_INCORRECT`) se: `InpTF` < H1 (A-R8/R9); `InpPlaceboAtr` != 0 fuori dal tester;
    `InpRischioSetupPct` <= 0; `InpMoltConfluenza` x rischio > `InpRischioMaxSetupPct` (il troncamento e' dichiarato a log);
 4. crea gli handle (`iATR` x2, `iMA` EMA200/14/89/9/21, `iADX`, `iBands` solo se `InpLogContesto`) e li rilascia in
-   `OnDeinit` **[CASA]**.
+   `OnDeinit` **[CASA]**. `iADX` = l'indicatore che MT5 chiama "ADX" (formula MetaQuotes), **non** `iADXWilder`: e' il default
+   perche' le immagini del PDF sono MT5 su BCM e "ADX" sulla piattaforma e' quello; Wilder e' l'asse `InpAdxTipo` (A5).
+   *(Precisato dal cancello sul codice 07/10: le due formule danno frequenze diverse di 2-10 volte, §5.4.)*
 
 ### 2.2 Le macchine a stati
 
@@ -291,13 +293,13 @@ x 2 TF, **per simbolo** (la regola dei due lati di casa si applica a tutti i sim
 | A2 scala | audio §3.2 + "5/10" | (5,5) / (10,5) / (5,10) | 2 | 8 |
 | A3 definizione di tocco | audio Q7 | RAGGIUNGE / SFIORA | 1 | 4 |
 | A4 conteggio | audio Q8 | letterale / illimitato; reset AL_FLIP / DISTACCO | 2 | 8 |
-| A5 ADX | A-R12 | spento; periodo 10; periodo 20; soglia 25; ambito TUTTE | 5 | 20 |
+| A5 ADX | A-R12 | spento; periodo 10; periodo 20; soglia 25; ambito TUTTE; formula Wilder (`InpAdxTipo`, aggiunta dal cancello 07/10) | 6 | 24 |
 | A6 inclinazione EMA200 | A-R19 | spenta; P25; P75; verso CONCORDE | 4 | 16 |
 | A7 linee | A-R11/13/14 | solo 2.5 / solo 3.0 / solo 3.5 | 3 | 12 |
 | A8 stop | A-R23 | ESTREMO_RECENTE + 5 | 1 | 4 |
 | A9 durata | A-R24 | 60 min | 1 | 4 |
 | A10 unita' (solo oro) | audio §3.3 | 0,1 USD contro 1,0 USD | 0 (aritmetica, §5.3) | 0 |
-| **Totale AUDIO** | | | **20** | **80** |
+| **Totale AUDIO** | | | **21** | **84** |
 
 ### 3.2 Assi del modo PDF (base: solo 3.5, conferma on, chiude vicino 0,5 ATR, confluenza EMA200 obbligatoria 0,5 ATR, mercato + limit a 20, stop estremo recente, TP EMA14/EMA89, R/R 1, BE al TP1, parziale 0)
 
@@ -325,12 +327,12 @@ x 2 TF, **per simbolo** (la regola dei due lati di casa si applica a tutti i sim
 ### 3.4 Totale e costo
 
 - **Base (fase 1)**: 3 famiglie x 2 lati x 2 TF = **12 passate per simbolo**.
-- **Assi completi (fase 2)**: 80 + 60 + 36 + 8 + 8 = **192 passate per simbolo**, ma **solo** sui simboli dove la base della
+- **Assi completi (fase 2)**: 84 + 60 + 36 + 8 + 8 = **196 passate per simbolo** *(192 -> 196 il 07/10: cella Wilder in A5)*, ma **solo** sui simboli dove la base della
   famiglia non e' morta. Se la collega risponde alle bloccanti, il totale scende (tabella §8). *(Corretto dal cancello 07/10: la
   v1 sommava 40 per M2, cioe' anche le 4 passate della sua base, gia' contate nelle 12 della fase 1: 196 -> 192.)*
 - Costo per passata a tick reali, ancore **misurate** in casa: 0,083 min/passata (R88a, tick M5, 21 mesi) - 0,333 min/passata
   (R245, 84 passate in 28 min); 20,1 s/passata Dow M5 (R202A). Il forex ha volumi di tick diversi dal Dow: banda larga.
-  -> fase 2 su 5 simboli = 960 passate = **1,3-5,3 ore di PC** **[STIMA]** (960 x 0,083-0,333 min); base su 15 simboli = 180 passate = **15-60 min** **[STIMA]**.
+  -> fase 2 su 5 simboli = 980 passate = **1,4-5,4 ore di PC** **[STIMA]** (980 x 0,083-0,333 min); base su 15 simboli = 180 passate = **15-60 min** **[STIMA]**.
 
 ---
 
@@ -439,6 +441,25 @@ conteggio) -> "35-40 setup l'anno per linea" e' riproducibile. 🔴 **Ma H4 e D1
 25 / 23 / 9 e **D1 sul 3.5 fa 6 tocchi/anno invece di 3** (2.5: 10 invece di 5). Le righe H4/D1 della tabella sono quindi
 **[DIPENDENTI DALL'OROLOGIO]**: la composizione delle candele H4/D1 cambia con l'ora del server (vedi §5.5).
 
+🔴 **Corretto dal cancello sul CODICE (07/10): la colonna ADX qui sopra e' contata con la formula di WILDER, ma l'EA usa `iADX`
+di MT5** (§2.1). Le due formule non sono la stessa misura: `iADX` (ADX.mq5 di MetaQuotes) divide +DM/-DM per il true range
+**barra per barra** e liscia con una media esponenziale `2/(n+1)`; Wilder liscia TR e DM separatamente con `1/n`. Sull'oro H1 della
+stessa finestra la mediana e' **28,9** con `iADX` contro **25,2** con Wilder, e la quota di barre <= 20 e' **17,3%** contro
+**29,4%**. Ricontato dal cancello con un programma indipendente (specchio di ADX.mq5 ricostruito a memoria, stesso esito dello
+specchio del collaudo; **[DA CONFERMARE sul terminale]**: un indicatore stampato in MT5 su 5 barre chiude il dubbio):
+
+| TF | linea | entro il limite audio | + Wilder <= 20 | **+ `iADX` <= 20 (default EA)** | `iADX` alla barra PRIMA (quella in cui la scala si arma) | `iADX` <= 25 |
+|---|---|---:|---:|---:|---:|---:|
+| H1 | 2.5 / 3.0 / 3.5 | 101 / 84 / 88 | 40 / 36 / 36 | **16 / 18 / 16** | 21 / 23 / 21 | 38 / 38 / 38 |
+| H4 | 2.5 / 3.0 / 3.5 | 26 / 19 / 22 | 11 / 6 / 10 | **5 / 1 / 1** | 5 / 2 / 2 | 10 / 6 / 8 |
+
+Perche' il default resta `iADX`: la collega dice "ADX" e "aspetta che controllo" (guarda il SUO grafico); le immagini del PDF del
+gruppo sono **MT5 su BCM** (`EURUSD.bcm`, `CHFJPY.bcm`), e su MT5 l'indicatore che si chiama "ADX" e' `iADX` (Wilder ha un nome
+suo). Scegliere Wilder vorrebbe dire usare un filtro che sull'oro equivale a `iADX` <= ~25, cioe' **spostare in silenzio** il "20"
+detto da lei. Wilder resta una cella dell'asse A5 (§3.1). Se la collega usa un'altra piattaforma (TradingView usa Wilder), la
+risposta alla bloccante 9 decide: e' una domanda, non una misura. **Conseguenza da scrivere accanto a E0**: su H4 il filtro
+letterale lascia **1-2 setup l'anno** sul 3.5 dell'oro: il modo AUDIO su H4 si legge solo come famiglia.
+
 Lettura (attese, non verdetti): AUDIO H1 per simbolo ~35-110 setup/anno a seconda di quante linee vivono **prima** dell'inclinazione
 -> in 2 anni di tick **70-220 per simbolo**: 150 IS + 150 OOS richiedono **2-4 simboli della stessa famiglia** sommati. PDF H4 sul
 3.5: 26 tocchi/anno **prima** di conferma, chiusura vicina e confluenza -> **[STIMA]** 5-15 setup/anno per simbolo -> per 300 sui
@@ -476,7 +497,7 @@ tick servono **10-30 simboli**: il merito del PDF a tick e' misurabile solo sull
 |---|---|---|---:|---|---|
 | **F0** sonda | `InpSoloConta`=true su 36 simboli x 8 configurazioni (AUDIO H1/H4/H12/D1, PDF H4/D1, M2 H1/H4), finestra dei tick | OHLC M1 | 288 | **14-160 min**, centro ~65 (2,9-33 s/passata, mediana 13,5, R88) | setup/anno per simbolo; soglie P25/P50/P75 dell'inclinazione **fissate qui, prima di qualunque P/L**; stop/pedaggio per ordine; regime della finestra |
 | **F1** base | i (simbolo, TF, famiglia) che F0 non esclude per costo, 2 lati | tick reali | 12 per simbolo | 15 simboli: **15-60 min** | motore vivo o no, per famiglia e lato |
-| **F2** assi | §3, uno alla volta, solo sulle famiglie vive | tick reali | fino a 192 per simbolo | 5 simboli: **1,3-5,3 h** | quale lettura delle fonti regge; centro dell'altopiano |
+| **F2** assi | §3, uno alla volta, solo sulle famiglie vive | tick reali | fino a 196 per simbolo | 5 simboli: **1,4-5,4 h** | quale lettura delle fonti regge; centro dell'altopiano |
 | **F3** IS/OOS | cella scelta sull'IS col centro dell'altopiano, OOS una volta sola | tick reali | 2 per simbolo | minuti | merito |
 | **F4** rischio | cella congelata sul vecchio a barre | OHLC M1 | 2 per simbolo | ordine dei minuti per passata **[STIMA NON AGGANCIATA]**: nessun round di casa cronometrato su 15 anni; R88 da' 2,9-33 s/passata OHLC sulle finestre di casa, lo scalaggio lineare sugli anni non e' misurato | rischio (puo' solo bocciare) |
 | (dopo) | forward demo, mai prima del cancello e della firma | - | - | settimane | collaudo vero |
@@ -514,7 +535,7 @@ Modello: passeggiata casuale senza edge, TP e stop fissi, pedaggio come al §5.3
 
 | # | ipotesi | attesa e soglia (scritte ora) | contro-esempio: che cosa produce l'alternativa |
 |---|---|---|---|
-| **E0** | il passo 0 conta abbastanza | AUDIO H1: >= 70 setup per simbolo nella finestra dei tick (tabella 5.4 fa 70-220 sull'oro) | se su BCM esce un ordine di grandezza meno, o il calcolo del tocco e' sbagliato o il feed esterno inganna: si confrontano oro BCM e oro HistData **sulla stessa finestra** prima di andare avanti |
+| **E0** | il passo 0 conta abbastanza | AUDIO H1: >= 70 setup per simbolo nella finestra dei tick (la base a tre linee con `iADX` solo sul 3.5 fa ~200/anno sull'oro, ~440 nei 2,19 anni). *Corretto dal cancello 07/10*: la sola linea 3.5 con `iADX` <= 20 fa ~16/anno su H1 (~34 nei 2,19 anni) e ~1-2/anno su H4: l'asse A7 "solo 3.5" **non** arriva a 70 per simbolo, si misura solo sulla famiglia | se su BCM esce un ordine di grandezza meno, o il calcolo del tocco e' sbagliato o il feed esterno inganna: si confrontano oro BCM e oro HistData **sulla stessa finestra** prima di andare avanti |
 | **E1** | fedelta' della geometria (non dell'edge) | AUDIO H1: durata mediana <= 60 min (A-R24 "un'oretta neanche"); 60-180 = compatibile con un TF d'esecuzione piu' alto, si chiede; > 180 = **non e' il metodo della collega**, si ferma la lettura del merito | una passeggiata casuale con barriere a circa 1 ATR esce in circa 1-2 barre [CALCOLO: tempo atteso = distanza^2 / varianza per barra]: **anche un motore senza edge** ha durata mediana di ~1-2 h su H1. Quindi E1 controlla la geometria, **non** dimostra niente sul merito |
 | **E2** | costo | per ogni (simbolo, TF, famiglia): stop/pedaggio mediano per ordine >= 40 (lavoro); < 13,3 = escluso per aritmetica | vedi §5.3: senza la commissione EURUSD passerebbe a 10 pip. Il cancello si calcola **con** la commissione |
 | **E3** | merito della famiglia | IS e OOS: n >= 150 **setup** (non ordini, §5.5) ciascuno; PF >= **max(1,15; soglia del nullo al 5% per la geometria e l'n misurati, §6.1)**; R/R e tasso di vincita scritti accanto (pareggio a ~75% con TP 10 e stop 26,7) | il nullo supera 1,15 nell'11-13% dei casi a n=150: con la sola soglia 1,15, una cella su otto senza edge passerebbe l'OOS |
@@ -564,7 +585,7 @@ Non codificato (ne' come filtro, ne' come uscita). Se Claudio o la collega lo fo
 
 | bloccante (audio §10.2) | assi che spegne | passate risparmiate per simbolo |
 |---|---|---:|
-| 1 quale fonte comanda | una modalita' intera | 60 (PDF) o 80 (AUDIO) |
+| 1 quale fonte comanda | una modalita' intera | 60 (PDF) o 84 (AUDIO) |
 | 2 direzione | nessuno (i due lati si misurano sempre, regola di casa); decide **cosa si schiera** | 0 |
 | 3 ruolo delle linee 2.5/3, periodo ATR | A7 | 12 |
 | 4 tocco, conteggio, conferma | A3, A4, P1 | 16 |
@@ -572,7 +593,7 @@ Non codificato (ne' come filtro, ne' come uscita). Se Claudio o la collega lo fo
 | 6 ingresso (scala, "5/10", pendenti) | A2, P4 | 16 |
 | 7 stop | A8, P5 | 12 |
 | 8 take profit, BE, parziali | A1, P6 | 12 |
-| 9 filtri (ADX, inclinazione, confluenza) | A5, A6, P3 | 48 |
+| 9 filtri (ADX: periodo, soglia, **quale ADX della piattaforma**; inclinazione, confluenza) | A5, A6, P3 | 52 |
 | 10 ingresso sulla sola EMA 200 | M2 | 40 |
 | 11 simboli e orari | riduce i simboli del passo 0 e di F1 | fino a 288 passate di F0 |
 | 12 taglie e rischio | S2, S3 | 8 |
