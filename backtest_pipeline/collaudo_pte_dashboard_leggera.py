@@ -177,6 +177,8 @@ API = {
     "ChartGetInteger": (2, 4), "ChartSetInteger": (3, 4), "ChartSetSymbolPeriod": (3, 3), "ChartOpen": (2, 2),
     "SymbolSelect": (2, 2), "SetIndexBuffer": (2, 3), "PlotIndexSetInteger": (3, 4), "PlotIndexSetString": (3, 3),
     "IndicatorSetInteger": (2, 3),
+    # cancello 07/10 (classi 930/951): EA sul grafico prima di cambiarne simbolo/TF, EA sul grafico nuovo
+    "ChartGetString": (2, 3), "ChartSymbol": (0, 1),
 }
 KEYW = {"if", "for", "while", "switch", "return", "sizeof", "else"}
 VIETATI = ["OrderSend", "CTrade", "Trade.mqh", "PositionOpen", "WebRequest", "Socket", "SendMail",
@@ -573,7 +575,28 @@ def raccordo_v11(src, code, bag):
     need('Etic(PD_PREF+"ht_"+IntegerToString(j),', S("Struttura"), "nome dell'etichetta TF diverso da ht_<j>")
     va = S("VaiA")
     need("if(SymbolInfoInteger(sym,SYMBOL_SELECT)==0&&!SymbolSelect(sym,true))", va, "simbolo fuori Market Watch non aggiunto (SymbolSelect)")
-    need("if(InpClickNuovoGrafico){if(ChartOpen(sym,tf)==0)", va, "grafico nuovo non aperto su (sym, tf) con InpClickNuovoGrafico")
+    need("if(InpClickNuovoGrafico){longid=ChartOpen(sym,tf);if(id==0)", va, "grafico nuovo non aperto su (sym, tf) con InpClickNuovoGrafico")
+    # --- cancello 07/10, classe 930: con un EA su QUESTO grafico il click non cambia simbolo/TF (l'EA si riavvierebbe
+    #     sull'altro strumento); il controllo sta PRIMA di ChartSetSymbolPeriod e vale solo per questo grafico
+    g930 = "if(!InpClickNuovoGrafico){if(sym==_Symbol&&tf==_Period)return;stringea=ChartGetString(0,CHART_EXPERT_NAME);if(StringLen(ea)>0){Alert("
+    need(g930, va, "classe 930: manca la guardia 'EA su questo grafico' prima di cambiare simbolo/TF")
+    if g930 in va and va.find(g930) > va.find("ChartSetSymbolPeriod("):
+        bag.append("V11 classe 930: la guardia EA sta DOPO ChartSetSymbolPeriod")
+    i930 = va.find(g930)
+    seg = va[i930:va.find("if(SymbolInfoInteger(sym,SYMBOL_SELECT)", i930)] if i930 >= 0 else ""
+    if not seg.endswith(");return;}}"):
+        bag.append("V11 classe 930: con un EA sul grafico il ramo dell'avviso non esce (return) prima del cambio simbolo/TF")
+    # --- classe 951: il grafico nuovo e' sorvegliato ~10 s (EA arrivato da default.tpl -> Alert)
+    need("elseSorvegliaNuovo(id);return;}", va, "classe 951: il grafico aperto dal click non e' sorvegliato")
+    sv = C("SorvegliaNuovo")
+    need("gNuovoId[gNuovoN]=id;gNuovoFino[gNuovoN]=gGiri+10;gNuovoN++;", sv, "classe 951: sorveglianza non registrata o senza scadenza")
+    cn = C("ControllaNuovi")
+    for pz, msg in (("stringsy=ChartSymbol(id);if(StringLen(sy)==0)via=true;", "grafico chiuso non tolto dalla sorveglianza"),
+                    ("stringea=ChartGetString(id,CHART_EXPERT_NAME);if(StringLen(ea)>0){Alert(", "EA del grafico NUOVO non letto o non avvisato"),
+                    ("elseif(gGiri>gNuovoFino[x])via=true;", "sorveglianza senza scadenza"),
+                    ("if(!via){gNuovoId[tieni]=gNuovoId[x];gNuovoFino[tieni]=gNuovoFino[x];tieni++;}", "lista sorvegliati non compattata")):
+        need(pz, cn, "classe 951: " + msg)
+    need("if(gNuovoN>0)ControllaNuovi();", C("OnTimer"), "classe 951: il timer non sorveglia i grafici aperti dal click")
     need("if(!ChartSetSymbolPeriod(0,sym,tf))", va, "ChartSetSymbolPeriod non su questo grafico con (sym, tf)")
     for f in ("ChartSetSymbolPeriod(", "ChartOpen(", "SymbolSelect("):
         if code.count(f) != 1 or f not in norm(corpo(code, "VaiA") or ""):
@@ -600,6 +623,13 @@ def raccordo_v11(src, code, bag):
          "HIDE nasconde anche il tasto che la riapre (o non nasconde la tabella)")
     for f in ("Rett", "Etic", "Bottone"):
         need("ObjectSetInteger(0,nome,OBJPROP_TIMEFRAMES,Periodi(nome));", C(f), "%s non applica la visibilita' di HIDE" % f)
+    # cancello 07/10: norm() toglie gli spazi anche DENTRO le stringhe, quindi '"b_hide "' passava l'ancora sopra (mutante
+    # VERDE: HIDE che nasconde il suo stesso tasto). Ogni nome di tasto usato (PD_PREF+"b_...") deve essere ESATTAMENTE
+    # uno di quelli creati da Bottone in Struttura, sul testo grezzo.
+    creati = set(re.findall(r'Bottone\(PD_PREF\+"(b_[^"]*)"', sc))
+    usati = set(re.findall(r'PD_PREF\+"(b_[^"]*)"', sc))
+    if not creati or usati - creati:
+        bag.append("V11 nomi di tasto usati ma mai creati (spazi o refusi dentro la stringa): %s" % sorted(usati - creati))
     need('gNascosta=on;GvSalva("SHIDE",on?1.0:0.0);Struttura();if(!on)Refresh();', S("Nascondi"),
          "HIDE/SHOW: stato non salvato, oggetti non riapplicati o niente ricalcolo allo SHOW")
     # --- STATO DEI TASTI (GlobalVariable con la ChartID)
@@ -625,6 +655,10 @@ def raccordo_v11(src, code, bag):
         if ch.count(pr) != 2 or "ChartSetInteger(0,%s,clrNONE)" % pr not in ch or pr not in C("ColsRestore"):
             bag.append("V11 colore %s non catturato/nascosto/ripristinato" % pr)
     need("ColsRestore();", od[:od.find("if(gProprietario)")] if "if(gProprietario)" in od else "", "OnDeinit non ripristina i colori per primo")
+    # cancello 07/10: la riga sopra cerca il TESTO, e 'if(reason!=REASON_CHARTCHANGE) ColsRestore();' la passava (mutante VERDE):
+    # il ripristino deve essere INCONDIZIONATO, subito dopo EventKillTimer
+    if not od[od.find("{"):].startswith("{EventKillTimer();ColsRestore();"):
+        bag.append("V11 OnDeinit: ColsRestore non e' incondizionato in testa (un motivo d'uscita lascerebbe le candele a clrNONE)")
     need("if(gHA)ColsHide();elseRepairInvisibleNative();", oi, "OnInit: HA acceso non nasconde / spento non ripara")
     need("if(on){gCure=0;ColsHide();}elseColsRestore();ApplicaPlot();", C("ImpostaHA"), "tasto HA: non nasconde/ripristina")
     need("if(!gHA||gCure>=3)return;", C("CuraColori"), "CuraColori fuori dall'HA acceso o senza limite")
@@ -643,8 +677,8 @@ def raccordo_v11(src, code, bag):
         need(v, S(f), "%s non salva lo stato o non ridisegna" % f)
     # --- GRAFICO CORRENTE (OnCalculate)
     oc = C("OnCalculate")
-    for pz, msg in (("boolpieno=(prev_calculated<=0||prev_calculated>rates_total);intda=(pieno?0:prev_calculated-1);",
-                     "ricalcolo incrementale non dalla barra prev_calculated-1 (la barra in formazione si rifa')"),
+    for pz, msg in (("boolpieno=(prev_calculated<=0||prev_calculated>rates_total);if(!pieno&&time[prev_calculated-1]!=gUltBarraGraf)pieno=true;intda=(pieno?0:prev_calculated-1);",
+                     "ricalcolo incrementale non dalla barra prev_calculated-1 (la barra in formazione si rifa') o senza l'ancora all'ora (classe 965)"),
                     ("PG_HA(open,high,low,close,rates_total,da,bHAo,bHAh,bHAl,bHAc);", "HA non dalle barre del grafico"),
                     ("for(intx=da;x<rates_total;x++)bHAcol[x]=(bHAc[x]>=bHAo[x])?0.0:1.0;", "colore HA non come ABTG_Pulsanti"),
                     ("PG_EMA(close,rates_total,da,InpEmaVeloce,bEmaV);PG_EMA(close,rates_total,da,InpEmaLenta,bEmaL);",
@@ -1794,9 +1828,9 @@ MUTANTI = [
     ("filtro del tipo di evento tolto", "   if(id!=CHARTEVENT_OBJECT_CLICK) return;\n   if(StringFind", "   if(StringFind"),
     ("SymbolSelect tolto", "   if(SymbolInfoInteger(sym,SYMBOL_SELECT)==0 && !SymbolSelect(sym,true))",
      "   if(SymbolInfoInteger(sym,SYMBOL_SELECT)<0)"),
-    ("grafico nuovo invertito", "   if(InpClickNuovoGrafico)\n     {\n      if(ChartOpen", "   if(!InpClickNuovoGrafico)\n     {\n      if(ChartOpen"),
+    ("grafico nuovo invertito", "   if(InpClickNuovoGrafico)\n     {\n      long id=ChartOpen", "   if(!InpClickNuovoGrafico)\n     {\n      long id=ChartOpen"),
     ("ChartSetSymbolPeriod sul simbolo corrente", "if(!ChartSetSymbolPeriod(0,sym,tf))", "if(!ChartSetSymbolPeriod(0,_Symbol,tf))"),
-    ("ChartOpen sul TF corrente", "if(ChartOpen(sym,tf)==0)", "if(ChartOpen(sym,_Period)==0)"),
+    ("ChartOpen sul TF corrente", "long id=ChartOpen(sym,tf);", "long id=ChartOpen(sym,_Period);"),
     ("default: click apre un grafico nuovo", "input bool InpClickNuovoGrafico = false;", "input bool InpClickNuovoGrafico = true;"),
     ("PD_Numero accetta non-cifre", "      if(ch<'0' || ch>'9') return(-1);\n", ""),
     ("prefisso del nome non controllato", "   if(StringLen(nome)<=lp || StringSubstr(nome,0,lp)!=p) return(0);", "   if(StringLen(nome)<=lp) return(0);"),
@@ -1822,7 +1856,7 @@ MUTANTI = [
     ("OnInit con HA acceso non nasconde", "   if(gHA)\n      ColsHide();     // ultimo passo", "   if(false)\n      ColsHide();     // ultimo passo"),
     ("riparazione dopo crash tolta", "   else\n      RepairInvisibleNative();\n   EventSetTimer(1);", "   EventSetTimer(1);"),
     ("cura dei colori non ricattura", "   gColsHidden=false;\n   ColsHide();\n   if(gCure>=3)", "   ColsHide();\n   if(gCure>=3)"),
-    ("cura dei colori tolta dal timer", "   CuraColori();\n   if(!gNascosta)", "   if(!gNascosta)"),
+    ("cura dei colori tolta dal timer", "   CuraColori();\n   if(gNuovoN>0)", "   if(gNuovoN>0)"),
     ("tasto HA spento non ripristina", "   else ColsRestore();\n   ApplicaPlot();", "   ApplicaPlot();"),
     ("plot HA invertito", "PlotIndexSetInteger(0,PLOT_DRAW_TYPE,gHA ? DRAW_COLOR_CANDLES : DRAW_NONE);",
      "PlotIndexSetInteger(0,PLOT_DRAW_TYPE,gHA ? DRAW_NONE : DRAW_COLOR_CANDLES);"),
@@ -1899,6 +1933,43 @@ MUTANTI = [
      "for(int p=9;p<=14;p++)\n     {\n      PlotIndexSetInteger(p,PLOT_DRAW_TYPE,gEma ?"),
     ("ST livello 1 con la linea del livello 2", "bSt1Su[x]=PG_StLinea(true,kDir1[x],kVal1[x],1.0);", "bSt1Su[x]=PG_StLinea(true,kDir2[x],kVal2[x],1.0);"),
     ("ST: buffer di calcolo come buffer disegnato", "ok=SetIndexBuffer(19,kAtr,   INDICATOR_CALCULATIONS) && ok;", "ok=SetIndexBuffer(19,kAtr,   INDICATOR_DATA) && ok;"),
+    # --- CANCELLO 07/10 (strato 2): mutanti scritti dal controllo-preventivo su righe NON scelte dall'autore.
+    #     Alla prima corsa 3 su 18 erano VERDI (OnDeinit che non ripristina al cambio simbolo, nome del tasto HIDE con uno
+    #     spazio dentro la stringa, GvPulisci che lascia le chiavi I): ancore aggiunte per i primi due; il terzo e'
+    #     dichiarato innocuo (residuo di 5 GlobalVariable, nessun effetto sullo stato) e NON e' in lista.
+    ("CANC CuraColori anche con HA spento", "   if(!gHA || gCure>=3) return;", "   if(gCure>=3) return;"),
+    ("CANC RepairInvisibleNative con || (classe 971)", "IsNone(CHART_COLOR_CANDLE_BULL) && IsNone(CHART_COLOR_CANDLE_BEAR) &&\n        IsNone(CHART_COLOR_CHART_UP) && IsNone(CHART_COLOR_CHART_DOWN) &&\n        IsNone(CHART_COLOR_CHART_LINE)))\n      return;\n   ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrLime);",
+     "IsNone(CHART_COLOR_CANDLE_BULL) || IsNone(CHART_COLOR_CANDLE_BEAR) ||\n        IsNone(CHART_COLOR_CHART_UP) || IsNone(CHART_COLOR_CHART_DOWN) ||\n        IsNone(CHART_COLOR_CHART_LINE)))\n      return;\n   ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrLime);"),
+    ("CANC ColOrDefault senza ripiego (ripristina clrNONE)", "   if(c==clrNONE)\n      return def;\n   return c;", "   return c;"),
+    ("CANC OnDeinit non ripristina al cambio simbolo/TF (click)", "   ColsRestore();                             // OGNI motivo",
+     "   if(reason!=REASON_CHARTCHANGE) ColsRestore();                             // OGNI motivo"),
+    ("CANC ColsRestore non abbassa gColsHidden", "   ChartSetInteger(0,CHART_COLOR_CHART_LINE, gColLine);\n   gColsHidden=false;", "   ChartSetInteger(0,CHART_COLOR_CHART_LINE, gColLine);"),
+    ("CANC ColsHide scambia barra su/giu", "   gColUp  =ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_UP),   clrLime);\n   gColDown=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_DOWN), clrRed);",
+     "   gColUp  =ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_DOWN), clrLime);\n   gColDown=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_UP),   clrRed);"),
+    ("CANC StatoAvvio salva lo stato come input", '   GvSalva("I"+cosa,inp ? 1.0 : 0.0);', '   GvSalva("I"+cosa,on ? 1.0 : 0.0);'),
+    ("CANC Nascondi salva sotto SHID", '   GvSalva("SHIDE",on ? 1.0 : 0.0);', '   GvSalva("SHID",on ? 1.0 : 0.0);'),
+    ("CANC click sul simbolo: limite nS non stretto", "      int a=PD_Numero(resto);\n      if(a<0 || a>=nS) return(0);", "      int a=PD_Numero(resto);\n      if(a<0 || a>nS) return(0);"),
+    ("CANC click sul rettangolo dell'intestazione ignorato", 'if(tipo=="hr" || tipo=="ht")', 'if(tipo=="ht")'),
+    ("CANC cella: simbolo da _Symbol", "   string sym=(i>=0 ? gSym[i] : _Symbol);", "   string sym=(i>=0 && j<0 ? gSym[i] : _Symbol);"),
+    ("CANC HA ON senza azzerare le cure", "   if(on){ gCure=0; ColsHide(); }", "   if(on){ ColsHide(); }"),
+    ("CANC ricostruzione solo sul pannello", '   if(ObjectFind(0,PD_PREF+"pannello")<0 || ObjectFind(0,PD_PREF+"b_hide")<0) Struttura();', '   if(ObjectFind(0,PD_PREF+"pannello")<0) Struttura();'),
+    ("CANC HIDE nasconde il suo tasto (spazio DENTRO la stringa)", 'nome!=PD_PREF+"b_hide") return(OBJ_NO_PERIODS);', 'nome!=PD_PREF+"b_hide ") return(OBJ_NO_PERIODS);'),
+    ("CANC incroci EMA da 1 a ogni tick", "   for(int x=(da<1 ? 1 : da);x<rates_total-1;x++)", "   for(int x=1;x<rates_total-1;x++)"),
+    ("CANC Supertrend da 0 a ogni tick", "SW_STCore(high,low,close,rates_total,da,InpStPeriodo,InpStMult1,", "SW_STCore(high,low,close,rates_total,0,InpStPeriodo,InpStMult1,"),
+    ("CANC MarcaDoji a ogni tick", "   if(time[rates_total-1]!=gUltBarraGraf)\n     {", "   if(gDoji) MarcaDoji();\n   if(time[rates_total-1]!=gUltBarraGraf)\n     {"),
+    # classe 930: EA sul grafico
+    ("CANC 930 guardia EA tolta", "      string ea=ChartGetString(0,CHART_EXPERT_NAME);\n      if(StringLen(ea)>0)\n        {\n         Alert(",
+     "      string ea=\"\";\n      if(StringLen(ea)>0)\n        {\n         Alert("),
+    ("CANC 930 guardia EA invertita", "      if(StringLen(ea)>0)\n        {\n         Alert(\"[PTE leggera] su QUESTO", "      if(StringLen(ea)==0)\n        {\n         Alert(\"[PTE leggera] su QUESTO"),
+    ("CANC 930 guardia EA senza return", "Metti la dashboard su un grafico SENZA EA.\");\n         return;", "Metti la dashboard su un grafico SENZA EA.\");"),
+    ("CANC 930 guardia EA anche col grafico nuovo saltata (ramo invertito)", "   if(!InpClickNuovoGrafico)\n     {\n      if(sym==_Symbol", "   if(InpClickNuovoGrafico)\n     {\n      if(sym==_Symbol"),
+    # classe 951: grafico nuovo sorvegliato
+    ("CANC 951 grafico nuovo non sorvegliato", "      else SorvegliaNuovo(id);", "      else Print(id);"),
+    ("CANC 951 sorveglianza tolta dal timer", "   if(gNuovoN>0) ControllaNuovi();\n", ""),
+    ("CANC 951 EA letto su QUESTO grafico invece del nuovo", "string ea=ChartGetString(id,CHART_EXPERT_NAME);", "string ea=ChartGetString(0,CHART_EXPERT_NAME);"),
+    ("CANC 951 sorveglianza senza scadenza", "         else if(gGiri>gNuovoFino[x]) via=true;", ""),
+    # classe 965: ancora all'ora
+    ("CANC 965 ancora all'ora tolta", "   if(!pieno && time[prev_calculated-1]!=gUltBarraGraf) pieno=true;\n", ""),
 ]
 
 

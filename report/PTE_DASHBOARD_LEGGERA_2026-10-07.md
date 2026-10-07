@@ -1,6 +1,8 @@
 # PTE Dashboard LEGGERA: la nostra versione della tabella PTE (07/10/2026)
 
 > **Stato v1.10 (07/10/2026 sera): strato 1 (collaudo) TUTTO OK, **157/157 mutanti presi** (66 della v1.00 + 91 nuovi: click 19, HA/colori 19, doji 16, HIDE 7, REFRESH 7, EMA 13, Supertrend 10; scritti dall'autore, quelli ciechi veri li scrive il cancello). Un mutante era VERDE alla prima corsa (il controllo delle cifre nel nome cliccato): aggiunto il contro-esempio `PDL_s_1/` (senza quel controllo diventerebbe la riga 9), poi preso · strato 2 (`controllo-preventivo`) NON ANCORA FATTO: lo fa la sessione principale, quindi la v1.10 NON è consegnabile finché non torna un PASS.**
+> **Strato 2 (`controllo-preventivo`, 07/10 sera): PASS CON RISERVA dopo 3 correzioni meccaniche fatte dal cancello** -- (1) **classe 930**: il click cambiava simbolo/TF anche a un grafico con un **EA** sopra (l'EA si sarebbe riavviato sull'altro strumento): ora con un EA sul grafico **non cambia niente** e lo dice con un `Alert`; (2) **classe 951**: il grafico aperto con `InpClickNuovoGrafico=true` e' sorvegliato 10 s (EA arrivato dal modello `default.tpl` -> `Alert`); (3) **classe 965**: ricalcolo incrementale ancorato all'ora. Il cancello ha scritto **18 mutanti ciechi suoi: 15 presi, 3 VERDI** (OnDeinit che non ripristina al click, spazio dentro il nome del tasto HIDE, chiavi `I` non cancellate -- quest'ultimo innocuo): ancore aggiunte, poi **+9 mutanti sulle correzioni**; collaudo intero rigirato: **183 mutanti** in lista. Serve un **secondo lettore indipendente** sulle tre correzioni (codice nuovo, scritto dal cancello). Classe nuova **1176** in checklist.
+> 🪟 **Bersaglio: SOLO il terminale MT5 `50503635` (`C:\MT5_MANUALE`) sul VPS, su un grafico SENZA EA.** Non tocca FTMO `1514806751` (`C:\FTMO`), REALE `10105439` (`C:\BCM_Reale`), piccolo `50503392`, 100k `50504263`, banco `50504400`, Pepperstone, Tickmill (dettaglio e riga di riconoscimento al §4).
 > **Mai compilata: qui non c'è MetaEditor.** La v1.00 (commit `5f3e4d0d`) era passata con riserva; la v1.10 è un file nuovo per metà e la sua prima compilazione la fai tu (F7).
 
 File:
@@ -27,7 +29,9 @@ Le sue parole: _"NELLA DASHBOARD PTE MANCANO LO SWITCH PER LE CANDELE HEIKENASHI
 | **click su una CELLA** (anche sull'orario scritto) | il grafico va su **quel simbolo e quel TF** | — |
 | **click sul TF dell'intestazione** (H1/H4/D1) | il grafico resta sul simbolo e passa a quel TF | — |
 
-Input nuovo `InpClickNuovoGrafico` (default `false`): con `true` il click **apre un grafico nuovo** invece di cambiare questo. Un simbolo che non è nel Market Watch viene **aggiunto** (`SymbolSelect`); se non esiste sul broker (suffisso sbagliato?) nel log Esperti esce il motivo.
+🔴 **Correzione del cancello (strato 2, 07/10 sera) — classe 930: se sul grafico della dashboard gira un EA, il click NON cambia simbolo né TF** (esce un `Alert` che lo dice). Cambiare simbolo a un grafico con un EA lo **riavvia sull'altro strumento**, col suo magic e il suo rischio: sul `50503635` il 27/09 girava `ABTG_ScalperDirezionale` (magic `779901`, XAUUSD M1). La v1.10 dell'autore non aveva questa guardia (che `ABTG_EMA200_Dashboard` e `SuperWave v4.1` hanno già). 👉 **Metti la dashboard su un grafico SENZA EA.**
+
+Input nuovo `InpClickNuovoGrafico` (default `false`): con `true` il click **apre un grafico nuovo** invece di cambiare questo; per ~10 s la dashboard guarda se quel grafico è nato con un EA dentro (dal modello `default.tpl`, classe 951) e, se sì, lo dice con un `Alert`. Un simbolo che non è nel Market Watch viene **aggiunto** (`SymbolSelect`); se non esiste sul broker (suffisso sbagliato?) nel log Esperti esce il motivo.
 
 ### Come si comporta al click (cosa succede "dietro")
 - Cambiare simbolo/TF del grafico **ricarica l'indicatore** (MT5 lo fa sempre). **Lo stato dei tasti sopravvive**: è in una **GlobalVariable del terminale** `PDLV_<numero del grafico>_...` (stessa tecnica di `ABTG_Pulsanti_Grafico.mq5`). Si cancella quando togli l'indicatore o chiudi il grafico. Se cambi un input "di partenza" (es. `InpHaDefault`), vale il nuovo input.
@@ -63,6 +67,8 @@ Input nuovo `InpClickNuovoGrafico` (default `false`): con `true` il click **apre
 - **Click**: che MT5 mandi `CHARTEVENT_OBJECT_CLICK` per etichette e rettangoli **non selezionabili** (è la pratica comune, non l'ho visto su un terminale); che `ChartSetSymbolPeriod` ricarichi l'indicatore come descritto.
 - **Cambio di tipo del disegno** (`PLOT_DRAW_TYPE`) a indicatore acceso: lo usiamo per accendere/spegnere HA/EMA/ST senza ricalcolare; se il terminale non lo ridisegna subito, si vedrà al tick successivo.
 - **HIDE** con `OBJ_NO_PERIODS`: gli oggetti restano ma non si vedono; non provato su un terminale.
+- **Guardia EA (classe 930) e sorveglianza del grafico nuovo (951)**: provate a tavolino (ancore + mutanti), non su un terminale; che `CHART_EXPERT_NAME` di un grafico appena aperto sia leggibile entro 10 s e' [NON VERIFICATO], come in `ABTG_Confluenza_Dashboard`.
+- **Ancora all'ora del ricalcolo incrementale (classe 965)**: se lo storico scorre senza che MT5 passi `prev_calculated = 0`, HA/EMA/Supertrend si ricalcolano da zero. Contro-esempio a modello (scratchpad del cancello): buffer che NON scorrono col dato -> senza ancora la HA sbaglia fino a 24,5 punti, con ancora 0; buffer che scorrono -> 0 e 0. Quale dei due sia MT5: [NON VERIFICATO]; l'ancora costa un confronto.
 - **Persistenza** della GlobalVariable dopo un **riavvio** del terminale: il numero del grafico potrebbe cambiare → si riparte dagli input [NON VERIFICATO], come in Pulsanti.
 - **Aspetto**: posizione e larghezza dei tasti (3 per riga, 96 pixel coi default), frecce, colori.
 - **Feed**: tutte le misure sono sull'oro HistData, non sul feed BCM.
@@ -135,7 +141,7 @@ La finestra giusta è quella con `Path` dentro `C:\MT5_MANUALE` **e** titolo che
 
 ✋ Poi, a mano dentro quel terminale:
 1. `File > Apri cartella dati > MQL5 > Indicators`: copia `ABTG_PTE_Dashboard_Leggera.mq5`; aprilo in MetaEditor e premi **F7**. Se esce anche un solo errore, mandami il testo: è la prima compilazione di sempre.
-2. Sullo **stesso grafico** dove gira l'originale aggiungi la nostra con **`InpOffsetX = 420`** (così sta a destra dell'originale e non si sovrappongono), **`InpModoConfronto = true`** e — novità v1.10 — **`InpHaDefault = false`**: l'originale disegna già le sue Heikin Ashi, e due indicatori che nascondono le candele sullo stesso grafico si pestano i colori.
+2. Sullo **stesso grafico** dove gira l'originale (🔴 **un grafico SENZA EA**: se in alto a destra c'è il nome di un EA, scegline un altro) aggiungi la nostra con **`InpOffsetX = 420`** (così sta a destra dell'originale e non si sovrappongono), **`InpModoConfronto = true`** e — novità v1.10 — **`InpHaDefault = false`**: l'originale disegna già le sue Heikin Ashi, e due indicatori che nascondono le candele sullo stesso grafico si pestano i colori.
 3. Aspetta ~10 secondi (riempimento), poi **una schermata** con le due tabelle affiancate.
 4. Ripeti cambiando **un input alla volta** (una schermata per ognuno): `InpCandela = Candele giapponesi` · `InpTmaModo = TMA centrata` · `InpCanale = Entrambi`. Conta le celle uguali su 105: **è una misura**, e ci dice quale lettura è giusta.
 5. Passando il mouse su una cella, il tooltip mostra la distanza del corpo dal canale in ATR (> 0 = fuori): dove le due tabelle non coincidono, ci dice se è mancato poco o tanto.

@@ -39,6 +39,12 @@
 //|                  cella; sul TF dell'intestazione: TF su questo   |
 //|                  simbolo. InpClickNuovoGrafico=true apre invece  |
 //|                  un grafico nuovo.                               |
+//|                  SE SU QUESTO GRAFICO GIRA UN EA il click NON    |
+//|                  cambia niente (Alert): l'EA si riavvierebbe su  |
+//|                  un altro simbolo (classe 930). Grafico nuovo:   |
+//|                  10 s di guardia su un EA arrivato dal modello   |
+//|                  default.tpl (classe 951, Alert).                |
+//|                  Storico che scorre: ricalcolo completo (965).   |
 //|   STATO DEI TASTI: GlobalVariable del terminale "PDLV_<ChartID>_" |
 //|   (come ABTG_Pulsanti): resta al cambio di simbolo/TF (il click  |
 //|   RICARICA l'indicatore) e al cambio parametri se l'input di     |
@@ -1427,8 +1433,21 @@ void ImpostaSt(bool on)
 //--- CLICK su simbolo/cella/TF: il grafico va li' (o un grafico nuovo con InpClickNuovoGrafico).
 //    ChartSetSymbolPeriod RICARICA questo indicatore: lo stato dei tasti resta (GlobalVariable), la
 //    cache della tabella no (si riempie in ~6 s).
+//    Classe 930 (cancello 07/10): se su QUESTO grafico gira un EA, cambiargli simbolo o TF lo
+//    reinizializza su un altro strumento (opererebbe li', col suo magic e il suo rischio): il grafico
+//    NON si tocca e non se ne apre un altro (classe 951: un grafico nuovo nasce da default.tpl).
 void VaiA(string sym,ENUM_TIMEFRAMES tf)
   {
+   if(!InpClickNuovoGrafico)
+     {
+      if(sym==_Symbol && tf==_Period) return;               // gia' qui: niente ricarico
+      string ea=ChartGetString(0,CHART_EXPERT_NAME);
+      if(StringLen(ea)>0)
+        {
+         Alert("[PTE leggera] su QUESTO grafico gira l'EA '",ea,"': simbolo/TF NON cambiati (l'EA si riavvierebbe su ",sym,"). Metti la dashboard su un grafico SENZA EA.");
+         return;
+        }
+     }
    if(SymbolInfoInteger(sym,SYMBOL_SELECT)==0 && !SymbolSelect(sym,true))
      {
       Print("[PTE leggera] ",sym,": non si puo' aggiungere al Market Watch (inesistente sul broker? suffisso giusto in InpSuffisso?), errore ",GetLastError());
@@ -1436,10 +1455,54 @@ void VaiA(string sym,ENUM_TIMEFRAMES tf)
      }
    if(InpClickNuovoGrafico)
      {
-      if(ChartOpen(sym,tf)==0) Print("[PTE leggera] ChartOpen ",sym," fallita, errore ",GetLastError());
+      long id=ChartOpen(sym,tf);
+      if(id==0) Print("[PTE leggera] ChartOpen ",sym," fallita, errore ",GetLastError());
+      else SorvegliaNuovo(id);                              // classe 951: EA arrivato col modello?
       return;
      }
    if(!ChartSetSymbolPeriod(0,sym,tf)) Print("[PTE leggera] ChartSetSymbolPeriod ",sym," fallita, errore ",GetLastError());
+  }
+
+//--- classe 951: un grafico aperto dal click nasce da default.tpl; se quel modello contiene un EA, il
+//    grafico nuovo ha un EA ACCESO. Si guarda CHART_EXPERT_NAME per ~10 s e si avvisa a voce alta.
+long gNuovoId[8];
+int  gNuovoFino[8];
+int  gNuovoN=0;
+
+void SorvegliaNuovo(long id)
+  {
+   if(gNuovoN>=8)
+     {
+      for(int x=1;x<8;x++){ gNuovoId[x-1]=gNuovoId[x]; gNuovoFino[x-1]=gNuovoFino[x]; }
+      gNuovoN=7;
+     }
+   gNuovoId[gNuovoN]=id;
+   gNuovoFino[gNuovoN]=gGiri+10;
+   gNuovoN++;
+  }
+
+void ControllaNuovi()
+  {
+   int tieni=0;
+   for(int x=0;x<gNuovoN;x++)
+     {
+      long id=gNuovoId[x];
+      bool via=false;
+      string sy=ChartSymbol(id);
+      if(StringLen(sy)==0) via=true;                        // grafico gia' chiuso
+      else
+        {
+         string ea=ChartGetString(id,CHART_EXPERT_NAME);
+         if(StringLen(ea)>0)
+           {
+            Alert("[PTE leggera] ATTENZIONE: il grafico ",sy," appena aperto dal click ha un EA ACCESO: '",ea,"' (arriva dal modello default.tpl). Se non lo volevi, toglilo SUBITO.");
+            via=true;
+           }
+         else if(gGiri>gNuovoFino[x]) via=true;             // ~10 s senza EA: a posto
+        }
+      if(!via){ gNuovoId[tieni]=gNuovoId[x]; gNuovoFino[tieni]=gNuovoFino[x]; tieni++; }
+     }
+   gNuovoN=tieni;
   }
 
 //==================================================================
@@ -1639,6 +1702,7 @@ void OnTimer()
    if(ObjectFind(0,PD_PREF+"pannello")<0 || ObjectFind(0,PD_PREF+"b_hide")<0) Struttura();
    if(gDoji && gMarcNome!="" && ObjectFind(0,gMarcNome)<0) MarcaDoji();
    CuraColori();
+   if(gNuovoN>0) ControllaNuovi();
    if(!gNascosta) GiroCelle(ora);             // NASCOSTA: carico zero, nessuna copia e nessun ricalcolo
    if(gRidisegna)
      {
@@ -1688,6 +1752,9 @@ int OnCalculate(const int rates_total,const int prev_calculated,const datetime &
    ArraySetAsSeries(low,false);
    ArraySetAsSeries(close,false);
    bool pieno=(prev_calculated<=0 || prev_calculated>rates_total);
+   //--- classe 965: l'indice incrementale si ANCORA all'ora. Se lo storico e' scorso (barre vecchie tolte
+   //    con rates_total costante) la barra prev_calculated-1 non e' piu' quella vista: si riparte da zero.
+   if(!pieno && time[prev_calculated-1]!=gUltBarraGraf) pieno=true;
    int da=(pieno ? 0 : prev_calculated-1);
    if(pieno)
      {
