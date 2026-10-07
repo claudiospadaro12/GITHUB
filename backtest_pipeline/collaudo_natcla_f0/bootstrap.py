@@ -66,7 +66,7 @@ simboli = lot["simboli"].split(",")
 configs = lot["configs"].split(",")
 nrun = len(simboli) * len(configs)
 tetto = int(lot["tetto_min"])
-bassa, alta = nrun * 28 / 60.0, nrun * 40 / 60.0   # [MISURATO] pilota 07/10 14:50 (MANIFEST_F0.csv: 28-40 s, media 33 s)
+bassa, alta = nrun * 23 / 60.0, nrun * 68 / 60.0   # [MISURATO] MANIFEST_F0.csv del pilota (28-40 s), del lotto B (23-68 s) e del lotto D (28-33 s), 07/10
 
 bersaglio = ("BERSAGLIO: SOLO una finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ: terminale C:\\Program Files\\BCM Markets MT5 Terminal (cartella BCM Markets MT5 Terminal), "
              "loggato sul demo 50503392. Lo script lo apre e lo chiude da solo, una volta per passata (backtest, AllowLiveTrading=false, EA in modalita SOLO CONTA: nessun ordine). "
@@ -93,7 +93,7 @@ elif LOTTO == "C0":
             "con la v1.04 sugli indici BCM l EMA200 non si calcolava mai e l EA non contava niente). Lo script RICOMPILA EA_NatCla v" + VER + " e gira " + str(len(simboli)) + " indici (" + ", ".join(simboli) + ") x " +
             str(len(configs)) + " configurazioni (" + ", ".join(configs) + ") = " + str(nrun) + " passate singole, Modello 1 (OHLC su M1), InpSoloConta=true, nessun ordine, dal 2024.09.26 al 2026.06.30. "
             "Il lotto C (oro e indici) resta FERMO finche questo lotto non stampa VERIFICA DEL RIMEDIO SUPERATA. Da mandare quando finisce: lo zip NATCLA_F0_C0.zip dal Desktop di questo PC.")
-    tempo = ("TEMPO ATTESO [MISURATO dal pilota e dai lotti B e D del 07/10, e dalla diagnosi sugli stessi due indici: 28-40 secondi a passata]: compilazione circa 1 minuto + " + str(nrun) + " passate x 28-40 secondi = " +
+    tempo = ("TEMPO ATTESO [MISURATO dal pilota e dai lotti B e D del 07/10: 23-68 secondi a passata, la maggior parte 28-40; la diagnosi sugli stessi due indici 28-30]: compilazione circa 1 minuto + " + str(nrun) + " passate x 23-68 secondi = " +
              ("%.0f" % (1 + bassa)) + "-" + ("%.0f" % (1 + alta)) + " minuti in tutto. Il tetto del lotto e " + str(tetto) + " minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti). "
              "NON fermarla prima di " + str(tetto + 25) + " minuti (caso peggiore: tetto " + str(tetto) + " + ultima passata fino a 20 + chiusura 2 + compilazione 2; lo zip si scrive solo alla FINE). Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
     guarda = ("ATTESA SCRITTA PRIMA DEI NUMERI: (1) compilazione 0 errori (se FALLISCE lo script si ferma con rc 1 PRIMA del tester e lo zip da mandare e NATCLA_F0_C0_COMPILAZIONE_FALLITA.zip); "
@@ -101,15 +101,15 @@ elif LOTTO == "C0":
               "(3) se ANCHE UNA passata non ha la VERIFICA ADX o ha zero righe CONTA: VERIFICA DEL RIMEDIO NON SUPERATA, rc 3, il rimedio NON basta e il lotto C resta FERMO (l ipotesi alternativa: il tester calcola gli indicatori solo per copie di piu elementi). Lo script CONTA e non giudica.")
 else:
     cosa = ("NATCLA F0 LOTTO " + LOTTO + " (commit " + C[:8] + ") -- " + str(len(simboli)) + " simboli (" + ", ".join(simboli) + ") x " + str(len(configs)) + " configurazioni (" + ", ".join(configs) + ") = " + str(nrun) +
-            " passate singole, Modello 1 (OHLC su M1), InpSoloConta=true, nessun ordine, finestra per classe fino al 2026.06.30. DA LANCIARE SOLO DOPO aver letto il lotto PILOTA (EA compilato e partito, VERIFICA ADX MetaQuotes, tempo misurato). "
+            " passate singole, Modello 1 (OHLC su M1), InpSoloConta=true, nessun ordine, finestra per classe fino al 2026.06.30. DA LANCIARE SOLO DOPO aver letto il lotto PILOTA (EA compilato e partito, VERIFICA ADX MetaQuotes, tempo misurato). " +
             ("UN GIRO ALLA VOLTA (un altro giro NATCLA_F0 gia in corso fa fermare questa con un messaggio rosso). " if LOTTO == "C" else
              "ORDINE CONSIGLIATO: A, poi B, poi D, UNA ALLA VOLTA (la seconda si lancia solo quando la prima ha scritto il suo zip: un altro giro gia in corso fa fermare questa con un messaggio rosso). ") +
             (("DA LANCIARE SOLO DOPO che il lotto C0 ha stampato VERIFICA DEL RIMEDIO v" + VER + " SUPERATA (rc 0, su U30USD e D30EUR): senza, gli indici restano a zero setup come nel pilota. ")
              if LOTTO == "C" else ("Il lotto C (oro e indici) resta FERMO finche il lotto C0 non ha verificato il rimedio v" + VER + ". ")) +
             "Da mandare quando finisce: lo zip NATCLA_F0_" + LOTTO + ".zip dal Desktop di questo PC. "
             "Nessun PF, nessun DD: la lettura dei setup e leggi_natcla_f0.py sullo zip, i criteri sono scritti nel file prova PRIMA dei numeri.")
-    tempo = ("TEMPO ATTESO [MISURATO dal pilota 07/10 su 3 simboli forex+oro e SOLO configurazioni H1: 28-40 secondi a passata, media 33]: compilazione circa 1 minuto + " + str(nrun) + " passate x 28-40 secondi = " + ("%.0f" % bassa) + "-" + ("%.0f" % alta) + " minuti. "
-             "Puo durare DI PIU se il terminale deve scaricare lo storico M1 di un simbolo mai usato su questo PC o se H4/H12/D1 costano piu di H1 (NON misurati): per questo il tetto resta largo. "
+    tempo = ("TEMPO ATTESO [MISURATO dal pilota e dai lotti B e D del 07/10, anche su H4/H12/D1: 23-68 secondi a passata, la maggior parte 28-40]: compilazione circa 1 minuto + " + str(nrun) + " passate x 23-68 secondi = " + ("%.0f" % bassa) + "-" + ("%.0f" % alta) + " minuti. "
+             "Puo durare DI PIU se il terminale deve scaricare lo storico M1 di un simbolo mai usato su questo PC (gli indici diversi da U30USD e D30EUR non sono mai girati qui): per questo il tetto resta largo. "
              "Il tetto del lotto e " + str(tetto) + " minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti): le passate non lanciate escono NON_LANCIATA nel MANIFEST. "
              "NON fermarla prima di " + str(tetto + 25) + " minuti (caso peggiore: tetto " + str(tetto) + " + ultima passata fino a 20 + chiusura 2 + compilazione 2; lo zip si scrive solo alla FINE). Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
     guarda = ("COSE DA GUARDARE PER PRIME quando torna, scritte PRIMA: (1) ESITO F0 e MANIFEST: quante passate OK, KO, NON_LANCIATE (con il motivo); (2) VERIFICA ADX: formula MetaQuotes su tutte le passate OK, se Wilder o NESSUNA ci si ferma; "

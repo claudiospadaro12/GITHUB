@@ -51,3 +51,16 @@ CANCELLO 07/10 sera (controllo-preventivo) sulle righe dei lotti A, B, D al pin 
   28-40 s, media 33] = 31-44 min (66 passate), 8-12 min (18); tetti 150/150/60 e 'NON fermarla prima di' 175/175/85 invariati; ORDINE A, B, D UNA ALLA VOLTA, C fermo, zip da mandare.
   ricollaudo: prova_pins OK, controlla_prova OK, controlla_riga verde (righe A/B/D + script: 14 passati, 8 rilievi = quelli del pilota), lettore 87/87, mutanti lettore 47/47,
   banco 70/70, mutanti script 30/30, riga 23/23. Contro-esempio in piu (fuori repo): le righe A, B, D ESEGUITE nel banco: rc 0, 66/66/18 lanci, zip sul Desktop.
+
+07/10 notte -- EA_NatCla v1.05 (tocco degli handle in CaricaDati, diagnosi NATCLA_DIAG_U30) + driver/lettore/prova per il lotto C0. Pin d6586360706b488356fba0504d62733d3f63c164.
+  NON passato dal cancello (strato 2): consegna dell'agente alla sessione principale.
+  EA: collaudo_natcla.py TUTTO OK, mutanti 80/80 (T1-T7 nuovi); modello del tester pigro (C++ sulla CaricaDati vera): v1.04 0 barre / v1.05 9761 dalla 302 su U30USD
+      (misurato (e) 0, (a) 9761 dalla 302), D30EUR 0 / 9453 dalla 302 (misurato), storia davanti e dal vivo IDENTICHE barra per barra; contro-esempio modello 3
+      (ricalcolo solo per copie di piu' elementi): v1.05 bloccata = lo decide il lotto C0. v1.05 = v1.04 (290e1b74) + il solo tocco (confronto senza commenti).
+  driver: VERSIONE_ATTESA 1.05, lotto C0 (righe CONTA > 0 obbligatorie), compilazione 1168 (ex5 vecchio, uscita di MetaEditor, log italiano), finestra dalla
+      riga VERA del giornale (regex verificata sui 6 log della diagnosi: 6/6 lette, 0/6 con EA_NatCla al posto di EA_NatCla_Diag), dedup 1173 per prefisso.
+  ricollaudo: prova_pins OK, controlla_prova OK, controlla_riga verde (prova, ps1, righe C0 e C), lettore 97/97, mutanti lettore 54/54, banco 88/88 (pieno:
+      lotti A, C, D, C0 e timeout), mutanti script 38/38, riga 28/28 (riga C0 eseguita nel banco: 4 OK + RIMEDIO SUPERATA; riga C eseguita: 66 OK).
+  contro-esempi: lettore sui 3 zip VERI archiviati (PILOTA, B, D): 90 OK marcate v1.04 ARCHIVIO, 2 KO = U30USD (lo stallo noto).
+  NOTA: bootstrap.py al pin d6586360 ha un errore di sintassi nel ramo A/B/C/D (corretto nel commit dopo; le righe C0 e C sono generate col file corretto,
+      la riga scarica solo script, EA, include e prova, che sono quelli del pin).

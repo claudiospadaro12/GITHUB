@@ -39,7 +39,7 @@ def main():
         "v1.05" in riga and "ATTESA SCRITTA PRIMA" in riga and "righe CONTA > 0" in riga and "2024.10.16" in riga and "resta FERMO" in riga and "NON SUPERATA" in riga)
     chk("la riga nomina per nome il bersaglio (50503392, BCM Markets MT5 Terminal) e i NON toccati (C:\\MT5_Backtest, C:\\FundedNext_Manuale, 541452707, 1514806751, 10105439, 50504263, 50503635, 50504400, Pepperstone, Tickmill)",
         all(x in riga for x in ("50503392", "BCM Markets MT5 Terminal", "C:\\MT5_Backtest", "C:\\FundedNext_Manuale", "541452707", "1514806751", "10105439", "50504263", "50503635", "50504400", "Pepperstone", "Tickmill")))
-    chk("la riga dichiara la durata attesa, il tetto e il 'non fermarla prima di' calcolato (tetto 15 + 25)", "3-4 minuti" in riga and "15 minuti" in riga and "NON fermarla prima di 40 minuti" in riga)
+    chk("la riga dichiara la durata attesa, il tetto e il 'non fermarla prima di' calcolato (tetto 15 + 25)", "3-6 minuti" in riga and "15 minuti" in riga and "NON fermarla prima di 40 minuti" in riga)
     chk("la riga elenca i file attesi nello zip e il codice d'uscita", "FILE ATTESI NELLO ZIP" in riga and "rc 3" in riga)
     mh = re.search(r"-ShaEA ([0-9A-F]{64}) -ShaInc ([0-9A-F]{64}) -ShaProva ([0-9A-F]{64})", riga)
     chk("le tre impronte passate allo script sono quelle del commit (git show)", mh is not None and all(
