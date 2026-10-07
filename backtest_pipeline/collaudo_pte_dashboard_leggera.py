@@ -429,6 +429,30 @@ def raccordo_cancello(src, code, bag):
                        ("ObjectsDeleteAll(0,PD_PREF);gProprietario=true;", "pulizia degli oggetti PDL_ rimasti")):
         if pz not in oi:
             bag.append("CANCELLO OnInit: manca '%s'" % perche)
+    # secondo giro cieco del cancello: 7 su 8 VERDI (colonna H4 riempita con H8, D1 con W1, suffisso ignorato...)
+    so = norm(corpo(sc, "OnInit") or "")
+    for nome, per in (("M15", "M15"), ("M30", "M30"), ("H1", "H1"), ("H4", "H4"), ("H8", "H8"), ("H12", "H12"),
+                      ("D1", "D1"), ("W1", "W1"), ("MN", "MN1")):
+        if 'AggiungiTF(Inp%s,PERIOD_%s,"%s");' % (nome, per, nome) not in so:
+            bag.append("CANCELLO OnInit: la colonna %s non e' legata a Inp%s e PERIOD_%s" % (nome, nome, per))
+    if so.count("AggiungiTF(") != 9:
+        bag.append("CANCELLO OnInit: attese 9 colonne AggiungiTF, trovate %d" % so.count("AggiungiTF("))
+    al_ = norm(corpo(code, "AggiungiLista") or "")
+    for pz, perche in (("StringTrimLeft(s);StringTrimRight(s);", "spazi attorno ai simboli tolti"),
+                       ("if(StringLen(s)==0)continue;", "voci vuote saltate"),
+                       ("gSym[gNS]=s+InpSuffisso;", "suffisso del broker aggiunto")):
+        if pz not in al_:
+            bag.append("CANCELLO AggiungiLista: manca '%s'" % perche)
+    val = ("if(InpLarghezzaCella<10||InpAltezzaCella<8||InpFontSize<4||InpBarreIndietro<1||InpBarreIndietro>500||"
+           "InpTmaLento<1||InpTmaVeloce<1||InpAtrLento<1||InpAtrVeloce<1||InpMultLento<=0||InpMultVeloce<=0||"
+           "InpCorpoMaxPct<=0||InpCellePerCiclo<1||InpRicontrolloSec<1||InpSemeHA<0||InpAlertMinuti<0)")
+    if val not in oi:
+        bag.append("CANCELLO OnInit: controllo dei parametri diverso da quello dichiarato")
+    if "if(InpModoConfronto&&gPronta[k]&&gStatoSim[i]==0)" not in ag:
+        bag.append("CANCELLO AggiornaCella: distanze del confronto mostrate anche a cella non pronta")
+    rt = norm(corpo(code, "Rett") or "")
+    if "ObjectSetInteger(0,nome,OBJPROP_BACK,false);" not in rt:
+        bag.append("CANCELLO Rett: i rettangoli devono stare davanti al grafico (OBJPROP_BACK false)")
     if "intb=s+3;" not in norm(corpo(code, "PD_Bisogno") or ""):
         bag.append("CANCELLO PD_Bisogno: la Heikin Ashi dell'EA legge la barra shift+2: servono almeno barre+3 barre")
 
@@ -1080,6 +1104,13 @@ MUTANTI = [
     ("ricostruzione degli oggetti tolta", "if(ObjectFind(0,PD_PREF+\"pannello\")<0) Struttura();", ""),
     ("cursore fermo sulla cella 0", "gCursore=(gCursore+1)%tot;", "gCursore=(gCursore+0)%tot;"),
     ("stato iniziale gia' 'ok'", "ArrayInitialize(gStatoSim,-1);", "ArrayInitialize(gStatoSim,0);"),
+    ("colonna H4 riempita con H8", 'AggiungiTF(InpH4,PERIOD_H4,"H4")', 'AggiungiTF(InpH4,PERIOD_H8,"H4")'),
+    ("colonna D1 riempita con W1", 'AggiungiTF(InpD1,PERIOD_D1,"D1")', 'AggiungiTF(InpD1,PERIOD_W1,"D1")'),
+    ("suffisso del broker ignorato", "gSym[gNS]=s+InpSuffisso;", "gSym[gNS]=s;"),
+    ("spazi attorno ai simboli tenuti", "StringTrimLeft(s); StringTrimRight(s);", ""),
+    ("distanze del confronto a cella non pronta", "if(InpModoConfronto && gPronta[k] && gStatoSim[i]==0)", "if(InpModoConfronto && gStatoSim[i]==0)"),
+    ("rettangoli dietro al grafico", "ObjectSetInteger(0,nome,OBJPROP_BACK,false);", "ObjectSetInteger(0,nome,OBJPROP_BACK,true);"),
+    ("seme HA negativo accettato", "InpSemeHA<0 ||", ""),
 ]
 
 
