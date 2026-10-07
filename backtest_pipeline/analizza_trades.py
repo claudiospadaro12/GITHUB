@@ -209,11 +209,27 @@ def giorni_fra(da, a):
         return None
 
 
-def senza_commento(r):
-    """True se la riga non appartiene a nessun EA nostro (manuale di Claudio)."""
-    vuoto = not (r.get("strategy") or "").strip()
-    magic0 = (str(r.get("magic", "0")) or "0").strip() in ("", "0")
-    return vuoto and magic0
+def fuori_flotta(r):
+    """True se la riga NON e' di un nostro EA, cioe' se il `magic` e' 0.
+
+    🔴 RISCRITTA IL 07/10/2026, e cambia dei totali gia' pubblicati.
+    Prima pretendeva **due** criteri -- commento vuoto **E** magic 0 -- e quindi
+    una riga a mano **con un commento battuto a mano** restava dentro il
+    "Totale giornata". Il difetto era **noto dal 02/10**: il `DIARIO` di quel
+    giorno scrive in chiaro *"VERA FLOTTA (magic != 0): -94,74 ... MANO (magic
+    0): +833,74 ... il «Totale giornata +623,13» dello strumento **mescola i
+    due**"*, e lo stesso era stato corretto a mano il 01/10 (-236,82 stampato,
+    **-118,36** pubblicato nel DIARIO). Lo strumento non e' mai stato cambiato,
+    e il **07/10** ha presentato il conto: una riga a mano da **10,00 lotti** con
+    il commento `reversale su st 3.0` valeva **+724,93** su un totale di
+    **+737,45**, cioe' il **98,3%** -- la flotta vera era **+12,52**.
+    👉 Il criterio giusto e' **UNO**: nessun nostro EA gira a magic 0, quindi
+    `magic == 0` -> fuori dalla flotta, **qualunque cosa ci sia scritta nel
+    commento**. Il verso opposto (commento vuoto ma magic valorizzato) e' un
+    nostro EA che non scrive il commento: **resta dentro**.
+    📌 Il nome e' cambiato da `senza_commento` a `fuori_flotta` di proposito: il
+    vecchio nome diceva il criterio sbagliato."""
+    return (str(r.get("magic", "0")) or "0").strip() in ("", "0")
 
 
 _CACHE_GIORNALE = {}
@@ -315,15 +331,24 @@ def _leggi_giornale_runner(conto):
 
 
 def discordi(righe):
-    """Righe in cui i due criteri NON coincidono: vanno dette, non indovinate."""
+    """Righe in cui i due criteri NON coincidono, **nel verso che resta**.
+
+    🔴 RISCRITTA IL 07/10/2026 insieme a `fuori_flotta`. Finche' il filtro
+    pretendeva commento vuoto **E** magic 0, i "discordi" erano DUE insiemi e
+    restavano tutti nel totale. Adesso il criterio e' il solo `magic`, quindi:
+      - `magic 0` **con** un commento -> **FUORI** dalla flotta, e il commento
+        serve solo a riconoscere la riga (il 07/10: `reversale su st 3.0`);
+      - commento **vuoto** con `magic` valorizzato -> **DENTRO**: e' un nostro
+        EA che non scrive il commento, e questa e' l'unica ambiguita' che
+        resta da guardare.
+    Quindi questa funzione torna il **secondo** caso, non piu' entrambi."""
     fuori = []
     for r in righe:
         vuoto = not (r.get("strategy") or "").strip()
         magic0 = (str(r.get("magic", "0")) or "0").strip() in ("", "0")
-        if vuoto != magic0:
+        if vuoto and not magic0:
             fuori.append(r)
     return fuori
-
 
 def leggi(path):
     if not os.path.exists(path):
@@ -554,9 +579,9 @@ def main():
     #     Si tolgono PRIMA di scegliere la giornata: altrimenti un giorno di
     #     sole manuali diventerebbe "la giornata" e la pagella parlerebbe di
     #     un lavoro che nessun EA ha fatto.
-    manuali_tutte = [r for r in righe if senza_commento(r)]
+    manuali_tutte = [r for r in righe if fuori_flotta(r)]
     ambigue = discordi(righe)
-    righe = [r for r in righe if not senza_commento(r)]
+    righe = [r for r in righe if not fuori_flotta(r)]
     if not righe:
         sys.exit("Nel CSV non c'e' nessuna operazione con commento: solo manuali.")
 
@@ -937,8 +962,23 @@ def main():
         motivi = defaultdict(int)
         for r in tr:
             motivi[r.get("close_reason") or "?"] += 1
-        fr = [f for f in (frazione_catturata(r, vpunto) for r in tr) if f is not None]
-        frm = ("%.0f%%" % (100 * sum(fr) / len(fr))) if fr else "—"
+        # 07/10/2026: la media per EA **scartava righe in silenzio** (quando il
+        # valore punto del simbolo non e' stimabile), e quindi l'`n` su cui
+        # poggia l'unita' dichiarata ("n>=3 vincenti dello stesso preset")
+        # NON era leggibile dalla tabella. Due sere di fila e' capitato su
+        # `USDCHF` dentro `BULGE_V520_VIOLA_S`: la media sembrava su 3 righe ed
+        # era su 2. Ora la tabella stampa **su quante di quante**.
+        vinc = [r for r in tr if num(r, "profit") + num(r, "swap")
+                + num(r, "commission") > 0]
+        fr = [f for f in (frazione_catturata(r, vpunto) for r in vinc)
+              if f is not None]
+        if not fr:
+            frm = "—"
+        elif len(fr) == len(vinc):
+            frm = "%.0f%%" % (100 * sum(fr) / len(fr))
+        else:
+            frm = ("%.0f%% _(su %d di %d vincenti)_"
+                   % (100 * sum(fr) / len(fr), len(fr), len(vinc)))
         out.append("| %s | %d | **%+.2f** | %s | %s | %s |" % (
             ea, len(tr), pnl,
             ("%.0f s" % dmed) if dmed < 120 else ("%.1f min" % (dmed / 60)),
@@ -1026,19 +1066,19 @@ def main():
     # contenuto. Senza manuali di giornata la sezione conteneva SOLO i discordi,
     # che il commento CE L'HANNO e che stanno DENTRO il totale della loro
     # giornata: l'opposto di "senza commento" e di "fuori dal totale".
-    CAPPELLO_DISCORDI = ("_Qui sotto non c'e' nessuna operazione \"senza "
-                         "commento\" di oggi: i **discordi** hanno il commento "
-                         "pieno e stanno **dentro** il totale della giornata in "
-                         "cui si sono chiusi._")
+    CAPPELLO_DISCORDI = ("_Qui sotto non c'e' nessuna riga fuori dalla flotta "
+                         "di oggi: i **discordi** sono righe con il commento "
+                         "**vuoto** e il `magic` valorizzato, cioe' nostri EA "
+                         "che non scrivono il commento, e **restano dentro** il "
+                         "totale della loro giornata._")
     if manuali_oggi:
-        out += ["", "## 🚫 Fuori dal totale — operazioni SENZA COMMENTO", ""]
-        # caso MISTO: il titolo parla di "senza commento" e sotto ci sono anche
-        # i discordi, che il commento CE L'HANNO. Il cappello lo dice.
+        out += ["", "## 🚫 Fuori dal totale — operazioni NON della flotta "
+                "(`magic` 0)", ""]
         if amb_oggi or amb_prima:
             out += ["_⚠️ Nel blocco in fondo ci sono anche i **discordi**, che "
-                    "il commento **ce l'hanno** e che stanno **dentro** il "
-                    "totale della loro giornata: il titolo qui sopra vale per "
-                    "le manuali, non per loro._", ""]
+                    "sono un'ALTRA cosa: commento **vuoto** con `magic` "
+                    "valorizzato, cioe' nostri EA senza commento, e quelli "
+                    "**restano dentro** il totale._", ""]
     elif amb_oggi or amb_prima:
         out += ["", "## 🚫 Fuori dal totale, e i casi da capire", "",
                 CAPPELLO_DISCORDI]
@@ -1050,12 +1090,22 @@ def main():
             v = perSymMan[r.get("symbol", "?")]
             v[0] += 1
             v[1] += num(r, "profit") + num(r, "swap") + num(r, "commission")
-        out += ["Trading **manuale** di Claudio sul piccolo (`strategy` vuota, "
-                "`magic` 0). **Non entrano nel totale della flotta** qui sopra "
-                "— Claudio, 07/09/2026.", "",
-                "| Simbolo | Trade | Netto |", "|---|---|---|"]
-        for sym, (nn, v) in sorted(perSymMan.items(), key=lambda x: x[1][1]):
-            out.append("| %s | %d | **%+.2f** |" % (sym, nn, v))
+        out += ["Righe **non della flotta**: `magic` **0**, cioe' nessun nostro "
+                "EA (il criterio e' **solo** il magic dal 07/10/2026 — una mano "
+                "che scrive un commento restava dentro il totale, e il 07/10 "
+                "valeva il **98,3%** della giornata). **Non entrano nel totale "
+                "della flotta** qui sopra — Claudio, 07/09/2026.", "",
+                "| Simbolo | Trade | Commento | Netto |", "|---|---|---|---|"]
+        perSymMan2 = defaultdict(lambda: [0, 0.0, set()])
+        for r in manuali_oggi:
+            v = perSymMan2[r.get("symbol", "?")]
+            v[0] += 1
+            v[1] += num(r, "profit") + num(r, "swap") + num(r, "commission")
+            c = (r.get("strategy") or "").strip()
+            v[2].add("`%s`" % c if c else "_(vuoto)_")
+        for sym, (nn, v, cc) in sorted(perSymMan2.items(), key=lambda x: x[1][1]):
+            out.append("| %s | %d | %s | **%+.2f** |"
+                       % (sym, nn, " · ".join(sorted(cc)), v))
         out += ["", "**Totale manuale (fuori dal conto): %+.2f** su %d operazioni."
                 % (netto_man, len(manuali_oggi)), "",
                 "> ⚠️ Attese **zero** manuali dal **%s** in poi: se questo blocco "
@@ -1065,27 +1115,25 @@ def main():
     if amb_oggi:
         _pid_oggi = ", ".join(str(r.get("pid", "?")) for r in amb_oggi[:10])
         if len(amb_oggi) > 1:
-            out += ["", "> 🔴 **%d operazioni DI OGGI con commento e magic "
-                    "DISCORDI** (una delle due cose dice EA e l'altra no). Il "
-                    "filtro pretende entrambi i criteri e queste **restano nel "
-                    "totale di oggi**: vanno capite prima di decidere da che "
-                    "parte stanno. pid: %s" % (len(amb_oggi), _pid_oggi)]
+            out += ["", "> ⚠️ **%d operazioni DI OGGI con il commento VUOTO ma "
+                    "il `magic` valorizzato**: sono nostri EA che non scrivono "
+                    "il commento, quindi **restano nel totale di oggi** ed e' "
+                    "giusto. Si elencano per poterle attribuire. pid: %s"
+                    % (len(amb_oggi), _pid_oggi)]
         else:
-            out += ["", "> 🔴 **1 operazione DI OGGI con commento e magic "
-                    "DISCORDI** (una delle due cose dice EA e l'altra no). Il "
-                    "filtro pretende entrambi i criteri e questa **resta nel "
-                    "totale di oggi**: va capita prima di decidere da che parte "
-                    "sta. pid: %s" % _pid_oggi]
+            out += ["", "> ⚠️ **1 operazione DI OGGI con il commento VUOTO ma "
+                    "il `magic` valorizzato**: e' un nostro EA che non scrive "
+                    "il commento, quindi **resta nel totale di oggi** ed e' "
+                    "giusto. Si elenca per poterla attribuire. pid: %s"
+                    % _pid_oggi]
     if amb_prima:
         _ult = max(r["_ct"] for r in amb_prima).strftime("%Y-%m-%d")
         _pid_prima = ", ".join(str(r.get("pid", "?")) for r in amb_prima[:10])
         if len(amb_prima) > 1:
             out += ["", "> ⚠️ **%d operazioni con commento e magic discordi in "
-                    "giornate PRECEDENTI** (la piu' recente il %s). Sono "
-                    "contate nel totale **della giornata in cui si sono "
-                    "chiuse**, non in quello di stasera: si elencano qui "
-                    "perche' il nodo non e' chiuso, non perche' pesino su "
-                    "oggi. pid: %s" % (len(amb_prima), _ult, _pid_prima)]
+                    "giornate PRECEDENTI** (la piu' recente il %s): commento vuoto e "
+                    "`magic` valorizzato. Sono contate nel totale **della "
+                    "giornata in cui si sono chiuse** ed e' giusto. pid: %s" % (len(amb_prima), _ult, _pid_prima)]
         else:
             out += ["", "> ⚠️ **1 operazione con commento e magic discordi in "
                     "una giornata PRECEDENTE** (il %s). E' contata nel totale "
@@ -1437,9 +1485,9 @@ def main():
                 #    (strategy vuota E magic 0) stanno FUORI dal totale, ma si
                 #    mostrano. Firma di Claudio del 07/09: non e' una regola
                 #    "del piccolo", e' come si legge un conto.
-                man_reale = [r for r in rreale if senza_commento(r)]
+                man_reale = [r for r in rreale if fuori_flotta(r)]
                 amb_reale = discordi(rreale)
-                flotta_reale = [r for r in rreale if not senza_commento(r)]
+                flotta_reale = [r for r in rreale if not fuori_flotta(r)]
 
                 def _netto_r(r):
                     return num(r, "profit") + num(r, "swap") + num(r, "commission")
