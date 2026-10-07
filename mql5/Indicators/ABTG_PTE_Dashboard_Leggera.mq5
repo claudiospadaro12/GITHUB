@@ -1,10 +1,55 @@
 //+------------------------------------------------------------------+
 //|                                ABTG_PTE_Dashboard_Leggera.mq5    |
 //|                                                                  |
-//|  Dashboard PTE "versione nostra, leggera" (07/10/2026).          |
+//|  Dashboard PTE "versione nostra, leggera".                       |
 //|  SOLO VISIONE: nessun ordine, nessuna rete, nessun file,         |
 //|  nessun handle di indicatore. Mette in MQL5\Indicators e         |
 //|  compila con F7.                                                 |
+//|                                                                  |
+//|  CRONOLOGIA                                                      |
+//|  1.10 (07/10/2026) richieste di Claudio dopo la 1.00: "NELLA     |
+//|   DASHBOARD PTE MANCANO LO SWITCH PER LE CANDELE HEIKENASHI, SE  |
+//|   CLICCO SIA SUL SIMBOLO CHE SULL'ORARIO, IL GRAFICO NON MI      |
+//|   PORTA LI. POI MI SEGNALAVA LE CANDELE DOJI" + tasti REFRESH,   |
+//|   HIDE, DOJI ON/OFF, "DI DEFAULT C'ERANO LE CANDELE HEIKENASHI", |
+//|   + EMA 9/21 con incrocio e SUPERTREND 3 LIVELLI (P. Lavorenti). |
+//|   NESSUNA di queste e' la formula dell'originale (sorgente non   |
+//|   disponibile): e' la NOSTRA ricostruzione da quello che Claudio |
+//|   descrive. Tasti (due righe sopra la tabella):                  |
+//|     HIDE/SHOW .. nasconde la tabella (resta solo questo tasto);  |
+//|                  nascosta = NESSUNA copia di dati, nessun calcolo|
+//|                  della tabella; allo SHOW si ricalcola subito.   |
+//|     REFRESH .... azzera la cache di tutte le celle: si ricalcolano|
+//|                  al ritmo normale (InpCellePerCiclo al secondo). |
+//|     HA ON/OFF .. candele Heikin Ashi sul grafico (default ACCESE |
+//|                  come l'originale), native nascoste a clrNONE e  |
+//|                  RIPRISTINATE a ogni uscita (tecnica di          |
+//|                  ABTG_Pulsanti_Grafico.mq5).                     |
+//|     DOJI ON/OFF  frecce sulle doji FUORI CANALE del grafico      |
+//|                  corrente (stessa regola delle celle), tooltip   |
+//|                  con la distanza in ATR. OFF = niente frecce e   |
+//|                  niente calcolo. Le CELLE non cambiano.          |
+//|     EMA 9/21 ... le due EMA e l'INCROCIO (frecce) sulle barre    |
+//|                  CHIUSE: barra x vs x-1, mai la barra in corso.  |
+//|     ST 3 LIV ... Supertrend 2,5/3,0/3,5 ATR 10 (SW_STCore, la    |
+//|                  stessa funzione di ABTG_Pulsanti_Grafico 1.01 e |
+//|                  NC_STCore di EA_NatCla, testo identico).        |
+//|     CLICK ...... sul SIMBOLO: il grafico va su quel simbolo (TF  |
+//|                  invariato); sulla CELLA: simbolo E TF della     |
+//|                  cella; sul TF dell'intestazione: TF su questo   |
+//|                  simbolo. InpClickNuovoGrafico=true apre invece  |
+//|                  un grafico nuovo.                               |
+//|   STATO DEI TASTI: GlobalVariable del terminale "PDLV_<ChartID>_" |
+//|   (come ABTG_Pulsanti): resta al cambio di simbolo/TF (il click  |
+//|   RICARICA l'indicatore) e al cambio parametri se l'input di     |
+//|   partenza non e' cambiato; si cancella togliendo l'indicatore o |
+//|   chiudendo il grafico.                                          |
+//|   AL RICARICO (click): la CACHE della tabella NON sopravvive      |
+//|   (istanza nuova): si riempie di nuovo in ~6 s (max 20 celle/s). |
+//|   SE LE CANDELE SPARISCONO (terminale in crash con HA acceso):   |
+//|   rimettere l'indicatore le fa tornare (colori di ripiego);      |
+//|   a mano: F8 > Colori > Candela su/giu, Barra su/giu, Linea.     |
+//|  1.00 (07/10/2026) prima versione: solo la tabella.              |
 //|                                                                  |
 //|  PERCHE' ESISTE                                                  |
 //|  La dashboard PTE_V3_18 3.18 (Emiliano Monza / ABTG, compilata,  |
@@ -42,15 +87,23 @@
 //|  ATR: calcolato qui dalle barre (media semplice del true range,  |
 //|  come iATR di MT5) invece che con un handle iATR: stesso numero, |
 //|  zero handle.                                                    |
+//|  DOJI SUL GRAFICO e CANDELE DISEGNATE: le frecce usano la regola |
+//|  delle celle (default InpCandela = HA a 2 barre di seme come     |
+//|  l'EA); le candele HA DISEGNATE sono la HA classica ricorsiva    |
+//|  (seme (o+c)/2 sulla barra piu' vecchia, PG_HA). Le due HA non   |
+//|  sono identiche: una freccia puo' stare su una candela disegnata |
+//|  che a occhio non sembra una doji. Dichiarato, misurato nel      |
+//|  collaudo (informativo).                                         |
 //|                                                                  |
 //|  CARICO (perche' e' leggera) -- [STIMA], non misura:             |
 //|   - handle di indicatori: 0;                                     |
-//|   - oggetti: 3 + 2*nTF + nSimboli*(1+2*nTF); default 35 x 3 TF = |
-//|     254 oggetti, creati UNA volta, aggiornati solo se testo o    |
-//|     colore cambiano; ChartRedraw solo se qualcosa e' cambiato;   |
-//|   - calcolo: SOLO a barra nuova di ciascun simbolo/TF (OnTimer   |
-//|     1 s), mai a ogni tick. Fra una barra e la successiva una     |
-//|     cella non chiama il terminale per niente (orario della       |
+//|   - oggetti della tabella: 9 + 2*nTF + nSimboli*(1+2*nTF);       |
+//|     default 35 x 3 TF = 260 oggetti, creati UNA volta, aggiornati|
+//|     solo se testo o colore cambiano; ChartRedraw solo se qualcosa|
+//|     e' cambiato; + al massimo InpBarreIndietro frecce doji;      |
+//|   - calcolo tabella: SOLO a barra nuova di ciascun simbolo/TF    |
+//|     (OnTimer 1 s), mai a ogni tick. Fra una barra e la successiva|
+//|     una cella non chiama il terminale per niente (orario della   |
 //|     prossima barra in memoria); quando la barra e' "dovuta" fa   |
 //|     1 SeriesInfoInteger ogni InpRicontrolloSec secondi finche'   |
 //|     la barra arriva (serie ancora vuota: 1 CopyRates, che la fa  |
@@ -63,7 +116,16 @@
 //|     (default 20 -> 105 celle in ~6 s), per non bloccare il       |
 //|     grafico;                                                     |
 //|   - simboli senza dati: saltati, riprovati con attesa crescente  |
-//|     2, 4, 8 ... 300 s.                                           |
+//|     2, 4, 8 ... 300 s;                                           |
+//|   - grafico corrente (OnCalculate, NESSUNA copia: gli array del  |
+//|     terminale): HA, EMA e Supertrend incrementali, a ogni tick   |
+//|     SOLO la barra in formazione (O(1); il Supertrend O(periodo)),|
+//|     tutto lo storico una volta al caricamento; frecce doji,      |
+//|     incroci EMA e canali SOLO a barra nuova. Con un tasto spento |
+//|     HA/EMA/ST non si disegnano ma il calcolo incrementale O(1)   |
+//|     continua (ricalcolare tutto lo storico all'accensione        |
+//|     richiederebbe una copia dati dentro il click); le DOJI invece|
+//|     spente non si calcolano affatto.                             |
 //|  Confronto con l'originale: se (come sembra dagli scatti)        |
 //|  ricalcolasse ~105-111 celle a OGNI tick, con 2-5 tick/s sarebbero|
 //|  ~200-550 copie+ricalcoli al secondo contro ~0,013 qui. E' una   |
@@ -72,19 +134,72 @@
 //|  USOIL + 5 indici); l'originale ne mostrerebbe 37: due mancano,  |
 //|  vanno chiesti a Claudio, NON inventati.                         |
 //|                                                                  |
-//|  NON implementato (dichiarato): frecce sul grafico, candele      |
-//|  Heikin Ashi disegnate, canali disegnati (la dashboard e' la     |
-//|  tabella), email/push, pulsanti del grafico (CHART BUTTONS:      |
-//|  non sappiamo cosa fanno). Alert: solo popup/suono, spenti.      |
-//|  Un solo esemplare per grafico (prefisso oggetti fisso "PDL_").  |
-//|  DEMO. Nessuna garanzia.                                         |
+//|  NON implementato (dichiarato): email/push, gli altri CHART      |
+//|  BUTTONS dell'originale che Claudio non ha descritto. Alert:     |
+//|  solo popup/suono, spenti. Un solo esemplare per grafico         |
+//|  (prefisso oggetti fisso "PDL_"), e NON insieme ad altri         |
+//|  indicatori che nascondono le candele (ABTG_Pulsanti_Grafico con |
+//|  HEIKIN ASHI acceso, ABTG_Segnali_EMA_BB_ST, SuperWave in HA).   |
+//|  MAI COMPILATA (qui non c'e' MetaEditor). DEMO. Nessuna garanzia.|
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.10"
 #property strict
 #property indicator_chart_window
-#property indicator_buffers 0
-#property indicator_plots   0
+#property indicator_buffers 32
+#property indicator_plots   15
+//--- plot 1: candele Heikin Ashi (buffer 0-3 OHLC, 4 colore)
+#property indicator_label1  "HA Apertura;HA Massimo;HA Minimo;HA Chiusura"
+#property indicator_type1   DRAW_COLOR_CANDLES
+#property indicator_color1  clrSeaGreen,clrFireBrick
+#property indicator_width1  1
+//--- plot 2-5: canali TMA (input InpDisegnaCanali)
+#property indicator_label2  "TMA veloce sup"
+#property indicator_type2   DRAW_LINE
+#property indicator_color2  clrSilver
+#property indicator_style2  STYLE_DOT
+#property indicator_label3  "TMA veloce inf"
+#property indicator_type3   DRAW_LINE
+#property indicator_color3  clrSilver
+#property indicator_style3  STYLE_DOT
+#property indicator_label4  "TMA lenta sup"
+#property indicator_type4   DRAW_LINE
+#property indicator_color4  clrSlateGray
+#property indicator_style4  STYLE_SOLID
+#property indicator_label5  "TMA lenta inf"
+#property indicator_type5   DRAW_LINE
+#property indicator_color5  clrSlateGray
+#property indicator_style5  STYLE_SOLID
+//--- plot 6-9: EMA veloce/lenta e frecce dell'incrocio (tasto EMA 9/21)
+#property indicator_label6  "EMA veloce"
+#property indicator_type6   DRAW_LINE
+#property indicator_color6  clrHotPink
+#property indicator_width6  1
+#property indicator_label7  "EMA lenta"
+#property indicator_type7   DRAW_LINE
+#property indicator_color7  clrGold
+#property indicator_width7  1
+#property indicator_label8  "Incrocio EMA su"
+#property indicator_type8   DRAW_ARROW
+#property indicator_color8  clrDodgerBlue
+#property indicator_width8  2
+#property indicator_label9  "Incrocio EMA giu"
+#property indicator_type9   DRAW_ARROW
+#property indicator_color9  clrMagenta
+#property indicator_width9  2
+//--- plot 10-15: Supertrend 3 livelli, due linee per livello (niente diagonale all'inversione)
+#property indicator_label10 "ST 2.5 su"
+#property indicator_type10  DRAW_LINE
+#property indicator_label11 "ST 2.5 giu"
+#property indicator_type11  DRAW_LINE
+#property indicator_label12 "ST 3.0 su"
+#property indicator_type12  DRAW_LINE
+#property indicator_label13 "ST 3.0 giu"
+#property indicator_type13  DRAW_LINE
+#property indicator_label14 "ST 3.5 su"
+#property indicator_type14  DRAW_LINE
+#property indicator_label15 "ST 3.5 giu"
+#property indicator_type15  DRAW_LINE
 
 //==================================================================
 //  ENUM (fuori dal blocco puro: servono agli input)
@@ -172,6 +287,7 @@ input color InpColIntest   = C'48,48,48';    // Intestazione
 input color InpColBordo    = C'60,60,60';    // Bordo celle
 input color InpColTesto    = clrWhite;       // Testo
 input color InpColSpento   = C'110,110,110'; // Simbolo non disponibile
+input color InpColTastoOn  = C'0,95,150';    // Tasto acceso
 
 input group "=== ALERTS ==="
 input bool InpAlertPopup  = false;  // Popup (solo segnali NUOVI sull'ultima barra chiusa)
@@ -183,6 +299,42 @@ input bool InpModoConfronto  = false; // Modalita confronto: distanza corpo-cana
 input int  InpCellePerCiclo  = 20;    // Celle ricalcolate al massimo per ciclo di timer (1 s)
 input int  InpRicontrolloSec = 5;     // Barra dovuta ma non ancora arrivata: ricontrolla ogni N s
 
+input group "=== TASTI: stato all'avvio (poi decide il tasto; resta al cambio simbolo/TF) ==="
+input bool InpHaDefault         = true;   // HA: candele Heikin Ashi accese (l'originale: accese di default)
+input bool InpDojiDefault       = true;   // DOJI: frecce sulle doji fuori canale del grafico
+input bool InpNascostaDefault   = false;  // HIDE: tabella nascosta
+input bool InpEmaDefault        = false;  // EMA 9/21 con incrocio
+input bool InpStDefault         = false;  // SUPERTREND 3 LIVELLI
+input bool InpClickNuovoGrafico = false;  // Click su simbolo/cella/TF: apre un grafico NUOVO (false = cambia questo)
+input color InpColHASu          = clrSeaGreen;  // Candela HA rialzista
+input color InpColHAGiu         = clrFireBrick; // Candela HA ribassista
+
+input group "=== CANALI TMA DISEGNATI (default spenti) ==="
+input bool  InpDisegnaCanali = false;        // Disegna i canali TMA (veloce e lento) del grafico corrente
+input int   InpBarreCanali   = 300;          // ...sulle ultime N barre chiuse (ricalcolo a barra nuova)
+input color InpColCanaleV    = clrSilver;    // Canale veloce
+input color InpColCanaleL    = clrSlateGray; // Canale lento
+
+input group "=== EMA 9/21 (tasto EMA) ==="
+input int   InpEmaVeloce    = 9;            // EMA veloce, periodo (sulla chiusura)
+input int   InpEmaLenta     = 21;           // EMA lenta, periodo (sulla chiusura)
+input color InpColEmaVeloce = clrHotPink;   // EMA veloce (rosa, come ABTG_Pulsanti)
+input color InpColEmaLenta  = clrGold;      // EMA lenta (gialla, come ABTG_Pulsanti)
+input color InpColIncSu     = clrDodgerBlue;// Freccia incrocio al rialzo (veloce sopra la lenta)
+input color InpColIncGiu    = clrMagenta;   // Freccia incrocio al ribasso
+
+input group "=== SUPERTREND 3 LIVELLI (tasto ST) ==="
+input int    InpStPeriodo = 10;             // [NOSTRA] periodo ATR dei tre livelli (audio: non detto; 10 = indizio PL-SUPERTREND V09, non fonte)
+input double InpStMult1   = 2.5;            // [FONTE: audio WA0090 "2.5, 3, 3.5"] livello 1, moltiplicatore
+input double InpStMult2   = 3.0;            // [FONTE: audio WA0090 "2.5, 3, 3.5"] livello 2, moltiplicatore
+input double InpStMult3   = 3.5;            // [FONTE: audio WA0090 "2.5, 3, 3.5"] livello 3, moltiplicatore
+input color  InpColSt1Su  = C'150,225,150'; // livello 1 trend SU (verde chiaro)
+input color  InpColSt1Giu = C'255,175,130'; // livello 1 trend GIU (salmone chiaro)
+input color  InpColSt2Su  = clrLimeGreen;   // livello 2 trend SU
+input color  InpColSt2Giu = clrOrangeRed;   // livello 2 trend GIU
+input color  InpColSt3Su  = C'0,150,80';    // livello 3 trend SU (verde scuro)
+input color  InpColSt3Giu = C'205,90,0';    // livello 3 trend GIU (arancio scuro)
+
 //==================================================================
 //  BLOCCO PURO: niente chiamate al terminale, solo array e numeri.
 //  Lo estrae e lo compila in C++ backtest_pipeline/
@@ -191,6 +343,8 @@ input int  InpRicontrolloSec = 5;     // Barra dovuta ma non ancora arrivata: ri
 //==================================================================
 //@@PD_PURE_BEGIN
 #define PD_NODATI (-9)
+#define PD_PREF   "PDL_"         // prefisso degli oggetti della tabella (anche il click lo legge)
+#define PG_VUOTO  EMPTY_VALUE
 
 struct PD_Par
   {
@@ -442,13 +596,197 @@ string PD_Testo(datetime t,int tfSec)
    if(tfSec<2419200) return(PD_Due(d)+"/"+PD_Due(mo));
    return(StringSubstr("JanFebMarAprMayJunJulAugSepOctNovDec",(mo-1)*3,3));
   }
+
+//--- v1.10 DOJI SUL GRAFICO: TUTTE le doji fra le barre chiuse 1..barre (la stessa PD_Valuta delle celle).
+//    Riempie sh/dir/dF/dS (capienza >= barre) e ritorna quante. La prima e' la piu' recente = PD_Ultimo.
+int PD_Marca(const double &o[],const double &h[],const double &l[],const double &c[],int n,int barre,const PD_Par &p,
+             int &sh[],int &dir[],double &dF[],double &dS[])
+  {
+   int q=0;
+   for(int s=1;s<=barre;s++)
+     {
+      double a=0.0, b=0.0;
+      int r=PD_Valuta(o,h,l,c,n,s,p,a,b);
+      if(r==PD_NODATI) break;
+      if(r!=0){ sh[q]=s; dir[q]=r; dF[q]=a; dS[q]=b; q++; }
+     }
+   return(q);
+  }
+
+//--- v1.10 CLICK: numero di indice da un pezzo di nome (solo cifre, 1-4), -1 se non lo e'
+int PD_Numero(string s)
+  {
+   int n=StringLen(s);
+   if(n<1 || n>4) return(-1);
+   int v=0;
+   for(int x=0;x<n;x++)
+     {
+      int ch=StringGetCharacter(s,x);
+      if(ch<'0' || ch>'9') return(-1);
+      v=v*10+(ch-'0');
+     }
+   return(v);
+  }
+
+//--- v1.10 CLICK: cosa e' stato cliccato. Nomi (Struttura): PDL_r_<i>_<j> rettangolo e PDL_t_<i>_<j> testo
+//    della cella (riga i = simbolo, colonna j = TF), PDL_s_<i> simbolo, PDL_hr_<j>/PDL_ht_<j> TF
+//    dell'intestazione. Ritorna 1 cella (i,j), 2 simbolo (i, j=-1), 3 TF (i=-1, j), 0 altro. Indici fuori
+//    dalla tabella (nS simboli, nT TF) = 0: un oggetto rimasto da una tabella piu' grande non porta altrove.
+int PD_Bersaglio(string nome,int nS,int nT,int &i,int &j)
+  {
+   i=-1; j=-1;
+   string p=PD_PREF;
+   int lp=StringLen(p);
+   if(StringLen(nome)<=lp || StringSubstr(nome,0,lp)!=p) return(0);
+   string r=StringSubstr(nome,lp);
+   int us=StringFind(r,"_");
+   if(us<1) return(0);
+   string tipo=StringSubstr(r,0,us);
+   string resto=StringSubstr(r,us+1);
+   if(tipo=="r" || tipo=="t")
+     {
+      int u2=StringFind(resto,"_");
+      if(u2<1) return(0);
+      int a=PD_Numero(StringSubstr(resto,0,u2));
+      int b=PD_Numero(StringSubstr(resto,u2+1));
+      if(a<0 || a>=nS || b<0 || b>=nT) return(0);
+      i=a; j=b;
+      return(1);
+     }
+   if(tipo=="s")
+     {
+      int a=PD_Numero(resto);
+      if(a<0 || a>=nS) return(0);
+      i=a;
+      return(2);
+     }
+   if(tipo=="hr" || tipo=="ht")
+     {
+      int b=PD_Numero(resto);
+      if(b<0 || b>=nT) return(0);
+      j=b;
+      return(3);
+     }
+   return(0);
+  }
+
+//--- v1.10 EMA: incrocio sulla barra CHIUSA x (indici 0 = barra piu' vecchia) rispetto alla x-1.
+//    +1 = la veloce passa SOPRA la lenta, -1 = SOTTO, 0 niente. Prima di 'primo' (riscaldamento della
+//    EMA, seme = prima chiusura) niente. Il chiamante non passa MAI la barra in formazione.
+int PD_Incrocio(const double &f[],const double &sl[],const int x,const int primo)
+  {
+   if(x<1 || x<primo) return(0);
+   if(f[x]>sl[x] && f[x-1]<=sl[x-1]) return(1);
+   if(f[x]<sl[x] && f[x-1]>=sl[x-1]) return(-1);
+   return(0);
+  }
+
+//--- Le funzioni qui sotto sono COPIATE IDENTICHE da mql5/Indicators/ABTG_Pulsanti_Grafico.mq5 v1.01
+//    (SW_STCore = anche NC_STCore di EA_NatCla.mq5): il collaudo confronta il testo. Indici 0 = barra
+//    piu' vecchia, come gli array di OnCalculate.
+//--- Supertrend: UNICA implementazione per griglia, grafico e setup.
+//    Indici 0 = barra piu' vecchia. Calcola le barre [from, n).
+//    ATR = media SEMPLICE degli ultimi 'per' True Range (come iATR di MT5),
+//    sommata ogni volta nello stesso ordine: lo stesso numero a qualunque
+//    punto parta la serie (niente deriva di una somma che scorre).
+//    dir: +1 su, -1 giu', 0 = non ancora calcolabile (i < per).
+int SW_STCore(const double &h[],const double &l[],const double &c[],const int n,const int from,
+              const int per,const double mult,double &atr[],double &upF[],double &dnF[],
+              double &dir[],double &val[])
+  {
+   if(per<1) return 0;
+   int st=from;
+   if(st<0) st=0;
+   for(int i=st;i<n;i++)
+     {
+      if(i<per)
+        {
+         atr[i]=0.0; upF[i]=0.0; dnF[i]=0.0; dir[i]=0.0; val[i]=0.0;
+         continue;
+        }
+      double s=0.0;
+      for(int k=i-per+1;k<=i;k++)
+         s+=MathMax(h[k],c[k-1])-MathMin(l[k],c[k-1]);
+      double a=s/per;
+      atr[i]=a;
+      double mid=(h[i]+l[i])/2.0;
+      double ub=mid+mult*a;
+      double lb=mid-mult*a;
+      if(i==per)
+        {
+         upF[i]=ub;
+         dnF[i]=lb;
+         dir[i]=(c[i]>=mid) ? 1.0 : -1.0;
+        }
+      else
+        {
+         upF[i]=(ub<upF[i-1] || c[i-1]>upF[i-1]) ? ub : upF[i-1];
+         dnF[i]=(lb>dnF[i-1] || c[i-1]<dnF[i-1]) ? lb : dnF[i-1];
+         if(c[i]>upF[i-1])
+            dir[i]=1.0;
+         else
+            if(c[i]<dnF[i-1])
+               dir[i]=-1.0;
+            else
+               dir[i]=dir[i-1];
+        }
+      val[i]=(dir[i]>0.0) ? dnF[i] : upF[i];
+     }
+   return n;
+  }
+//--- EMA come iMA(MODE_EMA) di MT5: seme = prima chiusura, poi e = c*a + e_prec*(1-a), a = 2/(per+1).
+//    Calcola le barre [from, n).
+int PG_EMA(const double &c[],const int n,const int from,const int per,double &e[])
+  {
+   if(per<1 || n<1) return 0;
+   double a=2.0/(per+1.0);
+   int st=from;
+   if(st<0) st=0;
+   for(int i=st;i<n;i++)
+     {
+      if(i==0) e[i]=c[0];
+      else     e[i]=c[i]*a+e[i-1]*(1.0-a);
+     }
+   return n;
+  }
+//--- Heikin Ashi (stessa formula di ABTG_Segnali_EMA_BB_ST.mq5): chiusura = media OHLC;
+//    apertura = media di apertura e chiusura HA della barra prima ((o+c)/2 sulla prima barra);
+//    massimo/minimo = estremi fra la barra vera e apertura/chiusura HA.
+int PG_HA(const double &o[],const double &h[],const double &l[],const double &c[],const int n,const int from,
+          double &ho[],double &hh[],double &hl[],double &hc[])
+  {
+   int st=from;
+   if(st<0) st=0;
+   for(int i=st;i<n;i++)
+     {
+      double xc=(o[i]+h[i]+l[i]+c[i])/4.0;
+      double xo=(i==0) ? (o[i]+c[i])/2.0 : (ho[i-1]+hc[i-1])/2.0;
+      ho[i]=xo;
+      hc[i]=xc;
+      hh[i]=MathMax(h[i],MathMax(xo,xc));
+      hl[i]=MathMin(l[i],MathMin(xo,xc));
+     }
+   return n;
+  }
+double PG_StLinea(const bool on,const double dir,const double val,const double verso)
+  {
+   return (on && dir==verso) ? val : PG_VUOTO;
+  }
+//--- stato iniziale di un tasto: vale quello salvato SOLO se l'input di partenza non e' cambiato
+bool PG_StatoIniziale(const bool haGv,const bool gvOn,const bool gvInp,const bool inpOra)
+  {
+   if(haGv && gvInp==inpOra) return gvOn;
+   return inpOra;
+  }
 //@@PD_PURE_END
 
 //==================================================================
 //  STATO
 //==================================================================
-#define PD_PREF "PDL_"
-#define PD_NOME "ABTG PTE Dashboard Leggera"
+#define PD_NOME   "ABTG PTE Dashboard Leggera"
+#define PD_TITOLO "PTE DASHBOARD (leggera)"
+#define PD_DOJI   "PDLG_d_"     // frecce doji del grafico: prefisso FUORI da PD_PREF (HIDE/Struttura non le toccano)
+#define PD_GV     "PDLV_"       // GlobalVariable dello stato dei tasti
 
 string          gSym[];      // simboli (con suffisso)
 int             gNS=0;
@@ -476,24 +814,66 @@ int      gBisogno=0;
 int      gCursore=0;
 bool     gRidisegna=false;
 bool     gProprietario=false;
-bool     gDoppioVisto=false;
+bool     gDoppio=false;
+int      gGiri=0;
 datetime gUltStato=0;
 MqlRates gR[];
 double   gO[], gH[], gL[], gC[];
 
+//--- v1.10 tasti (stato in GlobalVariable PD_GV<ChartID>_)
+bool     gNascosta=false, gHA=false, gDoji=false, gEma=false, gSt=false;
+
+//--- v1.10 grafico corrente: buffer (plot 0 HA, 1-4 canali, 5-6 EMA, 7-8 incroci, 9-14 Supertrend)
+double bHAo[], bHAh[], bHAl[], bHAc[], bHAcol[];        // 0-4   plot 0
+double bCVs[], bCVi[], bCLs[], bCLi[];                  // 5-8   plot 1-4
+double bEmaV[], bEmaL[];                                // 9-10  plot 5-6
+double bIncSu[], bIncGiu[];                             // 11-12 plot 7-8
+double bSt1Su[], bSt1Giu[], bSt2Su[], bSt2Giu[], bSt3Su[], bSt3Giu[];   // 13-18 plot 9-14
+double kAtr[];                                          // 19    calcolo (ATR comune: non dipende dal moltiplicatore)
+double kUp1[], kDn1[], kDir1[], kVal1[];                // 20-23 calcolo livello 1
+double kUp2[], kDn2[], kDir2[], kVal2[];                // 24-27 calcolo livello 2
+double kUp3[], kDn3[], kDir3[], kVal3[];                // 28-31 calcolo livello 3
+
+//--- istantanea in ordine SERIE (0 = barra in formazione) delle ultime gBisognoGraf barre del grafico,
+//    presa a barra nuova da OnCalculate (nessuna copia dal terminale): serve a doji e canali, anche dal click
+double   gXo[], gXh[], gXl[], gXc[], gXhh[], gXhl[];
+datetime gXt[];
+int      gXn=0, gXrt=0;
+int      gBisognoGraf=0;
+datetime gUltBarraGraf=0;
+int      gCanDa=-1;
+int      gMs[], gMd[];
+double   gMf[], gMl[];
+string   gMarcNome="";
+
+//--- colori delle candele native (tecnica di ABTG_Pulsanti_Grafico.mq5, classi 963/971)
+bool     gColsHidden=false;
+color    gColBull=clrNONE, gColBear=clrNONE, gColUp=clrNONE, gColDown=clrNONE, gColLine=clrNONE;
+int      gCure=0;
+
 //==================================================================
-//  POSIZIONI (angolo dell'originale). Rettangoli: punto di ancoraggio
-//  in alto a sinistra; etichette: centro. Angoli diversi da Left upper
-//  NON provati (nessun terminale qui).
+//  POSIZIONI (angolo dell'originale). Rettangoli e tasti: punto di
+//  ancoraggio in alto a sinistra; etichette: centro. Angoli diversi da
+//  Left upper NON provati (nessun terminale qui).
+//  Righe: 0-1 tasti, 2 titolo, 3 intestazione, 4.. simboli.
 //==================================================================
 int TotW(){ return(InpLarghezzaCella*(1+gNT)); }
-int TotH(){ return(InpAltezzaCella*(2+gNS)); }
+int LB(){ int b=TotW()/3; return(b<64 ? 64 : b); }          // larghezza di un tasto (3 per riga)
+int PW(){ int w=TotW(); return(w<3*LB() ? 3*LB() : w); }     // larghezza del pannello
+int TotH(){ return(InpAltezzaCella*(4+gNS)); }
 bool AngoloDestro(){ return(InpAngolo==CORNER_RIGHT_UPPER || InpAngolo==CORNER_RIGHT_LOWER); }
 bool AngoloBasso(){ return(InpAngolo==CORNER_LEFT_LOWER || InpAngolo==CORNER_RIGHT_LOWER); }
-int RX(int x){ return(AngoloDestro() ? InpOffsetX+TotW()-x : InpOffsetX+x); }
+int RX(int x){ return(AngoloDestro() ? InpOffsetX+PW()-x : InpOffsetX+x); }
 int RY(int y){ return(AngoloBasso()  ? InpOffsetY+TotH()-y : InpOffsetY+y); }
-int CX(int x){ return(AngoloDestro() ? InpOffsetX+TotW()-x-InpLarghezzaCella/2 : InpOffsetX+x+InpLarghezzaCella/2); }
+int CX(int x){ return(AngoloDestro() ? InpOffsetX+PW()-x-InpLarghezzaCella/2 : InpOffsetX+x+InpLarghezzaCella/2); }
 int CY(int y){ return(AngoloBasso()  ? InpOffsetY+TotH()-y-InpAltezzaCella/2 : InpOffsetY+y+InpAltezzaCella/2); }
+
+//--- HIDE: tutti gli oggetti della tabella spariscono (OBJ_NO_PERIODS), TRANNE il tasto che la riapre
+long Periodi(string nome)
+  {
+   if(gNascosta && nome!=PD_PREF+"b_hide") return(OBJ_NO_PERIODS);
+   return(OBJ_ALL_PERIODS);
+  }
 
 void Rett(string nome,int x,int y,int w,int hh,color bg)
   {
@@ -509,6 +889,7 @@ void Rett(string nome,int x,int y,int w,int hh,color bg)
    ObjectSetInteger(0,nome,OBJPROP_BACK,false);
    ObjectSetInteger(0,nome,OBJPROP_SELECTABLE,false);
    ObjectSetInteger(0,nome,OBJPROP_HIDDEN,true);
+   ObjectSetInteger(0,nome,OBJPROP_TIMEFRAMES,Periodi(nome));
   }
 
 void Etic(string nome,int x,int y,string testo,color col)
@@ -524,27 +905,74 @@ void Etic(string nome,int x,int y,string testo,color col)
    ObjectSetInteger(0,nome,OBJPROP_COLOR,col);
    ObjectSetInteger(0,nome,OBJPROP_SELECTABLE,false);
    ObjectSetInteger(0,nome,OBJPROP_HIDDEN,true);
+   ObjectSetInteger(0,nome,OBJPROP_TIMEFRAMES,Periodi(nome));
+  }
+
+void Bottone(string nome,int x,int y,int w,int hh)
+  {
+   if(ObjectFind(0,nome)<0) ObjectCreate(0,nome,OBJ_BUTTON,0,0,0);
+   ObjectSetInteger(0,nome,OBJPROP_CORNER,InpAngolo);
+   ObjectSetInteger(0,nome,OBJPROP_XDISTANCE,x);
+   ObjectSetInteger(0,nome,OBJPROP_YDISTANCE,y);
+   ObjectSetInteger(0,nome,OBJPROP_XSIZE,w);
+   ObjectSetInteger(0,nome,OBJPROP_YSIZE,hh);
+   ObjectSetString(0,nome,OBJPROP_FONT,InpFont);
+   ObjectSetInteger(0,nome,OBJPROP_FONTSIZE,InpFontSize);
+   ObjectSetInteger(0,nome,OBJPROP_COLOR,InpColTesto);
+   ObjectSetInteger(0,nome,OBJPROP_BORDER_COLOR,InpColBordo);
+   ObjectSetInteger(0,nome,OBJPROP_STATE,false);
+   ObjectSetInteger(0,nome,OBJPROP_BACK,false);
+   ObjectSetInteger(0,nome,OBJPROP_SELECTABLE,false);
+   ObjectSetInteger(0,nome,OBJPROP_HIDDEN,true);
+   ObjectSetInteger(0,nome,OBJPROP_TIMEFRAMES,Periodi(nome));
+  }
+
+//--- testo e colore di un tasto; lo stato "premuto" torna SEMPRE su (OBJPROP_STATE=false)
+void Tasto(string suff,string testo,bool on)
+  {
+   string nome=PD_PREF+suff;
+   ObjectSetString(0,nome,OBJPROP_TEXT,testo);
+   ObjectSetInteger(0,nome,OBJPROP_BGCOLOR,on ? InpColTastoOn : InpColIntest);
+   ObjectSetInteger(0,nome,OBJPROP_STATE,false);
+  }
+
+void DipingiTasti()
+  {
+   Tasto("b_hide",gNascosta ? "SHOW" : "HIDE",gNascosta);
+   Tasto("b_refresh","REFRESH",false);
+   Tasto("b_ha",gHA ? "HA ON" : "HA OFF",gHA);
+   Tasto("b_doji",gDoji ? "DOJI ON" : "DOJI OFF",gDoji);
+   Tasto("b_ema","EMA "+IntegerToString(InpEmaVeloce)+"/"+IntegerToString(InpEmaLenta)+(gEma ? " ON" : " OFF"),gEma);
+   Tasto("b_st",gSt ? "ST 3 LIV ON" : "ST 3 LIV OFF",gSt);
+   gRidisegna=true;
   }
 
 string NomeR(int i,int j){ return(PD_PREF+"r_"+IntegerToString(i)+"_"+IntegerToString(j)); }
 string NomeT(int i,int j){ return(PD_PREF+"t_"+IntegerToString(i)+"_"+IntegerToString(j)); }
 string NomeS(int i){ return(PD_PREF+"s_"+IntegerToString(i)); }
 
-//--- costruisce TUTTI gli oggetti una volta (e azzera la cache del disegno)
+//--- costruisce TUTTI gli oggetti una volta (e azzera la cache del disegno). Rispetta HIDE.
 void Struttura()
   {
-   int W=InpLarghezzaCella, Hc=InpAltezzaCella;
-   Rett(PD_PREF+"pannello",RX(0),RY(0),TotW(),TotH(),InpColPannello);
-   Etic(PD_PREF+"titolo",RX(0)+(AngoloDestro() ? -TotW()/2 : TotW()/2),CY(0),"PTE DASHBOARD (leggera)",InpColTesto);
-   Etic(PD_PREF+"h_pair",CX(0),CY(Hc),"PAIR",InpColTesto);
+   int W=InpLarghezzaCella, Hc=InpAltezzaCella, B=LB();
+   Rett(PD_PREF+"pannello",RX(0),RY(0),PW(),TotH(),InpColPannello);
+   Bottone(PD_PREF+"b_hide",   RX(0),  RY(0), B,Hc);
+   Bottone(PD_PREF+"b_refresh",RX(B),  RY(0), B,Hc);
+   Bottone(PD_PREF+"b_ha",     RX(2*B),RY(0), B,Hc);
+   Bottone(PD_PREF+"b_doji",   RX(0),  RY(Hc),B,Hc);
+   Bottone(PD_PREF+"b_ema",    RX(B),  RY(Hc),B,Hc);
+   Bottone(PD_PREF+"b_st",     RX(2*B),RY(Hc),B,Hc);
+   DipingiTasti();
+   Etic(PD_PREF+"titolo",RX(0)+(AngoloDestro() ? -PW()/2 : PW()/2),CY(2*Hc),gDoppio ? "PTE DASHBOARD: 2 COPIE! rimuovine una" : PD_TITOLO,InpColTesto);
+   Etic(PD_PREF+"h_pair",CX(0),CY(3*Hc),"PAIR",InpColTesto);
    for(int j=0;j<gNT;j++)
      {
-      Rett(PD_PREF+"hr_"+IntegerToString(j),RX(W*(1+j)),RY(Hc),W,Hc,InpColIntest);
-      Etic(PD_PREF+"ht_"+IntegerToString(j),CX(W*(1+j)),CY(Hc),gTFn[j],InpColTesto);
+      Rett(PD_PREF+"hr_"+IntegerToString(j),RX(W*(1+j)),RY(3*Hc),W,Hc,InpColIntest);
+      Etic(PD_PREF+"ht_"+IntegerToString(j),CX(W*(1+j)),CY(3*Hc),gTFn[j],InpColTesto);
      }
    for(int i=0;i<gNS;i++)
      {
-      int y=Hc*(2+i);
+      int y=Hc*(4+i);
       color cs=(gStatoSim[i]==0 ? InpColTesto : InpColSpento);   // anche quando si ricostruisce
       Etic(NomeS(i),CX(0),CY(y),gSym[i],cs);
       gColSim[i]=cs;
@@ -586,6 +1014,7 @@ void AggiornaCella(int k)
       if(gDir[k]!=0) tip+=StringFormat(" | segnale V %+.2f L %+.2f ATR",gDF[k],gDS[k]);
       tip+=StringFormat(" | ultima chiusa V %+.2f L %+.2f ATR (>0 = corpo fuori)",gDF1[k],gDS1[k]);
      }
+   if(gStatoSim[i]==0) tip+=" | click: apri "+gSym[i]+" "+gTFn[j];
    if(txt!=gTxt[k]){ ObjectSetString(0,NomeT(i,j),OBJPROP_TEXT,txt); gTxt[k]=txt; gRidisegna=true; }
    if(bg!=gBg[k]){ ObjectSetInteger(0,NomeR(i,j),OBJPROP_BGCOLOR,bg); gBg[k]=bg; gRidisegna=true; }
    if(tip!=gTip[k])
@@ -699,18 +1128,318 @@ bool Elabora(int k,datetime ora)
    return(true);
   }
 
-//--- avviso se sul grafico ci sono due copie (si pestano gli oggetti PDL_)
+//--- avviso se sul grafico ci sono due copie (si pestano gli oggetti PDL_). Ripetuto ogni 10 s e
+//    reversibile: subito dopo un click (ricarico) la copia vecchia puo' esserci ancora per un attimo.
 void ControllaDoppio()
   {
-   gDoppioVisto=true;
    int n=0, tot=ChartIndicatorsTotal(0,0);
    for(int x=0;x<tot;x++) if(ChartIndicatorName(0,0,x)==PD_NOME) n++;
+   bool d=false;
    if(n>=2)
      {
-      Print("[PTE leggera] ATTENZIONE: ",n," copie su questo grafico. Ne serve UNA: rimuovi le altre.");
-      ObjectSetString(0,PD_PREF+"titolo",OBJPROP_TEXT,"PTE DASHBOARD: 2 COPIE! rimuovine una");
+      d=true;
+      if(!gDoppio) Print("[PTE leggera] ATTENZIONE: ",n," copie su questo grafico. Ne serve UNA: rimuovi le altre.");
+     }
+   if(d!=gDoppio)
+     {
+      gDoppio=d;
+      ObjectSetString(0,PD_PREF+"titolo",OBJPROP_TEXT,d ? "PTE DASHBOARD: 2 COPIE! rimuovine una" : PD_TITOLO);
       gRidisegna=true;
      }
+  }
+
+//==================================================================
+//  v1.10 STATO DEI TASTI: GlobalVariable PD_GV<ChartID>_S<tasto> (stato) e _I<tasto> (input con cui
+//  e' stato salvato). Sopravvive al RICARICO dell'indicatore (click = ChartSetSymbolPeriod).
+//==================================================================
+string GvChiave(string cosa){ return(PD_GV+IntegerToString(ChartID())+"_"+cosa); }
+
+void GvSalva(string cosa,double v)
+  {
+   if(GlobalVariableSet(GvChiave(cosa),v)==0)
+      Print("[PTE leggera] GlobalVariableSet fallita (",cosa,"), errore ",GetLastError(),": lo stato del tasto non sopravvivera' al cambio simbolo/TF.");
+  }
+
+bool StatoAvvio(string cosa,bool inp)
+  {
+   string ks=GvChiave("S"+cosa), ki=GvChiave("I"+cosa);
+   bool has=(GlobalVariableCheck(ks) && GlobalVariableCheck(ki));
+   bool gvOn=(has && GlobalVariableGet(ks)>0.5);
+   bool gvIn=(has && GlobalVariableGet(ki)>0.5);
+   bool on=PG_StatoIniziale(has,gvOn,gvIn,inp);
+   GvSalva("S"+cosa,on ? 1.0 : 0.0);
+   GvSalva("I"+cosa,inp ? 1.0 : 0.0);
+   return(on);
+  }
+
+void GvPulisci()
+  {
+   string t[5]={"HIDE","HA","DOJI","EMA","ST"};
+   for(int x=0;x<5;x++)
+     {
+      GlobalVariableDel(GvChiave("S"+t[x]));
+      GlobalVariableDel(GvChiave("I"+t[x]));
+     }
+  }
+
+//==================================================================
+//  v1.10 COLORI DEL GRAFICO: nascondi (HA) / ripristina. COPIA della tecnica di
+//  ABTG_Pulsanti_Grafico.mq5 (classi 963/971): i colori si catturano PRIMA di metterli a clrNONE; un
+//  clrNONE trovato al momento della cattura (istanza morta senza ripristino) diventa un colore di ripiego.
+//==================================================================
+color ColOrDefault(const long v,const color def)
+  {
+   color c=(color)v;
+   if(c==clrNONE)
+      return def;
+   return c;
+  }
+
+void ColsHide()
+  {
+   if(gColsHidden)
+      return;
+   // i colori si catturano ADESSO (prima di nasconderli): sono quelli veri e attuali
+   gColBull=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CANDLE_BULL),clrLime);
+   gColBear=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CANDLE_BEAR),clrRed);
+   gColUp  =ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_UP),   clrLime);
+   gColDown=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_DOWN), clrRed);
+   gColLine=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_LINE), clrLime);
+   gColsHidden=true;   // da qui in poi OGNI uscita ripristina
+   bool ok=true;
+   ok=ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrNONE) && ok;
+   ok=ChartSetInteger(0,CHART_COLOR_CANDLE_BEAR,clrNONE) && ok;
+   ok=ChartSetInteger(0,CHART_COLOR_CHART_UP,   clrNONE) && ok;
+   ok=ChartSetInteger(0,CHART_COLOR_CHART_DOWN, clrNONE) && ok;
+   ok=ChartSetInteger(0,CHART_COLOR_CHART_LINE, clrNONE) && ok;
+   if(!ok)
+      Print("[PTE leggera] impossibile nascondere le candele native (errore ",GetLastError(),").");
+  }
+
+void ColsRestore()
+  {
+   if(!gColsHidden)
+      return;
+   ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,gColBull);
+   ChartSetInteger(0,CHART_COLOR_CANDLE_BEAR,gColBear);
+   ChartSetInteger(0,CHART_COLOR_CHART_UP,   gColUp);
+   ChartSetInteger(0,CHART_COLOR_CHART_DOWN, gColDown);
+   ChartSetInteger(0,CHART_COLOR_CHART_LINE, gColLine);
+   gColsHidden=false;
+  }
+
+bool IsNone(const ENUM_CHART_PROPERTY_INTEGER prop)
+  {
+   return ((color)ChartGetInteger(0,prop)==clrNONE);
+  }
+
+//--- candele native INVISIBILI su TUTTE e cinque le proprieta': firma di un HA finito senza OnDeinit
+//    (crash, grafico salvato coi colori nascosti). Chi nasconde apposta solo candele/barre non e' toccato.
+void RepairInvisibleNative()
+  {
+   if(!(IsNone(CHART_COLOR_CANDLE_BULL) && IsNone(CHART_COLOR_CANDLE_BEAR) &&
+        IsNone(CHART_COLOR_CHART_UP) && IsNone(CHART_COLOR_CHART_DOWN) &&
+        IsNone(CHART_COLOR_CHART_LINE)))
+      return;
+   ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrLime);
+   ChartSetInteger(0,CHART_COLOR_CANDLE_BEAR,clrRed);
+   ChartSetInteger(0,CHART_COLOR_CHART_UP,   clrLime);
+   ChartSetInteger(0,CHART_COLOR_CHART_DOWN, clrRed);
+   ChartSetInteger(0,CHART_COLOR_CHART_LINE, clrLime);
+   Print("[PTE leggera] candele native trovate INVISIBILI (residuo di HEIKIN ASHI chiuso male): ",
+         "rimesse visibili con colori di ripiego verde/rosso (F8 > Colori per i tuoi).");
+  }
+
+//--- HA acceso ma candele native di nuovo visibili (es. l'OnDeinit dell'istanza VECCHIA, dopo un click,
+//    arriva DOPO questo OnInit e ripristina): si ricatturano i colori ATTUALI (quelli veri) e si
+//    rinascondono. Al massimo 3 volte (poi qualcun altro le vuole visibili: si smette).
+void CuraColori()
+  {
+   if(!gHA || gCure>=3) return;
+   if(IsNone(CHART_COLOR_CANDLE_BULL) && IsNone(CHART_COLOR_CANDLE_BEAR) &&
+      IsNone(CHART_COLOR_CHART_UP) && IsNone(CHART_COLOR_CHART_DOWN)) return;
+   gCure++;
+   gColsHidden=false;
+   ColsHide();
+   if(gCure>=3) Print("[PTE leggera] le candele native continuano a riapparire con HA acceso: smetto di nasconderle.");
+   gRidisegna=true;
+  }
+
+//==================================================================
+//  v1.10 PLOT: cosa si DISEGNA (il calcolo incrementale di HA/EMA/ST continua comunque, O(1) per tick)
+//==================================================================
+void ApplicaPlot()
+  {
+   PlotIndexSetInteger(0,PLOT_DRAW_TYPE,gHA ? DRAW_COLOR_CANDLES : DRAW_NONE);
+   PlotIndexSetInteger(0,PLOT_SHOW_DATA,gHA);
+   for(int p=1;p<=4;p++)
+     {
+      PlotIndexSetInteger(p,PLOT_DRAW_TYPE,InpDisegnaCanali ? DRAW_LINE : DRAW_NONE);
+      PlotIndexSetInteger(p,PLOT_SHOW_DATA,InpDisegnaCanali);
+     }
+   for(int p=5;p<=6;p++)
+     {
+      PlotIndexSetInteger(p,PLOT_DRAW_TYPE,gEma ? DRAW_LINE : DRAW_NONE);
+      PlotIndexSetInteger(p,PLOT_SHOW_DATA,gEma);
+     }
+   for(int p=7;p<=8;p++)
+     {
+      PlotIndexSetInteger(p,PLOT_DRAW_TYPE,gEma ? DRAW_ARROW : DRAW_NONE);
+      PlotIndexSetInteger(p,PLOT_SHOW_DATA,gEma);
+     }
+   PlotIndexSetInteger(7,PLOT_ARROW,233);
+   PlotIndexSetInteger(8,PLOT_ARROW,234);
+   for(int p=9;p<=14;p++)
+     {
+      PlotIndexSetInteger(p,PLOT_DRAW_TYPE,gSt ? DRAW_LINE : DRAW_NONE);
+      PlotIndexSetInteger(p,PLOT_SHOW_DATA,gSt);
+     }
+  }
+
+//==================================================================
+//  v1.10 GRAFICO CORRENTE: istantanea, doji, canali (SOLO a barra nuova)
+//==================================================================
+void Istantanea(const int rt,const datetime &time[],const double &open[],const double &high[],const double &low[],const double &close[])
+  {
+   int n=(rt<gBisognoGraf ? rt : gBisognoGraf);
+   ArrayResize(gXo,n); ArrayResize(gXh,n); ArrayResize(gXl,n); ArrayResize(gXc,n);
+   ArrayResize(gXhh,n); ArrayResize(gXhl,n); ArrayResize(gXt,n);
+   for(int x=0;x<n;x++)
+     {
+      int y=rt-1-x;
+      gXo[x]=open[y]; gXh[x]=high[y]; gXl[x]=low[y]; gXc[x]=close[y];
+      gXt[x]=time[y]; gXhh[x]=bHAh[y]; gXhl[x]=bHAl[y];
+     }
+   gXn=n; gXrt=rt;
+  }
+
+//--- frecce sulle doji fuori canale delle ultime InpBarreIndietro barre chiuse (regola delle celle)
+void MarcaDoji()
+  {
+   ObjectsDeleteAll(0,PD_DOJI);
+   gMarcNome="";
+   gRidisegna=true;
+   if(gXn<=0) return;
+   int nm=PD_Marca(gXo,gXh,gXl,gXc,gXn,InpBarreIndietro,gPar,gMs,gMd,gMf,gMl);
+   for(int q=0;q<nm;q++)
+     {
+      int s=gMs[q];
+      bool su=(gMd[q]>0);                       // sotto il canale = rialzista: freccia SU sotto la candela
+      string nome=PD_DOJI+IntegerToString((long)gXt[s]);
+      double pr=(su ? gXhl[s] : gXhh[s]);
+      if(!ObjectCreate(0,nome,OBJ_ARROW,0,gXt[s],pr)) continue;
+      ObjectSetInteger(0,nome,OBJPROP_ARROWCODE,su ? 233 : 234);
+      ObjectSetInteger(0,nome,OBJPROP_ANCHOR,su ? ANCHOR_TOP : ANCHOR_BOTTOM);
+      ObjectSetInteger(0,nome,OBJPROP_COLOR,su ? InpColRialzo : InpColRibasso);
+      ObjectSetInteger(0,nome,OBJPROP_WIDTH,2);
+      ObjectSetInteger(0,nome,OBJPROP_BACK,false);
+      ObjectSetInteger(0,nome,OBJPROP_SELECTABLE,false);
+      ObjectSetInteger(0,nome,OBJPROP_HIDDEN,true);
+      ObjectSetString(0,nome,OBJPROP_TOOLTIP,(su ? "Doji RIALZISTA (corpo SOTTO il canale) " : "Doji RIBASSISTA (corpo SOPRA il canale) ")+
+                      TimeToString(gXt[s],TIME_DATE|TIME_MINUTES)+" ora server"+
+                      StringFormat(" | corpo-canale V %+.2f L %+.2f ATR (>0 = fuori)",gMf[q],gMl[q]));
+      if(gMarcNome=="") gMarcNome=nome;
+     }
+  }
+
+//--- canali TMA sulle ultime InpBarreCanali barre chiuse (stessa PD_Banda delle celle)
+void Canali()
+  {
+   int rt=gXrt;
+   int vecchio=rt-1-InpBarreCanali;
+   if(vecchio<0) vecchio=0;
+   if(gCanDa>=0)
+      for(int x=gCanDa;x<vecchio && x<rt;x++){ bCVs[x]=EMPTY_VALUE; bCVi[x]=EMPTY_VALUE; bCLs[x]=EMPTY_VALUE; bCLi[x]=EMPTY_VALUE; }
+   gCanDa=vecchio;
+   for(int s=1;s<=InpBarreCanali;s++)
+     {
+      int x=rt-1-s;
+      if(x<0) break;
+      double mid=0, up=0, lo=0, a=0;
+      if(PD_Banda(gXh,gXl,gXc,gXn,s,gPar.tmaModo,gPar.tmaF,gPar.atrF,gPar.multF,mid,up,lo,a)){ bCVs[x]=up; bCVi[x]=lo; }
+      else { bCVs[x]=EMPTY_VALUE; bCVi[x]=EMPTY_VALUE; }
+      if(PD_Banda(gXh,gXl,gXc,gXn,s,gPar.tmaModo,gPar.tmaS,gPar.atrS,gPar.multS,mid,up,lo,a)){ bCLs[x]=up; bCLi[x]=lo; }
+      else { bCLs[x]=EMPTY_VALUE; bCLi[x]=EMPTY_VALUE; }
+     }
+  }
+
+//==================================================================
+//  v1.10 TASTI
+//==================================================================
+//--- REFRESH: azzera la cache di TUTTE le celle; il ricalcolo lo fa il timer al ritmo normale
+//    (InpCellePerCiclo al secondo): qui NESSUNA copia di dati.
+void Refresh()
+  {
+   int nc=gNS*gNT;
+   for(int k=0;k<nc;k++)
+     {
+      gProssimo[k]=0;
+      gAttesa[k]=0;
+      gUltBarra[k]=0;
+      gPronta[k]=false;                 // niente alert al primo ricalcolo; la cella si mostra vuota finche' non torna
+      AggiornaCella(k);
+     }
+   gUltStato=0;                         // stato dei simboli riletto al prossimo giro
+   gCursore=0;
+   if(gDoji) MarcaDoji();               // dall'istantanea: nessuna copia
+   gRidisegna=true;
+  }
+
+void Nascondi(bool on)
+  {
+   gNascosta=on;
+   GvSalva("SHIDE",on ? 1.0 : 0.0);
+   Struttura();                          // riapplica la visibilita' a TUTTI gli oggetti (Periodi)
+   if(!on) Refresh();                    // allo SHOW si ricalcola subito
+  }
+
+void ImpostaHA(bool on)
+  {
+   gHA=on;
+   GvSalva("SHA",on ? 1.0 : 0.0);
+   if(on){ gCure=0; ColsHide(); }
+   else ColsRestore();
+   ApplicaPlot();
+  }
+
+void ImpostaDoji(bool on)
+  {
+   gDoji=on;
+   GvSalva("SDOJI",on ? 1.0 : 0.0);
+   if(on) MarcaDoji();
+   else { ObjectsDeleteAll(0,PD_DOJI); gMarcNome=""; gRidisegna=true; }
+  }
+
+void ImpostaEma(bool on)
+  {
+   gEma=on;
+   GvSalva("SEMA",on ? 1.0 : 0.0);
+   ApplicaPlot();
+  }
+
+void ImpostaSt(bool on)
+  {
+   gSt=on;
+   GvSalva("SST",on ? 1.0 : 0.0);
+   ApplicaPlot();
+  }
+
+//--- CLICK su simbolo/cella/TF: il grafico va li' (o un grafico nuovo con InpClickNuovoGrafico).
+//    ChartSetSymbolPeriod RICARICA questo indicatore: lo stato dei tasti resta (GlobalVariable), la
+//    cache della tabella no (si riempie in ~6 s).
+void VaiA(string sym,ENUM_TIMEFRAMES tf)
+  {
+   if(SymbolInfoInteger(sym,SYMBOL_SELECT)==0 && !SymbolSelect(sym,true))
+     {
+      Print("[PTE leggera] ",sym,": non si puo' aggiungere al Market Watch (inesistente sul broker? suffisso giusto in InpSuffisso?), errore ",GetLastError());
+      return;
+     }
+   if(InpClickNuovoGrafico)
+     {
+      if(ChartOpen(sym,tf)==0) Print("[PTE leggera] ChartOpen ",sym," fallita, errore ",GetLastError());
+      return;
+     }
+   if(!ChartSetSymbolPeriod(0,sym,tf)) Print("[PTE leggera] ChartSetSymbolPeriod ",sym," fallita, errore ",GetLastError());
   }
 
 //==================================================================
@@ -724,6 +1453,12 @@ int OnInit()
       InpCorpoMaxPct<=0 || InpCellePerCiclo<1 || InpRicontrolloSec<1 || InpSemeHA<0 || InpAlertMinuti<0)
      {
       Print("[PTE leggera] parametri non validi: controlla dimensioni, periodi, moltiplicatori e barre (1-500).");
+      return(INIT_PARAMETERS_INCORRECT);
+     }
+   if(InpBarreCanali<1 || InpBarreCanali>5000 || InpEmaVeloce<1 || InpEmaLenta<1 || InpStPeriodo<1 ||
+      InpStMult1<=0 || InpStMult2<=0 || InpStMult3<=0)
+     {
+      Print("[PTE leggera] parametri del grafico non validi: barre canali 1-5000, periodi EMA/ATR >= 1, moltiplicatori > 0.");
       return(INIT_PARAMETERS_INCORRECT);
      }
    gNS=0; ArrayResize(gSym,0);
@@ -748,6 +1483,7 @@ int OnInit()
    gPar.usaCode=InpUsaCode; gPar.rapInf=InpRapCodaInf; gPar.rapSup=InpRapCodaSup;
    gPar.flip=InpConfermaFlip; gPar.semeHA=InpSemeHA;
    gBisogno=PD_Bisogno(gPar,InpBarreIndietro);
+   gBisognoGraf=PD_Bisogno(gPar,(InpDisegnaCanali && InpBarreCanali>InpBarreIndietro) ? InpBarreCanali : InpBarreIndietro);
 
    int nc=gNS*gNT;
    ArrayResize(gStatoSim,gNS); ArrayInitialize(gStatoSim,-1);
@@ -763,34 +1499,125 @@ int OnInit()
    ArrayInitialize(gDF,0); ArrayInitialize(gDS,0); ArrayInitialize(gDF1,0); ArrayInitialize(gDS1,0);
    ArrayResize(gTxt,nc); ArrayResize(gBg,nc); ArrayResize(gTip,nc);
    ArraySetAsSeries(gR,true);                 // gR[0] = barra in formazione, come gli array del blocco puro
+   ArrayResize(gMs,InpBarreIndietro); ArrayResize(gMd,InpBarreIndietro);
+   ArrayResize(gMf,InpBarreIndietro); ArrayResize(gMl,InpBarreIndietro);
+
+   //--- buffer: 0-18 disegnati, 19-31 di calcolo
+   bool ok=true;
+   ok=SetIndexBuffer(0, bHAo,   INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(1, bHAh,   INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(2, bHAl,   INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(3, bHAc,   INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(4, bHAcol, INDICATOR_COLOR_INDEX)  && ok;
+   ok=SetIndexBuffer(5, bCVs,   INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(6, bCVi,   INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(7, bCLs,   INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(8, bCLi,   INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(9, bEmaV,  INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(10,bEmaL,  INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(11,bIncSu, INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(12,bIncGiu,INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(13,bSt1Su, INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(14,bSt1Giu,INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(15,bSt2Su, INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(16,bSt2Giu,INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(17,bSt3Su, INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(18,bSt3Giu,INDICATOR_DATA)         && ok;
+   ok=SetIndexBuffer(19,kAtr,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(20,kUp1,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(21,kDn1,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(22,kDir1,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(23,kVal1,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(24,kUp2,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(25,kDn2,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(26,kDir2,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(27,kVal2,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(28,kUp3,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(29,kDn3,   INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(30,kDir3,  INDICATOR_CALCULATIONS) && ok;
+   ok=SetIndexBuffer(31,kVal3,  INDICATOR_CALCULATIONS) && ok;
+   if(!ok)
+     {
+      Print("[PTE leggera] SetIndexBuffer fallita, errore ",GetLastError());
+      return(INIT_FAILED);
+     }
+   PlotIndexSetInteger(0,PLOT_LINE_COLOR,0,InpColHASu);
+   PlotIndexSetInteger(0,PLOT_LINE_COLOR,1,InpColHAGiu);
+   PlotIndexSetInteger(1,PLOT_LINE_COLOR,InpColCanaleV);
+   PlotIndexSetInteger(2,PLOT_LINE_COLOR,InpColCanaleV);
+   PlotIndexSetInteger(3,PLOT_LINE_COLOR,InpColCanaleL);
+   PlotIndexSetInteger(4,PLOT_LINE_COLOR,InpColCanaleL);
+   PlotIndexSetInteger(5,PLOT_LINE_COLOR,InpColEmaVeloce);
+   PlotIndexSetInteger(6,PLOT_LINE_COLOR,InpColEmaLenta);
+   PlotIndexSetInteger(7,PLOT_LINE_COLOR,InpColIncSu);
+   PlotIndexSetInteger(8,PLOT_LINE_COLOR,InpColIncGiu);
+   PlotIndexSetInteger(7,PLOT_ARROW_SHIFT,12);           // freccia SU sotto la candela
+   PlotIndexSetInteger(8,PLOT_ARROW_SHIFT,-12);          // freccia GIU sopra la candela
+   PlotIndexSetInteger(9, PLOT_LINE_COLOR,InpColSt1Su);
+   PlotIndexSetInteger(10,PLOT_LINE_COLOR,InpColSt1Giu);
+   PlotIndexSetInteger(11,PLOT_LINE_COLOR,InpColSt2Su);
+   PlotIndexSetInteger(12,PLOT_LINE_COLOR,InpColSt2Giu);
+   PlotIndexSetInteger(13,PLOT_LINE_COLOR,InpColSt3Su);
+   PlotIndexSetInteger(14,PLOT_LINE_COLOR,InpColSt3Giu);
+   PlotIndexSetInteger(9, PLOT_LINE_WIDTH,1);
+   PlotIndexSetInteger(10,PLOT_LINE_WIDTH,1);
+   PlotIndexSetInteger(11,PLOT_LINE_WIDTH,2);
+   PlotIndexSetInteger(12,PLOT_LINE_WIDTH,2);
+   PlotIndexSetInteger(13,PLOT_LINE_WIDTH,3);
+   PlotIndexSetInteger(14,PLOT_LINE_WIDTH,3);
+   PlotIndexSetInteger(5,PLOT_DRAW_BEGIN,InpEmaVeloce-1);
+   PlotIndexSetInteger(6,PLOT_DRAW_BEGIN,InpEmaLenta-1);
+   for(int p=9;p<=14;p++) PlotIndexSetInteger(p,PLOT_DRAW_BEGIN,InpStPeriodo);
+   PlotIndexSetString(5,PLOT_LABEL,"EMA "+IntegerToString(InpEmaVeloce));
+   PlotIndexSetString(6,PLOT_LABEL,"EMA "+IntegerToString(InpEmaLenta));
+   IndicatorSetInteger(INDICATOR_DIGITS,_Digits);
+
+   //--- stato dei tasti: dalla GlobalVariable se l'input di partenza non e' cambiato, se no dall'input
+   gNascosta=StatoAvvio("HIDE",InpNascostaDefault);
+   gHA=StatoAvvio("HA",InpHaDefault);
+   gDoji=StatoAvvio("DOJI",InpDojiDefault);
+   gEma=StatoAvvio("EMA",InpEmaDefault);
+   gSt=StatoAvvio("ST",InpStDefault);
 
    ObjectsDeleteAll(0,PD_PREF);               // oggetti rimasti da una chiusura anomala
+   ObjectsDeleteAll(0,PD_DOJI);
    gProprietario=true;
-   gCursore=0; gDoppioVisto=false;
+   gCursore=0; gDoppio=false; gGiri=0;
+   gXn=0; gXrt=0; gUltBarraGraf=0; gCanDa=-1; gMarcNome=""; gCure=0;
    Struttura();
    AggiornaStatoSimboli();
    gUltStato=TimeCurrent();
+   ApplicaPlot();
+   if(gHA)
+      ColsHide();     // ultimo passo: da qui OnDeinit ripristina sempre
+   else
+      RepairInvisibleNative();
    EventSetTimer(1);
    PrintFormat("[PTE leggera] %d simboli x %d TF = %d celle, %d oggetti, %d barre per copia, 0 handle. TMA %s, candele %s, canale %d.",
-               gNS,gNT,nc,3+2*gNT+gNS*(1+2*gNT),gBisogno,EnumToString(InpTmaModo),EnumToString(InpCandela),(int)InpCanale);
+               gNS,gNT,nc,9+2*gNT+gNS*(1+2*gNT),gBisogno,EnumToString(InpTmaModo),EnumToString(InpCandela),(int)InpCanale);
    return(INIT_SUCCEEDED);
   }
 
 void OnDeinit(const int reason)
   {
    EventKillTimer();
-   if(gProprietario) ObjectsDeleteAll(0,PD_PREF);
+   ColsRestore();                             // OGNI motivo di uscita: le candele native tornano
+   if(gProprietario)
+     {
+      ObjectsDeleteAll(0,PD_PREF);
+      ObjectsDeleteAll(0,PD_DOJI);
+     }
+   if(reason==REASON_REMOVE || reason==REASON_CHARTCLOSE)
+      GvPulisci();                             // tolto l'indicatore / chiuso il grafico: lo stato dei tasti si dimentica
    ChartRedraw(0);
   }
 
-void OnTimer()
+//--- il giro delle celle: SOLO con la tabella visibile
+void GiroCelle(datetime ora)
   {
-   datetime ora=TimeCurrent();
-   if(!gDoppioVisto) ControllaDoppio();
    if(ora-gUltStato>=60)
      {
       gUltStato=ora;
-      if(ObjectFind(0,PD_PREF+"pannello")<0) Struttura();   // oggetti cancellati a mano: si ricostruiscono
       AggiornaStatoSimboli();
      }
    int tot=gNS*gNT, fatte=0, viste=0;
@@ -801,6 +1628,18 @@ void OnTimer()
       viste++;
       if(Elabora(k,ora)) fatte++;
      }
+  }
+
+void OnTimer()
+  {
+   datetime ora=TimeCurrent();
+   gGiri++;
+   if(gGiri%10==3) ControllaDoppio();
+   //--- oggetti spariti (a mano, o l'OnDeinit dell'istanza vecchia arrivato DOPO questo OnInit dopo un click)
+   if(ObjectFind(0,PD_PREF+"pannello")<0 || ObjectFind(0,PD_PREF+"b_hide")<0) Struttura();
+   if(gDoji && gMarcNome!="" && ObjectFind(0,gMarcNome)<0) MarcaDoji();
+   CuraColori();
+   if(!gNascosta) GiroCelle(ora);             // NASCOSTA: carico zero, nessuna copia e nessun ricalcolo
    if(gRidisegna)
      {
       gRidisegna=false;
@@ -808,11 +1647,90 @@ void OnTimer()
      }
   }
 
-//--- niente calcolo qui: tutto avviene nel timer, a barra nuova
+void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam)
+  {
+   if(id!=CHARTEVENT_OBJECT_CLICK) return;
+   if(StringFind(sparam,PD_PREF)!=0) return;  // guardia: solo i NOSTRI oggetti
+   bool tasto=true;
+   if(sparam==PD_PREF+"b_hide")         Nascondi(!gNascosta);
+   else if(sparam==PD_PREF+"b_refresh") Refresh();
+   else if(sparam==PD_PREF+"b_ha")      ImpostaHA(!gHA);
+   else if(sparam==PD_PREF+"b_doji")    ImpostaDoji(!gDoji);
+   else if(sparam==PD_PREF+"b_ema")     ImpostaEma(!gEma);
+   else if(sparam==PD_PREF+"b_st")      ImpostaSt(!gSt);
+   else tasto=false;
+   if(tasto)
+     {
+      ObjectSetInteger(0,sparam,OBJPROP_STATE,false);   // il tasto torna su
+      DipingiTasti();
+      gRidisegna=false;
+      ChartRedraw(0);
+      return;
+     }
+   int i=-1, j=-1;
+   int tipo=PD_Bersaglio(sparam,gNS,gNT,i,j);
+   if(tipo==0) return;
+   string sym=(i>=0 ? gSym[i] : _Symbol);
+   ENUM_TIMEFRAMES tf=(j>=0 ? gTF[j] : (ENUM_TIMEFRAMES)_Period);
+   VaiA(sym,tf);
+  }
+
+//--- GRAFICO CORRENTE. Nessuna copia dati: gli array del terminale. Per tick SOLO la barra in formazione
+//    (incrementale); frecce doji, incroci EMA e canali SOLO a barra nuova (sulle barre CHIUSE).
 int OnCalculate(const int rates_total,const int prev_calculated,const datetime &time[],const double &open[],
                 const double &high[],const double &low[],const double &close[],const long &tick_volume[],
                 const long &volume[],const int &spread[])
   {
+   if(rates_total<3) return(0);
+   ArraySetAsSeries(time,false);
+   ArraySetAsSeries(open,false);
+   ArraySetAsSeries(high,false);
+   ArraySetAsSeries(low,false);
+   ArraySetAsSeries(close,false);
+   bool pieno=(prev_calculated<=0 || prev_calculated>rates_total);
+   int da=(pieno ? 0 : prev_calculated-1);
+   if(pieno)
+     {
+      ArrayInitialize(bCVs,EMPTY_VALUE); ArrayInitialize(bCVi,EMPTY_VALUE);
+      ArrayInitialize(bCLs,EMPTY_VALUE); ArrayInitialize(bCLi,EMPTY_VALUE);
+      ArrayInitialize(bIncSu,EMPTY_VALUE); ArrayInitialize(bIncGiu,EMPTY_VALUE);
+      gUltBarraGraf=0; gCanDa=-1;
+     }
+   else
+      for(int x=prev_calculated;x<rates_total;x++)
+        { bCVs[x]=EMPTY_VALUE; bCVi[x]=EMPTY_VALUE; bCLs[x]=EMPTY_VALUE; bCLi[x]=EMPTY_VALUE; bIncSu[x]=EMPTY_VALUE; bIncGiu[x]=EMPTY_VALUE; }
+   //--- HA classica ricorsiva (seme (o+c)/2 sulla barra piu' vecchia), EMA, Supertrend: dalla barra 'da'
+   PG_HA(open,high,low,close,rates_total,da,bHAo,bHAh,bHAl,bHAc);
+   for(int x=da;x<rates_total;x++) bHAcol[x]=(bHAc[x]>=bHAo[x]) ? 0.0 : 1.0;
+   PG_EMA(close,rates_total,da,InpEmaVeloce,bEmaV);
+   PG_EMA(close,rates_total,da,InpEmaLenta,bEmaL);
+   SW_STCore(high,low,close,rates_total,da,InpStPeriodo,InpStMult1,kAtr,kUp1,kDn1,kDir1,kVal1);
+   SW_STCore(high,low,close,rates_total,da,InpStPeriodo,InpStMult2,kAtr,kUp2,kDn2,kDir2,kVal2);
+   SW_STCore(high,low,close,rates_total,da,InpStPeriodo,InpStMult3,kAtr,kUp3,kDn3,kDir3,kVal3);
+   for(int x=da;x<rates_total;x++)
+     {
+      bSt1Su[x]=PG_StLinea(true,kDir1[x],kVal1[x],1.0); bSt1Giu[x]=PG_StLinea(true,kDir1[x],kVal1[x],-1.0);
+      bSt2Su[x]=PG_StLinea(true,kDir2[x],kVal2[x],1.0); bSt2Giu[x]=PG_StLinea(true,kDir2[x],kVal2[x],-1.0);
+      bSt3Su[x]=PG_StLinea(true,kDir3[x],kVal3[x],1.0); bSt3Giu[x]=PG_StLinea(true,kDir3[x],kVal3[x],-1.0);
+     }
+   //--- incroci EMA: SOLO barre chiuse (x <= rates_total-2), la barra in formazione mai
+   int primo=(InpEmaVeloce>InpEmaLenta ? InpEmaVeloce : InpEmaLenta);
+   for(int x=(da<1 ? 1 : da);x<rates_total-1;x++)
+     {
+      int r=PD_Incrocio(bEmaV,bEmaL,x,primo);
+      bIncSu[x]=(r>0 ? bHAl[x] : EMPTY_VALUE);
+      bIncGiu[x]=(r<0 ? bHAh[x] : EMPTY_VALUE);
+     }
+   bIncSu[rates_total-1]=EMPTY_VALUE; bIncGiu[rates_total-1]=EMPTY_VALUE;
+   //--- barra nuova: istantanea, frecce doji (solo con DOJI acceso), canali (solo con l'input)
+   if(time[rates_total-1]!=gUltBarraGraf)
+     {
+      gUltBarraGraf=time[rates_total-1];
+      Istantanea(rates_total,time,open,high,low,close);
+      if(gDoji) MarcaDoji();
+      if(InpDisegnaCanali) Canali();
+      gRidisegna=true;
+     }
    return(rates_total);
   }
 //+------------------------------------------------------------------+

@@ -160,11 +160,17 @@ API = {
     "PrintFormat": (1, 64), "Print": (1, 64), "PeriodSeconds": (0, 1), "ChartIndicatorsTotal": (2, 2),
     "ChartIndicatorName": (3, 3), "IndicatorSetString": (2, 3), "EnumToString": (1, 1), "Alert": (1, 64),
     "PlaySound": (1, 1), "MathMax": (2, 2), "MathMin": (2, 2), "MathAbs": (1, 1),
+    # v1.10 (click, tasti, buffer del grafico, stato in GlobalVariable)
+    "StringFind": (2, 3), "StringGetCharacter": (2, 2), "ChartID": (0, 0), "GetLastError": (0, 0),
+    "GlobalVariableSet": (2, 2), "GlobalVariableGet": (1, 2), "GlobalVariableCheck": (1, 1), "GlobalVariableDel": (1, 1),
+    "ChartGetInteger": (2, 4), "ChartSetInteger": (3, 4), "ChartSetSymbolPeriod": (3, 3), "ChartOpen": (2, 2),
+    "SymbolSelect": (2, 2), "SetIndexBuffer": (2, 3), "PlotIndexSetInteger": (3, 4), "PlotIndexSetString": (3, 3),
+    "IndicatorSetInteger": (2, 3),
 }
 KEYW = {"if", "for", "while", "switch", "return", "sizeof", "else"}
 VIETATI = ["OrderSend", "CTrade", "Trade.mqh", "PositionOpen", "WebRequest", "Socket", "SendMail",
-           "SendNotification", "SendFTP", "FileOpen", "FileWrite", "#import", ".dll", "GlobalVariableSet",
-           "ChartSetSymbolPeriod", "iCustom", "iATR", "iMA(", "CopyBuffer", "ExpertRemove", "ShellExecute",
+           "SendNotification", "SendFTP", "FileOpen", "FileWrite", "#import", ".dll", "GlobalVariableTemp",
+           "GlobalVariablesDeleteAll", "ChartApplyTemplate", "ChartSaveTemplate", "iCustom", "iATR", "iMA(", "CopyBuffer", "ExpertRemove", "ShellExecute",
            "iTime(", "iClose(", "iOpen(", "iHigh(", "iLow("]
 LISTE = {
     "InpLista1": "AUDCAD,AUDCHF,AUDJPY,AUDNZD,AUDUSD,CADCHF,CADJPY,CHFJPY",
@@ -185,6 +191,12 @@ DEFAULT_ATTESI = {
     "InpSemeHA": "50", "InpColRialzo": "C'39,174,96'", "InpColRibasso": "C'192,57,43'",
     "InpAlertPopup": "false", "InpAlertSuono": "false", "InpAlertMinuti": "5",
     "InpModoConfronto": "false", "InpCellePerCiclo": "20", "InpRicontrolloSec": "5",
+    # v1.10: HA ACCESO di default ("di default c'erano le candele heikenashi"), doji sul grafico accese,
+    # tabella visibile, EMA e Supertrend spenti, click sullo STESSO grafico, canali TMA spenti
+    "InpHaDefault": "true", "InpDojiDefault": "true", "InpNascostaDefault": "false", "InpEmaDefault": "false",
+    "InpStDefault": "false", "InpClickNuovoGrafico": "false", "InpDisegnaCanali": "false", "InpBarreCanali": "300",
+    "InpEmaVeloce": "9", "InpEmaLenta": "21", "InpStPeriodo": "10", "InpStMult1": "2.5", "InpStMult2": "3.0",
+    "InpStMult3": "3.5",
 }
 # ogni campo di PD_Par e l'input da cui DEVE arrivare (raccordo: un campo scollegato non lo vede nessun numero)
 PAR_DA_INPUT = {"candela": "(int)InpCandela", "tmaModo": "(int)InpTmaModo", "tmaS": "InpTmaLento", "atrS": "InpAtrLento",
@@ -340,17 +352,21 @@ def raccordo(src, code, bag):
     ri = corpo(code, "Rinvia") or ""
     if "gAttesa[k]=(gAttesa[k]<=0?2:(gAttesa[k]>=150?300:gAttesa[k]*2));gProssimo[k]=ora+gAttesa[k];" not in norm(ri):
         bag.append("RACCORDO: attesa crescente 2..300 s non come dichiarato")
-    # ChartRedraw: solo nel timer sotto gRidisegna, e in OnDeinit
-    if code.count("ChartRedraw(") != 2:
-        bag.append("ChartRedraw deve comparire 2 volte (timer condizionato + OnDeinit), trovate %d" % code.count("ChartRedraw("))
+    # ChartRedraw: nel timer sotto gRidisegna, in OnDeinit e UNA volta nel ramo dei tasti di OnChartEvent (v1.10)
+    if code.count("ChartRedraw(") != 3:
+        bag.append("ChartRedraw deve comparire 3 volte (timer condizionato + OnDeinit + tasti), trovate %d" % code.count("ChartRedraw("))
     ot = norm(corpo(code, "OnTimer") or "")
     if "if(gRidisegna){gRidisegna=false;ChartRedraw(0);}" not in ot:
         bag.append("RACCORDO: ChartRedraw del timer non condizionato a gRidisegna")
-    if "while(viste<tot&&fatte<InpCellePerCiclo)" not in ot or "if(Elabora(k,ora))fatte++;" not in ot:
-        bag.append("RACCORDO: il timer non limita le copie per ciclo a InpCellePerCiclo")
+    oe_ = norm(corpo(code, "OnChartEvent") or "")
+    if oe_.count("ChartRedraw(") != 1 or "if(tasto){" not in oe_ or oe_.find("ChartRedraw(") < oe_.find("if(tasto){"):
+        bag.append("RACCORDO: ChartRedraw di OnChartEvent fuori dal ramo dei tasti")
+    gc_ = norm(corpo(code, "GiroCelle") or "")
+    if "while(viste<tot&&fatte<InpCellePerCiclo)" not in gc_ or "if(Elabora(k,ora))fatte++;" not in gc_:
+        bag.append("RACCORDO: il giro delle celle non limita le copie per ciclo a InpCellePerCiclo")
     od = norm(corpo(code, "OnDeinit") or "")
-    if "EventKillTimer();" not in od or "if(gProprietario)ObjectsDeleteAll(0,PD_PREF);" not in od:
-        bag.append("RACCORDO: OnDeinit non spegne il timer o non cancella gli oggetti PDL_")
+    if "EventKillTimer();" not in od or "if(gProprietario){ObjectsDeleteAll(0,PD_PREF);ObjectsDeleteAll(0,PD_DOJI);}" not in od:
+        bag.append("RACCORDO: OnDeinit non spegne il timer o non cancella gli oggetti PDL_ e le frecce PDLG_d_")
     oi = norm(corpo(code, "OnInit") or "")
     if "EventSetTimer(1);" not in oi:
         bag.append("RACCORDO: timer non a 1 s in OnInit")
@@ -358,8 +374,8 @@ def raccordo(src, code, bag):
         if "gPar.%s=%s;" % (c_, v_) not in oi:
             bag.append("RACCORDO: gPar.%s non e' %s in OnInit" % (c_, v_))
     oc = norm(corpo(code, "OnCalculate") or "")
-    if not oc.endswith("{return(rates_total);}"):
-        bag.append("OnCalculate deve essere vuoto (return(rates_total))")
+    if "CopyRates(" in oc or "Elabora(" in oc or "SeriesInfoInteger(" in oc:
+        bag.append("OnCalculate (grafico corrente) non deve copiare dati ne' toccare la tabella")
     ag = norm(corpo(code, "AggiornaCella") or "")
     for pz in ("if(txt!=gTxt[k]){ObjectSetString(0,NomeT(i,j),OBJPROP_TEXT,txt);gTxt[k]=txt;gRidisegna=true;}",
                "if(bg!=gBg[k]){ObjectSetInteger(0,NomeR(i,j),OBJPROP_BGCOLOR,bg);gBg[k]=bg;gRidisegna=true;}",
@@ -371,16 +387,18 @@ def raccordo(src, code, bag):
         bag.append("AggiornaCella: oggetti toccati fuori dai controlli di cambio (%d ObjectSet, attesi 4)" % ag.count("ObjectSet"))
     st = norm(corpo(code, "Struttura") or "")
     # pannello+titolo+PAIR (3) | per TF: rett+etich (2) | per simbolo: etich (1) + per TF rett+etich (2)
-    if st.count("Rett(") != 3 or st.count("Etic(") != 5:
-        bag.append("Struttura: %d Rett e %d Etic (attesi 3 e 5 -> 3+2*nTF+nS*(1+2*nTF) oggetti)" % (st.count("Rett("), st.count("Etic(")))
-    if "3+2*gNT+gNS*(1+2*gNT)" not in norm(code):
+    if st.count("Rett(") != 3 or st.count("Etic(") != 5 or st.count("Bottone(") != 6:
+        bag.append("Struttura: %d Rett, %d Etic, %d Bottone (attesi 3, 5, 6 -> 9+2*nTF+nS*(1+2*nTF) oggetti)"
+                   % (st.count("Rett("), st.count("Etic("), st.count("Bottone(")))
+    if "9+2*gNT+gNS*(1+2*gNT)" not in norm(code):
         bag.append("conteggio oggetti stampato diverso dalla formula")
-    if "254 oggetti" not in src:
-        bag.append("la testata non dichiara 254 oggetti coi default (3+2*3+35*7)")
+    if "260 oggetti" not in src:
+        bag.append("la testata non dichiara 260 oggetti coi default (9+2*3+35*7)")
     du = norm(corpo(code, "DurataBarra") or "")
     if "if(tf==PERIOD_MN1)return(28*86400);returnPeriodSeconds(tf);".replace("returnPeriodSeconds(tf)", "return(PeriodSeconds(tf))") not in du:
         bag.append("DurataBarra: MN deve usare il mese piu' corto (28 giorni)")
     raccordo_cancello(src, code, bag)
+    raccordo_v11(src, code, bag)
 
 
 def raccordo_cancello(src, code, bag):
@@ -409,17 +427,18 @@ def raccordo_cancello(src, code, bag):
         if pz not in sa:
             bag.append("CANCELLO AggiornaStatoSimboli: manca il controllo '%s'" % perche)
     ot = norm(corpo(code, "OnTimer") or "")
-    for pz, perche in (("gCursore=(gCursore+1)%tot;", "il cursore avanza di una cella"),
-                       ("if(ora-gUltStato>=60)", "stato dei simboli ogni 60 s"),
-                       ("if(!gDoppioVisto)ControllaDoppio();", "controllo delle due copie")):
-        if pz not in ot:
-            bag.append("CANCELLO OnTimer: manca '%s'" % perche)
+    gc = norm(corpo(code, "GiroCelle") or "")
+    for pz, perche, dove in (("gCursore=(gCursore+1)%tot;", "il cursore avanza di una cella", gc),
+                             ("if(ora-gUltStato>=60)", "stato dei simboli ogni 60 s", gc),
+                             ("if(gGiri%10==3)ControllaDoppio();", "controllo delle due copie (ogni 10 s)", ot)):
+        if pz not in dove:
+            bag.append("CANCELLO OnTimer/GiroCelle: manca '%s'" % perche)
     # il nome vero dell'oggetto si controlla sul sorgente a stringhe INTATTE (nel mascherato qualunque stringa da 8 caratteri passa)
     otv = norm(corpo(sc, "OnTimer") or "")
-    if 'if(ObjectFind(0,PD_PREF+"pannello")<0)Struttura();' not in otv:
-        bag.append("CANCELLO OnTimer: manca la ricostruzione degli oggetti col nome vero 'pannello' (oggetti cancellati a mano)")
-    if ot.find("AggiornaStatoSimboli();") < 0 or ot.find("AggiornaStatoSimboli();") > ot.find("while("):
-        bag.append("CANCELLO OnTimer: AggiornaStatoSimboli non chiamato prima del giro delle celle")
+    if 'if(ObjectFind(0,PD_PREF+"pannello")<0||ObjectFind(0,PD_PREF+"b_hide")<0)Struttura();' not in otv:
+        bag.append("CANCELLO OnTimer: manca la ricostruzione degli oggetti coi nomi veri 'pannello' e 'b_hide' (cancellati a mano o dall'istanza vecchia)")
+    if gc.find("AggiornaStatoSimboli();") < 0 or gc.find("AggiornaStatoSimboli();") > gc.find("while("):
+        bag.append("CANCELLO GiroCelle: AggiornaStatoSimboli non chiamato prima del giro delle celle")
     if "if(n>=2)" not in norm(corpo(code, "ControllaDoppio") or ""):
         bag.append("CANCELLO ControllaDoppio: l'avviso '2 COPIE' deve scattare da 2 copie in su, non da 1")
     ag = norm(corpo(sc, "AggiornaCella") or "")
@@ -433,7 +452,7 @@ def raccordo_cancello(src, code, bag):
     oi = norm(corpo(code, "OnInit") or "")
     for pz, perche in (("InpBarreIndietro<1||InpBarreIndietro>500", "barre di ricerca 1-500"),
                        ("ArrayInitialize(gStatoSim,-1);", "stato iniziale 'da valutare'"),
-                       ("ObjectsDeleteAll(0,PD_PREF);gProprietario=true;", "pulizia degli oggetti PDL_ rimasti")):
+                       ("ObjectsDeleteAll(0,PD_PREF);ObjectsDeleteAll(0,PD_DOJI);gProprietario=true;", "pulizia degli oggetti PDL_ e PDLG_d_ rimasti")):
         if pz not in oi:
             bag.append("CANCELLO OnInit: manca '%s'" % perche)
     # secondo giro cieco del cancello: 7 su 8 VERDI (colonna H4 riempita con H8, D1 con W1, suffisso ignorato...)
@@ -465,6 +484,232 @@ def raccordo_cancello(src, code, bag):
 
 
 # ===========================================================================
+# v1.10: RACCORDO dei tasti, del click, del grafico (HA, doji, EMA, Supertrend), dello stato
+# ===========================================================================
+PULSANTI = os.path.join(ROOT, "mql5/Indicators/ABTG_Pulsanti_Grafico.mq5")
+NATCLA = os.path.join(ROOT, "mql5/Experts/EA_NatCla.mq5")
+# plot -> buffer (plot 0 = 5 buffer delle candele colorate, poi uno per plot), tipo, colore impostato in OnInit
+PLOT_BUF = ["bCVs", "bCVi", "bCLs", "bCLi", "bEmaV", "bEmaL", "bIncSu", "bIncGiu",
+            "bSt1Su", "bSt1Giu", "bSt2Su", "bSt2Giu", "bSt3Su", "bSt3Giu"]
+PLOT_TIPO = ["DRAW_COLOR_CANDLES"] + ["DRAW_LINE"] * 6 + ["DRAW_ARROW"] * 2 + ["DRAW_LINE"] * 6
+PLOT_COL = {1: "InpColCanaleV", 2: "InpColCanaleV", 3: "InpColCanaleL", 4: "InpColCanaleL", 5: "InpColEmaVeloce",
+            6: "InpColEmaLenta", 7: "InpColIncSu", 8: "InpColIncGiu", 9: "InpColSt1Su", 10: "InpColSt1Giu",
+            11: "InpColSt2Su", 12: "InpColSt2Giu", 13: "InpColSt3Su", 14: "InpColSt3Giu"}
+CALC_BUF = ["kAtr", "kUp1", "kDn1", "kDir1", "kVal1", "kUp2", "kDn2", "kDir2", "kVal2", "kUp3", "kDn3", "kDir3", "kVal3"]
+TASTI = {"b_hide": "Nascondi(!gNascosta);", "b_refresh": "Refresh();", "b_ha": "ImpostaHA(!gHA);",
+         "b_doji": "ImpostaDoji(!gDoji);", "b_ema": "ImpostaEma(!gEma);", "b_st": "ImpostaSt(!gSt);"}
+COLORI_5 = ["CHART_COLOR_CANDLE_BULL", "CHART_COLOR_CANDLE_BEAR", "CHART_COLOR_CHART_UP", "CHART_COLOR_CHART_DOWN",
+            "CHART_COLOR_CHART_LINE"]
+
+
+def raccordo_v11(src, code, bag):
+    sc = re.sub(r"//[^\n]*", "", src)            # senza commenti, stringhe intatte
+    def C(nome):
+        return norm(corpo(code, nome) or "")
+    def S(nome):
+        return norm(corpo(sc, nome) or "")
+    def need(pz, dove, msg):
+        if pz not in dove:
+            bag.append("V11 " + msg)
+    # --- STRUTTURA dei buffer e dei plot (un riferimento all'indice sbagliato colora/riempie il plot sbagliato)
+    nb = re.search(r"#property\s+indicator_buffers\s+(\d+)", src)
+    np_ = re.search(r"#property\s+indicator_plots\s+(\d+)", src)
+    if not nb or nb.group(1) != "32" or not np_ or np_.group(1) != "15":
+        bag.append("V11 indicator_buffers/plots diversi da 32/15")
+    sib = re.findall(r"SetIndexBuffer\(\s*(\d+)\s*,\s*(\w+)\s*,\s*(\w+)\s*\)", sc)
+    attesi = ["bHAo", "bHAh", "bHAl", "bHAc", "bHAcol"] + PLOT_BUF + CALC_BUF
+    if [int(a) for a, _, _ in sib] != list(range(32)) or [b for _, b, _ in sib] != attesi:
+        bag.append("V11 SetIndexBuffer: indici/nomi diversi dalla mappa plot->buffer (%s)" % [b for _, b, _ in sib][:8])
+    tipi = [t for _, _, t in sib]
+    if tipi != ["INDICATOR_DATA"] * 4 + ["INDICATOR_COLOR_INDEX"] + ["INDICATOR_DATA"] * 14 + ["INDICATOR_CALCULATIONS"] * 13:
+        bag.append("V11 SetIndexBuffer: tipi (DATA/COLOR_INDEX/CALCULATIONS) fuori posto")
+    for k, t in enumerate(PLOT_TIPO):
+        m = re.search(r"#property\s+indicator_type%d\s+(\w+)" % (k + 1), src)
+        if not m or m.group(1) != t:
+            bag.append("V11 plot %d: tipo #property diverso da %s" % (k, t))
+    for m in re.finditer(r"PlotIndexSet(?:Integer|String)\((\d+),", sc):
+        if int(m.group(1)) >= 15:
+            bag.append("V11 PlotIndexSet con indice %s >= 15 plot" % m.group(1))
+    oi = S("OnInit")
+    for k, col in PLOT_COL.items():
+        need("PlotIndexSetInteger(%d,PLOT_LINE_COLOR,%s);" % (k, col), oi, "colore del plot %d non e' %s" % (k, col))
+    need("PlotIndexSetInteger(0,PLOT_LINE_COLOR,0,InpColHASu);PlotIndexSetInteger(0,PLOT_LINE_COLOR,1,InpColHAGiu);", oi,
+         "colori HA (indice 0 su, 1 giu) non dagli input")
+    # --- CLICK
+    oe = S("OnChartEvent")
+    need("if(id!=CHARTEVENT_OBJECT_CLICK)return;", oe, "OnChartEvent non filtra il click")
+    need("if(StringFind(sparam,PD_PREF)!=0)return;", oe, "OnChartEvent non si limita ai NOSTRI oggetti")
+    for b, f in TASTI.items():
+        need('if(sparam==PD_PREF+"%s")%s' % (b, f) if b == "b_hide" else 'elseif(sparam==PD_PREF+"%s")%s' % (b, f), oe,
+             "il tasto %s non chiama %s" % (b, f))
+        need('Bottone(PD_PREF+"%s",' % b, S("Struttura"), "il tasto %s non e' creato in Struttura" % b)
+        need('Tasto("%s",' % b, S("DipingiTasti"), "il tasto %s non e' dipinto" % b)
+    need("if(tasto){ObjectSetInteger(0,sparam,OBJPROP_STATE,false);DipingiTasti();", oe, "il tasto cliccato non torna su (OBJPROP_STATE)")
+    need("ObjectSetInteger(0,nome,OBJPROP_STATE,false);", S("Tasto"), "Tasto non rimette su lo stato del bottone")
+    for pz, msg in (("inttipo=PD_Bersaglio(sparam,gNS,gNT,i,j);", "il click non passa nome, nS, nT a PD_Bersaglio"),
+                    ("if(tipo==0)return;", "click su oggetto non della tabella non ignorato"),
+                    ("stringsym=(i>=0?gSym[i]:_Symbol);", "il simbolo del click non e' quello della RIGA cliccata"),
+                    ("ENUM_TIMEFRAMEStf=(j>=0?gTF[j]:(ENUM_TIMEFRAMES)_Period);", "il TF del click non e' quello della COLONNA cliccata"),
+                    ("VaiA(sym,tf);", "il click non porta a (sym, tf)")):
+        need(pz, oe, msg)
+    if oe.find("VaiA(") < oe.find("if(tipo==0)return;"):
+        bag.append("V11 VaiA prima del controllo del bersaglio")
+    for nome, att in (("NomeR", 'return(PD_PREF+"r_"+IntegerToString(i)+"_"+IntegerToString(j));'),
+                      ("NomeT", 'return(PD_PREF+"t_"+IntegerToString(i)+"_"+IntegerToString(j));'),
+                      ("NomeS", 'return(PD_PREF+"s_"+IntegerToString(i));')):
+        need(att, S(nome), "%s: il nome non e' quello che PD_Bersaglio sa leggere" % nome)
+    need('Rett(PD_PREF+"hr_"+IntegerToString(j),', S("Struttura"), "nome del rettangolo TF diverso da hr_<j>")
+    need('Etic(PD_PREF+"ht_"+IntegerToString(j),', S("Struttura"), "nome dell'etichetta TF diverso da ht_<j>")
+    va = S("VaiA")
+    need("if(SymbolInfoInteger(sym,SYMBOL_SELECT)==0&&!SymbolSelect(sym,true))", va, "simbolo fuori Market Watch non aggiunto (SymbolSelect)")
+    need("if(InpClickNuovoGrafico){if(ChartOpen(sym,tf)==0)", va, "grafico nuovo non aperto su (sym, tf) con InpClickNuovoGrafico")
+    need("if(!ChartSetSymbolPeriod(0,sym,tf))", va, "ChartSetSymbolPeriod non su questo grafico con (sym, tf)")
+    for f in ("ChartSetSymbolPeriod(", "ChartOpen(", "SymbolSelect("):
+        if code.count(f) != 1 or f not in norm(corpo(code, "VaiA") or ""):
+            bag.append("V11 %s deve esistere una volta, dentro VaiA" % f)
+    # --- REFRESH: TUTTE le cache, nessuna copia nell'handler
+    rf = C("Refresh")
+    i0 = rf.find("for(intk=0;k<nc;k++){")
+    ciclo = rf[i0:rf.find("}", i0)] if i0 >= 0 else ""
+    for pz in ("gProssimo[k]=0;", "gAttesa[k]=0;", "gUltBarra[k]=0;", "gPronta[k]=false;", "AggiornaCella(k);"):
+        need(pz, ciclo, "REFRESH non azzera '%s' per OGNI cella (dentro il ciclo su nc)" % pz)
+    need("intnc=gNS*gNT;", rf, "REFRESH non scorre tutte le celle")
+    need("gUltStato=0;", rf, "REFRESH non rilegge lo stato dei simboli")
+    for f in ("Refresh", "OnChartEvent", "Nascondi", "ImpostaHA", "ImpostaDoji", "ImpostaEma", "ImpostaSt", "MarcaDoji"):
+        b_ = C(f)
+        if "CopyRates(" in b_ or "Elabora(" in b_ or "GiroCelle(" in b_ or "SeriesInfoInteger(" in b_:
+            bag.append("V11 %s copia dati o ricalcola celle dentro l'handler (deve farlo il timer, a rate)" % f)
+    if code.count("Elabora(") != 2 or "Elabora(" not in C("GiroCelle"):
+        bag.append("V11 Elabora va chiamata SOLO dal giro delle celle")
+    if code.count("GiroCelle(") != 2:
+        bag.append("V11 GiroCelle va chiamata SOLO dal timer")
+    # --- HIDE: carico zero, il tasto resta
+    need("if(!gNascosta)GiroCelle(ora);", C("OnTimer"), "con la tabella NASCOSTA il timer continua a copiare/ricalcolare")
+    need('if(gNascosta&&nome!=PD_PREF+"b_hide")return(OBJ_NO_PERIODS);return(OBJ_ALL_PERIODS);', S("Periodi"),
+         "HIDE nasconde anche il tasto che la riapre (o non nasconde la tabella)")
+    for f in ("Rett", "Etic", "Bottone"):
+        need("ObjectSetInteger(0,nome,OBJPROP_TIMEFRAMES,Periodi(nome));", C(f), "%s non applica la visibilita' di HIDE" % f)
+    need('gNascosta=on;GvSalva("SHIDE",on?1.0:0.0);Struttura();if(!on)Refresh();', S("Nascondi"),
+         "HIDE/SHOW: stato non salvato, oggetti non riapplicati o niente ricalcolo allo SHOW")
+    # --- STATO DEI TASTI (GlobalVariable con la ChartID)
+    need("return(PD_GV+IntegerToString(ChartID())+\"_\"+cosa);", S("GvChiave"), "chiave della GlobalVariable senza ChartID")
+    need("boolon=PG_StatoIniziale(has,gvOn,gvIn,inp);", C("StatoAvvio"), "StatoAvvio non usa PG_StatoIniziale")
+    need('GvSalva("S"+cosa,on?1.0:0.0);GvSalva("I"+cosa,inp?1.0:0.0);', S("StatoAvvio"), "StatoAvvio non salva stato e input")
+    for nome, inp in (("HIDE", "InpNascostaDefault"), ("HA", "InpHaDefault"), ("DOJI", "InpDojiDefault"), ("EMA", "InpEmaDefault"),
+                      ("ST", "InpStDefault")):
+        need('=StatoAvvio("%s",%s);' % (nome, inp), oi, "stato iniziale %s non da %s" % (nome, inp))
+    salvati = set(re.findall(r'GvSalva\("S(\w+)"', sc))
+    if salvati != {"HIDE", "HA", "DOJI", "EMA", "ST"}:
+        bag.append("V11 i tasti salvano chiavi diverse da quelle lette all'avvio: %s" % sorted(salvati))
+    need('stringt[5]={"HIDE","HA","DOJI","EMA","ST"};', S("GvPulisci"), "GvPulisci non dimentica tutti e 5 i tasti")
+    od = C("OnDeinit")
+    need("if(reason==REASON_REMOVE||reason==REASON_CHARTCLOSE)GvPulisci();", od,
+         "lo stato si cancella al cambio simbolo/TF (deve restare) o non si cancella togliendo l'indicatore")
+    # --- HA: colori salvati PRIMA di metterli a clrNONE, ripristinati a OGNI uscita
+    ch = C("ColsHide")
+    cattura = ch.find("gColBull=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CANDLE_BULL),clrLime);")
+    if cattura < 0 or ch.find("gColsHidden=true;") < cattura or ch.find("clrNONE") < ch.find("gColsHidden=true;"):
+        bag.append("V11 ColsHide: i colori non si catturano PRIMA di metterli a clrNONE")
+    for pr in COLORI_5:
+        if ch.count(pr) != 2 or "ChartSetInteger(0,%s,clrNONE)" % pr not in ch or pr not in C("ColsRestore"):
+            bag.append("V11 colore %s non catturato/nascosto/ripristinato" % pr)
+    need("ColsRestore();", od[:od.find("if(gProprietario)")] if "if(gProprietario)" in od else "", "OnDeinit non ripristina i colori per primo")
+    need("if(gHA)ColsHide();elseRepairInvisibleNative();", oi, "OnInit: HA acceso non nasconde / spento non ripara")
+    need("if(on){gCure=0;ColsHide();}elseColsRestore();ApplicaPlot();", C("ImpostaHA"), "tasto HA: non nasconde/ripristina")
+    need("if(!gHA||gCure>=3)return;", C("CuraColori"), "CuraColori fuori dall'HA acceso o senza limite")
+    need("gColsHidden=false;ColsHide();", C("CuraColori"), "CuraColori non ricattura i colori ATTUALI")
+    need("CuraColori();", C("OnTimer"), "il timer non cura i colori (ricarico: l'istanza vecchia li ripristina DOPO)")
+    ap = C("ApplicaPlot")
+    for pz in ("PlotIndexSetInteger(0,PLOT_DRAW_TYPE,gHA?DRAW_COLOR_CANDLES:DRAW_NONE);",
+               "for(intp=1;p<=4;p++){PlotIndexSetInteger(p,PLOT_DRAW_TYPE,InpDisegnaCanali?DRAW_LINE:DRAW_NONE);",
+               "for(intp=5;p<=6;p++){PlotIndexSetInteger(p,PLOT_DRAW_TYPE,gEma?DRAW_LINE:DRAW_NONE);",
+               "for(intp=7;p<=8;p++){PlotIndexSetInteger(p,PLOT_DRAW_TYPE,gEma?DRAW_ARROW:DRAW_NONE);",
+               "PlotIndexSetInteger(7,PLOT_ARROW,233);PlotIndexSetInteger(8,PLOT_ARROW,234);",
+               "for(intp=9;p<=14;p++){PlotIndexSetInteger(p,PLOT_DRAW_TYPE,gSt?DRAW_LINE:DRAW_NONE);"):
+        need(pz, ap, "ApplicaPlot: manca '%s'" % pz[:60])
+    for f, v in (("ImpostaEma", 'gEma=on;GvSalva("SEMA",on?1.0:0.0);ApplicaPlot();'),
+                 ("ImpostaSt", 'gSt=on;GvSalva("SST",on?1.0:0.0);ApplicaPlot();')):
+        need(v, S(f), "%s non salva lo stato o non ridisegna" % f)
+    # --- GRAFICO CORRENTE (OnCalculate)
+    oc = C("OnCalculate")
+    for pz, msg in (("boolpieno=(prev_calculated<=0||prev_calculated>rates_total);intda=(pieno?0:prev_calculated-1);",
+                     "ricalcolo incrementale non dalla barra prev_calculated-1 (la barra in formazione si rifa')"),
+                    ("PG_HA(open,high,low,close,rates_total,da,bHAo,bHAh,bHAl,bHAc);", "HA non dalle barre del grafico"),
+                    ("for(intx=da;x<rates_total;x++)bHAcol[x]=(bHAc[x]>=bHAo[x])?0.0:1.0;", "colore HA non come ABTG_Pulsanti"),
+                    ("PG_EMA(close,rates_total,da,InpEmaVeloce,bEmaV);PG_EMA(close,rates_total,da,InpEmaLenta,bEmaL);",
+                     "EMA veloce/lenta: periodi o buffer scambiati"),
+                    ("SW_STCore(high,low,close,rates_total,da,InpStPeriodo,InpStMult1,kAtr,kUp1,kDn1,kDir1,kVal1);", "ST livello 1"),
+                    ("SW_STCore(high,low,close,rates_total,da,InpStPeriodo,InpStMult2,kAtr,kUp2,kDn2,kDir2,kVal2);", "ST livello 2"),
+                    ("SW_STCore(high,low,close,rates_total,da,InpStPeriodo,InpStMult3,kAtr,kUp3,kDn3,kDir3,kVal3);", "ST livello 3"),
+                    ("bSt1Su[x]=PG_StLinea(true,kDir1[x],kVal1[x],1.0);bSt1Giu[x]=PG_StLinea(true,kDir1[x],kVal1[x],-1.0);", "linee ST 1"),
+                    ("bSt2Su[x]=PG_StLinea(true,kDir2[x],kVal2[x],1.0);bSt2Giu[x]=PG_StLinea(true,kDir2[x],kVal2[x],-1.0);", "linee ST 2"),
+                    ("bSt3Su[x]=PG_StLinea(true,kDir3[x],kVal3[x],1.0);bSt3Giu[x]=PG_StLinea(true,kDir3[x],kVal3[x],-1.0);", "linee ST 3"),
+                    ("intprimo=(InpEmaVeloce>InpEmaLenta?InpEmaVeloce:InpEmaLenta);", "riscaldamento dell'incrocio = periodo maggiore"),
+                    ("for(intx=(da<1?1:da);x<rates_total-1;x++){intr=PD_Incrocio(bEmaV,bEmaL,x,primo);",
+                     "incrocio valutato anche sulla barra IN FORMAZIONE o con le EMA scambiate"),
+                    ("bIncSu[x]=(r>0?bHAl[x]:EMPTY_VALUE);bIncGiu[x]=(r<0?bHAh[x]:EMPTY_VALUE);", "frecce incrocio: verso o posizione"),
+                    ("bIncSu[rates_total-1]=EMPTY_VALUE;bIncGiu[rates_total-1]=EMPTY_VALUE;", "freccia sulla barra in formazione non pulita"),
+                    ("if(time[rates_total-1]!=gUltBarraGraf){gUltBarraGraf=time[rates_total-1];Istantanea(rates_total,time,open,high,low,close);if(gDoji)MarcaDoji();if(InpDisegnaCanali)Canali();",
+                     "doji/canali non SOLO a barra nuova, o doji calcolate a tasto spento")):
+        need(pz, oc, msg)
+    for b in ("bCVs", "bCVi", "bCLs", "bCLi", "bIncSu", "bIncGiu"):
+        need("ArrayInitialize(%s,EMPTY_VALUE);" % b, oc, "%s non pulito al ricalcolo completo" % b)
+        need("%s[x]=EMPTY_VALUE;" % b, oc, "%s non pulito sulle barre nuove" % b)
+    ist = C("Istantanea")
+    for pz in ("intn=(rt<gBisognoGraf?rt:gBisognoGraf);", "inty=rt-1-x;",
+               "gXo[x]=open[y];gXh[x]=high[y];gXl[x]=low[y];gXc[x]=close[y];", "gXt[x]=time[y];gXhh[x]=bHAh[y];gXhl[x]=bHAl[y];",
+               "gXn=n;gXrt=rt;"):
+        need(pz, ist, "Istantanea (ordine SERIE dalle barre del grafico): manca '%s'" % pz)
+    need("gBisognoGraf=PD_Bisogno(gPar,(InpDisegnaCanali&&InpBarreCanali>InpBarreIndietro)?InpBarreCanali:InpBarreIndietro);", oi,
+         "barre dell'istantanea non sufficienti per doji e canali")
+    md = C("MarcaDoji")
+    for pz, msg in (("ObjectsDeleteAll(0,PD_DOJI);", "frecce vecchie non cancellate prima di ridisegnare"),
+                    ("intnm=PD_Marca(gXo,gXh,gXl,gXc,gXn,InpBarreIndietro,gPar,gMs,gMd,gMf,gMl);", "frecce non con la regola delle celle"),
+                    ("boolsu=(gMd[q]>0);", "verso della freccia"),
+                    ("doublepr=(su?gXhl[s]:gXhh[s]);", "freccia rialzista non sotto / ribassista non sopra la candela"),
+                    ("ObjectCreate(0,nome,OBJ_ARROW,0,gXt[s],pr)", "freccia non sulla candela della doji"),
+                    ("ObjectSetInteger(0,nome,OBJPROP_COLOR,su?InpColRialzo:InpColRibasso);", "colore della freccia non per direzione")):
+        need(pz, md, "MarcaDoji: " + msg)
+    need("gMf[q],gMl[q]", md, "tooltip della freccia senza la distanza in ATR")
+    need('if(on)MarcaDoji();else{ObjectsDeleteAll(0,PD_DOJI);gMarcNome="";gRidisegna=true;}', S("ImpostaDoji"),
+         "tasto DOJI: OFF non toglie le frecce o ON non le disegna")
+    need('gDoji=on;GvSalva("SDOJI",on?1.0:0.0);', S("ImpostaDoji"), "tasto DOJI: stato non salvato")
+    # ogni chiamata di MarcaDoji e' sotto DOJI acceso (OFF = nessun calcolo)
+    for m in re.finditer(r"MarcaDoji\(\)", code):
+        riga = code[code.rfind("\n", 0, m.start()) + 1:code.find("\n", m.end())]
+        if "void MarcaDoji" in riga:
+            continue
+        if "gDoji" not in riga and "if(on)" not in norm(riga):
+            bag.append("V11 MarcaDoji chiamata senza DOJI acceso: '%s'" % riga.strip()[:70])
+    if code.count("MarcaDoji()") != 5:
+        bag.append("V11 MarcaDoji: attese 4 chiamate + definizione, trovate %d" % code.count("MarcaDoji()"))
+    need("if(gDoji&&gMarcNome!=\"\"&&ObjectFind(0,gMarcNome)<0)MarcaDoji();", S("OnTimer"), "frecce cancellate dall'istanza vecchia non rifatte")
+    ca = C("Canali")
+    need("if(PD_Banda(gXh,gXl,gXc,gXn,s,gPar.tmaModo,gPar.tmaF,gPar.atrF,gPar.multF,mid,up,lo,a)){bCVs[x]=up;bCVi[x]=lo;}", ca, "canale veloce")
+    need("if(PD_Banda(gXh,gXl,gXc,gXn,s,gPar.tmaModo,gPar.tmaS,gPar.atrS,gPar.multS,mid,up,lo,a)){bCLs[x]=up;bCLi[x]=lo;}", ca, "canale lento")
+    need("intx=rt-1-s;", ca, "canali: indice cronologico della barra s")
+    # prefissi: le frecce NON stanno sotto PD_PREF (HIDE non le tocca), il click legge solo PD_PREF
+    m1 = re.search(r'#define\s+PD_PREF\s+"([^"]+)"', src)
+    m2 = re.search(r'#define\s+PD_DOJI\s+"([^"]+)"', src)
+    if not m1 or not m2 or m2.group(1).startswith(m1.group(1)) or m1.group(1) != "PDL_":
+        bag.append("V11 prefissi: PD_DOJI non deve iniziare con PD_PREF (e PD_PREF = PDL_)")
+    # funzioni COPIATE identiche da ABTG_Pulsanti_Grafico.mq5 (e SW_STCore = NC_STCore di EA_NatCla)
+    pu = maschera(leggi(PULSANTI).decode("latin-1"))
+    nc = maschera(leggi(NATCLA).decode("latin-1"))
+    for f in ("SW_STCore", "PG_EMA", "PG_HA", "PG_StLinea", "PG_StatoIniziale"):
+        a_, b_ = norm(corpo(code, f) or "x"), norm(corpo(pu, f) or "y")
+        if a_ != b_:
+            bag.append("V11 %s NON identica a quella di ABTG_Pulsanti_Grafico.mq5" % f)
+    if norm(corpo(code, "SW_STCore") or "x") != norm(corpo(nc, "NC_STCore") or "y").replace("NC_STCore", "SW_STCore"):
+        bag.append("V11 SW_STCore NON identica a NC_STCore di EA_NatCla.mq5")
+    for f in ("ColsHide", "ColsRestore", "ColOrDefault", "IsNone"):
+        a_ = re.sub(r'Print\([^;]*\);', "", norm(corpo(code, f) or "x"))
+        b_ = re.sub(r'Print\([^;]*\);', "", norm(corpo(pu, f) or "y"))
+        if a_ != b_:
+            bag.append("V11 %s NON identica (a meno dei messaggi) a quella di ABTG_Pulsanti_Grafico.mq5" % f)
+
+
+# ===========================================================================
 # P) BLOCCO PURO in C++
 # ===========================================================================
 SHIM = r'''
@@ -480,6 +725,11 @@ inline double MathMin(double a,double b){ return a<b?a:b; }
 inline double MathAbs(double a){ return std::fabs(a); }
 inline string IntegerToString(long long v){ return std::to_string(v); }
 inline string StringSubstr(const string &s,int start,int len=-1){ if(start<0||start>=(int)s.size()) return ""; return len<0? s.substr(start): s.substr(start,len); }
+inline int StringLen(const string &s){ return (int)s.size(); }
+inline int StringFind(const string &s,const string &f,int start=0){ size_t p=s.find(f,(size_t)start); return p==std::string::npos? -1 : (int)p; }
+inline int StringGetCharacter(const string &s,int i){ return (i>=0 && i<(int)s.size())? (unsigned char)s[i] : 0; }
+#include <cfloat>
+#define EMPTY_VALUE DBL_MAX
 '''
 
 DRIVER = r'''
@@ -543,6 +793,68 @@ int main(){
         printf("%d %d %d ",e,r,sh); pa(a); pa(b); pa(a1); pa(b1); printf("\n");
       }
       printf("FINE\n");
+    } else if(c=="BERS"){
+      char nm[256]; int nS,nT; if(scanf("%255s %d %d",nm,&nS,&nT)!=3) return 2;
+      int i=-7,j=-7; int t=PD_Bersaglio(std::string(nm),nS,nT,i,j); printf("%d %d %d\n",t,i,j);
+    } else if(c=="SCANM"){
+      /* come SCAN, ma PD_Marca (tutte le doji) accanto a PD_Ultimo (la piu' recente) sulla stessa finestra */
+      PD_Par p; if(!rpar(p)) return 2; int N,L,start,step,win;
+      if(scanf("%d %d %d %d %d",&N,&L,&start,&step,&win)!=5) return 2;
+      std::vector<double> o,h,l,cl; if(!rv(o,N)||!rv(h,N)||!rv(l,N)||!rv(cl,N)) return 2;
+      int w= win>0 ? win : PD_Bisogno(p,L);
+      std::vector<double> wo(w),wh(w),wl(w),wc(w),mf(L+1),ml(L+1); std::vector<int> ms(L+1),md(L+1);
+      for(int e=start;e<N;e+=step){
+        if(e-w+1<0) continue;
+        for(int i=0;i<w;i++){ wo[i]=o[e-i]; wh[i]=h[e-i]; wl[i]=l[e-i]; wc[i]=cl[e-i]; }
+        int sh=0; double a=0,b=0,a1=0,b1=0;
+        int r=PD_Ultimo(wo.data(),wh.data(),wl.data(),wc.data(),w,L,p,sh,a,b,a1,b1);
+        int q=PD_Marca(wo.data(),wh.data(),wl.data(),wc.data(),w,L,p,ms.data(),md.data(),mf.data(),ml.data());
+        printf("%d %d %d %d",e,r,sh,q);
+        for(int k=0;k<q;k++){ printf(" %d %d ",ms[k],md[k]); pa(mf[k]); pa(ml[k]); }
+        printf("\n");
+      }
+      printf("FINE\n");
+    } else if(c=="INC"){
+      int n,x,primo; if(scanf("%d %d %d",&n,&x,&primo)!=3) return 2;
+      std::vector<double> f,s; if(!rv(f,n)||!rv(s,n)) return 2; printf("%d\n",PD_Incrocio(f.data(),s.data(),x,primo));
+    } else if(c=="INCALL"){
+      int n,primo; if(scanf("%d %d",&n,&primo)!=2) return 2;
+      std::vector<double> f,s; if(!rv(f,n)||!rv(s,n)) return 2;
+      for(int x=0;x<n;x++) printf("%d ",PD_Incrocio(f.data(),s.data(),x,primo)); printf("\n");
+    } else if(c=="EMA"){
+      int n,per; if(scanf("%d %d",&n,&per)!=2) return 2; std::vector<double> cl,e(n); if(!rv(cl,n)) return 2;
+      PG_EMA(cl.data(),n,0,per,e.data()); for(int i=0;i<n;i++) pa(e[i]); printf("\n");
+    } else if(c=="ST"){
+      int n,per; double mult; if(scanf("%d %d %lf",&n,&per,&mult)!=3) return 2;
+      std::vector<double> h,l,cl; if(!rv(h,n)||!rv(l,n)||!rv(cl,n)) return 2;
+      std::vector<double> at(n),up(n),dn(n),di(n),va(n);
+      /* intera serie dalla barra 0 (il seme e' la barra 'per'): la finestra la sceglie il chiamante */
+      SW_STCore(h.data(),l.data(),cl.data(),n,0,per,mult,at.data(),up.data(),dn.data(),di.data(),va.data());
+      for(int i=0;i<n;i++){ printf("%d ",(int)di[i]); pa(va[i]); }
+      printf("\n");
+    } else if(c=="HAINC"){
+      /* OnCalculate simulato: per ogni rt la barra rt-1 prima PROVVISORIA (chiusura a meta'), poi definitiva;
+         da = prev_calculated-1 (mode 1, come il sorgente) oppure prev_calculated (mode 0, contro-esempio) */
+      int n,mode; if(scanf("%d %d",&n,&mode)!=2) return 2;
+      std::vector<double> o,h,l,cl; if(!rv(o,n)||!rv(h,n)||!rv(l,n)||!rv(cl,n)) return 2;
+      std::vector<double> ho(n),hh(n),hl(n),hc(n),po(n),ph(n),pl(n),pc(n);
+      int prev=0;
+      for(int rt=1;rt<=n;rt++){
+        for(int i=0;i<rt;i++){ po[i]=o[i]; ph[i]=h[i]; pl[i]=l[i]; pc[i]=cl[i]; }
+        pc[rt-1]=(o[rt-1]+cl[rt-1])/2.0; ph[rt-1]=MathMax(o[rt-1],pc[rt-1]); pl[rt-1]=MathMin(o[rt-1],pc[rt-1]);
+        for(int pass=0;pass<2;pass++){
+          if(pass==1){ pc[rt-1]=cl[rt-1]; ph[rt-1]=h[rt-1]; pl[rt-1]=l[rt-1]; }
+          int da=(prev<=0 ? 0 : (mode==1 ? prev-1 : prev));
+          PG_HA(po.data(),ph.data(),pl.data(),pc.data(),rt,da,ho.data(),hh.data(),hl.data(),hc.data());
+          prev=rt;
+        }
+      }
+      for(int i=0;i<n;i++){ pa(ho[i]); pa(hc[i]); pa(hh[i]); pa(hl[i]); }
+      printf("\n");
+    } else if(c=="STATO"){
+      int a,b,d,e; if(scanf("%d %d %d %d",&a,&b,&d,&e)!=4) return 2; printf("%d\n",PG_StatoIniziale(a!=0,b!=0,d!=0,e!=0)?1:0);
+    } else if(c=="LINEA"){
+      int on; double di,va,ve; if(scanf("%d %lf %lf %lf",&on,&di,&va,&ve)!=4) return 2; pa(PG_StLinea(on!=0,di,va,ve)); printf("\n");
     } else return 3;
     fflush(stdout);
   }
@@ -558,7 +870,7 @@ def blocco_puro(src):
 def to_cxx(block):
     """unici adattamenti MQL5 -> C++ (convenzione di collaudo_pulsanti_grafico.py): array per riferimento ->
     puntatore; long -> long long."""
-    out = re.sub(r"(const\s+)?(double|int|datetime)\s*&\s*(\w+)\[\]",
+    out = re.sub(r"(const\s+)?(double|int|datetime|long)\s*&\s*(\w+)\[\]",
                  lambda m: (m.group(1) or "") + m.group(2) + " *" + m.group(3), block)
     return re.sub(r"\blong\b", "long long", out)
 
@@ -1025,6 +1337,331 @@ def informativo(tenuti, sers):
 
 
 # ===========================================================================
+# v1.10: NUMERI e CONTRO-ESEMPI di click, tasti, HA, doji sul grafico, EMA, Supertrend
+# ===========================================================================
+def py_ema(c, per):
+    a = 2.0 / (per + 1.0)
+    e = [0.0] * len(c)
+    for i in range(len(c)):
+        e[i] = c[0] if i == 0 else c[i] * a + e[i - 1] * (1.0 - a)
+    return e
+
+
+def py_st(h, l, c, per, mult):
+    """specchio del Supertrend (SW_STCore): stesse operazioni nello stesso ordine -> bit per bit"""
+    n = len(c)
+    up, dn, di, va = [0.0] * n, [0.0] * n, [0.0] * n, [0.0] * n
+    for i in range(n):
+        if i < per:
+            continue
+        s = 0.0
+        for k in range(i - per + 1, i + 1):
+            s += max(h[k], c[k - 1]) - min(l[k], c[k - 1])
+        a = s / per
+        mid = (h[i] + l[i]) / 2.0
+        ub, lb = mid + mult * a, mid - mult * a
+        if i == per:
+            up[i], dn[i] = ub, lb
+            di[i] = 1.0 if c[i] >= mid else -1.0
+        else:
+            up[i] = ub if (ub < up[i - 1] or c[i - 1] > up[i - 1]) else up[i - 1]
+            dn[i] = lb if (lb > dn[i - 1] or c[i - 1] < dn[i - 1]) else dn[i - 1]
+            di[i] = 1.0 if c[i] > up[i - 1] else (-1.0 if c[i] < dn[i - 1] else di[i - 1])
+        va[i] = dn[i] if di[i] > 0 else up[i]
+    return di, va
+
+
+def cx_st(cx, h, l, c, per, mult):
+    n = len(c)
+    out = cx.run("ST %d %d %r\n" % (n, per, mult) + "\n".join(" ".join(repr(x) for x in a) for a in (h, l, c)) + "\n")[0].split()
+    return [float(out[2 * i]) for i in range(n)], [fx(out[2 * i + 1]) for i in range(n)]
+
+
+def cx_ema(cx, c, per):
+    out = cx.run("EMA %d %d\n" % (len(c), per) + " ".join(repr(x) for x in c) + "\n")[0].split()
+    return [fx(z) for z in out]
+
+
+def test_click(cx, bag, verbose):
+    nS, nT = 35, 3
+    righe, att = [], []
+    for i in range(nS):
+        for j in range(nT):
+            for pre in ("r", "t"):
+                righe.append("BERS PDL_%s_%d_%d %d %d" % (pre, i, j, nS, nT)); att.append((1, i, j))
+        righe.append("BERS PDL_s_%d %d %d" % (i, nS, nT)); att.append((2, i, -1))
+    for j in range(nT):
+        for pre in ("hr", "ht"):
+            righe.append("BERS PDL_%s_%d %d %d" % (pre, j, nS, nT)); att.append((3, -1, j))
+    no = ["PDL_r_35_0", "PDL_r_0_3", "PDL_t_2_34", "PDL_s_35", "PDL_ht_3", "PDL_hr_3", "PDL_r_3", "PDL_r_3_x", "PDL_r__1",
+          "PDL_r_-1_0", "XDL_r_1_1", "PDL_titolo", "PDL_pannello", "PDL_h_pair", "PDL_b_hide", "PDL_b_refresh", "PDL_b_ha",
+          "PDL_b_doji", "PDL_b_ema", "PDL_b_st", "PDLG_d_1696000000", "PDL_r_1_1_1", "PDL_", "PDL_s_", "PDL_r_00001_0",
+          "PDL_x_1_1", "pdl_r_1_1", "PDL_r_1_"]
+    for nm in no:
+        righe.append("BERS %s %d %d" % (nm, nS, nT)); att.append((0, -1, -1))
+    out = cx.run("\n".join(righe) + "\n")
+    bad = [(r, o) for r, o, a in zip(righe, out, att) if tuple(int(z) for z in o.split()) != a]
+    check(not bad and len(out) == len(att), "CLICK: PD_Bersaglio su %d nomi (tutte le celle 35x3, simboli, TF, %d nomi da rifiutare) %s"
+          % (len(att), len(no), bad[:3]), quiet=not verbose, bag=bag)
+    # CONTRO-ESEMPIO riga/colonna scambiata: la cella (riga 2 = simbolo 2, colonna 1 = H4) NON deve diventare (1, 2);
+    # e PDL_t_2_34 (colonna 34 inesistente) NON deve essere letta come riga 34 colonna 2
+    o1 = tuple(int(z) for z in cx.run("BERS PDL_r_2_1 35 3\n")[0].split())
+    o2 = tuple(int(z) for z in cx.run("BERS PDL_t_2_34 35 3\n")[0].split())
+    check(o1 == (1, 2, 1) and o1 != (1, 1, 2) and o2 == (0, -1, -1),
+          "CLICK CONTRO-ESEMPIO: r_2_1 -> simbolo 2 / TF 1 (non 1/2: %s); t_2_34 rifiutata (non riga 34: %s)" % (o1, o2),
+          quiet=not verbose, bag=bag)
+
+
+def test_stato_linea_inc(cx, bag, verbose):
+    righe, att = [], []
+    for a in (0, 1):
+        for b in (0, 1):
+            for d in (0, 1):
+                for e in (0, 1):
+                    righe.append("STATO %d %d %d %d" % (a, b, d, e)); att.append(str(b if (a and d == e) else e))
+    out = cx.run("\n".join(righe) + "\n")
+    check(out == att, "STATO dei tasti (PG_StatoIniziale) sulle 16 combinazioni: vale il salvato SOLO se l'input non e' cambiato",
+          quiet=not verbose, bag=bag)
+    big = 1.7976931348623157e308
+    for cmd, v in (("LINEA 1 1 5 1", 5.0), ("LINEA 1 -1 5 1", big), ("LINEA 1 -1 5 -1", 5.0), ("LINEA 1 0 5 1", big), ("LINEA 0 1 5 1", big)):
+        r = fx(cx.run(cmd + "\n")[0].split()[0])
+        check(r == v, "PG_StLinea %s -> %s" % (cmd, v), quiet=True, bag=bag)
+    # incrocio a mano: veloce f, lenta s (indici 0 = barra piu' vecchia)
+    for f, s_, x, primo, a in (([1, 1, 3], [2, 2, 2], 2, 0, 1), ([1, 1, 3], [2, 2, 2], 1, 0, 0), ([3, 3, 1], [2, 2, 2], 2, 0, -1),
+                               ([1, 2, 3], [2, 2, 2], 2, 0, 1), ([1, 2, 3], [2, 2, 2], 1, 0, 0), ([1, 1, 3], [2, 2, 2], 2, 3, 0),
+                               ([1, 1, 3], [2, 2, 2], 0, 0, 0), ([3, 3, 3], [2, 2, 2], 2, 0, 0), ([1, 3, 1], [2, 2, 2], 2, 0, -1),
+                               ([1, 3, 1], [2, 2, 2], 1, 0, 1)):
+        r = int(cx.run("INC 3 %d %d " % (x, primo) + " ".join(repr(float(z)) for z in f + s_) + "\n")[0])
+        check(r == a, "INCROCIO a mano f=%s s=%s x=%d primo=%d -> %d (%d)" % (f, s_, x, primo, a, r), quiet=True, bag=bag)
+
+
+def test_ema_st(cx, ser, tf, bag, verbose, rapido):
+    t, o, h, l, c = ser
+    n = len(c)
+    # EMA: bit per bit con lo specchio; incroci == cambio di segno dello specchio (dal periodo maggiore, solo x <= n-2)
+    for per in (9, 21):
+        e1, e2 = cx_ema(cx, c, per), py_ema(c, per)
+        check(e1 == e2, "%s EMA %d: C++ == specchio Python bit per bit (%d barre)" % (tf, per, n), quiet=not verbose, bag=bag)
+    fv, fl = py_ema(c, 9), py_ema(c, 21)
+    out = cx.run("INCALL %d 21\n" % n + " ".join(repr(z) for z in fv + fl) + "\n")[0].split()
+    bad = 0
+    for x in range(n):
+        a = 0 if (x < 21 or x < 1) else (1 if fv[x] > fl[x] and fv[x - 1] <= fl[x - 1] else (-1 if fv[x] < fl[x] and fv[x - 1] >= fl[x - 1] else 0))
+        bad += int(int(out[x]) != a)
+    ninc = sum(1 for x in range(21, n - 1) if (fv[x] > fl[x]) != (fv[x - 1] > fl[x - 1]))
+    check(bad == 0 and len(out) == n, "%s INCROCIO EMA 9/21: PD_Incrocio == regola scritta su tutte le %d barre (%d incroci sulle chiuse)"
+          % (tf, n, ninc), quiet=not verbose, bag=bag)
+    # SUPERTREND 3 livelli: bit per bit con lo specchio
+    for m in (2.5, 3.0, 3.5):
+        d1, v1 = cx_st(cx, h, l, c, 10, m)
+        d2, v2 = py_st(h, l, c, 10, m)
+        nflip = sum(1 for i in range(11, n) if d2[i] != d2[i - 1])
+        check(d1 == d2 and v1 == v2, "%s SUPERTREND 10 x %.1f: C++ == specchio bit per bit (%d inversioni)" % (tf, m, nflip),
+              quiet=not verbose, bag=bag)
+        if m == 3.0 and not rapido:
+            # SEME e indipendenza dall'inizio della finestra: si ricalcola partendo da k barre dopo e si misura
+            # dopo quante barre il risultato coincide ESATTAMENTE con quello sull'intera serie
+            rnd = random.Random(3)
+            lags, morde = [], 0
+            for _ in range(12):
+                k = rnd.randrange(50, max(51, n // 2))
+                ds, vs = cx_st(cx, h[k:], l[k:], c[k:], 10, m)
+                diff = [i for i in range(len(ds)) if i >= 10 and (ds[i] != d1[k + i] or vs[i] != v1[k + i])]
+                morde += int(bool(diff))
+                lags.append((max(diff) + 1) if diff else 10)
+            check(max(lags) < 1500 and morde > 0,
+                  "%s SUPERTREND: il valore NON dipende dall'inizio della finestra oltre %d barre (12 partenze; seme = barra 'periodo', "
+                  "dir = chiusura >= HL2; %d partenze divergono all'inizio: la prova morde)" % (tf, max(lags), morde),
+                  quiet=not verbose, bag=bag)
+            le = []
+            for _ in range(12):
+                k = rnd.randrange(50, max(51, n // 2))
+                es = cx_ema(cx, c[k:], 21)
+                full = py_ema(c, 21)
+                diff = [i for i in range(len(es)) if abs(es[i] - full[k + i]) > 1e-12 * abs(full[k + i])]
+                le.append((max(diff) + 1) if diff else 0)
+            check(max(le) < 600, "%s EMA 21: dopo %d barre dall'inizio della finestra lo scarto relativo e' < 1e-12 (seme = prima chiusura)"
+                  % (tf, max(le)), quiet=not verbose, bag=bag)
+
+
+def test_ha_inc(cx, ser, tf, bag, verbose):
+    t, o, h, l, c = ser
+    N = 900
+    o, h, l, c = o[:N], h[:N], l[:N], c[:N]
+    sp = Specchio((t[:N], o, h, l, c))
+    def run(mode):
+        z = cx.run("HAINC %d %d\n" % (N, mode) + "\n".join(" ".join(repr(x) for x in a) for a in (o, h, l, c)) + "\n")[0].split()
+        return [fx(v) for v in z]
+    def uguale(z):
+        for i in range(N):
+            ho, hc, hh, hl = z[4 * i:4 * i + 4]
+            if ho != sp.ha_o[i] or hc != sp.ha_c[i] or hh != max(h[i], max(ho, hc)) or hl != min(l[i], min(ho, hc)):
+                return i
+        return -1
+    g, b = uguale(run(1)), uguale(run(0))
+    check(g == -1, "%s HA DISEGNATA incrementale (barra in formazione prima provvisoria poi vera, da = prev_calculated-1) == HA "
+          "ricorsiva dell'intera serie, seme (o+c)/2 sulla barra piu' vecchia (%d barre)" % (tf, N), quiet=not verbose, bag=bag)
+    check(b >= 0, "%s CONTRO-ESEMPIO: con da = prev_calculated (senza -1) la HA resta sulla barra provvisoria (prima differenza alla "
+          "barra %d): l'ancora su 'prev_calculated-1' morde" % (tf, b), quiet=not verbose, bag=bag)
+
+
+def test_marca(cx, sp, ser, tf, bag, verbose, rapido):
+    t, o, h, l, c = ser
+    L = 30
+    for nome, p in CONFIG[:1] + ([] if rapido else [CONFIG[2], CONFIG[4]]):
+        step = 5 if rapido else (11 if p["tma"] == 1 else 3)
+        txt = "SCANM %s %d %d %d %d %d\n" % (spar(p), len(c), L, 0, step, 0)
+        txt += "\n".join(" ".join(repr(x) for x in arr) for arr in (o, h, l, c)) + "\n"
+        out = cx.run(txt)
+        punti = bad_ult = bad_sp = pareggi = frecce = 0
+        es = ""
+        for ln in out:
+            if ln == "FINE":
+                break
+            z = ln.split()
+            e, r, sh, q = int(z[0]), int(z[1]), int(z[2]), int(z[3])
+            lst = [(int(z[4 + 4 * k]), int(z[5 + 4 * k])) for k in range(q)]
+            punti += 1
+            frecce += q
+            if (r == 0) != (q == 0) or (q and (lst[0] != (sh, r))) or any(not 1 <= s_ <= L for s_, _ in lst) or \
+               any(lst[k][0] >= lst[k + 1][0] for k in range(q - 1)):
+                bad_ult += 1
+                es = es or "e=%d ultimo=(%d,%d) marca=%s" % (e, r, sh, lst[:3])
+            att = []
+            mg = []
+            for s_ in range(1, L + 1):
+                rr, _, _, m_ = sp.valuta(e, s_, p)
+                mg.append(min(m_))
+                if rr != 0:
+                    att.append((s_, rr))
+            if att != lst:
+                if min(mg) < 1e-9 * max(1.0, abs(sp.c[e])):
+                    pareggi += 1
+                else:
+                    bad_sp += 1
+                    es = es or "e=%d specchio=%s marca=%s" % (e, att[:3], lst[:3])
+        check(punti > 0 and bad_ult == 0 and bad_sp == 0,
+              "%s DOJI SUL GRAFICO %s: PD_Marca == tutte le doji dello specchio nelle %d barre chiuse, la prima == la cella "
+              "(PD_Ultimo), mai la barra in formazione (%d istanti, %d frecce, %d pareggi al bit) %s"
+              % (tf, nome[:2], L, punti, frecce, pareggi, es), quiet=not verbose, bag=bag)
+
+
+def informativo_ha(sers):
+    """quante frecce (regola delle celle, default: HA a 2 barre come l'EA) cadono su una candela HA DISEGNATA
+    (classica ricorsiva) che a occhio NON e' una doji. Informativo, non un verdetto."""
+    print("  INFORMATIVO frecce doji contro candele HA disegnate (oro HistData, default C1):")
+    p = CONFIG[0][1]
+    for tf, ser in sers.items():
+        sp = Specchio(ser)
+        tot = nodoji = 0
+        for x in range(400, sp.n - 1):
+            r, _, _, _ = sp.valuta(x + 1, 1, p)
+            if r == 0:
+                continue
+            tot += 1
+            O, C = sp.ha_o[x], sp.ha_c[x]
+            H, L_ = max(sp.h[x], O, C), min(sp.l[x], O, C)
+            if not (H - L_ > 0 and abs(C - O) <= p["corpo"] / 100.0 * (H - L_)):
+                nodoji += 1
+        print("      %s: %d frecce, su %d (%.0f%%) la candela HA disegnata NON e' una doji al 10%%" % (tf, tot, nodoji, 100.0 * nodoji / max(1, tot)))
+
+
+# --- modello ESEGUIBILE dei colori: le funzioni VERE estratte dal sorgente, compilate in C++ su un grafico finto,
+#     DUE istanze (la vecchia e la nuova del ricarico da click) che condividono lo stesso grafico
+COL_SHIM = r'''
+#include <cstdio>
+#include <map>
+#include <string>
+typedef unsigned int color;
+typedef std::string string;
+enum ENUM_CHART_PROPERTY_INTEGER { CHART_COLOR_CANDLE_BULL=1, CHART_COLOR_CANDLE_BEAR, CHART_COLOR_CHART_UP, CHART_COLOR_CHART_DOWN, CHART_COLOR_CHART_LINE };
+const color clrNONE=0xFFFFFFFFu, clrLime=0x00FF00u, clrRed=0x0000FFu;
+static std::map<int,long long> CH;
+static long long NONE_AS=4294967295LL;     /* come il terminale restituisce clrNONE: provati 4294967295 e -1 */
+inline long long ChartGetInteger(long long,int p){ return CH[p]; }
+inline bool ChartSetInteger(long long,int p,long long v){ CH[p]=((color)v==clrNONE)? NONE_AS : (long long)(color)v; return true; }
+template<typename... A> void Print(A...){}
+inline int GetLastError(){ return 0; }
+'''
+COL_FUN = ("ColOrDefault", "ColsHide", "ColsRestore", "IsNone", "RepairInvisibleNative", "CuraColori")
+COL_MAIN = r'''
+static const int P[5]={CHART_COLOR_CANDLE_BULL,CHART_COLOR_CANDLE_BEAR,CHART_COLOR_CHART_UP,CHART_COLOR_CHART_DOWN,CHART_COLOR_CHART_LINE};
+static const long long O[5]={0x111111,0x222222,0x333333,0x444444,0x555555};
+static void metti(){ for(int k=0;k<5;k++) CH[P[k]]=O[k]; }
+static bool originali(){ for(int k=0;k<5;k++) if(CH[P[k]]!=O[k]) return false; return true; }
+static bool tuttenone(){ for(int k=0;k<5;k++) if((color)CH[P[k]]!=clrNONE) return false; return true; }
+static bool nessunanone(){ for(int k=0;k<5;k++) if((color)CH[P[k]]==clrNONE) return false; return true; }
+static void reset(){ A::gColsHidden=false; B::gColsHidden=false; A::gCure=0; B::gCure=0; }
+int main(){
+  for(int modo=0;modo<2;modo++){
+    NONE_AS = modo==0 ? 4294967295LL : -1LL;
+    /* S1 HA acceso all'avvio (default ON) poi rimozione: i colori tornano QUELLI di prima */
+    metti(); reset(); A::gHA=true; A::ColsHide(); bool s1a=tuttenone(); A::ColsRestore(); printf("S1 %d\n",(s1a&&originali())?1:0);
+    /* S2 click = ricarico, l'OnDeinit della VECCHIA (A) arriva DOPO l'OnInit della NUOVA (B) */
+    metti(); reset(); A::gHA=true; A::ColsHide(); B::gHA=true; B::ColsHide(); A::ColsRestore();
+    B::CuraColori(); bool s2a=tuttenone(); B::ColsRestore(); printf("S2 %d\n",(s2a&&originali())?1:0);
+    /* S3 ricarico nell'ordine "normale": A esce, poi B entra */
+    metti(); reset(); A::gHA=true; A::ColsHide(); A::ColsRestore(); B::gHA=true; B::ColsHide(); bool s3a=tuttenone(); B::ColsRestore();
+    printf("S3 %d\n",(s3a&&originali())?1:0);
+    /* S4 crash con HA acceso (niente OnDeinit) e riavvio con HA spento: le candele tornano VISIBILI */
+    metti(); reset(); A::gHA=true; A::ColsHide(); B::gHA=false; B::RepairInvisibleNative(); printf("S4 %d\n",nessunanone()?1:0);
+    /* S5 chi nasconde apposta solo le candele (linea visibile) non viene toccato */
+    metti(); reset(); CH[P[0]]=(long long)NONE_AS; CH[P[1]]=(long long)NONE_AS; B::RepairInvisibleNative();
+    printf("S5 %d\n",((color)CH[P[0]]==clrNONE && CH[P[4]]==O[4])?1:0);
+    /* S6 tasto HA acceso/spento due volte */
+    metti(); reset(); A::gHA=true; A::ColsHide(); A::ColsRestore(); A::ColsHide(); A::ColsRestore(); printf("S6 %d\n",originali()?1:0);
+    /* S7 crash con HA acceso e riavvio con HA ACCESO: si nasconde e alla rimozione tornano visibili (ripiego), mai clrNONE */
+    metti(); reset(); A::gHA=true; A::ColsHide(); B::gHA=true; B::ColsHide(); bool s7a=tuttenone(); B::ColsRestore();
+    printf("S7 %d\n",(s7a&&nessunanone())?1:0);
+  }
+  return 0;
+}
+'''
+
+
+def modello_colori(src, tmp, bag, verbose):
+    cxx = shutil.which("g++") or shutil.which("clang++")
+    sc = re.sub(r"//[^\n]*", "", src)
+    corpi = []
+    for f in COL_FUN:
+        b_ = corpo(sc, f)
+        if not b_:
+            bag.append("V11 colori: funzione %s non trovata" % f)
+            return
+        corpi.append(re.sub(r"\blong\b", "long long", b_))
+    glob = "bool gColsHidden=false; color gColBull=clrNONE,gColBear=clrNONE,gColUp=clrNONE,gColDown=clrNONE,gColLine=clrNONE; " \
+           "int gCure=0; bool gHA=false; bool gRidisegna=false;\n"
+    testo = COL_SHIM + "".join("namespace %s {\n%s%s\n}\n" % (ns, glob, "\n".join(corpi)) for ns in ("A", "B")) + COL_MAIN
+    os.makedirs(tmp, exist_ok=True)
+    cp, exe = os.path.join(tmp, "colori.cpp"), os.path.join(tmp, "colori")
+    with open(cp, "w") as f:
+        f.write(testo)
+    r = subprocess.run([cxx, "-std=c++17", "-O1", "-w", "-o", exe, cp], capture_output=True, text=True)
+    if r.returncode != 0:
+        bag.append("V11 colori: il modello non compila: %s" % r.stderr[:200])
+        return
+    out = subprocess.run([exe], capture_output=True, text=True).stdout.split("\n")
+    esiti = [ln for ln in out if ln.startswith("S")]
+    ko = [ln for ln in esiti if not ln.endswith(" 1")]
+    check(len(esiti) == 14 and not ko,
+          "COLORI (funzioni VERE estratte, grafico finto, due istanze): HA di default ON + rimozione, ricarico da click in "
+          "tutti e due gli ordini, crash, toggle; clrNONE come 4294967295 e come -1 -> %d/14 ok %s" % (len(esiti) - len(ko), ko),
+          quiet=not verbose, bag=bag)
+
+
+def test_v11(cx, src, tmp, sers, bag, verbose, rapido):
+    test_click(cx, bag, verbose)
+    test_stato_linea_inc(cx, bag, verbose)
+    modello_colori(src, os.path.join(tmp, "colori"), bag, verbose)
+    for tf, ser in sers.items():
+        if rapido and tf != "H4":
+            continue
+        test_ema_st(cx, ser, tf, bag, verbose, rapido)
+        test_ha_inc(cx, ser, tf, bag, verbose)
+        test_marca(cx, Specchio(ser), ser, tf, bag, verbose, rapido)
+
+
+# ===========================================================================
 # SUITE (la stessa per il vero e per i mutanti)
 # ===========================================================================
 def suite(raw, tmp, sers, ea_src, verbose, rapido):
@@ -1043,6 +1680,7 @@ def suite(raw, tmp, sers, ea_src, verbose, rapido):
         unitari(cx, bag)
         testi_casuali(cx, bag)
         tenuti = numeri(cx, sers, bag, verbose, rapido)
+        test_v11(cx, src, tmp, sers, bag, verbose, rapido)
     except Exception as ex:
         bag.append("eccezione: %s" % ex)
         return bag, None
@@ -1167,6 +1805,7 @@ def main():
         check(not bag, "suite completa sul sorgente vero (%d difetti) %s" % (len(bag), bag[:8]))
         if tenuti:
             informativo(tenuti, sers)
+            informativo_ha(sers)
     if not SENZA_MUTANTI:
         print("== M) MUTANTI CIECHI (copia in cartella temporanea FUORI dal repo; suite ridotta: H4 2025-2026) ==")
         sers_m = {"H4": serie_tf(240, 2025)}
