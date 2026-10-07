@@ -1,0 +1,35 @@
+NATCLA DIAG U30 -- quale delle 4 condizioni di CaricaDati() (EA_NatCla v1.04 r.1262-1280) cade sugli indici BCM (Modello 1 OHLC su M1, EA_NatCla_Diag di SOLA LETTURA, NESSUN ordine)
+data: 2026-10-07 23:10:48   pc: DESKTOP-H4D7CAJ   pin: f6551cdda57be97a335bdc41a284ea5126f5b281
+EA_NatCla_Diag.mq5 SHA256 C59069E224D863A6DCF546DCE8FF20DF3A1F43CDA1B2348CF6D52B187DD485BA  (NCD_VER 1.00)   compilazione: 0 errori, 0 avvisi (-1 = non letto)
+passate 6: OK 0, KO 6, NON LANCIATE 0   durata 3 minuti
+
+passata;simbolo;da;a;t_avvio;durata_s;stato;cd_ok;cd_n;cd_bc;cd_cr;cd_cb;primo_ok;finestra;motivi
+a;U30USD;2024.09.26;2026.06.30;2026-10-07 23:07:56;30;KO;;;;;;;non letta;PIU righe RIASSUNTO distinte (2): log di due passate mescolati
+b;U30USD;2025.01.02;2026.06.30;2026-10-07 23:08:26;28;KO;;;;;;;non letta;PIU righe RIASSUNTO distinte (2): log di due passate mescolati
+c;D30EUR;2024.09.26;2026.06.30;2026-10-07 23:08:54;28;KO;;;;;;;non letta;PIU righe RIASSUNTO distinte (2): log di due passate mescolati
+d;EURUSD;2024.09.26;2026.06.30;2026-10-07 23:09:23;28;KO;;;;;;;non letta;PIU righe RIASSUNTO distinte (2): log di due passate mescolati
+e;U30USD;2024.09.26;2026.06.30;2026-10-07 23:09:51;28;KO;;;;;;;non letta;PIU righe RIASSUNTO distinte (2): log di due passate mescolati
+f;D30EUR;2024.09.26;2026.06.30;2026-10-07 23:10:19;28;KO;;;;;;;non letta;PIU righe RIASSUNTO distinte (2): log di due passate mescolati
+
+ATTESE SCRITTE PRIMA DEI NUMERI (lo script NON giudica: queste righe dicono come si legge):
+ (d) EURUSD dal 2024.09.26 = CONTROLLO POSITIVO: cd_ok > 0 e primo_ok alla PRIMA barra della finestra. Se (d) non passa, la diagnosi e rotta e NESSUN numero di (a)(b)(c) si legge.
+ (e) U30USD dal 2024.09.26 con SOLO la catena (= EA_NatCla alla lettera) deve RIPRODURRE il KO del pilota: cd_ok = 0. E la passata FEDELE: comanda lei.
+ (a) e (e) insieme (ipotesi principale, documentata: nel tester gli indicatori si calcolano SOLO quando si chiede un buffer, classe 1171):
+     se (a) ha cd_ok > 0 e (e) ha cd_ok = 0 con cd_bc circa nuove-301 e min_bc/max_bc dell EMA200 fermi a -1 o bassi, la causa e BarsCalculated chiesto PRIMA di
+     CopyBuffer nel tester pigro: rimedio in EA_NatCla v1.05, e il lotto C resta FERMO fino ad allora.
+     se (a) ha cd_ok > 0 e (e) ha cd_ok = 0 ma in (e) la colonna che porta le barre NON e cd_bc: le chiamate in piu guariscono comunque, la colonna dice per quale via.
+     se ANCHE (a) ha cd_ok = 0: le chiamate in piu NON guariscono, il tester pigro NON e la causa; la condizione e la colonna cd_* di (e), e (b) dice se e la finestra o il simbolo.
+     se (e) ha cd_ok > 0 e una CONTRADDIZIONE col pilota (stesso codice di CaricaDati, stessi handle, stesso terminale, stessa .ini salvo gli input): NON vuol dire
+     che il KO non e in CaricaDati. La differenza sta in quello che EA_NatCla fa OLTRE la catena o nel giro, e le righe GUASTO e TESTER di queste passate NON la
+     possono contenere (sono dell EA diagnostico). Prossima misura: EA_NatCla stesso su U30USD con le righe d errore e il contenuto delle righe IMBUTO tenuti.
+ LOTTO C: resta FERMO in OGNI esito di questo zip. Riparte solo con un rimedio (FromDate con storia davanti o EA_NatCla v1.05) RIPROVATO su U30USD (riga VERIFICA ADX stampata e righe CONTA nel CSV).
+ Come si legge (a): la colonna cd_* che porta tutte le barre nuove e la condizione che cade. cd_n su tutte con max_barre < 302 = Bars() non cresce dentro la finestra;
+     cd_bc con min_bc/max_bc = -1 o fermi = indicatori mai calcolati; cd_cr / cd_cb = copia rifiutata (il codice d errore e nelle colonne u_cr / u_cb, valore/errore).
+ (b) U30USD dal 2025.01.02: se primo_ok cade alla PRIMA barra, con storia davanti il simbolo funziona e il guasto e il riscaldamento DENTRO la finestra (tocca H4/H12/D1 di tutti gli indici).
+     Se (b) resta a cd_ok = 0, il guasto e del SIMBOLO (o della classe), non della finestra.
+ (c) D30EUR dal 2024.09.26 e (f) uguale con SOLO la catena: dicono se e la classe degli indici BCM (stesso esito di (a) e (e)) o il solo U30USD.
+ (b) e (d) sono fedeli all EA se primo_ok cade alla PRIMA barra della finestra (prima del primo CopyBuffer delle verifiche separate).
+ RIGA RIASSUNTO TRONCATA: le chiavi cd_* stanno nei primi ~300 caratteri e restano nel DIAG_RIASSUNTO.csv. La passata esce KO ma NON si butta: si leggono le chiavi presenti.
+
+FILE: MANIFEST_DIAG.csv (stato per passata), DIAG_RIASSUNTO.csv (tutte le chiavi della riga RIASSUNTO, una colonna per chiave), log\DIAG_<passata>.txt (AVVIO, transizioni EV, RIASSUNTO, righe di guasto e del tester).
+Questo script CONTA e dice se ogni passata e leggibile: NON giudica, NON promuove, NON tocca EA_NatCla.

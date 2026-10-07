@@ -1,0 +1,16 @@
+passata [e] U30USD H1 dal 2024.09.26 (come (a) ma SOLO la catena: EA_NatCla alla lettera (passata FEDELE, classe 1171))   ini diag_e_U30USD_20240926.ini   durata 28 s   finestra letta: non letta
+[NatCla-DIAG-AVVIO] v1.00 sym=U30USD tf=PERIOD_H1 ema=200 atr=14 adx=14/NC_ADX_MT5 contesto=si separate=no | SOLA LETTURA: nessun ordine, nessun file
+[NatCla-DIAG-EV] barra=2024.10.04_01:00 motivo=inizio->N nuove=1 barre=117 n=115 bc=nc/nc/nc cr=nc/0 cb=nc/0,nc/0,nc/0
+[NatCla-DIAG-EV] barra=2024.10.16_12:00 motivo=N->BC nuove=186 barre=302 n=300 bc=-1/nc/nc cr=nc/0 cb=nc/0,nc/0,nc/0
+[NatCla-DIAG] RIASSUNTO v=1.00 sym=U30USD tf=PERIOD_H1 adx=NC_ADX_MT5 sep=0 motivo_deinit=1 tick=2363255 tick_t0zero=0 nuove=9946 prima=2024.10.04_01:00 ultima=2026.06.29_23:00 cd_ok=0 cd_n=185 cd_bc=9761 cd_cr=0 cd_cb=0 primo_ok=mai primo_ok_barre=-1 cade_n=185 cade_bc=9761 cade_bc_k=9761/0/0 cade_cr=0 cade_cb=0 cade_cb_k=0/0/0 copia_saltata=0 incoerenze=0 max_barre=10062 min_bc=-1/nc/nc max_bc=-1/nc/nc i0_first=2024.09.26_16:00 i0_tfirst=2024.09.26_16:00 i0_count=117 u_first=2024.09
+[NatCla-DIAG] RIASSUNTO v=1.00 sym=U30USD tf=PERIOD_H1 adx=NC_ADX_MT5 sep=0 motivo_deinit=1 tick=2363255 tick_t0zero=0 nuove=9946 prima=2024.10.04_01:00 ultima=2026.06.29_23:00 cd_ok=0 cd_n=185 cd_bc=9761 cd_cr=0 cd_cb=0 primo_ok=mai primo_ok_barre=-1 cade_n=185 cade_bc=9761 cade_bc_k=9761/0/0 cade_cr=0 cade_cb=0 cade_cb_k=0/0/0 copia_saltata=0 incoerenze=0 max_barre=10062 min_bc=-1/nc/nc max_bc=-1/nc/nc i0_first=2024.09.26_16:00 i0_tfirst=2024.09.26_16:00 i0_count=117 u_first=2024.09.26_16:00 u_tfirst=2024.09.26_16:00 maxbars_term=10000000 i0_barre=117 i0_n=115 i0_bc=nc/nc/nc i0_cr=nc/0 i0_cb=nc/0,nc/0,nc/0 u_barre=10062 u_n=1500 u_bc=-1/nc/nc u_cr=nc/0 u_cb=nc/0,nc/0,nc/0 ok_barre=nc ok_n=nc ok_bc=nc/nc/nc ok_cr=nc/0 ok_cb=nc/0,nc/0,nc/0 eventi=2 fine=1
+TESTER JK	0	23:10:03.286	Tester	last test passed with result "successfully finished" in 0:00:00.724
+TESTER FH	0	23:10:01.745	Tester	U30USD,H1 (BCMMarkets-Server): testing of Experts\EA_NatCla_Diag.ex5 from 2024.09.26 00:00 to 2026.06.30 00:00
+TESTER OS	0	23:10:01.894	Tester	quality of analyzed history is 100%
+TESTER CS	3	23:10:01.758	Tester	U30USD: start time changed to 2024.10.04 00:00 to provide data at beginning
+TESTER CS	0	23:10:01.758	Tester	U30USD,H1 (BCMMarkets-Server): 1 minutes OHLC ticks generating
+TESTER CS	0	23:10:01.758	Tester	U30USD,H1: testing of Experts\EA_NatCla_Diag.ex5 from 2024.09.26 00:00 to 2026.06.30 00:00 started with inputs:
+TESTER CS	0	23:10:02.475	Tester	U30USD,H1: 2363255 ticks, 9946 bars generated. Environment synchronized in 0:00:00.017. Test passed in 0:00:00.724 (including ticks preprocessing 0:00:00.156).
+TESTER CS	0	23:10:02.475	Tester	U30USD,H1: total time from login to stop testing 0:00:00.741 (including 0:00:00.017 for history data synchronization)
+TESTER CS	0	23:10:02.475	Tester	82 Mb memory used including 0.94 Mb of history data, 64 Mb of tick data
+TESTER CS	0	23:10:02.476	Tester	test Experts\EA_NatCla_Diag.ex5 on U30USD,H1 thread finished

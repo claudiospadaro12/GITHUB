@@ -1,0 +1,14 @@
+passata [d] EURUSD H1 dal 2024.09.26 (CONTROLLO POSITIVO: forex con storia prima di FromDate)   ini diag_d_EURUSD_20240926.ini   durata 28 s   finestra letta: non letta
+[NatCla-DIAG-AVVIO] v1.00 sym=EURUSD tf=PERIOD_H1 ema=200 atr=14 adx=14/NC_ADX_MT5 contesto=si separate=si | SOLA LETTURA: nessun ordine, nessun file
+[NatCla-DIAG-EV] barra=2024.09.26_00:00 motivo=inizio->OK nuove=1 barre=10804 n=1500 bc=10803/10803/10803 cr=1500/0 cb=1500/0,1500/0,1500/0
+[NatCla-DIAG] RIASSUNTO v=1.00 sym=EURUSD tf=PERIOD_H1 adx=NC_ADX_MT5 sep=1 motivo_deinit=1 tick=2572775 tick_t0zero=0 nuove=10861 prima=2024.09.26_00:00 ultima=2026.06.29_23:00 cd_ok=10861 cd_n=0 cd_bc=0 cd_cr=0 cd_cb=0 primo_ok=2024.09.26_00:00 primo_ok_barre=10804 cade_n=0 cade_bc=0 cade_bc_k=0/0/0 cade_cr=0 cade_cb=0 cade_cb_k=0/0/0 copia_saltata=0 incoerenze=0 max_barre=21664 min_bc=10803/10803/10803 max_bc=21663/21663/21663 i0_first=2023.01.02_05:00 i0_tfirst=2023.01.02_05:00 i0
+[NatCla-DIAG] RIASSUNTO v=1.00 sym=EURUSD tf=PERIOD_H1 adx=NC_ADX_MT5 sep=1 motivo_deinit=1 tick=2572775 tick_t0zero=0 nuove=10861 prima=2024.09.26_00:00 ultima=2026.06.29_23:00 cd_ok=10861 cd_n=0 cd_bc=0 cd_cr=0 cd_cb=0 primo_ok=2024.09.26_00:00 primo_ok_barre=10804 cade_n=0 cade_bc=0 cade_bc_k=0/0/0 cade_cr=0 cade_cb=0 cade_cb_k=0/0/0 copia_saltata=0 incoerenze=0 max_barre=21664 min_bc=10803/10803/10803 max_bc=21663/21663/21663 i0_first=2023.01.02_05:00 i0_tfirst=2023.01.02_05:00 i0_count=10804 u_first=2023.01.02_05:00 u_tfirst=2023.01.02_05:00 maxbars_term=10000000 i0_barre=10804 i0_n=1500 i0_bc=10803/10803/10803 i0_cr=1500/0 i0_cb=1500/0,1500/0,1500/0 u_barre=21664 u_n=1500 u_bc=21663/21663/21663 u_cr=1500/0 u_cb=1500/0,1500/0,1500/0 ok_barre=10804 ok_n=1500 ok_bc=10803/10803/10803 ok_cr=1500/0 ok_cb=1500/0,1500/0,1500/0 eventi=1 fine=1
+TESTER HN	0	23:09:35.389	Tester	last test passed with result "successfully finished" in 0:00:02.176
+TESTER QO	0	23:09:33.181	Tester	EURUSD,H1 (BCMMarkets-Server): testing of Experts\EA_NatCla_Diag.ex5 from 2024.09.26 00:00 to 2026.06.30 00:00
+TESTER NE	0	23:09:33.455	Tester	quality of analyzed history is 99%
+TESTER CS	0	23:09:33.291	Tester	EURUSD,H1 (BCMMarkets-Server): 1 minutes OHLC ticks generating
+TESTER CS	0	23:09:33.291	Tester	EURUSD,H1: testing of Experts\EA_NatCla_Diag.ex5 from 2024.09.26 00:00 to 2026.06.30 00:00 started with inputs:
+TESTER CS	0	23:09:35.369	Tester	EURUSD,H1: 2572775 ticks, 10861 bars generated. Environment synchronized in 0:00:00.019. Test passed in 0:00:02.176 (including ticks preprocessing 0:00:00.250).
+TESTER CS	0	23:09:35.369	Tester	EURUSD,H1: total time from login to stop testing 0:00:02.195 (including 0:00:00.019 for history data synchronization)
+TESTER CS	0	23:09:35.369	Tester	88 Mb memory used including 1.41 Mb of history data, 64 Mb of tick data
+TESTER CS	0	23:09:35.370	Tester	test Experts\EA_NatCla_Diag.ex5 on EURUSD,H1 thread finished
