@@ -1,0 +1,214 @@
+# ==========================================================================
+#  EA: EA_NatCla
+#  NATCLA_F0 -- PASSO 0 (fase F0) di 'Ea Nat&Cla', 07/10/2026. File prova del CONTEGGIO dei setup.
+#  Strato 1 verde, strato 2 DA FARE: NON consegnabile finche' il cancello non passa.
+#  SOLO PASSATA SINGOLA (backtest_pipeline/righe/NATCLA_F0_PASSATE.ps1): MAI col driver dei round
+#  (walkforward_generico*.ps1 / RIGA_ROUND_VPS*.ps1): l'EA scrive il CSV dei setup SOLO fuori
+#  dall'ottimizzazione (EA_NatCla.mq5 r.1216, 'if(!MQLInfoInteger(MQL_OPTIMIZATION))') e i round
+#  girano SEMPRE in ottimizzazione (driver r.1258/2315 'Optimization=1'): col driver dei round
+#  il passo 0 uscirebbe con Trades=0 e NESSUN setup contato.
+#  Sorgenti delle regole: report/NATCLA_SPECIFICA_2026-10-07.md (sez. 'DECISIONE 07/10: PDF escluso', 3.1, 3.3, 5.3-5.6, 6) e
+#  report/NATCLA_CODICE_NOTE_2026-10-07.md (par. 6 checklist del primo giro, par. 7, riga VERIFICA ADX). Mai le regole del PDF.
+# ==========================================================================
+#
+#  CHE COSA MISURA (e NIENT'ALTRO)
+#   Per ogni (simbolo, configurazione): quanti SETUP l'EA vedrebbe nella finestra, per linea, con quale ADX, quale inclinazione, quale
+#   rapporto stop/pedaggio per ordine. InpSoloConta=true: l'EA valuta tutto, scrive una riga CONTA per ogni barra che tocca la linea
+#   in MQL5\Files\natcla_setup_<simbolo>_<magic>.csv (cartella comune) e NON manda nessun ordine. Modello 1 (OHLC su M1).
+#   Le barre OHLC possono SOLO BOCCIARE (specifica 5.1): qui non c'e' nessun PF, nessun DD, nessun merito. Una cella 'bella' qui non e' niente.
+#   Decide: F1 (quali (simbolo, TF, famiglia) vale la pena girare a tick reali) e le soglie P25/P50/P75 dell'inclinazione.
+#
+#  PERCHE' UN FILE PROVA CHE NON E' UNA GRIGLIA
+#   controlla_prova.py pretende UN asse Y: l'asse e' TECNICO (InpMagic=0||0||1||1||Y) e la passata singola usa il PRIMO valore (0 = magic
+#   automatico 7786 + 10*modalita + cifra TF). La 2a cella (magic 1) e' fuori dal blocco 778600-778699: l'EA la rifiuta in OnInit. Quindi dato in
+#   pasto al driver dei round questo file produrrebbe una passata rifiutata e una vuota, mai un conteggio: e' voluto.
+#   I 71 pin sono i default compilati del sorgente (prova_pins.py li confronta a macchina), con TRE sole deviazioni dichiarate:
+#   InpSoloConta=true; InpModalita=0 e InpTF=16385 (la configurazione base AUDIO_H1: il driver le sostituisce a ogni passata con quelle del @F0-CONFIG).
+#
+#  FINESTRA (emendamento del 16/08, regola A: la collocazione si DICHIARA)
+#   '@DAQUANDO-DALLA-RIGA' qui sotto: la data cambia per CLASSE di simbolo (pavimento dei tick BCM, specifica 5.1) ed e' nei blocchi @F0-SIMBOLO.
+#   Forex dal 2024.07.05, oro dal 2024.07.10, indici dal 2024.09.26; fino al 2026.06.30 (@FINOA, standard di casa). REGIME: toro su oro e indici
+#   (RESOCONTO_EA_IN_PAROLE_SEMPLICI r.65); sul forex e' [NON MISURATO] da questa corsa (vedi LIMITI). XAGUSD, EURJPY, EURCHF: pavimento dei tick
+#   e M1 [NON MISURATI] (specifica 5.1): date provvisorie, lotto D. I TF alti sugli indici hanno un RISCALDAMENTO: l'EA non valuta nulla finche'
+#   non ha 300 barre del TF (NC_BARRE_MIN, r.323) e BCM sugli indici ha dati solo dal 2024.09.26: H4 ~50 giorni, H12 ~150, D1 ~300 giorni di
+#   borsa PERSI dalla finestra. Il lettore usa come inizio effettivo la barra della riga VERIFICA ADX (la prima valutata), non la data della riga.
+#   Clock BCM (CLAUDE.md 24/09): sul FOREX le candele H4/H12/D1 sono costruite su DUE orologi dentro la finestra (cambio fra il 26/12/2024 e il
+#   02/02/2025): il lettore stampa i conteggi H4/H12/D1 forex separati prima del 2024.12.26, dopo il 2025.02.02 e la zona dubbia in mezzo.
+#
+#  LA REGOLA DEL CONTO: n = SETUP (specifica 5.5), per LINEA
+#   Una riga CONTA e' un SETUP se: nuovo_ep=1 (prima barra di un episodio di tocco) E tocco_n <= limite della linea (ST25 1, ST30 1, ST35 2,
+#   E200 illimitato: i limiti del modo AUDIO, A-R11/13/14) E ctx_arm=0 (il contesto era valido alla barra in cui la scala si arma, cioe' la barra
+#   PRIMA del tocco: e' la lettura dell'EA, ValutaScala). n_istanza = setup somma delle linee; n_barre = barre distinte con almeno un setup
+#   (due linee toccate nella stessa barra sono UN setup col semaforo E7 a 1). NON si contano le righe (un episodio dura piu' barre: le righe
+#   sono 2-4 volte i setup) NE' gli ordini (3 per setup). Il numero di righe e' scritto accanto solo come contro-esempio.
+#
+#  ATTESE E SOGLIE, SCRITTE PRIMA DEI NUMERI (ognuna col numero che produrrebbe l'ipotesi alternativa)
+#   E0  VIVO: AUDIO_H1, setup >= 70 per simbolo nella finestra della sua classe (specifica 6.2 E0). Sotto 70 = SOTTO SOGLIA (non 'morto': si
+#       somma sulla famiglia per E3, che chiede 150 IS + 150 OOS = 300 setup). Per le altre configurazioni la specifica non scrive soglie per
+#       simbolo: il lettore stampa quanti simboli superano 70 come INFORMAZIONE e la somma della famiglia contro 300, senza dichiarare vivo/morto.
+#       ORO BCM, AUDIO_H1, per anno: ST25 ~101, ST30 ~84, ST35 ~21 (iADX<=20 alla barra PRIMA del tocco) = ~206/anno; in 1,97 anni ~405.
+#       Fonte: specifica 5.4 su feed HistData con orologio +6 h (NON BCM): episodi/anno 151/121/97, entro il limite 101/84/88, con iADX<=20 alla barra
+#       del tocco 16/18/16 (la colonna adx del CSV e' alla barra del tocco), alla barra prima 21/23/21.
+#       BANDA DI COERENZA col feed esterno, per ogni numero per linea: rapporto BCM/HistData in [0,5 - 2,0] = coerente; in [0,1 - 0,5) o (2,0 - 10] =
+#       DA GUARDARE (si cerca la causa prima di andare avanti); < 0,1 = UN ORDINE DI GRANDEZZA MENO = STOP (E0: o il calcolo del tocco e' sbagliato
+#       o il feed esterno inganna). La banda e' [NOSTRA]: la specifica scrive solo 'un ordine di grandezza'.
+#       CONTRO-ESEMPIO: se il lettore contasse le RIGHE invece degli episodi otterrebbe ~2-4 volte il numero giusto per ST25: fuori banda sopra.
+#   E0b H4 sull'oro (iADX<=20 alla barra del tocco, per linea per anno): 11/6/10 con Wilder, 5/1/1 con iADX; D1: 1/0/1 con Wilder: si legge SOLO come
+#       famiglia (nessuna soglia per simbolo). I TF alti sugli indici hanno anni EFFETTIVI molto meno di quelli della finestra (riscaldamento).
+#   E2  COSTO (specifica 5.3 e 6.2 E2), per ogni (simbolo, config) e per ORDINE della scala (anticipo / linea / profondo): rapporto =
+#       mediana di |prezzo_ordine - SL| / pedaggio, pedaggio = spread della riga + commissione. Commissione DERIVATA (l'EA qui la conta 0):
+#       forex 0,004% del prezzo [DERIVATO: 0,47 pip su EURUSD], oro 0,04 USD, argento/indici 0. >= 40 = PASSA IL LAVORO; fra 13,3 e 40 = FRA;
+#       < 13,3 = ORDINE ESCLUSO PER ARITMETICA. Il (simbolo, config) e' ESCLUSO PER COSTO (F1 non parte) se l'ordine con la distanza MAGGIORE
+#       (l'anticipo) ha rapporto mediano < 13,3 [NOSTRA operativizzazione di E2]. CONTRO-ESEMPIO: senza commissione EURUSD passerebbe a 8 pip
+#       di stop minimo (specifica 5.3): il lettore stampa SEMPRE le due versioni e dice se il verdetto cambia.
+#   F5  INCLINAZIONE: il lettore stampa P25/P50/P75 di |incl_atr| sui SETUP, per configurazione (somma dei simboli) e per simbolo. NON sono soglie
+#       del merito: sono le 3 celle dell'asse A6 (specifica F5), fissate qui PRIMA di qualunque P/L. Riferimento: oro H1 HistData 0,34/0,69/1,18 su
+#       TUTTE le barre (popolazione diversa: sui setup ci si aspetta un P50 piu' basso, il prezzo ritraccia verso la linea: [STIMA]).
+#   E4  PILOTA, PER PRIMA (4 simboli x 2 configurazioni, 8 passate): la prima COMPILAZIONE VERA di EA_NatCla (MetaEditor non e' mai stato usato su
+#       questo file) e il primo giro nel tester. Cose da guardare (NATCLA_CODICE_NOTE par. 6): (1) riga AVVIO v1.04 con modalita' giusta, '1 u' giusta
+#       per la classe, 'ADX ACCESO (AUDIO) / spento (EMA200), iADX MetaQuotes', magic 778601/778621, 'solo conta SI'; (2) riga VERIFICA ADX: 'il
+#       terminale coincide con: formula MetaQuotes'. Se dice NESSUNA o Wilder: FERMARSI e non leggere nessun numero di ADX; (3) CSV presente, fresco,
+#       con righe CONTA; (4) zero ordini (l'EA non ne manda in SoloConta); (5) il TEMPO per passata, che sostituisce la stima.
+#       DETERMINISMO GRATIS: le passate del pilota (simbolo, config) si ripetono nei lotti A e C: due corse dello stesso (simbolo, config) devono
+#       dare lo STESSO CSV (Modello 1 e' deterministico): se cambia, il conto non e' riproducibile e F0 non vale.
+#
+#  TEMPO [STIMA NON AGGANCIATA a un giro a passata singola OHLC di questo EA: lo misura il pilota]
+#   Banda per passata 30-120 s (apertura e chiusura del terminale ~15-30 s + ~3 milioni di tick OHLC; ancore: R88 2,9-33 s/passata OHLC in
+#   ottimizzazione, nessun costo di avvio dentro; R280/R263f: una gamba di 2 celle a tick reali con avvio del terminale ~42 s). Pilota 8 passate +
+#   compilazione: ~6-18 minuti. F0 intera 216 passate: 108-432 minuti = 1,8-7,2 ore, centro ~3,6 ore, in 4 lotti da 66/66/66/18. La stima della
+#   specifica (10-119 minuti, centro ~49, 216 passate x 2,9-33 s) NON vale per la passata singola: ammortizza l'avvio dentro un'ottimizzazione.
+#
+#  LIMITI DICHIARATI (non coperti da questo file)
+#   - REGIME della finestra (rendimento e ADX medio per simbolo, specifica 5.5): NON e' nel CSV dell'EA. Il lettore stampa solo un PROXY (prezzo della
+#     linea al primo e all'ultimo tocco) etichettato [PROXY]; il numero vero richiede una riga in piu' nell'EA (decisione del cancello: v1.05) o una lettura barre.
+#   - Barre OHLC M1: il PF/DD di qui non si leggono mai; lo spread e' quello della barra M1 della storia, non quello di un tick vero.
+#   - La compilazione e' del terminale vero: nessun MetaEditor qui. Windows PowerShell 5.1: non provato qui (pwsh 7).
+#   - Il Guardian nel tester e' FAIL-OPEN (specifica 2.5): irrilevante in SoloConta (nessun ordine), da scrivere comunque nel referto.
+#
+#  @DAQUANDO-DALLA-RIGA la data arriva dai blocchi @F0-SIMBOLO (una per classe di simbolo) perche' il pavimento dei tick BCM e' diverso per classe (forex 05/07, oro 10/07, indici 26/09/2024)
+#
+#  BLOCCHI LEGGIBILI A MACCHINA (la sola fonte per il driver e il lettore; sono commenti: il driver dei round li salta). Chiavi: k=v separate da spazi.
+#  @F0-CONFIG nome=AUDIO_H1 modalita=0 tf=16385 periodo=H1 magic=778601 linee=ST25,ST30,ST35 adx=ACCESO
+#  @F0-CONFIG nome=AUDIO_H4 modalita=0 tf=16388 periodo=H4 magic=778604 linee=ST25,ST30,ST35 adx=ACCESO
+#  @F0-CONFIG nome=AUDIO_H12 modalita=0 tf=16396 periodo=H12 magic=778602 linee=ST25,ST30,ST35 adx=ACCESO
+#  @F0-CONFIG nome=AUDIO_D1 modalita=0 tf=16408 periodo=D1 magic=778608 linee=ST25,ST30,ST35 adx=ACCESO
+#  @F0-CONFIG nome=M2_H1 modalita=2 tf=16385 periodo=H1 magic=778621 linee=E200 adx=spento
+#  @F0-CONFIG nome=M2_H4 modalita=2 tf=16388 periodo=H4 magic=778624 linee=E200 adx=spento
+#  @F0-SIMBOLO nome=EURUSD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=GBPUSD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=AUDUSD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=NZDUSD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=USDCAD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=USDCHF classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=USDJPY classe=FX da=2024.07.05 u=0.01
+#  @F0-SIMBOLO nome=EURGBP classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=EURNZD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=GBPJPY classe=FX da=2024.07.05 u=0.01
+#  @F0-SIMBOLO nome=GBPAUD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=GBPCAD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=GBPNZD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=AUDJPY classe=FX da=2024.07.05 u=0.01
+#  @F0-SIMBOLO nome=AUDCAD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=AUDNZD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=NZDJPY classe=FX da=2024.07.05 u=0.01
+#  @F0-SIMBOLO nome=NZDCAD classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=NZDCHF classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=CADJPY classe=FX da=2024.07.05 u=0.01
+#  @F0-SIMBOLO nome=CADCHF classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=CHFJPY classe=FX da=2024.07.05 u=0.01
+#  @F0-SIMBOLO nome=EURJPY classe=FX da=2024.07.05 u=0.01
+#  @F0-SIMBOLO nome=EURCHF classe=FX da=2024.07.05 u=0.0001
+#  @F0-SIMBOLO nome=XAUUSD classe=ORO da=2024.07.10 u=1.0
+#  @F0-SIMBOLO nome=XAGUSD classe=ARG da=2024.07.10 u=1.0
+#  @F0-SIMBOLO nome=D30EUR classe=IDX da=2024.09.26 u=1.0
+#  @F0-SIMBOLO nome=U30USD classe=IDX da=2024.09.26 u=1.0
+#  @F0-SIMBOLO nome=NASUSD classe=IDX da=2024.09.26 u=1.0
+#  @F0-SIMBOLO nome=SPXUSD classe=IDX da=2024.09.26 u=1.0
+#  @F0-SIMBOLO nome=200AUD classe=IDX da=2024.09.26 u=1.0
+#  @F0-SIMBOLO nome=225JPY classe=IDX da=2024.09.26 u=1.0
+#  @F0-SIMBOLO nome=F40EUR classe=IDX da=2024.09.26 u=1.0
+#  @F0-SIMBOLO nome=E50EUR classe=IDX da=2024.09.26 u=1.0
+#  @F0-SIMBOLO nome=E35EUR classe=IDX da=2024.09.26 u=1.0
+#  @F0-SIMBOLO nome=100GBP classe=IDX da=2024.09.26 u=1.0
+#  @F0-LOTTO nome=PILOTA tetto_min=40 simboli=EURUSD,GBPUSD,XAUUSD,U30USD configs=AUDIO_H1,M2_H1
+#  @F0-LOTTO nome=A tetto_min=150 simboli=EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD configs=AUDIO_H1,AUDIO_H4,AUDIO_H12,AUDIO_D1,M2_H1,M2_H4
+#  @F0-LOTTO nome=B tetto_min=150 simboli=GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY configs=AUDIO_H1,AUDIO_H4,AUDIO_H12,AUDIO_D1,M2_H1,M2_H4
+#  @F0-LOTTO nome=C tetto_min=150 simboli=XAUUSD,D30EUR,U30USD,NASUSD,SPXUSD,200AUD,225JPY,F40EUR,E50EUR,E35EUR,100GBP configs=AUDIO_H1,AUDIO_H4,AUDIO_H12,AUDIO_D1,M2_H1,M2_H4
+#  @F0-LOTTO nome=D tetto_min=60 simboli=XAGUSD,EURJPY,EURCHF configs=AUDIO_H1,AUDIO_H4,AUDIO_H12,AUDIO_D1,M2_H1,M2_H4
+#
+# ==========================================================================
+
+@FINOA    2026.06.30
+
+InpModalita=0
+InpTF=16385
+InpDirezione=0
+InpStAtrPeriodo=10
+InpStMult1=2.5
+InpStMult2=3.0
+InpStMult3=3.5
+InpUsaST25=-1
+InpUsaST30=-1
+InpUsaST35=-1
+InpEmaLentaPeriodo=200
+InpEmaTp1=14
+InpEmaTp2=89
+InpLogContesto=true
+InpAtrNormPeriodo=14
+InpMotoreEma200=-1
+InpTocchiMaxEma=0
+InpToccoDef=0
+InpSfioraAtr=0.10
+InpTocchiMax25=-1
+InpTocchiMax30=-1
+InpTocchiMax35=-1
+InpResetConteggio=0
+InpDistaccoAtr=1.0
+InpChiudeVicinoAtr=-1
+InpConfermaApertura=-1
+InpTimingTocco=0
+InpAdxUsa=-1
+InpAdxMax=20
+InpAdxPeriodo=14
+InpAdxAmbito=0
+InpAdxTipo=0
+InpInclUsa=-1
+InpInclBarre=20
+InpInclMinAtr=0
+InpInclVerso=0
+InpConfluenza=-1
+InpConflTolAtr=0.5
+InpMaxSpreadPunti=0
+InpUnita=0
+InpUnitaManuale=0.1
+InpTipoIngresso=-1
+InpScalaAnticipo=5
+InpScalaOltre=5
+InpPdfDistanzaSecondo=20
+InpPdfAperturaLontana=0
+InpPdfLontanoAtr=0.5
+InpScadenzaBarre=1
+InpMaxSetupAperti=1
+InpRischioSetupPct=0.25
+InpRischioMaxSetupPct=0
+InpPesiScala=0
+InpPesiPdf=0
+InpMoltConfluenza=1.0
+InpSLCriterio=-1
+InpSLBuffer=5
+InpSLEstremoBarre=3
+InpTPCriterio=-1
+InpTPDistanza=10
+InpRRMin=-1
+InpParzialeTP1Pct=0
+InpBEalTP1=-1
+InpDurataMaxMin=0
+InpCommissionePrezzo=0
+InpCancelloCostoX=40
+InpUsaGuardian=true
+InpMagic=0||0||1||1||Y
+InpComment=NATCLA
+InpLogImbuto=true
+InpVerbose=true
+InpSoloConta=true
+InpPlaceboAtr=0
