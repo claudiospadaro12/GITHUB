@@ -115,7 +115,7 @@ $Pin = $Pin.ToLower()
 if($Lotto -notmatch '^(PILOTA|A|B|C|D)$'){ throw ('-Lotto deve essere PILOTA, A, B, C o D (e ' + $Lotto + ').') }
 foreach($hx in @($ShaEA, $ShaInc, $ShaProva)){ if($hx -notmatch '^[0-9a-fA-F]{64}$'){ throw '-ShaEA, -ShaInc e -ShaProva devono essere di 64 caratteri esadecimali (SHA256 calcolato dal commit, mai dal disco).' } }
 $ShaEA = $ShaEA.ToUpper(); $ShaInc = $ShaInc.ToUpper(); $ShaProva = $ShaProva.ToUpper()
-if($TimeoutRunMin -lt 5 -or $TimeoutRunMin -gt 60){ throw '-TimeoutRunMin fuori da 5-60 minuti.' }
+if($TimeoutRunMin -lt 1 -or $TimeoutRunMin -gt 60){ throw '-TimeoutRunMin fuori da 1-60 minuti.' }
 $RAW = 'https://raw.githubusercontent.com/claudiospadaro12/GITHUB/' + $Pin + '/'
 
 function Dico($t,$c='Gray'){ Write-Host ('   ' + $t) -ForegroundColor $c }
@@ -329,7 +329,7 @@ if($compErr -gt 0){ throw ('MetaEditor ha prodotto l.ex5 ma il log dice ' + $com
 Dico ('compilato: ' + $ex5 + '   SHA256 .ex5 ' + (Get-FileHash -LiteralPath $ex5 -Algorithm SHA256).Hash.Substring(0,12)) 'Green'
 if($compErr -eq 0){ Dico ('log di compilazione: 0 errori, ' + $compWarn + ' avvisi') $(if($compWarn -eq 0){'Green'}else{'Yellow'}) }
 else { Dico 'log di compilazione: riga "Result: N errors, M warnings" NON letta (formato diverso?): il verdetto e l esistenza dell .ex5' 'Yellow' }
-foreach($lw in @(($testoLogC -split "`r?`n") | Where-Object { $_ -match 'warning' -and $_ -notmatch 'Result' } | Select-Object -First 12)){ Dico ('   ' + $lw) 'Yellow' }
+foreach($lw in @(($testoLogC -split "`r?`n") | Where-Object { $_ -match 'warning' -and $_ -notmatch '\d+ errors?,\s*\d+ warnings?' } | Select-Object -First 12)){ Dico ('   ' + $lw) 'Yellow' }
 
 # ---------------------------------------------------------------------
 #  2. LE PASSATE SINGOLE (Optimization=0, Model=1, InpSoloConta=true)
@@ -427,10 +427,9 @@ function TrovaCsv($nomeCsv, $tDa){
     $p = Join-Path $d0 $nomeCsv
     if(Test-Path -LiteralPath $p){ $it = Get-Item -LiteralPath $p; if($it.LastWriteTime -ge $tDa){ return $it } }
   }
+  # ripiego: il file scritto nella cartella MQL5\Files dell'agente locale (senza FILE_COMMON). Percorso con caratteri jolly, NON una ricorsione sulle cartelle dei tick.
   $ag = Join-Path $LogRoot 'Tester'
-  if(Test-Path -LiteralPath $ag){
-    foreach($it in @(Get-ChildItem -Path $ag -Recurse -Filter $nomeCsv -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $tDa } | Sort-Object LastWriteTime -Descending)){ return $it }
-  }
+  foreach($it in @(Get-ChildItem -Path (Join-Path $ag ('*\Agent-*\MQL5\Files\' + $nomeCsv)) -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $tDa } | Sort-Object LastWriteTime -Descending)){ return $it }
   return $null
 }
 
@@ -495,7 +494,7 @@ foreach($ru in $runs){
   $dur = ((Get-Date) - $tRun).TotalSeconds
 
   # --- lettura delle sole righe scritte DOPO la fotografia
-  $avvi = @{}; $righeEA = @{}; $ver = @{}; $fin = @{}; $nImb = 0; $nImbRotte = 0; $illeggibili = 0
+  $avvi = @{}; $righeEA = @{}; $ver = @{}; $fin = @{}; $evTester = @{}; $nImb = 0; $nImbRotte = 0; $illeggibili = 0
   foreach($f in @(ElencoLog)){
     $off = 0; if($foto.ContainsKey($f.FullName)){ $off = [long]$foto[$f.FullName] }
     if($f.Length -le $off){ continue }
@@ -505,7 +504,11 @@ foreach($ru in $runs){
       if($mf.Success){ $fin[$mf.Value] = $mf; continue }
       if($reImbuto.IsMatch($riga)){ if($riga.IndexOf('quadratura ROTTA') -ge 0){ $nImbRotte = $nImbRotte + 1 }; $nImb = $nImb + 1; continue }
       $mn = $reNatCla.Match($riga)
-      if(-not $mn.Success){ continue }
+      if(-not $mn.Success){
+        # le righe del TESTER che raccontano un guasto (storia mancante, errore, terminale non collegato): servono a capire una passata morta, non entrano in nessun conto
+        if($evTester.Count -lt 30 -and $riga -match "`tTester`t" -and $riga -match '(?i)history|no data|cannot|failed|error|stopped|not found|disconnect|authoriz|synchron|download'){ $evTester[$riga.Trim()] = $true }
+        continue
+      }
       $chiave = $mn.Groups[1].Value.TrimEnd()
       $ma = $reAvvio.Match($riga)
       if($ma.Success){ $avvi[$chiave] = $ma; continue }
@@ -564,6 +567,7 @@ foreach($ru in $runs){
   foreach($a in $ver.Keys){ [void]$lg.Add('[NatCla] ' + $a) }
   foreach($a in ($righeEA.Keys | Sort-Object)){ [void]$lg.Add('[NatCla] ' + $a) }
   foreach($a in $fin.Keys){ [void]$lg.Add('TESTER ' + $a) }
+  foreach($a in $evTester.Keys){ [void]$lg.Add('TESTER-EVENTO ' + $a) }
   ($lg -join "`r`n") | Set-Content -LiteralPath (Join-Path (Join-Path $Cart 'log') ('EA_' + $tag + '.txt')) -Encoding ASCII
 
   $stato = 'OK'
@@ -574,6 +578,7 @@ foreach($ru in $runs){
   $col = 'Green'; if($stato -ne 'OK'){ $col = 'Red' }
   Write-Host ('   ' + $etich + '  ' + $stato + '   ' + [int]$dur + ' s   righe CONTA ' + $righeConta + '   AVVIO ' + $avvioOk + '   ADX ' + $adxV + '   finestra ' + $finest) -ForegroundColor $col
   foreach($x in $motivi){ Write-Host ('        - ' + $x) -ForegroundColor Red }
+  if($stato -like 'KO*'){ foreach($x in @($evTester.Keys | Select-Object -First 5)){ Write-Host ('        tester: ' + $x) -ForegroundColor DarkYellow } }
 }
 $durTot = ((Get-Date) - $TLotto).TotalMinutes
 

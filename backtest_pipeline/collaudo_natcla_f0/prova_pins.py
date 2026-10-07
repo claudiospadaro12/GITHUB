@@ -135,7 +135,7 @@ def verifica(percorso=PROVA, ea=EA):
         if k in pin and pin[k] != v:
             pr.append("pin %s = %s ma il default compilato (con le deviazioni dichiarate) e' %s" % (k, pin[k], v))
     if len(p["pin"]) != len(d) - 1:
-        pr.append("righe di pin %d invece di %d (82 input meno l'asse tecnico)" % (len(p["pin"]), len(d) - 1))
+        pr.append("righe di pin %d invece di %d (tutti gli input del sorgente meno l'asse tecnico)" % (len(p["pin"]), len(d) - 1))
     if p["direttive"] != {"FINOA": "2026.06.30"}:
         pr.append("direttive del file prova: attese solo @FINOA 2026.06.30, trovate %s" % p["direttive"])
     if len(p["marker_da"]) < 20:
