@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: ascii -*-
 """
-bootstrap_test.py -- prova la RIGA di lancio (RIGA_LANCIA_NATCLA_F0_PILOTA.txt) incollata com'e' (Invoke-Expression, come fa Claudio) nel banco di NATCLA_F0_PASSATE.ps1: il solo URL di
+bootstrap_test.py -- prova la RIGA di lancio da consegnare (dal 07/10 notte RIGA_LANCIA_NATCLA_F0_C0.txt, la verifica del rimedio v1.05; prima era la PILOTA) incollata com'e' (Invoke-Expression, come fa Claudio) nel banco di NATCLA_F0_PASSATE.ps1: il solo URL di
 download diventa quello del server locale, lo script e' servito INALTERATO. Controlla che la riga lanci davvero lo script (con le impronte giuste), e che si fermi SENZA scrivere niente quando
-l'impronta, il marcatore, la macchina, i processi MT5 o la scrittura su disco non tornano. Ricostruisce le righe di tutti i lotti (A-D) con --dest in cartella temporanea e ne controlla il parser.
+l'impronta, il marcatore, la macchina, i processi MT5 o la scrittura su disco non tornano. Ricostruisce le righe di tutti gli altri lotti (PILOTA, A-D) con --dest in cartella temporanea e ne controlla il parser;
+la riga del lotto C (quella che segue C0) la ESEGUE anche, una volta, nel banco (66 passate).
 Uso: python3 -I backtest_pipeline/collaudo_natcla_f0/bootstrap_test.py <PIN_40_hex>
 Il working tree DEVE essere uguale al commit PINNATO per i quattro file (script, prova, EA, include): se no, si ferma.
 """
@@ -29,13 +30,16 @@ def main():
         git = subprocess.run(["git", "show", "%s:%s" % (pin, rel)], cwd=REPO, capture_output=True, check=True).stdout
         disco = open(os.path.join(REPO, rel), "rb").read()
         assert git == disco, "il working tree NON e' uguale al pin per %s: commit prima, poi rifai il bootstrap e il test" % rel
-    riga = open(os.path.join(REPO, "backtest_pipeline", "righe", "RIGA_LANCIA_NATCLA_F0_PILOTA.txt"), encoding="ascii").read()
+    LOT = "C0"
+    riga = open(os.path.join(REPO, "backtest_pipeline", "righe", "RIGA_LANCIA_NATCLA_F0_%s.txt" % LOT), encoding="ascii").read()
     chk("la riga contiene il pin", ("$PIN='" + pin + "'") in riga)
     chk("la riga e' UNA riga fisica ASCII", "\n" not in riga and "\r" not in riga and riga.isascii())
-    chk("la riga imposta TLS 1.2, la guardia macchina, lo stesso lotto PILOTA, il timeout 20", "Tls12" in riga and "DESKTOP-H4D7CAJ" in riga and "-Lotto PILOTA" in riga and "-TimeoutRunMin 20" in riga)
+    chk("la riga imposta TLS 1.2, la guardia macchina, lo stesso lotto C0, il timeout 20", "Tls12" in riga and "DESKTOP-H4D7CAJ" in riga and "-Lotto C0 " in riga and "-TimeoutRunMin 20" in riga)
+    chk("la riga C0 dice la versione 1.05, l'ATTESA scritta prima (VERIFICA ADX, righe CONTA > 0, 2024.10.16) e che il lotto C resta FERMO se non passa",
+        "v1.05" in riga and "ATTESA SCRITTA PRIMA" in riga and "righe CONTA > 0" in riga and "2024.10.16" in riga and "resta FERMO" in riga and "NON SUPERATA" in riga)
     chk("la riga nomina per nome il bersaglio (50503392, BCM Markets MT5 Terminal) e i NON toccati (C:\\MT5_Backtest, C:\\FundedNext_Manuale, 541452707, 1514806751, 10105439, 50504263, 50503635, 50504400, Pepperstone, Tickmill)",
         all(x in riga for x in ("50503392", "BCM Markets MT5 Terminal", "C:\\MT5_Backtest", "C:\\FundedNext_Manuale", "541452707", "1514806751", "10105439", "50504263", "50503635", "50504400", "Pepperstone", "Tickmill")))
-    chk("la riga dichiara la durata attesa e il tetto", "6-18 minuti" in riga and "40 minuti" in riga)
+    chk("la riga dichiara la durata attesa, il tetto e il 'non fermarla prima di' calcolato (tetto 15 + 25)", "3-4 minuti" in riga and "15 minuti" in riga and "NON fermarla prima di 40 minuti" in riga)
     chk("la riga elenca i file attesi nello zip e il codice d'uscita", "FILE ATTESI NELLO ZIP" in riga and "rc 3" in riga)
     mh = re.search(r"-ShaEA ([0-9A-F]{64}) -ShaInc ([0-9A-F]{64}) -ShaProva ([0-9A-F]{64})", riga)
     chk("le tre impronte passate allo script sono quelle del commit (git show)", mh is not None and all(
@@ -69,8 +73,9 @@ def main():
             return [l for l in open(f).read().splitlines() if not l.startswith("LANCIO")] if os.path.exists(f) else []
 
         p, c, sd = scena("verde")
-        z = os.path.join(c, "Users", "Master", "Desktop", "NATCLA_F0_PILOTA.zip")
-        chk("RIGA verde: lancia lo script, 8 passate OK, rc 0, zip sul Desktop", "F0 lotto PILOTA rc 0" in p.stdout and "TUTTE LE PASSATE OK" in p.stdout and os.path.exists(z) and len(lanci(sd)) == 8, p.stdout[-800:] + p.stderr[-400:])
+        z = os.path.join(c, "Users", "Master", "Desktop", "NATCLA_F0_C0.zip")
+        chk("RIGA verde: lancia lo script, 4 passate OK sugli indici, rc 0, VERIFICA DEL RIMEDIO SUPERATA, zip sul Desktop", "F0 lotto C0 rc 0" in p.stdout and "TUTTE LE PASSATE OK" in p.stdout and
+            "SUPERATA su 4 passate su 4" in p.stdout and os.path.exists(z) and len(lanci(sd)) == 4 and all(("U30USD " in x or "D30EUR " in x) for x in lanci(sd)), p.stdout[-800:] + p.stderr[-400:])
         chk("RIGA verde: stampa impronta OK, marcatore OK, il bersaglio e i NON toccati", "impronta script" in p.stdout and "marcatore OK" in p.stdout and "NON TOCCATI" in p.stdout and "DESKTOP-H4D7CAJ" in p.stdout)
         chk("RIGA verde: lo script scritto sul disco ha l'impronta della riga", hashlib.sha256(open(os.path.join(c, "Users", "Master", "abtg_passata", "NATCLA_F0_PASSATE.ps1"), "rb").read()).hexdigest().upper() == H)
         # script alterato di un byte in coda -> IMPRONTA DIVERSA, niente scritto, niente lanciato
@@ -100,8 +105,14 @@ def main():
         # lo script servito rifiuta se le impronte passate non tornano (EA diverso da quello della riga)
         p, c, sd = scena("ea", muta={B.F_EA: lambda b: b + b"\n//x\n"})
         chk("RIGA: EA diverso da quello pinnato (SHA256 della riga) -> lo script si ferma, nessun terminale", "SHA256" in (p.stdout + p.stderr) and not lanci(sd), (p.stdout + p.stderr)[-300:])
+        # la riga del lotto C (quella che segue C0): eseguita UNA volta nel banco, 66 passate
+        rigac = open(os.path.join(REPO, "backtest_pipeline", "righe", "RIGA_LANCIA_NATCLA_F0_C.txt"), encoding="ascii").read()
+        chk("riga C: contiene il pin, -Lotto C, dice di lanciarla SOLO dopo C0 SUPERATA", ("$PIN='" + pin + "'") in rigac and "-Lotto C " in rigac and "SOLO DOPO che il lotto C0" in rigac)
+        p, c, sd = scena("rigaC", riga=rigac)
+        chk("riga C eseguita nel banco: 66 passate OK, rc 0, zip NATCLA_F0_C.zip", "F0 lotto C rc 0" in p.stdout and len(lanci(sd)) == 66 and
+            os.path.exists(os.path.join(c, "Users", "Master", "Desktop", "NATCLA_F0_C.zip")), p.stdout[-600:] + p.stderr[-300:])
         # le righe degli altri lotti: si generano e il parser le compila
-        for lot in ("A", "B", "C", "D"):
+        for lot in ("PILOTA", "A", "B", "C", "D", "C0"):
             dest = os.path.join(base, "RIGA_%s.txt" % lot)
             out = subprocess.run([sys.executable, "-I", os.path.join(QD, "bootstrap.py"), pin, lot, "--dest", dest], capture_output=True, text=True)
             t = open(dest, encoding="ascii").read() if out.returncode == 0 else ""

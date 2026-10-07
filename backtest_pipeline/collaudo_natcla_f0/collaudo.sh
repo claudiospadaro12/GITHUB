@@ -7,7 +7,8 @@ python3 -I $QD/prova_pins.py
 python3 $REPO/backtest_pipeline/controlla_prova.py --ea $REPO/mql5/Experts/EA_NatCla.mq5 $REPO/backtest_pipeline/prove/NATCLA_F0_conteggio_2026-10-07.txt | grep -E "ESITO|OK$"
 python3 $REPO/backtest_pipeline/controlla_riga.py --oggetto prova $REPO/backtest_pipeline/prove/NATCLA_F0_conteggio_2026-10-07.txt | grep -E "ESITO"
 python3 $REPO/backtest_pipeline/controlla_riga.py --oggetto ps1 $REPO/backtest_pipeline/righe/NATCLA_F0_PASSATE.ps1 | grep -E "ESITO|OK   compila|BLOCCANTI|^  X"
-python3 $REPO/backtest_pipeline/controlla_riga.py --oggetto riga --riga $REPO/backtest_pipeline/righe/RIGA_LANCIA_NATCLA_F0_PILOTA.txt | grep -E "ESITO|OK   compila|BLOCCANTI|^  X"
+python3 $REPO/backtest_pipeline/controlla_riga.py --oggetto riga --riga $REPO/backtest_pipeline/righe/RIGA_LANCIA_NATCLA_F0_C0.txt | grep -E "ESITO|OK   compila|BLOCCANTI|^  X"
+python3 $REPO/backtest_pipeline/controlla_riga.py --oggetto riga --riga $REPO/backtest_pipeline/righe/RIGA_LANCIA_NATCLA_F0_C.txt | grep -E "ESITO|OK   compila|BLOCCANTI|^  X"
 python3 -I $REPO/backtest_pipeline/leggi_natcla_f0.py --autotest | tail -1
 python3 -I $QD/mutazioni_reader.py | tail -1
 python3 -I $QD/battery.py $RAPIDO | tail -1

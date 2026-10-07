@@ -6,7 +6,8 @@ Stessa forma di collaudo_riga_R290A/bootstrap.py (la riga e' anche il lancio): s
 SHA256 e il marcatore, lo scrive sul disco e RICONTROLLA l'impronta del file scritto, e solo allora lo lancia, passandogli anche le impronte SHA256 dell'EA, dell'include e del file prova
 (calcolate qui dal commit): lo script le ricontrolla sui file che scarica al pin.
 Il commit passato DEVE essere raggiungibile da origin/lavoro (git merge-base --is-ancestor): un commit riscritto da un rebase e' un 404 su GitHub raw.
-Uso: python3 backtest_pipeline/collaudo_natcla_f0/bootstrap.py <COMMIT_40_hex> <LOTTO: PILOTA|A|B|C|D> [--dest FILE] [--senza-origin]
+Uso: python3 backtest_pipeline/collaudo_natcla_f0/bootstrap.py <COMMIT_40_hex> <LOTTO: PILOTA|A|B|C|D|C0> [--dest FILE] [--senza-origin]
+C0 (07/10 notte) = VERIFICA DEL RIMEDIO v1.05 sugli indici (4 passate): la riga del lotto C dice di lanciarla SOLO dopo C0 superato.
 """
 import hashlib, os, re, subprocess, sys
 
@@ -18,7 +19,7 @@ import prova_pins as PP
 C = sys.argv[1]
 LOTTO = sys.argv[2]
 assert re.match(r"^[0-9a-f]{40}$", C), "il commit va passato di 40 caratteri esadecimali minuscoli"
-assert LOTTO in ("PILOTA", "A", "B", "C", "D"), "lotto sconosciuto"
+assert LOTTO in ("PILOTA", "A", "B", "C", "D", "C0"), "lotto sconosciuto"
 if "--senza-origin" not in sys.argv:
     r = subprocess.run(["git", "merge-base", "--is-ancestor", C, "origin/lavoro"], cwd=REPO)
     assert r.returncode == 0, "il commit %s NON e' raggiungibile da origin/lavoro: prima push, poi bootstrap" % C[:8]
@@ -42,6 +43,11 @@ src = git_show(FILE)
 src.decode("ascii")
 H = sha(src)
 SEA, SINC, SPROVA = sha(git_show(FEA)), sha(git_show(FINC)), sha(git_show(FPROVA))
+mver = re.search(rb'#define NC_VER "([0-9.]+)"', git_show(FEA))
+assert mver, "NC_VER non trovato nell'EA al pin"
+VER = mver.group(1).decode("ascii")
+mvs = re.search(rb"\$VERSIONE_ATTESA = '([0-9.]+)'", src)
+assert mvs and mvs.group(1).decode("ascii") == VER, "la versione attesa dallo script al pin NON e' NC_VER dell'EA al pin: la riga partirebbe per fermarsi"
 MARC = "MARCATORE_NATCLA_F0_PASSATE_v1"
 assert src.count(MARC.encode()) >= 1 and src.splitlines()[1].decode() == "#  " + MARC, "il marcatore deve stare alla riga 2 dello script"
 # i lotti: letti dal file prova AL PIN (la sola fonte), da un file temporaneo FUORI dal repo
@@ -71,9 +77,9 @@ bersaglio = ("BERSAGLIO: SOLO una finestra PowerShell sul PC di backtest DESKTOP
              "Scrive SOLO: la cartella abtg_passata nel profilo utente, MQL5\\Experts e MQL5\\Include del terminale BCM di questa macchina, il Desktop (cartella e zip NATCLA_F0_" + LOTTO + "); "
              "i file natcla_setup_* in Common\\Files li scrive l EA nel tester e lo script li COPIA senza cancellarli. NON lanciarla se una riga di round o un altro giro NATCLA_F0 sta GIA girando su questo PC (classe 853).")
 if LOTTO == "PILOTA":
-    cosa = ("NATCLA F0 LOTTO PILOTA (commit " + C[:8] + ") -- PRIMA compilazione vera di EA_NatCla (mql5/Experts/EA_NatCla.mq5 v1.04, MetaEditor non lo ha mai compilato) e primo giro nel tester: "
+    cosa = ("NATCLA F0 LOTTO PILOTA (commit " + C[:8] + ") -- PRIMA compilazione vera di EA_NatCla (mql5/Experts/EA_NatCla.mq5 v" + VER + ", MetaEditor non lo ha mai compilato) e primo giro nel tester: "
             "4 simboli (" + ", ".join(simboli) + ") x 2 configurazioni (AUDIO H1 e EMA200 H1) = 8 passate singole, Modello 1 (OHLC su M1), InpSoloConta=true, nessun ordine, finestra per classe fino al 2026.06.30. "
-            "Misura il TEMPO per passata e verifica che l EA parta e stampi la riga di avvio giusta (versione 1.04, modalita, 1 u per classe, iADX MetaQuotes, magic 778601 e 778621) e la riga VERIFICA ADX. "
+            "Misura il TEMPO per passata e verifica che l EA parta e stampi la riga di avvio giusta (versione " + VER + ", modalita, 1 u per classe, iADX MetaQuotes, magic 778601 e 778621) e la riga VERIFICA ADX. "
             "Nessun PF, nessun DD: la lettura dei setup e leggi_natcla_f0.py sullo zip, i criteri sono scritti nel file prova PRIMA dei numeri.")
     tempo = ("TEMPO ATTESO [STIMA NON AGGANCIATA a un giro a passata singola OHLC di questo EA, lo misura proprio questo lotto]: compilazione circa 1 minuto + 8 passate x 30-120 secondi = 6-18 minuti in tutto. "
              "Il tetto del lotto e " + str(tetto) + " minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti e se lo supera lo script chiude il terminale da solo con CloseMainWindow). "
@@ -82,18 +88,33 @@ if LOTTO == "PILOTA":
               "(2) ESITO F0 e MANIFEST: 8 passate OK, ognuna con AVVIO si, ADX MetaQuotes e finestra uguale a quella dichiarata; se una e KO il motivo e scritto e NESSUN numero di quella passata si legge; "
               "(3) VERIFICA ADX: deve dire formula MetaQuotes su tutte e 8, se dice Wilder o NESSUNA ci si ferma e si manda la finestra; "
               "(4) il numero che sostituisce la stima: la media di secondi per passata e la stima di F0 intera (216 passate) che lo script stampa alla fine. Lo script CONTA e non giudica.")
+elif LOTTO == "C0":
+    cosa = ("NATCLA F0 LOTTO C0 (commit " + C[:8] + ") -- VERIFICA DEL RIMEDIO di EA_NatCla v" + VER + " (il TOCCO degli handle in CaricaDati, dopo la diagnosi NATCLA_DIAG_U30 del 07/10: "
+            "con la v1.04 sugli indici BCM l EMA200 non si calcolava mai e l EA non contava niente). Lo script RICOMPILA EA_NatCla v" + VER + " e gira " + str(len(simboli)) + " indici (" + ", ".join(simboli) + ") x " +
+            str(len(configs)) + " configurazioni (" + ", ".join(configs) + ") = " + str(nrun) + " passate singole, Modello 1 (OHLC su M1), InpSoloConta=true, nessun ordine, dal 2024.09.26 al 2026.06.30. "
+            "Il lotto C (oro e indici) resta FERMO finche questo lotto non stampa VERIFICA DEL RIMEDIO SUPERATA. Da mandare quando finisce: lo zip NATCLA_F0_C0.zip dal Desktop di questo PC.")
+    tempo = ("TEMPO ATTESO [MISURATO dal pilota e dai lotti B e D del 07/10, e dalla diagnosi sugli stessi due indici: 28-40 secondi a passata]: compilazione circa 1 minuto + " + str(nrun) + " passate x 28-40 secondi = " +
+             ("%.0f" % (1 + bassa)) + "-" + ("%.0f" % (1 + alta)) + " minuti in tutto. Il tetto del lotto e " + str(tetto) + " minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti). "
+             "NON fermarla prima di " + str(tetto + 25) + " minuti (caso peggiore: tetto " + str(tetto) + " + ultima passata fino a 20 + chiusura 2 + compilazione 2; lo zip si scrive solo alla FINE). Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
+    guarda = ("ATTESA SCRITTA PRIMA DEI NUMERI: (1) compilazione 0 errori (se FALLISCE lo script si ferma con rc 1 PRIMA del tester e lo zip da mandare e NATCLA_F0_C0_COMPILAZIONE_FALLITA.zip); "
+              "(2) su TUTTE e " + str(nrun) + " le passate: AVVIO v" + VER + ", riga VERIFICA ADX con formula MetaQuotes (attesa datata 2024.10.16, la barra in cui la diagnosi era guarita) e righe CONTA > 0: allora lo script stampa VERIFICA DEL RIMEDIO SUPERATA e rc 0, e il lotto C si puo lanciare; "
+              "(3) se ANCHE UNA passata non ha la VERIFICA ADX o ha zero righe CONTA: VERIFICA DEL RIMEDIO NON SUPERATA, rc 3, il rimedio NON basta e il lotto C resta FERMO (l ipotesi alternativa: il tester calcola gli indicatori solo per copie di piu elementi). Lo script CONTA e non giudica.")
 else:
     cosa = ("NATCLA F0 LOTTO " + LOTTO + " (commit " + C[:8] + ") -- " + str(len(simboli)) + " simboli (" + ", ".join(simboli) + ") x " + str(len(configs)) + " configurazioni (" + ", ".join(configs) + ") = " + str(nrun) +
             " passate singole, Modello 1 (OHLC su M1), InpSoloConta=true, nessun ordine, finestra per classe fino al 2026.06.30. DA LANCIARE SOLO DOPO aver letto il lotto PILOTA (EA compilato e partito, VERIFICA ADX MetaQuotes, tempo misurato). "
-            "ORDINE CONSIGLIATO: A, poi B, poi D, UNA ALLA VOLTA (la seconda si lancia solo quando la prima ha scritto il suo zip: un altro giro gia in corso fa fermare questa con un messaggio rosso). "
-            "Il lotto C (oro e indici) resta FERMO finche non gira la passata diagnostica su U30USD. Da mandare quando finisce: lo zip NATCLA_F0_" + LOTTO + ".zip dal Desktop di questo PC. "
+            ("UN GIRO ALLA VOLTA (un altro giro NATCLA_F0 gia in corso fa fermare questa con un messaggio rosso). " if LOTTO == "C" else
+             "ORDINE CONSIGLIATO: A, poi B, poi D, UNA ALLA VOLTA (la seconda si lancia solo quando la prima ha scritto il suo zip: un altro giro gia in corso fa fermare questa con un messaggio rosso). ") +
+            (("DA LANCIARE SOLO DOPO che il lotto C0 ha stampato VERIFICA DEL RIMEDIO v" + VER + " SUPERATA (rc 0, su U30USD e D30EUR): senza, gli indici restano a zero setup come nel pilota. ")
+             if LOTTO == "C" else ("Il lotto C (oro e indici) resta FERMO finche il lotto C0 non ha verificato il rimedio v" + VER + ". ")) +
+            "Da mandare quando finisce: lo zip NATCLA_F0_" + LOTTO + ".zip dal Desktop di questo PC. "
             "Nessun PF, nessun DD: la lettura dei setup e leggi_natcla_f0.py sullo zip, i criteri sono scritti nel file prova PRIMA dei numeri.")
     tempo = ("TEMPO ATTESO [MISURATO dal pilota 07/10 su 3 simboli forex+oro e SOLO configurazioni H1: 28-40 secondi a passata, media 33]: compilazione circa 1 minuto + " + str(nrun) + " passate x 28-40 secondi = " + ("%.0f" % bassa) + "-" + ("%.0f" % alta) + " minuti. "
              "Puo durare DI PIU se il terminale deve scaricare lo storico M1 di un simbolo mai usato su questo PC o se H4/H12/D1 costano piu di H1 (NON misurati): per questo il tetto resta largo. "
              "Il tetto del lotto e " + str(tetto) + " minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti): le passate non lanciate escono NON_LANCIATA nel MANIFEST. "
              "NON fermarla prima di " + str(tetto + 25) + " minuti (caso peggiore: tetto " + str(tetto) + " + ultima passata fino a 20 + chiusura 2 + compilazione 2; lo zip si scrive solo alla FINE). Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
     guarda = ("COSE DA GUARDARE PER PRIME quando torna, scritte PRIMA: (1) ESITO F0 e MANIFEST: quante passate OK, KO, NON_LANCIATE (con il motivo); (2) VERIFICA ADX: formula MetaQuotes su tutte le passate OK, se Wilder o NESSUNA ci si ferma; "
-              "(3) la media di secondi per passata contro la stima. Lo script CONTA e non giudica: la tabella la fa leggi_natcla_f0.py.")
+              "(3) la media di secondi per passata contro la stima" + ("; (4) sugli INDICI la riga VERIFICA ADX su ogni passata (su H12 e D1 cade TARDI: servono 300 barre del TF, riscaldamento dichiarato nel file prova) e righe CONTA > 0 sulle passate H1 come in C0, e XAUUSD con righe CONTA IDENTICHE al PILOTA girato con la v1.04 (riga DETERMINISMO del lettore: misura che la v" + VER + " non cambia niente dove la v1.04 funzionava)" if LOTTO == "C" else "") +
+              ". Lo script CONTA e non giudica: la tabella la fa leggi_natcla_f0.py.")
 fine = ("FILE ATTESI NELLO ZIP sul Desktop (NATCLA_F0_" + LOTTO + ".zip): RIEPILOGO_F0.txt + MANIFEST_F0.csv + il file prova + compile_natcla.log + csv\\natcla_setup_<simbolo>_<magic>.csv x " + str(nrun) +
         " + log\\EA_<simbolo>_<config>.txt x " + str(nrun) + " + ini\\f0_<simbolo>_<config>.ini x " + str(nrun) + "; rc 0 = tutte OK, rc 3 = almeno una KO o non lanciata (lo zip esce lo stesso), rc 1 = si e fermato prima del tester (se e la COMPILAZIONE, lo zip da mandare e NATCLA_F0_" + LOTTO + "_COMPILAZIONE_FALLITA.zip)")
 avviso_mt5 = ("QUI CI SONO TRE MT5 (C:\\Program Files\\BCM Markets MT5 Terminal = demo 50503392, C:\\MT5_Backtest, C:\\FundedNext_Manuale): devono essere TUTTI CHIUSI, MetaEditor compreso. NON serve aprirne nessuno: lo script controlla da solo "
