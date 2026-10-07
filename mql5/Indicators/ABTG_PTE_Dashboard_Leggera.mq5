@@ -53,7 +53,8 @@
 //|     cella non chiama il terminale per niente (orario della       |
 //|     prossima barra in memoria); quando la barra e' "dovuta" fa   |
 //|     1 SeriesInfoInteger ogni InpRicontrolloSec secondi finche'   |
-//|     la barra arriva;                                             |
+//|     la barra arriva (serie ancora vuota: 1 CopyRates, che la fa  |
+//|     costruire, con attesa crescente);                            |
 //|   - copia: 1 CopyRates per cella per barra nuova, col numero     |
 //|     MINIMO di barre (default 131: ATR lento 100 + 30 barre di    |
 //|     ricerca + 1); a regime H1+H4+D1 su 35 simboli fanno circa    |
@@ -666,8 +667,11 @@ bool Elabora(int k,datetime ora)
    string s=gSym[i];
    ENUM_TIMEFRAMES tf=gTF[j];
    datetime lb=(datetime)SeriesInfoInteger(s,tf,SERIES_LASTBAR_DATE);
-   if(lb==0){ Rinvia(k,ora); return(false); }                                   // storico non pronto
-   if(lb==gUltBarra[k]){ gProssimo[k]=ora+InpRicontrolloSec; return(false); }   // nessuna barra nuova: niente copia
+   if(lb!=0 && lb==gUltBarra[k]){ gProssimo[k]=ora+InpRicontrolloSec; return(false); }   // nessuna barra nuova: niente copia
+   //--- lb==0 (serie non ancora costruita): NON si rinvia senza copiare. E' la CopyRates
+   //    che chiede al terminale di costruire la serie (in un indicatore non blocca: torna
+   //    corta o -1 e la carica in sottofondo); se torna corta, rinvio con attesa crescente.
+   //    Senza questo, una serie che resta a 0 finche' nessuno la chiede non si riempie MAI.
    int got=CopyRates(s,tf,0,gBisogno,gR);
    if(got<gBisogno){ Rinvia(k,ora); return(true); }
    ArrayResize(gO,got); ArrayResize(gH,got); ArrayResize(gL,got); ArrayResize(gC,got);

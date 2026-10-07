@@ -10,7 +10,7 @@ provare a tavolino e si dichiara il resto.
      //@@PD_PURE_BEGIN..END una volta; ogni funzione MQL5 chiamata e' in una lista di firme note (numero di
      argomenti controllato chiamata per chiamata); StringFormat/PrintFormat: segnaposto == argomenti;
      NIENTE trading/rete/file/handle (OrderSend, CTrade, WebRequest, FileOpen, iATR, iCustom, CopyBuffer...);
-     default degli input == specifica (37 simboli nelle 5 liste dell'originale, H1/H4/D1 accesi, canale
+     default degli input == specifica (35 simboli nelle 5 liste, 37 nell'originale: domanda a Claudio; H1/H4/D1 accesi, canale
      "uno dei due", alert spenti, confronto spento); funzioni COPIATE dall'EA ABTG_PTE.mq5 identiche nel
      testo (ciclo TMA, IsDoji, Heikin Ashi a 2 barre di seme).
   R) RACCORDO (il codice NON puro, quello che parla col terminale): la copia dei dati sta dietro al
@@ -306,7 +306,7 @@ def raccordo(src, code, bag):
         bag.append("CopyRates deve esistere UNA volta sola, dentro Elabora")
     ic = el.find("CopyRates(")
     for pezzo, perche in (("if(ora<gProssimo[k])return(false);", "orario della prossima barra"),
-                          ("if(lb==gUltBarra[k]){gProssimo[k]=ora+InpRicontrolloSec;return(false);}", "barra nuova (cache)"),
+                          ("if(lb!=0&&lb==gUltBarra[k]){gProssimo[k]=ora+InpRicontrolloSec;return(false);}", "barra nuova (cache)"),
                           ("if(gStatoSim[i]!=0)return(false);", "simbolo non disponibile saltato"),
                           ("datetimelb=(datetime)SeriesInfoInteger(s,tf,SERIES_LASTBAR_DATE);", "lettura dell'ultima barra")):
         k = el.find(pezzo)
@@ -380,6 +380,57 @@ def raccordo(src, code, bag):
     du = norm(corpo(code, "DurataBarra") or "")
     if "if(tf==PERIOD_MN1)return(28*86400);returnPeriodSeconds(tf);".replace("returnPeriodSeconds(tf)", "return(PeriodSeconds(tf))") not in du:
         bag.append("DurataBarra: MN deve usare il mese piu' corto (28 giorni)")
+    raccordo_cancello(src, code, bag)
+
+
+def raccordo_cancello(src, code, bag):
+    """ANCORE aggiunte dal cancello (controllo-preventivo, 07/10/2026, classe 1068): 16 mutanti ciechi su 20,
+    scritti su righe di raccordo NON scelte dall'autore, erano VERDI (fra questi: tabella SEMPRE vuota con
+    'gPronta' mai vera, Market Watch invertito, cursore fermo sulla cella 0, titolo '2 COPIE' sempre acceso)."""
+    sc = re.sub(r"//[^\n]*", "", src)            # sorgente senza commenti, stringhe intatte
+    el = norm(corpo(code, "Elabora") or "")
+    ic = el.find("CopyRates(")
+    # lb==0 non deve rinviare SENZA copiare: e' la CopyRates che fa costruire la serie
+    if "if(lb==0)" in el[:max(ic, 0)]:
+        bag.append("CANCELLO: con la serie vuota (lb==0) si rinvia senza mai chiamare CopyRates: la cella puo' non riempirsi MAI")
+    for pz, perche in (("gPronta[k]=true;", "la cella non diventa mai 'pronta' (tabella sempre vuota)"),
+                       ("gAttesa[k]=0;", "l'attesa crescente non si azzera dopo un calcolo riuscito")):
+        if pz not in el or el.find(pz) < ic:
+            bag.append("CANCELLO Elabora: %s" % perche)
+    sa = norm(corpo(code, "AggiornaStatoSimboli") or "")
+    for pz, perche in (("if(!SymbolExist(gSym[i],custom))st=2;", "simbolo inesistente"),
+                       ("elseif(InpSoloMarketWatch&&SymbolInfoInteger(gSym[i],SYMBOL_SELECT)==0)st=1;", "fuori dal Market Watch"),
+                       ("if(st==gStatoSim[i])continue;", "stato invariato saltato"),
+                       ("if(st==0){gProssimo[k]=0;gAttesa[k]=0;gUltBarra[k]=0;}", "al rientro nel Market Watch la cella si ricalcola subito")):
+        if pz not in sa:
+            bag.append("CANCELLO AggiornaStatoSimboli: manca il controllo '%s'" % perche)
+    ot = norm(corpo(code, "OnTimer") or "")
+    for pz, perche in (("gCursore=(gCursore+1)%tot;", "il cursore avanza di una cella"),
+                       ("if(ora-gUltStato>=60)", "stato dei simboli ogni 60 s"),
+                       ('if(ObjectFind(0,PD_PREF+"xxxxxxxx")<0)Struttura();', "oggetti cancellati a mano: ricostruzione"),
+                       ("if(!gDoppioVisto)ControllaDoppio();", "controllo delle due copie")):
+        if pz not in ot:
+            bag.append("CANCELLO OnTimer: manca '%s'" % perche)
+    if ot.find("AggiornaStatoSimboli();") < 0 or ot.find("AggiornaStatoSimboli();") > ot.find("while("):
+        bag.append("CANCELLO OnTimer: AggiornaStatoSimboli non chiamato prima del giro delle celle")
+    if "if(n>=2)" not in norm(corpo(code, "ControllaDoppio") or ""):
+        bag.append("CANCELLO ControllaDoppio: l'avviso '2 COPIE' deve scattare da 2 copie in su, non da 1")
+    ag = norm(corpo(sc, "AggiornaCella") or "")
+    for pz in ('if(gStatoSim[i]==1)tip=base+"fuori', 'elseif(gStatoSim[i]==2)tip=base+"simbolo inesistente',
+               'elseif(!gPronta[k])tip=base+"dati non ancora', 'elseif(gDir[k]==0)tip=base+"nessuna doji',
+               'tip=base+(gDir[k]>0?"doji RIALZISTA (sotto)":"doji RIBASSISTA (sopra)")'):
+        if norm(pz) not in ag:
+            bag.append("CANCELLO AggiornaCella: tooltip diverso da '%s'" % pz[:60])
+    if "colorcs=(gStatoSim[i]==0?InpColTesto:InpColSpento);" not in norm(corpo(code, "Struttura") or ""):
+        bag.append("CANCELLO Struttura: colore del simbolo non legato allo stato")
+    oi = norm(corpo(code, "OnInit") or "")
+    for pz, perche in (("InpBarreIndietro<1||InpBarreIndietro>500", "barre di ricerca 1-500"),
+                       ("ArrayInitialize(gStatoSim,-1);", "stato iniziale 'da valutare'"),
+                       ("ObjectsDeleteAll(0,PD_PREF);gProprietario=true;", "pulizia degli oggetti PDL_ rimasti")):
+        if pz not in oi:
+            bag.append("CANCELLO OnInit: manca '%s'" % perche)
+    if "intb=s+3;" not in norm(corpo(code, "PD_Bisogno") or ""):
+        bag.append("CANCELLO PD_Bisogno: la Heikin Ashi dell'EA legge la barra shift+2: servono almeno barre+3 barre")
 
 
 # ===========================================================================
@@ -978,7 +1029,7 @@ MUTANTI = [
     ("HA come l'EA con il seme sbagliato", "double haO_prev=(o[shift+2]+c[shift+2])/2.0;", "double haO_prev=(o[shift+1]+c[shift+1])/2.0;"),
     ("giorno della settimana sfasato", "(int)((g+4)%7)*3", "(int)((g+3)%7)*3"),
     ("barre minime senza l'ATR lento", "   b=PD_MaxI(b,s+p.atrS+1);\n", ""),
-    ("cache della barra tolta", "   if(lb==gUltBarra[k]){ gProssimo[k]=ora+InpRicontrolloSec; return(false); }   // nessuna barra nuova: niente copia\n", ""),
+    ("cache della barra tolta", "   if(lb!=0 && lb==gUltBarra[k]){ gProssimo[k]=ora+InpRicontrolloSec; return(false); }   // nessuna barra nuova: niente copia\n", ""),
     ("ChartRedraw a ogni ciclo", "   if(gRidisegna)\n     {\n      gRidisegna=false;\n      ChartRedraw(0);\n     }",
      "   gRidisegna=false;\n   ChartRedraw(0);"),
     ("timer non spento", "   EventKillTimer();\n", ""),
@@ -1011,6 +1062,24 @@ MUTANTI = [
     ("parametro flip non passato", "gPar.flip=InpConfermaFlip;", "gPar.flip=false;"),
     ("rapporti delle code scambiati", "gPar.rapInf=InpRapCodaInf; gPar.rapSup=InpRapCodaSup;", "gPar.rapInf=InpRapCodaSup; gPar.rapSup=InpRapCodaInf;"),
     ("seme HA tolto dalle barre minime", "   if(p.candela==2) b=PD_MaxI(b,s+1+p.semeHA);\n", ""),
+    # --- mutanti CIECHI del cancello (controllo-preventivo 07/10/2026): 16 su 20 erano VERDI prima delle ancore
+    ("serie vuota rinviata senza copia", "   if(lb!=0 && lb==gUltBarra[k])", "   if(lb==0){ Rinvia(k,ora); return(false); }\n   if(lb!=0 && lb==gUltBarra[k])"),
+    ("Market Watch invertito", "SymbolInfoInteger(gSym[i],SYMBOL_SELECT)==0", "SymbolInfoInteger(gSym[i],SYMBOL_SELECT)!=0"),
+    ("reset al rientro nel Market Watch tolto", "if(st==0){ gProssimo[k]=0; gAttesa[k]=0; gUltBarra[k]=0; }", ""),
+    ("avviso 2 copie con 1 copia", "if(n>=2)", "if(n>=1)"),
+    ("stato dei simboli mai riletto", "if(ora-gUltStato>=60)", "if(ora-gUltStato>=600000)"),
+    ("colore del simbolo invertito", "color cs=(gStatoSim[i]==0 ? InpColTesto : InpColSpento);", "color cs=(gStatoSim[i]==0 ? InpColSpento : InpColTesto);"),
+    ("limite 500 barre tolto", "InpBarreIndietro>500 ||", ""),
+    ("tooltip con la direzione scambiata", "(gDir[k]>0 ? \"doji RIALZISTA (sotto)\" : \"doji RIBASSISTA (sopra)\")",
+     "(gDir[k]>0 ? \"doji RIBASSISTA (sopra)\" : \"doji RIALZISTA (sotto)\")"),
+    ("cella mai pronta (tabella sempre vuota)", "   gPronta[k]=true;\n", ""),
+    ("attesa non azzerata dopo il calcolo", "   gAttesa[k]=0;\n   gProssimo[k]=gR[0].time", "   gProssimo[k]=gR[0].time"),
+    ("barre minime senza la barra shift+2 della HA", "int b=s+3;", "int b=s+2;"),
+    ("pulizia iniziale tolta", "   ObjectsDeleteAll(0,PD_PREF);               // oggetti", "   //ObjectsDeleteAll(0,PD_PREF);               // oggetti"),
+    ("tooltip fuori Market Watch mai", "if(gStatoSim[i]==1)      tip=", "if(gStatoSim[i]==7)      tip="),
+    ("ricostruzione degli oggetti tolta", "if(ObjectFind(0,PD_PREF+\"pannello\")<0) Struttura();", ""),
+    ("cursore fermo sulla cella 0", "gCursore=(gCursore+1)%tot;", "gCursore=(gCursore+0)%tot;"),
+    ("stato iniziale gia' 'ok'", "ArrayInitialize(gStatoSim,-1);", "ArrayInitialize(gStatoSim,0);"),
 ]
 
 
