@@ -1,0 +1,41 @@
+ESITO DEL COLLAUDO di NATCLA_F0 (passo 0 / fase F0 di Ea Nat&Cla) -- 07/10/2026
+(Sviluppatore; il giudizio e' dell'Agente dei Controlli: controllo-preventivo, strato 2, NON ancora fatto. Strato 1 verde. NON consegnabile finche' lo strato 2 non passa.)
+Pin della riga e dello script: 472bcef867c97c84c98a2093eb582b32d7452516 (su origin/lavoro).
+SHA256 script 276D38701598912679D957B7E0FEA3C91E8CF8BE013533995FEDAF087B6ADB77 | EA_NatCla.mq5 v1.04 681DC8823F01... | ABTG_PausaGuardian.mqh 3EC971152E85... | file prova 79B698530DA7...
+(le impronte intere sono dentro la riga; bootstrap_test.py le ricalcola da git show e le confronta).
+
+PERCHE' NON IL DRIVER DEI ROUND (R280): MISURATO sul sorgente. EA_NatCla.mq5 r.1216 scrive il CSV dei setup SOLO fuori dall'ottimizzazione; walkforward_generico_RETRY.ps1 r.1258/r.2315
+scrive SEMPRE Optimization=1; in ottimizzazione l'unico output dell'EA e' OptFrame con Trades=0 (SoloConta non manda ordini): il passo 0 sarebbe uscito VUOTO. Quindi uno script NUOVO di passata
+singola, derivato da PASSATA_STOP_SUPREV_NAS.ps1 (stessa famiglia di guardie), un lotto di passate per riga, guardie e raccolta identiche. Il driver dei round non e' toccato.
+
+FATTO (a macchina, Linux con pwsh 7.4.6; terminale e MetaEditor FINTI):
+  controlla_prova.py --ea EA_NatCla.mq5 ............ OK, pin 72, asse tecnico 2 celle
+  controlla_riga.py --oggetto prova / ps1 / riga ... nessun difetto meccanico (rilievi: nomi dei terminali vietati citati nella riga come NON toccati, CloseMainWindow nel testo)
+  prova_pins.py ..................................... i 71 pin = default compilati del sorgente tranne 2 deviazioni dichiarate; 36 simboli, 6 configurazioni, 5 lotti, lotti A-D coprono i 36 una volta sola
+  leggi_natcla_f0.py --autotest ..................... 84 controlli su dati finti con risposta nota per COSTRUZIONE (conto dei setup per linea, limite di tocchi, barra PRIMA contro barra del tocco,
+                                                     costo con/senza commissione, ESCLUSO PER COSTO ai bordi 13,3/40, split orologio ai bordi 26/12 e 03/02, anni dal VERIFICA ADX, E0 banda,
+                                                     contro-esempio iADX contro Wilder, VERIFICA ADX estratta e incoerenza dei tre numeri, AVVIO campo per campo, spread costante/variabile/lontano,
+                                                     determinismo fra due zip, KO del lettore)
+  mutazioni_reader.py ............................... 45 mutanti su copie FUORI dal repo, 45 presi (primo giro: 2 sopravvissuti = test mancanti, aggiunti)
+  battery.py (banco pwsh: finto C:, server HTTP al pin) 67 controlli, 0 falliti: pilota verde (8 passate, ini vere lette dal finto terminale, zip, il lettore legge lo zip del driver), 22 guardie
+                                                     (VPS, MT5/MetaEditor aperto, sedia attaccata, grafico illeggibile, installazione non censita, due cartelle dati, zero grafici, mutex, SHA256 EA/include/prova,
+                                                     NC_VER 1.03, InpSoloConta=false, pin in meno/doppio, asse diverso, simbolo senza blocco, pin 404, lotto sconosciuto), compilazione (fallita, 3 avvisi stampati, log
+                                                     senza Result), 13 difetti per passata, unita sbagliata, log vecchio escluso, zip/cartella vecchi rinominati, tetto, timeout, terminale che non si chiude, lotti A/C/D interi
+  mutazioni_script.py ............................... 30 mutanti dello script (ini, guardie, SHA, mutex, tetto, AVVIO, ADX, finestra, fotografia dei log, rinomina, rc, CloseMainWindow, .ex5, TF alti), 30 presi
+                                                     (primo giro: D06 TF e D28 .ex5 sopravvissuti: D06 = il pilota e' tutto H1, aggiunto uno scenario H4+D1; D28 = secondo controllo (Get-FileHash) lo fermava lo stesso, ora si pretende il messaggio giusto)
+  bootstrap_test.py ................................. 23 controlli sulla RIGA incollata (Invoke-Expression): verde, impronta diversa (byte in piu / stessa lunghezza), marcatore assente, VPS, MT5 aperto, scrittura corrotta, EA diverso;
+                                                     righe dei lotti A-D generate e compilate dal parser.
+
+TROVATO E CORRETTO durante il collaudo: (1) AbandonedMutexException se un giro precedente muore col blocco (ora ripreso e detto); (2) la descrizione dell'unita nella riga AVVIO puo contenere parentesi
+("forex (valute base/profitto)"): la regex era [^)]* e avrebbe dato AVVIO NON TROVATO; (3) ricorsione su tutto %APPDATA%\MetaQuotes due volte per passata x 216: scoperta una volta, poi cartelle note;
+(4) la stima di tempo della specifica (10-119 minuti per F0) vale per passate DENTRO un'ottimizzazione, non per 216 avvii di terminale; (5) la finestra dichiarata non e' la finestra VALUTATA: l'EA non valuta
+nulla finche' non ha 300 barre del TF (indici: H4 ~50 giorni, H12 ~150, D1 ~300 di borsa persi): il lettore usa la barra della riga VERIFICA ADX.
+
+NON COPERTO (dichiarato):
+  - Windows PowerShell 5.1 (qui pwsh 7); il ramo catch AbandonedMutexException (su Linux .NET non lo solleva);
+  - MetaEditor e MT5 veri: la prima compilazione di EA_NatCla, il formato esatto delle righe del log d'agente (preso dai log veri di R246/R271 del repo per giornale e MetaEditor, NON per le righe [NatCla]),
+    dove il tester scrive il CSV con FILE_COMMON (si cerca in Common\Files e negli agenti), le chiavi Period=H12/D1 e Model=1 nel .ini (house: Model e Period gia usati), storia M1 di XAGUSD/EURJPY/EURCHF;
+  - lo SPREAD del Modello 1 (corrente costante o dalla barra M1): il pilota lo mostra, il lettore lo stampa e lo confronta con spread_vivo per 8 simboli;
+  - il TEMPO per passata: [STIMA NON AGGANCIATA], 30-120 s; il pilota lo misura.
+CLASSI candidate per CHECKLIST_RIGA_DI_LANCIO.md (NON scritte: file condiviso): collettore di round scelto per un EA che scrive l'output solo fuori ottimizzazione; anni dichiarati contro anni valutati
+(riscaldamento); mutex senza gestione dell'abbandono; ricorsione di log per passata moltiplicata per il numero di passate.

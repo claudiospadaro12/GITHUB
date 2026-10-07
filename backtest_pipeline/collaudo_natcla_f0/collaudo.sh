@@ -11,4 +11,5 @@ python3 $REPO/backtest_pipeline/controlla_riga.py --oggetto riga --riga $REPO/ba
 python3 -I $REPO/backtest_pipeline/leggi_natcla_f0.py --autotest | tail -1
 python3 -I $QD/mutazioni_reader.py | tail -1
 python3 -I $QD/battery.py $RAPIDO | tail -1
+python3 -I $QD/mutazioni_script.py | tail -1
 python3 -I $QD/bootstrap_test.py $PIN | tail -1

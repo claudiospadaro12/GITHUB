@@ -65,7 +65,7 @@ bassa, alta = nrun * 30 / 60.0, nrun * 120 / 60.0
 bersaglio = ("BERSAGLIO: SOLO una finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ: terminale C:\\Program Files\\BCM Markets MT5 Terminal (cartella BCM Markets MT5 Terminal), "
              "loggato sul demo 50503392. Lo script lo apre e lo chiude da solo, una volta per passata (backtest, AllowLiveTrading=false, EA in modalita SOLO CONTA: nessun ordine). "
              "NON TOCCATI, per nome, PRIMA SU QUESTO PC (censimento P0 del 05/10): C:\\MT5_Backtest (cartella dati 04C7A32B, conto non censito) e C:\\FundedNext_Manuale (cartella dati 2B8180C3, conto non censito), che devono restare CHIUSI; "
-             "POI il VPS VMI3047753 e TUTTE le sue cartelle dati -- FTMO 541452707 (C:\\FTMO), trial FTMO 1514806751 (C:\\FTMO), REALE 10105439 (C:\\BCM_Reale), 100k 50504263 (BCM Markets MT5 Terminal -V3), "
+             "POI il VPS VMI3047753 e TUTTE le sue cartelle dati -- FTMO trial 1514806751 (C:\\FTMO, ex challenge 541452707: le sedie e il Guardian), REALE 10105439 (C:\\BCM_Reale), 100k 50504263 (BCM Markets MT5 Terminal -V3), "
              "piccolo 50503392 sul VPS (BCM Markets MT5 Terminal), manuale 50503635 (C:\\MT5_MANUALE), banco 50504400 (C:\\MT5_Backtest), Pepperstone, Tickmill. "
              "NON tocca CODA.txt, il runner notturno, preset, sedie, conti, taglie. "
              "Scrive SOLO: la cartella abtg_passata nel profilo utente, MQL5\\Experts e MQL5\\Include del terminale BCM di questa macchina, il Desktop (cartella e zip NATCLA_F0_" + LOTTO + "); "

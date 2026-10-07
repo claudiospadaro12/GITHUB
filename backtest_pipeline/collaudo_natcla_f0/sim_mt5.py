@@ -41,7 +41,9 @@ if kind == "editor":
     if len(argv) == 2 and len(comp) == 1 and len(logp) == 1:
         f = lin(comp[0][len("/compile:"):])
         ok = (b"NC_VER" in open(f, "rb").read()) and not scen.get("compile_fallisce")
-        nerr = 0 if ok else 3
+        nerr = 0 if (ok or scen.get("compile_silenzioso")) else 3
+        if scen.get("compile_errori_con_ex5"):
+            ok, nerr = True, 2
         w = scen.get("compile_avvisi", 0)
         righe = ["0\t2026.10.08 09:00:00.000\tCompile\t%s - %d errors, %d warnings, 1915 ms elapsed, cpu='X64 Regular'" % (f, nerr, w)]
         for k in range(min(w, 3)):
@@ -90,7 +92,7 @@ tfn = int(inp.get("InpTF", "16385"))
 cifra = {16385: 1, 16388: 4, 16396: 2, 16408: 8}.get(tfn, 0)
 magic = 778600 + 10 * modalita + cifra
 tfname = {16385: "H1", 16388: "H4", 16396: "H12", 16408: "D1"}.get(tfn, "H1")
-solo = "SI" if inp.get("InpSoloConta") == "true" else "no"
+solo = "SI" if (inp.get("InpSoloConta") == "true" and fault != "solo_no") else "no"
 import leggi_natcla_f0 as L
 prova = open(os.path.join(os.environ["SIM_REPO_BP"], "prove", "NATCLA_F0_conteggio_2026-10-07.txt"), encoding="ascii").read()
 bl = L.leggi_blocchi(prova)
