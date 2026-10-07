@@ -30,8 +30,13 @@ a tavolino, e si dice cosa resta fuori.
        barre NO: contro-esempio che prova che il controllo morde);
      - conteggio setup/anno AUDIO H1 2024-07-10 -> 2026-09-18 contro la specifica (151/121/97 episodi,
        101/84/88 entro il limite, 37/34/37 con ADX Wilder <= 20; ricontati 40/36/36). L'EA usa iADX di MT5
-       (specifica par. 2.1): il conteggio con quella formula si stampa accanto.
-  M) MUTANTI CIECHI: 21 mutazioni del sorgente (logica pura e codice d'ordine) applicate a una COPIA in
+       (specifica par. 2.1, scelta confermata dal cancello 07/10): 16/18/16 con lo specchio di ADX.mq5
+       (scritto a memoria, ricostruito in modo indipendente dal cancello con lo stesso esito; NON
+       verificato col terminale), controllato dentro 14-20.
+  R) RACCORDO (cancello 07/10): invarianti SEMANTICI sul codice non puro -- lato dell'ordine nel ramo
+     (s>0), lotto/SL/TP passati come variabili controllate, ogni filtro arriva a NC_Contesto, ADX dal
+     buffer 0, nessuna ora locale ne' costante oraria, riga d'avvio che stampa le variabili giuste.
+  M) MUTANTI CIECHI: 43 mutazioni del sorgente (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
      controllo. Un mutante che passa = buco del collaudo.
@@ -179,7 +184,8 @@ API = {
     "iMA": (6, 6), "iATR": (3, 3), "iADX": (3, 3), "iADXWilder": (3, 3), "iBands": (6, 6),
     "CopyBuffer": (5, 5), "CopyRates": (5, 5), "BarsCalculated": (1, 1), "IndicatorRelease": (1, 1),
     "Bars": (2, 4), "iTime": (3, 3), "iOpen": (3, 3),
-    "SymbolInfoDouble": (2, 3), "SymbolInfoInteger": (2, 3), "AccountInfoDouble": (1, 1), "AccountInfoInteger": (1, 1),
+    "SymbolInfoDouble": (2, 3), "SymbolInfoInteger": (2, 3), "SymbolInfoString": (2, 3),
+    "AccountInfoDouble": (1, 1), "AccountInfoInteger": (1, 1), "StringLen": (1, 1),
     "OrderCalcProfit": (6, 6), "PositionsTotal": (0, 0), "PositionGetTicket": (1, 1), "PositionGetString": (1, 2),
     "PositionGetInteger": (1, 2), "PositionGetDouble": (1, 2), "PositionSelectByTicket": (1, 1),
     "OrdersTotal": (0, 0), "OrderGetTicket": (1, 1), "OrderGetString": (1, 2), "OrderGetInteger": (1, 2),
@@ -412,7 +418,119 @@ def statico(raw, bag):
         b = corpo(code, fn) or ""
         if fine not in b:
             bag.append("%s: manca %s" % (fn, fine))
+    invarianti_raccordo(src, code, bag)
     return src
+
+
+def invarianti_raccordo(src, code, bag):
+    """INVARIANTI SEMANTICI sul raccordo (cancello 07/10, classi 1068/1076): il primo giro di 8 mutanti
+    ciechi del cancello sul codice NON puro ne lasciava passare 6 (lato invertito, SL azzerato,
+    ADX e inclinazione scollegati, orologio, riga d'avvio). Qui si controlla il SIGNIFICATO del
+    raccordo, non un testo: residuo dichiarato nelle note (par. 5)."""
+    # (1) LATO: un acquisto parte SOLO nel ramo s>0, una vendita SOLO nel ramo opposto
+    for m in re.finditer(r"\bgTrade\.(Buy|BuyLimit|Sell|SellLimit)\s*\(", code):
+        nome = m.group(1)
+        prima = code[max(0, m.start() - 200):m.start()]
+        stmt = prima[prima.rfind(";") + 1:]
+        if nome.startswith("Buy") and not re.search(r"\(\s*s\s*>\s*0\s*\)\s*\?\s*$", stmt):
+            bag.append("RACCORDO: gTrade.%s non e' nel ramo (s>0) ? ... (lato)" % nome)
+        if nome.startswith("Sell") and not re.search(r"\(\s*s\s*>\s*0\s*\)\s*\?\s*gTrade\.Buy\w*\s*\(.*\)\s*:\s*$", stmt, re.S):
+            bag.append("RACCORDO: gTrade.%s non e' nel ramo ':' di (s>0) ? Buy... (lato)" % nome)
+        # (2) SL/TP/LOTTO: gli argomenti sono le variabili controllate (if(sl<=0) ...), non espressioni
+        args = argomenti(code, m.end() - 1, chiusa(code, m.end() - 1))
+        txt = [code[a:b].strip() for a, b in args]
+        att = {"Buy": (0, 3, 4), "Sell": (0, 3, 4), "BuyLimit": (0, 3, 4), "SellLimit": (0, 3, 4)}[nome]
+        if len(txt) > 4 and (txt[att[0]], txt[att[1]], txt[att[2]]) != ("lot", "sl", "tp"):
+            bag.append("RACCORDO: gTrade.%s con lotto/SL/TP %s invece di (lot, sl, tp)" % (nome, txt[:5]))
+    # (3) FILTRI: ogni filtro risolto in Risolvi arriva a NC_Contesto come variabile, non come costante
+    cb = corpo(code, "Contesto") or ""
+    mc = re.search(r"\bNC_Contesto\s*\(", cb)
+    if not mc:
+        bag.append("RACCORDO: Contesto non chiama NC_Contesto")
+    else:
+        a = [cb[x:y].strip() for x, y in argomenti(cb, mc.end() - 1, chiusa(cb, mc.end() - 1))]
+        att = ["s", "adxApplica", "adx", "InpAdxMax", "gInclUsa", "incl", "InpInclMinAtr", "(int)InpInclVerso",
+               "gConfl", "dc", "InpConflTolAtr"]
+        if a != att:
+            bag.append("RACCORDO: NC_Contesto chiamata con %s invece di %s" % (a, att))
+        md = re.search(r"\bbool\s+adxApplica\s*=\s*([^;]+);", cb)
+        if not md or not re.match(r"gAdxUsa\s*&&", md.group(1).strip()) or "L!=NC_LEMA" not in md.group(1).replace(" ", ""):
+            bag.append("RACCORDO: adxApplica non parte da gAdxUsa && L!=NC_LEMA")
+        if not re.search(r"\badx\s*=\s*gAdx\s*\[\s*k\s*\]", cb) or not re.search(r"\bincl\s*=\s*NC_Inclinazione\s*\(\s*gEma\s*,\s*gAtrN\s*,\s*k\s*,\s*InpInclBarre\s*\)", cb):
+            bag.append("RACCORDO: ADX/inclinazione non letti alla barra k del contesto")
+    # (4) ADX: la riga principale e' il buffer 0 sia di iADX sia di iADXWilder
+    if not re.search(r"CopyBuffer\s*\(\s*hAdx\s*,\s*0\s*,", code):
+        bag.append("RACCORDO: CopyBuffer di hAdx non legge il buffer 0 (riga ADX)")
+    # (5) OROLOGIO: nessuna ora locale, nessuno spostamento orario cablato
+    for v in ("TimeLocal", "TimeGMT", "TimeGMTOffset", "TimeDaylightSavings"):
+        if re.search(r"\b%s\s*\(" % v, code):
+            bag.append("RACCORDO: orologio non del server (%s)" % v)
+    if re.search(r"(?<![\w.])(3600|7200|10800|-3600)(?![\w.])", code):
+        bag.append("RACCORDO: costante oraria cablata (3600/7200/10800): l'EA non ha regole d'orario")
+    # (6) RIGA D'AVVIO: le etichette che contano stampano la variabile giusta
+    ma = re.search(r'string\s+avvio\s*=\s*StringFormat\s*\(', code)
+    if not ma:
+        bag.append("RACCORDO: riga d'avvio non trovata")
+    else:
+        i = ma.end() - 1
+        args = argomenti(code, i, chiusa(code, i))     # posizioni dal codice mascherato, testo dal sorgente
+        lit = src[args[0][0]:args[0][1]].strip()[1:-1].replace("%%", "")
+        pezzi = re.split(r"%[-+ #0]*\d*(?:\.\d+)?[dfs]", lit)
+        val = [src[a:b].strip() for a, b in args[1:]]
+        mappa = {"rischio setup ": "InpRischioSetupPct", "placebo ": "InpPlaceboAtr", "magic ": "IntegerToString(gMagic)",
+                 "modalita' ": "NomeModalita()"}
+        for k_, v_ in mappa.items():
+            pos = [j for j, p in enumerate(pezzi[:-1]) if p.endswith(k_)]
+            if len(pos) != 1 or pos[0] >= len(val) or val[pos[0]] != v_:
+                bag.append("RACCORDO: riga d'avvio, '%s' non stampa %s" % (k_.strip(), v_))
+    nospazi = re.sub(r"\s+", "", code)
+    # (7) DATI: barre e buffer copiati dalla STESSA posizione (1 = ultima chiusa) e nello stesso numero
+    cd = corpo(code, "CaricaDati") or ""
+    for m in re.finditer(r"\b(CopyRates|CopyBuffer)\s*\(", cd):
+        a = [cd[x:y].strip() for x, y in argomenti(cd, m.end() - 1, chiusa(cd, m.end() - 1))]
+        if len(a) != 5 or a[2] != "1" or a[3] != "n":
+            bag.append("RACCORDO: %s in CaricaDati con inizio/numero %s invece di (1, n)" % (m.group(1), a[2:4]))
+    # (8) SEMAFORO: al primo riempimento si cancellano le ALTRE linee armate, non quella riempita
+    if "if(K!=L&&gSet[K].attivo&&!gSet[K].riempito&&gSet[K].tipo==NC_TIPO_SCALA)" not in nospazi:
+        bag.append("RACCORDO: il semaforo non cancella le ALTRE linee armate (K!=L, non riempite) [ancora]")
+    # (9) CONTEGGIO: armabile se il numero del tocco e' <= max, cioe' si scarta solo con '>' stretto
+    for m in re.finditer(r"(\w+)\s*(>=|<=|>|<|==)\s*gTocchiMax\s*\[", code):
+        if m.group(2) != ">" or m.group(1) not in ("prossimo", "nEp"):
+            bag.append("RACCORDO: confronto col massimo dei tocchi '%s %s gTocchiMax' (atteso: n > max scarta)" % (m.group(1), m.group(2)))
+    # (10) DA_MODALITA: la risoluzione dei default == colonne AUDIO / PDF / EMA200 della specifica par. 1
+    attese = ["gUsaLinea[NC_L25]=DaModB(InpUsaST25,true,false,false)", "gUsaLinea[NC_L30]=DaModB(InpUsaST30,true,false,false)",
+              "gUsaLinea[NC_L35]=DaModB(InpUsaST35,true,true,false)", "gUsaLinea[NC_LEMA]=DaModB(InpMotoreEma200,false,false,true)",
+              "gTocchiMax[NC_L25]=DaModI(InpTocchiMax25,1,0,1)", "gTocchiMax[NC_L30]=DaModI(InpTocchiMax30,1,0,1)",
+              "gTocchiMax[NC_L35]=DaModI(InpTocchiMax35,2,0,2)", "gChiudeVicino=DaModD(InpChiudeVicinoAtr,0.0,0.5,0.0)",
+              "gConferma=DaModB(InpConfermaApertura,false,true,false)", "gAdxUsa=DaModB(InpAdxUsa,true,false,false)",
+              "gInclUsa=DaModB(InpInclUsa,true,false,true)", "gRRMin=DaModD(InpRRMin,0.0,1.0,0.0)", "gBE=DaModB(InpBEalTP1,false,true,false)",
+              "gConfl=(InpConfluenza==NC_CONFL_DA_MODALITA)?((InpModalita==NC_PDF)?2:1)",
+              "gIngresso=(InpTipoIngresso==NC_ING_DA_MODALITA)?((InpModalita==NC_PDF)?1:0)",
+              "gSLCrit=(InpSLCriterio==NC_SL_DA_MODALITA)?((InpModalita==NC_PDF)?1:0)",
+              "gTPCrit=(InpTPCriterio==NC_TP_DA_MODALITA)?((InpModalita==NC_PDF)?2:0)",
+              "if(InpTF==PERIOD_CURRENT)gTF=(InpModalita==NC_PDF)?PERIOD_H4:PERIOD_H1"]
+    for a in attese:
+        if a not in nospazi:
+            bag.append("RACCORDO: risoluzione DA_MODALITA diversa dalla specifica: manca '%s'" % a)
+    # (11) STOP: il 'profondo' passato a NC_Stop e' l'ultimo ordine del setup (scala p[2], PDF p[1])
+    for fn, att in (("ArmaScala", "p[2]"), ("EntraPdf", "p[1]"), ("ScriviConta", "p[2]")):
+        b = corpo(code, fn) or ""
+        m = re.search(r"\bNC_Stop\s*\(", b)
+        a = [b[x:y].strip() for x, y in argomenti(b, m.end() - 1, chiusa(b, m.end() - 1))] if m else []
+        if len(a) != 6 or a[3] != att or a[0] != "gSLCrit" or a[5] != "InpSLBuffer*gU":
+            bag.append("RACCORDO: NC_Stop in %s con %s (atteso gSLCrit, ..., profondo %s, ..., InpSLBuffer*gU)" % (fn, a, att))
+    # (12) PERDITA PER LOTTO: 1 lotto, distanza intera (ancora: OrderCalcProfit non gira fuori dal terminale)
+    if ("OrderCalcProfit(ORDER_TYPE_BUY,_Symbol,1.0,px,px-dist,prof)" not in nospazi or "loss=(dist/tsz)*tv;" not in nospazi):
+        bag.append("RACCORDO: PerditaPerLotto non calcola 1 lotto sulla distanza intera [ancora]")
+    # (13) X10: i residui si cancellano alla PRIMA USCITA (meno posizioni vive di quelle viste), non al primo riempimento
+    if "if(no>0&&np<gSet[L].nPosId&&!gSet[L].residuiCancellati)" not in nospazi:
+        bag.append("RACCORDO: X10 non scatta alla prima uscita del setup [ancora]")
+    # (14) NETTING rifiutato e retcode: solo DONE / PLACED / DONE_PARTIAL contano come invio riuscito
+    if "if(AccountInfoInteger(ACCOUNT_MARGIN_MODE)!=ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)" not in nospazi:
+        bag.append("RACCORDO: conto non HEDGING non rifiutato [ancora]")
+    eo = re.sub(r"\s+", "", corpo(code, "EsitoOk") or "")
+    if sorted(re.findall(r"TRADE_RETCODE_\w+", eo)) != ["TRADE_RETCODE_DONE", "TRADE_RETCODE_DONE_PARTIAL", "TRADE_RETCODE_PLACED"]:
+        bag.append("RACCORDO: EsitoOk accetta retcode diversi da DONE/PLACED/DONE_PARTIAL")
 
 
 def magic_libero():
@@ -512,6 +630,16 @@ int main(){
       int n,i,defT; double sf,pl; if(scanf("%d %d %d %lf %lf",&n,&i,&defT,&sf,&pl)!=5) return 2;
       std::vector<double> H=rd(n),Lo=rd(n),C=rd(n),V=rd(n),D=rd(n),A=rd(n);
       printf("%d\n",NC_Tocco(H.data(),Lo.data(),C.data(),V.data(),D.data(),A.data(),i,defT,sf,pl));
+    } else if(c=="PIP"){
+      int d; double p; if(scanf("%d %lf",&d,&p)!=2) return 2; printf("%a\n",NC_Pip(d,p));
+    } else if(c=="LATO"){
+      int d,s; if(scanf("%d %d",&d,&s)!=2) return 2; printf("%d\n",NC_LatoAmmesso(d,s)?1:0);
+    } else if(c=="RISCHIO"){
+      double sa,pc,mo,dc,to,mx; if(scanf("%lf %lf %lf %lf %lf %lf",&sa,&pc,&mo,&dc,&to,&mx)!=6) return 2;
+      printf("%a\n",NC_RischioSoldi(sa,pc,mo,dc,to,mx));
+    } else if(c=="PEND"){
+      int s; double pr,sl,tp,ak,bd,md; if(scanf("%d %lf %lf %lf %lf %lf %lf",&s,&pr,&sl,&tp,&ak,&bd,&md)!=7) return 2;
+      printf("%d\n",NC_ControllaPendente(s,pr,sl,tp,ak,bd,md));
     } else return 3;
     fflush(stdout);
   }
@@ -606,6 +734,25 @@ def unitari(cx, bag):
         check(fx(one(cmd)[0]) == att, "%s -> %s" % (cmd, att), quiet=True, bag=bag)
     for cmd, att in (("META 0 3600", 1), ("META 1799 3600", 1), ("META 1800 3600", 2), ("META 3599 3600", 2)):
         check(int(one(cmd)[0]) == att, "%s -> %d" % (cmd, att), quiet=True, bag=bag)
+    # cancello 07/10: funzioni spostate nel blocco puro (pip, lato, rischio in soldi)
+    for cmd, att in (("PIP 5 0.00001", 0.0001), ("PIP 3 0.001", 0.01), ("PIP 2 0.01", 0.01), ("PIP 1 0.1", 0.1), ("PIP 4 0.0001", 0.0001)):
+        v = fx(one(cmd)[0])
+        check(abs(v - att) < 1e-15, "%s -> %r (atteso %r)" % (cmd, v, att), quiet=True, bag=bag)
+    for cmd, att in (("LATO 0 1", 1), ("LATO 0 -1", 1), ("LATO 1 1", 1), ("LATO 1 -1", 0), ("LATO 2 1", 0), ("LATO 2 -1", 1)):
+        check(int(one(cmd)[0]) == att, "%s -> %d" % (cmd, att), quiet=True, bag=bag)
+    # saldo pct molt dc tol tetto: 10000 x 0,25% = 25; B3 x2 con confluenza troncata al tetto 0,25 -> 25; tetto 0,5 -> 50
+    for cmd, att in (("RISCHIO 10000 0.25 1 0.1 0.5 0.25", 25.0), ("RISCHIO 10000 0.25 2 0.1 0.5 0.25", 25.0),
+                     ("RISCHIO 10000 0.25 2 0.1 0.5 0.5", 50.0), ("RISCHIO 10000 0.25 2 0.9 0.5 0.5", 25.0),
+                     ("RISCHIO 2000 0.5 1 9 0.5 0.5", 10.0)):
+        v = fx(one(cmd)[0])
+        check(abs(v - att) < 1e-9, "%s -> %r (atteso %r)" % (cmd, v, att), quiet=True, bag=bag)
+    # NC_ControllaPendente: s prezzo sl tp ask bid md (ask 100,02, bid 100,00, md 0,05)
+    for cmd, att in (("PEND 1 99 98 101 100.02 100 0.05", 0), ("PEND 1 99.98 98 101 100.02 100 0.05", 1),
+                     ("PEND 1 99 99.5 101 100.02 100 0.05", 2), ("PEND 1 99 98.97 101 100.02 100 0.05", 2),
+                     ("PEND 1 99 98 99.03 100.02 100 0.05", 2), ("PEND -1 101 102 99 100.02 100 0.05", 0),
+                     ("PEND -1 100.04 102 99 100.02 100 0.05", 1), ("PEND -1 101 100.5 99 100.02 100 0.05", 2),
+                     ("PEND -1 101 102 100.97 100.02 100 0.05", 2), ("PEND 1 101 98 103 100.02 100 0.05", 1)):
+        check(int(one(cmd)[0]) == att, "%s -> atteso %d" % (cmd, att), quiet=True, bag=bag)
     o = [fx(x) for x in one("EMADIR 5 1 2 2 1 5 1.5 1.5 2 1.5 0")]
     check(o == [-1.0, 1.0, 1.0, -1.0, 0.0], "EMADIR: chiusura == EMA tiene la direzione, EMA<=0 -> 0 (%s)" % o, quiet=True, bag=bag)
     v = fx(one("INCL 4 3 2 10 11 12 14 1 1 1 2")[0])
@@ -1002,6 +1149,34 @@ def mutanti(raw, ser):
         ("CSV: una colonna in meno nella riga del setup", "IntegerToString(gSet[L].toccoN)+\";;;;;;;\"",
          "IntegerToString(gSet[L].toccoN)+\";;;;;;\""),
         ("magic fuori dal blocco", "gMagic=778600+10*(long)InpModalita+cifraTF;", "gMagic=770600+10*(long)InpModalita+cifraTF;"),
+        # --- giro cieco del cancello 07/10 sul RACCORDO (6 su 8 erano VERDI prima di invarianti_raccordo)
+        ("C1 lato invertito sui limit", "bool ok=(s>0) ? gTrade.BuyLimit(lot,price,_Symbol,sl,tp,tt,ex,cm)",
+         "bool ok=(s<0) ? gTrade.BuyLimit(lot,price,_Symbol,sl,tp,tt,ex,cm)"),
+        ("C2 SL azzerato sul SellLimit", "                 : gTrade.SellLimit(lot,price,_Symbol,sl,tp,tt,ex,cm);",
+         "                 : gTrade.SellLimit(lot,price,_Symbol,sl*0,tp,tt,ex,cm);"),
+        ("C3 lotto non arrotondato", "         lotti[i]=NC_LottoGiu(w[i]*b,step,vmin,vmax);", "         lotti[i]=w[i]*b;"),
+        ("C4 conteggio non azzerato al flip", "   while(s0>first && dir[s0-1]==d) s0--;", "   while(s0>first) s0--;"),
+        ("C5 ADX scollegato", "   bool adxApplica=gAdxUsa && L!=NC_LEMA", "   bool adxApplica=false && L!=NC_LEMA"),
+        ("C6 inclinazione scollegata", "   int r=NC_Contesto(s,adxApplica,adx,InpAdxMax,gInclUsa,incl,",
+         "   int r=NC_Contesto(s,adxApplica,adx,InpAdxMax,false,incl,"),
+        ("C7 orologio spostato di un'ora", "   if(TimeCurrent()-gTbar0>NC_GRAZIA_SEC)", "   if(TimeCurrent()+3600-gTbar0>NC_GRAZIA_SEC)"),
+        ("C8 riga d'avvio: rischio stampato dal placebo",
+         "\"MERCATO_PIU_PENDENTE\",InpRischioSetupPct,", "\"MERCATO_PIU_PENDENTE\",InpPlaceboAtr,"),
+        # --- secondo giro cieco del cancello 07/10 (10 su 10 VERDI prima di blocco puro + invarianti 7-13)
+        ("D1 ATR letto con shift 2", "if(CopyBuffer(hAtrN,0,1,n,gAtrN)!=n) return false;", "if(CopyBuffer(hAtrN,0,2,n,gAtrN)!=n) return false;"),
+        ("D2 semaforo cancella la linea riempita", "if(K!=L && gSet[K].attivo && !gSet[K].riempito", "if(K==L && gSet[K].attivo && !gSet[K].riempito"),
+        ("D3 conteggio con >=", "if(gTocchiMax[L]>0 && prossimo>gTocchiMax[L])", "if(gTocchiMax[L]>0 && prossimo>=gTocchiMax[L])"),
+        ("D4 solo LONG blocca i long", "   if(direzione==1 && s<0) return false;", "   if(direzione==1 && s>0) return false;"),
+        ("D5 max tocchi 3.5 AUDIO a 1", "gTocchiMax[NC_L35]=DaModI(InpTocchiMax35,2,0,2);", "gTocchiMax[NC_L35]=DaModI(InpTocchiMax35,1,0,2);"),
+        ("D6 stop agganciato all'ordine sulla linea", "double sl=NormPrezzo(NC_Stop(gSLCrit,s,lv,p[2],", "double sl=NormPrezzo(NC_Stop(gSLCrit,s,lv,p[1],"),
+        ("D7 rischio x10", "   return saldo*p/100.0;", "   return saldo*p/10.0;"),
+        ("D8 perdita per lotto dimezzata", "OrderCalcProfit(ORDER_TYPE_BUY,_Symbol,1.0,px,px-dist,prof)", "OrderCalcProfit(ORDER_TYPE_BUY,_Symbol,1.0,px,px-dist*0.5,prof)"),
+        ("D9 pip x10", "   return (cifre==3 || cifre==5) ? punto*10.0 : punto;", "   return (cifre==3 || cifre==5) ? punto*100.0 : punto;"),
+        ("E1 BuyLimit: controllo prezzo rovesciato", "if(price>=ask-md) return 1;", "if(price<=ask-md) return 1;"),
+        ("E2 SellLimit: SL dal lato sbagliato accettato", "if(sl<=price || sl-price<md) return 2;", "if(sl>=price || sl-price<md) return 2;"),
+        ("E7 requote preso per buono", "return(rc==TRADE_RETCODE_DONE || rc==TRADE_RETCODE_PLACED", "return(rc==TRADE_RETCODE_DONE || rc==TRADE_RETCODE_REQUOTE || rc==TRADE_RETCODE_PLACED"),
+        ("E8 netting accettato", "if(AccountInfoInteger(ACCOUNT_MARGIN_MODE)!=ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)", "if(AccountInfoInteger(ACCOUNT_MARGIN_MODE)==ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)"),
+        ("D10 X10 al primo riempimento", "if(no>0 && np<gSet[L].nPosId && !gSet[L].residuiCancellati)", "if(no>0 && np<=gSet[L].nPosId && !gSet[L].residuiCancellati)"),
     ]
     base = tempfile.mkdtemp(prefix="natcla_mutanti_")     # FUORI dal repo (classe 1159)
     assert not os.path.abspath(base).startswith(os.path.abspath(ROOT))
@@ -1063,6 +1238,7 @@ def main():
                 check(abs(ep_ - s[0]) <= 0.03 * s[0], "linea %s: episodi/anno %.1f entro il 3%% della specifica (%d)" % (("2.5", "3.0", "3.5")[L], ep_, s[0]))
                 check(abs(en_ - s[1]) <= 0.03 * s[1], "linea %s: entro il limite audio %.1f entro il 3%% della specifica (%d)" % (("2.5", "3.0", "3.5")[L], en_, s[1]))
                 check(33 <= w_ <= 42, "linea %s: setup/anno con ADX Wilder <= 20 = %.1f dentro 33-42 (specifica 35-40)" % (("2.5", "3.0", "3.5")[L], w_))
+                check(14 <= m_ <= 20, "linea %s: setup/anno con iADX MT5 <= 20 (default EA) = %.1f dentro 14-20 (specifica corretta 07/10: 16/18/16)" % (("2.5", "3.0", "3.5")[L], m_))
             # H4/D1 solo informativi: dipendono dall'orologio (specifica par. 5.4)
             for mins, lab in ((240, "H4"), (1440, "D1")):
                 s2 = serie_tf(mins, 2021)

@@ -19,8 +19,11 @@
 //|  di trading e nessun suo valore di parametro e' entrato qui.     |
 //|                                                                  |
 //|  STATO: strato 1 (collaudo statico + logica pura su dati reali)  |
-//|  fatto dove possibile; strato 2 DA FARE. NON consegnabile.       |
-//|  NON compilato qui (nessun MetaEditor in questo ambiente).       |
+//|  fatto; strato 2 (controllo-preventivo 07/10): PASS CON RISERVE, |
+//|  vedi report/NATCLA_CODICE_NOTE_2026-10-07.md par. 5.            |
+//|  NON compilato qui (nessun MetaEditor in questo ambiente): la     |
+//|  prima compilazione e il primo giro nel tester sono il collaudo  |
+//|  che manca. Solo DEMO/TESTER finche' Claudio non firma.          |
 //|                                                                  |
 //|  MAPPA REGOLA -> CODICE (sigle della specifica, par. 1)          |
 //|   I1-I3 Supertrend HL2 +/- k x ATR10 ......... NC_STCore (puro)  |
@@ -216,6 +219,9 @@ input ENUM_NC_TRI InpAdxUsa     = NC_TRI_DA_MODALITA; // Filtro ADX massimo (AUD
 input double InpAdxMax          = 20;   // ADX massimo [FONTE A-R12: "a 20 non di piu'"]
 input int    InpAdxPeriodo      = 14;   // Periodo ADX [NOSTRA, Wilder]
 input ENUM_NC_ADXAMB InpAdxAmbito = NC_ADX_SOLO_ST35; // Linee su cui vale l'ADX (F3). Mai sulla EMA200
+//--- InpAdxTipo [cancello 07/10]: default iADX = l'indicatore che MT5 chiama "ADX" (le immagini del
+//    PDF sono MT5 su BCM): e' la lettura che NON sposta in silenzio il "20" della collega. Wilder e'
+//    piu' basso (sull'oro H1 mediana 25 contro 29): passa circa il DOPPIO dei setup. Resta un asse.
 input ENUM_NC_ADXTIPO InpAdxTipo  = NC_ADX_MT5; // Formula ADX: iADX (specifica 2.1) o iADXWilder [NOSTRA, asse]
 input ENUM_NC_TRI InpInclUsa    = NC_TRI_DA_MODALITA; // EMA200 inclinata (AUDIO si, PDF no, EMA200 si) [A-R19]
 input int    InpInclBarre       = 20;   // Inclinazione: |EMA200[1]-EMA200[1+N]|/ATR14[1], N barre [NOSTRA]
@@ -638,6 +644,52 @@ int NC_MetaTocco(const long secDaApertura,const long periodoSec)
   {
    return (2*secDaApertura<periodoSec) ? 1 : 2;
   }
+
+//--- U1 [CASA]: 1 pip = 10 punti sulle quotazioni a 3/5 cifre, altrimenti 1 punto.
+//    (Spostata qui dal cancello 07/10 perche' il collaudo la provi per comportamento.)
+double NC_Pip(const int cifre,const double punto)
+  {
+   return (cifre==3 || cifre==5) ? punto*10.0 : punto;
+  }
+
+//--- D1: il lato s (+1 long, -1 short) e' ammesso? direzione 0 entrambi, 1 solo long, 2 solo short.
+bool NC_LatoAmmesso(const int direzione,const int s)
+  {
+   if(direzione==1 && s<0) return false;
+   if(direzione==2 && s>0) return false;
+   return true;
+  }
+
+//--- S1/S4: rischio del setup in SOLDI = saldo x pct / 100. Bandiera B3: con confluenza
+//    (dc <= tol) e moltiplicatore diverso da 1 il pct sale, ma TRONCATO al tetto pctMax.
+double NC_RischioSoldi(const double saldo,const double pct,const double molt,const double dc,const double tol,
+                       const double pctMax)
+  {
+   double p=pct;
+   if(molt!=1.0 && dc<=tol) p=MathMin(pct*molt,pctMax);
+   return saldo*p/100.0;
+  }
+
+//--- ordine pendente LIMIT valido verso il mercato? 0 ok, 1 prezzo gia' superato o troppo vicino
+//    (BuyLimit sotto l'ask, SellLimit sopra il bid, di almeno md), 2 SL dal lato sbagliato o SL/TP
+//    dentro md (stops/freeze level). Spostata qui dal cancello 07/10 (provata per comportamento).
+int NC_ControllaPendente(const int s,const double price,const double sl,const double tp,const double ask,
+                         const double bid,const double md)
+  {
+   if(s>0)
+     {
+      if(price>=ask-md) return 1;
+      if(sl>=price || price-sl<md) return 2;
+      if(tp-price<md) return 2;
+     }
+   else
+     {
+      if(price<=bid+md) return 1;
+      if(sl<=price || sl-price<md) return 2;
+      if(price-tp<md) return 2;
+     }
+   return 0;
+  }
 //@@NC_PURE_END
 
 //==================================================================
@@ -794,8 +846,7 @@ double NormPrezzo(const double price)    // [CASA] r.535-541 del riferimento
 
 double PipMT()
   {
-   int d=(int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS);
-   return (d==3 || d==5) ? _Point*10.0 : _Point;
+   return NC_Pip((int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS),_Point);
   }
 
 //--- U1: valore di 1 u in prezzo
@@ -810,6 +861,14 @@ double CalcolaUnita(string &descr)
    long cm=SymbolInfoInteger(_Symbol,SYMBOL_TRADE_CALC_MODE);
    if(cm==SYMBOL_CALC_MODE_FOREX || cm==SYMBOL_CALC_MODE_FOREX_NO_LEVERAGE)
      { descr="AUTO_CLASSE forex: pip"; return PipMT(); }
+   //--- [CASA, cancello 07/10] un forex servito in modo CFD resta forex: base e profitto sono due
+   //    VALUTE vere e diverse (stessa regola di IsForex in ABTG_EMA200_Dashboard.mq5). Senza, un
+   //    USDJPY in modo CFD avrebbe 1 u = 1,0 yen = 100 pip (geometria sbagliata, rischio sempre R).
+   string valute=",AUD,CAD,CHF,CNH,CZK,DKK,EUR,GBP,HKD,HUF,JPY,MXN,NOK,NZD,PLN,SEK,SGD,TRY,USD,ZAR,";
+   string vb=SymbolInfoString(_Symbol,SYMBOL_CURRENCY_BASE), vp=SymbolInfoString(_Symbol,SYMBOL_CURRENCY_PROFIT);
+   StringToUpper(vb); StringToUpper(vp);
+   if(StringLen(vb)==3 && StringLen(vp)==3 && vb!=vp && StringFind(valute,","+vb+",")>=0 && StringFind(valute,","+vp+",")>=0)
+     { descr="AUTO_CLASSE forex (valute base/profitto): pip"; return PipMT(); }
    descr="AUTO_CLASSE indice/CFD: 1,0 punto";
    return 1.0;
   }
@@ -852,21 +911,7 @@ double MinDist()
 //    superato/troppo vicino, 2 SL o TP dentro lo stops level
 int ControllaPendente(const int s,const double price,const double sl,const double tp)
   {
-   double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK), bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
-   double md=MinDist();
-   if(s>0)
-     {
-      if(price>=ask-md) return 1;
-      if(sl>=price || price-sl<md) return 2;
-      if(tp-price<md) return 2;
-     }
-   else
-     {
-      if(price<=bid+md) return 1;
-      if(sl<=price || sl-price<md) return 2;
-      if(price-tp<md) return 2;
-     }
-   return 0;
+   return NC_ControllaPendente(s,price,sl,tp,SymbolInfoDouble(_Symbol,SYMBOL_ASK),SymbolInfoDouble(_Symbol,SYMBOL_BID),MinDist());
   }
 
 bool EsitoOk()
@@ -1176,9 +1221,7 @@ void OnNewBar()
 
 bool LatoAmmesso(const int s)
   {
-   if(InpDirezione==NC_DIR_LONG && s<0) return false;
-   if(InpDirezione==NC_DIR_SHORT && s>0) return false;
-   return true;
+   return NC_LatoAmmesso((int)InpDirezione,s);
   }
 
 double LineaPrezzo(const int k,const int s)   // linea in vigore DOPO la barra k (per la barra k+1)
@@ -1459,9 +1502,7 @@ bool ValidaOrdine(const int L,const int i,const int s,const double price,const d
 
 double RischioSoldi(const double dc)
   {
-   double pct=InpRischioSetupPct;
-   if(InpMoltConfluenza!=1.0 && dc<=InpConflTolAtr) pct=MathMin(InpRischioSetupPct*InpMoltConfluenza,gRischioMax);   // B3, troncata
-   return AccountInfoDouble(ACCOUNT_BALANCE)*pct/100.0;
+   return NC_RischioSoldi(AccountInfoDouble(ACCOUNT_BALANCE),InpRischioSetupPct,InpMoltConfluenza,dc,InpConflTolAtr,gRischioMax);   // B3 troncata
   }
 
 void CalcolaLotti(const int L,const int nOrd,const int pesi,const double &p[],const double sl,const bool &ok[],const double dc,double &lot[])
