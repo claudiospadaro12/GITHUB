@@ -39,7 +39,7 @@ Misura **sull'oro HistData** (un simbolo, feed **non BCM**, non la dashboard ori
 | **default** (HA come l'EA, TMA dell'EA, uno dei due, 30 barre) | 71% | 73% | 69% |
 | TMA centrata (la nostra ipotesi dell'originale) | 42% | 46% | 43% |
 | candele giapponesi + **entrambi** i canali | 21% | 24% | 22% |
-| **schermata di Claudio** (35-37 simboli, un istante) | **19%** (7) | **0%** (0) | **11%** (4) |
+| **schermata di Claudio** (37 simboli, un istante: 7/37, 0/37, 4/37) | **19%** (7) | **0%** (0) | **11%** (4) |
 
 Cosa dice, e cosa **non** dice:
 - con i default la nostra tabella sarebbe accesa **da quasi 4 a più di 6 volte più** dell'originale (H1 71% contro 19%, D1 69% contro 11%; H4 73% contro 0%): o la lettura delle celle è diversa, o le barre di ricerca sono meno di 30, o la doji dell'originale è più severa;
@@ -50,7 +50,7 @@ E una differenza **certa** da aspettarsi: anche se tutto il resto fosse identico
 
 ## 4. Come confrontarla con l'originale (quando sarà consegnabile)
 
-🪟 **Bersaglio: SOLO il terminale MT5 `50503635` (`C:\MT5_MANUALE`), sul VPS.** **Non viene toccato nessun altro terminale** del VPS: né FTMO `541452707` (`C:\FTMO`), né piccolo `50503392`, né 100k `50504263`, né banco `50504400` (`C:\MT5_Backtest`), né Pepperstone, né Tickmill, e **MAI il REALE `10105439` (`C:\BCM_Reale`)**. Prima di toccare una finestra, riconoscila con questa riga (🖥️ **finestra PowerShell sul VPS**, sola lettura, non apre né tocca nessun terminale):
+🪟 **Bersaglio: SOLO il terminale MT5 `50503635` (`C:\MT5_MANUALE`), sul VPS.** **Non viene toccato nessun altro terminale** del VPS: né FTMO `1514806751` (`C:\FTMO`, ex `541452707`), né piccolo `50503392`, né 100k `50504263`, né banco `50504400` (`C:\MT5_Backtest`), né Pepperstone, né Tickmill, e **MAI il REALE `10105439` (`C:\BCM_Reale`)**. Prima di toccare una finestra, riconoscila con questa riga (🖥️ **finestra PowerShell sul VPS**, sola lettura, non apre né tocca nessun terminale):
 
 ```
 Get-Process terminal64 | select Id, MainWindowTitle, Path

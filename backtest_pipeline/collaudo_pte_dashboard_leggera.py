@@ -393,6 +393,10 @@ def raccordo_cancello(src, code, bag):
     # lb==0 non deve rinviare SENZA copiare: e' la CopyRates che fa costruire la serie
     if "if(lb==0)" in el[:max(ic, 0)]:
         bag.append("CANCELLO: con la serie vuota (lb==0) si rinvia senza mai chiamare CopyRates: la cella puo' non riempirsi MAI")
+    # [lettore indipendente 07/10: l'ancora sul solo testo 'if(lb==0)' lasciava VERDE if(!lb) / if(0==lb) / if(lb<=0) / if(lb<1)]
+    # STRUTTURALE: prima di CopyRates restano esattamente 3 uscite (stato simbolo, gProssimo, cache sulla barra); una quarta e' la regressione 1170
+    if ic < 0 or el[:ic].count("return(") != 3:
+        bag.append("CANCELLO: prima di CopyRates ci sono %d uscite (attese 3: stato simbolo, attesa, cache): una uscita in piu' puo' rinviare senza copiare" % (el[:ic].count("return(") if ic >= 0 else -1))
     for pz, perche in (("gPronta[k]=true;", "la cella non diventa mai 'pronta' (tabella sempre vuota)"),
                        ("gAttesa[k]=0;", "l'attesa crescente non si azzera dopo un calcolo riuscito")):
         if pz not in el or el.find(pz) < ic:
@@ -407,10 +411,13 @@ def raccordo_cancello(src, code, bag):
     ot = norm(corpo(code, "OnTimer") or "")
     for pz, perche in (("gCursore=(gCursore+1)%tot;", "il cursore avanza di una cella"),
                        ("if(ora-gUltStato>=60)", "stato dei simboli ogni 60 s"),
-                       ('if(ObjectFind(0,PD_PREF+"xxxxxxxx")<0)Struttura();', "oggetti cancellati a mano: ricostruzione"),
                        ("if(!gDoppioVisto)ControllaDoppio();", "controllo delle due copie")):
         if pz not in ot:
             bag.append("CANCELLO OnTimer: manca '%s'" % perche)
+    # il nome vero dell'oggetto si controlla sul sorgente a stringhe INTATTE (nel mascherato qualunque stringa da 8 caratteri passa)
+    otv = norm(corpo(sc, "OnTimer") or "")
+    if 'if(ObjectFind(0,PD_PREF+"pannello")<0)Struttura();' not in otv:
+        bag.append("CANCELLO OnTimer: manca la ricostruzione degli oggetti col nome vero 'pannello' (oggetti cancellati a mano)")
     if ot.find("AggiornaStatoSimboli();") < 0 or ot.find("AggiornaStatoSimboli();") > ot.find("while("):
         bag.append("CANCELLO OnTimer: AggiornaStatoSimboli non chiamato prima del giro delle celle")
     if "if(n>=2)" not in norm(corpo(code, "ControllaDoppio") or ""):
@@ -1101,6 +1108,10 @@ MUTANTI = [
     ("barre minime senza la barra shift+2 della HA", "int b=s+3;", "int b=s+2;"),
     ("pulizia iniziale tolta", "   ObjectsDeleteAll(0,PD_PREF);               // oggetti", "   //ObjectsDeleteAll(0,PD_PREF);               // oggetti"),
     ("tooltip fuori Market Watch mai", "if(gStatoSim[i]==1)      tip=", "if(gStatoSim[i]==7)      tip="),
+    ("serie vuota: uscita if(!lb) prima della riga corretta", "   if(lb!=0 && lb==gUltBarra[k])", "   if(!lb){ Rinvia(k,ora); return(false); }\n   if(lb!=0 && lb==gUltBarra[k])"),
+    ("serie vuota: uscita if(lb<=0) prima della riga corretta", "   if(lb!=0 && lb==gUltBarra[k])", "   if(lb<=0){ Rinvia(k,ora); return(false); }\n   if(lb!=0 && lb==gUltBarra[k])"),
+    ("serie vuota: uscita if(lb<1) con attesa fissa", "   if(lb!=0 && lb==gUltBarra[k])", "   if(lb<1){ gProssimo[k]=ora+60; return(false); }\n   if(lb!=0 && lb==gUltBarra[k])"),
+    ("nome oggetto sbagliato nel controllo di OnTimer", "if(ObjectFind(0,PD_PREF+\"pannello\")<0) Struttura();", "if(ObjectFind(0,PD_PREF+\"pannellx\")<0) Struttura();"),
     ("ricostruzione degli oggetti tolta", "if(ObjectFind(0,PD_PREF+\"pannello\")<0) Struttura();", ""),
     ("cursore fermo sulla cella 0", "gCursore=(gCursore+1)%tot;", "gCursore=(gCursore+0)%tot;"),
     ("stato iniziale gia' 'ok'", "ArrayInitialize(gStatoSim,-1);", "ArrayInitialize(gStatoSim,0);"),
