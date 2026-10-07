@@ -123,11 +123,25 @@ DURATA_SOSPETTA = 120   # secondi: sotto = quasi certamente trailing/BE troppo s
 #
 # MISURATO su trades_auto.csv (30/03 -> 07/09/2026), non assunto:
 #   - 661 operazioni hanno  strategy=""  e  magic=0 ;
-#   - la corrispondenza e' ESATTA nei due sensi: zero righe con strategy vuota
-#     e magic != 0, zero righe con strategy piena e magic 0. Quindi "senza
-#     commento" e "magic 0" sono lo STESSO insieme, e il filtro non deve
-#     scegliere fra i due criteri: li pretende entrambi e segnala se un giorno
-#     dovessero divergere.
+#   - AL 07/09/2026 la corrispondenza era ESATTA nei due sensi -- zero righe
+#     con strategy vuota e magic != 0, zero righe con strategy piena e magic 0
+#     -- e da QUELLA misura nacque un filtro che pretendeva ENTRAMBI i criteri.
+#   🔴 QUELLA MISURA E' SCADUTA, e il 07/10/2026 ha presentato il conto: dal
+#     01/10 esistono righe con strategy PIENA e magic 0 (cinque: 01/10 x1,
+#     02/10 x3, 07/10 x1, taglie 1,00-10,00 lotti battute a mano). I due
+#     insiemi NON coincidono piu', e il filtro pretendeva l'INTERSEZIONE: il
+#     07/10 una riga a mano da 10,00 lotti col commento `reversale su st 3.0`
+#     e' restata DENTRO il "Totale giornata", e valeva il 98,3% della giornata
+#     (+724,93 su +737,45; flotta vera +12,52).
+#   🔴 E la clausola "segnala se un giorno dovessero divergere" E' STATA
+#     ONORATA E NON E' BASTATA: il 01/10 e il 02/10 lo strumento LO HA
+#     SEGNALATO ("operazioni con commento e magic DISCORDI ... restano nel
+#     totale", pid 3537169/3538850/3539766/3545427) e il segnale e' stato
+#     letto come "caso da capire", non come "il filtro e' sbagliato".
+#     Un avviso che non cambia il numero non e' una guardia: e' una nota.
+#     Classe 1174.
+#   👉 Dal 07/10/2026 il criterio e' UNO SOLO: `magic == 0` -> fuori.
+#     Una premessa misurata su una finestra si RIMISURA, non si eredita.
 #   - valgono -18.706,94 EUR contro i -1.235,41 EUR di TUTTA la flotta: se
 #     entrano nel totale, il netto del piccolo non e' il netto della flotta.
 #   - l'ULTIMA e' del 27/07/2026. Dal 28/07 in poi il conto e' solo EA
@@ -1030,7 +1044,11 @@ def main():
             "cambiato `profit` dopo la prima pubblicazione). 👉 Un **`expert`** "
             "nella colonna delle uscite vuol dire **frazione non leggibile in "
             "nessun verso**; sulle altre il pavimento del 30%% si giudica **il "
-            "giorno dopo**. 📌 E vale per la pagella scritta **la sera stessa**: "
+            "giorno dopo**. 📌 Un **`(0 di N vincenti)`** sulle righe **ereditate** "
+            "e' la regola **multi-giorno** del 15/09 (vedi l'avviso in "
+            "testa), **non** il valore punto non stimabile: i due motivi oggi "
+            "condividono la notazione, e distinguerli e' **aperto**. 📌 E vale "
+            "per la pagella scritta **la sera stessa**: "
             "su una pagella **rigenerata** a giorni di distanza la banda e' gia' "
             "completa e la frazione e' una misura._" % _ora_pubblicazione_server(giorno)]
 
@@ -1494,8 +1512,8 @@ def main():
                         "una sezione muta e' un'informazione, un totale "
                         "sbagliato no._"]
             else:
-                # 2) stesso filtro del piccolo: le righe a MAGIC 0 (non di un nostro EA)
-                #    (strategy vuota E magic 0) stanno FUORI dal totale, ma si
+                # 2) stesso filtro del piccolo: le righe a MAGIC 0 (non di
+                #    un nostro EA) stanno FUORI dal totale, ma si
                 #    mostrano. Firma di Claudio del 07/09: non e' una regola
                 #    "del piccolo", e' come si legge un conto.
                 man_reale = [r for r in rreale if fuori_flotta(r)]
