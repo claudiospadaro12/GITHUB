@@ -6,7 +6,9 @@ sim_mt5.py -- il TERMINALE e METAEDITOR FINTI del banco di NATCLA_F0_PASSATE.ps1
                  (UTF-16, '... .mq5 - 0 errors, 0 warnings, 1915 ms elapsed, cpu=...'), con gli avvisi dello scenario.
   KIND=terminal: legge la .ini data con /config: e si comporta come il tester ma SOLO a partire da cio' che trova nell'ini (Symbol, Period, FromDate, ToDate, Optimization, Model,
                  AllowLiveTrading, [TesterInputs] InpModalita/InpTF/InpSoloConta/...): scrive nel LOG dell'agente (UTF-16 con BOM, formato vero 'CS<TAB>0<TAB>HH:MM:SS.mmm<TAB>EA (SIM,TF)<TAB>data   [NatCla] ...')
-                 la riga AVVIO (derivata dall'ini: se l'ini e' sbagliata l'AVVIO lo dice), la VERIFICA ADX, gli avvisi; nel giornale del tester la riga 'Tester<TAB>Experts\\EA_NatCla.ex5 on SIM,TF from .. to ..';
+                 la riga AVVIO (derivata dall'ini: se l'ini e' sbagliata l'AVVIO lo dice), la VERIFICA ADX, gli avvisi; nel giornale del tester le DUE righe VERE
+                 dell'intestazione (copiate dai log della diagnosi NATCLA_DIAG_U30 del 07/10): 'Tester<TAB>SIM,TF (BCMMarkets-Server): testing of Experts\\EA_NatCla.ex5 from ..
+                 to ..' e 'Tester<TAB>SIM,TF: testing of ... started with inputs:' (D1 = 'Daily'; sugli indici anche 'start time changed to ...');
                  e il CSV dei setup in Terminal\\Common\\Files\\natcla_setup_<sim>_<magic>.csv (righe CONTA vere prodotte da leggi_natcla_f0.csv_finto). Lo scenario puo' iniettare difetti per passata.
 """
 import datetime, json, os, re, sys, time
@@ -43,9 +45,12 @@ if kind == "editor":
         ok = (b"NC_VER" in open(f, "rb").read()) and not scen.get("compile_fallisce")
         nerr = 0 if (ok or scen.get("compile_silenzioso")) else 3
         if scen.get("compile_errori_con_ex5"):
-            ok, nerr = True, 2
+            ok, nerr = True, scen.get("nerr", 2)
         w = scen.get("compile_avvisi", 0)
         righe = ["0\t2026.10.08 09:00:00.000\tCompile\t%s - %d errors, %d warnings, 1915 ms elapsed, cpu='X64 Regular'" % (f, nerr, w)]
+        if scen.get("compile_italiano"):
+            # classe 1168: MetaEditor in italiano, anche al singolare ('1 errore', '1 avviso')
+            righe = ["0\t2026.10.08 09:00:00.000\tCompile\t%s - %d %s, %d %s, 1915 ms trascorsi" % (f, nerr, "errore" if nerr == 1 else "errori", w, "avviso" if w == 1 else "avvisi")]
         for k in range(min(w, 3)):
             righe.insert(0, "1\t2026.10.08 09:00:00.000\tCompile\t%s(%d,5) : warning 43: possible loss of data due to type conversion" % (f, 100 + k))
         if scen.get("compile_senza_riga_result"):
@@ -102,7 +107,7 @@ mod = "AUDIO" if modalita == 0 else "EMA200"
 linee = "ST25 ST30 ST35 " if modalita == 0 else "E200"
 adx = "ACCESO" if modalita == 0 else "spento"
 descr = {"FX": "AUTO_CLASSE forex: pip", "ORO": "AUTO_CLASSE metallo: 1,0 USD", "ARG": "AUTO_CLASSE metallo: 1,0 USD", "IDX": "AUTO_CLASSE indice/CFD: 1,0 punto"}[cl]
-ver = "1.03" if fault == "avvio_ver" else "1.04"
+ver = "1.04" if fault == "avvio_ver" else "1.05"
 avv = ("[NatCla] AVVIO v%s | modalita' %s | %s PERIOD_%s | 1 u = %s (%s) | 1 pip = %s | magic %s | linee %s | ADX %s, iADX MetaQuotes, max 20.0, periodo 14 | ingresso SCALA3_PENDENTI | "
        "rischio setup 0.25%% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian ON (nel tester FAIL-OPEN) | solo conta %s | placebo 0.00 ATR | fonte SOLO AUDIO (PDF escluso 07/10)" % (
            ver, mod, sym, tfname, ("%.5f" % u), descr, ("%.5f" % u), magic, linee, adx, solo))
@@ -132,11 +137,14 @@ if fault != "no_avvio":
     righe.append(riga(avv))
     if fault == "doppio_avvio":
         righe.append(riga(avv.replace("magic %d" % magic, "magic %d" % (magic + 1))))
+    if fault == "doppio_avvio_lungo":
+        # un AVVIO DIVERSO e piu' LUNGO con lo stesso inizio (magic 7786011): NON e' una copia troncata, restano due righe distinte
+        righe.append(riga(avv.replace("magic %d" % magic, "magic %d1" % magic)))
 if fault == "rifiutato":
     righe.append(riga("[NatCla] AVVIO RIFIUTATO: InpMagic fuori dal blocco 778600-778699"))
 else:
     righe.append(riga("[NatCla] AVVISO: SOLO CONTA: nessun ordine verra' inviato"))
-    if fault != "no_verifica":
+    if fault not in ("no_verifica", "stallo"):
         righe.append(riga(vrf))
 for g in range(3):
     righe.append(riga("[NATCLA-IMBUTO] %s PERIOD_%s parziale del 2024.07.0%d | valutate 24 | quadratura OK || ordini: | nessun ordine 0" % (sym, tfname, 5 + g)))
@@ -154,7 +162,19 @@ a = tester.get("ToDate")
 if fault == "finestra":
     a = "2025.12.31"
 if fault != "no_giornale":
-    jr = "RD\t0\t%s.100\tTester\tExperts\\EA_NatCla.ex5 on %s,%s from %s 00:00 to %s 00:00\r\n" % (ora, sym, {"D1": "Daily"}.get(per, per), da, a)
+    tfg = {"D1": "Daily"}.get(per, per)
+    jr = ("RE\t0\t%s.100\tTester\t%s,%s (BCMMarkets-Server): testing of Experts\\EA_NatCla.ex5 from %s 00:00 to %s 00:00\r\n" % (ora, sym, tfg, da, a) +
+          "CS\t0\t%s.101\tTester\t%s,%s: testing of Experts\\EA_NatCla.ex5 from %s 00:00 to %s 00:00 started with inputs:\r\n" % (ora, sym, tfg, da, a))
+    if cl == "IDX":
+        jr += "CS\t3\t%s.102\tTester\t%s: start time changed to 2024.10.04 00:00 to provide data at beginning\r\n" % (ora, sym)
+    if fault == "giornale_vecchio_formato":
+        # la riga INVENTATA che il driver cercava prima del 07/10 notte (mai vista in un log vero): non deve piu' contare come finestra
+        jr = "RD\t0\t%s.100\tTester\tExperts\\EA_NatCla.ex5 on %s,%s from %s 00:00 to %s 00:00\r\n" % (ora, sym, tfg, da, a)
+    # classe 1173: la stessa riga [NatCla] anche nel giornale, TRONCATA (la VERIFICA dentro la frase finale, l'AVVIO dopo 'placebo 0.00 ATR')
+    if fault == "verifica_troncata":
+        jr += "CS\t0\t%s.103\tEA_NatCla (%s,%s)\t2024.07.05 00:00:00   %s\r\n" % (ora, sym, tfname, vrf[:len(vrf) - 25])
+    if fault == "avvio_troncato":
+        jr += "CS\t0\t%s.104\tEA_NatCla (%s,%s)\t2024.07.05 00:00:00   %s\r\n" % (ora, sym, tfname, avv[:avv.index("placebo 0.00 ATR") + len("placebo 0.00 ATR") + 4])
     if fault == "nocsv":
         jr += "XX\t0\t%s.200\tTester\t%s: no history data found, tester stopped\r\n" % (ora, sym)
     with open(jp, "ab") as f:
@@ -169,6 +189,8 @@ if fault not in ("nocsv", "rifiutato"):
     piano = {linea: [(2, 1, 0, 0, 15.0, 0.5, base + datetime.timedelta(hours=7 * i)) for i in range(nrip)]}
     if modalita == 0:
         piano["ST35"] = [(1, 1, 0, 0, 15.0, 0.7, base + datetime.timedelta(hours=7 * i + 3)) for i in range(2)]
+    if fault in ("conta_zero", "stallo"):
+        piano = {}          # CSV con intestazione e #cfg ma ZERO righe CONTA (= il pilota v1.04 sugli indici)
     cb = L.csv_finto(piano, u=u, spread=(0.25 if cl in ("ORO", "ARG", "IDX") else 0.00002), lv0=(2400.0 if cl in ("ORO", "ARG", "IDX") else 1.1))
     if fault == "csv_senza_header":
         cb = cb.replace(b"tipo;barra;linea;lato;", b"x;barra;linea;lato;")

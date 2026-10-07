@@ -26,7 +26,11 @@ VIVO_E0 = 70                  # E0: AUDIO_H1, setup >= 70 per simbolo nella fine
 FAMIGLIA_E3 = 300             # E3: 150 IS + 150 OOS setup
 LAVORO_X = 40.0               # E2: stop >= 40 x pedaggio = PASSA IL LAVORO
 DURO_X = 13.3                 # E2: sotto = ESCLUSO PER ARITMETICA
-VERSIONE_EA = "1.04"
+VERSIONE_EA = "1.05"           # 07/10 notte: il tocco degli handle in CaricaDati (diagnosi NATCLA_DIAG_U30)
+# lotti girati PRIMA del rimedio (PILOTA, A, B, D del 07/10, EA v1.04): si leggono, ma ogni passata e' MARCATA e contata a parte nel riepilogo.
+# La v1.05 cambia qualcosa solo dove la v1.04 restava bloccata (collaudo_natcla.py, modelli 0 e 2): sul forex e sull'oro le righe CONTA attese
+# sono IDENTICHE, e XAUUSD (PILOTA v1.04 contro lotto C v1.05) lo misura nel DETERMINISMO.
+VERSIONI_ARCHIVIO = ("1.04",)
 FINE_FINESTRA = datetime.date(2026, 6, 30)
 CAMBIO_OROLOGIO_DA = datetime.date(2024, 12, 26)     # forex: ultimo giorno col vecchio orologio (specifica 5.5)
 CAMBIO_OROLOGIO_A = datetime.date(2025, 2, 3)        # forex: primo giorno col nuovo orologio sicuro (02/02/2025 23:05 e' l'ultimo dubbio)
@@ -123,7 +127,7 @@ def controlla_avvio(riga, cfg, sim):
         return ["riga AVVIO non riconosciuta: " + riga[:80]]
     g = m.groupdict()
     mot = []
-    if g["v"] != VERSIONE_EA:
+    if g["v"] != VERSIONE_EA and g["v"] not in VERSIONI_ARCHIVIO:
         mot.append("versione %s invece di %s" % (g["v"], VERSIONE_EA))
     if g["mod"] != ("AUDIO" if cfg["modalita"] == "0" else "EMA200"):
         mot.append("modalita %s" % g["mod"])
@@ -153,6 +157,24 @@ def controlla_avvio(riga, cfg, sim):
     if not g["descr"].startswith(dat):
         mot.append("descrizione unita '%s' non comincia per '%s'" % (g["descr"], dat))
     return mot
+
+
+def senza_troncate(righe):
+    """classe 1173: MT5 scrive la stessa riga Print in DUE log e una puo' essere TRONCATA (a 489 caratteri nella diagnosi del 07/10).
+    Una riga che e' PREFISSO PROPRIO di un'altra e' la sua copia troncata, non una riga diversa: si tiene la piu' lunga. Le copie identiche
+    restano una. L'ordine delle righe tenute e' quello del file."""
+    pulite = [r.rstrip() for r in righe]
+    lunghe = sorted(set(pulite), key=len, reverse=True)
+    tenute = set()
+    for r in lunghe:
+        if not any(len(x) > len(r) and x.startswith(r) for x in tenute):
+            tenute.add(r)
+    out, viste = [], set()
+    for r in pulite:
+        if r in tenute and r not in viste:
+            out.append(r)
+            viste.add(r)
+    return out
 
 
 def verdetto_adx(t, e, w):
@@ -375,10 +397,10 @@ def carica(sorgenti, prova_txt=None):
                 out["problemi"].append("MANIFEST: (%s, %s) non e' nei blocchi @F0 del file prova" % (m["simbolo"], m["config"]))
                 continue
             rec = {"manifest": m, "sim": sim, "cfg": cfg, "sorgente": s.percorso, "righe": None, "limiti": None, "calc": None, "adx": None, "avvio_motivi": None, "csv_sha": None,
-                   "stato": m["stato"], "problemi": []}
+                   "conta_sha": None, "versione": None, "stato": m["stato"], "problemi": []}
             tag = "%s_%s" % (m["simbolo"], m["config"])
             logn = "log/EA_%s.txt" % tag
-            righe_log = testo(s.leggi(logn)).splitlines() if s.ha(logn) else []
+            righe_log = senza_troncate(testo(s.leggi(logn)).splitlines()) if s.ha(logn) else []
             if not righe_log and m["stato"].startswith("OK"):
                 rec["problemi"].append("stato OK nel MANIFEST ma log dell'EA assente")
             avvi = [r for r in righe_log if "[NatCla] AVVIO v" in r]
@@ -388,6 +410,8 @@ def carica(sorgenti, prova_txt=None):
                 else:
                     mot = controlla_avvio(avvi[0].split("[NatCla] ", 1)[1], cfg, sim)
                     rec["avvio_motivi"] = mot
+                    mv_ = RE_AVVIO.search(avvi[0])
+                    rec["versione"] = mv_.group("v") if mv_ else None
                     for x in mot:
                         rec["problemi"].append("AVVIO: " + x)
                 ver = leggi_verifica(righe_log)
@@ -406,6 +430,8 @@ def carica(sorgenti, prova_txt=None):
                 else:
                     b = s.leggi(cn)
                     rec["csv_sha"] = hashlib.sha256(b).hexdigest()
+                    # determinismo SENZA la riga #AVVIO (porta la versione dell'EA: v1.04 e v1.05 la scrivono diversa, il resto del CSV no)
+                    rec["conta_sha"] = hashlib.sha256("\n".join(l for l in testo(b).splitlines() if not l.startswith("#AVVIO")).encode("ascii", "replace")).hexdigest()
                     righe, limiti, header = leggi_csv(b)
                     rec["righe"] = righe
                     rec["limiti"] = limiti
@@ -461,9 +487,20 @@ def riepilogo(dati, righe_out):
             mdn, statistics.mean(durate), min(durate), max(durate), 216 * mdn / 3600.0, 216 * statistics.mean(durate) / 3600.0))
     # ---- determinismo (stessa passata in due sorgenti)
     for chiave, lst in sorted(runs.items()):
-        shas = [r["csv_sha"] for r in lst if r["csv_sha"]]
+        shas = [r["conta_sha"] for r in lst if r["conta_sha"]]
         if len(shas) > 1:
-            P("DETERMINISMO %s/%s: %d corse, CSV %s" % (chiave[0], chiave[1], len(shas), "IDENTICI" if len(set(shas)) == 1 else "DIVERSI: il conto non e' riproducibile, F0 non vale"))
+            vers = sorted(set(r["versione"] or "?" for r in lst if r["conta_sha"]))
+            P("DETERMINISMO %s/%s: %d corse%s, CSV (senza la riga #AVVIO) %s" % (chiave[0], chiave[1], len(shas),
+              (" con EA " + " e ".join("v" + v for v in vers) + ": misura anche che la v1.05 non cambia le righe CONTA dove la v1.04 funzionava") if len(vers) > 1 else "",
+              "IDENTICI" if len(set(shas)) == 1 else "DIVERSI: il conto non e' riproducibile, F0 non vale"))
+    vconta = {}
+    for r in tutte:
+        if r["versione"]:
+            vconta[r["versione"]] = vconta.get(r["versione"], 0) + 1
+    if vconta:
+        P("VERSIONI DELL'EA nelle righe AVVIO: %s%s" % (", ".join("v%s x %d" % kv for kv in sorted(vconta.items())),
+          ("   (v%s = ARCHIVIO, lotti girati prima del rimedio v%s: letti, ma per gli INDICI vale solo la v%s)" % ("/".join(VERSIONI_ARCHIVIO), VERSIONE_EA, VERSIONE_EA))
+          if any(v in VERSIONI_ARCHIVIO for v in vconta) else ""))
     # ---- VERIFICA ADX
     P("")
     P("-" * 110)
@@ -670,9 +707,9 @@ def riga_conta(barra, linea, nep, nuovo, ctx_arm, ctx_tocco, adx, incl, lv, spre
     return ";".join(c)
 
 
-def csv_finto(piano, u, spread, lv0, anno_inizio=2024, limiti=(1, 1, 2, 0), spread_alt=None):
+def csv_finto(piano, u, spread, lv0, anno_inizio=2024, limiti=(1, 1, 2, 0), spread_alt=None, versione=VERSIONE_EA):
     """piano: {linea: lista di episodi (n_barre_di_tocco, nep, ctx_arm, ctx_tocco, adx, incl)}. Gli episodi sono distribuiti su barre diverse in ordine cronologico."""
-    righe = ["#AVVIO v1.04 finto", "#cfg;TocchiMax;%d / %d / %d / EMA %d (0 = illimitato)   [FONTE]" % limiti]
+    righe = ["#AVVIO v%s finto" % versione, "#cfg;TocchiMax;%d / %d / %d / EMA %d (0 = illimitato)   [FONTE]" % limiti]
     righe += ["#cfg;x;y;z"] * 25
     righe.append(INTEST)
     t = datetime.datetime(anno_inizio, 7, 8, 10, 0)
@@ -689,7 +726,7 @@ def csv_finto(piano, u, spread, lv0, anno_inizio=2024, limiti=(1, 1, 2, 0), spre
     return ("\n".join(righe) + "\n").encode("ascii")
 
 
-def log_finto(sim, cfg, barra_verifica="2024.07.08 10:00", adx_t=21.34, adx_e=21.30, adx_w=18.10, chi="formula MetaQuotes (DI per barra, media esponenziale 2/(n+1))", u=None, versione="1.04", sc="SI",
+def log_finto(sim, cfg, barra_verifica="2024.07.08 10:00", adx_t=21.34, adx_e=21.30, adx_w=18.10, chi="formula MetaQuotes (DI per barra, media esponenziale 2/(n+1))", u=None, versione=VERSIONE_EA, sc="SI",
               modalita=None, descr=None):
     u = u if u is not None else sim["u"]
     mod = modalita or ("AUDIO" if cfg["modalita"] == "0" else "EMA200")
@@ -734,7 +771,8 @@ def autotest():
         esiti.append((nome, bool(cond), dettaglio))
 
     # ---- il file prova letto bene
-    chk("blocchi: 6 configurazioni, 36 simboli, 5 lotti", len(bl["config"]) == 6 and len(bl["simboli"]) == 36 and len(bl["lotti"]) == 5)
+    chk("blocchi: 6 configurazioni, 36 simboli, 6 lotti (C0 = verifica del rimedio v1.05)", len(bl["config"]) == 6 and len(bl["simboli"]) == 36 and len(bl["lotti"]) == 6 and
+        bl["lotti"]["C0"]["simboli"] == "U30USD,D30EUR" and bl["lotti"]["C0"]["configs"] == "AUDIO_H1,M2_H1")
     chk("lotti A-D coprono i 36 simboli una volta sola", sorted(s for n in "ABCD" for s in bl["lotti"][n]["simboli"].split(",")) == sorted(bl["simboli"]))
     chk("magic delle configurazioni = 7786 + 10*modalita + cifraTF", all(int(c["magic"]) == 778600 + 10 * int(c["modalita"]) + {"16385": 1, "16388": 4, "16396": 2, "16408": 8}[c["tf"]] for c in bl["config"].values()))
 
@@ -771,6 +809,23 @@ def autotest():
         assert a in giusta, a
         chk("AVVIO cambiato (%s) -> almeno un motivo" % nome, controlla_avvio(giusta.replace(a, b), cfg_h1, sim_eur) != [])
     chk("AVVIO illeggibile -> motivo", controlla_avvio("AVVIO v1.04 ma il resto no", cfg_h1, sim_eur) != [])
+    # ---- v1.05: versione attesa 1.05; la 1.04 si legge come ARCHIVIO (lotti girati prima del rimedio); qualunque altra e' un motivo
+    chk("AVVIO v1.05 (versione attesa) senza motivi", VERSIONE_EA == "1.05" and controlla_avvio(log_finto(sim_eur, cfg_h1, versione="1.05").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur) == [])
+    chk("AVVIO v1.04 letta come ARCHIVIO (nessun motivo), v1.06 rifiutata",
+        controlla_avvio(log_finto(sim_eur, cfg_h1, versione="1.04").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur) == [] and
+        any("versione" in m for m in controlla_avvio(log_finto(sim_eur, cfg_h1, versione="1.06").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur)))
+    # ---- classe 1173: la stessa riga in due log, una TRONCATA -> una sola; due righe DIVERSE (non prefisso) restano due
+    lf = log_finto(sim_xau, cfg_h1).splitlines()
+    avv_ok, ver_ok = lf[1], lf[2]
+    doppio = [lf[0], avv_ok[:300], ver_ok, avv_ok, ver_ok[:len(ver_ok) - 20], lf[3]]
+    st = senza_troncate(doppio)
+    chk("1173: AVVIO intero + copia troncata a 300 caratteri -> UNA riga AVVIO, quella intera", [r for r in st if "AVVIO v" in r] == [avv_ok])
+    chk("1173: VERIFICA ADX intera + copia troncata dentro la frase finale -> letta (una sola)", leggi_verifica(st) is not None and leggi_verifica(doppio) is None)
+    altra = avv_ok.replace("magic 778601", "magic 778602")
+    altra2 = avv_ok.replace("magic 778601", "magic 7786012")       # piu' LUNGA, stesso inizio, ma la corta NON ne e' prefisso
+    chk("1173 CONTRO-ESEMPIO: due AVVIO diverse (stessa lunghezza, o piu' lunga con lo stesso inizio ma senza essere prefisso) restano DUE",
+        len([r for r in senza_troncate([avv_ok, altra]) if "AVVIO v" in r]) == 2 and len([r for r in senza_troncate([avv_ok, altra2]) if "AVVIO v" in r]) == 2)
+    chk("1173: copie IDENTICHE restano una, l'ordine del file e' tenuto", senza_troncate(["b", "a", "b", "c"]) == ["b", "a", "c"])
     cfg_m2 = bl["config"]["M2_H1"]
     chk("AVVIO M2_H1: linee E200, ADX spento", controlla_avvio(log_finto(sim_eur, cfg_m2).splitlines()[1].split("[NatCla] ", 1)[1], cfg_m2, sim_eur) == [])
     chk("AVVIO forex servito come CFD (descrizione con parentesi) riconosciuto", controlla_avvio(log_finto(sim_eur, cfg_h1, descr="AUTO_CLASSE forex (valute base/profitto): pip").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur) == [])
@@ -920,6 +975,31 @@ def autotest():
         out3 = []
         riepilogo(d3, out3)
         chk("determinismo: CSV DIVERSI -> il lettore lo dice", any("DETERMINISMO XAUUSD/AUDIO_H1" in x and "DIVERSI" in x for x in out3))
+        # v1.05: la stessa passata girata con la v1.04 (PILOTA, archivio) e con la v1.05 (lotto C): CSV che differiscono SOLO nella riga #AVVIO
+        zp8 = os.path.join(tmp, "NATCLA_F0_PILOTA_V104.zip")
+        csv104 = csv_finto(piano, u=1.0, spread=0.25, lv0=2400.0, versione="1.04")
+        costruisci_zip(zp8, prova, [dict(lotto="PILOTA", sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=csv104, log_txt=log_finto(sim_xau, cfg_h1, versione="1.04"), righe=len(righe), durata=33)])
+        d8 = carica([Sorgente(zp8), Sorgente(zp)])
+        out8 = []
+        riepilogo(d8, out8)
+        r8 = d8["runs"][("XAUUSD", "AUDIO_H1")]
+        chk("v1.04 (archivio) contro v1.05, righe CONTA uguali: CSV interi DIVERSI (riga #AVVIO) ma DETERMINISMO IDENTICI, con le due versioni dichiarate",
+            csv104 != csvb and len(set(x["csv_sha"] for x in r8)) == 2 and all(x["stato"].startswith("OK") for x in r8) and
+            any("DETERMINISMO XAUUSD/AUDIO_H1" in x and "IDENTICI" in x and "v1.04 e v1.05" in x for x in out8), [x for x in out8 if "DETERMINISMO" in x])
+        chk("riepilogo: le passate v1.04 sono contate e marcate come ARCHIVIO", any("VERSIONI DELL'EA" in x and "v1.04 x 1" in x and "ARCHIVIO" in x for x in out8))
+        zp9 = os.path.join(tmp, "NATCLA_F0_C_V105_DIVERSO.zip")
+        costruisci_zip(zp9, prova, [dict(lotto="C", sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=csv_diverso, log_txt=log_finto(sim_xau, cfg_h1), righe=15, durata=55)])
+        out9 = []
+        riepilogo(carica([Sorgente(zp8), Sorgente(zp9)]), out9)
+        chk("CONTRO-ESEMPIO: v1.04 contro v1.05 con righe CONTA DIVERSE -> DIVERSI (la riga #AVVIO tolta non nasconde una differenza vera)",
+            any("DETERMINISMO XAUUSD/AUDIO_H1" in x and "DIVERSI" in x for x in out9))
+        # classe 1173 dentro la lettura vera: il log della passata ha la riga AVVIO e la VERIFICA ADX due volte, una TRONCATA
+        lf2 = log_finto(sim_xau, cfg_h1).splitlines()
+        log_doppio = "\r\n".join(lf2 + [lf2[1][:300], lf2[2][:len(lf2[2]) - 15]]) + "\r\n"
+        zp10 = os.path.join(tmp, "NATCLA_F0_TRONCATE.zip")
+        costruisci_zip(zp10, prova, [dict(sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=csvb, log_txt=log_doppio, righe=len(righe))])
+        r10 = carica([Sorgente(zp10)])["runs"][("XAUUSD", "AUDIO_H1")][0]
+        chk("1173 nella lettura: log con AVVIO e VERIFICA ADX ripetute TRONCATE -> passata OK (una AVVIO, una VERIFICA)", r10["stato"].startswith("OK") and r10["adx"] is not None, str(r10["problemi"]))
         # MANIFEST che dice OK ma il CSV manca nello zip
         zp4 = os.path.join(tmp, "NATCLA_F0_X.zip")
         costruisci_zip(zp4, prova, [dict(sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=None, log_txt=log_finto(sim_xau, cfg_h1), righe=10)])

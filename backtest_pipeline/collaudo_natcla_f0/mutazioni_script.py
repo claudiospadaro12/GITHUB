@@ -88,6 +88,35 @@ def sc_rc3(r):
     return T.rc_di(r["p"]) == "3"
 
 
+def sc_finestra_letta(r):
+    z = T.zip_di(r["c"])
+    m = T.manifest(z) if z else []
+    return len(m) == 8 and all(x["stato"] == "OK" and x["finestra"] != "non letta" for x in m)
+
+
+def sc_ex5_vecchio(r):
+    return sc_si_ferma(r) and "vecchio .ex5 non si cancella" in (r["p"].stdout + r["p"].stderr)
+
+
+def sc_ok_una(r):
+    z = T.zip_di(r["c"])
+    m = T.manifest(z) if z else []
+    return T.rc_di(r["p"]) == "0" and len(m) == 8 and all(x["stato"] == "OK" for x in m)
+
+
+def sc_c0_zero(r):
+    z = T.zip_di(r["c"], "C0")
+    m = T.manifest(z) if z else []
+    uno = [x for x in m if x["simbolo"] == "U30USD" and x["config"] == "AUDIO_H1"]
+    return len(m) == 4 and len(uno) == 1 and uno[0]["stato"] == "KO" and "ZERO righe CONTA" in uno[0]["motivi"] and T.rc_di(r["p"]) == "3" and "NON SUPERATA" in r["p"].stdout
+
+
+def sc_c0_ok(r):
+    z = T.zip_di(r["c"], "C0")
+    m = T.manifest(z) if z else []
+    return len(m) == 4 and all(x["stato"] == "OK" for x in m) and T.rc_di(r["p"]) == "0" and "SUPERATA su 4 passate su 4" in r["p"].stdout
+
+
 TF_ALTI = lambda t: t.replace("simboli=EURUSD,GBPUSD,XAUUSD,U30USD configs=AUDIO_H1,M2_H1", "simboli=EURUSD configs=AUDIO_H4,AUDIO_D1")
 SOLO1 = lambda t: t.replace("simboli=EURUSD,GBPUSD,XAUUSD,U30USD configs=AUDIO_H1,M2_H1", "simboli=EURUSD,GBPUSD configs=AUDIO_H1")
 TETTO0 = lambda t: t.replace("@F0-LOTTO nome=PILOTA tetto_min=40", "@F0-LOTTO nome=PILOTA tetto_min=0")
@@ -124,6 +153,20 @@ MUTANTI = [
     ("D28 .ex5 non atteso (compilazione fallita in silenzio: nessun .ex5, log con 0 errori)", "if(-not (Test-Path -LiteralPath $ex5)){\n  try{", "if($false){\n  try{", dict(scen=dict(compile_fallisce=True, compile_silenzioso=True)), sc_ex5),
     ("D30 log con errori ignorato (.ex5 c'e' ma il log dice errori)", "if($compErr -gt 0){\n", "if($false){\n", dict(scen=dict(compile_errori_con_ex5=True)), sc_si_ferma),
     ("D29 AVVIO rifiutato dall'EA non visto", "if($rr -match 'AVVIO RIFIUTATO|ERRORE|INIT_FAILED|FALLITA'){", "if($false){", dict(scen=dict(falli={"EURUSD_AUDIO_H1": "rifiutato"})), sc_ko_una("AVVIO RIFIUTATO")),
+    # --- 07/10 notte: v1.05, classe 1168 (compilazione), finestra dalla riga vera, classe 1173 (righe troncate), lotto C0
+    ("D31 1168: .ex5 vecchio non controllato dopo la cancellazione", "if(Test-Path -LiteralPath $ex5){ FermaCompilazione 'il vecchio", "if($false){ FermaCompilazione 'il vecchio",
+     dict(ex5_vecchio=True, ex5_bloccato=True), sc_ex5_vecchio),
+    ("D32 1168: riga del risultato letta SOLO in inglese", "'(\\d+)\\s+(?:errors?|errori|errore),\\s*(\\d+)\\s+(?:warnings?|avvisi|avviso)'", "'(\\d+)\\s+errors?,\\s*(\\d+)\\s+warnings?'",
+     dict(scen=dict(compile_italiano=True, compile_errori_con_ex5=True, nerr=1)), sc_si_ferma),
+    ("D33 finestra: la regex non cerca piu' la riga VERA ('testing of')", r":\s+testing of Experts\\' + [regex]", r":\s+on Experts\\' + [regex]",
+     {}, sc_finestra_letta),
+    ("D34 1173: copie troncate non tolte (VERIFICA ADX troncata in un secondo log)", "foreach($chiave in @(SenzaTroncate @($nat.Keys))){", "foreach($chiave in @($nat.Keys)){",
+     dict(scen=dict(falli={"EURUSD_AUDIO_H1": "verifica_troncata"})), sc_ok_una),
+    ("D35 1173: tolte anche righe che NON sono prefisso", "if($t.Length -gt $c.Length -and $t.StartsWith($c, [StringComparison]::Ordinal)){", "if($t.Length -gt $c.Length -and $t.Substring(0, 20) -eq $c.Substring(0, 20)){",
+     dict(scen=dict(falli={"EURUSD_AUDIO_H1": "doppio_avvio_lungo"})), sc_ko_una("PIU righe AVVIO")),
+    ("D36 C0: zero righe CONTA non controllate", "if($Lotto -eq 'C0' -and $cc.Righe -le 0){", "if($false){", dict(lotto="C0", scen=dict(falli={"U30USD_AUDIO_H1": "conta_zero"})), sc_c0_zero),
+    ("D37 C0: lotto rifiutato dal parametro", "'^(PILOTA|A|B|C|D|C0)$'", "'^(PILOTA|A|B|C|D)$'", dict(lotto="C0"), sc_c0_ok),
+    ("D38 versione attesa rimasta 1.04", "$VERSIONE_ATTESA = '1.05'", "$VERSIONE_ATTESA = '1.04'", {}, sc_pilota_ok),
 ]
 
 

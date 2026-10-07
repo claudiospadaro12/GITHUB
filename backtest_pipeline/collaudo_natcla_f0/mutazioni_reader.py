@@ -47,7 +47,7 @@ MUTANTI = [
     ("M31 AVVIO: unita non controllata", 'if abs(float(g["u"]) - float(sim["u"])) > 1e-9:', "if False:"),
     ("M32 AVVIO: tipo ADX non controllato", 'if g["tipo"] != "iADX MetaQuotes":', "if False:"),
     ("M33 AVVIO: ADX max/periodo non controllati", 'if float(g["max"]) != 20.0 or int(g["per"]) != 14:', "if False:"),
-    ("M34 AVVIO: versione non controllata", 'if g["v"] != VERSIONE_EA:', "if False:"),
+    ("M34 AVVIO: versione non controllata", 'if g["v"] != VERSIONE_EA and g["v"] not in VERSIONI_ARCHIVIO:', "if False:"),
     ("M35 VERIFICA ADX: verdetto non confrontato con i numeri", "stampato == ric or adx_al_bordo(stampato, t, e, w)", "True"),
     ("M36 VERIFICA ADX: verdetto 'Wilder' accettato", 'if ver[1] != "MetaQuotes":', "if False:"),
     ("M37 righe CONTA del MANIFEST non confrontate col CSV", 'if int(m["righe_conta"]) != len(righe):', "if False:"),
@@ -62,6 +62,16 @@ MUTANTI = [
     ("M46 cartella: backslash dei nomi (Compress-Archive) NON normalizzato", '.replace(os.sep, "/").replace("\\\\", "/")', '.replace(os.sep, "/")'),
     ("M47 cartella: due file diversi con lo stesso nome normalizzato accettati in silenzio",
      'if open(self.reali[nome], "rb").read() != open(vero, "rb").read():', 'if False:'),
+    # --- v1.05 (07/10 notte): versione attesa 1.05 con l'archivio 1.04 marcato; classe 1173 (righe troncate); determinismo senza la riga #AVVIO
+    ("M48 1173: righe troncate NON tolte nella lettura", "righe_log = senza_troncate(testo(s.leggi(logn)).splitlines()) if s.ha(logn) else []",
+     "righe_log = testo(s.leggi(logn)).splitlines() if s.ha(logn) else []"),
+    ("M49 1173: tolte anche righe che NON sono prefisso (basta l'inizio uguale)", "if not any(len(x) > len(r) and x.startswith(r) for x in tenute):",
+     "if not any(len(x) > len(r) and x[:40] == r[:40] for x in tenute):"),
+    ("M50 archivio v1.04 letto ma NON marcato nel riepilogo", "if any(v in VERSIONI_ARCHIVIO for v in vconta) else \"\")", "if False else \"\")"),
+    ("M51 determinismo di nuovo sul CSV intero (riga #AVVIO compresa)", 'shas = [r["conta_sha"] for r in lst if r["conta_sha"]]', 'shas = [r["csv_sha"] for r in lst if r["conta_sha"]]'),
+    ("M52 riga #AVVIO non tolta dall'impronta del determinismo", 'if not l.startswith("#AVVIO")).encode', 'if True).encode'),
+    ("M53 archivio vuoto: la v1.04 rifiutata", 'VERSIONI_ARCHIVIO = ("1.04",)', "VERSIONI_ARCHIVIO = ()"),
+    ("M54 versione attesa rimasta 1.04", 'VERSIONE_EA = "1.05"', 'VERSIONE_EA = "1.04"'),
 ]
 
 

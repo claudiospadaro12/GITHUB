@@ -352,10 +352,10 @@ function FermaCompilazione($perche){
   } catch { Write-Host ('   zip della compilazione NON creato (' + $_.Exception.Message + '): il log e in ' + $logC) -ForegroundColor Red }
   throw ('COMPILAZIONE FALLITA: ' + $perche + ' Nessuna passata e partita. Manda lo zip NATCLA_F0_' + $Lotto + '_COMPILAZIONE_FALLITA.zip dal Desktop.')
 }
+Remove-Item -LiteralPath $logC -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
 # classe 1168 (i): un .ex5 VECCHIO che resta sul disco passerebbe per il compilato nuovo (v1.04 al posto della v1.05)
 if(Test-Path -LiteralPath $ex5){ FermaCompilazione 'il vecchio .ex5 non si cancella: un compilato vecchio passerebbe per nuovo.' }
-Remove-Item -LiteralPath $logC -Force -ErrorAction SilentlyContinue
 $pMe = Start-Process -FilePath $MetaEditor -ArgumentList @(('/compile:' + (Join-Path $MqlExp ($EXPERT + '.mq5'))), ('/log:' + $logC)) -PassThru
 $attC = 0
 while(-not (Test-Path -LiteralPath $ex5) -and $attC -lt 60){ Start-Sleep -Seconds 2; $attC = $attC + 1 }
@@ -364,20 +364,24 @@ if(-not (Test-Path -LiteralPath $ex5)){
   if(Test-Path -LiteralPath $logC){ (Leggi-Condiviso $logC) -split "`r?`n" | Select-Object -Last 20 | ForEach-Object { Write-Host ('     ' + $_) -ForegroundColor DarkYellow } }
   FermaCompilazione ($EXPERT + '.ex5 NON prodotto dopo 120 secondi. Senza il compilato il giro non parte: il log di MetaEditor e qui sopra.')
 }
+# classe 1168 (ii): si aspetta che MetaEditor ESCA prima di leggere il log (al massimo 60 secondi)
+$attE = 0
+while(-not $pMe.HasExited -and $attE -lt 30){ Start-Sleep -Seconds 2; $attE = $attE + 1 }
 Start-Sleep -Seconds 3
 $testoLogC = ''
 if(Test-Path -LiteralPath $logC){ $testoLogC = Leggi-Condiviso $logC }
 $compErr = -1; $compWarn = -1
-$mRes = [regex]::Match($testoLogC, '(\d+)\s+errors?,\s*(\d+)\s+warnings?')
+# classe 1168 (iii): la riga del risultato in inglese e in italiano, anche al singolare
+$mRes = [regex]::Match($testoLogC, '(\d+)\s+(?:errors?|errori|errore),\s*(\d+)\s+(?:warnings?|avvisi|avviso)')
 if($mRes.Success){ $compErr = [int]$mRes.Groups[1].Value; $compWarn = [int]$mRes.Groups[2].Value }
 if($compErr -gt 0){
-  ($testoLogC -split "`r?`n") | Where-Object { $_ -match '(?i)error' } | Select-Object -First 20 | ForEach-Object { Write-Host ('     ' + $_) -ForegroundColor DarkYellow }
+  ($testoLogC -split "`r?`n") | Where-Object { $_ -match '(?i)error|errori' } | Select-Object -First 20 | ForEach-Object { Write-Host ('     ' + $_) -ForegroundColor DarkYellow }
   FermaCompilazione ('MetaEditor ha prodotto l.ex5 ma il log dice ' + $compErr + ' errori: non si usa un compilato dubbio.')
 }
 Dico ('compilato: ' + $ex5 + '   SHA256 .ex5 ' + (Get-FileHash -LiteralPath $ex5 -Algorithm SHA256).Hash.Substring(0,12)) 'Green'
 if($compErr -eq 0){ Dico ('log di compilazione: 0 errori, ' + $compWarn + ' avvisi') $(if($compWarn -eq 0){'Green'}else{'Yellow'}) }
-else { Dico 'log di compilazione: riga "Result: N errors, M warnings" NON letta (formato diverso?): il verdetto e l esistenza dell .ex5' 'Yellow' }
-foreach($lw in @(($testoLogC -split "`r?`n") | Where-Object { $_ -match 'warning' -and $_ -notmatch '\d+ errors?,\s*\d+ warnings?' } | Select-Object -First 12)){ Dico ('   ' + $lw) 'Yellow' }
+else { Dico 'log di compilazione: riga del risultato NON letta (formato diverso?): il verdetto e l esistenza dell .ex5 appena prodotto (quello vecchio e stato cancellato prima)' 'Yellow' }
+foreach($lw in @(($testoLogC -split "`r?`n") | Where-Object { $_ -match '(?i)warning|avviso|avvisi' -and $_ -notmatch '\d+\s+(?:errors?|errori|errore),' } | Select-Object -First 12)){ Dico ('   ' + $lw) 'Yellow' }
 
 # ---------------------------------------------------------------------
 #  2. LE PASSATE SINGOLE (Optimization=0, Model=1, InpSoloConta=true)
@@ -401,7 +405,9 @@ $reAvvio = New-Object Text.RegularExpressions.Regex("\[NatCla\]\s+(AVVIO v(?<v>[
 $reVerifica = New-Object Text.RegularExpressions.Regex('\[NatCla\]\s+(VERIFICA ADX barra (?<barra>\d{4}\.\d\d\.\d\d \d\d:\d\d) .*il terminale coincide con: (?<chi>.*))')
 $reNatCla = New-Object Text.RegularExpressions.Regex('\[NatCla\]\s+(.*)')
 $reImbuto = New-Object Text.RegularExpressions.Regex('\[NATCLA-IMBUTO\]')
-$reFin = New-Object Text.RegularExpressions.Regex(('Tester\s+Experts\\' + [regex]::Escape($EXPERT) + '\.ex5 on (?<sim>[A-Za-z0-9_.#-]+),(?<tf>[A-Za-z0-9]+) from (?<da>\d{4}\.\d\d\.\d\d) (?<ha>\d\d:\d\d) to (?<a>\d{4}\.\d\d\.\d\d) (?<hb>\d\d:\d\d)'), [Text.RegularExpressions.RegexOptions]::IgnoreCase)
+# DEVIAZIONE 13: la riga VERA del giornale (log della diagnosi NATCLA_DIAG_U30, 07/10): 'Tester<TAB>U30USD,H1 (BCMMarkets-Server): testing of
+# Experts\EA_NatCla_Diag.ex5 from 2024.09.26 00:00 to 2026.06.30 00:00' e la gemella 'U30USD,H1: testing of ... started with inputs:' (stessa chiave).
+$reFin = New-Object Text.RegularExpressions.Regex(('Tester\s+(?<sim>[A-Za-z0-9_.#-]+),(?<tf>[A-Za-z0-9]+)(?:\s+\([^)]*\))?:\s+testing of Experts\\' + [regex]::Escape($EXPERT) + '\.ex5 from (?<da>\d{4}\.\d\d\.\d\d) (?<ha>\d\d:\d\d) to (?<a>\d{4}\.\d\d\.\d\d) (?<hb>\d\d:\d\d)'), [Text.RegularExpressions.RegexOptions]::IgnoreCase)
 
 # DEVIAZIONE 11: la scoperta ricorsiva dei .log (come nella passata NAS) si fa UNA VOLTA a inizio lotto e ricorda le CARTELLE; poi a ogni passata si
 # rileggono solo quelle (piu' i percorsi noti degli agenti): una ricorsione su tutto %APPDATA%\MetaQuotes, con le cartelle 'bases' dei tick, costerebbe
@@ -441,6 +447,17 @@ function LeggiCoda($path, $offset){
     $sr = New-Object IO.StreamReader($fs, $enc, $false)
     return $sr.ReadToEnd()
   } finally { $fs.Close() }
+}
+# classe 1173: fra le righe [NatCla] di una passata, quelle che sono PREFISSO di una piu' lunga sono copie TRONCATE (MT5 scrive la stessa
+# riga in due log e una la tronca, a 489 caratteri nella diagnosi del 07/10): si tengono solo le piu' lunghe, nell'ordine dalla piu' lunga.
+function SenzaTroncate($chiavi){
+  $tenute = New-Object System.Collections.ArrayList
+  foreach($c in @($chiavi | Sort-Object -Property Length -Descending)){
+    $tronca = $false
+    foreach($t in $tenute){ if($t.Length -gt $c.Length -and $t.StartsWith($c, [StringComparison]::Ordinal)){ $tronca = $true; break } }
+    if(-not $tronca){ [void]$tenute.Add($c) }
+  }
+  return $tenute.ToArray()
 }
 # i controlli dell'AVVIO, uno per uno, contro la configurazione e il simbolo della passata
 function ControllaAvvio($ma, $cfg, $sim){
@@ -542,7 +559,7 @@ foreach($ru in $runs){
   $dur = ((Get-Date) - $tRun).TotalSeconds
 
   # --- lettura delle sole righe scritte DOPO la fotografia
-  $avvi = @{}; $righeEA = @{}; $ver = @{}; $fin = @{}; $evTester = @{}; $nImb = 0; $nImbRotte = 0; $illeggibili = 0
+  $avvi = @{}; $righeEA = @{}; $ver = @{}; $fin = @{}; $evTester = @{}; $nat = @{}; $nImb = 0; $nImbRotte = 0; $illeggibili = 0
   foreach($f in @(ElencoLog)){
     $off = 0; if($foto.ContainsKey($f.FullName)){ $off = [long]$foto[$f.FullName] }
     if($f.Length -le $off){ continue }
@@ -557,13 +574,18 @@ foreach($ru in $runs){
         if($evTester.Count -lt 30 -and $riga -match "`tTester`t" -and $riga -match '(?i)history|no data|cannot|failed|error|stopped|not found|disconnect|authoriz|synchron|download'){ $evTester[$riga.Trim()] = $true }
         continue
       }
-      $chiave = $mn.Groups[1].Value.TrimEnd()
-      $ma = $reAvvio.Match($riga)
-      if($ma.Success){ $avvi[$chiave] = $ma; continue }
-      $mv = $reVerifica.Match($riga)
-      if($mv.Success){ $ver[$chiave] = $mv; continue }
-      $righeEA[$chiave] = $true
+      $nat[$mn.Groups[1].Value.TrimEnd()] = $riga
     }
+  }
+  # DEVIAZIONE 14 (classe 1173): una riga [NatCla] che e' PREFISSO di un'altra e' la sua copia TRONCATA in un secondo log, non una riga
+  # diversa: si tiene la piu' lunga, POI si contano AVVIO e VERIFICA ADX (prima, due copie della stessa riga davano 'PIU righe distinte').
+  foreach($chiave in @(SenzaTroncate @($nat.Keys))){
+    $riga = $nat[$chiave]
+    $ma = $reAvvio.Match($riga)
+    if($ma.Success){ $avvi[$chiave] = $ma; continue }
+    $mv = $reVerifica.Match($riga)
+    if($mv.Success){ $ver[$chiave] = $mv; continue }
+    $righeEA[$chiave] = $true
   }
   $motivi = New-Object System.Collections.ArrayList
   if($timeout){ [void]$motivi.Add('timeout di ' + $TimeoutRunMin + ' minuti') }
@@ -605,6 +627,8 @@ foreach($ru in $runs){
       if(-not $cc.Header){ [void]$motivi.Add('CSV senza intestazione tipo;barra;linea;lato') }
       if(-not $cc.Avvio){ [void]$motivi.Add('CSV senza la riga #AVVIO in testa') }
       if($cc.Cfg -lt 20){ [void]$motivi.Add('CSV con solo ' + $cc.Cfg + ' righe #cfg (attese >= 20)') }
+      # DEVIAZIONE 15: il lotto C0 verifica il rimedio v1.05 sugli indici; senza righe CONTA il rimedio NON basta
+      if($Lotto -eq 'C0' -and $cc.Righe -le 0){ [void]$motivi.Add('C0: ZERO righe CONTA nel CSV: il rimedio v1.05 NON basta, il lotto C resta FERMO') }
       Copy-Item -LiteralPath $csvIt.FullName -Destination (Join-Path (Join-Path $Cart 'csv') $nomeCsv) -Force
     }
   }
@@ -644,6 +668,11 @@ $testa = @(
   'Guardian nel tester: FAIL-OPEN (specifica 2.5): irrilevante in SoloConta (nessun ordine).',
   ''
 )
+if($Lotto -eq 'C0'){
+  $testa = $testa + @('LOTTO C0 = VERIFICA DEL RIMEDIO v1.05 (tocco degli handle in CaricaDati). ATTESA SCRITTA PRIMA: su TUTTE le passate AVVIO v1.05, riga VERIFICA ADX stampata',
+    '(formula MetaQuotes) e righe CONTA > 0 nel CSV. Se ANCHE UNA manca, il rimedio NON basta e il lotto C resta FERMO. Data attesa della VERIFICA ADX: il 2024.10.16',
+    '(la barra in cui la diagnosi (a)/(c) e guarita, 302 barre H1 di storia); molto dopo = il tocco funziona ma tardi (da capire, non blocca).', '')
+}
 (($testa + $manifest + @('',
   'COME SI LEGGE: python3 backtest_pipeline/leggi_natcla_f0.py <questo zip o la cartella>. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e la colonna adx_verifica',
   '(deve dire MetaQuotes su tutte: se dice NESSUNA o Wilder nessun numero di ADX si usa); poi la tabella dei setup per linea e simbolo contro le attese scritte nel file prova.',
@@ -655,6 +684,11 @@ Write-Host ('passate OK ' + $nOk + ', KO ' + $nKo + ', NON LANCIATE ' + $nNon + 
 Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
 Write-Host 'FILE ATTESI NELLO ZIP: RIEPILOGO_F0.txt + MANIFEST_F0.csv + il file prova + compile_natcla.log + csv\natcla_setup_<simbolo>_<magic>.csv + log\EA_<simbolo>_<config>.txt + ini\f0_<simbolo>_<config>.ini' -ForegroundColor Gray
 try{ $Mutex.ReleaseMutex() }catch{ }
-if($nKo -eq 0 -and $nNon -eq 0 -and $nOk -eq $runs.Count){ Write-Host 'ESITO F0: TUTTE LE PASSATE OK (rc 0)' -ForegroundColor Green; exit 0 }
+$tutteOk = ($nKo -eq 0 -and $nNon -eq 0 -and $nOk -eq $runs.Count)
+if($Lotto -eq 'C0'){
+  if($tutteOk){ Write-Host ('VERIFICA DEL RIMEDIO v1.05 (lotto C0): SUPERATA su ' + $runs.Count + ' passate su ' + $runs.Count + ' (AVVIO v1.05, VERIFICA ADX MetaQuotes, righe CONTA > 0): il lotto C si puo lanciare.') -ForegroundColor Green }
+  else { Write-Host ('VERIFICA DEL RIMEDIO v1.05 (lotto C0): NON SUPERATA (OK ' + $nOk + ' su ' + $runs.Count + '): il lotto C resta FERMO, si manda lo zip e si legge il MANIFEST.') -ForegroundColor Red }
+}
+if($tutteOk){ Write-Host 'ESITO F0: TUTTE LE PASSATE OK (rc 0)' -ForegroundColor Green; exit 0 }
 Write-Host 'ESITO F0: ALMENO UNA PASSATA KO O NON LANCIATA (rc 3): lo zip esce lo stesso, il MANIFEST dice quali e perche.' -ForegroundColor Red
 exit 3

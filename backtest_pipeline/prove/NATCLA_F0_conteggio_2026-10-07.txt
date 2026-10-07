@@ -65,12 +65,21 @@
 #       del merito: sono le 3 celle dell'asse A6 (specifica F5), fissate qui PRIMA di qualunque P/L. Riferimento: oro H1 HistData 0,34/0,69/1,18 su
 #       TUTTE le barre (popolazione diversa: sui setup ci si aspetta un P50 piu' basso, il prezzo ritraccia verso la linea: [STIMA]).
 #   E4  PILOTA, PER PRIMA (4 simboli x 2 configurazioni, 8 passate): la prima COMPILAZIONE VERA di EA_NatCla (MetaEditor non e' mai stato usato su
-#       questo file) e il primo giro nel tester. Cose da guardare (NATCLA_CODICE_NOTE par. 6): (1) riga AVVIO v1.04 con modalita' giusta, '1 u' giusta
+#       questo file) e il primo giro nel tester. Cose da guardare (NATCLA_CODICE_NOTE par. 6): (1) riga AVVIO v1.04 (ora v1.05) con modalita' giusta, '1 u' giusta
 #       per la classe, 'ADX ACCESO (AUDIO) / spento (EMA200), iADX MetaQuotes', magic 778601/778621, 'solo conta SI'; (2) riga VERIFICA ADX: 'il
 #       terminale coincide con: formula MetaQuotes'. Se dice NESSUNA o Wilder: FERMARSI e non leggere nessun numero di ADX; (3) CSV presente, fresco,
 #       con righe CONTA; (4) zero ordini (l'EA non ne manda in SoloConta); (5) il TEMPO per passata, che sostituisce la stima.
 #       DETERMINISMO GRATIS: le passate del pilota (simbolo, config) si ripetono nei lotti A e C: due corse dello stesso (simbolo, config) devono
 #       dare lo STESSO CSV (Modello 1 e' deterministico): se cambia, il conto non e' riproducibile e F0 non vale.
+#   C0  VERIFICA DEL RIMEDIO v1.05 (07/10 notte, dopo la diagnosi NATCLA_DIAG_U30: report/NATCLA_DIAG_U30_LETTURA_2026-10-07.md). L'EA v1.05
+#       'tocca' hEma200/hAtrN/hAdx con un CopyBuffer di 1 elemento prima dei controlli BarsCalculated di CaricaDati. Lotto C0: U30USD e D30EUR x
+#       AUDIO_H1 e M2_H1 = 4 passate, ~2-3 minuti. ATTESA SCRITTA PRIMA: su TUTTE e 4 riga AVVIO v1.05, riga VERIFICA ADX stampata con 'formula
+#       MetaQuotes' e righe CONTA > 0 nel CSV; la VERIFICA ADX cade il 2024.10.16 (la barra in cui le passate (a) e (c) della diagnosi sono
+#       guarite: 302 barre H1 di storia). IPOTESI ALTERNATIVA (il tester ricalcola solo per copie di PIU' elementi: modello 3 di collaudo_natcla.py):
+#       niente VERIFICA ADX e zero CONTA su tutte e 4, come il pilota con la v1.04. Se ANCHE UNA passata non ha la VERIFICA o ha zero CONTA, il
+#       rimedio NON basta e il lotto C resta FERMO. I lotti PILOTA, A, B, D (girati con la v1.04) NON si rifanno: la v1.05 cambia qualcosa solo
+#       dove la v1.04 restava bloccata (modelli 0 e 2 del collaudo: identiche barra per barra con storia davanti e dal vivo). Controllo gratis:
+#       XAUUSD AUDIO_H1 e M2_H1 sono sia nel PILOTA (v1.04) sia nel lotto C (v1.05): le righe CONTA devono essere IDENTICHE (il lettore lo dice).
 #
 #  TEMPO [STIMA NON AGGANCIATA a un giro a passata singola OHLC di questo EA: lo misura il pilota]
 #   Banda per passata 30-120 s (apertura e chiusura del terminale ~15-30 s + ~3 milioni di tick OHLC; ancore: R88 2,9-33 s/passata OHLC in
@@ -81,7 +90,7 @@
 #
 #  LIMITI DICHIARATI (non coperti da questo file)
 #   - REGIME della finestra (rendimento e ADX medio per simbolo, specifica 5.5): NON e' nel CSV dell'EA. Il lettore stampa solo un PROXY (prezzo della
-#     linea al primo e all'ultimo tocco) etichettato [PROXY]; il numero vero richiede una riga in piu' nell'EA (decisione del cancello: v1.05) o una lettura barre.
+#     linea al primo e all'ultimo tocco) etichettato [PROXY]; il numero vero richiede una riga in piu' nell'EA (NON nella v1.05, che porta SOLO il tocco degli handle) o una lettura barre.
 #   - Barre OHLC M1: il PF/DD di qui non si leggono mai. SPREAD: nel Modello 1 e' quello che il tester assegna (spread CORRENTE al lancio, costante, oppure quello
 #     della barra M1: [NON MISURATO] quale dei due), NON lo spread tick. Il .ini non scrive la riga Spread (come tutti i round di casa). Il lettore stampa min/mediana/max
 #     dello spread per simbolo (costante = il primo caso) e, per gli 8 simboli con spread_vivo (specifica 5.3), il rapporto con quello del campo: il rapporto di costo E2
@@ -139,6 +148,7 @@
 #  @F0-LOTTO nome=B tetto_min=150 simboli=GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY configs=AUDIO_H1,AUDIO_H4,AUDIO_H12,AUDIO_D1,M2_H1,M2_H4
 #  @F0-LOTTO nome=C tetto_min=150 simboli=XAUUSD,D30EUR,U30USD,NASUSD,SPXUSD,200AUD,225JPY,F40EUR,E50EUR,E35EUR,100GBP configs=AUDIO_H1,AUDIO_H4,AUDIO_H12,AUDIO_D1,M2_H1,M2_H4
 #  @F0-LOTTO nome=D tetto_min=60 simboli=XAGUSD,EURJPY,EURCHF configs=AUDIO_H1,AUDIO_H4,AUDIO_H12,AUDIO_D1,M2_H1,M2_H4
+#  @F0-LOTTO nome=C0 tetto_min=15 simboli=U30USD,D30EUR configs=AUDIO_H1,M2_H1
 #
 # ==========================================================================
 

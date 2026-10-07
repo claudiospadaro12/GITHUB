@@ -157,14 +157,18 @@ def verifica(percorso=PROVA, ea=EA):
     if len(set(sim)) != len(sim) or len(sim) != 36:
         pr.append("simboli F0: attesi 36 diversi, trovati %d (%d unici)" % (len(sim), len(set(sim))))
     nomi_lotti = [l["nome"] for l in p["lotti"]]
-    if nomi_lotti != ["PILOTA", "A", "B", "C", "D"]:
-        pr.append("lotti attesi PILOTA,A,B,C,D, trovati %s" % nomi_lotti)
+    if nomi_lotti != ["PILOTA", "A", "B", "C", "D", "C0"]:
+        pr.append("lotti attesi PILOTA,A,B,C,D,C0, trovati %s" % nomi_lotti)
+    # C0 (07/10 notte) = verifica del rimedio v1.05 su due indici: come il PILOTA ripete simboli dei lotti A-D, non entra nella copertura.
+    c0 = [l for l in p["lotti"] if l["nome"] == "C0"]
+    if c0 and (c0[0]["simboli"] != "U30USD,D30EUR" or c0[0]["configs"] != "AUDIO_H1,M2_H1"):
+        pr.append("lotto C0 diverso dalla verifica del rimedio dichiarata (U30USD,D30EUR x AUDIO_H1,M2_H1): %s" % c0[0])
     visti = []
     for l in p["lotti"]:
         for s in l["simboli"].split(","):
             if s not in sim:
                 pr.append("lotto %s: simbolo %s non e' fra i 36" % (l["nome"], s))
-            if l["nome"] != "PILOTA":
+            if l["nome"] not in ("PILOTA", "C0"):
                 visti.append(s)
         for c in l["configs"].split(","):
             if c not in nomi_cfg:

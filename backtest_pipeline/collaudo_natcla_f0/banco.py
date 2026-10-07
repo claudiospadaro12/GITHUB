@@ -31,7 +31,8 @@ def sha(b):
 
 def spec_base(**kw):
     s = dict(macchina="DESKTOP-H4D7CAJ", chr=[{}], mt5_vivo=False, doppio_dati=False, altra_inst=False, pin=PIN, lotto="PILOTA", timeout_min=20, args_extra="", scen={}, muta={}, desktop_vecchio=False,
-             log_vecchio=False, sleep_reale=False, no_exit=False, senza_origin=False, censite=True, sha_override={}, muta_script=None, riga=None, mutex_occupato=False, prova_tetto=None)
+             log_vecchio=False, sleep_reale=False, no_exit=False, senza_origin=False, censite=True, sha_override={}, muta_script=None, riga=None, mutex_occupato=False, prova_tetto=None,
+             ex5_vecchio=False, ex5_bloccato=False)
     s.update(kw)
     return s
 
@@ -65,6 +66,9 @@ def costruisci(base, spec):
             open(os.path.join(ap, dd, "origin.txt"), "wb").write(utf16(inst))
             open(os.path.join(cc, "chart01.chr"), "wb").write(utf16("<chart>\nsymbol=EURUSD\n<window>\n<expert>\nname=QUALUNQUE\n</expert>\n</window>\n</chart>\n"))
             open(os.path.join(ap, dd, "MQL5", "Experts", "QUALUNQUE.ex5"), "wb").write(b"x")
+    if spec["ex5_vecchio"]:
+        # classe 1168: un compilato VECCHIO (v1.04) gia' nella cartella Experts prima del giro
+        open(os.path.join(dati, "MQL5", "Experts", "EA_NatCla.ex5"), "wb").write(b"EX5VECCHIO v1.04")
     cd = os.path.join(dati, "MQL5", "Profiles", "Charts", "Default")
     for i, ch in enumerate(spec["chr"]):
         p = os.path.join(cd, "chart%02d.chr" % (i + 1))
@@ -147,6 +151,8 @@ $PSStyle.OutputRendering = 'PlainText'; $ErrorView = 'NormalView'
 New-PSDrive -Name C -PSProvider FileSystem -Root $env:CDRIVE | Out-Null
 function Start-Sleep { [CmdletBinding()] param([int]$Seconds, [int]$Milliseconds)
   if($env:SLEEP_REALE -eq '1'){ Microsoft.PowerShell.Utility\Start-Sleep -Milliseconds 300 } }
+if($env:EX5_BLOCCATO -eq '1'){ function Remove-Item { [CmdletBinding()] param([string]$LiteralPath, [switch]$Force)
+  if($LiteralPath -notlike '*.ex5'){ Microsoft.PowerShell.Management\Remove-Item -LiteralPath $LiteralPath -Force -ErrorAction SilentlyContinue } } }
 function Start-Process { [CmdletBinding()] param([string]$FilePath, [string[]]$ArgumentList, [switch]$PassThru)
   $env:SIM_ARGS = ($ArgumentList -join ' ')
   $env:SIM_ARGV_JSON = (ConvertTo-Json -InputObject @($ArgumentList) -Compress)
@@ -175,7 +181,8 @@ def esegui(spec, c, srv, scen_dir, timeout=900):
     env.update(COMPUTERNAME=spec["macchina"], USERNAME="Master", USERPROFILE="C:\\Users\\Master", APPDATA="C:\\Users\\Master\\AppData\\Roaming", TEMP=tmp, TMP=tmp,
                SystemRoot="C:\\Windows", POWERSHELL_TELEMETRY_OPTOUT="1", POWERSHELL_UPDATECHECK="Off", CDRIVE=c, HOME=user, SIM_SCEN=scen, SIM_LOG=simlog, SIM_CDRIVE=c,
                SIM_SCRIPT=os.path.join(QD, "sim_mt5.py"), SIM_REPO_BP=os.path.join(REPO, "backtest_pipeline"),
-               SLEEP_REALE="1" if spec["sleep_reale"] else "0", SIM_NOEXIT="1" if spec["no_exit"] else "0", SIM_NOCLOSE="1" if spec.get("no_close") else "0", LOCAL_RAW=srv.base)
+               SLEEP_REALE="1" if spec["sleep_reale"] else "0", SIM_NOEXIT="1" if spec["no_exit"] else "0", SIM_NOCLOSE="1" if spec.get("no_close") else "0", LOCAL_RAW=srv.base,
+               EX5_BLOCCATO="1" if spec["ex5_bloccato"] else "0")
     os.makedirs(simlog, exist_ok=True)
     bindir = os.path.join(scen_dir, "bin"); os.makedirs(bindir, exist_ok=True)
     pid = None

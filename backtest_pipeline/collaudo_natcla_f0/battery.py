@@ -77,6 +77,8 @@ def main():
         chk("S01 zip sul Desktop", z is not None)
         m = manifest(z)
         chk("S01 MANIFEST: 8 passate, tutte OK, ordine simbolo x config", len(m) == 8 and all(x["stato"] == "OK" for x in m) and [(x["simbolo"], x["config"]) for x in m][:4] == [("EURUSD", "AUDIO_H1"), ("EURUSD", "M2_H1"), ("GBPUSD", "AUDIO_H1"), ("GBPUSD", "M2_H1")])
+        chk("S01 FINESTRA letta dalla riga VERA del giornale (formato dei log della diagnosi 07/10) su tutte e 8: forex 2024.07.05, oro 2024.07.10, indici 2024.09.26 (anche con 'start time changed')",
+            [x["finestra"] for x in m] == ["2024.07.05-2026.06.30"] * 4 + ["2024.07.10-2026.06.30"] * 2 + ["2024.09.26-2026.06.30"] * 2, [x["finestra"] for x in m])
         nomi = z.namelist()
         chk("S01 zip: 8 CSV, 8 log, 8 ini, compile log, prova, riepilogo, manifest",
             sum(n.startswith("csv/") for n in nomi) == 8 and sum(n.startswith("log/") for n in nomi) == 8 and sum(n.startswith("ini/") for n in nomi) == 8 and
@@ -125,7 +127,7 @@ def main():
         ferma("S11 SHA256 dell'EA diverso da quello della riga", "SHA256", sha_override={"ea": "0" * 64})
         ferma("S12 SHA256 della prova diverso", "SHA256", sha_override={"prova": "1" * 64})
         ferma("S13 SHA256 dell'include diverso", "SHA256", sha_override={"inc": "2" * 64})
-        ferma("S14 EA servito con NC_VER 1.03 (SHA coerente con quello servito)", "NC_VER", muta={B.F_EA: lambda b: b.replace(b'#define NC_VER "1.04"', b'#define NC_VER "1.03"')})
+        ferma("S14 EA servito con NC_VER 1.04 (SHA coerente con quello servito: il sorgente di prima del rimedio)", "NC_VER", muta={B.F_EA: lambda b: b.replace(b'#define NC_VER "1.05"', b'#define NC_VER "1.04"')})
         ferma("S15 prova con InpSoloConta=false (mandera' ordini)", "InpSoloConta=true", muta={B.F_PROVA: prova_mut(lambda t: t.replace("InpSoloConta=true", "InpSoloConta=false"))})
         ferma("S16 prova con un pin in meno", "pin letti dal file prova", muta={B.F_PROVA: prova_mut(lambda t: t.replace("InpPlaceboAtr=0\n", ""))})
         ferma("S17 prova con asse tecnico diverso", "asse del file prova", muta={B.F_PROVA: prova_mut(lambda t: t.replace("InpMagic=0||0||1||1||Y", "InpMagic=0||0||2||2||Y"))})
@@ -134,7 +136,7 @@ def main():
         r = scenario("S20", base, pin="b" * 40, pin_srv="a" * 40)
         chk("S20 pin senza file sul server (404): si ferma, nessun terminale, niente sul Desktop", rc_di(r["p"]) != "0" and not lanci(r["sd"]) and zip_di(r["c"]) is None and "ESITO F0" not in r["p"].stdout, r["p"].stdout[-300:] + r["p"].stderr[-300:])
         rr = scenario("S21", base, lotto="Z")
-        chk("S21 lotto sconosciuto rifiutato", rc_di(rr["p"]) != "0" and "PILOTA, A, B, C o D" in (rr["p"].stdout + rr["p"].stderr))
+        chk("S21 lotto sconosciuto rifiutato", rc_di(rr["p"]) != "0" and "PILOTA, A, B, C, D o C0" in (rr["p"].stdout + rr["p"].stderr))
 
         # ---------------------------------------------------------------- compilazione
         print("S22-S24 compilazione")
@@ -155,14 +157,31 @@ def main():
         chk("S23 compilazione con 3 avvisi: li STAMPA (prima compilazione vera) e prosegue", rc_di(r["p"]) == "0" and "0 errori, 3 avvisi" in r["p"].stdout and "possible loss of data" in r["p"].stdout, r["p"].stdout[:1500])
         chk("S23 il riepilogo dice 3 avvisi", "3 avvisi" in zip_di(r["c"]).read("RIEPILOGO_F0.txt").decode("ascii"))
         r = scenario("S24", base, scen=dict(compile_senza_riga_result=True))
-        chk("S24 log di compilazione senza la riga Result: prosegue (il verdetto e' l'.ex5) ma lo DICE", rc_di(r["p"]) == "0" and "NON letta" in r["p"].stdout)
+        chk("S24 log di compilazione senza la riga Result: prosegue (il verdetto e' l'.ex5 appena prodotto) ma lo DICE", rc_di(r["p"]) == "0" and "NON letta" in r["p"].stdout)
+        # classe 1168: .ex5 vecchio, log in italiano
+        r = scenario("S24b", base, ex5_vecchio=True, ex5_bloccato=True)
+        zc = os.path.join(r["c"], "Users", "Master", "Desktop", "NATCLA_F0_PILOTA_COMPILAZIONE_FALLITA.zip")
+        chk("S24b 1168: .ex5 VECCHIO che non si cancella (file bloccato simulato): si ferma PRIMA di compilare, zip della compilazione, nessun terminale",
+            rc_di(r["p"]) != "0" and "vecchio .ex5 non si cancella" in (r["p"].stdout + r["p"].stderr) and not lanci(r["sd"]) and os.path.exists(zc) and zip_di(r["c"]) is None,
+            (r["p"].stdout + r["p"].stderr)[-400:])
+        chk("S24b il MetaEditor NON e' stato lanciato (il .ex5 vecchio avrebbe vinto la corsa)", not os.path.exists(os.path.join(r["sd"], "simlog", "sim_args_editor.txt")))
+        r = scenario("S24c", base, ex5_vecchio=True)
+        chk("S24c .ex5 vecchio che si cancella: il giro prosegue verde (8 OK)", rc_di(r["p"]) == "0" and "TUTTE LE PASSATE OK" in r["p"].stdout, r["p"].stdout[-300:])
+        r = scenario("S24d", base, scen=dict(compile_italiano=True, compile_avvisi=2))
+        chk("S24d 1168: log di MetaEditor in ITALIANO ('0 errori, 2 avvisi'): letto, stampa gli avvisi, prosegue", rc_di(r["p"]) == "0" and "log di compilazione: 0 errori, 2 avvisi" in r["p"].stdout, r["p"].stdout[:1500])
+        r = scenario("S24e", base, scen=dict(compile_italiano=True, compile_errori_con_ex5=True, nerr=1))
+        chk("S24e 1168: log ITALIANO '1 errore' con un .ex5 prodotto: si ferma, nessun terminale, zip della compilazione", rc_di(r["p"]) != "0" and not lanci(r["sd"]) and zip_di(r["c"]) is None and
+            os.path.exists(os.path.join(r["c"], "Users", "Master", "Desktop", "NATCLA_F0_PILOTA_COMPILAZIONE_FALLITA.zip")), (r["p"].stdout + r["p"].stderr)[-400:])
 
         # ---------------------------------------------------------------- difetti per passata
         print("S25 difetti per passata (uno alla volta su EURUSD AUDIO_H1)")
-        casi = [("nocsv", "KO", "CSV natcla_setup_EURUSD_778601.csv NON trovato"), ("csv_vecchio", "KO", "NON trovato fresco"), ("avvio_ver", "KO", "versione EA 1.03"), ("wilder", "KO", "Wilder"),
+        casi = [("nocsv", "KO", "CSV natcla_setup_EURUSD_778601.csv NON trovato"), ("csv_vecchio", "KO", "NON trovato fresco"), ("avvio_ver", "KO", "versione EA 1.04"), ("wilder", "KO", "Wilder"),
                 ("nessuna_adx", "KO", "NESSUNA"), ("finestra", "KO", "finestra girata DIVERSA"), ("no_avvio", "KO", "riga AVVIO dell EA NON trovata"), ("doppio_avvio", "KO", "PIU righe AVVIO"),
-                ("rifiutato", "KO", "AVVIO RIFIUTATO"), ("csv_senza_header", "KO", "senza intestazione"), ("no_verifica", "KO", "VERIFICA ADX NON trovata"),
-                ("no_giornale", "OK_FINESTRA_NON_LETTA", ""), ("csv_agente", "OK", "")]
+                ("rifiutato", "KO", "AVVIO RIFIUTATO"), ("doppio_avvio_lungo", "KO", "PIU righe AVVIO"), ("csv_senza_header", "KO", "senza intestazione"), ("no_verifica", "KO", "VERIFICA ADX NON trovata"),
+                ("no_giornale", "OK_FINESTRA_NON_LETTA", ""), ("csv_agente", "OK", ""),
+                ("giornale_vecchio_formato", "OK_FINESTRA_NON_LETTA", ""),        # la riga INVENTATA di prima non vale piu' come finestra
+                ("verifica_troncata", "OK", ""), ("avvio_troncato", "OK", ""),     # classe 1173: la copia troncata in un secondo log non fa 'PIU righe distinte'
+                ("stallo", "KO", "VERIFICA ADX NON trovata")]
         for fault, stato_atteso, msg in casi:
             r = scenario("S25" + fault, base, scen=dict(falli={"EURUSD_AUDIO_H1": fault}))
             z = zip_di(r["c"])
@@ -191,6 +210,29 @@ def main():
         vecchia = [x for x in elenco if x.startswith("NATCLA_F0_PILOTA_VECCHIA_")][0]
         chk("S29 il residuo vecchio e' ancora dentro la cartella rinominata", os.path.exists(os.path.join(ds, vecchia, "RESIDUO.txt")))
 
+        # ---------------------------------------------------------------- C0: verifica del rimedio v1.05 (4 passate sugli indici)
+        print("S33-S35 lotto C0")
+        r = scenario("S33", base, lotto="C0")
+        z = zip_di(r["c"], "C0")
+        m = manifest(z) if z else []
+        chk("S33 C0: 4 passate (U30USD, D30EUR x AUDIO_H1, M2_H1), tutte OK con righe CONTA > 0 e finestra 2024.09.26, rc 0, 'VERIFICA DEL RIMEDIO ... SUPERATA'",
+            [(x["simbolo"], x["config"]) for x in m] == [("U30USD", "AUDIO_H1"), ("U30USD", "M2_H1"), ("D30EUR", "AUDIO_H1"), ("D30EUR", "M2_H1")] and
+            all(x["stato"] == "OK" and int(x["righe_conta"]) > 0 and x["finestra"] == "2024.09.26-2026.06.30" for x in m) and rc_di(r["p"]) == "0" and "SUPERATA su 4 passate su 4" in r["p"].stdout,
+            (m, r["p"].stdout[-500:]))
+        chk("S33 C0: il RIEPILOGO porta l'ATTESA scritta prima", z is not None and "ATTESA SCRITTA PRIMA" in z.read("RIEPILOGO_F0.txt").decode("ascii") and "2024.10.16" in z.read("RIEPILOGO_F0.txt").decode("ascii"))
+        r = scenario("S34", base, lotto="C0", scen=dict(falli={"U30USD_AUDIO_H1": "conta_zero"}))
+        m = manifest(zip_di(r["c"], "C0")) if zip_di(r["c"], "C0") else []
+        uno = [x for x in m if x["simbolo"] == "U30USD" and x["config"] == "AUDIO_H1"]
+        chk("S34 C0 con ZERO righe CONTA su U30USD AUDIO_H1 (VERIFICA ADX presente): quella KO 'ZERO righe CONTA', le altre 3 OK, rc 3, 'NON SUPERATA'",
+            len(m) == 4 and len(uno) == 1 and uno[0]["stato"] == "KO" and "ZERO righe CONTA" in uno[0]["motivi"] and sum(x["stato"] == "OK" for x in m) == 3 and rc_di(r["p"]) == "3" and
+            "NON SUPERATA" in r["p"].stdout, (m, r["p"].stdout[-400:]))
+        r = scenario("S35", base, lotto="C0", scen=dict(fault_tutti="stallo"))
+        m = manifest(zip_di(r["c"], "C0")) if zip_di(r["c"], "C0") else []
+        chk("S35 C0 come il pilota v1.04 (nessuna VERIFICA ADX, zero CONTA) su tutte e 4: 4 KO, rc 3, 'NON SUPERATA'", len(m) == 4 and all(x["stato"] == "KO" for x in m) and rc_di(r["p"]) == "3" and "NON SUPERATA" in r["p"].stdout, m)
+        r = scenario("S36", base, scen=dict(falli={"EURUSD_AUDIO_H1": "conta_zero"}))
+        m = manifest(zip_di(r["c"])) if zip_di(r["c"]) else []
+        chk("S36 CONTRO-ESEMPIO: zero CONTA in un lotto NON C0 (forex) non e' un KO (un simbolo puo' non toccare mai la linea): 8 OK", len(m) == 8 and all(x["stato"] == "OK" for x in m), m[:1])
+
         # ---------------------------------------------------------------- tetto
         print("S30 tetto di minuti")
         r = scenario("S30", base, muta={B.F_PROVA: prova_mut(lambda t: t.replace("@F0-LOTTO nome=PILOTA tetto_min=40", "@F0-LOTTO nome=PILOTA tetto_min=0"))})
@@ -210,7 +252,7 @@ def main():
 
         # ---------------------------------------------------------------- i lotti veri: A (forex con JPY, D1 'Daily'), C (oro e indici), D
         if not rapido:
-            for lot, nrun in (("A", 66), ("C", 66), ("D", 18)):
+            for lot, nrun in (("A", 66), ("C", 66), ("D", 18), ("C0", 4)):
                 print("S4x lotto %s (%d passate)" % (lot, nrun))
                 r = scenario("S4" + lot, base, lotto=lot)
                 z = zip_di(r["c"], lot)
