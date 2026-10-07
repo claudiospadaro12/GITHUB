@@ -72,6 +72,10 @@ MUTANTI = [
     ("M52 riga #AVVIO non tolta dall'impronta del determinismo", 'if not l.startswith("#AVVIO")).encode', 'if True).encode'),
     ("M53 archivio vuoto: la v1.04 rifiutata", 'VERSIONI_ARCHIVIO = ("1.04",)', "VERSIONI_ARCHIVIO = ()"),
     ("M54 versione attesa rimasta 1.04", 'VERSIONE_EA = "1.05"', 'VERSIONE_EA = "1.04"'),
+    # cancello 07/10 notte (controllo-preventivo): due mutanti ciechi del cancello erano VERDI (Y2, Y4) + la regola nuova archivio-non-sugli-indici
+    ("M55 impronta del determinismo senza NESSUNA riga '#' (anche #cfg)", 'if not l.startswith("#AVVIO")).encode', 'if not l.startswith("#")).encode'),
+    ("M56 VERIFICA ADX 'NESSUNA' accettata (si rifiuta solo Wilder)", 'if ver[1] != "MetaQuotes":', 'if ver[1] == "Wilder":'),
+    ("M57 archivio v1.04 accettato anche sugli INDICI", 'if g["v"] in VERSIONI_ARCHIVIO and sim["classe"] == "IDX":', 'if False:'),
 ]
 
 

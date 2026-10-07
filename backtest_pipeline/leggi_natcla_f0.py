@@ -129,6 +129,10 @@ def controlla_avvio(riga, cfg, sim):
     mot = []
     if g["v"] != VERSIONE_EA and g["v"] not in VERSIONI_ARCHIVIO:
         mot.append("versione %s invece di %s" % (g["v"], VERSIONE_EA))
+    # cancello 07/10 notte: l'archivio v1.04 vale SOLO fuori dagli indici. Sugli indici BCM la v1.04 e' lo STALLO misurato dalla
+    # diagnosi NATCLA_DIAG_U30: una passata d'indice v1.04 non e' mai un conto valido, qualunque cosa dica il resto (la nota del riepilogo non basta).
+    if g["v"] in VERSIONI_ARCHIVIO and sim["classe"] == "IDX":
+        mot.append("versione %s su un INDICE: sugli indici BCM vale solo la v%s (la v%s e' lo stallo della diagnosi NATCLA_DIAG_U30)" % (g["v"], VERSIONE_EA, g["v"]))
     if g["mod"] != ("AUDIO" if cfg["modalita"] == "0" else "EMA200"):
         mot.append("modalita %s" % g["mod"])
     if g["sym"] != sim["nome"]:
@@ -814,6 +818,11 @@ def autotest():
     chk("AVVIO v1.04 letta come ARCHIVIO (nessun motivo), v1.06 rifiutata",
         controlla_avvio(log_finto(sim_eur, cfg_h1, versione="1.04").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur) == [] and
         any("versione" in m for m in controlla_avvio(log_finto(sim_eur, cfg_h1, versione="1.06").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur)))
+    # cancello 07/10 notte: l'archivio v1.04 NON vale sugli indici (lo stallo); la v1.05 sullo stesso indice si'
+    sim_u30 = bl["simboli"]["U30USD"]
+    chk("AVVIO v1.04 su un INDICE (U30USD) = motivo; v1.05 sullo stesso indice nessun motivo",
+        any("INDICE" in m for m in controlla_avvio(log_finto(sim_u30, cfg_h1, versione="1.04").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_u30)) and
+        controlla_avvio(log_finto(sim_u30, cfg_h1).splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_u30) == [])
     # ---- classe 1173: la stessa riga in due log, una TRONCATA -> una sola; due righe DIVERSE (non prefisso) restano due
     lf = log_finto(sim_xau, cfg_h1).splitlines()
     avv_ok, ver_ok = lf[1], lf[2]
@@ -993,6 +1002,26 @@ def autotest():
         riepilogo(carica([Sorgente(zp8), Sorgente(zp9)]), out9)
         chk("CONTRO-ESEMPIO: v1.04 contro v1.05 con righe CONTA DIVERSE -> DIVERSI (la riga #AVVIO tolta non nasconde una differenza vera)",
             any("DETERMINISMO XAUUSD/AUDIO_H1" in x and "DIVERSI" in x for x in out9))
+        # cancello 07/10 notte (mutante cieco Y2): dall'impronta si toglie SOLO la riga #AVVIO; una #cfg diversa (configurazione diversa) resta DIVERSA
+        csv_cfg = csvb.replace(b"#cfg;x;y;z\n", b"#cfg;x;y;DIVERSA\n", 1)
+        zp11 = os.path.join(tmp, "NATCLA_F0_C_CFG_DIVERSA.zip")
+        costruisci_zip(zp11, prova, [dict(lotto="C", sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=csv_cfg, log_txt=log_finto(sim_xau, cfg_h1), righe=len(righe), durata=55)])
+        out11 = []
+        riepilogo(carica([Sorgente(zp8), Sorgente(zp11)]), out11)
+        chk("CONTRO-ESEMPIO: stesse righe CONTA ma una riga #cfg DIVERSA -> DIVERSI (si toglie solo #AVVIO)",
+            csv_cfg != csvb and any("DETERMINISMO XAUUSD/AUDIO_H1" in x and "DIVERSI" in x for x in out11), [x for x in out11 if "DETERMINISMO" in x])
+        # cancello 07/10 notte (mutante cieco Y4): VERIFICA ADX 'NESSUNA DELLE DUE' (coerente coi tre numeri) e' KO come Wilder
+        zp12 = os.path.join(tmp, "NATCLA_F0_NESSUNA.zip")
+        costruisci_zip(zp12, prova, [dict(sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=csvb, righe=len(righe),
+                                          log_txt=log_finto(sim_xau, cfg_h1, adx_t=25.0, chi="NESSUNA DELLE DUE: il filtro ADX va capito PRIMA di leggere i numeri"))])
+        r12 = carica([Sorgente(zp12)])["runs"][("XAUUSD", "AUDIO_H1")][0]
+        chk("zip: VERIFICA ADX 'NESSUNA' (coerente coi tre numeri) = KO del lettore", r12["stato"] == "KO(lettore)" and any("NESSUNA" in p for p in r12["problemi"]), str(r12["problemi"]))
+        # cancello 07/10 notte: una passata d'INDICE girata con la v1.04 non e' mai OK nel lettore (nemmeno con VERIFICA e CONTA)
+        sim_u30z = bl["simboli"]["U30USD"]
+        zp13 = os.path.join(tmp, "NATCLA_F0_C_U30_V104.zip")
+        costruisci_zip(zp13, prova, [dict(lotto="C", sim="U30USD", cfg="AUDIO_H1", csv_bytes=csv104, log_txt=log_finto(sim_u30z, cfg_h1, versione="1.04"), righe=len(righe))])
+        r13 = carica([Sorgente(zp13)])["runs"][("U30USD", "AUDIO_H1")][0]
+        chk("zip: U30USD con AVVIO v1.04 (archivio) = KO del lettore: sugli indici vale solo la v1.05", r13["stato"] == "KO(lettore)" and any("INDICE" in p for p in r13["problemi"]), str(r13["problemi"]))
         # classe 1173 dentro la lettura vera: il log della passata ha la riga AVVIO e la VERIFICA ADX due volte, una TRONCATA
         lf2 = log_finto(sim_xau, cfg_h1).splitlines()
         log_doppio = "\r\n".join(lf2 + [lf2[1][:300], lf2[2][:len(lf2[2]) - 15]]) + "\r\n"

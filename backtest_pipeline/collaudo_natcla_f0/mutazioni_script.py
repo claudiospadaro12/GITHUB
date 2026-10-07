@@ -117,6 +117,35 @@ def sc_c0_ok(r):
     return len(m) == 4 and all(x["stato"] == "OK" for x in m) and T.rc_di(r["p"]) == "0" and "SUPERATA su 4 passate su 4" in r["p"].stdout
 
 
+def sc_c0_m2_zero(r):
+    # cancello 07/10 notte: il criterio di C0 vale su TUTTE e 4 le passate, anche EMA200 (M2_H1), non solo AUDIO
+    z = T.zip_di(r["c"], "C0")
+    m = T.manifest(z) if z else []
+    uno = [x for x in m if x["simbolo"] == "D30EUR" and x["config"] == "M2_H1"]
+    return len(m) == 4 and len(uno) == 1 and uno[0]["stato"] == "KO" and "ZERO righe CONTA" in uno[0]["motivi"] and T.rc_di(r["p"]) == "3" and "NON SUPERATA" in r["p"].stdout
+
+
+def sc_c0_ko_senza_giornale(r):
+    # cancello 07/10 notte: una passata con un motivo E senza la riga della finestra resta KO (non diventa OK_FINESTRA_NON_LETTA)
+    z = T.zip_di(r["c"], "C0")
+    m = T.manifest(z) if z else []
+    uno = [x for x in m if x["simbolo"] == "D30EUR" and x["config"] == "M2_H1"]
+    return len(m) == 4 and len(uno) == 1 and uno[0]["stato"] == "KO" and uno[0]["finestra"] == "non letta" and T.rc_di(r["p"]) == "3" and "NON SUPERATA" in r["p"].stdout
+
+
+def sc_c0_non_lanciate(r):
+    # cancello 07/10 notte: passate NON LANCIATE (tetto) non fanno una VERIFICA DEL RIMEDIO 'SUPERATA'
+    return T.rc_di(r["p"]) == "3" and "NON SUPERATA" in r["p"].stdout and "SUPERATA su" not in r["p"].stdout
+
+
+def sc_c0_senza_verifica(r):
+    z = T.zip_di(r["c"], "C0")
+    m = T.manifest(z) if z else []
+    uno = [x for x in m if x["simbolo"] == "D30EUR" and x["config"] == "M2_H1"]
+    return len(uno) == 1 and uno[0]["stato"] == "KO" and "VERIFICA ADX NON trovata" in uno[0]["motivi"] and "NON SUPERATA" in r["p"].stdout
+
+
+C0_TETTO0 = lambda t: t.replace("@F0-LOTTO nome=C0 tetto_min=15", "@F0-LOTTO nome=C0 tetto_min=0")
 TF_ALTI = lambda t: t.replace("simboli=EURUSD,GBPUSD,XAUUSD,U30USD configs=AUDIO_H1,M2_H1", "simboli=EURUSD configs=AUDIO_H4,AUDIO_D1")
 SOLO1 = lambda t: t.replace("simboli=EURUSD,GBPUSD,XAUUSD,U30USD configs=AUDIO_H1,M2_H1", "simboli=EURUSD,GBPUSD configs=AUDIO_H1")
 TETTO0 = lambda t: t.replace("@F0-LOTTO nome=PILOTA tetto_min=40", "@F0-LOTTO nome=PILOTA tetto_min=0")
@@ -167,6 +196,15 @@ MUTANTI = [
     ("D36 C0: zero righe CONTA non controllate", "if($Lotto -eq 'C0' -and $cc.Righe -le 0){", "if($false){", dict(lotto="C0", scen=dict(falli={"U30USD_AUDIO_H1": "conta_zero"})), sc_c0_zero),
     ("D37 C0: lotto rifiutato dal parametro", "'^(PILOTA|A|B|C|D|C0)$'", "'^(PILOTA|A|B|C|D)$'", dict(lotto="C0"), sc_c0_ok),
     ("D38 versione attesa rimasta 1.04", "$VERSIONE_ATTESA = '1.05'", "$VERSIONE_ATTESA = '1.04'", {}, sc_pilota_ok),
+    # --- cancello 07/10 notte (controllo-preventivo): 4 mutanti ciechi del cancello; contro la batteria intera X2 e X4 erano VERDI (D39, D40)
+    ("D39 C0: zero righe CONTA controllato solo in AUDIO (M2_H1 sfugge)", "if($Lotto -eq 'C0' -and $cc.Righe -le 0){", "if($Lotto -eq 'C0' -and $cc.Righe -le 0 -and $cfg.modalita -eq '0'){",
+     dict(lotto="C0", scen=dict(falli={"D30EUR_M2_H1": "conta_zero"})), sc_c0_m2_zero),
+    ("D40 finestra non letta trasforma un KO in OK_FINESTRA_NON_LETTA", "if($finest -eq 'non letta' -and $motivi.Count -eq 0){ $stato = 'OK_FINESTRA_NON_LETTA' }", "if($finest -eq 'non letta'){ $stato = 'OK_FINESTRA_NON_LETTA' }",
+     dict(lotto="C0", scen=dict(falli={"D30EUR_M2_H1": "no_giornale"}, unita={"D30EUR": "0.1"})), sc_c0_ko_senza_giornale),
+    ("D41 C0 SUPERATA anche con passate NON LANCIATE", "$tutteOk = ($nKo -eq 0 -and $nNon -eq 0 -and $nOk -eq $runs.Count)", "$tutteOk = ($nKo -eq 0)",
+     dict(lotto="C0", muta={B.F_PROVA: prova_mut(C0_TETTO0)}), sc_c0_non_lanciate),
+    ("D42 VERIFICA ADX assente non e' un motivo", "} elseif($ver.Count -eq 0){ [void]$motivi.Add(", "} elseif($false){ [void]$motivi.Add(",
+     dict(lotto="C0", scen=dict(falli={"D30EUR_M2_H1": "no_verifica"})), sc_c0_senza_verifica),
 ]
 
 

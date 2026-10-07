@@ -696,7 +696,12 @@ def magic_libero():
                         ":!.claude", ":!mql5/Experts/EA_NatCla.mq5", ":!mql5/Experts/EA_NatCla_Diag.mq5", ":!backtest_pipeline/collaudo_natcla.py",
                         ":!backtest_pipeline/collaudo_natcla_diag.py", ":!backtest_pipeline/collaudo_natcla_f0", ":!backtest_pipeline/leggi_natcla_f0.py",
                         ":!backtest_pipeline/righe/NATCLA_*", ":!backtest_pipeline/righe/RIGA_LANCIA_NATCLA_*", ":!backtest_pipeline/prove/NATCLA_*",
-                        ":!backtest_pipeline/risultati_archivio/NATCLA_*", ":!report/NATCLA_*", ":!data/natcla"], capture_output=True, text=True)
+                        ":!backtest_pipeline/risultati_archivio/NATCLA_*", ":!report/NATCLA_*", ":!data/natcla",
+                        # cancello 07/10 notte: il referto della giornata del 07/10 CITA la regola del magic di Nat&Cla (r.120-121, '778600 + 10*modalita'...',
+                        # 'blocco 778600-778699'): e' una citazione, non un EA che usa il blocco. Senza questa riga il collaudo usciva ROSSO (1 controllo) gia' al pin
+                        # d6586360, mentre l'ESITO dichiarava 'TUTTO OK'. Esclusione per NOME del file, non per estensione: un .md che ASSEGNASSE il blocco a un altro EA
+                        # (registro dei magic, censimento) deve restare visibile.
+                        ":!report/giornata_2026-10-07.md"], capture_output=True, text=True)
     return [ln for ln in r.stdout.splitlines() if ln.strip()]
 
 
