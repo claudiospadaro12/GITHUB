@@ -1,8 +1,9 @@
 # Ea Nat&Cla - SPECIFICA dell'EA `EA_NatCla.mq5` (07/10/2026)
 
-**STATO: BOZZA, NON passata dal cancello.** E' una specifica, non codice: non autorizza a compilare, a lanciare backtest ne' a
-toccare il VPS. Passa dal cancello (strato 1 `controlla_riga.py --oggetto md` + strato 2 `controllo-preventivo`) PRIMA che si
-scriva una riga di MQL5.
+**STATO: specifica passata dal cancello il 07/10/2026 (strato 1 `controlla_riga.py --oggetto md` verde + strato 2
+`controllo-preventivo`: PASS CON RISERVE, correzioni gia' applicate nel testo e marcate "corretto dal cancello").** Resta una
+specifica, non codice: non autorizza a lanciare backtest ne' a toccare il VPS; il codice MQL5 che ne nascera' passa dal suo
+cancello.
 
 **Fonti delle REGOLE, e SOLO queste** (regola di Claudio: l'EA si basa solo sui file che ha mandato):
 - `report/NATCLA_ANALISI_AUDIO_2026-10-06.md` (tre audio della collega, regole R1-R27, divergenze §10.1, 12 bloccanti §10.2;
@@ -32,7 +33,7 @@ quantificano (sempre dichiarata, sempre un input) · **[CASA]** = convenzione de
 3. Le taglie crescenti ("size piu' grosse", "dieci volte tanto", il 2/3 del PDF) sono **spente**: tutti gli ordini dello stesso setup hanno la stessa taglia, e il rischio TOTALE del setup e' fissato prima di entrare.
 4. Il rischio per setup (0,25%) e' un **segnaposto da firmare**, non una nostra proposta. Niente martingala, niente recupero, niente griglia aperta: lo stop c'e' sempre.
 5. **Una misura che pesa gia' oggi (aritmetica, non opinione)**: con i numeri letterali dell'audio (take profit 10, stop a 5-20 di distanza) **su nessuno degli 8 simboli con spread misurato la scala intera passa il cancello del costo di lavoro** (stop >= 40 x pedaggio): su EURUSD servono almeno 26,7 pip di stop, sugli indici 64-80 punti; solo sull'oro, contando 1 punto = 1 dollaro, passano i due ordini piu' lontani. Lo stop "letterale" va quindi misurato anche nella versione agganciata alla volatilita' (manopola gia' prevista).
-6. Contato su un feed esterno dell'oro 2024-26 (NON BCM): il modo AUDIO su H1 fa circa **35-37 setup l'anno per linea** dopo il filtro ADX; il modo PDF su H4 circa **26 tocchi l'anno** sulla linea 3.5, prima delle conferme. Per avere 150 operazioni IS + 150 OOS sui tick veri (circa 2 anni) **bisogna sommare piu' simboli della stessa famiglia**.
+6. Contato su un feed esterno dell'oro 2024-26 (NON BCM): il modo AUDIO su H1 fa circa **35-40 setup l'anno per linea** dopo il filtro ADX (ricontato due volte, con due programmi diversi); il modo PDF su H4 circa **26 tocchi l'anno** sulla linea 3.5, prima delle conferme. Per avere 150 operazioni IS + 150 OOS sui tick veri (circa 2 anni) **bisogna sommare piu' simboli della stessa famiglia**.
 7. Piano: passo 0 di solo conteggio su 36 simboli (circa 1 ora di PC [STIMA]), poi la base dei due modi sui simboli che passano il costo, poi le manopole una alla volta solo dove c'e' un motore vivo. Tutto sul **PC di backtest**, mai sul VPS.
 8. Le soglie per dire "funziona" sono scritte **prima** dei numeri, ognuna con il numero che produrrebbe il caso "non c'e' niente": per esempio con 150 operazioni una strategia a caso supera PF 1,15 nell'11-13% dei casi (calcolo, §6), quindi la soglia sale.
 9. Restano solo a te: **rischio e taglie**, **su quali simboli e su quale conto** andrebbe, e **se l'EA deve essere fedele alla collega o il meglio misurato** quando le due cose non coincidono.
@@ -123,7 +124,7 @@ impostato a mano vince sempre sulla modalita'. Le unita' "u" sono quelle di `Inp
 | # | regola | fonte | input | valori | default AUDIO / PDF | motivo |
 |---|---|---|---|---|---|---|
 | X1 | Criterio di stop | A-R23 WA0091 *"leggermente sopra qualche resistenza, se c'e'"* (nessun numero); P-p17/p26 *"sotto il minimo recente o il Supertrend"*; P-p21 fig.4 *"STOP LOSS a 5 PIP 2 Ordine pendente"*; P-p18 livelli/multipivot. **Quattro criteri, nessuna priorita'** (P §C-10) | `InpSLCriterio` | ORDINE_PROFONDO_PIU_BUFFER / ESTREMO_RECENTE / LINEA_PIU_BUFFER | ORDINE_PROFONDO / ESTREMO_RECENTE | **[NOSTRA] l'operativizzazione dell'audio**: la "resistenza" e' la linea su cui si opera e lo stop sta "leggermente" oltre l'ordine piu' profondo. **"Leggermente" = 5 u e' preso dalla collega stessa**: in WA0092 dice *"un'altra leggermente sopra, di 5 punti"*, cioe' usa "leggermente" per 5. "Se c'e'": se non c'e' altra resistenza vale lo stesso criterio (mai stop assente). PDF: il primo criterio scritto (p17, e risposta C del quiz p29 Q4); "livelli tecnici/multipivot" non meccanizzabili (§7) |
-| X2 | Buffer dello stop | A WA0092 "leggermente ... di 5 punti"; P-p21 fig.4 "5 PIP" | `InpSLBuffer` | 5 u | 5 / 5 | stessa cifra in entrambe le fonti |
+| X2 | Buffer dello stop | AUDIO: **nessun numero per lo stop** (A-R23); il "5" di WA0092 e' la posizione di un ORDINE, non dello stop. PDF: p21 fig.4 "STOP LOSS a 5 PIP" (scritta in figura, non nel testo) | `InpSLBuffer` | 5 u | 5 / 5 | PDF: dalla figura. AUDIO: **[NOSTRA]**, trasferimento del "leggermente = 5" dall'ordine allo stop (X1): e' una nostra lettura, NON una cifra detta dalla collega per lo stop *(corretto dal cancello 07/10: la v1 diceva "stessa cifra in entrambe le fonti")* |
 | X3 | "Minimo recente" | P-p17 non quantificato | `InpSLEstremoBarre` | 3 | 3 / 3 | **[NOSTRA]**: barra del tocco + due precedenti |
 | X4 | Stop comune e vincoli | P-p21 fig.4 stop comune; audio: non detto | (fisso) | UNO stop per tutto il setup; mai piu' vicino dell'ordine piu' profondo + buffer; mai dentro `SYMBOL_TRADE_STOPS_LEVEL` | - | stop comune = rischio totale noto prima di entrare (attenua B1). Se lo stop non e' calcolabile o viola i vincoli -> **setup scartato e contato nell'imbuto, mai aperto senza stop** |
 | X5 | Take profit | A-R22 WA0091 *"10 pip"*, WA0092 *"10 punti dal Supertrend o EMA"*; P-p17 EMA14 poi EMA89, livelli superiori | `InpTPCriterio`, `InpTPDistanza` | FISSO_DALLA_LINEA / FISSO_DAL_RIEMPIMENTO / EMA14_POI_EMA89; 10 u | DALLA_LINEA, 10 / EMA14_POI_EMA89 | AUDIO letterale WA0092 ("dal Supertrend o EMA"); DAL_RIEMPIMENTO e' l'asse (audio §3.4). Nota letta in audio §3.2: con l'anticipo a 10 e TP a 10 dalla linea, l'ordine d'anticipo avrebbe TP a distanza 0 -> l'EA **non piazza** un ordine il cui TP non e' oltre il suo prezzo d'ingresso di almeno 1 u (contato nell'imbuto) |
@@ -138,7 +139,7 @@ impostato a mano vince sempre sulla modalita'. Le unita' "u" sono quelle di `Inp
 | input | default | da dove |
 |---|---|---|
 | `InpUsaGuardian` | true | **[CASA]** `ABTG_SupertrendReversal.mq5` r.32-44, firme B1/C1 del 18/08 (§2.5) |
-| `InpMagic` | dal preset, blocco proposto **778600-778699** | **[CASA]** schema: `7786` + cifra motore (0 AUDIO, 1 PDF, 2 EMA200) + cifra TF (1 H1, 4 H4, 2 H12, 8 D1): es. 778601 = AUDIO H1, 778614 = PDF H4, 778624 = EMA200 H4. **Blocco verificato libero oggi** in `mql5/Experts/*.mq5` (nessun `InpMagic` 7786xx) e in tutto il repo fuori da `.claude/` (l'unico `778603` trovato e' un frammento di hash in un log): **da ricontrollare contro i preset vivi prima della compilazione** |
+| `InpMagic` | dal preset, blocco proposto **778600-778699** | **[CASA]** schema: `7786` + cifra motore (0 AUDIO, 1 PDF, 2 EMA200) + cifra TF (1 H1, 4 H4, 2 H12, 8 D1): es. 778601 = AUDIO H1, 778614 = PDF H4, 778624 = EMA200 H4. **Blocco verificato libero oggi** in `mql5/Experts/*.mq5` (nessun `InpMagic` 7786xx) e in tutto il repo fuori da `.claude/` (l'unico `778603` trovato e' un frammento di hash in un log). **Ricontrollato dal cancello il 07/10**: zero occorrenze di `7786xx` come numero intero in tutti i file del repo e su **tutti i 23 rami** locali e remoti (`git grep`), preset compresi; restano da ricontrollare i **preset vivi sui terminali** (non sono nel repo) prima della compilazione |
 | `InpComment` | "NATCLA" + suffisso linea/ordine nel commento dell'ordine (es. `NATCLA_A_ST35_O2`) | [CASA] + attribuzione per-trade |
 | `InpLogImbuto` | true | **[CASA]** imbuto di mortalita' dell'11/09 (r.111-198 del riferimento): contatori di rifiuto, solo log |
 | `InpVerbose` | true | [CASA] |
@@ -324,11 +325,12 @@ x 2 TF, **per simbolo** (la regola dei due lati di casa si applica a tutti i sim
 ### 3.4 Totale e costo
 
 - **Base (fase 1)**: 3 famiglie x 2 lati x 2 TF = **12 passate per simbolo**.
-- **Assi completi (fase 2)**: 80 + 60 + 40 + 8 + 8 = **196 passate per simbolo**, ma **solo** sui simboli dove la base della
-  famiglia non e' morta. Se la collega risponde alle bloccanti, il totale scende (tabella §8).
+- **Assi completi (fase 2)**: 80 + 60 + 36 + 8 + 8 = **192 passate per simbolo**, ma **solo** sui simboli dove la base della
+  famiglia non e' morta. Se la collega risponde alle bloccanti, il totale scende (tabella §8). *(Corretto dal cancello 07/10: la
+  v1 sommava 40 per M2, cioe' anche le 4 passate della sua base, gia' contate nelle 12 della fase 1: 196 -> 192.)*
 - Costo per passata a tick reali, ancore **misurate** in casa: 0,083 min/passata (R88a, tick M5, 21 mesi) - 0,333 min/passata
   (R245, 84 passate in 28 min); 20,1 s/passata Dow M5 (R202A). Il forex ha volumi di tick diversi dal Dow: banda larga.
-  -> fase 2 su 5 simboli = 980 passate = **1,4-5,4 ore di PC** **[STIMA]**; base su 15 simboli = 180 passate = **15-60 min** **[STIMA]**.
+  -> fase 2 su 5 simboli = 960 passate = **1,3-5,3 ore di PC** **[STIMA]** (960 x 0,083-0,333 min); base su 15 simboli = 180 passate = **15-60 min** **[STIMA]**.
 
 ---
 
@@ -376,7 +378,7 @@ di 10 u si riempiono e si chiudono **dentro la stessa barra M1**, dove il modell
 | famiglia | TF provati nella base | TF solo nel passo 0 (frequenza) | escluso, con il numero |
 |---|---|---|---|
 | AUDIO | H1, H4 | H12, D1 | sotto H1: vietato dalla fonte (A-R8) |
-| PDF | H4, D1 | (H1 degli esempi p08/p11: un asse in piu' se la base H4 vive) | W1: ~52 barre l'anno; sull'oro D1 conta **3 tocchi/anno** sul 3.5 (tabella 5.4) e su W1, con un quinto delle barre, se ne attendono meno [STIMA]: sui tick (2 anni) anche sommando i 22 forex si resta sotto ~150 -> NON MISURABILE per il merito, non "morto" |
+| PDF | H4, D1 | (H1 degli esempi p08/p11: un asse in piu' se la base H4 vive) | W1: ~52 barre l'anno; sull'oro D1 conta **3 tocchi/anno** sul 3.5 (tabella 5.4; **6** con l'orologio +5 h, stessa conclusione) e su W1, con un quinto delle barre, se ne attendono meno [STIMA]: sui tick (2 anni) anche sommando i 22 forex si resta sotto ~150 -> NON MISURABILE per il merito, non "morto" |
 | M2 (EMA200) | H1, H4 | - | sotto H1 vietato (A-R9) |
 
 ### 5.3 Il cancello del costo, CALCOLATO (misura, non giudizio)
@@ -396,7 +398,7 @@ Criteri di casa (`report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.168-175): **lavo
 | NASUSD | 1,8 | 0 | 1,8 | 72 | 23,9 | idem | tutti sotto il duro |
 | U30USD | 2,0 | 0 | 2,0 | 80 | 26,6 | idem | tutti sotto il duro |
 | 225JPY | 22 | 0 | 22 | 880 | 293 | idem | tutti sotto il duro |
-| XAUUSD (u = 1 USD) | 0,21 USD | 0,04 USD | 0,25 | 10,0 | 3,3 | 5 / 10 / 15 / 20 USD | 15 e 20 passano; **10 sul bordo (40,0x)**; 5 fra duro e lavoro |
+| XAUUSD (u = 1 USD) | 0,21 USD | 0,04 USD | 0,25 | 10,0 | 3,3 | 5 / 10 / 15 / 20 USD | 15 e 20 passano; **10 appena sotto (39,9x: pedaggio 0,2507, stop minimo 10,03)**; 5 fra duro e lavoro |
 | XAUUSD (u = 0,1 USD) | | | 0,25 | 10,0 | 3,3 | 0,5 / 1 / 1,5 / 2 USD | **tutti sotto il duro**: l'asse "pip dell'oro = 0,1" e' chiuso per aritmetica |
 
 Come leggere le distanze: scala (5,5) con stop = ordine profondo + 5 -> ordine profondo 5, linea 10, anticipo 15; con anticipo 10
@@ -430,6 +432,13 @@ semplice; ADX di Wilder implementato da me) **[MISURATO su feed esterno]**:
 | H4 | 2.5 / 3.0 / 3.5 | 44 / 25 / 26 | 26 / 19 / 22 | 9 / 6 / 10 |
 | D1 | 2.5 / 3.0 / 3.5 | 5 / 5 / 3 | 4 / 3 / 3 | 2 / 0 / 1 |
 
+**Ricontato dal cancello (07/10), codice indipendente sugli stessi 14 zip**: episodi e limite audio **identici** su tutte e nove le
+righe; la colonna ADX esce **40 / 36 / 36** su H1 (contro 37 / 34 / 37: differenza dovuta all'innesco dell'ADX di Wilder, non al
+conteggio) -> "35-40 setup l'anno per linea" e' riproducibile. 🔴 **Ma H4 e D1 dipendono dall'orologio**: con lo spostamento **+5 h**
+(la calibrazione di casa dei feed HistData, `SCHEDE_SIMBOLO_PIANO` §2.2) invece di +6, H1 resta identico mentre H4 sul 3.5 fa
+25 / 23 / 9 e **D1 sul 3.5 fa 6 tocchi/anno invece di 3** (2.5: 10 invece di 5). Le righe H4/D1 della tabella sono quindi
+**[DIPENDENTI DALL'OROLOGIO]**: la composizione delle candele H4/D1 cambia con l'ora del server (vedi §5.5).
+
 Lettura (attese, non verdetti): AUDIO H1 per simbolo ~35-110 setup/anno a seconda di quante linee vivono **prima** dell'inclinazione
 -> in 2 anni di tick **70-220 per simbolo**: 150 IS + 150 OOS richiedono **2-4 simboli della stessa famiglia** sommati. PDF H4 sul
 3.5: 26 tocchi/anno **prima** di conferma, chiusura vicina e confluenza -> **[STIMA]** 5-15 setup/anno per simbolo -> per 300 sui
@@ -440,6 +449,18 @@ tick servono **10-30 simboli**: il merito del PDF a tick e' misurabile solo sull
 
 - **Unita' = operazioni.** IS = la prima parte cronologica della finestra a tick in cui la famiglia somma **>= 150 operazioni**,
   OOS = il resto, **>= 150**. Se il totale e' < 300: merito **SOSPESO per n**, il rischio si giudica lo stesso.
+- 🔴 **Un'"operazione" qui e' un SETUP, non un ordine ne' un deal** *(aggiunto dal cancello 07/10)*: i tre ordini della scala AUDIO
+  (e i due del PDF) condividono la linea, lo stop e quasi sempre l'esito, quindi NON sono prove indipendenti. Contare gli ordini
+  gonfierebbe n fino a 3 volte e renderebbe falsa la soglia del nullo del §6.1, che assume prove indipendenti. Il PF e il DD si
+  calcolano sul P/L **per setup** (somma degli ordini riempiti), in R; il conto per ordine resta nel CSV solo come diagnosi.
+- **Orologio** (`CLAUDE.md` 24/09, `report/OROLOGIO_BCM_2026-09-24.md`): l'EA **non ha regole d'orario**, quindi l'ora entra
+  solo nella **composizione delle candele** H4/H12/D1 (e nell'ora del rollover, ore 22 server, dove GBPUSD/USDJPY hanno mediana
+  8,0/6,8 pip). BCM oggi e' **UTC+1 fisso** (d'inverno = ora italiana, d'estate = ora italiana - 1); sugli indici UTC+1 su tutto
+  l'arco tick; sul **forex** il vecchio orologio (UTC+0 d'inverno) vale fino al cambio fra il **26/12/2024 e il 02/02/2025**, cioe'
+  **dentro** la finestra a tick (dal 05/07/2024) e dentro tutto il vecchio 2010-2024: le candele H4/D1 forex sono costruite su due
+  orologi, e su un altro broker (FTMO, ora italiana + 1) sarebbero diverse. Misurato al §5.4 che H4/D1 sono sensibili a 1 ora di
+  spostamento: F0 stampa i conteggi H4/D1 **separati prima e dopo il cambio**, e la riga del conto vero (domanda 2 del §8) li rifa'
+  sull'orologio di quel broker.
 - **Regime dichiarato**: la finestra a tick (luglio/settembre 2024 -> giugno 2026) e' **toro** su oro e indici (detto in casa,
   `RESOCONTO_EA_IN_PAROLE_SEMPLICI_2026-10-06.md` r.65); per il forex il passo 0 stampa per simbolo rendimento della finestra e
   ADX medio, e il regime si **scrive** accanto al numero, non si assume.
@@ -455,9 +476,9 @@ tick servono **10-30 simboli**: il merito del PDF a tick e' misurabile solo sull
 |---|---|---|---:|---|---|
 | **F0** sonda | `InpSoloConta`=true su 36 simboli x 8 configurazioni (AUDIO H1/H4/H12/D1, PDF H4/D1, M2 H1/H4), finestra dei tick | OHLC M1 | 288 | **14-160 min**, centro ~65 (2,9-33 s/passata, mediana 13,5, R88) | setup/anno per simbolo; soglie P25/P50/P75 dell'inclinazione **fissate qui, prima di qualunque P/L**; stop/pedaggio per ordine; regime della finestra |
 | **F1** base | i (simbolo, TF, famiglia) che F0 non esclude per costo, 2 lati | tick reali | 12 per simbolo | 15 simboli: **15-60 min** | motore vivo o no, per famiglia e lato |
-| **F2** assi | §3, uno alla volta, solo sulle famiglie vive | tick reali | fino a 196 per simbolo | 5 simboli: **1,4-5,4 h** | quale lettura delle fonti regge; centro dell'altopiano |
+| **F2** assi | §3, uno alla volta, solo sulle famiglie vive | tick reali | fino a 192 per simbolo | 5 simboli: **1,3-5,3 h** | quale lettura delle fonti regge; centro dell'altopiano |
 | **F3** IS/OOS | cella scelta sull'IS col centro dell'altopiano, OOS una volta sola | tick reali | 2 per simbolo | minuti | merito |
-| **F4** rischio | cella congelata sul vecchio a barre | OHLC M1 | 2 per simbolo | ~1-3 min/passata [STIMA] su 15 anni | rischio (puo' solo bocciare) |
+| **F4** rischio | cella congelata sul vecchio a barre | OHLC M1 | 2 per simbolo | ordine dei minuti per passata **[STIMA NON AGGANCIATA]**: nessun round di casa cronometrato su 15 anni; R88 da' 2,9-33 s/passata OHLC sulle finestre di casa, lo scalaggio lineare sugli anni non e' misurato | rischio (puo' solo bocciare) |
 | (dopo) | forward demo, mai prima del cancello e della firma | - | - | settimane | collaudo vero |
 
 Regole di lettura, valide in tutte le fasi:
@@ -496,12 +517,12 @@ Modello: passeggiata casuale senza edge, TP e stop fissi, pedaggio come al §5.3
 | **E0** | il passo 0 conta abbastanza | AUDIO H1: >= 70 setup per simbolo nella finestra dei tick (tabella 5.4 fa 70-220 sull'oro) | se su BCM esce un ordine di grandezza meno, o il calcolo del tocco e' sbagliato o il feed esterno inganna: si confrontano oro BCM e oro HistData **sulla stessa finestra** prima di andare avanti |
 | **E1** | fedelta' della geometria (non dell'edge) | AUDIO H1: durata mediana <= 60 min (A-R24 "un'oretta neanche"); 60-180 = compatibile con un TF d'esecuzione piu' alto, si chiede; > 180 = **non e' il metodo della collega**, si ferma la lettura del merito | una passeggiata casuale con barriere a circa 1 ATR esce in circa 1-2 barre [CALCOLO: tempo atteso = distanza^2 / varianza per barra]: **anche un motore senza edge** ha durata mediana di ~1-2 h su H1. Quindi E1 controlla la geometria, **non** dimostra niente sul merito |
 | **E2** | costo | per ogni (simbolo, TF, famiglia): stop/pedaggio mediano per ordine >= 40 (lavoro); < 13,3 = escluso per aritmetica | vedi §5.3: senza la commissione EURUSD passerebbe a 10 pip. Il cancello si calcola **con** la commissione |
-| **E3** | merito della famiglia | IS e OOS: n >= 150 ciascuno; PF >= **max(1,15; soglia del nullo al 5% per la geometria e l'n misurati, §6.1)**; R/R e tasso di vincita scritti accanto (pareggio a ~75% con TP 10 e stop 26,7) | il nullo supera 1,15 nell'11-13% dei casi a n=150: con la sola soglia 1,15, una cella su otto senza edge passerebbe l'OOS |
+| **E3** | merito della famiglia | IS e OOS: n >= 150 **setup** (non ordini, §5.5) ciascuno; PF >= **max(1,15; soglia del nullo al 5% per la geometria e l'n misurati, §6.1)**; R/R e tasso di vincita scritti accanto (pareggio a ~75% con TP 10 e stop 26,7) | il nullo supera 1,15 nell'11-13% dei casi a n=150: con la sola soglia 1,15, una cella su otto senza edge passerebbe l'OOS |
 | **E4** | "il terzo e' il piu' sicuro" (A-R15) | tasso di vincita ST3.5 > ST2.5 di almeno 2 errori standard (**12-14 punti** con ~100 operazioni per linea [CALCOLO: errore standard della differenza 6-7 punti]) | senza edge il tasso di vincita dipende solo dalla geometria, uguale sulle tre linee: differenza attesa 0, con un errore standard di 6-7 punti |
 | **E5** | "al massimo due tocchi, poi sfonda" (A-R11) | nella variante a conteggio illimitato (A4), PF dei tocchi 1-2 > PF dei tocchi >= 3 nella maggioranza dei simboli | senza edge il numero del tocco non conta: segno casuale per simbolo |
 | **E6** | "ADX sopra 20 rischia di sfondare" (A-R12), e ogni filtro in generale | si tiene il filtro solo se migliora il PF nello stesso verso in **>= 6 simboli su 8** (o >= 9 su 12) della famiglia | un filtro che toglie operazioni a caso cambia il segno a caso: P(>= 6 su 8) = **14,5%**, P(>= 9 su 12) = **7,3%** [CALCOLO]. Su 8 simboli la regola e' debole: preferire famiglie >= 12 |
 | **E7** | la LINEA conta (non solo un ritracciamento qualsiasi) | PF linea vera > PF placebo (`InpPlaceboAtr`=1,0) in >= 2/3 dei simboli | se l'edge e' del ritracciamento generico e non della linea, il placebo guadagna uguale: allora l'EA ha forse un edge, ma **non e' quello descritto dalla collega**, e va detto |
-| **E8** | rischio | DD massimo a saldo chiuso e peggior giornata, **in R**. Il rischio massimo compatibile e' `r_max = 10% / DD_R` (muro 10% usato in casa, R264) e `4,0% / peggior_giornata_R` (pausa Guardian): il backtest consegna `r_max`, la taglia la sceglie Claudio | il DD a barre e' un limite inferiore: se a barre `r_max` e' gia' sotto il segnaposto 0,25%, **boccia**; se e' sopra, **non promuove** |
+| **E8** | rischio | DD massimo a saldo chiuso e peggior giornata, **in R**. Il rischio massimo compatibile e' `r_max = 10% / DD_R` (muro 10% usato in casa, R264) e `4,0% / peggior_giornata_R` (pausa Guardian): il backtest consegna `r_max`, la taglia la sceglie Claudio | il DD a barre e' un limite inferiore: se a barre `r_max` e' gia' sotto il rischio che Claudio firmera' (oggi il segnaposto 0,25%: il confronto si rifa' col numero firmato), **boccia**; se e' sopra, **non promuove** |
 | **E9** | bandiere di taglia (pesi 1:2:1 / 1:2) | a parita' di R totale: si riporta la differenza di PF e di DD_R; **nessuna accensione senza firma**, anche se migliora | i pesi spostano solo la distribuzione del rischio fra ordini: senza edge la differenza attesa e' rumore; con i riempimenti piu' profondi meno frequenti, i pesi verso la linea cambiano poco l'n |
 
 ---
@@ -569,12 +590,25 @@ di dieci risposte a voce.
   della "resistenza"; episodi di tocco e reset al flip; ATR14 come unita' delle tolleranze; ADX sul TF del segnale; target PDF
   congelati all'ingresso con ripiego in R; scadenza pendenti 1 barra; un setup alla volta; unita' AUTO_CLASSE (oro = 1 USD);
   lotto arrotondato per difetto con scarto sotto il minimo (deviazione dalla convenzione del riferimento, in senso prudente).
-- **Sovrapposizione con la flotta (da guardare PRIMA di F1, non l'ho letta per regola delle fonti)**: in casa esistono gia'
-  `ABTG_SupertrendReversal.mq5` (magic 770901) e sei sedie `ABTG_SupRev_*_Ottimizzato` costruite sullo stesso PDF, e `ABTG_EMA200`
-  (la prima sedia, `771531`) vicina al motore M2. Il modo PDF di `EA_NatCla` rischia di rimisurare un motore gia' misurato e di
-  essere **correlato** con sedie vive: la lista dei caduti in `REGISTRO_TEST.md` (per esempio R243 SupRev) va letta prima di
-  spendere passate sul modo PDF, e la correlazione si misura prima di schierare. Le **regole** di `EA_NatCla` restano quelle dei
-  due documenti, qualunque cosa dica quel codice.
+- **Sovrapposizione con la flotta - LETTA dal cancello il 07/10** (resoconti di casa, NON fonti di regole: le **regole** di
+  `EA_NatCla` restano quelle dei due documenti, qualunque cosa dica quel codice):
+  - **Modo PDF contro `ABTG_SupertrendReversal` (770901) e le sei `SupRev_*_Ottimizzato` (97091x)**: stesso documento, stesso
+    Supertrend (10, 3.5), ma **uscite diverse** (quelle hanno trailing sul ST, uscita al flip, TP in R; qui EMA14/EMA89 senza
+    trailing) e confluenza diversa (qualunque EMA entro 1,5 ATR contro sola EMA200 entro 0,5 ATR). Quindi **non e' un doppione da
+    saltare**, ma il prior di casa va scritto accanto: `RESOCONTO_EA_G5_SUPERTREND_GOLDEN_ORO_2026-10-05.md` r.40-49 e r.230-233 =
+    **MERITO SOSPESO** su tutte le celle sopra 1 (n OOS <= 114), **nessun MORTO**, sul **forex nessuna tipologia superata**
+    (CHFJPY 0/12, AUDUSD solo celle a segno invertito), NASUSD H1 **ESCLUSO PER COSTO** stimato 28,7x. 👉 **Cosa non si spende**:
+    F1 PDF su NASUSD H1 non parte se F0 conferma stop/pedaggio < 40x; il modo PDF su H1 resta un asse solo se la base H4 vive.
+  - **Motore M2 contro `ABTG_EMA200` (771531)**: quell'EA mette gia' **due limit attorno alla EMA200** con stop oltre il secondo:
+    M2 e' un **parente stretto**, non un motore nuovo. E in casa il fenomeno sotto c'e' gia' misurato:
+    `RESOCONTO_EA_G2_EMA200_SW_ORB_2026-10-05.md` r.95-97: il **rimbalzo al primo tocco della EMA200 e' NULLO** su H4 forex
+    (6 coppie Oanda 2005-2020: P 0,487 / 0,470 contro surrogati 0,478 / 0,491), 13 NULLO + 8 ZONA GRIGIA su 21 celle M5-H1 su
+    DAX/oro/S&P, **NON ANCORA MISURATO** dentro i regimi. 👉 **Cosa non si spende**: per M2 si gira **solo la base (4 passate) +
+    il placebo E7**; i suoi 36 assi partono **solo** se la base vive **e** batte il placebo. Attesa scritta ora: con quel prior, la
+    base M2 deve uscire **non distinguibile dal placebo**; se esce diversa, prima si cerca l'errore, poi si festeggia.
+  - **Correlazione, prima di schierare**: dal CSV per-trade si conta la quota di setup `EA_NatCla` che entrano **nella stessa
+    barra e nello stesso verso** di un ingresso di 770901/97091x/771531 sullo stesso simbolo; sopra la soglia (da fissare nella
+    prova, prima dei numeri) le due istanze contano come **una sola sedia** nel cap 3,25%. E' una misura, non una decisione.
 - **Numeri presi da feed esterno**: frequenze e inclinazione dell'oro vengono da HistData con orologio approssimato (+6 h): servono
   a dimensionare il piano, non a decidere niente. Il passo 0 li rifa' su BCM.
 - **Spread vivo**: 5 giornate, 8 simboli. Il cancello del §5.3 e' aritmetica su quel campione; si rifa' con lo spread del tester.
