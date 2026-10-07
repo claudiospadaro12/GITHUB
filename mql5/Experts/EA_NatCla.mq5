@@ -33,6 +33,11 @@
 //|  InpModalita=PDF OnInit rifiuta (INIT_PARAMETERS_INCORRECT). Il  |
 //|  codice PDF NON e' cancellato (CODICE MORTO, tenuto per archivio)|
 //|  per non rompere altro. Strato 2 su questa versione: DA FARE.    |
+//|  v1.04 (07/10, cancello sulla v1.03): Risolvi rifiuta anche le   |
+//|  manopole nate SOLO dal PDF impostate a mano in AUDIO/EMA200     |
+//|  (ingresso mercato+pendente, TP EMA14/EMA89, conferma, chiude    |
+//|  vicino, timing, BE/parziale al TP1, R/R minimo, pesi PDF,       |
+//|  confluenza obbligatoria). Scala AUDIO e assi del piano intatti. |
 //|  NON compilato qui (nessun MetaEditor in questo ambiente): la     |
 //|  prima compilazione e il primo giro nel tester sono il collaudo  |
 //|  che manca. Solo DEMO/TESTER finche' Claudio non firma.          |
@@ -76,10 +81,10 @@
 //+------------------------------------------------------------------+
 #property copyright "Ea Nat&Cla - progetto Claudio (ABTG)"
 #property description "Ea Nat&Cla: modo AUDIO (collega) / motore solo EMA200 (audio WA0092). Modo PDF ESCLUSO da Claudio il 07/10/2026. Specifica report/NATCLA_SPECIFICA_2026-10-07.md. Rischio 0,25% = SEGNAPOSTO da firmare da Claudio."
-#property version   "1.03"
+#property version   "1.04"
 #property strict
 
-#define NC_VER "1.03"
+#define NC_VER "1.04"
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -197,7 +202,7 @@ input ENUM_TIMEFRAMES   InpTF       = PERIOD_CURRENT;  // TF del segnale. CURREN
 input ENUM_NC_DIREZIONE InpDirezione= NC_DIR_ENTRAMBI; // Direzione (A-R26 mai dichiarata): nei test i lati si girano SEPARATI
 
 input group "=== Indicatori (specifica par. 1.1) ==="
-input int    InpStAtrPeriodo    = 10;   // Supertrend: periodo ATR [FONTE P-p07]
+input int    InpStAtrPeriodo    = 10;   // Supertrend: periodo ATR [NOSTRA dal 07/10: l'unica fonte era il PDF, escluso]
 input double InpStMult1         = 2.5;  // Supertrend linea 1 (2.5) [FONTE A-R2, P-p04]
 input double InpStMult2         = 3.0;  // Supertrend linea 2 (3.0) [FONTE]
 input double InpStMult3         = 3.5;  // Supertrend linea 3 (3.5) [FONTE]
@@ -1053,6 +1058,21 @@ bool Risolvi(string &err)
    gTPCrit=(InpTPCriterio==NC_TP_DA_MODALITA) ? ((InpModalita==NC_PDF) ? 2 : 0) : (int)InpTPCriterio;
    gRRMin=DaModD(InpRRMin,0.0,1.0,0.0);
    gBE=DaModB(InpBEalTP1,false,true,false);
+   //--- v1.04 [decisione di Claudio 07/10/2026, data/natcla/LEGGIMI.md]: le manopole nate SOLO dal PDF
+   //    non rientrano da un preset in AUDIO/EMA200. Nessun asse AUDIO/M2 del piano le usa (specifica 3.1/3.3);
+   //    la scala AUDIO (InpPesiScala 1:2:1), lo stop ESTREMO_RECENTE (A8) e il TP dal riempimento (A1) restano.
+   string pdfx="";
+   if(gIngresso==1) pdfx+=" InpTipoIngresso=MERCATO_PIU_PENDENTE";
+   if(gTPCrit==2) pdfx+=" InpTPCriterio=EMA14_POI_EMA89";
+   if(gConferma) pdfx+=" InpConfermaApertura=SI";
+   if(gChiudeVicino>0) pdfx+=" InpChiudeVicinoAtr>0";
+   if(InpTimingTocco!=NC_TIMING_IGNORA) pdfx+=" InpTimingTocco";
+   if(gBE) pdfx+=" InpBEalTP1=SI";
+   if(InpParzialeTP1Pct>0) pdfx+=" InpParzialeTP1Pct>0";
+   if(gRRMin>0) pdfx+=" InpRRMin>0";
+   if(InpPesiPdf!=NC_PESI_1_1) pdfx+=" InpPesiPdf=1:2";
+   if(gConfl==2) pdfx+=" InpConfluenza=OBBLIGATORIA";
+   if(pdfx!=""){ err="manopole nate SOLO dal PDF (escluso da Claudio il 07/10/2026):"+pdfx; return false; }
    //--- U1
    gU=CalcolaUnita(gUDescr);
    if(!(gU>0)){ err="unita' u non valida (InpUnitaManuale <= 0?)"; return false; }
@@ -1104,7 +1124,7 @@ void StampaConfigurazione()
    if(gFh!=INVALID_HANDLE) FileWrite(gFh,"#"+avvio);
    Cfg("InpTF",EnumToString(gTF),Orig(InpTF!=PERIOD_CURRENT)+" [FONTE A-R8 / P-p05]");
    Cfg("InpDirezione",EnumToString(InpDirezione),"[FONTE: direzione mai dichiarata, A-R26]");
-   Cfg("Supertrend",StringFormat("ATR %d, mult %.2f / %.2f / %.2f, HL2",InpStAtrPeriodo,InpStMult1,InpStMult2,InpStMult3),"[FONTE] calcolo SW_STCore [CASA]");
+   Cfg("Supertrend",StringFormat("ATR %d, mult %.2f / %.2f / %.2f, HL2",InpStAtrPeriodo,InpStMult1,InpStMult2,InpStMult3),"[FONTE A-R2 i mult; ATR [NOSTRA] dal 07/10] calcolo SW_STCore [CASA]");
    Cfg("Linee",StringFormat("ST25 %s, ST30 %s, ST35 %s, EMA200 %s",gUsaLinea[0] ? "si" : "no",gUsaLinea[1] ? "si" : "no",gUsaLinea[2] ? "si" : "no",gUsaLinea[3] ? "si" : "no"),
        Orig(InpUsaST25!=NC_TRI_DA_MODALITA || InpUsaST30!=NC_TRI_DA_MODALITA || InpUsaST35!=NC_TRI_DA_MODALITA || InpMotoreEma200!=NC_TRI_DA_MODALITA)+" [FONTE A-R11/13/14/20, P-p11]");
    Cfg("TocchiMax",StringFormat("%d / %d / %d / EMA %d (0 = illimitato)",gTocchiMax[0],gTocchiMax[1],gTocchiMax[2],gTocchiMax[3]),
@@ -1461,9 +1481,9 @@ void ArmaScala(const int L,const int s,const int last,const int toccoN,const dat
 //==================================================================
 //  CODICE MORTO: modalita PDF esclusa, tenuto per archivio.
 //  (v1.03, decisione di Claudio 07/10/2026.) Con InpModalita=PDF
-//  l'EA non parte. ATTENZIONE: questo ramo resta raggiungibile SOLO
-//  forzando a mano InpTipoIngresso=MERCATO_PIU_PENDENTE in AUDIO o
-//  EMA200: non va fatto, non e' un asse del piano.
+//  l'EA non parte. Dalla v1.04 non e' raggiungibile nemmeno a mano:
+//  Risolvi rifiuta InpTipoIngresso=MERCATO_PIU_PENDENTE e le altre
+//  manopole nate solo dal PDF anche in AUDIO/EMA200.
 //  MODO PDF: tocco sulla barra chiusa, conferma all'apertura della
 //  successiva, 1 ordine a mercato + 1 limit oltre (E1, E4, E5).
 //==================================================================

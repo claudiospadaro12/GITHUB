@@ -7,7 +7,9 @@ Il file NON e' stato compilato (nessun MetaEditor qui) e NON e' girato nel teste
 - Codice: `mql5/Experts/EA_NatCla.mq5` (2048 righe, ASCII puro). Regole SOLO da `report/NATCLA_SPECIFICA_2026-10-07.md`.
 - Collaudo: `python3 backtest_pipeline/collaudo_natcla.py` (circa 2 minuti; `--senza-mutanti` circa 16 s). Esito al commit del cancello: **TUTTO OK**, mutanti ciechi **43/43 presi** (21 dell'autore + 22 del cancello, par. 5).
 - **v1.03 (07/10, decisione di Claudio "ignorare il pdf, concentrarsi sugli audio")**: modalita' PDF **esclusa** (OnInit la rifiuta),
-  codice PDF tenuto come archivio. Collaudo **TUTTO OK, mutanti 68/68**. **Strato 2 su v1.03: DA FARE -> NON consegnabile.** Par. 8.
+  codice PDF tenuto come archivio. Collaudo **TUTTO OK, mutanti 68/68**. **Strato 2 su v1.03: FAIL corretto in v1.04** (par. 8).
+- **v1.04 (07/10, cancello sulla v1.03)**: `Risolvi` rifiuta anche le manopole nate SOLO dal PDF impostate a mano in AUDIO/EMA200.
+  Collaudo **TUTTO OK, mutanti 73/73** (invarianti 29-30, mutanti K1-K5). **Serve un secondo lettore sulla v1.04 -> NON consegnabile.**
 
 ## 1. Che cosa il collaudo ha MISURATO (feed HistData dell'oro, orologio +6 h, NON BCM)
 
@@ -257,10 +259,22 @@ e il messaggio) + mutanti **J1** (rifiuto rimosso) e **J2** (rifiuto che restitu
 1159). Contro-esempio extra a mano: rifiuto spostato su `NC_EMA200` -> preso. Esito: **TUTTO OK, mutanti 68/68** (i 66 di prima
 tutti ancora presi + J1/J2), numeri dell'oro invariati.
 
-**Riserva per lo strato 2 (dichiarata, non corretta per mandato di modifica minima):** il ramo PDF resta **raggiungibile a mano**
-in AUDIO/EMA200 forzando `InpTipoIngresso=MERCATO_PIU_PENDENTE`; e le manopole nate dal PDF (`InpTPCriterio=EMA14_POI_EMA89`,
-`InpConfermaApertura=SI`, `InpChiudeVicinoAtr>0`, `InpTimingTocco`, `InpBEalTP1=SI`, `InpRRMin>0`, `InpPesiPdf`) restano
-impostabili da un preset. Nessuna e' un default e nessuna e' nel piano; se si vuole il blocco duro, e' un ritocco a `Risolvi`.
+**Riserva dell'autore sulla v1.03 -> giudicata dal cancello (strato 2, 07/10) come difetto di SOSTANZA, corretta in v1.04.**
+In v1.03 il ramo PDF restava raggiungibile in AUDIO/EMA200 forzando `InpTipoIngresso=MERCATO_PIU_PENDENTE`, e altre manopole
+nate dal PDF entravano **anche nella scala AUDIO** senza toccare l'ingresso: `gTPCrit==2` (EMA14/EMA89) in `ValutaScala`, `gRRMin` in
+`NC_OrdineValido`, `gBE`/parziale in `GestisciTP1`, `gConfl==2` in `NC_Contesto`. Un preset (o un'ottimizzazione che scorre un enum)
+avrebbe girato regole del PDF con lettera **A** e magic **77860x**: la fonte esclusa da Claudio rientrava dalla porta di servizio.
+**v1.04**: in `Risolvi`, sulle variabili RISOLTE (dopo `gBE`, prima del magic, quindi prima di handle e file), se e' acceso uno fra
+ingresso mercato+pendente, TP EMA14/EMA89, conferma all'apertura, chiude vicino > 0, timing del tocco, BE al TP1, parziale al TP1,
+R/R minimo > 0, pesi PDF 1:2, confluenza OBBLIGATORIA -> `AVVIO RIFIUTATO: manopole nate SOLO dal PDF ...` +
+`INIT_PARAMETERS_INCORRECT`, con l'elenco delle manopole colpevoli. **Restano** (sono AUDIO o assi del piano, §3.1/§3.3 della
+specifica): la scala AUDIO e i suoi pesi 1:2:1 (S2, A-R21 "prima size leggera, poi piu' pesante"), lo stop `ESTREMO_RECENTE` (A8)
+(e `LINEA_PIU_BUFFER`, lettura [NOSTRA] fuori piano, tenuta oltre l'ordine piu' profondo da X4), il TP dal riempimento (A1), la durata (A9), la confluenza SPENTA/SOLO_ETICHETTA. Nessun asse del piano usa una
+manopola rifiutata: il costo del piano non cambia. Collaudo: invariante **29** (blocco presente, completo, nel punto giusto, e
+**non** tocca scala/stop/TP dal riempimento), invariante **30** (valori dell'enum fissi AUDIO=0, PDF=1, EMA200=2: il magic M2 non
+si sposta), mutanti **K1-K5**; piu' 4 mutanti a mano del cancello sul rifiuto in `OnInit` (spostato dopo `Risolvi`, allargato a
+EMA200 con `>=`, `INIT_FAILED` al posto di `INIT_PARAMETERS_INCORRECT`, enum riordinato): **tutti presi**. Le `InpPdf*`,
+`InpScadenzaBarre`, `InpEmaTp1/2` restano input ma sono **inerti** (le usano solo il ramo PDF e il TP EMA, ora irraggiungibili).
 Checklist del par. 6: il punto **(5)** ("in PDF, `ORDINE ... LIMIT` con scadenza") **decade**; al suo posto: con `InpModalita=PDF`
 il Giornale deve dire `AVVIO RIFIUTATO: modalita PDF esclusa ...` e l'EA non resta sul grafico.
 
@@ -274,8 +288,19 @@ il Giornale deve dire `AVVIO RIFIUTATO: modalita PDF esclusa ...` e l'EA non res
 4. **Simboli e orari** (A-R27: mai nominati): su cosa opera davvero la collega e in quale fascia. Accorcia il passo 0 (36 simboli).
 5. **Periodi degli indicatori**: **ADX** periodo e tipo (A-R12 dice solo "a 20, non di piu'": iADX di MT5 o Wilder di TradingView,
    e la scelta dimezza o raddoppia i setup) e **ATR del Supertrend** (il 10 veniva **solo** dal PDF, P-p07: da oggi e' [NOSTRA]).
+   **Indizio, NON fonte**: lo strumento del coach **Paolo Lavorenti** `PL-SUPERTREND 3_LIVELLI V09` (scheda
+   `backtest_pipeline/caccia_strategie/biblioteca/schede/SUPERTREND_EX5_DISCO_CLAUDIO_2026-08-19.md`) ha **ATR 10, mult
+   2,5/3,0/3,5**, cioe' gli stessi tre livelli dell'audio (A-R2), e la collega chiama il PDF *"quello che ci aveva dato Paolo"*.
+   Non entra come fonte per la regola del 06/10 (*"l'EA si basa SOLO su questi file"*, `data/natcla/LEGGIMI.md`): la domanda resta,
+   ma con una risposta probabile da farle confermare ("usi l'indicatore di Paolo con ATR 10?").
 6. **Inclinazione della EMA200** (A-R19 "abbastanza inclinata"): quanta (soglia) e in che verso (concorde col trade o qualsiasi).
 7. **Rischio e taglie**: **decisione tua**, non della collega (segnaposto 0,25% per setup, istanze dentro il cap 3,25%, pesi della
    scala e confluenza spenti finche' non firmi). Il backtest consegna `r_max` in R; la taglia la scegli tu.
 8. **"Dieci volte tanto"** (A-R17, la collega stessa dice "non so"): 10 volte cosa? Oggi **non implementato**: se fosse x10 sulla
    taglia, e' una bandiera rossa di rischio e richiede la tua firma.
+9. **(aggiunta dal cancello 07/10) Quando piazza gli ordini della scala** (E3, "il punto piu' forte da far confermare"): in anticipo
+   e riprezzati a ogni barra, come fa l'EA (dedotto da *"a volte dura anche qualche secondo"*), o solo quando il prezzo arriva sulla
+   linea? Non e' un asse: e' una lettura fissa, quindi **nessun backtest la decide**.
+
+Restano inoltre, invariate, le domande del §8 della specifica che non nascevano dal PDF: **conto/broker** su cui girerebbe l'EA
+(commissioni, spread, orologio) e **fedelta' o misura** (se la lettura che regge nei test non e' quella della collega).

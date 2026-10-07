@@ -37,6 +37,12 @@ Il motore **EMA200 (M2) resta**: viene dall'audio WA0092 (A-R20), non dal PDF.
 *"modalita PDF esclusa da Claudio il 07/10/2026: Ea Nat&Cla segue solo gli audio"*). Il codice PDF **non e' cancellato**
 (marcato *CODICE MORTO, tenuto per archivio*): toglierlo rischiava di rompere il resto piu' di quanto valesse. Il default resta AUDIO.
 
+**v1.04 (cancello 07/10):** anche in AUDIO/EMA200 l'EA **rifiuta di partire** se un preset accende una manopola nata SOLO dal
+PDF (ingresso mercato+pendente, TP EMA14/EMA89, conferma, chiude vicino, timing, BE/parziale al TP1, R/R minimo, pesi PDF 1:2,
+confluenza OBBLIGATORIA). La scala AUDIO (pesi 1:2:1 compresi), lo stop `ESTREMO_RECENTE` (A8) e il TP dal riempimento (A1) **restano**: sono
+assi AUDIO/M2 (§3.1, §3.3). Lo stop `LINEA_PIU_BUFFER` resta impostabile come lettura **[NOSTRA]** di "resistenza", fuori piano
+(il vincolo X4 lo tiene comunque oltre l'ordine piu' profondo). Nessun asse del piano usa una manopola rifiutata.
+
 **Il resto di questa specifica NON e' stato riscritto**: dove sotto si legge "PDF", "P-pNN", la colonna "default PDF" o "le due
 fonti", vale l'elenco qui sotto. Le sezioni restano come archivio di cio' che era stato pensato.
 
@@ -55,7 +61,9 @@ fonti", vale l'elenco qui sotto. Le sezioni restano come archivio di cio' che er
    Williams, PeakRepairerStrict, ADR, numeri tondi, volatilita'/gap/news, versione del PDF).
 
 **Cosa NON decade ma perde la fonte** (valori invariati nell'EA, la v1.03 non tocca i default): **I1 periodo ATR 10 del
-Supertrend** aveva come unica fonte P-p07 -> da oggi e' **[NOSTRA]** (diventa domanda residua); **C1 "con l'ombra"** (P-p06) ->
+Supertrend** aveva come unica fonte P-p07 -> da oggi e' **[NOSTRA]** (diventa domanda residua; **indizio esterno, non fonte**
+per la regola del 06/10: lo strumento del coach Lavorenti `PL-SUPERTREND 3_LIVELLI V09` ha ATR 10 con mult 2,5/3,0/3,5, scheda
+`backtest_pipeline/caccia_strategie/biblioteca/schede/SUPERTREND_EX5_DISCO_CLAUDIO_2026-08-19.md`); **C1 "con l'ombra"** (P-p06) ->
 RAGGIUNGE resta come lettura **[NOSTRA]** di "toccare"; **A8 stop ESTREMO_RECENTE** resta come asse, lettura **[NOSTRA]** di
 "resistenza" (audio Q19), non piu' "il criterio del PDF".
 

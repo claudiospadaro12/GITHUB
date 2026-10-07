@@ -36,7 +36,7 @@ a tavolino, e si dice cosa resta fuori.
   R) RACCORDO (cancello 07/10): invarianti SEMANTICI sul codice non puro -- lato dell'ordine nel ramo
      (s>0), lotto/SL/TP passati come variabili controllate, ogni filtro arriva a NC_Contesto, ADX dal
      buffer 0, nessuna ora locale ne' costante oraria, riga d'avvio che stampa le variabili giuste.
-  M) MUTANTI CIECHI: 68 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
+  M) MUTANTI CIECHI: 73 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
      controllo. Un mutante che passa = buco del collaudo.
@@ -368,8 +368,9 @@ def statico(raw, bag):
         bag.append("input di lotto fisso presente")
     # bandiere: AVVISO condizionato all'input diverso dal default
     for cond in ("InpPesiScala!=NC_PESI_1_1_1", "InpPesiPdf!=NC_PESI_1_1", "InpMoltConfluenza!=1.0"):
-        k = src.find("if(" + cond + ")")
-        if k < 0 or "AVVISO BANDIERA" not in src[k:k + 300]:
+        # v1.04: "if(InpPesiPdf!=NC_PESI_1_1)" compare anche nel blocco solo-PDF di Risolvi: basta che UNA occorrenza abbia l'AVVISO
+        ks = [m.start() for m in re.finditer(re.escape("if(" + cond + ")"), src)]
+        if not any("AVVISO BANDIERA" in src[k:k + 300] for k in ks):
             bag.append("manca l'AVVISO in log per la bandiera %s" % cond)
     # magic: blocco e risoluzione
     if "gMagic<778600 || gMagic>778699" not in code:
@@ -634,6 +635,27 @@ def invarianti_raccordo(src, code, bag):
     if not oin.startswith(rif):
         bag.append("RACCORDO: OnInit non rifiuta InpModalita=PDF come prima istruzione con INIT_PARAMETERS_INCORRECT "
                    "e il messaggio della decisione del 07/10")
+    # (29) v1.04 (cancello sulla v1.03): in AUDIO/EMA200 Risolvi rifiuta le manopole nate SOLO dal PDF (sulle variabili
+    #      RISOLTE, dopo gBE e prima del magic), e il blocco NON tocca la scala AUDIO (InpPesiScala), lo stop (gSLCrit,
+    #      asse A8) ne' il TP dal riempimento (gTPCrit==1, asse A1). Mutanti K1-K4.
+    rb = ns(corpo(stc, "Risolvi"))
+    attese29 = ["if(gIngresso==1)pdfx+=", "if(gTPCrit==2)pdfx+=", "if(gConferma)pdfx+=", "if(gChiudeVicino>0)pdfx+=",
+                "if(InpTimingTocco!=NC_TIMING_IGNORA)pdfx+=", "if(gBE)pdfx+=", "if(InpParzialeTP1Pct>0)pdfx+=",
+                "if(gRRMin>0)pdfx+=", "if(InpPesiPdf!=NC_PESI_1_1)pdfx+=", "if(gConfl==2)pdfx+="]
+    i0, i1 = rb.find('stringpdfx="";'), rb.find('if(pdfx!=""){err="manopolenateSOLOdalPDF')
+    ibe, imag = rb.find("gBE=DaModB("), rb.find("if(InpMagic==0)")
+    blocco = rb[i0:i1] if 0 <= i0 < i1 else ""
+    if not blocco or not (0 <= ibe < i0 and i1 < imag) or "+pdfx;returnfalse;}" not in rb[i1:i1 + 120]:
+        bag.append("RACCORDO: Risolvi senza il blocco delle manopole solo-PDF (dopo gBE, prima del magic, con return false)")
+    for c in attese29:
+        if blocco.count(c) != 1:
+            bag.append("RACCORDO: blocco solo-PDF senza '%s'" % c)
+    if blocco.count("if(") != len(attese29) or any(t in blocco for t in ("InpPesiScala", "gSLCrit", "gTPCrit==1", "gTPCrit!=")):
+        bag.append("RACCORDO: il blocco solo-PDF tocca altro (scala AUDIO, stop, TP dal riempimento o una condizione in piu')")
+    # (30) v1.04: il magic automatico 7786+10*InpModalita+TF dipende dai VALORI dell'enum. NC_PDF=1 resta (escluso ma non
+    #      cancellato) perche' AUDIO resti 77860x e EMA200 resti 77862x: un enum rinumerato sposterebbe il magic M2. Mutante K5.
+    if not re.search(r"enumENUM_NC_MODALITA\{NC_AUDIO=0,NC_PDF=1,NC_EMA200=2\}", ns(code)):
+        bag.append("RACCORDO: ENUM_NC_MODALITA non e' piu' AUDIO=0, PDF=1, EMA200=2 (il magic automatico di EMA200 si sposterebbe)")
 
 
 def magic_libero():
@@ -1348,6 +1370,14 @@ def mutanti(raw, ser):
          ""),
         ("J2 rifiuto della modalita' PDF che fa partire l'EA", "segue solo gli audio\"); return(INIT_PARAMETERS_INCORRECT); }",
          "segue solo gli audio\"); return(INIT_SUCCEEDED); }"),
+        # --- v1.04 (cancello sulla v1.03): manopole solo-PDF rifiutate in Risolvi (invariante 29)
+        ("K1 blocco solo-PDF che non rifiuta piu'", "   if(pdfx!=\"\"){ err=\"manopole nate SOLO dal PDF (escluso da Claudio il 07/10/2026):\"+pdfx; return false; }\n",
+         "   if(pdfx!=\"\") Print(\"[NatCla] AVVISO manopole PDF:\",pdfx);\n"),
+        ("K2 TP EMA14/EMA89 di nuovo ammesso in AUDIO", "   if(gTPCrit==2) pdfx+=\" InpTPCriterio=EMA14_POI_EMA89\";\n", ""),
+        ("K3 il blocco spegne anche la scala AUDIO 1:2:1", "   if(InpPesiPdf!=NC_PESI_1_1) pdfx+=",
+         "   if(InpPesiPdf!=NC_PESI_1_1 || InpPesiScala!=NC_PESI_1_1_1) pdfx+="),
+        ("K4 confluenza: rifiutata l'etichetta AUDIO invece dell'obbligatoria", "   if(gConfl==2) pdfx+=", "   if(gConfl==1) pdfx+="),
+        ("K5 enum rinumerato: EMA200=3 (magic M2 77862x -> 77863x)", "   NC_EMA200=2     // EMA200:", "   NC_EMA200=3     // EMA200:"),
     ]
     base = tempfile.mkdtemp(prefix="natcla_mutanti_")     # FUORI dal repo (classe 1159)
     assert not os.path.abspath(base).startswith(os.path.abspath(ROOT))
