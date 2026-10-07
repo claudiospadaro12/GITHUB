@@ -592,13 +592,14 @@ int NC_CifreLotto(const double step)
 
 //--- 2.4: lotto arrotondato SEMPRE per DIFETTO allo step; sotto il minimo
 //    = 0 (l'ordine si SCARTA, mai alzato al minimo). Sopra il massimo =
-//    massimo (sempre verso il basso). La tolleranza 1e-7 step evita che
-//    2,9999999997 step diventino 2 per errore di rappresentazione.
+//    massimo (sempre verso il basso). La tolleranza 1e-9 step evita che
+//    29,999999999999996 step (0,30/0,01 in virgola mobile) diventino 29;
+//    0,299999999 lotti restano 0,29 (collaudato).
 double NC_LottoGiu(const double v,const double step,const double vmin,const double vmax)
   {
    if(!(v>0.0) || !(step>0.0)) return 0.0;
-   double lot=MathFloor(v/step+1e-7)*step;
-   if(vmax>0.0 && lot>vmax) lot=MathFloor(vmax/step+1e-7)*step;
+   double lot=MathFloor(v/step+1e-9)*step;
+   if(vmax>0.0 && lot>vmax) lot=MathFloor(vmax/step+1e-9)*step;
    if(lot<vmin-1e-12) return 0.0;
    return NormalizeDouble(lot,NC_CifreLotto(step));
   }
@@ -1246,6 +1247,10 @@ void ValutaScala(const int L)
    int ctx=Contesto(L,s,last,adx,incl,dc);
    if(ctx!=0){ gArmatoPrima[L]=false; Esito(ctx); return; }
    if(Aperti()>=InpMaxSetupAperti){ gArmatoPrima[L]=false; Esito(IMB_SEMAFORO); return; }
+   //--- GUARDIA ANTI-DUPLICATO [CASA, reload-safe]: se sul conto c'e' ancora qualcosa di questa
+   //    linea (cancellazione non riuscita, riempimento in volo) non si piazza niente di nuovo
+   int np0,no0; ContaLinea(L,np0,no0);
+   if(np0>0 || no0>0){ gArmatoPrima[L]=false; Esito(IMB_OCCUPATA); Log(StringFormat("%s: guardia anti-duplicato (%d posizioni, %d pendenti ancora sul conto)",gTag[L],np0,no0)); return; }
    ArmaScala(L,s,last,prossimo,chiave,adx,incl,dc);
   }
 
@@ -1350,6 +1355,8 @@ void ValutaPdf(const int L)
    bool lontana=(dist>InpPdfLontanoAtr);
    if(lontana && InpPdfAperturaLontana==NC_LONTANA_SALTA){ Esito(IMB_LONTANA); Log(StringFormat("tocco %s %s SCARTATO: apertura lontana dalla linea (%.2f ATR > %.2f)",gTag[L],Lato(s),dist,InpPdfLontanoAtr)); return; }
    if(Aperti()>=InpMaxSetupAperti){ Esito(IMB_SEMAFORO); return; }
+   int np0,no0; ContaLinea(L,np0,no0);   // GUARDIA ANTI-DUPLICATO [CASA]
+   if(np0>0 || no0>0){ Esito(IMB_OCCUPATA); Log(StringFormat("%s: guardia anti-duplicato (%d posizioni, %d pendenti ancora sul conto)",gTag[L],np0,no0)); return; }
    EntraPdf(L,s,last,nEp,chiave,lontana,lv0,dist,adx,incl,dc);
   }
 
@@ -1396,7 +1403,6 @@ void EntraPdf(const int L,const int s,const int last,const int toccoN,const date
    gSet[L].rischioSoldi=RischioSoldi(dc); gSet[L].adx=adx; gSet[L].incl=incl; gSet[L].conflDist=dc;
    gSet[L].conflEtichetta=(dc<=InpConflTolAtr) ? 1 : 0; gSet[L].distApertura=dist;
    gSet[L].tScadenza=gTbar0+(datetime)(((InpScadenzaBarre>1) ? InpScadenzaBarre : 1)*PeriodSeconds(gTF));
-   gUltimoEp[L]=chiave;     // nessun secondo setup sullo stesso episodio (X10), anche se i pendenti scadono
    ContestoLog(L,last);
    double ped=Pedaggio();
    int piazzati=0;
@@ -1416,6 +1422,7 @@ void EntraPdf(const int L,const int s,const int last,const int toccoN,const date
      }
    gSet[L].nOrdini=piazzati;
    if(piazzati==0){ ResetSetup(L); Esito(IMB_NESSUNORD); return; }
+   gUltimoEp[L]=chiave;     // nessun secondo setup sullo stesso episodio (X10), anche se i pendenti scadono
    Log(StringFormat("SETUP %s %s %s: tocco n.%d, linea %s, SL %s, TP1 %s, ordini %d, ADX %.1f, incl %.2f, confl %.2f ATR, apertura a %.2f ATR",
                     gTag[L],Lato(s),mercato ? "mercato+pendente" : "due pendenti",toccoN,P(lv0),P(sl),P(tp1),piazzati,adx,incl,dc,dist));
    if(InpPesiPdf!=NC_PESI_1_1) Log("AVVISO BANDIERA 2/3 PDF attiva su questo setup (pesi 1:2)");
@@ -1644,27 +1651,34 @@ void AdottaEsistenti()
       ContaLinea(L,np,no);
       if(np>0)
         {
-         ResetSetup(L);
-         gSet[L].attivo=true; gSet[L].riempito=true; gSet[L].adottato=true;
-         gSet[L].tipo=(gIngresso==0) ? NC_TIPO_SCALA : NC_TIPO_PDF; gSet[L].tRiempimento=TimeCurrent(); gSet[L].tSetup=TimeCurrent();
-         for(int i=PositionsTotal()-1;i>=0;i--)
-           {
-            ulong tk=PositionGetTicket(i);
-            if(tk==0) continue;
-            if(PositionGetString(POSITION_SYMBOL)!=_Symbol || PositionGetInteger(POSITION_MAGIC)!=gMagic) continue;
-            if(LineaDaCommento(PositionGetString(POSITION_COMMENT))!=L) continue;
-            gSet[L].lato=(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY) ? 1 : -1;
-            gSet[L].sl=PositionGetDouble(POSITION_SL);
-            datetime pt=(datetime)PositionGetInteger(POSITION_TIME);
-            if(pt<gSet[L].tRiempimento) gSet[L].tRiempimento=pt;
-            if(gSet[L].nPosId<8){ gSet[L].posId[gSet[L].nPosId]=(ulong)PositionGetInteger(POSITION_IDENTIFIER); gSet[L].nPosId++; }
-           }
-         gSet[L].tSetup=gSet[L].tRiempimento;
+         AdottaLinea(L);
          Log(StringFormat("AVVIO: ADOTTATO setup %s con %d posizioni e %d pendenti (TP1/pareggio non ricostruibili dopo un riavvio)",gTag[L],np,no));
         }
       else
          if(no>0) CancellaOrdiniLinea(L,"avvio: pendenti senza posizione, si riarmano dai dati");
      }
+  }
+
+//--- adotta le posizioni di una linea senza setup in memoria (riavvio, oppure
+//    un limit riempito mentre veniva cancellato per il riprezzamento)
+void AdottaLinea(const int L)
+  {
+   ResetSetup(L);
+   gSet[L].attivo=true; gSet[L].riempito=true; gSet[L].adottato=true;
+   gSet[L].tipo=(gIngresso==0) ? NC_TIPO_SCALA : NC_TIPO_PDF; gSet[L].tRiempimento=TimeCurrent();
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)!=_Symbol || PositionGetInteger(POSITION_MAGIC)!=gMagic) continue;
+      if(LineaDaCommento(PositionGetString(POSITION_COMMENT))!=L) continue;
+      gSet[L].lato=(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY) ? 1 : -1;
+      gSet[L].sl=PositionGetDouble(POSITION_SL);
+      datetime pt=(datetime)PositionGetInteger(POSITION_TIME);
+      if(pt<gSet[L].tRiempimento) gSet[L].tRiempimento=pt;
+      AggiungiPosId(L,(ulong)PositionGetInteger(POSITION_IDENTIFIER));
+     }
+   gSet[L].tSetup=gSet[L].tRiempimento;
   }
 
 void AggiungiPosId(const int L,const ulong id)
@@ -1681,9 +1695,22 @@ void Sincronizza()
    gOrfani=ContaOrfani();
    for(int L=0;L<NC_NL;L++)
      {
-      if(!gSet[L].attivo) continue;
       int np,no;
       ContaLinea(L,np,no);
+      if(!gSet[L].attivo)
+        {
+         if(np>0)
+           {
+            AdottaLinea(L);
+            Log(StringFormat("ADOTTATO %s: %d posizioni senza setup in memoria (riempimento durante una cancellazione?)",gTag[L],np));
+            if(Aperti()>InpMaxSetupAperti)
+              {
+               gImb[IMB_SEM_SFORATO]++;
+               Log(StringFormat("AVVISO SEMAFORO SFORATO: %d setup riempiti contro un massimo di %d",Aperti(),InpMaxSetupAperti));
+              }
+           }
+         continue;
+        }
       //--- registra gli ID delle posizioni della linea
       if(np>0)
          for(int i=PositionsTotal()-1;i>=0;i--)
