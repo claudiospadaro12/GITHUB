@@ -77,7 +77,7 @@ if LOTTO == "PILOTA":
             "Nessun PF, nessun DD: la lettura dei setup e leggi_natcla_f0.py sullo zip, i criteri sono scritti nel file prova PRIMA dei numeri.")
     tempo = ("TEMPO ATTESO [STIMA NON AGGANCIATA a un giro a passata singola OHLC di questo EA, lo misura proprio questo lotto]: compilazione circa 1 minuto + 8 passate x 30-120 secondi = 6-18 minuti in tutto. "
              "Il tetto del lotto e " + str(tetto) + " minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti e se lo supera lo script chiude il terminale da solo con CloseMainWindow). "
-             "NON fermarla prima di 45 minuti. Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
+             "NON fermarla prima di 65 minuti (caso peggiore: compilazione 2 + tetto 40 + ultima passata fino a 20 + chiusura 2; lo zip si scrive solo alla FINE). Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
     guarda = ("COSE DA GUARDARE PER PRIME quando torna, scritte PRIMA: (1) la riga di compilazione: 0 errori e quanti avvisi (se la compilazione FALLISCE lo script si ferma con rc 1 PRIMA del tester e mette il log di MetaEditor nello zip NATCLA_F0_PILOTA_COMPILAZIONE_FALLITA.zip sul Desktop: si manda QUELLO); "
               "(2) ESITO F0 e MANIFEST: 8 passate OK, ognuna con AVVIO si, ADX MetaQuotes e finestra uguale a quella dichiarata; se una e KO il motivo e scritto e NESSUN numero di quella passata si legge; "
               "(3) VERIFICA ADX: deve dire formula MetaQuotes su tutte e 8, se dice Wilder o NESSUNA ci si ferma e si manda la finestra; "
@@ -88,7 +88,7 @@ else:
             "Nessun PF, nessun DD: la lettura dei setup e leggi_natcla_f0.py sullo zip, i criteri sono scritti nel file prova PRIMA dei numeri.")
     tempo = ("TEMPO ATTESO [STIMA, da CORREGGERE con la media misurata dal pilota]: " + str(nrun) + " passate x 30-120 secondi = " + ("%.0f" % bassa) + "-" + ("%.0f" % alta) + " minuti. "
              "Il tetto del lotto e " + str(tetto) + " minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti): le passate non lanciate escono NON_LANCIATA nel MANIFEST. "
-             "NON fermarla prima di " + str(tetto + 5) + " minuti. Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
+             "NON fermarla prima di " + str(tetto + 25) + " minuti (caso peggiore: tetto " + str(tetto) + " + ultima passata fino a 20 + chiusura 2 + compilazione 2; lo zip si scrive solo alla FINE). Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
     guarda = ("COSE DA GUARDARE PER PRIME quando torna, scritte PRIMA: (1) ESITO F0 e MANIFEST: quante passate OK, KO, NON_LANCIATE (con il motivo); (2) VERIFICA ADX: formula MetaQuotes su tutte le passate OK, se Wilder o NESSUNA ci si ferma; "
               "(3) la media di secondi per passata contro la stima. Lo script CONTA e non giudica: la tabella la fa leggi_natcla_f0.py.")
 fine = ("FILE ATTESI NELLO ZIP sul Desktop (NATCLA_F0_" + LOTTO + ".zip): RIEPILOGO_F0.txt + MANIFEST_F0.csv + il file prova + compile_natcla.log + csv\\natcla_setup_<simbolo>_<magic>.csv x " + str(nrun) +
