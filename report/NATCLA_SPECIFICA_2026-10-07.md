@@ -144,3 +144,205 @@ impostato a mano vince sempre sulla modalita'. Le unita' "u" sono quelle di `Inp
 | `InpVerbose` | true | [CASA] |
 | `InpSoloConta` | false | **[NOSTRA]** modalita' sonda per il passo 0: valuta tutto, scrive i setup nel CSV, **non manda ordini** |
 | `InpPlaceboAtr` | 0 | **[NOSTRA]** strumento di misura (§6, E7): sposta ogni linea di k x ATR verso il prezzo. **Fuori dal tester l'EA rifiuta di partire se e' diverso da 0** |
+
+---
+
+## 2. LOGICA DELL'EA A STATI
+
+### 2.1 Risoluzione della configurazione (OnInit)
+
+Ogni input "ambiguo" ha un valore `DA_MODALITA` (default). In `OnInit` l'EA:
+1. risolve ogni `DA_MODALITA` con la colonna AUDIO o PDF del §1;
+2. **stampa nel Giornale e scrive in testa al CSV la CONFIGURAZIONE EFFETTIVA** (una riga per input, con l'etichetta
+   `[FONTE]`/`[NOSTRA]`): nessuna scelta resta nascosta, e un report del tester si puo' sempre ricondurre ai valori veri;
+3. rifiuta l'avvio (`INIT_PARAMETERS_INCORRECT`) se: `InpTF` < H1 (A-R8/R9); `InpPlaceboAtr` != 0 fuori dal tester;
+   `InpRischioSetupPct` <= 0; `InpMoltConfluenza` x rischio > `InpRischioMaxSetupPct` (il troncamento e' dichiarato a log);
+4. crea gli handle (`iATR` x2, `iMA` EMA200/14/89/9/21, `iADX`, `iBands` solo se `InpLogContesto`) e li rilascia in
+   `OnDeinit` **[CASA]**.
+
+### 2.2 Le macchine a stati
+
+Una macchina **per linea** L in {ST2.5, ST3.0, ST3.5, EMA200} (solo quelle attive), piu' un **semaforo di istanza**
+(`InpMaxSetupAperti`). Tutto il segnale si valuta **a barra chiusa** (`OnNewBar`); gli ordini vivono sui tick.
+
+```text
+STATI DI UNA LINEA L
+  INERTE ............ contesto non valido (filtri falliti, linea non calcolabile, conteggio esaurito)
+  ARMATO ............ [solo SCALA3_PENDENTI] tre limit vivi attorno alla linea, riprezzati a ogni barra
+  ATTESA_CONFERMA ... [solo MERCATO_PIU_PENDENTE] tocco valido sulla barra appena chiusa, si aspetta l'open successivo
+  IN_POSIZIONE ...... almeno un ordine del setup riempito
+  CHIUSO ............ setup finito (TP, SL, tempo): si aggiorna il contatore, nessun riarmo sullo stesso episodio
+
+TRANSIZIONI
+  INERTE -> ARMATO            OnNewBar: ContestoOk(L) && ToccoNumeroProssimo(L) <= MaxTocchi(L) && semaforo libero
+  ARMATO -> ARMATO            OnNewBar: riprezza i tre limit sulla nuova linea (OrderModify; se FREEZE/STOPS lo vietano: cancella e riarma)
+  ARMATO -> INERTE            OnNewBar: ContestoOk(L) falso, flip della linea, conteggio esaurito -> cancella i limit
+  ARMATO -> IN_POSIZIONE      OnTradeTransaction: riempimento di un limit del setup -> cancella i limit delle ALTRE linee (semaforo)
+  INERTE -> ATTESA_CONFERMA   OnNewBar (barra i chiusa): ToccoValido(L,i) && ChiudeVicino && ContestoOk(L) && conteggio ok
+  ATTESA_CONFERMA -> IN_POSIZIONE  primo tick della barra i+1: open dal lato giusto (se InpConfermaApertura) -> mercato + pendente
+  ATTESA_CONFERMA -> INERTE   open fuori (setup invalidato, P-p14/p20) oppure apertura "lontana" con SALTA
+  IN_POSIZIONE -> CHIUSO      TP/SL del setup, durata massima, oppure tutti gli ordini scaduti senza riempimento
+  CHIUSO -> INERTE            alla prima barra che NON tocca la linea (fine episodio, C5)
+  qualunque -> INERTE          flip della linea: azzera il contatore (AL_FLIP) e cancella i pendenti NON riempiti
+```
+
+### 2.3 Pseudocodice
+
+```text
+OnNewBar():
+  ImbutoGiro()                                     // [CASA] riepilogo giornaliero dei rifiuti
+  per ogni linea L attiva:
+     calcola linea[1], linea[2], dir[1], dir[2]    // Supertrend su HL2 con iATR(10); EMA200 per il motore M2
+     se dir[1] != dir[2]: Flip(L); continue        // flip = nuovo segmento, contatore a 0, pendenti cancellati
+     tocco = ToccoValido(L, barra 1)               // C1-C3: estremo raggiunge linea[2], chiusura dal lato del trend
+     AggiornaEpisodi(L, tocco)                     // C5, C6
+     se InpSoloConta: ScriviSetupCSV(L, ...) ; continue   // passo 0: niente ordini
+     se stato(L)==ARMATO e !ContestoOk(L): CancellaLimit(L); stato=INERTE; conta rifiuto
+     se stato(L)==INERTE:
+        se modo SCALA3 e ContestoOk(L) e ProssimoTocco(L) <= MaxTocchi(L) e Semaforo(): ArmaScala(L)
+        se modo MERCATO_PIU_PENDENTE e tocco e ChiudeVicino(L) e ContestoOk(L) e conteggio ok: stato=ATTESA_CONFERMA
+
+ContestoOk(L):
+  lato coerente con InpDirezione                   // D1
+  ADX: se InpAdxUsa e (Ambito==TUTTE o L==ST3.5): ADX[1] <= InpAdxMax
+  Inclinazione: se InpInclUsa: abs(EMA200[1]-EMA200[1+N])/ATR14[1] >= soglia (e verso concorde se CONCORDE)
+  Confluenza: se OBBLIGATORIA: abs(linea[1]-EMA200[1]) <= k*ATR14[1]   (se SOLO_ETICHETTA: si scrive e basta)
+  spread: se InpMaxSpreadPunti>0
+  ritorna vero solo se tutti passano; il PRIMO che fallisce incrementa il suo contatore d'imbuto
+
+ArmaScala(L):                                       // modo AUDIO (E2, E3)
+  livelli = [linea + s*anticipo, linea, linea - s*oltre]   // s = +1 long (ordini sopra/su/sotto il floor), -1 short (specchio)
+  SL = PrezzoStop(L, livelli)                       // X1-X4: comune, oltre l'ordine piu' profondo + buffer
+  TP_i = linea + s*10u (DALLA_LINEA) oppure livello_i + s*10u (DAL_RIEMPIMENTO)
+  scarta l'ordine i se TP_i non e' oltre livello_i di almeno 1u (X5) o se livello_i viola STOPS_LEVEL
+  lotti = Lotto(R_setup, pesi, distanze livello_i->SL)  // stesso lotto per tutti se pesi 1:1:1 (S1-S2, sez. 2.4)
+  per ogni ordine i rimasto:
+     se !ABTG_GuardiaIngresso(InpUsaGuardian,"EA_NatCla"): conta cO_guardian; non inviare   // sez. 2.5
+     BuyLimit/SellLimit(lotto, livello_i, SL, TP_i, commento "NATCLA_A_<L>_O<i>"); controlla retcode, logga il rifiuto
+
+ConfermaPDF(L) al primo tick della nuova barra:     // modo PDF (C8, E1, E4, E5)
+  se InpConfermaApertura e open non e' dal lato del trend rispetto a linea[1]: INERTE (invalidato), conta
+  dist = abs(open - linea[1]) / ATR14
+  se dist > InpPdfLontanoAtr: SALTA (default) oppure due limit [linea, linea - s*dist2]
+  altrimenti: ordine a mercato + limit a s*InpPdfDistanzaSecondo OLTRE il primo ingresso (verso la linea, P-p21 fig.4)
+  SL = PrezzoStop; TP1 = EMA14 congelata, TP finale = EMA89 o InpRRMin*R (X6); filtro R/R minimo (X7)
+  stessa Guardia immediatamente prima di OGNI invio; il pendente scade dopo InpScadenzaBarre barre
+
+OnTick():
+  GestisciPosizioni():  BE/parziale al TP1 (PDF), durata massima (X9), cancellazione dei residui al primo TP o allo SL (X10)
+  [il segnale NON si rivaluta sui tick: solo gestione]
+
+OnTester():  ExportTrades esteso (sez. 2.6) + statistiche OptFrame                                   // [CASA]
+```
+
+### 2.4 Il calcolo del lotto (rischio del setup fissato PRIMA di entrare)
+
+- Con stop comune e pesi w_i, il lotto base `b` si sceglie perche' **se TUTTI gli ordini si riempiono** la perdita allo stop sia
+  esattamente `R_setup`: `b = R_setup / sum_i( w_i x PerditaPerLotto(d_i) )`, con `d_i` = distanza ingresso_i -> SL.
+  Ordine i = `w_i x b`. Con pesi 1:1:1 tutti gli ordini hanno **lo stesso lotto** (mandato: "stessa size per tutti").
+- `PerditaPerLotto` con `OrderCalcProfit` e ripiego sul tick value **[CASA]** (riferimento r.543-565, lezione 08/08 sul 225JPY).
+- **Arrotondamento SEMPRE per difetto allo step**; se un ordine scende sotto `SYMBOL_VOLUME_MIN` **si scarta quell'ordine** (contato
+  nell'imbuto). **Qui NON copio la convenzione del riferimento** (r.571 `MathMax(mn, ...)` arrotonda al lotto minimo, cioe' alza il
+  rischio in silenzio sui conti piccoli): deviazione dichiarata, in senso prudente.
+- Il rischio non dipende mai dal P/L passato (niente martingala): legge solo il **saldo** e `R_setup`.
+
+### 2.5 Guardian di casa: come e dove
+
+- `#include <ABTG_PausaGuardian.mqh>` e `input bool InpUsaGuardian = true;` **[CASA]**, testo del commento copiato dal riferimento
+  r.33-44 (firme B1 pausa giornaliera e C1 cap rischio aperto del 18/08).
+- Chiamata `ABTG_GuardiaIngresso(InpUsaGuardian,"EA_NatCla")` **immediatamente prima di ogni invio di APERTURA** (mercato E
+  ciascun pendente), **mai in cima all'imbuto** e mai sulle chiusure: regola scritta nella libreria stessa (`ABTG_PausaGuardian.mqh`
+  r.57-66), perche' altrimenti la macchina a stati non registrerebbe il tocco e l'EA entrerebbe dopo su un livello vecchio.
+  Argomenti in coda lasciati al default neutro (P1/S1/P0/C2 spenti), come le 93 chiamate censite della flotta.
+- **Avvertenza fail-open nel tester, da scrivere in ogni referto di backtest**: nello Strategy Tester le GlobalVariable del
+  Guardian non esistono, quindi la guardia **lascia passare tutto** (libreria r.1517-1520: input spento / canale inesistente /
+  battito vecchio = passa). I backtest misurano l'EA **senza** pausa B1 e senza cap C1: e' voluto (confrontabilita'), ma vuol dire
+  che il DD del tester **non** e' ridotto dal Guardian.
+- **Avvertenza specifica di QUESTO EA (buco B6)**: C1 somma solo **posizioni con SL**; i pendenti non si contano
+  (`ABTG_Guardian.mq5` r.90-93) e un pendente piazzato a cap libero **scatta lo stesso** dopo (libreria r.49-52). Con la scala
+  AUDIO il rischio vive per lo piu' in pendenti: la guardia vede il setup solo mentre si riempie. Mitigazioni gia' dentro l'EA:
+  `R_setup` fisso per costruzione (2.4) e `InpMaxSetupAperti`=1. Il tetto P0 per simbolo/lato **conta anche i pendenti** ma e'
+  spento di default in tutta la flotta: accenderlo e' una decisione di rischio (firma), non di questa specifica.
+- Ricordo da `CLAUDE.md` (12/09): una sedia che gira su un conto **senza** Guardian e' fail-open in campo. Prima di schierare,
+  il binario compilato deve contenere `InpUsaGuardian` (verificabile) e il conto deve avere il Guardian vivo.
+
+### 2.6 Log e CSV per-trade (servono alle attese del §6)
+
+Oltre all'export di casa (`abtg_trades_<EA>_<simbolo>_<magic>.csv`, cartella comune **[CASA]**), un CSV `natcla_setup_...` con
+una riga per setup (anche in `InpSoloConta`): ora apertura barra, linea, lato, numero del tocco nel segmento, ADX, inclinazione,
+distanza linea-EMA200 in ATR, etichetta confluenza, ordini piazzati/riempiti, prezzi, SL, TP, **stop/pedaggio per ordine**
+(spread al momento + commissione), EMA9, EMA21, larghezza Bollinger, esito in R, durata in minuti, motivo di chiusura. E' cio' che
+permette di dividere i risultati per lato, linea e numero di tocco **senza** girare passate in piu'.
+
+---
+
+## 3. LE AMBIGUITA' COME ASSI, E QUANTO COSTANO
+
+Regole di casa applicate: **una variabile alla volta** contro la base della propria modalita'; si apre un asse **solo** dove la
+base non e' gia' morta con certificato; **mai griglie incrociate** nel primo giro. Unita' di costo: **passate** = celle x 2 lati
+x 2 TF, **per simbolo** (la regola dei due lati di casa si applica a tutti i simboli, non solo agli indici).
+
+### 3.1 Assi del modo AUDIO (base: tutte e tre le linee, 1/1/2 tocchi, ADX14 <= 20 solo sul 3.5, inclinazione P50, scala (5,5), stop ordine profondo + 5, TP 10 dalla linea)
+
+| asse | ambiguita' (fonte) | valori | celle oltre la base | passate/simbolo |
+|---|---|---|---:|---:|
+| A1 ancora del TP | audio §3.4 | DALLA_LINEA / DAL_RIEMPIMENTO | 1 | 4 |
+| A2 scala | audio §3.2 + "5/10" | (5,5) / (10,5) / (5,10) | 2 | 8 |
+| A3 definizione di tocco | audio Q7 | RAGGIUNGE / SFIORA | 1 | 4 |
+| A4 conteggio | audio Q8 | letterale / illimitato; reset AL_FLIP / DISTACCO | 2 | 8 |
+| A5 ADX | A-R12 | spento; periodo 10/20; soglia 25; ambito TUTTE | 4 | 16 |
+| A6 inclinazione EMA200 | A-R19 | spenta; P25; P75; verso CONCORDE | 3 | 12 |
+| A7 linee | A-R11/13/14 | solo 2.5 / solo 3.0 / solo 3.5 | 3 | 12 |
+| A8 stop | A-R23 | ESTREMO_RECENTE + 5 | 1 | 4 |
+| A9 durata | A-R24 | 60 min | 1 | 4 |
+| A10 unita' (solo oro) | audio §3.3 | 0,1 USD contro 1,0 USD | 0 (aritmetica, §5.3) | 0 |
+| **Totale AUDIO** | | | **18** | **72** |
+
+### 3.2 Assi del modo PDF (base: solo 3.5, conferma on, chiude vicino 0,5 ATR, confluenza EMA200 obbligatoria 0,5 ATR, mercato + limit a 20, stop estremo recente, TP EMA14/EMA89, R/R 1, BE al TP1, parziale 0)
+
+| asse | ambiguita' (fonte) | valori | celle oltre la base | passate/simbolo |
+|---|---|---|---:|---:|
+| P1 conferma | P-p06 vs audio | off | 1 | 4 |
+| P2 chiude vicino | P-p14 "vicino" | 0,25 / 1,0 | 2 | 8 |
+| P3 confluenza | P-p21 vs audio | spenta; tolleranza 0,25 / 1,0 | 3 | 12 |
+| P4 secondo ordine | P §C-3 | 10 invece di 20; ramo DUE_PENDENTI | 2 | 8 |
+| P5 stop | P §C-10 | LINEA + 5; ORDINE_PROFONDO + 5 (fig.4) | 2 | 8 |
+| P6 uscite | P §C-2, p17 | R/R 2; parziale 50 | 2 | 8 |
+| P7 timing | P §C-1 | PRIMA_META / SECONDA_META | 2 | 8 |
+| P8 durata | (asse di uscita) | 60 min | 1 | 4 |
+| **Totale PDF** | | | **15** | **60** |
+
+### 3.3 Motore EMA200 (M2) e bandiere di taglia
+
+| famiglia | celle | passate/simbolo |
+|---|---:|---:|
+| M2 base (scala AUDIO sulla EMA200, inclinazione P50, nessun limite di tocchi) | 1 | 4 |
+| M2 assi: tocco, inclinazione P25/P75/CONCORDE, TP dal riempimento, scala 2 varianti, stop, durata | 9 | 36 |
+| Bandiera S2 pesi 1:2:1 (AUDIO) e S3 1:2 (PDF), **a parita' di rischio totale** | 2 | 8 |
+| Placebo (E7): linea spostata di 1 x ATR, una per modalita' | 2 | 8 |
+
+### 3.4 Totale e costo
+
+- **Base (fase 1)**: 3 famiglie x 2 lati x 2 TF = **12 passate per simbolo**.
+- **Assi completi (fase 2)**: 72 + 60 + 40 + 8 + 8 = **188 passate per simbolo**, ma **solo** sui simboli dove la base della
+  famiglia non e' morta. Se la collega risponde alle bloccanti, il totale scende (tabella §8).
+- Costo per passata a tick reali, ancore **misurate** in casa: 0,083 min/passata (R88a, tick M5, 21 mesi) - 0,333 min/passata
+  (R245, 84 passate in 28 min); 20,1 s/passata Dow M5 (R202A). Il forex ha volumi di tick diversi dal Dow: banda larga.
+  -> fase 2 su 5 simboli = 940 passate = **1,3-5,2 ore di PC** **[STIMA]**; base su 15 simboli = 180 passate = **15-60 min** **[STIMA]**.
+
+---
+
+## 4. BANDIERE ROSSE E COME SONO GESTITE
+
+| # | bandiera (fonte) | gestione nell'EA | resta da decidere a |
+|---|---|---|---|
+| B1 | Scala con taglie crescenti sui riempimenti avversi (A §5 B1; P §D 2/3 contro il movimento) | pesi **1:1:1 / 1:1** di default; **stop comune**: `R_setup` e' la perdita se TUTTI gli ordini si riempiono, fissata prima di entrare; i pesi alternativi si misurano **a parita' di R** | Claudio, se mai si volessero accendere |
+| B2 | "Dieci volte tanto" (A-R17) | **non implementato** | Claudio + collega (cosa vuol dire) |
+| B3 | Taglia per convinzione con confluenza (A-R16) | `InpMoltConfluenza`=1,0; un valore > 1 e' troncato a `InpRischioMaxSetupPct` | Claudio (firma su un rischio piu' alto) |
+| B4 | Stop non definito (A-R23) | criterio dichiarato e **sempre presente**; setup scartato se lo stop non e' calcolabile; **mai un ordine senza SL** | collega (numero vero) |
+| B5 | R/R ignoto, TP piccolo contro stop largo | R/R scritto per ogni ordine nel CSV; nel modo PDF filtro R/R minimo | misura (§6 E3) |
+| B6 | Cancello del costo | misurato per simbolo e per ordine (§5.3); nessun filtro nascosto | misura |
+| B7 | Operazioni di pochi secondi | merito **solo** a tick reali; le barre possono solo bocciare | misura |
+| B8 | Rischio aggregato (3 ordini x 3 linee x piu' TF) | `InpMaxSetupAperti`=1; Guardian C1 (con il buco B6 dei pendenti dichiarato, §2.5); una istanza per TF = rischio che si somma fra istanze: **da contare nel cap 3,25%** | Claudio (quante istanze) |
+| B9 | Martingala / recovery / griglia | **assenti per costruzione**: lotto indipendente dal P/L passato, max 3 ordini per setup, nessun riarmo sullo stesso episodio, residui cancellati a fine setup (X10) | - |
+| B10 | PDF: 2/3 "su breakout successivo" (p12) | **non implementato** (contraddice p17/p21/p26 e il livello "Res D1" non e' meccanizzabile) | collega |
