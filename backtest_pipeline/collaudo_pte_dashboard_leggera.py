@@ -597,6 +597,10 @@ def raccordo_v11(src, code, bag):
                     ("if(!via){gNuovoId[tieni]=gNuovoId[x];gNuovoFino[tieni]=gNuovoFino[x];tieni++;}", "lista sorvegliati non compattata")):
         need(pz, cn, "classe 951: " + msg)
     need("if(gNuovoN>0)ControllaNuovi();", C("OnTimer"), "classe 951: il timer non sorveglia i grafici aperti dal click")
+    # [lettore indipendente 08/10: 3 mutanti ciechi su 12 restavano VERDI nella sorveglianza del grafico nuovo]
+    need("via=true;}elseif(gGiri>gNuovoFino[x])via=true;}if(!via)", cn, "classe 951: dopo l'Alert il grafico non esce dalla sorveglianza (Alert ogni secondo)")
+    need("tieni++;}}gNuovoN=tieni;}", cn, "classe 951: lista sorvegliati non accorciata (Alert ripetuti)")
+    need("if(gNuovoN>=8){for(intx=1;x<8;x++){gNuovoId[x-1]=gNuovoId[x];gNuovoFino[x-1]=gNuovoFino[x];}gNuovoN=7;}", sv, "classe 951: overflow della lista sorvegliati (indice 8 fuori range -> indicatore scaricato)")
     need("if(!ChartSetSymbolPeriod(0,sym,tf))", va, "ChartSetSymbolPeriod non su questo grafico con (sym, tf)")
     for f in ("ChartSetSymbolPeriod(", "ChartOpen(", "SymbolSelect("):
         if code.count(f) != 1 or f not in norm(corpo(code, "VaiA") or ""):
@@ -1969,6 +1973,9 @@ MUTANTI = [
     ("CANC 951 EA letto su QUESTO grafico invece del nuovo", "string ea=ChartGetString(id,CHART_EXPERT_NAME);", "string ea=ChartGetString(0,CHART_EXPERT_NAME);"),
     ("CANC 951 sorveglianza senza scadenza", "         else if(gGiri>gNuovoFino[x]) via=true;", ""),
     # classe 965: ancora all'ora
+    ("CANC 951 Alert del grafico nuovo senza uscita dalla sorveglianza", "(arriva dal modello default.tpl). Se non lo volevi, toglilo SUBITO.\");\n            via=true;", "(arriva dal modello default.tpl). Se non lo volevi, toglilo SUBITO.\");"),
+    ("CANC 951 lista sorvegliati mai compattata", "   gNuovoN=tieni;\n", ""),
+    ("CANC 951 overflow della lista sorvegliati senza gNuovoN=7", "      gNuovoN=7;\n", ""),
     ("CANC 965 ancora all'ora tolta", "   if(!pieno && time[prev_calculated-1]!=gUltBarraGraf) pieno=true;\n", ""),
 ]
 
