@@ -36,7 +36,7 @@ a tavolino, e si dice cosa resta fuori.
   R) RACCORDO (cancello 07/10): invarianti SEMANTICI sul codice non puro -- lato dell'ordine nel ramo
      (s>0), lotto/SL/TP passati come variabili controllate, ogni filtro arriva a NC_Contesto, ADX dal
      buffer 0, nessuna ora locale ne' costante oraria, riga d'avvio che stampa le variabili giuste.
-  M) MUTANTI CIECHI: 66 mutazioni del sorgente (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
+  M) MUTANTI CIECHI: 68 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
      controllo. Un mutante che passa = buco del collaudo.
@@ -623,6 +623,17 @@ def invarianti_raccordo(src, code, bag):
             bag.append("RACCORDO: VerificaAdx senza '%s'" % a)
     if "if(ok&&!gAdxVerificato){VerificaAdx();gAdxVerificato=true;}" not in ns(corpo(code, "OnNewBar")):
         bag.append("RACCORDO: la riga VERIFICA ADX non e' stampata alla prima barra con dati")
+    # (28) v1.03, decisione di Claudio 07/10/2026 (data/natcla/LEGGIMI.md): la modalita' PDF e' ESCLUSA.
+    #      OnInit la rifiuta come PRIMA istruzione (prima di stato, handle, file), con INIT_PARAMETERS_INCORRECT
+    #      e il messaggio in chiaro. Il default AUDIO e' gia' in DEFAULT_ATTESI. Mutanti J1/J2.
+    ob = corpo(code, "OnInit") or ""
+    oi_ = code.find(ob) if ob else -1
+    oin = ns(stc[oi_:oi_ + len(ob)]) if oi_ >= 0 else ""
+    rif = ('intOnInit(){if(InpModalita==NC_PDF){Print("[NatCla]AVVIORIFIUTATO:modalitaPDFesclusadaClaudioil07/10/2026:'
+           'EaNat&Claseguesologliaudio");return(INIT_PARAMETERS_INCORRECT);}')
+    if not oin.startswith(rif):
+        bag.append("RACCORDO: OnInit non rifiuta InpModalita=PDF come prima istruzione con INIT_PARAMETERS_INCORRECT "
+                   "e il messaggio della decisione del 07/10")
 
 
 def magic_libero():
@@ -1331,6 +1342,12 @@ def mutanti(raw, ser):
         ("I7 filtro simbolo tolto nella cancellazione",
          "      if(OrderGetString(ORDER_SYMBOL)!=_Symbol || OrderGetInteger(ORDER_MAGIC)!=gMagic) continue;\n      if(LineaDaCommento(OrderGetString(ORDER_COMMENT))!=L) continue;\n      if(gTrade.OrderDelete",
          "      if(OrderGetInteger(ORDER_MAGIC)!=gMagic) continue;\n      if(LineaDaCommento(OrderGetString(ORDER_COMMENT))!=L) continue;\n      if(gTrade.OrderDelete"),
+        # --- v1.03 (decisione di Claudio 07/10/2026): modalita' PDF esclusa in OnInit (invariante 28)
+        ("J1 rifiuto della modalita' PDF rimosso",
+         "   if(InpModalita==NC_PDF)\n     { Print(\"[NatCla] AVVIO RIFIUTATO: modalita PDF esclusa da Claudio il 07/10/2026: Ea Nat&Cla segue solo gli audio\"); return(INIT_PARAMETERS_INCORRECT); }\n",
+         ""),
+        ("J2 rifiuto della modalita' PDF che fa partire l'EA", "segue solo gli audio\"); return(INIT_PARAMETERS_INCORRECT); }",
+         "segue solo gli audio\"); return(INIT_SUCCEEDED); }"),
     ]
     base = tempfile.mkdtemp(prefix="natcla_mutanti_")     # FUORI dal repo (classe 1159)
     assert not os.path.abspath(base).startswith(os.path.abspath(ROOT))

@@ -1,9 +1,11 @@
 //+------------------------------------------------------------------+
 //|                                                  EA_NatCla.mq5   |
 //|                                                                  |
-//|  "Ea Nat&Cla" -- UN SOLO EA, tre motori scelti da InpModalita:  |
+//|  "Ea Nat&Cla" -- UN SOLO EA, motori scelti da InpModalita:       |
 //|    AUDIO  = come opera la collega a voce (audio WA0090/91/92)    |
-//|    PDF    = documento "Supertrend Reversal" (data/natcla/)       |
+//|    PDF    = ESCLUSA da Claudio il 07/10/2026 (data/natcla/       |
+//|             LEGGIMI.md: comandano SOLO gli audio). OnInit rifiuta|
+//|             di partire; il codice PDF resta solo per archivio.   |
 //|    EMA200 = motore M2 "solo EMA 200" (A-R20), scala AUDIO sulla  |
 //|             EMA200 (specifica par. 3.3)                          |
 //|                                                                  |
@@ -27,6 +29,10 @@
 //|  v1.02 (terza lettura 07/10): il ritentativo sui pendenti orfani |
 //|  e' cadenzato (uno ogni NC_ORF_PAUSA_SEC per linea, non a ogni   |
 //|  tick): niente raffica di richieste se la cancellazione fallisce.|
+//|  v1.03 (07/10, decisione di Claudio): modalita' PDF ESCLUSA. Con |
+//|  InpModalita=PDF OnInit rifiuta (INIT_PARAMETERS_INCORRECT). Il  |
+//|  codice PDF NON e' cancellato (CODICE MORTO, tenuto per archivio)|
+//|  per non rompere altro. Strato 2 su questa versione: DA FARE.    |
 //|  NON compilato qui (nessun MetaEditor in questo ambiente): la     |
 //|  prima compilazione e il primo giro nel tester sono il collaudo  |
 //|  che manca. Solo DEMO/TESTER finche' Claudio non firma.          |
@@ -69,11 +75,11 @@
 //|  DEMO/TESTER. Nessun EA garantisce profitti.                     |
 //+------------------------------------------------------------------+
 #property copyright "Ea Nat&Cla - progetto Claudio (ABTG)"
-#property description "Ea Nat&Cla: modo AUDIO (collega) / PDF (Supertrend Reversal) / motore solo EMA200. Specifica report/NATCLA_SPECIFICA_2026-10-07.md. Rischio 0,25% = SEGNAPOSTO da firmare da Claudio."
-#property version   "1.02"
+#property description "Ea Nat&Cla: modo AUDIO (collega) / motore solo EMA200 (audio WA0092). Modo PDF ESCLUSO da Claudio il 07/10/2026. Specifica report/NATCLA_SPECIFICA_2026-10-07.md. Rischio 0,25% = SEGNAPOSTO da firmare da Claudio."
+#property version   "1.03"
 #property strict
 
-#define NC_VER "1.02"
+#define NC_VER "1.03"
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -85,7 +91,7 @@
 enum ENUM_NC_MODALITA
   {
    NC_AUDIO=0,     // AUDIO: come opera la collega (3 audio)
-   NC_PDF=1,       // PDF: documento Supertrend Reversal
+   NC_PDF=1,       // PDF: ESCLUSA il 07/10/2026 (OnInit rifiuta di partire)
    NC_EMA200=2     // EMA200: motore M2 solo EMA200 (scala AUDIO)
   };
 enum ENUM_NC_TRI
@@ -186,7 +192,7 @@ enum ENUM_NC_TP
 //  INPUT
 //==================================================================
 input group "=== Modalita' e timeframe ==="
-input ENUM_NC_MODALITA  InpModalita = NC_AUDIO;        // Modalita': AUDIO / PDF / EMA200 (motore M2)
+input ENUM_NC_MODALITA  InpModalita = NC_AUDIO;        // Modalita': AUDIO / EMA200 (motore M2). PDF = ESCLUSA 07/10 (rifiutata)
 input ENUM_TIMEFRAMES   InpTF       = PERIOD_CURRENT;  // TF del segnale. CURRENT = DA_MODALITA (AUDIO H1, PDF H4, EMA200 H1). Sotto H1 = rifiutato (A-R8/R9)
 input ENUM_NC_DIREZIONE InpDirezione= NC_DIR_ENTRAMBI; // Direzione (A-R26 mai dichiarata): nei test i lati si girano SEPARATI
 
@@ -1087,7 +1093,7 @@ void Cfg(const string nome,const string valore,const string etichetta)
 
 void StampaConfigurazione()
   {
-   string avvio=StringFormat("AVVIO v%s | modalita' %s | %s %s | 1 u = %s (%s) | 1 pip = %s | magic %s | linee %s%s%s%s | ADX %s, %s, max %.1f, periodo %d | ingresso %s | rischio setup %.2f%% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian %s | solo conta %s | placebo %.2f ATR",
+   string avvio=StringFormat("AVVIO v%s | modalita' %s | %s %s | 1 u = %s (%s) | 1 pip = %s | magic %s | linee %s%s%s%s | ADX %s, %s, max %.1f, periodo %d | ingresso %s | rischio setup %.2f%% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian %s | solo conta %s | placebo %.2f ATR | fonte SOLO AUDIO (PDF escluso 07/10)",
                              NC_VER,NomeModalita(),_Symbol,EnumToString(gTF),DoubleToString(gU,_Digits),gUDescr,
                              DoubleToString(PipMT(),_Digits),IntegerToString(gMagic),
                              gUsaLinea[0] ? "ST25 " : "",gUsaLinea[1] ? "ST30 " : "",gUsaLinea[2] ? "ST35 " : "",gUsaLinea[3] ? "E200" : "",
@@ -1153,6 +1159,10 @@ void StampaConfigurazione()
 //==================================================================
 int OnInit()
   {
+   //--- v1.03 [decisione di Claudio 07/10/2026, data/natcla/LEGGIMI.md]: comandano SOLO gli audio.
+   //    La modalita' PDF si rifiuta PRIMA di tutto (nessun handle, nessun file, nessun ordine).
+   if(InpModalita==NC_PDF)
+     { Print("[NatCla] AVVIO RIFIUTATO: modalita PDF esclusa da Claudio il 07/10/2026: Ea Nat&Cla segue solo gli audio"); return(INIT_PARAMETERS_INCORRECT); }
    ArrayInitialize(gImb,0); ArrayInitialize(gImbSnap,0);
    for(int L=0;L<NC_NL;L++){ ResetSetup(L); gUltimoEp[L]=0; gArmatoPrima[L]=false; gOrfTent[L]=0; }
    string err="";
@@ -1449,6 +1459,11 @@ void ArmaScala(const int L,const int s,const int last,const int toccoN,const dat
   }
 
 //==================================================================
+//  CODICE MORTO: modalita PDF esclusa, tenuto per archivio.
+//  (v1.03, decisione di Claudio 07/10/2026.) Con InpModalita=PDF
+//  l'EA non parte. ATTENZIONE: questo ramo resta raggiungibile SOLO
+//  forzando a mano InpTipoIngresso=MERCATO_PIU_PENDENTE in AUDIO o
+//  EMA200: non va fatto, non e' un asse del piano.
 //  MODO PDF: tocco sulla barra chiusa, conferma all'apertura della
 //  successiva, 1 ordine a mercato + 1 limit oltre (E1, E4, E5).
 //==================================================================

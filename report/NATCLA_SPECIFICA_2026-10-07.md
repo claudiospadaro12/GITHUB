@@ -26,6 +26,65 @@ quantificano (sempre dichiarata, sempre un input) · **[CASA]** = convenzione de
 
 ---
 
+## DECISIONE 07/10: PDF escluso
+
+**Fatto.** Claudio, 07/10/2026 sera, testuale: _"Di agli agenti di ignorare il pdf e di concentrarsi sugli audio"_
+(registrata in `data/natcla/LEGGIMI.md`). E' la risposta alla **domanda bloccante n.1** ("quale fonte comanda"): per
+`EA_NatCla` comandano **SOLO gli audio della collega** (WA0090/91/92). Il PDF resta in repo come **archivio, mai come fonte**.
+Il motore **EMA200 (M2) resta**: viene dall'audio WA0092 (A-R20), non dal PDF.
+
+**Nell'EA (v1.03):** con `InpModalita=PDF` l'EA **rifiuta di partire** in `OnInit` (`INIT_PARAMETERS_INCORRECT`, messaggio
+*"modalita PDF esclusa da Claudio il 07/10/2026: Ea Nat&Cla segue solo gli audio"*). Il codice PDF **non e' cancellato**
+(marcato *CODICE MORTO, tenuto per archivio*): toglierlo rischiava di rompere il resto piu' di quanto valesse. Il default resta AUDIO.
+
+**Il resto di questa specifica NON e' stato riscritto**: dove sotto si legge "PDF", "P-pNN", la colonna "default PDF" o "le due
+fonti", vale l'elenco qui sotto. Le sezioni restano come archivio di cio' che era stato pensato.
+
+### Cosa DECADE
+1. **La modalita' PDF** (colonna "default PDF" di tutto il §1; I6 EMA14/EMA89; C7 chiusura vicina, C8 conferma, C9 timing; E4-E6
+   secondo ordine/apertura lontana/scadenza; X6-X8 target EMA, R/R minimo, parziale/pareggio; S3 pesi 1:2; B10).
+2. **Gli assi PDF del §3.2** (P1-P8): **60 passate per simbolo**, tutte.
+3. **Il piano di backtest PDF**: la base PDF H4/D1 in F1 (4 passate per simbolo), le 2 configurazioni PDF del passo 0 (72 passate
+   su 36 simboli), la riga PDF del §5.2, le frequenze PDF del §5.4, il placebo della modalita' PDF, la bandiera S3, e il punto del
+   §9 sulla sovrapposizione col `ABTG_SupertrendReversal` (770901/97091x) e sul NASUSD H1 (riguardava solo il modo PDF).
+4. **Le divergenze audio/PDF** del §10.1 dell'analisi audio (`report/NATCLA_ANALISI_AUDIO_2026-10-06.md`): **non sono piu'
+   domande**. Dove le due fonti divergevano, vale l'audio; dove l'audio tace, il PDF **non** riempie il buco (resta domanda o [NOSTRA]).
+5. **Le domande che il PDF faceva nascere**: la bloccante 1 (risposta), le meta' PDF delle bloccanti 3-9 e 12 del §10.2 (conferma
+   all'apertura, timing p14 contro p25, 1/3 + 2/3 a +-20 pip, stop "minimo recente/Supertrend", EMA14/EMA89, R/R 1:1 contro 1:2,
+   BE/parziali, confluenza obbligatoria, pesi 1/3-2/3) e tutte le "PDF Qnn" del "da definire dopo" (Fibonacci, pivot, Larry
+   Williams, PeakRepairerStrict, ADR, numeri tondi, volatilita'/gap/news, versione del PDF).
+
+**Cosa NON decade ma perde la fonte** (valori invariati nell'EA, la v1.03 non tocca i default): **I1 periodo ATR 10 del
+Supertrend** aveva come unica fonte P-p07 -> da oggi e' **[NOSTRA]** (diventa domanda residua); **C1 "con l'ombra"** (P-p06) ->
+RAGGIUNGE resta come lettura **[NOSTRA]** di "toccare"; **A8 stop ESTREMO_RECENTE** resta come asse, lettura **[NOSTRA]** di
+"resistenza" (audio Q19), non piu' "il criterio del PDF".
+
+### Il costo del piano, RICALCOLATO (solo AUDIO + EMA200)
+Stesse ancore del §3.4 e del §5.6 (nessun numero nuovo): tick reali **0,083-0,333 min/passata** (R88a, R245); OHLC M1 del passo 0
+**2,9-33 s/passata, mediana 13,5** (R88). Stessi simboli ipotetici del §5.6 (F0 su 36, F1 su 15, F2 su 5).
+
+| fase | per simbolo, PRIMA | per simbolo, ORA | passate totali ORA (prima) | tempo PC ORA **[STIMA]** (prima) |
+|---|---:|---:|---|---|
+| **F0** sonda (OHLC M1, `InpSoloConta`) | 8 config | **6** (AUDIO H1/H4/H12/D1, M2 H1/H4) | 36 x 6 = **216** (288) | **10-119 min**, centro ~49 (14-160, centro ~65) |
+| **F1** base (tick) | 3 famiglie x 2 lati x 2 TF = 12 | **2 famiglie x 2 lati x 2 TF = 8** | 15 x 8 = **120** (180) | **10-40 min** (15-60) |
+| **F2** assi (tick), di cui: | 196 | **132** | 5 x 132 = **660** (980) | **0,9-3,7 h** (1,4-5,4 h) |
+| - assi AUDIO §3.1 | 84 | **84** | | |
+| - assi M2 §3.3 | 36 | **36** (solo se la base M2 vive **e** batte il placebo, §9) | | |
+| - bandiere di taglia | 8 (S2 AUDIO + S3 PDF) | **4** (solo S2 AUDIO: S3 era PDF) | | |
+| - placebo E7 | 8 | **8** (AUDIO 4 + M2 4: il placebo M2 lo chiede il §9) | | |
+| **Totale F0 + F1 + F2** | | | **996** (1448) | **~75-379 min = 1,3-6,3 h** (~110-545 min = 1,8-9,1 h) |
+
+- **Se vale il prior del §9** (base M2 non distinguibile dal placebo, quindi i 36 assi M2 non partono): F2 = 84 + 4 + 8 = **96 per
+  simbolo**, 480 passate su 5 simboli = **0,7-2,7 h [STIMA]**.
+- **Riconciliazione dei numeri citati nell'incarico** ("AUDIO 80, EMA200 40, bandiere 8"): sono numeri **superati dalla specifica
+  stessa**. AUDIO e' **84** dal 07/10 (cella Wilder in A5, §3.4); M2 e' **36**, perche' le 4 passate della sua base stanno gia' in F1
+  (correzione del cancello, §3.4); le bandiere scendono a **4** perche' la S3 era del PDF. Se Claudio volesse misurare i pesi 1:2:1
+  anche sulla scala M2, si torna a 8 (e conta come asse M2, quindi solo su M2 vivo).
+- F3 (IS/OOS) e F4 (rischio a barre) restano **2 passate per simbolo** ciascuna: non dipendono dal PDF.
+- Il **certificato di morte** resta completabile con **8 passate per simbolo per famiglia** (§5.6): invariato.
+
+---
+
 ## 0. SINTESI PER CLAUDIO (10 righe, senza tecnicismi)
 
 1. Un solo EA, `EA_NatCla`, con un interruttore: **modo AUDIO** (come opera la collega a voce) o **modo PDF** (il documento "Supertrend Reversal").

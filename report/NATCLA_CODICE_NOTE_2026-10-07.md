@@ -6,6 +6,8 @@ Il file NON e' stato compilato (nessun MetaEditor qui) e NON e' girato nel teste
 
 - Codice: `mql5/Experts/EA_NatCla.mq5` (2048 righe, ASCII puro). Regole SOLO da `report/NATCLA_SPECIFICA_2026-10-07.md`.
 - Collaudo: `python3 backtest_pipeline/collaudo_natcla.py` (circa 2 minuti; `--senza-mutanti` circa 16 s). Esito al commit del cancello: **TUTTO OK**, mutanti ciechi **43/43 presi** (21 dell'autore + 22 del cancello, par. 5).
+- **v1.03 (07/10, decisione di Claudio "ignorare il pdf, concentrarsi sugli audio")**: modalita' PDF **esclusa** (OnInit la rifiuta),
+  codice PDF tenuto come archivio. Collaudo **TUTTO OK, mutanti 68/68**. **Strato 2 su v1.03: DA FARE -> NON consegnabile.** Par. 8.
 
 ## 1. Che cosa il collaudo ha MISURATO (feed HistData dell'oro, orologio +6 h, NON BCM)
 
@@ -238,3 +240,42 @@ commenti, documenti e collaudo. Rischio residuo limitato a **demo/tester** (solo
 
 **NON COPERTO**: compilazione (nessun MetaEditor qui), tester, ordine reale degli eventi, `iADX`/`iADXWilder` del terminale (li
 decide la riga `VERIFICA ADX`), il comportamento reale del freeze level BCM, il Guardian vivo, il modo PDF (fuori perimetro).
+
+## 8. v1.03 (07/10/2026): modalita' PDF ESCLUSA (decisione di Claudio). Strato 2: DA FARE, NON consegnabile
+
+**v1.03** - Claudio, 07/10 sera: *"Di agli agenti di ignorare il pdf e di concentrarsi sugli audio"* (`data/natcla/LEGGIMI.md`).
+Modifica chirurgica, nessuna regola di trading toccata:
+- `OnInit`: **prima istruzione** `if(InpModalita==NC_PDF)` -> `Print("[NatCla] AVVIO RIFIUTATO: modalita PDF esclusa da Claudio il
+  07/10/2026: Ea Nat&Cla segue solo gli audio")` + `return(INIT_PARAMETERS_INCORRECT)`: nessun handle, file o ordine prima del rifiuto.
+- Codice PDF **non cancellato**: blocco `ValutaPdf`/`EntraPdf` marcato *"CODICE MORTO: modalita PDF esclusa, tenuto per archivio"*.
+  Enum invariato (`NC_PDF=1` resta, cosi' il magic automatico 7786**1**x non viene riassegnato), default `NC_AUDIO` invariato.
+- Intestazione, `#property version`/`NC_VER` = 1.03, riga di cronologia; riga d'avvio `AVVIO v1.03 ... | fonte SOLO AUDIO (PDF escluso 07/10)`.
+- Specifica: sezione in testa *"DECISIONE 07/10: PDF escluso"* (cosa decade, costo del piano ricalcolato). Nient'altro toccato.
+
+**Collaudo** (`collaudo_natcla.py`): invariante **28** (il rifiuto e' la prima istruzione di `OnInit`, con `INIT_PARAMETERS_INCORRECT`
+e il messaggio) + mutanti **J1** (rifiuto rimosso) e **J2** (rifiuto che restituisce `INIT_SUCCEEDED`), su copie in `/tmp` (classe
+1159). Contro-esempio extra a mano: rifiuto spostato su `NC_EMA200` -> preso. Esito: **TUTTO OK, mutanti 68/68** (i 66 di prima
+tutti ancora presi + J1/J2), numeri dell'oro invariati.
+
+**Riserva per lo strato 2 (dichiarata, non corretta per mandato di modifica minima):** il ramo PDF resta **raggiungibile a mano**
+in AUDIO/EMA200 forzando `InpTipoIngresso=MERCATO_PIU_PENDENTE`; e le manopole nate dal PDF (`InpTPCriterio=EMA14_POI_EMA89`,
+`InpConfermaApertura=SI`, `InpChiudeVicinoAtr>0`, `InpTimingTocco`, `InpBEalTP1=SI`, `InpRRMin>0`, `InpPesiPdf`) restano
+impostabili da un preset. Nessuna e' un default e nessuna e' nel piano; se si vuole il blocco duro, e' un ritocco a `Risolvi`.
+Checklist del par. 6: il punto **(5)** ("in PDF, `ORDINE ... LIMIT` con scadenza") **decade**; al suo posto: con `InpModalita=PDF`
+il Giornale deve dire `AVVIO RIFIUTATO: modalita PDF esclusa ...` e l'EA non resta sul grafico.
+
+### DOMANDE RESIDUE PER CLAUDIO dopo l'esclusione del PDF (solo cio' che l'audio non dice; in ordine di importanza)
+1. **Direzione**: long, short o entrambi? (A-R26: "sotto"/"sopra" mai legati a un lato; letture A/B/C). Decide cosa si schiera e
+   come si legge la scala; i test girano comunque i due lati separati.
+2. **Stop numerico, e cosa fare se non c'e' una resistenza** (A-R23 "leggermente sopra qualche resistenza, se c'e'"). E' la domanda
+   che decide il **cancello del costo** (stop >= 40 x pedaggio): oggi lo stop e' una nostra lettura (ordine profondo + 5 u).
+3. **Pip o punti, e da dove si misura il TP** (A-R22: "10 pip" WA0091 contro "10 punti dal Supertrend o EMA" WA0092): dalla linea o
+   dal prezzo di riempimento? Sull'oro cambia la distanza di 10 volte (0,1 contro 1,0 USD).
+4. **Simboli e orari** (A-R27: mai nominati): su cosa opera davvero la collega e in quale fascia. Accorcia il passo 0 (36 simboli).
+5. **Periodi degli indicatori**: **ADX** periodo e tipo (A-R12 dice solo "a 20, non di piu'": iADX di MT5 o Wilder di TradingView,
+   e la scelta dimezza o raddoppia i setup) e **ATR del Supertrend** (il 10 veniva **solo** dal PDF, P-p07: da oggi e' [NOSTRA]).
+6. **Inclinazione della EMA200** (A-R19 "abbastanza inclinata"): quanta (soglia) e in che verso (concorde col trade o qualsiasi).
+7. **Rischio e taglie**: **decisione tua**, non della collega (segnaposto 0,25% per setup, istanze dentro il cap 3,25%, pesi della
+   scala e confluenza spenti finche' non firmi). Il backtest consegna `r_max` in R; la taglia la scegli tu.
+8. **"Dieci volte tanto"** (A-R17, la collega stessa dice "non so"): 10 volte cosa? Oggi **non implementato**: se fosse x10 sulla
+   taglia, e' una bandiera rossa di rischio e richiede la tua firma.
