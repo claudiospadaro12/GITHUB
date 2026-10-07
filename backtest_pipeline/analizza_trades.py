@@ -144,9 +144,19 @@ DURATA_SOSPETTA = 120   # secondi: sotto = quasi certamente trailing/BE troppo s
 #     Una premessa misurata su una finestra si RIMISURA, non si eredita.
 #   - valgono -18.706,94 EUR contro i -1.235,41 EUR di TUTTA la flotta: se
 #     entrano nel totale, il netto del piccolo non e' il netto della flotta.
-#   - l'ULTIMA e' del 27/07/2026. Dal 28/07 in poi il conto e' solo EA
-#     (264 operazioni, tutte con commento). Il confine e' una misura, non
-#     una data scelta a mano.
+#   - AL 07/09/2026 l'ULTIMA era del 27/07 e dal 28/07 il conto era solo EA
+#     (264 operazioni, tutte con commento): da li' il confine, che era una
+#     misura e non una data scelta a mano.
+#   🔴 SCADUTA ANCHE QUESTA, e il 07/10/2026 la rimisuro: dal 28/07 il piccolo
+#     ha 396 righe, di cui 15 a magic 0 su QUATTRO giornate (01/10 x4,
+#     02/10 x9, 06/10 x1, 07/10 x1) e flotta 381. L'ultima a magic 0 e' di
+#     OGGI, 07/10 08:32:24. "Il conto e' solo EA" non e' piu' vero dal 01/10.
+#   👉 E CAMBIO_SOLO_EA NON si sposta per far tacere l'avviso: non e' una
+#     constatazione, e' l'ATTESA (zero manuali da quella data). Spostarlo
+#     spegnerebbe l'unico cartello che dice che la mano e' tornata, ed e' il
+#     perimetro aperto dal 23/09 -- una firma di Claudio, non una manopola.
+#     🟢 E la guardia ha funzionato: stasera il blocco e' comparso ed e' stato
+#     guardato. Era la prosa qui sopra a essere vecchia, non il meccanismo.
 #
 # Non si cancellano: si mostrano FUORI dal totale, come i "RESIDUI SU DISCO"
 # del censimento. Un numero che mescola due cose non e' un numero.
