@@ -59,6 +59,9 @@ MUTANTI = [
     ("M44 spread: banda coerente 0,5 -> 0,1", "BANDA_SPREAD = (0.5, 2.0)", "BANDA_SPREAD = (0.1, 2.0)"),
     ("M45 spread: riferimento EURUSD 0,2 -> 2,0", '"EURUSD": 0.2, "GBPUSD"', '"EURUSD": 2.0, "GBPUSD"'),
     ("M40 anticipo/linea/profondo: costo con p3 al posto di p1", 'for i, col in enumerate(("p1", "p2", "p3")):', 'for i, col in enumerate(("p3", "p2", "p1")):'),
+    ("M46 cartella: backslash dei nomi (Compress-Archive) NON normalizzato", '.replace(os.sep, "/").replace("\\\\", "/")', '.replace(os.sep, "/")'),
+    ("M47 cartella: due file diversi con lo stesso nome normalizzato accettati in silenzio",
+     'if open(self.reali[nome], "rb").read() != open(vero, "rb").read():', 'if False:'),
 ]
 
 

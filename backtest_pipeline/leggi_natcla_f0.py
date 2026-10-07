@@ -52,10 +52,20 @@ class Sorgente:
         self.percorso = percorso
         self.zip = None
         if os.path.isdir(percorso):
+            # SEPARATORI (07/10, lettura del pilota): Compress-Archive scrive i nomi con il BACKSLASH ('csv\natcla_...'); estratti su Linux diventano FILE
+            # con il backslash nel nome, non sottocartelle. Si normalizza come per lo zip, e si ricorda il percorso VERO di ogni nome normalizzato.
             self.nomi = []
+            self.reali = {}
             for rd, _d, files in os.walk(percorso):
                 for f in files:
-                    self.nomi.append(os.path.relpath(os.path.join(rd, f), percorso).replace(os.sep, "/"))
+                    vero = os.path.join(rd, f)
+                    nome = os.path.relpath(vero, percorso).replace(os.sep, "/").replace("\\", "/")
+                    if nome in self.reali:
+                        if open(self.reali[nome], "rb").read() != open(vero, "rb").read():
+                            raise ValueError("due file diversi con lo stesso nome normalizzato '%s' (uno col backslash, uno in sottocartella): quale si legge e' ambiguo" % nome)
+                        continue
+                    self.reali[nome] = vero
+                    self.nomi.append(nome)
         else:
             self.zip = zipfile.ZipFile(percorso)
             self.nomi = [n.replace("\\", "/") for n in self.zip.namelist() if not n.endswith("/")]
@@ -66,7 +76,7 @@ class Sorgente:
                 if n.replace("\\", "/") == nome:
                     return self.zip.read(n)
             raise KeyError(nome)
-        return open(os.path.join(self.percorso, *nome.split("/")), "rb").read()
+        return open(self.reali[nome], "rb").read()
 
     def ha(self, nome):
         return nome in self.nomi
@@ -958,6 +968,32 @@ def autotest():
         tc = os.path.join(tmp, "t.csv")
         tabella_csv(dati, tc)
         chk("tabella CSV scritta con intestazione e righe per linea", open(tc).read().count("\n") > 4)
+        # SEPARATORI (07/10, pilota vero): zip di Compress-Archive con i nomi a BACKSLASH, estratto in una CARTELLA con zipfile (su Linux: file col backslash nel nome)
+        zb = os.path.join(tmp, "NATCLA_F0_BACKSLASH.zip")
+        with zipfile.ZipFile(zp) as zsrc, zipfile.ZipFile(zb, "w") as zdst:
+            for n in zsrc.namelist():
+                zdst.writestr(n.replace("/", "\\"), zsrc.read(n))
+        cb_dir = os.path.join(tmp, "estratto_backslash")
+        os.makedirs(cb_dir)
+        zipfile.ZipFile(zb).extractall(cb_dir)
+        dzb = carica([Sorgente(zb)])
+        ddir = carica([Sorgente(cb_dir)])
+        okz = dzb["runs"][("XAUUSD", "AUDIO_H1")][0]
+        okd = ddir["runs"][("XAUUSD", "AUDIO_H1")][0]
+        chk("separatori: zip con nomi a backslash letto, XAUUSD AUDIO_H1 OK 57 setup", okz["stato"].startswith("OK") and okz["calc"]["n_linee"] == 57, str(okz["problemi"]))
+        chk("separatori: CARTELLA estratta da quello zip letta uguale (OK, 57 setup, stesso SHA del CSV)",
+            okd["stato"].startswith("OK") and okd["calc"] is not None and okd["calc"]["n_linee"] == 57 and okd["csv_sha"] == okz["csv_sha"], str(okd["problemi"]))
+        # contro-esempio: stesso nome normalizzato, contenuto DIVERSO (backslash + sottocartella) -> errore, non una scelta silenziosa
+        amb = os.path.join(tmp, "ambiguo")
+        os.makedirs(os.path.join(amb, "csv"))
+        open(os.path.join(amb, "csv", "x.csv"), "wb").write(b"uno")
+        open(os.path.join(amb, "csv\\x.csv"), "wb").write(b"due")
+        try:
+            Sorgente(amb)
+            ambiguo_preso = (os.sep == "\\")      # su Windows il secondo file e' lo stesso del primo: niente da prendere
+        except ValueError:
+            ambiguo_preso = True
+        chk("separatori: due file DIVERSI con lo stesso nome normalizzato -> errore dichiarato", ambiguo_preso)
     finally:
         import shutil
         shutil.rmtree(tmp, ignore_errors=True)
