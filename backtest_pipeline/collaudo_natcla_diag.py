@@ -3,7 +3,7 @@
 """
 collaudo_natcla_diag.py -- collaudo STRATO 1 della diagnosi del KO U30USD del pilota F0 di 'Ea Nat&Cla' (07/10/2026):
   mql5/Experts/EA_NatCla_Diag.mq5            (EA diagnostico di SOLA LETTURA)
-  backtest_pipeline/righe/NATCLA_DIAG_U30.ps1 (driver: 4 passate singole sul PC di backtest)
+  backtest_pipeline/righe/NATCLA_DIAG_U30.ps1 (driver: 6 passate singole sul PC di backtest)
   backtest_pipeline/righe/RIGA_LANCIA_NATCLA_DIAG_U30.txt (riga di lancio, generata qui con --genera-riga)
 
 Qui NON c'e' MetaEditor ne' MT5: niente compila l'MQL5, niente gira nel tester. Si prova a tavolino quello che si puo',
@@ -24,7 +24,7 @@ e si dice cosa resta fuori.
      su ~6000 scenari (bordi + casuali) la sequenza di chiamate della catena == quella dell'EA, il risultato == quello
      dell'EA, i valori e i codici d'errore registrati == quelli restituiti; NCD_Completa fa SOLO le chiamate mancanti.
      Contro-esempio: un EA con l'ordine dei BarsCalculated scambiato DEVE essere preso.
-  B) BANCO pwsh del driver (finto disco C:, server HTTP locale al pin, terminale/MetaEditor finti): verde (4 passate,
+  B) BANCO pwsh del driver (finto disco C:, server HTTP locale al pin, terminale/MetaEditor finti): verde (6 passate,
      .ini lette dal finto terminale, zip), guardie, compilazione (fallita, errori con .ex5, .ex5 vecchio bloccato, log in
      italiano), difetti per passata, doppioni di log, log vecchi esclusi, timeout, tetto, Desktop rinominato.
   M) MUTANTI CIECHI su COPIE fuori dal repo (classe 1159): dell'EA (S+P+C devono fallire) e del driver (lo scenario
@@ -344,8 +344,14 @@ def statico(diag, ea, ps1, prova, bag):
     for nm in CONDIVISI + ["InpTF"]:
         if ("%s=%s" % (nm, pv.get(nm))) not in ing:
             bag.append("input %s della .ini diverso dal file prova F0 (%s)" % (nm, pv.get(nm)))
-    if "InpVerificheSeparate=true" not in ing:
-        bag.append("la .ini non chiede le verifiche separate")
+    if any(x.startswith("InpVerificheSeparate") for x in ing):
+        bag.append("InpVerificheSeparate in $Ingressi: va PER PASSATA (classe 1171)")
+    seps = re.findall(r"\[pscustomobject\]@\{ Id = '(\w)'; Sim = '(\w+)'; Da = '([\d.]+)'; Sep = '(\w+)'", t)
+    if seps != [("a", "U30USD", "2024.09.26", "true"), ("b", "U30USD", "2025.01.02", "true"), ("c", "D30EUR", "2024.09.26", "true"), ("d", "EURUSD", "2024.09.26", "true"),
+                ("e", "U30USD", "2024.09.26", "false"), ("f", "D30EUR", "2024.09.26", "false")]:
+        bag.append("passate del driver diverse dal piano (a-d separate, e-f SOLO catena, classe 1171): %s" % seps)
+    if '"`r`nInpVerificheSeparate=" + $ps.Sep + "`r`n"' not in t:
+        bag.append("la .ini non porta InpVerificheSeparate della passata")
     for nm in [x.split("=")[0] for x in ing]:
         if input_default(src, nm) is None:
             bag.append("la .ini passa %s che l'EA diagnostico non ha" % nm)
@@ -621,9 +627,10 @@ if kind == "editor":
         ok = (b"NCD_VER" in open(f, "rb").read()) and not scen.get("compile_fallisce")
         nerr = 0 if ok else 3
         if scen.get("compile_errori_con_ex5"): ok, nerr = True, 2
+        if scen.get("nerr") is not None: ok, nerr = True, scen["nerr"]
         w = scen.get("compile_avvisi", 0)
         if scen.get("compile_italiano"):
-            righe = ["0\t2026.10.08 09:00:00.000\tCompile\t%s - %d errori, %d avvisi, 1915 ms trascorsi" % (f, nerr, w)]
+            righe = ["0\t2026.10.08 09:00:00.000\tCompile\t%s - %d %s, %d %s, 1915 ms trascorsi" % (f, nerr, "errore" if nerr == 1 else "errori", w, "avviso" if w == 1 else "avvisi")]
         else:
             righe = ["0\t2026.10.08 09:00:00.000\tCompile\t%s - %d errors, %d warnings, 1915 ms elapsed, cpu='X64 Regular'" % (f, nerr, w)]
         for k in range(min(w, 3)):
@@ -647,19 +654,22 @@ sym = tester.get("Symbol", "?"); da = tester.get("FromDate", "?"); a = tester.ge
 open(os.path.join(LOG, "sim_terminale_lanci.txt"), "a").write("Expert=%s Symbol=%s Period=%s FromDate=%s ToDate=%s Model=%s Optimization=%s Live=%s Dll=%s Shutdown=%s INPUT %s\n" % (
     tester.get("Expert"), sym, tester.get("Period"), da, a, tester.get("Model"), tester.get("Optimization"), tester.get("EXP_AllowLiveTrading"), tester.get("EXP_AllowDllImport"),
     tester.get("ShutdownTerminal"), ",".join("%s=%s" % kv for kv in inp.items())))
-fault = scen.get("falli", {}).get(sym + "_" + da)
+sepv = "1" if inp.get("InpVerificheSeparate") == "true" else "0"
+chiave_p = sym + "_" + da + "_" + sepv
+fault = scen.get("falli", {}).get(chiave_p)
 ora = time.strftime("%H:%M:%S")
 mk = [0]
 def riga(t, sorg="EA_NatCla_Diag"):
     mk[0] += 1
     return "CS\t0\t%s.%03d\t%s (%s,H1)\t%s 00:00:00   %s" % (ora, mk[0] % 1000, sorg, sym, da, t)
 chiavi = scen["chiavi"]
-val = {"v": "1.00", "sym": sym, "tf": "PERIOD_H1", "adx": "NC_ADX_MT5", "sep": "1", "fine": "1", "nuove": "9946", "prima": da.replace(" ", "_") + "_01:00", "primo_ok": "mai"}
+val = {"v": "1.00", "sym": sym, "tf": "PERIOD_H1", "adx": "NC_ADX_MT5", "sep": sepv, "fine": "1", "nuove": "9946", "prima": da.replace(" ", "_") + "_01:00", "primo_ok": "mai"}
 if sym == "U30USD" and da == "2024.09.26":
     val.update(cd_n="9946", cd_ok="0", max_barre="301")
 else:
     val.update(cd_ok="9000", cd_n="0", primo_ok=da + "_01:00")
-val.update(scen.get("valori", {}).get(sym + "_" + da, {}))
+val.update(scen.get("valori", {}).get(chiave_p, {}))
+if fault == "sep_sbagliata": val["sep"] = "1" if sepv == "0" else "0"
 if fault == "sym": val["sym"] = "XXXUSD"
 ch = [k for k in chiavi if not (fault == "chiave" and k == "cd_bc")]
 rias = "[NatCla-DIAG] RIASSUNTO " + " ".join("%s=%s" % (k, val.get(k, "0")) for k in ch)
@@ -897,8 +907,11 @@ def tutto(r):
     return r["p"].stdout + r["p"].stderr
 
 
-INGRESSI_ATTESI = "INPUT InpTF=16385,InpEmaLentaPeriodo=200,InpEmaTp1=14,InpEmaTp2=89,InpLogContesto=true,InpAtrNormPeriodo=14,InpAdxPeriodo=14,InpAdxTipo=0,InpVerificheSeparate=true,InpMaxEventi=20"
-PASSATE_ATTESE = [("U30USD", "2024.09.26"), ("U30USD", "2025.01.02"), ("D30EUR", "2024.09.26"), ("EURUSD", "2024.09.26")]
+INGRESSI_BASE = "INPUT InpTF=16385,InpEmaLentaPeriodo=200,InpEmaTp1=14,InpEmaTp2=89,InpLogContesto=true,InpAtrNormPeriodo=14,InpAdxPeriodo=14,InpAdxTipo=0,InpMaxEventi=20,InpVerificheSeparate="
+# (simbolo, FromDate, verifiche separate): (a)-(d) separate, (e)(f) SOLO la catena = EA_NatCla alla lettera (classe 1171)
+PASSATE_ATTESE = [("U30USD", "2024.09.26", "true"), ("U30USD", "2025.01.02", "true"), ("D30EUR", "2024.09.26", "true"), ("EURUSD", "2024.09.26", "true"),
+                  ("U30USD", "2024.09.26", "false"), ("D30EUR", "2024.09.26", "false")]
+NP = len(PASSATE_ATTESE)
 
 
 # --- i giudizi degli scenari (True = lo script si e' comportato BENE): servono anche ai mutanti
@@ -906,10 +919,10 @@ def g_verde(r):
     z = zipd(r)
     m = tab(z, "MANIFEST_DIAG.csv")
     la = lanci(r)
-    ok = rc_di(r) == "0" and len(m) == 4 and all(x["stato"] == "OK" for x in m) and len(la) == 4
-    ok = ok and [tuple(re.search(r"Symbol=(\S+) Period=\S+ FromDate=(\S+)", x).groups()) for x in la] == PASSATE_ATTESE
+    ok = rc_di(r) == "0" and len(m) == NP and all(x["stato"] == "OK" for x in m) and len(la) == NP
+    ok = ok and [re.search(r"Symbol=(\S+) Period=\S+ FromDate=(\S+)", x).groups() + (x.rsplit("InpVerificheSeparate=", 1)[-1],) for x in la] == PASSATE_ATTESE
     ok = ok and all(("Expert=EA_NatCla_Diag.ex5" in x and "Period=H1" in x and "ToDate=2026.06.30" in x and "Model=1" in x and "Optimization=0" in x and "Live=false" in x and
-                     "Dll=false" in x and "Shutdown=1" in x and x.endswith(INGRESSI_ATTESI)) for x in la)
+                     "Dll=false" in x and "Shutdown=1" in x and x.endswith(INGRESSI_BASE + pa[2])) for x, pa in zip(la, PASSATE_ATTESE))
     return ok
 
 
@@ -919,11 +932,16 @@ def g_si_ferma(msg):
     return f
 
 
-def g_ko_a(msg):
+def g_ko(i, msg):
+    """la sola passata i (0 = (a)) KO col motivo, le altre OK, rc 3"""
     def f(r):
         m = tab(zipd(r), "MANIFEST_DIAG.csv")
-        return (rc_di(r) == "3" and len(m) == 4 and m[0]["stato"] == "KO" and msg in m[0]["motivi"] and all(x["stato"] == "OK" for x in m[1:]))
+        return (rc_di(r) == "3" and len(m) == NP and m[i]["stato"] == "KO" and msg in m[i]["motivi"] and all(x["stato"] == "OK" for k, x in enumerate(m) if k != i))
     return f
+
+
+def g_ko_a(msg):
+    return g_ko(0, msg)
 
 
 def g_comp_fallita(r):
@@ -961,29 +979,30 @@ def g_guasto(r):
 
 def g_timeout(r):
     m = tab(zipd(r), "MANIFEST_DIAG.csv")
-    return (len(m) == 4 and m[0]["stato"] == "KO" and "timeout" in m[0]["motivi"] and all(x["stato"] == "OK" for x in m[1:]) and rc_di(r) == "3"
+    return (len(m) == NP and m[0]["stato"] == "KO" and "timeout" in m[0]["motivi"] and all(x["stato"] == "OK" for x in m[1:]) and rc_di(r) == "3"
             and os.path.exists(os.path.join(r["sd"], "simlog", "sim_closemainwindow.txt")) and not os.path.exists(os.path.join(r["sd"], "simlog", "sim_kill.txt")))
 
 
 def g_tetto(r):
     m = tab(zipd(r), "MANIFEST_DIAG.csv")
-    return len(m) == 4 and all(x["stato"] == "NON_LANCIATA" for x in m) and not lanci(r) and rc_di(r) == "3"
+    return len(m) == NP and all(x["stato"] == "NON_LANCIATA" for x in m) and not lanci(r) and rc_di(r) == "3"
 
 
 def banco(chiavi, base):
     print("B) BANCO del driver (pwsh %s)" % (subprocess.run(["pwsh", "-NoProfile", "-Command", "$PSVersionTable.PSVersion.ToString()"], capture_output=True, text=True).stdout.strip()))
     B = Banco(base, chiavi)
     r = B.gira("verde")
-    chk("B01 verde: rc 0, 4 passate OK, nell'ordine (a) U30USD 2024.09.26, (b) U30USD 2025.01.02, (c) D30EUR 2024.09.26, (d) EURUSD 2024.09.26; .ini lette dal finto "
-        "terminale: Expert=EA_NatCla_Diag.ex5, H1, fino al 2026.06.30, Model=1, Optimization=0, AllowLiveTrading=false, Dll=false, input == file prova F0", g_verde(r), tutto(r)[-900:] + str(lanci(r))[:600])
+    chk("B01 verde: rc 0, 6 passate OK, nell'ordine (a) U30USD 2024.09.26, (b) U30USD 2025.01.02, (c) D30EUR 2024.09.26, (d) EURUSD 2024.09.26 con verifiche separate, "
+        "(e) U30USD 2024.09.26 e (f) D30EUR 2024.09.26 con SOLO la catena; .ini lette dal finto terminale: Expert=EA_NatCla_Diag.ex5, H1, fino al 2026.06.30, Model=1, "
+        "Optimization=0, AllowLiveTrading=false, Dll=false, input == file prova F0 + InpVerificheSeparate della passata", g_verde(r), tutto(r)[-900:] + str(lanci(r))[:600])
     z = zipd(r)
     nomi = z.namelist() if z else []
-    chk("B02 zip: RIEPILOGO_DIAG.txt, MANIFEST_DIAG.csv, DIAG_RIASSUNTO.csv, EA_NatCla_Diag.mq5, compile_natcla_diag.log, 4 log, 4 ini",
+    chk("B02 zip: RIEPILOGO_DIAG.txt, MANIFEST_DIAG.csv, DIAG_RIASSUNTO.csv, EA_NatCla_Diag.mq5, compile_natcla_diag.log, 6 log, 6 ini",
         all(x in nomi for x in ("RIEPILOGO_DIAG.txt", "MANIFEST_DIAG.csv", "DIAG_RIASSUNTO.csv", "EA_NatCla_Diag.mq5", "compile_natcla_diag.log")) and
-        sum(n.startswith("log/") for n in nomi) == 4 and sum(n.startswith("ini/") for n in nomi) == 4, nomi)
+        sum(n.startswith("log/") for n in nomi) == NP and sum(n.startswith("ini/") for n in nomi) == NP, nomi)
     rs = tab(z, "DIAG_RIASSUNTO.csv")
-    chk("B03 DIAG_RIASSUNTO.csv: 4 righe, una colonna per chiave, valori letti dalla riga RIASSUNTO ((a) cd_n 9946 cd_ok 0 max_barre 301; (d) cd_ok 9000; fine=1 ovunque)",
-        len(rs) == 4 and list(rs[0].keys())[4:] == chiavi and rs[0]["cd_n"] == "9946" and rs[0]["cd_ok"] == "0" and rs[0]["max_barre"] == "301" and rs[3]["cd_ok"] == "9000" and all(x["fine"] == "1" for x in rs), rs[:1])
+    chk("B03 DIAG_RIASSUNTO.csv: 6 righe, una colonna per chiave, valori letti dalla riga RIASSUNTO ((a) cd_n 9946 cd_ok 0 max_barre 301; (d) cd_ok 9000; sep 1 su a-d e 0 su e-f; fine=1 ovunque)",
+        len(rs) == NP and [x["sep"] for x in rs] == ["1", "1", "1", "1", "0", "0"] and list(rs[0].keys())[4:] == chiavi and rs[0]["cd_n"] == "9946" and rs[0]["cd_ok"] == "0" and rs[0]["max_barre"] == "301" and rs[3]["cd_ok"] == "9000" and all(x["fine"] == "1" for x in rs), rs[:1])
     chk("B04 MetaEditor chiamato con DUE argomenti (/compile e /log, classe 1152); scaricato SOLO l'EA diagnostico al pin",
         len(json.load(open(os.path.join(r["sd"], "simlog", "sim_args_editor.txt")))) == 2 and sorted(set(x.split("?")[0].split("/", 2)[2] for x in r["srv"].hits)) == [F_DIAG], r["srv"].hits)
     chk("B05 il disco FUORI dal perimetro non e' cambiato di un byte (EA_NatCla.mq5/.ex5, installazioni censite, grafici, origin.txt, Common)", r["perimetro"])
@@ -991,9 +1010,9 @@ def banco(chiavi, base):
     chk("B06 log della passata (a): AVVIO, una transizione EV, UNA riga RIASSUNTO (la copia nel giornale del terminale e' tolta per contenuto), righe del tester col simbolo ('bars generated')",
         lg.count("[NatCla-DIAG] RIASSUNTO") == 1 and "[NatCla-DIAG-AVVIO]" in lg and "[NatCla-DIAG-EV]" in lg and "bars generated" in lg, lg[:600])
     rp = z.read("RIEPILOGO_DIAG.txt").decode("ascii") if z else ""
-    chk("B07 RIEPILOGO con le ATTESE scritte prima (controllo positivo (d), (a) riproduce il KO, quinta passata dichiarata)",
-        "ATTESE SCRITTE PRIMA" in rp and "CONTROLLO POSITIVO" in rp and "InpVerificheSeparate=false" in rp, rp[:300])
-    chk("B08 console: per ogni passata la CATENA (OK | n<300 | BarsCalculated | CopyRates | CopyBuffer) e la prima barra tutta OK", r["p"].stdout.count("CATENA: OK ") == 4 and "n<300 9946" in r["p"].stdout)
+    chk("B07 RIEPILOGO con le ATTESE scritte prima (controllo positivo (d), (e) passata FEDELE con cd_ok = 0, lettura (a)+(e) del tester pigro, rimedio v1.05, nota sulla riga TRONCATA)",
+        "ATTESE SCRITTE PRIMA" in rp and "CONTROLLO POSITIVO" in rp and "(e) U30USD dal 2024.09.26 con SOLO la catena" in rp and "v1.05" in rp and "TRONCATA" in rp and "primi ~300 caratteri" in rp, rp[:300])
+    chk("B08 console: per ogni passata la CATENA (OK | n<300 | BarsCalculated | CopyRates | CopyBuffer) e la prima barra tutta OK", r["p"].stdout.count("CATENA: OK ") == NP and "n<300 9946" in r["p"].stdout)
     print("   guardie")
     for nome, msg, kw in (("B10 macchina diversa (VPS)", "gira SOLO sul PC di backtest", dict(macchina="VMI3047753")),
                           ("B11 terminal64 vivo", "APERTO", dict(mt5_vivo="terminal64")),
@@ -1014,7 +1033,11 @@ def banco(chiavi, base):
     rr = B.gira("B22", scen=dict(compile_errori_con_ex5=True))
     chk("B22 .ex5 prodotto ma log con 2 errori: si ferma, zip della compilazione", g_comp_fallita(rr), tutto(rr)[-400:])
     rr = B.gira("B23", scen=dict(compile_italiano=True, compile_avvisi=2))
-    chk("B23 log di MetaEditor in ITALIANO ('0 errori, 2 avvisi'): letto, prosegue, 4 OK", g_italiano(rr), r["p"].stdout[:300] + rr["p"].stdout[:1200])
+    chk("B23 log di MetaEditor in ITALIANO ('0 errori, 2 avvisi'): letto, prosegue, 6 OK", g_italiano(rr), r["p"].stdout[:300] + rr["p"].stdout[:1200])
+    rr = B.gira("B26", scen=dict(compile_italiano=True, nerr=1))
+    chk("B26 .ex5 prodotto ma log ITALIANO al singolare ('1 errore, 0 avvisi', classe 1168): si ferma, zip della compilazione", g_comp_fallita(rr), tutto(rr)[-400:])
+    rr = B.gira("B27", scen=dict(compile_italiano=True, compile_avvisi=1))
+    chk("B27 log ITALIANO '0 errori, 1 avviso' (singolare): letto, prosegue verde", g_verde(rr) and "log di compilazione: 0 errori, 1 avvisi" in rr["p"].stdout, rr["p"].stdout[:1200])
     rr = B.gira("B24", ex5_vecchio=True, ex5_bloccato=True)
     chk("B24 .ex5 vecchio che NON si cancella (file bloccato simulato): si ferma prima di compilare, zip della compilazione", g_ex5_bloccato(rr), tutto(rr)[-400:])
     rr = B.gira("B25", ex5_vecchio=True)
@@ -1022,26 +1045,33 @@ def banco(chiavi, base):
     print("   difetti per passata (sulla passata (a))")
     for fault, msg in (("no_rias", "RIASSUNTO NON trovata"), ("troncato", "TRONCATA"), ("doppio", "PIU righe RIASSUNTO"), ("sym", "simbolo XXXUSD"),
                        ("chiave", "chiavi assenti nel RIASSUNTO: cd_bc"), ("rifiutato", "RIFIUTATO"), ("no_avvio", "AVVIO] NON trovata")):
-        rr = B.gira("B3x" + fault, scen=dict(falli={"U30USD_2024.09.26": fault}))
-        chk("B3x %s: (a) KO con '%s', le altre 3 OK, rc 3, lo zip esce" % (fault, msg), g_ko_a(msg)(rr), str(tab(zipd(rr), "MANIFEST_DIAG.csv")[:1]) + tutto(rr)[-300:])
-    rr = B.gira("B40", scen=dict(valori={"U30USD_2024.09.26": {"nuove": "0"}}))
+        rr = B.gira("B3x" + fault, scen=dict(falli={"U30USD_2024.09.26_1": fault}))
+        chk("B3x %s: (a) KO con '%s', le altre 5 OK, rc 3, lo zip esce" % (fault, msg), g_ko_a(msg)(rr), str(tab(zipd(rr), "MANIFEST_DIAG.csv")[:1]) + tutto(rr)[-300:])
+    rr = B.gira("B40", scen=dict(valori={"U30USD_2024.09.26_1": {"nuove": "0"}}))
     chk("B40 zero barre nuove viste dall'EA: (a) KO", g_ko_a("ZERO barre nuove")(rr))
-    rr = B.gira("B41", scen=dict(falli={"U30USD_2024.09.26": "guasto"}))
+    rr = B.gira("B47", scen=dict(falli={"U30USD_2024.09.26_0": "sep_sbagliata"}))
+    chk("B47 la passata (e) che riporta sep=1 (verifiche separate accese nella passata FEDELE): (e) KO, le altre 5 OK", g_ko(4, "verifiche separate 1 invece di 0")(rr), str(tab(zipd(rr), "MANIFEST_DIAG.csv")[4:5]) + tutto(rr)[-300:])
+    rr = B.gira("B48", scen=dict(falli={"U30USD_2024.09.26_0": "troncato"}))
+    m = tab(zipd(rr), "MANIFEST_DIAG.csv")
+    rs = tab(zipd(rr), "DIAG_RIASSUNTO.csv")
+    chk("B48 riga RIASSUNTO di (e) TRONCATA: (e) KO 'TRONCATA', ma le chiavi cd_* restano nel DIAG_RIASSUNTO.csv (la passata non si butta)",
+        g_ko(4, "TRONCATA")(rr) and rs[4]["cd_n"] == "9946" and rs[4]["cd_ok"] == "0" and rs[4]["fine"] == "", str(rs[4:5])[:400])
+    rr = B.gira("B41", scen=dict(falli={"U30USD_2024.09.26_1": "guasto"}))
     chk("B41 riga 'array out of range' del terminale: finisce nel log della passata come GUASTO", g_guasto(rr), tutto(rr)[-300:])
     rr = B.gira("B42", log_vecchio=True)
-    chk("B42 log dell'agente con un RIASSUNTO VECCHIO prima del giro: la fotografia lo esclude, 4 OK", g_log_vecchio(rr), str(tab(zipd(rr), "MANIFEST_DIAG.csv")[:1]))
+    chk("B42 log dell'agente con un RIASSUNTO VECCHIO prima del giro: la fotografia lo esclude, 6 OK", g_log_vecchio(rr), str(tab(zipd(rr), "MANIFEST_DIAG.csv")[:1]))
     rr = B.gira("B43", desktop_vecchio=True)
     chk("B43 cartella e zip di un giro precedente RINOMINATI con la data, il residuo non entra nello zip nuovo", g_desktop(rr))
     rr = B.gira("B44", muta_script=lambda b: b.replace(b"$TETTO_MIN = 40", b"$TETTO_MIN = 0"))
-    chk("B44 tetto 0 (costante cambiata sulla copia): 4 NON_LANCIATA, nessun terminale, rc 3, lo zip esce", g_tetto(rr), tutto(rr)[-300:])
+    chk("B44 tetto 0 (costante cambiata sulla copia): 6 NON_LANCIATA, nessun terminale, rc 3, lo zip esce", g_tetto(rr), tutto(rr)[-300:])
     if not RAPIDO:
         print("   timeout (reale: ~1 minuto ciascuno)")
         rr = B.gira("B45", timeout_min=1, no_exit=1, sleep_reale=True)
-        chk("B45 timeout sulla passata (a): CloseMainWindow (mai Kill), (a) KO 'timeout', le altre 3 OK, rc 3", g_timeout(rr), str(tab(zipd(rr), "MANIFEST_DIAG.csv")) + tutto(rr)[-300:])
+        chk("B45 timeout sulla passata (a): CloseMainWindow (mai Kill), (a) KO 'timeout', le altre 5 OK, rc 3", g_timeout(rr), str(tab(zipd(rr), "MANIFEST_DIAG.csv")) + tutto(rr)[-300:])
         rr = B.gira("B46", timeout_min=1, no_exit=1, no_close=True, sleep_reale=True)
         m = tab(zipd(rr), "MANIFEST_DIAG.csv")
-        chk("B46 il terminale non si chiude nemmeno con CloseMainWindow: (a) KO, (b)(c)(d) NON_LANCIATA 'giro fermato', un solo lancio, nessun Kill",
-            len(m) == 4 and m[0]["stato"] == "KO" and all(x["stato"] == "NON_LANCIATA" and "giro fermato" in x["motivi"] for x in m[1:]) and len(lanci(rr)) == 1 and
+        chk("B46 il terminale non si chiude nemmeno con CloseMainWindow: (a) KO, (b)-(f) NON_LANCIATA 'giro fermato', un solo lancio, nessun Kill",
+            len(m) == NP and m[0]["stato"] == "KO" and all(x["stato"] == "NON_LANCIATA" and "giro fermato" in x["motivi"] for x in m[1:]) and len(lanci(rr)) == 1 and
             not os.path.exists(os.path.join(rr["sd"], "simlog", "sim_kill.txt")), str(m) + tutto(rr)[-300:])
     return B
 
@@ -1094,24 +1124,28 @@ MUT_PS = [
     ("P06", "Model=0", b"`r`nModel=1`r`n", b"`r`nModel=0`r`n", {}, g_verde),
     ("P07", "Optimization=1", b"Optimization=0`r`n", b"Optimization=1`r`n", {}, g_verde),
     ("P08", "doppioni del RIASSUNTO non tolti", b"$c0 = 'R|' + $mr.Groups[1].Value.TrimEnd(); if(-not $visti.ContainsKey($c0))", b"$c0 = 'R|' + $mr.Groups[1].Value.TrimEnd(); if($true)", {}, g_verde),
-    ("P09", "fine=1 non controllato", b"if($R['fine'] -ne '1')", b"if($false)", dict(scen=dict(falli={"U30USD_2024.09.26": "troncato"})), g_ko_a("TRONCATA")),
-    ("P10", "simbolo non controllato", b"if($R['sym'] -ne $ps.Sim)", b"if($false)", dict(scen=dict(falli={"U30USD_2024.09.26": "sym"})), g_ko_a("simbolo XXXUSD")),
-    ("P11", "chiavi non controllate", b"if($mancano.Count -gt 0)", b"if($false)", dict(scen=dict(falli={"U30USD_2024.09.26": "chiave"})), g_ko_a("chiavi assenti")),
+    ("P09", "fine=1 non controllato", b"if($R['fine'] -ne '1')", b"if($false)", dict(scen=dict(falli={"U30USD_2024.09.26_1": "troncato"})), g_ko_a("TRONCATA")),
+    ("P10", "simbolo non controllato", b"if($R['sym'] -ne $ps.Sim)", b"if($false)", dict(scen=dict(falli={"U30USD_2024.09.26_1": "sym"})), g_ko_a("simbolo XXXUSD")),
+    ("P11", "chiavi non controllate", b"if($mancano.Count -gt 0)", b"if($false)", dict(scen=dict(falli={"U30USD_2024.09.26_1": "chiave"})), g_ko_a("chiavi assenti")),
     ("P12", "fotografia ignorata", b"$off = 0; if($foto.ContainsKey($f.FullName)){ $off = [long]$foto[$f.FullName] }", b"$off = 0", dict(log_vecchio=True), g_log_vecchio),
     ("P13", "CloseMainWindow tolto", b"try{ [void]$p.CloseMainWindow() }catch{ }", b"", dict(timeout_min=1, no_exit=1, sleep_reale=True), g_timeout),
     ("P14", ".ex5 vecchio non controllato", b"if(Test-Path -LiteralPath $ex5){ FermaCompilazione 'il vecchio .ex5", b"if($false){ FermaCompilazione 'il vecchio .ex5", dict(ex5_vecchio=True, ex5_bloccato=True), g_ex5_bloccato),
-    ("P15", "regex del risultato solo in inglese", b"'(\\d+)\\s+(?:errors?|errori),\\s*(\\d+)\\s+(?:warnings?|avvisi)'", b"'(\\d+)\\s+errors?,\\s*(\\d+)\\s+warnings?'", dict(scen=dict(compile_italiano=True, compile_avvisi=2)), g_italiano),
+    ("P15", "regex del risultato solo in inglese", b"'(\\d+)\\s+(?:errors?|errori|errore),\\s*(\\d+)\\s+(?:warnings?|avvisi|avviso)'", b"'(\\d+)\\s+errors?,\\s*(\\d+)\\s+warnings?'", dict(scen=dict(compile_italiano=True, compile_avvisi=2)), g_italiano),
     ("P16", "zip della compilazione tolto", b"    Compress-Archive -Path (Join-Path $CartC '*') -DestinationPath $zipC -Force\n", b"", dict(scen=dict(compile_fallisce=True)), g_comp_fallita),
     ("P17", "Desktop vecchio non rinominato", b"if(Test-Path -LiteralPath $Cart){ Move-Item", b"if($false){ Move-Item", dict(desktop_vecchio=True), g_desktop),
-    ("P18", "rc 3 -> 0", b"exit 3", b"exit 0", dict(scen=dict(falli={"U30USD_2024.09.26": "no_rias"})), g_ko_a("RIASSUNTO NON trovata")),
+    ("P18", "rc 3 -> 0", b"exit 3", b"exit 0", dict(scen=dict(falli={"U30USD_2024.09.26_1": "no_rias"})), g_ko_a("RIASSUNTO NON trovata")),
     ("P19", "data della passata (b) cambiata", b"Da = '2025.01.02'", b"Da = '2025.01.03'", {}, g_verde),
     ("P20", "mutex con un altro nome", b"New-Object System.Threading.Mutex($false, 'Global\\ABTG_NATCLA_F0')", b"New-Object System.Threading.Mutex($false, 'Global\\ABTG_ALTRO')", dict(mutex_occupato=True), g_si_ferma("")),
     ("P21", "InpAdxTipo=1 nella .ini", b"'InpAdxTipo=0'", b"'InpAdxTipo=1'", {}, g_verde),
     ("P22", "censimento delle installazioni spento", b"if($ignote.Count -gt 0){", b"if($ignote.Count -gt 99){", dict(altra_inst=True), g_si_ferma("")),
     ("P23", "sedie sui grafici non guardate", b"if($conEA.Count -gt 0){", b"if($conEA.Count -gt 99){", dict(chr=[{}, {"ea": "ABTG_Qualcosa"}]), g_si_ferma("")),
-    ("P24", "righe di guasto non tenute", b"if($reGuasto.IsMatch($riga)){", b"if($false){", dict(scen=dict(falli={"U30USD_2024.09.26": "guasto"})), g_guasto),
-    ("P25", "AVVIO rifiutato non controllato", b"if($a -match 'RIFIUTATO|ERRORE')", b"if($false)", dict(scen=dict(falli={"U30USD_2024.09.26": "rifiutato"})), g_ko_a("RIFIUTATO")),
-    ("P26", "zero barre nuove non controllato", b"if($R.ContainsKey('nuove') -and $R['nuove'] -eq '0')", b"if($false)", dict(scen=dict(valori={"U30USD_2024.09.26": {"nuove": "0"}})), g_ko_a("ZERO barre")),
+    ("P24", "righe di guasto non tenute", b"if($reGuasto.IsMatch($riga)){", b"if($false){", dict(scen=dict(falli={"U30USD_2024.09.26_1": "guasto"})), g_guasto),
+    ("P25", "AVVIO rifiutato non controllato", b"if($a -match 'RIFIUTATO|ERRORE')", b"if($false)", dict(scen=dict(falli={"U30USD_2024.09.26_1": "rifiutato"})), g_ko_a("RIFIUTATO")),
+    ("P27", "(e) con sep=true", b"Id = 'e'; Sim = 'U30USD'; Da = '2024.09.26'; Sep = 'false'", b"Id = 'e'; Sim = 'U30USD'; Da = '2024.09.26'; Sep = 'true'", {}, g_verde),
+    ("P28", "controllo sep fisso a 1", b"$sepAtteso = '0'; if($ps.Sep -eq 'true'){ $sepAtteso = '1' }", b"$sepAtteso = '1'", {}, g_verde),
+    ("P29", "regex del risultato senza i singolari italiani", b"(?:errors?|errori|errore),\\s*(\\d+)\\s+(?:warnings?|avvisi|avviso)", b"(?:errors?|errori),\\s*(\\d+)\\s+(?:warnings?|avvisi)",
+     dict(scen=dict(compile_italiano=True, nerr=1)), g_comp_fallita),
+    ("P26", "zero barre nuove non controllato", b"if($R.ContainsKey('nuove') -and $R['nuove'] -eq '0')", b"if($false)", dict(scen=dict(valori={"U30USD_2024.09.26_1": {"nuove": "0"}})), g_ko_a("ZERO barre")),
 ]
 
 
@@ -1176,7 +1210,7 @@ def genera_riga(pin, dest=None, senza_origin=False):
     SEA = sha(git_show(pin, F_DIAG))
     assert src.splitlines()[1].decode() == "#  " + MARC, "il marcatore deve stare alla riga 2 dello script"
     bersaglio = ("BERSAGLIO: SOLO una finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ: terminale C:\\Program Files\\BCM Markets MT5 Terminal (cartella BCM Markets MT5 Terminal), "
-                 "loggato sul demo 50503392. Lo script lo apre e lo chiude da solo, una volta per passata (4 passate di backtest, AllowLiveTrading=false, EA DIAGNOSTICO EA_NatCla_Diag "
+                 "loggato sul demo 50503392. Lo script lo apre e lo chiude da solo, una volta per passata (6 passate di backtest, AllowLiveTrading=false, EA DIAGNOSTICO EA_NatCla_Diag "
                  "di SOLA LETTURA: nessun ordine, nessun file, fuori dal tester rifiuta di partire). "
                  "NON TOCCATI, per nome, PRIMA SU QUESTO PC (censimento P0 del 05/10): C:\\MT5_Backtest (cartella dati 04C7A32B, conto non censito) e C:\\FundedNext_Manuale (cartella dati 2B8180C3, conto non censito), che devono restare CHIUSI; "
                  "POI il VPS VMI3047753 e TUTTE le sue cartelle dati -- FTMO trial 1514806751 (C:\\FTMO, ex challenge 541452707: le sedie e il Guardian), REALE 10105439 (C:\\BCM_Reale), 100k 50504263 (BCM Markets MT5 Terminal -V3), "
@@ -1187,21 +1221,22 @@ def genera_riga(pin, dest=None, senza_origin=False):
     avviso_mt5 = ("QUI CI SONO TRE MT5 (C:\\Program Files\\BCM Markets MT5 Terminal = demo 50503392, C:\\MT5_Backtest, C:\\FundedNext_Manuale): devono essere TUTTI CHIUSI, MetaEditor compreso. NON serve aprirne nessuno: lo script controlla da solo "
                   "i grafici salvati del terminale BCM e si ferma se trova una SEDIA attaccata (il 14/08/2026 da questa macchina sono partiti ordini VERI, #3160534/#3160535, -104,60). "
                   "Se uno e aperto, qui sotto compare il suo PID, titolo e cartella: chiudi QUELLO, a mano, e rilancia.")
-    cosa = ("NATCLA DIAG U30 (commit " + pin[:8] + ") -- 4 passate singole dell EA diagnostico EA_NatCla_Diag (v1.00, MAI compilato prima: la prima compilazione la fa lo script), Modello 1 (OHLC su M1), H1, fino al 2026.06.30: "
-            "(a) U30USD dal 2024.09.26 (riproduce il KO del pilota), (b) U30USD dal 2025.01.02 (circa 3 mesi di storia BCM davanti), (c) D30EUR dal 2024.09.26 (secondo indice), (d) EURUSD dal 2024.09.26 (CONTROLLO POSITIVO). "
+    cosa = ("NATCLA DIAG U30 (commit " + pin[:8] + ") -- 6 passate singole dell EA diagnostico EA_NatCla_Diag (v1.00, MAI compilato prima: la prima compilazione la fa lo script), Modello 1 (OHLC su M1), H1, fino al 2026.06.30: "
+            "(a) U30USD dal 2024.09.26 (riproduce il KO del pilota), (b) U30USD dal 2025.01.02 (circa 3 mesi di storia BCM davanti), (c) D30EUR dal 2024.09.26 (secondo indice), (d) EURUSD dal 2024.09.26 (CONTROLLO POSITIVO), tutte con le verifiche separate, piu (e) U30USD e (f) D30EUR dal 2024.09.26 con SOLO la catena (EA_NatCla alla lettera: la passata FEDELE). "
             "Dice QUALE delle 4 condizioni di CaricaDati di EA_NatCla cade (n sotto 300, BarsCalculated, CopyRates, CopyBuffer) e da quale barra passano tutte. Nessun PF, nessun DD, nessun ordine. "
             "Il lotto C di F0 resta FERMO finche questo zip non e letto. Da mandare quando finisce: lo zip NATCLA_DIAG_U30.zip dal Desktop di questo PC.")
-    tempo = ("TEMPO ATTESO [MISURATO dal pilota 07/10 su H1: 28-40 secondi a passata, il KO U30USD e costato 28 s]: compilazione circa 1 minuto + 4 passate x 28-40 secondi = 3-4 minuti. "
+    tempo = ("TEMPO ATTESO [MISURATO dal pilota 07/10 su H1: 28-40 secondi a passata, il KO U30USD e costato 28 s]: compilazione circa 1 minuto + 6 passate x 28-40 secondi = 4-5 minuti. "
              "Puo durare DI PIU se il terminale deve scaricare lo storico M1 di D30EUR (mai girato in F0 su questo PC): per questo il tetto resta largo. "
              "Il tetto del giro e 40 minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti, chiuso con CloseMainWindow). "
-             "NON fermarla prima di 65 minuti (caso peggiore: compilazione 2 + tetto 40 + ultima passata fino a 20 + chiusura 2; lo zip si scrive solo alla FINE). "
+             "NON fermarla prima di 70 minuti (caso peggiore: compilazione fino a 3 + tetto 40 + ultima passata fino a 20 + chiusura fino a 2, piu il margine per la raccolta; lo zip si scrive solo alla FINE). "
              "Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
     guarda = ("COSE DA GUARDARE PER PRIME quando torna, scritte PRIMA: (1) la compilazione: 0 errori (se FALLISCE lo script si ferma con rc 1 prima del tester e lo zip da mandare e NATCLA_DIAG_U30_COMPILAZIONE_FALLITA.zip); "
               "(2) (d) EURUSD deve avere cd_ok sopra 0 e la prima barra tutta OK all inizio della finestra: se no la diagnosi e rotta e nient altro si legge; "
-              "(3) (a) U30USD dal 2024.09.26 deve avere cd_ok = 0 (riproduce il KO): la colonna fra cd_n, cd_bc, cd_cr e cd_cb che porta le barre e la condizione che cade; "
-              "se invece (a) ha cd_ok sopra 0 la diagnosi NON riproduce il KO e serve una quinta passata con InpVerificheSeparate=false (dichiarata, non lanciata qui); "
-              "(4) (b) e (c): con storia davanti passa? l altro indice cade allo stesso modo? Lo script CONTA e non giudica.")
-    fine = ("FILE ATTESI NELLO ZIP sul Desktop (NATCLA_DIAG_U30.zip): RIEPILOGO_DIAG.txt + MANIFEST_DIAG.csv + DIAG_RIASSUNTO.csv + EA_NatCla_Diag.mq5 + compile_natcla_diag.log + log\\DIAG_<passata>.txt x 4 + ini\\diag_<passata>.ini x 4; "
+              "(3) (e) U30USD dal 2024.09.26 con SOLO la catena deve avere cd_ok = 0 (riproduce il KO): la colonna fra cd_n, cd_bc, cd_cr e cd_cb che porta le barre e la condizione che cade; "
+              "se (a) ha cd_ok sopra 0 e (e) cd_ok = 0 con cd_bc circa nuove-301 e min_bc/max_bc dell EMA200 fermi a -1 o bassi, la causa e BarsCalculated chiesto prima di CopyBuffer nel tester pigro (rimedio in EA_NatCla v1.05, lotto C fermo fino ad allora); "
+              "se (e) ha cd_ok sopra 0 il KO non e in CaricaDati e si leggono le righe GUASTO e TESTER; "
+              "(4) (b), (c) e (f): con storia davanti passa? l altro indice cade allo stesso modo? Lo script CONTA e non giudica.")
+    fine = ("FILE ATTESI NELLO ZIP sul Desktop (NATCLA_DIAG_U30.zip): RIEPILOGO_DIAG.txt + MANIFEST_DIAG.csv + DIAG_RIASSUNTO.csv + EA_NatCla_Diag.mq5 + compile_natcla_diag.log + log\\DIAG_<passata>.txt x 6 + ini\\diag_<passata>.ini x 6; "
             "rc 0 = tutte leggibili, rc 3 = almeno una KO o non lanciata (lo zip esce lo stesso), rc 1 = si e fermato prima del tester (se e la COMPILAZIONE, lo zip da mandare e NATCLA_DIAG_U30_COMPILAZIONE_FALLITA.zip)")
     for s in (bersaglio, cosa, tempo, guarda, fine, avviso_mt5):
         assert "'" not in s, s
@@ -1249,9 +1284,9 @@ def prova_riga(pin, B, base):
     chk("R02 impronta dello script e dell'EA nella riga == quelle del commit (git show)", ("$h -ne '" + H + "'") in riga and ("-ShaEA " + SEA + " ") in riga)
     chk("R03 bersaglio per nome (50503392, BCM Markets MT5 Terminal) e i NON toccati (C:\\MT5_Backtest, C:\\FundedNext_Manuale, 541452707, 1514806751, 10105439, 50504263, 50503635, 50504400, Pepperstone, Tickmill)",
         riga.startswith("& { ") and riga.index("BERSAGLIO") < riga.index("DownloadData") and all(x in riga for x in ("50503392", "BCM Markets MT5 Terminal", "C:\\MT5_Backtest", "C:\\FundedNext_Manuale", "541452707", "1514806751", "10105439", "50504263", "50503635", "50504400", "Pepperstone", "Tickmill", "NON tocca EA_NatCla.mq5")))
-    chk("R04 la riga dichiara tempo, tetto, file attesi e codici d'uscita", "3-4 minuti" in riga and "65 minuti" in riga and "FILE ATTESI NELLO ZIP" in riga and "rc 3" in riga)
+    chk("R04 la riga dichiara tempo, tetto, file attesi e codici d'uscita", "4-5 minuti" in riga and "70 minuti" in riga and "FILE ATTESI NELLO ZIP" in riga and "rc 3" in riga)
     r = B.gira("R05", riga=riga, pin=pin)
-    chk("R05 RIGA verde nel banco: scarica, controlla l'impronta, lancia lo script, 4 passate giuste, rc 0, zip", "NATCLA DIAG U30 rc 0" in r["p"].stdout and g_verde(r) and zipd(r) is not None, tutto(r)[-600:])
+    chk("R05 RIGA verde nel banco: scarica, controlla l'impronta, lancia lo script, 6 passate giuste, rc 0, zip", "NATCLA DIAG U30 rc 0" in r["p"].stdout and g_verde(r) and zipd(r) is not None, tutto(r)[-600:])
     scr = os.path.join(r["c"], "Users", "Master", "abtg_passata", "NATCLA_DIAG_U30.ps1")
     chk("R06 lo script scritto sul disco ha l'impronta della riga", os.path.exists(scr) and sha(open(scr, "rb").read()) == H)
     def scritto(rr):

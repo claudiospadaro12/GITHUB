@@ -3,7 +3,7 @@
 #  NATCLA_DIAG_U30.ps1 -- DIAGNOSI DEL KO U30USD DEL PILOTA F0 DI 'Ea Nat&Cla'
 #
 #  CHE COSA FA, e una cosa sola:
-#    lancia 4 passate SINGOLE del tester (Optimization=0, Model=1 = OHLC su M1)
+#    lancia 6 passate SINGOLE del tester (Optimization=0, Model=1 = OHLC su M1)
 #    dell'EA diagnostico mql5/Experts/EA_NatCla_Diag.mq5 (SOLA LETTURA: nessun
 #    ordine, nessun file, nessuna CTrade; fuori dal tester rifiuta di partire)
 #    e raccoglie dal log dell'agente la sua UNICA riga riassuntiva
@@ -15,21 +15,27 @@
 #    quattro condizioni (r.1266 n<300, r.1267 BarsCalculated, r.1270
 #    CopyRates, r.1274-1276 CopyBuffer) e quando passano TUTTE la prima volta.
 #
-#  LE 4 PASSATE (fisse, scritte qui: nessun file prova, nessuna lista doppia):
+#  LE 6 PASSATE (fisse, scritte qui: nessun file prova, nessuna lista doppia):
 #    (a) U30USD H1 dal 2024.09.26 -- riproduce il KO del pilota (stessa finestra)
 #    (b) U30USD H1 dal 2025.01.02 -- ~3 mesi di storia BCM PRIMA di FromDate
 #    (c) D30EUR H1 dal 2024.09.26 -- secondo indice, stessa storia dal 2024.09.26
 #    (d) EURUSD H1 dal 2024.09.26 -- CONTROLLO POSITIVO (forex, storia prima di FromDate)
+#    (e) U30USD H1 dal 2024.09.26 -- come (a) ma InpVerificheSeparate=false: SOLO la
+#        catena = EA_NatCla alla lettera (la passata FEDELE, classe 1171)
+#    (f) D30EUR H1 dal 2024.09.26 -- come (c), SOLO la catena
 #    tutte fino al 2026.06.30. Input dell'EA = quelli del file prova F0
 #    (NATCLA_F0_conteggio_2026-10-07.txt r.157-161, 176, 178): EMA 200, EMA14/89
 #    creati, contesto si, ATR 14, ADX 14 iADX MetaQuotes; TF H1 (16385).
-#    Se 4 passate NON bastano (es. (a) non riproduce il KO perche' le verifiche
-#    separate dell'EA diagnostico "guariscono" gli indicatori), la quinta e'
-#    (a) con InpVerificheSeparate=false: DICHIARATA, non lanciata qui.
+#    (a)-(d) con InpVerificheSeparate=true, (e)-(f) con false. PERCHE' (classe 1171,
+#    cancello 07/10): nel tester gli indicatori si calcolano SOLO quando si chiede
+#    un buffer (manuale MQL5, 'The Calculation of Indicators During Testing'); le
+#    verifiche separate chiamano CopyBuffer anche quando la catena si ferma, e
+#    quindi potrebbero GUARIRE proprio il guasto da misurare. La passata fedele
+#    gira nello STESSO giro, non in un secondo.
 #
 #  DERIVATO DA NATCLA_F0_PASSATE.ps1 (pin e2f0506b, NON toccato), stesse guardie.
 #  DEVIAZIONI, tutte dichiarate:
-#   1. 4 passate fisse invece dei lotti del file prova; nessun CSV di setup.
+#   1. 6 passate fisse invece dei lotti del file prova; nessun CSV di setup.
 #   2. UN solo sorgente scaricato (l'EA diagnostico non ha include) e
 #      controllato per SHA256 PASSATO DALLA RIGA (-ShaEA, calcolato dal commit)
 #      e per NCD_VER 1.00.
@@ -37,7 +43,8 @@
 #      (par. 7): (i) se il vecchio .ex5 non si cancella ci si ferma (un compilato
 #      vecchio passerebbe per nuovo); (ii) si aspetta che MetaEditor esca prima
 #      di leggere il log; (iii) la riga del risultato si legge in inglese E in
-#      italiano ('errors/errori', 'warnings/avvisi').
+#      italiano, anche al singolare ('errors/errori/errore', 'warnings/avvisi/avviso',
+#      classe 1168).
 #   4. Si tengono le righe d'errore dell'EA e del terminale ('critical',
 #      'array out of range', 'zero divide', ...) e le righe del tester sul
 #      simbolo: il pilota le aveva buttate, ed e' per questo che il KO non si
@@ -99,15 +106,17 @@ $ShaEA = $ShaEA.ToUpper()
 if($TimeoutRunMin -lt 1 -or $TimeoutRunMin -gt 60){ throw '-TimeoutRunMin fuori da 1-60 minuti.' }
 $RAW = 'https://raw.githubusercontent.com/claudiospadaro12/GITHUB/' + $Pin + '/'
 
-# le 4 passate: (a) riproduce il KO, (b) storia davanti, (c) secondo indice, (d) controllo positivo
+# le 6 passate: (a) riproduce il KO, (b) storia davanti, (c) secondo indice, (d) controllo positivo, (e)(f) = (a)(c) con SOLO la catena (EA_NatCla alla lettera)
 $Passate = @(
-  [pscustomobject]@{ Id = 'a'; Sim = 'U30USD'; Da = '2024.09.26'; Ruolo = 'riproduce il KO del pilota (stessa finestra)' },
-  [pscustomobject]@{ Id = 'b'; Sim = 'U30USD'; Da = '2025.01.02'; Ruolo = 'circa 3 mesi di storia BCM prima di FromDate' },
-  [pscustomobject]@{ Id = 'c'; Sim = 'D30EUR'; Da = '2024.09.26'; Ruolo = 'secondo indice, storia BCM dal 2024.09.26' },
-  [pscustomobject]@{ Id = 'd'; Sim = 'EURUSD'; Da = '2024.09.26'; Ruolo = 'CONTROLLO POSITIVO: forex con storia prima di FromDate' }
+  [pscustomobject]@{ Id = 'a'; Sim = 'U30USD'; Da = '2024.09.26'; Sep = 'true'; Ruolo = 'riproduce il KO del pilota (stessa finestra), con verifiche separate' },
+  [pscustomobject]@{ Id = 'b'; Sim = 'U30USD'; Da = '2025.01.02'; Sep = 'true'; Ruolo = 'circa 3 mesi di storia BCM prima di FromDate' },
+  [pscustomobject]@{ Id = 'c'; Sim = 'D30EUR'; Da = '2024.09.26'; Sep = 'true'; Ruolo = 'secondo indice, storia BCM dal 2024.09.26' },
+  [pscustomobject]@{ Id = 'd'; Sim = 'EURUSD'; Da = '2024.09.26'; Sep = 'true'; Ruolo = 'CONTROLLO POSITIVO: forex con storia prima di FromDate' },
+  [pscustomobject]@{ Id = 'e'; Sim = 'U30USD'; Da = '2024.09.26'; Sep = 'false'; Ruolo = 'come (a) ma SOLO la catena: EA_NatCla alla lettera (passata FEDELE, classe 1171)' },
+  [pscustomobject]@{ Id = 'f'; Sim = 'D30EUR'; Da = '2024.09.26'; Sep = 'false'; Ruolo = 'come (c) ma SOLO la catena: EA_NatCla alla lettera' }
 )
-# gli input dell'EA diagnostico = quelli del file prova F0 (r.157-161, 176, 178) + le due manopole della diagnosi
-$Ingressi = @('InpTF=16385', 'InpEmaLentaPeriodo=200', 'InpEmaTp1=14', 'InpEmaTp2=89', 'InpLogContesto=true', 'InpAtrNormPeriodo=14', 'InpAdxPeriodo=14', 'InpAdxTipo=0', 'InpVerificheSeparate=true', 'InpMaxEventi=20')
+# gli input dell'EA diagnostico = quelli del file prova F0 (r.157-161, 176, 178) + InpMaxEventi; InpVerificheSeparate si aggiunge PER PASSATA (campo Sep)
+$Ingressi = @('InpTF=16385', 'InpEmaLentaPeriodo=200', 'InpEmaTp1=14', 'InpEmaTp2=89', 'InpLogContesto=true', 'InpAtrNormPeriodo=14', 'InpAdxPeriodo=14', 'InpAdxTipo=0', 'InpMaxEventi=20')
 # le chiavi della riga RIASSUNTO, nell'ordine delle colonne di DIAG_RIASSUNTO.csv (il collaudo le confronta con quelle che l'EA stampa)
 $CHIAVI = @('v','sym','tf','adx','sep','motivo_deinit','tick','tick_t0zero','nuove','prima','ultima','cd_ok','cd_n','cd_bc','cd_cr','cd_cb','primo_ok','primo_ok_barre','cade_n','cade_bc','cade_bc_k','cade_cr','cade_cb','cade_cb_k','copia_saltata','incoerenze','max_barre','min_bc','max_bc','i0_first','i0_tfirst','i0_count','u_first','u_tfirst','maxbars_term','i0_barre','i0_n','i0_bc','i0_cr','i0_cb','u_barre','u_n','u_bc','u_cr','u_cb','ok_barre','ok_n','ok_bc','ok_cr','ok_cb','eventi','fine')
 
@@ -266,7 +275,7 @@ $testoLogC = ''
 if(Test-Path -LiteralPath $logC){ $testoLogC = Leggi-Condiviso $logC }
 $compErr = -1; $compWarn = -1
 # correzione (iii): la riga del risultato in inglese e in italiano
-$mRes = [regex]::Match($testoLogC, '(\d+)\s+(?:errors?|errori),\s*(\d+)\s+(?:warnings?|avvisi)')
+$mRes = [regex]::Match($testoLogC, '(\d+)\s+(?:errors?|errori|errore),\s*(\d+)\s+(?:warnings?|avvisi|avviso)')
 if($mRes.Success){ $compErr = [int]$mRes.Groups[1].Value; $compWarn = [int]$mRes.Groups[2].Value }
 if($compErr -gt 0){
   ($testoLogC -split "`r?`n") | Where-Object { $_ -match '(?i)error|errori' } | Select-Object -First 20 | ForEach-Object { Write-Host ('     ' + $_) -ForegroundColor DarkYellow }
@@ -275,10 +284,10 @@ if($compErr -gt 0){
 Dico ('compilato: ' + $ex5 + '   SHA256 .ex5 ' + (Get-FileHash -LiteralPath $ex5 -Algorithm SHA256).Hash.Substring(0,12)) 'Green'
 if($compErr -eq 0){ Dico ('log di compilazione: 0 errori, ' + $compWarn + ' avvisi') $(if($compWarn -eq 0){'Green'}else{'Yellow'}) }
 else { Dico 'log di compilazione: riga del risultato NON letta (formato diverso?): il verdetto e l esistenza dell .ex5' 'Yellow' }
-foreach($lw in @(($testoLogC -split "`r?`n") | Where-Object { $_ -match '(?i)warning|avviso' -and $_ -notmatch '\d+\s+(?:errors?|errori),' } | Select-Object -First 12)){ Dico ('   ' + $lw) 'Yellow' }
+foreach($lw in @(($testoLogC -split "`r?`n") | Where-Object { $_ -match '(?i)warning|avviso' -and $_ -notmatch '\d+\s+(?:errors?|errori|errore),' } | Select-Object -First 12)){ Dico ('   ' + $lw) 'Yellow' }
 
 # ---------------------------------------------------------------------
-#  2. LE 4 PASSATE SINGOLE (Optimization=0, Model=1, EA di sola lettura)
+#  2. LE 6 PASSATE SINGOLE (Optimization=0, Model=1, EA di sola lettura)
 # ---------------------------------------------------------------------
 $dsk  = [Environment]::GetFolderPath('Desktop')
 $Cart = Join-Path $dsk $NOME
@@ -379,7 +388,7 @@ foreach($ps in $Passate){
               "[Tester]`r`nExpert=" + $EXPERT + ".ex5`r`nSymbol=" + $ps.Sim + "`r`nPeriod=H1`r`nModel=1`r`n" +
               "Optimization=0`r`nFromDate=" + $ps.Da + "`r`nToDate=" + $DATA_A + "`r`nForwardMode=0`r`nDeposit=10000`r`nCurrency=EUR`r`nLeverage=100`r`n" +
               "ExecutionMode=0`r`nShutdownTerminal=1`r`n`r`n" +
-              "[TesterInputs]`r`n" + ($Ingressi -join "`r`n") + "`r`n"
+              "[TesterInputs]`r`n" + ($Ingressi -join "`r`n") + "`r`nInpVerificheSeparate=" + $ps.Sep + "`r`n"
   Set-Content -LiteralPath $iniF -Value $testoIni -Encoding ASCII
   Copy-Item -LiteralPath $iniF -Destination (Join-Path $Cart 'ini') -Force
 
@@ -441,7 +450,8 @@ foreach($ps in $Passate){
     if($R['v'] -ne $VERSIONE_ATTESA){ [void]$motivi.Add('versione EA diagnostico ' + $R['v'] + ' invece di ' + $VERSIONE_ATTESA) }
     if($R['sym'] -ne $ps.Sim){ [void]$motivi.Add('simbolo ' + $R['sym'] + ' invece di ' + $ps.Sim) }
     if($R['tf'] -ne 'PERIOD_H1'){ [void]$motivi.Add('TF ' + $R['tf'] + ' invece di PERIOD_H1') }
-    if($R['sep'] -ne '1'){ [void]$motivi.Add('verifiche separate ' + $R['sep'] + ' invece di 1') }
+    $sepAtteso = '0'; if($ps.Sep -eq 'true'){ $sepAtteso = '1' }
+    if($R['sep'] -ne $sepAtteso){ [void]$motivi.Add('verifiche separate ' + $R['sep'] + ' invece di ' + $sepAtteso) }
     $mancano = @($CHIAVI | Where-Object { -not $R.ContainsKey($_) })
     if($mancano.Count -gt 0){ [void]$motivi.Add('chiavi assenti nel RIASSUNTO: ' + ($mancano -join ',')) }
     if($R.ContainsKey('nuove') -and $R['nuove'] -eq '0'){ [void]$motivi.Add('ZERO barre nuove viste dall EA: la passata non ha girato sul TF') }
@@ -488,13 +498,18 @@ $testa = @(
 $attese = @(
   'ATTESE SCRITTE PRIMA DEI NUMERI (lo script NON giudica: queste righe dicono come si legge):',
   ' (d) EURUSD dal 2024.09.26 = CONTROLLO POSITIVO: cd_ok > 0 e primo_ok alla PRIMA barra della finestra. Se (d) non passa, la diagnosi e rotta e NESSUN numero di (a)(b)(c) si legge.',
-  ' (a) U30USD dal 2024.09.26 deve RIPRODURRE il KO del pilota: cd_ok = 0. Se invece cd_ok > 0, la diagnosi NON riproduce il KO: le verifiche separate potrebbero aver fatto calcolare gli indicatori;',
-  '     allora serve la quinta passata (a) con InpVerificheSeparate=false (dichiarata, NON lanciata qui).',
+  ' (e) U30USD dal 2024.09.26 con SOLO la catena (= EA_NatCla alla lettera) deve RIPRODURRE il KO del pilota: cd_ok = 0. E la passata FEDELE: comanda lei.',
+  ' (a) e (e) insieme (ipotesi principale, documentata: nel tester gli indicatori si calcolano SOLO quando si chiede un buffer, classe 1171):',
+  '     se (a) ha cd_ok > 0 e (e) ha cd_ok = 0 con cd_bc circa nuove-301 e min_bc/max_bc dell EMA200 fermi a -1 o bassi, la causa e BarsCalculated chiesto PRIMA di',
+  '     CopyBuffer nel tester pigro: rimedio in EA_NatCla v1.05, e il lotto C resta FERMO fino ad allora.',
+  '     se (e) ha cd_ok > 0, il KO del pilota NON e in CaricaDati: si leggono le righe GUASTO e TESTER del log delle passate.',
   ' Come si legge (a): la colonna cd_* che porta tutte le barre nuove e la condizione che cade. cd_n su tutte con max_barre < 302 = Bars() non cresce dentro la finestra;',
   '     cd_bc con min_bc/max_bc = -1 o fermi = indicatori mai calcolati; cd_cr / cd_cb = copia rifiutata (il codice d errore e nelle colonne u_cr / u_cb, valore/errore).',
   ' (b) U30USD dal 2025.01.02: se primo_ok cade alla PRIMA barra, con storia davanti il simbolo funziona e il guasto e il riscaldamento DENTRO la finestra (tocca H4/H12/D1 di tutti gli indici).',
   '     Se (b) resta a cd_ok = 0, il guasto e del SIMBOLO (o della classe), non della finestra.',
-  ' (c) D30EUR dal 2024.09.26: dice se e la classe degli indici BCM (stesso esito di (a)) o il solo U30USD.',
+  ' (c) D30EUR dal 2024.09.26 e (f) uguale con SOLO la catena: dicono se e la classe degli indici BCM (stesso esito di (a) e (e)) o il solo U30USD.',
+  ' (b) e (d) sono fedeli all EA se primo_ok cade alla PRIMA barra della finestra (prima del primo CopyBuffer delle verifiche separate).',
+  ' RIGA RIASSUNTO TRONCATA: le chiavi cd_* stanno nei primi ~300 caratteri e restano nel DIAG_RIASSUNTO.csv. La passata esce KO ma NON si butta: si leggono le chiavi presenti.',
   ''
 )
 (($testa + $manifest + @('') + $attese + @(
@@ -506,7 +521,7 @@ Compress-Archive -Path (Join-Path $Cart '*') -DestinationPath $zip -Force
 Write-Host ''
 Write-Host ('passate OK ' + $nOk + ', KO ' + $nKo + ', NON LANCIATE ' + $nNon + ' su ' + $Passate.Count + '   durata ' + [int]$durTot + ' minuti') -ForegroundColor Cyan
 Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
-Write-Host 'FILE ATTESI NELLO ZIP: RIEPILOGO_DIAG.txt + MANIFEST_DIAG.csv + DIAG_RIASSUNTO.csv + EA_NatCla_Diag.mq5 + compile_natcla_diag.log + log\DIAG_<passata>.txt x 4 + ini\diag_<passata>.ini x 4' -ForegroundColor Gray
+Write-Host 'FILE ATTESI NELLO ZIP: RIEPILOGO_DIAG.txt + MANIFEST_DIAG.csv + DIAG_RIASSUNTO.csv + EA_NatCla_Diag.mq5 + compile_natcla_diag.log + log\DIAG_<passata>.txt x 6 + ini\diag_<passata>.ini x 6' -ForegroundColor Gray
 try{ $Mutex.ReleaseMutex() }catch{ }
 if($nKo -eq 0 -and $nNon -eq 0 -and $nOk -eq $Passate.Count){ Write-Host 'ESITO DIAG: TUTTE LE PASSATE LEGGIBILI (rc 0). Il verdetto lo danno le colonne cd_* lette con le ATTESE del RIEPILOGO.' -ForegroundColor Green; exit 0 }
 Write-Host 'ESITO DIAG: ALMENO UNA PASSATA KO O NON LANCIATA (rc 3): lo zip esce lo stesso, il MANIFEST dice quali e perche.' -ForegroundColor Red
