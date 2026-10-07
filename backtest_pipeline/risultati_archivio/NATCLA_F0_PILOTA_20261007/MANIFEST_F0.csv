@@ -1,0 +1,9 @@
+lotto;simbolo;config;magic;t_avvio;durata_s;stato;csv;righe_conta;avvio_ok;adx_verifica;finestra;motivi
+PILOTA;EURUSD;AUDIO_H1;778601;2026-10-07 14:50:55;40;OK_FINESTRA_NON_LETTA;natcla_setup_EURUSD_778601.csv;1271;si;MetaQuotes;non letta;
+PILOTA;EURUSD;M2_H1;778621;2026-10-07 14:51:36;32;OK_FINESTRA_NON_LETTA;natcla_setup_EURUSD_778621.csv;559;si;MetaQuotes;non letta;
+PILOTA;GBPUSD;AUDIO_H1;778601;2026-10-07 14:52:08;38;OK_FINESTRA_NON_LETTA;natcla_setup_GBPUSD_778601.csv;1263;si;MetaQuotes;non letta;
+PILOTA;GBPUSD;M2_H1;778621;2026-10-07 14:52:46;28;OK_FINESTRA_NON_LETTA;natcla_setup_GBPUSD_778621.csv;498;si;MetaQuotes;non letta;
+PILOTA;XAUUSD;AUDIO_H1;778601;2026-10-07 14:53:15;33;OK_FINESTRA_NON_LETTA;natcla_setup_XAUUSD_778601.csv;1039;si;MetaQuotes;non letta;
+PILOTA;XAUUSD;M2_H1;778621;2026-10-07 14:53:48;28;OK_FINESTRA_NON_LETTA;natcla_setup_XAUUSD_778621.csv;400;si;MetaQuotes;non letta;
+PILOTA;U30USD;AUDIO_H1;778601;2026-10-07 14:54:17;28;KO;natcla_setup_U30USD_778601.csv;0;si;assente;non letta;riga VERIFICA ADX NON trovata (l EA non ha mai avuto dati sufficienti: 300 barre del TF)
+PILOTA;U30USD;M2_H1;778621;2026-10-07 14:54:45;28;KO;natcla_setup_U30USD_778621.csv;0;si;assente;non letta;riga VERIFICA ADX NON trovata (l EA non ha mai avuto dati sufficienti: 300 barre del TF)

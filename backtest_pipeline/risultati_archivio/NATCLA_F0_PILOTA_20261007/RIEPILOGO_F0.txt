@@ -1,0 +1,20 @@
+NATCLA F0 -- lotto PILOTA: conteggio dei setup di Ea Nat&Cla (Modello 1 OHLC su M1, InpSoloConta=true, NESSUN ordine)
+data: 2026-10-07 14:55:13   pc: DESKTOP-H4D7CAJ   pin: e2f0506b2fd5a2d2dbf2a119b7674a14f2088b96
+EA_NatCla.mq5 SHA256 681DC8823F01BEEA814D46FF749EEDF561902490DBB09A4F0EDBB35DEE39D3D9  (NC_VER 1.04)   compilazione: 0 errori, 0 avvisi (-1 = non letto)
+passate del lotto 8: OK 6, KO 2, NON LANCIATE 0   durata totale 4 minuti   media per passata OK 33 secondi
+STIMA F0 INTERA con la media misurata: 216 passate x 33 s = 119 minuti (solo se il lotto e rappresentativo: indici e forex hanno barre M1 diverse)
+Guardian nel tester: FAIL-OPEN (specifica 2.5): irrilevante in SoloConta (nessun ordine).
+
+lotto;simbolo;config;magic;t_avvio;durata_s;stato;csv;righe_conta;avvio_ok;adx_verifica;finestra;motivi
+PILOTA;EURUSD;AUDIO_H1;778601;2026-10-07 14:50:55;40;OK_FINESTRA_NON_LETTA;natcla_setup_EURUSD_778601.csv;1271;si;MetaQuotes;non letta;
+PILOTA;EURUSD;M2_H1;778621;2026-10-07 14:51:36;32;OK_FINESTRA_NON_LETTA;natcla_setup_EURUSD_778621.csv;559;si;MetaQuotes;non letta;
+PILOTA;GBPUSD;AUDIO_H1;778601;2026-10-07 14:52:08;38;OK_FINESTRA_NON_LETTA;natcla_setup_GBPUSD_778601.csv;1263;si;MetaQuotes;non letta;
+PILOTA;GBPUSD;M2_H1;778621;2026-10-07 14:52:46;28;OK_FINESTRA_NON_LETTA;natcla_setup_GBPUSD_778621.csv;498;si;MetaQuotes;non letta;
+PILOTA;XAUUSD;AUDIO_H1;778601;2026-10-07 14:53:15;33;OK_FINESTRA_NON_LETTA;natcla_setup_XAUUSD_778601.csv;1039;si;MetaQuotes;non letta;
+PILOTA;XAUUSD;M2_H1;778621;2026-10-07 14:53:48;28;OK_FINESTRA_NON_LETTA;natcla_setup_XAUUSD_778621.csv;400;si;MetaQuotes;non letta;
+PILOTA;U30USD;AUDIO_H1;778601;2026-10-07 14:54:17;28;KO;natcla_setup_U30USD_778601.csv;0;si;assente;non letta;riga VERIFICA ADX NON trovata (l EA non ha mai avuto dati sufficienti: 300 barre del TF)
+PILOTA;U30USD;M2_H1;778621;2026-10-07 14:54:45;28;KO;natcla_setup_U30USD_778621.csv;0;si;assente;non letta;riga VERIFICA ADX NON trovata (l EA non ha mai avuto dati sufficienti: 300 barre del TF)
+
+COME SI LEGGE: python3 backtest_pipeline/leggi_natcla_f0.py <questo zip o la cartella>. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e la colonna adx_verifica
+(deve dire MetaQuotes su tutte: se dice NESSUNA o Wilder nessun numero di ADX si usa); poi la tabella dei setup per linea e simbolo contro le attese scritte nel file prova.
+Questo script CONTA e dice se ogni passata e affidabile: NON giudica, NON promuove, NON sceglie nessuna cella.
