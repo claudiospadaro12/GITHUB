@@ -37,18 +37,23 @@
 #      solo bocciare (specifica 5.1).
 #   3. EA, include e file prova scaricati al pin e controllati per SHA256 PASSATO
 #      DALLA RIGA (-ShaEA -ShaInc -ShaProva, calcolati dal commit): non basta
-#      una firma di testo (classe 166). Piu': NC_VER = 1.04 nel sorgente.
+#      una firma di testo (classe 166). Piu': NC_VER = 1.05 nel sorgente (v1.05:
+#      il TOCCO degli handle in CaricaDati, rimedio allo stallo degli indici BCM
+#      misurato dalla diagnosi NATCLA_DIAG_U30 del 07/10).
 #   4. Un solo giro alla volta: Mutex 'Global\ABTG_NATCLA_F0' (classe 853: la
 #      guardia sui processi MT5 e una FOTO, non un lucchetto).
 #   5. Nessuna misura di spread/G0: qui non c'e' G0 (nessun numero atteso da
 #      riprodurre). Al suo posto i controlli PER PASSATA: riga AVVIO dell'EA
-#      (versione 1.04, modalita', simbolo, TF, magic, unita' per classe, linee,
+#      (versione 1.05, modalita', simbolo, TF, magic, unita' per classe, linee,
 #      ADX, 'solo conta SI'), riga VERIFICA ADX ('il terminale coincide con:
 #      formula MetaQuotes'), finestra girata letta dal giornale del tester
 #      ('from .. to ..'), CSV fresco con intestazione e righe CONTA.
-#   6. MetaEditor: l'esito e' l'esistenza dell'.ex5; il log di compilazione e'
-#      LETTO ('Result: N errors, M warnings') e stampato, e finisce nello zip:
-#      e' la PRIMA COMPILAZIONE VERA di EA_NatCla (mai provata prima). Se la
+#   6. MetaEditor: l'esito e' l'esistenza dell'.ex5 DIMOSTRATO NUOVO (classe
+#      1168: se il vecchio .ex5 non si cancella ci si ferma; si aspetta che
+#      MetaEditor ESCA prima di leggere il log); il log di compilazione e'
+#      LETTO in inglese E in italiano, anche al singolare ('Result: N errors,
+#      M warnings' / 'N errori, M avvisi' / '1 errore, 1 avviso') e stampato,
+#      e finisce nello zip. Se la
 #      compilazione FALLISCE (niente .ex5, o errori nel log) il giro si ferma
 #      PRIMA del tester e il log va in NATCLA_F0_<lotto>_COMPILAZIONE_FALLITA.zip
 #      sul Desktop (cancello 07/10, strato 2: prima stava solo nella finestra).
@@ -66,6 +71,14 @@
 #  11. La scoperta ricorsiva dei .log si fa UNA VOLTA a inizio lotto (come la passata NAS) e a ogni passata si rileggono solo le cartelle trovate piu' i
 #      percorsi noti degli agenti (Tester\*\Agent-*\logs): ricorsione su tutto %APPDATA%\MetaQuotes, con le cartelle dei tick, due volte per passata x 216 = ore.
 #  12. Nessun report .htm (niente Report= nel .ini): senza ordini non c'e' niente da leggere, e 216 report con i grafici sporcherebbero il terminale.
+#  13. (07/10 notte) La FINESTRA girata si legge dalla riga VERA del giornale del tester, presa dai log della diagnosi
+#      NATCLA_DIAG_U30 ('U30USD,H1 (BCMMarkets-Server): testing of Experts\<EA>.ex5 from 2024.09.26 00:00 to 2026.06.30 00:00'
+#      e la gemella '... started with inputs:'): la regex di prima cercava '... .ex5 on SIM,TF from' e su 47 passate vere
+#      (pilota, B, D) ha sempre detto 'non letta'.
+#  14. (07/10 notte, classe 1173) La stessa riga [NatCla] puo' comparire in DUE log, una TRONCATA (a 489 caratteri nella
+#      diagnosi): le righe dell'EA si confrontano per PREFISSO e si tiene la piu' lunga, prima di contare AVVIO e VERIFICA ADX.
+#  15. (07/10 notte) Lotto C0 = VERIFICA DEL RIMEDIO v1.05 su U30USD e D30EUR (AUDIO_H1, M2_H1): oltre ai controlli di sempre
+#      ogni passata deve avere righe CONTA > 0. Se una non le ha, il rimedio NON basta e il lotto C resta fermo.
 #  INVARIATI: guardia macchina DESKTOP-H4D7CAJ, tutti gli MT5 e MetaEditor
 #  chiusi (le due installazioni censite il 05/10 sono ammesse PER NOME,
 #  classe 1157), nessuna installazione non censita, cartella dati risolta per
@@ -109,13 +122,13 @@ $IC = [Globalization.CultureInfo]::InvariantCulture
 
 $EXPERT = 'EA_NatCla'
 $PROVA  = 'NATCLA_F0_conteggio_2026-10-07.txt'
-$VERSIONE_ATTESA = '1.04'
+$VERSIONE_ATTESA = '1.05'
 $DATA_A = '2026.06.30'
 $ASSE_ATTESO = 'InpMagic=0||0||1||1||Y'
 $N_PIN_ATTESI = 71
 if($Pin -notmatch '^[0-9a-fA-F]{40}$'){ throw '-Pin obbligatorio e di 40 caratteri esadecimali: senza, girerebbe la punta del branch spacciandola per un commit congelato.' }
 $Pin = $Pin.ToLower()
-if($Lotto -notmatch '^(PILOTA|A|B|C|D)$'){ throw ('-Lotto deve essere PILOTA, A, B, C o D (e ' + $Lotto + ').') }
+if($Lotto -notmatch '^(PILOTA|A|B|C|D|C0)$'){ throw ('-Lotto deve essere PILOTA, A, B, C, D o C0 (e ' + $Lotto + ').') }
 foreach($hx in @($ShaEA, $ShaInc, $ShaProva)){ if($hx -notmatch '^[0-9a-fA-F]{64}$'){ throw '-ShaEA, -ShaInc e -ShaProva devono essere di 64 caratteri esadecimali (SHA256 calcolato dal commit, mai dal disco).' } }
 $ShaEA = $ShaEA.ToUpper(); $ShaInc = $ShaInc.ToUpper(); $ShaProva = $ShaProva.ToUpper()
 if($TimeoutRunMin -lt 1 -or $TimeoutRunMin -gt 60){ throw '-TimeoutRunMin fuori da 1-60 minuti.' }
@@ -291,7 +304,7 @@ $doppi = @($pinProva | ForEach-Object { $_[0] } | Group-Object | Where-Object { 
 if($doppi.Count -gt 0){ throw ('parametri DOPPI nel file prova: ' + (($doppi | ForEach-Object { $_.Name }) -join ', ') + '. Non si parte.') }
 $pinH = @{}; foreach($pp in $pinProva){ $pinH[$pp[0]] = $pp[1] }
 if($pinH['InpSoloConta'] -ne 'true'){ throw 'il file prova NON ha InpSoloConta=true: il giro manderebbe ORDINI. Non si parte.' }
-if(@($blocchi.CONFIG).Count -ne 6 -or @($blocchi.SIMBOLO).Count -ne 36 -or @($blocchi.LOTTO).Count -ne 5){ throw ('blocchi @F0 letti: configurazioni ' + @($blocchi.CONFIG).Count + ' (attese 6), simboli ' + @($blocchi.SIMBOLO).Count + ' (attesi 36), lotti ' + @($blocchi.LOTTO).Count + ' (attesi 5). Non si parte.') }
+if(@($blocchi.CONFIG).Count -ne 6 -or @($blocchi.SIMBOLO).Count -ne 36 -or @($blocchi.LOTTO).Count -ne 6){ throw ('blocchi @F0 letti: configurazioni ' + @($blocchi.CONFIG).Count + ' (attese 6), simboli ' + @($blocchi.SIMBOLO).Count + ' (attesi 36), lotti ' + @($blocchi.LOTTO).Count + ' (attesi 6: PILOTA, A, B, C, D, C0). Non si parte.') }
 $lottoDef = @($blocchi.LOTTO | Where-Object { $_.nome -eq $Lotto })
 if($lottoDef.Count -ne 1){ throw ('lotto ' + $Lotto + ' non trovato (o doppio) nel file prova.') }
 $lottoDef = $lottoDef[0]

@@ -36,14 +36,21 @@ a tavolino, e si dice cosa resta fuori.
   R) RACCORDO (cancello 07/10): invarianti SEMANTICI sul codice non puro -- lato dell'ordine nel ramo
      (s>0), lotto/SL/TP passati come variabili controllate, ogni filtro arriva a NC_Contesto, ADX dal
      buffer 0, nessuna ora locale ne' costante oraria, riga d'avvio che stampa le variabili giuste.
-  M) MUTANTI CIECHI: 73 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
+  T) TESTER PIGRO (v1.05): CaricaDati VERA estratta dal sorgente e compilata in C++ contro quattro modelli del calcolo degli
+     indicatori (pigro sincrono = quello che riproduce i numeri misurati dalla diagnosi NATCLA_DIAG_U30; pigro differito;
+     zelante = dal vivo; contro-esempio "ricalcola solo per copie di piu' elementi"). La stessa CaricaDati SENZA il tocco e'
+     la v1.04: resta bloccata (= passate (e)(f)), la v1.05 parte alla barra 302 (= passate (a)(c)), con storia davanti e dal
+     vivo sono IDENTICHE barra per barra. Piu': la v1.05 e' la v1.04 del commit 290e1b74 + il SOLO tocco (confronto senza
+     commenti, una volta, sul sorgente vero).
+  M) MUTANTI CIECHI: 80 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic + T1-T7 della v1.05: il tocco degli handle) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
      controllo. Un mutante che passa = buco del collaudo.
 
 Uso:   python3 backtest_pipeline/collaudo_natcla.py [--senza-mutanti]
 Esce con 0 solo se tutto passa. NON prova: compilazione MQL5, CTrade/riempimenti, Guardian, iADX/iATR/iMA
-del terminale, tick reali, orologio BCM (il feed e' HistData, NON BCM).
+del terminale, tick reali, orologio BCM (il feed e' HistData, NON BCM), e QUALE dei modelli T e' il tester vero (il
+modello 0 spiega i numeri della diagnosi, non li dimostra: lo dice il lotto C0 di NATCLA_F0).
 """
 import datetime as dt
 import math
@@ -490,6 +497,8 @@ def invarianti_raccordo(src, code, bag):
     cd = corpo(code, "CaricaDati") or ""
     for m in re.finditer(r"\b(CopyRates|CopyBuffer)\s*\(", cd):
         a = [cd[x:y].strip() for x, y in argomenti(cd, m.end() - 1, chiusa(cd, m.end() - 1))]
+        if m.group(1) == "CopyBuffer" and len(a) == 5 and a[4] == "tocco":
+            continue                     # v1.05: il TOCCO (1 elemento, esito ignorato) e' controllato dall'invariante (31)
         if len(a) != 5 or a[2] != "1" or a[3] != "n":
             bag.append("RACCORDO: %s in CaricaDati con inizio/numero %s invece di (1, n)" % (m.group(1), a[2:4]))
     # (8) SEMAFORO: al primo riempimento si cancellano le ALTRE linee armate, non quella riempita
@@ -656,12 +665,38 @@ def invarianti_raccordo(src, code, bag):
     #      cancellato) perche' AUDIO resti 77860x e EMA200 resti 77862x: un enum rinumerato sposterebbe il magic M2. Mutante K5.
     if not re.search(r"enumENUM_NC_MODALITA\{NC_AUDIO=0,NC_PDF=1,NC_EMA200=2\}", ns(code)):
         bag.append("RACCORDO: ENUM_NC_MODALITA non e' piu' AUDIO=0, PDF=1, EMA200=2 (il magic automatico di EMA200 si sposterebbe)")
+    # (31) v1.05 (diagnosi NATCLA_DIAG_U30 07/10, classi 1170/1171): in CaricaDati il TOCCO dei tre handle che CaricaDati
+    #      controlla (hEma200, hAtrN, hAdx), UNO per handle, 1 elemento a shift 1, viene PRIMA di ogni uscita e di ogni
+    #      BarsCalculated; e' un'istruzione a se' (esito IGNORATO: niente if, niente assegnamento, niente confronto) e
+    #      l'array del tocco non e' letto da nessuna parte. Dopo, i controlli di sempre, intatti. Mutanti T1-T7.
+    cdm = corpo(code, "CaricaDati") or ""
+    tocchi = list(re.finditer(r"\bCopyBuffer\s*\(\s*(\w+)\s*,\s*0\s*,\s*1\s*,\s*1\s*,\s*tocco\s*\)", cdm))
+    if sorted(m.group(1) for m in tocchi) != ["hAdx", "hAtrN", "hEma200"]:
+        bag.append("RACCORDO v1.05: il tocco in CaricaDati non e' uno per handle su hEma200, hAtrN, hAdx (trovati %s)" % [m.group(1) for m in tocchi])
+    ibc = cdm.find("BarsCalculated(")
+    mret = re.search(r"\breturn\b", cdm)
+    for m in tocchi:
+        if ibc < 0 or not mret or not (m.start() < ibc and m.start() < mret.start()):
+            bag.append("RACCORDO v1.05: il tocco di %s non e' PRIMA di ogni uscita e di ogni BarsCalculated di CaricaDati" % m.group(1))
+        prima, dopo = cdm[:m.start()].rstrip(), cdm[m.end():].lstrip()
+        if not (prima.endswith(";") or prima.endswith("{")) or not dopo.startswith(";"):
+            bag.append("RACCORDO v1.05: l'esito del tocco di %s e' usato (deve essere un'istruzione a se', esito ignorato)" % m.group(1))
+    if not re.search(r"\bdouble\s+tocco\s*\[\s*1\s*\]\s*;", cdm) or len(re.findall(r"\btocco\b", cdm)) != 1 + len(tocchi) or len(re.findall(r"\btocco\b", code)) != len(re.findall(r"\btocco\b", cdm)):
+        bag.append("RACCORDO v1.05: l'array del tocco non e' 'double tocco[1]' usato SOLO dai tocchi in CaricaDati")
+    if "if(BarsCalculated(hEma200)<n+1||BarsCalculated(hAtrN)<n+1||BarsCalculated(hAdx)<n+1)returnfalse;" not in ns(cdm) or "if(n<NC_BARRE_MIN)returnfalse;" not in ns(cdm):
+        bag.append("RACCORDO v1.05: i controlli di sempre di CaricaDati (n minimo, BarsCalculated dei tre handle) non sono intatti")
+    if '#define NC_VER "1.05"' not in src or not re.search(r'#property\s+version\s+"1\.05"', src):
+        bag.append("RACCORDO v1.05: NC_VER / #property version non sono 1.05")
 
 
 def magic_libero():
+    # v1.05: escluse anche le cartelle/file del passo F0 e della diagnosi di Nat&Cla (sono file Nat&Cla: citano i SUOI magic).
+    # Prima di questa riga il collaudo usciva ROSSO (1 controllo) per tre righe di collaudo_natcla_f0/ (banco, bootstrap, prova_pins).
     r = subprocess.run(["git", "-C", ROOT, "grep", "-nE", r"\b7786[0-9]{2}\b", "--", ".",
-                        ":!.claude", ":!mql5/Experts/EA_NatCla.mq5", ":!backtest_pipeline/collaudo_natcla.py",
-                        ":!report/NATCLA_*"], capture_output=True, text=True)
+                        ":!.claude", ":!mql5/Experts/EA_NatCla.mq5", ":!mql5/Experts/EA_NatCla_Diag.mq5", ":!backtest_pipeline/collaudo_natcla.py",
+                        ":!backtest_pipeline/collaudo_natcla_diag.py", ":!backtest_pipeline/collaudo_natcla_f0", ":!backtest_pipeline/leggi_natcla_f0.py",
+                        ":!backtest_pipeline/righe/NATCLA_*", ":!backtest_pipeline/righe/RIGA_LANCIA_NATCLA_*", ":!backtest_pipeline/prove/NATCLA_*",
+                        ":!backtest_pipeline/risultati_archivio/NATCLA_*", ":!report/NATCLA_*", ":!data/natcla"], capture_output=True, text=True)
     return [ln for ln in r.stdout.splitlines() if ln.strip()]
 
 
@@ -809,6 +844,165 @@ class Cxx:
 
 def fx(x):
     return float.fromhex(x)
+
+
+# ===========================================================================
+# T) IL TESTER PIGRO (v1.05, diagnosi NATCLA_DIAG_U30 del 07/10): CaricaDati VERA, estratta dal sorgente, compilata in C++
+#    contro quattro modelli di come il terminale calcola gli indicatori. Non e' MT5: e' la spiegazione dei numeri misurati.
+#    MODELLO 0 PIGRO SINCRONO  = quello che RIPRODUCE i sei numeri della diagnosi (risultati_archivio/NATCLA_DIAG_U30_20261007):
+#             alla creazione (OnInit) un handle e' calcolato se le barre bastano (ATR/ADX si', EMA200 con 116 barre no: min_bc
+#             -1/116/116); dopo, un handle si ricalcola SOLO quando qualcuno chiede un suo buffer, e con meno barre del periodo
+#             resta -1 (in (a) BarsCalculated cade 84 volte = barre 117..200, CopyBuffer 83 = 117..199, e alla barra 302
+#             bc=301/301/301 = calcolato all'evento prima).
+#    MODELLO 1 PIGRO DIFFERITO = la richiesta viene servita all'evento DOPO (variante: la conclusione non deve dipendere da questo).
+#    MODELLO 2 ZELANTE         = ricalcola tutto a ogni evento (il terminale dal vivo): v1.04 e v1.05 devono dare la STESSA sequenza.
+#    MODELLO 3 CONTRO-ESEMPIO  = un tester che ricalcola SOLO per richieste di PIU' di 1 elemento: li' il tocco NON basta.
+#             Dichiarato: se il tester vero fosse cosi', il lotto C0 lo vede (niente VERIFICA ADX, zero CONTA) e il lotto C resta fermo.
+# ===========================================================================
+MODELLO_CPP = r'''
+#include <vector>
+#include <cstdio>
+#include <cstdlib>
+typedef long long datetime;
+struct MqlRates { datetime time; double open, high, low, close; long long tick_volume; int spread; long long real_volume; };
+static const char* _Symbol = "SIM";
+static int gTF = 16385;
+#define NC_BARRE 1500
+#define NC_BARRE_MIN 300
+static int MODELLO = 0;
+static int BARS = 0;
+static const int PER[4] = {0, 200, 14, 28};      // EMA200, ATR14, ADX14 (DI + media: ~2 x 14 barre)
+static int CALC[4] = {0, -1, -1, -1};
+static bool PEND[4] = {false, false, false, false};
+static long long NRICH[4] = {0, 0, 0, 0};
+static int hEma200 = 1, hAtrN = 2, hAdx = 3;
+static std::vector<double> gO, gH, gL, gC, gEma, gAtrN, gAdx, gLV, gLD, gWa, gWu, gWd;
+static std::vector<datetime> gT;
+static int gN = 0;
+static void calcola(int h){ CALC[h] = (BARS >= PER[h]) ? BARS : -1; }
+static int Bars(const char*, int){ return BARS; }
+static int BarsCalculated(int h){ return (h >= 1 && h <= 3) ? CALC[h] : -1; }
+static int richiesta(int h, int start, int count){
+  if(h < 1 || h > 3) return -1;
+  NRICH[h]++;
+  bool scatta = (MODELLO == 0 || MODELLO == 1) || (MODELLO == 3 && count > 1);
+  if(scatta){ if(MODELLO == 1) PEND[h] = true; else calcola(h); }
+  return (CALC[h] >= start + count) ? count : -1;      // -1 = 4806, dati non pronti
+}
+template<size_t N> static int CopyBuffer(int h, int, int start, int count, double (&a)[N]){
+  int r = richiesta(h, start, count); if(r > 0) for(int i = 0; i < r && i < (int)N; i++) a[i] = 1.0; return r; }
+static int CopyBuffer(int h, int, int start, int count, std::vector<double>& a){
+  int r = richiesta(h, start, count); if(r > 0) a.assign(r, 1.0); return r; }
+static int CopyRates(const char*, int, int start, int count, std::vector<MqlRates>& r){
+  if(BARS < start + count) return -1; r.assign(count, MqlRates()); return count; }
+template<class T> static bool ArraySetAsSeries(T&, bool){ return true; }
+template<class T> static int ArrayResize(std::vector<T>& v, int n){ v.resize(n); return n; }
+//@@CARICADATI@@
+int main(int argc, char** argv){
+  if(argc != 4) return 2;
+  MODELLO = atoi(argv[1]); int b0 = atoi(argv[2]); int nuove = atoi(argv[3]);
+  BARS = b0;
+  for(int h = 1; h <= 3; h++) calcola(h);             // creazione degli handle in OnInit
+  long long ok = 0, primo = -1, cade_n = 0; unsigned long long firma = 1469598103934665603ULL;
+  for(int k = 1; k <= nuove; k++){
+    BARS = b0 + k;
+    if(MODELLO == 1) for(int h = 1; h <= 3; h++) if(PEND[h]){ calcola(h); PEND[h] = false; }
+    if(MODELLO == 2) for(int h = 1; h <= 3; h++) calcola(h);
+    int n = (BARS - 2 < NC_BARRE) ? BARS - 2 : NC_BARRE;
+    if(n < NC_BARRE_MIN) cade_n++;
+    bool r = CaricaDati();
+    if(r){ ok++; if(primo < 0) primo = BARS; }
+    firma = (firma ^ (unsigned long long)(r ? 1 : 0)) * 1099511628211ULL;
+  }
+  printf("%lld %lld %lld %llu %lld %lld %lld\n", ok, primo, cade_n, firma, NRICH[1], NRICH[2], NRICH[3]);
+  return 0;
+}
+'''
+
+# i numeri MISURATI dalla diagnosi (riga RIASSUNTO completa di ogni passata), scritti qui PRIMA di girare il modello:
+# (barre alla creazione = barre del primo evento - 1, nuove barre, cd_ok, primo_ok_barre, cd_n)
+DIAG_U30 = (116, 9946, 9761, 302, 185)        # (a) con verifiche separate = guarisce; (e) catena fedele = cd_ok 0, cd_bc 9761
+DIAG_D30 = (115, 9639, 9453, 302, 186)        # (c) / (f)
+DIAG_U30_STORIA = (1462, 8600, 8600, 1463, 0)  # (b) storia davanti: dalla prima barra
+
+
+def tocchi_via(cd):
+    """CaricaDati SENZA il tocco (= la catena della v1.04): via la dichiarazione e le istruzioni 'CopyBuffer(...,tocco);'"""
+    cd = re.sub(r"[ \t]*double\s+tocco\s*\[\s*1\s*\]\s*;[^\n]*\n", "", cd)
+    return re.sub(r"[ \t]*CopyBuffer\s*\(\s*\w+\s*,\s*0\s*,\s*1\s*,\s*1\s*,\s*tocco\s*\)\s*;[^\n]*\n", "", cd)
+
+
+class ModelloTester:
+    def __init__(self, cd_testo, tmp):
+        self.ok, self.err = False, ""
+        cxx = shutil.which("g++") or shutil.which("clang++")
+        if not cxx or not cd_testo:
+            self.err = "g++ assente o CaricaDati non trovata"
+            return
+        os.makedirs(tmp, exist_ok=True)
+        cd = re.sub(r"\bMqlRates\s+(\w+)\s*\[\s*\]\s*;", r"std::vector<MqlRates> \1;", cd_testo)
+        cpp = os.path.join(tmp, "modello.cpp")
+        with open(cpp, "w") as f:
+            f.write(MODELLO_CPP.replace("//@@CARICADATI@@", "static " + cd.lstrip()))
+        self.exe = os.path.join(tmp, "modello")
+        r = subprocess.run([cxx, "-std=c++17", "-O2", "-o", self.exe, cpp], capture_output=True, text=True)
+        self.err = r.stderr
+        self.ok = (r.returncode == 0)
+
+    def gira(self, modello, b0, nuove):
+        r = subprocess.run([self.exe, str(modello), str(b0), str(nuove)], capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError("modello del tester uscito con %d" % r.returncode)
+        ok, primo, cade_n, firma, r1, r2, r3 = r.stdout.split()
+        return dict(ok=int(ok), primo=int(primo), cade_n=int(cade_n), firma=firma, rich=(int(r1), int(r2), int(r3)))
+
+
+def tester_pigro(src, tmp, bag, verbose):
+    """CaricaDati del sorgente (v1.05) e la stessa SENZA il tocco (v1.04 per costruzione) nei quattro modelli"""
+    cd5 = corpo(src, "CaricaDati")
+    if not cd5:
+        bag.append("MODELLO: CaricaDati non trovata nel sorgente")
+        return
+    cd4 = tocchi_via(cd5)
+    m5, m4 = ModelloTester(cd5, os.path.join(tmp, "v105")), ModelloTester(cd4, os.path.join(tmp, "v104"))
+    if not (m5.ok and m4.ok):
+        bag.append("MODELLO: CaricaDati non compila nel modello del tester (%s)" % (m5.err or m4.err)[:200])
+        return
+    b0, nu, okd, prd, cnd = DIAG_U30
+    a4, a5 = m4.gira(0, b0, nu), m5.gira(0, b0, nu)
+    check(a4["ok"] == 0 and a4["cade_n"] == cnd and a4["rich"][0] == 0,
+          "MODELLO 0 (pigro sincrono) U30USD, catena SENZA tocco (= v1.04, = passata (e)): %d barre valutate (misurato 0), %d con n<300 (misurato %d), "
+          "%d richieste di buffer EMA200 (stallo: mai una)" % (a4["ok"], a4["cade_n"], cnd, a4["rich"][0]), quiet=not verbose, bag=bag)
+    check(a5["ok"] == okd and a5["primo"] == prd,
+          "MODELLO 0 U30USD, v1.05 col tocco: %d barre valutate dalla barra %d (misurato in (a) con le richieste separate: %d dalla %d)"
+          % (a5["ok"], a5["primo"], okd, prd), quiet=not verbose, bag=bag)
+    b0, nu, okd, prd, cnd = DIAG_D30
+    d4, d5 = m4.gira(0, b0, nu), m5.gira(0, b0, nu)
+    check(d4["ok"] == 0 and d5["ok"] == okd and d5["primo"] == prd and d5["cade_n"] == cnd,
+          "MODELLO 0 D30EUR: v1.04 %d (misurato (f) 0), v1.05 %d dalla barra %d (misurato (c) %d dalla %d)" % (d4["ok"], d5["ok"], d5["primo"], okd, prd),
+          quiet=not verbose, bag=bag)
+    b0, nu, okd, prd, cnd = DIAG_U30_STORIA
+    s4, s5 = m4.gira(0, b0, nu), m5.gira(0, b0, nu)
+    check(s4["ok"] == okd and s4["primo"] == prd and s4["firma"] == s5["firma"] and s5["ok"] == okd,
+          "MODELLO 0 U30USD con storia davanti (= (b)): v1.04 %d dalla %d, v1.05 IDENTICA barra per barra (%s) -- misurato %d dalla %d"
+          % (s4["ok"], s4["primo"], "si" if s4["firma"] == s5["firma"] else "NO", okd, prd), quiet=not verbose, bag=bag)
+    b0, nu, okd, prd, cnd = DIAG_U30
+    f4, f5 = m4.gira(1, b0, nu), m5.gira(1, b0, nu)
+    check(f4["ok"] == 0 and f5["ok"] == okd and f5["primo"] == prd,
+          "MODELLO 1 (pigro DIFFERITO, variante): v1.04 %d, v1.05 %d dalla barra %d (la conclusione non dipende da sincrono/differito)"
+          % (f4["ok"], f5["ok"], f5["primo"]), quiet=not verbose, bag=bag)
+    z4, z5 = m4.gira(2, b0, nu), m5.gira(2, b0, nu)
+    check(z4["firma"] == z5["firma"] and z4["ok"] == z5["ok"] == okd,
+          "MODELLO 2 (zelante = dal vivo): v1.04 e v1.05 IDENTICHE barra per barra (%d e %d barre valutate): il tocco non cambia il comportamento dal vivo"
+          % (z4["ok"], z5["ok"]), quiet=not verbose, bag=bag)
+    c4, c5 = m4.gira(3, b0, nu), m5.gira(3, b0, nu)
+    check(c4["ok"] == 0 and c5["ok"] == 0,
+          "CONTRO-ESEMPIO MODELLO 3 (ricalcola solo per richieste di PIU' elementi): v1.05 resta bloccata (%d barre): il tocco di 1 elemento NON basta li'. "
+          "Dichiarato: lo decide il lotto C0 (VERIFICA ADX e righe CONTA)" % c5["ok"], quiet=not verbose, bag=bag)
+    cr = m5.gira(0, b0, nu)["rich"]
+    check(cr[0] >= nu and cr[1] >= nu and cr[2] >= nu,
+          "CARICO: con la v1.05 ogni handle e' chiesto a ogni barra (EMA200 %d, ATR %d, ADX %d richieste su %d barre): 3 copie di 1 elemento in piu' per barra"
+          % (cr[0], cr[1], cr[2], nu), quiet=not verbose, bag=bag)
 
 
 def unitari(cx, bag):
@@ -1228,6 +1422,7 @@ def suite(raw, tmp, ser, verbose):
         bag.append("il blocco puro non compila in C++: %s" % cx.err[:300])
         return bag, None
     try:
+        tester_pigro(src, tmp, bag, verbose)
         unitari(cx, bag)
         res, e, a = confronta_numeri(cx, ser, bag, verbose)
         # VERIFICA ADX (seconda lettura 07/10): il ricalcolo dell'EA (riga "VERIFICA ADX") == specchi Python
@@ -1267,6 +1462,33 @@ def suite(raw, tmp, ser, verbose):
         bag.append("eccezione: %s" % ex)
         return bag, None
     return bag, res
+
+
+TOCCO = "   CopyBuffer(hEma200,0,1,1,tocco);\n   CopyBuffer(hAtrN,0,1,1,tocco);\n   CopyBuffer(hAdx,0,1,1,tocco);\n"
+DOPO_TOCCO = "   int barre=Bars(_Symbol,gTF);\n   int n=(barre-2<NC_BARRE) ? barre-2 : NC_BARRE;\n   if(n<NC_BARRE_MIN) return false;\n"
+BC_LINEA = "   if(BarsCalculated(hEma200)<n+1 || BarsCalculated(hAtrN)<n+1 || BarsCalculated(hAdx)<n+1) return false;\n"
+V104_COMMIT = "290e1b74"      # ultimo commit con EA_NatCla v1.04 (lettura della diagnosi NATCLA_DIAG_U30)
+
+
+def solo_il_tocco(src105):
+    """NESSUN'ALTRA MODIFICA: la v1.05 senza commenti, senza il tocco e con le due stringhe di versione riportate a 1.04 deve
+    essere IDENTICA (spazi a parte) alla v1.04 del commit V104_COMMIT. Gira solo sul sorgente vero (un mutante la romperebbe sempre)."""
+    r = subprocess.run(["git", "-C", ROOT, "show", "%s:mql5/Experts/EA_NatCla.mq5" % V104_COMMIT], capture_output=True)
+    if r.returncode != 0:
+        return None, "v1.04 non leggibile da git (%s)" % V104_COMMIT
+    def senza_commenti(s):
+        m = maschera(s)
+        return "".join(sc if mc == "x" else mc for mc, sc in zip(m, s))
+    a = senza_commenti(r.stdout.decode("ascii"))
+    b = senza_commenti(src105)
+    b = re.sub(r"[ \t]*double\s+tocco\s*\[\s*1\s*\]\s*;[ \t]*\n", "", b)
+    b = re.sub(r"[ \t]*CopyBuffer\s*\(\s*\w+\s*,\s*0\s*,\s*1\s*,\s*1\s*,\s*tocco\s*\)\s*;[ \t]*\n", "", b)
+    b = b.replace('#property version   "1.05"', '#property version   "1.04"').replace('#define NC_VER "1.05"', '#define NC_VER "1.04"')
+    na, nb = re.sub(r"\s+", "", a), re.sub(r"\s+", "", b)
+    if na == nb:
+        return True, ""
+    k = next(i for i in range(min(len(na), len(nb)) + 1) if i == min(len(na), len(nb)) or na[i] != nb[i])
+    return False, "prima differenza: v1.04 '...%s' contro v1.05 '...%s'" % (na[max(0, k - 40):k + 40], nb[max(0, k - 40):k + 40])
 
 
 def mutanti(raw, ser):
@@ -1378,6 +1600,14 @@ def mutanti(raw, ser):
          "   if(InpPesiPdf!=NC_PESI_1_1 || InpPesiScala!=NC_PESI_1_1_1) pdfx+="),
         ("K4 confluenza: rifiutata l'etichetta AUDIO invece dell'obbligatoria", "   if(gConfl==2) pdfx+=", "   if(gConfl==1) pdfx+="),
         ("K5 enum rinumerato: EMA200=3 (magic M2 77862x -> 77863x)", "   NC_EMA200=2     // EMA200:", "   NC_EMA200=3     // EMA200:"),
+        # --- v1.05 (diagnosi NATCLA_DIAG_U30 07/10): il tocco degli handle in CaricaDati (invariante 31 + modello del tester pigro)
+        ("T1 tocco su UN solo handle (EMA200)", "   CopyBuffer(hAtrN,0,1,1,tocco);\n   CopyBuffer(hAdx,0,1,1,tocco);\n", ""),
+        ("T2 tocco DOPO il controllo BarsCalculated", TOCCO + DOPO_TOCCO + BC_LINEA, DOPO_TOCCO + BC_LINEA + TOCCO),
+        ("T3 esito del tocco usato per uscire", "   CopyBuffer(hEma200,0,1,1,tocco);\n", "   if(CopyBuffer(hEma200,0,1,1,tocco)!=1) return false;\n"),
+        ("T4 tocco dopo l'uscita per barre insufficienti", TOCCO + DOPO_TOCCO, DOPO_TOCCO + TOCCO),
+        ("T5 tocco sull'handle sbagliato (EMA14 invece di EMA200)", "   CopyBuffer(hEma200,0,1,1,tocco);\n", "   CopyBuffer(hEma14,0,1,1,tocco);\n"),
+        ("T6 esito del tocco assegnato e usato", "   CopyBuffer(hAdx,0,1,1,tocco);\n", "   int tk=CopyBuffer(hAdx,0,1,1,tocco); if(tk<0) return false;\n"),
+        ("T7 versione rimasta 1.04", '#define NC_VER "1.05"', '#define NC_VER "1.04"'),
     ]
     base = tempfile.mkdtemp(prefix="natcla_mutanti_")     # FUORI dal repo (classe 1159)
     assert not os.path.abspath(base).startswith(os.path.abspath(ROOT))
@@ -1418,6 +1648,9 @@ def main():
     check(norm(a).replace("SW_STCore", "NC_STCore") == norm(b), "NC_STCore == SW_STCore della casa (testo, a meno del nome)")
     altri = magic_libero()
     check(not altri, "blocco magic 7786xx libero nel repo fuori dai file Nat&Cla (%s)" % altri[:3])
+    esito, det = solo_il_tocco(src)
+    check(esito is True, "v1.05 = v1.04 (commit %s) + il SOLO tocco in CaricaDati + le due stringhe di versione: nessun'altra modifica di logica, CSV, magic, input %s"
+          % (V104_COMMIT, det))
 
     print("== P + N) funzioni pure C++ e numeri su barre reali dell'oro (HistData, +6 h, NON BCM) ==")
     ser = serie_tf(60, 2023)
