@@ -1,6 +1,6 @@
 # PTE Dashboard LEGGERA: la nostra versione della tabella PTE (07/10/2026)
 
-> **Stato v1.10 (07/10/2026 sera): strato 1 (collaudo) @@ESITO@@ · strato 2 (`controllo-preventivo`) NON ANCORA FATTO: lo fa la sessione principale, quindi la v1.10 NON è consegnabile finché non torna un PASS.**
+> **Stato v1.10 (07/10/2026 sera): strato 1 (collaudo) TUTTO OK, **157/157 mutanti presi** (66 della v1.00 + 91 nuovi: click 19, HA/colori 19, doji 16, HIDE 7, REFRESH 7, EMA 13, Supertrend 10; scritti dall'autore, quelli ciechi veri li scrive il cancello). Un mutante era VERDE alla prima corsa (il controllo delle cifre nel nome cliccato): aggiunto il contro-esempio `PDL_s_1/` (senza quel controllo diventerebbe la riga 9), poi preso · strato 2 (`controllo-preventivo`) NON ANCORA FATTO: lo fa la sessione principale, quindi la v1.10 NON è consegnabile finché non torna un PASS.**
 > **Mai compilata: qui non c'è MetaEditor.** La v1.00 (commit `5f3e4d0d`) era passata con riserva; la v1.10 è un file nuovo per metà e la sua prima compilazione la fai tu (F7).
 
 File:
@@ -158,6 +158,15 @@ La finestra giusta è quella con `Path` dentro `C:\MT5_MANUALE` **e** titolo che
 - **Contro-esempi**: con 2 sole barre di seme la Heikin Ashi ricorsiva **diverge** (quindi il confronto morde); un ATR "alla Wilder" si distingue dall'iATR di MT5 fino al 25-37%.
 - **39 mutanti ciechi su 39 presi** (copie fuori dal repo) nella prima stesura; il cancello (strato 2, 07/10) ne ha scritti altri **28 su righe di raccordo non scelte dall'autore** e **23 erano VERDI** (fra questi: tabella sempre vuota, Market Watch invertito, cursore fermo sulla cella 0, colonna H4 riempita con dati H8, suffisso ignorato). Dopo le ancore aggiunte: **62 mutanti su 62 presi**, poi **66 su 66** dopo le 3 correzioni del lettore indipendente.
 - **Correzione del cancello**: se la serie di un simbolo/TF risultava vuota (`SERIES_LASTBAR_DATE` = 0), la cella si rinviava **senza mai chiamare `CopyRates`**, cioè senza mai chiedere al terminale di costruire la serie: se il terminale la costruisce solo su richiesta di una copia, quella cella non si sarebbe **mai** riempita. Ora con la serie vuota si copia (in un indicatore non blocca) e, se torna corta, si rinvia con attesa crescente. Contro-esempio a modello: col terminale "costruisce solo su richiesta" la versione vecchia non si riempie mai in 3 ore, la nuova in 2 s; col terminale "costruisce da sola" le due fanno **le stesse 4 copie**. Quale dei due sia il comportamento vero di MT5 **non è verificato**: la correzione non costa niente in tutti e due i casi.
+
+### 6-bis. Cosa è provato nella v1.10 (strato 1, collaudo PASS, 157/157 mutanti)
+- **Struttura**: 32 buffer / 15 plot, ogni `SetIndexBuffer` all'indice giusto col tipo giusto (dati / colore / calcolo), tipo e colore di ogni plot.
+- **Click**: `PD_Bersaglio` vera (compilata in C++) su **tutte le 105 celle**, i 35 simboli, i TF e **31 nomi da rifiutare** (tasti, titolo, frecce, indici fuori tabella, nomi storti). **Contro-esempio riga/colonna scambiata**: `PDL_r_2_1` deve dare simbolo 2 / TF 1, non 1 / 2; `PDL_t_2_34` (colonna 34 inesistente) va rifiutata e non letta come riga 34. Il raccordo (simbolo dalla RIGA, TF dalla COLONNA, `SymbolSelect`, grafico nuovo o questo) è ancorato.
+- **Colori**: le funzioni VERE (`ColsHide`, `ColsRestore`, `RepairInvisibleNative`, `CuraColori`...) estratte e compilate su un **grafico finto con due istanze**: HA di default ON e rimozione, ricarico da click **nei due ordini**, crash, toggle; `clrNONE` letto come 4294967295 e come -1 → **14/14**. Il mutante "HA di default ON che dimentica di salvare i colori" è preso.
+- **HA disegnata**: incrementale come `OnCalculate` (barra in formazione prima provvisoria poi vera) == HA ricorsiva dell'intera serie; **contro-esempio** `da = prev_calculated` (senza -1): resta la barra provvisoria.
+- **Doji sul grafico**: `PD_Marca` == tutte le doji dello specchio nelle 30 barre chiuse, la prima == la cella, mai la barra in formazione (oro H1/H4/D1, 3 configurazioni, 0 differenze).
+- **EMA 9/21** e **Supertrend 2,5/3,0/3,5**: bit per bit con uno specchio Python indipendente; testo identico a `ABTG_Pulsanti_Grafico.mq5` (e `NC_STCore` di `EA_NatCla.mq5`); incrocio == regola scritta su tutte le barre.
+- **REFRESH / HIDE / DOJI OFF**: ancore + mutanti (una sola cache azzerata, copia in blocco nell'handler, HIDE che nasconde il suo tasto, HIDE che continua a copiare, DOJI OFF che lascia le frecce o le calcola lo stesso): **tutti presi**.
 
 ## 7. Domande a Claudio
 
