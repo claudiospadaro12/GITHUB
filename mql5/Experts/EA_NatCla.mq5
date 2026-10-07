@@ -24,6 +24,9 @@
 //|  v1.01 (seconda lettura 07/10): riga VERIFICA ADX alla prima     |
 //|  barra, pendenti orfani ricancellati, scala tolta senza dati,    |
 //|  parziale che lascia il residuo >= minimo. SERVE UN TERZO LETTORE|
+//|  v1.02 (terza lettura 07/10): il ritentativo sui pendenti orfani |
+//|  e' cadenzato (uno ogni NC_ORF_PAUSA_SEC per linea, non a ogni   |
+//|  tick): niente raffica di richieste se la cancellazione fallisce.|
 //|  NON compilato qui (nessun MetaEditor in questo ambiente): la     |
 //|  prima compilazione e il primo giro nel tester sono il collaudo  |
 //|  che manca. Solo DEMO/TESTER finche' Claudio non firma.          |
@@ -67,10 +70,10 @@
 //+------------------------------------------------------------------+
 #property copyright "Ea Nat&Cla - progetto Claudio (ABTG)"
 #property description "Ea Nat&Cla: modo AUDIO (collega) / PDF (Supertrend Reversal) / motore solo EMA200. Specifica report/NATCLA_SPECIFICA_2026-10-07.md. Rischio 0,25% = SEGNAPOSTO da firmare da Claudio."
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 
-#define NC_VER "1.01"
+#define NC_VER "1.02"
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -222,9 +225,11 @@ input ENUM_NC_TRI InpAdxUsa     = NC_TRI_DA_MODALITA; // Filtro ADX massimo (AUD
 input double InpAdxMax          = 20;   // ADX massimo [FONTE A-R12: "a 20 non di piu'"]
 input int    InpAdxPeriodo      = 14;   // Periodo ADX [NOSTRA, Wilder]
 input ENUM_NC_ADXAMB InpAdxAmbito = NC_ADX_SOLO_ST35; // Linee su cui vale l'ADX (F3). Mai sulla EMA200
-//--- InpAdxTipo [cancello 07/10]: default iADX = l'indicatore che MT5 chiama "ADX" (le immagini del
-//    PDF sono MT5 su BCM): e' la lettura che NON sposta in silenzio il "20" della collega. Wilder e'
-//    piu' basso (sull'oro H1 mediana 25 contro 29): passa circa il DOPPIO dei setup. Resta un asse.
+//--- InpAdxTipo: default iADX = l'indicatore che MT5 chiama "ADX". E' un'ASSUNZIONE [NOSTRA]: l'audio
+//    dice solo "ADX a 20, non di piu'" (A-R12), NON la piattaforma, NON la formula, NON il periodo.
+//    Se la collega usa MT5 vede iADX; se usa TradingView vede Wilder. Lo spostamento e' simmetrico
+//    (oro H1: Wilder<=20 ~ iADX<=23; iADX<=20 ~ Wilder<=17): iADX e' la lettura PIU' STRETTA (circa
+//    meta' dei setup), non "la piu' fedele". Wilder resta un asse. Si chiede alla collega (bloccante 9).
 input ENUM_NC_ADXTIPO InpAdxTipo  = NC_ADX_MT5; // Formula ADX: iADX (specifica 2.1) o iADXWilder [NOSTRA, asse]
 input ENUM_NC_TRI InpInclUsa    = NC_TRI_DA_MODALITA; // EMA200 inclinata (AUDIO si, PDF no, EMA200 si) [A-R19]
 input int    InpInclBarre       = 20;   // Inclinazione: |EMA200[1]-EMA200[1+N]|/ATR14[1], N barre [NOSTRA]
@@ -305,6 +310,7 @@ input double InpPlaceboAtr  = 0;        // PLACEBO (strumento di misura E7): spo
 #define NC_LEMA      3
 #define NC_BARRE     1500   // finestra di calcolo (barre chiuse). Il collaudo prova che il risultato non dipende dall'inizio
 #define NC_BARRE_MIN 300
+#define NC_ORF_PAUSA_SEC 10 // pendenti orfani: un ritentativo di cancellazione ogni 10 s per linea [terza lettura 07/10]
 #define NC_GRAZIA_SEC 300   // PDF: ingresso a mercato solo entro 5 min dall'apertura della barra [CASA: InpGraceSec di ABTG_EMA200_Ombra r.152]
 #define NC_TIPO_SCALA 0
 #define NC_TIPO_PDF   1
@@ -828,6 +834,7 @@ datetime gUltimoEp[NC_NL];   // chiave dell'ultimo episodio usato (nessun riarmo
 bool     gArmatoPrima[NC_NL];
 int      gOrfani=0;          // posizioni/ordini del magic senza etichetta di linea (dopo un riavvio)
 bool     gAdxVerificato=false; // riga "VERIFICA ADX" gia' stampata (una volta per avvio)
+datetime gOrfTent[NC_NL];   // ultimo ritentativo di cancellazione dei pendenti orfani della linea
 
 //--- CSV per-setup
 int gFh=INVALID_HANDLE;
@@ -1147,7 +1154,7 @@ void StampaConfigurazione()
 int OnInit()
   {
    ArrayInitialize(gImb,0); ArrayInitialize(gImbSnap,0);
-   for(int L=0;L<NC_NL;L++){ ResetSetup(L); gUltimoEp[L]=0; gArmatoPrima[L]=false; }
+   for(int L=0;L<NC_NL;L++){ ResetSetup(L); gUltimoEp[L]=0; gArmatoPrima[L]=false; gOrfTent[L]=0; }
    string err="";
    if(!Risolvi(err)){ Print("[NatCla] AVVIO RIFIUTATO: ",err); return(INIT_PARAMETERS_INCORRECT); }
    if(AccountInfoInteger(ACCOUNT_MARGIN_MODE)!=ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)
@@ -1839,8 +1846,11 @@ void Sincronizza()
          //--- [cancello 07/10, seconda lettura] pendenti di una linea SENZA setup in memoria e senza
          //    posizioni: una cancellazione precedente non e' riuscita (rete, freeze level) e lo stato e'
          //    gia' stato azzerato. Senza questa riga resterebbero vivi per sempre al prezzo vecchio, FUORI
-         //    dal semaforo (Aperti() non li vede) e senza scadenza. Si riprova a ogni passaggio.
-         if(np==0 && no>0) CancellaOrdiniLinea(L,"pendenti senza setup in memoria (cancellazione precedente non riuscita)");
+         //    dal semaforo (Aperti() non li vede) e senza scadenza. Si riprova, ma [terza lettura 07/10]
+         //    al massimo una volta ogni NC_ORF_PAUSA_SEC per linea: se il rifiuto e' permanente (freeze
+         //    level, AutoTrading spento) non parte una richiesta (e una riga d'errore di CTrade) a ogni tick.
+         if(np==0 && no>0 && TimeCurrent()-gOrfTent[L]>=NC_ORF_PAUSA_SEC)
+           { gOrfTent[L]=TimeCurrent(); CancellaOrdiniLinea(L,"pendenti senza setup in memoria (cancellazione precedente non riuscita)"); }
          continue;
         }
       //--- registra gli ID delle posizioni della linea

@@ -160,7 +160,8 @@ Ogni input "ambiguo" ha un valore `DA_MODALITA` (default). In `OnInit` l'EA:
    `InpRischioSetupPct` <= 0; `InpMoltConfluenza` x rischio > `InpRischioMaxSetupPct` (il troncamento e' dichiarato a log);
 4. crea gli handle (`iATR` x2, `iMA` EMA200/14/89/9/21, `iADX`, `iBands` solo se `InpLogContesto`) e li rilascia in
    `OnDeinit` **[CASA]**. `iADX` = l'indicatore che MT5 chiama "ADX" (formula MetaQuotes), **non** `iADXWilder`: e' il default
-   perche' le immagini del PDF sono MT5 su BCM e "ADX" sulla piattaforma e' quello; Wilder e' l'asse `InpAdxTipo` (A5).
+   **per ASSUNZIONE [NOSTRA]** (l'audio dice solo "ADX a 20, non di piu'": ne' piattaforma, ne' formula, ne' periodo; vedi §5.4,
+   motivazione riscritta dalla terza lettura 07/10); Wilder e' l'asse `InpAdxTipo` (A5).
    *(Precisato dal cancello sul codice 07/10: le due formule danno frequenze diverse di 2-10 volte, §5.4.)*
 
 ### 2.2 Le macchine a stati
@@ -453,11 +454,17 @@ specchio del collaudo; **[DA CONFERMARE sul terminale]**: un indicatore stampato
 | H1 | 2.5 / 3.0 / 3.5 | 101 / 84 / 88 | 40 / 36 / 36 | **16 / 18 / 16** | 21 / 23 / 21 | 38 / 38 / 38 |
 | H4 | 2.5 / 3.0 / 3.5 | 26 / 19 / 22 | 11 / 6 / 10 | **5 / 1 / 1** | 5 / 2 / 2 | 10 / 6 / 8 |
 
-Perche' il default resta `iADX`: la collega dice "ADX" e "aspetta che controllo" (guarda il SUO grafico); le immagini del PDF del
-gruppo sono **MT5 su BCM** (`EURUSD.bcm`, `CHFJPY.bcm`), e su MT5 l'indicatore che si chiama "ADX" e' `iADX` (Wilder ha un nome
-suo). Scegliere Wilder vorrebbe dire usare un filtro che sull'oro equivale a `iADX` <= ~25, cioe' **spostare in silenzio** il "20"
-detto da lei. Wilder resta una cella dell'asse A5 (§3.1). Se la collega usa un'altra piattaforma (TradingView usa Wilder), la
-risposta alla bloccante 9 decide: e' una domanda, non una misura. **Conseguenza da scrivere accanto a E0**: su H4 il filtro
+Perche' il default resta `iADX` *(motivazione riscritta dalla terza lettura del codice, 07/10: quella di prima usava le immagini
+del PDF, che **non contengono nessun ADX** — p22: sotto-finestre `PeakRepairerStrict` e `ATR(14)` — e che per decisione di Claudio
+del 07/10 non sono piu' una fonte di questo EA)*: **e' un'ASSUNZIONE [NOSTRA], non una lettura della fonte.** L'audio (A-R12) dice
+solo *"ADX a 20, non di piu'"* e *"aspetta che controllo"* (guarda il suo grafico): **piattaforma, formula e periodo NON sono
+detti**. Se la collega usa MT5, quello che vede si chiama "ADX" ed e' `iADX`; se usa TradingView vede Wilder. Lo spostamento e'
+**simmetrico** (oro H1 HistData 2021-01 -> 2026-09, 33.033 barre, ricontato dalla terza lettura con una quarta mano: Wilder <= 20 equivale in
+quota a `iADX` <= ~23; `iADX` <= 20 equivale a Wilder <= ~17): con l'una o l'altra scelta, se la piattaforma e' l'altra il "20" si
+sposta. Quindi `iADX` **non e' "la lettura piu' fedele"**: e' la lettura **nativa della piattaforma su cui gira l'EA** e la **piu'
+stretta** (circa meta' dei setup: 16-18 contro 36-40 l'anno per linea sull'oro H1), cioe' l'errore prudente se l'assunzione e'
+sbagliata. Il prezzo e' la frequenza (E0). Wilder resta una cella dell'asse A5 (§3.1), e la risposta della collega alla
+bloccante 9 (che piattaforma usa?) decide: e' una domanda, non una misura. **Conseguenza da scrivere accanto a E0**: su H4 il filtro
 letterale lascia **1-2 setup l'anno** sul 3.5 dell'oro: il modo AUDIO su H4 si legge solo come famiglia.
 
 Lettura (attese, non verdetti): AUDIO H1 per simbolo ~35-110 setup/anno a seconda di quante linee vivono **prima** dell'inclinazione

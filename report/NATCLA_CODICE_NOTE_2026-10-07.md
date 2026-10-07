@@ -30,9 +30,12 @@ l'**ADX di Wilder**. Le due formule NON danno lo stesso numero: con lo specchio 
 (lettera della specifica, par. 2.1) e `iADXWilder` come asse.
 
 **Decisione del cancello (07/10)**: il default resta **`iADX`** e si e' corretta la specifica (commit a parte, par. 5.4 e E0).
-Il motivo in parole semplici: la collega dice "l'ADX a 20" guardando il suo grafico; il materiale del gruppo e' MT5 su BCM, e su
-MT5 "ADX" e' `iADX`. Con la formula di Wilder lo stesso "20" lascerebbe passare il doppio dei setup: sarebbe cambiare il suo
-filtro senza dirlo. Ricontato dal cancello con un programma suo: 16,4 / 17,8 / 15,5 (identico). Su **H4** il filtro letterale
+~~Il motivo: il materiale del gruppo e' MT5 su BCM~~ *(argomento ritirato dalla terza lettura 07/10: le immagini del PDF non
+contengono nessun ADX, e il PDF non e' piu' una fonte di questo EA)*. **Il motivo vero, in parole semplici: e' un'assunzione.**
+L'audio dice solo "ADX a 20", non su che programma lo guarda: su MT5 "ADX" e' `iADX`, su TradingView e' Wilder, e con la formula
+sbagliata il "20" si sposta **in tutti e due i versi** (oro H1: Wilder 20 ~ `iADX` 23; `iADX` 20 ~ Wilder 17). `iADX` resta il
+default perche' e' quello del programma su cui gira l'EA e perche' e' il **piu' stretto** (sbagliando, si perdono setup, non si
+aprono setup in piu'). Va chiesto alla collega (bloccante 9). Ricontato dal cancello con un programma suo: 16,4 / 17,8 / 15,5 (identico). Su **H4** il filtro letterale
 lascia **1-5 setup l'anno** per linea sull'oro. Lo specchio di `iADX` resta **[DA CONFERMARE sul terminale]** (scritto a memoria
 da due mani diverse, con lo stesso risultato: non e' una verifica).
 
@@ -173,7 +176,7 @@ preset vivi sui terminali (fuori dal repo) per il magic.
    riarmo (lo scrive a log): da guardare nel primo giro demo.
 3. GTC dato per accettato dal simbolo (non si legge `SYMBOL_EXPIRATION_GTC`): se un simbolo lo rifiuta, `INVIO FALLITO` a log.
 
-**Checklist per il primo giro nel tester (leggibile nel log, una riga per punto):** (1) `AVVIO v1.01` con `1 u` giusta per il
+**Checklist per il primo giro nel tester (leggibile nel log, una riga per punto):** (1) `AVVIO v1.02` con `1 u` giusta per il
 simbolo (oro 1,00; forex 1 pip) e `ADX ... iADX MetaQuotes`; (2) `VERIFICA ADX ... coincide con: formula MetaQuotes` (se dice
 NESSUNA, fermarsi); (3) almeno un `RIEMPITO` seguito da `cancellati N pendenti (X10...)` o `(semaforo...)`; (4) nessun
 `SEMAFORO SFORATO` oltre i salti del lunedi'; (5) in PDF, `ORDINE ... LIMIT` con scadenza e poi `E6 scadenza pendenti` o
@@ -181,3 +184,57 @@ NESSUNA, fermarsi); (3) almeno un `RIEMPITO` seguito da `cancellati N pendenti (
 
 **NON COPERTO**: compilazione (nessun MetaEditor), tester, ordine degli eventi reali, `OrderCalcProfit`/`iADX` del terminale, il
 Guardian vivo, i preset sui terminali (fuori dal repo).
+
+## 7. Terza lettura indipendente (`controllo-preventivo`, 07/10/2026): PASS CON RISERVE, v1.02 — NON serve un quarto lettore
+
+Per decisione di Claudio (07/10) l'EA segue **solo gli audio**: questa lettura ha guardato i modi **AUDIO** e **EMA200**; il modo
+PDF non e' stato riletto ne' toccato (lo toglie un passaggio separato).
+
+**Controllato, e com'e' andata** (anche i passati):
+- **Delta v1.00 -> v1.01 riletto riga per riga.** La cancellazione dei pendenti orfani tocca SOLO ordini con **stesso simbolo, stesso
+  magic e etichetta di linea** `NATCLA_..._O<n>`: un ordine a mano di Claudio (magic 0) o di un'altra istanza (magic diverso: il
+  magic automatico cambia con modo e TF) **non si tocca**. Non puo' colpire una scala viva: `ArmaScala` segna il setup attivo
+  **prima** di inviare, e gli eventi di MT5 non si accavallano. Unico caso scoperto: due istanze con **lo stesso magic sullo stesso
+  simbolo** (solo con `InpMagic` messo a mano uguale): si cancellerebbero i pendenti a vicenda. Regola: **un magic = una istanza**.
+- 🔧 **Corretto (forma, classe 1165)**: il ritentativo partiva **a ogni tick** (fino a 3 `OrderDelete` per linea per tick, e una
+  riga d'errore per ognuno se il rifiuto e' permanente: freeze level, AutoTrading spento). Ora **uno ogni 10 secondi per linea**,
+  il primo subito. Caso peggiore dei riarmi normali: AUDIO 3 linee x (3 cancellazioni + 3 invii) = **18 richieste per barra**,
+  su H1 al massimo ~430 al giorno se tutte e tre le linee restano armate tutto il giorno.
+- **Scadenza logica dei pendenti** (AUDIO/EMA200, scala GTC): a ogni barra chiusa la scala non riempita viene cancellata e
+  ripiazzata, anche su linea n/d, flip e (nuovo) barra senza dati; dopo un riavvio i pendenti senza posizione si cancellano e
+  si riarmano dai dati. Restano vivi oltre la barra solo i **residui di un setup gia' riempito** (fino a X10/TP1/flip/durata/fine
+  setup) e quelli di un setup adottato dopo un riavvio: e' il buco B6, scritto sotto.
+- **Parziale al TP1**, fatto a mano: EURUSD e oro (minimo 0,01, passo 0,01): 0,07 lotti al 50% -> chiude 0,03, restano 0,04;
+  0,01 -> nessun parziale (sotto il minimo). Indice con minimo 0,5 e passo 0,1, al 60%: 1,0 -> 0,6 lascerebbe 0,4 < 0,5 ->
+  **nessun parziale** (prima della v1.01 il server l'avrebbe rifiutato: nessun danno, ma un errore). Sempre per difetto al passo;
+  il verso lo mette `PositionClosePartial` sul ticket (un BUY si chiude con un SELL dello stesso volume).
+- **VERIFICA ADX**: stampa e basta (invariante 27: non assegna stato, non ritorna, non ferma l'EA). Ricostruite **da me, con una
+  quarta mano**, tutte e due le formule sull'oro H1 HistData (2021-01 -> 2026-09, 33.033 barre): coincidono con gli specchi del
+  collaudo a 1e-13. Restano formule **ricordate**, non lette dal terminale: decide la riga `VERIFICA ADX` al primo giro.
+  Il PDF **non contiene nessun ADX** (p22 riguardata: `PeakRepairerStrict` e `ATR(14)`): motivazione riscritta (par. 2 e
+  specifica §5.4), **default `iADX` invariato**, dichiarato **assunzione**.
+- **Percorsi di denaro**: Guardian (`ABTG_GuardiaIngresso`) chiamato **prima di ogni invio**, pendenti compresi (`InviaLimit` r.~1630);
+  mai un ordine senza stop; lotto per difetto con somma dei rischi <= R; stops/freeze level controllati sui pendenti; un LIMIT gia'
+  superato si scarta; semaforo come al par. 6.
+- **Collaudo**: 3 mutanti miei erano **VERDI** (filtro magic tolto, filtro simbolo tolto, parziale sotto il minimo): aggiunte le
+  invarianti 22b/25/26/27. Rilanciato: **TUTTO OK, mutanti 66/66** (59 + 7 della terza lettura), tutti su copie in `/tmp`.
+
+**Le riserve per Claudio, in parole semplici** (nessuna e' nuova; qui sono tutte insieme):
+1. **Semaforo sforabile**: con 3 linee armate in AUDIO, un salto di prezzo puo' riempirle insieme: **fino a 0,75%** invece di 0,25%.
+   E' una scelta di rischio: **tua**.
+2. **Buco B6**: i pendenti rimasti di un setup gia' entrato (e quelli ripresi dopo un riavvio) **non ripassano dal Guardian** e
+   restano al prezzo vecchio finche' il setup non finisce. Il tetto per setup tiene comunque.
+3. **Limit GTC se togli l'EA**: i pendenti restano sul conto (con il loro stop). Per spegnerlo davvero: togliere l'EA **e**
+   cancellare a mano gli ordini `NATCLA_`.
+4. **Riarmo = cancella e ripiazza** (non `OrderModify`): fino a 18 richieste per barra in AUDIO.
+5. **Nessun controllo del margine**: un ordine senza margine lo rifiuta il broker (un setup perso, nessun danno).
+6. **`SYMBOL_EXPIRATION_GTC` non letto**: se un simbolo non accetta GTC, `INVIO FALLITO` a log e niente ordini.
+7. **Un magic = una istanza** sullo stesso simbolo.
+8. **ADX: e' un'assunzione** (MT5 contro TradingView): va chiesto alla collega.
+
+**Perche' non serve un quarto lettore**: l'unica correzione al codice di questa lettura e' la **cadenza** di un ritentativo di
+cancellazione (non apre, non dimensiona, non sposta stop): nessun percorso che crea rischio e' cambiato. Le altre modifiche sono
+commenti, documenti e collaudo. Rischio residuo limitato a **demo/tester** (solo DEMO finche' Claudio non firma).
+
+**NON COPERTO**: compilazione (nessun MetaEditor qui), tester, ordine reale degli eventi, `iADX`/`iADXWilder` del terminale (li
+decide la riga `VERIFICA ADX`), il comportamento reale del freeze level BCM, il Guardian vivo, il modo PDF (fuori perimetro).

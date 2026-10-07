@@ -36,7 +36,7 @@ a tavolino, e si dice cosa resta fuori.
   R) RACCORDO (cancello 07/10): invarianti SEMANTICI sul codice non puro -- lato dell'ordine nel ramo
      (s>0), lotto/SL/TP passati come variabili controllate, ogni filtro arriva a NC_Contesto, ADX dal
      buffer 0, nessuna ora locale ne' costante oraria, riga d'avvio che stampa le variabili giuste.
-  M) MUTANTI CIECHI: 59 mutazioni del sorgente (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
+  M) MUTANTI CIECHI: 66 mutazioni del sorgente (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
      controllo. Un mutante che passa = buco del collaudo.
@@ -586,8 +586,33 @@ def invarianti_raccordo(src, code, bag):
     if "gSet[L].attivo=true;gSet[L].riempito=true;gSet[L].adottato=true;" not in ns(corpo(code, "AdottaLinea")):
         bag.append("RACCORDO: AdottaLinea non marca il setup attivo e riempito [ancora]")
     # (22) PENDENTI ORFANI: una linea senza setup in memoria e senza posizioni non tiene pendenti vivi
-    if "if(np==0&&no>0)CancellaOrdiniLinea(L," not in ns(corpo(code, "Sincronizza")):
-        bag.append("RACCORDO: Sincronizza non cancella i pendenti di una linea senza setup (cancellazione fallita prima) [ancora]")
+    if "if(np==0&&no>0&&TimeCurrent()-gOrfTent[L]>=NC_ORF_PAUSA_SEC){gOrfTent[L]=TimeCurrent();CancellaOrdiniLinea(L," not in ns(corpo(code, "Sincronizza")):
+        bag.append("RACCORDO: Sincronizza non cancella (cadenzato) i pendenti di una linea senza setup (cancellazione fallita prima) [ancora]")
+    # (22b) terza lettura 07/10: il ritentativo e' cadenzato (1..60 s) e il cronometro parte da zero all'avvio
+    mp = re.search(r"#define\s+NC_ORF_PAUSA_SEC\s+(\d+)", src)
+    if not mp or not (1 <= int(mp.group(1)) <= 60):
+        bag.append("RACCORDO: NC_ORF_PAUSA_SEC assente o fuori da 1-60 s (raffica di OrderDelete o orfano lasciato vivo troppo)")
+    if "gOrfTent[L]=0;" not in ns(corpo(code, "OnInit")):
+        bag.append("RACCORDO: OnInit non azzera gOrfTent[] (primo ritentativo non immediato)")
+    # (25) terza lettura 07/10: OGNI scansione di ordini/posizioni filtra simbolo E magic (ordini manuali e altre
+    #      istanze non si toccano). Il filtro tolto in CancellaOrdiniLinea restava VERDE.
+    cc = ns(code)
+    fo = cc.count("if(OrderGetString(ORDER_SYMBOL)!=_Symbol||OrderGetInteger(ORDER_MAGIC)!=gMagic)continue;")
+    fp = (cc.count("if(PositionGetString(POSITION_SYMBOL)!=_Symbol||PositionGetInteger(POSITION_MAGIC)!=gMagic)continue;")
+          + cc.count("if(PositionGetString(POSITION_SYMBOL)==_Symbol&&PositionGetInteger(POSITION_MAGIC)==gMagic&&"))
+    if cc.count("OrderGetTicket(") != fo or cc.count("PositionGetTicket(") != fp:
+        bag.append("RACCORDO: una scansione di ordini/posizioni non filtra simbolo E magic (ordini %d/%d, posizioni %d/%d)"
+                   % (fo, cc.count("OrderGetTicket("), fp, cc.count("PositionGetTicket(")))
+    # (26) terza lettura 07/10: parziale al TP1 per difetto allo step, e il residuo resta >= minimo
+    g1b = ns(corpo(code, "GestisciTP1"))
+    for a in ("doublestep=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP),vmin=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);",
+              "doublecv=NC_LottoGiu(v*InpParzialeTP1Pct/100.0,step,vmin,0);if(cv>0&&cv<v&&v-cv>=vmin-1e-12)gTrade.PositionClosePartial(tk,cv);"):
+        if a not in g1b:
+            bag.append("RACCORDO: GestisciTP1 senza '%s' (parziale con residuo >= minimo)" % a)
+    # (27) terza lettura 07/10: VERIFICA ADX e' SOLA LETTURA (stampa e basta: non spegne, non ferma, non cambia stato)
+    vb = ns(corpo(code, "VerificaAdx"))
+    if (not vb or "ExpertRemove" in vb or "return" in vb or re.search(r"\b(g[A-Z]\w*|Inp\w+)(\[[^\]]*\])?(=(?!=)|\+\+|--|\+=|-=)", vb)):
+        bag.append("RACCORDO: VerificaAdx non e' sola lettura (assegna uno stato globale, ritorna o ferma l'EA)")
     # (23) DATI N/D: la scala armata non sopravvive a una barra senza dati
     if "if(gSet[L].attivo&&!gSet[L].riempito&&gSet[L].tipo==NC_TIPO_SCALA){CancellaSetupNonRiempito(L," not in ns(corpo(code, "OnNewBar")):
         bag.append("RACCORDO: OnNewBar senza dati non cancella la scala armata [ancora]")
@@ -1288,10 +1313,24 @@ def mutanti(raw, ser):
         ("G6 adozione al riavvio tolta", "   AdottaEsistenti();\n   return(INIT_SUCCEEDED);", "   return(INIT_SUCCEEDED);"),
         # --- le tre righe aggiunte dalla seconda lettura
         ("H1 ricalcolo ADX MetaQuotes con 1/n", "   double k=2.0/(per+1.0);", "   double k=1.0/per;"),
-        ("H2 pendenti orfani lasciati vivi", "if(np==0 && no>0) CancellaOrdiniLinea(L,", "if(np==0 && no<0) CancellaOrdiniLinea(L,"),
+        ("H2 pendenti orfani lasciati vivi", "if(np==0 && no>0 && TimeCurrent()", "if(np==0 && no<0 && TimeCurrent()"),
         ("H3 scala viva senza dati", "if(gSet[L].attivo && !gSet[L].riempito && gSet[L].tipo==NC_TIPO_SCALA)\n           { CancellaSetupNonRiempito(L,\"dati",
          "if(false && gSet[L].attivo && !gSet[L].riempito && gSet[L].tipo==NC_TIPO_SCALA)\n           { CancellaSetupNonRiempito(L,\"dati"),
         ("H4 verifica ADX sulla barra sbagliata", "   double t=gAdx[gN-1];", "   double t=gAdx[gN-2];"),
+        # --- terza lettura del cancello 07/10: sette mutanti sui percorsi nuovi (I3, I4, I7 erano VERDI)
+        ("I1 cancellazione degli orfani rimossa", "{ gOrfTent[L]=TimeCurrent(); CancellaOrdiniLinea(L,\"pendenti senza setup",
+         "{ gOrfTent[L]=TimeCurrent(); Log(\"pendenti senza setup"),
+        ("I2 orfani: np==0 invertita", "if(np==0 && no>0 && TimeCurrent()", "if(np!=0 && no>0 && TimeCurrent()"),
+        ("I3 filtro magic tolto nella cancellazione",
+         "      if(OrderGetString(ORDER_SYMBOL)!=_Symbol || OrderGetInteger(ORDER_MAGIC)!=gMagic) continue;\n      if(LineaDaCommento(OrderGetString(ORDER_COMMENT))!=L) continue;\n      if(gTrade.OrderDelete",
+         "      if(OrderGetString(ORDER_SYMBOL)!=_Symbol) continue;\n      if(LineaDaCommento(OrderGetString(ORDER_COMMENT))!=L) continue;\n      if(gTrade.OrderDelete"),
+        ("I4 parziale che lascia il residuo sotto il minimo", "if(cv>0 && cv<v && v-cv>=vmin-1e-12) gTrade", "if(cv>0 && cv<v) gTrade"),
+        ("I5 VERIFICA ADX che spegne una linea", "         \" -> il terminale coincide con: \",chi);\n",
+         "         \" -> il terminale coincide con: \",chi);\n   if(StringFind(chi,\"NESSUNA\")==0) gUsaLinea[2]=false;\n"),
+        ("I6 ritentativo degli orfani a ogni tick", "if(np==0 && no>0 && TimeCurrent()-gOrfTent[L]>=NC_ORF_PAUSA_SEC)", "if(np==0 && no>0)"),
+        ("I7 filtro simbolo tolto nella cancellazione",
+         "      if(OrderGetString(ORDER_SYMBOL)!=_Symbol || OrderGetInteger(ORDER_MAGIC)!=gMagic) continue;\n      if(LineaDaCommento(OrderGetString(ORDER_COMMENT))!=L) continue;\n      if(gTrade.OrderDelete",
+         "      if(OrderGetInteger(ORDER_MAGIC)!=gMagic) continue;\n      if(LineaDaCommento(OrderGetString(ORDER_COMMENT))!=L) continue;\n      if(gTrade.OrderDelete"),
     ]
     base = tempfile.mkdtemp(prefix="natcla_mutanti_")     # FUORI dal repo (classe 1159)
     assert not os.path.abspath(base).startswith(os.path.abspath(ROOT))
