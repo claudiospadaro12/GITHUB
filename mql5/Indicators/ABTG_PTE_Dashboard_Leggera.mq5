@@ -753,7 +753,7 @@ int OnInit()
    ArrayResize(gAttesa,nc);    ArrayInitialize(gAttesa,0);
    ArrayResize(gDir,nc);       ArrayInitialize(gDir,0);
    ArrayResize(gTSeg,nc);      ArrayInitialize(gTSeg,0);
-   ArrayResize(gPronta,nc);    ArrayInitialize(gPronta,false);
+   ArrayResize(gPronta,nc);    for(int x=0;x<nc;x++) gPronta[x]=false;
    ArrayResize(gUltAllerta,nc);ArrayInitialize(gUltAllerta,0);
    ArrayResize(gDF,nc);  ArrayResize(gDS,nc);  ArrayResize(gDF1,nc);  ArrayResize(gDS1,nc);
    ArrayInitialize(gDF,0); ArrayInitialize(gDS,0); ArrayInitialize(gDF1,0); ArrayInitialize(gDS1,0);
