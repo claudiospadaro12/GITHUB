@@ -1,0 +1,30 @@
+NATCLA F0 -- lotto D: conteggio dei setup di Ea Nat&Cla (Modello 1 OHLC su M1, InpSoloConta=true, NESSUN ordine)
+data: 2026-10-07 21:03:53   pc: DESKTOP-H4D7CAJ   pin: e2f0506b2fd5a2d2dbf2a119b7674a14f2088b96
+EA_NatCla.mq5 SHA256 681DC8823F01BEEA814D46FF749EEDF561902490DBB09A4F0EDBB35DEE39D3D9  (NC_VER 1.04)   compilazione: 0 errori, 0 avvisi (-1 = non letto)
+passate del lotto 18: OK 18, KO 0, NON LANCIATE 0   durata totale 9 minuti   media per passata OK 29 secondi
+STIMA F0 INTERA con la media misurata: 216 passate x 29 s = 104 minuti (solo se il lotto e rappresentativo: indici e forex hanno barre M1 diverse)
+Guardian nel tester: FAIL-OPEN (specifica 2.5): irrilevante in SoloConta (nessun ordine).
+
+lotto;simbolo;config;magic;t_avvio;durata_s;stato;csv;righe_conta;avvio_ok;adx_verifica;finestra;motivi
+D;XAGUSD;AUDIO_H1;778601;2026-10-07 20:55:07;33;OK_FINESTRA_NON_LETTA;natcla_setup_XAGUSD_778601.csv;1095;si;MetaQuotes;non letta;
+D;XAGUSD;AUDIO_H4;778604;2026-10-07 20:55:40;28;OK_FINESTRA_NON_LETTA;natcla_setup_XAGUSD_778604.csv;311;si;MetaQuotes;non letta;
+D;XAGUSD;AUDIO_H12;778602;2026-10-07 20:56:09;28;OK_FINESTRA_NON_LETTA;natcla_setup_XAGUSD_778602.csv;95;si;MetaQuotes;non letta;
+D;XAGUSD;AUDIO_D1;778608;2026-10-07 20:56:37;28;OK_FINESTRA_NON_LETTA;natcla_setup_XAGUSD_778608.csv;42;si;MetaQuotes;non letta;
+D;XAGUSD;M2_H1;778621;2026-10-07 20:57:05;28;OK_FINESTRA_NON_LETTA;natcla_setup_XAGUSD_778621.csv;411;si;MetaQuotes;non letta;
+D;XAGUSD;M2_H4;778624;2026-10-07 20:57:34;28;OK_FINESTRA_NON_LETTA;natcla_setup_XAGUSD_778624.csv;113;si;MetaQuotes;non letta;
+D;EURJPY;AUDIO_H1;778601;2026-10-07 20:58:02;33;OK_FINESTRA_NON_LETTA;natcla_setup_EURJPY_778601.csv;1156;si;MetaQuotes;non letta;
+D;EURJPY;AUDIO_H4;778604;2026-10-07 20:58:36;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURJPY_778604.csv;274;si;MetaQuotes;non letta;
+D;EURJPY;AUDIO_H12;778602;2026-10-07 20:59:04;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURJPY_778602.csv;112;si;MetaQuotes;non letta;
+D;EURJPY;AUDIO_D1;778608;2026-10-07 20:59:33;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURJPY_778608.csv;56;si;MetaQuotes;non letta;
+D;EURJPY;M2_H1;778621;2026-10-07 21:00:01;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURJPY_778621.csv;547;si;MetaQuotes;non letta;
+D;EURJPY;M2_H4;778624;2026-10-07 21:00:29;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURJPY_778624.csv;152;si;MetaQuotes;non letta;
+D;EURCHF;AUDIO_H1;778601;2026-10-07 21:00:58;33;OK_FINESTRA_NON_LETTA;natcla_setup_EURCHF_778601.csv;1345;si;MetaQuotes;non letta;
+D;EURCHF;AUDIO_H4;778604;2026-10-07 21:01:31;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURCHF_778604.csv;317;si;MetaQuotes;non letta;
+D;EURCHF;AUDIO_H12;778602;2026-10-07 21:02:00;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURCHF_778602.csv;115;si;MetaQuotes;non letta;
+D;EURCHF;AUDIO_D1;778608;2026-10-07 21:02:28;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURCHF_778608.csv;81;si;MetaQuotes;non letta;
+D;EURCHF;M2_H1;778621;2026-10-07 21:02:56;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURCHF_778621.csv;705;si;MetaQuotes;non letta;
+D;EURCHF;M2_H4;778624;2026-10-07 21:03:25;28;OK_FINESTRA_NON_LETTA;natcla_setup_EURCHF_778624.csv;201;si;MetaQuotes;non letta;
+
+COME SI LEGGE: python3 backtest_pipeline/leggi_natcla_f0.py <questo zip o la cartella>. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e la colonna adx_verifica
+(deve dire MetaQuotes su tutte: se dice NESSUNA o Wilder nessun numero di ADX si usa); poi la tabella dei setup per linea e simbolo contro le attese scritte nel file prova.
+Questo script CONTA e dice se ogni passata e affidabile: NON giudica, NON promuove, NON sceglie nessuna cella.
