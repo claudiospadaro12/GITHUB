@@ -1056,7 +1056,10 @@ MUT_EA = [
     ("D04", "BarsCalculated < n invece di < n+1", "return (bc<n+1);", "return (bc<n);"),
     ("D05", "catena: primo BarsCalculated su hAtrN", "gcBc[0]=BarsCalculated(hEma200);\n   if(NCD_CadeBC(n,gcBc[0]))", "gcBc[0]=BarsCalculated(hAtrN);\n   if(NCD_CadeBC(n,gcBc[0]))"),
     ("D06", "catena: CopyRates dalla barra 0", "gcCr=CopyRates(_Symbol,gTF,1,n,r);", "gcCr=CopyRates(_Symbol,gTF,0,n,r);"),
-    ("D07", "catena: niente ResetLastError prima del CopyBuffer ATR", "   ResetLastError();\n   gcCb[1]=CopyBuffer", "   gcCb[1]=CopyBuffer"),
+    # D07: il ResetLastError prima del CopyBuffer ATR NON si muta: e' EQUIVALENTE (misurato: sopravvive) perche' il CopyBuffer EMA che lo precede
+    #      e' riuscito e un'API riuscita non tocca _LastError. Si muta quello prima di CopyRates, preceduto da Bars/BarsCalculated che non azzerano
+    #      un errore VECCHIO (gli stub partono da 777): li' il buco si vede.
+    ("D07", "catena: niente ResetLastError prima di CopyRates", "   ResetLastError();\n   gcCr=CopyRates", "   gcCr=CopyRates"),
     ("D08", "catena: CopyBuffer ADX cade come CR", "if(NCD_CadeCopia(n,gcCb[2])) return NCD_CB;", "if(NCD_CadeCopia(n,gcCb[2])) return NCD_CR;"),
     ("D09", "completa: BarsCalculated EMA anche se gia' chiesto", "if(gcBc[0]==NCD_NC) gcBc[0]=BarsCalculated(hEma200);", "gcBc[0]=BarsCalculated(hEma200);"),
     ("D10", "completa: copia anche con n<1", "if(gcN<1) return;", "if(gcN<0) return;"),
