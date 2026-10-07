@@ -820,7 +820,8 @@ int main(){
     } else if(c=="INCALL"){
       int n,primo; if(scanf("%d %d",&n,&primo)!=2) return 2;
       std::vector<double> f,s; if(!rv(f,n)||!rv(s,n)) return 2;
-      for(int x=0;x<n;x++) printf("%d ",PD_Incrocio(f.data(),s.data(),x,primo)); printf("\n");
+      for(int x=0;x<n;x++) printf("%d ",PD_Incrocio(f.data(),s.data(),x,primo));
+      printf("\n");
     } else if(c=="EMA"){
       int n,per; if(scanf("%d %d",&n,&per)!=2) return 2; std::vector<double> cl,e(n); if(!rv(cl,n)) return 2;
       PG_EMA(cl.data(),n,0,per,e.data()); for(int i=0;i<n;i++) pa(e[i]); printf("\n");
@@ -1549,9 +1550,10 @@ def test_marca(cx, sp, ser, tf, bag, verbose, rapido):
 def informativo_ha(sers):
     """quante frecce (regola delle celle, default: HA a 2 barre come l'EA) cadono su una candela HA DISEGNATA
     (classica ricorsiva) che a occhio NON e' una doji. Informativo, non un verdetto."""
-    print("  INFORMATIVO frecce doji contro candele HA disegnate (oro HistData, default C1):")
-    p = CONFIG[0][1]
-    for tf, ser in sers.items():
+    print("  INFORMATIVO frecce doji contro candele HA disegnate (oro HistData; default C1 = HA a 2 barre come l'EA,"
+          " CONTRO-ESEMPIO = HA ricorsiva, seme 50):")
+    for etich, p, ser_tf in (("C1 default", CONFIG[0][1], None), ("HA ricorsiva", cfg(candela=2), None)):
+      for tf, ser in sers.items():
         sp = Specchio(ser)
         tot = nodoji = 0
         for x in range(400, sp.n - 1):
@@ -1563,7 +1565,8 @@ def informativo_ha(sers):
             H, L_ = max(sp.h[x], O, C), min(sp.l[x], O, C)
             if not (H - L_ > 0 and abs(C - O) <= p["corpo"] / 100.0 * (H - L_)):
                 nodoji += 1
-        print("      %s: %d frecce, su %d (%.0f%%) la candela HA disegnata NON e' una doji al 10%%" % (tf, tot, nodoji, 100.0 * nodoji / max(1, tot)))
+        print("      %-12s %s: %d frecce, su %d (%.0f%%) la candela HA disegnata NON e' una doji al 10%%"
+              % (etich, tf, tot, nodoji, 100.0 * nodoji / max(1, tot)))
 
 
 # --- modello ESEGUIBILE dei colori: le funzioni VERE estratte dal sorgente, compilate in C++ su un grafico finto,
