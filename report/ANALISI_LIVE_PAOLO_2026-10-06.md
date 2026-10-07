@@ -1,6 +1,6 @@
 # ANALISI LIVE PAOLO - 06/10/2026 (martedi' sera: "ripasso mercati americani, correlazione Nikkei-S&P-DAX, ORB troppo largo, ripasso Forex")
 
-**Stato: BOZZA, NON passata dal cancello** (`controlla_riga.py --oggetto md` eseguito: esito in fondo; il passaggio `controllo-preventivo` non e' stato fatto).
+**Stato: passata dal cancello il 07/10/2026** (strato 1 `controlla_riga.py --oggetto md` verde; strato 2 `controllo-preventivo`: **PASS CON RISERVE dopo correzioni**, elenco in fondo).
 **Fonte unica:** `data/trascrizioni/LIVE_PAOLO_2026-10-06.txt` (269 righe per `cat -n`, 60.592 byte, trascrizione automatica TurboScribe).
 Letta per intero, riga per riga. Nessuna navigazione, nessun completamento da memoria: dove cito il repo lo dico col file.
 **Analista:** agente `analista-trascrizioni`, 07/10/2026.
@@ -35,15 +35,15 @@ lo riporto. Promemoria nostro: BCM = UTC+1 fisso (`report/OROLOGIO_BCM_2026-09-2
 > 5 ambra), ZERO regole prop, ZERO trucchi anti-prop, ZERO numeri di performance di conto.** La live ha **due meta' molto diverse**: (A) r.1-255 e' un
 > **ripasso operativo** sui mercati americani/DAX (correlazione Nikkei-S&P-DAX, livelli, ORB, trailing stop, BCM che salta gli ordini);
 > (B) r.255-269 e' la **lezione 01 "Introduzione al Forex"** per i nuovi (sessioni, orari broker, liquidita', COT, volumi, gap, rollover, bank holiday).
-> **Il dato piu' solido per noi e' una convergenza di forma, non di numero:** Paolo abbandona l'ORB del giorno perche' *"il range e' troppo grande,
-> il rapporto di rendimento non sta in piedi"* (r.165, r.205, r.213-215) e la nostra sedia ORB Dow ha gia' quel filtro come input vivo
+> **Il dato piu' solido per noi e' una convergenza di forma, non di numero:** Paolo abbandona l'ORB del giorno perche' *"sui primi 15 minuti ti fa un orbe di
+> questo tipo, non e' piu' tradabile ... un rapporto di sorrendimento che non sta in piedi"* (r.165) e *"quando l'ho visto cosi' grande ho abbandonato l'orbe"* (r.205) e la nostra sedia ORB Dow ha gia' quel filtro come input vivo
 > (`InpMaxRangePct=0.8`, *"range ... sopra il tetto ... (movimento gia' fatto): niente setup oggi"*, `ABTG_ORB_Ottimizzato.mq5` r.201 e r.505-506,
-> preset `ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set` r.91). **MA la fonte non e' indipendente**: lo stesso Paolo ha gia' ispirato altre manopole nostre
-> (vedi scheda 10/01 §9.1), quindi e' una conferma di impianto, non una prova di merito.
+> preset `ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set` r.91). **MA non e' una prova di merito**: il filtro nell'EA e' etichettato
+> *"(edgeful)"* (r.201), cioe' viene da un'altra fonte esterna, non da Paolo: sono **due dichiarazioni esterne che convergono, nessuna delle due e' una misura** (e il corso resta la fonte di altre manopole nostre, scheda 10/01 §9.1).
 > **Il pezzo piu' nuovo e piu' pericoloso per un EA** e' una frase sola, r.233-235: *"a me oggi e' capitato che sull'opening USA io ho fatto praticamente
 > un algoritmo ce l'ho automatizzata e mi ha proprio saltato l'ordine ... Spesso me lo fa BCM. Quando c'e' un movimento forte non mi prende l'ordine."*
-> E' **esattamente il tipo di ordine (pendente su apertura USA) che usano le nostre sedie**, e dice che sul broker BCM un ordine pendente puo' **non essere
-> eseguito** nel movimento forte. E' una dichiarazione, non una misura: ma e' una **domanda concreta** sul nostro forward BCM (Parte 5, D1).
+> Il **tipo d'ordine NON e' detto** (pendente o a mercato: `[NON CHIARO]`, D1); se fosse un pendente sull'apertura USA sarebbe **il tipo che usano le nostre sedie**, e direbbe che sul broker
+> BCM un ordine puo' **non essere eseguito** nel movimento forte. E' una dichiarazione, non una misura: ma e' una **domanda concreta** sul nostro forward BCM (Parte 5, D1).
 > **La seconda novita':** *"a me gli indici short non mi piace farli, mi piace farli longhe"* (r.151): una **preferenza di lato** esplicita sugli indici,
 > opposta alle nostre sedie DAX short (`770105`, `770411`) e opposta all'operativita' short di Emiliano del giorno dopo (live 07/10).
 
@@ -62,8 +62,8 @@ lo riporto. Promemoria nostro: BCM = UTC+1 fisso (`report/OROLOGIO_BCM_2026-09-2
 
 | # | punto | dove | che cosa vale |
 |---|---|---|---|
-| 1 | **ORB: se il range dei primi 15' e' troppo largo, non si fa** ("non e' piu' tradabile durante il giorno ... un rapporto di rendimento che non sta in piedi") | r.165, r.205, r.213-215 | **CONVERGE** con `InpMaxRangePct` (sedia ORB Dow trial). Non indipendente. Soglia **non dichiarata** da lui |
-| 2 | **BCM salta gli ordini nei movimenti forti** (su apertura USA, ordine di un suo algoritmo) | r.231-235 | **NUOVO**, dichiarazione di terza parte su **un limite del nostro broker**. Va misurato sul nostro giornale (D1) |
+| 1 | **ORB: se il range dei primi 15' e' troppo largo, non si fa** ("non e' piu' tradabile durante il giorno ... un rapporto di sorrendimento che non sta in piedi") | r.165, r.205, r.213-215 | **CONVERGE** con `InpMaxRangePct` (sedia ORB Dow trial; il filtro e' marcato *"(edgeful)"* nell'EA r.201). Due fonti esterne, **zero misure**. Soglia **non dichiarata** da lui |
+| 2 | **BCM salta gli ordini nei movimenti forti** (su apertura USA, ordine di un suo algoritmo; **tipo d'ordine non detto**) | r.231-235 | **NUOVO**, dichiarazione di terza parte su **un limite del nostro broker**. Va misurato sul nostro giornale (D1) |
 | 3 | **Il pendente di domani sta sulla confluenza D1 EMA50 + H4 EMA200 + zona di liquidita'/imbalance**; *"tengo l'ingresso di sicurezza"* | r.149-151 | **NUOVO** come livello d'attesa. `ABTG_EMA200` legge l'EMA200 **del TF operativo**, non l'EMA50 D1 (scheda 10/01 §9.1) |
 | 4 | **Preferenza long sugli indici** (*"gli indici short non mi piace farli"*) e rimozione del pendente di notte | r.151 | **MESSA IN DUBBIO** del lato short della flotta DAX; preferenza, non misura. **Contraddice** la sua stessa live 01/10 (ordine lasciato di notte sulla EMA200) |
 | 5 | **Cascata di correlazione Nikkei -> S&P -> DAX** guidata in D1 + sei figure a schermo; *"negli ultimi mesi c'e' stata un po' di scorrelazione"* | r.71-77 | Ripete 01/10 (r.73-77, 191-195, 365-373). `770411` FTMO ha un solo anello (US500), Nikkei assente |
@@ -102,7 +102,7 @@ di notte in modo incoerente fra live; **B3** *"sempre con un terzo rischio"* amb
 | "senza stop" | 0 | *stop* compare **25 volte**, tutte come SL di un'operazione o come "stop hunt"/"trading stop" |
 | profit factor / backtest / statistica di strategia | 0 / 0 / 3 | "statistic" = base statistica del gap (r.269) |
 | rischio per trade in %, lotti | 0 / 1 | "lott" = lotto/sizing nel pannello (r.243), nessun valore |
-| M3, ATR, trailing "ATR" | 0 / 0 | **a differenza** di Emiliano 10/07 (3 e 2 occorrenze) |
+| M3, ATR, trailing "ATR" | 0 / 0 | **a differenza** di Emiliano 07/10 (3 e 2 occorrenze); M3 compare pero' in live Paolo piu' vecchie (`docs/live_paolo/`, 05/05, 07/05, 03/09) |
 
 ---
 
@@ -191,7 +191,7 @@ OGGETTO          (A) r.1-45 amministrazione e domande dei nuovi; r.45-63 piattaf
 | P23 | ORB: stop | *"lo stoppi da quest'altra parte"*; *"quando tu hai un super treno a quattro punti questa non la puoi fare"* | r.213-215 | r.213-215 | **`[TRASCRITTO dubbio]`**: lato e distanza non dettati; "Supertrend a quattro punti" non chiaro |
 | P24 | ORB e confluenza | **ORB + Bollinger**; contesto **H4**: Supertrend H4 *"quasi in confluenza con la media a 200"*, media 200 H4, media a **50** | *"Qui c'e' una coincidenza tra orbe e bande di Bollinger"*; *"in H4 qua c'e' il super treno ... quasi in confluenza con la media a 200"* | r.183-195, r.221 | chiaro; periodi del Supertrend/Bollinger **non dettati** |
 | P25 | trailing stop MT5 | in **punti**, **non pip**: *"da 25.000 a 25.001 e' un punto"*; per 10 punti scrivere **1.000** | *"quando metti il trading stop, questi punti qua non sono pip, sono punti ... se con il tuo mouse fai un spostamento di 10 punti, qui ti ho riscritto 1.000. Allora devi scrivere 1.000"* | r.173-175 | `[INFERITO]` coerente con simbolo a 2 decimali (D30EUR BCM 24.998,25 nei nostri referti: `report/TRIAL_GIORNO1_STOP_DAX_2026-10-01.md`); il passo e' confuso |
-| P26 | orario pannello ORB | **Nasdaq 14:30-14:44:59** (broker) = **15:30-15:45 IT**; **DAX 8:00-8:14:59** (broker); sempre **"un secondo prima"** | *"questo box ... si apre alle 15 e 30 l'ora italiana e si chiude alle 15 e 45 l'ora italiana si apre alle 14 e 30 l'orario broker e si chiude alle 14 e 45"*; *"dovrai mettere 8, 8, 14 e 59"* ; *"dovete settarla sempre un secondo prima della chiusura dell'ora perche' sennò prende una candela in piu'"* | r.269 | chiaro; **fuso dichiarato: "io che uso BCM dovro' mettere l'ora in meno"** |
+| P26 | orario pannello ORB | **Nasdaq 14:30-14:44:59** (broker) = **15:30-15:45 IT**; **DAX 8:00-8:14:59** (broker); sempre **"un secondo prima"** | *"questo box ... si apre alle 15 e 30 l'ora italiana e si chiude alle 15 e 45 l'ora italiana si apre alle 14 e 30 l'orario broker e si chiude alle 14 e 45"*; *"dovrai mettere 8, 8, 14 e 59"* ; *"dovete settarla sempre un secondo prima della chiusura dell'ora perchè sennò dipende una candela in più"* | r.269 | chiaro; **fuso dichiarato: "io che uso BCM dovro' mettere l'ora in meno"** |
 | P27 | pre-ORB (variante) | box **5 minuti** (**07:55-07:59:59**); ordini **10 punti** sopra e **10 punti** sotto; stop **lato opposto**; DAX | *"se io questo qua lo setto invece che 8 lo setto 07 e 55 07 59 e 59 ... va messo un ingresso 10 punti sotto e un ingresso 10 punti sopra ... quando arriva a toccare il prezzo viene messo lo stop dalla parte opposta"* | r.269 | chiaro; **tipo di DAX: dice "a me non piace sul DAX, funziona meglio sull'apertura americana"** |
 | P28 | pre-ORB: esito di esempio | *"15 punti"* di profitto sul DAX se non si prendeva lo stop | *"quando togli questa candela qua di rifiuto ... sarebbe stato 15 punti DAX"* | r.269 | esempio, n = 1 |
 | P29 | Mataf, finestra | **10 settimane** (*"per le dieci settimane precedenti"*) | r.269 | r.269 | chiaro (stessa del 01/10 r.357) |
@@ -253,7 +253,7 @@ OGGETTO          (A) r.1-45 amministrazione e domande dei nuovi; r.45-63 piattaf
 
 | # | bandiera | colore | prova | nota |
 |---|---|---|---|---|
-| B1 | **Esecuzione di ordini pendenti nel movimento forte su BCM** + algoritmo personale | **arancione** | r.233-235 (*"Spesso me lo fa BCM"*) | non e' un difetto del metodo di Paolo: e' un **rischio di esecuzione** del broker che usiamo anche noi (D1) |
+| B1 | **Esecuzione di ordini automatici (tipo non detto) nel movimento forte su BCM** + algoritmo personale | **arancione** | r.233-235 (*"Spesso me lo fa BCM"*) | non e' un difetto del metodo di Paolo: e' un **rischio di esecuzione** del broker che usiamo anche noi (D1) |
 | B2 | **Pendenti di notte, due regole opposte** | arancione | r.151 *"lo tolgo di notte"* (indice) contro r.269 *"ritengo l'ordine pendente"* (forex) e contro 01/10 r.131 (ordine sulla EMA200 lasciato ieri sera) | **incoerenza** fra live: non si puo' copiare nessuna delle due senza chiedere a chi |
 | B3 | **"sempre con un terzo rischio"** | arancione | r.151 | ambiguo: se significa 1/3 del rischio per ciascuna delle 3 strategie in correlazione, e' sizing; se significa terzo ingresso, e' scale-in. **Non si legge** (D2) |
 | B4 | **COT "il mercato va dalla parte opposta dei retail"** | ambra | r.269 | assoluto non misurato |
@@ -262,8 +262,8 @@ OGGETTO          (A) r.1-45 amministrazione e domande dei nuovi; r.45-63 piattaf
 | B7 | **Indicatore "che sto testando" + EA ORB non distribuito** | ambra | r.163, r.229, r.237 | mostrato a schermo, non dettato, *"non funziona ancora bene"*: non lo si usa |
 | B8 | **IA per analizzare video** *"non li fido mai"* | ambra | r.151 | rischio di metodo dichiarato; zero valore operativo |
 
-**Nessuna rossa:** nessun recovery, nessuna griglia, nessuna martingala, nessun size crescente, **nessun trucco anti-prop**, nessun hedging. **Le tre cose che il giorno dopo compaiono nella live di Emiliano
-(hedging-parente, stessa size sul retest, scala 2-4-10-20) qui NON ci sono.**
+**Nessuna rossa:** nessun recovery, nessuna griglia di ordini, nessuna martingala, nessuna size crescente dopo una perdita, **nessun trucco anti-prop**, nessun hedging. **Le tre cose che il giorno dopo compaiono nella live di Emiliano
+("chiudi meta' per coprire la perdita", stessa size sul retest, scala di size verso il livello) qui NON ci sono.**
 
 ## 2.8 NUMERI DI PERFORMANCE (tutti [DICHIARATO, NON verificato]; si registrano, non pesano)
 
@@ -275,7 +275,7 @@ Paolo dice, in ordine:
 1. *"noi lavoreremo con ... CET ... l'ora italiana ... in basso a destra della piattaforma; in alto a sinistra ... market watch ... l'orario del broker"* (r.269).
 2. *"io che uso BCM dovro' mettere l'ora in meno"* (r.269) = BCM e' **un'ora indietro** rispetto all'Italia. **E' vero oggi (estate, fino al 25/10)** e coincide con `OROLOGIO_BCM_2026-09-24.md` (UTC+1 fisso). **Dal 26/10 non e' piu' vero** (d'inverno BCM = ora italiana).
 3. *"per il nostro broker e' l'orario di Greenwich"* e *"000 che e' lo 000 dell'orario di broker"* (r.269): **in tensione con la nostra misura** (BCM = UTC+1 fisso, non GMT). Puo' essere una semplificazione di lezione (la mezzanotte del grafico non e' la mezzanotte GMT). **Non converto, non rimisuro: [INCERTO]**.
-4. *"il disallineamento che c'e' per due settimane notturne e due settimane in primavera tra l'ora legale europea e l'ora legale americana ... le borse americane non apriranno alle 15.30 ... ma alle 14.30"* (r.269): dichiarato da lui, **coerente** con `OROLOGIO_BCM` (DAX cambia dal 26/10, USA dal 02/11 per le sedie a ora fissa) `[DERIVATO]`: in quella settimana la finestra di arming 14:30 delle sedie USA e' **per caso allineata**. **NON verificato da me sul calendario.**
+4. *"il disegnamento che c'e' per due settimane notturne e due settimane in primavera tra l'ora legale europea e l'ora legale americana per due settimane abbiamo l'ora sfalsata pertanto le borse americane non apriranno alle 15.30 o all'italiana non apriranno alle 14.30"* (r.269) `[TRASCRITTO dubbio]`: "disegnamento" = disallineamento, "notturne" = autunnali; la frase letterale dice *"non apriranno alle 14.30"*, il senso ricostruito (apertura USA alle 14:30 IT in quelle settimane) e' `[INFERITO]`. Dichiarato da lui, **coerente** con `OROLOGIO_BCM` (DAX cambia dal 26/10, USA dal 02/11 per le sedie a ora fissa) `[DERIVATO]`: in quella settimana la finestra di arming 14:30 delle sedie USA e' **per caso allineata**. **NON verificato da me sul calendario.**
 5. *"il prossimo [bank holiday USA] che abbiamo il 12 ottobre ... lunedi' 12 ottobre ... tutte le banche statunitense sono chiuse ... si lascia stare EURUSD"* (r.269): [NON VERIFICATO da me se i mercati azionari USA (Nasdaq/Dow) siano aperti quel giorno]: **controllo di calendario broker** (D3).
 
 ## 2.10 COSA C'ERA A SCHERMO E NON NEL PARLATO (da chiedere a Claudio / ascoltare)
@@ -320,7 +320,7 @@ Confronto con: `report/SCHEDA_LIVE_PAOLO_2026-10-01.md`, `report/ANALISI_LIVE_PA
 | Gap-fill | 29/09 e repo (`GapFill`) | **sconsigliato dal docente** (*"ingresso da scommettitore"*) | NUOVO giudizio |
 | Strumenti tradabili | 01/10: forex, indici, oro | **forex, indici, oro e petrolio**; ma il petrolio e' *"troppo erratico"* per lui (r.151, r.261) | CHIARISCE |
 | Cascata top-down | 01/10 r.447-461 (D1 -> H4 -> H1 -> M15) | S&P: *"dall'H1 all'H4 e' tutta lunga"*, D1 per le bande e il Nasdaq | ripetizione |
-| M3 | 01/10: **0 occorrenze** | **0 occorrenze** anche qui | invariato (M3 compare solo da Emiliano 10/07) |
+| M3 | 01/10: **0 occorrenze** | **0 occorrenze** anche qui | invariato (M3 c'e' da Emiliano 07/10 e in live Paolo piu' vecchie: `docs/live_paolo/` 05/05, 07/05, 03/09; `ABTG_DAX_M3` = "Strategia DAX M3" del corso) |
 | Prop / challenge / risultati di conto | 01/10: **nessuna** | **nessuna** | invariato |
 
 ---
@@ -335,7 +335,7 @@ Lette per questa parte (cito il file): `report/SCHEDA_LIVE_PAOLO_2026-10-01.md` 
 
 | sedia / EA | cosa dice Paolo (citazione) | cosa c'e' da noi | verdetto |
 |---|---|---|---|
-| **ORB Dow trial** (`ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set`, magic 770621; piccolo 770611) | *"sui primi 15 minuti ti fa un orbe di questo tipo, non e' piu' tradabile durante il giorno ... un rapporto di rendimento che non sta in piedi"* (r.165-167); *"stamattina quando l'ho visto cosi' grande ho abbandonato l'orbe"* (r.205) | `InpMaxRangePct=0.8` (preset r.91; EA r.201: *"ampiezza MASSIMA del range in % del prezzo ... 0 = off"*; r.505-506 log *"movimento gia' fatto: niente setup oggi"*) | **CONFERMA la forma** del filtro. La nostra soglia e' % del prezzo, la sua e' il rapporto R:R dell'ingresso (non dichiarato). Fonte non indipendente. **Non cambia nessun valore** |
+| **ORB Dow trial** (`ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set`, magic 770621; piccolo 770611) | *"sui primi 15 minuti ti fa un orbe di questo tipo, non e' piu' tradabile durante il giorno ... un rapporto di rendimento che non sta in piedi"* (r.165-167); *"stamattina quando l'ho visto cosi' grande ho abbandonato l'orbe"* (r.205) | `InpMaxRangePct=0.8` (preset r.91; EA r.201: *"(edgeful) ampiezza MASSIMA del range in % del prezzo ... 0 = off"*; r.505-506 log *"movimento gia' fatto: niente setup oggi"*) | **CONFERMA la forma** del filtro. La nostra soglia e' % del prezzo, la sua e' il rapporto R:R dell'ingresso (non dichiarato). Il filtro viene da **edgeful**, non da Paolo: due fonti esterne, **nessuna misura**. **Non cambia nessun valore** |
 | **ORB Dow, orari** | box 14:30-14:44:59 server (Nasdaq e, per estensione, Dow) (r.269) | preset trial: 16:30-16:45 **ora FTMO** (= IT+1) (`PIANO_FREE_TRIAL`); BCM piccolo in ora server | **COERENTE** (stesso 15:30-15:45 IT) |
 | **Famiglia Apertura DAX** (`770101`/`770105`): il mercato del mattino e' il momento migliore | *"uno dei momenti migliori per tradare e' la mattina tra le nove ... e le dieci, ma anche verso le undici"* (r.67) | armano l'apertura DAX con range 35' (mappa DAX) | **CONFERMA** a livello generico (non indipendente) |
 | **Parziale + pari** (ricetta d'uscita comune) | *"si parzializza, si portano a pari"* (r.269) | TP1 50% + BE + trailing PREVBAR M5 (scheda 10/05 §C10) | **CONFERMA** (gia' nostra) |
@@ -347,9 +347,9 @@ Lette per questa parte (cito il file): `report/SCHEDA_LIVE_PAOLO_2026-10-01.md` 
 |---|---|---|---|
 | **DAX short: `770105` (FTMO), `770411` MaxMin DAX short** | *"a me gli indici short non mi piace farli, mi piace farli longhe"* (r.151) | 770105 short: ritest PF 0,965/0,957, DD OOS 12,3% (bocciato per rischio, scheda 10/05 §C14 che cita mappa DAX); 770411: PF OOS 2,16 su **14** posizioni (n<30, **non si legge**, scheda 10/05 §C1) | **MESSO IN DUBBIO come preferenza, NON come misura.** Il giorno dopo Emiliano **shorta il DAX** (live 07/10): **i due coach non concordano sul lato**. Nessun numero nostro e' cambiato |
 | **Nasdaq ORB "funziona molto bene sul Nasdaq"** (r.157) | *"funziona molto bene perche' dopo un periodo di oscillazione direzionale"* (r.157) | breakout nudo al tocco **chiuso** (R12 48/48 negative OOS, R45 0/48, R97 0/4 n=135; `CENSIMENTO_ORB` §0.3); Nasdaq 35-45 min: 1 cella su 8 (§0.4); **vive il RETEST** (n=102, PF OOS 1,109 o 1,215: **due contratti**, §0.7) | **CONTRADDETTO dai nostri numeri** per il breakout al tocco; **non per il retest**. Dichiarazione senza misura |
-| **ORB Dow "meno bene"** (r.157) | *"funziona meno bene sul Dow Jones, pero' va bene anche fare sul Dow Jones"* | Dow breakout a due lati **n=197, la riga piu' robusta** insieme al DAX long (`CENSIMENTO_ORB` §0.1); Dow retest a 15' positivo in OOS (PF 1,42, §0.4) | **CONTRADDETTO**: da noi il Dow e' l'ORB **che vive**. Il suo "meno bene" non e' misurato |
-| **Pendenti su apertura USA (es. `770260` Nasdaq_Apertura_US, NASUSD M15)** | *"mi ha proprio saltato l'ordine ... Spesso me lo fa BCM. Quando c'e' un movimento forte non mi prende l'ordine"* (r.233-235) | `770260` L+S operativa in FTMO (non su BCM) (`PIANO_FREE_TRIAL`); sul BCM operano le sedie del piccolo e del 100k | **MESSO IN DUBBIO per le sedie che girano su BCM**: se una sedia a pendente non viene eseguita nel movimento forte, **il forward sottostima la frequenza e il backtest (che riempie sempre) la sovrastima**. **NON verificato**: D1 |
-| **`REGISTRO_TEST.md` r.378-379** (sintesi "REGOLE PAOLO") | l'ORB e' una sua strategia attiva: *"il mio consiglio e' farlo la mattina su DAX e il pomeriggio su NASDAQ"* (r.161) | il registro dice *"Paolo ... NON fa breakout in apertura"* (r.379) e che *"fa soprattutto forex swing/reversal"* | **SUPERATO dalle live 22/09, 01/10, 06/10**: la sintesi del registro e' **vecchia** su questo punto. Nessuna modifica fatta (e' un file di storia): segnalo. Resta valido **r.382**: *"NON entrare se ... il prezzo e' troppo lontano dal livello di rottura"*, **la stessa idea** del suo "ORB troppo largo" (r.165-167) |
+| **ORB Dow "meno bene"** (r.157) | *"funziona meno bene sul Dow Jones, pero' va bene anche fare sul Dow Jones"* | Dow breakout a due lati **n=197** (una delle due sole righe sopra 150 in OOS, `CENSIMENTO_ORB` §0.1) ma **non schierabile per rischio** (§2 riga 6); ORB Dow `ABTG_ORB_Ottimizzato` OOS 1,674 su n=119 (**merito sospeso**); Dow retest a 15' positivo in OOS (PF 1,42, §0.4); il gemello NASUSD **fallisce** (R97 0,84-0,91) | **CONTRADDETTO nel confronto relativo** (da noi il breakout Dow va meglio di quello Nasdaq), **non in assoluto**: sul Dow il merito e' **sospeso** (n < 150 o rischio). Il suo "meno bene" non e' misurato |
+| **Pendenti su apertura USA (es. `770260` Nasdaq_Apertura_US, NASUSD M15)** | *"mi ha proprio saltato l'ordine ... Spesso me lo fa BCM. Quando c'e' un movimento forte non mi prende l'ordine"* (r.233-235) | `770260` L+S operativa in FTMO (non su BCM) (`PIANO_FREE_TRIAL`); sul BCM operano le sedie del piccolo e del 100k | **MESSO IN DUBBIO per le sedie che girano su BCM** (con la riserva che il **tipo d'ordine di Paolo non e' detto**, D1): se una sedia a pendente non viene eseguita nel movimento forte, **il forward sottostima la frequenza e il backtest (che riempie sempre) la sovrastima**. **NON verificato**: D1 |
+| **`backtest_pipeline/REGISTRO_TEST.md` r.378-379** (sintesi "REGOLE PAOLO") | l'ORB e' una sua strategia attiva: *"il mio consiglio e' farlo la mattina su DAX e il pomeriggio su NASDAQ"* (r.161) | il registro dice *"Paolo ... NON fa breakout in apertura"* (r.379) e che *"fa soprattutto forex swing/reversal"* | **SUPERATO dalle live 22/09, 01/10, 06/10**: la sintesi del registro e' **vecchia** su questo punto. Nessuna modifica fatta (e' un file di storia): segnalo. Resta valido **r.382**: *"NON entrare se ... il prezzo e' troppo lontano dal livello di rottura"*, **la stessa idea** del suo "ORB troppo largo" (r.165-167) |
 | **Orologio**: *"io che uso BCM dovro' mettere l'ora in meno"* (r.269) | | `OROLOGIO_BCM`: BCM = UTC+1 fisso; "IT - 1" vale **solo d'estate**; dal **26/10** DAX, dal **02/11** USA le sedie a ora fissa armano un'ora prima | **MESSO IN DUBBIO nel tempo**: la regola del docente smette di valere fra 19 giorni. Una nota per Claudio nella decisione gia' attesa **entro il 25/10** |
 | **"BCM = Greenwich"** (r.269) | *"per il nostro broker e' l'orario di Greenwich"* | UTC+1 fisso (`OROLOGIO_BCM`) | **TENSIONE**, probabilmente semplificazione didattica; non si usa |
 
@@ -376,7 +376,7 @@ motori senza edge; **due lati sempre**; **n >= 150** per il merito (altrimenti i
 
 ### P-3 - "Pre-ORB DAX: costo prima del merito" (aritmetica, un minuto)
 - **Passo 0:** ordini a **+/-10 punti** dal box con stop **sul lato opposto** (r.269): stop **>= 20 punti** `[DERIVATO: 10 + 10, **minimo** perche' non conosco l'ampiezza del box]`. Contro lo spread BCM **1,70**: **20 / 1,70 = 11,8x**; FTMO **1,23** (P95 1,33): **16,3x / 15,0x** `[DERIVATO]`. Il **pavimento duro 13,3x** e il **40x** sono in `APERTURE_DAX_MAPPA_2026-10-03.md` §3. **Lettura:** a BCM il pre-ORB DAX a 10 punti **sta sotto il pavimento duro**; a FTMO ci sta sopra ma **molto sotto il 40x**.
-- **Attesa:** **escluso per costo**, con i numeri accanto. **Contro-esempio:** se il box misurato e' >= 53 punti (40 x 1,33) il costo regge e lo studio puo' proseguire.
+- **Attesa:** **escluso per costo**, con i numeri accanto. **Riferimento dei +/-10 punti `[NON CHIARO]`**: *"un ingresso 10 punti sotto e un ingresso 10 punti sopra il mercato"* (r.269) puo' voler dire dal **prezzo** (stop = 20 esatti) o dal **box** (stop = box + 20). Il box cade alle 07:55-07:59 server, ora 7 pre-mercato: spread BCM **2,80** mediana (`APERTURE_DAX_MAPPA` r.127), quindi se il riempimento avviene prima delle 08:00 il conto peggiora (20 / 2,80 = **7,1x**). **Contro-esempio:** se lo **stop reale** (distanza fra i due ordini) misurato e' >= **53,2** punti a FTMO P95 / >= **68,0** a BCM (40x, mappa DAX r.128) il costo regge e lo studio puo' proseguire; nella lettura "dal prezzo" questo non succede mai.
 - **Costo:** **zero tester**. E' la prima riga, la scrivo cosi' perche' e' la conferma o la smentita di una frase di Paolo (*"a me non piace sul DAX"*) con un numero.
 
 ### P-4 - "Il filtro `InpMaxRangePct` letto contro l'ADR" (split ex post sui per-trade, zero tester; **solo se gia' esistono i per-trade ORB Dow**)
@@ -384,6 +384,7 @@ motori senza edge; **due lati sempre**; **n >= 150** per il merito (altrimenti i
 - **Attesa:** nessuna differenza di PF oltre la banda di rumore (stessa logica di S1 della scheda 10/05); campione OOS Dow ORB gia' noto (n=197) -> ~100 per meta'.
 - **Contro-esempio:** PF(sopra mediana) < 0,85 **e** PF(sotto) > 1,25 in **entrambe** le ere con n >= 40.
 - `[NON VERIFICATO da me]` dove stiano i per-trade dell'ORB Dow e se coprano **piu' regimi**; il 21 mesi sono **un regime**. **Costo:** ore, non giorni `[NON MISURATO]`.
+- **Due lati:** la sedia trial e' **solo long** (preset r.3 e r.68-69: `InpAllowShort=false`): lo split legge **un lato solo**. Il lato short del filtro resta `[NON MISURATO]` e va dichiarato tale accanto al numero (regola dei due lati sugli indici).
 
 ### Cosa NON propongo (col motivo)
 - **COT/retail contrarian**: nessun dato COT nel repo `[NON VERIFICATO]` e il segnale non e' per H1/intraday.
@@ -404,7 +405,7 @@ motori senza edge; **due lati sempre**; **n >= 150** per il merito (altrimenti i
 | D4 | A Paolo: **a che ora esatta** (e in quale fuso) il pendente su D1 EMA50 / H4 EMA200 e che **lato**? Lo ha poi tolto di notte? (C2) | r.149-151 non dice ne' prezzo ne' lato |
 | D5 | A Paolo: **il range "troppo largo" dell'ORB**: quanti punti/quale % o rapporto R:R fa dire "oggi non lo faccio"? (r.165, r.205, r.213-215) | permette di confrontare con `InpMaxRangePct=0.8` |
 | D6 | **Per riascoltare**: i passaggi di S1, S3, S5, S6 della registrazione (Claudio ha il link; il `.txt` non ha timestamp) | §2.10 |
-| D7 | Pre-ORB DAX: **la "versione corretta del Circle"** (r.269 *"questa fa parte del percorso di scalping"*) e quella che ci ha dato sono la stessa cosa? | per non confondere le due ORB nei confronti |
+| D7 | Pre-ORB DAX: **la "versione corretta del Circle"** (r.269 *"questa fa parte del percorso di scatting"* `[TRASCRITTO dubbio]`: scalping?) e quella che ci ha dato sono la stessa cosa? | per non confondere le due ORB nei confronti |
 
 ---
 
@@ -412,7 +413,17 @@ motori senza edge; **due lati sempre**; **n >= 150** per il merito (altrimenti i
 
 - **Non toccato:** nessun preset, EA, sedia, conto, terminale, VPS, forward, parametro di rischio o taglia. Nessun round lanciato, nessuna riga di lancio scritta, nessun messaggio a Claudio.
 - **Letto solo:** trascrizione `LIVE_PAOLO_2026-10-06.txt`; schede e dossier del repo citati; `mql5/Experts/ABTG_ORB_Ottimizzato.mq5` r.201 e r.505-506; preset `ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set` r.91.
-- **Bozza, NON passata dal cancello.** Servono lo strato 1 (`controlla_riga.py --oggetto md`, esito in fondo) **e** lo strato 2 (`controllo-preventivo`) prima che qualunque proposta diventi un file prova.
+- **Documento passato dal cancello (strati 1 e 2, 07/10).** Le proposte della Parte 4 restano **specifiche**: per diventare un file prova ripassano **di nuovo** dai due strati.
 
 ## Esito del controllo deterministico
-`python3 backtest_pipeline/controlla_riga.py --oggetto md` su questo file e su `ANALISI_LIVE_EMILIANO_2026-10-07.md` (07/10/2026): **ESITO: nessun difetto meccanico**; 1 rilievo [225] (la prosa nomina il conto 50504263 in P-2: lettura di un giornale esistente, **nessuna stringa e nessun terminale toccato**). **NON e' un PASS completo:** manca lo strato 2 (`controllo-preventivo`).
+`python3 backtest_pipeline/controlla_riga.py --oggetto md` su questo file e su `ANALISI_LIVE_EMILIANO_2026-10-07.md` (07/10/2026): **ESITO: nessun difetto meccanico**; 1 rilievo [225] (la prosa nomina il conto 50504263 in P-2: lettura di un giornale esistente, **nessuna stringa e nessun terminale toccato**). Strato 2 (`controllo-preventivo`) fatto il 07/10: **PASS CON RISERVE** dopo le correzioni elencate in fondo.
+
+## Correzioni del cancello (strato 2, `controllo-preventivo`, 07/10/2026)
+Fatte nel file prima della consegna, controllate alla fonte (`cat -n` della trascrizione, EA, preset, mappe):
+- §1.0/§1.2: la citazione *"il range e' troppo grande, il rapporto di rendimento non sta in piedi"* **non esiste** in trascrizione: sostituita con le parole di r.165 e r.205.
+- §1.0/§1.2/§4.1: `InpMaxRangePct` e' marcato *"(edgeful)"* nell'EA r.201: la convergenza e' fra **due fonti esterne**, non "Paolo che ha ispirato la manopola".
+- §1.0/B1/§4.2: r.233-235 **non dice che l'ordine fosse pendente**: tipo d'ordine `[NON CHIARO]` (gia' in D1).
+- §4.2 ORB Dow: "CONTRADDETTO" ridotto a **confronto relativo**; sul Dow il merito e' sospeso (n < 150 o rischio).
+- P-3: il contro-esempio confondeva **box** e **stop** (stop = box + 20, oppure 20 esatti se i +/-10 sono dal prezzo); aggiunto lo spread dell'ora 7 (2,80).
+- P-4: la sedia trial e' **solo long**: dichiarato che lo split legge un lato.
+- Citazioni rese letterali (r.269 "dipende una candela", "disegnamento", "scatting"); percorso `backtest_pipeline/REGISTRO_TEST.md`; data "10/07" -> 07/10; M3 presente in live Paolo vecchie.

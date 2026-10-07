@@ -408,7 +408,7 @@ Ordine di valore per **una sedia schierabile**: **basso** (la live e' discrezion
 
 - **Non toccato:** nessun preset, EA, sedia, conto, terminale, VPS, forward, parametro di rischio o taglia. Nessun round lanciato, nessuna riga di lancio scritta, nessun messaggio a Claudio.
 - **Letto solo:** trascrizione `LIVE_EMILIANO_2026-10-07.txt`; schede e mappe del repo citate; `mql5/Files/abtg_news.csv` (grep).
-- **Bozza, NON passata dal cancello.** Servono lo strato 1 (`controlla_riga.py --oggetto md`, esito in fondo) **e** lo strato 2 (`controllo-preventivo`) prima che qualunque proposta diventi un file prova.
+- **Documento passato dal cancello (strati 1 e 2, 07/10).** Le proposte della Parte 4 restano **specifiche**: per diventare un file prova ripassano **di nuovo** dai due strati.
 
 ## Esito del controllo deterministico
-`python3 backtest_pipeline/controlla_riga.py --oggetto md` su questo file e su `ANALISI_LIVE_PAOLO_2026-10-06.md` (07/10/2026): **ESITO: nessun difetto meccanico**, nessun rilievo su questo file. **NON e' un PASS completo:** manca lo strato 2 (`controllo-preventivo`).
+`python3 backtest_pipeline/controlla_riga.py --oggetto md` su questo file e su `ANALISI_LIVE_PAOLO_2026-10-06.md` (07/10/2026): **ESITO: nessun difetto meccanico**, nessun rilievo su questo file. Strato 2 (`controllo-preventivo`) fatto il 07/10: **PASS CON RISERVE** dopo le correzioni elencate in fondo.
