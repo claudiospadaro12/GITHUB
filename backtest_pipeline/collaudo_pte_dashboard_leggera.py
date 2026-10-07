@@ -32,6 +32,17 @@ provare a tavolino e si dichiara il resto.
   M) MUTANTI CIECHI: mutazioni del sorgente applicate a una COPIA in una cartella temporanea FUORI dal repo
      (classe 1159); per ognuna si rigira la stessa suite ridotta: deve FALLIRE almeno un controllo.
 
+  V) v1.10 (07/10/2026 sera): tasti HIDE/REFRESH/HA/DOJI/EMA 9-21/ST 3 LIV, click su simbolo/cella/TF, candele HA
+     disegnate, frecce doji, EMA con incrocio, Supertrend 3 livelli. STRUTTURA buffer/plot (indici, nomi, tipi, colori);
+     RACCORDO (click con la riga/colonna della cella cliccata, SymbolSelect, grafico nuovo o questo; REFRESH azzera TUTTE
+     le cache e non copia nell'handler; HIDE = nessuna copia e il tasto resta; DOJI OFF = niente frecce e niente
+     calcolo; stato dei tasti in GlobalVariable con ChartID); funzioni COPIATE identiche da ABTG_Pulsanti_Grafico.mq5
+     (SW_STCore anche = NC_STCore di EA_NatCla.mq5); NUMERI: PD_Bersaglio su tutte le celle 35x3 + 28 nomi da rifiutare
+     (contro-esempio riga/colonna scambiata), EMA e Supertrend bit per bit con lo specchio, seme e indipendenza
+     dall'inizio della finestra, HA incrementale con barra provvisoria (contro-esempio da = prev_calculated), frecce doji
+     == tutte le doji dello specchio e la prima == la cella; MODELLO ESEGUIBILE dei colori (funzioni VERE estratte,
+     grafico finto, due istanze: ricarico da click nei due ordini, crash, toggle, clrNONE come 4294967295 e -1).
+
 Uso:   python3 backtest_pipeline/collaudo_pte_dashboard_leggera.py [--senza-mutanti]
 Esce con 0 solo se tutto passa. NON prova: compilazione MQL5, aspetto grafico (posizioni, font, angoli),
 SeriesInfoInteger/CopyRates/oggetti del terminale, il feed BCM, l'equivalenza con la dashboard originale.
@@ -1697,7 +1708,8 @@ MUTANTI = [
     ("canale 'uno dei due' diventa 'entrambi'", "sopra=(sF || sS); sotto=(gF || gS);", "sopra=(sF && sS); sotto=(gF && gS);"),
     ("colori invertiti", "int dir=(sotto ? 1 : -1);", "int dir=(sotto ? -1 : 1);"),
     ("uscita dal canale non stretta", "bool sF=(blo>upF), gF=(bhi<loF)", "bool sF=(blo>=upF), gF=(bhi<=loF)"),
-    ("ricerca dalla barra piu' vecchia", "for(int s=1;s<=barre;s++)", "for(int s=barre;s>=1;s--)"),
+    ("ricerca dalla barra piu' vecchia", "for(int s=1;s<=barre;s++)\n     {\n      double a=0.0, b=0.0;\n      int r=PD_Valuta(o,h,l,c,n,s,p,a,b);\n      if(r==PD_NODATI) return(PD_NODATI);",
+     "for(int s=barre;s>=1;s--)\n     {\n      double a=0.0, b=0.0;\n      int r=PD_Valuta(o,h,l,c,n,s,p,a,b);\n      if(r==PD_NODATI) return(PD_NODATI);"),
     ("HA come l'EA con il seme sbagliato", "double haO_prev=(o[shift+2]+c[shift+2])/2.0;", "double haO_prev=(o[shift+1]+c[shift+1])/2.0;"),
     ("giorno della settimana sfasato", "(int)((g+4)%7)*3", "(int)((g+3)%7)*3"),
     ("barre minime senza l'ATR lento", "   b=PD_MaxI(b,s+p.atrS+1);\n", ""),
@@ -1705,11 +1717,11 @@ MUTANTI = [
     ("ChartRedraw a ogni ciclo", "   if(gRidisegna)\n     {\n      gRidisegna=false;\n      ChartRedraw(0);\n     }",
      "   gRidisegna=false;\n   ChartRedraw(0);"),
     ("timer non spento", "   EventKillTimer();\n", ""),
-    ("oggetti non cancellati", "   if(gProprietario) ObjectsDeleteAll(0,PD_PREF);\n   ChartRedraw(0);", "   ChartRedraw(0);"),
+    ("oggetti non cancellati", "      ObjectsDeleteAll(0,PD_PREF);\n      ObjectsDeleteAll(0,PD_DOJI);\n     }\n   if(reason", "     }\n   if(reason"),
     ("H4 spento di default", "input bool InpH4  = true;", "input bool InpH4  = false;"),
     ("canale veloce di default", "input ENUM_PD_CANALE InpCanale          = PD_CH_UNO;", "input ENUM_PD_CANALE InpCanale          = PD_CH_VELOCE;"),
     ("lista 4 senza XAUUSD", "USDJPY,XAUUSD,USOIL\"", "USDJPY,USOIL\""),
-    ("include di trading", "#property indicator_plots   0\n", "#property indicator_plots   0\n#include <Trade/Trade.mqh>\n"),
+    ("include di trading", "#property indicator_plots   15\n", "#property indicator_plots   15\n#include <Trade/Trade.mqh>\n"),
     ("prossima barra 10 volte piu' lontana", "gProssimo[k]=gR[0].time+DurataBarra(tf);", "gProssimo[k]=gR[0].time+DurataBarra(tf)*10;"),
     ("flip sulla barra in formazione", "if(shift<2) return(0);", "if(shift<1) return(0);"),
     ("TMA centrata con la barra in formazione", "if(shift-j>=1){ sum+=k*c[shift-j]; sw+=k; }", "if(shift-j>=0){ sum+=k*c[shift-j]; sw+=k; }"),
@@ -1752,8 +1764,8 @@ MUTANTI = [
     ("serie vuota: uscita if(!lb) prima della riga corretta", "   if(lb!=0 && lb==gUltBarra[k])", "   if(!lb){ Rinvia(k,ora); return(false); }\n   if(lb!=0 && lb==gUltBarra[k])"),
     ("serie vuota: uscita if(lb<=0) prima della riga corretta", "   if(lb!=0 && lb==gUltBarra[k])", "   if(lb<=0){ Rinvia(k,ora); return(false); }\n   if(lb!=0 && lb==gUltBarra[k])"),
     ("serie vuota: uscita if(lb<1) con attesa fissa", "   if(lb!=0 && lb==gUltBarra[k])", "   if(lb<1){ gProssimo[k]=ora+60; return(false); }\n   if(lb!=0 && lb==gUltBarra[k])"),
-    ("nome oggetto sbagliato nel controllo di OnTimer", "if(ObjectFind(0,PD_PREF+\"pannello\")<0) Struttura();", "if(ObjectFind(0,PD_PREF+\"pannellx\")<0) Struttura();"),
-    ("ricostruzione degli oggetti tolta", "if(ObjectFind(0,PD_PREF+\"pannello\")<0) Struttura();", ""),
+    ("nome oggetto sbagliato nel controllo di OnTimer", "if(ObjectFind(0,PD_PREF+\"pannello\")<0 ||", "if(ObjectFind(0,PD_PREF+\"pannellx\")<0 ||"),
+    ("ricostruzione degli oggetti tolta", "   if(ObjectFind(0,PD_PREF+\"pannello\")<0 || ObjectFind(0,PD_PREF+\"b_hide\")<0) Struttura();\n", ""),
     ("cursore fermo sulla cella 0", "gCursore=(gCursore+1)%tot;", "gCursore=(gCursore+0)%tot;"),
     ("stato iniziale gia' 'ok'", "ArrayInitialize(gStatoSim,-1);", "ArrayInitialize(gStatoSim,0);"),
     ("colonna H4 riempita con H8", 'AggiungiTF(InpH4,PERIOD_H4,"H4")', 'AggiungiTF(InpH4,PERIOD_H8,"H4")'),
@@ -1761,8 +1773,129 @@ MUTANTI = [
     ("suffisso del broker ignorato", "gSym[gNS]=s+InpSuffisso;", "gSym[gNS]=s;"),
     ("spazi attorno ai simboli tenuti", "StringTrimLeft(s); StringTrimRight(s);", ""),
     ("distanze del confronto a cella non pronta", "if(InpModoConfronto && gPronta[k] && gStatoSim[i]==0)", "if(InpModoConfronto && gStatoSim[i]==0)"),
-    ("rettangoli dietro al grafico", "ObjectSetInteger(0,nome,OBJPROP_BACK,false);", "ObjectSetInteger(0,nome,OBJPROP_BACK,true);"),
+    ("rettangoli dietro al grafico", "   ObjectSetInteger(0,nome,OBJPROP_BACK,false);\n   ObjectSetInteger(0,nome,OBJPROP_SELECTABLE,false);\n   ObjectSetInteger(0,nome,OBJPROP_HIDDEN,true);\n   ObjectSetInteger(0,nome,OBJPROP_TIMEFRAMES,Periodi(nome));\n  }\n\nvoid Etic",
+     "   ObjectSetInteger(0,nome,OBJPROP_BACK,true);\n   ObjectSetInteger(0,nome,OBJPROP_SELECTABLE,false);\n   ObjectSetInteger(0,nome,OBJPROP_HIDDEN,true);\n   ObjectSetInteger(0,nome,OBJPROP_TIMEFRAMES,Periodi(nome));\n  }\n\nvoid Etic"),
     ("seme HA negativo accettato", "InpSemeHA<0 ||", ""),
+    # --- v1.10 mutanti CIECHI su click, tasti, HA, doji sul grafico, HIDE, REFRESH, EMA, Supertrend
+    # CLICK (contro-esempio: riga/colonna scambiata, limiti, prefisso, tipo di evento, destinazione)
+    ("click: simbolo preso dalla COLONNA", "string sym=(i>=0 ? gSym[i] : _Symbol);", "string sym=(j>=0 ? gSym[j] : _Symbol);"),
+    ("click: TF preso dalla RIGA", "ENUM_TIMEFRAMES tf=(j>=0 ? gTF[j] : (ENUM_TIMEFRAMES)_Period);",
+     "ENUM_TIMEFRAMES tf=(i>=0 ? gTF[i] : (ENUM_TIMEFRAMES)_Period);"),
+    ("PD_Bersaglio riga e colonna scambiate", "      i=a; j=b;\n      return(1);", "      i=b; j=a;\n      return(1);"),
+    ("PD_Bersaglio limite della colonna non stretto", "if(a<0 || a>=nS || b<0 || b>=nT) return(0);", "if(a<0 || a>=nS || b<0 || b>nT) return(0);"),
+    ("PD_Bersaglio limiti nS/nT scambiati", "if(a<0 || a>=nS || b<0 || b>=nT) return(0);", "if(a<0 || a>=nT || b<0 || b>=nS) return(0);"),
+    ("NomeT con riga e colonna scambiate", 'return(PD_PREF+"t_"+IntegerToString(i)+"_"+IntegerToString(j));',
+     'return(PD_PREF+"t_"+IntegerToString(j)+"_"+IntegerToString(i));'),
+    ("click sul simbolo porta alla colonna 0", "      i=a;\n      return(2);", "      i=a; j=0;\n      return(2);"),
+    ("click sul TF porta al simbolo 0", "      j=b;\n      return(3);", "      i=0; j=b;\n      return(3);"),
+    ("filtro del tipo di evento tolto", "   if(id!=CHARTEVENT_OBJECT_CLICK) return;\n   if(StringFind", "   if(StringFind"),
+    ("SymbolSelect tolto", "   if(SymbolInfoInteger(sym,SYMBOL_SELECT)==0 && !SymbolSelect(sym,true))",
+     "   if(SymbolInfoInteger(sym,SYMBOL_SELECT)<0)"),
+    ("grafico nuovo invertito", "   if(InpClickNuovoGrafico)\n     {\n      if(ChartOpen", "   if(!InpClickNuovoGrafico)\n     {\n      if(ChartOpen"),
+    ("ChartSetSymbolPeriod sul simbolo corrente", "if(!ChartSetSymbolPeriod(0,sym,tf))", "if(!ChartSetSymbolPeriod(0,_Symbol,tf))"),
+    ("ChartOpen sul TF corrente", "if(ChartOpen(sym,tf)==0)", "if(ChartOpen(sym,_Period)==0)"),
+    ("default: click apre un grafico nuovo", "input bool InpClickNuovoGrafico = false;", "input bool InpClickNuovoGrafico = true;"),
+    ("PD_Numero accetta non-cifre", "      if(ch<'0' || ch>'9') return(-1);\n", ""),
+    ("prefisso del nome non controllato", "   if(StringLen(nome)<=lp || StringSubstr(nome,0,lp)!=p) return(0);", "   if(StringLen(nome)<=lp) return(0);"),
+    ("il tasto cliccato non torna su", "      ObjectSetInteger(0,sparam,OBJPROP_STATE,false);   // il tasto torna su\n", ""),
+    ("click senza controllo del bersaglio", "   if(tipo==0) return;\n", ""),
+    ("tasto REFRESH collegato a HA", 'else if(sparam==PD_PREF+"b_refresh") Refresh();', 'else if(sparam==PD_PREF+"b_refresh") ImpostaHA(!gHA);'),
+    # HA e colori del grafico
+    ("HA di default ON che DIMENTICA di salvare i colori",
+     "   gColBull=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CANDLE_BULL),clrLime);\n"
+     "   gColBear=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CANDLE_BEAR),clrRed);\n"
+     "   gColUp  =ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_UP),   clrLime);\n"
+     "   gColDown=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_DOWN), clrRed);\n"
+     "   gColLine=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CHART_LINE), clrLime);\n", ""),
+    ("colori catturati DOPO averli messi a clrNONE", "   gColsHidden=true;   // da qui in poi OGNI uscita ripristina\n   bool ok=true;\n"
+     "   ok=ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrNONE) && ok;\n",
+     "   gColsHidden=true;   // da qui in poi OGNI uscita ripristina\n   bool ok=true;\n"
+     "   ok=ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrNONE) && ok;\n"
+     "   gColBull=ColOrDefault(ChartGetInteger(0,CHART_COLOR_CANDLE_BULL),clrLime);\n"),
+    ("colore LINEA non nascosto", "   ok=ChartSetInteger(0,CHART_COLOR_CHART_LINE, clrNONE) && ok;\n", ""),
+    ("colore LINEA non ripristinato", "   ChartSetInteger(0,CHART_COLOR_CHART_LINE, gColLine);\n   gColsHidden=false;", "   gColsHidden=false;"),
+    ("OnDeinit non ripristina i colori", "   ColsRestore();                             // OGNI motivo", "   //ColsRestore();                             // OGNI motivo"),
+    ("HA spento di default", "input bool InpHaDefault         = true;", "input bool InpHaDefault         = false;"),
+    ("OnInit con HA acceso non nasconde", "   if(gHA)\n      ColsHide();     // ultimo passo", "   if(false)\n      ColsHide();     // ultimo passo"),
+    ("riparazione dopo crash tolta", "   else\n      RepairInvisibleNative();\n   EventSetTimer(1);", "   EventSetTimer(1);"),
+    ("cura dei colori non ricattura", "   gColsHidden=false;\n   ColsHide();\n   if(gCure>=3)", "   ColsHide();\n   if(gCure>=3)"),
+    ("cura dei colori tolta dal timer", "   CuraColori();\n   if(!gNascosta)", "   if(!gNascosta)"),
+    ("tasto HA spento non ripristina", "   else ColsRestore();\n   ApplicaPlot();", "   ApplicaPlot();"),
+    ("plot HA invertito", "PlotIndexSetInteger(0,PLOT_DRAW_TYPE,gHA ? DRAW_COLOR_CANDLES : DRAW_NONE);",
+     "PlotIndexSetInteger(0,PLOT_DRAW_TYPE,gHA ? DRAW_NONE : DRAW_COLOR_CANDLES);"),
+    ("colore HA invertito", "bHAcol[x]=(bHAc[x]>=bHAo[x]) ? 0.0 : 1.0;", "bHAcol[x]=(bHAc[x]>=bHAo[x]) ? 1.0 : 0.0;"),
+    ("HA incrementale senza -1 (barra in formazione congelata)", "int da=(pieno ? 0 : prev_calculated-1);", "int da=(pieno ? 0 : prev_calculated);"),
+    ("HA col seme sbagliato", "double xo=(i==0) ? (o[i]+c[i])/2.0 : (ho[i-1]+hc[i-1])/2.0;",
+     "double xo=(i==0) ? (o[i]+h[i]+l[i]+c[i])/4.0 : (ho[i-1]+hc[i-1])/2.0;"),
+    ("stato dimenticato al cambio simbolo/TF", "   if(reason==REASON_REMOVE || reason==REASON_CHARTCLOSE)", "   if(reason==REASON_CHARTCHANGE)"),
+    ("GlobalVariable senza ChartID (grafici che si pestano)", 'return(PD_GV+IntegerToString(ChartID())+"_"+cosa);', 'return(PD_GV+cosa);'),
+    ("stato HA letto dall'input DOJI", 'gHA=StatoAvvio("HA",InpHaDefault);', 'gHA=StatoAvvio("HA",InpDojiDefault);'),
+    ("tasto HA salva una chiave che nessuno legge", 'GvSalva("SHA",on ? 1.0 : 0.0);', 'GvSalva("SHA_",on ? 1.0 : 0.0);'),
+    # DOJI sul grafico
+    ("DOJI OFF non toglie le frecce", '   else { ObjectsDeleteAll(0,PD_DOJI); gMarcNome=""; gRidisegna=true; }', '   else { gMarcNome=""; gRidisegna=true; }'),
+    ("DOJI OFF: le frecce si calcolano lo stesso", "      if(gDoji) MarcaDoji();\n      if(InpDisegnaCanali)", "      MarcaDoji();\n      if(InpDisegnaCanali)"),
+    ("REFRESH calcola le frecce a DOJI spento", "   if(gDoji) MarcaDoji();               // dall'istantanea", "   MarcaDoji();               // dall'istantanea"),
+    ("frecce doji a ogni tick", "   if(time[rates_total-1]!=gUltBarraGraf)", "   if(true)"),
+    ("frecce vecchie non cancellate", "   ObjectsDeleteAll(0,PD_DOJI);\n   gMarcNome=\"\";\n   gRidisegna=true;\n   if(gXn<=0) return;",
+     "   gMarcNome=\"\";\n   gRidisegna=true;\n   if(gXn<=0) return;"),
+    ("freccia col colore invertito", "OBJPROP_COLOR,su ? InpColRialzo : InpColRibasso", "OBJPROP_COLOR,su ? InpColRibasso : InpColRialzo"),
+    ("freccia rialzista sopra la candela", "double pr=(su ? gXhl[s] : gXhh[s]);", "double pr=(su ? gXhh[s] : gXhl[s]);"),
+    ("istantanea non in ordine serie", "      int y=rt-1-x;", "      int y=x;"),
+    ("PD_Marca dalla barra in formazione", "   for(int s=1;s<=barre;s++)\n     {\n      double a=0.0, b=0.0;\n      int r=PD_Valuta(o,h,l,c,n,s,p,a,b);\n      if(r==PD_NODATI) break;",
+     "   for(int s=0;s<=barre;s++)\n     {\n      double a=0.0, b=0.0;\n      int r=PD_Valuta(o,h,l,c,n,s,p,a,b);\n      if(r==PD_NODATI) break;"),
+    ("PD_Marca si ferma alla prima doji", "      if(r!=0){ sh[q]=s; dir[q]=r; dF[q]=a; dS[q]=b; q++; }", "      if(r!=0){ sh[q]=s; dir[q]=r; dF[q]=a; dS[q]=b; q++; break; }"),
+    ("frecce su una finestra diversa dalle celle", "int nm=PD_Marca(gXo,gXh,gXl,gXc,gXn,InpBarreIndietro,gPar,", "int nm=PD_Marca(gXo,gXh,gXl,gXc,gXn,5,gPar,"),
+    ("tooltip della freccia senza distanza", "gMf[q],gMl[q]));", "0.0,0.0));"),
+    ("frecce cancellate dall'istanza vecchia mai rifatte", "   if(gDoji && gMarcNome!=\"\" && ObjectFind(0,gMarcNome)<0) MarcaDoji();\n", ""),
+    ("DOJI spento di default", "input bool InpDojiDefault       = true;", "input bool InpDojiDefault       = false;"),
+    ("istantanea troppo corta per i canali", "gBisognoGraf=PD_Bisogno(gPar,(InpDisegnaCanali && InpBarreCanali>InpBarreIndietro) ? InpBarreCanali : InpBarreIndietro);",
+     "gBisognoGraf=PD_Bisogno(gPar,InpBarreIndietro);"),
+    ("canale veloce disegnato col lento", "if(PD_Banda(gXh,gXl,gXc,gXn,s,gPar.tmaModo,gPar.tmaF,gPar.atrF,gPar.multF,mid,up,lo,a)){ bCVs[x]=up; bCVi[x]=lo; }",
+     "if(PD_Banda(gXh,gXl,gXc,gXn,s,gPar.tmaModo,gPar.tmaS,gPar.atrS,gPar.multS,mid,up,lo,a)){ bCVs[x]=up; bCVi[x]=lo; }"),
+    # HIDE
+    ("HIDE nasconde anche il suo tasto (non si riapre piu')", '   if(gNascosta && nome!=PD_PREF+"b_hide") return(OBJ_NO_PERIODS);', "   if(gNascosta) return(OBJ_NO_PERIODS);"),
+    ("HIDE continua a copiare dati", "   if(!gNascosta) GiroCelle(ora);", "   GiroCelle(ora);"),
+    ("SHOW senza ricalcolo", "   if(!on) Refresh();                    // allo SHOW", "   //if(!on) Refresh();                    // allo SHOW"),
+    ("HIDE non applicato ai rettangoli", "   ObjectSetInteger(0,nome,OBJPROP_TIMEFRAMES,Periodi(nome));\n  }\n\nvoid Etic", "  }\n\nvoid Etic"),
+    ("stato HIDE non salvato", '   GvSalva("SHIDE",on ? 1.0 : 0.0);\n', ""),
+    ("ricostruzione solo se manca il pannello (tasto HIDE perso)", ' || ObjectFind(0,PD_PREF+"b_hide")<0) Struttura();', ") Struttura();"),
+    ("HIDE di default", "input bool InpNascostaDefault   = false;", "input bool InpNascostaDefault   = true;"),
+    # REFRESH (contro-esempio: UNA sola cache azzerata)
+    ("REFRESH non azzera gProssimo", "      gProssimo[k]=0;\n", ""),
+    ("REFRESH non azzera gAttesa", "      gAttesa[k]=0;\n", ""),
+    ("REFRESH non azzera gUltBarra", "      gUltBarra[k]=0;\n", ""),
+    ("REFRESH non azzera gPronta", "      gPronta[k]=false;                 // niente alert", "      //gPronta[k]=false;                 // niente alert"),
+    ("REFRESH copia tutto in blocco nell'handler", "   gUltStato=0;                         // stato",
+     "   for(int z=0;z<nc;z++) Elabora(z,TimeCurrent());\n   gUltStato=0;                         // stato"),
+    ("REFRESH su una cella sola", "   for(int k=0;k<nc;k++)\n     {\n      gProssimo[k]=0;", "   for(int k=0;k<1;k++)\n     {\n      gProssimo[k]=0;"),
+    ("REFRESH non rilegge lo stato dei simboli", "   gUltStato=0;                         // stato dei simboli", "   gUltStato=gUltStato;                         // stato dei simboli"),
+    # EMA 9/21
+    ("incrocio sulla barra APERTA", "for(int x=(da<1 ? 1 : da);x<rates_total-1;x++)", "for(int x=(da<1 ? 1 : da);x<rates_total;x++)"),
+    ("freccia sulla barra in formazione non pulita", "   bIncSu[rates_total-1]=EMPTY_VALUE; bIncGiu[rates_total-1]=EMPTY_VALUE;\n", ""),
+    ("incrocio col segno invertito", "if(f[x]>sl[x] && f[x-1]<=sl[x-1]) return(1);", "if(f[x]>sl[x] && f[x-1]<=sl[x-1]) return(-1);"),
+    ("periodi EMA scambiati", "PG_EMA(close,rates_total,da,InpEmaVeloce,bEmaV);", "PG_EMA(close,rates_total,da,InpEmaLenta,bEmaV);"),
+    ("EMA scambiate nell'incrocio", "int r=PD_Incrocio(bEmaV,bEmaL,x,primo);", "int r=PD_Incrocio(bEmaL,bEmaV,x,primo);"),
+    ("incrocio senza riscaldamento", "   if(x<1 || x<primo) return(0);", "   if(x<1) return(0);"),
+    ("incrocio con disuguaglianza stretta (salta il tocco)", "if(f[x]>sl[x] && f[x-1]<=sl[x-1])", "if(f[x]>sl[x] && f[x-1]<sl[x-1])"),
+    ("EMA veloce 10 di default", "input int   InpEmaVeloce    = 9;", "input int   InpEmaVeloce    = 10;"),
+    ("frecce incrocio sul lato sbagliato", "bIncSu[x]=(r>0 ? bHAl[x] : EMPTY_VALUE);", "bIncSu[x]=(r>0 ? bHAh[x] : EMPTY_VALUE);"),
+    ("buffer EMA veloce/lenta scambiati", "ok=SetIndexBuffer(9, bEmaV,  INDICATOR_DATA)         && ok;\n   ok=SetIndexBuffer(10,bEmaL,",
+     "ok=SetIndexBuffer(9, bEmaL,  INDICATOR_DATA)         && ok;\n   ok=SetIndexBuffer(10,bEmaV,"),
+    ("colore della EMA lenta sul plot delle frecce", "PlotIndexSetInteger(6,PLOT_LINE_COLOR,InpColEmaLenta);", "PlotIndexSetInteger(7,PLOT_LINE_COLOR,InpColEmaLenta);"),
+    ("tasto EMA non salva lo stato", '   GvSalva("SEMA",on ? 1.0 : 0.0);\n', ""),
+    ("tasto EMA non ridisegna", '   gEma=on;\n   GvSalva("SEMA",on ? 1.0 : 0.0);\n   ApplicaPlot();', '   gEma=on;\n   GvSalva("SEMA",on ? 1.0 : 0.0);'),
+    # SUPERTREND 3 LIVELLI
+    ("ST livello 2 col moltiplicatore del livello 1", "InpStPeriodo,InpStMult2,kAtr,kUp2", "InpStPeriodo,InpStMult1,kAtr,kUp2"),
+    ("ST linea giu del livello 3 col verso su", "bSt3Giu[x]=PG_StLinea(true,kDir3[x],kVal3[x],-1.0);", "bSt3Giu[x]=PG_StLinea(true,kDir3[x],kVal3[x],1.0);"),
+    ("ST inversione contro la banda della barra stessa", "         if(c[i]>upF[i-1])\n            dir[i]=1.0;", "         if(c[i]>upF[i])\n            dir[i]=1.0;"),
+    ("ST seme col verso invertito", "dir[i]=(c[i]>=mid) ? 1.0 : -1.0;", "dir[i]=(c[i]>=mid) ? -1.0 : 1.0;"),
+    ("ST bande non HL2 (chiusura)", "      double mid=(h[i]+l[i])/2.0;", "      double mid=c[i];"),
+    ("ST livello 3 a 3,0 di default", "input double InpStMult3   = 3.5;", "input double InpStMult3   = 3.0;"),
+    ("ST periodo ATR 14 di default", "input int    InpStPeriodo = 10;", "input int    InpStPeriodo = 14;"),
+    ("ST disegnato col tasto EMA", "for(int p=9;p<=14;p++)\n     {\n      PlotIndexSetInteger(p,PLOT_DRAW_TYPE,gSt ?",
+     "for(int p=9;p<=14;p++)\n     {\n      PlotIndexSetInteger(p,PLOT_DRAW_TYPE,gEma ?"),
+    ("ST livello 1 con la linea del livello 2", "bSt1Su[x]=PG_StLinea(true,kDir1[x],kVal1[x],1.0);", "bSt1Su[x]=PG_StLinea(true,kDir2[x],kVal2[x],1.0);"),
+    ("ST: buffer di calcolo come buffer disegnato", "ok=SetIndexBuffer(19,kAtr,   INDICATOR_CALCULATIONS) && ok;", "ok=SetIndexBuffer(19,kAtr,   INDICATOR_DATA) && ok;"),
 ]
 
 

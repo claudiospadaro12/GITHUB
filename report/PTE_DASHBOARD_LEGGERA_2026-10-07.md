@@ -1,11 +1,86 @@
 # PTE Dashboard LEGGERA: la nostra versione della tabella PTE (07/10/2026)
 
-> **Stato: strato 1 PASS dove si può provare senza MetaTrader · strato 2 (`controllo-preventivo`, 07/10) PASS CON RISERVA dopo correzioni meccaniche (serie vuota che non si riempiva mai, collaudo rinforzato da 39 a 62 mutanti, cifra "3 volte" corretta, bersaglio "sul VPS") · le correzioni sono state riguardate da un lettore indipendente (PASS CON RISERVA), che ha chiesto 3 correzioni meccaniche (ancora strutturale sulle uscite prima di CopyRates, nome oggetto 'pannello', 37 simboli/FTMO 1514806751): fatte, collaudo 66/66. RISERVA RESIDUA: mai compilata in MetaEditor.**
-> Mai compilata: qui non c'è MetaEditor. La prima compilazione la fai tu (F7).
+> **Stato v1.10 (07/10/2026 sera): strato 1 (collaudo) @@ESITO@@ · strato 2 (`controllo-preventivo`) NON ANCORA FATTO: lo fa la sessione principale, quindi la v1.10 NON è consegnabile finché non torna un PASS.**
+> **Mai compilata: qui non c'è MetaEditor.** La v1.00 (commit `5f3e4d0d`) era passata con riserva; la v1.10 è un file nuovo per metà e la sua prima compilazione la fai tu (F7).
 
 File:
-- indicatore: `mql5/Indicators/ABTG_PTE_Dashboard_Leggera.mq5`
+- indicatore: `mql5/Indicators/ABTG_PTE_Dashboard_Leggera.mq5` (v1.10)
 - collaudo: `backtest_pipeline/collaudo_pte_dashboard_leggera.py` (si rigira con `python3 backtest_pipeline/collaudo_pte_dashboard_leggera.py`)
+
+## 0. Novità della v1.10 — quello che Claudio ha chiesto
+
+Le sue parole: _"NELLA DASHBOARD PTE MANCANO LO SWITCH PER LE CANDELE HEIKENASHI, SE CLICCO SIA SUL SIMBOLO CHE SULL'ORARIO, IL GRAFICO NON MI PORTA LI. POI MI SEGNALAVA LE CANDELE DOJI. VOGLIO CHE LO FAI ESATTAMENTE COM'ERA"_, poi _"C'ERA IL TASTO REFRESH"_, _"IL TASTO HIDE"_, _"IL TASTO DOJI ON/OFF"_, _"DI DEFAULT C'ERANO LE CANDELE HEIKENASHI"_ e _"aggiungi ai tasti INCROCIO EMA 9 E 21 e inserisci il SUPERTREND 3 LIVELLI DI PAOLO LAVORENTI"_.
+
+🔴 **Nessuna di queste funzioni è la formula dell'originale**: il sorgente della `PTE_V3_18` non ce l'abbiamo. Sono la **nostra ricostruzione** da quello che Claudio descrive. "Esattamente com'era" si può ottenere solo confrontando con l'originale: per questo in fondo ci sono le domande e le schermate che servono.
+
+### I tasti (due righe sopra la tabella)
+
+| tasto | cosa fa | di default |
+|---|---|---|
+| **HIDE / SHOW** | nasconde la tabella; resta visibile **solo** questo tasto per riaprirla. Da nascosta: **nessuna copia di dati e nessun calcolo** della tabella (carico zero). Allo SHOW le celle si ricalcolano subito, come REFRESH | tabella visibile |
+| **REFRESH** | azzera la cache di **tutte** le celle (orario prossima barra, attesa, ultima barra, "pronta"); il ricalcolo lo fa il timer **al ritmo normale** (20 celle al secondo): il click **non** copia dati, quindi non blocca il terminale | — |
+| **HA ON/OFF** | candele **Heikin Ashi** sul grafico al posto delle native (le native diventano invisibili, colori a "nessuno") | **ACCESO** (come l'originale) |
+| **DOJI ON/OFF** | **frecce** sulle doji fuori canale del grafico corrente nelle ultime 30 barre chiuse (stessa regola delle celle), verde sotto = rialzista, rosso sopra = ribassista; **tooltip** con ora e distanza del corpo dal canale in ATR. OFF = frecce tolte e **niente calcolo**. **Le celle della tabella NON cambiano** (decisione nostra: domanda 10) | acceso |
+| **EMA 9/21** | le due EMA (chiusura) e una **freccia sull'incrocio**: blu sotto la candela = la 9 passa sopra la 21, magenta sopra = passa sotto | spento |
+| **ST 3 LIV** | Supertrend a 3 livelli **2,5 / 3,0 / 3,5**, ATR 10, su HL2; per ogni livello verde sotto il prezzo (su) e arancio/rosso sopra (giù), sottile/medio/spesso | spento |
+| **click sul SIMBOLO** | il grafico va su quel simbolo, **TF invariato** | — |
+| **click su una CELLA** (anche sull'orario scritto) | il grafico va su **quel simbolo e quel TF** | — |
+| **click sul TF dell'intestazione** (H1/H4/D1) | il grafico resta sul simbolo e passa a quel TF | — |
+
+Input nuovo `InpClickNuovoGrafico` (default `false`): con `true` il click **apre un grafico nuovo** invece di cambiare questo. Un simbolo che non è nel Market Watch viene **aggiunto** (`SymbolSelect`); se non esiste sul broker (suffisso sbagliato?) nel log Esperti esce il motivo.
+
+### Come si comporta al click (cosa succede "dietro")
+- Cambiare simbolo/TF del grafico **ricarica l'indicatore** (MT5 lo fa sempre). **Lo stato dei tasti sopravvive**: è in una **GlobalVariable del terminale** `PDLV_<numero del grafico>_...` (stessa tecnica di `ABTG_Pulsanti_Grafico.mq5`). Si cancella quando togli l'indicatore o chiudi il grafico. Se cambi un input "di partenza" (es. `InpHaDefault`), vale il nuovo input.
+- **La cache della tabella NON sopravvive** (è un'istanza nuova): dopo ogni click la tabella **si riempie di nuovo in ~6 secondi**. È il prezzo di non leggere/scrivere file. Se ti dà fastidio, dimmelo: si può tenere il disegno vecchio finché arrivano i numeri nuovi.
+- MT5 a volte chiude l'istanza vecchia **dopo** aver aperto la nuova: la vecchia allora cancella oggetti e rimette i colori. La v1.10 se ne accorge entro **1 secondo** e ripara (tabella, frecce, candele nascoste). Provato a tavolino con le funzioni vere dei colori, **nei due ordini**.
+
+### ⚠️ Candele Heikin Ashi accese di default: la sicurezza dei colori
+- I colori originali delle candele (5: candela su, candela giù, barra su, barra giù, linea) si **salvano PRIMA** di metterli a "nessuno" e si **rimettono** allo switch OFF, alla rimozione dell'indicatore e a **ogni** uscita.
+- 🔴 **Se il terminale va in CRASH con HA acceso** (niente uscita pulita), il grafico può riaprirsi **senza candele**. Come recuperarle: **rimetti l'indicatore** (se trova tutte e 5 le proprietà a "nessuno" le rimette visibili con colori di ripiego verde/rosso), oppure a mano **F8 › Colori** e reimposti *Candela rialzista/ribassista*, *Barra su/giù* e *Grafico a linee*.
+- Non usare l'HA di questa dashboard **insieme** all'HA di `ABTG_Pulsanti_Grafico` (o di `ABTG_Segnali_EMA_BB_ST`/SuperWave) sullo stesso grafico: due indicatori che nascondono le candele si salvano a vicenda i colori sbagliati.
+
+### Le doji sul grafico: quale candela, e una misura che devi vedere
+- **Default dichiarato**: le frecce usano **la regola delle celle** (`InpCandela` = Heikin Ashi "come l'EA", cioè la HA approssimata con 2 barre di seme di `ABTG_PTE.mq5`), così **freccia e cella dicono sempre la stessa cosa**. Le candele HA **disegnate** invece sono la HA classica ricorsiva (quella che si vede su qualunque grafico HA).
+- 🔴 **Misura (oro HistData, NON BCM)**: con il default, su **56-69% delle frecce** la candela HA disegnata **non sembra una doji** al 10% (H1 537/964, H4 260/439, D1 50/72). **Contro-esempio**: con `InpCandela = Heikin Ashi ricorsiva` le frecce cadono su una doji disegnata nel **100%** dei casi (H1 899, H4 372, D1 64 frecce, zero eccezioni).
+- Quindi se a te le frecce "sembrano sbagliate", **prova `InpCandela = Heikin Ashi ricorsiva`**: è un input, non serve ricompilare. Non ho cambiato il default da solo perché cambierebbe **anche le celle** della tabella (che seguono la stessa regola) e la scelta va fatta guardando l'originale: domanda 11.
+
+### EMA 9/21 e Supertrend: cosa è fonte e cosa no
+- **Incrocio EMA**: valutato **solo sulle barre CHIUSE** — barra `x` contro barra `x-1`, freccia sulla barra `x`; la barra in formazione **mai** (una freccia che appare e scompare col prezzo non serve a nessuno). Prime 21 barre dello storico escluse (riscaldamento della EMA). Caso limite dichiarato: se le due EMA sono **esattamente uguali** su una barra, conta come "dalla parte opposta" (con prezzi veri non capita in pratica). EMA identica a `iMA` di MT5 (seme = prima chiusura), testo **copiato** da `ABTG_Pulsanti_Grafico.mq5`.
+- **Supertrend**: **lo stesso calcolo, parola per parola**, di `ABTG_Pulsanti_Grafico.mq5` v1.01 (`SW_STCore`) e di `EA_NatCla.mq5` (`NC_STCore`): il collaudo confronta il testo. Etichette:
+  - moltiplicatori **2,5 / 3,0 / 3,5** — **[FONTE]** audio WA0090: _"tutti i tre livelli 2.5, 3, 3.5"_;
+  - periodo ATR **10** — **[NOSTRA]**: l'audio non lo dice; 10 è l'indizio dello strumento del coach Lavorenti `PL-SUPERTREND 3_LIVELLI V09` (indizio esterno, non fonte: `report/NATCLA_SPECIFICA_2026-10-07.md` r.63-65);
+  - formula HL2 ± k × ATR (ATR = media semplice come `iATR`) — **[NOSTRA+CASA]**.
+  - ✏️ **Correzione di un'etichetta**: mi era stato chiesto di scrivere _"[FONTE: audio Paolo Lavorenti]"_. In repo gli audio sono **di una collega di Claudio** (`data/natcla/LEGGIMI.md`), che cita Paolo come chi aveva dato il PDF; lo strumento a 3 livelli è del coach Lavorenti. Ho scritto la fonte che il repo documenta. Se gli audio sono davvero di Paolo, dimmelo e cambio l'etichetta.
+- **Seme e finestra** (misurati sull'oro): il Supertrend parte dalla barra `periodo` dello storico caricato; ripartendo da 12 punti diversi il valore coincide **bit per bit** con quello dell'intera serie dopo al massimo **53 barre (H1), 42 (H4), 26 (D1)**. La EMA 21 dopo **~240-260 barre** (scarto relativo < 1e-12). Quindi quello che vedi a destra del grafico **non dipende** da quanto storico ha caricato il terminale.
+
+### Carico della v1.10 [STIMA]
+- **Tabella**: invariata (solo a barra nuova di ciascun simbolo/TF, ~45 copie all'ora a regime); con **HIDE zero**.
+- **Grafico corrente**: nessuna copia di dati (usa gli array del terminale). HA, EMA e Supertrend sono **incrementali**: al caricamento tutto lo storico una volta, poi a ogni tick **solo la barra in formazione** (O(1); il Supertrend 3 × 10 somme). Frecce doji, incroci EMA e canali **solo a barra nuova**. Con HA/EMA/ST **spenti** non si disegnano ma quel calcolo O(1) continua (riaccenderli non richiede di ricopiare lo storico); con DOJI spento le frecce **non si calcolano**.
+- **Oggetti**: 260 per la tabella (era 254: +6 tasti) + al massimo 30 frecce doji. Le frecce degli incroci EMA sono **buffer** (possono essere centinaia sullo storico: niente oggetti).
+- **Dimensione del file**: ~1.700 righe (era 820). Non è un problema di carico (il terminale esegue solo quello che serve), ma **lo split è possibile e lo propongo come opzione**: `ABTG_Pulsanti_Grafico.mq5` ha **già** EMA 9/21, Supertrend 3 livelli e HA (stesse funzioni, copiate). Se usi già Pulsanti su quel grafico, la dashboard potrebbe restare "tabella + doji + click" e lasciare EMA/ST/HA a Pulsanti. Non ho tolto niente: decidi tu (domanda 12).
+
+### Cosa NON è provato nella v1.10 (oltre a "mai compilata")
+- **Click**: che MT5 mandi `CHARTEVENT_OBJECT_CLICK` per etichette e rettangoli **non selezionabili** (è la pratica comune, non l'ho visto su un terminale); che `ChartSetSymbolPeriod` ricarichi l'indicatore come descritto.
+- **Cambio di tipo del disegno** (`PLOT_DRAW_TYPE`) a indicatore acceso: lo usiamo per accendere/spegnere HA/EMA/ST senza ricalcolare; se il terminale non lo ridisegna subito, si vedrà al tick successivo.
+- **HIDE** con `OBJ_NO_PERIODS`: gli oggetti restano ma non si vedono; non provato su un terminale.
+- **Persistenza** della GlobalVariable dopo un **riavvio** del terminale: il numero del grafico potrebbe cambiare → si riparte dagli input [NON VERIFICATO], come in Pulsanti.
+- **Aspetto**: posizione e larghezza dei tasti (3 per riga, 96 pixel coi default), frecce, colori.
+- **Feed**: tutte le misure sono sull'oro HistData, non sul feed BCM.
+
+### Elenco dei tasti dell'originale (da Claudio) e cosa abbiamo fatto
+| nell'originale (parole di Claudio) | nella v1.10 |
+|---|---|
+| switch candele Heikin Ashi (acceso di default) | **HA ON/OFF**, acceso di default |
+| REFRESH | **REFRESH** |
+| HIDE | **HIDE/SHOW** |
+| DOJI ON/OFF | **DOJI ON/OFF** (solo frecce sul grafico) |
+| click su simbolo e orario → il grafico ci va | **click** su simbolo, cella, TF |
+| (aggiunta di Claudio, non dell'originale) | **EMA 9/21** con incrocio, **ST 3 LIV** |
+| altri? | **domanda 9** |
+
+---
+
+# Sezioni della v1.00 (restano valide per la TABELLA; dove la v1.10 cambia qualcosa è scritto)
 
 ## 1. Cosa fa
 
@@ -14,8 +89,8 @@ Disegna la stessa tabella della `PTE_V3_18 3.18` (finestra in alto a sinistra, c
 - **solo visione**: nessun ordine, nessuna rete, nessun file, **zero handle** di indicatori;
 - **calcola solo quando un simbolo/TF chiude una barra**, mai a ogni tick (timer di 1 secondo e orario della prossima barra tenuto in memoria);
 - copia **il minimo di barre** che serve (131 con i default: ATR lento 100 + 30 barre di ricerca + 1);
-- **254 oggetti** (35 simboli x 3 TF) creati una volta sola; un oggetto viene toccato solo se cambia testo o colore, e il grafico si ridisegna solo in quel caso;
-- niente frecce, niente candele Heikin Ashi disegnate, niente canali disegnati: **la dashboard è la tabella**.
+- **254 oggetti** nella v1.00 (**260** nella v1.10: +6 tasti) (35 simboli x 3 TF) creati una volta sola; un oggetto viene toccato solo se cambia testo o colore, e il grafico si ridisegna solo in quel caso;
+- ~~niente frecce, niente candele Heikin Ashi disegnate, niente canali disegnati~~ — **superato dalla v1.10** (§0): ora ci sono tasti HA, DOJI, EMA 9/21, ST 3 LIV, REFRESH, HIDE e il click; i canali TMA disegnati restano un input spento (`InpDisegnaCanali`).
 
 Il carico, in numeri **[STIMA, non misura]**: a regime H1+H4+D1 su 35 simboli fanno circa **45 copie di dati all'ora** (una ogni ~80 secondi). All'avvio riempie la tabella in ~6 secondi (max 20 celle al secondo). Se l'originale ricalcolasse ~105-111 celle **a ogni tick** (ipotesi che spiegherebbe gli scatti, **non verificata**: non abbiamo il sorgente), con 2-5 tick al secondo sarebbero centinaia di ricalcoli al secondo.
 
@@ -60,7 +135,7 @@ La finestra giusta è quella con `Path` dentro `C:\MT5_MANUALE` **e** titolo che
 
 ✋ Poi, a mano dentro quel terminale:
 1. `File > Apri cartella dati > MQL5 > Indicators`: copia `ABTG_PTE_Dashboard_Leggera.mq5`; aprilo in MetaEditor e premi **F7**. Se esce anche un solo errore, mandami il testo: è la prima compilazione di sempre.
-2. Sullo **stesso grafico** dove gira l'originale aggiungi la nostra con **`InpOffsetX = 420`** (così sta a destra dell'originale e non si sovrappongono) e **`InpModoConfronto = true`**.
+2. Sullo **stesso grafico** dove gira l'originale aggiungi la nostra con **`InpOffsetX = 420`** (così sta a destra dell'originale e non si sovrappongono), **`InpModoConfronto = true`** e — novità v1.10 — **`InpHaDefault = false`**: l'originale disegna già le sue Heikin Ashi, e due indicatori che nascondono le candele sullo stesso grafico si pestano i colori.
 3. Aspetta ~10 secondi (riempimento), poi **una schermata** con le due tabelle affiancate.
 4. Ripeti cambiando **un input alla volta** (una schermata per ognuno): `InpCandela = Candele giapponesi` · `InpTmaModo = TMA centrata` · `InpCanale = Entrambi`. Conta le celle uguali su 105: **è una misura**, e ci dice quale lettura è giusta.
 5. Passando il mouse su una cella, il tooltip mostra la distanza del corpo dal canale in ATR (> 0 = fuori): dove le due tabelle non coincidono, ci dice se è mancato poco o tanto.
@@ -73,7 +148,7 @@ La finestra giusta è quella con `Path` dentro `C:\MT5_MANUALE` **e** titolo che
 - **Carico reale**: le cifre sopra sono **[STIMA]**, nessuna misura sul tuo terminale.
 - **Feed**: i numeri sono sull'oro HistData (orologio +6 h, convenzione di `collaudo_natcla.py`), **non** sul feed BCM.
 - **Equivalenza con l'originale**: impossibile senza il sorgente. È esattamente ciò che misura il confronto del punto 4.
-- Non implementati, e dichiarati: email/push, pulsanti del grafico (CHART BUTTONS: non sappiamo cosa fanno), frecce, canali e Heikin Ashi disegnati. Gli alert ci sono solo popup/suono, **spenti** come nell'originale.
+- Non implementati, e dichiarati: email/push, eventuali altri CHART BUTTONS dell'originale che Claudio non ha ancora descritto (domanda 9). Frecce, HA, canali e i tasti descritti da Claudio ci sono dalla v1.10. Gli alert ci sono solo popup/suono, **spenti** come nell'originale.
 
 ## 6. Cosa è provato (strato 1, collaudo PASS)
 
@@ -91,5 +166,15 @@ La finestra giusta è quella con `Path` dentro `C:\MT5_MANUALE` **e** titolo che
 3. **I simboli sono 35 o 37?** Le 5 liste che ho fanno **35** (28 coppie forex + XAUUSD + USOIL + 5 indici). Se l'originale ne mostra 37, quali sono gli altri due? Non li ho inventati.
 4. **Quali simboli e quali TF usi davvero?** Se sono meno, la tabella è ancora più leggera.
 5. **La doji si cerca sulle candele Heikin Ashi o su quelle giapponesi?** L'originale disegna le HA, ma non sappiamo su quali candele cerca la doji.
-6. **Cosa fanno i CHART BUTTONS** dell'originale (aprono il grafico del simbolo cliccato?).
+6. ~~Cosa fanno i CHART BUTTONS~~ — risposta di Claudio: click su simbolo/orario apre il grafico; tasti HA, REFRESH, HIDE, DOJI ON/OFF (v1.10). Restano le domande 8-14 qui sotto.
 7. Sul terminale `50503635` i simboli hanno un **suffisso** (es. `EURUSD.r`)? Se sì, va messo in `InpSuffisso`.
+
+### Domande nuove per la v1.10 (per farla "esattamente com'era")
+8. 📸 **Due schermate dell'originale, per favore**: (a) un grafico con **le doji segnalate** (si deve vedere com'è il segno: freccia, pallino, rettangolo? sopra/sotto la candela? colore?) e (b) il **pannello Input completo** dell'indicatore (tutte le schede scorrendo): così riproduco **nomi e valori** dei parametri invece di inventarli.
+9. **C'erano altri tasti** oltre a HA, REFRESH, HIDE, DOJI ON/OFF e al click su simbolo/orario? E **a cosa serviva ciascuno**, in una riga? (es. REFRESH ricalcolava solo la tabella o anche il grafico? HIDE nascondeva anche le frecce sul grafico o solo la tabella?)
+10. **DOJI OFF spegneva anche le celle accese della tabella**, o solo i segni sul grafico? Nella v1.10 spegne **solo i segni sul grafico**.
+11. Nell'originale le doji si cercavano **sulle candele Heikin Ashi** (quelle disegnate) **o sulle giapponesi**? La misura del §0 dice che con la HA "come l'EA" più di metà delle frecce cade su candele HA che a occhio non sono doji; con la HA classica coincidono tutte. La tua risposta decide il default.
+12. Usi già **`ABTG_Pulsanti_Grafico`** sullo stesso grafico? Se sì, EMA 9/21, Supertrend 3 livelli e HA ci sono già lì: preferisci la dashboard **solo tabella + doji + click** (più leggera) o **tutto in uno** come adesso?
+13. Il click: deve cambiare **questo** grafico (default) o **aprirne uno nuovo** (`InpClickNuovoGrafico = true`)? E dopo un click la tabella si riempie di nuovo in ~6 s: ti va bene?
+14. **Supertrend 3 livelli "di Paolo Lavorenti"**: gli audio in repo sono di una tua collega che cita Paolo; lo strumento con ATR 10 è il `PL-SUPERTREND 3_LIVELLI V09`. Il periodo ATR **10** e il calcolo su **HL2** sono quelli di Paolo? Se hai una schermata del suo pannello Input, risolve tutto.
+
