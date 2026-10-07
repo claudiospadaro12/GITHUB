@@ -10,7 +10,7 @@
 //|  La dashboard PTE_V3_18 3.18 (Emiliano Monza / ABTG, compilata,  |
 //|  sorgente NON disponibile e NON decompilato) sul terminale       |
 //|  manuale di Claudio va a scatti. Questa e' una tabella con la    |
-//|  STESSA forma (PAIR / H1 / H4 / D1, 37 simboli su 5 liste) ma    |
+//|  STESSA forma (PAIR / H1 / H4 / D1, simboli su 5 liste) ma       |
 //|  con carico minimo. NON e' una copia dell'originale: la sua      |
 //|  logica interna non la conosciamo.                               |
 //|                                                                  |
@@ -45,8 +45,8 @@
 //|                                                                  |
 //|  CARICO (perche' e' leggera) -- [STIMA], non misura:             |
 //|   - handle di indicatori: 0;                                     |
-//|   - oggetti: 3 + 2*nTF + nSimboli*(1+2*nTF); default 37 x 3 TF = |
-//|     268 oggetti, creati UNA volta, aggiornati solo se testo o    |
+//|   - oggetti: 3 + 2*nTF + nSimboli*(1+2*nTF); default 35 x 3 TF = |
+//|     254 oggetti, creati UNA volta, aggiornati solo se testo o    |
 //|     colore cambiano; ChartRedraw solo se qualcosa e' cambiato;   |
 //|   - calcolo: SOLO a barra nuova di ciascun simbolo/TF (OnTimer   |
 //|     1 s), mai a ogni tick. Fra una barra e la successiva una     |
@@ -56,17 +56,20 @@
 //|     la barra arriva;                                             |
 //|   - copia: 1 CopyRates per cella per barra nuova, col numero     |
 //|     MINIMO di barre (default 131: ATR lento 100 + 30 barre di    |
-//|     ricerca + 1); a regime H1+H4+D1 su 37 simboli fanno circa    |
-//|     37+9+1.5 = ~48 copie all'ora (una ogni ~75 s);               |
+//|     ricerca + 1); a regime H1+H4+D1 su 35 simboli fanno circa    |
+//|     35+8,75+1,5 = ~45 copie all'ora (una ogni ~80 s);            |
 //|   - all'avvio: al massimo InpCellePerCiclo copie al secondo      |
-//|     (default 20 -> 111 celle in ~6 s), per non bloccare il       |
+//|     (default 20 -> 105 celle in ~6 s), per non bloccare il       |
 //|     grafico;                                                     |
 //|   - simboli senza dati: saltati, riprovati con attesa crescente  |
 //|     2, 4, 8 ... 300 s.                                           |
 //|  Confronto con l'originale: se (come sembra dagli scatti)        |
-//|  ricalcolasse 111 celle a OGNI tick, con 2-5 tick/s sarebbero    |
+//|  ricalcolasse ~105-111 celle a OGNI tick, con 2-5 tick/s sarebbero|
 //|  ~200-550 copie+ricalcoli al secondo contro ~0,013 qui. E' una   |
 //|  IPOTESI sull'originale, non una misura.                         |
+//|  NB: le 5 liste di default fanno 35 simboli (28 forex + XAUUSD + |
+//|  USOIL + 5 indici); l'originale ne mostrerebbe 37: due mancano,  |
+//|  vanno chiesti a Claudio, NON inventati.                         |
 //|                                                                  |
 //|  NON implementato (dichiarato): frecce sul grafico, candele      |
 //|  Heikin Ashi disegnate, canali disegnati (la dashboard e' la     |
