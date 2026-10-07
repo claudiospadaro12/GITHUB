@@ -39,3 +39,9 @@ NON COPERTO (dichiarato):
   - il TEMPO per passata: [STIMA NON AGGANCIATA], 30-120 s; il pilota lo misura.
 CLASSI candidate per CHECKLIST_RIGA_DI_LANCIO.md (NON scritte: file condiviso): collettore di round scelto per un EA che scrive l'output solo fuori ottimizzazione; anni dichiarati contro anni valutati
 (riscaldamento); mutex senza gestione dell'abbandono; ricorsione di log per passata moltiplicata per il numero di passate.
+
+CANCELLO 07/10 (controllo-preventivo, strato 2) sul pin 472bcef8 -> FAIL CORRETTO, nuovo pin e2f0506b2fd5a2d2dbf2a119b7674a14f2088b96:
+  difetto (classe 1167): compilazione fallita = log di MetaEditor SOLO nella finestra, nessuno zip. Ora NATCLA_F0_<lotto>_COMPILAZIONE_FALLITA.zip sul Desktop (log intero + righe d'errore), rc 1, nessuna passata.
+  ricollaudo al nuovo pin: controlla_prova OK, controlla_riga verde, lettore 84/84, mutanti lettore 45/45, banco 70/70 (S22/S22b nuovi), mutanti script 30/30, riga 23/23.
+  contro-esempi del cancello (fuori repo): compilazione fallita, enum errato (modalita 1 in AUDIO: 8 KO), CSV mancante in 1 passata su 8 (7 OK + 1 KO, rc 3), MetaEditor aperto: 4/4.
+  SHA256 dei 4 file riscaricati da raw.githubusercontent al pin = quelli della riga. Serve un SECONDO lettore sulla correzione.
