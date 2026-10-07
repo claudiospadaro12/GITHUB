@@ -1,6 +1,6 @@
 # PTE Dashboard LEGGERA: la nostra versione della tabella PTE (07/10/2026)
 
-> **Stato: strato 1 PASS dove si può provare senza MetaTrader · strato 2 (`controllo-preventivo`, 07/10) PASS CON RISERVA dopo correzioni meccaniche (serie vuota che non si riempiva mai, collaudo rinforzato da 39 a 62 mutanti, cifra "3 volte" corretta, bersaglio "sul VPS") · le correzioni vanno riguardate da un lettore indipendente prima della consegna.**
+> **Stato: strato 1 PASS dove si può provare senza MetaTrader · strato 2 (`controllo-preventivo`, 07/10) PASS CON RISERVA dopo correzioni meccaniche (serie vuota che non si riempiva mai, collaudo rinforzato da 39 a 62 mutanti, cifra "3 volte" corretta, bersaglio "sul VPS") · le correzioni sono state riguardate da un lettore indipendente (PASS CON RISERVA), che ha chiesto 3 correzioni meccaniche (ancora strutturale sulle uscite prima di CopyRates, nome oggetto 'pannello', 37 simboli/FTMO 1514806751): fatte, collaudo 66/66. RISERVA RESIDUA: mai compilata in MetaEditor.**
 > Mai compilata: qui non c'è MetaEditor. La prima compilazione la fai tu (F7).
 
 File:
@@ -48,7 +48,7 @@ Cosa dice, e cosa **non** dice:
 
 E una differenza **certa** da aspettarsi: anche se tutto il resto fosse identico, la TMA dell'EA (non-repaint, quindi **in ritardo di mezzo periodo**) e una TMA centrata (che **ripittura**) danno la **stessa cella solo nel ~59-65% degli istanti** sull'oro. Quindi, anche nel caso migliore, circa 4 celle su 10 possono differire per il solo calcolo del canale. Per vederlo c'è l'input `InpTmaModo = TMA centrata`: è la **nostra ipotesi** di come è fatta l'originale (TMA centrata classica, mezza-lunghezza = periodo, solo barre chiuse), **non** la sua formula.
 
-## 4. Come confrontarla con l'originale (quando sarà consegnabile)
+## 4. Come confrontarla con l'originale (consegnata con riserva: prima F7 a cura di Claudio)
 
 🪟 **Bersaglio: SOLO il terminale MT5 `50503635` (`C:\MT5_MANUALE`), sul VPS.** **Non viene toccato nessun altro terminale** del VPS: né FTMO `1514806751` (`C:\FTMO`, ex `541452707`), né piccolo `50503392`, né 100k `50504263`, né banco `50504400` (`C:\MT5_Backtest`), né Pepperstone, né Tickmill, e **MAI il REALE `10105439` (`C:\BCM_Reale`)**. Prima di toccare una finestra, riconoscila con questa riga (🖥️ **finestra PowerShell sul VPS**, sola lettura, non apre né tocca nessun terminale):
 
@@ -81,7 +81,7 @@ La finestra giusta è quella con `Path` dentro `C:\MT5_MANUALE` **e** titolo che
 - **Raccordo**: la copia dei dati sta dietro al controllo "barra nuova"; copia il numero minimo di barre; il grafico si ridisegna solo se qualcosa cambia; gli oggetti si cancellano all'uscita; gli alert scattano solo su segnale nuovo dell'ultima barra chiusa, mai al primo calcolo.
 - **Numeri**: la funzione vera (estratta e compilata in C++) sulla **finestra minima** di barre dà **lo stesso risultato** dello specchio Python calcolato sull'intera serie: **0 differenze** su 7 configurazioni x H1/H4/D1 (~96.000 istanti), più i casi scritti a mano (doji al bordo del 10%, ATR, TMA, uscita "stretta" dal canale) e il testo delle celle su 2000 istanti casuali.
 - **Contro-esempi**: con 2 sole barre di seme la Heikin Ashi ricorsiva **diverge** (quindi il confronto morde); un ATR "alla Wilder" si distingue dall'iATR di MT5 fino al 25-37%.
-- **39 mutanti ciechi su 39 presi** (copie fuori dal repo) nella prima stesura; il cancello (strato 2, 07/10) ne ha scritti altri **28 su righe di raccordo non scelte dall'autore** e **23 erano VERDI** (fra questi: tabella sempre vuota, Market Watch invertito, cursore fermo sulla cella 0, colonna H4 riempita con dati H8, suffisso ignorato). Dopo le ancore aggiunte: **62 mutanti su 62 presi**.
+- **39 mutanti ciechi su 39 presi** (copie fuori dal repo) nella prima stesura; il cancello (strato 2, 07/10) ne ha scritti altri **28 su righe di raccordo non scelte dall'autore** e **23 erano VERDI** (fra questi: tabella sempre vuota, Market Watch invertito, cursore fermo sulla cella 0, colonna H4 riempita con dati H8, suffisso ignorato). Dopo le ancore aggiunte: **62 mutanti su 62 presi**, poi **66 su 66** dopo le 3 correzioni del lettore indipendente.
 - **Correzione del cancello**: se la serie di un simbolo/TF risultava vuota (`SERIES_LASTBAR_DATE` = 0), la cella si rinviava **senza mai chiamare `CopyRates`**, cioè senza mai chiedere al terminale di costruire la serie: se il terminale la costruisce solo su richiesta di una copia, quella cella non si sarebbe **mai** riempita. Ora con la serie vuota si copia (in un indicatore non blocca) e, se torna corta, si rinvia con attesa crescente. Contro-esempio a modello: col terminale "costruisce solo su richiesta" la versione vecchia non si riempie mai in 3 ore, la nuova in 2 s; col terminale "costruisce da sola" le due fanno **le stesse 4 copie**. Quale dei due sia il comportamento vero di MT5 **non è verificato**: la correzione non costa niente in tutti e due i casi.
 
 ## 7. Domande a Claudio
