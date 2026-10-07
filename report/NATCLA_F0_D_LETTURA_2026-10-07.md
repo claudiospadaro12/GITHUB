@@ -15,3 +15,6 @@ Lettore: `backtest_pipeline/leggi_natcla_f0.py` (autotest 87/87). Modello 1 OHLC
 - 171 righe-ordine con stop_ped dell'EA fuori tolleranza rispetto a |p-SL|/spread (lotto B: 740). Causa NON indagata; in SoloConta non muove ordini, ma il costo in tabella usa lo spread del CSV: da chiarire prima di fidarsi del bordo FRAGILE.
 - XAGUSD: una finestra con un solo regime e +85% -> setup abbondanti non provano nulla sul merito.
 - Nessuno spread_vivo: 28 simboli senza misura dello spread vivo.
+
+## Ripetizione (21:19, stesso pin e stessa EA v1.04)
+Claudio ha rilanciato il lotto D: 18/18 OK, ADX MetaQuotes 18/18. La tabella del lettore e' IDENTICA alla prima corsa (unica differenza: media 30 s invece di 29 s). I 18 CSV sono confrontati byte per byte con quelli del primo giro : tutti e 18 IDENTICI (nessuna differenza). Archivio: `risultati_archivio/NATCLA_F0_D_RIPETIZIONE_20261007/`. Vale come prova di riproducibilita' del Modello 1 sulla stessa macchina: non prova niente sul merito.
