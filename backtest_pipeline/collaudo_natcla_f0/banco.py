@@ -187,6 +187,12 @@ def esegui(spec, c, srv, scen_dir, timeout=900):
     if spec["mutex_occupato"]:
         mx = subprocess.Popen(["pwsh", "-NoProfile", "-Command", "$m = New-Object System.Threading.Mutex($false, 'Global\\ABTG_NATCLA_F0'); [void]$m.WaitOne(); Start-Sleep -Seconds 120"], env=env)
         time.sleep(3)
+    if spec.get("mutex_abbandonato"):
+        # un giro che prende il blocco e muore (kill -9) senza rilasciarlo: il blocco resta ABBANDONATO
+        ab = subprocess.Popen(["pwsh", "-NoProfile", "-Command", "$m = New-Object System.Threading.Mutex($false, 'Global\\ABTG_NATCLA_F0'); [void]$m.WaitOne(); Start-Sleep -Seconds 120"], env=env)
+        time.sleep(3)
+        ab.kill(); ab.wait()
+        time.sleep(1)
     ea_b, inc_b, pr_b = srv.files[F_EA], srv.files[F_INC], srv.files[F_PROVA]
     sh = dict(ea=sha(ea_b), inc=sha(inc_b), prova=sha(pr_b))
     sh.update(spec["sha_override"])

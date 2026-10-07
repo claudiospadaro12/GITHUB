@@ -90,7 +90,7 @@ def main():
         chk("S01 ini: una sola InpModalita, una sola InpTF, InpSoloConta=true, nessun InpMagic doppio, 72 input",
             ini1.count("InpModalita=") == 1 and ini1.count("InpTF=") == 1 and "InpSoloConta=true" in ini1 and ini1.count("InpMagic=") == 1 and ini1.split("[TesterInputs]")[1].strip().count("\n") + 1 == 72 and
             "Symbol=XAUUSD" in ini1 and "FromDate=2024.07.10" in ini1 and "ToDate=2026.06.30" in ini1 and "Model=1" in ini1 and "Optimization=0" in ini1 and "AllowLiveTrading=false" in ini1, ini1)
-        chk("S01 ini senza Report= (nessun .htm da raccogliere)", "Report=" not in ini1)
+        chk("S01 ini senza Report= (nessun .htm da raccogliere) e senza Spread= (come tutti i round di casa)", "Report=" not in ini1 and "Spread=" not in ini1)
         ea = open(os.path.join(r["sd"], "simlog", "sim_args_editor.txt")).read()
         chk("S01 MetaEditor chiamato con DUE argomenti (/compile e /log), classe 1152", len(json.loads(ea)) == 2)
         chk("S01 scaricati al pin: EA, include, prova", sorted(set(x.split("?")[0].split("/", 2)[2] for x in r["srv"].hits)) == sorted([B.F_EA, B.F_INC, B.F_PROVA]), r["srv"].hits)
@@ -120,6 +120,8 @@ def main():
         ferma("S08 due cartelle dati per il BCM", "NON risolta in modo univoco", doppio_dati=True)
         ferma("S09 zero grafici letti", "ZERO grafici", chr=[])
         ferma("S10 mutex occupato da un altro giro", "ALTRO giro", mutex_occupato=True)
+        rab = scenario("S10b", base, mutex_abbandonato=True)
+        chk("S10b blocco lasciato da un giro MORTO (kill -9): il giro successivo non resta bloccato per sempre, gira (8 passate OK, rc 0). Su Linux .NET non solleva l'eccezione di mutex abbandonato: il ramo catch AbandonedMutexException e' NON PROVATO qui", rc_di(rab["p"]) == "0" and "TUTTE LE PASSATE OK" in rab["p"].stdout, rab["p"].stdout[:600] + rab["p"].stderr[-300:])
         ferma("S11 SHA256 dell'EA diverso da quello della riga", "SHA256", sha_override={"ea": "0" * 64})
         ferma("S12 SHA256 della prova diverso", "SHA256", sha_override={"prova": "1" * 64})
         ferma("S13 SHA256 dell'include diverso", "SHA256", sha_override={"inc": "2" * 64})

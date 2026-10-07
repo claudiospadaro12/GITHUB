@@ -38,6 +38,8 @@ ORO_SETUP_ATTESI_ANNO = (101.0, 84.0, 21.0)          # ST25, ST30 (senza ADX), S
 BANDA_COERENTE = (0.5, 2.0)
 BANDA_GUARDARE = (0.1, 10.0)
 INCL_ORO_H1 = (0.34, 0.69, 1.18)                     # P25/P50/P75 su TUTTE le barre (popolazione diversa dai setup)
+SPREAD_VIVO = {"EURUSD": 0.2, "GBPUSD": 0.3, "USDJPY": 0.3, "D30EUR": 1.6, "NASUSD": 1.8, "U30USD": 2.0, "225JPY": 22.0, "XAUUSD": 0.21}   # specifica 5.3: pip / punti indice / USD (5 giornate, 04-11/09/2026)
+BANDA_SPREAD = (0.5, 2.0)
 LINEE = ("ST25", "ST30", "ST35", "E200")
 CAMPI_NUM = ("tocco_n", "nuovo_ep", "troncato", "ctx_arm", "ctx_tocco")
 
@@ -228,6 +230,8 @@ def calcola(righe, limiti, sim, cfg, inizio_effettivo):
     fin = FINE_FINESTRA
     ini = inizio_effettivo.date()
     ris["inizio"] = ini
+    sp_all = [float(r["spread"]) for r in righe]
+    ris["spread"] = {"min": min(sp_all), "med": statistics.median(sp_all), "max": max(sp_all), "n": len(sp_all)} if sp_all else None
     ris["anni"] = anni(ini, fin)
     ris["troncati"] = 0
     per_linea = {}
@@ -539,6 +543,33 @@ def riepilogo(dati, righe_out):
         rr = sum(c["linee"][l]["righe"] for l in ("ST25", "ST30", "ST35"))
         ee = sum(c["linee"][l]["episodi"] for l in ("ST25", "ST30", "ST35"))
         P("   CONTRO-ESEMPIO: se si contassero le RIGHE invece degli episodi: %d righe contro %d episodi = x%.2f (le righe NON sono setup)" % (rr, ee, rr / ee if ee else 0))
+    # ---- spread usato dal tester
+    P("")
+    P("-" * 110)
+    P("SPREAD USATO DAL TESTER (Modello 1; AUDIO_H1 se c'e', altrimenti la prima configurazione letta), in u (pip / punti / USD). COSTANTE = spread corrente al lancio, VARIABILE = dalla barra M1.")
+    for sn in sorted(bl["simboli"]):
+        rr_ = None
+        for cn in ["AUDIO_H1"] + [x for x in ordine_cfg if x != "AUDIO_H1"]:
+            for r in runs.get((sn, cn), []):
+                if r["calc"] is not None and r["calc"]["spread"] and r["stato"].startswith("OK"):
+                    rr_ = r
+                    break
+            if rr_:
+                break
+        if not rr_:
+            continue
+        sp = rr_["calc"]["spread"]
+        u = float(bl["simboli"][sn]["u"])
+        cost = "COSTANTE" if sp["min"] == sp["max"] else "VARIABILE"
+        rif = SPREAD_VIVO.get(sn)
+        if rif:
+            rap = (sp["med"] / u) / rif
+            conf = "rapporto con spread_vivo %.2f: %s" % (rap, "COERENTE" if BANDA_SPREAD[0] <= rap <= BANDA_SPREAD[1] else "LONTANO dal campo: il verdetto di costo di F0 NON si usa")
+            rif_t = "spread_vivo %.2f" % rif
+        else:
+            conf = "nessuno spread_vivo (28 simboli NON MISURATI: questo e' il primo numero)"
+            rif_t = ""
+        P("   %-8s min %.5g  mediana %.5g  max %.5g  (in u: %.3g)  %s  %s  %s" % (sn, sp["min"], sp["med"], sp["max"], sp["med"] / u, cost, rif_t, conf))
     # ---- inclinazione
     P("")
     P("-" * 110)
@@ -629,7 +660,7 @@ def riga_conta(barra, linea, nep, nuovo, ctx_arm, ctx_tocco, adx, incl, lv, spre
     return ";".join(c)
 
 
-def csv_finto(piano, u, spread, lv0, anno_inizio=2024, limiti=(1, 1, 2, 0)):
+def csv_finto(piano, u, spread, lv0, anno_inizio=2024, limiti=(1, 1, 2, 0), spread_alt=None):
     """piano: {linea: lista di episodi (n_barre_di_tocco, nep, ctx_arm, ctx_tocco, adx, incl)}. Gli episodi sono distribuiti su barre diverse in ordine cronologico."""
     righe = ["#AVVIO v1.04 finto", "#cfg;TocchiMax;%d / %d / %d / EMA %d (0 = illimitato)   [FONTE]" % limiti]
     righe += ["#cfg;x;y;z"] * 25
@@ -642,8 +673,9 @@ def csv_finto(piano, u, spread, lv0, anno_inizio=2024, limiti=(1, 1, 2, 0)):
             for k in range(nb):
                 tutte.append((quando + datetime.timedelta(hours=k), linea, nep, 1 if k == 0 else 0, ca, ct, adx, incl))
     tutte.sort(key=lambda x: (x[0], x[1]))
-    for q, linea, nep, nuovo, ca, ct, adx, incl in tutte:
-        righe.append(riga_conta(q.strftime("%Y.%m.%d %H:%M"), linea, nep, nuovo, ca, ct, adx, incl, lv0, spread, u))
+    for k, (q, linea, nep, nuovo, ca, ct, adx, incl) in enumerate(tutte):
+        sp = spread if (spread_alt is None or k % 2 == 0) else spread_alt
+        righe.append(riga_conta(q.strftime("%Y.%m.%d %H:%M"), linea, nep, nuovo, ca, ct, adx, incl, lv0, sp, u))
     return ("\n".join(righe) + "\n").encode("ascii")
 
 
@@ -905,6 +937,23 @@ def autotest():
         riepilogo(d7, o7)
         t7 = "\n".join(o7)
         chk("E0: 70 setup = VIVO, 69 = non vivo (1 su 2)", "VIVI (setup >= 70 nella finestra): 1 su 2 letti: EURUSD" in t7, [x for x in o7 if "E0: VIVI" in x].__str__())
+        # spread usato dal tester: costante coerente, costante lontano dal campo, variabile
+        zs = os.path.join(tmp, "NATCLA_F0_S.zip")
+        pe2 = {"ST25": [ep(k, 1, 1, 0, 0, 10.0, 0.5) for k in range(6)]}
+        costruisci_zip(zs, prova, [
+            dict(sim="EURUSD", cfg="AUDIO_H1", csv_bytes=csv_finto(pe2, u=0.0001, spread=0.00002, lv0=1.1), log_txt=log_finto(sim_eur, cfg_h1), righe=6),
+            dict(sim="GBPUSD", cfg="AUDIO_H1", csv_bytes=csv_finto(pe2, u=0.0001, spread=0.00020, lv0=1.3), log_txt=log_finto(bl["simboli"]["GBPUSD"], cfg_h1), righe=6),
+            dict(sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=csv_finto(pe2, u=1.0, spread=0.20, lv0=2400.0, spread_alt=0.60), log_txt=log_finto(sim_xau, cfg_h1), righe=6),
+            dict(sim="EURGBP", cfg="AUDIO_H1", csv_bytes=csv_finto(pe2, u=0.0001, spread=0.00005, lv0=0.85), log_txt=log_finto(bl["simboli"]["EURGBP"], cfg_h1), righe=6),
+            dict(sim="USDJPY", cfg="AUDIO_H1", csv_bytes=csv_finto(pe2, u=0.01, spread=0.0006, lv0=150.0), log_txt=log_finto(bl["simboli"]["USDJPY"], cfg_h1), righe=6)])
+        os_ = []
+        riepilogo(carica([Sorgente(zs)]), os_)
+        riga_sp = {x.split()[0]: x for x in os_ if x.startswith("   ") and "min " in x and "mediana" in x and "max" in x}
+        chk("spread EURUSD 0,2 pip costante, rapporto 1,00 con spread_vivo: COERENTE", "COSTANTE" in riga_sp.get("EURUSD", "") and "rapporto con spread_vivo 1.00: COERENTE" in riga_sp.get("EURUSD", ""), riga_sp.get("EURUSD"))
+        chk("spread GBPUSD 2 pip contro 0,3 del campo: LONTANO, il verdetto di costo non si usa", "LONTANO" in riga_sp.get("GBPUSD", ""), riga_sp.get("GBPUSD"))
+        chk("spread oro variabile (0,20 / 0,60): VARIABILE", "VARIABILE" in riga_sp.get("XAUUSD", ""), riga_sp.get("XAUUSD"))
+        chk("spread USDJPY 0,06 pip contro 0,3 del campo (rapporto 0,2, SOTTO la banda 0,5 ma sopra 0,1): LONTANO", "LONTANO" in riga_sp.get("USDJPY", ""), riga_sp.get("USDJPY"))
+        chk("spread EURGBP: nessuno spread_vivo, lo dice", "nessuno spread_vivo" in riga_sp.get("EURGBP", ""), riga_sp.get("EURGBP"))
         # tabella csv
         tc = os.path.join(tmp, "t.csv")
         tabella_csv(dati, tc)

@@ -186,7 +186,10 @@ Dico ('pc   : ' + $env:COMPUTERNAME) 'Green'
 Dico ('pin  : ' + $Pin) 'Green'
 Dico ('lotto: ' + $Lotto) 'Green'
 $Mutex = New-Object System.Threading.Mutex($false, 'Global\ABTG_NATCLA_F0')
-if(-not $Mutex.WaitOne(0)){
+$preso = $false
+# un giro precedente interrotto (finestra chiusa, Ctrl+C, crash) lascia il blocco ABBANDONATO: .NET lo segnala con un'eccezione e il blocco e comunque nostro
+try{ $preso = $Mutex.WaitOne(0) } catch [System.Threading.AbandonedMutexException] { $preso = $true; Dico 'il blocco Global\ABTG_NATCLA_F0 era stato lasciato da un giro INTERROTTO: lo riprendo (nessun altro giro sta girando)' 'Yellow' }
+if(-not $preso){
   throw 'Un ALTRO giro di NATCLA_F0 sta gia girando su questo PC (mutex Global\ABTG_NATCLA_F0 occupato). Un solo giro alla volta: aspetta che finisca, NON chiudere il suo terminale.'
 }
 if((@(Get-Process -Name terminal64, metaeditor64 -ErrorAction SilentlyContinue)).Count -gt 0){
@@ -501,7 +504,7 @@ foreach($ru in $runs){
     try{ $testo = LeggiCoda $f.FullName $off }catch{ $illeggibili = $illeggibili + 1; continue }
     foreach($riga in ($testo -split "`r?`n")){
       $mf = $reFin.Match($riga)
-      if($mf.Success){ $fin[$mf.Value] = $mf; continue }
+      if($mf.Success){ $fin[($mf.Groups['sim'].Value + '|' + $mf.Groups['tf'].Value + '|' + $mf.Groups['da'].Value + '|' + $mf.Groups['ha'].Value + '|' + $mf.Groups['a'].Value + '|' + $mf.Groups['hb'].Value)] = $mf; continue }
       if($reImbuto.IsMatch($riga)){ if($riga.IndexOf('quadratura ROTTA') -ge 0){ $nImbRotte = $nImbRotte + 1 }; $nImb = $nImb + 1; continue }
       $mn = $reNatCla.Match($riga)
       if(-not $mn.Success){

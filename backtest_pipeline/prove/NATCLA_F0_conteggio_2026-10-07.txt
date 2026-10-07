@@ -22,8 +22,8 @@
 #   controlla_prova.py pretende UN asse Y: l'asse e' TECNICO (InpMagic=0||0||1||1||Y) e la passata singola usa il PRIMO valore (0 = magic
 #   automatico 7786 + 10*modalita + cifra TF). La 2a cella (magic 1) e' fuori dal blocco 778600-778699: l'EA la rifiuta in OnInit. Quindi dato in
 #   pasto al driver dei round questo file produrrebbe una passata rifiutata e una vuota, mai un conteggio: e' voluto.
-#   I 71 pin sono i default compilati del sorgente (prova_pins.py li confronta a macchina), con TRE sole deviazioni dichiarate:
-#   InpSoloConta=true; InpModalita=0 e InpTF=16385 (la configurazione base AUDIO_H1: il driver le sostituisce a ogni passata con quelle del @F0-CONFIG).
+#   I 71 pin sono i default compilati del sorgente (prova_pins.py li confronta a macchina), con DUE deviazioni dichiarate: InpSoloConta=true e InpTF=16385,
+#   piu' InpModalita=0 scritto esplicito (e' il default): la configurazione base AUDIO_H1, che il driver sostituisce a ogni passata con quella del @F0-CONFIG.
 #
 #  FINESTRA (emendamento del 16/08, regola A: la collocazione si DICHIARA)
 #   '@DAQUANDO-DALLA-RIGA' qui sotto: la data cambia per CLASSE di simbolo (pavimento dei tick BCM, specifica 5.1) ed e' nei blocchi @F0-SIMBOLO.
@@ -74,14 +74,18 @@
 #
 #  TEMPO [STIMA NON AGGANCIATA a un giro a passata singola OHLC di questo EA: lo misura il pilota]
 #   Banda per passata 30-120 s (apertura e chiusura del terminale ~15-30 s + ~3 milioni di tick OHLC; ancore: R88 2,9-33 s/passata OHLC in
-#   ottimizzazione, nessun costo di avvio dentro; R280/R263f: una gamba di 2 celle a tick reali con avvio del terminale ~42 s). Pilota 8 passate +
+#   ottimizzazione e r151a ~3,1 s per ANNO di storico OHLC (REGISTRO_TEST r.4457, 'velocita' del PC su OHLC forex NON MISURATA'), nessun costo di avvio
+#   dentro; R280/R263f: una gamba di 2 celle a tick reali con avvio del terminale ~42 s). Il basso della banda (30 s) e' l'avvio + ~6 s di calcolo. Pilota 8 passate +
 #   compilazione: ~6-18 minuti. F0 intera 216 passate: 108-432 minuti = 1,8-7,2 ore, centro ~3,6 ore, in 4 lotti da 66/66/66/18. La stima della
 #   specifica (10-119 minuti, centro ~49, 216 passate x 2,9-33 s) NON vale per la passata singola: ammortizza l'avvio dentro un'ottimizzazione.
 #
 #  LIMITI DICHIARATI (non coperti da questo file)
 #   - REGIME della finestra (rendimento e ADX medio per simbolo, specifica 5.5): NON e' nel CSV dell'EA. Il lettore stampa solo un PROXY (prezzo della
 #     linea al primo e all'ultimo tocco) etichettato [PROXY]; il numero vero richiede una riga in piu' nell'EA (decisione del cancello: v1.05) o una lettura barre.
-#   - Barre OHLC M1: il PF/DD di qui non si leggono mai; lo spread e' quello della barra M1 della storia, non quello di un tick vero.
+#   - Barre OHLC M1: il PF/DD di qui non si leggono mai. SPREAD: nel Modello 1 e' quello che il tester assegna (spread CORRENTE al lancio, costante, oppure quello
+#     della barra M1: [NON MISURATO] quale dei due), NON lo spread tick. Il .ini non scrive la riga Spread (come tutti i round di casa). Il lettore stampa min/mediana/max
+#     dello spread per simbolo (costante = il primo caso) e, per gli 8 simboli con spread_vivo (specifica 5.3), il rapporto con quello del campo: il rapporto di costo E2
+#     vale quanto quello spread. Se e' costante e lontano da spread_vivo il verdetto di costo di F0 NON si usa: si rifa' con lo spread vero.
 #   - La compilazione e' del terminale vero: nessun MetaEditor qui. Windows PowerShell 5.1: non provato qui (pwsh 7).
 #   - Il Guardian nel tester e' FAIL-OPEN (specifica 2.5): irrilevante in SoloConta (nessun ordine), da scrivere comunque nel referto.
 #

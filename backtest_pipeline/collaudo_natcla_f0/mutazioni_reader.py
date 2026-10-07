@@ -55,6 +55,9 @@ MUTANTI = [
     ("M39 n_istanza = barre distinte", 'ris["n_linee"] = sum(d["setup"] for d in ris["linee"].values())', 'ris["n_linee"] = len(ris["barre"])'),
     ("M41 ADX: Wilder atteso uguale a iADX (il contro-esempio non distingue)", "ORO_WILDER_TOCCO = (40.0, 36.0, 36.0)", "ORO_WILDER_TOCCO = (16.0, 18.0, 16.0)"),
     ("M42 ADX: confronto iADX/Wilder rovesciato", 'dm <= dw else', 'dm > dw else'),
+    ("M43 spread: costante dichiarato sempre", 'cost = "COSTANTE" if sp["min"] == sp["max"] else "VARIABILE"', 'cost = "COSTANTE"'),
+    ("M44 spread: banda coerente 0,5 -> 0,1", "BANDA_SPREAD = (0.5, 2.0)", "BANDA_SPREAD = (0.1, 2.0)"),
+    ("M45 spread: riferimento EURUSD 0,2 -> 2,0", '"EURUSD": 0.2, "GBPUSD"', '"EURUSD": 2.0, "GBPUSD"'),
     ("M40 anticipo/linea/profondo: costo con p3 al posto di p1", 'for i, col in enumerate(("p1", "p2", "p3")):', 'for i, col in enumerate(("p3", "p2", "p1")):'),
 ]
 
