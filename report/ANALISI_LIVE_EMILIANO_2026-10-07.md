@@ -46,14 +46,14 @@ il server BCM e' **un'ora indietro** rispetto all'Italia `[DERIVATO da report/OR
   In r.195 un partecipante gli dice *"Paolo, mi sta bene"*: errore STT sul nome `[INFERITO]`.
 - **Quando:** **mercoledi' 07/10/2026 mattina** (*"siamo anche a mercoledi', siamo a meta' settimana"*, r.11). Comincia ~**un quarto d'ora prima dell'apertura** (r.23) e arriva almeno a r.193 (*"sono le 9.56"*) `[INFERITO: ora italiana]`.
 - **Non e' una prop.** Zero `prop`, `FTMO`, `funded`, `challenge`, `drawdown` (verificato `grep`: le 29 occorrenze di "prop" sono "proprio"/"proprieta'"; **0** come parola intera).
-- **Qualita':** media. Il passo r.191 (13.500 caratteri senza punteggiatura) e' in parte **non ricostruibile**: dove una frase cambia il senso lo segnalo (§2.1). La frase *"a, a, a, a, a, ..."* (r.191, **30 ripetizioni**) e' un loop STT, **non contenuto**.
+- **Qualita':** media. Il passo r.191 (13.500 caratteri senza punteggiatura) e' in parte **non ricostruibile**: dove una frase cambia il senso lo segnalo (§2.1). La frase *"a, a, a, a, a, ..."* (r.191, **15 ripetizioni** `[MISURATO grep]`) e' un loop STT, **non contenuto**.
 - **Nessun fatto personale rilevante** (r.1-3, r.31-33: problema di password su Zoom, profilo Instagram hackerato): scartato.
 
 ## 1.2 I punti piu' importanti (ordinati per valore per noi)
 
 | # | punto | dove | che cosa vale |
 |---|---|---|---|
-| 1 | **Retest con la stessa size** dopo aver gia' portato a casa un parziale (*"fieno in cascina"*) | r.169, r.171 | **NUOVO** meccanismo di re-entry; **incompatibile** con `InpOneTradePerDay=true` delle sedie DAX (scheda 09/30 §279). Non si copia |
+| 1 | **Retest con la stessa size** dopo aver gia' portato a casa un parziale (*"fieno in cascina"*) | r.169, r.171 | **NUOVO** meccanismo di re-entry; **incompatibile** con `InpOneTradePerDay=true` delle sedie DAX (scheda 09/30 r.279). Non si copia |
 | 2 | **Chiudere la gamba perdente con meta' del profitto dell'altra** | r.161 | **NUOVO**; parente del recovery (netting). Arancione. *"Io lo faccio quasi sempre"* |
 | 3 | **Regola dell'apertura sotto un livello -> si va nella direzione** (short), subito smentita dal rimbalzo | r.119-135 | **CONTRADDICE il 05/10** (*"scarica sempre in direzione opposta"*, scheda 10/05 C5). Dichiarazione senza misura |
 | 4 | **Numero tondo SOLO con una confluenza; altrimenti quantita' piu' piccola** | r.93-101, r.191 | **CAMBIA** il 02/10 e il 05/10 (tondo come livello in se'). Ora: *"io personalmente non lavoro il numero tondo fine a se stesso"* (r.191) |
@@ -91,7 +91,7 @@ B8 sposta gli ordini in corsa quando e' "sfiorato"; B9 size senza capitale ne' v
 | hedging / ejami / "legato" / copy | 0 / 0 / 0 / 0 | **assente** (presente il 05/10, r.235-243) |
 | martingala / raddoppio / griglia (parola) / recupero | 0 / 0 / 0 / 0 | ma vedi B1, B2, B3, B6 (parenti senza la parola) |
 | "senza stop" | 0 | *stop* compare 14 volte, sempre come stop di un ordine o spostamento |
-| PF / backtest / statistica | 0 / 0 / 0 | **non c'e' niente su PF, storico, regimi**; l'unico accenno e' *"E' la regola del nostro livello ..."* niente |
+| PF / backtest / statistica / storico / anni | 0 / 0 / 0 / 0 / 0 | **non c'e' niente su PF, storico, regimi** |
 | ATR | 2 | r.205 *"l'uscita qua con l'ATR"* (e un'altra occorrenza nello stesso passo) |
 | M3 | 3 | r.5, r.173, r.189 |
 | VWAP/WAP/VVAP/move up | 20 | **protagonista** (ingressi, stop, bande di regressione) |
@@ -376,7 +376,7 @@ Ordine di valore per **una sedia schierabile**: **basso** (la live e' discrezion
 ### P-3 - "Il 07/10 al minuto" (**zero macchina**, una domanda a Claudio; stile S4 del 05/10)
 - **Domanda:** il DAX stamattina ha fatto davvero *"aperto sotto il livello, rimbalzo fino a VWAP/tondo, poi circa 80 punti giu'"* (r.117-131, r.169) e **che cosa hanno fatto le sedie** (`770411`, `770101`, `770105`)?
 - **Cosa serve:** screenshot M5 `D30EUR` (BCM) o `GER40.cash` (FTMO) **08:50-10:00 ora italiana** + il giornale delle sedie del 07/10 (**con numero di conto e cartella programma scritti in testa**). Oggi e' ancora ora legale: BCM = IT-1.
-- **Attesa (scritta ora):** il DAX ha toccato il VWAP/tondo **dopo** l'apertura **e** poi ha chiuso la candela M5 delle 09:00-09:05 **sotto** l'apertura (la descrizione di r.117). **Contro-esempio:** la prima M5 **chiude sopra** l'apertura: la mattina descritta non e' quella che vedo.
+- **Attesa (scritta ora):** il DAX ha **aperto sotto** il livello identificato (minimo della notte) (r.117), ha **toccato il VWAP o il tondo 25.300 entro i primi ~30 minuti** (r.121-131) e poi e' sceso di **~80 punti** (r.169). **Contro-esempio:** non tocca il VWAP/tondo nei primi 30', **oppure** il calo successivo e' **< 40 punti** `[40 = meta' degli 80 dichiarati, scelto solo per definire il contro-esempio]`: la mattina descritta non e' quella che vedo.
 - **Costo:** zero. **Limite:** **n = 1 giorno**: e' **una domanda, non evidenza**.
 
 ### Cosa NON propongo (col motivo)
@@ -411,4 +411,4 @@ Ordine di valore per **una sedia schierabile**: **basso** (la live e' discrezion
 - **Bozza, NON passata dal cancello.** Servono lo strato 1 (`controlla_riga.py --oggetto md`, esito in fondo) **e** lo strato 2 (`controllo-preventivo`) prima che qualunque proposta diventi un file prova.
 
 ## Esito del controllo deterministico
-(riportato in chat dall'analista dopo l'esecuzione di `python3 backtest_pipeline/controlla_riga.py --oggetto md`)
+`python3 backtest_pipeline/controlla_riga.py --oggetto md` su questo file e su `ANALISI_LIVE_PAOLO_2026-10-06.md` (07/10/2026): **ESITO: nessun difetto meccanico**, nessun rilievo su questo file. **NON e' un PASS completo:** manca lo strato 2 (`controllo-preventivo`).
