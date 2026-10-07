@@ -212,17 +212,21 @@ def giorni_fra(da, a):
 def fuori_flotta(r):
     """True se la riga NON e' di un nostro EA, cioe' se il `magic` e' 0.
 
-    🔴 RISCRITTA IL 07/10/2026, e cambia dei totali gia' pubblicati.
+    🔴 RISCRITTA IL 07/10/2026.
     Prima pretendeva **due** criteri -- commento vuoto **E** magic 0 -- e quindi
     una riga a mano **con un commento battuto a mano** restava dentro il
-    "Totale giornata". Il difetto era **noto dal 02/10**: il `DIARIO` di quel
-    giorno scrive in chiaro *"VERA FLOTTA (magic != 0): -94,74 ... MANO (magic
-    0): +833,74 ... il «Totale giornata +623,13» dello strumento **mescola i
-    due**"*, e lo stesso era stato corretto a mano il 01/10 (-236,82 stampato,
-    **-118,36** pubblicato nel DIARIO). Lo strumento non e' mai stato cambiato,
-    e il **07/10** ha presentato il conto: una riga a mano da **10,00 lotti** con
-    il commento `reversale su st 3.0` valeva **+724,93** su un totale di
-    **+737,45**, cioe' il **98,3%** -- la flotta vera era **+12,52**.
+    "Totale giornata". Il fatto era **misurato e scritto** il **02/10** (il
+    `DIARIO` di quel giorno: *"VERA FLOTTA (magic != 0): -94,74 ... il «Totale
+    giornata +623,13» dello strumento **mescola i due**"*) ma era stato
+    **giudicato "non un difetto"**, con la correzione delegata alla mano. Il
+    **07/10** ha presentato il conto: una riga a mano da **10,00 lotti** col
+    commento `reversale su st 3.0` valeva **+724,93** su **+737,45**, il
+    **98,3%** -- la flotta vera era **+12,52**.
+    📊 Contabilita' del danno, esatta: **un solo** totale pubblicato era
+    sbagliato (**02/10**, +623,13 contro -94,74); il **07/10** e' stato preso
+    prima di uscire; il **01/10** fu pubblicato **giusto** (-118,36) per un
+    **caso d'orario** -- la riga a mano col commento chiuse alle 23:01:30, dopo
+    la pubblicazione delle 22:45.
     👉 Il criterio giusto e' **UNO**: nessun nostro EA gira a magic 0, quindi
     `magic == 0` -> fuori dalla flotta, **qualunque cosa ci sia scritta nel
     commento**. Il verso opposto (commento vuoto ma magic valorizzato) e' un
@@ -575,7 +579,7 @@ def main():
         r["_ct"] = tempo(r.get("close_time", ""))
     righe = [r for r in righe if r["_ot"] and r["_ct"]]
 
-    # --- FUORI DAL TOTALE: le manuali di Claudio (vedi in cima al file).
+    # --- FUORI DAL TOTALE: le righe a MAGIC 0 (non di un nostro EA).
     #     Si tolgono PRIMA di scegliere la giornata: altrimenti un giorno di
     #     sole manuali diventerebbe "la giornata" e la pagella parlerebbe di
     #     un lavoro che nessun EA ha fatto.
@@ -583,7 +587,8 @@ def main():
     ambigue = discordi(righe)
     righe = [r for r in righe if not fuori_flotta(r)]
     if not righe:
-        sys.exit("Nel CSV non c'e' nessuna operazione con commento: solo manuali.")
+        sys.exit("Nel CSV non c'e' nessuna riga con un magic nostro: "
+                 "solo righe a magic 0.")
 
     # La giornata si sceglie sulla CHIUSURA, non sull'apertura.
     # Il 05/08 questo filtro girava su open_time e ha buttato fuori due
@@ -599,7 +604,7 @@ def main():
         soloman = [r for r in manuali_tutte
                    if r["_ct"].strftime("%Y-%m-%d") == giorno]
         if soloman:
-            sys.exit("Il %s ha SOLO %d operazioni senza commento (manuali, "
+            sys.exit("Il %s ha SOLO %d righe a magic 0 (non di un nostro EA, "
                      "fuori dal conto della flotta): nessun EA ha operato."
                      % (giorno, len(soloman)))
         sys.exit("Nessun trade chiuso il %s." % giorno)
@@ -973,7 +978,9 @@ def main():
         fr = [f for f in (frazione_catturata(r, vpunto) for r in vinc)
               if f is not None]
         if not fr:
-            frm = "—"
+            # N5 (cancello del 07/10): se TUTTE le vincenti sono scartate, un
+            # "—" muto e' lo stesso scarto silenzioso nel caso peggiore (100%).
+            frm = "—" if not vinc else "— _(0 di %d vincenti)_" % len(vinc)
         elif len(fr) == len(vinc):
             frm = "%.0f%%" % (100 * sum(fr) / len(fr))
         else:
@@ -1038,10 +1045,11 @@ def main():
     out.append("")
     out.append("**Totale giornata: %+.2f**" % sum(perSym.values()))
     out.append("")
-    out.append("_Totale della **sola flotta**: le operazioni senza commento "
-               "(manuali, magic 0) stanno fuori — vedi sotto._")
+    out.append("_Totale della **sola flotta**: le righe a `magic` 0 (non di un "
+               "nostro EA) stanno fuori — vedi sotto, e il criterio e' **solo** "
+               "il magic, qualunque sia il commento._")
 
-    # ---------- FUORI DAL TOTALE: le manuali ----------
+    # ---------- FUORI DAL TOTALE: le righe a MAGIC 0 ----------
     manuali_oggi = [r for r in manuali_tutte
                     if r["_ct"].strftime("%Y-%m-%d") == giorno]
     # --- 05/10/2026: `ambigue` e' calcolato su TUTTO il file (vedi r.394),
@@ -1085,25 +1093,20 @@ def main():
     if manuali_oggi:
         netto_man = sum(num(r, "profit") + num(r, "swap") + num(r, "commission")
                         for r in manuali_oggi)
-        perSymMan = defaultdict(lambda: [0, 0.0])
-        for r in manuali_oggi:
-            v = perSymMan[r.get("symbol", "?")]
-            v[0] += 1
-            v[1] += num(r, "profit") + num(r, "swap") + num(r, "commission")
         out += ["Righe **non della flotta**: `magic` **0**, cioe' nessun nostro "
                 "EA (il criterio e' **solo** il magic dal 07/10/2026 — una mano "
                 "che scrive un commento restava dentro il totale, e il 07/10 "
                 "valeva il **98,3%** della giornata). **Non entrano nel totale "
                 "della flotta** qui sopra — Claudio, 07/09/2026.", "",
                 "| Simbolo | Trade | Commento | Netto |", "|---|---|---|---|"]
-        perSymMan2 = defaultdict(lambda: [0, 0.0, set()])
+        perSymMan = defaultdict(lambda: [0, 0.0, set()])
         for r in manuali_oggi:
-            v = perSymMan2[r.get("symbol", "?")]
+            v = perSymMan[r.get("symbol", "?")]
             v[0] += 1
             v[1] += num(r, "profit") + num(r, "swap") + num(r, "commission")
             c = (r.get("strategy") or "").strip()
             v[2].add("`%s`" % c if c else "_(vuoto)_")
-        for sym, (nn, v, cc) in sorted(perSymMan2.items(), key=lambda x: x[1][1]):
+        for sym, (nn, v, cc) in sorted(perSymMan.items(), key=lambda x: x[1][1]):
             out.append("| %s | %d | %s | **%+.2f** |"
                        % (sym, nn, " · ".join(sorted(cc)), v))
         out += ["", "**Totale manuale (fuori dal conto): %+.2f** su %d operazioni."
