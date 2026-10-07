@@ -33,10 +33,13 @@
 //|       ATTENZIONE: le chiamate in piu' NON esistono nell'EA. Se   |
 //|       nel tester un CopyBuffer facesse calcolare un indicatore   |
 //|       che altrimenti resta fermo, (B) potrebbe "guarire" la      |
-//|       catena delle barre DOPO: allora la passata U30USD dal      |
-//|       2024.09.26 NON riprodurrebbe il KO (cd_ok > 0) e serve una |
-//|       passata con InpVerificheSeparate=false (dichiarata, non    |
-//|       fatta: il driver ne gira 4).                               |
+//|       catena delle barre DOPO. Per questo (classe 1171) il       |
+//|       driver gira nello STESSO giro anche (e) U30USD e (f) D30EUR|
+//|       con InpVerificheSeparate=false: SOLO la catena, cioe'      |
+//|       EA_NatCla alla lettera. Con false le uniche chiamate in    |
+//|       piu' sono SeriesInfoInteger x3 alla PRIMA barra nuova      |
+//|       (proprieta' della serie, nessun buffer di indicatore) e,   |
+//|       a test finito, quelle di OnDeinit.                         |
 //|  Registra i primi valori (barra 1), gli ultimi, i massimi, la    |
 //|  prima barra in cui TUTTE passano, e le transizioni del motivo.  |
 //|  A OnDeinit stampa UNA riga "[NatCla-DIAG] RIASSUNTO k=v k=v.."  |

@@ -1011,7 +1011,7 @@ def banco(chiavi, base):
         lg.count("[NatCla-DIAG] RIASSUNTO") == 1 and "[NatCla-DIAG-AVVIO]" in lg and "[NatCla-DIAG-EV]" in lg and "bars generated" in lg, lg[:600])
     rp = z.read("RIEPILOGO_DIAG.txt").decode("ascii") if z else ""
     chk("B07 RIEPILOGO con le ATTESE scritte prima (controllo positivo (d), (e) passata FEDELE con cd_ok = 0, lettura (a)+(e) del tester pigro, rimedio v1.05, nota sulla riga TRONCATA)",
-        "ATTESE SCRITTE PRIMA" in rp and "CONTROLLO POSITIVO" in rp and "(e) U30USD dal 2024.09.26 con SOLO la catena" in rp and "v1.05" in rp and "TRONCATA" in rp and "primi ~300 caratteri" in rp, rp[:300])
+        "ATTESE SCRITTE PRIMA" in rp and "CONTROLLO POSITIVO" in rp and "(e) U30USD dal 2024.09.26 con SOLO la catena" in rp and "v1.05" in rp and "TRONCATA" in rp and "primi ~300 caratteri" in rp and "CONTRADDIZIONE col pilota" in rp and "NON e in CaricaDati" not in rp and "LOTTO C: resta FERMO in OGNI esito" in rp, rp[:300])
     chk("B08 console: per ogni passata la CATENA (OK | n<300 | BarsCalculated | CopyRates | CopyBuffer) e la prima barra tutta OK", r["p"].stdout.count("CATENA: OK ") == NP and "n<300 9946" in r["p"].stdout)
     print("   guardie")
     for nome, msg, kw in (("B10 macchina diversa (VPS)", "gira SOLO sul PC di backtest", dict(macchina="VMI3047753")),
@@ -1234,7 +1234,9 @@ def genera_riga(pin, dest=None, senza_origin=False):
               "(2) (d) EURUSD deve avere cd_ok sopra 0 e la prima barra tutta OK all inizio della finestra: se no la diagnosi e rotta e nient altro si legge; "
               "(3) (e) U30USD dal 2024.09.26 con SOLO la catena deve avere cd_ok = 0 (riproduce il KO): la colonna fra cd_n, cd_bc, cd_cr e cd_cb che porta le barre e la condizione che cade; "
               "se (a) ha cd_ok sopra 0 e (e) cd_ok = 0 con cd_bc circa nuove-301 e min_bc/max_bc dell EMA200 fermi a -1 o bassi, la causa e BarsCalculated chiesto prima di CopyBuffer nel tester pigro (rimedio in EA_NatCla v1.05, lotto C fermo fino ad allora); "
-              "se (e) ha cd_ok sopra 0 il KO non e in CaricaDati e si leggono le righe GUASTO e TESTER; "
+              "se ANCHE (a) ha cd_ok = 0 il tester pigro NON e la causa e la colonna di (e) dice quale condizione; "
+              "se (e) ha cd_ok sopra 0 e una CONTRADDIZIONE col pilota (NON vuol dire che il KO non e in CaricaDati): la prossima misura e EA_NatCla stesso con le righe d errore e IMBUTO tenute; "
+              "il lotto C resta FERMO in OGNI esito di questo zip; "
               "(4) (b), (c) e (f): con storia davanti passa? l altro indice cade allo stesso modo? Lo script CONTA e non giudica.")
     fine = ("FILE ATTESI NELLO ZIP sul Desktop (NATCLA_DIAG_U30.zip): RIEPILOGO_DIAG.txt + MANIFEST_DIAG.csv + DIAG_RIASSUNTO.csv + EA_NatCla_Diag.mq5 + compile_natcla_diag.log + log\\DIAG_<passata>.txt x 6 + ini\\diag_<passata>.ini x 6; "
             "rc 0 = tutte leggibili, rc 3 = almeno una KO o non lanciata (lo zip esce lo stesso), rc 1 = si e fermato prima del tester (se e la COMPILAZIONE, lo zip da mandare e NATCLA_DIAG_U30_COMPILAZIONE_FALLITA.zip)")
