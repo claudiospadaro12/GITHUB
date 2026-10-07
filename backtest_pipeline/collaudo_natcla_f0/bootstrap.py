@@ -60,7 +60,7 @@ simboli = lot["simboli"].split(",")
 configs = lot["configs"].split(",")
 nrun = len(simboli) * len(configs)
 tetto = int(lot["tetto_min"])
-bassa, alta = nrun * 30 / 60.0, nrun * 120 / 60.0
+bassa, alta = nrun * 28 / 60.0, nrun * 40 / 60.0   # [MISURATO] pilota 07/10 14:50 (MANIFEST_F0.csv: 28-40 s, media 33 s)
 
 bersaglio = ("BERSAGLIO: SOLO una finestra PowerShell sul PC di backtest DESKTOP-H4D7CAJ: terminale C:\\Program Files\\BCM Markets MT5 Terminal (cartella BCM Markets MT5 Terminal), "
              "loggato sul demo 50503392. Lo script lo apre e lo chiude da solo, una volta per passata (backtest, AllowLiveTrading=false, EA in modalita SOLO CONTA: nessun ordine). "
@@ -85,8 +85,11 @@ if LOTTO == "PILOTA":
 else:
     cosa = ("NATCLA F0 LOTTO " + LOTTO + " (commit " + C[:8] + ") -- " + str(len(simboli)) + " simboli (" + ", ".join(simboli) + ") x " + str(len(configs)) + " configurazioni (" + ", ".join(configs) + ") = " + str(nrun) +
             " passate singole, Modello 1 (OHLC su M1), InpSoloConta=true, nessun ordine, finestra per classe fino al 2026.06.30. DA LANCIARE SOLO DOPO aver letto il lotto PILOTA (EA compilato e partito, VERIFICA ADX MetaQuotes, tempo misurato). "
+            "ORDINE CONSIGLIATO: A, poi B, poi D, UNA ALLA VOLTA (la seconda si lancia solo quando la prima ha scritto il suo zip: un altro giro gia in corso fa fermare questa con un messaggio rosso). "
+            "Il lotto C (oro e indici) resta FERMO finche non gira la passata diagnostica su U30USD. Da mandare quando finisce: lo zip NATCLA_F0_" + LOTTO + ".zip dal Desktop di questo PC. "
             "Nessun PF, nessun DD: la lettura dei setup e leggi_natcla_f0.py sullo zip, i criteri sono scritti nel file prova PRIMA dei numeri.")
-    tempo = ("TEMPO ATTESO [STIMA, da CORREGGERE con la media misurata dal pilota]: " + str(nrun) + " passate x 30-120 secondi = " + ("%.0f" % bassa) + "-" + ("%.0f" % alta) + " minuti. "
+    tempo = ("TEMPO ATTESO [MISURATO dal pilota 07/10 su 3 simboli forex+oro e SOLO configurazioni H1: 28-40 secondi a passata, media 33]: compilazione circa 1 minuto + " + str(nrun) + " passate x 28-40 secondi = " + ("%.0f" % bassa) + "-" + ("%.0f" % alta) + " minuti. "
+             "Puo durare DI PIU se il terminale deve scaricare lo storico M1 di un simbolo mai usato su questo PC o se H4/H12/D1 costano piu di H1 (NON misurati): per questo il tetto resta largo. "
              "Il tetto del lotto e " + str(tetto) + " minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti): le passate non lanciate escono NON_LANCIATA nel MANIFEST. "
              "NON fermarla prima di " + str(tetto + 25) + " minuti (caso peggiore: tetto " + str(tetto) + " + ultima passata fino a 20 + chiusura 2 + compilazione 2; lo zip si scrive solo alla FINE). Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
     guarda = ("COSE DA GUARDARE PER PRIME quando torna, scritte PRIMA: (1) ESITO F0 e MANIFEST: quante passate OK, KO, NON_LANCIATE (con il motivo); (2) VERIFICA ADX: formula MetaQuotes su tutte le passate OK, se Wilder o NESSUNA ci si ferma; "
