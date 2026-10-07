@@ -115,7 +115,7 @@ COLONNE_MINIME = ("open_time", "close_time", "profit", "swap", "commission",
 FRAZIONE_BASSA = 0.30   # sotto il 30% del movimento catturato = la gestione taglia troppo presto
 DURATA_SOSPETTA = 120   # secondi: sotto = quasi certamente trailing/BE troppo stretti
 
-# --- FUORI DAL TOTALE: le operazioni SENZA COMMENTO del conto piccolo -------
+# --- FUORI DAL TOTALE: le righe a MAGIC 0 del conto piccolo -------
 #
 # Claudio, 07/09/2026: "sul conto piccolo demo avevo iniziato a farlo manuale.
 # Da quando vedi costanza nei commenti, vuol dire che siamo partiti solo con
@@ -1200,12 +1200,22 @@ def main():
             continue
         d = (r["_ct"] - r["_ot"]).total_seconds()
         f = frazione_catturata(r, vpunto)
-        if num(r, "profit") > 0 and d < DURATA_SOSPETTA:
+        # 07/10/2026 (cancello, N4): "vincente" si legge sul NETTO, come nella
+        # media per EA. Era sul LORDO, e l'allarme sparava su righe che sono
+        # SCRATCH: `giornata_2026-09-30.md` dice "BLU_L su USDJPY: preso il 1%"
+        # su un trade con lordo +0,22 e **netto -0,14**. Un allarme che fischia
+        # li' insegna a ignorare quelli veri, e FRAZIONE_BASSA e' l'allarme che
+        # apre un round. Raggio misurato: **3 bullet su 128** in tutto lo
+        # storico, tutti e tre a frazione 1% e netto fra -0,08 e -0,14 (01/04
+        # ARANCIO_S e BLU_S su NZDUSD, 30/09 BLU_L su USDJPY). Una decisione
+        # sola, applicata ai due siti che la usavano in modo diverso.
+        netto_r = num(r, "profit") + num(r, "swap") + num(r, "commission")
+        if netto_r > 0 and d < DURATA_SOSPETTA:
             avvisi.append("⏱️ **%s** su %s: chiuso in **%.0f s** in profitto (%s) — "
                           "gestione probabilmente troppo stretta" % (
                               r.get("strategy"), r.get("symbol"), d,
                               r.get("close_reason") or "?"))
-        elif f is not None and f < FRAZIONE_BASSA:
+        elif netto_r > 0 and f is not None and f < FRAZIONE_BASSA:
             avvisi.append("📉 **%s** su %s: preso il **%.0f%%** di quanto la giornata offriva "
                           "dopo il suo ingresso (uscito con `%s`)" % (
                               r.get("strategy"), r.get("symbol"), 100 * f,
@@ -1484,7 +1494,7 @@ def main():
                         "una sezione muta e' un'informazione, un totale "
                         "sbagliato no._"]
             else:
-                # 2) stesso filtro del piccolo: le operazioni SENZA COMMENTO
+                # 2) stesso filtro del piccolo: le righe a MAGIC 0 (non di un nostro EA)
                 #    (strategy vuota E magic 0) stanno FUORI dal totale, ma si
                 #    mostrano. Firma di Claudio del 07/09: non e' una regola
                 #    "del piccolo", e' come si legge un conto.
@@ -1571,17 +1581,18 @@ def main():
                 if man_reale:
                     netto_man_re = sum(_netto_r(r) for r in man_reale)
                     ultima = max(r["_ct"] for r in man_reale).strftime("%Y-%m-%d")
-                    out += ["", "### 🚫 Fuori dal totale — operazioni SENZA COMMENTO (reale)", "",
-                            "`strategy` vuota **e** `magic` 0: non appartengono a "
-                            "nessuna nostra sedia. **%d operazion%s, %+.2f** "
+                    out += ["", "### 🚫 Fuori dal totale — operazioni NON della flotta (`magic` 0, reale)", "",
+                            "`magic` **0**: non appartengono a nessuna nostra "
+                            "sedia (il criterio e' **solo** il magic dal 07/10/2026, qualunque sia il commento). **%d operazion%s, %+.2f** "
                             "(ultima il %s). **Non entrano** nel netto qui sopra "
                             "— stessa regola del piccolo, Claudio 07/09/2026."
                             % (len(man_reale), "i" if len(man_reale) > 1 else "e",
                                netto_man_re, ultima)]
                 if amb_reale:
-                    out += ["", "> 🔴 **%d operazion%s con commento e magic DISCORDI "
-                            "sul CONTO REALE.** Restano nel totale e vanno capite: "
-                            "pid %s"
+                    out += ["", "> ⚠️ **%d operazion%s col commento VUOTO ma il `magic` "
+                            "valorizzato sul CONTO REALE**: sono nostri EA che non "
+                            "scrivono il commento, quindi **restano nel totale** ed "
+                            "e' giusto. Si elencano per attribuirle: pid %s"
                             % (len(amb_reale), "i" if len(amb_reale) > 1 else "e",
                                ", ".join(str(r.get("pid", "?")) for r in amb_reale[:10]))]
 
