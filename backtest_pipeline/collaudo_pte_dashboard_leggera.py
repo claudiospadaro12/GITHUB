@@ -186,8 +186,12 @@ DEFAULT_ATTESI = {
     "InpAlertPopup": "false", "InpAlertSuono": "false", "InpAlertMinuti": "5",
     "InpModoConfronto": "false", "InpCellePerCiclo": "20", "InpRicontrolloSec": "5",
 }
-PAR_CAMPI = ["candela", "tmaModo", "tmaS", "atrS", "multS", "tmaF", "atrF", "multF", "corpoMaxPct", "soloFuori",
-             "canale", "usaCode", "rapInf", "rapSup", "flip", "semeHA"]
+# ogni campo di PD_Par e l'input da cui DEVE arrivare (raccordo: un campo scollegato non lo vede nessun numero)
+PAR_DA_INPUT = {"candela": "(int)InpCandela", "tmaModo": "(int)InpTmaModo", "tmaS": "InpTmaLento", "atrS": "InpAtrLento",
+                "multS": "InpMultLento", "tmaF": "InpTmaVeloce", "atrF": "InpAtrVeloce", "multF": "InpMultVeloce",
+                "corpoMaxPct": "InpCorpoMaxPct", "soloFuori": "InpSoloFuoriCanale", "canale": "(int)InpCanale",
+                "usaCode": "InpUsaCode", "rapInf": "InpRapCodaInf", "rapSup": "InpRapCodaSup", "flip": "InpConfermaFlip",
+                "semeHA": "InpSemeHA"}
 
 
 def norm(x):
@@ -350,9 +354,9 @@ def raccordo(src, code, bag):
     oi = norm(corpo(code, "OnInit") or "")
     if "EventSetTimer(1);" not in oi:
         bag.append("RACCORDO: timer non a 1 s in OnInit")
-    for c_ in PAR_CAMPI:
-        if "gPar.%s=" % c_ not in oi:
-            bag.append("RACCORDO: gPar.%s non assegnato in OnInit" % c_)
+    for c_, v_ in PAR_DA_INPUT.items():
+        if "gPar.%s=%s;" % (c_, v_) not in oi:
+            bag.append("RACCORDO: gPar.%s non e' %s in OnInit" % (c_, v_))
     oc = norm(corpo(code, "OnCalculate") or "")
     if not oc.endswith("{return(rates_total);}"):
         bag.append("OnCalculate deve essere vuoto (return(rates_total))")
@@ -863,7 +867,7 @@ def numeri(cx, sers, bag, verbose, rapido=False):
             continue
         # CONTRO-ESEMPIO 1: canali corti (TMA 5, ATR 10) -> la finestra la decide il seme della HA ricorsiva.
         # Controllo: seme 50 == specchio. Contro-esempio: seme 2 DEVE divergere (se no il confronto non morde).
-        pk = cfg(candela=2, canale=2, tmaS=5, tmaF=5, atrS=10, atrF=10, multS=0.5, multF=0.5, seme=50)
+        pk = cfg(candela=2, canale=2, tmaS=5, tmaF=5, atrS=10, atrF=10, multS=0.1, multF=0.1, seme=50)
         confronta(cx, sp, ser, pk, L, 0, 3, "%s HA ricorsiva, canali corti, seme 50" % tf, bag, verbose)
         # seme misurato DIRETTAMENTE sulla candela piu' profonda (shift 30): finestra = 30+1+seme, come PD_Bisogno
         def scarto_seme(seme):
@@ -1005,6 +1009,7 @@ MUTANTI = [
     ("timer a 5 s", "   EventSetTimer(1);", "   EventSetTimer(5);"),
     ("rinvio senza crescita", "gAttesa[k]=(gAttesa[k]<=0 ? 2 : (gAttesa[k]>=150 ? 300 : gAttesa[k]*2));", "gAttesa[k]=2;"),
     ("parametro flip non passato", "gPar.flip=InpConfermaFlip;", "gPar.flip=false;"),
+    ("rapporti delle code scambiati", "gPar.rapInf=InpRapCodaInf; gPar.rapSup=InpRapCodaSup;", "gPar.rapInf=InpRapCodaSup; gPar.rapSup=InpRapCodaInf;"),
     ("seme HA tolto dalle barre minime", "   if(p.candela==2) b=PD_MaxI(b,s+1+p.semeHA);\n", ""),
 ]
 
