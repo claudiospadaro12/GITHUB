@@ -1408,7 +1408,10 @@ def test_click(cx, bag, verbose):
     no = ["PDL_r_35_0", "PDL_r_0_3", "PDL_t_2_34", "PDL_s_35", "PDL_ht_3", "PDL_hr_3", "PDL_r_3", "PDL_r_3_x", "PDL_r__1",
           "PDL_r_-1_0", "XDL_r_1_1", "PDL_titolo", "PDL_pannello", "PDL_h_pair", "PDL_b_hide", "PDL_b_refresh", "PDL_b_ha",
           "PDL_b_doji", "PDL_b_ema", "PDL_b_st", "PDLG_d_1696000000", "PDL_r_1_1_1", "PDL_", "PDL_s_", "PDL_r_00001_0",
-          "PDL_x_1_1", "pdl_r_1_1", "PDL_r_1_"]
+          "PDL_x_1_1", "pdl_r_1_1", "PDL_r_1_",
+          # CONTRO-ESEMPIO del controllo delle cifre: '/' vale '0'-1, quindi senza quel controllo "1/" diventerebbe 9 e
+          # "2/" 19, DENTRO la tabella (35 righe): solo il controllo delle cifre li rifiuta (gli altri nomi cadono gia' sui limiti)
+          "PDL_s_1/", "PDL_r_2/_1", "PDL_t_1/_0"]
     for nm in no:
         righe.append("BERS %s %d %d" % (nm, nS, nT)); att.append((0, -1, -1))
     out = cx.run("\n".join(righe) + "\n")

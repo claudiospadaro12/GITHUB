@@ -41,6 +41,16 @@
 //|  NON compilato qui (nessun MetaEditor in questo ambiente): la     |
 //|  prima compilazione e il primo giro nel tester sono il collaudo  |
 //|  che manca. Solo DEMO/TESTER finche' Claudio non firma.          |
+//|  v1.05 (07/10 notte, diagnosi NATCLA_DIAG_U30): CaricaDati       |
+//|  "tocca" hEma200, hAtrN e hAdx con un CopyBuffer di 1 elemento   |
+//|  PRIMA dei controlli BarsCalculated, esito ignorato. Nel tester  |
+//|  un indicatore si calcola solo quando si chiede un suo buffer:   |
+//|  su U30USD/D30EUR (storia BCM dal 26/09/2024, meno di 200 barre  |
+//|  all'avvio) l'EMA200 restava a BarsCalculated=-1 per tutta la    |
+//|  finestra e l'EA non chiedeva mai un buffer (stallo, zero CONTA).|
+//|  Nessun'altra modifica. Dal vivo, e nel tester con storia        |
+//|  davanti, nessun cambiamento atteso (il tocco non cambia valori  |
+//|  ne' stato). NON compilato qui: la verifica e' il lotto C0.      |
 //|                                                                  |
 //|  MAPPA REGOLA -> CODICE (sigle della specifica, par. 1)          |
 //|   I1-I3 Supertrend HL2 +/- k x ATR10 ......... NC_STCore (puro)  |
@@ -81,10 +91,10 @@
 //+------------------------------------------------------------------+
 #property copyright "Ea Nat&Cla - progetto Claudio (ABTG)"
 #property description "Ea Nat&Cla: modo AUDIO (collega) / motore solo EMA200 (audio WA0092). Modo PDF ESCLUSO da Claudio il 07/10/2026. Specifica report/NATCLA_SPECIFICA_2026-10-07.md. Rischio 0,25% = SEGNAPOSTO da firmare da Claudio."
-#property version   "1.04"
+#property version   "1.05"
 #property strict
 
-#define NC_VER "1.04"
+#define NC_VER "1.05"
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -1261,6 +1271,16 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,const MqlTradeRequest &
 //==================================================================
 bool CaricaDati()
   {
+   //--- v1.05 [diagnosi NATCLA_DIAG_U30 07/10, classi 1170/1171]: TOCCO degli handle PRIMA di ogni uscita e
+   //    di ogni BarsCalculated. Nel tester un indicatore si calcola SOLO quando si chiede un suo buffer: se
+   //    alla creazione non c'era storia (indici BCM dal 26/09/2024, < 200 barre) BarsCalculated resta -1 e
+   //    senza una richiesta il controllo qui sotto non lascerebbe MAI arrivare ai CopyBuffer (stallo).
+   //    Esito IGNORATO apposta: alla prima chiamata un 4806 (dati non pronti) e' atteso; decidono i controlli
+   //    di sempre qui sotto. Il tocco non scrive nessuno stato dell'EA (array locale, mai letto).
+   double tocco[1];
+   CopyBuffer(hEma200,0,1,1,tocco);
+   CopyBuffer(hAtrN,0,1,1,tocco);
+   CopyBuffer(hAdx,0,1,1,tocco);
    int barre=Bars(_Symbol,gTF);
    int n=(barre-2<NC_BARRE) ? barre-2 : NC_BARRE;
    if(n<NC_BARRE_MIN) return false;
