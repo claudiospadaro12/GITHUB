@@ -1,6 +1,6 @@
 # ANALISI LIVE EMILIANO - 07/10/2026 (mercoledi' mattina: "analisi del DAX con Luca, apertura sotto il livello, short sul VWAP/numero tondo, retest con la stessa size, oro e ORB")
 
-**Stato: BOZZA, NON passata dal cancello** (`controlla_riga.py --oggetto md` eseguito: esito in fondo; il passaggio `controllo-preventivo` non e' stato fatto).
+**Stato: passata dal cancello il 07/10/2026** (strato 1 `controlla_riga.py --oggetto md` verde; strato 2 `controllo-preventivo`: **PASS CON RISERVE dopo correzioni**, elenco in fondo).
 **Fonte unica:** `data/trascrizioni/LIVE_EMILIANO_2026-10-07.txt` (211 righe per `cat -n`, 53.013 byte, trascrizione automatica TurboScribe).
 Letta per intero, riga per riga. Nessuna navigazione, nessun completamento da memoria: dove cito il repo lo dico col file.
 **Analista:** agente `analista-trascrizioni`, 07/10/2026.
@@ -28,15 +28,17 @@ il server BCM e' **un'ora indietro** rispetto all'Italia `[DERIVATO da report/OR
 
 ## 1.0 La riga che conta
 
-> **Su 211 righe: 32 parametri con valore (nessuno e' una regola completa e verificabile), 27 meccanismi, 11 bandiere (ZERO rosse piene; 5 arancioni; 6 ambra), ZERO regole prop, ZERO trucchi anti-prop,
+> **Su 211 righe: 32 parametri con valore (nessuno e' una regola completa e verificabile), 27 meccanismi, 10 bandiere (ZERO rosse piene; 5 arancioni; 5 ambra), ZERO regole prop, ZERO trucchi anti-prop,
 > ZERO numeri di P/L in euro.** E' una live **operativa dal vivo** (DAX in apertura) con un **allievo, Luca, che apre con l'analisi** (r.3-27) ed Emiliano che poi **opera e commenta** (r.89-205).
-> **Il pezzo che fa piu' differenza per noi sono TRE meccanismi di gestione, tutti dichiarati in prima persona e nessuno misurato:**
+> **Il pezzo che fa piu' differenza per noi sono TRE meccanismi di gestione, nessuno misurato** ((1) e (2) in prima persona da Emiliano; (3) in parte dal piano di Luca):
 > **(1)** **retest con la STESSA size del primo ordine**, ammesso solo se *"hai gia' un fieno in cascina"* (r.169-171: *"se avevo 10 mettevo 10, se avevo 20 mettevo 20, la stessa size identica"*): **re-entry dopo profitto parziale**;
-> **(2)** **chiudere meta' della posizione in profitto per pagare la perdita dell'altra gamba** (r.161: *"togli una quantita' tale dal tuo ordine in profitto, tale per cui ti copre la perdita"*): *"Io lo faccio quasi sempre"*;
-> **(3)** **scala di ordini a size crescente verso il livello migliore** (r.69 *"2-4 fa 6, 10"*; r.91 *"dieci contratti"*; r.191 *"questa da venti questa da dieci"*), gia' vista il 05/10 (2-4-10-20).
-> Nessuno e' un hedging (**l'hedging di r.235-243 del 05/10 qui NON c'e'**), ma **(1)-(3) sono parenti del recovery/scale-in**: arancioni, non rossi (§2.7). Sono **gli opposti** del nostro modello (un ciclo/giorno per sedia, rischio in % del conto, un solo stop).
-> **Il secondo pezzo e' una CONTRADDIZIONE FRA LIVE SUCCESSIVE:** il 05/10 (Tommy/Emiliano) *"in apertura scarica sempre in direzione opposta"*; il 07/10 *"aperto sotto un livello di resistenza ... tendo ad andare short"* (r.119-133) e,
-> subito dopo, la sorpresa: *"non mi scrittavo neanche che aprendo sotto potesse rimbalzare in questa maniera"* (r.135). **Una regola di apertura che cambia in 48 ore non e' una regola.**
+> **(2)** **chiudere meta' della posizione in profitto per pagare la perdita dell'altra gamba** (r.161: *"togli una quantita' tale dal tuo ordine in Profitto, tale per cui ti copre la perdita"*): *"Io lo faccio quasi sempre"* (r.163);
+> **(3)** **scala di ordini a size diversa secondo la qualita' del livello** (r.69, **Luca**: *"2-4 fa 6, 10"*; r.91 *"dieci contratti"*; r.99 tondo senza confluenza = *"quantita' inferiore"*; r.191 *"questa da venti questa e' da dieci"*), parente della scala 2-4-10-20 del 05/10 (r.209: *"entro con 10, con 20 ... l'ordine civetta"*).
+> Nessuno e' un hedging (**l'hedging di r.235-243 del 05/10 qui NON c'e'**). **(1) e (3) sono parenti del re-entry/scale-in: arancioni; (2) riduce l'esposizione, non la aumenta: ambra** (§2.7). Sono **gli opposti** del nostro modello (un ciclo/giorno per sedia, rischio in % del conto, un solo stop).
+> **Il secondo pezzo NON e' una contraddizione fra live (verificato alla fonte):** il 05/10 (Tommy, r.141-155) la regola e' *"candela importante [tra le 8 e le 9] ... arriva sul livello importante. In prima istanza in apertura scarica sempre in direzione opposta"*;
+> il 07/10 la stessa regola e' **richiamata** (r.63: *"quando fa queste candele importanti, o di discesa o di salita, in apertura se le rimangia"*) e la mattina la **segue**: pre-apertura gia' -50/60 punti (r.23, r.37) sul supporto (r.43),
+> apertura, **rimbalzo** fino a VWAP/tondo (r.121-135: *"non mi scrittavo neanche che aprendo sotto potesse rimbalzare in questa maniera"*), poi lo short *"aperto sotto un livello di resistenza"* (r.123) **dalla resistenza**.
+> Le due frasi parlano di **due momenti diversi** (primo scarico, poi direzione) e si compongono. Resta **n = 1 mattina**: coerenza, non misura.
 > **Il terzo pezzo e' una convergenza di forma con la nostra misura piu' solida:** il **retest** (*"i livelli li va sempre a ritestare, per definirli"*, r.169; *"il retest e' il momento in cui puo' rientrare"*, r.171) e' il motore che nel repo
 > **vive** mentre il breakout nudo e' chiuso (`report/CENSIMENTO_ORB_2026-09-29.md` §0.3; `report/DIARIO.md` r.87: *"RETEST ✓ re incontrastato"*). **Non indipendente** (stessa scuola).
 
@@ -55,15 +57,15 @@ il server BCM e' **un'ora indietro** rispetto all'Italia `[DERIVATO da report/OR
 |---|---|---|---|
 | 1 | **Retest con la stessa size** dopo aver gia' portato a casa un parziale (*"fieno in cascina"*) | r.169, r.171 | **NUOVO** meccanismo di re-entry; **incompatibile** con `InpOneTradePerDay=true` delle sedie DAX (scheda 09/30 r.279). Non si copia |
 | 2 | **Chiudere la gamba perdente con meta' del profitto dell'altra** | r.161 | **NUOVO**; parente del recovery (netting). Arancione. *"Io lo faccio quasi sempre"* |
-| 3 | **Regola dell'apertura sotto un livello -> si va nella direzione** (short), subito smentita dal rimbalzo | r.119-135 | **CONTRADDICE il 05/10** (*"scarica sempre in direzione opposta"*, scheda 10/05 C5). Dichiarazione senza misura |
+| 3 | **Regola dell'apertura sotto un livello -> short dalla resistenza**, dopo un primo rimbalzo | r.119-135 | **Si compone col 05/10** (*"in apertura scarica sempre in direzione opposta"*, richiamata qui a r.63): primo scarico contro la candela di pre-apertura, poi direzione. Dichiarazione senza misura, n = 1 |
 | 4 | **Numero tondo SOLO con una confluenza; altrimenti quantita' piu' piccola** | r.93-101, r.191 | **CAMBIA** il 02/10 e il 05/10 (tondo come livello in se'). Ora: *"io personalmente non lavoro il numero tondo fine a se stesso"* (r.191) |
 | 5 | **Fill:** per essere eseguiti l'ordine va messo **prima** del tondo, non sopra (*"mi sfiora e non mi becca"*, Luca mancato **per 10 punti**) | r.167-169 | **NUOVO**: lezione di esecuzione. Tocca la distanza `Buffer` dei nostri pendenti |
-| 6 | **Stop 20-30 punti dal primo ordine** sul DAX (r.65) | r.65 | **[DERIVATO]** 20-30 / 1,70 = **11,8-17,6x lo spread BCM**: **sotto il pavimento duro 13,3x per il 20; sotto 40x in ogni caso** (`APERTURE_DAX_MAPPA_2026-10-03.md` §3). **Quello che fa lui non passa il nostro cancello di costo** |
+| 6 | **Stop 20-30 punti dal primo ordine** sul DAX (r.65, **piano di Luca**, approvato da Emiliano r.73) | r.65 | **[DERIVATO]** 20-30 / 1,70 = **11,8-17,6x lo spread BCM**: **sotto il pavimento duro 13,3x per il 20; sotto 40x in ogni caso** (`APERTURE_DAX_MAPPA_2026-10-03.md` §3). **Quello stop non passa il nostro cancello di costo** |
 | 7 | **Volumi M15 decrescenti = niente ORB**; i minimi della notte valgono come livello di **retest**, non come **floor di un box ORB** | r.193-195 | Converge col filtro volumi gia' vivo nella RETEST Nasdaq (`APERTURE_NASDAQ_MAPPA_2026-10-03.md` r.50). Non indipendente |
 | 8 | **Contro-trend long sul tondo** con weekly **e** daily short, *"esasperando l'operativita'"* per didattica | r.173-179 | **Contraddice** *"sempre in direzione"* (r.189, r.191) detto 10 righe dopo. Bandiera arancione |
 | 9 | **Sistema di Girolamo: pendenti automatici su tutti i numeri tondi** (200, 100, 300) *"perche' tanto il mercato sale e scende ad onde"*, costruito con IA | r.175, r.191 | **Griglia di pendenti** di un allievo, lodata (*"bellissimo sistema"*) ma **non adottata** da Emiliano. Intelligence, non pratica |
 | 10 | **Uscita con l'ATR** e **cancellare tutti i pendenti in prossimita' di dati** | r.205-207 | **Conferma** la gestione ATR di `770411` (2,5x ATR, mappa DAX §3); il filtro news dei preset FTMO indici resta **spento** (decisione di Claudio) |
-| 11 | **Il DAX viene tenuto per la prima volta in M3** (S&P e Nikkei a fianco) | r.5, r.173, r.189 | M3 era **assente** da Paolo (01/10 e 06/10); `ABTG_DAX_M3` **mai misurato**. Una testimonianza, non una misura |
+| 11 | **Il DAX tenuto in M3** (S&P e Nikkei a fianco) | r.5, r.173, r.189 | **prima volta nelle live Emiliano trascritte** (18/09-05/10: 0); **non** nuovo nel corso: M3 c'e' in live Paolo vecchie (`docs/live_paolo/` 05/05, 07/05, 03/09) e `ABTG_DAX_M3` e' la "Strategia DAX M3" (Supertrend su M3), **mai un CSV** (`backtest_pipeline/REGISTRO_TEST.md` r.123). Una testimonianza, non una misura |
 
 ## 1.3 Regole di rischio / prop
 
@@ -80,8 +82,8 @@ L'unico numero di size e' in **contratti**: 10, 20, *"quattro lotti"* (r.41), 2-
 ## 1.5 Bandiere (dettaglio in §2.7)
 
 **Rosse piene: 0.** **Arancioni (5):** B1 *"riparare l'operazione"* col secondo ordine (mediazione); B2 sistema di Girolamo (griglia di pendenti sui numeri tondi); B3 stessa size sul retest con "fieno in cascina" (re-entry);
-B4 scala di size crescente (2-4-10-20, ripetuta); B5 contro-trend long con W1+D1 short. **Ambra (6):** B6 chiusura meta' profitto per coprire la perdita; B7 assoluti (*"il profitto lo si porta sempre a casa"*);
-B8 sposta gli ordini in corsa quando e' "sfiorato"; B9 size senza capitale ne' valore del punto; B10 pressione sui partecipanti a "cliccare" in live; B11 regola di apertura che cambia fra live. **Trucchi anti-prop: 0.** Hedging: **0 parole** (a differenza del 05/10).
+B4 scala di size secondo il livello (parente del 2-4-10-20 del 05/10); B5 contro-trend long con W1+D1 short. **Ambra (5):** B6 chiusura meta' profitto per coprire la perdita; B7 assoluti (*"il profitto lo si porta sempre a casa"*);
+B8 sposta gli ordini in corsa quando e' "sfiorato"; B9 size senza capitale ne' valore del punto; B10 pressione sui partecipanti a "cliccare" in live. (La B11 della bozza, "regola di apertura che cambia fra live", e' **ritirata**: vedi §1.0.) **Trucchi anti-prop: 0.** Hedging: **0 parole** (a differenza del 05/10).
 
 ## 1.6 Quello che NON c'e' (verificato con `grep`, case-insensitive)
 
@@ -94,7 +96,7 @@ B8 sposta gli ordini in corsa quando e' "sfiorato"; B9 size senza capitale ne' v
 | PF / backtest / statistica / storico / anni | 0 / 0 / 0 / 0 / 0 | **non c'e' niente su PF, storico, regimi** |
 | ATR | 2 | r.205 *"l'uscita qua con l'ATR"* (e un'altra occorrenza nello stesso passo) |
 | M3 | 3 | r.5, r.173, r.189 |
-| VWAP/WAP/VVAP/move up | 20 | **protagonista** (ingressi, stop, bande di regressione) |
+| VWAP/V-Vap/VVAP/wwap/move up | 26 | **protagonista** (ingressi, stop, bande di regressione) |
 | retest/ritest | 18 | **protagonista** |
 
 ---
@@ -176,9 +178,9 @@ OGGETTO          Mercoledi' 07/10 mattina: DAX (apertura cash), analisi weekly/d
 | P13 | livello | **25.166** *"a 66 ... un livello importante"* | r.89 | r.89 | `[TRASCRITTO dubbio]` (25.266 o 25.166: *"25,166"* detto) |
 | P14 | size DAX | **dieci contratti** sopra; sul tondo **quantita' inferiore** | *"dieci contratti mi metto sopra"*; *"ci metto qua uno, e' a cavallo"* | r.91, r.101 | **`[TRASCRITTO dubbio]`**: "uno" |
 | P15 | secondo ordine | a **~20 punti** dal tondo, *"sull'86"* | *"Siamo distanti circa 20 punti, quindi diciamo sull'86"* | r.103 | chiaro |
-| P16 | regola d'apertura | *"aperto sotto un livello di resistenza"* -> primo ordine al livello, secondo ordine al VWAP, **terzo al numero tondo**; tendo **short**; **stop sopra il VWAP** | *"la regola e' aperto sotto un livello di resistenza. Il primo ordine lo metto li', il secondo ordine lo piazzo su questo livello. Quindi per me tendo ad andare short ... lo stop lo metto sopra V-Vap"* | r.123-129 | chiaro come regola; **assolutizzata dal giorno** (B11) |
+| P16 | regola d'apertura | *"aperto sotto un livello di resistenza"* -> primo ordine al livello, secondo ordine al VWAP, **terzo al numero tondo**; tendo **short**; **stop sopra il VWAP** | *"la regola e' aperto sotto un livello di resistenza. Il primo ordine lo metto li', il secondo ordine lo piazzo su questo livello. Quindi per me tendo ad andare short ... lo stop lo metto sopra V-Vap"* | r.123-129 | chiaro come regola; **assolutizzata dal giorno**; si compone con la regola del 05/10 (§1.0) |
 | P17 | gestione (primo/secondo ordine) | primo ordine *"me lo porta a casa"*; secondo *"mi porta a casa 10 e chiudo il resto"*; **stop in pari**; poi *"ho portato Profitto con la meta'"*; stop *"sopra l'ordine pendente"* | r.143-151 | r.143-151 | `[TRASCRITTO dubbio]` sul "10" (punti? contratti?) |
-| P18 | regola mentale | chiudi **meta' della posizione in perdita... togli dalla posizione in profitto la quantita' che copre la perdita**; gestisci solo l'operazione in profitto | *"Prendi, chiudi meta' posizione qua, questo guadagno, chiudi questa perdita e ti gestisci solo l'operazione in Profitto ... togli una quantita' tale dal tuo ordine in Profitto, tale per cui ti copre la perdita"* | r.161 | chiaro; *"Io lo faccio quasi sempre, quasi sempre"* |
+| P18 | regola mentale | chiudi **meta' della posizione in perdita... togli dalla posizione in profitto la quantita' che copre la perdita**; gestisci solo l'operazione in profitto | *"Prendi, chiudi meta' posizione qua, questo guadagno, chiudi questa perdita e ti gestisci solo l'operazione in Profitto ... togli una quantita' tale dal tuo ordine in Profitto, tale per cui ti copre la perdita"* | r.161-163 | chiaro; *"Io lo faccio quasi sempre, quasi sempre"* (r.163) |
 | P19 | primo ordine di Luca | **25.306** (*"Ah, 306, si'"*), **sopra** il numero tondo; **mancato per 10 punti** | r.167 | r.167 | `[TRASCRITTO dubbio]` ("306") |
 | P20 | regola di fill | *"quando voglio essere fillato ... lo metto sotto il numero tondo"* (per uno short) | *"Io quando voglio essere beccato non lo metto sopra il numero tondo, lo metto sotto il numero tondo quando voglio essere fillato"* | r.169 | chiaro come regola; la **distanza non e' dichiarata** |
 | P21 | retest: size | **stessa size** del primo ordine (*"se avevo 10 mettevo 10, se avevo 20 mettevo 20"*), *"sopra invece lo messo leggermente in superiore"* | r.169 | r.169 | chiaro (re-entry full size) |
@@ -258,14 +260,13 @@ OGGETTO          Mercoledi' 07/10 mattina: DAX (apertura cash), analisi weekly/d
 | B1 | ***"col secondo ordine penso di andare a riparare l'operazione"*** (mediazione) | **arancione** | r.187 | il secondo ordine **ripara** il primo: e' averaging. Con stop sul primo? **non detto** (D3) |
 | B2 | **Sistema di Girolamo**: pendenti automatici **su tutti i numeri tondi** (200, 100, 300), via IA | **arancione** | r.175, r.191: *"mette l'ordine pendenti su i livelli numeri tondo perche' dice lui li mette su tutti i numeri tondi ... perche' tanto dice il mercato che sale e scende ad onde"* | **griglia di livelli fissi**; Emiliano **lo elogia** ma dichiara *"io personalmente non lavoro il numero tondo fine a se stesso"* (r.191). **Documento come intelligence, non lo propongo** |
 | B3 | **Stessa size sul retest** con *"fieno in cascina"* | **arancione** | r.169, r.171 | **re-entry full size** dopo profitto: la perdita eventuale del retest e' piu' grande del primo ordine; **nessun cap del rischio dichiarato** |
-| B4 | **Scala di size crescente** (2-4-10-20 del 05/10; oggi 2-4-6-10, *"questa da venti questa da dieci"*) | **arancione** | r.69, r.91, r.191 | la size cresce **verso il livello migliore**, non dopo una perdita: scale-in contro il prezzo |
+| B4 | **Scala di size secondo il livello** (2-4-10-20 del 05/10; oggi *"2-4 fa 6, 10"* di Luca, *"questa da venti questa e' da dieci"*) | **arancione** | r.69, r.91, r.99, r.191 | la size cresce **verso il livello migliore**, non dopo una perdita: scale-in contro il prezzo. **Perche' non rossa:** la rossa di casa e' la size che cresce **dopo una perdita** o senza tetto (martingala/recovery); qui la scala e' **decisa al piazzamento** con **uno stop comune dichiarato** (r.65, r.71 *"lo stop di tutto ... sopra questo spike"*), quindi la perdita massima e' nota prima. **Diventa rossa** se D3 risponde che il primo ordine non ha stop |
 | B5 | **Contro-trend long con weekly e daily short**, per *"esasperare l'operativita'"* | **arancione** | r.173-179 *"Mi metto contro trend, si', mi metto contro trend"* | **contraddice** *"sempre in direzione"* (r.189, r.191) e *"se vado a lavorarmi l'oro in queste condizioni prima o poi ci lascio le penne"* (r.191) detti pochi minuti dopo |
-| B6 | **Chiudi meta' in profitto per coprire la perdita** | ambra | r.161 *"togli una quantita' ... tale per cui ti copre la perdita"* | netting della perdita: **non e' hedging, non e' martingala**, ma e' il motivo per cui la gamba perdente non viene giudicata da sola |
+| B6 | **Chiudi meta' in profitto per coprire la perdita** | ambra | r.161 *"togli una quantita' ... tale per cui ti copre la perdita"* | netting della perdita: **non e' hedging, non e' martingala**, e **riduce** l'esposizione (chiude, non apre): per questo ambra e non arancione. Il difetto e' contabile: la gamba perdente non viene giudicata da sola |
 | B7 | **Assoluti**: *"il Profitto lo si porta sempre a casa, sempre, perche' sei in direzione"* | ambra | r.159; r.191 *"non e' possibile non portarci a casa il risultato"* | non misurato; **smentito dallo stesso r.195** (ORB short sbagliato) |
 | B8 | **Sposta gli ordini quando il prezzo li sfiora** | ambra | r.189-191 *"nei momenti in cui mi sfiora io come faccio sempre gli ordini li sposto piu' in giu'"* | gestione discrezionale, **non replicabile** |
 | B9 | **Size in contratti senza capitale ne' valore del punto** | ambra | r.41, r.91, r.191 | non si puo' ricostruire il rischio % |
 | B10 | **Pressione a "cliccare" in live** | ambra | r.191 *"io ho bisogno che vivete quel momento insieme a me ... se non cliccate state sempre a guardare manca un pezzo operativo"* | rischio didattico/emulazione, non nostro |
-| B11 | **Regola di apertura che cambia fra live** | ambra | 05/10 *"scarica sempre in direzione opposta"* vs 07/10 r.123-135 | confronto in §3 |
 
 **Nessuna rossa:** nessun hedging (e' **assente rispetto al 05/10**), nessuna martingala, nessun recovery dichiarato come tale, **nessun trucco anti-prop**, nessuno stop assente.
 
@@ -301,7 +302,7 @@ Confronto con: `report/SCHEDA_LIVE_EMILIANO_2026-10-05.md` (+ `-10-02`, `-09-30`
 | Struttura della live | 05/10: Emiliano da solo, *"live un po' operativa"* | **Luca fa l'analisi, Emiliano la commenta e poi opera**; l'allievo diventa il metro (*"ho avuto il buon maestro"*, r.27) | NUOVO formato |
 | Cascata weekly -> daily -> H1 | 05/10 C7: *"la direzione dei Wi-Fi dei Devi"* | **ripetuta** (r.29): *"si parte sempre da weekly, daily"* | CONFERMA |
 | Numero tondo | 02/10 (25.000), 05/10 (25.200): livello d'ingresso e di estensione | **solo con confluenza**; senza supporto **quantita' inferiore**; *"io personalmente non lavoro il numero tondo fine a se stesso"* (r.191) | **CAMBIA** (stretta) |
-| Apertura del mercato | 05/10: *"scarica sempre in direzione opposta"* (Tommy, riformulato da Emiliano); 02/10: ritest/rimbalzo sul tondo | **"aperto sotto un livello di resistenza -> si va short"** (r.123-129), poi rimbalzo | **CONTRADDICE il 05/10** |
+| Apertura del mercato | 05/10: *"in prima istanza in apertura scarica sempre in direzione opposta"* (Tommy, r.155, dopo una candela importante fra le 8 e le 9); 02/10: ritest/rimbalzo sul tondo | **richiamata** (r.63 *"in apertura se le rimangia"*) e **seguita**: rimbalzo, poi **"aperto sotto un livello di resistenza -> short"** dalla resistenza (r.123-135) | **SI COMPONE** (due momenti diversi), n = 1 |
 | Pre-apertura | 05/10: *"rischiosissimo"*; 02/10: *"rischio ... ancora moderato"* | **Luca**: rimbalzo ok **se il mercato e' chiuso**, vicino all'apertura *"come lanciare la monetina"* (r.49-53); **Emiliano concorda** (r.55) | CONFERMA 05/10, **in contrasto** col 02/10 |
 | Hedging | 05/10 r.235-243 (rossa piena) | **assente** | CAMBIA (non c'e' piu') |
 | Ordine "civetta" | 05/10: 2 contratti, poi 4, poi 10/20 | **"2-4 fa 6, 10"** (r.69) + **"cipettino"** (r.193) | CONFERMA/ripetizione |
@@ -310,7 +311,7 @@ Confronto con: `report/SCHEDA_LIVE_EMILIANO_2026-10-05.md` (+ `-10-02`, `-09-30`
 | Fill | mai trattato | **ordine prima del tondo per essere fillato**; Luca mancato per 10 punti | NUOVO |
 | Contro-trend | 28/09: *"long contro il piano"* (oro, DAX) | **contro-trend sul tondo con W1+D1 short** (r.173-179) | RIPETIZIONE della bandiera 28/09 |
 | ORB | 05/10: ORB 09:15, 15 min | **volumi M15 decrescenti = niente ORB**; **min notte come retest, non floor di box** (r.193-197) | NUOVO filtro |
-| M3 | non in 05/10 | **DAX in M3** (r.5, r.173, r.189): HH/LL | NUOVO |
+| M3 | non in 05/10 (ne' nelle live Emiliano trascritte prima) | **DAX in M3** (r.5, r.173, r.189): HH/LL | NUOVO per Emiliano; **non** per il corso (live Paolo 05/05, 07/05, 03/09; `ABTG_DAX_M3`) |
 | Uscita ATR / cancello dati | 30/09: *"tre stop di fila -> fermarsi"* | **uscita ATR + cancella tutti i pendenti vicino ai dati** (r.205-207) | NUOVO (uscita) |
 | Dashboard | 28/09: Bollinger/VWAP/Supertrend (strumenti che non abbiamo) | **"sweet"/currency strength**: *"dollaro forte e oro debole"* (r.197-205) | NUOVO |
 | Griglia | mai | **sistema di Girolamo**: pendenti su tutti i tondi (r.175, r.191) | NUOVO (bandiera arancione) |
@@ -336,7 +337,7 @@ Lette per questa parte (cito il file): `report/SCHEDA_LIVE_EMILIANO_2026-10-05.m
 | **Gestione parziale + stop in pari** | r.143-151 | TP1 50% + BE + trailing PREVBAR M5 (scheda 10/05 §C10) | **CONFERMA** (gia' nostra) |
 | **`770411` gestione ad ATR** | *"l'uscita qua con l'ATR"* (r.205) | `770411` 2,5x ATR(`InpMgmtTF`) (`APERTURE_DAX_MAPPA` §3, riga TF/ATR) | **CONFERMA la forma**, **parametri non detti** (S8) |
 | **Filtro volumi (RETEST Nasdaq)** | *"per rompere il livello ... ci devono essere i volumi"*; M15 decrescenti = non si entra (r.193-195) | *"Giornata 01/10: la RETEST Nasdaq ha saltato per volumi insufficienti ... E' il filtro volumi che fa il suo lavoro"* (`APERTURE_NASDAQ_MAPPA` r.50) | **CONVERGE di forma** (non indipendente); **non sappiamo** se il DAX RETEST ha il filtro `[NON VERIFICATO da me]` |
-| **ORB DAX non da fare** | Emiliano rinuncia all'ORB short sui minimi della notte (r.195) | DAX breakout 5-15' **0/4 OOS**, solo 35' positivo in entrambe le finestre (`CENSIMENTO_ORB` §0.4) | **CONFERMA ex post** (aneddoto, n=1) |
+| **ORB DAX non da fare** | Emiliano rinuncia all'ORB short sui minimi della notte (r.195) | DAX breakout 5-15' **0/8 in OOS** (ma **7/8 positive in IS**: ribaltamento), solo 35' positivo in entrambe le finestre (`CENSIMENTO_ORB` §0 punto 4, §5) | **CONFERMA ex post** solo sull'OOS (aneddoto, n=1) |
 | **`771531` EMA200 / Bulge** come "livello di confluenza" | la *"media 200 H1"* e le medie 14/89/100 sono **ingredienti** della confluenza (r.59, r.63, r.71) | `771531` EMA200 H1 Dow (cella viva, 257 posizioni); sul **DAX** l'EMA200 H1 e' **0/28** (scheda 10/05 §C4) | **non conferma l'EMA200 come regola autonoma**: per lui e' un ingrediente a occhio (stessa lettura del 05/10) |
 
 ## 4.2 CONTRADDETTI o MESSI IN DUBBIO
@@ -344,7 +345,7 @@ Lette per questa parte (cito il file): `report/SCHEDA_LIVE_EMILIANO_2026-10-05.m
 | sedia / EA | cosa dice Emiliano (citazione) | cosa c'e' da noi | verdetto |
 |---|---|---|---|
 | **Sedie DAX: un solo ciclo al giorno** (`770101`, `770105`, `770411`: `InpOneTradePerDay=true`, scheda 09/30 r.279) | **retest con la stessa size** *"se avevo 10 mettevo 10"* (r.169) e *"fieno in cascina"* (r.171); **terzo ordine** al tondo (r.129) | un ciclo/giorno, un solo stop, rischio in % del conto | **CONTRADDICE il modello**: re-entry e scale-in **non si copiano** (esclusione di casa); **non si misura** come candidato |
-| **Regola dell'apertura** (famiglia Apertura: BREAKOUT/RETEST/FADE) | **07/10:** *"aperto sotto un livello di resistenza ... tendo ad andare short"*; **05/10:** *"scarica sempre in direzione opposta"* | RANGE_FADE DAX **0/24** celle con PF >= 1 (OOS 0,772, stop 13,7x lo spread: ESCLUSO PER COSTO); BREAKOUT nudo **chiuso** (`CENSIMENTO_ORB` §0.3) | **MESSO IN DUBBIO come regola**: due regole opposte in 48 ore. Il suo stesso giorno (rimbalzo prima del calo) assomiglia piu' a un **retest** che a un **breakout**: aneddoto n=1 |
+| **Regola dell'apertura** (famiglia Apertura: BREAKOUT/RETEST/FADE) | **07/10:** *"aperto sotto un livello di resistenza ... tendo ad andare short"*; **05/10:** *"scarica sempre in direzione opposta"* | RANGE_FADE DAX **0/24** celle con PF >= 1 (OOS 0,772, stop 13,7x lo spread: ESCLUSO PER COSTO); BREAKOUT nudo **chiuso** (`CENSIMENTO_ORB` §0.3) | **Le due frasi (05/10 e 07/10) si compongono** (primo scarico opposto, poi direzione: §1.0); **ma nessuna e' misurata**. Il suo giorno (rimbalzo prima del calo) assomiglia piu' a un **retest** che a un **breakout**, e il **fade** del primo scarico da noi e' 0/24: aneddoto n=1 |
 | **`770411` arma pre-apertura (08:59 IT)** | Luca r.47-53: *"a ridosso dell'apertura ... assolutamente non si opera"*; Emiliano r.55 concorda; **ma** r.85-87 sui max/min della notte *"in pre-apertura ... si fa l'operazione"* `[TRASCRITTO dubbio]` | scheda 10/05 §C2 (la tensione c'era gia'); `PRV_DAXAP_03` (ritardo +5/+10/+15: IS sale, OOS crolla su 13-15 deal) | **TENSIONE RIPETUTA, terza live** (02/10, 05/10, 07/10): i due coach **non sono coerenti** sul pre-apertura. **Non cambia nessun numero nostro** |
 | **Stop 20-30 punti sul DAX** (r.65) | **[DERIVATO]** 11,8-17,6x lo spread BCM | frontiera `stop >= 40 x spread` = 68,0 idx (BCM 1,70), 53,2 (FTMO P95 1,33); pavimento duro 13,3x | **il suo stop NON passa il nostro cancello di costo**: se lo si volesse tradurre in EA, lo stop va rifatto a >= 68 (BCM). Non e' un dettaglio |
 | **Lato short sugli indici** | Emiliano **shorta** il DAX (r.123-131); **Paolo 06/10**: *"a me gli indici short non mi piace farli"* (analisi Paolo r.151) | 770105 short PF 0,965/0,957, DD OOS 12,3%; 770411 n=14 (scheda 10/05 §C1, §C14) | **i due coach divergono sul lato**; nessun numero nostro si muove |
@@ -381,7 +382,7 @@ Ordine di valore per **una sedia schierabile**: **basso** (la live e' discrezion
 
 ### Cosa NON propongo (col motivo)
 - **Re-entry con la stessa size / scale-in 2-4-10-20 / "chiudi meta' per coprire la perdita"**: esclusione di casa (rischio non cappato, un ciclo/giorno).
-- **Il sistema di Girolamo (pendenti su tutti i numeri tondi)**: **griglia di livelli fissi**; regola del 19/08 (niente griglie su motori senza edge) e nessun edge misurato. **Intelligence, non pratica.**
+- **Il sistema di Girolamo (pendenti su tutti i numeri tondi)**: **griglia di ordini su livelli fissi**, stop non detto, nessun edge misurato, nessuna fonte oltre la parola del coach. (Non e' la regola del 19/08, che vieta le griglie di **parametri** su motori senza edge: qui il motivo e' che una griglia di ordini senza stop dichiarato e' rischio non cappato.) **Intelligence, non pratica.**
 - **Contro-trend sul tondo / oro in contro-direzione**: lo sconsiglia lui stesso (r.189-191).
 - **ORB DAX/oro**: gia' misurati e negativi (`CENSIMENTO_ORB` §0.4-§0.5).
 - **Il VWAP M15 come livello**: **non lo propongo come misura nuova** da questa live perche' i dati non dicono ne' l'ancoraggio ne' le deviazioni (S4): **prima la domanda a Emiliano**.
@@ -393,7 +394,7 @@ Ordine di valore per **una sedia schierabile**: **basso** (la live e' discrezion
 
 | # | domanda | perche' |
 |---|---|---|
-| D1 | A Emiliano: **qual e' la regola dell'apertura, "scarica sempre in direzione opposta" (05/10) o "aperto sotto un livello -> si va in quella direzione" (07/10)?** Quale vale e quando? | due regole opposte in 48 ore (B11) |
+| D1 | A Emiliano: la lettura giusta e' **"prima scarica in direzione opposta alla candela di pre-apertura (05/10, richiamata il 07/10 r.63), poi si lavora la direzione dalla resistenza (07/10 r.123)"**? Che cosa conta come "candela importante" (punti? fra le 8 e le 9 di quale fuso)? | le due frasi si compongono (§1.0) ma nessuna ha una soglia: senza la soglia non si misura |
 | D2 | A Emiliano: **il "10" di r.143** (*"il secondo ordine mi porta a casa 10"*) sono **punti** o **contratti**? E il **"5 e 10"** di r.169? | senza questo il suo guadagno non si legge |
 | D3 | A Emiliano: *"col secondo ordine penso di andare a riparare l'operazione"* (r.187): **il primo ordine ha uno stop?** o l'obiettivo e' mediare? | e' **mediazione** se non c'e' stop sul primo |
 | D4 | **Per riascoltare**: i passaggi S1, S2, S7, S8 della registrazione (il `.txt` non ha timestamp) | §2.9 |
@@ -412,3 +413,13 @@ Ordine di valore per **una sedia schierabile**: **basso** (la live e' discrezion
 
 ## Esito del controllo deterministico
 `python3 backtest_pipeline/controlla_riga.py --oggetto md` su questo file e su `ANALISI_LIVE_PAOLO_2026-10-06.md` (07/10/2026): **ESITO: nessun difetto meccanico**, nessun rilievo su questo file. Strato 2 (`controllo-preventivo`) fatto il 07/10: **PASS CON RISERVE** dopo le correzioni elencate in fondo.
+
+## Correzioni del cancello (strato 2, `controllo-preventivo`, 07/10/2026)
+Fatte nel file prima della consegna, controllate alla fonte (`cat -n` delle trascrizioni 05/10 e 07/10, mappe, censimento):
+- **La "contraddizione fra live" (05/10 vs 07/10) e' ritirata**, con la B11: la regola del 05/10 (r.141-155: candela importante 8-9 -> primo scarico opposto) e' **richiamata** il 07/10 (r.63) e la mattina la segue (rimbalzo, poi short dalla resistenza). §1.0, §1.2 riga 3, §1.5, §2.7, Parte 3, §4.2 e D1 riscritti. Bandiere: 10 (5 arancioni, 5 ambra).
+- §1.0: (2) "chiudi meta'" e' **ambra** (B6), non arancione; (3) la scala e' in parte **di Luca** (r.69); B4 motiva perche' arancione e non rossa (stop comune dichiarato r.65/r.71; rossa se D3 dice "niente stop").
+- Stop 20-30 punti (r.65) e' il **piano di Luca** approvato da Emiliano (r.73), non "quello che fa lui".
+- §4.1 ORB DAX: "0/4 OOS" -> **0/8 in OOS, 7/8 in IS** (`CENSIMENTO_ORB` §0 punto 4).
+- M3: **non** e' la prima volta nel corso (live Paolo 05/05, 07/05, 03/09; `ABTG_DAX_M3`): e' la prima nelle live Emiliano trascritte.
+- Girolamo: il motivo d'esclusione **non** e' la regola del 19/08 (griglie di parametri) ma il rischio non cappato di una griglia di ordini.
+- Conteggi/righe: VWAP 26 occorrenze; "Io lo faccio quasi sempre" e' r.163.
