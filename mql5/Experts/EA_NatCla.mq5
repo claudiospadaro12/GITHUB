@@ -20,7 +20,10 @@
 //|                                                                  |
 //|  STATO: strato 1 (collaudo statico + logica pura su dati reali)  |
 //|  fatto; strato 2 (controllo-preventivo 07/10): PASS CON RISERVE, |
-//|  vedi report/NATCLA_CODICE_NOTE_2026-10-07.md par. 5.            |
+//|  vedi report/NATCLA_CODICE_NOTE_2026-10-07.md par. 5 e 6.        |
+//|  v1.01 (seconda lettura 07/10): riga VERIFICA ADX alla prima     |
+//|  barra, pendenti orfani ricancellati, scala tolta senza dati,    |
+//|  parziale che lascia il residuo >= minimo. SERVE UN TERZO LETTORE|
 //|  NON compilato qui (nessun MetaEditor in questo ambiente): la     |
 //|  prima compilazione e il primo giro nel tester sono il collaudo  |
 //|  che manca. Solo DEMO/TESTER finche' Claudio non firma.          |
@@ -64,10 +67,10 @@
 //+------------------------------------------------------------------+
 #property copyright "Ea Nat&Cla - progetto Claudio (ABTG)"
 #property description "Ea Nat&Cla: modo AUDIO (collega) / PDF (Supertrend Reversal) / motore solo EMA200. Specifica report/NATCLA_SPECIFICA_2026-10-07.md. Rischio 0,25% = SEGNAPOSTO da firmare da Claudio."
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
-#define NC_VER "1.00"
+#define NC_VER "1.01"
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -690,6 +693,63 @@ int NC_ControllaPendente(const int s,const double price,const double sl,const do
      }
    return 0;
   }
+
+//--- VERIFICA ADX (seconda lettura del cancello 07/10): l'ADX della barra n-1 RICALCOLATO dalle barre
+//    della finestra con le DUE formule candidate. NON entra in nessuna decisione: serve solo alla riga
+//    "VERIFICA ADX" stampata alla prima barra, che dice quale formula usa DAVVERO il terminale.
+//    tipo 0 = ADX.mq5 di MetaQuotes: DI per barra = 100 x DM/TR, medie esponenziali 2/(per+1), seme 0.
+//    tipo 1 = Wilder: TR e DM lisciati separatamente con 1/per, ADX = media di Wilder del DX.
+//    -1 = finestra troppo corta. Il seme pesa (1-2/(per+1))^n: sulle >= 300 barre dell'EA e' nullo.
+double NC_AdxUltimo(const double &h[],const double &l[],const double &c[],const int n,const int per,const int tipo)
+  {
+   if(per<1 || n<2*per+2) return -1.0;
+   double k=2.0/(per+1.0);
+   double pdi=0.0,ndi=0.0,adx=0.0,sTr=0.0,sP=0.0,sN=0.0,somDx=0.0;
+   int nDx=0;
+   bool pronto=false;
+   for(int i=1;i<n;i++)
+     {
+      double up=h[i]-h[i-1];
+      double dn=l[i-1]-l[i];
+      if(up<0.0) up=0.0;
+      if(dn<0.0) dn=0.0;
+      if(up>dn) dn=0.0;
+      else
+         if(up<dn) up=0.0;
+         else { up=0.0; dn=0.0; }
+      double tr=MathMax(MathMax(MathAbs(h[i]-l[i]),MathAbs(h[i]-c[i-1])),MathAbs(l[i]-c[i-1]));
+      if(tipo==0)
+        {
+         double pd=(tr!=0.0) ? 100.0*up/tr : 0.0;
+         double nd=(tr!=0.0) ? 100.0*dn/tr : 0.0;
+         pdi=pd*k+pdi*(1.0-k);
+         ndi=nd*k+ndi*(1.0-k);
+         double sd=pdi+ndi;
+         double dx=(sd!=0.0) ? 100.0*MathAbs((pdi-ndi)/sd) : 0.0;
+         adx=dx*k+adx*(1.0-k);
+         continue;
+        }
+      if(i<=per)
+        {
+         sTr+=tr; sP+=up; sN+=dn;
+         if(i<per) continue;
+        }
+      else
+        {
+         sTr=sTr-sTr/per+tr; sP=sP-sP/per+up; sN=sN-sN/per+dn;
+        }
+      double p=(sTr>0.0) ? 100.0*sP/sTr : 0.0;
+      double m=(sTr>0.0) ? 100.0*sN/sTr : 0.0;
+      double dxw=(p+m>0.0) ? 100.0*MathAbs(p-m)/(p+m) : 0.0;
+      if(!pronto)
+        {
+         somDx+=dxw; nDx++;
+         if(nDx==per){ adx=somDx/per; pronto=true; }
+        }
+      else adx=(adx*(per-1)+dxw)/per;
+     }
+   return adx;
+  }
 //@@NC_PURE_END
 
 //==================================================================
@@ -767,6 +827,7 @@ NCSetup  gSet[NC_NL];
 datetime gUltimoEp[NC_NL];   // chiave dell'ultimo episodio usato (nessun riarmo sullo stesso: X10)
 bool     gArmatoPrima[NC_NL];
 int      gOrfani=0;          // posizioni/ordini del magic senza etichetta di linea (dopo un riavvio)
+bool     gAdxVerificato=false; // riga "VERIFICA ADX" gia' stampata (una volta per avvio)
 
 //--- CSV per-setup
 int gFh=INVALID_HANDLE;
@@ -1019,10 +1080,11 @@ void Cfg(const string nome,const string valore,const string etichetta)
 
 void StampaConfigurazione()
   {
-   string avvio=StringFormat("AVVIO v%s | modalita' %s | %s %s | 1 u = %s (%s) | 1 pip = %s | magic %s | linee %s%s%s%s | ingresso %s | rischio setup %.2f%% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian %s | solo conta %s | placebo %.2f ATR",
+   string avvio=StringFormat("AVVIO v%s | modalita' %s | %s %s | 1 u = %s (%s) | 1 pip = %s | magic %s | linee %s%s%s%s | ADX %s, %s, max %.1f, periodo %d | ingresso %s | rischio setup %.2f%% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian %s | solo conta %s | placebo %.2f ATR",
                              NC_VER,NomeModalita(),_Symbol,EnumToString(gTF),DoubleToString(gU,_Digits),gUDescr,
                              DoubleToString(PipMT(),_Digits),IntegerToString(gMagic),
                              gUsaLinea[0] ? "ST25 " : "",gUsaLinea[1] ? "ST30 " : "",gUsaLinea[2] ? "ST35 " : "",gUsaLinea[3] ? "E200" : "",
+                             gAdxUsa ? "ACCESO" : "spento",(InpAdxTipo==NC_ADX_WILDER) ? "iADXWilder" : "iADX MetaQuotes",InpAdxMax,InpAdxPeriodo,
                              (gIngresso==0) ? "SCALA3_PENDENTI" : "MERCATO_PIU_PENDENTE",InpRischioSetupPct,
                              InpUsaGuardian ? "ON (nel tester FAIL-OPEN)" : "OFF",InpSoloConta ? "SI" : "no",InpPlaceboAtr);
    Print("[NatCla] ",avvio);
@@ -1202,16 +1264,40 @@ double Buf1(const int h,const int buf)
    return a[0];
   }
 
+//--- VERIFICA ADX [cancello 07/10, seconda lettura]: UNA riga alla prima barra con dati. Confronta
+//    l'ADX del TERMINALE (buffer 0 dell'handle scelto da InpAdxTipo) con i due ricalcoli dalle stesse
+//    barre: dice nel Giornale/log del tester quale formula usa davvero MT5, senza fidarsi della memoria.
+void VerificaAdx()
+  {
+   double t=gAdx[gN-1];
+   double e=NC_AdxUltimo(gH,gL,gC,gN,InpAdxPeriodo,0);
+   double w=NC_AdxUltimo(gH,gL,gC,gN,InpAdxPeriodo,1);
+   string chi="NESSUNA DELLE DUE: il filtro ADX va capito PRIMA di leggere i numeri";
+   if(MathAbs(t-e)<=0.05) chi="formula MetaQuotes (DI per barra, media esponenziale 2/(n+1))";
+   else
+      if(MathAbs(t-w)<=0.05) chi="formula di Wilder (1/n)";
+   Print("[NatCla] VERIFICA ADX barra ",TimeToString(gT[gN-1],TIME_DATE|TIME_MINUTES)," periodo ",IntegerToString(InpAdxPeriodo),
+         ": terminale ",EnumToString(InpAdxTipo)," = ",D(t,2)," | ricalcolo MetaQuotes = ",D(e,2)," | ricalcolo Wilder = ",D(w,2),
+         " -> il terminale coincide con: ",chi);
+  }
+
 //==================================================================
 //  NUOVA BARRA: una valutazione per linea attiva (par. 2.3)
 //==================================================================
 void OnNewBar()
   {
    bool ok=CaricaDati();
+   if(ok && !gAdxVerificato){ VerificaAdx(); gAdxVerificato=true; }
    for(int L=0;L<NC_NL;L++)
      {
       if(!gUsaLinea[L]) continue;
-      if(!ok){ Esito(IMB_VAL); Esito(IMB_ND); continue; }
+      if(!ok)
+        {
+         //--- [cancello 07/10, seconda lettura] senza dati la scala NON resta viva al prezzo della barra prima
+         if(gSet[L].attivo && !gSet[L].riempito && gSet[L].tipo==NC_TIPO_SCALA)
+           { CancellaSetupNonRiempito(L,"dati della barra non disponibili"); gArmatoPrima[L]=false; }
+         Esito(IMB_VAL); Esito(IMB_ND); continue;
+        }
       CalcolaLinea(L);
       if(gIngresso==0) ValutaScala(L);
       else ValutaPdf(L);
@@ -1750,6 +1836,11 @@ void Sincronizza()
                Log(StringFormat("AVVISO SEMAFORO SFORATO: %d setup riempiti contro un massimo di %d",Aperti(),InpMaxSetupAperti));
               }
            }
+         //--- [cancello 07/10, seconda lettura] pendenti di una linea SENZA setup in memoria e senza
+         //    posizioni: una cancellazione precedente non e' riuscita (rete, freeze level) e lo stato e'
+         //    gia' stato azzerato. Senza questa riga resterebbero vivi per sempre al prezzo vecchio, FUORI
+         //    dal semaforo (Aperti() non li vede) e senza scadenza. Si riprova a ogni passaggio.
+         if(np==0 && no>0) CancellaOrdiniLinea(L,"pendenti senza setup in memoria (cancellazione precedente non riuscita)");
          continue;
         }
       //--- registra gli ID delle posizioni della linea
@@ -1851,7 +1942,7 @@ void GestisciTP1(const int L)
       if(InpParzialeTP1Pct>0)
         {
          double cv=NC_LottoGiu(v*InpParzialeTP1Pct/100.0,step,vmin,0);
-         if(cv>0 && cv<v) gTrade.PositionClosePartial(tk,cv);
+         if(cv>0 && cv<v && v-cv>=vmin-1e-12) gTrade.PositionClosePartial(tk,cv);   // il residuo resta >= minimo
         }
       if(gBE)
         {

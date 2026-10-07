@@ -1,6 +1,6 @@
 # Ea Nat&Cla - note sul CODICE di `EA_NatCla.mq5` v1.00 (07/10/2026)
 
-**STATO: strato 1 fatto; strato 2 (`controllo-preventivo`, 07/10): PASS CON RISERVE (par. 5). Solo DEMO/TESTER: niente di questo
+**STATO: strato 1 fatto; strato 2 (`controllo-preventivo`, 07/10): PASS CON RISERVE (par. 5); seconda lettura (07/10, par. 6): PASS CON RISERVE, v1.01, **serve un TERZO lettore** sulle righe nuove dei pendenti. Solo DEMO/TESTER: niente di questo
 EA va su un conto senza la prima compilazione, un giro nel tester e una firma di Claudio.**
 Il file NON e' stato compilato (nessun MetaEditor qui) e NON e' girato nel tester. Nessun backtest lanciato, VPS non toccato.
 
@@ -134,3 +134,50 @@ sopra (spostate, non riscritte), l'unita' forex per valute (punto 6 del par. 3),
 `OnTradeTransaction`, il Guardian vivo, `iADX`/`iATR`/`iMA` del terminale, `OrderCalcProfit` del broker, l'orologio BCM, i
 preset vivi sui terminali (fuori dal repo) per il magic.
 
+
+## 6. Seconda lettura indipendente (`controllo-preventivo`, 07/10/2026): PASS CON RISERVE, v1.01, serve un TERZO lettore
+
+**Controllato, e com'e' andata** (anche i passati):
+- **ADX**: lo specchio `py_adx_mt5` coincide con `ADX.mq5` di MetaQuotes come lo ricordo io (DM pulito per barra, DI = 100 x DM/TR
+  **barra per barra**, EMA `2/(n+1)` su +DI, -DI e DX, seme 0): stessa formula, terza mano. Resta memoria, non misura.
+  **Le immagini del PDF NON contengono un ADX** (`NATCLA_ANALISI_PDF` r.174; p22 riletta: sotto-finestre `PeakRepairerStrict` e
+  `ATR(14)`): che il gruppo lavori su MT5/BCM e' vero (`EURUSD.bcm`, `CHFJPY.bcm`), ma l'ADX viene **solo dall'audio** e la
+  piattaforma della collega resta una deduzione. "Wilder <= 20 ~ `iADX` <= 25": sostenuto **in frequenza** sull'oro H1
+  (40/36/36 contro 38/38/38) e H4, non barra per barra. 👉 Aggiunta la riga **`VERIFICA ADX`** (prima barra con dati): ADX del
+  terminale contro i due ricalcoli dalle stesse barre (`NC_AdxUltimo`, blocco puro) e il verdetto scritto. Collaudo: ricalcolo ==
+  specchi a 0 di scarto su 13 finestre da 1500 barre; le due formule differiscono di > 0,05 in 13/13 (la riga **decide**).
+  La riga d'avvio stampa ora anche `ADX acceso/spento, iADX MetaQuotes/iADXWilder, max, periodo`.
+- **Percorsi di denaro riletti**: perdita per lotto con `OrderCalcProfit` su 1 lotto e distanza intera (vale per forex con
+  quotazione inversa, oro, indici: converte il broker; spread e commissione NON inclusi, come la casa); lotto per difetto,
+  sotto il minimo = scartato, tetto al massimo; stop sempre presente e dal lato giusto; STOPS/FREEZE nel controllo dei
+  pendenti; un LIMIT gia' superato dal prezzo **si scarta** (il server lo rifiuterebbe come prezzo non valido: non diventa
+  mercato); magic 7786xx **libero su tutti i rami** (`git grep` su ogni ref). Nessun controllo del margine: un ordine senza
+  margine viene rifiutato dal server (niente danno, un setup perso).
+- **Difetto di SOSTANZA trovato e corretto (classe 1164)**: se una cancellazione falliva, lo stato del setup veniva azzerato lo
+  stesso e il pendente restava vivo **per sempre**, al prezzo vecchio, **fuori dal semaforo** e senza scadenza (la guardia
+  anti-duplicato lo vedeva ma non lo cancellava mai). Ora `Sincronizza` lo ricancella a ogni passaggio. Correlati: la scala
+  armata si cancella anche su una barra senza dati; il parziale al TP1 parte solo se il residuo resta >= minimo.
+- **Buco del collaudo trovato**: "rischio x10" passato DAL CHIAMANTE (`RischioSoldi`) restava **VERDE** (D7 mordeva solo dentro
+  la funzione pura): ricorrenza della classe 1068. Invarianti 15-24 aggiunte; i **6 residui VERDI** del par. 5 ora sono presi.
+  Mutanti: **59/59 presi** (43 + 6 sui soldi + 6 residui + 4 sulle righe nuove), tutti su copie fuori dal repo.
+- **Buco B6**: confermato alla fonte (`ABTG_Guardian.mq5` r.385-413 somma solo posizioni). L'attenuante "la scala si ripiazza a
+  ogni barra" e' **vera per la scala non riempita** (max 1 barra) ma **falsa per i pendenti residui di un setup gia' riempito**
+  (restano fino a X10/TP1/flip/fine setup, mai ripassati dal Guardian) e per i setup adottati dopo un riavvio. Il tetto R per
+  setup tiene comunque per costruzione.
+
+**Riserve aggiunte** (oltre a quelle del par. 5, che restano):
+1. **Semaforo**: coerente con la LETTERA della specifica (2.2: cancella al riempimento), non con la frase "un setup alla volta":
+   il caso peggiore e' **linee attive x R** (AUDIO 3 x 0,25% = 0,75%), solo su salti di prezzo. Decisione di rischio = Claudio.
+2. **Riprezzamento**: la specifica dice `OrderModify`, il codice cancella e riarma (giustificato: il lotto dipende dalla distanza
+   dallo stop). In campo, se la lista ordini del terminale si aggiorna in ritardo, la guardia anti-duplicato puo' far saltare un
+   riarmo (lo scrive a log): da guardare nel primo giro demo.
+3. GTC dato per accettato dal simbolo (non si legge `SYMBOL_EXPIRATION_GTC`): se un simbolo lo rifiuta, `INVIO FALLITO` a log.
+
+**Checklist per il primo giro nel tester (leggibile nel log, una riga per punto):** (1) `AVVIO v1.01` con `1 u` giusta per il
+simbolo (oro 1,00; forex 1 pip) e `ADX ... iADX MetaQuotes`; (2) `VERIFICA ADX ... coincide con: formula MetaQuotes` (se dice
+NESSUNA, fermarsi); (3) almeno un `RIEMPITO` seguito da `cancellati N pendenti (X10...)` o `(semaforo...)`; (4) nessun
+`SEMAFORO SFORATO` oltre i salti del lunedi'; (5) in PDF, `ORDINE ... LIMIT` con scadenza e poi `E6 scadenza pendenti` o
+`SCADUTO_SENZA_RIEMPIMENTO`; (6) togliere e rimettere l'EA a posizione aperta: `AVVIO: ADOTTATO setup ...`.
+
+**NON COPERTO**: compilazione (nessun MetaEditor), tester, ordine degli eventi reali, `OrderCalcProfit`/`iADX` del terminale, il
+Guardian vivo, i preset sui terminali (fuori dal repo).

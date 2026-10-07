@@ -36,7 +36,7 @@ a tavolino, e si dice cosa resta fuori.
   R) RACCORDO (cancello 07/10): invarianti SEMANTICI sul codice non puro -- lato dell'ordine nel ramo
      (s>0), lotto/SL/TP passati come variabili controllate, ogni filtro arriva a NC_Contesto, ADX dal
      buffer 0, nessuna ora locale ne' costante oraria, riga d'avvio che stampa le variabili giuste.
-  M) MUTANTI CIECHI: 43 mutazioni del sorgente (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
+  M) MUTANTI CIECHI: 59 mutazioni del sorgente (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
      controllo. Un mutante che passa = buco del collaudo.
@@ -478,7 +478,8 @@ def invarianti_raccordo(src, code, bag):
         pezzi = re.split(r"%[-+ #0]*\d*(?:\.\d+)?[dfs]", lit)
         val = [src[a:b].strip() for a, b in args[1:]]
         mappa = {"rischio setup ": "InpRischioSetupPct", "placebo ": "InpPlaceboAtr", "magic ": "IntegerToString(gMagic)",
-                 "modalita' ": "NomeModalita()"}
+                 "modalita' ": "NomeModalita()", "ADX ": 'gAdxUsa ? "ACCESO" : "spento"', "max ": "InpAdxMax",
+                 "periodo ": "InpAdxPeriodo"}
         for k_, v_ in mappa.items():
             pos = [j for j, p in enumerate(pezzi[:-1]) if p.endswith(k_)]
             if len(pos) != 1 or pos[0] >= len(val) or val[pos[0]] != v_:
@@ -531,6 +532,72 @@ def invarianti_raccordo(src, code, bag):
     eo = re.sub(r"\s+", "", corpo(code, "EsitoOk") or "")
     if sorted(re.findall(r"TRADE_RETCODE_\w+", eo)) != ["TRADE_RETCODE_DONE", "TRADE_RETCODE_DONE_PARTIAL", "TRADE_RETCODE_PLACED"]:
         bag.append("RACCORDO: EsitoOk accetta retcode diversi da DONE/PLACED/DONE_PARTIAL")
+
+    # ---- seconda lettura del cancello 07/10: i 6 residui VERDI del terzo giro + il raccordo del rischio
+    stc = "".join(sc if mc == "x" else mc for mc, sc in zip(code, src))     # commenti via, stringhe tenute
+    ns = lambda t: re.sub(r"\s+", "", t or "")
+    # (15) RISCHIO al raccordo: la funzione pura era provata, la CHIAMATA no (rischio x10 al chiamante restava VERDE)
+    if "returnNC_RischioSoldi(AccountInfoDouble(ACCOUNT_BALANCE),InpRischioSetupPct,InpMoltConfluenza,dc,InpConflTolAtr,gRischioMax);" not in ns(corpo(code, "RischioSoldi")):
+        bag.append("RACCORDO: RischioSoldi non passa (saldo, InpRischioSetupPct, InpMoltConfluenza, dc, tolleranza, tetto) [ancora]")
+    cl = ns(corpo(code, "CalcolaLotti"))
+    for a in ("pl[i]=(w[i]>0)?PerditaPerLotto(MathAbs(p[i]-sl)):0.0;", "NC_LottiSetup(RischioSoldi(dc),w,pl,3,step,vmin,vmax,lot);",
+              "doublestep=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP);", "doublevmin=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);",
+              "doublevmax=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX);"):
+        if a not in cl:
+            bag.append("RACCORDO: CalcolaLotti senza '%s' [ancora]" % a)
+    # (16) SCADENZA: la scala e' GTC (riprezzata a ogni barra), il PDF porta la sua scadenza
+    for fn, att in (("ArmaScala", "0"), ("EntraPdf", "gSet[L].tScadenza")):
+        b = corpo(code, fn) or ""
+        m = re.search(r"\bInviaLimit\s*\(", b)
+        a = [b[x:y].strip() for x, y in argomenti(b, m.end() - 1, chiusa(b, m.end() - 1))] if m else []
+        if len(a) != 8 or a[5] != att:
+            bag.append("RACCORDO: InviaLimit in %s con scadenza %s (attesa %s)" % (fn, a[5:6], att))
+    if "if(scad>0&&gScadServer){tt=ORDER_TIME_SPECIFIED;ex=scad;}" not in ns(corpo(code, "InviaLimit")):
+        bag.append("RACCORDO: InviaLimit non applica la scadenza solo se scad>0 e il simbolo la accetta [ancora]")
+    # (17) TP1: verso del raggiungimento, del pareggio e della liceita' rispetto allo stops level
+    g1 = ns(corpo(code, "GestisciTP1"))
+    for a in ("boolhit=(s>0)?(bid>=gSet[L].tp1):(ask<=gSet[L].tp1);", "boolmigliora=(s>0)?(medio>slNow):(medio<slNow||slNow==0);",
+              "boollecito=(s>0)?(medio<bid-md):(medio>ask+md);"):
+        if a not in g1:
+            bag.append("RACCORDO: GestisciTP1 senza '%s' (verso del TP1/pareggio) [ancora]" % a)
+    # (18) DURATA: minuti dell'input x 60 contro secondi dal riempimento
+    if "TimeCurrent()-gSet[L].tRiempimento>=(long)InpDurataMaxMin*60" not in ns(corpo(code, "Sincronizza")):
+        bag.append("RACCORDO: durata massima non in minuti x 60 dal primo riempimento [ancora]")
+    # (19) UNITA': metalli 1,0 USD; forex (modo di calcolo o valute) = pip; il resto 1,0
+    cu = ns(corpo(stc, "CalcolaUnita"))
+    if not re.search(r'if\(StringFind\(sy,"XAU"\)==0\|\|StringFind\(sy,"XAG"\)==0\)\{descr="[^"]*";return1\.0;\}', cu):
+        bag.append("RACCORDO: CalcolaUnita, oro/argento non a 1,0 USD [ancora]")
+    if cu.count("returnPipMT();") != 3 or not cu.endswith('descr="AUTO_CLASSEindice/CFD:1,0punto";return1.0;}'):
+        bag.append("RACCORDO: CalcolaUnita, forex non a pip (a mano, modo di calcolo, valute) o indice non a 1,0 [ancora]")
+    if "returnNC_Pip((int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS),_Point);" not in ns(corpo(code, "PipMT")):
+        bag.append("RACCORDO: PipMT non passa cifre e punto del simbolo [ancora]")
+    # (20) CONFERMA PDF: la candela dopo apre dal lato del trend (s x (open - linea) > 0)
+    vp = ns(corpo(code, "ValutaPdf"))
+    for a in ("doubleop0=iOpen(_Symbol,gTF,0);", "doublelv0=LineaPrezzo(last,s);", "if(gConferma&&!(s*(op0-lv0)>0))"):
+        if a not in vp:
+            bag.append("RACCORDO: conferma PDF senza '%s' [ancora]" % a)
+    # (21) ADOZIONE al riavvio: OnInit adotta, le posizioni si adottano, i pendenti senza posizione si cancellano
+    oi = ns(corpo(code, "OnInit"))
+    if not oi.endswith("AdottaEsistenti();return(INIT_SUCCEEDED);}"):
+        bag.append("RACCORDO: OnInit non chiama AdottaEsistenti() subito prima di INIT_SUCCEEDED [ancora]")
+    ae = ns(corpo(code, "AdottaEsistenti"))
+    if "if(np>0){AdottaLinea(L);" not in ae or "elseif(no>0)CancellaOrdiniLinea(L," not in ae:
+        bag.append("RACCORDO: AdottaEsistenti non adotta le posizioni / non cancella i pendenti senza posizione [ancora]")
+    if "gSet[L].attivo=true;gSet[L].riempito=true;gSet[L].adottato=true;" not in ns(corpo(code, "AdottaLinea")):
+        bag.append("RACCORDO: AdottaLinea non marca il setup attivo e riempito [ancora]")
+    # (22) PENDENTI ORFANI: una linea senza setup in memoria e senza posizioni non tiene pendenti vivi
+    if "if(np==0&&no>0)CancellaOrdiniLinea(L," not in ns(corpo(code, "Sincronizza")):
+        bag.append("RACCORDO: Sincronizza non cancella i pendenti di una linea senza setup (cancellazione fallita prima) [ancora]")
+    # (23) DATI N/D: la scala armata non sopravvive a una barra senza dati
+    if "if(gSet[L].attivo&&!gSet[L].riempito&&gSet[L].tipo==NC_TIPO_SCALA){CancellaSetupNonRiempito(L," not in ns(corpo(code, "OnNewBar")):
+        bag.append("RACCORDO: OnNewBar senza dati non cancella la scala armata [ancora]")
+    # (24) VERIFICA ADX: terminale (buffer letto alla barra chiusa) contro i due ricalcoli sulle stesse barre
+    va = ns(corpo(code, "VerificaAdx"))
+    for a in ("doublet=gAdx[gN-1];", "doublee=NC_AdxUltimo(gH,gL,gC,gN,InpAdxPeriodo,0);", "doublew=NC_AdxUltimo(gH,gL,gC,gN,InpAdxPeriodo,1);"):
+        if a not in va:
+            bag.append("RACCORDO: VerificaAdx senza '%s'" % a)
+    if "if(ok&&!gAdxVerificato){VerificaAdx();gAdxVerificato=true;}" not in ns(corpo(code, "OnNewBar")):
+        bag.append("RACCORDO: la riga VERIFICA ADX non e' stampata alla prima barra con dati")
 
 
 def magic_libero():
@@ -640,6 +707,10 @@ int main(){
     } else if(c=="PEND"){
       int s; double pr,sl,tp,ak,bd,md; if(scanf("%d %lf %lf %lf %lf %lf %lf",&s,&pr,&sl,&tp,&ak,&bd,&md)!=7) return 2;
       printf("%d\n",NC_ControllaPendente(s,pr,sl,tp,ak,bd,md));
+    } else if(c=="ADX"){
+      int n,per,tipo; if(scanf("%d %d %d",&n,&per,&tipo)!=3) return 2;
+      std::vector<double> H=rd(n),Lo=rd(n),C=rd(n);
+      printf("%a\n",NC_AdxUltimo(H.data(),Lo.data(),C.data(),n,per,tipo));
     } else return 3;
     fflush(stdout);
   }
@@ -1101,6 +1172,27 @@ def suite(raw, tmp, ser, verbose):
     try:
         unitari(cx, bag)
         res, e, a = confronta_numeri(cx, ser, bag, verbose)
+        # VERIFICA ADX (seconda lettura 07/10): il ricalcolo dell'EA (riga "VERIFICA ADX") == specchi Python
+        # della serie intera, e le due formule si DISTINGUONO (altrimenti la riga non deciderebbe niente)
+        t_, o_, h_, l_, c_ = ser
+        am_, aw_ = py_adx_mt5(h_, l_, c_, 14), py_adx_wilder(h_, l_, c_, 14)
+        W = 1500
+        dm_ = dw_ = 0.0
+        distinti = casi_ = 0
+        for e_ in range(W - 1, len(c_), max(1, (len(c_) - W) // 12)):
+            o0 = e_ - W + 1
+            arrs = (h_[o0:e_ + 1], l_[o0:e_ + 1], c_[o0:e_ + 1])
+            txt = "".join("ADX %d 14 %d\n" % (W, tp_) + "\n".join(" ".join(repr(x) for x in arr) for arr in arrs) + "\n"
+                          for tp_ in (0, 1))
+            r0, r1 = [fx(x) for x in cx.run(txt)]
+            dm_ = max(dm_, abs(r0 - am_[e_])); dw_ = max(dw_, abs(r1 - aw_[e_]))
+            distinti += 1 if abs(r0 - r1) > 0.05 else 0
+            casi_ += 1
+        check(casi_ >= 5 and dm_ < 1e-6 and dw_ < 1e-6,
+              "VERIFICA ADX: ricalcolo dell'EA su 1500 barre == specchi della serie intera (%d punti, scarto max MetaQuotes %.1e, Wilder %.1e)"
+              % (casi_, dm_, dw_), quiet=not verbose, bag=bag)
+        check(distinti >= casi_ - 1, "CONTRO-ESEMPIO: le due formule ADX differiscono di > 0,05 in %d punti su %d (la riga VERIFICA ADX le distingue)"
+              % (distinti, casi_), quiet=not verbose, bag=bag)
         # finestra di 1500 barre (EA) contro la serie intera
         t, o, h, l, c = ser
         n = len(c)
@@ -1177,6 +1269,29 @@ def mutanti(raw, ser):
         ("E7 requote preso per buono", "return(rc==TRADE_RETCODE_DONE || rc==TRADE_RETCODE_PLACED", "return(rc==TRADE_RETCODE_DONE || rc==TRADE_RETCODE_REQUOTE || rc==TRADE_RETCODE_PLACED"),
         ("E8 netting accettato", "if(AccountInfoInteger(ACCOUNT_MARGIN_MODE)!=ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)", "if(AccountInfoInteger(ACCOUNT_MARGIN_MODE)==ACCOUNT_MARGIN_MODE_RETAIL_HEDGING)"),
         ("D10 X10 al primo riempimento", "if(no>0 && np<gSet[L].nPosId && !gSet[L].residuiCancellati)", "if(no>0 && np<=gSet[L].nPosId && !gSet[L].residuiCancellati)"),
+        # --- seconda lettura del cancello 07/10: sei mutanti sui percorsi di denaro (il primo era VERDE)
+        ("F1 rischio x10 al chiamante", "InpRischioSetupPct,InpMoltConfluenza,dc,InpConflTolAtr,gRischioMax);",
+         "InpRischioSetupPct*10,InpMoltConfluenza,dc,InpConflTolAtr,gRischioMax);"),
+        ("F2 perdita per lotto dimezzata nel ripiego", "loss=(dist/tsz)*tv;", "loss=(dist/tsz)*tv*0.5;"),
+        ("F3 buffer dello stop dal lato sbagliato", "double base=profondo-s*buf;", "double base=profondo+s*buf;"),
+        ("F4 SL=0 sull'ordine a mercato", "gTrade.Buy(lot,_Symbol,px,sl,tp,cm)", "gTrade.Buy(lot,_Symbol,px,0,tp,cm)"),
+        ("F5 lotto quasi per eccesso", "double lot=MathFloor(v/step+1e-9)*step;", "double lot=MathFloor(v/step+0.999)*step;"),
+        ("F6 Guardian saltato sul mercato", "if(!ABTG_GuardiaIngresso(InpUsaGuardian,\"EA_NatCla\")){ gImb[IMB_O_GUARDIAN]++; Log(",
+         "if(false){ gImb[IMB_O_GUARDIAN]++; Log("),
+        # --- i sei residui VERDI del terzo giro del primo cancello (ora invarianti 16-21)
+        ("G1 scadenza applicata alla scala", "InviaLimit(s,p[i],lot[i],sl,tp[i],0,cm,!gArmatoPrima[L])",
+         "InviaLimit(s,p[i],lot[i],sl,tp[i],gTbar0+PeriodSeconds(gTF),cm,!gArmatoPrima[L])"),
+        ("G2 verso del TP1", "bool hit=(s>0) ? (bid>=gSet[L].tp1) : (ask<=gSet[L].tp1);", "bool hit=(s>0) ? (bid<=gSet[L].tp1) : (ask>=gSet[L].tp1);"),
+        ("G3 durata in secondi", ">=(long)InpDurataMaxMin*60)", ">=(long)InpDurataMaxMin)"),
+        ("G4 unita' dell'oro a 0,1", "descr=\"AUTO_CLASSE metallo: 1,0 USD\"; return 1.0;", "descr=\"AUTO_CLASSE metallo: 1,0 USD\"; return 0.1;"),
+        ("G5 conferma PDF rovesciata", "if(gConferma && !(s*(op0-lv0)>0))", "if(gConferma && (s*(op0-lv0)>0))"),
+        ("G6 adozione al riavvio tolta", "   AdottaEsistenti();\n   return(INIT_SUCCEEDED);", "   return(INIT_SUCCEEDED);"),
+        # --- le tre righe aggiunte dalla seconda lettura
+        ("H1 ricalcolo ADX MetaQuotes con 1/n", "   double k=2.0/(per+1.0);", "   double k=1.0/per;"),
+        ("H2 pendenti orfani lasciati vivi", "if(np==0 && no>0) CancellaOrdiniLinea(L,", "if(np==0 && no<0) CancellaOrdiniLinea(L,"),
+        ("H3 scala viva senza dati", "if(gSet[L].attivo && !gSet[L].riempito && gSet[L].tipo==NC_TIPO_SCALA)\n           { CancellaSetupNonRiempito(L,\"dati",
+         "if(false && gSet[L].attivo && !gSet[L].riempito && gSet[L].tipo==NC_TIPO_SCALA)\n           { CancellaSetupNonRiempito(L,\"dati"),
+        ("H4 verifica ADX sulla barra sbagliata", "   double t=gAdx[gN-1];", "   double t=gAdx[gN-2];"),
     ]
     base = tempfile.mkdtemp(prefix="natcla_mutanti_")     # FUORI dal repo (classe 1159)
     assert not os.path.abspath(base).startswith(os.path.abspath(ROOT))
