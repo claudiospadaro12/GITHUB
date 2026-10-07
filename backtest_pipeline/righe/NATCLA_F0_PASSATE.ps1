@@ -325,9 +325,7 @@ Copy-Item -LiteralPath $srcEA  -Destination (Join-Path $MqlExp ($EXPERT + '.mq5'
 Copy-Item -LiteralPath $srcInc -Destination (Join-Path $MqlInc 'ABTG_PausaGuardian.mqh') -Force
 
 $ex5 = Join-Path $MqlExp ($EXPERT + '.ex5')
-Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
 $logC = Join-Path $Work 'compile_natcla.log'
-Remove-Item -LiteralPath $logC -Force -ErrorAction SilentlyContinue
 # il verdetto NON e' il codice d'uscita di MetaEditor (a volte si stacca): e' l'esistenza del .ex5
 # appena prodotto. Ogni argomento fra parentesi (classe 1152: la virgola lega piu' del +).
 # COMPILAZIONE FALLITA (cancello 07/10, strato 2): e' la PRIMA compilazione vera di EA_NatCla. Il log di MetaEditor
@@ -345,7 +343,7 @@ function FermaCompilazione($perche){
     $righeLog = @()
     if($haLog){
       Copy-Item -LiteralPath $logC -Destination (Join-Path $CartC 'compile_natcla.log') -Force
-      $righeLog = @(((Leggi-Condiviso $logC) -split "`r?`n") | Where-Object { $_ -match '(?i)error|warning|result' } | Select-Object -First 60)
+      $righeLog = @(((Leggi-Condiviso $logC) -split "`r?`n") | Where-Object { $_ -match '(?i)error|errori|warning|avvis|result|risultato' } | Select-Object -First 60)
     }
     $testaC = @(('NATCLA F0 lotto ' + $Lotto + ': COMPILAZIONE DI EA_NatCla FALLITA. Nessuna passata lanciata, nessun ordine.'), ('motivo: ' + $perche), ('pin: ' + $Pin + '   pc: ' + $env:COMPUTERNAME + '   data: ' + $stC), ('log di MetaEditor presente: ' + $haLog), '', 'righe di errore/avviso del log (il log intero e compile_natcla.log):')
     (($testaC + $righeLog) -join "`r`n") | Set-Content -LiteralPath (Join-Path $CartC 'COMPILAZIONE_FALLITA.txt') -Encoding ASCII
@@ -354,6 +352,10 @@ function FermaCompilazione($perche){
   } catch { Write-Host ('   zip della compilazione NON creato (' + $_.Exception.Message + '): il log e in ' + $logC) -ForegroundColor Red }
   throw ('COMPILAZIONE FALLITA: ' + $perche + ' Nessuna passata e partita. Manda lo zip NATCLA_F0_' + $Lotto + '_COMPILAZIONE_FALLITA.zip dal Desktop.')
 }
+Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
+# classe 1168 (i): un .ex5 VECCHIO che resta sul disco passerebbe per il compilato nuovo (v1.04 al posto della v1.05)
+if(Test-Path -LiteralPath $ex5){ FermaCompilazione 'il vecchio .ex5 non si cancella: un compilato vecchio passerebbe per nuovo.' }
+Remove-Item -LiteralPath $logC -Force -ErrorAction SilentlyContinue
 $pMe = Start-Process -FilePath $MetaEditor -ArgumentList @(('/compile:' + (Join-Path $MqlExp ($EXPERT + '.mq5'))), ('/log:' + $logC)) -PassThru
 $attC = 0
 while(-not (Test-Path -LiteralPath $ex5) -and $attC -lt 60){ Start-Sleep -Seconds 2; $attC = $attC + 1 }
