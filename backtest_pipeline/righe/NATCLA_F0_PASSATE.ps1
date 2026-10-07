@@ -48,7 +48,10 @@
 #      ('from .. to ..'), CSV fresco con intestazione e righe CONTA.
 #   6. MetaEditor: l'esito e' l'esistenza dell'.ex5; il log di compilazione e'
 #      LETTO ('Result: N errors, M warnings') e stampato, e finisce nello zip:
-#      e' la PRIMA COMPILAZIONE VERA di EA_NatCla (mai provata prima).
+#      e' la PRIMA COMPILAZIONE VERA di EA_NatCla (mai provata prima). Se la
+#      compilazione FALLISCE (niente .ex5, o errori nel log) il giro si ferma
+#      PRIMA del tester e il log va in NATCLA_F0_<lotto>_COMPILAZIONE_FALLITA.zip
+#      sul Desktop (cancello 07/10, strato 2: prima stava solo nella finestra).
 #   7. Il CSV si cerca in Common\Files e, se manca, negli agenti locali del
 #      tester; e deve essere SCRITTO DOPO l'avvio della passata (un file di una
 #      corsa precedente non vale: classe 1019/1032). Niente viene cancellato.
@@ -314,13 +317,37 @@ $logC = Join-Path $Work 'compile_natcla.log'
 Remove-Item -LiteralPath $logC -Force -ErrorAction SilentlyContinue
 # il verdetto NON e' il codice d'uscita di MetaEditor (a volte si stacca): e' l'esistenza del .ex5
 # appena prodotto. Ogni argomento fra parentesi (classe 1152: la virgola lega piu' del +).
+# COMPILAZIONE FALLITA (cancello 07/10, strato 2): e' la PRIMA compilazione vera di EA_NatCla. Il log di MetaEditor
+# va in uno zip sul Desktop (NATCLA_F0_<lotto>_COMPILAZIONE_FALLITA.zip), non solo nella finestra; nessuna passata parte.
+function FermaCompilazione($perche){
+  $dskC  = [Environment]::GetFolderPath('Desktop')
+  $CartC = Join-Path $dskC ('NATCLA_F0_' + $Lotto + '_COMPILAZIONE_FALLITA')
+  $zipC  = $CartC + '.zip'
+  $stC   = (Get-Date).ToString('yyyyMMdd_HHmmss')
+  try{
+    if(Test-Path -LiteralPath $CartC){ Move-Item -LiteralPath $CartC -Destination ($CartC + '_VECCHIA_' + $stC) -Force }
+    if(Test-Path -LiteralPath $zipC){ Move-Item -LiteralPath $zipC -Destination ($CartC + '_VECCHIO_' + $stC + '.zip') -Force }
+    New-Item -ItemType Directory -Force -Path $CartC | Out-Null
+    $haLog = Test-Path -LiteralPath $logC
+    $righeLog = @()
+    if($haLog){
+      Copy-Item -LiteralPath $logC -Destination (Join-Path $CartC 'compile_natcla.log') -Force
+      $righeLog = @(((Leggi-Condiviso $logC) -split "`r?`n") | Where-Object { $_ -match '(?i)error|warning|result' } | Select-Object -First 60)
+    }
+    $testaC = @(('NATCLA F0 lotto ' + $Lotto + ': COMPILAZIONE DI EA_NatCla FALLITA. Nessuna passata lanciata, nessun ordine.'), ('motivo: ' + $perche), ('pin: ' + $Pin + '   pc: ' + $env:COMPUTERNAME + '   data: ' + $stC), ('log di MetaEditor presente: ' + $haLog), '', 'righe di errore/avviso del log (il log intero e compile_natcla.log):')
+    (($testaC + $righeLog) -join "`r`n") | Set-Content -LiteralPath (Join-Path $CartC 'COMPILAZIONE_FALLITA.txt') -Encoding ASCII
+    Compress-Archive -Path (Join-Path $CartC '*') -DestinationPath $zipC -Force
+    Write-Host ('   ZIP DA MANDARE (compilazione fallita): ' + $zipC) -ForegroundColor Red
+  } catch { Write-Host ('   zip della compilazione NON creato (' + $_.Exception.Message + '): il log e in ' + $logC) -ForegroundColor Red }
+  throw ('COMPILAZIONE FALLITA: ' + $perche + ' Nessuna passata e partita. Manda lo zip NATCLA_F0_' + $Lotto + '_COMPILAZIONE_FALLITA.zip dal Desktop.')
+}
 $pMe = Start-Process -FilePath $MetaEditor -ArgumentList @(('/compile:' + (Join-Path $MqlExp ($EXPERT + '.mq5'))), ('/log:' + $logC)) -PassThru
 $attC = 0
 while(-not (Test-Path -LiteralPath $ex5) -and $attC -lt 60){ Start-Sleep -Seconds 2; $attC = $attC + 1 }
 if(-not (Test-Path -LiteralPath $ex5)){
   try{ if(-not $pMe.HasExited){ $pMe.Kill() } }catch{ }
   if(Test-Path -LiteralPath $logC){ (Leggi-Condiviso $logC) -split "`r?`n" | Select-Object -Last 20 | ForEach-Object { Write-Host ('     ' + $_) -ForegroundColor DarkYellow } }
-  throw ($EXPERT + '.ex5 NON prodotto dopo 120 secondi. Senza il compilato il giro non parte: il log di MetaEditor e qui sopra.')
+  FermaCompilazione ($EXPERT + '.ex5 NON prodotto dopo 120 secondi. Senza il compilato il giro non parte: il log di MetaEditor e qui sopra.')
 }
 Start-Sleep -Seconds 3
 $testoLogC = ''
@@ -328,7 +355,10 @@ if(Test-Path -LiteralPath $logC){ $testoLogC = Leggi-Condiviso $logC }
 $compErr = -1; $compWarn = -1
 $mRes = [regex]::Match($testoLogC, '(\d+)\s+errors?,\s*(\d+)\s+warnings?')
 if($mRes.Success){ $compErr = [int]$mRes.Groups[1].Value; $compWarn = [int]$mRes.Groups[2].Value }
-if($compErr -gt 0){ throw ('MetaEditor ha prodotto l.ex5 ma il log dice ' + $compErr + ' errori: non si usa un compilato dubbio. Guarda ' + $logC) }
+if($compErr -gt 0){
+  ($testoLogC -split "`r?`n") | Where-Object { $_ -match '(?i)error' } | Select-Object -First 20 | ForEach-Object { Write-Host ('     ' + $_) -ForegroundColor DarkYellow }
+  FermaCompilazione ('MetaEditor ha prodotto l.ex5 ma il log dice ' + $compErr + ' errori: non si usa un compilato dubbio.')
+}
 Dico ('compilato: ' + $ex5 + '   SHA256 .ex5 ' + (Get-FileHash -LiteralPath $ex5 -Algorithm SHA256).Hash.Substring(0,12)) 'Green'
 if($compErr -eq 0){ Dico ('log di compilazione: 0 errori, ' + $compWarn + ' avvisi') $(if($compWarn -eq 0){'Green'}else{'Yellow'}) }
 else { Dico 'log di compilazione: riga "Result: N errors, M warnings" NON letta (formato diverso?): il verdetto e l esistenza dell .ex5' 'Yellow' }

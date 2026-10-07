@@ -78,7 +78,7 @@ if LOTTO == "PILOTA":
     tempo = ("TEMPO ATTESO [STIMA NON AGGANCIATA a un giro a passata singola OHLC di questo EA, lo misura proprio questo lotto]: compilazione circa 1 minuto + 8 passate x 30-120 secondi = 6-18 minuti in tutto. "
              "Il tetto del lotto e " + str(tetto) + " minuti (ferma l AVVIO di una passata, non la sua fine; ogni passata ha un timeout di 20 minuti e se lo supera lo script chiude il terminale da solo con CloseMainWindow). "
              "NON fermarla prima di 45 minuti. Prerequisito: NESSUN MT5 o MetaEditor aperto su questo PC e NESSUNA sedia attaccata ai grafici salvati del terminale BCM (lo script si ferma e lo dice).")
-    guarda = ("COSE DA GUARDARE PER PRIME quando torna, scritte PRIMA: (1) la riga di compilazione: 0 errori e quanti avvisi (se ci sono errori lo script si ferma e il log di MetaEditor e nella finestra); "
+    guarda = ("COSE DA GUARDARE PER PRIME quando torna, scritte PRIMA: (1) la riga di compilazione: 0 errori e quanti avvisi (se la compilazione FALLISCE lo script si ferma con rc 1 PRIMA del tester e mette il log di MetaEditor nello zip NATCLA_F0_PILOTA_COMPILAZIONE_FALLITA.zip sul Desktop: si manda QUELLO); "
               "(2) ESITO F0 e MANIFEST: 8 passate OK, ognuna con AVVIO si, ADX MetaQuotes e finestra uguale a quella dichiarata; se una e KO il motivo e scritto e NESSUN numero di quella passata si legge; "
               "(3) VERIFICA ADX: deve dire formula MetaQuotes su tutte e 8, se dice Wilder o NESSUNA ci si ferma e si manda la finestra; "
               "(4) il numero che sostituisce la stima: la media di secondi per passata e la stima di F0 intera (216 passate) che lo script stampa alla fine. Lo script CONTA e non giudica.")
@@ -92,7 +92,7 @@ else:
     guarda = ("COSE DA GUARDARE PER PRIME quando torna, scritte PRIMA: (1) ESITO F0 e MANIFEST: quante passate OK, KO, NON_LANCIATE (con il motivo); (2) VERIFICA ADX: formula MetaQuotes su tutte le passate OK, se Wilder o NESSUNA ci si ferma; "
               "(3) la media di secondi per passata contro la stima. Lo script CONTA e non giudica: la tabella la fa leggi_natcla_f0.py.")
 fine = ("FILE ATTESI NELLO ZIP sul Desktop (NATCLA_F0_" + LOTTO + ".zip): RIEPILOGO_F0.txt + MANIFEST_F0.csv + il file prova + compile_natcla.log + csv\\natcla_setup_<simbolo>_<magic>.csv x " + str(nrun) +
-        " + log\\EA_<simbolo>_<config>.txt x " + str(nrun) + " + ini\\f0_<simbolo>_<config>.ini x " + str(nrun) + "; rc 0 = tutte OK, rc 3 = almeno una KO o non lanciata (lo zip esce lo stesso), rc 1 = si e fermato prima del tester")
+        " + log\\EA_<simbolo>_<config>.txt x " + str(nrun) + " + ini\\f0_<simbolo>_<config>.ini x " + str(nrun) + "; rc 0 = tutte OK, rc 3 = almeno una KO o non lanciata (lo zip esce lo stesso), rc 1 = si e fermato prima del tester (se e la COMPILAZIONE, lo zip da mandare e NATCLA_F0_" + LOTTO + "_COMPILAZIONE_FALLITA.zip)")
 avviso_mt5 = ("QUI CI SONO TRE MT5 (C:\\Program Files\\BCM Markets MT5 Terminal = demo 50503392, C:\\MT5_Backtest, C:\\FundedNext_Manuale): devono essere TUTTI CHIUSI, MetaEditor compreso. NON serve aprirne nessuno: lo script controlla da solo "
               "i grafici salvati del terminale BCM e si ferma se trova una SEDIA attaccata (il 14/08/2026 da questa macchina sono partiti ordini VERI, #3160534/#3160535, -104,60). "
               "Se uno e aperto, qui sotto compare il suo PID, titolo e cartella: chiudi QUELLO, a mano, e rilancia.")

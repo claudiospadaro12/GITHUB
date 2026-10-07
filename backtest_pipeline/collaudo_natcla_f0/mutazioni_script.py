@@ -122,7 +122,7 @@ MUTANTI = [
     ("D26 terminale che non si chiude: il lotto prosegue", "if(-not $p.HasExited){ $abort = $true;", "if($false){ $abort = $true;", dict(timeout_min=1, no_exit=True, no_close=True, sleep_reale=True, muta={B.F_PROVA: prova_mut(SOLO1)}), sc_noclose),
     ("D27 nome del CSV con il magic sbagliato", "$nomeCsv = 'natcla_setup_' + $sim.nome + '_' + $cfg.magic + '.csv'", "$nomeCsv = 'natcla_setup_' + $sim.nome + '_' + $cfg.modalita + '.csv'", {}, sc_pilota_ok),
     ("D28 .ex5 non atteso (compilazione fallita in silenzio: nessun .ex5, log con 0 errori)", "if(-not (Test-Path -LiteralPath $ex5)){\n  try{", "if($false){\n  try{", dict(scen=dict(compile_fallisce=True, compile_silenzioso=True)), sc_ex5),
-    ("D30 log con errori ignorato (.ex5 c'e' ma il log dice errori)", "if($compErr -gt 0){ throw", "if($false){ throw", dict(scen=dict(compile_errori_con_ex5=True)), sc_si_ferma),
+    ("D30 log con errori ignorato (.ex5 c'e' ma il log dice errori)", "if($compErr -gt 0){\n", "if($false){\n", dict(scen=dict(compile_errori_con_ex5=True)), sc_si_ferma),
     ("D29 AVVIO rifiutato dall'EA non visto", "if($rr -match 'AVVIO RIFIUTATO|ERRORE|INIT_FAILED|FALLITA'){", "if($false){", dict(scen=dict(falli={"EURUSD_AUDIO_H1": "rifiutato"})), sc_ko_una("AVVIO RIFIUTATO")),
 ]
 

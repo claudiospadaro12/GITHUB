@@ -140,6 +140,17 @@ def main():
         print("S22-S24 compilazione")
         r = scenario("S22", base, scen=dict(compile_fallisce=True))
         chk("S22 compilazione fallita: si ferma con '.ex5 NON prodotto', nessun terminale lanciato", rc_di(r["p"]) != "0" and ".ex5 NON prodotto" in (r["p"].stdout + r["p"].stderr) and not lanci(r["sd"]), (r["p"].stdout + r["p"].stderr)[-400:])
+        zc = os.path.join(r["c"], "Users", "Master", "Desktop", "NATCLA_F0_PILOTA_COMPILAZIONE_FALLITA.zip")
+        nz = zipfile.ZipFile(zc).namelist() if os.path.exists(zc) else []
+        chk("S22 compilazione fallita: il log di MetaEditor e' nello zip NATCLA_F0_PILOTA_COMPILAZIONE_FALLITA.zip sul Desktop, e lo zip delle passate NON esiste",
+            "compile_natcla.log" in nz and "COMPILAZIONE_FALLITA.txt" in nz and zip_di(r["c"]) is None and "COMPILAZIONE_FALLITA.zip dal Desktop" in (r["p"].stdout + r["p"].stderr), nz)
+        if nz:
+            tx = zipfile.ZipFile(zc).read("COMPILAZIONE_FALLITA.txt").decode("ascii")
+            chk("S22 il riassunto della compilazione riporta le righe d'errore del log (3 errors)", "3 errors" in tx, tx[:400])
+        r = scenario("S22b", base, scen=dict(compile_errori_con_ex5=True))
+        zc = os.path.join(r["c"], "Users", "Master", "Desktop", "NATCLA_F0_PILOTA_COMPILAZIONE_FALLITA.zip")
+        chk("S22b .ex5 presente ma log con 2 errori: si ferma, nessun terminale, log nello zip della compilazione", rc_di(r["p"]) != "0" and not lanci(r["sd"]) and zip_di(r["c"]) is None and os.path.exists(zc) and
+            "compile_natcla.log" in zipfile.ZipFile(zc).namelist(), (r["p"].stdout + r["p"].stderr)[-400:])
         r = scenario("S23", base, scen=dict(compile_avvisi=3))
         chk("S23 compilazione con 3 avvisi: li STAMPA (prima compilazione vera) e prosegue", rc_di(r["p"]) == "0" and "0 errori, 3 avvisi" in r["p"].stdout and "possible loss of data" in r["p"].stdout, r["p"].stdout[:1500])
         chk("S23 il riepilogo dice 3 avvisi", "3 avvisi" in zip_di(r["c"]).read("RIEPILOGO_F0.txt").decode("ascii"))
