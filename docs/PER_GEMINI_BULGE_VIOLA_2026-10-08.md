@@ -1,4 +1,4 @@
-# PER GEMINI -- EA #2: Bulge, segnale VIOLA (08/10/2026) -- secondo pacchetto "a squadra"
+# PER GEMINI -- Bulge, segnale VIOLA (08/10/2026) -- secondo pacchetto "a squadra" (nell'ordine di sez. 5 del protocollo il Bulge resta l'ottavo: l'ordine non cambia)
 
 Scritto da Claude per Gemini, secondo `docs/gemini/PROTOCOLLO_SQUADRA_2026-10-08.md` (ricevuto insieme a questo file): rispondi nei ruoli **A, B, C, D** (e la sezione E del
 protocollo), una riga per affermazione, con la regola "senza fonte = IPOTESI". Se l'intestazione o l'istruzione di sistema che ricevi parla di "Agente 1-4" o di "Agente 3 e
@@ -33,7 +33,8 @@ USCITA, REGIME e SIMBOLI senza ridurre molto la frequenza. Proposte che stringon
   vincita media e perdita media in R sono i dati del conto C-1. DD sulle sole chiusure VIOLA del backtest: 14,9% a 0,8% di rischio per operazione.
 - Commissioni e swap pesano l'8-23% della perdita netta; il PF **prima di commissioni e swap** e' gia' 0,43-0,75 nelle tre fonti forward (19, 33, 50 posizioni). **Lo spread
   e' dentro quel lordo e per 19 delle 22 coppie NON e' misurato** (lo abbiamo solo per EURUSD, GBPUSD, USDJPY: alle 22 ora server vale il 3-21% di R contro <1% nelle altre ore, con un ATR stimato da 1-4 stop): "i costi non spiegano
-  la perdita" vale per commissioni e swap, non per lo spread.
+  la perdita" vale per commissioni e swap, non per lo spread. I numeri del Bulge nella BASE (backtest 0,87/0,82; antenato 0,83 su 297; costi 56% della perdita) sono di **tutti i segnali**
+  (nell'antenato domina il BLU) e non contraddicono questi, che sono del **solo VIOLA**: le 50 VIOLA dell'antenato sono dentro quelle 297 [LETTO: MIGLIORA 1.4].
 - Forward: 19 posizioni su un conto di prova prop, PF 0,40; versione antenata (50 posizioni), PF 0,68; versione corrente sul demo (33, al 07/10), PF 0,47; l'08/10 il demo ha chiuso altre 9 VIOLA, tutte a TP: con quelle, 42 posizioni e PF 0,75 sul netto in valuta [MISURATO; fuori dal pool e da ogni numero sotto]: un solo giorno sposta il PF di 0,28. **Non sono quattro conferme
   indipendenti**: 31 delle 33 del demo sono dentro il pool (le altre 2 sono su XAUUSD, fuori dalle 22 coppie della lista di default: la lista di simboli in campo e' quindi diversa [INFERITO dalle 2 posizioni] ed e' NON VERIFICATA); il conto di prova condivide le operazioni del demo sui cross comuni; il backtest e l'antenato coprono lo stesso periodo.
   Il solo numero buono che abbiamo (PF 1,60 su 268 operazioni) e' un backtest del capo del progetto su **BLU+VIOLA insieme**, 6 cross, 2022-2026.03, il cui file **non e' nel repo** [NON LEGGIBILE]: non e' una misura del solo VIOLA.
@@ -103,7 +104,8 @@ Verdetto: **NON ANCORA MISURATO**, non "morto". Regole di portafoglio simulate a
 - C-2. Servono segnali per simbolo per distinguere un vantaggio di +0,10 R da zero: sigma 0,570 R (misurata per POSIZIONE sul pool 221), alpha = 0,05/22 a due code, potenza 80%. Con `n = (sigma x (z(1-alpha/2)+z(0,80))/delta)^2`, quanto vale n?
 - C-3. Un break-even riporta a pareggio ogni vincitore (perde la vincita media 0,254 R) e salva ogni perdente (recupera 0,951 R): qual e' il rapporto minimo perdenti salvati / vincitori riportati a BE perche' il BE non costi?
 **Ruolo D -- Sintesi.** Al massimo 5 cose da MISURARE, in ordine di vicinanza a una sedia schierabile, ognuna con asse unico, finestra, cella di controllo, attesa con banda, falsificatore, costo (usa i ritmi di sez. 3),
-"Firma Claudio SI/NO"; poi l'elenco dei punti dove tu e la nostra lettura vi contraddite. Poi la sezione E del protocollo.
+"Firma Claudio SI/NO"; poi l'elenco dei punti dove tu e la nostra lettura vi contraddite. Poi la sezione E del protocollo, **solo con punti nuovi**: le tue tre dell'08/10
+(pulizia degli outlier, analista di sensibilita', soglia dei 150 da misurare a 100/200) sono gia' lette (MEMORIA par. 7, punto 6 per le prime due); se non ne hai, scrivi "E: niente di nuovo".
 
 ## 5. Vincoli
 Niente martingala/griglia/recovery; stop >= 40 x (spread + commissione) all'ora d'ingresso; centro dell'altopiano mai il picco; nessun criterio si abbassa; **non stringere l'entrata del VIOLA**; il certificato di morte a 5 caselle vale;

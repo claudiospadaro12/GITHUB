@@ -136,8 +136,11 @@ proposta che non regge al contro-esempio torna all'Agente 3 con la nota; non si 
 - Le proposte non si eseguono: tornano a Claudio e a Claude, che le passano dal cancello di casa
   (controllo deterministico + contro-esempio) prima che qualunque cosa cambi nel repo o in campo.
 
-Prima consegna richiesta: Agente 1 su `ABTG_DAX_Apertura_EU.mq5` e `ABTG_Dow_Apertura_US.mq5`,
-Agente 2 sul sistema, Agente 3 con al massimo dieci proposte, Agente 4 su quelle dieci.
+Consegna richiesta: quella che chiede il documento del giorno. La prima consegna di questo comando
+(Agente 1 sui due EA d'apertura DAX e Dow, Agente 2 sul sistema, Agenti 3 e 4) e' gia' stata data
+il 28/09: non rifarla. Se il documento del giorno segue `PROTOCOLLO_SQUADRA` (ruoli A, B, C, D e
+sezione E), valgono i suoi ruoli e il suo formato a tabella: A e B corrispondono agli Agenti 3 e 4,
+C e D sono nuovi, e il riquadro in testa non serve.
 
 ## FINE COMANDO
 
