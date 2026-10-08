@@ -1,0 +1,20 @@
+NATCLA F0 -- lotto C0: conteggio dei setup di Ea Nat&Cla (Modello 1 OHLC su M1, InpSoloConta=true, NESSUN ordine)
+data: 2026-10-08 14:50:58   pc: DESKTOP-H4D7CAJ   pin: d6586360706b488356fba0504d62733d3f63c164
+EA_NatCla.mq5 SHA256 7D89A3DF11C70D0A13B92CD62A677C0DB54EFC8CC23630FB17B1B4ECC324C9AC  (NC_VER 1.05)   compilazione: 0 errori, 0 avvisi (-1 = non letto)
+passate del lotto 4: OK 4, KO 0, NON LANCIATE 0   durata totale 2 minuti   media per passata OK 31 secondi
+STIMA F0 INTERA con la media misurata: 216 passate x 31 s = 112 minuti (solo se il lotto e rappresentativo: indici e forex hanno barre M1 diverse)
+Guardian nel tester: FAIL-OPEN (specifica 2.5): irrilevante in SoloConta (nessun ordine).
+
+LOTTO C0 = VERIFICA DEL RIMEDIO v1.05 (tocco degli handle in CaricaDati). ATTESA SCRITTA PRIMA: su TUTTE le passate AVVIO v1.05, riga VERIFICA ADX stampata
+(formula MetaQuotes) e righe CONTA > 0 nel CSV. Se ANCHE UNA manca, il rimedio NON basta e il lotto C resta FERMO. Data attesa della VERIFICA ADX: il 2024.10.16
+(la barra in cui la diagnosi (a)/(c) e guarita, 302 barre H1 di storia); molto dopo = il tocco funziona ma tardi (da capire, non blocca).
+
+lotto;simbolo;config;magic;t_avvio;durata_s;stato;csv;righe_conta;avvio_ok;adx_verifica;finestra;motivi
+C0;U30USD;AUDIO_H1;778601;2026-10-08 14:48:53;35;OK;natcla_setup_U30USD_778601.csv;1061;si;MetaQuotes;2024.09.26-2026.06.30;
+C0;U30USD;M2_H1;778621;2026-10-08 14:49:28;28;OK;natcla_setup_U30USD_778621.csv;401;si;MetaQuotes;2024.09.26-2026.06.30;
+C0;D30EUR;AUDIO_H1;778601;2026-10-08 14:49:57;33;OK;natcla_setup_D30EUR_778601.csv;845;si;MetaQuotes;2024.09.26-2026.06.30;
+C0;D30EUR;M2_H1;778621;2026-10-08 14:50:30;28;OK;natcla_setup_D30EUR_778621.csv;431;si;MetaQuotes;2024.09.26-2026.06.30;
+
+COME SI LEGGE: python3 backtest_pipeline/leggi_natcla_f0.py <questo zip o la cartella>. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e la colonna adx_verifica
+(deve dire MetaQuotes su tutte: se dice NESSUNA o Wilder nessun numero di ADX si usa); poi la tabella dei setup per linea e simbolo contro le attese scritte nel file prova.
+Questo script CONTA e dice se ogni passata e affidabile: NON giudica, NON promuove, NON sceglie nessuna cella.
