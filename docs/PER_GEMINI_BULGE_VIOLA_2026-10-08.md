@@ -5,7 +5,8 @@ protocollo), una riga per affermazione, con la regola "senza fonte = IPOTESI". S
 Agente 4", per questo scambio vale il protocollo: i ruoli A e B corrispondono agli Agenti 3 e 4, C e D sono nuovi. Nessun numero di conto, nessun preset, nessuno script in questo documento.
 Etichette nostre: **[LETTO]** letto in un file del repo; **[MISURATO]** rifatto da noi su un CSV; **[DERIVATO]** conto da numeri misurati; **[INFERITO]**; **[NON MISURATO]**.
 Fonti nel repo (`lavoro`): `report/MIGLIORA_BULGE_VIOLA_2026-10-08.md` (parti 1-3, 11-13), `report/BULGE_VIOLA_TELEMETRIA_SPEC_2026-10-08.md`,
-`report/CONFRONTO_BULGE_VIOLA_VS_BREAKING_BAND_2026-10-08.md`, il sorgente `mql5/Experts/ABTG_Bulge.mq5` (NON allegato: i nomi degli input sono ricontrollati su di esso).
+`report/CONFRONTO_BULGE_VIOLA_VS_BREAKING_BAND_2026-10-08.md`, il sorgente `mql5/Experts/ABTG_Bulge.mq5` (citati per riferimento, **nessuno allegato**: i nomi degli input sono ricontrollati sul sorgente).
+**Dati forward chiusi al 07/10** (i numeri MISURATI si riproducono solo con quel taglio).
 **Decisione del capo del progetto, in chiaro: "il motore VIOLA non si tocca; ogni tocco dopo un impulso, com'e' ora; non stringere l'entrata".** Cerchiamo di migliorare
 USCITA, REGIME e SIMBOLI senza ridurre molto la frequenza. Proposte che stringono l'ingresso non servono.
 
@@ -16,20 +17,23 @@ USCITA, REGIME e SIMBOLI senza ridurre molto la frequenza. Proposte che stringon
    piatta (variazione <= 0,6 ATR rispetto a 6 barre prima) e la candela di conferma ha corpo <= 1,5 ATR. Si entra **contro** l'impulso (long dopo un impulso ribassista).
 2. **Il VIOLA NON richiede un "bulge" delle bande** (ampiezza >= 1,1x media): quel controllo (`isBulgeSig`) vale solo per gli altri due segnali (arancio, blu).
 3. Stop = 3 ATR (`SL_ATR_Mult`); take profit = la mediana delle bande (media mobile centrale), **riscritta a ogni tick** (`UpdateAllTP`) se resta oltre l'entrata: si sposta con
-   la media, e sul conto di prova i TP riscritti si sono **tutti** avvicinati all'entrata [LETTO: per-trade]. Break-even, trailing e parziale sono
+   la media, e sul conto di prova i TP riscritti si sono **tutti** avvicinati all'entrata (6 su 6) [LETTO: per-trade]. Break-even, trailing e parziale sono
    **spenti** di default (`Enable_BE_1R`, `Enable_Trailing_R`, `Enable_Partial_Close`). Rischio per operazione `Risk_Percent`, `Max_Trades` sulle posizioni aperte dell'intero cesto, kill switch giornaliero (`Use_Kill_Switch`).
-4. Nel codice corrente una sola posizione per simbolo e tipo di segnale, per istanza dell'EA. Nel forward della versione antenata **3 segnali hanno aperto due posizioni identiche** [LETTO: per-trade;
+   **Filtri di regime GIA' nel codice**: `Use_ATR_Filter` (default acceso: ATR della barra chiusa fra `ATR_Min_Mult` 0,5 e `ATR_Max_Mult` 1,8 volte la sua media a 20) vale
+   **anche per il VIOLA**; era **spento** nel backtest di screening (190 delle 221 posizioni del pool), acceso nel preset del conto di prova, sul demo NON VERIFICATO: il pool
+   mescola i due stati. `Use_ADX_Filter` esiste ma di default non si applica al VIOLA (`ADX_Apply_On_Purple` spento). Filtro orario: `Use_News_Filter` + `News_Block_Hours` (spento).
+4. Nel codice corrente una sola posizione per simbolo, segnale e lato (confronto sul commento dell'ordine), per istanza dell'EA. Nel forward della versione antenata **3 segnali hanno aperto due posizioni identiche** [LETTO: per-trade;
    causa NON verificata]: dove serve, le misure sotto distinguono POSIZIONI e SEGNALI, e le due posizioni dello stesso segnale **non sono indipendenti**.
 
 ## 2. I numeri, con la fonte
 
 ### 2.1 Quanto vale oggi  [MISURATO su CSV del repo; riepilogo in MIGLIORA parte 0 e parte 1]
-- Pool della versione corrente (n **221** posizioni VIOLA: backtest di screening di 4 mesi del 2026, 190, + forward demo, 31): **PF 0,72**, tasso di vincita **72,9%**;
+- Pool della versione corrente (n **221** posizioni VIOLA: gamba fuori campione di **2 mesi** (maggio-giugno 2026) di un backtest di screening di 4 mesi, 190, + forward demo, 31): **PF 0,72**, tasso di vincita **72,9%**;
   vincita media e perdita media in R sono i dati del conto C-1. DD sulle sole chiusure VIOLA del backtest: 14,9% a 0,8% di rischio per operazione.
 - Commissioni e swap pesano l'8-23% della perdita netta; il PF **prima di commissioni e swap** e' gia' 0,43-0,75 nelle tre fonti forward (19, 33, 50 posizioni). **Lo spread
-  dei cross e' dentro quel lordo e NON e' misurato** (lo abbiamo solo per 3 maggiori: alle 22 ora server vale il 3-21% di R contro <1% nelle altre ore): "i costi non spiegano
+  dei cross e' dentro quel lordo e NON e' misurato** (lo abbiamo solo per 3 maggiori: alle 22 ora server vale il 3-21% di R contro <1% nelle altre ore, con un ATR stimato da 1-4 stop): "i costi non spiegano
   la perdita" vale per commissioni e swap, non per lo spread.
-- Forward: 19 posizioni su un conto di prova prop, PF 0,40; versione antenata (50 posizioni), PF 0,68; versione corrente sul demo (33), PF 0,47. **Non sono quattro conferme
+- Forward: 19 posizioni su un conto di prova prop, PF 0,40; versione antenata (50 posizioni), PF 0,68; versione corrente sul demo (33, al 07/10), PF 0,47; l'08/10 il demo ha chiuso altre 9 VIOLA, tutte a TP: con quelle, 42 posizioni e PF 0,75 sul netto in valuta [MISURATO; fuori dal pool e da ogni numero sotto]: un solo giorno sposta il PF di 0,28. **Non sono quattro conferme
   indipendenti**: 31 delle 33 del demo sono dentro il pool; il conto di prova condivide le operazioni del demo sui cross comuni; il backtest e l'antenato coprono lo stesso periodo.
   Il solo numero buono che abbiamo (PF 1,60 su 268 operazioni) e' un backtest del capo del progetto su **BLU+VIOLA insieme**, 6 cross, 2022-2026.03, il cui file **non e' nel repo** [NON LEGGIBILE]: non e' una misura del solo VIOLA.
 - **La forma del payoff**: la mediana dista ~0,7 ATR dall'entrata (mediana fra simboli, ricavata come 3 x la vincita mediana in R) con stop a 3 ATR; **nessuna delle 161 vincite
@@ -46,7 +50,7 @@ USCITA, REGIME e SIMBOLI senza ridurre molto la frequenza. Proposte che stringon
 - Un break-even colpito **conta come SL nel kill switch** (conta ogni uscita per SL o con profitto negativo): un BE che sostituisce una vincita puo' aumentare le pause. "A frequenza invariata" e' un'ipotesi da misurare.
 - **Attenzione a una trappola di lettura [corretta dal cancello]**: `UpdateAllTP` avvicina il TP all'entrata, quindi il profitto finale di una vincita nel CSV e' il **minimo** della sua escursione, non l'escursione. Il percorso vero non e' nel repo [NON MISURATO]:
   per questo ogni conclusione sul BE che usa l'r finale delle vincite e' un'ipotesi.
-- Il trigger di un eventuale **parziale** scatterebbe, a 0,25 R, nel 30-67% delle 81 posizioni (37-74% sul conto di prova) e a 0,50 R nel 2,5-38% (5-16%): forchette larghe, il numero vero lo da' solo la telemetria.
+- Il trigger di un eventuale **parziale** scatterebbe, a 0,25 R, nel 30-67% delle posizioni del demo e dell'antenato (37-74% sul conto di prova) e a 0,50 R nel 2,5-38% (5-16%): forchette larghe, il numero vero lo da' solo la telemetria.
 
 ### 2.3 Orario  [MISURATO, MIGLIORA parte 12; stesse 81 posizioni = 78 segnali]
 Sei fasce fissate prima del ricalcolo (ora server). **Ma la fascia 08-12 non e' una scoperta fresca**: un blocco vicino (08-13) era gia' stato visto sugli stessi dati
@@ -62,9 +66,11 @@ e' dominato da un episodio (5 stop in 3 giorni). Notte 00-08: r medio -0,04, non
 - Valuta NZD peggiore (-12,05 R su 69 posizioni) ma "peggiore fra 8 valute" da' p 0,17.
 
 ### 2.5 Cosa e' gia' stato giudicato e cosa manca (certificato a 5 caselle)
-(1) PF: si', **ma solo 2026** (backtest di screening di 4 mesi + forward); la cella lunga 2010-2026 e' scritta e **mai girata**. (2) n e DD: si', n 190-221, DD solo sulle chiusure o per il cesto intero.
+(1) PF: si', **ma solo 2026** (backtest di screening di 4 mesi, merito non misurato per costruzione, + forward); la cella lunga 2010-2026 e' scritta e **mai girata**. (2) n e DD: si', n 190-221, DD solo sulle chiusure o per il cesto intero.
 (3) uscita ad asse: **non fatta** nel tester (solo carta sopra). (4) simboli gemelli: **no** a lungo (cesto 22 contro 15 mai confrontato); a carta nessun simbolo distinguibile.
-(5) TF: **mai cambiato** (H1 nel codice; M30 escluso per costo con la frontiera di sez. 5).
+(5) TF: **mai cambiato** (H1 nel codice). **M30 e' escluso per costo solo sui cross a stop corto** (es. NZDCHF: stop M30 stimato ~11,9 pip, budget 0,30 pip contro 0,41 di
+sola commissione; stima con ATR M30 ~ ATR H1 / radice di 2 [DERIVATO, non misurato]); sui cross a stop lungo (GBPNZD, EURNZD: 77-80 pip a H1) dipende dallo spread, NON MISURATO.
+E gia' a H1 la frontiera di sez. 5 non regge su tutti: EURGBP e' fuori anche a spread zero, NZDCHF ha 0,01 pip di margine. H4: non escluso per costo, ~1/4 della frequenza, mai misurato.
 Verdetto: **NON ANCORA MISURATO**, non "morto". Regole di portafoglio simulate a carta (14 regole x 4 fonti) non sono distinguibili dal caso.
 
 ## 3. Cosa manca e quanto costa
