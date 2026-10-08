@@ -1384,10 +1384,20 @@ def main():
                 if gr:
                     _perche = ""
                     if (gr["righe"] or 0) < SOGLIA_LOG_PIENO:
+                        # 🔴 08/10/2026: la prosa fu corretta il 07/10 ("la
+                        # soglia e' NOSTRA, non del referto: era uno
+                        # SCAVALCAMENTO") e il GENERATORE no, quindi la frase
+                        # falsa e' tornata la sera dopo. Seconda sera di classe
+                        # 1174. Il referto, su quel blocco, conclude il
+                        # CONTRARIO ("nessuna riga di ordine in un log NON
+                        # vuoto: questo giorno il conto NON ha operato"): il suo
+                        # test di vuotezza e' kb < 1 e il file e' 1,7 KB.
                         _perche = (" — e **%s righe totali** stanno **sotto la "
                                    "soglia di %d**: su un log quasi vuoto lo "
-                                   "zero **non vuol dire niente**, lo scrive il "
-                                   "referto stesso (classe 162)"
+                                   "zero **non vuol dire niente**, e **la "
+                                   "soglia e' NOSTRA** (principio della classe "
+                                   "162): su questo blocco il referto conclude "
+                                   "il **CONTRARIO**"
                                    % (gr["righe"], SOGLIA_LOG_PIENO))
                     out += ["> ℹ️ Il giornale del runner (`%s`) c'e' ma **non "
                             "scioglie il dubbio**: ultimo giorno di log "
