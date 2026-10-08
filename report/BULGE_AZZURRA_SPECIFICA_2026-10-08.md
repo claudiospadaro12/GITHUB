@@ -126,6 +126,19 @@ riporta l'uscita reale. Nella **copia AZZURRA** il solo caso di prova e' portato
 altrimenti l'AZZURRA direbbe "NON mettere in campo" per un errore non suo. **Correggerlo anche in `ABTG_Bulge.mq5` e'
 una decisione della sessione principale** (la consegna era di non toccarlo).
 
+✏️ **Aggiunto dal cancello (controllo-preventivo, 08/10/2026), riletto a mano sul sorgente.** Il conto torna:
+`PurpleReactionCore(true, 1.10000, 1.10020, 0.0010, false)` = `|0,0002| <= 0,0015` -> `true` -> `eLargo=true` ->
+`aEA=false` -> B) stampa `*** FAIL ***` e il verdetto d'insieme (r.~754 di `ABTG_Bulge.mq5`) stampa *"la condizione del
+VIOLA non si comporta come atteso: NON mettere in campo"*. La riga e' entrata con `c4426c53` (21/08, v5.20) e da allora
+il sorgente non e' cambiato; il binario della sedia Bulge della trial (magic 772720) e' dichiarato `c4426c53`
+(`report/NFP_2026-10-02_SEDIE_TRIAL.md` r.128). **Effetto sul trading: nessuno** (l'autotest stampa e basta, nessun
+ritorno usato da `OnInit`). **Effetto vero: un canarino che grida al lupo a ogni avvio** da sette settimane, e chi lo
+legge impara a ignorare proprio la riga che dice "NON mettere in campo". **Come si misura**: nel giornale Esperti del
+terminale dove gira `ABTG_Bulge` (riga di sola lettura del log `MQL5\Logs\AAAAMMGG.log` del giorno di un avvio), cercare
+`[BULGE][AUTOTEST] B)` -> atteso `corpo20pip=passa ... *** FAIL ***`. Non e' stato misurato qui: nessun log del campo
+in repo. Le etichette restano sbagliate di 10x anche nella copia AZZURRA (`corpo20pip` stampa ora il caso da 0,0017 =
+17 pip con ATR finto da 10): cosmetico, l'attesa "scarta" e' giusta.
+
 ## 7. 🧪 Cosa prova il collaudo (e cosa no)
 
 `python3 backtest_pipeline/collaudo_bulge_azzurra.py` — **esito 08/10/2026: PASS** (exit 0, ~9 minuti), sull'EA
@@ -160,6 +173,43 @@ finestre casuali del collaudo **non sono una stima di frequenza** (serie sinteti
 4. **Finestra**: 40 barre H1 fra l'impulso e il test (come il VIOLA) ti torna, o la continuazione e' piu' corta?
 5. **TF e ADX**: H1 come il Bulge (o anche M30, che la guida cita per le news)? E l'ADX: sull'AZZURRA lo lasciamo
    spento, o per una continuazione lo vuoi **al contrario** (entrare solo se il trend e' forte)?
+
+## 8-bis. 🔎 Aggiunto dal cancello (controllo-preventivo, 08/10/2026): da mettere ACCANTO alle domande
+
+Collaudo **rilanciato dal cancello** sullo stesso SHA256 `b6b06347...` (EA) / `5eb058fc...` (collaudo): **PASS**, exit 0,
+9m40s, 63/63 mutanti, riga `INFO` `eLargo=1 aEA=0` su `ABTG_Bulge`. Piu' **10 mutanti ciechi scritti dal cancello** sulla
+logica AZZURRA (tocco stretto `<`, ordinato da `iSig+1`, candela di test letta su `iSig`, finestra short +1, primo tocco
+short sul verso sbagliato, `orderedUp/Down` scambiati nel solo long, TP long sulla banda alta, short soppresso se c'e'
+il long, ordinato su meta' range, soglia della candela di test a ~2 x ATR): **9 presi da P o X, 1 sopravvissuto ed
+equivalente** (punto 5). Classi nuove della checklist: **1186** (punto 1) e **1187** (§6).
+
+1. **Il precedente in casa, che questa specifica non citava.** `mql5/Experts/ABTG_BreakingBand.mq5` (v1.05, magic
+   772101) ha **gia'** una CONTINUAZIONE codificata dalla **stessa guida** (`UpdatePost`, r.914-1030): invalida con
+   range > 1,5 x ATR **compresa la candela di test** (r.941, con ATR congelato a fine bulge se `InpPostATRRef=1`),
+   **zig-zag** = candela contraria con range >= `InpZigZagATR` x ATR (r.966-968), spike profondo, bande che si
+   rigonfiano, band riding, `InpContRequireNarrow` / `InpContRequireStdDown`, e tre modi d'ingresso (primo tocco /
+   retest / in-bulge di Claudio) con il setup **consumato** al tocco. L'AZZURRA non usa nessuno di questi salvo il
+   range 1,5 x ATR (e **senza** la candela di test): e' coerente con "stesse impostazioni del Bulge" e con la decisione
+   VIOLA "ogni tocco dopo un impulso" (`report/PRIORITA_EA_E_DA_FARE_2026-10-08.md` §F), ma le domande 1 e 3 hanno gia'
+   una lettura "da guida" **codificata in casa**: e' il confronto da mettere davanti a Claudio, non da reinventare.
+   Sul VIOLA la distanza misurata fra le due letture e' ~38x di frequenza (`CONFRONTO_BULGE_VIOLA_VS_BREAKING_BAND_2026-10-08.md`);
+   per l'AZZURRA contro la CONT del BB e' **[NON MISURATO]**.
+2. **La candela di test ha il range libero.** La guida: *"Non entrare se ... il prezzo raggiunge la banda opposta con
+   violenza (no gradini, ma candele grandi)"* e invalidazione *"Test impulsivo (>1.5xATR)"*. L'AZZURRA misura solo il
+   **corpo** della candela di test (<= 1,5 x ATR): una candela con range 3 x ATR e corpo 1 x ATR che piomba sulla banda
+   **entra**. E' una scelta dichiarata in §2 ("spike ammesso"), ma il BB legge il contrario (range, test compreso).
+   Domanda 1-bis per Claudio: il test violento di range, non di corpo, invalida?
+3. **Commento lungo al massimo 21 caratteri.** `HasOpenTrade` confronta il commento della posizione **esatto**
+   (`==`): se il server lo tronca (limite 31), la guardia "una posizione per simbolo e segnale" non riconosce piu' la
+   sua posizione e riapre a ogni barra fino a `Max_Trades`. `InpComment` + `_AZZURRA_L` (10) <= 31 -> prefisso <= 21.
+   Il default (13 + 10 = 23) e' dentro; un preset tipo `BULGE_AZZURRA_V520_FT` (21) e' **al limite**.
+4. **Kill switch per istanza anche sulla perdita giornaliera.** Oltre a `Max_Trades`, anche `Max_Daily_Loss_Pct=2,0`
+   conta solo il proprio magic: Bulge + AZZURRA sullo stesso conto si fermano **ciascuno** al -2% realizzato, quindi
+   fino a **-4%** realizzato nel giorno prima che siano fermi tutti e due, **piu'** il rischio aperto (6,40% coi
+   default). Contro un limite giornaliero prop del 5% e' un numero da mettere davanti a Claudio insieme alle taglie.
+5. **Long e short AZZURRA sulla stessa barra: impossibili in pratica.** Il mutante "short soppresso se c'e' anche il
+   long" **sopravvive** al collaudo (unico su 10 mutanti ciechi del cancello), ma e' **equivalente**: i due ordini
+   hanno lo stesso TP (`bbBasisCnf`) e `OpenOrder` pretende `tp > ask` per il long e `tp < bid` per lo short.
 
 ## 9. ⚠️ Avvertenze prima di qualunque uso
 
