@@ -4633,3 +4633,9 @@ Banco: **PC di backtest `DESKTOP-H4D7CAJ`, mai il VPS**, deposito 100000. Magic:
   vuoto dopo il 2025.07.03, **UTC-1 dal 2025.03.30**). Ricontati dal cancello e VERI: 119/92 e la posizione 1356 nel moncone; floor 0 e 8;
   64/50 deal prima delle 13:00, 306/257, 242 vive, 161 timestop +22.882, 41/50 stop dopo le 13:00, 15/9 rimasti; K1 23,32/27,98 $ e quota
   [19;37]; bootstrap sd 0,193/0,198/0,290; estate/inverno DAX 45/0,818 e 27/1,030; 81/102 dal 2024.09.26; magic 7972xx vergini.
+
+### 08/10/2026 -- BULGE VIOLA (ABTG_Bulge v5.20, magic 772700): NON ANCORA MISURATO (certificato di morte a 5 caselle)
+- **Verdetto: NON ANCORA MISURATO, non "morto".** Fonte: `report/MIGLIORA_BULGE_VIOLA_2026-10-08.md` (cancello PASS CON RISERVA, numeri ricalcolati da zero dal cancello); decisione di Claudio 08/10: il motore resta "ogni tocco dopo un impulso".
+- **Numeri nostri sul pool v5.20** (R92BAB VIOLA 190 + piccolo v5.20 31): n 221, **PF(r) 0,717**, win rate 72,9% (pareggio 78,9%), payoff 0,267, nessuna delle 161 vincite arriva a 1 R (mediana 0,239 R, max 0,825 R). Trial FTMO: PF 0,40 (n 19, -4.925,49 EUR, 10 vinte). Piccolo v5.20: PF 0,47 (n 33). Antenato: PF 0,68 (n 50).
+- **Caselle del certificato**: (1) PF misurato: SI; (2) n e DD: SI (DD R92BAB 14,9%, piccolo 5,4%); (3) gestione dell'uscita messa ad asse: **NO** (BE/trailing/parziale con trigger basso mai provati; MFE/MAE assenti); (4) simboli gemelli: **NO** (nessun simbolo si distingue dal caso, 22 cross con ~10 segnali ciascuno); (5) TF cambiato: **NO** (solo H1).
+- **Cosa manca / prossime misure**: telemetria di banco (MFE/MAE, percorso intra-candela) per simulare offline le uscite; `backtest_pipeline/prove/BULGE_M1_cella_campo_lunga.txt` (4 passate, mai girata); asse orario con fasce fissate a priori; asse uscita a trigger basso. Il backtest di Claudio (268 operazioni, PF 1,599, 40% qualita' dati, nessun OOS) NON e' nel repo e non e' riconciliato con le nostre misure.
