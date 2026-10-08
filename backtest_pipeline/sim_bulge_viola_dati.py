@@ -98,9 +98,12 @@ def carica_bcm(percorso=TRADES_AUTO):
         if motivo == "sl" and o > 0:   # SL = 3 ATR: la distanza entrata-uscita a SL e' 3 ATR (slippage a parte)
             d = abs(o - c) / 3.0
             atr_rel, atr_pip = d / o, d / pip_size(r["symbol"])
-        out[chiave].append(nuova(chiave, (chiave, r["symbol"], lato, apre), r["symbol"], lato, apre, chiude,
-                                 1, netto, None, motivo, seg, chiave, comm=float(r["commission"]), swap=float(r["swap"]),
-                                 atr_rel=atr_rel, atr_pip=atr_pip))
+        pos_ = nuova(chiave, (chiave, r["symbol"], lato, apre), r["symbol"], lato, apre, chiude,
+                     1, netto, None, motivo, seg, chiave, comm=float(r["commission"]), swap=float(r["swap"]),
+                     atr_rel=atr_rel, atr_pip=atr_pip)
+        # banda M5 dall'ingresso a fine GIORNO d'ingresso (ABTG_TradeExporter): proxy di MFE/MAE, vedi sim_bulge_viola_mfe_limite.py
+        pos_.update({"o": o, "c": c, "hi": float(r["session_high"] or 0), "lo": float(r["session_low"] or 0)})
+        out[chiave].append(pos_)
     for chiave, lst in out.items():
         sl = [-p["netto"] for p in lst if p["motivo"] == "sl" and p["netto"] < 0]
         R = st.median(sl) if sl else None
@@ -144,7 +147,7 @@ def carica_trial(percorso=TRIAL_XLSX, off_utc=3):
     warnings.filterwarnings("ignore")
     ws = openpyxl.load_workbook(percorso, read_only=True).active
     righe = list(ws.iter_rows(values_only=True))
-    sezione, pos, commenti = None, [], {}
+    sezione, pos, commenti, tp_ordine = None, [], {}, {}
     for r in righe:
         a = r[0]
         if a in ("Posizioni", "Ordini", "Affari", "Risultati"):
@@ -156,6 +159,7 @@ def carica_trial(percorso=TRIAL_XLSX, off_utc=3):
             pos.append(r)
         elif sezione == "Ordini":
             commenti[r[1]] = r[11]
+            tp_ordine[r[1]] = r[7]
     out = []
     for r in pos:
         com = commenti.get(r[1]) or ""
@@ -177,6 +181,8 @@ def carica_trial(percorso=TRIAL_XLSX, off_utc=3):
         apre, chiude = dt(r[0]), dt(r[8])
         p = nuova("trial", ("trial", sym, lato, apre), sym, lato, apre, chiude, off_utc, netto, R, motivo, seg, ist,
                   comm=comm, swap=swap, atr_rel=dist / 3.0 / o, atr_pip=dist / 3.0 / pip_size(sym))
+        tp0 = tp_ordine.get(r[1])
+        p.update({"o": o, "c": c, "sl": sl, "tp_ini": (float(tp0) if isinstance(tp0, (int, float)) else None)})
         out.append(p)
     return out
 
