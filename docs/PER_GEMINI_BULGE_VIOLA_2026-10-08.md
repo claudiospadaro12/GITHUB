@@ -35,7 +35,7 @@ USCITA, REGIME e SIMBOLI senza ridurre molto la frequenza. Proposte che stringon
   e' dentro quel lordo e per 19 delle 22 coppie NON e' misurato** (lo abbiamo solo per EURUSD, GBPUSD, USDJPY: alle 22 ora server vale il 3-21% di R contro <1% nelle altre ore, con un ATR stimato da 1-4 stop): "i costi non spiegano
   la perdita" vale per commissioni e swap, non per lo spread.
 - Forward: 19 posizioni su un conto di prova prop, PF 0,40; versione antenata (50 posizioni), PF 0,68; versione corrente sul demo (33, al 07/10), PF 0,47; l'08/10 il demo ha chiuso altre 9 VIOLA, tutte a TP: con quelle, 42 posizioni e PF 0,75 sul netto in valuta [MISURATO; fuori dal pool e da ogni numero sotto]: un solo giorno sposta il PF di 0,28. **Non sono quattro conferme
-  indipendenti**: 31 delle 33 del demo sono dentro il pool; il conto di prova condivide le operazioni del demo sui cross comuni; il backtest e l'antenato coprono lo stesso periodo.
+  indipendenti**: 31 delle 33 del demo sono dentro il pool (le altre 2 sono su XAUUSD, fuori dalle 22 coppie del codice: la lista di simboli dell'istanza del demo non e' quella di default ed e' NON VERIFICATA); il conto di prova condivide le operazioni del demo sui cross comuni; il backtest e l'antenato coprono lo stesso periodo.
   Il solo numero buono che abbiamo (PF 1,60 su 268 operazioni) e' un backtest del capo del progetto su **BLU+VIOLA insieme**, 6 cross, 2022-2026.03, il cui file **non e' nel repo** [NON LEGGIBILE]: non e' una misura del solo VIOLA.
 - **La forma del payoff**: la mediana dista ~0,7 ATR dall'entrata (mediana fra simboli, ricavata come 3 x la vincita mediana in R) con stop a 3 ATR; **nessuna delle 161 vincite
   CHIUDE a 1 R o piu'** (massimo 0,83 R), vincita mediana 0,24 R, 90-esimo percentile 0,46 R; sul conto di prova il TP iniziale non supera 0,73 R in nessuna delle 19 posizioni.
@@ -78,10 +78,11 @@ Verdetto: **NON ANCORA MISURATO**, non "morto". Regole di portafoglio simulate a
 - Una sola **copia di banco con telemetria** (massimo e minimo per posizione, ora d'ingresso, ATR e spread alla barra del segnale) chiuderebbe quasi tutti i buchi. Richiede una firma del capo: **non e' ancora data**.
 - Il tester gira solo su un PC separato dai conti. Ritmi misurati sulla stessa finestra (job di 2 celle su 4 mesi): **68 secondi con 1 simbolo, 95 con 22**, cioe' **circa 67 secondi fissi
   per job + circa 1,3 secondi per simbolo**. La stima per le 38 passate previste (9 file) e' **1-3 ore** [DERIVATO, forchetta larga; primo caricamento dello storico NON MISURATO].
-- **Gia' scritti, MAI girati** (9 file, solo VIOLA, 2010-2026.06, 15 coppie, filtro ATR acceso, solo input esistenti; un asse per file): cella base; BE a 0,25 / 0,50 / 0,75 R;
-  parziale del 50% a 0,25 / 0,50 R; ADX applicato al VIOLA a 25 / 30; `ATR_Max_Mult` 1,2 / 1,5; `SL_ATR_Mult` 2,5 / 3,5 (solo con decisione del capo); tre fasce
-  orarie bloccate con `News_Block_Hours` (00-08, 08-12, 22-24 ora server). Solo nel simulatore offline (aspetta la telemetria): time-stop e chiusura d'invalidazione
-  a 15 / 30 / 45 minuti dall'ingresso (prezzo avverso, colore della candela d'entrata, gap).
+- **Gia' scritti, MAI girati** (9 file, solo VIOLA, 2010-2026.06, 15 coppie = 12 cross + 3 con l'USD, non i 15 cross di sez. 1; filtro ATR acceso, solo input esistenti; un asse per file): cella base; BE a 0,25 / 0,50 / 0,75 R;
+  parziale del 50% a 0,25 / 0,50 R (il codice porta anche lo stop a pareggio sul residuo); ADX applicato al VIOLA a 25 / 30; `ATR_Max_Mult` 1,2 / 1,5; `SL_ATR_Mult` 2,5 / 3,5 (solo con decisione del capo); tre fasce
+  orarie bloccate con `News_Block_Hours` (00-08, 08-12, 22-24 ora server). Solo nel simulatore offline (aspetta la telemetria): chiusura d'invalidazione a 15 / 30 / 45 minuti
+  dall'ingresso (prezzo avverso di 0 / 0,25 / 0,5 ATR; candela d'entrata di colore opposto con prezzo oltre il centro della candela di conferma; gap contro che continua), uscita a fine candela d'entrata se chiude di colore opposto,
+  time-stop a 6 / 12 ore se la posizione e' in perdita, trailing a R con partenza 0,50 / 0,75 R (sotto 1 R vale un BE, vedi 2.2).
 - Per la prova di `TimeGMT` nel tester serve una finestra con almeno **5 ingressi attesi** all'ora discriminante; una finestra piu' corta non distingue le due ipotesi.
 
 ## 4. Le domande
@@ -90,7 +91,8 @@ Verdetto: **NON ANCORA MISURATO**, non "morto". Regole di portafoglio simulate a
 - A-1. Sulla stessa inefficienza (fade di un tocco di banda dopo un impulso, SL 3 ATR, TP sulla mediana, tasso di vincita 72,9%), proponi al massimo **2 meccanismi di USCITA** diversi da BE, parziale e trailing a R
   (qui quasi inerti: nessuna vincita chiude a 1 R) e da quelli gia' in lista in sez. 3 (se un tuo meccanismo coincide, dillo). Per ognuno: nome esatto dell'input o "nome da verificare", attesa con banda e **numero dell'ipotesi alternativa**, falsificatore, costo in passate.
 - A-2. Proponi al massimo **2 filtri di REGIME** esterni al segnale (orario, evento, volatilita' del cesto, correlazione fra valute) che non cambino la condizione d'ingresso e non richiedano di conoscere il futuro. Filtro ATR per simbolo, ADX sul VIOLA e lista di ore
-  esistono gia' e sono gia' in prova (sez. 1 e 3): se ne riproponi uno, dillo e spiega cosa aggiungi.
+  esistono gia' e sono gia' in prova (sez. 1 e 3): se ne riproponi uno, dillo e spiega quale meccanismo nuovo aggiungi (un'altra soglia dello stesso filtro non conta).
+  Nessuna proposta tocca le condizioni del segnale VIOLA di sez. 1: dire che una proposta coincide con una gia' in lista non la rende ammessa.
   Dichiara se riducono il numero di ingressi e di quanto. Se un filtro che scarta segnali conti come "stringere l'entrata" e' una domanda **ancora aperta** al capo: per ora sono ipotesi da misurare.
 **Ruolo B -- Avvocato del diavolo.** Per ogni proposta di A e per queste letture nostre, il contro-esempio concreto (cosa produce l'ipotesi alternativa e se cade nella banda):
 - B-1. "La fascia 08-12 e' peggiore": spiegala con un episodio (5 stop in 3 giorni) o con il regime; quale numero atteso se e' solo l'episodio?
