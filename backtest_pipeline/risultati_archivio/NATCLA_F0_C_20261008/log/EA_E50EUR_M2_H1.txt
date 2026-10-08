@@ -1,0 +1,41 @@
+passata [53/66] E50EUR M2_H1   ini f0_E50EUR_M2_H1.ini   durata 38 s   IMBUTO: 898 righe, quadratura ROTTA 0
+[NatCla] AVVIO v1.05 | modalita' EMA200 | E50EUR PERIOD_H1 | 1 u = 1.00 (AUTO_CLASSE indice/CFD: 1,0 punto) | 1 pip = 0.01 | magic 778621 | linee E200 | ADX spento, iADX MetaQuotes, max 20.0, periodo 14 | ingresso SCALA3_PENDENTI | rischio setup 0.25% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian ON (nel tester FAIL-OPEN) | solo conta SI | placebo 0.00 ATR | fonte SOLO AUDIO (PDF escluso 07/10)
+[NatCla] VERIFICA ADX barra 2024.10.28 21:00 periodo 14: terminale NC_ADX_MT5 = 20.79 | ricalcolo MetaQuotes = 20.79 | ricalcolo Wilder = 23.80 -> il terminale coincide con: formula MetaQuotes (DI per barra, media esponenziale 2/(n+1))
+[NatCla] AVVISO: filtro inclinazione ACCESO con soglia 0 = NO-OP DICHIARATO (lascia passare tutto) finche' il preset non porta il P50 del passo 0 (specifica F5)
+[NatCla] AVVISO: SOLO CONTA: nessun ordine verra' inviato
+[NatCla] CFG ADX = spento, max 20.0, periodo 14, ambito NC_ADX_SOLO_ST35, tipo NC_ADX_MT5   DA_MODALITA [FONTE A-R12] periodo/tipo [NOSTRA]
+[NatCla] CFG ChiudeVicinoAtr = 0.00 (0 = spento)   DA_MODALITA [FONTE P-p14] tolleranza [NOSTRA]
+[NatCla] CFG ConfermaApertura = no   DA_MODALITA [FONTE P-p06]
+[NatCla] CFG Confluenza = 1 (0 spenta, 1 solo etichetta, 2 obbligatoria), tolleranza 0.50 ATR   DA_MODALITA [FONTE A-R16 / P-p21] tolleranza [NOSTRA]
+[NatCla] CFG Costo = commissione 0.00 in prezzo, cancello 40.0x (SOLO diagnostica)   [CASA] cancello del costo
+[NatCla] CFG DurataMaxMin = 0 (0 = spenta)   [FONTE A-R24: osservazione, non regola]
+[NatCla] CFG EmaLenta = 200 EMA su close   [FONTE] periodo; close [NOSTRA]
+[NatCla] CFG Inclinazione = ACCESA, N 20, soglia 0.000 ATR, verso NC_INCL_QUALSIASI   DA_MODALITA [FONTE A-R19] misura [NOSTRA]
+[NatCla] CFG Ingresso = SCALA3_PENDENTI   DA_MODALITA [FONTE A-R21 / P-p17]
+[NatCla] CFG InpDirezione = NC_DIR_ENTRAMBI   [FONTE: direzione mai dichiarata, A-R26]
+[NatCla] CFG InpTF = PERIOD_H1   A MANO [FONTE A-R8 / P-p05]
+[NatCla] CFG Linee = ST25 no, ST30 no, ST35 no, EMA200 si   DA_MODALITA [FONTE A-R11/13/14/20, P-p11]
+[NatCla] CFG MaxSetupAperti = 1   [NOSTRA] E7
+[NatCla] CFG MaxSpreadPunti = 0 (0 = spento)   [CASA]
+[NatCla] CFG MoltConfluenza = 1.00   BANDIERA B3 (1,0 = spenta)
+[NatCla] CFG PDF secondo ordine = 20.00 u, lontana NC_LONTANA_SALTA (0.50 ATR), scadenza 1 barre   [FONTE P-p17] / [NOSTRA]
+[NatCla] CFG PesiPdf = NC_PESI_1_1   BANDIERA 2/3 PDF (default spenta)
+[NatCla] CFG PesiScala = NC_PESI_1_1_1   BANDIERA B1 (default spenta)
+[NatCla] CFG ResetConteggio = NC_RESET_AL_FLIP (distacco 1.00 ATR)   [NOSTRA] C6
+[NatCla] CFG RischioSetupPct = 0.250 (tetto 0.250)   SEGNAPOSTO DA FIRMARE DA CLAUDIO (nessuna fonte)
+[NatCla] CFG Scadenza server pendenti = si   [CASA]
+[NatCla] CFG Scala = anticipo 5.00 u, oltre 5.00 u   [FONTE] numeri, [NOSTRA] normalizzazione
+[NatCla] CFG SL = criterio 0 (0 ordine profondo, 1 estremo recente, 2 linea), buffer 5.00 u, estremo su 3 barre   DA_MODALITA [FONTE P-p17/p21] / [NOSTRA] audio
+[NatCla] CFG Supertrend = ATR 10, mult 2.50 / 3.00 / 3.50, HL2   [FONTE A-R2 i mult; ATR [NOSTRA] dal 07/10] calcolo SW_STCore [CASA]
+[NatCla] CFG TimingTocco = NC_TIMING_IGNORA   [FONTE P-p14 vs p25: contraddizione]
+[NatCla] CFG TocchiMax = 1 / 1 / 2 / EMA 0 (0 = illimitato)   DA_MODALITA [FONTE A-R11/R13/R14]
+[NatCla] CFG ToccoDef = NC_TOCCO_RAGGIUNGE (sfiora 0.10 ATR)   [FONTE] RAGGIUNGE, [NOSTRA] SFIORA
+[NatCla] CFG TP = criterio 0 (0 dalla linea, 1 dal riempimento, 2 EMA14/EMA89), distanza 10.00 u, R/R min 0.00   DA_MODALITA [FONTE A-R22 / P-p17]
+[NatCla] CFG TP1 = parziale 0.0%, pareggio no   DA_MODALITA [FONTE P-p17 'posso']
+[NatCla] CFG Unita = 1.00 AUTO_CLASSE indice/CFD: 1,0 punto   [NOSTRA] U1
+TESTER E50EUR|H1|2024.09.26|00:00|2026.06.30|00:00
+TESTER-EVENTO CS	0	15:22:54.190	Tester	E50EUR,H1: total time from login to stop testing 0:00:01.951 (including 0:00:00.017 for history data synchronization)
+TESTER-EVENTO LI	0	15:22:51.701	Tester	E50EUR: history data begins from 2024.09.26 00:00
+TESTER-EVENTO MK	0	15:22:52.309	Tester	quality of analyzed history is 97%
+TESTER-EVENTO CS	0	15:22:54.190	Tester	E50EUR,H1: 1276470 ticks, 6614 bars generated. Environment synchronized in 0:00:00.017. Test passed in 0:00:01.934 (including ticks preprocessing 0:00:00.125).
+TESTER-EVENTO CS	0	15:22:54.190	Tester	61 Mb memory used including 0.94 Mb of history data, 64 Mb of tick data

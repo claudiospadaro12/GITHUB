@@ -1,0 +1,43 @@
+#AVVIO v1.05 | modalita' AUDIO | NASUSD PERIOD_D1 | 1 u = 1.00 (AUTO_CLASSE indice/CFD: 1,0 punto) | 1 pip = 0.01 | magic 778608 | linee ST25 ST30 ST35  | ADX ACCESO, iADX MetaQuotes, max 20.0, periodo 14 | ingresso SCALA3_PENDENTI | rischio setup 0.25% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian ON (nel tester FAIL-OPEN) | solo conta SI | placebo 0.00 ATR | fonte SOLO AUDIO (PDF escluso 07/10)
+#cfg;InpTF;PERIOD_D1;A MANO [FONTE A-R8 / P-p05]
+#cfg;InpDirezione;NC_DIR_ENTRAMBI;[FONTE: direzione mai dichiarata, A-R26]
+#cfg;Supertrend;ATR 10, mult 2.50 / 3.00 / 3.50, HL2;[FONTE A-R2 i mult; ATR [NOSTRA] dal 07/10] calcolo SW_STCore [CASA]
+#cfg;Linee;ST25 si, ST30 si, ST35 si, EMA200 no;DA_MODALITA [FONTE A-R11/13/14/20, P-p11]
+#cfg;TocchiMax;1 / 1 / 2 / EMA 0 (0 = illimitato);DA_MODALITA [FONTE A-R11/R13/R14]
+#cfg;EmaLenta;200 EMA su close;[FONTE] periodo; close [NOSTRA]
+#cfg;ToccoDef;NC_TOCCO_RAGGIUNGE (sfiora 0.10 ATR);[FONTE] RAGGIUNGE, [NOSTRA] SFIORA
+#cfg;ResetConteggio;NC_RESET_AL_FLIP (distacco 1.00 ATR);[NOSTRA] C6
+#cfg;ChiudeVicinoAtr;0.00 (0 = spento);DA_MODALITA [FONTE P-p14] tolleranza [NOSTRA]
+#cfg;ConfermaApertura;no;DA_MODALITA [FONTE P-p06]
+#cfg;TimingTocco;NC_TIMING_IGNORA;[FONTE P-p14 vs p25: contraddizione]
+#cfg;ADX;ACCESO, max 20.0, periodo 14, ambito NC_ADX_SOLO_ST35, tipo NC_ADX_MT5;DA_MODALITA [FONTE A-R12] periodo/tipo [NOSTRA]
+#cfg;Inclinazione;ACCESA, N 20, soglia 0.000 ATR, verso NC_INCL_QUALSIASI;DA_MODALITA [FONTE A-R19] misura [NOSTRA]
+#cfg;Confluenza;1 (0 spenta, 1 solo etichetta, 2 obbligatoria), tolleranza 0.50 ATR;DA_MODALITA [FONTE A-R16 / P-p21] tolleranza [NOSTRA]
+#cfg;MaxSpreadPunti;0 (0 = spento);[CASA]
+#cfg;Unita;1.00 AUTO_CLASSE indice/CFD: 1,0 punto;[NOSTRA] U1
+#cfg;Ingresso;SCALA3_PENDENTI;DA_MODALITA [FONTE A-R21 / P-p17]
+#cfg;Scala;anticipo 5.00 u, oltre 5.00 u;[FONTE] numeri, [NOSTRA] normalizzazione
+#cfg;PDF secondo ordine;20.00 u, lontana NC_LONTANA_SALTA (0.50 ATR), scadenza 1 barre;[FONTE P-p17] / [NOSTRA]
+#cfg;MaxSetupAperti;1;[NOSTRA] E7
+#cfg;RischioSetupPct;0.250 (tetto 0.250);SEGNAPOSTO DA FIRMARE DA CLAUDIO (nessuna fonte)
+#cfg;PesiScala;NC_PESI_1_1_1;BANDIERA B1 (default spenta)
+#cfg;PesiPdf;NC_PESI_1_1;BANDIERA 2/3 PDF (default spenta)
+#cfg;MoltConfluenza;1.00;BANDIERA B3 (1,0 = spenta)
+#cfg;SL;criterio 0 (0 ordine profondo, 1 estremo recente, 2 linea), buffer 5.00 u, estremo su 3 barre;DA_MODALITA [FONTE P-p17/p21] / [NOSTRA] audio
+#cfg;TP;criterio 0 (0 dalla linea, 1 dal riempimento, 2 EMA14/EMA89), distanza 10.00 u, R/R min 0.00;DA_MODALITA [FONTE A-R22 / P-p17]
+#cfg;TP1;parziale 0.0%, pareggio no;DA_MODALITA [FONTE P-p17 'posso']
+#cfg;DurataMaxMin;0 (0 = spenta);[FONTE A-R24: osservazione, non regola]
+#cfg;Costo;commissione 0.00 in prezzo, cancello 40.0x (SOLO diagnostica);[CASA] cancello del costo
+#cfg;Scadenza server pendenti;si;[CASA]
+tipo;barra;linea;lato;tocco_n;nuovo_ep;troncato;ctx_arm;ctx_tocco;vicino_ok;conferma_ok;dist_apertura_atr;adx;incl_atr;confl_dist_atr;confl_etichetta;ema9;ema21;bb_larg;atr14;linea_prezzo;ingresso;n_ordini;p1;p2;p3;sl;tp1;tp2;tp3;lotto1;lotto2;lotto3;spread;commissione;stop_ped1;stop_ped2;stop_ped3;rischio_soldi;n_riempiti;esito_soldi;esito_R;durata_min;motivo
+CONTA;2025.11.05 00:00;ST25;1;1;1;0;0;0;1;1;0.785;39.04;1.360;6.082;0;25673.69;25398.50;2005.59;375.12;25330.50;SCALA3;0;25335.50;25330.50;25325.50;25320.50;25340.50;25340.50;25340.50;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA
+CONTA;2025.11.05 00:00;ST30;1;1;1;0;0;0;1;1;1.179;39.04;1.360;5.688;0;25673.69;25398.50;2005.59;375.12;25182.63;SCALA3;0;25187.63;25182.63;25177.63;25172.63;25192.63;25192.63;25192.63;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA
+CONTA;2025.12.05 00:00;ST25;-1;1;1;0;0;0;1;1;0.053;34.17;0.828;5.132;0;25398.27;25248.06;1870.22;447.41;25755.00;SCALA3;0;25750.00;25755.00;25760.00;25765.00;25745.00;25745.00;25745.00;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA
+CONTA;2025.12.08 00:00;ST25;-1;1;0;0;0;0;1;1;0.194;36.41;0.857;5.325;0;25433.88;25277.90;1855.99;427.18;25755.00;SCALA3;0;25750.00;25755.00;25760.00;25765.00;25745.00;25745.00;25745.00;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA
+CONTA;2025.12.15 00:00;ST25;1;1;1;0;0;0;1;1;0.189;31.87;1.189;4.754;0;25406.47;25339.67;1939.92;306.04;25032.18;SCALA3;0;25037.18;25032.18;25027.18;25022.18;25042.18;25042.18;25042.18;0;0;0;2.10;0.00;7.1;4.8;2.4;0;0;0;0;0;SOLO_CONTA
+CONTA;2025.12.16 00:00;ST25;1;1;0;0;0;0;1;1;0.169;30.53;1.183;4.648;0;25356.25;25322.92;1845.99;309.64;25032.18;SCALA3;0;25037.18;25032.18;25027.18;25022.18;25042.18;25042.18;25042.18;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.01.12 00:00;ST25;-1;1;1;0;0;0;1;1;0.255;17.39;1.279;7.398;0;25595.93;25484.50;1108.79;264.65;25842.43;SCALA3;0;25837.43;25842.43;25847.43;25852.43;25832.43;25832.43;25832.43;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.01.13 00:00;ST25;-1;1;0;0;0;0;1;1;0.372;17.53;1.278;7.279;0;25621.86;25506.41;1123.36;266.44;25842.43;SCALA3;0;25837.43;25842.43;25847.43;25852.43;25832.43;25832.43;25832.43;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.01.28 00:00;ST35;-1;1;1;0;0;0;1;1;0.068;19.44;0.867;5.596;0;25681.45;25565.24;1036.51;376.79;26182.28;SCALA3;0;26177.28;26182.28;26187.28;26192.28;26172.28;26172.28;26172.28;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.02.02 00:00;ST25;1;1;1;0;0;0;1;1;1.398;15.89;0.739;2.307;0;25692.19;25600.69;969.37;445.99;25151.07;SCALA3;0;25156.07;25151.07;25146.07;25141.07;25161.07;25161.07;25161.07;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.02.03 00:00;ST25;1;1;0;0;0;0;1;1;0.291;13.99;0.691;2.175;0;25616.73;25574.71;1001.42;467.67;25151.07;SCALA3;0;25156.07;25151.07;25146.07;25141.07;25161.07;25161.07;25161.07;0;0;0;2.70;0.00;5.6;3.7;1.9;0;0;0;0;0;SOLO_CONTA

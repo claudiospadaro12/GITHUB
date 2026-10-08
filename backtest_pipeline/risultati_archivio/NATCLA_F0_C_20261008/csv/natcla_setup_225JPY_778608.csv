@@ -1,0 +1,41 @@
+#AVVIO v1.05 | modalita' AUDIO | 225JPY PERIOD_D1 | 1 u = 1 (AUTO_CLASSE indice/CFD: 1,0 punto) | 1 pip = 1 | magic 778608 | linee ST25 ST30 ST35  | ADX ACCESO, iADX MetaQuotes, max 20.0, periodo 14 | ingresso SCALA3_PENDENTI | rischio setup 0.25% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian ON (nel tester FAIL-OPEN) | solo conta SI | placebo 0.00 ATR | fonte SOLO AUDIO (PDF escluso 07/10)
+#cfg;InpTF;PERIOD_D1;A MANO [FONTE A-R8 / P-p05]
+#cfg;InpDirezione;NC_DIR_ENTRAMBI;[FONTE: direzione mai dichiarata, A-R26]
+#cfg;Supertrend;ATR 10, mult 2.50 / 3.00 / 3.50, HL2;[FONTE A-R2 i mult; ATR [NOSTRA] dal 07/10] calcolo SW_STCore [CASA]
+#cfg;Linee;ST25 si, ST30 si, ST35 si, EMA200 no;DA_MODALITA [FONTE A-R11/13/14/20, P-p11]
+#cfg;TocchiMax;1 / 1 / 2 / EMA 0 (0 = illimitato);DA_MODALITA [FONTE A-R11/R13/R14]
+#cfg;EmaLenta;200 EMA su close;[FONTE] periodo; close [NOSTRA]
+#cfg;ToccoDef;NC_TOCCO_RAGGIUNGE (sfiora 0.10 ATR);[FONTE] RAGGIUNGE, [NOSTRA] SFIORA
+#cfg;ResetConteggio;NC_RESET_AL_FLIP (distacco 1.00 ATR);[NOSTRA] C6
+#cfg;ChiudeVicinoAtr;0.00 (0 = spento);DA_MODALITA [FONTE P-p14] tolleranza [NOSTRA]
+#cfg;ConfermaApertura;no;DA_MODALITA [FONTE P-p06]
+#cfg;TimingTocco;NC_TIMING_IGNORA;[FONTE P-p14 vs p25: contraddizione]
+#cfg;ADX;ACCESO, max 20.0, periodo 14, ambito NC_ADX_SOLO_ST35, tipo NC_ADX_MT5;DA_MODALITA [FONTE A-R12] periodo/tipo [NOSTRA]
+#cfg;Inclinazione;ACCESA, N 20, soglia 0.000 ATR, verso NC_INCL_QUALSIASI;DA_MODALITA [FONTE A-R19] misura [NOSTRA]
+#cfg;Confluenza;1 (0 spenta, 1 solo etichetta, 2 obbligatoria), tolleranza 0.50 ATR;DA_MODALITA [FONTE A-R16 / P-p21] tolleranza [NOSTRA]
+#cfg;MaxSpreadPunti;0 (0 = spento);[CASA]
+#cfg;Unita;1 AUTO_CLASSE indice/CFD: 1,0 punto;[NOSTRA] U1
+#cfg;Ingresso;SCALA3_PENDENTI;DA_MODALITA [FONTE A-R21 / P-p17]
+#cfg;Scala;anticipo 5.00 u, oltre 5.00 u;[FONTE] numeri, [NOSTRA] normalizzazione
+#cfg;PDF secondo ordine;20.00 u, lontana NC_LONTANA_SALTA (0.50 ATR), scadenza 1 barre;[FONTE P-p17] / [NOSTRA]
+#cfg;MaxSetupAperti;1;[NOSTRA] E7
+#cfg;RischioSetupPct;0.250 (tetto 0.250);SEGNAPOSTO DA FIRMARE DA CLAUDIO (nessuna fonte)
+#cfg;PesiScala;NC_PESI_1_1_1;BANDIERA B1 (default spenta)
+#cfg;PesiPdf;NC_PESI_1_1;BANDIERA 2/3 PDF (default spenta)
+#cfg;MoltConfluenza;1.00;BANDIERA B3 (1,0 = spenta)
+#cfg;SL;criterio 0 (0 ordine profondo, 1 estremo recente, 2 linea), buffer 5.00 u, estremo su 3 barre;DA_MODALITA [FONTE P-p17/p21] / [NOSTRA] audio
+#cfg;TP;criterio 0 (0 dalla linea, 1 dal riempimento, 2 EMA14/EMA89), distanza 10.00 u, R/R min 0.00;DA_MODALITA [FONTE A-R22 / P-p17]
+#cfg;TP1;parziale 0.0%, pareggio no;DA_MODALITA [FONTE P-p17 'posso']
+#cfg;DurataMaxMin;0 (0 = spenta);[FONTE A-R24: osservazione, non regola]
+#cfg;Costo;commissione 0 in prezzo, cancello 40.0x (SOLO diagnostica);[CASA] cancello del costo
+#cfg;Scadenza server pendenti;si;[CASA]
+tipo;barra;linea;lato;tocco_n;nuovo_ep;troncato;ctx_arm;ctx_tocco;vicino_ok;conferma_ok;dist_apertura_atr;adx;incl_atr;confl_dist_atr;confl_etichetta;ema9;ema21;bb_larg;atr14;linea_prezzo;ingresso;n_ordini;p1;p2;p3;sl;tp1;tp2;tp3;lotto1;lotto2;lotto3;spread;commissione;stop_ped1;stop_ped2;stop_ped3;rischio_soldi;n_riempiti;esito_soldi;esito_R;durata_min;motivo
+CONTA;2026.01.02 00:00;ST25;-1;1;1;0;0;0;1;1;0.029;16.80;1.683;8.678;0;50481;50274;2098;724;51111;SCALA3;0;51106;51111;51116;51121;51101;51101;51101;0;0;0;29;0;0.5;0.3;0.2;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.03.03 00:00;ST35;1;1;1;0;9;9;1;1;0.224;22.36;1.309;4.362;0;57351;56712;5449;1478;54864;SCALA3;0;54869;54864;54859;54854;54874;54874;54874;0;0;0;29;0;0.5;0.3;0.2;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.03.04 00:00;ST35;1;1;0;0;9;9;1;1;0.865;22.59;1.238;4.080;0;57134;56672;5028;1561;54864;SCALA3;0;54869;54864;54859;54854;54874;54874;54874;0;0;0;29;0;0.5;0.3;0.2;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.05.18 00:00;ST25;1;1;1;0;0;0;1;1;0.704;26.79;1.496;6.249;0;62035;61157;6380;1268;60665;SCALA3;0;60670;60665;60660;60655;60675;60675;60675;0;0;0;28;0;0.5;0.4;0.2;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.05.19 00:00;ST30;1;1;1;0;0;0;1;1;0.354;28.20;1.389;5.375;0;61746;61105;6278;1359;60119;SCALA3;0;60124;60119;60114;60109;60129;60129;60129;0;0;0;28;0;0.5;0.4;0.2;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.05.20 00:00;ST30;1;1;0;0;0;0;1;1;0.670;30.26;1.291;4.970;0;61615;61104;6213;1453;60119;SCALA3;0;60124;60119;60114;60109;60129;60129;60129;0;0;0;18;0;0.8;0.6;0.3;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.05.20 00:00;ST35;1;1;1;0;9;9;1;1;1.046;30.26;1.291;4.595;0;61615;61104;6213;1453;59574;SCALA3;0;59579;59574;59569;59564;59584;59584;59584;0;0;0;18;0;0.8;0.6;0.3;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.06.09 00:00;ST30;1;2;1;0;0;0;1;1;0.417;31.98;1.218;4.746;0;65160;64552;8362;1800;63383;SCALA3;0;63388;63383;63378;63373;63393;63393;63393;0;0;0;23;0;0.7;0.4;0.2;0;0;0;0;0;SOLO_CONTA
+CONTA;2026.06.11 00:00;ST35;1;2;1;0;9;9;1;1;1.891;29.96;1.074;3.683;0;65059;64588;7247;2066;62646;SCALA3;0;62651;62646;62641;62636;62656;62656;62656;0;0;0;28;0;0.5;0.4;0.2;0;0;0;0;0;SOLO_CONTA
