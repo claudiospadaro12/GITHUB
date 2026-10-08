@@ -226,3 +226,19 @@ In parallelo la lettura **inversa** (leave-one-out: parto da A6 e tolgo una cond
 **Non fatto:** nessun backtest; nessuna modifica a EA, preset, script, sedia, conto; nessuna riga di lancio; nessuna verifica sul binario in campo; nessuna lettura del PDF degli esempi (le note 6.2 sono quelle riferite da Claudio); `controllo-preventivo` non invocato (non e' una riga di lancio ne' un verdetto di archiviazione; il **piano del par. 4 non va lanciato** prima del cancello).
 
 **Per Claudio, due domande che solo lui chiude:** (1) nel suo Pine il post-bulge senza `isBulge` e' voluto? (cambia la lettura della differenza n.1); (2) quale dei due comportamenti vuole come riferimento per il VIOLA: "ogni tocco dopo un impulso" (com'e' ora) o "dopo un bulge validato come dice la guida"? La seconda risposta e' una **firma sul motore**, non un lavoro.
+
+---
+
+## 7. Cancello (strato 2, controllo-preventivo, 08/10) -- correzioni meccaniche applicate
+
+Esito **PASS con riserva**. Il file su disco era identico al commit `78776baa` (nessuna alterazione dopo il push). Codice riaperto riga per riga (25/25 righe della tabella del par. 2 con i numeri di riga, `ABTG_Bulge.mq5` v5.20 e `ABTG_BreakingBand.mq5` v1.05 a HEAD, Pine r.98-119): **la differenza n.1 e' confermata** (il VIOLA r.1564-1574 non contiene `isBulgeSig`, usato solo da ARANCIO/BLU r.1500-1506; il Pine r.100-119 non contiene `isBulge`). Numeri ricontati dalle fonti: 33 VIOLA (19 L + 14 S; 7/3/4/9/6/4), 18 simboli, 19 chiuse 05-07/10 (+3 BLU), 1 BB, 19 VIOLA sul trial (tutte VIOLA, nessuna BLU; 10 vinte, -4.925,49 con commissioni), 106 di R92, 268 in 4,24 anni, 128/190 di R92BAB, 50/297 dell'antenato: **confermati**. Corretti (meccanici, nessuna conclusione cambia di verso):
+1. finestra del forward BB: era ancorata alla prima operazione (20/08) e contava 35 giorni dove sono 34; ora 13/08 (accensione) - 07/10 meno i 4 giorni a terminale fermo = ~36; il rapporto passa da ~38x a **~40x**, il per-simbolo da 6,4x a **6,6x** (par. 0 e 3) -- classe 1181;
+2. 2 delle 33 VIOLA sono XAUUSD, fuori dalla lista di r.463 e dai preset del repo: universo in campo [NON VERIFICATO]; il CSV ha solo chiuse -> 33 e' un limite inferiore;
+3. il funnel EURUSD ha **anche** la fase 2 dell'INV (51 su 62 morti): il buco e' solo la fase 3 INV (par. 0.9, 3.1, H2, 5.9) -- classe 1182;
+4. riga 1 del par. 2: la r.14 del BB non e' una nota di contesto di trend; il solo filtro di trend del codice e' quello del `InpContEntryMode=2` (CONT, spento);
+5. righe del G4 sfasate di una (r.32/33/34, M30 r.38); "~10-19" -> "~9-19" all'anno (R102 AUDUSD 8,7);
+6. trial: il commento sta nella sezione "Affari", non in un "foglio Ordini";
+7. fonte dei 94,98 minuti (`BULGE_M1_cella_campo_lunga.txt` r.80-84, proiezione da un controllo fallito);
+8. par. 5.2: la regola del 19/08 vieta le griglie su un motore **dichiarato** senza edge; il BB ha merito sospeso (la cautela resta, con la ragione giusta).
+
+**Riserva:** queste correzioni le ha fatte il cancello stesso: servono gli occhi di un **lettore indipendente** prima che il documento arrivi a Claudio.
