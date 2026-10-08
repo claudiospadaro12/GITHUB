@@ -1,77 +1,92 @@
 # PER GEMINI -- EA #2: Bulge, segnale VIOLA (08/10/2026) -- secondo pacchetto "a squadra"
 
 Scritto da Claude per Gemini, secondo `docs/gemini/PROTOCOLLO_SQUADRA_2026-10-08.md` (ricevuto insieme a questo file): rispondi nei ruoli **A, B, C, D** (e la sezione E del
-protocollo), una riga per affermazione, con la regola "senza fonte = IPOTESI". Nessun numero di conto, nessun preset, nessuno script in questo documento.
+protocollo), una riga per affermazione, con la regola "senza fonte = IPOTESI". Se l'intestazione o l'istruzione di sistema che ricevi parla di "Agente 1-4" o di "Agente 3 e
+Agente 4", per questo scambio vale il protocollo: i ruoli A e B corrispondono agli Agenti 3 e 4, C e D sono nuovi. Nessun numero di conto, nessun preset, nessuno script in questo documento.
 Etichette nostre: **[LETTO]** letto in un file del repo; **[MISURATO]** rifatto da noi su un CSV; **[DERIVATO]** conto da numeri misurati; **[INFERITO]**; **[NON MISURATO]**.
 Fonti nel repo (`lavoro`): `report/MIGLIORA_BULGE_VIOLA_2026-10-08.md` (parti 1-3, 11-13), `report/BULGE_VIOLA_TELEMETRIA_SPEC_2026-10-08.md`,
 `report/CONFRONTO_BULGE_VIOLA_VS_BREAKING_BAND_2026-10-08.md`, il sorgente `mql5/Experts/ABTG_Bulge.mq5` (NON allegato: i nomi degli input sono ricontrollati su di esso).
 **Decisione del capo del progetto, in chiaro: "il motore VIOLA non si tocca; ogni tocco dopo un impulso, com'e' ora; non stringere l'entrata".** Cerchiamo di migliorare
 USCITA, REGIME e SIMBOLI senza ridurre molto la frequenza. Proposte che stringono l'ingresso non servono.
 
-## 1. Il motore, in poche righe  [LETTO: sorgente]
-1. Timeframe H1, 22 cross forex. Un **impulso** = la candela tocca una banda di Bollinger e il corpo e' almeno 0,2 ATR. Il VIOLA (post-bulge) guarda cio' che segue: entro una
-   finestra di 40 barre (`Lookback_Bars` x 2) il prezzo tocca la **mediana** dopo l'impulso, **non** tocca la banda opposta, la barra di conferma ha il minimo sotto la banda bassa (e lo specchio per lo short),
-   il fondo e' piatto per 6 barre (0,6 ATR) e la candela di reazione ha corpo <= 1,5 ATR. Si entra **contro** l'impulso.
+## 1. Il motore, in poche righe  [LETTO: sorgente, salvo dove indicato]
+1. Timeframe H1 **scritto nel codice** (nessun input per cambiarlo: cambiare TF e' codice nuovo), 22 cross forex. Un **impulso** = una candela nella direzione della banda
+   (ribassista per la banda bassa) che la tocca, con corpo di almeno 0,2 ATR. Il VIOLA (post-bulge) guarda cio' che segue: entro 40 barre dall'impulso (`Lookback_Bars` x 2)
+   il prezzo tocca la **mediana**, **non** tocca la banda opposta, la barra di conferma ha il minimo sotto la banda bassa (e lo specchio per lo short), la banda bassa e' quasi
+   piatta (variazione <= 0,6 ATR rispetto a 6 barre prima) e la candela di conferma ha corpo <= 1,5 ATR. Si entra **contro** l'impulso (long dopo un impulso ribassista).
 2. **Il VIOLA NON richiede un "bulge" delle bande** (ampiezza >= 1,1x media): quel controllo (`isBulgeSig`) vale solo per gli altri due segnali (arancio, blu).
-3. Stop = 3 ATR (`SL_ATR_Mult`); take profit = la mediana delle bande, **riscritta a ogni tick** (`UpdateAllTP`), quindi si avvicina all'entrata quando le bande si stringono. Break-even, trailing e parziale sono
-   **spenti** di default (`Enable_BE_1R`, `Enable_Trailing_R`, `Enable_Partial_Close`). Rischio per operazione `Risk_Percent`, `Max_Trades` per EA, kill switch giornaliero.
-4. Per ogni segnale il Bulge puo' aprire **due gambe** (stesso segnale, posizioni distinte): le gambe **non sono indipendenti**. Le misure sotto usano il SEGNALE come unita' dove dichiarato.
+3. Stop = 3 ATR (`SL_ATR_Mult`); take profit = la mediana delle bande (media mobile centrale), **riscritta a ogni tick** (`UpdateAllTP`) se resta oltre l'entrata: si sposta con
+   la media, e sul conto di prova i TP riscritti si sono **tutti** avvicinati all'entrata [LETTO: per-trade]. Break-even, trailing e parziale sono
+   **spenti** di default (`Enable_BE_1R`, `Enable_Trailing_R`, `Enable_Partial_Close`). Rischio per operazione `Risk_Percent`, `Max_Trades` sulle posizioni aperte dell'intero cesto, kill switch giornaliero (`Use_Kill_Switch`).
+4. Nel codice corrente una sola posizione per simbolo e tipo di segnale, per istanza dell'EA. Nel forward della versione antenata **3 segnali hanno aperto due posizioni identiche** [LETTO: per-trade;
+   causa NON verificata]: dove serve, le misure sotto distinguono POSIZIONI e SEGNALI, e le due posizioni dello stesso segnale **non sono indipendenti**.
 
 ## 2. I numeri, con la fonte
 
 ### 2.1 Quanto vale oggi  [MISURATO su CSV del repo; riepilogo in MIGLIORA parte 0 e parte 1]
-- Pool della versione corrente (n **221** posizioni VIOLA): **PF 0,72**, vincita media **0,25 R**, perdita media **0,95 R**, tasso di vincita **72,9%** contro **78,9%** di pareggio.
-  Il PF **lordo** (senza commissioni e swap) e' gia' 0,43-0,75: i costi non sono il problema (pesano l'8-23% della perdita netta).
-- Una prova di 19 posizioni su un conto di prova prop: PF 0,40. Una versione antenata (50 posizioni): PF 0,68. Una versione piu' recente sul demo piccolo (33): PF 0,47.
-  Il solo numero buono che abbiamo (PF 1,60 su 268 operazioni) e' un backtest dell'utente il cui file **non e' nel repo** [NON LEGGIBILE].
-- **La forma del payoff**: la mediana dista in media ~0,7 ATR dall'entrata con stop a 3 ATR; **zero vincite su 161 arrivano a 1 R**, vincita mediana 0,24 R, 90-esimo percentile 0,46 R.
-  Per questo BE a 1 R, trailing da 1,5 R e parziale a 1 R sono inerti per costruzione.
-- Frequenza: ~4,6 segnali VIOLA al giorno di borsa nel pool (190 in 41 giorni), ~5,5 sul demo piccolo. I 150 segnali per un giudizio di merito arrivano in circa 6 settimane di forward.
+- Pool della versione corrente (n **221** posizioni VIOLA: backtest di screening di 4 mesi del 2026, 190, + forward demo, 31): **PF 0,72**, tasso di vincita **72,9%**;
+  vincita media e perdita media in R sono i dati del conto C-1. DD sulle sole chiusure VIOLA del backtest: 14,9% a 0,8% di rischio per operazione.
+- Commissioni e swap pesano l'8-23% della perdita netta; il PF **prima di commissioni e swap** e' gia' 0,43-0,75 nelle tre fonti forward (19, 33, 50 posizioni). **Lo spread
+  dei cross e' dentro quel lordo e NON e' misurato** (lo abbiamo solo per 3 maggiori: alle 22 ora server vale il 3-21% di R contro <1% nelle altre ore): "i costi non spiegano
+  la perdita" vale per commissioni e swap, non per lo spread.
+- Forward: 19 posizioni su un conto di prova prop, PF 0,40; versione antenata (50 posizioni), PF 0,68; versione corrente sul demo (33), PF 0,47. **Non sono quattro conferme
+  indipendenti**: 31 delle 33 del demo sono dentro il pool; il conto di prova condivide le operazioni del demo sui cross comuni; il backtest e l'antenato coprono lo stesso periodo.
+  Il solo numero buono che abbiamo (PF 1,60 su 268 operazioni) e' un backtest del capo del progetto su **BLU+VIOLA insieme**, 6 cross, 2022-2026.03, il cui file **non e' nel repo** [NON LEGGIBILE]: non e' una misura del solo VIOLA.
+- **La forma del payoff**: la mediana dista ~0,7 ATR dall'entrata (mediana fra simboli, ricavata come 3 x la vincita mediana in R) con stop a 3 ATR; **nessuna delle 161 vincite
+  CHIUDE a 1 R o piu'** (massimo 0,83 R), vincita mediana 0,24 R, 90-esimo percentile 0,46 R; sul conto di prova il TP iniziale non supera 0,73 R in nessuna delle 19 posizioni.
+  Per questo BE a 1 R, trailing da 1,5 R e parziale a 1 R non scattano quasi mai [DERIVATO].
+- Frequenza: ~4,6 posizioni VIOLA al giorno di borsa nel backtest di screening (190 in 41 giorni), ~5,5 sul demo (33 in 6 giorni). 150 posizioni in forward arriverebbero in circa 6 settimane.
 
-### 2.2 Uscita: cosa dice (e non dice) il per-trade  [MISURATO, MIGLIORA parte 11; tutti i limiti sono LIMITI]
-- Sulle perdite chiuse lo stesso giorno (15 posizioni VIOLA) il massimo guadagno non realizzato, letto dalla banda M5, ha toccato +0,3 R in **4**, +0,5 R in **2**, +0,75 R in **1** (limite SUPERIORE).
-  Un break-even a quelle soglie salverebbe al massimo +3,87 / +2,00 / +1,06 R su 81 posizioni (somma r -9,78). Dall'altra parte stanno i vincitori che poi tornano a pareggio.
-  Il BE aiuta solo se salva almeno **0,267 perdenti per ogni vincitore tagliato** (rapporto vincita media / perdita media).
+### 2.2 Uscita: cosa dice (e non dice) il per-trade  [MISURATO, MIGLIORA parte 11; insieme di 81 posizioni su cross con banda M5: demo v. corrente 31 + antenato 50]
+- Delle 21 perdite a SL, **15 chiudono lo stesso giorno**: fra queste il massimo guadagno non realizzato (banda M5) ha toccato +0,3 R in **4**, +0,5 R in **2**, +0,75 R in **1**
+  (limite SUPERIORE). Un break-even a quelle soglie salverebbe su queste 15 al massimo +3,87 / +2,00 / +1,06 R (somma r delle 81: -9,78). **Le altre 6 perdite durano piu' giorni
+  e per loro il massimo e' ignoto**: se tutte e 6 avessero toccato +0,3 R, il tetto complessivo a 0,3 R salirebbe a +10,64 R (per loro il pavimento e' 0). Dall'altra parte stanno i vincitori che poi tornano a pareggio: quanti, NON MISURATO.
+  Quanti perdenti salvati servono per ogni vincitore tagliato e' il conto C-3.
 - **Il trailing come e' scritto vale break-even sotto 1 R**: il blocco `TrailLockR` e' zero finche' r < 1, quindi un "trailing a trigger basso" coincide con un BE. Un vero trailing a distanza e' codice nuovo.
-- Un break-even colpito **conta come SL nel kill switch** (conta ogni uscita per SL o con profitto negativo): un BE a +2 punti aumenta le pause. "A frequenza invariata" e' un'ipotesi da misurare.
+- Un break-even colpito **conta come SL nel kill switch** (conta ogni uscita per SL o con profitto negativo): un BE che sostituisce una vincita puo' aumentare le pause. "A frequenza invariata" e' un'ipotesi da misurare.
 - **Attenzione a una trappola di lettura [corretta dal cancello]**: `UpdateAllTP` avvicina il TP all'entrata, quindi il profitto finale di una vincita nel CSV e' il **minimo** della sua escursione, non l'escursione. Il percorso vero non e' nel repo [NON MISURATO]:
   per questo ogni conclusione sul BE che usa l'r finale delle vincite e' un'ipotesi.
-- Il trigger di un eventuale **parziale** scatterebbe, a 0,25 R, nel 30-67% delle posizioni del pool (37-74% sul conto di prova) e a 0,50 R nel 2,5-38% (5-16%): forchette larghe, il numero vero lo da' solo la telemetria.
+- Il trigger di un eventuale **parziale** scatterebbe, a 0,25 R, nel 30-67% delle 81 posizioni (37-74% sul conto di prova) e a 0,50 R nel 2,5-38% (5-16%): forchette larghe, il numero vero lo da' solo la telemetria.
 
-### 2.3 Orario  [MISURATO, MIGLIORA parte 12; pool 81 posizioni, 78 segnali]
-Sei fasce fissate a priori (ora server). Una sola e' fuori attesa: **08-12 (europa mattina)**, n 14, r medio **-0,527 R**, PF 0,15, p 0,003 (0,005 per segnale; soglia corretta per 6 fasce 0,0083).
-Togliendola il PF del pool passa da 0,56 a 0,83 (da 0,53 a 0,78 per segnale): ancora sotto 1. La replica in campioni disgiunti ha lo stesso segno ma nessuna soglia raggiunta (-0,72 n 7; -0,33 n 7; -0,16 n 7).
-Il campione e' dominato da un episodio (5 stop in 3 giorni). Notte 00-08: r medio -0,04, non distinguibile da zero. **INDIZIO, non esito.**
+### 2.3 Orario  [MISURATO, MIGLIORA parte 12; stesse 81 posizioni = 78 segnali]
+Sei fasce fissate prima del ricalcolo (ora server). **Ma la fascia 08-12 non e' una scoperta fresca**: un blocco vicino (08-13) era gia' stato visto sugli stessi dati
+qualche giorno prima. Una sola fascia e' fuori attesa: **08-12 (europa mattina)**, n 14, r medio **-0,527 R**, PF 0,15, p 0,003 (0,005 per segnale; soglia corretta per 6 fasce 0,0083).
+Togliendola il PF delle 81 passa da 0,56 a 0,83 (da 0,53 a 0,78 per segnale): ancora sotto 1. Le 14 si dividono nelle due fonti che formano l'insieme: antenato -0,72 (n 7),
+demo v. corrente -0,33 (n 7, p 0,17); il conto di prova -0,16 (n 7) condivide operazioni col demo. Senza il giorno peggiore la fascia resta negativa (-0,35 R). L'antenato
+e' dominato da un episodio (5 stop in 3 giorni). Notte 00-08: r medio -0,04, non distinguibile da zero. **INDIZIO, non esito.**
 **Orologio**: il server segue l'ora di Londra per il forex fino a dicembre 2024 e UTC+1 fisso dopo; per gli anni prima del 2015 e' estrapolato, non misurato. Sul tester `TimeGMT()` e `TimeTradeServer()` coincidono (documentazione MQL5).
 
-### 2.4 Simboli  [MISURATO, MIGLIORA parte 3]
+### 2.4 Simboli  [MISURATO, MIGLIORA parte 3; pool 221]
 - Correlazione di Spearman fra volatilita' (ATR/prezzo) e r medio per simbolo: **rho -0,03**, p 0,89 (20 simboli). Dispersione fra simboli: p 0,97. Nessun simbolo passa la soglia congelata (p < 0,05/22): il migliore ha p 0,073 su 6 vincite su 6.
-- Il test e' **debole**: con ~10 segnali per simbolo trova un vantaggio di 0,25 R solo nel 43% dei casi; per +0,10 R servono ~490 segnali per simbolo. La volatilita' e' stata misurata sui soli trade stoppati.
+- Il test e' **debole**: con ~10 segnali per simbolo una differenza lineare di 0,25 R fra simboli si trova solo nel 43% dei casi (simulazione); quanti segnali servono per +0,10 R e' il conto C-2. La volatilita' e' stata misurata sui soli trade stoppati.
 - Valuta NZD peggiore (-12,05 R su 69 posizioni) ma "peggiore fra 8 valute" da' p 0,17.
 
 ### 2.5 Cosa e' gia' stato giudicato e cosa manca (certificato a 5 caselle)
-(1) PF: fatto. (2) n e DD: fatto sul pool (n 221). (3) uscita ad asse: **non fatta** nel tester (solo carta sopra). (4) simboli gemelli: carta, nessun simbolo distinguibile. (5) TF: **mai cambiato**.
+(1) PF: si', **ma solo 2026** (backtest di screening di 4 mesi + forward); la cella lunga 2010-2026 e' scritta e **mai girata**. (2) n e DD: si', n 190-221, DD solo sulle chiusure o per il cesto intero.
+(3) uscita ad asse: **non fatta** nel tester (solo carta sopra). (4) simboli gemelli: **no** a lungo (cesto 22 contro 15 mai confrontato); a carta nessun simbolo distinguibile.
+(5) TF: **mai cambiato** (H1 nel codice; M30 escluso per costo con la frontiera di sez. 5).
 Verdetto: **NON ANCORA MISURATO**, non "morto". Regole di portafoglio simulate a carta (14 regole x 4 fonti) non sono distinguibili dal caso.
 
 ## 3. Cosa manca e quanto costa
 - Una sola **copia di banco con telemetria** (massimo e minimo per posizione, ora d'ingresso, ATR e spread alla barra del segnale) chiuderebbe quasi tutti i buchi. Richiede una firma del capo: **non e' ancora data**.
-- Il tester gira solo su un PC separato dai conti. Ritmi misurati: una corsa corta (1 simbolo) dura circa 68 secondi, una lunga (22 simboli) circa 95: **circa 67 secondi fissi per ogni passata + una parte per simbolo**. La stima per le 38 passate previste e' **1-3 ore** [DERIVATO, forchetta larga].
+- Il tester gira solo su un PC separato dai conti. Ritmi misurati sulla stessa finestra (job di 2 celle su 4 mesi): **68 secondi con 1 simbolo, 95 con 22**, cioe' **circa 67 secondi fissi
+  per job + circa 1,3 secondi per simbolo**. La stima per le 38 passate previste (9 file) e' **1-3 ore** [DERIVATO, forchetta larga; primo caricamento dello storico NON MISURATO].
 - Per la prova di `TimeGMT` nel tester serve una finestra con almeno **5 ingressi attesi** all'ora discriminante; una finestra piu' corta non distingue le due ipotesi.
 
 ## 4. Le domande
 
 **Ruolo A -- Cacciatore (massimo 2+2 meccanismi, niente parametri del motore).**
-- A-1. Sulla stessa inefficienza (fade di un tocco di banda dopo un impulso, SL 3 ATR, TP sulla mediana, payoff ~0,27, win rate 72,9%), proponi al massimo **2 meccanismi di USCITA** diversi da BE, parziale e trailing a R
-  (qui inerti: zero vincite su 161 arrivano a 1 R). Per ognuno: nome esatto dell'input o "nome da verificare", attesa con banda e **numero dell'ipotesi alternativa**, falsificatore, costo in passate.
+- A-1. Sulla stessa inefficienza (fade di un tocco di banda dopo un impulso, SL 3 ATR, TP sulla mediana, tasso di vincita 72,9%), proponi al massimo **2 meccanismi di USCITA** diversi da BE, parziale e trailing a R
+  (qui quasi inerti: nessuna vincita chiude a 1 R). Per ognuno: nome esatto dell'input o "nome da verificare", attesa con banda e **numero dell'ipotesi alternativa**, falsificatore, costo in passate.
 - A-2. Proponi al massimo **2 filtri di REGIME** esterni al segnale (orario, evento, volatilita' del cesto, correlazione fra valute) che non cambino la condizione d'ingresso e non richiedano di conoscere il futuro.
-  Dichiara se riducono il numero di ingressi e di quanto.
+  Dichiara se riducono il numero di ingressi e di quanto. Se un filtro che scarta segnali conti come "stringere l'entrata" e' una domanda **ancora aperta** al capo: per ora sono ipotesi da misurare.
 **Ruolo B -- Avvocato del diavolo.** Per ogni proposta di A e per queste letture nostre, il contro-esempio concreto (cosa produce l'ipotesi alternativa e se cade nella banda):
 - B-1. "La fascia 08-12 e' peggiore": spiegala con un episodio (5 stop in 3 giorni) o con il regime; quale numero atteso se e' solo l'episodio?
-- B-2. "Le regole di portafoglio non aiutano": quando una regola che toglie il 26-48% dei segnali sembra neutra con la sola rimozione e invece non lo e'?
+- B-2. "Le regole di portafoglio non aiutano": quando una regola (es. al massimo 1 posizione per valuta, che toglie il 26-48% delle posizioni) sembra neutra in una simulazione che sa solo TOGLIERE ingressi (non vede quelli che entrerebbero negli slot liberati) e invece non lo e'?
 - B-3. "La volatilita' non spiega il r medio per simbolo (misurata sui soli trade stoppati)": in quale caso concreto la misura darebbe zero anche se l'effetto esistesse?
 **Ruolo C -- Auditor dei numeri** (deroga: **al massimo 3 conti**, uno per riga, con formula e controllo di verso; solo dati di questo pacchetto; NON LO SO se manca).
 - C-1. Vincita media 0,254 R, perdita media 0,951 R, tasso di vincita osservato 72,9%: qual e' il tasso di vincita di pareggio `L/(W+L)` e l'osservato sta sopra o sotto?
-- C-2. Servono segnali per simbolo per distinguere un vantaggio di +0,10 R da zero: sigma 0,570 R, alpha = 0,05/22 a due code, potenza 80%. Con `n = (sigma x (z(1-alpha/2)+z(0,80))/delta)^2`, quanto vale n?
+- C-2. Servono segnali per simbolo per distinguere un vantaggio di +0,10 R da zero: sigma 0,570 R (misurata per POSIZIONE sul pool 221), alpha = 0,05/22 a due code, potenza 80%. Con `n = (sigma x (z(1-alpha/2)+z(0,80))/delta)^2`, quanto vale n?
 - C-3. Un break-even riporta a pareggio ogni vincitore (perde la vincita media 0,254 R) e salva ogni perdente (recupera 0,951 R): qual e' il rapporto minimo perdenti salvati / vincitori riportati a BE perche' il BE non costi?
 **Ruolo D -- Sintesi.** Al massimo 5 cose da MISURARE, in ordine di vicinanza a una sedia schierabile, ognuna con asse unico, finestra, cella di controllo, attesa con banda, falsificatore, costo (usa i ritmi di sez. 3),
 "Firma Claudio SI/NO"; poi l'elenco dei punti dove tu e la nostra lettura vi contraddite. Poi la sezione E del protocollo.
