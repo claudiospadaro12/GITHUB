@@ -22,6 +22,9 @@
 #  ALTERNATIVA (il filtro non porta informazione): delta PF ~ 0 entro il rumore A3, cioe' la frontiera e' piatta: trattenere meno trade a pari PF.
 #  Un delta PF >= +10% e' un EFFETTO solo con monotonia (25 piu' marcato di 30 dello stesso segno), stesso segno in IS e OOS e almeno -25% di trade.
 #  DICHIARATO: ADX >= 30 su H1 e' frequente nei periodi di trend (2022): il filtro puo' spegnere il VIOLA proprio quando il bandriding fa male; lo si legge per sottoperiodo.
+#  CANCELLO 08/10 (K1, classe 41): tutte le celle di questo file hanno lo STESSO magic, quindi il per-trade abtg_trades_*_<magic>_violaEA.csv
+#  contiene UNA passata sola (l'ultima che scrive). Qui si leggono SOLO i totali per cella e gamba dell'OptResults; il per-trade della cella e il
+#  criterio (iv) si leggono nel FILE DI CONFERMA a gemelle sul magic (vedi file A, K1-K4).
 # =====================================================================
 @SIMBOLO    NZDCHF
 @PERIODO    H1

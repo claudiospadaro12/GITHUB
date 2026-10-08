@@ -15,12 +15,22 @@
 #  GBPNZD nell'IS parte dal 2010.05.10 (muro misurato). Grafico NZDCHF (dentro i 15). 15 cross del preset trial.
 #  UNA VARIABILE PER FILE (controlla_prova.py lo impone): un asse Y per file; gli altri input sono pinnati identici a BULGE_M1.
 #
-#  ===== E2 -- FASCIA EUROPA MATTINA (ore server BCM 08-12 = 07-11 UTC) BLOCCATA con il filtro news ESISTENTE (asse Use_News_Filter {0 = controllo = A; 1}) =====
+#  ===== E2 -- FASCIA EUROPA MATTINA (ore server 08-12; = 07-11 UTC solo con l'orologio di oggi, vedi sotto) BLOCCATA con il filtro news ESISTENTE (asse Use_News_Filter {0 = controllo = A; 1}) =====
 #  Input ESISTENTI: Use_News_Filter, News_Block_Hours (qui pinnata). IsNewsHour() usa TimeGMT() e blocca l'ingresso se l'ora corrisponde: e' valutata al PRIMO TICK
-#  della nuova barra H1 (cioe' all'ora d'ingresso). IN CAMPO e' ora UTC. NEL TESTER, secondo la documentazione MQL4/MQL5 citata dalla comunita', TimeGMT() = TimeCurrent()
-#  = ORA SERVER (BCM = UTC+1): quindi la lista qui sotto e' scritta in ORA SERVER BCM. L'equivalente IN CAMPO e' la stessa lista MENO un'ora (UTC).
-#  [NON VERIFICATO sul nostro tester: il controllo e' la copia di banco con open_time. Finche' non c'e', il file E si lancia solo per il conteggio di Trades e PF,
-#  e la fascia vera e' ASSUNTA.]  NIENTE FILTRO ORARIO PER SESSIONE ESISTE FRA GLI INPUT: News_Block_Hours e' l'unico modo (lista di ore); una fascia fissa o per classe
+#  della nuova barra H1 (cioe' all'ora d'ingresso). IN CAMPO e' ora UTC.
+#  CORRETTO DAL CANCELLO 08/10. NEL TESTER TimeGMT() = TimeTradeServer() = ORA SERVER SIMULATA: lo dice la documentazione UFFICIALE MQL5, recuperata dal
+#  cancello (https://www.mql5.com/en/docs/dateandtime/timegmt: 'During testing in the strategy tester, TimeGMT() is always equal to TimeTradeServer() simulated
+#  server time'; e https://www.mql5.com/en/docs/runtime/testing, 'Simulation of Time in the Strategy Tester'). Quindi la lista qui sotto e' in ORA SERVER del tester.
+#  L'ORA SERVER NON E' UN FUSO FISSO SULLA FINESTRA (classe 762; report/OROLOGIO_BCM_2026-09-24.md par. 3.1): lo storico FOREX BCM fino a fine dic-2024 e' sul
+#  VECCHIO orologio (UTC+0 d'inverno, UTC+1 d'estate = ora di LONDRA), dal 2025 e' UTC+1 FISSO. Le ore server bloccate sono quindi le stesse ore di Londra in
+#  tutto l'IS 2010-2021, nell'OOS 2022-2024 e nelle estati 2025-2026; negli inverni gen-mar 2025 e fine ott 2025-mar 2026 (~8 mesi sui 54 dell'OOS) la
+#  fascia cade un'ora PRIMA rispetto a Londra. L'equivalenza in UTC del titolo vale SOLO per l'orologio di oggi (estate 2026).
+#  IN CAMPO TimeGMT() e' UTC vero: un preset con la stessa lista farebbe un'altra fascia. Va tradotto, e la traduzione cambia con la stagione (per
+#  bloccare le stesse ore di Londra che il backtest 2010-2024 ha bloccato: lista server -1 d'estate, invariata d'inverno). Non e' una proposta di filtro.
+#  CHIUSURA EMPIRICA senza codice nuovo (in piu' della documentazione): una passata SINGOLA della cella Use_News_Filter=1 su una finestra corta dell'estate
+#  2026; nel rapporto del tester (scheda Affari, ora server) ZERO ingressi alle ore della lista. CONTRO-ESEMPIO: se TimeGMT fosse UTC (server -1), la lista
+#  bloccherebbe le ore server +1: comparirebbero ingressi alle 08 e nessuno alle 12. Le due attese sono disgiunte.
+#  Finche' la chiusura empirica non c'e', la fascia e' DOCUMENTATA, non MISURATA sul nostro tester.  NIENTE FILTRO ORARIO PER SESSIONE ESISTE FRA GLI INPUT: News_Block_Hours e' l'unico modo (lista di ore); una fascia fissa o per classe
 #  di cross e' CODICE NUOVO = firma di Claudio.
 #  Fascia fissata A PRIORI (08/10, sulla struttura dei mercati; sim_bulge_viola_orario.py): F2. Ora che conta = ora d'ingresso; con Signal_Bar_Offset=1 la barra di
 #  CONFERMA e' quella PRECEDENTE (ingresso h <-> conferma h-1).
@@ -29,6 +39,9 @@
 #  La fascia e' un'ipotesi NATA dal campione (vedi dossier par. 12): la sua replica e' l'IS 2010-2021 e l'OOS 2022-2026, due campioni disgiunti da quello di scoperta.
 #  La cella Use_News_Filter=0 e' una replica di A: controllo G1 gratuito. QUOTA TRATTENUTA = Trades(1)/Trades(0); FRONTIERA = quota contro delta PF; decide Claudio.
 #  CRITERIO DI PICCO: una fascia e' un EFFETTO solo se il segno regge in IS e OOS e nelle due meta' dell'OOS; 6 fasce guardate = soglia p 0,05/6 sul nullo 'k posizioni a caso'.
+#  CANCELLO 08/10 (K1, classe 41): tutte le celle di questo file hanno lo STESSO magic, quindi il per-trade abtg_trades_*_<magic>_violaEA.csv
+#  contiene UNA passata sola (l'ultima che scrive). Qui si leggono SOLO i totali per cella e gamba dell'OptResults; il per-trade della cella e il
+#  criterio (iv) si leggono nel FILE DI CONFERMA a gemelle sul magic (vedi file A, K1-K4).
 # =====================================================================
 @SIMBOLO    NZDCHF
 @PERIODO    H1

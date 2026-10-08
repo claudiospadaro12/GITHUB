@@ -17,10 +17,23 @@
 #
 #  ===== B2 -- PARZIALE 50% A TRIGGER BASSO + BE sul residuo, asse Partial_Close_R {0,25; 0,50} =====
 #  Input ESISTENTI: Enable_Partial_Close=1, Partial_Close_Pct=0.5, Partial_Close_R (asse). DoPartialCloseIfNeeded chiude la meta' del volume a R
-#  e porta lo SL del residuo a pari (entrata).  A 0,25 R scatta su ~45% delle posizioni (vincite con r >= 0,25), a 0,50 R su ~7%.
-#  ATTESA: n(cella)/n(A) 0,95-1,05. A 0,50: |delta PF| < 3% (quasi inerte). A 0,25: delta PF -10%..+5%; commissione +1% di R sulla meta' chiusa.
+#  e porta lo SL del residuo a pari (entrata).  A 0,25 R scatta su ~28-35% delle posizioni, a 0,50 R su ~3-6%. CORRETTO DAL CANCELLO 08/10: qui c'era
+#  "~45% (vincite con r >= 0,25)" e "~7%": ricontato su trades_auto.csv, 23 posizioni VIOLA su 83 chiudono con r >= 0,25 (28%; 20 su 78 per segnale),
+#  piu' le perdite che hanno toccato 0,25 R prima dello stop (banda M5, limite superiore) -> ~35%; a 0,50 R: 2 vincite su 83 + 2 perdite = ~5%.
+#  ATTESA: POSIZIONI(cella)/POSIZIONI(A) 0,95-1,05. A 0,50: |delta PF| < 3% (quasi inerte). A 0,25: delta PF -10%..+5%; commissione +1% di R sulla meta' chiusa.
+#  CANCELLO 08/10 (K2, classe 454): Trades del CSV = deal di USCITA = posizioni + parziali: atteso Trades(cella)/Trades(A) ~ +25..+40% a 0,25 R e +2..+8% a
+#  0,50 R, e NON e' frequenza. Le POSIZIONI si contano solo nel file di conferma (position_id distinti del per-trade). Effetti sul kill switch, dal sorgente
+#  (KillSwitchEvaluate r.965-1023): il deal del parziale ha profitto > 0 e AZZERA la serie di SL consecutivi (r.999-1001); il residuo chiuso a pari (offset 0,
+#  netto < 0 per la commissione, DEAL_REASON_SL) conta come SL (r.993). Quindi la stessa posizione vale "una vincita + uno stop" per Max_SL_PerDay.
+#  CONTROLLO DEL PARZIALE (nel file di conferma): posizioni con DUE righe di uscita nel per-trade = parziali eseguiti, attese ~28-35% a 0,25 R.
+#  Se sono ~0 la cella non si legge: o lo STOPS_LEVEL ha impedito il pari e il parziale, o la GlobalVariable PartialDoneKey (r.1589-1592, mai cancellata)
+#  e' sopravvissuta da una passata precedente sullo stesso agente con lo stesso ticket [NON VERIFICATO: la documentazione del tester dice che le
+#  GlobalVariable sono emulate nell'agente, non dice se si azzerano a ogni passata].
 #  ALTERNATIVA: delta PF >= +15% (il parziale incassa piu' di quanto il BE sul residuo tagli) o <= -15%.
 #  PICCO: 2 celle: senza centro. Effetto solo se concorde con B1 a parita' di trigger e stesso segno in IS e OOS.
+#  CANCELLO 08/10 (K1, classe 41): tutte le celle di questo file hanno lo STESSO magic, quindi il per-trade abtg_trades_*_<magic>_violaEA.csv
+#  contiene UNA passata sola (l'ultima che scrive). Qui si leggono SOLO i totali per cella e gamba dell'OptResults; il per-trade della cella e il
+#  criterio (iv) si leggono nel FILE DI CONFERMA a gemelle sul magic (vedi file A, K1-K4).
 # =====================================================================
 @SIMBOLO    NZDCHF
 @PERIODO    H1

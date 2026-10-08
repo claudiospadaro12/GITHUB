@@ -20,7 +20,7 @@
 #  dopo aver controllato che il CSV di M1 abbia le stesse 50 colonne di input). Tutti gli altri file di questa famiglia si confrontano
 #  con A: stessa finestra, stessi pin, stesso EA.
 #
-#  LA FAMIGLIA (otto file, ognuno con UN asse; passate = celle x 2 gambe; costo a 26 min per passata [dato del coordinatore] e a
+#  LA FAMIGLIA (nove file: A + otto assi, ognuno con UN asse; passate = celle x 2 gambe; costo a 26 min per passata [dato del coordinatore] e a
 #  4-15 min per passata [DERIVATO: 15-60 min per 4 passate di BULGE_M1]; entrambi [NON MISURATI] su queste celle):
 #     A   base (2 celle gemelle sul magic)                                    4 passate   1,7 h (26 min)  /  0,3-1,0 h
 #     B1  BE a {0,25; 0,50; 0,75} R (Enable_BE_1R=1, BE_At_R)                 6 passate   2,6 h           /  0,4-1,5 h
@@ -33,6 +33,13 @@
 #     E3  fascia rollover bloccata (ore server 22-23)                          4 passate   1,7 h           /  0,3-1,0 h
 #     TOTALE 38 passate = 16,5 h (a 26 min) oppure 2,5-9,5 h (a 4-15 min). Due celle di controllo (Use_News_Filter=0 in E1-E3) sono
 #     repliche di A: danno gratis tre controlli G1 in piu'. Non e' una griglia fitta: 2-3 celle per asse, un meccanismo per file.
+#     CORRETTO DAL CANCELLO 08/10 (costo): nel repo NON c'e' nessun "26 min a passata" del Bulge. L'unico "~26 minuti" e'
+#     report/CONFRONTO_BULGE_VIOLA_VS_BREAKING_BAND_2026-10-08.md r.193 = 7 passate x 3,7 min. Stima ANCORATA a una misura di casa
+#     [DERIVATO]: R92BAB_A (RIEPILOGO_ROUND_R92BAB.txt r.4) = 95 s, driver compreso, per 2 celle x (2 mesi IS + 2 mesi OOS) su 22 cross;
+#     scalata in modo lineare a 19 celle x 16,5 anni x 15 cross = ~8,5 h, cioe' ~13 min a passata e ~27 min a CELLA (IS+OOS): il "26 min"
+#     torna se e' per CELLA, non per passata, e allora il totale e' ~8 h, non 16,5 h. La scala lineare ignora il caricamento dello storico
+#     e il parallelismo degli agenti: ordine di grandezza, [NON MISURATO] su queste celle. Le ore dei GIRI qui sotto sono a 26 min per passata
+#     (tetto pessimistico), non la stima centrale.
 #  ORDINE E FERMATE (a ~12 passate per giro):
 #     GIRO 1 (10 passate, 4,3 h): A (4, o niente se M1 e' gia' girato) + B1 (6).  Si legge, si decide.
 #     GIRO 2 (12 passate, 5,2 h): B2 + C1 + C2.
@@ -49,7 +56,10 @@
 #   >= 0,75 R 1 su 15 (7%) [LIMITE SUPERIORE: la banda M5 include barre dopo l'uscita; le perdite multi-giorno sono incognite]; le vincite con
 #   r >= 0,3 R sono 18 su 61, >= 0,5 R 2 su 61. CONDIZIONE DI PAREGGIO del BE: servono 0,267 perdenti salvate per ogni vincitore tagliato
 #   (0,254 R / 0,951 R). Il trailing con Trail_Start_R < 1 NON e' un trailing: TrailLockR(r) = max(0, start + n*step - 1), quindi con start
-#   0,5 il lock vale 0 fino a r = 1,0 (BE a `start` con offset 0): non e' un asse distinto dal BE e non ha un file (dossier parte 11).
+#   0,5 il lock vale 0 per r fra 0,5 e 1,25 (primo gradino +0,25 R solo a r = 1,25; BE a `start` con offset 0, ABTG_Bulge.mq5 r.1765-1774
+#   e r.1881-1894, riletto dal cancello 08/10): non e' un asse distinto dal BE e non ha un file (dossier parte 11).
+#   Nota del cancello: le 61 vincite e le 15 perdite di questa riga sono il pool di 83 POSIZIONI (2 XAUUSD e 3 segnali dell'antenato con DUE gambe
+#   identiche, classe 1179): i conteggi delle perdite non cambiano (le gambe doppie sono tutte TP), le vincite per segnale sono 56-59.
 #
 #  PASSATE E MISURE COMUNI A TUTTI I FILE (per ogni cella, ogni gamba):
 #   P0  nel CSV: Use_Blue=0, Use_Orange=0, Use_Purple=1, Signal_Bar_Offset=1, Use_Purple_PineReaction=0, SL_ATR_Mult=3.0 (salvo D),
@@ -74,6 +84,22 @@
 #   fosse quello di Claudio (PF 1,60), PF OOS >= 1,30 e tutta la famiglia B-E si legge su un altro piano.
 #  COSA QUESTA FAMIGLIA NON FA: non misura il merito a tick reali, non misura lo spread dei cross, non misura la ragione per cui una cella vince, non
 #   cambia l'entrata, non propone di restringerla: misura una FRONTIERA e decide Claudio.
+#  CORREZIONI DEL CANCELLO (controllo-preventivo 08/10, su 8687921c; testo soltanto, sezioni dei parametri invariate; serve un lettore indipendente):
+#   K1 PER-TRADE PER CELLA (classe 41). ExportTrades (ABTG_Bulge.mq5 r.2047-2052) nomina il file per MAGIC e variante VIOLA e scrive a OGNI passata.
+#      A ha due magic (799701/799751): il per-trade OOS esiste per tutte e due le celle. In B1..E3 TUTTE le celle dello stesso file hanno lo STESSO
+#      magic: sopravvive il per-trade di UNA SOLA passata (l'ultima che scrive: cella e gamba NON scelte). Quindi in B1..E3 si leggono SOLO i totali
+#      per cella e per gamba dell'OptResults (Profit, PF, DD, Trades, Peggior giornata); il file per-trade superstite si identifica confrontando la
+#      sua somma con i Profit delle righe e non si usa per la frontiera. "SOMMA del per-trade OOS = Profit" e il criterio (iv) "due sottoperiodi
+#      dell'OOS" si leggono SOLO su A e su un FILE DI CONFERMA: una cella che passa (i)-(iii) si rifa' da sola, a gemelle sul magic come A
+#      (asse InpMagic m/m+50, input della cella pinnato, magic nuovo), +4 passate. Il nullo "k posizioni tolte a caso" usa il per-trade di A: resta valido.
+#   K2 TRADES NON E' FREQUENZA QUANDO C'E' UN PARZIALE (classe 454). Trades = STAT_TRADES = deal di USCITA. In B2 ogni parziale aggiunge un deal:
+#      Trades(B2)/Trades(A) NON e' la frequenza (a 0,25 R gonfia di ~28-35%). La frequenza di B2 si legge solo nel suo file di conferma, come
+#      position_id distinti del per-trade. In A, B1, C1, C2, D, E1-E3 una posizione = un deal di uscita (nessun parziale): li' Trades e' frequenza.
+#   K3 E1-E3: P0 legge nel CSV ANCHE News_Block_Hours, che deve essere IDENTICA alla lista pinnata (OptFrame_CsvField la mette fra virgolette perche'
+#      contiene virgole; il driver la passa verbatim come pin stringa, walkforward_generico.ps1 r.857). Se la stringa nel CSV e' troncata, la cella non si legge.
+#   K4 UNITA' DEI NUMERI DEL DOSSIER (classe 1179): il pool "81" e' di POSIZIONI; i SEGNALI sono 78 (3 segnali dell'antenato con due gambe identiche).
+#      Ricontato per segnale dal cancello: F2 n 14, media r -0,527, p 0,005 (resta sotto 0,0083); PF pool 0,53 -> 0,78 senza F2; a T+30 aperti 70 su 78.
+#      Le conclusioni non cambiano; i numeri si citano con la loro unita'.
 # =====================================================================
 @SIMBOLO    NZDCHF
 @PERIODO    H1
@@ -137,7 +163,7 @@ Trail_Start_R=1.5
 Trail_Step_R=0.25
 Trail_MinMove_Points=10
 # --- L'UNICO ASSE DI QUESTO FILE: InpMagic (asse tecnico, non di strategia)
-#     magic m / m+50: due passate identiche (G1). Blocco 7996xx libero (grep su tutto il repo: zero occorrenze).
+#     magic m / m+50: due passate identiche (G1). Blocco 7997xx libero (grep su tutto il repo, cancello 08/10: zero occorrenze fuori da questa famiglia).
 InpMagic=799701||799701||50||799751||Y
 InpComment=BULGE_V520_FT
 # i 15 cross del preset trial (104 caratteri), stessa lista di ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set
