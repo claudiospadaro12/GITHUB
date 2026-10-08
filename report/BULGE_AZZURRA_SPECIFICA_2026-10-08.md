@@ -128,7 +128,13 @@ una decisione della sessione principale** (la consegna era di non toccarlo).
 
 ## 7. 🧪 Cosa prova il collaudo (e cosa no)
 
-`python3 backtest_pipeline/collaudo_bulge_azzurra.py` — esito nel referto di consegna. Strati:
+`python3 backtest_pipeline/collaudo_bulge_azzurra.py` — **esito 08/10/2026: PASS** (exit 0, ~9 minuti), sull'EA
+con SHA256 `b6b06347f6f73b4e0f8de508087e48d089b911ee4ccac250f8beb8be032a926b`: 18 zone su 18 col loro blocco e
+nessun blocco fuori zona (25 blocchi, 22 righe di `ABTG_Bulge` toccate); 33/33 casi `AzureCore`, 9/9
+`AzureOrderedRetrace`, 11/11 tag; 27/27 scenari a mano; differenziale identico su 4 configurazioni (6000 finestre,
+ordini di `ABTG_Bulge` presenti: VIOLA 148, BLU 143, ARANCIO 385 -> il confronto morde); specchio Python con **0
+disaccordi** su 6000 x 7 (AZZURRA long 418, short 422 -> morde); **mutanti 63/63 presi** (38 di logica, tutti presi
+da P o X; 25 statici). Strati:
 - **Z** zone del diff; **S** statico (funzioni identiche, input, magic, Guardian prima di ogni invio, segnaposto);
 - **P** funzioni pure compilate in C++: `AzureCore` (33 casi a mano), `AzureOrderedRetrace` (9, bordi esatti),
   `ExtractSignalTag` (11), `AdxFilterOk`, `PurpleReactionCore` uguale fra i due EA, e il **pezzo vero dell'autotest**;
