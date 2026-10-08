@@ -54,10 +54,10 @@ affermazione:
 3. **Fail-open e casi limite**: cosa succede al riavvio del terminale con posizione aperta, nel
    weekend, al cambio d'ora (il server BCM è UTC+1 fisso; FTMO è ora italiana +1 tutto l'anno),
    con un ordine eseguito parzialmente, con spread allargato, con il Guardian assente o muto, con
-   un errore di `OrderSend`. Per ogni caso: il codice lo gestisce (riga), lo ignora, o lo gestisce
+   un errore di `OrderSend`. Per ogni caso: il codice lo gestisce (nome della funzione), lo ignora, o lo gestisce
    male. Un «non gestito» è un fatto da scrivere, non un'opinione.
 4. **Divergenze fra codice e documentazione**: se un commento, un preset o la scheda di audit
-   allegata dice una cosa e il codice ne fa un'altra, la riga vince e la divergenza va scritta.
+   allegata dice una cosa e il codice ne fa un'altra, il codice vince e la divergenza va scritta.
 5. **Domande aperte**: ciò che non si capisce dal solo sorgente (dipende dal broker, dai dati,
    da un file non allegato). Scritte come domande, non come ipotesi travestite da fatti.
 **Divieto**: non proporre ancora migliorie. Prima si capisce, poi si propone.

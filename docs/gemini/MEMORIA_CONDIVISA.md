@@ -31,7 +31,7 @@ MISURATO; prima della macchina, la misura a costo zero nei per-trade gia' in arc
 
 ## 4-bis. Regola nata dai primi due giri (29/09)
 Cita il NOME dell'input o della funzione, NON il numero di riga: i numeri di riga citati nei giri 1-2 erano sbagliati 3 volte su 3
-(InpMgmtTF r.146/218-219 non 105/154; InpSLatr sta in ABTG_EMA200.mq5 r.74/358, non in Guardian; una 'riga 412' del dossier era di un altro motore).
+(`InpMgmtTF` in ABTG_MaxMinNotte.mq5, letto in `OnInit` dagli handle ATR/EMA200: righe citate sbagliate; `InpSLatr` sta in ABTG_EMA200.mq5, usato da `PlaceOrders` per lo stop, non in Guardian; la riga del dossier citata come fonte di una stima conteneva un input di un altro motore).
 Il contenuto tecnico era utile: la manopola InpSLatr e' viva e mai messa ad asse (candidato A4).
 
 ## 5. Storico degli scambi
