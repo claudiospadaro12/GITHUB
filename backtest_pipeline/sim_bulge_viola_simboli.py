@@ -429,9 +429,16 @@ def main():
           % (obs_min, (g_min + 1) / (nperm + 1.0), obs_max, (g_max + 1) / (nperm + 1.0)))
 
     # ---------- (b) volatilita' al segnale
+    # cancello 08/10 (classe 1179): due segnali aperti allo STESSO tick con lo stesso SL (antenato
+    # USDCHF 2026.04.01 03:00:55, ARANCIO_L + BLU_L) sono UNA misura di ATR, non due: si conta una volta.
     vol_rel, vol_pip = collections.defaultdict(list), collections.defaultdict(list)
+    visti_vol = set()
     for p in v520 + ant + trial:
         if p["atr_rel"] is not None and p["sym"] in D.SYM22:
+            k_vol = (p["sym"], p["apre"], round(p["atr_rel"], 12))
+            if k_vol in visti_vol:
+                continue
+            visti_vol.add(k_vol)
             vol_rel[p["sym"]].append(p["atr_rel"])
             vol_pip[p["sym"]].append(p["atr_pip"])
     print("\n=== (b) VOLATILITA' AL SEGNALE (ATR H1 / prezzo), misurata da SL = 3 ATR (uscite a SL del piccolo + SL del trial) ===")
