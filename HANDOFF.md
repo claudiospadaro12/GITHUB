@@ -8,6 +8,7 @@
 ---
 
 ## 🗓️ 08/10/2026 -- PRIORITA' EA + COSE DA FARE (Claudio: "GLI EA SONO LA PRIORITA'")
+- **Sera 08/10**: Bulge VIOLA prove uscita/orario (9 file, 38 passate, ~1-3 h) + `ABTG_BulgeAzzurra` (magic 774500) passati da cancello e lettore indipendente (cd164ada); nessuna riga di lancio. Stato e attese: `report/PRIORITA_EA_E_DA_FARE_2026-10-08.md` sez. F-bis. Pacchetto Gemini #2 `docs/PER_GEMINI_BULGE_VIOLA_2026-10-08.md` in attesa di PASS.
 Leggere **`report/PRIORITA_EA_E_DA_FARE_2026-10-08.md`**: miglioramento degli EA uno alla volta (ordine, protocollo), confronto con Gemini su ogni EA (`docs/gemini/PROTOCOLLO_SQUADRA_2026-10-08.md`), accumulo delle live di Paolo/Emiliano (cicli di 3 mesi: ripartono da capo) in `docs/SAPERE_LIVE_PER_EA.md`, elenco degli aperti (NatCla C0, trial FTMO sbloccato a 9,9, dashboard, firme).
 
 ---
