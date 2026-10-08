@@ -599,3 +599,7 @@ commettere errori e non trovare parametri e pf migliori, confrontati con lui per
 - 🔴 **"Parametri e PF migliori" NON vuol dire abbassare l'asticella**: vuol dire piu' MISURE (meccanismi, simboli, TF, uscita) dentro
   l'imbuto, con attesa e contro-esempio scritti prima. Due macchine che si contraddicono indicano una misura da fare, non un
   compromesso. Le regole del 19/08 (niente griglie su motori senza edge) e del 09/09 (certificato di morte) restano intere.
+
+## 🎯 GLI EA SONO LA PRIORITA' (Claudio, 08/10/2026)
+Testuale: _"GLI EA SONO LA PRIORITA', DEVI CONFRONTARTI SEMPRE CON GEMINI... DOBBIAMO GUARDARE GLI EA NUOVAMENTE E MIGLIORARLI UNO ALLA VOLTA."_
+Dashboard, indicatori e strumenti sono ponteggio: si chiudono e si torna agli EA. Memoria di lavoro: `report/PRIORITA_EA_E_DA_FARE_2026-10-08.md` (ordine degli EA, protocollo di miglioramento, aperti). **Le live di Paolo ed Emiliano** si accumulano (cicli di 3 mesi: ripartono da capo per i nuovi iscritti): ogni trascrizione ricevuta si analizza e il sapere va in `docs/SAPERE_LIVE_PER_EA.md`, come ipotesi da misurare (mai criteri).

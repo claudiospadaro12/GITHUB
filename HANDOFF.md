@@ -7,6 +7,11 @@
 
 ---
 
+## 🗓️ 08/10/2026 -- PRIORITA' EA + COSE DA FARE (Claudio: "GLI EA SONO LA PRIORITA'")
+Leggere **`report/PRIORITA_EA_E_DA_FARE_2026-10-08.md`**: miglioramento degli EA uno alla volta (ordine, protocollo), confronto con Gemini su ogni EA (`docs/gemini/PROTOCOLLO_SQUADRA_2026-10-08.md`), accumulo delle live di Paolo/Emiliano (cicli di 3 mesi: ripartono da capo) in `docs/SAPERE_LIVE_PER_EA.md`, elenco degli aperti (NatCla C0, trial FTMO sbloccato a 9,9, dashboard, firme).
+
+---
+
 ## 🗓️ 01/10 notte (00:30 ora IT) — FREE TRIAL FTMO 160K ACCESA; stato e cose aperte
 - **Trial**: login **1514806751**, server FTMO-Demo, conto **Hedge**, 160.000 EUR, **dentro `C:\FTMO`** (Path `C:\FTMO\terminal64.exe`, PID 9236 al P0 delle 22:57). Orologio server = **IT+1** (00:12 contro 23:12). **Guardian (CLAU12 v1.12) portato a InpStartBalance=160000** (pannello: Saldo iniziale 160000, giorno 4,5%, totale 9,3%, cap 4,00%, Stato OK). **Algo Trading ACCESO da Claudio alle ~00:30** con le **sette sedie vecchie** (770101, 770105, 770202, 770260, 771531, 770511, 770411) a **2,00% per operazione**. "Salva profilo" dopo il Guardian: **NON confermato**. Bulge e ORB **NON ancora attaccati**.
 - **Pacchetto Bulge viola + ORB Dow** (commit pin `756dd58f`, preset `mql5/Presets/FTMO/ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set` magic 772720 commento BULGE_V520_FT 15 cross, `ABTG_ORB_Ottimizzato_DOW_FTMO_TRIAL.set` magic 770621 rischio 0,3 range 16:30-16:45 FTMO), riga `backtest_pipeline/righe/RIGA_LANCIA_BULGE_ORB_TRIAL.txt` (cancello: meccanica PASS): **Claudio deve ancora lanciarla, F7, attaccare su due grafici NUOVI (USDCAD H1, US30.cash M5), salvare profilo**.
