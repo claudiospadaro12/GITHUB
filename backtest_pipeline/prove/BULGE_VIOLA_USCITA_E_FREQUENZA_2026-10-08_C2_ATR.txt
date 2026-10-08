@@ -1,0 +1,100 @@
+#  EA: ABTG_Bulge
+#  ABTG_Bulge v5.20 (SHA256 ED4E88B1CFBA36AD..., NON modificato). H1 (cablato), Modello 1 (OHLC M1): SOLO SCREENING, nessun
+#  verdetto a tick reali (R57). Deposito 10000 e Modello 1 vanno passati ESPLICITI dalla riga di lancio. Gira SOLO sul PC di
+#  backtest DESKTOP-H4D7CAJ (regola 21/09): NON sul VPS, NON su 50504400, NON su nessuna sedia, NON sul forward.
+#  Scritto l'08/10/2026, PRIMA di qualunque numero. Dossier: report/MIGLIORA_BULGE_VIOLA_2026-10-08.md (parte 11-13).
+#  NESSUNA RIGA DI LANCIO qui: la fa la sessione principale e passa dai cancelli (controlla_prova.py, controlla_riga.py,
+#  controllo-preventivo). Non promuove niente, non propone nessuna taglia: Risk_Percent 0,80 e Max_Trades 4 sono quelli del
+#  preset trial copiati cosi' come sono.
+#  DECISIONE DI CLAUDIO (08/10): il motore del VIOLA NON cambia ("ogni tocco dopo un impulso"). Qui si misura SOLO cio' che
+#  sta dopo l'entrata e attorno, con input GIA' ESISTENTI. Nessun parametro d'ingresso e' un asse.
+#  FINESTRA (come BULGE_M1 e R92b, firmata): 2010.01.01-2026.06.30, @FRAZIONEIS 0.7275 -> IS 2010.01.01-2021.12.31 (12,0 anni, piu'
+#  regimi: crisi del debito euro, calma 2013-14, shock SNB 15/01/2015 su NZDCHF/USDCHF/CADCHF, Brexit, COVID), OOS 2022.01.01-2026.06.30
+#  (4,5 anni: dollaro forte, disinflazione 2023-24, 2025-26). Il per-trade sopravvive solo per la gamba OOS. IS e OOS si dimensionano
+#  in OPERAZIONI (>= 150 per gamba: n OOS atteso 1.000-2.500; sotto 150 il MERITO e' sospeso, il RISCHIO si legge lo stesso).
+#  GBPNZD nell'IS parte dal 2010.05.10 (muro misurato). Grafico NZDCHF (dentro i 15). 15 cross del preset trial.
+#  UNA VARIABILE PER FILE (controlla_prova.py lo impone): un asse Y per file; gli altri input sono pinnati identici a BULGE_M1.
+#
+#  ===== C2 -- FILTRO ATR PIU' STRETTO, asse ATR_Max_Mult {1,2; 1,5}  (1,8 = cella A) =====
+#  Input ESISTENTI: Use_ATR_Filter=1 (gia' acceso in A), ATR_MA_Len=20, ATR_Min_Mult=0.5, ATR_Max_Mult (asse). AtrOk lascia passare solo se ATR(barra 1) e'
+#  fra 0,5 e Max x la sua media a 20: Max piu' basso esclude i regimi di volatilita' alta. Il confronto 'filtro spento' contro 'filtro 1,8' non e' mai stato
+#  fatto a parita' di tutto il resto (AMPIA di R92BAB: spento; preset trial: acceso): QUI il controllo e' A (1,8). La cella spenta si fa solo dopo, se C2 si muove.
+#  ATTESA: quota trattenuta 90-97% a 1,5 e 75-90% a 1,2 rispetto ad A. Delta PF: |delta| < 5% a 1,5; -5%..+10% a 1,2.
+#  ALTERNATIVA: delta PF >= +10% monotono (1,8 -> 1,5 -> 1,2) = i regimi di volatilita' alta sono dove il VIOLA perde; oppure |delta| < 3% = filtro inerte.
+#  CRITERIO DI PICCO: i tre punti 1,2/1,5/1,8 devono salire o scendere insieme; un solo punto che si muove = bordo.
+# =====================================================================
+@SIMBOLO    NZDCHF
+@PERIODO    H1
+@DAQUANDO   2010.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.7275
+
+# Bollinger, cuore del motore: NON si tocca
+BB_Period=20
+BB_Deviation=2.0
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+Bulge_Multi=1.1
+Lookback_Bars=20
+# SOLO VIOLA, come il preset trial
+Use_Orange=0
+Use_Blue=0
+Use_Purple=1
+# VIOLA-EA (0): non e' un asse di questo lavoro
+Use_Purple_PineReaction=0
+# v5.20: 1 = barre CHIUSE
+Signal_Bar_Offset=1
+# filtro ATR ACCESO, come il preset trial
+Use_ATR_Filter=1
+ATR_MA_Len=20
+ATR_Max_Mult=1.2||1.2||0.3||1.5||Y
+ATR_Min_Mult=0.5
+# ADX spento, come il preset trial (ADX_Apply_On_Purple=0 comunque)
+Use_ADX_Filter=0
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=1
+ADX_Apply_On_Purple=0
+ADX_Apply_On_Orange=0
+Use_News_Filter=0
+# stringa con virgole: inerte (Use_News_Filter=0); gia' pin del driver
+News_Block_Hours=7,9,11,12,15,22
+# gestione NUDA: nessun parziale, nessun BE, nessun trailing (1 posizione = 1 deal di uscita)
+Enable_Partial_Close=0
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+# kill switch ACCESO, come in origine e nel preset trial
+Use_Kill_Switch=1
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+# 0 = RISK_PER_TRADE. Valori del preset trial copiati cosi' come sono: NON e' una taglia scelta qui
+Risk_Mode=0
+Risk_Percent=0.8
+Total_Risk_Percent=2.0
+Max_Trades=4
+# spento: nel tester non esistono ordini manuali
+Manage_Manual_Orders=0
+Manual_SL_ATR_Mult=3.0
+Enable_BE_1R=0
+BE_At_R=1.0
+BE_Offset_Points=2
+Enable_Trailing_R=0
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+# --- L'UNICO ASSE DI QUESTO FILE: InpMagic (asse tecnico, non di strategia)
+#     magic m / m+50: due passate identiche (G1). Blocco 7996xx libero (grep su tutto il repo: zero occorrenze).
+InpMagic=799722
+InpComment=BULGE_V520_FT
+# i 15 cross del preset trial (104 caratteri), stessa lista di ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set
+Symbols_List=NZDUSD,USDCAD,USDCHF,EURGBP,EURNZD,GBPAUD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF
+# acceso come in campo; nel tester e' INERTE (fail-open)
+InpUsaGuardian=1
+# spento nelle corse lunghe (in ottimizzazione le Print non escono comunque)
+InpVerbose=0
+# spento: l'autotest si legge in una passata singola, non qui
+InpAutoTest=0
+# =====================================================================
+

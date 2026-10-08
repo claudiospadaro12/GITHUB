@@ -1,0 +1,107 @@
+#  EA: ABTG_Bulge
+#  ABTG_Bulge v5.20 (SHA256 ED4E88B1CFBA36AD..., NON modificato). H1 (cablato), Modello 1 (OHLC M1): SOLO SCREENING, nessun
+#  verdetto a tick reali (R57). Deposito 10000 e Modello 1 vanno passati ESPLICITI dalla riga di lancio. Gira SOLO sul PC di
+#  backtest DESKTOP-H4D7CAJ (regola 21/09): NON sul VPS, NON su 50504400, NON su nessuna sedia, NON sul forward.
+#  Scritto l'08/10/2026, PRIMA di qualunque numero. Dossier: report/MIGLIORA_BULGE_VIOLA_2026-10-08.md (parte 11-13).
+#  NESSUNA RIGA DI LANCIO qui: la fa la sessione principale e passa dai cancelli (controlla_prova.py, controlla_riga.py,
+#  controllo-preventivo). Non promuove niente, non propone nessuna taglia: Risk_Percent 0,80 e Max_Trades 4 sono quelli del
+#  preset trial copiati cosi' come sono.
+#  DECISIONE DI CLAUDIO (08/10): il motore del VIOLA NON cambia ("ogni tocco dopo un impulso"). Qui si misura SOLO cio' che
+#  sta dopo l'entrata e attorno, con input GIA' ESISTENTI. Nessun parametro d'ingresso e' un asse.
+#  FINESTRA (come BULGE_M1 e R92b, firmata): 2010.01.01-2026.06.30, @FRAZIONEIS 0.7275 -> IS 2010.01.01-2021.12.31 (12,0 anni, piu'
+#  regimi: crisi del debito euro, calma 2013-14, shock SNB 15/01/2015 su NZDCHF/USDCHF/CADCHF, Brexit, COVID), OOS 2022.01.01-2026.06.30
+#  (4,5 anni: dollaro forte, disinflazione 2023-24, 2025-26). Il per-trade sopravvive solo per la gamba OOS. IS e OOS si dimensionano
+#  in OPERAZIONI (>= 150 per gamba: n OOS atteso 1.000-2.500; sotto 150 il MERITO e' sospeso, il RISCHIO si legge lo stesso).
+#  GBPNZD nell'IS parte dal 2010.05.10 (muro misurato). Grafico NZDCHF (dentro i 15). 15 cross del preset trial.
+#  UNA VARIABILE PER FILE (controlla_prova.py lo impone): un asse Y per file; gli altri input sono pinnati identici a BULGE_M1.
+#
+#  ===== E1 -- FASCIA NOTTE/ASIA (ore server BCM 00-08 = 23-07 UTC) BLOCCATA con il filtro news ESISTENTE (asse Use_News_Filter {0 = controllo = A; 1}) =====
+#  Input ESISTENTI: Use_News_Filter, News_Block_Hours (qui pinnata). IsNewsHour() usa TimeGMT() e blocca l'ingresso se l'ora corrisponde: e' valutata al PRIMO TICK
+#  della nuova barra H1 (cioe' all'ora d'ingresso). IN CAMPO e' ora UTC. NEL TESTER, secondo la documentazione MQL4/MQL5 citata dalla comunita', TimeGMT() = TimeCurrent()
+#  = ORA SERVER (BCM = UTC+1): quindi la lista qui sotto e' scritta in ORA SERVER BCM. L'equivalente IN CAMPO e' la stessa lista MENO un'ora (UTC).
+#  [NON VERIFICATO sul nostro tester: il controllo e' la copia di banco con open_time. Finche' non c'e', il file E si lancia solo per il conteggio di Trades e PF,
+#  e la fascia vera e' ASSUNTA.]  NIENTE FILTRO ORARIO PER SESSIONE ESISTE FRA GLI INPUT: News_Block_Hours e' l'unico modo (lista di ore); una fascia fissa o per classe
+#  di cross e' CODICE NUOVO = firma di Claudio.
+#  Fascia fissata A PRIORI (08/10, sulla struttura dei mercati; sim_bulge_viola_orario.py): F1. Ora che conta = ora d'ingresso; con Signal_Bar_Offset=1 la barra di
+#  CONFERMA e' quella PRECEDENTE (ingresso h <-> conferma h-1).
+#  ATTESA: quota di ingressi bloccati 20-30% (VIOLA 81: 26% in F1). Delta PF: -5%..+5%; la fascia notturna non e' distinguibile dal giorno nel campione
+#  (F1 media r -0,04, p 0,76). H-O2 (JPY e AUD/NZD in Asia): NON testabile con questo file (serve la classe di cross per ora: telemetria + script offline).
+#  ALTERNATIVA 'la notte e' di bassa qualita'': delta PF >= +10% togliendola. ALTERNATIVA 'la notte e' la migliore': delta PF <= -10% (si perde qualita').
+#  La cella Use_News_Filter=0 e' una replica di A: controllo G1 gratuito. QUOTA TRATTENUTA = Trades(1)/Trades(0); FRONTIERA = quota contro delta PF; decide Claudio.
+#  CRITERIO DI PICCO: una fascia e' un EFFETTO solo se il segno regge in IS e OOS e nelle due meta' dell'OOS; 6 fasce guardate = soglia p 0,05/6 sul nullo 'k posizioni a caso'.
+# =====================================================================
+@SIMBOLO    NZDCHF
+@PERIODO    H1
+@DAQUANDO   2010.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.7275
+
+# Bollinger, cuore del motore: NON si tocca
+BB_Period=20
+BB_Deviation=2.0
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+Bulge_Multi=1.1
+Lookback_Bars=20
+# SOLO VIOLA, come il preset trial
+Use_Orange=0
+Use_Blue=0
+Use_Purple=1
+# VIOLA-EA (0): non e' un asse di questo lavoro
+Use_Purple_PineReaction=0
+# v5.20: 1 = barre CHIUSE
+Signal_Bar_Offset=1
+# filtro ATR ACCESO, come il preset trial
+Use_ATR_Filter=1
+ATR_MA_Len=20
+ATR_Max_Mult=1.8
+ATR_Min_Mult=0.5
+# ADX spento, come il preset trial (ADX_Apply_On_Purple=0 comunque)
+Use_ADX_Filter=0
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=1
+ADX_Apply_On_Purple=0
+ADX_Apply_On_Orange=0
+Use_News_Filter=0||0||1||1||Y
+# stringa con virgole: inerte (Use_News_Filter=0); gia' pin del driver
+News_Block_Hours=0,1,2,3,4,5,6,7
+# gestione NUDA: nessun parziale, nessun BE, nessun trailing (1 posizione = 1 deal di uscita)
+Enable_Partial_Close=0
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+# kill switch ACCESO, come in origine e nel preset trial
+Use_Kill_Switch=1
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+# 0 = RISK_PER_TRADE. Valori del preset trial copiati cosi' come sono: NON e' una taglia scelta qui
+Risk_Mode=0
+Risk_Percent=0.8
+Total_Risk_Percent=2.0
+Max_Trades=4
+# spento: nel tester non esistono ordini manuali
+Manage_Manual_Orders=0
+Manual_SL_ATR_Mult=3.0
+Enable_BE_1R=0
+BE_At_R=1.0
+BE_Offset_Points=2
+Enable_Trailing_R=0
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+# --- L'UNICO ASSE DI QUESTO FILE: InpMagic (asse tecnico, non di strategia)
+#     magic m / m+50: due passate identiche (G1). Blocco 7996xx libero (grep su tutto il repo: zero occorrenze).
+InpMagic=799741
+InpComment=BULGE_V520_FT
+# i 15 cross del preset trial (104 caratteri), stessa lista di ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set
+Symbols_List=NZDUSD,USDCAD,USDCHF,EURGBP,EURNZD,GBPAUD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF
+# acceso come in campo; nel tester e' INERTE (fail-open)
+InpUsaGuardian=1
+# spento nelle corse lunghe (in ottimizzazione le Print non escono comunque)
+InpVerbose=0
+# spento: l'autotest si legge in una passata singola, non qui
+InpAutoTest=0
+# =====================================================================
+

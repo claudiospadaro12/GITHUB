@@ -1,0 +1,152 @@
+#  EA: ABTG_Bulge
+#  ABTG_Bulge v5.20 (SHA256 ED4E88B1CFBA36AD..., NON modificato). H1 (cablato), Modello 1 (OHLC M1): SOLO SCREENING, nessun
+#  verdetto a tick reali (R57). Deposito 10000 e Modello 1 vanno passati ESPLICITI dalla riga di lancio. Gira SOLO sul PC di
+#  backtest DESKTOP-H4D7CAJ (regola 21/09): NON sul VPS, NON su 50504400, NON su nessuna sedia, NON sul forward.
+#  Scritto l'08/10/2026, PRIMA di qualunque numero. Dossier: report/MIGLIORA_BULGE_VIOLA_2026-10-08.md (parte 11-13).
+#  NESSUNA RIGA DI LANCIO qui: la fa la sessione principale e passa dai cancelli (controlla_prova.py, controlla_riga.py,
+#  controllo-preventivo). Non promuove niente, non propone nessuna taglia: Risk_Percent 0,80 e Max_Trades 4 sono quelli del
+#  preset trial copiati cosi' come sono.
+#  DECISIONE DI CLAUDIO (08/10): il motore del VIOLA NON cambia ("ogni tocco dopo un impulso"). Qui si misura SOLO cio' che
+#  sta dopo l'entrata e attorno, con input GIA' ESISTENTI. Nessun parametro d'ingresso e' un asse.
+#  FINESTRA (come BULGE_M1 e R92b, firmata): 2010.01.01-2026.06.30, @FRAZIONEIS 0.7275 -> IS 2010.01.01-2021.12.31 (12,0 anni, piu'
+#  regimi: crisi del debito euro, calma 2013-14, shock SNB 15/01/2015 su NZDCHF/USDCHF/CADCHF, Brexit, COVID), OOS 2022.01.01-2026.06.30
+#  (4,5 anni: dollaro forte, disinflazione 2023-24, 2025-26). Il per-trade sopravvive solo per la gamba OOS. IS e OOS si dimensionano
+#  in OPERAZIONI (>= 150 per gamba: n OOS atteso 1.000-2.500; sotto 150 il MERITO e' sospeso, il RISCHIO si legge lo stesso).
+#  GBPNZD nell'IS parte dal 2010.05.10 (muro misurato). Grafico NZDCHF (dentro i 15). 15 cross del preset trial.
+#  UNA VARIABILE PER FILE (controlla_prova.py lo impone): un asse Y per file; gli altri input sono pinnati identici a BULGE_M1.
+#
+#  ===== FILE MADRE E CELLA BASE: A (asse tecnico InpMagic, 2 celle gemelle = determinismo G1) =====
+#  A e' IDENTICO a prove/BULGE_M1_cella_campo_lunga.txt salvo il magic: se M1 e' gia' girato, A NON si rilancia (si usa M1 come base,
+#  dopo aver controllato che il CSV di M1 abbia le stesse 50 colonne di input). Tutti gli altri file di questa famiglia si confrontano
+#  con A: stessa finestra, stessi pin, stesso EA.
+#
+#  LA FAMIGLIA (otto file, ognuno con UN asse; passate = celle x 2 gambe; costo a 26 min per passata [dato del coordinatore] e a
+#  4-15 min per passata [DERIVATO: 15-60 min per 4 passate di BULGE_M1]; entrambi [NON MISURATI] su queste celle):
+#     A   base (2 celle gemelle sul magic)                                    4 passate   1,7 h (26 min)  /  0,3-1,0 h
+#     B1  BE a {0,25; 0,50; 0,75} R (Enable_BE_1R=1, BE_At_R)                 6 passate   2,6 h           /  0,4-1,5 h
+#     B2  Parziale 50% a {0,25; 0,50} R + BE sul residuo                      4 passate   1,7 h           /  0,3-1,0 h
+#     C1  ADX sul VIOLA: ADX_Threshold {25; 30} con Apply_On_Purple=1          4 passate   1,7 h           /  0,3-1,0 h
+#     C2  Filtro ATR piu' stretto: ATR_Max_Mult {1,2; 1,5}  (1,8 = A)          4 passate   1,7 h           /  0,3-1,0 h
+#     D   SL_ATR_Mult {2,5; 3,5}  (3,0 = A) -- NON LANCIARE SENZA CLAUDIO      4 passate   1,7 h           /  0,3-1,0 h
+#     E1  fascia notte/asia bloccata (ore server 0-7)                          4 passate   1,7 h           /  0,3-1,0 h
+#     E2  fascia europa mattina bloccata (ore server 8-11)                     4 passate   1,7 h           /  0,3-1,0 h
+#     E3  fascia rollover bloccata (ore server 22-23)                          4 passate   1,7 h           /  0,3-1,0 h
+#     TOTALE 38 passate = 16,5 h (a 26 min) oppure 2,5-9,5 h (a 4-15 min). Due celle di controllo (Use_News_Filter=0 in E1-E3) sono
+#     repliche di A: danno gratis tre controlli G1 in piu'. Non e' una griglia fitta: 2-3 celle per asse, un meccanismo per file.
+#  ORDINE E FERMATE (a ~12 passate per giro):
+#     GIRO 1 (10 passate, 4,3 h): A (4, o niente se M1 e' gia' girato) + B1 (6).  Si legge, si decide.
+#     GIRO 2 (12 passate, 5,2 h): B2 + C1 + C2.
+#     GIRO 3 (12 passate, 5,2 h): E1 + E2 + E3 -- SOLO dopo il controllo di TimeGMT (vedi E) e solo se la copia di banco con telemetria
+#             (spec: report/BULGE_VIOLA_TELEMETRIA_SPEC_2026-10-08.md) non ha gia' risposto offline a costo zero.
+#     GIRO 4 (4 passate, 1,7 h): D -- SOLO con la decisione di Claudio sulla testata di ABTG_Bulge.mq5.
+#  LA STRADA PIU' CORTA (consigliata): una corsa con la copia di banco ABTG_Bulge_Telemetria (open_time, percorso M1, MFE/MAE) +
+#  sim_bulge_viola_uscite.py valuta OFFLINE tutti gli assi B, C-ATR, E e la regola di invalidazione a T+30 a costo zero di tester; i file
+#  di questa famiglia diventano le CONFERME nel tester delle sole celle che passano l'offline. Il codice di banco e' firma di Claudio.
+#
+#  FACCIA DEL PROBLEMA, in numeri (fonte: dossier; pool v5.20 n 221; sim_bulge_viola_*.py):
+#   PF(r) 0,72; vincita media 0,25 R, perdita media 0,95 R; win rate 72,9% contro 78,9% di pareggio; 0 vincite su 161 arrivano a 1 R
+#   (mediana 0,24 R, p90 0,46 R, max 0,83 R); le perdite stesse-giornata con MFE di banda >= 0,3 R sono 4 su 15 (27%), >= 0,5 R 2 su 15 (13%),
+#   >= 0,75 R 1 su 15 (7%) [LIMITE SUPERIORE: la banda M5 include barre dopo l'uscita; le perdite multi-giorno sono incognite]; le vincite con
+#   r >= 0,3 R sono 18 su 61, >= 0,5 R 2 su 61. CONDIZIONE DI PAREGGIO del BE: servono 0,267 perdenti salvate per ogni vincitore tagliato
+#   (0,254 R / 0,951 R). Il trailing con Trail_Start_R < 1 NON e' un trailing: TrailLockR(r) = max(0, start + n*step - 1), quindi con start
+#   0,5 il lock vale 0 fino a r = 1,0 (BE a `start` con offset 0): non e' un asse distinto dal BE e non ha un file (dossier parte 11).
+#
+#  PASSATE E MISURE COMUNI A TUTTI I FILE (per ogni cella, ogni gamba):
+#   P0  nel CSV: Use_Blue=0, Use_Orange=0, Use_Purple=1, Signal_Bar_Offset=1, Use_Purple_PineReaction=0, SL_ATR_Mult=3.0 (salvo D),
+#       Risk_Percent=0.8, Max_Trades=4, Symbols_List 104 caratteri, InpComment=BULGE_V520_FT, e il SOLO input dell'asse diverso da A.
+#   G1  le due celle gemelle di A: Trades IDENTICI; in OOS Profit, PF, DD identici al centesimo; in IS |dProfit| <= 0,10 e |dPF| <= 0,0001
+#       (tolleranza scritta ORA: lo scarto 0,02-0,06 visto in R92BAB e' di causa [NON MISURATA]). Le celle di controllo di E1-E3
+#       (Use_News_Filter=0) devono riprodurre A su Trades, Profit, PF, DD in OOS.
+#   SOMMA del per-trade OOS = Profit del CSV OOS (in R92BAB: -203,65 non spiegati) prima di leggere un PF.
+#   FREQUENZA INVARIATA? Trades(cella)/Trades(A): entro +-5% = "invariata"; fuori = l'asse ha cambiato quante posizioni si aprono
+#       (meccanismi: slot Max_Trades liberati o occupati; kill switch: l'EA conta come SL ogni deal con DEAL_REASON_SL o con profitto < 0
+#       (isSL in KillSwitchEvaluate): un BE colpito e' un'uscita per SL e conta anche se chiude a +2 punti -> piu' pause del kill switch). Si scrive il numero.
+#   FRONTIERA qualita'/frequenza (C1, C2, E1-E3): quota trattenuta = Trades(cella)/Trades(A) contro delta PF = PF(cella)/PF(A) - 1, e delta
+#       Profit e delta DD. La pendenza H0 e' "la rimozione di posizioni a caso lascia il PF invariato" (linea piatta); una cella e' un EFFETTO
+#       solo se sta fuori dal rumore A3 (10,5% relativo sul PF) E fuori da cio' che dato da k posizioni tolte a caso dal per-trade di A.
+#   PICCO DI RUMORE: con 2-3 celle per asse non c'e' un "centro dell'altopiano" vero. Regola: una cella e' un EFFETTO solo se (i) sta oltre il
+#       rumore A3, (ii) il segno e' lo stesso in IS e OOS, (iii) le celle vicine dello stesso asse vanno nello stesso verso (monotonia),
+#       (iv) vale in due sottoperiodi dell'OOS. Una cella che sporge da sola = "bordo/picco", si scrive cosi' e non si usa.
+#  SOGLIE CONGELATE (non si cambiano dopo i numeri): rumore A3 10,5%; S1 n >= 150 per gamba; S3 WR >= 65% con Profit > 0; DD alla taglia dentro il
+#   10% (cancello di RISCHIO, si legge a qualunque n); PF OOS di A < 1,05 = niente griglie sull'ingresso (qui non ce ne sono) e ogni
+#   miglioramento si paga con una prova fuori campione e di regime; PF di una cella >= 1,30 con S3 -> tick reali prima di tutto il resto.
+#  ATTESA SU A (dalla M1): PF OOS 0,80-1,05; WR 70-77%; payoff 0,28-0,40; DD OOS 8-25% a 0,80%; n OOS 1.000-2.500. IPOTESI ALTERNATIVA: se il motore
+#   fosse quello di Claudio (PF 1,60), PF OOS >= 1,30 e tutta la famiglia B-E si legge su un altro piano.
+#  COSA QUESTA FAMIGLIA NON FA: non misura il merito a tick reali, non misura lo spread dei cross, non misura la ragione per cui una cella vince, non
+#   cambia l'entrata, non propone di restringerla: misura una FRONTIERA e decide Claudio.
+# =====================================================================
+@SIMBOLO    NZDCHF
+@PERIODO    H1
+@DAQUANDO   2010.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.7275
+
+# Bollinger, cuore del motore: NON si tocca
+BB_Period=20
+BB_Deviation=2.0
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+Bulge_Multi=1.1
+Lookback_Bars=20
+# SOLO VIOLA, come il preset trial
+Use_Orange=0
+Use_Blue=0
+Use_Purple=1
+# VIOLA-EA (0): non e' un asse di questo lavoro
+Use_Purple_PineReaction=0
+# v5.20: 1 = barre CHIUSE
+Signal_Bar_Offset=1
+# filtro ATR ACCESO, come il preset trial
+Use_ATR_Filter=1
+ATR_MA_Len=20
+ATR_Max_Mult=1.8
+ATR_Min_Mult=0.5
+# ADX spento, come il preset trial (ADX_Apply_On_Purple=0 comunque)
+Use_ADX_Filter=0
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=1
+ADX_Apply_On_Purple=0
+ADX_Apply_On_Orange=0
+Use_News_Filter=0
+# stringa con virgole: inerte (Use_News_Filter=0); gia' pin del driver
+News_Block_Hours=7,9,11,12,15,22
+# gestione NUDA: nessun parziale, nessun BE, nessun trailing (1 posizione = 1 deal di uscita)
+Enable_Partial_Close=0
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+# kill switch ACCESO, come in origine e nel preset trial
+Use_Kill_Switch=1
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+# 0 = RISK_PER_TRADE. Valori del preset trial copiati cosi' come sono: NON e' una taglia scelta qui
+Risk_Mode=0
+Risk_Percent=0.8
+Total_Risk_Percent=2.0
+Max_Trades=4
+# spento: nel tester non esistono ordini manuali
+Manage_Manual_Orders=0
+Manual_SL_ATR_Mult=3.0
+Enable_BE_1R=0
+BE_At_R=1.0
+BE_Offset_Points=2
+Enable_Trailing_R=0
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+# --- L'UNICO ASSE DI QUESTO FILE: InpMagic (asse tecnico, non di strategia)
+#     magic m / m+50: due passate identiche (G1). Blocco 7996xx libero (grep su tutto il repo: zero occorrenze).
+InpMagic=799701||799701||50||799751||Y
+InpComment=BULGE_V520_FT
+# i 15 cross del preset trial (104 caratteri), stessa lista di ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set
+Symbols_List=NZDUSD,USDCAD,USDCHF,EURGBP,EURNZD,GBPAUD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF
+# acceso come in campo; nel tester e' INERTE (fail-open)
+InpUsaGuardian=1
+# spento nelle corse lunghe (in ottimizzazione le Print non escono comunque)
+InpVerbose=0
+# spento: l'autotest si legge in una passata singola, non qui
+InpAutoTest=0
+# =====================================================================
+

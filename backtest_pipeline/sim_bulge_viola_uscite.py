@@ -21,6 +21,9 @@
 #  Effetto sulla FREQUENZA: portafoglio rigiocato con Max_Trades e HasOpenTrade: l'uscita anticipata libera slot
 #  e i segnali BLOCK_MAXTRADES/BLOCK_HASOPEN possono diventare aperture (solo cosi' si vede l'effetto vero).
 #
+#  KILL SWITCH NON SIMULATO nel rigioco del portafoglio: ma nell'EA un BE colpito e' un'uscita per SL (DEAL_REASON_SL) e conta come SL
+#  (4 al giorno, 3 consecutivi): l'effetto delle regole BE/TRAIL/PARZ sulla FREQUENZA e' quindi SOTTOSTIMATO qui e va misurato nel tester (Trades(cella)/Trades(A)).
+#
 #  CONVENZIONI (dichiarate, non nascoste): percorso a BID; long entra ask / esce bid; short entra bid / esce ask
 #  (= bid + spread di barra). Dentro una barra l'ordine e' PESSIMISTICO: prima il lato avverso (SL), poi il
 #  favorevole (TP). BE/trailing/parziale scattano sull'estremo favorevole della barra e valgono dalla barra
