@@ -23,13 +23,17 @@
 #  server time'; e https://www.mql5.com/en/docs/runtime/testing, 'Simulation of Time in the Strategy Tester'). Quindi la lista qui sotto e' in ORA SERVER del tester.
 #  L'ORA SERVER NON E' UN FUSO FISSO SULLA FINESTRA (classe 762; report/OROLOGIO_BCM_2026-09-24.md par. 3.1): lo storico FOREX BCM fino a fine dic-2024 e' sul
 #  VECCHIO orologio (UTC+0 d'inverno, UTC+1 d'estate = ora di LONDRA), dal 2025 e' UTC+1 FISSO. Le ore server bloccate sono quindi le stesse ore di Londra in
-#  tutto l'IS 2010-2021, nell'OOS 2022-2024 e nelle estati 2025-2026; negli inverni gen-mar 2025 e fine ott 2025-mar 2026 (~8 mesi sui 54 dell'OOS) la
+#  tutto l'IS 2010-2021 (2010-2014 ESTRAPOLATO: OROLOGIO_BCM misura dagli inverni 2014/15; lettore 08/10), nell'OOS 2022-2024 e nelle estati 2025-2026; negli inverni gen-mar 2025 e fine ott 2025-mar 2026 (~8 mesi sui 54 dell'OOS) la
 #  fascia cade un'ora PRIMA rispetto a Londra. L'equivalenza in UTC del titolo vale SOLO per l'orologio di oggi (estate 2026).
 #  IN CAMPO TimeGMT() e' UTC vero: un preset con la stessa lista farebbe un'altra fascia. Va tradotto, e la traduzione cambia con la stagione (per
 #  bloccare le stesse ore di Londra che il backtest 2010-2024 ha bloccato: lista server -1 d'estate, invariata d'inverno). Non e' una proposta di filtro.
 #  CHIUSURA EMPIRICA senza codice nuovo (in piu' della documentazione): una passata SINGOLA della cella Use_News_Filter=1 su una finestra corta dell'estate
 #  2026; nel rapporto del tester (scheda Affari, ora server) ZERO ingressi alle ore della lista. CONTRO-ESEMPIO: se TimeGMT fosse UTC (server -1), la lista
 #  bloccherebbe le ore server +1: comparirebbero ingressi alle 00 e nessuno alle 08. Le due attese sono disgiunte.
+#  LETTORE INDIPENDENTE 08/10 (classe 178): disgiunte SOLO se all'ora discriminante cadono ingressi. Nel pool VIOLA (81 posizioni) le ore
+#  discriminanti pesano 2 su 81 (ora 00) e 5 su 81 (ora 08): una finestra di poche settimane da' ZERO contro ZERO anche sotto l'alternativa
+#  e conferma il falso. La finestra si dimensiona PRIMA: giorni >= 5 / (quota oraria x ingressi VIOLA al giorno), su un tratto tutto a
+#  UTC+1 (es. estate 2025, 2025.04.01-2025.10.24); se non si arriva a 5 attesi, la chiusura si fa su E2 (ora 08 = 5 su 81) o con la copia di banco.
 #  Finche' la chiusura empirica non c'e', la fascia e' DOCUMENTATA, non MISURATA sul nostro tester.  NIENTE FILTRO ORARIO PER SESSIONE ESISTE FRA GLI INPUT: News_Block_Hours e' l'unico modo (lista di ore); una fascia fissa o per classe
 #  di cross e' CODICE NUOVO = firma di Claudio.
 #  Fascia fissata A PRIORI (08/10, sulla struttura dei mercati; sim_bulge_viola_orario.py): F1. Ora che conta = ora d'ingresso; con Signal_Bar_Offset=1 la barra di

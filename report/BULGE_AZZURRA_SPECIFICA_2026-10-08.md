@@ -128,7 +128,7 @@ una decisione della sessione principale** (la consegna era di non toccarlo).
 
 ✏️ **Aggiunto dal cancello (controllo-preventivo, 08/10/2026), riletto a mano sul sorgente.** Il conto torna:
 `PurpleReactionCore(true, 1.10000, 1.10020, 0.0010, false)` = `|0,0002| <= 0,0015` -> `true` -> `eLargo=true` ->
-`aEA=false` -> B) stampa `*** FAIL ***` e il verdetto d'insieme (r.~754 di `ABTG_Bulge.mq5`) stampa *"la condizione del
+`aEA=false` -> B) stampa `*** FAIL ***` e il verdetto d'insieme (r.764-765 di `ABTG_Bulge.mq5`; qui c'era "r.~754", che e' `r92EaS`: riga corretta dal lettore indipendente 08/10) stampa *"la condizione del
 VIOLA non si comporta come atteso: NON mettere in campo"*. La riga e' entrata con `c4426c53` (21/08, v5.20) e da allora
 il sorgente non e' cambiato; il binario della sedia Bulge della trial (magic 772720) e' dichiarato `c4426c53`
 (`report/NFP_2026-10-02_SEDIE_TRIAL.md` r.128). **Effetto sul trading: nessuno** (l'autotest stampa e basta, nessun

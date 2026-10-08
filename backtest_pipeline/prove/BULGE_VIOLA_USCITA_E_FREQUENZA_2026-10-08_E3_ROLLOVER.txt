@@ -23,13 +23,17 @@
 #  server time'; e https://www.mql5.com/en/docs/runtime/testing, 'Simulation of Time in the Strategy Tester'). Quindi la lista qui sotto e' in ORA SERVER del tester.
 #  L'ORA SERVER NON E' UN FUSO FISSO SULLA FINESTRA (classe 762; report/OROLOGIO_BCM_2026-09-24.md par. 3.1): lo storico FOREX BCM fino a fine dic-2024 e' sul
 #  VECCHIO orologio (UTC+0 d'inverno, UTC+1 d'estate = ora di LONDRA), dal 2025 e' UTC+1 FISSO. Le ore server bloccate sono quindi le stesse ore di Londra in
-#  tutto l'IS 2010-2021, nell'OOS 2022-2024 e nelle estati 2025-2026; negli inverni gen-mar 2025 e fine ott 2025-mar 2026 (~8 mesi sui 54 dell'OOS) la
+#  tutto l'IS 2010-2021 (2010-2014 ESTRAPOLATO: OROLOGIO_BCM misura dagli inverni 2014/15; lettore 08/10), nell'OOS 2022-2024 e nelle estati 2025-2026; negli inverni gen-mar 2025 e fine ott 2025-mar 2026 (~8 mesi sui 54 dell'OOS) la
 #  fascia cade un'ora PRIMA rispetto a Londra. L'equivalenza in UTC del titolo vale SOLO per l'orologio di oggi (estate 2026).
 #  IN CAMPO TimeGMT() e' UTC vero: un preset con la stessa lista farebbe un'altra fascia. Va tradotto, e la traduzione cambia con la stagione (per
 #  bloccare le stesse ore di Londra che il backtest 2010-2024 ha bloccato: lista server -1 d'estate, invariata d'inverno). Non e' una proposta di filtro.
 #  CHIUSURA EMPIRICA senza codice nuovo (in piu' della documentazione): una passata SINGOLA della cella Use_News_Filter=1 su una finestra corta dell'estate
 #  2026; nel rapporto del tester (scheda Affari, ora server) ZERO ingressi alle ore della lista. CONTRO-ESEMPIO: se TimeGMT fosse UTC (server -1), la lista
 #  bloccherebbe le ore server +1: comparirebbero ingressi alle 22 e nessuno alle 00. Le due attese sono disgiunte.
+#  LETTORE INDIPENDENTE 08/10 (classe 178): disgiunte SOLO se all'ora discriminante cadono ingressi. Nel pool VIOLA (81 posizioni) le ore
+#  discriminanti pesano 2 su 81 (ora 22) e 2 su 81 (ora 00): una finestra di poche settimane da' ZERO contro ZERO anche sotto l'alternativa
+#  e conferma il falso. La finestra si dimensiona PRIMA: giorni >= 5 / (quota oraria x ingressi VIOLA al giorno), su un tratto tutto a
+#  UTC+1 (es. estate 2025, 2025.04.01-2025.10.24); se non si arriva a 5 attesi, la chiusura si fa su E2 (ora 08 = 5 su 81) o con la copia di banco.
 #  Finche' la chiusura empirica non c'e', la fascia e' DOCUMENTATA, non MISURATA sul nostro tester.  NIENTE FILTRO ORARIO PER SESSIONE ESISTE FRA GLI INPUT: News_Block_Hours e' l'unico modo (lista di ore); una fascia fissa o per classe
 #  di cross e' CODICE NUOVO = firma di Claudio.
 #  Fascia fissata A PRIORI (08/10, sulla struttura dei mercati; sim_bulge_viola_orario.py): F6. Ora che conta = ora d'ingresso; con Signal_Bar_Offset=1 la barra di
@@ -40,7 +44,9 @@
 #  CANCELLO 08/10 -- COSA E3 PUO' MISURARE A MODELLO 1: nel tester lo spread "non e' modellato ma preso dallo storico" (doc MQL5 'Simulation of spread'),
 #  cioe' dal campo spread delle barre M1; se quel campo registri il picco delle 22 visto dal logger e' [NON MISURATO]. Quindi E3 a Modello 1 misura la
 #  QUALITA' dei segnali a quell'ora, non il COSTO del rollover: il costo lo misurano solo i tick reali. Il rollover (17:00 New York) cade alle 22 server
-#  sul vecchio orologio e d'estate dal 2025, alle 23 server negli inverni 2025-26: la lista 22,23 copre tutti e due.
+#  sul vecchio orologio e d'estate dal 2025, alle 23 server negli inverni 2025-26: la lista 22,23 copre tutti e due,
+#  TRANNE le ~3-4 settimane l'anno del vecchio orologio (2010-2024) in cui New York e' gia' o ancora in ora legale e Londra no (marzo e
+#  fine ottobre-inizio novembre): li' 17:00 NY = 21:00 UTC = ore 21 server, fuori lista [DERIVATO dal calendario; lettore 08/10].
 #  La cella Use_News_Filter=0 e' una replica di A: controllo G1 gratuito. QUOTA TRATTENUTA = Trades(1)/Trades(0); FRONTIERA = quota contro delta PF; decide Claudio.
 #  CRITERIO DI PICCO: una fascia e' un EFFETTO solo se il segno regge in IS e OOS e nelle due meta' dell'OOS; 6 fasce guardate = soglia p 0,05/6 sul nullo 'k posizioni a caso'.
 #  CANCELLO 08/10 (K1, classe 41): tutte le celle di questo file hanno lo STESSO magic, quindi il per-trade abtg_trades_*_<magic>_violaEA.csv

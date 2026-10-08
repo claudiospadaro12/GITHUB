@@ -20,12 +20,16 @@
 #  e porta lo SL del residuo a pari (entrata).  A 0,25 R scatta su ~28-35% delle posizioni, a 0,50 R su ~3-6%. CORRETTO DAL CANCELLO 08/10: qui c'era
 #  "~45% (vincite con r >= 0,25)" e "~7%": ricontato su trades_auto.csv, 23 posizioni VIOLA su 83 chiudono con r >= 0,25 (28%; 20 su 78 per segnale),
 #  piu' le perdite che hanno toccato 0,25 R prima dello stop (banda M5, limite superiore) -> ~35%; a 0,50 R: 2 vincite su 83 + 2 perdite = ~5%.
+#  RICORRETTO DAL LETTORE INDIPENDENTE 08/10 (file A, L1): quelli sono PAVIMENTI. UpdateAllTP (r.1922-1964) sposta il TP verso l'entrata a ogni tick,
+#  quindi l'r finale di una vincita e' il MINIMO della sua escursione. Forchetta (r di prezzo, come curR r.1594): 0,25 R -> 30-67% (pool BCM 81) /
+#  37-74% (trial, 15 cross di questo preset); 0,50 R -> 2,5-38% (pool, tetto di banda) / 5-16% (trial, tetto dal TP iniziale). Il "~45%" dell'autore
+#  sta dentro. L'attesa "A 0,50 quasi inerte" regge solo se il trigger e' vicino al pavimento: con il tetto del trial (16%) non e' inerte.
 #  ATTESA: POSIZIONI(cella)/POSIZIONI(A) 0,95-1,05. A 0,50: |delta PF| < 3% (quasi inerte). A 0,25: delta PF -10%..+5%; commissione +1% di R sulla meta' chiusa.
-#  CANCELLO 08/10 (K2, classe 454): Trades del CSV = deal di USCITA = posizioni + parziali: atteso Trades(cella)/Trades(A) ~ +25..+40% a 0,25 R e +2..+8% a
-#  0,50 R, e NON e' frequenza. Le POSIZIONI si contano solo nel file di conferma (position_id distinti del per-trade). Effetti sul kill switch, dal sorgente
+#  CANCELLO 08/10 (K2, classe 454): Trades del CSV = deal di USCITA = posizioni + parziali: atteso Trades(cella)/Trades(A) ~ +30..+75% a 0,25 R e +2..+16% a
+#  0,50 R (lettore 08/10; era +25..+40% e +2..+8%, costruito sul pavimento), e NON e' frequenza. Le POSIZIONI si contano solo nel file di conferma (position_id distinti del per-trade). Effetti sul kill switch, dal sorgente
 #  (KillSwitchEvaluate r.965-1023): il deal del parziale ha profitto > 0 e AZZERA la serie di SL consecutivi (r.999-1001); il residuo chiuso a pari (offset 0,
 #  netto < 0 per la commissione, DEAL_REASON_SL) conta come SL (r.993). Quindi la stessa posizione vale "una vincita + uno stop" per Max_SL_PerDay.
-#  CONTROLLO DEL PARZIALE (nel file di conferma): posizioni con DUE righe di uscita nel per-trade = parziali eseguiti, attese ~28-35% a 0,25 R.
+#  CONTROLLO DEL PARZIALE (nel file di conferma): posizioni con DUE righe di uscita nel per-trade = parziali eseguiti, attese ~30-75% a 0,25 R (lettore 08/10).
 #  Se sono ~0 la cella non si legge: o lo STOPS_LEVEL ha impedito il pari e il parziale, o la GlobalVariable PartialDoneKey (r.1589-1592, mai cancellata)
 #  e' sopravvissuta da una passata precedente sullo stesso agente con lo stesso ticket [NON VERIFICATO: la documentazione del tester dice che le
 #  GlobalVariable sono emulate nell'agente, non dice se si azzerano a ogni passata].
