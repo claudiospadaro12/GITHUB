@@ -46,3 +46,9 @@ Domanda: per il VIOLA il riferimento e' "ogni tocco dopo un impulso" (com'e' ora
 - **Difetto vecchio in `ABTG_Bulge.mq5` (in campo)**: autotest B) stampa FAIL a ogni avvio dal 21/08 (caso di prova sbagliato di 10x), nessun effetto sul trading. Correggerlo = decisione di Claudio (EA vivo).
 - **Pacchetto Gemini #2**: `docs/PER_GEMINI_BULGE_VIOLA_2026-10-08.md` scritto, senza numeri di conto; **non inviato finche' il cancello non da' PASS**.
 - **Attese da Claudio**: zip NATCLA_F0_A; 5 domande Azzurra + candela di test; si/no correzione autotest Bulge; firma telemetria `ABTG_Bulge_Telemetria`.
+
+### F-ter. Gemini #2 sul Bulge VIOLA: INVIATO e verificato (notte 08/10)
+- Pacchetto `docs/PER_GEMINI_BULGE_VIOLA_2026-10-08.md` passato da **8 letture indipendenti** (ognuna ha trovato e corretto qualcosa: la 6a un ordine contraddittorio fra pacchetto e memoria sui "3 conti", la 8a la riga d'invio senza protocollo). Inviato con 4 documenti, 56.529 car., nessun numero di conto. Risposta: `docs/gemini/RISPOSTA_GEMINI_2026-10-08_2155.md`; verifica col cancello: `docs/RISPOSTA_A_GEMINI_BULGE_VIOLA_2026-10-08.md` (commit 571dbd0e, FAIL corretto; **manca il lettore indipendente delle correzioni del cancello**).
+- Esito: C-1 giusto (pareggio 78,9%, osservato 72,9%, sotto di 6,0 punti). A1/A2 gia' nostre (V5, time-stop 6 h). Nessuna proposta eseguita, nessun criterio cambiato.
+- **Idee che meritano una misura** (tutte dopo M1/telemetria, firma Q4 di Claudio): I-1 correlazione media del cesto a 24 h al segnale (sonda 5-15 min, 0 passate; campo = firma Q1); I-2 test non monotono (terzili di volatilita') nel rerun di `sim_bulge_viola_simboli.py`; I-3 ATR(H1)/ATR(D1) (bassa priorita'); I-4 secondo seme.
+- Nota dati: `trades_auto.csv` e' cresciuto dopo il taglio 07/10 (oggi pool 90, F2 n 16, -0,432, p 0,004; campione vergine F2 -0,018 su n 6): i numeri del pacchetto si riproducono solo col taglio dichiarato.
