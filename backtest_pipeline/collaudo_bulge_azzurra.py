@@ -249,7 +249,7 @@ def controlla_zone(old, new, bag, quiet=False):
                 break
         if dove is None:
             check(False, "blocco del diff FUORI dalle zone dichiarate: righe ABTG_Bulge %d-%d (%s) -> %r"
-                  % (i1 + 1, i2, tag, "\n".join(new_lines[j1:j2])[:160]), bag)
+                  % (i1 + 1, i2, tag, "\n".join(new_lines[j1:j2])[:160]), bag, quiet=quiet)
         else:
             usate[dove] = usate.get(dove, 0) + 1
     for k, (nome, s, e) in enumerate(zone):
@@ -370,7 +370,7 @@ def statico(raw, old, bag, quiet=False):
         n = len(re.findall(r"%(?!%)[-+ 0#]*\d*(?:\.\d+)?[sdifgeExXcu]", fmt.replace("%%", "")))
         nfmt += 1
         if n != len(args) - 1:
-            check(False, "PrintFormat riga %d: %d segnaposto, %d argomenti" % (src[:i].count("\n") + 1, n, len(args) - 1), bag)
+            check(False, "PrintFormat riga %d: %d segnaposto, %d argomenti" % (src[:i].count("\n") + 1, n, len(args) - 1), bag, quiet=quiet)
     check(nfmt >= 15, "PrintFormat/StringFormat controllati: %d" % nfmt, bag, quiet=quiet)
     # contatore e CSV
     pc = fn.get("PrintContaSegnali", "")
@@ -879,7 +879,7 @@ def casi_puri(cx, bag, quiet=False):
     txt0 += "AUTOTEST\nAUTOB\n"
     out = cx.run(txt0)
     if out is None:
-        check(False, "driver C++ dei casi puri uscito con errore", bag)
+        check(False, "driver C++ dei casi puri uscito con errore", bag, quiet=quiet)
         return
     out = [x for x in out if x != ""]
     k = 0
@@ -926,7 +926,7 @@ def scenari(cx_new, cx_old, bag, quiet=False, ridotto=False):
     txt = "".join(c.riga() + w.riga(nome) for nome, c, w, _ in sc)
     out = cx_new.run(txt)
     if out is None:
-        check(False, "CheckSignal AZZURRA (C++) uscita con errore sugli scenari a mano", bag)
+        check(False, "CheckSignal AZZURRA (C++) uscita con errore sugli scenari a mano", bag, quiet=quiet)
         return
     res = parse_ordini(out)
     check("__OOR__" not in res, "nessun indice fuori dagli array negli scenari a mano", bag, quiet=quiet)
@@ -959,7 +959,7 @@ def scenari(cx_new, cx_old, bag, quiet=False, ridotto=False):
         r_new = cx_new.run(cv.riga() + body)
         r_old = cx_old.run(old_c.riga() + body)
         if r_new is None or r_old is None:
-            check(False, "differenziale cfg %d: un driver e' uscito con errore" % ci, bag)
+            check(False, "differenziale cfg %d: un driver e' uscito con errore" % ci, bag, quiet=quiet)
             continue
         pn, po = parse_ordini(r_new), parse_ordini(r_old)
         # il commento di ABTG_Bulge nel driver e' quello della shim ("BULGE_AZZURRA"): stesso prefisso per tutti e due
@@ -987,7 +987,7 @@ def scenari(cx_new, cx_old, bag, quiet=False, ridotto=False):
         body = "".join(w.riga("p%d_%d" % (ci, i)) for i, w in enumerate(wins))
         r = cx_new.run(c.riga() + body)
         if r is None:
-            check(False, "specchio cfg %d: driver uscito con errore" % ci, bag)
+            check(False, "specchio cfg %d: driver uscito con errore" % ci, bag, quiet=quiet)
             continue
         pr = parse_ordini(r)
         for i, w in enumerate(wins):
@@ -997,7 +997,7 @@ def scenari(cx_new, cx_old, bag, quiet=False, ridotto=False):
                 tot[o[0]] += 1
             if got != att:
                 disaccordi += 1
-                if disaccordi <= 3:
+                if disaccordi <= 3 and not quiet:
                     print("        disaccordo cfg %d finestra %d: C++ %s / Python %s" % (ci, i, got, att))
     check(disaccordi == 0, "specchio Python indipendente == CheckSignal VERA su %d finestre x 7 configurazioni (disaccordi %d)"
           % (len(wins), disaccordi), bag, quiet=quiet)

@@ -914,8 +914,8 @@ void AutoTestBulge()
    bool oOrd  = AzureOrderedRetrace(azH,  azL, 0, 4, 0.0010, 1.5);   // atteso true (impulso fuori finestra)
    bool oDis  = AzureOrderedRetrace(azHx, azL, 0, 4, 0.0010, 1.5);   // atteso false
    bool oOff  = AzureOrderedRetrace(azHx, azL, 0, 4, 0.0010, 0.0);   // atteso true (controllo spento)
-   bool rOk   = PurpleReactionCore(true, 1.10000, 1.10005, 0.0010, false);   // corpo 5 pip: non impulsiva
-   bool rImp  = PurpleReactionCore(true, 1.10000, 1.10200, 0.0010, false);   // corpo 200 pip: impulsiva
+   bool rOk   = PurpleReactionCore(true, 1.10000, 1.10005, 0.0010, false);   // corpo 0,00005 <= 0,0015: non impulsiva
+   bool rImp  = PurpleReactionCore(true, 1.10000, 1.10200, 0.0010, false);   // corpo 0,0020 > 0,0015: impulsiva
    //                         lato  rUp rDn midUp midDn oppUp oppDn lowCnf  highCnf bbLow   bbUp    ordUp ordDn reaz  lb  primo
    bool aLong   = AzureCore(true,  5, -1, true, false, false, false, 1.0990, 1.1010, 1.0995, 1.1100, oOrd, true, rOk,  20, false);
    bool aShort  = AzureCore(false,-1,  5, false,true,  false, false, 1.1050, 1.1105, 1.0900, 1.1100, true, oOrd, rOk,  20, false);
