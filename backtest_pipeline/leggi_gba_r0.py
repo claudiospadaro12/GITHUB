@@ -42,6 +42,7 @@ PF_TRANCHE = 1.3            # S4: PF_V > 1,3 in almeno 2 tranche su 3
 TOP1_FRAGILE = 0.25         # S5
 TOP_N_FRAGILE = 5           # S5
 TETTO_BARRE = 100000
+DEPOSITO_ATTESO = 1000000.0  # v3 del driver (Deposit=1000000): se il report dice altro, il .ini non e' stato applicato come dichiarato -> DA GUARDARE
 FASCE = [(0, 7, "asia"), (7, 12, "europa"), (12, 14, "pausa"), (14, 17, "USA apertura"), (17, 22, "USA pomeriggio"), (22, 24, "rollover")]
 # attese E1 (proxy del 09/10, banda 0,5x-2x): n della cella REPL per tranche
 ATTESA_N_REPL = {"T1": (60, 260), "T2": (125, 500), "T3": (350, 1400)}
@@ -138,6 +139,7 @@ def leggi_report(raw):
     r["trades"] = numero(_cella(piatto, ["Numero di Operazioni di Trading Totali", "Total Trades"]))
     r["profitto"] = numero(_cella(piatto, ["Profitto Totale Netto", "Total Net Profit"]))
     r["pf"] = numero(_cella(piatto, ["Fattore di Profitto", "Profit Factor"]))
+    r["deposito"] = numero(_cella(piatto, ["Deposito Iniziale", "Initial Deposit"]))
     r["dd_eq_abs"], r["dd_eq_pct"] = _dd(_cella(piatto, ["Equit. Drawdown Massima", "Equity Drawdown Maximal"]))
     r["dd_bil_abs"], r["dd_bil_pct"] = _dd(_cella(piatto, ["Bilancio Drawdown Massimo", "Balance Drawdown Maximal"]))
     # i deal: righe <tr> con 13 celle, la prima e' una data e la seconda un intero
@@ -185,7 +187,10 @@ RE_CONTA = re.compile(r"^\[GBA-CONTA\] (?P<quando>\w+) \| segnali (?P<seg>[0-9]+
 
 
 def leggi_log(testo):
-    out = {"segnali": [], "ingressi": [], "conta_fine": None, "tester": [], "righe": 0}
+    # "anomalie": le righe dell'EA che cambiano n o l'USCITA senza far cadere la passata (ordini saltati, errori d'ordine, errori di gestione: trailing/tempo).
+    # Il driver v3 ne conta solo una parte nella testa del log; qui si contano tutte e si stampano nel punto (1). Limite: il driver deduplica per
+    # (ora simulata + primi 70 caratteri), quindi errori ripetuti nello stesso secondo simulato contano UNA volta: e' un minimo, non un totale.
+    out = {"segnali": [], "ingressi": [], "conta_fine": None, "tester": [], "righe": 0, "anomalie": {}}
     for riga in testo.splitlines():
         riga = riga.rstrip()
         if not riga:
@@ -199,6 +204,21 @@ def leggi_log(testo):
         out["righe"] += 1
         st, msg = m.group(1), m.group(2)
         t = datetime.datetime.strptime(st, "%Y.%m.%d %H:%M:%S")
+        ka = None
+        if msg.startswith("[GBA] MARGINE INSUFFICIENTE"):
+            ka = "margine insufficiente (ingresso saltato)"
+        elif msg.startswith("[GBA] ERRORE ordine"):
+            ka = "errore d'ordine (ingresso non eseguito)"
+        elif msg.startswith("[GBA] ERRORE spostamento SL"):
+            ka = "errore spostamento SL (trailing/BE non applicato)"
+        elif msg.startswith("[GBA] ERRORE chiusura a tempo"):
+            ka = "errore chiusura a tempo"
+        elif "ordine saltato" in msg:
+            ka = "altro ingresso saltato (" + re.sub(r"[0-9.]+", "#", msg[6:].split(" -- ")[0])[:50].strip() + ")"
+        elif msg.startswith("[GBA] ERRORE"):
+            ka = "altro errore (" + re.sub(r"[0-9.]+", "#", msg[6:46]).strip() + ")"
+        if ka:
+            out["anomalie"][ka] = out["anomalie"].get(ka, 0) + 1
         ms = RE_SEG.match(msg)
         if ms:
             d = ms.groupdict()
@@ -440,6 +460,13 @@ def stampa(passate, csv_out=None):
         W("  %-34s modello %s  stato driver %-22s G0 %s" % (P["tag"], r["modello"], r["stato"], stato))
         for m in P["g0"]:
             W("       - " + m)
+        # DA GUARDARE (non G0: a lotto fisso non cambiano i numeri da soli, ma dicono che la passata non e' quella dichiarata o che n/uscite sono state toccate)
+        dep = P["rep"].get("deposito") if P["rep"] else None
+        if dep is not None and abs(dep - DEPOSITO_ATTESO) > 0.5:
+            W("       ! DA GUARDARE: deposito iniziale del report %.2f invece di %.0f (Deposit= del .ini non applicato come dichiarato)" % (dep, DEPOSITO_ATTESO))
+        an = P["log"]["anomalie"] if P["log"] else {}
+        if an:
+            W("       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): " + "; ".join("%s %d" % (k, an[k]) for k in sorted(an)))
     ok = [P for P in passate if not P["g0"]]
     # G1: gemelle S0
     W("")
@@ -628,11 +655,12 @@ def stampa(passate, csv_out=None):
 # ---------------------------------------------------------------------------------------------------------------------
 #  AUTOTEST: dati finti con risposta nota + contro-esempi
 # ---------------------------------------------------------------------------------------------------------------------
-def _htm(deals, trades, profit, pf, qual="100% ticks reali", periodo="M1 (2026.07.01 - 2026.09.30)", dd="1 000.00 (1.00%)"):
+def _htm(deals, trades, profit, pf, qual="100% ticks reali", periodo="M1 (2026.07.01 - 2026.09.30)", dd="1 000.00 (1.00%)", deposito="1 000 000.00"):
     """Un report finto nel formato vero (UTF-16, righe <tr> da 13 celle)."""
     def row(c):
         return "<tr>" + "".join("<td>%s</td>" % x for x in c) + "</tr>\n"
     h = "<html><body><table>\n"
+    h += "<tr><td colspan=3>Deposito Iniziale:</td><td colspan=10><b>%s</b></td></tr>\n" % deposito
     h += "<tr><td colspan=3>Expert:</td><td colspan=10><b>ABTG_GoldBreakoutATR</b></td></tr>\n"
     h += "<tr><td colspan=3>Simbolo:</td><td colspan=10><b>XAUUSD</b></td></tr>\n"
     h += "<tr><td colspan=3>Periodo:</td><td colspan=10><b>%s</b></td></tr>\n" % periodo
@@ -792,7 +820,20 @@ def autotest():
     with contextlib.redirect_stdout(io.StringIO()):
         out3, _t3 = stampa(carica([tmp3]), None)
     ck("CONTRO-ESEMPIO qualita': 90% ticks reali in una passata a Modello 1 NON e' un errore (la qualita' conta solo a Modello 4)", True)
-    for pth in (tmp, tmp2, tmp3):
+    # --- 7. (v3) deposito a 7 cifre e anomalie del giornale: risposta nota + contro-esempio
+    rd = leggi_report(_htm(deals, 2, "-1 234 567.89", "2.00", dd="76 123.45 (7.61%)"))
+    ck("report v3: deposito '1 000 000.00' = 1000000, profitto a 7 cifre e DD '76 123.45 (7.61%)' letti", rd["deposito"] == 1000000.0 and rd["profitto"] == -1234567.89 and rd["dd_bil_abs"] == 76123.45 and rd["dd_bil_pct"] == 7.61, str((rd["deposito"], rd["profitto"], rd["dd_bil_abs"])))
+    rd2 = leggi_report(_htm(deals, 2, "1\u00a0000.00", "2.00", deposito="1\u00a0000\u00a0000.00"))
+    ck("report v3: separatore delle migliaia NBSP", rd2["deposito"] == 1000000.0 and rd2["profitto"] == 1000.0)
+    tmp4 = _zip_finto(deposito="100 000.00", righe_extra=["2026.07.03 10:00:01   [GBA] ERRORE spostamento SL ticket 7 a 4001.00: retcode 10016 (Invalid stops)",
+                                                           "2026.07.03 10:00:02   [GBA] SL 4000.00 troppo vicino (stops level 0.50) -- ordine saltato"])
+    with contextlib.redirect_stdout(io.StringIO()):
+        out4, _t4 = stampa(carica([tmp4]), None)
+    t4 = "\n".join(out4)
+    ck("CONTRO-ESEMPIO deposito: report a 100 000.00 -> DA GUARDARE (Deposit= non applicato)", "deposito iniziale del report 100000.00 invece di 1000000" in t4)
+    ck("CONTRO-ESEMPIO giornale: errore di trailing e SL troppo vicino -> contati e stampati", "errore spostamento SL (trailing/BE non applicato) 1" in t4 and "altro ingresso saltato (SL # troppo vicino (stops level #)) 1" in t4, [x for x in out4 if "DA GUARDARE (giornale" in x][:1])
+    ck("pulito: report a 1 000 000.00 e giornale senza anomalie -> nessun DA GUARDARE", "DA GUARDARE" not in testo)
+    for pth in (tmp, tmp2, tmp3, tmp4):
         try:
             os.remove(pth)
         except OSError:
@@ -805,7 +846,7 @@ def autotest():
     return 0
 
 
-def _zip_finto(gemelle_diverse=False, qualita_cattiva=False):
+def _zip_finto(gemelle_diverse=False, qualita_cattiva=False, deposito="1 000 000.00", righe_extra=()):
     import tempfile
     tr = []
     base = datetime.datetime(2026, 7, 1, 1, 0, 0)
@@ -822,9 +863,9 @@ def _zip_finto(gemelle_diverse=False, qualita_cattiva=False):
         tag = "S0_0%d_REPL_T1_m%s" % (1 if mg == "775800" else 2, mg)
         prof = sum(nets) + (5.0 if (gemelle_diverse and mg == "775850") else 0.0)
         ddl = list(dd)
-        rep = _htm(ddl, 40, _fmt(prof), "%.2f" % pf_di(nets), qual="n/a" if not qualita_cattiva else "90% ticks reali")
+        rep = _htm(ddl, 40, _fmt(prof), "%.2f" % pf_di(nets), qual="n/a" if not qualita_cattiva else "90% ticks reali", deposito=deposito)
         z.writestr("report\\GBA_R0_" + tag + ".htm", rep)
-        z.writestr("log\\GBA_" + tag + ".txt", "\r\n".join(["# passata finta"] + lg))
+        z.writestr("log\\GBA_" + tag + ".txt", "\r\n".join(["# passata finta"] + lg + list(righe_extra)))
         righe.append("S0;%s;REPL;0.05;T1;2026.07.01;2026.09.30;1;%s;2026-10-09 10:00:00;60;OK;40;%s;%.2f;n/a;88000;;88000;350000;;100;40;si;si;2026.07.01-2026.09.30;" % (tag, mg, prof, pf_di(nets)))
     z.writestr("MANIFEST_R0.csv", _manifest(righe))
     z.close()
