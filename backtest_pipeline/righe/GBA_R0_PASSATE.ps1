@@ -566,8 +566,8 @@ foreach($ru in $runs){
     if($m3.StartsWith('[GBA] AVVIO v')){ $avvioRighe = $avvioRighe + 1 }
     if($m3 -match '^\[GBA\] (AVVIO|SEGNALE|SPREAD|LATI|USCITE|BREAKEVEN|ESECUZIONE|RISCHIO|IDENTITA)'){ $testoAvvio = $testoAvvio + $m3 + "`n" }
     if($reIngresso.IsMatch($m3)){ $nIngr = $nIngr + 1 }
-    if($m3 -like '*[[]GBA][[]AUTOTEST] VERDETTO: PASS*'){ $autoPass = $autoPass + 1 }
-    if($m3 -like '*[[]GBA][[]AUTOTEST]*FAIL*'){ $autoFail = $autoFail + 1 }
+    if($m3.IndexOf('[GBA][AUTOTEST] VERDETTO: PASS', [StringComparison]::Ordinal) -ge 0){ $autoPass = $autoPass + 1 }
+    if($m3.IndexOf('[GBA][AUTOTEST]', [StringComparison]::Ordinal) -ge 0 -and $m3.IndexOf('FAIL', [StringComparison]::Ordinal) -ge 0){ $autoFail = $autoFail + 1 }
     if($m3.StartsWith('[GBA-CONTA] FINE')){ $contaFine = $contaFine + 1 }
   }
   $avvioOk = 'no'
