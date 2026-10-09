@@ -78,6 +78,7 @@ _Regola di aggiornamento: ogni trascrizione nuova passa da `analista-trascrizion
 | `POST_EMILIANO_2026-10-05_UPDATE_OPERATIVO.txt` | lun 05/10 ore 11:03 IT | **C** | post della community (Circle): "DAX LONG sul Supertrend ... +1.300 EUR", EURUSD short; dichiarazione esterna non verificata | [LETTO] |
 | `LIVE_PAOLO_2026-10-06.txt` | mar 06/10 sera | **C** | ripasso mercati americani + ORB troppo largo + lezione 01 "Introduzione al Forex" per i nuovi | [LETTO] r.61 |
 | `LIVE_EMILIANO_2026-10-07.txt` | mer 07/10 mattina | **C** | l'allievo Luca apre con l'analisi, Emiliano commenta e opera: retest con stessa size, short sul VWAP/tondo, oro, ORB | [LETTO] |
+| `docs/live_emiliano/LIVE_EMILIANO_2026-10-09.txt` (**fuori** da `data/trascrizioni/`) | ven 09/10 mattina | **C** (settimana 2) | logistica nuova area (r.1-77); GBA "+25k" (r.79); EURUSD short, DAX short con retest dei minimi della notte, regola W/D; **loop STT a r.255** + Riccardo (BCM Tech: bonus, commissioni); oro e **descrizione dell'EA GBA** (r.287) | [LETTO] r.1-286; ciclo [INFERITO] dalla data. Scheda: §2.7 e `report/LIVE_EMILIANO_SCHEDA_2026-10-09.md` |
 
 ### 2.3 Tutto il corpus per ciclo (date; "grezza" = trascrizione nel repo, "analisi" = solo analisi)
 
@@ -85,7 +86,7 @@ _Regola di aggiornamento: ogni trascrizione nuova passa da `analista-trascrizion
 |---|---|---|
 | **A** (apr-giu, [INFERITO]) | grezze `docs/live_emiliano/`: 08/04, 10/04 (anche in `trascrizioni/`), 13/04, 15/04, 17/04, 19/04, 20/04, 22/04, 24/04, 27/04, 04/05, 06/05, 08/05, 11/05, 13/05. Analisi: `report/ANALISI_LIVE_EMILIANO_2026-04-10.md`, `docs/live_emiliano/ANALISI_LIVE_storico.md` | grezze `docs/live_paolo/`: 28/04, 30/04 (file chiamato "30.01.26"), 05/05, 07/05, 12/05 |
 | **B** (lug-30/09, [INFERITO]) | grezze: 17/07, 31/07 (solo saluti), 03/08, 31/08, 07/09, 09/09, 14/09, 16/09, 18/09, 25/09, 28/09, 30/09 (`data/trascrizioni/`). Solo analisi: 20/07, 26/07, 27/07, 29/07 (FOMC e mattina), 24/08, 27/08, 28/08. Analisi nel repo: `report/ANALISI_LIVE_EMILIANO_2026-07-17/09-09/09-18/09-28.md`; `docs/live_emiliano/ANALISI_LIVE_luglio.md`, `RILETTURA_LIVE_05-08.md`; `backtest_pipeline/caccia_strategie/ANALISI_LIVE_EMILIANO_2026-08-24.md`, `ANALISI_TRASCRIZIONI_2026-09-14.md` e `-09-25.md`; `backtest_pipeline/risultati_archivio/ANALISI_LIVE_EMILIANO_2026-08-27/08-28/08-31/09-07.md` (queste ultime **non lette da me**) | grezze: 30/07, 03/09 (`docs/live_paolo/`), 25/08 (`backtest_pipeline/caccia_strategie/trascrizioni_2026-08-18/LIVE_PAOLO_2026-08-25.txt`). Solo analisi/scheda: 28/07, 27/08, 08/09, 22/09 (`LIVE_PAOLO_2026-09-22_SCHEDA.md`), 29/09 (`ANALISI_LIVE_PAOLO_2026-09-29.md`) |
-| **C** (dal 01/10) | 02/10, 05/10, POST 05/10, 07/10 (`data/trascrizioni/`) | 01/10, 06/10 (`data/trascrizioni/`) |
+| **C** (dal 01/10) | 02/10, 05/10, POST 05/10, 07/10 (`data/trascrizioni/`), **09/10** (`docs/live_emiliano/`) | 01/10, 06/10 (`data/trascrizioni/`) |
 
 ### 2.4 Le BASI che si ripetono a ogni ciclo (non sono novita': non leggerle come tali)
 
