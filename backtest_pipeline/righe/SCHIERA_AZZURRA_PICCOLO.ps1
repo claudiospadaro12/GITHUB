@@ -49,6 +49,11 @@
 #    - il preset dal -Pin della riga.
 #  Se un byte non torna, FERMO prima di scrivere.
 #
+#  USCITA: 0 = i due file sono al loro posto e gli include per F7 ci
+#  sono; 2 = i due file sono al loro posto MA l include del Guardian o
+#  Trade.mqh non tornano (F7 dara errori: non attaccare); 1 = FERMO
+#  (nessuna scrittura, salvo quanto dichiarato nel referto).
+#
 #  ASCII PURO: niente emoji, niente accentate (PS 5.1 legge i .ps1 come
 #  ANSI -- regola di casa del 17/08). Solo parametri [string]: tutti
 #  sopravvivono a powershell -File.
@@ -420,16 +425,23 @@ try {
     if($r -match '^\s*(InpMagic|InpComment|Risk_Mode|Risk_Percent|Max_Trades|Use_Azure|Use_Orange|Use_Blue|Use_Purple|Use_Kill_Switch|Max_SL_PerDay|Max_Consecutive_SL|Max_Daily_Loss_Pct|InpUsaGuardian|InpAutoTest|Symbols_List)\s*='){ Dillo ('      ' + $r.Trim()) $null }
   }
   Dillo '' $null
+  $nCop = $SCRITTO.Count
+  $nGia = @($DA_COPIARE | Where-Object { $_.Stato -eq 'GIA IDENTICO' }).Count
   if($tuttoBene){
-    Dillo ' ESITO: TUTTO COPIATO E VERIFICATO. Ora i passi A MANO di report/AZZURRA_PICCOLO_PASSI_2026-10-09.md:' 'Green'
-    Dillo ('        F7 nel MetaEditor del terminale ' + $CONTO + ' -> 0 errori -> UN grafico -> preset. Algo Trading globale NON si tocca.') 'Green'
-    if(-not ($incOk -and $tmOk)){ Dillo ' MA: gli include del passo 4 non tornano: F7 dara errori. NON attaccare, riporta gli errori.' 'Yellow' }
+    Dillo (' ESITO: I DUE FILE SONO AL LORO POSTO E VERIFICATI (copiati adesso: ' + $nCop + ', gia identici e non toccati: ' + $nGia + ').') 'Green'
+    if($incOk -and $tmOk){
+      Dillo ('        Ora i passi A MANO di report/AZZURRA_PICCOLO_PASSI_2026-10-09.md: F7 nel MetaEditor del terminale ' + $CONTO + ' -> 0 errori -> UN grafico -> preset. Algo Trading globale NON si tocca.') 'Green'
+    } else {
+      Dillo ' MA: gli include del passo 4 NON tornano: F7 dara errori. NON attaccare niente, manda lo zip (uscita 2).' 'Yellow'
+    }
   } else {
     Dillo ' ESITO: QUALCOSA NON TORNA (righe rosse sopra). NON premere F7 finche non e chiaro.' 'Red'
   }
   Dillo ' Questa riga NON ha compilato, NON ha attaccato EA, NON ha toccato Algo Trading ne processi.' $null
   Dillo ' Sul piccolo NON gira nessun Guardian: InpUsaGuardian=true e fail-open (nessuna pausa B1, nessun cap C1).' 'Yellow'
-  if($tuttoBene){ Chiudi 0 } else { Chiudi 1 }
+  if(-not $tuttoBene){ Chiudi 1 }
+  if(-not ($incOk -and $tmOk)){ Chiudi 2 }
+  Chiudi 0
 } catch {
   Muori ('ECCEZIONE NON PREVISTA: ' + $_.Exception.Message + ' (riga ' + $_.InvocationInfo.ScriptLineNumber + ')')
 }
