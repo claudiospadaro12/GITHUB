@@ -457,6 +457,11 @@ def statico(raw, old, bag, quiet=False):
     # costanti del percorso = spec
     for nome, val in (("TEL_M1_MINUTI", "180"), ("TEL_H1_DA", "3"), ("TEL_H1_A", "119")):
         check(re.search(r"(?m)^#define %s\s+%s\b" % (nome, val), src) is not None, "#define %s %s (spec par. 3)" % (nome, val), bag, quiet=quiet)
+    # (Cancello 09/10) exit_after_path: nessuno scenario X ha un OPENED SENZA percorso, quindi il ramo
+    # "path_fine <= 0 -> 1" e il ramo "exit_time <= 0 -> 1" si ancorano qui (mutante S26).
+    check(re.search(r"exit_after_path\s*=\s*\(g_tel\[j\]\.path_fine\s*<=\s*0\s*\|\|\s*g_tel\[j\]\.exit_time\s*<=\s*0\s*\|\|\s*"
+                    r"g_tel\[j\]\.exit_time\s*>\s*g_tel\[j\]\.path_fine\)\s*\?\s*1\s*:\s*0;", maschera(fn.get("TelScriviFine", ""))) is not None,
+          "exit_after_path = 1 se manca il percorso, se manca l'uscita o se l'uscita cade oltre il percorso", bag, quiet=quiet)
     lett = set(re.findall(r'"((?:BLOCK|SKIP)_\w+|OPENED|NON_RISOLTO|ATTESA|INVIO)"', "".join(corpi_tel)))
     check(lett <= ESITI and {"OPENED", "BLOCK_MAXTRADES", "BLOCK_HASOPEN", "BLOCK_ATR"} <= lett,
           "esiti usati = dichiarati (%s)" % sorted(lett - ESITI), bag, quiet=quiet)
@@ -677,9 +682,11 @@ double GetATR(int, int idx = 1) { if(idx < 0 || idx >= S.n) return 0.0; return S
 bool AtrOk(int) { return S.atrOk; }
 double GetBBWidthMA(int) { return S.widthMA; }
 double GetADX(int, int = 1) { return S.adx; }
-int CopyBuffer(int h, int, int, int count, Arr &a) { if(h != 303) return -1; a.v.assign(count, S.adxTel); return count; }
-int CopyBuffer(int h, int, datetime x, datetime z, Arr &a) {
-  if(h != 101 && h != 202) return -1; a.v.clear();
+// (Cancello 09/10) il BUFFER conta: 0 = ADX main / mediana BB / ATR. Prima lo shim lo ignorava e un mutante
+// "mid1 = banda superiore" (buffer 1) restava verde: ora un buffer diverso da 0 non restituisce niente.
+int CopyBuffer(int h, int buf, int, int count, Arr &a) { if(h != 303 || buf != 0) return -1; a.v.assign(count, S.adxTel); return count; }
+int CopyBuffer(int h, int buf, datetime x, datetime z, Arr &a) {
+  if((h != 101 && h != 202) || buf != 0) return -1; a.v.clear();
   for(size_t i = 0; i < S.h1.size(); i++) if(S.h1[i].time >= x && S.h1[i].time <= z && S.h1[i].time <= S.now) a.v.push_back(h == 101 ? S.h1mid[i] : S.h1atr[i]);
   return (int)a.v.size(); }
 int CopyTime(const string &, int, datetime x, datetime z, Vec<datetime> &o) { o.v.clear();
@@ -1971,6 +1978,12 @@ MUTANTI = [
     ("S22", "Max_Trades cambiato", "Max_Trades            = 4;", "Max_Trades            = 6;", 0, "S"),
     ("S23", "kill switch spento di default", "Use_Kill_Switch     = true;", "Use_Kill_Switch     = false;", 0, "S"),
     ("S24", "Signal_Bar_Offset 0 di default", "Signal_Bar_Offset = 1;", "Signal_Bar_Offset = 0;", 0, "S"),
+    # (Cancello 09/10) mutanti ciechi del cancello: G05/G06 erano VERDI sul collaudo dell'autore
+    ("L45", "mid1 = banda superiore (buffer 1)", "   int nM = CopyBuffer(g_hBands[idx], 0, hA, hB, hMid);",
+     "   int nM = CopyBuffer(g_hBands[idx], 1, hA, hB, hMid);", 0, "L"),
+    ("L46", "colonna adx = +DI (buffer 1)", "   if(CopyBuffer(h, 0, g_sigOff, 1, a) < 1) return -1.0;",
+     "   if(CopyBuffer(h, 1, g_sigOff, 1, a) < 1) return -1.0;", 0, "L"),
+    ("S26", "exit_after_path 0 se il percorso manca", "(g_tel[j].path_fine <= 0 || ", "(false || ", 0, "S"),
     ("S25", "OrderCalcProfit in una Tel*", "   if(tickSize <= 0 || tickValue <= 0) return 0.0;\n",
      "   if(tickSize <= 0 || tickValue <= 0) return 0.0;\n   double pr = 0; OrderCalcProfit(ORDER_TYPE_BUY, sym, lots, 1.0, 1.1, pr);\n", 0, "S"),
 ]
