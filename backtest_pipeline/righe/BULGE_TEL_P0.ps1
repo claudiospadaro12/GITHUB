@@ -518,10 +518,14 @@ W 'GEMELLE DELLO STESSO EA (R92BAB: in IS differivano di 0,02-0,06 in Profit; NO
 foreach($j in $JOBS){ foreach($g in @('IS','OOS')){ W ('  ' + $j.L + ' ' + $g + ': ' + (Diff4 $X[$j.L][$g][$j.M0] $X[$j.L][$g][$j.M1])) } }
 W ''
 # --- per-trade OOS deal per deal (la gamba OOS e l ultima a scrivere il file del magic)
-function LeggiPT($p){ if([string]::IsNullOrEmpty($p) -or -not (Test-Path -LiteralPath $p)){ return $null }; try{ return @(Import-Csv -LiteralPath $p -Delimiter ';') } catch { return $null } }
+# la VIRGOLA tiene l'array intero (cancello del 09/10): senza, PowerShell lo srotola al ritorno e con UNA sola riga
+# arriva un PSCustomObject, che in Windows PowerShell 5.1 NON ha .Count: il ciclo deal per deal non girava e usciva
+# "IDENTICI" senza aver confrontato niente. Con ZERO righe arrivava $null e passava per "file mancante".
+function LeggiPT($p){ if([string]::IsNullOrEmpty($p) -or -not (Test-Path -LiteralPath $p)){ return $null }; try{ return ,@(Import-Csv -LiteralPath $p -Delimiter ';') } catch { return $null } }
 function ConfrontaPT($pa, $pb){
   $a = LeggiPT $pa; $b = LeggiPT $pb
   if($null -eq $a -or $null -eq $b){ return [pscustomobject]@{ Ok=$false; Txt='file mancante o illeggibile' } }
+  if($a.Count -eq 0 -or $b.Count -eq 0){ return [pscustomobject]@{ Ok=$false; Txt=('per-trade SENZA deal (' + $a.Count + ' / ' + $b.Count + '): niente da confrontare, non e identita') } }
   if($a.Count -ne $b.Count){ return [pscustomobject]@{ Ok=$false; Txt=('righe ' + $a.Count + ' contro ' + $b.Count) } }
   for($i = 0; $i -lt $a.Count; $i++){
     foreach($c in $COL_PT){
