@@ -1309,6 +1309,44 @@ def scenari_fuzz(wins, seed):
         if rnd.random() < 0.05:
             book.append(dict(sym=c.sym, magic=4242, comment="BULGE_V520_FT_VIOLA_L"))   # stesso commento, ALTRO magic: non conta
         out.append(("f%d" % i, c, st, book, w))
+    return forzati(wins, t_base) + out
+
+
+def forzati(wins, t_base):
+    """scenari FORZATI per gli esiti rari, in TESTA alla lista (cosi' stanno anche nella suite ridotta dei mutanti):
+    la copertura non deve dipendere dal caso."""
+    out = []
+    c0 = Cfg()
+    sig = [w for w in wins if py_viola(w, c0) and py_viola(w, c0)["sides"]]
+    piccoli = [w for w in sig if py_viola(w, c0)["atr"] * 3.0 < 0.0049]
+    base_st = dict(tv=1.0, vstep=0.01, vmin=0.01, vmax=100.0, bal=10000.0, canOpen=1, news=0, atrOk=1, adx=-1.0,
+                   adxTel=20.0, guard=1, rejV=0, rejAll=0, magic=799601, comment="BULGE_V520_FT")
+    k = 0
+    for w in sig[:4]:
+        side, atr, mid, rel = py_viola(w, c0)["sides"][0]
+        lungo = side > 0
+        px = norm(w.C[0], 5)
+        for tipo in ("LOTS", "HASOPEN", "TP", "GUARD", "OK"):
+            st = dict(base_st)
+            st.update(ask=px, bid=px, digits=5, point=1e-05, ts=1e-05, now=t_base + 10 ** 6 + k * 3600 + 7, bar=t_base + 10 ** 6 + k * 3600)
+            book = []
+            if tipo == "LOTS":
+                st.update(bal=1.0, vmin=0.0)
+            elif tipo == "HASOPEN":
+                book.append(dict(sym=c0.sym, magic=799601, comment="BULGE_V520_FT_VIOLA_" + ("L" if lungo else "S")))
+            elif tipo == "TP":
+                st.update(ask=norm(mid + (0.002 if lungo else -0.002), 5), bid=norm(mid + (0.002 if lungo else -0.002), 5))
+            elif tipo == "GUARD":
+                st.update(guard=0)
+            out.append(("z%d_%s" % (k, tipo), c0, st, book, w))
+            k += 1
+    for w in piccoli[:3]:
+        side, atr, mid, rel = py_viola(w, c0)["sides"][0]
+        px = norm(mid - 0.03 if side > 0 else mid + 0.03, 2)
+        st = dict(base_st)
+        st.update(ask=px, bid=px, digits=2, point=0.01, ts=0.01, now=t_base + 10 ** 6 + k * 3600 + 7, bar=t_base + 10 ** 6 + k * 3600)
+        out.append(("z%d_SL" % k, c0, st, [], w))
+        k += 1
     return out
 
 
