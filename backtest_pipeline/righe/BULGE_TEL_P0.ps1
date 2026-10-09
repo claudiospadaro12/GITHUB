@@ -346,7 +346,9 @@ foreach($j in $JOBS){
   $st.Lanciato = $true
   $tIniJob = Get-Date
   $st.TIni = $tIniJob
-  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $rrv -Expert $j.EA -Prova $j.P -Etichetta $j.L -Pin $Pin -Modello $MODELLO -Deposito $DEPOSITO
+  # argomenti in variabili SEMPLICI (come R92BAB): niente accesso a proprieta' dentro la riga di comando di un eseguibile
+  $argEA = '' + $j.EA; $argPr = '' + $j.P; $argEt = '' + $j.L
+  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $rrv -Expert $argEA -Prova $argPr -Etichetta $argEt -Pin $Pin -Modello $MODELLO -Deposito $DEPOSITO
   $st.Rc = $LASTEXITCODE
   $st.Dur = ((Get-Date) - $tIniJob).TotalSeconds
   Dico ('durata del job ' + $j.L + ': ' + [int]$st.Dur + ' s (driver compreso)   rc ' + $st.Rc) 'Gray'
