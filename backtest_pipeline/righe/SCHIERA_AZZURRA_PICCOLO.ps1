@@ -1,5 +1,8 @@
 # =====================================================================
-#  MARCATORE_SCHIERA_AZZURRA_PICCOLO_v1
+#  MARCATORE_SCHIERA_AZZURRA_PICCOLO_v2
+#  (v2, 09/10: aggiunta la trial FTMO 1514806751, il conto VIVO di
+#  C:\FTMO secondo CODA_09 del 09/10, alla lista dei rifiuti e ai banner;
+#  il referto stampa le liste di rifiuto usate -- classe 150-ter)
 #
 #  PORTA ABTG_BulgeAzzurra (magic 774500, commento BULGE_AZZURRA) e il
 #  suo preset nel terminale del conto DEMO PICCOLO 50503392, sul VPS
@@ -38,7 +41,7 @@
 #       215D85D767A1C39E22D242C8114BF9F5 (censimento: e la cartella dati
 #       del piccolo); ha bases\BCMMarkets-Server; il suo GIORNALE (logs,
 #       10 file piu recenti) nomina 50503392 e NON nomina nessuno di:
-#       FTMO, 541452707, 10105439, 50504263, 50503635, 50504400,
+#       FTMO, 541452707, 1514806751, 10105439, 50504263, 50503635, 50504400,
 #       Pepperstone, Tickmill;
 #    4. le confermate devono essere UNA. Zero o piu di una: FERMO.
 #
@@ -74,7 +77,7 @@ $BASE_BCM     = 'BCMMarkets-Server'
 $REPO_RAW     = 'https://raw.githubusercontent.com/claudiospadaro12/GITHUB'
 
 # Compaiono QUI solo per RIFIUTARE: nessuna scrittura punta a loro.
-$GIORNALE_NUMERI_VIETATI = @('541452707', '10105439', '50504263', '50503635', '50504400')
+$GIORNALE_NUMERI_VIETATI = @('541452707', '1514806751', '10105439', '50504263', '50503635', '50504400')
 $GIORNALE_PAROLE_VIETATE = @('FTMO', 'Pepperstone', 'Tickmill')
 $PERCORSO_VIETATO        = @('-V3', 'BCM_Reale', 'MT5_Backtest', 'MT5_MANUALE', 'FTMO', 'Pepperstone', 'Tickmill')
 
@@ -208,7 +211,7 @@ try {
   Dillo '=====================================================================' $null
   Dillo ' SCHIERA AZZURRA SUL PICCOLO -- SOLO COPIA DI 2 FILE. NESSUN F7.' $null
   Dillo (' BERSAGLIO : terminale del conto DEMO piccolo ' + $CONTO + ' (cartella dati ' + $HASH_PICCOLO + '), MQL5\Experts e MQL5\Presets') $null
-  Dillo ' NON TOCCATI: FTMO 541452707 / trial (C:\FTMO), 100k 50504263 (cartella -V3), REALE 10105439 (C:\BCM_Reale),' $null
+  Dillo ' NON TOCCATI: FTMO challenge 541452707 e trial 1514806751 (C:\FTMO), 100k 50504263 (cartella -V3), REALE 10105439 (C:\BCM_Reale),' $null
   Dillo '             manuale 50503635 (C:\MT5_MANUALE), banco 50504400 (C:\MT5_Backtest), Pepperstone, Tickmill.' $null
   Dillo (' pin preset: ' + $Pin) $null
   Dillo (' pin EA    : ' + $EA.Pin) $null
@@ -270,6 +273,7 @@ try {
 
   # PASSO 3 -- certificazione: censimento, bases, giornale.
   Dillo ('[3/7] certificazione delle candidate (' + $candidate.Count.ToString($INV) + '): nome censito, bases\' + $BASE_BCM + ', giornale') $null
+  Dillo ('      liste di rifiuto usate: numeri ' + ($GIORNALE_NUMERI_VIETATI -join ', ') + ' ; parole ' + ($GIORNALE_PAROLE_VIETATE -join ', ') + ' ; percorsi ' + ($PERCORSO_VIETATO -join ', ')) $null
   $MAXB = [long]33554432
   $confermate = @()
   foreach($c in $candidate){
