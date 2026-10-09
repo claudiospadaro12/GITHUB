@@ -1,0 +1,230 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA_R0 -- PASSO 0 (sonda) + PASSO 1 (replica) di 'GoldBreakoutATR' su XAUUSD, 09/10/2026. File prova.
+#  Strato 1 (controlla_prova.py / controlla_riga.py) da rifare dopo ogni modifica; strato 2 (controllo-preventivo) DA FARE:
+#  NON consegnabile a Claudio finche' il cancello non passa. Questo file NON e' un PASS: e' una preparazione.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato), magic 775800.
+#  Piano: report/EA_NOTTURNO_GBA_SPECIFICA_2026-10-09.md par. 11 (passi 0 e 1), audit par. 12-13, report/EA_GBA_NOTE_2026-10-09.md.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale BCM demo 50503392). MAI sul VPS, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward. Nessun parametro in forward.
+#
+#  ======================= IL DIFETTO CHE QUESTO FILE DICHIARA PER PRIMO =======================
+#  QUESTO FILE NON SI DA' AL DRIVER DEI ROUND (walkforward_generico*.ps1 / RIGA_ROUND_*.ps1). MISURATO sul sorgente:
+#   (a) il driver dei round scrive SEMPRE Optimization=1 (walkforward_generico.ps1 r.1015 e r.2013) e legge il risultato SOLO da
+#       OptResults_<EA>_<simbolo>.csv, che l'EA deve scrivere con FrameAdd/OnTesterDeinit (r.75-79, r.2030-2056: "OnTester non gira,
+#       FrameAdd non manda niente, e OnTesterDeinit crea il file e lo lascia vuoto");
+#   (b) ABTG_GoldBreakoutATR.mq5 v1.10 NON ha nessun OnTester*, nessun FrameAdd, nessun OptFrame (grep, 09/10: zero occorrenze;
+#       report/EA_GBA_NOTE_2026-10-09.md par. 2.16: "il round lo legge dal report del tester");
+#   (c) quindi col driver dei round questa prova uscirebbe con un CSV da zero byte e NESSUNA operazione letta.
+#  Il driver di questa famiglia e' backtest_pipeline/righe/GBA_R0_PASSATE.ps1: PASSATA SINGOLA (Optimization=0), report .htm del tester
+#  + giornale dell'EA, derivato da NATCLA_F0_PASSATE.ps1 (le deviazioni sono elencate in testa allo script). Il lettore e'
+#  backtest_pipeline/leggi_gba_r0.py. Il driver dei round non si tocca. Niente e' stato aggiunto all'EA (richiesta: EA invariato).
+#  PERCHE' UN FILE PROVA CHE NON E' UNA GRIGLIA: controlla_prova.py pretende UN asse Y. L'asse qui e' TECNICO (InpMagic=775800||775800||50||
+#  775850||Y: due celle gemelle sul magic = cancello G1 di determinismo, usato dal lotto S0) e NON e' la variabile misurata. La variabile
+#  misurata e' UNA: InpSpreadMaxATR, le cui celle stanno nei blocchi '# @GBA-CELLA' qui sotto (il driver rifiuta un blocco che cambi
+#  un qualunque altro input). Dato al driver dei round questo file produrrebbe una passata sul magic e basta: e' voluto.
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  PASSO 0 -- SONDA (lotto S0, Modello 1 = OHLC su M1, SOLO CONTA, nessun verdetto di merito): sulla tranche piu' recente (T1) la cella REPLICA due
+#   volte (gemelle sul magic: cancello G1) e le tre celle di controllo dello spread. Dice: se l'EA compila e parte (riga AVVIO v1.10, AUTOTEST PASS),
+#   quante barre M1 genera il tester per tranche (tetto ~100.000: il driver legge la riga 'N bars generated' del giornale), quanti segnali, quanti
+#   scartati per spread (con spread/ATR e stop/spread di ogni segnale), ATR M1 e spread per ORA SERVER sulle sole barre di rottura (campione
+#   SELEZIONATO, non lo spread di tutte le barre: [NON MISURATO] lo spread di tutte le barre), tempo per passata. Profondita' dei tick: la riga
+#   'XAUUSD: ticks data begins from 2024.07.10' e' GIA' MISURATA (giornale di R268a, 28/09, report/PIANO_MISURE_CANDIDATI_2026-10-06.md C6); il lotto
+#   R1A la RICONFERMA sul terminale di questo PC e legge 'Qualita' dello Storico' nel report (deve dire 100% ticks reali, altrimenti niente verdetto).
+#  PASSO 1 -- REPLICA (lotti R1A e R1B, Modello 4 = ticks reali, VERDETTO): la cella REPLICA (valori della foto del pannello Input di Emiliano, spec. par. 2 e 8.1)
+#   su 3 tranche (R1A); poi, UNA variabile per volta, InpSpreadMaxATR 0,10 / 0,20 / 0,35 sulle stesse 3 tranche (R1B). Si legge in questo ordine:
+#   (1) cancelli di affidabilita' G0/G1/G2; (2) n e frequenza; (3) COSTO (mediana stop/(spread+commissione) degli ingressi) PRIMA di qualunque PF;
+#   (4) PF, DD, lato long/short; (5) concentrazione; (6) ORA (6 fasce a priori). Il lettore stampa tutto e NON giudica ne' promuove.
+#  NON E' una ricerca di parametri: la cella REPLICA e' congelata sui valori della foto, le altre tre sono i valori GIA' VISTI nei pannelli (0,35 alle 08:52,
+#  0,05 alle 08:59 del 09/10). Nessuna cella e' scelta guardando un numero.
+#
+#  ======================= LE CELLE (UNA variabile: InpSpreadMaxATR) =======================
+#   cella  InpSpreadMaxATR  stop/spread MINIMO garantito dal filtro (2,5 / cella)   ruolo
+#   REPL   0,05             50,0x                                                   REPLICA (valore del file Input di Emiliano, foto 08:59)
+#   C010   0,10             25,0x                                                   controllo
+#   C020   0,20             12,5x  (sotto il duro 13,3x)                            controllo
+#   C035   0,35             7,1x   (sotto il duro 13,3x)                            controllo (valore del pannello alle 08:52)
+#  ATTENZIONE: il minimo GARANTITO non e' il verdetto di costo. Il verdetto (regola E2 di NATCLA_F0, stessa frontiera di casa) e' la MEDIANA su tutti gli
+#  INGRESSI di stop_i / (spread_i + commissione): >= 40 PASSA; fra 13,3 e 40 FRA (sotto la frontiera di casa `stop >= 40 x spread`: si legge per
+#  misurare l'ipotesi di Emiliano, la cella NON puo' diventare sedia); < 13,3 ESCLUSA PER COSTO (col numero accanto). Commissione: 3,90 EUR/lotto
+#  dichiarata da Riccardo di BCM Tech (live del 09/10, r.259-261), per lato o a giro NON detto [spec. par. 9-bis]; a 1,00 lotto = 100 oz sono
+#  0,04 USD/oz se e' a giro intero, 0,08 se e' per lato: il lettore stampa SEMPRE entrambe le versioni (contro-esempio) e dice se il verdetto cambia.
+#  Il pavimento 'REPL passa il filtro 0,05 quasi mai' della terza ipotesi del cancello (spec. par. 13) e' stato MISURATO su proxy (vedi attese): non si verifica.
+#
+#  ======================= FINESTRE: TRANCHE DICHIARATE (nessuna griglia, nessun IS/OOS) =======================
+#  Il tetto del tester e' ~100.000 barre per corsa (CLAUDE.md): M1 oro = ~72 giorni di mercato (~101 di calendario). Una corsa unica 2024-2026 e' impossibile;
+#  si gira per TRANCHE TRIMESTRALI, dalla piu' recente indietro, e si DICHIARA che cosi' si misura UN REGIME SOLO (non ha fuori-campione di regime).
+#   T1 2026.07.01 -> 2026.09.30  barre M1 [PROXY HistData fino al 18/09] 79.584 -> ~90.000 a fine trimestre   ATR M1 mediana 1,81   prezzo 4.013 -> 4.378 (+9,1% al 18/09)
+#   T2 2026.04.01 -> 2026.06.30  barre M1 [PROXY] 87.916                                                      ATR M1 mediana 2,15   prezzo 4.681 -> 4.013 (-14,3%)
+#   T3 2026.01.01 -> 2026.03.31  barre M1 [PROXY] 86.552                                                      ATR M1 mediana 2,91, p90 7,18   prezzo 4.324 -> 4.680 (+8,2%), massimo 5.597, minimo 4.098
+#  Margine dal tetto: 5-20% [DERIVATO: il conto delle barre BCM puo' differire da HistData]. Il driver legge 'N bars generated' e segna KO una passata a >= 100.000
+#  (finestra troncata) e avvisa fra 95.000 e 100.000. Fonte dei proxy: 1.980.301 barre M1 XAUUSD HistData in repo (backtest_pipeline/risultati_prove/
+#  oro_m1_histdata_zip), ora New York -> UTC -> +1 h = server BCM, stesso trattamento di atr_m1_oro_proxy.py (ATR H1 uguale a quello del tester BCM a mediana 1,005,
+#  97% entro +/-10%, spec. par. 13). NON E' IL FEED BCM: i numeri 'PROXY' di questo file sono stime, mai misure del tester.
+#  ToDate = ultimo giorno del trimestre; se il tester lo esclude si perde al piu' UN giorno, mai un giorno doppio fra tranche contigue ([NON MISURATO] quale dei due).
+#  Tick reali dal 2024.07.10 (MISURATO, giornale R268a): le tre tranche sono dentro. Anni 2024-2025 NON in questo file: ATR M1 mediana 0,59 (2024) e 1,12 (2025)
+#  [PROXY]: con lo spread vivo la cella 0,05 vi passa lo 0,1% e l'1,8% dei segnali (spec. par. 13). Sono la prova di REGIME che si paga DOPO (vedi 'Dopo R0').
+#  REGIME DICHIARATO (regola A/D dell'emendamento 16/08): gen-set 2026 = oro ad ALTA volatilita' dopo il +64,5% del 2025 (2.625 -> 4.318), 2026 senza direzione
+#  (+8,2%, -14,3%, +9,1% per trimestre, con un picco a 5.597 e ritorno a 4.098 in T3). Qualunque numero di R0 vale per QUESTO regime. La cella 0,05 per costruzione
+#  seleziona i minuti piu' volatili: la sua frequenza dipende dal regime piu' del motore.
+#  OROLOGIO (CLAUDE.md 24/09): BCM = UTC+1 FISSO. T3 e' quasi tutta invernale (server = ora italiana fino al 28/03), T2 e T1 estive (server = IT - 1). Le fasce orarie sono in ora SERVER:
+#  la stessa fascia cade a un'ora diversa rispetto a Londra/New York fra T3 e T2/T1. Il lettore taglia OGNI fascia anche per tranche: una fascia positiva solo in T3 e' orologio, non motore.
+#
+#  ======================= MODELLO DI TICK =======================
+#  VERDETTO = Modello 4 (ticks reali, regola R57: uno scalping con trailing a 48 barre M1 si legge solo cosi'). Modello 1 (OHLC su M1) SOLO per CONTARE e per il tempo (lotto S0):
+#  un PF a Modello 1 non e' mai un verdetto. Spread nel Modello 1: [NON MISURATO] se e' quello della barra M1 o il corrente al lancio (NATCLA_F0, LIMITI); nel Modello 4 e' lo spread del tick.
+#  ExecutionMode=0 (zero latenza, standard di casa): per uno scalper a pochi minuti e' OTTIMISTICO; la sensibilita' alla latenza e' un asse FUTURO [NON MISURATO].
+#  Deposito 100000, valuta EUR, leva 100 (standard di casa): NON e' il conto. A 1,00 lotto il deposito serve solo a non far scattare il controllo del margine; il rischio in % si ricalcola sul
+#  conto che Claudio sceglie (firma sua). Profitti nel report in EUR (conversione del tester); lo SL a 1,00 lotto e' 2,5 x ATR x 100 USD.
+#
+#  ======================= PINS: i 31 input dell'EA = DEFAULT COMPILATI =======================
+#  Verificato a macchina il 09/10 (confronto riga per riga col sorgente v1.10): 31 su 31 identici al default, con UNA deviazione dichiarata: InpSymbol=XAUUSD (il default e' "" = simbolo del grafico;
+#  un pin vuoto qui sotto e' vietato da controlla_prova e sarebbe ignorato da MT5). InpSignalTF=1 = PERIOD_M1; InpTrendTF=0 / InpAtrTF=0 = PERIOD_CURRENT = TF del SEGNALE (semantica nostra, scelta
+#  dichiarata: la spec. par. 7 scrive 'EMA e ATR sullo stesso TF del segnale come default'; che sia davvero cosi' per Emiliano e' [INFERITO], non detto). Valori della replica: canale 48, EMA 100, ATR 14,
+#  SL 2,5, trailing 2,5, tempo 48, breakeven acceso a 1,0 ATR con offset 0,0, lotto fisso 1,00 (decisione di Claudio 09/10), nessun filtro orario (0-24), nessun tetto di operazioni (0),
+#  perdita giornaliera spenta (0), margine ON, slippage 30, Guardian ON (nel tester e' FAIL-OPEN: irrilevante), InpVerbose=true (serve: ogni segnale stampa la sua riga con ATR, spread, ora),
+#  InpAutoTest=true (l'AUTOTEST dell'EA e' il primo segno che il compilato fa quello che dice).
+#  Pin 'InpSpreadMaxATR=0.05' qui sotto = cella REPLICA; il driver lo SOSTITUISCE nelle altre celle e rifiuta qualunque altra sostituzione.
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI DEL TESTER =======================
+#  Fonti delle attese: (i) la spec. par. 11.1 (banda e alternativa, scritte il 09/10 prima di qualunque numero); (ii) un PROXY MIO, calcolato il 09/10 sulle barre HistData con lo spread vivo
+#  del logger di settembre (data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv, 5 giornate) APPLICATO A TUTTO IL 2026 [ASSUNZIONE], filtro di spread come l'EA, un'ordine alla volta, uscite
+#  a livello di BARRA con l'ordine peggiore (lo stop esistente si controlla prima di aggiornare il trailing), commissione 0,04 USD/oz: e' una simulazione GREZZA, NON la misura del tester, e il PF che
+#  da' e' un'ordine di grandezza. La serve a due cose: stimare n (e quindi se i 150 si raggiungono) e fare da CONTRO-ESEMPIO al tester (se il tester dice una cosa lontana dal proxy, si cerca perche').
+#  E1 [n, cella REPL, Modello 4]: proxy 111 (T1, fino al 18/09) / 250 (T2) / 696 (T3) = 1.057 ingressi; banda attesa del tester 0,5x-2x il proxy:
+#      T1 60-260 (il proxy copre l'81% del trimestre), T2 125-500, T3 350-1.400, tre tranche 535-2.100. Frequenza proxy 1,6 / 3,3 / 10,4 ingressi per giorno di mercato
+#      (Emiliano dichiara 62 operazioni in ~7 notti, ~9 al giorno, e 12 nel giorno record: compatibile col solo T3).
+#      SMENTITA: n(tre tranche) < 300 = cella quasi VUOTA (terza ipotesi del cancello, spec. par. 13): il merito della REPL non si legge e la misura passa alle celle larghe;
+#      n > 3.500 = il proxy e' sbagliato in un modo da capire PRIMA di leggere PF.
+#  E2 [n, celle larghe]: proxy 12,0 / 29,6 / 31,8 ingressi al giorno in T1 per C010 / C020 / C035 (T2 15,8 / 28,8 / 30,4; T3 25,1 / 34,5 / 35,7): 3.700 / 6.600 / 6.900 ingressi sulle tre tranche.
+#      Sono cifre LARGHE per costruzione: il filtro spread a 0,20 e 0,35 lascia passare il 92-99% dei segnali. Banda 0,5x-2x anche qui.
+#  E3 [PF, ipotesi nulla = la MIA, spec. par. 11.1]: PF della cella REPL in 0,8-1,3. Il proxy da' 0,91 (T1), 0,78 (T2), 1,04 (T3), 0,98 sulle tre insieme (long 1,04 su n 476, short 0,93 su n 581).
+#      Le celle larghe: proxy 0,74-0,89 (peggio della REPL: piu' ingressi, costo maggiore). Win rate proxy 25-29% (Emiliano dichiara 46,8% con 62 operazioni: dipende da come si contano i pareggi del BE).
+#      IPOTESI ALTERNATIVA (la dichiarazione di Emiliano, PF ~2,0): PF >= 1,5 su n >= 150. Il numero che la distingue dalla mia ipotesi nulla e' 1,5 contro 1,3.
+#  E4 [uscita, solo come predizione che si controlla]: proxy mediana 6 barre (media 9) di vita, uscite a TEMPO ~1% (8 su 1.057): l'uscita a 48 barre quasi non morde. Se il tester dice >10% a tempo, il proxy sbaglia.
+#      Questa e' anche la predizione sulla manopola 'tempo': e' probabilmente INERTE su questa geometria (come le 874 manopole inerti del censimento del 09/09): R0 NON la mette ad asse, la annota.
+#  E5 [rischio per operazione, 1,00 lotto]: proxy ATR M1 MEDIANA AGLI INGRESSI della REPL = 5,4 USD (perche' il filtro 0,05 chiede ATR >= 20 x spread = 4-5,4 USD): SL mediano ~1.350 USD a lotto
+#      (~1.150 EUR a EURUSD 1,17 [ASSUNZIONE]); celle larghe ATR mediano 2,2-3,1 USD, SL ~550-780 USD. Sul demo piccolo (saldo ~5.400 EUR) uno SL della REPL varrebbe ~21% del saldo: il conto
+#      e il rischio sono firme di Claudio, qui si MISURA soltanto (il lettore stampa SL per operazione in valuta, mediana, p90, massimo).
+#  E6 [costo, mediana stop/(spread+comm) sugli ingressi, proxy]: REPL 62,6 solo spread / 52,4 con 0,04 / 45,2 con 0,08 -> PASSA; C010 35,5 / 30,0 / 25,9 -> FRA; C020 25,5 / 21,6 / 18,7 -> FRA;
+#      C035 24,6 / 20,9 / 18,1 -> FRA. Nessuna cella < 13,3 alla mediana. La quota di singoli ingressi sotto 40x e sotto 13,3x si stampa comunque.
+#  E7 [ORA]: ipotesi nulla = NESSUNA fascia diversa da zero dopo la correzione per sei fasce. Ipotesi alternativa (Emiliano, 'lo faccio girare di notte'): la fascia ASIA 00-07 positiva.
+#      DICHIARAZIONE DI TRASPARENZA: il proxy, calcolato dopo aver fissato le fasce (spec. par. 11.2) e prima di qualunque numero del tester, per la REPL su T1+T2+T3 da' PF 1,38 in asia (n 172), 0,80 europa (146),
+#      1,14 pausa (101), 0,84 apertura USA (413), 1,02 pomeriggio USA (190), 0,42 rollover (35). NON e' un'attesa e NON e' un risultato: ho gia' VISTO questa suddivisione, quindi il tester sugli STESSI mesi
+#      non e' piu' un campione indipendente per l'ipotesi 'notte'. La prova vera della fascia e' fuori da queste tranche (2024-2025, o forward): resta passo 2, non si conclude nulla su 'la notte' da R0.
+#  I numeri 'proxy' di E1-E7 sono scritti QUI il 09/10, prima del primo giro. Se il tester li smentisce, e' un risultato: si scrive cosi' e si cerca la causa (spread dello storico tick vs logger di settembre,
+#  barre BCM vs HistData, commissione che il tester applica o no), non si ritocca l'attesa.
+#
+#  ======================= SOGLIE CONGELATE (non si cambiano dopo i numeri) =======================
+#  S1 MERITO: si legge solo con n >= 150 nella cella (somma delle tre tranche); una tranche si legge da sola solo con n >= 150. Sotto: MERITO SOSPESO. Il RISCHIO (DD, perdita per operazione, peggior giornata) si legge a qualunque n.
+#  S2 COSTO: prima del PF. >= 40 PASSA; 13,3-40 FRA; < 13,3 ESCLUSA PER COSTO. Mediana sugli ingressi, con commissione 0,04 USD/oz come base e 0,08 come contro-esempio (E6).
+#  S3 PF DI RIFERIMENTO: PF_V = fattore di profitto sui deal (profitto + commissioni + swap), ricalcolato dal lettore dal report e confrontato col PF del report (tolleranza 0,02, altrimenti G0 KO). Se il tester NON
+#     addebita commissioni (somma commissioni = 0) il lettore sottrae 3,90 EUR per lotto e per OPERAZIONE (a giro) e stampa anche la versione 7,80 (per lato): PF_V si legge dopo la commissione ipotetica.
+#  S4 ESITO DELLA REPLICA (cella REPL, tre tranche insieme, n >= 150): PF_V >= 1,5 E PF_V > 1,3 in almeno 2 tranche su 3 E la quota del migliore operazione < 25% del profitto netto E PF con 7,80 a giro >= 1,3
+#     -> 'la dichiarazione di Emiliano trova un RISCONTRO sul nostro feed, in un regime solo': e' il permesso di passare al passo 2, NON un candidato.
+#     PF_V fra 1,3 e 1,5 -> NESSUN VERDETTO. PF_V fra 1,0 e 1,3 -> coerente con l'ipotesi nulla (nessun edge distinguibile dal costo su questo regime). PF_V < 1,0 -> la dichiarazione non regge sul nostro feed.
+#     Tutte le altre combinazioni di PF_V >= 1,5 (concentrato, una sola tranche, solo senza commissione) -> NESSUN VERDETTO e si scrive quale condizione manca.
+#  S5 CONCENTRAZIONE: migliore operazione >= 25% del profitto netto positivo, oppure profitto netto senza le 5 migliori <= 0 -> FRAGILE (come il +21.491 = 35% del netto di Emiliano, spec. par. 8.4).
+#  S6 ORA (sei fasce server, fissate a priori, spec. par. 11.2): asia 00-07, europa 07-12, pausa 12-14, apertura USA 14-17, pomeriggio USA 17-22, rollover 22-24 (ora della barra d'ingresso).
+#     Una fascia si legge solo con n >= 100. Statistica: media di r (profitto / perdita a SL dell'operazione) contro zero, soglia p < 0,05/6 = 0,0083 (correzione per sei fasce), E stesso segno in almeno 2 tranche su 3.
+#     Una fascia che sporge sola, con le vicine in direzione opposta, e' 'picco/bordo' e non si usa.
+#  S7 CELLE LARGHE: la misura e' la FRONTIERA (n, PF, costo mediano), non la ricerca della cella migliore. Se una cella larga ha PF_V >= 1,5 con n >= 150, vale S4 piu' la riga del costo: se il costo e' FRA
+#     o ESCLUSA, la cella non puo' diventare sedia comunque. CENTRO DELL'ALTOPIANO, MAI IL PICCO: con quattro celle lungo UN asse l'altopiano si legge solo se PF_V sale o scende in modo monotono; una cella che
+#     sporge da sola e' un picco e si scrive cosi'.
+#  GATE di affidabilita' (se uno cade, NESSUN numero di quella passata si usa):
+#   G0 compilazione 0 errori; riga AVVIO v1.10 con simbolo/TF/canale/EMA/ATR/spread/uscite/BE/lotto/magic UGUALI alla cella; AUTOTEST 'VERDETTO: PASS'; finestra girata uguale alla tranche (giornale del tester);
+#      barre generate < 100.000; (Modello 4) 'Qualita' dello Storico' 100% ticks reali; report presente con Expert/Simbolo/Periodo giusti; PF e profitto netto RICALCOLATI dai deal = quelli del report; operazioni del
+#      report = ingressi del giornale (+/-1: una posizione aperta a fine test).
+#   G1 le due gemelle di S0 (magic 775800 e 775850, stessa cella, stessa tranche, Modello 1): operazioni, profitto, PF e DD IDENTICI (Modello 1 e' deterministico). Se cadono, nessun conteggio e' riproducibile.
+#   G2 stessa cella REPL su T1 a Modello 1 (S0) e a Modello 4 (R1A): il lettore stampa il rapporto n(ticks)/n(OHLC) e il numero di segnali; fuori da 0,5-2,0 = DA GUARDARE (si cerca la causa), non e' un fallimento.
+#
+#  ======================= CERTIFICATO DI MORTE (5 caselle) -- cosa MANCA dopo R0 =======================
+#   1 PF misurato ........................ R0 lo da' (REPL e 3 controlli, 3 tranche, UN regime)       2 n e DD ........ R0 li da'
+#   3 gestione dell'USCITA ad asse ....... NO: nessuna manopola di uscita e' ad asse in R0 (spec. par. 11, punto 4)   <- MANCA
+#   4 simboli GEMELLI .................... NO: XAGUSD / indici non provati (spec. par. 11, punto 6)                      <- MANCA
+#   5 TF cambiato almeno una volta ....... NO: solo M1 (M3/M5 sono il punto 5 della spec.)                              <- MANCA
+#  Quindi, QUALUNQUE numero esca da R0, la parola 'MORTO' NON si scrive: l'esito piu' severo ammesso e' 'la replica non regge sul nostro feed (n=..., PF_V=..., un regime)' e in REGISTRO_TEST.md
+#  va scritto che mancano le caselle 3, 4, 5 (e la prova di regime fuori da gen-set 2026). Il verdetto resta 'NON ANCORA MISURATO'.
+#
+#  ======================= DOPO R0 (NON autorizzato qui: sono le regole che valgono) =======================
+#  Regola del 19/08: se la REPL e' sotto 1,0 a tick reali, l'oro M1 con questa geometria non ha edge sul nostro feed e NON si allarga la griglia sui suoi parametri d'ingresso (canale, EMA, spread):
+#  si cercano MECCANISMI alternativi sulla stessa inefficienza (breakout di range con filtro di volatilita', TF piu' alti, uscita) e si torna all'imbuto. Se la REPL ha un RISCONTRO (S4), ogni
+#  allargamento (ora, uscita, TF, gemelli, kSL/kTrail, N, EMA) si paga con una prova FUORI CAMPIONE o di REGIME: gli anni 2024-2025 (ATR M1 0,59-1,12: la REPL vi sara' quasi vuota, vedi spec. par. 13) o il forward.
+#  Ordine dichiarato dalla spec. par. 11: 2 ora, 4 uscita (uno alla volta), 5 segnale, 6 gemelli, 7 regime. Mai una griglia piena. Questo file non lancia niente di tutto cio'.
+#
+#  ======================= COSTO IN TEMPO MACCHINA [STIMA, NON AGGANCIATA a una corsa del GBA: la misura il lotto S0] =======================
+#  Il PC di backtest e' (giornale del terminale, 29/09) 8 x Intel Core i7-8550U @ 1,80 GHz, 15 GB: una CPU lenta. Ancore: tick OHLC XAUUSD 2,745 milioni su 2024.07.10-2026.06.30 (NATCLA_F0, Modello 1: 2-7 s per
+#  passata di NatCla su H1); NASUSD H1 a ticks reali 1,75 anni: 15-25 minuti per DUE passate; D30EUR M15 a ticks reali 34,4 milioni di tick in 2 anni. Il numero di tick REALI dell'oro BCM per trimestre e' [NON MISURATO]
+#  (lo stampa la riga 'N ticks, M bars generated' del primo R1A): se fosse 5-40 tick per barra M1, 0,45-3,5 milioni a trimestre.
+#   Lotto S0  : 5 passate Modello 1 (1-3 minuti ciascuna con avvio/chiusura del terminale) + compilazione ~1 minuto             = 6-16 minuti. Tetto 30.
+#   Lotto R1A : 3 passate Modello 4, REPL x T1,T2,T3 (3-20 minuti ciascuna, la prima scarica i tick dal server BCM)             = 9-60 minuti. Tetto 90.
+#   Lotto R1B : 9 passate Modello 4, C010/C020/C035 x T1,T2,T3                                                                = 27-180 minuti. Tetto 240.
+#   TOTALE 17 passate: 0,7-4,3 ore, centro ~1,5-2 ore [STIMA]. Un lotto per volta: dopo R1A si legge, e R1B parte solo se serve (e' comunque nel piano: la REPL puo' essere quasi vuota).
+#   Rischio noto: 'no memory for ticks generating' (GBPUSD R116, cella da ~1.600 s) su simboli densi con ticks reali: l'oro a 3 mesi non dovrebbe, ma e' [NON MISURATO]; il timeout per passata chiude il terminale
+#   con CloseMainWindow (mai Stop-Process).
+#
+#  ======================= BUCHI DICHIARATI =======================
+#   B1 EA mai compilato (MetaEditor non c'e' in questo ambiente; collaudo_gba.py e' a tavolino, 106/106 mutanti ma niente compilatore). Se la compilazione fallisce il driver si ferma PRIMA del tester e mette il log
+#      nello zip GBA_R0_<lotto>_COMPILAZIONE_FALLITA.zip. Punti noti se il compilatore si lamenta: MathMax su due long in GbaGestisci, formati %I64u (note par. 3).
+#   B2 Il lettore non e' stato provato su un report del GBA (non ne esiste uno): formato dei deal verificato su un report vero (R109, D30EUR, Italia, UTF-16), autotest su dati finti con risposta nota.
+#   B3 La commissione che il tester addebita sull'oro BCM e' [NON MISURATA] (3,90 EUR/lotto per lato o a giro: non detto): S3 e E6 tengono le due versioni.
+#   B4 Lo spread del tester a ticks reali sull'oro nel 2026 e' [NON MISURATO]; il proxy usa 5 giornate di settembre ovunque.
+#   B5 Spread per ora su TUTTE le barre: non misurato (l'EA stampa lo spread solo alle barre di rottura): campione selezionato. Un logger dedicato nel tester non esiste; non lo si aggiunge qui.
+#   B6 ExecutionMode=0: nessuna latenza ne' slippage vero; per uno scalper e' il bias piu' favorevole possibile. Asse futuro.
+#   B7 Weekend e pausa giornaliera: l'uscita a tempo conta barre esistenti (note par. 2.5, 7.3) e il proxy dice che quasi non morde, ma i gap non sono modellati; la cella REPL puo' rimanere aperta nel weekend con il solo SL.
+#   B8 La riga 'posizione aperta' viene PRIMA dello spread nell'ordine dei cancelli dell'EA: la quota 'scartati per spread' si conta sui soli segnali LIBERI (senza posizione aperta), non su tutti.
+#   B9 L'accoppiamento deal 'in'/'out' del lettore assume UNA posizione per volta (vero per un magic: R9 dell'EA). Se il report contiene due 'in' di fila, G0 KO.
+#   B10 Una tranche = un regime; tre tranche contigue NON sono tre campioni indipendenti. Il segno concorde in 2 tranche su 3 e' un controllo debole, non una prova fuori campione.
+#   B11 Tetto 100.000 barre: il conto delle barre BCM e' [DERIVATO] da HistData.
+#   B12 Il tempo per passata e il numero di tick reali sono [NON MISURATI]; la prima corsa li misura.
+#   B13 Sul demo piccolo 50503392 non gira nessun Guardian (CLAUDE.md, misura 12/09) e il rischio per operazione a 1,00 lotto non ha tetto nell'EA (spec. par. 13 e note par. 7.4): decisione di Claudio PRIMA di qualunque campo, non di R0.
+#   B14 Il periodo girato e' il 2026: non e' un fuori campione rispetto a Emiliano (il suo EA gira da una settimana, stesso regime): non puo' ne' confermare ne' smentire che il metodo regga in altri regimi.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @GBA-TRANCHE qui sotto (tre finestre trimestrali, non una finestra unica: il driver GBA_R0_PASSATE.ps1 le legge dal file, nessuna IS/OOS)
+#
+#  BLOCCHI LEGGIBILI A MACCHINA (la sola fonte per il driver e il lettore; sono commenti: il driver dei round li salta). Chiavi: k=v separate da spazi.
+#  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+#  @GBA-TRANCHE nome=T2 da=2026.04.01 a=2026.06.30
+#  @GBA-TRANCHE nome=T3 da=2026.01.01 a=2026.03.31
+#  @GBA-CELLA nome=REPL InpSpreadMaxATR=0.05
+#  @GBA-CELLA nome=C010 InpSpreadMaxATR=0.10
+#  @GBA-CELLA nome=C020 InpSpreadMaxATR=0.20
+#  @GBA-CELLA nome=C035 InpSpreadMaxATR=0.35
+#  @GBA-LOTTO nome=S0 modello=1 tetto_min=30 passate=REPL:T1:775800,REPL:T1:775850,C010:T1,C020:T1,C035:T1
+#  @GBA-LOTTO nome=R1A modello=4 tetto_min=90 passate=REPL:T1,REPL:T2,REPL:T3
+#  @GBA-LOTTO nome=R1B modello=4 tetto_min=240 passate=C010:T1,C010:T2,C010:T3,C020:T1,C020:T2,C020:T3,C035:T1,C035:T2,C035:T3
+#
+# ==========================================================================
+
+InpSymbol=XAUUSD
+InpSignalTF=1
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=24
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true
