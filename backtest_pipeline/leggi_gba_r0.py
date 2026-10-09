@@ -536,7 +536,7 @@ def stampa(passate, csv_out=None):
             nn = per_tr.get(P["tranche"], [])
             W("      %-3s n=%-5d PF_V %.2f   PF del report %s   DD equity %s EUR (%s%%)   DD bilancio %s EUR (%s%%)" % (P["tranche"], len(nn), pf_di([x["net_v"] for x in nn]), P["rep"]["pf"], P["rep"]["dd_eq_abs"], P["rep"]["dd_eq_pct"],
                                                                                                                       P["rep"]["dd_bil_abs"], P["rep"]["dd_bil_pct"]))
-        W("   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 100000: la % non e' quella di un conto vero)")
+        W("   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)")
         for lato in ("BUY", "SELL"):
             ll = [x["net_v"] for x in tutte if x["lato"] == lato]
             if ll:

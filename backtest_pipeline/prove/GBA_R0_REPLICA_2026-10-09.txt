@@ -55,6 +55,9 @@
 #
 #  ======================= FINESTRE: TRANCHE DICHIARATE (nessuna griglia, nessun IS/OOS) =======================
 #  Il tetto del tester e' ~100.000 barre per corsa (CLAUDE.md): M1 oro = ~72 giorni di mercato (~101 di calendario). Una corsa unica 2024-2026 e' impossibile;
+#  [CONTRADDETTO IN REPO, cancello 09/10: risultati_archivio/ROUND_CORTI_A_2026-09-28/CCOMM_R258/CCOMM_R258.htm ha Barre 146331 M5 su 2024.07.05-2026.06.30 a finestra INTERA,
+#   qualita' 100% ticks reali: il tetto di 100.000 NON e' dimostrato per il tester (e' il 'Max barre nel grafico' del terminale). Le tranche RESTANO per la lettura per tranche
+#   (S4, B10) e la soglia KO a 100.000 non morde (un trimestre M1 = ~88.000-91.000 barre): cambia solo che 'impossibile' va letto 'non provato'.]
 #  si gira per TRANCHE TRIMESTRALI, dalla piu' recente indietro, e si DICHIARA che cosi' si misura UN REGIME SOLO (non ha fuori-campione di regime).
 #   T1 2026.07.01 -> 2026.09.30  barre M1 [PROXY HistData fino al 18/09] 79.584 -> ~90.000 a fine trimestre   ATR M1 mediana 1,81   prezzo 4.013 -> 4.378 (+9,1% al 18/09)
 #   T2 2026.04.01 -> 2026.06.30  barre M1 [PROXY] 87.916                                                      ATR M1 mediana 2,15   prezzo 4.681 -> 4.013 (-14,3%)
@@ -76,7 +79,8 @@
 #  VERDETTO = Modello 4 (ticks reali, regola R57: uno scalping con trailing a 48 barre M1 si legge solo cosi'). Modello 1 (OHLC su M1) SOLO per CONTARE e per il tempo (lotto S0):
 #  un PF a Modello 1 non e' mai un verdetto. Spread nel Modello 1: [NON MISURATO] se e' quello della barra M1 o il corrente al lancio (NATCLA_F0, LIMITI); nel Modello 4 e' lo spread del tick.
 #  ExecutionMode=0 (zero latenza, standard di casa): per uno scalper a pochi minuti e' OTTIMISTICO; la sensibilita' alla latenza e' un asse FUTURO [NON MISURATO].
-#  Deposito 100000, valuta EUR, leva 100 (standard di casa): NON e' il conto. A 1,00 lotto il deposito serve solo a non far scattare il controllo del margine; il rischio in % si ricalcola sul
+#  Deposito 1000000 (v3 del driver, 09/10: lo standard di casa 100000 portava il proxy delle celle larghe a un fattore ~1,1-1,5 dal fondo, classe 1204/1206), valuta EUR, leva 100: NON e' il conto.
+#  A 1,00 lotto il deposito non cambia n, PF ne' DD in valuta: serve solo a non far scattare il controllo del margine; il DD in % del report NON si legge; il rischio in % si ricalcola sul
 #  conto che Claudio sceglie (firma sua). Profitti nel report in EUR (conversione del tester); lo SL a 1,00 lotto e' 2,5 x ATR x 100 USD.
 #
 #  ======================= PINS: i 31 input dell'EA = DEFAULT COMPILATI =======================

@@ -1,10 +1,10 @@
 # =====================================================================
-#  MARCATORE_GBA_R0_PASSATE_v2
+#  MARCATORE_GBA_R0_PASSATE_v3
 #  GBA_R0_PASSATE.ps1 -- PASSO 0 (sonda) E PASSO 1 (replica) DI 'GoldBreakoutATR' (ABTG_GoldBreakoutATR v1.10) SU XAUUSD
 #
 #  CHE COSA FA, e una cosa sola:
 #    per ogni passata di UN LOTTO del file prova backtest_pipeline/prove/GBA_R0_REPLICA_2026-10-09.txt lancia UNA passata SINGOLA del tester
-#    (Optimization=0, Modello 1 = OHLC su M1 per la sonda S0, Modello 4 = ticks reali per la replica R1A/R1B, deposito 100000 EUR, un solo
+#    (Optimization=0, Modello 1 = OHLC su M1 per la sonda S0, Modello 4 = ticks reali per la replica R1A/R1B, deposito 1000000 EUR, un solo
 #    input diverso fra una cella e l'altra: InpSpreadMaxATR), poi RACCOGLIE il report .htm del tester, le righe [GBA...] del giornale
 #    dell'EA (tutte: una per segnale, una per ingresso, AVVIO, AUTOTEST, [GBA-CONTA]) e le righe del tester (ticks data begins,
 #    N ticks M bars generated, finestra girata), le mette in un zip sul Desktop e dice per ogni passata se e' AFFIDABILE (OK) o no (KO).
@@ -47,6 +47,11 @@
 #      giornale della passata = KO. Le righe '[GBA] ERRORE ordine' si contano nella testa del log (non KO).
 #  10. (v2) la profondita' dei tick (Modello 4) si giudica SOLO sulla riga di XAUUSD: la riga 'EURUSD: ticks data begins from' (simbolo di conversione, conto in EUR)
 #      non conta. I due formati delle soglie AVVIO usano InvariantCulture esplicita (non l'operatore -f).
+#  11. (v3, controllo-preventivo 09/10) DEPOSITO 1000000 EUR invece di 100000, PRIMA di qualunque corsa: a lotto FISSO 1,00 il deposito non cambia n, PF,
+#      DD in valuta ne' nessun numero letto; serve solo a non far scattare il margine. Il proxy (C035 T1 ~-76.000 USD, piu' fino a ~18.000 EUR di commissione
+#      [NON MISURATA]) arrivava a un fattore ~1,1-1,5 dal fondo di 100000: il 'canarino' di S0 (classe 1204, soglia 50.000 EUR) era PREVISTO scattare e
+#      avrebbe imposto una v3 fra S0 e R1B, e la regola non stava nella riga di R1B (classe 1206). La deviazione 9 (KO su margine/stop out) RESTA come rete.
+#      Le righe '-- ordine saltato' dell'EA diverse dal margine (SL troppo vicino, lotto nullo, OrderCalcMargin, prezzi/ATR) si CONTANO nella testa del log.
 #
 #  E' UN BACKTEST, NON UN ORDINE. [Experts] AllowLiveTrading=false nel .ini: il terminale del PC di backtest e' loggato sul DEMO 50503392 e il 14/08/2026
 #  da questa macchina sono partiti ordini VERI.
@@ -473,7 +478,7 @@ function NeedlesAvvio($cella, $magic){
   return $n
 }
 
-Titolo ('2 - LOTTO ' + $Lotto + ': ' + $runs.Count + ' PASSATE SINGOLE (Modello ' + $modello + ', deposito 100000 EUR, lotto fisso 1,00)')
+Titolo ('2 - LOTTO ' + $Lotto + ': ' + $runs.Count + ' PASSATE SINGOLE (Modello ' + $modello + ', deposito 1000000 EUR, lotto fisso 1,00)')
 $TLotto = Get-Date
 $manifest = New-Object System.Collections.ArrayList
 [void]$manifest.Add('lotto;passata;cella;spread_max_atr;tranche;da;a;modello;magic;t_avvio;durata_s;stato;trades_report;profitto_report;pf_report;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;righe_gba;ingressi_log;avvio_ok;autotest;finestra;motivi')
@@ -512,7 +517,7 @@ foreach($ru in $runs){
   $iniF = Join-Path $Work ('gba_' + $tag + '.ini')
   $testoIni = "[Experts]`r`nAllowLiveTrading=false`r`nAllowDllImport=false`r`n`r`n" +
               "[Tester]`r`nExpert=" + $EXPERT + ".ex5`r`nSymbol=" + $SIMBOLO + "`r`nPeriod=" + $PERIODO + "`r`nModel=" + $modello + "`r`n" +
-              "Optimization=0`r`nFromDate=" + $tr['da'] + "`r`nToDate=" + $tr['a'] + "`r`nForwardMode=0`r`nDeposit=100000`r`nCurrency=EUR`r`nLeverage=100`r`n" +
+              "Optimization=0`r`nFromDate=" + $tr['da'] + "`r`nToDate=" + $tr['a'] + "`r`nForwardMode=0`r`nDeposit=1000000`r`nCurrency=EUR`r`nLeverage=100`r`n" +
               "ExecutionMode=0`r`nReplaceReport=1`r`nShutdownTerminal=1`r`nReport=" + $nomeRep + "`r`n`r`n" +
               "[TesterInputs]`r`n" + ($righeIn -join "`r`n") + "`r`n"
   Set-Content -LiteralPath $iniF -Value $testoIni -Encoding ASCII
@@ -568,11 +573,12 @@ foreach($ru in $runs){
   $motivi = New-Object System.Collections.ArrayList
   if($timeout){ [void]$motivi.Add('timeout di ' + $TimeoutRunMin + ' minuti') }
   # --- il giornale dell'EA: AVVIO, AUTOTEST, CONTA FINE, ingressi
-  $testoAvvio = ''; $nIngr = 0; $autoPass = 0; $autoFail = 0; $contaFine = 0; $avvioRighe = 0; $nMargine = 0; $nErrOrd = 0
+  $testoAvvio = ''; $nIngr = 0; $autoPass = 0; $autoFail = 0; $contaFine = 0; $avvioRighe = 0; $nMargine = 0; $nErrOrd = 0; $nSaltati = 0
   foreach($kk2 in $gbaOrd){
     $m3 = $gbaMsg[$kk2]
     if($m3.StartsWith('[GBA] MARGINE INSUFFICIENTE')){ $nMargine = $nMargine + 1 }
     if($m3.StartsWith('[GBA] ERRORE ordine')){ $nErrOrd = $nErrOrd + 1 }
+    elseif($m3.IndexOf('ordine saltato', [StringComparison]::Ordinal) -ge 0 -and -not $m3.StartsWith('[GBA] MARGINE INSUFFICIENTE')){ $nSaltati = $nSaltati + 1 }
     if($m3.StartsWith('[GBA] AVVIO v')){ $avvioRighe = $avvioRighe + 1 }
     if($m3 -match '^\[GBA\] (AVVIO|SEGNALE|SPREAD|LATI|USCITE|BREAKEVEN|ESECUZIONE|RISCHIO|IDENTITA)'){ $testoAvvio = $testoAvvio + $m3 + "`n" }
     if($reIngresso.IsMatch($m3)){ $nIngr = $nIngr + 1 }
@@ -648,7 +654,7 @@ foreach($ru in $runs){
   }
   # il log dell'EA di questa passata, per intero
   $lg = New-Object System.Collections.ArrayList
-  [void]$lg.Add('# passata ' + $etich + '   ini gba_' + $tag + '.ini   durata ' + [int]$dur + ' s   righe [GBA] uniche ' + $gbaOrd.Count + ' (grezze ' + $nGrezze + ')   margine insufficiente ' + $nMargine + '   stop out/no money/Guardian ' + $nSoldi + '   errori d ordine ' + $nErrOrd)
+  [void]$lg.Add('# passata ' + $etich + '   ini gba_' + $tag + '.ini   durata ' + [int]$dur + ' s   righe [GBA] uniche ' + $gbaOrd.Count + ' (grezze ' + $nGrezze + ')   margine insufficiente ' + $nMargine + '   stop out/no money/Guardian ' + $nSoldi + '   errori d ordine ' + $nErrOrd + '   altri ordini saltati ' + $nSaltati)
   foreach($e in $evTester.Keys){ [void]$lg.Add('# TESTER ' + $e) }
   foreach($e in $fin.Keys){ [void]$lg.Add('# FINESTRA ' + $e) }
   foreach($kk2 in $gbaOrd){ [void]$lg.Add($gbaSt[$kk2] + '   ' + $gbaMsg[$kk2]) }
@@ -686,7 +692,7 @@ if($Lotto -eq 'S0'){
 Titolo '3 - RACCOLTA'
 $mediaS = 0.0; if($nDur -gt 0){ $mediaS = $sommaDur / $nDur }
 $testa = @(
-  ('GBA R0 -- lotto ' + $Lotto + ': ' + $EXPERT + ' v' + $VERSIONE_ATTESA + ' su ' + $SIMBOLO + ' M1, Modello ' + $modello + ', lotto fisso 1,00, deposito 100000 EUR, UNA variabile (InpSpreadMaxATR)'),
+  ('GBA R0 -- lotto ' + $Lotto + ': ' + $EXPERT + ' v' + $VERSIONE_ATTESA + ' su ' + $SIMBOLO + ' M1, Modello ' + $modello + ', lotto fisso 1,00, deposito 1000000 EUR, UNA variabile (InpSpreadMaxATR)'),
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss') + '   pc: ' + $env:COMPUTERNAME + '   pin: ' + $Pin),
   ($EXPERT + '.mq5 SHA256 ' + $ShaEA + '   compilazione: ' + $compErr + ' errori, ' + $compWarn + ' avvisi (-1 = non letto)'),
   ('passate del lotto ' + $runs.Count + ': OK ' + $nOk + ', KO ' + $nKo + ', NON LANCIATE ' + $nNon + '   durata totale ' + [int]$durTot + ' minuti   media per passata OK ' + [int]$mediaS + ' secondi'),
