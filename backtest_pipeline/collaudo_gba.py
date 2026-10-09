@@ -996,7 +996,7 @@ def uguali(a, b):
 
 def simulazioni(cx, bag, quiet=False, ridotto=False):
     semi = [11] if ridotto else [11, 22, 33]
-    n = 900 if ridotto else 1800
+    n = 1600 if ridotto else 1800   # > 1440 barre M1: anche la corsa ridotta attraversa una mezzanotte server
     tot_tr, tot_motivi = 0, [0] * N_MOTIVI
     giorni_tetto = {}
     tutti_ok = True
@@ -1140,8 +1140,8 @@ MUTANTI = [
     ("L49", "mezzanotte spostata di un'ora", "return (datetime)(((long)t / 86400) * 86400);",
      "return (datetime)((((long)t + 3600) / 86400) * 86400);", 0, "L"),
     ("L50", "tetto prima della posizione aperta (motivo sbagliato)",
-     "   if(posAperta)                          { motivo = GBA_POSIZIONE;  return 0; }\n",
-     "   if(GbaTroppeOggi(aperteOggi, maxGiorno)) { motivo = GBA_TETTO;    return 0; }\n   if(posAperta)                          { motivo = GBA_POSIZIONE;  return 0; }\n", 0, "L"),
+     "   if(posAperta)                        { motivo = GBA_POSIZIONE;  return 0; }\n",
+     "   if(GbaTroppeOggi(aperteOggi, maxGiorno)) { motivo = GBA_TETTO;    return 0; }\n   if(posAperta)                        { motivo = GBA_POSIZIONE;  return 0; }\n", 0, "L"),
     ("S01", "Guardian tolto prima del Buy", G + "      inviato = trade.Buy(", "      inviato = trade.Buy(", 0, "S"),
     ("S02", "Guardian dopo il Sell", G + "      inviato = trade.Sell(lots, g_sym, bid, sl, 0.0, cmt);",
      "      inviato = trade.Sell(lots, g_sym, bid, sl, 0.0, cmt) && ABTG_GuardiaIngresso(InpUsaGuardian, \"ABTG_GoldBreakoutATR\");", 0, "S"),
