@@ -9,7 +9,7 @@ a tavolino, e si dice cosa resta fuori.
 
   S) STATICO sul sorgente vero: ASCII puro, LF, parentesi bilanciate fuori da commenti/stringhe; niente
      WebRequest/SendMail/SendNotification/SendFTP/#import/OrderSend; input = esattamente i nomi, tipi e
-     default dichiarati (valori della foto + decisioni dichiarate); magic di default e il suo blocco 7751xx
+     default dichiarati (valori della foto + decisioni dichiarate); magic di default e il suo blocco 7758xx
      assenti da TUTTO il repo fuori dai file del GBA; ogni trade.Buy/trade.Sell preceduto dalla riga del
      Guardian (esattamente 2 invii, dentro GbaApri); chiusure e modifiche solo in GbaGestisci; SL iniziale
      = InpSL_ATR x ATR; slippage passato a CTrade; commento <= 21 caratteri; handle rilasciati; OnTick
@@ -173,7 +173,7 @@ INPUT_ATTESI = {
     "InpBE_OffsetATR": ("double", "0.0"), "InpSlippagePoints": ("int", "30"), "InpMaxDailyLoss": ("double", "0.0"),
     "InpCheckFreeMargin": ("bool", "true"), "InpHourStart": ("int", "0"), "InpHourEnd": ("int", "24"),
     "InpLotMode": ("int", "0"), "InpLots": ("double", "1.00"), "InpRiskPct": ("double", "0.25"),
-    "InpMagic": ("long", "775100"), "InpComment": ("string", '"GBA"'), "InpUsaGuardian": ("bool", "true"),
+    "InpMagic": ("long", "775800"), "InpComment": ("string", '"GBA"'), "InpUsaGuardian": ("bool", "true"),
     "InpVerbose": ("bool", "true"), "InpAutoTest": ("bool", "true"),
 }
 FUNZIONI_ATTESE = {
@@ -1051,7 +1051,12 @@ MUTANTI = [
     ("L31", "ATR fisso (modo 1) ignorato", "if(InpTrailAtrMode == 1)", "if(false)", 0, "L"),
     ("L32", "estremo sulla sola barra in corso", "int cnt = barre + 1;", "int cnt = 1;", 0, "L"),
     ("L33", "close della barra in formazione", "CopyClose(g_sym, g_tfSig, 1, 1, c)", "CopyClose(g_sym, g_tfSig, 0, 1, c)", 0, "L"),
-    ("L34", "EMA letta sul TF dell'ATR", "GbaShiftChiusa(g_tfTrend, t0), ema)", "GbaShiftChiusa(g_tfAtr, t0), ema)", 0, "L"),
+    # NB: "EMA letta con GbaShiftChiusa(g_tfAtr, t0)" e' un mutante EQUIVALENTE e non sta qui: con t0 = istante
+    #     corrente iBarShift da' 0 su QUALUNQUE TF, quindi lo shift chiuso vale 1 comunque. Il TF conta solo per un
+    #     istante passato (ATR fisso del modo 1): e' L34.
+    ("L34", "ATR fisso (modo 1) cercato sul TF del segnale", "GbaShiftChiusa(g_tfAtr, tRif), atr)", "GbaShiftChiusa(g_tfSig, tRif), atr)", 0, "L"),
+    ("L43", "EMA letta dall'handle dell'ATR", "GbaLeggiBuffer(g_hEma, GbaShiftChiusa(g_tfTrend, t0), ema)",
+     "GbaLeggiBuffer(g_hAtr, GbaShiftChiusa(g_tfTrend, t0), ema)", 0, "L"),
     ("L35", "lotti arrotondati invece che troncati", "MathFloor(lots / step + 1e-9)", "MathRound(lots / step + 1e-9)", 0, "L"),
     ("L36", "rischio senza /100", "(saldo * pct / 100.0)", "(saldo * pct)", 0, "L"),
     ("L37", "lotti sotto il minimo alzati al minimo", "if(v < vmin - 1e-12) return 0.0;", "if(v < vmin - 1e-12) v = vmin;", 0, "L"),
@@ -1065,8 +1070,9 @@ MUTANTI = [
     ("S02", "Guardian dopo il Sell", G + "      inviato = trade.Sell(lots, g_sym, bid, sl, 0.0, cmt);",
      "      inviato = trade.Sell(lots, g_sym, bid, sl, 0.0, cmt) && ABTG_GuardiaIngresso(InpUsaGuardian, \"ABTG_GoldBreakoutATR\");", 0, "S"),
     ("S03", "InpUsaGuardian spento di default", "InpUsaGuardian = true;", "InpUsaGuardian = false;", 0, "S"),
-    ("S04", "magic dell'Azzurra", "= 775100;", "= 774500;", 0, "S"),
-    ("S05", "magic nel blocco occupato 7753xx", "= 775100;", "= 775399;", 0, "S"),
+    ("S04", "magic dell'Azzurra", "= 775800;", "= 774500;", 0, "S"),
+    ("S05", "magic nel blocco occupato 7753xx", "= 775800;", "= 775399;", 0, "S"),
+    ("S05b", "magic della Bulge_Telemetria (775100)", "= 775800;", "= 775100;", 0, "S"),
     ("S06", "canale 47", "InpChannelBars  = 48;", "InpChannelBars  = 47;", 0, "S"),
     ("S07", "EMA 50 di default", "InpEmaPeriod    = 100;", "InpEmaPeriod    = 50;", 0, "S"),
     ("S08", "kSL 2,0", "InpSL_ATR        = 2.5;", "InpSL_ATR        = 2.0;", 0, "S"),

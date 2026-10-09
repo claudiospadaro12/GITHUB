@@ -164,12 +164,13 @@ input double InpRiskPct = 0.25; // Rischio % per trade (modo 1): SEGNAPOSTO DA F
 // INPUT -- IDENTITA' E STANDARD DI CASA
 //==================================================================
 input group "=== Identita' e standard di casa ==="
-//--- Magic 775100: blocco 7751xx LIBERO, verificato il 09/10 con
+//--- Magic 775800: blocco 7758xx LIBERO, verificato il 09/10 con
 //    git grep --untracked su TUTTO il repo (zero occorrenze di un
-//    numero a 6 cifre 7751xx). 7745xx Azzurra, 7746xx-7748xx e
-//    7753xx/7755xx occupati. Il magic della foto (20261105) NON si usa:
+//    numero a 6 cifre 7758xx). 7745xx Azzurra, 7746xx-7748xx,
+//    7753xx/7755xx/7757xx occupati; 7751xx preso lo stesso giorno da
+//    ABTG_Bulge_Telemetria mentre questo file era in stesura. Il magic della foto (20261105) NON si usa:
 //    e' l'identita' dell'EA di Emiliano, non della nostra sedia.
-input long   InpMagic       = 775100; // Magic Number
+input long   InpMagic       = 775800; // Magic Number
 input string InpComment     = "GBA";  // Prefisso commento (commento = prefisso + "_L"/"_S", max 21 caratteri)
 input bool   InpUsaGuardian = true;   // Guardian: ferma i NUOVI ingressi (firme B1/C1)
 input bool   InpVerbose     = true;   // Stampe informative (gli errori si stampano sempre)
