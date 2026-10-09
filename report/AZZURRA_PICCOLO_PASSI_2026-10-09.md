@@ -14,8 +14,8 @@ verificatore-stringhe + lettore indipendente). Finche' non c'e' il PASS, niente 
 |---|---|---|
 | `mql5/Experts/ABTG_BulgeAzzurra.mq5` (pin `31a11096`) | l'EA, **non toccato** | `b6b06347f6f73b4e0f8de508087e48d089b911ee4ccac250f8beb8be032a926b` |
 | `mql5/Presets/sedie_piccolo/ABTG_BulgeAzzurra_piccolo_demo.set` | il preset del piccolo | `9f6492b92746ca464adc58a32a252d81a480de759237aac3531c037179e38a4d` |
-| `backtest_pipeline/righe/SCHIERA_AZZURRA_PICCOLO.ps1` | lo script SOLO COPIA | `0a7fcb4c6b9b12708cb8b6573b0f962f6e2adcc64a418aa65b2ebbfefee20b90` |
-| `backtest_pipeline/righe/RIGA_SCHIERA_AZZURRA_PICCOLO.txt` | la riga da incollare (pin `c00eb8c3`) | vedi `git` |
+| `backtest_pipeline/righe/SCHIERA_AZZURRA_PICCOLO.ps1` | lo script SOLO COPIA | `c09b39335c517de727d1f794ad8d5dbff525b21add3b2b461a1410d7066d0f3c` (v2, pin `81ebc5e8`) |
+| `backtest_pipeline/righe/RIGA_SCHIERA_AZZURRA_PICCOLO.txt` | la riga da incollare (pin `81ebc5e8`) | vedi `git` |
 
 **Il preset** = default dell'EA, confrontati a macchina **54 input su 54** (nessun nome in piu', nessuno in
 meno), con **una sola** differenza voluta: `Risk_Percent` **0.8 -> 0.5**. Rispetto al modello
@@ -56,10 +56,10 @@ della specifica: prefisso <= 21).
 i terminali). Scrive **solo** nella cartella dati del terminale del conto DEMO PICCOLO **50503392**
 (`C:\Program Files\BCM Markets MT5 Terminal`, cartella dati `215D85D767A1C39E22D242C8114BF9F5`), sottocartelle
 `MQL5\Experts` e `MQL5\Presets`, piu' il Desktop del VPS.
-**Non tocca:** FTMO 541452707 e trial (`C:\FTMO`), 100k 50504263 (`...MT5 Terminal -V3`), REALE 10105439
+**Non tocca:** FTMO challenge 541452707 e trial 1514806751 (`C:\FTMO`), 100k 50504263 (`...MT5 Terminal -V3`), REALE 10105439
 (`C:\BCM_Reale`), manuale 50503635 (`C:\MT5_MANUALE`), banco 50504400 (`C:\MT5_Backtest`), Pepperstone, Tickmill.
 
-La riga e' in `backtest_pipeline/righe/RIGA_SCHIERA_AZZURRA_PICCOLO.txt` (una riga sola, pin `c00eb8c3`). Il
+La riga e' in `backtest_pipeline/righe/RIGA_SCHIERA_AZZURRA_PICCOLO.txt` (una riga sola, pin `81ebc5e8`; v1 al pin `c00eb8c3` superata dal cancello del 09/10: mancava la trial 1514806751 fra i rifiuti e la sessione Administrator non era inchiodata). Il
 terminale 50503392 **puo' e deve restare APERTO**: la riga non compila e non tocca processi, e le serve vederlo
 vivo per certificarlo. Uscite:
 - **0** = i 2 file sono nel terminale 50503392 e gli include per F7 ci sono -> passo 1;
@@ -69,7 +69,7 @@ vivo per certificarlo. Uscite:
 Le serrature dello script (provate su un banco simulato, 19 scenari su 19 come attesi): UN solo terminale col
 titolo che comincia per 50503392, proprietario = utente della sessione (da Master scatta: la copia sotto
 Master e' MORTA, 03/09), origin.txt = cartella di quell'eseguibile, nome cartella = `215D85...` del censimento,
-`bases\BCMMarkets-Server`, giornale che nomina 50503392 e **nessuno** di FTMO / 541452707 / 10105439 /
+`bases\BCMMarkets-Server`, giornale che nomina 50503392 e **nessuno** di FTMO / 541452707 / 1514806751 / 10105439 /
 50504263 / 50503635 / 50504400 / Pepperstone / Tickmill. Un file gia' presente e **diverso** = FERMO, mai
 sovrascritto.
 
