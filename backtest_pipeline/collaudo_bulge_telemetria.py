@@ -462,6 +462,15 @@ def statico(raw, old, bag, quiet=False):
     check(re.search(r"exit_after_path\s*=\s*\(g_tel\[j\]\.path_fine\s*<=\s*0\s*\|\|\s*g_tel\[j\]\.exit_time\s*<=\s*0\s*\|\|\s*"
                     r"g_tel\[j\]\.exit_time\s*>\s*g_tel\[j\]\.path_fine\)\s*\?\s*1\s*:\s*0;", maschera(fn.get("TelScriviFine", ""))) is not None,
           "exit_after_path = 1 se manca il percorso, se manca l'uscita o se l'uscita cade oltre il percorso", bag, quiet=quiet)
+    # (Cancello 09/10, lettore indipendente, classe 1203) l'ancora qui sopra e' un TAPPO sul mutante S26: cinque mutanti
+    # nuovi che non toccano il testo ancorato passavano VERDI (path_fine gonfiato; path_fine valorizzato col percorso
+    # mancante; percorso M1 dal simbolo del GRAFICO; mid1 dall'handle del simbolo 0; adx sulla barra 0). Il terminale
+    # finto ha UN simbolo e nessuno scenario ha un OPENED oltre il percorso: TelScriviPathSegnale si CONGELA con
+    # un'impronta (sha256[:16] del testo mascherato, spazi compressi). Congela, NON prova: ogni modifica fa FAIL e
+    # obbliga a rileggerla a mano e ad aggiornare l'impronta DICHIARANDOLO. EA SHA 96502ae5...
+    impr = hashlib.sha256(" ".join(maschera(fn.get("TelScriviPathSegnale", "")).split()).encode("ascii", "replace")).hexdigest()[:16]
+    check(impr == "64c5ff4d35aac427", "TelScriviPathSegnale: impronta invariata (%s): simbolo/handle del cross e path_fine CONGELATI, non provati" % impr,
+          bag, quiet=quiet)
     lett = set(re.findall(r'"((?:BLOCK|SKIP)_\w+|OPENED|NON_RISOLTO|ATTESA|INVIO)"', "".join(corpi_tel)))
     check(lett <= ESITI and {"OPENED", "BLOCK_MAXTRADES", "BLOCK_HASOPEN", "BLOCK_ATR"} <= lett,
           "esiti usati = dichiarati (%s)" % sorted(lett - ESITI), bag, quiet=quiet)
@@ -684,7 +693,9 @@ double GetBBWidthMA(int) { return S.widthMA; }
 double GetADX(int, int = 1) { return S.adx; }
 // (Cancello 09/10) il BUFFER conta: 0 = ADX main / mediana BB / ATR. Prima lo shim lo ignorava e un mutante
 // "mid1 = banda superiore" (buffer 1) restava verde: ora un buffer diverso da 0 non restituisce niente.
-int CopyBuffer(int h, int buf, int, int count, Arr &a) { if(h != 303 || buf != 0) return -1; a.v.assign(count, S.adxTel); return count; }
+// (Cancello 09/10, lettore indipendente) anche la BARRA conta: adxTel e' l'ADX della barra di CONFERMA (g_sigOff,
+// spec col. 9); un'altra barra ha un altro valore. Prima lo shim scartava lo start e "adx letto sulla barra 0" restava verde.
+int CopyBuffer(int h, int buf, int start, int count, Arr &a) { if(h != 303 || buf != 0) return -1; a.v.assign(count, S.adxTel + (start == g_sigOff ? 0.0 : 7.0)); return count; }
 int CopyBuffer(int h, int buf, datetime x, datetime z, Arr &a) {
   if((h != 101 && h != 202) || buf != 0) return -1; a.v.clear();
   for(size_t i = 0; i < S.h1.size(); i++) if(S.h1[i].time >= x && S.h1[i].time <= z && S.h1[i].time <= S.now) a.v.push_back(h == 101 ? S.h1mid[i] : S.h1atr[i]);
@@ -1984,6 +1995,15 @@ MUTANTI = [
     ("L46", "colonna adx = +DI (buffer 1)", "   if(CopyBuffer(h, 0, g_sigOff, 1, a) < 1) return -1.0;",
      "   if(CopyBuffer(h, 1, g_sigOff, 1, a) < 1) return -1.0;", 0, "L"),
     ("S26", "exit_after_path 0 se il percorso manca", "(g_tel[j].path_fine <= 0 || ", "(false || ", 0, "S"),
+    # (Cancello 09/10, lettore indipendente, classe 1203) mutanti NUOVI che non toccano il testo ancorato: erano 5/5 VERDI
+    ("L47", "adx letto sulla barra 0 invece che su g_sigOff", "   if(CopyBuffer(h, 0, g_sigOff, 1, a) < 1) return -1.0;",
+     "   if(CopyBuffer(h, 0, 0, 1, a) < 1) return -1.0;", 0, "L"),
+    ("S27", "path_fine gonfiato di 30 giorni", "   g_tel[j].path_fine = fine;\n", "   g_tel[j].path_fine = fine + (datetime)(30 * 86400);\n", 0, "S"),
+    ("S28", "percorso mancante ma path_fine valorizzato", "{ g_telPathMancanti++; return; }",
+     "{ g_telPathMancanti++; g_tel[j].path_fine = TimeCurrent(); return; }", 0, "S"),
+    ("S29", "percorso M1 dal simbolo del grafico", "   int n1 = CopyRates(sym, PERIOD_M1,", "   int n1 = CopyRates(_Symbol, PERIOD_M1,", 0, "S"),
+    ("S30", "mid1 dall'handle del simbolo 0", "   int nM = CopyBuffer(g_hBands[idx], 0, hA, hB, hMid);",
+     "   int nM = CopyBuffer(g_hBands[0], 0, hA, hB, hMid);", 0, "S"),
     ("S25", "OrderCalcProfit in una Tel*", "   if(tickSize <= 0 || tickValue <= 0) return 0.0;\n",
      "   if(tickSize <= 0 || tickValue <= 0) return 0.0;\n   double pr = 0; OrderCalcProfit(ORDER_TYPE_BUY, sym, lots, 1.0, 1.1, pr);\n", 0, "S"),
 ]
@@ -2078,7 +2098,10 @@ def main():
         shutil.rmtree(tmp, ignore_errors=True)
     print("\nNON PROVATO: compilazione MQL5 (MetaEditor assente), test P0 nel tester (Trades/Profit/PF/DD identici a "
           "ABTG_Bulge v5.20), CTrade e Guardian veri, iBands/iATR/iADX/CopyRates/CopyBuffer per data del terminale, "
-          "scrittura reale in Common\\Files, il tetto di barre del tester, nessun backtest.")
+          "scrittura reale in Common\\Files, il tetto di barre del tester, nessun backtest. "
+          "MULTI-SIMBOLO: il terminale finto ha UN simbolo, quindi simbolo e handle del cross in TelScriviPathSegnale "
+          "sono solo CONGELATI dall'impronta (S29/S30), non provati; i rami exit_after_path = 1 (percorso mancante, "
+          "uscita oltre il percorso) non hanno uno scenario X: ancora + impronta (S26/S27/S28), non prova.")
     if FAILS:
         print("\nESITO: FAIL (%d)" % len(FAILS))
         for f in FAILS[:40]:

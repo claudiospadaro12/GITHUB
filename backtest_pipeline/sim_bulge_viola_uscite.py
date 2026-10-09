@@ -326,11 +326,27 @@ def controlla(sig, path):
             continue
         e = rigioca(s, path[i], {})
         mot_real = s["exit_reason"]
-        if e["motivo"] == mot_real or (e["motivo"] in ("sl", "tp") and mot_real == e["motivo"]):
+        if e["motivo"] != mot_real:
+            dist.append((i, e["motivo"], mot_real))
+            continue
+        # (Cancello 09/10, lettore indipendente) la spec par. 5 punto 5 chiede che coincidano exit_reason E exit_time:
+        # l'uscita reale deve cadere DENTRO la barra in cui il rigioco esce (M1 nelle prime 3 ore, poi H1). Prima
+        # bastava il motivo: uno SL rigiocato all'ora 5 e uno reale all'ora 70 risultavano "coincidenti", e il
+        # portafoglio rigiocato (slot liberati) usa proprio quel tempo.
+        dur = datetime.timedelta(minutes=1) if e["t"] < s["t_bar"] + datetime.timedelta(hours=3) else datetime.timedelta(hours=1)
+        te = s.get("t_exit")
+        if te is not None and e["t"] <= te < e["t"] + dur:
             ok_ += 1
         else:
-            dist.append((i, e["motivo"], mot_real))
+            dist.append((i, "%s@%s" % (e["motivo"], e["t"].strftime(FMT)), "%s@%s" % (mot_real, te.strftime(FMT) if te else "-")))
     return len(opened), ok_, dist
+
+
+def oltre_percorso(sig, dist):
+    """(Cancello 09/10, lettore indipendente) quante discordanze sono OPENED con exit_after_path = 1 (uscita reale oltre i
+    5 giorni del percorso: troncamento del formato, NON infedelta' del rigioco). Solo diagnosi: la soglia del 95% resta
+    sulla spec (tutte le OPENED), cosi' un troncamento frequente si VEDE invece di sparire dal denominatore."""
+    return sum(1 for m in dist if str(sig[m[0]].get("exit_after_path", "0")).strip() == "1")
 
 
 def invarianti(sig, path):
@@ -352,6 +368,15 @@ def invarianti(sig, path):
                 v.append(i)
                 break
     out.append(("3b percorso: t_open = bar_open_time + k (M1 da k=0 = bar_open_time; sig_id esistente)", len(v), v[:5]))
+    # (Cancello 09/10, lettore indipendente) la seconda meta' della 3 della spec, alla lettera: "primo M1 di ogni sig_id
+    # ha t_open = bar_open_time". La 3b non la copre: un percorso SENZA righe M1 (storico M1 assente: l'EA non lo conta
+    # fra i "percorsi mancanti") passa la 3b e il rigioco parte dalla H1 k=3, CIECO sulle prime 3 ore e con bid0 sbagliato
+    # per V1/V2/V3. I sig_id senza NESSUNA riga restano fuori di qui: sono gia' discordanti/esclusi e contati.
+    # Gli esempi portano (sig_id, tf e k della PRIMA riga): "H1 3" = nessun M1 (dannoso: rigioco cieco); "M1 2" = minuto 0
+    # senza tick (possibile alle 00:00 del rollover: benigno per il rigioco, ma la spec lo vieta e va spiegato, non taciuto).
+    v = [(i, rows[0]["tf"], rows[0]["k"]) for i, rows in path.items()
+         if rows and i in sig and not (rows[0]["tf"] == "M1" and rows[0]["t"] == sig[i]["t_bar"])]
+    out.append(("3c primo M1 del percorso: t_open = bar_open_time (k=0)", len(v), v[:5]))
     v = []
     for i, s in sig.items():
         if s["outcome"] != "OPENED":
@@ -385,6 +410,9 @@ def analizza(sig, path):
         return 1
     print("COMMISSIONE per trade: %.4f R (mediana OPENED)" % cr)
     print("RIGIOCO DI BASE: %d OPENED, uscita coincidente %d (%.1f%%)  [soglia di validita' 95%%]" % (n, ok_, 100.0 * ok_ / max(1, n)))
+    nop = oltre_percorso(sig, mism)
+    if nop:
+        print("  di cui discordanti con uscita OLTRE il percorso (exit_after_path=1, troncamento, non infedelta'): %d su %d" % (nop, len(mism)))
     if n and ok_ / float(n) < 0.95:
         print("  >>> SIMULAZIONE NON VALIDA per questa cella: nessun numero sotto si legge. Prime discordanze: %s" % mism[:5])
         return 1
@@ -587,7 +615,8 @@ def autotest():
     # T15 (Cancello 09/10): OPENED SENZA righe di percorso (l'EA lo prevede: "percorsi mancanti"). Prima: IndexError
     # su rows[0]. Ora: discordante (conta contro il 95%), e il portafoglio la esclude e la CONTA.
     s15a = _sig()
-    s15a.update({"sig_id": 1, "outcome": "OPENED", "exit_reason": "sl"})
+    s15a.update({"sig_id": 1, "outcome": "OPENED", "exit_reason": "sl",
+                 "t_exit": s15a["t_bar"] + datetime.timedelta(hours=5, minutes=12)})   # dentro la barra H1 dello SL rigiocato
     s15b = _sig()
     s15b.update({"sig_id": 2, "symbol": "GBPUSD", "outcome": "OPENED", "exit_reason": "sl"})
     p15 = {1: _path(p1, {5: (0.9985, 0.9985, 0.9969, 0.9970)})}          # il 2 non ha righe (chiave assente)
@@ -619,7 +648,35 @@ def autotest():
     ok(viol(c, ph16) == {"6": 1}, "T16 CONTROESEMPIO 6: un NON_RISOLTO (canarino) -> violata")
     c = {k: dict(v) for k, v in sg16.items()}
     c[1]["t_bar"] = c[1]["t_bar"] + datetime.timedelta(minutes=1)
-    ok(set(viol(c, ph16)) == {"3a", "3b"}, "T16 CONTROESEMPIO 3: barra spostata di un minuto -> violate 3a e 3b")
+    ok(set(viol(c, ph16)) == {"3a", "3b", "3c"}, "T16 CONTROESEMPIO 3: barra spostata di un minuto -> violate 3a, 3b e 3c")
+    # T17 (Cancello 09/10, lettore indipendente): spec par. 5 punto 3 seconda meta' (primo M1 = bar_open_time) e punto 5
+    # (exit_TIME, non solo exit_reason). Ogni caso e' un controesempio che la versione 0841b150 lasciava passare.
+    ph17 = {1: [r for r in ph16[1] if r["tf"] == "H1"]}                     # percorso senza NESSUNA riga M1
+    ok(viol(sg16, ph17) == {"3c": 1}, "T17 CONTROESEMPIO 3c: percorso senza righe M1 (rigioco cieco sulle prime 3 ore) -> violata")
+    ph17 = {1: ph16[1][3:]}                                                 # primo M1 a k=3
+    ok(viol(sg16, ph17) == {"3c": 1}, "T17 CONTROESEMPIO 3c: primo M1 a k=3 invece che a bar_open_time -> violata")
+    s17 = dict(s15a)
+    t17 = s17["t_bar"]
+    ok(controlla({1: s17}, p15)[1] == 1, "T17 tempo: SL reale alle +5h12m, dentro la barra H1 dello SL rigiocato (+5h) -> coincide")
+    s17["t_exit"] = t17 + datetime.timedelta(hours=70, minutes=3)
+    n17, ok17, mm17 = controlla({1: s17}, p15)
+    ok(ok17 == 0 and len(mm17) == 1, "T17 CONTROESEMPIO tempo: stesso motivo (sl) ma uscita reale 65 ore dopo -> discordante (prima: coincidente)")
+    s17["t_exit"] = None
+    ok(controlla({1: s17}, p15)[1] == 0, "T17 CONTROESEMPIO tempo: OPENED con exit_reason ma senza exit_time -> discordante")
+    def p17(k):
+        return flat(1.0) if k < 40 else (1.0, 1.0, 0.9969, 0.9970)              # SL al minuto 40 (zona M1)
+    pm17 = {1: _path(p17)}
+    s17["t_exit"] = t17 + datetime.timedelta(minutes=40, seconds=30)
+    ok(controlla({1: s17}, pm17)[1] == 1, "T17 tempo in zona M1: SL reale a 40m30s, rigiocato nella barra M1 k=40 -> coincide")
+    s17["t_exit"] = t17 + datetime.timedelta(minutes=41, seconds=5)
+    ok(controlla({1: s17}, pm17)[1] == 0, "T17 CONTROESEMPIO tempo in zona M1: SL reale nel minuto DOPO (41m05s) -> discordante (tolleranza = una barra M1)")
+    s17.update({"t_exit": t17 + datetime.timedelta(days=7), "exit_after_path": 1})
+    def p17b(k):
+        return flat(1.0)
+    pf17 = {1: _path(p17b, {hh: flat(1.0) for hh in range(3, 120)})}
+    n17, ok17, mm17 = controlla({1: s17}, pf17)
+    ok(ok17 == 0 and oltre_percorso({1: s17}, mm17) == 1,
+       "T17 exit_after_path: uscita reale al giorno 7, rigioco 'fine' -> discordante E contata a parte come troncamento")
     # T14: SENZA EDGE, quante delle regole risultano 'significative' (IC95 del delta che esclude 0) per puro caso?
     frac = []
     for seed in range(6):
@@ -660,6 +717,11 @@ def main():
             nsp = sum(1 for m in mism if m[1] == "senza_percorso")
             if nsp:
                 print("OPENED SENZA PERCORSO (contate come discordanti): %d" % nsp)
+            nop = oltre_percorso(sig, mism)
+            if nop:
+                print("DISCORDANTI CON USCITA OLTRE IL PERCORSO (exit_after_path=1, troncamento a 5 giorni, non infedelta'): %d su %d" % (nop, len(mism)))
+            if mism:
+                print("Prime discordanze (sig_id, rigioco, reale): %s" % mism[:5])
             inv = invarianti(sig, path)
             for nome, nv, es in inv:
                 print("INVARIANTE %s: %s" % (nome, "OK" if nv == 0 else "VIOLATA %d volte, es. sig_id %s" % (nv, es)))
