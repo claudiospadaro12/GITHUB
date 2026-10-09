@@ -49,7 +49,7 @@ a tavolino, e si dice cosa resta fuori.
      un simbolo della v1.10 (guardia del diff, con contro-esempio). (b) OLTRE_LINEA_ESTERNA: casi a mano (long/short, linea
      esterna discorde, dentro la scala = X4, stop <= 0) + specchio Python INDIPENDENTE su ogni barra H1 dell'oro, 4 linee,
      famiglia ST3,5 / EMA200 calcolata dallo specchio py_stcore / py_ema (non dal C++). (c) invarianti di raccordo 32-41.
-  M) MUTANTI CIECHI: 80 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic + T1-T7 della v1.05: il tocco degli handle) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
+  M) MUTANTI CIECHI: 101 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic + T1-T7 della v1.05: il tocco degli handle + V1-V21 della v1.10: la regola di stop OLTRE_LINEA_ESTERNA) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
      controllo. Un mutante che passa = buco del collaudo.
@@ -758,7 +758,7 @@ def invarianti_stop(src, code, stc, bag):
     if "returngXV[k]+s*InpPlaceboAtr*gAtrN[k];" not in ns(corpo(code, "LineaEsternaPrezzo")):
         bag.append("RACCORDO v1.10: LineaEsternaPrezzo non e' gXV[k] + s x placebo x ATR[k] (stessa regola di LineaPrezzo)")
     # (38) gXD/gXV letti SOLO dentro i rami OLTRE (in GEOMETRIA_ATTUALE non sono nemmeno dimensionati)
-    letti = [m.start() for m in re.finditer(r"\bgX[VD]\s*\[", code)]
+    letti = [m.start() for m in re.finditer(r"\bgX[VD]\s*\[\s*[^\]\s]", code)]      # [] vuote = dichiarazione, non lettura
     for fn in ("CalcolaLineaEsterna", "LineaEsternaPrezzo", "ArmaScala", "ScriviConta"):
         b = corpo(code, fn) or ""
         k = code.find(b) if b else -1
@@ -1873,7 +1873,7 @@ def mutanti(raw, ser):
         ("D3 conteggio con >=", "if(gTocchiMax[L]>0 && prossimo>gTocchiMax[L])", "if(gTocchiMax[L]>0 && prossimo>=gTocchiMax[L])"),
         ("D4 solo LONG blocca i long", "   if(direzione==1 && s<0) return false;", "   if(direzione==1 && s>0) return false;"),
         ("D5 max tocchi 3.5 AUDIO a 1", "gTocchiMax[NC_L35]=DaModI(InpTocchiMax35,2,0,2);", "gTocchiMax[NC_L35]=DaModI(InpTocchiMax35,1,0,2);"),
-        ("D6 stop agganciato all'ordine sulla linea", "double sl=NormPrezzo(NC_Stop(gSLCrit,s,lv,p[2],", "double sl=NormPrezzo(NC_Stop(gSLCrit,s,lv,p[1],"),
+        ("D6 stop agganciato all'ordine sulla linea", "double sl=NormPrezzo(NC_StopSetup((int)InpStopModo,gSLCrit,s,lv,p[2],", "double sl=NormPrezzo(NC_StopSetup((int)InpStopModo,gSLCrit,s,lv,p[1],"),
         ("D7 rischio x10", "   return saldo*p/100.0;", "   return saldo*p/10.0;"),
         ("D8 perdita per lotto dimezzata", "OrderCalcProfit(ORDER_TYPE_BUY,_Symbol,1.0,px,px-dist,prof)", "OrderCalcProfit(ORDER_TYPE_BUY,_Symbol,1.0,px,px-dist*0.5,prof)"),
         ("D9 pip x10", "   return (cifre==3 || cifre==5) ? punto*10.0 : punto;", "   return (cifre==3 || cifre==5) ? punto*100.0 : punto;"),
@@ -1940,7 +1940,30 @@ def mutanti(raw, ser):
         ("T4 tocco dopo l'uscita per barre insufficienti", TOCCO + DOPO_TOCCO, DOPO_TOCCO + TOCCO),
         ("T5 tocco sull'handle sbagliato (EMA14 invece di EMA200)", "   CopyBuffer(hEma200,0,1,1,tocco);\n", "   CopyBuffer(hEma14,0,1,1,tocco);\n"),
         ("T6 esito del tocco assegnato e usato", "   CopyBuffer(hAdx,0,1,1,tocco);\n", "   int tk=CopyBuffer(hAdx,0,1,1,tocco); if(tk<0) return false;\n"),
-        ("T7 versione rimasta 1.04", '#define NC_VER "1.05"', '#define NC_VER "1.04"'),
+        ("T7 versione rimasta 1.05 (v1.10)", '#define NC_VER "1.10"', '#define NC_VER "1.05"'),
+        # --- v1.10 (decisione di Claudio 08/10): la regola di stop OLTRE_LINEA_ESTERNA (unitari V, barre vere, invarianti 32-41, guardia del diff)
+        ("V1 stop OLTRE dal lato sbagliato", "double oltreLinea=lineaEst-s*oltre;", "double oltreLinea=lineaEst+s*oltre;"),
+        ("V2 X4 tolto sul long", "   if(s>0 && oltreLinea>x4) { r=x4; esito=2; }\n", ""),
+        ("V3 linea esterna discorde non scartata", "if(dirEst!=(double)s || !(lineaEst>0.0)) { esito=1; return 0.0; }", "if(!(lineaEst>0.0)) { esito=1; return 0.0; }"),
+        ("V4 GEOMETRIA_ATTUALE che legge la linea esterna", "if(modo!=1) return NC_Stop(criterio,s,linea,profondo,estremo,buf);",
+         "if(modo!=1) return (lineaEst>0.0 && dirEst==(double)s) ? MathMin(NC_Stop(criterio,s,linea,profondo,estremo,buf),lineaEst) : NC_Stop(criterio,s,linea,profondo,estremo,buf);"),
+        ("V5 default OLTRE (default non neutro)", "InpStopModo = NC_STOP_GEOMETRIA_ATTUALE;", "InpStopModo = NC_STOP_OLTRE_LINEA_ESTERNA;"),
+        ("V6 default 10 u invece di 20", "input double InpStopOltreU      = 20.0;", "input double InpStopOltreU      = 10.0;"),
+        ("V7 CSV del conteggio sempre in GEOMETRIA_ATTUALE", "double sl=NC_StopSetup((int)InpStopModo,gSLCrit,s,lv0,", "double sl=NC_StopSetup(0,gSLCrit,s,lv0,"),
+        ("V8 linea di setup al posto della linea esterna", "lest=NormPrezzo(LineaEsternaPrezzo(last,s)); dest=gXD[last];", "lest=lv; dest=gXD[last];"),
+        ("V9 linea esterna col moltiplicatore della linea di setup", "gMultLinea[F],gXa", "gMultLinea[L],gXa"),
+        ("V10 famiglia: EMA200 misurata sulla ST3,5", "return (L==3) ? 3 : 2;", "return (L==3) ? 2 : 2;"),
+        ("V11 oltre non moltiplicato per l'unita'", "InpStopOltreU*gU,es));", "InpStopOltreU,es));"),
+        ("V12 esito 1 che non scarta", "if(es==1){ gImb[IMB_O_STOPEST]++;", "if(es==7){ gImb[IMB_O_STOPEST]++;"),
+        ("V13 placebo senza verso sulla linea esterna", "return gXV[k]+s*InpPlaceboAtr*gAtrN[k];", "return gXV[k]+InpPlaceboAtr*gAtrN[k];"),
+        ("V14 CSV: linea_stop scritta dalla linea di setup", "P(gSet[L].lineaStop)", "P(gSet[L].linea)"),
+        ("V15 stop_ped calcolato su uno stop scartato", "D((ped>0 && es!=1) ? MathAbs(p[0]-sl)/ped : 0,1)", "D((ped>0) ? MathAbs(p[0]-sl)/ped : 0,1)"),
+        ("V16 linea esterna calcolata anche in GEOMETRIA_ATTUALE", "if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA) CalcolaLineaEsterna(L);", "CalcolaLineaEsterna(L);"),
+        ("V17 criterio a mano accettato con OLTRE", "if(InpSLCriterio!=NC_SL_DA_MODALITA){ err=", "if(false){ err="),
+        ("V18 linea esterna scritta sugli array della linea di setup", "gMultLinea[F],gXa,gXu,gXdn,gXD,gXV);", "gMultLinea[F],gXa,gXu,gXdn,gLD,gLV);"),
+        ("V19 X4 dello short contato come regola", "if(s<0 && oltreLinea<x4) { r=x4; esito=2; }", "if(s<0 && oltreLinea<x4) { r=x4; esito=0; }"),
+        ("V20 X4 dello short rovesciato", "if(s<0 && oltreLinea<x4)", "if(s<0 && oltreLinea>x4)"),
+        ("V21 colonne nuove fuori dalla coda (stop_modo prima di motivo)", "durata_min;motivo;stop_modo;linea_stop;stop_esito", "durata_min;stop_modo;motivo;linea_stop;stop_esito"),
     ]
     base = tempfile.mkdtemp(prefix="natcla_mutanti_")     # FUORI dal repo (classe 1159)
     assert not os.path.abspath(base).startswith(os.path.abspath(ROOT))
