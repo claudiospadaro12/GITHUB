@@ -102,7 +102,7 @@ def carica(cartella):
                 d[k] = int(d[k])
         for k in ("entry_ref_price", "atr_sig", "risk_dist", "sl_price", "tp_ini", "spread_entry_pts", "point", "pip_size",
                   "cnf_open", "cnf_high", "cnf_low", "cnf_close", "atr_ratio", "adx", "commission", "risk_money", "net",
-                  "exit_price", "mfe_r", "mae_r"):
+                  "exit_price", "mfe_r", "mae_r", "open_price"):
             if d.get(k, "") not in ("", None):
                 d[k] = float(d[k])
         d["t_bar"] = T(d["bar_open_time"])
@@ -291,8 +291,12 @@ def valuta_regola(nome, regola, sig, path, ids, base, rng):
 def portafoglio(sig, path, ids_candidati, regola, max_trades=4, usa_atr_ok=True):
     """Rigioca il portafoglio: i candidati sono OPENED/BLOCK_MAXTRADES/BLOCK_HASOPEN (e atr_ok==1) in ordine di tempo;
     un candidato entra se (aperte < max_trades) e non c'e' gia' la stessa (simbolo, lato). Le uscite dipendono da `regola`."""
+    # (Cancello 09/10) un candidato SENZA righe di percorso (l'EA lo conta in "percorsi mancanti") non si puo'
+    # rigiocare: si esclude e si CONTA, invece di far morire il lettore su rows[0] (IndexError).
     cand = [i for i in ids_candidati if sig[i]["outcome"] in ("OPENED", "BLOCK_MAXTRADES", "BLOCK_HASOPEN")
             and (not usa_atr_ok or sig[i]["atr_ok"] == 1)]
+    senza = [i for i in cand if not path.get(i)]
+    cand = [i for i in cand if path.get(i)]
     cand.sort(key=lambda i: (sig[i]["t_bar"], i))
     aperte = []                    # (t_exit, sym, side)
     presi, r_tot = [], 0.0
@@ -307,7 +311,7 @@ def portafoglio(sig, path, ids_candidati, regola, max_trades=4, usa_atr_ok=True)
         aperte.append((e["t"], sig[i]["symbol"], sig[i]["side"]))
         presi.append(i)
         r_tot += e["r"]
-    return {"n": len(presi), "sum_r": r_tot, "ids": presi}
+    return {"n": len(presi), "sum_r": r_tot, "ids": presi, "senza_percorso": len(senza)}
 
 
 def controlla(sig, path):
@@ -316,6 +320,10 @@ def controlla(sig, path):
     dist = []
     for i in opened:
         s = sig[i]
+        # (Cancello 09/10) OPENED senza percorso: NON coincide (conta CONTRO il 95%, prudente) e non fa crollare il lettore
+        if not path.get(i):
+            dist.append((i, "senza_percorso", s["exit_reason"]))
+            continue
         e = rigioca(s, path[i], {})
         mot_real = s["exit_reason"]
         if e["motivo"] == mot_real or (e["motivo"] in ("sl", "tp") and mot_real == e["motivo"]):
@@ -323,6 +331,40 @@ def controlla(sig, path):
         else:
             dist.append((i, e["motivo"], mot_real))
     return len(opened), ok_, dist
+
+
+def invarianti(sig, path):
+    """(Cancello 09/10) Invarianti 3, 4 e 6 della spec par. 5, che la spec attribuisce a --controlla e che il lettore
+    non controllava. Ritorna [(nome, violazioni, primi esempi)]. La 1 e la 2 (totali e sum(net) contro il CSV di
+    OptResults) restano FUORI: quel CSV non sta nella cartella della telemetria (si fanno a mano, dichiarato)."""
+    out = []
+    v = [i for i in sig if sig[i]["t_bar"].minute != 0 or sig[i]["t_bar"].second != 0]
+    out.append(("3a bar_open_time sull'ora piena", len(v), v[:5]))
+    v = []
+    for i, rows in path.items():
+        if i not in sig:
+            v.append(i)
+            continue
+        t0 = sig[i]["t_bar"]
+        for r in rows:
+            passo = datetime.timedelta(minutes=r["k"]) if r["tf"] == "M1" else datetime.timedelta(hours=r["k"])
+            if r["t"] != t0 + passo:
+                v.append(i)
+                break
+    out.append(("3b percorso: t_open = bar_open_time + k (M1 da k=0 = bar_open_time; sig_id esistente)", len(v), v[:5]))
+    v = []
+    for i, s in sig.items():
+        if s["outcome"] != "OPENED":
+            continue
+        pt = s.get("point") or 0.0
+        op = s.get("open_price")
+        if not (isinstance(s.get("pos_id"), int) and s["pos_id"] > 0) or not isinstance(op, float) \
+                or abs(op - s["entry_ref_price"]) > 0.5 * pt:
+            v.append(i)
+    out.append(("4 OPENED: pos_id > 0 e entry_ref_price = open_price", len(v), v[:5]))
+    v = [i for i in sig if sig[i]["outcome"] != "OPENED" and not str(sig[i]["outcome"]).startswith(("BLOCK_", "SKIP_"))]
+    out.append(("6 outcome != OPENED solo con un motivo BLOCK_*/SKIP_* (NON_RISOLTO = canarino)", len(v), v[:5]))
+    return out
 
 
 def prepara(sig):
@@ -337,12 +379,18 @@ def analizza(sig, path):
     rng = random.Random(SEME)
     cr = prepara(sig)
     n, ok_, mism = controlla(sig, path)
+    inv = invarianti(sig, path)
+    if any(nv for _, nv, _ in inv):
+        print("INVARIANTI VIOLATE (spec par. 5): %s -- nessun numero si legge" % [(nm, nv) for nm, nv, _ in inv if nv])
+        return 1
     print("COMMISSIONE per trade: %.4f R (mediana OPENED)" % cr)
     print("RIGIOCO DI BASE: %d OPENED, uscita coincidente %d (%.1f%%)  [soglia di validita' 95%%]" % (n, ok_, 100.0 * ok_ / max(1, n)))
     if n and ok_ / float(n) < 0.95:
         print("  >>> SIMULAZIONE NON VALIDA per questa cella: nessun numero sotto si legge. Prime discordanze: %s" % mism[:5])
         return 1
-    ids = [i for i in sig if sig[i]["outcome"] == "OPENED"]
+    ids = [i for i in sig if sig[i]["outcome"] == "OPENED" and path.get(i)]
+    if len(ids) < n:
+        print("OPENED SENZA PERCORSO, escluse dalle regole e dal portafoglio: %d (gia' contate come discordanti sopra)" % (n - len(ids)))
     base = esiti(sig, path, {}, ids)
     print("\n%d regole x %d posizioni. Delta = somma(r regola - r base); IC95 = bootstrap per GIORNO sul delta MEDIO per posizione." % (len(regole_standard()) - 1, len(ids)))
     print("%-42s %4s %5s %8s %8s %8s %9s %17s %6s %6s %6s %6s" % ("regola", "n", "chius", "r chiusi", "r base", "r resto", "delta R", "IC95 delta medio", "PFb", "PFr", "DDb", "DDr"))
@@ -354,7 +402,7 @@ def analizza(sig, path):
             nome, v["n"], v["n_early"], v["r_early_rule"], v["r_early_base"], v["r_resto"], v["delta"], v["d_lo"], v["d_hi"], v["pf_base"], v["pf_rule"], v["dd_base"], v["dd_rule"]))
     cand = [i for i in sig]
     pb = portafoglio(sig, path, cand, {})
-    print("\nFREQUENZA (portafoglio rigiocato, Max_Trades=4): base %d aperture, somma r %+.2f" % (pb["n"], pb["sum_r"]))
+    print("\nFREQUENZA (portafoglio rigiocato, Max_Trades=4): base %d aperture, somma r %+.2f (candidati senza percorso esclusi: %d)" % (pb["n"], pb["sum_r"], pb["senza_percorso"]))
     for nome in ("V1 T+30 adverso >= 0.00 ATR", "V2 T+30 colore opposto e oltre centro cnf", "V5 fine candela opposta", "BE 0.30 R"):
         rg = regole_standard()[nome]
         pr = portafoglio(sig, path, cand, rg)
@@ -536,6 +584,42 @@ def autotest():
     s13.update({"outcome": "OPENED", "exit_reason": "tp"})
     n_, ok_, mism = controlla({1: s13}, {1: _path(p1, {5: (0.9985, 0.9985, 0.9969, 0.9970)})})
     ok(n_ == 1 and ok_ == 0 and len(mism) == 1, "T13 discordanza: rigioco dice SL, reale dice TP -> 0/1 coincidenti (simulazione NON valida)")
+    # T15 (Cancello 09/10): OPENED SENZA righe di percorso (l'EA lo prevede: "percorsi mancanti"). Prima: IndexError
+    # su rows[0]. Ora: discordante (conta contro il 95%), e il portafoglio la esclude e la CONTA.
+    s15a = _sig()
+    s15a.update({"sig_id": 1, "outcome": "OPENED", "exit_reason": "sl"})
+    s15b = _sig()
+    s15b.update({"sig_id": 2, "symbol": "GBPUSD", "outcome": "OPENED", "exit_reason": "sl"})
+    p15 = {1: _path(p1, {5: (0.9985, 0.9985, 0.9969, 0.9970)})}          # il 2 non ha righe (chiave assente)
+    try:
+        n15, ok15, mm15 = controlla({1: s15a, 2: s15b}, p15)
+        ok(n15 == 2 and ok15 == 1 and mm15 == [(2, "senza_percorso", "sl")],
+           "T15 OPENED senza percorso: 1 su 2 coincidenti, la mancante e' 'senza_percorso' (nessun IndexError)")
+        p15b = dict(p15)
+        p15b[2] = []                                                      # chiave presente ma lista vuota
+        pf15 = portafoglio({1: s15a, 2: s15b}, p15b, [1, 2], {})
+        ok(pf15["n"] == 1 and pf15["senza_percorso"] == 1, "T15 portafoglio: il candidato senza percorso e' escluso e contato (1 preso, 1 escluso)")
+    except IndexError:
+        ok(False, "T15 OPENED senza percorso: il lettore muore con IndexError")
+    # T16 (Cancello 09/10): invarianti 3/4/6 della spec. Pulito -> zero violazioni; poi un CONTROESEMPIO per ognuna.
+    s16 = _sig()
+    s16.update({"sig_id": 1, "outcome": "OPENED", "exit_reason": "sl", "pos_id": 7, "open_price": s16["entry_ref_price"]})
+    b16 = _sig()
+    b16.update({"sig_id": 2, "symbol": "GBPUSD", "outcome": "BLOCK_MAXTRADES", "pos_id": 0})
+    sg16 = {1: s16, 2: b16}
+    ph16 = {1: _path(p1, {5: (0.9985, 0.9985, 0.9969, 0.9970)})}
+    ok(all(nv == 0 for _, nv, _ in invarianti(sg16, ph16)), "T16 invarianti: segnali e percorso coerenti -> zero violazioni")
+    def viol(sg, ph):
+        return {nm[:2].strip(): nv for nm, nv, _ in invarianti(sg, ph) if nv}
+    c = {k: dict(v) for k, v in sg16.items()}
+    c[1]["open_price"] = c[1]["entry_ref_price"] + 3e-5
+    ok(viol(c, ph16) == {"4": 1}, "T16 CONTROESEMPIO 4: open_price diverso da entry_ref_price di 3 punti -> violata")
+    c = {k: dict(v) for k, v in sg16.items()}
+    c[2]["outcome"] = "NON_RISOLTO"
+    ok(viol(c, ph16) == {"6": 1}, "T16 CONTROESEMPIO 6: un NON_RISOLTO (canarino) -> violata")
+    c = {k: dict(v) for k, v in sg16.items()}
+    c[1]["t_bar"] = c[1]["t_bar"] + datetime.timedelta(minutes=1)
+    ok(set(viol(c, ph16)) == {"3a", "3b"}, "T16 CONTROESEMPIO 3: barra spostata di un minuto -> violate 3a e 3b")
     # T14: SENZA EDGE, quante delle regole risultano 'significative' (IC95 del delta che esclude 0) per puro caso?
     frac = []
     for seed in range(6):
@@ -573,6 +657,15 @@ def main():
         if "--controlla" in a:
             n, ok_, mism = controlla(sig, path)
             print("OPENED %d, rigioco coincidente %d (%.1f%%)" % (n, ok_, 100.0 * ok_ / max(1, n)))
+            nsp = sum(1 for m in mism if m[1] == "senza_percorso")
+            if nsp:
+                print("OPENED SENZA PERCORSO (contate come discordanti): %d" % nsp)
+            inv = invarianti(sig, path)
+            for nome, nv, es in inv:
+                print("INVARIANTE %s: %s" % (nome, "OK" if nv == 0 else "VIOLATA %d volte, es. sig_id %s" % (nv, es)))
+            if any(nv for _, nv, _ in inv):
+                print("  >>> invarianti violate: il file NON si legge finche' non sono spiegate")
+                return 1
             return 0 if n and ok_ / float(n) >= 0.95 else 1
         return analizza(sig, path)
     return 0
