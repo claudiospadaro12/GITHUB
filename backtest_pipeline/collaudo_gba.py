@@ -34,8 +34,11 @@ Esce con 0 solo se tutto passa. NON prova: compilazione MQL5 (MetaEditor assente
 Guardian (fuori dalla sua riga), GbaApri/GbaGestisci/GbaPnlGiorno/GbaMargineOk/GbaPosizioneAperta (API di conto),
 iMA/iATR del terminale, tick reali, spread reale BCM, NESSUN backtest. E NON esegue la COLLA: GbaNuovaBarra (spread,
 ora, posizione aperta, giornata, tetto passati a GbaDecidi) e il dispatch di OnTick li rifa' il driver C++ da se';
-su quella colla ci sono solo ANCORE statiche (S38-S45, aggiunte dal cancello del 09/10: prima 7 mutanti su 9 verdi).
+su quella colla ci sono solo ANCORE statiche (S38-S45, aggiunte dal cancello del 09/10: prima 7 mutanti su 9 verdi)
+piu' le chiamate intere e l'IMPRONTA delle 10 funzioni non eseguite (secondo lettore del 09/10: altri 9 mutanti su 9
+erano verdi contro le sole S38-S45). L'impronta CONGELA quel codice, non lo prova: ogni modifica fa FAIL.
 """
+import hashlib
 import math
 import os
 import random
@@ -188,6 +191,15 @@ FUNZIONI_ATTESE = {
     "GbaGestisci", "OnInit", "OnDeinit", "OnTick", "GbaLogAvvio", "GbaCaso", "GbaAutotestNucleo", "AutoTestGba",
 }
 RIGA_GUARDIAN = 'if(!ABTG_GuardiaIngresso(InpUsaGuardian, "ABTG_GoldBreakoutATR")) return;'
+# Impronta (sha256[:16] del testo mascherato -- commenti tolti, contenuto delle stringhe a 'x' -- con gli spazi
+# compressi) delle funzioni che NESSUN driver esegue. Si aggiorna SOLO dopo averle rilette a mano, e lo si dichiara
+# nelle note dell'EA (par. 3-4). EA v1.10, SHA 1381e3dc...
+IMPRONTE_COLLA = {
+    "OnTick": "9bf5a706a06db9f8", "GbaNuovaBarra": "c4827779e0298e00", "GbaApri": "ff7e8ead7d712659",
+    "GbaGestisci": "72838ef807eb2341", "GbaPosizioneAperta": "0f66e139660de765", "GbaPnlGiorno": "1accbd6de512f18b",
+    "GbaAperteOggi": "6e0c835dbf9f9ff1", "GbaMargineOk": "35201d379082c215", "GbaLotti": "b709d8fd083eb870",
+    "GbaTickValue": "006efaa508e93217",
+}
 _CACHE_MAGIC = {}
 
 
@@ -344,6 +356,32 @@ def statico(raw, bag, quiet=False):
           in fn.get("GbaPosizioneAperta", ""), "COLLA GbaPosizioneAperta: simbolo E magic", bag, quiet=quiet)
     check("SYMBOL_TRADE_FREEZE_LEVEL" in ge and "PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;" in ge,
           "COLLA GbaGestisci: freeze level nella distanza minima, solo le posizioni del magic", bag, quiet=quiet)
+    # COLLA, secondo lettore (09/10): le ancore S38-S45 coprivano i NOVE punti mutati e basta. Nove mutanti nuovi
+    # (hh/ll scambiati nella chiamata a GbaDecidi, filtro spread a 0.0, spread azzerato dopo la lettura, GbaApri col
+    # lato invertito, BE trigger/offset scambiati, uscita a tempo a 0, lato invertito in GbaLeggiGestione, ema come
+    # atr, trailing col moltiplicatore dello SL) passavano TUTTI verdi. Due rimedi: (a) le CHIAMATE intere della
+    # colla ancorate testo per testo; (b) l'IMPRONTA delle funzioni che nessun driver esegue: qualunque modifica
+    # (anche una riga aggiunta) fa FAIL e obbliga a rileggerle a mano e ad aggiornare l'impronta DICHIARANDOLO.
+    check("int dir = GbaDecidi(close1, hh, ll, ema, atr, spread, InpSpreadMaxATR,\n"
+          "                       dt.hour, InpHourStart, InpHourEnd,\n"
+          "                       GbaPosizioneAperta(), giorno, InpAllowLong, InpAllowShort,\n"
+          "                       aperteOggi, InpMaxTradesPerDay, motivo);" in nb
+          and "if(!GbaLeggiSegnale(t0, close1, hh, ll, ema, atr))" in nb and "GbaApri(dir > 0, atr, spread);" in nb,
+          "COLLA GbaNuovaBarra: chiamate intere a GbaLeggiSegnale, GbaDecidi (17 argomenti in ordine) e GbaApri (lato)",
+          bag, quiet=quiet)
+    check("if(!GbaLeggiGestione(tOpen, isLong, t0, barre, estremo, atr)) { estremo = 0.0; atr = 0.0; }" in ge
+          and "int az = GbaAzione(isLong, openPx, curSL, bid, ask, estremo, atr,\n"
+              "                         barre, InpTimeExitBars,\n"
+              "                         InpTrail_ATR, InpUseBreakeven, InpBE_TriggerATR, InpBE_OffsetATR,\n"
+              "                         minDist, tickSize, nuovo);" in ge,
+          "COLLA GbaGestisci: chiamate intere a GbaLeggiGestione e GbaAzione (argomenti in ordine)", bag, quiet=quiet)
+    impronte = {}
+    for nome in IMPRONTE_COLLA:
+        testo = " ".join(maschera(fn.get(nome, "")).split())
+        impronte[nome] = hashlib.sha256(testo.encode("ascii", "replace")).hexdigest()[:16]
+    cambiate = sorted(k for k in IMPRONTE_COLLA if impronte[k] != IMPRONTE_COLLA[k])
+    check(not cambiate, "COLLA: impronta delle %d funzioni NON eseguite dal driver invariata (cambiate: %s)"
+          % (len(IMPRONTE_COLLA), ["%s %s" % (k, impronte[k]) for k in cambiate]), bag, quiet=quiet)
     # autotest
     at = fn.get("AutoTestGba", "")
     check("GbaAutotestNucleo()" in at and "ABTG_AutotestGuardia()" in at, "autotest: nucleo + Guardian", bag, quiet=quiet)
@@ -1219,6 +1257,21 @@ MUTANTI = [
     ("S43", "freeze level ignorato", "SymbolInfoInteger(g_sym, SYMBOL_TRADE_FREEZE_LEVEL)) * point;", "0) * point;", 0, "S"),
     ("S44", "g_lastBar mai aggiornato (segnale a ogni tick)", "   g_lastBar = t0;\n   GbaNuovaBarra(t0);", "   GbaNuovaBarra(t0);", 0, "S"),
     ("S45", "giornata mai bloccata nella colla", "giorno = GbaGiornoBloccato(GbaPnlGiorno(), InpMaxDailyLoss);", "giorno = false;", 0, "S"),
+    # COLLA, secondo lettore (09/10): scritti DOPO le ancore S38-S45 e passati tutti VERDI contro di esse.
+    ("S46", "hh/ll scambiati nella chiamata a GbaDecidi", "int dir = GbaDecidi(close1, hh, ll, ema, atr,",
+     "int dir = GbaDecidi(close1, ll, hh, ema, atr,", 0, "S"),
+    ("S47", "filtro spread a 0.0 nella colla", "atr, spread, InpSpreadMaxATR,\n", "atr, spread, 0.0,\n", 0, "S"),
+    ("S48", "spread azzerato dopo la lettura", "   int motivo = GBA_NO_SEGNALE;\n   int dir",
+     "   spread = 0.0;\n   int motivo = GBA_NO_SEGNALE;\n   int dir", 0, "S"),
+    ("S49", "GbaApri col lato invertito", "GbaApri(dir > 0, atr, spread);", "GbaApri(dir < 0, atr, spread);", 0, "S"),
+    ("S50", "BE trigger/offset scambiati in GbaGestisci", "InpBE_TriggerATR, InpBE_OffsetATR,\n",
+     "InpBE_OffsetATR, InpBE_TriggerATR,\n", 0, "S"),
+    ("S51", "uscita a tempo spenta in GbaGestisci", "barre, InpTimeExitBars,", "barre, 0,", 0, "S"),
+    ("S52", "lato invertito in GbaLeggiGestione", "GbaLeggiGestione(tOpen, isLong, t0,", "GbaLeggiGestione(tOpen, !isLong, t0,", 0, "S"),
+    ("S53", "ema passata come atr a GbaDecidi", "int dir = GbaDecidi(close1, hh, ll, ema, atr,",
+     "int dir = GbaDecidi(close1, hh, ll, ema, ema,", 0, "S"),
+    ("S54", "trailing col moltiplicatore dello SL in GbaGestisci", "InpTrail_ATR, InpUseBreakeven,", "InpSL_ATR, InpUseBreakeven,", 0, "S"),
+    ("S55", "riga aggiunta in OnTick (g_lastBar azzerato)", "   GbaNuovaBarra(t0);\n}", "   GbaNuovaBarra(t0);\n   g_lastBar = 0;\n}", 0, "S"),
 ]
 
 
@@ -1271,7 +1324,8 @@ def main():
         shutil.rmtree(tmp, ignore_errors=True)
     print("\nNON PROVATO: compilazione MQL5 (MetaEditor assente), CTrade e riempimenti, Guardian oltre la sua riga, "
           "GbaApri/GbaGestisci/GbaPnlGiorno/GbaMargineOk/GbaPosizioneAperta (API di conto), la COLLA GbaNuovaBarra/OnTick "
-          "(il driver C++ la rifa' da se': solo ancore statiche), iMA/iATR del terminale, tick e spread reali, "
+          "(il driver C++ la rifa' da se': solo ancore statiche + impronta, cioe' CONGELATA, non eseguita), "
+          "iMA/iATR del terminale, tick e spread reali, "
           "NESSUN backtest.")
     if FAILS:
         print("\nESITO: FAIL (%d)" % len(FAILS))
