@@ -5,6 +5,10 @@ rischio Azzurra 0,5%, e proviamolo nel conto DEMO PICCOLO 50503392, NON nel cont
 
 Stato al momento della scrittura: **preparato, NON ancora passato dal cancello** (controllo-preventivo +
 verificatore-stringhe + lettore indipendente). Finche' non c'e' il PASS, niente di questo esce verso il VPS.
+**controllo-preventivo (strato 2) 09/10: FAIL corretto qui**, in modo mirato (avvisi 1, 2, 5, nuovo 6 sulla trial
+FTMO viva; bersaglio dei passi 2-4; grafico EURGBP invece di EURUSD; righe ERR attese a secco; proprieta' da menu;
+ora dell'accensione; NON VERIFICATO). Serve il **lettore indipendente** di queste correzioni, e il passo 4
+aspetta la scelta A/B/C di Claudio (avviso 6).
 
 ---
 
@@ -36,17 +40,51 @@ della specifica: prefisso <= 21).
 1. **Rischio aperto delle due Bulge sul piccolo: 5,2%.** Bulge VIOLA 4 x 0,8% = 3,2% + Azzurra 4 x 0,5% = 2,0%.
    E' **sopra il cap C1 firmato (3,25%)**, che sul piccolo comunque **non lo applica nessuno**. Claudio lo sa e
    l'ha deciso il 09/10. E le altre sedie del piccolo si **sommano** a questo numero.
-2. **Kill switch giornaliero 2% PER ISTANZA, non per conto.** Ogni EA conta solo i SUOI deal chiusi (filtro sul
-   magic) della giornata: Bulge 772700 e Azzurra 774500 hanno ciascuno il suo 2% e i suoi 4 SL. Il kill switch
-   **blocca i NUOVI ingressi**, non chiude le posizioni aperte, e **non guarda il flottante**. Giornata peggiore
-   delle sole due Bulge, a stop pieni: **circa 4%** realizzato (fatto dal codice, non misurato in campo).
+   Per ordine di grandezza (sonda `CODA_01` del 09/10 03:30, profilo ORO, **28 sedie**): la somma dei campi
+   `rischio` delle altre sedie del piccolo, una posizione ciascuna, fa **circa 19%** (BreakingBand 3 x 1,0;
+   GapFill 3 x 1,0; PunteLarry 3,8; PostNews 3 x 1,3; e le altre); con le due Bulge **circa 24%**. Unita' del
+   campo non verificata EA per EA: e' un ordine di grandezza, non una misura. Ultimo saldo letto del piccolo:
+   **5.430,99 EUR** (30/09, HANDOFF).
+2. **Kill switch giornaliero PER ISTANZA, non per conto.** Ogni EA conta solo i SUOI deal chiusi (filtro sul
+   magic) della giornata server: si ferma a **4 SL nel giorno**, **3 SL consecutivi** o **perdita chiusa >= 2%**
+   (conta come "SL" ogni chiusura in perdita, anche un TP sotto la commissione). Il kill switch **blocca i NUOVI
+   ingressi**, non chiude le posizioni aperte, e **non guarda il flottante**. Quindi la giornata peggiore NON e'
+   2% per istanza: quando scatta, possono restare aperte **fino a 3 posizioni** (Max_Trades 4 meno quella appena
+   chiusa), che possono andare a stop dopo. Limite da codice, a stop di 1 R esatto e senza gap: **Azzurra circa
+   3,5%** (4 SL x 0,5 + 3 aperte x 0,5) e **Bulge 772700 circa 5,6%** (4 SL x 0,8 + 3 x 0,8), cioe' **fino a
+   circa 9% lordo in un giorno per le due Bulge insieme** (le vincite intercalate lo riducono; gap e slittamento
+   sullo stop lo aumentano). Fatto dal codice (r.1121-1180), non misurato in campo.
+   _(Correzione del controllo-preventivo 09/10: qui c'era scritto "circa 4%", che contava solo il 2% di soglia
+   per istanza e dimenticava le posizioni ancora aperte quando il kill switch scatta.)_
 3. **Sul piccolo NON gira nessun Guardian.** `InpUsaGuardian=true` resta acceso per standard di casa, ma senza
    Guardian e' **fail-open**: niente pausa B1, niente cap C1. Lo script **non** porta il Guardian ne' l'include.
 4. **L'Azzurra NON e' MAI stata compilata in MetaEditor** (ne' backtestata). Il collaudo 63/63 prova la logica a
    tavolino. **Se F7 da' anche un solo errore: NON attaccare niente, riporta gli errori.**
 5. Da sapere (non misurato): Azzurra e Bulge VIOLA girano sugli **stessi 22 cross** dello stesso conto. La VIOLA
    entra **contro** l'impulso, l'Azzurra **a favore**: sullo stesso cross possono trovarsi aperte in versi
-   opposti (il conto e' hedging, quindi e' permesso). Si vede dai magic.
+   opposti (il conto e' hedging, quindi e' permesso). Si vede dai magic. Plausibilmente raro (tutte e due escono
+   alla mediana, e per aprire dalla banda opposta il prezzo deve attraversarla), ma non misurato. Stesso conto,
+   stessa famiglia di meccanismo: `ABTG_BreakingBand` (772161-772163, continuazione) gira gia' su GBPUSD, EURUSD,
+   AUDUSD del piccolo, e li' l'Azzurra puo' **raddoppiare** lo stesso ingresso.
+6. **LA TRIAL FTMO 1514806751 (`C:\FTMO`) E' VIVA e la Bulge VIOLA della trial (magic 772720) gira su 15 dei 22
+   cross dell'Azzurra** (preset `ABTG_Bulge_v520_SOLO_VIOLA_FTMO_TRIAL.set`: NZDUSD, USDCAD, USDCHF, EURGBP, EURNZD,
+   GBPAUD, GBPNZD, AUDJPY, AUDCAD, AUDNZD, NZDJPY, NZDCAD, NZDCHF, CADJPY, CADCHF). Giornale della trial,
+   sonda `CODA_09` del 09/10 03:30: Guardian `stato=OK pausa=off`, rischio aperto 1,61%, scade il 14/10.
+   La regola scritta dal supporto FTMO (`PIANO_FREE_TRIAL_FTMO_2026-09-30.md` par. 3, punto 8) vieta posizioni
+   **OPPOSTE fra conti diversi**, anche demo di un altro broker, anche su strumenti **correlati**, senza soglia,
+   anche se accidentali; che valga per la Free Trial e' [NON MISURATO] e la casa la tratta come SI'. La VIOLA
+   entra **contro** l'impulso, l'Azzurra **a favore**: accendere l'Azzurra sui 22 cross **aggiunge occasioni di
+   posizioni opposte con la trial** (stesso cross raro per la ragione del punto 5; cross correlati, es. AUD/NZD/CAD,
+   non stimato). E' lo stesso tema gia' aperto dal 01/10 per la Bulge 772700 del piccolo (HANDOFF, "Decisioni
+   aperte": pausa o ridotto ai 7 cross comuni), che Claudio non ha ancora chiuso.
+   **DOMANDA A CLAUDIO, PRIMA DEL PASSO 4** (il passo 0-3 non apre posizioni):
+   - **A.** accendere subito sui 22 cross, accettando il rischio sulla trial fino al 14/10;
+   - **B.** fare il passo 3 (autotest) ora e il **passo 4 dopo il 14/10** (trial scaduta): zero rischio, costa
+     ~5 giorni di forward;
+   - **C.** `Symbols_List` ridotta ai 7 cross che la trial NON ha (EURUSD, GBPUSD, AUDUSD, USDJPY, GBPJPY, GBPCAD,
+     CHFJPY): cambia un default -> preset nuovo, riga nuova, cancello di nuovo; resta la correlazione fra cross
+     diversi.
+   Finche' Claudio non sceglie, **il passo 4 non si fa.**
 
 ---
 
@@ -93,6 +131,11 @@ Tutti i passi sotto si fanno **solo** nella finestra MT5 con **50503392** nel ti
 
 ## PASSO 2: F7 (terminale 50503392, `C:\Program Files\BCM Markets MT5 Terminal`)
 
+**Bersaglio:** azione a mano dentro MT5, terminale del conto DEMO PICCOLO **50503392**
+(`C:\Program Files\BCM Markets MT5 Terminal`), riconosciuto dal passo 1. **Non tocca:** trial 1514806751
+(`C:\FTMO`), 100k 50504263 (`...MT5 Terminal -V3`), REALE 10105439 (`C:\BCM_Reale`), manuale 50503635
+(`C:\MT5_MANUALE`), banco 50504400 (`C:\MT5_Backtest`), Pepperstone, Tickmill.
+
 1. Nella finestra MT5 col titolo **50503392**: tasto **F4** (apre il MetaEditor **di quel** terminale).
 2. Controllo del MetaEditor giusto: `File > Apri cartella dati` deve aprire una cartella che finisce con
    **`215D85D767A1C39E22D242C8114BF9F5`**. Se finisce con un altro nome: **chiudere il MetaEditor e non compilare**.
@@ -104,23 +147,32 @@ Tutti i passi sotto si fanno **solo** nella finestra MT5 con **50503392** nel ti
 
 ---
 
-## PASSO 3: attaccare A SECCO su UN SOLO grafico (terminale 50503392)
+## PASSO 3: attaccare A SECCO su UN SOLO grafico (terminale 50503392, `C:\Program Files\BCM Markets MT5 Terminal`)
+
+**Bersaglio:** azione a mano dentro MT5, terminale **50503392** (stesso del passo 2, stessa lista di cio' che
+NON si tocca).
 
 L'autotest `[BULGE][AUTOTEST]` si stampa all'**avvio dell'EA sul grafico** (OnInit), **non** con F7. Quindi
 lo si legge **attaccando l'EA con il trading SPENTO per lui**, e lo si accende solo dopo.
 
 1. Nella finestra MT5 col titolo **50503392**: Navigatore -> tasto destro su **Expert Advisors** -> **Aggiorna**:
    deve comparire `ABTG_BulgeAzzurra`.
-2. **Un grafico NUOVO**: `File > Nuovo grafico > EURUSD`, timeframe **H1** (l'EA lavora sempre su H1 per tutti i
-   22 cross; il grafico serve solo a dargli i tick). **UN SOLO grafico**: due copie con lo stesso magic 774500
-   si pesterebbero (Max_Trades e kill switch contati insieme, segnali doppi).
+2. **Un grafico NUOVO**: `File > Nuovo grafico > EURGBP`, timeframe **H1** (l'EA lavora sempre su H1 per tutti i
+   22 cross; il grafico serve solo a dargli i tick). **EURGBP e non EURUSD**: sul piccolo ci sono gia' DUE grafici
+   EURUSD H1 con una sedia (BreakingBand 772162, GapFill 772232; sonda `CODA_01` del 09/10), ed EURGBP non ne ha
+   nessuno: cosi' al passo 4 e al passo 3.5 non si puo' aprire o togliere l'EA del grafico sbagliato.
+   **Prima di trascinare**: nell'angolo in alto a destra del grafico nuovo **non deve esserci il nome di nessun
+   EA**. Se c'e', non e' il grafico nuovo: **NON chiuderlo** (chiudere un grafico con una sedia la toglie dal
+   conto), lasciarlo com'e' e aprirne un altro.
+   **UN SOLO grafico**: due copie con lo stesso magic 774500 si pesterebbero (Max_Trades e kill switch contati
+   insieme, segnali doppi).
 3. Trascinare `ABTG_BulgeAzzurra` sul grafico. Nella finestra che si apre:
    - scheda **Input** -> **Carica** -> `ABTG_BulgeAzzurra_piccolo_demo.set`; poi controllare a vista
      `InpMagic = 774500`, `InpComment = BULGE_AZZURRA`, `Risk_Percent = 0.5`, `Max_Trades = 4`,
      `Use_Azure = true`, `Use_Purple = false`;
    - scheda **Comune**: **togliere** la spunta "Consenti Algo Trading" (**solo per questo EA**, e solo per ora);
    - **OK**.
-4. Scheda **Esperti** del terminale (non "Giornale"). Le righe sono quelle con il nome `ABTG_BulgeAzzurra (EURUSD,H1)`:
+4. Scheda **Esperti** del terminale (non "Giornale"). Le righe sono quelle con il nome `ABTG_BulgeAzzurra (EURGBP,H1)`:
    attenzione, il prefisso `[BULGE]` e' lo **stesso** della Bulge VIOLA, a distinguerle e' il **nome dell'EA**.
    Righe attese:
    - `[BULGE] Init OK | Simboli: 22 | Rischio: PER_TRADE 0.50% | Max trade: 4 | ADX: ON soglia=30.0 su: BLU | Kill: ON ...`
@@ -132,15 +184,27 @@ lo si legge **attaccando l'EA con il trading SPENTO per lui**, e lo si accende s
      `gestione (b) SPENTA`; la riga **`AZZURRA: ... -> PASS`**; **`VIOLA invariato ... PASS`**;
    - dall'include: `[AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.`
    - **NON** devono esserci righe `Simbolo non trovato`.
-5. **Se compare anche UN solo `*** FAIL ***` o `NON mettere in campo`**: togliere l'EA dal grafico
-   (tasto destro -> Expert Advisors -> Rimuovi) e mandare lo screenshot. Fine.
+   - **Atteso e innocuo durante il passo a secco**: se l'ultima candela H1 chiusa ha un segnale, compare una riga
+     `[BULGE] LONG ERR | ...` o `[BULGE] SHORT ERR | ...` con un motivo di trading non consentito: e' l'ordine
+     rifiutato perche' la spunta e' tolta. **Non e' un FAIL** e non apre niente.
+5. **Se compare anche UN solo `*** FAIL ***` o `NON mettere in campo`**: sul grafico **EURGBP H1** che ha
+   `ABTG_BulgeAzzurra` scritto nell'angolo in alto a destra (controllarlo PRIMA del clic), togliere l'EA
+   (tasto destro sul grafico -> Expert Advisors -> Rimuovi) e mandare lo screenshot. Fine.
 
 ---
 
-## PASSO 4: accendere (terminale 50503392), solo se il passo 3 e' tutto PASS
+## PASSO 4: accendere (terminale 50503392, `C:\Program Files\BCM Markets MT5 Terminal`), solo se il passo 3 e' tutto PASS E Claudio ha scelto A/B/C dell'avviso 6
 
-1. Sul grafico EURUSD H1 dell'Azzurra: **F7** (proprieta' dell'EA) -> scheda **Comune** -> **mettere** la spunta
+**Bersaglio:** azione a mano dentro MT5, terminale **50503392** (stesso del passo 2, stessa lista di cio' che
+NON si tocca).
+
+1. Sul grafico **EURGBP H1** con `ABTG_BulgeAzzurra` nell'angolo in alto a destra: **tasto destro sul grafico ->
+   Expert Advisors -> Proprieta'** (e' la stessa cosa del tasto F7 **del terminale**; NON premere F7 se in
+   primo piano c'e' il MetaEditor, che invece ricompila) -> scheda **Comune** -> **mettere** la spunta
    "Consenti Algo Trading" -> **OK**. L'EA si riavvia e ristampa l'autotest (normale).
+   **Quando**: nei primi minuti dopo un'ora tonda. Al riavvio l'EA valuta l'ultima candela H1 chiusa (punto 4
+   qui sotto): acceso alle xx:40, un segnale di quella candela entrerebbe con 40 minuti di ritardo, cosa che
+   l'EA in regime non fa mai (lui entra al primo tick della candela nuova).
 2. Il bottone **Algo Trading** della barra in alto **e' gia' VERDE** per le altre sedie del piccolo:
    **NON cliccarlo.** Cliccandolo si **SPEGNE per tutte** le sedie del conto 50503392.
 3. Nell'angolo del grafico l'EA deve risultare attivo (icona del cappello **blu** / faccina, non grigia).
@@ -164,3 +228,12 @@ lo si legge **attaccando l'EA con il trading SPENTO per lui**, e lo si accende s
   usata dalla riga della trial (`1514806751*`). Se non e' cosi', la riga si ferma e stampa la tabella.
 - Che MT5 carichi il `.set` (ASCII, fine riga LF, stesso formato dei preset Bulge gia' in repo): per questo il
   passo 3.3 chiede di **controllare a vista** sei valori dopo il caricamento.
+- **La trial FTMO** (avviso 6): la lista dei 15 cross e' quella del preset in repo, NON letta dal `.chr` vivo
+  (la sonda `CODA_08` non ricostruisce `Symbols_List` della Bulge); che la regola dell'hedging fra conti valga
+  per la Free Trial e' [NON MISURATO] (domanda al supporto mai chiusa); quanto spesso Azzurra (piccolo) e VIOLA
+  (trial) si troverebbero opposte, sullo stesso cross o su cross correlati, non e' stimato.
+- **Che la Bulge 772700 del piccolo giri col preset SOLO_VIOLA o ancora con BLU+VIOLA**: HANDOFF 01/10 lo dava
+  "non ancora applicato" e la sonda `CODA_08` non ricostruisce gli `Use_*` della Bulge. Il rischio dell'avviso 1
+  non cambia (lo limita Max_Trades), l'etichetta "Bulge VIOLA" si'.
+- **Che la scritta "Consenti Algo Trading" e il menu `Expert Advisors -> Proprieta'/Rimuovi`** abbiano
+  esattamente questi nomi nella build installata sul VPS: sono quelli dell'MT5 in italiano, non visti oggi.

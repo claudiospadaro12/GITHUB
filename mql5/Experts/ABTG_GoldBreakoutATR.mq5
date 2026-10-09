@@ -36,6 +36,14 @@
 //|   R12 filtro orario sulle ore SERVER dei NUOVI ingressi (GbaOraOk)|
 //|   R13 Guardian (firme B1/C1) IMMEDIATAMENTE prima di trade.Buy /  |
 //|      trade.Sell (GbaApri). Mai sulle chiusure ne' sullo stop.     |
+//|   R14 lati LONG/SHORT accendibili (pannello "LONG ON / SHORT ON"; |
+//|      default entrambi accesi = nessun effetto) (GbaDecidi)        |
+//|                                                                   |
+//|  ASSE SPREAD (spec. par. 9): InpSpreadMaxATR 0,05 = REPLICA del   |
+//|  file Input; 0,10 / 0,20 / 0,35 = celle di MISURA (alle 08:52 il  |
+//|  pannello di Emiliano era a 0,35). Contatore [GBA-CONTA] dei      |
+//|  segnali scartati per spread in OnDeinit; ogni segnale scartato   |
+//|  stampa spread/ATR in % e il rapporto stop/spread.                |
 //|                                                                   |
 //|  OROLOGIO: le ore sono ORA SERVER. BCM e' UTC+1 FISSO (misura del |
 //|  24/09): d'estate = ora italiana - 1, d'INVERNO = ora italiana.   |
@@ -89,6 +97,8 @@ CTrade trade;
 #define GBA_GIORNO      4
 #define GBA_SPREAD      5
 #define GBA_DATI        6
+#define GBA_LATO        7
+#define GBA_N_MOTIVI    8
 
 #define GBA_AZ_NULLA    0
 #define GBA_AZ_SPOSTA   1
@@ -110,7 +120,15 @@ input group "=== Segnale: rottura del canale + EMA ==="
 input int    InpChannelBars  = 48;   // N barre del canale, ESCLUSA la barra di segnale
 input int    InpEmaPeriod    = 100;  // EMA del filtro di trend (a voce anche 50)
 input int    InpAtrPeriod    = 14;   // Periodo ATR
-input double InpSpreadMaxATR = 0.05; // Spread massimo come frazione dell'ATR (0 = filtro spento)
+//--- InpSpreadMaxATR e' un ASSE PRINCIPALE (spec. par. 9): 0,05 e' la
+//    REPLICA dichiarata (valore del file Input di Emiliano); 0,10 /
+//    0,20 / 0,35 sono celle di MISURA (alle 08:52 il suo pannello
+//    mostrava 0,35, cambiato a mano a runtime). Lo stop/spread minimo
+//    garantito vale InpSL_ATR / InpSpreadMaxATR: 50x a 0,05, 7,1x a
+//    0,35 (sotto la frontiera di casa stop >= 40 x spread).
+input double InpSpreadMaxATR = 0.05; // Spread massimo come frazione dell'ATR (0 = filtro spento). ASSE: 0,05 replica / 0,10 / 0,20 / 0,35
+input bool   InpAllowLong    = true; // Lato LONG consentito (pannello: "LONG ON")
+input bool   InpAllowShort   = true; // Lato SHORT consentito (pannello: "SHORT ON")
 
 //==================================================================
 // INPUT -- USCITE (valori della foto)
@@ -167,6 +185,11 @@ ENUM_TIMEFRAMES g_tfAtr   = PERIOD_M1;
 int             g_hEma    = INVALID_HANDLE;
 int             g_hAtr    = INVALID_HANDLE;
 datetime        g_lastBar = 0;
+//--- contatori dei SEGNALI (barre con rottura + lato EMA) per motivo:
+//    g_conta[GBA_OK] = ingressi tentati, g_conta[GBA_SPREAD] = scartati
+//    per spread, ecc. Stampati in OnDeinit: nel tester dicono quanto
+//    morde il filtro di spread su ogni cella dell'asse.
+int             g_conta[GBA_N_MOTIVI];
 
 void Log(string m) { if(InpVerbose) Print("[GBA] ", m); }
 
@@ -231,11 +254,13 @@ bool GbaGiornoBloccato(const double pnlGiorno, const double maxPerdita)
 int GbaDecidi(const double close1, const double hh, const double ll, const double ema,
               const double atr, const double spread, const double kSpread,
               const int ora, const int hStart, const int hEnd,
-              const bool posAperta, const bool giornoBloccato, int &motivo)
+              const bool posAperta, const bool giornoBloccato,
+              const bool allowLong, const bool allowShort, int &motivo)
 {
    int dir = GbaDirezione(close1, hh, ll, ema);
    if(dir == 0)                           { motivo = GBA_NO_SEGNALE; return 0; }
-   if(posAperta)                          { motivo = GBA_POSIZIONE;  return 0; }
+   if((dir > 0 && !allowLong) || (dir < 0 && !allowShort)) { motivo = GBA_LATO; return 0; }
+   if(posAperta)                        { motivo = GBA_POSIZIONE;  return 0; }
    if(!GbaOraOk(ora, hStart, hEnd))       { motivo = GBA_ORA;        return 0; }
    if(giornoBloccato)                     { motivo = GBA_GIORNO;     return 0; }
    if(atr <= 0.0)                         { motivo = GBA_DATI;       return 0; }
@@ -555,7 +580,8 @@ void GbaApri(const bool isLong, const double atr, const double spread)
    sl = NormalizeDouble(GbaArrotonda(sl, tickSize), digits);
    if(!GbaSLValido(isLong, sl, bid, ask, minDist))
    {
-      PrintFormat("[GBA] SL %.*f troppo vicino (stops level %.*f) -- ordine saltato", digits, sl, digits, minDist);
+      PrintFormat("[GBA] SL %s troppo vicino (stops level %s) -- ordine saltato",
+                  DoubleToString(sl, digits), DoubleToString(minDist, digits));
       return;
    }
    double lots = GbaLotti(slDist);
@@ -584,9 +610,10 @@ void GbaApri(const bool isLong, const double atr, const double spread)
    }
    double rischio = lots * slDist / tickSize * GbaTickValue();
    if(InpVerbose)
-      PrintFormat("[GBA] %s %.2f lotti @ %.*f | SL %.*f (%.2f x ATR %.*f) | spread %.*f | perdita a SL ~%.2f %s",
-                  (isLong ? "BUY" : "SELL"), lots, digits, trade.ResultPrice(), digits, sl, InpSL_ATR,
-                  digits, atr, digits, spread, rischio, AccountInfoString(ACCOUNT_CURRENCY));
+      PrintFormat("[GBA] %s %.2f lotti @ %s | SL %s (%.2f x ATR %s) | spread %s | perdita a SL ~%.2f %s",
+                  (isLong ? "BUY" : "SELL"), lots, DoubleToString(trade.ResultPrice(), digits),
+                  DoubleToString(sl, digits), InpSL_ATR, DoubleToString(atr, digits),
+                  DoubleToString(spread, digits), rischio, AccountInfoString(ACCOUNT_CURRENCY));
 }
 
 //==================================================================
@@ -612,18 +639,38 @@ void GbaNuovaBarra(const datetime t0)
    int motivo = GBA_NO_SEGNALE;
    int dir = GbaDecidi(close1, hh, ll, ema, atr, spread, InpSpreadMaxATR,
                        dt.hour, InpHourStart, InpHourEnd,
-                       GbaPosizioneAperta(), giorno, motivo);
+                       GbaPosizioneAperta(), giorno, InpAllowLong, InpAllowShort, motivo);
+   if(motivo == GBA_NO_SEGNALE) return;
+   if(motivo >= 0 && motivo < GBA_N_MOTIVI) g_conta[motivo]++;
+
+   //--- spec. par. 9: in OGNI riga di segnale, spread/ATR in % e il
+   //    rapporto stop/spread (stop = InpSL_ATR x ATR). E' la misura
+   //    che dice se la cella dell'asse spread sta sopra la frontiera
+   //    di casa (stop >= 40 x spread).
+   double spreadPct = (atr > 0.0) ? (100.0 * spread / atr) : -1.0;
+   double stopSpread = (spread > 0.0) ? (InpSL_ATR * atr / spread) : -1.0;
+   string lato = (GbaDirezione(close1, hh, ll, ema) > 0 ? "BUY" : "SELL");
    if(dir == 0)
    {
-      if(motivo != GBA_NO_SEGNALE && InpVerbose)
-         PrintFormat("[GBA] segnale %s SALTATO (%s) | close %.2f canale %.2f-%.2f EMA %.2f ATR %.2f spread %.2f ora %d",
-                     (close1 > hh ? "BUY" : "SELL"), GbaMotivoTesto(motivo), close1, ll, hh, ema, atr, spread, dt.hour);
+      if(InpVerbose || motivo == GBA_SPREAD)
+         PrintFormat("[GBA] segnale %s SALTATO (%s) | close %.2f canale %.2f-%.2f EMA %.2f ATR %.2f spread %.2f = %.1f%% ATR (max %.1f%%) | stop/spread %.1fx | ora server %d",
+                     lato, GbaMotivoTesto(motivo), close1, ll, hh, ema, atr, spread, spreadPct,
+                     100.0 * InpSpreadMaxATR, stopSpread, dt.hour);
       return;
    }
    if(InpVerbose)
-      PrintFormat("[GBA] segnale %s | close %.2f canale %.2f-%.2f EMA %.2f ATR %.2f spread %.2f ora server %d",
-                  (dir > 0 ? "BUY" : "SELL"), close1, ll, hh, ema, atr, spread, dt.hour);
+      PrintFormat("[GBA] segnale %s | close %.2f canale %.2f-%.2f EMA %.2f ATR %.2f spread %.2f = %.1f%% ATR (max %.1f%%) | stop/spread %.1fx | ora server %d",
+                  lato, close1, ll, hh, ema, atr, spread, spreadPct, 100.0 * InpSpreadMaxATR, stopSpread, dt.hour);
    GbaApri(dir > 0, atr, spread);
+}
+
+void GbaStampaConta(const string quando)
+{
+   int segnali = 0;
+   for(int i = 0; i < GBA_N_MOTIVI; i++) if(i != GBA_NO_SEGNALE) segnali += g_conta[i];
+   PrintFormat("[GBA-CONTA] %s | segnali %d | ingressi tentati %d | scartati: SPREAD %d (spread max %.2f x ATR) | posizione aperta %d | ora %d | perdita giornaliera %d | lato spento %d | ATR non valido %d",
+               quando, segnali, g_conta[GBA_OK], g_conta[GBA_SPREAD], InpSpreadMaxATR, g_conta[GBA_POSIZIONE],
+               g_conta[GBA_ORA], g_conta[GBA_GIORNO], g_conta[GBA_LATO], g_conta[GBA_DATI]);
 }
 
 string GbaMotivoTesto(const int m)
@@ -635,6 +682,7 @@ string GbaMotivoTesto(const int m)
    if(m == GBA_GIORNO)     return "perdita giornaliera raggiunta";
    if(m == GBA_SPREAD)     return "spread oltre il limite";
    if(m == GBA_DATI)       return "ATR non valido";
+   if(m == GBA_LATO)       return "lato spento";
    return "?";
 }
 
@@ -691,7 +739,7 @@ void GbaGestisci()
          double sl = NormalizeDouble(nuovo, digits);
          if(!trade.PositionModify(tk, sl, curTP) && TimeCurrent() - ultimoErr >= 60)
          {
-            PrintFormat("[GBA] ERRORE spostamento SL ticket %I64u a %.*f: retcode %u (%s)", tk, digits, sl,
+            PrintFormat("[GBA] ERRORE spostamento SL ticket %I64u a %s: retcode %u (%s)", tk, DoubleToString(sl, digits),
                         trade.ResultRetcode(), trade.ResultRetcodeDescription());
             ultimoErr = TimeCurrent();
          }
@@ -747,6 +795,7 @@ int OnInit()
       return(INIT_FAILED);
    }
 
+   ArrayInitialize(g_conta, 0);
    trade.SetExpertMagicNumber(InpMagic);
    trade.SetDeviationInPoints((ulong)InpSlippagePoints);
    trade.SetTypeFilling(GetFillingMode(g_sym));
@@ -762,6 +811,7 @@ int OnInit()
 
 void OnDeinit(const int reason)
 {
+   GbaStampaConta("FINE");
    if(g_hEma != INVALID_HANDLE) IndicatorRelease(g_hEma);
    if(g_hAtr != INVALID_HANDLE) IndicatorRelease(g_hAtr);
    g_hEma = INVALID_HANDLE;
@@ -793,6 +843,11 @@ void GbaLogAvvio()
                EnumToString(InpTrendTF), EnumToString(g_tfTrend), EnumToString(InpAtrTF), EnumToString(g_tfAtr));
    PrintFormat("[GBA] SEGNALE | InpChannelBars=%d (esclusa la barra di segnale) | InpEmaPeriod=%d | InpAtrPeriod=%d | InpSpreadMaxATR=%.3f",
                InpChannelBars, InpEmaPeriod, InpAtrPeriod, InpSpreadMaxATR);
+   PrintFormat("[GBA] SPREAD (ASSE) | InpSpreadMaxATR=%.2f%s | stop/spread minimo garantito = InpSL_ATR / InpSpreadMaxATR = %s | celle: 0,05 replica, 0,10 / 0,20 / 0,35 misura",
+               InpSpreadMaxATR, (InpSpreadMaxATR > 0.0 ? "" : " (filtro SPENTO)"),
+               (InpSpreadMaxATR > 0.0 ? DoubleToString(InpSL_ATR / InpSpreadMaxATR, 1) + "x" : "nessun limite"));
+   PrintFormat("[GBA] LATI | InpAllowLong=%s | InpAllowShort=%s",
+               (InpAllowLong ? "true" : "false"), (InpAllowShort ? "true" : "false"));
    PrintFormat("[GBA] USCITE | InpSL_ATR=%.2f | InpTrail_ATR=%.2f | InpTrailAtrMode=%d (%s) | InpTimeExitBars=%d",
                InpSL_ATR, InpTrail_ATR, InpTrailAtrMode,
                (InpTrailAtrMode == 1 ? "ATR della barra di segnale, fisso" : "ATR dell'ultima barra chiusa"), InpTimeExitBars);
@@ -876,22 +931,30 @@ int GbaAutotestNucleo()
 
    //--- DECISIONE COMPLETA (ordine dei cancelli)
    int mot = -1;
-   int d1 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, mot);
+   int d1 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, mot);
    GbaCaso("decisione: BUY pulito", d1 == 1 && mot == GBA_OK, fall);
-   int d2 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, mot);
+   int d2 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, mot);
    GbaCaso("decisione: SELL pulito", d2 == -1 && mot == GBA_OK, fall);
-   int d3 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, true, false, mot);
+   int d3 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, true, false, true, true, mot);
    GbaCaso("decisione: posizione aperta -> niente", d3 == 0 && mot == GBA_POSIZIONE, fall);
-   int d4 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 12, 22, 6, false, false, mot);
+   int d4 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 12, 22, 6, false, false, true, true, mot);
    GbaCaso("decisione: fuori orario -> niente", d4 == 0 && mot == GBA_ORA, fall);
-   int d5 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, true, mot);
+   int d5 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, true, true, true, mot);
    GbaCaso("decisione: giornata bloccata -> niente", d5 == 0 && mot == GBA_GIORNO, fall);
-   int d6 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.06, 0.05, 3, 0, 24, false, false, mot);
+   int d6 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.06, 0.05, 3, 0, 24, false, false, true, true, mot);
    GbaCaso("decisione: spread largo -> niente", d6 == 0 && mot == GBA_SPREAD, fall);
-   int d7 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 0.0, 0.03, 0.0, 3, 0, 24, false, false, mot);
+   int d7 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 0.0, 0.03, 0.0, 3, 0, 24, false, false, true, true, mot);
    GbaCaso("decisione: ATR nullo -> niente anche a filtro spread spento", d7 == 0 && mot == GBA_DATI, fall);
-   int d8 = GbaDecidi(2005.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, mot);
+   int d8 = GbaDecidi(2005.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, mot);
    GbaCaso("decisione: dentro il canale -> nessun segnale", d8 == 0 && mot == GBA_NO_SEGNALE, fall);
+   int d9 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, false, true, mot);
+   GbaCaso("decisione: BUY con LONG spento -> niente", d9 == 0 && mot == GBA_LATO, fall);
+   int d10 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, false, mot);
+   GbaCaso("decisione: SELL con SHORT spento -> niente", d10 == 0 && mot == GBA_LATO, fall);
+   int d11 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, false, true, mot);
+   GbaCaso("decisione: SELL con LONG spento -> passa", d11 == -1 && mot == GBA_OK, fall);
+   int d12 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.30, 0.35, 3, 0, 24, false, false, true, true, mot);
+   GbaCaso("decisione: asse spread 0,35 -> spread 30% ATR passa", d12 == 1 && mot == GBA_OK, fall);
 
    //--- R7 USCITA A TEMPO
    GbaCaso("tempo: 47 barre su 48 -> resta",  !GbaUscitaTempo(47, 48), fall);
