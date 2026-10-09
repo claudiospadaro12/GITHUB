@@ -35,7 +35,7 @@ Guardian (fuori dalla sua riga), GbaApri/GbaGestisci/GbaPnlGiorno/GbaMargineOk/G
 iMA/iATR del terminale, tick reali, spread reale BCM, NESSUN backtest. E NON esegue la COLLA: GbaNuovaBarra (spread,
 ora, posizione aperta, giornata, tetto passati a GbaDecidi) e il dispatch di OnTick li rifa' il driver C++ da se';
 su quella colla ci sono solo ANCORE statiche (S38-S45, aggiunte dal cancello del 09/10: prima 7 mutanti su 9 verdi)
-piu' le chiamate intere e l'IMPRONTA delle 10 funzioni non eseguite (secondo lettore del 09/10: altri 9 mutanti su 9
+piu' le chiamate intere e l'IMPRONTA delle 12 funzioni non eseguite (secondo lettore del 09/10: altri 9 mutanti su 9
 erano verdi contro le sole S38-S45). L'impronta CONGELA quel codice, non lo prova: ogni modifica fa FAIL.
 """
 import hashlib
@@ -198,7 +198,7 @@ IMPRONTE_COLLA = {
     "OnTick": "9bf5a706a06db9f8", "GbaNuovaBarra": "c4827779e0298e00", "GbaApri": "ff7e8ead7d712659",
     "GbaGestisci": "72838ef807eb2341", "GbaPosizioneAperta": "0f66e139660de765", "GbaPnlGiorno": "1accbd6de512f18b",
     "GbaAperteOggi": "6e0c835dbf9f9ff1", "GbaMargineOk": "35201d379082c215", "GbaLotti": "b709d8fd083eb870",
-    "GbaTickValue": "006efaa508e93217",
+    "GbaTickValue": "006efaa508e93217", "OnInit": "cad05f04f6afeb1b", "OnDeinit": "8ad7a3ca9a97039d",
 }
 _CACHE_MAGIC = {}
 
