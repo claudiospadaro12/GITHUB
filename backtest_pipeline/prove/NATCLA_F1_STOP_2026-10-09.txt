@@ -1,0 +1,383 @@
+# ==========================================================================
+#  EA: EA_NatCla
+#  NATCLA_F1_STOP -- FASE F1 di 'Ea Nat&Cla', 09/10/2026: la PRIMA misura del MERITO (PF, DD, n a TICK REALI) e il confronto
+#  delle TRE regole di stop della v1.11 (decisione di Claudio del 09/10 sulla domanda 7: "Quale vuoi? Proviamole entrambe.").
+#  STATO: PREPARAZIONE. Strato 1 (controlla_prova.py / controlla_riga.py) fatto da chi l'ha scritto; strato 2 (controllo-preventivo)
+#  DA FARE. NON consegnabile a Claudio e NON lanciabile finche' il cancello non passa. Questo file NON e' un PASS.
+#  EA v1.11, SHA256 75c7b5efa774929db0ea163504ac5be2ccf6be6a44943b622e549ad61e9ef75d (NON toccato: e' in cancello), include
+#  ABTG_PausaGuardian.mqh SHA256 3ec971152e85e0082488cc4243ff45ae09948c191d52ab96050b48f94641a737 (congelato per il P0: NON toccato).
+#  Fonti: report/NATCLA_SPECIFICA_2026-10-07.md (par. 3.1, 3.3, 5.3-5.6, 6, F1, E3, certificato), report/NATCLA_V110_STOP_2026-10-09.md,
+#  report/NATCLA_V111_STOP_2026-10-09.md, data/natcla/LEGGIMI.md (risposte di Claudio 08-09/10), letture F0 (report/NATCLA_F0_*_LETTURA_*.md),
+#  CHECKLIST classi 1204-1210. Driver: backtest_pipeline/righe/NATCLA_F1_PASSATE.ps1. Lettore: backtest_pipeline/leggi_natcla_f1.py (--autotest).
+#  Collaudo a pezzi (pwsh vero, cultura it-IT, senza MT5) + mutanti del driver e del lettore: backtest_pipeline/collaudo_natcla_f1.py.
+#  Righe di lancio: backtest_pipeline/righe/RIGA_LANCIA_NATCLA_F1_<lotto>.txt (P, O, FA, FB, I).
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale BCM demo 50503392 di QUESTO PC, C:\Program Files\BCM Markets MT5 Terminal).
+#  MAI sul VPS (nessuna delle sue cartelle), MAI su C:\MT5_Backtest, MAI su C:\FundedNext_Manuale, MAI su un conto, MAI su un preset di campo.
+#
+#  ======================= PERCHE' NON IL DRIVER DEI ROUND (misurato sul sorgente, 09/10) =======================
+#  EA_NatCla v1.11 HA OnTester + FrameAdd + OnTesterDeinit (r.2359-2405): il driver dei round (walkforward_generico*.ps1, congelato per il P0)
+#  produrrebbe un OptResults. NON basta, per TRE motivi che cambiano il numero:
+#   (a) UNITA': la specifica 5.5 vuole n = SETUP e PF/DD calcolati sul P/L PER SETUP (i tre ordini della scala condividono linea, stop ed esito:
+#       non sono prove indipendenti). OptFrame porta STAT_TRADES e STAT_PROFIT_FACTOR = per DEAL/posizione: n gonfiato fino a 3 volte e una
+#       soglia del nullo falsa (specifica 6.1 assume prove indipendenti);
+#   (b) il CSV per-setup natcla_setup_* (esito_R, n_riempiti, durata, stop_modo, lato) si scrive SOLO fuori dall'ottimizzazione (r.1327);
+#   (c) nell'ottimizzazione ogni passata riscrive gli STESSI abtg_trades_*/natcla_setup_* (nome = simbolo + magic, uguali per i 3 modi e i 2 lati).
+#  Quindi: PASSATA SINGOLA (Optimization=0) per (simbolo, config, lato, modo), report .htm + giornale + i due CSV dell'EA copiati SUBITO dopo ogni
+#  passata con un nome unico. Driver DERIVATO da NATCLA_F0_PASSATE.ps1 (blocchi del file prova, guardie, compilazione) e da GBA_R0_PASSATE.ps1 v3
+#  (report .htm, Modello 4, profondita' tick sul SOLO simbolo della prova, rete KO su soldi/margine, numeri con InvariantCulture). Il driver dei
+#  round NON si tocca.
+#  Perche' l'asse e' TECNICO: controlla_prova.py pretende un asse Y. InpMagic=0||0||1||1||Y: la passata singola usa il PRIMO valore (0 = magic
+#  automatico 7786 + 10*modalita + cifra TF); la 2a cella (1) e' fuori dal blocco 778600-778699 e l'EA la RIFIUTA in OnInit. Le variabili misurate
+#  (modo di stop, lato) stanno nei blocchi '# @F1-...' qui sotto: il driver sostituisce SOLO InpModalita, InpTF, InpDirezione, InpStopModo,
+#  InpInclMinAtr, nient'altro.
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  Per ogni GAMBA = (famiglia x config x LATO x MODO DI STOP): n (setup riempiti, righe SETUP del CSV), PF_R per setup (somma degli R positivi / somma
+#  degli R negativi, R = esito del setup / rischio del setup, colonna esito_R dell'EA), media di R e p unilaterale, tasso di vincita contro il pareggio,
+#  DD in R e peggior giornata in R, durata mediana. Poi il CONFRONTO dei tre modi a parita' di simboli, lato e config.
+#  Le tre regole (una variabile alla volta: lo stop; tutto il resto e' la BASE della specifica 3.1/3.3):
+#   GEOM  InpStopModo=0 GEOMETRIA_ATTUALE  stop = ordine profondo + 5 u (v1.05). La BASELINE.
+#   LINEA InpStopModo=1 OLTRE_LINEA_ESTERNA stop = 20 u oltre la ST3,5 (setup Supertrend) / oltre la EMA200 (motore M2). Lettura "per motore".
+#   PIU   InpStopModo=2 OLTRE_PIU_ESTERNA  stop = 20 u oltre la PIU' esterna fra ST3,5 ed EMA200 (setup Supertrend); M2 = LINEA (una sola linea).
+#  Sul motore M2 i modi LINEA e PIU sono IDENTICI per costruzione (v1.11 par. 1: "Nel motore M2 resta la EMA200"): M2 gira SOLO GEOM e LINEA.
+#  BASE (specifica 3.1 e 3.3, default compilati dell'EA): AUDIO = tre linee 2,5/3,0/3,5, tocchi 1/1/2, ADX iADX MetaQuotes(14) <= 20 solo sul 3,5,
+#  inclinazione EMA200 >= P50 della famiglia (blocchi @F1-INCL), scala (5,5), TP 10 u dalla linea, pesi 1:1:1, un setup alla volta, nessun orario,
+#  nessun filtro spread. M2 = scala AUDIO sulla EMA200, inclinazione >= P50, nessun limite di tocchi, nessun ADX. Unita' AUTO_CLASSE
+#  (forex 1 u = 1 pip, oro 1 u = 1,0 USD, indici 1 u = 1,0 punto: decisioni di Claudio 08/10, LEGGIMI).
+#  INCLINAZIONE P50 (specifica F5 e LEGGIMI risposta 6: "le soglie si fissano ai P25/P50/P75 della famiglia sul passo 0, prima di qualunque P/L"):
+#  calcolate il 09/10 sui CSV F0 in archivio (lotti A, C; regola del conto di F0: nuovo_ep=1, tocco_n entro il limite, ctx_arm=0), |incl_atr|
+#  sui SETUP, finestra intera F0, per famiglia e config. Nessun P/L esiste in quei CSV (InpSoloConta). P25/P50/P75 (la cella base e' il P50):
+#   ORO  AUDIO_H1 0,325/0,700/1,161  AUDIO_H4 0,423/0,740/1,177  M2_H1 0,099/0,219/0,373  M2_H4 0,135/0,203/0,355
+#   FX7  AUDIO_H1 0,281/0,623/1,116  AUDIO_H4 0,325/0,624/1,007  M2_H1 0,097/0,207/0,362  M2_H4 0,102/0,226/0,378
+#   IDX3 AUDIO_H1 0,307/0,623/1,138  AUDIO_H4 0,326/0,649/1,173  M2_H1 0,105/0,227/0,403  M2_H4 0,111/0,255/0,392
+#  LIMITE: la colonna incl_atr del CSV F0 e' alla barra del TOCCO, il filtro dell'EA guarda la barra in cui la scala si ARMA (la barra prima): una
+#  barra di differenza sulla stessa EMA200 a 20 barre. Il driver controlla che l'EA stampi la soglia giusta (riga CFG Inclinazione).
+#
+#  ======================= LA SELEZIONE DELLE CELLE, SCRITTA PRIMA DEI NUMERI =======================
+#  Nessun P/L di NatCla esiste oggi (F0 era SoloConta, Modello 1): la selezione usa SOLO costo, unita' e frequenza dei CSV F0.
+#  REGOLA S1 (costo, la regola di F0 congelata il 07/10 ed estesa ai modi nuovi senza cambiarla): una cella (simbolo, config, modo) e' ESCLUSA PER COSTO
+#   se la mediana di |prezzo dell'ordine d'ANTICIPO - SL| / (spread + commissione derivata) sui setup F0 e' < 13,3 (frontiera dura di casa). L'anticipo
+#   e' l'ordine con la distanza maggiore ed e' il PRIMO a riempirsi (il prezzo arriva verso la linea): file prova F0, E2. Commissione derivata come F0:
+#   forex 0,004% del prezzo, oro 0,04 USD/oncia, indici 0. Per GEOM la distanza e' quella del CSV (15 u); per LINEA e' 25 u sui setup ST35/E200, e sui
+#   setup ST25/ST30 e' >= 25 u (la ST3,5 sta piu' lontana della linea del setup quando e' concorde): 25 u/pedaggio e' un PAVIMENTO; per PIU lo stop
+#   non e' MAI piu' vicino di LINEA (v1.11 par. 3, collaudato): il pavimento di LINEA vale anche per PIU. Una cella fra 13,3 e 40 e' FRA: si misura e si
+#   scrive accanto che NON puo' diventare sedia senza superare la frontiera di lavoro (40x).
+#  REGOLA S2 (unita' in scala, classe 1210, nuova e dichiarata [NOSTRA]): il TP di 10 u misurato in ATR14 del TF (mediana sui setup F0) deve stare dentro
+#   la banda dei simboli di RIFERIMENTO (forex maggiori + oro, stessa config) allargata di un fattore 2 per parte. Banda di riferimento H1 0,44-1,03 ATR
+#   -> ammessi 0,22-2,06; H4 0,21-0,50 -> ammessi 0,105-1,00. Un simbolo fuori NON entra nella lettura del costo: va nelle DOMANDE sull'unita'.
+#   CONTRO-ESEMPIO del fattore: con un fattore 3 entrerebbero anche D30EUR (0,18 ATR su H1) e NASUSD (0,16): il loro verdetto DIPENDE dal fattore,
+#   ed e' scritto qui per questo.
+#  REGOLA S3 (simboli di partenza, dall'incarico): oro + i 7 forex maggiori (EURUSD, GBPUSD, USDJPY, AUDUSD, NZDUSD, USDCAD, USDCHF) + gli indici SOLO
+#   se passano S1 in almeno un modo E S2. Nessun altro simbolo (i cross restano a F2/F3 come gemelli, se la famiglia vive).
+#  REGOLA S4 (tetto): 200 passate in tutto (P 4 + O 20 + FA 80 + FB 60 + I 36). Nessuna passata in piu' senza un file prova NUOVO.
+#  ESITO DELLE REGOLE (calcolato il 09/10 dai CSV F0, mediane sui setup; [MISURATO su Modello 1, spread del tester BCM]):
+#   simbolo  GEOM anticipo 15u  LINEA/PIU anticipo >=25u  TP 10u in ATR14 H1/H4  ->
+#   XAUUSD   62,5 / 55,6 / 65,2 / 65,2 (H1/H4/M2H1/M2H4) PASSA   104 / 93 / 109 / 109 PASSA   1,01 / 0,48   AMMESSO tutti i modi
+#   EURUSD   26,3 / 26,2 / 24,1 / 26,2 FRA                43,9 / 43,9 / 40,2 / 43,8 PASSA     0,83 / 0,40   AMMESSO tutti i modi
+#   GBPUSD   20,5 / 20,5 / 20,4 / 20,3 FRA                34,2 / 34,2 / 34,0 / 33,9 FRA       0,66 / 0,31   AMMESSO tutti i modi
+#   USDJPY   18,4 / 18,0 / 18,3 / 18,7 FRA                30,6 / 30,1 / 30,6 / 31,2 FRA       0,44 / 0,21   AMMESSO tutti i modi
+#   AUDUSD   30,9 / 31,1 / 30,9 / 32,5 FRA                51,6 / 51,9 / 51,5 / 54,2 PASSA     0,94 / 0,44   AMMESSO tutti i modi
+#   NZDUSD   27,9 / 28,5 / 28,1 / 28,0 FRA                46,6 / 47,6 / 46,9 / 46,8 PASSA     1,03 / 0,50   AMMESSO tutti i modi
+#   USDCAD   17,5 / 17,4 / 17,2 / 17,6 FRA                29,1 / 29,0 / 28,6 / 29,4 FRA       0,88 / 0,43   AMMESSO tutti i modi
+#   USDCHF   20,0 / 20,6 / 18,4 / 22,7 FRA                33,3 / 34,3 / 30,8 / 37,8 FRA       0,98 / 0,46   AMMESSO tutti i modi
+#   SPXUSD   10,7 tutte ESCLUSO                           17,9 tutte FRA                      0,79 / 0,33   AMMESSO solo LINEA/PIU
+#   100GBP   10,7 / 10,7 / 9,4 / 10,7 ESCLUSO             17,9 / 17,9 / 15,6 / 17,9 FRA       0,55 / 0,27   AMMESSO solo LINEA/PIU
+#   200AUD   9,4 tutte ESCLUSO                            15,6 tutte FRA                      0,56 / 0,29   AMMESSO solo LINEA/PIU
+#   D30EUR   8,8 / 8,8 / 8,8 / 7,9 ESCLUSO                14,8 / 14,8 / 14,8 / 13,1 FRA(M2H4 ESCL.)  0,18 / 0,09   FUORI SCALA (S2): domanda
+#   NASUSD   8,3 tutte ESCLUSO                            13,9 tutte FRA                      0,16 / 0,07   FUORI SCALA (S2): domanda
+#   U30USD, F40EUR, E50EUR, E35EUR, 225JPY: ESCLUSI PER COSTO in tutti i modi (LINEA <= 12,5); U30USD e 225JPY anche fuori scala.
+#   XAGUSD: costo 300-440x ma FUORI SCALA di due ordini di grandezza (TP 10 u = 56 ATR14 H1, stop 20 u = 113 ATR e ~56% del prezzo, classe 1210):
+#   NON ammesso; e' il gemello naturale dell'oro per il certificato (casella 4): resta una DOMANDA a Claudio sull'unita' dell'argento.
+#
+#  ======================= FINESTRA: SOLO L'IS (emendamento del 16/08, regola A) =======================
+#  IS = dal pavimento dei tick (forex 2024.07.05, oro 2024.07.10, indici 2024.09.26) al 2025.06.30. OOS = 2025.07.01 -> 2026.06.30, NON TOCCATO da F1
+#  ne' da F2: la specifica F3 lo usa UNA volta sola. Se F1 girasse sulla finestra intera, F2 sceglierebbe gli assi anche sull'OOS e il verdetto E3 non
+#  sarebbe piu' possibile su questo feed. Data del taglio: meta' del calendario, scelta qui; dove la mettiamo non e' una regola di casa (regola A):
+#  la si dichiara. n atteso per gamba (blocchi @F1-ATTESA: setup F0 nell'IS con incl >= P50, per lato), somme di famiglia:
+#   FX7  AUDIO_H1 L 475 S 409 | AUDIO_H4 L 117 S 110 | M2_H1 L 344 S 284 | M2_H4 L 68 S 55
+#   ORO  AUDIO_H1 L  62 S  38 | AUDIO_H4 L  17 S   7 | M2_H1 L  39 S  31 | M2_H4 L 11 S  5
+#   IDX3 AUDIO_H1 L 140 S 119 | AUDIO_H4 L  33 S  19 | M2_H1 L  77 S  70 | M2_H4 L 21 S  8
+#  QUINDI, A PRIORI: solo QUATTRO gambe per modo possono arrivare a n >= 150 (FX7 AUDIO_H1 e M2_H1, long e short). Tutto l'ORO, tutti gli IDX3, FX7 su
+#  H4 = SOTTILI per costruzione: MERITO SOSPESO, si legge il RISCHIO (DD, peggior giornata), il segno e il confronto dei modi come descrizione.
+#  Sull'oro nemmeno la finestra intera arriva a 150 per lato (L 121, S 84 con il P50): il merito dell'oro per lato NON e' misurabile su questo feed
+#  con la base della specifica, comunque si tagli la finestra. E' un fatto da dire a Claudio, non un difetto della prova.
+#  REGIME DICHIARATO dell'IS [PROXY: prezzo della linea al primo e all'ultimo setup F0 dell'IS]: oro TORO +39% (2.369 -> 3.298); forex con il dollaro che
+#  cede nel 2025 (EURUSD +7,6% con minimo 1,0275 a gennaio, USDJPY -10,5%, USDCHF -10,6%, GBPUSD +7,4%, AUDUSD -2,6%, NZDUSD -0,6%, USDCAD +0,2%);
+#  indici toro con il crollo di aprile 2025 (SPXUSD +6,5%, minimo 5.012). UN regime per classe, non misurato come regime.
+#  OROLOGIO (CLAUDE.md 24/09): sul forex il cambio di orologio BCM cade DENTRO l'IS (26/12/2024-02/02/2025): le candele H4 forex sono costruite su due
+#  orologi. Nessuna regola d'orario nell'EA: cambia solo la composizione delle candele H4.
+#  Riscaldamento: l'EA non valuta niente prima di 300 barre del TF; forex e oro hanno storia davanti (M1 dal 2010, H1 oro dal 2004); gli INDICI no
+#  (BCM dal 2024.09.26): su H4 perdono ~50 giorni di borsa dell'IS. Il lettore usa come inizio effettivo la barra della riga VERIFICA ADX.
+#  MaxBars: sul PC di backtest il terminale BCM ha MaxBars=100000000 (classe 1208); 1 anno H1 = ~6.200 barre, H4 = ~1.550: nessun tetto morde.
+#
+#  ======================= MODELLO, DEPOSITO, COSTO =======================
+#  Modello 4 = ogni tick basato su TICK REALI (la scala vive sui limit e il TP di 10 u si chiude spesso dentro una barra M1: specifica 5.1, solo i tick
+#  reali danno merito). Il driver segna KO se il report non dice 100% ticks reali o se 'ticks data begins from' del SOLO simbolo della prova cade dopo
+#  l'inizio della finestra (la riga del simbolo di conversione EURUSD non conta: classe 1205). ExecutionMode=0 (zero latenza): OTTIMISTICO per dei limit.
+#  DEPOSITO 1.000.000 EUR, valuta EUR, leva 100. DEVIAZIONE DICHIARATA dall'incarico, che chiedeva un deposito normale perche' i lotti sono a rischio
+#  0,25% (e quindi nessun margine si esaurisce). Vero per il margine, FALSO per i lotti: l'EA arrotonda PER DIFETTO allo step 0,01 e SCARTA l'ordine
+#  sotto il lotto minimo (specifica 2.4, mai alzato), e scrive R = soldi / rischio OBIETTIVO (r.1806). CONTRO-ESEMPIO calcolato sull'oro (0,01 lotto =
+#  1 oncia, 1 USD di movimento = 1 USD): rischio del setup R = 0,25% del saldo diviso sui 3 ordini, stop medio GEOM 10 u, LINEA 20 u, PIU fino a ~100 u.
+#   10.000 EUR  -> R ~27 USD: lotto base = 27 / (somma delle 3 distanze, 30-60 USD per 0,01) < 0,01 -> TUTTI gli ordini oro di LINEA e PIU SCARTATI;
+#   100.000 EUR -> R ~270 USD: LINEA 0,045 -> 0,04 (-11%), PIU con la EMA200 a 30 u -> 0,018 -> 0,01 (-44% sull'R vero), PIU sopra ~90 u -> SCARTATO;
+#   1.000.000 EUR -> R ~2.700 USD: errore di arrotondamento <= ~11% nel caso peggiore, <= 2% nel caso mediano; nessuno scarto.
+#  Quindi il deposito qui NON cambia R ne' PF per costruzione SOLO se e' abbastanza grande: e' una condizione della misura, non un rischio (il rischio
+#  e' in R; il DD in % e in EUR del report NON si legge). Margine: 1.000.000 EUR a leva 100 copre ~1.000 lotti forex nozionali; nessuna passata ci arriva.
+#  Rete (classe 1204/1208): ogni riga 'lotto sotto il minimo' dell'EA, 'INVIO FALLITO' con retcode 10019, 'stop out', 'no money', 'not enough money'
+#  = passata KO; gli altri 'INVIO FALLITO' si contano e il lettore li stampa come DA GUARDARE. Il driver rilegge 'Deposito Iniziale' dal report.
+#  COMMISSIONE [MISURATO in casa, letto il 09/10 dai report in archivio con il lettore di questa prova]: il tester BCM la ADDEBITA sul forex (GBPUSD M5
+#  tick reali, ROUND_CORTI_A/CCOMM_R258.htm: colonna Commissioni -2.560,87 EUR su 496 operazioni) e NON sugli indici (NASUSD H1, R290A: 0,00); oro [NON MISURATO].
+#  Il lettore somma la colonna Commissioni dei deal del report di OGNI passata. Se e' ZERO (il tester non la addebita), sottrae una commissione DERIVATA
+#  (forex 0,004% del prezzo, oro 0,04 USD/oncia, indici 0, a giro) in R per setup = rischio x riempiti x c / somma delle distanze degli ordini dallo
+#  stop (lotti uguali, pesi 1:1:1; sovrastima di al piu' l'errore di arrotondamento, quindi prudente) e stampa SEMPRE anche la versione al DOPPIO
+#  (per lato) come contro-esempio: se il verdetto cambia fra le due, si scrive.
+#  Guardian nel tester: FAIL-OPEN (specifica 2.5). Il DD del tester NON e' ridotto da pausa B1 ne' da cap C1. Buco B6 (pendenti fuori dal C1) dichiarato.
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (ognuna con l'ipotesi alternativa) =======================
+#  A1 [n per gamba]: setup F0 dell'IS (blocchi @F1-ATTESA) x [0,5 - 2,0] = COERENTE; fuori = DA GUARDARE; < 0,1x o > 10x = STOP (si cerca la causa
+#     prima di leggere il PF). Perche' la banda e' larga verso l'ALTO: a tick reali l'ordine d'anticipo si riempie gia' quando il prezzo arriva a 5 u
+#     dalla linea, senza toccarla (F0 contava i TOCCHI); verso il BASSO: un setup aperto blocca gli altri (semaforo E7) e nei modi LINEA/PIU i setup
+#     ST2,5/ST3,0 con la ST3,5 discorde si SCARTANO (sull'oro HistData 21% e 9%). CONTRO-ESEMPIO: se il lettore contasse gli ORDINI o i DEAL invece
+#     dei setup otterrebbe 1-3 volte n: la banda lo lascerebbe passare fino a 2x, per questo il lettore conta SOLO le righe SETUP e controlla che la
+#     somma dei riempiti sia uguale alle operazioni del report.
+#  A2 [ipotesi nulla = nessun edge, passeggiata casuale con il pedaggio, CALCOLO per ordine: PF = p(TP-c)/((1-p)(SL+c)), p = SL/(TP+SL)]:
+#     EURUSD (c 0,67 pip)  GEOM anticipo/linea/profondo 0,83/0,87/0,84   LINEA 0,84/0,90/0,91   PIU (EMA200 oltre di 38 u) 0,86/0,92/0,94
+#     USDJPY (c 0,91 pip)  GEOM 0,77/0,83/0,80   LINEA 0,79/0,87/0,89   PIU 0,81/0,90/0,92
+#     XAUUSD (c 0,25 USD)  GEOM 0,93/0,95/0,94   LINEA 0,94/0,96/0,97   PIU (oltre di 31,5 u) 0,95/0,97/0,98
+#     -> PF_R del nullo per setup: forex 0,77-0,94, oro 0,93-0,98. E il passaggio GEOM -> LINEA -> PIU ALZA il PF del nullo di +0,01/+0,05 SOLO
+#     per il costo (stop piu' largo, pedaggio pesa meno): un miglioramento di LINEA o PIU su GEOM ENTRO +0,05 non distingue niente dal nullo.
+#  A3 [pareggio richiesto, tasso di vincita per ordine, (SL+c)/(TP+SL)]: EURUSD GEOM 78,3/53,3/28,3%, LINEA 85,6/68,9/52,2%, PIU (oltre di 38 u)
+#     93,6/86,3/78,9%; oro GEOM 76,2/51,2/26,2%, LINEA 84,2/67,5/50,8%, PIU (oltre di 31,5 u) ~93/84/78%. Lo stop piu' largo alza il tasso di vincita
+#     E il pareggio richiesto INSIEME: il tasso di vincita da solo non dice niente, si legge solo contro questa riga.
+#  A4 [E1 della specifica, fedelta' della geometria]: durata mediana per gamba <= 60 min (A-R24 "un'oretta neanche"); 60-180 compatibile; > 180 =
+#     non e' il metodo della collega (il merito si legge lo stesso, ma si scrive). ALTERNATIVA: una passeggiata casuale con barriere a ~1 ATR esce in
+#     1-2 barre: anche senza edge la durata mediana su H1 e' ~1-2 h. E1 controlla la GEOMETRIA, non il merito.
+#  A5 [lato e regime]: l'IS dell'oro e' un toro (+39%): la deriva gonfia il LONG anche senza edge. ALTERNATIVA da battere: PF long > 1 e PF short < 1
+#     sull'oro = regime, non linea. Il placebo (E7) e' di F2.
+#  A6 [confronto dei modi]: nessuna preferenza scritta (Claudio: "Proviamole entrambe"). Prior: lo stop piu' largo riduce il peso del costo (A2) e
+#     sposta il profilo verso molte piccole vincite e poche perdite grandi; senza edge PF_R resta sotto 1 in tutti e tre i modi.
+#
+#  ======================= SOGLIE CONGELATE (il lettore le applica alla lettera, non si cambiano dopo i numeri) =======================
+#  T1 n: una gamba si legge per il MERITO solo con n >= 150 (somma dei simboli della famiglia, quel lato, quel modo). Sotto: SOTTILE = merito SOSPESO;
+#     il RISCHIO si legge a qualunque n.
+#  T2 VIVO (permesso di aprire gli assi di F2 su quella gamba, MAI una promozione): n >= 150 E PF_R >= 1,15 E media di R > 0 con p unilaterale < 0,05
+#     (approssimazione normale; e' PIU' severa della soglia del nullo con costo della specifica 6.1, che ha media negativa) E regola del segno: PF_R > 1
+#     in almeno 2/3 (per eccesso) dei simboli della famiglia con n >= 30 in quella gamba, con ALMENO 2 simboli votanti (una famiglia di un solo simbolo,
+#     l'ORO qui, non puo' essere VIVA: e' la casella 4 del certificato). Tutto DOPO la commissione derivata se il tester non la addebita; se cambia con la
+#     commissione doppia, si scrive.
+#  T3 PERDENTE MISURATO: n >= 150 E PF_R < 1 E media di R < 0 con p unilaterale < 0,05. T4 NON DISTINGUIBILE: n >= 150 e ne' T2 ne' T3.
+#  T5 CONFRONTO DEI MODI (stessa famiglia, config, lato): un modo e' MIGLIORE di un altro solo se e' VIVO, la differenza di PF_R e' >= 0,10 (il doppio
+#     dello spostamento del nullo di A2) E il segno e' concorde in almeno 2/3 dei simboli con n >= 30 in entrambi. Altrimenti NESSUNA DIFFERENZA
+#     DISTINGUIBILE. Se due modi sono VIVI e non distinguibili, la scelta per F2 e' di CLAUDIO (fedelta' o misura, specifica 8 punto 3).
+#  T6 RISCHIO (E8 della specifica): DD massimo in R e peggior giornata in R per gamba (sequenza unita dei simboli della famiglia per data del setup);
+#     r_max = 10% / DD_R e 4,0% / peggior giornata_R. Il backtest consegna r_max, la taglia e' di Claudio (oggi il segnaposto e' 0,25%).
+#  T7 CERTIFICATO DI MORTE (5 caselle; MAI 'morto' se ne manca una): (1) PF misurato, (2) n e DD, (3) uscita ad asse (A1 TP dal riempimento, A9 durata 60:
+#     sono di F2, quindi dopo F1 la casella 3 e' VUOTA per tutti), (4) simboli gemelli (FX7: 7 simboli si'; ORO: NO, l'argento e' fuori scala; IDX3: 3
+#     simboli si'), (5) TF cambiato (H1 e H4: si'). Dopo F1 nessuna gamba puo' essere MORTA: il verdetto massimo e' 'NON ANCORA MISURATO (manca la 3)'.
+#  T8 F2 (regola fissata ora, file prova nuovo dopo i numeri): assi pieni (specifica 3.1/3.3) SOLO sulle gambe VIVE; sulle altre SOLO le due celle d'uscita
+#     del certificato (A1, A9). Nessuna griglia su una gamba non viva (regola del 19/08).
+#
+#  ======================= TEMPO MACCHINA (ricalcolato; la stima della specifica F1 NON vale) =======================
+#  La specifica scriveva 15-60 min per 15 simboli x 12 passate con 0,083-0,333 min/passata: ancore di OTTIMIZZAZIONI (agenti in parallelo, terminale
+#  aperto una volta, classe 1189). Qui ogni passata apre e chiude il terminale e legge un anno di tick reali. ANCORA MISURATA su QUESTO PC: R290A, passata
+#  singola SupRev NASUSD H1 2024.09.26-2026.06.30, 154,9 milioni di tick = 12 minuti (~215.000 tick/s compresi apertura e chiusura). Tick dell'IS:
+#  GBPUSD ~31 milioni/anno (CCOMM_R258: 62,7 milioni su 2 anni) [DERIVATO], gli altri forex [NON MISURATI, stessa classe]; oro [NON MISURATO];
+#  indici IS 9 mesi: NASUSD ~70 milioni (misura_tick 166,5 su 21 mesi), gli altri tre [NON MISURATI]. Peso dell'OnTick di NatCla rispetto a SupRev:
+#  [NON MISURATO]. Banda per passata: forex 1,5-6 min (centro ~2,5), oro 2,5-10 (centro ~5), indici 2-8 (centro ~4). Il PILOTA la misura.
+#   P   4 passate   ~8-32 min  (+ compilazione 1-3)       O   20 passate  50-200 min (centro ~100)
+#   FA  80 passate  120-480 min (centro ~200)            FB  60 passate  90-360 min (centro ~150)
+#   I   36 passate  72-288 min (centro ~145)
+#   TOTALE 200 passate: ~5,7-23 ore, centro ~10 ore (senza I ~7,8 ore). Primo scarico dei tick di un simbolo mai girato a Modello 4 su questo PC:
+#   [NON MISURATO], puo' aggiungere minuti per simbolo (prima passata del simbolo).
+#  Tetto per lotto (ferma l'AVVIO di una passata, non la sua fine): blocchi @F1-LOTTO. Timeout per passata: 45 minuti.
+#
+#  ======================= DOMANDE APERTE PER CLAUDIO (con il DEFAULT usato in questa prova) =======================
+#  Q1 Periodo ATR del Supertrend: default 10 [NOSTRA dal 07/10; l'unica fonte era il PDF escluso]. Nessun asse in F1.
+#  Q2 Simboli: la collega su cosa opera davvero? Default: oro + 7 forex maggiori + 3 indici in scala (regole S1-S3).
+#  Q3 ARGENTO: "10 punti di prezzo" = 10 USD (letterale, LEGGIMI 08/10) da' TP = 56 ATR14 H1 e stop ~56% del prezzo: e' davvero quello? Oppure 10
+#     centesimi? Default: XAGUSD FUORI da F1. Senza argento l'oro non ha gemelli: casella 4 del certificato VUOTA per l'oro.
+#  Q4 INDICI: TP 10 punti = 0,16-0,18 ATR14 H1 su NASUSD e D30EUR (fuori scala, S2) e 0,55-0,79 su SPXUSD/100GBP/200AUD; nel modo PIU lo stop arriva a
+#     centinaia di punti (U30USD 352). Default: TP 10 punti letterale, SOLO SPXUSD/100GBP/200AUD, SOLO LINEA/PIU (GEOM escluso per costo), lotto I per
+#     ultimo. NASUSD/D30EUR NON misurati (fuori scala): restano NON ANCORA MISURATI con questo motivo.
+#  Q5 Setup scartati nei modi LINEA/PIU (ST3,5 discorde, o tutte e due le linee dal lato opposto): default SCARTATI (scelta della v1.10/v1.11).
+#  Q6 ST3,5 dentro la scala: default vince X4 (stop mai piu' vicino dell'ordine profondo + 5 u).
+#  Q7 Lo stop si riprezza a ogni barra con la scala finche' non si riempie, poi resta fermo: default cosi' (v1.10 domanda 6).
+#  Q8 Rischio per setup: 0,25% SEGNAPOSTO (non toccato). Il backtest consegna r_max in R; la taglia e' una firma.
+#
+#  ======================= LIMITI DICHIARATI =======================
+#  - L'EA NON e' mai stato compilato nella v1.11 (v1.10/v1.11: zero passate nel tester). Il PILOTA e' la prima compilazione e la prima corsa con ordini
+#    VERI nel tester di EA_NatCla: se la compilazione fallisce il driver si ferma PRIMA del tester con uno zip del log di MetaEditor.
+#  - La v1.05 aveva girato SOLO in SoloConta: il ramo ordini (ArmaScala, InviaLimit, Sincronizza, ChiudiSetup, ExportTrades) e' collaudato a tavolino,
+#    mai eseguito. Il PILOTA controlla la colla: righe SETUP = operazioni del report, soldi del CSV = profitto del report, lato e modo nelle righe.
+#  - Spread del tester a Modello 4 = spread dei tick (classe: SPREAD_FLOTTA_MISURA, solo-bid 0,000% sugli indici; forex [NON MISURATO]).
+#  - Un regime per classe; nessun fuori-campione di regime; broker singolo (BCM); ExecutionMode 0.
+#
+#  @DAQUANDO-DALLA-RIGA la data d'inizio arriva dai blocchi @F1-SIMBOLO perche' il pavimento dei tick BCM cambia per classe (forex 2024.07.05, oro 2024.07.10, indici 2024.09.26)
+#
+#  BLOCCHI LEGGIBILI A MACCHINA (la sola fonte per driver e lettore; sono commenti: il driver dei round li salta). Chiavi k=v separate da spazi.
+#  @F1-CONFIG nome=AUDIO_H1 modalita=0 tf=16385 periodo=H1 magic=778601 linee=ST25,ST30,ST35 adx=ACCESO modi=GEOM,LINEA,PIU
+#  @F1-CONFIG nome=AUDIO_H4 modalita=0 tf=16388 periodo=H4 magic=778604 linee=ST25,ST30,ST35 adx=ACCESO modi=GEOM,LINEA,PIU
+#  @F1-CONFIG nome=M2_H1 modalita=2 tf=16385 periodo=H1 magic=778621 linee=E200 adx=spento modi=GEOM,LINEA
+#  @F1-CONFIG nome=M2_H4 modalita=2 tf=16388 periodo=H4 magic=778624 linee=E200 adx=spento modi=GEOM,LINEA
+#  @F1-MODO nome=GEOM valore=0 avvio=GEOMETRIA_ATTUALE
+#  @F1-MODO nome=LINEA valore=1 avvio=OLTRE_LINEA_ESTERNA
+#  @F1-MODO nome=PIU valore=2 avvio=OLTRE_PIU_ESTERNA
+#  @F1-LATO nome=LONG valore=1 segno=1 cfg=NC_DIR_LONG
+#  @F1-LATO nome=SHORT valore=2 segno=-1 cfg=NC_DIR_SHORT
+#  @F1-SIMBOLO nome=XAUUSD classe=ORO famiglia=ORO da=2024.07.10 u=1.0
+#  @F1-SIMBOLO nome=EURUSD classe=FX famiglia=FX7 da=2024.07.05 u=0.0001
+#  @F1-SIMBOLO nome=GBPUSD classe=FX famiglia=FX7 da=2024.07.05 u=0.0001
+#  @F1-SIMBOLO nome=USDJPY classe=FX famiglia=FX7 da=2024.07.05 u=0.01
+#  @F1-SIMBOLO nome=AUDUSD classe=FX famiglia=FX7 da=2024.07.05 u=0.0001
+#  @F1-SIMBOLO nome=NZDUSD classe=FX famiglia=FX7 da=2024.07.05 u=0.0001
+#  @F1-SIMBOLO nome=USDCAD classe=FX famiglia=FX7 da=2024.07.05 u=0.0001
+#  @F1-SIMBOLO nome=USDCHF classe=FX famiglia=FX7 da=2024.07.05 u=0.0001
+#  @F1-SIMBOLO nome=SPXUSD classe=IDX famiglia=IDX3 da=2024.09.26 u=1.0
+#  @F1-SIMBOLO nome=100GBP classe=IDX famiglia=IDX3 da=2024.09.26 u=1.0
+#  @F1-SIMBOLO nome=200AUD classe=IDX famiglia=IDX3 da=2024.09.26 u=1.0
+#  @F1-INCL famiglia=ORO config=AUDIO_H1 soglia=0.700
+#  @F1-INCL famiglia=ORO config=AUDIO_H4 soglia=0.740
+#  @F1-INCL famiglia=ORO config=M2_H1 soglia=0.219
+#  @F1-INCL famiglia=ORO config=M2_H4 soglia=0.203
+#  @F1-INCL famiglia=FX7 config=AUDIO_H1 soglia=0.623
+#  @F1-INCL famiglia=FX7 config=AUDIO_H4 soglia=0.624
+#  @F1-INCL famiglia=FX7 config=M2_H1 soglia=0.207
+#  @F1-INCL famiglia=FX7 config=M2_H4 soglia=0.226
+#  @F1-INCL famiglia=IDX3 config=AUDIO_H1 soglia=0.623
+#  @F1-INCL famiglia=IDX3 config=AUDIO_H4 soglia=0.649
+#  @F1-INCL famiglia=IDX3 config=M2_H1 soglia=0.227
+#  @F1-INCL famiglia=IDX3 config=M2_H4 soglia=0.255
+#  @F1-ATTESA simbolo=XAUUSD config=AUDIO_H1 long=62 short=38
+#  @F1-ATTESA simbolo=XAUUSD config=AUDIO_H4 long=17 short=7
+#  @F1-ATTESA simbolo=XAUUSD config=M2_H1 long=39 short=31
+#  @F1-ATTESA simbolo=XAUUSD config=M2_H4 long=11 short=5
+#  @F1-ATTESA simbolo=EURUSD config=AUDIO_H1 long=62 short=61
+#  @F1-ATTESA simbolo=EURUSD config=AUDIO_H4 long=16 short=11
+#  @F1-ATTESA simbolo=EURUSD config=M2_H1 long=46 short=39
+#  @F1-ATTESA simbolo=EURUSD config=M2_H4 long=10 short=5
+#  @F1-ATTESA simbolo=GBPUSD config=AUDIO_H1 long=70 short=71
+#  @F1-ATTESA simbolo=GBPUSD config=AUDIO_H4 long=20 short=23
+#  @F1-ATTESA simbolo=GBPUSD config=M2_H1 long=37 short=36
+#  @F1-ATTESA simbolo=GBPUSD config=M2_H4 long=9 short=7
+#  @F1-ATTESA simbolo=USDJPY config=AUDIO_H1 long=69 short=65
+#  @F1-ATTESA simbolo=USDJPY config=AUDIO_H4 long=17 short=12
+#  @F1-ATTESA simbolo=USDJPY config=M2_H1 long=50 short=34
+#  @F1-ATTESA simbolo=USDJPY config=M2_H4 long=12 short=9
+#  @F1-ATTESA simbolo=AUDUSD config=AUDIO_H1 long=71 short=51
+#  @F1-ATTESA simbolo=AUDUSD config=AUDIO_H4 long=15 short=15
+#  @F1-ATTESA simbolo=AUDUSD config=M2_H1 long=46 short=47
+#  @F1-ATTESA simbolo=AUDUSD config=M2_H4 long=10 short=11
+#  @F1-ATTESA simbolo=NZDUSD config=AUDIO_H1 long=73 short=55
+#  @F1-ATTESA simbolo=NZDUSD config=AUDIO_H4 long=10 short=13
+#  @F1-ATTESA simbolo=NZDUSD config=M2_H1 long=56 short=31
+#  @F1-ATTESA simbolo=NZDUSD config=M2_H4 long=16 short=9
+#  @F1-ATTESA simbolo=USDCAD config=AUDIO_H1 long=71 short=51
+#  @F1-ATTESA simbolo=USDCAD config=AUDIO_H4 long=13 short=15
+#  @F1-ATTESA simbolo=USDCAD config=M2_H1 long=41 short=52
+#  @F1-ATTESA simbolo=USDCAD config=M2_H4 long=7 short=9
+#  @F1-ATTESA simbolo=USDCHF config=AUDIO_H1 long=59 short=55
+#  @F1-ATTESA simbolo=USDCHF config=AUDIO_H4 long=26 short=21
+#  @F1-ATTESA simbolo=USDCHF config=M2_H1 long=68 short=45
+#  @F1-ATTESA simbolo=USDCHF config=M2_H4 long=4 short=5
+#  @F1-ATTESA simbolo=SPXUSD config=AUDIO_H1 long=65 short=53
+#  @F1-ATTESA simbolo=SPXUSD config=AUDIO_H4 long=13 short=7
+#  @F1-ATTESA simbolo=SPXUSD config=M2_H1 long=25 short=22
+#  @F1-ATTESA simbolo=SPXUSD config=M2_H4 long=7 short=3
+#  @F1-ATTESA simbolo=100GBP config=AUDIO_H1 long=40 short=32
+#  @F1-ATTESA simbolo=100GBP config=AUDIO_H4 long=6 short=3
+#  @F1-ATTESA simbolo=100GBP config=M2_H1 long=32 short=26
+#  @F1-ATTESA simbolo=100GBP config=M2_H4 long=8 short=3
+#  @F1-ATTESA simbolo=200AUD config=AUDIO_H1 long=35 short=34
+#  @F1-ATTESA simbolo=200AUD config=AUDIO_H4 long=14 short=9
+#  @F1-ATTESA simbolo=200AUD config=M2_H1 long=20 short=22
+#  @F1-ATTESA simbolo=200AUD config=M2_H4 long=6 short=2
+#  @F1-LOTTO nome=P tetto_min=60 passate=XAUUSD:AUDIO_H1:LONG:GEOM,XAUUSD:AUDIO_H1:LONG:PIU,EURUSD:AUDIO_H1:SHORT:LINEA,EURUSD:M2_H1:SHORT:GEOM
+#  @F1-LOTTO nome=O tetto_min=300 simboli=XAUUSD configs=AUDIO_H1,AUDIO_H4,M2_H1,M2_H4 lati=LONG,SHORT modi=GEOM,LINEA,PIU
+#  @F1-LOTTO nome=FA tetto_min=600 simboli=EURUSD,GBPUSD,USDJPY,AUDUSD configs=AUDIO_H1,AUDIO_H4,M2_H1,M2_H4 lati=LONG,SHORT modi=GEOM,LINEA,PIU
+#  @F1-LOTTO nome=FB tetto_min=450 simboli=NZDUSD,USDCAD,USDCHF configs=AUDIO_H1,AUDIO_H4,M2_H1,M2_H4 lati=LONG,SHORT modi=GEOM,LINEA,PIU
+#  @F1-LOTTO nome=I tetto_min=420 simboli=SPXUSD,100GBP,200AUD configs=AUDIO_H1,AUDIO_H4,M2_H1,M2_H4 lati=LONG,SHORT modi=LINEA,PIU
+#
+#  ORDINE DEI LOTTI (scritto qui e in ogni riga): P per PRIMO e da solo; O, FA, FB, I SOLO dopo che il pilota e' tornato con tutte e 4 le passate OK e il
+#  lettore ha detto 'colla OK' (righe SETUP = operazioni, soldi = profitto, lato e modo giusti). I per ULTIMO (tutto SOTTILE a priori).
+#  PINS: i 74 input della v1.11 = DEFAULT COMPILATI (confronto riga per riga col sorgente, 09/10), con queste DEVIAZIONI dichiarate: InpSoloConta=false
+#  e' il default (scritto esplicito); InpModalita=0, InpTF=16385, InpDirezione=1, InpStopModo=0, InpInclMinAtr=0 sono la cella base che il driver
+#  SOSTITUISCE a ogni passata con i valori dei blocchi (modalita/tf della config, lato, modo, soglia @F1-INCL); InpMagic e' l'asse tecnico.
+#
+# ==========================================================================
+
+@FINOA    2025.06.30
+
+InpModalita=0
+InpTF=16385
+InpDirezione=1
+InpStAtrPeriodo=10
+InpStMult1=2.5
+InpStMult2=3.0
+InpStMult3=3.5
+InpUsaST25=-1
+InpUsaST30=-1
+InpUsaST35=-1
+InpEmaLentaPeriodo=200
+InpEmaTp1=14
+InpEmaTp2=89
+InpLogContesto=true
+InpAtrNormPeriodo=14
+InpMotoreEma200=-1
+InpTocchiMaxEma=0
+InpToccoDef=0
+InpSfioraAtr=0.10
+InpTocchiMax25=-1
+InpTocchiMax30=-1
+InpTocchiMax35=-1
+InpResetConteggio=0
+InpDistaccoAtr=1.0
+InpChiudeVicinoAtr=-1
+InpConfermaApertura=-1
+InpTimingTocco=0
+InpAdxUsa=-1
+InpAdxMax=20
+InpAdxPeriodo=14
+InpAdxAmbito=0
+InpAdxTipo=0
+InpInclUsa=-1
+InpInclBarre=20
+InpInclMinAtr=0
+InpInclVerso=0
+InpConfluenza=-1
+InpConflTolAtr=0.5
+InpMaxSpreadPunti=0
+InpUnita=0
+InpUnitaManuale=0.1
+InpTipoIngresso=-1
+InpScalaAnticipo=5
+InpScalaOltre=5
+InpPdfDistanzaSecondo=20
+InpPdfAperturaLontana=0
+InpPdfLontanoAtr=0.5
+InpScadenzaBarre=1
+InpMaxSetupAperti=1
+InpRischioSetupPct=0.25
+InpRischioMaxSetupPct=0
+InpPesiScala=0
+InpPesiPdf=0
+InpMoltConfluenza=1.0
+InpSLCriterio=-1
+InpSLBuffer=5
+InpSLEstremoBarre=3
+InpStopModo=0
+InpStopOltreU=20.0
+InpTPCriterio=-1
+InpTPDistanza=10
+InpRRMin=-1
+InpParzialeTP1Pct=0
+InpBEalTP1=-1
+InpDurataMaxMin=0
+InpCommissionePrezzo=0
+InpCancelloCostoX=40
+InpUsaGuardian=true
+InpMagic=0||0||1||1||Y
+InpComment=NATCLA
+InpLogImbuto=true
+InpVerbose=true
+InpSoloConta=false
+InpPlaceboAtr=0
