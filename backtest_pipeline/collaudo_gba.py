@@ -31,8 +31,10 @@ a tavolino, e si dice cosa resta fuori.
 
 Uso:   python3 backtest_pipeline/collaudo_gba.py [--senza-mutanti]
 Esce con 0 solo se tutto passa. NON prova: compilazione MQL5 (MetaEditor assente), CTrade e riempimenti,
-Guardian (fuori dalla sua riga), GbaApri/GbaGestisci/GbaPnlGiorno/GbaMargineOk (API di conto), iMA/iATR del
-terminale, tick reali, spread reale BCM, NESSUN backtest.
+Guardian (fuori dalla sua riga), GbaApri/GbaGestisci/GbaPnlGiorno/GbaMargineOk/GbaPosizioneAperta (API di conto),
+iMA/iATR del terminale, tick reali, spread reale BCM, NESSUN backtest. E NON esegue la COLLA: GbaNuovaBarra (spread,
+ora, posizione aperta, giornata, tetto passati a GbaDecidi) e il dispatch di OnTick li rifa' il driver C++ da se';
+su quella colla ci sono solo ANCORE statiche (S38-S45, aggiunte dal cancello del 09/10: prima 7 mutanti su 9 verdi).
 """
 import math
 import os
@@ -325,6 +327,23 @@ def statico(raw, bag, quiet=False):
           "riga di log per OGNI segnale scartato dal tetto (incondizionata)", bag, quiet=quiet)
     check("g_conta[GBA_TETTO]" in sc and "InpMaxTradesPerDay" in sc, "[GBA-CONTA] conta gli scarti per tetto", bag, quiet=quiet)
     check("InpMaxTradesPerDay < 0" in oi, "OnInit: tetto negativo rifiutato", bag, quiet=quiet)
+    # COLLA (cancello 09/10): GbaNuovaBarra, OnTick, GbaApri, GbaPosizioneAperta e GbaGestisci NON girano nel
+    # driver C++ (il driver rifa' da se' il dispatch della barra e l'assemblaggio degli input di GbaDecidi):
+    # nove mutanti scritti dal cancello su questa colla, 7 su 9 passavano verdi. Qui solo ANCORE statiche.
+    check("double spread = SymbolInfoDouble(g_sym, SYMBOL_ASK) - SymbolInfoDouble(g_sym, SYMBOL_BID);" in nb
+          and "TimeToStruct(t0, dt);" in nb and "dt.hour, InpHourStart, InpHourEnd," in nb
+          and "GbaPosizioneAperta(), giorno, InpAllowLong, InpAllowShort," in nb
+          and "giorno = GbaGiornoBloccato(GbaPnlGiorno(), InpMaxDailyLoss);" in nb,
+          "COLLA GbaNuovaBarra: spread = Ask - Bid, ora della barra t0, posizione aperta e giornata passate a GbaDecidi",
+          bag, quiet=quiet)
+    check("if(t0 == g_lastBar) return;\n   g_lastBar = t0;\n   GbaNuovaBarra(t0);" in ot,
+          "COLLA OnTick: un segnale per barra (g_lastBar aggiornato prima di GbaNuovaBarra)", bag, quiet=quiet)
+    check("double price = isLong ? ask : bid;" in ap and "double sl    = isLong ? (price - slDist) : (price + slDist);" in ap,
+          "COLLA GbaApri: prezzo Ask/Bid e SL dal lato giusto", bag, quiet=quiet)
+    check("PositionGetString(POSITION_SYMBOL) == g_sym &&\n         PositionGetInteger(POSITION_MAGIC) == InpMagic) return true;"
+          in fn.get("GbaPosizioneAperta", ""), "COLLA GbaPosizioneAperta: simbolo E magic", bag, quiet=quiet)
+    check("SYMBOL_TRADE_FREEZE_LEVEL" in ge and "PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;" in ge,
+          "COLLA GbaGestisci: freeze level nella distanza minima, solo le posizioni del magic", bag, quiet=quiet)
     # autotest
     at = fn.get("AutoTestGba", "")
     check("GbaAutotestNucleo()" in at and "ABTG_AutotestGuardia()" in at, "autotest: nucleo + Guardian", bag, quiet=quiet)
@@ -1187,6 +1206,19 @@ MUTANTI = [
     ("S36", "tetto tolto da [GBA-CONTA]", "               g_conta[GBA_TETTO], InpMaxTradesPerDay);", "               0, InpMaxTradesPerDay);", 0, "S"),
     ("S37", "conteggio delle aperture mai chiamato", "      aperteOggi = GbaAperteOggi(t0);", "      aperteOggi = 0;", 0, "S"),
     ("S32", "margine libero non verificato", "if(InpCheckFreeMargin && !GbaMargineOk(isLong, lots, price)) return;", "", 0, "S"),
+    # COLLA (cancello 09/10): mutanti scritti da chi NON ha scritto il codice (classe 1068); prima passavano verdi.
+    ("S38", "spread Bid - Ask (filtro morto)", "double spread = SymbolInfoDouble(g_sym, SYMBOL_ASK) - SymbolInfoDouble(g_sym, SYMBOL_BID);",
+     "double spread = SymbolInfoDouble(g_sym, SYMBOL_BID) - SymbolInfoDouble(g_sym, SYMBOL_ASK);", 0, "S"),
+    ("S39", "ora del filtro spostata di un'ora", "TimeToStruct(t0, dt);", "TimeToStruct(t0 - 3600, dt);", 0, "S"),
+    ("S40", "posizione aperta passata false", "GbaPosizioneAperta(), giorno, InpAllowLong", "false, giorno, InpAllowLong", 0, "S"),
+    ("S41", "SL long dal lato sbagliato in GbaApri", "double sl    = isLong ? (price - slDist) : (price + slDist);",
+     "double sl    = isLong ? (price + slDist) : (price + slDist);", 0, "S"),
+    ("S42", "magic ignorato in GbaPosizioneAperta",
+     "PositionGetString(POSITION_SYMBOL) == g_sym &&\n         PositionGetInteger(POSITION_MAGIC) == InpMagic) return true;",
+     "PositionGetString(POSITION_SYMBOL) == g_sym) return true;", 0, "S"),
+    ("S43", "freeze level ignorato", "SymbolInfoInteger(g_sym, SYMBOL_TRADE_FREEZE_LEVEL)) * point;", "0) * point;", 0, "S"),
+    ("S44", "g_lastBar mai aggiornato (segnale a ogni tick)", "   g_lastBar = t0;\n   GbaNuovaBarra(t0);", "   GbaNuovaBarra(t0);", 0, "S"),
+    ("S45", "giornata mai bloccata nella colla", "giorno = GbaGiornoBloccato(GbaPnlGiorno(), InpMaxDailyLoss);", "giorno = false;", 0, "S"),
 ]
 
 
@@ -1238,7 +1270,8 @@ def main():
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     print("\nNON PROVATO: compilazione MQL5 (MetaEditor assente), CTrade e riempimenti, Guardian oltre la sua riga, "
-          "GbaApri/GbaGestisci/GbaPnlGiorno/GbaMargineOk (API di conto), iMA/iATR del terminale, tick e spread reali, "
+          "GbaApri/GbaGestisci/GbaPnlGiorno/GbaMargineOk/GbaPosizioneAperta (API di conto), la COLLA GbaNuovaBarra/OnTick "
+          "(il driver C++ la rifa' da se': solo ancore statiche), iMA/iATR del terminale, tick e spread reali, "
           "NESSUN backtest.")
     if FAILS:
         print("\nESITO: FAIL (%d)" % len(FAILS))
