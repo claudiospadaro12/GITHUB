@@ -107,6 +107,12 @@ MUTANTI_LETTORE = [
     ("VERIFICA ADX non controllata", 'if len(g["verifica"]) != 1 or "il terminale coincide con: formula MetaQuotes" not in g["verifica"][0]:', "if False:"),
     ("PIU con la linea dentro ammesso", 'if r["linea"] == "ST35" and modo["valore"] == "2" and s * (lp - ls) < -tl:', "if False:"),
     ("determinismo sempre IDENTICHE", 'out.append((k, "IDENTICHE" if visti[k] == impronta else "DIVERSE"))', 'out.append((k, "IDENTICHE"))'),
+    # [cancello 09/10] i tre controlli aggiunti dal cancello: simbolo a zero setup, stop pieni, nullo sulla geometria vera
+    ("simbolo a zero setup sparisce", '        g["sim"].setdefault(P["sim"]["nome"], [])\n        for r in P["rows"]:', '        for r in P["rows"]:'),
+    ("banda degli stop pieni spenta", "return len(v), med, max(v), not (BANDA_STOP_PIENO[0] <= med <= BANDA_STOP_PIENO[1])", "return len(v), med, max(v), False"),
+    ("nullo senza pedaggio sulle vincite", "ew += pr * a * sum(l2 * (T - d2 - c) for d2, l2 in pieni)", "ew += pr * a * sum(l2 * (T - d2) for d2, l2 in pieni)"),
+    ("nullo che salta gli ordini successivi", "nxt = liv[k + 1][0] if k + 1 < len(liv) else 0.0", "nxt = 0.0"),
+    ("pilota + lotto contati due volte", "        if k5 in contate:\n            continue\n", ""),
 ]
 
 

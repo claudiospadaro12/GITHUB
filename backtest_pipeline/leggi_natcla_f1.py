@@ -303,6 +303,50 @@ def comm_prezzo(sim, linea_prezzo):
     return {"FX": 0.00004 * linea_prezzo, "ORO": 0.04, "IDX": 0.0}[sim["classe"]]
 
 
+# [CANCELLO 09/10] IL NULLO MISURATO SULLA GEOMETRIA VERA (contro-esempio di A2/T5, solo DIAGNOSTICA: nessun verdetto cambia).
+# Passeggiata casuale senza deriva che parte dal PRIMO ordine piazzato (una riga SETUP esiste solo se almeno un ordine si e' riempito),
+# riempie gli altri in ordine di distanza dallo stop, esce tutta insieme al TP comune o allo SL comune. Gambler's ruin a ogni ordine:
+# P(TP prima del prossimo ordine | sul livello x) = (x - prossimo) / (TP - prossimo). Pedaggio c per lotto (spread + commissione).
+# Ritorna (vincita attesa, perdita attesa) IN R del setup (R = sum lotto_i x |p_i - SL|), oppure None se la geometria non e' leggibile.
+# Controllato: ordine singolo = formula per ordine di A2 (EURUSD 0,83/0,87/0,84); scala intera contro Monte Carlo entro l'1%.
+def nullo_setup(s, ps_lotti, sl, tp, c):
+    liv = sorted(((s * (p - sl), lt) for p, lt in ps_lotti if lt > 0), reverse=True)
+    T = s * (tp - sl)
+    if not liv or liv[-1][0] <= 0 or T <= liv[0][0]:
+        return None
+    R = sum(d * lt for d, lt in liv)
+    ew, pr, pieni = 0.0, 1.0, []
+    for k, (d, lt) in enumerate(liv):
+        pieni.append((d, lt))
+        nxt = liv[k + 1][0] if k + 1 < len(liv) else 0.0
+        a = (d - nxt) / (T - nxt)
+        ew += pr * a * sum(l2 * (T - d2 - c) for d2, l2 in pieni)
+        pr *= (1.0 - a)
+    el = pr * sum(l2 * (d2 + c) for d2, l2 in pieni)
+    return ew / R, el / R
+
+
+def nullo_riga(r, sim):
+    try:
+        s = int(r["lato"])
+        ps = [(float(r["p%d" % k]), float(r["lotto%d" % k])) for k in (1, 2, 3)]
+        tps = [float(r["tp%d" % k]) for k in (1, 2, 3) if float(r["lotto%d" % k]) > 0]
+        sl, sp = float(r["sl"]), float(r["spread"])
+        c = max(sp, 0.0) + comm_prezzo(sim, float(r["linea_prezzo"]))
+    except (ValueError, KeyError):
+        return None
+    if not tps or max(tps) - min(tps) > 1e-9 * max(1.0, abs(tps[0])):
+        return None
+    return nullo_setup(s, ps, sl, tps[0], c)
+
+
+# [CANCELLO 09/10] R DI UNO STOP PIENO: un setup con i 3 ordini riempiti che esce allo SL deve valere ~ -1 R (meno commissione e scivolamento).
+# Se vale molto meno in valore assoluto, i lotti sono stati arrotondati/troncati (deposito, step 0,1 degli indici, volume massimo) e il PF_R
+# pesa i setup in modo diverso da quello dichiarato. Banda della MEDIANA scritta prima dei numeri: [-1,10 ; -0,85] (arrotondamento <= ~11% a
+# 1.000.000 EUR sull'oro H1, file prova; commissione forex di uno stop pieno ~0,04-0,06 R). Solo DIAGNOSTICA (DA GUARDARE), nessun verdetto cambia.
+BANDA_STOP_PIENO = (-1.10, -0.85)
+
+
 def comm_r(r, sim):
     """commissione derivata di UN setup in R (lotti uguali, pesi 1:1:1): riempiti x c / somma delle distanze dallo stop degli ordini piazzati."""
     c = comm_prezzo(sim, float(r["linea_prezzo"]))
@@ -489,18 +533,36 @@ def chiave_gamba(P):
 def calcola(bl, passate):
     """gambe[(fam, cfg, lato, modo)] -> statistiche; solo passate senza KO."""
     gambe = {}
+    # [CANCELLO 09/10] una passata RIPETUTA (pilota P + lotto O/FA che la rigira: le 4 del pilota) si conta UNA volta sola, la prima letta.
+    # Senza, leggere P insieme ai lotti -- cio' che USO e il punto (6) chiedono -- raddoppiava n, la peggior giornata e la significativita'.
+    contate = set()
     for P in passate:
         if P["ko"]:
             continue
+        k5 = (P["sim"]["nome"], P["cfg"]["nome"], P["lato"]["nome"], P["modo"]["nome"])
+        if k5 in contate:
+            continue
+        contate.add(k5)
         rep = P["rep"]
         tester_comm = rep is not None and abs(rep.get("commissioni") or 0.0) > 1e-9
-        g = gambe.setdefault(chiave_gamba(P), {"sim": {}, "seq": [], "comm_tester": set()})
+        g = gambe.setdefault(chiave_gamba(P), {"sim": {}, "seq": [], "comm_tester": set(), "nullo": [0.0, 0.0, 0], "pieni": []})
         g["comm_tester"].add(tester_comm)
+        # [CANCELLO 09/10] il simbolo entra nella gamba ANCHE con zero righe SETUP: senza, un simbolo a n 0 sparirebbe da n E dall'attesa (A1 cieca)
+        g["sim"].setdefault(P["sim"]["nome"], [])
         for r in P["rows"]:
             cr = 0.0 if tester_comm else comm_r(r, P["sim"])
             x = float(r["esito_R"])
             g["seq"].append((r["barra"], P["sim"]["nome"], x - cr, x - 2.0 * cr, x, float(r["durata_min"])))
             g["sim"].setdefault(P["sim"]["nome"], []).append((x - cr, x - 2.0 * cr))
+            nu = nullo_riga(r, P["sim"])
+            if nu is None:
+                g["nullo"][2] += 1
+            else:
+                g["nullo"][0] += nu[0]
+                g["nullo"][1] += nu[1]
+            piazzati = sum(1 for k in (1, 2, 3) if float(r["lotto%d" % k]) > 0)
+            if r["motivo"] == "SL" and piazzati == 3 and int(r["n_riempiti"]) == 3:
+                g["pieni"].append(x)
     out = {}
     for k, g in gambe.items():
         seq = sorted(g["seq"])
@@ -532,8 +594,20 @@ def calcola(bl, passate):
                   "wr": (100.0 * sum(1 for x in v1 if x > 0) / n) if n else float("nan"), "dd": ddr, "peggio": peggio,
                   "dur": statistics.median([x[5] for x in seq]) if seq else float("nan"), "pf_sim": pfs1, "n_sim": ns, "segno": (pos, vot),
                   "verdetto": verdetto(n, pf1, pp1, pn1, ok1), "verdetto2": verdetto(n, pf2, pp2, pn2, ok2), "attesa": att,
-                  "comm_tester": sorted(g["comm_tester"]), "sequenza": [(x[0], x[1], x[2]) for x in seq]}
+                  "comm_tester": sorted(g["comm_tester"]), "sequenza": [(x[0], x[1], x[2]) for x in seq],
+                  "pf_nullo": (g["nullo"][0] / g["nullo"][1]) if g["nullo"][1] > 0 else float("nan"), "nullo_saltati": g["nullo"][2],
+                  "att_sim": {s: (bl["ATTESA"].get((s, k[1])) or (0, 0))[0 if k[2] == "LONG" else 1] for s in ns},
+                  "pieni": sorted(g["pieni"])}
     return out
+
+
+def stop_pieno(g):
+    """(n, mediana, il meno negativo, fuori banda?) degli R degli stop pieni della gamba; None se nessuno."""
+    v = g.get("pieni") or []
+    if not v:
+        return None
+    med = statistics.median(v)
+    return len(v), med, max(v), not (BANDA_STOP_PIENO[0] <= med <= BANDA_STOP_PIENO[1])
 
 
 def banda_n(n, att):
@@ -623,7 +697,20 @@ def riepilogo(bl, passate, problemi, gambe, W):
             v += "  [con la commissione DOPPIA: %s]" % g["verdetto2"]
         W("   %-6s %-9s %-5s %-5s %5d %-26s %6s %6s %6s %7s %6s %6s %6s %7s %7s  %s" % (k[0], k[1], k[2], k[3], g["n"], banda_n(g["n"], g["attesa"]) + " att %d" % g["attesa"], f2(g["pf"]), f2(g["pf2"]), f2(g["pf_lordo"]),
                                                                                 f2(g["media"], 3), f2(g["pp"], 3), f2(g["wr"], 1), f2(g["dd"], 1), f2(g["peggio"], 2), f2(g["dur"], 0), v))
-        W("        segno: PF_R > 1 in %d su %d simboli con n >= %d | per simbolo: %s" % (g["segno"][0], g["segno"][1], N_SIM_SEGNO, ", ".join("%s %s (n %d)" % (s, f2(g["pf_sim"][s]), g["n_sim"][s]) for s in sorted(g["n_sim"]))))
+        W("        segno: PF_R > 1 in %d su %d simboli con n >= %d | per simbolo: %s" % (g["segno"][0], g["segno"][1], N_SIM_SEGNO, ", ".join("%s %s (n %d, att %d)" % (s, f2(g["pf_sim"][s]), g["n_sim"][s], g["att_sim"].get(s, 0)) for s in sorted(g["n_sim"]))))
+        for s in sorted(g["n_sim"]):
+            a_s = g["att_sim"].get(s, 0)
+            if a_s > 0 and g["n_sim"][s] < STOP_N[0] * a_s:
+                W("        ! DA GUARDARE (A1 per simbolo): %s ha n %d contro un'attesa di %d (< %.1fx): si cerca la causa prima di leggere la gamba" % (s, g["n_sim"][s], a_s, STOP_N[0]))
+        W("        nullo sulla geometria vera (passeggiata casuale con questo pedaggio, DIAGNOSTICA): PF_R0 = %s%s ; PF_R - PF_R0 = %s" % (
+            f2(g["pf_nullo"]), (" (%d setup senza geometria leggibile esclusi)" % g["nullo_saltati"]) if g["nullo_saltati"] else "", f2(g["pf"] - g["pf_nullo"]) if g["pf_nullo"] == g["pf_nullo"] else "n.d."))
+        sp_ = stop_pieno(g)
+        if sp_ is None:
+            W("        R degli stop pieni (3 riempiti, uscita SL): nessuno in questa gamba")
+        else:
+            W("        R degli stop pieni (3 riempiti, uscita SL): n %d, mediana %s, il meno negativo %s, banda della mediana [%.2f ; %.2f]%s" % (
+                sp_[0], f2(sp_[1], 3), f2(sp_[2], 3), BANDA_STOP_PIENO[0], BANDA_STOP_PIENO[1],
+                "  ! DA GUARDARE: lotti arrotondati/troncati, R deformato (deposito, step, volume massimo): il PF_R pesa i setup diversamente dal dichiarato" if sp_[3] else "  ok"))
         rm1 = (MURO_DD / g["dd"]) if g["dd"] > 0 else float("inf")
         rm2 = (PAUSA_GIORNO / -g["peggio"]) if g["peggio"] < 0 else float("inf")
         W("        rischio (T6): r_max = 10%%/DD_R = %s%% ; 4%%/peggior giornata = %s%% per setup (segnaposto 0,25%%: la taglia e' di Claudio)   E1 durata: %s" % (f2(rm1), f2(rm2), ("FEDELE (<= 60 min)" if g["dur"] <= DUR_FEDELE else ("compatibile (60-180)" if g["dur"] <= DUR_COMPAT else "NON e' il metodo della collega (> 180 min)")) if g["dur"] == g["dur"] else "n.d."))
@@ -632,15 +719,19 @@ def riepilogo(bl, passate, problemi, gambe, W):
     W("")
     W("(5) CONFRONTO DEI MODI (T5: migliore solo se VIVO, delta PF_R >= %.2f e segno concorde in >= 2/3 dei simboli con n >= %d in entrambi)." % (DPF_MODO, N_SIM_SEGNO))
     W("    Il nullo sposta il PF di +0,01/+0,05 da GEOM a LINEA a PIU SOLO per il costo (file prova A2): un delta sotto la soglia non distingue niente.")
+    W("    [cancello 09/10] Per SETUP il nullo si sposta di piu' sui setup con la EMA200 oltre la ST3,5 (EURUSD GEOM 0,85 -> LINEA 0,88 -> PIU con 38 u 0,91;")
+    W("    USDJPY fino a +0,08): accanto a ogni delta c'e' il delta del NULLO misurato sulla geometria vera delle due gambe. Il verdetto T5 resta quello congelato.")
     for (grp, a, b, d, piu_b, nc, esito) in confronta_modi(gambe):
-        W("   %-6s %-9s %-5s  %s -> %s: delta PF_R %s, %s meglio in %d su %d simboli  => %s" % (grp[0], grp[1], grp[2], a, b, f2(d), b, piu_b, nc, esito))
+        ga, gb = gambe.get((grp[0], grp[1], grp[2], a)), gambe.get((grp[0], grp[1], grp[2], b))
+        dn = (gb["pf_nullo"] - ga["pf_nullo"]) if (ga and gb and ga["pf_nullo"] == ga["pf_nullo"] and gb["pf_nullo"] == gb["pf_nullo"]) else float("nan")
+        W("   %-6s %-9s %-5s  %s -> %s: delta PF_R %s (delta del nullo %s), %s meglio in %d su %d simboli  => %s" % (grp[0], grp[1], grp[2], a, b, f2(d), f2(dn), b, piu_b, nc, esito))
     W("")
     W("(6) DETERMINISMO (stessa passata girata due volte, es. pilota contro lotto):")
     det = determinismo(passate)
     if not det:
         W("   nessuna passata ripetuta fra le sorgenti lette")
     for k, e in det:
-        W("   %s: righe SETUP %s" % (" ".join(k), e))
+        W("   %s: righe SETUP %s (nei numeri la passata conta UNA volta, la prima letta)" % (" ".join(k), e))
     W("")
     W("CERTIFICATO (T7): (1) PF misurato si', (2) n e DD si', (3) uscita ad asse NO (A1/A9 sono di F2), (4) gemelli: FX7 si', IDX3 si', ORO NO (argento fuori scala, domanda Q3),")
     W("(5) TF H1 e H4 si'. Quindi NESSUNA gamba e' 'morta' dopo F1: il verdetto massimo e' 'NON ANCORA MISURATO (manca la casella 3)'.")
@@ -650,10 +741,13 @@ def riepilogo(bl, passate, problemi, gambe, W):
 def tabella_csv(gambe, percorso):
     with open(percorso, "w", newline="") as f:
         w = csv.writer(f, delimiter=";")
-        w.writerow(["famiglia", "config", "lato", "modo", "n", "attesa", "pf_r", "pf_r_comm_doppia", "pf_lordo", "media_r", "p_pos", "wr", "dd_r", "peggior_giornata_r", "durata_mediana", "verdetto", "verdetto_comm_doppia"])
+        w.writerow(["famiglia", "config", "lato", "modo", "n", "attesa", "pf_r", "pf_r_comm_doppia", "pf_lordo", "media_r", "p_pos", "wr", "dd_r", "peggior_giornata_r", "durata_mediana", "verdetto", "verdetto_comm_doppia",
+                    "pf_r_nullo", "stop_pieni_n", "stop_pieni_mediana_r"])
         for k in sorted(gambe):
             g = gambe[k]
-            w.writerow(list(k) + [g["n"], g["attesa"], f2(g["pf"], 4), f2(g["pf2"], 4), f2(g["pf_lordo"], 4), f2(g["media"], 4), f2(g["pp"], 4), f2(g["wr"], 2), f2(g["dd"], 3), f2(g["peggio"], 3), f2(g["dur"], 1), g["verdetto"], g["verdetto2"]])
+            sp_ = stop_pieno(g)
+            w.writerow(list(k) + [g["n"], g["attesa"], f2(g["pf"], 4), f2(g["pf2"], 4), f2(g["pf_lordo"], 4), f2(g["media"], 4), f2(g["pp"], 4), f2(g["wr"], 2), f2(g["dd"], 3), f2(g["peggio"], 3), f2(g["dur"], 1), g["verdetto"], g["verdetto2"],
+                                  f2(g["pf_nullo"], 4), sp_[0] if sp_ else 0, f2(sp_[1], 4) if sp_ else "n.d."])
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -714,7 +808,7 @@ def costruisci(cartella, bl, prova_txt, passate, lotto="P"):
         d0 = datetime.datetime(2024, 8, 1, 10, 0)
         for j, x in enumerate(q["esiti"]):
             barra = (d0 + datetime.timedelta(hours=7 * j)).strftime("%Y.%m.%d %H:%M")
-            righe.append(riga_setup(bl, sim, cfg, lato, modo, barra, x, sl_sbagliato=(q.get("sl_sbagliato") and j == 0), ls_extra=q.get("ls_extra", 0.0)))
+            righe.append(riga_setup(bl, sim, cfg, lato, modo, barra, x, nfill=q.get("nfill", 2), sl_sbagliato=(q.get("sl_sbagliato") and j == 0), ls_extra=q.get("ls_extra", 0.0)))
         if q.get("lato_riga_sbagliato") and righe:
             c = righe[0].split(";")
             c[3] = str(-int(c[3]))
@@ -936,6 +1030,9 @@ def autotest():
     ok(determinismo(pp) == [(("XAUUSD", "AUDIO_H1", "LONG", "PIU"), "IDENTICHE")], "determinismo: IDENTICHE")
     _b, pp, _p = carica([e1, e3])
     ok(determinismo(pp) == [(("XAUUSD", "AUDIO_H1", "LONG", "PIU"), "DIVERSE")], "determinismo: DIVERSE")
+    # [cancello 09/10] pilota + lotto letti insieme: la passata ripetuta conta UNA volta (n 2, non 4)
+    bd, pd_, _p = carica([e1, e2])
+    ok(calcola(bd, pd_)[("ORO", "AUDIO_H1", "LONG", "PIU")]["n"] == 2, "pilota + lotto insieme: la passata ripetuta non raddoppia n")
     # --- 7. la banda di n e la parola vietata
     ok(banda_n(475, 475).startswith("COERENTE") and banda_n(100, 475).startswith("DA GUARDARE") and banda_n(30, 475).startswith("STOP"), "banda di n contro le attese")
     buf = io.StringIO()
@@ -943,6 +1040,41 @@ def autotest():
     testo_out = buf.getvalue()
     ok("NON ANCORA MISURATO" in testo_out and "SOTTILE" in testo_out, "la stampa dice SOTTILE e 'NON ANCORA MISURATO' (certificato)")
     ok(all(g["verdetto"] in VERDETTI for g in gm.values()), "verdetti solo nell'elenco chiuso (nessun 'morto')")
+    # --- 8. [cancello 09/10] il nullo sulla geometria vera, contro i numeri gia' scritti da altri (file prova A2, per ORDINE, EURUSD c 0,67 pip)
+    def pfn(x):
+        return x[0] / x[1] if x else float("nan")
+    ok(abs(pfn(nullo_setup(1, [(5, 1), (0, 0), (-5, 0)], -10, 10, 0.67)) - 0.83) < 0.005, "nullo, solo anticipo GEOM = A2 0,83")
+    ok(abs(pfn(nullo_setup(1, [(5, 0), (0, 1), (-5, 0)], -10, 10, 0.67)) - 0.87) < 0.005, "nullo, solo linea GEOM = A2 0,87")
+    ok(abs(pfn(nullo_setup(1, [(5, 0), (0, 0), (-5, 1)], -10, 10, 0.67)) - 0.84) < 0.005, "nullo, solo profondo GEOM = A2 0,84")
+    ok(abs(pfn(nullo_setup(1, [(5, 0), (0, 1), (-5, 0)], -20, 10, 0.67)) - 0.90) < 0.005, "nullo, solo linea LINEA = A2 0,90")
+    geo = pfn(nullo_setup(1, [(5, 1), (0, 1), (-5, 1)], -10, 10, 0.67))
+    lin = pfn(nullo_setup(1, [(5, 1), (0, 1), (-5, 1)], -20, 10, 0.67))
+    piu = pfn(nullo_setup(1, [(5, 1), (0, 1), (-5, 1)], -58, 10, 0.67))
+    ok(0.84 < geo < 0.85 and 0.875 < lin < 0.885 and 0.90 < piu < 0.91, "nullo per SETUP (scala intera) GEOM/LINEA/PIU38 = 0,846/0,881/0,905 (Monte Carlo 0,842/0,872/0,894) (%.4f %.4f %.4f)" % (geo, lin, piu))
+    ok(piu - geo > 0.05, "contro-esempio di A2: per setup con la EMA200 oltre, il nullo si sposta di PIU' di +0,05 (%.3f)" % (piu - geo))
+    ok(abs(pfn(nullo_setup(-1, [(-5, 1), (0, 1), (5, 1)], 10, -10, 0.67)) - geo) < 1e-12, "nullo: lo SHORT e' lo specchio del LONG")
+    ok(nullo_setup(1, [(5, 1), (0, 1), (-5, 1)], -10, 4, 0.67) is None and nullo_setup(1, [(5, 1)], 6, 10, 0.67) is None, "nullo: TP non oltre il primo ordine o SL non sotto gli ordini = geometria non leggibile")
+    rr0 = pas[0]["rows"][0]
+    ok(nullo_riga(rr0, b1["SIMBOLO"]["XAUUSD"]) is not None and gm1[("ORO", "AUDIO_H1", "LONG", "GEOM")]["nullo_saltati"] == 0, "nullo letto dalle righe SETUP del lettore")
+    # --- 9. [cancello 09/10] R degli stop pieni: -1,0 R = ok; -0,56 R (il PIU a 100.000 EUR del file prova) = DA GUARDARE
+    for nome, rsl, atteso in (("pieni ok", -1.0, False), ("pieni deformati", -0.56, True)):
+        dsp = os.path.join(base, re.sub(r"\W", "_", nome))
+        costruisci(dsp, bl, prova_txt, [dict(sim="XAUUSD", cfg="AUDIO_H1", lato="LONG", modo="PIU", esiti=[0.3, rsl, 0.3, rsl], nfill=3)])
+        bsp, psp, _p = carica([dsp])
+        gsp = calcola(bsp, psp)[("ORO", "AUDIO_H1", "LONG", "PIU")]
+        sp_ = stop_pieno(gsp)
+        bufp = io.StringIO()
+        riepilogo(bsp, psp, [], {("ORO", "AUDIO_H1", "LONG", "PIU"): gsp}, lambda s: bufp.write(s + "\n"))
+        ok(sp_ is not None and sp_[0] == 2 and sp_[3] == atteso and (("lotti arrotondati" in bufp.getvalue()) == atteso), "stop pieni: %s (%s)" % (nome, sp_))
+    # --- 10. [cancello 09/10] un simbolo con ZERO setup resta nella gamba: n 0 accanto alla sua attesa, e la banda A1 lo vede
+    dz = os.path.join(base, "zero")
+    costruisci(dz, bl, prova_txt, [dict(sim="EURUSD", cfg="AUDIO_H1", lato="LONG", modo="LINEA", esiti=[0.3] * 62), dict(sim="GBPUSD", cfg="AUDIO_H1", lato="LONG", modo="LINEA", esiti=[])])
+    bz, pz, _p = carica([dz])
+    gz = calcola(bz, pz)[("FX7", "AUDIO_H1", "LONG", "LINEA")]
+    bufz = io.StringIO()
+    riepilogo(bz, pz, [], {("FX7", "AUDIO_H1", "LONG", "LINEA"): gz}, lambda s: bufz.write(s + "\n"))
+    ok(not any(P["ko"] for P in pz) and gz["n_sim"].get("GBPUSD") == 0 and gz["attesa"] == 62 + 70 and "A1 per simbolo): GBPUSD" in bufz.getvalue(),
+       "simbolo a zero setup: nella gamba con n 0, attesa 62+70, segnalato (%s, att %d)" % (gz["n_sim"], gz["attesa"]))
     print("AUTOTEST: %d controlli, %d falliti" % (nctl[0], len(fallite)))
     return 1 if fallite else 0
 
