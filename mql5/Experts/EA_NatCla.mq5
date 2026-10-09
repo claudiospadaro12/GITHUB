@@ -630,11 +630,11 @@ double NC_StopSetup(const int modo,const int criterio,const int s,const double l
    esito=0;
    if(modo!=1) return NC_Stop(criterio,s,linea,profondo,estremo,buf);
    if(dirEst!=(double)s || !(lineaEst>0.0)) { esito=1; return 0.0; }
-   double crit=lineaEst-s*oltre;
-   double base=profondo-s*buf;
-   double r=crit;
-   if(s>0 && crit>base) { r=base; esito=2; }
-   if(s<0 && crit<base) { r=base; esito=2; }
+   double oltreLinea=lineaEst-s*oltre;
+   double x4=profondo-s*buf;
+   double r=oltreLinea;
+   if(s>0 && oltreLinea>x4) { r=x4; esito=2; }
+   if(s<0 && oltreLinea<x4) { r=x4; esito=2; }
    if(!(r>0.0)) { esito=1; return 0.0; }
    return r;
   }

@@ -42,6 +42,13 @@ a tavolino, e si dice cosa resta fuori.
      la v1.04: resta bloccata (= passate (e)(f)), la v1.05 parte alla barra 302 (= passate (a)(c)), con storia davanti e dal
      vivo sono IDENTICHE barra per barra. Piu': la v1.05 e' la v1.04 del commit 290e1b74 + il SOLO tocco (confronto senza
      commenti, una volta, sul sorgente vero).
+  V) v1.10 STOP (decisione di Claudio 08/10, data/natcla/LEGGIMI.md risposta 2): NC_StopSetup / NC_FamigliaStop VERI in C++.
+     (a) INVARIANZA: con InpStopModo = GEOMETRIA_ATTUALE (default) NC_StopSetup == NC_Stop BIT PER BIT (stringa %a) su 4000
+     casi casuali con argomenti nuovi a caso, e sulle barre vere dell'oro; il raccordo passa a NC_StopSetup gli STESSI argomenti
+     che la v1.05 passava a NC_Stop; e la v1.10 senza commenti differisce dalla v1.05 (pin d6586360) SOLO in righe che portano
+     un simbolo della v1.10 (guardia del diff, con contro-esempio). (b) OLTRE_LINEA_ESTERNA: casi a mano (long/short, linea
+     esterna discorde, dentro la scala = X4, stop <= 0) + specchio Python INDIPENDENTE su ogni barra H1 dell'oro, 4 linee,
+     famiglia ST3,5 / EMA200 calcolata dallo specchio py_stcore / py_ema (non dal C++). (c) invarianti di raccordo 32-41.
   M) MUTANTI CIECHI: 80 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic + T1-T7 della v1.05: il tocco degli handle) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
@@ -236,6 +243,8 @@ DEFAULT_ATTESI = {
     "InpParzialeTP1Pct": "0", "InpDurataMaxMin": "0", "InpCancelloCostoX": "40", "InpCommissionePrezzo": "0",
     "InpUsaGuardian": "true", "InpMagic": "0", "InpLogImbuto": "true", "InpSoloConta": "false",
     "InpPlaceboAtr": "0", "InpLogContesto": "true",
+    # v1.10: la regola di stop nuova e' SPENTA di default (default neutro = v1.05); 20 u = il numero di Claudio (08/10)
+    "InpStopModo": "NC_STOP_GEOMETRIA_ATTUALE", "InpStopOltreU": "20.0",
 }
 TRI_DA_MODALITA = ["InpUsaST25", "InpUsaST30", "InpUsaST35", "InpMotoreEma200", "InpConfermaApertura",
                    "InpAdxUsa", "InpInclUsa", "InpBEalTP1"]
@@ -487,7 +496,7 @@ def invarianti_raccordo(src, code, bag):
         val = [src[a:b].strip() for a, b in args[1:]]
         mappa = {"rischio setup ": "InpRischioSetupPct", "placebo ": "InpPlaceboAtr", "magic ": "IntegerToString(gMagic)",
                  "modalita' ": "NomeModalita()", "ADX ": 'gAdxUsa ? "ACCESO" : "spento"', "max ": "InpAdxMax",
-                 "periodo ": "InpAdxPeriodo"}
+                 "periodo ": "InpAdxPeriodo", "stop ": "StopDescr()"}
         for k_, v_ in mappa.items():
             pos = [j for j, p in enumerate(pezzi[:-1]) if p.endswith(k_)]
             if len(pos) != 1 or pos[0] >= len(val) or val[pos[0]] != v_:
@@ -523,9 +532,22 @@ def invarianti_raccordo(src, code, bag):
     for a in attese:
         if a not in nospazi:
             bag.append("RACCORDO: risoluzione DA_MODALITA diversa dalla specifica: manca '%s'" % a)
-    # (11) STOP: il 'profondo' passato a NC_Stop e' l'ultimo ordine del setup (scala p[2], PDF p[1])
+    # (11) STOP: il 'profondo' passato a NC_Stop e' l'ultimo ordine del setup (scala p[2], PDF p[1]).
+    #      v1.10: in ArmaScala e ScriviConta lo stop passa da NC_StopSetup, che in GEOMETRIA_ATTUALE E' NC_Stop: i SEI argomenti
+    #      della v1.05 (criterio, lato, linea, profondo, estremo, buffer) devono essere gli STESSI, nello stesso ordine, dopo il modo
+    #      (= invarianza al raccordo); in coda la linea esterna, la sua direzione, InpStopOltreU*gU, l'esito. EntraPdf (codice morto) resta su NC_Stop.
+    sei105 = {"ArmaScala": ["gSLCrit", "s", "lv", "p[2]", "Estremo(s,last)", "InpSLBuffer*gU"],
+              "ScriviConta": ["gSLCrit", "s", "lv0", "p[2]", "Estremo(s,last)", "InpSLBuffer*gU"]}
     for fn, att in (("ArmaScala", "p[2]"), ("EntraPdf", "p[1]"), ("ScriviConta", "p[2]")):
         b = corpo(code, fn) or ""
+        if fn in sei105:
+            m = re.search(r"\bNC_StopSetup\s*\(", b)
+            a = [re.sub(r"\s+", "", b[x:y]) for x, y in argomenti(b, m.end() - 1, chiusa(b, m.end() - 1))] if m else []
+            if len(a) != 11 or a[0] != "(int)InpStopModo" or a[1:7] != sei105[fn] or a[7:] != ["lest", "dest", "InpStopOltreU*gU", "es"]:
+                bag.append("RACCORDO v1.10: NC_StopSetup in %s con %s (attesi (int)InpStopModo, %s, lest, dest, InpStopOltreU*gU, es)" % (fn, a, sei105[fn]))
+            if re.search(r"\bNC_Stop\s*\(", b):
+                bag.append("RACCORDO v1.10: %s chiama ancora NC_Stop direttamente (la regola nuova verrebbe saltata)" % fn)
+            continue
         m = re.search(r"\bNC_Stop\s*\(", b)
         a = [b[x:y].strip() for x, y in argomenti(b, m.end() - 1, chiusa(b, m.end() - 1))] if m else []
         if len(a) != 6 or a[3] != att or a[0] != "gSLCrit" or a[5] != "InpSLBuffer*gU":
@@ -685,8 +707,78 @@ def invarianti_raccordo(src, code, bag):
         bag.append("RACCORDO v1.05: l'array del tocco non e' 'double tocco[1]' usato SOLO dai tocchi in CaricaDati")
     if "if(BarsCalculated(hEma200)<n+1||BarsCalculated(hAtrN)<n+1||BarsCalculated(hAdx)<n+1)returnfalse;" not in ns(cdm) or "if(n<NC_BARRE_MIN)returnfalse;" not in ns(cdm):
         bag.append("RACCORDO v1.05: i controlli di sempre di CaricaDati (n minimo, BarsCalculated dei tre handle) non sono intatti")
-    if '#define NC_VER "1.05"' not in src or not re.search(r'#property\s+version\s+"1\.05"', src):
-        bag.append("RACCORDO v1.05: NC_VER / #property version non sono 1.05")
+    if '#define NC_VER "1.10"' not in src or not re.search(r'#property\s+version\s+"1\.10"', src):
+        bag.append("RACCORDO v1.10: NC_VER / #property version non sono 1.10")
+    invarianti_stop(src, code, stc, bag)
+
+
+def invarianti_stop(src, code, stc, bag):
+    """v1.10 (decisione di Claudio 08/10): il RACCORDO della regola di stop nuova. Le funzioni pure sono provate in unitari() e
+    sulle barre vere; qui si prova che il codice non puro le chiama coi dati giusti e che in GEOMETRIA_ATTUALE non fa niente di nuovo."""
+    ns = lambda t: re.sub(r"\s+", "", t or "")
+    # (32) enum: GEOMETRIA_ATTUALE=0 (il default), OLTRE_LINEA_ESTERNA=1 (NC_StopSetup riconosce SOLO 1)
+    if not re.search(r"enumENUM_NC_STOPMODO\{NC_STOP_GEOMETRIA_ATTUALE=0,NC_STOP_OLTRE_LINEA_ESTERNA=1\}", ns(code)):
+        bag.append("RACCORDO v1.10: ENUM_NC_STOPMODO non e' GEOMETRIA_ATTUALE=0, OLTRE_LINEA_ESTERNA=1")
+    # (33) ArmaScala: linea esterna e direzione lette SOLO in OLTRE, alla barra 'last', normalizzate come lv; esito 1 = SCARTO prima
+    #      di ogni ordine (con Esito e return), esito 2 contato; il setup registra linea esterna ed esito.
+    ar = ns(corpo(stc, "ArmaScala"))
+    for a in ("doublelest=0,dest=0;", "intes=0;",
+              "if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){lest=NormPrezzo(LineaEsternaPrezzo(last,s));dest=gXD[last];}",
+              "if(es==2)gImb[IMB_O_STOPX4]++;", "gSet[L].lineaStop=lest;gSet[L].stopEsito=es;"):
+        if ar.count(a) != 1:
+            bag.append("RACCORDO v1.10: ArmaScala senza '%s'" % a)
+    m33 = re.search(r"if\(es==1\)\{gImb\[IMB_O_STOPEST\]\+\+;.*?gArmatoPrima\[L\]=false;Esito\(IMB_NESSUNORD\);return;\}", ar)
+    if not m33 or not (0 <= m33.start() < ar.find("ValidaOrdine(")):
+        bag.append("RACCORDO v1.10: ArmaScala non SCARTA il setup con esito 1 (Esito IMB_NESSUNORD + return) PRIMA di validare gli ordini")
+    # (34) ScriviConta: stessa lettura (senza NormPrezzo, come la v1.05), stop_ped a 0 se esito 1, tre colonne in coda
+    sc = ns(corpo(stc, "ScriviConta"))
+    for a in ("doublelest=0,dest=0;", "intes=0;", "if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){lest=LineaEsternaPrezzo(last,s);dest=gXD[last];}",
+              'D((ped>0&&es!=1)?MathAbs(p[0]-sl)/ped:0,1)', 'D((ped>0&&es!=1)?MathAbs(p[1]-sl)/ped:0,1)', 'D((ped>0&&es!=1)?MathAbs(p[2]-sl)/ped:0,1)',
+              '"0;0;0;0;0;SOLO_CONTA;"+IntegerToString((int)InpStopModo)+";"+P(lest)+";"+IntegerToString(es);'):
+        if sc.count(a) != 1:
+            bag.append("RACCORDO v1.10: ScriviConta senza '%s'" % a)
+    # (35) ScriviRiga: le tre colonne in coda vengono dal setup (modo dell'input, linea esterna ed esito registrati in ArmaScala)
+    if '+motivo+";"+IntegerToString((int)InpStopModo)+";"+P(gSet[L].lineaStop)+";"+IntegerToString(gSet[L].stopEsito);' not in ns(corpo(stc, "ScriviRiga")):
+        bag.append("RACCORDO v1.10: ScriviRiga senza le colonne stop_modo/linea_stop/stop_esito in coda")
+    if not re.search(r'FileWrite\(gFh,"tipo;[^"]*;durata_min;motivo;stop_modo;linea_stop;stop_esito"\)', src):
+        bag.append("RACCORDO v1.10: intestazione del CSV senza ';stop_modo;linea_stop;stop_esito' IN CODA dopo 'motivo'")
+    # (36) OnNewBar: la linea esterna si calcola SOLO in OLTRE, DOPO la linea di setup e PRIMA della valutazione
+    nb = ns(corpo(code, "OnNewBar"))
+    if "CalcolaLinea(L);if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)CalcolaLineaEsterna(L);if(gIngresso==0)ValutaScala(L);" not in nb:
+        bag.append("RACCORDO v1.10: OnNewBar non calcola la linea esterna (solo in OLTRE) fra CalcolaLinea e ValutaScala")
+    # (37) CalcolaLineaEsterna: famiglia da NC_FamigliaStop; EMA200 = gEma + NC_EmaDir; Supertrend = NC_STCore col MOLTIPLICATORE
+    #      della famiglia (gMultLinea[F] = InpStMult3) e lo STESSO periodo ATR della linea di setup; array PROPRI (gLV/gLD intatti)
+    ce = ns(corpo(code, "CalcolaLineaEsterna"))
+    for a in ("intF=NC_FamigliaStop(L);", "if(F==NC_LEMA){for(inti=0;i<gN;i++)gXV[i]=gEma[i];NC_EmaDir(gC,gEma,gN,gXD);return;}",
+              "NC_STCore(gH,gL,gC,gN,0,InpStAtrPeriodo,gMultLinea[F],gXa,gXu,gXdn,gXD,gXV);"):
+        if a not in ce:
+            bag.append("RACCORDO v1.10: CalcolaLineaEsterna senza '%s'" % a)
+    if re.search(r"\bg(LV|LD|Wa|Wu|Wd)\b", ce):
+        bag.append("RACCORDO v1.10: CalcolaLineaEsterna tocca gli array della linea di setup (gLV/gLD/gWa/gWu/gWd)")
+    if "returngXV[k]+s*InpPlaceboAtr*gAtrN[k];" not in ns(corpo(code, "LineaEsternaPrezzo")):
+        bag.append("RACCORDO v1.10: LineaEsternaPrezzo non e' gXV[k] + s x placebo x ATR[k] (stessa regola di LineaPrezzo)")
+    # (38) gXD/gXV letti SOLO dentro i rami OLTRE (in GEOMETRIA_ATTUALE non sono nemmeno dimensionati)
+    letti = [m.start() for m in re.finditer(r"\bgX[VD]\s*\[", code)]
+    for fn in ("CalcolaLineaEsterna", "LineaEsternaPrezzo", "ArmaScala", "ScriviConta"):
+        b = corpo(code, fn) or ""
+        k = code.find(b) if b else -1
+        letti = [x for x in letti if not (k >= 0 and k <= x < k + len(b))]
+    if letti:
+        bag.append("RACCORDO v1.10: gXV/gXD letti fuori dalle quattro funzioni della regola di stop (%d punti)" % len(letti))
+    # (39) Risolvi: in OLTRE rifiuta InpStopOltreU <= 0 e InpSLCriterio impostato a mano (due regole di stop)
+    rb = ns(corpo(stc, "Risolvi"))
+    for a in ('if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){if(!(InpStopOltreU>0)){err=', 'if(InpSLCriterio!=NC_SL_DA_MODALITA){err='):
+        if a not in rb:
+            bag.append("RACCORDO v1.10: Risolvi senza '%s'" % a)
+    # (40) riga d'avvio e #cfg;Stop: il modo stampato e' quello dell'input
+    sd = ns(corpo(stc, "StopDescr"))
+    if sd != ns('stringStopDescr(){if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)return"OLTRE_LINEA_ESTERNA "+DoubleToString(InpStopOltreU,2)+" u";return"GEOMETRIA_ATTUALE";}'):
+        bag.append("RACCORDO v1.10: StopDescr non stampa il modo dell'input (OLTRE_LINEA_ESTERNA N u / GEOMETRIA_ATTUALE)")
+    if 'Cfg("Stop",StopDescr(),' not in ns(corpo(stc, "StampaConfigurazione")):
+        bag.append("RACCORDO v1.10: manca la riga #cfg;Stop nel CSV / CFG Stop nel Giornale")
+    # (41) EntraPdf (codice morto) NON chiama la regola nuova: il PDF resta escluso e la sua geometria e' quella della v1.04
+    if "NC_StopSetup" in (corpo(code, "EntraPdf") or ""):
+        bag.append("RACCORDO v1.10: EntraPdf (codice morto del PDF) chiama NC_StopSetup")
 
 
 def magic_libero():
@@ -701,7 +793,11 @@ def magic_libero():
                         # 'blocco 778600-778699'): e' una citazione, non un EA che usa il blocco. Senza questa riga il collaudo usciva ROSSO (1 controllo) gia' al pin
                         # d6586360, mentre l'ESITO dichiarava 'TUTTO OK'. Esclusione per NOME del file, non per estensione: un .md che ASSEGNASSE il blocco a un altro EA
                         # (registro dei magic, censimento) deve restare visibile.
-                        ":!report/giornata_2026-10-07.md"], capture_output=True, text=True)
+                        ":!report/giornata_2026-10-07.md",
+                        # v1.10 (09/10): la nota EA_GBA del 09/10 r.94 CITA un CSV di Nat&Cla per nome ('natcla_setup_XAUUSD_778601.csv', '778621'):
+                        # citazione di un file Nat&Cla, non un EA che usa il blocco. Il collaudo era gia' ROSSO per questa riga PRIMA della v1.10
+                        # (misurato sulla v1.05 il 09/10). Esclusione per NOME del file, come sopra.
+                        ":!report/EA_GBA_NOTE_2026-10-09.md"], capture_output=True, text=True)
     return [ln for ln in r.stdout.splitlines() if ln.strip()]
 
 
@@ -755,6 +851,12 @@ int main(){
     } else if(c=="STOP"){
       int cr,s; double li,pr,es,bu; if(scanf("%d %d %lf %lf %lf %lf",&cr,&s,&li,&pr,&es,&bu)!=6) return 2;
       printf("%a\n",NC_Stop(cr,s,li,pr,es,bu));
+    } else if(c=="STOPSET"){
+      int mo,cr,s,e=-7; double li,pr,es,bu,le,de,ol;
+      if(scanf("%d %d %d %lf %lf %lf %lf %lf %lf %lf",&mo,&cr,&s,&li,&pr,&es,&bu,&le,&de,&ol)!=10) return 2;
+      double r=NC_StopSetup(mo,cr,s,li,pr,es,bu,le,de,ol,e); printf("%a %d %a\n",r,e,NC_Stop(cr,s,li,pr,es,bu));
+    } else if(c=="FAM"){
+      int L; if(scanf("%d",&L)!=1) return 2; printf("%d\n",NC_FamigliaStop(L));
     } else if(c=="TPEMA"){
       int s; double in,sl,e14,e89,rr; if(scanf("%d %lf %lf %lf %lf %lf",&s,&in,&sl,&e14,&e89,&rr)!=6) return 2;
       double t1=-1; double t=NC_TpEma(s,in,sl,e14,e89,rr,t1); printf("%a %a\n",t,t1);
@@ -1010,6 +1112,109 @@ def tester_pigro(src, tmp, bag, verbose):
           % (cr[0], cr[1], cr[2], nu), quiet=not verbose, bag=bag)
 
 
+def py_stop_v105(cr, s, li, pr, es, bu):
+    """specchio di X1-X4 scritto dalla SPECIFICA (non copiato dal C++): base = ordine profondo + buffer; criterio 1 = estremo + buffer,
+    2 = linea + buffer, altrimenti la base; si tiene il piu' LONTANO dal prezzo (long: il piu' basso, short: il piu' alto)"""
+    base = pr - s * bu
+    cand = {1: es - s * bu, 2: li - s * bu}.get(cr, base)
+    return min(cand, base) if s > 0 else max(cand, base)
+
+
+def py_stop_oltre(s, pr, bu, le, de, ol):
+    """specchio della regola di Claudio (08/10) scritto dalla decisione: lo stop sta 'ol' OLTRE la linea esterna, dal lato del rischio;
+    la linea esterna deve stare dal lato del setup (direzione == s) e valere > 0; X4 resta (mai piu' vicino dell'ordine profondo + buffer).
+    Ritorna (stop, esito): esito 1 = scartato (stop 0), 2 = vince X4, 0 = regola."""
+    if de != s or not le > 0:
+        return 0.0, 1
+    cand = le - s * ol
+    x4 = pr - s * bu
+    lontano = min(cand, x4) if s > 0 else max(cand, x4)
+    esito = 0 if lontano == cand else 2
+    if not lontano > 0:
+        return 0.0, 1
+    return lontano, esito
+
+
+def stop_v110_unitari(cx, bag):
+    """v1.10: NC_StopSetup / NC_FamigliaStop. Casi a mano col valore scritto qui + invarianza BIT PER BIT del modo 0 + proprieta' del modo 1"""
+    def one(cmd):
+        return cx.run(cmd + "\n")[0].split()
+    for L, att in ((0, 2), (1, 2), (2, 2), (3, 3)):
+        check(int(one("FAM %d" % L)[0]) == att, "NC_FamigliaStop(%d) = %d (Supertrend -> ST3,5; EMA200 -> EMA200)" % (L, att), quiet=True, bag=bag)
+    # STOPSET modo criterio s linea profondo estremo buffer lineaEst dirEst oltre -> (stop, esito)
+    casi = [("STOPSET 1 0 1 100 95 90 5 100 1 20", 80.0, 0, "long ST3,5 = linea del setup: 20 sotto"),
+            ("STOPSET 1 0 1 100 95 90 5 92 1 20", 72.0, 0, "long ST2,5 con ST3,5 piu' in basso: 20 sotto la ST3,5"),
+            ("STOPSET 1 0 1 100 95 90 5 115 1 20", 90.0, 2, "long, ST3,5 dentro la scala (115-20=95 sopra 90): vince X4"),
+            ("STOPSET 1 0 1 100 95 90 5 110 1 20", 90.0, 0, "long, 110-20 = 90 = X4 esatto: regola (non X4)"),
+            ("STOPSET 1 0 1 100 95 90 5 100 -1 20", 0.0, 1, "long con ST3,5 al ribasso (discorde): scartato"),
+            ("STOPSET 1 0 1 100 95 90 5 100 0 20", 0.0, 1, "long con ST3,5 non calcolabile (dir 0): scartato"),
+            ("STOPSET 1 0 1 100 95 90 5 0 1 20", 0.0, 1, "linea esterna 0: scartato"),
+            ("STOPSET 1 0 1 15 10 5 5 15 1 20", 0.0, 1, "long, 15-20 < 0: stop impossibile, scartato"),
+            ("STOPSET 1 0 -1 100 105 110 5 100 -1 20", 120.0, 0, "short: 20 SOPRA la linea"),
+            ("STOPSET 1 0 -1 100 105 110 5 108 -1 20", 128.0, 0, "short ST2,5 con ST3,5 piu' in alto"),
+            ("STOPSET 1 0 -1 100 105 110 5 85 -1 20", 110.0, 2, "short, ST3,5 dentro la scala: vince X4"),
+            ("STOPSET 1 0 -1 100 105 110 5 100 1 20", 0.0, 1, "short con ST3,5 al rialzo: scartato"),
+            ("STOPSET 1 1 1 100 95 50 5 100 1 20", 80.0, 0, "OLTRE ignora il criterio (ESTREMO_RECENTE darebbe 45)"),
+            ("STOPSET 1 0 1 1.1 1.0995 1.09 0.0005 1.1 1 0.002", 1.1 - 0.002, 0, "EURUSD, 20 pip sotto 1,1000"),
+            ("STOPSET 0 1 1 100 95 90 5 777 -1 3", 85.0, 0, "GEOMETRIA_ATTUALE: e' NC_Stop (estremo 90 + 5), argomenti nuovi ignorati"),
+            ("STOPSET 0 0 -1 100 105 110 5 0 0 0", 110.0, 0, "GEOMETRIA_ATTUALE short: ordine profondo + 5")]
+    for cmd, att, ea, lab in casi:
+        o = one(cmd)
+        check(fx(o[0]) == att and int(o[1]) == ea, "STOPSET %s: %s -> %s esito %s (atteso %s esito %d)" % (lab, cmd, fx(o[0]), o[1], att, ea), quiet=True, bag=bag)
+    # INVARIANZA (a): modo 0 == NC_Stop BIT PER BIT (stringa %a identica), con argomenti nuovi a caso; == specchio della specifica
+    rnd = random.Random(1010)
+    righe, casi0 = [], []
+    for _ in range(4000):
+        s = rnd.choice([1, -1])
+        li = rnd.choice([rnd.uniform(0.5, 2.0), rnd.uniform(1000, 40000), rnd.uniform(50, 200)])
+        u = rnd.choice([0.0001, 0.01, 1.0])
+        pr = li - s * rnd.choice([5, 10]) * u
+        es = li - s * rnd.uniform(-30, 60) * u
+        bu = rnd.choice([5, 10]) * u
+        cr = rnd.choice([0, 1, 2])
+        le, de, ol = rnd.uniform(-5, 5e4), rnd.choice([-1, 0, 1]), rnd.uniform(-50, 50)
+        casi0.append((cr, s, li, pr, es, bu))
+        righe.append("STOPSET 0 %d %d %r %r %r %r %r %d %r" % (cr, s, li, pr, es, bu, le, de, ol))
+    out = cx.run("\n".join(righe) + "\n")
+    bit = sum(1 for o in out if o.split()[0] != o.split()[2] or o.split()[1] != "0")
+    spe = sum(1 for o, c in zip(out, casi0) if fx(o.split()[0]) != py_stop_v105(*c))
+    check(bit == 0 and spe == 0 and len(out) == 4000,
+          "INVARIANZA v1.10: GEOMETRIA_ATTUALE == NC_Stop della v1.05 BIT PER BIT su 4000 casi (diversi %d) e == specchio della specifica (diversi %d)" % (bit, spe),
+          quiet=True, bag=bag)
+    # OLTRE (b): == specchio indipendente, e proprieta': stop OLTRE tutti e tre gli ordini, mai piu' vicino di X4, esito 0 = esattamente lineaEst -/+ oltre
+    righe, casi1 = [], []
+    for _ in range(4000):
+        s = rnd.choice([1, -1])
+        u = rnd.choice([0.0001, 0.01, 1.0])
+        li = rnd.choice([rnd.uniform(0.5, 2.0), rnd.uniform(1000, 40000), rnd.uniform(50, 200)])
+        an, ol2 = rnd.choice([5, 10]), rnd.choice([5, 10])
+        p = [li + s * an * u, li, li - s * ol2 * u]
+        bu = 5 * u
+        le = li - s * rnd.uniform(-25, 60) * u if rnd.random() > 0.05 else 0.0
+        de = s if rnd.random() > 0.15 else rnd.choice([-s, 0])
+        ol = rnd.choice([20, 10, 30]) * u
+        casi1.append((s, p, bu, le, de, ol))
+        righe.append("STOPSET 1 0 %d %r %r %r %r %r %d %r" % (s, li, p[2], li, bu, le, de, ol))
+    out = cx.run("\n".join(righe) + "\n")
+    dif = viol = n0 = n1 = n2 = 0
+    for o, (s, p, bu, le, de, ol) in zip(out, casi1):
+        v, e = fx(o.split()[0]), int(o.split()[1])
+        pv, pe = py_stop_oltre(s, p[2], bu, le, de, ol)
+        if (v, e) != (pv, pe):
+            dif += 1
+        n0 += e == 0; n1 += e == 1; n2 += e == 2
+        if e == 1:
+            viol += v != 0.0
+            continue
+        if not all(s * (x - v) > 0 for x in p) or s * ((p[2] - s * bu) - v) < 0:
+            viol += 1
+        if e == 0 and v != le - s * ol:
+            viol += 1
+    check(dif == 0 and viol == 0 and n0 > 1000 and n1 > 200 and n2 > 200,
+          "OLTRE_LINEA_ESTERNA: C++ == specchio indipendente su 4000 casi (diversi %d), stop oltre i tre ordini e mai dentro X4 (violazioni %d); "
+          "esiti 0/1/2 = %d/%d/%d (tutti e tre visitati)" % (dif, viol, n0, n1, n2), quiet=True, bag=bag)
+
+
 def unitari(cx, bag):
     """casi a mano: valore atteso scritto qui, non ricalcolato con la stessa formula"""
     def one(cmd):
@@ -1022,6 +1227,7 @@ def unitari(cx, bag):
     for cmd, att in casi:
         v = fx(one(cmd)[0])
         check(abs(v - att) < 1e-12, "%s -> %s (atteso %s)" % (cmd, v, att), quiet=True, bag=bag)
+    stop_v110_unitari(cx, bag)
     # NC_TpEma
     for cmd, att, att1 in (("TPEMA 1 100 90 105 120 1", 120, 105), ("TPEMA 1 100 90 105 103 1", 110, 105),
                            ("TPEMA 1 100 90 95 120 1", 120, 0), ("TPEMA 1 100 90 95 98 1", 110, 0),
@@ -1396,6 +1602,48 @@ def confronta_numeri(cx, ser, bag, verbose, configs=CONFIG):
     return ris, e, a
 
 
+def stop_su_barre(cx, ser, res, e, bag, verbose):
+    """v1.10 sulle barre VERE dell'oro (u = 1 USD, scala 5/5, buffer 5, oltre 20): per ogni barra con la linea definita, la scala che l'EA
+    armerebbe per la barra dopo e lo stop nei due modi. La linea ESTERNA e' calcolata dallo SPECCHIO Python (py_stcore 3,5 / py_ema +
+    py_emadir), la famiglia scelta in Python: il C++ deve dare (a) in GEOMETRIA_ATTUALE lo stesso valore di NC_Stop bit per bit, (b) in
+    OLTRE lo stesso (stop, esito) dello specchio indipendente. Ritorna, per linea, gli esiti e le distanze sui SETUP (episodi entro il limite)."""
+    t, o, h, l, c = ser
+    n = len(c)
+    _a, _u, _d, pr35, pv35 = CG.st_full(h, l, c, 10, 3.5)
+    ed = py_emadir(c, e)
+    righe, chiavi = [], []
+    for L in range(4):
+        v, d = res[L][0], res[L][1]
+        lev, led = (e, ed) if L == 3 else (pv35, pr35)
+        for i in range(1, n):
+            if d[i] == 0.0:
+                continue
+            s = int(d[i])
+            lv = v[i]
+            p2 = lv - s * 5.0
+            est = min(l[max(0, i - 2):i + 1]) if s > 0 else max(h[max(0, i - 2):i + 1])
+            righe.append("STOPSET 0 0 %d %r %r %r 5 %r %r 20" % (s, lv, p2, est, lev[i], led[i]))
+            righe.append("STOPSET 1 0 %d %r %r %r 5 %r %r 20" % (s, lv, p2, est, lev[i], led[i]))
+            chiavi.append((L, i, s, lv, p2, est, lev[i], led[i]))
+    out = cx.run("\n".join(righe) + "\n")
+    bit = dif = 0
+    per_linea = {L: {} for L in range(4)}
+    for k, (L, i, s, lv, p2, est, le, de) in enumerate(chiavi):
+        o0, o1 = out[2 * k].split(), out[2 * k + 1].split()
+        if o0[0] != o0[2] or o0[1] != "0" or fx(o0[0]) != py_stop_v105(0, s, lv, p2, est, 5.0):
+            bit += 1
+        pv, pe = py_stop_oltre(s, p2, 5.0, le, de, 20.0)
+        if (fx(o1[0]), int(o1[1])) != (pv, pe):
+            dif += 1
+        per_linea[L][i] = (int(o1[1]), abs(lv - fx(o1[0])) if int(o1[1]) != 1 else None)
+    check(bit == 0 and len(chiavi) > 4 * 0.9 * n,
+          "INVARIANZA v1.10 sull'oro H1: GEOMETRIA_ATTUALE == NC_Stop v1.05 bit per bit su %d scale (4 linee, ogni barra): diverse %d" % (len(chiavi), bit),
+          quiet=not verbose, bag=bag)
+    check(dif == 0, "OLTRE_LINEA_ESTERNA sull'oro H1: C++ == specchio (famiglia ST3,5 / EMA200 dallo specchio Python) su %d scale: diverse %d" % (len(chiavi), dif),
+          quiet=not verbose, bag=bag)
+    return per_linea
+
+
 def conteggi(t, h, l, c, res, verbose):
     ep = dt.datetime(1970, 1, 1)
     da = int((dt.datetime(2024, 7, 10) - ep).total_seconds() // 60)
@@ -1419,6 +1667,9 @@ def conteggi(t, h, l, c, res, verbose):
 # ===========================================================================
 # SUITE (la stessa per il vero e per i mutanti)
 # ===========================================================================
+STOP_BARRE = None      # v1.10: esiti e distanze dello stop OLTRE sulle barre dell'oro (solo per la stampa informativa del sorgente vero)
+
+
 def suite(raw, tmp, ser, verbose):
     bag = []
     src = statico(raw, bag)
@@ -1430,6 +1681,8 @@ def suite(raw, tmp, ser, verbose):
         tester_pigro(src, tmp, bag, verbose)
         unitari(cx, bag)
         res, e, a = confronta_numeri(cx, ser, bag, verbose)
+        global STOP_BARRE
+        STOP_BARRE = stop_su_barre(cx, ser, res, e, bag, verbose)
         # VERIFICA ADX (seconda lettura 07/10): il ricalcolo dell'EA (riga "VERIFICA ADX") == specchi Python
         # della serie intera, e le due formule si DISTINGUONO (altrimenti la riga non deciderebbe niente)
         t_, o_, h_, l_, c_ = ser
@@ -1494,6 +1747,81 @@ def solo_il_tocco(src105):
         return True, ""
     k = next(i for i in range(min(len(na), len(nb)) + 1) if i == min(len(na), len(nb)) or na[i] != nb[i])
     return False, "prima differenza: v1.04 '...%s' contro v1.05 '...%s'" % (na[max(0, k - 40):k + 40], nb[max(0, k - 40):k + 40])
+
+
+V105_COMMIT = "d6586360"      # pin della v1.05 (sha256 7d89a3df...c9ac, lotti F0 C0/C/A): la base della v1.10
+FUNZ_NUOVE_V110 = ("NC_FamigliaStop", "NC_StopSetup", "CalcolaLineaEsterna", "LineaEsternaPrezzo", "StopDescr")
+TOK_V110 = ("InpStopModo", "InpStopOltreU", "NC_StopSetup", "NC_FamigliaStop", "CalcolaLineaEsterna", "LineaEsternaPrezzo", "StopDescr",
+            "gXV", "gXD", "gXa", "gXu", "gXdn", "lineaStop", "stopEsito", "ENUM_NC_STOPMODO", "NC_STOP_", "IMB_O_STOPEST", "IMB_O_STOPX4",
+            "lest", "dest", "intes=0;", "es==1", "es==2", "es!=1", "stop_modo", "stoplineaesterna", '"1.10"', "|stop%s")
+# righe della v1.05 (senza commenti e spazi) che la v1.10 puo' togliere o riscrivere: SOLO queste, elencate per nome
+TOLTE_OK_V110 = (
+    '#propertyversion"1.05"', '#defineNC_VER"1.05"', "#defineIMB_N35", '"riempimenti","setupchiusi"',
+    "doublesl=NormPrezzo(NC_Stop(gSLCrit,s,lv,p[2],Estremo(s,last),InpSLBuffer*gU));",
+    "doublesl=NC_Stop(gSLCrit,s,lv0,p[2],Estremo(s,last),InpSLBuffer*gU);",
+    'D((ped>0)?MathAbs(p[0]-sl)/ped:0,1)+";"+D((ped>0)?MathAbs(p[1]-sl)/ped:0,1)+";"+D((ped>0)?MathAbs(p[2]-sl)/ped:0,1)+";"+',
+    '"0;0;0;0;0;SOLO_CONTA";',
+    'D(gSet[L].rischioSoldi,2)+";"+IntegerToString(nRiemp)+";"+D(soldi,2)+";"+D(R,3)+";"+D(dur,1)+";"+motivo;',
+    'InpUsaGuardian?"ON(neltesterFAIL-OPEN)":"OFF",InpSoloConta?"SI":"no",InpPlaceboAtr);',
+)
+# righe della v1.05 che la v1.10 RISCRIVE con una trasformazione esatta: (prefisso, (vecchio pezzo, nuovo pezzo)); la riga trasformata DEVE essere fra le aggiunte
+TRASFORMA_V110 = (('stringavvio=StringFormat("AVVIOv%s|', ('(PDFescluso07/10)",', '(PDFescluso07/10)|stop%s",')),
+                  ('FileWrite(gFh,"tipo;barra;', ('motivo");', 'motivo;stop_modo;linea_stop;stop_esito");')))
+AGGIUNTE_OK_V110 = ("{", "}", "};", "#defineIMB_N37", '"riempimenti","setupchiusi",',
+                    'D(gSet[L].rischioSoldi,2)+";"+IntegerToString(nRiemp)+";"+D(soldi,2)+";"+D(R,3)+";"+D(dur,1)+";"+motivo+";"+')
+
+
+def senza_commenti_sorgente(s):
+    m = maschera(s)
+    return "".join(sc if mc == "x" else mc for mc, sc in zip(m, s))
+
+
+def diff_v105_v110(a105, b110):
+    """lista dei difetti: righe tolte dalla v1.05 fuori da TOLTE_OK_V110, righe aggiunte senza un simbolo della v1.10 (fuori dalle funzioni NUOVE)"""
+    import difflib
+    dif = []
+    a = senza_commenti_sorgente(a105)
+    b = senza_commenti_sorgente(b110)
+    for fn in FUNZ_NUOVE_V110:
+        if corpo(a, fn):
+            dif.append("la funzione 'nuova' %s esiste gia' nella v1.05" % fn)
+        cb = corpo(b, fn)
+        if not cb:
+            dif.append("funzione nuova %s assente nella v1.10" % fn)
+            continue
+        b = b.replace(cb, "\n", 1)
+    la = [x for x in (re.sub(r"\s+", "", r) for r in a.split("\n")) if x]
+    lb = [x for x in (re.sub(r"\s+", "", r) for r in b.split("\n")) if x]
+    ops = difflib.SequenceMatcher(None, la, lb, autojunk=False).get_opcodes()
+    aggiunte = set(r for op, i1, i2, j1, j2 in ops if op in ("replace", "insert") for r in lb[j1:j2])
+    for op, i1, i2, j1, j2 in ops:
+        if op in ("replace", "delete"):
+            for r in la[i1:i2]:
+                if r in TOLTE_OK_V110:
+                    continue
+                tr = [r.replace(v_, n_, 1) for pref, (v_, n_) in TRASFORMA_V110 if r.startswith(pref) and v_ in r]
+                if tr and tr[0] in aggiunte:
+                    continue
+                dif.append("riga della v1.05 tolta o cambiata fuori dall'elenco: %s" % r[:110])
+        if op in ("replace", "insert"):
+            for r in lb[j1:j2]:
+                if r not in AGGIUNTE_OK_V110 and not any(t in r for t in TOK_V110):
+                    dif.append("riga aggiunta senza un simbolo della v1.10: %s" % r[:110])
+    return dif
+
+
+def solo_lo_stop(src110):
+    """v1.10 = v1.05 (pin V105_COMMIT) + SOLO la regola di stop: ogni riga tolta e' nell'elenco, ogni riga aggiunta porta un simbolo della v1.10.
+    Con DUE contro-esempi costruiti qui (una riga di logica cambiata, una riga di logica aggiunta senza simbolo): la guardia li deve vedere."""
+    r = subprocess.run(["git", "-C", ROOT, "show", "%s:mql5/Experts/EA_NatCla.mq5" % V105_COMMIT], capture_output=True)
+    if r.returncode != 0:
+        return None, "v1.05 non leggibile da git (%s)" % V105_COMMIT, None
+    v105 = r.stdout.decode("ascii")
+    dif = diff_v105_v110(v105, src110)
+    ce1 = src110.replace("#define NC_BARRE_MIN 300", "#define NC_BARRE_MIN 301", 1)
+    ce2 = src110.replace("   if(!(gU>0)){ err=", "   gU=gU*2.0;\n   if(!(gU>0)){ err=", 1)
+    ce_ok = (ce1 != src110 and ce2 != src110 and len(diff_v105_v110(v105, ce1)) > 0 and len(diff_v105_v110(v105, ce2)) > 0)
+    return (not dif), "; ".join(dif[:4]), ce_ok
 
 
 def mutanti(raw, ser):
@@ -1653,9 +1981,14 @@ def main():
     check(norm(a).replace("SW_STCore", "NC_STCore") == norm(b), "NC_STCore == SW_STCore della casa (testo, a meno del nome)")
     altri = magic_libero()
     check(not altri, "blocco magic 7786xx libero nel repo fuori dai file Nat&Cla (%s)" % altri[:3])
-    esito, det = solo_il_tocco(src)
-    check(esito is True, "v1.05 = v1.04 (commit %s) + il SOLO tocco in CaricaDati + le due stringhe di versione: nessun'altra modifica di logica, CSV, magic, input %s"
-          % (V104_COMMIT, det))
+    # v1.10: la prova del tocco resta, sulla v1.05 del suo pin (storia: la v1.05 e' la base della v1.10)
+    r105 = subprocess.run(["git", "-C", ROOT, "show", "%s:mql5/Experts/EA_NatCla.mq5" % V105_COMMIT], capture_output=True)
+    esito, det = solo_il_tocco(r105.stdout.decode("ascii")) if r105.returncode == 0 else (None, "v1.05 non leggibile (%s)" % V105_COMMIT)
+    check(esito is True, "v1.05 (pin %s) = v1.04 (commit %s) + il SOLO tocco in CaricaDati + le due stringhe di versione: nessun'altra modifica di logica, CSV, magic, input %s"
+          % (V105_COMMIT, V104_COMMIT, det))
+    esito, det, ce = solo_lo_stop(src)
+    check(esito is True, "v1.10 = v1.05 (pin %s) + SOLO la regola di stop: righe tolte nell'elenco, righe aggiunte con un simbolo della v1.10 %s" % (V105_COMMIT, det))
+    check(ce is True, "CONTRO-ESEMPIO della guardia del diff: NC_BARRE_MIN 300 -> 301 e una riga 'gU=gU*2.0;' aggiunta in Risolvi sono VISTE")
 
     print("== P + N) funzioni pure C++ e numeri su barre reali dell'oro (HistData, +6 h, NON BCM) ==")
     ser = serie_tf(60, 2023)
@@ -1678,6 +2011,27 @@ def main():
                 check(abs(en_ - s[1]) <= 0.03 * s[1], "linea %s: entro il limite audio %.1f entro il 3%% della specifica (%d)" % (("2.5", "3.0", "3.5")[L], en_, s[1]))
                 check(33 <= w_ <= 42, "linea %s: setup/anno con ADX Wilder <= 20 = %.1f dentro 33-42 (specifica 35-40)" % (("2.5", "3.0", "3.5")[L], w_))
                 check(14 <= m_ <= 20, "linea %s: setup/anno con iADX MT5 <= 20 (default EA) = %.1f dentro 14-20 (specifica corretta 07/10: 16/18/16)" % (("2.5", "3.0", "3.5")[L], m_))
+            # v1.10 (informativo, NON un criterio): la regola OLTRE sui SETUP dell'oro H1 (HistData, NON BCM), stop 20 USD oltre la linea esterna.
+            #      La scala che si riempie alla barra i e' quella armata alla chiusura della barra i-1: esito e distanza si leggono li'.
+            if STOP_BARRE is not None:
+                ep_ = dt.datetime(1970, 1, 1)
+                da_ = int((dt.datetime(2024, 7, 10) - ep_).total_seconds() // 60)
+                a_ = int((dt.datetime(2026, 9, 19) - ep_).total_seconds() // 60)
+                print("       v1.10 OLTRE_LINEA_ESTERNA 20 u sull'oro H1 (u = 1 USD), sui setup 2024-07-10 -> 2026-09-18 (episodi entro 1/1/2, EMA200 illimitato):")
+                print("       linea | setup | regola | discorde/scartato | vince X4 | distanza linea->stop (ordine sulla linea) USD: mediana / P10-P90 | /pedaggio 0,25")
+                for L in range(4):
+                    v_, d_, k_, seg_, ne_, tl_, nu_, ei_ = res[L]
+                    lim_ = (1, 1, 2, 0)[L]
+                    idx_ = [i for i in range(1, len(c)) if da_ <= t[i] < a_ and nu_[i] == 1 and (lim_ == 0 or ne_[i] <= lim_) and (i - 1) in STOP_BARRE[L]]
+                    es_ = [STOP_BARRE[L][i - 1] for i in idx_]
+                    di_ = sorted(x[1] for x in es_ if x[1] is not None)
+                    q = lambda f: di_[min(len(di_) - 1, int(f * (len(di_) - 1) + 0.5))] if di_ else float("nan")
+                    print("       %-5s | %5d | %6d | %17d | %8d | %6.1f / %.1f-%.1f | %6.0fx" % (("ST25", "ST30", "ST35", "E200")[L], len(es_), sum(1 for x in es_ if x[0] == 0),
+                          sum(1 for x in es_ if x[0] == 1), sum(1 for x in es_ if x[0] == 2), q(.5), q(.1), q(.9), q(.5) / 0.25))
+                    if L in (2, 3):
+                        check(all(x[0] == 0 and x[1] is not None and abs(x[1] - 20.0) < 1e-6 for x in es_) and es_,
+                              "v1.10: linea %s = linea esterna di se stessa: su TUTTI i %d setup stop esattamente 20 u oltre la linea, nessuno scartato, nessun X4"
+                              % (("ST25", "ST30", "ST35", "E200")[L], len(es_)))
             # H4/D1 solo informativi: dipendono dall'orologio (specifica par. 5.4)
             for mins, lab in ((240, "H4"), (1440, "D1")):
                 s2 = serie_tf(mins, 2021)
