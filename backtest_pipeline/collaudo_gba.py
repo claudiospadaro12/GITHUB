@@ -171,6 +171,7 @@ INPUT_ATTESI = {
     "InpSL_ATR": ("double", "2.5"), "InpTrail_ATR": ("double", "2.5"), "InpTrailAtrMode": ("int", "0"),
     "InpTimeExitBars": ("int", "48"), "InpUseBreakeven": ("bool", "true"), "InpBE_TriggerATR": ("double", "1.0"),
     "InpBE_OffsetATR": ("double", "0.0"), "InpSlippagePoints": ("int", "30"), "InpMaxDailyLoss": ("double", "0.0"),
+    "InpMaxTradesPerDay": ("int", "0"),
     "InpCheckFreeMargin": ("bool", "true"), "InpHourStart": ("int", "0"), "InpHourEnd": ("int", "24"),
     "InpLotMode": ("int", "0"), "InpLots": ("double", "1.00"), "InpRiskPct": ("double", "0.25"),
     "InpMagic": ("long", "775800"), "InpComment": ("string", '"GBA"'), "InpUsaGuardian": ("bool", "true"),
@@ -179,7 +180,7 @@ INPUT_ATTESI = {
 FUNZIONI_ATTESE = {
     "Log", "GbaCanale", "GbaDirezione", "GbaSpreadOk", "GbaOraOk", "GbaGiornoBloccato", "GbaDecidi",
     "GbaEstremo", "GbaBeArmato", "GbaSLProposto", "GbaArrotonda", "GbaSLMigliore", "GbaSLValido",
-    "GbaUscitaTempo", "GbaAzione", "GbaLottiRischio", "GbaLottiNorm", "GbaShiftChiusa", "GbaLeggiBuffer",
+    "GbaUscitaTempo", "GbaAzione", "GbaInizioGiorno", "GbaStessoGiorno", "GbaTroppeOggi", "GbaAperteOggi", "GbaLottiRischio", "GbaLottiNorm", "GbaShiftChiusa", "GbaLeggiBuffer",
     "GbaLeggiSegnale", "GbaLeggiGestione", "GetFillingMode", "GbaPosizioneAperta", "GbaPnlGiorno",
     "GbaMargineOk", "GbaTickValue", "GbaLotti", "GbaApri", "GbaNuovaBarra", "GbaStampaConta", "GbaMotivoTesto",
     "GbaGestisci", "OnInit", "OnDeinit", "OnTick", "GbaLogAvvio", "GbaCaso", "GbaAutotestNucleo", "AutoTestGba",
@@ -311,6 +312,19 @@ def statico(raw, bag, quiet=False):
     check(righe_ok == 2 and "g_conta[motivo]++" in nb and "motivo == GBA_SPREAD" in nb,
           "righe di segnale (presa e scartata) con spread/ATR %% e stop/spread; lo scarto per spread si stampa sempre (%d)"
           % righe_ok, bag, quiet=quiet)
+    # R15 tetto di operazioni (spec. par. 12)
+    ao = fn.get("GbaAperteOggi", "")
+    check("DEAL_ENTRY_IN" in ao and "GbaInizioGiorno(t)" in ao and "GbaStessoGiorno(" in ao and "InpMagic" in ao
+          and "g_sym" in ao, "GbaAperteOggi: deal d'INGRESSO del magic e del simbolo, dalla mezzanotte server", bag, quiet=quiet)
+    check("GbaInizioGiorno(ora)" in fn.get("GbaPnlGiorno", ""), "perdita giornaliera e tetto: stessa mezzanotte (GbaInizioGiorno)",
+          bag, quiet=quiet)
+    check("if(InpMaxTradesPerDay > 0 && GbaDirezione(close1, hh, ll, ema) != 0)\n      aperteOggi = GbaAperteOggi(t0);" in nb
+          and "aperteOggi, InpMaxTradesPerDay, motivo);" in nb,
+          "GbaNuovaBarra: conta le aperture solo col tetto acceso e le passa a GbaDecidi", bag, quiet=quiet)
+    check(re.search(r"if\(motivo == GBA_TETTO\)\s*\n\s*PrintFormat\(\"\[GBA\] TETTO GIORNALIERO", nb) is not None,
+          "riga di log per OGNI segnale scartato dal tetto (incondizionata)", bag, quiet=quiet)
+    check("g_conta[GBA_TETTO]" in sc and "InpMaxTradesPerDay" in sc, "[GBA-CONTA] conta gli scarti per tetto", bag, quiet=quiet)
+    check("InpMaxTradesPerDay < 0" in oi, "OnInit: tetto negativo rifiutato", bag, quiet=quiet)
     # autotest
     at = fn.get("AutoTestGba", "")
     check("GbaAutotestNucleo()" in at and "ABTG_AutotestGuardia()" in at, "autotest: nucleo + Guardian", bag, quiet=quiet)
@@ -413,8 +427,9 @@ DRIVER = r"""
 static std::vector<double> rd(int n) { std::vector<double> v(n); for(int i = 0; i < n; i++) std::cin >> v[i]; return v; }
 static std::vector<long long> rdl(int n) { std::vector<long long> v(n); for(int i = 0; i < n; i++) std::cin >> v[i]; return v; }
 static void sim() {
-  int N, mode, tex, useBE, hS, hE, aL, aS, tfT, tfA; double kSL, kTr, trig, off, kSp, passo;
-  std::cin >> N >> kSL >> kTr >> mode >> tex >> useBE >> trig >> off >> kSp >> hS >> hE >> aL >> aS >> tfT >> tfA >> passo;
+  int N, mode, tex, useBE, hS, hE, aL, aS, tfT, tfA, maxG; double kSL, kTr, trig, off, kSp, passo;
+  std::cin >> N >> kSL >> kTr >> mode >> tex >> useBE >> trig >> off >> kSp >> hS >> hE >> aL >> aS >> tfT >> tfA >> passo >> maxG;
+  std::vector<long long> ingressi;
   InpChannelBars = N; InpTrailAtrMode = mode; g_tfSig = 1; g_tfTrend = tfT; g_tfAtr = tfA;
   int n; std::cin >> n; Serie s1; s1.T = rdl(n); std::vector<double> O = rd(n); s1.H = rd(n); s1.L = rd(n); s1.C = rd(n);
   std::vector<double> S = rd(n);
@@ -450,12 +465,15 @@ static void sim() {
         double c1 = 0, hh = 0, ll = 0, ema = 0, atr = 0;
         if(GbaLeggiSegnale(s1.T[i], c1, hh, ll, ema, atr)) {
           int mot = GBA_NO_SEGNALE; int ora = (int)((s1.T[i] % 86400) / 3600);
-          int dir = GbaDecidi(c1, hh, ll, ema, atr, S[i], kSp, ora, hS, hE, on, false, aL != 0, aS != 0, mot);
+          int aperte = 0;
+          for(size_t q = 0; q < ingressi.size(); q++) if(GbaStessoGiorno(ingressi[q], s1.T[i])) aperte++;
+          int dir = GbaDecidi(c1, hh, ll, ema, atr, S[i], kSp, ora, hS, hE, on, false, aL != 0, aS != 0, aperte, maxG, mot);
           if(mot != GBA_NO_SEGNALE) conta[mot]++;
           if(dir != 0) {
             bool L = dir > 0; double px = L ? ask : bid;
             double s0 = GbaArrotonda(L ? px - kSL * atr : px + kSL * atr, passo);
-            if(GbaSLValido(L, s0, bid, ask, 0.0)) { on = true; isL = L; op = px; sl = s0; sl0 = s0; tO = s1.T[i]; iE = i; mods = 0; }
+            if(GbaSLValido(L, s0, bid, ask, 0.0)) { on = true; isL = L; op = px; sl = s0; sl0 = s0; tO = s1.T[i]; iE = i; mods = 0;
+                                                    ingressi.push_back(s1.T[i]); }
           }
         }
       }
@@ -472,9 +490,11 @@ int main() {
     if(cmd == "AUTO") { std::printf("%d\n", GbaAutotestNucleo()); }
     else if(cmd == "CAN") { int nn, m; std::cin >> nn >> m; Arr h, l; h.v = rd(m); l.v = rd(m); double hh = -1, ll = -1;
       bool ok = GbaCanale(h, l, nn, hh, ll); std::printf("%d %.17g %.17g\n", ok ? 1 : 0, ok ? hh : 0.0, ok ? ll : 0.0); }
-    else if(cmd == "DEC") { double c, hh, ll, e, a, sp, k; int o, hs, he, p, g, al, as;
-      std::cin >> c >> hh >> ll >> e >> a >> sp >> k >> o >> hs >> he >> p >> g >> al >> as; int mot = -1;
-      int d = GbaDecidi(c, hh, ll, e, a, sp, k, o, hs, he, p, g, al, as, mot); std::printf("%d %d\n", d, mot); }
+    else if(cmd == "DEC") { double c, hh, ll, e, a, sp, k; int o, hs, he, p, g, al, as, ap, mg;
+      std::cin >> c >> hh >> ll >> e >> a >> sp >> k >> o >> hs >> he >> p >> g >> al >> as >> ap >> mg; int mot = -1;
+      int d = GbaDecidi(c, hh, ll, e, a, sp, k, o, hs, he, p, g, al, as, ap, mg, mot); std::printf("%d %d\n", d, mot); }
+    else if(cmd == "GSRV") { long long t1, t2; int a, m; std::cin >> t1 >> t2 >> a >> m;
+      std::printf("%lld %d %d\n", (long long)GbaInizioGiorno(t1), GbaStessoGiorno(t1, t2) ? 1 : 0, GbaTroppeOggi(a, m) ? 1 : 0); }
     else if(cmd == "AZ") { int il, br, mb, ube; double op, cs, b, a, es, at, kt, tr, of, md, ps;
       std::cin >> il >> op >> cs >> b >> a >> es >> at >> br >> mb >> kt >> ube >> tr >> of >> md >> ps; double ns = -1;
       int az = GbaAzione(il, op, cs, b, a, es, at, br, mb, kt, ube, tr, of, md, ps, ns); std::printf("%d %.17g\n", az, ns); }
@@ -489,7 +509,8 @@ int main() {
 }
 """
 
-NOMI_ESTRATTI = ["GbaCanale", "GbaDirezione", "GbaSpreadOk", "GbaOraOk", "GbaGiornoBloccato", "GbaDecidi",
+NOMI_ESTRATTI = ["GbaCanale", "GbaDirezione", "GbaSpreadOk", "GbaOraOk", "GbaGiornoBloccato", "GbaInizioGiorno",
+                 "GbaStessoGiorno", "GbaTroppeOggi", "GbaDecidi",
                  "GbaEstremo", "GbaBeArmato", "GbaSLProposto", "GbaArrotonda", "GbaSLMigliore", "GbaSLValido",
                  "GbaUscitaTempo", "GbaAzione", "GbaLottiRischio", "GbaLottiNorm", "GbaShiftChiusa",
                  "GbaLeggiBuffer", "GbaLeggiSegnale", "GbaLeggiGestione", "GbaCaso", "GbaAutotestNucleo"]
@@ -540,7 +561,8 @@ def g(x):
 # ===========================================================================
 # SPECCHIO PYTHON -- scritto dalla SPECIFICA (report/EA_NOTTURNO_GBA_SPECIFICA_2026-10-09.md), non dall'EA
 # ===========================================================================
-OK, NO_SEGNALE, POSIZIONE, ORA, GIORNO, SPREAD, DATI, LATO = 0, 1, 2, 3, 4, 5, 6, 7
+OK, NO_SEGNALE, POSIZIONE, ORA, GIORNO, SPREAD, DATI, LATO, TETTO = 0, 1, 2, 3, 4, 5, 6, 7, 8
+N_MOTIVI = 9
 AZ_NULLA, AZ_SPOSTA, AZ_CHIUDI = 0, 1, 2
 
 
@@ -565,7 +587,12 @@ def py_ora_ok(o, s, e):
     return s <= o < e if s < e else (o >= s or o < e)
 
 
-def py_decidi(c, hh, ll, ema, atr, spr, k, ora, hs, he, pos, gio, al, ash):
+def py_giorno_server(t):
+    """indice del giorno SERVER (mezzanotte server = multiplo di 86400 secondi)."""
+    return t // 86400
+
+
+def py_decidi(c, hh, ll, ema, atr, spr, k, ora, hs, he, pos, gio, al, ash, aperte=0, maxg=0):
     d = py_direzione(c, hh, ll, ema)
     if d == 0:
         return 0, NO_SEGNALE
@@ -577,6 +604,8 @@ def py_decidi(c, hh, ll, ema, atr, spr, k, ora, hs, he, pos, gio, al, ash):
         return 0, ORA
     if gio:
         return 0, GIORNO
+    if maxg > 0 and aperte >= maxg:
+        return 0, TETTO
     if atr <= 0:
         return 0, DATI
     if k > 0 and not (spr <= k * atr):
@@ -683,12 +712,13 @@ def casi_puri(cx, bag, quiet=False, ridotto=False):
             spr = k * atr
         ora, hs, he = r.randint(0, 23), r.randint(0, 23), r.randint(0, 24)
         pos, gio, al, ash = (r.random() < 0.2), (r.random() < 0.2), (r.random() < 0.85), (r.random() < 0.85)
-        righe.append("DEC %s %s %s %s %s %s %s %d %d %d %d %d %d %d" % (g(c), g(hh), g(ll), g(ema), g(atr), g(spr), g(k),
-                                                                         ora, hs, he, pos, gio, al, ash))
-        attese.append(py_decidi(c, hh, ll, ema, atr, spr, k, ora, hs, he, pos, gio, al, ash))
+        ap, mg = r.randint(0, 5), r.choice([0, 0, 1, 3, 5])
+        righe.append("DEC %s %s %s %s %s %s %s %d %d %d %d %d %d %d %d %d" % (g(c), g(hh), g(ll), g(ema), g(atr), g(spr), g(k),
+                                                                               ora, hs, he, pos, gio, al, ash, ap, mg))
+        attese.append(py_decidi(c, hh, ll, ema, atr, spr, k, ora, hs, he, pos, gio, al, ash, ap, mg))
     res = cx.run("\n".join(righe) + "\n") or []
     bad = sum(1 for a, o in zip(attese, res) if tuple(map(int, o.split())) != a)
-    check(len(res) >= giri and bad == 0, "GbaDecidi (canale, EMA, lato, posizione, ora, giorno, ATR, spread) = specchio su %d casi: %d diversi"
+    check(len(res) >= giri and bad == 0, "GbaDecidi (canale, EMA, lato, posizione, ora, giorno, tetto, ATR, spread) = specchio su %d casi: %d diversi"
           % (giri, bad), bag, quiet=quiet)
     # azione di gestione
     righe, attese = [], []
@@ -740,6 +770,19 @@ def casi_puri(cx, bag, quiet=False, ridotto=False):
     for (t, a), o in zip(attese, res):
         bad += (int(o) != a) if t == "B" else (abs(float(o) - a) > 1e-9)
     check(len(res) >= len(attese) and bad == 0, "GbaEstremo, GbaLottiNorm, GbaLottiRischio, GbaGiornoBloccato = specchio su %d casi: %d diversi"
+          % (len(attese), bad), bag, quiet=quiet)
+    # mezzanotte server e tetto: attorno ai bordi del giorno
+    righe, attese = [], []
+    for _ in range(giri // 3):
+        t1 = T0 + 86400 * r.randint(0, 400) + r.choice([0, 1, 86399, 86400, r.randint(0, 86399)])
+        t2 = t1 + r.choice([0, 1, -1, 86399, -86399, 86400, r.randint(-90000, 90000)])
+        a, m = r.randint(0, 6), r.choice([0, 1, 2, 6])
+        righe.append("GSRV %d %d %d %d" % (t1, t2, a, m))
+        attese.append("%d %d %d" % (py_giorno_server(t1) * 86400, 1 if py_giorno_server(t1) == py_giorno_server(t2) else 0,
+                                    1 if (m > 0 and a >= m) else 0))
+    res = cx.run("\n".join(righe) + "\n") or []
+    bad = sum(1 for a, o in zip(attese, res) if o.strip() != a)
+    check(len(res) >= len(attese) and bad == 0, "GbaInizioGiorno, GbaStessoGiorno, GbaTroppeOggi = specchio su %d casi ai bordi della mezzanotte: %d diversi"
           % (len(attese), bad), bag, quiet=quiet)
 
 
@@ -810,6 +853,7 @@ class Cfg:
         self.useBE, self.trig, self.off, self.kSp = 1, 1.0, 0.0, 0.05
         self.hS, self.hE, self.aL, self.aS = 0, 24, 1, 1
         self.tfT, self.tfA, self.passo, self.emaP, self.atrP = 1, 1, 0.01, 100, 14
+        self.maxG = 0
         self.__dict__.update(kw)
 
 
@@ -822,6 +866,8 @@ CFGS = [
     Cfg("EMA su M5, ATR su M1", tfT=5, N=20, kSp=0.35),
     Cfg("EMA su M1, ATR su M5, ATR fisso", tfA=5, mode=1, N=20, kSp=0.20, trig=0.5),
     Cfg("solo short, spread spento, ore 3-11", aL=0, kSp=0.0, hS=3, hE=11, N=24),
+    Cfg("tetto 2 operazioni/giorno", maxG=2, kSp=0.35, N=24, tex=12),
+    Cfg("tetto 1/giorno, ore 22-6 (a cavallo della mezzanotte)", maxG=1, kSp=0.35, N=24, tex=12, hS=22, hE=6),
 ]
 
 
@@ -843,7 +889,8 @@ def py_sim(dati, cfg):
     TT, ET, _ = buffer_tf(cfg.tfT, cfg, T, H, L, C)
     TA, _, AT = buffer_tf(cfg.tfA, cfg, T, H, L, C)
     n = len(T)
-    trades, conta = [], [0] * 8
+    trades, conta = [], [0] * N_MOTIVI
+    ingressi = []
     pos = None
     for i in range(n):
         path = [O[i]] + ([L[i], H[i]] if C[i] >= O[i] else [H[i], L[i]]) + [C[i]]
@@ -884,8 +931,9 @@ def py_sim(dati, cfg):
                     continue
                 hh, ll = max(H[s - cfg.N:s]), min(L[s - cfg.N:s])
                 ora = (T[i] % 86400) // 3600
+                aperte = sum(1 for t in ingressi if py_giorno_server(t) == py_giorno_server(T[i]))
                 d, mot = py_decidi(C[s], hh, ll, ET[je], AT[ja], S[i], cfg.kSp, ora, cfg.hS, cfg.hE,
-                                   pos is not None, False, cfg.aL, cfg.aS)
+                                   pos is not None, False, cfg.aL, cfg.aS, aperte, cfg.maxG)
                 if mot != NO_SEGNALE:
                     conta[mot] += 1
                 if d != 0:
@@ -894,6 +942,7 @@ def py_sim(dati, cfg):
                     s0 = tick_round(px - cfg.kSL * AT[ja] if lng else px + cfg.kSL * AT[ja], cfg.passo)
                     if (s0 < bid) if lng else (s0 > ask):
                         pos = {"L": lng, "op": px, "sl": s0, "sl0": s0, "i": i, "mods": 0}
+                        ingressi.append(T[i])
     if pos is not None:
         trades.append(chiudi(pos, n - 1, 3, "FINE", C[n - 1] if pos["L"] else C[n - 1] + S[n - 1]))
     return trades, conta
@@ -910,9 +959,9 @@ def cx_sim(cx, dati, cfg):
     T5 = m5(T, H, L, C)[0]
     j = lambda xs: " ".join(map(g, xs))
     ji = lambda xs: " ".join(str(int(x)) for x in xs)
-    txt = ("SIM %d %s %s %d %d %d %s %s %s %d %d %d %d %d %d %s\n" % (
+    txt = ("SIM %d %s %s %d %d %d %s %s %s %d %d %d %d %d %d %s %d\n" % (
         cfg.N, g(cfg.kSL), g(cfg.kTr), cfg.mode, cfg.tex, cfg.useBE, g(cfg.trig), g(cfg.off), g(cfg.kSp),
-        cfg.hS, cfg.hE, cfg.aL, cfg.aS, cfg.tfT, cfg.tfA, g(cfg.passo)))
+        cfg.hS, cfg.hE, cfg.aL, cfg.aS, cfg.tfT, cfg.tfA, g(cfg.passo), cfg.maxG))
     txt += "%d %s %s %s %s %s %s\n" % (len(T), ji(T), j(O), j(H), j(L), j(C), j(S))
     txt += "%d %s\n" % (len(T5), ji(T5))
     txt += "%d %s\n%d %s\n" % (len(ET), j(ET), len(AT), j(AT))
@@ -948,7 +997,8 @@ def uguali(a, b):
 def simulazioni(cx, bag, quiet=False, ridotto=False):
     semi = [11] if ridotto else [11, 22, 33]
     n = 900 if ridotto else 1800
-    tot_tr, tot_motivi = 0, [0] * 8
+    tot_tr, tot_motivi = 0, [0] * N_MOTIVI
+    giorni_tetto = {}
     tutti_ok = True
     uscite = set()
     for cfg in CFGS:
@@ -967,6 +1017,10 @@ def simulazioni(cx, bag, quiet=False, ridotto=False):
             tot_tr += len(pa)
             tot_motivi = [a + b for a, b in zip(tot_motivi, pc)]
             uscite |= {t[6] for t in pa}
+            if cfg.maxG > 0:
+                for t in pa:
+                    k = (cfg.nome, sd, py_giorno_server(dati[0][t[1]]))
+                    giorni_tetto[k] = giorni_tetto.get(k, 0) + 1
             if not ok:
                 diff = next((k for k, (x, y) in enumerate(zip(pa, ca)) if not uguali([x], [y])), min(len(pa), len(ca)))
                 check(False, "SIM [%s] seme %d: EA %d operazioni, specchio %d; prima differenza #%d EA=%s specchio=%s; conta EA=%s specchio=%s"
@@ -977,9 +1031,17 @@ def simulazioni(cx, bag, quiet=False, ridotto=False):
     if not ridotto:
         check(tot_tr >= 100 and {"SL", "TEMPO"} <= uscite,
               "copertura: >= 100 operazioni e uscite sia a SL sia a TEMPO (%d, %s)" % (tot_tr, sorted(uscite)), bag, quiet=quiet)
-        check(tot_motivi[SPREAD] > 0 and tot_motivi[POSIZIONE] > 0 and tot_motivi[ORA] > 0 and tot_motivi[LATO] > 0,
-              "copertura: scarti per spread %d, posizione %d, ora %d, lato %d (tutti > 0)"
-              % (tot_motivi[SPREAD], tot_motivi[POSIZIONE], tot_motivi[ORA], tot_motivi[LATO]), bag, quiet=quiet)
+        check(tot_motivi[SPREAD] > 0 and tot_motivi[POSIZIONE] > 0 and tot_motivi[ORA] > 0 and tot_motivi[LATO] > 0
+              and tot_motivi[TETTO] > 0,
+              "copertura: scarti per spread %d, posizione %d, ora %d, lato %d, tetto %d (tutti > 0)"
+              % (tot_motivi[SPREAD], tot_motivi[POSIZIONE], tot_motivi[ORA], tot_motivi[LATO], tot_motivi[TETTO]),
+              bag, quiet=quiet)
+        maxg = {c.nome: c.maxG for c in CFGS}
+        sopra = [k for k, v in giorni_tetto.items() if v > maxg[k[0]]]
+        pieni_due = {(k[0], k[1]) for k in giorni_tetto if k[2] == py_giorno_server(T0) + 1}
+        check(not sopra and len(pieni_due) >= 2,
+              "tetto: mai piu' di N ingressi per giorno server (%d giorni-cella), e dopo la mezzanotte si riapre (%d celle con ingressi il giorno 2)"
+              % (len(giorni_tetto), len(pieni_due)), bag, quiet=quiet)
 
 
 def suite(raw, tmp, bag, quiet=False, ridotto=False):
@@ -1066,6 +1128,20 @@ MUTANTI = [
      "   double prezzo", 0, "L"),
     ("L41", "ATR di gestione dalla barra d'ingresso anche in modo 0", "   datetime tRif = t0;\n", "   datetime tRif = iTime(g_sym, g_tfSig, barre);\n", 0, "L"),
     ("L42", "giornata bloccata ignorata", "   if(giornoBloccato)  ", "   if(false)  ", 0, "L"),
+    ("L44", "tetto: > invece di >=", "return (maxGiorno > 0 && aperteOggi >= maxGiorno);",
+     "return (maxGiorno > 0 && aperteOggi > maxGiorno);", 0, "L"),
+    ("L45", "tetto 0 non spegne", "return (maxGiorno > 0 && aperteOggi >= maxGiorno);", "return (aperteOggi >= maxGiorno);", 0, "L"),
+    ("L46", "il tetto non si azzera a mezzanotte (giorno = settimana)", "return (datetime)(((long)t / 86400) * 86400);",
+     "return (datetime)(((long)t / 604800) * 604800);", 0, "L"),
+    ("L47", "tetto ignorato nella decisione", "if(GbaTroppeOggi(aperteOggi, maxGiorno)) { motivo = GBA_TETTO;",
+     "if(false) { motivo = GBA_TETTO;", 0, "L"),
+    ("L48", "scarto per tetto contato come perdita giornaliera", "{ motivo = GBA_TETTO;    return 0; }",
+     "{ motivo = GBA_GIORNO;    return 0; }", 0, "L"),
+    ("L49", "mezzanotte spostata di un'ora", "return (datetime)(((long)t / 86400) * 86400);",
+     "return (datetime)((((long)t + 3600) / 86400) * 86400);", 0, "L"),
+    ("L50", "tetto prima della posizione aperta (motivo sbagliato)",
+     "   if(posAperta)                          { motivo = GBA_POSIZIONE;  return 0; }\n",
+     "   if(GbaTroppeOggi(aperteOggi, maxGiorno)) { motivo = GBA_TETTO;    return 0; }\n   if(posAperta)                          { motivo = GBA_POSIZIONE;  return 0; }\n", 0, "L"),
     ("S01", "Guardian tolto prima del Buy", G + "      inviato = trade.Buy(", "      inviato = trade.Buy(", 0, "S"),
     ("S02", "Guardian dopo il Sell", G + "      inviato = trade.Sell(lots, g_sym, bid, sl, 0.0, cmt);",
      "      inviato = trade.Sell(lots, g_sym, bid, sl, 0.0, cmt) && ABTG_GuardiaIngresso(InpUsaGuardian, \"ABTG_GoldBreakoutATR\");", 0, "S"),
@@ -1105,6 +1181,11 @@ MUTANTI = [
     ("S30", "SL iniziale col moltiplicatore del trailing", "double slDist   = InpSL_ATR * atr;", "double slDist   = InpTrail_ATR * atr;", 0, "S"),
     ("S31", "Guardian chiamato anche in chiusura", "         if(trade.PositionClose(tk, (ulong)InpSlippagePoints))",
      "         if(ABTG_GuardiaIngresso(InpUsaGuardian, \"ABTG_GoldBreakoutATR\") && trade.PositionClose(tk, (ulong)InpSlippagePoints))", 0, "S"),
+    ("S33", "tetto 2 di default (non la replica)", "InpMaxTradesPerDay = 0;", "InpMaxTradesPerDay = 2;", 0, "S"),
+    ("S34", "conta anche i deal di USCITA", "!= DEAL_ENTRY_IN) continue;", "!= DEAL_ENTRY_OUT) continue;", 0, "S"),
+    ("S35", "riga del tetto solo se verbose", "      if(motivo == GBA_TETTO)\n", "      if(motivo == GBA_TETTO && InpVerbose)\n", 0, "S"),
+    ("S36", "tetto tolto da [GBA-CONTA]", "               g_conta[GBA_TETTO], InpMaxTradesPerDay);", "               0, InpMaxTradesPerDay);", 0, "S"),
+    ("S37", "conteggio delle aperture mai chiamato", "      aperteOggi = GbaAperteOggi(t0);", "      aperteOggi = 0;", 0, "S"),
     ("S32", "margine libero non verificato", "if(InpCheckFreeMargin && !GbaMargineOk(isLong, lots, price)) return;", "", 0, "S"),
 ]
 
