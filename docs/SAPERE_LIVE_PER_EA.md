@@ -116,6 +116,34 @@ _Regola di aggiornamento: ogni trascrizione nuova passa da `analista-trascrizion
 - La lezione 01 del 06/10 annuncia sei moduli (r.257-259): introduzione al Forex, **come si calcola il rischio operativo**, **costi di esecuzione e liquidita' (spread, slippage, commissioni, rollover)**, leva/margine/rischio tecnico, management del trade, punti pivot e livelli operativi. Rilevanti per il nostro cancello di costo: registrare ogni numero su spread e slippage **senza** usarlo come soglia.
 - Calendario: il giovedi' 08/10 la lezione di Paolo e' spostata a venerdi' 09/10 (06/10 r.23-25); lunedi' 12/10 "bank holiday USA" secondo Paolo (r.269): controllo di calendario broker, non decisione (D3 dell'analisi del 06/10).
 
+### 2.7 Live di Emiliano del 09/10/2026 (ciclo C, settimana 2): la scheda e le occorrenze sulle voci esistenti
+
+Fonte: `docs/live_emiliano/LIVE_EMILIANO_2026-10-09.txt` (286 righe), **[LETTO] per intero**. Scheda breve: `report/LIVE_EMILIANO_SCHEDA_2026-10-09.md`. Specifica dell'EA notturno: `report/EA_NOTTURNO_GBA_SPECIFICA_2026-10-09.md` (confrontata alla trascrizione in V62; **non riscritta**).
+
+**Struttura e limiti (leggere prima delle voci).** r.1-77 logistica (da lunedi' 12/10 le live passano alla nuova area `coaching.alfiobardola.com`, Circle "cancellato a fine mese", r.63): zero contenuto operativo. r.79-253 live operativa. **r.255 e' una riga da 4.734 caratteri che contiene un loop dello speech-to-text ("un altro piccettino" x82, contati con grep) e, senza stacco, il cambio di relatore**: da li' parla Riccardo (BCM Tech), con promozione e commissioni; **il tratto di audio fra "lo spazio per l'altro ingresso c'e'" (r.253) e Riccardo e' perso**. L'"altro piccettino" **non** e' una serie di operazioni (stesso tipo di loop del "sale di due" x33 del 05/10, §5). r.257-277 Riccardo. r.279-287 oro e descrizione di GBA. Gli **orari della live di Emiliano non sono dichiarati** (e' di venerdi' mattina); Riccardo: "il martedi' e il giovedi', alla preapertura e apertura dei mercati americani ... le tre e un quarto o tre e mezza" (r.263, **fuso non dichiarato: non converto**).
+
+**Occorrenze del 09/10 sulle voci esistenti** (la colonna "Ciclo" delle singole voci non e' stata riscritta una per una; vale questa tabella; tutte [DICHIARATO DA LORO]):
+
+| voce | occorrenza 09/10 | cosa cambia |
+|---|---|---|
+| V01 / V03 | "i minimi della notte sono gia' stati rotti, quindi sono stati violati e confermati, quindi al limite uno potrebbe mettere sul test dei minimi della notte" (r.111); "le candele partono dall'apertura della sessione, non di Tokyo, ma dalla sessione notturna" (r.113) | **conferma V03 nella forma retest**; novita': definisce la "notte" (ora di inizio non detta, Q15) |
+| V06 / V07 | "tento un retest sulla value area, perche' tendo ad entrare sempre short" (r.111); "lo metto sopra il livello, metto circa 20 punti" (r.111) | ripetizione; la regola di fill vale **anche per il target** (V66) |
+| V12 / V13 | "la media 200 in daily ... la candela che ha aperto sotto la media 200, quindi la pressione e' ribassista" (r.103); "la media mobile 200 e' uno spartiacque. Mi apre sopra la media, vado long. Mi apre sotto la media, tento lo short" (r.241); "qual e' il piu' forte tra i due? La media o il supporto weekly? ... la media 200 c'e' una bella lotta" (r.251) | **novita' V63** (apertura D1 rispetto alla EMA200 D1 come spartiacque) |
+| V16 / V54 | "VWAP che porta tutto verso il basso", "super trail ribassista" in H1 (r.109); "l'altra meta' me la tolgo qua, sul wrap" (r.233) | ripetizione; **VWAP come obiettivo di uscita** (settimo uso gia' in V54) |
+| V33 | "adesso io mi metto subito lo stop in pari, subito. Abbiamo oltre 40 punti ... addirittura 20, meta' posizione me la porto a casa" (r.119); stop in pari preso (r.135); "il suo obiettivo e' a 35 punti e abbiamo fatto 35 punti" (r.235) | ripetizione; **caso concreto in cui il BE immediato e' stato preso e il prezzo e' poi tornato** (V67). Una live non riapre un cancello chiuso |
+| V34 | "Di solito 20 punti [secondo ordine]" (r.131); "14 non ci puo' stare" (r.111) | **stesso valore di 10/04 e 18/09** (stessa fonte, non conferma indipendente) |
+| V35 / B02 / B03 | "dovevo limitare le size, assolutamente. Sempre mantenendole nella stessa linea" (r.199); "lascerei un altro piccettino" (r.255, prima del loop) | **autocorrezione parziale** del raddoppio (V68); resta una frase di scale-in (B22) |
+| V36 / B04 | "al limite ci facciamo piu' giri" (r.155) | **stessa pratica del 07/10** (re-entry), questa volta dopo uno stop in pari, non dopo un profitto (B19) |
+| V38 / V11 | "da 180 a 240 pero' lo stop tecnico va messo li'" (r.179); "lavoro sempre in funzione dello stop" (r.207) | **opposto a B08 (28/09)**: qui l'euro si adatta allo stop (C22) |
+| V41 | "ho ridotto le size a 3 e a 6. Ridicole" (r.127); "entra con i 20, 30, 100, 1000 contratti, 3 contratti, 5 contratti, 6 contratti" (r.251) | ripetizione; unita' dei contratti non detta |
+| V44 | "unemployment claims ... era notizia rossa" (r.285, Riccardo/Emiliano, ieri alle "due e mezza", fuso non dichiarato) | ripetizione; spike news sull'oro (B21) |
+| V51 / V58 | "per capire la direzione dobbiamo vedere daily e weekly" (r.165); regola su "tutti i time frame ... oro compreso" (r.187); "ho sempre cercato delle posizioni short, mai una posizione long ... tendo a seguire sempre il macro trend" (r.237-239) | ripetizione; **contraddetta** da EURUSD (C23) |
+| V53 | "volatilita' zero. Volumi bassi" (r.125); "non ho mai visto ... una sorta di volatilita' cosi' bassa" (r.111) | ripetizione |
+| V55 | tondo 25.000 come livello del 2o ordine (r.111-113) con confluenza (value area low + minimi notte + POC) | **coerente con la linea del 07/10** (tondo solo con confluenza) |
+| V56 | value area / POC letti in H1, "volumi laterali ... ci danno un'indicazione dove poter posizionare degli ordini" (r.111) | ripetizione, "richiede occhio umano" |
+| V48 | "dipende da broker a broker ... gli indicatori specifici ... sono proprio settati sui nostri prezzi" (Riccardo, r.255) | ripetizione sul feed (V75) |
+| V60 / V61 | "ho creato un sistema sull'oro, che lo vedete il GBA" (r.79); "+25k" (r.79) | **novita'** (V62) |
+
 ---
 
 ## 3. (b) LE VOCI PER TEMA
