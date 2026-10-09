@@ -38,6 +38,10 @@
 //|      trade.Sell (GbaApri). Mai sulle chiusure ne' sullo stop.     |
 //|   R14 lati LONG/SHORT accendibili (pannello "LONG ON / SHORT ON"; |
 //|      default entrambi accesi = nessun effetto) (GbaDecidi)        |
+//|   R15 tetto di operazioni APERTE per giorno SERVER (audit del     |
+//|      dossier Gold Breakout PRO, spec. par. 12): InpMaxTradesPerDay|
+//|      0 = nessun limite (replica). Blocca solo i NUOVI ingressi,   |
+//|      si azzera a mezzanotte server (GbaTroppeOggi, GbaAperteOggi) |
 //|                                                                   |
 //|  ASSE SPREAD (spec. par. 9): InpSpreadMaxATR 0,05 = REPLICA del   |
 //|  file Input; 0,10 / 0,20 / 0,35 = celle di MISURA (alle 08:52 il  |
@@ -53,6 +57,9 @@
 //|  col giornale.                                                    |
 //+------------------------------------------------------------------+
 //  CHANGELOG
+//  v1.10  09/10/2026 -- R15: InpMaxTradesPerDay (default 0 = nessun
+//         effetto), motivo GBA_TETTO nel conto [GBA-CONTA] e nel log.
+//         GbaInizioGiorno unica per perdita giornaliera e tetto.
 //  v1.00  09/10/2026 -- prima stesura, dalla specifica. NON compilata
 //         (MetaEditor assente nell'ambiente di scrittura), NON
 //         testata nel tester. Il collaudo a tavolino e'
@@ -78,7 +85,7 @@
 //+------------------------------------------------------------------+
 #property strict
 #property copyright "ABTG -- GBA ricreato dalla descrizione di Emiliano (live 09/10/2026)"
-#property version   "1.00"
+#property version   "1.10"
 
 #include <Trade\Trade.mqh>
 //--- firme B1/C1 del 18/08: la guardia del conto, lato EA.
@@ -98,7 +105,8 @@ CTrade trade;
 #define GBA_SPREAD      5
 #define GBA_DATI        6
 #define GBA_LATO        7
-#define GBA_N_MOTIVI    8
+#define GBA_TETTO       8
+#define GBA_N_MOTIVI    9
 
 #define GBA_AZ_NULLA    0
 #define GBA_AZ_SPOSTA   1
@@ -148,6 +156,7 @@ input double InpBE_OffsetATR  = 0.0;  // Breakeven: SL = ingresso +/- X ATR (0 =
 input group "=== Esecuzione e protezioni ==="
 input int    InpSlippagePoints  = 30;   // Slippage massimo (punti)
 input double InpMaxDailyLoss    = 0.0;  // Perdita giornaliera massima, valuta del conto (0 = spenta)
+input int    InpMaxTradesPerDay = 0;    // Tetto di operazioni APERTE per giorno SERVER (0 = nessun limite, replica)
 input bool   InpCheckFreeMargin = true; // Verifica il margine libero prima dell'ordine
 input int    InpHourStart       = 0;    // Ora SERVER di inizio dei NUOVI ingressi (inclusa, 0-23)
 input int    InpHourEnd         = 24;   // Ora SERVER di fine (esclusa, 0-24). Start > End = a cavallo della mezzanotte
@@ -250,13 +259,33 @@ bool GbaGiornoBloccato(const double pnlGiorno, const double maxPerdita)
    return (maxPerdita > 0.0 && pnlGiorno <= -maxPerdita);
 }
 
+//--- R10 + R15: inizio del giorno SERVER (mezzanotte server) di t.
+//    Unica per la perdita giornaliera e per il tetto di operazioni.
+datetime GbaInizioGiorno(const datetime t)
+{
+   return (datetime)(((long)t / 86400) * 86400);
+}
+
+bool GbaStessoGiorno(const datetime a, const datetime b)
+{
+   return (GbaInizioGiorno(a) == GbaInizioGiorno(b));
+}
+
+//--- R15: tetto raggiunto se le operazioni APERTE oggi sono gia'
+//    maxGiorno. maxGiorno <= 0 = nessun limite.
+bool GbaTroppeOggi(const int aperteOggi, const int maxGiorno)
+{
+   return (maxGiorno > 0 && aperteOggi >= maxGiorno);
+}
+
 //--- R1..R12: la decisione su una barra chiusa. Ritorna la direzione
 //    da aprire (0 = nessun ordine) e in motivo il perche'.
 int GbaDecidi(const double close1, const double hh, const double ll, const double ema,
               const double atr, const double spread, const double kSpread,
               const int ora, const int hStart, const int hEnd,
               const bool posAperta, const bool giornoBloccato,
-              const bool allowLong, const bool allowShort, int &motivo)
+              const bool allowLong, const bool allowShort,
+              const int aperteOggi, const int maxGiorno, int &motivo)
 {
    int dir = GbaDirezione(close1, hh, ll, ema);
    if(dir == 0)                           { motivo = GBA_NO_SEGNALE; return 0; }
@@ -264,6 +293,7 @@ int GbaDecidi(const double close1, const double hh, const double ll, const doubl
    if(posAperta)                        { motivo = GBA_POSIZIONE;  return 0; }
    if(!GbaOraOk(ora, hStart, hEnd))       { motivo = GBA_ORA;        return 0; }
    if(giornoBloccato)                     { motivo = GBA_GIORNO;     return 0; }
+   if(GbaTroppeOggi(aperteOggi, maxGiorno)) { motivo = GBA_TETTO;    return 0; }
    if(atr <= 0.0)                         { motivo = GBA_DATI;       return 0; }
    if(!GbaSpreadOk(spread, atr, kSpread)) { motivo = GBA_SPREAD;     return 0; }
    motivo = GBA_OK;
@@ -494,7 +524,7 @@ bool GbaPosizioneAperta()
 double GbaPnlGiorno()
 {
    datetime ora = TimeCurrent();
-   datetime ini = (datetime)(((long)ora / 86400) * 86400);   // mezzanotte SERVER
+   datetime ini = GbaInizioGiorno(ora);   // mezzanotte SERVER
    double pnl = 0.0;
    if(HistorySelect(ini, ora + 60))
    {
@@ -519,6 +549,31 @@ double GbaPnlGiorno()
       pnl += PositionGetDouble(POSITION_PROFIT) + PositionGetDouble(POSITION_SWAP);
    }
    return pnl;
+}
+
+//--- R15: operazioni APERTE oggi (giorno SERVER di t) da questo magic
+//    su questo simbolo = deal d'INGRESSO (DEAL_ENTRY_IN) dello storico.
+//    Senza stato: sopravvive a un riavvio del terminale.
+int GbaAperteOggi(const datetime t)
+{
+   int n = 0;
+   if(!HistorySelect(GbaInizioGiorno(t), TimeCurrent() + 60))
+   {
+      Print("[GBA] ERRORE HistorySelect per il tetto giornaliero: ", GetLastError());
+      return n;
+   }
+   int nd = HistoryDealsTotal();
+   for(int i = 0; i < nd; i++)
+   {
+      ulong dk = HistoryDealGetTicket(i);
+      if(dk == 0) continue;
+      if(HistoryDealGetInteger(dk, DEAL_MAGIC) != InpMagic) continue;
+      if(HistoryDealGetString(dk, DEAL_SYMBOL) != g_sym) continue;
+      if(HistoryDealGetInteger(dk, DEAL_ENTRY) != DEAL_ENTRY_IN) continue;
+      if(!GbaStessoGiorno((datetime)HistoryDealGetInteger(dk, DEAL_TIME), t)) continue;
+      n++;
+   }
+   return n;
 }
 
 //--- R11: margine libero sufficiente per il volume all'ingresso.
@@ -633,6 +688,9 @@ void GbaNuovaBarra(const datetime t0)
    bool giorno = false;
    if(InpMaxDailyLoss > 0.0 && GbaDirezione(close1, hh, ll, ema) != 0)
       giorno = GbaGiornoBloccato(GbaPnlGiorno(), InpMaxDailyLoss);
+   int aperteOggi = 0;
+   if(InpMaxTradesPerDay > 0 && GbaDirezione(close1, hh, ll, ema) != 0)
+      aperteOggi = GbaAperteOggi(t0);
 
    MqlDateTime dt;
    TimeToStruct(t0, dt);
@@ -640,7 +698,8 @@ void GbaNuovaBarra(const datetime t0)
    int motivo = GBA_NO_SEGNALE;
    int dir = GbaDecidi(close1, hh, ll, ema, atr, spread, InpSpreadMaxATR,
                        dt.hour, InpHourStart, InpHourEnd,
-                       GbaPosizioneAperta(), giorno, InpAllowLong, InpAllowShort, motivo);
+                       GbaPosizioneAperta(), giorno, InpAllowLong, InpAllowShort,
+                       aperteOggi, InpMaxTradesPerDay, motivo);
    if(motivo == GBA_NO_SEGNALE) return;
    if(motivo >= 0 && motivo < GBA_N_MOTIVI) g_conta[motivo]++;
 
@@ -653,6 +712,10 @@ void GbaNuovaBarra(const datetime t0)
    string lato = (GbaDirezione(close1, hh, ll, ema) > 0 ? "BUY" : "SELL");
    if(dir == 0)
    {
+      //--- R15: ogni segnale scartato per il tetto ha la sua riga, sempre.
+      if(motivo == GBA_TETTO)
+         PrintFormat("[GBA] TETTO GIORNALIERO: segnale %s scartato, %d operazioni aperte oggi (giorno server %s, max %d)",
+                     lato, aperteOggi, TimeToString(GbaInizioGiorno(t0), TIME_DATE), InpMaxTradesPerDay);
       if(InpVerbose || motivo == GBA_SPREAD)
          PrintFormat("[GBA] segnale %s SALTATO (%s) | close %.2f canale %.2f-%.2f EMA %.2f ATR %.2f spread %.2f = %.1f%% ATR (max %.1f%%) | stop/spread %.1fx | ora server %d",
                      lato, GbaMotivoTesto(motivo), close1, ll, hh, ema, atr, spread, spreadPct,
@@ -669,9 +732,10 @@ void GbaStampaConta(const string quando)
 {
    int segnali = 0;
    for(int i = 0; i < GBA_N_MOTIVI; i++) if(i != GBA_NO_SEGNALE) segnali += g_conta[i];
-   PrintFormat("[GBA-CONTA] %s | segnali %d | ingressi tentati %d | scartati: SPREAD %d (spread max %.2f x ATR) | posizione aperta %d | ora %d | perdita giornaliera %d | lato spento %d | ATR non valido %d",
+   PrintFormat("[GBA-CONTA] %s | segnali %d | ingressi tentati %d | scartati: SPREAD %d (spread max %.2f x ATR) | posizione aperta %d | ora %d | perdita giornaliera %d | lato spento %d | ATR non valido %d | tetto giornaliero %d (max %d)",
                quando, segnali, g_conta[GBA_OK], g_conta[GBA_SPREAD], InpSpreadMaxATR, g_conta[GBA_POSIZIONE],
-               g_conta[GBA_ORA], g_conta[GBA_GIORNO], g_conta[GBA_LATO], g_conta[GBA_DATI]);
+               g_conta[GBA_ORA], g_conta[GBA_GIORNO], g_conta[GBA_LATO], g_conta[GBA_DATI],
+               g_conta[GBA_TETTO], InpMaxTradesPerDay);
 }
 
 string GbaMotivoTesto(const int m)
@@ -684,6 +748,7 @@ string GbaMotivoTesto(const int m)
    if(m == GBA_SPREAD)     return "spread oltre il limite";
    if(m == GBA_DATI)       return "ATR non valido";
    if(m == GBA_LATO)       return "lato spento";
+   if(m == GBA_TETTO)      return "tetto di operazioni del giorno";
    return "?";
 }
 
@@ -776,6 +841,7 @@ int OnInit()
    if(InpBE_TriggerATR < 0.0)                      err += " InpBE_TriggerATR";
    if(InpSlippagePoints < 0)                       err += " InpSlippagePoints";
    if(InpMaxDailyLoss < 0.0)                       err += " InpMaxDailyLoss";
+   if(InpMaxTradesPerDay < 0)                      err += " InpMaxTradesPerDay";
    if(InpHourStart < 0 || InpHourStart > 23)       err += " InpHourStart";
    if(InpHourEnd < 0 || InpHourEnd > 24)           err += " InpHourEnd";
    if(InpLotMode != 0 && InpLotMode != 1)          err += " InpLotMode";
@@ -839,7 +905,7 @@ void OnTick()
 //==================================================================
 void GbaLogAvvio()
 {
-   PrintFormat("[GBA] AVVIO v1.00 | InpSymbol=\"%s\" -> simbolo %s | InpSignalTF=%s -> %s | InpTrendTF=%s -> %s | InpAtrTF=%s -> %s",
+   PrintFormat("[GBA] AVVIO v1.10 | InpSymbol=\"%s\" -> simbolo %s | InpSignalTF=%s -> %s | InpTrendTF=%s -> %s | InpAtrTF=%s -> %s",
                InpSymbol, g_sym, EnumToString(InpSignalTF), EnumToString(g_tfSig),
                EnumToString(InpTrendTF), EnumToString(g_tfTrend), EnumToString(InpAtrTF), EnumToString(g_tfAtr));
    PrintFormat("[GBA] SEGNALE | InpChannelBars=%d (esclusa la barra di segnale) | InpEmaPeriod=%d | InpAtrPeriod=%d | InpSpreadMaxATR=%.3f",
@@ -854,8 +920,9 @@ void GbaLogAvvio()
                (InpTrailAtrMode == 1 ? "ATR della barra di segnale, fisso" : "ATR dell'ultima barra chiusa"), InpTimeExitBars);
    PrintFormat("[GBA] BREAKEVEN | InpUseBreakeven=%s | InpBE_TriggerATR=%.2f | InpBE_OffsetATR=%.2f",
                (InpUseBreakeven ? "true" : "false"), InpBE_TriggerATR, InpBE_OffsetATR);
-   PrintFormat("[GBA] ESECUZIONE | InpSlippagePoints=%d | InpMaxDailyLoss=%.2f%s | InpCheckFreeMargin=%s | InpHourStart=%d | InpHourEnd=%d%s",
+   PrintFormat("[GBA] ESECUZIONE | InpSlippagePoints=%d | InpMaxDailyLoss=%.2f%s | InpMaxTradesPerDay=%d%s | InpCheckFreeMargin=%s | InpHourStart=%d | InpHourEnd=%d%s",
                InpSlippagePoints, InpMaxDailyLoss, (InpMaxDailyLoss > 0.0 ? "" : " (spenta)"),
+               InpMaxTradesPerDay, (InpMaxTradesPerDay > 0 ? " (giorno SERVER)" : " (nessun limite)"),
                (InpCheckFreeMargin ? "true" : "false"), InpHourStart, InpHourEnd,
                ((InpHourStart == InpHourEnd || (InpHourStart == 0 && InpHourEnd == 24)) ? " (nessun filtro orario)" : ""));
    PrintFormat("[GBA] RISCHIO | InpLotMode=%d (%s) | InpLots=%.2f | InpRiskPct=%.2f (SEGNAPOSTO DA FIRMARE)",
@@ -868,7 +935,7 @@ void GbaLogAvvio()
                IntegerToString(InpMagic), InpComment, InpComment, InpComment,
                (InpUsaGuardian ? "true" : "false"), (InpVerbose ? "true" : "false"), (InpAutoTest ? "true" : "false"));
    Print("[GBA] OROLOGIO | le ore sono ORA SERVER. BCM = UTC+1 fisso: d'estate ora italiana - 1, d'inverno = ora italiana. ",
-         "La perdita giornaliera si azzera a mezzanotte SERVER.");
+         "La perdita giornaliera e il tetto di operazioni si azzerano a mezzanotte SERVER.");
    if(g_tfSig != PERIOD_M1 && g_tfSig != PERIOD_M3 && g_tfSig != PERIOD_M5)
       Print("[GBA] ATTENZIONE: TF del segnale fuori dagli assi dichiarati (M1/M3/M5): ", EnumToString(g_tfSig));
    if(InpLotMode == 1 && InpRiskPct > 1.0)
@@ -930,32 +997,50 @@ int GbaAutotestNucleo()
    GbaCaso("giorno: -99,99 con tetto 100 -> libero",   !GbaGiornoBloccato(-99.99, 100.0), fall);
    GbaCaso("giorno: tetto 0 -> spento",                !GbaGiornoBloccato(-1000000.0, 0.0), fall);
 
+   //--- R15 TETTO DI OPERAZIONI E MEZZANOTTE SERVER
+   //    1767225600 = 2026.01.01 00:00:00 (ora server)
+   GbaCaso("tetto: 2 aperte con max 2 -> bloccato",     GbaTroppeOggi(2, 2), fall);
+   GbaCaso("tetto: 1 aperta con max 2 -> libero",       !GbaTroppeOggi(1, 2), fall);
+   GbaCaso("tetto: max 0 = nessun limite",              !GbaTroppeOggi(1000, 0), fall);
+   GbaCaso("mezzanotte: 12:34:56 -> 00:00:00",          GbaInizioGiorno((datetime)(1767225600 + 45296)) == (datetime)1767225600, fall);
+   GbaCaso("mezzanotte: 23:59:59 e 00:00:00 dopo sono giorni DIVERSI",
+           !GbaStessoGiorno((datetime)(1767225600 + 86399), (datetime)(1767225600 + 86400)), fall);
+   GbaCaso("mezzanotte: 00:00:00 e 23:59:59 stesso giorno", GbaStessoGiorno((datetime)1767225600, (datetime)(1767225600 + 86399)), fall);
+
    //--- DECISIONE COMPLETA (ordine dei cancelli)
    int mot = -1;
-   int d1 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, mot);
+   int d1 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, 0, 0, mot);
    GbaCaso("decisione: BUY pulito", d1 == 1 && mot == GBA_OK, fall);
-   int d2 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, mot);
+   int d2 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, 0, 0, mot);
    GbaCaso("decisione: SELL pulito", d2 == -1 && mot == GBA_OK, fall);
-   int d3 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, true, false, true, true, mot);
+   int d3 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, true, false, true, true, 0, 0, mot);
    GbaCaso("decisione: posizione aperta -> niente", d3 == 0 && mot == GBA_POSIZIONE, fall);
-   int d4 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 12, 22, 6, false, false, true, true, mot);
+   int d4 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 12, 22, 6, false, false, true, true, 0, 0, mot);
    GbaCaso("decisione: fuori orario -> niente", d4 == 0 && mot == GBA_ORA, fall);
-   int d5 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, true, true, true, mot);
+   int d5 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, true, true, true, 0, 0, mot);
    GbaCaso("decisione: giornata bloccata -> niente", d5 == 0 && mot == GBA_GIORNO, fall);
-   int d6 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.06, 0.05, 3, 0, 24, false, false, true, true, mot);
+   int d6 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.06, 0.05, 3, 0, 24, false, false, true, true, 0, 0, mot);
    GbaCaso("decisione: spread largo -> niente", d6 == 0 && mot == GBA_SPREAD, fall);
-   int d7 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 0.0, 0.03, 0.0, 3, 0, 24, false, false, true, true, mot);
+   int d7 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 0.0, 0.03, 0.0, 3, 0, 24, false, false, true, true, 0, 0, mot);
    GbaCaso("decisione: ATR nullo -> niente anche a filtro spread spento", d7 == 0 && mot == GBA_DATI, fall);
-   int d8 = GbaDecidi(2005.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, mot);
+   int d8 = GbaDecidi(2005.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, 0, 0, mot);
    GbaCaso("decisione: dentro il canale -> nessun segnale", d8 == 0 && mot == GBA_NO_SEGNALE, fall);
-   int d9 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, false, true, mot);
+   int d9 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, false, true, 0, 0, mot);
    GbaCaso("decisione: BUY con LONG spento -> niente", d9 == 0 && mot == GBA_LATO, fall);
-   int d10 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, false, mot);
+   int d10 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, false, 0, 0, mot);
    GbaCaso("decisione: SELL con SHORT spento -> niente", d10 == 0 && mot == GBA_LATO, fall);
-   int d11 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, false, true, mot);
+   int d11 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, false, true, 0, 0, mot);
    GbaCaso("decisione: SELL con LONG spento -> passa", d11 == -1 && mot == GBA_OK, fall);
-   int d12 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.30, 0.35, 3, 0, 24, false, false, true, true, mot);
+   int d12 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.30, 0.35, 3, 0, 24, false, false, true, true, 0, 0, mot);
    GbaCaso("decisione: asse spread 0,35 -> spread 30% ATR passa", d12 == 1 && mot == GBA_OK, fall);
+   int d13 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, 3, 3, mot);
+   GbaCaso("decisione: 3 aperte oggi con tetto 3 -> niente", d13 == 0 && mot == GBA_TETTO, fall);
+   int d14 = GbaDecidi(1992.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, 2, 3, mot);
+   GbaCaso("decisione: 2 aperte oggi con tetto 3 -> passa", d14 == -1 && mot == GBA_OK, fall);
+   int d15 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, false, false, true, true, 50, 0, mot);
+   GbaCaso("decisione: tetto 0 -> nessun effetto anche a 50 aperte", d15 == 1 && mot == GBA_OK, fall);
+   int d16 = GbaDecidi(2009.0, 2008.0, 1993.0, 2000.0, 1.0, 0.03, 0.05, 3, 0, 24, true, false, true, true, 3, 3, mot);
+   GbaCaso("decisione: posizione aperta viene prima del tetto", d16 == 0 && mot == GBA_POSIZIONE, fall);
 
    //--- R7 USCITA A TEMPO
    GbaCaso("tempo: 47 barre su 48 -> resta",  !GbaUscitaTempo(47, 48), fall);
@@ -1013,7 +1098,7 @@ void AutoTestGba()
    int fall = GbaAutotestNucleo();
    int fallG = ABTG_AutotestGuardia();
    if(fall == 0 && fallG == 0)
-      Print("[GBA][AUTOTEST] VERDETTO: PASS (canale, lato EMA, spread, ora, perdita giornaliera, trailing, tempo, breakeven, lotti, Guardian)");
+      Print("[GBA][AUTOTEST] VERDETTO: PASS (canale, lato EMA, spread, ora, perdita giornaliera, tetto giornaliero, trailing, tempo, breakeven, lotti, Guardian)");
    else
       PrintFormat("[GBA][AUTOTEST] *** FAIL *** nucleo %d casi falliti, Guardian %d -- NON mettere in campo.", fall, fallG);
 }
