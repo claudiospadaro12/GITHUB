@@ -66,6 +66,14 @@
 //|  inutile). CaricaDati e le righe del tocco NON sono toccate.     |
 //|  NON compilato qui (nessun MetaEditor): report/NATCLA_V110_STOP_ |
 //|  2026-10-09.md dice cosa manca.                                  |
+//|  v1.11 (09/10, Claudio sulla domanda 7: "Proviamole entrambe"):  |
+//|  terzo valore InpStopModo = OLTRE_PIU_ESTERNA. Nei setup         |
+//|  Supertrend lo stop e' InpStopOltreU u oltre la PIU' esterna fra |
+//|  ST3,5 ed EMA200 (long: la piu' bassa; short: la piu' alta), fra |
+//|  le linee dal lato del setup; nessuna dal lato del setup = setup |
+//|  scartato (come la v1.10). Linea EMA200 (M2): resta la EMA200.   |
+//|  GEOMETRIA_ATTUALE e OLTRE_LINEA_ESTERNA identiche alla v1.10.   |
+//|  Stessi 3 campi CSV (stop_modo = 2). NON compilato qui.          |
 //|                                                                  |
 //|  MAPPA REGOLA -> CODICE (sigle della specifica, par. 1)          |
 //|   I1-I3 Supertrend HL2 +/- k x ATR10 ......... NC_STCore (puro)  |
@@ -93,6 +101,8 @@
 //|   X1-X4 stop comune ........................ NC_Stop (puro)      |
 //|   X1 v1.10 stop oltre la linea esterna ..... NC_StopSetup,       |
 //|              NC_FamigliaStop (puri), CalcolaLineaEsterna         |
+//|   X1 v1.11 stop oltre la piu' esterna ...... NC_PiuEsterna (puro)|
+//|              LineaPiuEsternaPrezzo                               |
 //|   X5-X7 take profit, R/R ................... NC_TpFisso/NC_TpEma/|
 //|                                              NC_OrdineValido     |
 //|   X8 parziale/pareggio al TP1 .............. GestisciTP1         |
@@ -108,10 +118,10 @@
 //+------------------------------------------------------------------+
 #property copyright "Ea Nat&Cla - progetto Claudio (ABTG)"
 #property description "Ea Nat&Cla: modo AUDIO (collega) / motore solo EMA200 (audio WA0092). Modo PDF ESCLUSO da Claudio il 07/10/2026. Specifica report/NATCLA_SPECIFICA_2026-10-07.md. Rischio 0,25% = SEGNAPOSTO da firmare da Claudio."
-#property version   "1.10"
+#property version   "1.11"
 #property strict
 
-#define NC_VER "1.10"
+#define NC_VER "1.11"
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -222,7 +232,8 @@ enum ENUM_NC_TP
 enum ENUM_NC_STOPMODO
   {
    NC_STOP_GEOMETRIA_ATTUALE=0,  // GEOMETRIA_ATTUALE (v1.05: InpSLCriterio + InpSLBuffer)
-   NC_STOP_OLTRE_LINEA_ESTERNA=1 // OLTRE_LINEA_ESTERNA (Claudio 08/10: N u oltre ST3,5 / EMA200)
+   NC_STOP_OLTRE_LINEA_ESTERNA=1,// OLTRE_LINEA_ESTERNA (Claudio 08/10: N u oltre ST3,5 / EMA200)
+   NC_STOP_OLTRE_PIU_ESTERNA=2   // OLTRE_PIU_ESTERNA (v1.11: N u oltre la piu' esterna fra ST3,5 ed EMA200)
   };
 
 //==================================================================
@@ -308,7 +319,7 @@ input int    InpSLEstremoBarre  = 3;    // "Minimo recente": barre (tocco + 2 pr
 //--- v1.10 [decisione di Claudio 08/10/2026, data/natcla/LEGGIMI.md risposta 2]: "20 punti oltre l'EMA200,
 //    oppure 20 punti oltre il Supertrend 3,5" (unita' = InpUnita: pip sul forex, punti di prezzo su indici e
 //    metalli). Default GEOMETRIA_ATTUALE = nessun cambiamento rispetto alla v1.05 (confronto con/senza).
-input ENUM_NC_STOPMODO InpStopModo = NC_STOP_GEOMETRIA_ATTUALE; // Regola di stop: GEOMETRIA_ATTUALE (v1.05) / OLTRE_LINEA_ESTERNA (Claudio 08/10)
+input ENUM_NC_STOPMODO InpStopModo = NC_STOP_GEOMETRIA_ATTUALE; // Regola di stop: GEOMETRIA_ATTUALE (v1.05) / OLTRE_LINEA_ESTERNA (Claudio 08/10) / OLTRE_PIU_ESTERNA (v1.11)
 input double InpStopOltreU      = 20.0; // OLTRE_LINEA_ESTERNA: stop a N u oltre ST3,5 (linee Supertrend) / EMA200 (linea EMA200) [FONTE Claudio 08/10]
 input ENUM_NC_TP InpTPCriterio  = NC_TP_DA_MODALITA; // Criterio di take profit (AUDIO dalla linea, PDF EMA14/EMA89) [X5]
 input double InpTPDistanza      = 10;   // TP fisso in u [FONTE A-R22: "10 pip / 10 punti"]
@@ -628,7 +639,7 @@ double NC_StopSetup(const int modo,const int criterio,const int s,const double l
                     const double oltre,int &esito)
   {
    esito=0;
-   if(modo!=1) return NC_Stop(criterio,s,linea,profondo,estremo,buf);
+   if(modo!=1 && modo!=2) return NC_Stop(criterio,s,linea,profondo,estremo,buf);
    if(dirEst!=(double)s || !(lineaEst>0.0)) { esito=1; return 0.0; }
    double oltreLinea=lineaEst-s*oltre;
    double x4=profondo-s*buf;
@@ -637,6 +648,23 @@ double NC_StopSetup(const int modo,const int criterio,const int s,const double l
    if(s<0 && oltreLinea<x4) { r=x4; esito=2; }
    if(!(r>0.0)) { esito=1; return 0.0; }
    return r;
+  }
+
+//--- v1.11 [Claudio 09/10, "Proviamole entrambe"]: la linea PIU' ESTERNA fra due candidate (ST3,5 ed EMA200)
+//    dal lato del setup s. Candidata valida = direzione == s e valore > 0 (dal lato del setup); long: la piu'
+//    BASSA, short: la piu' ALTA. dirOut = s se c'e' almeno una candidata valida, 0 se nessuna (il chiamante passa
+//    0 a NC_StopSetup -> esito 1, setup scartato: la stessa scelta della v1.10 per la linea discorde).
+//    Una linea dal lato opposto sta oltre il prezzo, quindi non sarebbe mai la piu' esterna: escluderla cambia
+//    il risultato solo quando TUTTE e due sono dal lato opposto (collaudato sull'oro).
+double NC_PiuEsterna(const int s,const double v1,const double d1,const double v2,const double d2,double &dirOut)
+  {
+   bool ok1=(d1==(double)s && v1>0.0);
+   bool ok2=(d2==(double)s && v2>0.0);
+   dirOut=(ok1 || ok2) ? (double)s : 0.0;
+   if(ok1 && ok2) return (s>0) ? MathMin(v1,v2) : MathMax(v1,v2);
+   if(ok1) return v1;
+   if(ok2) return v2;
+   return 0.0;
   }
 
 //--- X5: TP fisso. criterio 0 = dalla linea (WA0092), 1 = dal riempimento.
@@ -871,6 +899,7 @@ double gO[], gH[], gL[], gC[], gEma[], gAtrN[], gAdx[];
 datetime gT[];
 double gLV[], gLD[], gWa[], gWu[], gWd[];   // linea in esame: valore, direzione, lavoro
 double gXV[], gXD[], gXa[], gXu[], gXdn[];  // v1.10: linea ESTERNA della famiglia (stop): valore, direzione, lavoro
+double gXE[];                                // v1.11: direzione della EMA200 (candidata di OLTRE_PIU_ESTERNA nei setup Supertrend)
 int    gN=0;
 datetime gTbar0=0, gUltimaBarra=0;
 
@@ -1152,7 +1181,7 @@ bool Risolvi(string &err)
    gU=CalcolaUnita(gUDescr);
    if(!(gU>0)){ err="unita' u non valida (InpUnitaManuale <= 0?)"; return false; }
    //--- v1.10: la regola nuova di stop sostituisce InpSLCriterio. Due regole di stop insieme = ambiguo: rifiutato.
-   if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)
+   if(InpStopModo!=NC_STOP_GEOMETRIA_ATTUALE)
      {
       if(!(InpStopOltreU>0)){ err="InpStopOltreU <= 0 con InpStopModo=OLTRE_LINEA_ESTERNA"; return false; }
       if(InpSLCriterio!=NC_SL_DA_MODALITA){ err="InpSLCriterio a mano con InpStopModo=OLTRE_LINEA_ESTERNA: due regole di stop, quale vale e' ambiguo"; return false; }
@@ -1390,6 +1419,7 @@ void CalcolaLineaEsterna(const int L)
   {
    int F=NC_FamigliaStop(L);
    ArrayResize(gXV,gN); ArrayResize(gXD,gN); ArrayResize(gXa,gN); ArrayResize(gXu,gN); ArrayResize(gXdn,gN);
+   if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA){ ArrayResize(gXE,gN); NC_EmaDir(gC,gEma,gN,gXE); }
    if(F==NC_LEMA)
      {
       for(int i=0;i<gN;i++) gXV[i]=gEma[i];
@@ -1406,10 +1436,20 @@ double LineaEsternaPrezzo(const int k,const int s)
    return gXV[k]+s*InpPlaceboAtr*gAtrN[k];
   }
 
+//--- v1.11: OLTRE_PIU_ESTERNA. Linea EMA200 (M2): la EMA200 stessa (come OLTRE_LINEA_ESTERNA). Linee Supertrend:
+//    la piu' esterna fra ST3,5 (gXV/gXD) ed EMA200 (gEma/gXE), tutte e due in vigore per la barra dopo, col placebo
+//    applicato a entrambe come in LineaEsternaPrezzo. dir = s se esiste, 0 se nessuna e' dal lato del setup.
+double LineaPiuEsternaPrezzo(const int L,const int k,const int s,double &dir)
+  {
+   if(NC_FamigliaStop(L)==NC_LEMA){ dir=gXD[k]; return LineaEsternaPrezzo(k,s); }
+   return NC_PiuEsterna(s,LineaEsternaPrezzo(k,s),gXD[k],gEma[k]+s*InpPlaceboAtr*gAtrN[k],gXE[k],dir);
+  }
+
 //--- v1.10: descrizione della regola di stop (riga AVVIO, #cfg;Stop)
 string StopDescr()
   {
    if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA) return "OLTRE_LINEA_ESTERNA "+DoubleToString(InpStopOltreU,2)+" u";
+   if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA) return "OLTRE_PIU_ESTERNA "+DoubleToString(InpStopOltreU,2)+" u";
    return "GEOMETRIA_ATTUALE";
   }
 
@@ -1459,6 +1499,7 @@ void OnNewBar()
         }
       CalcolaLinea(L);
       if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA) CalcolaLineaEsterna(L);
+      if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA) CalcolaLineaEsterna(L);
       if(gIngresso==0) ValutaScala(L);
       else ValutaPdf(L);
      }
@@ -1555,6 +1596,7 @@ void ArmaScala(const int L,const int s,const int last,const int toccoN,const dat
    double lest=0, dest=0;
    int es=0;
    if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){ lest=NormPrezzo(LineaEsternaPrezzo(last,s)); dest=gXD[last]; }
+   if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA){ lest=NormPrezzo(LineaPiuEsternaPrezzo(L,last,s,dest)); }
    double sl=NormPrezzo(NC_StopSetup((int)InpStopModo,gSLCrit,s,lv,p[2],Estremo(s,last),InpSLBuffer*gU,lest,dest,InpStopOltreU*gU,es));
    if(es==1){ gImb[IMB_O_STOPEST]++; if(!gArmatoPrima[L]) Log(StringFormat("SCARTATO %s %s: linea esterna dello stop discorde o non calcolabile (dir %.0f, linea %s)",gTag[L],Lato(s),dest,P(lest))); gArmatoPrima[L]=false; Esito(IMB_NESSUNORD); return; }
    if(es==2) gImb[IMB_O_STOPX4]++;
@@ -2236,6 +2278,7 @@ void ScriviConta(const int L,const int last,const int nEp,const bool nuovo,const
    double lest=0, dest=0;
    int es=0;
    if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){ lest=LineaEsternaPrezzo(last,s); dest=gXD[last]; }
+   if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA){ lest=LineaPiuEsternaPrezzo(L,last,s,dest); }
    double sl=NC_StopSetup((int)InpStopModo,gSLCrit,s,lv0,p[2],Estremo(s,last),InpSLBuffer*gU,lest,dest,InpStopOltreU*gU,es);
    double tp[3];
    for(int i=0;i<3;i++) tp[i]=NC_TpFisso((gTPCrit==1) ? 1 : 0,s,lv0,p[i],InpTPDistanza*gU);

@@ -49,7 +49,12 @@ a tavolino, e si dice cosa resta fuori.
      un simbolo della v1.10 (guardia del diff, con contro-esempio). (b) OLTRE_LINEA_ESTERNA: casi a mano (long/short, linea
      esterna discorde, dentro la scala = X4, stop <= 0) + specchio Python INDIPENDENTE su ogni barra H1 dell'oro, 4 linee,
      famiglia ST3,5 / EMA200 calcolata dallo specchio py_stcore / py_ema (non dal C++). (c) invarianti di raccordo 32-41.
-  M) MUTANTI CIECHI: 101 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic + T1-T7 della v1.05: il tocco degli handle + V1-V21 della v1.10: la regola di stop OLTRE_LINEA_ESTERNA) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
+  W) v1.11 OLTRE_PIU_ESTERNA (Claudio 09/10 "Proviamole entrambe"): NC_PiuEsterna VERA in C++ (casi a mano: long/short, EMA o ST3,5
+     dal lato opposto, tutte e due opposte, non calcolabili) + specchio Python sull'oro (scelta della linea e stop, 4 linee) + la
+     lettura LETTERALE ("la piu' bassa/alta delle due") coincide dove almeno una linea e' dal lato del setup. IDENTITA' v1.10 -> v1.11:
+     NC_StopSetup del pin v1.10 (aeebb11d) e della v1.11 compilate fianco a fianco, modi 0 e 1, stessa stringa %a su casi casuali e
+     sull'oro (con contro-esempio), e guardia del diff v1.10 -> v1.11. Mutanti W1-W15.
+  M) MUTANTI CIECHI: 116 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic + T1-T7 della v1.05: il tocco degli handle + V1-V21 della v1.10: la regola di stop OLTRE_LINEA_ESTERNA + W1-W15 della v1.11: OLTRE_PIU_ESTERNA) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
      controllo. Un mutante che passa = buco del collaudo.
@@ -707,8 +712,8 @@ def invarianti_raccordo(src, code, bag):
         bag.append("RACCORDO v1.05: l'array del tocco non e' 'double tocco[1]' usato SOLO dai tocchi in CaricaDati")
     if "if(BarsCalculated(hEma200)<n+1||BarsCalculated(hAtrN)<n+1||BarsCalculated(hAdx)<n+1)returnfalse;" not in ns(cdm) or "if(n<NC_BARRE_MIN)returnfalse;" not in ns(cdm):
         bag.append("RACCORDO v1.05: i controlli di sempre di CaricaDati (n minimo, BarsCalculated dei tre handle) non sono intatti")
-    if '#define NC_VER "1.10"' not in src or not re.search(r'#property\s+version\s+"1\.10"', src):
-        bag.append("RACCORDO v1.10: NC_VER / #property version non sono 1.10")
+    if '#define NC_VER "1.11"' not in src or not re.search(r'#property\s+version\s+"1\.11"', src):
+        bag.append("RACCORDO v1.11: NC_VER / #property version non sono 1.11")
     invarianti_stop(src, code, stc, bag)
 
 
@@ -717,22 +722,24 @@ def invarianti_stop(src, code, stc, bag):
     sulle barre vere; qui si prova che il codice non puro le chiama coi dati giusti e che in GEOMETRIA_ATTUALE non fa niente di nuovo."""
     ns = lambda t: re.sub(r"\s+", "", t or "")
     # (32) enum: GEOMETRIA_ATTUALE=0 (il default), OLTRE_LINEA_ESTERNA=1 (NC_StopSetup riconosce SOLO 1)
-    if not re.search(r"enumENUM_NC_STOPMODO\{NC_STOP_GEOMETRIA_ATTUALE=0,NC_STOP_OLTRE_LINEA_ESTERNA=1\}", ns(code)):
-        bag.append("RACCORDO v1.10: ENUM_NC_STOPMODO non e' GEOMETRIA_ATTUALE=0, OLTRE_LINEA_ESTERNA=1")
+    if not re.search(r"enumENUM_NC_STOPMODO\{NC_STOP_GEOMETRIA_ATTUALE=0,NC_STOP_OLTRE_LINEA_ESTERNA=1,NC_STOP_OLTRE_PIU_ESTERNA=2\}", ns(code)):
+        bag.append("RACCORDO v1.11: ENUM_NC_STOPMODO non e' GEOMETRIA_ATTUALE=0, OLTRE_LINEA_ESTERNA=1, OLTRE_PIU_ESTERNA=2")
     # (33) ArmaScala: linea esterna e direzione lette SOLO in OLTRE, alla barra 'last', normalizzate come lv; esito 1 = SCARTO prima
     #      di ogni ordine (con Esito e return), esito 2 contato; il setup registra linea esterna ed esito.
     ar = ns(corpo(stc, "ArmaScala"))
     for a in ("doublelest=0,dest=0;", "intes=0;",
               "if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){lest=NormPrezzo(LineaEsternaPrezzo(last,s));dest=gXD[last];}",
-              "if(es==2)gImb[IMB_O_STOPX4]++;", "gSet[L].lineaStop=lest;gSet[L].stopEsito=es;"):
+              "if(es==2)gImb[IMB_O_STOPX4]++;", "gSet[L].lineaStop=lest;gSet[L].stopEsito=es;",
+              "if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA){lest=NormPrezzo(LineaPiuEsternaPrezzo(L,last,s,dest));}"):
         if ar.count(a) != 1:
-            bag.append("RACCORDO v1.10: ArmaScala senza '%s'" % a)
+            bag.append("RACCORDO v1.10/v1.11: ArmaScala senza '%s'" % a)
     m33 = re.search(r"if\(es==1\)\{gImb\[IMB_O_STOPEST\]\+\+;.*?gArmatoPrima\[L\]=false;Esito\(IMB_NESSUNORD\);return;\}", ar)
     if not m33 or not (0 <= m33.start() < ar.find("ValidaOrdine(")):
         bag.append("RACCORDO v1.10: ArmaScala non SCARTA il setup con esito 1 (Esito IMB_NESSUNORD + return) PRIMA di validare gli ordini")
     # (34) ScriviConta: stessa lettura (senza NormPrezzo, come la v1.05), stop_ped a 0 se esito 1, tre colonne in coda
     sc = ns(corpo(stc, "ScriviConta"))
     for a in ("doublelest=0,dest=0;", "intes=0;", "if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){lest=LineaEsternaPrezzo(last,s);dest=gXD[last];}",
+              "if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA){lest=LineaPiuEsternaPrezzo(L,last,s,dest);}",
               'D((ped>0&&es!=1)?MathAbs(p[0]-sl)/ped:0,1)', 'D((ped>0&&es!=1)?MathAbs(p[1]-sl)/ped:0,1)', 'D((ped>0&&es!=1)?MathAbs(p[2]-sl)/ped:0,1)',
               '"0;0;0;0;0;SOLO_CONTA;"+IntegerToString((int)InpStopModo)+";"+P(lest)+";"+IntegerToString(es);'):
         if sc.count(a) != 1:
@@ -744,39 +751,50 @@ def invarianti_stop(src, code, stc, bag):
         bag.append("RACCORDO v1.10: intestazione del CSV senza ';stop_modo;linea_stop;stop_esito' IN CODA dopo 'motivo'")
     # (36) OnNewBar: la linea esterna si calcola SOLO in OLTRE, DOPO la linea di setup e PRIMA della valutazione
     nb = ns(corpo(code, "OnNewBar"))
-    if "CalcolaLinea(L);if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)CalcolaLineaEsterna(L);if(gIngresso==0)ValutaScala(L);" not in nb:
-        bag.append("RACCORDO v1.10: OnNewBar non calcola la linea esterna (solo in OLTRE) fra CalcolaLinea e ValutaScala")
+    if ("CalcolaLinea(L);if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)CalcolaLineaEsterna(L);if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA)CalcolaLineaEsterna(L);"
+            "if(gIngresso==0)ValutaScala(L);") not in nb:
+        bag.append("RACCORDO v1.10/v1.11: OnNewBar non calcola la linea esterna (solo nei due modi OLTRE) fra CalcolaLinea e ValutaScala")
     # (37) CalcolaLineaEsterna: famiglia da NC_FamigliaStop; EMA200 = gEma + NC_EmaDir; Supertrend = NC_STCore col MOLTIPLICATORE
     #      della famiglia (gMultLinea[F] = InpStMult3) e lo STESSO periodo ATR della linea di setup; array PROPRI (gLV/gLD intatti)
     ce = ns(corpo(code, "CalcolaLineaEsterna"))
     for a in ("intF=NC_FamigliaStop(L);", "if(F==NC_LEMA){for(inti=0;i<gN;i++)gXV[i]=gEma[i];NC_EmaDir(gC,gEma,gN,gXD);return;}",
-              "NC_STCore(gH,gL,gC,gN,0,InpStAtrPeriodo,gMultLinea[F],gXa,gXu,gXdn,gXD,gXV);"):
+              "NC_STCore(gH,gL,gC,gN,0,InpStAtrPeriodo,gMultLinea[F],gXa,gXu,gXdn,gXD,gXV);",
+              "if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA){ArrayResize(gXE,gN);NC_EmaDir(gC,gEma,gN,gXE);}"):
         if a not in ce:
             bag.append("RACCORDO v1.10: CalcolaLineaEsterna senza '%s'" % a)
     if re.search(r"\bg(LV|LD|Wa|Wu|Wd)\b", ce):
         bag.append("RACCORDO v1.10: CalcolaLineaEsterna tocca gli array della linea di setup (gLV/gLD/gWa/gWu/gWd)")
     if "returngXV[k]+s*InpPlaceboAtr*gAtrN[k];" not in ns(corpo(code, "LineaEsternaPrezzo")):
         bag.append("RACCORDO v1.10: LineaEsternaPrezzo non e' gXV[k] + s x placebo x ATR[k] (stessa regola di LineaPrezzo)")
+    # (42) v1.11: LineaPiuEsternaPrezzo = EMA200 sola in M2; nei Supertrend NC_PiuEsterna fra ST3,5 (gXV/gXD, placebo) ed EMA200
+    #      (gEma/gXE, STESSO placebo), alla barra k e col lato s
+    if ns(corpo(code, "LineaPiuEsternaPrezzo")) != ns("doubleLineaPiuEsternaPrezzo(constintL,constintk,constints,double&dir){if(NC_FamigliaStop(L)==NC_LEMA){dir=gXD[k];returnLineaEsternaPrezzo(k,s);}"
+                                                      "returnNC_PiuEsterna(s,LineaEsternaPrezzo(k,s),gXD[k],gEma[k]+s*InpPlaceboAtr*gAtrN[k],gXE[k],dir);}"):
+        bag.append("RACCORDO v1.11: LineaPiuEsternaPrezzo non e' (M2: EMA200 sola; Supertrend: NC_PiuEsterna fra ST3,5 ed EMA200 col placebo su entrambe)")
     # (38) gXD/gXV letti SOLO dentro i rami OLTRE (in GEOMETRIA_ATTUALE non sono nemmeno dimensionati)
-    letti = [m.start() for m in re.finditer(r"\bgX[VD]\s*\[\s*[^\]\s]", code)]      # [] vuote = dichiarazione, non lettura
-    for fn in ("CalcolaLineaEsterna", "LineaEsternaPrezzo", "ArmaScala", "ScriviConta"):
+    letti = [m.start() for m in re.finditer(r"\bgX[VDE]\s*\[\s*[^\]\s]", code)]      # [] vuote = dichiarazione, non lettura
+    for fn in ("CalcolaLineaEsterna", "LineaEsternaPrezzo", "LineaPiuEsternaPrezzo", "ArmaScala", "ScriviConta"):
         b = corpo(code, fn) or ""
         k = code.find(b) if b else -1
         letti = [x for x in letti if not (k >= 0 and k <= x < k + len(b))]
     if letti:
-        bag.append("RACCORDO v1.10: gXV/gXD letti fuori dalle quattro funzioni della regola di stop (%d punti)" % len(letti))
+        bag.append("RACCORDO v1.10/v1.11: gXV/gXD/gXE letti fuori dalle cinque funzioni della regola di stop (%d punti)" % len(letti))
     # (39) Risolvi: in OLTRE rifiuta InpStopOltreU <= 0 e InpSLCriterio impostato a mano (due regole di stop)
     rb = ns(corpo(stc, "Risolvi"))
-    for a in ('if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){if(!(InpStopOltreU>0)){err=', 'if(InpSLCriterio!=NC_SL_DA_MODALITA){err='):
+    for a in ('if(InpStopModo!=NC_STOP_GEOMETRIA_ATTUALE){if(!(InpStopOltreU>0)){err=', 'if(InpSLCriterio!=NC_SL_DA_MODALITA){err='):
         if a not in rb:
             bag.append("RACCORDO v1.10: Risolvi senza '%s'" % a)
     # (40) riga d'avvio e #cfg;Stop: il modo stampato e' quello dell'input
     sd = ns(corpo(stc, "StopDescr"))
-    if sd != ns('stringStopDescr(){if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)return"OLTRE_LINEA_ESTERNA "+DoubleToString(InpStopOltreU,2)+" u";return"GEOMETRIA_ATTUALE";}'):
+    if sd != ns('stringStopDescr(){if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)return"OLTRE_LINEA_ESTERNA "+DoubleToString(InpStopOltreU,2)+" u";'
+                'if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA)return"OLTRE_PIU_ESTERNA "+DoubleToString(InpStopOltreU,2)+" u";return"GEOMETRIA_ATTUALE";}'):
         bag.append("RACCORDO v1.10: StopDescr non stampa il modo dell'input (OLTRE_LINEA_ESTERNA N u / GEOMETRIA_ATTUALE)")
     if 'Cfg("Stop",StopDescr(),' not in ns(corpo(stc, "StampaConfigurazione")):
         bag.append("RACCORDO v1.10: manca la riga #cfg;Stop nel CSV / CFG Stop nel Giornale")
     # (41) EntraPdf (codice morto) NON chiama la regola nuova: il PDF resta escluso e la sua geometria e' quella della v1.04
+    # (43) v1.11: NC_StopSetup tratta il modo 2 come il modo 1 (stessa regola, linea scelta dal chiamante); ogni altro modo e' NC_Stop
+    if "if(modo!=1&&modo!=2)returnNC_Stop(criterio,s,linea,profondo,estremo,buf);" not in ns(corpo(code, "NC_StopSetup")):
+        bag.append("RACCORDO v1.11: NC_StopSetup non riserva NC_Stop ai modi diversi da 1 e 2")
     if "NC_StopSetup" in (corpo(code, "EntraPdf") or ""):
         bag.append("RACCORDO v1.10: EntraPdf (codice morto del PDF) chiama NC_StopSetup")
 
@@ -855,6 +873,14 @@ int main(){
       int mo,cr,s,e=-7; double li,pr,es,bu,le,de,ol;
       if(scanf("%d %d %d %lf %lf %lf %lf %lf %lf %lf",&mo,&cr,&s,&li,&pr,&es,&bu,&le,&de,&ol)!=10) return 2;
       double r=NC_StopSetup(mo,cr,s,li,pr,es,bu,le,de,ol,e); printf("%a %d %a\n",r,e,NC_Stop(cr,s,li,pr,es,bu));
+    } else if(c=="PIU"){
+      int s; double v1,d1,v2,d2; if(scanf("%d %lf %lf %lf %lf",&s,&v1,&d1,&v2,&d2)!=5) return 2;
+      double dp=-7; double lp=NC_PiuEsterna(s,v1,d1,v2,d2,dp); printf("%a %a\n",lp,dp);
+    } else if(c=="STOP2"){
+      int cr,s,e=-7; double li,pr,es,bu,v1,d1,v2,d2,ol;
+      if(scanf("%d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf",&cr,&s,&li,&pr,&es,&bu,&v1,&d1,&v2,&d2,&ol)!=11) return 2;
+      double dp=-7; double lp=NC_PiuEsterna(s,v1,d1,v2,d2,dp);
+      double r=NC_StopSetup(2,cr,s,li,pr,es,bu,lp,dp,ol,e); printf("%a %a %a %d\n",lp,dp,r,e);
     } else if(c=="FAM"){
       int L; if(scanf("%d",&L)!=1) return 2; printf("%d\n",NC_FamigliaStop(L));
     } else if(c=="TPEMA"){
@@ -1135,6 +1161,77 @@ def py_stop_oltre(s, pr, bu, le, de, ol):
     return lontano, esito
 
 
+def py_piu_esterna(s, v1, d1, v2, d2):
+    """specchio della v1.11 scritto dalla decisione: fra ST3,5 (v1, d1) ed EMA200 (v2, d2) si tengono SOLO le linee dal lato del setup
+    (direzione == s, valore > 0); long la piu' bassa, short la piu' alta. Nessuna -> (0, 0): il setup si scarta come nella v1.10."""
+    cand = [v for v, d in ((v1, d1), (v2, d2)) if d == s and v > 0]
+    if not cand:
+        return 0.0, 0.0
+    return (min(cand) if s > 0 else max(cand)), float(s)
+
+
+def stop_v111_unitari(cx, bag):
+    """v1.11: NC_PiuEsterna e la catena NC_PiuEsterna -> NC_StopSetup(2, ...). Valori attesi scritti qui."""
+    def one(cmd):
+        return cx.run(cmd + "\n")[0].split()
+    casi = [("PIU 1 95 1 90 1", 90.0, 1.0, "long, tutte e due dal lato del setup: la piu' BASSA (EMA200)"),
+            ("PIU 1 85 1 90 1", 85.0, 1.0, "long: la piu' bassa e' la ST3,5"),
+            ("PIU -1 105 -1 110 -1", 110.0, -1.0, "short: la piu' ALTA"),
+            ("PIU 1 95 1 120 -1", 95.0, 1.0, "long, EMA200 dal lato opposto (sopra il prezzo): resta la ST3,5"),
+            ("PIU 1 120 -1 90 1", 90.0, 1.0, "long, ST3,5 dal lato opposto: resta la EMA200"),
+            ("PIU 1 120 -1 130 -1", 0.0, 0.0, "long, tutte e due dal lato opposto: nessuna (scarto)"),
+            ("PIU -1 90 1 110 -1", 110.0, -1.0, "short, ST3,5 dal lato opposto: EMA200"),
+            ("PIU -1 90 1 80 1", 0.0, 0.0, "short, tutte e due dal lato opposto: nessuna"),
+            ("PIU 1 95 0 90 1", 90.0, 1.0, "ST3,5 non calcolabile (dir 0): EMA200"),
+            ("PIU 1 95 1 0 1", 95.0, 1.0, "EMA200 a 0: ST3,5"),
+            ("PIU 1 95 1 95 1", 95.0, 1.0, "linee uguali")]
+    for cmd, att, ad, lab in casi:
+        o = one(cmd)
+        check(fx(o[0]) == att and fx(o[1]) == ad, "PIU %s: %s -> %s %s (atteso %s %s)" % (lab, cmd, fx(o[0]), fx(o[1]), att, ad), quiet=True, bag=bag)
+    casi2 = [("STOP2 0 1 100 95 90 5 100 1 70 1 20", 70.0, 50.0, 0, "long, EMA200 oltre la ST3,5: 20 sotto la EMA200"),
+             ("STOP2 0 1 100 95 90 5 100 1 120 -1 20", 100.0, 80.0, 0, "long, EMA200 sopra il prezzo: 20 sotto la ST3,5 (= v1.10)"),
+             ("STOP2 0 1 100 95 90 5 110 -1 130 -1 20", 0.0, 0.0, 1, "long, tutte e due dal lato opposto: scartato"),
+             ("STOP2 0 1 100 95 90 5 110 -1 80 1 20", 80.0, 60.0, 0, "long, ST3,5 discorde ma EMA200 dal lato giusto: si arma (v1.10 scartava)"),
+             ("STOP2 0 -1 100 105 110 5 100 -1 130 -1 20", 130.0, 150.0, 0, "short, EMA200 oltre: 20 sopra la EMA200"),
+             ("STOP2 0 1 100 95 90 5 115 1 112 1 20", 112.0, 90.0, 2, "long, la piu' esterna (112) dentro la scala: vince X4")]
+    for cmd, al, att, ea, lab in casi2:
+        o = one(cmd)
+        check(fx(o[0]) == al and fx(o[2]) == att and int(o[3]) == ea, "STOP2 %s: %s -> linea %s stop %s esito %s (atteso %s %s %d)" % (lab, cmd, fx(o[0]), fx(o[2]), o[3], al, att, ea),
+              quiet=True, bag=bag)
+    rnd = random.Random(1111)
+    righe1, righe2, casi = [], [], []
+    for _ in range(4000):
+        sg = rnd.choice([1, -1])
+        u = rnd.choice([0.0001, 0.01, 1.0])
+        li = rnd.choice([rnd.uniform(0.5, 2.0), rnd.uniform(1000, 40000), rnd.uniform(50, 200)])
+        p2 = li - sg * rnd.choice([5, 10]) * u
+        bu = 5 * u
+        v1 = li - sg * rnd.uniform(-25, 60) * u if rnd.random() > 0.05 else 0.0
+        v2 = li - sg * rnd.uniform(-60, 90) * u if rnd.random() > 0.05 else 0.0
+        d1 = sg if rnd.random() > 0.2 else rnd.choice([-sg, 0])
+        d2 = sg if rnd.random() > 0.35 else rnd.choice([-sg, 0])
+        ol = rnd.choice([10, 20, 30]) * u
+        casi.append((sg, p2, bu, v1, d1, v2, d2, ol))
+        righe2.append("STOP2 0 %d %r %r %r %r %r %d %r %d %r" % (sg, li, p2, li, bu, v1, d1, v2, d2, ol))
+        lp, dp = py_piu_esterna(sg, v1, d1, v2, d2)
+        righe1.append("STOPSET 1 0 %d %r %r %r %r %r %r %r" % (sg, li, p2, li, bu, lp, dp, ol))
+    o2 = cx.run("\n".join(righe2) + "\n")
+    o1 = cx.run("\n".join(righe1) + "\n")
+    dif = uguali1 = viste = 0
+    for a, b, (sg, p2, bu, v1, d1, v2, d2, ol) in zip(o2, o1, casi):
+        a = a.split(); b = b.split()
+        lp, dp = py_piu_esterna(sg, v1, d1, v2, d2)
+        pv, pe = py_stop_oltre(sg, p2, bu, lp, dp, ol)
+        if (fx(a[0]), fx(a[1]), fx(a[2]), int(a[3])) != (lp, dp, pv, pe):
+            dif += 1
+        if a[2] != b[0] or a[3] != b[1]:
+            uguali1 += 1
+        viste |= {0: 1, 1: 2, 2: 4}[pe]
+    check(dif == 0 and uguali1 == 0 and viste == 7 and len(o2) == 4000,
+          "OLTRE_PIU_ESTERNA: C++ == specchio indipendente su 4000 casi (diversi %d); a parita' di linea scelta il modo 2 == modo 1 bit per bit (diversi %d); "
+          "esiti 0/1/2 visitati %s" % (dif, uguali1, viste == 7), quiet=True, bag=bag)
+
+
 def stop_v110_unitari(cx, bag):
     """v1.10: NC_StopSetup / NC_FamigliaStop. Casi a mano col valore scritto qui + invarianza BIT PER BIT del modo 0 + proprieta' del modo 1"""
     def one(cmd):
@@ -1228,6 +1325,7 @@ def unitari(cx, bag):
         v = fx(one(cmd)[0])
         check(abs(v - att) < 1e-12, "%s -> %s (atteso %s)" % (cmd, v, att), quiet=True, bag=bag)
     stop_v110_unitari(cx, bag)
+    stop_v111_unitari(cx, bag)
     # NC_TpEma
     for cmd, att, att1 in (("TPEMA 1 100 90 105 120 1", 120, 105), ("TPEMA 1 100 90 105 103 1", 110, 105),
                            ("TPEMA 1 100 90 95 120 1", 120, 0), ("TPEMA 1 100 90 95 98 1", 110, 0),
@@ -1603,10 +1701,12 @@ def confronta_numeri(cx, ser, bag, verbose, configs=CONFIG):
 
 
 def stop_su_barre(cx, ser, res, e, bag, verbose):
-    """v1.10 sulle barre VERE dell'oro (u = 1 USD, scala 5/5, buffer 5, oltre 20): per ogni barra con la linea definita, la scala che l'EA
-    armerebbe per la barra dopo e lo stop nei due modi. La linea ESTERNA e' calcolata dallo SPECCHIO Python (py_stcore 3,5 / py_ema +
-    py_emadir), la famiglia scelta in Python: il C++ deve dare (a) in GEOMETRIA_ATTUALE lo stesso valore di NC_Stop bit per bit, (b) in
-    OLTRE lo stesso (stop, esito) dello specchio indipendente. Ritorna, per linea, gli esiti e le distanze sui SETUP (episodi entro il limite)."""
+    """v1.10/v1.11 sulle barre VERE dell'oro (u = 1 USD, scala 5/5, buffer 5, oltre 20): per ogni barra con la linea definita, la scala che l'EA
+    armerebbe per la barra dopo e lo stop nei TRE modi. Le linee candidate (ST3,5 ed EMA200, con le direzioni) sono calcolate dallo SPECCHIO
+    Python (py_stcore 3,5 / py_ema + py_emadir), la famiglia e la scelta della linea in Python: il C++ deve dare (a) in GEOMETRIA_ATTUALE lo
+    stesso valore di NC_Stop bit per bit, (b) in OLTRE_LINEA_ESTERNA e (c) in OLTRE_PIU_ESTERNA lo stesso (linea, stop, esito) dello specchio.
+    (d) dove almeno una candidata e' dal lato del setup, la scelta coincide con la lettura LETTERALE ("la piu' bassa/alta delle due").
+    Ritorna, per modo (1, 2) e per linea, esito e distanza per barra."""
     t, o, h, l, c = ser
     n = len(c)
     _a, _u, _d, pr35, pv35 = CG.st_full(h, l, c, 10, 3.5)
@@ -1624,24 +1724,47 @@ def stop_su_barre(cx, ser, res, e, bag, verbose):
             est = min(l[max(0, i - 2):i + 1]) if s > 0 else max(h[max(0, i - 2):i + 1])
             righe.append("STOPSET 0 0 %d %r %r %r 5 %r %r 20" % (s, lv, p2, est, lev[i], led[i]))
             righe.append("STOPSET 1 0 %d %r %r %r 5 %r %r 20" % (s, lv, p2, est, lev[i], led[i]))
-            chiavi.append((L, i, s, lv, p2, est, lev[i], led[i]))
+            if L == 3:
+                righe.append("STOPSET 2 0 %d %r %r %r 5 %r %r 20" % (s, lv, p2, est, e[i], ed[i]))
+            else:
+                righe.append("STOP2 0 %d %r %r %r 5 %r %r %r %r 20" % (s, lv, p2, est, pv35[i], pr35[i], e[i], ed[i]))
+            chiavi.append((L, i, s, lv, p2, est, lev[i], led[i], pv35[i], pr35[i], e[i], ed[i]))
     out = cx.run("\n".join(righe) + "\n")
-    bit = dif = 0
-    per_linea = {L: {} for L in range(4)}
-    for k, (L, i, s, lv, p2, est, le, de) in enumerate(chiavi):
-        o0, o1 = out[2 * k].split(), out[2 * k + 1].split()
+    bit = dif = dif2 = lett = 0
+    per_modo = {1: {L: {} for L in range(4)}, 2: {L: {} for L in range(4)}}
+    for k, (L, i, s, lv, p2, est, le, de, v35, d35, ve, dE) in enumerate(chiavi):
+        o0, o1, o2 = out[3 * k].split(), out[3 * k + 1].split(), out[3 * k + 2].split()
         if o0[0] != o0[2] or o0[1] != "0" or fx(o0[0]) != py_stop_v105(0, s, lv, p2, est, 5.0):
             bit += 1
         pv, pe = py_stop_oltre(s, p2, 5.0, le, de, 20.0)
         if (fx(o1[0]), int(o1[1])) != (pv, pe):
             dif += 1
-        per_linea[L][i] = (int(o1[1]), abs(lv - fx(o1[0])) if int(o1[1]) != 1 else None)
+        per_modo[1][L][i] = (int(o1[1]), abs(lv - fx(o1[0])) if int(o1[1]) != 1 else None)
+        if L == 3:
+            lp, dp = (ve, dE) if (dE == s and ve > 0) else (0.0, 0.0)
+            pv2, pe2 = py_stop_oltre(s, p2, 5.0, ve, dE, 20.0)
+            got = (fx(o2[0]), int(o2[1]))
+        else:
+            lp, dp = py_piu_esterna(s, v35, d35, ve, dE)
+            pv2, pe2 = py_stop_oltre(s, p2, 5.0, lp, dp, 20.0)
+            got = (fx(o2[2]), int(o2[3]))
+            if fx(o2[0]) != lp:
+                dif2 += 1
+            if dp != 0.0 and lp != (min(v35, ve) if s > 0 else max(v35, ve)):
+                lett += 1
+        if got != (pv2, pe2):
+            dif2 += 1
+        per_modo[2][L][i] = (got[1], abs(lv - got[0]) if got[1] != 1 else None)
     check(bit == 0 and len(chiavi) > 4 * 0.9 * n,
           "INVARIANZA v1.10 sull'oro H1: GEOMETRIA_ATTUALE == NC_Stop v1.05 bit per bit su %d scale (4 linee, ogni barra): diverse %d" % (len(chiavi), bit),
           quiet=not verbose, bag=bag)
     check(dif == 0, "OLTRE_LINEA_ESTERNA sull'oro H1: C++ == specchio (famiglia ST3,5 / EMA200 dallo specchio Python) su %d scale: diverse %d" % (len(chiavi), dif),
           quiet=not verbose, bag=bag)
-    return per_linea
+    check(dif2 == 0, "v1.11 OLTRE_PIU_ESTERNA sull'oro H1: linea scelta e stop del C++ == specchio (ST3,5 ed EMA200 dallo specchio Python) su %d scale: diverse %d"
+          % (len(chiavi), dif2), quiet=not verbose, bag=bag)
+    check(lett == 0, "v1.11: dove almeno una fra ST3,5 ed EMA200 e' dal lato del setup, la linea scelta == lettura LETTERALE (min long / max short delle due): "
+          "diverse %d (escludere le linee dal lato opposto cambia solo il caso 'tutte e due opposte')" % lett, quiet=not verbose, bag=bag)
+    return per_modo
 
 
 def conteggi(t, h, l, c, res, verbose):
@@ -1750,10 +1873,11 @@ def solo_il_tocco(src105):
 
 
 V105_COMMIT = "d6586360"      # pin della v1.05 (sha256 7d89a3df...c9ac, lotti F0 C0/C/A): la base della v1.10
-FUNZ_NUOVE_V110 = ("NC_FamigliaStop", "NC_StopSetup", "CalcolaLineaEsterna", "LineaEsternaPrezzo", "StopDescr")
+FUNZ_NUOVE_V110 = ("NC_FamigliaStop", "NC_StopSetup", "CalcolaLineaEsterna", "LineaEsternaPrezzo", "StopDescr", "NC_PiuEsterna", "LineaPiuEsternaPrezzo")
 TOK_V110 = ("InpStopModo", "InpStopOltreU", "NC_StopSetup", "NC_FamigliaStop", "CalcolaLineaEsterna", "LineaEsternaPrezzo", "StopDescr",
             "gXV", "gXD", "gXa", "gXu", "gXdn", "lineaStop", "stopEsito", "ENUM_NC_STOPMODO", "NC_STOP_", "IMB_O_STOPEST", "IMB_O_STOPX4",
-            "lest", "dest", "intes=0;", "es==1", "es==2", "es!=1", "stop_modo", "stoplineaesterna", '"1.10"', "|stop%s")
+            "lest", "dest", "intes=0;", "es==1", "es==2", "es!=1", "stop_modo", "stoplineaesterna", '"1.10"', "|stop%s",
+            "gXE", '"1.11"')   # v1.11: la guardia v1.05 -> sorgente corrente vale per la v1.10 + la v1.11 insieme
 # righe della v1.05 (senza commenti e spazi) che la v1.10 puo' togliere o riscrivere: SOLO queste, elencate per nome
 TOLTE_OK_V110 = (
     '#propertyversion"1.05"', '#defineNC_VER"1.05"', "#defineIMB_N35", '"riempimenti","setupchiusi"',
@@ -1778,13 +1902,29 @@ def senza_commenti_sorgente(s):
 
 def diff_v105_v110(a105, b110):
     """lista dei difetti: righe tolte dalla v1.05 fuori da TOLTE_OK_V110, righe aggiunte senza un simbolo della v1.10 (fuori dalle funzioni NUOVE)"""
+    return diff_versioni(a105, b110, FUNZ_NUOVE_V110, TOK_V110, TOLTE_OK_V110, AGGIUNTE_OK_V110, TRASFORMA_V110)
+
+
+# v1.11 (Claudio 09/10, "Proviamole entrambe"): guardia del diff v1.10 (pin V110_COMMIT) -> v1.11
+V110_COMMIT = "aeebb11d"      # EA v1.10 sha256 af034d87...020a (cancello strato 2: PASS con riserve, 135cb9a5)
+FUNZ_NUOVE_V111 = ("NC_PiuEsterna", "LineaPiuEsternaPrezzo")
+TOK_V111 = ("NC_STOP_OLTRE_PIU_ESTERNA", "OLTRE_PIU_ESTERNA", "gXE", "LineaPiuEsternaPrezzo", "NC_PiuEsterna", '"1.11"')
+TOLTE_OK_V111 = ('#propertyversion"1.10"', '#defineNC_VER"1.10"', "NC_STOP_OLTRE_LINEA_ESTERNA=1",
+                 "if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)", "if(modo!=1)returnNC_Stop(criterio,s,linea,profondo,estremo,buf);")
+AGGIUNTE_OK_V111 = ("{", "}", "};", "NC_STOP_OLTRE_LINEA_ESTERNA=1,", "if(InpStopModo!=NC_STOP_GEOMETRIA_ATTUALE)",
+                    "if(modo!=1&&modo!=2)returnNC_Stop(criterio,s,linea,profondo,estremo,buf);")
+
+
+def diff_versioni(va, vb, funz_nuove, tok, tolte, aggiunte_ok, trasforma):
+    """lista dei difetti del passaggio va -> vb: righe tolte da va fuori da 'tolte' (o dalle trasformazioni esatte), righe aggiunte senza un
+    simbolo di 'tok' fuori dalle funzioni NUOVE e da 'aggiunte_ok'. Commenti e spazi non contano."""
     import difflib
     dif = []
-    a = senza_commenti_sorgente(a105)
-    b = senza_commenti_sorgente(b110)
-    for fn in FUNZ_NUOVE_V110:
+    a = senza_commenti_sorgente(va)
+    b = senza_commenti_sorgente(vb)
+    for fn in funz_nuove:
         if corpo(a, fn):
-            dif.append("la funzione 'nuova' %s esiste gia' nella v1.05" % fn)
+            dif.append("la funzione 'nuova' %s esiste gia' nella versione di partenza" % fn)
         cb = corpo(b, fn)
         if not cb:
             dif.append("funzione nuova %s assente nella v1.10" % fn)
@@ -1797,16 +1937,16 @@ def diff_v105_v110(a105, b110):
     for op, i1, i2, j1, j2 in ops:
         if op in ("replace", "delete"):
             for r in la[i1:i2]:
-                if r in TOLTE_OK_V110:
+                if r in tolte:
                     continue
-                tr = [r.replace(v_, n_, 1) for pref, (v_, n_) in TRASFORMA_V110 if r.startswith(pref) and v_ in r]
+                tr = [r.replace(v_, n_, 1) for pref, (v_, n_) in trasforma if r.startswith(pref) and v_ in r]
                 if tr and tr[0] in aggiunte:
                     continue
-                dif.append("riga della v1.05 tolta o cambiata fuori dall'elenco: %s" % r[:110])
+                dif.append("riga della versione di partenza tolta o cambiata fuori dall'elenco: %s" % r[:110])
         if op in ("replace", "insert"):
             for r in lb[j1:j2]:
-                if r not in AGGIUNTE_OK_V110 and not any(t in r for t in TOK_V110):
-                    dif.append("riga aggiunta senza un simbolo della v1.10: %s" % r[:110])
+                if r not in aggiunte_ok and not any(t in r for t in tok):
+                    dif.append("riga aggiunta senza un simbolo della versione nuova: %s" % r[:110])
     return dif
 
 
@@ -1822,6 +1962,85 @@ def solo_lo_stop(src110):
     ce2 = src110.replace("   if(!(gU>0)){ err=", "   gU=gU*2.0;\n   if(!(gU>0)){ err=", 1)
     ce_ok = (ce1 != src110 and ce2 != src110 and len(diff_v105_v110(v105, ce1)) > 0 and len(diff_v105_v110(v105, ce2)) > 0)
     return (not dif), "; ".join(dif[:4]), ce_ok
+
+
+STOPSET_MIN = r'''
+#include "shim.h"
+#include "pure.mqh"
+int main(){
+  char cmd[32];
+  while(scanf("%31s",cmd)==1){
+    int mo,cr,s,e=-7; double li,pr,es,bu,le,de,ol;
+    if(scanf("%d %d %d %lf %lf %lf %lf %lf %lf %lf",&mo,&cr,&s,&li,&pr,&es,&bu,&le,&de,&ol)!=10) return 2;
+    double r=NC_StopSetup(mo,cr,s,li,pr,es,bu,le,de,ol,e); printf("%a %d\n",r,e);
+  }
+  return 0;
+}
+'''
+
+
+def compila_stopset(src, cartella):
+    """il blocco puro di 'src' con un driver che chiama SOLO NC_StopSetup (esiste dalla v1.10): None se non compila"""
+    cxx = shutil.which("g++") or shutil.which("clang++")
+    if not cxx:
+        return None
+    os.makedirs(cartella, exist_ok=True)
+    for nm, txt in (("shim.h", CG.SHIM + SHIM_EXTRA), ("pure.mqh", CG.to_cxx(blocco_puro(src))), ("drv.cpp", STOPSET_MIN)):
+        with open(os.path.join(cartella, nm), "w") as f:
+            f.write(txt)
+    exe = os.path.join(cartella, "drv")
+    r = subprocess.run([cxx, "-std=c++17", "-O2", "-ffp-contract=off", "-o", exe, os.path.join(cartella, "drv.cpp")], capture_output=True, text=True)
+    return exe if r.returncode == 0 else None
+
+
+def identita_v110(src111, ser, tmp):
+    """GEOMETRIA_ATTUALE e OLTRE_LINEA_ESTERNA della v1.11 == v1.10 (pin V110_COMMIT) BIT PER BIT: le due NC_StopSetup compilate fianco a fianco
+    sugli STESSI ingressi (8000 casuali + ogni scala dell'oro H1 con ST3,5 / EMA200 vere, modi 0 e 1). Contro-esempio: una v1.11 con lo stop
+    OLTRE dal lato sbagliato deve dare differenze. Ritorna (n righe, diverse, diverse nel contro-esempio, esito della guardia del diff, dettaglio)."""
+    r = subprocess.run(["git", "-C", ROOT, "show", "%s:mql5/Experts/EA_NatCla.mq5" % V110_COMMIT], capture_output=True)
+    if r.returncode != 0:
+        return None, None, None, None, "v1.10 non leggibile (%s)" % V110_COMMIT
+    v110 = r.stdout.decode("ascii")
+    e10 = compila_stopset(v110, os.path.join(tmp, "v110"))
+    e11 = compila_stopset(src111, os.path.join(tmp, "v111"))
+    ce_src = src111.replace("double oltreLinea=lineaEst-s*oltre;", "double oltreLinea=lineaEst+s*oltre;", 1)
+    ece = compila_stopset(ce_src, os.path.join(tmp, "v111ce"))
+    if not (e10 and e11 and ece) or ce_src == src111:
+        return None, None, None, None, "compilazione del confronto fallita"
+    rnd = random.Random(1011)
+    righe = []
+    for _ in range(8000):
+        sg = rnd.choice([1, -1]); u = rnd.choice([0.0001, 0.01, 1.0])
+        li = rnd.choice([rnd.uniform(0.5, 2.0), rnd.uniform(1000, 40000), rnd.uniform(50, 200)])
+        righe.append("S %d %d %d %r %r %r %r %r %d %r" % (rnd.choice([0, 1]), rnd.choice([0, 1, 2]), sg, li, li - sg * rnd.choice([5, 10]) * u,
+                     li - sg * rnd.uniform(-30, 60) * u, 5 * u, li - sg * rnd.uniform(-25, 60) * u if rnd.random() > 0.05 else 0.0,
+                     sg if rnd.random() > 0.15 else rnd.choice([-sg, 0]), rnd.choice([10, 20, 30]) * u))
+    t, o, h, l, c = ser
+    e = py_ema(c, 200); ed = py_emadir(c, e)
+    for mult in (2.5, 3.0, 3.5):
+        _a, _u, _d, pr_, pv_ = CG.st_full(h, l, c, 10, mult)
+        _a, _u, _d, pr35, pv35 = CG.st_full(h, l, c, 10, 3.5)
+        for i in range(1, len(c)):
+            if pr_[i] == 0.0:
+                continue
+            sg = int(pr_[i]); lv = pv_[i]
+            for mo in (0, 1):
+                righe.append("S %d 0 %d %r %r %r 5 %r %r 20" % (mo, sg, lv, lv - sg * 5.0, min(l[max(0, i - 2):i + 1]) if sg > 0 else max(h[max(0, i - 2):i + 1]), pv35[i], pr35[i]))
+    for i in range(1, len(c)):
+        if ed[i] != 0.0:
+            sg = int(ed[i])
+            for mo in (0, 1):
+                righe.append("S %d 0 %d %r %r %r 5 %r %r 20" % (mo, sg, e[i], e[i] - sg * 5.0, e[i], e[i], ed[i]))
+    txt = "\n".join(righe) + "\n"
+    g = lambda exe: subprocess.run([exe], input=txt, capture_output=True, text=True).stdout.split("\n")
+    a, b, cc = g(e10), g(e11), g(ece)
+    diverse = sum(1 for x, y in zip(a, b) if x != y) + abs(len(a) - len(b))
+    diverse_ce = sum(1 for x, y in zip(a, cc) if x != y)
+    gd = diff_versioni(v110, src111, FUNZ_NUOVE_V111, TOK_V111, TOLTE_OK_V111, AGGIUNTE_OK_V111, ())
+    ce1 = diff_versioni(v110, src111.replace("double x4=profondo-s*buf;", "double x4=profondo-s*buf*2.0;", 1), FUNZ_NUOVE_V111, TOK_V111, TOLTE_OK_V111, AGGIUNTE_OK_V111, ())
+    ce2 = diff_versioni(v110, src111.replace("   if(es==2) gImb[IMB_O_STOPX4]++;", "   if(es==2) gImb[IMB_O_STOPX4]++;\n   gU=gU*2.0;", 1),
+                        FUNZ_NUOVE_V111, TOK_V111, TOLTE_OK_V111, AGGIUNTE_OK_V111, ())
+    return len(righe), diverse, diverse_ce, (not gd and len(ce1) > 0 and len(ce2) > 0), "; ".join(gd[:4])
 
 
 def mutanti(raw, ser):
@@ -1940,13 +2159,13 @@ def mutanti(raw, ser):
         ("T4 tocco dopo l'uscita per barre insufficienti", TOCCO + DOPO_TOCCO, DOPO_TOCCO + TOCCO),
         ("T5 tocco sull'handle sbagliato (EMA14 invece di EMA200)", "   CopyBuffer(hEma200,0,1,1,tocco);\n", "   CopyBuffer(hEma14,0,1,1,tocco);\n"),
         ("T6 esito del tocco assegnato e usato", "   CopyBuffer(hAdx,0,1,1,tocco);\n", "   int tk=CopyBuffer(hAdx,0,1,1,tocco); if(tk<0) return false;\n"),
-        ("T7 versione rimasta 1.05 (v1.10)", '#define NC_VER "1.10"', '#define NC_VER "1.05"'),
+        ("T7 versione rimasta 1.10 (v1.11)", '#define NC_VER "1.11"', '#define NC_VER "1.10"'),
         # --- v1.10 (decisione di Claudio 08/10): la regola di stop OLTRE_LINEA_ESTERNA (unitari V, barre vere, invarianti 32-41, guardia del diff)
         ("V1 stop OLTRE dal lato sbagliato", "double oltreLinea=lineaEst-s*oltre;", "double oltreLinea=lineaEst+s*oltre;"),
         ("V2 X4 tolto sul long", "   if(s>0 && oltreLinea>x4) { r=x4; esito=2; }\n", ""),
         ("V3 linea esterna discorde non scartata", "if(dirEst!=(double)s || !(lineaEst>0.0)) { esito=1; return 0.0; }", "if(!(lineaEst>0.0)) { esito=1; return 0.0; }"),
-        ("V4 GEOMETRIA_ATTUALE che legge la linea esterna", "if(modo!=1) return NC_Stop(criterio,s,linea,profondo,estremo,buf);",
-         "if(modo!=1) return (lineaEst>0.0 && dirEst==(double)s) ? MathMin(NC_Stop(criterio,s,linea,profondo,estremo,buf),lineaEst) : NC_Stop(criterio,s,linea,profondo,estremo,buf);"),
+        ("V4 GEOMETRIA_ATTUALE che legge la linea esterna", "if(modo!=1 && modo!=2) return NC_Stop(criterio,s,linea,profondo,estremo,buf);",
+         "if(modo!=1 && modo!=2) return (lineaEst>0.0 && dirEst==(double)s) ? MathMin(NC_Stop(criterio,s,linea,profondo,estremo,buf),lineaEst) : NC_Stop(criterio,s,linea,profondo,estremo,buf);"),
         ("V5 default OLTRE (default non neutro)", "InpStopModo = NC_STOP_GEOMETRIA_ATTUALE;", "InpStopModo = NC_STOP_OLTRE_LINEA_ESTERNA;"),
         ("V6 default 10 u invece di 20", "input double InpStopOltreU      = 20.0;", "input double InpStopOltreU      = 10.0;"),
         ("V7 CSV del conteggio sempre in GEOMETRIA_ATTUALE", "double sl=NC_StopSetup((int)InpStopModo,gSLCrit,s,lv0,", "double sl=NC_StopSetup(0,gSLCrit,s,lv0,"),
@@ -1964,6 +2183,22 @@ def mutanti(raw, ser):
         ("V19 X4 dello short contato come regola", "if(s<0 && oltreLinea<x4) { r=x4; esito=2; }", "if(s<0 && oltreLinea<x4) { r=x4; esito=0; }"),
         ("V20 X4 dello short rovesciato", "if(s<0 && oltreLinea<x4)", "if(s<0 && oltreLinea>x4)"),
         ("V21 colonne nuove fuori dalla coda (stop_modo prima di motivo)", "durata_min;motivo;stop_modo;linea_stop;stop_esito", "durata_min;stop_modo;motivo;linea_stop;stop_esito"),
+        # --- v1.11 (Claudio 09/10 "Proviamole entrambe"): OLTRE_PIU_ESTERNA (unitari W, oro, invarianti 32-43)
+        ("W1 long: la piu' ALTA invece della piu' bassa", "return (s>0) ? MathMin(v1,v2) : MathMax(v1,v2);", "return (s>0) ? MathMax(v1,v2) : MathMax(v1,v2);"),
+        ("W2 EMA200 dal lato opposto accettata", "bool ok2=(d2==(double)s && v2>0.0);", "bool ok2=(v2>0.0);"),
+        ("W3 nessuna linea dal lato del setup ma direzione s (setup non scartato)", "dirOut=(ok1 || ok2) ? (double)s : 0.0;", "dirOut=(double)s;"),
+        ("W4 modo 2 ricade su NC_Stop (GEOMETRIA_ATTUALE)", "if(modo!=1 && modo!=2) return NC_Stop(", "if(modo!=1) return NC_Stop("),
+        ("W5 EMA200 senza placebo fra le candidate", "gEma[k]+s*InpPlaceboAtr*gAtrN[k],gXE[k],dir);", "gEma[k],gXE[k],dir);"),
+        ("W6 direzione dell'EMA200 presa dalla ST3,5", "gAtrN[k],gXE[k],dir);", "gAtrN[k],gXD[k],dir);"),
+        ("W7 direzione dell'EMA200 mai calcolata", "{ ArrayResize(gXE,gN); NC_EmaDir(gC,gEma,gN,gXE); }", "{ ArrayResize(gXE,gN); }"),
+        ("W8 CSV del conteggio senza il modo 2", "   if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA){ lest=LineaPiuEsternaPrezzo(L,last,s,dest); }\n", ""),
+        ("W9 ordini in modo 2 con la linea del modo 1", "lest=NormPrezzo(LineaPiuEsternaPrezzo(L,last,s,dest));", "lest=NormPrezzo(LineaEsternaPrezzo(last,s)); dest=gXD[last];"),
+        ("W10 riga AVVIO del modo 2 come modo 1", "return \"OLTRE_PIU_ESTERNA \"+", "return \"OLTRE_LINEA_ESTERNA \"+"),
+        ("W11 linee esterne non calcolate in modo 2", "      if(InpStopModo==NC_STOP_OLTRE_PIU_ESTERNA) CalcolaLineaEsterna(L);\n", ""),
+        ("W12 Risolvi controlla solo il modo 1", "   if(InpStopModo!=NC_STOP_GEOMETRIA_ATTUALE)\n     {", "   if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)\n     {"),
+        ("W13 short: la piu' BASSA", "? MathMin(v1,v2) : MathMax(v1,v2);", "? MathMin(v1,v2) : MathMin(v1,v2);"),
+        ("W14 ST3,5 dal lato opposto accettata", "bool ok1=(d1==(double)s && v1>0.0);", "bool ok1=(v1>0.0);"),
+        ("W15 enum del modo 2 a 3 (NC_StopSetup lo tratterebbe come GEOMETRIA_ATTUALE)", "NC_STOP_OLTRE_PIU_ESTERNA=2", "NC_STOP_OLTRE_PIU_ESTERNA=3"),
     ]
     base = tempfile.mkdtemp(prefix="natcla_mutanti_")     # FUORI dal repo (classe 1159)
     assert not os.path.abspath(base).startswith(os.path.abspath(ROOT))
@@ -2010,13 +2245,20 @@ def main():
     check(esito is True, "v1.05 (pin %s) = v1.04 (commit %s) + il SOLO tocco in CaricaDati + le due stringhe di versione: nessun'altra modifica di logica, CSV, magic, input %s"
           % (V105_COMMIT, V104_COMMIT, det))
     esito, det, ce = solo_lo_stop(src)
-    check(esito is True, "v1.10 = v1.05 (pin %s) + SOLO la regola di stop: righe tolte nell'elenco, righe aggiunte con un simbolo della v1.10 %s" % (V105_COMMIT, det))
+    check(esito is True, "v1.11 = v1.05 (pin %s) + SOLO le regole di stop (v1.10 + v1.11): righe tolte nell'elenco, righe aggiunte con un simbolo della v1.10/v1.11 %s" % (V105_COMMIT, det))
     check(ce is True, "CONTRO-ESEMPIO della guardia del diff: NC_BARRE_MIN 300 -> 301 e una riga 'gU=gU*2.0;' aggiunta in Risolvi sono VISTE")
 
     print("== P + N) funzioni pure C++ e numeri su barre reali dell'oro (HistData, +6 h, NON BCM) ==")
     ser = serie_tf(60, 2023)
     if not check(ser is not None and len(ser[4]) > 15000, "barre H1 dell'oro dal 2023 (%d)" % (len(ser[4]) if ser else 0)):
         sys.exit(1)
+    with tempfile.TemporaryDirectory() as tmpi:
+        nr, dv, dce, guardia, det = identita_v110(src, ser, tmpi)
+        check(nr is not None and nr > 100000 and dv == 0,
+              "IDENTITA' v1.10 (pin %s) -> v1.11: NC_StopSetup in GEOMETRIA_ATTUALE e OLTRE_LINEA_ESTERNA, %s ingressi (8000 casuali + ogni scala dell'oro H1, 4 linee), "
+              "uscite diverse %s %s" % (V110_COMMIT, nr, dv, det))
+        check(dce is not None and dce > 1000, "CONTRO-ESEMPIO dell'identita': una v1.11 con lo stop OLTRE dal lato sbagliato da' %s uscite diverse dalla v1.10" % dce)
+        check(guardia is True, "v1.11 = v1.10 (pin %s) + SOLO il modo OLTRE_PIU_ESTERNA (guardia del diff, con 2 contro-esempi visti) %s" % (V110_COMMIT, det))
     with tempfile.TemporaryDirectory() as tmp:
         bag, res = suite(raw, os.path.join(tmp, "vero"), ser, True)
         check(not bag, "suite completa sul sorgente vero (%d difetti) %s" % (len(bag), bag[:6]))
@@ -2045,8 +2287,8 @@ def main():
                 for L in range(4):
                     v_, d_, k_, seg_, ne_, tl_, nu_, ei_ = res[L]
                     lim_ = (1, 1, 2, 0)[L]
-                    idx_ = [i for i in range(1, len(c)) if da_ <= t[i] < a_ and nu_[i] == 1 and (lim_ == 0 or ne_[i] <= lim_) and (i - 1) in STOP_BARRE[L]]
-                    es_ = [STOP_BARRE[L][i - 1] for i in idx_]
+                    idx_ = [i for i in range(1, len(c)) if da_ <= t[i] < a_ and nu_[i] == 1 and (lim_ == 0 or ne_[i] <= lim_) and (i - 1) in STOP_BARRE[1][L]]
+                    es_ = [STOP_BARRE[1][L][i - 1] for i in idx_]
                     di_ = sorted(x[1] for x in es_ if x[1] is not None)
                     q = lambda f: di_[min(len(di_) - 1, int(f * (len(di_) - 1) + 0.5))] if di_ else float("nan")
                     print("       %-5s | %5d | %6d | %17d | %8d | %6.1f / %.1f-%.1f | %6.0fx" % (("ST25", "ST30", "ST35", "E200")[L], len(es_), sum(1 for x in es_ if x[0] == 0),
@@ -2055,6 +2297,27 @@ def main():
                         check(all(x[0] == 0 and x[1] is not None and abs(x[1] - 20.0) < 1e-6 for x in es_) and es_,
                               "v1.10: linea %s = linea esterna di se stessa: su TUTTI i %d setup stop esattamente 20 u oltre la linea, nessuno scartato, nessun X4"
                               % (("ST25", "ST30", "ST35", "E200")[L], len(es_)))
+                print("       v1.11 OLTRE_PIU_ESTERNA 20 u, stessi setup: per linea esito e allargamento dello stop rispetto a OLTRE_LINEA_ESTERNA (USD)")
+                print("       linea | setup | regola | scartato | vince X4 | distanza linea->stop mediana (P10-P90) | allargati / mediana allargamento | armati in piu' (v1.10 scartava)")
+                for L in range(4):
+                    v_, d_, k_, seg_, ne_, tl_, nu_, ei_ = res[L]
+                    lim_ = (1, 1, 2, 0)[L]
+                    idx_ = [i for i in range(1, len(c)) if da_ <= t[i] < a_ and nu_[i] == 1 and (lim_ == 0 or ne_[i] <= lim_) and (i - 1) in STOP_BARRE[2][L]]
+                    e2_ = [STOP_BARRE[2][L][i - 1] for i in idx_]
+                    e1_ = [STOP_BARRE[1][L][i - 1] for i in idx_]
+                    di_ = sorted(x[1] for x in e2_ if x[1] is not None)
+                    q = lambda f: di_[min(len(di_) - 1, int(f * (len(di_) - 1) + 0.5))] if di_ else float("nan")
+                    al_ = sorted(b_[1] - a1[1] for a1, b_ in zip(e1_, e2_) if a1[1] is not None and b_[1] is not None and b_[1] - a1[1] > 1e-9)
+                    piu_ = sum(1 for a1, b_ in zip(e1_, e2_) if a1[0] == 1 and b_[0] != 1)
+                    print("       %-5s | %5d | %6d | %8d | %8d | %6.1f (%.1f-%.1f) | %4d / %6.1f | %4d" % (("ST25", "ST30", "ST35", "E200")[L], len(e2_), sum(1 for x in e2_ if x[0] == 0),
+                          sum(1 for x in e2_ if x[0] == 1), sum(1 for x in e2_ if x[0] == 2), q(.5), q(.1), q(.9), len(al_),
+                          al_[len(al_) // 2] if al_ else float("nan"), piu_))
+                    if L == 3:
+                        check(e2_ == e1_ and e2_, "v1.11: linea E200 (M2): OLTRE_PIU_ESTERNA == OLTRE_LINEA_ESTERNA su tutti i %d setup (una sola linea)" % len(e2_))
+                    else:
+                        check(all(b_[1] is None or a1[1] is None or b_[1] >= a1[1] - 1e-9 for a1, b_ in zip(e1_, e2_)),
+                              "v1.11: linea %s: lo stop OLTRE_PIU_ESTERNA non e' mai PIU' VICINO di OLTRE_LINEA_ESTERNA (sui setup armati in tutti e due i modi)"
+                              % ("ST25", "ST30", "ST35")[L])
             # H4/D1 solo informativi: dipendono dall'orologio (specifica par. 5.4)
             for mins, lab in ((240, "H4"), (1440, "D1")):
                 s2 = serie_tf(mins, 2021)

@@ -18,6 +18,9 @@ anche i CSV della v1.04/v1.05 (44 colonne, stop = GEOMETRIA_ATTUALE). Il COSTO s
 regola di stop della passata, che la tabella DICHIARA; i setup con stop_esito 1 (linea esterna discorde: l'EA NON li arma) restano nel conto n (regola del file prova,
 scritta prima) ma ESCONO dal costo e sono contati a parte. Ogni riga OLTRE si ricontrolla: SL = linea_stop -/+ N u (esito 0), oltre X4 (esito 2), SL 0 (esito 1).
 Il DETERMINISMO si confronta solo fra passate con la STESSA regola di stop; la v1.10 in GEOMETRIA_ATTUALE ha la stessa impronta della v1.05.
+v1.11 DELL'EA (09/10, Claudio "Proviamole entrambe"): terzo modo OLTRE_PIU_ESTERNA (stop_modo = 2), stessi campi. La riga si ricontrolla come OLTRE
+(SL = linea_stop -/+ N u); in piu', per tutti e due i modi OLTRE: sulla linea E200 la linea dello stop E' la linea del setup; sulla ST35 lo e' in
+OLTRE_LINEA_ESTERNA, e in OLTRE_PIU_ESTERNA e' la linea del setup o una PIU' esterna (mai dentro). La scelta fra ST3,5 ed EMA200 non e' nel CSV.
 """
 import csv, datetime, hashlib, io, os, re, statistics, sys, tempfile, zipfile
 
@@ -32,8 +35,10 @@ VIVO_E0 = 70                  # E0: AUDIO_H1, setup >= 70 per simbolo nella fine
 FAMIGLIA_E3 = 300             # E3: 150 IS + 150 OOS setup
 LAVORO_X = 40.0               # E2: stop >= 40 x pedaggio = PASSA IL LAVORO
 DURO_X = 13.3                 # E2: sotto = ESCLUSO PER ARITMETICA
-VERSIONE_EA = "1.10"           # 09/10: regola di stop OLTRE_LINEA_ESTERNA dietro InpStopModo (default GEOMETRIA_ATTUALE = v1.05)
-VERSIONI_VALIDE = ("1.05", "1.10")   # 1.05 = il tocco degli handle in CaricaDati (diagnosi NATCLA_DIAG_U30): lotti F0 al pin d6586360, validi
+VERSIONE_EA = "1.11"           # 09/10: secondo modo di stop OLTRE_PIU_ESTERNA (v1.10: OLTRE_LINEA_ESTERNA; default GEOMETRIA_ATTUALE = v1.05)
+VERSIONI_VALIDE = ("1.05", "1.10", "1.11")
+VERSIONI_CON_STOP = ("1.10", "1.11")   # versioni che DEVONO dichiarare la regola di stop nella riga AVVIO
+MODI_STOP = {"GEOMETRIA_ATTUALE": "0", "OLTRE_LINEA_ESTERNA": "1", "OLTRE_PIU_ESTERNA": "2"}   # valore della colonna stop_modo   # 1.05 = il tocco degli handle in CaricaDati (diagnosi NATCLA_DIAG_U30): lotti F0 al pin d6586360, validi
 # lotti girati PRIMA del rimedio (PILOTA, A, B, D del 07/10, EA v1.04): si leggono, ma ogni passata e' MARCATA e contata a parte nel riepilogo.
 # La v1.05 cambia qualcosa solo dove la v1.04 restava bloccata (collaudo_natcla.py, modelli 0 e 2): sul forex e sull'oro le righe CONTA attese
 # sono IDENTICHE, e XAUUSD (PILOTA v1.04 contro lotto C v1.05) lo misura nel DETERMINISMO.
@@ -136,8 +141,8 @@ def controlla_avvio(riga, cfg, sim):
     mot = []
     if g["v"] not in VERSIONI_VALIDE and g["v"] not in VERSIONI_ARCHIVIO:
         mot.append("versione %s invece di %s" % (g["v"], "/".join(VERSIONI_VALIDE)))
-    if g["v"] == "1.10" and stop_da_avvio(riga) is None:
-        mot.append("versione 1.10 senza la regola di stop nella riga AVVIO ('| stop ...')")
+    if g["v"] in VERSIONI_CON_STOP and stop_da_avvio(riga) is None:
+        mot.append("versione %s senza la regola di stop nella riga AVVIO ('| stop ...')" % g["v"])
     # cancello 07/10 notte: l'archivio v1.04 vale SOLO fuori dagli indici. Sugli indici BCM la v1.04 e' lo STALLO misurato dalla
     # diagnosi NATCLA_DIAG_U30: una passata d'indice v1.04 non e' mai un conto valido, qualunque cosa dica il resto (la nota del riepilogo non basta).
     if g["v"] in VERSIONI_ARCHIVIO and sim["classe"] == "IDX":
@@ -172,8 +177,8 @@ def controlla_avvio(riga, cfg, sim):
     return mot
 
 
-RE_STOP_AVVIO = re.compile(r"\| stop (?P<m>GEOMETRIA_ATTUALE|OLTRE_LINEA_ESTERNA (?P<u>[0-9.]+) u)\s*$")
-RE_STOP_CFG = re.compile(r"^#cfg;Stop;(?P<m>GEOMETRIA_ATTUALE|OLTRE_LINEA_ESTERNA (?P<u>[0-9.]+) u);")
+RE_STOP_AVVIO = re.compile(r"\| stop (?P<m>GEOMETRIA_ATTUALE|(?P<mo>OLTRE_LINEA_ESTERNA|OLTRE_PIU_ESTERNA) (?P<u>[0-9.]+) u)\s*$")
+RE_STOP_CFG = re.compile(r"^#cfg;Stop;(?P<m>GEOMETRIA_ATTUALE|(?P<mo>OLTRE_LINEA_ESTERNA|OLTRE_PIU_ESTERNA) (?P<u>[0-9.]+) u);")
 STOP_V105 = ("GEOMETRIA_ATTUALE", None)
 
 
@@ -182,7 +187,7 @@ def stop_da_avvio(riga):
     m = RE_STOP_AVVIO.search(riga.rstrip())
     if not m:
         return None
-    return ("OLTRE_LINEA_ESTERNA", float(m.group("u"))) if m.group("u") else STOP_V105
+    return (m.group("mo"), float(m.group("u"))) if m.group("u") else STOP_V105
 
 
 def stop_da_csv(b):
@@ -190,7 +195,7 @@ def stop_da_csv(b):
     for l in testo(b).splitlines():
         m = RE_STOP_CFG.match(l)
         if m:
-            return ("OLTRE_LINEA_ESTERNA", float(m.group("u"))) if m.group("u") else STOP_V105
+            return (m.group("mo"), float(m.group("u"))) if m.group("u") else STOP_V105
     return None
 
 
@@ -313,7 +318,7 @@ def anni(da, a):
 
 def stop_coerente(r, stop, u):
     """v1.10: None se la riga rispetta la regola di stop DICHIARATA (stop = (modo, N u)), altrimenti il motivo. Righe senza le colonne nuove = v1.04/v1.05."""
-    atteso = "1" if stop[0] == "OLTRE_LINEA_ESTERNA" else "0"
+    atteso = MODI_STOP[stop[0]]
     modo_r = r.get("stop_modo")
     if modo_r is None:
         return None if atteso == "0" else "colonna stop_modo assente con la regola OLTRE dichiarata"
@@ -339,6 +344,16 @@ def stop_coerente(r, stop, u):
         return "SL %s non a %.2f u oltre la linea esterna %s (atteso %.6f)" % (r["sl"], stop[1], r["linea_stop"], crit)
     if es == "2" and lato * (crit - sl) < -tol:
         return "stop_esito 2 (vince X4) ma lo SL %s e' piu' VICINO della regola (%.6f)" % (r["sl"], crit)
+    # v1.11: la LINEA dello stop rispetto alla linea del setup (stesso calcolo, stessa stampa nel CSV del conteggio)
+    lp = float(r["linea_prezzo"])
+    dl = len(r["linea_prezzo"].split(".")[1]) if "." in r["linea_prezzo"] else 0
+    tl = 1.5 * 10 ** (-max(dl, dec))
+    if r["linea"] == "E200" and abs(ls - lp) > tl:
+        return "linea E200: la linea dello stop %s non e' la EMA200 del setup %s" % (r["linea_stop"], r["linea_prezzo"])
+    if r["linea"] == "ST35" and atteso == "1" and abs(ls - lp) > tl:
+        return "ST35 in OLTRE_LINEA_ESTERNA: la linea dello stop %s non e' la ST3,5 del setup %s" % (r["linea_stop"], r["linea_prezzo"])
+    if r["linea"] == "ST35" and atteso == "2" and lato * (lp - ls) < -tl:
+        return "ST35 in OLTRE_PIU_ESTERNA: la linea dello stop %s sta DENTRO la ST3,5 del setup %s" % (r["linea_stop"], r["linea_prezzo"])
     return None
 
 
@@ -829,7 +844,7 @@ def riga_conta(barra, linea, nep, nuovo, ctx_arm, ctx_tocco, adx, incl, lv, spre
     p = [lv + s * 5 * u, lv, lv - s * 5 * u]
     sl = p[2] - s * 5 * u
     esito, le = 0, 0.0
-    if stop is not None and stop[0] == "OLTRE_LINEA_ESTERNA":
+    if stop is not None and stop[0] != "GEOMETRIA_ATTUALE":
         le = lv if linea_est is None else linea_est
         cand = le - s * stop[1] * u
         if discorde:
@@ -844,7 +859,7 @@ def riga_conta(barra, linea, nep, nuovo, ctx_arm, ctx_tocco, adx, incl, lv, spre
          "0", "0", "0", "0", "0", "SOLO_CONTA"]
     assert len(c) == 44 and len(INTEST.split(";")) == 44
     if stop is not None:
-        c += ["1" if stop[0] == "OLTRE_LINEA_ESTERNA" else "0", "%.5f" % le, str(esito)]
+        c += [MODI_STOP[stop[0]], "%.5f" % le, str(esito)]
         assert len(c) == 47 and len(INTEST_110.split(";")) == 47
     return ";".join(c)
 
@@ -854,7 +869,7 @@ def csv_finto(piano, u, spread, lv0, anno_inizio=2024, limiti=(1, 1, 2, 0), spre
     stop 'auto' = formato della versione (v1.10: GEOMETRIA_ATTUALE con le colonne nuove e #cfg;Stop; v1.04/v1.05: 44 colonne, nessuna #cfg;Stop).
     discorde_ogni k > 0: una riga ogni k ha la linea esterna discorde (solo OLTRE)."""
     if stop == "auto":
-        stop = STOP_V105 if versione == "1.10" else None
+        stop = STOP_V105 if versione in VERSIONI_CON_STOP else None
     righe = ["#AVVIO v%s finto" % versione, "#cfg;TocchiMax;%d / %d / %d / EMA %d (0 = illimitato)   [FONTE]" % limiti]
     righe += ["#cfg;x;y;z"] * 25
     if stop is not None:
@@ -886,7 +901,7 @@ def log_finto(sim, cfg, barra_verifica="2024.07.08 10:00", adx_t=21.34, adx_e=21
            "rischio setup 0.25%% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian ON (nel tester FAIL-OPEN) | solo conta %s | placebo 0.00 ATR | fonte SOLO AUDIO (PDF escluso 07/10)" % (
                versione, mod, sim["nome"], cfg["periodo"], u, descr, u, cfg["magic"], linee, adx, sc))
     if stop == "auto":
-        stop = STOP_V105 if versione == "1.10" else None
+        stop = STOP_V105 if versione in VERSIONI_CON_STOP else None
     if stop is not None:
         avv += " | stop " + nome_stop(stop)
     ver = ("[NatCla] VERIFICA ADX barra %s periodo 14: terminale NC_ADX_MT5 = %.2f | ricalcolo MetaQuotes = %.2f | ricalcolo Wilder = %.2f -> il terminale coincide con: %s" % (barra_verifica, adx_t, adx_e, adx_w, chi))
@@ -963,7 +978,8 @@ def autotest():
         chk("AVVIO cambiato (%s) -> almeno un motivo" % nome, controlla_avvio(giusta.replace(a, b), cfg_h1, sim_eur) != [])
     chk("AVVIO illeggibile -> motivo", controlla_avvio("AVVIO v1.04 ma il resto no", cfg_h1, sim_eur) != [])
     # ---- v1.05: versione attesa 1.05; la 1.04 si legge come ARCHIVIO (lotti girati prima del rimedio); qualunque altra e' un motivo
-    chk("AVVIO v1.05 (lotti F0 al pin d6586360) e v1.10 (versione attesa, con '| stop') senza motivi", VERSIONE_EA == "1.10" and
+    chk("AVVIO v1.05 (lotti F0 al pin d6586360), v1.10 e v1.11 (versione attesa, con '| stop') senza motivi", VERSIONE_EA == "1.11" and
+        controlla_avvio(log_finto(sim_eur, cfg_h1, versione="1.11").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur) == [] and
         controlla_avvio(log_finto(sim_eur, cfg_h1, versione="1.05").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur) == [] and
         controlla_avvio(log_finto(sim_eur, cfg_h1, versione="1.10").splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur) == [])
     chk("CONTRO-ESEMPIO: AVVIO v1.10 SENZA la regola di stop -> motivo (una v1.10 deve dichiarare lo stop)",
@@ -1099,8 +1115,9 @@ def autotest():
     # ---- v1.10: la regola di stop OLTRE_LINEA_ESTERNA (Claudio 08/10). Risposte scritte qui per COSTRUZIONE (u, spread, commissione del lettore).
     OL = ("OLTRE_LINEA_ESTERNA", 20.0)
     p6 = {"ST35": [ep(k, 1, 1, 0, 0, 10.0, 0.5) for k in range(6)]}
-    def costo_di(sim, u, spread, lv0, **kw):
-        rr_, ll_, _h = leggi_csv(csv_finto(p6, u=u, spread=spread, lv0=lv0, versione="1.10", **kw))
+    p6b = {"ST25": [ep(k, 1, 1, 0, 0, 10.0, 0.5) for k in range(6)]}      # linea esterna DIVERSA dalla linea del setup: solo sulla ST2,5/3,0 e' possibile
+    def costo_di(sim, u, spread, lv0, piano=None, **kw):
+        rr_, ll_, _h = leggi_csv(csv_finto(piano or p6, u=u, spread=spread, lv0=lv0, versione=kw.pop("versione", "1.10"), **kw))
         return calcola(rr_, ll_, sim, cfg_h1, datetime.datetime(2024, 7, 8, 10, 0), kw.get("stop") or STOP_V105)
     co_ = costo_di(sim_xau, 1.0, 0.25, 2400.0, stop=OL)
     chk("v1.10 OLTRE oro (u 1 USD, spread 0,25, commissione 0,04): distanze 25/20/15, senza 100/80/60, con 86,2/69,0/51,7, PASSA, nessuna incoerenza",
@@ -1117,12 +1134,12 @@ def autotest():
     cg_ = costo_di(sim_xau, 1.0, 0.25, 2400.0)
     chk("CONTRO-ESEMPIO: stesso piano in GEOMETRIA_ATTUALE (v1.10, colonne nuove a 0) = distanze 15/10/5 della v1.05: la regola CAMBIA il costo e il lettore la segue",
         [round(cg_["costo"][i]["dist"], 6) for i in range(3)] == [15.0, 10.0, 5.0] and cg_["incoerenti_stop"] == 0 and cg_["stop"] == STOP_V105)
-    cx4 = costo_di(sim_xau, 1.0, 0.25, 2400.0, stop=OL, linea_est=2415.0)
-    chk("v1.10 OLTRE con la linea esterna DENTRO la scala (2415 - 20 = 2395 sopra l'X4 2390): esito 2, SL 2390, coerente, distanze 15/10/5",
+    cx4 = costo_di(sim_xau, 1.0, 0.25, 2400.0, piano=p6b, stop=OL, linea_est=2415.0)
+    chk("v1.10 OLTRE (setup ST2,5) con la linea esterna DENTRO la scala (2415 - 20 = 2395 sopra l'X4 2390): esito 2, SL 2390, coerente, distanze 15/10/5",
         cx4["incoerenti_stop"] == 0 and [round(cx4["costo"][i]["dist"], 6) for i in range(3)] == [15.0, 10.0, 5.0], str(cx4["esempi_stop"]))
-    cd_ = costo_di(sim_xau, 1.0, 0.25, 2400.0, stop=OL, discorde_ogni=3)
-    chk("v1.10 OLTRE con 2 setup su 6 a linea esterna DISCORDE: restano in n (6), escono dal costo (n costo 4), SL 0 senza rapporti assurdi, coerenti",
-        cd_["linee"]["ST35"]["setup"] == 6 and cd_["stop_scartati"] == 2 and cd_["linee"]["ST35"]["stop_scartati"] == 2 and cd_["costo"][0]["n"] == 4 and
+    cd_ = costo_di(sim_xau, 1.0, 0.25, 2400.0, piano=p6b, stop=OL, discorde_ogni=3)
+    chk("v1.10 OLTRE con 2 setup ST2,5 su 6 a linea esterna DISCORDE: restano in n (6), escono dal costo (n costo 4), SL 0 senza rapporti assurdi, coerenti",
+        cd_["linee"]["ST25"]["setup"] == 6 and cd_["stop_scartati"] == 2 and cd_["linee"]["ST25"]["stop_scartati"] == 2 and cd_["costo"][0]["n"] == 4 and
         cd_["incoerenti_stop"] == 0 and max(cd_["costo"][i]["r_senza"] for i in range(3)) == 100.0, str((cd_["stop_scartati"], cd_["costo"][0]["n"], cd_["esempi_stop"])))
     # contro-esempi della coerenza: righe che VIOLANO la regola dichiarata devono essere contate
     rr_, ll_, _h = leggi_csv(csv_finto(p6, u=1.0, spread=0.25, lv0=2400.0, versione="1.10", stop=OL))
@@ -1146,12 +1163,38 @@ def autotest():
     b105 = csv_finto(p6, u=1.0, spread=0.25, lv0=2400.0, versione="1.05")
     b110g = csv_finto(p6, u=1.0, spread=0.25, lv0=2400.0, versione="1.10")
     b110o = csv_finto(p6, u=1.0, spread=0.25, lv0=2400.0, versione="1.10", stop=OL)
-    b110o2 = csv_finto(p6, u=1.0, spread=0.25, lv0=2400.0, versione="1.10", stop=OL, linea_est=2398.0)
+    b110o2 = csv_finto(p6b, u=1.0, spread=0.25, lv0=2400.0, versione="1.10", stop=OL, linea_est=2398.0)
+    b110o1 = csv_finto(p6b, u=1.0, spread=0.25, lv0=2400.0, versione="1.10", stop=OL)
     chk("impronta: v1.05 == v1.10 GEOMETRIA_ATTUALE (stesse righe CONTA); v1.10 OLTRE con linea esterna diversa -> DIVERSA",
-        b105 != b110g and impronta(b105) == impronta(b110g) and impronta(b110o) != impronta(b110o2) and stop_da_csv(b110o) == OL and stop_da_csv(b105) is None and stop_da_csv(b110g) == STOP_V105)
+        b105 != b110g and impronta(b105) == impronta(b110g) and impronta(b110o1) != impronta(b110o2) and stop_da_csv(b110o) == OL and stop_da_csv(b105) is None and stop_da_csv(b110g) == STOP_V105)
     chk("stop dalla riga AVVIO: v1.10 GEOMETRIA / OLTRE 20,00 u letti, v1.05 None",
         stop_da_avvio(log_finto(sim_xau, cfg_h1).splitlines()[1]) == STOP_V105 and stop_da_avvio(log_finto(sim_xau, cfg_h1, stop=OL).splitlines()[1]) == OL and
         stop_da_avvio(log_finto(sim_xau, cfg_h1, versione="1.05").splitlines()[1]) is None)
+
+    # ---- v1.11: OLTRE_PIU_ESTERNA (stop_modo 2). Risposte per COSTRUZIONE.
+    OP = ("OLTRE_PIU_ESTERNA", 20.0)
+    c2_ = costo_di(sim_xau, 1.0, 0.25, 2400.0, versione="1.11", stop=OP, linea_est=2370.0)
+    chk("v1.11 OLTRE_PIU_ESTERNA oro, setup ST35 con la EMA200 30 USD OLTRE la ST3,5 (2370): SL 2350, distanze 55/50/45, senza 220/200/180, coerente",
+        [round(c2_["costo"][i]["dist"], 6) for i in range(3)] == [55.0, 50.0, 45.0] and [round(c2_["costo"][i]["r_senza"], 6) for i in range(3)] == [220.0, 200.0, 180.0] and
+        c2_["incoerenti_stop"] == 0 and c2_["stop"] == OP, str(c2_["esempi_stop"]))
+    c2b = costo_di(sim_xau, 1.0, 0.25, 2400.0, versione="1.11", stop=OP)
+    chk("v1.11 OLTRE_PIU_ESTERNA, setup ST35 con la ST3,5 piu' esterna: stesse distanze di OLTRE_LINEA_ESTERNA (25/20/15), coerente",
+        [round(c2b["costo"][i]["dist"], 6) for i in range(3)] == [25.0, 20.0, 15.0] and c2b["incoerenti_stop"] == 0)
+    c2c = costo_di(sim_xau, 1.0, 0.25, 2400.0, versione="1.11", stop=OP, linea_est=2410.0)
+    chk("CONTRO-ESEMPIO v1.11: setup ST35 long con la linea dello stop 2410 SOPRA la ST3,5 2400 (dentro) -> 6 righe incoerenti", c2c["incoerenti_stop"] == 6, str(c2c["esempi_stop"][:1]))
+    c2d = costo_di(sim_xau, 1.0, 0.25, 2400.0, versione="1.11", stop=OP, linea_est=2370.0, piano={"E200": [ep(k, 1, 1, 0, 0, 10.0, 0.5) for k in range(6)]})
+    chk("CONTRO-ESEMPIO v1.11: linea E200 (M2) con la linea dello stop diversa dalla EMA200 del setup -> 6 righe incoerenti", c2d["incoerenti_stop"] == 6, str(c2d["esempi_stop"][:1]))
+    c2e = costo_di(sim_xau, 1.0, 0.25, 2400.0, versione="1.11", stop=OL, linea_est=2370.0)
+    chk("CONTRO-ESEMPIO v1.10/v1.11: setup ST35 in OLTRE_LINEA_ESTERNA con la linea dello stop diversa dalla ST3,5 -> 6 righe incoerenti", c2e["incoerenti_stop"] == 6)
+    c2f = costo_di(sim_xau, 1.0, 0.25, 2400.0, versione="1.11", stop=OP, linea_est=2370.0, piano=p6b)
+    chk("v1.11: setup ST2,5 con la linea dello stop piu' esterna (EMA200) e' coerente (la scelta ST3,5/EMA200 non e' nel CSV: non si giudica)", c2f["incoerenti_stop"] == 0)
+    rr2_, ll2_, _h = leggi_csv(csv_finto(p6, u=1.0, spread=0.25, lv0=2400.0, versione="1.11", stop=OP, linea_est=2370.0))
+    chk("CONTRO-ESEMPIO v1.11: righe stop_modo 2 lette con la regola OLTRE_LINEA_ESTERNA dichiarata -> 6 incoerenti",
+        calcola(rr2_, ll2_, sim_xau, cfg_h1, datetime.datetime(2024, 7, 8, 10, 0), OL)["incoerenti_stop"] == 6)
+    b111p = csv_finto(p6, u=1.0, spread=0.25, lv0=2400.0, versione="1.11", stop=OP, linea_est=2370.0)
+    chk("v1.11: regola dalla riga AVVIO e da #cfg;Stop (OLTRE_PIU_ESTERNA 20,00 u); AVVIO v1.11 senza '| stop' -> motivo",
+        stop_da_avvio(log_finto(sim_xau, cfg_h1, stop=OP).splitlines()[1]) == OP and stop_da_csv(b111p) == OP and
+        any("regola di stop" in m for m in controlla_avvio(log_finto(sim_eur, cfg_h1, versione="1.11", stop=None).splitlines()[1].split("[NatCla] ", 1)[1], cfg_h1, sim_eur)))
 
     # ---- la lettura da zip: pilota finto con 4 passate (XAU AUDIO_H1 ok; EURUSD AUDIO_H1 KO in log; XAU M2_H1 ok senza righe; EURUSD M2_H1 NON_LANCIATA)
     tmp = tempfile.mkdtemp(prefix="natcla_f0_autotest_")
@@ -1202,9 +1245,9 @@ def autotest():
         out8 = []
         riepilogo(d8, out8)
         r8 = d8["runs"][("XAUUSD", "AUDIO_H1")]
-        chk("v1.04 (archivio, 44 colonne) contro v1.10 in GEOMETRIA_ATTUALE (47 colonne + #cfg;Stop), righe CONTA uguali: CSV interi DIVERSI ma DETERMINISMO IDENTICI, con le due versioni dichiarate",
+        chk("v1.04 (archivio, 44 colonne) contro v1.11 in GEOMETRIA_ATTUALE (47 colonne + #cfg;Stop), righe CONTA uguali: CSV interi DIVERSI ma DETERMINISMO IDENTICI, con le due versioni dichiarate",
             csv104 != csvb and len(set(x["csv_sha"] for x in r8)) == 2 and all(x["stato"].startswith("OK") for x in r8) and
-            any("DETERMINISMO XAUUSD/AUDIO_H1" in x and "IDENTICI" in x and "v1.04 e v1.10" in x for x in out8), [x for x in out8 if "DETERMINISMO" in x])
+            any("DETERMINISMO XAUUSD/AUDIO_H1" in x and "IDENTICI" in x and "v1.04 e v1.11" in x for x in out8), [x for x in out8 if "DETERMINISMO" in x])
         chk("riepilogo: le passate v1.04 sono contate e marcate come ARCHIVIO", any("VERSIONI DELL'EA" in x and "v1.04 x 1" in x and "ARCHIVIO" in x for x in out8))
         zp9 = os.path.join(tmp, "NATCLA_F0_C_V105_DIVERSO.zip")
         costruisci_zip(zp9, prova, [dict(lotto="C", sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=csv_diverso, log_txt=log_finto(sim_xau, cfg_h1), righe=15, durata=55)])
@@ -1344,9 +1387,24 @@ def autotest():
         od = []
         riepilogo(carica([Sorgente(zg), Sorgente(zv), Sorgente(z105)]), od)
         det = [x for x in od if "DETERMINISMO XAUUSD/AUDIO_H1" in x]
-        chk("determinismo v1.10: GEOMETRIA (v1.05 e v1.10) contro OLTRE -> 'REGOLE DI STOP DIVERSE', le due GEOMETRIA IDENTICHE, nessun 'DIVERSI' falso",
-            any("REGOLE DI STOP DIVERSE" in x for x in det) and any("[stop GEOMETRIA_ATTUALE]" in x and "IDENTICI" in x and "v1.05 e v1.10" in x for x in det) and
+        chk("determinismo v1.10/v1.11: GEOMETRIA (v1.05 e v1.11) contro OLTRE -> 'REGOLE DI STOP DIVERSE', le due GEOMETRIA IDENTICHE, nessun 'DIVERSI' falso",
+            any("REGOLE DI STOP DIVERSE" in x for x in det) and any("[stop GEOMETRIA_ATTUALE]" in x and "IDENTICI" in x and "v1.05 e v1.11" in x for x in det) and
             not any("DIVERSI:" in x for x in det), det)
+        # ---- v1.11 nella lettura vera: OLTRE_PIU_ESTERNA OK, e contro OLTRE_LINEA_ESTERNA = regole diverse
+        zp2 = os.path.join(tmp, "NATCLA_F0_V111.zip")
+        costruisci_zip(zp2, prova, [dict(lotto="A", sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=b111p, log_txt=log_finto(sim_xau, cfg_h1, stop=OP), righe=6)])
+        r2z = carica([Sorgente(zp2)])["runs"][("XAUUSD", "AUDIO_H1")][0]
+        o2z = []
+        riepilogo(carica([Sorgente(zp2), Sorgente(zv)]), o2z)
+        d2z = [x for x in o2z if "DETERMINISMO XAUUSD/AUDIO_H1" in x]
+        chk("zip v1.11 OLTRE_PIU_ESTERNA: OK; contro una OLTRE_LINEA_ESTERNA -> 'REGOLE DI STOP DIVERSE', nessun 'DIVERSI' falso",
+            r2z["stato"].startswith("OK") and r2z["stop"] == OP and any("REGOLE DI STOP DIVERSE" in x and "OLTRE_PIU_ESTERNA" in x for x in d2z) and
+            not any("DIVERSI:" in x for x in d2z), str(r2z["problemi"]) + str(d2z))
+        zb5 = os.path.join(tmp, "NATCLA_F0_V111_AVVIO.zip")
+        costruisci_zip(zb5, prova, [dict(lotto="A", sim="XAUUSD", cfg="AUDIO_H1", csv_bytes=b111p, log_txt=log_finto(sim_xau, cfg_h1, stop=OL), righe=6)])
+        rb5 = carica([Sorgente(zb5)])["runs"][("XAUUSD", "AUDIO_H1")][0]
+        chk("CONTRO-ESEMPIO zip v1.11: AVVIO dice OLTRE_LINEA_ESTERNA, CSV dice OLTRE_PIU_ESTERNA -> KO(lettore)", rb5["stato"] == "KO(lettore)" and
+            any("riga AVVIO" in x for x in rb5["problemi"]), str(rb5["problemi"]))
     finally:
         import shutil
         shutil.rmtree(tmp, ignore_errors=True)
