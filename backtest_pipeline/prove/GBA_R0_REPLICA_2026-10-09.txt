@@ -99,6 +99,10 @@
 #      (Emiliano dichiara 62 operazioni in ~7 notti, ~9 al giorno, e 12 nel giorno record: compatibile col solo T3).
 #      SMENTITA: n(tre tranche) < 300 = cella quasi VUOTA (terza ipotesi del cancello, spec. par. 13): il merito della REPL non si legge e la misura passa alle celle larghe;
 #      n > 3.500 = il proxy e' sbagliato in un modo da capire PRIMA di leggere PF.
+#  E1b [quota dei segnali di rottura che passano il filtro di spread, e frequenza relativa alla cella 0,05, DERIVATO dal proxy con lo spread vivo di settembre]: sui segnali GREZZI (canale 48 + EMA 100, senza posizione
+#      aperta) passano REPL 4,7% (T1) / 9,4% (T2) / 28,6% (T3); C010 34,8 / 49,9 / 68,4%; C020 91,7 / 93,8 / 96,9%; C035 99,8 / 99,8 / 99,9%. Il "~11%" della spec. par. 13 e' l'ultimo anno intero (11,9%): qui, per tranche,
+#      il 2026 va da meno della meta' a quasi tre volte quel valore, perche' la cella 0,05 e' un filtro di VOLATILITA' (ATR >= 20 x spread = 4-5,4 USD) piu' che di spread. Ingressi rispetto alla REPL (proxy, ordine alla volta):
+#      C010 7,5x / 4,9x / 2,4x, C020 18x / 8,9x / 3,3x, C035 20x / 9,4x / 3,4x in T1 / T2 / T3: la differenza di frequenza fra le celle e' massima dove la volatilita' e' minore (T1) e si schiaccia dove e' massima (T3).
 #  E2 [n, celle larghe]: proxy per giorno feriale in T1 / T2 / T3: C010 14,3 / 18,7 / 26,3; C020 35,2 / 34,2 / 36,2; C035 37,9 / 36,0 / 37,4 = 3.727 / 6.574 / 6.930 ingressi sulle tre tranche.
 #      Sono cifre LARGHE per costruzione: il filtro spread a 0,20 e 0,35 lascia passare il 92-99% dei segnali. Banda 0,5x-2x anche qui.
 #  E3 [PF, ipotesi nulla = la MIA, spec. par. 11.1]: PF della cella REPL in 0,8-1,3. Il proxy da' 0,91 (T1), 0,78 (T2), 1,04 (T3), 0,98 sulle tre insieme (long 1,04 su n 476, short 0,93 su n 581).
