@@ -680,13 +680,13 @@ double GetADX(int, int = 1) { return S.adx; }
 int CopyBuffer(int h, int, int, int count, Arr &a) { if(h != 303) return -1; a.v.assign(count, S.adxTel); return count; }
 int CopyBuffer(int h, int, datetime x, datetime z, Arr &a) {
   if(h != 101 && h != 202) return -1; a.v.clear();
-  for(size_t i = 0; i < S.h1.size(); i++) if(S.h1[i].time >= x && S.h1[i].time <= z) a.v.push_back(h == 101 ? S.h1mid[i] : S.h1atr[i]);
+  for(size_t i = 0; i < S.h1.size(); i++) if(S.h1[i].time >= x && S.h1[i].time <= z && S.h1[i].time <= S.now) a.v.push_back(h == 101 ? S.h1mid[i] : S.h1atr[i]);
   return (int)a.v.size(); }
 int CopyTime(const string &, int, datetime x, datetime z, Vec<datetime> &o) { o.v.clear();
-  for(size_t i = 0; i < S.h1.size(); i++) if(S.h1[i].time >= x && S.h1[i].time <= z) o.v.push_back(S.h1[i].time); return (int)o.v.size(); }
+  for(size_t i = 0; i < S.h1.size(); i++) if(S.h1[i].time >= x && S.h1[i].time <= z && S.h1[i].time <= S.now) o.v.push_back(S.h1[i].time); return (int)o.v.size(); }
 int CopyRates(const string &, int tf, datetime x, datetime z, Vec<MqlRates> &o) { o.v.clear();
   const std::vector<MqlRates> &src = (tf == PERIOD_M1) ? S.m1 : S.h1;
-  for(size_t i = 0; i < src.size(); i++) if(src[i].time >= x && src[i].time <= z) o.v.push_back(src[i]); return (int)o.v.size(); }
+  for(size_t i = 0; i < src.size(); i++) if(src[i].time >= x && src[i].time <= z && src[i].time <= S.now) o.v.push_back(src[i]); return (int)o.v.size(); }
 int iBarShift(const string &, int, datetime t, bool) { int nOk = 0, j = -1;
   for(size_t i = 0; i < S.h1.size(); i++) { if(S.h1[i].time <= S.now) nOk++; if(S.h1[i].time <= t) j = (int)i; }
   if(j < 0) return -1; return nOk - 1 - j; }
@@ -1391,6 +1391,12 @@ def forzati(wins, t_base):
                 st.update(guard=0)
             out.append(("z%d_%s" % (k, tipo), c0, st, book, w))
             k += 1
+    for nome, c, w, att in scenari_a_mano():
+        st = dict(base_st)
+        px = norm(w.C[0], 5)
+        st.update(ask=px, bid=px, digits=5, point=1e-05, ts=1e-05, now=t_base + 10 ** 6 + k * 3600 + 7, bar=t_base + 10 ** 6 + k * 3600)
+        out.append(("zm%d_%s" % (k, nome), c, st, [], w))
+        k += 1
     for w in piccoli[:3]:
         side, atr, mid, rel = py_viola(w, c0)["sides"][0]
         px = norm(mid - 0.03 if side > 0 else mid + 0.03, 2)
