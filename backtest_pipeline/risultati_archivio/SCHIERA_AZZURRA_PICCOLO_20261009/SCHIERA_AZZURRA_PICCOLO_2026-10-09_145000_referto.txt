@@ -1,0 +1,79 @@
+﻿=====================================================================
+ SCHIERA AZZURRA SUL PICCOLO -- SOLO COPIA DI 2 FILE. NESSUN F7.
+ BERSAGLIO : terminale del conto DEMO piccolo 50503392 (cartella dati 215D85D767A1C39E22D242C8114BF9F5), MQL5\Experts e MQL5\Presets
+ NON TOCCATI: FTMO challenge 541452707 e trial 1514806751 (C:\FTMO), 100k 50504263 (cartella -V3), REALE 10105439 (C:\BCM_Reale),
+             manuale 50503635 (C:\MT5_MANUALE), banco 50504400 (C:\MT5_Backtest), Pepperstone, Tickmill.
+ pin preset: 81ebc5e8fefa4d6959a8aacf43aa2dd4f9f9aedb
+ pin EA    : 31a11096d1e7194646ac63e48a43b8a153f95f28
+ macchina  : VMI3047753   utente: Administrator
+ ora       : 2026-10-09 14:50:00  (ora locale del VPS)
+=====================================================================
+[0/7] macchina VMI3047753 e pin accettati.
+[1/7] terminali MT5 vivi su questa macchina (Id, titolo, percorso) -- sola lettura:
+         Id MainWindowTitle                                                                  Path
+         -- ---------------                                                                  ----
+       2960 50503635 - BCMMarkets-Server: Conto Demo - Hedge - BCM Markets Ltd - [CADCHF,H4] C:\MT5_MANUALE\terminal64.exe
+       7528 10105439 - BCMMarkets-Server - Hedge - BCM Markets Ltd - [EURAUD,H1]             C:\BCM_Reale\terminal64.exe
+       9160 1514806751 - FTMO-Demo: Conto Demo - Hedge - FTMO Global Markets Ltd - [Market]  C:\FTMO\terminal64.exe
+      10256 50503392 - BCMMarkets-Server: Conto Demo - Hedge - BCM Markets Ltd - [D30EUR,M5] C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+      PID 10256  titolo "50503392 - BCMMarkets-Server: Conto Demo - Hedge - BCM Markets Ltd - [D30EUR,M5]"
+      eseguibile C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe  proprietario VMI3047753\Administrator (= questa sessione)
+[2/7] cartelle dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal: 8
+      esclusa   04C7A32B575E40027B4FF8724D14D702  origin = "C:\MT5_Backtest" (non e l installazione del processo 50503392)
+      candidata 215D85D767A1C39E22D242C8114BF9F5  origin = "C:\Program Files\BCM Markets MT5 Terminal"
+      esclusa   46C9F8E9FF0C747B2B5E09BCC13D5237  origin = "C:\FTMO" (non e l installazione del processo 50503392)
+      esclusa   73B7A2420D6397DFF9014A20F1201F97  origin = "C:\Program Files\Pepperstone MetaTrader 5" (non e l installazione del processo 50503392)
+      esclusa   857385E4B0F2356AD99AA95CDF40FAE9  origin = "C:\Program Files\Tickmill Europe MT5 Terminal" (non e l installazione del processo 50503392)
+      esclusa   BCA8AD18563BF5B64A433C2662D0A104  origin = "C:\Program Files\BCM Markets MT5 Terminal -V3" (non e l installazione del processo 50503392)
+      esclusa   CF6C240A869369695913FB76DA84BD22  origin = "C:\MT5_MANUALE" (non e l installazione del processo 50503392)
+      esclusa   E23E1504A8D02A22179395F0652B86B6  origin = "C:\BCM_Reale" (non e l installazione del processo 50503392)
+[3/7] certificazione delle candidate (1): nome censito, bases\BCMMarkets-Server, giornale
+      liste di rifiuto usate: numeri 541452707, 1514806751, 10105439, 50504263, 50503635, 50504400 ; parole FTMO, Pepperstone, Tickmill ; percorsi -V3, BCM_Reale, MT5_Backtest, MT5_MANUALE, FTMO, Pepperstone, Tickmill
+      215D85D767A1C39E22D242C8114BF9F5  giornali letti 10, piu recente 20261009.log (2026-10-09 03:23), illeggibili 0, letti solo in coda (oltre 32 MB) 0
+      login visti nel giornale: 50503392
+      -> CONFERMATA: censita, feed BCM, giornale con 50503392 e senza nomi vietati
+[3/7] BERSAGLIO CERTIFICATO -- conto 50503392
+      cartella dati : C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+      installazione : C:\Program Files\BCM Markets MT5 Terminal
+[4/7] prerequisiti di F7 nel terminale (SOLA LETTURA, la riga non li tocca):
+      include ABTG_PausaGuardian.mqh: presente, 112481 byte, 2026-09-03 16:14, sha256 B7462CD5D2F8B903
+      definisce ABTG_GuardiaIngresso(...): True   ABTG_AutotestGuardia(...): True
+      include di libreria Trade\Trade.mqh: True
+[5/7] destinazioni (nessuna scrittura ancora):
+      ABTG_BulgeAzzurra.mq5                 ASSENTE   (C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Experts\ABTG_BulgeAzzurra.mq5)
+      ABTG_BulgeAzzurra_piccolo_demo.set    ASSENTE   (C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Presets\ABTG_BulgeAzzurra_piccolo_demo.set)
+[6/7] scarico e verifico PRIMA di scrivere:
+      ABTG_BulgeAzzurra.mq5                 pin 31a11096  byte 126091  sha B6B06347F6F73B4E  VERIFICATO
+      ABTG_BulgeAzzurra_piccolo_demo.set    pin 81ebc5e8  byte 1215  sha 9F6492B92746CA46  VERIFICATO
+[7/7] copia:
+      ABTG_BulgeAzzurra.mq5: copiato
+      ABTG_BulgeAzzurra_piccolo_demo.set: copiato
+
+=====================================================================
+ RISULTATO -- riletto dal disco del terminale 50503392, non dedotto
+=====================================================================
+  ABTG_BulgeAzzurra.mq5                 C E, ED E QUELLO GIUSTO (sha B6B06347F6F73B4E)
+  ABTG_BulgeAzzurra_piccolo_demo.set    C E, ED E QUELLO GIUSTO (sha 9F6492B92746CA46)
+
+ TAGLIA E IDENTITA nel preset (solo lettura):
+      Use_Orange=false
+      Use_Blue=false
+      Use_Purple=false
+      Use_Azure=true
+      Use_Kill_Switch=true
+      Max_SL_PerDay=4
+      Max_Consecutive_SL=3
+      Max_Daily_Loss_Pct=2.0
+      Risk_Mode=0
+      Risk_Percent=0.5
+      Max_Trades=4
+      InpMagic=774500
+      InpComment=BULGE_AZZURRA
+      Symbols_List=EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY
+      InpUsaGuardian=true
+      InpAutoTest=true
+
+ ESITO: I DUE FILE SONO AL LORO POSTO E VERIFICATI (copiati adesso: 2, gia identici e non toccati: 0).
+        Ora i passi A MANO di report/AZZURRA_PICCOLO_PASSI_2026-10-09.md: F7 nel MetaEditor del terminale 50503392 -> 0 errori -> UN grafico -> preset. Algo Trading globale NON si tocca.
+ Questa riga NON ha compilato, NON ha attaccato EA, NON ha toccato Algo Trading ne processi.
+ Sul piccolo NON gira nessun Guardian: InpUsaGuardian=true e fail-open (nessuna pausa B1, nessun cap C1).
