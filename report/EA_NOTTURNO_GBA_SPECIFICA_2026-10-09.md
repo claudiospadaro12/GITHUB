@@ -44,3 +44,6 @@ Trailing a 2,5 ATR e tempo a 48 barre su M1 = posizioni di ~48 minuti al massimo
 - Finestra notturna come INPUT (ore server) con default 0-24 = nessun filtro: l'asse notte/giorno si MISURA, non si assume.
 - Misure da fare prima di qualunque campo (certificato dei 5): PF/n/DD; uscita ad asse (trailing, tempo, BE on/off); simboli gemelli (XAGUSD? indici? da dichiarare); TF (M1 contro M3 contro M5); ora (notte vs giorno); costo reale (spread di notte) con tick reali.
 - Nulla sul conto reale, nulla sui conti di campo finche' non c'e' il PASS dei cancelli e le firme di Claudio.
+
+## 6. Decisione di Claudio (09/10, dopo la prima stesura): "LOTTI 1, INIZIAMO COSI'"
+Lotto **fisso 1,00** per le prime prove (`InpLotMode=0`, `InpLots=1.00`). 1,00 lotto sull'oro = 100 oz: 1 USD di movimento = 100 USD. Perdita a SL per trade = 2,5 x ATR(M1) x 100 oz: dipende dall'ATR del momento ([NON MISURATO], da leggere nel tester). Il rischio in % del conto dipende dal conto, **che non e' ancora deciso**: sul demo piccolo (saldo ~5.400) un solo SL da 2-3 USD di ATR varrebbe circa 250-300 USD (~5%), su un conto da 100.000 circa 0,3%. [INFERITO: ATR M1 dell'oro dell'ordine di 1 USD, da misurare]. Il conto va scelto da Claudio prima di qualunque campo.
