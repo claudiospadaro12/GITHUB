@@ -37,7 +37,9 @@ della specifica: prefisso <= 21).
 
 ## AVVISI IN CHIARO (da leggere PRIMA del passo 1)
 
-1. **Rischio aperto delle due Bulge sul piccolo: 5,2%.** Bulge VIOLA 4 x 0,8% = 3,2% + Azzurra 4 x 0,5% = 2,0%.
+1. **Rischio aperto delle due Bulge sul piccolo: 5,2%.** Bulge 772700 (VIOLA; se il BLU sia ancora acceso e'
+   NON VERIFICATO, il numero non cambia) 4 x 0,8% = 3,2% + Azzurra 774500 4 x 0,5% = 2,0%. Magic diversi: la
+   Bulge e l'Azzurra non si contano a vicenda (Max_Trades, doppioni e kill switch filtrano per magic).
    E' **sopra il cap C1 firmato (3,25%)**, che sul piccolo comunque **non lo applica nessuno**. Claudio lo sa e
    l'ha deciso il 09/10. E le altre sedie del piccolo si **sommano** a questo numero.
    Per ordine di grandezza (sonda `CODA_01` del 09/10 03:30, profilo ORO, **28 sedie**): la somma dei campi
