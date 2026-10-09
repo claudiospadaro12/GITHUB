@@ -7,8 +7,10 @@ Stato al momento della scrittura: **preparato, NON ancora passato dal cancello**
 verificatore-stringhe + lettore indipendente). Finche' non c'e' il PASS, niente di questo esce verso il VPS.
 **controllo-preventivo (strato 2) 09/10: FAIL corretto qui**, in modo mirato (avvisi 1, 2, 5, nuovo 6 sulla trial
 FTMO viva; bersaglio dei passi 2-4; grafico EURGBP invece di EURUSD; righe ERR attese a secco; proprieta' da menu;
-ora dell'accensione; NON VERIFICATO). Serve il **lettore indipendente** di queste correzioni, e il passo 4
-aspetta la scelta A/B/C di Claudio (avviso 6).
+ora dell'accensione; NON VERIFICATO). **Lettore indipendente 09/10: riga e script PASS** (SHA al pin
+riscaricato = quello dichiarato, cancello deterministico verde, 8 contro-esempi eseguiti su banco); su questa
+pagina tre aggiunte mirate (stato della trial per pesare A/B/C, passo 4 secondo la scelta, ORB CADCHF della
+trial e banco fra i NON VERIFICATI). Il passo 4 aspetta la scelta A/B/C di Claudio (avviso 6).
 
 ---
 
@@ -79,6 +81,13 @@ della specifica: prefisso <= 21).
    posizioni opposte con la trial** (stesso cross raro per la ragione del punto 5; cross correlati, es. AUD/NZD/CAD,
    non stimato). E' lo stesso tema gia' aperto dal 01/10 per la Bulge 772700 del piccolo (HANDOFF, "Decisioni
    aperte": pausa o ridotto ai 7 cross comuni), che Claudio non ha ancora chiuso.
+   **Per pesare la scelta** (aggiunto dal lettore indipendente, 09/10): la trial **non puo' piu' raggiungere
+   l'obiettivo** (+8.000: servivano +22.916,29 l'08/10, `FTMO_TRIAL_AUTOPSIA_2026-10-08.md`) ed e' viva **sul filo**:
+   Guardian sbloccato l'08/10 con `InpTotalDDPct 9.9` (pavimento 144.160, `PRIORITA_EA_E_DA_FARE_2026-10-08.md`),
+   muro FTMO a 144.000, equity **147.248,38** il 09/10 03:30 (`CODA_09`) = circa **3.250 EUR** dal muro. Quindi
+   quello che l'opzione A mette in gioco **non e' l'esito della trial** (gia' deciso dall'obiettivo) ma una
+   violazione della regola dell'hedging registrata da FTMO a nome di Claudio, con conseguenze sulle prossime
+   challenge **[NON MISURATO]** (la domanda al supporto non e' mai stata chiusa).
    **DOMANDA A CLAUDIO, PRIMA DEL PASSO 4** (il passo 0-3 non apre posizioni):
    - **A.** accendere subito sui 22 cross, accettando il rischio sulla trial fino al 14/10;
    - **B.** fare il passo 3 (autotest) ora e il **passo 4 dopo il 14/10** (trial scaduta): zero rischio, costa
@@ -197,6 +206,10 @@ lo si legge **attaccando l'EA con il trading SPENTO per lui**, e lo si accende s
 
 ## PASSO 4: accendere (terminale 50503392, `C:\Program Files\BCM Markets MT5 Terminal`), solo se il passo 3 e' tutto PASS E Claudio ha scelto A/B/C dell'avviso 6
 
+**Quando, secondo la scelta:** con **A** subito dopo il passo 3; con **B** non prima del **15/10** (trial scaduta);
+con **C** **NON con questo preset**: serve il preset a 7 cross, una riga nuova e un cancello nuovo, e questo
+passo 4 si riscrive.
+
 **Bersaglio:** azione a mano dentro MT5, terminale **50503392** (stesso del passo 2, stessa lista di cio' che
 NON si tocca).
 
@@ -234,6 +247,17 @@ NON si tocca).
   (la sonda `CODA_08` non ricostruisce `Symbols_List` della Bulge); che la regola dell'hedging fra conti valga
   per la Free Trial e' [NON MISURATO] (domanda al supporto mai chiusa); quanto spesso Azzurra (piccolo) e VIOLA
   (trial) si troverebbero opposte, sullo stesso cross o su cross correlati, non e' stimato.
+  **E la Bulge potrebbe non essere l'unica sedia della trial sui 22 cross**: la sonda `CODA_02` del 09/10 legge nel
+  giornale della trial (`C:\FTMO`, 08/10 16:30:37) un `ABTG_ORB_Ottimizzato (CADCHF,H1)` con un `BUY STOP` (5 righe),
+  che **non** compare fra le 10 sedie del profilo attivo in `CODA_01` (li' l'ORB e' su US30.cash M5). Se quel grafico
+  e' ancora aperto, CADCHF e' gia' fra i 15; il verso dell'ORB (rottura, a favore) e' lo stesso dell'Azzurra, quindi
+  il rischio d'hedging su quel cross non cresce, ma l'elenco delle sedie trial sui cross **non e' chiuso**.
+- **Il banco simulato "19 scenari su 19"** non e' in repo. Il lettore indipendente ne ha rifatto **8** con un banco
+  suo (pwsh 7 su Linux, `Get-Process`/CIM finti, download VERO dai pin): sessione Master, `-V3` col titolo del
+  piccolo, titolo `505033920...`, giornale con `1514806751`/`FTMO`, terminale chiuso, file gia' presente e diverso
+  -> tutti **uscita 1, niente scritto**; include assente -> **uscita 2**; caso buono -> **uscita 0**, SHA dei due
+  file riletti uguali ai congelati, **zero** file nella cartella `-V3`. Non e' Windows PowerShell 5.1 (quello lo
+  copre il parser del cancello, non un'esecuzione).
 - **Che la Bulge 772700 del piccolo giri col preset SOLO_VIOLA o ancora con BLU+VIOLA**: HANDOFF 01/10 lo dava
   "non ancora applicato" e la sonda `CODA_08` non ricostruisce gli `Use_*` della Bulge. Il rischio dell'avviso 1
   non cambia (lo limita Max_Trades), l'etichetta "Bulge VIOLA" si'.
