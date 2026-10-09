@@ -55,3 +55,36 @@ Letto per intero il passaggio sull'oro (dal "sistema sull'oro, il GBA" a inizio 
 - **Frequenza**: "ma anche l'orario funziona molto bene, pero' ti fa un'operazione al giorno, due operazioni": riferito a una variante con filtro ORARIO (quindi con la finestra il numero di operazioni cala a 1-2 al giorno). Non e' la frequenza della versione senza filtro. [LETTURA NOSTRA, ambigua]
 - **Altro detto**: la perdita giornaliera massima e' usata ("se perdo piu' di 5.000 euro ti fermi" come esempio); "adesso l'ho disabilitato"; stanotte "da 49 a 68" e "da 88 a 202" (prezzi dell'oro in punti, senza lotti ne' valuta: non interpretabile); "non vi posso dare l'EA".
 **Conseguenza:** EMA/ATR sullo stesso TF del segnale come default dichiarato (assi da misurare: M1/M3, EMA 50/100); le ore notturne diventano un asse da misurare con le fasce a priori (come per il Bulge), non un valore da assumere. Se Claudio vuole la risposta vera, va chiesta a Emiliano (e' disponibile "anche di notte").
+
+## 8. SECONDA FOTO (nitida) -- pannello Input + pannello statistiche dell'EA di Emiliano (09/10, ~08:59 sul suo orologio)
+File: `docs/live_emiliano/GBA_pannello_input_2026-10-09.jpg`, `GBA_pannello_statistiche_2026-10-09.jpg`. Tutto sotto e' **letto da foto** (alcune righe del pannello statistiche si sovrappongono) e **DICHIARATO**: nessun numero e' verificabile da noi.
+
+### 8.1 Input: la foto nitida CONFERMA tutti i valori del §2 e scioglie un dubbio
+- **InpLots = 10,0 (non 0,10)**: confermato anche dal pannello statistiche ("Lotto 10.00"). Altri input: passo lotto dei pulsanti 0,0; tetto lotti 0,0; **passo limite perdita giornaliera 500,0**; finestra per la seconda pressione di conferma 4000 (ms); ripristino all'avvio dei valori modificati dal pannello false; InpLogName `GBA_events.csv`; InpStartHour 0 / InpEndHour 24, filtro orario false.
+- **Timeframe di ATR: [INFERITO dai numeri del pannello]** M1. Il pannello dice "Lotto / perdita a SL iniziale 10.00 / 2995.54": con 10 lotti = 1.000 oz, SL = 2995,54/1000 = **2,9955 USD**, cioe' **ATR = 2,9955/2,5 = 1,198 USD** alla barra d'ingresso (ordine di grandezza da M1: l'ATR(14) di M15 sull'oro sarebbe di alcuni USD e lo stop di 10+ USD, cioe' 10.000+ di perdita a 10 lotti). Nello stesso pannello: "ATR(14) / EMA(100) = 1,35 / 4192,93" e "Spread / % ATR (max 5%) = 0,07 / 5,2%" (0,07/1,35 = 5,2%: coerente) -> **lo spread di 0,07 USD era sopra il limite del 5%**: segnale bloccato. EMA100 sullo stesso TF del segnale: ancora [INFERITO] (non letto).
+- Altre righe del pannello: "Canale (48 barre) alto/basso 4196,77 / 4189,85"; "Ultima chiusura 4193,84 (sopra EMA: si')"; "Serve chiusura > / < 4196,77 / 4189,85"; "Distanza dal prezzo (ATR) 2,13 / 3,01"; filtri "spread/sess./perdita/margine ok/ok/ok/ok" (esiste un filtro di SESSIONE oltre a quello di spread); "Direzioni consentite LONG SHORT"; "**Ultimo segnale bloccato 05:22 SPREAD**"; in testa "TRADING NON CONSENTITO / OFF" (EA disabilitato, come detto nella live). Pulsanti sul grafico: TRAILING ON, USCITA TEMPO ON, **BREAKEVEN ON**, FILTRO SPREAD ON, VISTA COMPATTA, AZZERA CONTATORI, CHIUDI POSIZIONE; spinner per lotto, kSL, kTrail, barre max uscita, N canale, spread max, perdita giornaliera max.
+
+### 8.2 Conto di Emiliano (dichiarato, foto)
+Simbolo "XAUUSD, 100 oz, Forward contract" (CFD/futures-like). Balance 192.299,54, equity 193.191,25, margine libero 192.991,25, leva 1:500, **hedging**. **Perdita a SL / equity = 1,55%** per operazione a 10 lotti (2.995,54 su ~193.000). Commissione "fissa 3,9" detta a voce [DICHIARATO]; le uscite a -35,02 / -35,64 sono compatibili con 10 lotti x ~3,5 di commissione [INFERITO].
+
+### 8.3 Statistiche del suo EA (tutte le chiusure dell'EA) [DICHIARATE da foto]
+| Voce | Valore | Nota nostra |
+|---|---:|---|
+| Operazioni / vinte / perse | 62 / 29 / 31 | 2 operazioni a zero? [NON LETTO] |
+| Win rate / profit factor | 46,8% / 2,03 | |
+| Netto (comm. e swap inclusi) | 61.517,73 | su equity ~193k |
+| di cui uscite EA | 32.628,34 | resto = **28.889,39 (47%) da uscite MANUALI/ESTERNE** [DERIVATO per sottrazione: la riga e' coperta da un'etichetta] |
+| Expectancy per operazione | 992,22 | |
+| Media vinta / persa | 4.188,42 / -1.816,56 | payoff 2,31 -> win rate di pareggio 30,2% [DERIVATO] |
+| Migliore / peggiore | 21.491,28 / -3.685,89 | **la migliore = 35% del netto** [DERIVATO] |
+| Drawdown realizzato ora / max | 0,00 / 16.168,05 | 8,4% di 193k [DERIVATO] |
+| Oggi: operazioni / netto | 12 / 24.961,69 | 1 manuale/esterna oggi: +285,03 |
+| Ultime operazioni (09/10) | 06:39 BUY +11.991,37 SL/trailing; 06:04 BUY -35,02; 05:34 BUY -35,02; 05:34 BUY +285,03 MANUALE/ESTERNO; 05:30 BUY -35,64 | tutte **BUY**, fra le 05:30 e le 06:39 **dell'orologio del suo pannello** (ora server o locale: NON dichiarata) |
+Coerenza interna [DERIVATO]: 29 x 4.188,42 = 121.464; 31 x 1.816,56 = 56.313; PF lordo 2,16, netto 65.151 contro 61.518 mostrati (differenza ~3.600 = commissioni+swap su 62 operazioni): torna entro cio' che il pannello chiama "comm. e swap inclusi". Sulle 5 ultime, **3 su 5 perdite sono da -35** (= stop a pareggio per breakeven: costano solo la commissione).
+
+### 8.4 Che cosa ne facciamo (ipotesi da misurare, mai criteri)
+1. **Il campione e' sottile e non e' tutto EA**: 62 operazioni in ~una settimana, **47% del netto da uscite manuali/esterne**, **il 35% del netto in un solo trade** (+21.491). PF 2,03 e "nessuna notte negativa" sono letture dichiarate su campione sottile, concentrate su pochi trade grossi (trailing su un impulso). Un EA con payoff 2,3 e win rate 47% e' plausibile come trend following da breakout, **ma 62 operazioni non lo provano**.
+2. **Breakeven a +1 ATR trasforma molte perdite in -35**: la media persa di -1.816 e' fatta da pochi stop pieni (peggiore -3.686 = ~1,2x lo stop iniziale per slippage/gap) e molti pareggi: da misurare l'effetto del BE (acceso/spento) come asse.
+3. **Il filtro di spread a 5% dell'ATR e' l'ingresso vero dell'EA**: il pannello mostra "ultimo segnale bloccato 05:22 SPREAD" e lo spread del momento (0,07) e' gia' 5,2%. La frequenza nostra dipende da quanto spesso lo spread BCM sull'oro passa quel cancello (**NON MISURATO**: il tester a M1 con spread vero e' la prima misura).
+4. **Ore**: le operazioni visibili sono fra le 05:30 e le 06:39 (suo orologio). Le ore vere restano da chiedergli.
+5. **Lotto**: 10 lotti (1,55% del suo conto da 193k) contro **1 lotto deciso da Claudio per noi**. Su un conto piu' piccolo del suo, 1 lotto e' piu' rischioso in %: da ricalcolare sul conto scelto.
