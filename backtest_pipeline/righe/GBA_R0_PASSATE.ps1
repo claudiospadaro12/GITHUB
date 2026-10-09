@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_GBA_R0_PASSATE_v1
+#  MARCATORE_GBA_R0_PASSATE_v2
 #  GBA_R0_PASSATE.ps1 -- PASSO 0 (sonda) E PASSO 1 (replica) DI 'GoldBreakoutATR' (ABTG_GoldBreakoutATR v1.10) SU XAUUSD
 #
 #  CHE COSA FA, e una cosa sola:
@@ -41,6 +41,12 @@
 #      Mutex Global\ABTG_GBA_R0 (un solo giro alla volta, classe 853), pin di 40 esadecimali, SHA256 di EA/include/prova passati dalla riga (classe 166),
 #      compilazione verificata dall'esistenza dell' .ex5 NUOVO (classe 1168), log di MetaEditor letto in inglese e italiano, CloseMainWindow e MAI
 #      Stop-Process sul terminale, TLS 1.2 qui dentro (classe 1156), cartella e zip esistenti RINOMINATI con la data e mai cancellati.
+#   9. (v2, verificatore-stringhe 09/10) DEPOSITO ESAURITO = KO: a lotto fisso 1,00 e migliaia di operazioni le celle larghe possono consumare il deposito
+#      (proxy: fino a ~-76.000 USD per tranche su 100000 EUR). Allora l'EA salta gli ingressi ('[GBA] MARGINE INSUFFICIENTE') o il tester fa stop out, e n e PF
+#      escono TRONCATI senza nessun errore. Ogni riga '[GBA] MARGINE INSUFFICIENTE', 'stop out', 'no money', 'not enough money' o '[GUARDIA] ... INGRESSO' del
+#      giornale della passata = KO. Le righe '[GBA] ERRORE ordine' si contano nella testa del log (non KO).
+#  10. (v2) la profondita' dei tick (Modello 4) si giudica SOLO sulla riga di XAUUSD: la riga 'EURUSD: ticks data begins from' (simbolo di conversione, conto in EUR)
+#      non conta. I due formati delle soglie AVVIO usano InvariantCulture esplicita (non l'operatore -f).
 #
 #  E' UN BACKTEST, NON UN ORDINE. [Experts] AllowLiveTrading=false nel .ini: il terminale del PC di backtest e' loggato sul DEMO 50503392 e il 14/08/2026
 #  da questa macchina sono partiti ordini VERI.
@@ -431,7 +437,7 @@ function LeggiCoda($path, $offset){
   } finally { $fs.Close() }
 }
 # la riga AVVIO e le righe dei parametri, scritte come l'EA le stampa (PrintFormat: spread a 3 decimali, gli altri decimali a 2)
-function Dec2($s){ return ('{0:0.00}' -f (Num $s)) }
+function Dec2($s){ return (Num $s).ToString('0.00', $IC) }
 function NeedlesAvvio($cella, $magic){
   $n = New-Object System.Collections.ArrayList
   [void]$n.Add('AVVIO v' + $VERSIONE_ATTESA)
@@ -442,7 +448,7 @@ function NeedlesAvvio($cella, $magic){
   [void]$n.Add('InpChannelBars=' + $pinH['InpChannelBars'] + ' (')
   [void]$n.Add('InpEmaPeriod=' + $pinH['InpEmaPeriod'] + ' |')
   [void]$n.Add('InpAtrPeriod=' + $pinH['InpAtrPeriod'] + ' |')
-  [void]$n.Add('InpSpreadMaxATR=' + ('{0:0.000}' -f (Num $cella['InpSpreadMaxATR'])))
+  [void]$n.Add('InpSpreadMaxATR=' + (Num $cella['InpSpreadMaxATR']).ToString('0.000', $IC))
   [void]$n.Add('InpAllowLong=' + $pinH['InpAllowLong'] + ' | InpAllowShort=' + $pinH['InpAllowShort'])
   [void]$n.Add('InpSL_ATR=' + (Dec2 $pinH['InpSL_ATR']) + ' |')
   [void]$n.Add('InpTrail_ATR=' + (Dec2 $pinH['InpTrail_ATR']) + ' |')
@@ -530,7 +536,7 @@ foreach($ru in $runs){
 
   # --- lettura delle sole righe scritte DOPO la fotografia
   $gbaMsg = @{}; $gbaSt = @{}; $gbaOrd = New-Object System.Collections.ArrayList; $nGrezze = 0
-  $fin = @{}; $evTester = @{}; $barreGen = $null; $tickGen = $null; $tickIni = @{}; $illeggibili = 0
+  $fin = @{}; $evTester = @{}; $barreGen = $null; $tickGen = $null; $tickIni = @{}; $illeggibili = 0; $nSoldi = 0
   foreach($f in @(ElencoLog)){
     $off = 0; if($foto.ContainsKey($f.FullName)){ $off = [long]$foto[$f.FullName] }
     if($f.Length -le $off){ continue }
@@ -547,6 +553,8 @@ foreach($ru in $runs){
         elseif($msg.Length -gt $gbaMsg[$kk2].Length){ $gbaMsg[$kk2] = $msg }
         continue
       }
+      # deposito esaurito / ordine rifiutato per soldi / Guardian che blocca: n e PF della passata sarebbero TRONCATI in silenzio (deviazione 9)
+      if($riga -match '(?i)stop out|no money|not enough money|\[GUARDIA\].*INGRESSO'){ $nSoldi = $nSoldi + 1; if($evTester.Count -lt 60){ $evTester[$riga.Trim()] = $true }; continue }
       $mf = $reFin.Match($riga)
       if($mf.Success){ $fin[($mf.Groups['sim'].Value + '|' + $mf.Groups['tf'].Value + '|' + $mf.Groups['da'].Value + '|' + $mf.Groups['ha'].Value + '|' + $mf.Groups['a'].Value + '|' + $mf.Groups['hb'].Value)] = $mf; continue }
       $mb = $reBarre.Match($riga)
@@ -560,9 +568,11 @@ foreach($ru in $runs){
   $motivi = New-Object System.Collections.ArrayList
   if($timeout){ [void]$motivi.Add('timeout di ' + $TimeoutRunMin + ' minuti') }
   # --- il giornale dell'EA: AVVIO, AUTOTEST, CONTA FINE, ingressi
-  $testoAvvio = ''; $nIngr = 0; $autoPass = 0; $autoFail = 0; $contaFine = 0; $avvioRighe = 0
+  $testoAvvio = ''; $nIngr = 0; $autoPass = 0; $autoFail = 0; $contaFine = 0; $avvioRighe = 0; $nMargine = 0; $nErrOrd = 0
   foreach($kk2 in $gbaOrd){
     $m3 = $gbaMsg[$kk2]
+    if($m3.StartsWith('[GBA] MARGINE INSUFFICIENTE')){ $nMargine = $nMargine + 1 }
+    if($m3.StartsWith('[GBA] ERRORE ordine')){ $nErrOrd = $nErrOrd + 1 }
     if($m3.StartsWith('[GBA] AVVIO v')){ $avvioRighe = $avvioRighe + 1 }
     if($m3 -match '^\[GBA\] (AVVIO|SEGNALE|SPREAD|LATI|USCITE|BREAKEVEN|ESECUZIONE|RISCHIO|IDENTITA)'){ $testoAvvio = $testoAvvio + $m3 + "`n" }
     if($reIngresso.IsMatch($m3)){ $nIngr = $nIngr + 1 }
@@ -583,6 +593,7 @@ foreach($ru in $runs){
   elseif($autoPass -ne 1){ [void]$motivi.Add('AUTOTEST: righe VERDETTO PASS = ' + $autoPass + ' (attesa 1)') }
   else { $autoOk = 'si' }
   if($contaFine -lt 1){ [void]$motivi.Add('riga [GBA-CONTA] FINE assente (OnDeinit non girato? passata interrotta?)') }
+  if($nMargine -gt 0 -or $nSoldi -gt 0){ [void]$motivi.Add('DEPOSITO NON BASTATO: ' + $nMargine + ' ingressi saltati per MARGINE INSUFFICIENTE (EA) e ' + $nSoldi + ' righe stop out / no money / Guardian nel giornale: n e PF di questa passata sono TRONCATI. Si rifa con un deposito piu alto, non si legge') }
   # finestra girata, dal giornale del tester
   $finest = 'non letta'
   if($fin.Count -eq 1){
@@ -597,9 +608,10 @@ foreach($ru in $runs){
   elseif($barreGen -ge $AVVISO_BARRE){ Dico ('   ATTENZIONE: barre generate ' + $barreGen + ' fra ' + $AVVISO_BARRE + ' e ' + $TETTO_BARRE + ': vicino al tetto') 'Yellow' }
   $tickIniTxt = (($tickIni.Keys | Sort-Object) -join ' / ')
   if($modello -eq 4){
-    $okTick = $false
-    foreach($tk in @($tickIni.Keys)){ $pz2 = $tk -split ' '; if($pz2[0] -eq $SIMBOLO -and $pz2[1].CompareTo($tr['da']) -le 0){ $okTick = $true } }
-    if($tickIni.Count -eq 0){ Dico '   (la riga "ticks data begins from" non e nel giornale di questa passata: succede se i tick erano gia in cache; si riconferma dal report)' 'Yellow' }
+    $okTick = $false; $nTickSim = 0
+    foreach($tk in @($tickIni.Keys)){ $pz2 = $tk -split ' '; if($pz2[0] -eq $SIMBOLO){ $nTickSim = $nTickSim + 1; if([string]::CompareOrdinal($pz2[1], $tr['da']) -le 0){ $okTick = $true } } }
+    # conta SOLO la riga di XAUUSD: quella di EURUSD (conversione, conto in EUR) non dice niente sui tick dell'oro
+    if($nTickSim -eq 0){ Dico ('   (la riga "ticks data begins from" di ' + $SIMBOLO + ' non e nel giornale di questa passata (altre: ' + $tickIniTxt + '): succede se i tick erano gia in cache; si riconferma dal report)') 'Yellow' }
     elseif(-not $okTick){ [void]$motivi.Add('ticks data begins from ' + $tickIniTxt + ': DOPO l inizio della tranche ' + $tr['da'] + ' (prima di quella data MT5 genera i tick: non sono reali)') }
   }
   # il report .htm
@@ -636,7 +648,7 @@ foreach($ru in $runs){
   }
   # il log dell'EA di questa passata, per intero
   $lg = New-Object System.Collections.ArrayList
-  [void]$lg.Add('# passata ' + $etich + '   ini gba_' + $tag + '.ini   durata ' + [int]$dur + ' s   righe [GBA] uniche ' + $gbaOrd.Count + ' (grezze ' + $nGrezze + ')')
+  [void]$lg.Add('# passata ' + $etich + '   ini gba_' + $tag + '.ini   durata ' + [int]$dur + ' s   righe [GBA] uniche ' + $gbaOrd.Count + ' (grezze ' + $nGrezze + ')   margine insufficiente ' + $nMargine + '   stop out/no money/Guardian ' + $nSoldi + '   errori d ordine ' + $nErrOrd)
   foreach($e in $evTester.Keys){ [void]$lg.Add('# TESTER ' + $e) }
   foreach($e in $fin.Keys){ [void]$lg.Add('# FINESTRA ' + $e) }
   foreach($kk2 in $gbaOrd){ [void]$lg.Add($gbaSt[$kk2] + '   ' + $gbaMsg[$kk2]) }

@@ -51,6 +51,21 @@
 //|  Nessun'altra modifica. Dal vivo, e nel tester con storia        |
 //|  davanti, nessun cambiamento atteso (il tocco non cambia valori  |
 //|  ne' stato). NON compilato qui: la verifica e' il lotto C0.      |
+//|  v1.10 (09/10, decisione di Claudio 08/10: data/natcla/LEGGIMI.md|
+//|  risposta 2): regola di stop NUOVA dietro InpStopModo. Default   |
+//|  GEOMETRIA_ATTUALE = la v1.05 bit per bit (NC_StopSetup chiama   |
+//|  NC_Stop con gli stessi argomenti e non legge gli altri).        |
+//|  OLTRE_LINEA_ESTERNA = stop di TUTTA la scala a InpStopOltreU u  |
+//|  (20) OLTRE la linea esterna della famiglia: Supertrend 3,5 per  |
+//|  le linee Supertrend, EMA200 per la linea EMA200 (motore M2).    |
+//|  Linea esterna discorde dal lato del setup = setup scartato e    |
+//|  contato; linea esterna DENTRO la scala = vince X4 (contato).    |
+//|  CSV: tre colonne IN CODA (stop_modo, linea_stop, stop_esito).   |
+//|  Il numero 1.06 resta al PIANO B del tocco (report/NATCLA_PIANO_ |
+//|  B_V106_2026-10-08.md, NON applicato: il lotto C0 lo ha reso     |
+//|  inutile). CaricaDati e le righe del tocco NON sono toccate.     |
+//|  NON compilato qui (nessun MetaEditor): report/NATCLA_V110_STOP_ |
+//|  2026-10-09.md dice cosa manca.                                  |
 //|                                                                  |
 //|  MAPPA REGOLA -> CODICE (sigle della specifica, par. 1)          |
 //|   I1-I3 Supertrend HL2 +/- k x ATR10 ......... NC_STCore (puro)  |
@@ -76,6 +91,8 @@
 //|   E7 setup contemporanei (semaforo) ........ Aperti/Sincronizza  |
 //|   S1-S4 rischio e pesi ..................... NC_LottiSetup (puro)|
 //|   X1-X4 stop comune ........................ NC_Stop (puro)      |
+//|   X1 v1.10 stop oltre la linea esterna ..... NC_StopSetup,       |
+//|              NC_FamigliaStop (puri), CalcolaLineaEsterna         |
 //|   X5-X7 take profit, R/R ................... NC_TpFisso/NC_TpEma/|
 //|                                              NC_OrdineValido     |
 //|   X8 parziale/pareggio al TP1 .............. GestisciTP1         |
@@ -91,10 +108,10 @@
 //+------------------------------------------------------------------+
 #property copyright "Ea Nat&Cla - progetto Claudio (ABTG)"
 #property description "Ea Nat&Cla: modo AUDIO (collega) / motore solo EMA200 (audio WA0092). Modo PDF ESCLUSO da Claudio il 07/10/2026. Specifica report/NATCLA_SPECIFICA_2026-10-07.md. Rischio 0,25% = SEGNAPOSTO da firmare da Claudio."
-#property version   "1.05"
+#property version   "1.10"
 #property strict
 
-#define NC_VER "1.05"
+#define NC_VER "1.10"
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -202,6 +219,11 @@ enum ENUM_NC_TP
    NC_TP_FISSO_DAL_RIEMPIMENTO=1,// FISSO_DAL_RIEMPIMENTO
    NC_TP_EMA14_POI_EMA89=2       // EMA14_POI_EMA89 (PDF p17)
   };
+enum ENUM_NC_STOPMODO
+  {
+   NC_STOP_GEOMETRIA_ATTUALE=0,  // GEOMETRIA_ATTUALE (v1.05: InpSLCriterio + InpSLBuffer)
+   NC_STOP_OLTRE_LINEA_ESTERNA=1 // OLTRE_LINEA_ESTERNA (Claudio 08/10: N u oltre ST3,5 / EMA200)
+  };
 
 //==================================================================
 //  INPUT
@@ -283,6 +305,11 @@ input group "=== Stop e uscite (par. 1.7) ==="
 input ENUM_NC_SL InpSLCriterio  = NC_SL_DA_MODALITA; // Criterio di stop (AUDIO ordine profondo, PDF estremo recente) [X1]
 input double InpSLBuffer        = 5;    // Buffer dello stop in u (PDF fig.4 p21; AUDIO [NOSTRA]) [X2]
 input int    InpSLEstremoBarre  = 3;    // "Minimo recente": barre (tocco + 2 precedenti) [NOSTRA, X3]
+//--- v1.10 [decisione di Claudio 08/10/2026, data/natcla/LEGGIMI.md risposta 2]: "20 punti oltre l'EMA200,
+//    oppure 20 punti oltre il Supertrend 3,5" (unita' = InpUnita: pip sul forex, punti di prezzo su indici e
+//    metalli). Default GEOMETRIA_ATTUALE = nessun cambiamento rispetto alla v1.05 (confronto con/senza).
+input ENUM_NC_STOPMODO InpStopModo = NC_STOP_GEOMETRIA_ATTUALE; // Regola di stop: GEOMETRIA_ATTUALE (v1.05) / OLTRE_LINEA_ESTERNA (Claudio 08/10)
+input double InpStopOltreU      = 20.0; // OLTRE_LINEA_ESTERNA: stop a N u oltre ST3,5 (linee Supertrend) / EMA200 (linea EMA200) [FONTE Claudio 08/10]
 input ENUM_NC_TP InpTPCriterio  = NC_TP_DA_MODALITA; // Criterio di take profit (AUDIO dalla linea, PDF EMA14/EMA89) [X5]
 input double InpTPDistanza      = 10;   // TP fisso in u [FONTE A-R22: "10 pip / 10 punti"]
 input double InpRRMin           = -1;   // R/R minimo (-1 = DA_MODALITA: AUDIO 0 spento, PDF 1,0) [X7]
@@ -374,7 +401,9 @@ input double InpPlaceboAtr  = 0;        // PLACEBO (strumento di misura E7): spo
 #define IMB_SEM_SFORATO 32
 #define IMB_RIEMPITI    33
 #define IMB_CHIUSI      34
-#define IMB_N           35
+#define IMB_O_STOPEST   35   // v1.10: linea esterna discorde o non calcolabile -> setup scartato
+#define IMB_O_STOPX4    36   // v1.10: linea esterna dentro la scala -> vince X4 (diagnostica, il setup parte)
+#define IMB_N           37
 
 //==================================================================
 //  FUNZIONI PURE: nessuna chiamata al terminale. Il collaudo
@@ -576,6 +605,38 @@ double NC_Stop(const int criterio,const int s,const double linea,const double pr
       if(criterio==2) crit=linea-s*buf;
    if(s>0) return MathMin(crit,base);
    return MathMax(crit,base);
+  }
+
+//--- v1.10 [decisione di Claudio 08/10/2026]: la linea della FAMIGLIA su cui si misura lo stop.
+//    L = 0/1/2 (Supertrend 2.5/3.0/3.5) -> 2 (la Supertrend 3,5, la piu' esterna delle tre);
+//    L = 3 (EMA200, motore M2) -> 3 (la EMA200 stessa). Indici come NC_L25..NC_LEMA.
+int NC_FamigliaStop(const int L)
+  {
+   return (L==3) ? 3 : 2;
+  }
+
+//--- v1.10: lo stop di UN setup.
+//    modo != 1 (GEOMETRIA_ATTUALE): ritorna NC_Stop con gli STESSI argomenti della v1.05 e non legge
+//    lineaEst/dirEst/oltre: stesso valore, bit per bit (collaudato su casi casuali e sull'oro).
+//    modo 1 (OLTRE_LINEA_ESTERNA): stop = lineaEst - s x oltre (long SOTTO la linea esterna, short SOPRA),
+//    con X4 che resta: mai piu' vicino dell'ordine piu' profondo + buf (si prende il piu' lontano).
+//    esito: 0 = regola applicata; 1 = linea esterna discorde (dirEst != s), non calcolabile (<= 0) o stop
+//    <= 0: ritorna 0.0 e il chiamante SCARTA il setup (mai un ordine senza stop); 2 = la linea esterna
+//    stava dentro la scala e vince X4 (ritorna l'ordine piu' profondo + buf). criterio e' ignorato in modo 1.
+double NC_StopSetup(const int modo,const int criterio,const int s,const double linea,const double profondo,
+                    const double estremo,const double buf,const double lineaEst,const double dirEst,
+                    const double oltre,int &esito)
+  {
+   esito=0;
+   if(modo!=1) return NC_Stop(criterio,s,linea,profondo,estremo,buf);
+   if(dirEst!=(double)s || !(lineaEst>0.0)) { esito=1; return 0.0; }
+   double crit=lineaEst-s*oltre;
+   double base=profondo-s*buf;
+   double r=crit;
+   if(s>0 && crit>base) { r=base; esito=2; }
+   if(s<0 && crit<base) { r=base; esito=2; }
+   if(!(r>0.0)) { esito=1; return 0.0; }
+   return r;
   }
 
 //--- X5: TP fisso. criterio 0 = dalla linea (WA0092), 1 = dal riempimento.
@@ -809,6 +870,7 @@ int hEma9=INVALID_HANDLE, hEma21=INVALID_HANDLE, hAtrN=INVALID_HANDLE, hAdx=INVA
 double gO[], gH[], gL[], gC[], gEma[], gAtrN[], gAdx[];
 datetime gT[];
 double gLV[], gLD[], gWa[], gWu[], gWd[];   // linea in esame: valore, direzione, lavoro
+double gXV[], gXD[], gXa[], gXu[], gXdn[];  // v1.10: linea ESTERNA della famiglia (stop): valore, direzione, lavoro
 int    gN=0;
 datetime gTbar0=0, gUltimaBarra=0;
 
@@ -849,6 +911,8 @@ struct NCSetup
    double   distApertura;
    ulong    posId[8];
    int      nPosId;
+   double   lineaStop;      // v1.10: linea esterna usata per lo stop (0 = GEOMETRIA_ATTUALE o setup adottato)
+   int      stopEsito;      // v1.10: esito di NC_StopSetup (0 regola, 2 vince X4)
   };
 NCSetup  gSet[NC_NL];
 datetime gUltimoEp[NC_NL];   // chiave dell'ultimo episodio usato (nessun riarmo sullo stesso: X10)
@@ -872,7 +936,8 @@ string   gImbNome[IMB_N]=
    "ritardo","apertura lontana","semaforo","nessun ordine valido","solo conta","ARMATO","ENTRATO",
    "ord prezzo superato","ord TP corto","ord R/R","ord stops level","ord lotto<min","ord guardian",
    "ord invio fallito","ORDINI PIAZZATI","ord SL n/d","ord costo<cancello","semaforo sforato",
-   "riempimenti","setup chiusi"
+   "riempimenti","setup chiusi",
+   "stop linea esterna discorde","stop X4 prevale"
   };
 
 //==================================================================
@@ -1086,6 +1151,12 @@ bool Risolvi(string &err)
    //--- U1
    gU=CalcolaUnita(gUDescr);
    if(!(gU>0)){ err="unita' u non valida (InpUnitaManuale <= 0?)"; return false; }
+   //--- v1.10: la regola nuova di stop sostituisce InpSLCriterio. Due regole di stop insieme = ambiguo: rifiutato.
+   if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA)
+     {
+      if(!(InpStopOltreU>0)){ err="InpStopOltreU <= 0 con InpStopModo=OLTRE_LINEA_ESTERNA"; return false; }
+      if(InpSLCriterio!=NC_SL_DA_MODALITA){ err="InpSLCriterio a mano con InpStopModo=OLTRE_LINEA_ESTERNA: due regole di stop, quale vale e' ambiguo"; return false; }
+     }
    //--- S1, S4
    if(!(InpRischioSetupPct>0)){ err="InpRischioSetupPct <= 0"; return false; }
    gRischioMax=(InpRischioMaxSetupPct>0) ? InpRischioMaxSetupPct : InpRischioSetupPct;
@@ -1123,13 +1194,13 @@ void Cfg(const string nome,const string valore,const string etichetta)
 
 void StampaConfigurazione()
   {
-   string avvio=StringFormat("AVVIO v%s | modalita' %s | %s %s | 1 u = %s (%s) | 1 pip = %s | magic %s | linee %s%s%s%s | ADX %s, %s, max %.1f, periodo %d | ingresso %s | rischio setup %.2f%% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian %s | solo conta %s | placebo %.2f ATR | fonte SOLO AUDIO (PDF escluso 07/10)",
+   string avvio=StringFormat("AVVIO v%s | modalita' %s | %s %s | 1 u = %s (%s) | 1 pip = %s | magic %s | linee %s%s%s%s | ADX %s, %s, max %.1f, periodo %d | ingresso %s | rischio setup %.2f%% (SEGNAPOSTO DA FIRMARE DA CLAUDIO) | guardian %s | solo conta %s | placebo %.2f ATR | fonte SOLO AUDIO (PDF escluso 07/10) | stop %s",
                              NC_VER,NomeModalita(),_Symbol,EnumToString(gTF),DoubleToString(gU,_Digits),gUDescr,
                              DoubleToString(PipMT(),_Digits),IntegerToString(gMagic),
                              gUsaLinea[0] ? "ST25 " : "",gUsaLinea[1] ? "ST30 " : "",gUsaLinea[2] ? "ST35 " : "",gUsaLinea[3] ? "E200" : "",
                              gAdxUsa ? "ACCESO" : "spento",(InpAdxTipo==NC_ADX_WILDER) ? "iADXWilder" : "iADX MetaQuotes",InpAdxMax,InpAdxPeriodo,
                              (gIngresso==0) ? "SCALA3_PENDENTI" : "MERCATO_PIU_PENDENTE",InpRischioSetupPct,
-                             InpUsaGuardian ? "ON (nel tester FAIL-OPEN)" : "OFF",InpSoloConta ? "SI" : "no",InpPlaceboAtr);
+                             InpUsaGuardian ? "ON (nel tester FAIL-OPEN)" : "OFF",InpSoloConta ? "SI" : "no",InpPlaceboAtr,StopDescr());
    Print("[NatCla] ",avvio);
    if(gFh!=INVALID_HANDLE) FileWrite(gFh,"#"+avvio);
    Cfg("InpTF",EnumToString(gTF),Orig(InpTF!=PERIOD_CURRENT)+" [FONTE A-R8 / P-p05]");
@@ -1165,6 +1236,7 @@ void StampaConfigurazione()
    Cfg("MoltConfluenza",DoubleToString(InpMoltConfluenza,2),"BANDIERA B3 (1,0 = spenta)");
    Cfg("SL",StringFormat("criterio %d (0 ordine profondo, 1 estremo recente, 2 linea), buffer %.2f u, estremo su %d barre",gSLCrit,InpSLBuffer,InpSLEstremoBarre),
        Orig(InpSLCriterio!=NC_SL_DA_MODALITA)+" [FONTE P-p17/p21] / [NOSTRA] audio");
+   Cfg("Stop",StopDescr(),"v1.10 [FONTE Claudio 08/10, LEGGIMI risposta 2]: OLTRE = ST3,5 per le linee Supertrend, EMA200 per la linea EMA200, X4 resta; GEOMETRIA_ATTUALE = v1.05");
    Cfg("TP",StringFormat("criterio %d (0 dalla linea, 1 dal riempimento, 2 EMA14/EMA89), distanza %.2f u, R/R min %.2f",gTPCrit,InpTPDistanza,gRRMin),
        Orig(InpTPCriterio!=NC_TP_DA_MODALITA || InpRRMin>=0)+" [FONTE A-R22 / P-p17]");
    Cfg("TP1",StringFormat("parziale %.1f%%, pareggio %s",InpParzialeTP1Pct,gBE ? "si" : "no"),Orig(InpBEalTP1!=NC_TRI_DA_MODALITA)+" [FONTE P-p17 'posso']");
@@ -1232,7 +1304,7 @@ int OnInit()
    StampaConfigurazione();
    if(gFh!=INVALID_HANDLE)
      {
-      FileWrite(gFh,"tipo;barra;linea;lato;tocco_n;nuovo_ep;troncato;ctx_arm;ctx_tocco;vicino_ok;conferma_ok;dist_apertura_atr;adx;incl_atr;confl_dist_atr;confl_etichetta;ema9;ema21;bb_larg;atr14;linea_prezzo;ingresso;n_ordini;p1;p2;p3;sl;tp1;tp2;tp3;lotto1;lotto2;lotto3;spread;commissione;stop_ped1;stop_ped2;stop_ped3;rischio_soldi;n_riempiti;esito_soldi;esito_R;durata_min;motivo");
+      FileWrite(gFh,"tipo;barra;linea;lato;tocco_n;nuovo_ep;troncato;ctx_arm;ctx_tocco;vicino_ok;conferma_ok;dist_apertura_atr;adx;incl_atr;confl_dist_atr;confl_etichetta;ema9;ema21;bb_larg;atr14;linea_prezzo;ingresso;n_ordini;p1;p2;p3;sl;tp1;tp2;tp3;lotto1;lotto2;lotto3;spread;commissione;stop_ped1;stop_ped2;stop_ped3;rischio_soldi;n_riempiti;esito_soldi;esito_R;durata_min;motivo;stop_modo;linea_stop;stop_esito");
       FileFlush(gFh);
      }
    AdottaEsistenti();
@@ -1311,6 +1383,36 @@ void CalcolaLinea(const int L)
    NC_STCore(gH,gL,gC,gN,0,InpStAtrPeriodo,gMultLinea[L],gWa,gWu,gWd,gLD,gLV);
   }
 
+//--- v1.10: calcola la linea ESTERNA della famiglia di L in gXV (valore) e gXD (direzione), con gli stessi
+//    dati e lo stesso calcolo della linea di setup (NC_STCore / NC_EmaDir). Gira solo con OLTRE_LINEA_ESTERNA.
+//    Array di lavoro propri: gLV/gLD della linea in esame NON vengono toccati.
+void CalcolaLineaEsterna(const int L)
+  {
+   int F=NC_FamigliaStop(L);
+   ArrayResize(gXV,gN); ArrayResize(gXD,gN); ArrayResize(gXa,gN); ArrayResize(gXu,gN); ArrayResize(gXdn,gN);
+   if(F==NC_LEMA)
+     {
+      for(int i=0;i<gN;i++) gXV[i]=gEma[i];
+      NC_EmaDir(gC,gEma,gN,gXD);
+      return;
+     }
+   NC_STCore(gH,gL,gC,gN,0,InpStAtrPeriodo,gMultLinea[F],gXa,gXu,gXdn,gXD,gXV);
+  }
+
+//--- v1.10: linea esterna in vigore DOPO la barra k (per la barra k+1), come LineaPrezzo. Il placebo (E7)
+//    sposta tutta la famiglia dello stesso k x ATR [NOSTRA]: la geometria relativa resta quella senza placebo.
+double LineaEsternaPrezzo(const int k,const int s)
+  {
+   return gXV[k]+s*InpPlaceboAtr*gAtrN[k];
+  }
+
+//--- v1.10: descrizione della regola di stop (riga AVVIO, #cfg;Stop)
+string StopDescr()
+  {
+   if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA) return "OLTRE_LINEA_ESTERNA "+DoubleToString(InpStopOltreU,2)+" u";
+   return "GEOMETRIA_ATTUALE";
+  }
+
 //--- valore di un buffer alla barra chiusa shift 1 (0 se n/d)
 double Buf1(const int h,const int buf)
   {
@@ -1356,6 +1458,7 @@ void OnNewBar()
          Esito(IMB_VAL); Esito(IMB_ND); continue;
         }
       CalcolaLinea(L);
+      if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA) CalcolaLineaEsterna(L);
       if(gIngresso==0) ValutaScala(L);
       else ValutaPdf(L);
      }
@@ -1447,7 +1550,14 @@ void ArmaScala(const int L,const int s,const int last,const int toccoN,const dat
    double p[3];
    NC_PrezziScala(lv,s,InpScalaAnticipo,InpScalaOltre,gU,p);
    for(int i=0;i<3;i++) p[i]=NormPrezzo(p[i]);
-   double sl=NormPrezzo(NC_Stop(gSLCrit,s,lv,p[2],Estremo(s,last),InpSLBuffer*gU));
+   //--- v1.10: GEOMETRIA_ATTUALE -> lest/dest restano 0 e NC_StopSetup e' NC_Stop (v1.05). OLTRE_LINEA_ESTERNA ->
+   //    lo stop parte dalla linea esterna della famiglia in vigore per la barra dopo (stessa normalizzazione di lv).
+   double lest=0, dest=0;
+   int es=0;
+   if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){ lest=NormPrezzo(LineaEsternaPrezzo(last,s)); dest=gXD[last]; }
+   double sl=NormPrezzo(NC_StopSetup((int)InpStopModo,gSLCrit,s,lv,p[2],Estremo(s,last),InpSLBuffer*gU,lest,dest,InpStopOltreU*gU,es));
+   if(es==1){ gImb[IMB_O_STOPEST]++; if(!gArmatoPrima[L]) Log(StringFormat("SCARTATO %s %s: linea esterna dello stop discorde o non calcolabile (dir %.0f, linea %s)",gTag[L],Lato(s),dest,P(lest))); gArmatoPrima[L]=false; Esito(IMB_NESSUNORD); return; }
+   if(es==2) gImb[IMB_O_STOPX4]++;
    double e14=gEma[last], e89=gEma[last];
    if(gTPCrit==2){ e14=Buf1(hEma14,0); e89=Buf1(hEma89,0); }
    double tp[3], tp1=0;
@@ -1473,6 +1583,7 @@ void ArmaScala(const int L,const int s,const int last,const int toccoN,const dat
    gSet[L].tEpisodio=chiave; gSet[L].tSetup=gTbar0; gSet[L].linea=lv; gSet[L].sl=sl; gSet[L].tp1=tp1;
    gSet[L].rischioSoldi=RischioSoldi(dc); gSet[L].adx=adx; gSet[L].incl=incl; gSet[L].conflDist=dc;
    gSet[L].conflEtichetta=(dc<=InpConflTolAtr) ? 1 : 0;
+   gSet[L].lineaStop=lest; gSet[L].stopEsito=es;
    ContestoLog(L,last);
    double ped=Pedaggio();
    int piazzati=0;
@@ -1810,6 +1921,7 @@ void ResetSetup(const int L)
    gSet[L].spread=0; gSet[L].distApertura=0; gSet[L].nPosId=0;
    for(int i=0;i<3;i++){ gSet[L].prezzo[i]=0; gSet[L].tp[i]=0; gSet[L].lotto[i]=0; gSet[L].stopPed[i]=0; }
    for(int i=0;i<8;i++) gSet[L].posId[i]=0;
+   gSet[L].lineaStop=0; gSet[L].stopEsito=0;
   }
 
 void ContestoLog(const int L,const int last)
@@ -2094,7 +2206,8 @@ void ScriviRiga(const string tipo,const int L,const int nRiemp,const double sold
             IntegerToString(gSet[L].nOrdini)+";"+P(gSet[L].prezzo[0])+";"+P(gSet[L].prezzo[1])+";"+P(gSet[L].prezzo[2])+";"+P(gSet[L].sl)+";"+
             P(gSet[L].tp[0])+";"+P(gSet[L].tp[1])+";"+P(gSet[L].tp[2])+";"+D(gSet[L].lotto[0],2)+";"+D(gSet[L].lotto[1],2)+";"+D(gSet[L].lotto[2],2)+";"+
             P(gSet[L].spread)+";"+P(InpCommissionePrezzo)+";"+D(gSet[L].stopPed[0],1)+";"+D(gSet[L].stopPed[1],1)+";"+D(gSet[L].stopPed[2],1)+";"+
-            D(gSet[L].rischioSoldi,2)+";"+IntegerToString(nRiemp)+";"+D(soldi,2)+";"+D(R,3)+";"+D(dur,1)+";"+motivo;
+            D(gSet[L].rischioSoldi,2)+";"+IntegerToString(nRiemp)+";"+D(soldi,2)+";"+D(R,3)+";"+D(dur,1)+";"+motivo+";"+
+            IntegerToString((int)InpStopModo)+";"+P(gSet[L].lineaStop)+";"+IntegerToString(gSet[L].stopEsito);
    FileWrite(gFh,r);
    FileFlush(gFh);
   }
@@ -2118,7 +2231,12 @@ void ScriviConta(const int L,const int last,const int nEp,const bool nuovo,const
    //--- geometria della scala sulla linea della barra dopo (per stop/pedaggio)
    double p[3];
    NC_PrezziScala(lv0,s,InpScalaAnticipo,InpScalaOltre,gU,p);
-   double sl=NC_Stop(gSLCrit,s,lv0,p[2],Estremo(s,last),InpSLBuffer*gU);
+   //--- v1.10: stessa regola di ArmaScala (senza normalizzazione, come la v1.05). esito 1 = setup che l'EA
+   //    scarterebbe: sl 0 e stop_ped 0 nel CSV (mai un rapporto calcolato su uno stop che non esiste)
+   double lest=0, dest=0;
+   int es=0;
+   if(InpStopModo==NC_STOP_OLTRE_LINEA_ESTERNA){ lest=LineaEsternaPrezzo(last,s); dest=gXD[last]; }
+   double sl=NC_StopSetup((int)InpStopModo,gSLCrit,s,lv0,p[2],Estremo(s,last),InpSLBuffer*gU,lest,dest,InpStopOltreU*gU,es);
    double tp[3];
    for(int i=0;i<3;i++) tp[i]=NC_TpFisso((gTPCrit==1) ? 1 : 0,s,lv0,p[i],InpTPDistanza*gU);
    double ped=Pedaggio();
@@ -2130,8 +2248,8 @@ void ScriviConta(const int L,const int last,const int nEp,const bool nuovo,const
             P(e9)+";"+P(e21)+";"+P(bb)+";"+P(atr)+";"+P(lv0)+";"+((gIngresso==0) ? "SCALA3" : "PDF")+";0;"+
             P(p[0])+";"+P(p[1])+";"+P(p[2])+";"+P(sl)+";"+P(tp[0])+";"+P(tp[1])+";"+P(tp[2])+";0;0;0;"+
             P(ped-InpCommissionePrezzo)+";"+P(InpCommissionePrezzo)+";"+
-            D((ped>0) ? MathAbs(p[0]-sl)/ped : 0,1)+";"+D((ped>0) ? MathAbs(p[1]-sl)/ped : 0,1)+";"+D((ped>0) ? MathAbs(p[2]-sl)/ped : 0,1)+";"+
-            "0;0;0;0;0;SOLO_CONTA";
+            D((ped>0 && es!=1) ? MathAbs(p[0]-sl)/ped : 0,1)+";"+D((ped>0 && es!=1) ? MathAbs(p[1]-sl)/ped : 0,1)+";"+D((ped>0 && es!=1) ? MathAbs(p[2]-sl)/ped : 0,1)+";"+
+            "0;0;0;0;0;SOLO_CONTA;"+IntegerToString((int)InpStopModo)+";"+P(lest)+";"+IntegerToString(es);
    FileWrite(gFh,r);
   }
 
