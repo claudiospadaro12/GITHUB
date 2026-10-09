@@ -12,7 +12,7 @@ Lettore: `backtest_pipeline/leggi_natcla_f0.py` (autotest 87/87). Modello 1 OHLC
 
 ## Non misurato / da non leggere troppo
 - Nessun PF/DD (Modello 1 puo' solo bocciare). Il passo 1 (tick reali) non e' partito.
-- 171 righe-ordine con stop_ped dell'EA fuori tolleranza rispetto a |p-SL|/spread (lotto B: 740). Causa NON indagata; in SoloConta non muove ordini, ma il costo in tabella usa lo spread del CSV: da chiarire prima di fidarsi del bordo FRAGILE.
+- 171 righe-ordine con stop_ped dell'EA fuori tolleranza rispetto a |p-SL|/spread (lotto B: 740). Causa NON indagata; in SoloConta non muove ordini, ma il costo in tabella usa lo spread del CSV: da chiarire prima di fidarsi del bordo FRAGILE. **Chiarito il 09/10** (`NATCLA_F0_A_LETTURA_2026-10-09.md`, Controlli): e' l'arrotondamento di prezzi e SL a `_Digits` nel CSV (fino a 1 punto sulla distanza), non dello spread; 0 righe su 171 fuori dalla banda "+/-1 punto", effetto sul costo sotto l'1%.
 - XAGUSD: una finestra con un solo regime e +85% -> setup abbondanti non provano nulla sul merito.
 - Nessuno spread_vivo: 28 simboli senza misura dello spread vivo.
 
