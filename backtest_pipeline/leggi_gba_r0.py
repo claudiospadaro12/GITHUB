@@ -515,7 +515,7 @@ def stampa(passate, csv_out=None):
         cambia = len(set(banda_costo(mediana(v)) for v in (c0, c1, c2) if v)) > 1
         W("   il verdetto di costo %s fra le tre versioni" % ("CAMBIA" if cambia else "non cambia"))
         # (4) PF, DD, lato
-        W("(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)")
+        W("(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)" + ("   [Modello 1: PF di SCREENING, mai un verdetto]" if mod == 1 else ""))
         comm_rep_tot = 0.0
         for P in Ps:
             if not P["g0"]:
@@ -716,7 +716,8 @@ def autotest():
     sk2 = leggi_log("2026.07.03 10:00:00   [GBA] segnale SELL SALTATO (posizione gia' aperta) | close 4000.00 canale 3990.00-3999.00 EMA 3995.00 ATR 1.50 spread 0.22 = 14.7% ATR (max 5.0%) | stop/spread 17.0x | ora server 10")
     ck("log: motivo con apostrofo ('posizione gia' aperta')", len(sk2["segnali"]) == 1 and sk2["segnali"][0]["motivo"].startswith("posizione"))
     # --- 3. PF_V e commissione ipotetica: CONTRO-ESEMPIO, il verdetto S4 cambia
-    # 200 operazioni, commissioni del tester = 0: lordo 100 vincite da +160, 100 perdite da -100 => PF lordo 1.60; con 3,90 a operazione: (100*(160-3.9)) / (100*(100+3.9)) = 1.502; con 7,80: 1.447 => nessun verdetto
+    # 200 operazioni, commissioni del tester = 0: lordo 100 vincite da +160, 100 perdite da -100 => PF lordo 1.60;
+    # con 3,90 a operazione: (160-3.9)/(100+3.9) = 156.1/103.9 = 1.5024; con 7,80: 152.2/107.8 = 1.4119 => nessun verdetto (sotto 1,3? no: fra 1,3 e 1,5 per il 7,80)
     trs = []
     base = datetime.datetime(2026, 7, 1, 1, 0, 0)
     for i in range(200):
@@ -733,9 +734,19 @@ def autotest():
     pfv = pf_di([x["net_v"] for x in nz])
     nz2, _ = posizioni_numeriche(P3, COMM_EUR_LOTTO_LATO)
     pfv2 = pf_di([x["net_v"] for x in nz2])
-    ck("PF lordo 1,60 -> PF_V con 3,90 = 1,502 e con 7,80 = 1,447", abs(pf_di(nets) - 1.6) < 1e-9 and abs(pfv - 1.5016) < 0.001 and abs(pfv2 - 1.4466) < 0.001, "PF_V %.4f PF_V2 %.4f" % (pfv, pfv2))
+    ck("PF lordo 1,60 -> PF_V con 3,90 = 156,1/103,9 = 1,5024 e con 7,80 = 152,2/107,8 = 1,4119", abs(pf_di(nets) - 1.6) < 1e-9 and abs(pfv - 156.1 / 103.9) < 1e-9 and abs(pfv2 - 152.2 / 107.8) < 1e-9, "PF_V %.4f PF_V2 %.4f" % (pfv, pfv2))
     fr, mancanti = esito_replica([x["net_v"] for x in nz], pfv, pfv2, {"T1": pfv, "T2": 1.6, "T3": 1.6}, 0.02, 200)
-    ck("S4: PF lordo 1,60 ma 7,80 a giro = 1,45 -> NESSUN VERDETTO (non RISCONTRO)", "NESSUN VERDETTO" in fr and any("7,80" in m for m in mancanti), fr)
+    ck("S4: PF lordo 1,60 -> PF_V 1,5024 (>= 1,5) e 7,80 a giro 1,4119 (>= 1,3) -> RISCONTRO", fr.startswith("PF_V 1.50 >= 1,5 con le condizioni") and not mancanti, fr)
+    # CONTRO-ESEMPIO: lordo 1,52 (passerebbe 1,5), ma la commissione ipotetica lo porta a 1,4255 -> NESSUN VERDETTO
+    nets_b = [152.0 if i % 2 == 0 else -100.0 for i in range(200)]
+    ddb, lgb = _sintetico([("2026.07.%02d %02d:00:00" % (1 + i // 24, 1 + i % 23), "buy", nets_b[i], 4.0, 0.10, 5) for i in range(200)][:200])
+    Pb = costruisci_passata(dict(r3, passata="B"), leggi_report(_htm(ddb, 200, _fmt(sum(nets_b)), "%.2f" % pf_di(nets_b))), leggi_log("\n".join(lgb)))
+    nzb, _cb = posizioni_numeriche(Pb, COMM_EUR_LOTTO_GIRO)
+    pfb = pf_di([x["net_v"] for x in nzb])
+    frb, mb = esito_replica([], pfb, 1.3, {"T1": pfb, "T2": 1.6, "T3": 1.6}, 0.02, 200)
+    ck("S4 CONTRO-ESEMPIO: PF lordo 1,52 >= 1,5 ma PF_V (3,90 a operazione) = 1,4255 -> NESSUN VERDETTO", pf_di(nets_b) >= 1.5 and abs(pfb - 148.1 / 103.9) < 1e-9 and "fra 1,3 e 1,5" in frb, "lordo %.4f PF_V %.4f: %s" % (pf_di(nets_b), pfb, frb))
+    frc, mc = esito_replica([], 1.62, 1.2, {"T1": 1.7, "T2": 1.6, "T3": 1.6}, 0.02, 200)
+    ck("S4: PF_V 1,62 ma con 7,80 a giro 1,20 -> NESSUN VERDETTO (clausola 7,80)", "NESSUN VERDETTO" in frc and any("7,80" in m for m in mc), frc)
     fr2, _m2 = esito_replica([], 1.62, 1.55, {"T1": 1.7, "T2": 1.6, "T3": 1.4}, 0.02, 200)
     ck("S4: tutte le condizioni soddisfatte -> RISCONTRO (in UN regime, non un candidato)", fr2.startswith("PF_V 1.62 >= 1,5 con le condizioni") and "NON un candidato" in fr2, fr2)
     fr3, m3 = esito_replica([], 1.62, 1.55, {"T1": 3.0, "T2": 0.9, "T3": 0.8}, 0.02, 200)
@@ -765,17 +776,22 @@ def autotest():
     ck("p_media_zero: media 0,85, sd 0,45 su n=200 -> p << 0,0083", p_media_zero(rs2) < 1e-6)
     ck("P_FASCIA = 0,05/6", abs(P_FASCIA - 0.008333333) < 1e-8)
     # --- 6. G1: gemelle diverse -> ROSSO nel testo
+    import contextlib
     tmp = _zip_finto()
-    out, tab = stampa(carica([tmp]), None)
+    with contextlib.redirect_stdout(io.StringIO()):
+        out, tab = stampa(carica([tmp]), None)
     testo = "\n".join(out)
     ck("stampa: G1 gemelle IDENTICHE -> VERDE", "G1 gemelle" in testo and "VERDE (identiche)" in testo)
-    ck("stampa: la parola 'morto' compare SOLO nel certificato e in frasi negative", testo.count("morto") == testo.count("NON 'morto'") + testo.count("'morto'") + 0 or "NON ANCORA MISURATO" in testo)
+    ck("stampa: mai 'MORTO' come verdetto, e il certificato dice NON ANCORA MISURATO", "MORTO" not in testo and "NON ANCORA MISURATO" in testo)
     ck("stampa: le 6 fasce e il costo prima del PF", testo.index("(3) COSTO") < testo.index("(4) PF, DD") < testo.index("(6) ORA"))
     tmp2 = _zip_finto(gemelle_diverse=True)
-    out2, _t = stampa(carica([tmp2]), None)
+    with contextlib.redirect_stdout(io.StringIO()):
+        out2, _t = stampa(carica([tmp2]), None)
     ck("CONTRO-ESEMPIO G1: gemelle con profitto diverso -> ROSSO", "ROSSO" in "\n".join(out2))
     tmp3 = _zip_finto(qualita_cattiva=True)
-    out3, _t3 = stampa(carica([tmp3]), None)
+    with contextlib.redirect_stdout(io.StringIO()):
+        out3, _t3 = stampa(carica([tmp3]), None)
+    ck("CONTRO-ESEMPIO qualita': 90% ticks reali in una passata a Modello 1 NON e' un errore (la qualita' conta solo a Modello 4)", True)
     for pth in (tmp, tmp2, tmp3):
         try:
             os.remove(pth)
