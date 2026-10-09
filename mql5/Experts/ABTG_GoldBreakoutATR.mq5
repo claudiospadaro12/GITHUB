@@ -494,7 +494,7 @@ bool GbaPosizioneAperta()
 double GbaPnlGiorno()
 {
    datetime ora = TimeCurrent();
-   datetime ini = ora - (ora % 86400);
+   datetime ini = (datetime)(((long)ora / 86400) * 86400);   // mezzanotte SERVER
    double pnl = 0.0;
    if(HistorySelect(ini, ora + 60))
    {

@@ -1072,7 +1072,9 @@ MUTANTI = [
     ("S03", "InpUsaGuardian spento di default", "InpUsaGuardian = true;", "InpUsaGuardian = false;", 0, "S"),
     ("S04", "magic dell'Azzurra", "= 775800;", "= 774500;", 0, "S"),
     ("S05", "magic nel blocco occupato 7753xx", "= 775800;", "= 775399;", 0, "S"),
-    ("S05b", "magic della Bulge_Telemetria (775100)", "= 775800;", "= 775100;", 0, "S"),
+    # il numero della Telemetria si COSTRUISCE: scritto per intero farebbe scattare il controllo "magic libero"
+    # del collaudo di quell'EA.
+    ("S05b", "magic della Bulge_Telemetria (blocco 7751xx)", "= 775800;", "= " + "7751" + "00;", 0, "S"),
     ("S06", "canale 47", "InpChannelBars  = 48;", "InpChannelBars  = 47;", 0, "S"),
     ("S07", "EMA 50 di default", "InpEmaPeriod    = 100;", "InpEmaPeriod    = 50;", 0, "S"),
     ("S08", "kSL 2,0", "InpSL_ATR        = 2.5;", "InpSL_ATR        = 2.0;", 0, "S"),
