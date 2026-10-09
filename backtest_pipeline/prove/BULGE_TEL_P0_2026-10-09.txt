@@ -1,0 +1,175 @@
+# =====================================================================
+#  EA: ABTG_Bulge
+#  BULGE_TEL_P0 -- TEST DI ACCETTAZIONE P0 DELLA COPIA DI BANCO ABTG_Bulge_Telemetria (FILE MADRE: l'ORIGINALE).
+#  Scritto il 09/10/2026, PRIMA di qualunque numero. Spec: report/BULGE_VIOLA_TELEMETRIA_SPEC_2026-10-08.md par. 0.1 e 5.
+#  ABTG_Bulge v5.20 (SHA256 ED4E88B1CFBA36AD81658935E8920FE31462AE3202DD61C9C50A039ACEF57BBD, NON modificato) contro la copia
+#  mql5/Experts/ABTG_Bulge_Telemetria.mq5 (SHA256 96502AE5FC99EE65E1EF8C8487057E412B081182DCB03F02BBD07B6E15421144, PASS del cancello,
+#  lettore indipendente chiuso: collaudo 196 controlli / 77 mutanti). H1 (cablato), Modello 1 (OHLC M1, come il file di casa
+#  prove/BULGE_M1_cella_campo_lunga.txt: la scelta e' quella, NON tick reali), deposito 10000. Gira SOLO sul PC di backtest
+#  DESKTOP-H4D7CAJ (regola 21/09). Non tocca sedie, conti, preset, taglie: Risk_Percent 0,80 e Max_Trades 4 sono quelli del preset
+#  trial copiati cosi' come sono.
+#
+#  LA FAMIGLIA P0 (tre file, UN EA per file: il driver compila UN EA per file prova, quindi "originale e copia nella stessa passata
+#  del tester" NON e' costruibile; si fa la cosa piu' vicina: STESSO lancio, STESSO terminale, STESSO storico, STESSI input salvo
+#  magic e InpTelemetria, tre job in fila):
+#     BULGE_TEL_P0_2026-10-09.txt        ABTG_Bulge (originale)                     InpMagic 775101 / 775151   <- QUESTO
+#     BULGE_TEL_P0_2026-10-09_TEL1.txt   ABTG_Bulge_Telemetria, InpTelemetria=1     InpMagic 775111 / 775161
+#     BULGE_TEL_P0_2026-10-09_TEL0.txt   ABTG_Bulge_Telemetria, InpTelemetria=0     InpMagic 775121 / 775171
+#  Ogni file: 2 celle gemelle sul magic (asse tecnico m / m+50, l'unico asse; magic DIVERSO per passata, perche' i nomi dei file
+#  abtg_trades_* e abtg_tel_* dipendono dal magic) x 2 gambe = 4 passate; 12 passate in tutto. Blocco 7751xx: zero occorrenze nel
+#  repo il 09/10 (git grep -w) salvo il default 775100 della copia, che qui NON si usa.
+#  Il TEL0 c'e' perche' il driver lo permette a costo di un job (~70 s): separa "la copia e' rotta anche spenta" da "e' l'osservazione
+#  (letture in piu') che sposta il trading" (classe 1171: la passata FEDELE gira nello stesso giro di quella che osserva).
+#
+#  FINESTRA: 2026.01.01 - 2026.06.30, @FRAZIONEIS 0.5 -> IS 2026.01.01-2026.04.01, OOS 2026.04.02-2026.06.30 (driver r.934).
+#  DUE gambe e non una: con @FRAZIONEIS 1.0 la gamba OOS del driver e' DEGENERE (FromDate dopo ToDate, comportamento di MT5
+#  [NON MISURATO]) e RIGA_ROUND_VPS la scriverebbe NON MISURATO; due gambe danno DUE prove P0 indipendenti, e la IS e' proprio dove
+#  in R92BAB le gemelle di un EA solo differivano (vedi IPOTESI ALTERNATIVA B). Il per-trade e la telemetria che sopravvivono sono
+#  della gamba OOS (ogni file per magic e' riscritto dall'ultima passata). REGIME: primo semestre 2026, lo stesso del forward e di
+#  R92BAB. NON misura il merito: misura se la copia fa le STESSE operazioni dell'originale.
+#  SIMBOLI: 3 cross della cella VIOLA-solo (dentro i 15 del preset trial), grafico NZDCHF (il grafico della cella), Symbols_List
+#  "EURGBP,NZDCHF,CADJPY" (20 caratteri, ordine relativo del preset). Scelti perche' sono fra i piu' attivi nel per-trade di R92BAB_A
+#  (EURGBP 37, NZDCHF 24, CADJPY 22 deal in 2 mesi, cella AMPIA) e perche' CADJPY porta un cross JPY (pip 0,01, 3 decimali): la
+#  telemetria scrive pip_size e i decimali per simbolo, e un solo tipo di cross non li proverebbe.
+#
+#  ATTESE (scritte PRIMA dei numeri)
+#   Confronto per GAMBA (IS, OOS) e per GEMELLA (k=0 magic m, k=1 magic m+50): righe ORIG[g,k], TEL1[g,k], TEL0[g,k] del CSV
+#   OptResults; campi Trades, Profit, Profit Factor, Equity DD % confrontati come STRINGHE ESATTE scritte da OptFrame (Profit a
+#   2 decimali, PF e DD come scritti): piu' stretto di "al centesimo" della spec, dichiarato.
+#   H0 (copia sana): TEL1[g,k] = ORIG[g,k] e TEL0[g,k] = ORIG[g,k] su tutti e quattro i campi, nelle due gambe e per le due gemelle;
+#      in piu', per-trade OOS (abtg_trades_*): ORIG, TEL1 e TEL0 identici deal per deal (stessa gemella) sulle colonne close_time,
+#      symbol, position_id, deal_type, volume, price, net_profit, signal (magic e commenti esclusi: il magic differisce per costruzione).
+#   n atteso [DERIVATO, non soglia]: da R92BAB_A (128 VIOLA su 15 cross in 2 mesi, cella AMPIA) e dai filtri della cella VIOLA-solo
+#      (tolgono il 30-70%): 1,3-3,0 operazioni per cross e mese -> 12-27 Trades per gamba (forchetta larga: 6-45). Con Trades < 10 in
+#      una gamba l'identita' ha POCA POTENZA (pochi percorsi del codice esercitati): il P0 su quella gamba si scrive "DEBOLE" e non si
+#      chiude da sola; Trades = 0 = NON MISURATO (non "identico").
+#   IPOTESI ALTERNATIVA A (quella del mandato): le letture in piu' della copia accesa (iADX creati in TelInit dove l'originale non
+#      li ha, CopyRates M1 sui cross a ogni barra) spostano la simulazione. Cosa produce: TEL1 != ORIG (Trades uguali e Profit/PF/DD
+#      diversi, oppure Trades diversi) MENTRE TEL0 = ORIG. Indistinguibile da un difetto di codice dai soli OptResults: in tutti e
+#      due i casi l'esito e' lo stesso, COPIA ROTTA ACCESA (sotto), e il primo deal diverso del per-trade dice simbolo e ora da cui
+#      ripartire.
+#   IPOTESI ALTERNATIVA B (banco, gia' vista): in R92BAB (01/10) le DUE gemelle di uno STESSO EA differivano nella sola gamba IS
+#      (A -860,62/-860,67; B -92,23/-92,29; C e D -1.014,25/-1.014,27; Trades uguali, PF alla quinta cifra) e coincidevano in OOS; A e
+#      A2 (magic 799401/799451 e 799441/799491) riproducono la STESSA coppia: lo scarto segue la POSIZIONE della passata, non il
+#      valore del magic. Quindi: (i) uno scarto ORIG[IS,0] != ORIG[IS,1] NON e' un difetto della copia, si scrive; (ii) la copia
+#      deve riprodurre la coppia nella STESSA posizione; (iii) se la riproduce SCAMBIATA (TEL[IS,0] = ORIG[IS,1] e TEL[IS,1] =
+#      ORIG[IS,0], esatti sui quattro campi) con la OOS identica, e' un fatto del banco (quale passata prende l'effetto), NON un
+#      difetto della copia: si scrive "IS IDENTICA A MENO DELLO SCAMBIO". Una copia rotta non produce per caso, esatti a 5 decimali,
+#      i numeri dell'ALTRA gemella. Indizio a favore di B, dal giornale dell'agente di R92BAB (LOG_TESTER\0003_Agent-127.0.0.1-3000):
+#      UN solo agente, le due passate IN FILA; la passata 0 della gamba IS dura 7,27 s e porta "history synchronized", la 1 dura
+#      5,57 s: la prima passata di ogni lancio e' diversa per costruzione. Quale delle due gemelle ne paghi lo scarto e' [NON MISURATO].
+#
+#  ESITI (congelati, si applicano DOPO le precondizioni)
+#   PRECONDIZIONI (se manca una, l'esito e' NON MISURATO, mai "identico" ne' "rotto"):
+#     p1 tre job partiti, 2 CSV per job (IS e OOS), 2 righe per CSV, Trades > 0 in ogni riga;
+#     p2 motore = pin dopo ogni job (SHA256 di ABTG_Bulge.mq5, ABTG_Bulge_Telemetria.mq5, ABTG_PausaGuardian.mqh,
+#        walkforward_generico.ps1: classe 166/595, il driver compila dal RAMO lavoro) e file prova = pin;
+#     p3 gli input sono ARRIVATI: nel CSV InpMagic = i due magic del file, Symbols_List di 20 caratteri, e nei due file della copia
+#        InpTelemetria = true/1 (TEL1) e false/0 (TEL0);
+#     p4 la telemetria e' DAVVERO accesa in TEL1 e DAVVERO spenta in TEL0: per i due magic di TEL1 esistono freschi
+#        abtg_tel_segnali_* e abtg_tel_path_*; per i due magic di TEL0 NON ne esiste nessuno fresco. CONTRO-ESEMPIO che p4 ferma: se
+#        il pin InpTelemetria=1 non arrivasse all'EA, TEL1 girerebbe spenta e il P0 uscirebbe "identico" senza aver provato niente;
+#     p5 per-trade abtg_trades_* fresco per tutti e sei i magic.
+#   P0 PASSA: H0 su tutte e quattro le (gamba, gemella), oppure IS a meno dello scambio (B-iii) con OOS identica; per-trade OOS
+#     ORIG = TEL1 = TEL0 deal per deal. Solo allora i numeri della telemetria si possono leggere (dopo il --controlla offline).
+#   COPIA ROTTA ACCESA: TEL0 = ORIG ovunque ma TEL1 != ORIG da qualche parte -> l'osservazione cambia il trading (difetto o ipotesi A):
+#     NESSUN numero della telemetria vale; si consegna il primo deal diverso al developer.
+#   COPIA ROTTA ANCHE SPENTA: TEL0 != ORIG da qualche parte (OptResults o per-trade) -> la copia non e' bit per bit l'originale nemmeno spenta (o il banco non
+#     e' deterministico fra due EA): NESSUN numero della telemetria vale, e TEL1 non si legge.
+#   DEBOLE: P0 passa ma una gamba ha Trades < 10: si scrive cosi', e prima della corsa lunga si rifa' su una finestra piu' lunga.
+#
+#  MISURE DI SCALA (non sono criteri: servono a dimensionare la corsa lunga della spec par. 4)
+#   - durata di ogni job (orologio, driver compreso) e confronto TEL1 / TEL0 / ORIG: riferimento R92BAB_B = 68 s per 1 cross, 4
+#     passate, 4 mesi (~67 s FISSI per job + ~1,3 s per cross ogni 4 mesi, classe 1189: la scala e' fissa + variabile, non lineare);
+#     qui atteso ~70-80 s per job, ~4 minuti di tester in tutto. Lo scarto TEL1 - TEL0 sul job e' DENTRO il rumore del costo fisso
+#     se e' sotto ~10 s, e si dice cosi'. La misura FINE del costo della scrittura sta nel giornale dell'agente: righe
+#     "<n> OnTester result ... : passed in h:mm:ss.fff" (in R92BAB 3,9-7,8 s a passata su 22 cross e 2 mesi), estratte nello zip
+#     (ESTRATTO_LOG.txt); si confrontano le passate 1 (non la 0, che porta la sincronizzazione) di TEL1 e TEL0, gamba per gamba.
+#   - dimensione dei file di telemetria della gamba OOS (byte, righe, segnali, righe di percorso per segnale): attese ~300 righe di
+#     percorso per segnale (M1 k 0..179 + H1 k 3..119 = 297, meno i buchi), 30-150 segnali grezzi per passata, 0,5-5 MB per il file
+#     path. Proiezione [DERIVATA] alla cella lunga (15 cross, gamba OOS 2022.01.01-2026.06.30 = 1.641 giorni, IS 4.382 giorni):
+#     byte_path / (3 cross x 89 giorni) x 15 x giorni della gamba. La spec stimava 100-400 MB: questa corsa ne misura la scala.
+#   - invariante 2 della spec: somma di net sulle righe OPENED del file segnali = Profit della riga OOS di quel magic. Atteso: scarto
+#     < 0,01 (net e' la somma dei deal, commissione d'ingresso compresa). Il per-trade abtg_trades_* NON la regge (scrive solo i deal
+#     di USCITA: la commissione d'ingresso manca, ed e' la causa candidata dei -203,65 di R92BAB_A, [NON VERIFICATA]).
+#   - OFFLINE, sullo zip, per ogni passata TEL1 (una cartella per passata, un file segnali e un file path ciascuna):
+#     python3 backtest_pipeline/sim_bulge_viola_uscite.py --controlla <cartella della passata>
+#     atteso: rigioco coincidente >= 95% delle OPENED e invarianti 3a/3b/4/6 OK. Con 6-45 OPENED il 95% vuol dire 0-2 discordanze:
+#     il numero si scrive con il suo n. Le due gemelle TEL1 in OOS devono dare file di telemetria IDENTICI (SHA256): se no, la
+#     telemetria non e' deterministica e si scrive.
+#  COSA QUESTO P0 NON DICE: non prova la fedelta' della telemetria sulla cella lunga (15 cross, 16,5 anni), non misura il merito, non
+#  misura i tick reali. Prova che, su questi 3 cross e 6 mesi, accendere la telemetria non cambia NESSUNA operazione.
+# =====================================================================
+@SIMBOLO    NZDCHF
+@PERIODO    H1
+@DAQUANDO   2026.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.5
+
+# Bollinger, cuore del motore: NON si tocca
+BB_Period=20
+BB_Deviation=2.0
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+Bulge_Multi=1.1
+Lookback_Bars=20
+# SOLO VIOLA, come il preset trial
+Use_Orange=0
+Use_Blue=0
+Use_Purple=1
+# VIOLA-EA (0): non e' un asse di questo lavoro
+Use_Purple_PineReaction=0
+# v5.20: 1 = barre CHIUSE
+Signal_Bar_Offset=1
+# filtro ATR ACCESO, come il preset trial
+Use_ATR_Filter=1
+ATR_MA_Len=20
+ATR_Max_Mult=1.8
+ATR_Min_Mult=0.5
+# ADX spento, come il preset trial (ADX_Apply_On_Purple=0 comunque)
+Use_ADX_Filter=0
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=1
+ADX_Apply_On_Purple=0
+ADX_Apply_On_Orange=0
+Use_News_Filter=0
+# stringa con virgole: inerte (Use_News_Filter=0); gia' pin del driver
+News_Block_Hours=7,9,11,12,15,22
+# gestione NUDA: nessun parziale, nessun BE, nessun trailing (1 posizione = 1 deal di uscita)
+Enable_Partial_Close=0
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+# kill switch ACCESO, come in origine e nel preset trial
+Use_Kill_Switch=1
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+# 0 = RISK_PER_TRADE. Valori del preset trial copiati cosi' come sono: NON e' una taglia scelta qui
+Risk_Mode=0
+Risk_Percent=0.8
+Total_Risk_Percent=2.0
+Max_Trades=4
+# spento: nel tester non esistono ordini manuali
+Manage_Manual_Orders=0
+Manual_SL_ATR_Mult=3.0
+Enable_BE_1R=0
+BE_At_R=1.0
+BE_Offset_Points=2
+Enable_Trailing_R=0
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+# --- L'UNICO ASSE DI QUESTO FILE: InpMagic (asse tecnico, non di strategia): gemella k=0 775101, gemella k=1 775151
+InpMagic=775101||775101||50||775151||Y
+InpComment=BULGE_V520_FT
+# 3 dei 15 cross del preset trial (20 caratteri), nell'ordine relativo del preset
+Symbols_List=EURGBP,NZDCHF,CADJPY
+# acceso come in campo; nel tester e' INERTE (fail-open)
+InpUsaGuardian=1
+# spento, come nel file di casa (NB: le Print dell'EA in ottimizzazione ESCONO nel giornale dell'agente: R92BAB ha le righe [BULGE] Init)
+InpVerbose=0
+# spento: l'autotest si legge in una passata singola, non qui
+InpAutoTest=0
+# =====================================================================

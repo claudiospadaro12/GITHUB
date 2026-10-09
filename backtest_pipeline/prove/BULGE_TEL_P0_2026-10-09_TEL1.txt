@@ -90,7 +90,7 @@ InpComment=BULGE_V520_FT
 Symbols_List=EURGBP,NZDCHF,CADJPY
 # acceso come in campo; nel tester e' INERTE (fail-open)
 InpUsaGuardian=1
-# spento (in ottimizzazione le Print non escono comunque)
+# spento, come nel file di casa (NB: le Print dell'EA in ottimizzazione ESCONO nel giornale dell'agente: R92BAB ha le righe [BULGE] Init)
 InpVerbose=0
 # spento: l'autotest si legge in una passata singola, non qui
 InpAutoTest=0
