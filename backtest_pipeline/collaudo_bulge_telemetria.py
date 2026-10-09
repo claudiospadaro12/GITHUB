@@ -801,6 +801,11 @@ int main() {
       std::vector<Pos> k; for(auto &q : S.pos) if(q.id != id) k.push_back(q); S.pos = k;
       Deal d; d.ticket = S.nextDeal++; d.posid = id; d.entry = DEAL_ENTRY_OUT; d.time = t; d.price = px; d.reason = reason; d.comment = com;
       d.commission = comm; d.swap = sw; d.profit = prof; S.deals.push_back(d); }
+    else if(cmd == "DEAL") { long id; datetime t; double px, prof, comm, sw; int reason; std::string com;
+      std::cin >> id >> t >> px >> reason >> com >> prof >> comm >> sw;
+      for(auto &c : com) if(c == '~') c = ' ';
+      Deal d; d.ticket = S.nextDeal++; d.posid = id; d.entry = DEAL_ENTRY_OUT; d.time = t; d.price = px; d.reason = reason; d.comment = com;
+      d.commission = comm; d.swap = sw; d.profit = prof; S.deals.push_back(d); }
     else if(cmd == "M1") { int n; std::cin >> n; for(int i = 0; i < n; i++) { MqlRates r; std::cin >> r.time >> r.open >> r.high >> r.low >> r.close >> r.spread; r.tick_volume = 0; r.real_volume = 0; S.m1.push_back(r); } }
     else if(cmd == "H1") { int n; std::cin >> n; for(int i = 0; i < n; i++) { MqlRates r; double md, at; std::cin >> r.time >> r.open >> r.high >> r.low >> r.close >> r.spread >> md >> at; r.tick_volume = 0; r.real_volume = 0; S.h1.push_back(r); S.h1mid.push_back(md); S.h1atr.push_back(at); } }
 #ifdef NUOVO
@@ -961,7 +966,7 @@ class Win:
         self.O[k], self.C[k], self.H[k], self.L[k] = o, c, h, l
 
 
-def w_viola_long(n=60):
+def w_viola_long(n=60, imp=6):
     """VIOLA LONG valido scritto a mano (indici come le serie MT5: 0 = in formazione, 1 = iCnf, 2 = iSig)."""
     w = Win(n)
     for k in range(n):
@@ -969,7 +974,7 @@ def w_viola_long(n=60):
         w.U[k], w.W[k], w.B[k], w.A[k] = 1.010, 0.990, 1.000, 0.004
     w.A[1] = 0.0041                       # ATR della conferma != ATR del segnale
     w.B[1] = 0.9993                       # mediana della conferma != mediana del segnale
-    w.barra(6, 1.000, 0.992, 1.001, 0.989)   # impulso ribassista: tocca 0.990, corpo 0.008
+    w.barra(imp, 1.000, 0.992, 1.001, 0.989)   # impulso ribassista: tocca 0.990, corpo 0.008
     w.barra(3, 0.998, 1.001, 1.002, 0.997)   # attraversa la mediana
     w.barra(2, 0.999, 0.996, 0.999, 0.995)   # iSig
     w.barra(1, 0.993, 0.991, 0.994, 0.989)   # iCnf: tocca la banda bassa, corpo 0.002
@@ -1117,12 +1122,47 @@ def parse_blocchi(lines):
     return res
 
 
+def scenari_a_mano():
+    """(nome, cfg, finestra, lati attesi) scritti A MANO ai bordi di ogni condizione del VIOLA: sulle finestre casuali
+    alcune condizioni (banda piatta, finestra dell'impulso, reazione) non decidono quasi mai."""
+    out = []
+    c0, cp = Cfg(), Cfg(pine=1)
+    out.append(("long_valido", c0, w_viola_long(), [1]))
+    out.append(("short_specchiato", c0, w_viola_long().specchio(), [-1]))
+    w = w_viola_long(); w.W[8] = 0.980
+    out.append(("banda_bassa_non_piatta", c0, w, []))
+    out.append(("banda_alta_non_piatta_specchiato", c0, w.specchio(), []))
+    w = w_viola_long(); w.W[8] = 0.9876
+    out.append(("banda_piatta_al_bordo_0_6_ATR", c0, w, [1]))
+    w = w_viola_long(); w.barra(3, 0.998, 0.999, 0.9995, 0.997)
+    out.append(("mediana_non_attraversata", c0, w, []))
+    out.append(("mediana_non_attraversata_specchiato", c0, w.specchio(), []))
+    w = w_viola_long(); w.barra(4, 1.005, 1.004, 1.011, 1.003)
+    out.append(("banda_opposta_toccata", c0, w, []))
+    w = w_viola_long(); w.barra(1, 0.999, 0.989, 0.999, 0.988)
+    out.append(("reazione_impulsiva", c0, w, []))
+    out.append(("reazione_impulsiva_specchiato", c0, w.specchio(), []))
+    w = w_viola_long(); w.barra(1, 0.993, 0.991, 0.994, 0.9905)
+    out.append(("conferma_non_tocca_la_banda", c0, w, []))
+    out.append(("impulso_rel_40", c0, w_viola_long(imp=41), [1]))
+    out.append(("impulso_rel_41", c0, w_viola_long(imp=42), []))
+    out.append(("impulso_rel_41_specchiato", c0, w_viola_long(imp=42).specchio(), []))
+    out.append(("pine_candela_rossa", cp, w_viola_long(), []))
+    w = w_viola_long(); w.barra(1, 0.990, 0.992, 0.993, 0.989)
+    out.append(("pine_candela_verde", cp, w, [1]))
+    out.append(("offset0_niente", Cfg(off=0), w_viola_long(), []))
+    return out
+
+
 def x1_raw(b, wins, bag, quiet=False):
     cfgs = [Cfg(), Cfg(pine=1), Cfg(off=0), Cfg(lb=10), Cfg(orange=1, blue=1),
             Cfg(adx_use=1, a_purple=1), Cfg(adx_use=1, a_purple=0), Cfg(adx_use=1, a_purple=1, adx_thr=25.0)]
     rnd = random.Random(777)
     txt = ""
     piano = []
+    mano = scenari_a_mano()
+    for nome, c, w, _ in mano:
+        txt += c.riga_raw() + "SCN m_%s %d %r 1 -1.0\n" % (nome, w.n, w.widthMA) + w.arrays()
     for ci, c in enumerate(cfgs):
         txt += c.riga_raw()
         for i, w in enumerate(wins):
@@ -1137,6 +1177,17 @@ def x1_raw(b, wins, bag, quiet=False):
         return
     res = parse_blocchi(out)
     check("__OOR__" not in res, "X1: nessun indice fuori dagli array", bag, quiet=quiet)
+    ko = []
+    for nome, c, w, att in mano:
+        r = res.get("m_" + nome, [])
+        tv = next((ln.split() for ln in r if ln.startswith("TV ")), None)
+        ords = [ln.split()[1] for ln in r if ln.startswith("ORD ") and ln.endswith(("_VIOLA_L", "_VIOLA_S"))]
+        lati = [] if tv is None else ([1] if tv[2] == "1" else []) + ([-1] if tv[3] == "1" else [])
+        lati_cs = [1 if o == "1" else -1 for o in ords]
+        if lati != att or lati_cs != att:
+            ko.append("%s: telemetria %s, CheckSignal %s, atteso %s" % (nome, lati, lati_cs, att))
+    check(not ko, "X1: %d scenari scritti a MANO ai bordi (banda piatta, mediana, banda opposta, reazione, finestra 40/41, PINE, offset): telemetria = CheckSignal = atteso %s"
+          % (len(mano), ko[:3]), bag, quiet=quiet)
     dis_cs = dis_py = 0
     tot = {1: 0, -1: 0}
     bloccati_atr = bloccati_adx = 0
@@ -1507,6 +1558,7 @@ def e2e_testo():
     t += "TIME %d %d\nTICK\n" % (T0 + 1, T0)                                     # 1: long aperto
     t += "PX 0.99312 0.993 5 1e-05 1.0 1e-05 0.01 0.01 100.0 10000.0\nNOW %d\nTICK\n" % (T0 + 600)
     t += "PX 0.99062 0.9905 5 1e-05 1.0 1e-05 0.01 0.01 100.0 10000.0\nNOW %d\nTICK\n" % (T0 + 1200)
+    t += "DEAL 1000 %d 0.997 %d parziale 1.2 -0.25 0.0\n" % (T0 + 30 * 60, 3)          # uscita PARZIALE (DEAL_REASON_EXPERT = 3)
     t += "CLOSE 1000 %d 0.9993 %d tp~0.99930 4.9 -0.5 -0.1\n" % (T0 + 41 * 60, 5)   # DEAL_REASON_TP = 5
     t += "NOW %d\nTICK\n" % (T0 + 42 * 60)
     S = W.specchio()
@@ -1561,7 +1613,7 @@ def x3_e2e(b, bag, quiet=False, tmp=None):
     pth = [r.split(";") for r in lp[1:] if r]
     check(len(sig) == 4 and all(len(r) == 47 for r in sig), "X3: 4 segnali, 47 campi ciascuno", bag, quiet=quiet)
     check(len(pth) > 0 and all(len(r) == 11 for r in pth), "X3: %d righe di percorso, 11 campi ciascuna" % len(pth), bag, quiet=quiet)
-    if len(sig) != 4:
+    if len(sig) != 4 or any(len(r) != 47 for r in sig) or any(len(r) != 11 for r in pth):
         return
     S = {c: [r[i] for r in sig] for i, c in enumerate(sp1)}
     check(S["outcome"] == ["OPENED", "OPENED", "BLOCK_ATR", "BLOCK_MAXTRADES"] and S["side"] == ["1", "-1", "1", "1"]
@@ -1573,11 +1625,11 @@ def x3_e2e(b, bag, quiet=False, tmp=None):
     v1 = dict(pos_id="1000", entry_ref_price="0.99112", atr_sig="0.00400000", risk_dist="0.01200000", sl_price="0.97912",
               tp_ini="0.99930", spread_entry_pts="12", point="0.00001", pip_size="0.00010", imp_bars_ago="5",
               cnf_open="0.99300", cnf_low="0.98900", sig_close="0.99600", bb_mid_cnf="0.99930", bb_lo_cnf="0.99000",
-              bb_width_ratio="1.333333", lots="0.06", risk_money="72.00", commission="-1.00", swap="-0.10", profit="4.90",
-              net="3.80", open_time="2026.10.01 07:00:01", open_price="0.99112", exit_time="2026.10.01 07:41:00",
+              bb_width_ratio="1.333333", lots="0.06", risk_money="72.00", commission="-1.25", swap="-0.10", profit="6.10",
+              net="4.75", open_time="2026.10.01 07:00:01", open_price="0.99112", exit_time="2026.10.01 07:41:00",
               exit_price="0.99930", exit_reason="tp", mfe_r="0.6817", mae_r="0.0517", bars_held="1", exit_after_path="0", adx="22.5000")
     bad = ["%s=%s (atteso %s)" % (k, S[k][0], v) for k, v in v1.items() if S[k][0] != v]
-    check(not bad, "X3: valori del long OPENED (R, SL, TP, lotti, rischio, somme dei deal, MFE/MAE, uscita) %s" % bad, bag, quiet=quiet)
+    check(not bad, "X3: valori del long OPENED (R, SL, TP, lotti, rischio, somme di TUTTI i deal compreso un parziale, uscita = ULTIMO deal OUT, MFE/MAE) %s" % bad, bag, quiet=quiet)
     v2 = dict(pos_id="1001", entry_ref_price="1.01500", sl_price="1.02700", tp_ini="1.00070", exit_reason="sl",
               exit_time="2026.10.01 09:59:00", exit_price="1.02700", net="-8.20", mfe_r="-0.0100", mae_r="1.0000",
               imp_bars_ago="5", exit_after_path="0", bars_held="1", commission="-1.00", lots="0.06")
@@ -1800,10 +1852,17 @@ def suite(raw, old, tmp, bag, quiet=False, ridotto=False, orig_exe=None, wins=No
         if not quiet:
             print("  FAIL compilazione C++: %s" % b.err[:1500])
         return strati, b
-    p_pure(b, strati["P"], quiet=quiet)
-    x1_raw(b, wins[:150] if ridotto else wins, strati["X"], quiet=quiet)
-    x2_ontick(b, wins[:300] if ridotto else wins, strati["X"], quiet=quiet)
-    x3_e2e(b, strati["X"], quiet=quiet, tmp=tmp)
+    passi = (("P", lambda: p_pure(b, strati["P"], quiet=quiet)),
+             ("X", lambda: x1_raw(b, wins[:150] if ridotto else wins, strati["X"], quiet=quiet)),
+             ("X", lambda: x2_ontick(b, wins[:300] if ridotto else wins, strati["X"], quiet=quiet)),
+             ("X", lambda: x3_e2e(b, strati["X"], quiet=quiet, tmp=tmp)))
+    for chi, passo in passi:
+        try:
+            passo()
+        except Exception as ex:          # noqa: BLE001  -- un'eccezione e' un difetto preso, non un crash del collaudo
+            strati[chi].append("eccezione: %r" % (ex,))
+            if not quiet:
+                print("  FAIL eccezione nel collaudo: %r" % (ex,))
     return strati, b
 
 
