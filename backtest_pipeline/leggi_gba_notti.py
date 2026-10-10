@@ -39,7 +39,7 @@ USO (sempre con -I)
   python3 -I backtest_pipeline/leggi_gba_notti.py --autotest
   uscita: 0 letto; 1 ERRORE (nessun numero); 2 nessun lotto applicabile; 3 almeno una passata NON LEGGIBILE (filtro/ini/G0).
 """
-import bisect, contextlib, datetime, hashlib, importlib.util, io, math, os, random, re, statistics, subprocess, sys, tempfile, zipfile
+import bisect, contextlib, csv, datetime, hashlib, importlib.util, io, math, os, random, re, statistics, subprocess, sys, tempfile, zipfile
 
 sys.dont_write_bytecode = True      # non scrivere __pycache__ nel repo (il lettore e' importato da file)
 
@@ -683,60 +683,67 @@ def mediana(v):
     return statistics.median(v) if v else float("nan")
 
 
+SUFFISSO_NV = "[attese del HEAD, NON verificate come quelle della partenza]"
+
+
 def stampa_attese(W, C, st_tot, costo_med):
     """Le attese del file prova accanto ai numeri: dentro/fuori. Nessuna soglia scritta qui: tutto e' letto dal file (riga citata)."""
     prova = C["prova"]
+    nv = bool(C.get("attese_non_verificate"))
+    Wd = (lambda riga: W(riga + "  " + SUFFISSO_NV)) if nv else W
     A = estrai_attese(prova)
     W("(3) ATTESE DEL FILE PROVA (%s, %s), LETTE a runtime accanto ai numeri" % (prova["nome"], descr_git(prova["git"])))
+    if nv:
+        W("   ! ATTESE NON VERIFICATE come quelle della partenza del lotto (vedi sopra): ogni riga DENTRO/FUORI qui sotto porta l'avviso.")
     if not A["sezioni_trovate"]:
-        W("   sezioni delle attese NON trovate nel file prova: dentro/fuori attesa NON VALUTABILE")
+        Wd("   sezioni delle attese NON trovate nel file prova: dentro/fuori attesa NON VALUTABILE")
         return
     n = st_tot["n_ops"]
     nn = st_tot["n_notti"]
     parz = " [TOTALE PARZIALE: mancano %s]" % ", ".join("%s:%s" % m for m in C["mancanti"]) if C["parziale"] else ""
     if A["n_banda"]:
         for lo, hi, riga, fr in A["n_banda"]:
-            W("   n totale = %d%s  | attesa r.%d '%s' = %d-%d -> %s" % (n, parz, riga, asc(fr), lo, hi, "DENTRO attesa" if dentro(n, lo, hi) else "FUORI attesa"))
+            Wd("   n totale = %d%s  | attesa r.%d '%s' = %d-%d -> %s" % (n, parz, riga, asc(fr), lo, hi, "DENTRO attesa" if dentro(n, lo, hi) else "FUORI attesa"))
     else:
-        W("   n totale = %d | banda di n NON letta dal file prova" % n)
+        Wd("   n totale = %d | banda di n NON letta dal file prova" % n)
     sm = A["n_smentita"]
     if sm and (sm.get("lo") or sm.get("hi")):
         for chiave, segno in (("hi", ">"), ("lo", "<")):
             if sm.get(chiave):
                 v, riga, fr = sm[chiave]
                 scatta = (n > v) if chiave == "hi" else (n < v)
-                W("   smentita r.%d '%s': n = %d %s %d? -> %s" % (riga, asc(fr), n, segno, v, "SCATTA: la causa si legge PRIMA di ogni numero (testo della smentita alla riga citata)" if scatta else "non scatta"))
+                Wd("   smentita r.%d '%s': n = %d %s %d? -> %s" % (riga, asc(fr), n, segno, v, "SCATTA: la causa si legge PRIMA di ogni numero (testo della smentita alla riga citata)" if scatta else "non scatta"))
     else:
-        W("   smentita su n: NON letta dal file prova")
+        Wd("   smentita su n: NON letta dal file prova")
     if A["pf_banda"]:
         for lo, hi, riga, fr in A["pf_banda"]:
             sosp = "" if n >= N_MIN_MERITO else "  [merito SOSPESO: n < %d (S1), il numero e' solo descrittivo]" % N_MIN_MERITO
-            W("   PF_V totale = %s | attesa r.%d '%s' = %s-%s -> %s%s" % (fpf(st_tot["pf"]), riga, asc(fr), f2(lo), f2(hi), "DENTRO attesa" if dentro(st_tot["pf"], lo, hi) else "FUORI attesa", sosp))
+            Wd("   PF_V totale = %s | attesa r.%d '%s' = %s-%s -> %s%s" % (fpf(st_tot["pf"]), riga, asc(fr), f2(lo), f2(hi), "DENTRO attesa" if dentro(st_tot["pf"], lo, hi) else "FUORI attesa", sosp))
     else:
-        W("   PF_V totale = %s | banda di PF_V NON letta dal file prova" % fpf(st_tot["pf"]))
+        Wd("   PF_V totale = %s | banda di PF_V NON letta dal file prova" % fpf(st_tot["pf"]))
     if C["costo"]:
         if A["costo_banda"]:
             for lo, hi, riga, fr in A["costo_banda"]:
-                W("   costo mediano (+0,04) = %.1fx | attesa r.%d '%s' = %d-%dx -> %s" % (costo_med, riga, asc(fr), lo, hi, "DENTRO attesa" if dentro(costo_med, lo, hi) else "FUORI attesa"))
+                Wd("   costo mediano (+0,04) = %.1fx | attesa r.%d '%s' = %d-%dx -> %s" % (costo_med, riga, asc(fr), lo, hi, "DENTRO attesa" if dentro(costo_med, lo, hi) else "FUORI attesa"))
         for v, riga, fr in A["costo_punto"]:
-            W("   costo mediano (+0,04) = %.1fx | attesa puntuale r.%d '%s' (nessuna banda scritta: nessun dentro/fuori automatico); soglia S2 del lettore: %s" % (
+            Wd("   costo mediano (+0,04) = %.1fx | attesa puntuale r.%d '%s' (nessuna banda scritta: nessun dentro/fuori automatico); soglia S2 del lettore: %s" % (
                 costo_med, riga, asc(fr), lg.banda_costo(costo_med)))
         if not A["costo_banda"] and not A["costo_punto"]:
-            W("   costo mediano (+0,04) = %.1fx | attesa di costo NON letta dal file prova" % costo_med)
+            Wd("   costo mediano (+0,04) = %.1fx | attesa di costo NON letta dal file prova" % costo_med)
     for np_, nneg, riga, fr in A["notti_punto"]:
-        W("   notti = %d, negative = %d | attesa puntuale r.%d '%s' (nessuna banda: nessun dentro/fuori automatico)" % (nn, st_tot["neg"], riga, asc(fr)))
+        Wd("   notti = %d, negative = %d | attesa puntuale r.%d '%s' (nessuna banda: nessun dentro/fuori automatico)" % (nn, st_tot["neg"], riga, asc(fr)))
     for mx, riga, fr in A["notti_max"]:
-        W("   notti = %d | attesa r.%d '%s' -> %s" % (nn, riga, asc(fr), "DENTRO attesa" if nn <= mx else "FUORI attesa (piu' notti del previsto)"))
+        Wd("   notti = %d | attesa r.%d '%s' -> %s" % (nn, riga, asc(fr), "DENTRO attesa" if nn <= mx else "FUORI attesa (piu' notti del previsto)"))
     for lo, hi, riga, fr in A["notti_banda"]:
-        W("   notti = %d | attesa r.%d '%s' = %d-%d -> %s" % (nn, riga, asc(fr), lo, hi, "DENTRO attesa" if dentro(nn, lo, hi) else "FUORI attesa"))
+        Wd("   notti = %d | attesa r.%d '%s' = %d-%d -> %s" % (nn, riga, asc(fr), lo, hi, "DENTRO attesa" if dentro(nn, lo, hi) else "FUORI attesa"))
     if not A["notti_punto"] and not A["notti_max"] and not A["notti_banda"]:
-        W("   notti = %d | attesa sul numero di notti NON letta dal file prova" % nn)
+        Wd("   notti = %d | attesa sul numero di notti NON letta dal file prova" % nn)
     if st_tot["q"] is not None:
         if A["q_banda"]:
             for lo, hi, riga, fr, tit in A["q_banda"]:
-                W("   q = %s | attesa r.%d '%s' [sezione: %s] = %s-%s -> %s" % (f2(st_tot["q"], 3), riga, asc(fr), asc(tit), f2(lo), f2(hi), "DENTRO attesa" if dentro(st_tot["q"], lo, hi) else "FUORI attesa"))
+                Wd("   q = %s | attesa r.%d '%s' [sezione: %s] = %s-%s -> %s" % (f2(st_tot["q"], 3), riga, asc(fr), asc(tit), f2(lo), f2(hi), "DENTRO attesa" if dentro(st_tot["q"], lo, hi) else "FUORI attesa"))
         else:
-            W("   q = %s | banda di q NON letta dal file prova" % f2(st_tot["q"], 3))
+            Wd("   q = %s | banda di q NON letta dal file prova" % f2(st_tot["q"], 3))
     W("   Il testo INTERO delle sezioni delle attese, dal file prova (la parola vietata del certificato, se presente, e' mascherata con [x]):")
     for tit, riga in A["sezioni_trovate"]:
         sez = [s for s in prova["sezioni"] if s["riga"] == riga][0]
@@ -931,15 +938,37 @@ def stampa_hm5n(W, C5, prove):
 # ---------------------------------------------------------------------------------------------------------------------
 #  CARICAMENTO DEGLI ZIP (anche annidati)
 # ---------------------------------------------------------------------------------------------------------------------
+def _compilazione_fallita(nome_zip, zf):
+    """Uno zip 'lotto con compilazione fallita': nome GBA_R0_<lotto>_COMPILAZIONE_FALLITA.zip, o senza MANIFEST e con un COMPILAZIONE_FALLITA.* dentro.
+    -> (lotto|None, testo del log, prime righe) oppure None."""
+    nomi = [n.replace("\\", "/") for n in zf.namelist() if not n.endswith("/")]
+    m = re.match(r"^GBA_R0_(.+?)_COMPILAZIONE_FALLITA\.zip$", os.path.basename(nome_zip), re.I)
+    log = [n for n in nomi if os.path.basename(n).upper().startswith("COMPILAZIONE_FALLITA")]
+    if not (m or ("MANIFEST_R0.csv" not in nomi and log)):
+        return None
+    testo = ""
+    if log:
+        for n in zf.namelist():
+            if n.replace("\\", "/") == log[0]:
+                testo = zf.read(n).decode("latin-1", "replace")
+    return (m.group(1) if m else None, nome_zip, [r for r in testo.splitlines() if r.strip()][:6])
+
+
 def espandi(percorsi, tmpdir):
     """Uno zip che contiene GLI ZIP dei lotti (e non un MANIFEST_R0.csv alla radice) viene estratto in tmpdir, un file per zip interno, col nome del membro.
-    Tutto passa poi a lg.carica insieme: il controllo dei doppioni vede anche lo stesso lotto caricato due volte (una volta nell'esterno, una a parte)."""
-    out = []
+    Tutto passa poi a lg.carica insieme: il controllo dei doppioni vede anche lo stesso lotto caricato due volte (una volta nell'esterno, una a parte).
+    Gli zip COMPILAZIONE_FALLITA (lotto che non e' partito) NON si caricano: si restituiscono a parte, cosi' il lotto sano si legge lo stesso.
+    -> (percorsi da caricare, [(lotto, origine, righe del log)])"""
+    out, falliti = [], []
     for p in percorsi:
         if os.path.isdir(p):
             out.append(p)
             continue
         z = zipfile.ZipFile(p)
+        cf = _compilazione_fallita(p, z)
+        if cf:
+            falliti.append(cf)
+            continue
         nomi = [n for n in z.namelist() if not n.endswith("/")]
         if "MANIFEST_R0.csv" in [n.replace("\\", "/") for n in nomi]:
             out.append(p)
@@ -949,42 +978,84 @@ def espandi(percorsi, tmpdir):
             out.append(p)               # lg.carica dira' 'manca MANIFEST_R0.csv'
             continue
         for k, n in enumerate(inner):
+            dato = z.read(n)
+            try:
+                cfi = _compilazione_fallita(n.replace("\\", "/"), zipfile.ZipFile(io.BytesIO(dato)))
+            except zipfile.BadZipFile:
+                cfi = None
+            if cfi:
+                falliti.append((cfi[0], os.path.basename(p) + ":" + os.path.basename(n.replace("\\", "/")), cfi[2]))
+                continue
             d = os.path.join(tmpdir, "%d_%d" % (len(out), k))
             os.makedirs(d)
             dest = os.path.join(d, os.path.basename(n.replace("\\", "/")))
             with open(dest, "wb") as f:
-                f.write(z.read(n))
+                f.write(dato)
             out.append(dest)
+    return out, falliti
+
+
+def _diff_righe(dato, letto, etich_dato):
+    import difflib
+    out = []
+    d = list(difflib.unified_diff(dato.decode("latin-1").splitlines(), letto.decode("latin-1").splitlines(), etich_dato, "letto_al_HEAD", n=0, lineterm=""))
+    for r in d[:40]:
+        out.append("     " + asc(r[:230]))
+    if len(d) > 40:
+        out.append("     ... e altre %d righe" % (len(d) - 40))
     return out
 
 
-def copia_prova_nello_zip(percorsi, prova):
-    """Se lo zip contiene una copia del file prova (il driver la copia dentro), la confronta col file letto al HEAD: se e' DIVERSA, le attese sono cambiate fra la
-    partenza del lotto e la lettura, e si stampano le righe che differiscono (una attesa riscritta DOPO i numeri non e' un'attesa)."""
-    import difflib
-    out = []
+def copia_prova_nello_zip(percorsi, prova, lotto):
+    """Le attese sono davvero quelle con cui il lotto e' PARTITO? Si guardano SOLO gli zip il cui MANIFEST_R0.csv contiene il lotto. Tre modi di NON poterlo dire:
+    (1) la colonna 'prova' del MANIFEST dice un altro file prova (rifatto con data nuova: trova_prova() prende l'ultimo in ordine alfabetico);
+    (2) la copia del file prova nello zip e' DIVERSA da quella letta;
+    (3) nessuna copia con quel nome negli zip del lotto (anche: manifest senza colonna 'prova').
+    -> (righe da stampare, attese_non_verificate True/False)."""
+    out, trovate, nv = [], 0, False
     letto = open(prova["percorso"], "rb").read()
     for pth in percorsi:
         if os.path.isdir(pth):
             continue
         try:
             z = zipfile.ZipFile(pth)
+            nomi = {n.replace("\\", "/"): n for n in z.namelist() if not n.endswith("/")}
+            if "MANIFEST_R0.csv" not in nomi:
+                continue
+            man = list(csv.DictReader(io.StringIO(z.read(nomi["MANIFEST_R0.csv"]).decode("ascii", "replace")), delimiter=";"))
         except Exception:
             continue
-        for n in z.namelist():
-            if os.path.basename(n.replace("\\", "/")) == prova["nome"]:
-                dato = z.read(n)
+        mie = [r for r in man if r.get("lotto") == lotto]
+        if not mie:
+            continue
+        zn = os.path.basename(pth)
+        if "prova" not in mie[0]:
+            out.append(" ! il MANIFEST di %s non ha la colonna 'prova': non dice con quale file prova il lotto e' partito" % zn)
+            nv = True
+        else:
+            for nome in sorted(set((r.get("prova") or "").strip() for r in mie)):
+                if nome != prova["nome"]:
+                    out.append(" ! il MANIFEST di %s dice che il lotto e' partito col file prova %s, qui si legge %s: le attese lette NON sono quelle della partenza" % (zn, nome or "(vuoto)", prova["nome"]))
+                    nv = True
+                    for n, orig in nomi.items():
+                        if nome and os.path.basename(n) == nome:
+                            out.append("   la copia di %s dentro %s differisce dal file letto in queste righe:" % (nome, zn))
+                            out += _diff_righe(z.read(orig), letto, "nello_zip")
+        for n, orig in nomi.items():
+            if os.path.basename(n) == prova["nome"]:
+                trovate += 1
+                dato = z.read(orig)
                 if dato == letto:
-                    out.append(" Copia del file prova dentro %s: IDENTICA al file letto (le attese sono quelle con cui il lotto e' partito)." % os.path.basename(pth))
+                    out.append(" Copia del file prova dentro %s: IDENTICA al file letto (le attese sono quelle con cui il lotto e' partito)." % zn)
                 else:
+                    nv = True
                     out.append(" ! Copia del file prova dentro %s: DIVERSA dal file letto (SHA256 zip %s, letto %s): le attese lette sono quelle del HEAD, NON necessariamente quelle con cui il lotto e' partito. Righe che differiscono:" % (
-                        os.path.basename(pth), hashlib.sha256(dato).hexdigest().upper()[:12], prova["sha256"][:12]))
-                    d = list(difflib.unified_diff(dato.decode("latin-1").splitlines(), letto.decode("latin-1").splitlines(), "nello_zip", "letto_al_HEAD", n=0, lineterm=""))
-                    for r in d[:40]:
-                        out.append("     " + asc(r[:230]))
-                    if len(d) > 40:
-                        out.append("     ... e altre %d righe" % (len(d) - 40))
-    return out
+                        zn, hashlib.sha256(dato).hexdigest().upper()[:12], prova["sha256"][:12]))
+                    out += _diff_righe(dato, letto, "nello_zip")
+    if trovate == 0:
+        out.append(" ! Copia del file prova %s NON trovata negli zip del lotto %s: NON verificabile che le attese siano quelle della partenza" % (prova["nome"], lotto))
+        nv = True
+    return out, nv
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -1053,7 +1124,7 @@ def _esegui(argv):
     tmp = tempfile.mkdtemp(prefix="gba_notti_")
     try:
         try:
-            percorsi = espandi(zs, tmp)
+            percorsi, falliti = espandi(zs, tmp)
             passate = lg.carica(percorsi)
         except SystemExit as e:
             print("ERRORE (nessun numero si stampa):\n  %s" % e)
@@ -1078,7 +1149,17 @@ def _esegui(argv):
             S["n_min"], S["q_alta"], S["q_bassa"], S["finestra"]))
         if (S5["n_min"], S5["q_alta"], S5["q_bassa"], S5["finestra"]) != (S["n_min"], S["q_alta"], S["q_bassa"], S["finestra"]):
             W(" ! ATTENZIONE: le soglie della lettura per notte nel file prova M5 sono DIVERSE da quelle di M1 (%s): si usano quelle di ciascuna cella" % ((S5["n_min"], S5["q_alta"], S5["q_bassa"], S5["finestra"]),))
+        for k in ("M1", "M5"):
+            cand = sorted(f for f in os.listdir(PROVE_DIR) if re.match(r"^GBA_R2_NOTTE%s_.*\.txt$" % k, f)) if os.path.isdir(PROVE_DIR) else []
+            if len(cand) > 1 and not opz["prova_m1" if k == "M1" else "prova_m5"]:
+                W(" ! ATTENZIONE: piu' file prova per la cella %s (%s): si legge l'ULTIMO in ordine alfabetico (%s); se il lotto e' partito con un altro, lo dice il confronto col MANIFEST qui sotto." % (k, ", ".join(cand), prove[k]["nome"]))
+        for lab, SS in (("M1", S), ("M5", S5)):
+            mancanti_s = [kk for kk in ("n_min", "q_alta", "q_bassa", "finestra") if SS[kk] is None]
+            if mancanti_s:
+                W(" ! SOGLIE NON LETTE dal file prova %s: %s -> la lettura per notte di quella cella NON e' valutabile (la regex non trova piu' la frase)" % (lab, ", ".join(mancanti_s)))
         W(" Zip caricati: %s" % ", ".join(sorted(set(P["sorgente"] for P in passate))))
+        for lotto_f, orig, righe_f in falliti:
+            W(" ! lotto %s: compilazione fallita, NON letto, vedi COMPILAZIONE_FALLITA.txt (zip %s)%s" % (lotto_f or "?", orig, (" | " + asc(" / ".join(r.strip()[:90] for r in righe_f[:3]))) if righe_f else ""))
         W(" Le parole citate dai file prova passano da un filtro che maschera con [x] la parola vietata dal certificato dei 5 punti; lo script non la scrive.")
         W("=" * 100)
         # lotti non applicabili
@@ -1098,6 +1179,13 @@ def _esegui(argv):
         any_app = False
         for k in ("M1", "M5"):
             Ps = lotti.get(applicabili[k])
+            if not Ps and any(f[0] == applicabili[k] for f in falliti):
+                W("")
+                W(" LOTTO %s (%s): compilazione fallita, NON letto, vedi COMPILAZIONE_FALLITA.txt" % (k, applicabili[k]))
+                C[k] = None
+                any_app = True
+                rc = 3
+                continue
             if not Ps:
                 W("")
                 W(" LOTTO %s (%s): NON PRESENTE fra gli zip caricati" % (k, applicabili[k]))
@@ -1106,12 +1194,18 @@ def _esegui(argv):
             any_app = True
             fk = fascia if k == "M1" else fascia5
             C[k] = valuta_cella(k, prove[k], Ps, fk)
-            copie = copia_prova_nello_zip(percorsi, prove[k])
+            copie, nv = copia_prova_nello_zip(percorsi, prove[k], applicabili[k])
+            C[k]["attese_non_verificate"] = nv
             for riga in copie:
                 W(riga)
             stampa_cella(W, C[k], S if k == "M1" else S5, opz["B"], opz["seed"], fk)
             if C[k]["non_leggibili"] or not C[k]["leggibili"]:
                 rc = 3
+        if not any_app and falliti:
+            W("")
+            W(" NIENTE DA LEGGERE: gli unici zip dei lotti notte hanno la compilazione fallita (vedi sopra).")
+            print("\n".join(out))
+            return 3
         if not any_app:
             W("")
             W(" NIENTE DA LEGGERE: nessuno dei lotti R2NOTTEM1 / R2NOTTEM5 e' fra gli zip caricati. I dati veri del lotto R2NOTTE non sono stati letti da questa corsa.")
@@ -1165,14 +1259,26 @@ def _spec_notte(date0, nets, ora=2, minuto=0, durata=6, passo_giorni=1, lato="bu
     return out
 
 
-def _zip_notte(prova, k, ops_per_tranche, ini_cambi=None, comm=0.0, qualita="100% ticks reali", magic="775800", cella=None, lotto=None, nome_ini_period=None, prova_nello_zip=None):
+_TMPZIP = [None, 0]     # cartella temporanea dell'autotest (ripulita alla fine) e contatore
+
+
+def _nuovo_zip():
+    if _TMPZIP[0] is None:
+        fd, pth = tempfile.mkstemp(suffix=".zip")
+        os.close(fd)
+        return pth
+    _TMPZIP[1] += 1
+    return os.path.join(_TMPZIP[0], "z%03d.zip" % _TMPZIP[1])
+
+
+def _zip_notte(prova, k, ops_per_tranche, ini_cambi=None, comm=0.0, qualita="100% ticks reali", magic="775800", cella=None, lotto=None, nome_ini_period=None, prova_nello_zip=None,
+               nome_copia=None, prova_nome_manifest=None, ingresso_aperto=None):
     """Zip finto di un lotto notte nel formato del driver v5, con ini e manifest coerenti con il file prova (salvo `ini_cambi`)."""
     cella = cella or sorted(prova["celle"])[0]
     lotto = lotto or prova["lotto"]
     att = inputs_attesi(prova, cella)
-    f = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
-    f.close()
-    z = zipfile.ZipFile(f.name, "w")
+    percorso_zip = _nuovo_zip()
+    z = zipfile.ZipFile(percorso_zip, "w")
     righe = []
     tf = int(float(att["InpSignalTF"]))
     per = nome_ini_period or {1: "M1", 5: "M5"}.get(tf, "M%d" % tf)
@@ -1180,6 +1286,8 @@ def _zip_notte(prova, k, ops_per_tranche, ini_cambi=None, comm=0.0, qualita="100
         da, a = prova["tranche"][tr]
         ops = ops_per_tranche[tr]
         deals, lg_ = lg._sintetico(ops, comm)
+        if ingresso_aperto and tr in ingresso_aperto:      # un deal d'ingresso SENZA uscita: non e' una posizione accoppiata
+            deals.append([ingresso_aperto[tr], "9999", "XAUUSD", "buy", "in", "1.00", "4000.00", "9999", "0.00", "0.00", "0.00", "100 000.00", "GBA_L"])
         nets = [x[2] + 2 * comm for x in ops]          # netto di report: profitto + commissioni dei due deal
         tag = "%s_%02d_%s_%s_m%s" % (lotto, j, cella, tr, magic)
         profit = sum(nets)
@@ -1191,25 +1299,24 @@ def _zip_notte(prova, k, ops_per_tranche, ini_cambi=None, comm=0.0, qualita="100
             inp.get("InpSymbol", "XAUUSD"), per, prova["modello"], da, a)
         txt += "\r\n".join("%s=%s" % (kk, vv) for kk, vv in inp.items()) + "\r\nInpMagic=%s\r\n" % magic
         z.writestr("ini\\gba_" + tag + ".ini", txt)
-        righe.append("%s;%s;%s;%s;%s;%s;%s;%s;%s;2026-10-11 10:00:00;60;OK;%d;%s;%.2f;100%%ticksreali;88000;;88000;25000000;;100;%d;si;si;%s-%s;;%s;%s;XAUUSD;%s;PROVA_FINTA.txt" % (
+        righe.append("%s;%s;%s;%s;%s;%s;%s;%s;%s;2026-10-11 10:00:00;60;OK;%d;%s;%.2f;100%%ticksreali;88000;;88000;25000000;;100;%d;si;si;%s-%s;;%s;%s;XAUUSD;%s;%s" % (
             lotto, tag, cella, att.get("InpSpreadMaxATR", "0.05"), tr, da, a, prova["modello"], magic, len(ops), profit, lg.pf_di(nets) if nets else 0.0, len(ops), da, a,
-            prova["asse"] or "InpHourEnd", "7", per))
+            prova["asse"] or "InpHourEnd", "7", per, prova_nome_manifest or prova["nome"]))
     cols = "lotto;passata;cella;spread_max_atr;tranche;da;a;modello;magic;t_avvio;durata_s;stato;trades_report;profitto_report;pf_report;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;righe_gba;ingressi_log;avvio_ok;autotest;finestra;motivi;asse;valore_asse;simbolo;periodo;prova"
     z.writestr("MANIFEST_R0.csv", cols + "\n" + "\n".join(righe) + "\n")
     if prova_nello_zip is not None:
-        z.writestr(prova["nome"], prova_nello_zip)
+        z.writestr(nome_copia or prova["nome"], prova_nello_zip)
     z.close()
-    return f.name
+    return percorso_zip
 
 
 def _zip_esterno(interni):
-    f = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
-    f.close()
-    z = zipfile.ZipFile(f.name, "w")
+    percorso_zip = _nuovo_zip()
+    z = zipfile.ZipFile(percorso_zip, "w")
     for nome, p in interni:
-        z.writestr(nome, open(p, "rb").read())
+        z.writestr(nome, open(p, "rb").read() if os.path.isfile(p) else p)
     z.close()
-    return f.name
+    return percorso_zip
 
 
 def _esegui_catturando(argv):
@@ -1260,8 +1367,24 @@ def _altera_profitto_notte(dat_utf16, nuovo="99 999.00"):
 
 
 def autotest():
+    import shutil
+    d = tempfile.mkdtemp(prefix="gba_notti_test_")
+    _TMPZIP[0], _TMPZIP[1] = d, 0
+    try:
+        return _autotest(d)
+    finally:
+        _TMPZIP[0] = None
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def _autotest(tmpd):
     falliti = []
     conta = [0]
+    saltati = []
+
+    def sk(nome, motivo):
+        saltati.append(nome)
+        print("  SALTATO %s   (%s)" % (nome, motivo))
 
     def ck(nome, cond, dettaglio=""):
         conta[0] += 1
@@ -1278,7 +1401,6 @@ def autotest():
         ck("il lettore importato ha l'SHA256 pinnato", False, str(e))
         print("\nAUTOTEST FALLITO: senza il lettore pinnato non si prosegue")
         return 1
-    tmpd = tempfile.mkdtemp(prefix="gba_notti_test_")
     alt = os.path.join(tmpd, "lettore_alterato.py")
     open(alt, "wb").write(open(LETTORE_PATH, "rb").read() + b"\n# alterato\n")
     try:
@@ -1425,7 +1547,12 @@ def autotest():
             break
     else:
         ck("H-M5N: OGNI riga del paragrafo del file prova (r.%d-%d) e' nell'uscita, parola per parola" % (h5[0][0], h5[-1][0]) if h5 else "H-M5N", bool(h5))
-    ck("la fascia, il commit e l'SHA256 dei file prova sono dichiarati in testa", "File prova M1" in txt and "SHA256" in txt and "ultimo commit" in txt)
+    ck("la fascia e l'SHA256 dei file prova sono dichiarati in testa", "File prova M1" in txt and "SHA256" in txt and "Fascia notturna dichiarata" in txt)
+    if git(["rev-parse", "HEAD"]) is not None:
+        ck("il commit dei file prova (HEAD e ultimo commit che li tocca) e' dichiarato in testa", "ultimo commit che tocca il file" in txt)
+    else:
+        sk("il commit dei file prova e' dichiarato in testa", "git non disponibile su questa macchina: lo script stampa 'git non disponibile (commit NON dichiarabile)'")
+        ck("senza git lo script lo dice invece di tacere", "git non disponibile" in descr_git({"head": None, "ultimo": None, "sporco": None}))
 
     # filtro: un deal d'ingresso alle 07:00 nella T2
     ops_f = {"T1": ops1["T1"], "T2": serie_ops(tr_da["T2"], base_nets[:7]) + _spec_notte("2026.05.20", [10.0], ora=7), "T3": ops1["T3"]}
@@ -1478,6 +1605,56 @@ def autotest():
     zP2 = _zip_notte(pr1, "M1", ops1, prova_nello_zip=testo_prova.replace(b"n 142-160", b"n 100-300"))
     rc, tp2 = _esegui_catturando([zP2, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
     ck("CONTRO-ESEMPIO: copia del file prova nello zip con l'attesa di n riscritta (142-160 -> 100-300) -> 'DIVERSA' e la riga che differisce e' stampata", "DIVERSA dal file letto" in tp2 and "n 100-300" in tp2 and "n 142-160" in tp2, tp2[:300])
+    # LE ATTESE SONO QUELLE DELLA PARTENZA? (classe 1289): copia assente / nome diverso nel MANIFEST / copia diversa -> avviso su OGNI riga DENTRO/FUORI
+    def sez3(t):
+        i0 = t.find("(3) ATTESE DEL FILE PROVA")
+        return t[i0:t.find("Il testo INTERO", i0)] if i0 >= 0 else ""
+
+    def tutte_con_avviso(t):
+        righe3 = [r for r in sez3(t).split("\n") if "attesa r." in r or "smentita r." in r]
+        return bool(righe3) and all(SUFFISSO_NV in r for r in righe3)
+    ck("copia IDENTICA e stesso nome nel MANIFEST: NESSUN avviso 'NON verificate' ne' sulle righe DENTRO/FUORI ne' altrove", SUFFISSO_NV not in tp and "NON trovata" not in tp and "dice che il lotto e' partito" not in tp and bool(sez3(tp)))
+    rc, ta = _esegui_catturando([zA, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("(a) zip SENZA copia del file prova: 'NON trovata negli zip del lotto', rc 0, e OGNI riga DENTRO/FUORI della sezione (3) porta '[attese del HEAD, NON verificate come quelle della partenza]'",
+       rc == 0 and "Copia del file prova %s NON trovata negli zip del lotto R2NOTTEM1: NON verificabile" % pr1["nome"] in ta and tutte_con_avviso(ta), sez3(ta)[:900])
+    nome_vecchio = pr1["nome"].replace("2026-10-10", "2026-10-09")
+    zN = _zip_notte(pr1, "M1", ops1, prova_nello_zip=testo_prova.replace(b"n 142-160", b"n 100-300"), nome_copia=nome_vecchio, prova_nome_manifest=nome_vecchio)
+    rc, tn = _esegui_catturando([zN, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("(b) il MANIFEST dice un altro file prova (2026-10-09) e la sua copia ha l'attesa di n riscritta: avviso 'il MANIFEST ... dice che il lotto e' partito col file prova ... qui si legge ...'",
+       ("dice che il lotto e' partito col file prova %s, qui si legge %s: le attese lette NON sono quelle della partenza" % (nome_vecchio, pr1["nome"])) in tn, tn[tn.find("MANIFEST"):tn.find("MANIFEST") + 300])
+    ck("... la riga che differisce nella copia col nome vecchio e' stampata (n 100-300 contro n 142-160)", "n 100-300" in tn and "n 142-160" in tn)
+    ck("... e ogni riga DENTRO/FUORI porta l'avviso (anche la copia col nome giusto manca: NON trovata)", tutte_con_avviso(tn) and "NON trovata" in tn)
+    ck("(c) copia DIVERSA (stesso nome, attesa riscritta): ogni riga DENTRO/FUORI porta l'avviso", tutte_con_avviso(tp2))
+    zB2 = _zip_notte(pr5, "M5", zM5_ops, prova_nello_zip=testo_prova, nome_copia=pr1["nome"])
+    rc, tl = _esegui_catturando([zA, zB2, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("la copia del file prova M1 dentro lo zip del lotto M5 NON conta per M1 (si guardano solo gli zip il cui MANIFEST contiene il lotto): M1 resta 'NON trovata'",
+       "Copia del file prova %s NON trovata negli zip del lotto R2NOTTEM1" % pr1["nome"] in tl, tl[:100])
+    # COMPILAZIONE_FALLITA (classe 1290): il lotto sano si legge lo stesso
+    cf_zip = os.path.join(tmpd, "GBA_R0_R2NOTTEM1_COMPILAZIONE_FALLITA.zip")
+    zc = zipfile.ZipFile(cf_zip, "w")
+    zc.writestr("COMPILAZIONE_FALLITA.log", "error 123: undeclared identifier 'X'\r\n")
+    zc.close()
+    ext2 = _zip_esterno([("GBA_R0_R2NOTTEM1_COMPILAZIONE_FALLITA.zip", cf_zip), ("GBA_R0_R2NOTTEM5.zip", zB)])
+    rc, tcf = _esegui_catturando([ext2, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("GBA_R2_NOTTE.zip con un COMPILAZIONE_FALLITA dentro: NON e' un ERRORE, il lotto fallito e' 'compilazione fallita, NON letto', rc 3", rc == 3 and "ERRORE" not in tcf
+       and "lotto R2NOTTEM1: compilazione fallita, NON letto, vedi COMPILAZIONE_FALLITA.txt" in tcf, "rc=%s\n%s" % (rc, tcf[:500]))
+    ck("... il lotto sano (M5) si legge lo stesso: 3 passate LEGGIBILI, e il log della compilazione e' citato", tcf.count("-> LEGGIBILE") == 3 and "undeclared identifier" in tcf)
+    rc, tcf2 = _esegui_catturando([cf_zip, "--senza-ancora", "--prova-m1", p1, "--prova-m5", p5])
+    ck("un COMPILAZIONE_FALLITA di R2NOTTEM1 passato da solo: rc 3 (non 2: c'e' un lotto che non e' partito), 'compilazione fallita, NON letto' e il lotto M5 'NON PRESENTE'", rc == 3 and "lotto R2NOTTEM1: compilazione fallita, NON letto" in tcf2 and "LOTTO M5 (R2NOTTEM5): NON PRESENTE" in tcf2, "rc=%s" % rc)
+    cf_altro = os.path.join(tmpd, "GBA_R0_R2ALTRO_COMPILAZIONE_FALLITA.zip")
+    open(cf_altro, "wb").write(open(cf_zip, "rb").read())
+    rc, tcf3 = _esegui_catturando([cf_altro, "--senza-ancora", "--prova-m1", p1, "--prova-m5", p5])
+    ck("un COMPILAZIONE_FALLITA di un lotto non notte, da solo: rc 3 e 'NIENTE DA LEGGERE' (non rc 2)", rc == 3 and "lotto R2ALTRO: compilazione fallita" in tcf3 and "NIENTE DA LEGGERE" in tcf3, "rc=%s\n%s" % (rc, tcf3[-400:]))
+    # controllo diretto su TUTTI i deal d'ingresso, non solo le posizioni accoppiate
+    zO = _zip_notte(pr1, "M1", ops1, ingresso_aperto={"T2": "2026.05.20 09:00:00"})
+    rc, to = _esegui_catturando([zO, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("un deal d'ingresso fuori fascia (09:00) SENZA uscita accoppiata -> 'FILTRO NON COME DICHIARATO / INPUT DIVERSI:' (1 su 9), passata T2 NON LEGGIBILE, rc 3",
+       "1 deal d'ingresso su 9 con ora server FUORI" in to and "FILTRO NON COME DICHIARATO / INPUT DIVERSI:" in to and rc == 3 and to.count("-> NON LEGGIBILE") == 1, "rc=%s\n%s" % (rc, to[:900]))
+    # le soglie non leggibili vengono DETTE
+    pm_s = os.path.join(tmpd, "prova_senza_soglia.txt")
+    open(pm_s, "wb").write(open(p1, "rb").read().replace(b"COMPATIBILE", b"COMPAT"))
+    rc, tsg = _esegui_catturando([zA, "--senza-ancora", "--bootstrap", "50", "--prova-m1", pm_s, "--prova-m5", p5])
+    ck("se la frase delle soglie non e' piu' leggibile (COMPATIBILE -> COMPAT) lo script lo dice: 'SOGLIE NON LETTE ... q_bassa' e la lettura q e' 'non valutabile'", "SOGLIE NON LETTE dal file prova M1: q_bassa" in tsg and "non valutabile" in tsg, tsg[:1500])
     # attese: confini dentro/fuori e smentite (stretti: > 175 e < 130)
     for n_, atteso_in, sm_hi, sm_lo in ((142, True, False, False), (160, True, False, False), (141, False, False, False), (161, False, False, False), (175, False, False, False), (176, False, True, False), (130, False, False, False), (129, False, False, True)):
         righe_ = []
@@ -1634,10 +1811,8 @@ def autotest():
     # 6. i file prova non vengono modificati dall'autotest (sha prima/dopo) e il lettore nemmeno
     ck("il lettore non e' stato modificato dall'autotest (SHA256 invariato)", sha256_file(LETTORE_PATH) == LETTORE_SHA256)
     ck("i file prova non sono stati toccati dall'autotest", sha256_file(p1) == pr1["sha256"] and sha256_file(p5) == pr5["sha256"])
-    import shutil
-    shutil.rmtree(tmpd, ignore_errors=True)
     print("")
-    print("controlli ESEGUITI: %d, falliti: %d" % (conta[0], len(falliti)))
+    print("controlli ESEGUITI: %d, SALTATI: %d%s, falliti: %d" % (conta[0], len(saltati), (" (" + "; ".join(saltati) + ")") if saltati else "", len(falliti)))
     if falliti:
         print("AUTOTEST FALLITO:")
         for n in falliti:
