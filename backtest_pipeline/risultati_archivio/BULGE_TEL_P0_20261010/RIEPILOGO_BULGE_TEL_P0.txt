@@ -1,0 +1,54 @@
+BULGE_TEL_P0 -- pin a1d8f381969d9401e1b362beaf4c761b739486de -- data 2026-10-10 09:46:00 -- pc DESKTOP-H4D7CAJ
+job: BTP0_ORIG 60 s rc 3 | BTP0_TEL1 53 s rc 3 | BTP0_TEL0 53 s rc 3
+compilazione della copia: 0 errori, 0 avvisi (-1 = riga non letta)
+
+RIGHE OptResults (k=0 = primo magic, k=1 = secondo):
+  IS  k=0 BTP0_ORIG  magic 775101 : Trades 95 | Profit 183.06 | PF 1.15671 | DD% 4.8036
+  IS  k=0 BTP0_TEL1  magic 775111 : Trades 95 | Profit 183.06 | PF 1.15671 | DD% 4.8036
+  IS  k=0 BTP0_TEL0  magic 775121 : Trades 95 | Profit 183.06 | PF 1.15671 | DD% 4.8036
+  IS  k=1 BTP0_ORIG  magic 775151 : Trades 95 | Profit 183.06 | PF 1.15671 | DD% 4.8036
+  IS  k=1 BTP0_TEL1  magic 775161 : Trades 95 | Profit 183.06 | PF 1.15671 | DD% 4.8036
+  IS  k=1 BTP0_TEL0  magic 775171 : Trades 95 | Profit 183.06 | PF 1.15671 | DD% 4.8036
+  OOS k=0 BTP0_ORIG  magic 775101 : Trades 94 | Profit 85.58 | PF 1.05837 | DD% 6.2640
+  OOS k=0 BTP0_TEL1  magic 775111 : Trades 94 | Profit 85.58 | PF 1.05837 | DD% 6.2640
+  OOS k=0 BTP0_TEL0  magic 775121 : Trades 94 | Profit 85.58 | PF 1.05837 | DD% 6.2640
+  OOS k=1 BTP0_ORIG  magic 775151 : Trades 94 | Profit 85.58 | PF 1.05837 | DD% 6.2640
+  OOS k=1 BTP0_TEL1  magic 775161 : Trades 94 | Profit 85.58 | PF 1.05837 | DD% 6.2640
+  OOS k=1 BTP0_TEL0  magic 775171 : Trades 94 | Profit 85.58 | PF 1.05837 | DD% 6.2640
+
+CONFRONTO CON L ORIGINALE (stringhe esatte, nessuna tolleranza):
+  BTP0_TEL1 IS: k=0 IDENTICHE   ||   k=1 IDENTICHE   => DIRETTO
+  BTP0_TEL1 OOS: k=0 IDENTICHE   ||   k=1 IDENTICHE   => DIRETTO
+  BTP0_TEL0 IS: k=0 IDENTICHE   ||   k=1 IDENTICHE   => DIRETTO
+  BTP0_TEL0 OOS: k=0 IDENTICHE   ||   k=1 IDENTICHE   => DIRETTO
+
+GEMELLE DELLO STESSO EA (R92BAB: in IS differivano di 0,02-0,06 in Profit; NON e un difetto della copia, si scrive):
+  BTP0_ORIG IS: IDENTICHE
+  BTP0_ORIG OOS: IDENTICHE
+  BTP0_TEL1 IS: IDENTICHE
+  BTP0_TEL1 OOS: IDENTICHE
+  BTP0_TEL0 IS: IDENTICHE
+  BTP0_TEL0 OOS: IDENTICHE
+
+PER-TRADE (abtg_trades_*, ultima gamba scritta = OOS) CONTRO L ORIGINALE:
+  BTP0_TEL1 k=0 (775101 / 775111): IDENTICI, 94 deal di uscita (colonne close_time,symbol,position_id,deal_type,volume,price,net_profit,signal)
+  BTP0_TEL1 k=1 (775151 / 775161): IDENTICI, 94 deal di uscita (colonne close_time,symbol,position_id,deal_type,volume,price,net_profit,signal)
+  BTP0_TEL0 k=0 (775101 / 775121): IDENTICI, 94 deal di uscita (colonne close_time,symbol,position_id,deal_type,volume,price,net_profit,signal)
+  BTP0_TEL0 k=1 (775151 / 775171): IDENTICI, 94 deal di uscita (colonne close_time,symbol,position_id,deal_type,volume,price,net_profit,signal)
+
+TELEMETRIA DI TEL1 (gamba OOS, una cartella per passata in PASSATE\):
+  magic 775111: segnali 120 (BLOCK_HASOPEN 18, OPENED 94, SKIP_TP 8)
+     OPENED 94, somma net 85.58 (net illeggibili 0) contro Profit OOS 85.58, scarto 0.00   [invariante 2, atteso scarto < 0.01]
+     file segnali 38658 byte; file path 2479214 byte, 29910 righe, sig_id distinti 120, 249.2 righe per segnale (attese ~297), 82.9 byte per riga
+     proiezione [DERIVATA, lineare in cross e giorni] alla cella lunga (15 cross): file path gamba OOS 1641 g ~218 MB, gamba IS 4382 g ~582 MB
+  magic 775161: segnali 120 (BLOCK_HASOPEN 18, OPENED 94, SKIP_TP 8)
+     OPENED 94, somma net 85.58 (net illeggibili 0) contro Profit OOS 85.58, scarto 0.00   [invariante 2, atteso scarto < 0.01]
+     file segnali 38658 byte; file path 2479214 byte, 29910 righe, sig_id distinti 120, 249.2 righe per segnale (attese ~297), 82.9 byte per riga
+     proiezione [DERIVATA, lineare in cross e giorni] alla cella lunga (15 cross): file path gamba OOS 1641 g ~218 MB, gamba IS 4382 g ~582 MB
+  gemelle TEL1 775111 / 775161: file di telemetria IDENTICI (SHA256)
+  TEL0: file di telemetria freschi per 775121/775171: ASSENTE/ASSENTE , ASSENTE/ASSENTE   (atteso ASSENTE o VECCHIO: spento = nessuna scrittura)
+
+PRECONDIZIONI p1-p5: tutte vere (3 job, 12 passate, motore = commit, input arrivati, telemetria accesa in TEL1 e spenta in TEL0, per-trade freschi)
+
+LETTURA MECCANICA (criteri congelati in prove/BULGE_TEL_P0_2026-10-09.txt): P0 PASSA
+Il verdetto lo scrive la sessione sullo zip, dopo sim_bulge_viola_uscite.py --controlla su PASSATE\BTP0_TEL1_775111 e PASSATE\BTP0_TEL1_775161.
