@@ -984,12 +984,91 @@ def autotest():
             os.remove(pth)
         except OSError:
             pass
+    # --- 8. (10/10) R2REG: 6 tranche, ToDate esclusivo, regimi della firma, long/short separati. Contro-esempi costruiti PRIMA.
+    ck("giorni feriali: ToDate ESCLUSIVO toglie l'ultimo giorno (2026.07.01-2026.09.30: 66 inclusivo, 65 esclusivo)", giorni_feriali("2026.07.01", "2026.09.30") == 66 and giorni_feriali("2026.07.01", "2026.09.30", True) == 65)
+    ck("giorni feriali: tranche contigue R2REG non si sovrappongono (T5+T4 esclusive = giorni feriali di 2025.07.01-2025.12.31)", giorni_feriali("2025.07.01", "2025.10.01", True) + giorni_feriali("2025.10.01", "2026.01.01", True) == giorni_feriali("2025.07.01", "2025.12.31"))
+    fa, ma = esito_replica([], 1.62, 1.55, {"T4": 1.7, "T5": 1.6, "T6": 1.4, "T7": 0.9, "T8": 0.9, "T9": 0.9}, 0.02, 400, {"T4": 200, "T5": 200, "T6": 200, "T7": 200, "T8": 200, "T9": 200})
+    ck("S4 su 6 tranche: PF_V>1,3 in 3 tranche su 6 (servono 4 = due terzi) -> NESSUN VERDETTO", "NESSUN VERDETTO" in fa and any("solo 3 tranche su 6 (servono 4" in m for m in ma), fa)
+    fb, mb2 = esito_replica([], 1.62, 1.55, {"T4": 1.7, "T5": 1.6, "T6": 1.4, "T7": 1.5, "T8": 0.9, "T9": 0.9}, 0.02, 400, {"T4": 200, "T5": 200, "T6": 200, "T7": 200, "T8": 200, "T9": 200})
+    ck("S4 su 6 tranche: 4 tranche su 6 con n>=150 -> RISCONTRO", fb.startswith("PF_V 1.62 >= 1,5 con le condizioni"), fb)
+    fc, mc2 = esito_replica([], 1.62, 1.55, {"T4": 1.7, "T5": 1.6, "T6": 1.4, "T7": 1.5, "T8": 0.9, "T9": 0.9}, 0.02, 400, {"T4": 200, "T5": 200, "T6": 20, "T7": 5, "T8": 100, "T9": 100})
+    ck("S1 dentro S4: tranche con PF_V alto ma n<150 NON contano (2 su 6 contate) -> NESSUN VERDETTO", "NESSUN VERDETTO" in fc and any("solo 2 tranche su 6" in m for m in mc2), fc)
+    lgn = leggi_log("2024.07.10 00:01:00   [GBA] dati non pronti sulla barra 2024.07.10 00:01 -- segnale non valutato")
+    ck("log: 'dati non pronti' contato fra le anomalie", lgn["anomalie"].get("dati non pronti (segnale NON valutato: storia M1/EMA/ATR mancante all'inizio della finestra?)") == 1)
+    # regimi sui DATI VERI di R1A (se l'archivio c'e'): la somma dei regimi deve tornare coi totali gia' letti (933 = 443 long + 490 short)
+    zr = os.path.join(REPO, "backtest_pipeline", "risultati_archivio", "GBA_R0_R1A_20261010", "GBA_R0_R1A.zip")
+    if os.path.exists(zr):
+        pr = carica([zr])
+        rg, vd = lettura_regimi(pr, "REPL")
+        tx = "\n".join(rg)
+        ck("DATI VERI R1A: LATERALE = T1+T3 n=685 (long 329, short 356), VOLATILE = T1+T2+T3 n=933 (long 443, short 490), RIBASSO = T2 sola -> NON MISURATO (1 tranche), TORO/CALMO senza tranche",
+           "LATERALE  tranche T1,T3        n=685   (long 329, short 356)" in tx and "VOLATILE  tranche T1,T2,T3     n=933   (long 443, short 490)" in tx and "meno di 2 tranche" in tx and tx.count("nessuna tranche letta") == 2, tx[:400])
+        ck("DATI VERI R1A: verdetto 'NON REGGE' (PF_V 0,88 e 0,85 < 1,0) e il toro non e' misurato", vd.startswith("NON REGGE") and "LATERALE long+short" in vd, vd)
+    for tipo, atteso, nome in (("laterale_perde", "NON REGGE: PF_V <= 1,0 in LATERALE long+short", "toro buono ma laterale in perdita -> NON REGGE"),
+                               ("solo_toro", "NON BASTA", "CONTRO-ESEMPIO 'PF buono solo nel toro': laterale con n=60 < 150 -> NON MISURATO -> NON BASTA"),
+                               ("tutto_bene", "regge nei regimi MISURATI (TORO, LATERALE", "tutti i regimi misurati con PF_V > 1,0 long e short -> regge (DD ancora aperto)"),
+                               ("short_perde_toro", "NON REGGE: PF_V <= 1,0 in TORO short", "CONTRO-ESEMPIO long/short: toro con long buono e short perdente -> NON REGGE (short)")):
+        zt = _zip_r2reg(tipo)
+        with contextlib.redirect_stdout(io.StringIO()):
+            outr, _tr = stampa(carica([zt]), None)
+        trx = "\n".join(outr)
+        rgx, vdx = lettura_regimi(carica([zt]), "REPL")
+        ck("R2REG finto (%s): %s" % (tipo, nome), atteso in vdx, vdx)
+        if tipo == "solo_toro":
+            ck("R2REG finto: LATERALE n=60 -> 'n < 150' e RIBASSO senza tranche -> NON MISURATO", any(r.strip().startswith("LATERALE") and "NON MISURATO (n < 150" in r for r in rgx) and any(r.strip().startswith("RIBASSO") and "NON MISURATO" in r for r in rgx))
+        if tipo == "tutto_bene":
+            ck("R2REG finto: stampa con attese R2REG, 'sei tranche', S7 senza altopiano, orologio uniforme (ingressi dal 27/10 esclusi), controesempio", "sei tranche: n=" in trx and "NESSUN altopiano si legge" in trx and "ORA con OROLOGIO UNIFORME" in trx and "CONTROESEMPIO (scritto prima)" in trx, "")
+            ck("R2REG finto: il lettore NON scrive 'MORTO' e porta l'intestazione del lotto", "MORTO" not in trx and "GBA R2REG -- lettore" in trx)
+        os.remove(zt)
     print("")
     if falliti:
         print("AUTOTEST FALLITO: %d controlli: %s" % (len(falliti), ", ".join(falliti)))
         return 1
     print("AUTOTEST OK")
     return 0
+
+
+def _zip_r2reg(tipo):
+    """Zip finto del lotto R2REG (REPL, 6 tranche T4..T9) con risposta nota. tipo:
+    'laterale_perde'  : toro PF 1,6 (n 320), laterale PF 0,5 (n 160)   -> NON REGGE (LATERALE)
+    'solo_toro'       : toro PF 1,6 (n 320), laterale con 30 operazioni per tranche (n 60) -> LATERALE NON MISURATO -> NON BASTA (solo toro)
+    'tutto_bene'      : toro e laterale PF 1,6, n>=150                  -> regge nei regimi misurati
+    'short_perde_toro': nel toro il long vince e lo short perde (PF short < 1) -> NON REGGE (TORO short)"""
+    import tempfile
+    tranche = {"T4": "2025.10.01", "T5": "2025.07.01", "T6": "2025.04.01", "T7": "2025.01.01", "T8": "2024.10.20", "T9": "2024.07.10"}
+    fine = {"T4": "2026.01.01", "T5": "2025.10.01", "T6": "2025.07.01", "T7": "2025.04.01", "T8": "2025.01.01", "T9": "2024.10.01"}
+    righe, z = [], None
+    f = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+    f.close()
+    z = zipfile.ZipFile(f.name, "w")
+    k = 0
+    for tr in ("T4", "T5", "T6", "T7", "T8", "T9"):
+        toro = REGIMI_TRANCHE[tr][0] == "TORO"
+        n = 80 if (toro or tipo in ("laterale_perde", "tutto_bene")) else 30
+        k += 1
+        base = datetime.datetime.strptime(tranche[tr], "%Y.%m.%d") + datetime.timedelta(hours=1)
+        lista, nets = [], []
+        for i in range(n):
+            lato = "buy" if i % 2 == 0 else "sell"
+            vince = ((i // 2) % 2 == 0)
+            if tipo == "laterale_perde" and not toro:
+                prof = 100.0 if vince else -200.0
+            elif tipo == "short_perde_toro" and toro and lato == "sell":
+                prof = 50.0 if vince else -200.0
+            else:
+                prof = 160.0 if vince else -100.0
+            t = base + datetime.timedelta(hours=i * 6)
+            lista.append((t.strftime("%Y.%m.%d %H:%M:%S"), lato, prof, 4.0, 0.10, 5))
+            nets.append(prof)
+        dd, lg = _sintetico(lista)
+        tag = "R2REG_%02d_REPL_%s_m775800" % (k, tr)
+        z.writestr("report\\GBA_R0_" + tag + ".htm", _htm(dd, n, _fmt(sum(nets)), "%.2f" % pf_di(nets)))
+        z.writestr("log\\GBA_" + tag + ".txt", "\r\n".join(["# passata finta"] + lg))
+        righe.append("R2REG;%s;REPL;0.05;%s;%s;%s;4;775800;2026-10-10 10:00:00;60;OK;%d;%s;%.2f;100%%ticksreali;88000;;88000;25000000;;100;%d;si;si;%s-%s;" % (
+            tag, tr, tranche[tr], fine[tr], n, sum(nets), pf_di(nets), n, tranche[tr], fine[tr]))
+    z.writestr("MANIFEST_R0.csv", _manifest(righe))
+    z.close()
+    return f.name
 
 
 def _zip_finto(gemelle_diverse=False, qualita_cattiva=False, deposito="1 000 000.00", righe_extra=()):
