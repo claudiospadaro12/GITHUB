@@ -242,7 +242,12 @@ def main():
         for rn, ks in regimi.items():
             allt = [x for k in ks for x in per[k]]
             v = [x["net"] for x in allt]
-            print("  >> %-28s n %5d   PF-proxy %.2f" % (rn, len(allt), pf(v) if v else float("nan")))
+            c0 = [K_SL * x["atr"] / x["spread"] for x in allt]
+            c1 = [K_SL * x["atr"] / (x["spread"] + COMM) for x in allt]
+            c2 = [K_SL * x["atr"] / (x["spread"] + 2 * COMM) for x in allt]
+            print("  >> %-28s n %5d   PF-proxy %.2f   costo mediano solo-spread/+0,04/+0,08: %.1f/%.1f/%.1f   quota ingressi <13,3x (+0,04): %.0f%%" % (
+                rn, len(allt), pf(v) if v else float("nan"), st.median(c0) if c0 else float("nan"), st.median(c1) if c1 else float("nan"),
+                st.median(c2) if c2 else float("nan"), 100.0 * sum(1 for x in c1 if x < 13.3) / max(1, len(c1))))
 
 
 if __name__ == "__main__":

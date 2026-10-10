@@ -239,6 +239,8 @@ datetime gKeyT1[STU_NTF];
 double   gKeyH[STU_NTF];
 double   gKeyL[STU_NTF];
 double   gKeyC[STU_NTF];
+uint     gPendMs[STU_NTF];      // da quando il TF aspetta i dati (0 = non aspetta)
+bool     gPendWarn[STU_NTF];    // avviso "dati non arrivano" gia' scritto
 //--- cio' che e' DISEGNATO (si scrive un oggetto solo se cambia)
 bool   gDrOk[STU_NTF][STU_NST];
 double gDrV[STU_NTF][STU_NST];
@@ -802,13 +804,45 @@ bool PlaceLabels()
    return chg;
   }
 
+// dimentica i valori di un TF: la prossima linea nasce solo da dati letti adesso
+void ForgetTF(const int i)
+  {
+   gKeyOk[i]=false;
+   gPendMs[i]=0;
+   for(int j=0;j<STU_NST;j++)
+      gLok[i][j]=false;
+  }
+
 // un giro completo: calcolo dei TF accesi (solo se serve) + disegno. true = qualcosa e' cambiato
 bool UpdateAll()
   {
-   if(!InpOnlyPanelNoLines && AnyStOn())
-      for(int i=0;i<STU_NTF;i++)
-         if(gTfOn[i])
-            CalcTF(i);
+   bool calc=(!InpOnlyPanelNoLines && AnyStOn());
+   for(int i=0;i<STU_NTF;i++)
+     {
+      //--- TF non calcolato in questo giro (spento, o nessuno ST acceso): dimentica i valori, cosi' quando
+      //    torna in gioco la sua linea nasce SOLO da dati letti in quel momento, mai da un valore vecchio
+      if(!calc || !gTfOn[i])
+        {
+         ForgetTF(i);
+         continue;
+        }
+      if(CalcTF(i)>=0)
+        {
+         gPendMs[i]=0;
+         continue;
+        }
+      //--- dati che non arrivano: UNA riga nella scheda Esperti dopo 60 s, cosi' la linea mancante ha un perche'
+      uint now=GetTickCount();
+      if(gPendMs[i]==0)
+         gPendMs[i]=now;
+      else
+         if(!gPendWarn[i] && now-gPendMs[i]>60000)
+           {
+            gPendWarn[i]=true;
+            Print("ABTG_ST_MTF_Unico: ",gTfName[i]," su ",_Symbol," senza dati sufficienti da 60 s (servono almeno ",
+                  gPer+2," barre): nessuna linea per quel timeframe finche' lo storico non arriva.");
+           }
+     }
    bool chg=false;
    if(RenderLines())
       chg=true;
@@ -897,6 +931,8 @@ int OnInit()
    for(int i=0;i<STU_NTF;i++)
      {
       gKeyOk[i]=false;
+      gPendMs[i]=0;
+      gPendWarn[i]=false;
       for(int j=0;j<STU_NST;j++)
         {
          gLok[i][j]=false;

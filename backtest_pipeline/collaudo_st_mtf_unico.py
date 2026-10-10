@@ -35,8 +35,10 @@ FAILS = []
 
 
 def check(cond, msg, quiet=False):
-    if not quiet:
-        print(("  ok   " if cond else "  FAIL ") + msg)
+    # quiet = uso interno sulle mutazioni: niente stampa e niente FAIL globale (li conta section_X)
+    if quiet:
+        return cond
+    print(("  ok   " if cond else "  FAIL ") + msg)
     if not cond:
         FAILS.append(msg)
     return cond
@@ -134,7 +136,7 @@ def judge(out, verbose):
             # gli abilitati sono TUTTI uguali (tutti accesi o tutti spenti), e due clic alternano
             E = [k for k in range(3) if (e >> k) & 1]
             if E:
-                good = good and len(set(after[k] for k in E)) == 1 and lit2 != lit if len(E) else good
+                good = good and (len(set(after[k] for k in E)) == 1) and (lit2 != lit)
             ok = ok and good
             rows.append((e, o, lit, after, lit2, good))
         elif p[0] == "C":
@@ -342,7 +344,12 @@ def static_ok(text, verbose=True):
     # UNICO a DESTRA dei tre ST: in BuildButtons l'ordine delle BAdd e' ST -> UNICO -> DEFAULT
     bb = re.search(r"void BuildButtons\(\)(.*?)\n  }\n", text, re.S).group(1)
     i_st, i_un, i_df = bb.find("BAdd(NameST("), bb.find("BAdd(NameUnico()"), bb.find("BAdd(NameDef()")
-    ok &= check(0 < i_st < i_un < i_df, "BuildButtons: ST -> UNICO -> DEFAULT (UNICO subito dopo i tre ST)", q)
+    once = all(bb.count(t) == 1 for t in ["BAdd(NameMain()", "BAdd(NameTF(", "BAdd(NameST(",
+                                          "BAdd(NameUnico()", "BAdd(NameDef()"])
+    guard = re.search(r"if\(InpShowUnico && NumStEn\(\)>0\)\s*\{\s*bool u=UnicoOn\(\);\s*BAdd\(NameUnico\(\)", bb)
+    ok &= check(once and guard is not None and 0 < i_st < i_un < i_df,
+                "BuildButtons: ogni tasto aggiunto UNA volta, ordine ST -> UNICO -> DEFAULT, guardia di UNICO "
+                "= InpShowUnico && almeno un ST abilitato", q)
     return ok
 
 
@@ -425,11 +432,9 @@ def main():
     print()
     section_C(raw)
     print()
-    n0 = len(FAILS)
     section_X(text)
-    # i FAIL delle mutazioni statiche sono attesi DENTRO static_ok (quiet): si contano solo i 'PRESA'
     print()
-    real = [f for f in FAILS]
+    real = list(FAILS)
     if real:
         print("ESITO: FAIL (%d)" % len(real))
         for f in real:
