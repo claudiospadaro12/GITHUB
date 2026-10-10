@@ -1,0 +1,304 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA_R2 -- PASSO 2 (PROVA DI REGIME) di 'GoldBreakoutATR' su XAUUSD, 10/10/2026. File prova del lotto R2REG.
+#  DERIVATO da backtest_pipeline/prove/GBA_R0_REPLICA_2026-10-09.txt (SHA256 289C7D8C46C081F29402B539126037BE2A90E86B83C701B54EFE18BFB624F92A): STESSI 30 pin + asse tecnico,
+#  STESSI criteri S1-S7 e cancelli G0/G1/G2 (le righe sono COPIATE dal file madre, non riscritte); cambiano le tranche, le celle, le attese e si AGGIUNGE la lettura per regime (S8, firma 10/10).
+#  Strato 1 (controlla_prova.py / controlla_riga.py) da rifare dopo ogni modifica; strato 2 (controllo-preventivo) DA FARE:
+#  NON consegnabile a Claudio finche' il cancello non passa. Questo file NON e' un PASS: e' una preparazione.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato), magic 775800.
+#  Piano: report/EA_NOTTURNO_GBA_SPECIFICA_2026-10-09.md par. 11 ('Dopo R0', passo 2 e 7); lettura di R1A: report/GBA_R0_R1A_LETTURA_2026-10-10.md; FIRMA: report/FIRME_2026-10-10.md (Firma 1).
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale BCM demo 50503392). MAI sul VPS, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward. Nessun parametro in forward.
+#
+#  ======================= IL DIFETTO CHE QUESTO FILE DICHIARA PER PRIMO =======================
+#  QUESTO FILE NON SI DA' AL DRIVER DEI ROUND (walkforward_generico*.ps1 / RIGA_ROUND_*.ps1). MISURATO sul sorgente:
+#   (a) il driver dei round scrive SEMPRE Optimization=1 (walkforward_generico.ps1 r.1015 e r.2013) e legge il risultato SOLO da
+#       OptResults_<EA>_<simbolo>.csv, che l'EA deve scrivere con FrameAdd/OnTesterDeinit (r.75-79, r.2030-2056: "OnTester non gira,
+#       FrameAdd non manda niente, e OnTesterDeinit crea il file e lo lascia vuoto");
+#   (b) ABTG_GoldBreakoutATR.mq5 v1.10 NON ha nessun OnTester*, nessun FrameAdd, nessun OptFrame (grep, 09/10: zero occorrenze;
+#       report/EA_GBA_NOTE_2026-10-09.md par. 2.16: "il round lo legge dal report del tester");
+#   (c) quindi col driver dei round questa prova uscirebbe con un CSV da zero byte e NESSUNA operazione letta.
+#  Il driver di questa famiglia e' backtest_pipeline/righe/GBA_R0_PASSATE.ps1: PASSATA SINGOLA (Optimization=0), report .htm del tester
+#  + giornale dell'EA, derivato da NATCLA_F0_PASSATE.ps1 (le deviazioni sono elencate in testa allo script). Il lettore e'
+#  backtest_pipeline/leggi_gba_r0.py. Il driver dei round non si tocca. Niente e' stato aggiunto all'EA (richiesta: EA invariato).
+#  PERCHE' UN FILE PROVA CHE NON E' UNA GRIGLIA: controlla_prova.py pretende UN asse Y. L'asse qui e' TECNICO (InpMagic=775800||775800||50||
+#  775850||Y: due celle gemelle sul magic = cancello G1 di determinismo, usato dal lotto S0) e NON e' la variabile misurata. La variabile
+#  misurata e' UNA: InpSpreadMaxATR, le cui celle stanno nei blocchi '# @GBA-CELLA' qui sotto (il driver rifiuta un blocco che cambi
+#  un qualunque altro input). Dato al driver dei round questo file produrrebbe una passata sul magic e basta: e' voluto.
+#  (R2REG, 10/10) Il driver e' la v4 di GBA_R0_PASSATE.ps1 (marcatore MARCATORE_GBA_R0_PASSATE_v4, parametro -Prova GBA_R2_REGIME_2026-10-10.txt): la v3 NON legge questo file
+#  (nome della prova, lotti ammessi e conteggi dei blocchi erano cablati nel sorgente: MISURATO, deviazione 12 in testa allo script). Il lettore e' leggi_gba_r0.py (aggiornato: tranche
+#  R2REG, ToDate esclusivo, tabella per regime, orologio uniforme; l'output su R1A e S0 e' IDENTICO a prima, salvo la sezione (7) aggiunta in coda).
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  PASSO 2 -- PROVA DI REGIME (lotto R2REG, Modello 4 = ticks reali 100%, VERDETTO). R1A ha letto UN regime (gen-set 2026, oro volatile): REPL PF_V 0,855 su n=933, nessuna tranche sopra 1,0.
+#  Qui gli STESSI input, UNA sola variabile (InpSpreadMaxATR), su SEI trimestri contigui dal 2024.07.10 al 2025.12.31 (tutta la profondita' dei tick reali BCM sull'oro: MISURATA, giornale R268a),
+#  con DUE celle: REPL (0,05, valore del file Input di Emiliano) e C035 (0,35, la cella piu' larga: valore del pannello della collega e dell'alba del 09/10). 12 passate.
+#  Si legge in questo ordine: (1) cancelli G0; (2) n per tranche contro l'attesa; (3) COSTO PRIMA del PF; (4) PF_V, DD, lato; (5) concentrazione; (6) ORA (con la tabella a orologio uniforme);
+#  (7) LETTURA PER REGIME (S8, firma di Claudio 10/10: report/FIRME_2026-10-10.md). Il lettore stampa tutto e NON giudica ne' promuove oltre le soglie qui sotto.
+#  NON E' una ricerca di parametri: le due celle sono valori GIA' VISTI nei pannelli, nessuna e' scelta guardando un numero. Il lotto non tocca l'uscita, il segnale, il TF, i gemelli.
+#  Il 2026 NON e' in questo lotto: e' R1A (gia' letto). Insieme al 2026 di R1A i regimi si leggono sulla stessa cella REPL (stessi 30 pin) ma il lettore tiene i lotti separati nelle sezioni (2)-(6).
+#
+#  ======================= LE CELLE (UNA variabile: InpSpreadMaxATR) =======================
+#   cella  InpSpreadMaxATR  stop/spread MINIMO garantito dal filtro (2,5 / cella)   ruolo
+#   REPL   0,05             50,0x                                                   REPLICA (valore del file Input di Emiliano, foto 08:59)
+#   C010   0,10             25,0x                                                   controllo
+#   C020   0,20             12,5x  (sotto il duro 13,3x)                            controllo
+#   C035   0,35             7,1x   (sotto il duro 13,3x)                            controllo (valore del pannello alle 08:52)
+#  ATTENZIONE: il minimo GARANTITO non e' il verdetto di costo. Il verdetto (regola E2 di NATCLA_F0, stessa frontiera di casa) e' la MEDIANA su tutti gli
+#  INGRESSI di stop_i / (spread_i + commissione): >= 40 PASSA; fra 13,3 e 40 FRA (sotto la frontiera di casa `stop >= 40 x spread`: si legge per
+#  misurare l'ipotesi di Emiliano, la cella NON puo' diventare sedia); < 13,3 ESCLUSA PER COSTO (col numero accanto). Commissione: 3,90 EUR/lotto
+#  dichiarata da Riccardo di BCM Tech (live del 09/10, r.259-261), per lato o a giro NON detto [spec. par. 9-bis]; a 1,00 lotto = 100 oz sono
+#  0,04 USD/oz se e' a giro intero, 0,08 se e' per lato: il lettore stampa SEMPRE entrambe le versioni (contro-esempio) e dice se il verdetto cambia.
+#  La terza ipotesi del cancello (spec. par. 13: cella 0,05 quasi VUOTA, celle larghe sotto i 40x) e' stata confrontata con un proxy mio (vedi attese E1, E6): il proxy dice che sul 2026 la 0,05 NON e' vuota e che le celle
+#  larghe hanno costo mediano FRA, non ESCLUSO. E' una stima: la smentisce o la conferma il tester.
+#  R2REG usa SOLO REPL e C035 (C010 e C020 non sono in questo file: R1B le misura sul 2026, se serve).
+#
+#  ======================= FINESTRE E REGIMI: SEI TRANCHE CONTIGUE, ToDate ESCLUSIVO (MISURATO) =======================
+#  FINESTRE (unita' = trimestre di calendario, scelta A PRIORI dal calendario, NON dal prezzo ne' da un PF). ToDate ESCLUSIVO: MISURATO sui dati di R1A (10/10): con ToDate=2026.09.30 l'ultimo
+#  evento dell'EA e' 2026.09.29 23:59:58; con ToDate=2026.06.30 e' 2026.06.29; con ToDate=2026.03.31 e' 2026.03.30. Quindi R1A ha perso 3 giorni (31/03, 30/06, 30/09): il file madre scriveva
+#  'ToDate = ultimo giorno del trimestre' e si perdeva un giorno per tranche. QUI 'a' = PRIMO GIORNO DELLA TRANCHE SUCCESSIVA (esclusivo): niente giorni persi, niente giorni doppi, le sei tranche
+#  coprono ESATTAMENTE 2024.07.10 00:00 -> 2025.12.31 23:59 (T4 finisce il 31/12/2025 e T3 di R1A parte il 01/01/2026). [DERIVATO da R1A, non da questo lotto: la prima corsa lo riconferma
+#  con la riga 'from ... to ...' del giornale, che il driver confronta con 'a'.]
+#     nome  da -> a (esclusivo)        ultimo giorno eseguito   giorni feriali  barre M1 [PROXY HistData]
+#     T9    2024.07.10 -> 2024.10.01   2024.09.30               59              81.265
+#     T8    2024.10.01 -> 2025.01.01   2024.12.31               66              89.066
+#     T7    2025.01.01 -> 2025.04.01   2025.03.31               64              86.610
+#     T6    2025.04.01 -> 2025.07.01   2025.06.30               65              87.984
+#     T5    2025.07.01 -> 2025.10.01   2025.09.30               66              90.679
+#     T4    2025.10.01 -> 2026.01.01   2025.12.31               66              88.678
+#  Barre: il tetto di 100.000 NON e' raggiungibile da un trimestre: 66 giorni feriali x 1.440 minuti = 95.040 < 100.000 [DERIVATO] e l'oro ha la pausa giornaliera; il massimo proxy (T5) e' 90.679, a 4,5%
+#  dall'avviso del driver (95.000). Il tester BCM genera ~1,5% in meno di HistData su T3 (83.916 contro 85.172) [MISURATO in R1A]. Tick: dal 2024.07.10 (riga 'ticks data begins from', giornale R268a);
+#  T9 INIZIA esattamente quel giorno: il driver chiede 'inizio dei tick <= da' e 2024.07.10 <= 2024.07.10 passa. [NON MISURATO] se all'inizio di T9 la storia M1 BCM prima del 2024.07.10 basta per
+#  EMA 100 / canale 48 / ATR 14: se non basta l'EA stampa '[GBA] dati non pronti' e il lettore lo conta fra le anomalie.
+#
+#  REGOLA OGGETTIVA SUL PREZZO PER I REGIMI (firma di Claudio 10/10, scritta PRIMA di vedere un PF; usa SOLO il prezzo M1 HistData in repo; script: backtest_pipeline/proxy_gba_r2reg.py --regimi):
+#     per ogni tranche: R = chiusura dell'ultimo giorno / chiusura del primo giorno - 1 (chiusure GIORNALIERE = ultima barra M1 del giorno server);
+#     ER = |R| / somma dei |rendimenti giornalieri| (rapporto di efficienza di Kaufman: 0 = nessuna direzione, 1 = linea retta).
+#     DIREZIONE:  TORO se R >= +5% E ER >= 0,15 | RIBASSO se R <= -5% E ER >= 0,15 | LATERALE in tutti gli altri casi (|R| < 5% oppure ER < 0,15).
+#     VOLATILITA': ATR(14) M1 mediana / prezzo mediano, in punti base: CALMO se < 3,5 bp, VOLATILE se >= 3,5 bp.
+#     Le soglie (5%, 0,15, 3,5 bp) sono numeri tondi scelti il 10/10 DOPO aver letto i rendimenti e gli ATR dei trimestri (NON i PF: nessun PF del 2024-25 esiste) e si dichiara: il confine
+#     di T6 (ER 0,081) e di T4 (ER 0,176, a poco dalla soglia) dipende da quei numeri tondi. Il proxy HistData NON e' il feed BCM; T1 di R1A arriva solo al 18/09.
+#     tranche  R        ER     ATR M1/prezzo   -> direzione  volatilita'
+#     T9       +11,0%   0,253  2,59 bp           TORO        CALMO
+#     T8       -1,4%    0,029  2,58 bp           LATERALE    CALMO
+#     T7       +17,5%   0,431  2,61 bp           TORO        CALMO
+#     T6       +6,4%    0,081  4,07 bp           LATERALE    VOLATILE
+#     T5       +15,5%   0,344  2,60 bp           TORO        CALMO
+#     T4       +11,8%   0,176  4,40 bp           TORO        VOLATILE
+#     (R1A, stessa regola, per il quadro d'insieme: T3 +4,1% ER 0,035 5,84 bp LATERALE VOLATILE | T2 -16,0% ER 0,184 4,73 bp RIBASSO VOLATILE | T1 +8,2% ER 0,116 4,22 bp LATERALE VOLATILE)
+#  REGIMI DI QUESTO LOTTO: TORO = T9, T7, T5, T4 (4 tranche) | LATERALE = T8, T6 (2 tranche, NON contigue) | RIBASSO = NESSUNA tranche | CALMO = T9, T8, T7, T5 | VOLATILE = T6, T4.
+#     Con R1A dietro: RIBASSO = T2 (1 tranche: NON MISURATO), LATERALE = T8, T6, T3, T1, VOLATILE = T6, T4, T3, T2, T1.
+#  DICHIARATO: i tick reali BCM sull'oro partono dal 2024.07.10: il RIBASSO e il LATERALE LUNGHI (anni) NON sono coperti da questo lotto (la finestra e' un solo ciclo di toro, +64,5% nel 2025). Andranno
+#  nel lotto SUCCESSIVO di screening in OHLC su M1 (non verdetto, dichiarando l'orologio BCM), che non e' in questo file.
+#  OROLOGIO (CLAUDE.md 24/09 e report/OROLOGIO_BCM_2026-09-24.md): BCM = UTC+1 FISSO dopo il cambio; per il FOREX il cambio cade fra il 26/12/2024 23:03 e il 02/02/2025 23:05 (giorno [NON MISURATO]);
+#  per l'ORO [NON MISURATO] che segua il forex. Prima del cambio il server era IT-1 tutto l'anno: UTC+1 d'estate (come oggi), UTC+0 d'inverno. Conseguenza per ogni tranche:
+#     T9 (lug-set 2024) estate: UNIFORME. T8 (ott-dic 2024): UNIFORME fino al 26/10, poi UTC+0 (un'ora indietro rispetto a oggi) fino al 31/12. T7 (gen-mar 2025): un'ora indietro fino al cambio
+#     (data ignota, al piu' il 02/02), poi UNIFORME. T6, T5, T4: UNIFORME (UTC+1 fisso).
+#  L'EA NON ha filtri orari (InpHourStart 0, InpHourEnd 24): l'orologio NON cambia i suoi ingressi, cambia SOLO la lettura delle 6 fasce orarie (S6). Il lettore (leggi_gba_r0.py) NON converte le ore:
+#  stampa la tabella delle fasce due volte, completa e ESCLUDENDO gli ingressi dal 2024.10.27 al 2025.02.02 (finestra a orologio incerto, taglio prudente), e il taglio per tranche del punto (6) c'e' gia'.
+#  REGIME DICHIARATO del lotto: oro CALMO e in TORO (ATR M1 mediana 0,65-0,76 in T9-T8-T7, +11% e +17,5% nei due trimestri direzionali) con due trimestri volatili (T6 laterale, T4 toro +11,8%): 2024 H2 +11,0%
+#  (2.364 -> 2.624), 2025 +64,5% (2.625 -> 4.318). Qualunque numero vale per QUESTI regimi, non per l'oro in generale.
+#
+#  ======================= MODELLO DI TICK =======================
+#  VERDETTO = Modello 4 (ticks reali, regola R57: uno scalping con trailing a 48 barre M1 si legge solo cosi'). Modello 1 (OHLC su M1) SOLO per CONTARE e per il tempo (lotto S0):
+#  un PF a Modello 1 non e' mai un verdetto. Spread nel Modello 1: [NON MISURATO] se e' quello della barra M1 o il corrente al lancio (NATCLA_F0, LIMITI); nel Modello 4 e' lo spread del tick.
+#  ExecutionMode=0 (zero latenza, standard di casa): per uno scalper a pochi minuti e' OTTIMISTICO; la sensibilita' alla latenza e' un asse FUTURO [NON MISURATO].
+#  Deposito 1000000 (v3 del driver, 09/10: lo standard di casa 100000 portava il proxy delle celle larghe a un fattore ~1,1-1,5 dal fondo, classe 1204/1206), valuta EUR, leva 100: NON e' il conto.
+#  A 1,00 lotto il deposito non cambia n, PF ne' DD in valuta: serve solo a non far scattare il controllo del margine; il DD in % del report NON si legge; il rischio in % si ricalcola sul
+#  conto che Claudio sceglie (firma sua). Profitti nel report in EUR (conversione del tester); lo SL a 1,00 lotto e' 2,5 x ATR x 100 USD.
+#
+#  ======================= PINS: i 31 input dell'EA = DEFAULT COMPILATI =======================
+#  Verificato a macchina il 09/10 (confronto riga per riga col sorgente v1.10): 31 su 31 identici al default, con UNA deviazione dichiarata: InpSymbol=XAUUSD (il default e' "" = simbolo del grafico;
+#  un pin vuoto qui sotto e' vietato da controlla_prova e sarebbe ignorato da MT5). InpSignalTF=1 = PERIOD_M1; InpTrendTF=0 / InpAtrTF=0 = PERIOD_CURRENT = TF del SEGNALE (semantica nostra, scelta
+#  dichiarata: la spec. par. 7 scrive 'EMA e ATR sullo stesso TF del segnale come default'; che sia davvero cosi' per Emiliano e' [INFERITO], non detto). Valori della replica: canale 48, EMA 100, ATR 14,
+#  SL 2,5, trailing 2,5, tempo 48, breakeven acceso a 1,0 ATR con offset 0,0, lotto fisso 1,00 (decisione di Claudio 09/10), nessun filtro orario (0-24), nessun tetto di operazioni (0),
+#  perdita giornaliera spenta (0), margine ON, slippage 30, Guardian ON (nel tester e' FAIL-OPEN: irrilevante), InpVerbose=true (serve: ogni segnale stampa la sua riga con ATR, spread, ora),
+#  InpAutoTest=true (l'AUTOTEST dell'EA e' il primo segno che il compilato fa quello che dice).
+#  Pin 'InpSpreadMaxATR=0.05' qui sotto = cella REPLICA; il driver lo SOSTITUISCE nelle altre celle e rifiuta qualunque altra sostituzione.
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI DEL TESTER (10/10/2026, prima di qualunque passata del lotto) =======================
+#  FONTI: (i) il proxy backtest_pipeline/proxy_gba_r2reg.py (NUOVO, autotest 6/6 PASS): rifa' E1-E2 del file madre sulle barre M1 HistData con lo spread vivo del logger di settembre 2026
+#  APPLICATO A TUTTI I PERIODI [ASSUNZIONE: lo spread BCM 2024-2025 NON e' misurato; il lotto lo misura: ogni riga di segnale dell'EA stampa lo spread]; uscite a livello di BARRA con l'ordine
+#  peggiore; commissione 0,04 USD/oz; UNA posizione per volta. (ii) CALIBRAZIONE sul tester gia' letto (R1A): REPL T1/T2/T3 proxy 113/246/658 contro tester 128/248/557 (rapporto tester/proxy
+#  1,13 / 1,01 / 0,85; aggregato 933/1017 = 0,92); C035 sulle stesse tre tranche proxy 2.228/2.321/2.263 = 6.812 (E2 del madre, altro script: 6.930, -1,7%). Il proxy NON e' indipendente dal tester
+#  (stesso prezzo): una coerenza fra due letture dello stesso mercato, non una conferma del motore.
+#  BANDA: 0,5x-2x il proxy, come nel file madre. NOVITA' DICHIARATA (non e' un criterio, e' una attesa): dove il proxy e' < 15 la banda 0,5x-2x non ha senso (0,5x di 2 e' 1): si scrive 'quasi vuota,
+#  n atteso 0-30'. Le attese NON si ritoccano dopo i numeri (regola di casa): se il tester le smentisce e' un risultato.
+#  E1 [n, cella REPL, Modello 4, ingressi per tranche] proxy -> banda:
+#     T9 4 -> 0-30 | T8 2 -> 0-30 | T7 0 -> 0-30 | T6 42 -> 21-84 | T5 16 -> 8-32 | T4 152 -> 76-304 | sei tranche 216 -> 108-432.   Frequenza proxy per giorno feriale: 0,1 / 0,0 / 0,0 / 0,6 / 0,2 / 2,3.
+#     Per regime (proxy): TORO 172 | LATERALE 44 | CALMO 22 | VOLATILE 194.  Per anno: 2024 = 6, 2025 = 210.
+#     La REPL e' un filtro di VOLATILITA' (ATR >= 20 x spread = ~4-5 USD): nel 2024-25 (ATR M1 0,65-1,35) quasi non scatta. E' la 'terza ipotesi del cancello' (cella quasi vuota) e qui e' ATTESA, non
+#     una sorpresa: la REPL e' vuota in T9, T8, T7 per costruzione.
+#     SENSIBILITA' ALLO SPREAD [PROXY]: se lo spread del 2024-25 fosse x0,5 / x0,75 / x1,0 / x1,5 di quello di settembre 2026, le sei tranche della REPL darebbero 1.740 / 587 / 216 / 47 ingressi
+#     (T4: 913 / 387 / 152 / 41). La banda 0,5x-2x (108-432) copre SOLO lo spread invariato: se l'n esce fuori, la causa piu' probabile e' lo spread, e il giornale dice di quanto.
+#     SMENTITA: T9 o T8 o T7 con n > 100 (nel 2024-25 il filtro passa molto piu' di quanto lo spread di settembre consente: l'assunzione sullo spread e' sbagliata, si legge lo spread per ora del
+#     giornale PRIMA di leggere un PF); n(sei tranche) > 1.000 idem. n(sei tranche) < 150: MERITO SOSPESO per la cella intera (S1).
+#  E2 [n, cella C035] proxy -> banda 0,5x-2x: T9 1.345 -> 673-2.690 | T8 1.600 -> 800-3.200 | T7 1.615 -> 808-3.230 | T6 2.442 -> 1.221-4.884 | T5 2.021 -> 1.011-4.042 | T4 2.324 -> 1.162-4.648 |
+#     sei tranche 11.347 -> 5.674-22.694.  Per giorno feriale: 22,8 / 24,2 / 25,2 / 37,6 / 30,6 / 35,2.  Per regime: TORO 7.305 | LATERALE 4.042 | CALMO 6.581 | VOLATILE 4.766.
+#     La C035 nel 2024 e' SENSIBILE allo spread (soglia 0,35 x ATR 0,65 = 0,23 USD contro spread 0,20-0,27): con spread x0,5 / x0,75 / x1,5 le sei tranche darebbero 14.025 / 12.988 / 7.790.
+#     SMENTITA: sei tranche < 1.500 o > 40.000.
+#  E3 [PF, ipotesi nulla = nessun edge distinguibile dal costo]. S1 comanda: il PF si LEGGE solo con n >= 150 (cella intera, regime, tranche). REPL: se n(sei tranche) >= 150, PF_V atteso 0,8-1,3 (proxy 0,90 su
+#     n=216: 2024 n=6 non si legge; 2025 0,89). C035: proxy PF 0,65 (2024) / 0,78 (2025) / 0,75 (sei tranche); per tranche 0,65 0,66 0,75 0,74 0,68 0,87: NESSUNA sopra 1,0.  Ipotesi alternativa
+#     (dichiarazione di Emiliano, PF ~2,0): PF_V >= 1,5. Il numero che separa le due letture e' 1,5 contro 1,3 (come nel madre). Un PF_V >= 1,3 con n >= 150 e' una SORPRESA: vale il CONTROESEMPIO di S8.
+#  E4 [uscita]: invariata rispetto al madre (vita mediana 7,4 minuti in R1A); non ripetuta.
+#  E5 [rischio per operazione, 1,00 lotto, USD per lotto = 250 x ATR all'ingresso]: REPL ATR mediano agli ingressi 3,8-4,9 USD -> SL ~940-1.230 USD; C035 ATR 0,83-0,90 (T9-T8-T7), 1,00 (T5), 1,38 (T6), 1,84 (T4)
+#     -> SL ~210-460 USD. DD massimo di tranche del PROXY a 1 lotto: C035 35.000 (T7) - 84.000 (T6) USD (deposito fittizio 1.000.000 EUR: nessun rischio di margine), REPL fino a 13.000 (T4). Il RISCHIO si legge a qualunque n.
+#  E6 [costo, mediana stop/(spread+comm) sugli ingressi, proxy; versioni solo spread / +0,04 / +0,08]:
+#     REPL sei tranche 57,3 / 47,4 / 40,9 -> PASSA in tutte e tre (per costruzione ATR >= 20 x spread; a +0,08 per un soffio sopra 40). C035: 2024 9,8 / 8,3 / 7,1 -> ESCLUSA PER COSTO (<13,3) in tutte e
+#     tre; 2025 14,3 / 12,0 / 10,4 -> FRA solo-spread, ESCLUSA con la commissione (il verdetto CAMBIA); sei tranche 12,9 / 10,9 / 9,4 -> ESCLUSA PER COSTO (quota ingressi sotto 13,3x con +0,04: 64%).
+#     Per tranche C035 (+0,04): T9 8,2 | T8 8,4 | T7 8,8 | T6 13,1 | T5 9,7 | T4 17,4. CONSEGUENZA SCRITTA PRIMA: nel 2024-25 la C035 non puo' diventare sedia, qualunque sia il suo PF (S7: costo FRA o ESCLUSA).
+#     SMENTITA: costo mediano C035 (+0,04) > 25 sulle sei tranche = lo spread del 2024-25 e' circa meta' di quello di settembre 2026 (con x0,5 il rapporto raddoppia): si legge lo spread, non si ritocca l'attesa.
+#  E7 [ORA]: ipotesi nulla = NESSUNA fascia diversa da zero dopo la correzione per sei fasce (p < 0,0083, segno concorde in 4 tranche su 6, vedi S8 'traduzione'). Ipotesi alternativa (Emiliano, 'di notte'): la fascia ASIA
+#     00-07 positiva. A DIFFERENZA di R1A nessuna suddivisione per fascia del 2024-25 e' stata calcolata prima di scrivere questo file: e' il campione fuori da gen-set 2026 che il madre prometteva.
+#     Con la REPL (n ~ 200) la fascia asia ha n < 100 -> SOSPESA (S6): 'la notte' si puo' provare solo con la C035, dove pero' il costo e' ESCLUSO (E6): un esito positivo e' una NOTA su un meccanismo, non una sedia.
+#  E8 [tempo e barre]: vedi COSTO IN TEMPO. Barre per tranche entro +/-3% del proxy (sopra); tetto 100.000 non raggiungibile.
+#  E9 [per REGIME, S8]: REPL: con n(proxy) TORO 172 e VOLATILE 194 solo questi due regimi hanno una chance di superare 150 operazioni, e DI POCO; LATERALE (44) e CALMO (22) saranno NON MISURATI per il merito;
+#     con long e short separati (~50/50) ogni lato avra' n ~ 85-100: lato 'indicativo'. C035: tutti e quattro i regimi hanno n >> 150; PF proxy per tranche 0,65-0,87 -> attesa: NON REGGE in ogni regime misurato
+#     (ipotesi nulla). RIBASSO: NON MISURATO (nessuna tranche). Se la REPL esce 'NON MISURATO' nei regimi questo NON e' un esito negativo ne' positivo: e' il limite del campione, e la Regola D (CLAUDE.md,
+#     16/08) lo dichiara: 'quasi vuota' non e' un verdetto di merito.
+#  I numeri 'proxy' di E1-E9 sono scritti QUI il 10/10, prima del primo giro. Se il tester li smentisce, e' un risultato: si scrive cosi' e si cerca la causa (spread del 2024-25, barre BCM contro HistData,
+#  commissione), non si ritocca l'attesa.
+#
+#  ======================= SOGLIE CONGELATE (non si cambiano dopo i numeri) =======================
+#  S1 MERITO: si legge solo con n >= 150 nella cella (somma delle tre tranche); una tranche si legge da sola solo con n >= 150. Sotto: MERITO SOSPESO. Il RISCHIO (DD, perdita per operazione, peggior giornata) si legge a qualunque n.
+#  S2 COSTO: prima del PF. >= 40 PASSA; 13,3-40 FRA; < 13,3 ESCLUSA PER COSTO. Mediana sugli ingressi, con commissione 0,04 USD/oz come base e 0,08 come contro-esempio (E6).
+#  S3 PF DI RIFERIMENTO: PF_V = fattore di profitto sui deal (profitto + commissioni + swap), ricalcolato dal lettore dal report e confrontato col PF del report (tolleranza 0,02, altrimenti G0 KO). Se il tester NON
+#     addebita commissioni (somma commissioni = 0) il lettore sottrae 3,90 EUR per lotto e per OPERAZIONE (a giro) e stampa anche la versione 7,80 (per lato): PF_V si legge dopo la commissione ipotetica.
+#  S4 ESITO DELLA REPLICA (cella REPL, tre tranche insieme, n >= 150): PF_V >= 1,5 E PF_V > 1,3 in almeno 2 tranche su 3 E la quota del migliore operazione < 25% del profitto netto E PF con 7,80 a giro >= 1,3
+#     -> 'la dichiarazione di Emiliano trova un RISCONTRO sul nostro feed, in un regime solo': e' il permesso di passare al passo 2, NON un candidato.
+#     PF_V fra 1,3 e 1,5 -> NESSUN VERDETTO. PF_V fra 1,0 e 1,3 -> coerente con l'ipotesi nulla (nessun edge distinguibile dal costo su questo regime). PF_V < 1,0 -> la dichiarazione non regge sul nostro feed.
+#     Tutte le altre combinazioni di PF_V >= 1,5 (concentrato, una sola tranche, solo senza commissione) -> NESSUN VERDETTO e si scrive quale condizione manca.
+#  S5 CONCENTRAZIONE: migliore operazione >= 25% del profitto netto positivo, oppure profitto netto senza le 5 migliori <= 0 -> FRAGILE (come il +21.491 = 35% del netto di Emiliano, spec. par. 8.4).
+#  S6 ORA (sei fasce server, fissate a priori, spec. par. 11.2): asia 00-07, europa 07-12, pausa 12-14, apertura USA 14-17, pomeriggio USA 17-22, rollover 22-24 (ora della barra d'ingresso).
+#     Una fascia si legge solo con n >= 100. Statistica: media di r (profitto / perdita a SL dell'operazione) contro zero, soglia p < 0,05/6 = 0,0083 (correzione per sei fasce), E stesso segno in almeno 2 tranche su 3.
+#     Una fascia che sporge sola, con le vicine in direzione opposta, e' 'picco/bordo' e non si usa.
+#  S7 CELLE LARGHE: la misura e' la FRONTIERA (n, PF, costo mediano), non la ricerca della cella migliore. Se una cella larga ha PF_V >= 1,5 con n >= 150, vale S4 piu' la riga del costo: se il costo e' FRA
+#     o ESCLUSA, la cella non puo' diventare sedia comunque. CENTRO DELL'ALTOPIANO, MAI IL PICCO: con quattro celle lungo UN asse l'altopiano si legge solo se PF_V sale o scende in modo monotono; una cella che
+#     sporge da sola e' un picco e si scrive cosi'.
+#  GATE di affidabilita' (se uno cade, NESSUN numero di quella passata si usa):
+#   G0 compilazione 0 errori; riga AVVIO v1.10 con simbolo/TF/canale/EMA/ATR/spread/uscite/BE/lotto/magic UGUALI alla cella; AUTOTEST 'VERDETTO: PASS'; finestra girata uguale alla tranche (giornale del tester);
+#      barre generate < 100.000; (Modello 4) 'Qualita' dello Storico' 100% ticks reali; report presente con Expert/Simbolo/Periodo giusti; PF e profitto netto RICALCOLATI dai deal = quelli del report; operazioni del
+#      report = ingressi del giornale (+/-1: una posizione aperta a fine test).
+#   G1 le due gemelle di S0 (magic 775800 e 775850, stessa cella, stessa tranche, Modello 1): operazioni, profitto, PF e DD IDENTICI (Modello 1 e' deterministico). Se cadono, nessun conteggio e' riproducibile.
+#   G2 stessa cella REPL su T1 a Modello 1 (S0) e a Modello 4 (R1A): il lettore stampa il rapporto n(ticks)/n(OHLC) e il numero di segnali; fuori da 0,5-2,0 = DA GUARDARE (si cerca la causa), non e' un fallimento.
+#
+#  S8 LETTURA PER REGIME (FIRMA di Claudio, 10/10/2026, report/FIRME_2026-10-10.md Firma 1: 'CONFERMO LA SOGLIA, SCRIVILA NEI FILE PROVA'). Si AGGIUNGE a S4-S7, NON li sostituisce. Scritta PRIMA dei numeri.
+#     1. L'EA 'REGGE' se il PF netto dei costi (PF_V) e' > 1,0 in OGNI regime che ha ALMENO 150 operazioni (e almeno 2 tranche), con LONG e SHORT letti SEPARATAMENTE, e nessun regime ha un drawdown
+#        superiore a quello PROMESSO dal backtest della cella.
+#     2. Un regime con meno di 150 operazioni (o meno di 2 tranche) NON giudica il merito: resta 'NON MISURATO', mai 'bocciato' ne' 'promosso'. Il RISCHIO (DD, perdita per operazione, peggior giornata)
+#        si legge a qualunque n (R59).
+#     3. Un PF buono solo nel toro non basta: se fra i regimi misurati non c'e' ne' LATERALE ne' RIBASSO il lettore scrive 'NON BASTA'.
+#     4. Le finestre dei regimi sono quelle della REGOLA SUL PREZZO scritta sopra (non anni di fila, non scelte guardando un PF).
+#     5. Strumento: questo lotto copre SOLO cio' che i tick coprono (2024.07.10 -> 2025.12.31). Ribasso e laterale LUNGHI vanno nel lotto successivo di screening in OHLC (MAI come verdetto).
+#     6. Il criterio non tocca le soglie di rischio, le taglie, il conto reale ne' la spesa: restano di Claudio.
+#     LETTURE DEL LETTORE (INTERPRETAZIONE dichiarata): il gate n >= 150 e' sul TOTALE del regime (come dice la firma); poi si stampano long e short con il loro n, e il verdetto richiede PF_V > 1,0 su ENTRAMBI. Un
+#     lato con n < 150 dentro un regime con n >= 150 si stampa con la nota 'indicativo' (non cambia il verdetto: la firma non pone una soglia al lato). Un regime e' MISURATO se n >= 150 E >= 2 tranche. Le DUE
+#     famiglie di regimi (direzione: TORO / LATERALE / RIBASSO; volatilita': CALMO / VOLATILE) sono lette entrambe: 'regge' vuole PF_V > 1,0 in OGNUNO dei misurati.
+#     DRAWDOWN PROMESSO: oggi NON ESISTE (nessuna cella e' stata promossa, nessun contratto): il cancello del DD resta APERTO. Il lettore stampa il DD equity massimo di tranche per regime (limite INFERIORE del DD
+#     di regime: ogni tranche riparte dal deposito); il confronto con un DD promesso si fa solo dopo un censimento di contratto. NON si scrive 'regge' senza dirlo.
+#  TRADUZIONE ALLE 6 TRANCHE (R2REG). I NUMERI di S1-S7 sono INVARIATI; cambiano solo i conti che nominano 'tre tranche':
+#     S1: 'somma delle tre tranche' = somma delle 6 tranche del lotto, per cella. Una tranche da sola si legge solo con n >= 150 (invariato): il lettore la CONTA dentro S4 solo se ha n >= 150 (in R1A questa regola non
+#         cambia nessun numero: nessuna tranche aveva PF_V > 1,3). Per n < 150 (cella, regime, tranche): MERITO SOSPESO; RISCHIO letto; COSTO stampato col suo n (il verdetto di costo si scrive sulle 6 tranche).
+#     S4: 'PF_V > 1,3 in almeno 2 tranche su 3' = in almeno 4 tranche su 6 (DUE TERZI: la proporzione si conserva, non si ammorbidisce). [TRADUZIONE: la cifra 2 su 3 non e' trasferibile a 6 senza scegliere; si e'
+#         scelta la lettura piu' severa; Claudio puo' dichiarare il minimo assoluto di 2.] CONSEGUENZA DICHIARATA: la REPL, che ha n < 150 in quasi tutte le tranche (E1), NON puo' raggiungere 4 tranche su 6 con n >= 150:
+#         per la REPL l'esito S4 e' STRUTTURALMENTE 'NESSUN VERDETTO' (mai 'riscontro'), anche con un PF_V alto. E' il costo di non inventare un criterio: il merito della REPL nel 2024-25 e' 'non misurabile', non 'negativo'.
+#     S6: 'stesso segno in almeno 2 tranche su 3' = in almeno 4 su 6 (stessa proporzione).
+#     S5: invariata (migliore operazione < 25% del profitto netto; netto senza le 5 migliori > 0). S7: con DUE celle lungo l'asse nessun altopiano si legge (la monotonia fra 2 punti e' vuota): contano n, PF_V e costo.
+#     G1 e G2 NON si applicano a R2REG (nessuna passata a Modello 1 in questo lotto); G0 vale per ognuna delle 12 passate. La riproducibilita' del Modello 4 fra due giri [NON MISURATO].
+#  CONTROESEMPIO SCRITTO PRIMA (richiesta di Claudio, 10/10): se il PF_V del 2024-25 e' >= 1,3 con n >= 150 su una cella, NON BASTA: serve replica in almeno 2 tranche (ciascuna con n >= 150 e PF_V > 1,3) E la
+#     quota della migliore operazione < 25% del profitto netto. Il lettore stampa la riga 'CONTROESEMPIO' sotto S4 per ogni cella. E' una condizione IN PIU' (minimo assoluto), non al posto della traduzione di S4.
+#
+#  ======================= CERTIFICATO DI MORTE (5 caselle) -- cosa MANCA dopo R0 =======================
+#   1 PF misurato ........................ R0 lo da' (REPL e 3 controlli, 3 tranche, UN regime)       2 n e DD ........ R0 li da'
+#   3 gestione dell'USCITA ad asse ....... NO: nessuna manopola di uscita e' ad asse in R0 (spec. par. 11, punto 4)   <- MANCA
+#   4 simboli GEMELLI .................... NO: XAGUSD / indici non provati (spec. par. 11, punto 6)                      <- MANCA
+#   5 TF cambiato almeno una volta ....... NO: solo M1 (M3/M5 sono il punto 5 della spec.)                              <- MANCA
+#  Quindi, QUALUNQUE numero esca da R0, la parola 'MORTO' NON si scrive: l'esito piu' severo ammesso e' 'la replica non regge sul nostro feed (n=..., PF_V=..., un regime)' e in REGISTRO_TEST.md
+#  va scritto che mancano le caselle 3, 4, 5 (e la prova di regime fuori da gen-set 2026). Il verdetto resta 'NON ANCORA MISURATO'.
+#  AGGIORNAMENTO dopo R2REG: le caselle 1 (PF) e 2 (n e DD) avranno due regimi in piu' (2024 H2 calmo, 2025 toro) a tick reali; restano MANCANTI le caselle 3 (uscita ad asse), 4 (simboli gemelli), 5 (TF cambiato) e i
+#  regimi RIBASSO e LATERALE lunghi (screening OHLC, non verdetto). Qualunque esito di R2REG, 'MORTO' NON si scrive: l'esito piu' severo ammesso e' 'la replica non regge nei regimi misurati (n=..., PF_V=...)', e in
+#  REGISTRO_TEST.md vanno scritte le caselle mancanti. Il verdetto resta 'NON ANCORA MISURATO'.
+#
+#  ======================= DOPO R2REG (NON autorizzato qui: sono le regole che valgono) =======================
+#  Regola del 19/08: se C035 e REPL non reggono a tick reali nei regimi misurati, l'oro M1 con questa geometria non ha edge sul nostro feed e NON si allarga la griglia sui suoi parametri d'ingresso (canale, EMA, spread):
+#  si cercano MECCANISMI alternativi sulla stessa inefficienza (breakout con filtro di volatilita', TF piu' alti, uscita), e si torna all'imbuto. Il lotto successivo del criterio di Claudio e' lo SCREENING in OHLC su M1
+#  dei regimi lunghi non coperti dai tick (ribasso, laterale): mai un verdetto, con l'orologio BCM dichiarato. Questo file non lancia niente di tutto cio'.
+#
+#  ======================= COSTO IN TEMPO MACCHINA [STIMA, ANCORATA a R1A] =======================
+#  MISURATO in R1A (PC DESKTOP-H4D7CAJ, 10/10): 3 passate a ticks reali in 4 minuti, 43-53 s ciascuna (compresi avvio e chiusura del terminale), 25,6-26,9 milioni di tick a trimestre, 'preliminary downloading of history
+#  ticks' completato in pochi secondi (tick 2026 verosimilmente gia' in cache). Per il 2024-25 il primo scaricamento dal server BCM e' [NON MISURATO] e puo' essere molto piu' lungo; i tick per trimestre nel 2024-25
+#  sono [NON MISURATI] (verosimilmente meno: oro piu' calmo). Le C035 hanno piu' operazioni (2.000-2.500 per trimestre contro 100-600): il tester e' piu' lento a parita' di tick [NON MISURATO].
+#     Compilazione: ~1 minuto [STIMA]. 12 passate: stima di centro 12-25 minuti in tutto (45-120 s a passata); intervallo 10-75 minuti [STIMA]; PEGGIORE dichiarato: 10 minuti a passata = 120 minuti.
+#     Tetto del lotto 180 minuti (1,5x il peggiore, come R1A 90 su 60); ogni passata ha un timeout di 60 minuti (-TimeoutRunMin 60) e se lo supera il terminale si chiude con CloseMainWindow (mai Stop-Process).
+#     'NON FERMARE PRIMA DI' 255 minuti: compilazione fino a 3 + tetto 180 + ultima passata fino a 60 + chiusura fino a 2 + lettura dei log e zip ~10. E' il caso peggiore; il caso atteso e' ~20 minuti.
+#     Rischio noto: 'no memory for ticks generating' su simboli densi con ticks reali: 898-1041 Mb usati in R1A; la C035 non cambia i tick. [NON MISURATO] sul 2024-25.
+#
+#  ======================= BUCHI DICHIARATI =======================
+#   B1 EA mai compilato (MetaEditor non c'e' in questo ambiente; collaudo_gba.py e' a tavolino, 106/106 mutanti ma niente compilatore). Se la compilazione fallisce il driver si ferma PRIMA del tester e mette il log
+#      nello zip GBA_R0_<lotto>_COMPILAZIONE_FALLITA.zip. Punti noti se il compilatore si lamenta: MathMax su due long in GbaGestisci, formati %I64u (note par. 3).
+#   B2 Il lettore non e' stato provato su un report del GBA (non ne esiste uno): formato dei deal verificato su un report vero (R109, D30EUR, Italia, UTF-16), autotest su dati finti con risposta nota.
+#   B3 La commissione che il tester addebita sull'oro BCM e' [NON MISURATA] (3,90 EUR/lotto per lato o a giro: non detto): S3 e E6 tengono le due versioni.
+#   B4 Lo spread del tester a ticks reali sull'oro nel 2026 e' [NON MISURATO]; il proxy usa 5 giornate di settembre ovunque.
+#   B5 Spread per ora su TUTTE le barre: non misurato (l'EA stampa lo spread solo alle barre di rottura): campione selezionato. Un logger dedicato nel tester non esiste; non lo si aggiunge qui.
+#   B6 ExecutionMode=0: nessuna latenza ne' slippage vero; per uno scalper e' il bias piu' favorevole possibile. Asse futuro.
+#   B7 Weekend e pausa giornaliera: l'uscita a tempo conta barre esistenti (note par. 2.5, 7.3) e il proxy dice che quasi non morde, ma i gap non sono modellati; la cella REPL puo' rimanere aperta nel weekend con il solo SL.
+#   B8 La riga 'posizione aperta' viene PRIMA dello spread nell'ordine dei cancelli dell'EA: la quota 'scartati per spread' si conta sui soli segnali LIBERI (senza posizione aperta), non su tutti.
+#   B9 L'accoppiamento deal 'in'/'out' del lettore assume UNA posizione per volta (vero per un magic: R9 dell'EA). Se il report contiene due 'in' di fila, G0 KO.
+#   B10 Una tranche = un regime; tre tranche contigue NON sono tre campioni indipendenti. Il segno concorde in 2 tranche su 3 e' un controllo debole, non una prova fuori campione.
+#   B11 Tetto 100.000 barre: il conto delle barre BCM e' [DERIVATO] da HistData.
+#   B12 Il tempo per passata e il numero di tick reali sono [NON MISURATI]; la prima corsa li misura.
+#   B13 Sul demo piccolo 50503392 non gira nessun Guardian (CLAUDE.md, misura 12/09) e il rischio per operazione a 1,00 lotto non ha tetto nell'EA (spec. par. 13 e note par. 7.4): decisione di Claudio PRIMA di qualunque campo, non di R0.
+#   B14 Il periodo girato e' il 2026: non e' un fuori campione rispetto a Emiliano (il suo EA gira da una settimana, stesso regime): non puo' ne' confermare ne' smentire che il metodo regga in altri regimi.
+#  B15 (R2REG) Spread del tester a ticks reali sull'oro nel 2024-25 [NON MISURATO]: tutte le attese di n e di costo dipendono dall'assunzione 'spread = quello di settembre 2026' (sensibilita' in E1/E2/E6).
+#  B16 (R2REG) L'orologio dell'ORO prima del 2025 non e' misurato (solo il forex): la tabella delle fasce a orologio uniforme esclude il 27/10/2024-02/02/2025, ma NON dimostra che l'oro seguisse il forex.
+#  B17 (R2REG) Le soglie della regola sul prezzo (5%, 0,15, 3,5 bp) sono tonde ma scelte vedendo i rendimenti dei trimestri; il confine di T6 e T4 ne dipende (dichiarato in testa). Non ci sono PF 2024-25 prima di questo lotto.
+#  B18 (R2REG) Il regime LATERALE di questo lotto sono DUE trimestri non contigui (T8, T6); il RIBASSO non c'e'. Un 'regge' dal solo toro e dal laterale a 2 trimestri NON e' 'regge su tutti i mercati'.
+#  B19 (R2REG) La storia M1 prima del 2024.07.10 per l'avvio di T9 e' [NON MISURATA] (vedi FINESTRE); il lettore conta '[GBA] dati non pronti'.
+#  B20 (R2REG) ToDate esclusivo e' MISURATO su R1A (3 tranche); la prima corsa del lotto lo riconferma con la riga 'from/to' del giornale. R1A ha 3 giorni persi (31/03, 30/06, 30/09 2026): il suo n e' di conseguenza ~1,5% corto.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @GBA-TRANCHE qui sotto (sei finestre trimestrali, ToDate ESCLUSIVO: 'a' e' il primo giorno della tranche successiva; il driver GBA_R0_PASSATE.ps1 v4 le legge dal file, nessuna IS/OOS)
+#
+#  BLOCCHI LEGGIBILI A MACCHINA (la sola fonte per il driver e il lettore; sono commenti: il driver dei round li salta). Chiavi: k=v separate da spazi.
+#  @GBA-TRANCHE nome=T4 da=2025.10.01 a=2026.01.01
+#  @GBA-TRANCHE nome=T5 da=2025.07.01 a=2025.10.01
+#  @GBA-TRANCHE nome=T6 da=2025.04.01 a=2025.07.01
+#  @GBA-TRANCHE nome=T7 da=2025.01.01 a=2025.04.01
+#  @GBA-TRANCHE nome=T8 da=2024.10.01 a=2025.01.01
+#  @GBA-TRANCHE nome=T9 da=2024.07.10 a=2024.10.01
+#  @GBA-CELLA nome=REPL InpSpreadMaxATR=0.05
+#  @GBA-CELLA nome=C035 InpSpreadMaxATR=0.35
+#  @GBA-LOTTO nome=R2REG modello=4 tetto_min=180 passate=REPL:T4,REPL:T5,REPL:T6,REPL:T7,REPL:T8,REPL:T9,C035:T4,C035:T5,C035:T6,C035:T7,C035:T8,C035:T9
+#
+# ==========================================================================
+
+InpSymbol=XAUUSD
+InpSignalTF=1
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=24
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true

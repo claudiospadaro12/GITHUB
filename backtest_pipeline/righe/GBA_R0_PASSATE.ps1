@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_GBA_R0_PASSATE_v3
+#  MARCATORE_GBA_R0_PASSATE_v4
 #  GBA_R0_PASSATE.ps1 -- PASSO 0 (sonda) E PASSO 1 (replica) DI 'GoldBreakoutATR' (ABTG_GoldBreakoutATR v1.10) SU XAUUSD
 #
 #  CHE COSA FA, e una cosa sola:
@@ -52,6 +52,11 @@
 #      [NON MISURATA]) arrivava a un fattore ~1,1-1,5 dal fondo di 100000: il 'canarino' di S0 (classe 1204, soglia 50.000 EUR) era PREVISTO scattare e
 #      avrebbe imposto una v3 fra S0 e R1B, e la regola non stava nella riga di R1B (classe 1206). La deviazione 9 (KO su margine/stop out) RESTA come rete.
 #      Le righe '-- ordine saltato' dell'EA diverse dal margine (SL troppo vicino, lotto nullo, OrderCalcMargin, prezzi/ATR) si CONTANO nella testa del log.
+#  12. (v4, 10/10) PARAMETRO -Prova: la v3 aveva il NOME del file prova ($PROVA), i tre lotti ammessi (S0|R1A|R1B) e i CONTEGGI dei blocchi (3 tranche, 4 celle,
+#      3 lotti) scritti nel sorgente: non poteva leggere il file del lotto R2REG (GBA_R2_REGIME_2026-10-10.txt: 6 tranche, 2 celle, 1 lotto). Ora una tabella
+#      ($PROVE_AMMESSE) lega ogni file prova ai suoi lotti e ai suoi conteggi; il DEFAULT di -Prova e' il file della v3, quindi una riga vecchia (S0/R1A/R1B)
+#      si comporta come prima. Un -Prova fuori tabella ferma tutto. Nient'altro e' cambiato: stessi 30 pin, stesso asse tecnico, stessi controlli, stessa
+#      cella REPL. Cio' che resta cablato e DICHIARATO: EA, simbolo XAUUSD, M1, versione 1.10, deposito 1000000, lotto fisso 1,00.
 #
 #  E' UN BACKTEST, NON UN ORDINE. [Experts] AllowLiveTrading=false nel .ini: il terminale del PC di backtest e' loggato sul DEMO 50503392 e il 14/08/2026
 #  da questa macchina sono partiti ordini VERI.
@@ -71,7 +76,8 @@ param(
   [Parameter(Mandatory=$true)][string]$ShaEA,
   [Parameter(Mandatory=$true)][string]$ShaInc,
   [Parameter(Mandatory=$true)][string]$ShaProva,
-  [int]$TimeoutRunMin = 30
+  [int]$TimeoutRunMin = 30,
+  [string]$Prova = 'GBA_R0_REPLICA_2026-10-09.txt'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -81,7 +87,14 @@ $IC = [Globalization.CultureInfo]::InvariantCulture
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
 $EXPERT = 'ABTG_GoldBreakoutATR'
-$PROVA  = 'GBA_R0_REPLICA_2026-10-09.txt'
+# (v4) i file prova ammessi: nome -> numero di blocchi attesi (guardia contro un file tronco o cambiato) e lotti che contiene
+$PROVE_AMMESSE = @{
+  'GBA_R0_REPLICA_2026-10-09.txt' = @{ Tr = 3; Ce = 4; Lo = 3; Lotti = '^(S0|R1A|R1B)$' }
+  'GBA_R2_REGIME_2026-10-10.txt'  = @{ Tr = 6; Ce = 2; Lo = 1; Lotti = '^(R2REG)$' }
+}
+if(-not $PROVE_AMMESSE.ContainsKey($Prova)){ throw ('-Prova ' + $Prova + ' non e fra i file prova ammessi: ' + (($PROVE_AMMESSE.Keys | Sort-Object) -join ', ') + '.') }
+$PROVA  = $Prova
+$CFG_PROVA = $PROVE_AMMESSE[$Prova]
 $VERSIONE_ATTESA = '1.10'
 $SIMBOLO = 'XAUUSD'
 $PERIODO = 'M1'
@@ -92,7 +105,7 @@ $TETTO_BARRE = 100000
 $AVVISO_BARRE = 95000
 if($Pin -notmatch '^[0-9a-fA-F]{40}$'){ throw '-Pin obbligatorio e di 40 caratteri esadecimali: senza, girerebbe la punta del branch spacciandola per un commit congelato.' }
 $Pin = $Pin.ToLower()
-if($Lotto -notmatch '^(S0|R1A|R1B)$'){ throw ('-Lotto deve essere S0, R1A o R1B (e ' + $Lotto + ').') }
+if($Lotto -notmatch $CFG_PROVA.Lotti){ throw ('-Lotto ' + $Lotto + ' non e un lotto del file prova ' + $PROVA + ' (ammessi: ' + $CFG_PROVA.Lotti + ').') }
 foreach($hx in @($ShaEA, $ShaInc, $ShaProva)){ if($hx -notmatch '^[0-9a-fA-F]{64}$'){ throw '-ShaEA, -ShaInc e -ShaProva devono essere di 64 caratteri esadecimali (SHA256 calcolato dal commit, mai dal disco).' } }
 $ShaEA = $ShaEA.ToUpper(); $ShaInc = $ShaInc.ToUpper(); $ShaProva = $ShaProva.ToUpper()
 if($TimeoutRunMin -lt 1 -or $TimeoutRunMin -gt 90){ throw '-TimeoutRunMin fuori da 1-90 minuti.' }
@@ -289,7 +302,7 @@ if($pinH['InpSymbol'] -ne $SIMBOLO){ throw ('InpSymbol del file prova e ' + $pin
 if($pinH['InpSignalTF'] -ne '1'){ throw 'InpSignalTF del file prova non e 1 (PERIOD_M1). Non si parte.' }
 if($pinH['InpVerbose'] -ne 'true'){ throw 'InpVerbose del file prova non e true: senza, il giornale non ha le righe dei segnali. Non si parte.' }
 if($pinH['InpLotMode'] -ne '0' -or (Num $pinH['InpLots']) -ne 1.0){ throw 'il file prova non ha lotto fisso 1,00 (InpLotMode=0, InpLots=1.0): decisione di Claudio del 09/10. Non si parte.' }
-if($blocchi.TRANCHE.Count -ne 3 -or $blocchi.CELLA.Count -ne 4 -or $blocchi.LOTTO.Count -ne 3){ throw ('blocchi @GBA letti: tranche ' + @($blocchi.TRANCHE).Count + ' (attese 3), celle ' + @($blocchi.CELLA).Count + ' (attese 4), lotti ' + @($blocchi.LOTTO).Count + ' (attesi 3: S0, R1A, R1B). Non si parte.') }
+if(@($blocchi.TRANCHE).Count -ne $CFG_PROVA.Tr -or @($blocchi.CELLA).Count -ne $CFG_PROVA.Ce -or @($blocchi.LOTTO).Count -ne $CFG_PROVA.Lo){ throw ('blocchi @GBA letti: tranche ' + @($blocchi.TRANCHE).Count + ' (attese ' + $CFG_PROVA.Tr + '), celle ' + @($blocchi.CELLA).Count + ' (attese ' + $CFG_PROVA.Ce + '), lotti ' + @($blocchi.LOTTO).Count + ' (attesi ' + $CFG_PROVA.Lo + ') nel file prova ' + $PROVA + '. Non si parte.') }
 $trDef = @{}
 foreach($b in $blocchi.TRANCHE){
   if(@($b.Keys).Count -ne 3 -or -not $b.ContainsKey('nome') -or -not $b.ContainsKey('da') -or -not $b.ContainsKey('a')){ throw 'un blocco @GBA-TRANCHE non ha esattamente nome, da, a.' }
@@ -696,7 +709,7 @@ $testa = @(
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss') + '   pc: ' + $env:COMPUTERNAME + '   pin: ' + $Pin),
   ($EXPERT + '.mq5 SHA256 ' + $ShaEA + '   compilazione: ' + $compErr + ' errori, ' + $compWarn + ' avvisi (-1 = non letto)'),
   ('passate del lotto ' + $runs.Count + ': OK ' + $nOk + ', KO ' + $nKo + ', NON LANCIATE ' + $nNon + '   durata totale ' + [int]$durTot + ' minuti   media per passata OK ' + [int]$mediaS + ' secondi'),
-  ('STIMA DEL PIANO INTERO (17 passate: S0 5 + R1A 3 + R1B 9) con la media di questo lotto: ' + [int](17 * $mediaS / 60.0) + ' minuti (valida solo se il Modello e lo stesso: S0 e OHLC, R1 e a ticks reali)'),
+  $(if($Lotto -eq 'R2REG'){ ('LOTTO R2REG: ' + $runs.Count + ' passate a ticks reali (nessun piano da 17 passate: la stima e nel file prova ' + $PROVA + ')') } else { ('STIMA DEL PIANO INTERO (17 passate: S0 5 + R1A 3 + R1B 9) con la media di questo lotto: ' + [int](17 * $mediaS / 60.0) + ' minuti (valida solo se il Modello e lo stesso: S0 e OHLC, R1 e a ticks reali)') }),
   'Guardian nel tester: FAIL-OPEN (irrilevante: nel tester non c e nessun altro EA).'
 )
 if($g1 -ne ''){ $testa = $testa + @($g1) }
