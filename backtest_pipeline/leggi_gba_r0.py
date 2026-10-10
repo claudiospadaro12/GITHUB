@@ -729,11 +729,12 @@ def stampa(passate, csv_out=None):
                 segni[x["tranche"]] = segni.get(x["tranche"], 0.0) + x["net_v"]
             tot_segno = 1 if sum(x["net_v"] for x in sel) > 0 else -1
             conc = sum(1 for v in segni.values() if (v > 0) == (tot_segno > 0))
+            servono_f = max(2, int(math.ceil(2.0 * len(segni) / 3.0 - 1e-9)))   # S6 'almeno 2 tranche su 3': in proporzione (6 tranche -> 4)
             if len(sel) < N_FASCIA:
                 verd = "SOSPESA (n<%d)" % N_FASCIA
             elif p is None:
                 verd = "r non calcolabile (accoppiamento)"
-            elif p < P_FASCIA and conc >= 2:
+            elif p < P_FASCIA and conc >= servono_f:
                 verd = "sopra la soglia corretta, segno concorde in %d tranche" % conc
             elif p < P_FASCIA:
                 verd = "sopra la soglia ma segno concorde in sole %d tranche: orologio/regime, NON si usa" % conc
