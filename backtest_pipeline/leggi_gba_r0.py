@@ -753,6 +753,11 @@ def lettura_regimi(passate, cella=None, comm_ip=COMM_EUR_LOTTO_GIRO, Ps=None, re
             v_n = lettura_regimi(passate, cella, comm_ip, Ps, regimi, durata, "non_misurato", dd_promesso)[1]
             if _esito(v_g) != _esito(v_n):
                 dipende.append("DIPENDE DAL LATO SOTTO 150 (decisione di Claudio aperta): giudica -> %s, non_misurato -> %s" % (v_g, v_n))
+        if not durata_esplicita and not lato_esplicito and not dipende:
+            # (3o FAIL, classe 1256) le due decisioni aperte una alla volta non bastano: si calcola anche la loro COMBINAZIONE (sempre un livello solo)
+            griglia = [(d_, l_, lettura_regimi(passate, cella, comm_ip, Ps, regimi, d_, l_, dd_promesso)[1]) for d_ in ("1anno", "365giorni") for l_ in LATI_SOTTO_150]
+            if len(set(_esito(v_) for _d, _l, v_ in griglia)) > 1:
+                dipende.append("DIPENDE DALLA COMBINAZIONE DURATA x LATO SOTTO 150 (decisioni di Claudio aperte): " + ", ".join("%s+%s -> %s" % (d_, l_, v_) for d_, l_, v_ in griglia))
         if dipende:
             verdetto = " || ".join(dipende)
     return righe, verdetto
@@ -1500,6 +1505,18 @@ def autotest():
         os.remove(zt)
     finally:
         DURATA_REGIME, PESO_LATO_SOTTO_150, DD_PROMESSO, DURATA_SCELTA, LATO_SCELTO = salva
+    # (3o FAIL, classe 1256) la COMBINAZIONE delle due decisioni aperte: ognuna da sola non cambia la categoria, insieme si'
+    zg = _zip_griglia()
+    pg = carica([zg])
+    cat = {(d_, l_): _esito(lettura_regimi(pg, "REPL", durata=d_, lato150=l_)[1]) for d_ in ("1anno", "365giorni") for l_ in LATI_SOTTO_150}
+    ck("GRIGLIA: 1anno+giudica, 1anno+non_misurato, 365giorni+giudica = NON REGGE; 365giorni+non_misurato = NON BASTA",
+       cat[("1anno", "giudica")] == cat[("1anno", "non_misurato")] == cat[("365giorni", "giudica")] == "NON REGGE" and cat[("365giorni", "non_misurato")] == "NON BASTA", str(cat))
+    _r, vgr = lettura_regimi(pg, "REPL")
+    ck("CONTRO-ESEMPIO GRIGLIA: con durata e lato non scelti il verdetto comincia con 'DIPENDE DALLA COMBINAZIONE DURATA x LATO SOTTO 150' e elenca le 4 letture",
+       vgr.startswith("DIPENDE DALLA COMBINAZIONE DURATA x LATO SOTTO 150 (decisioni di Claudio aperte): 1anno+giudica -> NON REGGE") and "365giorni+non_misurato -> NON BASTA" in vgr, vgr[:150])
+    _r, vgr2 = lettura_regimi(pg, "REPL", durata="1anno")
+    ck("GRIGLIA: con la durata scelta (1anno) le due letture del lato concordano (NON REGGE) -> nessun DIPENDE", vgr2.startswith("NON REGGE") and "DIPENDE" not in vgr2, vgr2[:80])
+    os.remove(zg)
     # (lato vuoto) cella solo-long (InpAllowShort=false): lo short ha n=0, NON e' un PF <= 1
     zt = _zip_r2reg("solo_long")
     rgl, vgl = lettura_regimi(carica([zt]), "REPL", durata="2trimestri")
@@ -1586,6 +1603,41 @@ def _togli_dd(zpath, tranche):
             b = ("\ufeff" + decodifica(b).replace("Equit\u00e0 Drawdown Massima:", "RIGA TOLTA:")).encode("utf-16-le")
         zo.writestr(n, b)
     zi.close(); zo.close()
+    return f.name
+
+
+def _zip_griglia():
+    """(3o FAIL, classe 1256) contro-esempio del cancello: T9-T4 come R2REG, T3-T1 come R1A. T8: 60 long a -100; T6, T3, T1: 40 long alternati +110/-100;
+    T9, T7, T5, T4, T2: 40 long a +100; T2 anche 30 short a -50. Le 4 letture (durata x lato) danno NON REGGE, NON REGGE, NON REGGE, NON BASTA."""
+    import tempfile
+    fin = {"T9": ("2024.07.10", "2024.10.01"), "T8": ("2024.10.01", "2025.01.01"), "T7": ("2025.01.01", "2025.04.01"), "T6": ("2025.04.01", "2025.07.01"),
+           "T5": ("2025.07.01", "2025.10.01"), "T4": ("2025.10.01", "2026.01.01"), "T3": ("2026.01.01", "2026.03.31"), "T2": ("2026.04.01", "2026.06.30"), "T1": ("2026.07.01", "2026.09.30")}
+    spec = {"T8": [("buy", -100.0)] * 60}
+    for tr in ("T6", "T3", "T1"):
+        spec[tr] = [("buy", 110.0 if i % 2 == 0 else -100.0) for i in range(40)]
+    for tr in ("T9", "T7", "T5", "T4", "T2"):
+        spec[tr] = [("buy", 100.0)] * 40
+    spec["T2"] = spec["T2"] + [("sell", -50.0)] * 30
+    f = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+    f.close()
+    z = zipfile.ZipFile(f.name, "w")
+    righe = []
+    for k, tr in enumerate(("T4", "T5", "T6", "T7", "T8", "T9", "T1", "T2", "T3"), 1):
+        lotto = "R2REG" if tr in ("T4", "T5", "T6", "T7", "T8", "T9") else "R1A"
+        da, a = fin[tr]
+        base = datetime.datetime.strptime(da, "%Y.%m.%d") + datetime.timedelta(hours=1)
+        lista = [((base + datetime.timedelta(hours=i * 6)).strftime("%Y.%m.%d %H:%M:%S"), lato, prof, 4.0, 0.10, 5) for i, (lato, prof) in enumerate(spec[tr])]
+        nets = [x[2] for x in lista]
+        dd, lg = _sintetico(lista)
+        tag = "%s_%02d_REPL_%s_m775800" % (lotto, k, tr)
+        pf = pf_di(nets)
+        # tranche tutta vincente: PF infinito, la cella del report resta VUOTA (con 'inf' il G0 la scarterebbe: inf - inf non sta nella tolleranza)
+        z.writestr("report\\GBA_R0_" + tag + ".htm", _htm(dd, len(nets), _fmt(sum(nets)), "%.2f" % pf if math.isfinite(pf) else ""))
+        z.writestr("log\\GBA_" + tag + ".txt", "\r\n".join(["# passata finta"] + lg))
+        righe.append("%s;%s;REPL;0.05;%s;%s;%s;4;775800;2026-10-10 10:00:00;60;OK;%d;%s;%s;100%%ticksreali;88000;;88000;25000000;;100;%d;si;si;%s-%s;" % (
+            lotto, tag, tr, da, a, len(nets), sum(nets), "%.2f" % pf if math.isfinite(pf) else "inf", len(nets), da, a))
+    z.writestr("MANIFEST_R0.csv", _manifest(righe))
+    z.close()
     return f.name
 
 

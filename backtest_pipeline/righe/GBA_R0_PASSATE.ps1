@@ -408,11 +408,12 @@ $ceDef = @{}
 foreach($b in $blocchi.CELLA){
   # UNA variabile per file prova: la cella puo' dichiarare SOLO nome e la chiave dell'asse
   if(@($b.Keys).Count -ne 2 -or -not $b.ContainsKey('nome') -or -not $b.ContainsKey($ASSE)){ throw ('la cella ' + $b['nome'] + ' dichiara qualcosa di diverso da ' + $ASSE + ': una variabile per file prova, lo script si ferma.') }
+  # (3o FAIL, classe 1251) il nome della cella entra nel tag (percorsi e MANIFEST): si valida anche nei file STORICI
+  if($b['nome'] -cnotmatch '^[A-Za-z0-9]{1,10}$'){ throw ('cella ' + $b['nome'] + ': nome non ammesso (1-10 lettere o cifre).') }
   if($STORICA){
     if($b['InpSpreadMaxATR'] -notmatch '^[0-9]+\.[0-9]+$'){ throw ('cella ' + $b['nome'] + ': InpSpreadMaxATR non e un decimale col punto.') }
   } else {
     if(-not ($b.Keys -ccontains $ASSE)){ throw ('la cella ' + $b['nome'] + ' scrive la chiave dell asse con maiuscole/minuscole diverse da ' + $ASSE + '.') }
-    if($b['nome'] -cnotmatch '^[A-Za-z0-9]{1,10}$'){ throw ('cella ' + $b['nome'] + ': nome non ammesso (1-10 lettere o cifre).') }
     $mv = ValoreNonValido $ASSE $b[$ASSE]; if($mv -ne ''){ throw ('cella ' + $b['nome'] + ': ' + $mv) }
   }
   if($ceDef.ContainsKey($b['nome'])){ throw ('cella ' + $b['nome'] + ' dichiarata DUE volte nel file prova.') }
