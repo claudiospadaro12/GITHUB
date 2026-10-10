@@ -1312,13 +1312,37 @@ def autotest():
     ck("log: 'dati non pronti' contato fra le anomalie", lgn["anomalie"].get("dati non pronti (segnale NON valutato: storia M1/EMA/ATR mancante all'inizio della finestra?)") == 1)
     # regimi sui DATI VERI di R1A (se l'archivio c'e'): la somma dei regimi deve tornare coi totali gia' letti (933 = 443 long + 490 short)
     zr = os.path.join(REPO, "backtest_pipeline", "risultati_archivio", "GBA_R0_R1A_20261010", "GBA_R0_R1A.zip")
+    zb = os.path.join(REPO, "backtest_pipeline", "risultati_archivio", "GBA_R0_R1B_20261010", "GBA_R0_R1B.zip")
     if os.path.exists(zr):
         pr = carica([zr])
-        rg, vd = lettura_regimi(pr, "REPL")
+        # (v5) con la regola del file prova R2REG ('2trimestri') i numeri e il verdetto sono quelli della v4: e' la prova che la riscrittura non li ha spostati
+        rg, vd = lettura_regimi(pr, "REPL", durata="2trimestri")
         tx = "\n".join(rg)
-        ck("DATI VERI R1A: LATERALE = T1+T3 n=685 (long 329, short 356), VOLATILE = T1+T2+T3 n=933 (long 443, short 490), RIBASSO = T2 sola -> NON MISURATO (1 tranche), TORO/CALMO senza tranche",
-           "LATERALE  tranche T1,T3        n=685   (long 329, short 356)" in tx and "VOLATILE  tranche T1,T2,T3     n=933   (long 443, short 490)" in tx and "meno di 2 tranche" in tx and tx.count("nessuna tranche letta") == 2, tx[:400])
-        ck("DATI VERI R1A: verdetto 'NON REGGE' (PF_V 0,88 e 0,85 < 1,0) e il toro non e' misurato", vd.startswith("NON REGGE") and "LATERALE long+short" in vd, vd)
+        ck("DATI VERI R1A (2trimestri = regola v4): LATERALE = T1+T3 n=685 (long 329, short 356), VOLATILE = T1+T2+T3 n=933 (long 443, short 490), RIBASSO = T2 sola -> NON MISURATO (1 tranche), TORO/CALMO senza tranche",
+           "LATERALE  tranche T1,T3        n=685   (long 329, short 356)" in tx and "VOLATILE  tranche T1,T2,T3     n=933   (long 443, short 490)" in tx and "durata: 1 < 2 tranche" in tx and tx.count("nessuna tranche letta") == 2, tx[:400])
+        ck("DATI VERI R1A (2trimestri): verdetto 'NON REGGE' (PF_V 0,88 e 0,85 < 1,0) identico alla v4", vd == "NON REGGE: PF_V <= 1,0 in LATERALE long+short; VOLATILE long+short", vd)
+        rg1, vd1 = lettura_regimi(pr, "REPL")
+        ck("DATI VERI R1A (default '1anno' = lettura letterale della firma): nessun regime ha 4 trimestri -> NON MISURATO (e NON 'non regge')", vd1.startswith("NON MISURATO") and "durata >= 4 tranche" in vd1, vd1)
+        # CONTRO-ESEMPIO del difetto 3: R1A caricata DUE volte. Prima della v5 il RIBASSO (T2 sola) diventava 'T2,T2' = due tranche = MISURATO.
+        try:
+            carica([zr, zr])
+            ck("CONTRO-ESEMPIO difetto 3: R1A caricata due volte -> ERRORE", False, "nessun errore")
+        except SystemExit as e:
+            ck("CONTRO-ESEMPIO difetto 3: R1A caricata due volte -> ERRORE (3 misure doppie, nessun numero stampato)", str(e).startswith("ERRORE") and str(e).count("caricata DUE volte") == 3, str(e)[:120])
+        dop = controlla_doppioni(carica([zr, zr], controlla=False))
+        ck("controlla_doppioni: 3 doppioni sull'ini (T1, T2, T3)", len(dop) == 3, str(len(dop)))
+        prx = carica([zr, zr], controlla=False)
+        _r, vdx2 = lettura_regimi(prx, "REPL", durata="2trimestri")
+        ck("CONTRO-ESEMPIO difetto 3, seconda rete: anche saltando il controllo, la lettura per regime si rifiuta (tranche doppia = ERRORE, non 'due tranche')", vdx2.startswith("ERRORE: la tranche"), vdx2[:100])
+        if os.path.exists(zb):
+            ck("R1A + R1B insieme (celle diverse, stesse tranche): NESSUN doppione", not controlla_doppioni(carica([zr, zb], controlla=False)))
+    # (v5) la regola sul prezzo e la sua sensibilita' alle soglie tonde
+    ck("regola sul prezzo: a ER 0,15 TRANCHE_PREZZO rida' ESATTAMENTE REGIMI_TRANCHE (9 tranche)", regimi_da_prezzo() == REGIMI_TRANCHE, str(regimi_da_prezzo()))
+    r10, r20 = regimi_da_prezzo(er=0.10), regimi_da_prezzo(er=0.20)
+    cambia10 = sorted(t for t in REGIMI_TRANCHE if r10[t] != REGIMI_TRANCHE[t])
+    cambia20 = sorted(t for t in REGIMI_TRANCHE if r20[t] != REGIMI_TRANCHE[t])
+    ck("SENSIBILITA': a ER 0,10 cambia solo T1 (ER 0,116: LATERALE->TORO); a ER 0,20 cambiano T2 (0,184: RIBASSO->LATERALE) e T4 (0,176: TORO->LATERALE)",
+       cambia10 == ["T1"] and r10["T1"][0] == "TORO" and cambia20 == ["T2", "T4"] and r20["T2"][0] == "LATERALE" and r20["T4"][0] == "LATERALE", "%s %s" % (cambia10, cambia20))
     for tipo, atteso, nome in (("laterale_perde", "NON REGGE: PF_V <= 1,0 in LATERALE long+short", "toro buono ma laterale in perdita -> NON REGGE"),
                                ("solo_toro", "NON BASTA", "CONTRO-ESEMPIO 'PF buono solo nel toro': laterale con n=60 < 150 -> NON MISURATO -> NON BASTA"),
                                ("tutto_bene", "regge nei regimi MISURATI (TORO, LATERALE", "tutti i regimi misurati con PF_V > 1,0 long e short -> regge (DD ancora aperto)"),
@@ -1327,14 +1351,81 @@ def autotest():
         with contextlib.redirect_stdout(io.StringIO()):
             outr, _tr = stampa(carica([zt]), None)
         trx = "\n".join(outr)
-        rgx, vdx = lettura_regimi(carica([zt]), "REPL")
-        ck("R2REG finto (%s): %s" % (tipo, nome), atteso in vdx, vdx)
+        # i quattro casi della v4 si leggono con la regola del file R2REG (2trimestri): con '1anno' il laterale (T8+T6) non arriva mai a 4 trimestri
+        rgx, vdx = lettura_regimi(carica([zt]), "REPL", durata="2trimestri")
+        ck("R2REG finto (%s, 2trimestri): %s" % (tipo, nome), atteso in vdx, vdx)
         if tipo == "solo_toro":
             ck("R2REG finto: LATERALE n=60 -> 'n < 150' e RIBASSO senza tranche -> NON MISURATO", any(r.strip().startswith("LATERALE") and "NON MISURATO (n < 150" in r for r in rgx) and any(r.strip().startswith("RIBASSO") and "NON MISURATO" in r for r in rgx))
         if tipo == "tutto_bene":
             ck("R2REG finto: stampa con attese R2REG, 'sei tranche', S7 senza altopiano, orologio uniforme (ingressi dal 27/10 esclusi), controesempio", "sei tranche: n=" in trx and "NESSUN altopiano si legge" in trx and "ORA con OROLOGIO UNIFORME" in trx and "CONTROESEMPIO (scritto prima)" in trx, "")
             ck("R2REG finto: il lettore NON scrive 'MORTO' e porta l'intestazione del lotto", "MORTO" not in trx and "GBA R2REG -- lettore" in trx)
+            # (v5) il verdetto NON comincia con 'regge' se il DD promesso manca
+            ck("DD promesso ASSENTE: il verdetto comincia con 'NON DICHIARABILE (DD promesso assente)', mai con 'regge'", vdx.startswith("NON DICHIARABILE (DD promesso assente): regge nei regimi MISURATI"), vdx[:90])
+            _r, vdd = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", dd_promesso=5000.0)
+            ck("DD promesso 5000 EUR e DD di tranche 1000: 'regge' si puo' scrivere, col DD accanto", vdd.startswith("regge nei regimi MISURATI") and "<= DD promesso 5000" in vdd, vdd[:120])
+            _r, vdk = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", dd_promesso=500.0)
+            ck("CONTRO-ESEMPIO DD: promesso 500 EUR e DD di tranche 1000 -> NON REGGE per DD anche con PF buono", vdk.startswith("NON REGGE") and "DD oltre il promesso" in vdk, vdk[:120])
+            # le TRE durate danno tre risposte diverse sullo stesso dato: il parametro morde davvero (contro-esempio della decisione aperta)
+            v_1a = lettura_regimi(carica([zt]), "REPL")[1]
+            v_365 = lettura_regimi(carica([zt]), "REPL", durata="365giorni")[1]
+            ck("DURATA '1anno' (default): TORO e CALMO hanno 4 trimestri, LATERALE e VOLATILE 2 -> misurati solo TORO/CALMO -> NON BASTA", v_1a.startswith("NON BASTA") and "TORO, CALMO" in v_1a, v_1a[:120])
+            ck("DURATA '365giorni': TORO = T9+T7+T5+T4 = 83+90+92+92 = 357 giorni < 365 (T9 parte dal 10/07) -> NON MISURATO", v_365.startswith("NON MISURATO") and "357 giorni" in "\n".join(lettura_regimi(carica([zt]), "REPL", durata="365giorni")[0]), v_365[:100])
+            ck("stampa (7): parametri dichiarati, nota soglie tonde con T6/T1/T4/T2, SENSIBILITA' a ER 0,10 e 0,20 che NON e' un verdetto",
+               "durata del regime   = '1anno'" in trx and "lato sotto 150      = 'giudica'" in trx and "T1 ER 0,116" in trx and "T2 ER 0,184" in trx and "T4 ER 0,176" in trx and "T6 ER 0,081" in trx
+               and trx.count("SENSIBILITA' (NON e' un verdetto) con ER 0,10") == 1 and trx.count("SENSIBILITA' (NON e' un verdetto) con ER 0,20") == 1 and "cambiano T4 TORO->LATERALE" in trx)
+            ck("orologio: 'fino al cambio (26/12/2024-02/02/2025, giorno NON MISURATO'", "fino al cambio (26/12/2024-02/02/2025, giorno NON MISURATO" in trx)
         os.remove(zt)
+    # (v5) PESO DI UN LATO SOTTO 150: toro con 240 long vincenti e 80 short perdenti (n regime 320 >= 150, lato short < 150)
+    zt = _zip_r2reg("short_pochi_perde")
+    rgs, vgs = lettura_regimi(carica([zt]), "REPL", durata="2trimestri")
+    rgn, vgn = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", lato150="non_misurato")
+    ck("LATO < 150, 'giudica' (default letterale): lo short con 80 operazioni e PF < 1 CONTA -> NON REGGE TORO short", vgs.startswith("NON REGGE") and "TORO short" in vgs, vgs[:100])
+    ck("LATO < 150, 'non_misurato': lo short non giudica, il toro si legge sul solo long -> nessun 'NON REGGE'", "NON REGGE" not in vgn and any(r.strip().startswith("TORO") and "lato NON MISURATO, n<150: short" in r and "PF_V > 1,0 su long" in r for r in rgn), vgn[:100])
+    os.remove(zt)
+    # (v5) FILE PROVA DICHIARATIVI: asse qualunque, ancora da R1A, gemelle fra zip, doppioni e sovrapposizioni, nomi di cella uguali su assi diversi
+    za = _zip_v5("R1A", [("REPL", "InpSpreadMaxATR", "0.05", t_, "775800", {}) for t_ in ("T1", "T2", "T3")], fine_t1="2026.09.30", storico=True)
+    zu = _zip_v5("R2UA", [("B990", "InpBE_TriggerATR", "99.0", t_, "775800", {"InpBE_TriggerATR": "99.0"}) for t_ in ("T1", "T2", "T3")]
+                 + [("REPL", "InpBE_TriggerATR", "1.0", "T1", "775850", {})], fine_t1="2026.09.30")
+    pv = carica([za, zu])
+    with contextlib.redirect_stdout(io.StringIO()):
+        outv, tabv = stampa(pv, None)
+    tv = "\n".join(outv)
+    ck("dichiarativo: cella col SUO asse nell'intestazione e lotto dichiarato", "CELLA B990 [lotto R2UA] (InpBE_TriggerATR 99.0)" in tv and "lotti di file prova DICHIARATIVI: R2UA" in tv, [x for x in outv if "CELLA B990" in x][:1])
+    ck("dichiarativo: S7 trova l'ANCORA (la REPL di R1A differisce SOLO in InpBE_TriggerATR, stesse tranche) e con 2 punti NON legge un altopiano",
+       "(S7) FRONTIERA del lotto R2UA lungo l'asse InpBE_TriggerATR (Modello 4): 2 punti" in tv and "(ancora, lotto R1A)" in tv and "solo 2 punti" in tv)
+    ck("dichiarativo: G1 della gemella 775850 contro la 775800 di R1A (altro zip, stessa identita' dall'ini) -> VERDE", any("G1 gemelle (cella REPL, tranche T1" in x and "VERDE" in x for x in outv), [x for x in outv if "G1 gemelle (cella REPL" in x][:1])
+    za2 = _zip_v5("R1A", [("REPL", "InpSpreadMaxATR", "0.05", t_, "775800", {"InpTrail_ATR": "3.5"}) for t_ in ("T1", "T2", "T3")], fine_t1="2026.09.30", storico=True)
+    with contextlib.redirect_stdout(io.StringIO()):
+        outa2, _t = stampa(carica([za2, zu]), None)
+    ta2 = "\n".join(outa2)
+    ck("CONTRO-ESEMPIO S7: una REPL che differisce anche in InpTrail_ATR NON e' un'ancora dell'asse InpBE_TriggerATR (1 punto solo, nessuna '(ancora')",
+       "(ancora, lotto R1A)" not in ta2 and "lungo l'asse InpBE_TriggerATR (Modello 4): 1 punti" in ta2)
+    os.remove(za2)
+    zu2 = _zip_v5("R2UA", [("REPL", "InpBE_TriggerATR", "1.0", "T1", "775850", {})], fine_t1="2026.09.30", profitto_extra=5.0)
+    with contextlib.redirect_stdout(io.StringIO()):
+        outg, _t = stampa(carica([za, zu2]), None)
+    ck("CONTRO-ESEMPIO G1 dichiarativo: gemella con profitto diverso di 5 EUR -> ROSSO", any("G1 gemelle (cella REPL, tranche T1" in x and "ROSSO" in x for x in outg))
+    zd = _zip_v5("R2UA", [("REPL", "InpBE_TriggerATR", "1.0", "T1", "775800", {})], fine_t1="2026.09.30")
+    err_d = controlla_doppioni(carica([za, zd], controlla=False))
+    ck("CONTRO-ESEMPIO: la REPL T1 775800 rifatta in un file dichiarativo (stessi input, asse diverso nel manifest) e' la STESSA misura di R1A -> ERRORE (ini)", len(err_d) == 1 and "caricata DUE volte" in err_d[0], err_d)
+    zo = _zip_v5("R2UA", [("REPL", "InpBE_TriggerATR", "1.0", "T1", "775800", {})], fine_t1="2026.10.01")
+    err_o = controlla_doppioni(carica([za, zo], controlla=False))
+    ck("CONTRO-ESEMPIO: T1 07.01-10.01 contro il T1 07.01-09.30 di R1A, stessa cella e magic -> finestre SOVRAPPOSTE = ERRORE", len(err_o) == 1 and "SOVRAPPOSTE" in err_o[0], err_o)
+    zx = _zip_v5("R2UX", [("C05", "InpBE_TriggerATR", "0.5", "T1", "775800", {"InpBE_TriggerATR": "0.5"})], fine_t1="2026.09.30")
+    zy = _zip_v5("R2UY", [("C05", "InpTrail_ATR", "1.5", "T1", "775800", {"InpTrail_ATR": "1.5"})], fine_t1="2026.09.30")
+    pxy = carica([zx, zy])
+    with contextlib.redirect_stdout(io.StringIO()):
+        oxy, _t = stampa(pxy, None)
+    ck("stesso NOME di cella (C05) su due assi diversi: nessun falso doppione, due blocchi separati (chiave modello, lotto, cella, asse)",
+       not controlla_doppioni(pxy) and sum(1 for x in oxy if x.startswith(" CELLA C05")) == 2)
+    zt1 = _zip_v5("R2UZ", [("C05", "InpBE_TriggerATR", "0.5", "T1", "775800", {"InpBE_TriggerATR": "0.5"})], fine_t1="2026.10.01", da_t1="2026.08.01")
+    pz = carica([zt1])
+    ck("una tranche chiamata T1 ma che NON parte il 2026.07.01 non prende il regime di T1 (TRANCHE_DA)", regime_di(pz[0]) is None)
+    zv = _zip_v5("R1A", [("REPL", "InpSpreadMaxATR", "0.05", "T1", "775800", {})], fine_t1="2026.09.30", storico=True, ini=False)
+    pzv = carica([zv])
+    ck("zip vecchio (manifest v3/v4 senza colonne v5, senza ini): asse InpSpreadMaxATR, XAUUSD M1, identita' dal manifest", pzv[0]["asse"] == "InpSpreadMaxATR" and pzv[0]["simbolo"] == "XAUUSD" and pzv[0]["periodo"] == "M1" and not pzv[0]["da_ini"])
+    for pth in (za, zu, zu2, zd, zo, zx, zy, zt1, zv):
+        os.remove(pth)
     print("")
     if falliti:
         print("AUTOTEST FALLITO: %d controlli: %s" % (len(falliti), ", ".join(falliti)))
@@ -1350,7 +1441,9 @@ def _zip_r2reg(tipo):
     'tutto_bene'      : toro e laterale PF 1,6, n>=150                  -> regge nei regimi misurati
     'short_perde_toro': nel toro il long vince e lo short perde (PF short < 1) -> NON REGGE (TORO short)"""
     import tempfile
-    tranche = {"T4": "2025.10.01", "T5": "2025.07.01", "T6": "2025.04.01", "T7": "2025.01.01", "T8": "2024.10.20", "T9": "2024.07.10"}
+    tranche = {"T4": "2025.10.01", "T5": "2025.07.01", "T6": "2025.04.01", "T7": "2025.01.01", "T8": "2024.10.01", "T9": "2024.07.10"}
+    # (v5) T8 della partizione parte il 2024.10.01 (TRANCHE_DA); le sue operazioni finte partono dal 20/10 per cadere anche nella finestra dell'orologio incerto
+    inizio_op = dict(tranche, T8="2024.10.20")
     fine = {"T4": "2026.01.01", "T5": "2025.10.01", "T6": "2025.07.01", "T7": "2025.04.01", "T8": "2025.01.01", "T9": "2024.10.01"}
     righe, z = [], None
     f = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
@@ -1359,14 +1452,21 @@ def _zip_r2reg(tipo):
     k = 0
     for tr in ("T4", "T5", "T6", "T7", "T8", "T9"):
         toro = REGIMI_TRANCHE[tr][0] == "TORO"
-        n = 80 if (toro or tipo in ("laterale_perde", "tutto_bene")) else 30
+        n = 80 if (toro or tipo in ("laterale_perde", "tutto_bene", "short_pochi_perde")) else 30
         k += 1
-        base = datetime.datetime.strptime(tranche[tr], "%Y.%m.%d") + datetime.timedelta(hours=1)
+        base = datetime.datetime.strptime(inizio_op[tr], "%Y.%m.%d") + datetime.timedelta(hours=1)
         lista, nets = [], []
+        cont = {"buy": 0, "sell": 0}
         for i in range(n):
             lato = "buy" if i % 2 == 0 else "sell"
             vince = ((i // 2) % 2 == 0)
-            if tipo == "laterale_perde" and not toro:
+            if tipo == "short_pochi_perde":
+                # (v5) toro: 3 long ogni short (60 long vincenti PF 1,6 e 20 short perdenti per tranche); altrove alternati e vincenti
+                lato = ("sell" if i % 4 == 0 else "buy") if toro else lato
+                vince = (cont[lato] % 2 == 0)
+                cont[lato] += 1
+                prof = (50.0 if vince else -200.0) if (toro and lato == "sell") else (160.0 if vince else -100.0)
+            elif tipo == "laterale_perde" and not toro:
                 prof = 100.0 if vince else -200.0
             elif tipo == "short_perde_toro" and toro and lato == "sell":
                 prof = 50.0 if vince else -200.0
@@ -1382,6 +1482,52 @@ def _zip_r2reg(tipo):
         righe.append("R2REG;%s;REPL;0.05;%s;%s;%s;4;775800;2026-10-10 10:00:00;60;OK;%d;%s;%.2f;100%%ticksreali;88000;;88000;25000000;;100;%d;si;si;%s-%s;" % (
             tag, tr, tranche[tr], fine[tr], n, sum(nets), pf_di(nets), n, tranche[tr], fine[tr]))
     z.writestr("MANIFEST_R0.csv", _manifest(righe))
+    z.close()
+    return f.name
+
+
+# (v5) i 30 pin di GBA_R2_REGIME_2026-10-10.txt (r.274-304): la base degli ini finti
+_PIN_BASE = {"InpSymbol": "XAUUSD", "InpSignalTF": "1", "InpTrendTF": "0", "InpAtrTF": "0", "InpChannelBars": "48", "InpEmaPeriod": "100", "InpAtrPeriod": "14",
+             "InpSpreadMaxATR": "0.05", "InpAllowLong": "true", "InpAllowShort": "true", "InpSL_ATR": "2.5", "InpTrail_ATR": "2.5", "InpTrailAtrMode": "0",
+             "InpTimeExitBars": "48", "InpUseBreakeven": "true", "InpBE_TriggerATR": "1.0", "InpBE_OffsetATR": "0.0", "InpSlippagePoints": "30", "InpMaxDailyLoss": "0.0",
+             "InpMaxTradesPerDay": "0", "InpCheckFreeMargin": "true", "InpHourStart": "0", "InpHourEnd": "24", "InpLotMode": "0", "InpLots": "1.0", "InpRiskPct": "0.25",
+             "InpComment": "GBA", "InpUsaGuardian": "true", "InpVerbose": "true", "InpAutoTest": "true"}
+
+
+def _zip_v5(lotto, voci, fine_t1="2026.09.30", da_t1="2026.07.01", storico=False, ini=True, profitto_extra=0.0):
+    """(v5) zip finto come lo scrive il driver v5: voci = [(cella, asse, valore, tranche, magic, input_cambiati)]. Ogni passata ha le STESSE 40 operazioni
+    (cosi' due gemelle sono identiche per costruzione), il suo ini (se ini=True) e, se storico=False, le 5 colonne in coda al manifest.
+    storico=True + ini=False imita uno zip v3/v4 (manifest a 27 colonne, nessun ini)."""
+    import tempfile
+    finestre = {"T1": (da_t1, fine_t1), "T2": ("2026.04.01", "2026.06.30"), "T3": ("2026.01.01", "2026.03.31")}
+    f = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+    f.close()
+    z = zipfile.ZipFile(f.name, "w")
+    righe = []
+    for k, (cella, asse, valore, tr, mg, cambi) in enumerate(voci, 1):
+        da, a = finestre[tr]
+        base = datetime.datetime.strptime(da, "%Y.%m.%d") + datetime.timedelta(hours=1)
+        lista = [((base + datetime.timedelta(hours=i * 11)).strftime("%Y.%m.%d %H:%M:%S"), "buy" if i % 3 else "sell", 90.0 if i % 2 == 0 else -100.0, 4.0, 0.10, 6) for i in range(40)]
+        nets = [x[2] for x in lista]
+        dd, lg = _sintetico(lista)
+        tag = "%s_%02d_%s_%s_m%s" % (lotto, k, cella, tr, mg)
+        z.writestr("report\\GBA_R0_" + tag + ".htm", _htm(dd, 40, _fmt(sum(nets) + (profitto_extra if mg == "775850" else 0.0)), "%.2f" % pf_di(nets), periodo="M1 (%s - %s)" % (da, a)))
+        z.writestr("log\\GBA_" + tag + ".txt", "\r\n".join(["# passata finta"] + lg))
+        if ini:
+            inp = dict(_PIN_BASE, **cambi)
+            testo = "[Experts]\r\nAllowLiveTrading=false\r\n\r\n[Tester]\r\nExpert=ABTG_GoldBreakoutATR.ex5\r\nSymbol=%s\r\nPeriod=M1\r\nModel=4\r\nFromDate=%s\r\nToDate=%s\r\n\r\n[TesterInputs]\r\n" % (inp["InpSymbol"], da, a)
+            testo += "\r\n".join("%s=%s" % (kk, vv) for kk, vv in inp.items()) + "\r\nInpMagic=%s\r\n" % mg
+            z.writestr("ini\\gba_" + tag + ".ini", testo)
+        spread = dict(_PIN_BASE, **cambi)["InpSpreadMaxATR"]
+        riga = "%s;%s;%s;%s;%s;%s;%s;4;%s;2026-10-10 10:00:00;60;OK;40;%s;%.2f;100%%ticksreali;88000;;88000;25000000;;100;40;si;si;%s-%s;" % (
+            lotto, tag, cella, spread, tr, da, a, mg, sum(nets), pf_di(nets), da, a)
+        if not storico:
+            riga += ";%s;%s;XAUUSD;M1;PROVA_FINTA.txt" % (asse, valore)
+        righe.append(riga)
+    cols = "lotto;passata;cella;spread_max_atr;tranche;da;a;modello;magic;t_avvio;durata_s;stato;trades_report;profitto_report;pf_report;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;righe_gba;ingressi_log;avvio_ok;autotest;finestra;motivi"
+    if not storico:
+        cols += ";asse;valore_asse;simbolo;periodo;prova"
+    z.writestr("MANIFEST_R0.csv", cols + "\n" + "\n".join(righe) + "\n")
     z.close()
     return f.name
 
