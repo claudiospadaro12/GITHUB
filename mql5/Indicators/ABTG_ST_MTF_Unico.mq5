@@ -10,9 +10,12 @@
 //|  RICOSTRUZIONE dell'indicatore "ST MTF-1" della collega, di cui   |
 //|  NON abbiamo il sorgente: solo 3 screenshot dei Dati in Ingresso. |
 //|  Nome DIVERSO apposta, per non confonderlo con l'originale.       |
-//|  Input: stessi nomi, stessi default, stesso ordine delle sezioni  |
-//|  degli screenshot. La descrizione di ogni input comincia col suo  |
-//|  NOME, cosi' si confronta riga per riga con l'originale.          |
+//|  Input: le 87 righe dei tre screenshot (11 titoli di sezione      |
+//|  InpSec01..InpSec11, che nell'originale sono 'input string', +    |
+//|  76 parametri), stessi nomi, default e ordine; piu' 5 righe       |
+//|  nuove del tasto UNICO (InpSec12 + 4 parametri) = 92. La          |
+//|  descrizione di ogni parametro comincia col suo NOME, cosi' si    |
+//|  confronta riga per riga con l'originale.                         |
 //|                                                                  |
 //|  NOVITA' (richiesta 10/10/2026): tasto UNICO, subito a DESTRA dei |
 //|  tre tasti ST (sotto, se la pulsantiera e' in colonna). Lo STESSO |
@@ -62,8 +65,14 @@
 //|     (in un oggetto INVISIBILE del grafico, niente file); si       |
 //|     riparte dai DEFAULT quando cambi i parametri o rimetti        |
 //|     l'indicatore.                                                 |
-//|  [DEDOTTO 9] Ordine degli input "Stile Linee": Style1/2/3 e poi   |
-//|     Width1/2/3 (come elencato; l'originale potrebbe alternarli).  |
+//|  [VISTO negli screenshot: Style1/2/3 poi Width1/2/3] ordine       |
+//|     degli input "Stile Linee" (non piu' una deduzione).           |
+//|                                                                  |
+//|  VERSIONE 1.01 (10/10/2026): i titoli di sezione sono 'input      |
+//|  string InpSecNN' come nell'originale (la 1.00 usava 'input       |
+//|  group', righe diverse da quelle degli screenshot). Logica        |
+//|  invariata. MAI compilato finora: F7 in MetaEditor ancora da      |
+//|  fare.                                                            |
 //|                                                                  |
 //|  Angoli diversi da CORNER_LEFT_UPPER: NON provati su terminale.   |
 //|  Una sola istanza per grafico (due istanze si contenderebbero gli |
@@ -72,7 +81,7 @@
 //|  grafico. Note: report/ST_MTF_UNICO_NOTE_2026-10-10.md            |
 //+------------------------------------------------------------------+
 #property copyright   "Progetto EA Aperture Mercati"
-#property version     "1.00"
+#property version     "1.01"
 #property description "SuperTrend multi-timeframe con pulsantiera e tasto UNICO (accende/spegne i tre ST)."
 #property description "Sola visione: nessun ordine, nessun file. Ricostruzione di 'ST MTF-1' (nome diverso)."
 #property indicator_chart_window
@@ -88,7 +97,7 @@
 #define STU_COL_UNSET ((color)0xFF000000)  // colore "mai impostato" per le cache
 
 //=== Layout Pulsantiera ===
-input group "=== Layout Pulsantiera ==="
+input string InpSec01 = "=== Layout Pulsantiera ==="; // InpSec01 - titolo di sezione
 input ENUM_BASE_CORNER InpCorner           = CORNER_LEFT_UPPER; // InpCorner - angolo della pulsantiera
 input int              InpOffsetX          = 10;                // InpOffsetX - distanza orizzontale dall'angolo (px)
 input int              InpOffsetY          = 50;                // InpOffsetY - distanza verticale dall'angolo (px)
@@ -96,7 +105,7 @@ input bool             InpHorizontalLayout = true;              // InpHorizontal
 input int              InpButtonPadding    = 1;                 // InpButtonPadding - spazio fra i tasti (px)
 
 //=== Dimensioni UI ===
-input group "=== Dimensioni UI ==="
+input string InpSec02 = "=== Dimensioni UI ==="; // InpSec02 - titolo di sezione
 input int    InpTFButtonWidth      = 42;      // InpTFButtonWidth - larghezza tasti timeframe (px)
 input int    InpSTButtonWidth      = 72;      // InpSTButtonWidth - larghezza tasti SuperTrend (px)
 input int    InpButtonHeight       = 24;      // InpButtonHeight - altezza dei tasti (px)
@@ -106,7 +115,7 @@ input int    InpButtonFontSize     = 9;       // InpButtonFontSize - dimensione 
 input string InpButtonFont         = "Arial"; // InpButtonFont - carattere dei tasti
 
 //=== Parametri SuperTrend ===
-input group "=== Parametri SuperTrend ==="
+input string InpSec03 = "=== Parametri SuperTrend ==="; // InpSec03 - titolo di sezione
 input int    InpSTPeriod        = 10;   // InpSTPeriod - periodo ATR del SuperTrend
 input double InpSTMultiplier1   = 2.5;  // InpSTMultiplier1 - moltiplicatore SuperTrend 1
 input double InpSTMultiplier2   = 3.0;  // InpSTMultiplier2 - moltiplicatore SuperTrend 2
@@ -114,26 +123,26 @@ input double InpSTMultiplier3   = 3.5;  // InpSTMultiplier3 - moltiplicatore Sup
 input int    InpBarsToCalculate = 500;  // InpBarsToCalculate - barre lette per ogni timeframe
 
 //=== Abilita SuperTrend ===
-input group "=== Abilita SuperTrend ==="
+input string InpSec04 = "=== Abilita SuperTrend ==="; // InpSec04 - titolo di sezione
 input bool   InpEnableST1 = true;   // InpEnableST1 - SuperTrend 1 disponibile (tasto presente)
 input bool   InpEnableST2 = true;   // InpEnableST2 - SuperTrend 2 disponibile (tasto presente)
 input bool   InpEnableST3 = true;   // InpEnableST3 - SuperTrend 3 disponibile (tasto presente)
 
 //=== DEFAULT SuperTrend Attivi ===
-input group "=== DEFAULT SuperTrend Attivi ==="
+input string InpSec05 = "=== DEFAULT SuperTrend Attivi ==="; // InpSec05 - titolo di sezione
 input bool   InpDefaultST1 = false; // InpDefaultST1 - SuperTrend 1 acceso all'avvio / con DEFAULT
 input bool   InpDefaultST2 = false; // InpDefaultST2 - SuperTrend 2 acceso all'avvio / con DEFAULT
 input bool   InpDefaultST3 = true;  // InpDefaultST3 - SuperTrend 3 acceso all'avvio / con DEFAULT
 
 //=== Opzioni Avanzate ===
-input group "=== Opzioni Avanzate ==="
+input string InpSec06 = "=== Opzioni Avanzate ==="; // InpSec06 - titolo di sezione
 input bool   InpOnlyPanelNoLines    = false; // InpOnlyPanelNoLines - solo pulsantiera, nessuna linea
 input bool   InpLinesInForeground   = true;  // InpLinesInForeground - linee sopra le candele
 input bool   InpPanelVisibleAtStart = true;  // InpPanelVisibleAtStart - pulsantiera aperta all'avvio
 input int    InpTimerSeconds        = 1;     // InpTimerSeconds - aggiornamento ogni N secondi
 
 //=== Stile Linee SuperTrend ===
-input group "=== Stile Linee SuperTrend ==="
+input string InpSec07 = "=== Stile Linee SuperTrend ==="; // InpSec07 - titolo di sezione
 input ENUM_LINE_STYLE InpSTLineStyle1 = STYLE_DASH; // InpSTLineStyle1 - stile linee SuperTrend 1
 input ENUM_LINE_STYLE InpSTLineStyle2 = STYLE_DASH; // InpSTLineStyle2 - stile linee SuperTrend 2
 input ENUM_LINE_STYLE InpSTLineStyle3 = STYLE_DASH; // InpSTLineStyle3 - stile linee SuperTrend 3
@@ -142,7 +151,7 @@ input int             InpSTLineWidth2 = 1;          // InpSTLineWidth2 - spessor
 input int             InpSTLineWidth3 = 1;          // InpSTLineWidth3 - spessore linee SuperTrend 3
 
 //=== Colori Linee per Timeframe ===
-input group "=== Colori Linee per Timeframe ==="
+input string InpSec08 = "=== Colori Linee per Timeframe ==="; // InpSec08 - titolo di sezione
 input color  InpColorM1  = clrSilver;      // InpColorM1 - colore linee M1
 input color  InpColorM3  = clrDeepSkyBlue; // InpColorM3 - colore linee M3
 input color  InpColorM5  = clrWhite;       // InpColorM5 - colore linee M5
@@ -156,7 +165,7 @@ input color  InpColorW1  = clrOrange;      // InpColorW1 - colore linee W1
 input color  InpColorMN1 = clrAqua;        // InpColorMN1 - colore linee MN1
 
 //=== Label Livelli SuperTrend ===
-input group "=== Label Livelli SuperTrend ==="
+input string InpSec09 = "=== Label Livelli SuperTrend ==="; // InpSec09 - titolo di sezione
 input bool   InpShowLevelLabels        = true;           // InpShowLevelLabels - scritta accanto a ogni linea
 input string InpLabelFont              = "Arial Narrow"; // InpLabelFont - carattere delle scritte
 input int    InpLabelFontSize          = 8;              // InpLabelFontSize - dimensione delle scritte
@@ -173,7 +182,7 @@ input int    InpLabelRightOffsetPx     = 280;            // InpLabelRightOffsetP
 input int    InpLabelVerticalOffsetPx  = -8;             // InpLabelVerticalOffsetPx - spostamento verticale (px, negativo = sopra)
 
 //=== DEFAULT Timeframe Attivi ===
-input group "=== DEFAULT Timeframe Attivi ==="
+input string InpSec10 = "=== DEFAULT Timeframe Attivi ==="; // InpSec10 - titolo di sezione
 input bool   InpDefaultM1  = false; // InpDefaultM1 - M1 acceso all'avvio / con DEFAULT
 input bool   InpDefaultM3  = false; // InpDefaultM3 - M3 acceso all'avvio / con DEFAULT
 input bool   InpDefaultM5  = false; // InpDefaultM5 - M5 acceso all'avvio / con DEFAULT
@@ -187,7 +196,7 @@ input bool   InpDefaultW1  = false; // InpDefaultW1 - W1 acceso all'avvio / con 
 input bool   InpDefaultMN1 = false; // InpDefaultMN1 - MN1 acceso all'avvio / con DEFAULT
 
 //=== Colori Pulsanti ===
-input group "=== Colori Pulsanti ==="
+input string InpSec11 = "=== Colori Pulsanti ==="; // InpSec11 - titolo di sezione
 input color  InpButtonTextColor     = clrWhite;       // InpButtonTextColor - testo dei tasti
 input color  InpButtonInactiveColor = clrDimGray;     // InpButtonInactiveColor - tasto spento
 input color  InpButtonMainColor     = clrForestGreen; // InpButtonMainColor - tasto principale (pulsantiera aperta)
@@ -197,7 +206,7 @@ input color  InpButtonDefaultColor  = clrRoyalBlue;   // InpButtonDefaultColor -
 input color  InpButtonSTActiveColor = clrCrimson;     // InpButtonSTActiveColor - tasto SuperTrend acceso
 
 //=== Pulsante UNICO (NUOVO) ===
-input group "=== Pulsante UNICO ==="
+input string InpSec12 = "=== Pulsante UNICO ==="; // InpSec12 - titolo di sezione
 input bool   InpShowUnico    = true;          // InpShowUnico - mostra il tasto UNICO (accende/spegne i tre ST)
 input string InpUnicoText    = "UNICO";       // InpUnicoText - testo del tasto UNICO
 input int    InpUnicoWidth   = 64;            // InpUnicoWidth - larghezza del tasto UNICO (px)

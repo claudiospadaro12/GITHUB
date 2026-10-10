@@ -1,15 +1,15 @@
 # ST MTF con tasto UNICO: note di consegna (10/10/2026)
 
-**File:** `mql5/Indicators/ABTG_ST_MTF_Unico.mq5` (v1.00, 1066 righe, ASCII, fine riga LF, senza BOM)
-**SHA256:** `5c731f94d1f1ef26bbb1dfce706497f0a280f7a0abed89b789c38f7a4ecc33c1`
-**Collaudo a secco:** `python3 backtest_pipeline/collaudo_st_mtf_unico.py` (usa anche `backtest_pipeline/collaudo_st_mtf_unico_sim.cpp`)
-**Stato:** NON ANCORA PASSATO DAL CANCELLO (`controllo-preventivo`). NON ancora compilato in MetaEditor: qui non c'e' MetaEditor.
+**File:** `ABTG_ST_MTF_Unico.mq5` (versione 1.01)
+
+**Attenzione: l'indicatore NON e' MAI stato compilato.** Dove e' stato scritto non c'e' MetaEditor:
+la compilazione (**F7**, sezione 6) e' ancora da fare ed e' il primo controllo (sezione 7).
 
 ## 1. Cosa e'
 
-La richiesta (Claudio, per una collega): la sua dashboard **"ST MTF-1"** ha tre tasti SuperTrend
-(2.5, 3.0, 3.5), e lei vuole **un tasto UNICO, accanto agli altri, che accende TUTTI E TRE i
-SuperTrend e li spegne con lo stesso tasto**.
+La richiesta: la dashboard **"ST MTF-1"** ha tre tasti SuperTrend (2.5, 3.0, 3.5), e serve
+**un tasto UNICO, accanto agli altri, che accende TUTTI E TRE i SuperTrend e li spegne con lo
+stesso tasto**.
 
 Il sorgente dell'originale non c'e': abbiamo solo 3 screenshot dei suoi **Dati in Ingresso**.
 Quindi l'indicatore e' stato **ricostruito**, con un **nome diverso** (`ABTG_ST_MTF_Unico`)
@@ -30,10 +30,10 @@ nessuna GlobalVariable, nessun oggetto altrui toccato. Tutti i suoi oggetti iniz
   a mano i tre tasti ST.
 - Un SuperTrend disabilitato (`InpEnableSTn = false`) non ha tasto e non partecipa a UNICO.
   Con zero SuperTrend abilitati, UNICO non compare.
-- Parametri nuovi, sezione `=== Pulsante UNICO ===`: `InpShowUnico` (true), `InpUnicoText`
+- Parametri nuovi, sezione `InpSec12` = `=== Pulsante UNICO ===`: `InpShowUnico` (true), `InpUnicoText`
   ("UNICO"), `InpUnicoWidth` (64), `InpUnicoOnColor` (clrDarkViolet).
 
-### Tabella di verita' (estratta dal codice VERO, compilato e confrontato con la specifica)
+### Tabella di verita' (provata sulle funzioni vere del file, tradotte in C++ fuori da MetaTrader)
 
 Tre SuperTrend abilitati. 1 = acceso, ordine (2.5, 3.0, 3.5).
 
@@ -53,13 +53,17 @@ Provati in tutto 64 casi (8 combinazioni di abilitazione x 8 stati), anche al se
 
 ## 3. Cosa e' stato preso dagli screenshot (FATTO)
 
-Tutti i parametri, con **stesso nome, stesso valore di default, stesso ordine delle sezioni**:
-Layout Pulsantiera, Dimensioni UI, Parametri SuperTrend, Abilita SuperTrend, DEFAULT SuperTrend
-Attivi, Opzioni Avanzate, Stile Linee SuperTrend, Colori Linee per Timeframe, Label Livelli
-SuperTrend, DEFAULT Timeframe Attivi, Colori Pulsanti (92 voci fra sezioni e parametri: il
-collaudo le confronta una per una). Ogni descrizione **comincia col nome del parametro**
-(es. `InpCorner - angolo della pulsantiera`), cosi' la collega puo' confrontare riga per riga con
-l'originale anche se l'originale mostrava i nomi nudi.
+**Le 87 righe dei tre screenshot (11 titoli `InpSec01`..`InpSec11` + 76 parametri), stesso nome,
+default e ordine; piu' 5 righe nuove del tasto UNICO (`InpSec12` + 4 parametri) = 92.** Le sezioni,
+nell'ordine: Layout Pulsantiera, Dimensioni UI, Parametri SuperTrend, Abilita SuperTrend, DEFAULT
+SuperTrend Attivi, Opzioni Avanzate, Stile Linee SuperTrend, Colori Linee per Timeframe, Label
+Livelli SuperTrend, DEFAULT Timeframe Attivi, Colori Pulsanti. Come nell'originale, ogni titolo e'
+una riga di testo (`InpSec01` = `=== Layout Pulsantiera ===`, ecc.). Ogni descrizione **comincia
+col nome del parametro** (es. `InpCorner - angolo della pulsantiera`), cosi' si puo' confrontare
+riga per riga con l'originale anche se l'originale mostrava i nomi nudi.
+
+**Ordine dei parametri di stile**: Style1, Style2, Style3, poi Width1, Width2, Width3, come si vede
+negli screenshot.
 
 ## 4. Cosa e' stato DEDOTTO (non si vede negli screenshot)
 
@@ -69,7 +73,7 @@ Ogni deduzione e' scritta anche in testa al file come `[DEDOTTO n]`.
    restano come sono. Verde (`InpButtonMainColor`) aperta, rosso (`InpButtonOffColor`) chiusa.
 2. **11 tasti TF** M1 M3 M5 M15 M30 H1 H4 H12 D1 W1 MN1: acceso = `InpButtonOnColor` (Lime),
    spento = `InpButtonInactiveColor`. **M3 e H12 sono timeframe nativi di MT5** (`PERIOD_M3`,
-   `PERIOD_H12`, gia' usati in altri file del repo).
+   `PERIOD_H12`).
 3. **3 tasti "ST 2.5" "ST 3.0" "ST 3.5"**: acceso = `InpButtonSTActiveColor` (Crimson).
 4. **Tasto comando "DEFAULT"** (`InpCommandButtonWidth`, `InpButtonDefaultColor`): rimette TF e
    ST ai valori DEFAULT dei parametri.
@@ -85,14 +89,11 @@ Ogni deduzione e' scritta anche in testa al file come `[DEDOTTO n]`.
 8. **Stato dei tasti conservato al cambio di simbolo/TF** del grafico (in un oggetto invisibile del
    grafico, niente file). Si riparte dai DEFAULT quando si cambiano i parametri o si rimette
    l'indicatore.
-9. **Ordine dei parametri di stile**: Style1, Style2, Style3, poi Width1, Width2, Width3 (come
-   elencati; l'originale potrebbe alternarli: non cambia niente nel funzionamento).
 
-Calcolo del SuperTrend: **la stessa funzione `SW_STCore` della SuperWave v4.1**, copiata identica
-(il collaudo lo verifica carattere per carattere): ATR = media semplice del True Range (la
-convenzione di `iATR` di MT5), bande che si stringono soltanto. Se l'originale usa un'altra
-variante (per esempio ATR di Wilder), i livelli possono differire di poco: e' la prima cosa da
-confrontare (sezione 7).
+Calcolo del SuperTrend: ATR = media semplice del True Range (la convenzione di `iATR` di MT5),
+bande che si stringono soltanto. Se l'originale usa un'altra variante (per esempio ATR di Wilder),
+i livelli possono differire, anche in modo visibile (con un ATR diverso il trend puo' girare su
+un'altra barra): e' la prima cosa da confrontare (sezione 7).
 
 ## 5. Cosa NON si vede e quindi NON e' garantito uguale all'originale
 
@@ -110,8 +111,12 @@ confrontare (sezione 7).
 1. Copiare `ABTG_ST_MTF_Unico.mq5` nella cartella `MQL5\Indicators` del suo MetaTrader 5
    (MT5: menu **File > Apri cartella dati**, poi `MQL5\Indicators`).
 2. Aprire il file in **MetaEditor** (doppio clic, oppure dal Navigatore) e premere **F7** (Compila).
+   E' la **prima compilazione in assoluto**: l'indicatore non e' mai stato compilato.
 3. In MT5, Navigatore > Indicatori > clic destro > **Aggiorna**; poi trascinare
    **ABTG_ST_MTF_Unico** sul grafico.
+4. Nella finestra dei parametri potrebbe comparire anche un campo **"Applica a"** (prezzo di
+   chiusura, ecc.), che negli screenshot dell'originale non si vede: l'indicatore non lo usa
+   (legge da se' le barre di ogni timeframe), lasciarlo com'e'.
 
 ## 7. Cosa controllare dopo
 
@@ -146,16 +151,30 @@ confrontare (sezione 7).
 - **Pulsantiera in un altro angolo** (`InpCorner` diverso da in alto a sinistra): non provato su un
   terminale vero; se i tasti escono dallo schermo, rimettere `CORNER_LEFT_UPPER` e segnalarlo.
 
-## 9. Collaudo a secco (cosa prova e cosa NON prova)
+---
 
-`python3 backtest_pipeline/collaudo_st_mtf_unico.py` -> **325 controlli ok, 0 FAIL** sul file con lo SHA256 sopra.
+# PARTE INTERNA - NON va alla collega (il PDF per lei si fa SOLO dalle sezioni 1-8 qui sopra)
+
+**File:** `mql5/Indicators/ABTG_ST_MTF_Unico.mq5` (v1.01, 1075 righe, ASCII, fine riga LF, senza BOM)
+**SHA256:** `41b53bea3b42d3cce7e9b3d726f7b7efb0d663f3a7fec6e10eacab8d473eef7c`
+**Collaudo a secco:** `python3 -I backtest_pipeline/collaudo_st_mtf_unico.py` (usa anche `backtest_pipeline/collaudo_st_mtf_unico_sim.cpp`)
+**Stato:** in attesa del secondo passaggio del cancello. La v1.00 (SHA `5c731f94...`) e' stata
+bocciata: titoli di sezione come `input group` invece delle righe `input string InpSecNN` degli
+screenshot. NON ancora compilato in MetaEditor: qui non c'e' MetaEditor.
+
+Calcolo: `SW_STCore` e' la stessa funzione della SuperWave v4.1, copiata identica (il collaudo lo
+verifica carattere per carattere).
+
+`python3 -I backtest_pipeline/collaudo_st_mtf_unico.py` -> **328 controlli ok, 0 FAIL** sul file con lo SHA256 sopra.
 
 - **A) logica UNICO**: le funzioni pure **vere**, estratte dal `.mq5` e compilate C++
   (`-Wall -Werror`), contro una specifica scritta dal testo della richiesta: 64 casi + doppio clic.
 - **B) calcolo**: `SW_STCore` identica a quella della SuperWave v4.1 (gia' collaudata).
-- **C) statica**: i 92 input contro gli screenshot; nessuna API vietata (ordini, file,
+- **C) statica**: 92 righe (87 degli screenshot + 5 di UNICO) contro la specifica; nessuna API vietata (ordini, file,
   GlobalVariable, `ObjectsDeleteAll`, `ChartSet*`, `Sleep`); ogni oggetto nasce dal prefisso ed e'
-  ripulito per nome; timer acceso e spento; ASCII senza BOM.
+  ripulito per nome; timer acceso e spento; ASCII senza BOM. La specifica e' fedele agli screenshot
+  perche' ricontrollata A MANO sulle immagini (non e' circolare: il collaudo non puo' accorgersi da
+  solo di un errore di trascrizione nella specifica).
 - **D) simulazione del codice intero**: il `.mq5` tradotto in C++ con sostituzioni meccaniche e
   compilato con AddressSanitizer/UBSan sopra finti MQL5 (oggetti, CopyRates sintetico, array con
   controllo dei limiti). Sessione completa in 4 varianti (base, ST2 disabilitato, in colonna, angolo

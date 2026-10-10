@@ -209,6 +209,16 @@ def section_B(text):
 # ===========================================================================
 # C) statica
 # ===========================================================================
+# FEDELTA' AGLI SCREENSHOT: verificata A MANO sull'IMMAGINE (non e' circolare).
+# Le prime 11 sezioni di SPEC sono trascritte dai tre screenshot dei Dati in Ingresso di "ST MTF-1"
+# (sessione del 10/10/2026, immagini 141/142/143) e RICONTROLLATE riga per riga sull'immagine, non
+# sul sorgente: 87 righe = 11 titoli InpSec01..InpSec11 (tipo 'ab' = input string, valore "=== X ===")
+# + 76 parametri, nello stesso ordine (Stile Linee: Style1/2/3 POI Width1/2/3, visto). L'ultima sezione
+# (InpSec12 + 4 parametri) e' NUOVA (tasto UNICO), non viene dagli screenshot. Questo script confronta
+# il sorgente con SPEC: non puo' accorgersi da solo di un errore di trascrizione in SPEC.
+SCREENSHOT_SEZIONI = 11      # titoli InpSecNN visti negli screenshot
+SCREENSHOT_PARAMETRI = 76    # parametri visti negli screenshot
+NUOVE_RIGHE = 5              # InpSec12 + InpShowUnico, InpUnicoText, InpUnicoWidth, InpUnicoOnColor
 SPEC = [
     ("=== Layout Pulsantiera ===", [
         ("ENUM_BASE_CORNER", "InpCorner", "CORNER_LEFT_UPPER"), ("int", "InpOffsetX", "10"),
@@ -287,8 +297,8 @@ def static_ok(text, verbose=True):
     ok = True
     seq = parse_inputs(text)
     exp = []
-    for g, items in SPEC:
-        exp.append(("G", g))
+    for k, (g, items) in enumerate(SPEC):
+        exp.append(("I", ("string", "InpSec%02d" % (k + 1), '"%s"' % g)))
         for it in items:
             exp.append(("I", it))
     got = [(s[0], s[1]) for s in seq]
@@ -336,7 +346,7 @@ def static_ok(text, verbose=True):
                 "EventSetTimer(InpTimerSeconds) con minimo 1 s", q)
     for o, c in [("(", ")"), ("{", "}"), ("[", "]")]:
         ok &= check(code.count(o) == code.count(c), "parentesi %s%s bilanciate (%d)" % (o, c, code.count(o)), q)
-    for p in ["indicator_chart_window", "indicator_buffers 0", "indicator_plots   0", 'version     "1.00"']:
+    for p in ["indicator_chart_window", "indicator_buffers 0", "indicator_plots   0", 'version     "1.01"']:
         ok &= check(p in text, "#property " + p, q)
     # stato codificato: 5 + 1 + 1 + 11 + 1 + 3 = 22, separatori in 6 e 18, TF da 7, ST da 19
     ok &= check("StringLen(s)!=22" in text and "StringGetCharacter(s,6)!='|'" in text and
@@ -369,6 +379,15 @@ def section_C(raw):
         asc = False
     check(asc, "ASCII puro (come ABTG_Supertrend/Pulsanti_Grafico/ForzaFX)")
     check(b"\r\n" not in raw, "fine riga LF (come gli altri file della cartella)")
+    shot = SPEC[:SCREENSHOT_SEZIONI]
+    n_par = sum(len(items) for _, items in shot)
+    n_new = sum(1 + len(items) for _, items in SPEC[SCREENSHOT_SEZIONI:])
+    check(len(shot) == 11 and n_par == SCREENSHOT_PARAMETRI == 76 and len(shot) + n_par == 87,
+          "SPEC degli screenshot: %d titoli + %d parametri = %d righe (attese 11 + 76 = 87, contate sull'immagine)"
+          % (len(shot), n_par, len(shot) + n_par))
+    check(len(SPEC) == 12 and n_new == NUOVE_RIGHE == 5 and len(shot) + n_par + n_new == 92,
+          "piu' %d righe nuove del tasto UNICO (InpSec12 + 4) = %d righe in tutto (attese 92)"
+          % (n_new, len(shot) + n_par + n_new))
     static_ok(raw.decode("ascii", "replace"), verbose=True)
 
 
@@ -411,7 +430,7 @@ def static_mutants(text):
               text.replace("   DelObj(NameUnico());\n   DelObj(NameDef());\n   for(int i=0;i<STU_NTF;i++)\n      for(int j=0;j<STU_NST;j++)\n        {\n         DelObj(NameL",
                            "   DelObj(NameDef());\n   for(int i=0;i<STU_NTF;i++)\n      for(int j=0;j<STU_NST;j++)\n        {\n         DelObj(NameL", 1)))
     m.append(("sezioni scambiate",
-              text.replace('input group "=== Abilita SuperTrend ==="', 'input group "=== XX ==="', 1)))
+              text.replace('InpSec04 = "=== Abilita SuperTrend ==="', 'InpSec04 = "=== XX ==="', 1)))
     m.append(("ordine dei TF sbagliato (H12 prima di H4)",
               text.replace("PERIOD_H4,PERIOD_H12", "PERIOD_H12,PERIOD_H4", 1)))
     return m
@@ -486,6 +505,9 @@ def run_sim(text, define, show):
 
 def section_D(text):
     print("D) simulazione del codice intero (g++ -fsanitize=address,undefined)")
+    secs = re.findall(r'^const string (InpSec\d\d) = "=== [^"]+ ===";', translate(text), re.M)
+    check(secs == ["InpSec%02d" % k for k in range(1, 13)],
+          "translate(): i 12 titoli diventano 'const string InpSec01..InpSec12' (%d trovati)" % len(secs))
     for name, rep, define in VARIANTS:
         t = text
         if rep:
