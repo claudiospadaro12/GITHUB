@@ -414,6 +414,19 @@ def posizioni_numeriche(P, comm_ipotetica):
     return out, comm_rep
 
 
+def netti_780(P):
+    """(classe 1272) netti con 7,80 EUR/lotto a giro DAVVERO applicati: profitto + swap dei due deal, meno la commissione piu' alta fra quella addebitata dal
+    tester e 7,80 x lotti. Se il tester addebita gia' 3,43 EUR a operazione, la versione 'pf_v2' di posizioni_numeriche coincide con PF_V e non e' un
+    contro-esempio: questa si'."""
+    out = []
+    for p in P["pos"]:
+        a, b = p["in"], p["out"]
+        lotti = a["vol"] or 1.0
+        lordo = a["profitto"] + a["swap"] + b["profitto"] + b["swap"]
+        out.append(lordo - max(COMM_EUR_LOTTO_LATO * lotti, -(a["comm"] + b["comm"])))
+    return out
+
+
 def costo_ingressi(P):
     """Rapporti stop/(spread+comm) sugli INGRESSI (righe d'ingresso): spread-only, +0,04, +0,08 USD/oz. Scarta spread 0,00 (rapporto infinito, il log ha 2 decimali)."""
     ing = P["log"]["ingressi"] if P["log"] else []
@@ -848,6 +861,35 @@ def tabella_regimi(passate, W):
                                                                                 "cambiano " + ", ".join(cambia) if cambia else "nessuna tranche di questa cella cambia direzione", v_alt))
 
 
+def _chiave_deal(d):
+    """(classe 1270) il deal senza il suo id: ora, tipo, direzione, volume, prezzo, commissioni, swap, profitto."""
+    return (d["t"], d["tipo"], d["dir"], d["vol"], d["prezzo"], d["comm"], d["swap"], d["profitto"])
+
+
+def confronta_gemelle(nome, a, b, testo_rosso):
+    """(classe 1270) G1 su due passate gemelle: NON VERIFICABILE se una delle due ha G0 KO o manca il report; VERDE solo se i totali del report
+    (operazioni, profitto, PF, DD equity) E tutti i deal (_chiave_deal, l'id escluso) sono identici, nello stesso ordine."""
+    if a["g0"] or b["g0"]:
+        return nome + ": G0 KO su %s -> NON VERIFICABILE" % " e ".join(x["tag"] for x in (a, b) if x["g0"])
+    ra, rb = a["rep"], b["rep"]
+    if not (ra and rb and ra["ok"] and rb["ok"]):
+        return nome + ": manca il report di una delle due -> NON VERIFICABILE"
+    tot_ok = (ra["trades"] == rb["trades"] and ra["profitto"] == rb["profitto"] and ra["pf"] == rb["pf"] and ra["dd_eq_abs"] == rb["dd_eq_abs"])
+    da, db = ra["deals"], rb["deals"]
+    primo = None
+    if len(da) != len(db):
+        primo = "numero di deal %d contro %d" % (len(da), len(db))
+    else:
+        for i, (x, y) in enumerate(zip(da, db)):
+            if _chiave_deal(x) != _chiave_deal(y):
+                primo = "deal n.%d: %s contro %s" % (i + 1, _chiave_deal(x), _chiave_deal(y))
+                break
+    uguali = tot_ok and primo is None
+    return nome + ": operazioni %s/%s, profitto %s/%s, PF %s/%s, DD equity %s/%s; deal confrontati %d (ora, tipo, direzione, volume, prezzo, commissioni, swap, profitto; id escluso)%s -> %s" % (
+        ra["trades"], rb["trades"], ra["profitto"], rb["profitto"], ra["pf"], rb["pf"], ra["dd_eq_abs"], rb["dd_eq_abs"], min(len(da), len(db)),
+        "" if primo is None else ", PRIMO DIVERSO: " + primo, "VERDE (identiche)" if uguali else testo_rosso)
+
+
 def gemelle_dichiarative(passate):
     """(v5) G1 fuori da S0: per ogni passata 775850 di un lotto dichiarativo, la gemella 775800 con la stessa identita' di cella e la stessa finestra
     (in qualunque zip caricato). Uguali (operazioni, profitto, PF, DD equity) = VERDE; diverse = ROSSO; gemella assente = NON VERIFICABILE."""
@@ -861,13 +903,7 @@ def gemelle_dichiarative(passate):
         if not cand:
             out.append(nome + ": la gemella 775800 NON e' fra gli zip caricati (stessa identita' di cella e stessa finestra) -> NON VERIFICABILE")
             continue
-        ra, rb = cand[0]["rep"], b["rep"]
-        if not (ra and rb and ra["ok"] and rb["ok"]):
-            out.append(nome + ": manca il report di una delle due -> NON VERIFICABILE")
-            continue
-        uguali = (ra["trades"] == rb["trades"] and ra["profitto"] == rb["profitto"] and ra["pf"] == rb["pf"] and ra["dd_eq_abs"] == rb["dd_eq_abs"])
-        out.append(nome + ": operazioni %s/%s, profitto %s/%s, PF %s/%s, DD equity %s/%s -> %s" % (ra["trades"], rb["trades"], ra["profitto"], rb["profitto"], ra["pf"], rb["pf"],
-                   ra["dd_eq_abs"], rb["dd_eq_abs"], "VERDE (identiche)" if uguali else "ROSSO: la passata non e' riproducibile, NESSUN numero del lotto %s si usa" % b["riga"]["lotto"]))
+        out.append(confronta_gemelle(nome, cand[0], b, "ROSSO: la passata non e' riproducibile, NESSUN numero del lotto %s si usa" % b["riga"]["lotto"]))
     return out
 
 
@@ -955,14 +991,7 @@ def stampa(passate, csv_out=None):
     gem = [P for P in passate if P["riga"]["lotto"] == "S0" and P["cella"] == "REPL" and P["tranche"] == "T1"]
     if len(gem) == 2:
         a, b = gem
-        ra, rb = a["rep"], b["rep"]
-        if ra and rb and ra["ok"] and rb["ok"]:
-            uguali = (ra["trades"] == rb["trades"] and ra["profitto"] == rb["profitto"] and ra["pf"] == rb["pf"] and ra["dd_eq_abs"] == rb["dd_eq_abs"])
-            W("  G1 gemelle (REPL, T1, Modello 1, magic %s e %s): operazioni %s/%s, profitto %s/%s, PF %s/%s, DD equity %s/%s -> %s" % (
-                a["magic"], b["magic"], ra["trades"], rb["trades"], ra["profitto"], rb["profitto"], ra["pf"], rb["pf"], ra["dd_eq_abs"], rb["dd_eq_abs"],
-                "VERDE (identiche)" if uguali else "ROSSO: il Modello 1 non e' riproducibile, NESSUN conteggio di S0 si usa"))
-        else:
-            W("  G1: manca il report di una delle due gemelle -> NON VERIFICABILE")
+        W(confronta_gemelle("  G1 gemelle (REPL, T1, Modello 1, magic %s e %s)" % (a["magic"], b["magic"]), a, b, "ROSSO: il Modello 1 non e' riproducibile, NESSUN conteggio di S0 si usa"))
     else:
         W("  G1: nessuna coppia di gemelle (lotto S0 non presente)")
     # (v5) G1 per i lotti dichiarativi: gemelle = stessa IDENTITA' di cella e stessa finestra, magic 775800 e 775850, anche in due zip diversi (ancora in R1A)
@@ -1052,7 +1081,14 @@ def stampa(passate, csv_out=None):
                 nets2 += [x["net_v"] for x in nn]
         pf_v, pf_v2 = pf_di(nets), pf_di(nets2)
         pf_grezzo = pf_di([x["net"] for x in tutte])
-        W("   PF_V %.3f   (7,80 a giro: %.3f;  senza commissione ipotetica: %.3f)   netto PF_V %.0f EUR   win rate %.0f%%" % (pf_v, pf_v2, pf_grezzo, sum(nets), 100.0 * sum(1 for x in nets if x > 0) / len(nets)))
+        # (classe 1272) il PF con 7,80 EUR/lotto a giro calcolato DAVVERO (anche quando il tester addebita gia' una commissione): e' quello che S4 legge
+        pf_780 = pf_di([x for P in Ps if not P["g0"] for x in netti_780(P)])
+        if lotto_c in LOTTI_STORICI:
+            # lotti storici: riga IDENTICA a quella gia' archiviata (R1A, R1B, S0, R2REG); NB: quando il tester addebita la commissione la cifra '7,80 a giro' qui coincide con PF_V
+            W("   PF_V %.3f   (7,80 a giro: %.3f;  senza commissione ipotetica: %.3f)   netto PF_V %.0f EUR   win rate %.0f%%" % (pf_v, pf_v2, pf_grezzo, sum(nets), 100.0 * sum(1 for x in nets if x > 0) / len(nets)))
+        else:
+            W("   PF_V %.3f   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: %.3f;  senza commissione ipotetica: %.3f)   netto PF_V %.0f EUR   win rate %.0f%%" % (
+                pf_v, pf_780, pf_grezzo, sum(nets), 100.0 * sum(1 for x in nets if x > 0) / len(nets)))
         for P in Ps:
             if P["g0"] or not P["rep"]:
                 continue
@@ -1084,8 +1120,16 @@ def stampa(passate, csv_out=None):
         ptr = {t: pf_di([x["net_v"] for x in v]) for t, v in per_tr.items()}
         if mod == 4:
             ptn = {t: len(v) for t, v in per_tr.items()}
-            frase, _m = esito_replica(nets, pf_v, pf_v2, ptr, top1_netto, n_tot, ptn)
-            W("   ESITO S4 per la cella %s: %s" % (cella, frase))
+            if lotto_c in LOTTI_STORICI:
+                frase, _m = esito_replica(nets, pf_v, pf_780, ptr, top1_netto, n_tot, ptn)
+                W("   ESITO S4 per la cella %s: %s" % (cella, frase))
+            else:
+                # (classe 1271) le frasi di esito_replica sono della sola cella REPL del file madre (GBA_R0_REPLICA r.134): per un file prova dichiarativo si
+                # stampano SOLO i numeri contro le soglie S4, in forma neutra; S8-S10 e le smentite del file prova le applica chi legge.
+                servono = max(2, int(math.ceil(2.0 * len(ptr) / 3.0 - 1e-9)))
+                k13 = sum(1 for tt, vv in ptr.items() if vv == vv and vv > PF_TRANCHE and ptn.get(tt, 0) >= N_MIN)
+                W("   S4 in forma NEUTRA per la cella %s (file prova dichiarativo: NESSUN esito qui): PF_V %.2f (soglie 1,0 / 1,3 / 1,5), n=%d (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: %d su %d (S4: almeno %d), migliore operazione = %s del netto (S4: < 25%%), PF con 7,80 EUR/lotto a giro = %s (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova." % (
+                    cella, pf_v, n_tot, k13, len(ptr), servono, "n.d." if top1_netto is None else "%.0f%%" % (100 * top1_netto), "n.d." if pf_780 != pf_780 else "%.2f" % pf_780))
             if lotto_c == "R2REG":
                 # CONTROESEMPIO scritto PRIMA dei numeri (file prova, S8): un PF_V >= 1,3 con n >= 150 su una cella NON BASTA
                 if pf_v >= PF_NESSUN_VERDETTO and n_tot >= N_MIN:
@@ -1146,7 +1190,7 @@ def stampa(passate, csv_out=None):
                 s2 = [s for s in sg if lo <= s["ora"] < hi]
                 if s2:
                     W("      %-15s ATR %.2f  spread %.2f  n=%d" % (nome, mediana([s["atr"] for s in s2]), mediana([s["spread"] for s in s2]), len(s2)))
-        tab.append({"modello": mod, "lotto": lotto_c, "cella": cella, "n": n_tot, "pf_v": pf_v, "pf_v2": pf_v2, "netto": sum(nets), "costo_mediano_c04": mediana(c1), "fragile": fragile,
+        tab.append({"modello": mod, "lotto": lotto_c, "cella": cella, "n": n_tot, "pf_v": pf_v, "pf_v2": pf_v2 if lotto_c in LOTTI_STORICI else pf_780, "netto": sum(nets), "costo_mediano_c04": mediana(c1), "fragile": fragile,
                     "asse": asse_c, "valore": Ps[0]["valore"], "id_cella": Ps[0]["id_cella"], "tranche_da": tuple(sorted(P["riga"]["da"] for P in Ps if not P["g0"])),
                     "inputs": dict(Ps[0]["ini"]["inputs"]) if Ps[0].get("ini") else None, "simbolo": Ps[0]["simbolo"], "periodo": Ps[0]["periodo"]})
     # confronto fra celle (S7)
@@ -1244,8 +1288,11 @@ def _manifest(righe):
 def autotest():
     global DURATA_REGIME, PESO_LATO_SOTTO_150, DD_PROMESSO, DURATA_SCELTA, LATO_SCELTO
     falliti = []
+    eseguiti = [0]
+    saltati = []   # (classe 1261) i controlli sui dati VERI che non girano perche' l'archivio non c'e': si contano e si DICONO, mai in silenzio
 
     def ck(nome, cond, extra=""):
+        eseguiti[0] += 1
         print("  %-4s %s %s" % ("ok" if cond else "FAIL", nome, extra))
         if not cond:
             falliti.append(nome)
@@ -1347,7 +1394,8 @@ def autotest():
     tmp2 = _zip_finto(gemelle_diverse=True)
     with contextlib.redirect_stdout(io.StringIO()):
         out2, _t = stampa(carica([tmp2]), None)
-    ck("CONTRO-ESEMPIO G1: gemelle con profitto diverso -> ROSSO", "ROSSO" in "\n".join(out2))
+    # (classe 1270) qui il riepilogo della gemella dice +5 EUR ma i deal sono identici: il G0 della gemella e' KO, quindi la G1 e' NON VERIFICABILE (mai VERDE)
+    ck("CONTRO-ESEMPIO G1: gemella col riepilogo alterato di 5 EUR (deal intatti) -> G0 KO -> NON VERIFICABILE, mai VERDE", any("G1 gemelle" in x and "G0 KO" in x and "NON VERIFICABILE" in x and "VERDE" not in x for x in out2))
     tmp3 = _zip_finto(qualita_cattiva=True)
     with contextlib.redirect_stdout(io.StringIO()):
         out3, _t3 = stampa(carica([tmp3]), None)
@@ -1407,6 +1455,10 @@ def autotest():
         ck("CONTRO-ESEMPIO difetto 3, seconda rete: anche saltando il controllo, la lettura per regime si rifiuta (tranche doppia = ERRORE, non 'due tranche')", vdx2.startswith("ERRORE: la tranche"), vdx2[:100])
         if os.path.exists(zb):
             ck("R1A + R1B insieme (celle diverse, stesse tranche): NESSUN doppione", not controlla_doppioni(carica([zr, zb], controlla=False)))
+        else:
+            saltati.append((1, "zip R1B non trovato (%s)" % zb))
+    else:
+        saltati.append((7, "zip R1A non trovato (%s): 6 controlli sui dati veri R1A e 1 su R1A+R1B" % zr))
     # (v5) la regola sul prezzo e la sua sensibilita' alle soglie tonde
     ck("regola sul prezzo: a ER 0,15 TRANCHE_PREZZO rida' ESATTAMENTE REGIMI_TRANCHE (9 tranche)", regimi_da_prezzo() == REGIMI_TRANCHE, str(regimi_da_prezzo()))
     r10, r20 = regimi_da_prezzo(er=0.10), regimi_da_prezzo(er=0.20)
@@ -1553,6 +1605,50 @@ def autotest():
            any(r.strip().startswith("LATERALE") and "[4 tranche, 363 giorni]" in r and "NON MISURATO (durata: 363 < 365 giorni" in r for r in rgm)
            and any(r.strip().startswith("LATERALE") and "MISURATO, " in r and "NON MISURATO" not in r for r in _r1))
         os.remove(zt)
+    else:
+        saltati.append((1, "zip R1A non trovato: il LATERALE R2REG+R1A a 363 giorni"))
+    # (classe 1270) G1 sui DATI VERI: la gemella REPL T1 775850 di R2TTREND contro R1A T1, deal per deal; e i tre contro-esempi del cancello sullo stesso zip
+    ztt = os.path.join(REPO, "backtest_pipeline", "risultati_archivio", "GBA_R2_SENZA_CODICE_20261010", "GBA_R0_R2TTREND.zip")
+    if os.path.exists(zr) and os.path.exists(ztt):
+        g = gemelle_dichiarative(carica([zr, ztt]))
+        ck("DATI VERI G1: REPL T1 775850 (R2TTREND) contro R1A T1 -> VERDE con 256 deal confrontati e nessuna differenza (id escluso)",
+           len(g) == 1 and "deal confrontati 256" in g[0] and "PRIMO DIVERSO" not in g[0] and g[0].endswith("VERDE (identiche)"), g[:1])
+        ck("DATI VERI G1 senza R1A: NON VERIFICABILE", any("NON VERIFICABILE" in x for x in gemelle_dichiarative(carica([ztt]))))
+        tag = "R2TTREND_01_REPL_T1_m775850"
+        for nome_ce, kw, attesa in (("deal +500 EUR con il totale del report intatto", dict(profitto=500.0), "G0 KO"),
+                                    ("deal +1,00 EUR (dentro la tolleranza G0)", dict(profitto=1.0), "PRIMO DIVERSO"),
+                                    ("deal spostato di 1 secondo", dict(secondi=1), "PRIMO DIVERSO"),
+                                    ("deal +500 EUR e totali del report alterati COERENTI", dict(profitto=500.0, coerente=True), "ROSSO")):
+            zm = _altera_deal(ztt, tag, 2, **kw)
+            gm = gemelle_dichiarative(carica([zr, zm]))
+            ck("CONTRO-ESEMPIO G1 (%s): MAI VERDE -> %s" % (nome_ce, attesa), len(gm) == 1 and "VERDE" not in gm[0] and attesa in gm[0], gm[0][-160:] if gm else gm)
+            os.remove(zm)
+    else:
+        saltati.append((6, "zip R1A o R2TTREND non trovati: G1 deal per deal sui dati veri e i suoi 4 contro-esempi"))
+    # (classe 1271) lotti DICHIARATIVI: S4 in forma neutra, mai le frasi della replica (Emiliano, passo 2), ne' con PF alto ne' con PF basso
+    for nome_ce, prof in (("PF_V >= 1,5", (300.0, -100.0)), ("PF_V < 1,0", (90.0, -100.0))):
+        zh = _zip_v5("R2UA", [("B990", "InpBE_TriggerATR", "99.0", t_, "775800", {"InpBE_TriggerATR": "99.0"}) for t_ in ("T1", "T2", "T3")], fine_t1="2026.09.30", n_op=160, prof=prof)
+        with contextlib.redirect_stdout(io.StringIO()):
+            oh, _t = stampa(carica([zh]), None)
+        th = "\n".join(oh)
+        ck("CONTRO-ESEMPIO S4 dichiarativo (%s, n=480): nessuna riga con 'Emiliano' ne' 'passo 2', e la riga S4 NEUTRA c'e'" % nome_ce,
+           "Emiliano" not in th and "passo 2" not in th and "S4 in forma NEUTRA per la cella B990" in th, [x for x in oh if "S4" in x][:1])
+        os.remove(zh)
+    zl = _zip_v5("R1A", [("REPL", "InpSpreadMaxATR", "0.05", t_, "775800", {}) for t_ in ("T1", "T2", "T3")], fine_t1="2026.09.30", storico=True, n_op=160, prof=(90.0, -100.0))
+    with contextlib.redirect_stdout(io.StringIO()):
+        ol, _t = stampa(carica([zl]), None)
+    ck("lotto STORICO (R1A, REPL) con PF_V < 1: la frase della replica resta (solo la REPL del file madre la porta)", any("ESITO S4 per la cella REPL" in x and "Emiliano" in x for x in ol))
+    os.remove(zl)
+    # (classe 1272) il PF a 7,80 EUR/lotto a giro quando il tester addebita GIA' 3,43 EUR a operazione: posizioni_numeriche(7,80) coincide con PF_V, netti_780 no
+    d7, l7 = _sintetico([("2026.07.%02d 03:10:00" % (1 + i), "buy", 100.0 if i % 2 == 0 else -100.0, 4.0, 0.10, 5) for i in range(20)], comm=-1.72)
+    P7 = costruisci_passata(dict(r3, passata="C780"), leggi_report(_htm(d7, 20, _fmt(sum((100.0 if i % 2 == 0 else -100.0) - 3.44 for i in range(20))), "%.2f" % (96.56 / 103.44))), leggi_log("\n".join(l7)))
+    v2 = pf_di([x["net_v"] for x in posizioni_numeriche(P7, COMM_EUR_LOTTO_LATO)[0]])
+    v780 = pf_di(netti_780(P7))
+    ck("1272: tester a 3,44 EUR/operazione (1,72 per deal): la vecchia '7,80' = PF_V = 96,56/103,44 (%.4f) mentre netti_780 sottrae davvero 7,80 -> 92,2/107,8 = 0,8553" % v2,
+       not P7["g0"] and abs(v2 - 96.56 / 103.44) < 1e-9 and abs(v780 - 92.2 / 107.8) < 1e-9, "%.4f %.4f %s" % (v2, v780, P7["g0"]))
+    # (classe 1272) con commissione ZERO dal tester le due coincidono (7,80 sottratti in tutti e due i calcoli)
+    v2z = pf_di([x["net_v"] for x in posizioni_numeriche(P3, COMM_EUR_LOTTO_LATO)[0]])
+    ck("1272: tester senza commissione: netti_780 = la versione 7,80 di prima (152,2/107,8)", abs(pf_di(netti_780(P3)) - v2z) < 1e-12 and abs(v2z - 152.2 / 107.8) < 1e-9)
     # (v5) PESO DI UN LATO SOTTO 150: toro con 240 long vincenti e 80 short perdenti (n regime 320 >= 150, lato short < 150)
     zt = _zip_r2reg("short_pochi_perde")
     rgs, vgs = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", lato150="giudica")
@@ -1582,7 +1678,7 @@ def autotest():
     zu2 = _zip_v5("R2UA", [("REPL", "InpBE_TriggerATR", "1.0", "T1", "775850", {})], fine_t1="2026.09.30", profitto_extra=5.0)
     with contextlib.redirect_stdout(io.StringIO()):
         outg, _t = stampa(carica([za, zu2]), None)
-    ck("CONTRO-ESEMPIO G1 dichiarativo: gemella con profitto diverso di 5 EUR -> ROSSO", any("G1 gemelle (cella REPL, tranche T1" in x and "ROSSO" in x for x in outg))
+    ck("CONTRO-ESEMPIO G1 dichiarativo: riepilogo della gemella alterato di 5 EUR (deal intatti) -> G0 KO -> NON VERIFICABILE, mai VERDE", any("G1 gemelle (cella REPL, tranche T1" in x and "G0 KO" in x and "VERDE" not in x for x in outg))
     zd = _zip_v5("R2UA", [("REPL", "InpBE_TriggerATR", "1.0", "T1", "775800", {})], fine_t1="2026.09.30")
     err_d = controlla_doppioni(carica([za, zd], controlla=False))
     ck("CONTRO-ESEMPIO: la REPL T1 775800 rifatta in un file dichiarativo (stessi input, asse diverso nel manifest) e' la STESSA misura di R1A -> ERRORE (ini)", len(err_d) == 1 and "caricata DUE volte" in err_d[0], err_d)
@@ -1605,11 +1701,57 @@ def autotest():
     for pth in (za, zu, zu2, zd, zo, zx, zy, zt1, zv):
         os.remove(pth)
     print("")
+    print("controlli ESEGUITI: %d" % eseguiti[0])
+    if saltati:
+        print("SALTATI %d controlli (NON eseguiti, dati veri assenti -- da rifare dentro il repo): %s" % (sum(k for k, _m in saltati), " | ".join(m for _k, m in saltati)))
     if falliti:
         print("AUTOTEST FALLITO: %d controlli: %s" % (len(falliti), ", ".join(falliti)))
         return 1
-    print("AUTOTEST OK")
+    print("AUTOTEST OK" + ("" if not saltati else "   [ATTENZIONE: %d controlli SALTATI, vedi sopra]" % sum(k for k, _m in saltati)))
     return 0
+
+
+def _altera_deal(zpath, tag, k, profitto=0.0, secondi=0, coerente=False):
+    """(classe 1270) copia dello zip con il k-esimo deal del report della passata 'tag' alterato: profitto + 'profitto' EUR e/o ora + 'secondi'.
+    coerente=True riscrive anche il profitto netto e il PF del riepilogo del report con i valori ricalcolati dai deal (cosi' il G0 resta pulito)."""
+    import tempfile
+    f = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+    f.close()
+    zi, zo = zipfile.ZipFile(zpath), zipfile.ZipFile(f.name, "w")
+    trovato = False
+    for n in zi.namelist():
+        b = zi.read(n)
+        if n.startswith("report") and tag in n and n.lower().endswith(".htm"):
+            t = decodifica(b)
+            vista = 0
+            for m in re.finditer(r"<tr[^>]*>(.*?)</tr>", t, flags=re.S | re.I):
+                celle = [re.sub(r"<[^>]+>", "", c).strip() for c in re.findall(r"<td[^>]*>(.*?)</td>", m.group(1), flags=re.S | re.I)]
+                if not (len(celle) == 13 and re.match(r"^\d{4}\.\d\d\.\d\d \d\d:\d\d:\d\d$", celle[0]) and celle[3] in ("buy", "sell")):
+                    continue
+                vista += 1
+                if vista != k:
+                    continue
+                tds = list(re.finditer(r"(<td[^>]*>)(.*?)(</td>)", m.group(1), flags=re.S | re.I))
+                nuovi = [x.group(2) for x in tds]
+                if profitto:
+                    nuovi[10] = _fmt(numero(celle[10]) + profitto)
+                if secondi:
+                    nuovi[0] = (datetime.datetime.strptime(celle[0], "%Y.%m.%d %H:%M:%S") + datetime.timedelta(seconds=secondi)).strftime("%Y.%m.%d %H:%M:%S")
+                riga = "".join(x.group(1) + v + x.group(3) for x, v in zip(tds, nuovi))
+                t = t[:m.start(1)] + riga + t[m.end(1):]
+                trovato = True
+                break
+            if coerente:
+                rr = leggi_report(("\ufeff" + t).encode("utf-16-le"))
+                pos, _ap, _e = accoppia(rr["deals"])
+                nets = [p["in"]["profitto"] + p["in"]["comm"] + p["in"]["swap"] + p["out"]["profitto"] + p["out"]["comm"] + p["out"]["swap"] for p in pos]
+                t = re.sub(r"(Profitto Totale Netto:</td>\s*<td[^>]*><b>)([^<]*)(</b>)", lambda mm: mm.group(1) + _fmt(sum(nets)) + mm.group(3), t, count=1)
+                t = re.sub(r"(Fattore di Profitto:</td>\s*<td[^>]*><b>)([^<]*)(</b>)", lambda mm: mm.group(1) + "%.2f" % pf_di(nets) + mm.group(3), t, count=1)
+            b = ("\ufeff" + t).encode("utf-16-le")
+        zo.writestr(n, b)
+    zi.close(); zo.close()
+    assert trovato, "deal %d della passata %s non trovato" % (k, tag)
+    return f.name
 
 
 def _togli_dd(zpath, tranche):
@@ -1737,7 +1879,7 @@ _PIN_BASE = {"InpSymbol": "XAUUSD", "InpSignalTF": "1", "InpTrendTF": "0", "InpA
              "InpComment": "GBA", "InpUsaGuardian": "true", "InpVerbose": "true", "InpAutoTest": "true"}
 
 
-def _zip_v5(lotto, voci, fine_t1="2026.09.30", da_t1="2026.07.01", storico=False, ini=True, profitto_extra=0.0):
+def _zip_v5(lotto, voci, fine_t1="2026.09.30", da_t1="2026.07.01", storico=False, ini=True, profitto_extra=0.0, n_op=40, prof=(90.0, -100.0)):
     """(v5) zip finto come lo scrive il driver v5: voci = [(cella, asse, valore, tranche, magic, input_cambiati)]. Ogni passata ha le STESSE 40 operazioni
     (cosi' due gemelle sono identiche per costruzione), il suo ini (se ini=True) e, se storico=False, le 5 colonne in coda al manifest.
     storico=True + ini=False imita uno zip v3/v4 (manifest a 27 colonne, nessun ini)."""
@@ -1750,11 +1892,11 @@ def _zip_v5(lotto, voci, fine_t1="2026.09.30", da_t1="2026.07.01", storico=False
     for k, (cella, asse, valore, tr, mg, cambi) in enumerate(voci, 1):
         da, a = finestre[tr]
         base = datetime.datetime.strptime(da, "%Y.%m.%d") + datetime.timedelta(hours=1)
-        lista = [((base + datetime.timedelta(hours=i * 11)).strftime("%Y.%m.%d %H:%M:%S"), "buy" if i % 3 else "sell", 90.0 if i % 2 == 0 else -100.0, 4.0, 0.10, 6) for i in range(40)]
+        lista = [((base + datetime.timedelta(hours=i * (11 if n_op <= 40 else 2))).strftime("%Y.%m.%d %H:%M:%S"), "buy" if i % 3 else "sell", prof[0] if i % 2 == 0 else prof[1], 4.0, 0.10, 6) for i in range(n_op)]
         nets = [x[2] for x in lista]
         dd, lg = _sintetico(lista)
         tag = "%s_%02d_%s_%s_m%s" % (lotto, k, cella, tr, mg)
-        z.writestr("report\\GBA_R0_" + tag + ".htm", _htm(dd, 40, _fmt(sum(nets) + (profitto_extra if mg == "775850" else 0.0)), "%.2f" % pf_di(nets), periodo="M1 (%s - %s)" % (da, a)))
+        z.writestr("report\\GBA_R0_" + tag + ".htm", _htm(dd, n_op, _fmt(sum(nets) + (profitto_extra if mg == "775850" else 0.0)), "%.2f" % pf_di(nets), periodo="M1 (%s - %s)" % (da, a)))
         z.writestr("log\\GBA_" + tag + ".txt", "\r\n".join(["# passata finta"] + lg))
         if ini:
             inp = dict(_PIN_BASE, **cambi)
@@ -1762,8 +1904,8 @@ def _zip_v5(lotto, voci, fine_t1="2026.09.30", da_t1="2026.07.01", storico=False
             testo += "\r\n".join("%s=%s" % (kk, vv) for kk, vv in inp.items()) + "\r\nInpMagic=%s\r\n" % mg
             z.writestr("ini\\gba_" + tag + ".ini", testo)
         spread = dict(_PIN_BASE, **cambi)["InpSpreadMaxATR"]
-        riga = "%s;%s;%s;%s;%s;%s;%s;4;%s;2026-10-10 10:00:00;60;OK;40;%s;%.2f;100%%ticksreali;88000;;88000;25000000;;100;40;si;si;%s-%s;" % (
-            lotto, tag, cella, spread, tr, da, a, mg, sum(nets), pf_di(nets), da, a)
+        riga = "%s;%s;%s;%s;%s;%s;%s;4;%s;2026-10-10 10:00:00;60;OK;%d;%s;%.2f;100%%ticksreali;88000;;88000;25000000;;100;%d;si;si;%s-%s;" % (
+            lotto, tag, cella, spread, tr, da, a, mg, n_op, sum(nets), pf_di(nets), n_op, da, a)
         if not storico:
             riga += ";%s;%s;XAUUSD;M1;PROVA_FINTA.txt" % (asse, valore)
         righe.append(riga)
