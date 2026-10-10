@@ -39,15 +39,17 @@
 #   G2) ATTIVITA' PIANIFICATE, FAIL-CLOSED: se l'elenco non si legge lo
 #       script SI RIFIUTA (classe 458). Uno zip citato da un'attivita'
 #       pianificata non si sposta.
-#   G3) FRESCHEZZA: uno zip piu' recente di -OreFerme ore (default 48) resta
+#   G3) FRESCHEZZA: uno zip piu' recente di -OreFerme ore (default 48; 14 giorni
+#       per le famiglie dei round ROUND_ NATCLA_ GBA_ AZZURRA_ BULGE_ PASSATA_) resta
 #       (Claudio deve ancora mandarmelo); resta anche se la gemella e' stata
 #       scritta da meno di -OreFerme ore (round che la sta riempiendo).
 #   G4) GIUNZIONI / NASCOSTI / DI SISTEMA: zip e cartelle gemelle di questo
 #       tipo si saltano.
-#   G5) TESTER VIVO: con metatester64 vivo -Esegui si RIFIUTA (un round in
-#       corso rilegge le sue cose dal Desktop; il 21/09 il tester sul VPS ha
-#       inchiodato la macchina). Anteprima e -Annulla non si fermano, ma
-#       avvisano.
+#   G5) ROUND VIVI: con metatester64 o metaeditor64 vivi (e, SOLO sul PC di
+#       backtest, anche terminal64) -Esegui si RIFIUTA stampando PID e Path:
+#       un round o la compilazione dei driver rileggono le loro cose dal
+#       Desktop. Sul VPS terminal64 e' SEMPRE vivo (challenge FTMO): contarlo
+#       renderebbe lo script inutilizzabile. Anteprima e -Annulla avvisano.
 #   G6) LISTA DI PROTEZIONE ESPLICITA (qui sotto, $PROT_*): nomi che restano
 #       SEMPRE, qualunque sia l'eta' e anche se hanno la gemella.
 #   G7) ANNULLA LEGATO A OGGI (classe 1235): -Annulla smonta SOLO il giro
@@ -158,7 +160,22 @@ function ContaIcone(){
 }
 function Ora(){ return (Get-Date).ToString("yyyy.MM.dd HH:mm:ss", $INV) }
 
-$testerVivi = @(Get-Process -Name "metatester64" -ErrorAction SilentlyContinue)
+# processi che dicono "qui si sta lavorando coi round": tester (round in corso), metaeditor64
+# (compilazione dei driver). terminal64 conta SOLO sul PC di backtest: sul VPS i terminali
+# vivi ci sono SEMPRE (challenge FTMO) e contarli renderebbe lo script inutilizzabile.
+$nomiProc = @("metatester64","metaeditor64")
+if($env:COMPUTERNAME -eq "DESKTOP-H4D7CAJ"){ $nomiProc = @("metatester64","metaeditor64","terminal64") }
+$testerVivi = @(Get-Process -Name $nomiProc -ErrorAction SilentlyContinue)
+function ElencoVivi(){
+  $o = @()
+  foreach($pr in $testerVivi){
+    $pp = ""
+    try{ $pp = [string]$pr.Path }catch{ $pp = "" }
+    if([string]::IsNullOrWhiteSpace($pp)){ $pp = "(percorso non leggibile)" }
+    $o += ($pr.ProcessName + " PID " + $pr.Id + " " + $pp)
+  }
+  return ($o -join " ; ")
+}
 
 # ---------------------------------------------------------------------
 # -Annulla: SOLO il giro piu' recente, SOLO se e' di OGGI (G7)
@@ -188,7 +205,7 @@ if($Annulla){
   [void]$righeA.Add("data: " + (Ora) + "   (ora locale del PC, non ora server MT5)")
   [void]$righeA.Add("macchina: " + $env:COMPUTERNAME + "   Desktop: " + $Desktop)
   if($testerVivi.Count -gt 0){
-    $avv = "ATTENZIONE: metatester64 e' vivo (un round e' in corso). Rimettere gli zip al loro posto non disturba il round, ma lo dico."
+    $avv = "ATTENZIONE: processi dei round vivi (" + (ElencoVivi) + "). Rimettere gli zip al loro posto non disturba il round, ma lo dico."
     Write-Host $avv -ForegroundColor Yellow
     [void]$righeA.Add($avv)
   }
@@ -281,8 +298,7 @@ if($Annulla){
 # G5 -- tester vivo: -Esegui si rifiuta
 # ---------------------------------------------------------------------
 if($Esegui -and $testerVivi.Count -gt 0){
-  $pidl = ($testerVivi | ForEach-Object { $_.Id }) -join ", "
-  Muori ("il tester di MT5 e' al lavoro (metatester64 PID " + $pidl + "): un round sta girando e rilegge le sue cose dal Desktop. Rilancia a round finito.")
+  Muori ("c'e' lavoro dei round in corso su questa macchina: " + (ElencoVivi) + ". Un tester (metatester64) o una compilazione (metaeditor64) o, sul PC di backtest, un terminal64 vivo vogliono dire round o driver in corso, che rileggono le loro cose dal Desktop. Rilancia a lavoro finito.")
 }
 
 # ---------------------------------------------------------------------
@@ -323,27 +339,29 @@ $testoAttivitaU = $testoAttivita.ToUpperInvariant()
 # (a) zip che le righe di prova ricreano sul Desktop e che Claudio deve ancora
 #     mandare: AZZURRA_FREQ.ps1, BULGE_TEL_P0.ps1, GBA_R0_PASSATE.ps1,
 #     NATCLA_F0_PASSATE.ps1, NATCLA_F1_PASSATE.ps1, NATCLA_DIAG_U30.ps1
-$PROT_ATTESA = @("AZZURRA_FREQ","BULGE_TEL_P0","GBA_R0_","NATCLA_F0_","NATCLA_F1_","NATCLA_DIAG")
+# 14 GIORNI (336 ore), non 48: Claudio puo' mandare uno zip giorni dopo. Prefissi: ROUND_ NATCLA_ GBA_ AZZURRA_ BULGE_ PASSATA_
+# (zip E gemella). Gli zip fuori da questi prefissi restano a -OreFerme (48).
+$ORE_FAMIGLIE = 336
+$PROT_ATTESA = @("ROUND_","NATCLA_","GBA_","AZZURRA_","BULGE_","PASSATA_")
+$OreFamiglie = $OreFerme
+if($ORE_FAMIGLIE -gt $OreFamiglie){ $OreFamiglie = $ORE_FAMIGLIE }
+function OreMinime($nome){
+  foreach($pf in $PROT_ATTESA){ if($nome.StartsWith($pf, $ORD)){ return $OreFamiglie } }
+  return $OreFerme
+}
 # (b) zip che sono INGRESSO di altri script (storico M1): oro_m1_histdata.ps1,
 #     importa_storico_esterno.ps1, RIGA_STORICO_INDICI.ps1, histdata_m1, sonde
 $PROT_INGRESSO = @("DAT_ASCII_","HISTDATA","DUKASCOPY","STORICO","ORO_M1_HISTDATA","PEPPERSTONE_STORICO","IMPORT_ESTERNO","BROKER_ESTERNO","SONDA_")
 # (c) tematiche di Claudio, copie di repo, archivi e pagelle: le stesse
 #     esclusioni dei gemelli (decisione del 14/08: non si toccano)
-$PROT_GEMELLI = @("ARCHIVIO","ABTG_RISULTATI","ABTG_ZIP","ABTG_DOCUMENTI","ABTG_VARIE","ABTG_ORDINE_LOG",
+$PROT_GEMELLI = @("ARCHIVIO","ABTG_",
   "EASYTREND","INDICATORI","BREAKOUT","NOTTE","PROCE","ALTA VELOCIT","NASDAQ APERTU","DAX E NASD","PIANO DI TRADI",
   "FILE WORD","FILE CHE SCARICO","GITHUB","PAGELLA")
-# (c2) INTERRUTTORE DICHIARATO: ROUND_*.zip protetti PER NOME, sempre? Il coordinatore l'ha
-#      chiesto, ma sul VPS 114 dei 132 zip con gemella sono ROUND_* di settembre: con $true lo
-#      script ne sposterebbe 17 invece di 131. Default $false = i ROUND_ sono protetti dalla
-#      freschezza (zip E gemella, 48 ore) e dal rifiuto con tester vivo, non per nome.
-$PROTEGGI_ROUND_PER_NOME = $false
 # (d) DINAMICA: lo zip e' citato (per nome o per percorso) da un'attivita' pianificata
 # (e) DINAMICA: i ROUND_*.zip e ogni altro zip appena scritto sono coperti dalla
 #     freschezza (-OreFerme, sullo zip E sulla gemella) e dal rifiuto con tester vivo
 
 function MotivoProtezione($nome, $percorso){
-  foreach($p in $PROT_ATTESA){ if($nome.StartsWith($p, $ORD)){ return "PROTETTO: famiglia di una riga di prova ('" + $p + "*'): e' lo zip che Claudio deve ancora mandare" } }
-  if($PROTEGGI_ROUND_PER_NOME -and $nome.StartsWith("ROUND_", $ORD)){ return "PROTETTO: ROUND_*.zip (interruttore PROTEGGI_ROUND_PER_NOME attivo)" }
   foreach($p in $PROT_INGRESSO){ if($nome.StartsWith($p, $ORD)){ return "PROTETTO: zip di INGRESSO di uno script di storico ('" + $p + "*')" } }
   foreach($p in $PROT_GEMELLI){ if($nome.StartsWith($p, $ORD)){ return "PROTETTO: nome tematico/archivio/copia di repo/pagella ('" + $p + "*'), come nei gemelli" } }
   if($testoAttivitaU.Contains($percorso.ToUpperInvariant()) -or $testoAttivitaU.Contains(($SEP + $nome.ToUpperInvariant()))){
@@ -419,9 +437,10 @@ foreach($z in $zipTutti){
   if($mp -ne ""){
     [void]$restano.Add([pscustomobject]@{ Nome=$z.Name; Cat="protetto"; Perche=$mp }); continue
   }
+  $oreMin = OreMinime $z.Name
   $oreZip = (New-TimeSpan -Start $z.LastWriteTime -End $adesso).TotalHours
-  if($oreZip -lt $OreFerme){
-    [void]$restano.Add([pscustomobject]@{ Nome=$z.Name; Cat="fresco"; Perche=("FRESCO: scritto " + $z.LastWriteTime.ToString("yyyy-MM-dd HH:mm", $INV) + ", meno di " + $OreFerme + " ore fa (Claudio deve ancora mandarlo?)") }); continue
+  if($oreZip -lt $oreMin){
+    [void]$restano.Add([pscustomobject]@{ Nome=$z.Name; Cat="fresco"; Perche=("FRESCO: scritto " + $z.LastWriteTime.ToString("yyyy-MM-dd HH:mm", $INV) + ", meno di " + $oreMin + " ore fa (Claudio puo' ancora mandarlo?)") }); continue
   }
   $lst = $null
   if(-not $mappa.TryGetValue($base, [ref]$lst)){
@@ -433,12 +452,12 @@ foreach($z in $zipTutti){
   foreach($v in $lst){
     $inf = InfoGemella $v
     if($inf.File -lt 1){ $vuote++; continue }
-    if((New-TimeSpan -Start $inf.Ultima -End $adesso).TotalHours -lt $OreFerme){ $fresche++; continue }
+    if((New-TimeSpan -Start $inf.Ultima -End $adesso).TotalHours -lt $oreMin){ $fresche++; continue }
     if($buona -eq $null){ $buona = $v }
   }
   if($buona -eq $null){
     if($fresche -gt 0){
-      [void]$restano.Add([pscustomobject]@{ Nome=$z.Name; Cat="gemella_fresca"; Perche=("la gemella e' stata scritta da meno di " + $OreFerme + " ore (round in corso?)") })
+      [void]$restano.Add([pscustomobject]@{ Nome=$z.Name; Cat="gemella_fresca"; Perche=("la gemella e' stata scritta da meno di " + $oreMin + " ore (round in corso?)") })
     } else {
       [void]$restano.Add([pscustomobject]@{ Nome=$z.Name; Cat="gemella_vuota"; Perche="la gemella esiste ma e' VUOTA (0 file): non vale come gemella" })
     }
@@ -468,17 +487,16 @@ else       { [void]$righe.Add("ANTEPRIMA zip_gemelli -- NESSUNO zip spostato") }
 [void]$righe.Add("macchina: " + $env:COMPUTERNAME + "   (richiesta: " + $Macchina + ")")
 [void]$righe.Add("Desktop: " + $Desktop)
 [void]$righe.Add("Destinazione: " + $DestDir)
-[void]$righe.Add("ore ferme richieste: " + $OreFerme + "   attivita' pianificate lette: " + $attivitaLette + "   metatester64 vivo: " + $(if($testerVivi.Count -gt 0){"SI"}else{"no"}))
+[void]$righe.Add("ore ferme richieste: " + $OreFerme + "   attivita' pianificate lette: " + $attivitaLette + "   processi dei round vivi: " + $(if($testerVivi.Count -gt 0){"SI: " + (ElencoVivi)}else{"no"}))
 [void]$righe.Add("zip sul Desktop: " + $zipTutti.Count + "   da spostare: " + $piano.Count + " (" + $mbTot.ToString("0.0", $INV) + " MB)   restano: " + $restano.Count)
 [void]$righe.Add("icone sul Desktop PRIMA: " + $icoPrima + "   attese DOPO se tutto va a buon fine: " + $icoAttese + "   (+1 per ogni referto .txt scritto qui)")
 [void]$righe.Add("")
 [void]$righe.Add("--- LISTA DI PROTEZIONE (restano SEMPRE, anche con la gemella) ---")
-[void]$righe.Add("  famiglie di righe di prova (zip da mandare): " + ($PROT_ATTESA -join " | "))
+[void]$righe.Add("  famiglie dei round, protette " + $OreFamiglie + " ore (14 giorni) su zip E gemella: " + ($PROT_ATTESA -join " | "))
 [void]$righe.Add("  zip di ingresso degli script di storico:     " + ($PROT_INGRESSO -join " | "))
 [void]$righe.Add("  nomi dei gemelli (tematiche, archivi, GitHub, pagelle): " + ($PROT_GEMELLI -join " | "))
-[void]$righe.Add("  ROUND_*.zip protetti per nome: " + $(if($PROTEGGI_ROUND_PER_NOME){"SI"}else{"NO (solo freschezza di zip e gemella, e rifiuto con tester vivo)"}))
 [void]$righe.Add("  cartelle: questo script NON muove mai nessuna cartella (nemmeno Desktop\NATCLA_F1_P con MANIFEST_F1.csv e RIEPILOGO_F1.txt, ne' cartelle con terminal64.exe/metaeditor64.exe/origin.txt/MQL5)")
-[void]$righe.Add("  dinamica: citato da un'attivita' pianificata; scritto da meno di " + $OreFerme + " ore (zip o gemella); nascosto/di sistema/collegamento")
+[void]$righe.Add("  dinamica: citato da un'attivita' pianificata; scritto da meno di " + $OreFerme + " ore (zip o gemella; " + $OreFamiglie + " per le famiglie dei round); nascosto/di sistema/collegamento")
 [void]$righe.Add("")
 [void]$righe.Add("--- RESTANO SUL DESKTOP E PERCHE' (" + $restano.Count + ") ---")
 foreach($r in ($restano | Sort-Object Cat, Nome)){ [void]$righe.Add("    " + $r.Nome + "   <-- " + $r.Perche) }
@@ -495,11 +513,11 @@ Write-Host ("data: " + (Ora) + "   (ora locale del PC, non ora server MT5)") -Fo
 Write-Host ("macchina : " + $env:COMPUTERNAME)
 Write-Host ("Desktop  : " + $Desktop)
 Write-Host ("Dest.    : " + $DestDir)
-Write-Host ("Attivita' pianificate lette: si', guardia ATTIVA   -   metatester64 vivo: " + $(if($testerVivi.Count -gt 0){"SI"}else{"no"}))
+Write-Host ("Attivita' pianificate lette: si', guardia ATTIVA   -   processi dei round vivi: " + $(if($testerVivi.Count -gt 0){"SI"}else{"no"}))
 Write-Host ("Icone sul Desktop PRIMA: " + $icoPrima + "   -   zip: " + $zipTutti.Count + "   da spostare: " + $piano.Count + "   restano: " + $restano.Count) -ForegroundColor White
 Write-Host "SOLO gli zip con la cartella gemella. Tutto il resto (altri zip, png, txt, pagelle, collegamenti, cartelle) NON SI TOCCA." -ForegroundColor Gray
 if($testerVivi.Count -gt 0){
-  Write-Host "ATTENZIONE: metatester64 e' vivo (round in corso). L'anteprima la faccio, ma -Esegui si RIFIUTEREBBE." -ForegroundColor Yellow
+  Write-Host ("ATTENZIONE: processi dei round vivi: " + (ElencoVivi) + ". L'anteprima la faccio, ma -Esegui si RIFIUTEREBBE.") -ForegroundColor Yellow
 }
 if($restano.Count -gt 0){
   Write-Host ""
