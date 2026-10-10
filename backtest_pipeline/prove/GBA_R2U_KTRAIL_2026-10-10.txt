@@ -10,7 +10,7 @@
 #
 #  ======================= DRIVER, LETTORE, E PERCHE' NON IL DRIVER DEI ROUND =======================
 #  Driver: backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (MARCATORE_GBA_R0_PASSATE_v5, SHA256 C239F628..., file prova DICHIARATIVO: blocco di asse, una chiave per file). NON toccato.
-#  Lettore: backtest_pipeline/leggi_gba_r0.py (SHA256 9CD02D2A..., commit ca0e8e59). NON toccato. L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) questa prova
+#  Lettore: backtest_pipeline/leggi_gba_r0.py (SHA256 9CD02D2A..., commit ca0e8e59, PASS del cancello in 7b4b6c53; la versione 20228005 ha dato FAIL e NON si usa). NON toccato. L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) questa prova
 #  uscirebbe con un CSV da zero byte (file madre GBA_R0_REPLICA_2026-10-09.txt, 'IL DIFETTO CHE QUESTO FILE DICHIARA PER PRIMO'). Il driver dei round non si tocca.
 #  L'asse InpMagic=775800||775800||50||775850||Y qui sotto e' TECNICO (G1 sul magic) e NON e' la variabile misurata: controlla_prova.py pretende un asse Y.
 #  MAGIC: 775800 (passate) e 775850 (gemella): il driver v5 ammette SOLO questi due ($MAGIC_AMMESSI) e il lettore legge come passata principale SOLO 775800. Nel tester il magic e' un'etichetta.
@@ -28,6 +28,12 @@
 #     una griglia piu' fitta troverebbe solo picchi di rumore: ogni allargamento si paga con T0 (S10).
 #  VERIFICA DELLE INI (pwsh, parsing vero del driver v5 su questi 4 file; il driver NON e' stato eseguito): le 25 ini che scrivera' differiscono dall'ini REALE di R1A (zip archiviato, stessa tranche) in UNA sola chiave, quella dell'asse
 #     (la gemella REPL: solo InpMagic 775800 -> 775850; le date sono identiche). I 30 valori attesi della riga AVVIO sono presenti nel testo AVVIO costruito dal sorgente dell'EA per ogni passata; i valori di un'altra cella NON lo sono (7 controesempi).
+#  DIFF CLAUSOLA PER CLAUSOLA COL PIANO R2 (3.1-3.6; classe 1274): COPIATO INTERO: i valori delle celle di 3.1 (BE 99 / 0,5 / 1,5; modo 1; kTrail 1,5 / 3,5; tempo 0), la gemella T1 magic 775850, le attese e le alternative di 3.2 (per cella, bande (P)),
+#     le soglie S8-S10 di 3.3, le TRE rotture di 3.4 (sopra) e il quarto controesempio di 3.4 (la coda destra di R1A: 15 operazioni a >= 3 R valgono +59.600 EUR, il 111% della perdita netta; se i trend d'impulso continuano, un trailing piu' largo o un BE piu' tardo
+#     li lascerebbe correre e sposterebbe l'aspettativa: e' la ragione per cui la casella 3 va MISURATA e non data per morta), la chiusura di 3.6 (nessuna cella vince: casella chiusa con i numeri, MAI 'morto' per una cella a 1,3 con n < 150).
+#     DEVIAZIONI, tutte dichiarate: (1) la cella KOFF (trailing spento, kTrail 99,0) NON e' nel piano: viene da RISK_MANAGER 5.4 (4 punti per la pendenza); (2) il piano 3.1 dice 'C, D e tempo SOLO SE A/B hanno qualcosa, altrimenti completezza' e che si fanno lo stesso
+#     perche' costano 12 minuti: qui girano TUTTI in una riga (25 passate) e il criterio d'arresto NON e' automatico; (3) le alternative del piano (PF_V >= 1,3 su tutte le tranche) sono lette nella partizione (a)-(d) con S8 e S10 (classi 1258-1260), la forma forte resta scritta accanto;
+#     (4) le bande (M) del modello nullo si AGGIUNGONO a quelle (P) del piano, e le discordanze (n di ATRFIX e BE05, SL iniziale di ATRFIX e K35, 'sotto 0,06' di KOFF) sono elencate cella per cella; (5) il piano chiede una struttura per motivo che il lettore passato non stampa (sopra).
 #  G0/G1. Un numero di un lotto si usa SOLO se il driver ha dato OK alla passata (G0) E la gemella di determinismo e' VERDE: G1 = REPL T1 con magic 775850 (sta nel lotto R2UBE) contro R1A T1:
 #     operazioni 128, profitto -6.577,48, PF 0,83, DD equity 12.511,35 e deal identici uno per uno. ROSSA o NON VERIFICABILE -> nessun confronto con R1A in NESSUNO dei quattro lotti (anche se il lotto
 #     R2UBE non e' partito). La G1 verde delle 19:19 del 10/10 (lotti R2 senza codice) e' l'evidenza di una sessione precedente, non di questo giro: per questo la gemella si RIFA' (1 passata).
