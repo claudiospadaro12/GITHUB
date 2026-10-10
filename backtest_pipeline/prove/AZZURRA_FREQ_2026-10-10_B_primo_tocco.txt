@@ -81,7 +81,7 @@ Use_Kill_Switch=1
 Max_SL_PerDay=4
 Max_Consecutive_SL=3
 Max_Daily_Loss_Pct=2.0
-# 0 = RISK_PER_TRADE. 0,80 x 4 = taglia dei file Bulge (consegna); il preset del campo dice 0,5 (vedi file madre A): NON e' una taglia scelta qui
+# 0 = RISK_PER_TRADE. 0,80 x 4 = QUELLA VERA DEL CAMPO (Init del 09/10 sul 50503392, vedi file madre A): NON e' una taglia scelta qui
 Risk_Mode=0
 Risk_Percent=0.8
 Total_Risk_Percent=2.0

@@ -8,26 +8,28 @@
 #      MetaEditor aperto, nessuna installazione MT5 fuori censimento,
 #      nessun EA attaccato ai grafici salvati del terminale BCM (demo
 #      50503392 di QUESTO PC), un solo giro alla volta (mutex);
-#   1. scarica AL PIN l'EA, l'include, RIGA_ROUND_VPS.ps1 e i TRE file
+#   1. scarica AL PIN l'EA, l'include, RIGA_ROUND_VPS.ps1 e i QUATTRO file
 #      prova, e ne controlla lo SHA256 (costanti qui sotto); poi COMPILA
 #      L'EA (prima compilazione su questo PC): .ex5 vecchio cancellato e
 #      dimostrato sparito, si aspetta l'uscita di MetaEditor, log letto in
 #      inglese e in italiano (classe 1168); se fallisce ->
 #      AZZURRA_FREQ_COMPILAZIONE_FALLITA.zip sul Desktop e NESSUN tester
 #      (classe 1167);
-#   2. tre job IN FILA con il driver dei round GIA' IN USO (RIGA_ROUND_VPS.ps1
-#      al pin, SHA 3341756F... = quello di R92BAB, girato il 01/10 su
-#      questo PC): AZF_A (cella base, gemelle 774511/774561), AZF_B (asse
-#      Azure_FirstTouchOnly, magic 774521), AZF_C (ritracciamento spento,
-#      gemelle 774531/774581). Modello 1, deposito 10000, finestra e input
+#   2. quattro job IN FILA con il driver dei round GIA' IN USO
+#      (RIGA_ROUND_VPS.ps1 al pin, SHA 3341756F... = quello di R92BAB, girato
+#      il 01/10 su questo PC): AZF_A (base dei controlli, 22 cross, gemelle
+#      774511/774561), AZF_B (asse Azure_FirstTouchOnly, magic 774521),
+#      AZF_C (ritracciamento spento, gemelle 774531/774581), AZF_D (LA CELLA
+#      DEL CAMPO: i 33 simboli su cui gira l'Azzurra 774500, gemelle
+#      774541/774591; classe 1222). Modello 1, deposito 10000, finestra e input
 #      dai file prova. Dopo OGNI job: SHA256 di EA, include, driver e file
 #      prova sui byte che hanno girato (classe 166/595: il driver compila
 #      dal RAMO lavoro, non dal pin);
-#   3. raccoglie: CSV OptResults (IS e OOS) dei tre job; da Common\Files il
+#   3. raccoglie: CSV OptResults (IS e OOS) dei quattro job; da Common\Files il
 #      per-trade FRESCO di ogni cella (abtg_trades_*_azzurraOGNI/PRIMO.csv),
 #      UNA CARTELLA PER CELLA; i log del tester e un estratto;
 #   4. CONTA, a macchina: aperture per giorno feriale (lambda) in IS (dal
-#      CSV) e in OOS (dal per-trade), distribuzione per GIORNO DI CHIUSURA,
+#      CSV) e in OOS (dal per-trade) -- la lambda del campo e' quella di D, distribuzione per GIORNO DI CHIUSURA,
 #      giorni a zero osservati contro Poisson, serie piu' lunga a zero,
 #      venerdi' 09/10, simboli, segnali, G1 delle gemelle, replica fra job,
 #      rapporti dei due controlli. Stampa la LETTURA MECCANICA con le
@@ -47,8 +49,10 @@
 #  notturno (VPS). Non giudica il merito: Modello 1 e' solo screening.
 #  Scrive SOLO: %USERPROFILE%\abtg_azzurra_freq, %USERPROFILE%\abtg_round
 #  (cartella di lavoro del driver), MQL5\Experts e MQL5\Include del
-#  terminale BCM di questa macchina, il Desktop. I file in Common\Files li
-#  scrivono gli EA nel tester: qui si COPIANO, non si cancellano.
+#  terminale BCM di questa macchina, il Desktop. Scrive DA SE' MT5 (non
+#  questo script): report e cache del tester nella cartella dati del
+#  terminale BCM, i per-trade dell'EA in Common\Files. Qui si COPIANO, non
+#  si cancellano.
 #
 #  UNA SOLA VOLTA CON QUESTI MAGIC: un secondo lancio con gli stessi input
 #  pesca le passate dalla cache del tester (tester\cache\*.opt) e NON
@@ -88,8 +92,9 @@ $SHA_INC  = '3EC971152E85E0082488CC4243FF45AE09948C191D52AB96050B48F94641A737'  
 $SHA_WF   = '6EFF8E4061EB6E82F88C66673B26B7CF5BFFC1F3AB55F07E3A504EC6E0E027A1'   # backtest_pipeline/walkforward_generico.ps1
 $SHA_RRV  = '3341756FB37889DBD6E827A87BAC26893E01C85B6C18343918083B01B4DD3425'   # backtest_pipeline/righe/RIGA_ROUND_VPS.ps1
 $SIMB = 'EURGBP'
-$SYMLIST = 'EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY'
-$SYMS = @($SYMLIST.Split(','))
+# classe 1222: il CAMPO gira su 33 simboli. A, B, C (controlli) su 22 cross; D = la cella del campo. La lista e' PER JOB, non globale.
+$SL22 = 'EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY'
+$SL33 = $SL22 + ',XAUUSD,100GBP,200AUD,225JPY,D30EUR,E35EUR,E50EUR,F40EUR,NASUSD,SPXUSD,U30USD'
 $MODELLO = 1
 $DEPOSITO = 10000
 # finestra del file prova: IS 2026.01.01 -> 2026.06.30 (esclusa), OOS 2026.07.01 -> 2026.10.10 (esclusa) (driver r.934, @FRAZIONEIS 0.6383)
@@ -98,8 +103,10 @@ $IS_A   = New-Object DateTime 2026, 6, 30
 $OOS_DA = New-Object DateTime 2026, 7, 1
 $OOS_A  = New-Object DateTime 2026, 10, 10
 $GIORNO_CAMPO = '2026-10-09'      # il venerdi' del campo
-$ORA_CAMPO = 15                   # 16:39 ora locale VPS = 15:39 server BCM: dalle 15 server in poi
-$ESPOSIZIONE_CAMPO = 8.0 / 24.0   # ~8 barre H1 chiuse valutate (16:00-23:00 server) su ~24
+# classe 1223: Init 16:39 ora locale CEST = 15:39 server (BCM UTC+1 fisso). Barre chiuse valutate 14:00-20:00 (la 14:00 al primo tick
+# dopo l Init); il forex BCM chiude alle 22:00 server il venerdi: 7 barre su 24.
+$INIZIO_CAMPO = New-Object DateTime 2026, 10, 9, 15, 39, 0
+$ESPOSIZIONE_CAMPO = 7.0 / 24.0
 function Feriali($da, $a){
   $l = New-Object System.Collections.ArrayList
   $xd = $da
@@ -109,17 +116,20 @@ function Feriali($da, $a){
 $GIORNI_IS  = Feriali $IS_DA $IS_A
 $GIORNI_OOS = Feriali $OOS_DA $OOS_A
 $JOBS = @(
-  [pscustomobject]@{ L='AZF_A'; P='AZZURRA_FREQ_2026-10-10_A_base.txt';               HP='46B2DA2343332CD7B7E247498184538E8F7A8805274B670A656FD07B2608323C';
+  [pscustomobject]@{ L='AZF_A'; P='AZZURRA_FREQ_2026-10-10_A_base.txt';               SL=$SL22; Lo=0.4; Hi=7.0; HP='9194C4136E8B8D7B88DC750712E4E4A404E31F873B3EC7B6832C9F0E41E3DF29';
     Righe=@('InpMagic=774511||774511||50||774561||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=1.5');
     Celle=@([pscustomobject]@{ K='A0'; M='774511'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='A1'; M='774561'; V='OGNI'; Primo='0'; Rng=1.5 }) },
-  [pscustomobject]@{ L='AZF_B'; P='AZZURRA_FREQ_2026-10-10_B_primo_tocco.txt';        HP='1E5DA7010D59B78BE4C1484B5E077C8476499966259E9421F6213405F4D28E25';
+  [pscustomobject]@{ L='AZF_B'; P='AZZURRA_FREQ_2026-10-10_B_primo_tocco.txt';        SL=$SL22; Lo=0.4; Hi=7.0; HP='A09620264E40E55EB87B3D0D3C48C1147345D7796D93DAD5B17DC2A683747A72';
     Righe=@('InpMagic=774521', 'Azure_FirstTouchOnly=0||0||1||1||Y', 'Azure_MaxRetraceRangeATR=1.5');
     Celle=@([pscustomobject]@{ K='B0'; M='774521'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='B1'; M='774521'; V='PRIMO'; Primo='1'; Rng=1.5 }) },
-  [pscustomobject]@{ L='AZF_C'; P='AZZURRA_FREQ_2026-10-10_C_ritracciamento_off.txt'; HP='ABD01CC9B345AE149388AE4B015A77C8FE2096670505E20445BA0F5796051447';
+  [pscustomobject]@{ L='AZF_C'; P='AZZURRA_FREQ_2026-10-10_C_ritracciamento_off.txt'; SL=$SL22; Lo=0.4; Hi=7.0; HP='89B71C5C408F80240F96BC0AEB490C868C7272DA00ACE119FD13793BF687A7AA';
     Righe=@('InpMagic=774531||774531||50||774581||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=0');
-    Celle=@([pscustomobject]@{ K='C0'; M='774531'; V='OGNI'; Primo='0'; Rng=0.0 }, [pscustomobject]@{ K='C1'; M='774581'; V='OGNI'; Primo='0'; Rng=0.0 }) }
+    Celle=@([pscustomobject]@{ K='C0'; M='774531'; V='OGNI'; Primo='0'; Rng=0.0 }, [pscustomobject]@{ K='C1'; M='774581'; V='OGNI'; Primo='0'; Rng=0.0 }) },
+  [pscustomobject]@{ L='AZF_D'; P='AZZURRA_FREQ_2026-10-10_D_campo33.txt';            SL=$SL33; Lo=0.6; Hi=10.0; HP='BEAE55C44F83D31E998918F245DD86DBE811AD851B69467C0FC7604972492473';
+    Righe=@('InpMagic=774541||774541||50||774591||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=1.5');
+    Celle=@([pscustomobject]@{ K='D0'; M='774541'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='D1'; M='774591'; V='OGNI'; Primo='0'; Rng=1.5 }) }
 )
-$RIGHE_COMUNI = @('Use_Azure=1', 'Use_Purple=0', 'Use_Blue=0', 'Use_Orange=0', 'Risk_Percent=0.8', 'Max_Trades=4', 'Enable_Partial_Close=0', 'Enable_BE_1R=0', 'Enable_Trailing_R=0', ('Symbols_List=' + $SYMLIST))
+$RIGHE_COMUNI = @('Use_Azure=1', 'Use_Purple=0', 'Use_Blue=0', 'Use_Orange=0', 'Risk_Percent=0.8', 'Max_Trades=4', 'Enable_Partial_Close=0', 'Enable_BE_1R=0', 'Enable_Trailing_R=0')
 $CAMPI = @('Trades','Profit','Profit Factor','Equity DD %')
 # per-trade: colonne confrontate deal per deal. SENZA magic (diverso per costruzione) e SENZA position_id (numerazione del tester: non e' l'operazione)
 $COL_PT = @('close_time','symbol','deal_type','volume','price','net_profit','signal')
@@ -259,13 +269,13 @@ if(-not (Select-String -LiteralPath $rrv -SimpleMatch -Pattern 'MARCATORE_RIGA_R
 foreach($j in $JOBS){
   $pp = Join-Path $W $j.P
   $tx = @(Get-Content -LiteralPath $pp)
-  foreach($rg in @($j.Righe + $RIGHE_COMUNI)){
+  foreach($rg in @($j.Righe + $RIGHE_COMUNI + @('Symbols_List=' + $j.SL))){
     $nome = $rg.Split('=')[0]
     $trov = @($tx | Where-Object { $_ -like ($nome + '=*') })
     if($trov.Count -ne 1 -or $trov[0] -ne $rg){ throw ($j.P + ': la riga ' + $nome + ' non e quella dichiarata (' + $rg + '). Non si parte.') }
   }
 }
-Dico 'file prova: magic, assi, Symbols_List e pin dell Azzurra come dichiarati nei tre file' 'Green'
+Dico 'file prova: magic, assi, Symbols_List e pin dell Azzurra come dichiarati nei quattro file' 'Green'
 
 # --- la PRIMA compilazione dell'EA su questo PC (classi 1167, 1168, 1152)
 $CompNome = $EA
@@ -466,7 +476,7 @@ foreach($j in $JOBS){
       $tr = ('' + $rw.Trades).Trim()
       if($tr -notmatch '^[0-9]+$'){ [void]$PRE[$c.K].Add('p1 ' + $g + ' Trades illeggibile: ' + $tr) }
       $sl = ('' + $rw.Symbols_List).Trim()
-      if($sl -ne $SYMLIST){ [void]$PRE[$c.K].Add('p3 ' + $g + ' Symbols_List nel CSV di ' + $sl.Length + ' caratteri (attesa la lista di 153)') }
+      if($sl -ne $j.SL){ [void]$PRE[$c.K].Add('p3 ' + $g + ' Symbols_List nel CSV di ' + $sl.Length + ' caratteri (attesa la lista del job, ' + $j.SL.Length + ' caratteri)') }
       foreach($cp in @(@('Use_Azure','1'), @('Use_Purple','0'), @('Use_Blue','0'), @('Use_Orange','0'))){
         if((Bool01 $rw.($cp[0])) -ne $cp[1]){ [void]$PRE[$c.K].Add('p3 ' + $g + ' ' + $cp[0] + ' nel CSV = ' + $rw.($cp[0]) + ' (atteso ' + $cp[1] + '): il pin NON e arrivato') }
       }
@@ -504,25 +514,28 @@ function ConfrontaPT($pa, $pb){
   return [pscustomobject]@{ Ok=$true; Txt=('IDENTICI, ' + $a.Count + ' deal di uscita (colonne ' + ($COL_PT -join ',') + ')') }
 }
 # --- l'analisi di UN per-trade (gamba OOS): aperture, giorni, simboli, venerdi' del campo
-function AnalizzaPT($p, $magicAtteso){
+function AnalizzaPT($p, $magicAtteso, $listaSimboli){
+  $syms = @(('' + $listaSimboli).Split(','))
   $o = [pscustomobject]@{ Ok=$false; Txt=''; Deal=0; Pos=0; Az=0; Altri=0; Lng=0; Sht=0; Vinte=0; SommaNet=0.0; NetKo=0; Prima=''; Ultima='';
         FineGamba=0; MagicKo=0; OraKo=0; FuoriOOS=0; Spostati=0; Ven=0; VenSera=0; GiorniZero=0; SerieZero=0; SerieZeroDa=''; MaxGiorno=0;
-        Isto=''; PerSimb=''; SimbZero=''; GiorniKS=0 }
+        Isto=''; PerSimb=''; SimbZero=''; NSimb=0; NSimbZero=0; GiorniKS=0 }
   $a = LeggiPT $p
   if($null -eq $a){ $o.Txt = 'file mancante o illeggibile'; return $o }
   $o.Deal = $a.Count
   $posIds = @{}; $perG = @{}; $perdG = @{}; $perS = @{}
   foreach($gg in $GIORNI_OOS){ $perG[$gg] = 0; $perdG[$gg] = 0 }
-  foreach($s in $SYMS){ $perS[$s] = 0 }
+  foreach($s in $syms){ $perS[$s] = 0 }
   $tMin = $null; $tMax = $null
   foreach($rr in $a){
     $posIds[('' + $rr.position_id).Trim()] = $true
-    if(('' + $rr.magic).Trim() -ne $magicAtteso){ $o.MagicKo++ }
+    # classe 1224: i deal "end of test" (magic 0, ultimo secondo della gamba) NON sono chiusure vere ne' magic sbagliati
+    $eot = (('' + $rr.exit_comment) -match '(?i)end of test')
+    if(-not $eot -and ('' + $rr.magic).Trim() -ne $magicAtteso){ $o.MagicKo++ }
     $sg = ('' + $rr.signal).Trim()
     if($sg -eq 'AZZURRA'){ $o.Az++ } else { $o.Altri++ }
     $ec = ('' + $rr.entry_comment).Trim()
     if($ec.EndsWith('_L')){ $o.Lng++ } elseif($ec.EndsWith('_S')){ $o.Sht++ }
-    if(('' + $rr.exit_comment) -match '(?i)end of test'){ $o.FineGamba++ }
+    if($eot){ $o.FineGamba++ }
     $sy = ('' + $rr.symbol).Trim()
     if($perS.ContainsKey($sy)){ $perS[$sy] = $perS[$sy] + 1 } else { $perS[$sy] = 1 }
     $nt = 0.0
@@ -533,12 +546,12 @@ function AnalizzaPT($p, $magicAtteso){
     if($null -eq $tMax -or $dt -gt $tMax){ $tMax = $dt }
     $dd = $dt.Date
     if($dd.DayOfWeek -eq [DayOfWeek]::Saturday){ $dd = $dd.AddDays(-1); $o.Spostati++ }
-    elseif($dd.DayOfWeek -eq [DayOfWeek]::Sunday){ $dd = $dd.AddDays(-2); $o.Spostati++ }
+    elseif($dd.DayOfWeek -eq [DayOfWeek]::Sunday){ $dd = $dd.AddDays(1); $o.Spostati++ }   # la domenica sera e' gia' il lunedi
     $k = $dd.ToString('yyyy-MM-dd', $IC)
     if(-not $perG.ContainsKey($k)){ $o.FuoriOOS++; continue }
     $perG[$k] = $perG[$k] + 1
     if($nt -lt 0){ $perdG[$k] = $perdG[$k] + 1 }
-    if($k -eq $GIORNO_CAMPO){ $o.Ven++; if($dt.Date -eq $dd -and $dt.Hour -ge $ORA_CAMPO){ $o.VenSera++ } }
+    if($k -eq $GIORNO_CAMPO){ $o.Ven++; if($dt.Date -eq $dd -and $dt -ge $INIZIO_CAMPO -and -not $eot){ $o.VenSera++ } }
   }
   $o.Pos = $posIds.Count
   if($null -ne $tMin){ $o.Prima = $tMin.ToString('yyyy.MM.dd HH:mm:ss', $IC); $o.Ultima = $tMax.ToString('yyyy.MM.dd HH:mm:ss', $IC) }
@@ -551,17 +564,19 @@ function AnalizzaPT($p, $magicAtteso){
     if($perdG[$gg] -ge 3){ $o.GiorniKS++ }
   }
   $o.Isto = ('giorni con 0/1/2/3/4/5+ chiusure: ' + ($isto -join '/'))
-  $o.PerSimb = ((@($SYMS | ForEach-Object { $_ + ' ' + $perS[$_] })) -join ', ')
-  $extra = @($perS.Keys | Where-Object { $SYMS -notcontains $_ })
+  $o.PerSimb = ((@($syms | ForEach-Object { $_ + ' ' + $perS[$_] })) -join ', ')
+  $extra = @($perS.Keys | Where-Object { $syms -notcontains $_ })
   if($extra.Count -gt 0){ $o.PerSimb = $o.PerSimb + ' | FUORI LISTA: ' + ((@($extra | ForEach-Object { $_ + ' ' + $perS[$_] })) -join ', ') }
-  $o.SimbZero = ((@($SYMS | Where-Object { $perS[$_] -eq 0 })) -join ',')
+  $zs = @($syms | Where-Object { $perS[$_] -eq 0 })
+  $o.SimbZero = ($zs -join ',')
+  $o.NSimb = $syms.Count; $o.NSimbZero = $zs.Count
   $o.Ok = $true
   return $o
 }
 
 $NIS = $GIORNI_IS.Count; $NOOS = $GIORNI_OOS.Count
 W ('AZZURRA_FREQ -- pin ' + $Pin + ' -- data ' + $T0.ToString('yyyy-MM-dd HH:mm:ss') + ' -- pc ' + $env:COMPUTERNAME)
-W ('EA ' + $EA + ' (SHA256 ' + $SHA_AZ.Substring(0,16) + '...), grafico ' + $SIMB + ' H1, 22 cross, Modello ' + $MODELLO + ', deposito ' + $DEPOSITO + ', rischio 0,8 x Max_Trades 4')
+W ('EA ' + $EA + ' (SHA256 ' + $SHA_AZ.Substring(0,16) + '...), grafico ' + $SIMB + ' H1, A/B/C 22 cross, D 33 simboli (il campo), Modello ' + $MODELLO + ', deposito ' + $DEPOSITO + ', rischio 0,80 x Max_Trades 4 (quello vero del campo)')
 W ('finestra: IS ' + $IS_DA.ToString('yyyy.MM.dd', $IC) + ' -> ' + $IS_A.ToString('yyyy.MM.dd', $IC) + ' (esclusa) = ' + $NIS + ' giorni feriali | OOS ' + $OOS_DA.ToString('yyyy.MM.dd', $IC) + ' -> ' + $OOS_A.ToString('yyyy.MM.dd', $IC) + ' (esclusa) = ' + $NOOS + ' giorni feriali')
 W ('job: ' + (($JOBS | ForEach-Object { $_.L + ' ' + [int]$STATO[$_.L].Dur + ' s rc ' + $STATO[$_.L].Rc }) -join ' | '))
 W ('compilazione: ' + $compErr + ' errori, ' + $compWarn + ' avvisi (-1 = riga non letta)')
@@ -578,26 +593,27 @@ foreach($j in $JOBS){
   foreach($c in $j.Celle){
     $e = $STATO[$j.L].PT[$c.K]
     $cp = ''; if($null -ne $e -and $e.Stato -eq 'FRESCO'){ $cp = $e.Copia }
-    $ana = AnalizzaPT $cp $c.M
+    $lsJ = '' + $j.SL
+    $ana = AnalizzaPT $cp $c.M $lsJ
     $AN[$c.K] = $ana
     if(-not $ana.Ok){ W ('  ' + $c.K + ' per-trade OOS: ' + $ana.Txt); continue }
     $lam = $ana.Pos / [double]$NOOS
     W ('  ' + $c.K + ' per-trade OOS: ' + $ana.Deal + ' deal di uscita, ' + $ana.Pos + ' posizioni (AZZURRA ' + $ana.Az + ', altri segnali ' + $ana.Altri + '; long ' + $ana.Lng + ', short ' + $ana.Sht + '), chiusure dal ' + $ana.Prima + ' al ' + $ana.Ultima)
     W ('     lambda OOS = ' + $ana.Pos + ' / ' + $NOOS + ' = ' + (F3 $lam) + ' aperture al giorno feriale | ' + $ana.Isto + ' | max in un giorno ' + $ana.MaxGiorno)
     W ('     giorni a zero OSSERVATI ' + $ana.GiorniZero + ' su ' + $NOOS + ' = ' + (Pc ($ana.GiorniZero / [double]$NOOS)) + '  contro Poisson exp(-lambda) = ' + (Pc ([Math]::Exp(-$lam))) + ' | serie piu lunga a zero: ' + $ana.SerieZero + ' giorni feriali (dal ' + $ana.SerieZeroDa + ')')
-    W ('     venerdi ' + $GIORNO_CAMPO + ': ' + $ana.Ven + ' chiusure, di cui ' + $ana.VenSera + ' dalle ' + $ORA_CAMPO + ':00 server; chiuse a fine gamba (end of test) ' + $ana.FineGamba)
+    W ('     venerdi ' + $GIORNO_CAMPO + ': ' + $ana.Ven + ' chiusure (end of test comprese), di cui VERE dalle 15:39 server (partenza dell EA in campo) ' + $ana.VenSera + '; posizioni chiuse a fine gamba (end of test) ' + $ana.FineGamba)
     if($ana.Pos -ne $ana.Deal){ W ('     ATTENZIONE: ' + $ana.Deal + ' deal ma ' + $ana.Pos + ' position_id distinti: con gestione nuda devono coincidere (parziale acceso o file sporco): la cella NON si legge') }
     W ('     controlli: magic diverso ' + $ana.MagicKo + ', ora illeggibile ' + $ana.OraKo + ', chiusure fuori dalla gamba OOS ' + $ana.FuoriOOS + ' (se > 0 il file NON e la gamba OOS), del weekend portate al venerdi ' + $ana.Spostati + ', net illeggibili ' + $ana.NetKo)
     W ('     screening (NON verdetto): vinte ' + $ana.Vinte + ' su ' + $ana.Deal + ', somma net ' + (F2 $ana.SommaNet) + ' (deal di USCITA: manca la commissione d ingresso, il Profit del CSV e quello che vale) | giorni con >= 3 chiusure in perdita (proxy kill switch a 0,8): ' + $ana.GiorniKS)
     W ('     per simbolo: ' + $ana.PerSimb)
-    if($ana.SimbZero -ne ''){ W ('     simboli a ZERO nella gamba OOS: ' + $ana.SimbZero) }
+    W ('     simboli a ZERO nella gamba OOS: ' + $ana.NSimbZero + ' su ' + $ana.NSimb + $(if($ana.SimbZero -ne ''){ ' (' + $ana.SimbZero + ')' }else{ '' }))
   }
 }
 W ''
 # --- G1, replica fra job, coerenza per-trade / CSV
 W 'DETERMINISMO E REPLICA:'
 $g1 = @{}
-foreach($cp in @(@('A0','A1'), @('C0','C1'), @('A0','B0'))){
+foreach($cp in @(@('A0','A1'), @('C0','C1'), @('D0','D1'), @('A0','B0'))){
   $k0 = $cp[0]; $k1 = $cp[1]
   $r0i = $X[$k0]['IS']; $r1i = $X[$k1]['IS']; $r0o = $X[$k0]['OOS']; $r1o = $X[$k1]['OOS']
   $trOk = ((TradesDi $r0i) -ge 0) -and ((TradesDi $r0i) -eq (TradesDi $r1i)) -and ((TradesDi $r0o) -ge 0) -and ((TradesDi $r0o) -eq (TradesDi $r1o))
@@ -617,64 +633,71 @@ foreach($j in $JOBS){ foreach($c in $j.Celle){
   if($ana.Ok -and $to -ge 0){ W ('  coerenza ' + $c.K + ': deal del per-trade ' + $ana.Deal + ' contro Trades OOS del CSV ' + $to + ' -> ' + $(if($ana.Deal -eq $to){'uguali'}else{'DIVERSI: il per-trade non e la gamba OOS di questa cella, o la cella non e nuda'})) }
 } }
 W ''
-# --- la cella base e la categoria
+# --- le basi: A (22 cross) per i controlli B e C; D (33 simboli) per la lambda DEL CAMPO (classe 1222)
 # leggibile = precondizioni vere, solo AZZURRA, tutto dentro la gamba OOS, un deal per posizione (gestione nuda), deal = Trades OOS del CSV
 function Leggibile($k){ return ($PRE[$k].Count -eq 0 -and $AN[$k].Ok -and $AN[$k].Altri -eq 0 -and $AN[$k].FuoriOOS -eq 0 -and $AN[$k].Pos -eq $AN[$k].Deal -and $AN[$k].Deal -eq (TradesDi $X[$k]['OOS'])) }
-# regola del file madre (G1): Trades DIVERSI fra le gemelle = determinismo rotto, la frequenza NON si legge (nemmeno da B0);
-# Trades uguali ma Profit/PF/DD diversi = la frequenza si legge, il PF no (si scrive). A non leggibile (job morto, pin non arrivato,
-# per-trade assente o di un altra gamba) = ripiego DICHIARATO su B0, replica di A a magic diverso nello stesso lancio.
-$base = ''
-$notaBase = ''
-$trA = ((TradesDi $X['A0']['IS']) -ge 0) -and ((TradesDi $X['A0']['IS']) -eq (TradesDi $X['A1']['IS'])) -and ((TradesDi $X['A0']['OOS']) -ge 0) -and ((TradesDi $X['A0']['OOS']) -eq (TradesDi $X['A1']['OOS']))
-$csvA = ((TradesDi $X['A0']['IS']) -ge 0) -and ((TradesDi $X['A1']['IS']) -ge 0) -and ((TradesDi $X['A0']['OOS']) -ge 0) -and ((TradesDi $X['A1']['OOS']) -ge 0)
-$determinismoRotto = ($csvA -and -not $trA)
-if($determinismoRotto){ }
-elseif((Leggibile 'A0') -and (Leggibile 'A1')){
-  if($g1['A0_A1']){ $base = 'A0'; $notaBase = 'cella base A0 (gemella A1 identica, G1 OK)' }
-  else { $base = 'A0'; $notaBase = 'cella base A0: gemella A1 con Trades UGUALI ma Profit/PF/DD o per-trade DIVERSI (G1 rotto sul resto): la frequenza si legge, PF e DD NO' }
+# regola del file madre (G1): Trades DIVERSI fra le gemelle = ROTTO (determinismo del banco: la frequenza NON si legge);
+# Trades uguali ma Profit/PF/DD o per-trade diversi = G1RESTO (la frequenza si legge, PF e DD no); altrimenti OK o NONLEGGIBILE.
+function Gemelle($k0, $k1){
+  $a0 = TradesDi $X[$k0]['IS']; $a1 = TradesDi $X[$k1]['IS']; $b0 = TradesDi $X[$k0]['OOS']; $b1 = TradesDi $X[$k1]['OOS']
+  if($a0 -ge 0 -and $a1 -ge 0 -and $b0 -ge 0 -and $b1 -ge 0 -and ($a0 -ne $a1 -or $b0 -ne $b1)){ return 'ROTTO' }
+  if((Leggibile $k0) -and (Leggibile $k1)){ if($g1[$k0 + '_' + $k1]){ return 'OK' }; return 'G1RESTO' }
+  return 'NONLEGGIBILE'
 }
-elseif((Leggibile 'B0')){ $base = 'B0'; $notaBase = 'cella base presa da B0 (replica di A a magic 774521) PERCHE A NON E LEGGIBILE: si scrive cosi' }
+function Lambda($k){ return [pscustomobject]@{ IS=((TradesDi $X[$k]['IS']) / [double]$NIS); OOS=($AN[$k].Pos / [double]$NOOS) } }
+# base dei CONTROLLI: A0; ripiego DICHIARATO su B0 (replica di A) solo se A non e leggibile e le gemelle A non sono rotte
+$statoA = Gemelle 'A0' 'A1'
+$baseA = ''
+if($statoA -eq 'OK' -or $statoA -eq 'G1RESTO'){ $baseA = 'A0' }
+elseif($statoA -ne 'ROTTO' -and (Leggibile 'B0')){ $baseA = 'B0' }
+W ('BASE DEI CONTROLLI (22 cross): gemelle A0/A1 ' + $statoA + ' -> ' + $(if($baseA -eq ''){'NESSUNA: i controlli B e C non si leggono'}elseif($baseA -eq 'B0'){'B0 (replica di A a magic 774521, ripiego DICHIARATO)'}else{'A0'}))
+if($baseA -ne ''){ $la = Lambda $baseA; W ('  lambda ' + $baseA + ' (22 cross): IS ' + (F3 $la.IS) + ' | OOS ' + (F3 $la.OOS) + ' al giorno feriale -- banda attesa [DERIVATA, debole] 0,4 - 7 -- NON e la cella del campo') }
+W ''
+# la cella del CAMPO: D0 (gemella D1). Nessun ripiego: senza D la lambda del campo e NON MISURATA (A ha 11 simboli in meno)
+$statoD = Gemelle 'D0' 'D1'
 $esito = ''
 $codice = 3
-if($determinismoRotto){
-  $esito = 'NON MISURATO: le gemelle A0/A1 hanno Trades DIVERSI = determinismo del banco rotto (file madre, G1): la frequenza non si legge da nessuna cella'
-} elseif($base -eq ''){
-  $esito = 'NON MISURATO: nessuna cella base leggibile (vedi precondizioni, G1 e coerenza qui sopra)'
+if($statoD -eq 'ROTTO'){
+  $esito = 'NON MISURATO: le gemelle D0/D1 (cella del campo) hanno Trades DIVERSI = determinismo del banco rotto (file madre, G1): la lambda del campo non si legge'
+} elseif($statoD -eq 'NONLEGGIBILE'){
+  $esito = 'NON MISURATO: la cella del campo D non e leggibile (vedi precondizioni, G1 e coerenza qui sopra); la lambda di A (22 cross) NON la sostituisce'
 } else {
-  $tIS = TradesDi $X[$base]['IS']; $tOOS = TradesDi $X[$base]['OOS']
+  $tIS = TradesDi $X['D0']['IS']; $tOOS = TradesDi $X['D0']['OOS']
   if($tIS -eq 0 -and $tOOS -eq 0){
-    $esito = 'NON MISURATO: Trades = 0 in IS e in OOS. EA cieco nel tester e regola che non scatta danno lo STESSO zero: prossimo passo il controllo positivo Use_Purple=1 (file madre, attesa Z)'
+    $esito = 'NON MISURATO: cella del campo D con Trades = 0 in IS e in OOS. EA cieco nel tester e regola che non scatta danno lo STESSO zero: prossimo passo il controllo positivo Use_Purple=1 (file madre, attesa Z)'
   } else {
     $codice = 0
-    $lamIS = $tIS / [double]$NIS
-    $lamO = $AN[$base].Pos / [double]$NOOS
+    $ld = Lambda 'D0'
+    $lamIS = $ld.IS; $lamO = $ld.OOS
     $cat = ''
     if($lamO -lt 0.1){ $cat = 'CELLA QUASI VUOTA (lambda < 0,1): una settimana a zero e la norma; serve solo PER FAMIGLIA; NON e un verdetto di morte' }
     elseif($lamO -lt 0.5){ $cat = 'RARA (0,1 <= lambda < 0,5): un giorno pieno a zero e la norma' }
     elseif($lamO -lt 2.0){ $cat = 'REGOLARE (0,5 <= lambda < 2): una SETTIMANA piena a zero in campo sarebbe un anomalia da controllare' }
     else { $cat = 'FREQUENTE (lambda >= 2): DUE giorni pieni consecutivi a zero in campo sarebbero un anomalia da controllare' }
-    W ('CELLA BASE: ' + $notaBase)
-    W ('  lambda IS (dal CSV) = ' + $tIS + ' / ' + $NIS + ' = ' + (F3 $lamIS) + ' | lambda OOS (dal per-trade) = ' + $AN[$base].Pos + ' / ' + $NOOS + ' = ' + (F3 $lamO) + ' aperture al giorno feriale, sui 22 cross')
+    W ('CELLA DEL CAMPO D0 (33 simboli, gemella D1 ' + $statoD + $(if($statoD -eq 'G1RESTO'){': la frequenza si legge, PF e DD NO'}else{''}) + ')')
+    W ('  lambda IS (dal CSV) = ' + $tIS + ' / ' + $NIS + ' = ' + (F3 $lamIS) + ' | lambda OOS (dal per-trade) = ' + $AN['D0'].Pos + ' / ' + $NOOS + ' = ' + (F3 $lamO) + ' aperture al giorno feriale, sui 33 simboli')
     $rap = $(if($lamIS -gt 0){ $lamO / $lamIS } else { [double]::NaN })
     W ('  rapporto OOS/IS = ' + $(if([double]::IsNaN($rap)){'n/d'}else{F2 $rap}) + '   (oltre 2 o sotto 0,5: la frequenza dipende dal tratto di mercato, un giorno in campo pesa ancora meno)')
-    W ('  banda attesa [DERIVATA, debole] 0,4 - 7 al giorno: ' + $(if($lamO -lt 0.4){'SOTTO la banda (piu rara del previsto)'}elseif($lamO -gt 7){'SOPRA la banda (piu frequente del VIOLA)'}else{'DENTRO la banda'}))
-    W ('  P(0) con la lambda OOS misurata: giorno intero ' + (Pc ([Math]::Exp(-$lamO))) + ' | 1/3 di giorno (il venerdi 09/10 del campo) ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ' | 2 giorni pieni ' + (Pc ([Math]::Exp(-2 * $lamO))) + ' | 5 giorni pieni ' + (Pc ([Math]::Exp(-5 * $lamO))))
-    $zOss = $AN[$base].GiorniZero / [double]$NOOS
+    W ('  banda attesa [DERIVATA, debole] 0,6 - 10 al giorno: ' + $(if($lamO -lt 0.6){'SOTTO la banda (piu rara del previsto)'}elseif($lamO -gt 10){'SOPRA la banda'}else{'DENTRO la banda'}))
+    W ('  simboli a ZERO nella gamba OOS: ' + $AN['D0'].NSimbZero + ' su ' + $AN['D0'].NSimb + $(if($AN['D0'].SimbZero -ne ''){ ' (' + $AN['D0'].SimbZero + ')' }else{''}) + '   (un simbolo che il tester non vede ABBASSA la lambda)')
+    if($baseA -ne ''){ $la = Lambda $baseA; if($la.OOS -gt 0){ W ('  rapporto D/A in OOS = ' + (F2 ($lamO / $la.OOS)) + '   (attesa 1,0 - 1,8; ~1,0 con simboli a zero fra gli 11 nuovi = il tester non li vede)') } }
+    W ('  P(0) con la lambda OOS misurata: giorno intero ' + (Pc ([Math]::Exp(-$lamO))) + ' | 7/24 di giorno (il venerdi 09/10 del campo) ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ' | 2 giorni pieni ' + (Pc ([Math]::Exp(-2 * $lamO))) + ' | 5 giorni pieni ' + (Pc ([Math]::Exp(-5 * $lamO))))
+    $zOss = $AN['D0'].GiorniZero / [double]$NOOS
     W ('  giorni a zero osservati ' + (Pc $zOss) + ' contro Poisson ' + (Pc ([Math]::Exp(-$lamO))) + ': ' + $(if($zOss -gt [Math]::Exp(-$lamO) + 0.10){'gli zeri SI RAGGRUPPANO (oltre +10 punti): per il campo vale la frazione OSSERVATA e la serie piu lunga, non la formula'}else{'entro +10 punti dalla Poisson'}))
     W ('  CATEGORIA: ' + $cat)
-    W ('  venerdi 09/10 nel tester (indizio, non prova: stato diverso dal campo): ' + $AN[$base].VenSera + ' chiusure dalle 15:00 server, ' + $AN[$base].FineGamba + ' posizioni portate a fine gamba')
-    $esito = ('FREQUENZA LEGGIBILE -- lambda OOS ' + (F3 $lamO) + '/giorno, ' + $cat)
+    W ('  venerdi 09/10 nel tester (indizio, non prova: stato diverso dal campo): ' + $AN['D0'].VenSera + ' chiusure VERE dalle 15:39 server (end of test escluse), ' + $AN['D0'].FineGamba + ' posizioni portate a fine gamba (end of test, magic diverso ignorato: MagicKo ' + $AN['D0'].MagicKo + ')')
+    $esito = ('FREQUENZA DEL CAMPO LEGGIBILE (cella D, 33 simboli) -- lambda OOS ' + (F3 $lamO) + '/giorno, simboli a zero nella gamba OOS ' + $AN['D0'].NSimbZero + '/' + $AN['D0'].NSimb + ', P(0) del venerdi 7/24 ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ', ' + $cat)
   }
 }
 W ''
 # --- i due controlli: rapporto di frequenza contro la base
-W 'CONTROLLI (rapporto Trades cella / Trades base, per gamba; attese e alternative nei file B e C):'
+W 'CONTROLLI (rapporto Trades cella / Trades base A, per gamba; si leggono SOLO se la replica A0/B0 e OK, classe 1206; attese e alternative nei file B e C):'
 foreach($cc in @(@('B1', 'solo il primo tocco', 0.3, 0.8, 0.9, 0.2), @('C0', 'ritracciamento spento', 1.05, 1.6, -1, 2.0))){
   $k = $cc[0]
-  if($base -eq '' -or -not (Leggibile $k)){ W ('  ' + $k + ' (' + $cc[1] + '): NON LEGGIBILE (cella o base non leggibili: precondizioni, segnali, gamba, posizioni = deal)'); continue }
+  if($baseA -eq '' -or -not (Leggibile $k) -or -not $g1['A0_B0']){ W ('  ' + $k + ' (' + $cc[1] + '): NON LEGGIBILE (base A assente, cella non leggibile o replica A0/B0 NON OK)'); continue }
   $txt = @()
   foreach($g in @('IS','OOS')){
-    $tb = TradesDi $X[$base][$g]; $tc = TradesDi $X[$k][$g]
+    $tb = TradesDi $X[$baseA][$g]; $tc = TradesDi $X[$k][$g]
     if($tb -le 0 -or $tc -lt 0){ $txt += ($g + ' n/d'); continue }
     $q = $tc / [double]$tb
     $cl = ''
@@ -687,6 +710,7 @@ foreach($cc in @(@('B1', 'solo il primo tocco', 0.3, 0.8, 0.9, 0.2), @('C0', 'ri
 W ''
 W ('LETTURA MECCANICA (categorie congelate in prove/AZZURRA_FREQ_2026-10-10_A_base.txt): ' + $esito)
 W 'NON E UN VERDETTO DI MERITO: Modello 1, 9 mesi, un regime. Vietato "morto" (certificato del 09/09: mancano uscita ad asse, gemelli, TF).'
+W 'LETTURA OBBLIGATORIA (file madre, P-VEN): VenSera esclude gia gli end of test; chi conta a mano tutte le chiusure del 09/10 dalle 15:39 toglie FineGamba. MagicKo deve essere 0.'
 W 'Il verdetto lo scrive la sessione sullo zip.'
 ($R -join "`r`n") | Set-Content -LiteralPath (Join-Path $OUT 'RIEPILOGO_AZZURRA_FREQ.txt') -Encoding ASCII
 
