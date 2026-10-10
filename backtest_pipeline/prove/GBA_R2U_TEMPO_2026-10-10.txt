@@ -26,7 +26,7 @@
 #  ======================= REGOLE DI LETTURA COMUNI AI QUATTRO LOTTI R2U (copiate in ognuno: nessun file dipende da un altro) =======================
 #  G0/G1. Un numero di un lotto si usa SOLO se il driver ha dato OK alla passata (G0) E la gemella di determinismo e' VERDE: G1 = REPL T1 con magic 775850 (sta nel lotto R2UBE) contro R1A T1:
 #     operazioni 128, profitto -6.577,48, PF 0,83, DD equity 12.511,35 e deal identici uno per uno. ROSSA o NON VERIFICABILE -> nessun confronto con R1A in NESSUNO dei quattro lotti (anche se il lotto
-#     R2UBE non e' partito). La G1 verde delle 19:19 del 10/10 (lotti R2 senza codice) e' un'evidenza di ieri sera, non di questo giro: per questo la gemella si RIFA' (1 passata).
+#     R2UBE non e' partito). La G1 verde delle 19:19 del 10/10 (lotti R2 senza codice) e' l'evidenza di una sessione precedente, non di questo giro: per questo la gemella si RIFA' (1 passata).
 #  CONFRONTO COL DEFAULT. Ogni cella scrive 'meglio / uguale / peggio del DEFAULT' (la REPL di R1A) col numero. Se il guadagno e' dentro il rumore: 'il default va bene' = un risultato, non un fallimento.
 #     dPF per tranche = PF_V(cella, tranche) - PF_V(REPL di R1A, tranche) [0,83 / 0,77 / 0,89], letto dal lettore (NON appaiato). Il dPF APPAIATO per giorno del dossier (RISK_MANAGER 5.8) il lettore
 #     passato dal cancello NON lo calcola: se serve si fa con uno strumento di analisi NON passato e si scrive cosi'. Il non-appaiato e' PIU' rumoroso: puo' solo far scattare (a) in piu', e (a) manda in T0, mai a una sedia.
@@ -99,12 +99,12 @@
 #  TOFF (0). n: (M) 925-940, (P) 925-940 (+-1% di 933: le 8 uscite a tempo liberano la posizione prima; con tempo spento restano aperte e possono bloccare qualche segnale); per tranche T1 127-129 / T2 246-250 / T3 552-561.
 #     PF_V: (M) 0,844-0,864 (centro 0,854, +-2 sd appaiate 0,005), (P) |dPF| <= 0,05 -> 0,805-0,905. Quote d'uscita invariate salvo il tempo = 0; durata media 9,5-10,5 min.
 #     CONTRO-ESEMPIO COSTRUITO (la banda (M) e' troppo stretta?): le 8 uscite a tempo valgono +22.919 EUR, il 7,2% del lordo vincite (PF_V 0,855 e netto -53.819 -> lordo vincite ~317.000, lordo perdite ~371.000 EUR [DERIVATO]).
-#     Senza l'uscita a tempo quelle 8 (piu' le 4 della pausa) escono col trailing o col BE: se in media cambiano di 1 R (1.302 EUR) l'una, 8 x 1.302 / 371.000 = 0,028 di PF; di 1,5 R, 0,042. Quindi un dPF fino a +-0,03 PUO' essere
-#     non un difetto di strumento ma il rumore di poche operazioni lunghe: la banda (M) +-0,01 e' troppo stretta per queste 8 operazioni reali, la banda (P) +-0,05 e' quella ragionevole.
+#     Senza l'uscita a tempo quelle 8 (piu' le 4 della pausa) escono col trailing o col BE: se in media cambiano di 1 R (1.302 EUR) l'una, 8 x 1.302 / 371.000 = 0,028 di PF; di 1,5 R, 0,042. Quindi un dPF fino a +-0,03 puo' essere
+#     il rumore di poche operazioni lunghe e non un difetto di strumento: la banda (M) +-0,01 e' troppo stretta per queste 8 operazioni reali, la banda (P) +-0,05 e' quella ragionevole.
 #     LETTURA DEL CONTROLLO (partizione): |dPF| <= 0,03 e |dn| <= 1% -> 'inerte confermato' (modello e tester coerenti); 0,03 < |dPF| <= 0,05 -> 'inerte dentro il piano, fuori dal modello' (le 12 operazioni lunghe pesano);
 #     |dPF| > 0,05 o |dn| > 1% -> 'la manopola NON era inerte' (e' un risultato: si scrive cosi') OPPURE difetto di strumento (si guarda prima il giornale e la G1). Non decide la casella 3.
 #     Alternativa (continuazione): predice dPF = -0,003 (H1) contro -0,001 (H0): la cella NON separa le ipotesi per costruzione, NON e' una prova di deriva.
-#     COSTO: invariato, 49,4x PASSA. DD: ~invariato [NON STIMATO]. Pausa delle 22:00: senza uscita a tempo le posizioni aperte a ridosso della pausa restano aperte (179 errori 'market closed' in R1A): letto dal giornale, SICUREZZA e non merito.
+#     COSTO: invariato, 49,4x PASSA. DD: ~invariato [NON STIMATO]. Pausa delle 22:00: R1A ha 179 righe 'market closed' (21:56-22:00 server, T3) e 4 operazioni tenute oltre la pausa; se cambiano senza uscita a tempo lo dice il giornale della cella [NON STIMATO]: e' SICUREZZA, non merito.
 #  PASSATE: 1 cella x 3 tranche = 3. Tempo [STIMA, come R2UBE]: ~1,1-1,5 min/passata -> centro ~4 minuti, intervallo 3-10. Tetto del lotto 20 minuti.
 #
 

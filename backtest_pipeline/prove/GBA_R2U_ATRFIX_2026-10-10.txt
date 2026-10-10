@@ -26,7 +26,7 @@
 #  ======================= REGOLE DI LETTURA COMUNI AI QUATTRO LOTTI R2U (copiate in ognuno: nessun file dipende da un altro) =======================
 #  G0/G1. Un numero di un lotto si usa SOLO se il driver ha dato OK alla passata (G0) E la gemella di determinismo e' VERDE: G1 = REPL T1 con magic 775850 (sta nel lotto R2UBE) contro R1A T1:
 #     operazioni 128, profitto -6.577,48, PF 0,83, DD equity 12.511,35 e deal identici uno per uno. ROSSA o NON VERIFICABILE -> nessun confronto con R1A in NESSUNO dei quattro lotti (anche se il lotto
-#     R2UBE non e' partito). La G1 verde delle 19:19 del 10/10 (lotti R2 senza codice) e' un'evidenza di ieri sera, non di questo giro: per questo la gemella si RIFA' (1 passata).
+#     R2UBE non e' partito). La G1 verde delle 19:19 del 10/10 (lotti R2 senza codice) e' l'evidenza di una sessione precedente, non di questo giro: per questo la gemella si RIFA' (1 passata).
 #  CONFRONTO COL DEFAULT. Ogni cella scrive 'meglio / uguale / peggio del DEFAULT' (la REPL di R1A) col numero. Se il guadagno e' dentro il rumore: 'il default va bene' = un risultato, non un fallimento.
 #     dPF per tranche = PF_V(cella, tranche) - PF_V(REPL di R1A, tranche) [0,83 / 0,77 / 0,89], letto dal lettore (NON appaiato). Il dPF APPAIATO per giorno del dossier (RISK_MANAGER 5.8) il lettore
 #     passato dal cancello NON lo calcola: se serve si fa con uno strumento di analisi NON passato e si scrive cosi'. Il non-appaiato e' PIU' rumoroso: puo' solo far scattare (a) in piu', e (a) manda in T0, mai a una sedia.
