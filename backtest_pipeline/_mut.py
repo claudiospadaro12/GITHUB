@@ -395,7 +395,7 @@ def bootstrap(notti, B, seed):
     rng = random.Random(seed)
     qs, pfs = [], []
     for _ in range(B):
-        s = rng.choices(notti, k=max(1, n - 1))
+        s = rng.choices(notti, k=n)
         qs.append(sum(1 for x in s if x["net"] < 0) / float(n))
         pfs.append(pf_da(sum(x["gp"] for x in s), sum(x["gl"] for x in s)))
     qs.sort()
@@ -540,7 +540,7 @@ def valuta_passata(P, prova, fascia):
 def valuta_cella(chiave, prova, Ps, fascia):
     """Ps = passate (tutte le magic) del lotto. Numeri solo dalla passata principale 775800; la gemella (775850) e' controllata, non sommata."""
     passate = [valuta_passata(P, prova, fascia) for P in Ps]
-    princ = [i for i in passate if i["magic"] == "775800"]
+    princ = [i for i in passate]
     vive = [i for i in passate if i["stato"] != "NON LANCIATA"]
     att = set(prova["passate"])
     viste = set((i["cella"], i["tranche"]) for i in princ if i["stato"] != "NON LANCIATA")

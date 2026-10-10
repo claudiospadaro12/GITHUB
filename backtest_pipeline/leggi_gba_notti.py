@@ -24,7 +24,8 @@ COME SI LEGGE (nell'ordine che il file prova impone: i numeri PRIMA di ogni lett
   (4) NOTTE = data server con almeno un ingresso nella fascia; netto di notte = somma dei netti PF_V delle posizioni ENTRATE quella notte. q = quota di notti con
       netto < 0; finestre scorrevoli di L notti consecutive (con ingressi, dentro la stessa tranche) senza notti negative contro il caso nullo (1-q)^L; lettura
       con le soglie del file prova (derivate dell'autore); bootstrap PER NOTTE (non per operazione) di q e del PF; autocorrelazione del netto per notte lag 1-3
-      e q condizionata alla notte precedente (Gemini B3: MISURA, non criterio).
+      e q condizionata alla notte precedente (Gemini B3: MISURA, non criterio). CONCENTRAZIONE PER NOTTE: netto senza le 3 e le 5 migliori notti, per passata e totale;
+      'netto senza le 3 migliori notti <= 0' = FRAGILE PER NOTTE (soglia letta dai file prova, o 3 DERIVATA dal cancello se non scritta); S5 del lettore conta le operazioni e non lo vede.
   (5) confronto M1 notte contro M5 notte sullo stesso insieme di notti (per tranche) e contro le ANCORE post-hoc di R1A, calcolate dagli stessi deal archiviati.
   (6) l'ipotesi H-M5N del collega, INTERA come nel file prova, con la dichiarazione di cosa questo lotto misura.
 Non scrive verdetti: 'NON ANCORA MISURATO' / 'dentro attesa' / 'fuori attesa'. Non scrive la parola vietata dal certificato dei 5 punti.
@@ -265,7 +266,7 @@ def estrai_attese(P):
 
 def estrai_soglie_notti(P):
     """Soglie della lettura per notte, dal file prova: {'n_min', 'q_alta', 'q_bassa', 'finestra', 'riga'} (None = non lette)."""
-    s = {"n_min": None, "q_alta": None, "q_bassa": None, "finestra": None, "riga": None}
+    s = {"n_min": None, "q_alta": None, "q_bassa": None, "finestra": None, "riga": None, "k_fragile": None, "k_riga": None, "k_extra": [], "k_derivata": False}
     for sez in sezioni_per(P, "CRITERIO DI EMILIANO", "NESSUNA NOTTE"):
         t, offs = testo_con_righe(sez["righe"])
         m = re.search(r"con\s*>=\s*(\d+)\s*notti", t)
@@ -281,6 +282,14 @@ def estrai_soglie_notti(P):
         m = re.search(r"finestre\s+di\s+(\d+)\s+notti", t, re.I)
         if m and s["finestra"] is None:
             s["finestra"] = int(m.group(1))
+    # CONCENTRAZIONE PER NOTTE: la soglia sta in qualunque punto del file prova ("netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE"); se non c'e' ancora, 3 DERIVATA dal cancello
+    t, offs = testo_con_righe(P["commenti"])
+    m = re.search(r"netto senza le (\d+) migliori notti\s*<=\s*0\s*=\s*FRAGILE PER NOTTE", t)
+    if m:
+        s["k_fragile"], s["k_riga"] = int(m.group(1)), riga_di(offs, m.start())
+        s["k_extra"] = sorted(set(int(x) for x in re.findall(r"(?:si stampa anche|anche) senza le (\d+)", t)))
+    else:
+        s["k_fragile"], s["k_derivata"] = 3, True
     return s
 
 
@@ -431,6 +440,12 @@ def statistiche(serie, S, B, seed):
     st["acf"] = {lag: acf_lag(serie, lag) for lag in (1, 2, 3)}
     st["cond"] = cond_neg(serie)
     st["lettura"] = lettura_q(st["n_notti"], st["q"], S)
+    kf = S.get("k_fragile") or 3
+    ks = sorted(set([3, 5, kf] + list(S.get("k_extra") or [])))
+    ordinate = sorted((n["net"] for n in tutte), reverse=True)
+    st["conc_k"] = {k: st["net"] - sum(ordinate[:k]) for k in ks}
+    st["k_fragile"] = kf
+    st["fragile_notte"] = (st["conc_k"][kf] <= 0) if tutte else None
     return st
 
 
@@ -646,6 +661,11 @@ def stampa_statistiche(W, titolo, st, S):
             W("      finestre di %d notti: NON MISURABILI (meno di %d notti con ingressi in una tranche)" % (st["L"], st["L"]))
     else:
         W("      finestre: lunghezza NON letta dal file prova")
+    if st["n_notti"]:
+        W("      CONCENTRAZIONE PER NOTTE: netto %s; %s -> %s  (soglia: netto senza le %d migliori notti <= 0 = FRAGILE PER NOTTE, %s)" % (
+            f2(st["net"], 0), "; ".join("senza le %d migliori notti %s" % (k, f2(v, 0)) for k, v in sorted(st["conc_k"].items())),
+            "FRAGILE PER NOTTE" if st["fragile_notte"] else "non fragile per notte", st["k_fragile"],
+            "DERIVATA dal cancello 3o passaggio R2NOTTE: il file prova non la scrive" if S.get("k_derivata") else "scritta nel file prova, r.%s" % S.get("k_riga")))
     ac = []
     for lag in (1, 2, 3):
         r, n = st["acf"][lag]
@@ -795,8 +815,13 @@ def stampa_cella(W, C, S, B, seed, fascia):
             senza5 = netto - sum(sorted(nets, reverse=True)[:lg.TOP_N_FRAGILE])
             fragile = (top1 is not None and top1 >= lg.TOP1_FRAGILE) or senza5 <= 0
             n780 = [v for i in C["leggibili"] for v in lg.netti_780(i["P"])]
-            W("   concentrazione (S5, definizione del lettore): migliore operazione = %s del profitto positivo; netto senza le %d migliori = %.0f -> %s | PF con 7,80 EUR/lotto a giro = %s" % (
+            W("   concentrazione PER OPERAZIONE (S5, definizione del lettore): migliore operazione = %s del profitto positivo; netto senza le %d migliori = %.0f -> %s | PF con 7,80 EUR/lotto a giro = %s" % (
                 "n.d." if top1 is None else "%.0f%%" % (100 * top1), lg.TOP_N_FRAGILE, senza5, "FRAGILE" if fragile else "non fragile", fpf(lg.pf_di(n780))))
+            C["s5"] = {"fragile": fragile, "top1": top1, "senza5": senza5}
+            W("   concentrazione PER NOTTE (S5 conta le operazioni e non vede 3 notti da 3 operazioni): %s -> %s  (soglia: senza le %d migliori notti <= 0 = FRAGILE PER NOTTE, %s)" % (
+                "; ".join("senza le %d migliori notti %s" % (k, f2(v, 0)) for k, v in sorted(totale["conc_k"].items())),
+                "FRAGILE PER NOTTE" if totale["fragile_notte"] else "non fragile per notte", totale["k_fragile"],
+                "DERIVATA dal cancello 3o passaggio R2NOTTE, il file prova non la scrive" if S.get("k_derivata") else "scritta nel file prova, r.%s" % S.get("k_riga")))
     else:
         W("   TOT: NON CALCOLATO -- almeno una passata della cella NON e' leggibile (%s)" % ", ".join(i["tag"] for i in C["non_leggibili"]))
     C["tr_stat"], C["tot_stat"], C["costo_med"] = righe_tr, totale, cm_tot
@@ -887,6 +912,13 @@ def stampa_hm5n(W, C5, prove):
             W("   CONFRONTO MECCANICO piano/prova: parole e numeri della frase del piano che NON compaiono nel paragrafo del file prova: %s" % (", ".join(diff) if diff else "nessuno"))
     W("   DICHIARAZIONE: da questo lotto e' misurabile SOLO la meta' NOTTURNA dell'ipotesi (PF_V della notte per tranche, con n >= 150 per tranche). La meta' 'di giorno'")
     W("   non e' in questo lotto (richiede M5 a 24 ore, R2T, e la fascia diurna): e' NON MISURATA qui, e senza di lei l'ipotesi H-M5N intera resta NON ANCORA MISURATA.")
+    if C5 is not None and C5.get("tot_stat") is not None:
+        t5 = C5["tot_stat"]
+        W("   Clausola (c) (il guadagno poggia su poche giornate?): si legge SOLO con la concentrazione PER NOTTE. M5 notte totale: per operazione (S5) %s; per notte %s (senza le 3 migliori notti %s EUR)." % (
+            ("FRAGILE" if C5.get("s5", {}).get("fragile") else "non fragile") if C5.get("s5") else "n.d.",
+            "FRAGILE PER NOTTE" if t5["fragile_notte"] else "non fragile per notte", f2(t5["conc_k"].get(3), 0)))
+    else:
+        W("   Clausola (c): NON MISURATO in questa corsa (totale M5 non leggibile/assente): senza la concentrazione per notte non si legge.")
     if C5 is not None and C5.get("tr_stat"):
         W("   Meta' notturna, per tranche (n op >= 150 serve per leggere il merito, S1):")
         for tr in sorted(C5["tr_stat"]):
@@ -1454,6 +1486,50 @@ def autotest():
         tt = "\n".join(righe_)
         okb = ("DENTRO attesa" in tt.split("\n")[1]) == atteso_in and (re.search(r"smentita r\.\d+ '> 175': n = %d > 175\? -> SCATTA" % n_, tt) is not None) == sm_hi and (("'n < 130': n = %d < 130? -> SCATTA" % n_) in tt) == sm_lo
         ck("attese: n = %d -> banda 142-160 %s, smentita >175 %s, smentita <130 %s" % (n_, "dentro" if atteso_in else "fuori", "scatta" if sm_hi else "no", "scatta" if sm_lo else "no"), okb, tt[:700])
+    # CONCENTRAZIONE PER NOTTE: il controesempio ESATTO del cancello (n=210, PF_V 1,40, 3 notti x 3 operazioni = +6.000 su netto +4.600)
+    def ops_notti(date0, liste, passo=1):
+        out = []
+        d0 = datetime.datetime.strptime(date0, "%Y.%m.%d")
+        for k, nets_n in enumerate(liste):
+            for h, v in enumerate(nets_n):
+                t = d0 + datetime.timedelta(days=k * passo, hours=h)
+                out.append((t.strftime("%Y.%m.%d %H:%M:%S"), "buy", round(v + 3.9, 2), 4.0, 0.10, 6))
+        return out
+    rng = random.Random(1)
+    normali = [101.0] * 100 + [0.0] + [-115.0] * 100            # 201 operazioni: gp 10100, gl 11500, netto -1400
+    rng.shuffle(normali)
+    notti_n = [normali[i:i + 3] for i in range(0, 201, 3)]       # 67 notti da 3 operazioni
+    grandi = [[2000.0 / 3] * 3 for _ in range(3)]                # 3 notti x 3 operazioni = +6000
+    parti = {"T1": grandi + notti_n[:22], "T2": notti_n[22:45], "T3": notti_n[45:]}
+    ops_c = {tr: ops_notti(tr_da[tr], parti[tr]) for tr in parti}
+    n_tot_c = sum(len(v) for v in ops_c.values())
+    zK = _zip_notte(pr1, "M1", ops_c)
+    rc, tk = _esegui_catturando([zK, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("lotto finto del controesempio: n = 210 operazioni, tutte le passate LEGGIBILI", n_tot_c == 210 and rc == 0 and tk.count("-> LEGGIBILE") == 3, "n=%d rc=%s" % (n_tot_c, rc))
+    mtot = re.search(r"TOT\s+n op\s+(\d+) \|.*?\| PF_V (\S+) \| netto (\S+)", tk)
+    ck("... PF_V 1,40 e netto +4.600 (come nel controesempio)", mtot is not None and int(mtot.group(1)) == 210 and abs(float(mtot.group(2)) - 1.40) < 0.005 and abs(float(mtot.group(3)) - 4600) < 1.0, str(mtot.groups() if mtot else tk[:300]))
+    ck("... S5 PER OPERAZIONE dice 'non fragile' (come il cancello ha trovato)", re.search(r"concentrazione PER OPERAZIONE \(S5.*-> non fragile", tk) is not None)
+    ck("... e la concentrazione PER NOTTE dice 'FRAGILE PER NOTTE' (netto senza le 3 migliori notti = -1.400)", re.search(r"concentrazione PER NOTTE.*senza le 3 migliori notti -1400.*-> FRAGILE PER NOTTE", tk) is not None, tk[tk.find("concentrazione PER NOTTE") - 20:tk.find("concentrazione PER NOTTE") + 500])
+    ck("... il caso 'senza le 3 migliori notti' ha PF_V 0,88 (100,10/115 -> gp 10100 / gl 11500)", abs(10100.0 / 11500.0 - 0.88) < 0.005)
+    st_k = statistiche({tr: notti_da_posizioni([{"t": datetime.datetime.strptime(o[0], "%Y.%m.%d %H:%M:%S"), "net_v": o[2] - 3.9, "ora": 0} for o in ops_c[tr]]) for tr in ops_c}, estrai_soglie_notti(pr1), 0, 1)
+    ck("... in unita': 70 notti, le 3 migliori valgono +6000, conc_k[3] = -1400, fragile_notte True", st_k["n_notti"] == 70 and abs(st_k["conc_k"][3] + 1400) < 1.0 and st_k["fragile_notte"] is True, str(st_k["conc_k"]))
+    dist = serie_da([50.0] * 40)
+    sd = statistiche(dist, estrai_soglie_notti(pr1), 0, 1)
+    ck("CASO OPPOSTO: guadagno distribuito su 40 notti (+50 ciascuna): senza le 3 migliori notti +1850 -> NON fragile per notte", sd["fragile_notte"] is False and abs(sd["conc_k"][3] - 1850) < 1e-9 and abs(sd["conc_k"][5] - 1750) < 1e-9, str(sd["conc_k"]))
+    ck("il confine: netto senza le 3 migliori notti ESATTAMENTE 0 -> FRAGILE PER NOTTE (<= 0)", statistiche(serie_da([10.0, 10.0, 10.0]), estrai_soglie_notti(pr1), 0, 1)["fragile_notte"] is True)
+    ck("la soglia k (3) e le 'anche senza le 5' sono LETTE dal file prova e dichiarate (riga citata) nella lettura", estrai_soglie_notti(pr1)["k_fragile"] == 3 and estrai_soglie_notti(pr1)["k_riga"] is not None and "scritta nel file prova, r." in tk, str(estrai_soglie_notti(pr1)))
+    sd2 = estrai_soglie_notti(mp)
+    ck("file prova SENZA la soglia per notte (mini): 3 DERIVATA dal cancello, dichiarata", sd2["k_fragile"] == 3 and sd2["k_derivata"] is True)
+    pm3 = os.path.join(tmpd, "mini3.txt")
+    open(pm3, "w").write(MINI_PROVA + "#  la soglia: netto senza le 4 migliori notti <= 0 = FRAGILE PER NOTTE (si stampa anche senza le 6)\n")
+    s3 = estrai_soglie_notti(leggi_prova(pm3))
+    ck("CONTRO-ESEMPIO: se il file prova dice 4 migliori notti (e anche 6), lo script legge 4 e 6 (non e' scritto nello script)", s3["k_fragile"] == 4 and s3["k_extra"] == [6] and statistiche(serie_da([10.0] * 4 + [-5.0]), s3, 0, 1)["fragile_notte"] is True and statistiche(serie_da([10.0] * 4 + [-5.0]), estrai_soglie_notti(pr1), 0, 1)["fragile_notte"] is False and 6 in statistiche(serie_da([1.0] * 8), s3, 0, 1)["conc_k"], str(s3))
+    zK5 = _zip_notte(pr5, "M5", ops_c)
+    rc, tk5 = _esegui_catturando([_zip_esterno([("GBA_R0_R2NOTTEM1.zip", zK), ("GBA_R0_R2NOTTEM5.zip", zK5)]), "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("clausola (c) di H-M5N con il controesempio nel lotto M5: 'per operazione (S5) non fragile; per notte FRAGILE PER NOTTE', letta solo con la concentrazione per notte",
+       re.search(r"Clausola \(c\).*SOLO con la concentrazione PER NOTTE.*per operazione \(S5\) non fragile; per notte FRAGILE PER NOTTE", tk5) is not None, tk5[tk5.find("Clausola"):tk5.find("Clausola") + 400])
+    rc, tk6 = _esegui_catturando([zA, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("clausola (c) senza lotto M5: 'NON MISURATO in questa corsa'", "Clausola (c): NON MISURATO" in tk6)
     # una passata SENZA operazioni non fa crollare niente
     ops_v = {"T1": ops1["T1"], "T2": [], "T3": ops1["T3"]}
     zE = _zip_notte(pr1, "M1", ops_v)
