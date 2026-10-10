@@ -1,0 +1,93 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA R2 -- lotto R2SOLOBUY: solo BUY (ST3, verifica di sequenza). UNA variabile: InpAllowShort.
+#  Prove R2 SENZA CODICE (input ESISTENTI dell'EA), 10/10/2026. Fonte dei valori e delle attese: report/GBA_PROPOSTA_STRATEGIST_2026-10-10.md (sezione citata
+#  per ogni cella) e, dove dichiarato, report/GBA_PROPOSTA_MARKET_REGIME_2026-10-10.md. Attese, smentite e soglie scritte PRIMA di qualunque numero di questo lotto.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul VPS VMI3047753, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward. Nessun parametro in forward. BOZZA: NON consegnabile finche' i due strati del cancello non danno PASS.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato: prova SENZA CODICE, solo input esistenti).
+#
+#  ======================= DRIVER, LETTORE, E PERCHE' NON IL DRIVER DEI ROUND =======================
+#  Driver: backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (MARCATORE_GBA_R0_PASSATE_v5, SHA256 C239F628..., file prova DICHIARATIVO: blocco @GBA-ASSE, una chiave per file).
+#  Lettore: backtest_pipeline/leggi_gba_r0.py (SHA256 20228005..., commit 4ac4b3d8). L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) questa prova
+#  uscirebbe con un CSV da zero byte (file madre GBA_R0_REPLICA_2026-10-09.txt, 'IL DIFETTO CHE QUESTO FILE DICHIARA PER PRIMO'). Il driver dei round non si tocca.
+#  L'asse InpMagic=775800||775800||50||775850||Y qui sotto e' TECNICO (G1 sul magic) e NON e' la variabile misurata: controlla_prova.py pretende un asse Y.
+#  MAGIC: 775800 (passate) e 775850 (gemella). La consegna chiedeva magic NUOVI in un blocco libero: NON si puo' senza toccare driver e lettore (il driver v5 ammette SOLO
+#  775800/775850, $MAGIC_AMMESSI e $ASSE_ATTESO; il lettore legge come passata principale SOLO 775800). Nel tester il magic non tocca niente fuori dalla passata
+#  (AllowLiveTrading=false, nessun altro EA): e' un'etichetta. Cambiarlo vorrebbe dire una v6 del driver e del lettore e un nuovo cancello: NON fatto, dichiarato.
+#
+#  ======================= TRANCHE: LE TRE DEL 2026, IDENTICHE A R1A (gemella e ancora) =======================
+#  T1 2026.07.01 -> 2026.09.30, T2 2026.04.01 -> 2026.06.30, T3 2026.01.01 -> 2026.03.31: le STESSE date di R1A (file madre). ToDate e' ESCLUSIVO (MISURATO in R1A: l'ultimo giorno
+#  non gira); si tengono le date di R1A apposta, perche' il confronto con la REPL di R1A sia sulla stessa finestra (e il lettore trova l'ancora solo su tranche identiche).
+#  E' il lotto di SCOPERTA (in-sample: le ipotesi del dossier nascono su questi dati, GBA_PROPOSTA_STRATEGIST sez. 6): nessuna cella si promuove da qui.
+#  Modello 4 (ticks reali, il verdetto), deposito 1000000 EUR, lotto FISSO 1,00 (decisione di Claudio 09/10), stessi 30 pin di R1A: cambia SOLO la chiave dell'asse.
+#  Riferimento (R1A, REPL, MISURATO, report/GBA_R0_R1A_LETTURA_2026-10-10.md e zip archiviato): T1 n=128 PF 0,83 (profitto -6.577,48), T2 n=248 PF 0,77, T3 n=557 PF 0,89;
+#  tre tranche n=933 PF_V 0,855; BUY n=443 PF_V 0,89, SELL n=490 PF_V 0,83; costo mediano 58,8x solo spread, 49,4x con 0,04 USD/oz (PASSA); DD equity 12.511 / 28.863 / 53.392 EUR.
+#
+#  ======================= SOGLIE (copiate, non riscritte: S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt, S8-S9 di report/GBA_R2_PIANO_2026-10-10.md sez. 3.3) ===============
+#  S1 merito solo con n >= 150 (cella, somma delle tre tranche; tranche da sola idem). Il RISCHIO (DD, perdita per operazione, peggior giornata) si legge a qualunque n (R59).
+#  S2 COSTO prima del PF: mediana sugli ingressi di stop/(spread+commissione): >= 40 PASSA; 13,3-40 FRA (non puo' diventare sedia); < 13,3 ESCLUSA PER COSTO.
+#  S3 PF_V = PF dei netti ricalcolato dai deal (tolleranza 0,02 sul report), con 3,90 EUR/lotto a giro se il tester non addebita commissioni (e la versione 7,80).
+#  S4 RISCONTRO = PF_V >= 1,5 su n >= 150, PF_V > 1,3 in 2 tranche su 3, migliore operazione < 25% del netto, PF con 7,80 >= 1,3. S5 concentrazione. S6 ora (6 fasce, p < 0,05/6).
+#  S7 centro dell'altopiano, MAI il picco; con 2 punti lungo un asse la monotonia e' vuota (nessun altopiano si legge).
+#  S8 (rumore, piano 3.3): la REPL ha PF_V 0,855 con intervallo per giorno [0,70; 1,03]: una cella con PF_V <= 1,03 e' INDISTINGUIBILE dalla REPL e da 1,0; fra 1,03 e 1,3 nessun verdetto.
+#  S9 (selezione, piano 3.3 e GBA_PROPOSTA_STRATEGIST sez. 4): un filtro che migliora il PF riducendo n (stesso R medio) e' SELEZIONE, non miglioramento; oltre il 40% di operazioni tolte
+#     si scrive cosi'. A un filtro NON si assegna mai 'regge': 'regge' e' solo la regola per regimi (firma 10/10, report/FIRME_2026-10-10.md), che qui ha UN regime (gen-set 2026).
+#  CERTIFICATO DEI 5 PUNTI (CLAUDE.md 09/09): 1 PF misurato (R1A: si'), 2 n e DD (R1A: si'), 3 USCITA ad asse (NON in questo file: e' R2U del piano / RM), 4 simboli GEMELLI (NON qui),
+#     5 TF cambiato (NON qui: questo file cambia il TF di un INDICATORE, non quello del SEGNALE, che e' R2T). Qualunque esito qui sotto e' 'NON ANCORA MISURATO' per il motore,
+#     mai 'morto': la parola non si scrive.
+#  FUORI CAMPIONE: T4-T9 (R2REG, 2024-25) e T0 dal 01/10/2026 (GBA_PROPOSTA_STRATEGIST sez. 6): una cella che supera S8 qui si ripete li' con lista e criteri gia' congelati.
+#
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  InpAllowShort = false (solo BUY). Neutro = true (R1A). Una cella: NOSHORT. File gemello: GBA_R2_SOLOBUY e GBA_R2_SOLOSELL sono DUE file perche' sono due chiavi.
+#  Verifica di SEQUENZA (STRATEGIST sez. 4.4): il lato si legge GRATIS dai deal (lettura per lato di R1A/R2REG); queste passate servono SOLO a verificare che nel tester
+#  l'effetto di sequenza sia ~zero come nel proxy (solo-BUY n=453 = i BUY del neutro, 453). Il lato e' una riduzione di zavorra, MAI una sedia: un solo-BUY e' una
+#  scommessa sulla deriva dell'oro, non un edge. Un solo regime (gen-set 2026). Caveat del dossier: nella REPL il segno si ribalta in T3 (BUY 0,77, SELL 0,93) e in T1
+#  (BUY 2,25, SELL 0,46 su n=51 / 61: sospeso, n < 150). Nel lettore v5 il lato spento esce 'lato spento/assente, n=0' (non e' un PF <= 1).
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate) =======================
+#  n 420-520 (STRATEGIST 4.4; i BUY di R1A sono 443: con sequenza ~0, n ~443); PF_V 0,84-0,95 (sottoinsieme R1A 0,89 su n=443).
+#  COSTO: invariato rispetto a R1A (stesso filtro, stesso stop): PASSA.
+#  SMENTITE: solo-BUY PF_V >= 1,03 su n >= 150 = sorpresa (S8, S4). Sequenza: |n - 443| > 10% = l'effetto di sequenza NON e' ~zero nel tester (il proxy sbaglia) e la
+#  lettura per lato dei deal NON basta: va scritto. PASSATE: 1 cella x 3 tranche = 3, ~7 min.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @GBA-TRANCHE qui sotto (le tre tranche di R1A, nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 le legge dal file)
+#  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+#  @GBA-TRANCHE nome=T2 da=2026.04.01 a=2026.06.30
+#  @GBA-TRANCHE nome=T3 da=2026.01.01 a=2026.03.31
+#  @GBA-ASSE chiave=InpAllowShort tranche=3 celle=1 lotti=1
+#  @GBA-CELLA nome=NOSHORT InpAllowShort=false
+#  @GBA-LOTTO nome=R2SOLOBUY modello=4 tetto_min=20 passate=NOSHORT:T1,NOSHORT:T2,NOSHORT:T3
+#
+InpSymbol=XAUUSD
+InpSignalTF=1
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=24
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true

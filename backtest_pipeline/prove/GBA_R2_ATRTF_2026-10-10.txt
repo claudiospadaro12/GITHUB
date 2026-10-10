@@ -1,0 +1,100 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA R2 -- lotto R2TATR: scala dell'ATR su M5 / M15 (ST4). UNA variabile: InpAtrTF.
+#  Prove R2 SENZA CODICE (input ESISTENTI dell'EA), 10/10/2026. Fonte dei valori e delle attese: report/GBA_PROPOSTA_STRATEGIST_2026-10-10.md (sezione citata
+#  per ogni cella) e, dove dichiarato, report/GBA_PROPOSTA_MARKET_REGIME_2026-10-10.md. Attese, smentite e soglie scritte PRIMA di qualunque numero di questo lotto.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul VPS VMI3047753, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward. Nessun parametro in forward. BOZZA: NON consegnabile finche' i due strati del cancello non danno PASS.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato: prova SENZA CODICE, solo input esistenti).
+#
+#  ======================= DRIVER, LETTORE, E PERCHE' NON IL DRIVER DEI ROUND =======================
+#  Driver: backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (MARCATORE_GBA_R0_PASSATE_v5, SHA256 C239F628..., file prova DICHIARATIVO: blocco @GBA-ASSE, una chiave per file).
+#  Lettore: backtest_pipeline/leggi_gba_r0.py (SHA256 20228005..., commit 4ac4b3d8). L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) questa prova
+#  uscirebbe con un CSV da zero byte (file madre GBA_R0_REPLICA_2026-10-09.txt, 'IL DIFETTO CHE QUESTO FILE DICHIARA PER PRIMO'). Il driver dei round non si tocca.
+#  L'asse InpMagic=775800||775800||50||775850||Y qui sotto e' TECNICO (G1 sul magic) e NON e' la variabile misurata: controlla_prova.py pretende un asse Y.
+#  MAGIC: 775800 (passate) e 775850 (gemella). La consegna chiedeva magic NUOVI in un blocco libero: NON si puo' senza toccare driver e lettore (il driver v5 ammette SOLO
+#  775800/775850, $MAGIC_AMMESSI e $ASSE_ATTESO; il lettore legge come passata principale SOLO 775800). Nel tester il magic non tocca niente fuori dalla passata
+#  (AllowLiveTrading=false, nessun altro EA): e' un'etichetta. Cambiarlo vorrebbe dire una v6 del driver e del lettore e un nuovo cancello: NON fatto, dichiarato.
+#
+#  ======================= TRANCHE: LE TRE DEL 2026, IDENTICHE A R1A (gemella e ancora) =======================
+#  T1 2026.07.01 -> 2026.09.30, T2 2026.04.01 -> 2026.06.30, T3 2026.01.01 -> 2026.03.31: le STESSE date di R1A (file madre). ToDate e' ESCLUSIVO (MISURATO in R1A: l'ultimo giorno
+#  non gira); si tengono le date di R1A apposta, perche' il confronto con la REPL di R1A sia sulla stessa finestra (e il lettore trova l'ancora solo su tranche identiche).
+#  E' il lotto di SCOPERTA (in-sample: le ipotesi del dossier nascono su questi dati, GBA_PROPOSTA_STRATEGIST sez. 6): nessuna cella si promuove da qui.
+#  Modello 4 (ticks reali, il verdetto), deposito 1000000 EUR, lotto FISSO 1,00 (decisione di Claudio 09/10), stessi 30 pin di R1A: cambia SOLO la chiave dell'asse.
+#  Riferimento (R1A, REPL, MISURATO, report/GBA_R0_R1A_LETTURA_2026-10-10.md e zip archiviato): T1 n=128 PF 0,83 (profitto -6.577,48), T2 n=248 PF 0,77, T3 n=557 PF 0,89;
+#  tre tranche n=933 PF_V 0,855; BUY n=443 PF_V 0,89, SELL n=490 PF_V 0,83; costo mediano 58,8x solo spread, 49,4x con 0,04 USD/oz (PASSA); DD equity 12.511 / 28.863 / 53.392 EUR.
+#
+#  ======================= SOGLIE (copiate, non riscritte: S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt, S8-S9 di report/GBA_R2_PIANO_2026-10-10.md sez. 3.3) ===============
+#  S1 merito solo con n >= 150 (cella, somma delle tre tranche; tranche da sola idem). Il RISCHIO (DD, perdita per operazione, peggior giornata) si legge a qualunque n (R59).
+#  S2 COSTO prima del PF: mediana sugli ingressi di stop/(spread+commissione): >= 40 PASSA; 13,3-40 FRA (non puo' diventare sedia); < 13,3 ESCLUSA PER COSTO.
+#  S3 PF_V = PF dei netti ricalcolato dai deal (tolleranza 0,02 sul report), con 3,90 EUR/lotto a giro se il tester non addebita commissioni (e la versione 7,80).
+#  S4 RISCONTRO = PF_V >= 1,5 su n >= 150, PF_V > 1,3 in 2 tranche su 3, migliore operazione < 25% del netto, PF con 7,80 >= 1,3. S5 concentrazione. S6 ora (6 fasce, p < 0,05/6).
+#  S7 centro dell'altopiano, MAI il picco; con 2 punti lungo un asse la monotonia e' vuota (nessun altopiano si legge).
+#  S8 (rumore, piano 3.3): la REPL ha PF_V 0,855 con intervallo per giorno [0,70; 1,03]: una cella con PF_V <= 1,03 e' INDISTINGUIBILE dalla REPL e da 1,0; fra 1,03 e 1,3 nessun verdetto.
+#  S9 (selezione, piano 3.3 e GBA_PROPOSTA_STRATEGIST sez. 4): un filtro che migliora il PF riducendo n (stesso R medio) e' SELEZIONE, non miglioramento; oltre il 40% di operazioni tolte
+#     si scrive cosi'. A un filtro NON si assegna mai 'regge': 'regge' e' solo la regola per regimi (firma 10/10, report/FIRME_2026-10-10.md), che qui ha UN regime (gen-set 2026).
+#  CERTIFICATO DEI 5 PUNTI (CLAUDE.md 09/09): 1 PF misurato (R1A: si'), 2 n e DD (R1A: si'), 3 USCITA ad asse (NON in questo file: e' R2U del piano / RM), 4 simboli GEMELLI (NON qui),
+#     5 TF cambiato (NON qui: questo file cambia il TF di un INDICATORE, non quello del SEGNALE, che e' R2T). Qualunque esito qui sotto e' 'NON ANCORA MISURATO' per il motore,
+#     mai 'morto': la parola non si scrive.
+#  FUORI CAMPIONE: T4-T9 (R2REG, 2024-25) e T0 dal 01/10/2026 (GBA_PROPOSTA_STRATEGIST sez. 6): una cella che supera S8 qui si ripete li' con lista e criteri gia' congelati.
+#
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  InpAtrTF = TF dell'ATR(14). Neutro = 0 (PERIOD_CURRENT = M1: R1A). Segnale, canale ed EMA restano a M1 (STRATEGIST sez. 4.5).
+#   cella  InpAtrTF   fonte
+#   A5     5  (M5)    ST4 (STRATEGIST sez. 4.5)
+#   A15    15 (M15)   ST4
+#  CONFONDIMENTO DICHIARATO (STRATEGIST 4.5): l'ATR fa stop iniziale, trailing, BE E filtro di spread TUTTI INSIEME. Con ATR M5 lo stop passa da ~5,5 a ~13 USD e
+#  'spread <= 0,05 x ATR' diventa ~0,26 USD (quasi sempre vero): entrano molti piu' segnali. R1B limita il confondimento: allargare il solo filtro di spread a M1 lascia
+#  PF_V 0,82-0,83; quindi una differenza oltre 0,82-0,83 e' scala di stop/trailing. La REPL di riferimento e' R1A (ancora per il lettore, stessi pin salvo InpAtrTF).
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate) =======================
+#  n (STRATEGIST 4.5): 2.300-3.500 a 3 tranche (proxy M5 2.923, M15 3.752, x0,92: A5 ~2.700, A15 ~3.450). PF_V 0,68-0,90 (proxy 0,93 - calibrazione 0,16 = 0,77).
+#  COSTO (S2): stop/spread ~52x con M5, ~94x con M15 [DERIVATO su proxy, mediana sui segnali, +0,04] -> PASSA la frontiera 40x con TUTTI i segnali.
+#  Frequenza attesa ~15 operazioni/giorno (frontiera di frequenza, non di PF). Perdita a SL per operazione 2-4 volte quella di R1A (stop piu' largo, lotto fisso 1,00).
+#
+#  ======================= SMENTITE =======================
+#  PF_V >= 1,03 su n >= 150 (STRATEGIST 4.5): sorpresa, vale S4 + S8 e il controesempio di concentrazione (S5). Altrimenti la casella 'A1 punto aperto' (GBA_R2_PIANO sez. 2)
+#  si chiude: la cella passa il costo ma il PF non c'e'. Costo mediano < 40x: il proxy sbaglia la scala, si legge lo spread per ora del giornale PRIMA del PF.
+#  PASSATE: 2 celle x 3 tranche = 6 (n ~1.000 a tranche: piu' lente di R1A). Tempo: ~2-3 min di orologio a passata -> ~15 min.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @GBA-TRANCHE qui sotto (le tre tranche di R1A, nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 le legge dal file)
+#  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+#  @GBA-TRANCHE nome=T2 da=2026.04.01 a=2026.06.30
+#  @GBA-TRANCHE nome=T3 da=2026.01.01 a=2026.03.31
+#  @GBA-ASSE chiave=InpAtrTF tranche=3 celle=2 lotti=1
+#  @GBA-CELLA nome=A5 InpAtrTF=5
+#  @GBA-CELLA nome=A15 InpAtrTF=15
+#  @GBA-LOTTO nome=R2TATR modello=4 tetto_min=45 passate=A5:T1,A5:T2,A5:T3,A15:T1,A15:T2,A15:T3
+#
+InpSymbol=XAUUSD
+InpSignalTF=1
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=24
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true
