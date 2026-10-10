@@ -351,7 +351,7 @@ if(-not $attivitaLette){
   }
 }
 if(-not $attivitaLette){
-  Muori "non riesco a leggere le attivita' pianificate, quindi non so quale zip e' l'input di un'attivita'. Il 16/09 un riordino ha spostato la cartella di ABTG_AggiornaNews e l'attivita' delle 07:20 e' morta. Rilancia da una console con i diritti giusti."
+  Muori "non riesco a leggere le attivita' pianificate, quindi non so quale cartella e' l'input di un'attivita'. Il 16/09 un riordino ha spostato la cartella di ABTG_AggiornaNews e l'attivita' delle 07:20 e' morta. Rilancia da una console con i diritti giusti."
 }
 $testoAttivitaU = $testoAttivita.ToUpperInvariant()
 
