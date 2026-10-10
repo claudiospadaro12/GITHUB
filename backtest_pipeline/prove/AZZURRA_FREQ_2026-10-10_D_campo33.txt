@@ -18,23 +18,26 @@
 #     Rapporto < 1 = Max_Trades 4 saturato dagli 11 in piu' (lo slot si riempie prima): si scrive con il numero.
 #   - G1 sulle gemelle 774541 / 774591: come A (Trades identici, OOS identica al centesimo, IS |dProfit| <= 0,10, per-trade identico).
 #   - nessun verdetto sul PF (Modello 1, un regime); costo [DERIVATO] ~2,8 minuti (33 simboli).
-#   - REGOLA DEGLI 11 SIMBOLI NON-FX (classe 1225 ed emendamento, scritta PRIMA dei numeri). Gli 11 sono elencati per NOME: XAUUSD, 100GBP,
-#     200AUD, 225JPY, D30EUR, E35EUR, E50EUR, F40EUR, NASUSD, SPXUSD, U30USD (mai "quelli che non sono nei 22"). Nella gamba OOS di D0 si
-#     contano z11 = gli 11 a ZERO e z22 = i 22 cross a ZERO nella STESSA cella:
-#       z11 = 11                                  -> NON MISURATO (rc 3): tester cieco e regola che non scatta danno lo stesso zero.
-#       z11 >= 4 e z11 >= 11 x z22 / 22 + 4      -> NON MISURATO (rc 3): cecita per CLASSE di strumento (il tester puo' vedere l'oro e non
-#                                                    gli indici, o il contrario). PERCHE': il segnale e' a scala libera (bande di Bollinger e
-#                                                    rapporto con l'ATR), quindi ci si aspetta un tasso PER SIMBOLO paragonabile fra cross e
-#                                                    non-FX: gli 11 a zero devono stare in proporzione ai 22 a zero. Il +4 e' un MARGINE DI
-#                                                    CAUTELA DICHIARATO, NON derivato da una misura.
-#       sotto soglia, z11 > 0                     -> rc 0, ma l'esito porta "LIMITE BASSO" con i DUE estremi della lambda: misurata, e con gli
-#                                                    z11 portati alla media dei simboli visti (lambda x (visti + z11) / visti). Il P(0) del
-#                                                    venerdi' e' allora un LIMITE ALTO: con quel numero si puo' dire "anomalo", MAI "normale".
-#       z11 = 0                                   -> lettura pulita.
-#     Prossimo passo dei due NON MISURATO: un job con i soli 11 + Use_Purple=1 (controllo positivo).
-#     CONTRO-ESEMPI che la regola ferma: D con deal solo sui 22 cross (z11 = 11) -> NON MISURATO; 22 cross + un solo non-FX visto
-#     (z11 = 10, z22 = 0, soglia 4) -> NON MISURATO. Prima dell'emendamento il secondo usciva "LEGGIBILE" con lambda bassa e P(0) alto,
-#     cioe' nel verso RASSICURANTE.
+#   - REGOLA DELLA CECITA' PER CLASSE, IN TUTTE E DUE LE DIREZIONI (classi 1225 emendata e 1226, scritta PRIMA dei numeri). Gli 11 non-FX
+#     sono elencati per NOME: XAUUSD, 100GBP, 200AUD, 225JPY, D30EUR, E35EUR, E50EUR, F40EUR, NASUSD, SPXUSD, U30USD (mai "quelli che non
+#     sono nei 22"). Nella gamba OOS di D0: z11 = gli 11 a ZERO, z22 = i 22 cross a ZERO, nella STESSA cella.
+#       tutti i 33 a zero (con Trades IS > 0)      -> NON MISURATO (rc 3): il tester non ha visto la gamba OOS, o la regola tace da luglio.
+#       z11 = 11                                    -> NON MISURATO (rc 3): non-FX ciechi; la lambda sarebbe quella dei 22.
+#       z22 = 22                                    -> NON MISURATO (rc 3): CROSS ciechi (classe 1226; R92BAB finiva il 30/06: lo storico M1
+#                                                      dei cross da luglio NON e' provato su questo PC).
+#       z11 >= 4 e z11 >= 11 x z22 / 22 + 4        -> NON MISURATO (rc 3): cecita' per CLASSE dei non-FX (l'oro si', gli indici no...).
+#       z22 >= 8 e z22 >= 22 x z11 / 11 + 8        -> NON MISURATO (rc 3): CROSS ciechi per CLASSE (classe 1226).
+#         PERCHE' le due soglie: il segnale e' a scala libera (bande di Bollinger e rapporto con l'ATR), quindi ci si aspetta un tasso PER
+#         SIMBOLO paragonabile fra cross e non-FX: i simboli a zero di una classe devono stare in proporzione a quelli dell'altra. I margini
+#         +4 (su 11) e +8 (su 22) sono la STESSA frazione 4/11: MARGINE DI CAUTELA DICHIARATO, NON derivato da una misura.
+#       sotto le soglie, almeno un simbolo a zero  -> rc 0 con LIMITE BASSO: lambda fra la misurata e misurata x 33 / visti; P(0) E CATEGORIA
+#                                                      dati ai DUE estremi. Il P(0) misurato e' un LIMITE ALTO: con quel numero si puo' dire
+#                                                      "anomalo", MAI "normale"; e con un LIMITE BASSO le descrizioni "e' la norma" NON si leggono.
+#       nessun simbolo a zero                       -> lettura pulita.
+#     Prossimo passo dei NON MISURATO: un job con i soli simboli a zero + Use_Purple=1 (controllo positivo).
+#     CONTRO-ESEMPI che la regola ferma: solo deal sui 22 cross (z11 = 11) -> NON MISURATO; 22 cross + un solo non-FX visto (z11 = 10,
+#     z22 = 0, soglia 4) -> NON MISURATO; solo deal sugli 11 (z22 = 22) -> NON MISURATO. Prima di queste regole il secondo e il terzo
+#     uscivano "LEGGIBILE" con lambda bassa e P(0) alto, cioe' nel verso RASSICURANTE.
 #  UNA VARIABILE: Symbols_List. L'asse InpMagic e' tecnico (G1), non di strategia.
 # =====================================================================
 @SIMBOLO    EURGBP

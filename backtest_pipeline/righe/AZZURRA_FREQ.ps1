@@ -61,10 +61,12 @@
 #  MISURATO). Per rifarla servono magic nuovi = nuovo pin.
 #
 #  CODICI D'USCITA: 0 = FREQUENZA LEGGIBILE (cella del campo D con
-#  precondizioni vere e niente cecita per classe sugli 11 non-FX; la
-#  categoria e' nel riepilogo, e se porta LIMITE BASSO il P(0) e' un limite
-#  ALTO); 3 = NON MISURATO (anche per cecita degli 11 non-FX; lo zip esce
-#  lo stesso); 1 = fermo PRIMA del tester.
+#  precondizioni vere e niente cecita per classe, ne' sugli 11 non-FX ne'
+#  sui 22 cross; la categoria e' nel riepilogo, e se porta LIMITE BASSO il
+#  P(0) e la categoria sono dati ai due estremi e il P(0) misurato e' un
+#  limite ALTO); 3 = NON MISURATO, anche per cecita per classe degli 11
+#  non-FX o dei 22 cross (lo zip esce lo stesso); 1 = fermo PRIMA del
+#  tester.
 #
 #  NIENTE EMOJI QUI DENTRO (regola del 17/08): Windows PowerShell 5.1 legge
 #  i .ps1 come ANSI. ASCII puro.
@@ -123,7 +125,7 @@ function Feriali($da, $a){
 $GIORNI_IS  = Feriali $IS_DA $IS_A
 $GIORNI_OOS = Feriali $OOS_DA $OOS_A
 $JOBS = @(
-  [pscustomobject]@{ L='AZF_D'; P='AZZURRA_FREQ_2026-10-10_D_campo33.txt';            SL=$SL33; Lo=0.6; Hi=10.0; HP='6FDF33ABF7BDD7373F72C238EBEF0F98B8AF4E27C5E42A34CFA6D616DE41194F';
+  [pscustomobject]@{ L='AZF_D'; P='AZZURRA_FREQ_2026-10-10_D_campo33.txt';            SL=$SL33; Lo=0.6; Hi=10.0; HP='31FB9163806AB8CDD9BF9D8F06825A5D5FDF1EA6AAD045C268E7272A899C6CBB';
     Righe=@('InpMagic=774541||774541||50||774591||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=1.5');
     Celle=@([pscustomobject]@{ K='D0'; M='774541'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='D1'; M='774591'; V='OGNI'; Primo='0'; Rng=1.5 }) },
   [pscustomobject]@{ L='AZF_A'; P='AZZURRA_FREQ_2026-10-10_A_base.txt';               SL=$SL22; Lo=0.4; Hi=7.0; HP='D12A3D7D56AE6935B0094BA480BE78A88B5CA6EF150B8466F06E52BADB8CF767';
@@ -661,6 +663,14 @@ W ('BASE DEI CONTROLLI (22 cross): gemelle A0/A1 ' + $statoA + ' -> ' + $(if($ba
 if($baseA -ne ''){ $la = Lambda $baseA; W ('  lambda ' + $baseA + ' (22 cross): IS ' + (F3 $la.IS) + ' | OOS ' + (F3 $la.OOS) + ' al giorno feriale -- banda attesa [DERIVATA, debole] 0,4 - 7 -- NON e la cella del campo') }
 W ''
 # la cella del CAMPO: D0 (gemella D1). Nessun ripiego: senza D la lambda del campo e NON MISURATA (A ha 11 simboli in meno)
+# categorie congelate nel file madre: nome breve e testo; il testo ("e la norma") si legge SOLO senza LIMITE BASSO
+function CatNome($l){ if([double]::IsNaN($l)){ return 'n/d' }; if($l -lt 0.1){ return 'QUASI VUOTA' }; if($l -lt 0.5){ return 'RARA' }; if($l -lt 2.0){ return 'REGOLARE' }; return 'FREQUENTE' }
+function CatTesto($n){
+  if($n -eq 'QUASI VUOTA'){ return 'CELLA QUASI VUOTA (lambda < 0,1): una settimana a zero e la norma; serve solo PER FAMIGLIA; NON e un verdetto di morte' }
+  if($n -eq 'RARA'){ return 'RARA (0,1 <= lambda < 0,5): un giorno pieno a zero e la norma' }
+  if($n -eq 'REGOLARE'){ return 'REGOLARE (0,5 <= lambda < 2): una SETTIMANA piena a zero in campo sarebbe un anomalia da controllare' }
+  return 'FREQUENTE (lambda >= 2): DUE giorni pieni consecutivi a zero in campo sarebbero un anomalia da controllare'
+}
 $statoD = Gemelle 'D0' 'D1'
 $esito = ''
 $codice = 3
@@ -673,46 +683,63 @@ if($statoD -eq 'ROTTO'){
   if($tIS -eq 0 -and $tOOS -eq 0){
     $esito = 'NON MISURATO: cella del campo D con Trades = 0 in IS e in OOS. EA cieco nel tester e regola che non scatta danno lo STESSO zero: prossimo passo il controllo positivo Use_Purple=1 (file madre, attesa Z)'
   } else {
-    # classe 1225 (emendata): gli 11 non-FX a zero nella gamba OOS di D si PESANO contro i 22 cross a zero della STESSA cella.
-    # NON MISURATO se z11 = 11, oppure z11 >= 4 e z11 >= 11 x z22 / 22 + 4 (cecita per CLASSE di strumento: il tester puo vedere l oro e
-    # non gli indici); sotto soglia e z11 > 0 = leggibile con LIMITE BASSO e i due estremi della lambda (il P(0) e allora un LIMITE ALTO).
+    # REGOLE CONGELATE NEL FILE D (classe 1225 emendata e classe 1226), IN TUTTE E DUE LE DIREZIONI: il tester puo essere cieco su una
+    # CLASSE di strumento (gli indici, l oro, oppure i cross se manca lo storico M1 luglio-ottobre: R92BAB finiva il 30/06).
+    #   z11 = gli 11 non-FX a zero nella gamba OOS di D0, z22 = i 22 cross a zero nella STESSA cella.
+    #   NON MISURATO (rc 3): tutti i 33 a zero; z11 = 11; z22 = 22; z11 >= 4 e z11 >= 11 x z22 / 22 + 4; z22 >= 8 e z22 >= 22 x z11 / 11 + 8
+    #   (margini +4 e +8 = la stessa frazione 4/11, DICHIARATI, NON misurati).
+    #   Sotto le soglie, almeno un simbolo a zero: LIMITE BASSO, lambda fra misurata e misurata x 33 / visti, P(0) E CATEGORIA ai due
+    #   estremi; con un LIMITE BASSO "e la norma" NON si legge mai. Nessun simbolo a zero: lettura pulita.
     $zD = @(('' + $AN['D0'].SimbZero).Split(','))
     $z11 = @($NUOVI11 | Where-Object { $zD -contains $_ })
     $z22 = @(@($SL22.Split(',')) | Where-Object { $zD -contains $_ })
     $soglia11 = 11.0 * $z22.Count / 22.0 + 4.0
-    $ciecoClasse = ($z11.Count -ge 4) -and ($z11.Count -ge $soglia11)
+    $soglia22 = 22.0 * $z11.Count / 11.0 + 8.0
+    $ciecoNonFX = ($z11.Count -ge 4) -and ($z11.Count -ge $soglia11)
+    $ciecoCross = ($z22.Count -ge 8) -and ($z22.Count -ge $soglia22)
+    $nVisti = $AN['D0'].NSimb - $AN['D0'].NSimbZero
+    $limBasso = ($AN['D0'].NSimbZero -gt 0)
     $ld = Lambda 'D0'
     $lamIS = $ld.IS; $lamO = $ld.OOS
-    $cat = ''
-    if($lamO -lt 0.1){ $cat = 'CELLA QUASI VUOTA (lambda < 0,1): una settimana a zero e la norma; serve solo PER FAMIGLIA; NON e un verdetto di morte' }
-    elseif($lamO -lt 0.5){ $cat = 'RARA (0,1 <= lambda < 0,5): un giorno pieno a zero e la norma' }
-    elseif($lamO -lt 2.0){ $cat = 'REGOLARE (0,5 <= lambda < 2): una SETTIMANA piena a zero in campo sarebbe un anomalia da controllare' }
-    else { $cat = 'FREQUENTE (lambda >= 2): DUE giorni pieni consecutivi a zero in campo sarebbero un anomalia da controllare' }
+    $lamHi = $(if($nVisti -gt 0){ $lamO * $AN['D0'].NSimb / [double]$nVisti } else { [double]::NaN })
+    $catO = CatNome $lamO
     W ('CELLA DEL CAMPO D0 (33 simboli, gemella D1 ' + $statoD + $(if($statoD -eq 'G1RESTO'){': la frequenza si legge, PF e DD NO'}else{''}) + ')')
     W ('  lambda IS (dal CSV) = ' + $tIS + ' / ' + $NIS + ' = ' + (F3 $lamIS) + ' | lambda OOS (dal per-trade) = ' + $AN['D0'].Pos + ' / ' + $NOOS + ' = ' + (F3 $lamO) + ' aperture al giorno feriale, sui 33 simboli')
     $rap = $(if($lamIS -gt 0){ $lamO / $lamIS } else { [double]::NaN })
-    W ('  rapporto OOS/IS = ' + $(if([double]::IsNaN($rap)){'n/d'}else{F2 $rap}) + '   (oltre 2 o sotto 0,5: la frequenza dipende dal tratto di mercato, un giorno in campo pesa ancora meno)')
+    W ('  rapporto OOS/IS = ' + $(if([double]::IsNaN($rap)){'n/d'}else{F2 $rap}) + '   (oltre 2 o sotto 0,5: la frequenza dipende dal tratto di mercato, OPPURE il tester e cieco su una gamba: la IS ha solo il CSV aggregato, senza per-trade non c e cancello)')
     W ('  banda attesa [DERIVATA, debole] 0,6 - 10 al giorno: ' + $(if($lamO -lt 0.6){'SOTTO la banda (piu rara del previsto)'}elseif($lamO -gt 10){'SOPRA la banda'}else{'DENTRO la banda'}))
     W ('  simboli a ZERO nella gamba OOS: ' + $AN['D0'].NSimbZero + ' su ' + $AN['D0'].NSimb + $(if($AN['D0'].SimbZero -ne ''){ ' (' + $AN['D0'].SimbZero + ')' }else{''}) + '   (un simbolo che il tester non vede ABBASSA la lambda)')
+    W ('  degli 11 simboli fuori dai cross (per nome) a ZERO ' + $z11.Count + $(if($z11.Count -gt 0){ ' (' + ($z11 -join ',') + ')' }else{''}) + ' | dei 22 cross a ZERO ' + $z22.Count + ' | soglie della cecita per classe: non-FX z11 >= 4 e z11 >= ' + (F2 $soglia11) + ' ; cross z22 >= 8 e z22 >= ' + (F2 $soglia22))
     if($baseA -ne ''){ $la = Lambda $baseA; if($la.OOS -gt 0){ W ('  rapporto D/A in OOS = ' + (F2 ($lamO / $la.OOS)) + '   (attesa 1,0 - 1,8; ~1,0 con simboli a zero fra gli 11 nuovi = il tester non li vede)') } }
-    W ('  P(0) con la lambda OOS misurata: giorno intero ' + (Pc ([Math]::Exp(-$lamO))) + ' | 7/24 di giorno (il venerdi 09/10 del campo) ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ' | 2 giorni pieni ' + (Pc ([Math]::Exp(-2 * $lamO))) + ' | 5 giorni pieni ' + (Pc ([Math]::Exp(-5 * $lamO))))
+    if($limBasso -and $nVisti -gt 0){
+      W ('  P(0) fra i due estremi (lambda ' + (F3 $lamHi) + ' e ' + (F3 $lamO) + '): giorno intero ' + (Pc ([Math]::Exp(-$lamHi))) + ' - ' + (Pc ([Math]::Exp(-$lamO))) + ' | 7/24 di giorno (il venerdi 09/10 del campo) ' + (Pc ([Math]::Exp(-$lamHi * $ESPOSIZIONE_CAMPO))) + ' - ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ' | 5 giorni pieni ' + (Pc ([Math]::Exp(-5 * $lamHi))) + ' - ' + (Pc ([Math]::Exp(-5 * $lamO))) + '   (il valore misurato e un LIMITE ALTO)')
+    } else {
+      W ('  P(0) con la lambda OOS misurata: giorno intero ' + (Pc ([Math]::Exp(-$lamO))) + ' | 7/24 di giorno (il venerdi 09/10 del campo) ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ' | 2 giorni pieni ' + (Pc ([Math]::Exp(-2 * $lamO))) + ' | 5 giorni pieni ' + (Pc ([Math]::Exp(-5 * $lamO))))
+    }
     $zOss = $AN['D0'].GiorniZero / [double]$NOOS
     W ('  giorni a zero osservati ' + (Pc $zOss) + ' contro Poisson ' + (Pc ([Math]::Exp(-$lamO))) + ': ' + $(if($zOss -gt [Math]::Exp(-$lamO) + 0.10){'gli zeri SI RAGGRUPPANO (oltre +10 punti): per il campo vale la frazione OSSERVATA e la serie piu lunga, non la formula'}else{'entro +10 punti dalla Poisson'}))
-    W ('  CATEGORIA: ' + $cat)
     W ('  venerdi 09/10 nel tester (indizio, non prova: stato diverso dal campo): ' + $AN['D0'].VenSera + ' chiusure VERE dalle 15:39 server (end of test escluse), ' + $AN['D0'].FineGamba + ' posizioni portate a fine gamba (end of test, magic diverso ignorato: MagicKo ' + $AN['D0'].MagicKo + ')')
-    W ('  degli 11 simboli fuori dai cross (per nome): a ZERO ' + $z11.Count + $(if($z11.Count -gt 0){ ' (' + ($z11 -join ',') + ')' }else{''}) + ' | dei 22 cross a ZERO nella stessa cella ' + $z22.Count + ' | soglia della cecita per classe: z11 >= 4 e z11 >= ' + (F2 $soglia11))
-    if($z11.Count -ge $NUOVI11.Count){
-      $esito = 'NON MISURATO: gli 11 simboli fuori dai cross a ZERO nella gamba OOS di D; tester cieco e regola che non scatta danno lo stesso zero; la lambda sarebbe quella dei 22 con l etichetta dei 33 (classe 1225). Prossimo passo: job con i soli 11 + Use_Purple=1'
-    } elseif($ciecoClasse){
-      $esito = ('NON MISURATO: ' + $z11.Count + ' degli 11 simboli fuori dai cross a ZERO (' + ($z11 -join ',') + ') contro ' + $z22.Count + ' dei 22 cross a zero nella stessa cella (soglia ' + (F2 $soglia11) + ', file D): cecita per CLASSE di strumento (classe 1225 emendata); la lambda sarebbe quella di una parte dei 33 con l etichetta dei 33. Prossimo passo: job con i soli 11 + Use_Purple=1')
+    $prossimo = ' Prossimo passo: job con i soli simboli a zero + Use_Purple=1 (controllo positivo).'
+    if($z11.Count -ge $NUOVI11.Count -and $z22.Count -ge 22){
+      $esito = 'NON MISURATO: TUTTI i 33 simboli a ZERO nella gamba OOS di D mentre la IS ha ' + $tIS + ' Trades: il tester non ha visto la gamba OOS (storico M1 luglio-ottobre mancante?) oppure la regola tace da luglio; i due casi danno lo stesso zero.' + $prossimo
+    } elseif($z11.Count -ge $NUOVI11.Count){
+      $esito = 'NON MISURATO: gli 11 simboli fuori dai cross a ZERO nella gamba OOS di D; tester cieco e regola che non scatta danno lo stesso zero; la lambda sarebbe quella dei 22 con l etichetta dei 33 (classe 1225).' + $prossimo
+    } elseif($z22.Count -ge 22){
+      $esito = 'NON MISURATO: i 22 CROSS TUTTI a ZERO nella gamba OOS di D; la lambda sarebbe quella degli 11 non-FX con l etichetta dei 33 (classe 1226; R92BAB finiva il 30/06: lo storico M1 dei cross da luglio non e provato).' + $prossimo
+    } elseif($ciecoNonFX){
+      $esito = ('NON MISURATO: ' + $z11.Count + ' degli 11 simboli fuori dai cross a ZERO (' + ($z11 -join ',') + ') contro ' + $z22.Count + ' dei 22 cross a zero nella stessa cella (soglia ' + (F2 $soglia11) + ', file D): cecita per CLASSE di strumento (classe 1225 emendata); la lambda sarebbe quella di una parte dei 33 con l etichetta dei 33.' + $prossimo)
+    } elseif($ciecoCross){
+      $esito = ('NON MISURATO: ' + $z22.Count + ' dei 22 cross a ZERO contro ' + $z11.Count + ' degli 11 non-FX a zero nella stessa cella (soglia ' + (F2 $soglia22) + ', file D): CROSS ciechi, cecita per CLASSE (classe 1226); la lambda sarebbe quella di una parte dei 33 con l etichetta dei 33.' + $prossimo)
+    } elseif($limBasso){
+      $codice = 0
+      $catHi = CatNome $lamHi
+      $catTxt = $(if($catHi -eq $catO){ $catO + ' ai due estremi' }else{ 'fra ' + $catO + ' e ' + $catHi })
+      W ('  CATEGORIA: ' + $catTxt + '   (LIMITE BASSO: le descrizioni "e la norma" NON si leggono)')
+      $esito = ('FREQUENZA DEL CAMPO LEGGIBILE (cella D, 33 simboli) -- LIMITE BASSO: ' + $AN['D0'].NSimbZero + ' simboli a zero (' + $AN['D0'].SimbZero + '): lambda fra ' + (F3 $lamO) + ' (misurata) e ' + (F3 $lamHi) + ' (misurata x 33 / ' + $nVisti + ' visti); P(0) del venerdi 7/24 fra ' + (Pc ([Math]::Exp(-$lamHi * $ESPOSIZIONE_CAMPO))) + ' e ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ' (il misurato e un LIMITE ALTO: con questo numero si puo dire anomalo, NON normale); CATEGORIA ' + $catTxt + ' (file D, ipotesi A)')
     } else {
       $codice = 0
-      $esito = ('FREQUENZA DEL CAMPO LEGGIBILE (cella D, 33 simboli) -- lambda OOS ' + (F3 $lamO) + '/giorno, simboli a zero nella gamba OOS ' + $AN['D0'].NSimbZero + '/' + $AN['D0'].NSimb + ', P(0) del venerdi 7/24 ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ', ' + $cat)
-      if($z11.Count -gt 0){
-        $nVisti = $AN['D0'].NSimb - $AN['D0'].NSimbZero
-        $lamHi = $(if($nVisti -gt 0){ $lamO * ($nVisti + $z11.Count) / [double]$nVisti } else { [double]::NaN })
-        $esito = $esito + (' -- LIMITE BASSO: ' + $z11.Count + ' degli 11 simboli non-FX a zero (' + ($z11 -join ',') + '): lambda fra ' + (F3 $lamO) + ' (misurata) e ' + (F3 $lamHi) + ' (i non-FX a zero portati alla media dei ' + $nVisti + ' simboli visti); P(0) del venerdi 7/24 fra ' + (Pc ([Math]::Exp(-$lamHi * $ESPOSIZIONE_CAMPO))) + ' e ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ': il P(0) misurato e un LIMITE ALTO, con questo numero si puo dire anomalo, NON normale (file D, ipotesi A)')
-      }
+      W ('  CATEGORIA: ' + (CatTesto $catO))
+      $esito = ('FREQUENZA DEL CAMPO LEGGIBILE (cella D, 33 simboli) -- lambda OOS ' + (F3 $lamO) + '/giorno, simboli a zero nella gamba OOS 0/' + $AN['D0'].NSimb + ', P(0) del venerdi 7/24 ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ', ' + (CatTesto $catO))
     }
   }
 }
