@@ -205,7 +205,7 @@ Storico di 8 operazioni **sell XAUUSD**, tutte con la colonna **S/L VUOTA**:
 
 ## 9. CONFRONTO CON GBA E CON LA FRONTIERA DEL COSTO
 
-### 9.1 Il nostro punto di riferimento (da `report/GBA_R2_PIANO_2026-10-10.md` e `docs/PER_GEMINI_GBA_ORO_2026-10-10.md`, **non ricontrollato qui**)
+### 9.1 Il nostro punto di riferimento (da `report/GBA_R2_PIANO_2026-10-10.md` e `docs/PER_GEMINI_GBA_ORO_2026-10-10.md` (al 10/10 17:30 il file e' stato rinominato da un'altra sessione in `docs/PER_GEMINI_ORO_DOCENTE_2026-10-10.md`; letto col nome vecchio), **non ricontrollato qui**)
 GBA (`ABTG_GoldBreakoutATR`, magic 775800): breakout di canale + EMA, SL 2,5 ATR, uscita a tempo; a tick reali 933 operazioni **PF_V 0,855** (bootstrap 2,5-97,5%: 0,70-1,03), lordo di costi -0,014 R. Frontiera del costo di casa **stop >= 40 x spread**; oro BCM spread mediano **0,21-0,26 USD**, ATR M1 mediano 2-5 USD; per M1 il nostro proxy da' **21,6x (FRA)**, M5 53,3x (passa).
 
 ### 9.2 Uno scalper dichiarato M1/M5 con stop corti passerebbe? [DERIVATO]
