@@ -412,7 +412,7 @@ def bootstrap(notti, B, seed):
 
     def pc(v, p):
         return v[min(len(v) - 1, int(p * (len(v) - 1)))] if v else float("nan")
-    return {"B": B, "q": (pc(qs, 0.025), pc(qs, 0.975)), "pf": (pc(pfv, 0.025), pc(pfv, 0.975)), "pf_nan": len(pfs) - len(pfv)}
+    return {"B": B, "q": (pc(qs, 0.025), pc(qs, 0.975)), "pf": (pc(pfv, 0.025), pc(pfv, 0.975)), "pf_nan": len(pfs) - len(pfv), "q_mediana": pc(qs, 0.5)}
 
 
 def statistiche(serie, S, B, seed):
@@ -1486,6 +1486,17 @@ def autotest():
         tt = "\n".join(righe_)
         okb = ("DENTRO attesa" in tt.split("\n")[1]) == atteso_in and (re.search(r"smentita r\.\d+ '> 175': n = %d > 175\? -> SCATTA" % n_, tt) is not None) == sm_hi and (("'n < 130': n = %d < 130? -> SCATTA" % n_) in tt) == sm_lo
         ck("attese: n = %d -> banda 142-160 %s, smentita >175 %s, smentita <130 %s" % (n_, "dentro" if atteso_in else "fuori", "scatta" if sm_hi else "no", "scatta" if sm_lo else "no"), okb, tt[:700])
+    # bootstrap: ricampiona ESATTAMENTE n notti (con 2 notti [negativa, positiva] la q mediana e' 0,5; con n-1 sarebbe 0 o 1)
+    bn = bootstrap([{"data": datetime.date(2026, 1, 1), "net": -1.0, "gp": 0.0, "gl": 1.0, "nops": 1}, {"data": datetime.date(2026, 1, 2), "net": 1.0, "gp": 1.0, "gl": 0.0, "nops": 1}], 1000, 5)
+    ck("bootstrap: ricampiona esattamente n notti (2 notti [-,+]: q mediana 0,5)", abs(bn["q_mediana"] - 0.5) < 1e-9, str(bn))
+    # gemella 775850 DICHIARATA nel file prova: controllata (G1) ma NON sommata
+    pg = os.path.join(tmpd, "prova_con_gemella.txt")
+    tp_ = open(p1, "rb").read().decode("latin-1")
+    ck("(prepara) il @GBA-LOTTO del file prova M1 e' quello atteso", "passate=N7:T1,N7:T2,N7:T3" in tp_)
+    open(pg, "wb").write(tp_.replace("passate=N7:T1,N7:T2,N7:T3", "passate=N7:T1,N7:T2,N7:T3,N7:T1:775850").encode("latin-1"))
+    zGem = _zip_notte(leggi_prova(pg), "M1", {"T1": ops1["T1"]}, magic="775850")
+    rc, tgm = _esegui_catturando([zA, zGem, "--senza-ancora", "--bootstrap", "50", "--prova-m1", pg, "--prova-m5", p5])
+    ck("gemella 775850 dichiarata: G1 VERDE, rc 0, e il totale resta 24 operazioni (la gemella NON si somma)", rc == 0 and "VERDE" in tgm and re.search(r"TOT\s+n op\s+24 ", tgm) is not None, "rc=%s" % rc)
     # CONCENTRAZIONE PER NOTTE: il controesempio ESATTO del cancello (n=210, PF_V 1,40, 3 notti x 3 operazioni = +6.000 su netto +4.600)
     def ops_notti(date0, liste, passo=1):
         out = []
