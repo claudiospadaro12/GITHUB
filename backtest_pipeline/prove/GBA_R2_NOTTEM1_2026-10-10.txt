@@ -84,6 +84,7 @@
 #  STRUMENTO: il lettore leggi_gba_r0.py v5 NON aggrega per notte. Questa lettura e la concentrazione per notte (netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE, si stampa
 #  anche senza le 5) si fanno con uno script di lettura (deal del report .htm, regola qui sopra) che va scritto e passato
 #  dal cancello PRIMA di aprire gli zip; fino ad allora e' NON MISURATO (nessun conto a mano sui numeri gia' visti).
+#  FRAGILE PER NOTTE e' prudente: con operazioni indipendenti e un vantaggio vero di PF 1,40 scatta nell'8% dei casi a n=210 e nel 20% a n=150; blocca solo l'indizio, non archivia niente.
 #  ANCORA E G1: il confronto con R1A vale SOLO se la G1 del lotto R2TTREND (REPL T1 magic 775850) e' VERDE contro R1A T1 (128 / -6577,48 / 0,83); ROSSA o NON VERIFICABILE (anche: R2TTREND non ancora girato) -> nessun numero di questo lotto si confronta con R1A ne' si usa; i numeri ASSOLUTI della notte (n, PF_V, notti negative, costo, DD) restano letti.
 #
 #  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @GBA-TRANCHE qui sotto (le tre tranche di R1A, nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 le legge dal file)
