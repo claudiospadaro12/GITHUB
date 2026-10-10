@@ -284,12 +284,12 @@ def estrai_soglie_notti(P):
             s["finestra"] = int(m.group(1))
     # CONCENTRAZIONE PER NOTTE: la soglia sta in qualunque punto del file prova ("netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE"); se non c'e' ancora, 3 DERIVATA dal cancello
     t, offs = testo_con_righe(P["commenti"])
-    m = re.search(r"netto senza le (\d+) migliori notti\s*<=\s*0\s*=\s*FRAGILE PER NOTTE", t)
-    if m:
-        s["k_fragile"], s["k_riga"] = int(m.group(1)), riga_di(offs, m.start())
+    trovate_k = [(int(x.group(1)), x.start()) for x in re.finditer(r"netto senza le (\d+) migliori notti\s*<=\s*0\s*=\s*FRAGILE PER NOTTE", t)]
+    if trovate_k and len(set(k for k, _ in trovate_k)) == 1:
+        s["k_fragile"], s["k_riga"] = trovate_k[0][0], riga_di(offs, trovate_k[0][1])
         s["k_extra"] = sorted(set(int(x) for x in re.findall(r"(?:si stampa anche|anche) senza le (\d+)", t)))
-    elif re.search(r"FRAGILE\s+PER\s+NOTTE", t, re.I):
-        s["k_non_letta"] = True         # il file la scrive, ma non nella forma che la regex legge: NON si ripiega su 3 (classe 1293)
+    elif trovate_k or re.search(r"FRAGIL|migliori\s+notti|notti\s+migliori", t, re.I):
+        s["k_non_letta"] = True         # il file ne parla (anche con altre parole, o con due k diversi) ma non in UNA forma che la regex legge: NON si ripiega su 3 (classe 1294)
     else:
         s["k_fragile"], s["k_derivata"] = 3, True
     return s
@@ -917,10 +917,13 @@ def stampa_hm5n(W, C5, prove):
     W("=" * 100)
     P5 = prove.get("M5")
     par = estrai_hm5n(P5) if P5 else None
+    sfx5 = ("  " + SUFFISSO_NV) if (C5 is not None and C5.get("attese_non_verificate")) else ""
     if par is None:
         W("   paragrafo H-M5N NON trovato nel file prova M5 (%s): non lo ricostruisco a memoria" % (P5["nome"] if P5 else "file prova assente"))
     else:
-        W("   dal file prova %s, righe %d-%d (%s):" % (P5["nome"], par[0][0], par[-1][0], descr_git(P5["git"])))
+        W("   dal file prova %s, righe %d-%d (%s):%s" % (P5["nome"], par[0][0], par[-1][0], descr_git(P5["git"]), sfx5))
+        if sfx5:
+            W("   ! PARAGRAFO H-M5N NON VERIFICATO come quello della partenza del lotto M5 (vedi la copia del file prova sopra): ogni lettura di (6) porta l'avviso.")
         for nr, b in par:
             W("     r.%-3d %s" % (nr, asc(b.rstrip())))
         pi = estrai_hm5n_piano()
@@ -935,16 +938,16 @@ def stampa_hm5n(W, C5, prove):
     W("   non e' in questo lotto (richiede M5 a 24 ore, R2T, e la fascia diurna): e' NON MISURATA qui, e senza di lei l'ipotesi H-M5N intera resta NON ANCORA MISURATA.")
     if C5 is not None and C5.get("tot_stat") is not None:
         t5 = C5["tot_stat"]
-        W("   Clausola (c) (il guadagno poggia su poche giornate?): si legge SOLO con la concentrazione PER NOTTE. M5 notte totale: per operazione (S5) %s; per notte %s (senza le 3 migliori notti %s EUR).%s" % (
+        W("   Clausola (c) (il guadagno poggia su poche giornate?): si legge SOLO con la concentrazione PER NOTTE. M5 notte totale: per operazione (S5) %s; per notte %s (senza le %s migliori notti %s EUR).%s" % (
             ("FRAGILE" if C5.get("s5", {}).get("fragile") else "non fragile") if C5.get("s5") else "n.d.",
-            etich_fragile(t5["fragile_notte"]), f2(t5["conc_k"].get(3), 0), ("  " + SUFFISSO_NV) if C5.get("attese_non_verificate") else ""))
+            etich_fragile(t5["fragile_notte"]), t5["k_fragile"] or "3 [k NON LETTO dal file prova]", f2(t5["conc_k"].get(t5["k_fragile"] or 3), 0), ("  " + SUFFISSO_NV) if C5.get("attese_non_verificate") else ""))
     else:
         W("   Clausola (c): NON MISURATO in questa corsa (totale M5 non leggibile/assente): senza la concentrazione per notte non si legge.")
     if C5 is not None and C5.get("tr_stat"):
         W("   Meta' notturna, per tranche (n op >= 150 serve per leggere il merito, S1):")
         for tr in sorted(C5["tr_stat"]):
             st = C5["tr_stat"][tr]
-            W("     %s: n op %d, PF_V %s -> %s" % (tr, st["n_ops"], fpf(st["pf"]), "merito NON misurabile per tranche (n < %d)" % N_MIN_MERITO if st["n_ops"] < N_MIN_MERITO else "n >= %d: PF_V si confronta con la condizione scritta sopra" % N_MIN_MERITO))
+            W("     %s: n op %d, PF_V %s -> %s%s" % (tr, st["n_ops"], fpf(st["pf"]), "merito NON misurabile per tranche (n < %d)" % N_MIN_MERITO if st["n_ops"] < N_MIN_MERITO else "n >= %d: PF_V si confronta con la condizione scritta sopra" % N_MIN_MERITO, sfx5))
     else:
         W("   Meta' notturna: nessun dato M5 leggibile in questa corsa.")
 
@@ -1080,7 +1083,7 @@ def copia_prova_nello_zip(percorsi, prova, lotto):
                 trovate += 1
                 dato = z.read(orig)
                 if dato == letto:
-                    out.append(" Copia del file prova dentro %s: IDENTICA al file letto%s." % (zn, " (ma il MANIFEST nomina un altro file: vedi sopra)" if nv else " (le attese sono quelle con cui il lotto e' partito)"))
+                    out.append(" Copia del file prova dentro %s: IDENTICA al file letto%s." % (zn, " (ma il MANIFEST non conferma questo file come quello della partenza: vedi sopra)" if nv else " (le attese sono quelle con cui il lotto e' partito)"))
                 else:
                     nv = True
                     out.append(" ! Copia del file prova dentro %s: DIVERSA dal file letto (SHA256 zip %s, letto %s): le attese lette sono quelle del HEAD, NON necessariamente quelle con cui il lotto e' partito. Righe che differiscono:" % (
@@ -1797,7 +1800,7 @@ def _autotest(tmpd):
        re.search(r"Clausola \(c\).*SOLO con la concentrazione PER NOTTE.*per operazione \(S5\) non fragile; per notte FRAGILE PER NOTTE", tk5) is not None, tk5[tk5.find("Clausola"):tk5.find("Clausola") + 400])
     rc, tk6 = _esegui_catturando([zA, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
     ck("clausola (c) senza lotto M5: 'NON MISURATO in questa corsa'", "Clausola (c): NON MISURATO" in tk6)
-    # D1 (classe 1293): la soglia FRAGILE PER NOTTE riscritta con altre parole -> NON LETTA, niente ripiego su 3 dichiarato "il file non la scrive"
+    # D1 (classe 1294): la soglia FRAGILE PER NOTTE riscritta con altre parole -> NON LETTA, niente ripiego su 3 dichiarato "il file non la scrive"
     t1_ = open(p1, "rb").read().decode("latin-1")
     ck("(prepara) il file prova M1 contiene la frase della soglia per notte nella forma letta", "migliori notti <= 0 = FRAGILE PER NOTTE" in t1_)
     for etich_, vecchia_, nuova_ in (("'minore o uguale a zero'", "migliori notti <= 0 = FRAGILE PER NOTTE", "migliori notti minore o uguale a zero = FRAGILE PER NOTTE"),
@@ -1810,17 +1813,39 @@ def _autotest(tmpd):
         ck("D1 %s: la lettura stampa 'SOGLIE NON LETTE ... k_fragile', 'FRAGILE PER NOTTE NON VALUTABILE' e NON dice 'il file prova non la scrive'" % etich_,
            "SOGLIE NON LETTE dal file prova M1:" in tkk and "k_fragile" in tkk and "FRAGILE PER NOTTE NON VALUTABILE" in tkk and "il file prova non la scrive" not in tkk, tkk[tkk.find("SOGLIE"):tkk.find("SOGLIE") + 300])
     ck("D1: senza la frase e senza il concetto (mini prova) il ripiego su 3 resta, dichiarato DERIVATA", estrai_soglie_notti(mp)["k_derivata"] is True and not estrai_soglie_notti(mp).get("k_non_letta"))
+    for etich_, txt_k in (("etichetta cambiata ovunque, k=5", t1_.replace("FRAGILE PER NOTTE", "FRAGILE NOTTURNA").replace("senza le 3 migliori notti <= 0 = FRAGILE NOTTURNA", "senza le 5 migliori notti <= 0 = FRAGILE NOTTURNA", 1)),
+                          ("due soglie diverse (3 e 5) nello stesso file", t1_.replace("migliori notti <= 0 = FRAGILE PER NOTTE", "migliori notti <= 0 = FRAGILE PER NOTTE; poi: netto senza le 5 migliori notti <= 0 = FRAGILE PER NOTTE", 1))):
+        pr_k = os.path.join(tmpd, "prova_k_riscritta2.txt")
+        open(pr_k, "wb").write(txt_k.encode("latin-1"))
+        sk_ = estrai_soglie_notti(leggi_prova(pr_k))
+        ck("D1 %s: NON LETTA, mai un k (ne' il primo trovato ne' il ripiego 3)" % etich_, sk_.get("k_non_letta") is True and sk_["k_fragile"] is None and not sk_["k_derivata"], str(sk_))
     # D2: l'avviso NV arriva a OGNI lettura a soglia (lettura q, finestre, concentrazione, clausola (c)), non solo alla sezione (3)
     ext_nc = _zip_esterno([("GBA_R0_R2NOTTEM1.zip", zK), ("GBA_R0_R2NOTTEM5.zip", zK5)])
     rc, tnv = _esegui_catturando([ext_nc, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
-    righe_soglia = [r for r in tnv.split("\n") if not re.match(r"^\s+r\.\d+", r) and ("[lettura:" in r or "finestre di " in r or "CONCENTRAZIONE PER NOTTE" in r or "concentrazione PER NOTTE" in r or "Clausola (c)" in r)]
+    ETICHETTE_LETTURA = ("[lettura:", "finestre di ", "CONCENTRAZIONE PER NOTTE", "concentrazione PER NOTTE", "Clausola (c)", "FRAGILE PER NOTTE NON VALUTABILE")
+
+    def lettura_righe(t):
+        """Le righe PRODOTTE DALLO SCRIPT che contengono una lettura (etichette estese + 'T<n>: n op' di (6)). Le righe CITATE dal file prova (formato esatto '     r.NN ') si escludono
+        strutturalmente, ma si CONTANO: se la citazione sparisse, il test cadrebbe."""
+        out_ = []
+        for r in t.split("\n"):
+            if re.match(r"^     r\.\d+", r):
+                continue
+            if any(e in r for e in ETICHETTE_LETTURA) or re.match(r"^     T\d: n op ", r) or re.match(r"^   dal file prova .* righe \d+-\d+", r):
+                out_.append(r)
+        return out_
+    ck("(prepara D2) le righe citate dal file prova ('     r.NN') ci sono e sono tante (> 40): l'esclusione non e' vuota", len(re.findall(r"(?m)^     r\.\d+", tnv)) > 40)
+    righe_soglia = lettura_righe(tnv)
     ck("D2 (copia assente): OGNI riga '[lettura:', 'finestre di', 'CONCENTRAZIONE PER NOTTE', 'concentrazione PER NOTTE' e la clausola (c) porta l'avviso (%d righe)" % len(righe_soglia),
        len(righe_soglia) >= 12 and all(SUFFISSO_NV in r for r in righe_soglia), "\n".join(r[:140] for r in righe_soglia if SUFFISSO_NV not in r)[:800])
     ck("D2: la riga '! SOGLIE NON VERIFICATE' apre la sezione (4) di ogni cella", tnv.count("! SOGLIE NON VERIFICATE come quelle della partenza") == 2)
     rc, tid = _esegui_catturando([_zip_esterno([("GBA_R0_R2NOTTEM1.zip", _zip_notte(pr1, "M1", ops_c, prova_nello_zip=testo_prova)), ("GBA_R0_R2NOTTEM5.zip", _zip_notte(pr5, "M5", ops_c, prova_nello_zip=open(p5, "rb").read()))]),
                                   "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
-    righe_soglia2 = [r for r in tid.split("\n") if not re.match(r"^\s+r\.\d+", r) and ("[lettura:" in r or "finestre di " in r or "CONCENTRAZIONE PER NOTTE" in r or "concentrazione PER NOTTE" in r or "Clausola (c)" in r)]
+    righe_soglia2 = lettura_righe(tid)
     ck("D2: con copia IDENTICA e MANIFEST giusto nessuna di queste righe porta l'avviso", len(righe_soglia2) >= 12 and not any(SUFFISSO_NV in r for r in righe_soglia2) and "SOGLIE NON VERIFICATE" not in tid)
+    r6 = [r for r in tnv.split("\n") if re.match(r"^   dal file prova .* righe \d+-\d+", r) or re.match(r"^     T\d: n op ", r)]
+    ck("D2 (6): con copia assente il paragrafo H-M5N e OGNI riga per tranche della meta' notturna portano l'avviso", len(r6) == 4 and all(SUFFISSO_NV in r for r in r6) and "PARAGRAFO H-M5N NON VERIFICATO" in tnv, "\n".join(r6))
+    ck("D2 (6): con copia IDENTICA nessun avviso in (6)", "PARAGRAFO H-M5N NON VERIFICATO" not in tid)
     # D3: zip COMPILAZIONE_FALLITA riconosciuto dal CONTENUTO (rinominato dal browser): lotto dal testo, rc 3
     cf_ren = os.path.join(tmpd, "GBA_R2_compilazione (1).zip")
     zc = zipfile.ZipFile(cf_ren, "w")
@@ -1842,25 +1867,51 @@ def _autotest(tmpd):
     for nm_ in (pr1["nome"], pr5["nome"]):
         open(os.path.join(pdir, nm_), "wb").write(open(os.path.join(PROVE_DIR, nm_), "rb").read())
     nuovo_m1 = pr1["nome"].replace("2026-10-10", "2026-10-12")
-    open(os.path.join(pdir, nuovo_m1), "wb").write(t1_.replace("n 142-160", "n 500-600", 1).encode("latin-1"))
+    open(os.path.join(pdir, nuovo_m1), "wb").write(t1_.replace("n 142-160", "n 500-600", 1).replace("senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE", "senza le 5 migliori notti <= 0 = FRAGILE PER NOTTE", 1).encode("latin-1"))
     pd_orig = globals()["PROVE_DIR"]
     globals()["PROVE_DIR"] = pdir
     try:
         ck("(prepara D4) con due file prova M1 nella cartella, trova_prova prende l'ultimo in ordine alfabetico (2026-10-12)", os.path.basename(trova_prova("M1")) == nuovo_m1)
         zD4 = _zip_notte(pr1, "M1", ops1, prova_nello_zip=testo_prova)
         rc, t4 = _esegui_catturando([zD4, "--senza-ancora", "--bootstrap", "50"])
+        ck("D4: anche le SOGLIE sono rilette dal file del MANIFEST (k=3 del 10-10, non k=5 del 10-12)", "soglia: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE, scritta" in t4 and "senza le 5 migliori notti <= 0 = FRAGILE PER NOTTE, scritta" not in t4)
         ck("D4: il MANIFEST nomina il file prova 2026-10-10: lo script lo rilegge e lo dichiara ('FILE PROVA M1 SCELTO DAL MANIFEST'), le attese sono 142-160 e non 500-600, e la copia nello zip e' IDENTICA senza avviso",
            "FILE PROVA M1 SCELTO DAL MANIFEST" in t4 and "= 142-160" in t4 and "500-600" not in t4 and "IDENTICA al file letto" in t4 and SUFFISSO_NV not in t4, t4[:1800])
         rc, t4b = _esegui_catturando([zD4, "--senza-ancora", "--bootstrap", "50", "--prova-m1", os.path.join(pdir, nuovo_m1)])
         ck("D4: con --prova-m1 esplicito NON si sostituisce (si legge quello passato) e l'avviso del MANIFEST c'e'", "SCELTO DAL MANIFEST" not in t4b and "= 500-600" in t4b and "dice che il lotto e' partito col file prova %s" % pr1["nome"] in t4b and SUFFISSO_NV in t4b)
     finally:
         globals()["PROVE_DIR"] = pd_orig
+    # M14: un nome di file prova nel MANIFEST che esce dalla cartella ('../altrove/...') ESISTENTE deve essere rifiutato (formato del nome + niente percorsi)
+    altrove = os.path.join(tmpd, "altrove")
+    os.makedirs(altrove, exist_ok=True)
+    open(os.path.join(altrove, "GBA_R2_NOTTEM1_2026-10-13.txt"), "wb").write(t1_.replace("n 142-160", "n 700-800", 1).encode("latin-1"))
+    pdir2 = os.path.join(tmpd, "prove_finte")
+    globals()["PROVE_DIR"] = pdir2
+    try:
+        zTr = _zip_notte(pr1, "M1", ops1, prova_nello_zip=testo_prova, prova_nome_manifest="../altrove/GBA_R2_NOTTEM1_2026-10-13.txt")
+        rc, ttr = _esegui_catturando([zTr, "--senza-ancora", "--bootstrap", "50"])
+        ck("M14: il MANIFEST nomina '../altrove/GBA_R2_NOTTEM1_2026-10-13.txt' (esiste fuori dalla cartella): NON si legge, nessun 'SCELTO DAL MANIFEST', avviso 'NON verificate'", "SCELTO DAL MANIFEST" not in ttr and "700-800" not in ttr and SUFFISSO_NV in ttr and "dice che il lotto e' partito col file prova ../altrove/" in ttr, ttr[:600])
+    finally:
+        globals()["PROVE_DIR"] = pd_orig
+    # la clausola (c) usa il k LETTO dal file prova (5), non un 3 fisso
+    t5_ = open(p5, "rb").read().decode("latin-1")
+    ck("(prepara) il file prova M5 contiene la soglia a 3 notti da portare a 5", "senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE" in t5_)
+    pr_m5k5 = os.path.join(tmpd, "GBA_R2_NOTTEM5_k5.txt")
+    open(pr_m5k5, "wb").write(t5_.replace("senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE", "senza le 5 migliori notti <= 0 = FRAGILE PER NOTTE", 1).encode("latin-1"))
+    pr5k = leggi_prova(pr_m5k5)
+    zK5k = _zip_notte(pr5k, "M5", ops_c)
+    rc, t5k = _esegui_catturando([_zip_esterno([("GBA_R0_R2NOTTEM1.zip", zK), ("GBA_R0_R2NOTTEM5.zip", zK5k)]), "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", pr_m5k5])
+    ck("clausola (c) con soglia letta k=5: 'senza le 5 migliori notti' (non 3 fisso)", re.search(r"Clausola \(c\).*per notte .*\(senza le 5 migliori notti ", t5k) is not None, t5k[t5k.find("Clausola"):t5k.find("Clausola") + 400])
+    # D5 con MANIFEST senza colonna 'prova' e copia IDENTICA: non dice 'nomina un altro file'
+    zNP2 = _zip_notte(pr1, "M1", ops1, prova_nello_zip=testo_prova, senza_colonna_prova=True)
+    rc, tnp2 = _esegui_catturando([zNP2, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("D5: MANIFEST senza colonna 'prova' + copia identica: 'non ha la colonna', e la riga IDENTICA non dice 'nomina un altro file'", "non ha la colonna 'prova'" in tnp2 and "nomina un altro file" not in tnp2 and "IDENTICA al file letto (ma il MANIFEST non conferma" in tnp2)
     # (d) MANIFEST senza la colonna 'prova'
     zNP = _zip_notte(pr1, "M1", ops1, prova_nello_zip=testo_prova, senza_colonna_prova=True)
     rc, tnp = _esegui_catturando([zNP, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
     ck("(d) MANIFEST senza la colonna 'prova': 'non ha la colonna 'prova'' e l'avviso su ogni riga DENTRO/FUORI", "non ha la colonna 'prova'" in tnp and tutte_con_avviso(tnp), tnp[:300])
     # D5: la frase 'le attese sono quelle con cui il lotto e' partito' NON c'e' quando il MANIFEST ha detto il contrario
-    ck("D5: con copia IDENTICA ma MANIFEST di un altro file prova, la riga non afferma 'quelle con cui il lotto e' partito'", "IDENTICA al file letto (ma il MANIFEST nomina un altro file" in tm and "le attese sono quelle con cui il lotto e' partito" not in tm)
+    ck("D5: con copia IDENTICA ma MANIFEST di un altro file prova, la riga non afferma 'quelle con cui il lotto e' partito'", "IDENTICA al file letto (ma il MANIFEST non conferma questo file" in tm and "le attese sono quelle con cui il lotto e' partito" not in tm)
     # ESITI_R2_NOTTE.txt della raccolta
     ext_es = _zip_esterno([("GBA_R0_R2NOTTEM1.zip", zK), ("ESITI_R2_NOTTE.txt", "R2NOTTEM5: NON LANCIATO: MT5 aperto\r\n")])
     rc, tes = _esegui_catturando([ext_es, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
