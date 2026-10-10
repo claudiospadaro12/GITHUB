@@ -24,6 +24,10 @@
 #  p2,5-p97,5 = 0,70-1,03); BUY n=443 PF_V 0,89, SELL n=490 PF_V 0,83; DD equity 12.511 / 28.863 / 53.392 EUR (1 lotto, deposito fittizio: la % non si legge).
 #
 #  ======================= REGOLE DI LETTURA COMUNI AI QUATTRO LOTTI R2U (copiate in ognuno: nessun file dipende da un altro) =======================
+#  REGOLA DEL 19/08 RISPETTATA: NESSUN parametro d'INGRESSO si muove (canale, EMA, filtro di spread, N, ora); si muove UN meccanismo d'USCITA per file; 8 celle + 1 gemella in tutto, non una griglia. Su un motore a PF < 1
+#     una griglia piu' fitta troverebbe solo picchi di rumore: ogni allargamento si paga con T0 (S10).
+#  VERIFICA DELLE INI (pwsh, parsing vero del driver v5 su questi 4 file; il driver NON e' stato eseguito): le 25 ini che scrivera' differiscono dall'ini REALE di R1A (zip archiviato, stessa tranche) in UNA sola chiave, quella dell'asse
+#     (la gemella REPL: solo InpMagic 775800 -> 775850; le date sono identiche). I 30 valori attesi della riga AVVIO sono presenti nel testo AVVIO costruito dal sorgente dell'EA per ogni passata; i valori di un'altra cella NON lo sono (7 controesempi).
 #  G0/G1. Un numero di un lotto si usa SOLO se il driver ha dato OK alla passata (G0) E la gemella di determinismo e' VERDE: G1 = REPL T1 con magic 775850 (sta nel lotto R2UBE) contro R1A T1:
 #     operazioni 128, profitto -6.577,48, PF 0,83, DD equity 12.511,35 e deal identici uno per uno. ROSSA o NON VERIFICABILE -> nessun confronto con R1A in NESSUNO dei quattro lotti (anche se il lotto
 #     R2UBE non e' partito). La G1 verde delle 19:19 del 10/10 (lotti R2 senza codice) e' l'evidenza di una sessione precedente, non di questo giro: per questo la gemella si RIFA' (1 passata).
@@ -40,6 +44,9 @@
 #     S9 (selezione): l'uscita cambia la sequenza degli ingressi (una posizione per volta): il confronto con la REPL NON e' appaiato. Si leggono R medio per operazione, PF_V per tranche e la struttura per motivo.
 #        Una cella che alza il PF riducendo n (stesso R medio) e' SELEZIONE, non miglioramento; oltre il 40% di operazioni tolte si scrive cosi'. A una cella NON si assegna mai 'regge'.
 #     S10 (in avanti): ogni cella che supera S8 si ripete sulla tranche T0 (dal 01/10/2026, mai vista da R1A) con lista e criteri congelati dal piano; passa T0 = candidato per una prova di regime, cade = rumore del 2026.
+#  PRIMA DI CREDERE A UNA CELLA (PIANO 3.4, il contro-esempio costruito prima): si prova a ROMPERLA in tre modi. (1) CONCENTRAZIONE IN T3: il tetto di 1 operazione al giorno ha PF 2,26 in T3 e 0,68 / 0,99 altrove (PIANO 1.7): un guadagno che
+#     esiste solo in T3 e' REGIME, non meccanismo. (2) SELEZIONE PER n (S9): il PF sale perche' n scende. (3) BOOTSTRAP PER GIORNO: se l'intervallo del PF_V della cella contiene 1,0 non e' una vittoria; se il guadagno sta nella coda (R >= 3)
+#     si tolgono la migliore e le cinque migliori (S5, il lettore stampa il netto senza le 5 migliori) e si rilegge. Il bootstrap per giorno NON e' nel lettore passato: [NON FATTO dal lettore], se serve lo si fa con uno strumento non passato e lo si scrive.
 #  CRITERIO PER REGIMI, FIRMATO da Claudio il 10/10/2026 (report/FIRME_2026-10-10.md, Firma 1, 'CONFERMO LA SOGLIA, SCRIVILA NEI FILE PROVA'), PER INTERO:
 #     1. L'EA 'regge' se il PF netto dei costi (PF_V) e' > 1,0 in OGNI regime che ha almeno 150 operazioni, con long e short letti SEPARATAMENTE, e nessun regime ha un drawdown superiore a quello
 #        promesso dal backtest della cella.
@@ -112,14 +119,17 @@
 #     COSTO: invariato, 49,4x PASSA. CONTRO-ESEMPIO (la banda contro l'ipotesi alternativa): l'alternativa ANCORATA alla REPL osservata (0,855 + dPF del modello) dice 0,847 (H1 con default a PF~1,0) / 0,835 (H1 mu 0,02) = DENTRO la banda (M) 0,76-0,95:
 #     la banda NON separa H0 da H1, e il modello dice dPF(BEOFF) = +0,003 (H0) contro -0,008/-0,020 (H1): la cella misura la FORMA (quanto pesa il BE), NON la deriva. Cosa la farebbe uscire dal nulla: PF_V > 1,03 con dPF >= +0,15 in T2 e T3 (ramo (a)).
 #     STRUTTURA (smentita del modello, informazione e non fallimento): se la quota 'trailing sotto l'ingresso' esce fuori 0,55-0,75 il modello nullo sbaglia la dinamica (RISK_MANAGER 5.3 (i)); se BE > 1% l'equivalenza 99 == spento e' falsa.
+#     ALTERNATIVA DEL PIANO (3.2, testo): 'continuazione dopo il ritracciamento: PF_V >= 1,3 su tutte e tre le tranche'. FORMA FORTE: in questo file vale sulle tranche GIUDICABILI (T1 non lo e': NON MISURATO); se scatta scatta anche (a) e porta a T0; S4 resta la sola porta al RISCONTRO.
 #  BE05 (0,5). n: (M) 960-1.300, (P) 900-1.000, recinto 900-1.300; per tranche (M) T1 132-178 / T2 255-346 / T3 573-776 -> giudicabili T2, T3, e T1 solo se n >= 150. PF_V: (M) 0,66-0,94 (centro 0,802), (P) 0,75-0,95; recinto 0,66-0,95.
-#     Win rate (M) 0,17, payoff (M) 3,7; quote (M): BE ~55% ((P) 40-50%), trailing sotto ~26% ((P) 25-30%); durata media ~7 min. DD: [NON STIMATO dal modello]. COSTO: invariato, 49,4x PASSA.
+#     Win rate (M) 0,17, payoff (M) 3,7; quote (M): BE ~55% ((P) 40-50%), trailing sotto ~26% ((P) 25-30%); durata media ~7 min. DD: (P) SOTTO (piu' pareggi), (M) [NON STIMATO]. COSTO: invariato, 49,4x PASSA.
 #     E' l'UNICO spostamento con effetto atteso apprezzabile (dPF -0,053 H0 / -0,075 H1): converte in pareggi le operazioni che avrebbero continuato. Prior di casa [AUDIT_USCITE 09/09 via PIANO R2 sez. 2, NON rifatto]: Dow, niente BE anticipato (6 confronti su 8 in perdita, fino a -38%).
 #     CONTRO-ESEMPIO: l'alternativa ancorata dice 0,780 (H1 PF~1,0) / 0,771 (mu 0,02): DENTRO la banda (M) -> neanche questa separa le ipotesi; qui H0 e H1 danno la STESSA direzione (peggio). SMENTITA del modello (RISK_MANAGER 5.6):
 #     PF_V >= 0,86 in almeno 2 tranche giudicabili = il BE anticipato NON costa (il modello sbaglia la dinamica). Per il merito vale la partizione (a)-(d) sopra.
+#     ALTERNATIVA DEL PIANO (3.2, testo): 'piu' operazioni protette = meno rischio, stesso merito: DD sotto, PF invariato'. Lettura: DD per tranche < 0,7 x R1A (soglia di rischio MIGLIORE sopra) con PF_V entro +-0,06 della REPL = il BE anticipato compra rischio a costo zero; DD sotto con PF_V < 0,80 = lo compra a PREZZO.
 #  BE15 (1,5). n: (M) 730-990, (P) 850-950, recinto 730-990; per tranche (M) T1 100-136 / T2 194-263 / T3 436-591 -> giudicabili T2, T3. PF_V: (M) 0,78-0,94 (centro 0,860), (P) 0,70-1,00; recinto 0,70-1,00.
 #     Win rate (M) 0,31, payoff (M) 1,9; quote (M): BE ~16% ((P) 20-25%), trailing sotto ~51%. DD: in salita lieve [NON STIMATO]. COSTO: 49,4x PASSA. CONTRO-ESEMPIO: ancorata 0,852 (H1 PF~1,0) / 0,847 (mu 0,02): DENTRO la banda.
 #     SMENTITA del modello (RISK_MANAGER 5.6): dPF <= -0,08 sulla somma = il BE tardivo COSTA (il modello sbaglia).
+#     ALTERNATIVA DEL PIANO (3.2, testo): 'come BE spento, attenuato'.
 #  LETTURA DELL'ASSE (S7): PF_V lungo 0,5 / 1,0 / 1,5 / 99,0. Sotto H0 la curva e' quasi piatta salvo BE05 piu' basso (-0,05). Una curva monotona crescente col ritardo del BE e' una FORMA (continuazione dopo il pareggio),
 #     un'unica cella che sporge e' un PICCO (S7): 'non c'e' una configurazione robusta'. Se tutto sta dentro +-0,06 della REPL: 'il default va bene'.
 #  PASSATE: 3 celle x 3 tranche + 1 gemella = 10. Tempo [STIMA ancorata a ESITI_R2_SENZA_CODICE 10/10: 28 passate + 4 compilazioni in 38 minuti, R2TTREND 16 passate in 17 minuti = 1,06 min/passata; il caso piu' lento

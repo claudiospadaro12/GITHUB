@@ -24,6 +24,10 @@
 #  p2,5-p97,5 = 0,70-1,03); BUY n=443 PF_V 0,89, SELL n=490 PF_V 0,83; DD equity 12.511 / 28.863 / 53.392 EUR (1 lotto, deposito fittizio: la % non si legge).
 #
 #  ======================= REGOLE DI LETTURA COMUNI AI QUATTRO LOTTI R2U (copiate in ognuno: nessun file dipende da un altro) =======================
+#  REGOLA DEL 19/08 RISPETTATA: NESSUN parametro d'INGRESSO si muove (canale, EMA, filtro di spread, N, ora); si muove UN meccanismo d'USCITA per file; 8 celle + 1 gemella in tutto, non una griglia. Su un motore a PF < 1
+#     una griglia piu' fitta troverebbe solo picchi di rumore: ogni allargamento si paga con T0 (S10).
+#  VERIFICA DELLE INI (pwsh, parsing vero del driver v5 su questi 4 file; il driver NON e' stato eseguito): le 25 ini che scrivera' differiscono dall'ini REALE di R1A (zip archiviato, stessa tranche) in UNA sola chiave, quella dell'asse
+#     (la gemella REPL: solo InpMagic 775800 -> 775850; le date sono identiche). I 30 valori attesi della riga AVVIO sono presenti nel testo AVVIO costruito dal sorgente dell'EA per ogni passata; i valori di un'altra cella NON lo sono (7 controesempi).
 #  G0/G1. Un numero di un lotto si usa SOLO se il driver ha dato OK alla passata (G0) E la gemella di determinismo e' VERDE: G1 = REPL T1 con magic 775850 (sta nel lotto R2UBE) contro R1A T1:
 #     operazioni 128, profitto -6.577,48, PF 0,83, DD equity 12.511,35 e deal identici uno per uno. ROSSA o NON VERIFICABILE -> nessun confronto con R1A in NESSUNO dei quattro lotti (anche se il lotto
 #     R2UBE non e' partito). La G1 verde delle 19:19 del 10/10 (lotti R2 senza codice) e' l'evidenza di una sessione precedente, non di questo giro: per questo la gemella si RIFA' (1 passata).
@@ -40,6 +44,9 @@
 #     S9 (selezione): l'uscita cambia la sequenza degli ingressi (una posizione per volta): il confronto con la REPL NON e' appaiato. Si leggono R medio per operazione, PF_V per tranche e la struttura per motivo.
 #        Una cella che alza il PF riducendo n (stesso R medio) e' SELEZIONE, non miglioramento; oltre il 40% di operazioni tolte si scrive cosi'. A una cella NON si assegna mai 'regge'.
 #     S10 (in avanti): ogni cella che supera S8 si ripete sulla tranche T0 (dal 01/10/2026, mai vista da R1A) con lista e criteri congelati dal piano; passa T0 = candidato per una prova di regime, cade = rumore del 2026.
+#  PRIMA DI CREDERE A UNA CELLA (PIANO 3.4, il contro-esempio costruito prima): si prova a ROMPERLA in tre modi. (1) CONCENTRAZIONE IN T3: il tetto di 1 operazione al giorno ha PF 2,26 in T3 e 0,68 / 0,99 altrove (PIANO 1.7): un guadagno che
+#     esiste solo in T3 e' REGIME, non meccanismo. (2) SELEZIONE PER n (S9): il PF sale perche' n scende. (3) BOOTSTRAP PER GIORNO: se l'intervallo del PF_V della cella contiene 1,0 non e' una vittoria; se il guadagno sta nella coda (R >= 3)
+#     si tolgono la migliore e le cinque migliori (S5, il lettore stampa il netto senza le 5 migliori) e si rilegge. Il bootstrap per giorno NON e' nel lettore passato: [NON FATTO dal lettore], se serve lo si fa con uno strumento non passato e lo si scrive.
 #  CRITERIO PER REGIMI, FIRMATO da Claudio il 10/10/2026 (report/FIRME_2026-10-10.md, Firma 1, 'CONFERMO LA SOGLIA, SCRIVILA NEI FILE PROVA'), PER INTERO:
 #     1. L'EA 'regge' se il PF netto dei costi (PF_V) e' > 1,0 in OGNI regime che ha almeno 150 operazioni, con long e short letti SEPARATAMENTE, e nessun regime ha un drawdown superiore a quello
 #        promesso dal backtest della cella.
@@ -105,6 +112,7 @@
 #     |dPF| > 0,05 o |dn| > 1% -> 'la manopola NON era inerte' (e' un risultato: si scrive cosi') OPPURE difetto di strumento (si guarda prima il giornale e la G1). Non decide la casella 3.
 #     Alternativa (continuazione): predice dPF = -0,003 (H1) contro -0,001 (H0): la cella NON separa le ipotesi per costruzione, NON e' una prova di deriva.
 #     COSTO: invariato, 49,4x PASSA. DD: ~invariato [NON STIMATO]. Pausa delle 22:00: R1A ha 179 righe 'market closed' (21:56-22:00 server, T3) e 4 operazioni tenute oltre la pausa; se cambiano senza uscita a tempo lo dice il giornale della cella [NON STIMATO]: e' SICUREZZA, non merito.
+#     ALTERNATIVA DEL PIANO (3.2, testo): 'se |dPF| > 0,05 la manopola inerte non lo era: e' un risultato' (|dPF| <= 0,05 e |dn| <= 1% = inerte confermato).
 #  PASSATE: 1 cella x 3 tranche = 3. Tempo [STIMA, come R2UBE]: ~1,1-1,5 min/passata -> centro ~4 minuti, intervallo 3-10. Tetto del lotto 20 minuti.
 #
 

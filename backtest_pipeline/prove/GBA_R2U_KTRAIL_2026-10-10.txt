@@ -24,6 +24,10 @@
 #  p2,5-p97,5 = 0,70-1,03); BUY n=443 PF_V 0,89, SELL n=490 PF_V 0,83; DD equity 12.511 / 28.863 / 53.392 EUR (1 lotto, deposito fittizio: la % non si legge).
 #
 #  ======================= REGOLE DI LETTURA COMUNI AI QUATTRO LOTTI R2U (copiate in ognuno: nessun file dipende da un altro) =======================
+#  REGOLA DEL 19/08 RISPETTATA: NESSUN parametro d'INGRESSO si muove (canale, EMA, filtro di spread, N, ora); si muove UN meccanismo d'USCITA per file; 8 celle + 1 gemella in tutto, non una griglia. Su un motore a PF < 1
+#     una griglia piu' fitta troverebbe solo picchi di rumore: ogni allargamento si paga con T0 (S10).
+#  VERIFICA DELLE INI (pwsh, parsing vero del driver v5 su questi 4 file; il driver NON e' stato eseguito): le 25 ini che scrivera' differiscono dall'ini REALE di R1A (zip archiviato, stessa tranche) in UNA sola chiave, quella dell'asse
+#     (la gemella REPL: solo InpMagic 775800 -> 775850; le date sono identiche). I 30 valori attesi della riga AVVIO sono presenti nel testo AVVIO costruito dal sorgente dell'EA per ogni passata; i valori di un'altra cella NON lo sono (7 controesempi).
 #  G0/G1. Un numero di un lotto si usa SOLO se il driver ha dato OK alla passata (G0) E la gemella di determinismo e' VERDE: G1 = REPL T1 con magic 775850 (sta nel lotto R2UBE) contro R1A T1:
 #     operazioni 128, profitto -6.577,48, PF 0,83, DD equity 12.511,35 e deal identici uno per uno. ROSSA o NON VERIFICABILE -> nessun confronto con R1A in NESSUNO dei quattro lotti (anche se il lotto
 #     R2UBE non e' partito). La G1 verde delle 19:19 del 10/10 (lotti R2 senza codice) e' l'evidenza di una sessione precedente, non di questo giro: per questo la gemella si RIFA' (1 passata).
@@ -40,6 +44,9 @@
 #     S9 (selezione): l'uscita cambia la sequenza degli ingressi (una posizione per volta): il confronto con la REPL NON e' appaiato. Si leggono R medio per operazione, PF_V per tranche e la struttura per motivo.
 #        Una cella che alza il PF riducendo n (stesso R medio) e' SELEZIONE, non miglioramento; oltre il 40% di operazioni tolte si scrive cosi'. A una cella NON si assegna mai 'regge'.
 #     S10 (in avanti): ogni cella che supera S8 si ripete sulla tranche T0 (dal 01/10/2026, mai vista da R1A) con lista e criteri congelati dal piano; passa T0 = candidato per una prova di regime, cade = rumore del 2026.
+#  PRIMA DI CREDERE A UNA CELLA (PIANO 3.4, il contro-esempio costruito prima): si prova a ROMPERLA in tre modi. (1) CONCENTRAZIONE IN T3: il tetto di 1 operazione al giorno ha PF 2,26 in T3 e 0,68 / 0,99 altrove (PIANO 1.7): un guadagno che
+#     esiste solo in T3 e' REGIME, non meccanismo. (2) SELEZIONE PER n (S9): il PF sale perche' n scende. (3) BOOTSTRAP PER GIORNO: se l'intervallo del PF_V della cella contiene 1,0 non e' una vittoria; se il guadagno sta nella coda (R >= 3)
+#     si tolgono la migliore e le cinque migliori (S5, il lettore stampa il netto senza le 5 migliori) e si rilegge. Il bootstrap per giorno NON e' nel lettore passato: [NON FATTO dal lettore], se serve lo si fa con uno strumento non passato e lo si scrive.
 #  CRITERIO PER REGIMI, FIRMATO da Claudio il 10/10/2026 (report/FIRME_2026-10-10.md, Firma 1, 'CONFERMO LA SOGLIA, SCRIVILA NEI FILE PROVA'), PER INTERO:
 #     1. L'EA 'regge' se il PF netto dei costi (PF_V) e' > 1,0 in OGNI regime che ha almeno 150 operazioni, con long e short letti SEPARATAMENTE, e nessun regime ha un drawdown superiore a quello
 #        promesso dal backtest della cella.
@@ -108,10 +115,12 @@
 #     Win rate (M) 0,33, payoff (M) 1,7; quote (M): SL iniziale ~0, BE 0,11, trailing sotto 0,56, trailing in profitto 0,34; durata media (M) 5,2 min ((P) ~5). Trailing in profitto: R medio (P) 0,4-0,6. DD: [NON STIMATO].
 #     COSTO: FRA a priori (stop reale 1,5 ATR -> 29,6x con 0,04 / 35,3x solo spread): si misura per capire, NON puo' diventare sedia (S2), anche se il lettore stampa 'PASSA' (formula nominale 2,5). E' la direzione 'stretta': si aspetta peggio.
 #     CONTRO-ESEMPIO: l'alternativa ancorata dice 0,794 (H1 PF~1,0) / 0,736 (mu 0,02): DENTRO la banda e nella STESSA direzione di H0 (0,827): nessuna ipotesi alternativa per la cella da sola; serve come punto basso della pendenza.
+#     ALTERNATIVA DEL PIANO (3.2, testo): 'nessuna: e' la direzione stretta, si aspetta peggio'.
 #  K35 (3,5). n: (M) 650-880, (P) 700-900, recinto 650-900; per tranche (M) T1 89-121 / T2 173-234 / T3 388-525 -> giudicabili T2, T3. PF_V: (M) 0,72-0,98 (centro 0,85), (P) 0,65-1,00; recinto 0,65-1,00.
 #     Win rate (M) 0,21, payoff (M) 3,2; quote (M): SL iniziale 0,20, BE 0,43, trailing sotto 0,16, trailing in profitto 0,17; durata media (M) 13,5 min. Trailing in profitto: R medio (P) >= 1,2. DD: in salita [NON STIMATO oltre la dev. std].
 #     DISACCORDO che la cella decide (scritto PRIMA): quota SL INIZIALE (M) ~20% contro (P) 30-45%. COSTO: invariato (lo SL iniziale resta 2,5 ATR), 49,4x PASSA.
 #     CONTRO-ESEMPIO: ancorata 0,869 (H1 PF~1,0) / 0,904 (mu 0,02) contro H0 0,847: tutte DENTRO la banda (M) 0,72-0,98.
+#     ALTERNATIVA DEL PIANO (3.2, testo): 'coda piu' lunga (R >= 3) che compensa le perdite piene'. Il lettore passato non stampa R per motivo: si legge sul PF_V e, come descrizione, con lo strumento non passato.
 #  KOFF (99,0 == trailing spento). n: (M) 565-765 (il piano non la contempla); per tranche (M) T1 78-105 / T2 150-203 / T3 337-457 -> T1 NON giudicabile; T2 sta SUL confine (150): se T2 < 150 le tranche giudicabili sono meno di 2 e vale il ramo (d).
 #     PF_V: (M) 0,69-1,03 (centro 0,86). Win rate (M) 0,11, payoff (M) 6,3; quote (M): SL iniziale ~0,27, BE ~0,55, tempo ~0,14, trailing in profitto 0 e trailing sotto l'ingresso 0 PER COSTRUZIONE DEL CODICE (la tabella 5.4 del RISK_MANAGER scrive
 #     'sotto 0,06': e' una discrepanza interna del dossier, il codice non ha altro modo di spostare lo SL che il BE: il file scrive 0 e un valore > 1% e' un difetto di equivalenza); durata media (M) 16,5 min. DD: in SALITA (sd del profitto piu' alta).
