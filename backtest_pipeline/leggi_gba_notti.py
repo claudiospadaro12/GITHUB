@@ -221,7 +221,7 @@ def sezioni_per(P, *chiavi):
 def estrai_attese(P):
     """{'n_banda': [...], 'n_smentita': {...}, 'pf_banda': [...], 'costo_banda': [...], 'costo_punto': [...], 'notti_punto', 'notti_max', 'q_banda': [...]}.
     Ogni voce porta la riga del file prova e il frammento letto. Quello che non si trova NON e' inventato: la chiave resta vuota."""
-    out = {"n_banda": [], "n_smentita": {}, "pf_banda": [], "costo_banda": [], "costo_punto": [], "notti_punto": [], "notti_max": [], "q_banda": [], "sezioni_trovate": []}
+    out = {"n_banda": [], "n_smentita": {}, "pf_banda": [], "costo_banda": [], "costo_punto": [], "notti_punto": [], "notti_max": [], "notti_banda": [], "q_banda": [], "sezioni_trovate": []}
     att = sezioni_per(P, "ATTESE")
     cri = sezioni_per(P, "CRITERIO DI EMILIANO", "NESSUNA NOTTE")
     out["sezioni_trovate"] = [(s["titolo"], s["riga"]) for s in att + cri]
@@ -241,6 +241,8 @@ def estrai_attese(P):
                 out["costo_punto"].append((int(m.group(1)), riga_di(offs, m.start()), m.group(0)))
             for m in re.finditer(r"Notti:\s*~\s*(\d+)\s*,\s*negative\s*~\s*(\d+)", t):
                 out["notti_punto"].append((int(m.group(1)), int(m.group(2)), riga_di(offs, m.start()), m.group(0)))
+            for m in re.finditer(r"Notti con almeno un ingresso:.{0,60}?banda larga\s+(\d+)\s*-\s*(\d+)", t):
+                out["notti_banda"].append((int(m.group(1)), int(m.group(2)), riga_di(offs, m.start()), m.group(0)))
             for m in re.finditer(r"Notti:\s*<=\s*~?\s*(\d+)", t):
                 out["notti_max"].append((int(m.group(1)), riga_di(offs, m.start()), m.group(0)))
             ms = re.search(r"SMENTITE:(.*?)(?:PASSATE:|$)", t)
@@ -290,7 +292,7 @@ def estrai_hm5n(P):
         return None
     righe = []
     for n, b in com[idx:]:
-        if righe and (re.match(r"^\s*(SMENTITE|SMENTITA|PASSATE)\b", b) or RE_INTEST.match(b)):
+        if righe and (re.match(r"^\s*(SMENTITE|SMENTITA|PASSATE|CONTROLLO DIRETTO)\b", b) or RE_INTEST.match(b)):
             break
         righe.append((n, b))
     return righe
@@ -696,7 +698,9 @@ def stampa_attese(W, C, st_tot, costo_med):
         W("   notti = %d, negative = %d | attesa puntuale r.%d '%s' (nessuna banda: nessun dentro/fuori automatico)" % (nn, st_tot["neg"], riga, asc(fr)))
     for mx, riga, fr in A["notti_max"]:
         W("   notti = %d | attesa r.%d '%s' -> %s" % (nn, riga, asc(fr), "DENTRO attesa" if nn <= mx else "FUORI attesa (piu' notti del previsto)"))
-    if not A["notti_punto"] and not A["notti_max"]:
+    for lo, hi, riga, fr in A["notti_banda"]:
+        W("   notti = %d | attesa r.%d '%s' = %d-%d -> %s" % (nn, riga, asc(fr), lo, hi, "DENTRO attesa" if dentro(nn, lo, hi) else "FUORI attesa"))
+    if not A["notti_punto"] and not A["notti_max"] and not A["notti_banda"]:
         W("   notti = %d | attesa sul numero di notti NON letta dal file prova" % nn)
     if st_tot["q"] is not None:
         if A["q_banda"]:
@@ -772,6 +776,15 @@ def stampa_cella(W, C, S, B, seed, fascia):
             "" if totale["n_ops"] >= N_MIN_MERITO else "   [merito SOSPESO: n < %d (S1)]" % N_MIN_MERITO))
         if C["parziale"]:
             W("   TOTALE PARZIALE: mancano %s" % ", ".join("%s:%s" % m for m in C["mancanti"]))
+        nets = [x["net_v"] for tr in sorted(C["pos"]) for x in C["pos"][tr]]
+        if nets:
+            pos_tot, netto = sum(x for x in nets if x > 0), sum(nets)
+            top1 = (max(nets) / pos_tot) if pos_tot > 0 else None
+            senza5 = netto - sum(sorted(nets, reverse=True)[:lg.TOP_N_FRAGILE])
+            fragile = (top1 is not None and top1 >= lg.TOP1_FRAGILE) or senza5 <= 0
+            n780 = [v for i in C["leggibili"] for v in lg.netti_780(i["P"])]
+            W("   concentrazione (S5, definizione del lettore): migliore operazione = %s del profitto positivo; netto senza le %d migliori = %.0f -> %s | PF con 7,80 EUR/lotto a giro = %s" % (
+                "n.d." if top1 is None else "%.0f%%" % (100 * top1), lg.TOP_N_FRAGILE, senza5, "FRAGILE" if fragile else "non fragile", fpf(lg.pf_di(n780))))
     else:
         W("   TOT: NON CALCOLATO -- almeno una passata della cella NON e' leggibile (%s)" % ", ".join(i["tag"] for i in C["non_leggibili"]))
     C["tr_stat"], C["tot_stat"], C["costo_med"] = righe_tr, totale, cm_tot
@@ -1081,9 +1094,9 @@ def _zip_notte(prova, k, ops_per_tranche, ini_cambi=None, comm=0.0, qualita="100
         da, a = prova["tranche"][tr]
         ops = ops_per_tranche[tr]
         deals, lg_ = lg._sintetico(ops, comm)
-        nets = [x[2] for x in ops]
+        nets = [x[2] + 2 * comm for x in ops]          # netto di report: profitto + commissioni dei due deal
         tag = "%s_%02d_%s_%s_m%s" % (lotto, j, cella, tr, magic)
-        profit = sum(nets) + 2 * comm * len(ops)
+        profit = sum(nets)
         z.writestr("report\\GBA_R0_" + tag + ".htm", lg._htm(deals, len(ops), lg._fmt(profit), "%.2f" % (lg.pf_di(nets) if nets else 0.0), qual=qualita, periodo="%s (%s - %s)" % (per, da, a)))
         z.writestr("log\\GBA_" + tag + ".txt", "\r\n".join(["# passata finta"] + lg_))
         inp = dict(att)
@@ -1263,11 +1276,8 @@ def autotest():
                 zout.writestr(n, dat)
             zout.close()
             a2 = ancora_r1a(alt_zip, fas)
-            if "serie" in a2:
-                st2 = statistiche(a2["serie"], Sm, 0, 1)
-                ck("CONTRO-ESEMPIO: un deal alterato (profitto 99 999) CAMBIA PF_V e il netto dell'ancora", st2["pf"] != st["pf"] and st2["net"] != st["net"], "%s vs %s" % (fpf(st2["pf"]), fpf(st["pf"])))
-            else:
-                ck("CONTRO-ESEMPIO: un deal alterato e' letto", False, str(a2))
+            ck("CONTRO-ESEMPIO: un deal di R1A alterato (profitto 99 999) senza ritoccare i totali del report -> l'ancora NON si legge (G0 del lettore: il ricalcolo dai deal non torna col report)",
+               "errore" in a2 and "G0 KO" in a2["errore"], str(a2)[:300])
     else:
         ck("ANCORA R1A: zip archiviato presente nel repo", False, R1A_ZIP)
 
@@ -1379,7 +1389,7 @@ def autotest():
     zD = _zip_notte(pr1, "M1", ops_alt)
     rc0, t0 = _esegui_catturando([zA, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
     rc1, t1 = _esegui_catturando([zD, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
-    ck("CONTRO-ESEMPIO: un deal alterato (+500 su una notte) CAMBIA i numeri letti (PF_V e netto)", rc1 == 0 and t0 != t1 and "PF_V" in t1 and re.findall(r"TOT\s+n op\s+\d+ \|[^|]*\|[^|]*\| PF_V \S+ \| netto \S+", t0) != re.findall(r"TOT\s+n op\s+\d+ \|[^|]*\|[^|]*\| PF_V \S+ \| netto \S+", t1), "rc=%s" % rc1)
+    ck("CONTRO-ESEMPIO: un deal alterato (+500 su una notte) CAMBIA i numeri letti (PF_V e netto)", rc1 == 0 and t0 != t1 and "PF_V" in t1 and re.findall(r"TOT\s+n op\s+\d+ \|.*?\| PF_V (\S+) \| netto (\S+)", t0) != re.findall(r"TOT\s+n op\s+\d+ \|.*?\| PF_V (\S+) \| netto (\S+)", t1), "rc=%s" % rc1)
     # una notte alterata (spostata di data): il numero di notti cambia
     ops_mv = {k: list(v) for k, v in ops1.items()}
     tt = ops_mv["T1"][1]
@@ -1400,7 +1410,7 @@ def autotest():
     if all(os.path.isfile(v) for v in veri):
         for v in veri:
             rc, tv = _esegui_catturando([v, "--senza-ancora", "--prova-m1", p1, "--prova-m5", p5])
-            ck("NON REGRESSIONE %s: NON APPLICABILE (rc 2), nessun numero per notte" % os.path.basename(v), rc == 2 and "NON APPLICABILE" in tv and "PF_V" not in tv and "notti " not in tv.replace("nessun numero per notte", "").replace("la 'notte'", ""), "rc=%s\n%s" % (rc, tv[-600:]))
+            ck("NON REGRESSIONE %s: NON APPLICABILE (rc 2), nessun numero per notte" % os.path.basename(v), rc == 2 and "NON APPLICABILE" in tv and "PF_V" not in tv and "(4) LA NOTTE" not in tv and "(2) PRIMA DI OGNI LETTURA" not in tv, "rc=%s\n%s" % (rc, tv[-600:]))
             ck("   ... e dice perche': il filtro orario dell'ini (InpHourStart=0 InpHourEnd=24)", "InpHourStart=0 InpHourEnd=24" in tv)
         rc, tv = _esegui_catturando(veri + ["--senza-ancora", "--prova-m1", p1, "--prova-m5", p5])
         ck("NON REGRESSIONE: i 4 zip veri insieme -> 4 lotti NON APPLICABILI, rc 2, il caricamento dei doppioni del lettore non da' errore", rc == 2 and tv.count("NON APPLICABILE") == 4, "rc=%s" % rc)
