@@ -395,7 +395,7 @@ def bootstrap(notti, B, seed):
     rng = random.Random(seed)
     qs, pfs = [], []
     for _ in range(B):
-        s = rng.choices(notti, k=n)
+        s = rng.choices(notti, k=max(1, n - 1))
         qs.append(sum(1 for x in s if x["net"] < 0) / float(n))
         pfs.append(pf_da(sum(x["gp"] for x in s), sum(x["gl"] for x in s)))
     qs.sort()
@@ -412,7 +412,7 @@ def statistiche(serie, S, B, seed):
     st = {"n_notti": len(tutte), "n_ops": sum(n["nops"] for n in tutte), "net": sum(n["net"] for n in tutte),
           "gp": sum(n["gp"] for n in tutte), "gl": sum(n["gl"] for n in tutte)}
     st["pf"] = pf_da(st["gp"], st["gl"])
-    st["neg"] = sum(1 for n in tutte if n["net"] <= 0)
+    st["neg"] = sum(1 for n in tutte if n["net"] < 0)
     st["q"] = (st["neg"] / float(st["n_notti"])) if st["n_notti"] else None
     L = S.get("finestra")
     st["L"] = L
