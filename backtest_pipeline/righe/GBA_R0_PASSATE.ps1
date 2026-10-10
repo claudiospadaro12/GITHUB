@@ -141,7 +141,7 @@ $AVVISO_BARRE = 95000
 if($Pin -notmatch '^[0-9a-fA-F]{40}$'){ throw '-Pin obbligatorio e di 40 caratteri esadecimali: senza, girerebbe la punta del branch spacciandola per un commit congelato.' }
 $Pin = $Pin.ToLower()
 if($STORICA){
-  if($Lotto -notmatch $CFG_PROVA.Lotti){ throw ('-Lotto ' + $Lotto + ' non e un lotto del file prova ' + $PROVA + ' (ammessi: ' + $CFG_PROVA.Lotti + ').') }
+  if($Lotto -cnotmatch $CFG_PROVA.Lotti){ throw ('-Lotto ' + $Lotto + ' non e un lotto del file prova ' + $PROVA + ' (ammessi: ' + $CFG_PROVA.Lotti + ').') }
 } else {
   # (v5) il lotto deve esistere nel file (si verifica dopo averlo letto); qui solo il formato e i nomi riservati
   if($Lotto -cnotmatch '^[A-Z0-9]{1,12}$'){ throw ('-Lotto ' + $Lotto + ': nome non ammesso (1-12 maiuscole o cifre).') }
@@ -389,6 +389,8 @@ foreach($b in $blocchi.TRANCHE){
   if(@($b.Keys).Count -ne 3 -or -not $b.ContainsKey('nome') -or -not $b.ContainsKey('da') -or -not $b.ContainsKey('a')){ throw 'un blocco @GBA-TRANCHE non ha esattamente nome, da, a.' }
   if($b['da'] -notmatch '^\d{4}\.\d\d\.\d\d$' -or $b['a'] -notmatch '^\d{4}\.\d\d\.\d\d$'){ throw ('tranche ' + $b['nome'] + ': date non aaaa.mm.gg.') }
   if([string]::CompareOrdinal($b['da'], $b['a']) -ge 0){ throw ('tranche ' + $b['nome'] + ': da ' + $b['da'] + ' non e prima di a ' + $b['a'] + '.') }
+  # (v5, classe 1251) il nome entra nel tag, quindi nei PERCORSI di ini/log/report e nelle colonne del MANIFEST: '..\', '/', ';', spazi e '$(' non devono passare
+  if(-not $STORICA -and $b['nome'] -cnotmatch '^[A-Za-z0-9]{1,10}$'){ throw ('tranche ' + $b['nome'] + ': nome non ammesso (1-10 lettere o cifre).') }
   if($trDef.ContainsKey($b['nome'])){ throw ('tranche ' + $b['nome'] + ' dichiarata DUE volte nel file prova.') }
   $trDef[$b['nome']] = $b
 }
