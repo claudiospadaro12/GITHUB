@@ -1,0 +1,178 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-10-10 03:31:57  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 8
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261009   (100.7 KB, ultima scrittura 2026-10-09 23:44) ---
+    righe totali: 362
+    RIGHE DI ORDINE / DEAL: 42
+      FI001:00:00.919ABTG_PunteLarry (GBPUSD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+      OP005:00:00.080ABTG_CostToCost (GBPCAD,H4)[COST] conferma valida ma posizione gia' aperta: nessun ingresso.
+      HO005:00:00.227ABTG_CostToCost (EURJPY,H4)[COST] target cost-to-cost dalla parte sbagliata del prezzo: nessun ingresso.
+      IL008:00:00.160ABTG_MaxMinNotte (XAUUSD,M15)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4182.66 sl: 4129.29 tp: 4396.14 [invalid price]
+      MR008:00:00.215ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] SELL STOP @ 4129.29 SL 4182.66 TP 3915.81 lot 0.01
+      LK015:45:00.239ABTG_ORB_Ottimizzato (XAGUSD,H4)CTrade::OrderSend: buy stop 0.05 XAGUSD at 70.985 sl: 70.821 tp: 71.479 [invalid stops]
+      PR016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] POSITION_TYPE_BUY -> lato buy                        atteso=1 ottenuto=1  PASS
+      JR016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] POSITION_TYPE_SELL -> lato sell                      atteso=-1 ottenuto=-1  PASS
+      PP016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_BUY_STOP -> lato buy                      atteso=1 ottenuto=1  PASS
+      MP016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_BUY_LIMIT -> lato buy                     atteso=1 ottenuto=1  PASS
+      NM016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_BUY_STOP_LIMIT -> lato buy                atteso=1 ottenuto=1  PASS
+      NN016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_SELL_STOP -> lato sell                    atteso=-1 ottenuto=-1  PASS
+      OF016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_SELL_LIMIT -> lato sell                   atteso=-1 ottenuto=-1  PASS
+      PJ016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_SELL_STOP_LIMIT -> lato sell              atteso=-1 ottenuto=-1  PASS
+      FG016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] 2 POSIZIONI buy sul DAX -> 2 sul lato buy            atteso=2 ottenuto=2  PASS
+      EQ016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] le stesse guardate dal lato SELL -> 0 (i lati sono separati) atteso=0 ottenuto=0  PASS
+      IN016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] 2 PENDENTI buy e NESSUNA posizione -> 2 (buco B6 chiuso) atteso=2 ottenuto=2  PASS
+      EO016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] misto: DAX lato buy -> 3 (1 posizione + 2 pendenti)  atteso=3 ottenuto=3  PASS
+      IS016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] misto: DAX lato sell -> 2 (il buy non si somma al sell) atteso=2 ottenuto=2  PASS
+      QK016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] misto: DOW lato buy -> 1 (l'altro simbolo non conta) atteso=1 ottenuto=1  PASS
+      RP016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] tetto 1 con UNA posizione buy -> FRENA (la seconda non entra) atteso=SI ottenuto=SI  PASS
+      EH016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] tetto 1 con UN SOLO PENDENTE buy -> FRENA lo stesso  atteso=SI ottenuto=SI  PASS
+      KL016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] tetto 3 sul lato SELL con 2 teste sell -> si passa   atteso=NO ottenuto=NO  PASS
+      JN016:26:38.066ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] tetto 2 sul lato SELL con 2 teste sell -> FRENA      atteso=SI ottenuto=SI  PASS
+      RL016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] POSITION_TYPE_BUY -> lato buy                        atteso=1 ottenuto=1  PASS
+      LO016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] POSITION_TYPE_SELL -> lato sell                      atteso=-1 ottenuto=-1  PASS
+      RJ016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_BUY_STOP -> lato buy                      atteso=1 ottenuto=1  PASS
+      GG016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_BUY_LIMIT -> lato buy                     atteso=1 ottenuto=1  PASS
+      LH016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_BUY_STOP_LIMIT -> lato buy                atteso=1 ottenuto=1  PASS
+      PD016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_SELL_STOP -> lato sell                    atteso=-1 ottenuto=-1  PASS
+      QI016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_SELL_LIMIT -> lato sell                   atteso=-1 ottenuto=-1  PASS
+      FQ016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ORDER_TYPE_SELL_STOP_LIMIT -> lato sell              atteso=-1 ottenuto=-1  PASS
+      DL016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] 2 POSIZIONI buy sul DAX -> 2 sul lato buy            atteso=2 ottenuto=2  PASS
+      GO016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] le stesse guardate dal lato SELL -> 0 (i lati sono separati) atteso=0 ottenuto=0  PASS
+      GE016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] 2 PENDENTI buy e NESSUNA posizione -> 2 (buco B6 chiuso) atteso=2 ottenuto=2  PASS
+      OH016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] misto: DAX lato buy -> 3 (1 posizione + 2 pendenti)  atteso=3 ottenuto=3  PASS
+      GF016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] misto: DAX lato sell -> 2 (il buy non si somma al sell) atteso=2 ottenuto=2  PASS
+      OF016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] misto: DOW lato buy -> 1 (l'altro simbolo non conta) atteso=1 ottenuto=1  PASS
+      LK016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] tetto 1 con UNA posizione buy -> FRENA (la seconda non entra) atteso=SI ottenuto=SI  PASS
+      OE016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] tetto 1 con UN SOLO PENDENTE buy -> FRENA lo stesso  atteso=SI ottenuto=SI  PASS
+      ... altre 2 righe non stampate (tetto).
+    GUARDIAN, ultima riga del giorno:
+      GD016:39:16.309ABTG_BulgeAzzurra (EURGBP,H1)[AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.
+
+--- GIORNO 20261010   (1.7 KB, ultima scrittura 2026-10-10 03:13) ---
+    righe totali: 7
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1514806751
+=====================================================================
+
+--- GIORNO 20261009   (100.7 KB, ultima scrittura 2026-10-09 23:47) ---
+    righe totali: 353
+    RIGHE DI ORDINE / DEAL: 3
+      LK015:45:00.358ABTG_ORB_Ottimizzato (US30.cash,M5)[ORB_OTT] BUY STOP @ 51402.85000 SL 51315.51000 TP 51664.88000 lot 5.69
+      GO016:11:19.428CLAU12_Nasdaq_Apertura_US (US100.cash,M5)[Nasdaq Apertura US] RETEST SELL: rottura con volumi insufficienti, salto (regola Emiliano).
+      IN017:00:00.541CLAU12_SuperWave_DOW_H1_Ottimizzato (US30.cash,H1)[SuperWave] pendente 2/3 8.34 lot @ 51438.15
+    GUARDIAN, ultima riga del giorno:
+      FG022:50:15.446CLAU12_Guardian (NZDJPY,M1)[GUARDIAN] eq=150029.52  dayLoss=-1.76%  totDD=6.23%  rischioAperto=1.59%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261010   (1.8 KB, ultima scrittura 2026-10-10 03:16) ---
+    righe totali: 7
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261006   (1.7 KB, ultima scrittura 2026-10-06 20:42) ---
+    righe totali: 6
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QJ020:42:10.503ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=100081.32  dayLoss=0.00%  totDD=-0.08%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261009   (735.5 KB, ultima scrittura 2026-10-09 23:51) ---
+    righe totali: 1085
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261010   (106.3 KB, ultima scrittura 2026-10-10 03:20) ---
+    righe totali: 154
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20261008   (83 KB, ultima scrittura 2026-10-08 23:55) ---
+    righe totali: 290
+    RIGHE DI ORDINE / DEAL: 1
+      DD015:45:00.488ABTG_ORB_Ottimizzato (EURAUD,H1)[ORB_OTT] BUY STOP @ 11.61145 SL 11.61102 TP 11.61276 lot 1.89
+    GUARDIAN, ultima riga del giorno:
+      KF023:55:01.202ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7551.34  dayLoss=0.00%  totDD=-0.68%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261009   (79.3 KB, ultima scrittura 2026-10-09 22:50) ---
+    righe totali: 277
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QP022:50:02.258ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7551.34  dayLoss=0.00%  totDD=-0.68%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
