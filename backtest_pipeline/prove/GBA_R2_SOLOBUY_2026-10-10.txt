@@ -34,7 +34,7 @@
 #  S9 (selezione, piano 3.3 e GBA_PROPOSTA_STRATEGIST sez. 4): un filtro che migliora il PF riducendo n (stesso R medio) e' SELEZIONE, non miglioramento; oltre il 40% di operazioni tolte
 #     si scrive cosi'. A un filtro NON si assegna mai 'regge': 'regge' e' solo la regola per regimi (firma 10/10, report/FIRME_2026-10-10.md), che qui ha UN regime (gen-set 2026).
 #  CERTIFICATO DEI 5 PUNTI (CLAUDE.md 09/09): 1 PF misurato (R1A: si'), 2 n e DD (R1A: si'), 3 USCITA ad asse (NON in questo file: e' R2U del piano / RM), 4 simboli GEMELLI (NON qui),
-#     5 TF cambiato (NON qui: questo file cambia il TF di un INDICATORE, non quello del SEGNALE, che e' R2T). Qualunque esito qui sotto e' 'NON ANCORA MISURATO' per il motore,
+#     5 TF cambiato (NON qui: questo file cambia il LATO consentito, non il TF del SEGNALE, che e' R2T). Qualunque esito qui sotto e' 'NON ANCORA MISURATO' per il motore,
 #     mai 'morto': la parola non si scrive.
 #  FUORI CAMPIONE: T4-T9 (R2REG, 2024-25) e T0 dal 01/10/2026 (GBA_PROPOSTA_STRATEGIST sez. 6): una cella che supera S8 qui si ripete li' con lista e criteri gia' congelati.
 #
@@ -46,11 +46,12 @@
 #  scommessa sulla deriva dell'oro, non un edge. Un solo regime (gen-set 2026). Caveat del dossier: nella REPL il segno si ribalta in T3 (BUY 0,77, SELL 0,93) e in T1
 #  (BUY 2,25, SELL 0,46 su n=51 / 61: sospeso, n < 150). Nel lettore v5 il lato spento esce 'lato spento/assente, n=0' (non e' un PF <= 1).
 #
+#  ANCORA E G1: il confronto con R1A vale SOLO se la G1 del lotto R2TTREND (REPL T1 magic 775850) e' VERDE contro R1A T1 (128 / -6577,48 / 0,83); ROSSA o NON VERIFICABILE -> nessun numero di questo lotto si confronta con R1A ne' si usa.
 #  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate) =======================
 #  n 420-520 (STRATEGIST 4.4; i BUY di R1A sono 443: con sequenza ~0, n ~443); PF_V 0,84-0,95 (sottoinsieme R1A 0,89 su n=443).
 #  COSTO: invariato rispetto a R1A (stesso filtro, stesso stop): PASSA.
-#  SMENTITE: solo-BUY PF_V >= 1,03 su n >= 150 = sorpresa (S8, S4). Sequenza: |n - 443| > 10% = l'effetto di sequenza NON e' ~zero nel tester (il proxy sbaglia) e la
-#  lettura per lato dei deal NON basta: va scritto. PASSATE: 1 cella x 3 tranche = 3, ~7 min.
+#  SMENTITE: solo-BUY PF_V >= 1,03 su n >= 150 = sorpresa (S8, S4). Sequenza [DERIVATO, soglia dell'autore, non del dossier]: |n - 443| > 10% = l'effetto di sequenza NON e' ~zero nel tester (il proxy sbaglia) e la
+#  lettura per lato dei deal NON basta: va scritto. ATTENZIONE: un n fra 488 e 520 e' INSIEME 'dentro l'attesa' (420-520) e 'smentita' della sequenza: si scrivono tutte e due. PASSATE: 1 cella x 3 tranche = 3, ~7 min.
 #
 #  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @GBA-TRANCHE qui sotto (le tre tranche di R1A, nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 le legge dal file)
 #  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30

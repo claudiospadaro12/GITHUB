@@ -48,6 +48,7 @@
 #  'spread <= 0,05 x ATR' diventa ~0,26 USD (quasi sempre vero): entrano molti piu' segnali. R1B limita il confondimento: allargare il solo filtro di spread a M1 lascia
 #  PF_V 0,82-0,83; quindi una differenza oltre 0,82-0,83 e' scala di stop/trailing. La REPL di riferimento e' R1A (ancora per il lettore, stessi pin salvo InpAtrTF).
 #
+#  ANCORA E G1: il confronto con R1A vale SOLO se la G1 del lotto R2TTREND (REPL T1 magic 775850) e' VERDE contro R1A T1 (128 / -6577,48 / 0,83); ROSSA o NON VERIFICABILE -> nessun numero di questo lotto si confronta con R1A ne' si usa.
 #  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate) =======================
 #  n (STRATEGIST 4.5): 2.300-3.500 a 3 tranche (proxy M5 2.923, M15 3.752, x0,92: A5 ~2.700, A15 ~3.450). PF_V 0,68-0,90 (proxy 0,93 - calibrazione 0,16 = 0,77).
 #  COSTO (S2): stop/spread ~52x con M5, ~94x con M15 [DERIVATO su proxy, mediana sui segnali, +0,04] -> PASSA la frontiera 40x con TUTTI i segnali.
