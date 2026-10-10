@@ -1,0 +1,169 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA R2U -- lotto R2UKTRAIL: la distanza del TRAILING: 1,5 / 3,5 / spento. UNA variabile: InpTrail_ATR.
+#  R2U = la GESTIONE DELL'USCITA messa ad asse (casella 3 del certificato dei 5 punti, CLAUDE.md 09/09), SENZA CODICE: solo input ESISTENTI dell'EA v1.10, 10/10/2026.
+#  Fonti dei valori e delle attese: report/GBA_R2_PIANO_2026-10-10.md (sez. 3 e 7), report/GBA_PROPOSTA_RISK_MANAGER_2026-10-10.md (sez. 3.3 e 5.3-5.6: modello nullo [SIMULATO], NON una misura),
+#  report/GBA_PROPOSTA_STRATEGIST_2026-10-10.md e GBA_PROPOSTA_MARKET_REGIME_2026-10-10.md (bozze), report/FIRME_2026-10-10.md. Attese, smentite e soglie scritte PRIMA di qualunque numero di questo lotto.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul VPS VMI3047753, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward. Nessun parametro in forward. BOZZA: NON consegnabile finche' i due strati del cancello non danno PASS.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato: prova SENZA CODICE, solo input esistenti).
+#
+#  ======================= DRIVER, LETTORE, E PERCHE' NON IL DRIVER DEI ROUND =======================
+#  Driver: backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (MARCATORE_GBA_R0_PASSATE_v5, SHA256 C239F628..., file prova DICHIARATIVO: blocco di asse, una chiave per file). NON toccato.
+#  Lettore: backtest_pipeline/leggi_gba_r0.py (SHA256 9CD02D2A..., commit ca0e8e59). NON toccato. L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) questa prova
+#  uscirebbe con un CSV da zero byte (file madre GBA_R0_REPLICA_2026-10-09.txt, 'IL DIFETTO CHE QUESTO FILE DICHIARA PER PRIMO'). Il driver dei round non si tocca.
+#  L'asse InpMagic=775800||775800||50||775850||Y qui sotto e' TECNICO (G1 sul magic) e NON e' la variabile misurata: controlla_prova.py pretende un asse Y.
+#  MAGIC: 775800 (passate) e 775850 (gemella): il driver v5 ammette SOLO questi due ($MAGIC_AMMESSI) e il lettore legge come passata principale SOLO 775800. Nel tester il magic e' un'etichetta.
+#
+#  ======================= TRANCHE: LE TRE DEL 2026, IDENTICHE A R1A (la REPL di riferimento e' R1A) =======================
+#  T1 2026.07.01 -> 2026.09.30, T2 2026.04.01 -> 2026.06.30, T3 2026.01.01 -> 2026.03.31: le STESSE date di R1A. ToDate e' ESCLUSIVO (MISURATO in R1A: l'ultimo giorno non gira); il lettore trova
+#  l'ancora (la REPL di R1A) solo su tranche identiche. E' il lotto di SCOPERTA (in-sample: le ipotesi nascono su questi dati): NESSUNA cella si promuove da qui.
+#  Modello 4 (ticks reali, il verdetto), deposito 1000000 EUR, lotto FISSO 1,00 (decisione di Claudio 09/10). TF del segnale M1 = il piu' BASSO (piu' operazioni, campione prima); frontiera del
+#  costo stop >= 40 x costo: la REPL e' a 58,8x solo spread / 49,4x con 0,04 USD/oz (PASSA). I 30 pin sono IDENTICI al pin di R1A (verificato riga per riga col file madre): cambia SOLO la chiave dell'asse.
+#  Riferimento (R1A, REPL = IL DEFAULT, MISURATO, zip archiviato): T1 n=128 PF 0,83 (profitto -6.577,48), T2 n=248 PF 0,77, T3 n=557 PF 0,89; tre tranche n=933 PF_V 0,855 (bootstrap per giorno
+#  p2,5-p97,5 = 0,70-1,03); BUY n=443 PF_V 0,89, SELL n=490 PF_V 0,83; DD equity 12.511 / 28.863 / 53.392 EUR (1 lotto, deposito fittizio: la % non si legge).
+#
+#  ======================= REGOLE DI LETTURA COMUNI AI QUATTRO LOTTI R2U (copiate in ognuno: nessun file dipende da un altro) =======================
+#  G0/G1. Un numero di un lotto si usa SOLO se il driver ha dato OK alla passata (G0) E la gemella di determinismo e' VERDE: G1 = REPL T1 con magic 775850 (sta nel lotto R2UBE) contro R1A T1:
+#     operazioni 128, profitto -6.577,48, PF 0,83, DD equity 12.511,35 e deal identici uno per uno. ROSSA o NON VERIFICABILE -> nessun confronto con R1A in NESSUNO dei quattro lotti (anche se il lotto
+#     R2UBE non e' partito). La G1 verde delle 19:19 del 10/10 (lotti R2 senza codice) e' un'evidenza di ieri sera, non di questo giro: per questo la gemella si RIFA' (1 passata).
+#  CONFRONTO COL DEFAULT. Ogni cella scrive 'meglio / uguale / peggio del DEFAULT' (la REPL di R1A) col numero. Se il guadagno e' dentro il rumore: 'il default va bene' = un risultato, non un fallimento.
+#     dPF per tranche = PF_V(cella, tranche) - PF_V(REPL di R1A, tranche) [0,83 / 0,77 / 0,89], letto dal lettore (NON appaiato). Il dPF APPAIATO per giorno del dossier (RISK_MANAGER 5.8) il lettore
+#     passato dal cancello NON lo calcola: se serve si fa con uno strumento di analisi NON passato e si scrive cosi'. Il non-appaiato e' PIU' rumoroso: puo' solo far scattare (a) in piu', e (a) manda in T0, mai a una sedia.
+#  SOGLIE (copiate, non riscritte: S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt, S8-S10 di report/GBA_R2_PIANO_2026-10-10.md sez. 3.3):
+#     S1 merito solo con n >= 150 (cella, somma delle tre tranche; tranche da sola idem). Il RISCHIO (DD, perdita per operazione, peggior giornata) si legge a qualunque n (R59).
+#     S2 COSTO prima del PF: mediana sugli ingressi di stop/(spread+commissione): >= 40 PASSA; 13,3-40 FRA (non puo' diventare sedia); < 13,3 ESCLUSA PER COSTO.
+#     S3 PF_V = PF dei netti ricalcolato dai deal (tolleranza 0,02 sul report), con 3,90 EUR/lotto a giro se il tester non addebita commissioni (e la versione 7,80).
+#     S4 RISCONTRO = PF_V >= 1,5 su n >= 150, PF_V > 1,3 in 2 tranche su 3, migliore operazione < 25% del netto, PF con 7,80 >= 1,3. S5 concentrazione. S6 ora (6 fasce, p < 0,05/6).
+#     S7 centro dell'altopiano, MAI il picco; con 2 punti lungo un asse la monotonia e' vuota (nessun altopiano si legge); una cella che sporge mentre le vicine no = 'non c'e' una configurazione robusta'.
+#     S8 (rumore): la REPL ha PF_V 0,855 con intervallo per giorno [0,70; 1,03]: una cella con PF_V <= 1,03 e' INDISTINGUIBILE dalla REPL e da 1,0; fra 1,03 e 1,3 esce dal rumore ma NON basta: nessun verdetto.
+#     S9 (selezione): l'uscita cambia la sequenza degli ingressi (una posizione per volta): il confronto con la REPL NON e' appaiato. Si leggono R medio per operazione, PF_V per tranche e la struttura per motivo.
+#        Una cella che alza il PF riducendo n (stesso R medio) e' SELEZIONE, non miglioramento; oltre il 40% di operazioni tolte si scrive cosi'. A una cella NON si assegna mai 'regge'.
+#     S10 (in avanti): ogni cella che supera S8 si ripete sulla tranche T0 (dal 01/10/2026, mai vista da R1A) con lista e criteri congelati dal piano; passa T0 = candidato per una prova di regime, cade = rumore del 2026.
+#  CRITERIO PER REGIMI, FIRMATO da Claudio il 10/10/2026 (report/FIRME_2026-10-10.md, Firma 1, 'CONFERMO LA SOGLIA, SCRIVILA NEI FILE PROVA'), PER INTERO:
+#     1. L'EA 'regge' se il PF netto dei costi (PF_V) e' > 1,0 in OGNI regime che ha almeno 150 operazioni, con long e short letti SEPARATAMENTE, e nessun regime ha un drawdown superiore a quello
+#        promesso dal backtest della cella.
+#     2. Un regime con meno di 150 operazioni NON giudica il merito: resta 'NON MISURATO', mai 'bocciato' ne' 'promosso'. (Il RISCHIO si legge a qualunque n, regola R59.)
+#     3. Un PF buono solo nel toro non basta.
+#     4. Le finestre dei regimi (toro / ribasso / laterale, e calmo / volatile) si scelgono con una regola oggettiva sul prezzo, scritta prima di vedere un PF, non per anni di fila. Un anno per regime, anche non contigui.
+#     5. Strumento: a TICK REALI (Modello 4) si misura solo cio' che i tick coprono (oro BCM: dal 2024.07.10, ~27 mesi). I regimi piu' vecchi (ribasso/laterale lunghi) si misurano in OHLC su M1 come
+#        screening, MAI come verdetto, dichiarando l'orologio BCM (prima del dicembre 2024 segue Londra, dopo UTC+1 fisso).
+#     6. Il criterio non tocca le soglie di rischio, le taglie, il conto reale ne' la spesa: restano di Claudio. Non sostituisce S4-S7 del file madre GBA_R0_REPLICA: si AGGIUNGE come lettura per regime.
+#     APPLICAZIONE A QUESTO LOTTO: T1-T3 sono UN periodo (gen-set 2026). Con la regola sul prezzo del lotto R2REG (piano 6.2, [proxy HistData, NON feed BCM], soglie scelte DOPO aver visto rendimenti e ATR, non i PF):
+#        T3 LATERALE, T2 RIBASSO, T1 LATERALE, tutte e tre volatili; NESSUN trimestre toro. Quindi: (1) 'regge' NON puo' uscire da qui (toro assente; DD promesso assente: senza --dd-promesso il verdetto del
+#        lettore comincia 'NON DICHIARABILE (DD promesso assente)'); (2) un regime con n < 150 per cella e' NON MISURATO; (3) BUY e SELL si leggono separati (il lettore li stampa per cella);
+#        (4) il 2024-25 (lotto R2REG, [NON ANCORA GIRATO a questa stesura]): la REPL M1 vi e' quasi vuota (RISK_MANAGER 5.3: ~216 ingressi attesi su 6 tranche), quindi il MERITO vi e' non misurabile
+#        per le celle d'uscita; il RISCHIO si legge a qualunque n, ma SOLO per una cella che superi S8 qui (S10).
+#  PARTIZIONE ESAUSTIVA E MUTUAMENTE ESCLUSIVA per ogni cella (classi 1258-1260; si applica alle CELLE nominate, mai a una 'casella' condivisa con altre ipotesi). LETTURA OPERATIVA scritta prima dei numeri:
+#     'tranche giudicabile' = n >= 150 (S1). Con le quote della REPL (T1 13,7% / T2 26,6% / T3 59,7% di n) T1 NON e' giudicabile per quasi nessuna cella (n atteso per tranche in ogni cella sotto):
+#     quindi '2 tranche su 3' si legge '2 fra le tranche giudicabili' e, dove le giudicabili sono meno di 2, il ramo (d). Esito UNICO, in quest'ordine:
+#        (d) meno di 2 tranche giudicabili per la cella -> NON MISURABILE sul segno per tranche (resta la lettura sulla SOMMA con S1 e S8); la cella passa a T0 (S10), non e' ne' promossa ne' bocciata;
+#        (a) dPF >= +0,15 in almeno 2 tranche giudicabili E PF_V(somma) > 1,03 (S8) -> 'segno di continuazione presente (in-sample, scoperta)': la cella va in T0 (S10), NON e' un candidato e NON e' un RISCONTRO (S4 resta la sola porta);
+#        (b) altrimenti, PF_V(somma) <= 1,03 -> NULLA per il regime di scoperta: la cella e' indistinguibile dalla REPL e da 1,0 (S8) qualunque sia la sua forma;
+#        (c) tutto il resto (1,03 < PF_V(somma), (a) non scattata) -> nessun verdetto (S8); la cella si ripete in T0 (S10).
+#     (a) richiede PF_V > 1,03, quindi non si sovrappone mai a (b). Dominio: T1-T3 (scoperta); la validazione e' T0 (in avanti) e il 2024-25 (R2REG). Testo del dossier accanto alle smentite di ogni cella.
+#  RISCHIO (letto a qualunque n): DD equity per tranche confrontato con R1A nella STESSA tranche (T1 12.511 / T2 28.863 / T3 53.392 EUR a 1 lotto). SOGLIA SCELTA ORA, non derivata da un dato: rischio PEGGIORE se DD > 1,5 x
+#     quello di R1A nella stessa tranche con PF_V non superiore; MIGLIORE se < 0,7 x. Il lettore stampa il DD per tranche; le decisioni di rischio e di taglia restano di Claudio.
+#  COSTO (S2). Il lettore calcola stop/(spread+commissione) con 2,5 x ATR (lo SL nominale). Per le celle che NON stringono lo stop reale e' giusto. ATTENZIONE alla cella K15 (lotto R2UKTRAIL): il trailing parte dal
+#     PRIMO tick (stop = estremo - kTrail x ATR), quindi lo stop REALE e' kTrail x ATR e non 2,5: a 1,5 il costo mediano e' 49,4 x 1,5/2,5 = 29,6x con 0,04 USD/oz (58,8 x 1,5/2,5 = 35,3x solo spread) = FRA [DERIVATO]:
+#     K15 si misura per capire ma NON puo' diventare sedia, anche se il lettore stampera' 'PASSA' (formula nominale). Per tutte le altre celle il costo atteso e' quello di R1A: 49,4x, PASSA.
+#  COSA IL LETTORE PASSATO NON STAMPA (buchi dichiarati): (1) la STRUTTURA PER MOTIVO d'uscita (quote SL iniziale / BE / trailing sotto l'ingresso / trailing in profitto / tempo) e R per motivo: li produce SOLO
+#     backtest_pipeline/leggi_gba_uscite.py, strumento di analisi NON passato dal cancello (bozza): le attese sulle quote sono scritte sotto e si leggono con quello strumento, dichiarandolo, come DESCRIZIONE;
+#     (2) il dPF appaiato per giorno (sopra); (3) il verdetto sulle smentite: le applica chi legge, il testo di questo file E' il criterio.
+#  FAKE BREAKOUT FILTER (uscire a mercato se la candela d'ingresso chiude contro la posizione; idea da un EA di mercato, report/MARKET_GOLD_REAPER_2026-10-10.md, [DICHIARATO DA TERZI]): NON in questo lotto.
+#     Nessuno dei 31 input dell'EA v1.10 lo esprime (InpTimeExitBars=1 chiude la posizione dopo la barra d'ingresso SEMPRE, non solo se la barra ha chiuso contro): richiede CODICE (EA v1.11) e quindi passa dal cancello del codice. Proposta a parte.
+#  EQUIVALENZE usate in questo lotto, PROVATE sul codice vero (non solo lette): le funzioni pure dell'EA (GbaBeArmato, GbaSLProposto, GbaArrotonda, GbaSLMigliore, GbaSLValido, GbaUscitaTempo, GbaAzione) estratte dal
+#     sorgente SHA 1381E3DC e compilate in C++, 200.000 percorsi di 2.900 tick per entrambi i lati, ATR 0,5-10, prezzo 3.000-4.100, tre regimi di deriva: (1) InpBE_TriggerATR=99,0 == InpUseBreakeven=false: 0 differenze;
+#     (2) InpTrail_ATR=99,0 == InpTrail_ATR=0 (trailing spento): 0 differenze; (3) InpTimeExitBars=0: 0 chiusure a tempo. Strumento: backtest_pipeline/gba_r2u_equivalenze.py (bozza NON passata dal cancello, committata DOPO questo pin). Controlli che devono MORDERE (stessi percorsi): uscita a tempo nel default 1.985, SL spostato 191.253,
+#     kTrail 5,0 diverso da kTrail spento 34.579, BE a 3,0 diverso da BE a 1,0 129.934. Resta fuori il glue (GbaGestisci, CTrade, il tester): la prima passata di ogni cella lo conferma dalla struttura per motivo.
+#  CERTIFICATO DEI 5 PUNTI (CLAUDE.md 09/09), stato dopo R1A e dopo i lotti R2 senza codice: 1 PF misurato SI (R1A 0,855) | 2 n e DD SI (933; DD 12.511 / 28.863 / 53.392 EUR a 1 lotto) | 3 USCITA ad asse: QUESTO insieme di
+#     quattro lotti (R2UBE, R2UATRFIX, R2UTEMPO, R2UKTRAIL) | 4 simboli GEMELLI NO (R2S) | 5 TF del SEGNALE cambiato NO (R2T: i lotti R2TTREND/R2TATR hanno cambiato il TF di INDICATORI, non quello del segnale).
+#     LA CASELLA 3 SI CHIUDE SOLO SE: (i) il driver ha dato OK (G0) a tutte e tre le tranche di BEOFF (lotto R2UBE) e di ATRFIX (lotto R2UATRFIX) [le due celle che il piano R2 indica come sufficienti]; (ii) G1 VERDE;
+#     (iii) il lettore stampa per ciascuna n, PF_V, DD e costo, con n(somma) >= 150 (S1); (iv) per ciascuna e' scritto 'meglio / uguale / peggio del DEFAULT' col numero. Se manca anche una sola di queste condizioni la
+#     casella resta APERTA e si scrive COSA manca. CHIUSA vuol dire MISURATA in un regime solo (gen-set 2026), non 'robusta'. Il verdetto sul motore resta 'NON ANCORA MISURATO': la parola MORTO non si scrive finche'
+#     non sono chiuse anche 4 e 5 e non e' passata la prova di regime/T0, e in REGISTRO_TEST.md con la clausola 'nel regime gen-set 2026 sul feed BCM; il 2024-25 e' non misurabile per n'.
+#  LA POTENZA (onesta'): una deriva di continuazione tale da dare alla REPL un PF vero di 1,14 (mu 0,02 nel modello del RISK_MANAGER) sta OLTRE il limite superiore al 97,5% (1,03) dell'intervallo per giorno della REPL osservata (0,855):
+#     R1A la rende molto poco credibile [DERIVATO dall'intervallo, non un test formale]. Resta viva solo una deriva da PF ~1,0 (mu ~0,0075), e a n=933
+#     il rumore appaiato sul PF delle celle d'uscita e' 0,04-0,09 contro differenze attese di 0,01-0,05 sotto H0: QUESTO LOTTO PUO' CHIAMARE solo derive grosse; la risposta piu' probabile e' 'il default va bene, nessuna
+#     uscita lo salva' (RISK_MANAGER, riassunto punto 10; PIANO 1.5), che chiude la casella 3 e NON e' un fallimento.
+#  NON PROVATO da questo lotto (dichiarato): nessun codice nuovo; latenza (ExecutionMode=0, il bias piu' favorevole per uno scalper); spread reale BCM 2024-25; regimi 2024-25; simboli gemelli; TF del segnale; i tetti di rischio
+#     (InpMaxDailyLoss / InpMaxTradesPerDay, che il RISK_MANAGER 5.2 propone di leggere ex-post senza passate); InpBE_OffsetATR; InpSL_ATR (non va ad asse: a 1,5 sfonda la frontiera del costo, a 3,5 e' inerte).
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO): LA DISTANZA DEL TRAILING (L'ASSE DELLA TENUTA) =======================
+#  InpTrail_ATR = kTrail: lo stop e' (estremo dall'ingresso) -/+ kTrail x ATR, dal PRIMO tick, e si sposta solo a favore. DEFAULT = 2,5 (R1A: 66% delle uscite passa dal trailing; solo 10 su 933 colpiscono lo SL iniziale: lo SL nominale e' quasi
+#  inerte perche' kSL = kTrail = 2,5). Il trailing piu' STRETTO tiene meno, il piu' LARGO tiene di piu': sotto una deriva di continuazione l'ordine di PF e' monotono nella TENUTA (1,5 < 2,5 < 3,5 < spento), sotto H0 l'asse e' quasi piatto:
+#  e' la PENDENZA che distingue le due ipotesi, non una cella (RISK_MANAGER 5.4, 'il rivelatore di deriva'). Fonte: PIANO R2U-D (1,5 e 3,5) + RISK_MANAGER 5.4 (aggiunge 'spento', NON presente nel piano R2).
+#   cella   InpTrail_ATR   significato                                                                       passate
+#   K15     1,5            trailing stretto                                                                  3
+#   K35     3,5            trailing largo (lo SL iniziale 2,5 torna dominante finche' l'estremo non sale oltre 1,0 ATR)  3
+#   KOFF    99,0           trailing SPENTO: rimangono SL iniziale 2,5 ATR + BE + uscita a tempo. Scritto 99,0 e NON 0,0 per un motivo di LETTURA: il lettore ordina i punti dell'asse per VALORE NUMERICO e con 0,0 il
+#                          punto 'spento' (la tenuta MASSIMA) finirebbe PRIMA di 1,5 e la riga S7 stamperebbe 'NON monotono: PICCO' su una curva che sale con la tenuta. A 99,0 l'ordine numerico E' l'ordine di tenuta.
+#                          99,0 == 0 (spento) provato sul codice vero (sez. EQUIVALENZE: 0 differenze su 200.000 percorsi). Se la prima passata di KOFF mostra uscite per trailing (sotto o in profitto) > 1% l'equivalenza e' falsa:
+#                          si rifa' la cella con 0,0 e si legge la pendenza A MANO nell'ordine 1,5 / 2,5 / 3,5 / spento.
+#  ORDINE DI LETTURA dell'asse (4 punti): 1,5 / 2,5 (ancora R1A) / 3,5 / 99,0. La REPL non si rigira (e' R1A). Ordine nel lotto: K15, K35, KOFF.
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate; DEFAULT = R1A: n 933, PF_V 0,855) =======================
+#  Ragionamento comune [INFERITO]: senza deriva il trailing cambia la forma e non il merito (arresto opzionale); l'alternativa (continuazione) premia la tenuta. n per tranche = banda x quote REPL 13,7 / 26,6 / 59,7% [DERIVATO].
+#  K15 (1,5). n: (M) 1.130-1.530, (P) 950-1.200, recinto 950-1.530; per tranche (M) T1 155-210 / T2 300-407 / T3 675-913 -> giudicabili T1 (se >= 150), T2, T3. PF_V: (M) 0,66-0,99 (centro 0,83), (P) 0,70-0,95; recinto 0,66-0,99.
+#     Win rate (M) 0,33, payoff (M) 1,7; quote (M): SL iniziale ~0, BE 0,11, trailing sotto 0,56, trailing in profitto 0,34; durata media (M) 5,2 min ((P) ~5). Trailing in profitto: R medio (P) 0,4-0,6. DD: [NON STIMATO].
+#     COSTO: FRA a priori (stop reale 1,5 ATR -> 29,6x con 0,04 / 35,3x solo spread): si misura per capire, NON puo' diventare sedia (S2), anche se il lettore stampa 'PASSA' (formula nominale 2,5). E' la direzione 'stretta': si aspetta peggio.
+#     CONTRO-ESEMPIO: l'alternativa ancorata dice 0,794 (H1 PF~1,0) / 0,736 (mu 0,02): DENTRO la banda e nella STESSA direzione di H0 (0,827): nessuna ipotesi alternativa per la cella da sola; serve come punto basso della pendenza.
+#  K35 (3,5). n: (M) 650-880, (P) 700-900, recinto 650-900; per tranche (M) T1 89-121 / T2 173-234 / T3 388-525 -> giudicabili T2, T3. PF_V: (M) 0,72-0,98 (centro 0,85), (P) 0,65-1,00; recinto 0,65-1,00.
+#     Win rate (M) 0,21, payoff (M) 3,2; quote (M): SL iniziale 0,20, BE 0,43, trailing sotto 0,16, trailing in profitto 0,17; durata media (M) 13,5 min. Trailing in profitto: R medio (P) >= 1,2. DD: in salita [NON STIMATO oltre la dev. std].
+#     DISACCORDO che la cella decide (scritto PRIMA): quota SL INIZIALE (M) ~20% contro (P) 30-45%. COSTO: invariato (lo SL iniziale resta 2,5 ATR), 49,4x PASSA.
+#     CONTRO-ESEMPIO: ancorata 0,869 (H1 PF~1,0) / 0,904 (mu 0,02) contro H0 0,847: tutte DENTRO la banda (M) 0,72-0,98.
+#  KOFF (99,0 == trailing spento). n: (M) 565-765 (il piano non la contempla); per tranche (M) T1 78-105 / T2 150-203 / T3 337-457 -> T1 NON giudicabile; T2 sta SUL confine (150): se T2 < 150 le tranche giudicabili sono meno di 2 e vale il ramo (d).
+#     PF_V: (M) 0,69-1,03 (centro 0,86). Win rate (M) 0,11, payoff (M) 6,3; quote (M): SL iniziale ~0,27, BE ~0,55, tempo ~0,14, trailing in profitto 0 e trailing sotto l'ingresso 0 PER COSTRUZIONE DEL CODICE (la tabella 5.4 del RISK_MANAGER scrive
+#     'sotto 0,06': e' una discrepanza interna del dossier, il codice non ha altro modo di spostare lo SL che il BE: il file scrive 0 e un valore > 1% e' un difetto di equivalenza); durata media (M) 16,5 min. DD: in SALITA (sd del profitto piu' alta).
+#     COSTO: invariato (SL iniziale 2,5 ATR), 49,4x PASSA. CONTRO-ESEMPIO: ancorata 0,899 (H1 PF~1,0) / 0,974 (mu 0,02): DENTRO la banda (M) e SOTTO 1,03 -> anche sotto H1 la cella da sola NON supera S8. La banda non separa le ipotesi.
+#  LA PENDENZA (l'unico contrasto che separa H0 da H1): pendenza = PF_V(KOFF) - PF_V(K15) sulla SOMMA. Attesa (M): H0 +0,035 +- 0,12 (sd in quadratura, prudente); H1 con default a PF~1,0 +0,105; H1 mu 0,02 +0,24.
+#     SMENTITA/ALTERNATIVA (RISK_MANAGER 5.4, testo del dossier: 'la continuazione e' presente se la pendenza (spento - 1,5), pooled sulle tre tranche, e' > +0,15 e le tre tranche hanno lo stesso segno e PF_V(spento) > 1,03'). LETTURA OPERATIVA
+#     scritta prima dei numeri [DERIVATA, il dossier non la scrive]: 'le tre tranche' e' IRRAGGIUNGIBILE alla lettera (T1 di KOFF ha n atteso 78-105 < 150 = S1), quindi 'stesso segno in ogni tranche in cui ENTRAMBE le celle hanno n >= 150,
+#     almeno 2'; se le tranche cosi' giudicabili sono meno di 2 -> ramo (d) per la pendenza. (a) per la pendenza = pendenza(somma) > +0,15 E segno positivo nelle tranche giudicabili (>= 2) E PF_V(KOFF) > 1,03 -> T0, NON candidato.
+#     LIMITE DI POTENZA, dichiarato dal dossier e qui ripetuto: a questa soglia la prova chiama solo derive da PF >= ~1,08; una deriva da PF ~1,0 (pendenza attesa +0,105) NON la supera e si scrive 'nessuna pendenza oltre il rumore'.
+#     Altrimenti il default (2,5) resta. Se una sola cella sporge e le vicine no: 'non c'e' una configurazione robusta'. Se tutto sta dentro +-0,06 della REPL: 'il default va bene'. Prior di casa [citati dal RISK_MANAGER 5.4, NON rifatti da me; motori diversi, non confrontabili]: R24 DAX soglia 0 contro 1,0 R
+#     ribaltata in-sample (8o ribaltamento); 'NUDA' contro trailing sul Dow 1,238 contro 1,371: due indizi che tenere meno non peggiora e che l'in-campione ribalta, quindi la pendenza si legge SOLO con la prova in avanti (T0).
+#  PASSATE: 3 celle x 3 tranche = 9. Tempo [STIMA, come R2UBE]: K15 ha n ~1.100-1.500 (le piu' veloci: trade corti) -> ~1,1-1,5 min/passata -> centro ~12 minuti, intervallo 9-25. Tetto del lotto 45 minuti (5 min/passata).
+#
+
+#  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi di tranche qui sotto (le tre tranche di R1A, nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 le legge dal file)
+#  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+#  @GBA-TRANCHE nome=T2 da=2026.04.01 a=2026.06.30
+#  @GBA-TRANCHE nome=T3 da=2026.01.01 a=2026.03.31
+#  @GBA-ASSE chiave=InpTrail_ATR tranche=3 celle=3 lotti=1
+#  @GBA-CELLA nome=K15 InpTrail_ATR=1.5
+#  @GBA-CELLA nome=K35 InpTrail_ATR=3.5
+#  @GBA-CELLA nome=KOFF InpTrail_ATR=99.0
+#  @GBA-LOTTO nome=R2UKTRAIL modello=4 tetto_min=45 passate=K15:T1,K15:T2,K15:T3,K35:T1,K35:T2,K35:T3,KOFF:T1,KOFF:T2,KOFF:T3
+#
+InpSymbol=XAUUSD
+InpSignalTF=1
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=24
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true
