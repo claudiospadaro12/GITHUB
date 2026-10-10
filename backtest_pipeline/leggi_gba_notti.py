@@ -1133,7 +1133,7 @@ def _spec_notte(date0, nets, ora=2, minuto=0, durata=6, passo_giorni=1, lato="bu
     return out
 
 
-def _zip_notte(prova, k, ops_per_tranche, ini_cambi=None, comm=0.0, qualita="100% ticks reali", magic="775800", cella=None, lotto=None, nome_ini_period=None):
+def _zip_notte(prova, k, ops_per_tranche, ini_cambi=None, comm=0.0, qualita="100% ticks reali", magic="775800", cella=None, lotto=None, nome_ini_period=None, prova_nello_zip=None):
     """Zip finto di un lotto notte nel formato del driver v5, con ini e manifest coerenti con il file prova (salvo `ini_cambi`)."""
     cella = cella or sorted(prova["celle"])[0]
     lotto = lotto or prova["lotto"]
@@ -1164,6 +1164,8 @@ def _zip_notte(prova, k, ops_per_tranche, ini_cambi=None, comm=0.0, qualita="100
             prova["asse"] or "InpHourEnd", "7", per))
     cols = "lotto;passata;cella;spread_max_atr;tranche;da;a;modello;magic;t_avvio;durata_s;stato;trades_report;profitto_report;pf_report;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;righe_gba;ingressi_log;avvio_ok;autotest;finestra;motivi;asse;valore_asse;simbolo;periodo;prova"
     z.writestr("MANIFEST_R0.csv", cols + "\n" + "\n".join(righe) + "\n")
+    if prova_nello_zip is not None:
+        z.writestr(prova["nome"], prova_nello_zip)
     z.close()
     return f.name
 
@@ -1436,6 +1438,27 @@ def autotest():
     rc, txt = _esegui_catturando([zB_p, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
     ck("   ... (contro-esempio) Period=M1 nell'ini di un lotto M5 -> 'Period=M1 nell'ini invece di M5'", "Period=M1 nell'ini invece di M5" in txt and txt.count("-> NON LEGGIBILE") == 3, txt[:600])
 
+    # copia del file prova dentro lo zip: identica / diversa (attese riscritte dopo la partenza del lotto)
+    testo_prova = open(p1, "rb").read()
+    zP = _zip_notte(pr1, "M1", ops1, prova_nello_zip=testo_prova)
+    rc, tp = _esegui_catturando([zP, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("copia del file prova nello zip IDENTICA a quella letta: dichiarato", "IDENTICA al file letto" in tp and rc == 0)
+    zP2 = _zip_notte(pr1, "M1", ops1, prova_nello_zip=testo_prova.replace(b"n 142-160", b"n 100-300"))
+    rc, tp2 = _esegui_catturando([zP2, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("CONTRO-ESEMPIO: copia del file prova nello zip con l'attesa di n riscritta (142-160 -> 100-300) -> 'DIVERSA' e la riga che differisce e' stampata", "DIVERSA dal file letto" in tp2 and "n 100-300" in tp2 and "n 142-160" in tp2, tp2[:300])
+    # attese: confini dentro/fuori e smentite (stretti: > 175 e < 130)
+    for n_, atteso_in, sm_hi, sm_lo in ((142, True, False, False), (160, True, False, False), (141, False, False, False), (161, False, False, False), (175, False, False, False), (176, False, True, False), (130, False, False, False), (129, False, False, True)):
+        righe_ = []
+        Cm = {"prova": mp, "costo": [], "parziale": False, "mancanti": []}
+        stampa_attese(righe_.append, Cm, {"n_ops": n_, "n_notti": 10, "neg": 3, "q": 0.3, "pf": 1.0}, float("nan"))
+        tt = "\n".join(righe_)
+        okb = ("DENTRO attesa" in tt.split("\n")[1]) == atteso_in and (re.search(r"smentita r\.\d+ '> 175': n = %d > 175\? -> SCATTA" % n_, tt) is not None) == sm_hi and (("'n < 130': n = %d < 130? -> SCATTA" % n_) in tt) == sm_lo
+        ck("attese: n = %d -> banda 142-160 %s, smentita >175 %s, smentita <130 %s" % (n_, "dentro" if atteso_in else "fuori", "scatta" if sm_hi else "no", "scatta" if sm_lo else "no"), okb, tt[:700])
+    # una passata SENZA operazioni non fa crollare niente
+    ops_v = {"T1": ops1["T1"], "T2": [], "T3": ops1["T3"]}
+    zE = _zip_notte(pr1, "M1", ops_v)
+    rc, te = _esegui_catturando([zE, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("una passata con ZERO operazioni (T2) non fa crollare la lettura: nessun ERRORE INTERNO, T2 mostra n op 0", "ERRORE INTERNO" not in te and re.search(r"T2\s+n op\s+0 ", te) is not None, te[-600:])
     # una gemella 775850 NON dichiarata nel file prova blocca il totale
     zG = _zip_notte(pr1, "M1", {"T1": ops1["T1"]}, magic="775850")
     rc, tg = _esegui_catturando([zA, zG, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
