@@ -1,7 +1,7 @@
 # =====================================================================
 #  MARCATORE_AZZURRA_FREQ_v1
 #  AZZURRA_FREQ.ps1 -- FREQUENZA E SCREENING DELLA BULGE AZZURRA
-#                      (ABTG_BulgeAzzurra, 22 cross, H1, Modello 1)
+#                      (ABTG_BulgeAzzurra, 33 simboli del campo + 22 cross, H1, Modello 1)
 #
 #  CHE COSA FA (10/10/2026):
 #   0. guardie: SOLO sul PC di backtest DESKTOP-H4D7CAJ, nessun MT5 o
@@ -17,11 +17,12 @@
 #      (classe 1167);
 #   2. quattro job IN FILA con il driver dei round GIA' IN USO
 #      (RIGA_ROUND_VPS.ps1 al pin, SHA 3341756F... = quello di R92BAB, girato
-#      il 01/10 su questo PC): AZF_A (base dei controlli, 22 cross, gemelle
-#      774511/774561), AZF_B (asse Azure_FirstTouchOnly, magic 774521),
-#      AZF_C (ritracciamento spento, gemelle 774531/774581), AZF_D (LA CELLA
+#      il 01/10 su questo PC), IN QUESTO ORDINE: AZF_D PER PRIMO (LA CELLA
 #      DEL CAMPO: i 33 simboli su cui gira l'Azzurra 774500, gemelle
-#      774541/774591; classe 1222). Modello 1, deposito 10000, finestra e input
+#      774541/774591; classe 1222: risponde alla domanda, quindi non sta
+#      sotto il tetto di avvio), poi AZF_A (base dei controlli, 22 cross,
+#      gemelle 774511/774561), AZF_B (asse Azure_FirstTouchOnly, magic
+#      774521), AZF_C (ritracciamento spento, gemelle 774531/774581). Modello 1, deposito 10000, finestra e input
 #      dai file prova. Dopo OGNI job: SHA256 di EA, include, driver e file
 #      prova sui byte che hanno girato (classe 166/595: il driver compila
 #      dal RAMO lavoro, non dal pin);
@@ -95,6 +96,10 @@ $SIMB = 'EURGBP'
 # classe 1222: il CAMPO gira su 33 simboli. A, B, C (controlli) su 22 cross; D = la cella del campo. La lista e' PER JOB, non globale.
 $SL22 = 'EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY'
 $SL33 = $SL22 + ',XAUUSD,100GBP,200AUD,225JPY,D30EUR,E35EUR,E50EUR,F40EUR,NASUSD,SPXUSD,U30USD'
+# classe 1225: gli 11 simboli fuori dai cross, elencati per NOME (mai "quelli che non sono nei 22"): se il tester non li vede tutti,
+# la cella D darebbe la lambda dei 22 con l etichetta dei 33
+$NUOVI11 = @('XAUUSD','100GBP','200AUD','225JPY','D30EUR','E35EUR','E50EUR','F40EUR','NASUSD','SPXUSD','U30USD')
+if(($SL22 + ',' + ($NUOVI11 -join ',')) -ne $SL33){ throw 'costanti incoerenti: SL22 + NUOVI11 non e SL33. Non si parte.' }
 $MODELLO = 1
 $DEPOSITO = 10000
 # finestra del file prova: IS 2026.01.01 -> 2026.06.30 (esclusa), OOS 2026.07.01 -> 2026.10.10 (esclusa) (driver r.934, @FRAZIONEIS 0.6383)
@@ -116,7 +121,10 @@ function Feriali($da, $a){
 $GIORNI_IS  = Feriali $IS_DA $IS_A
 $GIORNI_OOS = Feriali $OOS_DA $OOS_A
 $JOBS = @(
-  [pscustomobject]@{ L='AZF_A'; P='AZZURRA_FREQ_2026-10-10_A_base.txt';               SL=$SL22; Lo=0.4; Hi=7.0; HP='9194C4136E8B8D7B88DC750712E4E4A404E31F873B3EC7B6832C9F0E41E3DF29';
+  [pscustomobject]@{ L='AZF_D'; P='AZZURRA_FREQ_2026-10-10_D_campo33.txt';            SL=$SL33; Lo=0.6; Hi=10.0; HP='C4FA6A45A2DB77722AD344517D651FA749F82FEDDC589F7DAEAAB2FD7314380F';
+    Righe=@('InpMagic=774541||774541||50||774591||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=1.5');
+    Celle=@([pscustomobject]@{ K='D0'; M='774541'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='D1'; M='774591'; V='OGNI'; Primo='0'; Rng=1.5 }) },
+  [pscustomobject]@{ L='AZF_A'; P='AZZURRA_FREQ_2026-10-10_A_base.txt';               SL=$SL22; Lo=0.4; Hi=7.0; HP='D12A3D7D56AE6935B0094BA480BE78A88B5CA6EF150B8466F06E52BADB8CF767';
     Righe=@('InpMagic=774511||774511||50||774561||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=1.5');
     Celle=@([pscustomobject]@{ K='A0'; M='774511'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='A1'; M='774561'; V='OGNI'; Primo='0'; Rng=1.5 }) },
   [pscustomobject]@{ L='AZF_B'; P='AZZURRA_FREQ_2026-10-10_B_primo_tocco.txt';        SL=$SL22; Lo=0.4; Hi=7.0; HP='A09620264E40E55EB87B3D0D3C48C1147345D7796D93DAD5B17DC2A683747A72';
@@ -124,10 +132,7 @@ $JOBS = @(
     Celle=@([pscustomobject]@{ K='B0'; M='774521'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='B1'; M='774521'; V='PRIMO'; Primo='1'; Rng=1.5 }) },
   [pscustomobject]@{ L='AZF_C'; P='AZZURRA_FREQ_2026-10-10_C_ritracciamento_off.txt'; SL=$SL22; Lo=0.4; Hi=7.0; HP='89B71C5C408F80240F96BC0AEB490C868C7272DA00ACE119FD13793BF687A7AA';
     Righe=@('InpMagic=774531||774531||50||774581||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=0');
-    Celle=@([pscustomobject]@{ K='C0'; M='774531'; V='OGNI'; Primo='0'; Rng=0.0 }, [pscustomobject]@{ K='C1'; M='774581'; V='OGNI'; Primo='0'; Rng=0.0 }) },
-  [pscustomobject]@{ L='AZF_D'; P='AZZURRA_FREQ_2026-10-10_D_campo33.txt';            SL=$SL33; Lo=0.6; Hi=10.0; HP='BEAE55C44F83D31E998918F245DD86DBE811AD851B69467C0FC7604972492473';
-    Righe=@('InpMagic=774541||774541||50||774591||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=1.5');
-    Celle=@([pscustomobject]@{ K='D0'; M='774541'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='D1'; M='774591'; V='OGNI'; Primo='0'; Rng=1.5 }) }
+    Celle=@([pscustomobject]@{ K='C0'; M='774531'; V='OGNI'; Primo='0'; Rng=0.0 }, [pscustomobject]@{ K='C1'; M='774581'; V='OGNI'; Primo='0'; Rng=0.0 }) }
 )
 $RIGHE_COMUNI = @('Use_Azure=1', 'Use_Purple=0', 'Use_Blue=0', 'Use_Orange=0', 'Risk_Percent=0.8', 'Max_Trades=4', 'Enable_Partial_Close=0', 'Enable_BE_1R=0', 'Enable_Trailing_R=0')
 $CAMPI = @('Trades','Profit','Profit Factor','Equity DD %')
@@ -340,7 +345,7 @@ foreach($lw in @(($testoLogC -split "`r?`n") | Where-Object { $_ -match '(?i)war
 Dico 'NB: il driver dei round la RICOMPILA dal ramo lavoro a ogni job; lo SHA256 dei byte compilati si ricontrolla DOPO ogni job (classe 166/595).' 'Gray'
 
 # =====================================================================
-#  2. CARTELLA DEI RISULTATI E I TRE JOB
+#  2. CARTELLA DEI RISULTATI E I QUATTRO JOB
 # =====================================================================
 $dsk = [Environment]::GetFolderPath('Desktop')
 if([string]::IsNullOrWhiteSpace($dsk)){ $dsk = Join-Path $env:USERPROFILE 'Desktop' }
@@ -666,7 +671,9 @@ if($statoD -eq 'ROTTO'){
   if($tIS -eq 0 -and $tOOS -eq 0){
     $esito = 'NON MISURATO: cella del campo D con Trades = 0 in IS e in OOS. EA cieco nel tester e regola che non scatta danno lo STESSO zero: prossimo passo il controllo positivo Use_Purple=1 (file madre, attesa Z)'
   } else {
-    $codice = 0
+    # classe 1225: gli 11 non-FX a zero nella gamba OOS di D. 11 su 11 = NON MISURATO; 1-10 = LIMITE BASSO in coda all esito
+    $zD = @(('' + $AN['D0'].SimbZero).Split(','))
+    $z11 = @($NUOVI11 | Where-Object { $zD -contains $_ })
     $ld = Lambda 'D0'
     $lamIS = $ld.IS; $lamO = $ld.OOS
     $cat = ''
@@ -686,7 +693,14 @@ if($statoD -eq 'ROTTO'){
     W ('  giorni a zero osservati ' + (Pc $zOss) + ' contro Poisson ' + (Pc ([Math]::Exp(-$lamO))) + ': ' + $(if($zOss -gt [Math]::Exp(-$lamO) + 0.10){'gli zeri SI RAGGRUPPANO (oltre +10 punti): per il campo vale la frazione OSSERVATA e la serie piu lunga, non la formula'}else{'entro +10 punti dalla Poisson'}))
     W ('  CATEGORIA: ' + $cat)
     W ('  venerdi 09/10 nel tester (indizio, non prova: stato diverso dal campo): ' + $AN['D0'].VenSera + ' chiusure VERE dalle 15:39 server (end of test escluse), ' + $AN['D0'].FineGamba + ' posizioni portate a fine gamba (end of test, magic diverso ignorato: MagicKo ' + $AN['D0'].MagicKo + ')')
-    $esito = ('FREQUENZA DEL CAMPO LEGGIBILE (cella D, 33 simboli) -- lambda OOS ' + (F3 $lamO) + '/giorno, simboli a zero nella gamba OOS ' + $AN['D0'].NSimbZero + '/' + $AN['D0'].NSimb + ', P(0) del venerdi 7/24 ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ', ' + $cat)
+    W ('  degli 11 simboli fuori dai cross (per nome): a ZERO ' + $z11.Count + $(if($z11.Count -gt 0){ ' (' + ($z11 -join ',') + ')' }else{''}))
+    if($z11.Count -ge $NUOVI11.Count){
+      $esito = 'NON MISURATO: gli 11 simboli fuori dai cross a ZERO nella gamba OOS di D; tester cieco e regola che non scatta danno lo stesso zero; la lambda sarebbe quella dei 22 con l etichetta dei 33 (classe 1225). Prossimo passo: job con i soli 11 + Use_Purple=1'
+    } else {
+      $codice = 0
+      $esito = ('FREQUENZA DEL CAMPO LEGGIBILE (cella D, 33 simboli) -- lambda OOS ' + (F3 $lamO) + '/giorno, simboli a zero nella gamba OOS ' + $AN['D0'].NSimbZero + '/' + $AN['D0'].NSimb + ', P(0) del venerdi 7/24 ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ', ' + $cat)
+      if($z11.Count -gt 0){ $esito = $esito + (' -- LIMITE BASSO: ' + $z11.Count + ' degli 11 simboli non-FX a zero (' + ($z11 -join ',') + '): se il tester non li vede la lambda e SOTTOSTIMATA (file D, ipotesi A)') }
+    }
   }
 }
 W ''

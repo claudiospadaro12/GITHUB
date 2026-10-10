@@ -19,7 +19,8 @@
 #  15:00 ... 20:00; il forex BCM chiude alle 22:00 server il venerdi'. Barre H1 chiuse valutate: 14:00-20:00 = 7 su 24:
 #  ESPOSIZIONE 7/24 DI GIORNO, non un giorno.
 #
-#  LA FAMIGLIA (quattro file, UN asse per file, UNA variabile diversa dalla cella base A per file; quattro job in fila nello stesso lancio):
+#  LA FAMIGLIA (quattro file, UN asse per file, UNA variabile diversa dalla cella base A per file; quattro job in fila nello stesso lancio,
+#  in quest'ordine: D PER PRIMO -- e' la cella che risponde alla domanda e non deve stare sotto il tetto di avvio -- poi A, B, C):
 #     AZZURRA_FREQ_2026-10-10_A_base.txt               asse InpMagic 774511 / 774561 (2 gemelle G1), default dell'EA, 22 cross  <- QUESTO
 #     AZZURRA_FREQ_2026-10-10_B_primo_tocco.txt        asse Azure_FirstTouchOnly false/true, InpMagic 774521 pinnato
 #     AZZURRA_FREQ_2026-10-10_C_ritracciamento_off.txt asse InpMagic 774531 / 774581, Azure_MaxRetraceRangeATR=0 (controllo spento)
@@ -49,6 +50,11 @@
 #  ABTG_BulgeAzzurra_piccolo_demo.set) dice 0.5 ma NON e' quello in uso. Dal codice la taglia NON entra nel segnale ne' in Max_Trades/
 #  HasOpenTrade; entra solo nel kill switch (Max_Daily_Loss_Pct 2,0, r.471: a 0,8 bastano 3 SL pieni nel giorno). Proxy nel riepilogo:
 #  giorni con >= 3 chiusure in perdita.
+#  DEPOSITO: 10.000 nel tester contro un saldo reale del piccolo di circa 5.431 EUR (report/GBA_R0_S0_LETTURA_2026-10-10.md r.29). Sulla
+#  FREQUENZA l'effetto e' trascurabile: il segnale non guarda il saldo; CalcLots (r.1372-1395) arrotonda in basso e poi porta al lotto
+#  MINIMO, non salta l'ordine; il kill switch e' in % del saldo e filtrato per magic. Unica via [NON MISURATA]: dove il lotto minimo supera
+#  lo 0,80% di 5.431 EUR (indici e oro con SL a 3 ATR) la perdita a SL in campo e' piu' grande in %, e il kill switch puo' scattare prima
+#  in campo che nel tester: la frequenza del tester sarebbe allora un po' SOPRA quella del campo.
 #  Use_ADX_Filter=1 come il campo e il default: sull'Azzurra e' INERTE (ADX_Apply_On_Azure=0, BLU/VIOLA/ARANCIO spenti, spec par. 5.7).
 #  Bulge_Multi e' INERTE sull'Azzurra (isBulgeSig non entra in AzureCore, r.1530-1550). Il filtro ATR 0,5-1,8 invece AGISCE (AtrOk e'
 #  un return all'inizio di CheckSignal, vale per tutti i segnali).
@@ -84,6 +90,9 @@
 #        5 giorni pieni:  78%    61%    22%    8%     0,7%   0%     0%     0%     0%     0%
 #      Quindi: anche a 7/giorno il venerdi' parziale a zero ha ~13% di probabilita' -> il solo 09/10 NON separa "nessuna occasione" da
 #      "campo muto". Lo separa la lambda misurata su D + i PROSSIMI giorni pieni in campo (categorie sotto).
+#      IPOTESI DEL 7/24: ritmo UNIFORME fra le ore della giornata [NON MISURATO]. Le barre 14:00-20:00 server sono la sessione di New York
+#      (con la fine di Londra): se l'Azzurra apre piu' spesso li', l'esposizione vera del venerdi' e' piu' di 7/24 e P(0) e' piu' bassa;
+#      se apre di piu' su Asia e mattina europea, e' il contrario. Il per-trade ha solo l'ora di CHIUSURA: questo lavoro non lo misura.
 #      CONTRO-ESEMPIO della Poisson: le aperture si raggruppano (il mercato fa giornate da tocchi e giornate morte). Se la frazione OSSERVATA
 #      di giorni a zero nella gamba OOS e' > exp(-lambda) + 10 punti, la Poisson SOTTOSTIMA gli zeri: per il campo vale la frazione
 #      osservata (e la serie piu' lunga di giorni a zero osservata), non la formula. Il riepilogo le stampa tutte e due.

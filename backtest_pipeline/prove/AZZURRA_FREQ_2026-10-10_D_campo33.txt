@@ -18,6 +18,14 @@
 #     Rapporto < 1 = Max_Trades 4 saturato dagli 11 in piu' (lo slot si riempie prima): si scrive con il numero.
 #   - G1 sulle gemelle 774541 / 774591: come A (Trades identici, OOS identica al centesimo, IS |dProfit| <= 0,10, per-trade identico).
 #   - nessun verdetto sul PF (Modello 1, un regime); costo [DERIVATO] ~2,8 minuti (33 simboli).
+#   - REGOLA DEGLI 11 SIMBOLI NON-FX (classe 1225, scritta PRIMA dei numeri). Gli 11 sono elencati per NOME: XAUUSD, 100GBP, 200AUD, 225JPY,
+#     D30EUR, E35EUR, E50EUR, F40EUR, NASUSD, SPXUSD, U30USD (mai "quelli che non sono nei 22"). Nella gamba OOS di D0:
+#       11 su 11 a ZERO  -> NON MISURATO (rc 3): tester cieco su quei simboli e regola che non scatta danno lo stesso zero, e la lambda sarebbe
+#                           quella dei 22 con l'etichetta dei 33. Prossimo passo: un job con i soli 11 + Use_Purple=1 (controllo positivo).
+#       1 - 10 a ZERO    -> la frequenza si legge (rc 0) ma l'esito porta in coda "LIMITE BASSO: k degli 11 simboli non-FX a zero (elenco)":
+#                           se il tester non li vede la lambda e' SOTTOSTIMATA (ipotesi A qui sopra).
+#       0 a ZERO         -> lettura pulita.
+#     CONTRO-ESEMPIO che la regola ferma: D con deal solo sui 22 cross dava statoD=OK e "FREQUENZA DEL CAMPO LEGGIBILE" con 11/33 a zero.
 #  UNA VARIABILE: Symbols_List. L'asse InpMagic e' tecnico (G1), non di strategia.
 # =====================================================================
 @SIMBOLO    EURGBP
