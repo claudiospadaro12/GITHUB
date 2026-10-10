@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_CARTELLE_GEMELLE_DESKTOP_v1
+#  MARCATORE_CARTELLE_GEMELLE_DESKTOP_v2
 #  CARTELLE_GEMELLE_DESKTOP.ps1 -- 10/10/2026
 #
 #  DERIVATO da ZIP_GEMELLI_DESKTOP_V2.ps1 (pin 334806a4, SHA 87C5C4F7, passato dal
@@ -8,11 +8,12 @@
 #  ARCHIVIATO. Stessi parametri, stesse guardie di macchina / Desktop / attivita'
 #  pianificate / processi / giunzioni / log / annulla.
 #
-#  RICHIESTA DI CLAUDIO (10/10/2026): "SI, GLI ZIP GEMELLI. LE ALTRE LASCIALE FUORI."
+#  RICHIESTA DI CLAUDIO (10/10/2026): "VOGLIO RIDURRE ANCORA LE CARTELLE DESKTOP".
 #  Dopo l'ESEGUI di ZIP_GEMELLI sul PC di backtest DESKTOP-H4D7CAJ (73 zip in
 #  Desktop\ARCHIVIO\2026-10-10\ZIP_GEMELLI) il Desktop aveva ancora ~175 icone:
-#  molte sono le CARTELLE GEMELLE di quegli zip. Il dato e' preservato nello zip
-#  archiviato, quindi la cartella si puo' spostare in sicurezza (e' reversibile).
+#  molte sono le CARTELLE GEMELLE di quegli zip. La cartella si sposta INTERA in
+#  ARCHIVIO (niente si cancella, e' reversibile). Lo zip gemello ha lo stesso NOME ma il
+#  suo contenuto NON e' confrontato con la cartella: NON e' una copia certificata.
 #
 #  COSA FA, in una frase: SPOSTA in Desktop\ARCHIVIO\<oggi>\CARTELLE_GEMELLE\ SOLO
 #  le CARTELLE del Desktop (un livello) il cui nome e' IDENTICO (senza maiuscole/
@@ -407,7 +408,7 @@ $zipArch = New-Object 'System.Collections.Generic.Dictionary[string,System.Colle
 $zipArchTot = 0
 
 function ZipLeggibile($f){
-  # il dato e' "preservato nello zip" solo se lo zip e' un vero zip: piu' di 22 byte (un
+  # lo zip conta come gemello solo se e' un vero zip: piu' di 22 byte (un
   # archivio vuoto ne ha 22) e firma PK. Non si apre il contenuto: la lettura e' rapida.
   if($f.Length -le 22){ return $false }
   try{
@@ -503,7 +504,7 @@ foreach($d in $cartelleTutte){
   }
   $lstZ = $null
   if(-not $zipArch.TryGetValue($nome, [ref]$lstZ)){
-    [void]$restano.Add([pscustomobject]@{ Nome=$nome; Cat="senza_zip_archiviato"; Perche="nessuno zip VALIDO (piu' di 22 byte, firma PK) con questo nome ESATTO in ARCHIVIO\<giorno>\ZIP_GEMELLI (il dato non e' in uno zip archiviato)" }); continue
+    [void]$restano.Add([pscustomobject]@{ Nome=$nome; Cat="senza_zip_archiviato"; Perche="nessuno zip VALIDO (piu' di 22 byte, firma PK) con questo nome ESATTO in ARCHIVIO\<giorno>\ZIP_GEMELLI (nessuno zip gemello archiviato)" }); continue
   }
   if($zipSulDesktop.Contains($nome)){
     [void]$restano.Add([pscustomobject]@{ Nome=$nome; Cat="zip_sul_desktop"; Perche="sul Desktop c'e' (di nuovo) uno zip con lo stesso nome: lo sta riscrivendo qualcuno, la cartella resta" }); continue
@@ -582,7 +583,7 @@ Write-Host ("Desktop  : " + $Desktop)
 Write-Host ("Dest.    : " + $DestDir)
 Write-Host ("Attivita' pianificate lette: si', guardia ATTIVA   -   processi dei round vivi: " + $(if($testerVivi.Count -gt 0){"SI"}else{"no"}))
 Write-Host ("Icone sul Desktop PRIMA: " + $icoPrima + "   -   cartelle: " + $cartelleTutte.Count + "   zip gemelli archiviati: " + $zipArchTot + "   da spostare: " + $piano.Count + "   restano: " + $restano.Count) -ForegroundColor White
-Write-Host "SOLO le CARTELLE con lo zip gemello gia' archiviato (il dato resta nello zip). Tutto il resto (file sciolti, collegamenti, altre cartelle, NATCLA_F1_P, cartelle tematiche e strumenti) NON SI TOCCA." -ForegroundColor Gray
+Write-Host "SOLO le CARTELLE con lo zip gemello gia' archiviato (la cartella si sposta INTERA; il contenuto dello zip NON e' confrontato con la cartella). Tutto il resto (file sciolti, collegamenti, altre cartelle, NATCLA_F1_P, cartelle tematiche e strumenti) NON SI TOCCA." -ForegroundColor Gray
 if($testerVivi.Count -gt 0){
   Write-Host ("ATTENZIONE: processi dei round vivi: " + (ElencoVivi) + ". L'anteprima la faccio, ma -Esegui si RIFIUTEREBBE.") -ForegroundColor Yellow
 }
@@ -685,7 +686,7 @@ Write-Host ""
 Write-Host ("FATTO: " + $log.Count + " cartelle spostate in " + $DestDir + ".   NON spostate: " + $falliti.Count + "   restano: " + $restano.Count) -ForegroundColor Green
 Write-Host ("Icone sul Desktop: prima " + $icoPrima + "   dopo " + $icoDopo + "   (questo referto escluso)") -ForegroundColor Green
 if($log.Count -gt 0){
-  Write-Host ("Spazio tolto dalla vista: " + $mbMossi.ToString("0.0", $INV) + " MB -- SPOSTATI, non cancellati (stesso disco: lo spazio libero non cambia). Il dato resta anche nello zip archiviato.") -ForegroundColor Green
+  Write-Host ("Spazio tolto dalla vista: " + $mbMossi.ToString("0.0", $INV) + " MB -- SPOSTATI, non cancellati (stesso disco: lo spazio libero non cambia). Le cartelle sono INTERE in ARCHIVIO; lo zip gemello NON e' una copia verificata della cartella: non cancellare ne' l'una ne' l'altro.") -ForegroundColor Green
   Write-Host ("Log per annullare: " + $logFile) -ForegroundColor Gray
   Write-Host "Per rimettere queste cartelle al loro posto: stessa riga con -Annulla, ma SOLO oggi (il giro di un altro giorno non si smonta)." -ForegroundColor Gray
 } else {
