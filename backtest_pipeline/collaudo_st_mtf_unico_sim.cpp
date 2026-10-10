@@ -61,7 +61,7 @@ enum ENUM_CUSTOMIND_PROPERTY_STRING { INDICATOR_SHORTNAME };
 const color clrSilver = 0xC0C0C0, clrDeepSkyBlue = 0xFFBF00, clrWhite = 0xFFFFFF, clrYellow = 0x00FFFF, clrTan = 0x8CB4D2,
             clrRoyalBlue = 0xE16941, clrRed = 0x0000FF, clrLightCoral = 0x8080F0, clrLime = 0x00FF00, clrOrange = 0x00A5FF,
             clrAqua = 0xFFFF00, clrDimGray = 0x696969, clrForestGreen = 0x228B22, clrCrimson = 0x3C14DC,
-            clrDarkViolet = 0xD30094, clrRoyalBlue2 = 0;
+            clrDarkViolet = 0xD30094;
 
 struct MqlRates { datetime time; double open, high, low, close; long long tick_volume; int spread; long long real_volume; };
 
@@ -159,6 +159,11 @@ int count_prefix(const string &p, int type = -1) {
 long long I(const string &n, int p) { return OBJ.count(n) ? OBJ[n].i[p] : -999; }
 void click(const string &n) { OnChartEvent(CHARTEVENT_OBJECT_CLICK, 0, 0.0, n); }
 void timer(int k = 1) { for(int a = 0; a < k; a++) { g_tick += 1000; OnTimer(); } }
+string snapshot() {
+  std::ostringstream o;
+  for(auto &kv : OBJ) { o << kv.first << "#" << kv.second.price; for(auto &q : kv.second.i) o << "," << q.first << "=" << q.second;
+    for(auto &q : kv.second.s) o << "," << q.first << "=" << q.second; o << ";"; }
+  return o.str(); }
 int visible_labels() { int n = 0; for(auto &kv : OBJ) if(kv.first.compare(0, 9, "ABTGSTU_T") == 0 && kv.second.i[OBJPROP_TIMEFRAMES] != OBJ_NO_PERIODS) n++; return n; }
 
 int main() {
@@ -181,6 +186,7 @@ int main() {
   for(int j = 0; j < 3; j++) if(ObjectFind(0, "ABTGSTU_B_ST" + std::to_string(j)) >= 0) order.push_back("ABTGSTU_B_ST" + std::to_string(j));
   order.push_back("ABTGSTU_B_UNICO"); order.push_back("ABTGSTU_B_DEF");
   bool seq = true, contig = true;
+  (void)seq;
   for(size_t k = 1; k < order.size(); k++) {
     long long xa = I(order[k - 1], OBJPROP_XDISTANCE), xb = I(order[k], OBJPROP_XDISTANCE);
     long long ya = I(order[k - 1], OBJPROP_YDISTANCE), yb = I(order[k], OBJPROP_YDISTANCE);
@@ -188,9 +194,9 @@ int main() {
 #if defined(VAR_VERTICALE)
     if(!(yb == ya + ha + 1 && xb == xa)) contig = false;
 #elif defined(VAR_DESTRA)
-    if(!(xb == xa - wa - 1 + (I(order[k - 1], OBJPROP_XSIZE) - I(order[k], OBJPROP_XSIZE)) + 0 * xb) && !(xa - xb == I(order[k], OBJPROP_XSIZE) - 0 + 1 - (I(order[k], OBJPROP_XSIZE) - wa))) contig = false;
+    // bordo sinistro a schermo = larghezza grafico - distanza: adiacenti se xa - xb == larghezza(a) + 1
+    if(!(xa - xb == wa + 1 && yb == ya)) contig = false;
     if(!(xb < xa)) seq = false;
-    (void)ya; (void)yb;
 #else
     if(!(xb == xa + wa + 1 && yb == ya)) contig = false;
 #endif
@@ -199,11 +205,11 @@ int main() {
   CHECK(contig, "in colonna: ogni tasto SOTTO il precedente (stessa x, y + 24 + 1) - UNICO sotto ST 3.5");
 #elif defined(VAR_DESTRA)
   CHECK(seq, "angolo DESTRO: distanza dal bordo destro decrescente lungo l'elenco (ordine sinistra->destra conservato)");
+  CHECK(contig, "angolo DESTRO: tasti adiacenti (1 px), stessa y - UNICO subito a destra di ST 3.5");
   CHECK(I("ABTGSTU_B_DEF", OBJPROP_XDISTANCE) == 10 + I("ABTGSTU_B_DEF", OBJPROP_XSIZE),
         "angolo DESTRO: DEFAULT (ultimo) a 10 px dal bordo destro col suo lato destro");
   CHECK(I("ABTGSTU_B_UNICO", OBJPROP_XDISTANCE) - I("ABTGSTU_B_DEF", OBJPROP_XDISTANCE) == 64 + 1,
         "angolo DESTRO: UNICO subito a sinistra di DEFAULT (64 + 1 px)");
-  (void)contig;
 #else
   CHECK(contig, "in riga: ogni tasto subito a DESTRA del precedente (x + larghezza + 1), stessa y");
   snprintf(m, sizeof m, "UNICO a x=%lld, dopo ST 3.5 (x=%lld, larghezza %lld): adiacente",
@@ -258,8 +264,18 @@ int main() {
   }
   int r0 = g_redraws; timer();
   CHECK(g_redraws == r0, "giro del timer senza cambiamenti: NESSUN ChartRedraw");
-  g_tickshift = 3; r0 = g_redraws; timer();
-  CHECK(g_redraws == r0 + 1, "tick che muove la barra in formazione: un ChartRedraw");
+  // ridisegno SE E SOLO SE e' cambiato almeno un oggetto (un tick piccolo puo' non muovere il livello:
+  // le bande del Supertrend si stringono soltanto, quindi "nessun ridisegno" puo' essere giusto)
+  bool iff = true, moved = false;
+  for(int ts = 1; ts <= 40; ts++) {
+    g_tickshift = ts * ts * 37;                 // da piccoli a molto grandi
+    string before = snapshot(); r0 = g_redraws; timer();
+    bool changed = (snapshot() != before);
+    if(changed != (g_redraws == r0 + 1) || g_redraws > r0 + 1) iff = false;
+    if(changed) moved = true;
+  }
+  CHECK(iff, "40 tick di ampiezza crescente: ChartRedraw (uno solo) SE E SOLO SE e' cambiato un oggetto");
+  CHECK(moved, "...e almeno un tick ha davvero mosso un livello (il test non e' vuoto)");
 
   printf("D3) tasto UNICO, lo STESSO tasto accende e spegne\n");
 #ifndef VAR_ST2_OFF
@@ -333,7 +349,10 @@ int main() {
   printf("D7) gara: OnDeinit della vecchia istanza DOPO OnInit della nuova\n");
   timer();
   int nl = count_prefix("ABTGSTU_L", OBJ_HLINE);
-  OnDeinit(REASON_CHARTCHANGE);      // la vecchia cancella gli oggetti della nuova (stessi nomi)
+  // la VECCHIA istanza (memoria sua, separata) cancella per nome gli oggetti della nuova, tranne STATO:
+  // si toglie direttamente dall'archivio, cosi' le cache della NUOVA restano quelle vere (test non addomesticato)
+  for(auto it = OBJ.begin(); it != OBJ.end();) {
+    if(it->first.compare(0, 8, "ABTGSTU_") == 0 && it->first != "ABTGSTU_STATO") it = OBJ.erase(it); else ++it; }
   CHECK(count_prefix("ABTGSTU_B_") == 0, "la vecchia istanza ha tolto i tasti della nuova");
   timer();
   CHECK(count_prefix("ABTGSTU_B_", OBJ_BUTTON) >= 16 && count_prefix("ABTGSTU_L", OBJ_HLINE) == nl,

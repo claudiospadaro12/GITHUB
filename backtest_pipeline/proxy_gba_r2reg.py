@@ -13,6 +13,7 @@
 # Limiti: ingresso al primo bid della barra nuova (open HistData) piu' lo spread dell'ora; niente tick, niente slippage; la tabella spread ha 23 ore su 24
 # (manca la 22: rollover, nessun ingresso); la commissione e' 0,04 USD/oz a giro.
 # USO: python3 -I backtest_pipeline/proxy_gba_r2reg.py            (stampa n e PF-proxy per cella x tranche, 2024-2026)
+#      python3 -I backtest_pipeline/proxy_gba_r2reg.py --regimi    (classifica le tranche con la regola sul prezzo, nessun PF)
 #      python3 -I backtest_pipeline/proxy_gba_r2reg.py --autotest (contro-esempi su barre finte con risposta nota)
 import sys, os, glob, zipfile, datetime as dt, statistics as st
 from zoneinfo import ZoneInfo
@@ -169,6 +170,48 @@ def giorni_feriali(t0, t1):
     return n
 
 
+# REGOLA OGGETTIVA SUL PREZZO per i regimi (firma di Claudio 10/10, report/FIRME_2026-10-10.md; scritta PRIMA di vedere un PF; si usa SOLO il prezzo):
+#   per ogni tranche: R = chiusura dell'ultimo giorno / chiusura del primo giorno - 1 (chiusure GIORNALIERE = ultima barra M1 del giorno server);
+#   ER = |R| / somma dei |rendimenti giornalieri| (rapporto di efficienza di Kaufman, 0 = niente direzione, 1 = linea retta);
+#   TORO: R >= +5% E ER >= 0,15 | RIBASSO: R <= -5% E ER >= 0,15 | LATERALE: tutto il resto (|R| < 5% oppure ER < 0,15).
+#   VOLATILITA' (asse secondo): ATR(14) M1 mediana / prezzo mediano, in punti base: CALMO < 3,5 bp | VOLATILE >= 3,5 bp.
+R_SOGLIA, ER_SOGLIA, BP_SOGLIA = 0.05, 0.15, 3.5
+
+
+def classifica(R, ER, bp):
+    if R >= R_SOGLIA and ER >= ER_SOGLIA:
+        d = "TORO"
+    elif R <= -R_SOGLIA and ER >= ER_SOGLIA:
+        d = "RIBASSO"
+    else:
+        d = "LATERALE"
+    return d, ("VOLATILE" if bp >= BP_SOGLIA else "CALMO")
+
+
+def metriche_prezzo(rows, atr, t0, t1):
+    import bisect
+    ts_ = [r[0] for r in rows]
+    i0, i1 = bisect.bisect_left(ts_, t0), bisect.bisect_left(ts_, t1)
+    d = {}
+    for i in range(i0, i1):
+        d[ts_[i] // 86400] = rows[i][4]
+    cl = [d[k] for k in sorted(d)]
+    R = cl[-1] / cl[0] - 1.0
+    somma = sum(abs(cl[k] / cl[k - 1] - 1.0) for k in range(1, len(cl)))
+    ER = abs(R) / somma if somma > 0 else 0.0
+    a_ = [atr[i] for i in range(i0, i1) if atr[i] is not None]
+    px = st.median(r[4] for r in rows[i0:i1])
+    return R, ER, st.median(a_) / px * 1e4, len(cl)
+
+
+def stampa_regimi(rows, atr):
+    print("REGOLA (solo prezzo): TORO R>=+5% e ER>=0,15 | RIBASSO R<=-5% e ER>=0,15 | LATERALE altrimenti | CALMO ATR/prezzo<3,5 bp | VOLATILE >=3,5 bp")
+    for nome, da, a in TRANCHE:
+        R, ER, bp, nd = metriche_prezzo(rows, atr, ts(da), ts(a))
+        d, v = classifica(R, ER, bp)
+        print("  %s %s -> %s  R %+.1f%%  ER %.3f  ATR M1/prezzo %.2f bp  (%d giorni con barre)  -> %s, %s" % (nome, da, a, 100 * R, ER, bp, nd, d, v))
+
+
 def autotest():
     """Contro-esempi con risposta nota. Barre finte: rialzo costante (nessuna rottura stretta del canale dopo l'EMA) e un'impennata isolata."""
     fall = 0
@@ -207,6 +250,12 @@ def autotest():
     tr2, _, _ = simula(rows, atr, ema, 10.0, 0, tj + 1)
     ok = (len(tr1) == 0 and len(tr2) >= 1)
     print("E ToDate esclusivo: con t1 = barra d'ingresso trade %d, con t1+1 trade %d -> %s" % (len(tr1), len(tr2), "ok" if ok else "FALLITO")); fall += 0 if ok else 1
+    # (f) regola dei regimi: contro-esempi con risposta nota (nessun PF in gioco)
+    casi = [((0.11, 0.25, 2.6), ("TORO", "CALMO")), ((0.11, 0.10, 2.6), ("LATERALE", "CALMO")),   # +11% ma a zig-zag: ER sotto 0,15 -> LATERALE
+            ((-0.16, 0.18, 4.7), ("RIBASSO", "VOLATILE")), ((0.049, 0.50, 3.5), ("LATERALE", "VOLATILE")),  # +4,9% = sotto soglia; 3,5 bp = VOLATILE (soglia inclusa)
+            ((0.05, 0.15, 3.49), ("TORO", "CALMO")), ((-0.014, 0.029, 2.58), ("LATERALE", "CALMO"))]
+    ok = all(classifica(*a) == b for a, b in casi)
+    print("F regola dei regimi su 6 casi noti (soglie incluse comprese) -> %s" % ("ok" if ok else "FALLITO")); fall += 0 if ok else 1
     print("AUTOTEST", "PASS" if fall == 0 else "FALLITO (%d)" % fall)
     return fall
 
@@ -215,6 +264,10 @@ def main():
     if "--autotest" in sys.argv:
         sys.exit(1 if autotest() else 0)
     rows = carica()
+    if "--regimi" in sys.argv:
+        atr_, _e = serie(rows)
+        stampa_regimi(rows, atr_)
+        return
     print("barre M1 %d: %s -> %s (ora server BCM, UTC+1 fisso)" % (len(rows), dt.datetime.fromtimestamp(rows[0][0], UTC).replace(tzinfo=None), dt.datetime.fromtimestamp(rows[-1][0], UTC).replace(tzinfo=None)))
     atr, ema = serie(rows)
     print("tranche [da, a): ToDate ESCLUSIVO come il tester (MISURATO in R1A: ultimo evento 29/09 23:59:58 con ToDate 30/09). Le righe T1-T3 usano le stesse date del file madre (a = ultimo giorno + 1).")

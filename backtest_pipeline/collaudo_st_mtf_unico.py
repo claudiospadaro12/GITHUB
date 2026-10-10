@@ -16,7 +16,13 @@ Qui NON c'e' MetaEditor: niente compila l'MQL5 e niente prova il grafico vero. S
      vietate (ordini, file, GlobalVariable, ObjectsDeleteAll); ogni nome di oggetto nasce dal prefisso
      e ogni generatore di nomi e' ripulito in DeleteAllOurs; EventSetTimer/EventKillTimer; parentesi
      bilanciate; ASCII senza BOM; indici dello stato codificato (22 caratteri).
-  CONTRO-ESEMPI: mutazioni del sorgente vero che il collaudo DEVE prendere.
+  D) SIMULAZIONE del CODICE INTERO: il .mq5 tradotto in C++ con sostituzioni meccaniche (nessuna riga
+     riscritta a mano) e incluso in collaudo_st_mtf_unico_sim.cpp (finti MQL5: archivio oggetti,
+     CopyRates sintetico, array con controllo dei limiti), compilato con -fsanitize=address,undefined.
+     Sessione: avvio, timer, clic su UNICO/ST/TF/ST MTF/DEFAULT, dati mancanti, cambio TF, gara
+     OnDeinit-dopo-OnInit, rimozione. Quattro varianti di input: base, ST2 disabilitato, in colonna,
+     angolo destro.
+  CONTRO-ESEMPI: mutazioni del sorgente vero che il collaudo DEVE prendere (anche sul codice intero).
 
 Uso:   python3 backtest_pipeline/collaudo_st_mtf_unico.py
 Esce con 0 solo se tutto passa.
@@ -423,6 +429,108 @@ def section_X(text):
         check(not static_ok(mt, verbose=False), "PRESA: " + name)
 
 
+# ===========================================================================
+# D) simulazione del codice intero
+# ===========================================================================
+SIM = os.path.join(ROOT, "backtest_pipeline/collaudo_st_mtf_unico_sim.cpp")
+
+
+def translate(text):
+    """sostituzioni MECCANICHE MQL5 -> C++ (nessuna logica riscritta)"""
+    out = []
+    for line in text.splitlines():
+        if line.startswith("#property"):
+            continue
+        if re.match(r"\s*input\s+group\s", line):
+            continue
+        line = re.sub(r"^input\s+", "const ", line)
+        line = re.sub(r'^#define PFX\s+"ABTGSTU_"', '#define PFX string("ABTGSTU_")', line)
+        line = re.sub(r"const double &(\w+)\[\]", r"const DArr<double> &\1", line)
+        line = re.sub(r"double &(\w+)\[\]", r"DArr<double> &\1", line)
+        if re.match(r"^double wH\[\]", line):
+            line = "DArr<double> " + line[len("double "):].replace("[]", "")
+        line = line.replace("MqlRates r[];", "DArr<MqlRates> r;")
+        out.append(line)
+    return "\n".join(out) + "\n"
+
+
+VARIANTS = [
+    ("base", None, ""),
+    ("ST2 disabilitato", ("InpEnableST2 = true;", "InpEnableST2 = false;"), "-DVAR_ST2_OFF"),
+    ("in colonna", ("InpHorizontalLayout = true;", "InpHorizontalLayout = false;"), "-DVAR_VERTICALE"),
+    ("angolo destro", ("InpCorner           = CORNER_LEFT_UPPER;", "InpCorner           = CORNER_RIGHT_UPPER;"),
+     "-DVAR_DESTRA"),
+]
+
+
+def run_sim(text, define, show):
+    with tempfile.TemporaryDirectory() as td:
+        with open(os.path.join(td, "ind_tradotto.cpp"), "w") as f:
+            f.write(translate(text))
+        ex = os.path.join(td, "sim")
+        cmd = ["g++", "-std=c++17", "-g", "-O0", "-Wall", "-fsanitize=address,undefined",
+               "-fno-sanitize-recover=undefined", "-I", td, "-o", ex, SIM]
+        if define:
+            cmd.insert(1, define)
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode != 0:
+            return False, "COMPILAZIONE FALLITA:\n" + r.stderr[:3000], ""
+        warn = [w for w in r.stderr.splitlines() if "warning" in w and "ind_tradotto" in w]
+        r = subprocess.run([ex], capture_output=True, text=True, env=dict(os.environ, ASAN_OPTIONS="detect_leaks=0"))
+        if show:
+            print(r.stdout, end="")
+            if r.returncode != 0 and r.stderr:
+                print(r.stderr[:2000])
+        return r.returncode == 0, r.stdout + r.stderr, "\n".join(warn)
+
+
+def section_D(text):
+    print("D) simulazione del codice intero (g++ -fsanitize=address,undefined)")
+    for name, rep, define in VARIANTS:
+        t = text
+        if rep:
+            check(rep[0] in t, "variante '%s': sostituzione applicabile" % name)
+            t = t.replace(rep[0], rep[1], 1)
+        print("  --- variante: %s" % name)
+        ok, out, warn = run_sim(t, define, show=True)
+        if out.startswith("COMPILAZIONE"):
+            print(out)
+        check(ok, "variante '%s': simulazione completa senza FAIL, senza accessi fuori array" % name)
+        check(warn == "", "variante '%s': nessun avviso del compilatore sul codice tradotto%s"
+              % (name, "" if not warn else ":\n" + warn))
+
+
+def sim_mutants(text):
+    m = []
+    m.append(("OnDeinit che dimentica le linee (fuga di oggetti)",
+              text.replace("         DelObj(NameL(i,j));\n", "", 1)))
+    m.append(("TF riacceso che riusa il valore VECCHIO (niente ForgetTF)",
+              text.replace("         ForgetTF(i);\n         continue;", "         continue;", 1)))
+    m.append(("finestra corta accettata anche se la serie non e' sincronizzata",
+              text.replace("if(got<gBars && SeriesInfoInteger(_Symbol,gTf[i],SERIES_SYNCHRONIZED)==0)",
+                           "if(false)", 1)))
+    m.append(("stato NON conservato al cambio di TF",
+              text.replace("DeleteAllOurs(reason==REASON_CHARTCHANGE);", "DeleteAllOurs(false);", 1)))
+    m.append(("nessuna autoriparazione dei tasti nel timer",
+              text.replace("   if(ButtonsMissing())\n", "   if(false)\n", 1)))
+    m.append(("linea al valore della barra CHIUSA invece che in formazione",
+              text.replace("double v=wV[last];", "double v=wV[last-1];", 1)))
+    m.append(("tasto UNICO non ridipinto dopo i clic sui tasti ST",
+              text.replace("   SaveState();\n   BuildButtons();                                // ridipinge",
+                           "   SaveState();\n   if(sparam==NameMain()) BuildButtons();                                // ridipinge", 1)))
+    m.append(("accesso fuori array (una barra oltre la fine)",
+              text.replace("double d=wDir[last];", "double d=wDir[last+1];", 1)))
+    return m
+
+
+def section_XD(text):
+    print("XD) contro-esempi sul codice intero: la simulazione DEVE fallire")
+    for name, mt in sim_mutants(text):
+        check(mt != text, "mutazione applicata: " + name)
+        ok, out, _ = run_sim(mt, "", show=False)
+        check(not ok, "PRESA: " + name)
+
+
 def main():
     raw = read(SRC)
     text = raw.decode("utf-8")
@@ -432,7 +540,11 @@ def main():
     print()
     section_C(raw)
     print()
+    section_D(text)
+    print()
     section_X(text)
+    print()
+    section_XD(text)
     print()
     real = list(FAILS)
     if real:
