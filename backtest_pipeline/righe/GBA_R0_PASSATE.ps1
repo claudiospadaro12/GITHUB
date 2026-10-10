@@ -390,7 +390,7 @@ foreach($b in $blocchi.TRANCHE){
   if($b['da'] -notmatch '^\d{4}\.\d\d\.\d\d$' -or $b['a'] -notmatch '^\d{4}\.\d\d\.\d\d$'){ throw ('tranche ' + $b['nome'] + ': date non aaaa.mm.gg.') }
   if([string]::CompareOrdinal($b['da'], $b['a']) -ge 0){ throw ('tranche ' + $b['nome'] + ': da ' + $b['da'] + ' non e prima di a ' + $b['a'] + '.') }
   # (v5, classe 1251) il nome entra nel tag, quindi nei PERCORSI di ini/log/report e nelle colonne del MANIFEST: '..\', '/', ';', spazi e '$(' non devono passare
-  if(-not $STORICA -and $b['nome'] -cnotmatch '^[A-Za-z0-9]{1,10}$'){ throw ('tranche ' + $b['nome'] + ': nome non ammesso (1-10 lettere o cifre).') }
+  if($b['nome'] -cnotmatch '^[A-Za-z0-9]{1,10}$'){ throw ('tranche ' + $b['nome'] + ': nome non ammesso (1-10 lettere o cifre).') }
   if($trDef.ContainsKey($b['nome'])){ throw ('tranche ' + $b['nome'] + ' dichiarata DUE volte nel file prova.') }
   $trDef[$b['nome']] = $b
 }

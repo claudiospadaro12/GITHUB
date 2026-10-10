@@ -96,6 +96,10 @@ DURATA_REGIME = "1anno"
 #    'non_misurato' = un lato con n < 150 non giudica (se nessun lato arriva a 150 il regime resta NON MISURATO).
 LATI_SOTTO_150 = ("giudica", "non_misurato")
 PESO_LATO_SOTTO_150 = "giudica"
+# (2o FAIL, D1) True quando il valore arriva da riga di comando (--durata-regime / --lato-sotto-150): allora la decisione e' DICHIARATA da chi legge e il verdetto
+# non deve piu' dire 'DIPENDE'; finche' sono False il default e' una lettura della firma, non una scelta, e il verdetto mostra se l'alternativa cambia l'esito.
+DURATA_SCELTA = False
+LATO_SCELTO = False
 # DD PROMESSO dal backtest della cella (firma, punto 1): oggi NON esiste (nessuna cella promossa, nessun censimento di contratto). Senza, il verdetto NON puo'
 # cominciare con 'regge': esce 'NON DICHIARABILE (DD promesso assente)'. Da riga di comando: --dd-promesso <EUR a 1,00 lotto>.
 DD_PROMESSO = None
@@ -624,7 +628,8 @@ def lettura_regimi(passate, cella=None, comm_ip=COMM_EUR_LOTTO_GIRO, Ps=None, re
     Ps gia' raggruppata per IDENTITA': R1A e R2REG sono la stessa cella REPL, stessi 30 pin). Le tranche si assegnano ai regimi con la regola sul prezzo
     (regimi; default REGIMI_TRANCHE) e si contano come INSIEME: una tranche vista due volte e' un ERRORE, non due tranche (difetto 3 del cancello R2REG).
     durata / lato150 / dd_promesso: i parametri delle decisioni di Claudio (default: lettura letterale della firma). Restituisce (righe, verdetto)."""
-    durata_esplicita = durata is not None
+    durata_esplicita = durata is not None or DURATA_SCELTA
+    lato_esplicito = lato150 is not None or LATO_SCELTO
     durata = DURATA_REGIME if durata is None else durata
     lato150 = PESO_LATO_SOTTO_150 if lato150 is None else lato150
     dd_promesso = DD_PROMESSO if dd_promesso is None else dd_promesso
@@ -734,18 +739,39 @@ def lettura_regimi(passate, cella=None, comm_ip=COMM_EUR_LOTTO_GIRO, Ps=None, re
             verdetto += " | DD n.d. in %s" % "; ".join(dd_mancanti)
         else:
             verdetto = "NON DICHIARABILE (DD n.d. in %s): %s" % ("; ".join(dd_mancanti), verdetto)
-    if not durata_esplicita and dati:
-        # (classe 1253) 'un anno per regime' tradotto in 4 trimestri e' una SCELTA: se la lettura in giorni da' un altro esito, il verdetto lo dice per primo
-        v_1a = lettura_regimi(passate, cella, comm_ip, Ps, regimi, "1anno", lato150, dd_promesso)[1]
-        v_365 = lettura_regimi(passate, cella, comm_ip, Ps, regimi, "365giorni", lato150, dd_promesso)[1]
-        if _esito_senza_durata(v_1a) != _esito_senza_durata(v_365):
-            verdetto = "DIPENDE DALLA DURATA (decisione di Claudio aperta): 1anno -> %s, 365giorni -> %s" % (v_1a, v_365)
+    if dati and not (durata_esplicita and lato_esplicito):
+        # (classi 1253 e 2o FAIL D3) le due letture della firma NON dichiarate da chi legge sono SCELTE: se l'alternativa cambia la CATEGORIA dell'esito
+        # (non il testo), il verdetto lo dice per primo. Le letture interne passano durata e lato espliciti: nessuna ricorsione oltre un livello.
+        dipende = []
+        if not durata_esplicita:
+            v_1a = lettura_regimi(passate, cella, comm_ip, Ps, regimi, "1anno", lato150, dd_promesso)[1]
+            v_365 = lettura_regimi(passate, cella, comm_ip, Ps, regimi, "365giorni", lato150, dd_promesso)[1]
+            if _esito(v_1a) != _esito(v_365):
+                dipende.append("DIPENDE DALLA DURATA (decisione di Claudio aperta): 1anno -> %s, 365giorni -> %s" % (v_1a, v_365))
+        if not lato_esplicito:
+            v_g = lettura_regimi(passate, cella, comm_ip, Ps, regimi, durata, "giudica", dd_promesso)[1]
+            v_n = lettura_regimi(passate, cella, comm_ip, Ps, regimi, durata, "non_misurato", dd_promesso)[1]
+            if _esito(v_g) != _esito(v_n):
+                dipende.append("DIPENDE DAL LATO SOTTO 150 (decisione di Claudio aperta): giudica -> %s, non_misurato -> %s" % (v_g, v_n))
+        if dipende:
+            verdetto = " || ".join(dipende)
     return righe, verdetto
 
 
-def _esito_senza_durata(v):
-    """l'esito di un verdetto di regime senza la parte che nomina la regola di durata (due durate che danno lo stesso esito concordano)."""
-    return re.sub(r" e durata >= [0-9]+ (tranche|giorni) \(regola '[a-z0-9]+'\)", "", v)
+def _esito(v):
+    """(2o FAIL, D2) la CATEGORIA di un verdetto di regime: ERRORE / NON REGGE / NON BASTA / NON MISURATO / regge / NESSUNA TRANCHE; per
+    'NON DICHIARABILE (...): X' la coppia NON DICHIARABILE + categoria di X. Due letture che danno la stessa categoria CONCORDANO, anche se il testo differisce."""
+    if v.startswith("NON DICHIARABILE ("):
+        i = v.find("): ")
+        return "NON DICHIARABILE+" + (_esito(v[i + 3:]) if i >= 0 else "?")
+    for cat in ("ERRORE", "NON REGGE", "NON BASTA", "NON MISURATO", "DIPENDE"):
+        if v.startswith(cat):
+            return cat
+    if v.startswith("regge"):
+        return "regge"
+    if v.startswith("nessuna tranche"):
+        return "NESSUNA TRANCHE"
+    return "?" + v[:20]
 
 
 def _ordine_cella(c):
@@ -799,7 +825,9 @@ def tabella_regimi(passate, W):
             W(r)
         W("   VERDETTO PER REGIME (cella %s): %s" % (etich, verdetto))
         for dur in ("1anno", "365giorni", "2trimestri"):
-            W("   DURATA '%s'%s -> %s" % (dur, " (in uso)" if dur == DURATA_REGIME else "", lettura_regimi(passate, Ps=Ps, durata=dur)[1]))
+            W("   DURATA '%s'%s -> %s" % (dur, " (in uso)" if dur == DURATA_REGIME else "", lettura_regimi(passate, Ps=Ps, durata=dur, lato150=PESO_LATO_SOTTO_150)[1]))
+        for lat in LATI_SOTTO_150:
+            W("   LATO SOTTO 150 '%s'%s -> %s" % (lat, " (in uso)" if lat == PESO_LATO_SOTTO_150 else "", lettura_regimi(passate, Ps=Ps, durata=DURATA_REGIME, lato150=lat)[1]))
         for er_alt in (0.10, 0.20):
             reg_alt = regimi_da_prezzo(er=er_alt)
             presenti = sorted(set(P["tranche"] for P in Ps if regime_di(P) is not None))
@@ -1203,6 +1231,7 @@ def _manifest(righe):
 
 
 def autotest():
+    global DURATA_REGIME, PESO_LATO_SOTTO_150, DD_PROMESSO, DURATA_SCELTA, LATO_SCELTO
     falliti = []
 
     def ck(nome, cond, extra=""):
@@ -1383,7 +1412,7 @@ def autotest():
             outr, _tr = stampa(carica([zt]), None)
         trx = "\n".join(outr)
         # i quattro casi della v4 si leggono con la regola del file R2REG (2trimestri): con '1anno' il laterale (T8+T6) non arriva mai a 4 trimestri
-        rgx, vdx = lettura_regimi(carica([zt]), "REPL", durata="2trimestri")
+        rgx, vdx = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", lato150="giudica")
         ck("R2REG finto (%s, 2trimestri): %s" % (tipo, nome), atteso in vdx, vdx)
         if tipo == "solo_toro":
             ck("R2REG finto: LATERALE n=60 -> 'n < 150' e RIBASSO senza tranche -> NON MISURATO", any(r.strip().startswith("LATERALE") and "NON MISURATO (n < 150" in r for r in rgx) and any(r.strip().startswith("RIBASSO") and "NON MISURATO" in r for r in rgx))
@@ -1392,7 +1421,7 @@ def autotest():
             ck("R2REG finto: il lettore NON scrive 'MORTO' e porta l'intestazione del lotto", "MORTO" not in trx and "GBA R2REG -- lettore" in trx)
             # (v5) il verdetto NON comincia con 'regge' se il DD promesso manca
             ck("DD promesso ASSENTE: il verdetto comincia con 'NON DICHIARABILE (DD promesso assente)', mai con 'regge'", vdx.startswith("NON DICHIARABILE (DD promesso assente): regge nei regimi MISURATI"), vdx[:90])
-            _r, vdd = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", dd_promesso=5000.0)
+            _r, vdd = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", lato150="giudica", dd_promesso=5000.0)
             ck("DD promesso 5000 EUR e DD di tranche 1000: 'regge' si puo' scrivere, col DD accanto", vdd.startswith("regge nei regimi MISURATI") and "<= DD promesso 5000" in vdd, vdd[:120])
             _r, vdk = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", dd_promesso=500.0)
             ck("CONTRO-ESEMPIO DD: promesso 500 EUR e DD di tranche 1000 -> NON REGGE per DD anche con PF buono", vdk.startswith("NON REGGE") and "DD oltre il promesso" in vdk, vdk[:120])
@@ -1413,12 +1442,12 @@ def autotest():
                "DURATA '1anno' (in uso) -> NON BASTA" in trx and "DURATA '365giorni' -> NON MISURATO" in trx and "DURATA '2trimestri' -> NON DICHIARABILE (DD promesso assente): regge" in trx)
             # (classe 1252) un DD che manca non e' un DD rispettato
             zn = _togli_dd(zt, ("T8",))
-            _r, vnd = lettura_regimi(carica([zn]), "REPL", durata="2trimestri", dd_promesso=5000.0)
+            _r, vnd = lettura_regimi(carica([zn]), "REPL", durata="2trimestri", lato150="giudica", dd_promesso=5000.0)
             ck("CONTRO-ESEMPIO DD n.d.: report di T8 senza riga DD + DD promesso 5000 -> 'NON DICHIARABILE (DD n.d. in ...)', mai 'regge'",
                vnd.startswith("NON DICHIARABILE (DD n.d. in LATERALE (T8); CALMO (T8))") and not vnd.startswith("regge"), vnd[:120])
             ck("DD n.d.: la riga del regime dice in quale tranche manca", any(r.strip().startswith("LATERALE") and "(DD n.d. in T8)" in r for r in _r))
             zn2 = _togli_dd(zt, ("T4", "T5", "T6", "T7", "T8", "T9"))
-            _r, vnd2 = lettura_regimi(carica([zn2]), "REPL", durata="2trimestri", dd_promesso=5000.0)
+            _r, vnd2 = lettura_regimi(carica([zn2]), "REPL", durata="2trimestri", lato150="giudica", dd_promesso=5000.0)
             ck("CONTRO-ESEMPIO DD n.d. ovunque + DD promesso 5000 -> NON DICHIARABILE (prima: 'regge ... <= DD promesso')", vnd2.startswith("NON DICHIARABILE (DD n.d. in") and "<= DD promesso" in vnd2, vnd2[:100])
             _r, vnk = lettura_regimi(carica([zn]), "REPL", durata="2trimestri", dd_promesso=500.0)
             ck("DD n.d. in T8 ma DD 1000 > 500 altrove -> resta NON REGGE (fatto misurato) con la nota del DD mancante", vnk.startswith("NON REGGE: DD oltre il promesso") and "DD n.d. in" in vnk, vnk[:120])
@@ -1429,6 +1458,48 @@ def autotest():
         with contextlib.redirect_stdout(io.StringIO()):
             rc_dd = main(["--dd-promesso", cattivo, "x.zip"])
         ck("--dd-promesso %s rifiutato (rc 2), DD_PROMESSO resta assente" % cattivo, rc_dd == 2 and DD_PROMESSO is None)
+    # (2o FAIL) D1: la durata scelta da riga di comando NON e' piu' 'aperta'; D2: tre NON REGGE non 'dipendono'; D3: il lato sotto 150 ha la stessa cura della durata
+    salva = (DURATA_REGIME, PESO_LATO_SOTTO_150, DD_PROMESSO, DURATA_SCELTA, LATO_SCELTO)
+    try:
+        zt = _zip_r2reg("tutto_bene")
+        pt = carica([zt])
+        DURATA_REGIME, DURATA_SCELTA, DD_PROMESSO = "2trimestri", True, 5000.0      # = --durata-regime 2trimestri --dd-promesso 5000
+        with contextlib.redirect_stdout(io.StringIO()):
+            o1, _t = stampa(pt, None)
+        verd = [x.split("): ", 1)[1] for x in o1 if x.startswith("   VERDETTO PER REGIME (cella ")][0]
+        ck("D1: '--durata-regime 2trimestri --dd-promesso 5000' (lato NON scelto): il verdetto non dice piu' 'DIPENDE DALLA DURATA' (il lato resta aperto e lo dice)",
+           "DIPENDE DALLA DURATA" not in verd and verd.startswith("DIPENDE DAL LATO SOTTO 150"), verd[:120])
+        PESO_LATO_SOTTO_150, LATO_SCELTO = "giudica", True                          # + --lato-sotto-150 giudica
+        with contextlib.redirect_stdout(io.StringIO()):
+            o2, _t = stampa(pt, None)
+        verd2 = [x.split("): ", 1)[1] for x in o2 if x.startswith("   VERDETTO PER REGIME (cella ")][0]
+        riga_uso = [x.split(" -> ", 1)[1] for x in o2 if x.startswith("   DURATA '2trimestri' (in uso) -> ")][0]
+        riga_lato = [x.split(" -> ", 1)[1] for x in o2 if x.startswith("   LATO SOTTO 150 'giudica' (in uso) -> ")][0]
+        ck("D1: durata e lato scelti da riga di comando -> il VERDETTO coincide con la riga '(in uso)' e non contiene DIPENDE",
+           verd2 == riga_uso == riga_lato and "DIPENDE" not in verd2 and verd2.startswith("regge nei regimi MISURATI"), verd2[:100])
+        os.remove(zt)
+        DURATA_REGIME, PESO_LATO_SOTTO_150, DD_PROMESSO, DURATA_SCELTA, LATO_SCELTO = salva
+        zt = _zip_r2reg("short_pochi_perde")
+        _r, vsp = lettura_regimi(carica([zt]), "REPL", dd_promesso=500.0)
+        ck("D2: short_pochi_perde + DD promesso 500 -> NON REGGE con ogni durata e ogni lato (rischio, R59): nessun DIPENDE", vsp.startswith("NON REGGE") and "DIPENDE" not in vsp, vsp[:100])
+        ck("D2: _esito confronta CATEGORIE: due NON REGGE con testi diversi concordano; NON DICHIARABILE(regge) != NON BASTA",
+           _esito("NON REGGE: PF_V <= 1,0 in TORO short") == _esito("NON REGGE: DD oltre il promesso in CALMO (1 > 0 EUR)") and
+           _esito("NON DICHIARABILE (DD n.d. in LATERALE (T8); CALMO (T8)): regge nei regimi") == "NON DICHIARABILE+regge" != _esito("NON BASTA: x"))
+        os.remove(zt)
+        zt = _zip_r2reg("uno_short")
+        _r, vu = lettura_regimi(carica([zt]), "REPL", durata="2trimestri")
+        ck("D3: TORO con 319 long vincenti e 1 short in perdita (n=1): con il lato NON scelto il verdetto comincia con 'DIPENDE DAL LATO'",
+           vu.startswith("DIPENDE DAL LATO SOTTO 150 (decisione di Claudio aperta): giudica -> NON REGGE: PF_V <= 1,0 in TORO short") and ", non_misurato -> " in vu, vu[:160])
+        rt = "\n".join(_r)
+        ck("D3: la riga TORO conta 319 long e 1 short", "(long 319, short 1)" in rt, [x for x in _r if x.strip().startswith("TORO")][:1])
+        _r, vu2 = lettura_regimi(carica([zt]), "REPL")
+        ck("D3: durata E lato non scelti -> il verdetto dice tutte e due le dipendenze, durata per prima", vu2.startswith("DIPENDE DALLA DURATA") and " || DIPENDE DAL LATO SOTTO 150" in vu2, vu2[:80])
+        with contextlib.redirect_stdout(io.StringIO()):
+            o3, _t = stampa(carica([zt]), None)
+        ck("(7): una riga per ogni valore di --lato-sotto-150 ('giudica' in uso, 'non_misurato')", sum(1 for x in o3 if x.startswith("   LATO SOTTO 150 'giudica' (in uso) -> ")) == 1 and sum(1 for x in o3 if x.startswith("   LATO SOTTO 150 'non_misurato' -> ")) == 1)
+        os.remove(zt)
+    finally:
+        DURATA_REGIME, PESO_LATO_SOTTO_150, DD_PROMESSO, DURATA_SCELTA, LATO_SCELTO = salva
     # (lato vuoto) cella solo-long (InpAllowShort=false): lo short ha n=0, NON e' un PF <= 1
     zt = _zip_r2reg("solo_long")
     rgl, vgl = lettura_regimi(carica([zt]), "REPL", durata="2trimestri")
@@ -1446,7 +1517,7 @@ def autotest():
         os.remove(zt)
     # (v5) PESO DI UN LATO SOTTO 150: toro con 240 long vincenti e 80 short perdenti (n regime 320 >= 150, lato short < 150)
     zt = _zip_r2reg("short_pochi_perde")
-    rgs, vgs = lettura_regimi(carica([zt]), "REPL", durata="2trimestri")
+    rgs, vgs = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", lato150="giudica")
     rgn, vgn = lettura_regimi(carica([zt]), "REPL", durata="2trimestri", lato150="non_misurato")
     ck("LATO < 150, 'giudica' (default letterale): lo short con 80 operazioni e PF < 1 CONTA -> NON REGGE TORO short", vgs.startswith("NON REGGE") and "TORO short" in vgs, vgs[:100])
     ck("LATO < 150, 'non_misurato': lo short non giudica, il toro si legge sul solo long -> nessun 'NON REGGE'", "NON REGGE" not in vgn and any(r.strip().startswith("TORO") and "lato NON MISURATO, n<150: short" in r and "PF_V > 1,0 su long" in r for r in rgn), vgn[:100])
@@ -1536,7 +1607,7 @@ def _zip_r2reg(tipo):
     k = 0
     for tr in ("T4", "T5", "T6", "T7", "T8", "T9"):
         toro = REGIMI_TRANCHE[tr][0] == "TORO"
-        n = 80 if (toro or tipo in ("laterale_perde", "tutto_bene", "short_pochi_perde", "solo_long")) else 30
+        n = 80 if (toro or tipo in ("laterale_perde", "tutto_bene", "short_pochi_perde", "solo_long", "uno_short")) else 30
         k += 1
         base = datetime.datetime.strptime(inizio_op[tr], "%Y.%m.%d") + datetime.timedelta(hours=1)
         lista, nets = [], []
@@ -1544,7 +1615,14 @@ def _zip_r2reg(tipo):
         for i in range(n):
             lato = "buy" if i % 2 == 0 else "sell"
             vince = ((i // 2) % 2 == 0)
-            if tipo == "solo_long":
+            if tipo == "uno_short":
+                # (2o FAIL, D3) toro: tutti long vincenti (PF 1,6) tranne UN solo short in perdita, il primo di T4; altrove alternati e vincenti
+                if toro:
+                    lato = "sell" if (tr == "T4" and i == 0) else "buy"
+                vince = (cont[lato] % 2 == 0)
+                cont[lato] += 1
+                prof = -200.0 if (toro and lato == "sell") else (160.0 if vince else -100.0)
+            elif tipo == "solo_long":
                 lato = "buy"
                 prof = 160.0 if vince else -100.0
             elif tipo == "short_pochi_perde":
@@ -1646,7 +1724,7 @@ def _zip_finto(gemelle_diverse=False, qualita_cattiva=False, deposito="1 000 000
 
 
 def main(argv):
-    global DURATA_REGIME, PESO_LATO_SOTTO_150, DD_PROMESSO
+    global DURATA_REGIME, PESO_LATO_SOTTO_150, DD_PROMESSO, DURATA_SCELTA, LATO_SCELTO
     if "--autotest" in argv:
         return autotest()
     csv_out = None
@@ -1663,6 +1741,7 @@ def main(argv):
                 print("--durata-regime: ammessi %s" % ", ".join(sorted(DURATE_REGIME)))
                 return 2
             DURATA_REGIME = argv[i + 1]
+            DURATA_SCELTA = True
             i += 2
             continue
         if argv[i] == "--lato-sotto-150" and i + 1 < len(argv):
@@ -1670,6 +1749,7 @@ def main(argv):
                 print("--lato-sotto-150: ammessi %s" % ", ".join(LATI_SOTTO_150))
                 return 2
             PESO_LATO_SOTTO_150 = argv[i + 1]
+            LATO_SCELTO = True
             i += 2
             continue
         if argv[i] == "--dd-promesso" and i + 1 < len(argv):
