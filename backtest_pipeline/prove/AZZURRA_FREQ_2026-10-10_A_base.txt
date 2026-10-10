@@ -1,0 +1,200 @@
+# =====================================================================
+#  EA: ABTG_BulgeAzzurra
+#  AZZURRA_FREQ_A -- FREQUENZA E SCREENING DELLA BULGE AZZURRA (FILE MADRE, cella BASE = default dell'EA, Azzurra sola).
+#  Scritto il 10/10/2026, PRIMA di qualunque numero. EA: mql5/Experts/ABTG_BulgeAzzurra.mq5 (commit 31a11096, SHA256
+#  B6B06347F6F73B4E0F8DE508087E48D089B911EE4CCAC250F8BEB8BE032A926B, NON modificato; e' lo stesso SHA copiato sul piccolo 50503392 il 09/10, CODA_07 del
+#  10/10 03:30). Specifica: report/BULGE_AZZURRA_SPECIFICA_2026-10-08.md. H1 (cablato nel codice), Modello 1 (OHLC M1, come il file di
+#  casa prove/BULGE_M1_cella_campo_lunga.txt): SOLO CONTEGGIO E SCREENING, nessun verdetto di merito (il verdetto e' a tick reali, R57).
+#  Deposito 10000 e Modello 1 li passa ESPLICITI lo script righe/AZZURRA_FREQ.ps1. Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ
+#  (firma 21/09): NON sul VPS, NON su 50504400, NON su nessuna sedia, NON sul forward. Non tocca conti, preset, taglie.
+#
+#  LA DOMANDA (una sola): l'Azzurra e' attiva dal 09/10 sul piccolo 50503392 (22 cross, magic 774500) e quel giorno NON ha aperto
+#  niente. Claudio: "puo' essere che non ci sia stata l'occasione". Nel repo NON c'e' nessuna misura della frequenza dell'Azzurra: questo
+#  lavoro la misura, cosi' "zero in un giorno" si legge contro un numero e non contro un'impressione.
+#  FATTO DI CALENDARIO, prima dei numeri: il 09/10/2026 e' un VENERDI'. L'autotest dell'Azzurra nel giornale del piccolo e' delle 16:39
+#  ORA LOCALE (= 15:39 server BCM, CODA_02 del 10/10, ultima riga dell'Azzurra), e il venerdi' il forex chiude. Il campo ha quindi visto
+#  circa 8 barre H1 chiuse (16:00-23:00 server) su ~24 di un giorno pieno: ESPOSIZIONE ~1/3 DI GIORNO, non un giorno.
+#
+#  LA FAMIGLIA (tre file, UN asse per file, UNA variabile diversa dalla cella base per file; tre job in fila nello stesso lancio):
+#     AZZURRA_FREQ_2026-10-10_A_base.txt               asse InpMagic 774511 / 774561 (2 gemelle G1), default dell'EA   <- QUESTO
+#     AZZURRA_FREQ_2026-10-10_B_primo_tocco.txt        asse Azure_FirstTouchOnly false/true, InpMagic 774521 pinnato
+#     AZZURRA_FREQ_2026-10-10_C_ritracciamento_off.txt asse InpMagic 774531 / 774581, Azure_MaxRetraceRangeATR=0 (controllo spento)
+#  12 passate in tutto (3 job x 2 celle x 2 gambe). Magic: blocco 7745xx, DIVERSI da 774500 (il campo) e da 774520 (valore di un mutante
+#  in collaudo_bulge_telemetria.py r.1964); 774511, 774521, 774531, 774561, 774571, 774581: zero occorrenze con git grep --untracked
+#  il 10/10. Magic diverso per cella dove serve: il nome del per-trade e' abtg_trades_<EA>_<grafico>_<magic>_violaEA_azzurra<OGNI|PRIMO>.csv
+#  (ABTG_BulgeAzzurra.mq5 r.2303-2308) e ogni passata lo RISCRIVE: con lo stesso nome sopravvive solo l'ultima (classe 41).
+#
+#  FINESTRA: 2026.01.01 - 2026.10.10, @FRAZIONEIS 0.6383 -> floor(282 x 0.6383) = 180 giorni (driver r.934):
+#     IS  2026.01.01 - 2026.06.30 (ToDate ESCLUSIVA: dati fino al 29/06 23:59; 128 giorni feriali, 01/01 compreso)
+#     OOS 2026.07.01 - 2026.10.10 (ToDate ESCLUSIVA: dati fino a venerdi' 09/10 23:59; 73 giorni feriali, 15 venerdi')
+#  Il 30/06 non sta in nessuna gamba (stesso taglio di R92BAB). DEVIAZIONE DICHIARATA dalla finestra suggerita (fino al 30/09): la fine e'
+#  spostata al 10/10 perche' cosi' la gamba OOS CONTIENE il venerdi' 09/10 del campo, e il tester dice se in quelle ore la regola avrebbe
+#  aperto (vedi P-VEN). REGIME [DICHIARATO da calendario, non misurato]: un solo regime, 2026 (lo stesso del forward Bulge, di R92BAB e di
+#  BULGE_TEL_P0); IS e OOS sono due tratti dello stesso anno, non due regimi. Il per-trade sopravvive SOLO per la gamba OOS (l'ultima che
+#  scrive): la gamba IS da' i soli totali del CSV OptResults (Trades, Profit, PF, DD).
+#  GRAFICO: EURGBP H1 = il grafico dell'Azzurra in campo (CODA_02 10/10: "ABTG_BulgeAzzurra EURGBP H1"), dentro i 22.
+#
+#  INPUT: i 54 input dell'EA, tutti pinnati. Uguali al preset del campo mql5/Presets/sedie_piccolo/ABTG_BulgeAzzurra_piccolo_demo.set
+#  (SHA 9F6492B9) salvo QUATTRO righe, tutte dichiarate:
+#   - InpMagic: asse tecnico 774511/774561 (il campo e' 774500);
+#   - InpVerbose=0 e InpAutoTest=0 (stampano e basta; in ottimizzazione le Print non escono comunque);
+#   - Risk_Percent=0.8: la taglia DEI FILE BULGE (0,80 x Max_Trades 4, come BULGE_M1 e BULGE_TEL_P0), come da consegna. Il PRESET DEL
+#     CAMPO dice 0.5 (avviso 1 di report/AZZURRA_PICCOLO_PASSI_2026-10-09.md, decisione di Claudio del 09/10); quale valore giri DAVVERO
+#     sul 50503392 e' [NON VERIFICATO] (nessuna foto della finestra Input). EFFETTO SULLA FREQUENZA, dal codice: la taglia NON entra nel
+#     segnale ne' in Max_Trades/HasOpenTrade; entra SOLO nel kill switch, via Max_Daily_Loss_Pct 2,0 (r.471): a 0,8 bastano 3 SL pieni
+#     nel giorno (2,4%), a 0,5 ne servono 4 (2,0%), che e' anche Max_SL_PerDay=4. Quindi a 0,8 il kill switch puo' fermare PRIMA: la
+#     frequenza misurata qui e' un LIMITE INFERIORE di quella a 0,5. Proxy nel riepilogo: giorni con >= 3 chiusure in perdita.
+#  Use_ADX_Filter=1 come il campo e il default: sull'Azzurra e' INERTE (ADX_Apply_On_Azure=0, BLU/VIOLA/ARANCIO spenti, spec par. 5.7).
+#  Bulge_Multi e' INERTE sull'Azzurra (isBulgeSig non entra in AzureCore, r.1530-1550). Il filtro ATR 0,5-1,8 invece AGISCE (AtrOk e'
+#  un return all'inizio di CheckSignal, vale per tutti i segnali).
+#
+#  COSA SI CONTA (unita' dichiarate, classe 454): con gestione NUDA (niente parziale, BE, trailing) una posizione = un deal di uscita,
+#  quindi Trades del CSV = POSIZIONI APERTE (dopo Max_Trades 4 sul cesto, HasOpenTrade per simbolo e verso, kill switch): sono APERTURE,
+#  non segnali grezzi. Un segnale che arriva con 4 posizioni aperte non si vede. Il per-trade scrive SOLO l'ora di CHIUSURA: la
+#  distribuzione per giorno qui sotto e' per GIORNO DI CHIUSURA (proxy del giorno di apertura: TP = mediana, di solito ore; lo scarto
+#  si dichiara). Le posizioni ancora aperte a fine gamba le chiude il tester (deal "end of test"): si contano, e si dicono.
+#
+#  ATTESE (scritte PRIMA dei numeri)
+#   F  FREQUENZA della cella base sui 22 cross, aperture per giorno feriale (lambda). [DERIVATO, debole: nessuna misura dell'Azzurra
+#      esiste] Banda 0,4 - 7 al giorno, centro 1 - 3. Ancore:
+#       - pavimento ~0,4: la continuazione del Breaking Band (stessa guida, MOLTI piu' filtri: zig-zag, spike, band riding, bande
+#         strette, setup consumato al tocco) fa 0,046 aperture per simbolo e giorno TUTTE le sue (inversione + continuazione), di cui la
+#         continuazione 2 su 5 (CONFRONTO_BULGE_VIOLA_VS_BREAKING_BAND_2026-10-08.md r.124) -> ~0,018 x 22 cross = ~0,4/giorno. L'Azzurra
+#         ha meno filtri del BB: dovrebbe stare SOPRA;
+#       - tetto ~7: il VIOLA v5.20 nel forward del piccolo fa <= 0,31 per simbolo e giorno (stessa nota r.140) -> 22 x 0,31 = ~6,8. Stesso
+#         impulso, stessa finestra di 40 barre, stessa mediana attraversata; il VIOLA chiede in piu' la banda PIATTA e il ritest della
+#         STESSA banda, l'Azzurra chiede la banda OPPOSTA e il ritracciamento ordinato. Quale delle due sia piu' rara NON e' derivabile
+#         dal codice: e' proprio la misura che manca;
+#       - il 5,5/giorno del VIOLA e' su 6 giorni e un regime: non e' un'ancora forte, e' un ordine di grandezza.
+#      FUORI BANDA = informazione, non errore: lambda < 0,4 dice "piu' rara del previsto", lambda > 7 dice "piu' frequente del VIOLA".
+#      lambda_IS e lambda_OOS si scrivono tutti e due; due tratti dello stesso anno che differiscono di oltre un fattore 2 = la frequenza
+#      dipende dal tratto di mercato, e un giorno in campo pesa ancora meno.
+#   Z  "ZERO IN UN GIORNO E' NORMALE?" -- Poisson, P(0) = exp(-lambda x esposizione) (tabella calcolata ora):
+#        lambda/giorno :  0,05   0,1    0,3    0,5    1      2      3      5      7
+#        giorno intero :  95%    90%    74%    61%    37%    14%    5%     1%     0%
+#        1/3 di giorno :  98%    97%    90%    85%    72%    51%    37%    19%    10%     <- il venerdi' 09/10 del campo
+#        2 giorni pieni:  90%    82%    55%    37%    14%    2%     0,2%   0%     0%
+#        5 giorni pieni:  78%    61%    22%    8%     0,7%   0%     0%     0%     0%
+#      Quindi: anche al TETTO della banda (7/giorno) il venerdi' parziale a zero ha ~10% di probabilita' -> il solo 09/10 NON separa
+#      "nessuna occasione" da "campo muto". Lo separa la lambda misurata + i PROSSIMI giorni pieni in campo (righe sotto).
+#      CONTRO-ESEMPIO della Poisson: le aperture si raggruppano (il mercato fa giornate da tocchi e giornate morte). Se la frazione OSSERVATA
+#      di giorni a zero nella gamba OOS e' > exp(-lambda) + 10 punti, la Poisson SOTTOSTIMA gli zeri: per il campo vale la frazione
+#      osservata (e la serie piu' lunga di giorni a zero osservata), non la formula. Il riepilogo le stampa tutte e due.
+#   CATEGORIE (congelate; si applicano a lambda_OOS della cella base, k=0):
+#      lambda < 0,1      CELLA QUASI VUOTA: l'Azzurra NON e' un EA da "vedere trade a giorni" (una settimana a zero e' la norma, >= 61%).
+#                        Serve solo PER FAMIGLIA (pavimento di frequenza per famiglia, firma 07/09): da sola non porta niente alla challenge.
+#                        Si scrive cosi' e si decide con Claudio se vale una sedia; NON e' un verdetto di morte (vedi certificato sotto).
+#      0,1 - 0,5         RARA: un giorno pieno a zero e' la norma (61-90%), una settimana a zero e' possibile (8-61%).
+#      0,5 - 2           REGOLARE: giorno pieno a zero 14-61%; una SETTIMANA piena a zero in campo (< 8%) = anomalia da controllare.
+#      >= 2              FREQUENTE: DUE giorni pieni consecutivi a zero in campo (< 2%) = anomalia da controllare (giornale Esperti del
+#                        50503392, Algo Trading, righe "[BULGE] ... skip/ERR").
+#      Trades = 0 in TUTTE le celle e gambe: NON MISURATO (non "lambda = 0"): l'EA cieco nel tester (GetBars/AtrOk/GetBB che falliscono
+#      in silenzio) e una regola che davvero non scatta danno lo STESSO zero. Prossimo passo, gia' scritto: controllo positivo con
+#      Use_Purple=1 sulla stessa cella (il VIOLA in R92BAB_A apre 128 volte in 2 mesi su 15 cross), un job, ~2 minuti.
+#   P-VEN  IL VENERDI' 09/10 NEL TESTER: chiusure del 09/10 dalle 15:00 server in poi, e posizioni chiuse a fine gamba ("end of test").
+#      Il tester entra nel 09/10 con le sue posizioni e il suo kill switch (il campo partiva da zero alle 15:39): non e' lo stesso stato,
+#      e' un indizio. Se il tester apre (proxy: chiude o porta a fine gamba) posizioni Azzurra nate in quelle ore e il campo no, e' un
+#      motivo in piu' per leggere il giornale del piccolo; se il tester non ne ha, "nessuna occasione" ha un fatto in piu' a favore.
+#   PF  NESSUN VERDETTO (Modello 1, 9 mesi, un regime). Attesa [DERIVATA, debole]: PF OOS 0,7-1,1, win rate alto (TP alla mediana vicino,
+#      SL a 3 ATR: la stessa geometria del VIOLA, le cui misure 2026 stanno tutte sotto 1: 0,79-0,87). IPOTESI ALTERNATIVA: una
+#      continuazione con edge darebbe PF OOS >= 1,30 con WR >= 65% e n >= 150 (soglie R92 di casa, S1-S3): solo allora si parla di tick
+#      reali. PF < 1,05 qui NON chiude niente (vedi certificato).
+#   G1 (determinismo) le due gemelle di questo file: Trades IDENTICI in tutte e due le gambe; in OOS Profit, PF, DD identici al centesimo;
+#      in IS |dProfit| <= 0,10 (in R92BAB le gemelle differivano di 0,02-0,06 nella sola IS, causa [NON MISURATA]). Il per-trade OOS delle
+#      due gemelle identico deal per deal (colonne senza magic). Trades diversi = determinismo rotto: la frequenza non si legge.
+#   REPLICA FRA JOB: la cella false di B (magic 774521) ha gli stessi input di questa salvo il magic: deve riprodurre A (Trades nelle due
+#      gambe; Profit/PF/DD e per-trade in OOS). R92BAB_A e A2 (stesso lancio, job diversi) si riproducevano: precedente misurato.
+#   COERENZA: righe del per-trade OOS = Trades OOS del CSV (un deal di uscita per posizione); tutti i deal con signal=AZZURRA (un VIOLA,
+#      BLU o ARANCIO = i pin Use_* NON sono arrivati: la cella non si legge).
+#
+#  CERTIFICATO DI MORTE (Claudio 09/09): VIETATO scrivere "morto" da questo lavoro, qualunque numero esca. Dei cinque punti questo ne da'
+#  al piu' uno e mezzo (PF in Modello 1, n e DD su 9 mesi). Mancano: la gestione dell'uscita messa ad asse (TP alla mediana, SL 3 ATR mai
+#  mossi), i simboli gemelli (sono gia' 22 cross: mancano metalli e indici, che il codice non esclude), il TF (H1 e' CABLATO nel codice
+#  condiviso: cambiarlo tocca il codice, spec par. 5.8). Il verdetto massimo e' "NON ANCORA MISURATO" sul merito.
+#
+#  COSTO IN TEMPO MACCHINA [DERIVATO da R92BAB del 01/10 su QUESTO PC: job da 1 cross 68 s, da 8 cross 74 s, da 22 cross 95 s per 4 passate
+#  da 2 mesi; modello del lettore indipendente 08/10: ~67 s fissi per job + ~0,16 s per cross x passata x mese]: qui ogni job = 2 celle x
+#  (6 + 3,3 mesi) = 18,6 passate-mese x 22 cross x 0,16 = ~65 s + 67 s = ~2,2 minuti per job; 3 job ~7 minuti + compilazione ~1 + raccolta
+#  1-2 = ~10 minuti. [NON MISURATI]: lo scaricamento dello storico M1 luglio-ottobre 2026 sui 22 cross (prima volta su questo PC?) e una
+#  gamba che muore con "OnTesterInit works too long" (R92BAB: 2 gambe su 12, ~+1,5 minuti ciascuna). Tetto pessimistico ~25 minuti.
+# =====================================================================
+@SIMBOLO    EURGBP
+@PERIODO    H1
+@DAQUANDO   2026.01.01
+@FINOA      2026.10.10
+@FRAZIONEIS 0.6383
+
+# Bollinger e ATR, cuore del motore: default dell'EA
+BB_Period=20
+BB_Deviation=2.0
+ATR_Period=14
+SL_ATR_Mult=3.0
+BB_Width_Len=50
+# inerte sull'Azzurra (isBulgeSig non entra in AzureCore)
+Bulge_Multi=1.1
+Lookback_Bars=20
+# AZZURRA SOLA: gli altri tre segnali spenti, come il preset del campo
+Use_Orange=0
+Use_Blue=0
+Use_Purple=0
+Use_Azure=1
+# default: ritracciamento ordinato = nessuna candela con range > 1,5 x ATR fra impulso e test
+Azure_MaxRetraceRangeATR=1.5
+# default: ogni tocco della banda opposta (come il VIOLA)
+Azure_FirstTouchOnly=0
+# manopola del solo VIOLA: inerte qui
+Use_Purple_PineReaction=0
+# v5.20: barre CHIUSE
+Signal_Bar_Offset=1
+# filtro ATR ACCESO (default e campo): agisce anche sull'Azzurra
+Use_ATR_Filter=1
+ATR_MA_Len=20
+ATR_Max_Mult=1.8
+ATR_Min_Mult=0.5
+# ADX acceso come il campo, ma INERTE sull'Azzurra (ADX_Apply_On_Azure=0)
+Use_ADX_Filter=1
+ADX_Period=14
+ADX_Threshold=30.0
+ADX_Apply_On_Blue=1
+ADX_Apply_On_Purple=0
+ADX_Apply_On_Orange=0
+ADX_Apply_On_Azure=0
+Use_News_Filter=0
+# stringa con virgole: inerte (Use_News_Filter=0); pin verbatim del driver
+News_Block_Hours=7,9,11,12,15,22
+# gestione NUDA: nessun parziale, nessun BE, nessun trailing (1 posizione = 1 deal di uscita)
+Enable_Partial_Close=0
+Partial_Close_Pct=0.5
+Partial_Close_R=1.0
+# kill switch ACCESO, come il campo
+Use_Kill_Switch=1
+Max_SL_PerDay=4
+Max_Consecutive_SL=3
+Max_Daily_Loss_Pct=2.0
+# 0 = RISK_PER_TRADE. 0,80 x 4 = taglia dei file Bulge (consegna); il preset del campo dice 0,5 (vedi testata): NON e' una taglia scelta qui
+Risk_Mode=0
+Risk_Percent=0.8
+Total_Risk_Percent=2.0
+Max_Trades=4
+# spento: nel tester non esistono ordini manuali
+Manage_Manual_Orders=0
+Manual_SL_ATR_Mult=3.0
+Enable_BE_1R=0
+BE_At_R=1.0
+BE_Offset_Points=2
+Enable_Trailing_R=0
+Trail_Start_R=1.5
+Trail_Step_R=0.25
+Trail_MinMove_Points=10
+# --- L'UNICO ASSE DI QUESTO FILE: InpMagic (asse tecnico, non di strategia)
+#     magic m / m+50: due passate identiche (G1). 774511 / 774561 liberi (git grep --untracked 10/10).
+InpMagic=774511||774511||50||774561||Y
+InpComment=BULGE_AZZURRA
+# i 22 cross del preset del campo (153 caratteri)
+Symbols_List=EURUSD,GBPUSD,AUDUSD,NZDUSD,USDCAD,USDCHF,USDJPY,EURGBP,EURNZD,GBPJPY,GBPAUD,GBPCAD,GBPNZD,AUDJPY,AUDCAD,AUDNZD,NZDJPY,NZDCAD,NZDCHF,CADJPY,CADCHF,CHFJPY
+# acceso come in campo; nel tester e' INERTE (fail-open)
+InpUsaGuardian=1
+# spenti: stampano e basta
+InpVerbose=0
+InpAutoTest=0
+# =====================================================================
