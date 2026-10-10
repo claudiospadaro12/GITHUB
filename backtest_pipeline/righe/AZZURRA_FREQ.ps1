@@ -61,11 +61,11 @@
 #  MISURATO). Per rifarla servono magic nuovi = nuovo pin.
 #
 #  CODICI D'USCITA: 0 = FREQUENZA LEGGIBILE (cella del campo D con
-#  precondizioni vere, fine girata 2026.10.10, nessuna coda a zero sospetta
+#  precondizioni vere, fine girata 2026.10.10, nessuna coda a zero sospetta, ne' sui 33 ne' per classe
 #  e niente cecita, ne' per classe ne' globale; la categoria e' nel
 #  riepilogo, e se porta LIMITE BASSO P(0), categoria, banda e rapporto D/A
 #  sono dati ai due estremi e il P(0) misurato e' un limite ALTO);
-#  3 = NON MISURATO, anche per fine girata, coda a zero o cecita (per
+#  3 = NON MISURATO, anche per fine girata, storico di un simbolo corto, coda a zero (sui 33 o su una classe) o cecita (per
 #  classe degli 11 non-FX o dei 22 cross, o GLOBALE) (lo zip esce lo
 #  stesso); 1 = fermo PRIMA del tester.
 #
@@ -126,7 +126,7 @@ function Feriali($da, $a){
 $GIORNI_IS  = Feriali $IS_DA $IS_A
 $GIORNI_OOS = Feriali $OOS_DA $OOS_A
 $JOBS = @(
-  [pscustomobject]@{ L='AZF_D'; P='AZZURRA_FREQ_2026-10-10_D_campo33.txt';            SL=$SL33; Lo=0.6; Hi=10.0; HP='766B807CD22145170BEF7E6B4996B07842710FE9023F26A1CA7DD5166072431C';
+  [pscustomobject]@{ L='AZF_D'; P='AZZURRA_FREQ_2026-10-10_D_campo33.txt';            SL=$SL33; Lo=0.6; Hi=10.0; HP='C14DBAB8FDB8B4AB579689575001B571FD79BA375A1E589273E7C5C650BC1E70';
     Righe=@('InpMagic=774541||774541||50||774591||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=1.5');
     Celle=@([pscustomobject]@{ K='D0'; M='774541'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='D1'; M='774591'; V='OGNI'; Primo='0'; Rng=1.5 }) },
   [pscustomobject]@{ L='AZF_A'; P='AZZURRA_FREQ_2026-10-10_A_base.txt';               SL=$SL22; Lo=0.4; Hi=7.0; HP='D12A3D7D56AE6935B0094BA480BE78A88B5CA6EF150B8466F06E52BADB8CF767';
@@ -372,6 +372,12 @@ function CartPT($j, $c){ return ('PASSATE\' + $j.L + '_' + $c.K + '_' + $c.M + '
 
 $ErrorActionPreference = 'Continue'
 $STATO = @{}
+# classe 1230: lo storico PER SIMBOLO, dal giornale dell agente, fotografato SUBITO DOPO il job D (i job dopo lo allungherebbero).
+# Formato MISURATO in risultati_archivio/ROUND_R92BAB_20261001_2201/LOG_TESTER/0003_Agent-127.0.0.1-3000_logs_20261001.log (UTF-16):
+#   CS<TAB>0<TAB>22:05:03.789<TAB>History<TAB>EURUSD: history synchronized from 1993.05.03 to 2026.09.29
+# Semantica di 'to' [DERIVATA da R92BAB: finestra al 30/06 -> 'to 2026.06.30' sui cross]: un buco IN MEZZO alla gamba non lo vede.
+$STORIA = @{}; $nLogAg = 0
+$reStoria = New-Object Text.RegularExpressions.Regex('\t(?<ora>\d\d:\d\d:\d\d)\.\d+\t[^\t]*\t(?<sym>[A-Za-z0-9._#]+): history synchronized from (?<da>\d{4}\.\d\d\.\d\d) to (?<a>\d{4}\.\d\d\.\d\d)')
 foreach($j in $JOBS){
   $st = [pscustomobject]@{ Lanciato=$false; Rc=-99; Dur=0.0; Motore=@(); CsvIS=$null; CsvOOS=$null; PT=@{} }
   $STATO[$j.L] = $st
@@ -433,6 +439,23 @@ foreach($j in $JOBS){
     }
     $st.PT[$c.K] = $e
     Dico ('cella ' + $c.K + ' magic ' + $c.M + ' ' + $c.V + ': per-trade ' + $e.Stato + ' (' + $e.Byte + ' byte)') 'Gray'
+  }
+  if($j.L -eq 'AZF_D'){
+    $dAg = Join-Path $OUT 'LOG_AGENTE_D'; New-Item -ItemType Directory -Force -Path $dAg | Out-Null
+    $giornoIni = $tIniJob.ToString('yyyyMMdd', $IC); $oraIni = $tIniJob.ToString('HH:mm:ss', $IC)
+    foreach($fa in @(Get-ChildItem -Path (Join-Path $env:APPDATA 'MetaQuotes') -Recurse -Filter '*.log' -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $tIniJob -and $_.FullName -match '[\\/]Agent-[^\\/]+[\\/]logs[\\/]' })){
+      $nLogAg = $nLogAg + 1
+      Copy-Item -LiteralPath $fa.FullName -Destination (Join-Path $dAg ($fa.Directory.Parent.Name + '_' + $fa.Name)) -Force -ErrorAction SilentlyContinue
+      $tuttoIlFile = ($fa.BaseName -ne $giornoIni)   # file di un giorno DOPO l avvio del job (mezzanotte passata): vale tutto
+      foreach($ln in @((LeggiCondiviso $fa.FullName) -split "`r?`n")){
+        $mS = $reStoria.Match($ln)
+        if(-not $mS.Success){ continue }
+        if(-not $tuttoIlFile -and $mS.Groups['ora'].Value -lt $oraIni){ continue }   # righe di PRIMA del job D (stesso giorno): non contano
+        $sS = $mS.Groups['sym'].Value; $aS = $mS.Groups['a'].Value
+        if(-not $STORIA.ContainsKey($sS) -or $aS -gt $STORIA[$sS]){ $STORIA[$sS] = $aS }
+      }
+    }
+    Dico ('storico per simbolo dal giornale dell agente (job D): ' + $STORIA.Count + ' simboli letti in ' + $nLogAg + ' log') 'Gray'
   }
   $srcR = Join-Path $dsk ('ROUND_' + $j.L)
   if(Test-Path -LiteralPath $srcR){ Copy-Item -LiteralPath $srcR -Destination $OUT -Recurse -Force -ErrorAction SilentlyContinue }
@@ -535,12 +558,12 @@ function AnalizzaPT($p, $magicAtteso, $listaSimboli){
   $syms = @(('' + $listaSimboli).Split(','))
   $o = [pscustomobject]@{ Ok=$false; Txt=''; Deal=0; Pos=0; Az=0; Altri=0; Lng=0; Sht=0; Vinte=0; SommaNet=0.0; NetKo=0; Prima=''; Ultima='';
         FineGamba=0; MagicKo=0; OraKo=0; FuoriOOS=0; Spostati=0; Ven=0; VenSera=0; GiorniZero=0; SerieZero=0; SerieZeroDa=''; MaxGiorno=0;
-        Isto=''; PerSimb=''; SimbZero=''; NSimb=0; NSimbZero=0; GiorniKS=0; CodaZero=0; CodaDa='' }
+        Isto=''; PerSimb=''; SimbZero=''; NSimb=0; NSimbZero=0; GiorniKS=0; CodaZero=0; CodaDa=''; Coda11=0; Coda11Da=''; Coda22=0; Coda22Da=''; Vere11=0; Vere22=0 }
   $a = LeggiPT $p
   if($null -eq $a){ $o.Txt = 'file mancante o illeggibile'; return $o }
   $o.Deal = $a.Count
-  $posIds = @{}; $perG = @{}; $perdG = @{}; $perS = @{}; $perGv = @{}
-  foreach($gg in $GIORNI_OOS){ $perG[$gg] = 0; $perdG[$gg] = 0; $perGv[$gg] = 0 }
+  $posIds = @{}; $perG = @{}; $perdG = @{}; $perS = @{}; $perGv = @{}; $perGv11 = @{}; $perGv22 = @{}
+  foreach($gg in $GIORNI_OOS){ $perG[$gg] = 0; $perdG[$gg] = 0; $perGv[$gg] = 0; $perGv11[$gg] = 0; $perGv22[$gg] = 0 }
   foreach($s in $syms){ $perS[$s] = 0 }
   $tMin = $null; $tMax = $null
   foreach($rr in $a){
@@ -568,6 +591,8 @@ function AnalizzaPT($p, $magicAtteso, $listaSimboli){
     if(-not $perG.ContainsKey($k)){ $o.FuoriOOS++; continue }
     $perG[$k] = $perG[$k] + 1
     if(-not $eot){ $perGv[$k] = $perGv[$k] + 1 }   # chiusure VERE (end of test escluse): servono alla coda a zero
+    # classe 1231: la coda si guarda anche PER CLASSE (11 non-FX per NOME, il resto = cross)
+    if(-not $eot){ if($NUOVI11 -contains $sy){ $perGv11[$k] = $perGv11[$k] + 1; $o.Vere11++ } else { $perGv22[$k] = $perGv22[$k] + 1; $o.Vere22++ } }
     if($nt -lt 0){ $perdG[$k] = $perdG[$k] + 1 }
     if($k -eq $GIORNO_CAMPO){ $o.Ven++; if($dt.Date -eq $dd -and $dt -ge $INIZIO_CAMPO -and -not $eot){ $o.VenSera++ } }
   }
@@ -584,6 +609,8 @@ function AnalizzaPT($p, $magicAtteso, $listaSimboli){
   $o.Isto = ('giorni con 0/1/2/3/4/5+ chiusure: ' + ($isto -join '/'))
   # coda: giorni feriali FINALI della gamba OOS senza chiusure vere
   for($ix = $GIORNI_OOS.Count - 1; $ix -ge 0; $ix--){ if($perGv[$GIORNI_OOS[$ix]] -eq 0){ $o.CodaZero++; $o.CodaDa = $GIORNI_OOS[$ix] } else { break } }
+  for($ix = $GIORNI_OOS.Count - 1; $ix -ge 0; $ix--){ if($perGv11[$GIORNI_OOS[$ix]] -eq 0){ $o.Coda11++; $o.Coda11Da = $GIORNI_OOS[$ix] } else { break } }
+  for($ix = $GIORNI_OOS.Count - 1; $ix -ge 0; $ix--){ if($perGv22[$GIORNI_OOS[$ix]] -eq 0){ $o.Coda22++; $o.Coda22Da = $GIORNI_OOS[$ix] } else { break } }
   $o.PerSimb = ((@($syms | ForEach-Object { $_ + ' ' + $perS[$_] })) -join ', ')
   $extra = @($perS.Keys | Where-Object { $syms -notcontains $_ })
   if($extra.Count -gt 0){ $o.PerSimb = $o.PerSimb + ' | FUORI LISTA: ' + ((@($extra | ForEach-Object { $_ + ' ' + $perS[$_] })) -join ', ') }
@@ -720,21 +747,47 @@ if($statoD -eq 'ROTTO'){
     $mediaVisti = $(if($nVisti -gt 0){ $AN['D0'].Pos / [double]$nVisti } else { 0.0 })
     $ciecoGlob = ($AN['D0'].NSimbZero -ge 12) -and ($mediaVisti -ge 3.0)
     # classe 1228 (ricorrenza 992): la cecita nel TEMPO. (t1) la FINE GIRATA letta nel giornale deve essere 2026.10.10 in tutte le occorrenze;
-    # (t2) la CODA: giorni feriali finali della gamba OOS senza chiusure vere; NON MISURATO se cz >= 5, meno di 4 slot occupati a fine gamba
-    # e P = exp(-lambdaV x cz) < 1%, con lambdaV = (posizioni - end of test) / (giorni - cz). Soglie 5 giorni e 1% DICHIARATE, NON misurate.
+    # (t2) la CODA: giorni feriali finali della gamba OOS senza chiusure vere; NON MISURATO se cz >= 5 e P = exp(-lambdaV x cz) < 1%, con
+    # lambdaV = chiusure vere / (giorni - cz), sui 33 e per classe; 4 slot occupati la scusano solo sotto 10 giorni (classe 1231, qui sotto).
     $finiU = @($FINI | Sort-Object -Unique)
+    # classe 1230: ognuno dei 33 deve avere lo storico fino al 2026.10.09 (ultimo giorno simulato) nel giornale dell agente del job D
+    $STORIA_MIN = '2026.10.09'
+    $corti = @(@($SL33.Split(',')) | Where-Object { -not $STORIA.ContainsKey($_) -or $STORIA[$_] -lt $STORIA_MIN })
+    $storiaOk = ($corti.Count -eq 0)
+    $cortiTxt = ((@($corti | Select-Object -First 12 | ForEach-Object { $_ + ' ' + $(if($STORIA.ContainsKey($_)){ 'a ' + $STORIA[$_] }else{ 'NON LETTO' }) })) -join ', ') + $(if($corti.Count -gt 12){ ', ...' }else{ '' })
     $fineOk = ($finiU.Count -eq 1 -and $finiU[0] -eq '2026.10.10')
+    # classe 1231: (a) la valvola della SATURAZIONE (4 slot occupati a fine gamba) ha un TETTO: per spiegare la coda le 4 posizioni
+    # devono restare aperte per TUTTA la coda, e la Bulge 772700 in campo (stessa geometria SL 3 ATR / TP alla mediana, H1) ha durata
+    # MASSIMA 1,04 giorni su 66 posizioni (data/statements/trades_auto.csv, mediana 0,18). Da 10 giorni feriali in su la valvola non vale.
+    # (b) la coda si cerca anche PER CLASSE (11 non-FX, 22 cross: 1226 x 1228), stesse soglie. Tetto 10 DICHIARATO, NON misurato.
+    $CODA_TETTO_SAT = 10
     $cz = $AN['D0'].CodaZero
-    $lamV = $(if(($NOOS - $cz) -gt 0){ ($AN['D0'].Pos - $AN['D0'].FineGamba) / [double]($NOOS - $cz) } else { 0.0 })
-    $pCoda = [Math]::Exp(-$lamV * $cz)
-    # senza nessuna chiusura vera la coda non ha senso: decide il ramo "TUTTI i 33" (motivo giusto, stesso rc 3)
-    $codaCieca = (($AN['D0'].Pos - $AN['D0'].FineGamba) -gt 0) -and ($cz -ge 5) -and ($AN['D0'].FineGamba -lt 4) -and ($pCoda -lt 0.01)
+    $codaCieca = $false; $codaEsito = ''
+    $codeD = @(
+      [pscustomobject]@{ Nome='i 33';          Cz=$AN['D0'].CodaZero; Da=$AN['D0'].CodaDa;   Vere=($AN['D0'].Pos - $AN['D0'].FineGamba) },
+      [pscustomobject]@{ Nome='gli 11 non-FX'; Cz=$AN['D0'].Coda11;   Da=$AN['D0'].Coda11Da; Vere=$AN['D0'].Vere11 },
+      [pscustomobject]@{ Nome='i 22 cross';    Cz=$AN['D0'].Coda22;   Da=$AN['D0'].Coda22Da; Vere=$AN['D0'].Vere22 })
+    foreach($cq in $codeD){
+      $lv = $(if(($NOOS - $cq.Cz) -gt 0){ $cq.Vere / [double]($NOOS - $cq.Cz) } else { 0.0 })
+      $pq = [Math]::Exp(-$lv * $cq.Cz)
+      $sat = ($AN['D0'].FineGamba -ge 4) -and ($cq.Cz -lt $CODA_TETTO_SAT)
+      # senza nessuna chiusura vera nella classe decidono le regole "TUTTI a zero" (motivo giusto, stesso rc 3)
+      $cieca = ($cq.Vere -gt 0) -and ($cq.Cz -ge 5) -and (-not $sat) -and ($pq -lt 0.01)
+      $cq | Add-Member -NotePropertyName Lv -NotePropertyValue $lv
+      $cq | Add-Member -NotePropertyName P -NotePropertyValue $pq
+      $cq | Add-Member -NotePropertyName Cieca -NotePropertyValue $cieca
+      if($cieca -and -not $codaCieca){
+        $codaCieca = $true
+        $codaEsito = ('NON MISURATO: coda della gamba OOS di D senza chiusure vere su ' + $cq.Nome + ' dal ' + $cq.Da + ' (' + $cq.Cz + ' giorni feriali, P ' + (Pc $pq) + ' con la lambda dei giorni visti ' + (F3 $lv) + ', slot occupati a fine gamba ' + $AN['D0'].FineGamba + $(if($AN['D0'].FineGamba -ge 4){ ': saturazione esclusa da ' + $CODA_TETTO_SAT + ' giorni feriali in su' }else{ '' }) + '): tester che smette di vedere e regola che tace danno lo stesso zero, e il venerdi 09/10 sta nella coda (classi 1228 e 1231, cecita nel TEMPO).')
+      }
+    }
     W ('CELLA DEL CAMPO D0 (33 simboli, gemella D1 ' + $statoD + $(if($statoD -eq 'G1RESTO'){': la frequenza si legge, PF e DD NO'}else{''}) + ')')
     W ('  lambda IS (dal CSV) = ' + $tIS + ' / ' + $NIS + ' = ' + (F3 $lamIS) + ' | lambda OOS (dal per-trade) = ' + $AN['D0'].Pos + ' / ' + $NOOS + ' = ' + (F3 $lamO) + ' aperture al giorno feriale, sui 33 simboli')
     $rap = $(if($lamIS -gt 0){ $lamO / $lamIS } else { [double]::NaN })
     W ('  rapporto OOS/IS = ' + $(if([double]::IsNaN($rap)){'n/d'}else{F2 $rap}) + '   (oltre 2 o sotto 0,5: la frequenza dipende dal tratto di mercato, OPPURE il tester e cieco su una gamba: la IS ha solo il CSV aggregato, senza per-trade non c e cancello)')
-    W ('  FINE GIRATA della gamba OOS nel giornale del tester: ' + $(if($FINI.Count -gt 0){ ($finiU -join ',') + ' (' + $FINI.Count + ' occorrenze)' }else{ 'NON LETTA' }) + '   (attesa 2026.10.10 in TUTTE le occorrenze; e la finestra chiesta al tester, la presenza dei dati la dice la coda)')
-    W ('  coda senza chiusure vere: ' + $cz + ' giorni feriali' + $(if($cz -gt 0){ ' (dal ' + $AN['D0'].CodaDa + ')' }else{''}) + ' | lambda dei giorni visti ' + (F3 $lamV) + ' | P(coda per caso) ' + (Pc $pCoda) + ' | slot occupati a fine gamba ' + $AN['D0'].FineGamba + '   (soglie: coda >= 5, slot < 4, P < 1%)')
+    W ('  STORICO PER SIMBOLO (giornale dell agente, job D, ' + $nLogAg + ' log): ' + (33 - $corti.Count) + ' dei 33 arrivano al ' + $STORIA_MIN + $(if($corti.Count -gt 0){ ' | CORTI o NON LETTI ' + $corti.Count + ': ' + $cortiTxt }else{ '' }))
+    W ('  FINE GIRATA della gamba OOS nel giornale del tester: ' + $(if($FINI.Count -gt 0){ ($finiU -join ',') + ' (' + $FINI.Count + ' occorrenze)' }else{ 'NON LETTA' }) + '   (attesa 2026.10.10 in TUTTE le occorrenze; e la finestra chiesta al tester, la presenza dei dati la dicono lo storico per simbolo e la coda)')
+    foreach($cq in $codeD){ W ('  coda senza chiusure vere su ' + $cq.Nome + ': ' + $cq.Cz + ' giorni feriali' + $(if($cq.Cz -gt 0){ ' (dal ' + $cq.Da + ')' }else{''}) + ' | lambda dei giorni visti ' + (F3 $cq.Lv) + ' | P(coda per caso) ' + (Pc $cq.P) + ' | slot occupati a fine gamba ' + $AN['D0'].FineGamba + ' -> ' + $(if($cq.Cieca){'CIECA'}else{'ok'}) + '   (soglie: coda >= 5 e P < 1%; 4 slot occupati la scusano solo sotto ' + $CODA_TETTO_SAT + ' giorni)') }
     W ('  banda attesa [DERIVATA, debole] 0,6 - 10 al giorno: ' + $(if($limBasso -and $nVisti -gt 0){ 'al limite basso (lambda ' + (F3 $lamO) + ') ' + (Banda $lamO) + ', al limite alto (lambda ' + (F3 $lamHi) + ') ' + (Banda $lamHi) + '   (LIMITE BASSO: vale la coppia)' }else{ Banda $lamO }))
     W ('  simboli a ZERO nella gamba OOS: ' + $AN['D0'].NSimbZero + ' su ' + $AN['D0'].NSimb + $(if($AN['D0'].SimbZero -ne ''){ ' (' + $AN['D0'].SimbZero + ')' }else{''}) + '   (un simbolo che il tester non vede ABBASSA la lambda)')
     W ('  degli 11 simboli fuori dai cross (per nome) a ZERO ' + $z11.Count + $(if($z11.Count -gt 0){ ' (' + ($z11 -join ',') + ')' }else{''}) + ' | dei 22 cross a ZERO ' + $z22.Count + ' | soglie della cecita per classe: non-FX z11 >= 4 e z11 >= ' + (F2 $soglia11) + ' ; cross z22 >= 8 e z22 >= ' + (F2 $soglia22) + ' ; GLOBALE z33 >= 12 e media dei visti >= 3 (qui z33 ' + $AN['D0'].NSimbZero + ', media ' + (F2 $mediaVisti) + ')')
@@ -750,8 +803,10 @@ if($statoD -eq 'ROTTO'){
     $prossimo = ' Prossimo passo: job con i soli simboli a zero + Use_Purple=1 (controllo positivo).'
     if(-not $fineOk){
       $esito = 'NON MISURATO: FINE GIRATA della gamba OOS ' + $(if($FINI.Count -gt 0){ $finiU -join ',' }else{ 'NON LETTA nel giornale del tester' }) + ' invece di 2026.10.10: il venerdi 09/10 non e provato simulato (classe 1228, ricorrenza 992).'
+    } elseif(-not $storiaOk){
+      $esito = ('NON MISURATO: storico per simbolo (giornale dell agente del job D) corto o non letto su ' + $corti.Count + ' dei 33 (' + $cortiTxt + '): un simbolo che il tester smette di vedere a meta gamba non e a zero e non fa coda, e abbassa la lambda senza dirlo (classe 1230). Prossimo passo: storico M1 dei simboli corti scaricato e prova rilanciata con magic nuovi.')
     } elseif($codaCieca){
-      $esito = 'NON MISURATO: coda della gamba OOS di D senza chiusure vere dal ' + $AN['D0'].CodaDa + ' (' + $cz + ' giorni feriali, P ' + (Pc $pCoda) + ' con la lambda dei giorni visti ' + (F3 $lamV) + ', slot occupati a fine gamba ' + $AN['D0'].FineGamba + '): tester che smette di vedere e regola che tace danno lo stesso zero, e il venerdi 09/10 sta nella coda (classe 1228, cecita nel TEMPO).' + $prossimo
+      $esito = $codaEsito + $prossimo
     } elseif($z11.Count -ge $NUOVI11.Count -and $z22.Count -ge 22){
       $esito = 'NON MISURATO: TUTTI i 33 simboli a ZERO nella gamba OOS di D mentre la IS ha ' + $tIS + ' Trades: il tester non ha visto la gamba OOS (storico M1 luglio-ottobre mancante?) oppure la regola tace da luglio; i due casi danno lo stesso zero.' + $prossimo
     } elseif($z11.Count -ge $NUOVI11.Count){
