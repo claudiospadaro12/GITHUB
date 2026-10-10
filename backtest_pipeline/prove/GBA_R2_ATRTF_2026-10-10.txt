@@ -40,6 +40,7 @@
 #
 #
 #  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  Questi lotti NON chiudono nessuna casella del certificato dei 5 punti; la messa ad asse dell'uscita (R2U) resta la priorita' del piano R2.
 #  InpAtrTF = TF dell'ATR(14). Neutro = 0 (PERIOD_CURRENT = M1: R1A). Segnale, canale ed EMA restano a M1 (STRATEGIST sez. 4.5).
 #   cella  InpAtrTF   fonte
 #   A5     5  (M5)    ST4 (STRATEGIST sez. 4.5)

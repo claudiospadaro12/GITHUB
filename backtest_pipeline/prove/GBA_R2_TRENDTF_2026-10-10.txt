@@ -40,6 +40,7 @@
 #
 #
 #  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  Questi lotti NON chiudono nessuna casella del certificato dei 5 punti; la messa ad asse dell'uscita (R2U) resta la priorita' del piano R2.
 #  InpTrendTF = TF dell'EMA100 del filtro di trend. Neutro = 0 (PERIOD_CURRENT = TF del segnale, M1: R1A). L'EMA di TF alto SOSTITUISCE quella di M1 (non si somma):
 #  segnale, canale, ATR, stop, uscite restano a M1 (MR 4.4, ST 4.3). Una variabile, un file: ST2 (M15, M5) e MR3 (H1, H4, D1) sono la STESSA chiave e stanno insieme,
 #  come scrive ST 4.3 ('da aggiungere al file di MR3 ... una variabile, un file'). Valori fissati a priori dai due dossier, nessuno scelto guardando un numero di questo lotto.
@@ -54,7 +55,7 @@
 #  Codici numerici ENUM_TIMEFRAMES (5, 15, 16385, 16388, 16408): verificati sul driver v5 ($TF_NOMI) e sull'EA (EnumToString nella riga AVVIO: il driver pretende
 #  'InpTrendTF=PERIOD_H1 -> PERIOD_H1' ecc. nella stampa dell'EA, quindi un codice sbagliato fa KO la passata, non la falsa).
 #
-#  LETTURA OPERATIVA (scritta prima dei numeri; il dossier e' ambiguo): n >= 300 = SOMMA delle tre tranche; "2 tranche su 3" = PF_V >= 1,15 in almeno 2 tranche FRA QUELLE con n >= 150 (S1); smentita MR3 "in tutte le tranche" = tutte quelle con n >= 150, e almeno 2. Se meno di 2 tranche hanno n >= 150 l'alternativa e la smentita sono NON MISURABILI su T1-T3: la casella NON si chiude, resta APERTA e passa a R2REG/T0 con questi criteri.
+#  LETTURA OPERATIVA (scritta prima dei numeri; il dossier e' ambiguo): n >= 300 = SOMMA delle tre tranche; "2 tranche su 3" = PF_V >= 1,15 in almeno 2 tranche FRA QUELLE con n >= 150 (S1); smentita MR3 "in tutte le tranche" = tutte quelle con n >= 150, e almeno 2. Se meno di 2 tranche hanno n >= 150 l'alternativa e la smentita sono NON MISURABILI su T1-T3: la casella NON si chiude, resta APERTA e passa a T0 (S10); il lotto R2REG NON contiene queste celle e sul 2024-25 la REPL a 0,05 e' quasi vuota (piano sez. 154) con questi criteri.
 #  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate, REPL come base) =======================
 #  E15 (ST2, STRATEGIST sez. 4.3): n 600-800 (proxy M15 734 su 1.017 = 72%); PF_V 0,78-0,95, |PF_V - 0,855| <= 0,06 (REPL-proxy 2026 +0,04). ATTESA NULLA: e' un risultato.
 #  E5  (ST2, STRATEGIST sez. 4.3): il dossier da' il proxy n 832 (82%) e il lift +0,06, NON una banda di n: la banda qui e' DERIVATA con la stessa ampiezza relativa
@@ -62,10 +63,10 @@
 #  EH1, EH4, ED1 (MR3, MARKET_REGIME sez. 4.4): n 450-700 (sottoinsiemi H1 554, H4 526, D1 483); PF_V 0,78-1,05, centro 0,88; nessuno sopra 1,03 con n >= 150 in 2 tranche.
 #      Lato: il miglioramento, se c'e', concentrato nei SELL (contro-trend nel toro).
 #  COSTO (S2): InpTrendTF non tocca stop, ATR ne' filtro di spread: costo mediano atteso come R1A, 58,8x solo spread / 49,4x con 0,04 -> PASSA. Se esce FRA, il lotto e' guasto.
-#  GEMELLA REPL T1 magic 775850: DEVE dare n=128, profitto -6.577,48, PF 0,83 (= R1A T1). Se no, G1 a Modello 4 ROSSO: nessun numero di questo lotto si usa (GBA_R2_PIANO 3.1).
+#  GEMELLA REPL T1 magic 775850: DEVE dare n=128, profitto -6.577,48, PF 0,83 (= R1A T1). Se no, o NON VERIFICABILE, G1 a Modello 4 ROSSO: nessun numero di questo lotto si usa (GBA_R2_PIANO 3.1).
 #
 #  ======================= SMENTITE (cosa le rompe) =======================
-#  ST2: il TF alto 'salva' il motore se PF_V >= 1,15 con n >= 300 in 2 tranche su 3 (STRATEGIST 4.3). Altrimenti la casella 'EMA su TF superiore' si chiude come NULLA per il regime di scoperta, solo se almeno 2 tranche hanno n >= 150.
+#  ST2 (celle E5 ed E15; EH1/EH4/ED1 seguono MR3): con almeno 2 tranche a n >= 150 (lettura operativa sopra) l'esito e' UNO solo, in quest'ordine: (a) PF_V >= 1,15 in almeno 2 di quelle tranche = il TF alto 'salva' il motore (STRATEGIST 4.3), si ripete in T0; (b) altrimenti, se il PF_V della cella (somma) e' <= 1,03 (S8) = NULLA per il regime di scoperta; (c) altrimenti = nessun verdetto (S8), la cella si ripete in T0 (S10 del piano). Con meno di 2 tranche a n >= 150: NON MISURABILE (lettura operativa).
 #  MR3: ipotesi alternativa = PF_V >= 1,15 con n >= 300 in 2 tranche su 3 E long e short entrambi > 1,0; smentita = PF_V <= 1,03 (S8) in tutte le tranche;
 #       se sporge SOLO H1 (come nel sottoinsieme post-hoc: 1,007) e H4/D1 no: e' un PICCO e si scrive 'picco' (S7).
 #  n fuori banda: si cerca la causa (righe '[GBA] dati non pronti', handle dell'EMA), non si ritocca l'attesa.

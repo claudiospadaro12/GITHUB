@@ -40,6 +40,7 @@
 #
 #
 #  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  Questi lotti NON chiudono nessuna casella del certificato dei 5 punti; la messa ad asse dell'uscita (R2U) resta la priorita' del piano R2.
 #  InpAllowShort = false (solo BUY). Neutro = true (R1A). Una cella: NOSHORT. File gemello: GBA_R2_SOLOBUY e GBA_R2_SOLOSELL sono DUE file perche' sono due chiavi.
 #  Verifica di SEQUENZA (STRATEGIST sez. 4.4): il lato si legge GRATIS dai deal (lettura per lato di R1A/R2REG); queste passate servono SOLO a verificare che nel tester
 #  l'effetto di sequenza sia ~zero come nel proxy (solo-BUY n=453 = i BUY del neutro, 453). Il lato e' una riduzione di zavorra, MAI una sedia: un solo-BUY e' una
