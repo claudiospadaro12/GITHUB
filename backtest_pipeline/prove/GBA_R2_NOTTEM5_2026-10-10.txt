@@ -61,7 +61,8 @@
 #  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
 #  InpSignalTF = 5 (cella M5) con InpHourStart=0 / InpHourEnd=7 FISSATI NEI PIN. EMA e ATR seguono il TF del segnale (InpTrendTF=0 / InpAtrTF=0 = PERIOD_CURRENT = TF del segnale:
 #  GBA_R2_PIANO 4.2); canale 48 barre M5 (= 4 ore), uscita a tempo 48 barre M5 (= 4 ore), SL 2,5 x ATR(M5). Il grafico del tester gira su M5 (driver v5: Period = TF del segnale).
-#  ANCORA: la cella N7 di R2NOTTEM1 (M1 notte), che differisce da questa SOLO in InpSignalTF. Qui NON c'e' una cella REPL: la REPL di questo file (InpSignalTF=1 con HourEnd=7)
+#  TERMINE DI CONFRONTO: la cella N7 di R2NOTTEM1 (M1 notte): differisce da questa in InpSignalTF e quindi nel Period del grafico (M5): il lettore v5 cerca l'ancora S7
+#  solo a parita' di simbolo e periodo, quindi NON le affianca da solo (MISURATO sugli ini, 10/10): il confronto si legge sui due blocchi di cella, tranche per tranche. Qui NON c'e' una cella REPL: la REPL di questo file (InpSignalTF=1 con HourEnd=7)
 #  SAREBBE la cella N7 di R2NOTTEM1, cioe' la STESSA misura due volte, e il lettore v5 si ferma con ERRORE se carica due copie della stessa misura. Una variabile, un file.
 #
 #  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate) =======================

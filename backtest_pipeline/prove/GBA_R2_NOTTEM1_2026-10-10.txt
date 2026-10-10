@@ -60,7 +60,7 @@
 #
 #  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
 #  InpHourEnd = 7 (cella N7) contro il pin 24 = R1A (nessun filtro orario). Tutto il resto = R1A: M1, REPL 0,05, stessi 30 pin. La REPL NON si rigira (e' R1A, ancora del lettore:
-#  l'ini differisce SOLO in InpHourEnd). Questa cella e' anche l'ANCORA di R2NOTTEM5 (che differisce da lei SOLO in InpSignalTF).
+#  l'ini differisce SOLO in InpHourEnd). Questa cella e' anche il TERMINE DI CONFRONTO di R2NOTTEM5 (che differisce da lei in InpSignalTF e quindi nel periodo del grafico, M5).
 #
 #  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate) =======================
 #  n 142-160 (fascia R1A 142 + le notti non piu' bloccate da posizioni del giorno, poche); per tranche T1 ~6, T2 ~32, T3 ~104-120: NESSUNA tranche arriva a 150 e il totale e' AL
