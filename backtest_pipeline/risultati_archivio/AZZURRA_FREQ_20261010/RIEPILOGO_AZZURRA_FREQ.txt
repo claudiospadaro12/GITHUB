@@ -1,0 +1,140 @@
+AZZURRA_FREQ -- pin 4e08b8a9f6a7fb2360065c93e860265ef54886be -- data 2026-10-10 12:08:40 -- pc DESKTOP-H4D7CAJ
+EA ABTG_BulgeAzzurra (SHA256 B6B06347F6F73B4E...), grafico EURGBP H1, A/B/C 22 cross, D 33 simboli (il campo), Modello 1, deposito 10000, rischio 0,80 x Max_Trades 4 (quello vero del campo)
+finestra: IS 2026.01.01 -> 2026.06.30 (esclusa) = 128 giorni feriali | OOS 2026.07.01 -> 2026.10.10 (esclusa) = 73 giorni feriali
+job: AZF_D 90 s rc 3 | AZF_A 75 s rc 3 | AZF_B 75 s rc 3 | AZF_C 79 s rc 3
+compilazione: 0 errori, 0 avvisi (-1 = riga non letta)
+
+RIGHE OptResults (Trades = deal di uscita = POSIZIONI, gestione nuda; Modello 1: PF e DD sono SCREENING, nessun verdetto):
+  D0 IS  magic 774541 tocco OGNI  range 1.5 : Trades 527 | Profit -333.67 | PF 0.96080 | DD% 16.0752
+  D0 OOS magic 774541 tocco OGNI  range 1.5 : Trades 259 | Profit -650.85 | PF 0.83598 | DD% 12.0310
+  D1 IS  magic 774591 tocco OGNI  range 1.5 : Trades 527 | Profit -333.66 | PF 0.96080 | DD% 16.0752
+  D1 OOS magic 774591 tocco OGNI  range 1.5 : Trades 259 | Profit -650.84 | PF 0.83598 | DD% 12.0309
+  A0 IS  magic 774511 tocco OGNI  range 1.5 : Trades 506 | Profit -80.74 | PF 0.99013 | DD% 14.1040
+  A0 OOS magic 774511 tocco OGNI  range 1.5 : Trades 246 | Profit -706.79 | PF 0.82014 | DD% 12.4007
+  A1 IS  magic 774561 tocco OGNI  range 1.5 : Trades 506 | Profit -80.73 | PF 0.99013 | DD% 14.1040
+  A1 OOS magic 774561 tocco OGNI  range 1.5 : Trades 246 | Profit -706.78 | PF 0.82014 | DD% 12.4006
+  B0 IS  magic 774521 tocco OGNI  range 1.5 : Trades 506 | Profit -80.74 | PF 0.99013 | DD% 14.1040
+  B0 OOS magic 774521 tocco OGNI  range 1.5 : Trades 246 | Profit -706.79 | PF 0.82014 | DD% 12.4007
+  B1 IS  magic 774521 tocco PRIMO range 1.5 : Trades 385 | Profit -118.14 | PF 0.98103 | DD% 13.1834
+  B1 OOS magic 774521 tocco PRIMO range 1.5 : Trades 183 | Profit -1033.97 | PF 0.69725 | DD% 11.5498
+  C0 IS  magic 774531 tocco OGNI  range 0 : Trades 1374 | Profit -5044.17 | PF 0.75814 | DD% 54.6888
+  C0 OOS magic 774531 tocco OGNI  range 0 : Trades 775 | Profit -1725.19 | PF 0.86218 | DD% 26.6472
+  C1 IS  magic 774581 tocco OGNI  range 0 : Trades 1374 | Profit -5044.17 | PF 0.75814 | DD% 54.6888
+  C1 OOS magic 774581 tocco OGNI  range 0 : Trades 775 | Profit -1725.18 | PF 0.86218 | DD% 26.6471
+
+PRECONDIZIONI PER CELLA (p1 girata, p2 motore = pin, p3 input arrivati, p4 per-trade fresco):
+  D0: tutte vere
+  D1: tutte vere
+  A0: tutte vere
+  A1: tutte vere
+  B0: tutte vere
+  B1: tutte vere
+  C0: tutte vere
+  C1: tutte vere
+
+  D0 per-trade OOS: 259 deal di uscita, 259 posizioni (AZZURRA 259, altri segnali 0; long 120, short 139), chiusure dal 2026.07.01 12:00:40 al 2026.10.09 21:54:59
+     lambda OOS = 259 / 73 = 3.548 aperture al giorno feriale | giorni con 0/1/2/3/4/5+ chiusure: 6/12/11/8/11/25 | max in un giorno 11
+     giorni a zero OSSERVATI 6 su 73 = 8.2%  contro Poisson exp(-lambda) = 2.9% | serie piu lunga a zero: 2 giorni feriali (dal 2026-07-02)
+     venerdi 2026-10-09: 7 chiusure (end of test comprese), di cui VERE dalle 15:39 server (partenza dell EA in campo) 0; posizioni chiuse a fine gamba (end of test) 2
+     controlli: magic diverso 0, ora illeggibile 0, chiusure fuori dalla gamba OOS 0 (se > 0 il file NON e la gamba OOS), del weekend portate al venerdi 8, net illeggibili 0
+     screening (NON verdetto): vinte 192 su 259, somma net -515.25 (deal di USCITA: manca la commissione d ingresso, il Profit del CSV e quello che vale) | giorni con >= 3 chiusure in perdita (proxy kill switch a 0,8): 6
+     per simbolo: EURUSD 9, GBPUSD 8, AUDUSD 14, NZDUSD 13, USDCAD 9, USDCHF 18, USDJPY 10, EURGBP 7, EURNZD 13, GBPJPY 16, GBPAUD 13, GBPCAD 6, GBPNZD 9, AUDJPY 9, AUDCAD 14, AUDNZD 12, NZDJPY 16, NZDCAD 14, NZDCHF 12, CADJPY 3, CADCHF 11, CHFJPY 9, XAUUSD 7, 100GBP 0, 200AUD 0, 225JPY 7, D30EUR 0, E35EUR 0, E50EUR 0, F40EUR 0, NASUSD 0, SPXUSD 0, U30USD 0
+     simboli a ZERO nella gamba OOS: 9 su 33 (100GBP,200AUD,D30EUR,E35EUR,E50EUR,F40EUR,NASUSD,SPXUSD,U30USD)
+  D1 per-trade OOS: 259 deal di uscita, 259 posizioni (AZZURRA 259, altri segnali 0; long 120, short 139), chiusure dal 2026.07.01 12:00:40 al 2026.10.09 21:54:59
+     lambda OOS = 259 / 73 = 3.548 aperture al giorno feriale | giorni con 0/1/2/3/4/5+ chiusure: 6/12/11/8/11/25 | max in un giorno 11
+     giorni a zero OSSERVATI 6 su 73 = 8.2%  contro Poisson exp(-lambda) = 2.9% | serie piu lunga a zero: 2 giorni feriali (dal 2026-07-02)
+     venerdi 2026-10-09: 7 chiusure (end of test comprese), di cui VERE dalle 15:39 server (partenza dell EA in campo) 0; posizioni chiuse a fine gamba (end of test) 2
+     controlli: magic diverso 0, ora illeggibile 0, chiusure fuori dalla gamba OOS 0 (se > 0 il file NON e la gamba OOS), del weekend portate al venerdi 8, net illeggibili 0
+     screening (NON verdetto): vinte 192 su 259, somma net -515.24 (deal di USCITA: manca la commissione d ingresso, il Profit del CSV e quello che vale) | giorni con >= 3 chiusure in perdita (proxy kill switch a 0,8): 6
+     per simbolo: EURUSD 9, GBPUSD 8, AUDUSD 14, NZDUSD 13, USDCAD 9, USDCHF 18, USDJPY 10, EURGBP 7, EURNZD 13, GBPJPY 16, GBPAUD 13, GBPCAD 6, GBPNZD 9, AUDJPY 9, AUDCAD 14, AUDNZD 12, NZDJPY 16, NZDCAD 14, NZDCHF 12, CADJPY 3, CADCHF 11, CHFJPY 9, XAUUSD 7, 100GBP 0, 200AUD 0, 225JPY 7, D30EUR 0, E35EUR 0, E50EUR 0, F40EUR 0, NASUSD 0, SPXUSD 0, U30USD 0
+     simboli a ZERO nella gamba OOS: 9 su 33 (100GBP,200AUD,D30EUR,E35EUR,E50EUR,F40EUR,NASUSD,SPXUSD,U30USD)
+  A0 per-trade OOS: 246 deal di uscita, 246 posizioni (AZZURRA 246, altri segnali 0; long 115, short 131), chiusure dal 2026.07.05 23:40:40 al 2026.10.09 21:54:59
+     lambda OOS = 246 / 73 = 3.370 aperture al giorno feriale | giorni con 0/1/2/3/4/5+ chiusure: 9/10/11/10/10/23 | max in un giorno 10
+     giorni a zero OSSERVATI 9 su 73 = 12.3%  contro Poisson exp(-lambda) = 3.4% | serie piu lunga a zero: 3 giorni feriali (dal 2026-07-01)
+     venerdi 2026-10-09: 7 chiusure (end of test comprese), di cui VERE dalle 15:39 server (partenza dell EA in campo) 0; posizioni chiuse a fine gamba (end of test) 2
+     controlli: magic diverso 0, ora illeggibile 0, chiusure fuori dalla gamba OOS 0 (se > 0 il file NON e la gamba OOS), del weekend portate al venerdi 8, net illeggibili 0
+     screening (NON verdetto): vinte 183 su 246, somma net -571.83 (deal di USCITA: manca la commissione d ingresso, il Profit del CSV e quello che vale) | giorni con >= 3 chiusure in perdita (proxy kill switch a 0,8): 6
+     per simbolo: EURUSD 9, GBPUSD 9, AUDUSD 14, NZDUSD 13, USDCAD 9, USDCHF 18, USDJPY 10, EURGBP 7, EURNZD 13, GBPJPY 16, GBPAUD 13, GBPCAD 6, GBPNZD 9, AUDJPY 9, AUDCAD 14, AUDNZD 12, NZDJPY 16, NZDCAD 14, NZDCHF 12, CADJPY 3, CADCHF 11, CHFJPY 9
+     simboli a ZERO nella gamba OOS: 0 su 22
+  A1 per-trade OOS: 246 deal di uscita, 246 posizioni (AZZURRA 246, altri segnali 0; long 115, short 131), chiusure dal 2026.07.05 23:40:40 al 2026.10.09 21:54:59
+     lambda OOS = 246 / 73 = 3.370 aperture al giorno feriale | giorni con 0/1/2/3/4/5+ chiusure: 9/10/11/10/10/23 | max in un giorno 10
+     giorni a zero OSSERVATI 9 su 73 = 12.3%  contro Poisson exp(-lambda) = 3.4% | serie piu lunga a zero: 3 giorni feriali (dal 2026-07-01)
+     venerdi 2026-10-09: 7 chiusure (end of test comprese), di cui VERE dalle 15:39 server (partenza dell EA in campo) 0; posizioni chiuse a fine gamba (end of test) 2
+     controlli: magic diverso 0, ora illeggibile 0, chiusure fuori dalla gamba OOS 0 (se > 0 il file NON e la gamba OOS), del weekend portate al venerdi 8, net illeggibili 0
+     screening (NON verdetto): vinte 183 su 246, somma net -571.82 (deal di USCITA: manca la commissione d ingresso, il Profit del CSV e quello che vale) | giorni con >= 3 chiusure in perdita (proxy kill switch a 0,8): 6
+     per simbolo: EURUSD 9, GBPUSD 9, AUDUSD 14, NZDUSD 13, USDCAD 9, USDCHF 18, USDJPY 10, EURGBP 7, EURNZD 13, GBPJPY 16, GBPAUD 13, GBPCAD 6, GBPNZD 9, AUDJPY 9, AUDCAD 14, AUDNZD 12, NZDJPY 16, NZDCAD 14, NZDCHF 12, CADJPY 3, CADCHF 11, CHFJPY 9
+     simboli a ZERO nella gamba OOS: 0 su 22
+  B0 per-trade OOS: 246 deal di uscita, 246 posizioni (AZZURRA 246, altri segnali 0; long 115, short 131), chiusure dal 2026.07.05 23:40:40 al 2026.10.09 21:54:59
+     lambda OOS = 246 / 73 = 3.370 aperture al giorno feriale | giorni con 0/1/2/3/4/5+ chiusure: 9/10/11/10/10/23 | max in un giorno 10
+     giorni a zero OSSERVATI 9 su 73 = 12.3%  contro Poisson exp(-lambda) = 3.4% | serie piu lunga a zero: 3 giorni feriali (dal 2026-07-01)
+     venerdi 2026-10-09: 7 chiusure (end of test comprese), di cui VERE dalle 15:39 server (partenza dell EA in campo) 0; posizioni chiuse a fine gamba (end of test) 2
+     controlli: magic diverso 0, ora illeggibile 0, chiusure fuori dalla gamba OOS 0 (se > 0 il file NON e la gamba OOS), del weekend portate al venerdi 8, net illeggibili 0
+     screening (NON verdetto): vinte 183 su 246, somma net -571.83 (deal di USCITA: manca la commissione d ingresso, il Profit del CSV e quello che vale) | giorni con >= 3 chiusure in perdita (proxy kill switch a 0,8): 6
+     per simbolo: EURUSD 9, GBPUSD 9, AUDUSD 14, NZDUSD 13, USDCAD 9, USDCHF 18, USDJPY 10, EURGBP 7, EURNZD 13, GBPJPY 16, GBPAUD 13, GBPCAD 6, GBPNZD 9, AUDJPY 9, AUDCAD 14, AUDNZD 12, NZDJPY 16, NZDCAD 14, NZDCHF 12, CADJPY 3, CADCHF 11, CHFJPY 9
+     simboli a ZERO nella gamba OOS: 0 su 22
+  B1 per-trade OOS: 183 deal di uscita, 183 posizioni (AZZURRA 183, altri segnali 0; long 83, short 100), chiusure dal 2026.07.05 23:40:40 al 2026.10.09 21:54:59
+     lambda OOS = 183 / 73 = 2.507 aperture al giorno feriale | giorni con 0/1/2/3/4/5+ chiusure: 11/16/15/11/8/12 | max in un giorno 9
+     giorni a zero OSSERVATI 11 su 73 = 15.1%  contro Poisson exp(-lambda) = 8.2% | serie piu lunga a zero: 3 giorni feriali (dal 2026-07-01)
+     venerdi 2026-10-09: 5 chiusure (end of test comprese), di cui VERE dalle 15:39 server (partenza dell EA in campo) 0; posizioni chiuse a fine gamba (end of test) 2
+     controlli: magic diverso 0, ora illeggibile 0, chiusure fuori dalla gamba OOS 0 (se > 0 il file NON e la gamba OOS), del weekend portate al venerdi 7, net illeggibili 0
+     screening (NON verdetto): vinte 132 su 183, somma net -933.22 (deal di USCITA: manca la commissione d ingresso, il Profit del CSV e quello che vale) | giorni con >= 3 chiusure in perdita (proxy kill switch a 0,8): 4
+     per simbolo: EURUSD 7, GBPUSD 4, AUDUSD 11, NZDUSD 10, USDCAD 4, USDCHF 15, USDJPY 7, EURGBP 7, EURNZD 8, GBPJPY 10, GBPAUD 9, GBPCAD 5, GBPNZD 9, AUDJPY 9, AUDCAD 10, AUDNZD 9, NZDJPY 13, NZDCAD 9, NZDCHF 9, CADJPY 2, CADCHF 10, CHFJPY 6
+     simboli a ZERO nella gamba OOS: 0 su 22
+  C0 per-trade OOS: 775 deal di uscita, 775 posizioni (AZZURRA 775, altri segnali 0; long 391, short 384), chiusure dal 2026.07.01 10:29:40 al 2026.10.09 21:54:59
+     lambda OOS = 775 / 73 = 10.616 aperture al giorno feriale | giorni con 0/1/2/3/4/5+ chiusure: 0/0/0/0/1/72 | max in un giorno 24
+     giorni a zero OSSERVATI 0 su 73 = 0.0%  contro Poisson exp(-lambda) = 0.0% | serie piu lunga a zero: 0 giorni feriali (dal )
+     venerdi 2026-10-09: 10 chiusure (end of test comprese), di cui VERE dalle 15:39 server (partenza dell EA in campo) 0; posizioni chiuse a fine gamba (end of test) 2
+     controlli: magic diverso 0, ora illeggibile 0, chiusure fuori dalla gamba OOS 0 (se > 0 il file NON e la gamba OOS), del weekend portate al venerdi 14, net illeggibili 0
+     screening (NON verdetto): vinte 563 su 775, somma net -1320.66 (deal di USCITA: manca la commissione d ingresso, il Profit del CSV e quello che vale) | giorni con >= 3 chiusure in perdita (proxy kill switch a 0,8): 43
+     per simbolo: EURUSD 33, GBPUSD 29, AUDUSD 74, NZDUSD 23, USDCAD 21, USDCHF 21, USDJPY 19, EURGBP 76, EURNZD 27, GBPJPY 20, GBPAUD 28, GBPCAD 13, GBPNZD 17, AUDJPY 62, AUDCAD 69, AUDNZD 51, NZDJPY 23, NZDCAD 12, NZDCHF 16, CADJPY 43, CADCHF 53, CHFJPY 45
+     simboli a ZERO nella gamba OOS: 0 su 22
+  C1 per-trade OOS: 775 deal di uscita, 775 posizioni (AZZURRA 775, altri segnali 0; long 391, short 384), chiusure dal 2026.07.01 10:29:40 al 2026.10.09 21:54:59
+     lambda OOS = 775 / 73 = 10.616 aperture al giorno feriale | giorni con 0/1/2/3/4/5+ chiusure: 0/0/0/0/1/72 | max in un giorno 24
+     giorni a zero OSSERVATI 0 su 73 = 0.0%  contro Poisson exp(-lambda) = 0.0% | serie piu lunga a zero: 0 giorni feriali (dal )
+     venerdi 2026-10-09: 10 chiusure (end of test comprese), di cui VERE dalle 15:39 server (partenza dell EA in campo) 0; posizioni chiuse a fine gamba (end of test) 2
+     controlli: magic diverso 0, ora illeggibile 0, chiusure fuori dalla gamba OOS 0 (se > 0 il file NON e la gamba OOS), del weekend portate al venerdi 14, net illeggibili 0
+     screening (NON verdetto): vinte 563 su 775, somma net -1320.65 (deal di USCITA: manca la commissione d ingresso, il Profit del CSV e quello che vale) | giorni con >= 3 chiusure in perdita (proxy kill switch a 0,8): 43
+     per simbolo: EURUSD 33, GBPUSD 29, AUDUSD 74, NZDUSD 23, USDCAD 21, USDCHF 21, USDJPY 19, EURGBP 76, EURNZD 27, GBPJPY 20, GBPAUD 28, GBPCAD 13, GBPNZD 17, AUDJPY 62, AUDCAD 69, AUDNZD 51, NZDJPY 23, NZDCAD 12, NZDCHF 16, CADJPY 43, CADCHF 53, CHFJPY 45
+     simboli a ZERO nella gamba OOS: 0 su 22
+
+DETERMINISMO E REPLICA:
+  A0 / A1: Trades IS e OOS uguali True | OOS identica (Trades, Profit, PF, DD) False | |dProfit IS| 0.01 (tolleranza 0,10) | per-trade OOS: primo deal diverso: riga 7 colonna net_profit (-79.56 -> -79.55) simbolo NZDJPY chiusura 2026.07.06 16:49:40  => NON OK
+  C0 / C1: Trades IS e OOS uguali True | OOS identica (Trades, Profit, PF, DD) False | |dProfit IS| 0.00 (tolleranza 0,10) | per-trade OOS: primo deal diverso: riga 5 colonna net_profit (6.56 -> 6.57) simbolo NZDCHF chiusura 2026.07.01 15:53:40  => NON OK
+  D0 / D1: Trades IS e OOS uguali True | OOS identica (Trades, Profit, PF, DD) False | |dProfit IS| 0.01 (tolleranza 0,10) | per-trade OOS: primo deal diverso: riga 8 colonna net_profit (-79.56 -> -79.55) simbolo NZDJPY chiusura 2026.07.06 16:49:40  => NON OK
+  A0 / B0: Trades IS e OOS uguali True | OOS identica (Trades, Profit, PF, DD) True | |dProfit IS| 0.00 (tolleranza 0,10) | per-trade OOS: IDENTICI, 246 deal di uscita (colonne close_time,symbol,deal_type,volume,price,net_profit,signal)  => OK
+  coerenza D0: deal del per-trade 259 contro Trades OOS del CSV 259 -> uguali
+  coerenza D1: deal del per-trade 259 contro Trades OOS del CSV 259 -> uguali
+  coerenza A0: deal del per-trade 246 contro Trades OOS del CSV 246 -> uguali
+  coerenza A1: deal del per-trade 246 contro Trades OOS del CSV 246 -> uguali
+  coerenza B0: deal del per-trade 246 contro Trades OOS del CSV 246 -> uguali
+  coerenza B1: deal del per-trade 183 contro Trades OOS del CSV 183 -> uguali
+  coerenza C0: deal del per-trade 775 contro Trades OOS del CSV 775 -> uguali
+  coerenza C1: deal del per-trade 775 contro Trades OOS del CSV 775 -> uguali
+
+BASE DEI CONTROLLI (22 cross): gemelle A0/A1 G1RESTO -> A0
+  lambda A0 (22 cross): IS 3.953 | OOS 3.370 al giorno feriale -- banda attesa [DERIVATA, debole] 0,4 - 7 -- NON e la cella del campo
+
+CELLA DEL CAMPO D0 (33 simboli, gemella D1 G1RESTO: la frequenza si legge, PF e DD NO)
+  lambda IS (dal CSV) = 527 / 128 = 4.117 | lambda OOS (dal per-trade) = 259 / 73 = 3.548 aperture al giorno feriale, sui 33 simboli
+  rapporto OOS/IS = 0.86   (oltre 2 o sotto 0,5: la frequenza dipende dal tratto di mercato, OPPURE il tester e cieco su una gamba: la IS ha solo il CSV aggregato, senza per-trade non c e cancello)
+  STORICO PER SIMBOLO (giornale dell agente, job D, 1 log): 33 dei 33 arrivano al 2026.10.09
+  FINE GIRATA della gamba OOS nel giornale del tester: 2026.10.10 (4 occorrenze)   (attesa 2026.10.10 in TUTTE le occorrenze; e la finestra chiesta al tester, la presenza dei dati la dicono lo storico per simbolo e la coda)
+  coda senza chiusure vere su i 33: 0 giorni feriali | lambda dei giorni visti 3.521 | P(coda per caso) 100.0% | slot occupati a fine gamba 2 -> ok   (soglie: coda >= 5 e P < 1%; 4 slot occupati la scusano solo sotto 10 giorni)
+  coda senza chiusure vere su gli 11 non-FX: 1 giorni feriali (dal 2026-10-09) | lambda dei giorni visti 0.194 | P(coda per caso) 82.3% | slot occupati a fine gamba 2 -> ok   (soglie: coda >= 5 e P < 1%; 4 slot occupati la scusano solo sotto 10 giorni)
+  coda senza chiusure vere su i 22 cross: 0 giorni feriali | lambda dei giorni visti 3.329 | P(coda per caso) 100.0% | slot occupati a fine gamba 2 -> ok   (soglie: coda >= 5 e P < 1%; 4 slot occupati la scusano solo sotto 10 giorni)
+  banda attesa [DERIVATA, debole] 0,6 - 10 al giorno: al limite basso (lambda 3.548) DENTRO la banda, al limite alto (lambda 4.878) DENTRO la banda   (LIMITE BASSO: vale la coppia)
+  simboli a ZERO nella gamba OOS: 9 su 33 (100GBP,200AUD,D30EUR,E35EUR,E50EUR,F40EUR,NASUSD,SPXUSD,U30USD)   (un simbolo che il tester non vede ABBASSA la lambda)
+  degli 11 simboli fuori dai cross (per nome) a ZERO 9 (100GBP,200AUD,D30EUR,E35EUR,E50EUR,F40EUR,NASUSD,SPXUSD,U30USD) | dei 22 cross a ZERO 0 | soglie della cecita per classe: non-FX z11 >= 4 e z11 >= 4.00 ; cross z22 >= 8 e z22 >= 26.00 ; GLOBALE z33 >= 12 e media dei visti >= 3 (qui z33 9, media 10.79)
+  rapporto D/A in OOS = fra 1.05 (lambda misurata) e 1.45 (lambda alta)   (attesa 1,0 - 1,8; ~1,0 con simboli a zero fra gli 11 nuovi = il tester non li vede)
+  P(0) fra i due estremi (lambda 4.878 e 3.548): giorno intero 0.8% - 2.9% | 7/24 di giorno (il venerdi 09/10 del campo) 24.1% - 35.5% | 5 giorni pieni 0.0% - 0.0%   (il valore misurato e un LIMITE ALTO)
+  giorni a zero osservati 8.2% contro Poisson 2.9%: entro +10 punti dalla Poisson
+  venerdi 09/10 nel tester (indizio, non prova: stato diverso dal campo): 0 chiusure VERE dalle 15:39 server (end of test escluse), 2 posizioni portate a fine gamba (end of test, magic diverso ignorato: MagicKo 0)
+
+CONTROLLI (rapporto Trades cella / Trades base A, per gamba; si leggono SOLO se la replica A0/B0 e OK, classe 1206; attese e alternative nei file B e C):
+  B1 (solo il primo tocco): IS 385/506 = 0.76 dentro l attesa | OOS 183/246 = 0.74 dentro l attesa
+  C0 (ritracciamento spento): IS 1374/506 = 2.72 ALTERNATIVA B (il filtro decide la frequenza) | OOS 775/246 = 3.15 ALTERNATIVA B (il filtro decide la frequenza)
+
+LETTURA MECCANICA (categorie congelate in prove/AZZURRA_FREQ_2026-10-10_A_base.txt): NON MISURATO: 9 degli 11 simboli fuori dai cross a ZERO (100GBP,200AUD,D30EUR,E35EUR,E50EUR,F40EUR,NASUSD,SPXUSD,U30USD) contro 0 dei 22 cross a zero nella stessa cella (soglia 4.00, file D): cecita per CLASSE di strumento (classe 1225 emendata); la lambda sarebbe quella di una parte dei 33 con l etichetta dei 33. Prossimo passo: job con i soli simboli a zero + Use_Purple=1 (controllo positivo).
+NON E UN VERDETTO DI MERITO: Modello 1, 9 mesi, un regime. Vietato "morto" (certificato del 09/09: mancano uscita ad asse, gemelli, TF).
+LETTURA OBBLIGATORIA (file madre, P-VEN): VenSera esclude gia gli end of test; chi conta a mano tutte le chiusure del 09/10 dalle 15:39 toglie FineGamba. MagicKo deve essere 0.
+Il verdetto lo scrive la sessione sullo zip.
