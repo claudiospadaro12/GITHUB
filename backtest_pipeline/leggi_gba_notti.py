@@ -155,7 +155,7 @@ def leggi_prova(percorso):
     raw = open(percorso, "rb").read()
     testo = raw.decode("latin-1")
     P = {"percorso": percorso, "nome": os.path.basename(percorso), "sha256": hashlib.sha256(raw).hexdigest().upper(), "pin": {}, "celle": {}, "tranche": {}, "lotto": None,
-         "modello": None, "passate": [], "asse": None, "commenti": [], "sezioni": [], "git": info_git(percorso)}
+         "modello": None, "passate": [], "gemelle": [], "asse": None, "commenti": [], "sezioni": [], "git": info_git(percorso)}
     for n, r in enumerate(testo.splitlines(), 1):
         r = r.rstrip("\r")
         if r.startswith("#"):
@@ -173,7 +173,12 @@ def leggi_prova(percorso):
                 elif m.group(1) == "LOTTO":
                     P["lotto"] = kv.get("nome")
                     P["modello"] = kv.get("modello")
-                    P["passate"] = [tuple(x.split(":", 1)) for x in kv.get("passate", "").split(",") if ":" in x]
+                    for x in kv.get("passate", "").split(","):
+                        parti = x.split(":")
+                        if len(parti) == 2:
+                            P["passate"].append((parti[0], parti[1]))
+                        elif len(parti) == 3:          # gemella: cella:tranche:magic
+                            P["gemelle"].append((parti[0], parti[1], parti[2]))
                 elif m.group(1) == "ASSE":
                     P["asse"] = kv.get("chiave")
         elif "=" in r and not r.strip().startswith(";"):
@@ -228,7 +233,7 @@ def estrai_attese(P):
     for sez, ruolo in [(s, "att") for s in att] + [(s, "cri") for s in cri]:
         t, offs = testo_con_righe(sez["righe"])
         if ruolo == "att":
-            for m in re.finditer(r"banda\s+[^=]{0,30}=\s*(\d+)\s*-\s*(\d+)", t):
+            for m in re.finditer(r"banda\s+[\d,.x]+\s*-\s*[\d,.x]+\s*=\s*(\d+)\s*-\s*(\d+)", t):
                 out["n_banda"].append((int(m.group(1)), int(m.group(2)), riga_di(offs, m.start()), m.group(0)))
             if not out["n_banda"]:
                 for m in re.finditer(r"(?<![A-Za-z_])n\s+(\d+)\s*-\s*(\d+)\b", t):
@@ -473,8 +478,10 @@ def valuta_passata(P, prova, fascia):
         info["motivi"].append("lotto '%s' invece di '%s'" % (r["lotto"], prova["lotto"]))
     if P["cella"] not in prova["celle"]:
         info["motivi"].append("cella '%s' non dichiarata nel file prova (celle: %s)" % (P["cella"], ", ".join(sorted(prova["celle"])) or "nessuna"))
-    elif (P["cella"], P["tranche"]) not in prova["passate"]:
+    elif P["magic"] == "775800" and (P["cella"], P["tranche"]) not in prova["passate"]:
         info["motivi"].append("passata %s:%s non prevista dal @GBA-LOTTO del file prova" % (P["cella"], P["tranche"]))
+    elif P["magic"] != "775800" and (P["cella"], P["tranche"], P["magic"]) not in prova["gemelle"]:
+        info["motivi"].append("passata gemella %s:%s:%s non prevista dal @GBA-LOTTO del file prova" % (P["cella"], P["tranche"], P["magic"]))
     dt = prova["tranche"].get(P["tranche"])
     if dt is None:
         info["motivi"].append("tranche '%s' non dichiarata nel file prova" % P["tranche"])
@@ -520,6 +527,8 @@ def valuta_passata(P, prova, fascia):
         ing = [d for d in rep["deals"] if d["dir"] in ("in", "in/out")]
         info["n_ing"] = len(ing)
         info["fuori"] = [d for d in ing if not (fascia[0] <= d["t"].hour < fascia[1])]
+        if rep["trades"] is not None and abs(len(ing) - int(rep["trades"])) > 1:
+            info["motivi"].append("deal d'ingresso letti %d contro %d operazioni del report: il controllo diretto non e' completo" % (len(ing), int(rep["trades"])))
     else:
         info["motivi"].append("report assente o illeggibile")
     if info["fuori"]:
@@ -676,7 +685,7 @@ def stampa_attese(W, C, st_tot, costo_med):
             if sm.get(chiave):
                 v, riga, fr = sm[chiave]
                 scatta = (n > v) if chiave == "hi" else (n < v)
-                W("   smentita r.%d '%s': n = %d %s %d? -> %s" % (riga, asc(fr), n, segno, v, "SCATTA (si legge prima il giornale: il proxy o il filtro non sono come previsti)" if scatta else "non scatta"))
+                W("   smentita r.%d '%s': n = %d %s %d? -> %s" % (riga, asc(fr), n, segno, v, "SCATTA: la causa si legge PRIMA di ogni numero (testo della smentita alla riga citata)" if scatta else "non scatta"))
     else:
         W("   smentita su n: NON letta dal file prova")
     if A["pf_banda"]:
@@ -745,6 +754,9 @@ def stampa_cella(W, C, S, B, seed, fascia):
             W("        NON LEGGIBILE: " + m)
         for m in i["guardare"]:
             W("        ! DA GUARDARE: " + m)
+    ing_tot = sum(i["n_ing"] for i in C["passate"] if i["stato"] != "NON LANCIATA")
+    fuori_tot = sum(len(i["fuori"]) for i in C["passate"] if i["stato"] != "NON LANCIATA")
+    W("   TOTALE della cella: deal d'ingresso %d, fuori fascia %d -> %s" % (ing_tot, fuori_tot, "tutti dentro" if fuori_tot == 0 else "FILTRO NON COME DICHIARATO: il totale non si calcola"))
     for g in C["g1"]:
         W(g)
     if C["mancanti"]:
@@ -914,10 +926,48 @@ def espandi(percorsi, tmpdir):
     return out
 
 
+def copia_prova_nello_zip(percorsi, prova):
+    """Se lo zip contiene una copia del file prova (il driver la copia dentro), la confronta col file letto al HEAD: se e' DIVERSA, le attese sono cambiate fra la
+    partenza del lotto e la lettura, e si stampano le righe che differiscono (una attesa riscritta DOPO i numeri non e' un'attesa)."""
+    import difflib
+    out = []
+    letto = open(prova["percorso"], "rb").read()
+    for pth in percorsi:
+        if os.path.isdir(pth):
+            continue
+        try:
+            z = zipfile.ZipFile(pth)
+        except Exception:
+            continue
+        for n in z.namelist():
+            if os.path.basename(n.replace("\\", "/")) == prova["nome"]:
+                dato = z.read(n)
+                if dato == letto:
+                    out.append(" Copia del file prova dentro %s: IDENTICA al file letto (le attese sono quelle con cui il lotto e' partito)." % os.path.basename(pth))
+                else:
+                    out.append(" ! Copia del file prova dentro %s: DIVERSA dal file letto (SHA256 zip %s, letto %s): le attese lette sono quelle del HEAD, NON necessariamente quelle con cui il lotto e' partito. Righe che differiscono:" % (
+                        os.path.basename(pth), hashlib.sha256(dato).hexdigest().upper()[:12], prova["sha256"][:12]))
+                    d = list(difflib.unified_diff(dato.decode("latin-1").splitlines(), letto.decode("latin-1").splitlines(), "nello_zip", "letto_al_HEAD", n=0, lineterm=""))
+                    for r in d[:40]:
+                        out.append("     " + asc(r[:230]))
+                    if len(d) > 40:
+                        out.append("     ... e altre %d righe" % (len(d) - 40))
+    return out
+
+
 # ---------------------------------------------------------------------------------------------------------------------
 #  MAIN
 # ---------------------------------------------------------------------------------------------------------------------
 def esegui(argv):
+    try:
+        return _esegui(argv)
+    except Exception:
+        import traceback
+        print("ERRORE INTERNO (nessun numero si stampa):\n" + traceback.format_exc())
+        return 1
+
+
+def _esegui(argv):
     opz = {"prova_m1": None, "prova_m5": None, "ancora": R1A_ZIP, "g1": R2TTREND_ZIP, "senza_ancora": False, "B": BOOT_DEFAULT, "seed": SEED_DEFAULT}
     zs = []
     i = 0
@@ -1022,9 +1072,13 @@ def esegui(argv):
                 C[k] = None
                 continue
             any_app = True
-            C[k] = valuta_cella(k, prove[k], Ps, fascia)
-            stampa_cella(W, C[k], S if k == "M1" else S5, opz["B"], opz["seed"], fascia)
-            if C[k]["non_leggibili"]:
+            fk = fascia if k == "M1" else fascia5
+            C[k] = valuta_cella(k, prove[k], Ps, fk)
+            copie = copia_prova_nello_zip(percorsi, prove[k])
+            for riga in copie:
+                W(riga)
+            stampa_cella(W, C[k], S if k == "M1" else S5, opz["B"], opz["seed"], fk)
+            if C[k]["non_leggibili"] or not C[k]["leggibili"]:
                 rc = 3
         if not any_app:
             W("")
@@ -1382,6 +1436,10 @@ def autotest():
     rc, txt = _esegui_catturando([zB_p, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
     ck("   ... (contro-esempio) Period=M1 nell'ini di un lotto M5 -> 'Period=M1 nell'ini invece di M5'", "Period=M1 nell'ini invece di M5" in txt and txt.count("-> NON LEGGIBILE") == 3, txt[:600])
 
+    # una gemella 775850 NON dichiarata nel file prova blocca il totale
+    zG = _zip_notte(pr1, "M1", {"T1": ops1["T1"]}, magic="775850")
+    rc, tg = _esegui_catturando([zA, zG, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("una passata gemella 775850 NON dichiarata dal file prova -> 'passata gemella ... non prevista', NON LEGGIBILE, totale non calcolato, rc 3", "passata gemella N7:T1:775850 non prevista" in tg and "TOT: NON CALCOLATO" in tg and rc == 3, "rc=%s" % rc)
     # deal alterato in un lotto finto: i numeri cambiano
     ops_alt = {k: list(v) for k, v in ops1.items()}
     t_, l_, p_, a_, s_, d_ = ops_alt["T1"][2]
@@ -1417,6 +1475,23 @@ def autotest():
         # e i 4 zip veri insieme a un lotto notte finto: il notte si legge, i 4 restano NON APPLICABILI
         rc, tv = _esegui_catturando(veri + [zA, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
         ck("i 4 zip veri + un lotto notte finto: il lotto notte si legge (rc 0) e i 4 restano NON APPLICABILI", rc == 0 and tv.count("NON APPLICABILE") == 4 and tv.count("-> LEGGIBILE") == 3, "rc=%s" % rc)
+        # l'ini REALE del driver v5 contro il file prova COPIATO nello zip: nessun falso positivo (pin + cella + Period + date), gemella dichiarata (REPL:T1:775850) accettata
+        for v in (veri[0], veri[3], veri[2]):
+            zz = zipfile.ZipFile(v)
+            pn = [n for n in zz.namelist() if n.startswith("GBA_R2_")][0]
+            pp = os.path.join(tmpd, pn)
+            open(pp, "wb").write(zz.read(pn))
+            prv = leggi_prova(pp)
+            infos = [valuta_passata(P, prv, (0, 24)) for P in lg.carica([v])]
+            ck("ini REALE del driver contro il file prova copiato nello zip (%s): tutte le %d passate LEGGIBILI con fascia 0-24, nessun input diverso" % (os.path.basename(v), len(infos)),
+               all(i["stato"] == "LEGGIBILE" and not i["filtro"] for i in infos), str([(i["tag"], i["motivi"], i["filtro"]) for i in infos if i["stato"] != "LEGGIBILE"]))
+        prv_txt = open(pp, "rb").read().decode("latin-1")
+        ck("(prepara il contro-esempio) il file prova di TATR contiene il pin InpEmaPeriod=100", "\nInpEmaPeriod=100" in prv_txt)
+        pp2 = os.path.join(tmpd, "prova_ritoccata.txt")
+        open(pp2, "wb").write(prv_txt.replace("\nInpEmaPeriod=100", "\nInpEmaPeriod=90").encode("latin-1"))
+        infos = [valuta_passata(P, leggi_prova(pp2), (0, 24)) for P in lg.carica([veri[2]])]
+        ck("CONTRO-ESEMPIO: se il file prova dice InpEmaPeriod=90 e l'ini REALE ha 100, ogni passata e' NON LEGGIBILE con 'InpEmaPeriod=100 nell'ini invece di 90'",
+           all(i["stato"] == "NON LEGGIBILE" and any("InpEmaPeriod=100 nell'ini invece di 90" in m for m in i["filtro"]) for i in infos), str([i["filtro"][:2] for i in infos]))
         # il controllo diretto, applicato per forza a un lotto vero senza filtro, FALLISCE (prova che discrimina)
         Ps = lg.carica([veri[0]])
         fi = [valuta_passata(P, pr1, (0, 7)) for P in Ps if P["magic"] == "775800"]
