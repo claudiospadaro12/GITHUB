@@ -67,7 +67,8 @@
 #  BORDO di S1 -> se n < 150 il MERITO e' SOSPESO (S1) per la cella intera e si leggono solo rischio, notti negative e costo. Lo si scrive ora: e' il limite del 2026 a M1 con la REPL.
 #  PF_V 0,75-1,10 (post-hoc 0,944; per tranche 0,11 / 0,51 / 1,12: concentrato in T3). Costo mediano ~50x (PASSA: il filtro 0,05 garantisce >= 50x solo spread).
 #  Notti: ~53, negative ~33 (q 0,50-0,75).
-#  SMENTITE: n > 175 (la sequenza conta piu' del previsto: le posizioni del giorno bloccavano la notte) oppure n < 130 (filtro non applicato come dichiarato: si legge la riga AVVIO);
+#  CONTROLLO DIRETTO: il 100% dei deal di ingresso con ora server 0-6; anche UNO fuori = filtro non come dichiarato, la passata non si legge.
+#  SMENTITE: n > 175 (la sequenza conta piu' del previsto: le posizioni del giorno bloccavano la notte) oppure n < 130 (la sequenza toglie invece di aggiungere: si legge il giornale);
 #  PF_V >= 1,15 con n >= 150 = la notte M1 'solo notte' si separa dalla fascia (sorpresa: S8, poi T0). PF_V fra 1,03 e 1,3 = nessun verdetto (S8).
 #  PASSATE: 1 cella x 3 tranche = 3, ~7 min.
 #

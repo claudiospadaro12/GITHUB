@@ -71,11 +71,17 @@
 #  Per tranche: quasi certamente < 150 -> merito per tranche SOSPESO (S1); il totale puo' passare 150. Il piano (4.3) scrive 'n per tranche 20-200, la maggior parte sotto 150'.
 #  PF_V 0,80-1,10 (GBA_R2_PIANO 4.3). COSTO: proxy M5 notte 2026 mediana 43,9x sui segnali grezzi (58% >= 40x); col filtro 0,05 entrano solo gli ingressi con stop >= 50x lo spread
 #  (spread mediano di notte 0,26): costo mediano atteso 43-55x con 0,04 -> PASSA, di poco. Se esce FRA, la cella M5 notte e' fuori frontiera su questo feed (S2): si scrive col numero.
-#  Notti: <= ~60 (una sola posizione per volta, posizioni di ore). q 0,40-0,75.
-#  IPOTESI ALTERNATIVA H-M5N (collega, DICHIARATO DA TERZI; GBA_R2_PIANO 4.3): PF_V >= 1,3 nella notte in OGNI tranche con n >= 150. Su T1-T3 con n per tranche < 150 e' NON
-#  MISURABILE per tranche: la si legge sul TOTALE solo come indizio (PF_V >= 1,3 con n >= 150 = SORPRESA, vale il controesempio di S4: migliore operazione < 25%, senza le 5
-#  migliori > 0) e si ripete in T0. Controesempio scritto prima (piano 4.3): se M5 notte 'vince' solo in T3 (ATR M5 6,65, costo 76% >= 40x) e perde o e' vuota in T1-T2, la
-#  spiegazione e' il regime di volatilita' + il costo, non la notte. 'Doppio del conto in 2 anni, DD 7-11%' NON e' confrontabile (rischio per trade e feed non detti).
+#  Notti con almeno un ingresso: [NON DERIVATO], banda larga 50-170 (con n ~210 e a M5 il filtro che lascia passare il 34-71% di 5,6 segnali grezzi per notte, ma posizioni di ore
+#  e una sola per volta: quanti ingressi per notte NON e' stimato). q 0,40-0,75.
+#  IPOTESI ALTERNATIVA H-M5N (collega, DICHIARATO DA TERZI), INTERA da GBA_R2_PIANO 4.3: 'PF_V >= 1,3 nella notte in OGNI tranche con n >= 150 E giorno < 1,0'. In QUESTO lotto e'
+#  misurabile SOLO la meta' notturna, e su T1-T3 con n per tranche < 150 nemmeno quella per tranche. La meta' 'giorno < 1,0' richiede la cella M5 a 24 ore (R2T M5), NON in questo
+#  lotto. DEVIAZIONE DAL PIANO, dichiarata: il piano confronta M5 notte con M5 24 ore su 9 tranche; qui il confronto e' con M1 notte (R2NOTTEM1 N7) su 3 tranche: si isola il TF a
+#  parita' di notte, NON la notte a parita' di TF. Controesempi del piano INTERI: (a) se M5 notte 'vince' solo in T3 (ATR M5 6,65, costo 76% >= 40x) e perde o e' vuota in T1-T2,
+#  la spiegazione e' il regime di volatilita' + il costo, non la notte; (b) se la fascia 00-07 vince in M5 ma vince anche 07-22, la fascia non conta: e' il TF -- (b) NON si legge
+#  da questo lotto. Lettura: PF_V >= 1,3 sul TOTALE con n >= 150 = SORPRESA e solo INDIZIO (controesempio di S4); PRIMA di T0 serve R2T M5 sulle stesse tre tranche. Mai 'H-M5N
+#  confermata' da questo lotto.
+#  'Doppio del conto in 2 anni, DD 7-11%' NON e' confrontabile (rischio per trade e feed non detti).
+#  CONTROLLO DIRETTO: il 100% dei deal di ingresso con ora server 0-6; anche UNO fuori = filtro non come dichiarato, la passata non si legge.
 #  SMENTITE: n < 105 o > 420 (il proxy sbaglia: si legge prima il giornale, segnali e scarti per spread); PF_V <= 1,03 su n >= 150 = la notte M5 e' indistinguibile dalla REPL (S8).
 #  PASSATE: 1 cella x 3 tranche = 3, ~7 min (i tick del trimestre sono gli stessi di M1).
 #
