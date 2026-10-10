@@ -1624,6 +1624,10 @@ def _autotest(tmpd):
        ("dice che il lotto e' partito col file prova %s, qui si legge %s: le attese lette NON sono quelle della partenza" % (nome_vecchio, pr1["nome"])) in tn, tn[tn.find("MANIFEST"):tn.find("MANIFEST") + 300])
     ck("... la riga che differisce nella copia col nome vecchio e' stampata (n 100-300 contro n 142-160)", "n 100-300" in tn and "n 142-160" in tn)
     ck("... e ogni riga DENTRO/FUORI porta l'avviso (anche la copia col nome giusto manca: NON trovata)", tutte_con_avviso(tn) and "NON trovata" in tn)
+    zM = _zip_notte(pr1, "M1", ops1, prova_nello_zip=testo_prova, prova_nome_manifest=nome_vecchio)
+    rc, tm = _esegui_catturando([zM, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
+    ck("(b2) copia IDENTICA col nome giusto, ma il MANIFEST dice un altro file prova (2026-10-09): l'avviso c'e' lo stesso e ogni riga DENTRO/FUORI lo porta (il nome nel MANIFEST conta da solo)",
+       "dice che il lotto e' partito col file prova %s" % nome_vecchio in tm and "IDENTICA al file letto" in tm and tutte_con_avviso(tm), sez3(tm)[:500])
     ck("(c) copia DIVERSA (stesso nome, attesa riscritta): ogni riga DENTRO/FUORI porta l'avviso", tutte_con_avviso(tp2))
     zB2 = _zip_notte(pr5, "M5", zM5_ops, prova_nello_zip=testo_prova, nome_copia=pr1["nome"])
     rc, tl = _esegui_catturando([zA, zB2, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
