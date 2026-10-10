@@ -1,0 +1,9 @@
+GBA R2 SENZA CODICE -- pin c6e0085266e79f3c7131616c1860d42b0462cc4f   pc DESKTOP-H4D7CAJ   inizio 2026-10-10 19:19:48   fine 2026-10-10 19:58:02   minuti 38
+R2TTREND rc 0   minuti 17
+R2TATR rc 0   minuti 15
+R2SOLOBUY rc 0   minuti 3
+R2SOLOSELL rc 0   minuti 3
+copiato GBA_R0_R2TTREND.zip
+copiato GBA_R0_R2TATR.zip
+copiato GBA_R0_R2SOLOBUY.zip
+copiato GBA_R0_R2SOLOSELL.zip
