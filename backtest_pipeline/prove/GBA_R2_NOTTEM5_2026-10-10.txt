@@ -83,7 +83,7 @@
 #  ed e' 'non fragile' SOLO se la migliore operazione e' < 25% del positivo E le 5 migliori operazioni sommano MENO del netto (codice S5 del lettore 9CD02D2A: le due gambe,
 #  sempre tutte e due). Casi eseguiti col codice, n=210, PF_V 1,40, notti pesanti P +6.000 in operazioni uguali e piu' grandi delle altre, resto R -1.400 (PF_V 0,88):
 #  3 notti x 3 op, 2 x 4, 1 x 8, 7 x 1 -> 'non fragile'; 1 x 3, 5 x 1, 2 x 3, 3 x 2, 1 x 6 -> FRAGILE. Stesso PF_V 1,40 con R -3.000: 3 x 3, 2 x 4, 1 x 8, 7 x 1 -> FRAGILE,
-#  11 x 1 -> 'non fragile'. Operazioni pesanti diverse (n=210, 1 da 4.100 + 19 da 100, resto R -1.400 senza operazioni sopra 100): le 5 migliori 4.500 < netto 4.600, ma la migliore e' il 25,2% del positivo -> FRAGILE. (c) si legge con
+#  11 x 1 -> 'non fragile'. Operazioni pesanti diverse (n=210, PF_V 1,40: positivo 16.100, netto 4.600; 1 da 4.100 + 19 da 100, resto R -1.400 senza operazioni sopra 100): le 5 migliori 4.500 < netto 4.600, ma la migliore e' il 25,5% del positivo (4.100 / 16.100) -> FRAGILE. (c) si legge con
 #  la CONCENTRAZIONE PER NOTTE, soglia scritta ORA: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE (si stampa anche senza le 5); la fa lo script di lettura per notte, e
 #  finche' quello non passa dal cancello (c) e' NON MISURATO. Lettura: PF_V >= 1,3 sul TOTALE con n >= 150 = SORPRESA e solo INDIZIO (controesempio di S4: migliore operazione <
 #  25% del netto e replica in 2 tranche su 3 con n >= 150; S5 non FRAGILE e non FRAGILE PER NOTTE; FRAGILE PER NOTTE, o (c) NON MISURATO, -> la SORPRESA NON diventa INDIZIO);
