@@ -12,6 +12,10 @@
 #  cartella gia' esistente (la "gemella"), e NON TOCCA NIENT'ALTRO.
 #
 #  COSA NON FA, MAI:
+#    - non muove NESSUNA CARTELLA (quindi nemmeno Desktop\NATCLA_F1_P, la
+#      cartella pilota con MANIFEST_F1.csv e RIEPILOGO_F1.txt che le righe
+#      NATCLA_F1_* rileggono, ne' cartelle con terminal64.exe, metaeditor64.exe,
+#      origin.txt o MQL5: classe 607);
 #    - non CANCELLA niente: non c'e' nessun Remove-Item su roba di Claudio;
 #    - non sovrascrive: se la destinazione esiste, lo zip RESTA e lo dichiara;
 #    - non tocca altri zip, .png, .txt, pagelle, .lnk, strumenti, cartelle;
@@ -48,7 +52,10 @@
 #       SEMPRE, qualunque sia l'eta' e anche se hanno la gemella.
 #   G7) ANNULLA LEGATO A OGGI (classe 1235): -Annulla smonta SOLO il giro
 #       piu' recente e SOLO se e' di OGGI; un giro di un altro giorno si
-#       ferma e dice quale sarebbe stato smontato.
+#       ferma e dice quale sarebbe stato smontato. Se il giro piu' recente e'
+#       gia' stato annullato (usato_*), un secondo -Annulla NON smonta quello
+#       prima. Se qualche zip non torna a posto (classe 143) il log NON diventa
+#       usato_ e conserva SOLO gli zip non rimessi.
 #   G8) GIRO A VUOTO (classe 1235): un -Esegui che non sposta niente NON
 #       scrive nessun log (un log vuoto confonderebbe -Annulla) e NON dice
 #       "rilancia con -Annulla".
@@ -159,15 +166,22 @@ $testerVivi = @(Get-Process -Name "metatester64" -ErrorAction SilentlyContinue)
 if($Annulla){
   $icoPrima = ContaIcone
   $fileA = NomeLibero $Desktop "annulla_zip_gemelli" ".txt"
+  # il "giro piu' recente" si sceglie fra TUTTI i log, anche quelli gia' usati (usato_*):
+  # se il piu' recente e' gia' stato annullato, un secondo -Annulla NON smonta il giro prima
   $cand = New-Object System.Collections.ArrayList
   if(Test-Path -LiteralPath $LogDir -PathType Container){
     foreach($c in @(Get-ChildItem -LiteralPath $LogDir -File -ErrorAction SilentlyContinue)){
-      if($c.Name -match '^zipgemelli_(\d{4}-\d{2}-\d{2})_\d{6}(_\d+)?\.csv$'){ [void]$cand.Add($c) }
+      if($c.Name -match '^(usato_(\d+_)?)?zipgemelli_(\d{4}-\d{2}-\d{2})_(\d{6})(_(\d+))?\.csv$'){
+        $suf = 0
+        if($Matches[6]){ $suf = [int]$Matches[6] }
+        $chiave = $Matches[3] + "_" + $Matches[4] + "_" + $suf.ToString("000000", $INV)
+        [void]$cand.Add([pscustomobject]@{ File = $c; Chiave = $chiave; Usato = [bool]$Matches[1]; Giorno = $Matches[3] })
+      }
     }
   }
   $ultimo = $null
   foreach($c in $cand){
-    if($ultimo -eq $null -or [string]::CompareOrdinal($c.Name, $ultimo.Name) -gt 0){ $ultimo = $c }
+    if($ultimo -eq $null -or [string]::CompareOrdinal($c.Chiave, $ultimo.Chiave) -gt 0){ $ultimo = $c }
   }
   $righeA = New-Object System.Collections.ArrayList
   [void]$righeA.Add("ESITO ANNULLAMENTO zip_gemelli")
@@ -185,7 +199,16 @@ if($Annulla){
     Write-Host ("Referto: " + $fileA) -ForegroundColor Gray
     exit 0
   }
-  $dataLog = $ultimo.Name.Substring(11, 10)
+  $dataLog = $ultimo.Giorno
+  if($ultimo.Usato){
+    $m = "Il giro piu' recente (" + $ultimo.File.Name + ") e' GIA' stato annullato: non smonto il giro prima. Niente toccato."
+    Write-Host $m -ForegroundColor Yellow
+    [void]$righeA.Add($m)
+    Set-Content -LiteralPath $fileA -Value $righeA -Encoding UTF8
+    Write-Host ("Referto: " + $fileA) -ForegroundColor Gray
+    exit 0
+  }
+  $ultimo = $ultimo.File
   if($dataLog -ne $oggi){
     $m = "ANNULLA FERMO: il giro piu' recente e' " + $ultimo.Name + " (giorno " + $dataLog + "), NON di oggi (" + $oggi + "). Non smonto giri vecchi: se e' proprio quello che vuoi, rimettili a mano oppure chiedi una riga apposta."
     Write-Host ""
@@ -202,6 +225,7 @@ if($Annulla){
   $vociLog = @(Import-Csv -LiteralPath $ultimo.FullName -ErrorAction SilentlyContinue)
   $n = 0; $ko = 0; $gia = 0
   $rilievi = New-Object System.Collections.ArrayList
+  $rimasti = New-Object System.Collections.ArrayList
   $archPref = $Arch.ToUpperInvariant() + $SEP
   foreach($r in $vociLog){
     try{
@@ -224,8 +248,13 @@ if($Annulla){
       $m = "  NON rimesso: " + [string]$r.Destinazione + "  --  " + $_.Exception.Message
       Write-Host $m -ForegroundColor Yellow
       [void]$rilievi.Add($m)
+      [void]$rimasti.Add([pscustomobject]@{ Origine = [string]$r.Origine; Destinazione = [string]$r.Destinazione })
       $ko++
     }
+  }
+  if($ko -gt 0){
+    # classe 143: il log NON diventa usato_; ci restano SOLO gli zip non rimessi, cosi' un secondo -Annulla (di oggi) riprova solo quelli
+    $rimasti | Export-Csv -LiteralPath $ultimo.FullName -NoTypeInformation -Encoding UTF8
   }
   if($ko -eq 0){
     $usato = Join-Path $ultimo.DirectoryName ("usato_" + $ultimo.Name)
@@ -238,7 +267,7 @@ if($Annulla){
   [void]$righeA.Add("rimessi a posto: " + $n + "   NON rimessi: " + $ko + "   gia' al loro posto: " + $gia)
   [void]$righeA.Add("icone sul Desktop PRIMA: " + $icoPrima + "   DOPO (questo referto escluso): " + $icoDopo)
   foreach($m in $rilievi){ [void]$righeA.Add($m) }
-  if($ko -gt 0){ [void]$righeA.Add("il log NON e' stato marcato come usato: dopo aver risolto a mano si puo' rilanciare -Annulla") }
+  if($ko -gt 0){ [void]$righeA.Add("il log NON e' stato marcato come usato e ora contiene SOLO i " + $ko + " zip non rimessi: dopo aver risolto a mano si puo' rilanciare -Annulla (oggi)") }
   Set-Content -LiteralPath $fileA -Value $righeA -Encoding UTF8
   Write-Host ("Rimessi a posto: " + $n + "   NON rimessi: " + $ko + "   gia' al loro posto: " + $gia) -ForegroundColor White
   Write-Host ("Icone sul Desktop: prima " + $icoPrima + "   dopo " + $icoDopo + "   (questo referto escluso)") -ForegroundColor White
@@ -303,12 +332,18 @@ $PROT_INGRESSO = @("DAT_ASCII_","HISTDATA","DUKASCOPY","STORICO","ORO_M1_HISTDAT
 $PROT_GEMELLI = @("ARCHIVIO","ABTG_RISULTATI","ABTG_ZIP","ABTG_DOCUMENTI","ABTG_VARIE","ABTG_ORDINE_LOG",
   "EASYTREND","INDICATORI","BREAKOUT","NOTTE","PROCE","ALTA VELOCIT","NASDAQ APERTU","DAX E NASD","PIANO DI TRADI",
   "FILE WORD","FILE CHE SCARICO","GITHUB","PAGELLA")
+# (c2) INTERRUTTORE DICHIARATO: ROUND_*.zip protetti PER NOME, sempre? Il coordinatore l'ha
+#      chiesto, ma sul VPS 114 dei 132 zip con gemella sono ROUND_* di settembre: con $true lo
+#      script ne sposterebbe 17 invece di 131. Default $false = i ROUND_ sono protetti dalla
+#      freschezza (zip E gemella, 48 ore) e dal rifiuto con tester vivo, non per nome.
+$PROTEGGI_ROUND_PER_NOME = $false
 # (d) DINAMICA: lo zip e' citato (per nome o per percorso) da un'attivita' pianificata
 # (e) DINAMICA: i ROUND_*.zip e ogni altro zip appena scritto sono coperti dalla
 #     freschezza (-OreFerme, sullo zip E sulla gemella) e dal rifiuto con tester vivo
 
 function MotivoProtezione($nome, $percorso){
   foreach($p in $PROT_ATTESA){ if($nome.StartsWith($p, $ORD)){ return "PROTETTO: famiglia di una riga di prova ('" + $p + "*'): e' lo zip che Claudio deve ancora mandare" } }
+  if($PROTEGGI_ROUND_PER_NOME -and $nome.StartsWith("ROUND_", $ORD)){ return "PROTETTO: ROUND_*.zip (interruttore PROTEGGI_ROUND_PER_NOME attivo)" }
   foreach($p in $PROT_INGRESSO){ if($nome.StartsWith($p, $ORD)){ return "PROTETTO: zip di INGRESSO di uno script di storico ('" + $p + "*')" } }
   foreach($p in $PROT_GEMELLI){ if($nome.StartsWith($p, $ORD)){ return "PROTETTO: nome tematico/archivio/copia di repo/pagella ('" + $p + "*'), come nei gemelli" } }
   if($testoAttivitaU.Contains($percorso.ToUpperInvariant()) -or $testoAttivitaU.Contains(($SEP + $nome.ToUpperInvariant()))){
@@ -441,6 +476,8 @@ else       { [void]$righe.Add("ANTEPRIMA zip_gemelli -- NESSUNO zip spostato") }
 [void]$righe.Add("  famiglie di righe di prova (zip da mandare): " + ($PROT_ATTESA -join " | "))
 [void]$righe.Add("  zip di ingresso degli script di storico:     " + ($PROT_INGRESSO -join " | "))
 [void]$righe.Add("  nomi dei gemelli (tematiche, archivi, GitHub, pagelle): " + ($PROT_GEMELLI -join " | "))
+[void]$righe.Add("  ROUND_*.zip protetti per nome: " + $(if($PROTEGGI_ROUND_PER_NOME){"SI"}else{"NO (solo freschezza di zip e gemella, e rifiuto con tester vivo)"}))
+[void]$righe.Add("  cartelle: questo script NON muove mai nessuna cartella (nemmeno Desktop\NATCLA_F1_P con MANIFEST_F1.csv e RIEPILOGO_F1.txt, ne' cartelle con terminal64.exe/metaeditor64.exe/origin.txt/MQL5)")
 [void]$righe.Add("  dinamica: citato da un'attivita' pianificata; scritto da meno di " + $OreFerme + " ore (zip o gemella); nascosto/di sistema/collegamento")
 [void]$righe.Add("")
 [void]$righe.Add("--- RESTANO SUL DESKTOP E PERCHE' (" + $restano.Count + ") ---")
