@@ -1,6 +1,6 @@
 # =====================================================================
-#  MARCATORE_GBA_R0_PASSATE_v4
-#  GBA_R0_PASSATE.ps1 -- PASSO 0 (sonda) E PASSO 1 (replica) DI 'GoldBreakoutATR' (ABTG_GoldBreakoutATR v1.10) SU XAUUSD
+#  MARCATORE_GBA_R0_PASSATE_v5
+#  GBA_R0_PASSATE.ps1 -- PASSO 0 (sonda), PASSO 1 (replica) E PASSO 2 (R2: una variabile per file) DI 'GoldBreakoutATR' (ABTG_GoldBreakoutATR v1.10)
 #
 #  CHE COSA FA, e una cosa sola:
 #    per ogni passata di UN LOTTO del file prova backtest_pipeline/prove/GBA_R0_REPLICA_2026-10-09.txt lancia UNA passata SINGOLA del tester
@@ -57,6 +57,25 @@
 #      ($PROVE_AMMESSE) lega ogni file prova ai suoi lotti e ai suoi conteggi; il DEFAULT di -Prova e' il file della v3, quindi una riga vecchia (S0/R1A/R1B)
 #      si comporta come prima. Un -Prova fuori tabella ferma tutto. Nient'altro e' cambiato: stessi 30 pin, stesso asse tecnico, stessi controlli, stessa
 #      cella REPL. Cio' che resta cablato e DICHIARATO: EA, simbolo XAUUSD, M1, versione 1.10, deposito 1000000, lotto fisso 1,00.
+#  13. (v5, 10/10, BOZZA) FILE PROVA DICHIARATIVO per il piano R2 (report/GBA_R2_PIANO_2026-10-10.md par. 3.5): la v4 accettava come variabile di cella SOLO
+#      InpSpreadMaxATR e aveva simbolo/TF cablati. Ora i file prova sono di DUE specie, e nient'altro:
+#      (a) STORICI, per nome, nella tabella $PROVE_AMMESSE (GBA_R0_REPLICA_2026-10-09.txt, GBA_R2_REGIME_2026-10-10.txt): leggono ESATTAMENTE come in v4
+#          (asse InpSpreadMaxATR, conteggi dalla tabella, cella REPL obbligatoria, InpSymbol=XAUUSD, InpSignalTF=1). Un blocco @GBA-ASSE in un file storico = stop.
+#      (b) DICHIARATIVI: qualunque altro nome (solo lettere, cifre, _ . -, finale .txt) e un blocco OBBLIGATORIO
+#          '# @GBA-ASSE chiave=<InpXxx> tranche=<n> celle=<n> lotti=<n>': la chiave e' la SOLA variabile del file (una per file, regola di casa), i conteggi
+#          sono la guardia contro un file tronco (oltre allo SHA256 della riga). Le chiavi ammesse come asse sono in $TIPI_INPUT (22 input dell'EA, ognuno col
+#          suo tipo e la sua riga AVVIO); NON sono ammesse come asse: InpLotMode, InpLots, InpRiskPct (rischio: decisione di Claudio 09/10, lotto fisso 1,00),
+#          InpMagic (asse tecnico), InpComment, InpUsaGuardian, InpVerbose, InpAutoTest, InpCheckFreeMargin. La cella REPL e' FACOLTATIVA (l'ancora puo' venire
+#          da R1A, il lettore la trova dall'ini), ma se c'e' deve coincidere col pin; una cella col valore del pin sotto un altro nome, o due celle con lo stesso
+#          valore = stop. I lotti di un file dichiarativo NON possono chiamarsi S0, R1A, R1B, R2REG (il lettore da' a quei nomi una semantica fissa).
+#      SIMBOLO E TF PER PASSATA: Symbol= e Period= del .ini vengono da InpSymbol e InpSignalTF EFFETTIVI della passata (pin, o cella se l'asse e' uno dei due);
+#      il grafico del tester gira sul TF del SEGNALE (per i file storici e' M1 come prima). Tutti i controlli sul simbolo e sul periodo (report, finestra girata,
+#      barre generate, inizio dei tick) usano quelli della passata. InpSignalTF=0 (PERIOD_CURRENT) e' vietato: il TF del segnale va scritto.
+#      CONTROLLI IN PIU' (i file storici li passano tutti: provato con pwsh, NON su Windows PowerShell 5.1): nomi doppi di tranche/celle/lotti, tranche con
+#      da >= a, voci di passata doppie, tipi e intervalli dei 22 input. AVVIO: ogni valore atteso deve essere seguito da un carattere che NON e' una cifra
+#      o un punto (in v4 'InpHourEnd=2' sarebbe stato trovato dentro 'InpHourEnd=24': con l'orario come asse e' un falso OK).
+#      MANIFEST: cinque colonne IN CODA (asse;valore_asse;simbolo;periodo;prova); le 27 colonne di v4 restano identiche e nello stesso ordine.
+#      G1: oltre al lotto S0 (invariato), ogni lotto dichiarativo con due gemelle (stessa cella e tranche, magic 775800 e 775850) le confronta.
 #
 #  E' UN BACKTEST, NON UN ORDINE. [Experts] AllowLiveTrading=false nel .ini: il terminale del PC di backtest e' loggato sul DEMO 50503392 e il 14/08/2026
 #  da questa macchina sono partiti ordini VERI.
@@ -87,17 +106,33 @@ $IC = [Globalization.CultureInfo]::InvariantCulture
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
 $EXPERT = 'ABTG_GoldBreakoutATR'
-# (v4) i file prova ammessi: nome -> numero di blocchi attesi (guardia contro un file tronco o cambiato) e lotti che contiene
+# (v4) i file prova STORICI: nome -> numero di blocchi attesi (guardia contro un file tronco o cambiato) e lotti che contiene. Letti ESATTAMENTE come in v4.
 $PROVE_AMMESSE = @{
   'GBA_R0_REPLICA_2026-10-09.txt' = @{ Tr = 3; Ce = 4; Lo = 3; Lotti = '^(S0|R1A|R1B)$' }
   'GBA_R2_REGIME_2026-10-10.txt'  = @{ Tr = 6; Ce = 2; Lo = 1; Lotti = '^(R2REG)$' }
 }
-if(-not $PROVE_AMMESSE.ContainsKey($Prova)){ throw ('-Prova ' + $Prova + ' non e fra i file prova ammessi: ' + (($PROVE_AMMESSE.Keys | Sort-Object) -join ', ') + '.') }
+$LOTTI_STORICI = @('S0', 'R1A', 'R1B', 'R2REG')
+# (v5) un file prova DICHIARATIVO: nome semplice (finisce nel percorso e nell'URL al pin), conteggi e lotti dal suo blocco @GBA-ASSE
+if($Prova -notmatch '^[A-Za-z0-9_.-]{1,80}\.txt$' -or $Prova.Contains('..')){ throw ('-Prova ' + $Prova + ': nome non ammesso (solo lettere, cifre, _ . -, finale .txt, niente cartelle).') }
+$STORICA = $PROVE_AMMESSE.ContainsKey($Prova)
 $PROVA  = $Prova
-$CFG_PROVA = $PROVE_AMMESSE[$Prova]
+$CFG_PROVA = $null
+if($STORICA){ $CFG_PROVA = $PROVE_AMMESSE[$Prova] }
 $VERSIONE_ATTESA = '1.10'
+# (v5) SIMBOLO e PERIODO del file (dai pin); quelli di OGNI passata stanno in $ru.Simbolo / $ru.Periodo (l'asse puo' essere InpSymbol o InpSignalTF)
 $SIMBOLO = 'XAUUSD'
 $PERIODO = 'M1'
+# (v5) codici ENUM_TIMEFRAMES di MQL5 -> nome del periodo (ini del tester, report, giornale). 0 = PERIOD_CURRENT, ammesso solo per InpTrendTF/InpAtrTF.
+$TF_NOMI = @{ 1 = 'M1'; 2 = 'M2'; 3 = 'M3'; 4 = 'M4'; 5 = 'M5'; 6 = 'M6'; 10 = 'M10'; 12 = 'M12'; 15 = 'M15'; 20 = 'M20'; 30 = 'M30'; 16385 = 'H1'; 16386 = 'H2'; 16387 = 'H3'; 16388 = 'H4'; 16390 = 'H6'; 16392 = 'H8'; 16396 = 'H12'; 16408 = 'D1'; 32769 = 'W1'; 49153 = 'MN1' }
+# (v5) gli input che possono fare da ASSE, col loro tipo (validazione del valore e formato della riga AVVIO). Gli altri 8 pin NON sono assi (intestazione, dev. 13).
+$TIPI_INPUT = @{
+  InpSymbol = 'simbolo'; InpSignalTF = 'tf'; InpTrendTF = 'tf0'; InpAtrTF = 'tf0'
+  InpChannelBars = 'int'; InpEmaPeriod = 'int'; InpAtrPeriod = 'int'; InpSpreadMaxATR = 'spread'
+  InpAllowLong = 'bool'; InpAllowShort = 'bool'
+  InpSL_ATR = 'dec'; InpTrail_ATR = 'dec'; InpTrailAtrMode = 'int01'; InpTimeExitBars = 'int'
+  InpUseBreakeven = 'bool'; InpBE_TriggerATR = 'dec'; InpBE_OffsetATR = 'dec'
+  InpSlippagePoints = 'int'; InpMaxDailyLoss = 'dec'; InpMaxTradesPerDay = 'int'; InpHourStart = 'ora0_23'; InpHourEnd = 'ora0_24'
+}
 $ASSE_ATTESO = 'InpMagic=775800||775800||50||775850||Y'
 $MAGIC_AMMESSI = @('775800', '775850')
 $N_PIN_ATTESI = 30
@@ -105,7 +140,13 @@ $TETTO_BARRE = 100000
 $AVVISO_BARRE = 95000
 if($Pin -notmatch '^[0-9a-fA-F]{40}$'){ throw '-Pin obbligatorio e di 40 caratteri esadecimali: senza, girerebbe la punta del branch spacciandola per un commit congelato.' }
 $Pin = $Pin.ToLower()
-if($Lotto -notmatch $CFG_PROVA.Lotti){ throw ('-Lotto ' + $Lotto + ' non e un lotto del file prova ' + $PROVA + ' (ammessi: ' + $CFG_PROVA.Lotti + ').') }
+if($STORICA){
+  if($Lotto -notmatch $CFG_PROVA.Lotti){ throw ('-Lotto ' + $Lotto + ' non e un lotto del file prova ' + $PROVA + ' (ammessi: ' + $CFG_PROVA.Lotti + ').') }
+} else {
+  # (v5) il lotto deve esistere nel file (si verifica dopo averlo letto); qui solo il formato e i nomi riservati
+  if($Lotto -cnotmatch '^[A-Z0-9]{1,12}$'){ throw ('-Lotto ' + $Lotto + ': nome non ammesso (1-12 maiuscole o cifre).') }
+  if($LOTTI_STORICI -contains $Lotto){ throw ('-Lotto ' + $Lotto + ' e un nome RISERVATO ai file prova storici (' + ($LOTTI_STORICI -join ', ') + '): il lettore gli da una semantica fissa.') }
+}
 foreach($hx in @($ShaEA, $ShaInc, $ShaProva)){ if($hx -notmatch '^[0-9a-fA-F]{64}$'){ throw '-ShaEA, -ShaInc e -ShaProva devono essere di 64 caratteri esadecimali (SHA256 calcolato dal commit, mai dal disco).' } }
 $ShaEA = $ShaEA.ToUpper(); $ShaInc = $ShaInc.ToUpper(); $ShaProva = $ShaProva.ToUpper()
 if($TimeoutRunMin -lt 1 -or $TimeoutRunMin -gt 90){ throw '-TimeoutRunMin fuori da 1-90 minuti.' }
@@ -149,6 +190,25 @@ function BloccoGba($riga){
   }
   return $h
 }
+# (v5) un valore di input contro il suo tipo: '' se va bene, altrimenti il motivo
+function ValoreNonValido($chiave, $v){
+  if(-not $TIPI_INPUT.ContainsKey($chiave)){ return '' }
+  switch($TIPI_INPUT[$chiave]){
+    'simbolo' { if($v -notmatch '^[A-Za-z0-9_.#-]{1,30}$'){ return ($chiave + '=' + $v + ': simbolo non valido (vuoto vietato: il simbolo va scritto)') } }
+    'tf'      { if($v -notmatch '^[0-9]{1,5}$' -or -not $TF_NOMI.ContainsKey([int]$v)){ return ($chiave + '=' + $v + ': non e un codice ENUM_TIMEFRAMES (0 = PERIOD_CURRENT vietato per il TF del segnale)') } }
+    'tf0'     { if($v -notmatch '^[0-9]{1,5}$' -or ([int]$v -ne 0 -and -not $TF_NOMI.ContainsKey([int]$v))){ return ($chiave + '=' + $v + ': non e un codice ENUM_TIMEFRAMES (0 = PERIOD_CURRENT)') } }
+    'int'     { if($v -notmatch '^[0-9]{1,6}$'){ return ($chiave + '=' + $v + ': intero non negativo atteso') } }
+    'int01'   { if($v -notmatch '^[01]$'){ return ($chiave + '=' + $v + ': ammessi 0 e 1') } }
+    'ora0_23' { if($v -notmatch '^[0-9]{1,2}$' -or [int]$v -gt 23){ return ($chiave + '=' + $v + ': ora 0-23') } }
+    'ora0_24' { if($v -notmatch '^[0-9]{1,2}$' -or [int]$v -gt 24){ return ($chiave + '=' + $v + ': ora 0-24') } }
+    'bool'    { if($v -cnotmatch '^(true|false)$'){ return ($chiave + '=' + $v + ': ammessi true e false') } }
+    'dec'     { if($v -notmatch '^[0-9]{1,4}\.[0-9]{1,2}$'){ return ($chiave + '=' + $v + ': decimale col punto, al massimo 2 decimali (l EA lo stampa a 2: un terzo decimale renderebbe la riga AVVIO non verificabile)') } }
+    'spread'  { if($v -notmatch '^[0-9]{1,2}\.[0-9]{1,3}$'){ return ($chiave + '=' + $v + ': decimale col punto, al massimo 3 decimali (l EA lo stampa a 3)') } }
+  }
+  return ''
+}
+# (v5) nome del TF come lo stampa EnumToString dell'EA
+function TfEnum($v){ if([int]$v -eq 0){ return 'PERIOD_CURRENT' }; return ('PERIOD_' + $TF_NOMI[[int]$v]) }
 # il report .htm di MT5: tabella di celle label / valore. Si tolgono i tag, si cerca "|ETICHETTA:|valore|". Etichette italiane e inglesi.
 function CercaCella([string]$t, [string[]]$etichette){
   foreach($e in $etichette){
@@ -279,12 +339,13 @@ foreach($ck in @(@($srcEA, $ShaEA, ($EXPERT + '.mq5')), @($srcInc, $ShaInc, 'ABT
 if(-not (Select-String -LiteralPath $srcEA -Pattern ('#property\s+version\s+"' + [regex]::Escape($VERSIONE_ATTESA) + '"') -Quiet)){ throw ('il sorgente dell EA non dichiara #property version "' + $VERSIONE_ATTESA + '". Non si parte.') }
 
 # --- il file prova: pin, asse tecnico, blocchi GBA
+# >>> PARSING DEL FILE PROVA (v5: storico = come v4; dichiarativo = @GBA-ASSE). Il pezzo fra '>>>' e '<<<' e' quello provato con pwsh (dev. 13).
 $pinProva = New-Object System.Collections.ArrayList
 $assi = New-Object System.Collections.ArrayList
-$blocchi = @{ TRANCHE = @(); CELLA = @(); LOTTO = @() }
+$blocchi = @{ TRANCHE = @(); CELLA = @(); LOTTO = @(); ASSE = @() }
 foreach($r in (Get-Content -LiteralPath $fileProva)){
   $t = $r.Trim()
-  if($t -match '^#\s*@GBA-(TRANCHE|CELLA|LOTTO)\s+(.*)$'){ $tipoB = $Matches[1]; $corpoB = $Matches[2]; $blocchi[$tipoB] = @($blocchi[$tipoB]) + @((BloccoGba $corpoB)); continue }
+  if($t -match '^#\s*@GBA-(TRANCHE|CELLA|LOTTO|ASSE)\s+(.*)$'){ $tipoB = $Matches[1]; $corpoB = $Matches[2]; $blocchi[$tipoB] = @($blocchi[$tipoB]) + @((BloccoGba $corpoB)); continue }
   if($t -eq '' -or $t.StartsWith('#')){ continue }
   if($t -match '^(Inp[A-Za-z0-9_]+)=(.*)$'){
     if($t.EndsWith('||Y')){ [void]$assi.Add($t) } else { [void]$pinProva.Add(@($Matches[1], $Matches[2])) }
@@ -298,25 +359,86 @@ $pinH = @{}; foreach($pp in $pinProva){ $pinH[$pp[0]] = $pp[1] }
 foreach($kk in @('InpSymbol','InpSignalTF','InpChannelBars','InpEmaPeriod','InpAtrPeriod','InpSpreadMaxATR','InpSL_ATR','InpTrail_ATR','InpTimeExitBars','InpUseBreakeven','InpBE_TriggerATR','InpBE_OffsetATR','InpLotMode','InpLots','InpUsaGuardian','InpVerbose','InpAutoTest','InpHourStart','InpHourEnd','InpMaxTradesPerDay','InpMaxDailyLoss','InpAllowLong','InpAllowShort','InpSlippagePoints','InpCheckFreeMargin','InpTrailAtrMode','InpTrendTF','InpAtrTF','InpRiskPct','InpComment')){
   if(-not $pinH.ContainsKey($kk)){ throw ('il file prova non ha il pin ' + $kk + ': non e il file che lo script si aspetta. Non si parte.') }
 }
-if($pinH['InpSymbol'] -ne $SIMBOLO){ throw ('InpSymbol del file prova e ' + $pinH['InpSymbol'] + ' invece di ' + $SIMBOLO + '. Non si parte.') }
-if($pinH['InpSignalTF'] -ne '1'){ throw 'InpSignalTF del file prova non e 1 (PERIOD_M1). Non si parte.' }
+# (v5) i 22 input con un tipo si validano gia' sui PIN (un pin storto farebbe girare l'EA con un valore che la riga AVVIO non puo' confermare)
+foreach($kk in @($TIPI_INPUT.Keys | Sort-Object)){ $mv = ValoreNonValido $kk $pinH[$kk]; if($mv -ne ''){ throw ('pin non valido nel file prova: ' + $mv + '. Non si parte.') } }
+if($STORICA){
+  # file STORICO: identico a v4 (simbolo e TF cablati, asse InpSpreadMaxATR, conteggi dalla tabella)
+  if(@($blocchi.ASSE).Count -ne 0){ throw ('il file prova storico ' + $PROVA + ' contiene un blocco @GBA-ASSE: un file storico e letto come in v4 e non ne ha. File cambiato? Non si parte.') }
+  if($pinH['InpSymbol'] -ne $SIMBOLO){ throw ('InpSymbol del file prova e ' + $pinH['InpSymbol'] + ' invece di ' + $SIMBOLO + '. Non si parte.') }
+  if($pinH['InpSignalTF'] -ne '1'){ throw 'InpSignalTF del file prova non e 1 (PERIOD_M1). Non si parte.' }
+  $ASSE = 'InpSpreadMaxATR'
+  $attTr = $CFG_PROVA.Tr; $attCe = $CFG_PROVA.Ce; $attLo = $CFG_PROVA.Lo
+} else {
+  # file DICHIARATIVO: un solo blocco '@GBA-ASSE chiave=.. tranche=.. celle=.. lotti=..'
+  if(@($blocchi.ASSE).Count -ne 1){ throw ('il file prova ' + $PROVA + ' non e fra i file storici e ha ' + @($blocchi.ASSE).Count + ' blocchi @GBA-ASSE (ne serve UNO: la sola variabile del file). Non si parte.') }
+  $bA = @($blocchi.ASSE)[0]
+  if(@($bA.Keys).Count -ne 4 -or -not $bA.ContainsKey('chiave') -or -not $bA.ContainsKey('tranche') -or -not $bA.ContainsKey('celle') -or -not $bA.ContainsKey('lotti')){ throw 'il blocco @GBA-ASSE non ha esattamente chiave, tranche, celle, lotti.' }
+  $ASSE = $bA['chiave']
+  if(-not $TIPI_INPUT.ContainsKey($ASSE)){ throw ('chiave dell asse ' + $ASSE + ' non ammessa: gli assi possibili sono ' + (($TIPI_INPUT.Keys | Sort-Object) -join ', ') + ' (rischio, magic, commento, Guardian, stampe e margine NON sono assi).') }
+  $ASSE = @($TIPI_INPUT.Keys | Where-Object { $_ -ceq $ASSE })
+  if($ASSE.Count -ne 1){ throw ('chiave dell asse ' + $bA['chiave'] + ': maiuscole/minuscole diverse dal nome dell input (MT5 le distingue).') }
+  $ASSE = $ASSE[0]
+  foreach($cn in @('tranche', 'celle', 'lotti')){ if($bA[$cn] -notmatch '^[1-9][0-9]?$'){ throw ('@GBA-ASSE ' + $cn + '=' + $bA[$cn] + ': conteggio 1-99 atteso.') } }
+  $attTr = [int]$bA['tranche']; $attCe = [int]$bA['celle']; $attLo = [int]$bA['lotti']
+}
 if($pinH['InpVerbose'] -ne 'true'){ throw 'InpVerbose del file prova non e true: senza, il giornale non ha le righe dei segnali. Non si parte.' }
 if($pinH['InpLotMode'] -ne '0' -or (Num $pinH['InpLots']) -ne 1.0){ throw 'il file prova non ha lotto fisso 1,00 (InpLotMode=0, InpLots=1.0): decisione di Claudio del 09/10. Non si parte.' }
-if(@($blocchi.TRANCHE).Count -ne $CFG_PROVA.Tr -or @($blocchi.CELLA).Count -ne $CFG_PROVA.Ce -or @($blocchi.LOTTO).Count -ne $CFG_PROVA.Lo){ throw ('blocchi @GBA letti: tranche ' + @($blocchi.TRANCHE).Count + ' (attese ' + $CFG_PROVA.Tr + '), celle ' + @($blocchi.CELLA).Count + ' (attese ' + $CFG_PROVA.Ce + '), lotti ' + @($blocchi.LOTTO).Count + ' (attesi ' + $CFG_PROVA.Lo + ') nel file prova ' + $PROVA + '. Non si parte.') }
+if(@($blocchi.TRANCHE).Count -ne $attTr -or @($blocchi.CELLA).Count -ne $attCe -or @($blocchi.LOTTO).Count -ne $attLo){ throw ('blocchi @GBA letti: tranche ' + @($blocchi.TRANCHE).Count + ' (attese ' + $attTr + '), celle ' + @($blocchi.CELLA).Count + ' (attese ' + $attCe + '), lotti ' + @($blocchi.LOTTO).Count + ' (attesi ' + $attLo + ') nel file prova ' + $PROVA + '. Non si parte.') }
 $trDef = @{}
 foreach($b in $blocchi.TRANCHE){
   if(@($b.Keys).Count -ne 3 -or -not $b.ContainsKey('nome') -or -not $b.ContainsKey('da') -or -not $b.ContainsKey('a')){ throw 'un blocco @GBA-TRANCHE non ha esattamente nome, da, a.' }
   if($b['da'] -notmatch '^\d{4}\.\d\d\.\d\d$' -or $b['a'] -notmatch '^\d{4}\.\d\d\.\d\d$'){ throw ('tranche ' + $b['nome'] + ': date non aaaa.mm.gg.') }
+  if([string]::CompareOrdinal($b['da'], $b['a']) -ge 0){ throw ('tranche ' + $b['nome'] + ': da ' + $b['da'] + ' non e prima di a ' + $b['a'] + '.') }
+  if($trDef.ContainsKey($b['nome'])){ throw ('tranche ' + $b['nome'] + ' dichiarata DUE volte nel file prova.') }
   $trDef[$b['nome']] = $b
+}
+# confronto di due valori dello stesso input, col suo tipo (0.5 = 0.50; 'true' distinto da 'True')
+function StessoValore($chiave, $x, $y){
+  switch($TIPI_INPUT[$chiave]){
+    'spread' { return ((Num $x) -eq (Num $y)) }
+    'dec'    { return ((Num $x) -eq (Num $y)) }
+    'simbolo'{ return ($x -ceq $y) }
+    'bool'   { return ($x -ceq $y) }
+  }
+  return ([long]$x -eq [long]$y)
 }
 $ceDef = @{}
 foreach($b in $blocchi.CELLA){
-  # UNA variabile per file prova: la cella puo' dichiarare SOLO nome e InpSpreadMaxATR
-  if(@($b.Keys).Count -ne 2 -or -not $b.ContainsKey('nome') -or -not $b.ContainsKey('InpSpreadMaxATR')){ throw ('la cella ' + $b['nome'] + ' dichiara qualcosa di diverso da InpSpreadMaxATR: una variabile per file prova, lo script si ferma.') }
-  if($b['InpSpreadMaxATR'] -notmatch '^[0-9]+\.[0-9]+$'){ throw ('cella ' + $b['nome'] + ': InpSpreadMaxATR non e un decimale col punto.') }
+  # UNA variabile per file prova: la cella puo' dichiarare SOLO nome e la chiave dell'asse
+  if(@($b.Keys).Count -ne 2 -or -not $b.ContainsKey('nome') -or -not $b.ContainsKey($ASSE)){ throw ('la cella ' + $b['nome'] + ' dichiara qualcosa di diverso da ' + $ASSE + ': una variabile per file prova, lo script si ferma.') }
+  if($STORICA){
+    if($b['InpSpreadMaxATR'] -notmatch '^[0-9]+\.[0-9]+$'){ throw ('cella ' + $b['nome'] + ': InpSpreadMaxATR non e un decimale col punto.') }
+  } else {
+    if(-not ($b.Keys -ccontains $ASSE)){ throw ('la cella ' + $b['nome'] + ' scrive la chiave dell asse con maiuscole/minuscole diverse da ' + $ASSE + '.') }
+    if($b['nome'] -cnotmatch '^[A-Za-z0-9]{1,10}$'){ throw ('cella ' + $b['nome'] + ': nome non ammesso (1-10 lettere o cifre).') }
+    $mv = ValoreNonValido $ASSE $b[$ASSE]; if($mv -ne ''){ throw ('cella ' + $b['nome'] + ': ' + $mv) }
+  }
+  if($ceDef.ContainsKey($b['nome'])){ throw ('cella ' + $b['nome'] + ' dichiarata DUE volte nel file prova.') }
   $ceDef[$b['nome']] = $b
 }
-if((Num $ceDef['REPL']['InpSpreadMaxATR']) -ne (Num $pinH['InpSpreadMaxATR'])){ throw 'la cella REPL non coincide col pin InpSpreadMaxATR del file prova: la replica non e la replica. Non si parte.' }
+if($STORICA){
+  if((Num $ceDef['REPL']['InpSpreadMaxATR']) -ne (Num $pinH['InpSpreadMaxATR'])){ throw 'la cella REPL non coincide col pin InpSpreadMaxATR del file prova: la replica non e la replica. Non si parte.' }
+} else {
+  if($ceDef.ContainsKey('REPL') -and -not (StessoValore $ASSE $ceDef['REPL'][$ASSE] $pinH[$ASSE])){ throw ('la cella REPL (' + $ASSE + '=' + $ceDef['REPL'][$ASSE] + ') non coincide col pin ' + $ASSE + '=' + $pinH[$ASSE] + ': la replica non e la replica. Non si parte.') }
+  $nomiC = @($ceDef.Keys | Sort-Object)
+  for($i = 0; $i -lt $nomiC.Count; $i++){
+    $ci = $ceDef[$nomiC[$i]]
+    if($nomiC[$i] -cne 'REPL' -and (StessoValore $ASSE $ci[$ASSE] $pinH[$ASSE])){ throw ('la cella ' + $nomiC[$i] + ' ha il valore del pin (' + $ASSE + '=' + $pinH[$ASSE] + '): e la REPL sotto un altro nome. Si chiama REPL, o cambia valore.') }
+    for($j = $i + 1; $j -lt $nomiC.Count; $j++){
+      if(StessoValore $ASSE $ci[$ASSE] $ceDef[$nomiC[$j]][$ASSE]){ throw ('le celle ' + $nomiC[$i] + ' e ' + $nomiC[$j] + ' hanno lo stesso valore di ' + $ASSE + ': sarebbero la stessa passata due volte.') }
+    }
+  }
+}
+$nomiLotti = @{}
+foreach($b in $blocchi.LOTTO){
+  if($nomiLotti.ContainsKey($b['nome'])){ throw ('lotto ' + $b['nome'] + ' dichiarato DUE volte nel file prova.') }
+  $nomiLotti[$b['nome']] = $true
+  if(-not $STORICA){
+    if(@($b.Keys).Count -ne 4 -or -not $b.ContainsKey('nome') -or -not $b.ContainsKey('modello') -or -not $b.ContainsKey('tetto_min') -or -not $b.ContainsKey('passate')){ throw ('il blocco @GBA-LOTTO ' + $b['nome'] + ' non ha esattamente nome, modello, tetto_min, passate.') }
+    if($b['nome'] -cnotmatch '^[A-Z0-9]{1,12}$' -or $LOTTI_STORICI -contains $b['nome']){ throw ('lotto ' + $b['nome'] + ': nome non ammesso in un file dichiarativo (1-12 maiuscole o cifre, non ' + ($LOTTI_STORICI -join '/') + ').') }
+    if($b['tetto_min'] -notmatch '^[0-9]{1,3}$' -or [int]$b['tetto_min'] -lt 1){ throw ('lotto ' + $b['nome'] + ': tetto_min ' + $b['tetto_min'] + ' non e un numero di minuti 1-999.') }
+  }
+}
 $lottoDef = @($blocchi.LOTTO | Where-Object { $_['nome'] -eq $Lotto })
 if($lottoDef.Count -ne 1){ throw ('lotto ' + $Lotto + ' non trovato (o doppio) nel file prova.') }
 $lottoDef = $lottoDef[0]
@@ -324,6 +446,7 @@ $tettoMin = [int]$lottoDef['tetto_min']
 $modello = [int]$lottoDef['modello']
 if($modello -ne 1 -and $modello -ne 4){ throw ('modello del lotto ' + $Lotto + ' = ' + $modello + ': ammessi 1 (OHLC su M1) e 4 (ticks reali).') }
 $runs = New-Object System.Collections.ArrayList
+$vociViste = @{}
 foreach($voce in ($lottoDef['passate'] -split ',')){
   $pz = $voce -split ':'
   if($pz.Count -lt 2 -or $pz.Count -gt 3){ throw ('voce di passata malformata: ' + $voce) }
@@ -331,9 +454,19 @@ foreach($voce in ($lottoDef['passate'] -split ',')){
   if(-not $trDef.ContainsKey($pz[1])){ throw ('tranche ' + $pz[1] + ' del lotto ' + $Lotto + ' inesistente.') }
   $mg = '775800'; if($pz.Count -eq 3){ $mg = $pz[2] }
   if($MAGIC_AMMESSI -notcontains $mg){ throw ('magic ' + $mg + ' non ammesso (solo i due dell asse tecnico: ' + ($MAGIC_AMMESSI -join ', ') + ').') }
-  [void]$runs.Add([pscustomobject]@{ Cella = $ceDef[$pz[0]]; Tranche = $trDef[$pz[1]]; Magic = $mg })
+  $kv = $pz[0] + ':' + $pz[1] + ':' + $mg
+  if($vociViste.ContainsKey($kv)){ throw ('passata ' + $kv + ' scritta DUE volte nel lotto ' + $Lotto + ': la stessa misura girerebbe due volte e il lettore la conterebbe doppia.') }
+  $vociViste[$kv] = $true
+  # (v5) i pin EFFETTIVI della passata: quelli del file, con la chiave dell'asse presa dalla cella
+  $eff = @{}; foreach($pk in @($pinH.Keys)){ $eff[$pk] = $pinH[$pk] }
+  $eff[$ASSE] = $ceDef[$pz[0]][$ASSE]
+  [void]$runs.Add([pscustomobject]@{ Cella = $ceDef[$pz[0]]; Tranche = $trDef[$pz[1]]; Magic = $mg; Eff = $eff; Simbolo = $eff['InpSymbol']; Periodo = $TF_NOMI[[int]$eff['InpSignalTF']] })
 }
+$SIMBOLO = $pinH['InpSymbol']; $PERIODO = $TF_NOMI[[int]$pinH['InpSignalTF']]
+$simTf = ((@($runs | ForEach-Object { $_.Simbolo }) | Select-Object -Unique) -join '/') + ' ' + ((@($runs | ForEach-Object { $_.Periodo }) | Select-Object -Unique) -join '/')
+# <<< PARSING DEL FILE PROVA
 Dico ('file prova letto: ' + $pinProva.Count + ' pin + asse tecnico; lotto ' + $Lotto + ': ' + $runs.Count + ' passate, Modello ' + $modello + ', tetto ' + $tettoMin + ' minuti') 'Green'
+Dico ('variabile del file: ' + $ASSE + $(if($STORICA){ ' (file prova storico, letto come in v4)' } else { ' (file prova dichiarativo, @GBA-ASSE)' }) + '   simbolo/TF delle passate: ' + $simTf) 'Green'
 
 Copy-Item -LiteralPath $srcEA  -Destination (Join-Path $MqlExp ($EXPERT + '.mq5')) -Force
 Copy-Item -LiteralPath $srcInc -Destination (Join-Path $MqlInc 'ABTG_PausaGuardian.mqh') -Force
@@ -456,45 +589,68 @@ function LeggiCoda($path, $offset){
 }
 # la riga AVVIO e le righe dei parametri, scritte come l'EA le stampa (PrintFormat: spread a 3 decimali, gli altri decimali a 2)
 function Dec2($s){ return (Num $s).ToString('0.00', $IC) }
-function NeedlesAvvio($cella, $magic){
+# (v5) dai pin EFFETTIVI della passata ($eff = pin del file con la chiave dell'asse presa dalla cella): ogni input con un tipo ha la sua riga attesa,
+# compresi simbolo e TF (PERIOD_CURRENT -> TF del segnale, come l'EA). Per i file storici le stringhe sono IDENTICHE a quelle di v4 (provato con pwsh).
+function Int0($s){ return ([long]$s).ToString($IC) }
+function NeedlesAvvio($eff, $magic){
   $n = New-Object System.Collections.ArrayList
+  $sig = TfEnum $eff['InpSignalTF']
   [void]$n.Add('AVVIO v' + $VERSIONE_ATTESA)
-  [void]$n.Add('InpSymbol="' + $pinH['InpSymbol'] + '" -> simbolo ' + $pinH['InpSymbol'])
-  [void]$n.Add('InpSignalTF=PERIOD_M1 -> PERIOD_M1')
-  [void]$n.Add('InpTrendTF=PERIOD_CURRENT -> PERIOD_M1')
-  [void]$n.Add('InpAtrTF=PERIOD_CURRENT -> PERIOD_M1')
-  [void]$n.Add('InpChannelBars=' + $pinH['InpChannelBars'] + ' (')
-  [void]$n.Add('InpEmaPeriod=' + $pinH['InpEmaPeriod'] + ' |')
-  [void]$n.Add('InpAtrPeriod=' + $pinH['InpAtrPeriod'] + ' |')
-  [void]$n.Add('InpSpreadMaxATR=' + (Num $cella['InpSpreadMaxATR']).ToString('0.000', $IC))
-  [void]$n.Add('InpAllowLong=' + $pinH['InpAllowLong'] + ' | InpAllowShort=' + $pinH['InpAllowShort'])
-  [void]$n.Add('InpSL_ATR=' + (Dec2 $pinH['InpSL_ATR']) + ' |')
-  [void]$n.Add('InpTrail_ATR=' + (Dec2 $pinH['InpTrail_ATR']) + ' |')
-  [void]$n.Add('InpTrailAtrMode=' + $pinH['InpTrailAtrMode'] + ' (')
-  [void]$n.Add('InpTimeExitBars=' + $pinH['InpTimeExitBars'])
-  [void]$n.Add('InpUseBreakeven=' + $pinH['InpUseBreakeven'] + ' |')
-  [void]$n.Add('InpBE_TriggerATR=' + (Dec2 $pinH['InpBE_TriggerATR']) + ' |')
-  [void]$n.Add('InpBE_OffsetATR=' + (Dec2 $pinH['InpBE_OffsetATR']))
-  [void]$n.Add('InpSlippagePoints=' + $pinH['InpSlippagePoints'] + ' |')
-  [void]$n.Add('InpMaxDailyLoss=' + (Dec2 $pinH['InpMaxDailyLoss']))
-  [void]$n.Add('InpMaxTradesPerDay=' + $pinH['InpMaxTradesPerDay'])
-  [void]$n.Add('InpCheckFreeMargin=' + $pinH['InpCheckFreeMargin'] + ' |')
-  [void]$n.Add('InpHourStart=' + $pinH['InpHourStart'] + ' |')
-  [void]$n.Add('InpHourEnd=' + $pinH['InpHourEnd'])
-  [void]$n.Add('InpLotMode=' + $pinH['InpLotMode'] + ' (')
-  [void]$n.Add('InpLots=' + (Dec2 $pinH['InpLots']) + ' |')
+  [void]$n.Add('InpSymbol="' + $eff['InpSymbol'] + '" -> simbolo ' + $eff['InpSymbol'])
+  [void]$n.Add('InpSignalTF=' + $sig + ' -> ' + $sig)
+  foreach($kt in @('InpTrendTF', 'InpAtrTF')){
+    $ris = $sig; if([int]$eff[$kt] -ne 0){ $ris = TfEnum $eff[$kt] }
+    [void]$n.Add($kt + '=' + (TfEnum $eff[$kt]) + ' -> ' + $ris)
+  }
+  [void]$n.Add('InpChannelBars=' + (Int0 $eff['InpChannelBars']) + ' (')
+  [void]$n.Add('InpEmaPeriod=' + (Int0 $eff['InpEmaPeriod']) + ' |')
+  [void]$n.Add('InpAtrPeriod=' + (Int0 $eff['InpAtrPeriod']) + ' |')
+  [void]$n.Add('InpSpreadMaxATR=' + (Num $eff['InpSpreadMaxATR']).ToString('0.000', $IC))
+  [void]$n.Add('InpAllowLong=' + $eff['InpAllowLong'] + ' | InpAllowShort=' + $eff['InpAllowShort'])
+  [void]$n.Add('InpSL_ATR=' + (Dec2 $eff['InpSL_ATR']) + ' |')
+  [void]$n.Add('InpTrail_ATR=' + (Dec2 $eff['InpTrail_ATR']) + ' |')
+  [void]$n.Add('InpTrailAtrMode=' + (Int0 $eff['InpTrailAtrMode']) + ' (')
+  [void]$n.Add('InpTimeExitBars=' + (Int0 $eff['InpTimeExitBars']))
+  [void]$n.Add('InpUseBreakeven=' + $eff['InpUseBreakeven'] + ' |')
+  [void]$n.Add('InpBE_TriggerATR=' + (Dec2 $eff['InpBE_TriggerATR']) + ' |')
+  [void]$n.Add('InpBE_OffsetATR=' + (Dec2 $eff['InpBE_OffsetATR']))
+  [void]$n.Add('InpSlippagePoints=' + (Int0 $eff['InpSlippagePoints']) + ' |')
+  [void]$n.Add('InpMaxDailyLoss=' + (Dec2 $eff['InpMaxDailyLoss']))
+  [void]$n.Add('InpMaxTradesPerDay=' + (Int0 $eff['InpMaxTradesPerDay']))
+  [void]$n.Add('InpCheckFreeMargin=' + $eff['InpCheckFreeMargin'] + ' |')
+  [void]$n.Add('InpHourStart=' + (Int0 $eff['InpHourStart']) + ' |')
+  [void]$n.Add('InpHourEnd=' + (Int0 $eff['InpHourEnd']))
+  [void]$n.Add('InpLotMode=' + $eff['InpLotMode'] + ' (')
+  [void]$n.Add('InpLots=' + (Dec2 $eff['InpLots']) + ' |')
   [void]$n.Add('InpMagic=' + $magic + ' |')
-  [void]$n.Add('InpComment="' + $pinH['InpComment'] + '"')
-  [void]$n.Add('InpUsaGuardian=' + $pinH['InpUsaGuardian'])
-  [void]$n.Add('InpVerbose=' + $pinH['InpVerbose'])
-  [void]$n.Add('InpAutoTest=' + $pinH['InpAutoTest'])
+  [void]$n.Add('InpComment="' + $eff['InpComment'] + '"')
+  [void]$n.Add('InpUsaGuardian=' + $eff['InpUsaGuardian'])
+  [void]$n.Add('InpVerbose=' + $eff['InpVerbose'])
+  [void]$n.Add('InpAutoTest=' + $eff['InpAutoTest'])
   return $n
+}
+# (v5) un valore atteso e' presente solo se NON e' seguito da una cifra o da un punto: 'InpHourEnd=2' non si trova piu' dentro 'InpHourEnd=24'
+function TrovaNeedle([string]$testo, [string]$nd){ return [regex]::IsMatch($testo, [regex]::Escape($nd) + '(?![0-9.])') }
+# (v5) il .ini della passata: i 30 pin del file prova, con SOLO la chiave dell'asse dalla cella e il magic della passata (asse tecnico)
+function TestoIni($ru, $nomeRep){
+  $righeIn = New-Object System.Collections.ArrayList
+  foreach($pp in $pinProva){
+    $val = $pp[1]
+    if($pp[0] -eq $ASSE){ $val = $ru.Cella[$ASSE] }
+    [void]$righeIn.Add($pp[0] + '=' + $val)
+  }
+  [void]$righeIn.Add('InpMagic=' + $ru.Magic)
+  return ("[Experts]`r`nAllowLiveTrading=false`r`nAllowDllImport=false`r`n`r`n" +
+          "[Tester]`r`nExpert=" + $EXPERT + ".ex5`r`nSymbol=" + $ru.Simbolo + "`r`nPeriod=" + $ru.Periodo + "`r`nModel=" + $modello + "`r`n" +
+          "Optimization=0`r`nFromDate=" + $ru.Tranche['da'] + "`r`nToDate=" + $ru.Tranche['a'] + "`r`nForwardMode=0`r`nDeposit=1000000`r`nCurrency=EUR`r`nLeverage=100`r`n" +
+          "ExecutionMode=0`r`nReplaceReport=1`r`nShutdownTerminal=1`r`nReport=" + $nomeRep + "`r`n`r`n" +
+          "[TesterInputs]`r`n" + ($righeIn -join "`r`n") + "`r`n")
 }
 
 Titolo ('2 - LOTTO ' + $Lotto + ': ' + $runs.Count + ' PASSATE SINGOLE (Modello ' + $modello + ', deposito 1000000 EUR, lotto fisso 1,00)')
 $TLotto = Get-Date
 $manifest = New-Object System.Collections.ArrayList
-[void]$manifest.Add('lotto;passata;cella;spread_max_atr;tranche;da;a;modello;magic;t_avvio;durata_s;stato;trades_report;profitto_report;pf_report;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;righe_gba;ingressi_log;avvio_ok;autotest;finestra;motivi')
+[void]$manifest.Add('lotto;passata;cella;spread_max_atr;tranche;da;a;modello;magic;t_avvio;durata_s;stato;trades_report;profitto_report;pf_report;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;righe_gba;ingressi_log;avvio_ok;autotest;finestra;motivi;asse;valore_asse;simbolo;periodo;prova')
 $nOk = 0; $nKo = 0; $nNon = 0; $sommaDur = 0.0; $nDur = 0
 $abort = $false
 $k = 0
@@ -502,37 +658,30 @@ $riassunti = @{}
 foreach($ru in $runs){
   $k = $k + 1
   $cella = $ru.Cella; $tr = $ru.Tranche; $mg = $ru.Magic
+  $SIMP = $ru.Simbolo; $PERP = $ru.Periodo
+  # (v5) colonne in coda al manifest: asse;valore_asse;simbolo;periodo;prova (le 27 di v4 restano identiche)
+  $coda = ';' + $ASSE + ';' + $cella[$ASSE] + ';' + $SIMP + ';' + $PERP + ';' + $PROVA
+  $spreadEff = $ru.Eff['InpSpreadMaxATR']
   $tag = $Lotto + '_' + $k.ToString('00') + '_' + $cella['nome'] + '_' + $tr['nome'] + '_m' + $mg
   $etich = '[' + $k + '/' + $runs.Count + '] ' + $cella['nome'] + ' ' + $tr['nome'] + ' magic ' + $mg
   $minDa = ((Get-Date) - $TLotto).TotalMinutes
   if($abort -or $minDa -ge $tettoMin){
     $nNon = $nNon + 1
     $why = 'tetto di ' + $tettoMin + ' minuti'; if($abort){ $why = 'lotto fermato' }
-    [void]$manifest.Add($Lotto + ';' + $tag + ';' + $cella['nome'] + ';' + $cella['InpSpreadMaxATR'] + ';' + $tr['nome'] + ';' + $tr['da'] + ';' + $tr['a'] + ';' + $modello + ';' + $mg + ';;0;NON_LANCIATA;;;;;;;;;;0;0;no;no;;' + $why)
+    [void]$manifest.Add($Lotto + ';' + $tag + ';' + $cella['nome'] + ';' + $spreadEff + ';' + $tr['nome'] + ';' + $tr['da'] + ';' + $tr['a'] + ';' + $modello + ';' + $mg + ';;0;NON_LANCIATA;;;;;;;;;;0;0;no;no;;' + $why + $coda)
     Write-Host ('   ' + $etich + '  NON LANCIATA (' + $why + ', minuto ' + [int]$minDa + ')') -ForegroundColor Red
     continue
   }
   if((@(Get-Process -Name terminal64 -ErrorAction SilentlyContinue)).Count -gt 0){
     Write-Host ('   ' + $etich + '  un terminal64 e ancora VIVO prima della passata: il lotto si ferma, non apro un secondo terminale.') -ForegroundColor Red
     $abort = $true; $nNon = $nNon + 1
-    [void]$manifest.Add($Lotto + ';' + $tag + ';' + $cella['nome'] + ';' + $cella['InpSpreadMaxATR'] + ';' + $tr['nome'] + ';' + $tr['da'] + ';' + $tr['a'] + ';' + $modello + ';' + $mg + ';;0;NON_LANCIATA;;;;;;;;;;0;0;no;no;;terminale ancora vivo')
+    [void]$manifest.Add($Lotto + ';' + $tag + ';' + $cella['nome'] + ';' + $spreadEff + ';' + $tr['nome'] + ';' + $tr['da'] + ';' + $tr['a'] + ';' + $modello + ';' + $mg + ';;0;NON_LANCIATA;;;;;;;;;;0;0;no;no;;terminale ancora vivo' + $coda)
     continue
   }
-  # --- l'ini: i 30 pin del file prova, con SOLO InpSpreadMaxATR della cella e il magic della passata (asse tecnico)
-  $righeIn = New-Object System.Collections.ArrayList
-  foreach($pp in $pinProva){
-    $val = $pp[1]
-    if($pp[0] -eq 'InpSpreadMaxATR'){ $val = $cella['InpSpreadMaxATR'] }
-    [void]$righeIn.Add($pp[0] + '=' + $val)
-  }
-  [void]$righeIn.Add('InpMagic=' + $mg)
+  # --- l'ini: i 30 pin del file prova, con SOLO la chiave dell'asse dalla cella e il magic della passata (asse tecnico); simbolo e TF della passata (v5)
   $nomeRep = 'GBA_R0_' + $tag
   $iniF = Join-Path $Work ('gba_' + $tag + '.ini')
-  $testoIni = "[Experts]`r`nAllowLiveTrading=false`r`nAllowDllImport=false`r`n`r`n" +
-              "[Tester]`r`nExpert=" + $EXPERT + ".ex5`r`nSymbol=" + $SIMBOLO + "`r`nPeriod=" + $PERIODO + "`r`nModel=" + $modello + "`r`n" +
-              "Optimization=0`r`nFromDate=" + $tr['da'] + "`r`nToDate=" + $tr['a'] + "`r`nForwardMode=0`r`nDeposit=1000000`r`nCurrency=EUR`r`nLeverage=100`r`n" +
-              "ExecutionMode=0`r`nReplaceReport=1`r`nShutdownTerminal=1`r`nReport=" + $nomeRep + "`r`n`r`n" +
-              "[TesterInputs]`r`n" + ($righeIn -join "`r`n") + "`r`n"
+  $testoIni = TestoIni $ru $nomeRep
   Set-Content -LiteralPath $iniF -Value $testoIni -Encoding ASCII
   Copy-Item -LiteralPath $iniF -Destination (Join-Path $Cart 'ini') -Force
 
@@ -576,7 +725,7 @@ foreach($ru in $runs){
       $mf = $reFin.Match($riga)
       if($mf.Success){ $fin[($mf.Groups['sim'].Value + '|' + $mf.Groups['tf'].Value + '|' + $mf.Groups['da'].Value + '|' + $mf.Groups['ha'].Value + '|' + $mf.Groups['a'].Value + '|' + $mf.Groups['hb'].Value)] = $mf; continue }
       $mb = $reBarre.Match($riga)
-      if($mb.Success -and $mb.Groups['sim'].Value -eq $SIMBOLO){ $barreGen = [long]$mb.Groups['barre'].Value; $tickGen = [long]$mb.Groups['tick'].Value; $evTester[$riga.Trim()] = $true; continue }
+      if($mb.Success -and $mb.Groups['sim'].Value -eq $SIMP){ $barreGen = [long]$mb.Groups['barre'].Value; $tickGen = [long]$mb.Groups['tick'].Value; $evTester[$riga.Trim()] = $true; continue }
       $mt = $reTickIni.Match($riga)
       if($mt.Success){ $tickIni[$mt.Groups['sim'].Value + ' ' + $mt.Groups['d'].Value] = $true; $evTester[$riga.Trim()] = $true; continue }
       # le righe del TESTER che raccontano un guasto (storia mancante, errore, memoria, terminale non collegato): servono a capire una passata morta
@@ -604,7 +753,7 @@ foreach($ru in $runs){
   elseif($avvioRighe -gt 1){ [void]$motivi.Add('PIU righe AVVIO distinte (' + $avvioRighe + '): log di due passate mescolati') }
   else {
     $mancano = @()
-    foreach($nd in (NeedlesAvvio $cella $mg)){ if($testoAvvio.IndexOf($nd, [StringComparison]::Ordinal) -lt 0){ $mancano = $mancano + @($nd) } }
+    foreach($nd in (NeedlesAvvio $ru.Eff $mg)){ if(-not (TrovaNeedle $testoAvvio $nd)){ $mancano = $mancano + @($nd) } }
     if($mancano.Count -eq 0){ $avvioOk = 'si' } else { [void]$motivi.Add('AVVIO: nella configurazione stampata dall EA mancano ' + $mancano.Count + ' valori attesi: ' + (($mancano | Select-Object -First 6) -join ' ## ')) }
   }
   $autoOk = 'no'
@@ -618,8 +767,8 @@ foreach($ru in $runs){
   if($fin.Count -eq 1){
     $mf = $fin.Values | Select-Object -First 1
     $daG = $tr['da']; $aG = $tr['a']
-    if($mf.Groups['sim'].Value -eq $SIMBOLO -and $mf.Groups['tf'].Value -eq $PERIODO -and $mf.Groups['da'].Value -eq $daG -and $mf.Groups['a'].Value -eq $aG -and $mf.Groups['ha'].Value -eq '00:00' -and $mf.Groups['hb'].Value -eq '00:00'){ $finest = $daG + '-' + $aG }
-    else { $finest = 'DIVERSA: ' + $mf.Groups['sim'].Value + ',' + $mf.Groups['tf'].Value + ' ' + $mf.Groups['da'].Value + '-' + $mf.Groups['a'].Value; [void]$motivi.Add('finestra girata ' + $finest + ' invece di ' + $SIMBOLO + ',' + $PERIODO + ' ' + $daG + '-' + $aG) }
+    if($mf.Groups['sim'].Value -eq $SIMP -and $mf.Groups['tf'].Value -eq $PERP -and $mf.Groups['da'].Value -eq $daG -and $mf.Groups['a'].Value -eq $aG -and $mf.Groups['ha'].Value -eq '00:00' -and $mf.Groups['hb'].Value -eq '00:00'){ $finest = $daG + '-' + $aG }
+    else { $finest = 'DIVERSA: ' + $mf.Groups['sim'].Value + ',' + $mf.Groups['tf'].Value + ' ' + $mf.Groups['da'].Value + '-' + $mf.Groups['a'].Value; [void]$motivi.Add('finestra girata ' + $finest + ' invece di ' + $SIMP + ',' + $PERP + ' ' + $daG + '-' + $aG) }
   } elseif($fin.Count -gt 1){ $finest = 'AMBIGUA'; [void]$motivi.Add('PIU intestazioni di passata nel giornale del tester: finestra non attribuibile') }
   # barre generate e profondita' dei tick
   if($null -eq $barreGen){ [void]$motivi.Add('riga "N ticks, M bars generated" NON trovata nel giornale del tester: il conto delle barre contro il tetto non e verificabile') }
@@ -628,9 +777,9 @@ foreach($ru in $runs){
   $tickIniTxt = (($tickIni.Keys | Sort-Object) -join ' / ')
   if($modello -eq 4){
     $okTick = $false; $nTickSim = 0
-    foreach($tk in @($tickIni.Keys)){ $pz2 = $tk -split ' '; if($pz2[0] -eq $SIMBOLO){ $nTickSim = $nTickSim + 1; if([string]::CompareOrdinal($pz2[1], $tr['da']) -le 0){ $okTick = $true } } }
-    # conta SOLO la riga di XAUUSD: quella di EURUSD (conversione, conto in EUR) non dice niente sui tick dell'oro
-    if($nTickSim -eq 0){ Dico ('   (la riga "ticks data begins from" di ' + $SIMBOLO + ' non e nel giornale di questa passata (altre: ' + $tickIniTxt + '): succede se i tick erano gia in cache; si riconferma dal report)') 'Yellow' }
+    foreach($tk in @($tickIni.Keys)){ $pz2 = $tk -split ' '; if($pz2[0] -eq $SIMP){ $nTickSim = $nTickSim + 1; if([string]::CompareOrdinal($pz2[1], $tr['da']) -le 0){ $okTick = $true } } }
+    # conta SOLO la riga del simbolo della passata: quella di EURUSD (conversione, conto in EUR) non dice niente sui suoi tick
+    if($nTickSim -eq 0){ Dico ('   (la riga "ticks data begins from" di ' + $SIMP + ' non e nel giornale di questa passata (altre: ' + $tickIniTxt + '): succede se i tick erano gia in cache; si riconferma dal report)') 'Yellow' }
     elseif(-not $okTick){ [void]$motivi.Add('ticks data begins from ' + $tickIniTxt + ': DOPO l inizio della tranche ' + $tr['da'] + ' (prima di quella data MT5 genera i tick: non sono reali)') }
   }
   # il report .htm
@@ -651,13 +800,13 @@ foreach($ru in $runs){
       if($null -ne $lr.Barre){ $barRep = [string]$lr.Barre }
       if($null -ne $lr.Ticks){ $tickRep = [string]$lr.Ticks }
       if($null -ne $lr.Expert -and $lr.Expert -ne $EXPERT){ [void]$motivi.Add('il report e di un altro EA (' + $lr.Expert + ')') }
-      if($null -ne $lr.Simbolo -and $lr.Simbolo -ne $SIMBOLO){ [void]$motivi.Add('il report e di un altro simbolo (' + $lr.Simbolo + ')') }
+      if($null -ne $lr.Simbolo -and $lr.Simbolo -ne $SIMP){ [void]$motivi.Add('il report e di un altro simbolo (' + $lr.Simbolo + ')') }
       if($null -ne $lr.Periodo){
-        $mpd = [regex]::Match($lr.Periodo, '^' + $PERIODO + '\((\d{4}\.\d\d\.\d\d)-(\d{4}\.\d\d\.\d\d)\)')
-        if(-not $mpd.Success){ [void]$motivi.Add('il periodo del report e "' + $lr.Periodo + '" invece di ' + $PERIODO + ' (' + $tr['da'] + ' - ' + $tr['a'] + ')') }
+        $mpd = [regex]::Match($lr.Periodo, '^' + $PERP + '\((\d{4}\.\d\d\.\d\d)-(\d{4}\.\d\d\.\d\d)\)')
+        if(-not $mpd.Success){ [void]$motivi.Add('il periodo del report e "' + $lr.Periodo + '" invece di ' + $PERP + ' (' + $tr['da'] + ' - ' + $tr['a'] + ')') }
         else {
           $dA = [datetime]::ParseExact($mpd.Groups[2].Value, 'yyyy.MM.dd', $IC); $dB = [datetime]::ParseExact($tr['a'], 'yyyy.MM.dd', $IC)
-          if($mpd.Groups[1].Value -ne $tr['da'] -or [math]::Abs(($dA - $dB).TotalDays) -gt 1){ [void]$motivi.Add('il periodo del report e "' + $lr.Periodo + '" invece di ' + $PERIODO + ' (' + $tr['da'] + ' - ' + $tr['a'] + ')') }
+          if($mpd.Groups[1].Value -ne $tr['da'] -or [math]::Abs(($dA - $dB).TotalDays) -gt 1){ [void]$motivi.Add('il periodo del report e "' + $lr.Periodo + '" invece di ' + $PERP + ' (' + $tr['da'] + ' - ' + $tr['a'] + ')') }
         }
       }
       if($modello -eq 4 -and $lr.Qualita -notmatch '^100%'){ [void]$motivi.Add('qualita dello storico "' + $lr.Qualita + '" invece di 100% ticks reali: il verdetto a ticks reali NON vale') }
@@ -679,7 +828,7 @@ foreach($ru in $runs){
   if($stato -like 'OK*'){ $nOk = $nOk + 1; $sommaDur = $sommaDur + $dur; $nDur = $nDur + 1 } else { $nKo = $nKo + 1 }
   $bgTxt = ''; if($null -ne $barreGen){ $bgTxt = [string]$barreGen }
   $tgTxt = ''; if($null -ne $tickGen){ $tgTxt = [string]$tickGen }
-  [void]$manifest.Add($Lotto + ';' + $tag + ';' + $cella['nome'] + ';' + $cella['InpSpreadMaxATR'] + ';' + $tr['nome'] + ';' + $tr['da'] + ';' + $tr['a'] + ';' + $modello + ';' + $mg + ';' + $tRun.ToString('yyyy-MM-dd HH:mm:ss') + ';' + [int]$dur + ';' + $stato + ';' + $nTrades + ';' + $profitto + ';' + $pfRep + ';' + $qual + ';' + $barRep + ';' + $tickRep + ';' + $bgTxt + ';' + $tgTxt + ';' + $tickIniTxt + ';' + $gbaOrd.Count + ';' + $nIngr + ';' + $avvioOk + ';' + $autoOk + ';' + $finest + ';' + (($motivi -join ' | ') -replace ';', ','))
+  [void]$manifest.Add($Lotto + ';' + $tag + ';' + $cella['nome'] + ';' + $spreadEff + ';' + $tr['nome'] + ';' + $tr['da'] + ';' + $tr['a'] + ';' + $modello + ';' + $mg + ';' + $tRun.ToString('yyyy-MM-dd HH:mm:ss') + ';' + [int]$dur + ';' + $stato + ';' + $nTrades + ';' + $profitto + ';' + $pfRep + ';' + $qual + ';' + $barRep + ';' + $tickRep + ';' + $bgTxt + ';' + $tgTxt + ';' + $tickIniTxt + ';' + $gbaOrd.Count + ';' + $nIngr + ';' + $avvioOk + ';' + $autoOk + ';' + $finest + ';' + (($motivi -join ' | ') -replace ';', ',') + $coda)
   if($lr -and $lr.Ok){ $riassunti[$cella['nome'] + '|' + $tr['nome'] + '|' + $mg] = $lr }
   $col = 'Green'; if($stato -ne 'OK'){ $col = 'Red' }
   Write-Host ('   ' + $etich + '  ' + $stato + '   ' + [int]$dur + ' s   operazioni ' + $nTrades + '   profitto ' + $profitto + '   PF ' + $pfRep + '   righe GBA ' + $gbaOrd.Count + '   barre ' + $bgTxt + '   AVVIO ' + $avvioOk + '   AUTOTEST ' + $autoOk + '   finestra ' + $finest) -ForegroundColor $col
@@ -688,8 +837,8 @@ foreach($ru in $runs){
 }
 $durTot = ((Get-Date) - $TLotto).TotalMinutes
 
-# G1 (solo S0): le due gemelle sul magic devono dare lo stesso report
-$g1 = ''
+# G1 (S0; v5: anche ogni lotto dichiarativo con gemelle): le due gemelle sul magic devono dare lo stesso report
+$g1 = ''; $g1Ko = $false; $g1Righe = @()
 if($Lotto -eq 'S0'){
   $a1 = $riassunti['REPL|T1|775800']; $b1 = $riassunti['REPL|T1|775850']
   if($null -eq $a1 -or $null -eq $b1){ $g1 = 'G1 NON VERIFICABILE: manca il report di una delle due gemelle (REPL su T1, magic 775800 e 775850).' }
@@ -697,6 +846,22 @@ if($Lotto -eq 'S0'){
   else { $g1 = 'G1 ROSSO: gemella 775800 operazioni ' + $a1.Trades + ' profitto ' + $a1.Profitto + ' PF ' + $a1.PF + ' contro gemella 775850 operazioni ' + $b1.Trades + ' profitto ' + $b1.Profitto + ' PF ' + $b1.PF + ': il Modello 1 non e riproducibile, NESSUN conteggio di questo lotto si usa.' }
   $colg = 'Green'; if($g1 -notlike 'G1 VERDE*'){ $colg = 'Red' }
   Write-Host ('   ' + $g1) -ForegroundColor $colg
+  $g1Ko = ($g1 -notlike 'G1 VERDE*')
+  $g1Righe = @($g1)
+} elseif(-not $STORICA){
+  # (v5) file dichiarativo: ogni gemella 775850 si confronta con la sua 775800 se e' nello stesso lotto; se non c'e' (ancora in R1A) lo fa il lettore sui due zip
+  foreach($ru2 in @($runs | Where-Object { $_.Magic -eq '775850' })){
+    $kb = $ru2.Cella['nome'] + '|' + $ru2.Tranche['nome']
+    $nomeG = 'G1 (cella ' + $ru2.Cella['nome'] + ', tranche ' + $ru2.Tranche['nome'] + ', Modello ' + $modello + ')'
+    $haA = (@($runs | Where-Object { $_.Magic -eq '775800' -and $_.Cella['nome'] -eq $ru2.Cella['nome'] -and $_.Tranche['nome'] -eq $ru2.Tranche['nome'] })).Count -gt 0
+    $a1 = $riassunti[$kb + '|775800']; $b1 = $riassunti[$kb + '|775850']
+    if(-not $haA){ $rg = $nomeG + ': la gemella 775800 NON e in questo lotto (di solito e in R1A): il confronto lo fa il lettore leggi_gba_r0.py caricando i due zip.'; $colg = 'Yellow' }
+    elseif($null -eq $a1 -or $null -eq $b1){ $rg = $nomeG + ' NON VERIFICABILE: manca il report di una delle due gemelle.'; $g1Ko = $true; $colg = 'Red' }
+    elseif($a1.Trades -eq $b1.Trades -and $a1.Profitto -eq $b1.Profitto -and $a1.PF -eq $b1.PF){ $rg = $nomeG + ' VERDE: operazioni ' + $a1.Trades + ', profitto ' + $a1.Profitto + ', PF ' + $a1.PF + ' IDENTICI sulle due gemelle.'; $colg = 'Green' }
+    else { $rg = $nomeG + ' ROSSO: gemella 775800 operazioni ' + $a1.Trades + ' profitto ' + $a1.Profitto + ' PF ' + $a1.PF + ' contro 775850 operazioni ' + $b1.Trades + ' profitto ' + $b1.Profitto + ' PF ' + $b1.PF + ': la passata non e riproducibile, NESSUN numero di questo lotto si usa.'; $g1Ko = $true; $colg = 'Red' }
+    $g1Righe = $g1Righe + @($rg)
+    Write-Host ('   ' + $rg) -ForegroundColor $colg
+  }
 }
 
 # ---------------------------------------------------------------------
@@ -705,14 +870,14 @@ if($Lotto -eq 'S0'){
 Titolo '3 - RACCOLTA'
 $mediaS = 0.0; if($nDur -gt 0){ $mediaS = $sommaDur / $nDur }
 $testa = @(
-  ('GBA R0 -- lotto ' + $Lotto + ': ' + $EXPERT + ' v' + $VERSIONE_ATTESA + ' su ' + $SIMBOLO + ' M1, Modello ' + $modello + ', lotto fisso 1,00, deposito 1000000 EUR, UNA variabile (InpSpreadMaxATR)'),
+  ('GBA R0 -- lotto ' + $Lotto + ': ' + $EXPERT + ' v' + $VERSIONE_ATTESA + ' su ' + $simTf + ', Modello ' + $modello + ', lotto fisso 1,00, deposito 1000000 EUR, UNA variabile (' + $ASSE + ')'),
   ('data: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss') + '   pc: ' + $env:COMPUTERNAME + '   pin: ' + $Pin),
   ($EXPERT + '.mq5 SHA256 ' + $ShaEA + '   compilazione: ' + $compErr + ' errori, ' + $compWarn + ' avvisi (-1 = non letto)'),
   ('passate del lotto ' + $runs.Count + ': OK ' + $nOk + ', KO ' + $nKo + ', NON LANCIATE ' + $nNon + '   durata totale ' + [int]$durTot + ' minuti   media per passata OK ' + [int]$mediaS + ' secondi'),
-  $(if($Lotto -eq 'R2REG'){ ('LOTTO R2REG: ' + $runs.Count + ' passate a ticks reali (nessun piano da 17 passate: la stima e nel file prova ' + $PROVA + ')') } else { ('STIMA DEL PIANO INTERO (17 passate: S0 5 + R1A 3 + R1B 9) con la media di questo lotto: ' + [int](17 * $mediaS / 60.0) + ' minuti (valida solo se il Modello e lo stesso: S0 e OHLC, R1 e a ticks reali)') }),
+  $(if($Lotto -eq 'R2REG'){ ('LOTTO R2REG: ' + $runs.Count + ' passate a ticks reali (nessun piano da 17 passate: la stima e nel file prova ' + $PROVA + ')') } elseif(-not $STORICA){ ('LOTTO ' + $Lotto + ' (file prova dichiarativo ' + $PROVA + ', asse ' + $ASSE + '): ' + $runs.Count + ' passate a Modello ' + $modello + ' (nessun piano da 17 passate: la stima e nel file prova)') } else { ('STIMA DEL PIANO INTERO (17 passate: S0 5 + R1A 3 + R1B 9) con la media di questo lotto: ' + [int](17 * $mediaS / 60.0) + ' minuti (valida solo se il Modello e lo stesso: S0 e OHLC, R1 e a ticks reali)') }),
   'Guardian nel tester: FAIL-OPEN (irrilevante: nel tester non c e nessun altro EA).'
 )
-if($g1 -ne ''){ $testa = $testa + @($g1) }
+if($g1Righe.Count -gt 0){ $testa = $testa + $g1Righe }
 $testa = $testa + @('')
 (($testa + $manifest + @('',
   'COME SI LEGGE: python3 backtest_pipeline/leggi_gba_r0.py <questo zip o la cartella>. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e i motivi; poi i cancelli G0/G1/G2,',
@@ -726,7 +891,7 @@ Write-Host ('ZIP PRONTO DA MANDARE: ' + $zip) -ForegroundColor Green
 Write-Host 'FILE ATTESI NELLO ZIP: RIEPILOGO_R0.txt + MANIFEST_R0.csv + il file prova + compile_gba.log + report\GBA_R0_<passata>.htm + log\GBA_<passata>.txt + ini\gba_<passata>.ini (un report, un log e un ini per passata)' -ForegroundColor Gray
 try{ $Mutex.ReleaseMutex() }catch{ }
 $tutteOk = ($nKo -eq 0 -and $nNon -eq 0 -and $nOk -eq $runs.Count)
-if($Lotto -eq 'S0' -and $g1 -ne '' -and $g1 -notlike 'G1 VERDE*'){ $tutteOk = $false }
+if($g1Ko){ $tutteOk = $false }
 if($tutteOk){ Write-Host 'ESITO GBA_R0: TUTTE LE PASSATE OK (rc 0)' -ForegroundColor Green; exit 0 }
 Write-Host 'ESITO GBA_R0: ALMENO UNA PASSATA KO O NON LANCIATA, O G1 NON VERDE (rc 3): lo zip esce lo stesso, il MANIFEST dice quali e perche.' -ForegroundColor Red
 exit 3

@@ -10,6 +10,12 @@ NON giudica il merito oltre le soglie CONGELATE nel file prova (S1-S7), NON prom
 USO
   python3 backtest_pipeline/leggi_gba_r0.py GBA_R0_S0.zip [GBA_R0_R1A.zip GBA_R0_R1B.zip ...] [--csv-out R0_tabella.csv]
   python3 backtest_pipeline/leggi_gba_r0.py --autotest      (dati finti con risposta nota + contro-esempi; esce 1 se un controllo cade)
+  (v5) opzioni della lettura per regime (decisioni APERTE di Claudio; default = lettura letterale della firma 10/10, report/FIRME_2026-10-10.md):
+     --durata-regime 1anno|365giorni|2trimestri   (default 1anno = 4 trimestri; 2trimestri = la regola scritta nel file prova R2REG)
+     --lato-sotto-150 giudica|non_misurato        (default giudica: la soglia 150 e' sul regime, ogni lato conta col suo n)
+     --dd-promesso <EUR>                           (default assente: nessun verdetto di regime puo' cominciare con 'regge')
+  (v5) legge anche gli zip dei file prova DICHIARATIVI del driver v5 (@GBA-ASSE: qualunque input come asse, simbolo/TF per passata) e si ferma con ERRORE
+  se la stessa misura (stessa cella, tranche, magic: confronto sugli ini) e' caricata due volte.
 
 COME SI CONTA (identico a cio' che dice il file prova)
   Posizione = coppia sequenziale di deal 'in' -> 'out' del report (un magic = UNA posizione per volta, R9 dell'EA; due 'in' di fila = G0 KO).
@@ -59,12 +65,42 @@ ATTESE_LOTTO = {
 # del trimestre: il loro conteggio dei giorni feriali resta quello gia' stampato (inclusivo), per non cambiare numeri gia' letti.
 LOTTI_A_ESCLUSIVA = ("R2REG",)
 ORDINE_LOTTI = {"S0": 0, "R1A": 1, "R1B": 2, "R2REG": 3}
+
+
+def a_esclusiva(lotto):
+    """(v5) 'a' esclusiva per R2REG e per OGNI lotto di un file prova dichiarativo (e' il comportamento vero del tester); S0/R1A/R1B restano come gia' stampati."""
+    return lotto in LOTTI_A_ESCLUSIVA or lotto not in LOTTI_STORICI
 # FIRMA di Claudio 10/10/2026 (report/FIRME_2026-10-10.md, Firma 1): lettura PER REGIME, regola oggettiva sul prezzo (proxy_gba_r2reg.py --regimi).
 # Direzione: TORO R>=+5% e ER>=0,15 | RIBASSO R<=-5% e ER>=0,15 | LATERALE altrimenti. Volatilita': CALMO < 3,5 bp, VOLATILE >= 3,5 bp.
 REGIMI_TRANCHE = {"T9": ("TORO", "CALMO"), "T8": ("LATERALE", "CALMO"), "T7": ("TORO", "CALMO"), "T6": ("LATERALE", "VOLATILE"), "T5": ("TORO", "CALMO"),
                   "T4": ("TORO", "VOLATILE"), "T3": ("LATERALE", "VOLATILE"), "T2": ("RIBASSO", "VOLATILE"), "T1": ("LATERALE", "VOLATILE")}
 N_REGIME = 150               # firma 10/10: regime con < 150 operazioni = NON MISURATO
-TRANCHE_MIN_REGIME = 2       # firma 10/10: regime con meno di due tranche = NON MISURATO
+# (v5) la regola sul prezzo con i suoi NUMERI per tranche (file prova GBA_R2_REGIME_2026-10-10.txt r.81-88, proxy HistData): R in %, ER di Kaufman, ATR M1/prezzo in bp.
+# Servono a stampare la SENSIBILITA' del verdetto alle soglie tonde (ER 0,10 e 0,20): l'autotest verifica che a ER 0,15 la regola ridia REGIMI_TRANCHE.
+TRANCHE_PREZZO = {"T9": (11.0, 0.253, 2.59), "T8": (-1.4, 0.029, 2.58), "T7": (17.5, 0.431, 2.61), "T6": (6.4, 0.081, 4.07), "T5": (15.5, 0.344, 2.60),
+                  "T4": (11.8, 0.176, 4.40), "T3": (4.1, 0.035, 5.84), "T2": (-16.0, 0.184, 4.73), "T1": (8.2, 0.116, 4.22)}
+REGOLA_R, REGOLA_ER, REGOLA_BP = 5.0, 0.15, 3.5
+# (v5) una tranche prende il regime della tabella SOLO se il suo inizio e' quello della partizione (un file prova dichiarativo potrebbe chiamare 'T1' un'altra finestra)
+TRANCHE_DA = {"T9": "2024.07.10", "T8": "2024.10.01", "T7": "2025.01.01", "T6": "2025.04.01", "T5": "2025.07.01", "T4": "2025.10.01", "T3": "2026.01.01", "T2": "2026.04.01", "T1": "2026.07.01"}
+# ---------------------------------------------------------------------------------------------------------------------
+#  (v5) LE DUE DECISIONI CHE SPETTANO A CLAUDIO, come PARAMETRI (una scelta non richiede una riscrittura). Default = lettura LETTERALE della firma 10/10
+#  (report/FIRME_2026-10-10.md, Firma 1). Si cambiano da riga di comando: --durata-regime e --lato-sotto-150. Il lettore stampa SEMPRE quali valori ha usato.
+# ---------------------------------------------------------------------------------------------------------------------
+# 1) DURATA MINIMA DI UN REGIME. Firma, punto 4: "Un anno per regime, anche non contigui". Letterale = un anno = 4 trimestri (le tranche sono trimestri).
+#    '365giorni' = la somma dei giorni di calendario delle tranche [da, a) >= 365 (T9 parte dal 10/07, inizio dei tick: il toro T9+T7+T5+T4 fa 357 giorni).
+#    '2trimestri' = la lettura del file prova R2REG (r.186: 'almeno 2 tranche'), che e' quella usata fino alla v4 del lettore.
+DURATE_REGIME = {"1anno": ("tranche", 4), "365giorni": ("giorni", 365), "2trimestri": ("tranche", 2)}
+DURATA_REGIME = "1anno"
+# 2) PESO DI UN LATO SOTTO 150 OPERAZIONI. Firma, punto 1: "PF_V > 1,0 in OGNI regime che ha almeno 150 operazioni, con long e short letti SEPARATAMENTE":
+#    la soglia 150 e' sul REGIME, al lato non ne pone una. Letterale = 'giudica': il lato conta nel verdetto qualunque sia il suo n (stampato col suo n).
+#    'non_misurato' = un lato con n < 150 non giudica (se nessun lato arriva a 150 il regime resta NON MISURATO).
+LATI_SOTTO_150 = ("giudica", "non_misurato")
+PESO_LATO_SOTTO_150 = "giudica"
+# DD PROMESSO dal backtest della cella (firma, punto 1): oggi NON esiste (nessuna cella promossa, nessun censimento di contratto). Senza, il verdetto NON puo'
+# cominciare con 'regge': esce 'NON DICHIARABILE (DD promesso assente)'. Da riga di comando: --dd-promesso <EUR a 1,00 lotto>.
+DD_PROMESSO = None
+# lotti dei file prova STORICI (semantica fissa; S0/R1A/R1B hanno 'a' INCLUSIVA nel conto dei giorni: vedi LOTTI_A_ESCLUSIVA e a_esclusiva)
+LOTTI_STORICI = ("S0", "R1A", "R1B", "R2REG")
 # orologio BCM (OROLOGIO_BCM_2026-09-24.md): ingressi dal 2024-10-27 al 2025-02-02 in un orologio (UTC+0 d'inverno) che per l'oro e' [NON MISURATO]
 OROLOGIO_INCERTO = (datetime.datetime(2024, 10, 27, 0, 0, 0), datetime.datetime(2025, 2, 3, 0, 0, 0))
 
@@ -430,7 +466,80 @@ def esito_replica(nz, pf_v, pf_v2, per_tranche, top1_quota, n_tot, per_tranche_n
 # ---------------------------------------------------------------------------------------------------------------------
 #  CARICAMENTO + STAMPA
 # ---------------------------------------------------------------------------------------------------------------------
-def carica(percorsi):
+def leggi_ini(testo):
+    """(v5) il .ini della passata (scritto dal driver, copiato nello zip): {'tester': {Symbol, Period, Model, FromDate, ToDate, ...}, 'inputs': {Inp...: valore}}."""
+    sez, out = None, {"tester": {}, "inputs": {}}
+    for riga in testo.splitlines():
+        riga = riga.strip()
+        if not riga or riga.startswith(";"):
+            continue
+        if riga.startswith("[") and riga.endswith("]"):
+            sez = riga[1:-1]
+            continue
+        if "=" not in riga:
+            continue
+        k, v = riga.split("=", 1)
+        if sez == "Tester":
+            out["tester"][k.strip()] = v.strip()
+        elif sez == "TesterInputs":
+            out["inputs"][k.strip()] = v.strip()
+    return out
+
+
+def _norm(v):
+    """'1.0' e '1.00' sono lo stesso input; '48' e '48.0' anche. Le stringhe restano come sono."""
+    try:
+        if re.fullmatch(r"-?[0-9]+(\.[0-9]+)?", str(v)):
+            return repr(float(v))
+    except ValueError:
+        pass
+    return str(v)
+
+
+def identita(P):
+    """(v5) IDENTITA' DELLA CELLA = cio' che rende due passate la stessa misura a meno di tranche e magic: Modello, simbolo, periodo e TUTTI gli input tranne
+    InpMagic, letti dall'ini dello zip (fonte: cio' che il tester ha davvero ricevuto). Senza ini (zip vecchi): dal manifest (modello, simbolo, periodo, asse=valore).
+    Restituisce (id_cella, id_misura, da_ini)."""
+    r = P["riga"]
+    if P.get("ini"):
+        te, inp = P["ini"]["tester"], P["ini"]["inputs"]
+        idc = ("ini", te.get("Model", r["modello"]), te.get("Symbol", ""), te.get("Period", ""), tuple(sorted((k, _norm(v)) for k, v in inp.items() if k != "InpMagic")))
+        return idc, idc + (te.get("FromDate", r["da"]), te.get("ToDate", r["a"]), inp.get("InpMagic", r["magic"])), True
+    idc = ("manifest", r["modello"], P["simbolo"], P["periodo"], P["asse"], _norm(P["valore"]))
+    return idc, idc + (r["da"], r["a"], r["magic"]), False
+
+
+def controlla_doppioni(passate):
+    """(v5, difetto 3 del cancello R2REG) la stessa misura caricata DUE volte (lo stesso zip passato due volte, o la stessa cella+tranche+magic in due lotti)
+    conterebbe le sue operazioni due volte in OGNI somma (cella, regime, lato) e farebbe passare per 'due tranche' una tranche sola. Vale anche per due finestre
+    che si SOVRAPPONGONO sulla stessa cella e lo stesso magic (es. T1 di R1A 07.01-09.30 e un T1 07.01-10.01 di un file nuovo): gli stessi giorni contati due volte.
+    Le passate NON_LANCIATA non contano (non hanno numeri). Stessa cella = stessa identita' dall'ini se l'hanno tutte e due; se a una manca, la chiave del
+    manifest (modello, simbolo, periodo, asse, valore, cella). Restituisce la lista degli errori (vuota = nessun doppione)."""
+    vive = [P for P in passate if P["riga"]["stato"] != "NON_LANCIATA"]
+    err = []
+    for i in range(len(vive)):
+        for j in range(i + 1, len(vive)):
+            a, b = vive[i], vive[j]
+            if a["da_ini"] and b["da_ini"]:
+                stessa = a["id_cella"] == b["id_cella"]
+                ma, mb = a["id_misura"][-1], b["id_misura"][-1]
+                da_a, a_a, da_b, a_b = a["id_misura"][-3], a["id_misura"][-2], b["id_misura"][-3], b["id_misura"][-2]
+            else:
+                stessa = (a["riga"]["modello"], a["simbolo"], a["periodo"], a["asse"], _norm(a["valore"]), a["cella"]) == (b["riga"]["modello"], b["simbolo"], b["periodo"], b["asse"], _norm(b["valore"]), b["cella"])
+                ma, mb = a["magic"], b["magic"]
+                da_a, a_a, da_b, a_b = a["riga"]["da"], a["riga"]["a"], b["riga"]["da"], b["riga"]["a"]
+            if not stessa or ma != mb:
+                continue
+            if (da_a, a_a) == (da_b, a_b):
+                err.append("la stessa misura e' caricata DUE volte: %s [%s] e %s [%s] (modello %s, cella %s/%s, tranche %s, magic %s)" % (
+                    a["tag"], a["sorgente"], b["tag"], b["sorgente"], a["riga"]["modello"], a["cella"], b["cella"], a["tranche"], ma))
+            elif da_a < a_b and da_b < a_a:
+                err.append("finestre SOVRAPPOSTE sulla stessa cella e lo stesso magic: %s [%s] %s-%s e %s [%s] %s-%s: gli stessi giorni si conterebbero due volte" % (
+                    a["tag"], a["sorgente"], da_a, a_a, b["tag"], b["sorgente"], da_b, a_b))
+    return err
+
+
+def carica(percorsi, controlla=True):
     passate = []
     for pth in percorsi:
         src = Sorgente(pth)
@@ -438,7 +547,7 @@ def carica(percorsi):
             raise SystemExit("%s: manca MANIFEST_R0.csv (non e' uno zip di GBA_R0_PASSATE.ps1)" % pth)
         man = list(csv.DictReader(io.StringIO(src.leggi("MANIFEST_R0.csv").decode("ascii", "replace")), delimiter=";"))
         for r in man:
-            rep, log = None, None
+            rep, log, ini = None, None, None
             if r["stato"] != "NON_LANCIATA":
                 cand = [n for n in src.nomi if n.startswith("report/GBA_R0_" + r["passata"]) and n.lower().endswith((".htm", ".html"))]
                 if cand:
@@ -446,9 +555,24 @@ def carica(percorsi):
                 nl = "log/GBA_" + r["passata"] + ".txt"
                 if nl in src.nomi:
                     log = leggi_log(src.leggi(nl).decode("ascii", "replace"))
+                ni = "ini/gba_" + r["passata"] + ".ini"
+                if ni in src.nomi:
+                    ini = leggi_ini(src.leggi(ni).decode("ascii", "replace"))
             P = costruisci_passata(r, rep, log)
             P["sorgente"] = os.path.basename(pth)
+            # (v5) colonne in coda al manifest del driver v5; uno zip v3/v4 non le ha: era l'asse InpSpreadMaxATR su XAUUSD M1
+            P["lotto"] = r["lotto"]
+            P["asse"] = r.get("asse") or "InpSpreadMaxATR"
+            P["valore"] = r.get("valore_asse") or r.get("spread_max_atr", "")
+            P["simbolo"] = r.get("simbolo") or "XAUUSD"
+            P["periodo"] = r.get("periodo") or "M1"
+            P["ini"] = ini
+            P["id_cella"], P["id_misura"], P["da_ini"] = identita(P)
             passate.append(P)
+    if controlla:
+        err = controlla_doppioni(passate)
+        if err:
+            raise SystemExit("ERRORE (nessun numero si stampa: ogni somma sarebbe falsata):\n  " + "\n  ".join(err) + "\nCarica ogni zip UNA volta sola, e una sola copia di ogni misura.")
     return passate
 
 
@@ -467,27 +591,66 @@ def riga_cella(titolo, Ps, comm_ip, out_csv):
         per_tr[P["tranche"]] = nz
         c = costo_ingressi(P)
         cost0 += c["solo_spread"]; cost1 += c["c04"]; cost2 += c["c08"]
-        tot_giorni += giorni_feriali(P["riga"]["da"], P["riga"]["a"], P["riga"]["lotto"] in LOTTI_A_ESCLUSIVA)
+        tot_giorni += giorni_feriali(P["riga"]["da"], P["riga"]["a"], a_esclusiva(P["riga"]["lotto"]))
     return tutte, per_tr, (cost0, cost1, cost2), tot_giorni
 
 
-def lettura_regimi(passate, cella, comm_ip=COMM_EUR_LOTTO_GIRO):
-    """FIRMA 10/10 (report/FIRME_2026-10-10.md): lettura PER REGIME, long e short SEPARATI. Raggruppa per CELLA attraverso i lotti a Modello 4 (R1A e R2REG sono
-    la stessa cella REPL: stessi 30 pin); le tranche si assegnano ai regimi con REGIMI_TRANCHE (regola sul prezzo). Restituisce (righe, verdetto)."""
-    Ps = [P for P in passate if int(P["riga"]["modello"]) == 4 and P["cella"] == cella and P["magic"] == "775800" and not P["g0"] and P["tranche"] in REGIMI_TRANCHE]
+def regimi_da_prezzo(er=REGOLA_ER, r=REGOLA_R, bp=REGOLA_BP):
+    """La regola sul prezzo del file prova R2REG applicata a TRANCHE_PREZZO: {tranche: (direzione, volatilita')}. A ER 0,15 rida' REGIMI_TRANCHE (autotest)."""
+    out = {}
+    for tr, (R, E, B) in TRANCHE_PREZZO.items():
+        d = "TORO" if (R >= r and E >= er) else ("RIBASSO" if (R <= -r and E >= er) else "LATERALE")
+        out[tr] = (d, "CALMO" if B < bp else "VOLATILE")
+    return out
+
+
+def regime_di(P, regimi=None):
+    """(v5) il regime della passata, SOLO se nome e inizio della tranche sono quelli della partizione (TRANCHE_DA); altrimenti None."""
+    regimi = REGIMI_TRANCHE if regimi is None else regimi
+    if P["tranche"] in regimi and TRANCHE_DA.get(P["tranche"]) == P["riga"]["da"]:
+        return regimi[P["tranche"]]
+    return None
+
+
+def giorni_calendario(P):
+    """giorni di calendario della finestra [da, a) (ToDate del tester ESCLUSIVO, misurato in R1A)."""
+    d0 = datetime.datetime.strptime(P["riga"]["da"], "%Y.%m.%d")
+    d1 = datetime.datetime.strptime(P["riga"]["a"], "%Y.%m.%d")
+    return (d1 - d0).days
+
+
+def lettura_regimi(passate, cella=None, comm_ip=COMM_EUR_LOTTO_GIRO, Ps=None, regimi=None, durata=None, lato150=None, dd_promesso=None):
+    """FIRMA 10/10 (report/FIRME_2026-10-10.md): lettura PER REGIME, long e short SEPARATI. Le passate sono quelle della CELLA (per nome, come prima, oppure la lista
+    Ps gia' raggruppata per IDENTITA': R1A e R2REG sono la stessa cella REPL, stessi 30 pin). Le tranche si assegnano ai regimi con la regola sul prezzo
+    (regimi; default REGIMI_TRANCHE) e si contano come INSIEME: una tranche vista due volte e' un ERRORE, non due tranche (difetto 3 del cancello R2REG).
+    durata / lato150 / dd_promesso: i parametri delle decisioni di Claudio (default: lettura letterale della firma). Restituisce (righe, verdetto)."""
+    durata = DURATA_REGIME if durata is None else durata
+    lato150 = PESO_LATO_SOTTO_150 if lato150 is None else lato150
+    dd_promesso = DD_PROMESSO if dd_promesso is None else dd_promesso
+    if durata not in DURATE_REGIME:
+        raise ValueError("durata del regime '%s' sconosciuta (ammesse: %s)" % (durata, ", ".join(sorted(DURATE_REGIME))))
+    if lato150 not in LATI_SOTTO_150:
+        raise ValueError("peso del lato sotto 150 '%s' sconosciuto (ammessi: %s)" % (lato150, ", ".join(LATI_SOTTO_150)))
+    tipo_d, soglia_d = DURATE_REGIME[durata]
+    if Ps is None:
+        Ps = [P for P in passate if P["cella"] == cella]
+    Ps = [P for P in Ps if int(P["riga"]["modello"]) == 4 and P["magic"] == "775800" and not P["g0"] and regime_di(P, regimi)]
     dati = {}
     for P in Ps:
         nz, _c = posizioni_numeriche(P, comm_ip)
-        dir_, vol_ = REGIMI_TRANCHE[P["tranche"]]
+        dir_, vol_ = regime_di(P, regimi)
         dd = P["rep"]["dd_eq_abs"] if P["rep"] and P["rep"].get("dd_eq_abs") is not None else None
         for reg in (dir_, vol_):
-            d = dati.setdefault(reg, {"tr": [], "pos": [], "dd": []})
-            d["tr"].append(P["tranche"])
+            d = dati.setdefault(reg, {"tr": {}, "pos": [], "dd": []})
+            if P["tranche"] in d["tr"]:
+                return ([], "ERRORE: la tranche %s compare DUE volte nel regime %s (passate %s): lettura per regime NON fatta, ogni somma sarebbe doppia" % (
+                    P["tranche"], reg, ", ".join(sorted(x["tag"] for x in Ps if x["tranche"] == P["tranche"]))))
+            d["tr"][P["tranche"]] = giorni_calendario(P)
             d["pos"] += nz
             if dd is not None:
                 d["dd"].append(dd)
     righe = []
-    misurati, non_misurati, fallimenti = [], [], []
+    misurati, non_misurati, fallimenti, dd_oltre = [], [], [], []
     for reg in ("TORO", "LATERALE", "RIBASSO", "CALMO", "VOLATILE"):
         d = dati.get(reg)
         if not d:
@@ -498,56 +661,188 @@ def lettura_regimi(passate, cella, comm_ip=COMM_EUR_LOTTO_GIRO):
         lung = [x["net_v"] for x in d["pos"] if x["lato"] == "BUY"]
         cor = [x["net_v"] for x in d["pos"] if x["lato"] == "SELL"]
         dd = "DD equity max di tranche %.0f EUR" % max(d["dd"]) if d["dd"] else "DD n.d."
-        base = "   %-9s tranche %-12s n=%-5d (long %d, short %d)  PF_V %s  long %s  short %s  %s" % (
+        ntr, ngg = len(d["tr"]), sum(d["tr"].values())
+        base = "   %-9s tranche %-12s n=%-5d (long %d, short %d)  PF_V %s  long %s  short %s  %s  [%d tranche, %d giorni]" % (
             reg, ",".join(sorted(d["tr"])), n, len(lung), len(cor), "%.2f" % pf_di([x["net_v"] for x in d["pos"]]),
-            "%.2f" % pf_di(lung) if lung else "n.d.", "%.2f" % pf_di(cor) if cor else "n.d.", dd)
-        if len(d["tr"]) < TRANCHE_MIN_REGIME:
-            righe.append(base + "  -> NON MISURATO (meno di %d tranche)" % TRANCHE_MIN_REGIME)
+            "%.2f" % pf_di(lung) if lung else "n.d.", "%.2f" % pf_di(cor) if cor else "n.d.", dd, ntr, ngg)
+        # il RISCHIO si legge a qualunque n (R59): un DD oltre il promesso boccia anche un regime NON MISURATO per il merito
+        if dd_promesso is not None and d["dd"] and max(d["dd"]) > dd_promesso:
+            dd_oltre.append("%s (%.0f > %.0f EUR)" % (reg, max(d["dd"]), dd_promesso))
+            base += "  DD OLTRE IL PROMESSO"
+        corta = (ntr < soglia_d) if tipo_d == "tranche" else (ngg < soglia_d)
+        if corta:
+            righe.append(base + "  -> NON MISURATO (durata: %s < %d %s, regola '%s')" % (ntr if tipo_d == "tranche" else ngg, soglia_d, tipo_d, durata))
             non_misurati.append(reg)
         elif n < N_REGIME:
             righe.append(base + "  -> NON MISURATO (n < %d: il merito non si giudica; il rischio si legge: vedi DD)" % N_REGIME)
             non_misurati.append(reg)
         else:
-            lati_ko = [nm for nm, v in (("long", lung), ("short", cor)) if not v or not (pf_di(v) > 1.0)]
-            note = "  (lato con n<150: indicativo)" if (len(lung) < N_REGIME or len(cor) < N_REGIME) else ""
+            lati = (("long", lung), ("short", cor))
+            giudicati = list(lati) if lato150 == "giudica" else [(nm, v) for nm, v in lati if len(v) >= N_REGIME]
+            sotto = [nm for nm, v in lati if len(v) < N_REGIME]
+            if lato150 == "giudica":
+                note = "  (lato con n<150: %s -- CONTA nel verdetto, lettura letterale della firma; --lato-sotto-150 non_misurato per l'alternativa)" % "+".join(sotto) if sotto else ""
+            else:
+                note = "  (lato NON MISURATO, n<150: %s -- regola '--lato-sotto-150 non_misurato')" % "+".join(sotto) if sotto else ""
+            if not giudicati:
+                righe.append(base + "  -> NON MISURATO (nessun lato con n >= %d, regola 'non_misurato')" % N_REGIME)
+                non_misurati.append(reg)
+                continue
+            lati_ko = [nm for nm, v in giudicati if not v or not (pf_di(v) > 1.0)]
             if lati_ko:
                 fallimenti.append("%s %s" % (reg, "+".join(lati_ko)))
                 righe.append(base + "  -> MISURATO, NON REGGE (PF_V <= 1,0 su: %s)%s" % (" e ".join(lati_ko), note))
             else:
-                righe.append(base + "  -> MISURATO, PF_V > 1,0 su long e short%s" % note)
+                righe.append(base + "  -> MISURATO, PF_V > 1,0 su %s%s" % (" e ".join(nm for nm, _v in giudicati), note))
             misurati.append(reg)
+    durata_txt = ("%d tranche" % soglia_d) if tipo_d == "tranche" else ("%d giorni" % soglia_d)
     if not dati:
-        verdetto = "nessuna tranche con regime assegnato (non e' un giro del lotto R1A/R2REG?)"
-    elif fallimenti:
-        verdetto = "NON REGGE: PF_V <= 1,0 in %s" % "; ".join(fallimenti)
+        verdetto = "nessuna tranche con regime assegnato (non e' un giro sulle tranche della partizione T1-T9?)"
+    elif fallimenti or dd_oltre:
+        parti = []
+        if fallimenti:
+            parti.append("PF_V <= 1,0 in %s" % "; ".join(fallimenti))
+        if dd_oltre:
+            parti.append("DD oltre il promesso in %s" % "; ".join(dd_oltre))
+        verdetto = "NON REGGE: " + " | ".join(parti)
     elif not misurati:
-        verdetto = "NON MISURATO: nessun regime con almeno %d operazioni e %d tranche" % (N_REGIME, TRANCHE_MIN_REGIME)
+        verdetto = "NON MISURATO: nessun regime con almeno %d operazioni e durata >= %s (regola '%s')" % (N_REGIME, durata_txt, durata)
     elif not any(r in ("LATERALE", "RIBASSO") for r in misurati):
         verdetto = "NON BASTA: un PF buono solo nel toro non basta (regimi misurati: %s; NON misurati: %s)" % (", ".join(misurati), ", ".join(non_misurati) or "nessuno")
     else:
-        verdetto = "regge nei regimi MISURATI (%s); NON misurati: %s. Il DD promesso dal backtest della cella NON esiste ancora (nessuna cella e' stata promossa): il cancello del drawdown resta APERTO" % (", ".join(misurati), ", ".join(non_misurati) or "nessuno")
+        regge = "regge nei regimi MISURATI (%s); NON misurati: %s" % (", ".join(misurati), ", ".join(non_misurati) or "nessuno")
+        if dd_promesso is None:
+            verdetto = ("NON DICHIARABILE (DD promesso assente): " + regge + ". Il DD promesso dal backtest della cella NON esiste ancora (nessuna cella e' stata promossa, "
+                        "nessun censimento di contratto): il cancello del drawdown resta APERTO e la parola 'regge' non si puo' scrivere da sola")
+        else:
+            verdetto = regge + "; DD equity max di tranche <= DD promesso %.0f EUR in ogni regime letto" % dd_promesso
     return righe, verdetto
 
 
-def tabella_regimi(passate, W):
-    celle = []
+def _ordine_cella(c):
+    return {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(c, 9)
+
+
+def gruppi_per_identita(passate, filtro):
+    """(v5) passate raggruppate per IDENTITA' della cella (stessi input tranne il magic, stesso simbolo/TF/modello), nell'ordine di casa. -> [(etichetta, [P...])]"""
+    gruppi = {}
     for P in passate:
-        if int(P["riga"]["modello"]) == 4 and P["tranche"] in REGIMI_TRANCHE and P["cella"] not in celle:
-            celle.append(P["cella"])
-    if not celle:
+        if filtro(P):
+            gruppi.setdefault(P["id_cella"], []).append(P)
+    out = []
+    for idc, Ps in gruppi.items():
+        nomi = sorted(set(P["cella"] for P in Ps), key=_ordine_cella)
+        lotti = sorted(set(P["riga"]["lotto"] for P in Ps), key=lambda l: (ORDINE_LOTTI.get(l, 9), l))
+        out.append(("%s (lotti %s)" % ("/".join(nomi), "+".join(lotti)), Ps, min(_ordine_cella(n) for n in nomi), nomi))
+    out.sort(key=lambda x: (x[2], x[0]))
+    return [(e, Ps, nomi) for e, Ps, _o, nomi in out]
+
+
+def tabella_regimi(passate, W):
+    filtro = lambda P: int(P["riga"]["modello"]) == 4 and regime_di(P) is not None
+    gruppi = gruppi_per_identita(passate, filtro)
+    if not gruppi:
         return
+    tipo_d, soglia_d = DURATE_REGIME[DURATA_REGIME]
     W("")
     W("-" * 100)
     W(" (7) LETTURA PER REGIME (firma di Claudio 10/10/2026, report/FIRME_2026-10-10.md; si AGGIUNGE a S4-S7, non li sostituisce)")
     W("     regola sul prezzo: TORO R>=+5% e ER>=0,15 | RIBASSO R<=-5% e ER>=0,15 | LATERALE altrimenti | CALMO ATR M1/prezzo <3,5 bp | VOLATILE >=3,5 bp (proxy_gba_r2reg.py --regimi)")
-    W("     regge se PF_V > 1,0 in OGNI regime con >= 150 operazioni e >= 2 tranche, long e short letti SEPARATAMENTE; < 150 operazioni = NON MISURATO; solo toro non basta")
-    for cella in sorted(celle, key=lambda c: {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(c, 9)):
-        lotti = sorted(set(P["riga"]["lotto"] for P in passate if int(P["riga"]["modello"]) == 4 and P["cella"] == cella and P["tranche"] in REGIMI_TRANCHE), key=lambda l: ORDINE_LOTTI.get(l, 9))
-        W("   --- cella %s (lotti %s) ---" % (cella, "+".join(lotti)))
-        righe, verdetto = lettura_regimi(passate, cella)
+    W("     regge se PF_V > 1,0 in OGNI regime con >= 150 operazioni e durata >= %s, long e short letti SEPARATAMENTE, e nessun regime ha DD oltre il promesso;" % (
+        ("%d tranche" % soglia_d) if tipo_d == "tranche" else ("%d giorni" % soglia_d)))
+    W("     < 150 operazioni = NON MISURATO; solo toro non basta. Le tranche di un regime si contano come INSIEME (una tranche doppia = ERRORE).")
+    W("     PARAMETRI (decisioni APERTE di Claudio; default = lettura letterale della firma 10/10):")
+    W("       durata del regime   = '%s' (%s)   [alternative: %s]" % (DURATA_REGIME, {"1anno": "un anno = 4 trimestri", "365giorni": "somma dei giorni [da,a) >= 365", "2trimestri": "almeno 2 tranche, come il file prova R2REG r.186"}[DURATA_REGIME],
+                                                                    ", ".join(k for k in sorted(DURATE_REGIME) if k != DURATA_REGIME)))
+    W("       lato sotto 150      = '%s' (%s)   [alternativa: %s]" % (PESO_LATO_SOTTO_150, {"giudica": "la soglia 150 e' sul regime: ogni lato conta nel verdetto col suo n", "non_misurato": "un lato con n<150 non giudica"}[PESO_LATO_SOTTO_150],
+                                                                   [x for x in LATI_SOTTO_150 if x != PESO_LATO_SOTTO_150][0]))
+    W("       DD promesso         = %s" % ("ASSENTE (nessuna cella promossa): nessun verdetto puo' cominciare con 'regge'" if DD_PROMESSO is None else "%.0f EUR (equity, 1,00 lotto)" % DD_PROMESSO))
+    if DURATA_REGIME != "2trimestri":
+        W("       NOTA: il file prova R2REG (r.186, 'almeno 2 tranche') e la firma ('un anno per regime') NON dicono la stessa cosa: per la lettura del file -> --durata-regime 2trimestri")
+    vicine = sorted(((abs(v[1] - REGOLA_ER), t, v[1]) for t, v in TRANCHE_PREZZO.items() if abs(v[1] - REGOLA_ER) <= 0.07), key=lambda x: x[0])
+    W("     SOGLIE TONDE (5%%, 0,15, 3,5 bp) scelte il 10/10 DOPO aver letto rendimenti e ATR dei trimestri (non i PF). Tranche vicine al confine ER 0,15 (entro 0,07): %s." % (
+        ", ".join("%s ER %s" % (t, ("%.3f" % e).replace(".", ",")) for _d, t, e in sorted(vicine, key=lambda x: x[2]))))
+    W("     Il loro regime dipende da quei numeri: sotto, per ogni cella, la SENSIBILITA' del verdetto a ER 0,10 e 0,20 (NON e' un verdetto: il verdetto e' quello a 0,15).")
+    for etich, Ps, _nomi in gruppi:
+        W("   --- cella %s ---" % etich)
+        righe, verdetto = lettura_regimi(passate, Ps=Ps)
         for r in righe:
             W(r)
-        W("   VERDETTO PER REGIME (cella %s): %s" % (cella, verdetto))
+        W("   VERDETTO PER REGIME (cella %s): %s" % (etich, verdetto))
+        for er_alt in (0.10, 0.20):
+            reg_alt = regimi_da_prezzo(er=er_alt)
+            presenti = sorted(set(P["tranche"] for P in Ps if regime_di(P) is not None))
+            cambia = ["%s %s->%s" % (t, REGIMI_TRANCHE[t][0], reg_alt[t][0]) for t in presenti if reg_alt[t][0] != REGIMI_TRANCHE[t][0]]
+            _r, v_alt = lettura_regimi(passate, Ps=Ps, regimi=reg_alt)
+            W("   SENSIBILITA' (NON e' un verdetto) con ER %s: %s -> esito: %s" % (("%.2f" % er_alt).replace(".", ","),
+                                                                                "cambiano " + ", ".join(cambia) if cambia else "nessuna tranche di questa cella cambia direzione", v_alt))
+
+
+def gemelle_dichiarative(passate):
+    """(v5) G1 fuori da S0: per ogni passata 775850 di un lotto dichiarativo, la gemella 775800 con la stessa identita' di cella e la stessa finestra
+    (in qualunque zip caricato). Uguali (operazioni, profitto, PF, DD equity) = VERDE; diverse = ROSSO; gemella assente = NON VERIFICABILE."""
+    out = []
+    for b in passate:
+        if b["magic"] != "775850" or b["riga"]["lotto"] in LOTTI_STORICI:
+            continue
+        cand = [a for a in passate if a["magic"] == "775800" and a["id_cella"] == b["id_cella"] and a["riga"]["da"] == b["riga"]["da"] and a["riga"]["a"] == b["riga"]["a"]]
+        nome = "  G1 gemelle (cella %s, tranche %s, Modello %s, magic 775800 [%s] e 775850 [%s])" % (b["cella"], b["tranche"], b["riga"]["modello"],
+                                                                                                    cand[0]["sorgente"] if cand else "?", b["sorgente"])
+        if not cand:
+            out.append(nome + ": la gemella 775800 NON e' fra gli zip caricati (stessa identita' di cella e stessa finestra) -> NON VERIFICABILE")
+            continue
+        ra, rb = cand[0]["rep"], b["rep"]
+        if not (ra and rb and ra["ok"] and rb["ok"]):
+            out.append(nome + ": manca il report di una delle due -> NON VERIFICABILE")
+            continue
+        uguali = (ra["trades"] == rb["trades"] and ra["profitto"] == rb["profitto"] and ra["pf"] == rb["pf"] and ra["dd_eq_abs"] == rb["dd_eq_abs"])
+        out.append(nome + ": operazioni %s/%s, profitto %s/%s, PF %s/%s, DD equity %s/%s -> %s" % (ra["trades"], rb["trades"], ra["profitto"], rb["profitto"], ra["pf"], rb["pf"],
+                   ra["dd_eq_abs"], rb["dd_eq_abs"], "VERDE (identiche)" if uguali else "ROSSO: la passata non e' riproducibile, NESSUN numero del lotto %s si usa" % b["riga"]["lotto"]))
+    return out
+
+
+def _num_o_testo(v):
+    try:
+        return (0, float(v))
+    except (TypeError, ValueError):
+        return (1, str(v))
+
+
+def frontiera_dichiarativa(tab, W):
+    """(v5) S7 per i lotti dei file prova dichiarativi: per ogni (lotto, asse), le celle del lotto PIU' le ANCORE caricate (una cella di qualunque lotto i cui input
+    differiscono SOLO nella chiave dell'asse, stesso modello/simbolo/TF e stesse tranche: di solito la REPL di R1A). Ordinate per valore dell'asse; la monotonia
+    del PF_V si legge solo con >= 3 punti numerici (con 2 punti e' vuota). Centro dell'altopiano, mai il picco: il lettore NON sceglie una cella."""
+    fam = {}
+    for t in tab:
+        if t["modello"] == 4 and t["lotto"] not in LOTTI_STORICI:
+            fam.setdefault((t["lotto"], t["asse"]), []).append(t)
+    for (lotto, asse), membri in sorted(fam.items()):
+        punti = {id(t): (t[ "valore"], t, "") for t in membri}
+        for t in membri:
+            if not t["inputs"]:
+                continue
+            for u in tab:
+                if u is t or id(u) in punti or u["modello"] != 4 or not u["inputs"] or (u["simbolo"], u["periodo"]) != (t["simbolo"], t["periodo"]):
+                    continue
+                diff = set(k for k in set(t["inputs"]) | set(u["inputs"]) if k != "InpMagic" and _norm(t["inputs"].get(k)) != _norm(u["inputs"].get(k)))
+                if diff == {asse}:
+                    if u["tranche_da"] == t["tranche_da"]:
+                        punti[id(u)] = (u["inputs"][asse], u, " (ancora, lotto %s)" % u["lotto"])
+                    else:
+                        W("   (S7 %s/%s) la cella %s del lotto %s differisce solo in %s ma gira su ALTRE tranche: non e' un'ancora confrontabile" % (lotto, asse, u["cella"], u["lotto"], asse))
+        righe = sorted(punti.values(), key=lambda x: _num_o_testo(x[0]))
+        W("")
+        W("-" * 100)
+        W(" (S7) FRONTIERA del lotto %s lungo l'asse %s (Modello 4): %d punti; centro dell'altopiano, mai il picco" % (lotto, asse, len(righe)))
+        for val, t, nota in righe:
+            W("   %-5s %s=%-8s n=%-6d PF_V %.3f  costo mediano (+0,04) %.1f  %s%s" % (t["cella"], asse, val, t["n"], t["pf_v"], t["costo_mediano_c04"], banda_costo(t["costo_mediano_c04"]), nota))
+        numerici = all(_num_o_testo(v)[0] == 0 for v, _t, _n in righe)
+        if len(righe) >= 3 and numerici:
+            pfs = [t["pf_v"] for _v, t, _n in righe]
+            mono = all(pfs[i] <= pfs[i + 1] for i in range(len(pfs) - 1)) or all(pfs[i] >= pfs[i + 1] for i in range(len(pfs) - 1))
+            W("   PF_V lungo l'asse: %s -> %s" % (" / ".join("%.2f" % x for x in pfs), "monotono (un altopiano si legge)" if mono else "NON monotono: una cella che sporge e' un PICCO, non un altopiano"))
+        else:
+            W("   %s -> NESSUN altopiano si legge: contano n, PF_V e costo" % ("solo %d punti (la monotonia fra 2 punti e' vuota)" % len(righe) if len(righe) < 3 else "asse non numerico"))
 
 
 def stampa(passate, csv_out=None):
@@ -555,7 +850,14 @@ def stampa(passate, csv_out=None):
     W = out.append
     W("=" * 100)
     lotti_presenti = set(P["riga"]["lotto"] for P in passate)
-    if "R2REG" in lotti_presenti:
+    generici = sorted(l for l in lotti_presenti if l not in LOTTI_STORICI)
+    if generici:
+        prove = sorted(set(P["riga"].get("prova") or "?" for P in passate if P["riga"]["lotto"] in generici))
+        W(" GBA R2 -- lettore (leggi_gba_r0.py), lotti di file prova DICHIARATIVI: %s (file %s). Soglie S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt, firma 10/10 per regime." % (", ".join(generici), ", ".join(prove)))
+        W(" Le attese per cella stanno nel file prova (scritte PRIMA dei numeri): il lettore NON le conosce e non le stampa. NON giudica oltre le soglie, NON promuove, NON scrive 'morto'.")
+        if lotti_presenti & set(LOTTI_STORICI):
+            W(" Caricati anche lotti storici (%s): ancore e gemelle si leggono insieme, raggruppate per IDENTITA' della cella (stessi input, dall'ini)." % ", ".join(sorted(lotti_presenti & set(LOTTI_STORICI), key=lambda l: ORDINE_LOTTI.get(l, 9))))
+    elif "R2REG" in lotti_presenti:
         W(" GBA R2REG -- lettore (leggi_gba_r0.py). Soglie e attese: file prova GBA_R2_REGIME_2026-10-10.txt (S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt + firma 10/10 per regime), scritte PRIMA dei numeri.")
         W(" NON giudica oltre S1-S8, NON promuove, NON scrive 'morto'. Tranche 2024.07.10-2025.12.31 a tick reali (ToDate ESCLUSIVO); i regimi si leggono nella sezione (7).")
     else:
@@ -593,6 +895,9 @@ def stampa(passate, csv_out=None):
             W("  G1: manca il report di una delle due gemelle -> NON VERIFICABILE")
     else:
         W("  G1: nessuna coppia di gemelle (lotto S0 non presente)")
+    # (v5) G1 per i lotti dichiarativi: gemelle = stessa IDENTITA' di cella e stessa finestra, magic 775800 e 775850, anche in due zip diversi (ancora in R1A)
+    for g in gemelle_dichiarative(passate):
+        W(g)
     # G2: n ticks / n OHLC su REPL T1
     s0 = [P for P in ok if P["riga"]["lotto"] == "S0" and P["cella"] == "REPL" and P["tranche"] == "T1" and P["magic"] == "775800"]
     r1 = [P for P in ok if P["riga"]["lotto"] == "R1A" and P["cella"] == "REPL" and P["tranche"] == "T1"]
@@ -605,23 +910,29 @@ def stampa(passate, csv_out=None):
 
     # per ogni (modello, cella): tutte le tranche OK
     celle = []
+    # (v5) chiave della cella = (modello, lotto, cella, asse): due file dichiarativi possono usare lo stesso nome di cella su assi diversi
     for P in passate:
-        k = (int(P["riga"]["modello"]), P["riga"]["lotto"], P["cella"])
+        k = (int(P["riga"]["modello"]), P["riga"]["lotto"], P["cella"], P["asse"])
         if k not in celle:
             celle.append(k)
-    celle.sort(key=lambda k: (-k[0], ORDINE_LOTTI.get(k[1], 9), {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(k[2], 9)))
+    celle.sort(key=lambda k: (-k[0], ORDINE_LOTTI.get(k[1], 9), k[1], {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(k[2], 9), k[2]))
     tab = []
-    for (mod, lotto_c, cella) in celle:
-        Ps = [P for P in passate if int(P["riga"]["modello"]) == mod and P["riga"]["lotto"] == lotto_c and P["cella"] == cella and P["magic"] == "775800"]
+    for (mod, lotto_c, cella, asse_c) in celle:
+        Ps = [P for P in passate if int(P["riga"]["modello"]) == mod and P["riga"]["lotto"] == lotto_c and P["cella"] == cella and P["asse"] == asse_c and P["magic"] == "775800"]
+        if not Ps:
+            # (v5) un lotto con la sola gemella 775850 di una cella (ancora in R1A): la si legge solo in G1
+            continue
+        simtf = "" if (Ps[0]["simbolo"], Ps[0]["periodo"]) == ("XAUUSD", "M1") else " %s %s" % (Ps[0]["simbolo"], Ps[0]["periodo"])
         W("")
         W("-" * 100)
-        W(" CELLA %s%s (InpSpreadMaxATR %s)  --  Modello %d (%s)" % (cella, " [lotto " + lotto_c + "]" if lotto_c == "R2REG" else "", Ps[0]["riga"]["spread_max_atr"], mod, "TICKS REALI: verdetto" if mod == 4 else "OHLC su M1: SOLO CONTEGGIO, nessun PF si legge come merito"))
+        W(" CELLA %s%s (%s %s)%s  --  Modello %d (%s)" % (cella, " [lotto " + lotto_c + "]" if lotto_c not in ("S0", "R1A", "R1B") else "", asse_c, Ps[0]["valore"], simtf, mod,
+                                                         "TICKS REALI: verdetto" if mod == 4 else "OHLC su %s: SOLO CONTEGGIO, nessun PF si legge come merito" % Ps[0]["periodo"]))
         W("-" * 100)
         # (2) n e frequenza
         W("(2) n e frequenza (denominatore: giorni feriali della tranche)")
         for P in Ps:
             n = len(P["pos"]) if not P["g0"] else None
-            gf = giorni_feriali(P["riga"]["da"], P["riga"]["a"], lotto_c in LOTTI_A_ESCLUSIVA)
+            gf = giorni_feriali(P["riga"]["da"], P["riga"]["a"], a_esclusiva(lotto_c))
             att_l = ATTESE_LOTTO.get((lotto_c, cella)) if mod == 4 else None
             att = att_l.get(P["tranche"]) if att_l else None
             sa = ""
@@ -742,8 +1053,8 @@ def stampa(passate, csv_out=None):
                 verd = "non distinguibile da zero (p=%.3f)" % p
             W("   %-15s %02d-%02d  n=%-5d PF_V %.2f  r medio %s  tranche con lo stesso segno %d/%d  -> %s" % (nome, lo, hi, len(sel), pf_di([x["net_v"] for x in sel]),
                                                                                                           "n.d." if not rs else "%.3f" % statistics.mean(rs), conc, len(segni), verd))
-        if lotto_c == "R2REG":
-            W("   ORA con OROLOGIO UNIFORME: esclusi gli ingressi dal %s al %s (server): orologio forex UTC+0 d'inverno prima del cambio, per l'ORO [NON MISURATO]; il lettore NON converte le ore" % (
+        if any(OROLOGIO_INCERTO[0] <= x["t"] < OROLOGIO_INCERTO[1] for x in tutte) or lotto_c == "R2REG":
+            W("   ORA con OROLOGIO UNIFORME: esclusi gli ingressi dal %s al %s (server): orologio UTC+0 d'inverno fino al cambio (26/12/2024-02/02/2025, giorno NON MISURATO; che l'ORO segua il forex e' [NON MISURATO]); il lettore NON converte le ore" % (
                 OROLOGIO_INCERTO[0].strftime("%Y.%m.%d"), (OROLOGIO_INCERTO[1] - datetime.timedelta(days=1)).strftime("%Y.%m.%d")))
             unif = [x for x in tutte if not (OROLOGIO_INCERTO[0] <= x["t"] < OROLOGIO_INCERTO[1])]
             W("   (ingressi esclusi: %d su %d)" % (len(tutte) - len(unif), len(tutte)))
@@ -765,7 +1076,9 @@ def stampa(passate, csv_out=None):
                 s2 = [s for s in sg if lo <= s["ora"] < hi]
                 if s2:
                     W("      %-15s ATR %.2f  spread %.2f  n=%d" % (nome, mediana([s["atr"] for s in s2]), mediana([s["spread"] for s in s2]), len(s2)))
-        tab.append({"modello": mod, "lotto": lotto_c, "cella": cella, "n": n_tot, "pf_v": pf_v, "pf_v2": pf_v2, "netto": sum(nets), "costo_mediano_c04": mediana(c1), "fragile": fragile})
+        tab.append({"modello": mod, "lotto": lotto_c, "cella": cella, "n": n_tot, "pf_v": pf_v, "pf_v2": pf_v2, "netto": sum(nets), "costo_mediano_c04": mediana(c1), "fragile": fragile,
+                    "asse": asse_c, "valore": Ps[0]["valore"], "id_cella": Ps[0]["id_cella"], "tranche_da": tuple(sorted(P["riga"]["da"] for P in Ps if not P["g0"])),
+                    "inputs": dict(Ps[0]["ini"]["inputs"]) if Ps[0].get("ini") else None, "simbolo": Ps[0]["simbolo"], "periodo": Ps[0]["periodo"]})
     # confronto fra celle (S7)
     # S7 si legge per FAMIGLIA di lotti sullo stesso asse: R1A+R1B (quattro celle) e R2REG (due celle: nessun altopiano) non si mescolano
     r4 = [t for t in tab if t["modello"] == 4 and t["lotto"] in ("R1A", "R1B", "S0")]
@@ -785,13 +1098,14 @@ def stampa(passate, csv_out=None):
         pfs = [t["pf_v"] for t in sorted(r4, key=lambda t: {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(t["cella"], 9))]
         mono = all(pfs[i] <= pfs[i + 1] for i in range(len(pfs) - 1)) or all(pfs[i] >= pfs[i + 1] for i in range(len(pfs) - 1))
         W("   PF_V lungo l'asse: %s -> %s" % (" / ".join("%.2f" % x for x in pfs), "monotono (un altopiano si legge)" if mono else "NON monotono: una cella che sporge e' un PICCO, non un altopiano"))
+    frontiera_dichiarativa(tab, W)
     tabella_regimi(passate, W)
     W("")
     W("-" * 100)
     W(" CERTIFICATO DI MORTE: mancano le caselle 3 (uscita ad asse), 4 (simboli gemelli), 5 (TF cambiato). Qualunque esito sopra NON e' 'morto': e' 'NON ANCORA MISURATO' o 'la replica non regge (un regime)'.")
     if csv_out:
         with open(csv_out, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=["modello", "lotto", "cella", "n", "pf_v", "pf_v2", "netto", "costo_mediano_c04", "fragile"], delimiter=";")
+            w = csv.DictWriter(f, fieldnames=["modello", "lotto", "cella", "n", "pf_v", "pf_v2", "netto", "costo_mediano_c04", "fragile", "asse", "valore"], delimiter=";", extrasaction="ignore")
             w.writeheader()
             for t in tab:
                 w.writerow(t)
@@ -1099,6 +1413,7 @@ def _zip_finto(gemelle_diverse=False, qualita_cattiva=False, deposito="1 000 000
 
 
 def main(argv):
+    global DURATA_REGIME, PESO_LATO_SOTTO_150, DD_PROMESSO
     if "--autotest" in argv:
         return autotest()
     csv_out = None
@@ -1109,6 +1424,28 @@ def main(argv):
             csv_out = argv[i + 1]
             i += 2
             continue
+        # (v5) le decisioni APERTE di Claudio come parametri (default = lettura letterale della firma 10/10)
+        if argv[i] == "--durata-regime" and i + 1 < len(argv):
+            if argv[i + 1] not in DURATE_REGIME:
+                print("--durata-regime: ammessi %s" % ", ".join(sorted(DURATE_REGIME)))
+                return 2
+            DURATA_REGIME = argv[i + 1]
+            i += 2
+            continue
+        if argv[i] == "--lato-sotto-150" and i + 1 < len(argv):
+            if argv[i + 1] not in LATI_SOTTO_150:
+                print("--lato-sotto-150: ammessi %s" % ", ".join(LATI_SOTTO_150))
+                return 2
+            PESO_LATO_SOTTO_150 = argv[i + 1]
+            i += 2
+            continue
+        if argv[i] == "--dd-promesso" and i + 1 < len(argv):
+            DD_PROMESSO = float(argv[i + 1])
+            i += 2
+            continue
+        if argv[i].startswith("--"):
+            print("opzione sconosciuta: %s" % argv[i])
+            return 2
         zs.append(argv[i])
         i += 1
     if not zs:
