@@ -159,6 +159,15 @@ int count_prefix(const string &p, int type = -1) {
 long long I(const string &n, int p) { return OBJ.count(n) ? OBJ[n].i[p] : -999; }
 void click(const string &n) { OnChartEvent(CHARTEVENT_OBJECT_CLICK, 0, 0.0, n); }
 void timer(int k = 1) { for(int a = 0; a < k; a++) { g_tick += 1000; OnTimer(); } }
+// valore atteso del Supertrend di un TF: ultima barra (in formazione) e penultima (chiusa)
+void expected(ENUM_TIMEFRAMES tf, double mult, double &vLast, double &vPrev) {
+  DArr<MqlRates> r; int n = CopyRates(_Symbol, tf, 0, 500, r);
+  DArr<double> h, l, c, a, u, d, di, v; h.v.resize(n); l.v.resize(n); c.v.resize(n); a.v.resize(n); u.v.resize(n);
+  d.v.resize(n); di.v.resize(n); v.v.resize(n);
+  for(int b = 0; b < n; b++) { h[b] = r[b].high; l[b] = r[b].low; c[b] = r[b].close; }
+  SW_STCore(h, l, c, n, 0, 10, mult, a, u, d, di, v);
+  vLast = v[n - 1]; vPrev = v[n - 2];
+}
 string snapshot() {
   std::ostringstream o;
   for(auto &kv : OBJ) { o << kv.first << "#" << kv.second.price; for(auto &q : kv.second.i) o << "," << q.first << "=" << q.second;
@@ -297,6 +306,23 @@ int main() {
   CHECK(I("ABTGSTU_B_UNICO", OBJPROP_BGCOLOR) == clrDimGray, "a mano: spento il 2.5 -> UNICO torna grigio");
   click("ABTGSTU_B_UNICO");
   CHECK(gStOn[0] && gStOn[1] && gStOn[2] && I("ABTGSTU_B_UNICO", OBJPROP_BGCOLOR) == clrDarkViolet, "due accesi + clic UNICO -> tutti accesi");
+  {
+    // ogni linea = valore sulla barra IN FORMAZIONE del suo TF, per 4 TF x 3 ST x 30 tick
+    ENUM_TIMEFRAMES tfs[4] = {PERIOD_H1, PERIOD_H4, PERIOD_H12, PERIOD_D1};
+    double mults[3] = {2.5, 3.0, 3.5};
+    bool all = true, distinguishes = false;
+    for(int ts = 0; ts < 30; ts++) {
+      g_tickshift = ts * ts * 53 - 4000; timer();
+      for(int a = 0; a < 4; a++) for(int j = 0; j < 3; j++) {
+        double vl, vp; expected(tfs[a], mults[j], vl, vp);
+        string n = "ABTGSTU_L" + std::to_string(5 + a) + "_" + std::to_string(j);
+        if(ObjectFind(0, n) < 0 || OBJ[n].price != vl) all = false;
+        if(vl != vp) distinguishes = true;
+      }
+    }
+    CHECK(all, "360 confronti: ogni linea = SW_STCore sulla barra IN FORMAZIONE del suo TF");
+    CHECK(distinguishes, "...e in almeno un caso la barra chiusa avrebbe dato un valore diverso (il test non e' vuoto)");
+  }
 #else
   click("ABTGSTU_B_UNICO");
   CHECK(gStOn[0] && !gStOn[1] && gStOn[2], "ST2 disabilitato: clic UNICO accende 2.5 e 3.5, il 3.0 resta fuori");

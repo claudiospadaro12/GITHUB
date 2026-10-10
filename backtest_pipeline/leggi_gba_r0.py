@@ -48,6 +48,25 @@ FASCE = [(0, 7, "asia"), (7, 12, "europa"), (12, 14, "pausa"), (14, 17, "USA ape
 ATTESA_N_REPL = {"T1": (60, 260), "T2": (125, 500), "T3": (350, 1400)}
 ATTESA_N_REPL_TOT = (535, 2100)
 SMENTITA_N_REPL = (300, 3500)
+# attese del lotto R2REG (file prova GBA_R2_REGIME_2026-10-10.txt, E1/E2, scritte PRIMA dei numeri; proxy backtest_pipeline/proxy_gba_r2reg.py, banda 0,5x-2x,
+# proxy < 15 -> banda 0-30 'quasi vuota'). Chiave (lotto, cella): {tranche: (min, max)}, "TOT": (min, max) sulle 6 tranche, "SMENTITA": (min, max) sul totale.
+ATTESE_LOTTO = {
+    ("R1A", "REPL"): {"T1": (60, 260), "T2": (125, 500), "T3": (350, 1400), "TOT": (535, 2100), "SMENTITA": (300, 3500)},
+    ("R2REG", "REPL"): {"T9": (0, 30), "T8": (0, 30), "T7": (0, 30), "T6": (21, 84), "T5": (8, 32), "T4": (76, 304), "TOT": (108, 432), "SMENTITA": (0, 1000)},
+    ("R2REG", "C035"): {"T9": (673, 2690), "T8": (800, 3200), "T7": (808, 3230), "T6": (1221, 4884), "T5": (1011, 4042), "T4": (1162, 4648), "TOT": (5674, 22694), "SMENTITA": (1500, 40000)},
+}
+# lotti la cui data 'a' e' ESCLUSIVA nel manifest (ToDate del tester: MISURATO in R1A, ultimo evento = giorno prima di 'a'). R1A/R1B/S0 hanno 'a' = ultimo giorno
+# del trimestre: il loro conteggio dei giorni feriali resta quello gia' stampato (inclusivo), per non cambiare numeri gia' letti.
+LOTTI_A_ESCLUSIVA = ("R2REG",)
+ORDINE_LOTTI = {"S0": 0, "R1A": 1, "R1B": 2, "R2REG": 3}
+# FIRMA di Claudio 10/10/2026 (report/FIRME_2026-10-10.md, Firma 1): lettura PER REGIME, regola oggettiva sul prezzo (proxy_gba_r2reg.py --regimi).
+# Direzione: TORO R>=+5% e ER>=0,15 | RIBASSO R<=-5% e ER>=0,15 | LATERALE altrimenti. Volatilita': CALMO < 3,5 bp, VOLATILE >= 3,5 bp.
+REGIMI_TRANCHE = {"T9": ("TORO", "CALMO"), "T8": ("LATERALE", "CALMO"), "T7": ("TORO", "CALMO"), "T6": ("LATERALE", "VOLATILE"), "T5": ("TORO", "CALMO"),
+                  "T4": ("TORO", "VOLATILE"), "T3": ("LATERALE", "VOLATILE"), "T2": ("RIBASSO", "VOLATILE"), "T1": ("LATERALE", "VOLATILE")}
+N_REGIME = 150               # firma 10/10: regime con < 150 operazioni = NON MISURATO
+TRANCHE_MIN_REGIME = 2       # firma 10/10: regime con meno di due tranche = NON MISURATO
+# orologio BCM (OROLOGIO_BCM_2026-09-24.md): ingressi dal 2024-10-27 al 2025-02-02 in un orologio (UTC+0 d'inverno) che per l'oro e' [NON MISURATO]
+OROLOGIO_INCERTO = (datetime.datetime(2024, 10, 27, 0, 0, 0), datetime.datetime(2025, 2, 3, 0, 0, 0))
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -217,6 +236,8 @@ def leggi_log(testo):
             ka = "altro ingresso saltato (" + re.sub(r"[0-9.]+", "#", msg[6:].split(" -- ")[0])[:50].strip() + ")"
         elif msg.startswith("[GBA] ERRORE"):
             ka = "altro errore (" + re.sub(r"[0-9.]+", "#", msg[6:46]).strip() + ")"
+        elif msg.startswith("[GBA] dati non pronti"):
+            ka = "dati non pronti (segnale NON valutato: storia M1/EMA/ATR mancante all'inizio della finestra?)"
         if ka:
             out["anomalie"][ka] = out["anomalie"].get(ka, 0) + 1
         ms = RE_SEG.match(msg)
@@ -271,9 +292,11 @@ def p_media_zero(valori):
     return math.erfc(abs(t) / math.sqrt(2.0))
 
 
-def giorni_feriali(da, a):
+def giorni_feriali(da, a, esclusivo=False):
     d0 = datetime.datetime.strptime(da, "%Y.%m.%d").date()
     d1 = datetime.datetime.strptime(a, "%Y.%m.%d").date()
+    if esclusivo:
+        d1 = d1 - datetime.timedelta(days=1)
     n = 0
     d = d0
     while d <= d1:
@@ -376,8 +399,10 @@ def banda_costo(m):
     return "ESCLUSA PER COSTO"
 
 
-def esito_replica(nz, pf_v, pf_v2, per_tranche, top1_quota, n_tot):
-    """S4. nz = lista netti PF_V, per_tranche = {tranche: pf_v}. Restituisce (frase, mancanti)."""
+def esito_replica(nz, pf_v, pf_v2, per_tranche, top1_quota, n_tot, per_tranche_n=None):
+    """S4. nz = lista netti PF_V, per_tranche = {tranche: pf_v}. Restituisce (frase, mancanti).
+    per_tranche_n (opzionale) = {tranche: n}: se dato, una tranche con n < 150 NON e' letta (S1) e non conta come 'PF_V > 1,3'; la soglia 'almeno 2 tranche su 3'
+    diventa in proporzione ceil(2/3 x tranche) (3 -> 2, 6 -> 4: TRADUZIONE alle 6 tranche del lotto R2REG, file prova GBA_R2_REGIME_2026-10-10.txt)."""
     if n_tot < N_MIN:
         return "MERITO SOSPESO (n=%d < %d): il rischio si legge lo stesso" % (n_tot, N_MIN), []
     if pf_v != pf_v:
@@ -389,9 +414,10 @@ def esito_replica(nz, pf_v, pf_v2, per_tranche, top1_quota, n_tot):
     if pf_v < PF_RISCONTRO:
         return "PF_V %.2f fra 1,3 e 1,5: NESSUN VERDETTO" % pf_v, []
     mancanti = []
-    conc = sum(1 for v in per_tranche.values() if v == v and v > PF_TRANCHE)
-    if conc < 2:
-        mancanti.append("PF_V > 1,3 in solo %d tranche su %d (servono 2)" % (conc, len(per_tranche)))
+    servono = max(2, int(math.ceil(2.0 * len(per_tranche) / 3.0 - 1e-9)))
+    conc = sum(1 for t, v in per_tranche.items() if v == v and v > PF_TRANCHE and (per_tranche_n is None or per_tranche_n.get(t, 0) >= N_MIN))
+    if conc < servono:
+        mancanti.append("PF_V > 1,3 in solo %d tranche su %d (servono %d%s)" % (conc, len(per_tranche), servono, "" if per_tranche_n is None else ", contando solo tranche con n >= 150"))
     if top1_quota is None or top1_quota >= TOP1_FRAGILE:
         mancanti.append("migliore operazione = %s del profitto netto (soglia < 25%%)" % ("n.d." if top1_quota is None else "%.0f%%" % (100 * top1_quota)))
     if pf_v2 != pf_v2 or pf_v2 < PF_NESSUN_VERDETTO:
@@ -441,16 +467,100 @@ def riga_cella(titolo, Ps, comm_ip, out_csv):
         per_tr[P["tranche"]] = nz
         c = costo_ingressi(P)
         cost0 += c["solo_spread"]; cost1 += c["c04"]; cost2 += c["c08"]
-        tot_giorni += giorni_feriali(P["riga"]["da"], P["riga"]["a"])
+        tot_giorni += giorni_feriali(P["riga"]["da"], P["riga"]["a"], P["riga"]["lotto"] in LOTTI_A_ESCLUSIVA)
     return tutte, per_tr, (cost0, cost1, cost2), tot_giorni
+
+
+def lettura_regimi(passate, cella, comm_ip=COMM_EUR_LOTTO_GIRO):
+    """FIRMA 10/10 (report/FIRME_2026-10-10.md): lettura PER REGIME, long e short SEPARATI. Raggruppa per CELLA attraverso i lotti a Modello 4 (R1A e R2REG sono
+    la stessa cella REPL: stessi 30 pin); le tranche si assegnano ai regimi con REGIMI_TRANCHE (regola sul prezzo). Restituisce (righe, verdetto)."""
+    Ps = [P for P in passate if int(P["riga"]["modello"]) == 4 and P["cella"] == cella and P["magic"] == "775800" and not P["g0"] and P["tranche"] in REGIMI_TRANCHE]
+    dati = {}
+    for P in Ps:
+        nz, _c = posizioni_numeriche(P, comm_ip)
+        dir_, vol_ = REGIMI_TRANCHE[P["tranche"]]
+        dd = P["rep"]["dd_eq_abs"] if P["rep"] and P["rep"].get("dd_eq_abs") is not None else None
+        for reg in (dir_, vol_):
+            d = dati.setdefault(reg, {"tr": [], "pos": [], "dd": []})
+            d["tr"].append(P["tranche"])
+            d["pos"] += nz
+            if dd is not None:
+                d["dd"].append(dd)
+    righe = []
+    misurati, non_misurati, fallimenti = [], [], []
+    for reg in ("TORO", "LATERALE", "RIBASSO", "CALMO", "VOLATILE"):
+        d = dati.get(reg)
+        if not d:
+            righe.append("   %-9s nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)" % reg)
+            non_misurati.append(reg)
+            continue
+        n = len(d["pos"])
+        lung = [x["net_v"] for x in d["pos"] if x["lato"] == "BUY"]
+        cor = [x["net_v"] for x in d["pos"] if x["lato"] == "SELL"]
+        dd = "DD equity max di tranche %.0f EUR" % max(d["dd"]) if d["dd"] else "DD n.d."
+        base = "   %-9s tranche %-12s n=%-5d (long %d, short %d)  PF_V %s  long %s  short %s  %s" % (
+            reg, ",".join(sorted(d["tr"])), n, len(lung), len(cor), "%.2f" % pf_di([x["net_v"] for x in d["pos"]]),
+            "%.2f" % pf_di(lung) if lung else "n.d.", "%.2f" % pf_di(cor) if cor else "n.d.", dd)
+        if len(d["tr"]) < TRANCHE_MIN_REGIME:
+            righe.append(base + "  -> NON MISURATO (meno di %d tranche)" % TRANCHE_MIN_REGIME)
+            non_misurati.append(reg)
+        elif n < N_REGIME:
+            righe.append(base + "  -> NON MISURATO (n < %d: il merito non si giudica; il rischio si legge: vedi DD)" % N_REGIME)
+            non_misurati.append(reg)
+        else:
+            lati_ko = [nm for nm, v in (("long", lung), ("short", cor)) if not v or not (pf_di(v) > 1.0)]
+            note = "  (lato con n<150: indicativo)" if (len(lung) < N_REGIME or len(cor) < N_REGIME) else ""
+            if lati_ko:
+                fallimenti.append("%s %s" % (reg, "+".join(lati_ko)))
+                righe.append(base + "  -> MISURATO, NON REGGE (PF_V <= 1,0 su: %s)%s" % (" e ".join(lati_ko), note))
+            else:
+                righe.append(base + "  -> MISURATO, PF_V > 1,0 su long e short%s" % note)
+            misurati.append(reg)
+    if not dati:
+        verdetto = "nessuna tranche con regime assegnato (non e' un giro del lotto R1A/R2REG?)"
+    elif fallimenti:
+        verdetto = "NON REGGE: PF_V <= 1,0 in %s" % "; ".join(fallimenti)
+    elif not misurati:
+        verdetto = "NON MISURATO: nessun regime con almeno %d operazioni e %d tranche" % (N_REGIME, TRANCHE_MIN_REGIME)
+    elif not any(r in ("LATERALE", "RIBASSO") for r in misurati):
+        verdetto = "NON BASTA: un PF buono solo nel toro non basta (regimi misurati: %s; NON misurati: %s)" % (", ".join(misurati), ", ".join(non_misurati) or "nessuno")
+    else:
+        verdetto = "regge nei regimi MISURATI (%s); NON misurati: %s. Il DD promesso dal backtest della cella NON esiste ancora (nessuna cella e' stata promossa): il cancello del drawdown resta APERTO" % (", ".join(misurati), ", ".join(non_misurati) or "nessuno")
+    return righe, verdetto
+
+
+def tabella_regimi(passate, W):
+    celle = []
+    for P in passate:
+        if int(P["riga"]["modello"]) == 4 and P["tranche"] in REGIMI_TRANCHE and P["cella"] not in celle:
+            celle.append(P["cella"])
+    if not celle:
+        return
+    W("")
+    W("-" * 100)
+    W(" (7) LETTURA PER REGIME (firma di Claudio 10/10/2026, report/FIRME_2026-10-10.md; si AGGIUNGE a S4-S7, non li sostituisce)")
+    W("     regola sul prezzo: TORO R>=+5% e ER>=0,15 | RIBASSO R<=-5% e ER>=0,15 | LATERALE altrimenti | CALMO ATR M1/prezzo <3,5 bp | VOLATILE >=3,5 bp (proxy_gba_r2reg.py --regimi)")
+    W("     regge se PF_V > 1,0 in OGNI regime con >= 150 operazioni e >= 2 tranche, long e short letti SEPARATAMENTE; < 150 operazioni = NON MISURATO; solo toro non basta")
+    for cella in sorted(celle, key=lambda c: {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(c, 9)):
+        lotti = sorted(set(P["riga"]["lotto"] for P in passate if int(P["riga"]["modello"]) == 4 and P["cella"] == cella and P["tranche"] in REGIMI_TRANCHE), key=lambda l: ORDINE_LOTTI.get(l, 9))
+        W("   --- cella %s (lotti %s) ---" % (cella, "+".join(lotti)))
+        righe, verdetto = lettura_regimi(passate, cella)
+        for r in righe:
+            W(r)
+        W("   VERDETTO PER REGIME (cella %s): %s" % (cella, verdetto))
 
 
 def stampa(passate, csv_out=None):
     out = []
     W = out.append
     W("=" * 100)
-    W(" GBA R0 -- lettore (leggi_gba_r0.py). Soglie e attese: file prova GBA_R0_REPLICA_2026-10-09.txt, scritte PRIMA dei numeri.")
-    W(" NON giudica oltre S1-S7, NON promuove, NON scrive 'morto'. Un regime solo (gen-set 2026).")
+    lotti_presenti = set(P["riga"]["lotto"] for P in passate)
+    if "R2REG" in lotti_presenti:
+        W(" GBA R2REG -- lettore (leggi_gba_r0.py). Soglie e attese: file prova GBA_R2_REGIME_2026-10-10.txt (S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt + firma 10/10 per regime), scritte PRIMA dei numeri.")
+        W(" NON giudica oltre S1-S8, NON promuove, NON scrive 'morto'. Tranche 2024.07.10-2025.12.31 a tick reali (ToDate ESCLUSIVO); i regimi si leggono nella sezione (7).")
+    else:
+        W(" GBA R0 -- lettore (leggi_gba_r0.py). Soglie e attese: file prova GBA_R0_REPLICA_2026-10-09.txt, scritte PRIMA dei numeri.")
+        W(" NON giudica oltre S1-S7, NON promuove, NON scrive 'morto'. Un regime solo (gen-set 2026).")
     W("=" * 100)
     W("")
     W("(1) CANCELLI DI AFFIDABILITA' (G0 per passata)")
@@ -496,23 +606,24 @@ def stampa(passate, csv_out=None):
     # per ogni (modello, cella): tutte le tranche OK
     celle = []
     for P in passate:
-        k = (int(P["riga"]["modello"]), P["cella"])
+        k = (int(P["riga"]["modello"]), P["riga"]["lotto"], P["cella"])
         if k not in celle:
             celle.append(k)
-    celle.sort(key=lambda k: (-k[0], {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(k[1], 9)))
+    celle.sort(key=lambda k: (-k[0], ORDINE_LOTTI.get(k[1], 9), {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(k[2], 9)))
     tab = []
-    for (mod, cella) in celle:
-        Ps = [P for P in passate if int(P["riga"]["modello"]) == mod and P["cella"] == cella and P["magic"] == "775800"]
+    for (mod, lotto_c, cella) in celle:
+        Ps = [P for P in passate if int(P["riga"]["modello"]) == mod and P["riga"]["lotto"] == lotto_c and P["cella"] == cella and P["magic"] == "775800"]
         W("")
         W("-" * 100)
-        W(" CELLA %s (InpSpreadMaxATR %s)  --  Modello %d (%s)" % (cella, Ps[0]["riga"]["spread_max_atr"], mod, "TICKS REALI: verdetto" if mod == 4 else "OHLC su M1: SOLO CONTEGGIO, nessun PF si legge come merito"))
+        W(" CELLA %s%s (InpSpreadMaxATR %s)  --  Modello %d (%s)" % (cella, " [lotto " + lotto_c + "]" if lotto_c == "R2REG" else "", Ps[0]["riga"]["spread_max_atr"], mod, "TICKS REALI: verdetto" if mod == 4 else "OHLC su M1: SOLO CONTEGGIO, nessun PF si legge come merito"))
         W("-" * 100)
         # (2) n e frequenza
         W("(2) n e frequenza (denominatore: giorni feriali della tranche)")
         for P in Ps:
             n = len(P["pos"]) if not P["g0"] else None
-            gf = giorni_feriali(P["riga"]["da"], P["riga"]["a"])
-            att = ATTESA_N_REPL.get(P["tranche"]) if cella == "REPL" and mod == 4 else None
+            gf = giorni_feriali(P["riga"]["da"], P["riga"]["a"], lotto_c in LOTTI_A_ESCLUSIVA)
+            att_l = ATTESE_LOTTO.get((lotto_c, cella)) if mod == 4 else None
+            att = att_l.get(P["tranche"]) if att_l else None
             sa = ""
             if n is not None and att:
                 sa = "  attesa %d-%d: %s" % (att[0], att[1], "DENTRO" if att[0] <= n <= att[1] else "FUORI (si cerca perche', non si ritocca l'attesa)")
@@ -524,9 +635,13 @@ def stampa(passate, csv_out=None):
         comm_ip = COMM_EUR_LOTTO_GIRO
         tutte, per_tr, (c0, c1, c2), gtot = riga_cella("", Ps, comm_ip, csv_out)
         n_tot = len(tutte)
-        if cella == "REPL" and mod == 4:
-            sm = "SMENTITA dell'attesa E1 (n fuori da %d-%d): leggere PRIMA la causa" % SMENTITA_N_REPL if not (SMENTITA_N_REPL[0] <= n_tot <= SMENTITA_N_REPL[1]) else "dentro 300-3.500"
-            W("   tre tranche: n=%d (attesa %d-%d), %s" % (n_tot, ATTESA_N_REPL_TOT[0], ATTESA_N_REPL_TOT[1], sm))
+        att_l = ATTESE_LOTTO.get((lotto_c, cella)) if mod == 4 else None
+        if att_l:
+            smn, smx = att_l["SMENTITA"]
+            sm = "SMENTITA dell'attesa (n fuori da %d-%d): leggere PRIMA la causa" % (smn, smx) if not (smn <= n_tot <= smx) else "dentro %d-%d" % (smn, smx)
+            if lotto_c == "R1A":
+                sm = sm.replace("dentro 300-3500", "dentro 300-3.500").replace("SMENTITA dell'attesa (", "SMENTITA dell'attesa E1 (")
+            W("   %s tranche: n=%d (attesa %d-%d), %s" % ({3: "tre", 6: "sei"}.get(len(Ps), str(len(Ps))), n_tot, att_l["TOT"][0], att_l["TOT"][1], sm))
         else:
             W("   tranche lette: n=%d" % n_tot)
         if n_tot == 0:
@@ -587,8 +702,19 @@ def stampa(passate, csv_out=None):
         # esito S4 (solo REPL a ticks reali)
         ptr = {t: pf_di([x["net_v"] for x in v]) for t, v in per_tr.items()}
         if mod == 4:
-            frase, _m = esito_replica(nets, pf_v, pf_v2, ptr, top1_netto, n_tot)
+            ptn = {t: len(v) for t, v in per_tr.items()}
+            frase, _m = esito_replica(nets, pf_v, pf_v2, ptr, top1_netto, n_tot, ptn)
             W("   ESITO S4 per la cella %s: %s" % (cella, frase))
+            if lotto_c == "R2REG":
+                # CONTROESEMPIO scritto PRIMA dei numeri (file prova, S8): un PF_V >= 1,3 con n >= 150 su una cella NON BASTA
+                if pf_v >= PF_NESSUN_VERDETTO and n_tot >= N_MIN:
+                    rt = sorted(t for t, v in ptr.items() if v == v and v > PF_TRANCHE and ptn.get(t, 0) >= N_MIN)
+                    q1 = "n.d." if top1_netto is None else "%.0f%%" % (100 * top1_netto)
+                    basta = len(rt) >= 2 and top1_netto is not None and top1_netto < TOP1_FRAGILE
+                    W("   CONTROESEMPIO (scritto prima): PF_V %.2f >= 1,3 con n=%d: replica in %d tranche con n>=150 e PF_V>1,3 (%s; servono almeno 2), migliore operazione = %s del profitto netto (serve < 25%%) -> %s" % (
+                        pf_v, n_tot, len(rt), ",".join(rt) if rt else "nessuna", q1, "le due condizioni ci sono (S4 decide il resto)" if basta else "NON BASTA"))
+                else:
+                    W("   CONTROESEMPIO (scritto prima): non scatta (serve PF_V >= 1,3 con n >= 150; qui PF_V %.2f, n=%d)" % (pf_v, n_tot))
         # (6) ora
         W("(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < %.4f (0,05/6); n >= %d; stesso segno in >= 2 tranche" % (P_FASCIA, N_FASCIA))
         for lo, hi, nome in FASCE:
@@ -615,6 +741,17 @@ def stampa(passate, csv_out=None):
                 verd = "non distinguibile da zero (p=%.3f)" % p
             W("   %-15s %02d-%02d  n=%-5d PF_V %.2f  r medio %s  tranche con lo stesso segno %d/%d  -> %s" % (nome, lo, hi, len(sel), pf_di([x["net_v"] for x in sel]),
                                                                                                           "n.d." if not rs else "%.3f" % statistics.mean(rs), conc, len(segni), verd))
+        if lotto_c == "R2REG":
+            W("   ORA con OROLOGIO UNIFORME: esclusi gli ingressi dal %s al %s (server): orologio forex UTC+0 d'inverno prima del cambio, per l'ORO [NON MISURATO]; il lettore NON converte le ore" % (
+                OROLOGIO_INCERTO[0].strftime("%Y.%m.%d"), (OROLOGIO_INCERTO[1] - datetime.timedelta(days=1)).strftime("%Y.%m.%d")))
+            unif = [x for x in tutte if not (OROLOGIO_INCERTO[0] <= x["t"] < OROLOGIO_INCERTO[1])]
+            W("   (ingressi esclusi: %d su %d)" % (len(tutte) - len(unif), len(tutte)))
+            for lo, hi, nome in FASCE:
+                sel = [x for x in unif if lo <= x["ora"] < hi]
+                if sel:
+                    W("      %-15s %02d-%02d  n=%-5d PF_V %.2f%s" % (nome, lo, hi, len(sel), pf_di([x["net_v"] for x in sel]), "   (n<%d: SOSPESA)" % N_FASCIA if len(sel) < N_FASCIA else ""))
+                else:
+                    W("      %-15s %02d-%02d  n=0" % (nome, lo, hi))
         # ATR e spread per ora dai SEGNALI (campione selezionato: solo barre di rottura)
         sg = [s for P in Ps if not P["g0"] and P["log"] for s in P["log"]["segnali"]]
         if sg:
@@ -627,9 +764,17 @@ def stampa(passate, csv_out=None):
                 s2 = [s for s in sg if lo <= s["ora"] < hi]
                 if s2:
                     W("      %-15s ATR %.2f  spread %.2f  n=%d" % (nome, mediana([s["atr"] for s in s2]), mediana([s["spread"] for s in s2]), len(s2)))
-        tab.append({"modello": mod, "cella": cella, "n": n_tot, "pf_v": pf_v, "pf_v2": pf_v2, "netto": sum(nets), "costo_mediano_c04": mediana(c1), "fragile": fragile})
+        tab.append({"modello": mod, "lotto": lotto_c, "cella": cella, "n": n_tot, "pf_v": pf_v, "pf_v2": pf_v2, "netto": sum(nets), "costo_mediano_c04": mediana(c1), "fragile": fragile})
     # confronto fra celle (S7)
-    r4 = [t for t in tab if t["modello"] == 4]
+    # S7 si legge per FAMIGLIA di lotti sullo stesso asse: R1A+R1B (quattro celle) e R2REG (due celle: nessun altopiano) non si mescolano
+    r4 = [t for t in tab if t["modello"] == 4 and t["lotto"] in ("R1A", "R1B", "S0")]
+    r2 = [t for t in tab if t["modello"] == 4 and t["lotto"] == "R2REG"]
+    if r2:
+        W("")
+        W("-" * 100)
+        W(" (S7) FRONTIERA del lotto R2REG: %d celle lungo l'asse InpSpreadMaxATR -> NESSUN altopiano si legge (la monotonia fra 2 punti e' vuota); contano n, PF_V e costo" % len(r2))
+        for t in sorted(r2, key=lambda t: {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(t["cella"], 9)):
+            W("   %-5s n=%-6d PF_V %.3f  costo mediano (+0,04) %.1f  %s" % (t["cella"], t["n"], t["pf_v"], t["costo_mediano_c04"], banda_costo(t["costo_mediano_c04"])))
     if len(r4) >= 2:
         W("")
         W("-" * 100)
@@ -639,12 +784,13 @@ def stampa(passate, csv_out=None):
         pfs = [t["pf_v"] for t in sorted(r4, key=lambda t: {"REPL": 0, "C010": 1, "C020": 2, "C035": 3}.get(t["cella"], 9))]
         mono = all(pfs[i] <= pfs[i + 1] for i in range(len(pfs) - 1)) or all(pfs[i] >= pfs[i + 1] for i in range(len(pfs) - 1))
         W("   PF_V lungo l'asse: %s -> %s" % (" / ".join("%.2f" % x for x in pfs), "monotono (un altopiano si legge)" if mono else "NON monotono: una cella che sporge e' un PICCO, non un altopiano"))
+    tabella_regimi(passate, W)
     W("")
     W("-" * 100)
     W(" CERTIFICATO DI MORTE: mancano le caselle 3 (uscita ad asse), 4 (simboli gemelli), 5 (TF cambiato). Qualunque esito sopra NON e' 'morto': e' 'NON ANCORA MISURATO' o 'la replica non regge (un regime)'.")
     if csv_out:
         with open(csv_out, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=["modello", "cella", "n", "pf_v", "pf_v2", "netto", "costo_mediano_c04", "fragile"], delimiter=";")
+            w = csv.DictWriter(f, fieldnames=["modello", "lotto", "cella", "n", "pf_v", "pf_v2", "netto", "costo_mediano_c04", "fragile"], delimiter=";")
             w.writeheader()
             for t in tab:
                 w.writerow(t)
