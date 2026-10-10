@@ -1,10 +1,11 @@
-# MARCATORE_ICONE_DESKTOP_v2
+# MARCATORE_ICONE_DESKTOP_v3
 # Riduce la dimensione delle icone del Desktop dell'utente con cui si e' collegati.
 # Scrive SOLO: HKCU\Software\Microsoft\Windows\Shell\Bags\1\Desktop\IconSize (questo utente).
 # Riavvia SOLO l'explorer.exe della SESSIONE corrente (filtro per SessionId, mai per nome da solo).
 # NON tocca terminal64, metaeditor64, MT5, EA, conti, preset, CODA.txt, runner, attivita' pianificate, file del Desktop.
 param([int]$Size = 32, [string]$Macchina = 'NESSUNA')
 $ErrorActionPreference = 'Stop'
+function VoceMenu([int]$v){ if($v -eq 96){ return 'Icone grandi' }; if($v -eq 48){ return 'Icone medie' }; if($v -eq 32){ return 'Icone piccole' }; return '' }
 if($Size -lt 16 -or $Size -gt 256){ throw ('Size ammessi: da 16 a 256 (32 piccole, 48 medie, 96 grandi, 256 molto grandi). Ricevuto: ' + $Size) }
 Write-Host ('macchina: ' + $env:COMPUTERNAME + '   utente: ' + $env:USERNAME) -ForegroundColor Green
 if($env:COMPUTERNAME -ne $Macchina){ throw ('Questa riga e per la macchina ' + $Macchina + ', e sei su ' + $env:COMPUTERNAME + ': non scrivo niente e non riavvio niente, mi fermo.') }
@@ -23,5 +24,16 @@ $ex | Stop-Process -Force
 Start-Sleep -Seconds 4
 $ri = @(Get-Process -Name explorer -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $sid })
 if($ri.Count -eq 0){ Start-Process explorer.exe; Start-Sleep -Seconds 3; Write-Host 'explorer riavviato da questo script (se si apre anche una finestra di Esplora risorse in piu, chiudila: e innocua)' -ForegroundColor Gray }
-Write-Host 'Fatto. Se il Desktop non e cambiato: clic destro su un punto vuoto del Desktop > Visualizza > Icone piccole. NON usare Esci / Disconnetti utente / Riavvia: chiudono TUTTI i programmi della sessione, MT5 compresi.' -ForegroundColor Green
-Write-Host ('PER RIPRISTINARE: rilancia la riga con -Size ' + $(if($null -ne $old){[string]$old}else{'48'}) + ' al posto di -Size ' + $Size + ' (e il valore di prima, stampato sopra), oppure tasto destro sul Desktop > Visualizza > Icone medie.') -ForegroundColor Gray
+$vn = VoceMenu $Size
+if($vn -ne ''){ $comeAMano = 'clic destro su un punto vuoto del Desktop > Visualizza > ' + $vn } else { $comeAMano = 'rilancia la stessa riga (per ' + $Size + ' non esiste una voce nel menu Visualizza)' }
+Write-Host ('Fatto. Se il Desktop non e cambiato: ' + $comeAMano + '. NON usare Esci / Disconnetti utente / Riavvia: chiudono TUTTI i programmi della sessione, MT5 compresi.') -ForegroundColor Green
+$oldNum = 48
+if($null -ne $old){ $oldNum = [int]$old }
+if($oldNum -ge 16 -and $oldNum -le 256){
+  Write-Host ('PER RIPRISTINARE il valore di prima (' + $oldNum + '): incolla in QUESTA finestra PowerShell la riga pronta qui sotto') -ForegroundColor Gray
+  Write-Host ('powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $PSCommandPath + '" -Size ' + $oldNum + ' -Macchina ' + $Macchina) -ForegroundColor White
+} else {
+  Write-Host ('PER RIPRISTINARE: il valore di prima (' + $oldNum + ') e fuori da 16-256 e questo script non lo riscrive: tieni premuto Ctrl e gira la rotella sul Desktop.') -ForegroundColor Gray
+}
+$vo = VoceMenu $oldNum
+if($vo -ne ''){ Write-Host ('oppure a mano: clic destro sul Desktop > Visualizza > ' + $vo) -ForegroundColor Gray } else { Write-Host ('oppure a mano: tieni premuto Ctrl e gira la rotella sul Desktop (per ' + $oldNum + ' non esiste una voce nel menu Visualizza)') -ForegroundColor Gray }
