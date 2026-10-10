@@ -271,7 +271,7 @@ def estrai_soglie_notti(P):
         m = re.search(r"q\s*<=\s*(\d[,.]\d+)\s*(?:->|=>|:)?\s*COMPATIBILE", t)
         if m and s["q_bassa"] is None:
             s["q_bassa"] = fnum(m.group(1))
-        m = re.search(r"finestre\s+di\s+(\d+)\s+notti", t)
+        m = re.search(r"finestre\s+di\s+(\d+)\s+notti", t, re.I)
         if m and s["finestra"] is None:
             s["finestra"] = int(m.group(1))
     return s
@@ -484,7 +484,7 @@ def valuta_passata(P, prova, fascia):
     if rep and rep["ok"]:
         q = re.sub(r"\s", "", (rep.get("qualita") or "")).lower()
         if str(r["modello"]) == "4" and q != QUALITA_ATTESA:
-            info["motivi"].append("qualita' dello storico del report '%s' invece di '100% ticks reali'" % (rep.get("qualita") or "n.d."))
+            info["motivi"].append("qualita' dello storico del report '%s' invece di '100%% ticks reali'" % (rep.get("qualita") or "n.d."))
         if rep.get("deposito") is not None and abs(rep["deposito"] - lg.DEPOSITO_ATTESO) > 0.5:
             info["guardare"].append("deposito del report %.2f invece di %.0f" % (rep["deposito"], lg.DEPOSITO_ATTESO))
     an = P["log"]["anomalie"] if P["log"] else {}
@@ -1142,6 +1142,22 @@ InpMagic=775800||775800||50||775850||Y
 """
 
 
+def _altera_profitto_notte(dat_utf16, nuovo="99 999.00"):
+    """Test: cambia il profitto del primo deal d'uscita che chiude una posizione entrata di notte (ora 00-06) nel report .htm (UTF-16). -> (bytes, trovato)"""
+    t = dat_utf16.decode("utf-16")
+    prev_notte = False
+    for m in re.finditer(r"<tr[^>]*>(.*?)</tr>", t, re.S | re.I):
+        tds = list(re.finditer(r"<td[^>]*>(.*?)</td>", m.group(1), re.S | re.I))
+        celle = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", x.group(1))).replace("&nbsp;", " ").strip() for x in tds]
+        if len(celle) == 13 and re.match(r"^\d{4}\.\d\d\.\d\d \d\d:\d\d:\d\d$", celle[0]) and celle[3] in ("buy", "sell"):
+            if prev_notte and celle[4] == "out":
+                a = m.start(1) + tds[10].start(1)
+                b = m.start(1) + tds[10].end(1)
+                return (t[:a] + nuovo + t[b:]).encode("utf-16"), True
+            prev_notte = celle[4] == "in" and int(celle[0][11:13]) < 7
+    return dat_utf16, False
+
+
 def autotest():
     falliti = []
     conta = [0]
@@ -1242,13 +1258,8 @@ def autotest():
             for n in zin.namelist():
                 dat = zin.read(n)
                 if n.replace("\\", "/") == "report/GBA_R0_R1A_03_REPL_T3_m775800.htm":
-                    t = dat.decode("utf-16")
-                    # il primo deal 'out' della T3 che chiude una posizione entrata di notte: si cambia il suo profitto
-                    m = re.search(r"<td>(\d{4}\.\d\d\.\d\d) 0[0-6]:\d\d:\d\d</td>.*?</tr>\s*<tr[^>]*>(?:<td[^>]*>[^<]*</td>){10}<td[^>]*>([-0-9 .]+)</td>", t, re.S)
-                    ck("(prepara l'alterazione) trovato un deal d'uscita di una posizione notturna in T3", m is not None)
-                    if m:
-                        t = t[:m.start(2)] + "99 999.00" + t[m.end(2):]
-                    dat = t.encode("utf-16")
+                    dat, fatto = _altera_profitto_notte(dat)
+                    ck("(prepara l'alterazione) trovato e alterato il deal d'uscita di una posizione notturna in T3", fatto)
                 zout.writestr(n, dat)
             zout.close()
             a2 = ancora_r1a(alt_zip, fas)
@@ -1322,7 +1333,7 @@ def autotest():
     ops_f = {"T1": ops1["T1"], "T2": serie_ops(tr_da["T2"], base_nets[:7]) + _spec_notte("2026.05.20", [10.0], ora=7), "T3": ops1["T3"]}
     zF = _zip_notte(pr1, "M1", ops_f)
     rc, txt = _esegui_catturando([zF, "--senza-ancora", "--bootstrap", "100", "--prova-m1", p1, "--prova-m5", p5])
-    ck("un ingresso alle 07:00:00 (UNO solo) -> 'FILTRO NON COME DICHIARATO' sulla passata T2", "FILTRO NON COME DICHIARATO" in txt and "1 deal d'ingresso su 8 con ora server FUORI" in txt)
+    ck("un ingresso alle 07:00:00 (UNO solo) -> 'FILTRO NON COME DICHIARATO' sulla passata T2", "FILTRO NON COME DICHIARATO / INPUT DIVERSI:" in txt and "1 deal d'ingresso su 8 con ora server FUORI" in txt)
     ck("... la passata T2 risulta NON LEGGIBILE, T1 e T3 restano LEGGIBILI, rc = 3", txt.count("-> NON LEGGIBILE") == 1 and txt.count("-> LEGGIBILE") == 2 and rc == 3, "rc=%s" % rc)
     ck("... e il TOTALE della cella NON si calcola (nessuna riga TOT)", "TOT: NON CALCOLATO" in txt and "\n   TOT " not in txt)
     ck("... e le attese non si stampano accanto a un totale che non c'e'", "(3) ATTESE DEL FILE PROVA" not in txt)
@@ -1331,7 +1342,7 @@ def autotest():
         ops_b["T3"][3] = _spec_notte("2026.02.20", [10.0], ora=ora, minuto=minuto)[0]
         zb = _zip_notte(pr1, "M1", ops_b)
         rc, tb = _esegui_catturando([zb, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])
-        ck("confine della fascia: ingresso alle %02d:%02d -> %s" % (ora, minuto, "dentro (letto)" if sec_ok else "FUORI (passata non letta)"), ("FILTRO NON COME DICHIARATO" not in tb) == sec_ok, tb[:300])
+        ck("confine della fascia: ingresso alle %02d:%02d -> %s" % (ora, minuto, "dentro (letto)" if sec_ok else "FUORI (passata non letta)"), ("FILTRO NON COME DICHIARATO / INPUT DIVERSI:" not in tb) == sec_ok, tb[:300])
     # ini diverso (HourEnd=24 nell'ini ma deal tutti di notte)
     zI = _zip_notte(pr1, "M1", ops1, ini_cambi={"InpHourEnd": "24"})
     rc, txt = _esegui_catturando([zI, "--senza-ancora", "--bootstrap", "50", "--prova-m1", p1, "--prova-m5", p5])

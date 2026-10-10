@@ -11,7 +11,7 @@
 #
 #  ======================= DRIVER, LETTORE, E PERCHE' NON IL DRIVER DEI ROUND =======================
 #  Driver: backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (MARCATORE_GBA_R0_PASSATE_v5, SHA256 C239F628..., file prova DICHIARATIVO: blocco @GBA-ASSE, una chiave per file).
-#  Lettore: backtest_pipeline/leggi_gba_r0.py (SHA256 20228005..., commit 4ac4b3d8). L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) questa prova
+#  Lettore: backtest_pipeline/leggi_gba_r0.py (SHA256 9CD02D2A..., contenuto di ca0e8e59, PASS del cancello 7b4b6c53; la 20228005 di 4ac4b3d8 ha dato FAIL al re-gate 28e42638 e NON si usa). L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) questa prova
 #  uscirebbe con un CSV da zero byte (file madre GBA_R0_REPLICA_2026-10-09.txt, 'IL DIFETTO CHE QUESTO FILE DICHIARA PER PRIMO'). Il driver dei round non si tocca.
 #  L'asse InpMagic=775800||775800||50||775850||Y qui sotto e' TECNICO (G1 sul magic) e NON e' la variabile misurata: controlla_prova.py pretende un asse Y.
 #  MAGIC: 775800 (passate) e 775850 (gemella). La consegna chiedeva magic NUOVI in un blocco libero: NON si puo' senza toccare driver e lettore (il driver v5 ammette SOLO

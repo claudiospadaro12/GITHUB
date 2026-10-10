@@ -11,7 +11,7 @@
 #
 #  ======================= DRIVER, LETTORE, E PERCHE' NON IL DRIVER DEI ROUND =======================
 #  Driver: backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (MARCATORE_GBA_R0_PASSATE_v5, SHA256 C239F628..., file prova DICHIARATIVO: blocco @GBA-ASSE, una chiave per file).
-#  Lettore: backtest_pipeline/leggi_gba_r0.py (SHA256 20228005..., commit 4ac4b3d8). L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) questa prova
+#  Lettore: backtest_pipeline/leggi_gba_r0.py (SHA256 9CD02D2A..., contenuto di ca0e8e59, PASS del cancello 7b4b6c53; la 20228005 di 4ac4b3d8 ha dato FAIL al re-gate 28e42638 e NON si usa). L'EA non ha OnTester/FrameAdd: col driver dei round (Optimization=1, CSV dell'EA) questa prova
 #  uscirebbe con un CSV da zero byte (file madre GBA_R0_REPLICA_2026-10-09.txt, 'IL DIFETTO CHE QUESTO FILE DICHIARA PER PRIMO'). Il driver dei round non si tocca.
 #  L'asse InpMagic=775800||775800||50||775850||Y qui sotto e' TECNICO (G1 sul magic) e NON e' la variabile misurata: controlla_prova.py pretende un asse Y.
 #  MAGIC: 775800 (passate) e 775850 (gemella). La consegna chiedeva magic NUOVI in un blocco libero: NON si puo' senza toccare driver e lettore (il driver v5 ammette SOLO
@@ -76,10 +76,12 @@
 #  IPOTESI ALTERNATIVA H-M5N (collega, DICHIARATO DA TERZI), INTERA da GBA_R2_PIANO 4.3: 'PF_V >= 1,3 nella notte in OGNI tranche con n >= 150 E giorno < 1,0'. In QUESTO lotto e'
 #  misurabile SOLO la meta' notturna, e su T1-T3 con n per tranche < 150 nemmeno quella per tranche. La meta' 'giorno < 1,0' richiede la cella M5 a 24 ore (R2T M5), NON in questo
 #  lotto. DEVIAZIONE DAL PIANO, dichiarata: il piano confronta M5 notte con M5 24 ore su 9 tranche; qui il confronto e' con M1 notte (R2NOTTEM1 N7) su 3 tranche: si isola il TF a
-#  parita' di notte, NON la notte a parita' di TF. Controesempi del piano INTERI: (a) se M5 notte 'vince' solo in T3 (ATR M5 6,65, costo 76% >= 40x) e perde o e' vuota in T1-T2,
-#  la spiegazione e' il regime di volatilita' + il costo, non la notte; (b) se la fascia 00-07 vince in M5 ma vince anche 07-22, la fascia non conta: e' il TF -- (b) NON si legge
-#  da questo lotto. Lettura: PF_V >= 1,3 sul TOTALE con n >= 150 = SORPRESA e solo INDIZIO (controesempio di S4); PRIMA di T0 serve R2T M5 sulle stesse tre tranche. Mai 'H-M5N
-#  confermata' da questo lotto.
+#  parita' di notte, NON la notte a parita' di TF. Controesempi del piano (r.215, TRE): (a) se M5 notte 'vince' solo in T3 (ATR M5 6,65, costo 76% >= 40x) e perde o e' vuota
+#  in T1-T2, la spiegazione e' il regime di volatilita' + il costo, non la notte: lo si vede dalla colonna per tranche del lettore (SI' in questo lotto) e dalla stessa cella a 24 ore
+#  (NON in questo lotto); (b) se la fascia 00-07 vince in M5 ma vince anche 07-22, la fascia non conta: e' il TF -- (b) NON si legge da questo lotto; (c) se la fascia asia a M5
+#  rende solo perche' 2-3 giornate pesano (come il 23/03 su M1, +14.171 EUR), S5 lo cattura (migliore operazione >= 25% del netto positivo, oppure netto senza le 5 migliori
+#  <= 0 = FRAGILE) -- (c) SI' si legge da questo lotto. Lettura: PF_V >= 1,3 sul TOTALE con n >= 150 = SORPRESA e solo INDIZIO (controesempio di S4: migliore operazione < 25%
+#  del netto e replica in 2 tranche su 3 con n >= 150; S5 non FRAGILE); PRIMA di T0 serve R2T M5 sulle stesse tre tranche. Mai 'H-M5N confermata' da questo lotto.
 #  'Doppio del conto in 2 anni, DD 7-11%' NON e' confrontabile (rischio per trade e feed non detti).
 #  CONTROLLO DIRETTO: il 100% dei deal di ingresso con ora server 0-6; anche UNO fuori = filtro non come dichiarato, la passata non si legge.
 #  SMENTITE: n < 105 o > 420 (il proxy sbaglia: si legge prima il giornale, segnali e scarti per spread); PF_V <= 1,03 su n >= 150 = la notte M5 e' indistinguibile dalla REPL (S8).
