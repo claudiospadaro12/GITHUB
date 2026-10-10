@@ -18,6 +18,16 @@
 #     Rapporto < 1 = Max_Trades 4 saturato dagli 11 in piu' (lo slot si riempie prima): si scrive con il numero.
 #   - G1 sulle gemelle 774541 / 774591: come A (Trades identici, OOS identica al centesimo, IS |dProfit| <= 0,10, per-trade identico).
 #   - nessun verdetto sul PF (Modello 1, un regime); costo [DERIVATO] ~2,8 minuti (33 simboli).
+#   - REGOLE DEL TEMPO (classe 1228, ricorrenza 992; scritte PRIMA dei numeri, e si applicano PRIMA di quelle per classe):
+#       FINE GIRATA: nel giornale del tester la riga della gamba OOS (formato MISURATO in R92BAB, LOG_TESTER/0002_Tester_logs_20261001.log:
+#         "Experts\ABTG_Bulge.ex5 on GBPUSD,H1 from 2026.05.02 00:00 to 2026.06.30 00:00") qui e' "Experts\ABTG_BulgeAzzurra.ex5 on EURGBP,H1
+#         from 2026.07.01 00:00 to <data> 00:00": <data> deve essere 2026.10.10 in TUTTE le occorrenze; diversa o non letta -> NON MISURATO
+#         (rc 3). E' la finestra CHIESTA al tester [che MT5 la accorci se mancano i dati e' NON VERIFICATO]: la presenza dei dati la dice la coda.
+#       CODA A ZERO: cz = giorni feriali FINALI della gamba OOS di D0 senza chiusure vere (end of test escluse); lambdaV = (posizioni - end of
+#         test) / (73 - cz). cz >= 5 e meno di 4 slot occupati a fine gamba e exp(-lambdaV x cz) < 1% -> NON MISURATO (rc 3): tester che smette
+#         di vedere (storico M1 che finisce) e regola che tace danno lo stesso zero, e il venerdi' 09/10 sta nella coda. Con 4 slot occupati
+#         a fine gamba la coda puo' essere SATURAZIONE di Max_Trades e la regola non scatta. Soglie 5 giorni e 1% DICHIARATE, NON misurate.
+#         Senza nessuna chiusura vera decide la riga "tutti i 33 a zero" qui sotto (stesso rc 3, motivo giusto).
 #   - REGOLA DELLA CECITA' PER CLASSE, IN TUTTE E DUE LE DIREZIONI (classi 1225 emendata e 1226, scritta PRIMA dei numeri). Gli 11 non-FX
 #     sono elencati per NOME: XAUUSD, 100GBP, 200AUD, 225JPY, D30EUR, E35EUR, E50EUR, F40EUR, NASUSD, SPXUSD, U30USD (mai "quelli che non
 #     sono nei 22"). Nella gamba OOS di D0: z11 = gli 11 a ZERO, z22 = i 22 cross a ZERO, nella STESSA cella.
@@ -27,17 +37,22 @@
 #                                                      dei cross da luglio NON e' provato su questo PC).
 #       z11 >= 4 e z11 >= 11 x z22 / 22 + 4        -> NON MISURATO (rc 3): cecita' per CLASSE dei non-FX (l'oro si', gli indici no...).
 #       z22 >= 8 e z22 >= 22 x z11 / 11 + 8        -> NON MISURATO (rc 3): CROSS ciechi per CLASSE (classe 1226).
+#       z33 >= 12 e Pos/visti >= 3 (gamba OOS)      -> NON MISURATO (rc 3): cecita GLOBALE (classe 1229): la regola per classe e un RAPPORTO e
+#                                                      non vede una cecita proporzionale; sotto 22 visti il fattore 33/visti supera 1,5; con
+#                                                      quella media zeri veri su un terzo dei simboli non sono plausibili. Soglie DICHIARATE,
+#                                                      NON misurate.
 #         PERCHE' le due soglie: il segnale e' a scala libera (bande di Bollinger e rapporto con l'ATR), quindi ci si aspetta un tasso PER
 #         SIMBOLO paragonabile fra cross e non-FX: i simboli a zero di una classe devono stare in proporzione a quelli dell'altra. I margini
 #         +4 (su 11) e +8 (su 22) sono la STESSA frazione 4/11: MARGINE DI CAUTELA DICHIARATO, NON derivato da una misura.
 #       sotto le soglie, almeno un simbolo a zero  -> rc 0 con LIMITE BASSO: lambda fra la misurata e misurata x 33 / visti; P(0) E CATEGORIA
-#                                                      dati ai DUE estremi. Il P(0) misurato e' un LIMITE ALTO: con quel numero si puo' dire
+#                                                      dati ai DUE estremi, e cosi' la banda attesa e il rapporto D/A. Il P(0) misurato e' un LIMITE ALTO: con quel numero si puo' dire
 #                                                      "anomalo", MAI "normale"; e con un LIMITE BASSO le descrizioni "e' la norma" NON si leggono.
 #       nessun simbolo a zero                       -> lettura pulita.
 #     Prossimo passo dei NON MISURATO: un job con i soli simboli a zero + Use_Purple=1 (controllo positivo).
 #     CONTRO-ESEMPI che la regola ferma: solo deal sui 22 cross (z11 = 11) -> NON MISURATO; 22 cross + un solo non-FX visto (z11 = 10,
-#     z22 = 0, soglia 4) -> NON MISURATO; solo deal sugli 11 (z22 = 22) -> NON MISURATO. Prima di queste regole il secondo e il terzo
-#     uscivano "LEGGIBILE" con lambda bassa e P(0) alto, cioe' nel verso RASSICURANTE.
+#     z22 = 0, soglia 4) -> NON MISURATO; solo deal sugli 11 (z22 = 22) -> NON MISURATO; solo EURGBP e XAUUSD visti a 8 posizioni
+#     (z11 = 10, z22 = 21) -> NON MISURATO (globale); deal su tutti i 33 ma solo fino al 29/07 -> NON MISURATO (coda).
+#     Prima di queste regole gli ultimi quattro uscivano "LEGGIBILE" con lambda bassa e P(0) alto, cioe' nel verso RASSICURANTE.
 #  UNA VARIABILE: Symbols_List. L'asse InpMagic e' tecnico (G1), non di strategia.
 # =====================================================================
 @SIMBOLO    EURGBP
