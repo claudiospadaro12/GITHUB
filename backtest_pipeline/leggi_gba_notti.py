@@ -1489,6 +1489,8 @@ def autotest():
     # bootstrap: ricampiona ESATTAMENTE n notti (con 2 notti [negativa, positiva] la q mediana e' 0,5; con n-1 sarebbe 0 o 1)
     bn = bootstrap([{"data": datetime.date(2026, 1, 1), "net": -1.0, "gp": 0.0, "gl": 1.0, "nops": 1}, {"data": datetime.date(2026, 1, 2), "net": 1.0, "gp": 1.0, "gl": 0.0, "nops": 1}], 1000, 5)
     ck("bootstrap: ricampiona esattamente n notti (2 notti [-,+]: q mediana 0,5)", abs(bn["q_mediana"] - 0.5) < 1e-9, str(bn))
+    b4 = bootstrap([{"data": datetime.date(2026, 1, 1 + i), "net": -1.0, "gp": 0.0, "gl": 1.0, "nops": 1} for i in range(4)], 200, 5)
+    ck("bootstrap: 4 notti tutte negative -> q = 1,0 in OGNI ricampionamento (intervallo [1 ; 1]); con meno di n notti ricampionate sarebbe 0,75", b4["q"] == (1.0, 1.0), str(b4))
     # gemella 775850 DICHIARATA nel file prova: controllata (G1) ma NON sommata
     pg = os.path.join(tmpd, "prova_con_gemella.txt")
     tp_ = open(p1, "rb").read().decode("latin-1")
@@ -1497,6 +1499,14 @@ def autotest():
     zGem = _zip_notte(leggi_prova(pg), "M1", {"T1": ops1["T1"]}, magic="775850")
     rc, tgm = _esegui_catturando([zA, zGem, "--senza-ancora", "--bootstrap", "50", "--prova-m1", pg, "--prova-m5", p5])
     ck("gemella 775850 dichiarata: G1 VERDE, rc 0, e il totale resta 24 operazioni (la gemella NON si somma)", rc == 0 and "VERDE" in tgm and re.search(r"TOT\s+n op\s+24 ", tgm) is not None, "rc=%s" % rc)
+    ops_g = {"T1": list(ops1["T1"])}
+    t_, l_, p_, a_, s_, d_ = ops_g["T1"][3]
+    ops_g["T1"][3] = (t_, l_, p_ + 700.0, a_, s_, d_)
+    zGem2 = _zip_notte(leggi_prova(pg), "M1", ops_g, magic="775850")
+    rc, tgm2 = _esegui_catturando([zA, zGem2, "--senza-ancora", "--bootstrap", "50", "--prova-m1", pg, "--prova-m5", p5])
+    riga_t1 = lambda t: re.search(r"\n   T1  n op .*", t).group(0)
+    ck("gemella DIVERSA dalla principale (G1 ROSSO): i numeri restano quelli della principale 775800 (riga T1 identica al lotto senza gemella), il G1 rosso e' stampato",
+       "ROSSO" in tgm2 and riga_t1(tgm2) == riga_t1(tgm), riga_t1(tgm2) + " | " + riga_t1(tgm))
     # CONCENTRAZIONE PER NOTTE: il controesempio ESATTO del cancello (n=210, PF_V 1,40, 3 notti x 3 operazioni = +6.000 su netto +4.600)
     def ops_notti(date0, liste, passo=1):
         out = []
