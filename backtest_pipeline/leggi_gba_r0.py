@@ -725,7 +725,7 @@ def lettura_regimi(passate, cella=None, comm_ip=COMM_EUR_LOTTO_GIRO, Ps=None, re
     elif not misurati:
         verdetto = "NON MISURATO: nessun regime con almeno %d operazioni e durata >= %s (regola '%s')" % (N_REGIME, durata_txt, durata)
     elif not any(r in ("LATERALE", "RIBASSO") for r in misurati):
-        verdetto = "NON BASTA: un PF buono solo nel toro non basta (regimi misurati: %s; NON misurati: %s)" % (", ".join(misurati), ", ".join(non_misurati) or "nessuno")
+        verdetto = "NON BASTA: nessun regime LATERALE o RIBASSO misurato: non basta (regimi misurati: %s; NON misurati: %s)" % (", ".join(misurati), ", ".join(non_misurati) or "nessuno")
     else:
         regge = "regge nei regimi MISURATI (%s); NON misurati: %s" % (", ".join(misurati), ", ".join(non_misurati) or "nessuno")
         if dd_promesso is None:
@@ -753,7 +753,7 @@ def lettura_regimi(passate, cella=None, comm_ip=COMM_EUR_LOTTO_GIRO, Ps=None, re
             v_n = lettura_regimi(passate, cella, comm_ip, Ps, regimi, durata, "non_misurato", dd_promesso)[1]
             if _esito(v_g) != _esito(v_n):
                 dipende.append("DIPENDE DAL LATO SOTTO 150 (decisione di Claudio aperta): giudica -> %s, non_misurato -> %s" % (v_g, v_n))
-        if not durata_esplicita and not lato_esplicito and not dipende:
+        if not durata_esplicita and not lato_esplicito:
             # (3o FAIL, classe 1256) le due decisioni aperte una alla volta non bastano: si calcola anche la loro COMBINAZIONE (sempre un livello solo)
             griglia = [(d_, l_, lettura_regimi(passate, cella, comm_ip, Ps, regimi, d_, l_, dd_promesso)[1]) for d_ in ("1anno", "365giorni") for l_ in LATI_SOTTO_150]
             if len(set(_esito(v_) for _d, _l, v_ in griglia)) > 1:
@@ -833,6 +833,12 @@ def tabella_regimi(passate, W):
             W("   DURATA '%s'%s -> %s" % (dur, " (in uso)" if dur == DURATA_REGIME else "", lettura_regimi(passate, Ps=Ps, durata=dur, lato150=PESO_LATO_SOTTO_150)[1]))
         for lat in LATI_SOTTO_150:
             W("   LATO SOTTO 150 '%s'%s -> %s" % (lat, " (in uso)" if lat == PESO_LATO_SOTTO_150 else "", lettura_regimi(passate, Ps=Ps, durata=DURATA_REGIME, lato150=lat)[1]))
+        if not DURATA_SCELTA and not LATO_SCELTO:
+            # (4o FAIL, classe 1256) la lettura incrociata che le righe marginali non mostrano (es. 365giorni + non_misurato)
+            for dur in ("1anno", "365giorni"):
+                for lat in LATI_SOTTO_150:
+                    if dur != DURATA_REGIME and lat != PESO_LATO_SOTTO_150:
+                        W("   COMBINAZIONE durata '%s' + lato '%s' -> %s" % (dur, lat, lettura_regimi(passate, Ps=Ps, durata=dur, lato150=lat)[1]))
         for er_alt in (0.10, 0.20):
             reg_alt = regimi_da_prezzo(er=er_alt)
             presenti = sorted(set(P["tranche"] for P in Ps if regime_di(P) is not None))
@@ -1517,6 +1523,21 @@ def autotest():
     _r, vgr2 = lettura_regimi(pg, "REPL", durata="1anno")
     ck("GRIGLIA: con la durata scelta (1anno) le due letture del lato concordano (NON REGGE) -> nessun DIPENDE", vgr2.startswith("NON REGGE") and "DIPENDE" not in vgr2, vgr2[:80])
     os.remove(zg)
+    # (4o FAIL) B2: un marginale scatta (DIPENDE DAL LATO) e la quarta lettura 365giorni+non_misurato (NON BASTA) deve comparire lo stesso
+    zg = _zip_griglia("B2")
+    pg = carica([zg])
+    cat = {(d_, l_): _esito(lettura_regimi(pg, "REPL", durata=d_, lato150=l_)[1]) for d_ in ("1anno", "365giorni") for l_ in LATI_SOTTO_150}
+    ck("B2: 1anno+giudica NON REGGE, 1anno+non_misurato NON DICHIARABILE+regge, 365giorni+giudica NON REGGE, 365giorni+non_misurato NON BASTA",
+       cat == {("1anno", "giudica"): "NON REGGE", ("1anno", "non_misurato"): "NON DICHIARABILE+regge", ("365giorni", "giudica"): "NON REGGE", ("365giorni", "non_misurato"): "NON BASTA"}, str(cat))
+    _r, vb2 = lettura_regimi(pg, "REPL")
+    ck("CONTRO-ESEMPIO B2: il verdetto tiene il marginale (DIPENDE DAL LATO) E la combinazione, con '365giorni+non_misurato -> NON BASTA'",
+       vb2.startswith("DIPENDE DAL LATO SOTTO 150") and " || DIPENDE DALLA COMBINAZIONE DURATA x LATO SOTTO 150" in vb2 and "365giorni+non_misurato -> NON BASTA" in vb2, vb2[:120])
+    with contextlib.redirect_stdout(io.StringIO()):
+        ob2, _t = stampa(pg, None)
+    ck("B2, sezione (7): la riga COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON BASTA (la lettura che le righe marginali non mostrano)",
+       sum(1 for x in ob2 if x.startswith("   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON BASTA")) == 1)
+    ck("NON BASTA col solo VOLATILE misurato: il testo non parla di toro", any(x.startswith("   COMBINAZIONE") and "nessun regime LATERALE o RIBASSO misurato" in x and "toro" not in x for x in ob2))
+    os.remove(zg)
     # (lato vuoto) cella solo-long (InpAllowShort=false): lo short ha n=0, NON e' un PF <= 1
     zt = _zip_r2reg("solo_long")
     rgl, vgl = lettura_regimi(carica([zt]), "REPL", durata="2trimestri")
@@ -1606,7 +1627,7 @@ def _togli_dd(zpath, tranche):
     return f.name
 
 
-def _zip_griglia():
+def _zip_griglia(tipo="griglia"):
     """(3o FAIL, classe 1256) contro-esempio del cancello: T9-T4 come R2REG, T3-T1 come R1A. T8: 60 long a -100; T6, T3, T1: 40 long alternati +110/-100;
     T9, T7, T5, T4, T2: 40 long a +100; T2 anche 30 short a -50. Le 4 letture (durata x lato) danno NON REGGE, NON REGGE, NON REGGE, NON BASTA."""
     import tempfile
@@ -1618,6 +1639,11 @@ def _zip_griglia():
     for tr in ("T9", "T7", "T5", "T4", "T2"):
         spec[tr] = [("buy", 100.0)] * 40
     spec["T2"] = spec["T2"] + [("sell", -50.0)] * 30
+    if tipo == "B2":
+        # (4o FAIL) contro-esempio B2: 40 long alternati +150/-100 in ogni tranche; T4 e T2 anche 30 short a -50
+        spec = {tr: [("buy", 150.0 if i % 2 == 0 else -100.0) for i in range(40)] for tr in fin}
+        for tr in ("T4", "T2"):
+            spec[tr] = spec[tr] + [("sell", -50.0)] * 30
     f = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
     f.close()
     z = zipfile.ZipFile(f.name, "w")
