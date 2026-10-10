@@ -60,9 +60,11 @@
 #  riscrive i per-trade; lo script se ne accorge (file NON freschi = NON
 #  MISURATO). Per rifarla servono magic nuovi = nuovo pin.
 #
-#  CODICI D'USCITA: 0 = FREQUENZA LEGGIBILE (cella base con precondizioni
-#  vere; la categoria e' nel riepilogo); 3 = NON MISURATO (lo zip esce lo
-#  stesso); 1 = fermo PRIMA del tester.
+#  CODICI D'USCITA: 0 = FREQUENZA LEGGIBILE (cella del campo D con
+#  precondizioni vere e niente cecita per classe sugli 11 non-FX; la
+#  categoria e' nel riepilogo, e se porta LIMITE BASSO il P(0) e' un limite
+#  ALTO); 3 = NON MISURATO (anche per cecita degli 11 non-FX; lo zip esce
+#  lo stesso); 1 = fermo PRIMA del tester.
 #
 #  NIENTE EMOJI QUI DENTRO (regola del 17/08): Windows PowerShell 5.1 legge
 #  i .ps1 come ANSI. ASCII puro.
@@ -121,7 +123,7 @@ function Feriali($da, $a){
 $GIORNI_IS  = Feriali $IS_DA $IS_A
 $GIORNI_OOS = Feriali $OOS_DA $OOS_A
 $JOBS = @(
-  [pscustomobject]@{ L='AZF_D'; P='AZZURRA_FREQ_2026-10-10_D_campo33.txt';            SL=$SL33; Lo=0.6; Hi=10.0; HP='C4FA6A45A2DB77722AD344517D651FA749F82FEDDC589F7DAEAAB2FD7314380F';
+  [pscustomobject]@{ L='AZF_D'; P='AZZURRA_FREQ_2026-10-10_D_campo33.txt';            SL=$SL33; Lo=0.6; Hi=10.0; HP='6FDF33ABF7BDD7373F72C238EBEF0F98B8AF4E27C5E42A34CFA6D616DE41194F';
     Righe=@('InpMagic=774541||774541||50||774591||Y', 'Azure_FirstTouchOnly=0', 'Azure_MaxRetraceRangeATR=1.5');
     Celle=@([pscustomobject]@{ K='D0'; M='774541'; V='OGNI'; Primo='0'; Rng=1.5 }, [pscustomobject]@{ K='D1'; M='774591'; V='OGNI'; Primo='0'; Rng=1.5 }) },
   [pscustomobject]@{ L='AZF_A'; P='AZZURRA_FREQ_2026-10-10_A_base.txt';               SL=$SL22; Lo=0.4; Hi=7.0; HP='D12A3D7D56AE6935B0094BA480BE78A88B5CA6EF150B8466F06E52BADB8CF767';
@@ -671,9 +673,14 @@ if($statoD -eq 'ROTTO'){
   if($tIS -eq 0 -and $tOOS -eq 0){
     $esito = 'NON MISURATO: cella del campo D con Trades = 0 in IS e in OOS. EA cieco nel tester e regola che non scatta danno lo STESSO zero: prossimo passo il controllo positivo Use_Purple=1 (file madre, attesa Z)'
   } else {
-    # classe 1225: gli 11 non-FX a zero nella gamba OOS di D. 11 su 11 = NON MISURATO; 1-10 = LIMITE BASSO in coda all esito
+    # classe 1225 (emendata): gli 11 non-FX a zero nella gamba OOS di D si PESANO contro i 22 cross a zero della STESSA cella.
+    # NON MISURATO se z11 = 11, oppure z11 >= 4 e z11 >= 11 x z22 / 22 + 4 (cecita per CLASSE di strumento: il tester puo vedere l oro e
+    # non gli indici); sotto soglia e z11 > 0 = leggibile con LIMITE BASSO e i due estremi della lambda (il P(0) e allora un LIMITE ALTO).
     $zD = @(('' + $AN['D0'].SimbZero).Split(','))
     $z11 = @($NUOVI11 | Where-Object { $zD -contains $_ })
+    $z22 = @(@($SL22.Split(',')) | Where-Object { $zD -contains $_ })
+    $soglia11 = 11.0 * $z22.Count / 22.0 + 4.0
+    $ciecoClasse = ($z11.Count -ge 4) -and ($z11.Count -ge $soglia11)
     $ld = Lambda 'D0'
     $lamIS = $ld.IS; $lamO = $ld.OOS
     $cat = ''
@@ -693,13 +700,19 @@ if($statoD -eq 'ROTTO'){
     W ('  giorni a zero osservati ' + (Pc $zOss) + ' contro Poisson ' + (Pc ([Math]::Exp(-$lamO))) + ': ' + $(if($zOss -gt [Math]::Exp(-$lamO) + 0.10){'gli zeri SI RAGGRUPPANO (oltre +10 punti): per il campo vale la frazione OSSERVATA e la serie piu lunga, non la formula'}else{'entro +10 punti dalla Poisson'}))
     W ('  CATEGORIA: ' + $cat)
     W ('  venerdi 09/10 nel tester (indizio, non prova: stato diverso dal campo): ' + $AN['D0'].VenSera + ' chiusure VERE dalle 15:39 server (end of test escluse), ' + $AN['D0'].FineGamba + ' posizioni portate a fine gamba (end of test, magic diverso ignorato: MagicKo ' + $AN['D0'].MagicKo + ')')
-    W ('  degli 11 simboli fuori dai cross (per nome): a ZERO ' + $z11.Count + $(if($z11.Count -gt 0){ ' (' + ($z11 -join ',') + ')' }else{''}))
+    W ('  degli 11 simboli fuori dai cross (per nome): a ZERO ' + $z11.Count + $(if($z11.Count -gt 0){ ' (' + ($z11 -join ',') + ')' }else{''}) + ' | dei 22 cross a ZERO nella stessa cella ' + $z22.Count + ' | soglia della cecita per classe: z11 >= 4 e z11 >= ' + (F2 $soglia11))
     if($z11.Count -ge $NUOVI11.Count){
       $esito = 'NON MISURATO: gli 11 simboli fuori dai cross a ZERO nella gamba OOS di D; tester cieco e regola che non scatta danno lo stesso zero; la lambda sarebbe quella dei 22 con l etichetta dei 33 (classe 1225). Prossimo passo: job con i soli 11 + Use_Purple=1'
+    } elseif($ciecoClasse){
+      $esito = ('NON MISURATO: ' + $z11.Count + ' degli 11 simboli fuori dai cross a ZERO (' + ($z11 -join ',') + ') contro ' + $z22.Count + ' dei 22 cross a zero nella stessa cella (soglia ' + (F2 $soglia11) + ', file D): cecita per CLASSE di strumento (classe 1225 emendata); la lambda sarebbe quella di una parte dei 33 con l etichetta dei 33. Prossimo passo: job con i soli 11 + Use_Purple=1')
     } else {
       $codice = 0
       $esito = ('FREQUENZA DEL CAMPO LEGGIBILE (cella D, 33 simboli) -- lambda OOS ' + (F3 $lamO) + '/giorno, simboli a zero nella gamba OOS ' + $AN['D0'].NSimbZero + '/' + $AN['D0'].NSimb + ', P(0) del venerdi 7/24 ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ', ' + $cat)
-      if($z11.Count -gt 0){ $esito = $esito + (' -- LIMITE BASSO: ' + $z11.Count + ' degli 11 simboli non-FX a zero (' + ($z11 -join ',') + '): se il tester non li vede la lambda e SOTTOSTIMATA (file D, ipotesi A)') }
+      if($z11.Count -gt 0){
+        $nVisti = $AN['D0'].NSimb - $AN['D0'].NSimbZero
+        $lamHi = $(if($nVisti -gt 0){ $lamO * ($nVisti + $z11.Count) / [double]$nVisti } else { [double]::NaN })
+        $esito = $esito + (' -- LIMITE BASSO: ' + $z11.Count + ' degli 11 simboli non-FX a zero (' + ($z11 -join ',') + '): lambda fra ' + (F3 $lamO) + ' (misurata) e ' + (F3 $lamHi) + ' (i non-FX a zero portati alla media dei ' + $nVisti + ' simboli visti); P(0) del venerdi 7/24 fra ' + (Pc ([Math]::Exp(-$lamHi * $ESPOSIZIONE_CAMPO))) + ' e ' + (Pc ([Math]::Exp(-$lamO * $ESPOSIZIONE_CAMPO))) + ': il P(0) misurato e un LIMITE ALTO, con questo numero si puo dire anomalo, NON normale (file D, ipotesi A)')
+      }
     }
   }
 }
