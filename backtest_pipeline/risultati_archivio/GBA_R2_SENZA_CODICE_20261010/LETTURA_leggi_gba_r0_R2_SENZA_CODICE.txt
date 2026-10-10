@@ -1,0 +1,677 @@
+====================================================================================================
+ GBA R2 -- lettore (leggi_gba_r0.py), lotti di file prova DICHIARATIVI: R2SOLOBUY, R2SOLOSELL, R2TATR, R2TTREND (file GBA_R2_ATRTF_2026-10-10.txt, GBA_R2_SOLOBUY_2026-10-10.txt, GBA_R2_SOLOSELL_2026-10-10.txt, GBA_R2_TRENDTF_2026-10-10.txt). Soglie S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt, firma 10/10 per regime.
+ Le attese per cella stanno nel file prova (scritte PRIMA dei numeri): il lettore NON le conosce e non le stampa. NON giudica oltre le soglie, NON promuove, NON scrive 'morto'.
+ Caricati anche lotti storici (R1A): ancore e gemelle si leggono insieme, raggruppate per IDENTITA' della cella (stessi input, dall'ini).
+====================================================================================================
+
+(1) CANCELLI DI AFFIDABILITA' (G0 per passata)
+  R1A_01_REPL_T1_m775800             modello 4  stato driver OK                     G0 OK
+  R1A_02_REPL_T2_m775800             modello 4  stato driver OK                     G0 OK
+  R1A_03_REPL_T3_m775800             modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 102; errore d'ordine (ingresso non eseguito) 8; errore spostamento SL (trailing/BE non applicato) 69
+  R2TTREND_01_REPL_T1_m775850        modello 4  stato driver OK                     G0 OK
+  R2TTREND_02_E15_T1_m775800         modello 4  stato driver OK                     G0 OK
+  R2TTREND_03_E15_T2_m775800         modello 4  stato driver OK                     G0 OK
+  R2TTREND_04_E15_T3_m775800         modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 88; errore d'ordine (ingresso non eseguito) 7; errore spostamento SL (trailing/BE non applicato) 71
+  R2TTREND_05_E5_T1_m775800          modello 4  stato driver OK                     G0 OK
+  R2TTREND_06_E5_T2_m775800          modello 4  stato driver OK                     G0 OK
+  R2TTREND_07_E5_T3_m775800          modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 67; errore d'ordine (ingresso non eseguito) 8; errore spostamento SL (trailing/BE non applicato) 54
+  R2TTREND_08_EH1_T1_m775800         modello 4  stato driver OK                     G0 OK
+  R2TTREND_09_EH1_T2_m775800         modello 4  stato driver OK                     G0 OK
+  R2TTREND_10_EH1_T3_m775800         modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 102; errore d'ordine (ingresso non eseguito) 2; errore spostamento SL (trailing/BE non applicato) 69
+  R2TTREND_11_EH4_T1_m775800         modello 4  stato driver OK                     G0 OK
+  R2TTREND_12_EH4_T2_m775800         modello 4  stato driver OK                     G0 OK
+  R2TTREND_13_EH4_T3_m775800         modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 102; errore d'ordine (ingresso non eseguito) 2; errore spostamento SL (trailing/BE non applicato) 69
+  R2TTREND_14_ED1_T1_m775800         modello 4  stato driver OK                     G0 OK
+  R2TTREND_15_ED1_T2_m775800         modello 4  stato driver OK                     G0 OK
+  R2TTREND_16_ED1_T3_m775800         modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 48; errore d'ordine (ingresso non eseguito) 2; errore spostamento SL (trailing/BE non applicato) 48
+  R2TATR_01_A5_T1_m775800            modello 4  stato driver OK                     G0 OK
+  R2TATR_02_A5_T2_m775800            modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore spostamento SL (trailing/BE non applicato) 2
+  R2TATR_03_A5_T3_m775800            modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 643; errore d'ordine (ingresso non eseguito) 24; errore spostamento SL (trailing/BE non applicato) 228
+  R2TATR_04_A15_T1_m775800           modello 4  stato driver OK                     G0 OK
+  R2TATR_05_A15_T2_m775800           modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 3; errore d'ordine (ingresso non eseguito) 1; errore spostamento SL (trailing/BE non applicato) 12
+  R2TATR_06_A15_T3_m775800           modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 755; errore d'ordine (ingresso non eseguito) 49; errore spostamento SL (trailing/BE non applicato) 196
+  R2SOLOBUY_01_NOSHORT_T1_m775800    modello 4  stato driver OK                     G0 OK
+  R2SOLOBUY_02_NOSHORT_T2_m775800    modello 4  stato driver OK                     G0 OK
+  R2SOLOBUY_03_NOSHORT_T3_m775800    modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 48; errore d'ordine (ingresso non eseguito) 1; errore spostamento SL (trailing/BE non applicato) 48
+  R2SOLOSELL_01_NOLONG_T1_m775800    modello 4  stato driver OK                     G0 OK
+  R2SOLOSELL_02_NOLONG_T2_m775800    modello 4  stato driver OK                     G0 OK
+  R2SOLOSELL_03_NOLONG_T3_m775800    modello 4  stato driver OK                     G0 OK
+       ! DA GUARDARE (giornale dell'EA, minimo: dedup per secondo simulato): errore chiusura a tempo 54; errore d'ordine (ingresso non eseguito) 7; errore spostamento SL (trailing/BE non applicato) 21
+
+  G1: nessuna coppia di gemelle (lotto S0 non presente)
+  G1 gemelle (cella REPL, tranche T1, Modello 4, magic 775800 [GBA_R0_R1A.zip] e 775850 [GBA_R0_R2TTREND.zip]): operazioni 128.0/128.0, profitto -6577.48/-6577.48, PF 0.83/0.83, DD equity 12511.35/12511.35; deal confrontati 256 (ora, tipo, direzione, volume, prezzo, commissioni, swap, profitto; id escluso) -> VERDE (identiche)
+  G2: serve S0 e R1A OK su REPL/T1 per il confronto Modello 1 / Modello 4
+
+----------------------------------------------------------------------------------------------------
+ CELLA REPL (InpSpreadMaxATR 0.05)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=128  1.94/giorno  attesa 60-260: DENTRO  segnali(EA) 6973, ingressi tentati 128, scartati spread 6614, a posizione aperta 231
+   T2   n=248  3.82/giorno  attesa 125-500: DENTRO  segnali(EA) 6238, ingressi tentati 248, scartati spread 5583, a posizione aperta 407
+   T3   n=557  8.70/giorno  attesa 350-1400: DENTRO  segnali(EA) 6332, ingressi tentati 565, scartati spread 4770, a posizione aperta 997
+   tre tranche: n=933 (attesa 535-2100), dentro 300-3.500
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=933 mediana 58.8  p10 51.3  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=933 mediana 49.4  p10 42.5  quota <40x: 2%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=933 mediana 43.0  p10 35.6  quota <40x: 34%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -3202.98 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.855   (7,80 a giro: 0.855;  senza commissione ipotetica: 0.855)   netto PF_V -53819 EUR   win rate 26%
+      T1  n=128   PF_V 0.83   PF del report 0.83   DD equity 12511.35 EUR (1.25%)   DD bilancio 10940.5 EUR (1.09%)
+      T2  n=248   PF_V 0.77   PF del report 0.77   DD equity 28862.6 EUR (2.87%)   DD bilancio 28069.39 EUR (2.79%)
+      T3  n=557   PF_V 0.89   PF del report 0.89   DD equity 53392.31 EUR (5.29%)   DD bilancio 50256.84 EUR (5.0%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=443 PF_V 0.89 netto -17281
+   lato SELL n=490 PF_V 0.83 netto -36538
+   perdita a SL scritta dall'EA: mediana 1112  p90 2053  max 5526 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 7.4  media 10.0  p90 19.2
+(5) concentrazione (S5)
+   migliore operazione = 3% del profitto positivo; netto senza le 5 migliori = -87199 -> FRAGILE
+   ESITO S4 per la cella REPL: PF_V 0.85 < 1,0: la dichiarazione di Emiliano NON regge sul nostro feed (un regime; NON 'morto': mancano le caselle 3, 4, 5 del certificato)
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=142   PF_V 0.94  r medio 0.025  tranche con lo stesso segno 2/3  -> non distinguibile da zero (p=0.726)
+   europa          07-12  n=132   PF_V 0.52  r medio -0.199  tranche con lo stesso segno 2/3  -> sopra la soglia corretta, segno concorde in 2 tranche
+   pausa           12-14  n=89    PF_V 2.03  r medio 0.208  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   USA apertura    14-17  n=381   PF_V 0.70  r medio -0.111  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.009)
+   USA pomeriggio  17-22  n=179   PF_V 0.93  r medio -0.022  tranche con lo stesso segno 2/3  -> non distinguibile da zero (p=0.744)
+   rollover        22-24  n=10    PF_V 0.80  r medio -0.093  tranche con lo stesso segno 1/2  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 17908, di cui scartati per spread 16967 = 95%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 2.14  spread 0.26  n=6496
+      europa          ATR 2.05  spread 0.21  n=3982
+      pausa           ATR 2.22  spread 0.21  n=1975
+      USA apertura    ATR 3.47  spread 0.21  n=2550
+      USA pomeriggio  ATR 1.89  spread 0.21  n=3900
+      rollover        ATR 1.39  spread 0.25  n=640
+
+----------------------------------------------------------------------------------------------------
+ CELLA NOSHORT [lotto R2SOLOBUY] (InpAllowShort false)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=61  0.94/giorno  segnali(EA) 6973, ingressi tentati 61, scartati spread 3260, a posizione aperta 141
+   T2   n=114  1.78/giorno  segnali(EA) 6238, ingressi tentati 114, scartati spread 2717, a posizione aperta 210
+   T3   n=268  4.25/giorno  segnali(EA) 6332, ingressi tentati 269, scartati spread 2821, a posizione aperta 574
+   tranche lette: n=443
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=443 mediana 59.2  p10 51.3  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=443 mediana 49.5  p10 42.7  quota <40x: 2%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=443 mediana 42.7  p10 35.6  quota <40x: 35%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -1518.35 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.887   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.876;  senza commissione ipotetica: 0.887)   netto PF_V -17281 EUR   win rate 28%
+      T1  n=61    PF_V 1.58   PF del report 1.58   DD equity 3635.25 EUR (0.36%)   DD bilancio 2701.67 EUR (0.27%)
+      T2  n=114   PF_V 0.79   PF del report 0.8   DD equity 13000.42 EUR (1.29%)   DD bilancio 11712.14 EUR (1.17%)
+      T3  n=268   PF_V 0.84   PF del report 0.84   DD equity 40678.78 EUR (4.01%)   DD bilancio 38496.01 EUR (3.8%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=443 PF_V 0.89 netto -17281
+   perdita a SL scritta dall'EA: mediana 1082  p90 1918  max 5526 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 8.7  media 11.6  p90 21.9
+(5) concentrazione (S5)
+   migliore operazione = 6% del profitto positivo; netto senza le 5 migliori = -39196 -> FRAGILE
+   S4 in forma NEUTRA per la cella NOSHORT (file prova dichiarativo: NESSUN esito qui): PF_V 0.89 (soglie 1,0 / 1,3 / 1,5), n=443 (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: 0 su 3 (S4: almeno 2), migliore operazione = n.d. del netto (S4: < 25%), PF con 7,80 EUR/lotto a giro = 0.88 (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova.
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=67    PF_V 1.18  r medio 0.125  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   europa          07-12  n=64    PF_V 0.27  r medio -0.298  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   pausa           12-14  n=50    PF_V 1.88  r medio 0.148  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   USA apertura    14-17  n=175   PF_V 0.81  r medio -0.053  tranche con lo stesso segno 2/3  -> non distinguibile da zero (p=0.388)
+   USA pomeriggio  17-22  n=81    PF_V 0.96  r medio 0.007  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   rollover        22-24  n=6     PF_V 0.87  r medio -0.021  tranche con lo stesso segno 1/2  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 9242, di cui scartati per spread 8798 = 95%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 2.14  spread 0.26  n=6496
+      europa          ATR 2.05  spread 0.21  n=3982
+      pausa           ATR 2.22  spread 0.21  n=1975
+      USA apertura    ATR 3.47  spread 0.21  n=2550
+      USA pomeriggio  ATR 1.89  spread 0.21  n=3900
+      rollover        ATR 1.39  spread 0.25  n=640
+
+----------------------------------------------------------------------------------------------------
+ CELLA NOLONG [lotto R2SOLOSELL] (InpAllowLong false)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=67  1.03/giorno  segnali(EA) 6973, ingressi tentati 67, scartati spread 3354, a posizione aperta 90
+   T2   n=134  2.09/giorno  segnali(EA) 6238, ingressi tentati 134, scartati spread 2866, a posizione aperta 197
+   T3   n=289  4.59/giorno  segnali(EA) 6332, ingressi tentati 296, scartati spread 1949, a posizione aperta 423
+   tranche lette: n=490
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=490 mediana 58.6  p10 51.2  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=490 mediana 49.3  p10 42.3  quota <40x: 2%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=490 mediana 43.1  p10 35.5  quota <40x: 33%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -1684.63 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.831   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.823;  senza commissione ipotetica: 0.831)   netto PF_V -36538 EUR   win rate 25%
+      T1  n=67    PF_V 0.47   PF del report 0.47   DD equity 14580.14 EUR (1.46%)   DD bilancio 13918.49 EUR (1.39%)
+      T2  n=134   PF_V 0.75   PF del report 0.75   DD equity 20335.45 EUR (2.02%)   DD bilancio 17918.51 EUR (1.79%)
+      T3  n=289   PF_V 0.93   PF del report 0.93   DD equity 34980.37 EUR (3.46%)   DD bilancio 31787.0 EUR (3.15%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato SELL n=490 PF_V 0.83 netto -36538
+   perdita a SL scritta dall'EA: mediana 1139  p90 2203  max 4993 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 5.9  media 8.5  p90 17.4
+(5) concentrazione (S5)
+   migliore operazione = 4% del profitto positivo; netto senza le 5 migliori = -66104 -> FRAGILE
+   S4 in forma NEUTRA per la cella NOLONG (file prova dichiarativo: NESSUN esito qui): PF_V 0.83 (soglie 1,0 / 1,3 / 1,5), n=490 (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: 0 su 3 (S4: almeno 2), migliore operazione = n.d. del netto (S4: < 25%), PF con 7,80 EUR/lotto a giro = 0.82 (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova.
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=75    PF_V 0.81  r medio -0.064  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   europa          07-12  n=68    PF_V 0.83  r medio -0.105  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   pausa           12-14  n=39    PF_V 2.21  r medio 0.285  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   USA apertura    14-17  n=206   PF_V 0.64  r medio -0.160  tranche con lo stesso segno 3/3  -> sopra la soglia corretta, segno concorde in 3 tranche
+   USA pomeriggio  17-22  n=98    PF_V 0.90  r medio -0.045  tranche con lo stesso segno 1/3  -> SOSPESA (n<100)
+   rollover        22-24  n=4     PF_V 0.73  r medio -0.202  tranche con lo stesso segno 1/2  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 8666, di cui scartati per spread 8169 = 94%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 2.14  spread 0.26  n=6496
+      europa          ATR 2.05  spread 0.21  n=3982
+      pausa           ATR 2.22  spread 0.21  n=1975
+      USA apertura    ATR 3.47  spread 0.21  n=2550
+      USA pomeriggio  ATR 1.89  spread 0.21  n=3900
+      rollover        ATR 1.39  spread 0.25  n=640
+
+----------------------------------------------------------------------------------------------------
+ CELLA A15 [lotto R2TATR] (InpAtrTF 15)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=1348  20.74/giorno  segnali(EA) 6973, ingressi tentati 1348, scartati spread 274, a posizione aperta 5351
+   T2   n=1277  19.95/giorno  segnali(EA) 6238, ingressi tentati 1278, scartati spread 206, a posizione aperta 4754
+   T3   n=1288  20.44/giorno  segnali(EA) 6332, ingressi tentati 1337, scartati spread 72, a posizione aperta 4923
+   tranche lette: n=3913
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=3913 mediana 100.2  p10 62.3  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=3913 mediana 84.9  p10 53.4  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=3913 mediana 73.9  p10 46.8  quota <40x: 2%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -13476.42 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.917   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.908;  senza commissione ipotetica: 0.917)   netto PF_V -138169 EUR   win rate 42%
+      T1  n=1348  PF_V 0.89   PF del report 0.89   DD equity 67011.52 EUR (6.66%)   DD bilancio 65694.18 EUR (6.54%)
+      T2  n=1277  PF_V 0.96   PF del report 0.96   DD equity 44535.6 EUR (4.44%)   DD bilancio 42912.62 EUR (4.28%)
+      T3  n=1288  PF_V 0.91   PF del report 0.91   DD equity 95289.06 EUR (9.44%)   DD bilancio 90792.62 EUR (9.01%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=1954 PF_V 0.95 netto -43772
+   lato SELL n=1959 PF_V 0.89 netto -94398
+   perdita a SL scritta dall'EA: mediana 1935  p90 3800  max 18100 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 48.0  media 58.7  p90 48.0
+(5) concentrazione (S5)
+   migliore operazione = 1% del profitto positivo; netto senza le 5 migliori = -191445 -> FRAGILE
+   S4 in forma NEUTRA per la cella A15 (file prova dichiarativo: NESSUN esito qui): PF_V 0.92 (soglie 1,0 / 1,3 / 1,5), n=3913 (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: 0 su 3 (S4: almeno 2), migliore operazione = n.d. del netto (S4: < 25%), PF con 7,80 EUR/lotto a giro = 0.91 (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova.
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=1253  PF_V 1.06  r medio 0.006  tranche con lo stesso segno 1/3  -> non distinguibile da zero (p=0.669)
+   europa          07-12  n=861   PF_V 0.85  r medio -0.034  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.025)
+   pausa           12-14  n=381   PF_V 0.95  r medio -0.002  tranche con lo stesso segno 2/3  -> non distinguibile da zero (p=0.964)
+   USA apertura    14-17  n=536   PF_V 0.83  r medio -0.026  tranche con lo stesso segno 2/3  -> non distinguibile da zero (p=0.299)
+   USA pomeriggio  17-22  n=781   PF_V 0.88  r medio -0.011  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.558)
+   rollover        22-24  n=101   PF_V 0.59  r medio -0.080  tranche con lo stesso segno 2/3  -> non distinguibile da zero (p=0.064)
+   segnali liberi (senza posizione aperta) 4515, di cui scartati per spread 552 = 12%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 8.40  spread 0.26  n=6496
+      europa          ATR 8.24  spread 0.21  n=3982
+      pausa           ATR 7.97  spread 0.21  n=1975
+      USA apertura    ATR 11.34  spread 0.21  n=2550
+      USA pomeriggio  ATR 10.27  spread 0.21  n=3900
+      rollover        ATR 6.05  spread 0.25  n=640
+
+----------------------------------------------------------------------------------------------------
+ CELLA A5 [lotto R2TATR] (InpAtrTF 5)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=920  14.15/giorno  segnali(EA) 6973, ingressi tentati 920, scartati spread 3073, a posizione aperta 2980
+   T2   n=1045  16.33/giorno  segnali(EA) 6238, ingressi tentati 1045, scartati spread 2139, a posizione aperta 3054
+   T3   n=1238  19.65/giorno  segnali(EA) 6332, ingressi tentati 1262, scartati spread 1331, a posizione aperta 3739
+   tranche lette: n=3203
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=3203 mediana 68.2  p10 52.4  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=3203 mediana 57.3  p10 44.3  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=3203 mediana 49.7  p10 38.2  quota <40x: 19%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -11020.37 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.896   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.886;  senza commissione ipotetica: 0.896)   netto PF_V -131093 EUR   win rate 33%
+      T1  n=920   PF_V 0.85   PF del report 0.85   DD equity 52039.42 EUR (5.17%)   DD bilancio 50233.26 EUR (5.0%)
+      T2  n=1045  PF_V 0.82   PF del report 0.82   DD equity 81733.4 EUR (8.15%)   DD bilancio 81479.55 EUR (8.13%)
+      T3  n=1238  PF_V 0.97   PF del report 0.97   DD equity 65772.29 EUR (6.43%)   DD bilancio 62780.89 EUR (6.16%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=1650 PF_V 0.93 netto -42266
+   lato SELL n=1553 PF_V 0.86 netto -88828
+   perdita a SL scritta dall'EA: mediana 1300  p90 2490  max 16414 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 36.0  media 37.2  p90 48.0
+(5) concentrazione (S5)
+   migliore operazione = 1% del profitto positivo; netto senza le 5 migliori = -184370 -> FRAGILE
+   S4 in forma NEUTRA per la cella A5 (file prova dichiarativo: NESSUN esito qui): PF_V 0.90 (soglie 1,0 / 1,3 / 1,5), n=3203 (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: 0 su 3 (S4: almeno 2), migliore operazione = n.d. del netto (S4: < 25%), PF con 7,80 EUR/lotto a giro = 0.89 (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova.
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=805   PF_V 1.01  r medio 0.010  tranche con lo stesso segno 2/3  -> non distinguibile da zero (p=0.685)
+   europa          07-12  n=789   PF_V 0.74  r medio -0.085  tranche con lo stesso segno 3/3  -> sopra la soglia corretta, segno concorde in 3 tranche
+   pausa           12-14  n=335   PF_V 0.90  r medio -0.024  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.630)
+   USA apertura    14-17  n=609   PF_V 0.86  r medio -0.025  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.383)
+   USA pomeriggio  17-22  n=641   PF_V 0.93  r medio -0.029  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.413)
+   rollover        22-24  n=24    PF_V 1.54  r medio 0.112  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 9770, di cui scartati per spread 6543 = 67%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 4.68  spread 0.26  n=6496
+      europa          ATR 4.75  spread 0.21  n=3982
+      pausa           ATR 4.65  spread 0.21  n=1975
+      USA apertura    ATR 7.54  spread 0.21  n=2550
+      USA pomeriggio  ATR 4.62  spread 0.21  n=3900
+      rollover        ATR 2.97  spread 0.25  n=640
+
+----------------------------------------------------------------------------------------------------
+ CELLA E15 [lotto R2TTREND] (InpTrendTF 15)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=102  1.57/giorno  segnali(EA) 4526, ingressi tentati 102, scartati spread 4245, a posizione aperta 179
+   T2   n=189  2.95/giorno  segnali(EA) 4133, ingressi tentati 189, scartati spread 3643, a posizione aperta 301
+   T3   n=388  6.16/giorno  segnali(EA) 4395, ingressi tentati 395, scartati spread 3256, a posizione aperta 744
+   tranche lette: n=679
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=679 mediana 58.4  p10 51.2  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=679 mediana 49.1  p10 42.3  quota <40x: 2%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=679 mediana 42.6  p10 35.3  quota <40x: 35%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -2332.36 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.969   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.958;  senza commissione ipotetica: 0.969)   netto PF_V -7878 EUR   win rate 27%
+      T1  n=102   PF_V 0.81   PF del report 0.81   DD equity 10997.91 EUR (1.09%)   DD bilancio 9442.58 EUR (0.94%)
+      T2  n=189   PF_V 0.78   PF del report 0.78   DD equity 23167.6 EUR (2.31%)   DD bilancio 21226.42 EUR (2.12%)
+      T3  n=388   PF_V 1.09   PF del report 1.09   DD equity 34592.7 EUR (3.37%)   DD bilancio 31399.33 EUR (3.06%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=274 PF_V 1.07 netto 5525
+   lato SELL n=405 PF_V 0.92 netto -13403
+   perdita a SL scritta dall'EA: mediana 1100  p90 2034  max 5101 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 7.4  media 10.2  p90 20.1
+(5) concentrazione (S5)
+   migliore operazione = 3% del profitto positivo; netto senza le 5 migliori = -37443 -> FRAGILE
+   S4 in forma NEUTRA per la cella E15 (file prova dichiarativo: NESSUN esito qui): PF_V 0.97 (soglie 1,0 / 1,3 / 1,5), n=679 (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: 0 su 3 (S4: almeno 2), migliore operazione = n.d. del netto (S4: < 25%), PF con 7,80 EUR/lotto a giro = 0.96 (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova.
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=102   PF_V 1.29  r medio 0.117  tranche con lo stesso segno 1/3  -> non distinguibile da zero (p=0.188)
+   europa          07-12  n=86    PF_V 0.57  r medio -0.203  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   pausa           12-14  n=65    PF_V 2.00  r medio 0.167  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   USA apertura    14-17  n=288   PF_V 0.74  r medio -0.083  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.115)
+   USA pomeriggio  17-22  n=129   PF_V 1.16  r medio 0.018  tranche con lo stesso segno 1/3  -> non distinguibile da zero (p=0.831)
+   rollover        22-24  n=9     PF_V 1.07  r medio -0.002  tranche con lo stesso segno 1/2  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 11830, di cui scartati per spread 11144 = 94%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 2.18  spread 0.26  n=4287
+      europa          ATR 2.07  spread 0.21  n=2619
+      pausa           ATR 2.23  spread 0.21  n=1295
+      USA apertura    ATR 3.52  spread 0.21  n=1904
+      USA pomeriggio  ATR 1.94  spread 0.21  n=2481
+      rollover        ATR 1.39  spread 0.25  n=468
+
+----------------------------------------------------------------------------------------------------
+ CELLA E5 [lotto R2TTREND] (InpTrendTF 5)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=111  1.71/giorno  segnali(EA) 5292, ingressi tentati 111, scartati spread 4994, a posizione aperta 187
+   T2   n=208  3.25/giorno  segnali(EA) 4867, ingressi tentati 208, scartati spread 4303, a posizione aperta 356
+   T3   n=446  7.08/giorno  segnali(EA) 4988, ingressi tentati 454, scartati spread 3729, a posizione aperta 805
+   tranche lette: n=765
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=765 mediana 58.3  p10 51.3  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=765 mediana 49.1  p10 42.5  quota <40x: 2%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=765 mediana 42.4  p10 35.6  quota <40x: 35%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -2626.62 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.952   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.941;  senza commissione ipotetica: 0.952)   netto PF_V -13761 EUR   win rate 28%
+      T1  n=111   PF_V 0.77   PF del report 0.77   DD equity 14283.69 EUR (1.42%)   DD bilancio 12712.84 EUR (1.27%)
+      T2  n=208   PF_V 0.84   PF del report 0.84   DD equity 19347.46 EUR (1.92%)   DD bilancio 17406.28 EUR (1.73%)
+      T3  n=446   PF_V 1.03   PF del report 1.03   DD equity 30141.94 EUR (2.94%)   DD bilancio 26659.36 EUR (2.61%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=328 PF_V 1.07 netto 6709
+   lato SELL n=437 PF_V 0.89 netto -20470
+   perdita a SL scritta dall'EA: mediana 1101  p90 1979  max 5101 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 7.4  media 10.0  p90 19.5
+(5) concentrazione (S5)
+   migliore operazione = 3% del profitto positivo; netto senza le 5 migliori = -42911 -> FRAGILE
+   S4 in forma NEUTRA per la cella E5 (file prova dichiarativo: NESSUN esito qui): PF_V 0.95 (soglie 1,0 / 1,3 / 1,5), n=765 (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: 0 su 3 (S4: almeno 2), migliore operazione = n.d. del netto (S4: < 25%), PF con 7,80 EUR/lotto a giro = 0.94 (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova.
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=114   PF_V 1.23  r medio 0.080  tranche con lo stesso segno 1/3  -> non distinguibile da zero (p=0.287)
+   europa          07-12  n=97    PF_V 0.70  r medio -0.152  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   pausa           12-14  n=75    PF_V 2.51  r medio 0.260  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   USA apertura    14-17  n=326   PF_V 0.67  r medio -0.116  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.013)
+   USA pomeriggio  17-22  n=143   PF_V 1.02  r medio -0.000  tranche con lo stesso segno 1/3  -> non distinguibile da zero (p=0.997)
+   rollover        22-24  n=10    PF_V 0.80  r medio -0.093  tranche con lo stesso segno 1/2  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 13799, di cui scartati per spread 13026 = 94%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 2.18  spread 0.26  n=5021
+      europa          ATR 2.07  spread 0.21  n=2995
+      pausa           ATR 2.25  spread 0.21  n=1584
+      USA apertura    ATR 3.52  spread 0.21  n=2116
+      USA pomeriggio  ATR 1.92  spread 0.21  n=2902
+      rollover        ATR 1.42  spread 0.25  n=529
+
+----------------------------------------------------------------------------------------------------
+ CELLA ED1 [lotto R2TTREND] (InpTrendTF 16408)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=68  1.05/giorno  segnali(EA) 3745, ingressi tentati 68, scartati spread 3550, a posizione aperta 127
+   T2   n=145  2.27/giorno  segnali(EA) 3477, ingressi tentati 145, scartati spread 3100, a posizione aperta 232
+   T3   n=273  4.33/giorno  segnali(EA) 3701, ingressi tentati 275, scartati spread 2856, a posizione aperta 570
+   tranche lette: n=486
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=486 mediana 58.4  p10 51.2  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=486 mediana 49.0  p10 42.2  quota <40x: 2%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=486 mediana 42.2  p10 35.2  quota <40x: 38%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -1667.63 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.843   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.832;  senza commissione ipotetica: 0.843)   netto PF_V -27067 EUR   win rate 26%
+      T1  n=68    PF_V 0.89   PF del report 0.89   DD equity 7043.73 EUR (0.7%)   DD bilancio 6614.68 EUR (0.66%)
+      T2  n=145   PF_V 0.72   PF del report 0.72   DD equity 19890.34 EUR (1.98%)   DD bilancio 17558.38 EUR (1.76%)
+      T3  n=273   PF_V 0.90   PF del report 0.9   DD equity 37046.81 EUR (3.65%)   DD bilancio 35393.41 EUR (3.5%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=285 PF_V 0.74 netto -25974
+   lato SELL n=201 PF_V 0.98 netto -1092
+   perdita a SL scritta dall'EA: mediana 1076  p90 1926  max 5526 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 7.9  media 10.8  p90 21.1
+(5) concentrazione (S5)
+   migliore operazione = 4% del profitto positivo; netto senza le 5 migliori = -50052 -> FRAGILE
+   S4 in forma NEUTRA per la cella ED1 (file prova dichiarativo: NESSUN esito qui): PF_V 0.84 (soglie 1,0 / 1,3 / 1,5), n=486 (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: 0 su 3 (S4: almeno 2), migliore operazione = n.d. del netto (S4: < 25%), PF con 7,80 EUR/lotto a giro = 0.83 (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova.
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=84    PF_V 1.15  r medio 0.083  tranche con lo stesso segno 1/3  -> SOSPESA (n<100)
+   europa          07-12  n=64    PF_V 0.34  r medio -0.285  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   pausa           12-14  n=51    PF_V 1.63  r medio 0.171  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   USA apertura    14-17  n=188   PF_V 0.78  r medio -0.070  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.257)
+   USA pomeriggio  17-22  n=96    PF_V 0.75  r medio -0.097  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   rollover        22-24  n=3     PF_V 2.39  r medio 0.339  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 9994, di cui scartati per spread 9506 = 95%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 2.17  spread 0.26  n=3697
+      europa          ATR 2.00  spread 0.21  n=2110
+      pausa           ATR 2.17  spread 0.21  n=1071
+      USA apertura    ATR 3.31  spread 0.21  n=1435
+      USA pomeriggio  ATR 1.81  spread 0.21  n=2248
+      rollover        ATR 1.35  spread 0.25  n=362
+
+----------------------------------------------------------------------------------------------------
+ CELLA EH1 [lotto R2TTREND] (InpTrendTF 16385)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=89  1.37/giorno  segnali(EA) 4119, ingressi tentati 89, scartati spread 3861, a posizione aperta 169
+   T2   n=155  2.42/giorno  segnali(EA) 3814, ingressi tentati 155, scartati spread 3400, a posizione aperta 259
+   T3   n=324  5.14/giorno  segnali(EA) 3789, ingressi tentati 326, scartati spread 2824, a posizione aperta 639
+   tranche lette: n=568
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=568 mediana 58.7  p10 51.2  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=568 mediana 49.2  p10 42.3  quota <40x: 2%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=568 mediana 42.6  p10 35.4  quota <40x: 35%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -1951.16 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 1.023   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 1.011;  senza commissione ipotetica: 1.023)   netto PF_V 4680 EUR   win rate 29%
+      T1  n=89    PF_V 1.01   PF del report 1.01   DD equity 7976.03 EUR (0.79%)   DD bilancio 6000.8 EUR (0.6%)
+      T2  n=155   PF_V 0.79   PF del report 0.79   DD equity 16366.95 EUR (1.63%)   DD bilancio 14831.38 EUR (1.48%)
+      T3  n=324   PF_V 1.12   PF del report 1.12   DD equity 25539.13 EUR (2.5%)   DD bilancio 22345.76 EUR (2.19%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=220 PF_V 1.11 netto 6114
+   lato SELL n=348 PF_V 0.99 netto -1434
+   perdita a SL scritta dall'EA: mediana 1104  p90 2043  max 4993 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 7.5  media 10.7  p90 21.1
+(5) concentrazione (S5)
+   migliore operazione = 3% del profitto positivo; netto senza le 5 migliori = -22443 -> FRAGILE
+   S4 in forma NEUTRA per la cella EH1 (file prova dichiarativo: NESSUN esito qui): PF_V 1.02 (soglie 1,0 / 1,3 / 1,5), n=568 (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: 0 su 3 (S4: almeno 2), migliore operazione = 151% del netto (S4: < 25%), PF con 7,80 EUR/lotto a giro = 1.01 (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova.
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=88    PF_V 1.06  r medio 0.063  tranche con lo stesso segno 1/3  -> SOSPESA (n<100)
+   europa          07-12  n=73    PF_V 0.75  r medio -0.136  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   pausa           12-14  n=57    PF_V 2.41  r medio 0.257  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   USA apertura    14-17  n=241   PF_V 0.86  r medio -0.022  tranche con lo stesso segno 1/3  -> non distinguibile da zero (p=0.699)
+   USA pomeriggio  17-22  n=101   PF_V 1.02  r medio -0.001  tranche con lo stesso segno 2/3  -> non distinguibile da zero (p=0.991)
+   rollover        22-24  n=8     PF_V 1.28  r medio 0.060  tranche con lo stesso segno 1/2  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 10655, di cui scartati per spread 10085 = 95%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 2.15  spread 0.25  n=3782
+      europa          ATR 2.04  spread 0.21  n=2351
+      pausa           ATR 2.19  spread 0.21  n=1122
+      USA apertura    ATR 3.43  spread 0.21  n=1738
+      USA pomeriggio  ATR 1.87  spread 0.21  n=2275
+      rollover        ATR 1.35  spread 0.25  n=454
+
+----------------------------------------------------------------------------------------------------
+ CELLA EH4 [lotto R2TTREND] (InpTrendTF 16388)  --  Modello 4 (TICKS REALI: verdetto)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=77  1.18/giorno  segnali(EA) 3899, ingressi tentati 77, scartati spread 3683, a posizione aperta 139
+   T2   n=149  2.33/giorno  segnali(EA) 3549, ingressi tentati 149, scartati spread 3161, a posizione aperta 239
+   T3   n=320  5.08/giorno  segnali(EA) 3767, ingressi tentati 322, scartati spread 2836, a posizione aperta 609
+   tranche lette: n=546
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=546 mediana 58.4  p10 51.2  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=546 mediana 49.0  p10 42.3  quota <40x: 2%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=546 mediana 42.6  p10 35.2  quota <40x: 37%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)
+   commissioni addebitate dal tester (somma): -1875.04 EUR -> il tester le addebita: PF_V le include gia'
+   PF_V 0.837   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.827;  senza commissione ipotetica: 0.837)   netto PF_V -33835 EUR   win rate 27%
+      T1  n=77    PF_V 0.71   PF del report 0.71   DD equity 7908.74 EUR (0.79%)   DD bilancio 7195.83 EUR (0.72%)
+      T2  n=149   PF_V 0.81   PF del report 0.81   DD equity 14738.85 EUR (1.47%)   DD bilancio 12321.91 EUR (1.23%)
+      T3  n=320   PF_V 0.87   PF del report 0.87   DD equity 45781.97 EUR (4.51%)   DD bilancio 44070.67 EUR (4.35%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=217 PF_V 0.76 netto -15984
+   lato SELL n=329 PF_V 0.87 netto -17851
+   perdita a SL scritta dall'EA: mediana 1099  p90 2007  max 4911 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 7.4  media 10.6  p90 19.5
+(5) concentrazione (S5)
+   migliore operazione = 3% del profitto positivo; netto senza le 5 migliori = -58362 -> FRAGILE
+   S4 in forma NEUTRA per la cella EH4 (file prova dichiarativo: NESSUN esito qui): PF_V 0.84 (soglie 1,0 / 1,3 / 1,5), n=546 (S1: merito solo con n >= 150), tranche con n >= 150 e PF_V > 1,3: 0 su 3 (S4: almeno 2), migliore operazione = n.d. del netto (S4: < 25%), PF con 7,80 EUR/lotto a giro = 0.83 (S4: >= 1,3). Si applicano S8-S10 e le smentite scritte nel file prova.
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=92    PF_V 0.97  r medio 0.032  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   europa          07-12  n=76    PF_V 0.39  r medio -0.255  tranche con lo stesso segno 3/3  -> SOSPESA (n<100)
+   pausa           12-14  n=54    PF_V 1.51  r medio 0.147  tranche con lo stesso segno 2/3  -> SOSPESA (n<100)
+   USA apertura    14-17  n=208   PF_V 0.76  r medio -0.059  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.341)
+   USA pomeriggio  17-22  n=111   PF_V 0.91  r medio -0.034  tranche con lo stesso segno 3/3  -> non distinguibile da zero (p=0.636)
+   rollover        22-24  n=5     PF_V 1.89  r medio 0.236  tranche con lo stesso segno 1/2  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 10228, di cui scartati per spread 9680 = 95%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 2.16  spread 0.25  n=3596
+      europa          ATR 2.01  spread 0.21  n=2247
+      pausa           ATR 2.20  spread 0.21  n=1063
+      USA apertura    ATR 3.35  spread 0.21  n=1562
+      USA pomeriggio  ATR 1.84  spread 0.21  n=2343
+      rollover        ATR 1.33  spread 0.25  n=404
+
+----------------------------------------------------------------------------------------------------
+ (S7) FRONTIERA del lotto R2SOLOBUY lungo l'asse InpAllowShort (Modello 4): 2 punti; centro dell'altopiano, mai il picco
+   NOSHORT InpAllowShort=false    n=443    PF_V 0.887  costo mediano (+0,04) 49.5  PASSA
+   REPL  InpAllowShort=true     n=933    PF_V 0.855  costo mediano (+0,04) 49.4  PASSA (ancora, lotto R1A)
+   solo 2 punti (la monotonia fra 2 punti e' vuota) -> NESSUN altopiano si legge: contano n, PF_V e costo
+
+----------------------------------------------------------------------------------------------------
+ (S7) FRONTIERA del lotto R2SOLOSELL lungo l'asse InpAllowLong (Modello 4): 2 punti; centro dell'altopiano, mai il picco
+   NOLONG InpAllowLong=false    n=490    PF_V 0.831  costo mediano (+0,04) 49.3  PASSA
+   REPL  InpAllowLong=true     n=933    PF_V 0.855  costo mediano (+0,04) 49.4  PASSA (ancora, lotto R1A)
+   solo 2 punti (la monotonia fra 2 punti e' vuota) -> NESSUN altopiano si legge: contano n, PF_V e costo
+
+----------------------------------------------------------------------------------------------------
+ (S7) FRONTIERA del lotto R2TATR lungo l'asse InpAtrTF (Modello 4): 3 punti; centro dell'altopiano, mai il picco
+   REPL  InpAtrTF=0        n=933    PF_V 0.855  costo mediano (+0,04) 49.4  PASSA (ancora, lotto R1A)
+   A5    InpAtrTF=5        n=3203   PF_V 0.896  costo mediano (+0,04) 57.3  PASSA
+   A15   InpAtrTF=15       n=3913   PF_V 0.917  costo mediano (+0,04) 84.9  PASSA
+   PF_V lungo l'asse: 0.85 / 0.90 / 0.92 -> monotono (un altopiano si legge)
+
+----------------------------------------------------------------------------------------------------
+ (S7) FRONTIERA del lotto R2TTREND lungo l'asse InpTrendTF (Modello 4): 6 punti; centro dell'altopiano, mai il picco
+   REPL  InpTrendTF=0        n=933    PF_V 0.855  costo mediano (+0,04) 49.4  PASSA (ancora, lotto R1A)
+   E5    InpTrendTF=5        n=765    PF_V 0.952  costo mediano (+0,04) 49.1  PASSA
+   E15   InpTrendTF=15       n=679    PF_V 0.969  costo mediano (+0,04) 49.1  PASSA
+   EH1   InpTrendTF=16385    n=568    PF_V 1.023  costo mediano (+0,04) 49.2  PASSA
+   EH4   InpTrendTF=16388    n=546    PF_V 0.837  costo mediano (+0,04) 49.0  PASSA
+   ED1   InpTrendTF=16408    n=486    PF_V 0.843  costo mediano (+0,04) 49.0  PASSA
+   PF_V lungo l'asse: 0.85 / 0.95 / 0.97 / 1.02 / 0.84 / 0.84 -> NON monotono: una cella che sporge e' un PICCO, non un altopiano
+
+----------------------------------------------------------------------------------------------------
+ (7) LETTURA PER REGIME (firma di Claudio 10/10/2026, report/FIRME_2026-10-10.md; si AGGIUNGE a S4-S7, non li sostituisce)
+     regola sul prezzo: TORO R>=+5% e ER>=0,15 | RIBASSO R<=-5% e ER>=0,15 | LATERALE altrimenti | CALMO ATR M1/prezzo <3,5 bp | VOLATILE >=3,5 bp (proxy_gba_r2reg.py --regimi)
+     regge se PF_V > 1,0 in OGNI regime con >= 150 operazioni e durata >= 4 tranche, long e short letti SEPARATAMENTE, e nessun regime ha DD oltre il promesso;
+     < 150 operazioni = NON MISURATO; solo toro non basta. Le tranche di un regime si contano come INSIEME (una tranche doppia = ERRORE).
+     PARAMETRI (decisioni APERTE di Claudio; default = lettura letterale della firma 10/10):
+       durata del regime   = '1anno' (un anno = 4 trimestri)   [alternative: 2trimestri, 365giorni]
+       lato sotto 150      = 'giudica' (la soglia 150 e' sul regime: ogni lato conta nel verdetto col suo n)   [alternativa: non_misurato]
+       DD promesso         = ASSENTE (nessuna cella promossa): nessun verdetto puo' cominciare con 'regge'
+       NOTA: il file prova R2REG (r.186, 'almeno 2 tranche') e la firma ('un anno per regime') NON dicono la stessa cosa: per la lettura del file -> --durata-regime 2trimestri
+     SOGLIE TONDE (5%, 0,15, 3,5 bp) scelte il 10/10 DOPO aver letto rendimenti e ATR dei trimestri (non i PF). Tranche vicine al confine ER 0,15 (entro 0,07): T6 ER 0,081, T1 ER 0,116, T4 ER 0,176, T2 ER 0,184.
+     Il loro regime dipende da quei numeri: sotto, per ogni cella, la SENSIBILITA' del verdetto a ER 0,10 e 0,20 (NON e' un verdetto: il verdetto e' quello a 0,15).
+   --- cella REPL (lotti R1A+R2TTREND) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=685   (long 329, short 356)  PF_V 0.88  long 0.92  short 0.86  DD equity max di tranche 53392 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=248   (long 114, short 134)  PF_V 0.77  long 0.79  short 0.75  DD equity max di tranche 28863 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=933   (long 443, short 490)  PF_V 0.85  long 0.89  short 0.83  DD equity max di tranche 53392 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella REPL (lotti R1A+R2TTREND)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in LATERALE long+short; VOLATILE long+short
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   --- cella A15 (lotti R2TATR) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=2636  (long 1320, short 1316)  PF_V 0.90  long 0.98  short 0.82  DD equity max di tranche 95289 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=1277  (long 634, short 643)  PF_V 0.96  long 0.86  short 1.08  DD equity max di tranche 44536 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=3913  (long 1954, short 1959)  PF_V 0.92  long 0.95  short 0.89  DD equity max di tranche 95289 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella A15 (lotti R2TATR)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in LATERALE long+short; VOLATILE long+short
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   --- cella A5 (lotti R2TATR) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=2158  (long 1124, short 1034)  PF_V 0.93  long 1.02  short 0.84  DD equity max di tranche 65772 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=1045  (long 526, short 519)  PF_V 0.82  long 0.75  short 0.91  DD equity max di tranche 81733 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=3203  (long 1650, short 1553)  PF_V 0.90  long 0.93  short 0.86  DD equity max di tranche 81733 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella A5 (lotti R2TATR)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in LATERALE short; VOLATILE long+short
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   --- cella E15 (lotti R2TTREND) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=490   (long 206, short 284)  PF_V 1.04  long 1.21  short 0.96  DD equity max di tranche 34593 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=189   (long 68, short 121)  PF_V 0.78  long 0.73  short 0.81  DD equity max di tranche 23168 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=679   (long 274, short 405)  PF_V 0.97  long 1.07  short 0.92  DD equity max di tranche 34593 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella E15 (lotti R2TTREND)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in LATERALE short; VOLATILE short
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   --- cella E5 (lotti R2TTREND) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=557   (long 240, short 317)  PF_V 0.99  long 1.17  short 0.90  DD equity max di tranche 30142 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=208   (long 88, short 120)  PF_V 0.84  long 0.80  short 0.87  DD equity max di tranche 19347 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=765   (long 328, short 437)  PF_V 0.95  long 1.07  short 0.89  DD equity max di tranche 30142 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella E5 (lotti R2TTREND)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in LATERALE short; VOLATILE short
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   --- cella ED1 (lotti R2TTREND) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=341   (long 234, short 107)  PF_V 0.90  long 0.79  short 1.14  DD equity max di tranche 37047 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=145   (long 51, short 94)  PF_V 0.72  long 0.53  short 0.82  DD equity max di tranche 19890 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=486   (long 285, short 201)  PF_V 0.84  long 0.74  short 0.98  DD equity max di tranche 37047 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella ED1 (lotti R2TTREND)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in LATERALE long; VOLATILE long+short
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   --- cella EH1 (lotti R2TTREND) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=413   (long 169, short 244)  PF_V 1.10  long 1.22  short 1.06  DD equity max di tranche 25539 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=155   (long 51, short 104)  PF_V 0.79  long 0.82  short 0.78  DD equity max di tranche 16367 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=568   (long 220, short 348)  PF_V 1.02  long 1.11  short 0.99  DD equity max di tranche 25539 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella EH1 (lotti R2TTREND)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in VOLATILE short
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   --- cella EH4 (lotti R2TTREND) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=397   (long 183, short 214)  PF_V 0.84  long 0.77  short 0.89  DD equity max di tranche 45782 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=149   (long 34, short 115)  PF_V 0.81  long 0.74  short 0.83  DD equity max di tranche 14739 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=546   (long 217, short 329)  PF_V 0.84  long 0.76  short 0.87  DD equity max di tranche 45782 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella EH4 (lotti R2TTREND)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in LATERALE long+short; VOLATILE long+short
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   --- cella NOLONG (lotti R2SOLOSELL) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=356   (long 0, short 356)  PF_V 0.86  long n.d.  short 0.86  DD equity max di tranche 34980 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=134   (long 0, short 134)  PF_V 0.75  long n.d.  short 0.75  DD equity max di tranche 20335 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=490   (long 0, short 490)  PF_V 0.83  long n.d.  short 0.83  DD equity max di tranche 34980 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella NOLONG (lotti R2SOLOSELL)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in LATERALE short; VOLATILE short
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   --- cella NOSHORT (lotti R2SOLOBUY) ---
+   TORO      nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   LATERALE  tranche T1,T3        n=329   (long 329, short 0)  PF_V 0.92  long 0.92  short n.d.  DD equity max di tranche 40679 EUR  [2 tranche, 180 giorni]  -> NON MISURATO (durata: 2 < 4 tranche, regola '1anno')
+   RIBASSO   tranche T2           n=114   (long 114, short 0)  PF_V 0.79  long 0.79  short n.d.  DD equity max di tranche 13000 EUR  [1 tranche, 90 giorni]  -> NON MISURATO (durata: 1 < 4 tranche, regola '1anno')
+   CALMO     nessuna tranche letta -> NON MISURATO (regime non coperto dalle tranche di questo giro)
+   VOLATILE  tranche T1,T2,T3     n=443   (long 443, short 0)  PF_V 0.89  long 0.89  short n.d.  DD equity max di tranche 40679 EUR  [3 tranche, 270 giorni]  -> NON MISURATO (durata: 3 < 4 tranche, regola '1anno')
+   VERDETTO PER REGIME (cella NOSHORT (lotti R2SOLOBUY)): NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '1anno' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   DURATA '365giorni' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   DURATA '2trimestri' -> NON REGGE: PF_V <= 1,0 in LATERALE long; VOLATILE long
+   LATO SOTTO 150 'giudica' (in uso) -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   LATO SOTTO 150 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   COMBINAZIONE durata '365giorni' + lato 'non_misurato' -> NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 365 giorni (regola '365giorni')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,10: cambiano T1 LATERALE->TORO -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+   SENSIBILITA' (NON e' un verdetto) con ER 0,20: cambiano T2 RIBASSO->LATERALE -> esito: NON MISURATO: nessun regime con almeno 150 operazioni e durata >= 4 tranche (regola '1anno')
+
+----------------------------------------------------------------------------------------------------
+ CERTIFICATO DI MORTE: mancano le caselle 3 (uscita ad asse), 4 (simboli gemelli), 5 (TF cambiato). Qualunque esito sopra NON e' 'morto': e' 'NON ANCORA MISURATO' o 'la replica non regge (un regime)'.
