@@ -1,0 +1,15 @@
+GBA R0 -- lotto R1A: ABTG_GoldBreakoutATR v1.10 su XAUUSD M1, Modello 4, lotto fisso 1,00, deposito 1000000 EUR, UNA variabile (InpSpreadMaxATR)
+data: 2026-10-10 10:18:20   pc: DESKTOP-H4D7CAJ   pin: 2f4a2a5b786bdc2dd5eddd883ac9d63bacbef02f
+ABTG_GoldBreakoutATR.mq5 SHA256 1381E3DC9B4B4E44BCDC0319F023CB1990900CE0D1A6B6A3EC1DF5DF99E601B1   compilazione: 0 errori, 0 avvisi (-1 = non letto)
+passate del lotto 3: OK 3, KO 0, NON LANCIATE 0   durata totale 4 minuti   media per passata OK 48 secondi
+STIMA DEL PIANO INTERO (17 passate: S0 5 + R1A 3 + R1B 9) con la media di questo lotto: 14 minuti (valida solo se il Modello e lo stesso: S0 e OHLC, R1 e a ticks reali)
+Guardian nel tester: FAIL-OPEN (irrilevante: nel tester non c e nessun altro EA).
+
+lotto;passata;cella;spread_max_atr;tranche;da;a;modello;magic;t_avvio;durata_s;stato;trades_report;profitto_report;pf_report;qualita;barre_report;ticks_report;barre_gen;ticks_gen;ticks_inizio;righe_gba;ingressi_log;avvio_ok;autotest;finestra;motivi
+R1A;R1A_01_REPL_T1_m775800;REPL;0.05;T1;2026.07.01;2026.09.30;4;775800;2026-10-10 10:14:30;48;OK;128;-6577.48;0.83;100%ticksreali;88416;25648545;88416;25648545;EURUSD 2024.07.05 / XAUUSD 2024.07.10;7181;128;si;si;2026.07.01-2026.09.30;
+R1A;R1A_02_REPL_T2_m775800;REPL;0.05;T2;2026.04.01;2026.06.30;4;775800;2026-10-10 10:15:34;43;OK;248;-19645.43;0.77;100%ticksreali;85799;26288458;85799;26288458;EURUSD 2024.07.05 / XAUUSD 2024.07.10;6567;248;si;si;2026.04.01-2026.06.30;
+R1A;R1A_03_REPL_T3_m775800;REPL;0.05;T3;2026.01.01;2026.03.31;4;775800;2026-10-10 10:16:35;53;OK;557;-27596.55;0.89;100%ticksreali;83916;26909140;83916;26909140;EURUSD 2024.07.05 / XAUUSD 2024.07.10;7155;557;si;si;2026.01.01-2026.03.31;
+
+COME SI LEGGE: python3 backtest_pipeline/leggi_gba_r0.py <questo zip o la cartella>. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e i motivi; poi i cancelli G0/G1/G2,
+n, frequenza, COSTO (stop/spread) PRIMA del PF, PF e DD, lato, concentrazione, ora (6 fasce), contro le attese e le soglie SCRITTE nel file prova prima dei numeri.
+Questo script RACCOGLIE e dice se ogni passata e affidabile: NON giudica, NON promuove, NON sceglie nessuna cella.
