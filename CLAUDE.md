@@ -64,6 +64,12 @@ senza nominare il bersaglio, dopo che la stessa lacuna il 06/09 aveva quasi
 fatto finire un EA sul conto REALE. Il numero di conto in chiaro costa tre
 parole e vale una challenge.
 
+## 🏷️ L'ETICHETTA IN GRASSETTO PRIMA DI OGNI STRINGA (richiesta di Claudio, 11/10/2026)
+Testuale: _"D'ORA IN AVANTI, PRIMA DI OGNI STRINGA, MI VENGA SCRITTO DA TE IN GRASSETTO L'ARGOMENTO PRINCIPALE CHE RIGUARDA LA STRINGA, AL MASSIMO 2 RIGHE OPPURE IL TITOLO (ES. EA NATCLA, BULGE AZZURRA TEST PER TIME FRAME). GLI ARGOMENTI SONO TANTI E IO POI NON MI RICORDO A COSA FA RIFERIMENTO. E METTI QUALCHE EMOTICON IN + X DARE HYPE."_
+- Ogni stringa che gli arriva porta, **in testa e in grassetto**, l'argomento (titolo o max 2 righe) con qualche emoji. Va PRIMA della riga del bersaglio (regola del 12/09), che resta obbligatoria.
+- Le emoji stanno nel messaggio in chat, MAI dentro il `.ps1` o la riga (regola ASCII).
+- La riga si copia **byte per byte dal file passato dal cancello** (SHA256 uguale): il 11/10 ho aggiunto un `;` in piu' ricopiando a mano una riga PASS e l'ho dovuto dichiarare. Una riga ricopiata a mano non e' piu' quella passata.
+
 ## REGOLA DELLE RIGHE DI LANCIO (richiesta esplicita di Claudio, 10/08)
 Ogni riga di lancio dettata a Claudio include SEMPRE, senza eccezioni:
 1. **l'`irm` davanti** che riscarica script e prova dal branch `lavoro` (il 10/08
