@@ -13,10 +13,12 @@
 #  backtest_pipeline/collaudo_natcla_f1_m30.py. Riga: backtest_pipeline/righe/RIGA_LANCIA_NATCLA_F1_M30.txt.
 #  EMENDAMENTO dell'11/10/2026 (dopo il PASS del giudizio sulla versione 15c70437 e la rilettura di Gemini del piano:
 #  docs/PER_GEMINI_NATCLA_M30_PIANO_2026-10-11.md, docs/RISPOSTA_A_GEMINI_NATCLA_M30_PIANO_2026-10-11.md), scritto PRIMA di qualunque numero M30.
-#  Cambia SOLO questo file (EA 729bb428 e driver 62a2e8bd invariati) e NESSUNA attesa, banda o soglia: (1) definizione di f con le occupate della
-#  guardia anti-duplicato (A2); (2) smentita di A1 con ENTRAMBE le gambe oro e casi non coperti; (3) TP in ATR14 dai CSV del pilota (SCALA SU M30);
-#  (4) caso P_003 riscritto su cio' che il giornale dice; (5) regola delle passate KO per il caso P_003; (6) rapporto riempiti/setup (A1, A7);
-#  (7) aiuti di lettura (c -> percentile, Poisson, minuti, finestra di calcolo); (8) passo 0 anticipato NON applicato (PASSO SUCCESSIVO).
+#  Cambia SOLO questo file (EA 729bb428 e driver 62a2e8bd invariati). Non cambia NESSUNA attesa, banda o soglia di smentita gia' scritta; AGGIUNGE due
+#  letture (rapporto riempiti/setup, DA GUARDARE e non KO; regola P_003 con la precedenza di A0) e porta il passo successivo a "> 0,56".
+#  Punti: (1) definizione di f con le occupate della guardia anti-duplicato (A2; per l'ADX anche i respinti dall'inclinazione); (2) smentita di A1 con
+#  ENTRAMBE le gambe oro e casi non coperti; (3) TP in ATR14 dai CSV del pilota (SCALA SU M30); (4) caso P_003 riscritto su cio' che il giornale dice
+#  e su cio' che NON puo' dire; (5) regola delle passate KO per il caso P_003, con la precedenza di A0 sul controllo H1; (6) rapporto riempiti/setup
+#  (A1, A7); (7) aiuti di lettura (c -> percentile, Poisson, minuti, finestra di calcolo); (8) passo 0 anticipato NON applicato (PASSO SUCCESSIVO).
 #  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale BCM demo 50503392 di QUESTO PC, C:\Program Files\BCM Markets MT5 Terminal).
 #  MAI sul VPS (nessuna delle sue cartelle), MAI su C:\MT5_Backtest, MAI su C:\FundedNext_Manuale, MAI su un conto, MAI su un preset di campo.
 #
@@ -55,18 +57,25 @@
 #  'ADOTTATO ST25: 1 posizioni senza setup in memoria' (Sincronizza, EA r.2072-2077 v1.12, condizioni `if(!gSet[L].attivo)` e `if(np>0)`); poi
 #  l'uscita 'riempiti 3, ... motivo TP (setup adottato dopo un riavvio)' con esito 807,44 = 0,00 R e la riga SETUP con rischio_soldi 0.00.
 #  Cosa NON si legge: PERCHE' i 3 pendenti erano ancora sul conto. Nel giornale della P_003 non c'e' nessun 10018 quel giorno: i suoi 9 'INVIO FALLITO'
-#  (retcode 10018) sono del 2024.07.30 (3) e del 2024.11.08 (6), e sono INVII di ordini nuovi, non cancellazioni. Che la cancellazione sia mancata per
-#  il mercato chiuso e' [IPOTESI]. '(setup adottato dopo un riavvio)' e' l'ETICHETTA FISSA che ChiudiSetup stampa per OGNI setup adottato (EA r.2245
-#  v1.12, condizione `gSet[L].adottato`), qualunque sia la causa: nella passata P_003 nessun riavvio (una sola riga AVVIO nel giornale).
+#  (retcode 10018) sono del 2024.07.30 (3) e del 2024.11.08 (6), e sono INVII di ordini nuovi, non cancellazioni.
+#  E il giornale NON POTREBBE mostrarlo: l'EA non scrive le cancellazioni fallite (CancellaOrdiniLinea, EA r.1962 v1.12:
+#  `if(gTrade.OrderDelete(t)) n++;`, nessun Log sul ramo falso) e le righe d'errore di CTrade non hanno il prefisso [NatCla] che il driver raccoglie
+#  (regex $reRiga, driver r.507): l'assenza NON e' un indizio. Che la cancellazione sia mancata per il mercato chiuso e' [IPOTESI].
+#  '(setup adottato dopo un riavvio)' e' l'ETICHETTA FISSA che ChiudiSetup stampa per OGNI setup adottato (EA r.2245 v1.12, condizione
+#  `gSet[L].adottato`), qualunque sia la causa: nella passata P_003 nessun riavvio (una sola riga AVVIO nel giornale).
 #  La v1.12 NON tocca questi rami.
 #  INTERAZIONE CON M30 [IPOTESI, NON MISURATO]: su M30 le aperture di barra sono il DOPPIO, quindi i riprezzamenti (cancella e riarma) nelle ore a
 #  mercato chiuso (22:00-00:00 server, dove cadono tutti i 10018 degli INVII del pilota: 29 / 29 / 9 / 5) sono attesi ALMENO quanti su H1: il caso P_003
 #  su M30 e' atteso ALMENO altrettanto frequente, non meno. NESSUNA scelta di gamba lo esclude (dipende da un pendente vivo a un orario, non dalla gamba).
-#  REGOLA, uguale per le 4 passate (le 3 M30 e il controllo H1): una passata con una riga ADOTTATO e una riga SETUP a rischio_soldi 0.00 e' "KO per il
-#  caso P_003" alla LETTURA (il driver NON la segna KO: non controlla rischio_soldi; la si trova in log\<passata>.txt e csv\<passata>.csv): QUELLA
-#  passata e' illeggibile, le altre si leggono; NON e' un difetto della deviazione. Se 2 o piu' passate su 4 (le 3 M30 e il controllo H1) escono KO per
-#  questo caso, il lotto e' illeggibile e la decisione P_003 (v1.13 dell'EA o tolleranza nel lettore) diventa PRIORITARIA rispetto a ogni altro lotto
-#  NatCla.
+#  REGOLA per le 3 passate M30: una passata con una riga ADOTTATO e una riga SETUP a rischio_soldi 0.00 e' "KO per il caso P_003" alla LETTURA (il
+#  driver NON la segna KO: non controlla rischio_soldi; la si trova in log\<passata>.txt e csv\<passata>.csv): QUELLA passata e' illeggibile, le altre
+#  si leggono; NON e' un difetto della deviazione.
+#  Sulla gamba di CONTROLLO H1 (M30_001) vale PRIMA A0: la P_001 del pilota NON ha righe ADOTTATO (0 nel giornale), quindi a ticks uguali una riga
+#  ADOTTATO o una riga SETUP a rischio_soldi 0.00 nel controllo e' una riga SETUP diversa = SMENTITA di A0 (STOP: il lotto M30 NON si legge e l'EA
+#  torna al cancello), NON un KO per il caso P_003. Solo a ticks DIVERSI (A0 non decide) il controllo con quella riga conta come passata KO per il caso
+#  P_003 nella soglia 2+ su 4.
+#  Se 2 o piu' passate su 4 (le 3 M30 e il controllo H1) escono KO per questo caso, il lotto e' illeggibile e la decisione P_003 (v1.13 dell'EA o
+#  tolleranza nel lettore) diventa PRIORITARIA rispetto a ogni altro lotto NatCla.
 #
 #  ======================= FINESTRA: SOLO L'IS (come F1, emendamento del 16/08 regola A) =======================
 #  IS = dal pavimento dei tick (forex 2024.07.05, oro 2024.07.10) al 2025.06.30. OOS = 2025.07.01 -> 2026.06.30 NON TOCCATO (firma 11/10: "solo IS,
@@ -142,7 +151,7 @@
 #     CONTRO-ESEMPIO: se si contassero ORDINI o DEAL invece dei setup, n M30 = 1,6-1,8 volte i setup (riempiti medi del pilota 1,60-1,77): con il
 #     centro x2,0 cadrebbe a x3,2-3,6 di n H1, FUORI banda; ma con il centro x1,4 cadrebbe a x2,2-2,5, DENTRO la banda. Quindi la banda DA SOLA non
 #     prende l'errore di unita': lo prendono il driver (conta le righe SETUP a parte dai riempiti e pretende operazioni del report = riempiti_somma) e il
-#     controllo incrociato di A2 (n previsto dalle frazioni dell'imbuto: x1,4 contro x2,2-2,5 misurato = scarto 60%, sopra il 25%; con il limite
+#     controllo incrociato di A2 (n previsto dalle frazioni dell'imbuto: x1,4 contro x2,2-2,5 misurato = scarto 57-79%, sopra il 25%; con il limite
 #     [INFERITO] scritto in A2), NON il lettore (per M30 un lettore passato non esiste, LIMITI). Il rapporto riempiti/setup qui sopra e' una lettura in piu'.
 #  A2 [imbuto: frazione f respinta dal FILTRO]. DEFINIZIONE (emendata PRIMA dei numeri M30): f = respinti dal filtro / (respinti dal filtro +
 #     valutazioni arrivate DOPO il filtro), somma di tutti i giorni; dopo il filtro = semaforo + nessun ordine valido + ARMATO + le OCCUPATE DELLA
@@ -151,8 +160,12 @@
 #     filtri (EA r.1596 v1.12, condizione `if(gSet[L].attivo && gSet[L].riempito)`) e quello della guardia, DOPO i filtri. ISTRUZIONE DI LETTURA: chi
 #     legge (lettore M30 futuro o lettura a mano) conta la guardia SEPARATAMENTE dalle righe 'guardia anti-duplicato' di log\<passata>.txt e la toglie
 #     dal campo occupata; il driver NON lo fa (raccoglie il giornale, non lo scompone).
+#     Per l'ADX (stadio PRECEDENTE all'inclinazione: Contesto, EA r.1556-1557 v1.12, e NC_Contesto r.599-603) "dopo il filtro" comprende ANCHE i
+#     respinti dall'inclinazione: f ADX = ADX / (ADX + inclinazione + semaforo + nessun ordine valido + ARMATO + guardia). Confluenza, spread, timing,
+#     conferma, ritardo, apertura lontana stanno dopo i filtri e valgono 0 nel pilota: se su M30 non sono 0, entrano nel "dopo" (per entrambi i filtri).
 #     Valori H1 del pilota con la definizione emendata [MISURATO: ricontato sul giornale dello zip archiviato]: INCLINAZIONE oro AUDIO GEOM 0,493, PIU
-#     0,486; EURUSD AUDIO 0,503; EURUSD M2 0,156 (M2 si riarma a ogni barra: per barra, non per setup). ADX oro AUDIO 0,356 / 0,362, EURUSD AUDIO 0,306.
+#     0,486; EURUSD AUDIO 0,503; EURUSD M2 0,156 (M2 si riarma a ogni barra: per barra, non per setup). ADX (formula qui sopra) oro AUDIO 0,356 / 0,362,
+#     EURUSD AUDIO 0,306.
 #     Righe di guardia: 64 / 64 / 55 / 70. VECCHIA DEFINIZIONE (senza le occupate della guardia): inclinazione 0,500 / 0,493 / 0,509 / 0,161; ADX 0,359 /
 #     0,365 / 0,308.
 #     IPOTESI 'soglia piu' severa' [DERIVATA]: inclinazione oro AUDIO su M30 ~0,65. IPOTESI 'senza scala': ~0,49-0,50. SOGLIE DI LETTURA, CONGELATE PRIMA
@@ -242,8 +255,10 @@
 #  - Il lettore leggi_natcla_f1.py (SHA256 728F3489, passato) NON legge questo lotto: ha VERSIONE_EA = 1.11 cablata (ogni passata v1.12 uscirebbe KO per
 #    '#AVVIO del CSV senza v1.11') e cerca nello zip il file prova madre per nome (senza --prova legge i blocchi della madre, dove AUDIO_M30 non esiste).
 #    Per leggere questo lotto serve una modifica del lettore (versione ammessa per lotto, file prova dallo zip) che passa dal cancello, oppure un
-#    lettore M30 separato. Il driver di questo lotto RACCOGLIE e controlla l'affidabilita' di ogni passata (come per F1); il confronto H1/M30 (A0-A3)
-#    e' scritto sopra con i comandi e i numeri di riferimento.
+#    lettore M30 separato. Il driver di questo lotto RACCOGLIE e controlla l'affidabilita' di ogni passata (come per F1). Del confronto H1/M30 c'e'
+#    un COMANDO solo per A0 (diff delle righe 'SETUP;' dei due CSV); A1 si legge dalle colonne setup_righe e riempiti_somma del MANIFEST; A2 si conta
+#    A MANO dalle righe [NATCLA-IMBUTO] e 'guardia anti-duplicato' di log\<passata>.txt; A3 (durata in minuti) dalla colonna durata_min dei CSV.
+#    Nessuno di questi conti e' automatizzato: i numeri di riferimento H1 sono scritti sopra.
 #  - Soglie d'inclinazione TRASPORTATE da H1 (sopra): la regola del passo 0 NON e' rispettata alla lettera, ed e' scritto.
 #  - Un regime, un broker (BCM), ExecutionMode 0, spread dei tick del tester. Due simboli. Un lato per simbolo.
 #
