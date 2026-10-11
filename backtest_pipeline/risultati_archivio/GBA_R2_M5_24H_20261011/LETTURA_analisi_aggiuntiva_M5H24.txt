@@ -1,0 +1,185 @@
+# python3 -I analisi_m5h24.py <worktree> GBA_R0_R2M5H24.zip GBA_R0_R2NOTTEM5.zip   -- STRUMENTO DI ANALISI DESCRITTIVA, NON PASSATO DAL CANCELLO
+# analisi_m5h24.py SHA256 3dc9ee22fdd6978fb10b8608c2e52cc1d8286bf632a0a2365200bdbaeb398ff9
+=== A. COERENZA col lettore: n, netto, PF_V per tranche e totale (parser indipendente del tool ingressi_comuni)
+  passata H24 T1: deal 672 posizioni 336 aperte a fine 0 costo imputato False chiavi duplicate 0
+  passata H24 T2: deal 686 posizioni 343 aperte a fine 0 costo imputato False chiavi duplicate 0
+  passata H24 T3: deal 762 posizioni 381 aperte a fine 0 costo imputato False chiavi duplicate 0
+  H24 T1  n  336  PF_V  0.897  netto  -10991.66  medio   -32.71
+  H24 T2  n  343  PF_V  0.873  netto  -18364.28  medio   -53.54
+  H24 T3  n  381  PF_V  0.954  netto  -10715.76  medio   -28.13
+  H24 TOT n 1060  PF_V  0.918  netto  -40071.70  medio   -37.80
+  (lettore: T1 336 PF_V 0.90 | T2 343 0.87 | T3 381 0.95 | tot 1060 PF_V 0.918 netto -40072)
+  NOTTEM5 T1  n   93  PF_V  0.873  netto   -3818.05  medio   -41.05
+  NOTTEM5 T2  n   97  PF_V  0.848  netto   -6325.25  medio   -65.21
+  NOTTEM5 T3  n  113  PF_V  2.094  netto   47462.45  medio   420.02
+  NOTTEM5 TOT n  303  PF_V  1.325  netto   37319.15  medio   123.17
+  (lettore ancora: 93 / 97 / 113 ; tot 303 PF_V 1.325 netto 37319)
+
+=== B. FASCE (ora server del deal d'ingresso) - controllo contro la tabella S6 del lettore
+  asia            00-07  n  296  PF_V  1.111  netto   12732.06  medio    43.01  || T1 n  93 PF  0.87 netto     -3818 | T2 n  94 PF  0.79 netto     -8603 | T3 n 109 PF  1.58 netto     25154
+  europa          07-12  n  230  PF_V  0.560  netto  -50551.90  medio  -219.79  || T1 n  73 PF  1.09 netto      1862 | T2 n  81 PF  0.62 netto    -12794 | T3 n  76 PF  0.35 netto    -39620
+  pausa           12-14  n  136  PF_V  1.131  netto    6574.20  medio    48.34  || T1 n  61 PF  1.05 netto       747 | T2 n  41 PF  1.28 netto      4282 | T3 n  34 PF  1.09 netto      1545
+  USA apertura    14-17  n  227  PF_V  0.654  netto  -44980.68  medio  -198.15  || T1 n  68 PF  0.48 netto    -15977 | T2 n  69 PF  0.72 netto     -7963 | T3 n  90 PF  0.70 netto    -21040
+  USA pomeriggio  17-22  n  159  PF_V  1.332  netto   23244.37  medio   146.19  || T1 n  40 PF  1.72 netto      6228 | T2 n  49 PF  1.11 netto      2364 | T3 n  70 PF  1.36 netto     14653
+  rollover        22-24  n   12  PF_V  3.211  netto   12910.25  medio  1075.85  || T1 n   1 PF  0.00 netto       -33 | T2 n   9 PF  1.75 netto      4351 | T3 n   2 PF 1105.51 netto      8593
+
+=== C. NOTTE (00-07) CONTRO RESTO (07-24): SOLO DESCRIZIONE (il resto 07-24 NON e' l'unione 07-22 della prova: include 12 op. rollover)
+  notte 00-07                            TOT n  296  PF_V  1.111  netto   12732.06  medio    43.01
+  notte 00-07                            T1  n   93  PF_V  0.873  netto   -3818.05  medio   -41.05
+  notte 00-07                            T2  n   94  PF_V  0.793  netto   -8603.40  medio   -91.53
+  notte 00-07                            T3  n  109  PF_V  1.580  netto   25153.51  medio   230.77
+  resto 07-24                            TOT n  764  PF_V  0.858  netto  -52803.76  medio   -69.11
+  resto 07-24                            T1  n  243  PF_V  0.906  netto   -7173.61  medio   -29.52
+  resto 07-24                            T2  n  249  PF_V  0.906  netto   -9760.88  medio   -39.20
+  resto 07-24                            T3  n  272  PF_V  0.812  netto  -35869.27  medio  -131.87
+  giorno 07-22 [solo conteggio n/netto]  TOT n  752  netto  -65714.01  medio   -87.39
+  giorno 07-22 [solo conteggio n/netto]  T1  n  242  netto   -7140.25  medio   -29.51
+  giorno 07-22 [solo conteggio n/netto]  T2  n  240  netto  -14111.44  medio   -58.80
+  giorno 07-22 [solo conteggio n/netto]  T3  n  270  netto  -44462.32  medio  -164.68
+  somma netto notte + resto = -40071.70 (totale H24 -40071.70)
+
+=== D. INGRESSI COMUNI con R2NOTTEM5 (chiave = tranche, data-ora server del deal d'ingresso, lato) - per le sole barre NOTTE (ingresso 00:00-06:59) di H24
+=== R2NOTTEM5 -> H24_notte
+  coerenza: comuni 296 + solo-R2NOTTEM5 7 = 303 (n R2NOTTEM5 303) | comuni 296 + solo-H24_notte 0 = 296 (n H24_notte 296)
+  [TOT] cella R2NOTTEM5: n  303 PF_V 1.3246 medio   123.17 netto   37319.15
+  [TOT] cella H24_notte: n  296 PF_V 1.1108 medio    43.01 netto   12732.06
+  [TOT] comuni con uscita R2NOTTEM5: n  296 PF_V 1.1108 medio    43.01 netto   12732.06
+  [TOT] comuni con uscita H24_notte: n  296 PF_V 1.1108 medio    43.01 netto   12732.06
+  [TOT] solo-R2NOTTEM5 (REMOVED): n    7 PF_V inf medio  3512.44 netto   24587.09
+  [TOT] solo-H24_notte (ADDED)  : n    0 PF_V nan medio      nan netto       0.00
+  [TOT] d_netto = uscita sui comuni +0.00 + ADDED +0.00 - REMOVED +24587.09 = -24587.09
+  [T1] cella R2NOTTEM5: n   93 PF_V 0.8730 medio   -41.05 netto   -3818.05
+  [T1] cella H24_notte: n   93 PF_V 0.8730 medio   -41.05 netto   -3818.05
+  [T1] comuni con uscita R2NOTTEM5: n   93 PF_V 0.8730 medio   -41.05 netto   -3818.05
+  [T1] comuni con uscita H24_notte: n   93 PF_V 0.8730 medio   -41.05 netto   -3818.05
+  [T1] solo-R2NOTTEM5 (REMOVED): n    0 PF_V nan medio      nan netto       0.00
+  [T1] solo-H24_notte (ADDED)  : n    0 PF_V nan medio      nan netto       0.00
+  [T1] d_netto = uscita sui comuni +0.00 + ADDED +0.00 - REMOVED +0.00 = +0.00
+  [T2] cella R2NOTTEM5: n   97 PF_V 0.8477 medio   -65.21 netto   -6325.25
+  [T2] cella H24_notte: n   94 PF_V 0.7928 medio   -91.53 netto   -8603.40
+  [T2] comuni con uscita R2NOTTEM5: n   94 PF_V 0.7928 medio   -91.53 netto   -8603.40
+  [T2] comuni con uscita H24_notte: n   94 PF_V 0.7928 medio   -91.53 netto   -8603.40
+  [T2] solo-R2NOTTEM5 (REMOVED): n    3 PF_V inf medio   759.38 netto    2278.15
+  [T2] solo-H24_notte (ADDED)  : n    0 PF_V nan medio      nan netto       0.00
+  [T2] d_netto = uscita sui comuni +0.00 + ADDED +0.00 - REMOVED +2278.15 = -2278.15
+  [T3] cella R2NOTTEM5: n  113 PF_V 2.0942 medio   420.02 netto   47462.45
+  [T3] cella H24_notte: n  109 PF_V 1.5799 medio   230.77 netto   25153.51
+  [T3] comuni con uscita R2NOTTEM5: n  109 PF_V 1.5799 medio   230.77 netto   25153.51
+  [T3] comuni con uscita H24_notte: n  109 PF_V 1.5799 medio   230.77 netto   25153.51
+  [T3] solo-R2NOTTEM5 (REMOVED): n    4 PF_V inf medio  5577.23 netto   22308.94
+  [T3] solo-H24_notte (ADDED)  : n    0 PF_V nan medio      nan netto       0.00
+  [T3] d_netto = uscita sui comuni +0.00 + ADDED +0.00 - REMOVED +22308.94 = -22308.94
+  ordine: comuni 296, stessa ora d'uscita 296, stessa ora E stesso netto 296, uscita diversa 0
+  chiave: comuni con prezzo o volume d'ingresso DIVERSO: 0
+  chiave: comuni con S/L iniziale (tabella Ordini) DIVERSO: 0; senza S/L leggibile in R2NOTTEM5: 0
+  comuni con stessa ora d'uscita: somma |netto B - netto A| = 0.00 (n 296)
+  uscite diverse, motivo in R2NOTTEM5: {} | in H24_notte: {}
+  uscite diverse: R2NOTTEM5 n    0 PF_V nan medio      nan netto       0.00 | H24_notte n    0 PF_V nan medio      nan netto       0.00
+  notte di H24: 296 ingressi (R2NOTTEM5: 303)
+  --- solo-R2NOTTEM5 (REMOVED in H24): per ogni caso, c'era in H24 una posizione aperta (entrata prima) che occupava la finestra? 
+    occupata da posizione H24 entrata di giorno/sera (>=07)                          7
+  --- bootstrap per GIORNO (5.000, seed 12345) del delta PF_V sugli ingressi COMUNI (H24_notte - R2NOTTEM5, appaiato)
+  comuni 296 giorni 165 delta +0.0000 sd 0.0000 [p2,5 +0.0000 ; p97,5 +0.0000] P(delta<=0) 1.000
+
+=== E. POSIZIONI APERTE DURANTE LA PAUSA GIORNALIERA DEI PREZZI (regola del repo: buco 23:00-00:05 server fino all'08/03/2026, 22:00-23:00 dal 09/03)
+  [regola del repo]
+    TOT attraversano: n   28  PF_V 13.314  netto   62799.64  medio  2242.84 | senza di loro: n 1032  PF_V  0.786  netto -102871.34  medio   -99.68
+    T1  attraversano: n    6  PF_V  4.217  netto    2579.75  medio   429.96 | senza di loro: n  330  PF_V  0.871  netto  -13571.41  medio   -41.13
+    T2  attraversano: n    8  PF_V 521.645  netto   17040.71  medio  2130.09 | senza di loro: n  335  PF_V  0.756  netto  -35404.99  medio  -105.69
+    T3  attraversano: n   14  PF_V 11.123  netto   43179.18  medio  3084.23 | senza di loro: n  367  PF_V  0.766  netto  -53894.94  medio  -146.85
+  [finestra LARGA 22:00-00:05 sempre (contro-esempio)]
+    TOT attraversano: n   41  PF_V  6.999  netto   74268.26  medio  1811.42 | senza di loro: n 1019  PF_V  0.759  netto -114339.96  medio  -112.21
+    T1  attraversano: n    7  PF_V  4.049  netto    2546.39  medio   363.77 | senza di loro: n  329  PF_V  0.872  netto  -13538.05  medio   -41.15
+    T2  attraversano: n   17  PF_V  4.669  netto   21391.27  medio  1258.31 | senza di loro: n  326  PF_V  0.715  netto  -39755.55  medio  -121.95
+    T3  attraversano: n   17  PF_V  9.807  netto   50330.60  medio  2960.62 | senza di loro: n  364  PF_V  0.733  netto  -61046.36  medio  -167.71
+  posizioni attraversanti (regola del repo), una per riga:
+      T3 2026-01-08 21:30:00 -> 2026-01-09 00:48:00 buy  netto     143.45  uscita 'sl 4473.71'  durata 3:18:00
+      T3 2026-01-12 21:45:00 -> 2026-01-13 00:16:36 sell netto     486.26  uscita 'sl 4587.25'  durata 2:31:36
+      T3 2026-01-22 21:15:00 -> 2026-01-23 00:14:10 buy  netto    1606.84  uscita 'sl 4946.91'  durata 2:59:10
+      T3 2026-01-27 21:50:00 -> 2026-01-28 00:22:46 buy  netto     333.80  uscita 'sl 5165.89'  durata 2:32:46
+      T3 2026-01-28 21:05:00 -> 2026-01-29 00:39:25 buy  netto   18103.81  uscita 'sl 5557.03'  durata 3:34:25
+      T3 2026-02-05 21:40:00 -> 2026-02-06 01:24:30 sell netto    9447.05  uscita 'sl 4697.82'  durata 3:44:30
+      T3 2026-02-20 21:25:00 -> 2026-02-23 01:01:00 buy  netto    4956.66  uscita 'sl 5146.11'  durata 2 days, 3:36:00
+      T3 2026-02-23 21:40:00 -> 2026-02-24 00:06:04 buy  netto     420.84  uscita 'sl 5236.57'  durata 2:26:04
+      T3 2026-02-24 21:35:00 -> 2026-02-25 00:05:00 buy  netto   -3024.45  uscita 'sl 5161.05'  durata 2:30:00
+      T3 2026-02-25 21:20:00 -> 2026-02-26 00:13:38 sell netto    1435.69  uscita 'sl 5168.35'  durata 2:53:38
+      T3 2026-02-27 21:25:00 -> 2026-03-02 00:06:21 buy  netto    8572.16  uscita 'sl 5364.00'  durata 2 days, 2:41:21
+      T3 2026-03-02 21:10:00 -> 2026-03-03 00:06:40 buy  netto    -119.59  uscita 'sl 5339.60'  durata 2:56:40
+      T3 2026-03-12 21:35:00 -> 2026-03-12 23:05:00 sell netto   -1121.23  uscita 'sl 5083.76'  durata 1:30:00
+      T3 2026-03-18 20:00:00 -> 2026-03-18 23:06:36 sell netto    1937.89  uscita 'sl 4829.96'  durata 3:06:36
+      T2 2026-04-07 20:50:00 -> 2026-04-07 23:18:37 buy  netto    1714.03  uscita 'sl 4726.35'  durata 2:28:37
+      T2 2026-04-10 21:30:00 -> 2026-04-12 23:10:54 sell netto    5848.38  uscita 'sl 4676.45'  durata 2 days, 1:40:54
+      T2 2026-05-11 21:05:00 -> 2026-05-12 00:11:51 buy  netto     816.49  uscita 'sl 4748.03'  durata 3:06:51
+      T2 2026-05-12 19:35:00 -> 2026-05-12 23:09:10 buy  netto    1944.09  uscita 'sl 4713.29'  durata 3:34:10
+      T2 2026-05-14 20:45:00 -> 2026-05-14 23:05:00 sell netto     161.10  uscita 'sl 4653.45'  durata 2:20:00
+      T2 2026-05-19 20:55:00 -> 2026-05-19 23:34:52 sell netto     -32.73  uscita 'sl 4483.71'  durata 2:39:52
+      T2 2026-06-10 20:05:00 -> 2026-06-10 23:33:27 sell netto    3762.39  uscita 'sl 4052.63'  durata 3:28:27
+      T2 2026-06-11 20:05:00 -> 2026-06-11 23:06:27 buy  netto    2826.96  uscita 'sl 4207.65'  durata 3:01:27
+      T1 2026-07-01 20:40:00 -> 2026-07-01 23:06:47 sell netto    1390.36  uscita 'sl 4039.80'  durata 2:26:47
+      T1 2026-08-10 19:40:00 -> 2026-08-11 00:09:14 buy  netto    1225.14  uscita 'sl 4396.78'  durata 4:29:14
+      T1 2026-08-18 21:25:00 -> 2026-08-18 23:05:00 sell netto    -377.49  uscita 'sl 4337.70'  durata 1:40:00
+      T1 2026-08-19 20:50:00 -> 2026-08-19 23:59:02 buy  netto     487.36  uscita 'sl 4517.29'  durata 3:09:02
+      T1 2026-09-17 21:35:00 -> 2026-09-17 23:31:18 sell netto    -424.30  uscita 'sl 4346.33'  durata 1:56:18
+      T1 2026-09-29 19:40:00 -> 2026-09-29 23:35:24 buy  netto     278.68  uscita 'sl 4178.21'  durata 3:55:24
+  giornale T1: righe con retcode 10018: 0 in 0 giorni: {}
+  giornale T2: righe con retcode 10018: 5 in 1 giorni: {'2026-04-10': 5}
+  giornale T3: righe con retcode 10018: 246 in 11 giorni: {'2026-01-08': 15, '2026-01-12': 30, '2026-01-22': 35, '2026-01-26': 1, '2026-01-28': 49, '2026-02-04': 2, '2026-02-05': 60, '2026-02-20': 1, '2026-02-25': 44, '2026-02-27': 3, '2026-03-02': 6}
+  contro-esempio: giorni con 10018 nel giornale che NON hanno una posizione 'attraversante' per la regola (data d'ingresso o d'uscita nel giorno/seguente):
+    T2 2026-04-10: coperto da posizione attraversante
+    T3 2026-01-08: coperto da posizione attraversante
+    T3 2026-01-12: coperto da posizione attraversante
+    T3 2026-01-22: coperto da posizione attraversante
+    T3 2026-01-26: NON coperto (ordine rifiutato / altro)
+    T3 2026-01-28: coperto da posizione attraversante
+    T3 2026-02-04: NON coperto (ordine rifiutato / altro)
+    T3 2026-02-05: coperto da posizione attraversante
+    T3 2026-02-20: coperto da posizione attraversante
+    T3 2026-02-25: coperto da posizione attraversante
+    T3 2026-02-27: coperto da posizione attraversante
+    T3 2026-03-02: coperto da posizione attraversante
+
+=== F. BOOTSTRAP PER GIORNO del PF_V (5.000, seed 12345; giorno = giorno server dell'ingresso). DESCRITTIVO: leggi_gba_r0.py non lo stampa
+  H24 totale                               n 1060 PF_V 0.918 giorni con ingressi 195  IC95 [0.742 ; 1.123]  P(PF>=1) 0.193
+  H24 senza attraversanti(regola repo)     n 1032 PF_V 0.786 giorni con ingressi 195  IC95 [0.636 ; 0.963]  P(PF>=1) 0.010
+  H24 fascia asia 00-07                    n  296 PF_V 1.111 giorni con ingressi 165  IC95 [0.761 ; 1.594]  P(PF>=1) 0.702
+  H24 resto 07-24                          n  764 PF_V 0.858 giorni con ingressi 194  IC95 [0.639 ; 1.112]  P(PF>=1) 0.129
+  R2NOTTEM5 totale (ancora)                n  303 PF_V 1.325 giorni con ingressi 167  IC95 [0.930 ; 1.839]  P(PF>=1) 0.942
+  H24 T1                                  n  336 PF_V 0.897 giorni  66  IC95 [0.616 ; 1.277]
+  H24 T2                                  n  343 PF_V 0.873 giorni  67  IC95 [0.642 ; 1.170]
+  H24 T3                                  n  381 PF_V 0.954 giorni  62  IC95 [0.674 ; 1.340]
+
+=== G. CONCENTRAZIONE (descrizione): migliori/peggiori operazioni, vita, SL
+  5 migliori: [18104, 9447, 8601, 8572, 8437] | somma 53161 | netto senza le 5 migliori -93233 | gross profit 445954 gross loss -486026
+  5 peggiori: [-4387, -4389, -6424, -6730, -10199]
+
+=== H. MOTIVO D'USCITA (commento deal out) per H24
+  sl                             n 1054  netto  -70064.20  PF  0.856
+  a mercato(commento vuoto)      n    6  netto   29992.50  PF    inf
+
+=== I. I 7 INGRESSI DI R2NOTTEM5 CHE H24 NON HA (solo-R2NOTTEM5): chi li occupa, che rango hanno, e CONTRO-ESEMPIO (sorteggio casuale di 7 su 303)
+  T2 2026-04-08 00:05:00 buy  netto in R2NOTTEM5   1181.20 (rango  44 su 303) | in H24 occupata da posizione 2026-04-07 23:35:00 -> 2026-04-08 01:25:16 buy netto 5407.60 attraversante-pausa False
+  T2 2026-04-20 00:05:00 sell netto in R2NOTTEM5    917.43 (rango  54 su 303) | in H24 occupata da posizione 2026-04-19 23:15:00 -> 2026-04-20 00:43:18 sell netto 2132.14 attraversante-pausa False
+  T2 2026-05-25 00:05:00 buy  netto in R2NOTTEM5    179.52 (rango  86 su 303) | in H24 occupata da posizione 2026-05-24 23:15:00 -> 2026-05-25 00:57:12 buy netto 1339.09 attraversante-pausa False
+  T3 2026-01-29 00:05:00 buy  netto in R2NOTTEM5   9291.06 (rango   1 su 303) | in H24 occupata da posizione 2026-01-28 21:05:00 -> 2026-01-29 00:39:25 buy netto 18103.81 attraversante-pausa True
+  T3 2026-02-06 00:25:00 sell netto in R2NOTTEM5   4893.73 (rango   5 su 303) | in H24 occupata da posizione 2026-02-05 21:40:00 -> 2026-02-06 01:24:30 sell netto 9447.05 attraversante-pausa True
+  T3 2026-02-23 00:10:00 buy  netto in R2NOTTEM5    885.87 (rango  57 su 303) | in H24 occupata da posizione 2026-02-20 21:25:00 -> 2026-02-23 01:01:00 buy netto 4956.66 attraversante-pausa True
+  T3 2026-03-25 00:20:00 buy  netto in R2NOTTEM5   7238.28 (rango   2 su 303) | in H24 occupata da posizione 2026-03-24 23:10:00 -> 2026-03-25 03:15:00 buy netto 8600.83 attraversante-pausa False
+  top 10 di R2NOTTEM5 per netto: [('T3', '2026-01-29 00:05:00', 9291), ('T3', '2026-03-25 00:20:00', 7238), ('T3', '2026-01-30 03:10:00', 5531), ('T2', '2026-05-28 02:15:00', 5400), ('T3', '2026-02-06 00:25:00', 4894), ('T3', '2026-01-12 00:10:00', 4303), ('T3', '2026-02-17 06:15:00', 3793), ('T3', '2026-03-09 00:10:00', 3665), ('T2', '2026-06-19 01:10:00', 3662), ('T3', '2026-02-24 02:05:00', 3628)]
+  sorteggio casuale di 7 su 303 (20.000 estrazioni, seed 777): P(netto rimosso >= 24587) = 0.0001
+  R2NOTTEM5 senza questi 7: n 296 PF_V 1.1108 netto 12732.06 (= i 296 comuni)
+
+=== J. ANCORA: posizioni di R2NOTTEM5 che attraversano la pausa
+  R2NOTTEM5 attraversanti (regola repo): 0 ; (finestra larga): 1
+
+=== K. DD: rapporto H24 / R2NOTTEM5 per tranche (equity, dal lettore: H24 22801.9 / 34924.97 / 47781.48 ; N5 11534.23 / 21663.21 / 11548.58)
+  T1 1.98x
+  T2 1.61x
+  T3 4.14x
+
+=== L. Senza le attraversanti, per fascia (descrizione): n, netto, PF_V
+  asia            senza: n  296  PF_V  1.111  netto   12732.06  medio    43.01 | attraversanti n 0 netto 0
+  europa          senza: n  230  PF_V  0.560  netto  -50551.90  medio  -219.79 | attraversanti n 0 netto 0
+  pausa           senza: n  136  PF_V  1.131  netto    6574.20  medio    48.34 | attraversanti n 0 netto 0
+  USA apertura    senza: n  227  PF_V  0.654  netto  -44980.68  medio  -198.15 | attraversanti n 0 netto 0
+  USA pomeriggio  senza: n  131  PF_V  0.390  netto  -39555.27  medio  -301.95 | attraversanti n 28 netto 62800
+  rollover        senza: n   12  PF_V  3.211  netto   12910.25  medio  1075.85 | attraversanti n 0 netto 0

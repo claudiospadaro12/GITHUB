@@ -1,0 +1,3 @@
+GBA R2 M5 24H -- pin 44671dc2cf24f43473a70ebe1b74e749f9e5defe   pc DESKTOP-H4D7CAJ   inizio 2026-10-11 17:57:44   fine 2026-10-11 18:01:31   minuti 4
+R2M5H24 rc 0   minuti 4
+copiato GBA_R0_R2M5H24.zip
