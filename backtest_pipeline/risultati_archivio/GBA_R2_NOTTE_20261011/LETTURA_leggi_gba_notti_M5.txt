@@ -1,0 +1,175 @@
+====================================================================================================
+ GBA R2NOTTE -- lettura PER NOTTE (leggi_gba_notti v1 (bozza)). BOZZA, NON passata dal cancello.
+ Lettore importato: leggi_gba_r0.py SHA256 9CD02D2A3BD30E3DF555F20FC0342CFCCCAB80222AD671F0BF727BE1DEAF862F (pinnato, verificato)
+ Questo script: SHA256 1404C68D526416519408D209B9B15A294E939E2FA78EB70E0797D0E81BF48255
+ File prova M1: GBA_R2_NOTTEM1_2026-10-10.txt SHA256 B3829E26F4D2EAD7728DDD07DB64DA5B675FBBB86114B25013E1EAB50154B8D7 | HEAD 8159d56a, ultimo commit che tocca il file a3a2823b
+ File prova M5: GBA_R2_NOTTEM5_2026-10-10.txt SHA256 F6D0CFCD9D729E48D7C0EE87AFAA4DE4FD8C9E19AFCE49BB9B55A519468A528A | HEAD 8159d56a, ultimo commit che tocca il file a3a2823b
+ Attese e soglie sono LETTE da questi file al momento della lettura (nessuna copiata nello script). Fascia notturna dichiarata: ora server 00:00-06:59.
+ Soglie della lettura per notte, lette dal file prova M1: notti minime 30, q alta 0.3, q bassa 0.1, finestra 7 notti (derivate dell'autore, non criteri firmati)
+ Zip caricati: m5_zip.zip
+ Le parole citate dai file prova passano da un filtro che maschera con [x] la parola vietata dal certificato dei 5 punti; lo script non la scrive.
+====================================================================================================
+
+ LOTTO M1 (R2NOTTEM1): NON PRESENTE fra gli zip caricati
+ Copia del file prova dentro m5_zip.zip: IDENTICA al file letto (le attese sono quelle con cui il lotto e' partito).
+
+====================================================================================================
+ CELLA M5 -- lotto R2NOTTEM5, cella M5 (InpSignalTF=5)  --  file prova GBA_R2_NOTTEM5_2026-10-10.txt
+====================================================================================================
+(1) CONTROLLO DIRETTO: il 100% dei deal d'ingresso con ora SERVER in 00:00-06:59 (anche UNO fuori = 'FILTRO NON COME DICHIARATO': la passata non si legge)
+   R2NOTTEM5_01_M5_T1_m775800         magic 775800  deal d'ingresso 93, dentro la fascia 93, fuori 0  -> LEGGIBILE
+   R2NOTTEM5_02_M5_T2_m775800         magic 775800  deal d'ingresso 97, dentro la fascia 97, fuori 0  -> LEGGIBILE
+   R2NOTTEM5_03_M5_T3_m775800         magic 775800  deal d'ingresso 113, dentro la fascia 113, fuori 0  -> LEGGIBILE
+   TOTALE della cella: deal d'ingresso 303, fuori fascia 0 -> tutti dentro
+(2) PRIMA DI OGNI LETTURA: n, costo e PF_V (PF_V = PF dei netti con la convenzione del lettore; S1: il merito vale solo con n >= 150)
+    costo = mediana sugli ingressi di 2,5 x ATR / (spread + 0,04 USD/oz), dalle righe d'ingresso dell'EA
+   T1  n op   93 | costo mediano 49.1x | PF_V 0.873 | netto -3818.05 EUR   [merito SOSPESO: n < 150]
+   T2  n op   97 | costo mediano 55.2x | PF_V 0.848 | netto -6325.25 EUR   [merito SOSPESO: n < 150]
+   T3  n op  113 | costo mediano 64.1x | PF_V 2.094 | netto 47462.45 EUR   [merito SOSPESO: n < 150]
+   TOT n op  303 | costo mediano 55.6x (quota <13,3x: 0%, quota <40x: 0%; S2 del lettore: PASSA) | PF_V 1.325 | netto 37319.15 EUR
+   concentrazione PER OPERAZIONE (S5, definizione del lettore): migliore operazione = 6% del profitto positivo; netto senza le 5 migliori = 4965 -> non fragile | PF con 7,80 EUR/lotto a giro = 1.311
+   concentrazione PER NOTTE (S5 conta le operazioni e non vede 3 notti da 3 operazioni): senza le 3 migliori notti 18034; senza le 5 migliori notti 7389 -> non fragile per notte  (soglia: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE, scritta nel file prova, r.87)
+(3) ATTESE DEL FILE PROVA (GBA_R2_NOTTEM5_2026-10-10.txt, HEAD 8159d56a, ultimo commit che tocca il file a3a2823b), LETTE a runtime accanto ai numeri
+   n totale = 303  | attesa r.70 'banda 0,5x-2x = 105-420' = 105-420 -> DENTRO attesa
+   smentita r.93 '> 420': n = 303 > 420? -> non scatta
+   smentita r.93 'n < 105': n = 303 < 105? -> non scatta
+   PF_V totale = 1.325 | attesa r.72 'PF_V 0,80-1,10' = 0.80-1.10 -> FUORI attesa
+   costo mediano (+0,04) = 55.6x | attesa r.73 'costo mediano atteso 43-55x' = 43-55x -> FUORI attesa
+   notti = 167 | attesa r.74 'Notti con almeno un ingresso: [NON DERIVATO], banda larga 50-170' = 50-170 -> DENTRO attesa
+   q = 0.629 | attesa r.75 'q 0,40-0,75' [sezione: ATTESE, SCRITTE PRIMA DEI NUMERI (tre tr] = 0.40-0.75 -> DENTRO attesa
+   q = 0.629 | attesa r.103 'q 0,45-0,75' [sezione: IL CRITERIO DI EMILIANO 'NESSUNA NOTTE N] = 0.45-0.75 -> DENTRO attesa
+   Il testo INTERO delle sezioni delle attese, dal file prova (la parola vietata del certificato, se presente, e' mascherata con [x]):
+     --- r.68 ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate)
+     r.69   n [DERIVATO dal proxy del piano, GBA_R2_PIANO 4.3: 5,6 segnali grezzi M5 di notte al giorno x quota che passa il filtro di spread 0,05 (T1 34% / T2 46% / T3 71%) x 0,38
+     r.70   (ingressi su segnali, misurato a M1: a M5 le posizioni durano di piu' e bloccano di piu', quindi e' un tetto)]: T1 ~48, T2 ~64, T3 ~97, totale ~210 -> banda 0,5x-2x = 105-420.
+     r.71   Per tranche: quasi certamente < 150 -> merito per tranche SOSPESO (S1); il totale puo' passare 150. Il piano (4.3) scrive 'n per tranche 20-200, la maggior parte sotto 150'.
+     r.72   PF_V 0,80-1,10 (GBA_R2_PIANO 4.3). COSTO: proxy M5 notte 2026 mediana 43,9x sui segnali grezzi (58% >= 40x); col filtro 0,05 entrano solo gli ingressi con stop >= 50x lo spread
+     r.73   (spread mediano di notte 0,26): costo mediano atteso 43-55x con 0,04 -> PASSA, di poco. Se esce FRA, la cella M5 notte e' fuori frontiera su questo feed (S2): si scrive col numero.
+     r.74   Notti con almeno un ingresso: [NON DERIVATO], banda larga 50-170 (con n ~210 e a M5 il filtro che lascia passare il 34-71% di 5,6 segnali grezzi per notte, ma posizioni di ore
+     r.75   e una sola per volta: quanti ingressi per notte NON e' stimato). q 0,40-0,75.
+     r.76   IPOTESI ALTERNATIVA H-M5N (collega, DICHIARATO DA TERZI), INTERA da GBA_R2_PIANO 4.3: 'PF_V >= 1,3 nella notte in OGNI tranche con n >= 150 E giorno < 1,0'. In QUESTO lotto e'
+     r.77   misurabile SOLO la meta' notturna, e su T1-T3 con n per tranche < 150 nemmeno quella per tranche. La meta' 'giorno < 1,0' richiede la cella M5 a 24 ore (R2T M5), NON in questo
+     r.78   lotto. DEVIAZIONE DAL PIANO, dichiarata: il piano confronta M5 notte con M5 24 ore su 9 tranche; qui il confronto e' con M1 notte (R2NOTTEM1 N7) su 3 tranche: si isola il TF a
+     r.79   parita' di notte, NON la notte a parita' di TF. Controesempi del piano (r.215, TRE): (a) se M5 notte 'vince' solo in T3 (ATR M5 6,65, costo 76% >= 40x) e perde o e' vuota
+     r.80   in T1-T2, la spiegazione e' il regime di volatilita' + il costo, non la notte: lo si vede dalla colonna per tranche del lettore (SI' in questo lotto) e dalla stessa cella a 24 ore
+     r.81   (NON in questo lotto); (b) se la fascia 00-07 vince in M5 ma vince anche 07-22, la fascia non conta: e' il TF -- (b) NON si legge da questo lotto; (c) se la fascia asia a M5
+     r.82   rende solo perche' 2-3 giornate pesano (come il 23/03 su M1: +14.171 EUR in 37 OPERAZIONI, GBA_R2_PIANO r.62), S5 da solo NON basta: S5 conta le OPERAZIONI, non le notti,
+     r.83   ed e' 'non fragile' SOLO se la migliore operazione e' < 25% del positivo E le 5 migliori operazioni sommano MENO del netto (codice S5 del lettore 9CD02D2A: le due gambe,
+     r.84   sempre tutte e due). Casi eseguiti col codice, n=210, PF_V 1,40, notti pesanti P +6.000 in operazioni uguali e piu' grandi delle altre, resto R -1.400 (PF_V 0,88):
+     r.85   3 notti x 3 op, 2 x 4, 1 x 8, 7 x 1 -> 'non fragile'; 1 x 3, 5 x 1, 2 x 3, 3 x 2, 1 x 6 -> FRAGILE. Stesso PF_V 1,40 con R -3.000: 3 x 3, 2 x 4, 1 x 8, 7 x 1 -> FRAGILE,
+     r.86   11 x 1 -> 'non fragile'. Operazioni pesanti diverse (n=210, PF_V 1,40: positivo 16.100, netto 4.600; 1 da 4.100 + 19 da 100, resto R -1.400 senza operazioni sopra 100): le 5 migliori 4.500 < netto 4.600, ma la migliore e' il 25,5% del positivo (4.100 / 16.100) -> FRAGILE. (c) si legge con
+     r.87   la CONCENTRAZIONE PER NOTTE, soglia scritta ORA: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE (si stampa anche senza le 5); la fa lo script di lettura per notte, e
+     r.88   finche' quello non passa dal cancello (c) e' NON MISURATO. Lettura: PF_V >= 1,3 sul TOTALE con n >= 150 = SORPRESA e solo INDIZIO (controesempio di S4: migliore operazione <
+     r.89   25% del netto e replica in 2 tranche su 3 con n >= 150; S5 non FRAGILE e non FRAGILE PER NOTTE; FRAGILE PER NOTTE, o (c) NON MISURATO, -> la SORPRESA NON diventa INDIZIO);
+     r.90   PRIMA di T0 serve R2T M5 sulle stesse tre tranche. Mai 'H-M5N confermata' da questo lotto.
+     r.91   'Doppio del conto in 2 anni, DD 7-11%' NON e' confrontabile (rischio per trade e feed non detti).
+     r.92   CONTROLLO DIRETTO: il 100% dei deal di ingresso con ora server 0-6; anche UNO fuori = filtro non come dichiarato, la passata non si legge.
+     r.93   SMENTITE: n < 105 o > 420 (il proxy sbaglia: si legge prima il giornale, segnali e scarti per spread); PF_V <= 1,03 su n >= 150 = la notte M5 e' indistinguibile dalla REPL (S8).
+     r.94   PASSATE: 1 cella x 3 tranche = 3, ~7 min (i tick del trimestre sono gli stessi di M1).
+     r.95  
+     --- r.96 IL CRITERIO DI EMILIANO 'NESSUNA NOTTE NEGATIVA', TRADOTTO IN MISURA (scritto PRIMA dei numeri)
+     r.97   Fonte: 'non ha chiuso una notte negativa' (live 09/10 r.287, ~7 notti in reale; DICHIARATO, non un criterio: EA_NOTTURNO_GBA_SPECIFICA r.86 e r.116).
+     r.98   Unita': NOTTE = data server con almeno un ingresso 00:00-06:59; netto della notte = somma dei netti PF_V (commissione 3,90 EUR/lotto a giro se il tester non la addebita, S3)
+     r.99   delle posizioni ENTRATE quella notte. Si stampano per tranche e in totale: notti, notti con netto < 0, q = negative / notti, e la quota di FINESTRE di 7 notti consecutive
+     r.100  (con ingressi) senza nessuna notte negativa (osservata), contro il CASO NULLO di notti indipendenti (1 - q)^7.
+     r.101  Lettura (soglie dell'autore, [DERIVATO], scritte ora): con >= 30 notti, q >= 0,30 -> 'nessuna notte negativa' NON e' una proprieta' del metodo su questo feed e regime
+     r.102  ((1 - 0,30)^7 = 0,08: una settimana senza notti negative accade per caso meno di 1 volta su 12); q <= 0,10 -> COMPATIBILE ((0,9)^7 = 0,48); in mezzo: una settimana pulita e'
+     r.103  plausibile per caso e NON dice niente. Con < 30 notti: NON MISURATO. Attesa (R1A post-hoc): q 0,45-0,75 (0,62 sulla REPL a M1) -> la frase di Emiliano descrive una settimana
+     r.104  fortunata, non il metodo. Smentita dell'attesa: q <= 0,30 con >= 30 notti.
+     r.105  STRUMENTO: il lettore leggi_gba_r0.py v5 NON aggrega per notte. Questa lettura e la concentrazione per notte di (c) si fanno con uno script di lettura (deal del report .htm, regola qui sopra) che va scritto e passato
+     r.106  dal cancello PRIMA di aprire gli zip; fino ad allora e' NON MISURATO (nessun conto a mano sui numeri gia' visti).
+     r.107  FRAGILE PER NOTTE e' prudente: blocca solo l'indizio, non archivia niente; quanto spesso scatta con un vantaggio vero NON e' misurato (dipende dalla forma delle vincite e dal numero di notti).
+     r.108  ANCORA E G1: il confronto con R1A vale SOLO se la G1 del lotto R2TTREND (REPL T1 magic 775850) e' VERDE contro R1A T1 (128 / -6577,48 / 0,83); ROSSA o NON VERIFICABILE (anche: R2TTREND non ancora girato) -> nessun numero di questo lotto si confronta con R1A ne' si usa; i numeri ASSOLUTI della notte (n, PF_V, notti negative, costo, DD) restano letti.
+     r.109 
+     r.110  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @GBA-TRANCHE qui sotto (le tre tranche di R1A, nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 le legge dal file)
+     r.111  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+     r.112  @GBA-TRANCHE nome=T2 da=2026.04.01 a=2026.06.30
+     r.113  @GBA-TRANCHE nome=T3 da=2026.01.01 a=2026.03.31
+     r.114  @GBA-ASSE chiave=InpSignalTF tranche=3 celle=1 lotti=1
+     r.115  @GBA-CELLA nome=M5 InpSignalTF=5
+     r.116  @GBA-LOTTO nome=R2NOTTEM5 modello=4 tetto_min=20 passate=M5:T1,M5:T2,M5:T3
+     r.117 
+(4) LA NOTTE: netto per notte, q, finestre contro il caso nullo, bootstrap per notte, dipendenza fra notti
+    notte = data server con almeno un ingresso in fascia; netto = somma dei netti PF_V delle posizioni entrate quella notte; soglie dal file prova (r.101)
+   [T1]
+      notti 57 (con 93 operazioni), negative 40, q = 0.702   [lettura: q >= 0.30: 'nessuna notte negativa' NON e' una proprieta' del metodo su questo feed e regime (soglia derivata dell'autore)]
+      bootstrap per NOTTE (5000 ricampionamenti, seed fisso): q 0.702 [0.579 ; 0.825]  PF_V 0.873 [0.440 ; 1.553]
+      finestre di 7 notti consecutive (scorrevoli, dentro la tranche): 0 su 51 senza notti negative = 0.000 osservata  contro (1-q)^7 = 0.000  (caso nullo di notti indipendenti)
+      CONCENTRAZIONE PER NOTTE: netto -3818; senza le 3 migliori notti -13520; senza le 5 migliori notti -17135 -> FRAGILE PER NOTTE  (soglia: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE, scritta nel file prova, r.87)
+      autocorrelazione del netto per notte (Gemini B3, MISURA non criterio; fra parentesi coppie e banda +-1,96/sqrt(n) del caso di indipendenza): lag1 -0.01 (coppie 56, +-0.26) | lag2 -0.14 (coppie 55, +-0.26) | lag3 -0.08 (coppie 54, +-0.27)
+      q condizionata (lag 1): dopo una notte negativa 0.692 (27 su 39); dopo una notte non negativa 0.706 (12 su 17)
+   [T2]
+      notti 54 (con 97 operazioni), negative 36, q = 0.667   [lettura: q >= 0.30: 'nessuna notte negativa' NON e' una proprieta' del metodo su questo feed e regime (soglia derivata dell'autore)]
+      bootstrap per NOTTE (5000 ricampionamenti, seed fisso): q 0.667 [0.537 ; 0.796]  PF_V 0.848 [0.390 ; 1.630]
+      finestre di 7 notti consecutive (scorrevoli, dentro la tranche): 0 su 48 senza notti negative = 0.000 osservata  contro (1-q)^7 = 0.000  (caso nullo di notti indipendenti)
+      CONCENTRAZIONE PER NOTTE: netto -6325; senza le 3 migliori notti -20650; senza le 5 migliori notti -26508 -> FRAGILE PER NOTTE  (soglia: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE, scritta nel file prova, r.87)
+      autocorrelazione del netto per notte (Gemini B3, MISURA non criterio; fra parentesi coppie e banda +-1,96/sqrt(n) del caso di indipendenza): lag1 +0.08 (coppie 53, +-0.27) | lag2 +0.05 (coppie 52, +-0.27) | lag3 +0.03 (coppie 51, +-0.27)
+      q condizionata (lag 1): dopo una notte negativa 0.743 (26 su 35); dopo una notte non negativa 0.500 (9 su 18)
+   [T3]
+      notti 56 (con 113 operazioni), negative 29, q = 0.518   [lettura: q >= 0.30: 'nessuna notte negativa' NON e' una proprieta' del metodo su questo feed e regime (soglia derivata dell'autore)]
+      bootstrap per NOTTE (5000 ricampionamenti, seed fisso): q 0.518 [0.375 ; 0.643]  PF_V 2.094 [1.294 ; 3.533]
+      finestre di 7 notti consecutive (scorrevoli, dentro la tranche): 0 su 50 senza notti negative = 0.000 osservata  contro (1-q)^7 = 0.006  (caso nullo di notti indipendenti)
+      CONCENTRAZIONE PER NOTTE: netto 47462; senza le 3 migliori notti 28177; senza le 5 migliori notti 18326 -> non fragile per notte  (soglia: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE, scritta nel file prova, r.87)
+      autocorrelazione del netto per notte (Gemini B3, MISURA non criterio; fra parentesi coppie e banda +-1,96/sqrt(n) del caso di indipendenza): lag1 -0.04 (coppie 55, +-0.26) | lag2 -0.18 (coppie 54, +-0.27) | lag3 -0.04 (coppie 53, +-0.27)
+      q condizionata (lag 1): dopo una notte negativa 0.448 (13 su 29); dopo una notte non negativa 0.615 (16 su 26)
+   [TOTALE]
+      notti 167 (con 303 operazioni), negative 105, q = 0.629   [lettura: q >= 0.30: 'nessuna notte negativa' NON e' una proprieta' del metodo su questo feed e regime (soglia derivata dell'autore)]
+      bootstrap per NOTTE (5000 ricampionamenti, seed fisso): q 0.629 [0.557 ; 0.701]  PF_V 1.325 [0.943 ; 1.836]
+      finestre di 7 notti consecutive (scorrevoli, dentro la tranche): 0 su 149 senza notti negative = 0.000 osservata  contro (1-q)^7 = 0.001  (caso nullo di notti indipendenti)
+      CONCENTRAZIONE PER NOTTE: netto 37319; senza le 3 migliori notti 18034; senza le 5 migliori notti 7389 -> non fragile per notte  (soglia: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE, scritta nel file prova, r.87)
+      autocorrelazione del netto per notte (Gemini B3, MISURA non criterio; fra parentesi coppie e banda +-1,96/sqrt(n) del caso di indipendenza): lag1 +0.06 (coppie 164, +-0.15) | lag2 -0.04 (coppie 161, +-0.15) | lag3 +0.04 (coppie 158, +-0.16)
+      q condizionata (lag 1): dopo una notte negativa 0.641 (66 su 103); dopo una notte non negativa 0.607 (37 su 61)
+
+ ANCORA R1A post-hoc (GBA_R0_R1A.zip, REPL 775800, posizioni entrate in fascia, dai deal archiviati): n op 142 | PF_V 0.944 | notti 53 | negative 33 | q 0.623 | costo mediano 50.7x
+ G1 DELL'ANCORA (REPL T1 gemella 775850 di R2TTREND contro R1A T1): VERDE
+   G1 gemelle (cella REPL, tranche T1, Modello 4, magic 775800 [GBA_R0_R1A.zip] e 775850 [GBA_R0_R2TTREND.zip]): operazioni 128.0/128.0, profitto -6577.48/-6577.48, PF 0.83/0.83, DD equity 12511.35/12511.35; deal confrontati 256 (ora, tipo, direzione, volume, prezzo, commissioni, swap, profitto; id escluso) -> VERDE (identiche)
+
+====================================================================================================
+ (5) CONFRONTO: M1 notte contro M5 notte, e contro le ANCORE post-hoc di R1A
+====================================================================================================
+   CONFRONTO M1/M5 NON POSSIBILE: manca o non e' leggibile: M1 notte (R2NOTTEM1)
+   (a) per tranche, ciascuna serie sul proprio insieme di notti; 'R1A post-hoc' = REPL a 24 ore con le posizioni entrate in fascia, filtrate DOPO (non e' il filtro in tester)
+   tr   serie           n op    PF_V  notti  negat.       q     netto
+   T1   R1A post-hoc       6   0.110      6       5   0.833     -3093
+   T1   M5 notte          93   0.873     57      40   0.702     -3818
+   T2   R1A post-hoc      32   0.509     15      12   0.800     -7081
+   T2   M5 notte          97   0.848     54      36   0.667     -6325
+   T3   R1A post-hoc     104   1.123     32      16   0.500      6292
+   T3   M5 notte         113   2.094     56      29   0.518     47462
+   TOT  R1A post-hoc     142   0.944     53      33   0.623     -3882
+   TOT  M5 notte         303   1.325    167     105   0.629     37319
+
+====================================================================================================
+ (6) L'IPOTESI H-M5N DEL COLLEGA (DICHIARATO DA TERZI), INTERA come nel file prova
+====================================================================================================
+   dal file prova GBA_R2_NOTTEM5_2026-10-10.txt, righe 76-91 (HEAD 8159d56a, ultimo commit che tocca il file a3a2823b):
+     r.76   IPOTESI ALTERNATIVA H-M5N (collega, DICHIARATO DA TERZI), INTERA da GBA_R2_PIANO 4.3: 'PF_V >= 1,3 nella notte in OGNI tranche con n >= 150 E giorno < 1,0'. In QUESTO lotto e'
+     r.77   misurabile SOLO la meta' notturna, e su T1-T3 con n per tranche < 150 nemmeno quella per tranche. La meta' 'giorno < 1,0' richiede la cella M5 a 24 ore (R2T M5), NON in questo
+     r.78   lotto. DEVIAZIONE DAL PIANO, dichiarata: il piano confronta M5 notte con M5 24 ore su 9 tranche; qui il confronto e' con M1 notte (R2NOTTEM1 N7) su 3 tranche: si isola il TF a
+     r.79   parita' di notte, NON la notte a parita' di TF. Controesempi del piano (r.215, TRE): (a) se M5 notte 'vince' solo in T3 (ATR M5 6,65, costo 76% >= 40x) e perde o e' vuota
+     r.80   in T1-T2, la spiegazione e' il regime di volatilita' + il costo, non la notte: lo si vede dalla colonna per tranche del lettore (SI' in questo lotto) e dalla stessa cella a 24 ore
+     r.81   (NON in questo lotto); (b) se la fascia 00-07 vince in M5 ma vince anche 07-22, la fascia non conta: e' il TF -- (b) NON si legge da questo lotto; (c) se la fascia asia a M5
+     r.82   rende solo perche' 2-3 giornate pesano (come il 23/03 su M1: +14.171 EUR in 37 OPERAZIONI, GBA_R2_PIANO r.62), S5 da solo NON basta: S5 conta le OPERAZIONI, non le notti,
+     r.83   ed e' 'non fragile' SOLO se la migliore operazione e' < 25% del positivo E le 5 migliori operazioni sommano MENO del netto (codice S5 del lettore 9CD02D2A: le due gambe,
+     r.84   sempre tutte e due). Casi eseguiti col codice, n=210, PF_V 1,40, notti pesanti P +6.000 in operazioni uguali e piu' grandi delle altre, resto R -1.400 (PF_V 0,88):
+     r.85   3 notti x 3 op, 2 x 4, 1 x 8, 7 x 1 -> 'non fragile'; 1 x 3, 5 x 1, 2 x 3, 3 x 2, 1 x 6 -> FRAGILE. Stesso PF_V 1,40 con R -3.000: 3 x 3, 2 x 4, 1 x 8, 7 x 1 -> FRAGILE,
+     r.86   11 x 1 -> 'non fragile'. Operazioni pesanti diverse (n=210, PF_V 1,40: positivo 16.100, netto 4.600; 1 da 4.100 + 19 da 100, resto R -1.400 senza operazioni sopra 100): le 5 migliori 4.500 < netto 4.600, ma la migliore e' il 25,5% del positivo (4.100 / 16.100) -> FRAGILE. (c) si legge con
+     r.87   la CONCENTRAZIONE PER NOTTE, soglia scritta ORA: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE (si stampa anche senza le 5); la fa lo script di lettura per notte, e
+     r.88   finche' quello non passa dal cancello (c) e' NON MISURATO. Lettura: PF_V >= 1,3 sul TOTALE con n >= 150 = SORPRESA e solo INDIZIO (controesempio di S4: migliore operazione <
+     r.89   25% del netto e replica in 2 tranche su 3 con n >= 150; S5 non FRAGILE e non FRAGILE PER NOTTE; FRAGILE PER NOTTE, o (c) NON MISURATO, -> la SORPRESA NON diventa INDIZIO);
+     r.90   PRIMA di T0 serve R2T M5 sulle stesse tre tranche. Mai 'H-M5N confermata' da questo lotto.
+     r.91   'Doppio del conto in 2 anni, DD 7-11%' NON e' confrontabile (rischio per trade e feed non detti).
+   frase del piano report/GBA_R2_PIANO_2026-10-10.md r.212 (per confronto): Ipotesi alternativa H-M5N (Roberto): PF_V >= 1,3 nella notte in OGNI tranche con n >= 150 e giorno < 1,0.
+   CONFRONTO MECCANICO piano/prova: parole e numeri della frase del piano che NON compaiono nel paragrafo del file prova: roberto
+   DICHIARAZIONE: da questo lotto e' misurabile SOLO la meta' NOTTURNA dell'ipotesi (PF_V della notte per tranche, con n >= 150 per tranche). La meta' 'di giorno'
+   non e' in questo lotto (richiede M5 a 24 ore, R2T, e la fascia diurna): e' NON MISURATA qui, e senza di lei l'ipotesi H-M5N intera resta NON ANCORA MISURATA.
+   Clausola (c) (il guadagno poggia su poche giornate?): si legge SOLO con la concentrazione PER NOTTE. M5 notte totale: per operazione (S5) non fragile; per notte non fragile per notte (senza le 3 migliori notti 18034 EUR).
+   Meta' notturna, per tranche (n op >= 150 serve per leggere il merito, S1):
+     T1: n op 93, PF_V 0.873 -> merito NON misurabile per tranche (n < 150)
+     T2: n op 97, PF_V 0.848 -> merito NON misurabile per tranche (n < 150)
+     T3: n op 113, PF_V 2.094 -> merito NON misurabile per tranche (n < 150)
+
+====================================================================================================
+ STATO: NON ANCORA MISURATO. Nessuna casella del certificato dei 5 punti si chiude con questo lotto (uscita ad asse, simboli gemelli, TF su 24 ore restano aperte).
+ Nessun numero qui sopra e' un verdetto sul motore: sono misure della sola notte 2026 (un regime), in-sample (la fascia nasce dalla lettura per ora di R1A); si ripetono in T0.
+====================================================================================================
