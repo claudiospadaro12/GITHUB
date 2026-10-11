@@ -92,19 +92,25 @@
 #     un altro magic: il driver segna KO per 'magic ... invece di 778601' prima ancora del diff.
 #  A1 [n per gamba M30, contro n H1 MISURATO nel pilota]: CENTRO x2,0 [STIMA, NON MISURATO: le barre raddoppiano; ancora del piano F0A: da H1 a H4,
 #     4 volte meno barre, setup forex 5.089 -> 1.225 = x4,15, quasi proporzionale] ma l'ipotesi della soglia trasportata (sopra) da' x1,4 (frazione che
-#     passa l'inclinazione 0,35 invece di 0,50). Banda COERENTE x1,2 - x2,6 di n H1:
+#     passa l'inclinazione 0,35 invece di 0,50). [INFERITO, NON VERIFICATO: il x1,4 assume n proporzionale a (1 - f), e n puo' calare MENO di (1 - f):
+#     f e' contata per VALUTAZIONE di barra per linea (oro H1: 16.953 valutate, 2.063 ARMATO, 144 setup) e il rifiuto dell'inclinazione NON consuma
+#     l'episodio (EA r.1601-1607: il conteggio sta a monte, lo stesso episodio si puo' armare a una barra dopo).] Banda COERENTE x1,2 - x2,6 di n H1:
 #       XAUUSD AUDIO_M30 LONG GEOM  n H1 144 -> 173-374 (centri 288 / 202)    XAUUSD AUDIO_M30 LONG PIU  n H1 134 -> 161-348 (centri 268 / 188)
 #       EURUSD M2_M30 SHORT GEOM    n H1  92 -> 110-239 (centri 184 / 129)
 #     Fuori banda = DA GUARDARE; sotto x0,5 o sopra x5 = STOP (si cerca la causa prima di leggere altro).
-#     SMENTITA della ragione della deviazione: se le DUE gambe dell'oro stanno sotto x1,2, M30 NON porta il campione promesso e la leva del muro dei 150
-#     non funziona su questo motore: si scrive, con il motivo letto nell'imbuto (A2).
+#     SMENTITA della ragione della deviazione, CONDIZIONATA ad A2 (la soglia trasportata e' una deviazione di QUESTO file e puo' da sola tagliare n):
+#     se le DUE gambe dell'oro stanno sotto x1,2 E la frazione respinta dall'inclinazione su M30 (A2, gambe oro AUDIO) e' <= 0,56: M30 NON porta il
+#     campione promesso e la leva del muro dei 150 non funziona su questo motore: si scrive, con il motivo letto nell'imbuto. Se quella frazione e'
+#     >= 0,59 la smentita NON si emette: il campione puo' essere tagliato dalla soglia trasportata e il verdetto sulla leva e' NON ANCORA MISURATO
+#     (manca il passo 0 su M30: conteggio SoloConta con le soglie P50 M30, file prova NUOVO, vedi PASSO SUCCESSIVO). Fra 0,56 e 0,59: non
+#     distinguibile, stessa conclusione (NON ANCORA MISURATO).
 #     BANDE DEL PILOTA CORRETTE (richiesta del pilota, classe 1283): n REALE H1 = 2,16-2,36 volte l'attesa F0 (3 gambe leggibili), quindi i blocchi
 #     ATTESA di questo file sono: H1 = F0 x 2,3 [MISURATO sul pilota, 3 gambe, solo XAUUSD/EURUSD]; M30 = F0 x 2,3 x 2,0 [STIMA, NON MISURATO].
 #     La banda A1 della madre (0,5-2,0 attorno all'attesa) resta la regola del lettore; la banda x1,2-x2,6 qui sopra e' la lettura del CONFRONTO H1/M30.
 #     CONTRO-ESEMPIO: se si contassero ORDINI o DEAL invece dei setup, n M30 = 1,6-1,8 volte i setup (riempiti medi del pilota 1,60-1,77): con il
 #     centro x2,0 cadrebbe a x3,2-3,6 di n H1, FUORI banda; ma con il centro x1,4 cadrebbe a x2,2-2,5, DENTRO la banda. Quindi la banda DA SOLA non
 #     prende l'errore di unita': lo prendono il driver (conta SOLO le righe SETUP e pretende riempiti = operazioni del report) e il controllo incrociato
-#     di A2 (n previsto dalle frazioni dell'imbuto: x1,4 contro x2,2-2,5 misurato = scarto 60%, sopra il 25%).
+#     di A2 (n previsto dalle frazioni dell'imbuto: x1,4 contro x2,2-2,5 misurato = scarto 60%, sopra il 25%; con il limite [INFERITO] scritto in A2).
 #  A2 [imbuto: frazione respinta dal FILTRO, MISURATA sul pilota H1 con lo stesso conto: respinti / (respinti + esiti dopo il filtro), somma di tutti i
 #     giorni]: INCLINAZIONE oro AUDIO GEOM 0,500, PIU 0,493; EURUSD AUDIO 0,509; EURUSD M2 0,161 (M2 si riarma a ogni barra: per barra, non per setup).
 #     ADX oro AUDIO 0,359 / 0,365, EURUSD AUDIO 0,308.
@@ -112,8 +118,10 @@
 #     la soglia H1 si comporta da P50 anche su M30; >= 0,59 = piu' severa (il confronto H1/M30 confonde TF e filtro: si scrive); fra 0,56 e 0,59 = non
 #     distinguibile. Per M2 (per barra) il confronto si fa solo come rapporto M30/H1 contro 0,161, senza soglia.
 #     CONTROLLO INCROCIATO (contro-esempio interno): n_M30 / n_H1 atteso ~ 2 x (1 - f_M30) / (1 - f_H1) con f = frazione respinta dall'inclinazione,
-#     per le due gambe AUDIO. Se lo scarto fra n misurato e questo n previsto supera il 25%, c'e' un'ALTRA differenza fra i TF (tocchi, episodi,
-#     semaforo, ADX): si cerca nelle altre voci dell'imbuto prima di leggere il PF.
+#     per le due gambe AUDIO. [INFERITO, NON VERIFICATO: n puo' calare MENO di (1 - f), perche' f e' per valutazione di barra per linea e il rifiuto
+#     dell'inclinazione non consuma l'episodio (EA r.1601-1607); la proporzionalita' NON e' verificabile con i dati in repo.] Quindi uno scarto oltre il
+#     25% fra n misurato e n previsto e' DA GUARDARE (si cerca nelle altre voci dell'imbuto: tocchi, episodi, semaforo, ADX, prima di leggere il PF),
+#     non una smentita: uno scarto con n misurato SOPRA il previsto e' anche compatibile con l'episodio non consumato.
 #  A3 [E1, fedelta' della geometria, durata mediana]: TP e stop sono in u FISSI (non in barre): la durata da riempimento a uscita NON dipende dal TF al
 #     primo ordine [INFERITO]. Attesa: durata mediana M30 entro x0,5-x2,0 di quella H1 della stessa gamba (oro GEOM 70 min, oro PIU 95, EURUSD M2 20).
 #     ALTERNATIVA: su M30 la ST3,5 e la EMA200 stanno piu' vicine al prezzo, quindi nel modo PIU lo stop e' piu' stretto e la durata puo' ACCORCIARSI;
@@ -163,6 +171,13 @@
 #    un simbolo su 7); (5) TF cambiato: H1, H4 e ora M30. Mancano la 3 e la 4: il verdetto massimo di ogni gamba e' 'NON ANCORA MISURATO (mancano 3 e 4)'.
 #    NESSUN 'morto', NESSUNA promozione, NESSUNA sedia: una sedia su M30 richiederebbe ANCHE la scelta di Claudio fedelta'/misura (la fonte dice non sotto H1).
 #  - RISCHIO (T6): si legge a qualunque n, per gamba, come descrizione (r_max). Il rischio per setup resta il segnaposto 0,25%: nessuna taglia nuova.
+#
+#  ======================= PASSO SUCCESSIVO DICHIARATO (NON in questo lotto) =======================
+#  La via piu' corta alle soglie giuste su M30 e' il PASSO 0 su M30 (report/NATCLA_MISURA_PARAMETRI_2026-10-10.md par. 9): conteggio SoloConta
+#  (InpSoloConta=true, nessun ordine) su XAUUSD ed EURUSD in AUDIO_M30 e M2_M30, da cui le P25/P50/P75 d'inclinazione della famiglia su M30 con la
+#  regola di F0 (LEGGIMI risposta 6), prima di qualunque P/L. Tempo [STIMA, ancora delle passate SoloConta di F0: ~33 s a passata]. NON e' in questo
+#  lotto e NON si lancia con questa riga: richiede un file prova NUOVO e un driver F0 adattato (NATCLA_F0_PASSATE.ps1 ha cablati v1.05, 71 pin e i
+#  lotti PILOTA/A/B/C/D/C0), quindi pin nuovo e cancello. Diventa NECESSARIO se A2 da' una frazione respinta >= 0,56 sulle gambe oro AUDIO.
 #
 #  ======================= LIMITI DICHIARATI =======================
 #  - La v1.12 NON e' mai stata compilata (nessun MetaEditor nella sandbox di chi l'ha scritta): la prima cosa che il driver fa e' compilarla; se la
