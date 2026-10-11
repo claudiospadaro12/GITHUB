@@ -117,7 +117,7 @@
 #       prodotta da R < -5 con DD < 15 (a R <= -5 e DD >= 15 sarebbe ORSO,
 #       che la proxy non suggerisce: DD proxy ~7,6 %).
 #       Questo inverno e' l'ORIGINE dell'osservazione H3 e non conta
-#       come prova (scheda H3 r.187).
+#       come prova (scheda H3 r.186).
 #     - tutti gli altri semestri (inverno 2024/25, apr-ott 2025, apr-ott
 #       2026 e le loro varianti): NESSUNA ATTESA: MISURA NUOVA. Per
 #       apr-ott 2026 la proxy finisce a giugno (apr 46.474 -> giu 50.896
@@ -132,7 +132,7 @@
 #     e' MISTO (+ almeno 5 gambe per lato in ciascuna meta': condizione
 #     sui TRADE, NON misurata qui: il per-trade IS non e' in repo). Questo
 #     script verifica SOLO la parte "etichetta". L'inverno 2025/26 e'
-#     l'origine e non conta (r.187). Attesa scritta: al piu' UN inverno
+#     l'origine e non conta (r.186). Attesa scritta: al piu' UN inverno
 #     BCM (2024/25) puo' contare; la scheda stessa prevede N = 2 in
 #     totale (2015/16 e 2024/25) = NON MISURABILE (r.195 fine).
 #
@@ -447,7 +447,7 @@ FINESTRE = [
     ("OOS_c", "OOS di contratto (tester)", D(2025, 6, 10), D(2026, 6, 30), "b"),
     ("INV24", "inverno 2024/25 (nov-mar)", D(2024, 11, 1), D(2025, 3, 31), "c"),
     ("EST25", "apr-ott 2025", D(2025, 4, 1), D(2025, 10, 31), "c"),
-    ("EST25r", "apr - 9 giu 2025 (solo parte IS, variante scheda H3 r.188)",
+    ("EST25r", "apr - 9 giu 2025 (solo parte IS, variante scheda H3 r.193)",
      D(2025, 4, 1), D(2025, 6, 9), "c"),
     ("INV25", "inverno 2025/26 (nov-mar) = ORIGINE, non conta", D(2025, 11, 1),
      D(2026, 3, 31), "c"),
