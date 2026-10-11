@@ -1,0 +1,6 @@
+T1 deal 12 pos 6 aperte_a_fine 0 | notte: n 6 PF_V 0.1104 netto -3093.45 notti 6 negative 5
+T2 deal 66 pos 33 aperte_a_fine 0 | notte: n 33 PF_V 0.4706 netto -8246.21 notti 15 negative 12
+T3 deal 208 pos 104 aperte_a_fine 0 | notte: n 104 PF_V 1.1229 netto 6292.47 notti 32 negative 16
+TOT n 143 PF_V 0.9282 netto -5047.19 notti 53 negative 33 q 0.6226 | uscite dopo le 07:00 (o altro giorno) 2
+netto senza le 3 migliori notti -16812.36, senza le 5 -22377.25
+finestre 7: 0 su 35 pulite; nullo (1-q)^7 = 0.0011

@@ -1,6 +1,6 @@
-# GBA R2NOTTE -- lotto M5 (notte a M5): lettura parziale del 11/10/2026
+# GBA R2NOTTE -- lotti M1 e M5 (la notte a M1 e a M5): lettura del 11/10/2026
 
-Fonte: `GBA_R0_R2NOTTEM5.zip` (pin 397bd24f, PC `DESKTOP-H4D7CAJ`, 09:19-09:22, 3 passate su 3 OK, 43 s l'una, compilazione 0 errori). **Il lotto M1 NON e' ancora arrivato** (e' arrivato solo questo zip): il confronto M1/M5 e' `NON POSSIBILE`. Lettore: `leggi_gba_notti.py` 1404C68D (PASS con riserve 30c23a17): le riserve C1-C3 sono TUTTE vere (file prova M5 SHA F6D0CFCD identico alla copia nello zip; nessuna riga NON VERIFICATO/NON trovata; soglia per notte letta dal file prova r.87). Lettura rifatta col parser INDIPENDENTE del cancello: **coincide al centesimo** (n, PF_V, netto, notti, notti negative, netto senza le 3 e le 5 migliori notti, finestre).
+Fonte: `GBA_R0_R2NOTTEM5.zip` (pin 397bd24f, PC `DESKTOP-H4D7CAJ`, 09:19-09:22, 3 passate su 3 OK, 43 s l'una, compilazione 0 errori). Il lotto M1 e' arrivato dopo (`GBA_R0_R2NOTTEM1.zip`, stessa corsa, 3 passate OK, 09:19): la sezione 'M1 e confronto' in fondo. Lettore: `leggi_gba_notti.py` 1404C68D (PASS con riserve 30c23a17): le riserve C1-C3 sono TUTTE vere (file prova M5 SHA F6D0CFCD identico alla copia nello zip; nessuna riga NON VERIFICATO/NON trovata; soglia per notte letta dal file prova r.87). Lettura rifatta col parser INDIPENDENTE del cancello: **coincide al centesimo** (n, PF_V, netto, notti, notti negative, netto senza le 3 e le 5 migliori notti, finestre).
 
 ## Cancelli
 - Periodo M5 vero: `InpSignalTF=5`, barre 16.787-17.684, 100% tick reali.
@@ -25,3 +25,16 @@ Fonte: `GBA_R0_R2NOTTEM5.zip` (pin 397bd24f, PC `DESKTOP-H4D7CAJ`, 09:19-09:22, 
 
 ## Stato
 **NON ANCORA MISURATO.** Nessuna casella del certificato si chiude. Prossimo: il lotto M1 (zip mancante), poi la domanda a Gemini sul confronto, poi M5 a 24 ore (richiede riga nuova e cancello) e T0.
+
+## M1 e confronto M1/M5 (zip arrivato dopo)
+Lettura: `leggi_gba_notti.py` 1404C68D su entrambi gli zip (riserve C1-C3 tutte vere; copia file prova identica per M1 e M5) e parser indipendente: **coincidono** (M1: n 143, PF_V 0,928, netto -5.047,19, 53 notti di cui 33 negative, senza le 3 migliori notti -16.812, finestre di 7 notti pulite 0 su 35).
+| tranche | M1 notte n / PF_V / netto | M5 notte n / PF_V / netto |
+|---|---|---|
+| T1 | 6 / 0,110 / -3.093 | 93 / 0,873 / -3.818 |
+| T2 | 33 / 0,471 / -8.246 | 97 / 0,848 / -6.325 |
+| T3 | 104 / 1,123 / +6.292 | 113 / 2,094 / +47.462 |
+| totale | 143 / 0,928 / -5.047 (DENTRO l'attesa 0,75-1,10) | 303 / 1,325 / +37.319 (FUORI) |
+- **M1 notte ridà l'ancora R1A post-hoc quasi identica** (142 contro 143 operazioni; T1 e T3 uguali al centesimo): filtrare la fascia nel tester o dopo da' la stessa cosa. Conferma la lettura dell'ancora e lo e' per il filtro orario.
+- **Sullo stesso insieme di notti** (52 comuni): M1 142 operazioni PF_V 0,933; M5 118 operazioni PF_V 2,053. Ma M5 ha **167 notti con ingressi contro 53**: 114 notti di M5 non hanno nessun ingresso M1. Non e' "la stessa cella cambiando il TF".
+- **Confondente da misurare, non dimostrato [INFERITO]**: il filtro di spread e' un multiplo dell'ATR del timeframe del segnale (`InpSpreadMaxATR` 0,05); l'ATR a M5 e' piu' grande di quello a M1, quindi a M5 lo stesso numero lascia passare piu' spread. Segnali scartati per spread nel giornale: M5 107-216 per tranche su 1.110-1.290 segnali; M1 notte 1.706-2.302 per tranche (non confrontabili per denominatore). La cella M5 cambia due cose insieme: TF e filtro di spread effettivo. Prima di leggere "M5 funziona di notte" va separato (cella M5 con soglia di spread equivalente in assoluto, oppure M5 a 24 ore per il controesempio (b)): sono righe nuove, da far passare dal cancello, NON una griglia (una cella).
+- **Stato: NON ANCORA MISURATO**, come sopra. Nessuna casella del certificato si chiude.
