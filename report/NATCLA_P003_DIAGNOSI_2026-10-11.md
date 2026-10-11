@@ -8,13 +8,23 @@ Che cosa cambia rispetto alla prima stesura:
 - la conclusione "nessun ritentativo poteva vincere" valeva per **4 eventi su 5**, non per tutti: il caso D (25/05/2025, -2.091,48 EUR)
   e' **NON DETERMINABILE** (par. 3.3);
 - "l'unico intervento e' una regola nuova" non era dimostrato: l'opzione C si divide in **C1** (cancellare in anticipo o scadenza lato
-  server, non cambia la vita di una barra) e **C2** (regola nuova); in piu' c'e' il **ritentativo senza pausa alla riapertura** per il caso D;
+  server: accorcia la vita dell'ordine solo dell'anticipo scelto prima della chiusura; non cambia quando e se la scala si arma) e **C2**
+  (regola nuova); in piu' c'e' il **ritentativo senza pausa alla riapertura** per il caso D;
 - le frasi "dal vivo" della tabella del par. 5 sono marcate INFERITO;
 - la citazione del formato CTrade puntava a un file senza righe CTrade: ora punta a quello giusto;
 - i residui li cancella anche il **flip**, non solo X10;
-- gli orfani risolti sono **442** (450 episodi con guardia + 1 cancellazione fallita senza guardia);
+- gli episodi di orfani sono **451** (450 con guardia + 1 senza, M30_004 2024.07.18): **442 risolti dal ritentativo (441 + 1), 9 adottati**;
 - le finestre dell'oro **cambiano con la stagione**: l'INFERITO "sessioni fisse della specifica" e' indebolito;
 - aggiunti: invii sincroni (FATTO di codice), P_004 alle 23:05:00 (smentisce un'alternativa), semaforo E7 che non scatta dopo un'adozione.
+
+**Revisione 3 (stesso giorno), dopo il secondo FAIL @ `f2e1acc9` (classe 1334, @ 4f9b4fe8).** Che cosa cambia rispetto alla revisione 2:
+- l'origine della pausa di 10 s: conta dall'**ultimo ritentativo fallito** (variabile `gOrfTent[L]`, scritta solo a EA r.2091, azzerata
+  in `OnInit` r.1327), **non** dalla guardia; la differenza fra le domeniche oro 2024 (sblocco 23:10:00/:01) e 2025 (23:10:05/:06) e'
+  la fase dell'ultimo ritentativo fallito, non la guardia (par. 3.3);
+- l'opzione B **non** rende determinabile il caso D: lo decidono i tick 23:09:50-23:10:01 e l'orario di sessione, oppure una passata con R;
+- il par. 5 non si contraddice piu' su B; C1 descritta come sopra, con il costo giusto (riempimenti persi, non esposizione);
+- i 10 episodi oro 00:00 -> 00:05 di lug-ott stanno solo nella M30_002 (P_001: zero);
+- la premessa dei "No" A/B/C (la sessione riapre esattamente alle 23:10:00) e' dichiarata, e l'etichetta e' INFERITO con premessa.
 
 **Fonti (tutte in repo, nessun dato nuovo):**
 - **P** = pilota H1 `backtest_pipeline/risultati_archivio/NATCLA_F1_P_20261011/NATCLA_F1_P.zip` (EA **v1.11**: riga `AVVIO v1.11` nei log;
@@ -48,18 +58,21 @@ Etichette: **FATTO** = letto in un file (citato); **INFERITO** = dedotto da fatt
    prefisso `[NatCla]` e il driver la scarta, r.507).
 5. **FATTO** -- Le finestre di chiusura: sull'**EURUSD** stanno ferme (lun-ven 22:00 -> 22:05 da luglio 2024 a febbraio 2025, anche
    attraverso il cambio d'orologio BCM); sull'**oro** cambiano con la stagione (lun-gio: lug-ott 23:00 -> 23:05, nov-dic 22:00 -> 01:10,
-   gen-feb 22:00 -> 00:05, mar-mag 00:00 -> 00:05; P_001 e M30_002, dove in lug-ott compare anche qualche 00:00 -> 00:05). Da dove vengano queste finestre (orari della specifica, buchi dei
-   tick, o tutti e due) e' **NON DETERMINATO**: l'idea "il tester applica una specifica fissa" regge sull'EURUSD e non basta sull'oro.
+   gen-feb 22:00 -> 00:05, mar-mag 00:00 -> 00:05; misurate su P_001 e M30_002; nella sola M30_002 in lug-ott compaiono anche 10
+   episodi 00:00 -> 00:05). Da dove vengano queste finestre (orari della specifica, buchi dei tick, o tutti e due) e' **NON DETERMINATO**: l'idea "il tester applica una specifica fissa" regge sull'EURUSD e non basta sull'oro.
 6. **FATTO (tabella Ordini dei `.htm`)** -- Nei 9 casi adottati il pendente veniva dall'**ultimo riarmo del venerdi** (21:00 H1, 21:30
-   M30, 20:30 M30) e si e' riempito alla riapertura della domenica: P_003 23:05:00, oro 15/09 e 13/10 (3 adozioni) 23:10:00 -- **al
-   secondo d'apertura** -- e oro 25/05 (caso D) **23:10:01**, un secondo dopo. Prezzi eseguiti contro limite: P_003 1.04033 su 1.04032,
+   M30, 20:30 M30) e si e' riempito alla riapertura della domenica: P_003 23:05:00 (lo stesso secondo in cui la P_004 riesce a
+   cancellare), oro 15/09 e 13/10 (3 adozioni) 23:10:00 (il primo secondo in cui le domeniche oro 2024 sbloccano le cancellazioni), e
+   oro 25/05 (caso D) **23:10:01**. Prezzi eseguiti contro limite: P_003 1.04033 su 1.04032,
    15/09 2577.94 su 2578.00, 13/10 2649.95 su 2653.85 e 2652.09 (salto vero), **caso D 3347.87 su 3347.88** (0,01: il prezzo arriva al
    limite, non lo scavalca).
 7. **FATTO (codice + log)** -- Il ritentativo che il compito proponeva **esiste gia' nella v1.12** (Sincronizza EA r.2084-2091, al massimo
    uno ogni 10 s per linea, EA r.387) e risolve 442 orfani su 451. **In 4 eventi su 5** (P_003; oro 15/09 e 13/10) il riempimento cade
-   al primo tick operabile: nessun ritentativo dopo la chiusura poteva vincere (INFERITO forte, par. 3.3). **Nel caso D** il riempimento
-   e' alle 23:10:01 a 0,01 dal limite: se esisteva un tick operabile alle 23:10:00, un ritentativo a ogni tick, senza la pausa di 10 s,
-   l'avrebbe cancellato. **NON DETERMINABILE dai dati** (mancano i tick).
+   al primo tick operabile: nessun ritentativo dopo la chiusura poteva vincere (P_003: INFERITO forte, confronto con la P_004; oro
+   15/09 e 13/10: INFERITO con la premessa dichiarata che la sessione riapra esattamente alle 23:10:00; par. 3.3). **Nel caso D** il
+   riempimento e' alle 23:10:01 a 0,01 dal limite. La pausa di 10 s conta dall'ultimo ritentativo FALLITO (`gOrfTent[L]`, scritto solo a
+   EA r.2091): se fra quel ritentativo e le 23:10:01 c'era un tick operabile, un ritentativo a ogni tick l'avrebbe cancellato. **NON
+   DETERMINABILE dai dati** (mancano i tick 23:09:50-23:10:01 e l'orario di sessione).
 8. **FATTO (codice + `.htm`)** -- Dopo l'adozione restano vivi **gli altri pendenti vecchi**: li cancellano solo X10 alla prima USCITA
    (EA r.2126-2127) o il **flip** della linea (EA r.1591-1593). P_003 riempie anche O2 e O3 un'ora dopo (`riempiti 3`); su M30 i residui
    2468, 2471, 9738 muoiono al flip. Il 13/10/2024 due linee adottate restano aperte insieme (SEMAFORO SFORATO, EA r.2078-2082). E
@@ -84,7 +97,7 @@ Etichette: **FATTO** = letto in un file (citato); **INFERITO** = dedotto da fatt
 | 4 | CancellaOrdiniLinea EA r.1962 | `if(gTrade.OrderDelete(t)) n++;` -- **nessun Log sul ramo falso** | FATTO (codice) |
 | 5 | CancellaSetupNonRiempito EA r.1970 | `ResetSetup(L)` **sempre**, anche se la cancellazione e' fallita: la memoria del setup (rischio, tocco, SL) si perde | FATTO (codice) |
 | 6 | ValutaScala EA r.1611-1612 | `ContaLinea` trova i pendenti ancora vivi -> riga `guardia anti-duplicato (0 posizioni, 3 pendenti ...)` e niente riarmo. La guardia si stampa solo se la valutazione arriva fin li' (filtri e semaforo prima): per questo esiste anche un orfano senza guardia (M30_004, 2024.07.18) | FATTO (codice + log) |
-| 7 | Sincronizza EA r.2090-2091 | linea senza setup, 0 posizioni, pendenti vivi -> ritenta `CancellaOrdiniLinea` al massimo ogni `NC_ORF_PAUSA_SEC`=10 s (EA r.387); se riesce: riga `cancellati N pendenti (pendenti senza setup ...)` | FATTO (codice + log) |
+| 7 | Sincronizza EA r.2090-2091 | linea senza setup, 0 posizioni, pendenti vivi -> ritenta `CancellaOrdiniLinea` se sono passati almeno `NC_ORF_PAUSA_SEC`=10 s (EA r.387) dal ritentativo precedente (`gOrfTent[L]`, scritto solo a r.2091, azzerato in `OnInit` r.1327: il primo ritentativo e' immediato); se riesce: riga `cancellati N pendenti (pendenti senza setup ...)` | FATTO (codice + log) |
 | 8a | -- | alla riapertura il ritentativo riesce: fine dell'episodio (442 orfani su 451) | FATTO (log) |
 | 8b | Sincronizza EA r.2074-2077, AdottaLinea r.2036-2054 | se un pendente vecchio si riempie prima: `ADOTTATO`, setup con `adottato=true`, `riempito=true`, `rischio_soldi`=0, `nPosId`=posizioni del momento | FATTO (codice + log) |
 | 8c | Sincronizza EA r.2092 contro r.2105-2116 | il ramo dell'adozione finisce con `continue`: il blocco del primo riempimento (con il semaforo E7 che cancella le scale armate delle ALTRE linee) non viene eseguito, ne' ora ne' dopo (`riempito` e' gia' true). Non misurato sui dati | FATTO (codice) |
@@ -145,15 +158,21 @@ il TF conta **attraverso l'ora dell'ultimo riarmo**, che decide quanto il penden
 | evento | riempimento | il dato che lo decide | ritentativo piu' fitto avrebbe vinto? |
 |---|---|---|---|
 | P_003 2025.03.02 | 23:05:00, limite 1.04032 -> 1.04033 | P_004, stessi tick: cancellazione riuscita **alle 23:05:00** -> 23:05:00 era operabile e il riempimento e' arrivato prima del ritentativo | **No** (INFERITO forte) |
-| A 2024.09.15 | 23:10:00, 2578.00 -> 2577.94 | le domeniche oro del 2024 sbloccano alle **23:10:00/23:10:01** (P_001 14/07, 28/07, 18/08 alle 23:10:00; 15/09 e 22/09 alle 23:10:01) -> 23:10:00 e' il primo secondo operabile | **No** (INFERITO forte, stessa lettura della P_003) |
-| B e C 2024.10.13 | 23:10:00, salto di 2-4 USD sotto i limiti | come A | **No** (INFERITO forte) |
-| **D 2025.05.25** (il piu' costoso) | **23:10:01**, 3347.88 -> 3347.87 (0,01) | le domeniche oro del 2025 sbloccano alle **23:10:05/23:10:06** (13/04, 25/05, 15/06; P_001 e M30), pur con tick alle 23:10:01 (il riempimento): la pausa di 10 s (EA r.387, r.2090), partita dalla guardia delle 23:05:00, tiene fermo il ritentativo in quei secondi. Se alle 23:10:00 c'era un tick operabile, un ritentativo a ogni tick l'avrebbe cancellato | **NON DETERMINABILE** (mancano i tick fra 23:10:00 e 23:10:01) |
+| A 2024.09.15 | 23:10:00, 2578.00 -> 2577.94 | le domeniche oro del 2024 sbloccano alle **23:10:00/23:10:01** (P_001 14/07, 28/07, 18/08 alle 23:10:00; 15/09 e 22/09 alle 23:10:01): a 23:10:00 si poteva cancellare e al ritentativo precedente no. **Premessa non verificabile qui: la sessione riapre esattamente alle 23:10:00** (se avesse riaperto qualche secondo prima, un ritentativo piu' fitto avrebbe potuto arrivare prima del riempimento) | **No** (INFERITO con premessa dichiarata; con la premessa, stessa lettura della P_003) |
+| B e C 2024.10.13 | 23:10:00, salto di 2-4 USD sotto i limiti | come A, con la stessa premessa | **No** (INFERITO con premessa dichiarata) |
+| **D 2025.05.25** (il piu' costoso) | **23:10:01**, 3347.88 -> 3347.87 (0,01) | la pausa di 10 s (EA r.387) conta dall'ultimo ritentativo FALLITO (`gOrfTent[L]`, scritto solo a EA r.2091, azzerato in `OnInit` r.1327): la guardia (r.1611) e r.1598 non la fanno partire. Nello stesso lotto la M30_001 (come la P_001) cancella solo alle **23:10:06** pur con il tick delle 23:10:01 (il riempimento della M30_002, stessi tick XAUUSD): in quel secondo la pausa era attiva, e l'ultimo ritentativo fallito cade a circa 23:09:52-56 (INFERITO: servono tick in quei secondi). Se fra quel ritentativo e le 23:10:01 c'era un tick operabile (in pratica alle 23:10:00), un ritentativo a ogni tick l'avrebbe cancellato | **NON DETERMINABILE** (mancano i tick 23:09:50-23:10:01 e l'orario di sessione) |
+
+Sulla differenza fra le domeniche oro 2024 (sblocco 23:10:00/:01) e 2025 (23:10:05/:06): l'origine della pausa e' l'**ultimo ritentativo
+fallito**, non la guardia. Con tick fitti i ritentativi cadono ogni ~10 s a partire dal primo tick in cui la linea e' senza setup, e la
+"fase" con cui arrivano alla riapertura decide se il primo ritentativo utile cade a 23:10:00 o qualche secondo dopo (INFERITO: la fase
+dipende dai tick, che non abbiamo).
 
 ### 3.4 Cosa NON e' osservabile nei dati che abbiamo
 1. Il **retcode** e la descrizione di ogni `OrderDelete` fallito (EA r.1962; righe CTrade scartate dal driver r.507).
 2. **Quanti** ritentativi falliti ci sono stati in ogni episodio e a che ora (EA r.2090: ramo falso muto).
 3. Lo **stato della sessione** al momento del tentativo (l'EA non chiede mai `SymbolInfoSessionTrade` ne' `SYMBOL_TRADE_MODE`).
-4. I **tick** intorno alle riaperture (in particolare 2025.05.25 23:10:00-23:10:01, decisivo per il caso D).
+4. I **tick** intorno alle riaperture e l'**orario di sessione** del simbolo (in particolare XAUUSD 2025.05.25 23:09:50-23:10:01,
+   decisivi per il caso D).
 5. L'ordine interno del tester sullo stesso tick (riempimento contro `OnTick`): solo dedotto dal confronto P_003/P_004.
 6. I riarmi di ogni barra (muti dopo il primo, EA r.1669/r.1673) e le cancellazioni riuscite a r.1598 (motivo vuoto): la catena "ordine
    piazzato alla barra k, cancellato alla barra k+1" si vede **solo** nei `.htm`.
@@ -192,20 +211,22 @@ dell'`OrderDelete` non e' scritto in nessun file. Per renderla dimostrabile bast
 
 Il compito chiedeva la v1.13 solo se l'intervento (1) logging + (2) "ritentare finche' riesce" fosse minimo e senza ambiguita'. Non lo e':
 - **(2) c'e' gia'** (EA r.2084-2091, cancello del 07/10 seconda e terza lettura) e risolve **442 orfani su 451**;
-- dei 5 eventi adottati, **4 non li risolve** un ritentativo piu' fitto (riempimento al primo tick operabile, par. 3.3); **sul quinto, il
+- dei 5 eventi adottati, **4 non li risolve** un ritentativo piu' fitto (riempimento al primo tick operabile, par. 3.3: P_003 INFERITO forte, A/B/C INFERITO con la premessa
+  dichiarata); **sul quinto, il
   caso D (-2.091,48 EUR), e' aperto**: la pausa di 10 s potrebbe essere la causa, i dati non bastano a dirlo;
-- per togliere i 4 eventi servono interventi **prima** della chiusura, e ce ne sono di due tipi: quelli che **non cambiano la vita di
-  una barra gia' prevista** (C1) e una **regola nuova** (C2). Non e' dimostrato che serva per forza una regola nuova.
+- per togliere i 4 eventi servono interventi **prima** della chiusura, e ce ne sono di due tipi: quelli che **accorciano la vita
+  dell'ordine solo dell'anticipo scelto prima della chiusura, senza cambiare quando e se la scala si arma** (C1) e una **regola nuova**
+  (C2). Non e' dimostrato che serva per forza una regola nuova.
 
-Il **solo** logging (1) sarebbe minimo e senza ambiguita', ma non risolve: e' l'opzione B, da scegliere esplicitamente.
+Il **solo** logging (1) sarebbe minimo e senza ambiguita', ma non risolve: e' l'opzione B, una delle scelte di Claudio e della collega.
 **Le opzioni non sono scelte qui: decidono Claudio e la collega.**
 
 | opzione | cosa | che cosa toglie | costo | rischi |
 |---|---|---|---|---|
 | **A. Prova senza EA** | cercare nei log grezzi dell'agente del tester (PC di backtest) le righe CTrade dei ticket del par. 4(a). Riga di **sola lettura**, dal cancello come ogni riga | niente (prova la causa) | minuti; nessuna compilazione, nessun nuovo PASS dell'EA | i log possono essere stati sovrascritti; che CTrade scriva i fallimenti nel tester e' INFERITO: se le righe mancano **non** e' una smentita |
-| **B. v1.13 solo diagnostica** | input nuovo `InpLogCancellazioni` (default false = v1.12 identica, giornale compreso): log del ramo falso di `OrderDelete` (r.1962) e log ricco dell'adozione (r.2077). Nessun'altra riga | niente (prova la causa; con i tempi dei tentativi rende **determinabile** il caso D) | compilazione + 2 passate (P_003 H1 e M30_002) con `true` + A0 con default sui due controlli | basso; a `true` il giornale cambia (piu' righe): la lettura del merito va fatta con il default |
-| **R. Ritentativo senza pausa nei secondi della riapertura** | input nuovo, default OFF: dopo una cancellazione fallita, ritentare a **ogni tick** (non ogni 10 s) finche' non riesce o finche' passa un tempo massimo | **forse il caso D** (NON DETERMINABILE oggi); non i 4 eventi al secondo d'apertura | compilazione + rifare le gambe oro | e' la ragione per cui la terza lettura del 07/10 mise la pausa (classe 1165): con un rifiuto permanente (AutoTrading spento, freeze) parte una richiesta a ogni tick; serve un tetto. Dal vivo l'utilita' e' INFERITA: il riempimento lo fa il server, l'EA non puo' competere |
-| **C1. Niente pendenti vivi attraverso una chiusura, senza cambiare la barra** | input nuovo, default OFF. Due varianti: **(a)** cancellare la scala all'**ultimo tick operabile prima della chiusura** (orari da `SymbolInfoSessionTrade`); **(b)** **scadenza lato server** sugli ordini della scala (oggi r.1669 passa `0`; la CFG dei log dice `Scadenza server pendenti = si`; r.1871 la usa solo con `scad>0`) | i 4 eventi al secondo d'apertura **e** il caso D, **se** l'ordine muore prima della chiusura | costo d'esposizione **stimato in secondi o minuti** di vita dell'ordine prima della chiusura (da misurare: e' la parte finale della barra gia' prevista); compilazione + rifare tutte le gambe (tocca ogni chiusura giornaliera) | (a): le sessioni del tester possono non coincidere con il vivo, e sull'oro le finestre cambiano con la stagione (par. 1 punto 5); (b): che tester e server facciano **scadere** un ordine a mercato chiuso e' **IPOTESI** (stesso dubbio della cancellazione); sessioni a cavallo della mezzanotte e piu' sessioni al giorno da collaudare |
+| **B. v1.13 solo diagnostica** | input nuovo `InpLogCancellazioni` (default false = v1.12 identica, giornale compreso): log del ramo falso di `OrderDelete` (r.1962) e log ricco dell'adozione (r.2077). Nessun'altra riga | niente (prova la causa: rende FATTO il retcode). **NON** rende determinabile il caso D: con la pausa invariata, alle 23:10:00 non parte nessun ritentativo da registrare | compilazione + 2 passate (P_003 H1 e M30_002) con `true` + A0 con default sui due controlli | basso; a `true` il giornale cambia (piu' righe): la lettura del merito va fatta con il default |
+| **R. Ritentativo senza pausa nei secondi della riapertura** | input nuovo, default OFF: dopo una cancellazione fallita, ritentare a **ogni tick** (non ogni 10 s) finche' non riesce o finche' passa un tempo massimo | **forse il caso D** (NON DETERMINABILE oggi); non i 4 eventi riempiti al primo tick operabile (con la premessa del par. 3.3) | compilazione + rifare le gambe oro | e' la ragione per cui la terza lettura del 07/10 mise la pausa (classe 1165): con un rifiuto permanente (AutoTrading spento, freeze) parte una richiesta a ogni tick; serve un tetto. Dal vivo l'utilita' e' INFERITA: il riempimento lo fa il server, l'EA non puo' competere |
+| **C1. Niente pendenti vivi attraverso una chiusura (accorcia la vita dell'ordine solo dell'anticipo scelto prima della chiusura; non cambia quando e se la scala si arma)** | input nuovo, default OFF. Due varianti: **(a)** cancellare la scala all'**ultimo tick operabile prima della chiusura** (orari da `SymbolInfoSessionTrade`); **(b)** **scadenza lato server** sugli ordini della scala (oggi r.1669 passa `0`; la CFG dei log dice `Scadenza server pendenti = si`; r.1871 la usa solo con `scad>0`) | i 4 eventi riempiti al primo tick operabile **e** il caso D, **se** l'ordine muore prima della chiusura | i riempimenti **persi** fra la cancellazione anticipata (o la scadenza) e la chiusura (**IPOTESI: secondi o minuti, da misurare**); togliere l'esposizione attraverso la chiusura e' il beneficio, non il costo. Piu' compilazione + rifare tutte le gambe (tocca ogni chiusura giornaliera) | (a): le sessioni del tester possono non coincidere con il vivo, e sull'oro le finestre cambiano con la stagione (par. 1 punto 5); (b): che tester e server facciano **scadere** un ordine a mercato chiuso e' **IPOTESI** (stesso dubbio della cancellazione); sessioni a cavallo della mezzanotte e piu' sessioni al giorno da collaudare |
 | **C2. Niente riarmo prima della chiusura** | input nuovo, default OFF: se la sessione chiude prima della barra successiva la scala **non si arma** | i 4 eventi e il caso D | progetto + cancello + compilazione + tutte le gambe | e' una **regola nuova**, non negli audio: va chiesta a Claudio/collega (lei terrebbe limit aperti a cavallo di una chiusura?). Toglie setup legittimi dell'ultima barra |
 | **D. v1.13 "contabilita' del setup"** | se la cancellazione fallisce il setup **non** si azzera: un riempimento successivo e' registrato come il setup ORIGINALE (rischio, tocco, SL veri, etichetta "riempito dopo cancellazione fallita"); a scelta, all'adozione si cancellano subito i residui | niente sul conto; la riga ha R vero (e i residui, con la seconda parte) | progetto + cancello + compilazione + rifare le gambe | non minimo: tocca l'ordine fra `Sincronizza` (passo 1) e `OnNewBar`, cioe' la sequenza dei ritentativi; la seconda parte cambia i riempimenti (P_003 O2/O3, M30 13/10 O2) |
 | **E. Tolleranza nel lettore** | nessuna modifica all'EA; regole del lettore congelate PRIMA di rileggere (sotto) | niente (le toglie dalla misura) | solo lettore + cancello | **post-hoc**: le adozioni sono gia' viste, quindi le soglie scritte oggi sono scelte guardando i numeri (regola di casa: i criteri si cambiano prima dei numeri, non dopo). E' **INFERITO**, non misurato, che dal vivo esista lo stesso meccanismo (pendenti dell'ultimo riarmo prima della chiusura + salto alla riapertura): dal vivo il riempimento lo fa il server, il 10018 sulle **cancellazioni** dal vivo (BCM/FTMO) non e' misurato e le sessioni del tester possono differire |
@@ -223,9 +244,10 @@ della riga E.
    applicare **solo** ai lotti nuovi: applicarla a M30_002/003 per "salvarle" sarebbe la soglia scelta dopo il numero (oggi 4/236 = 1,7%
    e 4/201 = 2,0%: una soglia al 2% scritta oggi le farebbe passare **per costruzione**).
 
-**Il passo che costa meno e non sceglie niente:** A (minuti, puo' trasformare l'INFERITO in FATTO). Se A non trova le righe, B rende
-determinabile anche il caso D. Le scelte fra R, C1, C2, D, E restano a Claudio e alla collega. Le due passate oro M30 restano
-**illeggibili** finche' la decisione non e' presa: nessuna di queste opzioni le rilegge "gratis".
+**Il passo che costa meno:** A (minuti, sola lettura, nessuna modifica all'EA; puo' trasformare l'INFERITO in FATTO). Il caso D si
+decide solo con i tick XAUUSD 2025.05.25 23:09:50-23:10:01 e l'orario di sessione (sola lettura, dal cancello), oppure con una passata
+con R. B, R, C1, C2, D, E sono scelte di Claudio e della collega. Le due passate oro M30 restano **illeggibili** finche' la decisione non
+e' presa: nessuna di queste opzioni le rilegge "gratis".
 
 ---
 
@@ -234,11 +256,13 @@ determinabile anche il caso D. Le scelte fra R, C1, C2, D, E restano a Claudio e
    riuscito, una sola senza guardia prima (M30_004 2024.07.18 22:05:13 E200). Includendo M30_001 (tick identici alla P_001): 514 episodi.
 2. Le righe delle tabelle 3.1, 3.2 e 3.3 contro le tabelle **Ordini** e **Deal** dei `.htm` (UTF-16) dei due zip, ticket per ticket, e
    contro i log (P_004 2025.03.02 23:05:00; domeniche oro 2024 a 23:10:00/01 e 2025 a 23:10:05/06).
-3. La tabella stagionale dell'oro (par. 1 punto 5) su P_001 e M30_002.
-4. La lettura del codice: EA r.387, 1335-1337, 1591-1593, 1598, 1611-1612, 1669, 1871, 1953-1971 (`ResetSetup` incondizionato a r.1970),
+3. La tabella stagionale dell'oro (par. 1 punto 5) su P_001 e M30_002, e i 10 episodi 00:00 -> 00:05 di lug-ott nella sola M30_002
+   (P_001: zero).
+4. La lettura del codice: `gOrfTent` (grep: dichiarata r.966, azzerata r.1327, scritta SOLO r.2091, letta r.2090); EA r.387, 1335-1337, 1591-1593, 1598, 1611-1612, 1669, 1871, 1953-1971 (`ResetSetup` incondizionato a r.1970),
    2072-2092 contro 2105-2116, 2126-2127, 2245; e che i rami siano identici in v1.11 e v1.12
    (`git diff 4db1af18 d1aef381 -- mql5/Experts/EA_NatCla.mq5`).
-5. Che nessuna frase dica piu' "nessun ritentativo poteva vincere" per tutti i casi, ne' "l'unico intervento e' una regola nuova".
+5. Che nessuna frase dica piu' "nessun ritentativo poteva vincere" per tutti i casi, ne' "l'unico intervento e' una regola nuova", ne' che la pausa parta dalla guardia, ne' che
+   B renda determinabile il caso D.
 6. Che il par. 5 non contenga una soglia scelta sui numeri di M30_002/003 (opzione E, punto 4) e che non scelga un'opzione.
 7. Che **nessun codice EA** sia stato scritto: `git show --stat` del commit deve mostrare solo questo file.
 
