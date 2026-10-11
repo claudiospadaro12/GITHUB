@@ -38961,3 +38961,7 @@ La griglia delle letture incrociate (durata x lato sotto 150) era calcolata SOLO
 ### CLASSE 1372 (11/10/2026, controllo-preventivo, terzo giro sul pacchetto `docs/PER_GEMINI_PIANO_PICCOLO_DEMO_2026-10-11.md` @ `f18e9d38`; numero assegnato dal coordinatore) -- un tasso contato in un'unita' (segnali ESEGUITI, dal per-trade) viene separato con uno strumento che conta in un'altra (barre armate e ordini LIMITE piazzati dall'IMBUTO)
 - **Caso reale.** Q1(a): in una settimana di "ottobre lento" la forma attesa e' `ARMATE>0`, `PIAZZATI>0` e nessuna posizione (ordini limite scaduti dopo `InpPendingExpiryBars`), caso che il testo non classificava: "nessun setup" era associato ad `ARMATE 0`.
 - **Regola.** Quando una riga diagnostica deve separare due spiegazioni di un numero, si scrive in quale unita' conta ciascuna delle due e si elencano TUTTI gli esiti della riga, compreso quello che produce l'ipotesi alternativa.
+
+### CLASSE 1373 (11/10/2026, controllo-preventivo, primo giro su `RIGA_LANCIA_EXPORT_BARRE_DOW_H1.txt` @ `e91d0fa5`; numero assegnato dal coordinatore) -- il DEITTICO della riga ("questo PC", "qui") scritto dal posto dell'autore: stampato nella console del bersaglio, indica l'altra macchina
+- **Caso reale.** "il verdetto lo da SOLO il collaudo su questo PC di lavoro", stampato sul PC di backtest, dove il collaudo non gira.
+- **Regola.** Ogni "questo/qui/qui sotto" in una stringa della riga si legge dal posto della console che la stampa. Una macchina diversa dal bersaglio si nomina per nome ("noi", "la sessione"), mai con un deittico.
