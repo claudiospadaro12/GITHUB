@@ -258,8 +258,8 @@ def corsa_passata_assente(script=None):
         p3 = [v for v in tab.values() if v['passata'] == 'P_003']
         m30 = [v for v in tab.values() if v['passata'] != 'P_003']
         ok(len(p3) == 3 and all(v['verdetto'].startswith('NON TROVATO') for v in p3), 'passata assente: i 3 ticket di P_003 (passata presente) sono NON TROVATO')
-        ok(len(m30) == 30 and all(v['verdetto'].startswith('NON VERIFICABILE (passata ') for v in m30), 'passata assente: i 30 ticket M30 (passata assente) sono NON VERIFICABILE, non NON TROVATO')
-        ok('NON VERIFICABILE (passata assente o log parziale) 30' in r.stdout, 'passata assente: la console conta 30 NON VERIFICABILE')
+        ok(len(m30) == 30 and all(v['verdetto'].startswith('NON VERIFICABILE (la passata ') and ' non compare nei log letti' in v['verdetto'] for v in m30), 'passata assente: i 30 ticket M30 (passata assente) sono NON VERIFICABILE, non NON TROVATO')
+        ok('NON VERIFICABILE 30' in r.stdout, 'passata assente: la console conta 30 NON VERIFICABILE')
         riep = open(os.path.join(cart, 'RIEPILOGO_LOG_AGENTI_P003.txt')).read()
         ok(', 10018 1, ' in riep, 'passata assente: la sonda conta 10018 UNA volta (retcode), non #10018 ne 1.10018')
 
@@ -283,7 +283,7 @@ def corsa_log_parziale(script=None):
         ok(tab['1967']['verdetto'].startswith('NON VERIFICABILE (la passata M30_002 e nei file letti'), 'log parziale: 1967 NON VERIFICABILE, non NON TROVATO (%s)' % tab['1967']['verdetto'][:90])
         ok(tab['2466']['verdetto'].startswith('NON VERIFICABILE (la passata M30_002'), 'log parziale: 2466 (2024.10.13) NON VERIFICABILE')
         ok(tab['9736']['verdetto'].startswith('NON VERIFICABILE (la passata M30_002'), 'log parziale: 9736 (2025.05.25) NON VERIFICABILE')
-        ok(tab['1696']['verdetto'].startswith('NON VERIFICABILE (passata M30_003'), 'log parziale: 1696 (passata M30_003 assente) NON VERIFICABILE')
+        ok(tab['1696']['verdetto'].startswith('NON VERIFICABILE (la passata M30_003 non compare'), 'log parziale: 1696 (passata M30_003 assente) NON VERIFICABILE')
         ok(not any(v['verdetto'].startswith('NON TROVATO') for v in tab.values()), 'log parziale: NESSUN ticket esce NON TROVATO')
 
 
@@ -308,11 +308,68 @@ def corsa_grande(script=None):
         ok(r.returncode == 0, 'grande: rc 0 (got %s)' % r.returncode)
         tab = leggi_csv(os.path.join(desk, 'LOG_AGENTI_P003', 'TICKET_ATTESI.csv'))
         m30 = [v for v in tab.values() if v['passata'] != 'P_003']
-        ok(len(m30) == 30 and all(v['verdetto'].startswith('NON VERIFICABILE (passata') for v in m30), 'grande: i 30 ticket M30 sono NON VERIFICABILE (passata assente), non NON TROVATO')
+        ok(len(m30) == 30 and all(v['verdetto'].startswith('NON VERIFICABILE (la passata') and ' non compare nei log letti' in v['verdetto'] for v in m30), 'grande: i 30 ticket M30 sono NON VERIFICABILE (passata assente), non NON TROVATO')
         ok(tab['4603']['verdetto'].startswith('TROVATO: 1'), 'grande: 4603 TROVATO (%s)' % tab['4603']['verdetto'][:50])
         ok(tab['4605']['verdetto'] == 'NON TROVATO', 'grande: 4605 NON TROVATO (passata presente fino in fondo, nessuna riga) (%s)' % tab['4605']['verdetto'][:60])
         riep = open(os.path.join(desk, 'LOG_AGENTI_P003', 'RIEPILOGO_LOG_AGENTI_P003.txt')).read()
         ok(', 10018 0, ' in riep, 'grande: nessun falso 10018 da order #10018..#10039 ne da prezzi 1.10018')
+
+
+def contro_esempi(script=None):
+    # CE1 (giudizio 11/10): il log del giorno c'e' ma NON contiene le passate dei 33 ticket -> NON VERIFICABILE, mai NON TROVATO
+    # CE2 (giudizio 11/10, classe 1336): dopo la passata giusta gira un ALTRO EA con lo stesso numero d'ordine nella finestra
+    #     -> la sua riga (sorgente "ABTG_ALTRO (...)") e quelle del server DOPO la sua testata NON valgono come trovate;
+    #     controllo positivo: le righe vere (sorgente EA_NatCla e sorgente Trade) DENTRO la passata restano TROVATO
+    # CE3 (giudizio 11/10): un secondo file del giorno che non si apre -> NON VERIFICABILE IN PARTE, rc 4, mai NON TROVATO muto
+    script = script or SCRIPT
+    SN = 'EA_NatCla (XAUUSD,M30)'
+    SA = 'ABTG_ALTRO (XAUUSD,M30)'
+    t_nat = riga(None, 'XAUUSD,M30: testing of Experts\\EA_NatCla.ex5 from 2024.07.10 00:00 to 2025.06.30 00:00 started with inputs:', src='Tester')
+    t_alt = riga(None, 'XAUUSD,M30: testing of Experts\\ABTG_ALTRO.ex5 from 2024.07.10 00:00 to 2025.06.30 00:00 started with inputs:', src='Tester')
+    av_ok = avvio('2024.07.10 00:00:00', 'XAUUSD', 'M30', '778603', 'GEOMETRIA_ATTUALE').replace('\tCore 1\t', '\t' + SN + '\t')
+    casi = [
+        ('CE1 log senza le passate', [riga(None, 'GBPUSD,M5: testing of Experts\\ABTG_Londra_ORB.ex5 from 2024.07.05 00:00 to 2026.06.30 00:00 started with inputs:', src='Tester'),
+                                      riga('2024.07.05 08:03:24', 'CTrade::OrderSend: cancel #2 [done]', src='ABTG_Londra_ORB (GBPUSD,M5)')]),
+        ('CE2 altro EA nella finestra', [t_nat, av_ok,
+                                         riga('2024.09.14 09:00:00', 'CTrade::OrderSend: cancel #1969 [market closed]', src=SN),
+                                         riga('2024.09.15 23:00:01', 'failed cancel [#1970 buy limit 0.90 XAUUSD at 2578.00] [Market closed]', src='Trade'),
+                                         riga('2024.09.15 23:00:02', 'CTrade::OrderSend: cancel #1968 [market closed]', src=SA),
+                                         riga('2025.06.30 00:00:00', 'neutra fine passata', src=SN),
+                                         t_alt,
+                                         riga('2024.09.15 23:00:30', 'failed cancel [#1967 buy limit 0.90 XAUUSD at 2578.00] [Market closed]', src='Trade'),
+                                         riga('2024.09.15 23:01:00', 'CTrade::OrderSend: cancel #1967 [market closed]', src=SA)]),
+        ('CE3 un file del giorno illeggibile', [t_nat, av_ok,
+                                                riga('2024.09.15 23:00:00', 'CTrade::OrderSend: cancel #1966 [market closed]', src=SN),
+                                                riga('2025.06.30 00:00:00', 'neutra fine passata', src=SN)]),
+    ]
+    for nome, righe in casi:
+        print('== CONTRO-ESEMPIO %s' % nome)
+        with tempfile.TemporaryDirectory() as radice:
+            appdata, home, desk = prepara(radice, con_log=False)
+            scrivi_utf16(os.path.join(appdata, 'MetaQuotes', 'Tester', 'H', 'Agent-127.0.0.1-3000', 'logs', '20261011.log'), righe)
+            if nome.startswith('CE3'):
+                d3 = os.path.join(appdata, 'MetaQuotes', 'Tester', 'H', 'Agent-127.0.0.1-3001', 'logs')
+                os.makedirs(d3, exist_ok=True)
+                os.symlink(os.path.join(radice, 'non_esiste.log'), os.path.join(d3, '20261011.log'))
+            r = lancia(script, radice)
+            tab = leggi_csv(os.path.join(desk, 'LOG_AGENTI_P003', 'TICKET_ATTESI.csv'))
+            if nome.startswith('CE1'):
+                ok(r.returncode == 0, 'CE1: rc 0 (got %s)' % r.returncode)
+                ok(len(tab) == 33 and all(v['verdetto'].startswith('NON VERIFICABILE (la passata') and ' non compare nei log letti' in v['verdetto'] for v in tab.values()), 'CE1: passate assenti dai log letti -> 33 NON VERIFICABILE, nessun NON TROVATO')
+                ok('NON TROVATO 0 | NON VERIFICABILE 33' in r.stdout, 'CE1: la console conta 33 NON VERIFICABILE')
+            elif nome.startswith('CE3'):
+                ok(r.returncode == 4, 'CE3: rc 4 = lettura parziale (got %s)' % r.returncode)
+                ok(tab['1967']['verdetto'].startswith('NON VERIFICABILE IN PARTE') and '1 file del giorno NON LETTI' in tab['1967']['verdetto'], 'CE3: 1967 NON VERIFICABILE IN PARTE, non NON TROVATO (%s)' % tab['1967']['verdetto'][:100])
+                ok(tab['1966']['verdetto'].startswith('TROVATO: 1'), 'CE3: 1966, trovato nel file letto, resta TROVATO (%s)' % tab['1966']['verdetto'][:40])
+                ok('NON TROVATO 0 ' in r.stdout and 'NON LETTI' in r.stdout, 'CE3: la console dice NON LETTI e non conta nessun NON TROVATO')
+                riep = open(os.path.join(desk, 'LOG_AGENTI_P003', 'RIEPILOGO_LOG_AGENTI_P003.txt')).read()
+                ok('NON LETTI: 1' in riep and 'lettura e PARZIALE' in riep, 'CE3: il riepilogo dichiara la lettura PARZIALE in testa')
+            else:
+                ok(r.returncode == 0, 'CE2: rc 0 (got %s)' % r.returncode)
+                ok(tab['1969']['verdetto'].startswith('TROVATO: 1'), 'CE2: 1969 (riga con sorgente EA_NatCla dentro la passata) resta TROVATO (%s)' % tab['1969']['verdetto'][:40])
+                ok(tab['1970']['verdetto'].startswith('TROVATO: 1'), 'CE2: 1970 (riga con sorgente Trade dentro la passata) resta TROVATO (%s)' % tab['1970']['verdetto'][:40])
+                ok(tab['1968']['verdetto'].startswith('NON TROVATO (ma 1 righe') and int(tab['1968']['altro_ea']) == 1 and int(tab['1968']['righe_coerenti']) == 0, 'CE2: 1968 (riga di ABTG_ALTRO DENTRO la passata) NON vale: altro_ea 1 (%s)' % tab['1968']['verdetto'][:70])
+                ok(tab['1967']['verdetto'].startswith('NON TROVATO (ma 2 righe') and int(tab['1967']['altro_ea']) == 1 and int(tab['1967']['segmento_ignoto']) == 1 and int(tab['1967']['righe_coerenti']) == 0, 'CE2: 1967 (altro EA dopo la sua testata: riga EA e riga Trade) NON vale: altro_ea 1 + passata ignota 1 (%s)' % tab['1967']['verdetto'][:70])
 
 
 def guardie():
@@ -341,7 +398,6 @@ def verifica_corsa(res):
     cart = res['cart']
     ctx = open(os.path.join(cart, 'RIGHE_CON_CONTESTO.txt')).read()
     # contesto: il blocco del 1966 deve avere 3 righe prima (neutra I/J/K... in realta' K,L? vedi sotto) e 3 dopo
-    ok('neutra I' not in ctx or True, 'contesto: (controllo morbido)')
     i = ctx.find('ticket 1966')
     blocco = ctx[i:i + 1500]
     ok('- ' in blocco and 'neutra J' in blocco and 'neutra K' in blocco and '+ ' in blocco and 'neutra L' in blocco and 'neutra N' in blocco, 'contesto: il blocco del ticket 1966 ha le 3 righe prima (I,J,K) e le 3 dopo (L,M,N)')
@@ -394,6 +450,7 @@ def mutante(nome, sost):
     corsa_senza_log(p)
     corsa_passata_assente(p)
     corsa_log_parziale(p)
+    contro_esempi(p)
     shutil.rmtree(d, ignore_errors=True)
     presi = len(FALLITI) - before
     for _ in range(presi):
@@ -410,6 +467,7 @@ def main():
     corsa_senza_log()
     corsa_passata_assente()
     corsa_log_parziale()
+    contro_esempi()
     if '--grande' in sys.argv:
         corsa_grande()
     guardie()
@@ -426,6 +484,10 @@ def main():
         ('legge_ogni_giorno', [("$DaLeggere = @($Trovati | Where-Object { $ListaGiorni -contains $_.BaseName })", "$DaLeggere = @($Trovati)")]),
         ('verdetto_vuoto_e_non_trovato', [("if($nLetti -eq 0){ return 'NON VERIFICABILE (nessun file log del giorno letto)' }", "if($false){ return 'x' }"), ("if(-not $SegVisti.ContainsKey($kp)){", "if($false){")]),
         ('log_parziale_e_non_trovato', [("if($reach -eq '' -or [string]::CompareOrdinal($reach, $fineNec) -lt 0){", "if($false){")]),
+        ('testata_non_chiude_la_passata', [("if($ln.IndexOf('testing of Experts\\') -ge 0 -or $ln.IndexOf('expert file added: Experts\\') -ge 0){", "if($false){")]),
+        ('altro_ea_vale_come_trovato', [("if($srcEA -ne '' -and $srcEA -ne 'EA_NatCla'){", "if($false){")]),
+        ('lettura_parziale_e_non_trovato', [("if($nIllegg -gt 0){ return", "if($false){ return")]),
+        ('lettura_parziale_rc_zero', [("if($nIllegg -gt 0){ exit 4 }", "")]),
         ('passata_assente_e_non_trovato', [("if(-not $SegVisti.ContainsKey($kp)){", "if($false){")]),
         ('10018_a_sottostringa', [("$R10018 = '(?<![#0-9.,])10018(?![0-9])(?![.,][0-9])'", "$R10018 = '10018'")]),
         ('retcode_10009_e_fallimento', [("retcode\\s*:?\\s*(?!10008|10009)[0-9]+", "retcode\\s*:?\\s*[0-9]+")]),

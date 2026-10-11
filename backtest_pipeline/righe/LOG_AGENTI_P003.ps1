@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_LOG_AGENTI_P003_v2
+#  MARCATORE_LOG_AGENTI_P003_v3
 #  LOG_AGENTI_P003.ps1 -- SOLA LETTURA dei log GREZZI degli agenti del Strategy Tester
 #
 #  PERCHE' ESISTE (report/NATCLA_P003_DIAGNOSI_2026-10-11.md, par. 3.3 e 4(a)):
@@ -7,7 +7,9 @@
 #   INFERITO, non FATTO: il retcode di OrderDelete non e' scritto in nessun file letto finora (l'EA non lo scrive,
 #   e il driver delle passate scarta tutte le righe senza il prefisso [NatCla]). La riga CTrade con il motivo
 #   (formato visto in repo: "CTrade::OrderSend: ... [invalid stops]") potrebbe stare nei log GREZZI dell'agente
-#   del tester, nel profilo utente di QUESTO PC. Questo script li cerca. Se non ci sono, dice NON TROVATO.
+#   del tester, nel profilo utente di QUESTO PC. Questo script li cerca. Se i log o la passata del ticket non ci sono
+#   (o un file del giorno non si apre, o il log si ferma prima della fine del ticket) dice NON VERIFICABILE;
+#   NON TROVATO solo se la passata e stata letta per intero (riga AVVIO) e nessuna riga coerente nomina il ticket.
 #
 #  COSA FA, e una cosa sola:
 #   1. elenca TUTTI i file .log sotto una cartella Tester di %APPDATA%\MetaQuotes (data e dimensione) e li
@@ -28,6 +30,10 @@
 #   - il numero si cerca come numero INTERO, non dentro un prezzo ("2466.50") ne' dentro un numero piu' lungo;
 #   - la riga vale solo se l'ora SIMULATA cade nella finestra di vita del ticket (piazzato -1 min .. fine +2 min,
 #     dalla tabella Ordini del report .htm); una riga con ora simulata assente o fuori finestra si conta a parte;
+#   - (v3) le righe di un ALTRO EA non valgono mai: la sorgente della riga (4o campo, "EA_NatCla (XAUUSD,M30)" per l EA, "Trade" per
+#     il server) e la testata di ogni test ("testing of Experts\" / "expert file added: Experts\") chiudono la passata, cosi le righe
+#     di un EA che gira DOPO non ereditano la chiave della passata giusta (classe ALTRO_EA / SEGMENTO_IGNOTO).
+#   - (v3) un file del giorno che non si apre rende l esito NON VERIFICABILE IN PARTE (rc 4), mai NON TROVATO muto.
 #   - (v2) un ticket la cui PASSATA (riga AVVIO) non compare in nessun file letto per intero, o il cui log si ferma PRIMA
 #     della fine della vita del ticket (log parziale), esce NON VERIFICABILE, non NON TROVATO: non e stato cercato fino in fondo. E 10018 vale solo come numero a se (non #10018 ordine, non 1.10018 prezzo).
 #
@@ -119,7 +125,7 @@ foreach($rg in @(($TabellaCsv -split "`r?`n") | Where-Object { $_.Trim() -ne '' 
     caso = $c[0]; passata = $c[1]; simbolo = $c[2]; tf = $c[3]; magic = $c[4]; stop = $c[5]; ticket = $c[6]
     piazzato = [datetime]::ParseExact($c[7], $FMT_SIM, $IC); fine = [datetime]::ParseExact($c[8], $FMT_SIM, $IC)
     stato = $c[9]; commento = $c[10]
-    n_coer = 0; n_coer_kw = 0; n_fail = 0; n_cancel = 0; n_fuori = 0; n_altro_seg = 0; n_senza_ora = 0; n_seg_ignoto = 0
+    n_coer = 0; n_coer_kw = 0; n_fail = 0; n_cancel = 0; n_fuori = 0; n_altro_seg = 0; n_senza_ora = 0; n_seg_ignoto = 0; n_altro_ea = 0
   }
   if($Tick.ContainsKey($o.ticket)){ throw ('Tabella ticket: ticket doppio ' + $o.ticket) }
   $Tick[$o.ticket] = $o
@@ -147,6 +153,7 @@ $reAvMg   = New-Object Text.RegularExpressions.Regex('\| magic (?<mg>[0-9]+) \|'
 $reAvStop = New-Object Text.RegularExpressions.Regex('\| stop (?<st>[A-Za-z0-9_]+)', $Opz)
 $reBrac   = New-Object Text.RegularExpressions.Regex('\[(?<t>[^\]]{1,80})\]\s*$', $Opz)
 $reRet    = New-Object Text.RegularExpressions.Regex('retcode\s*:?\s*(?<n>[0-9]+)', $OpzI)
+$reSrcEA   = New-Object Text.RegularExpressions.Regex('^(?<ea>[^\s()]+) \([^,()]+,[^()]+\)$', $Opz)
 $reCTrade = New-Object Text.RegularExpressions.Regex('CTrade::', $Opz)
 $reMC     = New-Object Text.RegularExpressions.Regex('market closed', $OpzI)
 
@@ -239,6 +246,13 @@ foreach($f in $DaLeggere){
           if($at['dopo'].Count -ge $Contesto){ $attivi.RemoveAt($ia) }
         }
       }
+      # la testata di un NUOVO test (qualunque EA) chiude la passata precedente: le righe di un EA che gira DOPO non ereditano la chiave
+      if($ln.IndexOf('testing of Experts\') -ge 0 -or $ln.IndexOf('expert file added: Experts\') -ge 0){
+        if($cnt['righe'] -gt 0){ [void]$Sonda.Add(@{ file = $f.FullName; segmento = $segEtich; c = $cnt }) }
+        $cnt = NuovoCnt
+        $segSim = ''; $segTf = ''; $segMg = ''; $segSt = ''; $segKey = ''
+        $segEtich = ('SEGMENTO IGNOTO (testata di un test alla riga ' + $nr + ', nessun AVVIO NatCla dopo)')
+      }
       # una riga AVVIO apre una nuova passata: si chiude il contatore della precedente PRIMA di contare questa riga
       if($ln.IndexOf('[NatCla] AVVIO') -ge 0 -and $reAvvio.IsMatch($ln)){
         if($cnt['righe'] -gt 0){ [void]$Sonda.Add(@{ file = $f.FullName; segmento = $segEtich; c = $cnt }) }
@@ -284,10 +298,15 @@ foreach($f in $DaLeggere){
         $kw = $reKw.IsMatch($ln)
         $fail = $reFail.IsMatch($ln)
         $canc = $reCancel.IsMatch($ln)
+        # sorgente della riga (4o campo): "EA_NatCla (XAUUSD,M30)" per l EA, "Trade" per il server, "Core 1"/"Tester" per il resto
+        $srcEA = ''
+        $campi = $ln.Split([char]9, 5)
+        if($campi.Count -ge 5){ $mse = $reSrcEA.Match($campi[3]); if($mse.Success){ $srcEA = $mse.Groups['ea'].Value } }
         foreach($tk in @($viste.Keys)){
           $row = $Tick[$tk]
           $classe = ''
-          if($null -eq $sim){ $classe = 'SENZA_ORA'; $row.n_senza_ora++ }
+          if($srcEA -ne '' -and $srcEA -ne 'EA_NatCla'){ $classe = 'ALTRO_EA'; $row.n_altro_ea++ }
+          elseif($null -eq $sim){ $classe = 'SENZA_ORA'; $row.n_senza_ora++ }
           elseif($sim -lt $row.piazzato.AddMinutes(-1) -or $sim -gt $row.fine.AddMinutes(2)){ $classe = 'FUORI_FINESTRA'; $row.n_fuori++ }
           elseif($segSim -eq ''){ $classe = 'SEGMENTO_IGNOTO'; $row.n_seg_ignoto++ }
           elseif($segSim -ne $row.simbolo -or $segTf -ne $row.tf -or $segMg -ne $row.magic -or $segSt -ne $row.stop){ $classe = 'ALTRO_SEGMENTO'; $row.n_altro_seg++ }
@@ -333,19 +352,21 @@ foreach($f in $DaLeggere){
 #  4. I VERDETTI PER TICKET (RACCOGLIE e non giudica la causa)
 # ---------------------------------------------------------------------
 $nLetti = @($FileEsito | Where-Object { $_['letto'] }).Count
+$nIllegg = @($FileEsito | Where-Object { -not $_['letto'] }).Count
 function Verdetto($row){
   if($nLetti -eq 0){ return 'NON VERIFICABILE (nessun file log del giorno letto)' }
   if($row.n_fail -gt 0){ return ('TROVATO: ' + $row.n_fail + ' righe con testo di fallimento') }
   if($row.n_coer_kw -gt 0){ return ('TROVATO SOLO senza fallimento: ' + $row.n_coer_kw + ' righe con parola chiave') }
   if($row.n_coer -gt 0){ return ('TROVATO solo il numero, senza parola chiave: ' + $row.n_coer + ' righe') }
+  if($nIllegg -gt 0){ return ('NON VERIFICABILE IN PARTE (nessuna riga coerente nei file letti, ma ' + $nIllegg + ' file del giorno NON LETTI)') }
   $kp = $row.simbolo + '|' + $row.tf + '|' + $row.magic + '|' + $row.stop
-  if(-not $SegVisti.ContainsKey($kp)){ return ('NON VERIFICABILE (passata ' + $row.passata + ' = ' + $row.simbolo + ' ' + $row.tf + ' magic ' + $row.magic + ' stop ' + $row.stop + ' ASSENTE dai file letti per intero: nessuna sua riga AVVIO, il ticket NON e stato cercato)') }
+  if(-not $SegVisti.ContainsKey($kp)){ return ('NON VERIFICABILE (la passata ' + $row.passata + ' non compare nei log letti: nessuna riga AVVIO ' + $row.simbolo + ' ' + $row.tf + ' magic ' + $row.magic + ' stop ' + $row.stop + ', il ticket NON e stato cercato)') }
   $fineNec = $row.fine.AddMinutes(2).ToString($FMT_SIM, $IC)
   $reach = ''
   if($SegReach.ContainsKey($kp)){ $reach = [string]$SegReach[$kp] }
   if($reach -eq '' -or [string]::CompareOrdinal($reach, $fineNec) -lt 0){ return ('NON VERIFICABILE (la passata ' + $row.passata + ' e nei file letti ma il suo log arriva solo a ora simulata ' + $(if($reach -eq ''){ '(nessuna riga con ora)' } else { $reach }) + ', la vita del ticket finisce a ' + $row.fine.ToString($FMT_SIM, $IC) + ': log PARZIALE (giro in corso, file ruotato o troncato?), il ticket NON e stato cercato fino in fondo)') }
-  $scartate = $row.n_fuori + $row.n_altro_seg + $row.n_senza_ora + $row.n_seg_ignoto
-  if($scartate -gt 0){ return ('NON TROVATO (ma ' + $scartate + ' righe con quel numero SCARTATE: fuori finestra ' + $row.n_fuori + ', altra passata ' + $row.n_altro_seg + ', senza ora ' + $row.n_senza_ora + ', passata ignota ' + $row.n_seg_ignoto + ': vedi RIGHE_TROVATE.csv)') }
+  $scartate = $row.n_fuori + $row.n_altro_seg + $row.n_senza_ora + $row.n_seg_ignoto + $row.n_altro_ea
+  if($scartate -gt 0){ return ('NON TROVATO (ma ' + $scartate + ' righe con quel numero SCARTATE: fuori finestra ' + $row.n_fuori + ', altra passata ' + $row.n_altro_seg + ', senza ora ' + $row.n_senza_ora + ', passata ignota ' + $row.n_seg_ignoto + ', altro EA ' + $row.n_altro_ea + ': vedi RIGHE_TROVATE.csv)') }
   return 'NON TROVATO'
 }
 $nFail = 0; $nKwOnly = 0; $nNum = 0; $nNon = 0; $nNonVer = 0
@@ -401,10 +422,10 @@ if($Trovati.Count -gt $MAXFILE){ [void]$csvF.Add('# elenco TRONCATO a ' + $MAXFI
 
 # 5b. TICKET_ATTESI.csv: la tabella usata, con i contatori
 $csvT = New-Object System.Collections.Generic.List[string]
-[void]$csvT.Add('caso;passata;simbolo;tf;magic;stop;ticket;piazzato;fine;stato;commento;righe_coerenti;con_parola_chiave;con_fallimento;con_cancel;fuori_finestra;altro_segmento;senza_ora;segmento_ignoto;verdetto')
+[void]$csvT.Add('caso;passata;simbolo;tf;magic;stop;ticket;piazzato;fine;stato;commento;righe_coerenti;con_parola_chiave;con_fallimento;con_cancel;fuori_finestra;altro_segmento;senza_ora;segmento_ignoto;altro_ea;verdetto')
 foreach($tk in $TickOrd){
   $r = $Tick[$tk]
-  [void]$csvT.Add(($r.caso + ';' + $r.passata + ';' + $r.simbolo + ';' + $r.tf + ';' + $r.magic + ';' + $r.stop + ';' + $r.ticket + ';' + $r.piazzato.ToString($FMT_SIM, $IC) + ';' + $r.fine.ToString($FMT_SIM, $IC) + ';' + $r.stato + ';' + $r.commento + ';' + $r.n_coer + ';' + $r.n_coer_kw + ';' + $r.n_fail + ';' + $r.n_cancel + ';' + $r.n_fuori + ';' + $r.n_altro_seg + ';' + $r.n_senza_ora + ';' + $r.n_seg_ignoto + ';' + (Verdetto $r)))
+  [void]$csvT.Add(($r.caso + ';' + $r.passata + ';' + $r.simbolo + ';' + $r.tf + ';' + $r.magic + ';' + $r.stop + ';' + $r.ticket + ';' + $r.piazzato.ToString($FMT_SIM, $IC) + ';' + $r.fine.ToString($FMT_SIM, $IC) + ';' + $r.stato + ';' + $r.commento + ';' + $r.n_coer + ';' + $r.n_coer_kw + ';' + $r.n_fail + ';' + $r.n_cancel + ';' + $r.n_fuori + ';' + $r.n_altro_seg + ';' + $r.n_senza_ora + ';' + $r.n_seg_ignoto + ';' + $r.n_altro_ea + ';' + (Verdetto $r)))
 }
 ($csvT -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'TICKET_ATTESI.csv') -Encoding ASCII
 
@@ -441,7 +462,8 @@ $rp = New-Object System.Collections.Generic.List[string]
 [void]$rp.Add('LOG_AGENTI_P003 -- ricerca nei log GREZZI degli agenti del Strategy Tester (SOLA LETTURA)')
 [void]$rp.Add('pc ' + $env:COMPUTERNAME + '   data ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $IC) + '   pin ' + $Pin + '   script SHA256 ' + $sha)
 [void]$rp.Add('scopo: trasformare l INFERITO "la cancellazione fallisce a mercato chiuso" (report/NATCLA_P003_DIAGNOSI_2026-10-11.md par. 4a) in FATTO, o in NON TROVATO')
-[void]$rp.Add('giorni cercati: ' + ($ListaGiorni -join ',') + '   file .log sotto Tester nel profilo: ' + $Trovati.Count + '   file dei giorni richiesti: ' + $DaLeggere.Count + '   letti: ' + $nLetti)
+[void]$rp.Add('giorni cercati: ' + ($ListaGiorni -join ',') + '   file .log sotto Tester nel profilo: ' + $Trovati.Count + '   file dei giorni richiesti: ' + $DaLeggere.Count + '   letti: ' + $nLetti + '   NON LETTI: ' + $nIllegg)
+if($nIllegg -gt 0){ [void]$rp.Add('*** ATTENZIONE: ' + $nIllegg + ' file del giorno NON LETTI: la lettura e PARZIALE, nessun NON TROVATO vale come tale (NON VERIFICABILE IN PARTE) ***') }
 [void]$rp.Add('')
 [void]$rp.Add('1. FILE DEI GIORNI RICHIESTI (data, byte, righe, passate AVVIO)')
 if($DaLeggere.Count -eq 0){ [void]$rp.Add('   NESSUNO. Cercati: ' + (($ListaGiorni | ForEach-Object { $_ + '.log' }) -join ', ') + ' sotto ' + (Asc $MQ) + ' (cartelle con un componente Tester). Il silenzio NON e una smentita: i log possono essere stati ruotati o cancellati, o stare in un altro profilo/terminale.') }
@@ -461,18 +483,18 @@ if($Sonda.Count -eq 0){ [void]$rp.Add('   (nessuna riga letta)') }
 [void]$rp.Add('')
 [void]$rp.Add('3. VERDETTO PER TICKET (33 ticket: P_003 4603-4605; M30_002 1966-1971 2466-2471 9736-9738; M30_003 1696-1701 2190-2195 8667-8669)')
 [void]$rp.Add('   COERENTI = ticket intero + ora simulata nella finestra di vita (piazzato -1 min .. fine +2 min) + passata giusta (simbolo, TF, magic, stop dalla riga AVVIO)')
-[void]$rp.Add('   ticket  caso                stato      coer  kw  fall  canc  fuori  altro_seg  senza_ora  verdetto')
+[void]$rp.Add('   ticket  caso                stato      coer  kw  fall  canc  fuori  altro_seg  senza_ora  altro_ea  verdetto')
 foreach($tk in $TickOrd){
   $r = $Tick[$tk]
-  [void]$rp.Add('   ' + $r.ticket.PadRight(7) + ' ' + $r.caso.PadRight(19) + ' ' + $r.stato.PadRight(9) + ' ' + ([string]$r.n_coer).PadLeft(4) + ' ' + ([string]$r.n_coer_kw).PadLeft(3) + ' ' + ([string]$r.n_fail).PadLeft(5) + ' ' + ([string]$r.n_cancel).PadLeft(5) + ' ' + ([string]$r.n_fuori).PadLeft(6) + ' ' + ([string]$r.n_altro_seg).PadLeft(10) + ' ' + ([string]$r.n_senza_ora).PadLeft(10) + '  ' + (Verdetto $r))
+  [void]$rp.Add('   ' + $r.ticket.PadRight(7) + ' ' + $r.caso.PadRight(19) + ' ' + $r.stato.PadRight(9) + ' ' + ([string]$r.n_coer).PadLeft(4) + ' ' + ([string]$r.n_coer_kw).PadLeft(3) + ' ' + ([string]$r.n_fail).PadLeft(5) + ' ' + ([string]$r.n_cancel).PadLeft(5) + ' ' + ([string]$r.n_fuori).PadLeft(6) + ' ' + ([string]$r.n_altro_seg).PadLeft(10) + ' ' + ([string]$r.n_senza_ora).PadLeft(10) + ' ' + ([string]$r.n_altro_ea).PadLeft(9) + '  ' + (Verdetto $r))
 }
 [void]$rp.Add('')
 if($nLetti -gt 0){
-  [void]$rp.Add('   TOTALE su 33: TROVATO con testo di fallimento ' + $nFail + ' | TROVATO senza fallimento ' + $nKwOnly + ' | solo il numero ' + $nNum + ' | NON TROVATO ' + $nNon + ' | NON VERIFICABILE (passata assente o log parziale) ' + $nNonVer)
+  [void]$rp.Add('   TOTALE su 33: TROVATO con testo di fallimento ' + $nFail + ' | TROVATO senza fallimento ' + $nKwOnly + ' | solo il numero ' + $nNum + ' | NON TROVATO ' + $nNon + ' | NON VERIFICABILE ' + $nNonVer)
 } else {
   [void]$rp.Add('   TOTALE su 33: NON VERIFICABILE (nessun file letto)')
 }
-[void]$rp.Add('   (fuori = ora simulata fuori finestra, altro_seg = stesso numero in un altra passata del file, senza_ora = riga senza ora simulata: SONO CONTATE A PARTE e non valgono come trovate; elenco in RIGHE_TROVATE.csv)')
+[void]$rp.Add('   (fuori = ora simulata fuori finestra, altro_seg = stesso numero in un altra passata del file, senza_ora = riga senza ora simulata, altro_ea = riga di un EA che non e EA_NatCla: SONO CONTATE A PARTE e non valgono come trovate; elenco in RIGHE_TROVATE.csv)')
 [void]$rp.Add('')
 [void]$rp.Add('4. CONTEGGIO PER TESTO D ERRORE')
 [void]$rp.Add('   4a. righe COERENTI dei 33 ticket con parola di fallimento (failed, market closed, 10018, reject, invalid, error, retcode diverso da 10008/10009):')
@@ -491,7 +513,7 @@ foreach($b in $Blocchi){
 }
 if($Blocchi.Count -eq 0){ [void]$rp.Add('   nessuna') }
 [void]$rp.Add('')
-[void]$rp.Add('COME SI LEGGE: TROVATO con fallimento = esiste una riga del log grezzo, nella passata giusta e nell ora giusta, che porta il numero del ticket e un testo di fallimento: il TESTO fra parentesi quadre o il retcode e il dato che mancava; leggerlo nel blocco. NON TROVATO = la passata del ticket e nei file letti per intero ma nessuna riga lo nomina: vale come "non trovato", NON come smentita, se la sonda globale mostra CTrade/cancel a zero. NON VERIFICABILE = il file del giorno manca, oppure la passata del ticket (riga AVVIO) non e in nessun file letto per intero, oppure il suo log si ferma prima della fine della vita del ticket (parziale): il ticket non e stato cercato fino in fondo.')
+[void]$rp.Add('COME SI LEGGE: TROVATO con fallimento = esiste una riga del log grezzo, nella passata giusta e nell ora giusta, che porta il numero del ticket e un testo di fallimento: il TESTO fra parentesi quadre o il retcode e il dato che mancava; leggerlo nel blocco. NON TROVATO = la passata del ticket e nei file letti per intero ma nessuna riga lo nomina: vale come "non trovato", NON come smentita, se la sonda globale mostra CTrade/cancel a zero. NON VERIFICABILE IN PARTE = almeno un file del giorno non si e aperto (rc 4). Una riga di un ALTRO EA (sorgente diversa da EA_NatCla, o dopo la testata di un altro test) non vale mai come trovata (colonna altro_ea). NON VERIFICABILE = il file del giorno manca, oppure la passata del ticket (riga AVVIO) non e in nessun file letto per intero, oppure il suo log si ferma prima della fine della vita del ticket (parziale): il ticket non e stato cercato fino in fondo.')
 [void]$rp.Add('Questo script RACCOGLIE e non giudica la causa. Nessun file di log e stato toccato.')
 ($rp -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'RIEPILOGO_LOG_AGENTI_P003.txt') -Encoding ASCII
 
@@ -516,9 +538,11 @@ Write-Host ''
 if($nLetti -eq 0){
   Dico 'ESITO: NON VERIFICABILE -- nessun file log dei giorni richiesti sotto una cartella Tester del profilo. Lo zip dice cosa e stato cercato e cosa c e.' 'Red'
 } else {
-  Dico ('ESITO su 33 ticket: TROVATO con testo di fallimento ' + $nFail + ' | TROVATO senza fallimento ' + $nKwOnly + ' | solo il numero ' + $nNum + ' | NON TROVATO ' + $nNon + ' | NON VERIFICABILE (passata assente o log parziale) ' + $nNonVer) 'Cyan'
+  Dico ('ESITO su 33 ticket: TROVATO con testo di fallimento ' + $nFail + ' | TROVATO senza fallimento ' + $nKwOnly + ' | solo il numero ' + $nNum + ' | NON TROVATO ' + $nNon + ' | NON VERIFICABILE ' + $nNonVer) 'Cyan'
 }
+if($nIllegg -gt 0){ Dico ('ATTENZIONE: ' + $nIllegg + ' file del giorno NON LETTI (vedi ILLEGGIBILE qui sopra e FILE_LOG_TROVATI.csv): i ticket senza riga coerente escono NON VERIFICABILE IN PARTE, non NON TROVATO. rc 4.') 'Red' }
 Dico ('ZIP PRONTO DA MANDARE: ' + $zip) 'Green'
 Dico 'FILE ATTESI NELLO ZIP: RIEPILOGO_LOG_AGENTI_P003.txt + RIGHE_CON_CONTESTO.txt + RIGHE_TROVATE.csv + FILE_LOG_TROVATI.csv + TICKET_ATTESI.csv' 'Gray'
 if($manca -gt 0){ Dico ('ATTENZIONE: ' + $manca + ' file attesi MANCANO: lo zip va mandato lo stesso, con il messaggio rosso qui sopra.') 'Red'; exit 3 }
+if($nIllegg -gt 0){ exit 4 }
 exit 0
