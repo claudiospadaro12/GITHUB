@@ -1,0 +1,4 @@
+famiglia;config;lato;modo;n;attesa;pf_r;pf_r_comm_doppia;pf_lordo;media_r;p_pos;wr;dd_r;peggior_giornata_r;durata_mediana;verdetto;verdetto_comm_doppia;pf_r_nullo;stop_pieni_n;stop_pieni_mediana_r
+FX7;M2_H1;SHORT;GEOM;92;39;0.7777;0.7777;0.7777;-0.0645;0.8295;70.65;8.663;-2.057;19.9;SOTTILE;SOTTILE;0.8261;18;-1.0375
+ORO;AUDIO_H1;LONG;GEOM;144;62;1.3189;1.3189;1.3189;0.0604;0.0932;79.86;6.161;-1.811;70.0;SOTTILE;SOTTILE;0.9324;16;-1.0085
+ORO;AUDIO_H1;LONG;PIU;134;62;1.1316;1.1316;1.1316;0.0075;0.3650;94.03;3.709;-1.077;94.8;SOTTILE;SOTTILE;0.9586;6;-1.0175

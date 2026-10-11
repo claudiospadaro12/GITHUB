@@ -1,0 +1,45 @@
+LETTORE NATCLA F1 -- EA_NatCla v1.11, tre regole di stop, tick reali, SOLO l'IS. Soglie congelate nel file prova (T1-T7). NESSUNA promozione.
+Guardian nel tester FAIL-OPEN: il DD qui NON e' ridotto da pausa B1 ne' da cap C1. Rischio per setup 0,25% = SEGNAPOSTO (si legge tutto in R).
+
+(1) AFFIDABILITA' DELLE PASSATE (una passata con un KO non entra in nessun numero)
+   P_001_XAUUSD_AUDIO_H1_LONG_GEOM              OK  setup 144   op 232    
+        ! DA GUARDARE: INVIO FALLITO (altri retcode): 29
+   P_002_XAUUSD_AUDIO_H1_LONG_PIU               OK  setup 134   op 214    
+        ! DA GUARDARE: INVIO FALLITO (altri retcode): 29
+   P_003_EURUSD_AUDIO_H1_SHORT_LINEA            KO  setup -     op 191      | 1 righe SETUP incoerenti con la passata (es. 2025.03.02 23:05 ST25: rischio_soldi 0.00 non positivo)
+        ! DA GUARDARE: INVIO FALLITO (altri retcode): 9
+   P_004_EURUSD_M2_H1_SHORT_GEOM                OK  setup 92    op 163    
+        ! DA GUARDARE: INVIO FALLITO (altri retcode): 5
+   passate 4, KO 1
+
+(2)+(3)+(4) GAMBE = famiglia x config x lato x modo. n = setup riempiti. PF_R per setup DOPO la commissione derivata se il tester non la addebita (PF2 = commissione doppia).
+   fam    config    lato  modo      n n contro attesa              PF_R    PF2  lordo  mediaR  p(>0)    WR%   DD_R peggioG dur_med  verdetto
+   FX7    M2_H1     SHORT GEOM     92 DA GUARDARE (2.36x) att 39   0.78   0.78   0.78  -0.064  0.830   70.7    8.7   -2.06      20  SOTTILE
+        segno: PF_R > 1 in 0 su 1 simboli con n >= 30 | per simbolo: EURUSD 0.78 (n 92, att 39)
+        nullo sulla geometria vera (passeggiata casuale con questo pedaggio, DIAGNOSTICA): PF_R0 = 0.83 ; PF_R - PF_R0 = -0.05
+        R degli stop pieni (3 riempiti, uscita SL): n 18, mediana -1.038, il meno negativo -0.073, banda della mediana [-1.10 ; -0.85]  ok
+        rischio (T6): r_max = 10%/DD_R = 1.15% ; 4%/peggior giornata = 1.94% per setup (segnaposto 0,25%: la taglia e' di Claudio)   E1 durata: FEDELE (<= 60 min)
+   ORO    AUDIO_H1  LONG  GEOM    144 DA GUARDARE (2.32x) att 62   1.32   1.32   1.32   0.060  0.093   79.9    6.2   -1.81      70  SOTTILE
+        segno: PF_R > 1 in 1 su 1 simboli con n >= 30 | per simbolo: XAUUSD 1.32 (n 144, att 62)
+        nullo sulla geometria vera (passeggiata casuale con questo pedaggio, DIAGNOSTICA): PF_R0 = 0.93 ; PF_R - PF_R0 = 0.39
+        R degli stop pieni (3 riempiti, uscita SL): n 16, mediana -1.008, il meno negativo -0.959, banda della mediana [-1.10 ; -0.85]  ok
+        rischio (T6): r_max = 10%/DD_R = 1.62% ; 4%/peggior giornata = 2.21% per setup (segnaposto 0,25%: la taglia e' di Claudio)   E1 durata: compatibile (60-180)
+   ORO    AUDIO_H1  LONG  PIU     134 DA GUARDARE (2.16x) att 62   1.13   1.13   1.13   0.007  0.365   94.0    3.7   -1.08      95  SOTTILE
+        segno: PF_R > 1 in 1 su 1 simboli con n >= 30 | per simbolo: XAUUSD 1.13 (n 134, att 62)
+        nullo sulla geometria vera (passeggiata casuale con questo pedaggio, DIAGNOSTICA): PF_R0 = 0.96 ; PF_R - PF_R0 = 0.17
+        R degli stop pieni (3 riempiti, uscita SL): n 6, mediana -1.018, il meno negativo -0.989, banda della mediana [-1.10 ; -0.85]  ok
+        rischio (T6): r_max = 10%/DD_R = 2.70% ; 4%/peggior giornata = 3.71% per setup (segnaposto 0,25%: la taglia e' di Claudio)   E1 durata: compatibile (60-180)
+
+(5) CONFRONTO DEI MODI (T5: migliore solo se VIVO, delta PF_R >= 0.10 e segno concorde in >= 2/3 dei simboli con n >= 30 in entrambi).
+    Il nullo sposta il PF di +0,01/+0,05 da GEOM a LINEA a PIU SOLO per il costo (file prova A2): un delta sotto la soglia non distingue niente.
+    [cancello 09/10] Per SETUP il nullo si sposta di piu' sui setup con la EMA200 oltre la ST3,5 (EURUSD GEOM 0,85 -> LINEA 0,88 -> PIU con 38 u 0,91;
+    USDJPY fino a +0,08): accanto a ogni delta c'e' il delta del NULLO misurato sulla geometria vera delle due gambe. Il verdetto T5 resta quello congelato.
+   ORO    AUDIO_H1  LONG   GEOM -> PIU: delta PF_R -0.19 (delta del nullo 0.03), PIU meglio in 0 su 1 simboli  => NESSUNA DIFFERENZA DISTINGUIBILE
+
+(6) DETERMINISMO (stessa passata girata due volte, es. pilota contro lotto):
+   nessuna passata ripetuta fra le sorgenti lette
+
+CERTIFICATO (T7): (1) PF misurato si', (2) n e DD si', (3) uscita ad asse NO (A1/A9 sono di F2), (4) gemelli: FX7 si', IDX3 si', ORO NO (argento fuori scala, domanda Q3),
+(5) TF H1 e H4 si'. Quindi NESSUNA gamba e' 'morta' dopo F1: il verdetto massimo e' 'NON ANCORA MISURATO (manca la casella 3)'.
+Regola T8 per F2 (file prova nuovo): assi pieni SOLO sulle gambe VIVE; sulle altre solo le due celle d'uscita A1 e A9.
+tabella delle gambe scritta in nc_gambe.csv
