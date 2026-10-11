@@ -15,7 +15,7 @@ M30_004_EURUSD_M2_M30_SHORT_GEOM: AVVIO 1 (AVVIO v1.12) | magic 778623 | righe d
    ADOTTATO 0 [] | SEMAFORO SFORATO 0 | INVIO FALLITO 10 per retcode {'10018': 10} per ora {'22': 10}
 
 == A0: controllo H1 M30_001 contro P_001 del pilota ==
-righe SETUP: M30_001 144, P_001 144, righe diverse (posizione per posizione) 0, identiche come insieme ordinato: True
+righe SETUP: M30_001 144, P_001 144, righe diverse (posizione per posizione, piu' la differenza di lunghezza) 0
 ticks: M30_001 53339206, P_001 53339206; operazioni 232 / 232; barre 5651 / 5651
 giornale (ora + messaggio, con 'AVVIO v1.12'->'v1.11'): solo in M30_001 1 ["[NatCla] CFG InpAmmettiTFSottoH1 = true   nessun effetto: TF PERIOD_H1 non e' sotto H1 [FI"] ; solo in P_001 0 []
 

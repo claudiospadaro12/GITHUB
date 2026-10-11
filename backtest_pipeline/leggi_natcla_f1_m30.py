@@ -8,6 +8,11 @@ STATO: strumento NUOVO, scritto l'11/10/2026 per leggere UN lotto. NON e' passat
 (che NON legge la v1.12): ne IMPORTA in sola lettura alcune funzioni gia' passate (Sorgente, leggi_csv, leggi_report, pf_di, dd_r,
 p_media, comm_r, nullo_riga) e NON lo modifica. Nessuna soglia e' decisa qui: le soglie sono quelle del file prova, scritte prima dei numeri.
 
+AUTOTEST (classe 1330: l'autotest deve esercitare le grandezze che DECIDONO l'esito): oltre ai numeri sopra controlla sul pilota
+  le righe SETUP a rischio 0 e le righe ADOTTATO (P_003: 1 e 1, le altre 0), gli INVIO FALLITO 10018 (29 / 29 / 9 / 5), A0 di P_001 contro se
+  stessa (0 righe diverse) e di P_001 contro P_002 (> 0: il confronto morde), la durata mediana esatta (70,0 / 94,85 / 19,95 min, tolleranza
+  0,01 min dichiarata, NON l'intero arrotondato).
+
 USO
   python3 backtest_pipeline/leggi_natcla_f1_m30.py <zip o cartella del lotto M30> <zip o cartella del pilota P>
   python3 backtest_pipeline/leggi_natcla_f1_m30.py --autotest <zip o cartella del pilota P>
@@ -19,6 +24,8 @@ DEFINIZIONI (dal file prova, A2 emendata):
   f inclinazione = incl / (incl + dopo + guardia);  f ADX = ADX / (ADX + incl + dopo + guardia)
   dopo = somma degli stadi DOPO l'inclinazione nell'imbuto (confluenza, spread, timing, conferma, ritardo, apertura lontana, semaforo,
          nessun ordine valido, solo conta, ARMATO, ENTRATO); guardia = righe '[NatCla] ... guardia anti-duplicato' del giornale.
+         DICHIARATO: 'solo conta' ed 'ENTRATO' entrano nel 'dopo' anche se la prova non li nomina (valgono 0 nel pilota e nel lotto M30:
+         SoloConta spento, ENTRATO solo del modo PDF escluso); se un giorno non fossero 0, la scelta va riletta.
   Il campo 'occupata' dell'imbuto contiene anche la guardia: occupata prima dei filtri = occupata - guardia.
 """
 import importlib.util, os, re, statistics, sys, math
@@ -74,6 +81,26 @@ def imbuto(righe):
             "occupata_pre": tot["occupata"] - guardia}
 
 
+def eventi(righe):
+    """righe ADOTTATO, AVVISO SEMAFORO SFORATO e INVIO FALLITO (per retcode e per ora server) del giornale di una passata."""
+    ado = [(o, m) for o, m in righe if m.startswith("[NatCla] ADOTTATO")]
+    sem = [(o, m) for o, m in righe if "SEMAFORO SFORATO" in m]
+    rc, ore = {}, {}
+    for o, m in righe:
+        if m.startswith("[NatCla] INVIO FALLITO"):
+            k = re.search(r"retcode (\d+)", m).group(1)
+            rc[k] = rc.get(k, 0) + 1
+            ore[o[11:13]] = ore.get(o[11:13], 0) + 1
+    return {"ado": ado, "sem": sem, "rc": rc, "ore": ore, "n_invio": sum(rc.values())}
+
+
+def a0_diverse(src_a, tag_a, src_b, tag_b):
+    """righe 'SETUP;' diverse posizione per posizione fra due CSV (piu' la differenza di lunghezza)."""
+    a = [l for l in L.decodifica(src_a.leggi("csv/%s.csv" % tag_a)).splitlines() if l.startswith("SETUP;")]
+    b = [l for l in L.decodifica(src_b.leggi("csv/%s.csv" % tag_b)).splitlines() if l.startswith("SETUP;")]
+    return sum(1 for x, y in zip(a, b) if x != y) + abs(len(a) - len(b)), len(a), len(b)
+
+
 def setup(src, tag):
     c = L.leggi_csv(src.leggi("csv/%s.csv" % tag))
     return c
@@ -113,23 +140,36 @@ def ffmt(x, d=3):
 
 def autotest(p_path):
     src = L.Sorgente(p_path)
-    att = {"P_001_XAUUSD_AUDIO_H1_LONG_GEOM": (0.493, 0.356, 64, 144, 1.32, 0.93, 6.2, 70),
-           "P_002_XAUUSD_AUDIO_H1_LONG_PIU": (0.486, 0.362, 64, 134, 1.13, 0.96, 3.7, 95),
-           "P_003_EURUSD_AUDIO_H1_SHORT_LINEA": (0.503, 0.306, 55, 110, None, None, None, None),
-           "P_004_EURUSD_M2_H1_SHORT_GEOM": (0.156, 0.0, 70, 92, 0.78, 0.83, 8.7, 20)}
+    # (f incl, f ADX, guardia, n, PF_R, nullo, DD_R, durata mediana esatta, righe rischio 0, righe ADOTTATO, INVIO FALLITO 10018)
+    att = {"P_001_XAUUSD_AUDIO_H1_LONG_GEOM": (0.493, 0.356, 64, 144, 1.32, 0.93, 6.2, 70.0, 0, 0, 29),
+           "P_002_XAUUSD_AUDIO_H1_LONG_PIU": (0.486, 0.362, 64, 134, 1.13, 0.96, 3.7, 94.85, 0, 0, 29),
+           "P_003_EURUSD_AUDIO_H1_SHORT_LINEA": (0.503, 0.306, 55, 110, None, None, None, None, 1, 1, 9),
+           "P_004_EURUSD_M2_H1_SHORT_GEOM": (0.156, 0.0, 70, 92, 0.78, 0.83, 8.7, 19.95, 0, 0, 5)}
+    TOL_DUR = 0.01   # minuti, dichiarata: la mediana si confronta col valore esatto, non con l'intero arrotondato
     falliti = 0
-    for tag, (fi, fa, g, n, pf, nu, dd, dur) in att.items():
-        im = imbuto(giornale(src, tag))
+    for tag, (fi, fa, g, n, pf, nu, dd, dur, r0, ado, i18) in att.items():
+        righe = giornale(src, tag)
+        im = imbuto(righe)
+        ev = eventi(righe)
         st = stat_gamba(src, tag, tag.split("_")[2])
-        prove = [("f incl", round(im["f_incl"], 3), fi), ("f ADX", round(im["f_adx"], 3), fa), ("guardia", im["guardia"], g), ("n", st["n"], n)]
+        prove = [("f incl", round(im["f_incl"], 3), fi), ("f ADX", round(im["f_adx"], 3), fa), ("guardia", im["guardia"], g), ("n", st["n"], n),
+                 ("rischio0", len(st["rischio0"]), r0), ("ADOTTATO", len(ev["ado"]), ado), ("10018", ev["rc"].get("10018", 0), i18)]
         if pf is not None:
-            prove += [("PF_R", round(st["pf"], 2), pf), ("nullo", round(st["nullo"], 2), nu), ("DD_R", round(st["dd"], 1), dd), ("durata", round(st["dur"]), dur)]
+            prove += [("PF_R", round(st["pf"], 2), pf), ("nullo", round(st["nullo"], 2), nu), ("DD_R", round(st["dd"], 1), dd), ("durata", st["dur"], dur)]
         for nome, val, exp in prove:
-            ok = (abs(val - exp) < 1e-9) if isinstance(exp, float) else (val == exp)
+            if nome == "durata":
+                ok = abs(val - exp) <= TOL_DUR
+            else:
+                ok = (abs(val - exp) < 1e-9) if isinstance(exp, float) else (val == exp)
             falliti += 0 if ok else 1
             print("AUTOTEST %-36s %-8s %s atteso %s  %s" % (tag, nome, val, exp, "OK" if ok else "FALLITO"))
         print("         quadratura dell'imbuto %s, righe IMBUTO %d" % ("OK" if im["quadra"] else "ROTTA", im["righe"]))
         falliti += 0 if im["quadra"] else 1
+    d0 = a0_diverse(src, "P_001_XAUUSD_AUDIO_H1_LONG_GEOM", src, "P_001_XAUUSD_AUDIO_H1_LONG_GEOM")[0]
+    d1 = a0_diverse(src, "P_001_XAUUSD_AUDIO_H1_LONG_GEOM", src, "P_002_XAUUSD_AUDIO_H1_LONG_PIU")[0]
+    for nome, ok in (("A0 P_001 contro P_001 = 0 righe diverse (%d)" % d0, d0 == 0), ("A0 P_001 contro P_002 > 0 righe diverse (%d): il confronto morde" % d1, d1 > 0)):
+        falliti += 0 if ok else 1
+        print("AUTOTEST %-60s %s" % (nome, "OK" if ok else "FALLITO"))
     print("AUTOTEST: %d controlli falliti" % falliti)
     return falliti
 
@@ -153,22 +193,15 @@ def main(m_path, p_path):
         g = giornale(M, t); G[t] = g
         dev = [m for _o, m in g if m.startswith("[NatCla] CFG InpTF") or m.startswith("[NatCla] CFG InpAmmettiTFSottoH1") or m.startswith("[NatCla] AVVISO DEVIAZIONE")]
         avv = [m for _o, m in g if m.startswith("[NatCla] AVVIO v")]
-        ado = [(o, m) for o, m in g if "ADOTTATO" in m]
-        sem = [(o, m) for o, m in g if "SEMAFORO SFORATO" in m]
-        inv = [(o, m) for o, m in g if m.startswith("[NatCla] INVIO FALLITO")]
-        rc = {}
-        ore = {}
-        for o, m in inv:
-            k = re.search(r"retcode (\d+)", m).group(1); rc[k] = rc.get(k, 0) + 1
-            ore[o[11:13]] = ore.get(o[11:13], 0) + 1
+        ev = eventi(g)
+        ado, sem, rc, ore = ev["ado"], ev["sem"], ev["rc"], ev["ore"]
+        inv = [None] * ev["n_invio"]
         W("%s: AVVIO %d (%s) | magic %s | righe deviazione: %s" % (t, len(avv), re.search(r"AVVIO v\S+", avv[0]).group(0) if avv else "-",
           re.search(r"magic (\d+)", avv[0]).group(1) if avv else "-", " || ".join(x[9:80] for x in dev)))
         W("   ADOTTATO %d %s | SEMAFORO SFORATO %d | INVIO FALLITO %d per retcode %s per ora %s" % (len(ado), [o for o, _m in ado], len(sem), len(inv), rc, dict(sorted(ore.items()))))
     W("\n== A0: controllo H1 M30_001 contro P_001 del pilota ==")
-    a = [l for l in L.decodifica(M.leggi("csv/M30_001_XAUUSD_AUDIO_H1_LONG_GEOM.csv")).splitlines() if l.startswith("SETUP;")]
-    b = [l for l in L.decodifica(P.leggi("csv/P_001_XAUUSD_AUDIO_H1_LONG_GEOM.csv")).splitlines() if l.startswith("SETUP;")]
-    diverse = sum(1 for x, y in zip(a, b) if x != y) + abs(len(a) - len(b))
-    W("righe SETUP: M30_001 %d, P_001 %d, righe diverse (posizione per posizione) %d, identiche come insieme ordinato: %s" % (len(a), len(b), diverse, a == b))
+    diverse, na, nb = a0_diverse(M, "M30_001_XAUUSD_AUDIO_H1_LONG_GEOM", P, "P_001_XAUUSD_AUDIO_H1_LONG_GEOM")
+    W("righe SETUP: M30_001 %d, P_001 %d, righe diverse (posizione per posizione, piu' la differenza di lunghezza) %d" % (na, nb, diverse))
     W("ticks: M30_001 %s, P_001 %s; operazioni %s / %s; barre %s / %s" % (pman and man[0]["ticks_report"], pman["P_001_XAUUSD_AUDIO_H1_LONG_GEOM"]["ticks_report"],
       man[0]["trades_report"], pman["P_001_XAUUSD_AUDIO_H1_LONG_GEOM"]["trades_report"], man[0]["barre_gen"], pman["P_001_XAUUSD_AUDIO_H1_LONG_GEOM"]["barre_gen"]))
     ga = {(o, m.replace("AVVIO v1.12", "AVVIO v1.11")) for o, m in G["M30_001_XAUUSD_AUDIO_H1_LONG_GEOM"]}
