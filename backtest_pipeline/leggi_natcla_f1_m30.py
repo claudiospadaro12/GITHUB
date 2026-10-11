@@ -10,7 +10,7 @@ p_media, comm_r, nullo_riga) e NON lo modifica. Nessuna soglia e' decisa qui: le
 
 AUTOTEST (classe 1330: l'autotest deve esercitare le grandezze che DECIDONO l'esito): oltre ai numeri sopra controlla sul pilota
   le righe SETUP a rischio 0 e le righe ADOTTATO (P_003: 1 e 1, le altre 0), gli INVIO FALLITO 10018 (29 / 29 / 9 / 5), A0 di P_001 contro se
-  stessa (0 righe diverse) e di P_001 contro P_002 (> 0: il confronto morde), la durata mediana esatta (70,0 / 94,85 / 19,95 min, tolleranza
+  stessa (0 righe diverse) e di P_001 contro P_002 (= 144 esatte: 134 per contenuto + 10 di lunghezza), la durata mediana esatta (70,0 / 94,85 / 19,95 min, tolleranza
   0,01 min dichiarata, NON l'intero arrotondato).
 
 USO
@@ -167,7 +167,7 @@ def autotest(p_path):
         falliti += 0 if im["quadra"] else 1
     d0 = a0_diverse(src, "P_001_XAUUSD_AUDIO_H1_LONG_GEOM", src, "P_001_XAUUSD_AUDIO_H1_LONG_GEOM")[0]
     d1 = a0_diverse(src, "P_001_XAUUSD_AUDIO_H1_LONG_GEOM", src, "P_002_XAUUSD_AUDIO_H1_LONG_PIU")[0]
-    for nome, ok in (("A0 P_001 contro P_001 = 0 righe diverse (%d)" % d0, d0 == 0), ("A0 P_001 contro P_002 > 0 righe diverse (%d): il confronto morde" % d1, d1 > 0)):
+    for nome, ok in (("A0 P_001 contro P_001 = 0 righe diverse (%d)" % d0, d0 == 0), ("A0 P_001 contro P_002 = 144 righe diverse (%d): 134 per contenuto + 10 di lunghezza" % d1, d1 == 144)):
         falliti += 0 if ok else 1
         print("AUTOTEST %-60s %s" % (nome, "OK" if ok else "FALLITO"))
     print("AUTOTEST: %d controlli falliti" % falliti)
