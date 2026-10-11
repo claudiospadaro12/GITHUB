@@ -1,0 +1,9 @@
+GBA R2 USCITA -- pin 9ee0e0ca744abc3299e3b162e1fdfd69bd9dff38   pc DESKTOP-H4D7CAJ   inizio 2026-10-11 08:36:05   fine 2026-10-11 09:06:41   minuti 31
+R2UBE rc 0   minuti 13
+R2UATRFIX rc 0   minuti 4
+R2UTEMPO rc 0   minuti 4
+R2UKTRAIL rc 0   minuti 10
+copiato GBA_R0_R2UBE.zip
+copiato GBA_R0_R2UATRFIX.zip
+copiato GBA_R0_R2UTEMPO.zip
+copiato GBA_R0_R2UKTRAIL.zip
