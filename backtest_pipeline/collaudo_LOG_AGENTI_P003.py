@@ -13,12 +13,13 @@ poi lancia lo script con pwsh (COMPUTERNAME finto DESKTOP-H4D7CAJ) e confronta T
 scritte QUI, a mano, prima di guardare l'uscita. Poi rilancia lo script con 5 MUTANTI (finestra, passata, prezzo,
 ora, giorno) e verifica che ognuno faccia fallire il collaudo.
 
-USO: python3 -I backtest_pipeline/collaudo_LOG_AGENTI_P003.py [percorso_script.ps1]
+USO: python3 -I backtest_pipeline/collaudo_LOG_AGENTI_P003.py [percorso_script.ps1] [--grande]
 """
 import csv, os, re, shutil, subprocess, sys, tempfile, zipfile
 
 QUI = os.path.dirname(os.path.abspath(__file__))
-SCRIPT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(QUI, 'righe', 'LOG_AGENTI_P003.ps1')
+_arg = [a for a in sys.argv[1:] if not a.startswith('--')]
+SCRIPT = _arg[0] if _arg else os.path.join(QUI, 'righe', 'LOG_AGENTI_P003.ps1')
 PIN = 'a' * 40
 FALLITI = []
 FATTI = [0]
@@ -66,6 +67,7 @@ def log_principale():
     L.append(riga('2025.06.01 22:00:00', 'failed cancel #4603 sell limit 0.50 EURUSD [Market closed]'))   # 4603 FUORI_FINESTRA (3 mesi dopo)
     # 4605: NESSUNA riga in questa passata (ticket assente)
     L.append(riga('2025.03.02 23:05:00', "[NatCla] ADOTTATO ST25: 1 posizioni senza setup in memoria (riempimento durante una cancellazione?)"))
+    L.append(riga('2025.06.30 00:00:00', 'neutra fine passata 1'))
     # ---- passata 2: M30_002 (XAUUSD M30 778603 GEOMETRIA_ATTUALE) ----
     L.append(avvio('2024.07.10 00:00:00', 'XAUUSD', 'M30', '778603', 'GEOMETRIA_ATTUALE'))
     L.append(riga('2024.09.15 22:59:57', 'neutra I'))
@@ -85,12 +87,14 @@ def log_principale():
     L.append(riga('2025.05.25 23:10:01', 'cancel order #9736 [Market closed]'))                        # 9736: nome diverso per il fallimento? -> parola chiave cancel + market closed
     # collisione: M30_003 ha un'ALTRA numerazione, ma qui mettiamo il numero 1696 (di M30_003) in una passata che non e' la sua
     L.append(riga('2024.09.15 23:00:30', 'cancel order #1696 buy limit [Market closed]'))              # 1696 in passata 2: ALTRO_SEGMENTO
+    L.append(riga('2025.06.30 00:00:00', 'neutra fine passata 2'))
     # ---- passata 3: M30_003 (XAUUSD M30 778603 OLTRE_PIU_ESTERNA) ----
     L.append(avvio('2024.07.10 00:00:00', 'XAUUSD', 'M30', '778603', 'OLTRE_PIU_ESTERNA'))
     L.append(riga('2024.09.15 23:00:00', 'CTrade::OrderSend: cancel order #1696 buy limit 0.90 XAUUSD [Market closed]'))   # 1696 FALLIMENTO (passata giusta)
     L.append(riga('2024.09.15 23:00:00', 'CTrade::OrderSend: cancel order #1966 buy limit 0.90 XAUUSD [Market closed]'))   # 1966 in passata 3: ALTRO_SEGMENTO (collisione di numeri)
     L.append(riga('2025.02.28 22:00:10', 'cancel #4605 sell limit [Market closed]'))                     # 4605 in passata 3 (XAUUSD): ALTRO_SEGMENTO
     L.append(riga('2024.09.15 23:00:00', 'failed instant buy 0.10 XAUUSD at 2578.00 [Market closed]'))   # nessun ticket: solo sonda globale
+    L.append(riga('2025.06.30 00:00:00', 'neutra fine passata 3'))
     return L
 
 
@@ -232,6 +236,85 @@ def corsa_senza_log(script=None):
         ok('NESSUNO' in riep and 'NON e una smentita' in riep, 'senza log: il riepilogo dice che nessun file e stato trovato e che il silenzio non e una smentita')
 
 
+def corsa_passata_assente(script=None):
+    # v2 (verificatore-stringhe 11/10): il file del giorno C'E' ed e' letto, ma contiene SOLO la passata P_003.
+    # I 30 ticket delle passate M30_002/M30_003 NON sono stati cercati: devono uscire NON VERIFICABILE, non NON TROVATO.
+    # E 10018 come ordine (#10018) o dentro un prezzo (1.10018) NON entra nella sonda; "retcode 10018" si'.
+    script = script or SCRIPT
+    print('== CORSA con il file del giorno ma SENZA le passate M30')
+    with tempfile.TemporaryDirectory() as radice:
+        appdata, home, desk = prepara(radice, con_log=False)
+        h = 'AB12CD34EF56AB12CD34EF56AB12CD34'
+        L = [avvio('2024.07.05 00:00:00', 'EURUSD', 'H1', '778601', 'OLTRE_LINEA_ESTERNA'),
+             riga('2025.02.28 21:00:00', 'order #10018 sell limit 2.88 EURUSD at 1.04032 placed'),
+             riga('2024.09.02 10:00:00', 'buy limit 2.88 EURUSD at 1.10018 placed'),
+             riga('2025.02.28 21:30:00', '[NatCla] INVIO FALLITO NATCLA_A_ST25_O1: retcode 10018'),
+             riga('2025.06.30 00:00:00', 'neutra fine passata')]
+        scrivi_utf16(os.path.join(appdata, 'MetaQuotes', 'Tester', h, 'Agent-127.0.0.1-3000', 'logs', '20261011.log'), L)
+        r = lancia(script, radice)
+        ok(r.returncode == 0, 'passata assente: rc 0 (got %s)' % r.returncode)
+        cart = os.path.join(desk, 'LOG_AGENTI_P003')
+        tab = leggi_csv(os.path.join(cart, 'TICKET_ATTESI.csv'))
+        p3 = [v for v in tab.values() if v['passata'] == 'P_003']
+        m30 = [v for v in tab.values() if v['passata'] != 'P_003']
+        ok(len(p3) == 3 and all(v['verdetto'].startswith('NON TROVATO') for v in p3), 'passata assente: i 3 ticket di P_003 (passata presente) sono NON TROVATO')
+        ok(len(m30) == 30 and all(v['verdetto'].startswith('NON VERIFICABILE (passata ') for v in m30), 'passata assente: i 30 ticket M30 (passata assente) sono NON VERIFICABILE, non NON TROVATO')
+        ok('NON VERIFICABILE (passata assente o log parziale) 30' in r.stdout, 'passata assente: la console conta 30 NON VERIFICABILE')
+        riep = open(os.path.join(cart, 'RIEPILOGO_LOG_AGENTI_P003.txt')).read()
+        ok(', 10018 1, ' in riep, 'passata assente: la sonda conta 10018 UNA volta (retcode), non #10018 ne 1.10018')
+
+
+def corsa_log_parziale(script=None):
+    # v2.1 (rilettura 11/10): la passata C'E' (riga AVVIO) ma il log si ferma PRIMA della fine della vita dei ticket
+    # (giro in corso / file troncato). Un NON TROVATO sarebbe falso: i ticket NON sono stati cercati fino in fondo.
+    script = script or SCRIPT
+    print('== CORSA con la passata M30_002 presente ma il log TRONCATO a 2024.09.15 23:00')
+    with tempfile.TemporaryDirectory() as radice:
+        appdata, home, desk = prepara(radice, con_log=False)
+        h = 'AB12CD34EF56AB12CD34EF56AB12CD34'
+        L = [avvio('2024.07.10 00:00:00', 'XAUUSD', 'M30', '778603', 'GEOMETRIA_ATTUALE'),
+             riga('2024.09.15 22:59:59', 'neutra'),
+             riga('2024.09.15 23:00:00', 'CTrade::OrderSend: cancel order #1966 buy limit 0.90 XAUUSD at 2578.00 [Market closed]')]
+        scrivi_utf16(os.path.join(appdata, 'MetaQuotes', 'Tester', h, 'Agent-127.0.0.1-3000', 'logs', '20261011.log'), L)
+        r = lancia(script, radice)
+        ok(r.returncode == 0, 'log parziale: rc 0 (got %s)' % r.returncode)
+        tab = leggi_csv(os.path.join(desk, 'LOG_AGENTI_P003', 'TICKET_ATTESI.csv'))
+        ok(tab['1966']['verdetto'].startswith('TROVATO: 1'), 'log parziale: 1966 TROVATO (la riga c e, e vale anche se il log e parziale) (%s)' % tab['1966']['verdetto'][:60])
+        ok(tab['1967']['verdetto'].startswith('NON VERIFICABILE (la passata M30_002 e nei file letti'), 'log parziale: 1967 NON VERIFICABILE, non NON TROVATO (%s)' % tab['1967']['verdetto'][:90])
+        ok(tab['2466']['verdetto'].startswith('NON VERIFICABILE (la passata M30_002'), 'log parziale: 2466 (2024.10.13) NON VERIFICABILE')
+        ok(tab['9736']['verdetto'].startswith('NON VERIFICABILE (la passata M30_002'), 'log parziale: 9736 (2025.05.25) NON VERIFICABILE')
+        ok(tab['1696']['verdetto'].startswith('NON VERIFICABILE (passata M30_003'), 'log parziale: 1696 (passata M30_003 assente) NON VERIFICABILE')
+        ok(not any(v['verdetto'].startswith('NON TROVATO') for v in tab.values()), 'log parziale: NESSUN ticket esce NON TROVATO')
+
+
+def corsa_grande(script=None):
+    # log "vero" da 200.000 righe con la SOLA passata EURUSD H1 (P_003) fino al 2025.06.30: i 30 ticket M30 sono NON VERIFICABILE
+    script = script or SCRIPT
+    print('== CORSA GRANDE: 200.000 righe, sola passata EURUSD H1')
+    with tempfile.TemporaryDirectory() as radice:
+        appdata, home, desk = prepara(radice, con_log=False)
+        h = 'AB12CD34EF56AB12CD34EF56AB12CD34'
+        L = [avvio('2024.07.05 00:00:00', 'EURUSD', 'H1', '778601', 'OLTRE_LINEA_ESTERNA')]
+        import datetime as dt
+        t = dt.datetime(2024, 7, 5)
+        passo = (dt.datetime(2025, 6, 30) - t) / 199990
+        for i in range(199990):
+            t = t + passo
+            L.append(riga(t.strftime('%Y.%m.%d %H:%M:%S'), '[NatCla] riga di giornale %06x prezzo 1.%05d order #%d' % (i, i % 100000, 10000 + (i % 40))))
+        L.append(riga('2025.02.28 22:00:00', 'CTrade::OrderSend: cancel order #4603 sell limit [Market closed]'))
+        L.append(riga('2025.06.30 00:00:00', 'neutra fine passata'))
+        scrivi_utf16(os.path.join(appdata, 'MetaQuotes', 'Tester', h, 'Agent-127.0.0.1-3000', 'logs', '20261011.log'), L)
+        r = lancia(script, radice)
+        ok(r.returncode == 0, 'grande: rc 0 (got %s)' % r.returncode)
+        tab = leggi_csv(os.path.join(desk, 'LOG_AGENTI_P003', 'TICKET_ATTESI.csv'))
+        m30 = [v for v in tab.values() if v['passata'] != 'P_003']
+        ok(len(m30) == 30 and all(v['verdetto'].startswith('NON VERIFICABILE (passata') for v in m30), 'grande: i 30 ticket M30 sono NON VERIFICABILE (passata assente), non NON TROVATO')
+        ok(tab['4603']['verdetto'].startswith('TROVATO: 1'), 'grande: 4603 TROVATO (%s)' % tab['4603']['verdetto'][:50])
+        ok(tab['4605']['verdetto'] == 'NON TROVATO', 'grande: 4605 NON TROVATO (passata presente fino in fondo, nessuna riga) (%s)' % tab['4605']['verdetto'][:60])
+        riep = open(os.path.join(desk, 'LOG_AGENTI_P003', 'RIEPILOGO_LOG_AGENTI_P003.txt')).read()
+        ok(', 10018 0, ' in riep, 'grande: nessun falso 10018 da order #10018..#10039 ne da prezzi 1.10018')
+
+
 def guardie():
     print('== GUARDIE')
     with tempfile.TemporaryDirectory() as radice:
@@ -309,6 +392,8 @@ def mutante(nome, sost):
     print('== MUTANTE %s (i FAIL qui sotto sono ATTESI)' % nome)
     res = corsa_completa(p, 'mutante ' + nome, verifica_corsa)
     corsa_senza_log(p)
+    corsa_passata_assente(p)
+    corsa_log_parziale(p)
     shutil.rmtree(d, ignore_errors=True)
     presi = len(FALLITI) - before
     for _ in range(presi):
@@ -323,6 +408,10 @@ def main():
         return 2
     res = corsa_completa(SCRIPT, 'script vero', verifica_corsa)
     corsa_senza_log()
+    corsa_passata_assente()
+    corsa_log_parziale()
+    if '--grande' in sys.argv:
+        corsa_grande()
     guardie()
     print()
     print('collaudo dello script vero: %d controlli, %d FALLITI' % (FATTI[0], len(FALLITI)))
@@ -335,7 +424,10 @@ def main():
         ('numero_dentro_numero', [("'(?<![0-9])(?<![0-9][.,])(?:'", "'(?:'"), ("(?![0-9])(?![.,][0-9])'), $Opz)", "'), $Opz)")]),
         ('senza_ora_e_ok', [("if($null -eq $sim){ $classe = 'SENZA_ORA'; $row.n_senza_ora++ }", "if($false){ $classe = 'SENZA_ORA'; $row.n_senza_ora++ }")]),
         ('legge_ogni_giorno', [("$DaLeggere = @($Trovati | Where-Object { $ListaGiorni -contains $_.BaseName })", "$DaLeggere = @($Trovati)")]),
-        ('verdetto_vuoto_e_non_trovato', [("if($nLetti -eq 0){ return 'NON VERIFICABILE (nessun file log del giorno letto)' }", "if($false){ return 'x' }")]),
+        ('verdetto_vuoto_e_non_trovato', [("if($nLetti -eq 0){ return 'NON VERIFICABILE (nessun file log del giorno letto)' }", "if($false){ return 'x' }"), ("if(-not $SegVisti.ContainsKey($kp)){", "if($false){")]),
+        ('log_parziale_e_non_trovato', [("if($reach -eq '' -or [string]::CompareOrdinal($reach, $fineNec) -lt 0){", "if($false){")]),
+        ('passata_assente_e_non_trovato', [("if(-not $SegVisti.ContainsKey($kp)){", "if($false){")]),
+        ('10018_a_sottostringa', [("$R10018 = '(?<![#0-9.,])10018(?![0-9])(?![.,][0-9])'", "$R10018 = '10018'")]),
         ('retcode_10009_e_fallimento', [("retcode\\s*:?\\s*(?!10008|10009)[0-9]+", "retcode\\s*:?\\s*[0-9]+")]),
         ('sovrascrive_cartella', [("Move-Item -LiteralPath $Cart -Destination $nuovo", "Remove-Item -LiteralPath $Cart -Recurse -Force")]),
     ]

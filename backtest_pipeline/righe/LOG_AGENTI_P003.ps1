@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_LOG_AGENTI_P003_v1
+#  MARCATORE_LOG_AGENTI_P003_v2
 #  LOG_AGENTI_P003.ps1 -- SOLA LETTURA dei log GREZZI degli agenti del Strategy Tester
 #
 #  PERCHE' ESISTE (report/NATCLA_P003_DIAGNOSI_2026-10-11.md, par. 3.3 e 4(a)):
@@ -27,7 +27,9 @@
 #     numero in un'ALTRA passata si conta a parte e NON vale come trovata;
 #   - il numero si cerca come numero INTERO, non dentro un prezzo ("2466.50") ne' dentro un numero piu' lungo;
 #   - la riga vale solo se l'ora SIMULATA cade nella finestra di vita del ticket (piazzato -1 min .. fine +2 min,
-#     dalla tabella Ordini del report .htm); una riga con ora simulata assente o fuori finestra si conta a parte.
+#     dalla tabella Ordini del report .htm); una riga con ora simulata assente o fuori finestra si conta a parte;
+#   - (v2) un ticket la cui PASSATA (riga AVVIO) non compare in nessun file letto per intero, o il cui log si ferma PRIMA
+#     della fine della vita del ticket (log parziale), esce NON VERIFICABILE, non NON TROVATO: non e stato cercato fino in fondo. E 10018 vale solo come numero a se (non #10018 ordine, non 1.10018 prezzo).
 #
 #  NON TOCCA: nessun processo (non apre MT5, MetaEditor, tester), nessun file di log (mai cancellato, spostato o
 #  modificato), nessun terminale, nessun conto, CODA.txt, runner, preset, sedie. Scrive SOLO il Desktop
@@ -132,8 +134,11 @@ $Opz = [Text.RegularExpressions.RegexOptions]::Compiled
 $OpzI = $Opz -bor [Text.RegularExpressions.RegexOptions]::IgnoreCase
 # il numero INTERO: non preceduto da cifra, ne' da "cifra." / "cifra,"; non seguito da cifra, ne' da ".cifra" / ",cifra" (prezzi, numeri piu' lunghi)
 $reTicket = New-Object Text.RegularExpressions.Regex(('(?<![0-9])(?<![0-9][.,])(?:' + ($TickOrd -join '|') + ')(?![0-9])(?![.,][0-9])'), $Opz)
-$reKw     = New-Object Text.RegularExpressions.Regex('cancel|delete|remove|OrderSend|failed|market closed|10018|retcode|reject|invalid|error|expired', $OpzI)
-$reFail   = New-Object Text.RegularExpressions.Regex('failed|market closed|10018|reject|invalid|error|retcode\s*:?\s*(?!10008|10009)[0-9]+', $OpzI)
+# 10018 come numero A SE: non un ordine (#10018 esiste in M30_002, 2025.06.05), non dentro un prezzo (1.10018) ne' in un numero piu' lungo
+$R10018 = '(?<![#0-9.,])10018(?![0-9])(?![.,][0-9])'
+$re10018  = New-Object Text.RegularExpressions.Regex($R10018, $Opz)
+$reKw     = New-Object Text.RegularExpressions.Regex(('cancel|delete|remove|OrderSend|failed|market closed|' + $R10018 + '|retcode|reject|invalid|error|expired'), $OpzI)
+$reFail   = New-Object Text.RegularExpressions.Regex(('failed|market closed|' + $R10018 + '|reject|invalid|error|retcode\s*:?\s*(?!10008|10009)[0-9]+'), $OpzI)
 $reCancel = New-Object Text.RegularExpressions.Regex('cancel|delete|remove', $OpzI)
 $reSim    = New-Object Text.RegularExpressions.Regex('[0-9]{4}\.[0-9]{2}\.[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}', $Opz)
 $reAvvio  = New-Object Text.RegularExpressions.Regex('\[NatCla\] AVVIO v[0-9.]+ ', $Opz)
@@ -151,7 +156,7 @@ function ChiaveErrore($msg){
   $m = $reRet.Match($msg)
   if($m.Success){ return ('retcode ' + $m.Groups['n'].Value) }
   if($reMC.IsMatch($msg)){ return 'market closed (senza altro)' }
-  if($msg.IndexOf('10018') -ge 0){ return '10018 (senza altro)' }
+  if($re10018.IsMatch($msg)){ return '10018 (senza altro)' }
   if($msg.ToLowerInvariant().IndexOf('failed') -ge 0){ return 'failed (senza motivo fra parentesi quadre)' }
   return 'altro'
 }
@@ -205,11 +210,15 @@ $ErrTicket = @{}      # testo d'errore -> conteggio, righe coerenti in finestra 
 $ErrGlobale = @{}     # testo d'errore -> conteggio, TUTTE le righe CTrade/failed del giorno (non legate ai ticket)
 $Sonda = New-Object System.Collections.Generic.List[object]  # per file e passata: contatori globali
 $FileEsito = New-Object System.Collections.Generic.List[object]
+$SegVisti = @{}      # simbolo|tf|magic|stop -> $true: passate (riga AVVIO) viste in file letti PER INTERO
+$SegReach = @{}      # simbolo|tf|magic|stop -> ultima ora SIMULATA (stringa AAAA.MM.GG HH:MM:SS) vista in una riga di quella passata: fin dove arriva il log
 
 foreach($f in $DaLeggere){
   $righe = 0; $lett = $true; $errLett = ''
   $seg = 'SEGMENTO IGNOTO (nessun AVVIO prima in questo file)'; $segSim = ''; $segTf = ''; $segMg = ''; $segSt = ''
   $segIdx = 0
+  $segFile = @{}
+  $segKey = ''
   $ring = New-Object System.Collections.Generic.Queue[string]
   $attivi = New-Object System.Collections.Generic.List[object]
   $cnt = NuovoCnt
@@ -240,14 +249,23 @@ foreach($f in $DaLeggere){
         if($ms.Success){ $segSim = $ms.Groups['sym'].Value; $segTf = $ms.Groups['tf'].Value }
         if($mm.Success){ $segMg = $mm.Groups['mg'].Value }
         if($mt.Success){ $segSt = $mt.Groups['st'].Value }
+        $segKey = ($segSim + '|' + $segTf + '|' + $segMg + '|' + $segSt)
+        $segFile[$segKey] = $true
         $segEtich = ('#' + $segIdx + ' ' + $segSim + ' ' + $segTf + ' magic ' + $segMg + ' stop ' + $segSt + ' (riga ' + $nr + ')')
       }
       $cnt['righe']++
+      # fin dove arriva il log di questa passata (confronto di stringhe ORDINALE: AAAA.MM.GG HH:MM:SS ordina come il tempo)
+      if($segKey -ne ''){
+        $mr = $reSim.Match($ln)
+        if($mr.Success -and $mr.Index -lt 60){
+          if(-not $SegReach.ContainsKey($segKey) -or [string]::CompareOrdinal($mr.Value, [string]$SegReach[$segKey]) -gt 0){ $SegReach[$segKey] = $mr.Value }
+        }
+      }
       $haCT = $false
       if($ln.IndexOf('CTrade::') -ge 0){ $haCT = $true; $cnt['ctrade']++ }
       if($reCancel.IsMatch($ln)){ $cnt['cancel']++ }
       if($reMC.IsMatch($ln)){ $cnt['mc']++ }
-      if($ln.IndexOf('10018') -ge 0){ $cnt['f10018']++ }
+      if($re10018.IsMatch($ln)){ $cnt['f10018']++ }
       $haFailed = ($ln.IndexOf('failed') -ge 0 -or $ln.IndexOf('Failed') -ge 0)
       if($haFailed){ $cnt['failed']++ }
       if($haCT -or $haFailed){
@@ -279,7 +297,7 @@ foreach($f in $DaLeggere){
             if($fail){ $row.n_fail++ }
             if($canc){ $row.n_cancel++ }
           }
-          if($Hits.Count -lt $MAXHIT){
+          if($Hits.Count -lt $MAXHIT -or $classe -eq 'COERENTE'){
             [void]$Hits.Add(@{ file = $f.FullName; riga = $nr; segmento = $segEtich; ticket = $tk; caso = $row.caso; classe = $classe; kw = $kw; fail = $fail
               sim = $(if($null -eq $sim){ '' } else { $sim.ToString($FMT_SIM, $IC) }); testo = (Tronca $ln 600) })
           } else { $HitTroncati++ }
@@ -300,6 +318,7 @@ foreach($f in $DaLeggere){
       while($ring.Count -gt $Contesto){ [void]$ring.Dequeue() }
     }
     if($cnt['righe'] -gt 0){ [void]$Sonda.Add(@{ file = $f.FullName; segmento = $segEtich; c = $cnt }) }
+    foreach($kf in @($segFile.Keys)){ $SegVisti[$kf] = $true }
   } catch {
     $lett = $false; $errLett = $_.Exception.Message
     Dico ('   ILLEGGIBILE ' + $f.FullName + ': ' + $errLett) 'Red'
@@ -319,16 +338,24 @@ function Verdetto($row){
   if($row.n_fail -gt 0){ return ('TROVATO: ' + $row.n_fail + ' righe con testo di fallimento') }
   if($row.n_coer_kw -gt 0){ return ('TROVATO SOLO senza fallimento: ' + $row.n_coer_kw + ' righe con parola chiave') }
   if($row.n_coer -gt 0){ return ('TROVATO solo il numero, senza parola chiave: ' + $row.n_coer + ' righe') }
+  $kp = $row.simbolo + '|' + $row.tf + '|' + $row.magic + '|' + $row.stop
+  if(-not $SegVisti.ContainsKey($kp)){ return ('NON VERIFICABILE (passata ' + $row.passata + ' = ' + $row.simbolo + ' ' + $row.tf + ' magic ' + $row.magic + ' stop ' + $row.stop + ' ASSENTE dai file letti per intero: nessuna sua riga AVVIO, il ticket NON e stato cercato)') }
+  $fineNec = $row.fine.AddMinutes(2).ToString($FMT_SIM, $IC)
+  $reach = ''
+  if($SegReach.ContainsKey($kp)){ $reach = [string]$SegReach[$kp] }
+  if($reach -eq '' -or [string]::CompareOrdinal($reach, $fineNec) -lt 0){ return ('NON VERIFICABILE (la passata ' + $row.passata + ' e nei file letti ma il suo log arriva solo a ora simulata ' + $(if($reach -eq ''){ '(nessuna riga con ora)' } else { $reach }) + ', la vita del ticket finisce a ' + $row.fine.ToString($FMT_SIM, $IC) + ': log PARZIALE (giro in corso, file ruotato o troncato?), il ticket NON e stato cercato fino in fondo)') }
   $scartate = $row.n_fuori + $row.n_altro_seg + $row.n_senza_ora + $row.n_seg_ignoto
   if($scartate -gt 0){ return ('NON TROVATO (ma ' + $scartate + ' righe con quel numero SCARTATE: fuori finestra ' + $row.n_fuori + ', altra passata ' + $row.n_altro_seg + ', senza ora ' + $row.n_senza_ora + ', passata ignota ' + $row.n_seg_ignoto + ': vedi RIGHE_TROVATE.csv)') }
   return 'NON TROVATO'
 }
-$nFail = 0; $nKwOnly = 0; $nNum = 0; $nNon = 0
+$nFail = 0; $nKwOnly = 0; $nNum = 0; $nNon = 0; $nNonVer = 0
 foreach($tk in $TickOrd){
-  $r = $Tick[$tk]
-  if($nLetti -gt 0){
-    if($r.n_fail -gt 0){ $nFail++ } elseif($r.n_coer_kw -gt 0){ $nKwOnly++ } elseif($r.n_coer -gt 0){ $nNum++ } else { $nNon++ }
-  }
+  $v = Verdetto $Tick[$tk]
+  if($v.StartsWith('TROVATO: ', [StringComparison]::Ordinal)){ $nFail++ }
+  elseif($v.StartsWith('TROVATO SOLO', [StringComparison]::Ordinal)){ $nKwOnly++ }
+  elseif($v.StartsWith('TROVATO solo', [StringComparison]::Ordinal)){ $nNum++ }
+  elseif($v.StartsWith('NON VERIFICABILE', [StringComparison]::Ordinal)){ $nNonVer++ }
+  else { $nNon++ }
 }
 
 # ---------------------------------------------------------------------
@@ -441,7 +468,7 @@ foreach($tk in $TickOrd){
 }
 [void]$rp.Add('')
 if($nLetti -gt 0){
-  [void]$rp.Add('   TOTALE su 33: TROVATO con testo di fallimento ' + $nFail + ' | TROVATO senza fallimento ' + $nKwOnly + ' | solo il numero ' + $nNum + ' | NON TROVATO ' + $nNon)
+  [void]$rp.Add('   TOTALE su 33: TROVATO con testo di fallimento ' + $nFail + ' | TROVATO senza fallimento ' + $nKwOnly + ' | solo il numero ' + $nNum + ' | NON TROVATO ' + $nNon + ' | NON VERIFICABILE (passata assente o log parziale) ' + $nNonVer)
 } else {
   [void]$rp.Add('   TOTALE su 33: NON VERIFICABILE (nessun file letto)')
 }
@@ -464,7 +491,7 @@ foreach($b in $Blocchi){
 }
 if($Blocchi.Count -eq 0){ [void]$rp.Add('   nessuna') }
 [void]$rp.Add('')
-[void]$rp.Add('COME SI LEGGE: TROVATO con fallimento = esiste una riga del log grezzo, nella passata giusta e nell ora giusta, che porta il numero del ticket e un testo di fallimento: il TESTO fra parentesi quadre o il retcode e il dato che mancava; leggerlo nel blocco. NON TROVATO = nessuna riga: vale come "non trovato", NON come smentita, se la sonda globale mostra CTrade/cancel a zero o se il file del giorno manca.')
+[void]$rp.Add('COME SI LEGGE: TROVATO con fallimento = esiste una riga del log grezzo, nella passata giusta e nell ora giusta, che porta il numero del ticket e un testo di fallimento: il TESTO fra parentesi quadre o il retcode e il dato che mancava; leggerlo nel blocco. NON TROVATO = la passata del ticket e nei file letti per intero ma nessuna riga lo nomina: vale come "non trovato", NON come smentita, se la sonda globale mostra CTrade/cancel a zero. NON VERIFICABILE = il file del giorno manca, oppure la passata del ticket (riga AVVIO) non e in nessun file letto per intero, oppure il suo log si ferma prima della fine della vita del ticket (parziale): il ticket non e stato cercato fino in fondo.')
 [void]$rp.Add('Questo script RACCOGLIE e non giudica la causa. Nessun file di log e stato toccato.')
 ($rp -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'RIEPILOGO_LOG_AGENTI_P003.txt') -Encoding ASCII
 
@@ -489,7 +516,7 @@ Write-Host ''
 if($nLetti -eq 0){
   Dico 'ESITO: NON VERIFICABILE -- nessun file log dei giorni richiesti sotto una cartella Tester del profilo. Lo zip dice cosa e stato cercato e cosa c e.' 'Red'
 } else {
-  Dico ('ESITO su 33 ticket: TROVATO con testo di fallimento ' + $nFail + ' | TROVATO senza fallimento ' + $nKwOnly + ' | solo il numero ' + $nNum + ' | NON TROVATO ' + $nNon) 'Cyan'
+  Dico ('ESITO su 33 ticket: TROVATO con testo di fallimento ' + $nFail + ' | TROVATO senza fallimento ' + $nKwOnly + ' | solo il numero ' + $nNum + ' | NON TROVATO ' + $nNon + ' | NON VERIFICABILE (passata assente o log parziale) ' + $nNonVer) 'Cyan'
 }
 Dico ('ZIP PRONTO DA MANDARE: ' + $zip) 'Green'
 Dico 'FILE ATTESI NELLO ZIP: RIEPILOGO_LOG_AGENTI_P003.txt + RIGHE_CON_CONTESTO.txt + RIGHE_TROVATE.csv + FILE_LOG_TROVATI.csv + TICKET_ATTESI.csv' 'Gray'
