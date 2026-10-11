@@ -20,11 +20,16 @@ Che cosa cambia rispetto alla prima stesura:
 **Revisione 3 (stesso giorno), dopo il secondo FAIL @ `f2e1acc9` (classe 1334, @ 4f9b4fe8).** Che cosa cambia rispetto alla revisione 2:
 - l'origine della pausa di 10 s: conta dall'**ultimo ritentativo fallito** (variabile `gOrfTent[L]`, scritta solo a EA r.2091, azzerata
   in `OnInit` r.1327), **non** dalla guardia; la differenza fra le domeniche oro 2024 (sblocco 23:10:00/:01) e 2025 (23:10:05/:06) e'
-  la fase dell'ultimo ritentativo fallito, non la guardia (par. 3.3);
+  INFERITO venire dalla fase dell'ultimo ritentativo fallito, non dalla guardia (par. 3.3);
 - l'opzione B **non** rende determinabile il caso D: lo decidono i tick 23:09:50-23:10:01 e l'orario di sessione, oppure una passata con R;
 - il par. 5 non si contraddice piu' su B; C1 descritta come sopra, con il costo giusto (riempimenti persi, non esposizione);
-- i 10 episodi oro 00:00 -> 00:05 di lug-ott stanno solo nella M30_002 (P_001: zero);
+- i 10 episodi oro 00:00 -> 00:05 di lug-ott stanno solo nelle passate M30 oro (M30_002 e M30_003, stesse 10 date: 2024.07.12 x3,
+  07.17, 09.13 x2, 09.25 x2, 10.16 x2; 5 mercoledi' e 5 venerdi'); zero nelle H1 (P_001, P_002, M30_001);
 - la premessa dei "No" A/B/C (la sessione riapre esattamente alle 23:10:00) e' dichiarata, e l'etichetta e' INFERITO con premessa.
+
+**Revisione 4 (stesso giorno), dopo il terzo FAIL @ `d6f35654` (classe 1335, @ e99c94a3).** I 10 episodi 00:00 -> 00:05 di lug-ott
+stanno in ENTRAMBE le passate M30 oro (M30_002 e M30_003), non solo nella M30_002 (la frase della revisione 3 e' stata corretta nel suo stesso punto, qui sopra);
+rimesse le etichette INFERITO sulla fase 2024/2025 e sulla conclusione del par. 1 punto 10; aggiunto il NON COPERTO sulla lettura dei tick.
 
 **Fonti (tutte in repo, nessun dato nuovo):**
 - **P** = pilota H1 `backtest_pipeline/risultati_archivio/NATCLA_F1_P_20261011/NATCLA_F1_P.zip` (EA **v1.11**: riga `AVVIO v1.11` nei log;
@@ -58,8 +63,9 @@ Etichette: **FATTO** = letto in un file (citato); **INFERITO** = dedotto da fatt
    prefisso `[NatCla]` e il driver la scarta, r.507).
 5. **FATTO** -- Le finestre di chiusura: sull'**EURUSD** stanno ferme (lun-ven 22:00 -> 22:05 da luglio 2024 a febbraio 2025, anche
    attraverso il cambio d'orologio BCM); sull'**oro** cambiano con la stagione (lun-gio: lug-ott 23:00 -> 23:05, nov-dic 22:00 -> 01:10,
-   gen-feb 22:00 -> 00:05, mar-mag 00:00 -> 00:05; misurate su P_001 e M30_002; nella sola M30_002 in lug-ott compaiono anche 10
-   episodi 00:00 -> 00:05). Da dove vengano queste finestre (orari della specifica, buchi dei tick, o tutti e due) e' **NON DETERMINATO**: l'idea "il tester applica una specifica fissa" regge sull'EURUSD e non basta sull'oro.
+   gen-feb 22:00 -> 00:05, mar-mag 00:00 -> 00:05; misurate su P_001 e M30_002; nelle sole passate M30 oro (M30_002 e M30_003,
+   stesse date) in lug-ott compaiono anche 10 episodi 00:00 -> 00:05 (5 mercoledi' e 5 venerdi': i venerdi' sono fuori dal lun-gio
+   della tabella); zero nelle H1). Da dove vengano queste finestre (orari della specifica, buchi dei tick, o tutti e due) e' **NON DETERMINATO**: l'idea "il tester applica una specifica fissa" regge sull'EURUSD e non basta sull'oro.
 6. **FATTO (tabella Ordini dei `.htm`)** -- Nei 9 casi adottati il pendente veniva dall'**ultimo riarmo del venerdi** (21:00 H1, 21:30
    M30, 20:30 M30) e si e' riempito alla riapertura della domenica: P_003 23:05:00 (lo stesso secondo in cui la P_004 riesce a
    cancellare), oro 15/09 e 13/10 (3 adozioni) 23:10:00 (il primo secondo in cui le domeniche oro 2024 sbloccano le cancellazioni), e
@@ -80,8 +86,8 @@ Etichette: **FATTO** = letto in un file (citato); **INFERITO** = dedotto da fatt
 9. **FATTO** -- Il rischio e' vero e limitato dallo SL originale dell'ordine (sta sul server): M30_002 il 2025.05.25 chiude a SL con
    -2.091,48 EUR, scritto nel CSV a **0,00 R** perche' `rischio_soldi` dell'adottato resta 0 (ResetSetup EA r.1990); circa -0,83 R
    ricostruito (INFERITO).
-10. **Conclusione** -- L'intervento (1) logging + (2) "ritentare finche' riesce" **non risolve 4 eventi su 5; sul quinto (il caso D, il
-    piu' costoso) e' aperto**. Quindi niente v1.13 di notte: servono la prova del retcode (opzione A, zero righe di EA) e una decisione
+10. **Conclusione** -- L'intervento (1) logging + (2) "ritentare finche' riesce" **non risolve 4 eventi su 5 (INFERITO: P_003 forte, A/B/C
+    con la premessa del par. 3.3); sul quinto (il caso D, il piu' costoso) e' aperto**. Quindi niente v1.13 di notte: servono la prova del retcode (opzione A, zero righe di EA) e una decisione
     fra le opzioni del par. 5.
 
 ---
@@ -165,7 +171,9 @@ il TF conta **attraverso l'ora dell'ultimo riarmo**, che decide quanto il penden
 Sulla differenza fra le domeniche oro 2024 (sblocco 23:10:00/:01) e 2025 (23:10:05/:06): l'origine della pausa e' l'**ultimo ritentativo
 fallito**, non la guardia. Con tick fitti i ritentativi cadono ogni ~10 s a partire dal primo tick in cui la linea e' senza setup, e la
 "fase" con cui arrivano alla riapertura decide se il primo ritentativo utile cade a 23:10:00 o qualche secondo dopo (INFERITO: la fase
-dipende dai tick, che non abbiamo).
+dipende dai tick, che non abbiamo). Sostenuto il 25/05/2025 (M30_001 23:10:06 con tick operabile alle 23:10:01) e il 15/09/2024
+(M30_002: ST25 riempito 23:10:00, ST30 orfano dallo stesso tick cancellato 23:10:01); il 13/04 e il 15/06/2025 (cancellazioni 23:10:05)
+e le domeniche 2024 a 23:10:00 sono compatibili anche con "il primo tick arriva in quel secondo".
 
 ### 3.4 Cosa NON e' osservabile nei dati che abbiamo
 1. Il **retcode** e la descrizione di ogni `OrderDelete` fallito (EA r.1962; righe CTrade scartate dal driver r.507).
@@ -177,6 +185,8 @@ dipende dai tick, che non abbiamo).
 6. I riarmi di ogni barra (muti dopo il primo, EA r.1669/r.1673) e le cancellazioni riuscite a r.1598 (motivo vuoto): la catena "ordine
    piazzato alla barra k, cancellato alla barra k+1" si vede **solo** nei `.htm`.
 7. L'origine delle finestre di chiusura (specifica, buchi dei tick): nessun file la riporta (par. 1 punto 5).
+8. **NON COPERTO**: che la lettura dei tick (caso D) sia di sola lettura non e' dimostrato: i file tick sono binari e serve uno script
+   dentro MT5. La riga che lo fara' dovra' passare dal cancello.
 
 ---
 
@@ -245,8 +255,8 @@ della riga E.
    e 4/201 = 2,0%: una soglia al 2% scritta oggi le farebbe passare **per costruzione**).
 
 **Il passo che costa meno:** A (minuti, sola lettura, nessuna modifica all'EA; puo' trasformare l'INFERITO in FATTO). Il caso D si
-decide solo con i tick XAUUSD 2025.05.25 23:09:50-23:10:01 e l'orario di sessione (sola lettura, dal cancello), oppure con una passata
-con R. B, R, C1, C2, D, E sono scelte di Claudio e della collega. Le due passate oro M30 restano **illeggibili** finche' la decisione non
+decide solo con i tick XAUUSD 2025.05.25 23:09:50-23:10:01 e l'orario di sessione (lettura che deve passare dal cancello: che sia di sola
+lettura non e' dimostrato, par. 3.4 punto 8), oppure con una passata con R. B, R, C1, C2, D, E sono scelte di Claudio e della collega. Le due passate oro M30 restano **illeggibili** finche' la decisione non
 e' presa: nessuna di queste opzioni le rilegge "gratis".
 
 ---
@@ -256,8 +266,8 @@ e' presa: nessuna di queste opzioni le rilegge "gratis".
    riuscito, una sola senza guardia prima (M30_004 2024.07.18 22:05:13 E200). Includendo M30_001 (tick identici alla P_001): 514 episodi.
 2. Le righe delle tabelle 3.1, 3.2 e 3.3 contro le tabelle **Ordini** e **Deal** dei `.htm` (UTF-16) dei due zip, ticket per ticket, e
    contro i log (P_004 2025.03.02 23:05:00; domeniche oro 2024 a 23:10:00/01 e 2025 a 23:10:05/06).
-3. La tabella stagionale dell'oro (par. 1 punto 5) su P_001 e M30_002, e i 10 episodi 00:00 -> 00:05 di lug-ott nella sola M30_002
-   (P_001: zero).
+3. La tabella stagionale dell'oro (par. 1 punto 5) su P_001 e M30_002, e i 10 episodi 00:00 -> 00:05 di lug-ott nelle sole passate M30
+   oro (M30_002 e M30_003, stesse date; P_001, P_002, M30_001: zero).
 4. La lettura del codice: `gOrfTent` (grep: dichiarata r.966, azzerata r.1327, scritta SOLO r.2091, letta r.2090); EA r.387, 1335-1337, 1591-1593, 1598, 1611-1612, 1669, 1871, 1953-1971 (`ResetSetup` incondizionato a r.1970),
    2072-2092 contro 2105-2116, 2126-2127, 2245; e che i rami siano identici in v1.11 e v1.12
    (`git diff 4db1af18 d1aef381 -- mql5/Experts/EA_NatCla.mq5`).
@@ -265,6 +275,8 @@ e' presa: nessuna di queste opzioni le rilegge "gratis".
    B renda determinabile il caso D.
 6. Che il par. 5 non contenga una soglia scelta sui numeri di M30_002/003 (opzione E, punto 4) e che non scelga un'opzione.
 7. Che **nessun codice EA** sia stato scritto: `git show --stat` del commit deve mostrare solo questo file.
+8. Da decidere (Claudio e la collega, non questo report): A; come decidere il caso D (tick + orario di sessione, con la riga che passa
+   dal cancello, oppure una passata con R); la scelta fra B, R, C1, C2, D, E; le soglie di E.
 
 ---
 
