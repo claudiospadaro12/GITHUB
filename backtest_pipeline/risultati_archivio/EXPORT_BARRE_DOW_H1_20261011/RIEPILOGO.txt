@@ -1,0 +1,11 @@
+EXPORT_BARRE_DOW_H1 -- export delle barre H1 di U30USD dal tester (Model=1, Visual=0), EA CLAU12_EXPORT_BARRE_H1 v1.00
+data: 2026-10-11 22:26:10   pc: DESKTOP-H4D7CAJ   pin: 031c921d308c389505b3bf039981968b47418753   run: 91fbb7cf1900
+EA SHA256 2F65C46067E4B9E0E868D974BE94C1239FD9CB01C5A62FD2DA6D0A055CD1523D   ini SHA256 09834BF0A59B4DDC9B94B47003CEA5BA05C12B846533F238B2246BB2BAE57A61   compilazione: 0 errori, 0 avvisi (-1 = non letto)
+finestra chiesta: 2024.09.26 -> 2026.10.11   durata passata 31 s
+CSV: U30USD_H1_91fbb7cf1900.csv   SHA256 FAE044F51EE46CDC6B418D33CCE5FACC94217F441BF20CF95919BC9002B6DC57   barre 11755   prima 2024.09.26 16:00   ultima 2026.10.09 20:00
+riga #FINE: #FINE;n=11755;prima=2024.09.26 16:00;ultima=2026.10.09 20:00;errori_copia=0;scartate=0;motivo_deinit=1
+STATO: OK
+motivi: 
+
+OROLOGIO: la colonna time_server e l ora del server BCM come registrata dal terminale, NON convertita. Il referto dice UTC+1 fisso sugli indici dal 2024.09.26 (report/OROLOGIO_BCM_2026-09-24.md par. 3.2): lo VERIFICA il collaudo.
+COME SI LEGGE: python3 backtest_pipeline/collaudo_export_barre_h1.py <csv> --run <run>. Questo script RACCOGLIE e basta: non giudica la serie.

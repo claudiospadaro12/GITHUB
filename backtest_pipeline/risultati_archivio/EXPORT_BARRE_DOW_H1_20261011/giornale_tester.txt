@@ -1,0 +1,35 @@
+CS	0	22:25:54.830	Symbols	U30USD: symbol to be synchronized
+CS	0	22:25:54.830	Symbols	U30USD: symbol synchronized, 4120 bytes of symbol info received
+CS	0	22:25:54.848	History	U30USD: load 9278 bytes of history data to synchronize in 0:00:00.012
+CS	0	22:25:54.848	History	U30USD: history synchronized from 2024.09.26 to 2026.10.09
+CS	0	22:25:54.852	History	U30USD,H1: history cache allocated for 12751 bars and contains 116 bars from 2024.09.26 16:00 to 2024.10.03 23:00
+CS	0	22:25:54.852	History	U30USD,H1: history begins from 2024.09.26 16:00
+CS	0	22:25:54.853	Tester	U30USD,H1: testing of Experts\CLAU12_EXPORT_BARRE_H1.ex5 from 2024.09.26 00:00 to 2026.10.11 00:00 started with inputs:
+CS	0	22:25:54.868	CLAU12_EXPORT_BARRE_H1 (U30USD,H1)	2024.10.04 00:00:00   [CLAU12_EXPORT] AVVIO v1.00 | U30USD H1 | run 91fbb7cf1900 | file Common\Files\CLAU12_EXPORT_BARRE_H1_U30USD_91fbb7cf1900.csv
+CS	0	22:25:55.611	Tester	final balance 100000.00 EUR
+CS	0	22:25:55.611	CLAU12_EXPORT_BARRE_H1 (U30USD,H1)	2026.10.09 21:54:59   [CLAU12_EXPORT] FINE n=11755;prima=2024.09.26 16:00;ultima=2026.10.09 20:00;errori_copia=0;scartate=0;motivo_deinit=1 | file Common\Files\CLAU12_EXPORT_BARRE_H1_U30USD_91fbb7cf1900.csv
+CS	0	22:25:55.619	Tester	U30USD,H1: 2764556 ticks, 11640 bars generated. Environment synchronized in 0:00:00.051. Test passed in 0:00:00.805 (including ticks preprocessing 0:00:00.375).
+CS	0	22:25:55.619	Tester	U30USD,H1: total time from login to stop testing 0:00:00.856 (including 0:00:00.051 for history data synchronization)
+CS	0	22:25:55.619	Tester	90 Mb memory used including 0.94 Mb of history data, 64 Mb of tick data
+FJ	0	22:25:54.773	Tester	U30USD,H1 (BCMMarkets-Server): testing of Experts\CLAU12_EXPORT_BARRE_H1.ex5 from 2024.09.26 00:00 to 2026.10.11 00:00
+HP	0	22:25:54.792	Core 1	common synchronization completed
+DK	0	22:25:54.837	Core 1	U30USD: history for 2026 year synchronized
+EO	0	22:25:54.837	Core 1	U30USD: history synchronization completed [9 Kb]
+RI	0	22:25:54.837	Core 1	U30USD: 9.06 Kb of history processed in 0:00:00.000
+PL	0	22:25:55.042	Tester	quality of analyzed history is 100%
+GG	0	22:25:55.620	Core 1	U30USD: symbol to be synchronized
+OR	0	22:25:55.620	Core 1	U30USD: symbol synchronized, 4120 bytes of symbol info received
+JM	0	22:25:55.620	Core 1	U30USD: load 9278 bytes of history data to synchronize in 0:00:00.012
+MJ	0	22:25:55.620	Core 1	U30USD: history synchronized from 2024.09.26 to 2026.10.09
+DO	0	22:25:55.620	Core 1	U30USD,H1: history cache allocated for 12751 bars and contains 116 bars from 2024.09.26 16:00 to 2024.10.03 23:00
+NM	0	22:25:55.620	Core 1	U30USD,H1: history begins from 2024.09.26 16:00
+QJ	0	22:25:55.620	Core 1	U30USD,H1: testing of Experts\CLAU12_EXPORT_BARRE_H1.ex5 from 2024.09.26 00:00 to 2026.10.11 00:00 started with inputs:
+MN	0	22:25:55.620	Core 1	2024.10.04 00:00:00   [CLAU12_EXPORT] AVVIO v1.00 | U30USD H1 | run 91fbb7cf1900 | file Common\Files\CLAU12_EXPORT_BARRE_H1_U30USD_91fbb7cf1900.csv
+PF	0	22:25:55.620	Core 1	final balance 100000.00 EUR
+KN	0	22:25:55.620	Core 1	2026.10.09 21:54:59   [CLAU12_EXPORT] FINE n=11755;prima=2024.09.26 16:00;ultima=2026.10.09 20:00;errori_copia=0;scartate=0;motivo_deinit=1 | file Common\Files\CLAU12_EXPORT_BARRE_H1_U30USD_91fbb7cf1900.csv
+GI	0	22:25:55.620	Core 1	U30USD,H1: 2764556 ticks, 11640 bars generated. Environment synchronized in 0:00:00.051. Test passed in 0:00:00.805 (including ticks preprocessing 0:00:00.375).
+IO	0	22:25:55.620	Core 1	U30USD,H1: total time from login to stop testing 0:00:00.856 (including 0:00:00.051 for history data synchronization)
+HL	0	22:25:55.620	Core 1	90 Mb memory used including 0.94 Mb of history data, 64 Mb of tick data
+DG	0	22:25:46.091	Network	'50503392': terminal synchronized with BCM Markets Ltd: 5 positions, 0 orders, 62 symbols, 0 spreads
+NN	0	22:25:55.767	Tester	last test passed with result "successfully finished" in 0:00:00.805
+QR	0	22:25:57.614	Network	'50503392': disconnected from BCMMarkets-Server
