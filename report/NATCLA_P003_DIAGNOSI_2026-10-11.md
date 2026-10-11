@@ -59,7 +59,7 @@ Riscontrati sui log e sul file prima di scriverli:
   (passata, data) 136; per data distinta 72 (lun 16, mar 20, mer 17, gio 19). Il "79 (lun 21, mar 19, mer 19, gio 20)" del cancello **non
   lo riproduco in nessuna di queste unita'**: il fatto "nessuna di venerdi'" regge in tutte e tre.
 Scansione delle espressioni con giorni e insiemi ("lun-ven", "lun-gio", "mercoledi'", "venerdi'", "domenica", "date", "episodi",
-"righe"): "lun-ven" resta solo come insieme di orari d'INIZIO (par. 1 punto 2, appendice, con la nota sull'etichetta dello script);
+"righe"): "lun-ven" resta come insieme di orari d'INIZIO (par. 1 punto 2) e come etichetta dello script nell'appendice (= "non domenica", per inizi e fini, spiegata nella nota);
 "lun-gio" dell'oro (par. 1 punto 5) conta solo episodi iniziati lun-gio; "ultimo riarmo del venerdi'" (9 adozioni) e le date 15/11,
 22/11, 20/12/2024 (tutti venerdi') tornano.
 
@@ -96,7 +96,7 @@ Etichette: **FATTO** = letto in un file (citato); **INFERITO** = dedotto da fatt
 5. **FATTO** -- Le finestre di chiusura: sull'**EURUSD** stanno ferme (lun-gio 22:00 -> 22:05 da luglio 2024 a febbraio 2025, anche
    attraverso il cambio d'orologio BCM; il venerdi' 22:00 i pendenti restano fino alla riapertura: dom 23:05 o lun 00:00/00:06); sull'**oro** cambiano con la stagione (lun-gio: lug-ott 23:00 -> 23:05, nov-dic 22:00 -> 01:10,
    gen-feb 22:00 -> 00:05, mar-mag 00:00 -> 00:05; misurate su P_001 e M30_002; nelle sole passate M30 oro (M30_002 e M30_003,
-   stesse date) in lug-ott compaiono anche 10 episodi 00:00 -> 00:05 in 5 date (3 mercoledi' con 5 episodi, 2 venerdi' con 5 episodi:
+   stesse date) in lug-ott compaiono anche 10 episodi 00:00 -> 00:05 per passata (gli stessi nelle due, 20 in tutto) in 5 date (3 mercoledi' con 5 episodi per passata, 2 venerdi' con 5 episodi per passata:
    i venerdi' sono fuori dal lun-gio della tabella); zero nelle H1). Da dove vengano queste finestre (orari della specifica, buchi dei tick, o tutti e due) e' **NON DETERMINATO**: l'idea "il tester applica una specifica fissa" regge sull'EURUSD e non basta sull'oro.
 6. **FATTO (tabella Ordini dei `.htm`)** -- Nei 9 casi adottati il pendente veniva dall'**ultimo riarmo del venerdi** (21:00 H1, 21:30
    M30, 20:30 M30) e si e' riempito alla riapertura della domenica: P_003 23:05:00 (lo stesso secondo in cui la P_004 riesce a
