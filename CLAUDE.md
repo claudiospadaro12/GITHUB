@@ -617,7 +617,8 @@ Regole che non cambiano: pacchetto anonimizzato (niente preset, script di lancio
 ## 🏷️ IL PREFISSO DEGLI EA DIVENTA `CLAU12_` (Claudio, 11/10/2026: "TUTTI GLI EA PRESTO AVRANNO IL MIO PREFISSO DAVANTI CLAU12 E NON + ABTG")
 **DECISO, NON ANCORA ESEGUITO.** Misurato l'11/10 sul repo: **3.373 file** con `ABTG` nel nome (174 EA `.mq5`), **4.143 file** e **~108.000 occorrenze** nel contenuto (EA, include `ABTG_*.mqh`, `ABTGLog`, script, lettori, prove, righe di lancio con SHA).
 - 🔴 **Non si rinomina "a sed" e non adesso**: ogni riga di lancio con PASS ha lo SHA256 dei file che chiama (cambiare un nome invalida i PASS), i lettori e il runner cercano `ABTG_` nei nomi, i profili grafici dei terminali vivi (6 sedie FTMO, 100k, piccolo) hanno gli EA attaccati per nome, e il **magic number NON si tocca mai**.
-- ✅ **Regola da ora:** gli EA NUOVI nascono gia' `CLAU12_...`; i vecchi restano `ABTG_` finche' non c'e' il round di migrazione.
+- ✅ **Regola da ora:** gli EA NUOVI nascono gia' `CLAU12_...`.
+- 🔴 **CHIARIMENTO DI CLAUDIO (stesso giorno):** _"IN REALTA' VOGLIO CHE TUTTI DIVENTINO COL MIO NOME CLAU12 PERCHE' LI ABBIAMO CREATI NOI. ABTG NON C'ENTRA NULLA."_ Quindi **TUTTI**, vecchi compresi: `ABTG` **sparisce** (EA, include, log, script, documenti). `ABTG_` che resta sui vecchi e' solo il ponteggio del periodo di transizione, non una scelta.
 - 📋 **Il round di migrazione** (con mappa vecchio->nuovo, include e `.mq5` compilati in parallelo, nessuna sedia in campo toccata di notte, nuovi PASS del cancello, firma di Claudio sulla data) si pianifica quando le sedie in campo sono ferme. Fino ad allora: nessuna sostituzione di massa.
 
 ## 🎯 GLI EA SONO LA PRIORITA' (Claudio, 08/10/2026)
