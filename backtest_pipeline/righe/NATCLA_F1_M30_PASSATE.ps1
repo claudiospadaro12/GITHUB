@@ -11,7 +11,8 @@
 #   M8. CONTROLLO NUOVO della DICHIARAZIONE della deviazione, per passata, dalla chiave devia=si|no del blocco @F1-CONFIG: giornale (CFG InpTF,
 #       CFG InpAmmettiTFSottoH1, riga AVVISO DEVIAZIONE) e CSV (#cfg;InpTF, #cfg;InpAmmettiTFSottoH1). devia=si senza dichiarazione, o devia=no con
 #       una dichiarazione, = passata KO. ContaSetup legge anche le due righe #cfg;
-#   M9. testi: commento della compilazione (v1.12), riga della stima nel RIEPILOGO (questo lotto, non le 200 passate di F1).
+#   M9. testi: commento della compilazione (v1.12), riga della stima nel RIEPILOGO (questo lotto, non le 200 passate di F1), righe COME SI LEGGE
+#       del RIEPILOGO (il lettore F1 v1.11 NON legge questo lotto) e nome dello script nel messaggio della guardia di macchina.
 #  TUTTO IL RESTO e' la madre: guardie di macchina, mutex Global\ABTG_NATCLA_F1 (i due driver si escludono), compilazione verificata, Modello 4,
 #  deposito 1000000, AllowLiveTrading=false, i 5 input sostituiti, colla, rete delle uscite silenziose, raccolta e zip sul Desktop.
 #
@@ -242,7 +243,7 @@ function LeggiReport($path){
 # ---------------------------------------------------------------------
 Titolo '0 - MACCHINA E TERMINALE'
 if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){
-  throw ('NATCLA_F1_PASSATE gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama: ' + $env:COMPUTERNAME + '. Sul VPS VMI3047753 non si lancia: la challenge FTMO sta operando (firma del 21/09/2026: i round girano sul PC di backtest).')
+  throw ('NATCLA_F1_M30_PASSATE gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama: ' + $env:COMPUTERNAME + '. Sul VPS VMI3047753 non si lancia: la challenge FTMO sta operando (firma del 21/09/2026: i round girano sul PC di backtest).')
 }
 Dico ('pc   : ' + $env:COMPUTERNAME) 'Green'
 Dico ('pin  : ' + $Pin) 'Green'
@@ -878,8 +879,8 @@ $testa = @(
   ''
 )
 (($testa + $manifest + @('',
-  'COME SI LEGGE: python3 backtest_pipeline/leggi_natcla_f1.py <questo zip o la cartella> [altri zip]. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e i motivi,',
-  'poi la colla (righe SETUP = operazioni del report, soldi = profitto), poi n per gamba contro le attese, poi PF_R, DD in R, verdetti e confronto dei modi con le soglie del file prova.',
+  'COME SI LEGGE: leggi_natcla_f1.py (VERSIONE_EA 1.11 cablata) NON legge questo lotto: ogni passata v1.12 uscirebbe KO. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e i motivi,',
+  'poi la colla (righe SETUP = operazioni del report, soldi = profitto), poi i confronti H1/M30 A0-A7 con i comandi e le attese del file prova NATCLA_F1_M30_2026-10-11.txt. NESSUN verdetto di merito in questo lotto.',
   'Questo script RACCOGLIE e dice se ogni passata e affidabile: NON giudica, NON promuove, NON sceglie nessun modo.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'RIEPILOGO_F1.txt') -Encoding ASCII
 (($manifest) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'MANIFEST_F1.csv') -Encoding ASCII
 Compress-Archive -Path (Join-Path $Cart '*') -DestinationPath $zip -Force
