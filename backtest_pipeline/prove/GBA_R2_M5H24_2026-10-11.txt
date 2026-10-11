@@ -97,8 +97,9 @@
 #
 #  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
 #  La domanda di Claudio dell'11/10, dopo R2NOTTEM5 (PF_V 1,325 su n=303, ma T1 0,873 / T2 0,848 / T3 2,094): conta la NOTTE o conta il TF?
-#  QUELLO CHE QUESTO LOTTO SA RISPONDERE: 'conta la NOTTE?' a parita' di TF M5 e di filtro di spread (0,05 x ATR M5). NON separa il TF dal filtro (sezione IL FILTRO DI SPREAD):
-#  ogni '[TF]' di questo file vuol dire 'M5 + filtro 0,05 x ATR M5', mai il TF da solo.
+#  QUELLO CHE QUESTO LOTTO SA DIRE: se la stessa cella senza filtro orario rende, nel totale e per tranche, accanto a R2NOTTEM5 (a parita' di TF M5 e di filtro di spread
+#  0,05 x ATR M5). La domanda 'conta la notte?' la AVVICINA ma NON la chiude: l'unione 07-22 non e' stampata (controesempio (b)) e il regime non si separa su tre tranche
+#  2026 (controesempio (a)). NON separa il TF dal filtro (sezione IL FILTRO DI SPREAD): ogni '[TF]' di questo file vuol dire 'M5 + filtro 0,05 x ATR M5', mai il TF da solo.
 #  InpHourEnd = 24 (cella H24) con InpSignalTF=5 e InpHourStart=0 nei pin: M5, tutte le ore. EMA e ATR seguono il TF del segnale (InpTrendTF=0 / InpAtrTF=0); canale 48 barre M5
 #  (= 4 ore), uscita a tempo 48 barre M5, SL 2,5 x ATR(M5), filtro di spread 0,05 x ATR(M5): TUTTO come R2NOTTEM5. Il grafico del tester gira su M5 (driver v5: Period = TF del segnale).
 #  TERMINE DI CONFRONTO: R2NOTTEM5 (M5 notte, MISURATO 11/10, zip archiviato in risultati_archivio/GBA_R2_NOTTE_20261011/), cioe' il disegno del PIANO (4.3 punto 2, r.190: 'cella 7
@@ -160,18 +161,22 @@
 #       DESCRIVE dopo la lettura; nessun esito di questo lotto la trasforma in 'regime'. I 'trimestri calmi' del piano sono nel 2024-25 (T9-T5): NON in questo lotto.
 #   (b) 'Se la fascia 00-07 vince in M5 ma anche 07-22 vince, la fascia non conta: e' il TF.' -> NON si decide da questo lotto: richiede l'unione 07-22 contro la fascia asia,
 #       che nessun lettore passato stampa. Si DESCRIVONO le sei fasce come le da' il lettore v5 (n, PF_V, r medio, segno per tranche).
-#  ======================= GLI ESITI DI QUESTO LOTTO: TRE, sui soli numeri che leggi_gba_r0.py 9CD02D2A stampa (PF_V e n della cella H24, totale e per tranche) =======================
-#  Prima degli esiti: la passata e' leggibile (G0 OK, CONTROLLO DIRETTO OK) e n totale >= 520; n < 520 = guasto (sezione SMENTITE), nessun esito.
-#   (E1) PF_V totale di H24 <= 1,03 -> 'H24 non rende: la notte conta o H24 e' piatta; si scrive il numero' (descrittivo; S8: indistinguibile dalla REPL e da 1,0).
-#   (E2) PF_V totale >= 1,3 (n totale >= 150) E almeno 2 tranche con PF_V di tranche > 1,3 e n di tranche >= 150 ciascuna -> 'H24 rende anche fuori dalla notte: la fascia NON
-#        e' sufficiente a spiegare M5 notte; filtro e TF restano non separati; si ripete in T0 (S10)'.
-#   (E3) TUTTO IL RESTO -> 'nessun verdetto: si scrive il numero e la colonna per tranche, T0 (S10)'.
-#  Niente altri esiti. E1 ed E2 si escludono (PF_V totale <= 1,03 contro >= 1,3); E3 e' il complemento. Verificato per enumerazione: python3 -I
-#  backtest_pipeline/tabella_decisione_gba_m5h24.py (strumento di analisi, NON passato dal cancello; riscritto per i tre esiti l'11/10: ogni combinazione di banda del PF_V
-#  totale x numero di tranche con PF_V > 1,3 e n >= 150 x n totale cade in UN esito solo; casi e mutanti in coda allo script).
 #   (c) 'Se la fascia asia a M5 rende solo perche' 2-3 giornate (come il 23/03 su M1, +14.171 EUR) pesano, S5 (senza i 5 migliori) lo cattura.' -> NON si rilegge da questo lotto: e' stata
 #       misurata su R2NOTTEM5 con la concentrazione PER NOTTE (leggi_gba_notti 1404C68D: senza le 3 migliori notti +18.034 sul totale, 'non fragile'; FRAGILE PER NOTTE in T1 e T2;
 #       LETTURA M5 2026-10-11). Qui S5 (per OPERAZIONE) si stampa sulla cella intera; la concentrazione per GIORNATA della cella H24 non la stampa nessun lettore passato: NON MISURATA.
+#  ======================= GLI ESITI DI QUESTO LOTTO: TRE, NEUTRI, sui soli numeri che leggi_gba_r0.py 9CD02D2A stampa (PF_V e n della cella H24, totale e per tranche) =======
+#  Prima degli esiti: la passata e' leggibile (G0 OK, CONTROLLO DIRETTO OK) e n totale >= 520; n < 520 = guasto (sezione SMENTITE), nessun esito.
+#  Gli esiti NON scrivono interpretazioni: [N], [TF], [R] restano spiegazioni descrittive (sezione LE SPIEGAZIONI).
+#   (E1) PF_V totale di H24 <= 1,03 -> 'cella H24 indistinguibile dalla REPL e da 1,0 (S8): non e' un candidato; si scrive il numero e la colonna per tranche. COMPATIBILE con [N]
+#        e con [R]: quale, lo DESCRIVONO la colonna per tranche e le sei fasce; nessuna delle due si scrive come verdetto'.
+#   (E2) PF_V totale >= 1,3 (n totale >= 150) E almeno 2 tranche con PF_V di tranche > 1,3 e n di tranche >= 150 ciascuna -> 'H24 rende nel totale e in almeno 2 tranche, a
+#        parita' di TF e filtro con R2NOTTEM5: COMPATIBILE con "la fascia non basta a spiegare M5 notte"; da dove venga (asia o 07-22) lo DESCRIVONO le sei fasce (unione 07-22
+#        non stampata); filtro e TF restano non separati; si ripete in T0 (S10)'.
+#   (E3) TUTTO IL RESTO -> 'nessun verdetto: si scrive il numero e la colonna per tranche, T0 (S10)'.
+#  Niente altri esiti. E1 ed E2 si escludono (PF_V totale <= 1,03 contro >= 1,3); E3 e' il complemento. Verificato per enumerazione: python3 -I
+#  backtest_pipeline/tabella_decisione_gba_m5h24.py (strumento di analisi, NON passato dal cancello): ogni combinazione di banda del PF_V totale x numero di tranche con
+#  PF_V > 1,3 e n >= 150 x n totale cade in UN esito solo; casi di controllo in coda allo script, fra cui i due casi di bordo del cancello (11/10, quinto giro): [R] canonico
+#  T1 0,80 / T2 0,80 / T3 1,45 (totale 1,021) -> E1 'compatibile con [N] e [R]'; asia 2,1 + giorno 1,0 (totale 1,305, due tranche > 1,3) -> E2 'compatibile', NON 'fuori dalla notte'.
 #  CONTROLLO DIRETTO: nessun filtro orario nella cella: la riga ESECUZIONE del giornale deve dire '(nessun filtro orario)' e InpHourEnd=24 (il driver la verifica: AVVIO); ingressi
 #  in TUTTE le fasce (atteso: almeno 5 delle 6 fasce con n > 0; rollover puo' essere ~0-30). Ingressi SOLO 00-06 = filtro non cambiato: la passata non si legge.
 #  SMENTITE: [n] il lotto puo' produrre solo n ~520-2.394 [DERIVATO dal giornale di R2NOTTEM5, ricalcolato dall'autore l'11/10: 2.394 (776 / 751 / 867) = barre M5 che passano
