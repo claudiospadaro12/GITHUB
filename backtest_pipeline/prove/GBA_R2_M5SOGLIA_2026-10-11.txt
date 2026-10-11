@@ -1,0 +1,209 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA R2 M5 NOTTE CON SOGLIA DI SPREAD EQUIVALENTE -- lotto R2M5SOGLIA. UNA variabile rispetto a R2NOTTEM5: InpSpreadMaxATR 0,05 -> 0,021 (0,05 x ATR(M1)/ATR(M5), derivato qui sotto).
+#  Prova SENZA CODICE (input ESISTENTI dell'EA), 11/10/2026. Nasce dalla lettura di R2NOTTEM5 (report/GBA_R2_NOTTE_M5_LETTURA_2026-10-11.md, 'Confondente da misurare'):
+#  la cella M5 notte cambia DUE cose insieme rispetto a M1 notte, il TF e il filtro di spread EFFETTIVO, perche' InpSpreadMaxATR e' un multiplo dell'ATR del TF del segnale.
+#  Fonti: report/GBA_R2_PIANO_2026-10-10.md (4.3 r.212-215, 3.3 S8-S10), report/GBA_R2_NOTTE_M5_LETTURA_2026-10-11.md, prove/GBA_R2_NOTTEM5_2026-10-10.txt (il file sorella:
+#  DIFF clausola per clausola qui sotto), report/FIRME_2026-10-10.md (Firma 1), i giornali dell'EA negli zip archiviati (sezione IL RAPPORTO). Attese, smentite e soglie scritte
+#  PRIMA di qualunque numero di questo lotto (nessuna passata M5 con InpSpreadMaxATR diverso da 0,05 esiste nel repo all'11/10).
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul VPS VMI3047753, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward. Nessun parametro in forward. BOZZA: NON consegnabile finche' i due strati del cancello non danno PASS.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato: prova SENZA CODICE, solo input esistenti).
+#
+#  ======================= DIFF CLAUSOLA PER CLAUSOLA CONTRO prove/GBA_R2_NOTTEM5_2026-10-10.txt (SHA256 F6D0CFCD..., classe 1274) =======================
+#  CAMBIA, e nient'altro di cio' che entra nel tester:
+#   D1 pin InpSignalTF: 1 -> 5. NON e' una seconda variabile: in NOTTEM5 il 5 veniva dalla CELLA (asse InpSignalTF), qui l'asse e' InpSpreadMaxATR e il 5 va nei pin. Valore
+#      EFFETTIVO della passata: 5 in tutti e due i file (driver v5 r.464-466: pin del file con la sola chiave dell'asse presa dalla cella).
+#   D2 @GBA-ASSE chiave: InpSignalTF -> InpSpreadMaxATR.
+#   D3 @GBA-CELLA: 'M5 InpSignalTF=5' -> 'S021 InpSpreadMaxATR=0.021' (il pin InpSpreadMaxATR resta 0.05: la cella col valore del pin SAREBBE R2NOTTEM5, gia' misurata: niente REPL).
+#   D4 @GBA-LOTTO: R2NOTTEM5 -> R2M5SOGLIA, passate S021:T1,S021:T2,S021:T3. Modello 4, tetto 20 minuti, tranche T1-T3: IDENTICI.
+#   RISULTATO SULL'INI (la sola cosa che il tester vede): R2NOTTEM5 ha InpSignalTF=5, InpHourStart=0, InpHourEnd=7, InpSpreadMaxATR=0.05, Period=M5; R2M5SOGLIA ha InpSignalTF=5,
+#      InpHourStart=0, InpHourEnd=7, InpSpreadMaxATR=0.021, Period=M5. UNA differenza. Nel FILE, dei 30 pin cambia SOLO la riga InpSignalTF (D1); gli altri 29 sono IDENTICI a NOTTEM5, compreso il pin InpSpreadMaxATR=0.05 che la cella sostituisce (diff delle righe Inp).
+#      PROVATO l'11/10 col codice VERO del driver v5 (pwsh: parsing r.342-470 e TestoIni r.638-651 eseguiti su questo file): l'ini T1 generato differisce dall'ini ARCHIVIATO
+#      di R2NOTTEM5 T1 SOLO in InpSpreadMaxATR (0.05 -> 0.021) e nel nome del Report; la riga AVVIO attesa e' 'InpSpreadMaxATR=0.021'.
+#  CAMBIA NEL COMMENTO: le attese (riscritte per la soglia 0,021), il TERMINE DI CONFRONTO (R2NOTTEM5 per la soglia; R2NOTTEM1 per la soglia ASSOLUTA uguale), la sezione
+#  IL RAPPORTO (nuova), la lettura di H-M5N e dei controesempi. Il nome del docente non e' scritto nel testo nuovo (resta solo nelle citazioni LETTERALI di S4/S5).
+#  NON CAMBIA: EA, include, driver (GBA_R0_PASSATE.ps1 v5, SHA256 C239F628...), tranche, modello, deposito, lotto fisso, magic, fascia 00-07, soglie S1-S10 (citate per intero), il
+#  blocco 'nessuna notte negativa' (copiato con le stesse soglie e le stesse frasi, perche' il lettore per notte le legge dal file).
+#
+#  ======================= IL RAPPORTO ATR(M1)/ATR(M5): FONTE, METODO, ARROTONDAMENTO, CONTROESEMPI (scritto PRIMA dei numeri di questo lotto) =======================
+#  FONTE: i giornali dell'EA (righe '[GBA] segnale ...', ATR e spread a 2 decimali) negli zip ARCHIVIATI: risultati_archivio/GBA_R2_NOTTE_20261011/GBA_R0_R2NOTTEM1.zip (M1, notte) e
+#  GBA_R0_R2NOTTEM5.zip (M5, notte), e risultati_archivio/GBA_R0_R1A_20261010/GBA_R0_R1A.zip (M1, 24 ore). Letti col parser del lettore pinnato leggi_gba_r0.py 9CD02D2A (leggi_log).
+#  INSIEME: TUTTE le righe 'segnale' con ora server 00-06, qualunque esito (preso, spread, posizione aperta, fuori orario). L'EA valuta posizione, ora e spread DOPO la direzione
+#  (GbaDecidi r.283-301), quindi l'insieme delle barre di rottura NON dipende dalla corsa: le notti M1 di R2NOTTEM1 e di R1A sono IDENTICHE riga per riga (T1 2.314, T2 2.127,
+#  T3 2.055: 0 righe solo in una delle due). M5 notte: T1 451, T2 393, T3 429.
+#  METODO: mediana dell'ATR sui segnali notturni M1 / mediana dell'ATR sui segnali notturni M5, stesse tre tranche:
+#     T1 1,87 / 4,37 = 0,4279 | T2 2,09 / 5,06 = 0,4130 | T3 2,78 / 7,07 = 0,3932 | TOTALE 2,14 / 5,14 = 0,4163.
+#  Riscontro indipendente: il lettore leggi_gba_r0.py stampa le stesse due mediane per la fascia asia (LETTURA_leggi_gba_r0_notte_M1_M5.txt r.53 'asia ATR 2.14 ... n=6496' e r.96
+#  'asia ATR 5.14 ... n=1273').
+#  VALORE: k = 0,05 x 0,4163 = 0,02082. ARROTONDAMENTO dichiarato: al millesimo piu' vicino -> 0,021 (il driver v5 ammette al massimo 3 decimali per InpSpreadMaxATR, r.206, e l'EA
+#  lo stampa a 3). Effetto dell'arrotondamento: soglia +0,9% rispetto a 0,02082. Per tranche il valore sarebbe 0,0214 / 0,0207 / 0,0197 (-> 0,021 / 0,021 / 0,020): una sola
+#  cella per tutte e tre, quella del totale.
+#  CHE COSA RENDE UGUALE: la soglia ASSOLUTA mediana. M1 notte: 0,05 x 2,14 = 0,107 USD; M5 notte a 0,05: 0,05 x 5,14 = 0,257 USD (2,4 volte piu' larga); M5 a 0,021: 0,021 x 5,14 =
+#  0,108 USD. Spread mediano ai segnali notturni: 0,26 (M1) e 0,25 (M5). CHE COSA NON RENDE UGUALE: il rapporto ATR(M1)/ATR(M5) varia momento per momento; nessun k unico replica
+#  il filtro M1 segnale per segnale. Un tetto di spread in USD (assoluto vero) NON esiste fra gli input dell'EA: servirebbe codice, e questo lotto non ne cambia.
+#  CONTROESEMPIO 1 (richiesto: un ALTRO insieme, gli INGRESSI invece dei segnali): ATR mediana sugli ingressi M1 notte 6,55 (n 143), sugli ingressi M5 notte 6,36 (n 303): rapporto
+#  1,0299 -> k = 0,0515, cioe' 'il filtro M5 a 0,05 e' gia' equivalente'. E' SBAGLIATO per costruzione: gli ingressi sono SELEZIONATI dal filtro stesso (passano solo i momenti
+#  con ATR alto rispetto allo spread: l'ATR degli ingressi M1 e' 3 volte la mediana dei segnali M1, 6,55 contro 2,14). Tarare la soglia sul campione che la soglia ha gia' scelto
+#  restituisce la soglia di partenza: e' la ragione per cui il metodo usa i SEGNALI.
+#  CONTROESEMPIO 2 (un altro insieme ancora: segnali APPAIATI nel tempo, ogni segnale M5 notturno con i segnali M1 dei suoi stessi 5 minuti, 1.182 coppie su 1.273): mediana dei
+#  rapporti 0,4578 (quartili 0,394-0,542) -> k = 0,0229 -> 0,023. Diverso dal metodo scelto di +10%: e' la sensibilita' dichiarata della scelta dell'insieme. La conclusione attesa
+#  qui sotto NON cambia fra 0,020 e 0,023 (n simulato 32 / 37 / 50 contro l'ipotesi alternativa ~300: sezione ATTESE).
+#  QUELLO CHE IL GIORNALE DICE GIA' [DERIVATO, non MISURATO nel tester]: dei segnali M5 notturni passano spread <= 0,021 x ATR (valori a 2 decimali) T1 2 su 451, T2 13 su 393,
+#  T3 55 su 429; a 0,05 erano 189 / 202 / 294. La passata lo MISURA (valori esatti, sequenza vera, durate vere): e' il motivo per cui costa 3 passate e non zero.
+#
+#  ======================= DRIVER, LETTORI, E PERCHE' NON IL DRIVER DEI ROUND =======================
+#  Driver: backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (MARCATORE_GBA_R0_PASSATE_v5, SHA256 C239F628..., file prova DICHIARATIVO: blocco @GBA-ASSE, una chiave per file).
+#  LETTORI. (1) backtest_pipeline/leggi_gba_r0.py (SHA256 9CD02D2A..., PASS del re-gate 7b4b6c53): legge i lotti dei file DICHIARATIVI qualunque sia l'asse e il nome del lotto.
+#  (2) backtest_pipeline/leggi_gba_notti.py (SHA256 1404C68D...): per DEFAULT legge solo R2NOTTEM1/R2NOTTEM5 e questo lotto esce 'NON APPLICABILE'. Con l'opzione ESISTENTE
+#  --prova-m5 <questo file> lo legge come cella 'M5' notte (fascia 00-07 dai pin, attese e soglie per notte lette da questo file) e lo confronta con R2NOTTEM1 sulle stesse notti:
+#  e' la lettura giusta per la domanda di questo lotto. Le etichette a schermo dicono 'M5 notte'/'R2NOTTEM5' dove il codice ha il nome fisso: si legge il nome del lotto stampato.
+#  PROVATO l'11/10 su zip FINTI (deal e giornale VERI di R2NOTTEM5 sotto le etichette di questo lotto: numeri senza significato): leggi_gba_r0 G0 OK e ancora S7 = R2NOTTEM5;
+#  leggi_gba_notti --prova-m5 questo file: soglie per notte lette (30 / 0,30 / 0,10 / 7, FRAGILE PER NOTTE r. di questo file), attese lette, copia del file prova IDENTICA, rc 0;
+#  e i numeri della notte M5 vera (n 303, 167 notti) escono 'FUORI attesa' su n, notti e costo e la smentita 'n > 100' SCATTA: e' l'esito che [TF] produrrebbe (sezione ATTESE).
+#  L'EA non ha OnTester/FrameAdd: col driver dei round questa prova uscirebbe con un CSV da zero byte (file madre GBA_R0_REPLICA_2026-10-09.txt). Il driver dei round non si tocca.
+#  L'asse InpMagic=775800||775800||50||775850||Y qui sotto e' TECNICO (G1 sul magic) e NON e' la variabile misurata: controlla_prova.py pretende un asse Y.
+#  MAGIC: 775800 (passate) e 775850 (gemella, non usata). Il driver v5 ammette SOLO questi due; nel tester il magic e' un'etichetta.
+#
+#  ======================= TRANCHE: LE TRE DEL 2026, IDENTICHE A R1A E A R2NOTTEM5 =======================
+#  T1 2026.07.01 -> 2026.09.30, T2 2026.04.01 -> 2026.06.30, T3 2026.01.01 -> 2026.03.31. ToDate ESCLUSIVO (MISURATO in R1A). Lotto di SCOPERTA (in-sample): nessuna cella si promuove.
+#  Modello 4 (ticks reali), deposito 1000000 EUR, lotto FISSO 1,00 (decisione di Claudio 09/10). Le tranche 2024-25 NON sono qui (orologio dell'oro prima del cambio [NON MISURATO]).
+#
+#  ======================= SOGLIE CONGELATE, CITATE PER INTERO (S1-S7: file madre GBA_R0_REPLICA_2026-10-09.txt r.130-144, testo letterale; S8-S10: GBA_R2_PIANO 3.3, testo letterale) ===
+#  S1 MERITO: si legge solo con n >= 150 nella cella (somma delle tre tranche); una tranche si legge da sola solo con n >= 150. Sotto: MERITO SOSPESO. Il RISCHIO (DD, perdita per operazione, peggior giornata) si legge a qualunque n.
+#  S2 COSTO: prima del PF. >= 40 PASSA; 13,3-40 FRA; < 13,3 ESCLUSA PER COSTO. Mediana sugli ingressi, con commissione 0,04 USD/oz come base e 0,08 come contro-esempio (E6).
+#  S3 PF DI RIFERIMENTO: PF_V = fattore di profitto sui deal (profitto + commissioni + swap), ricalcolato dal lettore dal report e confrontato col PF del report (tolleranza 0,02, altrimenti G0 KO). Se il tester NON
+#     addebita commissioni (somma commissioni = 0) il lettore sottrae 3,90 EUR per lotto e per OPERAZIONE (a giro) e stampa anche la versione 7,80 (per lato): PF_V si legge dopo la commissione ipotetica.
+#  S4 ESITO DELLA REPLICA (cella REPL, tre tranche insieme, n >= 150): PF_V >= 1,5 E PF_V > 1,3 in almeno 2 tranche su 3 E la quota del migliore operazione < 25% del profitto netto E PF con 7,80 a giro >= 1,3
+#     -> 'la dichiarazione di Emiliano trova un RISCONTRO sul nostro feed, in un regime solo': e' il permesso di passare al passo 2, NON un candidato.
+#     PF_V fra 1,3 e 1,5 -> NESSUN VERDETTO. PF_V fra 1,0 e 1,3 -> coerente con l'ipotesi nulla (nessun edge distinguibile dal costo su questo regime). PF_V < 1,0 -> la dichiarazione non regge sul nostro feed.
+#     Tutte le altre combinazioni di PF_V >= 1,5 (concentrato, una sola tranche, solo senza commissione) -> NESSUN VERDETTO e si scrive quale condizione manca.
+#  S5 CONCENTRAZIONE: migliore operazione >= 25% del profitto netto positivo, oppure profitto netto senza le 5 migliori <= 0 -> FRAGILE (come il +21.491 = 35% del netto di Emiliano, spec. par. 8.4).
+#  S6 ORA (sei fasce server, fissate a priori, spec. par. 11.2): asia 00-07, europa 07-12, pausa 12-14, apertura USA 14-17, pomeriggio USA 17-22, rollover 22-24 (ora della barra d'ingresso).
+#     Una fascia si legge solo con n >= 100. Statistica: media di r (profitto / perdita a SL dell'operazione) contro zero, soglia p < 0,05/6 = 0,0083 (correzione per sei fasce), E stesso segno in almeno 2 tranche su 3.
+#     Una fascia che sporge sola, con le vicine in direzione opposta, e' 'picco/bordo' e non si usa.
+#  S7 CELLE LARGHE: la misura e' la FRONTIERA (n, PF, costo mediano), non la ricerca della cella migliore. Se una cella larga ha PF_V >= 1,5 con n >= 150, vale S4 piu' la riga del costo: se il costo e' FRA
+#     o ESCLUSA, la cella non puo' diventare sedia comunque. CENTRO DELL'ALTOPIANO, MAI IL PICCO: con quattro celle lungo UN asse l'altopiano si legge solo se PF_V sale o scende in modo monotono; una cella che
+#     sporge da sola e' un picco e si scrive cosi'.
+#  (Il DOMINIO di S4 e' la cella REPL del passo R0: qui S4 si legge in forma NEUTRA, come la stampa il lettore v5, e la frase 'la dichiarazione ... trova un RISCONTRO' NON si scrive per
+#  questo lotto, classe 1271. Con n atteso < 150, S4 non e' comunque raggiungibile: sezione ATTESE.)
+#  S8 (rumore): la REPL ha PF_V 0,855 con intervallo per giorno al 95% [0,70; 1,03] (sez. 1.6). Una cella con PF_V <= 1,03 e' "indistinguibile dalla REPL e da 1,0": non e' un candidato, qualunque sia la sua forma.
+#     Una cella fra 1,03 e 1,3 "esce dal rumore ma non basta": nessun verdetto. S4 resta la sola porta al RISCONTRO.
+#  S9 (confronto): l'uscita cambia la sequenza degli ingressi (una posizione per volta), quindi il confronto con la REPL non e' appaiato. Si leggono R medio per operazione, PF_V per tranche e la struttura per
+#     motivo (come 1.1), non solo il PF_V aggregato. Una cella che migliora il PF riducendo n (meno operazioni, stesso R medio) e' una selezione, non un miglioramento: va scritto cosi'.
+#     CLAUSOLE DI S9 SCRITTE ALTROVE, copiate intere (classe 1305): file sorella GBA_R2U_KTRAIL_2026-10-10.txt r.51 'Una cella che alza il PF riducendo n (stesso R medio) e' SELEZIONE,
+#     non miglioramento; oltre il 40% di operazioni tolte si scrive cosi'. A una cella NON si assegna mai 'regge'.' (stessa regola in GBA_PROPOSTA_STRATEGIST_2026-10-10.md r.134).
+#     APPLICAZIONE, scritta ora: questa cella TOGLIE ~89% delle operazioni di R2NOTTEM5 (303 -> ~33 attese): ben oltre il 40%. Un PF_V piu' alto di 1,325 si scrive
+#     SELEZIONE (S9), non miglioramento, anche prima di S1 (che lo sospende comunque, n < 150).
+#  S10 (in avanti): ogni cella che supera S8 si ripete sulla tranche T0 (sez. 6) con lista e criteri congelati da questo documento. Una cella che passa in T0 e' un candidato per una prova di regime; una che
+#     cade in T0 e' "rumore del campione 2026". (T0 = dal 01/10/2026: all'11/10 ha dieci giorni.)
+#  CRITERIO PER REGIMI (report/FIRME_2026-10-10.md, Firma 1, testo letterale dei sei punti):
+#     1. L'EA "regge" se il PF netto dei costi (PF_V) e' > 1,0 in OGNI regime che ha almeno 150 operazioni, con long e short letti SEPARATAMENTE, e nessun regime ha un drawdown superiore a quello promesso
+#        dal backtest della cella.
+#     2. Un regime con meno di 150 operazioni NON giudica il merito: resta "NON MISURATO", mai "bocciato" ne' "promosso". (Il RISCHIO si legge a qualunque n, regola R59.)
+#     3. Un PF buono solo nel toro non basta.
+#     4. Le finestre dei regimi (toro / ribasso / laterale, e calmo / volatile) si scelgono con una regola oggettiva sul prezzo, scritta prima di vedere un PF, non per anni di fila. Un anno per regime, anche
+#        non contigui.
+#     5. Strumento: a TICK REALI (Modello 4) si misura solo cio' che i tick coprono (oro BCM: dal 2024.07.10, ~27 mesi). I regimi piu' vecchi (ribasso/laterale lunghi) si misurano in OHLC su M1 come
+#        screening, MAI come verdetto, dichiarando l'orologio BCM (prima del dicembre 2024 segue Londra, dopo UTC+1 fisso).
+#     6. Il criterio non tocca le soglie di rischio, le taglie, il conto reale ne' la spesa: restano di Claudio. Non sostituisce S4-S7 del file madre GBA_R0_REPLICA: si AGGIUNGE come lettura per regime.
+#     APPLICAZIONE A QUESTO LOTTO, scritta ora: nove mesi e n atteso < 150: NESSUN regime ha ne' un anno ne' 150 operazioni -> NON MISURATO qualunque cosa esca.
+#  CERTIFICATO DEI 5 PUNTI (CLAUDE.md 09/09): questo lotto NON chiude nessuna casella (3 USCITA: R2U; 4 GEMELLI: no; 5 TF: e' la notte M5 con un altro filtro, non il TF a 24 ore).
+#     Qualunque esito qui sotto e' 'NON ANCORA MISURATO' per il motore: la parola vietata non si scrive.
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  InpSpreadMaxATR = 0,021 (cella S021) con InpSignalTF=5, InpHourStart=0, InpHourEnd=7 nei pin: M5, notte 00-07 server, soglia di spread ASSOLUTA mediana uguale a quella di M1 notte.
+#  La domanda: R2NOTTEM5 ha ingressi in 167 notti, R2NOTTEM1 in 53 (115 notti di M5 senza nessun ingresso M1: LETTURA M5 2026-10-11, 'M1 e confronto'). Le notti in piu' vengono dal
+#  FILTRO DI SPREAD EFFETTIVO (2,4 volte piu' largo a M5) o dal TF? Con la stessa soglia assoluta, il TF resta l'unica differenza fra questa cella e M1 notte.
+#  TERMINE DI CONFRONTO: (i) R2NOTTEM5 (stessa cella salvo InpSpreadMaxATR: il lettore v5 la trova come ancora a parita' di simbolo e periodo M5 se si caricano i due zip insieme);
+#  (ii) R2NOTTEM1 (stessa soglia ASSOLUTA mediana, TF diverso): lo confronta il lettore per notte con --prova-m5, sulle stesse notti.
+#  QUELLO CHE QUESTO LOTTO NON PUO' DARE, scritto PRIMA (classe 1258): il MERITO. n atteso ~33 (sotto): S1 lo SOSPENDE per costruzione, in ogni tranche e in totale. L'esito di
+#  merito e' quindi 'NON MISURABILE in questo lotto', non 'nullo' ne' 'positivo', qualunque PF_V esca. Il lotto risponde alla domanda di CONTEGGIO (da dove vengono le notti in
+#  piu') e al RISCHIO; la cella che darebbe il MERITO sulla stessa domanda e' lo SPECCHIO: M1 notte con la soglia assoluta di M5, InpSpreadMaxATR = 0,05 / 0,4163 = 0,120 su M1
+#  (simulato con lo stesso metodo: ~1.300 operazioni sulle tre tranche) -> NON in questo lotto, e' una proposta.
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (tre tranche sommate) =======================
+#  n [DERIVATO, simulatore dell'autore sui segnali veri del giornale di R2NOTTEM5 (ogni barra di rottura M5 notturna con ATR e spread), una posizione per volta, durate ricampionate
+#  dalle 303 durate VERE di R2NOTTEM5, 400 ripetizioni; CALIBRATO su lotti noti: R1A 146 / 288 / 653 contro 128 / 248 / 557, R2NOTTEM1 7 / 36 / 118 contro 6 / 33 / 104,
+#  R2NOTTEM5 105 / 102 / 126 contro 93 / 97 / 113, sovrastima 1,05-1,17, media 1,13]: simulato T1 2, T2 8, T3 27, totale 37 -> diviso 1,13: T1 ~2, T2 ~7, T3 ~24, totale ~33
+#  -> banda 0,5x-2x = 16-66. (k 0,020: 32 simulati; k 0,023: 50.) MERITO SOSPESO (S1) in ogni lettura: si scrive ORA.
+#  PF_V 0,70-1,60 [banda larga di proposito, merito SOSPESO]: il sottoinsieme degli ingressi VERI di R2NOTTEM5 con spread <= 0,021 x ATR e' n 26, PF_V 1,350 (T1 1, T2 5, T3 20):
+#  non e' la stessa sequenza (con meno ingressi entrano segnali che in R2NOTTEM5 erano bloccati), ed e' n 26.
+#  COSTO: sui segnali M5 notturni che passano 0,021 (70 nel giornale) la mediana di 2,5 x ATR / (spread + 0,04) e' 120,4x (137,3x solo spread; il minimo garantito solo spread e'
+#  2,5 / 0,021 = 119x): costo mediano atteso 100-140x -> PASSA largo. Il costo NON e' la domanda di questo lotto.
+#  Notti con almeno un ingresso: [DERIVATO, simulato ~22 notti -> ~20] banda larga 10-45 (contro 167 di R2NOTTEM5 e 53 di R2NOTTEM1). q 0,40-0,75 (come le due notti misurate:
+#  0,629 a M5, 0,623 a M1), ma con < 30 notti la lettura per notte e' NON MISURATA (soglia del blocco qui sotto).
+#  LE DUE IPOTESI, COL NUMERO CHE CIASCUNA PRODUCE (classe 178):
+#   [F] 'le notti in piu' di M5 vengono dal FILTRO di spread effettivo': n ~16-66, notti ~10-45 (MENO di M1 notte: a M5 i segnali notturni sono 5 volte meno numerosi, 1.273 contro
+#       6.496, e la soglia assoluta e' la stessa). E' l'attesa.
+#   [TF] 'vengono dal TF' (il segnale M5 entra di notte in momenti in cui M1 non entra, a parita' di soglia): n vicino a R2NOTTEM5, ~200-300, notti ~120-170. FUORI dalla banda.
+#   La banda distingue [F] da [TF] di un fattore ~5: e' la ragione per cui il lotto si gira anche se il merito e' sospeso.
+#  IPOTESI ALTERNATIVA H-M5N (collega, DICHIARATO DA TERZI), INTERA dal piano 4.3 r.212: 'PF_V >= 1,3 nella notte in OGNI tranche con n >= 150 e giorno < 1,0'. In QUESTO lotto: NON
+#  MISURABILE in nessuna delle due meta' (notte: n per tranche atteso 2 / 7 / 24, sotto 150; giorno: non c'e', e' il lotto R2M5H24). Mai 'H-M5N confermata' ne' 'smentita' da qui.
+#  CONTROESEMPI DEL PIANO (r.215: TRE frasi, (a) (b) (c); ognuna marcata 'si legge / non si legge da questo lotto'):
+#   (a) 'se M5 di notte "vince" nel solo 2026 ad alta volatilita' (T3: ATR M5 6,65, costo 76% sopra 40x) e fallisce o e' vuoto nei trimestri calmi, la spiegazione e' il regime di
+#       volatilita' + il costo, non la notte: lo si vede dalla colonna per tranche del lettore e dalla stessa cella a 24 ore.' -> la colonna per tranche si stampa ma con n 2 / 7 / 24
+#       NON giudica (S1); la 'stessa cella a 24 ore' e' R2M5H24, non questo lotto. NON si legge da qui.
+#   (b) 'Se la fascia 00-07 vince in M5 ma anche 07-22 vince, la fascia non conta: e' il TF.' -> NON si legge da questo lotto (niente 07-22): e' R2M5H24.
+#   (c) 'Se la fascia asia a M5 rende solo perche' 2-3 giornate (come il 23/03 su M1, +14.171 EUR) pesano, S5 (senza i 5 migliori) lo cattura.' -> si stampa (S5 per operazione dal
+#       lettore v5; netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE dal lettore per notte con --prova-m5, si stampa anche senza le 5) ma con n ~33 e ~20 notti NON giudica.
+#  CONTROLLO DIRETTO: il 100% dei deal d'ingresso con ora server 0-6 (il lettore per notte lo fa: anche UNO fuori = filtro non come dichiarato, la passata non si legge); la riga
+#  SEGNALE del giornale deve dire InpSpreadMaxATR=0.021 (il driver la verifica: AVVIO) e le righe 'segnale ... (max 2.1%)'.
+#  SMENTITE: n < 10 o > 100 (il giornale e il simulatore sbagliano: si legge prima il giornale, segnali presi e scartati per spread); notti > 60 = la soglia non ha tolto le notti
+#  in piu' (direzione [TF]: si legge il giornale PRIMA di dirlo). PASSATE: 1 cella x 3 tranche = 3, ~3 minuti (MISURATO 11/10: R2NOTTEM5 43 s a passata, stessi tick).
+#
+#  ======================= IL CRITERIO DEL DOCENTE 'NESSUNA NOTTE NEGATIVA', TRADOTTO IN MISURA (copiato da GBA_R2_NOTTEM5, stesse soglie; scritto PRIMA dei numeri) =======================
+#  Fonte: 'non ha chiuso una notte negativa' (live 09/10 r.287, ~7 notti in reale; DICHIARATO, non un criterio: EA_NOTTURNO_GBA_SPECIFICA r.86 e r.116).
+#  Unita': NOTTE = data server con almeno un ingresso 00:00-06:59; netto della notte = somma dei netti PF_V (commissione 3,90 EUR/lotto a giro se il tester non la addebita, S3)
+#  delle posizioni ENTRATE quella notte. Si stampano per tranche e in totale: notti, notti con netto < 0, q = negative / notti, e la quota di FINESTRE di 7 notti consecutive
+#  (con ingressi) senza nessuna notte negativa (osservata), contro il CASO NULLO di notti indipendenti (1 - q)^7.
+#  Lettura (soglie dell'autore, [DERIVATO], scritte il 10/10 e non cambiate): con >= 30 notti, q >= 0,30 -> 'nessuna notte negativa' NON e' una proprieta' del metodo su questo feed e regime
+#  ((1 - 0,30)^7 = 0,08: una settimana senza notti negative accade per caso meno di 1 volta su 12); q <= 0,10 -> COMPATIBILE ((0,9)^7 = 0,48); in mezzo: una settimana pulita e'
+#  plausibile per caso e NON dice niente. Con < 30 notti: NON MISURATO. Attesa per QUESTO lotto: ~20 notti (banda 10-45) -> quasi certamente NON MISURATO; se le notti sono >= 30,
+#  q 0,40-0,75 come nelle due notti misurate. Smentita dell'attesa: q <= 0,30 con >= 30 notti.
+#  CONCENTRAZIONE PER NOTTE: netto senza le 3 migliori notti <= 0 = FRAGILE PER NOTTE (si stampa anche senza le 5); la fa leggi_gba_notti.py con --prova-m5 questo file.
+#  FRAGILE PER NOTTE e' prudente: in questo lotto il merito e' gia' SOSPESO da S1, quindi non blocca niente che non sia gia' bloccato; non archivia niente; quanto spesso scatta con un
+#  vantaggio vero NON e' misurato (dipende dalla forma delle vincite e dal numero di notti).
+#  ANCORA E G1: il confronto con R1A vale SOLO se la G1 del lotto R2TTREND (REPL T1 magic 775850) e' VERDE contro R1A T1 (128 / -6577,48 / 0,83): VERDE, letta l'11/10
+#  (LETTURA_leggi_gba_notti_M1_M5.txt r.215-216). ROSSA o NON VERIFICABILE in una rilettura -> nessun numero di questo lotto si confronta con R1A ne' si usa; i numeri ASSOLUTI della notte
+#  (n, PF_V, notti negative, costo, DD) restano letti.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @GBA-TRANCHE qui sotto (le tre tranche di R1A, nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 le legge dal file)
+#  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+#  @GBA-TRANCHE nome=T2 da=2026.04.01 a=2026.06.30
+#  @GBA-TRANCHE nome=T3 da=2026.01.01 a=2026.03.31
+#  @GBA-ASSE chiave=InpSpreadMaxATR tranche=3 celle=1 lotti=1
+#  @GBA-CELLA nome=S021 InpSpreadMaxATR=0.021
+#  @GBA-LOTTO nome=R2M5SOGLIA modello=4 tetto_min=20 passate=S021:T1,S021:T2,S021:T3
+#
+InpSymbol=XAUUSD
+InpSignalTF=5
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=7
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true
