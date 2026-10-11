@@ -880,7 +880,7 @@ $testa = @(
 )
 (($testa + $manifest + @('',
   'COME SI LEGGE: leggi_natcla_f1.py (VERSIONE_EA 1.11 cablata) NON legge questo lotto: ogni passata v1.12 uscirebbe KO. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e i motivi,',
-  'poi la colla (righe SETUP = operazioni del report, soldi = profitto), poi i confronti H1/M30 A0-A7 con i comandi e le attese del file prova NATCLA_F1_M30_2026-10-11.txt. NESSUN verdetto di merito in questo lotto.',
+  'poi la colla (operazioni del report = somma dei RIEMPITI delle righe SETUP, colonne trades_report / riempiti_somma, fino a 3 in piu per un setup aperto a fine test; soldi = profitto), poi i confronti H1/M30 A0-A7 con i comandi e le attese del file prova NATCLA_F1_M30_2026-10-11.txt. NESSUN verdetto di merito in questo lotto.',
   'Questo script RACCOGLIE e dice se ogni passata e affidabile: NON giudica, NON promuove, NON sceglie nessun modo.')) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'RIEPILOGO_F1.txt') -Encoding ASCII
 (($manifest) -join "`r`n") | Set-Content -LiteralPath (Join-Path $Cart 'MANIFEST_F1.csv') -Encoding ASCII
 Compress-Archive -Path (Join-Path $Cart '*') -DestinationPath $zip -Force

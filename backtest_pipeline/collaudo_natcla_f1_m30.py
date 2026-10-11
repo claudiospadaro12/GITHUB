@@ -88,6 +88,7 @@ MUTANTI = [
     ("periodo del report: qualunque TF accettato", "$mpd = [regex]::Match($lr.Periodo, '^' + $cfg['periodo'] + '\\(", "$mpd = [regex]::Match($lr.Periodo, '^[A-Z0-9]+\\("),
     ("soglia non sostituita", "    if($pp[0] -eq 'InpInclMinAtr'){ $val = $ru.Soglia }\n", ""),
     ("colla operazioni tolta", "if($dTr -lt 0 -or $dTr -gt 3)", "if($false)"),
+    ("RIEPILOGO con la frase della madre (classe 1280)", "poi la colla (operazioni del report = somma dei RIEMPITI delle righe SETUP, colonne trades_report / riempiti_somma, fino a 3 in piu per un setup aperto a fine test; soldi = profitto)", "poi la colla (righe SETUP = operazioni del report, soldi = profitto)"),
 ]
 
 
@@ -124,6 +125,11 @@ $ast = [System.Management.Automation.Language.Parser]::ParseFile('@@DRIVER@@', [
 $fdefs = $ast.FindAll({ param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
 foreach($fd in $fdefs){ . ([scriptblock]::Create($fd.Extent.Text)) }
 C ($fdefs.Count -ge 14) ('funzioni estratte: ' + $fdefs.Count)
+# testi del RIEPILOGO dello zip (cancelli 11/10: classi 1276 e 1280): niente rimando al lettore v1.11, niente "righe SETUP = operazioni"
+$drvTxt = Get-Content -Raw -LiteralPath '@@DRIVER@@'
+C (-not $drvTxt.Contains('python3 backtest_pipeline/leggi_natcla_f1.py <questo zip')) 'RIEPILOGO: nessun rimando al lettore F1 v1.11 come lettore di questo lotto (classe 1276)'
+C (-not $drvTxt.Contains('righe SETUP = operazioni del report')) 'RIEPILOGO: nessuna frase "righe SETUP = operazioni del report" (classe 1280: un setup ha fino a 3 ordini)'
+C ($drvTxt.Contains('operazioni del report = somma dei RIEMPITI delle righe SETUP') -and $drvTxt.Contains('NESSUN verdetto di merito in questo lotto')) 'RIEPILOGO: colla in RIEMPITI e nessun verdetto di merito'
 C ($VERSIONE_ATTESA -eq '1.12' -and $PROVA -eq 'NATCLA_F1_M30_2026-10-11.txt' -and $N_PIN_ATTESI -eq 74 -and $DEPOSITO -eq 1000000 -and $MODELLO -eq 4 -and $DATA_A -eq '2025.06.30') ('costanti M2-M4 e della madre: v' + $VERSIONE_ATTESA + ' ' + $PROVA + ' pin ' + $N_PIN_ATTESI + ' dep ' + $DEPOSITO + ' modello ' + $MODELLO + ' fine IS ' + $DATA_A)
 # M5: il solo lotto ammesso
 foreach($pz in @(@('M30', $false), @('P', $true), @('O', $true), @('m30x', $true))){
