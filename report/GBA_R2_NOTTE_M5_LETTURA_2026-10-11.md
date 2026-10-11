@@ -19,8 +19,8 @@ Fonte: `GBA_R0_R2NOTTEM5.zip` (pin 397bd24f, PC `DESKTOP-H4D7CAJ`, 09:19-09:22, 
 
 ## Lettura contro quanto scritto prima
 - E' la **SORPRESA** prevista dal file prova (r.88: PF_V >= 1,3 sul totale con n >= 150), non una conferma. Il file prova dice anche cosa serve perche' sia un INDIZIO: replica in 2 tranche su 3 con n >= 150 (qui **nessuna tranche ha n >= 150, e 2 su 3 perdono**) e niente FRAGILE PER NOTTE. Quindi **NON diventa INDIZIO**. Mai «H-M5N confermata» (r.90).
-- **Controesempio (a) del piano, verificato**: M5 notte "vince" solo in T3 e perde in T1 e T2. La classificazione di regime (T1 e T3 laterale, T2 ribasso) NON la spiega: T1 e T3 sono lo stesso regime e danno 0,873 contro 2,094. Resta T3 come periodo (gen-mar 2026) e il suo ATR M5 piu' alto; per quanto riguarda il costo, T3 ha la mediana piu' alta (64x), non la piu' bassa.
-- Lo scarto di netto fra T3 (+47.462) e l'ancora M1 post-hoc nella stessa tranche (+6.292, PF 1,12) e' in parte scala: a M5 l'ATR e' piu' alto e il rischio per operazione in euro anche (a 1 lotto). Il PF non dipende dalla scala; il netto si'.
+- **Controesempio (a) del piano, verificato**: M5 notte "vince" solo in T3 e perde in T1 e T2. La classificazione di regime (T1 e T3 laterale, T2 ribasso) NON la spiega: T1 e T3 sono lo stesso regime e danno 0,873 contro 2,094. Resta T3 come periodo (gen-mar 2026) e il suo ATR M5 piu' alto [dal proxy del piano]; per quanto riguarda il costo, T3 ha la mediana piu' alta (64x), non la piu' bassa.
+- Lo scarto di netto fra T3 (+47.462) e l'ancora M1 post-hoc nella stessa tranche (+6.292, PF 1,12) potrebbe essere in parte scala [INFERITO, NON misurato qui]: a M5 l'ATR e' piu' alto (il piano cita 6,65 per T3, sul proxy) e quindi lo stop in euro a 1 lotto. Il PF non dipende dalla scala; il netto si'.
 - **Non misurato qui**: M1 notte (lotto R2NOTTEM1), M5 a 24 ore (se la notte conta o e' il TF: controesempio (b) del piano), la tranche T0 (dal 01/10/2026, mai vista), il periodo 2024-25 (R2REG). La fascia 00-07 nasce dalla lettura per ora di R1A: in-sample.
 
 ## Stato
