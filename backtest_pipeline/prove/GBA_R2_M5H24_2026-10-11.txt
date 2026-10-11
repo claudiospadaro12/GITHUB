@@ -1,6 +1,6 @@
 # ==========================================================================
 #  EA: ABTG_GoldBreakoutATR
-#  GBA R2 M5 A 24 ORE -- lotto R2M5H24: la cella M5 SENZA filtro orario (controesempio (b) del piano). UNA variabile rispetto a R2NOTTEM5: InpHourEnd 7 -> 24.
+#  GBA R2 M5 A 24 ORE -- lotto R2M5H24: la cella M5 SENZA filtro orario (la cella del controesempio (b) del piano, che qui si DESCRIVE e non si decide). UNA variabile rispetto a R2NOTTEM5: InpHourEnd 7 -> 24.
 #  Prova SENZA CODICE (input ESISTENTI dell'EA), 11/10/2026. Richiesta di Claudio dell'11/10: 'mandami la stringa del M5 a 24 ore'.
 #  Fonti: report/GBA_R2_PIANO_2026-10-10.md (4.2, 4.3 R2N r.190, attese r.211-214, controesempio r.215, 3.3 S8-S10), report/GBA_R2_NOTTE_M5_LETTURA_2026-10-11.md (R2NOTTEM5 e
 #  R2NOTTEM1 MISURATI), prove/GBA_R2_NOTTEM5_2026-10-10.txt (il file sorella da cui questo deriva: DIFF clausola per clausola qui sotto), report/FIRME_2026-10-10.md (Firma 1).
@@ -22,7 +22,7 @@
 #      PROVATO l'11/10 col codice VERO del driver v5 (pwsh: parsing r.342-470 e TestoIni r.638-651 eseguiti su questo file): l'ini T1 generato differisce dall'ini ARCHIVIATO
 #      di R2NOTTEM5 T1 (zip 11/10) SOLO in InpHourEnd (7 -> 24) e nel nome del Report; la stessa prova sul file NOTTEM5 rida l'ini archiviato.
 #  CAMBIA NEL COMMENTO: le attese (riscritte per la cella a 24 ore), il TERMINE DI CONFRONTO (qui e' quello del PIANO: notte contro 24 ore a parita' di TF), la lettura dei
-#  controesempi (a)(b)(c) e di H-M5N (qui la meta' 'giorno' diventa misurabile). Il blocco 'nessuna notte negativa' di NOTTEM5 NON e' copiato: a 24 ore non c'e' una notte filtrata
+#  controesempi (a)(b)(c) e di H-M5N (qui la meta' 'giorno' si DESCRIVE fascia per fascia; gli esiti sono tre, E1-E3). Il blocco 'nessuna notte negativa' di NOTTEM5 NON e' copiato: a 24 ore non c'e' una notte filtrata
 #  da leggere, e il lettore per notte (leggi_gba_notti.py 1404C68D) NON e' il lettore di questo lotto (sezione LETTORI).
 #  Il nome del docente non e' scritto nel testo nuovo (resta solo nelle citazioni LETTERALI di S4/S5 del file madre). Nelle citazioni dal piano (r.214) il nome del collega e'
 #  sostituito da [del collega], fra parentesi quadre: e' l'unico ritocco alle citazioni.
@@ -132,7 +132,7 @@
 #  apertura + USA pomeriggio) ~730, per tranche ~240-250: ATTESA, NON garanzia. Il pavimento della fascia giorno DENTRO H24 e' ~360-410 (minimo con durate libere fino alla
 #  massima: 137 / 132 / 138 a 240 min, 122 / 115 / 122 a 300 min) [DERIVATO dal giornale di R2NOTTEM5, programmazione dinamica dell'autore, ricalcolata uguale dal cancello
 #  l'11/10]: le posizioni di notte e di rollover bloccano i segnali del giorno. 148 / 147 / 153 e' il pavimento di un lotto filtrato 07-22, non di questo: una tranche con
-#  n_G < 150 e' PRODUCIBILE, e la tabella di (b) qui sotto la tratta (tranche NON giudicabile).
+#  n_G < 150 e' PRODUCIBILE (per questo gli esiti qui sotto NON dipendono dalla fascia giorno).
 #  PF_V 0,75-1,10 (piano 4.3 r.211, 'M5 24 ore'). Per fascia: GIORNO 07-22 PF_V < 1,0 (piano r.214: 'Giorno: PF_V < 1,0 su M5, in direzione dell'indizio [del collega] e di S6 di R1A
 #  (europa 0,52, USA 0,70)'); asia dentro H24 ~ R2NOTTEM5 (1,325 su 303), banda larga 1,10-1,55, n 240-330 (stessi segnali, pochi blocchi dal giorno; NON una soglia: se esce fuori,
 #  si legge il giornale prima di tutto: e' la sequenza, non il mercato).
@@ -141,47 +141,34 @@
 #  RISCHIO (a qualunque n): DD equity per tranche a 1 lotto; R2NOTTEM5 ha dato T1 11.534 / T2 21.663 / T3 11.549 EUR (LETTURA_leggi_gba_r0_notte_M1_M5.txt r.76-78). Atteso: piu' alto,
 #  fino a ~3x (circa 3,4x le operazioni) [INFERITO, non derivato: il DD dipende dalla sequenza]: si legge, non si giudica (nessun DD promesso per una cella R2).
 #
-#  ======================= LE IPOTESI, CON IL NUMERO CHE CIASCUNA PRODUCE (classe 178: l'attesa si prova contro l'ALTRA spiegazione, non contro il nulla) =======================
+#  ======================= LE SPIEGAZIONI, CON IL NUMERO CHE CIASCUNA PRODUCE: DESCRITTIVE, NON RAMI DECISIONALI (classe 178; si discutono DOPO la lettura, anche con Gemini) =====
 #  [N] 'conta la NOTTE' (H-M5N del collega, DICHIARATO DA TERZI; e il piano r.214): asia dentro H24 ~1,3; GIORNO 07-22 PF_V < 1,0; totale H24 ~0,85-1,05 [INFERITO: media
 #      grezza con circa 3/4 delle operazioni di giorno, non un calcolo sui deal]. Cade DENTRO l'attesa del totale (0,75-1,10).
-#  [TF] 'conta il TF M5 col suo filtro di spread, non la notte': il GIORNO rende come la notte, GIORNO 07-22 PF_V >= 1,3 su n >= 150, totale H24 >= 1,25. Cade FUORI dall'attesa del
-#      totale: la banda distingue. LIMITE: questo lotto separa NOTTE da GIORNO a parita' di TF e filtro; NON separa il TF dal filtro (sezione IL FILTRO DI SPREAD): '[TF]' qui vuol
-#      dire 'M5 + filtro 0,05 x ATR M5', mai il TF da solo.
-#  [R] 'conta il regime' (controesempio (a) del piano): T3 >= 1,3 a tutte le ore, T1 e T2 < 1,0 a tutte le ore: la colonna per tranche lo mostra (T3 R2NOTTEM5 2,094 contro 0,87/0,85).
-#      Il totale puo' cadere ovunque fra 0,9 e 1,4 (dipende da quanto pesa T3): il totale da solo NON distingue [R] da [TF] o da [N]; la colonna per tranche si'.
-#  IPOTESI ALTERNATIVA H-M5N (collega, DICHIARATO DA TERZI), INTERA dal piano 4.3 r.212: 'PF_V >= 1,3 nella notte in OGNI tranche con n >= 150 e giorno < 1,0'. In QUESTO lotto:
-#     la meta' 'giorno < 1,0' e' MISURABILE (giorno 07-22, n atteso ~240-250 per tranche, pavimento 115-138: una tranche puo' scendere sotto 150) MA il numero (unione delle fasce 07-22) NON lo stampa nessun lettore passato (sezione LETTORI):
-#     finche' lo script non passa dal cancello, la meta' giorno si legge SOLO fascia per fascia, come descrizione. La meta' 'notte in OGNI tranche con n >= 150' NON e' misurabile su T1-T3:
-#     la notte M5 ha n 93 / 97 / 113 per tranche (R2NOTTEM5) e la fascia asia dentro H24 e' attesa ~90-110 per tranche (simulato / 1,13: 93 / 88 / 112). Quindi H-M5N INTERA resta NON MISURABILE da questo lotto e da
-#     R2NOTTEM5 insieme; si scrive cosi'. Mai 'H-M5N confermata' ne' 'smentita' da questo lotto.
-#     Il piano r.214 aggiunge: 'Se invece il giorno M5 fosse > 1,0 con n >= 150, la lettura [del collega] ("disastro di giorno") non si riproduce sul nostro feed.' Si applica qui, con lo
-#     stesso limite (unione 07-22 = script).
+#  [TF] 'conta M5 + filtro 0,05 x ATR M5, non la notte' (il TF da solo NON si separa dal filtro in questo lotto, sezione IL FILTRO DI SPREAD): il GIORNO rende come la notte,
+#      totale H24 >= 1,25. Cade FUORI dall'attesa del totale.
+#  [R] 'conta il regime' (controesempio (a) del piano): T3 >= 1,3, T1 e T2 < 1,0: il totale puo' cadere ovunque fra 0,9 e 1,4; la colonna per tranche lo mostra.
+#  Queste tre frasi NON sono esiti di questo lotto: nessuna si scrive come verdetto. Dopo la lettura si dice quale e' COMPATIBILE coi numeri stampati, e perche'.
+#  IPOTESI ALTERNATIVA H-M5N (collega, DICHIARATO DA TERZI), INTERA dal piano 4.3 r.212: 'PF_V >= 1,3 nella notte in OGNI tranche con n >= 150 e giorno < 1,0'. In QUESTO lotto NON
+#     si decide: la meta' 'giorno < 1,0' richiede l'unione delle fasce 07-22, che nessun lettore passato stampa (si leggono le quattro fasce separate, come DESCRIZIONE); la meta'
+#     'notte in OGNI tranche con n >= 150' NON e' misurabile su T1-T3 (notte M5: n 93 / 97 / 113 per tranche; fascia asia dentro H24 attesa ~90-110 per tranche, simulato / 1,13:
+#     93 / 88 / 112). H-M5N INTERA resta NON MISURABILE da questo lotto e da R2NOTTEM5 insieme. Mai 'H-M5N confermata' ne' 'smentita' da questo lotto.
+#     Il piano r.214 aggiunge: 'Se invece il giorno M5 fosse > 1,0 con n >= 150, la lettura [del collega] ("disastro di giorno") non si riproduce sul nostro feed.' Stesso limite:
+#     l'unione 07-22 non e' stampata; qui si DESCRIVE fascia per fascia.
 #  CONTROESEMPI DEL PIANO (r.215: TRE frasi, (a) (b) (c); ognuna copiata e marcata 'si legge / non si legge da questo lotto', classe 1274 seconda ricorrenza):
 #   (a) 'se M5 di notte "vince" nel solo 2026 ad alta volatilita' (T3: ATR M5 6,65, costo 76% sopra 40x) e fallisce o e' vuoto nei trimestri calmi, la spiegazione e' il regime di
-#       volatilita' + il costo, non la notte: lo si vede dalla colonna per tranche del lettore e dalla stessa cella a 24 ore.' -> la meta' 'colonna per tranche' era gia' letta in
-#       R2NOTTEM5 (vince solo T3); la meta' 'stessa cella a 24 ore' SI' si legge da QUESTO lotto (colonna per tranche di H24). I 'trimestri calmi' del piano sono nel 2024-25 (T9-T5):
-#       NON in questo lotto.
-#   (b) 'Se la fascia 00-07 vince in M5 ma anche 07-22 vince, la fascia non conta: e' il TF.' -> SI' si legge da questo lotto, CON IL LIMITE dello script per l'unione 07-22. Lettura
-#       scritta ORA come PARTIZIONE ESAUSTIVA (classe 1260), con G = PF_V delle posizioni con ingresso 07:00-21:59 (stessa convenzione PF_V del lettore), n_G il loro numero:
-#       Tranche GIUDICABILE = n_G di tranche >= 150 (S1). Tranche che VINCE = G di tranche > 1,3 (stessa disuguaglianza di S4 'PF_V > 1,3 in almeno 2 tranche su 3').
-#       TABELLA DECISIONALE, GENERATA E VERIFICATA DA SCRIPT (non scritta a mano: la partizione a mano ha avuto buchi in 3 giri su 3, classe 1260 e ricorrenze):
-#       comando: python3 -I backtest_pipeline/tabella_decisione_gba_m5h24.py   (strumento di analisi, NON passato dal cancello; SHA256 3614EC1F...)
-#       Enumera 1.296 combinazioni (n_G >= 150 si/no x G totale L <= 1,03 / M fra 1,03 e 1,3 / H >= 1,3 x per tranche giudicabile si/no x VINCE / PERDE / MEZZO), toglie le 666
-#       impossibili (tranche giudicabile con n_G totale < 150; PF dell'unione fuori dal minimo-massimo delle tranche) e verifica che OGNI combinazione coerente (630) abbia UN ramo
-#       solo: esito 'TABELLA VERIFICATA', 0 combinazioni senza ramo o con piu' rami; 7 casi di controllo (i tre controesempi del cancello compresi) tornano; 4 mutanti dei rami
-#       (eseguiti dall'autore) fanno cadere la verifica. a = tranche GIUDICABILI che VINCONO, b = tranche NON giudicabili che VINCONO:
-#         n_G >= 150 | G totale | a   | b   | ramo
-#         no         | qualunque|  -  |  -  | B4  NON MISURABILE (n_G totale < 150: guasto o pavimento; si legge il giornale)
-#         si         | L        |  -  |  -  | B2  giorno indistinguibile dalla REPL e da 1,0 (S8): (b) NON scatta; la colonna per tranche si DESCRIVE; 'giorno < 1,0' di H-M5N e'
-#                    |          |     |     |     soddisfatto alla lettera SOLO se G < 1,00 (fra 1,00 e 1,03: 'NON alla lettera, ma nel rumore (S8)'); notte: 'compatibile con [N], non dimostrato'
-#         si         | M        |  -  |  -  | B3  nessun verdetto (S8 'esce dal rumore ma non basta'): numero e colonna per tranche; T0 (S10)
-#         si         | H        | >=2 | any | B1  'anche il giorno vince: la fascia NON conta; resta M5 + filtro di spread, NON separati da questo lotto' ([TF] col suo limite); S5/S9; T0
-#         si         | H        |  1  |  0  | A   'regime' (controesempio (a) del piano: vince UNA tranche sola, ed e' giudicabile), non 'TF' ne' 'notte'
-#         si         | H        |  1  | >=1 | NM  NON MISURABILE per n di tranche: si scrive il numero, T0 (S10)
-#         si         | H        |  0  | any | NM  NON MISURABILE per n di tranche: si scrive il numero, T0 (S10)
-#       (a) 'regime' si scrive SOLO nella riga A: nel ramo L (B2) e M (B3) non si applica, e una tranche NON giudicabile non porta mai 'regime' (S1).
-#       FINCHE' lo script dell'unione 07-22 non e' passato dal cancello: nessun ramo della tabella si scrive; si stampano le quattro fasce come le da' il lettore (n, PF_V, r medio,
-#       segno per tranche) e si dice 'DESCRIZIONE, (b) NON MISURATO'.
+#       volatilita' + il costo, non la notte: lo si vede dalla colonna per tranche del lettore e dalla stessa cella a 24 ore.' -> la colonna per tranche di H24 si STAMPA e si
+#       DESCRIVE dopo la lettura; nessun esito di questo lotto la trasforma in 'regime'. I 'trimestri calmi' del piano sono nel 2024-25 (T9-T5): NON in questo lotto.
+#   (b) 'Se la fascia 00-07 vince in M5 ma anche 07-22 vince, la fascia non conta: e' il TF.' -> NON si decide da questo lotto: richiede l'unione 07-22 contro la fascia asia,
+#       che nessun lettore passato stampa. Si DESCRIVONO le sei fasce come le da' il lettore v5 (n, PF_V, r medio, segno per tranche).
+#  ======================= GLI ESITI DI QUESTO LOTTO: TRE, sui soli numeri che leggi_gba_r0.py 9CD02D2A stampa (PF_V e n della cella H24, totale e per tranche) =======================
+#  Prima degli esiti: la passata e' leggibile (G0 OK, CONTROLLO DIRETTO OK) e n totale >= 520; n < 520 = guasto (sezione SMENTITE), nessun esito.
+#   (E1) PF_V totale di H24 <= 1,03 -> 'H24 non rende: la notte conta o H24 e' piatta; si scrive il numero' (descrittivo; S8: indistinguibile dalla REPL e da 1,0).
+#   (E2) PF_V totale >= 1,3 (n totale >= 150) E almeno 2 tranche con PF_V di tranche > 1,3 e n di tranche >= 150 ciascuna -> 'H24 rende anche fuori dalla notte: la fascia NON
+#        e' sufficiente a spiegare M5 notte; filtro e TF restano non separati; si ripete in T0 (S10)'.
+#   (E3) TUTTO IL RESTO -> 'nessun verdetto: si scrive il numero e la colonna per tranche, T0 (S10)'.
+#  Niente altri esiti. E1 ed E2 si escludono (PF_V totale <= 1,03 contro >= 1,3); E3 e' il complemento. Verificato per enumerazione: python3 -I
+#  backtest_pipeline/tabella_decisione_gba_m5h24.py (strumento di analisi, NON passato dal cancello; riscritto per i tre esiti l'11/10: ogni combinazione di banda del PF_V
+#  totale x numero di tranche con PF_V > 1,3 e n >= 150 x n totale cade in UN esito solo; casi e mutanti in coda allo script).
 #   (c) 'Se la fascia asia a M5 rende solo perche' 2-3 giornate (come il 23/03 su M1, +14.171 EUR) pesano, S5 (senza i 5 migliori) lo cattura.' -> NON si rilegge da questo lotto: e' stata
 #       misurata su R2NOTTEM5 con la concentrazione PER NOTTE (leggi_gba_notti 1404C68D: senza le 3 migliori notti +18.034 sul totale, 'non fragile'; FRAGILE PER NOTTE in T1 e T2;
 #       LETTURA M5 2026-10-11). Qui S5 (per OPERAZIONE) si stampa sulla cella intera; la concentrazione per GIORNATA della cella H24 non la stampa nessun lettore passato: NON MISURATA.
@@ -192,8 +179,8 @@
 #  con durate libere fino alla massima (programmazione dinamica) 622 (206 / 205 / 211) - 563 (192 / 181 / 190); meno al piu' un ingresso per fine settimana (~39); lo stesso metodo sulla sola notte da' 65 / 63 / 73 contro i veri 93 / 97 / 113, quindi e' davvero un pavimento]. Smentita del simulatore:
 #  n < 700 o n > 1.600 (oltre gli scenari durate x2 / x0,5, ~820 / ~1.275): si legge prima il giornale, segnali e scarti per spread e per posizione aperta. n < 520 = guasto di
 #  strumento o di filtro (CONTROLLO DIRETTO), non un errore del simulatore; fascia asia fuori da
-#  n 200-350 (la sequenza conta piu' del previsto: si dice prima di leggere il PF della fascia); totale PF_V >= 1,25 = fuori dall'attesa, nella direzione di [TF] (si legge con (b) e (a),
-#  MAI da solo); totale PF_V <= 1,03 su n >= 150 = la cella a 24 ore e' indistinguibile dalla REPL (S8).
+#  n 200-350 (la sequenza conta piu' del previsto: si dice prima di leggere il PF della fascia); totale PF_V >= 1,25 = fuori dall'attesa, nella direzione della spiegazione [TF] (descrittiva: si legge con
+#  l'esito E1/E2/E3 e la colonna per tranche, MAI da sola); totale PF_V <= 1,03 su n >= 150 = la cella a 24 ore e' indistinguibile dalla REPL (S8).
 #  ANCORA E G1: il confronto con R1A vale SOLO se la G1 del lotto R2TTREND (REPL T1 magic 775850) e' VERDE contro R1A T1 (128 / -6577,48 / 0,83): VERDE, letta l'11/10
 #  (LETTURA_leggi_gba_notti_M1_M5.txt r.215-216). Il confronto con R2NOTTEM5 (stesso driver, stesso pin del driver, stessa EA) non ha bisogno di una G1 nuova: e' la stessa
 #  configurazione salvo InpHourEnd.
