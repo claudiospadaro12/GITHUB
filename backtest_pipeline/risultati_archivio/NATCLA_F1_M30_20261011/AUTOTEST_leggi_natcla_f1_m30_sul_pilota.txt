@@ -43,5 +43,5 @@ AUTOTEST P_004_EURUSD_M2_H1_SHORT_GEOM        DD_R     8.7 atteso 8.7  OK
 AUTOTEST P_004_EURUSD_M2_H1_SHORT_GEOM        durata   19.95 atteso 19.95  OK
          quadratura dell'imbuto OK, righe IMBUTO 294
 AUTOTEST A0 P_001 contro P_001 = 0 righe diverse (0)                  OK
-AUTOTEST A0 P_001 contro P_002 > 0 righe diverse (144): il confronto morde OK
+AUTOTEST A0 P_001 contro P_002 = 144 righe diverse (144): 134 per contenuto + 10 di lunghezza OK
 AUTOTEST: 0 controlli falliti

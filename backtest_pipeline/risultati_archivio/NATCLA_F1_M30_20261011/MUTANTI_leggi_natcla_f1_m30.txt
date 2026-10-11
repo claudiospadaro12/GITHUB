@@ -4,3 +4,4 @@ MUTANTE 10018 non contati                        rc 1 AUTOTEST: 4 controlli fall
 MUTANTE guardia tolta da f inclinazione          rc 1 AUTOTEST: 4 controlli falliti ['P_001_XAUUSD_AUDIO_H1_LONG_GEOM f', 'P_002_XAUUSD_AUDIO_H1_LONG_PIU f', 'P_003_EURUSD_AUDIO_H1_SHORT_LINEA f', 'P_004_EURUSD_M2_H1_SHORT_GEOM f'] -> PRESO
 MUTANTE A0 cieco (confronto sempre 0)            rc 1 AUTOTEST: 1 controlli falliti ['A0 P_001'] -> PRESO
 MUTANTE durata arrotondata all'intero            rc 1 AUTOTEST: 2 controlli falliti ['P_002_XAUUSD_AUDIO_H1_LONG_PIU durata', 'P_004_EURUSD_M2_H1_SHORT_GEOM durata'] -> PRESO
+MUTANTE A0 solo lunghezza (A0 vale 10, non 144)  rc 1 AUTOTEST: 1 controlli falliti ['A0 P_001'] -> PRESO

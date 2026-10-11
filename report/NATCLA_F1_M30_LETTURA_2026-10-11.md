@@ -12,7 +12,7 @@
 EA v1.12 SHA256 `729BB428`, compilazione **0 errori, 0 avvisi**, 4 passate OK / 0 KO / 0 non lanciate per il driver, 11 minuti.
 **Prova**: `backtest_pipeline/prove/NATCLA_F1_M30_2026-10-11.txt` SHA256 `90d67485` (la copia nello zip ha lo stesso SHA). Nessuna soglia spostata.
 
-**Strumento**: `backtest_pipeline/leggi_natcla_f1_m30.py` (SHA256 `343d677c`) -- NUOVO, scritto oggi per questa lettura, **NON passato dal
+**Strumento**: `backtest_pipeline/leggi_natcla_f1_m30.py` (SHA256 `31a4db6b`) -- NUOVO, scritto oggi per questa lettura, **NON passato dal
 cancello** (va al cancello come oggetto). Importa in sola lettura funzioni del lettore passato `leggi_natcla_f1.py` (728F3489, non toccato):
 `Sorgente`, `leggi_csv`, `leggi_report`, `pf_di`, `dd_r`, `p_media`, `comm_r`, `nullo_riga`. Output integrale:
 `risultati_archivio/NATCLA_F1_M30_20261011/LETTURA_leggi_natcla_f1_m30.txt`.
@@ -20,9 +20,9 @@ cancello** (va al cancello come oggetto). Importa in sola lettura funzioni del l
 stesso codice ridà sul pilota f inclinazione 0,493 / 0,486 / 0,503 / 0,156, f ADX 0,356 / 0,362 / 0,306, guardia 64 / 64 / 55 / 70, n 144 / 134 /
 110 / 92, PF_R 1,32 / 1,13 / 0,78, nullo 0,93 / 0,96 / 0,83, DD_R 6,2 / 3,7 / 8,7, durata mediana esatta 70,0 / 94,85 / 19,95 min (tolleranza 0,01
 min), **le grandezze che decidono l'esito** (classe 1330): righe SETUP a rischio 0 e righe ADOTTATO 0 / 0 / 1 / 0 (la P_003), INVIO FALLITO 10018
-29 / 29 / 9 / 5, A0 di P_001 contro se stessa 0 righe diverse e contro P_002 144 (il confronto morde). Sei mutanti, tutti presi
-(`MUTANTI_leggi_natcla_f1_m30.txt`): righe a rischio 0 mai contate, ADOTTATO non contato, 10018 non contati, guardia tolta da f, A0 cieco,
-durata arrotondata all'intero. Nel 'dopo' di f entrano anche 'solo conta' ed 'ENTRATO' (la prova non li nomina; valgono 0 nel pilota e nel lotto).
+29 / 29 / 9 / 5, A0 di P_001 contro se stessa 0 righe diverse e contro P_002 esattamente 144 (134 per contenuto + 10 di lunghezza: un confronto della sola
+lunghezza darebbe 10 e cade). Sette mutanti, tutti presi (`MUTANTI_leggi_natcla_f1_m30.txt`): righe a rischio 0 mai contate, ADOTTATO non
+contato, 10018 non contati, guardia tolta da f, A0 cieco, durata arrotondata all'intero, A0 solo lunghezza (vale 10, non 144). Nel 'dopo' di f entrano anche 'solo conta' ed 'ENTRATO' (la prova non li nomina; valgono 0 nel pilota e nel lotto).
 
 ---
 
@@ -85,12 +85,17 @@ M30_003 ed e' la riga del 2024.10.13 23:10, quando **due** setup adottati (ST25 
    registrato a **0,00 R**; uno stop normale con 2 riempimenti nello stesso giornale vale -0,83 R (2024.10.14 16:56, ST25, -2.087,87 EUR). Esiti in
    soldi delle 4 adottate: GEOM +416,54 / +1.424,69 / +1.579,41 / -2.091,48; PIU +72,44 / +438,38 / +451,24 / +185,93. E' rischio vero che il CSV
    non misura (rischio 0): va nella decisione P_003.
-   **Lotti e TP delle adottate** [trades `M30_002`]: a ottobre lotti 0,91 uguali alla scala del venerdi; i TP no: le uscite al TP sono a 2.657,10
-   (ST30) e 2.658,88 (ST25) contro TP armati il venerdi a 2.655,56 e 2.657,57; il 25/05 lotti 0,95 contro 0,94 armati il 23/05. I pendenti erano
-   stati **riprezzati senza riga nel giornale** [FATTO dal codice v1.12: a ogni barra `CancellaSetupNonRiempito(L,"")` r.1598 cancella con motivo
-   vuoto, e `CancellaOrdiniLinea` scrive solo se il motivo non e' vuoto, r.1964; poi `ArmaScala` reinvia con `logga = !gArmatoPrima[L]`, falso dopo
-   il primo armo, r.1669 e r.1672-1676: nessuna riga ORDINE ne' SETUP]. Quali prezzi e lotti avessero i pendenti all'ultimo riprezzamento prima
-   della chiusura si legge solo dai trades, non dal giornale.
+   **Lotti e TP delle adottate** [giornale e trades `M30_002`]: il giornale ha solo il PRIMO armo (venerdi 2024.10.11 20:00: lotti 0,91, TP
+   2.657,57 ST25 e 2.655,56 ST30; venerdi 2025.05.23 09:00: ST30 lotti 0,94, TP 3.320,64); le uscite al TP di ottobre sono a 2.657,10 (ST30) e
+   2.658,88 (ST25) e il 25/05 i lotti sono 0,95: non sono i valori del primo armo. I pendenti erano stati **riprezzati senza riga nel giornale**
+   [FATTO dal codice v1.12: a ogni barra `CancellaSetupNonRiempito(L,"")` r.1598 cancella con motivo vuoto, e `CancellaOrdiniLinea` scrive solo
+   se il motivo non e' vuoto, r.1964; poi `ArmaScala` reinvia con `logga = !gArmatoPrima[L]`, falso dopo il primo armo, r.1669 e r.1672-1676:
+   nessuna riga ORDINE ne' SETUP; e dalla tabella Ordini del .htm]. Prezzi, SL, TP e lotti di ogni reinvio NON stanno nel giornale ne' nei
+   trades\ (che hanno solo le chiusure): stanno nella tabella Ordini dei report .htm dello zip archiviato, che mostra il riprezzamento anche nei
+   DATI. M30_002: reinvii del venerdi 2024.10.11 alle 20:30, 21:00 e 21:30; gli adottati del 13/10 sono quelli delle 21:30 (ST25 2653.85 /
+   2648.85 / 2643.85, SL 2638.85, TP 2658.85; ST30 2652.09 / 2647.09 / 2642.09, SL 2637.09, TP 2657.09; 0,91 lotti); l'adottato del 25/05 e' il
+   reinvio del 2025.05.23 20:30 (ST30 3347.88 / 3342.88 / 3337.88, SL 3332.88, TP 3352.88, 0,95 lotti). M30_003: stessi orari, prezzi e TP (SL e
+   lotti del modo PIU). Le uscite al TP di ottobre (2.657,10 e 2.658,88) combaciano a pochi centesimi con i TP adottati (2.657,09 e 2.658,85).
 3. Le **stesse 4 adozioni** in GEOM e PIU (stesse date e linee): il modo di stop non c'entra, il meccanismo sta nei pendenti.
 4. **10018 meno numerosi su M30** sull'oro (22 / 14 contro 29): l'attesa della prova ("almeno quanti") non si conferma nei numeri descrittivi;
    l'ipotesi alla base (piu' aperture di barra = piu' riprezzamenti a mercato chiuso) resta tale. Sono INVII di ordini nuovi, non cancellazioni.
@@ -109,12 +114,15 @@ M30_003 ed e' la riga del 2024.10.13 23:10, quando **due** setup adottati (ST25 
 - Non e' un OOS, ne' una prova di regime (un regime, un broker, ExecutionMode 0).
 
 ## 5. Errori e limiti
-- Strumento di lettura **non passato dal cancello** (autotest sul pilota e 6 mutanti fatti da me: il cancello deve rifarli).
+- Strumento di lettura **non passato dal cancello** (autotest sul pilota e 7 mutanti fatti da me: il cancello deve rifarli).
+- Lo strumento conta le ADOTTATO con `startswith('[NatCla] ADOTTATO')`: NON conta le righe `[NatCla] AVVIO: ADOTTATO setup` (adozione al
+  riavvio, EA r.2027). Nel tester non c'e' riavvio e l'output su questo lotto e' identico, ma su un giornale con riavvii sarebbe un buco.
+- `collaudo_natcla.py`: rosso su origin/lavoro per file di un'altra bozza (LOG_AGENTI_P003), mutanti 125/125; verde a 92023408.
 - PF_R, nullo, DD, p con le funzioni del lettore passato; il raggruppamento per gamba e' mio (un simbolo per gamba qui).
 - Il "nullo madre" di A5 e' l'intervallo scritto nella prova; il nullo "sulla geometria vera" (S) e' quello del lettore passato, DIAGNOSTICA; nelle
   passate oro salta 4 righe (le adottate, senza geometria).
 - Poisson: approssimazione normale, sovradispersione e correlazione fra gambe NON misurate.
-- I report `.htm` non sono estratti nell'archivio (23 MB): stanno nello zip archiviato.
+- I report `.htm` non sono estratti nell'archivio (23 MB): stanno nello zip archiviato (la tabella Ordini dei reinvii, §3.2, si legge da li').
 
 ## 6. La domanda aperta (quella che la prova rende prioritaria)
 **Decisione P_003**: (a) **v1.13 dell'EA** (le adozioni non devono nascere: ad esempio non riprezzare/ricancellare alla prima barra dopo la
@@ -125,10 +133,11 @@ Il passo 0 su M30 (conteggio F0) **non e' valutabile in questo stato**: la sua c
 Domanda secondaria per chi scrive la prova: in un lotto illeggibile, una passata senza righe P_003 (qui M30_004) si legge o no?
 
 ## 7. Cosa il cancello deve ricontrollare
-1. `leggi_natcla_f1_m30.py` (nuovo, SHA256 `343d677c`): autotest sul pilota (comprese rischio 0, ADOTTATO, 10018, A0), i 6 mutanti, la formula di f e
+1. `leggi_natcla_f1_m30.py` (nuovo, SHA256 `31a4db6b`): autotest sul pilota (comprese rischio 0, ADOTTATO, 10018, A0 = 144 esatte), i 7 mutanti, la formula di f e
    di f ADX contro la prova (A2 emendata), la scelta di 'solo conta' ed 'ENTRATO' nel 'dopo'.
 2. La regola P_003 applicata alle passate M30_002/003 (4 righe `rischio_soldi` 0.00 ciascuna nei `csv\`, righe ADOTTATO nei `log\`).
 3. A0: il confronto riga per riga dei due CSV e il confronto dei giornali (1 sola riga in piu').
 4. La lettura di `semaforo` / `imbuto_rotte` del MANIFEST contro il driver `NATCLA_F1_M30_PASSATE.ps1`.
 5. Che nessun numero, oro o EURUSD M2, sia usato come lettura (lotto illeggibile): esiti veri solo deviazione, A0, colla, uscite silenziose.
-6. Il riprezzamento muto (§3.2) contro il codice v1.12 r.1598, r.1964, r.1669, r.1672-1676.
+6. Il riprezzamento muto (§3.2) contro il codice v1.12 r.1598, r.1964, r.1669, r.1672-1676, e i reinvii contro la tabella Ordini dei `.htm`
+   (M30_002 ordini 2448-2471 e 9724-9738; M30_003 ordini 2172-2195 e 8655-8669).
