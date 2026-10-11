@@ -870,7 +870,12 @@ def magic_libero():
                         # v1.12 (11/10): i collaudi dei driver F1 di Nat&Cla citano i SUOI magic nei dati finti (778601/778603/778623): sono file Nat&Cla,
                         # non EA che usano il blocco. collaudo_natcla_f1.py teneva il collaudo ROSSO (1 controllo) GIA' alla HEAD con la v1.11 (misurato
                         # l'11/10 su un worktree pulito): esclusione per NOME del file, come sopra.
-                        ":!backtest_pipeline/collaudo_natcla_f1.py", ":!backtest_pipeline/collaudo_natcla_f1_m30.py"], capture_output=True, text=True)
+                        ":!backtest_pipeline/collaudo_natcla_f1.py", ":!backtest_pipeline/collaudo_natcla_f1_m30.py",
+                        # v1.13 (11/10): lo strumento di SOLA LETTURA dei log grezzi del tester per il caso P_003 di Nat&Cla (LOG_AGENTI_P003) porta nella sua
+                        # tabella dei 33 ticket la chiave della passata (simbolo, TF, magic 778601/778603, stop) per riconoscere a quale passata appartiene una
+                        # riga di log: sono dati di Nat&Cla, non un EA che usa il blocco. Esclusione per NOME dei DUE file (script e collaudo), non per pattern:
+                        # una copia con un altro nome, o un altro file che citi il blocco, resta visibile (contro-esempio in LOG_AGENTI_P003: provato).
+                        ":!backtest_pipeline/collaudo_LOG_AGENTI_P003.py", ":!backtest_pipeline/righe/LOG_AGENTI_P003.ps1"], capture_output=True, text=True)
     return [ln for ln in r.stdout.splitlines() if ln.strip()]
 
 
