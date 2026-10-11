@@ -115,6 +115,7 @@ L'IC del totale contiene 1,0 e l'intervallo S8 della REPL [0,70 ; 1,03]. Control
 
 ## 10. Limiti e cosa NON dice
 - In-sample, tre tranche del 2026 (gen-set), un solo orologio BCM (UTC+1 fisso), 1 lotto, deposito fittizio; DD e netto in EUR non sono quelli di un conto vero. Le sei tranche 2024-25 e la tranche T0 (dal 01/10/2026) NON sono in questo lotto.
+- Strumenti NON passati dal cancello usati in sez. 5-7: `gba_ingressi_comuni.py` (intestazione "Bozza, NON passata dal cancello"), `analisi_m5h24.py`, `finestre_pausa_m5h24.py`. Riserve su `analisi_m5h24.py` (NON va promosso a lettore): soglia del sorteggio rim=24587.09 e DD della sezione K scritti fissi nel codice; dipende da `gba_ingressi_comuni.py`; copertura dei 10018 per data e non per istante; regola della pausa fissa nel codice (d'inverno non include 22:00-22:55); righe morte.
 - **Non separa il TF dal filtro di spread** (0,05 x ATR M5 in tutte e due le celle): ogni "[TF]" vuol dire "M5 + filtro".
 - Non dice che la notte conta, non dice che non conta, non dice che il motore e' "morto" (la parola e' vietata: il certificato non e' completo), non promuove nessuna cella.
 - Il PF_V dell'unione 07-22 e la concentrazione per GIORNATA NON sono stampati da nessun lettore passato: **NON MISURATI** per la regola della prova (per 07-22 il segno e' implicato dal netto -65.714: PF_V < 1,0, 0,820, descrizione). Le cifre "resto 07-24" e bootstrap di questo documento sono descrizione di uno strumento non passato dal cancello.
