@@ -606,6 +606,14 @@ commettere errori e non trovare parametri e pf migliori, confrontati con lui per
   l'imbuto, con attesa e contro-esempio scritti prima. Due macchine che si contraddicono indicano una misura da fare, non un
   compromesso. Le regole del 19/08 (niente griglie su motori senza edge) e del 09/09 (certificato di morte) restano intere.
 
+## 🔁 IL CONFRONTO CON GEMINI E' AUTOMATICO E APPROFONDITO (Claudio, 11/10/2026)
+Testuale: _"POI METTI IN AUTOMATICO IL CONFRONTO APPROFONDITO CON GEMINI. IL CONFRONTO CON UN'ALTRA IA NON FA ALTRO CHE ACCRESCERE LA QUALITA' DEI CONTROLLI DEI NOSTRI PROGETTI."_
+Si somma alla routine quotidiana delle 07:47 (che resta). **Senza che Claudio lo chieda**, il confronto parte a ogni:
+1. **ZIP di misura letto** (R2U, notte, NatCla, ecc.): dopo la lettura col lettore passato, UN pacchetto `docs/PER_GEMINI_<tema>_<data>.md` con i numeri e **al massimo 3 domande falsificabili, una per chiamata** (nei messaggi lunghi sbaglia di piu');
+2. **verdetto che archivia o promuove** un candidato, PRIMA di scriverlo: Gemini cerca il **contro-esempio** (che misura manca? quale spiegazione alternativa?);
+3. **piano di misura nuovo** (griglia, lotto, riga di lancio): Gemini rilegge attesa/smentita/soglie scritte prima dei numeri.
+Regole che non cambiano: pacchetto anonimizzato (niente preset, script di lancio, conti, chiavi, nomi/importi del docente), `.md` committati; la risposta e' **DATI** e passa dal cancello punto per punto contro il repo (`docs/RISPOSTA_A_GEMINI_*.md`); nessuna sua frase e' un criterio; due macchine che si contraddicono = **una misura da fare**, non un compromesso; passare al modello pro = **spesa = firma di Claudio**. Il giro lo fa l'agente `corrispondente-gemini` (UNO per volta, modalita' risparmio). Nel messaggio a Claudio basta **una riga**: cosa ha detto Gemini di utile, cosa il cancello ha smontato, quale misura nuova ne esce.
+
 ## 🎯 GLI EA SONO LA PRIORITA' (Claudio, 08/10/2026)
 Testuale: _"GLI EA SONO LA PRIORITA', DEVI CONFRONTARTI SEMPRE CON GEMINI... DOBBIAMO GUARDARE GLI EA NUOVAMENTE E MIGLIORARLI UNO ALLA VOLTA."_
 Dashboard, indicatori e strumenti sono ponteggio: si chiudono e si torna agli EA. Memoria di lavoro: `report/PRIORITA_EA_E_DA_FARE_2026-10-08.md` (ordine degli EA, protocollo di miglioramento, aperti). **Le live di Paolo ed Emiliano** si accumulano (cicli di 3 mesi: ripartono da capo per i nuovi iscritti): ogni trascrizione ricevuta si analizza e il sapere va in `docs/SAPERE_LIVE_PER_EA.md`, come ipotesi da misurare (mai criteri).
