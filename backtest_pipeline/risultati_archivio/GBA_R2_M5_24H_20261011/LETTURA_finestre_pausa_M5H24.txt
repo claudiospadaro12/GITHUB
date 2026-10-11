@@ -1,0 +1,22 @@
+# python3 -I finestre_pausa_m5h24.py <worktree> GBA_R0_R2M5H24.zip -- STRUMENTO DI ANALISI DESCRITTIVA, NON PASSATO DAL CANCELLO
+# finestre_pausa_m5h24.py SHA256 1834564a3b11dc6337a15d33d0206fa65c0d252f3d7336ae34d8544664ed6b30
+=== a. insieme 07-22 (ora d'ingresso 07:00-21:59): n  752  PF_V  0.820  netto  -65714.01
+    resto 07-24: n  764  PF_V  0.858  netto  -52803.76 | notte 00-07: n  296  PF_V  1.111  netto   12732.06
+=== d. quattro finestre
+  repo (23:00-00:05 fino all'08/03; 22:00-23:00 dal 09/03)     attraversanti n   28  PF_V 13.314  netto   62799.64 | senza: n 1032  PF_V  0.786  netto -102871.34
+  buco tick (22:55-00:04 prima del 09/03; 21:55-23:00 dopo)    attraversanti n   28  PF_V 13.314  netto   62799.64 | senza: n 1032  PF_V  0.786  netto -102871.34
+  trading fermo (21:55-00:05 inverno; 21:55-23:05 estate)      attraversanti n   28  PF_V 13.314  netto   62799.64 | senza: n 1032  PF_V  0.786  netto -102871.34
+  larga (22:00-00:05 sempre)                                   attraversanti n   41  PF_V  6.999  netto   74268.26 | senza: n 1019  PF_V  0.759  netto -114339.96
+  stesso insieme delle 28 del repo? repo (23:00-00:05 fino all'08/03; 22:00-23:00 dal 09/03)     True (diff: +0 -0)
+  stesso insieme delle 28 del repo? buco tick (22:55-00:04 prima del 09/03; 21:55-23:00 dopo)    True (diff: +0 -0)
+  stesso insieme delle 28 del repo? trading fermo (21:55-00:05 inverno; 21:55-23:05 estate)      True (diff: +0 -0)
+  stesso insieme delle 28 del repo? larga (22:00-00:05 sempre)                                   False (diff: +13 -0)
+=== b. le 28 (regola repo): uscite con giorno della settimana
+  T3 2026-02-20 21:25:00 -> 2026-02-23 01:01:00 (lun) buy 4956.66
+  T3 2026-02-27 21:25:00 -> 2026-03-02 00:06:21 (lun) buy 8572.16
+  T2 2026-04-10 21:30:00 -> 2026-04-12 23:10:54 (dom) sell 5848.38
+  ultima uscita (max ora)/prima: 
+  uscite: min ora 00:05:00  max ora 23:59:02
+=== c. righe 10018 nei giornali: orario simulato min/max e conteggio per tranche
+  T2: 5 righe, 1 giorni; ora min 21:50:00 max 21:54:04; prima del 09/03 0 righe (min None max None); dal 09/03 5 righe (min 21:50:00 max 21:54:04)
+  T3: 246 righe, 11 giorni; ora min 21:52:21 max 22:54:55; prima del 09/03 246 righe (min 21:52:21 max 22:54:55); dal 09/03 0 righe (min None max None)
