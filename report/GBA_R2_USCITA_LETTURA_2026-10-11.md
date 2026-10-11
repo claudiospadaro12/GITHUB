@@ -4,7 +4,7 @@ Fonte: `GBA_R2_USCITA.zip` (pin 9ee0e0ca, PC `DESKTOP-H4D7CAJ`, inizio 08:36 fin
 
 ## Cancelli
 - **G1 (la gemella)**: REPL T1 col magic 775850 ridà R1A T1 identica: 128 operazioni, -6.577,48, PF 0,83, DD equity 12.511,35, **256 deal confrontati**. La macchina e' la stessa di R1A.
-- **G0**: 25 passate su 25, tick reali (modello 4), stato driver OK. Il giornale dell'EA segnala errori di spostamento SL (trailing/BE non applicato) da 20 a 156 per lotto e di chiusura a tempo fino a 187: da guardare, non cambiano il PF del report (coincide col PF_V in ogni tranche).
+- **G0**: 25 passate su 25, tick reali (modello 4), stato driver OK. Il giornale dell'EA segnala, per cella, errori di spostamento SL (trailing/BE non applicato) da 0 (KOFF) a 156 e di chiusura a tempo fino a 187: da guardare, non cambiano il PF del report (coincide col PF_V in ogni tranche).
 
 ## I numeri (PF_V = PF netto di costi, somma delle 3 tranche 2026; n)
 | cella | variabile | n | PF_V | PF per tranche T1/T2/T3 (report del tester) |
@@ -23,7 +23,7 @@ Fonte: `GBA_R2_USCITA.zip` (pin 9ee0e0ca, PC `DESKTOP-H4D7CAJ`, inizio 08:36 fin
 - **S8 (rumore)**: la REPL ha PF_V 0,855 con intervallo per giorno [0,70; 1,03]. **Nessuna delle 9 celle supera 1,03** (massimo K35 0,911): tutte INDISTINGUIBILI dalla REPL e da 1,0. Per la partizione (b) del file prova: **NULLA per il regime di scoperta**; nessuna cella va in T0 (S10).
 - **Contro-esempio cercato** (CLAUDE.md 10/09): "il lettore potrebbe nascondere una cella buona nella somma". Smentito sul numero del tester stesso: **27 tranche su 27 hanno PF del report < 1,0** (massimo 0,98, KOFF T1); K35 e KOFF non hanno nessuna tranche >= 1. I lati: massimo K35 BUY 1,03 (n 415) e KOFF BUY 1,01 (n 408): dentro il rumore, un lato non e' un verdetto.
 - **Controllo positivo**: spegnere l'uscita a tempo cambia **1 operazione su 933** (932) e il PF di 0,006: l'uscita a tempo non e' una leva su questa macchina (quasi nessuna posizione arriva al tempo massimo: vita mediana 7,4 minuti, p90 19,2). Che il tester risponda alle altre leve d'uscita si vede in n: BE05 1.074 operazioni, K15 1.131, KOFF 859 contro 933.
-- **Direzione, senza giudicarla**: il BE stretto peggiora (BE05 0,778 contro BEOFF 0,843); trailing largo o spento migliora di circa 0,05 (K35 0,911, KOFF 0,900) ma K15 0,848 e REPL 0,855 non sono monotoni con K35/KOFF: e' dentro il rumore.
+- **Direzione, senza giudicarla**: il BE stretto peggiora (BE05 0,778 contro BEOFF 0,843); l'asse del trailing (1,5 / 2,5 [REPL] / 3,5 / spento) da' 0,848 / 0,855 / 0,911 / 0,900: sui tre punti finiti sale (+0,007, +0,056), l'unico passo che rompe la monotonia e' 3,5 -> spento (-0,011). Tutto dentro il rumore [0,70; 1,03].
 - **S5**: tutte le celle FRAGILI (netto senza le 5 migliori operazioni peggiora).
 - **Frontiera del costo**: invariata (mediana 49 x con 3,90 EUR a giro; 0% sotto 13,3x).
 
