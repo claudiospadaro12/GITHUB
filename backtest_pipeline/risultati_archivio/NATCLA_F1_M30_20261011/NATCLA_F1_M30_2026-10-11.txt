@@ -1,0 +1,378 @@
+# ==========================================================================
+#  EA: EA_NatCla
+#  NATCLA_F1_M30 -- 'Ea Nat&Cla' su M30, 11/10/2026: il PILOTA della DEVIAZIONE DI TF firmata da Claudio (report/FIRME_2026-10-11.md punto 1:
+#  "VIA LIBERA AL M30, PROVIAMO ANCHE QUELLO"). La fonte dice "non sotto H1" (A-R8/R9): M30 e' una MISURA, NON il metodo della collega.
+#  STATO: PREPARAZIONE. Strato 1 (controlla_prova.py / controlla_riga.py / collaudo_natcla.py / collaudo_natcla_f1_m30.py) fatto da chi l'ha scritto;
+#  strato 2 (controllo-preventivo) DA FARE. NON consegnabile a Claudio e NON lanciabile finche' il cancello non passa. Questo file NON e' un PASS.
+#  EA v1.12 (input NUOVO InpAmmettiTFSottoH1, default false = v1.11; con true ammette SOLO PERIOD_M30), include ABTG_PausaGuardian.mqh SHA256
+#  3ec971152e85e0082488cc4243ff45ae09948c191d52ab96050b48f94641a737 (congelato: NON toccato). Gli SHA256 di EA, prova e driver stanno nella riga.
+#  Fonti: file prova madre backtest_pipeline/prove/NATCLA_F1_STOP_2026-10-09.txt (base, soglie T1-T7, modello, deposito, costo: tutto ereditato
+#  salvo le DEVIAZIONI qui sotto), report/NATCLA_MISURA_PARAMETRI_2026-10-10.md par. 9 (la proposta M30), report/NATCLA_F1_P_LETTURA_2026-10-11.md
+#  (il pilota di colla H1: i numeri di riferimento di questo lotto), backtest_pipeline/risultati_archivio/NATCLA_F1_P_20261011/NATCLA_F1_P.zip.
+#  Driver: backtest_pipeline/righe/NATCLA_F1_M30_PASSATE.ps1 (DERIVATO da NATCLA_F1_PASSATE.ps1, che NON e' toccato). Collaudo del driver:
+#  backtest_pipeline/collaudo_natcla_f1_m30.py. Riga: backtest_pipeline/righe/RIGA_LANCIA_NATCLA_F1_M30.txt.
+#  EMENDAMENTO dell'11/10/2026 (dopo il PASS del giudizio sulla versione 15c70437 e la rilettura di Gemini del piano:
+#  docs/PER_GEMINI_NATCLA_M30_PIANO_2026-10-11.md, docs/RISPOSTA_A_GEMINI_NATCLA_M30_PIANO_2026-10-11.md), scritto PRIMA di qualunque numero M30.
+#  Cambia SOLO questo file (EA 729bb428 e driver 62a2e8bd invariati). Non cambia NESSUNA attesa, banda o soglia di smentita gia' scritta; AGGIUNGE due
+#  letture (rapporto riempiti/setup, DA GUARDARE e non KO; regola P_003 con la precedenza di A0) e porta il passo successivo a "> 0,56".
+#  Punti: (1) definizione di f con le occupate della guardia anti-duplicato (A2; per l'ADX anche i respinti dall'inclinazione); (2) smentita di A1 con
+#  ENTRAMBE le gambe oro e casi non coperti; (3) TP in ATR14 dai CSV del pilota (SCALA SU M30); (4) caso P_003 riscritto su cio' che il giornale dice
+#  e su cio' che NON puo' dire; (5) regola delle passate KO per il caso P_003, con la precedenza di A0 sul controllo H1; (6) rapporto riempiti/setup
+#  (A1, A7); (7) aiuti di lettura (c -> percentile, Poisson, minuti, finestra di calcolo); (8) passo 0 anticipato NON applicato (PASSO SUCCESSIVO).
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale BCM demo 50503392 di QUESTO PC, C:\Program Files\BCM Markets MT5 Terminal).
+#  MAI sul VPS (nessuna delle sue cartelle), MAI su C:\MT5_Backtest, MAI su C:\FundedNext_Manuale, MAI su un conto, MAI su un preset di campo.
+#
+#  ======================= PERCHE' UN DRIVER DERIVATO E NON QUELLO DI F1 (misurato sul sorgente, 11/10) =======================
+#  NATCLA_F1_PASSATE.ps1 (SHA256 1a2ef447..., passato dal cancello per il lotto P) ha CABLATI: $PROVA = NATCLA_F1_STOP_2026-10-09.txt (r.90),
+#  $VERSIONE_ATTESA = 1.11 (r.91, controllata su NC_VER, riga AVVIO e #AVVIO del CSV), $N_PIN_ATTESI = 73 (r.94), lotti P|O|FA|FB|I (r.101) e i
+#  conteggi dei blocchi 4 config / 11 simboli / 12 soglie / 5 lotti (r.346). La v1.12 ha UN input in piu' e questo lotto ha UN file prova suo:
+#  il driver di F1 si fermerebbe prima del tester. Toccarlo cambierebbe lo SHA del driver passato che servira' ai lotti O/FA/FB/I della v1.11.
+#  Quindi: driver NUOVO, copia di quello passato con DEVIAZIONI CONTATE (elencate nella sua intestazione, M1-M9), stesso mutex
+#  Global\ABTG_NATCLA_F1 (i due driver si escludono a vicenda), stesse guardie di macchina, stessa raccolta.
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  UNA variabile: il TF del segnale, H1 -> M30, a parita' di TUTTO il resto (simbolo, config, lato, modo di stop, soglie, deposito, rischio,
+#  finestra, modello). Le domande, nell'ordine:
+#   (1) la deviazione e' DICHIARATA (CFG InpTF, CFG InpAmmettiTFSottoH1, riga AVVISO, #cfg del CSV) e il magic M30 e' quello atteso (778603 AUDIO,
+#       778623 EMA200), e la v1.12 COMPILA;
+#   (2) IDENTITA' della v1.12 su H1 (gamba di CONTROLLO, A0): la passata H1 della v1.12 riproduce bit per bit le righe SETUP della P_001 v1.11;
+#   (3) CAMPIONE: n per gamba M30 contro n H1 MISURATO nel pilota (A1) -- e' la ragione della deviazione (il muro dei 150, MISURA_PARAMETRI par. 9);
+#   (4) COLLA e TEMPO su M30 (operazioni del report = riempiti delle righe SETUP; secondi per passata, A6);
+#   (5) DESCRITTIVO: PF_R, durata mediana (E1), frazioni dell'imbuto. NESSUN verdetto di merito (vedi T1-T7 e "lettura" sotto).
+#
+#  ======================= LE GAMBE, E PERCHE' QUESTE =======================
+#  Quattro passate: le TRE gambe LEGGIBILI del pilota H1 rifatte su M30 (confronto H1/M30 uno a uno) + UNA gamba di CONTROLLO H1 con la v1.12.
+#   M30_001 XAUUSD AUDIO_H1  LONG  GEOM   CONTROLLO: stessa passata della P_001 (v1.11), ora con la v1.12 e InpAmmettiTFSottoH1=true (A0)
+#   M30_002 XAUUSD AUDIO_M30 LONG  GEOM   contro P_001 (H1: n 144, durata mediana 70 min, 133 s)
+#   M30_003 XAUUSD AUDIO_M30 LONG  PIU    contro P_002 (H1: n 134, durata mediana 95 min, 168 s)
+#   M30_004 EURUSD M2_M30    SHORT GEOM   contro P_004 (H1: n 92, durata mediana 20 min, 83 s)
+#  ESCLUSA: EURUSD AUDIO SHORT LINEA (la P_003). La sua passata H1 e' KO per il lettore (riga di giornale 'ADOTTATO ST25: 1 posizioni senza setup in
+#  memoria' del 2025.03.02 23:05 e una riga SETUP con rischio_soldi 0.00): non c'e' un numero H1 contro cui confrontarla. NON e' un modo per EVITARE
+#  il caso P_003: vedi sotto.
+#  Il CONTROLLO e' sull'oro GEOM (e non sull'EURUSD M2, 83 s) perche' attraversa tre linee Supertrend, ADX e inclinazione: copre piu' codice.
+#
+#  ======================= IL CASO P_003 (decisione SEPARATA, NON corretta qui) =======================
+#  Cosa SI LEGGE nel giornale della P_003 (zip del pilota): venerdi 2025.02.28 21:00 armati 3 pendenti ST25; alle 22:00 la riga 'ST25: guardia
+#  anti-duplicato (0 posizioni, 3 pendenti ancora sul conto)' (EA r.1612 v1.12, condizione `if(np0>0 || no0>0)`); domenica 2025.03.02 23:05 la riga
+#  'ADOTTATO ST25: 1 posizioni senza setup in memoria' (Sincronizza, EA r.2072-2077 v1.12, condizioni `if(!gSet[L].attivo)` e `if(np>0)`); poi
+#  l'uscita 'riempiti 3, ... motivo TP (setup adottato dopo un riavvio)' con esito 807,44 = 0,00 R e la riga SETUP con rischio_soldi 0.00.
+#  Cosa NON si legge: PERCHE' i 3 pendenti erano ancora sul conto. Nel giornale della P_003 non c'e' nessun 10018 quel giorno: i suoi 9 'INVIO FALLITO'
+#  (retcode 10018) sono del 2024.07.30 (3) e del 2024.11.08 (6), e sono INVII di ordini nuovi, non cancellazioni.
+#  E il giornale NON POTREBBE mostrarlo: l'EA non scrive le cancellazioni fallite (CancellaOrdiniLinea, EA r.1962 v1.12:
+#  `if(gTrade.OrderDelete(t)) n++;`, nessun Log sul ramo falso) e le righe d'errore di CTrade non hanno il prefisso [NatCla] che il driver raccoglie
+#  (regex $reRiga, driver r.507): l'assenza NON e' un indizio. Che la cancellazione sia mancata per il mercato chiuso e' [IPOTESI].
+#  '(setup adottato dopo un riavvio)' e' l'ETICHETTA FISSA che ChiudiSetup stampa per OGNI setup adottato (EA r.2245 v1.12, condizione
+#  `gSet[L].adottato`), qualunque sia la causa: nella passata P_003 nessun riavvio (una sola riga AVVIO nel giornale).
+#  La v1.12 NON tocca questi rami.
+#  INTERAZIONE CON M30 [IPOTESI, NON MISURATO]: su M30 le aperture di barra sono il DOPPIO, quindi i riprezzamenti (cancella e riarma) nelle ore a
+#  mercato chiuso (22:00-00:00 server, dove cadono tutti i 10018 degli INVII del pilota: 29 / 29 / 9 / 5) sono attesi ALMENO quanti su H1: il caso P_003
+#  su M30 e' atteso ALMENO altrettanto frequente, non meno. NESSUNA scelta di gamba lo esclude (dipende da un pendente vivo a un orario, non dalla gamba).
+#  REGOLA per le 3 passate M30: una passata con una riga ADOTTATO e una riga SETUP a rischio_soldi 0.00 e' "KO per il caso P_003" alla LETTURA (il
+#  driver NON la segna KO: non controlla rischio_soldi; la si trova in log\<passata>.txt e csv\<passata>.csv): QUELLA passata e' illeggibile, le altre
+#  si leggono; NON e' un difetto della deviazione.
+#  Sulla gamba di CONTROLLO H1 (M30_001) vale PRIMA A0: la P_001 del pilota NON ha righe ADOTTATO (0 nel giornale), quindi a ticks uguali una riga
+#  ADOTTATO o una riga SETUP a rischio_soldi 0.00 nel controllo e' una riga SETUP diversa = SMENTITA di A0 (STOP: il lotto M30 NON si legge e l'EA
+#  torna al cancello), NON un KO per il caso P_003. Solo a ticks DIVERSI (A0 non decide) il controllo con quella riga conta come passata KO per il caso
+#  P_003 nella soglia 2+ su 4.
+#  Se 2 o piu' passate su 4 (le 3 M30 e il controllo H1) escono KO per questo caso, il lotto e' illeggibile e la decisione P_003 (v1.13 dell'EA o
+#  tolleranza nel lettore) diventa PRIORITARIA rispetto a ogni altro lotto NatCla.
+#
+#  ======================= FINESTRA: SOLO L'IS (come F1, emendamento del 16/08 regola A) =======================
+#  IS = dal pavimento dei tick (forex 2024.07.05, oro 2024.07.10) al 2025.06.30. OOS = 2025.07.01 -> 2026.06.30 NON TOCCATO (firma 11/10: "solo IS,
+#  OOS intatto"). Regime dichiarato: quello del file prova madre (oro TORO +39%, forex col dollaro che cede nel 2025): UN regime, non misurato come regime.
+#  Riscaldamento: 300 barre M30 = ~6 giorni di borsa; oro e forex hanno storia M1 davanti alla finestra: nessuna perdita d'IS attesa. La finestra di calcolo
+#  dell'EA resta 1500 barre (NC_BARRE): su M30 sono ~31 giorni invece di ~62 (H1). E' la finestra di CALCOLO degli indicatori (barre chiuse lette a
+#  ogni valutazione), NON la finestra di misura del PF_R: il PF_R si misura sull'INTERO IS, uguale per H1 e M30.
+#   Il collaudo di casa prova che il risultato non dipende dall'inizio della
+#  finestra (EMA200 dopo 1300 barre: errore di avvio ~e^-13). MaxBars del terminale 100000000: 1 anno M30 = ~12.400 barre, nessun tetto morde.
+#  OROLOGIO: sul forex il cambio BCM cade DENTRO l'IS (26/12/2024-02/02/2025): M30 e H1 sono INVARIANTI all'orologio (barre intere d'ora o mezz'ora).
+#
+#  ======================= MODELLO, DEPOSITO, COSTO: INVARIATI dal file prova madre =======================
+#  Modello 4 (tick reali), KO se il report non dice 100% o se 'ticks data begins from' del simbolo della prova cade dopo l'inizio della finestra.
+#  Deposito 1.000.000 EUR, EUR, leva 100 (il contro-esempio dell'arrotondamento dei lotti sull'oro e' quello del file prova madre: vale identico, lo stop
+#  in u non dipende dal TF). Rischio per setup 0,25% = SEGNAPOSTO (non toccato: nessuna taglia, nessun rischio nuovo). ExecutionMode 0. Guardian nel
+#  tester FAIL-OPEN (specifica 2.5): il DD del tester NON e' ridotto da B1 ne' da C1. Commissione: come il file prova madre.
+#  COSTO SU M30 (regola S1 della madre): stop/pedaggio NON dipende dal TF (stop e TP in u fissi): XAUUSD e EURUSD restano AMMESSI come su H1.
+#  SCALA SU M30 (regola S2 della madre): TP 10 u in multipli di ATR14 del TF, mediana sui SETUP del pilota IS [MISURATO: ricontato sui CSV dello zip
+#  archiviato, colonne tp1 - linea_prezzo (mediana 10,0 u) e atr14; conto nostro, non di un lettore passato]: oro GEOM 1,57 (atr14 mediano 6,38),
+#  oro PIU 1,58 (6,335), EURUSD AUDIO 1,12, EURUSD M2 0,77 ATR14 H1. (I valori 1,01 / 0,83 della tabella S2 della madre vengono dal conteggio F0 su
+#  1,99 anni con anche l'OOS, modello OHLC: finestra diversa, NON sono il riferimento di questo lotto.) Su M30 [IPOTESI: ATR14 M30 = ATR14 H1 /
+#  radice(2), NON misurato]: oro ~2,2 ATR14 M30, SOPRA la banda ammessa H1 0,22-2,06; EURUSD M2 ~1,09, dentro. S2 NON ha una banda M30 di
+#  riferimento: su M30 non e' un cancello.
+#
+#  ======================= LE SOGLIE TRASPORTATE (deviazione dichiarata, conseguenza della firma) =======================
+#  INCLINAZIONE: la regola di casa (LEGGIMI risposta 6) vuole la soglia al P50 della FAMIGLIA SUL PASSO 0 (F0, SoloConta), prima di ogni P/L. Un passo 0
+#  su M30 NON esiste. Questo lotto usa le soglie P50 di H1 (ORO AUDIO 0,700, FX7 M2 0,207: blocchi @F1-INCL) TRASPORTATE senza cambiarle, e lo dichiara.
+#  Effetto atteso [DERIVATO, NON MISURATO]: inclinazione = |EMA200[1]-EMA200[21]| / ATR14[1] su 20 BARRE. Su M30, per lo stesso trend di pendenza k
+#  all'ora, il numeratore copre 10 h invece di 20 (x0,5) e l'ATR14 e' ~x0,71: incl_M30 ~ 0,71 x incl_H1. La soglia H1 su M30 e' quindi PIU' SEVERA:
+#  sui percentili F0 (ORO AUDIO_H1 P50 0,700 P75 1,161) cade a ~P65 dell'oro, (FX7 M2_H1 P50 0,207 P75 0,362) a ~P64 dell'EURUSD.
+#  ALTERNATIVA (inclinazione 'senza scala'): la soglia H1 resta il P50 anche su M30. Le due ipotesi danno numeri DIVERSI nell'imbuto (A2).
+#  ADX: soglia 20 e periodo 14 invariati (iADX su M30 copre 7 h); distribuzione su M30 [NON MISURATA]: si legge la frazione respinta nell'imbuto (A2).
+#  NESSUNA soglia si ritocca dopo i numeri di questo lotto. Se A2 dice che la soglia trasportata non e' il P50, il confronto H1/M30 CONFONDE TF e
+#  severita' del filtro, si scrive, e il passo giusto e' un passo 0 su M30 (conteggio SoloConta, file prova NUOVO), NON una soglia scelta a mano.
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI (ognuna con l'ipotesi alternativa) =======================
+#  A0 [IDENTITA' della v1.12 su H1, gamba M30_001 contro P_001 del pilota v1.11, zip archiviato]: le righe SETUP dei due CSV sono IDENTICHE byte per byte
+#     (stesso numero 144, stesse barre, stessi esiti); report: operazioni 232, ticks 53339206, barre 5651; righe di giornale dell'EA uguali salvo
+#     'v1.11' -> 'v1.12' e la riga in piu' 'CFG InpAmmettiTFSottoH1 = true   nessun effetto: TF PERIOD_H1 non e' sotto H1'; nessuna riga AVVISO DEVIAZIONE.
+#     Comando di confronto: diff delle righe che cominciano per 'SETUP;' di csv\P_001_XAUUSD_AUDIO_H1_LONG_GEOM.csv (zip P) e
+#     csv\M30_001_XAUUSD_AUDIO_H1_LONG_GEOM.csv (zip M30). SMENTITA: anche UNA riga diversa a ticks uguali = la v1.12 ha cambiato il comportamento su H1:
+#     STOP, il lotto M30 NON si legge e l'EA torna al cancello. Ticks diversi = l'ambiente e' cambiato (storico BCM riscaricato): A0 non decide, si scrive.
+#     CONTRO-ESEMPIO: se la v1.12 avesse spostato anche solo la cifra del magic su H1 (es. cifraTF M30 = 1), il CSV H1 cambierebbe nome e l'AVVIO direbbe
+#     un altro magic: il driver segna KO per 'magic ... invece di 778601' prima ancora del diff.
+#  A1 [n per gamba M30, contro n H1 MISURATO nel pilota]: CENTRO x2,0 [STIMA, NON MISURATO: le barre raddoppiano; ancora del piano F0A: da H1 a H4,
+#     4 volte meno barre, setup forex 5.089 -> 1.225 = x4,15, quasi proporzionale] ma l'ipotesi della soglia trasportata (sopra) da' x1,4 (frazione che
+#     passa l'inclinazione ~0,35 invece di ~0,50). [INFERITO, NON VERIFICATO: il x1,4 assume n proporzionale a (1 - f), e n puo' calare MENO di (1 - f):
+#     f e' contata per VALUTAZIONE di barra per linea (oro H1: 16.953 valutate, 2.063 ARMATO, 144 setup) e il rifiuto dell'inclinazione NON consuma
+#     l'episodio (EA r.1603-1607 v1.12: le condizioni `if(chiave==gUltimoEp[L])` e `if(gTocchiMax[L]>0 && prossimo>gTocchiMax[L])` stanno a monte
+#     di `if(ctx!=0)`, e gUltimoEp si aggiorna solo in ArmaScala, r.1798: lo stesso episodio si puo' armare a una barra dopo).]
+#     Banda COERENTE x1,2 - x2,6 di n H1:
+#       XAUUSD AUDIO_M30 LONG GEOM  n H1 144 -> 173-374 (centri 288 / 202)    XAUUSD AUDIO_M30 LONG PIU  n H1 134 -> 161-348 (centri 268 / 188)
+#       EURUSD M2_M30 SHORT GEOM    n H1  92 -> 110-239 (centri 184 / 129)
+#     Fuori banda = DA GUARDARE; sotto x0,5 o sopra x5 = STOP (si cerca la causa prima di leggere altro).
+#     SMENTITA della ragione della deviazione, CONDIZIONATA ad A2 (la soglia trasportata e' una deviazione di QUESTO file e puo' da sola tagliare n).
+#     Si emette SOLO se valgono TUTTE E QUATTRO: n M30 della gamba oro GEOM < 173 (x1,2 di 144) E n M30 della gamba oro PIU < 161 (x1,2 di 134) E f
+#     inclinazione (A2, definizione emendata) <= 0,56 nella gamba GEOM E <= 0,56 nella gamba PIU. Allora: M30 NON porta il campione promesso e la leva
+#     del muro dei 150 non funziona su questo motore; si scrive, con il motivo letto nell'imbuto.
+#     In OGNI altro caso il verdetto sulla leva e' NON ANCORA MISURATO, compresi i casi che la smentita non copre: (a) f > 0,56 in almeno una gamba oro
+#     (fra 0,56 e 0,59 non distinguibile; >= 0,59 piu' severa): il campione puo' essere tagliato dalla soglia trasportata e manca il passo 0 su M30 (vedi
+#     PASSO SUCCESSIVO); (b) n sotto x1,2 in UNA sola gamba oro; (c) n >= x1,2 in entrambe le gambe oro con f <= 0,56 in entrambe: la smentita non
+#     scatta, ma questo file NON scrive un verdetto positivo sulla leva (si descrive n contro i 150 di T1).
+#     ACCANTO a n si riporta l'intervallo di Poisson [informativo: NON cambia la soglia x1,2, scritta prima]: con n M30 vero a x1,4 (202) P(n < 173)
+#     ~1,9% [CALCOLO nostro, normale con correzione di continuita': z = (172,5 - 202) / radice(202) = -2,08]; sovradispersione e correlazione fra le due
+#     gambe oro [NON MISURATE] lo alzerebbero.
+#     RAPPORTO RIEMPITI / SETUP (lettura, NON KO): dal MANIFEST, riempiti_somma / setup_righe per passata: atteso 1,60-1,77 (pilota H1 [MISURATO]: 1,61 /
+#     1,60 / 1,74 / 1,77); fuori da 1,2-2,2 = DA GUARDARE. Serve perche' la colla del driver (operazioni del report = riempiti_somma, fino a 3 in piu')
+#     NON prenderebbe un errore in cui ogni riempimento diventasse una riga SETUP (setup = riempiti = operazioni: la colla torna lo stesso, il rapporto
+#     scende a 1,0).
+#     BANDE DEL PILOTA CORRETTE (richiesta del pilota, classe 1283): n REALE H1 = 2,16-2,36 volte l'attesa F0 (3 gambe leggibili), quindi i blocchi
+#     ATTESA di questo file sono: H1 = F0 x 2,3 [MISURATO sul pilota, 3 gambe, solo XAUUSD/EURUSD]; M30 = F0 x 2,3 x 2,0 [STIMA, NON MISURATO].
+#     La banda A1 della madre (0,5-2,0 attorno all'attesa) resta la regola del lettore; la banda x1,2-x2,6 qui sopra e' la lettura del CONFRONTO H1/M30.
+#     CONTRO-ESEMPIO: se si contassero ORDINI o DEAL invece dei setup, n M30 = 1,6-1,8 volte i setup (riempiti medi del pilota 1,60-1,77): con il
+#     centro x2,0 cadrebbe a x3,2-3,6 di n H1, FUORI banda; ma con il centro x1,4 cadrebbe a x2,2-2,5, DENTRO la banda. Quindi la banda DA SOLA non
+#     prende l'errore di unita': lo prendono il driver (conta le righe SETUP a parte dai riempiti e pretende operazioni del report = riempiti_somma) e il
+#     controllo incrociato di A2 (n previsto dalle frazioni dell'imbuto: x1,4 contro x2,2-2,5 misurato = scarto 57-79%, sopra il 25%; con il limite
+#     [INFERITO] scritto in A2), NON il lettore (per M30 un lettore passato non esiste, LIMITI). Il rapporto riempiti/setup qui sopra e' una lettura in piu'.
+#  A2 [imbuto: frazione f respinta dal FILTRO]. DEFINIZIONE (emendata PRIMA dei numeri M30): f = respinti dal filtro / (respinti dal filtro +
+#     valutazioni arrivate DOPO il filtro), somma di tutti i giorni; dopo il filtro = semaforo + nessun ordine valido + ARMATO + le OCCUPATE DELLA
+#     GUARDIA ANTI-DUPLICATO (esito occupata dato DOPO i filtri: EA r.1612 v1.12, condizione `if(np0>0 || no0>0)`, riga di giornale '<linea>: guardia
+#     anti-duplicato (N posizioni, M pendenti ancora sul conto)'). Il campo 'occupata' delle righe [NATCLA-IMBUTO] SOMMA due esiti: quello PRIMA dei
+#     filtri (EA r.1596 v1.12, condizione `if(gSet[L].attivo && gSet[L].riempito)`) e quello della guardia, DOPO i filtri. ISTRUZIONE DI LETTURA: chi
+#     legge (lettore M30 futuro o lettura a mano) conta la guardia SEPARATAMENTE dalle righe 'guardia anti-duplicato' di log\<passata>.txt e la toglie
+#     dal campo occupata; il driver NON lo fa (raccoglie il giornale, non lo scompone).
+#     Per l'ADX (stadio PRECEDENTE all'inclinazione: Contesto, EA r.1556-1557 v1.12, e NC_Contesto r.599-603) "dopo il filtro" comprende ANCHE i
+#     respinti dall'inclinazione: f ADX = ADX / (ADX + inclinazione + semaforo + nessun ordine valido + ARMATO + guardia). Confluenza, spread, timing,
+#     conferma, ritardo, apertura lontana stanno dopo i filtri e valgono 0 nel pilota: se su M30 non sono 0, entrano nel "dopo" (per entrambi i filtri).
+#     Valori H1 del pilota con la definizione emendata [MISURATO: ricontato sul giornale dello zip archiviato]: INCLINAZIONE oro AUDIO GEOM 0,493, PIU
+#     0,486; EURUSD AUDIO 0,503; EURUSD M2 0,156 (M2 si riarma a ogni barra: per barra, non per setup). ADX (formula qui sopra) oro AUDIO 0,356 / 0,362,
+#     EURUSD AUDIO 0,306.
+#     Righe di guardia: 64 / 64 / 55 / 70. VECCHIA DEFINIZIONE (senza le occupate della guardia): inclinazione 0,500 / 0,493 / 0,509 / 0,161; ADX 0,359 /
+#     0,365 / 0,308.
+#     IPOTESI 'soglia piu' severa' [DERIVATA]: inclinazione oro AUDIO su M30 ~0,65. IPOTESI 'senza scala': ~0,49-0,50. SOGLIE DI LETTURA, CONGELATE PRIMA
+#     dei numeri M30 e NON spostate da questo emendamento: <= 0,56 = la soglia H1 si comporta da P50 anche su M30; >= 0,59 = piu' severa (il confronto
+#     H1/M30 confonde TF e filtro: si scrive); fra 0,56 e 0,59 = non distinguibile. La definizione emendata sposta f H1 dell'oro di circa -0,007
+#     (0,500 -> 0,493; 0,493 -> 0,486): dentro la larghezza delle fasce e molto sotto l'errore standard di f per giorno sul pilota H1 (~0,036-0,037
+#     [CALCOLO: bootstrap per giorno, 5.000 ricampionamenti, docs/PER_GEMINI_NATCLA_M30_PIANO_2026-10-11.md sez. 2.2, non rifatto qui]; su M30 NON
+#     misurato). Le due gambe oro condividono gli stessi giorni: sono UNA osservazione di f, non due [IPOTESI sulla dipendenza]. Per M2 (per barra) il
+#     confronto si fa solo come rapporto M30/H1 contro 0,156, senza soglia; per l'ADX, solo come confronto con 0,356 / 0,362, senza soglia.
+#     AIUTO DI LETTURA (non cambia nessuna attesa) [CALCOLO, interpolazione lineare fra (P50; 0,700) e (P75; 1,161) dei percentili F0 dell'oro AUDIO_H1,
+#     assunzione dichiarata]: se inclinazione M30 = c x inclinazione H1, la soglia 0,700 cade al percentile 50 + 25 x (0,700 / c - 0,700) / 0,461:
+#     c = 1,000 -> 50; c = 0,8635 -> 56; c = 0,85 -> 56,7; c = 0,8084 -> 59; c = 0,71 -> 65,5. Dominio: c in [0,603 ; 1,000] (fuori si estrapola oltre
+#     P75 o sotto P50). 'Percentile del setup' e 'f per valutazione di barra' hanno denominatori diversi: l'equivalenza su M30 e' [IPOTESI].
+#     CONTROLLO INCROCIATO (contro-esempio interno): n_M30 / n_H1 atteso ~ 2 x (1 - f_M30) / (1 - f_H1) con f = frazione respinta dall'inclinazione
+#     nella definizione emendata (f_H1 0,493 GEOM, 0,486 PIU), per le due gambe AUDIO.
+#     [INFERITO, NON VERIFICATO: n puo' calare MENO di (1 - f), perche' f e' per valutazione di barra per linea e il rifiuto
+#     dell'inclinazione non consuma l'episodio (EA r.1603-1607 e r.1798 v1.12, vedi A1); la proporzionalita' NON e' verificabile con i dati in repo.]
+#     Quindi uno scarto oltre il
+#     25% fra n misurato e n previsto e' DA GUARDARE (si cerca nelle altre voci dell'imbuto: tocchi, episodi, semaforo, ADX, prima di leggere il PF),
+#     non una smentita: uno scarto con n misurato SOPRA il previsto e' anche compatibile con l'episodio non consumato.
+#  A3 [E1, fedelta' della geometria, durata mediana]: TP e stop sono in u FISSI (non in barre): la durata da riempimento a uscita NON dipende dal TF al
+#     primo ordine [INFERITO]. La durata si legge in MINUTI (colonna durata_min, da riempimento a uscita), MAI in barre. Attesa: durata mediana M30
+#     entro x0,5-x2,0 di quella H1 della stessa gamba, in minuti (oro GEOM 70, oro PIU 95, EURUSD M2 20).
+#     ALTERNATIVA: su M30 la ST3,5 e la EMA200 stanno piu' vicine al prezzo, quindi nel modo PIU lo stop e' piu' stretto e la durata puo' ACCORCIARSI;
+#     sotto x0,5 su PIU e' compatibile con questo, su GEOM no (GEOM non dipende dalle linee per lo stop). Le soglie E1 della madre (<= 60 fedele, 60-180
+#     compatibile, > 180 non e' il metodo) si stampano come nella madre.
+#  A4 [lato e regime]: invariato dalla madre (oro TORO: PF long > 1 e short < 1 = regime, non linea). Qui gira SOLO il LONG dell'oro: il segno del PF
+#     dell'oro LONG su M30 NON separa linea e deriva, e non lo si chiede.
+#  A5 [PF_R descrittivo]: NESSUNA attesa di direzione. Nullo per setup dalla madre (A2 madre: oro 0,93-0,98, forex 0,77-0,94): un PF_R M30 dentro il nullo
+#     o dentro +0,10 dal PF_R H1 della stessa gamba NON distingue niente (T5 della madre).
+#  A6 [TEMPO, ancorato ai secondi MISURATI oggi sul pilota, 68-168 s a passata, 113 s medi]: i tick sono gli STESSI (oro 53,3 milioni, EURUSD 24,0 milioni
+#     nell'IS), le barre raddoppiano (oro 5.651 -> ~11.300, EURUSD 6.071 -> ~12.140). Modello t = parte per tick + parte per barra: tutto per tick = x1,0,
+#     tutto per barra = x2,0. Per passata: oro GEOM M30 133-266 s, oro PIU M30 168-336 s, EURUSD M2 M30 83-166 s, controllo H1 oro GEOM 110-170 s.
+#     LOTTO: 494-938 s = 8,2-15,6 minuti di passate + compilazione 1-3 = 9-19 minuti. Il tick dell'oro e dell'EURUSD e' gia' nella cache di questo PC
+#     (pilota del 11/10): nessuno scarico atteso. SMENTITA del modello: una passata M30 sopra x3 della sua H1 (oro GEOM > 400 s) = il costo per barra
+#     dell'EA non e' lineare: si scrive, perche' cambia la stima di ogni lotto M30 futuro.
+#     CASO PEGGIORE (per 'NON fermarla prima di N minuti'): compilazione fino a 3 + tetto del lotto 45 (ferma l'AVVIO) + ultima passata fino al timeout 25
+#     + chiusura del terminale fino a 1,6 + lettura dei log e zip ~2 = ~77 minuti -> 'NON fermarla prima di 80 minuti'.
+#  A7 [colla e uscite silenziose]: come il pilota: operazioni del report = somma dei riempiti delle righe SETUP (riempiti_somma; fino a 3 in piu' per
+#     un setup aperto a fine test), soldi del CSV = profitto del report entro 2 rischi; in piu' il rapporto riempiti_somma / setup_righe di A1 (lettura).
+#     INVIO FALLITO con 10018 attesi (mercato chiuso 22:00-00:00 server) e NON KO: su M30 ATTESI
+#     ALMENO quanti su H1 (pilota: 29 / 29 / 9 / 5). 10019, stop out, lotto sotto il minimo = KO come nella madre.
+#
+#  ======================= SOGLIE CONGELATE (copiate INTERE dal file prova madre NATCLA_F1_STOP_2026-10-09.txt r.161-176, NON cambiate) =======================
+#  T1 n: una gamba si legge per il MERITO solo con n >= 150 (somma dei simboli della famiglia, quel lato, quel modo). Sotto: SOTTILE = merito SOSPESO;
+#     il RISCHIO si legge a qualunque n.
+#  T2 VIVO (permesso di aprire gli assi di F2 su quella gamba, MAI una promozione): n >= 150 E PF_R >= 1,15 E media di R > 0 con p unilaterale < 0,05
+#     (approssimazione normale; e' PIU' severa della soglia del nullo con costo della specifica 6.1, che ha media negativa) E regola del segno: PF_R > 1
+#     in almeno 2/3 (per eccesso) dei simboli della famiglia con n >= 30 in quella gamba, con ALMENO 2 simboli votanti (una famiglia di un solo simbolo,
+#     l'ORO qui, non puo' essere VIVA: e' la casella 4 del certificato). Tutto DOPO la commissione derivata se il tester non la addebita; se cambia con la
+#     commissione doppia, si scrive.
+#  T3 PERDENTE MISURATO: n >= 150 E PF_R < 1 E media di R < 0 con p unilaterale < 0,05. T4 NON DISTINGUIBILE: n >= 150 e ne' T2 ne' T3.
+#  T5 CONFRONTO DEI MODI (stessa famiglia, config, lato): un modo e' MIGLIORE di un altro solo se e' VIVO, la differenza di PF_R e' >= 0,10 (il doppio
+#     dello spostamento del nullo di A2) E il segno e' concorde in almeno 2/3 dei simboli con n >= 30 in entrambi. Altrimenti NESSUNA DIFFERENZA
+#     DISTINGUIBILE. Se due modi sono VIVI e non distinguibili, la scelta per F2 e' di CLAUDIO (fedelta' o misura, specifica 8 punto 3).
+#  T6 RISCHIO (E8 della specifica): DD massimo in R e peggior giornata in R per gamba (sequenza unita dei simboli della famiglia per data del setup);
+#     r_max = 10% / DD_R e 4,0% / peggior giornata_R. Il backtest consegna r_max, la taglia e' di Claudio (oggi il segnaposto e' 0,25%).
+#  T7 CERTIFICATO DI MORTE (5 caselle; MAI 'morto' se ne manca una): (1) PF misurato, (2) n e DD, (3) uscita ad asse (A1 TP dal riempimento, A9 durata 60:
+#     sono di F2, quindi dopo F1 la casella 3 e' VUOTA per tutti), (4) simboli gemelli (FX7: 7 simboli si'; ORO: NO, l'argento e' fuori scala; IDX3: 3
+#     simboli si'), (5) TF cambiato (H1 e H4: si'). Dopo F1 nessuna gamba puo' essere MORTA: il verdetto massimo e' 'NON ANCORA MISURATO (manca la 3)'.
+#  (T8 della madre, regola di F2, resta quella: questo lotto non apre e non chiude nessun asse di F2.)
+#
+#  ======================= COME SI APPLICANO QUI (lettura scritta PRIMA dei numeri) =======================
+#  - Le gambe di questo lotto sono PARZIALI per la famiglia: FX7 qui ha UN solo simbolo (EURUSD) su 7. La regola del segno di T2 vuole >= 2 simboli votanti:
+#    NESSUNA gamba di questo lotto puo' essere VIVA, comunque esca il PF. Anche T3/T4 su una famiglia letta con 1 simbolo su 7 NON si emettono: n >= 150
+#    su un simbolo solo NON e' 'la somma dei simboli della famiglia'. Per l'oro (famiglia di un solo simbolo) T3/T4 si possono scrivere SOLO come
+#    descrizione accanto al numero, con la casella 4 del certificato vuota e la deviazione dalla fonte scritta accanto.
+#  - CERTIFICATO (T7, 5 caselle): (1) PF misurato: si' (descrittivo); (2) n e DD: si'; (3) uscita ad asse: NO; (4) gemelli: NO (oro senza argento; FX7
+#    un simbolo su 7); (5) TF cambiato: H1, H4 e ora M30. Mancano la 3 e la 4: il verdetto massimo di ogni gamba e' 'NON ANCORA MISURATO (mancano 3 e 4)'.
+#    NESSUN 'morto', NESSUNA promozione, NESSUNA sedia: una sedia su M30 richiederebbe ANCHE la scelta di Claudio fedelta'/misura (la fonte dice non sotto H1).
+#  - RISCHIO (T6): si legge a qualunque n, per gamba, come descrizione (r_max). Il rischio per setup resta il segnaposto 0,25%: nessuna taglia nuova.
+#
+#  ======================= PASSO SUCCESSIVO DICHIARATO (NON in questo lotto) =======================
+#  La via piu' corta alle soglie giuste su M30 e' il PASSO 0 su M30 (report/NATCLA_MISURA_PARAMETRI_2026-10-10.md par. 9): conteggio SoloConta
+#  (InpSoloConta=true, nessun ordine) su XAUUSD ed EURUSD in AUDIO_M30 e M2_M30, da cui le P25/P50/P75 d'inclinazione della famiglia su M30 con la
+#  regola di F0 (LEGGIMI risposta 6), prima di qualunque P/L. Tempo [STIMA, ancora delle passate SoloConta di F0: ~33 s a passata]. NON e' in questo
+#  lotto e NON si lancia con questa riga: richiede un file prova NUOVO e un driver F0 adattato (NATCLA_F0_PASSATE.ps1 ha cablati v1.05, 71 pin e i
+#  lotti PILOTA/A/B/C/D/C0), quindi pin nuovo e cancello. Diventa NECESSARIO se A2 da' una frazione respinta > 0,56 in almeno una gamba oro AUDIO
+#  (con <= 0,56 in entrambe A1 puo' emettere la smentita: nessun bordo ambiguo).
+#  DECISIONE DEL PIANO (11/10, proposta 'M1' della rilettura di Gemini: anticipare il passo 0 PRIMA di questo lotto): NON si applica. Motivo: questo
+#  lotto produce gia' le righe [NATCLA-IMBUTO] da cui si legge f su M30 (A2), con la stessa definizione del pilota H1; il passo 0 serve solo se f > 0,56,
+#  e anticiparlo cambierebbe l'ordine del piano (file prova nuovo, driver, pin, cancello) senza cambiare quello che questo lotto puo' leggere.
+#
+#  ======================= LIMITI DICHIARATI =======================
+#  - La v1.12 NON e' mai stata compilata (nessun MetaEditor nella sandbox di chi l'ha scritta): la prima cosa che il driver fa e' compilarla; se la
+#    compilazione fallisce il driver si ferma PRIMA del tester (rc 1) e scrive sul Desktop NATCLA_F1_M30_COMPILAZIONE_FALLITA.zip col log di MetaEditor.
+#  - Il lettore leggi_natcla_f1.py (SHA256 728F3489, passato) NON legge questo lotto: ha VERSIONE_EA = 1.11 cablata (ogni passata v1.12 uscirebbe KO per
+#    '#AVVIO del CSV senza v1.11') e cerca nello zip il file prova madre per nome (senza --prova legge i blocchi della madre, dove AUDIO_M30 non esiste).
+#    Per leggere questo lotto serve una modifica del lettore (versione ammessa per lotto, file prova dallo zip) che passa dal cancello, oppure un
+#    lettore M30 separato. Il driver di questo lotto RACCOGLIE e controlla l'affidabilita' di ogni passata (come per F1). Del confronto H1/M30 c'e'
+#    un COMANDO solo per A0 (diff delle righe 'SETUP;' dei due CSV); A1 si legge dalle colonne setup_righe e riempiti_somma del MANIFEST; A2 si conta
+#    A MANO dalle righe [NATCLA-IMBUTO] e 'guardia anti-duplicato' di log\<passata>.txt; A3 (durata in minuti) dalla colonna durata_min dei CSV.
+#    Nessuno di questi conti e' automatizzato: i numeri di riferimento H1 sono scritti sopra.
+#  - Soglie d'inclinazione TRASPORTATE da H1 (sopra): la regola del passo 0 NON e' rispettata alla lettera, ed e' scritto.
+#  - Un regime, un broker (BCM), ExecutionMode 0, spread dei tick del tester. Due simboli. Un lato per simbolo.
+#
+#  @DAQUANDO-DALLA-RIGA la data d'inizio arriva dai blocchi @F1-SIMBOLO perche' il pavimento dei tick BCM cambia per classe (forex 2024.07.05, oro 2024.07.10)
+#
+#  BLOCCHI LEGGIBILI A MACCHINA (la sola fonte per il driver; sono commenti: il driver dei round li salta). Chiavi k=v separate da spazi.
+#  devia=si: la passata DEVE dichiarare la deviazione (CFG InpTF con DEVIAZIONE, CFG InpAmmettiTFSottoH1 'DEVIAZIONE ATTIVA', una riga AVVISO DEVIAZIONE);
+#  devia=no: NON deve (CFG InpTF '[FONTE A-R8 / P-p05]', CFG InpAmmettiTFSottoH1 'nessun effetto', nessuna riga AVVISO DEVIAZIONE). Il driver li controlla.
+#  @F1-CONFIG nome=AUDIO_M30 modalita=0 tf=30 periodo=M30 magic=778603 linee=ST25,ST30,ST35 adx=ACCESO modi=GEOM,LINEA,PIU devia=si
+#  @F1-CONFIG nome=M2_M30 modalita=2 tf=30 periodo=M30 magic=778623 linee=E200 adx=spento modi=GEOM,LINEA devia=si
+#  @F1-CONFIG nome=AUDIO_H1 modalita=0 tf=16385 periodo=H1 magic=778601 linee=ST25,ST30,ST35 adx=ACCESO modi=GEOM,LINEA,PIU devia=no
+#  @F1-MODO nome=GEOM valore=0 avvio=GEOMETRIA_ATTUALE
+#  @F1-MODO nome=LINEA valore=1 avvio=OLTRE_LINEA_ESTERNA
+#  @F1-MODO nome=PIU valore=2 avvio=OLTRE_PIU_ESTERNA
+#  @F1-LATO nome=LONG valore=1 segno=1 cfg=NC_DIR_LONG
+#  @F1-LATO nome=SHORT valore=2 segno=-1 cfg=NC_DIR_SHORT
+#  @F1-SIMBOLO nome=XAUUSD classe=ORO famiglia=ORO da=2024.07.10 u=1.0
+#  @F1-SIMBOLO nome=EURUSD classe=FX famiglia=FX7 da=2024.07.05 u=0.0001
+#  @F1-INCL famiglia=ORO config=AUDIO_M30 soglia=0.700
+#  @F1-INCL famiglia=ORO config=M2_M30 soglia=0.219
+#  @F1-INCL famiglia=ORO config=AUDIO_H1 soglia=0.700
+#  @F1-INCL famiglia=FX7 config=AUDIO_M30 soglia=0.623
+#  @F1-INCL famiglia=FX7 config=M2_M30 soglia=0.207
+#  @F1-INCL famiglia=FX7 config=AUDIO_H1 soglia=0.623
+#  @F1-ATTESA simbolo=XAUUSD config=AUDIO_M30 long=285 short=175
+#  @F1-ATTESA simbolo=XAUUSD config=M2_M30 long=179 short=143
+#  @F1-ATTESA simbolo=XAUUSD config=AUDIO_H1 long=143 short=87
+#  @F1-ATTESA simbolo=EURUSD config=AUDIO_M30 long=285 short=281
+#  @F1-ATTESA simbolo=EURUSD config=M2_M30 long=212 short=179
+#  @F1-ATTESA simbolo=EURUSD config=AUDIO_H1 long=143 short=140
+#  @F1-LOTTO nome=M30 tetto_min=45 passate=XAUUSD:AUDIO_H1:LONG:GEOM,XAUUSD:AUDIO_M30:LONG:GEOM,XAUUSD:AUDIO_M30:LONG:PIU,EURUSD:M2_M30:SHORT:GEOM
+#
+#  (Le @F1-ATTESA: F0 della madre x 2,3 per H1 [MISURATO sul pilota], x 2,3 x 2,0 per M30 [STIMA, NON MISURATO]; arrotondate all'intero.)
+#  ORDINE: un lotto solo, da solo, DOPO che il cancello ha passato EA v1.12, questo file, il driver e la riga. Nessun altro giro di tester insieme.
+#  PINS: i 75 input della v1.12 = DEFAULT COMPILATI (gli stessi 74 della madre, confronto riga per riga col sorgente) + InpAmmettiTFSottoH1=true (la
+#  DEVIAZIONE firmata, uguale per tutte le passate: sulla gamba di controllo H1 non ha effetto per costruzione, EA Risolvi). InpModalita, InpTF,
+#  InpDirezione, InpStopModo, InpInclMinAtr sono la cella base che il driver SOSTITUISCE a ogni passata con i valori dei blocchi; InpMagic e' l'asse tecnico.
+#
+# ==========================================================================
+
+@FINOA    2025.06.30
+
+InpModalita=0
+InpTF=30
+InpAmmettiTFSottoH1=true
+InpDirezione=1
+InpStAtrPeriodo=10
+InpStMult1=2.5
+InpStMult2=3.0
+InpStMult3=3.5
+InpUsaST25=-1
+InpUsaST30=-1
+InpUsaST35=-1
+InpEmaLentaPeriodo=200
+InpEmaTp1=14
+InpEmaTp2=89
+InpLogContesto=true
+InpAtrNormPeriodo=14
+InpMotoreEma200=-1
+InpTocchiMaxEma=0
+InpToccoDef=0
+InpSfioraAtr=0.10
+InpTocchiMax25=-1
+InpTocchiMax30=-1
+InpTocchiMax35=-1
+InpResetConteggio=0
+InpDistaccoAtr=1.0
+InpChiudeVicinoAtr=-1
+InpConfermaApertura=-1
+InpTimingTocco=0
+InpAdxUsa=-1
+InpAdxMax=20
+InpAdxPeriodo=14
+InpAdxAmbito=0
+InpAdxTipo=0
+InpInclUsa=-1
+InpInclBarre=20
+InpInclMinAtr=0
+InpInclVerso=0
+InpConfluenza=-1
+InpConflTolAtr=0.5
+InpMaxSpreadPunti=0
+InpUnita=0
+InpUnitaManuale=0.1
+InpTipoIngresso=-1
+InpScalaAnticipo=5
+InpScalaOltre=5
+InpPdfDistanzaSecondo=20
+InpPdfAperturaLontana=0
+InpPdfLontanoAtr=0.5
+InpScadenzaBarre=1
+InpMaxSetupAperti=1
+InpRischioSetupPct=0.25
+InpRischioMaxSetupPct=0
+InpPesiScala=0
+InpPesiPdf=0
+InpMoltConfluenza=1.0
+InpSLCriterio=-1
+InpSLBuffer=5
+InpSLEstremoBarre=3
+InpStopModo=0
+InpStopOltreU=20.0
+InpTPCriterio=-1
+InpTPDistanza=10
+InpRRMin=-1
+InpParzialeTP1Pct=0
+InpBEalTP1=-1
+InpDurataMaxMin=0
+InpCommissionePrezzo=0
+InpCancelloCostoX=40
+InpUsaGuardian=true
+InpMagic=0||0||1||1||Y
+InpComment=NATCLA
+InpLogImbuto=true
+InpVerbose=true
+InpSoloConta=false
+InpPlaceboAtr=0

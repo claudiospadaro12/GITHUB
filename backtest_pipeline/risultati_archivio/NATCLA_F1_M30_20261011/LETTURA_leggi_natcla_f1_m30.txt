@@ -1,0 +1,58 @@
+== LOTTO M30: MANIFEST ==
+M30_001_XAUUSD_AUDIO_H1_LONG_GEOM stato OK op 232 setup 144 riempiti 232 soldi 21851.38 profitto 21851.38 PF(deal) 1.31 ticks 53339206 barre 5651 durata_s 161 invio_fallito 29 semaforo 0 imbuto_rotte 0 avvio si adx MetaQuotes finestra 2024.07.10-2025.06.30
+M30_002_XAUUSD_AUDIO_M30_LONG_GEOM stato OK op 372 setup 236 riempiti 372 soldi -2675.11 profitto -2675.11 PF(deal) 0.98 ticks 53339206 barre 11297 durata_s 138 invio_fallito 22 semaforo 1 imbuto_rotte 0 avvio si adx MetaQuotes finestra 2024.07.10-2025.06.30
+M30_003_XAUUSD_AUDIO_M30_LONG_PIU stato OK op 322 setup 201 riempiti 322 soldi 4336.00 profitto 4336.00 PF(deal) 1.13 ticks 53339206 barre 11297 durata_s 178 invio_fallito 14 semaforo 1 imbuto_rotte 0 avvio si adx MetaQuotes finestra 2024.07.10-2025.06.30
+M30_004_EURUSD_M2_M30_SHORT_GEOM stato OK op 346 setup 199 riempiti 346 soldi -28779.77 profitto -28779.77 PF(deal) 0.81 ticks 24018311 barre 12142 durata_s 88 invio_fallito 10 semaforo 0 imbuto_rotte 0 avvio si adx MetaQuotes finestra 2024.07.05-2025.06.30
+
+== GIORNALE: deviazione dichiarata, ADOTTATO, semaforo, INVIO FALLITO ==
+M30_001_XAUUSD_AUDIO_H1_LONG_GEOM: AVVIO 1 (AVVIO v1.12) | magic 778601 | righe deviazione: CFG InpTF = PERIOD_H1   A MANO [FONTE A-R8 / P-p05] || CFG InpAmmettiTFSottoH1 = true   nessun effetto: TF PERIOD_H1 non e' so
+   ADOTTATO 0 [] | SEMAFORO SFORATO 0 | INVIO FALLITO 29 per retcode {'10018': 29} per ora {'00': 18, '22': 5, '23': 6}
+M30_002_XAUUSD_AUDIO_M30_LONG_GEOM: AVVIO 1 (AVVIO v1.12) | magic 778603 | righe deviazione: CFG InpTF = PERIOD_M30   A MANO [DEVIAZIONE DALLA FONTE A-R8/R9 'non so || CFG InpAmmettiTFSottoH1 = true   DEVIAZIONE ATTIVA: TF PERIOD_M30 sotto || AVVISO DEVIAZIONE DALLA FONTE ACCESA: TF PERIOD_M30 sotto H1 (fonte A-R
+   ADOTTATO 4 ['2024.09.15 23:10:00', '2024.10.13 23:10:00', '2024.10.13 23:10:00', '2025.05.25 23:10:01'] | SEMAFORO SFORATO 1 | INVIO FALLITO 22 per retcode {'10018': 22} per ora {'00': 9, '22': 5, '23': 8}
+M30_003_XAUUSD_AUDIO_M30_LONG_PIU: AVVIO 1 (AVVIO v1.12) | magic 778603 | righe deviazione: CFG InpTF = PERIOD_M30   A MANO [DEVIAZIONE DALLA FONTE A-R8/R9 'non so || CFG InpAmmettiTFSottoH1 = true   DEVIAZIONE ATTIVA: TF PERIOD_M30 sotto || AVVISO DEVIAZIONE DALLA FONTE ACCESA: TF PERIOD_M30 sotto H1 (fonte A-R
+   ADOTTATO 4 ['2024.09.15 23:10:00', '2024.10.13 23:10:00', '2024.10.13 23:10:00', '2025.05.25 23:10:01'] | SEMAFORO SFORATO 1 | INVIO FALLITO 14 per retcode {'10018': 14} per ora {'00': 9, '22': 5}
+M30_004_EURUSD_M2_M30_SHORT_GEOM: AVVIO 1 (AVVIO v1.12) | magic 778623 | righe deviazione: CFG InpTF = PERIOD_M30   A MANO [DEVIAZIONE DALLA FONTE A-R8/R9 'non so || CFG InpAmmettiTFSottoH1 = true   DEVIAZIONE ATTIVA: TF PERIOD_M30 sotto || AVVISO DEVIAZIONE DALLA FONTE ACCESA: TF PERIOD_M30 sotto H1 (fonte A-R
+   ADOTTATO 0 [] | SEMAFORO SFORATO 0 | INVIO FALLITO 10 per retcode {'10018': 10} per ora {'22': 10}
+
+== A0: controllo H1 M30_001 contro P_001 del pilota ==
+righe SETUP: M30_001 144, P_001 144, righe diverse (posizione per posizione) 0, identiche come insieme ordinato: True
+ticks: M30_001 53339206, P_001 53339206; operazioni 232 / 232; barre 5651 / 5651
+giornale (ora + messaggio, con 'AVVIO v1.12'->'v1.11'): solo in M30_001 1 ["[NatCla] CFG InpAmmettiTFSottoH1 = true   nessun effetto: TF PERIOD_H1 non e' sotto H1 [FI"] ; solo in P_001 0 []
+
+== A1/A2/A3/A5/A6/A7 per passata (M30 contro la passata H1 di riferimento del pilota) ==
+M30_001_XAUUSD_AUDIO_H1_LONG_GEOM  (rif. H1 P_001_XAUUSD_AUDIO_H1_LONG_GEOM)
+   n 144 (H1 144) rapporto 1.000 | riempiti 232 riempiti/setup 1.611 | Poisson 95% n 120-168
+   righe SETUP con rischio_soldi <= 0: 0 []
+   imbuto: righe 278 quadratura OK valutate 16953 ADX 2502 incl 2230 dopo 2230 guardia 64 occupata 462 (prima dei filtri 398) | f incl 0.493 (vecchia def 0.500, H1 0.493) | f ADX 0.356 (H1 0.356)
+   stadi: {'valutate': 16953, 'flip': 425, 'occupata': 462, 'lato spento': 7321, "episodio gia' usato": 10, 'conteggio esaurito': 1773, 'ADX': 2502, 'inclinazione': 2230, 'semaforo': 157, 'nessun ordine valido': 10, 'ARMATO': 2063}
+   controllo incrociato: n previsto 288.0 (= 144 x 2 x (1-0.493)/(1-0.493)), scarto -50.0%
+   PF_R 1.32 (H1 1.32) nullo 0.93 (H1 0.93, saltati 0) media R 0.060 p(>0) 0.093 WR 79.9% DD_R 6.2 peggior giorno -1.81 | commissione tester True
+   durata mediana 70.0 min (H1 70.0) rapporto 1.00 | secondi 161 (H1 133) rapporto 1.21
+   colla: operazioni 232 - riempiti 232 = 0 | profitto 21851.38 - soldi 21851.38 = -0.00 | report PF 1.31 profitto 21851.38 commissioni -809.6300000000043
+M30_002_XAUUSD_AUDIO_M30_LONG_GEOM  (rif. H1 P_001_XAUUSD_AUDIO_H1_LONG_GEOM)
+   n 236 (H1 144) rapporto 1.639 | riempiti 372 riempiti/setup 1.576 | Poisson 95% n 206-266
+   righe SETUP con rischio_soldi <= 0: 4 [('2024.09.15 23:10', 'ST25', '416.54', '0.000'), ('2024.10.13 23:10', 'ST30', '1424.69', '0.000'), ('2024.10.13 23:10', 'ST25', '1579.41', '0.000'), ('2025.05.25 23:10', 'ST30', '-2091.48', '0.000')]
+   imbuto: righe 278 quadratura OK valutate 33891 ADX 4583 incl 4623 dopo 4073 guardia 91 occupata 1591 (prima dei filtri 1500) | f incl 0.526 (vecchia def 0.532, H1 0.493) | f ADX 0.343 (H1 0.356)
+   stadi: {'valutate': 33891, 'flip': 882, 'occupata': 1591, 'lato spento': 14070, "episodio gia' usato": 7, 'conteggio esaurito': 4062, 'ADX': 4583, 'inclinazione': 4623, 'semaforo': 648, 'nessun ordine valido': 8, 'ARMATO': 3417}
+   controllo incrociato: n previsto 269.1 (= 144 x 2 x (1-0.526)/(1-0.493)), scarto -12.3%
+   PF_R 0.97 (H1 1.32) nullo 0.93 (H1 0.93, saltati 4) media R -0.006 p(>0) 0.568 WR 75.0% DD_R 8.3 peggior giorno -2.97 | commissione tester True
+   durata mediana 87.2 min (H1 70.0) rapporto 1.25 | secondi 138 (H1 133) rapporto 1.04
+   colla: operazioni 372 - riempiti 372 = 0 | profitto -2675.11 - soldi -2675.11 = 0.00 | report PF 0.98 profitto -2675.11 commissioni -1257.5100000000048
+M30_003_XAUUSD_AUDIO_M30_LONG_PIU  (rif. H1 P_002_XAUUSD_AUDIO_H1_LONG_PIU)
+   n 201 (H1 134) rapporto 1.500 | riempiti 322 riempiti/setup 1.602 | Poisson 95% n 173-229
+   righe SETUP con rischio_soldi <= 0: 4 [('2024.09.15 23:10', 'ST25', '72.44', '0.000'), ('2024.10.13 23:10', 'ST30', '438.38', '0.000'), ('2024.10.13 23:10', 'ST25', '451.24', '0.000'), ('2025.05.25 23:10', 'ST30', '185.93', '0.000')]
+   imbuto: righe 278 quadratura OK valutate 33891 ADX 4568 incl 4065 dopo 3950 guardia 83 occupata 3883 (prima dei filtri 3800) | f incl 0.502 (vecchia def 0.507, H1 0.486) | f ADX 0.361 (H1 0.362)
+   stadi: {'valutate': 33891, 'flip': 787, 'occupata': 3883, 'lato spento': 12706, "episodio gia' usato": 5, 'conteggio esaurito': 3927, 'ADX': 4568, 'inclinazione': 4065, 'semaforo': 754, 'nessun ordine valido': 201, 'ARMATO': 2995}
+   controllo incrociato: n previsto 259.4 (= 134 x 2 x (1-0.502)/(1-0.486)), scarto -22.5%
+   PF_R 1.10 (H1 1.13) nullo 0.95 (H1 0.96, saltati 4) media R 0.006 p(>0) 0.362 WR 90.5% DD_R 3.5 peggior giorno -1.03 | commissione tester True
+   durata mediana 119.6 min (H1 94.8) rapporto 1.26 | secondi 178 (H1 168) rapporto 1.06
+   colla: operazioni 322 - riempiti 322 = 0 | profitto 4336.00 - soldi 4336.00 = -0.00 | report PF 1.13 profitto 4336.0 commissioni -261.1400000000002
+M30_004_EURUSD_M2_M30_SHORT_GEOM  (rif. H1 P_004_EURUSD_M2_H1_SHORT_GEOM)
+   n 199 (H1 92) rapporto 2.163 | riempiti 346 riempiti/setup 1.739 | Poisson 95% n 171-227
+   righe SETUP con rischio_soldi <= 0: 0 []
+   imbuto: righe 294 quadratura OK valutate 12142 ADX 0 incl 834 dopo 4272 guardia 75 occupata 515 (prima dei filtri 440) | f incl 0.161 (vecchia def 0.163, H1 0.156) | f ADX 0.000 (H1 0.000)
+   stadi: {'valutate': 12142, 'flip': 390, 'occupata': 515, 'lato spento': 6111, "episodio gia' usato": 20, 'inclinazione': 834, 'nessun ordine valido': 4, 'ARMATO': 4268}
+   controllo incrociato: n previsto 183.0 (= 92 x 2 x (1-0.161)/(1-0.156)), scarto 8.8%
+   PF_R 0.80 (H1 0.78) nullo 0.77 (H1 0.83, saltati 0) media R -0.058 p(>0) 0.896 WR 69.8% DD_R 17.0 peggior giorno -2.08 | commissione tester True
+   durata mediana 25.3 min (H1 19.9) rapporto 1.27 | secondi 88 (H1 83) rapporto 1.06
+   colla: operazioni 346 - riempiti 346 = 0 | profitto -28779.77 - soldi -28779.77 = -0.00 | report PF 0.81 profitto -28779.77 commissioni -13445.680000000024

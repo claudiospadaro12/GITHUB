@@ -1,0 +1,16 @@
+NATCLA F1 -- lotto M30: EA_NatCla v1.12, Modello 4 (tick reali), IS fino al 2025.06.30, deposito 1000000 EUR, rischio per setup 0,25% (SEGNAPOSTO)
+data: 2026-10-11 17:52:44   pc: DESKTOP-H4D7CAJ   pin: e2fb98ed7e63c8190e06ca997e858f365bcb05af
+EA_NatCla.mq5 SHA256 729BB4289B013D8465366C1AFCA15C26636DA01D62F03B3A9BBE044AB5D358C7  (NC_VER 1.12)   compilazione: 0 errori, 0 avvisi (-1 = non letto)
+passate del lotto 4: OK 4, KO 0, NON LANCIATE 0   durata totale 11 minuti   media per passata OK 141 secondi
+TEMPO M30 contro H1: confrontare i secondi di ogni passata del MANIFEST con quelli del pilota P (file prova NATCLA_F1_M30_2026-10-11.txt, attesa A6: x1,0-x2,0 per passata)
+Guardian nel tester: FAIL-OPEN (specifica 2.5): il DD del tester NON e ridotto da pausa B1 ne da cap C1.
+
+lotto;passata;simbolo;config;lato;modo;magic;soglia_incl;da;a;t_avvio;durata_s;stato;trades_report;profitto_report;pf_report;qualita;deposito;ticks_report;barre_gen;ticks_inizio;setup_righe;riempiti_somma;soldi_somma;invio_fallito;lotto_min;semaforo;imbuto_rotte;righe_ea;avvio_ok;adx_verifica;finestra;motivi
+M30;M30_001_XAUUSD_AUDIO_H1_LONG_GEOM;XAUUSD;AUDIO_H1;LONG;GEOM;778601;0.700;2024.07.10;2025.06.30;2026-10-11 17:42:03;161;OK;232;21851.38;1.31;100%ticksreali;1000000.00;53339206;5651;EURUSD 2024.07.05 / XAUUSD 2024.07.10;144;232;21851.38;29;0;0;0;2543;si;MetaQuotes;2024.07.10-2025.06.30;
+M30;M30_002_XAUUSD_AUDIO_M30_LONG_GEOM;XAUUSD;AUDIO_M30;LONG;GEOM;778603;0.700;2024.07.10;2025.06.30;2026-10-11 17:45:06;138;OK;372;-2675.11;0.98;100%ticksreali;1000000.00;53339206;11297;EURUSD 2024.07.05 / XAUUSD 2024.07.10;236;372;-2675.11;22;0;1;0;3701;si;MetaQuotes;2024.07.10-2025.06.30;
+M30;M30_003_XAUUSD_AUDIO_M30_LONG_PIU;XAUUSD;AUDIO_M30;LONG;PIU;778603;0.700;2024.07.10;2025.06.30;2026-10-11 17:47:45;178;OK;322;4336.00;1.13;100%ticksreali;1000000.00;53339206;11297;EURUSD 2024.07.05 / XAUUSD 2024.07.10;201;322;4336.00;14;0;1;0;2833;si;MetaQuotes;2024.07.10-2025.06.30;
+M30;M30_004_EURUSD_M2_M30_SHORT_GEOM;EURUSD;M2_M30;SHORT;GEOM;778623;0.207;2024.07.05;2025.06.30;2026-10-11 17:51:01;88;OK;346;-28779.77;0.81;100%ticksreali;1000000.00;24018311;12142;EURUSD 2024.07.05;199;346;-28779.77;10;0;0;0;2132;si;MetaQuotes;2024.07.05-2025.06.30;
+
+COME SI LEGGE: leggi_natcla_f1.py (VERSIONE_EA 1.11 cablata) NON legge questo lotto: ogni passata v1.12 uscirebbe KO. Prima lo STATO di ogni passata (OK / KO / NON_LANCIATA) e i motivi,
+poi la colla (operazioni del report = somma dei RIEMPITI delle righe SETUP, colonne trades_report / riempiti_somma, fino a 3 in piu per un setup aperto a fine test; soldi = profitto), poi i confronti H1/M30 A0-A7 con i comandi e le attese del file prova NATCLA_F1_M30_2026-10-11.txt. NESSUN verdetto di merito in questo lotto.
+Questo script RACCOGLIE e dice se ogni passata e affidabile: NON giudica, NON promuove, NON sceglie nessun modo.
