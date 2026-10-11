@@ -54,7 +54,10 @@ a tavolino, e si dice cosa resta fuori.
      lettura LETTERALE ("la piu' bassa/alta delle due") coincide dove almeno una linea e' dal lato del setup. IDENTITA' v1.10 -> v1.11:
      NC_StopSetup del pin v1.10 (aeebb11d) e della v1.11 compilate fianco a fianco, modi 0 e 1, stessa stringa %a su casi casuali e
      sull'oro (con contro-esempio), e guardia del diff v1.10 -> v1.11. Mutanti W1-W15.
-  M) MUTANTI CIECHI: 116 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic + T1-T7 della v1.05: il tocco degli handle + V1-V21 della v1.10: la regola di stop OLTRE_LINEA_ESTERNA + W1-W15 della v1.11: OLTRE_PIU_ESTERNA) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
+  Y) v1.12 DEVIAZIONE M30 (FIRMA di Claudio 11/10/2026): invarianti 44-48 (default false, ramo esatto sotto H1 = rifiuto v1.11 o SOLO M30,
+     cifre del magic tutte diverse con M30 = 3, dichiarazione CFG/AVVISO solo se attiva, input letto solo in Risolvi e StampaConfigurazione),
+     guardia del diff v1.11 (pin f2d47079) -> v1.12 con 2 contro-esempi. Mutanti Y1-Y9.
+  M) MUTANTI CIECHI: 125 mutazioni del sorgente (66 fino alla v1.02 + J1/J2 della v1.03: rifiuto della modalita' PDF + K1-K5 della v1.04: manopole solo-PDF, valori dell'enum del magic + T1-T7 della v1.05: il tocco degli handle + V1-V21 della v1.10: la regola di stop OLTRE_LINEA_ESTERNA + W1-W15 della v1.11: OLTRE_PIU_ESTERNA + Y1-Y9 della v1.12: la deviazione M30) (logica pura, codice d'ordine, raccordo) applicate a una COPIA in
      una cartella temporanea FUORI dal repo (classe 1159: niente mutanti committati); per ognuna si rigira
      la STESSA suite (S + P + N ridotto) senza sapere quale mutazione c'e': deve FALLIRE almeno un
      controllo. Un mutante che passa = buco del collaudo.
@@ -712,9 +715,57 @@ def invarianti_raccordo(src, code, bag):
         bag.append("RACCORDO v1.05: l'array del tocco non e' 'double tocco[1]' usato SOLO dai tocchi in CaricaDati")
     if "if(BarsCalculated(hEma200)<n+1||BarsCalculated(hAtrN)<n+1||BarsCalculated(hAdx)<n+1)returnfalse;" not in ns(cdm) or "if(n<NC_BARRE_MIN)returnfalse;" not in ns(cdm):
         bag.append("RACCORDO v1.05: i controlli di sempre di CaricaDati (n minimo, BarsCalculated dei tre handle) non sono intatti")
-    if '#define NC_VER "1.11"' not in src or not re.search(r'#property\s+version\s+"1\.11"', src):
-        bag.append("RACCORDO v1.11: NC_VER / #property version non sono 1.11")
+    if '#define NC_VER "1.12"' not in src or not re.search(r'#property\s+version\s+"1\.12"', src):
+        bag.append("RACCORDO v1.12: NC_VER / #property version non sono 1.12")
     invarianti_stop(src, code, stc, bag)
+    invarianti_v112(src, code, stc, bag)
+
+
+def invarianti_v112(src, code, stc, bag):
+    """v1.12 (FIRMA di Claudio 11/10/2026, report/FIRME_2026-10-11.md p.1: "VIA LIBERA AL M30"): InpAmmettiTFSottoH1. Con il default false
+    il rifiuto sotto H1 e' quello della v1.11 (stesso test, stesso messaggio); con true passa SOLO PERIOD_M30; la deviazione si DICHIARA
+    (CFG InpTF, CFG InpAmmettiTFSottoH1, riga AVVISO) solo quando e' attiva; l'input non e' letto da nessun'altra parte. Mutanti Y1-Y9."""
+    ns = lambda t: re.sub(r"\s+", "", t or "")
+    # (44) default NEUTRO: false
+    if "inputboolInpAmmettiTFSottoH1=false;" not in ns(code):
+        bag.append("RACCORDO v1.12: InpAmmettiTFSottoH1 non ha il default false (il default deve essere la v1.11)")
+    # (45) Risolvi: il ramo sotto H1, ESATTO, PRIMA del magic; con false il messaggio della v1.11
+    rb = ns(corpo(stc, "Risolvi"))
+    blocco = ('if(PeriodSeconds(gTF)<PeriodSeconds(PERIOD_H1)){if(!InpAmmettiTFSottoH1){err="TFsottoH1:vietatodallafonte(A-R8/R9)";returnfalse;}'
+              'if(gTF!=PERIOD_M30){err="TF"+EnumToString(gTF)+"sottoH1:ladeviazionefirmatail11/10/2026ammetteSOLOPERIOD_M30(fonteA-R8/R9)";returnfalse;}}')
+    if rb.count(blocco) != 1 or not (0 <= rb.find(blocco) < rb.find("intcifraTF=-1;")):
+        bag.append("RACCORDO v1.12: Risolvi senza il ramo esatto sotto H1 (false = rifiuto v1.11; true = SOLO M30) PRIMA del magic")
+    if not (rb.find(blocco) > rb.find('if(InpTF==PERIOD_CURRENT)gTF=(InpModalita==NC_PDF)?PERIOD_H4:PERIOD_H1;') >= 0):
+        bag.append("RACCORDO v1.12: il ramo sotto H1 non viene DOPO la risoluzione di gTF da InpTF")
+    # (46) magic M30: cifra 3, e le cifre del TF tutte DIVERSE (una cifra condivisa fonderebbe due TF nello stesso magic e nello stesso CSV)
+    cifre = re.findall(r"if\(gTF==PERIOD_(\w+)\)cifraTF=(\d);", rb)
+    if ("M30", "3") not in cifre or len(set(c for _, c in cifre)) != len(cifre) or len(cifre) != 5:
+        bag.append("RACCORDO v1.12: cifre del TF nel magic %s (attese 5, tutte diverse, M30 = 3)" % cifre)
+    # (47) StampaConfigurazione: la dichiarazione esiste solo quando la deviazione e' attiva
+    sc = ns(corpo(stc, "StampaConfigurazione"))
+    for a in ("booldevTF=(PeriodSeconds(gTF)<PeriodSeconds(PERIOD_H1));",
+              'Cfg("InpTF",EnumToString(gTF),Orig(InpTF!=PERIOD_CURRENT)+(devTF?"[DEVIAZIONEDALLAFONTEA-R8/R9',
+              ':"[FONTEA-R8/P-p05]"));',
+              "if(InpAmmettiTFSottoH1)Cfg(\"InpAmmettiTFSottoH1\",\"true\",devTF?(\"DEVIAZIONEATTIVA:TF\"+EnumToString(gTF)+\"sottoH1[FIRMAClaudio11/10/2026]\"):(\"nessuneffetto:TF\"+EnumToString(gTF)+\"none'sottoH1[FIRMAClaudio11/10/2026]\"));",
+              'if(devTF)Print("[NatCla]AVVISODEVIAZIONEDALLAFONTEACCESA:TF",EnumToString(gTF),"sottoH1(fonteA-R8/R9:'):
+        if sc.count(a) != 1:
+            bag.append("RACCORDO v1.12: StampaConfigurazione senza '%s'" % a[:90])
+    # (48) l'input e PERIOD_M30 si leggono SOLO in Risolvi e StampaConfigurazione (nessuna regola di trading cambia)
+    resto = code
+    for fn in ("Risolvi", "StampaConfigurazione"):
+        b = corpo(code, fn) or ""
+        if b:
+            resto = resto.replace(b, "\n", 1)
+    if len(re.findall(r"\bInpAmmettiTFSottoH1\b", resto)) != 1 or re.search(r"\bPERIOD_M30\b", resto) or re.search(r"\bdevTF\b", resto):
+        bag.append("RACCORDO v1.12: InpAmmettiTFSottoH1 / PERIOD_M30 / devTF letti fuori da Risolvi e StampaConfigurazione")
+    # ...e DENTRO le due funzioni SOLO nei punti dichiarati (codice con le stringhe mascherate): Risolvi 1 lettura dell'input (il ramo sotto H1)
+    # e 2 di PERIOD_M30 (ramo e cifra del magic); StampaConfigurazione 1 lettura dell'input (la riga CFG) e 4 di devTF. Un input che toccasse
+    # un'altra regola DENTRO Risolvi (es. ADX, mutante Y8) cambia il conto.
+    cr, cs_ = corpo(code, "Risolvi") or "", corpo(code, "StampaConfigurazione") or ""
+    conti = (len(re.findall(r"\bInpAmmettiTFSottoH1\b", cr)), len(re.findall(r"\bPERIOD_M30\b", cr)), len(re.findall(r"\bdevTF\b", cr)),
+             len(re.findall(r"\bInpAmmettiTFSottoH1\b", cs_)), len(re.findall(r"\bPERIOD_M30\b", cs_)), len(re.findall(r"\bdevTF\b", cs_)))
+    if conti != (1, 2, 0, 1, 0, 4):
+        bag.append("RACCORDO v1.12: letture di InpAmmettiTFSottoH1/PERIOD_M30/devTF in Risolvi e StampaConfigurazione %s invece di (1, 2, 0, 1, 0, 4)" % (conti,))
 
 
 def invarianti_stop(src, code, stc, bag):
@@ -815,7 +866,11 @@ def magic_libero():
                         # v1.10 (09/10): la nota EA_GBA del 09/10 r.94 CITA un CSV di Nat&Cla per nome ('natcla_setup_XAUUSD_778601.csv', '778621'):
                         # citazione di un file Nat&Cla, non un EA che usa il blocco. Il collaudo era gia' ROSSO per questa riga PRIMA della v1.10
                         # (misurato sulla v1.05 il 09/10). Esclusione per NOME del file, come sopra.
-                        ":!report/EA_GBA_NOTE_2026-10-09.md"], capture_output=True, text=True)
+                        ":!report/EA_GBA_NOTE_2026-10-09.md",
+                        # v1.12 (11/10): i collaudi dei driver F1 di Nat&Cla citano i SUOI magic nei dati finti (778601/778603/778623): sono file Nat&Cla,
+                        # non EA che usano il blocco. collaudo_natcla_f1.py teneva il collaudo ROSSO (1 controllo) GIA' alla HEAD con la v1.11 (misurato
+                        # l'11/10 su un worktree pulito): esclusione per NOME del file, come sopra.
+                        ":!backtest_pipeline/collaudo_natcla_f1.py", ":!backtest_pipeline/collaudo_natcla_f1_m30.py"], capture_output=True, text=True)
     return [ln for ln in r.stdout.splitlines() if ln.strip()]
 
 
@@ -1915,6 +1970,38 @@ AGGIUNTE_OK_V111 = ("{", "}", "};", "NC_STOP_OLTRE_LINEA_ESTERNA=1,", "if(InpSto
                     "if(modo!=1&&modo!=2)returnNC_Stop(criterio,s,linea,profondo,estremo,buf);")
 
 
+# v1.12 (FIRMA di Claudio 11/10/2026, "VIA LIBERA AL M30"): guardia del diff v1.11 (pin V111_COMMIT) -> v1.12
+V111_COMMIT = "f2d47079"      # pin del pilota F1 P: EA v1.11 sha256 75c7b5ef...f75d (compilata 0 errori 0 avvisi, 4 passate a tick reali)
+TOK_V112 = ("InpAmmettiTFSottoH1", "devTF", "PERIOD_M30", '"1.12"')
+TOLTE_OK_V112 = ('#propertyversion"1.11"', '#defineNC_VER"1.11"',
+                 'if(PeriodSeconds(gTF)<PeriodSeconds(PERIOD_H1)){err="TFsottoH1:vietatodallafonte(A-R8/R9)";returnfalse;}',
+                 'if(cifraTF<0){err="magicautomaticodefinitosoloperH1/H4/H12/D1:impostaInpMagicnelblocco778600-778699";returnfalse;}',
+                 'Cfg("InpTF",EnumToString(gTF),Orig(InpTF!=PERIOD_CURRENT)+"[FONTEA-R8/P-p05]");')
+AGGIUNTE_OK_V112 = ("{", "}", "if(PeriodSeconds(gTF)<PeriodSeconds(PERIOD_H1))")
+# le guardie v1.05 -> corrente e v1.10 -> corrente leggono il sorgente CORRENTE: tollerano la v1.12 come la v1.11 aveva fatto con la v1.10
+TOK_V110 = TOK_V110 + TOK_V112
+TOLTE_OK_V110 = TOLTE_OK_V110 + TOLTE_OK_V112[2:]
+AGGIUNTE_OK_V110 = AGGIUNTE_OK_V110 + AGGIUNTE_OK_V112
+TOK_V111 = TOK_V111 + TOK_V112
+TOLTE_OK_V111 = TOLTE_OK_V111 + TOLTE_OK_V112[2:]
+AGGIUNTE_OK_V111 = AGGIUNTE_OK_V111 + AGGIUNTE_OK_V112
+
+
+def solo_la_deviazione_m30(src112):
+    """v1.12 = v1.11 (pin V111_COMMIT) + SOLO la deviazione M30: ogni riga tolta e' nell'elenco, ogni riga aggiunta porta un simbolo della v1.12.
+    Con DUE contro-esempi (una riga di logica cambiata, una aggiunta senza simbolo) che la guardia DEVE vedere."""
+    r = subprocess.run(["git", "-C", ROOT, "show", "%s:mql5/Experts/EA_NatCla.mq5" % V111_COMMIT], capture_output=True)
+    if r.returncode != 0:
+        return None, "v1.11 non leggibile da git (%s)" % V111_COMMIT, None
+    v111 = r.stdout.decode("ascii")
+    g = lambda b: diff_versioni(v111, b, (), TOK_V112, TOLTE_OK_V112, AGGIUNTE_OK_V112, ())
+    dif = g(src112)
+    ce1 = src112.replace("#define NC_BARRE_MIN 300", "#define NC_BARRE_MIN 301", 1)
+    ce2 = src112.replace("   if(!(gU>0)){ err=", "   gU=gU*2.0;\n   if(!(gU>0)){ err=", 1)
+    ce_ok = (ce1 != src112 and ce2 != src112 and len(g(ce1)) > 0 and len(g(ce2)) > 0)
+    return (not dif), "; ".join(dif[:4]), ce_ok
+
+
 def diff_versioni(va, vb, funz_nuove, tok, tolte, aggiunte_ok, trasforma):
     """lista dei difetti del passaggio va -> vb: righe tolte da va fuori da 'tolte' (o dalle trasformazioni esatte), righe aggiunte senza un
     simbolo di 'tok' fuori dalle funzioni NUOVE e da 'aggiunte_ok'. Commenti e spazi non contano."""
@@ -2159,7 +2246,7 @@ def mutanti(raw, ser):
         ("T4 tocco dopo l'uscita per barre insufficienti", TOCCO + DOPO_TOCCO, DOPO_TOCCO + TOCCO),
         ("T5 tocco sull'handle sbagliato (EMA14 invece di EMA200)", "   CopyBuffer(hEma200,0,1,1,tocco);\n", "   CopyBuffer(hEma14,0,1,1,tocco);\n"),
         ("T6 esito del tocco assegnato e usato", "   CopyBuffer(hAdx,0,1,1,tocco);\n", "   int tk=CopyBuffer(hAdx,0,1,1,tocco); if(tk<0) return false;\n"),
-        ("T7 versione rimasta 1.10 (v1.11)", '#define NC_VER "1.11"', '#define NC_VER "1.10"'),
+        ("T7 versione rimasta 1.11 (v1.12)", '#define NC_VER "1.12"', '#define NC_VER "1.11"'),
         # --- v1.10 (decisione di Claudio 08/10): la regola di stop OLTRE_LINEA_ESTERNA (unitari V, barre vere, invarianti 32-41, guardia del diff)
         ("V1 stop OLTRE dal lato sbagliato", "double oltreLinea=lineaEst-s*oltre;", "double oltreLinea=lineaEst+s*oltre;"),
         ("V2 X4 tolto sul long", "   if(s>0 && oltreLinea>x4) { r=x4; esito=2; }\n", ""),
@@ -2199,6 +2286,16 @@ def mutanti(raw, ser):
         ("W13 short: la piu' BASSA", "? MathMin(v1,v2) : MathMax(v1,v2);", "? MathMin(v1,v2) : MathMin(v1,v2);"),
         ("W14 ST3,5 dal lato opposto accettata", "bool ok1=(d1==(double)s && v1>0.0);", "bool ok1=(v1>0.0);"),
         ("W15 enum del modo 2 a 3 (NC_StopSetup lo tratterebbe come GEOMETRIA_ATTUALE)", "NC_STOP_OLTRE_PIU_ESTERNA=2", "NC_STOP_OLTRE_PIU_ESTERNA=3"),
+        # --- v1.12 (FIRMA di Claudio 11/10/2026, "VIA LIBERA AL M30"): la deviazione M30 dietro InpAmmettiTFSottoH1 (invarianti 44-48)
+        ("Y1 deviazione accesa di default", "input bool              InpAmmettiTFSottoH1 = false;", "input bool              InpAmmettiTFSottoH1 = true;"),
+        ("Y2 rifiuto sotto H1 tolto (con false passa tutto)", "      if(!InpAmmettiTFSottoH1){ err=\"TF sotto H1: vietato dalla fonte (A-R8/R9)\"; return false; }\n", ""),
+        ("Y3 con true passa QUALUNQUE TF sotto H1", "      if(gTF!=PERIOD_M30){ err=", "      if(false){ err="),
+        ("Y4 cifra del magic M30 = 1 (stesso magic e stesso CSV di H1)", "if(gTF==PERIOD_M30) cifraTF=3;", "if(gTF==PERIOD_M30) cifraTF=1;"),
+        ("Y5 riga AVVISO stampata sempre", "   if(devTF)\n      Print(\"[NatCla] AVVISO DEVIAZIONE", "   if(true)\n      Print(\"[NatCla] AVVISO DEVIAZIONE"),
+        ("Y6 CFG InpTF senza la deviazione", "(devTF ? \" [DEVIAZIONE DALLA FONTE", "(false ? \" [DEVIAZIONE DALLA FONTE"),
+        ("Y7 devTF rovesciato", "bool devTF=(PeriodSeconds(gTF)<PeriodSeconds(PERIOD_H1));", "bool devTF=(PeriodSeconds(gTF)>=PeriodSeconds(PERIOD_H1));"),
+        ("Y8 l'input spegne l'ADX (regola di trading toccata)", "   gAdxUsa=DaModB(InpAdxUsa,true,false,false);", "   gAdxUsa=DaModB(InpAdxUsa,true,false,false) && !InpAmmettiTFSottoH1;"),
+        ("Y9 messaggio del rifiuto v1.11 cambiato", "err=\"TF sotto H1: vietato dalla fonte (A-R8/R9)\"", "err=\"TF sotto H1 (v1.12)\""),
     ]
     base = tempfile.mkdtemp(prefix="natcla_mutanti_")     # FUORI dal repo (classe 1159)
     assert not os.path.abspath(base).startswith(os.path.abspath(ROOT))
@@ -2247,6 +2344,9 @@ def main():
     esito, det, ce = solo_lo_stop(src)
     check(esito is True, "v1.11 = v1.05 (pin %s) + SOLO le regole di stop (v1.10 + v1.11): righe tolte nell'elenco, righe aggiunte con un simbolo della v1.10/v1.11 %s" % (V105_COMMIT, det))
     check(ce is True, "CONTRO-ESEMPIO della guardia del diff: NC_BARRE_MIN 300 -> 301 e una riga 'gU=gU*2.0;' aggiunta in Risolvi sono VISTE")
+    esito, det, ce = solo_la_deviazione_m30(src)
+    check(esito is True, "v1.12 = v1.11 (pin %s) + SOLO la deviazione M30 (InpAmmettiTFSottoH1, cifra 3 del magic, dichiarazione in CFG/AVVISO) %s" % (V111_COMMIT, det))
+    check(ce is True, "CONTRO-ESEMPIO della guardia v1.11 -> v1.12: NC_BARRE_MIN 300 -> 301 e 'gU=gU*2.0;' aggiunta sono VISTE")
 
     print("== P + N) funzioni pure C++ e numeri su barre reali dell'oro (HistData, +6 h, NON BCM) ==")
     ser = serie_tf(60, 2023)

@@ -74,6 +74,15 @@
 //|  scartato (come la v1.10). Linea EMA200 (M2): resta la EMA200.   |
 //|  GEOMETRIA_ATTUALE e OLTRE_LINEA_ESTERNA identiche alla v1.10.   |
 //|  Stessi 3 campi CSV (stop_modo = 2). NON compilato qui.          |
+//|  v1.12 (11/10, FIRMA di Claudio, report/FIRME_2026-10-11.md p.1: |
+//|  "VIA LIBERA AL M30, PROVIAMO ANCHE QUELLO"): input NUOVO        |
+//|  InpAmmettiTFSottoH1 (default false = rifiuto sotto H1 IDENTICO  |
+//|  alla v1.11). Con true ammette SOLO PERIOD_M30 (M1-M20 restano   |
+//|  rifiutati): DEVIAZIONE DICHIARATA dalla fonte (A-R8/R9 "non     |
+//|  sotto H1"), scritta in CFG InpTF, in una riga AVVISO e nel CSV. |
+//|  Magic automatico M30 = cifra TF 3 (778603 AUDIO, 778623 EMA200).|
+//|  Nessun'altra regola toccata. NON compilato qui (nessun          |
+//|  MetaEditor): la compilazione e' il primo passo del lotto M30.   |
 //|                                                                  |
 //|  MAPPA REGOLA -> CODICE (sigle della specifica, par. 1)          |
 //|   I1-I3 Supertrend HL2 +/- k x ATR10 ......... NC_STCore (puro)  |
@@ -85,6 +94,8 @@
 //|   D1 direzione ............................. LatoAmmesso         |
 //|   D2 verso del rimbalzo .................... NC_Tocco (puro)     |
 //|   T1 TF (rifiuto sotto H1) ................. Risolvi             |
+//|   T1 v1.12 deviazione M30 (firma 11/10) .... Risolvi,            |
+//|              StampaConfigurazione (CFG InpTF + AVVISO)           |
 //|   M2 motore EMA200 ......................... NC_EmaDir (puro)    |
 //|   C1-C3 tocco .............................. NC_Tocco (puro)     |
 //|   C4-C6 conteggio, episodi, azzeramento .... NC_Episodi (puro)   |
@@ -118,10 +129,10 @@
 //+------------------------------------------------------------------+
 #property copyright "Ea Nat&Cla - progetto Claudio (ABTG)"
 #property description "Ea Nat&Cla: modo AUDIO (collega) / motore solo EMA200 (audio WA0092). Modo PDF ESCLUSO da Claudio il 07/10/2026. Specifica report/NATCLA_SPECIFICA_2026-10-07.md. Rischio 0,25% = SEGNAPOSTO da firmare da Claudio."
-#property version   "1.11"
+#property version   "1.12"
 #property strict
 
-#define NC_VER "1.11"
+#define NC_VER "1.12"
 
 #include <Trade/Trade.mqh>
 #include <ABTG_PausaGuardian.mqh>
@@ -241,7 +252,11 @@ enum ENUM_NC_STOPMODO
 //==================================================================
 input group "=== Modalita' e timeframe ==="
 input ENUM_NC_MODALITA  InpModalita = NC_AUDIO;        // Modalita': AUDIO / EMA200 (motore M2). PDF = ESCLUSA 07/10 (rifiutata)
-input ENUM_TIMEFRAMES   InpTF       = PERIOD_CURRENT;  // TF del segnale. CURRENT = DA_MODALITA (AUDIO H1, PDF H4, EMA200 H1). Sotto H1 = rifiutato (A-R8/R9)
+input ENUM_TIMEFRAMES   InpTF       = PERIOD_CURRENT;  // TF del segnale. CURRENT = DA_MODALITA (AUDIO H1, PDF H4, EMA200 H1). Sotto H1 = rifiutato (A-R8/R9), salvo M30 con InpAmmettiTFSottoH1
+//--- v1.12 [FIRMA di Claudio 11/10/2026, report/FIRME_2026-10-11.md punto 1]: DEVIAZIONE DALLA FONTE, per MISURA.
+//    La fonte dice "non sotto H1" (A-R8/R9). false = la v1.11 bit per bit (rifiuto di ogni TF sotto H1).
+//    true = ammette SOLO PERIOD_M30 (M1..M20 restano rifiutati). Non tocca nessun'altra regola.
+input bool              InpAmmettiTFSottoH1 = false;   // DEVIAZIONE DALLA FONTE (firma 11/10/2026): true = ammette M30 (solo M30). Default false = rifiuto sotto H1
 input ENUM_NC_DIREZIONE InpDirezione= NC_DIR_ENTRAMBI; // Direzione (A-R26 mai dichiarata): nei test i lati si girano SEPARATI
 
 input group "=== Indicatori (specifica par. 1.1) ==="
@@ -351,7 +366,7 @@ input group "=== Convenzioni di casa ==="
 //    pendenti: la guardia vede il setup solo mentre si riempie.
 //    Non tocca MAI le posizioni aperte: blocca soltanto l'APERTURA.
 input bool   InpUsaGuardian = true;     // Guardian: rispetta pausa giornaliera (B1) e cap rischio aperto (C1)
-input long   InpMagic       = 0;        // Magic (0 = automatico: 7786 + motore 0/1/2 + TF 1/4/2/8). Ammesso solo 778600-778699
+input long   InpMagic       = 0;        // Magic (0 = automatico: 7786 + motore 0/1/2 + TF 1/4/2/8, M30 = 3 solo con InpAmmettiTFSottoH1). Ammesso solo 778600-778699
 input string InpComment     = "NATCLA"; // Prefisso del commento degli ordini (es. NATCLA_A_ST35_O2)
 //--- IMBUTO DI MORTALITA' [CASA, 11/09/2026]: governa SOLO il log.
 input bool   InpLogImbuto   = true;     // Imbuto: riepilogo giornaliero dei rifiuti nel Giornale
@@ -1136,7 +1151,13 @@ bool Risolvi(string &err)
    //--- T1: TF del segnale
    gTF=InpTF;
    if(InpTF==PERIOD_CURRENT) gTF=(InpModalita==NC_PDF) ? PERIOD_H4 : PERIOD_H1;
-   if(PeriodSeconds(gTF)<PeriodSeconds(PERIOD_H1)){ err="TF sotto H1: vietato dalla fonte (A-R8/R9)"; return false; }
+   //--- v1.12: con InpAmmettiTFSottoH1=false il ramo e' quello della v1.11 (stesso test, stesso messaggio).
+   //    Con true passa SOLO PERIOD_M30: qualunque altro TF sotto H1 resta rifiutato (la firma dice M30, non "sotto H1").
+   if(PeriodSeconds(gTF)<PeriodSeconds(PERIOD_H1))
+     {
+      if(!InpAmmettiTFSottoH1){ err="TF sotto H1: vietato dalla fonte (A-R8/R9)"; return false; }
+      if(gTF!=PERIOD_M30){ err="TF "+EnumToString(gTF)+" sotto H1: la deviazione firmata il 11/10/2026 ammette SOLO PERIOD_M30 (fonte A-R8/R9)"; return false; }
+     }
    //--- I4/M2: linee
    gUsaLinea[NC_L25]=DaModB(InpUsaST25,true,false,false);
    gUsaLinea[NC_L30]=DaModB(InpUsaST30,true,false,false);
@@ -1206,7 +1227,8 @@ bool Risolvi(string &err)
       if(gTF==PERIOD_H4) cifraTF=4;
       if(gTF==PERIOD_H12) cifraTF=2;
       if(gTF==PERIOD_D1) cifraTF=8;
-      if(cifraTF<0){ err="magic automatico definito solo per H1/H4/H12/D1: imposta InpMagic nel blocco 778600-778699"; return false; }
+      if(gTF==PERIOD_M30) cifraTF=3;   // v1.12: raggiungibile SOLO con InpAmmettiTFSottoH1=true (sopra). 3 = libera nel blocco (1/4/2/8 usate)
+      if(cifraTF<0){ err="magic automatico definito solo per H1/H4/H12/D1 (e M30 con InpAmmettiTFSottoH1): imposta InpMagic nel blocco 778600-778699"; return false; }
       gMagic=778600+10*(long)InpModalita+cifraTF;
      }
    else gMagic=InpMagic;
@@ -1232,7 +1254,12 @@ void StampaConfigurazione()
                              InpUsaGuardian ? "ON (nel tester FAIL-OPEN)" : "OFF",InpSoloConta ? "SI" : "no",InpPlaceboAtr,StopDescr());
    Print("[NatCla] ",avvio);
    if(gFh!=INVALID_HANDLE) FileWrite(gFh,"#"+avvio);
-   Cfg("InpTF",EnumToString(gTF),Orig(InpTF!=PERIOD_CURRENT)+" [FONTE A-R8 / P-p05]");
+   //--- v1.12: la deviazione dalla fonte si DICHIARA quando e' attiva (TF sotto H1: dopo Risolvi solo M30 con
+   //    InpAmmettiTFSottoH1=true). Con InpAmmettiTFSottoH1=false la riga CFG InpTF e' quella della v1.11 e niente in piu'.
+   bool devTF=(PeriodSeconds(gTF)<PeriodSeconds(PERIOD_H1));
+   Cfg("InpTF",EnumToString(gTF),Orig(InpTF!=PERIOD_CURRENT)+(devTF ? " [DEVIAZIONE DALLA FONTE A-R8/R9 'non sotto H1': ammesso da InpAmmettiTFSottoH1, firma di Claudio 11/10/2026, SOLO MISURA]" : " [FONTE A-R8 / P-p05]"));
+   if(InpAmmettiTFSottoH1)
+      Cfg("InpAmmettiTFSottoH1","true",devTF ? ("DEVIAZIONE ATTIVA: TF "+EnumToString(gTF)+" sotto H1 [FIRMA Claudio 11/10/2026]") : ("nessun effetto: TF "+EnumToString(gTF)+" non e' sotto H1 [FIRMA Claudio 11/10/2026]"));
    Cfg("InpDirezione",EnumToString(InpDirezione),"[FONTE: direzione mai dichiarata, A-R26]");
    Cfg("Supertrend",StringFormat("ATR %d, mult %.2f / %.2f / %.2f, HL2",InpStAtrPeriodo,InpStMult1,InpStMult2,InpStMult3),"[FONTE A-R2 i mult; ATR [NOSTRA] dal 07/10] calcolo SW_STCore [CASA]");
    Cfg("Linee",StringFormat("ST25 %s, ST30 %s, ST35 %s, EMA200 %s",gUsaLinea[0] ? "si" : "no",gUsaLinea[1] ? "si" : "no",gUsaLinea[2] ? "si" : "no",gUsaLinea[3] ? "si" : "no"),
@@ -1283,6 +1310,8 @@ void StampaConfigurazione()
       Print("[NatCla] AVVISO: PLACEBO ACCESO (",DoubleToString(InpPlaceboAtr,2)," ATR): e' uno strumento di misura, non una strategia");
    if(InpSoloConta)
       Print("[NatCla] AVVISO: SOLO CONTA: nessun ordine verra' inviato");
+   if(devTF)
+      Print("[NatCla] AVVISO DEVIAZIONE DALLA FONTE ACCESA: TF ",EnumToString(gTF)," sotto H1 (fonte A-R8/R9: 'non sotto H1'), ammesso da InpAmmettiTFSottoH1 con la firma di Claudio del 11/10/2026: e' una MISURA, non il metodo della collega");
   }
 
 //==================================================================
