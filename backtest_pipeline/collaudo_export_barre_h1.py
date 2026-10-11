@@ -493,8 +493,14 @@ def main():
     if not a.csv:
         ap.print_usage()
         sys.exit(2)
-    with open(a.csv, "r", encoding="ascii", errors="strict", newline="") as f:
-        testo = f.read()
+    with open(a.csv, "rb") as f:
+        grezzo = f.read()
+    try:
+        testo = grezzo.decode("ascii")
+    except UnicodeDecodeError as e:
+        print("FAIL: il CSV non e' ASCII puro (byte %d): l'EA scrive FILE_ANSI con soli caratteri ASCII" % e.start)
+        print("VERDETTO: FAIL (1 motivi)")
+        sys.exit(1)
     ok, _, _ = collauda(testo, run=a.run)
     sys.exit(0 if ok else 1)
 
