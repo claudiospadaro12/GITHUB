@@ -5,7 +5,7 @@ o aggiunto. L'EA in repo resta `mql5/Experts/EA_NatCla.mq5` v1.12, SHA256 `729bb
 
 **Revisione 2 (stesso giorno), dopo il FAIL del cancello sulla prima stesura @ `65bac763` (classe 1331 della checklist, @ a7e88130).**
 Che cosa cambia rispetto alla prima stesura:
-- la conclusione "nessun ritentativo poteva vincere" valeva per **4 eventi su 5**, non per tutti: il caso D (25/05/2025, -2.091,48 EUR)
+- la conclusione "nessun ritentativo poteva vincere" valeva per **4 eventi su 5** (INFERITO, par. 3.3), non per tutti: il caso D (25/05/2025, -2.091,48 EUR)
   e' **NON DETERMINABILE** (par. 3.3);
 - "l'unico intervento e' una regola nuova" non era dimostrato: l'opzione C si divide in **C1** (cancellare in anticipo o scadenza lato
   server: accorcia la vita dell'ordine solo dell'anticipo scelto prima della chiusura; non cambia quando e se la scala si arma) e **C2**
@@ -30,6 +30,20 @@ Che cosa cambia rispetto alla prima stesura:
 **Revisione 4 (stesso giorno), dopo il terzo FAIL @ `d6f35654` (classe 1335, @ e99c94a3).** I 10 episodi 00:00 -> 00:05 di lug-ott
 stanno in ENTRAMBE le passate M30 oro (M30_002 e M30_003), non solo nella M30_002 (la frase della revisione 3 e' stata corretta nel suo stesso punto, qui sopra);
 rimesse le etichette INFERITO sulla fase 2024/2025 e sulla conclusione del par. 1 punto 10; aggiunto il NON COPERTO sulla lettura dei tick.
+
+**Revisione 5 (stesso giorno), dopo il quarto giro @ `ea67f3db` (6 errori preesistenti di conteggio/intervallo, nessuno cambia verdetto
+o opzioni).** Riscontrati sui log con uno script prima di scriverli:
+- par. 4(b) "riempimento fra tentativo e conferma": l'attesa va da **5 min 01 s** (caso D) a **49 h 05 min** (P_003), non "da 10 minuti a 49 h";
+- par. 4(b) "ordine in transito": i pendenti restano da **4 min** (5 episodi EURUSD 22:01 -> 22:05) a **51 h 10 min** (14 episodi oro
+  ven 22:00 -> lun 01:10), non "da 5 minuti a 49 h";
+- intestazione del par. 3.2: **4 eventi** (A, B, C, D, in 3 weekend), non 3; in tutto il documento: **9 adozioni = 5 eventi** (P_003,
+  A, B, C, D) in **4 weekend**, su **3 passate** (P_003, M30_002, M30_003);
+- par. 1 punto 6: "3 adozioni" contava per passata dentro "Nei 9 casi": ora A, B, C = 6 adozioni, D = 2, P_003 = 1;
+- testata, revisione 2: "4 eventi su 5" ora porta l'etichetta INFERITO;
+- par. 3.3: aggiunte alla lista la domenica 22/09/2024 (23:10:01) e le date delle domeniche 2024 a 23:10:00.
+Scansione fatta da me su tutte le espressioni "da X a Y", "fra X e Y", "N casi/eventi/adozioni/episodi/passate/righe" del documento
+contro i log: le altre tornano (EURUSD luglio 2024-febbraio 2025; 450 / 451 / 442 / 514 episodi; 7 passate; 13 righe CTrade; 2-4 USD;
+49 h 05 min; 2 passate dell'opzione B; 10 episodi 00:00 -> 00:05 per passata M30 oro).
 
 **Fonti (tutte in repo, nessun dato nuovo):**
 - **P** = pilota H1 `backtest_pipeline/risultati_archivio/NATCLA_F1_P_20261011/NATCLA_F1_P.zip` (EA **v1.11**: riga `AVVIO v1.11` nei log;
@@ -68,12 +82,12 @@ Etichette: **FATTO** = letto in un file (citato); **INFERITO** = dedotto da fatt
    della tabella); zero nelle H1). Da dove vengano queste finestre (orari della specifica, buchi dei tick, o tutti e due) e' **NON DETERMINATO**: l'idea "il tester applica una specifica fissa" regge sull'EURUSD e non basta sull'oro.
 6. **FATTO (tabella Ordini dei `.htm`)** -- Nei 9 casi adottati il pendente veniva dall'**ultimo riarmo del venerdi** (21:00 H1, 21:30
    M30, 20:30 M30) e si e' riempito alla riapertura della domenica: P_003 23:05:00 (lo stesso secondo in cui la P_004 riesce a
-   cancellare), oro 15/09 e 13/10 (3 adozioni) 23:10:00 (il primo secondo in cui le domeniche oro 2024 sbloccano le cancellazioni), e
-   oro 25/05 (caso D) **23:10:01**. Prezzi eseguiti contro limite: P_003 1.04033 su 1.04032,
+   cancellare), oro 15/09 e 13/10 (eventi A, B, C: 6 adozioni fra M30_002 e M30_003) 23:10:00 (il primo secondo in cui le domeniche oro
+   2024 sbloccano le cancellazioni), e oro 25/05 (caso D, 2 adozioni) **23:10:01**. Prezzi eseguiti contro limite: P_003 1.04033 su 1.04032,
    15/09 2577.94 su 2578.00, 13/10 2649.95 su 2653.85 e 2652.09 (salto vero), **caso D 3347.87 su 3347.88** (0,01: il prezzo arriva al
    limite, non lo scavalca).
 7. **FATTO (codice + log)** -- Il ritentativo che il compito proponeva **esiste gia' nella v1.12** (Sincronizza EA r.2084-2091, al massimo
-   uno ogni 10 s per linea, EA r.387) e risolve 442 orfani su 451. **In 4 eventi su 5** (P_003; oro 15/09 e 13/10) il riempimento cade
+   uno ogni 10 s per linea, EA r.387) e risolve 442 orfani su 451. **In 4 eventi su 5** (P_003; oro A 15/09, B e C 13/10) il riempimento cade
    al primo tick operabile: nessun ritentativo dopo la chiusura poteva vincere (P_003: INFERITO forte, confronto con la P_004; oro
    15/09 e 13/10: INFERITO con la premessa dichiarata che la sessione riapra esattamente alle 23:10:00; par. 3.3). **Nel caso D** il
    riempimento e' alle 23:10:01 a 0,01 dal limite. La pausa di 10 s conta dall'ultimo ritentativo FALLITO (`gOrfTent[L]`, scritto solo a
@@ -117,7 +131,7 @@ restituito `false` con 10018 e' INFERITO: l'invio e' sincrono (passo 0) e 10018 
 
 ---
 
-## 3. Le 9 adozioni (5 eventi), ricostruite (orario server = orario del tester)
+## 3. Le 9 adozioni (5 eventi in 4 weekend, su 3 passate), ricostruite (orario server = orario del tester)
 
 ### 3.1 P_003 -- EURUSD AUDIO H1 SHORT LINEA (pilota, v1.11)
 Fonti: `log\P_003_...txt` righe 1823-1831; `report\P_003_...htm` tabelle Ordini/Deal; `csv\P_003_...csv` riga 125; per il confronto
@@ -140,7 +154,7 @@ cancellare. Questo **smentisce** l'alternativa "ritentativo eseguito alle 23:05:
 "sullo stesso tick il tester riempie il pendente **prima** di passare il tick all'EA" (INFERITO forte: l'ordine interno della piattaforma
 non e' scritto in nessun file, ma e' l'unica lettura compatibile con le due passate).
 
-### 3.2 M30_002 / M30_003 -- XAUUSD AUDIO M30 LONG (GEOM / PIU, v1.12): le stesse 4 adozioni (3 eventi)
+### 3.2 M30_002 / M30_003 -- XAUUSD AUDIO M30 LONG (GEOM / PIU, v1.12): le stesse 4 adozioni per passata (4 eventi: A, B, C, D, in 3 weekend; B e C sono due linee dello stesso weekend)
 Fonti: `log\M30_002_...txt`; `report\M30_002_...htm`; `csv\M30_002_...csv` e `csv\M30_003_...csv` (righe SETUP con `rischio_soldi` 0.00).
 
 | caso | piazzati (ultimo riarmo prima del weekend) | prima barra dopo | riempimento (ordine, limite -> eseguito) | il resto | esito CSV GEOM / PIU |
@@ -172,8 +186,9 @@ Sulla differenza fra le domeniche oro 2024 (sblocco 23:10:00/:01) e 2025 (23:10:
 fallito**, non la guardia. Con tick fitti i ritentativi cadono ogni ~10 s a partire dal primo tick in cui la linea e' senza setup, e la
 "fase" con cui arrivano alla riapertura decide se il primo ritentativo utile cade a 23:10:00 o qualche secondo dopo (INFERITO: la fase
 dipende dai tick, che non abbiamo). Sostenuto il 25/05/2025 (M30_001 23:10:06 con tick operabile alle 23:10:01) e il 15/09/2024
-(M30_002: ST25 riempito 23:10:00, ST30 orfano dallo stesso tick cancellato 23:10:01); il 13/04 e il 15/06/2025 (cancellazioni 23:10:05)
-e le domeniche 2024 a 23:10:00 sono compatibili anche con "il primo tick arriva in quel secondo".
+(M30_002: ST25 riempito 23:10:00, ST30 orfano dallo stesso tick cancellato 23:10:01); il 13/04 e il 15/06/2025 (cancellazioni 23:10:05),
+il 22/09/2024 (23:10:01) e le domeniche 2024 a 23:10:00 (14/07, 28/07, 18/08) sono compatibili anche con "il primo tick arriva in quel
+secondo".
 
 ### 3.4 Cosa NON e' osservabile nei dati che abbiamo
 1. Il **retcode** e la descrizione di ogni `OrderDelete` fallito (EA r.1962; righe CTrade scartate dal driver r.507).
@@ -211,9 +226,9 @@ dell'`OrderDelete` non e' scritto in nessun file. Per renderla dimostrabile bast
 | ipotesi | verdetto | il fatto che decide | fonte |
 |---|---|---|---|
 | **mercato chiuso / finestra di pausa** | **COMPATIBILE, sostenuta** (non dimostrata: manca il retcode) | i 450 episodi con guardia iniziano in pochi orari e finiscono ai minuti di riapertura; 10018 sugli invii negli stessi orari e, il 2024.07.30 22:00:00, nello stesso secondo; i riempimenti alla riapertura | log delle 7 passate (appendice); P_003 log r.245-252; `.htm` |
-| **ordine "in transito"** | **ESCLUSA** | i pendenti restano sul conto da 5 minuti a 49 h e poi vengono cancellati o riempiti come ordini normali; e gli invii sono sincroni (FATTO di codice, passo 0) | `.htm` Ordini (es. 4603: 02.28 21:00 -> 03.02 23:05 `filled`); EA r.1335-1337 |
+| **ordine "in transito"** | **ESCLUSA** | dopo la cancellazione fallita i pendenti restano sul conto da 4 minuti (EURUSD lun-ven 22:01 -> 22:05, 2024.10.01 e 10.14) a 51 h 10 min (oro ven 22:00 -> lun 01:10, 15/11, 22/11 e 20/12/2024) e poi vengono cancellati o riempiti come ordini normali (episodi con guardia: minimo 4 min in 5 episodi P_003/P_004/M30_004, massimo 51 h 10 min in 14 episodi P_001/P_002/M30_002/M30_003); e gli invii sono sincroni (FATTO di codice, passo 0) | `.htm` Ordini (es. 4603: 02.28 21:00 -> 03.02 23:05 `filled`); EA r.1335-1337 |
 | **stato MODIFY / freeze level** | **ESCLUSA come causa generale** (il valore di freeze del simbolo non e' nei dati) | il freeze dipende dalla distanza dal prezzo a qualunque ora; qui gli inizi sono SOLO agli orari di chiusura e alla riapertura la cancellazione riesce sugli stessi ordini, agli stessi prezzi | distribuzione oraria (par. 1 punto 2) |
-| **riempimento fra tentativo e conferma** | **ESCLUSA** (anche come lettura della riga `ADOTTATO ... (riempimento durante una cancellazione?)`) | la guardia vede **0 posizioni** dopo il tentativo; il riempimento arriva da 10 minuti a 49 h dopo, alla riapertura | log (guardia) + `.htm` Deal |
+| **riempimento fra tentativo e conferma** | **ESCLUSA** (anche come lettura della riga `ADOTTATO ... (riempimento durante una cancellazione?)`) | la guardia vede **0 posizioni** dopo il tentativo; il riempimento arriva da 5 min 01 s (caso D: guardia dom 23:05:00, riempimento 23:10:01; M30_002 log r.3210-3211) a 49 h 05 min (P_003) dopo, alla riapertura | log (guardia) + `.htm` Deal |
 
 ---
 
