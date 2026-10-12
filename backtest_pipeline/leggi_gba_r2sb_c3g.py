@@ -31,9 +31,10 @@ REGOLE (scritte nei file prova prima dei numeri; qui implementate, non reinterpr
 RIFIUTO (nessun numero): pin diverso da d53493a9; SHA dell'EA diverso; RIEPILOGO assente o di un altro lotto/modello; ESITI_R2S_B.txt di un altro pin o che nomina
 un lotto fuori elenco; manifest non v5 (32 colonne); lotto non in elenco; la stessa (cella, tranche) due volte; passata non dichiarata nel file prova; simbolo/TF/
 modello/tranche/magic/file prova del manifest, dell'ini, dell'AVVIO, della FINESTRA o del report diversi dal file prova; input dell'ini diversi dai pin; giornale
-assente; riga che il parser non legge; ora server diversa dall'ora simulata; righe segnale o d'ingresso fuori da [da, a); lettore o D2 con SHA256 diverso.
-RIUSA (senza modificarli, SHA256 pinnati, eseguiti dai BYTE verificati): D2 leggi_gba_r2s_c3g.py (14384D87...: giornale, analizza, mediana, CE2-CE4-CE6) e il
-lettore leggi_gba_r0.py (9CD02D2A...: report, giornale, G0 = costruisci_passata).
+assente; riga che il parser non legge; ora server diversa dall'ora simulata; righe segnale o d'ingresso fuori da [da, a); lettore con SHA256 diverso (ERRORE, uscita 2).
+RIUSA, in due modi DIVERSI: (1) D2 leggi_gba_r2s_c3g.py v2 (14384D87...: giornale, analizza, mediana, CE2-CE4-CE6) NON si carica ne' si esegue: costanti e funzioni
+sono COPIATE VERBATIM fra i marcatori COPIA_D2, impronta pinnata e verificata dall'autotest (il file D2 sul disco puo' essere un'altra versione: non cambia nulla);
+(2) il lettore leggi_gba_r0.py (9CD02D2A...: report, giornale, G0 = costruisci_passata) si ESEGUE dai BYTE di cui si e' verificato lo SHA256.
 NON FA: non giudica il merito, non promuove, non legge un PF come merito, non scrive la parola vietata del certificato ne' l'esito di chiusura della casella 4.
 
 USO (sempre con -I)
