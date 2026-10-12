@@ -164,10 +164,19 @@
 #       la L3 col suo nome; la frase la decide il C3G se c'e', altrimenti la L3) e, se e' < 40x, la frase 'FRA sui segnali grezzi, PASSA solo grazie al filtro'
 #       (13,3-40) oppure 'SOTTO 13,3x sui segnali grezzi, PASSA solo grazie al filtro' (< 13,3). (TERZO GIRO del cancello, classe 1369: prima, sotto 13,3x non si
 #       scriveva nessuna frase.)
+#       n DELLA PORTA (QUINTO GIRO del cancello, classe 1372): gli ingressi a spread ZERO NON contano per i 30. Sono le righe segnale del giornale SENZA 'SALTATO'
+#       e con 'stop/spread -1.0x' (EA r.711): il lettore li tiene in n ma li toglie dal costo SENZA stamparne il numero (leggi_gba_r0.py r.431-442, 'spread_zero'),
+#       quindi CE3 non li vede. Si contano nel giornale e si scrivono accanto a n; se n meno quegli ingressi e' < 30, l'esito e' (B). Contro-esempio: 40 ingressi, 15
+#       su barre a spread zero -> il lettore stampa n=40 e il costo dei soli 25 con spread, e la cella passerebbe con 25 ingressi a costo vero.
 #   (B) NON PASSA PER n: n < 30. Si scrivono n, la quota scartata per spread e il costo grezzo (della CELLA e di TUTTE le fasce). Soglia S con il margine dell'arrotondamento
-#       (L4): S = 6,65x per l'argento, S = 13,3x per gli indici. 'ESCLUSA PER COSTO col numero' (e la casella 4 si chiude per quel (simbolo, TF)) SOLO se valgono TUTTE E TRE:
-#       (i) ALMENO UNA fascia con >= 100 segnali; (ii) C3G < S in OGNI fascia con >= 100 segnali; (iii) C3G della CELLA < S. Senza la (i) la (ii) sarebbe vera A VUOTO:
-#       NON e' 'ESCLUSA'. (TERZO GIRO del cancello, classe 291: (i)-(iii) si leggono SOLO sul C3G, il campo stop/spread delle righe del giornale; la L3 sottostima
+#       (L4): S = 6,65x per l'argento, S = 13,3x per gli indici. 'ESCLUSA PER COSTO col numero' (e la casella 4 si chiude per quel (simbolo, TF)) SOLO se valgono TUTTE E QUATTRO:
+#       (i) ALMENO UNA fascia con >= 100 segnali; (ii) C3G < S in OGNI fascia con >= 100 segnali; (iii) C3G della CELLA < S; (iv) C3G < S anche su CIASCUN LATO:
+#       mediana del campo stop/spread delle sole righe BUY della cella, e delle sole righe SELL, ciascun lato con >= 100 righe. Senza la (i) la (ii) sarebbe vera A VUOTO:
+#       NON e' 'ESCLUSA'. (QUINTO GIRO del cancello, classe 1104 b e regola dei due lati CLAUDE.md 25/08: (i)-(iii) mescolano i due lati, e il lato e' un asse del GBA,
+#       prove GBA_R2_SOLOBUY/SOLOSELL. Contro-esempio: in una fascia BUY 150 righe a 8-14x e SELL 130 a 12-18x, fuori fascia 10 BUY a 10x e 10 SELL a 14x -> fascia e cella
+#       12,85x < 13,3 = 'ESCLUSA' con (i)-(iii), mentre il SELL da solo fa 14,77x. Misurato sull'oro S0_01, fascia asia: 19,80x la fascia, BUY 21,40x, SELL 18,50x:
+#       i lati si separano del 16% dentro una fascia. Un lato a >= S, o sotto 100 righe -> 'n insufficiente', mai 'ESCLUSA'.)
+#       (TERZO GIRO del cancello, classe 291: (i)-(iv) si leggono SOLO sul C3G, il campo stop/spread delle righe del giornale; la L3 sottostima
 #       sull'oro del 14,6% proprio verso 'ESCLUSA' e NON decide. Se lo strumento D2 non ha passato il cancello PRIMA di aprire lo zip: NIENTE 'ESCLUSA', l'esito e'
 #       'n insufficiente' con la L3 accanto come descrizione. Con il C3G l'arrotondamento L4 non entra: 6,65x per l'argento resta come margine prudenziale scritto
 #       prima dei numeri. Sulla L3 quel margine NON bastava: con lo spread di fascia stampato 0,01 una cella stampata 5,00x puo' valere 24,5x, ricerca esaustiva
