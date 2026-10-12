@@ -48,7 +48,10 @@
 #      sull'aggregato). Le righe (6) danno SEI rapporti, uno per fascia; il 'costo grezzo' di una CELLA (quello che usano le attese, le smentite, la frase 'FRA sui
 #      segnali grezzi' e l'esito A) e' UNO solo: la MEDIANA PONDERATA dei rapporti per fascia, peso = n della fascia nelle righe (6) (fasce con n = 0 escluse): si ordinano
 #      i rapporti in modo crescente e si prende il primo a cui la somma dei pesi raggiunge la meta' del totale. Accanto si scrivono TUTTE le fasce. Resta fascia per fascia,
-#      come gia' scritto, SOLO la regola 'ESCLUSA PER COSTO' dell'esito B ('< 13,3x in OGNI fascia con >= 100 segnali') e la smentita dell'argento 'in una fascia'.
+#      come gia' scritto, SOLO la regola 'ESCLUSA PER COSTO' dell'esito B e la smentita dell'argento 'in una fascia'. SECONDO GIRO del cancello (12/10, classi 1369 e
+#      1104 b): 'in OGNI fascia con >= 100 segnali' e' vero A VUOTO se nessuna fascia arriva a 100, e una fascia sola non descrive la cella. Quindi 'ESCLUSA' chiede ANCHE
+#      almeno una fascia con >= 100 segnali E il costo grezzo della CELLA sotto soglia; la smentita dell'argento scatta ANCHE sul costo grezzo della CELLA >= 13,3x.
+#      Il testo che decide e' negli ESITI (B) dei file dei simboli gemelli.
 #      Controprova sull'oro (righe (6) di S0_01): fasce 10,6 / 19,25 / 19,5 / 25,1 / 25,1 / 37,0x con n 276 / 1346 / 2314 / 1426 / 778 / 833 -> mediana ponderata 19,5x
 #      (FRA), stessa classe del proxy del piano (21,6x). Campione = barre di rottura (SELEZIONATO), non tutte le barre: si scrive accanto al numero.
 #   L4 le righe segnale scrivono ATR e spread a 2 decimali (EA r.720-727, '%.2f'): sugli indici e' irrilevante, sull'argento (spread ~0,04) l'errore di arrotondamento
@@ -108,8 +111,8 @@
 #  ATTESA DELLO STADIO A: esito (B) sulle DUE celle -> nessuna passata dell'argento allo stadio B. n = 0 e' PRODUCIBILE e PROBABILE (servirebbe ATR >= 20 x spread,
 #     cioe' ATR >= ~0,8 USD con spread 0,041): allora la passata esce KO per 'ZERO operazioni' e il lotto R2SXAG con rc 3, ed e' ATTESO (eccezione negli ESITI); il lettore
 #     non stampa le righe (6) e il costo grezzo dell'argento resta NON MISURATO finche' non si decide D2 (scheda). Con n fra 1 e 29 il lettore stampa le righe (6) e vale
-#     la regola 'ESCLUSA PER COSTO col numero' (costo grezzo < 6,65x in ogni fascia con >= 100 segnali).
-#  SMENTITE: n >= 30 in una cella, oppure quota scartata < 90%, oppure costo grezzo >= 13,3x in una fascia con >= 100 segnali -> la stima del piano (n=4 e una lettura) e'
+#     la regola 'ESCLUSA PER COSTO col numero' dell'esito (B): almeno una fascia con >= 100 segnali, < 6,65x in ognuna di esse, e costo grezzo della CELLA < 6,65x.
+#  SMENTITE: n >= 30 in una cella, oppure quota scartata < 90%, oppure costo grezzo >= 13,3x in una fascia con >= 100 segnali o nella CELLA (mediana ponderata, L3) -> la stima del piano (n=4 e una lettura) e'
 #     sbagliata: si scrive cosi', si legge il giornale (spread vero alle barre: righe d'ingresso a 3 decimali) e la cella va allo stadio B con l'esito (A) se lo merita.
 #     Spread mediano alle barre di rottura > 0,08 o < 0,02 -> lo spread di una lettura (0,041) non descrive l'argento BCM: si scrive il numero nuovo (e' IL numero che mancava).
 #  LATI: il lettore stampa n per BUY e per SELL (sezione 4); attesa: nessuno dei due lati sotto il 25% degli ingressi della cella (EMA 100 e canale sono simmetrici). Un lato
@@ -143,8 +146,12 @@
 #  passato legge il campo stop/spread delle righe segnale).
 #   (A) PASSA ALLO STADIO B: n (ingressi, T1) >= 30 E 'solo spread' sugli ingressi >= 40x. Si scrive accanto il costo GREZZO (L3) e, se e' in FRA (13,3-40), la frase
 #       'FRA sui segnali grezzi, PASSA solo grazie al filtro'.
-#   (B) NON PASSA PER n: n < 30. Si scrivono n, la quota scartata per spread e il costo grezzo. Se il costo grezzo e' < 13,3x in OGNI fascia con >= 100 segnali, con il
-#       margine dell'arrotondamento (L4: < 6,65x per l'argento, < 13,3x per gli indici) -> 'ESCLUSA PER COSTO col numero' e la casella 4 si chiude per quel (simbolo, TF).
+#   (B) NON PASSA PER n: n < 30. Si scrivono n, la quota scartata per spread e il costo grezzo (della CELLA e di TUTTE le fasce). Soglia S con il margine dell'arrotondamento
+#       (L4): S = 6,65x per l'argento, S = 13,3x per gli indici. 'ESCLUSA PER COSTO col numero' (e la casella 4 si chiude per quel (simbolo, TF)) SOLO se valgono TUTTE E TRE:
+#       (i) ALMENO UNA fascia con >= 100 segnali nelle righe (6); (ii) costo grezzo < S in OGNI fascia con >= 100 segnali; (iii) costo grezzo della CELLA (mediana ponderata,
+#       L3) < S. Senza la (i) la (ii) sarebbe vera A VUOTO: NON e' 'ESCLUSA'. Contro-esempi scritti prima (secondo giro del cancello, 12/10): storia M1 parziale o pochi
+#       segnali -> nessuna fascia a 100 -> 'ESCLUSA' a vuoto; una sola fascia a >= 100 segnali (asia, spread largo fuori cassa) sotto S e le altre cinque (99 segnali l'una)
+#       a 45x -> 'ESCLUSA' con la cella a 45x. Tutti e due ora escono 'n insufficiente'.
 #       Altrimenti -> 'n insufficiente a Modello 1 su una tranche' (NON 'escluso'). Con n = 0 (eccezione qui sopra) -> 'la REPL non apre nessuna operazione su questo
 #       (simbolo, TF) in T1: N segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo NON MISURATO' -> non passa allo stadio B.
 #   (C) NON SI LEGGE: passata KO, lettore che non stampa la cella, CE1-CE4 rossi.
