@@ -1,0 +1,183 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-10-12 03:32:31  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 8
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260920   (59.7 KB, ultima scrittura 2026-09-20 14:38) ---
+    righe totali: 228
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260921   (37.2 KB, ultima scrittura 2026-09-21 14:51) ---
+    righe totali: 142
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20261011   (37.4 KB, ultima scrittura 2026-10-11 23:56) ---
+    righe totali: 144
+    RIGHE DI ORDINE / DEAL: 7
+      GO023:07:11.982Grid Scalper MA MT5 EA (XAUUSD,M5)-> [GV] No open positions found. Starting fresh. Basket IDs reset to 1. All GVs cleared.
+      FL023:07:15.143Grid Scalper MA MT5 EA (XAUUSD,M1)-> [GV] No open positions found. Starting fresh. Basket IDs reset to 1. All GVs cleared.
+      HM023:07:54.485SafeScalperPro (XAUUSD,H1)SafeScalperPro v4.00 [INFO]    AlgoSphere Quant ecosystem: search 'AlgoSphere Quant' on MQL5 Market
+      JE023:08:03.803SafeScalperPro (XAUUSD,M5)SafeScalperPro v4.00 [INFO]    AlgoSphere Quant ecosystem: search 'AlgoSphere Quant' on MQL5 Market
+      PE023:10:00.221ABTG_GapFill (AUDUSD,H1)[GAP] GAP VALIDO DOWN alle 2026.10.11 22:00: venClose 0.69858 -> weekOpen 0.69704 (gap -0.00154 = 0.39 x ATR D1). Direzione: BUY (contro il gap).
+      NO023:10:00.356ABTG_GapFill (AUDUSD,H1)[GAP] GAP-FILL BUY @ 0.69736  SL 0.69550  TP 0.69858  lot 0.26  (gap -0.00154 = 0.39 x ATR D1, spread 33 pts, barra 1 della settimana, ordine 3634739)
+      DS023:16:11.608ABTG_PunteLarry (GBPUSD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261012   (55.8 KB, ultima scrittura 2026-10-12 03:16) ---
+    righe totali: 203
+    RIGHE DI ORDINE / DEAL: 52
+      QR000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] POSITION_TYPE_BUY -> lato buy                        atteso=1 ottenuto=1  PASS
+      KQ000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] POSITION_TYPE_SELL -> lato sell                      atteso=-1 ottenuto=-1  PASS
+      QP000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] ORDER_TYPE_BUY_STOP -> lato buy                      atteso=1 ottenuto=1  PASS
+      HQ000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] ORDER_TYPE_BUY_LIMIT -> lato buy                     atteso=1 ottenuto=1  PASS
+      KM000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] ORDER_TYPE_BUY_STOP_LIMIT -> lato buy                atteso=1 ottenuto=1  PASS
+      ON000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] ORDER_TYPE_SELL_STOP -> lato sell                    atteso=-1 ottenuto=-1  PASS
+      RF000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] ORDER_TYPE_SELL_LIMIT -> lato sell                   atteso=-1 ottenuto=-1  PASS
+      EK000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] ORDER_TYPE_SELL_STOP_LIMIT -> lato sell              atteso=-1 ottenuto=-1  PASS
+      CG000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] 2 POSIZIONI buy sul DAX -> 2 sul lato buy            atteso=2 ottenuto=2  PASS
+      HQ000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] le stesse guardate dal lato SELL -> 0 (i lati sono separati) atteso=0 ottenuto=0  PASS
+      HN000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] 2 PENDENTI buy e NESSUNA posizione -> 2 (buco B6 chiuso) atteso=2 ottenuto=2  PASS
+      PN000:04:59.734ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] misto: DAX lato buy -> 3 (1 posizione + 2 pendenti)  atteso=3 ottenuto=3  PASS
+      GS000:04:59.735ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] misto: DAX lato sell -> 2 (il buy non si somma al sell) atteso=2 ottenuto=2  PASS
+      OK000:04:59.735ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] misto: DOW lato buy -> 1 (l'altro simbolo non conta) atteso=1 ottenuto=1  PASS
+      LP000:04:59.735ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] tetto 1 con UNA posizione buy -> FRENA (la seconda non entra) atteso=SI ottenuto=SI  PASS
+      OK000:04:59.735ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] tetto 1 con UN SOLO PENDENTE buy -> FRENA lo stesso  atteso=SI ottenuto=SI  PASS
+      IK000:04:59.735ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] tetto 3 sul lato SELL con 2 teste sell -> si passa   atteso=NO ottenuto=NO  PASS
+      HN000:04:59.735ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] tetto 2 sul lato SELL con 2 teste sell -> FRENA      atteso=SI ottenuto=SI  PASS
+      KD000:52:00.818Grid Scalper MA MT5 EA (XAUUSD,M1)-> [BOS] SELL signal: close 4185.61 broke below swing low 4186.54
+      MF000:52:00.874Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 1: Initial SELL at 4185.62 (0.01 lots) | Magic: 1234567 | Order: 3635271 | Deal: 3171809
+      RI001:00:00.247ABTG_PunteLarry (GBPUSD,H1)[LARRY] posizione/pendente gia' in vita o giornata gia' operata: nessun nuovo ciclo.
+      PE001:06:00.652Grid Scalper MA MT5 EA (XAUUSD,M1)-> [SmartGrid] Basket 1 (SELL): Uptrend (HH+HL). COOLDOWN.
+      FE001:11:00.156Grid Scalper MA MT5 EA (XAUUSD,M1)-> [BOS] BUY signal: close 4188.94 broke above swing high 4187.14
+      HF001:11:00.202Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Initial BUY at 4189.19 (0.01 lots) | Magic: 1234567 | Order: 3635322 | Deal: 3171850
+      EG002:08:00.220Grid Scalper MA MT5 EA (XAUUSD,M1)-> [Geometry] New BUY signal at 4195.86 rejected: too close to existing BUY #3635322 (pts=667, range=5500)
+      PJ002:10:54.915Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4199.33
+      EE002:10:56.245Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4199.38
+      MQ002:10:57.232Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4199.39
+      OE002:10:58.296Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4199.41
+      EQ002:10:59.396Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4199.47
+      JL002:12:15.937Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4200.06
+      GH002:12:16.047Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4200.66
+      PK002:12:16.151Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4201.06
+      NG002:14:15.261Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4202.02
+      ES002:14:15.384Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4202.90
+      LN002:14:16.927Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4202.93
+      JS002:14:17.287Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4202.95
+      MN002:14:17.390Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4202.97
+      RS002:14:22.946Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4204.02
+      HN002:14:22.995Grid Scalper MA MT5 EA (XAUUSD,M1)-> Basket 2: Trailing BUY #3635322 -> 4204.97
+      ... altre 12 righe non stampate (tetto).
+    GUARDIAN, ultima riga del giorno:
+      GR000:04:59.735ABTG_BulgeAzzurra (EURGBP,M5)[AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.
+
+=====================================================================
+=== C:\FTMO
+=== conto: 1514806751
+=====================================================================
+
+--- GIORNO 20261011   (16 KB, ultima scrittura 2026-10-11 23:56) ---
+    righe totali: 62
+    RIGHE DI ORDINE / DEAL: 1
+      NL023:05:00.541ABTG_Bulge (AUDNZD,M15)CTrade::OrderSend: modify position #560390377 EURNZD (sl: 1.99102, tp: 1.99735) [position closed]
+    GUARDIAN, ultima riga del giorno:
+      JF023:55:04.438CLAU12_Guardian (NZDJPY,M1)[GUARDIAN] eq=148822.27  dayLoss=0.10%  totDD=6.99%  rischioAperto=0.81%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261012   (15.9 KB, ultima scrittura 2026-10-12 03:25) ---
+    righe totali: 58
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      HK003:30:04.280CLAU12_Guardian (NZDJPY,M1)[GUARDIAN] eq=148908.21  dayLoss=-0.17%  totDD=6.93%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20261006   (1.7 KB, ultima scrittura 2026-10-06 20:42) ---
+    righe totali: 6
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QJ020:42:10.503ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=100081.32  dayLoss=0.00%  totDD=-0.08%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+
+--- GIORNO 20261011   (729.4 KB, ultima scrittura 2026-10-11 23:50) ---
+    righe totali: 1058
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20261012   (108.1 KB, ultima scrittura 2026-10-12 03:21) ---
+    righe totali: 163
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20261011   (3.2 KB, ultima scrittura 2026-10-11 23:56) ---
+    righe totali: 12
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      IF023:55:05.259ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7551.34  dayLoss=0.00%  totDD=-0.68%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20261012   (12.4 KB, ultima scrittura 2026-10-12 03:25) ---
+    righe totali: 45
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      LG003:30:04.092ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7551.34  dayLoss=0.00%  totDD=-0.68%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
