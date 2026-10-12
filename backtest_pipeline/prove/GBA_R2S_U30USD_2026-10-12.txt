@@ -44,6 +44,13 @@
 #   L3 la mediana del campo 'stop/spread' che l'EA scrive a piena precisione in OGNI riga segnale (anche SALTATO) NON e' stampata da nessun lettore passato. Al suo posto,
 #      DICHIARATO ORA: il 'costo grezzo per fascia' = 2,5 x (ATR mediana) / (spread mediana) dalle righe (6) del lettore, fascia per fascia (rapporto delle mediane, NON
 #      mediana dei rapporti: un'approssimazione, e lo si scrive accanto al numero).
+#      COSTO GREZZO DELLA CELLA, scritto ORA prima dei numeri (controllo-preventivo 12/10, classe 1104 b: un criterio su un insieme dice se vale per ciascuno o
+#      sull'aggregato). Le righe (6) danno SEI rapporti, uno per fascia; il 'costo grezzo' di una CELLA (quello che usano le attese, le smentite, la frase 'FRA sui
+#      segnali grezzi' e l'esito A) e' UNO solo: la MEDIANA PONDERATA dei rapporti per fascia, peso = n della fascia nelle righe (6) (fasce con n = 0 escluse): si ordinano
+#      i rapporti in modo crescente e si prende il primo a cui la somma dei pesi raggiunge la meta' del totale. Accanto si scrivono TUTTE le fasce. Resta fascia per fascia,
+#      come gia' scritto, SOLO la regola 'ESCLUSA PER COSTO' dell'esito B ('< 13,3x in OGNI fascia con >= 100 segnali') e la smentita dell'argento 'in una fascia'.
+#      Controprova sull'oro (righe (6) di S0_01): fasce 10,6 / 19,25 / 19,5 / 25,1 / 25,1 / 37,0x con n 276 / 1346 / 2314 / 1426 / 778 / 833 -> mediana ponderata 19,5x
+#      (FRA), stessa classe del proxy del piano (21,6x). Campione = barre di rottura (SELEZIONATO), non tutte le barre: si scrive accanto al numero.
 #   L4 le righe segnale scrivono ATR e spread a 2 decimali (EA r.720-727, '%.2f'): sugli indici e' irrilevante, sull'argento (spread ~0,04) l'errore di arrotondamento
 #      arriva a +-25% su ogni mediana (le righe d'ingresso usano invece le cifre del simbolo, 3 per XAGUSD).
 #   L5 PF_V (4): se il tester non addebita commissioni, il lettore sottrae 3,90 EUR/lotto a operazione (la commissione dell'ORO, r.42). Sugli indici BCM la commissione e'
