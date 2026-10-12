@@ -44,3 +44,16 @@ Il giornale dell'argento M1 arriva fino al 29/09 23:59:59 e stampa la riga FINE 
 1. **Stadio B a tick reali** per NASUSD M15, D30EUR M15, U30USD M15 su 3 tranche (e, se Claudio vuole capire, le M5 FRA come sola descrizione). File prova, riga e cancello da scrivere.
 2. **Argento** M1 e M15 rifatti con timeout piu' lungo.
 3. Confronto con Gemini su questa lettura (dovuto, regola dell'11/10).
+
+## ERRATA (12/10/2026 sera, strato 2 del cancello; la lettura sopra resta com'era scritta)
+**E-L1. La frase della sezione "Dove stanno gli ingressi (E2)" -- «Il costo e' basso solo dove lo spread e' stretto» -- e' SBAGLIATA per Nasdaq e Dow e vera solo in parte per il DAX.** Va letta cosi':
+*«Gli ingressi stanno dove l'ATR supera 20 volte lo spread (il filtro 0,05 x ATR). A Modello 1 lo spread di NASUSD e U30USD e' praticamente fisso, quindi su questi due simboli la selezione e' per VOLATILITA', non per spread stretto. Sul DAX lo spread ha due livelli e la selezione e' per tutte e due le cose: le ore a 2,80 sono escluse dallo spread, dentro le ore a spread basso decide l'ATR.»*
+Conteggi sui giornali dello zip [MISURATO, strato 2, parser indipendente dalla bozza]:
+- NASUSD: spread 1,80 in 1.491 righe su 1.491 (M5) e in 487 su 488 (M15, una a 1,90). ATR mediano degli ingressi contro tutte le righe: **43,78 contro 24,44** (M5), 52,16 contro 44,63 (M15).
+- U30USD: spread 2,00 in 1.446 su 1.451 (M5, 5 a 3,00) e 457 su 460 (M15, 3 a 3,00). ATR mediano ingressi contro righe: **53,33 contro 24,00** (M5), 61,14 contro 46,43 (M15).
+- D30EUR: spread **1,30-1,60 (mediana 1,40) nelle ore server 8-15** (e in parte alle 7, alle 16 e in qualche riga serale delle 17-21) e **2,80 la notte e la sera** (tutte le righe delle ore 0-6 e 23, quasi tutte delle 17-21, parte delle 7 e 16). M5: 695 righe a 1,30-1,60 e 698 a 2,80; le righe a 2,80 hanno C3G **10,65x e 0 ingressi**. M15: 263 righe a 1,30-1,60 e 155 a 2,80; le righe a 2,80 hanno C3G **20,60x e 2 ingressi** su 98. Dentro le righe a 1,40 l'ATR mediano e' 23,95 (M5) contro 30,65 degli ingressi; a M15 36,64 contro 37,77 (a M15 la banda bassa sta gia' a 65,45x: li' quasi tutto passa il filtro e a togliere e' la regola «una posizione per volta»).
+Conseguenza: nessuna. Nessun esito, nessuna soglia e nessuna cella cambiano; cambia la SPIEGAZIONE della concentrazione, che non e' «costo basso» (regola R2 di `docs/RISPOSTA_A_GEMINI_GBA_R2S_LETTURA_2026-10-12.md`).
+
+**E-L2. Tabella "Esito per cella", riga D30EUR M15**: BUY / SELL non e' «n.d. nel riepilogo»: lo strumento D2 li stampa, **46,30 (n 222) / 52,85 (n 196)**; righe >= 40x non e' «--» ma **245** (`LETTURA_D2_R2S_A.txt`, riga della cella, e `D2_C3G_R2S_A.csv`). Nessun esito cambia (la cella e' (A) per C3G 49,05 >= 40x e n 98 >= 30).
+
+**E-L3. Dichiarazioni, seconda riga**: «sulla sonda a Modello 1 il C3G dell'oro e' +5,6% rispetto ai tick reali» e' giusto in quella base; nell'altra base (tick su Modello 1) e' -5,3% (21,60 / 22,80). Da qui in avanti si scrive sempre la base.
