@@ -2,8 +2,23 @@
 # -*- coding: ascii -*-
 """
 leggi_gba_r2s_c3g.py -- STRUMENTO D2 del lotto GBA R2S stadio A (simboli gemelli, sonda dei costi, Modello 1, tranche T1).
-Strato 2 del cancello (controllo-preventivo, 12/10/2026): PASS su QUESTA versione, dopo 5 correzioni (mediana pari al bordo in virgola mobile, varianti senza
-la dicitura di chiusura, pin ed EA dal RIEPILOGO, orologio e date delle righe, cella doppia nel manifest). Qualunque modifica invalida il PASS: si ripassa.
+v2: strato 2 del cancello (controllo-preventivo, 12/10/2026) PASS sulla v2 (SHA256 14384d87...), dopo 5 correzioni (mediana pari al bordo in virgola mobile,
+varianti senza la dicitura di chiusura, pin ed EA dal RIEPILOGO, orologio e date delle righe, cella doppia nel manifest).
+v3 (12/10 sera, BOZZA per il cancello: il PASS della v2 NON vale per questa versione): legge ANCHE il lotto del RILANCIO DELL'ARGENTO R2SXAG2 (file prova
+backtest_pipeline/prove/GBA_R2S_XAGUSD2_2026-10-12.txt, SHA256 dbe11bc3..., pin della riga d53493a9...; scheda report/GBA_R2S_XAG2_SCHEDA_2026-10-12.md sez. 4):
+  - PIN PER LOTTO: R2SANC/R2SXAG/R2SNAS/R2SD30/R2SU30 SOLO col pin cc9bcda0, R2SXAG2 SOLO col pin d53493a9 (RIEPILOGO_R0.txt e ESITI_*.txt); un altro pin = RIFIUTO;
+  - X2: nel manifest la M15 viene PRIMA (R2SXAG2_01_M15_T1_m775800, poi R2SXAG2_02_REPL_T1_m775800: tag e ordine verificati); gli esiti restano quelli della prova
+    (E1-E4 + ordine di E3), e l'esito della M15 dipende dal CE7 della REPL (X6), che si calcola PRIMA di stampare qualunque esito;
+  - CE7 (determinismo della REPL, tolleranza ZERO sulle cifre stampate da D2 rispetto al giornale del 12/10: 6611 righe, EA 6611/0/6611/0/0, C3G cella 2.40, BUY 2.50
+    n 3364, SELL 2.30 n 3247, fasce 2149 2.10 / 1458 2.40 / 680 2.80 / 802 4.20 / 1251 2.10 / 271 1.40); NON VALUTABILE se la REPL non e' lanciata, se il giornale
+    non ha UNA riga [GBA-CONTA] FINE o se la prova d'accettazione di D2 non passa (il PASS del cancello su QUESTO SHA e' una precondizione ESTERNA, come il G0);
+  - X6: CE1 del lotto R2SXAG2 VERDE solo se l'ancora del 12/10 e' verde (GBA_R0_R2SANC.zip con lo SHA256 dello zip archiviato in
+    risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip, pin cc9bcda0) E CE7 e' VERDE; altrimenti TUTTE E DUE le celle (C), senza appello;
+  - CE8 (causa dello stallo): SOLO DESCRIZIONE (t_avvio, ora di 'Test passed' / 'total time' rispetto a t_avvio, riga 'last test passed', durata, n): nessun esito ne dipende;
+  - il lotto R2SXAG2 si legge col SOLO zip dell'ancora del 12/10 (nessun altro lotto dello stadio A nella stessa lettura: RIFIUTO).
+  La lettura dello stadio A (senza R2SXAG2) e' IDENTICA a quella della v2 riga per riga, salvo la riga dell'intestazione con versione e SHA256 di D2.
+REGOLA E3(3), dichiarata e stampata in testa a ogni lettura del lotto R2SXAG2: una conferma a tick reali letta con uno strumento D2 di SHA256 DIVERSO da quello che ha
+letto la passata a Modello 1 e' 'conferma non data' (casella 4 aperta). Lo SHA256 di D2 si stampa per intero. Qualunque modifica invalida il PASS: si ripassa.
 
 COSA FA (e niente altro). Legge il giornale dell'EA (log\\GBA_<passata>.txt) di ogni passata dei 5 lotti R2SANC / R2SXAG / R2SNAS / R2SD30 / R2SU30 e stampa,
 per ogni cella (simbolo, TF), il C3G = MEDIANA VERA del campo 'stop/spread' delle righe segnale (scheda report/GBA_R2S_A_SCHEDA_2026-10-12.md, decisione D2; blocco L3
@@ -42,6 +57,8 @@ sezione (1)); non valuta l'A3 dell'ancora (doppione con GBA_R0_S0.zip: e' del le
 USO (sempre con -I)
   python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py GBA_R2S_A.zip [--csv-out D2_C3G_R2S_A.csv]
   python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py GBA_R0_R2SANC.zip GBA_R0_R2SXAG.zip ... [--csv-out F]
+  python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py GBA_R0_R2SANC.zip GBA_R2S_XAG2.zip [--csv-out D2_C3G_R2S_XAG2.csv]   (ancora del 12/10 + raccolta del rilancio;
+       oppure GBA_R0_R2SXAG2.zip al posto della raccolta. GBA_R0_R2SANC.zip e' DENTRO risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip: si estrae, non si rigira)
   python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py --autotest
   uscita: 0 letto; 1 autotest fallito; 2 ERRORE / zip RIFIUTATO (nessun numero).
 """
@@ -51,7 +68,7 @@ sys.dont_write_bytecode = True
 
 QD = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(QD, ".."))
-VERSIONE = "leggi_gba_r2s_c3g v2 (D2, strato 2 del 12/10)"
+VERSIONE = "leggi_gba_r2s_c3g v3 (D2 + lotto R2SXAG2, rilancio dell'argento)"
 
 # ---------------------------------------------------------------------------------------------------------------------
 #  DEFINIZIONI COPIATE (l'autotest verifica che siano identiche a quelle del lettore leggi_gba_r0.py, SHA256 9CD02D2A...)
@@ -77,22 +94,46 @@ MOTIVI_EA = ("ok", "posizione gia' aperta", "fuori orario", "perdita giornaliera
 TRANCHE = ("T1", "2026.07.01", "2026.09.30")
 MODELLO = "1"
 MAGIC = "775800"
-PIN_AMMESSI = ("cc9bcda0b64943b1e02ae8f52af68ccff81012d4",)   # pin della riga RIGA_LANCIA_GBA_R2S_A (il driver lo scrive minuscolo nel RIEPILOGO, r.142 e r.877)
+PIN_A = "cc9bcda0b64943b1e02ae8f52af68ccff81012d4"      # pin della riga RIGA_LANCIA_GBA_R2S_A (il driver lo scrive minuscolo nel RIEPILOGO, r.142 e r.877)
+PIN_XAG2 = "d53493a92901b82c6b4c12c1d79ec3cb4ebfa5bb"   # pin della riga RIGA_LANCIA_GBA_R2S_XAG2 (PASS al 4o giro, scheda XAG2 in fondo)
+PIN_AMMESSI = (PIN_A, PIN_XAG2)                          # ammessi SOLO PER LOTTO (LOTTI[L]["pin"]): lo zip del 12/10 resta leggibile, nessun pin vale per un altro lotto
 SHA_EA = "1381E3DC9B4B4E44BCDC0319F023CB1990900CE0D1A6B6A3EC1DF5DF99E601B1"   # EA v1.10 (-ShaEA della riga; il driver lo scrive maiuscolo, r.151 e r.878)
 TF_NUM = {"M1": "1", "M5": "5", "M15": "15"}
 LOTTI = {
     "R2SANC": {"prova": "GBA_R2S_ANCORA_2026-10-12.txt", "sha": "42773ac50e3665e8a1b0fca038bdf2da3faf9c24ed42a2184f90f03eeb0d05ae", "simbolo": "XAUUSD",
-               "celle": [("REPL", "M1")], "S": None},
+               "celle": [("REPL", "M1")], "S": None, "pin": PIN_A},
     "R2SXAG": {"prova": "GBA_R2S_XAGUSD_2026-10-12.txt", "sha": "019c99bb53c45cfe92434e363e716bc409f408ece0299b1b49584d563dbe46de", "simbolo": "XAGUSD",
-               "celle": [("REPL", "M1"), ("M15", "M15")], "S": 6.65},
+               "celle": [("REPL", "M1"), ("M15", "M15")], "S": 6.65, "pin": PIN_A},
+    # RILANCIO DELL'ARGENTO (X1-X6 del file prova): M15 PRIMA nel manifest (X2), tag verificati
+    "R2SXAG2": {"prova": "GBA_R2S_XAGUSD2_2026-10-12.txt", "sha": "dbe11bc3b219fdc13464e1a8531552658f2b62b42e7e871e3a377b7b6e6c57b3", "simbolo": "XAGUSD",
+                "celle": [("M15", "M15"), ("REPL", "M1")], "S": 6.65, "pin": PIN_XAG2,
+                "tag": {"M15": "R2SXAG2_01_M15_T1_m775800", "REPL": "R2SXAG2_02_REPL_T1_m775800"}},
     "R2SNAS": {"prova": "GBA_R2S_NASUSD_2026-10-12.txt", "sha": "3eabed3d735cf162c69afe90cc420af7533933f5669155c8d46e5e47a69cfe4c", "simbolo": "NASUSD",
-               "celle": [("M5", "M5"), ("M15", "M15")], "S": 13.3},
+               "celle": [("M5", "M5"), ("M15", "M15")], "S": 13.3, "pin": PIN_A},
     "R2SD30": {"prova": "GBA_R2S_D30EUR_2026-10-12.txt", "sha": "3c8cf14be362ae1373b69c4a6bb309568a29d743978814d570417a52646b2507", "simbolo": "D30EUR",
-               "celle": [("M5", "M5"), ("M15", "M15")], "S": 13.3},
+               "celle": [("M5", "M5"), ("M15", "M15")], "S": 13.3, "pin": PIN_A},
     "R2SU30": {"prova": "GBA_R2S_U30USD_2026-10-12.txt", "sha": "5c7e8e4d250f54310a6f4b3b6876e9cc496a0546330bc3d07dfb982983ce6c28", "simbolo": "U30USD",
-               "celle": [("M5", "M5"), ("M15", "M15")], "S": 13.3},
+               "celle": [("M5", "M5"), ("M15", "M15")], "S": 13.3, "pin": PIN_A},
 }
-ORDINE = ["R2SANC", "R2SXAG", "R2SNAS", "R2SD30", "R2SU30"]
+ORDINE = ["R2SANC", "R2SXAG", "R2SXAG2", "R2SNAS", "R2SD30", "R2SU30"]
+# DUE GIRI, letti separati: lo stadio A del 12/10 (pin cc9bcda0) e il rilancio dell'argento (pin d53493a9) con la SOLA ancora del 12/10 (X6). Un lotto di un giro
+# non si stampa (nemmeno come 'NON CARICATO') nella lettura dell'altro: la lettura dello stadio A resta quella della v2.
+GIRO_A = ("R2SANC", "R2SXAG", "R2SNAS", "R2SD30", "R2SU30")
+GIRO_XAG2 = ("R2SANC", "R2SXAG2")
+ESITI_FILE = {"ESITI_R2S_A.txt": (PIN_A, set(GIRO_A)), "ESITI_R2S_XAG2.txt": (PIN_XAG2, {"R2SXAG2"})}   # raccolta: pin e lotti ammessi
+# X6 (1): l'ancora del lotto R2SXAG2 e' QUELLA del 12/10: GBA_R0_R2SANC.zip dentro risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip (SHA256 dello zip interno)
+SHA_ANCORA_1210 = "259f4ba0922b4406dc58847b29525ea7467b1043565e3e8cc10148d1d2f4b980"
+ARCH_R2S_A = os.path.join(QD, "risultati_archivio", "GBA_R2S_A_20261012", "GBA_R2S_A.zip")
+# REGRESSIONE (autotest): la lettura v2 archiviata dello stadio A deve uscire IDENTICA dalla v3, salvo la riga 2 (versione e SHA256 di D2) e la riga del percorso del CSV
+SHA_ARCH_R2S_A = "ae62e772345fa531cc7a5f6f041b248923e52f48a1f804904669368e82ce2814"
+ARCH_LETTURA_A = (os.path.join(QD, "risultati_archivio", "GBA_R2S_A_20261012", "LETTURA_D2_R2S_A.txt"), "d3359c0960e7653013e26f60e39b917602e6815d4f1ba2007eeee1bafbf0419d")
+ARCH_CSV_A = (os.path.join(QD, "risultati_archivio", "GBA_R2S_A_20261012", "D2_C3G_R2S_A.csv"), "910109693cab047407c3355a7b63f6e13f77ab41a84297928f5025e78f335efb")
+# CE7 del file prova XAG2 (r.68-78): i numeri del giornale della REPL del 12/10 COME LI STAMPA D2 (LETTURA_D2_R2S_A.txt r.35-45), tolleranza ZERO sulle cifre stampate
+CE7_ATTESA = {"righe": 6611, "conta": {"seg": 6611, "ing": 0, "spr": 6611, "pos": 0, "dati": 0}, "cella": "2.40", "BUY": ("2.50", 3364), "SELL": ("2.30", 3247),
+              "fasce": [("asia", 2149, "2.10"), ("europa", 1458, "2.40"), ("pausa", 680, "2.80"), ("USA apertura", 802, "4.20"), ("USA pomeriggio", 1251, "2.10"),
+                        ("rollover", 271, "1.40")]}
+DEPOSITO = "1000000.00"      # CE8: 'final balance' uguale al deposito = zero operazioni chiuse (file prova XAG2, CE8)
+CE8_ENTRO_S = 60             # CE8: 'test finito entro ~1 minuto' dall'avvio (12/10: +13 s); oltre = 'test finito TARDI' (DESCRIZIONE, nessun esito ne dipende)
 # SOGLIE (copiate dagli ESITI dei file prova e dagli emendamenti E1-E3 di docs/RISPOSTA_A_GEMINI_GBA_R2S_STADIO_A_2026-10-12.md)
 N_PORTA = 30                 # (A): n >= 30, al netto degli ingressi a spread zero
 COSTO_LAVORO = 40.0          # S2: >= 40 PASSA ('solo spread' sugli ingressi); frase dell'esito (A) sul C3G
@@ -200,7 +241,8 @@ def leggi_giornale(testo, etich="giornale"):
                 msgs[k][1] = msg
             msgs[k].append(None)                    # segna il doppione
     doppioni = sum(len(msgs[k]) - 2 for k in ordine)
-    out = {"righe": [], "ingressi_eseguiti": [], "conta": None, "avvio": [], "finestre": [], "doppioni": doppioni, "ridotti": 0, "conta_n": 0}
+    out = {"righe": [], "ingressi_eseguiti": [], "conta": None, "avvio": [], "finestre": [], "doppioni": doppioni, "ridotti": 0, "conta_n": 0,
+           "tester": [t for t in testa if t.startswith("# TESTER ")]}    # righe del tester raccolte dal driver (r.735, r.823): servono SOLO al CE8 (descrizione)
     for t in testa:
         mf = RE_FINESTRA.match(t)
         if mf:
@@ -380,7 +422,7 @@ def leggi_lotto(nome_zip, dati):
         raise Rifiuto("%s: piu' lotti nello stesso manifest (%s)" % (nome_zip, ", ".join(sorted(lotti))))
     L = lotti.pop()
     if L not in LOTTI:
-        raise Rifiuto("%s: lotto '%s' NON e' uno dei 5 lotti R2S stadio A (%s)" % (nome_zip, L, ", ".join(ORDINE)))
+        raise Rifiuto("%s: lotto '%s' NON e' uno dei lotti R2S che D2 sa leggere (%s)" % (nome_zip, L, ", ".join(ORDINE)))
     base = os.path.basename(nome_zip.replace("\\", "/").split("!")[-1])
     if base.startswith("GBA_R0_") and base.lower().endswith(".zip") and base[7:-4] != L:
         raise Rifiuto("%s: il nome dello zip dice lotto %s, il manifest dice %s" % (nome_zip, base[7:-4], L))
@@ -397,8 +439,8 @@ def leggi_lotto(nome_zip, dati):
         raise Rifiuto("%s: manca RIEPILOGO_R0.txt: pin e EA della passata non verificabili" % nome_zip)
     rie = z.read(N["RIEPILOGO_R0.txt"]).decode("ascii", "replace")
     pins = set(re.findall(r"\bpin: ([0-9a-fA-F]{40})\b", rie))
-    if len(pins) != 1 or next(iter(pins)).lower() not in PIN_AMMESSI:
-        raise Rifiuto("%s: il RIEPILOGO dice pin %s, la riga di lancio e' al pin %s" % (nome_zip, ", ".join(sorted(pins)) or "assente", " / ".join(PIN_AMMESSI)))
+    if len(pins) != 1 or next(iter(pins)).lower() != D["pin"]:      # pin PER LOTTO (v3): un pin ammesso per un altro lotto NON vale qui
+        raise Rifiuto("%s: il RIEPILOGO dice pin %s, la riga di lancio del lotto %s e' al pin %s" % (nome_zip, ", ".join(sorted(pins)) or "assente", L, D["pin"]))
     if ("ABTG_GoldBreakoutATR.mq5 SHA256 " + SHA_EA) not in rie:
         raise Rifiuto("%s: il RIEPILOGO non dice ABTG_GoldBreakoutATR.mq5 SHA256 %s...: un altro EA" % (nome_zip, SHA_EA[:12]))
     pin = pin_della_prova(raw_prova.decode("ascii", "replace"))
@@ -409,6 +451,14 @@ def leggi_lotto(nome_zip, dati):
     doppie = sorted(set(c for c in celle_man if celle_man.count(c) > 1))
     if doppie:
         raise Rifiuto("%s: la cella %s compare PIU' volte nel manifest: ogni numero sarebbe doppio" % (nome_zip, ", ".join(doppie)))
+    if D.get("tag"):
+        # X1-X2 (lotto R2SXAG2): tag delle passate della riga e ordine del manifest = ordine delle passate del file prova (M15 PRIMA, poi REPL)
+        for r in man:
+            if r["cella"] in D["tag"] and r["passata"] != D["tag"][r["cella"]]:
+                raise Rifiuto("%s: la passata della cella %s si chiama %s, il file prova (X1-X2) dice %s" % (nome_zip, r["cella"], r["passata"], D["tag"][r["cella"]]))
+        ordine_att = [c for c, _tf in D["celle"] if c in celle_man]
+        if [c for c in celle_man if c in celle_att] != ordine_att:
+            raise Rifiuto("%s: ordine delle celle nel manifest %s, il file prova (X2) dice %s" % (nome_zip, " -> ".join(celle_man), " -> ".join(ordine_att)))
     passate = []
     for r in man:
         tag = r["passata"]
@@ -471,11 +521,11 @@ def leggi_lotto(nome_zip, dati):
                 raise Rifiuto("%s: il report dice periodo '%s', il file prova %s" % (e, rep["periodo"], tf))
             P["report"] = rep
         passate.append(P)
-    return {"lotto": L, "passate": passate, "zip": nome_zip}
+    return {"lotto": L, "passate": passate, "zip": nome_zip, "sha_zip": hashlib.sha256(dati).hexdigest()}
 
 
 def carica(percorsi):
-    """Zip di lotto o raccolta GBA_R2S_A.zip (zip annidati). Restituisce ({lotto: lettura}, [note])."""
+    """Zip di lotto o raccolta GBA_R2S_A.zip / GBA_R2S_XAG2.zip (zip annidati). Restituisce ({lotto: lettura}, [note])."""
     lotti, note = {}, []
 
     def aggiungi(nome, dati):
@@ -483,6 +533,7 @@ def carica(percorsi):
         if Lz["lotto"] in lotti:
             raise Rifiuto("lotto %s caricato DUE volte (%s e %s): ogni numero sarebbe doppio" % (Lz["lotto"], lotti[Lz["lotto"]]["zip"], nome))
         lotti[Lz["lotto"]] = Lz
+        return Lz["lotto"]
     for p in percorsi:
         try:
             dati = open(p, "rb").read()
@@ -496,17 +547,29 @@ def carica(percorsi):
         interni = sorted(n for n in N if n.lower().endswith(".zip"))
         if not interni:
             raise Rifiuto("%s: ne' zip di lotto (MANIFEST_R0.csv) ne' raccolta (zip annidati)" % p)
+        dentro = []
         for n in interni:
             if n.endswith("_COMPILAZIONE_FALLITA.zip"):
                 note.append("%s: %s -> quel lotto si e' fermato alla COMPILAZIONE: nessuna passata, esito (C)" % (p, n))
                 continue
-            aggiungi(p + "!" + n, z.read(N[n]))
-        if "ESITI_R2S_A.txt" in N:
-            es = z.read(N["ESITI_R2S_A.txt"]).decode("ascii", "replace")
+            dentro.append(aggiungi(p + "!" + n, z.read(N[n])))
+        for ne in ("ESITI_R2S_A.txt", "ESITI_R2S_XAG2.txt"):
+            if ne not in N:
+                continue
+            pin_es, lotti_es = ESITI_FILE[ne]
+            es = z.read(N[ne]).decode("ascii", "replace")
             pe = set(re.findall(r"\bpin ([0-9a-fA-F]{40})\b", es))
-            if len(pe) != 1 or next(iter(pe)).lower() not in PIN_AMMESSI:
-                raise Rifiuto("%s: ESITI_R2S_A.txt dice pin %s, la riga di lancio e' al pin %s" % (p, ", ".join(sorted(pe)) or "assente", " / ".join(PIN_AMMESSI)))
-            note.append("ESITI_R2S_A.txt: " + " / ".join(x.strip() for x in z.read(N["ESITI_R2S_A.txt"]).decode("ascii", "replace").splitlines() if x.strip()))
+            if len(pe) != 1 or next(iter(pe)).lower() != pin_es:
+                raise Rifiuto("%s: %s dice pin %s, la riga di lancio e' al pin %s" % (p, ne, ", ".join(sorted(pe)) or "assente", pin_es))
+            estranei = sorted(set(dentro) - lotti_es)
+            if estranei:
+                raise Rifiuto("%s: la raccolta con %s contiene lotti di un altro giro (%s)" % (p, ne, ", ".join(estranei)))
+            note.append(ne + ": " + " / ".join(x.strip() for x in es.splitlines() if x.strip()))
+    if "R2SXAG2" in lotti:
+        altri = sorted(L for L in lotti if L not in GIRO_XAG2)
+        if altri:
+            raise Rifiuto("il lotto R2SXAG2 (rilancio, pin %s) si legge SOLO con l'ancora del 12/10 GBA_R0_R2SANC.zip; caricati anche %s: due giri nella stessa "
+                          "lettura (estrarre GBA_R0_R2SANC.zip da GBA_R2S_A.zip e rileggere)" % (PIN_XAG2[:8], ", ".join(altri)))
     return lotti, note
 
 
@@ -815,15 +878,181 @@ def stato_ce1(lotti):
     return (True, "VERDE (parte D2: manifest 158/-6364.79/0.86, conteggi EA, C3G cella/fasce/lati asia, solo spread 55.9 identici a S0_01; l'A3 doppione la verifica il lettore)")
 
 
+# ---------------------------------------------------------------------------------------------------------------------
+#  LOTTO R2SXAG2 (rilancio dell'argento): CE7, X6, CE8 del file prova GBA_R2S_XAGUSD2_2026-10-12.txt
+# ---------------------------------------------------------------------------------------------------------------------
+def _passata(lotti, L, cella):
+    if L not in lotti:
+        return None
+    for P in lotti[L]["passate"]:
+        if P["cella"] == cella:
+            return P
+    return None
+
+
+def stato_ce7(lotti, acc_ok):
+    """CE7 DETERMINISMO DELLA REPL: ('VERDE' | 'ROSSA' | 'NON VALUTABILE', testo). Tolleranza ZERO sulle cifre STAMPATE da D2 (stringhe '%.2f' e interi)."""
+    P = _passata(lotti, "R2SXAG2", "REPL")
+    if P is None or P["stato"] == "NON_LANCIATA" or P["giornale"] is None:
+        return ("NON VALUTABILE", "la REPL R2SXAG2_02 non e' lanciata (o assente dal manifest): niente giornale da confrontare")
+    G = P["giornale"]
+    if G["conta"] is None or G["conta_n"] != 1:
+        return ("NON VALUTABILE", "il giornale della REPL non ha UNA riga [GBA-CONTA] FINE (%d)" % G["conta_n"])
+    if not acc_ok:
+        return ("NON VALUTABILE", "la prova d'accettazione di D2 NON e' passata: lo strumento non e' quello accettato")
+    A = P["A"] if "A" in P else analizza(G["righe"])
+    att = CE7_ATTESA
+    diff = []
+
+    def cmp(nome, letto, atteso):
+        if letto != atteso:
+            diff.append("%s %s invece di %s" % (nome, letto, atteso))
+    cmp("righe segnale", A["n"], att["righe"])
+    for k, nome in (("seg", "EA segnali"), ("ing", "ingressi tentati"), ("spr", "scartati spread"), ("pos", "posizione aperta"), ("dati", "ATR non valido")):
+        cmp(nome, G["conta"][k], att["conta"][k])
+    cmp("C3G cella", fx(A["c3g"]), att["cella"])
+    for lato in ("BUY", "SELL"):
+        cmp("C3G " + lato, fx(A["lati"][lato]["c3g"]), att[lato][0])
+        cmp("n " + lato, A["lati"][lato]["n"], att[lato][1])
+    for f, (nome, n_att, c_att) in zip(A["fasce"], att["fasce"]):
+        cmp("righe " + nome, f["n"], n_att)
+        cmp("C3G " + nome, fx(f["c3g"]), c_att)
+    if diff:
+        return ("ROSSA", "la REPL NON rifa' il giornale del 12/10 (" + "; ".join(diff) + "): la REPL di questo lotto e' (C), senza appello, e il giornale del "
+                "12/10 NON si usa al suo posto")
+    return ("VERDE", "la REPL rifa' il giornale del 12/10 a tolleranza zero (6611 righe; EA 6611/0/6611/0/0; C3G cella 2.40, BUY 2.50 n 3364, SELL 2.30 n 3247; "
+            "fasce 2149 2.10 / 1458 2.40 / 680 2.80 / 802 4.20 / 1251 2.10 / 271 1.40): l'esito si legge sul giornale NUOVO")
+
+
+def stato_ce1_x6(lotti, ce1_anc, ce7):
+    """X6: CE1 del lotto R2SXAG2 VERDE solo se l'ancora del 12/10 e' verde (e lo zip e' quello del 12/10) E CE7 e' VERDE."""
+    err = []
+    if not ce1_anc[0]:
+        err.append("ancora del 12/10 NON verde (" + ce1_anc[1] + ")")
+    elif lotti["R2SANC"].get("sha_zip") != SHA_ANCORA_1210:
+        err.append("lo zip dell'ancora NON e' GBA_R0_R2SANC.zip del 12/10 (SHA256 %s, quello archiviato in GBA_R2S_A.zip e' %s)" % (
+            (lotti["R2SANC"].get("sha_zip") or "n.d.")[:12], SHA_ANCORA_1210[:12]))
+    if ce7[0] != "VERDE":
+        err.append("CE7 " + ce7[0])
+    if err:
+        return (False, "NON VERDE -> TUTTE E DUE le celle del lotto R2SXAG2 (M15 e REPL) sono (C), senza appello: " + "; ".join(err))
+    return (True, "VERDE (ancora del 12/10 verde, zip archiviato SHA256 %s..., E CE7 verde)" % SHA_ANCORA_1210[:12])
+
+
+RE_TESTER = re.compile(r"^# TESTER \S+\t[^\t]*\t(?P<ora>\d\d):(?P<mi>\d\d):(?P<se>\d\d(?:\.\d+)?)\t[^\t]*\t(?P<msg>.*)$")
+
+
+def ce8_passata(P):
+    """CE8 (DESCRIZIONE, nessun esito ne dipende): t_avvio, ora di 'Test passed' / 'total time' rispetto a t_avvio, riga 'last test passed', durata, n.
+    Ore: t_avvio del MANIFEST e righe del tester raccolte dal driver sono tutte e due ore del PC. Restituisce un dict."""
+    r = P["riga"]
+    d = {"lanciata": P["stato"] != "NON_LANCIATA" and P["giornale"] is not None, "t_avvio": (r.get("t_avvio") or "").strip(), "durata": (r.get("durata_s") or "").strip(),
+         "n": (r.get("trades_report") or "").strip(), "report": P["report"] is not None or (r.get("trades_report") or "").strip().isdigit(),
+         "test_s": None, "last_s": None, "last": False, "balance": None, "tentati": None, "classe": "non lanciata"}
+    if not d["lanciata"]:
+        return d
+    G = P["giornale"]
+    d["tentati"] = G["conta"]["ing"] if G["conta"] else None
+    m0 = re.search(r"(\d\d):(\d\d):(\d\d)$", d["t_avvio"])
+    t0 = int(m0.group(1)) * 3600 + int(m0.group(2)) * 60 + int(m0.group(3)) if m0 else None
+
+    def rel(m):
+        if t0 is None:
+            return None
+        s = int(m.group("ora")) * 3600 + int(m.group("mi")) * 60 + float(m.group("se")) - t0
+        return s + 86400 if s < 0 else s
+    for riga in G["tester"]:
+        m = RE_TESTER.match(riga)
+        if not m:
+            continue
+        msg = m.group("msg")
+        if msg.startswith("last test passed with result"):
+            d["last"] = True
+            s = rel(m)
+            d["last_s"] = s if d["last_s"] is None or (s is not None and s < d["last_s"]) else d["last_s"]
+        elif "Test passed in" in msg or "total time from login to stop testing" in msg:
+            s = rel(m)
+            if s is not None and (d["test_s"] is None or s < d["test_s"]):
+                d["test_s"] = s
+        mb = re.search(r"final balance ([0-9.]+)", msg)
+        if mb:
+            d["balance"] = mb.group(1)
+    if d["report"]:
+        d["classe"] = "report scritto"
+    elif d["test_s"] is None:
+        d["classe"] = "nessuna riga di fine test nel giornale: non classificata"
+    elif d["test_s"] > CE8_ENTRO_S:
+        d["classe"] = "test finito TARDI (+%d s dall'avvio): causa a monte del test (storia, sincronizzazione), non lo stallo del 12/10" % int(d["test_s"])
+    elif not d["last"]:
+        d["classe"] = "BLOCCATA DOPO IL TEST (test finito a +%d s, nessuna riga 'last test passed', report non scritto)" % int(d["test_s"])
+    else:
+        d["classe"] = "report non scritto con la riga 'last test passed' presente: firma DIVERSA dallo stallo del 12/10"
+    return d
+
+
+def ce8_testo(d):
+    if not d["lanciata"]:
+        return "passata non lanciata: nessun dato"
+    return "t_avvio %s | fine del test ('Test passed' / 'total time') %s | 'last test passed' %s | durata %s s | n del report %s | final balance %s | tentati (EA) %s -> %s" % (
+        d["t_avvio"] or "n.d.", "n.d." if d["test_s"] is None else "+%d s" % int(d["test_s"]),
+        ("SI (+%d s)" % int(d["last_s"]) if d["last_s"] is not None else "SI") if d["last"] else "ASSENTE", d["durata"] or "n.d.", d["n"] or "n.d.",
+        d["balance"] or "n.d.", "n.d." if d["tentati"] is None else d["tentati"], d["classe"])
+
+
+def ce8_lettura(lotti):
+    """La lettura del CE8 scritta nel file prova PRIMA dei numeri (r.79-92), applicata alla lettera. DESCRIZIONE: nessun esito ne dipende."""
+    PR, PM = _passata(lotti, "R2SXAG2", "REPL"), _passata(lotti, "R2SXAG2", "M15")
+    dr = ce8_passata(PR) if PR else None
+    dm = ce8_passata(PM) if PM else None
+    out = []
+
+    def bloccata(d):
+        return d is not None and d["classe"].startswith("BLOCCATA DOPO IL TEST")
+    if dr and dr["lanciata"]:
+        if dr["report"] and dr["n"] == "0" and PR["riga"]["motivi"].strip() == "ZERO operazioni nel report":
+            out.append("REPL con n = 0 e report scritto (KO per il SOLO 'ZERO operazioni nel report') -> H-ZERO-R SMENTITA: lo stallo del 12/10 non dipendeva dalle zero "
+                       "operazioni col report; resta lo stallo occasionale (F5)")
+        elif bloccata(dr):
+            out.append("REPL di nuovo senza report, test finito entro ~1 minuto, nessuna 'last test passed' -> stallo RIPRODOTTO 2 volte su 2 sulla stessa passata: causa "
+                       "legata alla passata (H-ZERO-R o altro della REPL argento M1, NON si sa quale); NON si rilancia una terza volta con un timeout piu' lungo: si porta "
+                       "a Claudio (decisione aperta 1 della scheda)")
+        elif dr["classe"].startswith("test finito TARDI"):
+            out.append("REPL: test finito TARDI -> la causa e' a monte del test (storia, sincronizzazione), non lo stallo del 12/10")
+    if dm and dm["lanciata"]:
+        if dm["report"]:
+            if dm["n"].isdigit() and int(dm["n"]) >= 1 and bloccata(dr):
+                out.append("M15 con n >= 1 e report scritto, REPL bloccata -> coerente con H-ZERO-R (NON la prova)")
+            elif dm["n"] == "0":
+                out.append("M15 con n = 0 e report scritto -> H-ZERO-R SMENTITA")
+        elif bloccata(dm):
+            if dm["tentati"] == 0 and dm["balance"] == DEPOSITO:
+                out.append("M15 con n = 0 e bloccata (final balance = deposito, [GBA-CONTA] FINE con ingressi tentati 0) -> coerente con H-ZERO-R (NON la prova)")
+            elif dm["tentati"] is not None and dm["tentati"] >= 1:
+                out.append("M15 con ingressi tentati %d (>= 1) e bloccata -> H-ZERO-R SMENTITA (lo stallo non e' legato alle zero operazioni): resta lo stallo "
+                           "occasionale" % dm["tentati"])
+        elif dm["classe"].startswith("test finito TARDI"):
+            out.append("M15: test finito TARDI -> la causa e' a monte del test (storia, sincronizzazione), non lo stallo del 12/10")
+    if not out:
+        out.append("nessuno dei casi scritti nel file prova (CE8) si applica: niente da leggere sulla causa")
+    return out
+
+
 def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
     out = []
     W = out.append
     righe_csv = []
+    xag2 = "R2SXAG2" in lotti
+    giro = GIRO_XAG2 if xag2 else GIRO_A
     W("=" * 110)
     W(" %s -- GBA R2S stadio A, C3G (mediana vera del campo stop/spread delle righe segnale). SHA256 di questo file: %s" % (
         VERSIONE, hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest()[:16]))
     W(" Regole: righe -1.0x = INFINITO (contate, non scartate); mediana con n PARI = media delle due centrali (INF se una delle due e' INF); fasce = lettore r.52, campo 'ora server'.")
     W(" Precondizione FUORI da D2: il G0 del lettore leggi_gba_r0.py (sezione (1)) per ogni passata; l'A3 dell'ancora (doppione con GBA_R0_S0.zip).")
+    if xag2:
+        W(" LOTTO R2SXAG2 (rilancio dell'argento, pin %s): SHA256 di D2 PER INTERO: %s" % (PIN_XAG2, sha_d2()))
+        W(" REGOLA E3(3): una conferma a tick reali letta con uno strumento D2 di SHA256 DIVERSO da quello qui sopra (che legge la passata a Modello 1) e' 'conferma non")
+        W("   data' (casella 4 aperta). Precondizione FUORI da D2: il PASS del cancello su QUESTO SHA256 PRIMA di aprire lo zip (senza: CE7 non valutabile, tutto (C)).")
+        W(" X6: CE1 del lotto = ancora del 12/10 (zip archiviato, pin %s) E CE7; CE7 rossa o non valutabile -> M15 e REPL (C). CE8 = sola descrizione." % PIN_A[:8])
     W("=" * 110)
     W("(0) PROVA D'ACCETTAZIONE di D2 (giornali archiviati, rifatta adesso): %s" % ("PASSATA" if acc_ok else "NON PASSATA -> nessuna cella esce 'ESCLUSA'"))
     for x in acc_righe:
@@ -838,7 +1067,19 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
                 controlli(P)
     ce1 = stato_ce1(lotti)
     W("   CE1 ancora: " + ce1[1])
+    ce1_lotto = {}
+    if xag2:
+        # X6 e CE7 PRIMA di qualunque esito: l'esito della M15 (prima nel manifest) dipende dal CE7 della REPL (seconda)
+        ce7 = stato_ce7(lotti, acc_ok)
+        ce1_lotto["R2SXAG2"] = stato_ce1_x6(lotti, ce1, ce7)
+        W("   CE7 (determinismo della REPL, tolleranza zero sulle cifre stampate): %s: %s" % (ce7[0], ce7[1]))
+        W("   CE1 del lotto R2SXAG2 (X6): " + ce1_lotto["R2SXAG2"][1])
+        W("   CE8 (causa dello stallo, DESCRIZIONE, nessun esito ne dipende; lettura scritta nel file prova prima dei numeri):")
+        for x in ce8_lettura(lotti):
+            W("      - " + x)
     for L in ORDINE:
+        if L not in giro:
+            continue
         if L not in lotti:
             W("")
             W("-" * 110)
@@ -855,6 +1096,8 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
             W(" LOTTO %s  CELLA %s = %s %s  (passata %s, stato driver %s%s)%s" % (L, P["cella"], P["simbolo"], P["tf"], P["tag"], P["stato"],
                                                                          "" if not P["riga"]["motivi"] else ": " + P["riga"]["motivi"], "  [ANCORA]" if L == "R2SANC" else ""))
             W("-" * 110)
+            if L == "R2SXAG2":
+                W("   CE8 (descrizione): " + ce8_testo(ce8_passata(P)))
             if P["giornale"] is None:
                 W("   passata non lanciata: niente da leggere -> esito (C)")
                 righe_csv.append({"lotto": L, "cella": P["cella"], "simbolo": P["simbolo"], "tf": P["tf"], "livello": "CELLA", "nome": "-", "esito_pinnato": "C", "esito_E1": "C",
@@ -902,15 +1145,18 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
                 cd = condizioni_b(A, S, soglia)
                 W("   condizioni di ESCLUSA, S = %sx, %s ((ii) su fasce >= %d righe: %s): (i) %s  (ii) %s  (iii) %s  (iv) %s  | (v) E4 righe >= 40x %d < 30: %s" % (
                     fx(S), nome_s, soglia, ", ".join(cd["fasce_ii"]) or "nessuna", *(["SI" if cd[k] else "no" for k in ("i", "ii", "iii", "iv")] + [A["ge40"], "SI" if cd["v"] else "no"])))
-            e_p = esito(P, S, "pinnato", acc_ok, ce1)
-            e_1 = esito(P, S, "E1", acc_ok, ce1)
-            e_r = esito(P, S, "riferimento", acc_ok, ce1)
+            ce1_p = ce1_lotto.get(L, ce1)          # R2SXAG2: X6 (ancora del 12/10 E CE7); gli altri lotti: CE1 dell'ancora come nella v2
+            e_p = esito(P, S, "pinnato", acc_ok, ce1_p)
+            e_1 = esito(P, S, "E1", acc_ok, ce1_p)
+            e_r = esito(P, S, "riferimento", acc_ok, ce1_p)
             c4 = casella4(e_r, P, None, S, acc_ok)
             W("   (variante) ESITO secondo il testo pinnato, (i)-(iv), (ii) >= 100: (%s) %s" % (e_p[0], e_p[1]))
             W("   (variante) ESITO con E1, (i)-(iv), (ii) >= 30:                  (%s) %s" % (e_1[0], e_1[1]))
             W("   ESITO DI RIFERIMENTO (E1 + E4, (i)-(v), dicitura E3):          (%s) %s" % (e_r[0], e_r[1]))
             W("   CASELLA 4 (E3): %s" % c4)
             rc.update({"esito_pinnato": e_p[0] + " " + e_p[1], "esito_E1": e_1[0] + " " + e_1[1], "esito_riferimento": e_r[0] + " " + e_r[1], "casella4_E3": c4})
+            if L == "R2SXAG2":
+                rc.update({"ce1_x6": ("VERDE " if ce1_p[0] else "NON VERDE ") + ce1_p[1], "ce8": ce8_testo(ce8_passata(P))})
             righe_csv.append(rc)
     W("")
     W(" NON giudica il merito, NON promuove, NON legge PF. Ogni esito vale solo con il G0 del lettore OK sulla stessa passata.")
@@ -919,6 +1165,8 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
         campi = ["lotto", "cella", "simbolo", "tf", "livello", "nome", "righe", "c3g", "buy_n", "buy_c3g", "sell_n", "sell_c3g", "ge40", "ge50", "ingressi", "quota_ingressi",
                  "ingressi_spread_zero", "righe_spread_zero", "n_report", "tentati", "scartati_spread", "solo_spread_mediana", "spread_cella", "esito_pinnato", "esito_E1",
                  "esito_riferimento", "casella4_E3"]
+        if xag2:
+            campi += ["ce1_x6", "ce8"]           # solo nella lettura del rilancio: il CSV dello stadio A resta quello della v2
         with open(csv_out, "w", newline="", encoding="ascii", errors="replace") as fh:
             w = csv.DictWriter(fh, fieldnames=campi, delimiter=";")
             w.writeheader()
@@ -978,8 +1226,8 @@ def _zip_lotto(L, celle, prova_bytes=None, togli=(), ini_mod=None, nome_prova=No
     for k, (cn, spec) in enumerate(celle.items()):
         tf = spec.get("tf", tfm.get(cn, "M5"))
         tag = "%s_%02d_%s_T1_m775800" % (L, k + 1, cn)
-        man.append("%s;%s;%s;0.05;T1;2026.07.01;2026.09.30;1;775800;2026-10-12 10:00:00;30;%s;%s;%s;%s;%s;1;1;1;1;%s;1;%s;si;si;2026.07.01-2026.09.30;%s;InpSignalTF;%s;%s;%s;%s" % (
-            L, tag, cn, spec.get("stato", "OK"), spec["n"], spec.get("profitto", "-1.00"), spec.get("pf", "0.90"), spec.get("qualita", "100%"), spec.get("ticks_inizio", ""),
+        man.append("%s;%s;%s;0.05;T1;2026.07.01;2026.09.30;1;775800;%s;%s;%s;%s;%s;%s;%s;1;1;1;1;%s;1;%s;si;si;2026.07.01-2026.09.30;%s;InpSignalTF;%s;%s;%s;%s" % (
+            L, tag, cn, spec.get("t_avvio", "2026-10-12 10:00:00"), spec.get("durata", "30"), spec.get("stato", "OK"), spec["n"], spec.get("profitto", "-1.00"), spec.get("pf", "0.90"), spec.get("qualita", "100%"), spec.get("ticks_inizio", ""),
             spec["n"], spec.get("motivi", ""),
             spec.get("valore", TF_NUM.get(tf, "5")), spec.get("simbolo", D["simbolo"]), tf, D["prova"]))
         if "ini" not in togli:
@@ -993,7 +1241,8 @@ def _zip_lotto(L, celle, prova_bytes=None, togli=(), ini_mod=None, nome_prova=No
         if "log" not in togli:
             lg = spec.get("log") or _log(D["simbolo"], tf, spec["righe"], spec.get("conta"), spec.get("avvio_sim"), spec.get("fin_sim"), spec.get("ingressi"))
             z.writestr("log\\GBA_%s.txt" % tag, lg)
-        z.writestr("report\\GBA_R0_%s.htm" % tag, spec.get("report") or _report(rep_sim or D["simbolo"], tf, spec["n"]))
+        if not spec.get("senza_report"):
+            z.writestr("report\\GBA_R0_%s.htm" % tag, spec.get("report") or _report(rep_sim or D["simbolo"], tf, spec["n"]))
     z.writestr("MANIFEST_R0.csv", "\r\n".join(man))
     if "riepilogo" not in togli:
         z.writestr("RIEPILOGO_R0.txt", riepilogo if riepilogo is not None else _riepilogo(L))
@@ -1004,7 +1253,7 @@ def _zip_lotto(L, celle, prova_bytes=None, togli=(), ini_mod=None, nome_prova=No
 def _riepilogo(L, pin=None, sha_ea=None):
     """Testa del RIEPILOGO_R0.txt come la scrive il driver v5 (r.875-878)."""
     return ("GBA R0 -- lotto %s: ABTG_GoldBreakoutATR v1.10\r\ndata: 2026-10-12 10:00:00   pc: DESKTOP-H4D7CAJ   pin: %s\r\n"
-            "ABTG_GoldBreakoutATR.mq5 SHA256 %s   compilazione: 0 errori, 0 avvisi (-1 = non letto)\r\n") % (L, pin or PIN_AMMESSI[0], sha_ea or SHA_EA)
+            "ABTG_GoldBreakoutATR.mq5 SHA256 %s   compilazione: 0 errori, 0 avvisi (-1 = non letto)\r\n") % (L, pin or LOTTI[L]["pin"], sha_ea or SHA_EA)
 
 
 def autotest():
@@ -1383,18 +1632,240 @@ def autotest():
         zr.writestr("GBA_R0_R2SANC.zip", zip_ancora(log_s0))
         zr.writestr("ESITI_R2S_A.txt", "GBA R2S A -- pin %s   pc DESKTOP-H4D7CAJ\r\nR2SANC rc 0" % ("2f4a2a5b786bdc2dd5eddd883ac9d63bacbef02f"))
     rifiuta("RIFIUTO: raccolta con ESITI_R2S_A.txt di un altro pin", lambda: carica([raccolta2]))
+    # --- 7. lotto R2SXAG2 (v3): regressione dello stadio A, CE7, X6, CE8, pin per lotto, ordine
+    _autotest_xag2(ck, rifiuta, td, zip_ancora, log_s0, KOZ)
     ck("il lettore non e' stato modificato dall'autotest", hashlib.sha256(open(lp, "rb").read()).hexdigest() == LETTORE_SHA256)
     import shutil
     shutil.rmtree(td, ignore_errors=True)
-    ck("i 5 file prova non sono stati toccati", all(hashlib.sha256(open(os.path.join(QD, "prove", D["prova"]), "rb").read()).hexdigest() == D["sha"] for D in LOTTI.values()))
+    ck("i 6 file prova non sono stati toccati", all(hashlib.sha256(open(os.path.join(QD, "prove", D["prova"]), "rb").read()).hexdigest() == D["sha"] for D in LOTTI.values()))
     print("AUTOTEST: %d OK, %d FAIL -> %s" % (ok_tot[0], ok_tot[1], "PASS" if ok_tot[1] == 0 else "FAIL"))
     return 0 if ok_tot[1] == 0 else 1
+
+
+def _autotest_xag2(ck, rifiuta, td, zip_ancora, log_s0, KOZ):
+    """Contro-esempi del lotto R2SXAG2 (v3). Ogni lettura passa da carica() + stampa() come da riga di comando."""
+    print("  --- lotto R2SXAG2 (rilancio dell'argento, v3) ---")
+    D = LOTTI["R2SXAG2"]
+    ck("R2SXAG2: file prova GBA_R2S_XAGUSD2 con lo SHA256 pinnato (dbe11bc3...), XAGUSD, S 6,65, celle M15 -> REPL, tag R2SXAG2_01_M15 / R2SXAG2_02_REPL",
+       hashlib.sha256(open(os.path.join(QD, "prove", D["prova"]), "rb").read()).hexdigest() == D["sha"] and D["S"] == 6.65 and D["simbolo"] == "XAGUSD"
+       and [c for c, _t in D["celle"]] == ["M15", "REPL"] and D["tag"] == {"M15": "R2SXAG2_01_M15_T1_m775800", "REPL": "R2SXAG2_02_REPL_T1_m775800"})
+    ck("pin PER LOTTO: i 5 lotti dello stadio A solo cc9bcda0, R2SXAG2 solo d53493a9; PIN_AMMESSI = (cc9bcda0, d53493a9)",
+       all(LOTTI[L]["pin"] == PIN_A for L in GIRO_A) and LOTTI["R2SXAG2"]["pin"] == PIN_XAG2 and set(PIN_AMMESSI) == {PIN_A, PIN_XAG2}
+       and PIN_XAG2 == "d53493a92901b82c6b4c12c1d79ec3cb4ebfa5bb")
+    acc_ok, acc_r = accettazione()
+    # 7a. REGRESSIONE: la lettura archiviata dello stadio A (v2) riga per riga
+    raw = open(ARCH_R2S_A, "rb").read()
+    ck("archivio GBA_R2S_A.zip del 12/10 con lo SHA256 pinnato (ae62e772...)", hashlib.sha256(raw).hexdigest() == SHA_ARCH_R2S_A)
+    arch = open(ARCH_LETTURA_A[0], "rb").read()
+    ck("lettura archiviata LETTURA_D2_R2S_A.txt (v2) con lo SHA256 pinnato (d3359c09...)", hashlib.sha256(arch).hexdigest() == ARCH_LETTURA_A[1])
+    la, na = carica([ARCH_R2S_A])
+    csv_a = os.path.join(td, "regr_A.csv")
+    testo_a = stampa(la, na, acc_ok, acc_r, csv_a).splitlines()
+    vecchie = arch.decode("ascii").splitlines()
+    diverse = [i + 1 for i in range(min(len(vecchie) - 1, len(testo_a))) if vecchie[i] != testo_a[i]]
+    ck("REGRESSIONE stadio A: la v3 rilegge GBA_R2S_A.zip e stampa le %d righe della v2 IDENTICHE, salvo la riga 2 (versione + SHA256 di D2); l'ultima riga archiviata "
+       "e' il percorso del CSV (stampato da main)" % (len(vecchie) - 1),
+       len(testo_a) == len(vecchie) - 1 and diverse == [2] and vecchie[-1].startswith(" CSV: ") and testo_a[1].startswith(" leggi_gba_r2s_c3g v3 ")
+       and testo_a[1].endswith(sha_d2()[:16]) and vecchie[1].endswith("14384d874d124021"), "righe diverse: %s" % diverse)
+    ck("REGRESSIONE stadio A: il CSV della v3 e' IDENTICO byte per byte a D2_C3G_R2S_A.csv archiviato (91010969...)",
+       hashlib.sha256(open(csv_a, "rb").read()).hexdigest() == ARCH_CSV_A[1] == hashlib.sha256(open(ARCH_CSV_A[0], "rb").read()).hexdigest())
+    ck("stadio A: nessuna riga del rilancio (E3(3), CE7, X6, CE8) nella lettura dello stadio A", not any(("E3(3)" in x or "CE7" in x or "X6" in x or "CE8" in x) for x in testo_a))
+    # 7b. dati VERI del 12/10: l'ancora e il giornale della REPL argento
+    zA = zipfile.ZipFile(io.BytesIO(raw))
+    NA = _nomi(zA)
+    anc = zA.read(NA["GBA_R0_R2SANC.zip"])
+    ck("ancora del 12/10: GBA_R0_R2SANC.zip dentro GBA_R2S_A.zip ha lo SHA256 pinnato in D2 (259f4ba0...)", hashlib.sha256(anc).hexdigest() == SHA_ANCORA_1210)
+    zx_raw = zA.read(NA["GBA_R0_R2SXAG.zip"])
+    zx = zipfile.ZipFile(io.BytesIO(zx_raw))
+    log1210 = zx.read(_nomi(zx)["log/GBA_R2SXAG_01_REPL_T1_m775800.txt"]).decode("ascii")
+    vera = leggi_lotto("GBA_R0_R2SXAG.zip", zx_raw)
+    d8 = ce8_passata(vera["passate"][0])
+    ck("CE8 sui dati VERI del 12/10 (F1-F3 del file prova): REPL argento avvio 16:31:36, fine del test +13 s, 'last test passed' ASSENTE, durata 1215 -> BLOCCATA DOPO IL TEST",
+       d8["t_avvio"] == "2026-10-12 16:31:36" and d8["test_s"] is not None and int(d8["test_s"]) == 13 and not d8["last"] and d8["durata"] == "1215"
+       and d8["classe"].startswith("BLOCCATA DOPO IL TEST") and d8["balance"] == DEPOSITO, ce8_testo(d8)[:160])
+    va = leggi_lotto("GBA_R0_R2SANC.zip", anc)
+    controlli(va["passate"][0])
+    da = ce8_passata(va["passate"][0])
+    ck("CE8 sui dati VERI del 12/10, controprova: l'ancora R2SANC ha il report, 'last test passed' presente 2,96-3,98 s dopo la fine del test (F2)",
+       da["classe"] == "report scritto" and da["last"] and 2.9 <= da["last_s"] - da["test_s"] <= 4.0, ce8_testo(da)[:160])
+    m15_righe = [("BUY" if i % 2 else "SELL", False, "spread oltre il limite", 9.0, i % 24) for i in range(600)]
+    STALLO = "timeout di 45 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAG2_02_REPL_T1_m775800): senza report non c e misura"
+
+    def repl_spec(log=None, **kw):
+        s = dict(KOZ, righe=None, log=log or log1210, n=0, t_avvio="2026-10-12 16:31:36", durata="20")
+        s.update(kw)
+        return s
+
+    def leggi(m15=None, repl=None, ancora=None, acc=None, nome="x"):
+        celle = {"M15": m15 if m15 is not None else dict(KOZ, righe=m15_righe, n=0)}
+        if repl is not False:
+            celle["REPL"] = repl if repl is not None else repl_spec()
+        pz = os.path.join(td, nome)
+        os.makedirs(pz, exist_ok=True)
+        pa, px = os.path.join(pz, "GBA_R0_R2SANC.zip"), os.path.join(pz, "GBA_R0_R2SXAG2.zip")
+        open(pa, "wb").write(ancora if ancora is not None else anc)
+        open(px, "wb").write(_zip_lotto("R2SXAG2", celle))
+        lt, nt = carica([pa, px])
+        cp = os.path.join(pz, "d2.csv")
+        t = stampa(lt, nt, acc_ok if acc is None else acc, acc_r, cp)
+        return t, open(cp, encoding="ascii").read()
+
+    def blocco(t, cella):
+        parti = t.split("-" * 110)
+        for i, p in enumerate(parti):
+            if p.strip().startswith("LOTTO R2SXAG2  CELLA %s " % cella):
+                return parti[i + 1] if i + 1 < len(parti) else ""
+        return ""
+
+    def rif(t, cella):
+        r = [x for x in blocco(t, cella).splitlines() if "ESITO DI RIFERIMENTO" in x]
+        return r[0] if r else "(assente)"
+    # 7c. il caso argento M1 deterministico: D2 accettato, ancora del 12/10 verde, CE7 verde -> REPL 'ESCLUSA (Modello 1)', casella 4 NON ANCORA MISURATO
+    t, c = leggi(nome="det")
+    ck("argento DETERMINISTICO: CE7 VERDE e CE1 del lotto (X6) VERDE", "CE7 (determinismo della REPL, tolleranza zero sulle cifre stampate): VERDE" in t
+       and "CE1 del lotto R2SXAG2 (X6): VERDE" in t, [x for x in t.splitlines() if x.startswith("   CE7 (")][0][:150])
+    rv = vecchie[34:35] + vecchie[36:45]
+    ck("argento DETERMINISTICO: il blocco della REPL ristampa le righe del 12/10 (LETTURA r.35, r.37-45: righe, motivi, C3G cella/lati, le 6 fasce) IDENTICHE",
+       all(x in blocco(t, "REPL").splitlines() for x in rv), "%d righe" % len(rv))
+    ck("argento DETERMINISTICO, n = 0 col report (eccezione n = 0), (i)-(v) con S 6,65: ESITO DI RIFERIMENTO (B) 'ESCLUSA (Modello 1)'",
+       "(B)" in rif(t, "REPL") and "ESCLUSA (Modello 1)" in rif(t, "REPL") and "S 6.65" in rif(t, "REPL"), rif(t, "REPL")[-110:])
+    ck("argento DETERMINISTICO: CASELLA 4 (E3) resta NON ANCORA MISURATO (la conferma a tick reali non c'e'); MAI 'ESCLUSA PER COSTO' nel testo e nel CSV",
+       "CASELLA 4 (E3): NON ANCORA MISURATO: ESCLUSA (Modello 1) da confermare" in blocco(t, "REPL") and "ESCLUSA PER COSTO" not in t and "ESCLUSA PER COSTO" not in c
+       and "Modello 1 e tick reali" not in t)
+    ck("argento DETERMINISTICO: M15 a 9,0x (n = 0 col report) -> (B) 'n insufficiente' ((iii) NO con S 6,65)", "(B)" in rif(t, "M15") and "n insufficiente" in rif(t, "M15"),
+       rif(t, "M15")[:110])
+    ck("ORDINE: M15 PRIMA della REPL nel testo (come nel manifest, X2), e CE7/X6 stampati PRIMA di ogni esito",
+       0 < t.find("LOTTO R2SXAG2  CELLA M15 ") < t.find("LOTTO R2SXAG2  CELLA REPL ") and t.find("CE1 del lotto R2SXAG2 (X6)") < t.find("LOTTO R2SXAG2  CELLA M15 "))
+    ck("intestazione del rilancio: SHA256 di D2 PER INTERO e la regola E3(3) ('conferma non data' con uno SHA diverso)",
+       ("SHA256 di D2 PER INTERO: " + sha_d2()) in t and "REGOLA E3(3)" in t and "conferma non" in t and len(sha_d2()) == 64)
+    ck("CE8 (descrizione): REPL e M15 con n = 0 e report scritto -> 'H-ZERO-R SMENTITA' (lettura del file prova), nessun esito cambia",
+       "REPL con n = 0 e report scritto" in t and "M15 con n = 0 e report scritto -> H-ZERO-R SMENTITA" in t)
+    ck("CSV del rilancio: colonne ce1_x6 e ce8 sulle due celle; lettura dello stadio A senza quelle colonne",
+       c.splitlines()[0].endswith(";ce1_x6;ce8") and c.count("VERDE VERDE (ancora del 12/10") == 2 and not open(csv_a).read().splitlines()[0].endswith("ce8"))
+    # 7d. CE7 ROSSA: cifre diverse dal 12/10 -> (C) per TUTTE E DUE le celle, senza appello
+    i_buy = log1210.index("[GBA] segnale BUY SALTATO")
+    log_lato = log1210[:i_buy] + "[GBA] segnale SELL SALTATO" + log1210[i_buy + len("[GBA] segnale BUY SALTATO"):]
+    t, c = leggi(repl=repl_spec(log=log_lato), nome="ce7lato")
+    ck("CE7 ROSSA: una riga BUY diventata SELL (n BUY 3363 invece di 3364) -> M15 e REPL (C) per CE1 (X6), nessuna ESCLUSA",
+       "CE7 (determinismo della REPL, tolleranza zero sulle cifre stampate): ROSSA" in t and "n BUY 3363 invece di 3364" in t
+       and rif(t, "M15").find("(C) NON SI LEGGE: CE1") > 0 and rif(t, "REPL").find("(C) NON SI LEGGE: CE1") > 0 and "ESCLUSA (Modello 1)" not in rif(t, "REPL"))
+    righe_log = log1210.split("\r\n") if "\r\n" in log1210 else log1210.split("\n")
+    sep = "\r\n" if "\r\n" in log1210 else "\n"
+    ultima = max(i for i, x in enumerate(righe_log) if "[GBA] segnale " in x)
+    log_meno = sep.join(righe_log[:ultima] + righe_log[ultima + 1:]).replace("| segnali 6611 |", "| segnali 6610 |").replace("SPREAD 6611 (", "SPREAD 6610 (")
+    t, c = leggi(repl=repl_spec(log=log_meno), nome="ce7meno")
+    ck("CE7 ROSSA: una riga segnale in meno (6610, EA coerente 6610/0/6610) -> (C) per tutte e due le celle", "ROSSA" in t and "righe segnale 6610 invece di 6611" in t
+       and "(C)" in rif(t, "M15") and "(C)" in rif(t, "REPL"))
+    # 7e. CE7 NON VALUTABILE -> (C) per tutte e due
+    t, c = leggi(repl={"righe": [], "n": "", "stato": "NON_LANCIATA", "motivi": "tetto di 50 minuti", "senza_report": True}, nome="nonlanc")
+    ck("REPL NON LANCIATA -> CE7 NON VALUTABILE -> anche la M15 e' (C) (X6)", "CE7 (determinismo della REPL, tolleranza zero sulle cifre stampate): NON VALUTABILE" in t
+       and "(C) NON SI LEGGE: CE1" in rif(t, "M15"), rif(t, "M15")[:120])
+    t, c = leggi(repl=False, nome="senzarepl")
+    ck("REPL ASSENTE dal manifest -> CE7 NON VALUTABILE -> M15 (C)", "NON VALUTABILE" in t and "(C) NON SI LEGGE: CE1" in rif(t, "M15"))
+    log_senza = sep.join(x for x in righe_log if "[GBA-CONTA] FINE" not in x)
+    t, c = leggi(repl=repl_spec(log=log_senza), nome="senzaconta")
+    ck("giornale della REPL SENZA la riga [GBA-CONTA] FINE -> CE7 NON VALUTABILE -> (C) tutte e due", "NON VALUTABILE: il giornale della REPL non ha UNA riga" in t
+       and "(C)" in rif(t, "M15") and "(C)" in rif(t, "REPL"))
+    t, c = leggi(acc=False, nome="noacc")
+    ck("D2 NON accettato (prova d'accettazione non passata) -> CE7 NON VALUTABILE -> (C) tutte e due, anche coi dati deterministici",
+       "NON VALUTABILE: la prova d'accettazione di D2 NON e' passata" in t and "(C)" in rif(t, "M15") and "(C)" in rif(t, "REPL") and "ESCLUSA" not in rif(t, "REPL"))
+    # 7f. X6: l'ancora deve essere QUELLA del 12/10
+    t, c = leggi(ancora=zip_ancora(log_s0), nome="altraancora")
+    ck("X6: ancora verde nei numeri (rifatta da S0_01) ma NON lo zip del 12/10 -> CE1 del lotto NON VERDE -> (C) tutte e due, anche con CE7 verde",
+       "CE1 ancora: VERDE" in t and "CE7 (determinismo della REPL, tolleranza zero sulle cifre stampate): VERDE" in t and "NON e' GBA_R0_R2SANC.zip del 12/10" in t
+       and "(C)" in rif(t, "M15") and "(C)" in rif(t, "REPL"))
+    raw1 = open(ACC_R1A["zip"], "rb").read()
+    log_r1 = zipfile.ZipFile(io.BytesIO(raw1)).read(_nomi(zipfile.ZipFile(io.BytesIO(raw1)))[ACC_R1A["log"]]).decode("ascii")
+    t, c = leggi(ancora=zip_ancora(log_r1), nome="ancorarossa")
+    ck("X6: ancora ROSSA (giornale di R1A) -> (C) tutte e due", "CE1 ancora: ROSSO" in t and "(C)" in rif(t, "M15") and "(C)" in rif(t, "REPL"))
+    # 7g. lo stallo: REPL bloccata di nuovo, M15 bloccata, M15 con n >= 1, test finito tardi (CE8 = descrizione, gli esiti non cambiano)
+    m15_ok = {"righe": m15_righe + [("BUY", True, "", 60.0, 15) for _i in range(3)], "n": 3}
+    t, c = leggi(m15=m15_ok, repl=repl_spec(stato="KO", motivi=STALLO, n="", senza_report=True), nome="repl_stallo")
+    ck("REPL BLOCCATA di nuovo (test a +13 s, niente 'last test passed', niente report), CE7 VERDE: REPL (C) per KO, M15 LETTA (X6 verde) -> (B) n 3",
+       "CE1 del lotto R2SXAG2 (X6): VERDE" in t and "(C) NON SI LEGGE: passata KO (timeout di 45 minuti" in rif(t, "REPL") and "(B)" in rif(t, "M15")
+       and "(n 3," in rif(t, "M15"), rif(t, "M15")[:100])
+    ck("CE8: REPL bloccata 2 su 2 -> 'stallo RIPRODOTTO', 'NON si rilancia una terza volta'; M15 n >= 1 col report -> 'coerente con H-ZERO-R (NON la prova)'",
+       "stallo RIPRODOTTO 2 volte su 2" in t and "NON si rilancia una terza volta" in t and "M15 con n >= 1 e report scritto, REPL bloccata -> coerente con H-ZERO-R" in t
+       and "BLOCCATA DOPO IL TEST (test finito a +13 s" in blocco(t, "REPL"))
+    tl = ("# TESTER CS\t0\t10:00:12.400\tTester\tfinal balance 1000000.00 EUR\r\n"
+          "# TESTER CS\t0\t10:00:12.500\tTester\tXAGUSD,M15: total time from login to stop testing 0:00:00.400 (including 0:00:00.010 for history data synchronization)\r\n")
+    m15_blocc = dict(stato="KO", motivi=STALLO.replace("_02_REPL", "_01_M15"), n="", senza_report=True, righe=None, log=tl + _log("XAGUSD", "M15", m15_righe))
+    t, c = leggi(m15=m15_blocc, nome="m15_stallo")
+    ck("M15 BLOCCATA (n = 0, final balance = deposito, tentati 0): M15 (C) per KO; REPL letta (ESCLUSA (Modello 1)); CE8 'coerente con H-ZERO-R (NON la prova)'",
+       "(C) NON SI LEGGE: passata KO (timeout" in rif(t, "M15") and "ESCLUSA (Modello 1)" in rif(t, "REPL")
+       and "M15 con n = 0 e bloccata (final balance = deposito" in t and "BLOCCATA DOPO IL TEST (test finito a +12 s" in blocco(t, "M15"))
+    m15_rows_ing = m15_righe + [("BUY", True, "", 60.0, 15)]
+    m15_blocc1 = dict(m15_blocc, log=tl.replace("1000000.00", "999990.00") + _log("XAGUSD", "M15", m15_rows_ing))
+    t, c = leggi(m15=m15_blocc1, nome="m15_stallo1")
+    ck("M15 BLOCCATA con 1 ingresso tentato -> CE8 'H-ZERO-R SMENTITA (lo stallo non e' legato alle zero operazioni)'; M15 (C)",
+       "M15 con ingressi tentati 1 (>= 1) e bloccata -> H-ZERO-R SMENTITA" in t and "(C)" in rif(t, "M15"))
+    m15_tardi = dict(m15_blocc, log=tl.replace("10:00:12", "10:05:00") + _log("XAGUSD", "M15", m15_righe))
+    t, c = leggi(m15=m15_tardi, nome="m15_tardi")
+    ck("M15 col test finito a +300 s -> CE8 'test finito TARDI': causa a monte del test (descrizione)", "M15: test finito TARDI" in t and "test finito TARDI (+300 s" in t)
+    ck("CE8 e' sola DESCRIZIONE: con lo stesso REPL deterministico l'esito della REPL e' lo stesso con la M15 bloccata, tardi o letta",
+       all("ESCLUSA (Modello 1)" in rif(leggi(m15=mm, nome="d%d" % k)[0], "REPL") for k, mm in enumerate((m15_blocc, m15_tardi, m15_ok))))
+    # 7h. RIFIUTI del lotto nuovo
+    rr = [("BUY" if i % 2 else "SELL", False, "spread oltre il limite", 9.0, i % 24) for i in range(50)]
+    rifiuta("RIFIUTO: zip R2SXAG2 col RIEPILOGO al pin cc9bcda0 (il pin dello stadio A NON vale per il rilancio)",
+            lambda: leggi_lotto("GBA_R0_R2SXAG2.zip", _zip_lotto("R2SXAG2", {"M15": dict(KOZ, righe=rr, n=0), "REPL": repl_spec()}, riepilogo=_riepilogo("R2SXAG2", pin=PIN_A))))
+    rifiuta("RIFIUTO: zip R2SANC (ancora) col RIEPILOGO al pin d53493a9 (il pin del rilancio NON vale per lo stadio A)",
+            lambda: leggi_lotto("GBA_R0_R2SANC.zip", _zip_lotto("R2SANC", {"REPL": {"righe": rr, "n": 0}}, riepilogo=_riepilogo("R2SANC", pin=PIN_XAG2))))
+    rifiuta("RIFIUTO: zip R2SNAS col RIEPILOGO al pin d53493a9", lambda: leggi_lotto("x.zip", _zip_lotto("R2SNAS", {"M5": {"righe": rr, "n": 0}}, riepilogo=_riepilogo("R2SNAS", pin=PIN_XAG2))))
+    rifiuta("RIFIUTO: manifest R2SXAG2 con la REPL PRIMA (tag R2SXAG2_01_REPL, contro X1-X2)",
+            lambda: leggi_lotto("x.zip", _zip_lotto("R2SXAG2", {"REPL": repl_spec(), "M15": dict(KOZ, righe=rr, n=0)})))
+    zb = _zip_lotto("R2SXAG2", {"M15": dict(KOZ, righe=rr, n=0), "REPL": repl_spec()})
+    bz = io.BytesIO()
+    with zipfile.ZipFile(io.BytesIO(zb)) as zi, zipfile.ZipFile(bz, "w") as zo:
+        for it in zi.namelist():
+            dati = zi.read(it)
+            if it == "MANIFEST_R0.csv":
+                rm = dati.decode("ascii").split("\r\n")
+                dati = "\r\n".join([rm[0], rm[2], rm[1]]).encode("ascii")
+            zo.writestr(it, dati)
+    rifiuta("RIFIUTO: manifest R2SXAG2 coi tag giusti ma le righe in ordine REPL -> M15 (X2)", lambda: leggi_lotto("x.zip", bz.getvalue()))
+    rifiuta("RIFIUTO: zip del lotto R2SXAG2 chiamato GBA_R0_R2SXAG.zip", lambda: leggi_lotto("GBA_R0_R2SXAG.zip", zb))
+    rifiuta("RIFIUTO: zip R2SXAG2 col file prova del 12/10 (GBA_R2S_XAGUSD, non XAGUSD2)",
+            lambda: leggi_lotto("x.zip", _zip_lotto("R2SXAG2", {"M15": dict(KOZ, righe=rr, n=0)}, nome_prova=LOTTI["R2SXAG2"]["prova"],
+                                                     prova_bytes=open(os.path.join(QD, "prove", LOTTI["R2SXAG"]["prova"]), "rb").read())))
+    pz = os.path.join(td, "rif")
+    os.makedirs(pz, exist_ok=True)
+    pa, px = os.path.join(pz, "GBA_R0_R2SANC.zip"), os.path.join(pz, "GBA_R0_R2SXAG2.zip")
+    open(pa, "wb").write(anc)
+    open(px, "wb").write(zb)
+
+    def raccolta(nome, esiti, testo_es, lotti_dentro=("GBA_R0_R2SXAG2.zip",)):
+        p = os.path.join(pz, nome)
+        with zipfile.ZipFile(p, "w") as zr:
+            for n in lotti_dentro:
+                zr.writestr(n, zb if n == "GBA_R0_R2SXAG2.zip" else anc)
+            if esiti:
+                zr.writestr(esiti, testo_es)
+        return p
+    rx = raccolta("GBA_R2S_XAG2.zip", "ESITI_R2S_XAG2.txt", "GBA R2S XAG2 -- pin %s   pc DESKTOP-H4D7CAJ\r\nR2SXAG2 rc 3   minuti 2" % PIN_XAG2)
+    lt, nt = carica([pa, rx])
+    ck("raccolta GBA_R2S_XAG2.zip (con ESITI_R2S_XAG2.txt al pin d53493a9) + ancora del 12/10: letta, ESITI in nota", set(lt) == {"R2SANC", "R2SXAG2"}
+       and any(x.startswith("ESITI_R2S_XAG2.txt: GBA R2S XAG2 -- pin d53493a9") for x in nt))
+    rifiuta("RIFIUTO: lotto R2SXAG2 caricato DUE volte (zip del lotto + raccolta)", lambda: carica([pa, px, rx]))
+    rifiuta("RIFIUTO: ancora caricata DUE volte", lambda: carica([pa, pa, px]))
+    rifiuta("RIFIUTO: ESITI_R2S_XAG2.txt al pin cc9bcda0 (un ESITI di un altro pin)",
+            lambda: carica([pa, raccolta("r2.zip", "ESITI_R2S_XAG2.txt", "GBA R2S XAG2 -- pin %s   pc X\r\n" % PIN_A)]))
+    rifiuta("RIFIUTO: raccolta con ESITI_R2S_A.txt (pin cc9bcda0) che contiene il lotto R2SXAG2 (altro giro)",
+            lambda: carica([pa, raccolta("r3.zip", "ESITI_R2S_A.txt", "GBA R2S A -- pin %s   pc X\r\n" % PIN_A)]))
+    rifiuta("RIFIUTO: R2SXAG2 letto insieme a TUTTO lo stadio A (GBA_R2S_A.zip): due giri nella stessa lettura", lambda: carica([ARCH_R2S_A, px]))
+    rifiuta("RIFIUTO: R2SXAG2 insieme a un lotto dello stadio A diverso dall'ancora (R2SNAS)",
+            lambda: carica([pa, px, _scrivi(pz, "GBA_R0_R2SNAS.zip", zA.read(NA["GBA_R0_R2SNAS.zip"]))]))
+
+
+def _scrivi(d, nome, dati):
+    p = os.path.join(d, nome)
+    open(p, "wb").write(dati)
+    return p
 
 
 def main(argv):
     if "--autotest" in argv:
         return autotest()
-    csv_out = "D2_C3G_R2S_A.csv"
+    csv_out = None
     args = []
     i = 0
     while i < len(argv):
@@ -1412,6 +1883,8 @@ def main(argv):
     except Rifiuto as ex:
         print("ERRORE -- zip RIFIUTATO, nessun numero si stampa: %s" % ex)
         return 2
+    if csv_out is None:
+        csv_out = "D2_C3G_R2S_XAG2.csv" if "R2SXAG2" in lotti else "D2_C3G_R2S_A.csv"
     acc_ok, acc_r = accettazione()
     print(stampa(lotti, note, acc_ok, acc_r, csv_out))
     print(" CSV: %s" % os.path.abspath(csv_out))
