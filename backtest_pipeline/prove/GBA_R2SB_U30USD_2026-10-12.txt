@@ -1,0 +1,178 @@
+# ==========================================================================
+#  EA: ABTG_GoldBreakoutATR
+#  GBA R2S STADIO B -- lotto R2SBU30: VERDETTO DI COSTO A TICK REALI (Modello 4) sul simbolo gemello U30USD (Dow Jones 30), cella M15, TRE tranche. Casella 4 del certificato (simboli gemelli), piano 5.3 stadio B.
+#  Prova SENZA CODICE (input ESISTENTI dell'EA), 12/10/2026. Via di Claudio del 12/10 allo stadio B: 'SI'.
+#  Fonti: report/GBA_R2_PIANO_2026-10-10.md (5.3 stadio B, 6 = criterio di regime firmato il 10/10), report/GBA_R2S_A_LETTURA_2026-10-12.md (lettura dello stadio A con le ERRATA E-L1..L3),
+#  docs/RISPOSTA_A_GEMINI_GBA_R2S_LETTURA_2026-10-12.md (regole R1-R3, scritte PRIMA dei numeri dello stadio B), docs/RISPOSTA_A_GEMINI_GBA_R2S_STADIO_A_2026-10-12.md (E1-E4),
+#  report/GBA_R2S_A_SCHEDA_2026-10-12.md, prove/GBA_R2S_U30USD_2026-10-12.txt (il file dello stadio A di questo simbolo: i 30 pin), prove/GBA_R0_REPLICA_2026-10-09.txt (file madre, tranche di R1A).
+#  Attese, smentite e soglie scritte PRIMA di qualunque numero di questo lotto: al 12/10 nel repo NON esiste nessuna passata del GBA a tick reali su un simbolo diverso da XAUUSD.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul VPS VMI3047753, MAI su C:\MT5_Backtest (50504400),
+#  MAI su C:\FundedNext_Manuale, MAI su una sedia, MAI sul forward, MAI sul conto reale 10105439. Nessun parametro in forward, nessuna taglia di rischio (lotto fisso 1,00 nel tester).
+#  BOZZA: NON consegnabile finche' i due strati del cancello non danno PASS.
+#  EA v1.10, SHA256 1381e3dc9b4b4e44bcdc0319f023cb1990900ce0d1a6b6a3ec1df5df99e601b1 (NON toccato: prova SENZA CODICE, solo input esistenti).
+#
+#  ======================= DIFF CONTRO IL FILE DELLO STADIO A prove/GBA_R2S_U30USD_2026-10-12.txt =======================
+#  I 30 PIN SONO IDENTICI byte per byte a quelli dello stadio A (InpSymbol=U30USD, InpSignalTF=1 come pin, canale 48, EMA 100, ATR 14, spread max 0,05 x ATR,
+#  SL e trailing 2,5 x ATR, trailing sull'ATR dell'ultima barra chiusa, tempo 48 barre, BE 1,0 ATR offset 0, ore 0-24, tetto giornaliero e perdita giornaliera spenti,
+#  lotto fisso 1,00, InpTrendTF=0 e InpAtrTF=0). Rispetto al file madre cambia SOLO InpSymbol (XAUUSD -> U30USD), come nello stadio A. CAMBIA:
+#   D1 @GBA-ASSE chiave=InpSignalTF con UNA sola cella, M15 = 15 (la cella (A) dello stadio A con C3G >= 40x; la M5 di questo simbolo e' FRA e NON e' nel lotto:
+#      il piano 5.3 la ammette solo 'per capire' e non puo' diventare sedia; la sua misura e' una decisione aperta della scheda, non di questo file).
+#   D2 @GBA-LOTTO R2SBU30: MODELLO 4 (ticks reali) invece di 1, TRE tranche (T1, T2, T3 = le STESSE di R1A, blocchi @GBA-TRANCHE copiati dal file madre), tetto 30 minuti.
+#   RISULTATO SULL'INI (la sola cosa che il tester vede): la passata M15:T1 ha l'ini IDENTICO a quello archiviato dello stadio A
+#      (risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip -> GBA_R0_R2SU30.zip -> ini\gba_R2SU30_02_M15_T1_m775800.ini) salvo Model=4 e il nome del Report;
+#      M15:T2 e M15:T3 cambiano in piu' solo FromDate/ToDate. (Provato il 12/10 col codice VERO del driver v5 eseguito con pwsh su questo file: parsing r.342-470 e TestoIni r.638-651.)
+#  NON CAMBIA: EA, include, driver (GBA_R0_PASSATE.ps1 v5, SHA256 C239F628...), deposito 1000000 EUR, lotto fisso 1,00, magic 775800 (il driver ammette solo 775800 e 775850;
+#  nel tester il magic e' un'etichetta; il blocco 7758xx non e' usato da nessuna sedia), soglie S1-S7 del file madre, soglie del piano 5.3 (40x, 30), regole E1-E4 e R1-R3.
+#
+#  ======================= DRIVER E CONTROLLI DI MODELLO 4 =======================
+#  Driver: backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (MARCATORE_GBA_R0_PASSATE_v5), file prova DICHIARATIVO (@GBA-ASSE, una chiave per file). A Modello 4 il driver mette la
+#  passata KO se (r.786) la riga 'ticks data begins from' DEL SIMBOLO DELLA PASSATA ha una data DOPO l'inizio della tranche (la riga di EURUSD, conversione del conto in EUR, non
+#  conta) e se (r.815) la qualita' dello storico del report NON comincia con '100%'. LIMITE DEL DRIVER, scritto qui e NON corretto (il driver non si tocca): r.815 controlla solo
+#  il prefisso '100%', e a Modello 1 il report dice '100%' senza 'ticks reali' (manifest dello stadio A: colonna qualita' = '100%'); se la riga 'ticks data begins from' manca
+#  (tick gia' in cache) il driver stampa un avviso giallo e non mette KO (r.785). Quindi IN LETTURA (strumento D2-B, sotto) una passata vale a tick reali SOLO con TUTTE E TRE:
+#  colonna 'modello' del manifest = 4, Model=4 nell'ini dello zip, colonna 'qualita' che, tolti gli spazi e in minuscolo, e' ESATTAMENTE '100%ticksreali' (R1A: '100%ticksreali').
+#  Altrimenti la passata e' (C) 'storia a tick NON confermata' anche se il driver l'ha detta OK.
+#  PROFONDITA' DEI TICK BCM di U30USD [MISURATO, fonti]: 67.618.571 tick dal 2024.09.26 al 20/08/2026 (risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt); 64.711.285 dal 2024.09.26 al 2026.06.30 (risultati_archivio/spread_flotta/REFERTO_SPREAD_FLOTTA.txt). Muro dei tick e delle barre M1 al 2024.09.26 ('IL BROKER NON HA PIU' STORICO').
+#  T1, T2 e T3 stanno tutte dopo il muro. NON MISURATO: (a) che il terminale BCM del PC DESKTOP-H4D7CAJ abbia ORA su disco i tick di T1 (lug-set 2026: le misure si fermano al
+#  20/08-07/09, settembre 2026 non e' mai stato contato; il tester li scarica se mancano); (b) buchi DENTRO una tranche: se ci sono, il tester genera i tick mancanti e la
+#  qualita' scende sotto 100% (r.815: KO). Densita': ~9,2 milioni di tick a trimestre [DERIVATO: 2024.09.26-2026.06.30 diviso 7,03 trimestri].
+#  LETTORI: backtest_pipeline/leggi_gba_r0.py (SHA256 9CD02D2A...) per G0, stato, n, lati, perdita a SL; il C3G e gli esiti di QUESTO lotto li legge SOLO lo strumento
+#  D2-B = estensione di backtest_pipeline/leggi_gba_r2s_c3g.py (D2, SHA256 14384D87..., oggi legge SOLO lo stadio A: Modello 1, una tranche, lotti R2SANC/XAG/NAS/D30/U30)
+#  a Modello 4 e a tre tranche: NON ESISTE ANCORA e deve passare dal cancello PRIMA di aprire lo zip. Senza D2-B: NESSUN esito di questo lotto si scrive (le celle restano (C)).
+#  Difetti noti di leggi_gba_r0.py su un indice (scheda dello stadio A, L1-L7): L5 = PF_V sottrae 3,90 EUR/lotto di commissione dell'ORO quando il tester non addebita
+#  commissioni (sugli indici BCM la commissione e' ZERO, MISURATO su 302 operazioni vere, CANCELLO_COSTO_FLOTTA r.188): il PF_V di leggi_gba_r0.py su questo lotto NON si
+#  usa; il PF di descrizione e' quello del report del tester (pf_report) e, per lato, dai deal SENZA commissione aggiunta (D2-B).
+#
+#  ======================= TRANCHE, MODELLO, REGIME, OROLOGIO =======================
+#  TRE tranche, le STESSE di R1A (file madre): T1 2026.07.01-2026.09.30, T2 2026.04.01-2026.06.30, T3 2026.01.01-2026.03.31. ToDate ESCLUSIVO (MISURATO: il giornale
+#  dello stadio A arriva al 29/09 23:59:59): il 30/09, il 30/06 e il 31/03 NON sono dentro. Si tengono cosi' per restare confrontabili con R1A e con lo stadio A.
+#  UNA TRANCHE NON E' UN REGIME (classe 1384). Per gli indici il regime di ogni tranche NON e' classificato (la regola R/ER del lotto R2REG e' stata applicata solo all'oro,
+#  su prezzi proxy: per l'oro T1 LATERALE, T2 RIBASSO, T3 LATERALE; la classificazione dell'oro NON si trasferisce al U30USD). Il piano 5.3 dichiara le tre tranche 2026
+#  UN SOLO regime. In tutti e due i casi il MERITO e' NON MISURATO qui (sezione ESITI, punto M).
+#  OROLOGIO (CLAUDE.md 24/09): BCM indici = UTC+1 FISSO su tutto l'arco. L'EA lavora a 24 ore (InpHourStart=0, InpHourEnd=24): l'orologio NON cambia nessun ingresso.
+#  Cambia la DESCRIZIONE per fascia oraria (le sei fasce del lettore sono in ora server): l'apertura cash USA e' alle 14:30 server con l'ora legale USA (T1, T2 e T3 dal 08/03/2026)
+#  e alle 15:30 server senza (T3 fino al 07/03/2026); l'apertura del DAX e' alle 8:00 server con l'ora legale europea (T1, T2 e T3 dal 29/03/2026) e alle 9:00 senza
+#  (T3 fino al 28/03/2026). Quindi in T3 la fascia che contiene l'apertura e' spostata di un'ora per la maggior parte della tranche: le quote per fascia di T3 NON si
+#  confrontano con T1/T2 come se fossero le stesse ore, e nessuna fascia si legge come merito.
+#  TAGLIA: lotto fisso 1,00. Le cifre in EUR (profitto, DD, perdita a SL) NON si confrontano con l'oro ne' fra simboli; il PF e il rapporto stop/spread si'.
+#
+#  ======================= LO STADIO A DI QUESTA CELLA (T1, Modello 1: i numeri da cui partono le attese) =======================
+#  [MISURATO, report/GBA_R2S_A_LETTURA_2026-10-12.md e errata] U30USD M15 T1 Modello 1: righe segnale 460, ingressi n 115, C3G della cella 58,05x (BUY 54,65 / SELL 67,95),
+#  righe >= 40x 363, righe >= 50x 286, costo 'solo spread' degli ingressi 76,1x (>= 50x PER COSTRUZIONE: L2, non si legge). Esito (A): C3G >= 40x e n >= 30.
+#  Spread a Modello 1: 2,00 FISSO (1.446 righe su 1.451 a M5, 457 su 460 a M15; le altre a 3,00). Spread dai tick storici BCM per ora (2024.09.26-2026.06.30): 1,8-2,0 in sessione cash (ore server 14-21 d'estate) e 2,6-2,8 fuori sessione.
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  La domanda (piano 5.3 stadio B, regola R1): il costo grezzo della cella U30USD M15 della REPL, misurato A TICK REALI, sta a >= 40x (S2 PASSA) IN OGNUNA delle tre
+#  tranche, con almeno 30 ingressi in ognuna? Si legge, PER TRANCHE: C3G della cella, C3G per lato (BUY, SELL) e per fascia col loro n di righe, righe >= 40x e >= 50x,
+#  righe -1.0x (spread zero), n ingressi e n NETTO (al netto degli ingressi a spread zero), CE6, la tabella di R2 (ii). NON si legge: nessun PF come merito; nessun lato e
+#  nessuna fascia come merito; nessun confronto in EUR.
+#  DEFINIZIONI (le stesse dello stadio A, non cambiano): C3G = mediana del campo 'stop/spread' (stampato dall'EA a 1 decimale) di TUTTE le righe segnale del giornale della
+#  passata (log\GBA_<passata>.txt), SALTATO compresi; le righe -1.0x (spread zero) valgono INFINITO e si contano accanto. n = operazioni del report; n NETTO = n meno gli
+#  ingressi a spread zero (righe segnale SENZA 'SALTATO' con 'stop/spread -1.0x'). Confronto con 40x inclusivo sul valore stampato (40,0 vale >= 40).
+#  NESSUN C3G AGGREGATO SULLE TRE TRANCHE DECIDE (classe 1104 b). Se D2-B lo stampa, e' la mediana del campo su TUTTE le righe delle tre tranche messe insieme (non la media ne'
+#  la mediana delle tre mediane), scritto 'DESCRIZIONE, non decide'. Contro-esempio scritto prima: T1 38,0x su 300 righe, T2 55x su 500, T3 60x su 500 -> mediana di tutte le
+#  righe ~55x; con un aggregato la cella 'passerebbe'; con la regola per tranche e' FRA in T1.
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI =======================
+#  T1 (2026.07.01-09.30), C3G a tick reali: 45-51x [INFERITO, e' una ESTRAPOLAZIONE e NON un DERIVATO (classe 1383)]. Da dove viene: le righe di segnale sono quelle della
+#     SOLA T1 a Modello 1 (stadio A); lo spread di ogni riga e' sostituito con lo spread MEDIANO (o MEDIO) DEI TICK STORICI per quell'ora server, preso da un ALTRO periodo
+#     (2024.09.26-2026.06.30, che contiene T2 e T3 ma NON T1, e mescola estate e inverno): 46,65 (mediane orarie) / 49,14 (medie orarie), +-3% (= l'errore del solo controllo sull'oro, che usa una tabella oraria
+#     dello STESSO periodo e quindi NON misura lo scarto di periodo, che resta [NON MISURATO]). Banda esatta: 45,25-50,61.
+#     Righe >= 50x in T1 a tick reali: circa 217 / 224 (-22/-24%) rispetto alle 286 di Modello 1 [INFERITO, stesso metodo].
+#     n ingressi T1 a tick reali: circa 85-93 [INFERITO: 115 x 0,74-0,81]; banda di lettura LARGA 40-160 (il calo delle righe >= 50x e' un proxy degli ingressi che la regola 'una posizione per volta'
+#     puo' comprimere meno). Attesa di porta: n NETTO >= 30.
+#  T2 e T3, C3G e n: [NON STIMATO]. Nel repo non c'e' NESSUNA riga di segnale del GBA su U30USD in T2 o T3: la sensibilita' non si estende a quelle tranche, e una banda
+#     scritta senza righe sarebbe un numero inventato. Si scrive solo la meccanica: C3G = 2,5 x ATR / spread, quindi un trimestre con ATR M15 piu' alto alza il C3G a parita'
+#     di spread, e uno con spread di tick piu' largo lo abbassa. Per T2 e T3 non c'e' smentita possibile: il numero e' NUOVO.
+#  CELLA A RISCHIO (regola R1)? NO (la banda sta 5,3-10,6 punti sopra 40x).
+#  LATI: nessun lato sotto il 25% degli ingressi in nessuna tranche (canale ed EMA simmetrici); un lato solo = DA GUARDARE (InpAllowLong/Short = true, AVVIO verificato dal driver).
+#  COMMISSIONE: ZERO [MISURATO]. Attesa nel report: nessuna commissione addebitata. Se diversa da zero, e' un fatto del tester da scrivere.
+#  RISCHIO (a qualunque n): perdita a SL scritta dall'EA (mediana, p90, massimo) e DD del report, in EUR a 1,00 lotto: si scrivono, NON si confrontano con l'oro; nessun
+#     contratto di DD esiste per questa cella (nessuna sedia).
+#  SMENTITE (regola R1, simmetriche: classe 1382). (a) T1 FUORI dalla banda 45,25-50,61, in BASSO o in ALTO: e' la SENSIBILITA' a essere smentita, non l'esito. L'esito
+#     resta quello della regola qui sotto (in basso sotto 40x: FRA in T1, non sedia; in alto: niente di diverso da una T1 in banda). Il giornale si legge per capire PERCHE'
+#     la stima ha sbagliato (spread delle barre di rottura contro la mediana oraria, ora mista 14 / 8, scarto di periodo), MAI per rimettere in discussione l'esito, e la
+#     lettura si fa in tutti e due i versi con lo stesso dettaglio (un esito sfavorevole non riceve un controllo in piu' che uno favorevole non avrebbe).
+#     (b) Per Nasdaq e Dow un C3G di T1 sotto 40x vorrebbe dire che la sensibilita' sbaglia di 14-20 punti, cinque-sette volte l'errore (-2,7%) del controllo sull'oro.
+#     Per il DAX un C3G di T1 sotto 40x NON e' una sorpresa (cella a rischio). (c) n di T1 fuori 40-160: si legge il giornale (segnali, scarti per spread e per posizione aperta).
+#
+#  ======================= CONTRO-ESEMPI DI STRUMENTO (costruiti PRIMA) =======================
+#  CE1 ANCORA: il lotto R2SBANC (prove/GBA_R2SB_ANCORA_2026-10-12.txt, STESSO giro, primo lotto) deve rifare R1A_01 al centesimo (128 operazioni, -6577.48, PF 0.83,
+#      25.648.545 tick, 88.416 barre, qualita' 100%ticksreali, ticks XAUUSD dal 2024.07.10) e dare C3G 21,60x; caricato con GBA_R0_R1A.zip il lettore deve fermarsi per doppione.
+#      Se no: NESSUN numero di questo lotto si usa (lo strumento o i dati non sono gli stessi del 10/10).
+#  CE2 SIMBOLO E MODELLO VERI: il driver mette KO la passata se report, riga del tester o riga AVVIO dicono un altro simbolo o TF (r.773-774, r.806-813). In lettura: manifest
+#      modello 4, ini Model=4, qualita' '100%ticksreali' (sopra); firma dell'oro (spread mediano 0,15-0,30 in OGNI fascia stampata) = letto come XAUUSD: (C).
+#  CE3 COSTO PER COSTRUZIONE: costo 'solo spread' sugli ingressi >= 50x e quota < 40x = 0% (L2); se no, difetto di parsing su questa cella: la riga costo non si usa.
+#  CE4 SCARTI COERENTI per tranche: segnali(EA) = ingressi tentati + scartati spread + posizione aperta (+ ATR non valido) nella riga [GBA-CONTA] FINE; se non torna, il
+#      giornale e' incompleto (dedup del driver): quella tranche e' (C).
+#  CE5 LOTTO: righe d'ingresso '1.00 lotti'; 'ATTENZIONE: lotto richiesto ... ridotto' si scrive (non cambia n ne' costo).
+#  CE6 ORDINI ESEGUITI per tranche: ingressi tentati - n = 0 oppure 1 (driver r.817); 2 o piu' = ordini rifiutati sul simbolo, n TRONCATO: quella tranche e' (C).
+#  CE7 SPREAD ZERO (classi 1376 e 1382, verso dell'errore): a tick reali le righe -1.0x contate come INFINITO spingono il C3G verso PASSA. Per ogni tranche D2-B ricalcola
+#      il C3G anche TOGLIENDO le righe -1.0x: se le due mediane stanno da parti diverse di 40,0, la tranche e' 'NON LEGGIBILE PER SPREAD ZERO' (esito N): ne' PASSA ne' FRA,
+#      si legge il giornale. Il bordo di stampa: un C3G stampato in [40,0 ; 40,1) si scrive 'AL BORDO DI STAMPA' accanto (il valore vero sta fra 39,95 e 40,15).
+#
+#  ======================= ESITI DELLO STADIO B PER LA CELLA U30USD M15: QUATTRO, nell'ordine, il PRIMO che vale decide =======================
+#  Una tranche e' LETTA se: passata OK nel driver, G0 OK in leggi_gba_r0.py, tick reali confermati (manifest modello 4, ini Model=4, qualita' '100%ticksreali'), CE2-CE6
+#  verdi, ancora CE1 verde, giornale letto da D2-B passato dal cancello prima di aprire lo zip. Una tranche LETTA GIUDICA IL COSTO solo se ha >= 100 righe segnale
+#  (stessa soglia delle fasce e dei lati di E1-E4) e non e' 'non leggibile per spread zero' (CE7).
+#  (C) NON SI LEGGE -> NON ANCORA MISURATO: ALMENO UNA delle TRE tranche non e' letta (KO, NON_LANCIATA, tick non confermati, CE rossa, D2-B assente). Si scrive QUALE
+#      tranche e COSA manca; i numeri delle tranche lette si stampano come descrizione. 'Per ogni tranche' vale sulle TRE tranche nominate (T1, T2, T3), MAI sulle sole
+#      tranche lette (classe 1369: con T2 KO e T1, T3 a 50x, 'ogni tranche letta >= 40x' sarebbe vero a vuoto su T2 e la cella passerebbe con due tranche su tre).
+#  (F) FRA IN Tx -> NON PUO' DIVENTARE SEDIA: tutte e tre lette e ALMENO UNA tranche che giudica il costo ha C3G < 40,0. Si elencano TUTTE le tranche sotto 40x col loro
+#      numero (sotto 13,3x si scrive 'SOTTO 13,3x in Tx'). FRA NON e' 'ESCLUSA': NON chiude la casella 4, NON archivia nulla; lo stadio B NON produce mai 'ESCLUSA PER COSTO'
+#      (quella via passa solo dall'esito (B) dello stadio A con E1-E4 ed E3). La cella si puo' misurare ancora 'per capire' (piano 5.3).
+#  (N) n INSUFFICIENTE o COSTO NON GIUDICATO in Tx -> NON PASSA LO STADIO B, NON ANCORA MISURATO: tutte e tre lette, nessuna FRA, ma in ALMENO UNA tranche n NETTO < 30,
+#      oppure righe segnale < 100, oppure 'non leggibile per spread zero'. Si scrive quale tranche, il numero e la via piu' corta al numero (piu' tranche dello storico
+#      BCM dal 2024.09.26, oppure un TF piu' alto), non un verdetto.
+#  (P) PASSA LO STADIO B (COSTO): tutte e tre le tranche lette, ognuna giudica il costo, ognuna con C3G >= 40,0 E n NETTO >= 30. Significa SOLO: il costo di U30USD M15 a
+#      tick reali e' alla frontiera di casa in tutti e tre i trimestri del 2026. NON e' una promozione, NON e' una sedia, NON va in un preset.
+#  M (vale per TUTTI gli esiti) MERITO = NON MISURATO, e si scrive cosi' qualunque sia il PF. Criterio firmato il 10/10 (piano 6.1): PF_V > 1,0 in OGNI regime con >= 150
+#      operazioni, long e short SEPARATI; un regime con < 150 operazioni NON giudica il merito. Qui: o le tre tranche sono UN regime (piano 5.3) e allora vale l'emendamento D
+#      (un solo regime = non misurabile anche per il merito), o il loro regime NON e' classificato per U30USD e allora nessun verdetto di regime si puo' scrivere. Contro-esempio
+#      scritto prima (classe 1384): T3 con 160 operazioni e PF 1,30 NON e' 'un regime promosso': e' una tranche, e il merito resta NON MISURATO. PF del report e PF per lato
+#      (dai deal, SENZA la commissione finta L5) per tranche si stampano come DESCRIZIONE, accanto a n.
+#  LATI: il costo si giudica sulla CELLA (regola R1, letterale, passata dal cancello); C3G e n per lato, per tranche, si stampano come DESCRIZIONE. Nessun lato si promuove da
+#      solo: una variante a lato singolo chiederebbe una regola sua, scritta prima e passata dal cancello, che qui non c'e'.
+#  R2 (concentrazione): per ogni tranche si scrivono la quota degli ingressi della fascia dominante, la quota delle righe che passano il filtro (stop/spread >= 50x) nella
+#      stessa fascia e n segnali contro n ingressi; il PF per fascia solo con n >= 100 nella fascia e solo come descrizione; l'espressione 'costo basso' non spiega la concentrazione.
+#  Nessun esito scrive la parola vietata; nessun esito promuove una cella a sedia; nessun numero di questo lotto va in un preset.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @GBA-TRANCHE qui sotto (tre tranche, le stesse di R1A; nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 le legge dal file)
+#  @GBA-TRANCHE nome=T1 da=2026.07.01 a=2026.09.30
+#  @GBA-TRANCHE nome=T2 da=2026.04.01 a=2026.06.30
+#  @GBA-TRANCHE nome=T3 da=2026.01.01 a=2026.03.31
+#  @GBA-ASSE chiave=InpSignalTF tranche=3 celle=1 lotti=1
+#  @GBA-CELLA nome=M15 InpSignalTF=15
+#  @GBA-LOTTO nome=R2SBU30 modello=4 tetto_min=30 passate=M15:T1,M15:T2,M15:T3
+#
+InpSymbol=U30USD
+InpSignalTF=1
+InpTrendTF=0
+InpAtrTF=0
+InpChannelBars=48
+InpEmaPeriod=100
+InpAtrPeriod=14
+InpSpreadMaxATR=0.05
+InpAllowLong=true
+InpAllowShort=true
+InpSL_ATR=2.5
+InpTrail_ATR=2.5
+InpTrailAtrMode=0
+InpTimeExitBars=48
+InpUseBreakeven=true
+InpBE_TriggerATR=1.0
+InpBE_OffsetATR=0.0
+InpSlippagePoints=30
+InpMaxDailyLoss=0.0
+InpMaxTradesPerDay=0
+InpCheckFreeMargin=true
+InpHourStart=0
+InpHourEnd=24
+InpLotMode=0
+InpLots=1.0
+InpRiskPct=0.25
+InpMagic=775800||775800||50||775850||Y
+InpComment=GBA
+InpUsaGuardian=true
+InpVerbose=true
+InpAutoTest=true
