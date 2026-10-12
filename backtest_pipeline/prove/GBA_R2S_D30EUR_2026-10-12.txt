@@ -59,7 +59,8 @@
 #      L3 19,48x (-14,6%: la mediana delle mediane di fascia NON e' la mediana della cella); fascia per fascia il rapporto delle mediane sta fra -6,6% e +2,7% del campo.
 #      La L3 SOTTOSTIMA, cioe' sbaglia verso 'ESCLUSA': resta DESCRIZIONE (attese, smentite, frase dell'esito A), si scrive col suo nome '[L3, sottostima misurata
 #      sull'oro -14,6%]' e NON decide 'ESCLUSA PER COSTO'. COSTO GREZZO MISURATO (C3G) = mediana del campo 'stop/spread' delle righe segnale del giornale della passata
-#      (log\GBA_<passata>.txt nello zip del lotto; righe con -1.0x = spread zero escluse e contate accanto), per CELLA (tutte le righe) e per FASCIA (le sei fasce del
+#      (log\GBA_<passata>.txt nello zip del lotto; righe con -1.0x = spread zero NON escluse: valgono stop/spread INFINITO, sopra ogni soglia, e si contano
+#      accanto; QUARTO GIRO del cancello: escluderle abbasserebbe la mediana proprio verso 'ESCLUSA'), per CELLA (tutte le righe) e per FASCIA (le sei fasce del
 #      lettore, sul campo 'ora server' della riga, con il loro n). Lo legge uno strumento che passa il cancello PRIMA di aprire lo zip (D2 della scheda); il giornale c'e'
 #      anche per le passate KO (driver r.820-826), quindi il C3G si legge anche a n = 0. Prova sull'oro: C3G della cella S0_01 = 22,80x (FRA, stessa classe della L3).
 #      SPREAD DELLA CELLA, dove serve: mediana del campo 'spread' di tutte le righe segnale del giornale con lo strumento D2, altrimenti mediana ponderata per n degli
