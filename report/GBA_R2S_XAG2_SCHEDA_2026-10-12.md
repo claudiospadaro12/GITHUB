@@ -67,10 +67,10 @@ Lettura: `python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py GBA_R0_R2SANC.zip GB
 
 ## 6. ⚪ Cosa NON è stato verificato
 - La **storia M1 e i tick dell'argento sul PC di backtest** (barre BCM H1 dal 2008.11.07; M1 su T1 c'è: 88.416 barre generate il 12/10; tick reali **[NON MISURATO]**, qui non servono: Modello 1).
-- **Perché** il terminale si è bloccato (H-ZERO è un'inferenza su n = 1); la riga intera non è stata girata (gira solo su Windows, sul PC di backtest).
+- **Perché** il terminale si è bloccato (H-ZERO-R, zero operazioni CON report, è un'inferenza su n = 1); la riga intera non è stata girata (gira solo su Windows, sul PC di backtest).
 - D2 sul lotto nuovo (non modificato, vedi §4).
 
 ## 7. 🙋 Decisioni aperte
-1. **Se il blocco si ripete** (H-ZERO sostenuta 2 su 2): l'eccezione n = 0 non si raggiunge con il driver v5. Due strade, tutte e due **firme**: un driver v6 che, quando il giornale ha `final balance` uguale al deposito e la riga `[GBA-CONTA] FINE`, accetti n = 0 senza report; oppure dichiarare la cella con il solo giornale (oggi E3 la chiama (C)). Non si allarga il timeout una terza volta.
+1. **Se il blocco si ripete** (2 su 2 sulla stessa passata = causa legata alla passata, H-ZERO-R o altro: CE8): l'eccezione n = 0 non si raggiunge con il driver v5. Due strade, tutte e due **firme**: un driver v6 che, quando il giornale ha `final balance` uguale al deposito e la riga `[GBA-CONTA] FINE`, accetti n = 0 senza report; oppure dichiarare la cella con il solo giornale (oggi E3 la chiama (C)). Non si allarga il timeout una terza volta.
 2. **D2**: la modifica minima di §4 (3 righe) e la rilettura degli zip dello stadio A con lo SHA nuovo.
-3. **CE7 e CE8** sono controlli nuovi di strumento (CE7 può solo portare la REPL a (C), CE8 è descrizione): il cancello li accetta così o li declassa a sola descrizione.
+3. **CE7 e CE8** sono controlli nuovi di strumento (per X6 una CE7 rossa o non valutabile porta a (C) TUTTE E DUE le celle, REPL e M15; CE8 è descrizione): il cancello li accetta così o li declassa a sola descrizione.
