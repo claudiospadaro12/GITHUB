@@ -1,0 +1,58 @@
+lotto;cella;simbolo;tf;livello;nome;righe;c3g;buy_n;buy_c3g;sell_n;sell_c3g;ge40;ge50;ingressi;quota_ingressi;ingressi_spread_zero;righe_spread_zero;n_report;tentati;scartati_spread;solo_spread_mediana;spread_cella;esito_pinnato;esito_E1;esito_riferimento;casella4_E3
+R2SANC;REPL;XAUUSD;M1;FASCIA;asia;2314;19.80;1139;21.40;1175;18.50;52;12;9;0.0570;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;europa;1426;24.50;694;24.70;732;24.50;73;33;12;0.0759;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;pausa;778;26.20;438;26.05;340;26.35;133;70;30;0.1899;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;USA apertura;833;39.20;442;37.35;391;40.00;389;195;90;0.5696;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;USA pomeriggio;1346;20.60;561;21.30;785;19.90;92;45;17;0.1076;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;FASCIA;rollover;276;10.65;188;10.60;88;11.20;1;0;0;0.0000;;;;;;;;;;;
+R2SANC;REPL;XAUUSD;M1;CELLA;-;6973;22.80;3462;23.25;3511;22.30;740;355;158;;0;0;158;158;6520;55.87;0.210;;;;
+R2SXAG;REPL;XAGUSD;M1;FASCIA;asia;2149;2.10;1103;2.20;1046;2.10;0;0;0;;;;;;;;;;;;
+R2SXAG;REPL;XAGUSD;M1;FASCIA;europa;1458;2.40;735;2.50;723;2.30;0;0;0;;;;;;;;;;;;
+R2SXAG;REPL;XAGUSD;M1;FASCIA;pausa;680;2.80;373;2.70;307;3.00;0;0;0;;;;;;;;;;;;
+R2SXAG;REPL;XAGUSD;M1;FASCIA;USA apertura;802;4.20;434;4.50;368;3.90;0;0;0;;;;;;;;;;;;
+R2SXAG;REPL;XAGUSD;M1;FASCIA;USA pomeriggio;1251;2.10;532;2.20;719;2.00;0;0;0;;;;;;;;;;;;
+R2SXAG;REPL;XAGUSD;M1;FASCIA;rollover;271;1.40;187;1.30;84;1.45;0;0;0;;;;;;;;;;;;
+R2SXAG;REPL;XAGUSD;M1;CELLA;-;6611;2.40;3364;2.50;3247;2.30;0;0;0;;0;0;;0;6611;;0.050;C NON SI LEGGE: passata KO (timeout di 20 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAG_01_REPL_T1_m775800): senza report non c e misura);C NON SI LEGGE: passata KO (timeout di 20 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAG_01_REPL_T1_m775800): senza report non c e misura);C NON SI LEGGE: passata KO (timeout di 20 minuti | report .htm della passata NON trovato (Report=GBA_R0_R2SXAG_01_REPL_T1_m775800): senza report non c e misura);NON ANCORA MISURATO, casella 4 aperta: nessuna ESCLUSA (Modello 1) da confermare
+R2SXAG;M15;XAGUSD;M15;CELLA;-;;;;;;;;;;;;;;;;;;C;C;C;NON ANCORA MISURATO: passata non lanciata
+R2SNAS;M5;NASUSD;M5;FASCIA;asia;452;28.00;238;24.10;214;33.40;87;37;15;0.1210;;;;;;;;;;;
+R2SNAS;M5;NASUSD;M5;FASCIA;europa;364;30.70;197;27.20;167;35.90;71;19;6;0.0484;;;;;;;;;;;
+R2SNAS;M5;NASUSD;M5;FASCIA;pausa;176;34.70;93;34.50;83;34.80;51;11;9;0.0726;;;;;;;;;;;
+R2SNAS;M5;NASUSD;M5;FASCIA;USA apertura;265;58.90;139;56.10;126;64.10;222;171;66;0.5323;;;;;;;;;;;
+R2SNAS;M5;NASUSD;M5;FASCIA;USA pomeriggio;185;33.20;114;29.85;71;53.00;69;54;21;0.1694;;;;;;;;;;;
+R2SNAS;M5;NASUSD;M5;FASCIA;rollover;49;27.30;23;30.00;26;26.35;16;14;7;0.0565;;;;;;;;;;;
+R2SNAS;M5;NASUSD;M5;CELLA;-;1491;33.90;804;30.30;687;37.40;516;306;124;;0;0;124;124;1101;60.81;1.800;"A PASSA ALLO STADIO B (n 124, al netto di 0 ingressi a spread zero = 124; solo spread 60.8x); C3G 33.90: FRA sui segnali grezzi, PASSA solo grazie al filtro";"A PASSA ALLO STADIO B (n 124, al netto di 0 ingressi a spread zero = 124; solo spread 60.8x); C3G 33.90: FRA sui segnali grezzi, PASSA solo grazie al filtro";"A PASSA ALLO STADIO B (n 124, al netto di 0 ingressi a spread zero = 124; solo spread 60.8x); C3G 33.90: FRA sui segnali grezzi, PASSA solo grazie al filtro";NON ANCORA MISURATO, casella 4 aperta: la cella va allo stadio B (A)
+R2SNAS;M15;NASUSD;M15;FASCIA;asia;107;51.60;56;43.35;51;59.40;79;57;23;0.1704;;;;;;;;;;;
+R2SNAS;M15;NASUSD;M15;FASCIA;europa;125;47.20;73;38.70;52;63.25;83;58;24;0.1778;;;;;;;;;;;
+R2SNAS;M15;NASUSD;M15;FASCIA;pausa;54;53.95;35;51.40;19;67.80;46;34;19;0.1407;;;;;;;;;;;
+R2SNAS;M15;NASUSD;M15;FASCIA;USA apertura;116;83.30;60;78.55;56;92.00;115;113;44;0.3259;;;;;;;;;;;
+R2SNAS;M15;NASUSD;M15;FASCIA;USA pomeriggio;77;87.80;49;76.30;28;98.85;76;65;22;0.1630;;;;;;;;;;;
+R2SNAS;M15;NASUSD;M15;FASCIA;rollover;9;66.50;7;60.30;2;75.20;8;8;3;0.0222;;;;;;;;;;;
+R2SNAS;M15;NASUSD;M15;CELLA;-;488;62.00;280;54.95;208;72.75;407;335;135;;0;0;135;135;132;72.44;1.800;"A PASSA ALLO STADIO B (n 135, al netto di 0 ingressi a spread zero = 135; solo spread 72.4x); costo grezzo C3G 62.00 >= 40x";"A PASSA ALLO STADIO B (n 135, al netto di 0 ingressi a spread zero = 135; solo spread 72.4x); costo grezzo C3G 62.00 >= 40x";"A PASSA ALLO STADIO B (n 135, al netto di 0 ingressi a spread zero = 135; solo spread 72.4x); costo grezzo C3G 62.00 >= 40x";NON ANCORA MISURATO, casella 4 aperta: la cella va allo stadio B (A)
+R2SD30;M5;D30EUR;M5;FASCIA;asia;406;9.70;223;8.80;183;11.10;0;0;0;0.0000;;;;;;;;;;;
+R2SD30;M5;D30EUR;M5;FASCIA;europa;454;37.10;223;35.20;231;39.40;202;107;37;0.6167;;;;;;;;;;;
+R2SD30;M5;D30EUR;M5;FASCIA;pausa;107;37.20;59;32.60;48;39.90;41;10;4;0.0667;;;;;;;;;;;
+R2SD30;M5;D30EUR;M5;FASCIA;USA apertura;220;38.70;97;37.90;123;39.00;95;38;18;0.3000;;;;;;;;;;;
+R2SD30;M5;D30EUR;M5;FASCIA;USA pomeriggio;169;11.00;73;8.60;96;13.30;5;4;1;0.0167;;;;;;;;;;;
+R2SD30;M5;D30EUR;M5;FASCIA;rollover;37;10.80;23;9.90;14;11.35;0;0;0;0.0000;;;;;;;;;;;
+R2SD30;M5;D30EUR;M5;CELLA;-;1393;22.20;698;19.45;695;26.20;343;159;60;;0;0;60;60;1194;54.54;2.800;"A PASSA ALLO STADIO B (n 60, al netto di 0 ingressi a spread zero = 60; solo spread 54.5x); C3G 22.20: FRA sui segnali grezzi, PASSA solo grazie al filtro";"A PASSA ALLO STADIO B (n 60, al netto di 0 ingressi a spread zero = 60; solo spread 54.5x); C3G 22.20: FRA sui segnali grezzi, PASSA solo grazie al filtro";"A PASSA ALLO STADIO B (n 60, al netto di 0 ingressi a spread zero = 60; solo spread 54.5x); C3G 22.20: FRA sui segnali grezzi, PASSA solo grazie al filtro";NON ANCORA MISURATO, casella 4 aperta: la cella va allo stadio B (A)
+R2SD30;M15;D30EUR;M15;FASCIA;asia;83;17.50;46;14.10;37;20.10;1;0;0;0.0000;;;;;;;;;;;
+R2SD30;M15;D30EUR;M15;FASCIA;europa;177;57.10;91;53.70;86;60.30;133;113;61;0.6224;;;;;;;;;;;
+R2SD30;M15;D30EUR;M15;FASCIA;pausa;45;63.40;27;52.70;18;72.45;44;37;13;0.1327;;;;;;;;;;;
+R2SD30;M15;D30EUR;M15;FASCIA;USA apertura;65;62.00;33;62.20;32;60.60;58;50;22;0.2245;;;;;;;;;;;
+R2SD30;M15;D30EUR;M15;FASCIA;USA pomeriggio;43;26.40;22;20.60;21;30.00;9;5;2;0.0204;;;;;;;;;;;
+R2SD30;M15;D30EUR;M15;FASCIA;rollover;5;21.40;3;32.80;2;16.70;0;0;0;0.0000;;;;;;;;;;;
+R2SD30;M15;D30EUR;M15;CELLA;-;418;49.05;222;46.30;196;52.85;245;205;98;;0;0;98;98;193;64.16;1.500;"A PASSA ALLO STADIO B (n 98, al netto di 0 ingressi a spread zero = 98; solo spread 64.2x); costo grezzo C3G 49.05 >= 40x";"A PASSA ALLO STADIO B (n 98, al netto di 0 ingressi a spread zero = 98; solo spread 64.2x); costo grezzo C3G 49.05 >= 40x";"A PASSA ALLO STADIO B (n 98, al netto di 0 ingressi a spread zero = 98; solo spread 64.2x); costo grezzo C3G 49.05 >= 40x";NON ANCORA MISURATO, casella 4 aperta: la cella va allo stadio B (A)
+R2SU30;M5;U30USD;M5;FASCIA;asia;369;16.80;220;16.10;149;18.60;1;0;0;0.0000;;;;;;;;;;;
+R2SU30;M5;U30USD;M5;FASCIA;europa;391;27.10;212;26.40;179;27.40;42;14;5;0.0446;;;;;;;;;;;
+R2SU30;M5;U30USD;M5;FASCIA;pausa;187;36.40;99;37.50;88;35.75;67;20;6;0.0536;;;;;;;;;;;
+R2SU30;M5;U30USD;M5;FASCIA;USA apertura;274;68.70;111;65.40;163;68.90;250;223;83;0.7411;;;;;;;;;;;
+R2SU30;M5;U30USD;M5;FASCIA;USA pomeriggio;191;38.90;104;36.50;87;42.60;89;49;16;0.1429;;;;;;;;;;;
+R2SU30;M5;U30USD;M5;FASCIA;rollover;39;28.90;26;23.55;13;33.00;9;2;2;0.0179;;;;;;;;;;;
+R2SU30;M5;U30USD;M5;CELLA;-;1451;29.90;772;27.80;679;32.50;458;308;112;;0;0;112;112;1112;66.66;2.000;"A PASSA ALLO STADIO B (n 112, al netto di 0 ingressi a spread zero = 112; solo spread 66.7x); C3G 29.90: FRA sui segnali grezzi, PASSA solo grazie al filtro";"A PASSA ALLO STADIO B (n 112, al netto di 0 ingressi a spread zero = 112; solo spread 66.7x); C3G 29.90: FRA sui segnali grezzi, PASSA solo grazie al filtro";"A PASSA ALLO STADIO B (n 112, al netto di 0 ingressi a spread zero = 112; solo spread 66.7x); C3G 29.90: FRA sui segnali grezzi, PASSA solo grazie al filtro";NON ANCORA MISURATO, casella 4 aperta: la cella va allo stadio B (A)
+R2SU30;M15;U30USD;M15;FASCIA;asia;78;34.25;45;34.60;33;33.90;24;6;1;0.0087;;;;;;;;;;;
+R2SU30;M15;U30USD;M15;FASCIA;europa;114;45.75;69;44.80;45;47.50;78;46;24;0.2087;;;;;;;;;;;
+R2SU30;M15;U30USD;M15;FASCIA;pausa;84;54.85;44;52.80;40;57.35;78;56;18;0.1565;;;;;;;;;;;
+R2SU30;M15;U30USD;M15;FASCIA;USA apertura;112;96.00;49;94.00;63;97.20;111;109;51;0.4435;;;;;;;;;;;
+R2SU30;M15;U30USD;M15;FASCIA;USA pomeriggio;64;99.75;31;116.30;33;94.00;64;63;18;0.1565;;;;;;;;;;;
+R2SU30;M15;U30USD;M15;FASCIA;rollover;8;54.60;8;54.60;0;n.d.;8;6;3;0.0261;;;;;;;;;;;
+R2SU30;M15;U30USD;M15;CELLA;-;460;58.05;246;54.65;214;67.95;363;286;115;;0;0;115;115;145;76.08;2.000;"A PASSA ALLO STADIO B (n 115, al netto di 0 ingressi a spread zero = 115; solo spread 76.1x); costo grezzo C3G 58.05 >= 40x";"A PASSA ALLO STADIO B (n 115, al netto di 0 ingressi a spread zero = 115; solo spread 76.1x); costo grezzo C3G 58.05 >= 40x";"A PASSA ALLO STADIO B (n 115, al netto di 0 ingressi a spread zero = 115; solo spread 76.1x); costo grezzo C3G 58.05 >= 40x";NON ANCORA MISURATO, casella 4 aperta: la cella va allo stadio B (A)

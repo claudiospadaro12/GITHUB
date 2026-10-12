@@ -1,0 +1,90 @@
+====================================================================================================
+ GBA R2 -- lettore (leggi_gba_r0.py), lotti di file prova DICHIARATIVI: R2SU30 (file GBA_R2S_U30USD_2026-10-12.txt). Soglie S1-S7 del file madre GBA_R0_REPLICA_2026-10-09.txt, firma 10/10 per regime.
+ Le attese per cella stanno nel file prova (scritte PRIMA dei numeri): il lettore NON le conosce e non le stampa. NON giudica oltre le soglie, NON promuove, NON scrive 'morto'.
+====================================================================================================
+
+(1) CANCELLI DI AFFIDABILITA' (G0 per passata)
+  R2SU30_01_M5_T1_m775800            modello 1  stato driver OK                     G0 OK
+  R2SU30_02_M15_T1_m775800           modello 1  stato driver OK                     G0 OK
+
+  G1: nessuna coppia di gemelle (lotto S0 non presente)
+  G2: serve S0 e R1A OK su REPL/T1 per il confronto Modello 1 / Modello 4
+
+----------------------------------------------------------------------------------------------------
+ CELLA M15 [lotto R2SU30] (InpSignalTF 15) U30USD M15  --  Modello 1 (OHLC su M15: SOLO CONTEGGIO, nessun PF si legge come merito)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=115  1.77/giorno  segnali(EA) 460, ingressi tentati 115, scartati spread 145, a posizione aperta 200
+   tranche lette: n=115
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=115 mediana 76.1  p10 52.1  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=115 mediana 74.6  p10 51.1  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=115 mediana 73.1  p10 50.1  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)   [Modello 1: PF di SCREENING, mai un verdetto]
+   commissioni addebitate dal tester (somma): 0.00 EUR -> il tester NON le addebita: PF_V sottrae 3,90 EUR a operazione
+   PF_V 0.691   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.628;  senza commissione ipotetica: 0.762)   netto PF_V -1628 EUR   win rate 31%
+      T1  n=115   PF_V 0.69   PF del report 0.76   DD equity 1611.4 EUR (0.16%)   DD bilancio 1347.52 EUR (0.13%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=60 PF_V 0.60 netto -1201
+   lato SELL n=55 PF_V 0.81 netto -427
+   perdita a SL scritta dall'EA: mediana 153  p90 243  max 410 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 108.7  media 245.8  p90 295.7
+(5) concentrazione (S5)
+   migliore operazione = 15% del profitto positivo; netto senza le 5 migliori = -3430 -> FRAGILE
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=1     PF_V 0.00  r medio -0.682  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   europa          07-12  n=24    PF_V 1.00  r medio -0.022  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   pausa           12-14  n=18    PF_V 1.98  r medio 0.233  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   USA apertura    14-17  n=51    PF_V 0.26  r medio -0.215  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   USA pomeriggio  17-22  n=18    PF_V 1.35  r medio 0.010  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   rollover        22-24  n=3     PF_V 0.58  r medio -0.132  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 260, di cui scartati per spread 145 = 56%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 27.39  spread 2.00  n=78
+      europa          ATR 36.61  spread 2.00  n=114
+      pausa           ATR 43.86  spread 2.00  n=84
+      USA apertura    ATR 76.78  spread 2.00  n=112
+      USA pomeriggio  ATR 79.79  spread 2.00  n=64
+      rollover        ATR 43.68  spread 2.00  n=8
+
+----------------------------------------------------------------------------------------------------
+ CELLA M5 [lotto R2SU30] (InpSignalTF 5) U30USD M5  --  Modello 1 (OHLC su M5: SOLO CONTEGGIO, nessun PF si legge come merito)
+----------------------------------------------------------------------------------------------------
+(2) n e frequenza (denominatore: giorni feriali della tranche)
+   T1   n=112  1.72/giorno  segnali(EA) 1451, ingressi tentati 112, scartati spread 1112, a posizione aperta 227
+   tranche lette: n=112
+(3) COSTO (S2): mediana sugli INGRESSI di 2,5 x ATR / (spread + commissione), ATR e spread dalle righe d'ingresso dell'EA (2 decimali)
+   solo spread                        n=112 mediana 66.7  p10 52.3  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,04 USD/oz (3,90 EUR a giro)     n=112 mediana 65.3  p10 51.3  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   +0,08 USD/oz (per lato)            n=112 mediana 64.1  p10 50.3  quota <40x: 0%  quota <13,3x: 0%  -> PASSA
+   il verdetto di costo non cambia fra le tre versioni
+(4) PF, DD, lato (n = posizioni; PF_V = PF dei netti, con commissione ipotetica 3,90 EUR/lotto a giro SE il tester non ne addebita)   [Modello 1: PF di SCREENING, mai un verdetto]
+   commissioni addebitate dal tester (somma): 0.00 EUR -> il tester NON le addebita: PF_V sottrae 3,90 EUR a operazione
+   PF_V 0.822   (PF con 7,80 EUR/lotto a giro, CALCOLATO sui deal sostituendo la commissione del tester se piu' bassa: 0.742;  senza commissione ipotetica: 0.913)   netto PF_V -804 EUR   win rate 35%
+      T1  n=112   PF_V 0.82   PF del report 0.91   DD equity 1305.71 EUR (0.13%)   DD bilancio 1217.25 EUR (0.12%)
+   (il RISCHIO si legge a qualunque n; DD in EUR a 1,00 lotto con deposito 1000000 (v3): la % non e' quella di un conto vero e non si legge)
+   lato BUY  n=52 PF_V 0.51 netto -1072
+   lato SELL n=60 PF_V 1.11 netto 268
+   perdita a SL scritta dall'EA: mediana 133  p90 185  max 282 (valuta del conto del tester; 1,00 lotto)
+   vita della posizione (minuti): mediana 40.7  media 56.1  p90 130.7
+(5) concentrazione (S5)
+   migliore operazione = 9% del profitto positivo; netto senza le 5 migliori = -2155 -> FRAGILE
+(6) ORA (S6): sei fasce server a priori, ora del deal d'ingresso; r = netto/perdita a SL; soglia p < 0.0083 (0,05/6); n >= 100; stesso segno in >= 2 tranche
+   asia            00-07  n=0
+   europa          07-12  n=5     PF_V 0.98  r medio -0.010  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   pausa           12-14  n=6     PF_V 5.59  r medio 0.457  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   USA apertura    14-17  n=83    PF_V 0.67  r medio -0.111  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   USA pomeriggio  17-22  n=16    PF_V 1.07  r medio 0.010  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   rollover        22-24  n=2     PF_V 1.08  r medio 0.027  tranche con lo stesso segno 1/1  -> SOSPESA (n<100)
+   segnali liberi (senza posizione aperta) 1224, di cui scartati per spread 1112 = 91%  [sui soli segnali liberi: l'EA controlla la posizione aperta PRIMA dello spread]
+   ATR e spread alle barre di rottura (campione SELEZIONATO, non tutte le barre), per fascia: ATR mediana / spread mediana / n
+      asia            ATR 13.43  spread 2.00  n=369
+      europa          ATR 21.71  spread 2.00  n=391
+      pausa           ATR 29.14  spread 2.00  n=187
+      USA apertura    ATR 55.00  spread 2.00  n=274
+      USA pomeriggio  ATR 31.14  spread 2.00  n=191
+      rollover        ATR 23.29  spread 2.00  n=39
+
+----------------------------------------------------------------------------------------------------
+ CERTIFICATO DI MORTE: mancano le caselle 3 (uscita ad asse), 4 (simboli gemelli), 5 (TF cambiato). Qualunque esito sopra NON e' 'morto': e' 'NON ANCORA MISURATO' o 'la replica non regge (un regime)'.
