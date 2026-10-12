@@ -92,3 +92,9 @@ python3 -I backtest_pipeline/leggi_gba_r0.py GBA_R0_R2SXAG.zip GBA_R0_R2SNAS.zip
 
 ## PASS del cancello (12/10/2026, sesto giro)
 Riga `backtest_pipeline/righe/RIGA_LANCIA_GBA_R2S_A.txt` @ 2a1d1199, SHA256 1C7443F79489DAA2E832BBC3B0AE56993BAC9729E6FCA3D52EB60DF4214A0CE0, PIN cc9bcda0b64943b1e02ae8f52af68ccff81012d4. Strato 1 (controlla_riga/controlla_prova) + verificatore-stringhe (meccanica): PASS. controllo-preventivo (giudizio): PASS al sesto giro dopo cinque FAIL nelle regole di lettura (classi 1104b, 1369, 1372, 1376). Dipendenze aperte: lo strumento D2 (C3G per cella, fascia e lato) NON esiste ancora e deve passare dal cancello prima di aprire lo zip; senza D2 nessuna cella puo' uscire "ESCLUSA PER COSTO". Il confronto con Gemini sul piano di misura e' dovuto e va chiuso PRIMA di aprire lo zip.
+
+## PASS del cancello su D2 e sugli emendamenti E1-E4 (12/10/2026)
+- Strumento di lettura `backtest_pipeline/leggi_gba_r2s_c3g.py` @ 44f12930, SHA256 14384D874D1240217640D5D6B5CFA5A14978FB1B77A484D099943D3FE346DF1F, autotest 105 OK / 0 FAIL: PASS dopo due controlli (controllo-preventivo con 5 difetti corretti, classi 1379-1381; secondo controllo indipendente sul diff: PASS). Accettato sullo zip vero GBA_R0_R2SU30.zip solo nella fase di provenienza/struttura/orologio, senza leggere numeri di costo.
+- Emendamenti E1-E4 (`docs/RISPOSTA_A_GEMINI_GBA_R2S_STADIO_A_2026-10-12.md`, SHA256 9D3CA6B538620B6A3F05E7F133C98129E8283C40295F68EBD676EC706D06C22E): ADOTTATI dal coordinatore e passati dal cancello (4 giri di giudizio).
+- Comando d'uso: `python3 -I backtest_pipeline/leggi_gba_r2s_c3g.py GBA_R2S_A.zip --csv-out D2_C3G_R2S_A.csv`. Senza il lotto-ancora R2SANC ogni esito e' (C).
+- Dichiarazione: del lotto R2SU30 e' stata vista per errore la riga del MANIFEST con n e PF a Modello 1 (112 / 0,91 a M5; 115 / 0,76 a M15): sonda a barre, non merito, regole di lettura scritte prima. Non usati.
