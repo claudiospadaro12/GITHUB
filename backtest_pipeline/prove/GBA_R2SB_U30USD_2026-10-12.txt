@@ -122,9 +122,13 @@
 #      numero (sotto 13,3x si scrive 'SOTTO 13,3x in Tx'). FRA NON e' 'ESCLUSA': NON chiude la casella 4, NON archivia nulla; lo stadio B NON produce mai 'ESCLUSA PER COSTO'
 #      (quella via passa solo dall'esito (B) dello stadio A con E1-E4 ed E3). La cella si puo' misurare ancora 'per capire' (piano 5.3).
 #  (N) n INSUFFICIENTE o COSTO NON GIUDICATO in Tx -> NON PASSA LO STADIO B, NON ANCORA MISURATO: tutte e tre lette, nessuna FRA, ma in ALMENO UNA tranche n NETTO < 30,
-#      oppure righe segnale < 100, oppure 'non leggibile per spread zero'. Si scrive quale tranche, il numero e la via piu' corta al numero (piu' tranche dello storico
+#      oppure righe segnale < 100, oppure righe segnale a spread > 0 (cioe' SENZA le -1.0x) < 100, oppure 'non leggibile per spread zero'. Le righe -1.0x valgono
+#      infinito nella mediana (classe 1376) ma NON comprano il campione: contro-esempio scritto prima, 300 righe di cui 210 a -1.0x e 90 a spread > 0 con mediana 42x
+#      -> C3G infinito e 42x, tutti e due >= 40 (CE7 non scatta): senza la clausola la tranche giudicherebbe il costo su 90 righe vere e potrebbe dare (P); con la clausola
+#      e' (N). La clausola sta in (N), DOPO (F): non toglie a (F) nessuna tranche (non apre una strada nuova verso un esito piu' favorevole, classe 1378).
+#      Si scrive quale tranche, il numero e la via piu' corta al numero (piu' tranche dello storico
 #      BCM dal 2024.09.26, oppure un TF piu' alto), non un verdetto.
-#  (P) PASSA LO STADIO B (COSTO): tutte e tre le tranche lette, ognuna giudica il costo, ognuna con C3G >= 40,0 E n NETTO >= 30. Significa SOLO: il costo di U30USD M15 a
+#  (P) PASSA LO STADIO B (COSTO): tutte e tre le tranche lette, ognuna giudica il costo, ognuna con C3G >= 40,0, n NETTO >= 30 E almeno 100 righe segnale a spread > 0. Significa SOLO: il costo di U30USD M15 a
 #      tick reali e' alla frontiera di casa in tutti e tre i trimestri del 2026. NON e' una promozione, NON e' una sedia, NON va in un preset.
 #  M (vale per TUTTI gli esiti) MERITO = NON MISURATO, e si scrive cosi' qualunque sia il PF. Criterio firmato il 10/10 (piano 6.1): PF_V > 1,0 in OGNI regime con >= 150
 #      operazioni, long e short SEPARATI; un regime con < 150 operazioni NON giudica il merito. Qui: o le tre tranche sono UN regime (piano 5.3) e allora vale l'emendamento D

@@ -22,7 +22,13 @@
 #     aperta >= 1215 s; 45 minuti = 2,2 volte il minimo osservato. NON e' una garanzia: la durata dello stallo e' [NON MISURATO] (vedi CAUSA qui sotto).
 #  X5 MAGIC: INVARIATO 775800 (il driver v5 ammette solo 775800/775850, r.459; lo strumento D2 leggi_gba_r2s_c3g.py r.79 e r.420 pretende 775800 nel manifest). Nel
 #     tester il magic e' un'etichetta. Il nome NUOVO della misura e' il LOTTO (X1), non il magic.
-#  NON CAMBIA, byte per byte rispetto al file madre: i 30 pin e l'asse tecnico (righe Inp... in fondo), il blocco @GBA-TRANCHE (T1 2026.07.01-2026.09.30),
+#  X6 ANCORA (CE1) (controllo-preventivo 12/10, primo giro sul rilancio): il CE1 copiato qui sotto chiede la passata R2SANC 'stesso giro', e QUESTO giro NON la rigira.
+#     Quindi, per il lotto R2SXAG2, CE1 e' VERDE solo se valgono TUTTE E DUE: (1) l'ancora del 12/10 e' verde (GBA_R0_R2SANC.zip dentro
+#     risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip, pin cc9bcda0, stessi EA/include/driver; 'CE1 ancora: VERDE' in LETTURA_D2_R2S_A.txt) E (2) CE7 qui sotto e'
+#     VERDE: CE7 e' il controllo del GIRO NUOVO (stesso PC, stessa storia XAGUSD M1, stesso tester), al posto della parola 'stesso giro'. CE7 rossa o NON VALUTABILE ->
+#     CE1 NON verde -> TUTTE E DUE le celle del lotto (anche la M15) sono (C). Direzione dell'errore: toglie la lettura, non la da'. CONTRO-ESEMPIO: tra il 12/10 e il
+#     rilancio il terminale si aggiorna da solo (la build NON e' scritta nel RIEPILOGO) o il broker riscrive la storia M1: l'ancora del 12/10 resta verde, CE7 no.
+#  NON CAMBIA, byte per byte rispetto al file madre (salvo la parola 'stesso giro' del CE1, sostituita da X6): i 30 pin e l'asse tecnico (righe Inp... in fondo), il blocco @GBA-TRANCHE (T1 2026.07.01-2026.09.30),
 #     il blocco dell'asse (InpSignalTF, 1 tranche, 2 celle, 1 lotto), le due celle (REPL = 1, M15 = 15), Modello 1, e TUTTO il testo da 'DIFF CONTRO IL FILE MADRE
 #     prove/GBA_R0_REPLICA' fino a 'ESITI ... (C) NON SI LEGGE' compreso: DRIVER E LETTORE, TRANCHE/MODELLO/REGIME, SOGLIE, CHE COSA MISURA, ATTESE, SMENTITE, CE1-CE6,
 #     ESITI (A)(B)(C) ed ECCEZIONE n = 0. Le regole di lettura restano E1-E4 + ordine di E3 (docs/RISPOSTA_A_GEMINI_GBA_R2S_STADIO_A_2026-10-12.md) e R3
@@ -33,19 +39,29 @@
 #  FATTI (giornale del tester raccolto dal driver, log\GBA_R2SXAG_01_REPL_T1_m775800.txt, ore del PC):
 #   F1 passata avviata 16:31:36; 'XAGUSD,M1: total time from login to stop testing 0:00:00.589 (including 0:00:00.058 for history data synchronization)' e
 #      'Test passed in 0:00:00.531' alle 16:31:49 = il TEST e' FINITO 13 s dopo l'avvio; 'final balance 1000000.00 EUR' (zero operazioni); riga [GBA-CONTA] FINE presente.
-#   F2 MANCA la riga del terminale 'last test passed with result "successfully finished"', che il driver raccoglie (r.735, 'Test passed' senza maiuscole): nelle 8 passate OK
-#      dello stesso giro arriva 3-4 s dopo la fine del test (R2SANC 16:30:53 -> 16:30:56; NAS, D30, U30 idem). Il terminale NON ha chiuso il test per 20 minuti.
+#   F2 MANCA la riga del terminale 'last test passed with result "successfully finished"', che il driver raccoglie (r.735, 'Test passed' senza maiuscole): nelle 7 passate OK
+#      dello stesso giro (R2SANC; NAS, D30, U30 a M5 e M15) arriva 3-4 s dopo la fine del test (2,96-3,98 s; R2SANC 16:30:53 -> 16:30:56). Il terminale NON ha chiuso il
+#      test per 20 minuti. (controllo-preventivo 12/10: la prima stesura diceva '8 passate OK'; i lanciati del giro sono 8, gli OK 7, MANIFEST dei cinque zip.)
 #   F3 durata 1215 s = 1200 di timeout + ~7 s di CloseMainWindow + 8 s di attesa log: il terminale si e' chiuso al primo tentativo (la M15 dice 'tetto', non 'lotto fermato').
 #   F4 87 passate GBA lanciate e archiviate (S0, R1A, R1B, R2 senza codice, uscite, notte, M5 24 ore, R2S A): le altre 86 durano 28-73 s; la REPL argento e' la SOLA con ZERO operazioni ed e' la
 #      SOLA bloccata. L'argento NON era nuovo sul terminale: NATCLA_F0_D del 07/10 ha girato XAGUSD H1-D1 a Modello 1 sullo stesso PC in 28-33 s a passata, con la stessa riga
 #      'XAGUSD: history data begins from 2016.12.28'.
+#   F5 (controllo-preventivo 12/10, cercato nell'archivio fuori dal GBA) lo stallo NON e' nuovo su questo PC: NATCLA_F0_C del 08/10, passata [58/66] E35EUR AUDIO_D1,
+#      avvio 15:25:53, 'Test passed in 0:00:00.572' e 'total time from login to stop testing' alle 15:26:06,994 (= +14 s), poi KO 'timeout di 20 minuti', durata 1215 s:
+#      la STESSA firma della REPL argento. Quella passata NON aveva Report= nell'ini e NON mandava ordini (EA_NatCla InpSoloConta=true, come tutte le NatCla F0).
+#      Le altre 245 passate NatCla F0 archiviate (A 66, B 66, C 65, C0 4, D 18, D ripetizione 18, PILOTA 8), tutte senza ordini e senza Report=, si sono chiuse in 23-68 s.
+#      Stalli con questa firma sulle 333 passate archiviate di questo PC (87 GBA + 246 NatCla F0): 2 [MISURATO sul conteggio dei MANIFEST; causa NON MISURATA,
+#      report/NATCLA_F0_C_LETTURA_2026-10-08.md r.7].
 #  IPOTESI: (a) report scritto in ritardo e non catturato -> NON SOSTENUTA: il driver cerca il report DOPO l'uscita del terminale (r.789-794) e il terminale non ha mai
 #      stampato la riga di fine test (F2); (b) sincronizzazione/download della storia M1 all'avvio -> SMENTITA: 0,058 s di sincronizzazione e test finito a +13 s (F1);
-#      (c) stallo del terminale DOPO la fine del test, prima del report -> SOSTENUTA come DESCRIZIONE (F1+F2+F3); (d) la causa dello stallo: ZERO operazioni nel test
-#      (H-ZERO) e' l'UNICA differenza trovata fra la passata bloccata e le altre 86 (F4) -> [INFERITO, n = 1], NON dimostrata; uno stallo occasionale non legato alla
-#      passata non e' escluso. Nessuna fonte del repo misura un report MT5 con zero operazioni (NATCLA non chiedeva Report=).
-#  CONSEGUENZA DICHIARATA PRIMA DEI NUMERI: se H-ZERO e' vera, la REPL (n = 0 atteso) si blocca DI NUOVO e allunga il timeout NON basta: esce KO per 'timeout di 45 minuti'
-#     e la cella resta (C) 'conferma non data'. Il rilancio e' quindi anche la PROVA di H-ZERO (CE8 qui sotto). L'eccezione n = 0 degli ESITI presuppone un report con
+#      (c) stallo del terminale DOPO la fine del test, prima del report -> SOSTENUTA come DESCRIZIONE (F1+F2+F3); (d) la causa dello stallo. 'ZERO operazioni' da sola
+#      e' SMENTITA dall'archivio (F5: 245 passate NatCla senza ordini chiuse in 23-68 s). Resta la forma ristretta H-ZERO-R = 'ZERO operazioni CON Report= richiesto':
+#      fra le 87 passate GBA (tutte con Report=) e' l'unica differenza trovata (F4) -> [INFERITO, n = 1], NON dimostrata. L'alternativa STALLO OCCASIONALE (non legato
+#      alla passata) ha un precedente MISURATO (F5, senza Report=): 2 stalli su 333 passate di questo PC, circa 0,6% [stima dal conteggio, non una probabilita' misurata].
+#      Nessuna fonte del repo misura un report MT5 con zero operazioni.
+#  CONSEGUENZA DICHIARATA PRIMA DEI NUMERI: se H-ZERO-R e' vera, la REPL (n = 0 atteso) si blocca DI NUOVO e allungare il timeout NON basta: esce KO per 'timeout di 45
+#     minuti' e la cella resta (C) NON SI LEGGE. Se lo stallo e' occasionale, ripetersi per caso sulla stessa passata ha una frequenza dell'ordine di 0,6% (F5). Il rilancio
+#     e' quindi anche la PROVA di H-ZERO-R (CE8 qui sotto). L'eccezione n = 0 degli ESITI presuppone un report con
 #     zero operazioni: se il terminale non lo scrive mai, con il driver v5 l'eccezione non e' raggiungibile (decisione aperta nella scheda, non una regola qui).
 #
 #  ======================= CONTROLLI IN PIU' DEL RILANCIO (sono CONTROLLI di strumento, come CE1: possono solo togliere la lettura, MAI dare un esito) =======================
@@ -53,21 +69,27 @@
 #      R2SANC del 12/10 ha rifatto S0_01 del 10/10 al centesimo, 158 / -6364,79 / 0,86, e le gemelle di S0 erano identiche]. Il giornale e' a UN solo run (12/10), quindi
 #      la tolleranza e' ZERO: righe segnale 6611; EA segnali 6611, ingressi tentati 0, scartati spread 6611, posizione aperta 0, ATR non valido 0; C3G CELLA 2.40, BUY 2.50
 #      (n 3364), SELL 2.30 (n 3247); fasce (righe, C3G) asia 2149 2.10, europa 1458 2.40, pausa 680 2.80, USA apertura 802 4.20, USA pomeriggio 1251 2.10, rollover 271 1.40
-#      (risultati_archivio/GBA_R2S_A_20261012/LETTURA_D2_R2S_A.txt r.35-45, stampati da D2 a 2 decimali). Anche UN numero diverso = CE7 ROSSA: la REPL e' (C) finche' la
-#      differenza non e' spiegata per iscritto (storia M1 del broker cambiata? passata diversa?), e NON si usa il giornale del 12/10 al suo posto. Direzione dell'errore
-#      (classi 1376, 1382): CE7 rossa toglie la lettura, non la da'. Verde = il giornale del 12/10 e quello nuovo sono la stessa misura; l'esito si legge su quello NUOVO.
+#      (risultati_archivio/GBA_R2S_A_20261012/LETTURA_D2_R2S_A.txt r.35-45, stampati da D2 a 2 decimali). Anche UN numero diverso = CE7 ROSSA: la REPL di QUESTO lotto e' (C),
+#      senza appello, e NON si usa il giornale del 12/10 al suo posto; la spiegazione scritta della differenza (storia M1 del broker cambiata? build del terminale?
+#      passata diversa?) serve a disegnare la misura DOPO (file prova nuovo, cancello), MAI a riaprire questa lettura dopo aver visto i numeri. CE7 NON VALUTABILE
+#      (REPL non lanciata, giornale senza [GBA-CONTA] FINE, oppure lo strumento D2 con il lotto R2SXAG2 non ha passato il cancello PRIMA di aprire lo zip) = CE7 NON
+#      verde, come rossa (e per X6 vale per tutte e due le celle). Direzione dell'errore (classi 1376, 1382): CE7 rossa o non valutabile toglie la lettura, non la da'. Verde = il giornale del 12/10 e quello nuovo sono la stessa misura; l'esito si legge su quello NUOVO.
 #      CONTRO-ESEMPIO: un giornale in cui il tester ha letto un'altra storia (es. M1 parziale) cambia le righe segnale: 6611 non torna e CE7 e' rossa, anche se il C3G
 #      restasse sotto 6,65x.
 #  CE8 CAUSA DELLO STALLO (DESCRIZIONE, nessun esito ne dipende): per ogni passata si scrivono t_avvio (MANIFEST), ora della riga 'total time from login to stop testing'
 #      o 'Test passed', presenza della riga 'last test passed with result', durata_s, operazioni del report. Lettura scritta ORA:
-#      - REPL con n = 0 e report scritto (KO per il SOLO motivo 'ZERO operazioni nel report') -> H-ZERO SMENTITA: lo stallo del 12/10 non dipendeva dalle zero operazioni.
-#      - REPL di nuovo senza report, test finito entro ~1 minuto e nessuna riga 'last test passed' -> stallo RIPRODOTTO 2 volte su 2 sulla stessa passata: H-ZERO resta la
-#        sola differenza nota, la durata non e' il rimedio; si scrive e si porta a Claudio (decisione aperta), non si rilancia una terza volta con un timeout piu' lungo.
-#      - M15 con n >= 1 e report scritto in ~30 s, REPL bloccata -> coerente con H-ZERO (non la prova). M15 con n = 0 e report scritto -> H-ZERO SMENTITA.
-#        M15 con n >= 1 e bloccata -> H-ZERO SMENTITA (lo stallo non e' legato alle zero operazioni).
+#      - REPL con n = 0 e report scritto (KO per il SOLO motivo 'ZERO operazioni nel report') -> H-ZERO-R SMENTITA: lo stallo del 12/10 non dipendeva dalle zero
+#        operazioni col report; resta lo stallo occasionale (F5), col conteggio aggiornato dalle passate di questo giro.
+#      - REPL di nuovo senza report, test finito entro ~1 minuto e nessuna riga 'last test passed' -> stallo RIPRODOTTO 2 volte su 2 sulla stessa passata: per caso
+#        succederebbe circa 0,6% delle volte (F5), quindi la causa e' legata alla passata (H-ZERO-R, o altro della REPL argento M1: NON si sa ancora quale); la durata
+#        non e' il rimedio; si scrive e si porta a Claudio (decisione aperta), non si rilancia una terza volta con un timeout piu' lungo.
+#      - M15 con n >= 1 e report scritto in ~30 s, REPL bloccata -> coerente con H-ZERO-R (non la prova). M15 con n = 0 e report scritto -> H-ZERO-R SMENTITA.
+#        M15 con n = 0 e bloccata (final balance = deposito, [GBA-CONTA] FINE con ingressi tentati 0) -> coerente con H-ZERO-R (non la prova).
+#        M15 con n >= 1 e bloccata -> H-ZERO-R SMENTITA (lo stallo non e' legato alle zero operazioni): resta lo stallo occasionale.
 #      - Test finito TARDI (riga 'Test passed' a minuti dall'avvio) -> la causa e' a monte del test (storia, sincronizzazione), non lo stallo del 12/10: si scrive.
-#      CONTRO-ESEMPIO della lettura: H-ZERO e (b) danno numeri DIVERSI sulla stessa riga: (b) sposta l'ora di 'Test passed' (sincronizzazione lunga PRIMA del test),
-#      H-ZERO no (test a +13 s, poi silenzio). Il 12/10 'Test passed' e' a +13 s: e' quella riga che separa le due ipotesi.
+#      CONTRO-ESEMPIO della lettura: H-ZERO-R e (b) danno numeri DIVERSI sulla stessa riga: (b) sposta l'ora di 'Test passed' (sincronizzazione lunga PRIMA del test),
+#      H-ZERO-R no (test a +13 s, poi silenzio). E lo stallo occasionale NON si separa da H-ZERO-R con una passata sola: per questo il caso 'bloccata di nuovo' conta
+#      solo come 2 su 2 sulla STESSA passata, mai come prova da sola. Il 12/10 'Test passed' e' a +13 s: e' quella riga che separa le due ipotesi.
 #
 #  ======================= DIFF CONTRO IL FILE MADRE prove/GBA_R0_REPLICA_2026-10-09.txt (i 30 pin, classe 1274) =======================
 #  CAMBIA, e nient'altro di cio' che entra nel tester:
