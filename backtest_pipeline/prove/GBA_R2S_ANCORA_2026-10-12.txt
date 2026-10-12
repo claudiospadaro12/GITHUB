@@ -50,6 +50,16 @@
 #      Il testo che decide e' negli ESITI (B) dei file dei simboli gemelli.
 #      Controprova sull'oro (righe (6) di S0_01): fasce 10,6 / 19,25 / 19,5 / 25,1 / 25,1 / 37,0x con n 276 / 1346 / 2314 / 1426 / 778 / 833 -> mediana ponderata 19,5x
 #      (FRA), stessa classe del proxy del piano (21,6x). Campione = barre di rottura (SELEZIONATO), non tutte le barre: si scrive accanto al numero.
+#      TERZO GIRO del cancello (12/10, classi 291 e 1104 b): la L3 confrontata coi numeri VERI gia' nello zip di S0 (log\GBA_S0_01_REPL_T1_m775800.txt, 6973 righe
+#      segnale, campo 'stop/spread' che l'EA calcola a piena precisione e stampa a 1 decimale, EA r.711 e r.720-727): mediana di TUTTE le righe 22,80x contro la mediana ponderata
+#      L3 19,48x (-14,6%: la mediana delle mediane di fascia NON e' la mediana della cella); fascia per fascia il rapporto delle mediane sta fra -6,6% e +2,7% del campo.
+#      La L3 SOTTOSTIMA, cioe' sbaglia verso 'ESCLUSA': resta DESCRIZIONE (attese, smentite, frase dell'esito A), si scrive col suo nome '[L3, sottostima misurata
+#      sull'oro -14,6%]' e NON decide 'ESCLUSA PER COSTO'. COSTO GREZZO MISURATO (C3G) = mediana del campo 'stop/spread' delle righe segnale del giornale della passata
+#      (log\GBA_<passata>.txt nello zip del lotto; righe con -1.0x = spread zero escluse e contate accanto), per CELLA (tutte le righe) e per FASCIA (le sei fasce del
+#      lettore, sul campo 'ora server' della riga, con il loro n). Lo legge uno strumento che passa il cancello PRIMA di aprire lo zip (D2 della scheda); il giornale c'e'
+#      anche per le passate KO (driver r.820-826), quindi il C3G si legge anche a n = 0. Prova sull'oro: C3G della cella S0_01 = 22,80x (FRA, stessa classe della L3).
+#      SPREAD DELLA CELLA, dove serve: mediana del campo 'spread' di tutte le righe segnale del giornale con lo strumento D2, altrimenti mediana ponderata per n degli
+#      spread mediani di fascia delle righe (6) (stessa regola della L3, e allora si scrive '[L3]' accanto).
 #   L4 le righe segnale scrivono ATR e spread a 2 decimali (EA r.720-727, '%.2f'): sugli indici e' irrilevante, sull'argento (spread ~0,04) l'errore di arrotondamento
 #      arriva a +-25% su ogni mediana (le righe d'ingresso usano invece le cifre del simbolo, 3 per XAGUSD).
 #   L5 PF_V (4): se il tester non addebita commissioni, il lettore sottrae 3,90 EUR/lotto a operazione (la commissione dell'ORO, r.42). Sugli indici BCM la commissione e'

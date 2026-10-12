@@ -54,6 +54,16 @@
 #      Il testo che decide e' negli ESITI (B) dei file dei simboli gemelli.
 #      Controprova sull'oro (righe (6) di S0_01): fasce 10,6 / 19,25 / 19,5 / 25,1 / 25,1 / 37,0x con n 276 / 1346 / 2314 / 1426 / 778 / 833 -> mediana ponderata 19,5x
 #      (FRA), stessa classe del proxy del piano (21,6x). Campione = barre di rottura (SELEZIONATO), non tutte le barre: si scrive accanto al numero.
+#      TERZO GIRO del cancello (12/10, classi 291 e 1104 b): la L3 confrontata coi numeri VERI gia' nello zip di S0 (log\GBA_S0_01_REPL_T1_m775800.txt, 6973 righe
+#      segnale, campo 'stop/spread' che l'EA calcola a piena precisione e stampa a 1 decimale, EA r.711 e r.720-727): mediana di TUTTE le righe 22,80x contro la mediana ponderata
+#      L3 19,48x (-14,6%: la mediana delle mediane di fascia NON e' la mediana della cella); fascia per fascia il rapporto delle mediane sta fra -6,6% e +2,7% del campo.
+#      La L3 SOTTOSTIMA, cioe' sbaglia verso 'ESCLUSA': resta DESCRIZIONE (attese, smentite, frase dell'esito A), si scrive col suo nome '[L3, sottostima misurata
+#      sull'oro -14,6%]' e NON decide 'ESCLUSA PER COSTO'. COSTO GREZZO MISURATO (C3G) = mediana del campo 'stop/spread' delle righe segnale del giornale della passata
+#      (log\GBA_<passata>.txt nello zip del lotto; righe con -1.0x = spread zero escluse e contate accanto), per CELLA (tutte le righe) e per FASCIA (le sei fasce del
+#      lettore, sul campo 'ora server' della riga, con il loro n). Lo legge uno strumento che passa il cancello PRIMA di aprire lo zip (D2 della scheda); il giornale c'e'
+#      anche per le passate KO (driver r.820-826), quindi il C3G si legge anche a n = 0. Prova sull'oro: C3G della cella S0_01 = 22,80x (FRA, stessa classe della L3).
+#      SPREAD DELLA CELLA, dove serve: mediana del campo 'spread' di tutte le righe segnale del giornale con lo strumento D2, altrimenti mediana ponderata per n degli
+#      spread mediani di fascia delle righe (6) (stessa regola della L3, e allora si scrive '[L3]' accanto).
 #   L4 le righe segnale scrivono ATR e spread a 2 decimali (EA r.720-727, '%.2f'): sugli indici e' irrilevante, sull'argento (spread ~0,04) l'errore di arrotondamento
 #      arriva a +-25% su ogni mediana (le righe d'ingresso usano invece le cifre del simbolo, 3 per XAGUSD).
 #   L5 PF_V (4): se il tester non addebita commissioni, il lettore sottrae 3,90 EUR/lotto a operazione (la commissione dell'ORO, r.42). Sugli indici BCM la commissione e'
@@ -119,8 +129,11 @@
 #  CE1 ANCORA: la passata R2SANC (file prova GBA_R2S_ANCORA_2026-10-12.txt, stesso giro) deve rifare S0_01 al centesimo (158 / -6364,79 / 0,86, solo spread 55,9x) e il lettore,
 #      caricato con GBA_R0_S0.zip, deve fermarsi per doppione. Se no: NESSUN numero di questo lotto si usa.
 #  CE2 SIMBOLO VERO: il driver mette KO la passata se report, riga del tester o riga AVVIO dicono un altro simbolo/TF. In piu', nel lettore: l'intestazione della cella DEVE
-#      portare 'D30EUR M..' (r.1024) e gli ordini di grandezza alle barre di rottura devono essere quelli del simbolo, NON dell'oro: ATR mediana per fascia 5-150 punti e spread mediana 0,8-6,0 punti. Una cella con lo spread mediano
-#      per fascia 0,15-0,30 (la firma dell'oro: S0 0,17-0,25 USD) o senza etichetta di simbolo = letta come XAUUSD: non si usa. PERCHE' SERVE: il lettore NON confronta il simbolo
+#      portare 'D30EUR M..' (r.1024) e gli ordini di grandezza alle barre di rottura devono essere quelli del simbolo, NON dell'oro: ATR mediana per fascia 5-150 punti e spread mediana 0,8-6,0 punti. CE2 e' ROSSA SOLO se
+#      l'intestazione non porta 'D30EUR M..', oppure se OGNI fascia stampata (almeno una) ha lo spread mediano in 0,15-0,30 (la firma dell'oro: S0 spread
+#      0,17-0,25 USD e ATR 1,06-2,96 in tutte e sei le fasce) = letta come XAUUSD: non si usa. Le bande d'ordine di grandezza qui sopra sono ATTESE, NON cancelli: una
+#      fascia fuori banda senza la firma dell'oro si scrive come numero nuovo (TERZO GIRO del cancello, classi 1104 b e 1369: prima non era scritto se la CE2 la
+#      facevano rossa le bande o la firma, ne' se 'per fascia' voleva dire ogni fascia o almeno una). PERCHE' SERVE: il lettore NON confronta il simbolo
 #      del report con quello del manifest (L7): PROVATO il 12/10 con uno zip FINTO (deal, giornale e report VERI di S0_01, oro, sotto l'etichetta R2SXAG M15 e l'ini del driver):
 #      il lettore stampa 'CELLA M15 [lotto R2SXAG] ... XAGUSD M15', G0 OK, e i numeri dell'oro (solo spread 55,9x, spread per fascia 0,17-0,25). La guardia e' il driver
 #      (report di un altro simbolo = KO, r.806) e, in lettura, questa firma.
@@ -130,26 +143,40 @@
 #      il giornale e' incompleto (dedup del driver): si legge il giornale prima di qualunque numero.
 #  CE5 LOTTO: le righe d'ingresso devono dire '1.00 lotti'. Se il simbolo non ammette 1,00 l'EA stampa 'ATTENZIONE: lotto richiesto ... ridotto' e la passata resta OK: la
 #      taglia diversa NON cambia n, quota scartata e costo, ma si scrive.
+#  CE6 ORDINI ESEGUITI (TERZO GIRO del cancello, classe 1372): 'ingressi tentati' della riga (2) conta i segnali che passano il filtro, NON gli ordini eseguiti (EA r.704).
+#      Deve valere: ingressi tentati - n = 0 oppure 1 (la tolleranza del driver r.817; S0_01: 158 = 158). Con 2 o piu': ordini saltati o rifiutati sul simbolo nuovo
+#      (intestazione del log 'errori d ordine N   altri ordini saltati M', driver r.822; nel giornale 'ERRORE ordine' / 'ordine saltato'): n e' TRONCATO, la cella e' (C)
+#      finche' la causa non e' scritta. Vale anche a n = 0 (ECCEZIONE qui sotto).
 #
 #  ======================= ESITI DELLO STADIO A PER OGNI (simbolo, TF): TRE, e nient'altro =======================
-#  Prima: passata OK nel driver, G0 OK nel lettore, CE1-CE4 verdi. Altrimenti: GUASTO, nessun esito.
+#  Prima: passata OK nel driver, G0 OK nel lettore, CE1-CE4 e CE6 verdi. Altrimenti: GUASTO, nessun esito.
 #  ECCEZIONE, SCRITTA ORA (contro-esempio trovato preparando il lotto): una passata KO per il SOLO motivo 'ZERO operazioni nel report' (driver r.816; AVVIO, AUTOTEST,
-#  finestra e riga [GBA-CONTA] FINE a posto) NON e' un guasto: e' n = 0, ed e' PRODUCIBILE (sull'argento e' l'attesa). Il driver la conta KO (il lotto esce con rc 3) e il
+#  finestra e riga [GBA-CONTA] FINE a posto) E con, nella riga (2), 'ingressi tentati 0' E 'scartati spread' >= 1 NON e' un guasto. (TERZO GIRO del cancello, classi
+#  1369 e 1372: l'EA conta 'ingressi tentati' PRIMA di mandare l'ordine (EA r.704, poi GbaApri r.623-667 puo' saltarlo) e il driver NON mette KO 'ERRORE ordine' ne'
+#  'ordine saltato' (r.745-746, solo contati): con tentati > 0 e n = 0 gli ordini sono stati RIFIUTATI, non filtrati -> (C), CE6; con segnali(EA) = 0 la frase 'tutti i
+#  liberi scartati' sarebbe vera A VUOTO -> (C), si legge la storia M1 del simbolo.) In quel caso: e' n = 0, ed e' PRODUCIBILE (sull'argento e' l'attesa). Il driver la conta KO (il lotto esce con rc 3) e il
 #  lettore la scarta (G0: 'KO del driver'), ma nella riga (2) stampa LO STESSO i conteggi della riga [GBA-CONTA] FINE dell'EA ('(G0 KO: non letta) n=n.d. ... segnali(EA)
 #  N, ingressi tentati 0, scartati spread X, a posizione aperta Y': PROVATO il 12/10 su uno zip finto con stato KO e motivo 'ZERO operazioni nel report') e NON stampa le
-#  righe (6) (ATR e spread per fascia). L'esito e' (B) con n = 0, coi conteggi della riga (2); il costo grezzo resta NON MISURATO (D2 della scheda: nessun lettore
-#  passato legge il campo stop/spread delle righe segnale).
-#   (A) PASSA ALLO STADIO B: n (ingressi, T1) >= 30 E 'solo spread' sugli ingressi >= 40x. Si scrive accanto il costo GREZZO (L3) e, se e' in FRA (13,3-40), la frase
-#       'FRA sui segnali grezzi, PASSA solo grazie al filtro'.
+#  righe (6) (ATR e spread per fascia). L'esito e' (B) con n = 0, coi conteggi della riga (2); il costo grezzo e' il C3G dal giornale se lo strumento D2 ha passato il
+#  cancello prima di aprire lo zip, altrimenti resta NON MISURATO (nessun lettore passato legge il campo stop/spread delle righe segnale).
+#   (A) PASSA ALLO STADIO B: n (ingressi, T1) >= 30 E 'solo spread' sugli ingressi >= 40x. Si scrive accanto il costo GREZZO (il C3G se lo strumento D2 c'e', e sempre
+#       la L3 col suo nome; la frase la decide il C3G se c'e', altrimenti la L3) e, se e' < 40x, la frase 'FRA sui segnali grezzi, PASSA solo grazie al filtro'
+#       (13,3-40) oppure 'SOTTO 13,3x sui segnali grezzi, PASSA solo grazie al filtro' (< 13,3). (TERZO GIRO del cancello, classe 1369: prima, sotto 13,3x non si
+#       scriveva nessuna frase.)
 #   (B) NON PASSA PER n: n < 30. Si scrivono n, la quota scartata per spread e il costo grezzo (della CELLA e di TUTTE le fasce). Soglia S con il margine dell'arrotondamento
 #       (L4): S = 6,65x per l'argento, S = 13,3x per gli indici. 'ESCLUSA PER COSTO col numero' (e la casella 4 si chiude per quel (simbolo, TF)) SOLO se valgono TUTTE E TRE:
-#       (i) ALMENO UNA fascia con >= 100 segnali nelle righe (6); (ii) costo grezzo < S in OGNI fascia con >= 100 segnali; (iii) costo grezzo della CELLA (mediana ponderata,
-#       L3) < S. Senza la (i) la (ii) sarebbe vera A VUOTO: NON e' 'ESCLUSA'. Contro-esempi scritti prima (secondo giro del cancello, 12/10): storia M1 parziale o pochi
+#       (i) ALMENO UNA fascia con >= 100 segnali; (ii) C3G < S in OGNI fascia con >= 100 segnali; (iii) C3G della CELLA < S. Senza la (i) la (ii) sarebbe vera A VUOTO:
+#       NON e' 'ESCLUSA'. (TERZO GIRO del cancello, classe 291: (i)-(iii) si leggono SOLO sul C3G, il campo stop/spread delle righe del giornale; la L3 sottostima
+#       sull'oro del 14,6% proprio verso 'ESCLUSA' e NON decide. Se lo strumento D2 non ha passato il cancello PRIMA di aprire lo zip: NIENTE 'ESCLUSA', l'esito e'
+#       'n insufficiente' con la L3 accanto come descrizione. Con il C3G l'arrotondamento L4 non entra: 6,65x per l'argento resta come margine prudenziale scritto
+#       prima dei numeri. Sulla L3 quel margine NON bastava: con lo spread di fascia stampato 0,01 una cella stampata 5,00x puo' valere 24,5x, ricerca esaustiva
+#       sulla stampa vera del lettore, EA '%.2f' per riga + statistics.median + '%.2f'.) Contro-esempi scritti prima (secondo giro del cancello, 12/10): storia M1 parziale o pochi
 #       segnali -> nessuna fascia a 100 -> 'ESCLUSA' a vuoto; una sola fascia a >= 100 segnali (asia, spread largo fuori cassa) sotto S e le altre cinque (99 segnali l'una)
 #       a 45x -> 'ESCLUSA' con la cella a 45x. Tutti e due ora escono 'n insufficiente'.
 #       Altrimenti -> 'n insufficiente a Modello 1 su una tranche' (NON 'escluso'). Con n = 0 (eccezione qui sopra) -> 'la REPL non apre nessuna operazione su questo
-#       (simbolo, TF) in T1: N segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo NON MISURATO' -> non passa allo stadio B.
-#   (C) NON SI LEGGE: passata KO, lettore che non stampa la cella, CE1-CE4 rossi.
+#       (simbolo, TF) in T1: N segnali, tutti i liberi scartati dal filtro (nessuno con stop/spread >= 50x); costo grezzo: C3G se lo strumento D2 c'e' (e allora vale la
+#       regola 'ESCLUSA' qui sopra), altrimenti NON MISURATO' -> non passa allo stadio B.
+#   (C) NON SI LEGGE: passata KO (salvo l'ECCEZIONE), lettore che non stampa la cella, CE1-CE4 o CE6 rossi.
 #  Nessun esito scrive la parola vietata; nessun esito promuove una cella a sedia; nessun numero di questo lotto va in un preset.
 #
 #  @DAQUANDO-DALLA-RIGA le date arrivano dal blocco @GBA-TRANCHE qui sotto (una tranche, T1 di R1A; nessuna IS/OOS: il driver GBA_R0_PASSATE.ps1 v5 la legge dal file)
