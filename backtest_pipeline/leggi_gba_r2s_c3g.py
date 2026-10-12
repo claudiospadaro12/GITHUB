@@ -2,7 +2,8 @@
 # -*- coding: ascii -*-
 """
 leggi_gba_r2s_c3g.py -- STRUMENTO D2 del lotto GBA R2S stadio A (simboli gemelli, sonda dei costi, Modello 1, tranche T1).
-BOZZA, NON passata dal cancello: finche' i due strati del cancello non danno PASS NON si apre lo zip GBA_R2S_A.zip con questo strumento.
+Strato 2 del cancello (controllo-preventivo, 12/10/2026): PASS su QUESTA versione, dopo 5 correzioni (mediana pari al bordo in virgola mobile, varianti senza
+la dicitura di chiusura, pin ed EA dal RIEPILOGO, orologio e date delle righe, cella doppia nel manifest). Qualunque modifica invalida il PASS: si ripassa.
 
 COSA FA (e niente altro). Legge il giornale dell'EA (log\\GBA_<passata>.txt) di ogni passata dei 5 lotti R2SANC / R2SXAG / R2SNAS / R2SD30 / R2SU30 e stampa,
 per ogni cella (simbolo, TF), il C3G = MEDIANA VERA del campo 'stop/spread' delle righe segnale (scheda report/GBA_R2S_A_SCHEDA_2026-10-12.md, decisione D2; blocco L3
@@ -12,8 +13,9 @@ e ESITI (A)(B)(C) dei file prova backtest_pipeline/prove/GBA_R2S_*_2026-10-12.tx
   - C3G della cella, delle 6 fasce orarie (definizione COPIATA dal lettore leggi_gba_r0.py r.52, ora = campo 'ora server' della riga, come nelle righe (6) del lettore)
     e dei due lati BUY/SELL, ciascuno col suo n; per cella e fascia anche il C3G per lato, le righe a >= 40x e a >= 50x e gli ingressi con la loro quota (E2);
   - le condizioni (i)-(iv) dell'esito (B) valutate LETTERALMENTE, con la soglia delle fasce della (ii) come PARAMETRO (100 = testo pinnato, 30 = E1), e la (v)
-    di E4: righe della CELLA con stop/spread >= 40,0x (inclusivo; -1.0x = INFINITO e conta) < 30. S = 13,3x indici, 6,65x argento. Si stampano TRE esiti: due
-    VARIANTI (testo pinnato: (i)-(iv), (ii) a 100; E1: (i)-(iv), (ii) a 30) e l'ESITO DI RIFERIMENTO = E1 + E4 ((i)-(v)) con la dicitura di E3;
+    di E4: righe della CELLA con stop/spread >= 40,0x (inclusivo; -1.0x = INFINITO e conta) < 30. S = 13,3x indici, 6,65x argento. Si stampano TRE righe: due
+    VARIANTI DESCRITTIVE NON IN VIGORE (testo pinnato: (i)-(iv), (ii) a 100; E1: (i)-(iv), (ii) a 30), che NON portano mai una dicitura di chiusura (E1-E4 sono
+    ADOTTATI: col solo Modello 1 l'unica dicitura e' quella di E3), e l'ESITO DI RIFERIMENTO = E1 + E4 ((i)-(v)) con la dicitura di E3;
   - la CASELLA 4 secondo E3: 'ESCLUSA (Modello 1)' -> NON ANCORA MISURATO finche' una passata a TICK REALI della stessa cella e tranche non da' n netto < 30 E
     (i)-(v) sul suo giornale (allora 'ESCLUSA PER COSTO (Modello 1 e tick reali)', casella CHIUSA); esiti IN ORDINE (storia a tick mancante; eccezione n=0;
     altro KO / CE rosse / SHA di D2 diverso = conferma non data; n netto >= 30 = conferma smentita per n, resta (B), mai (A); condizione falsa; conferma). casella4();
@@ -24,12 +26,16 @@ e ESITI (A)(B)(C) dei file prova backtest_pipeline/prove/GBA_R2S_*_2026-10-12.tx
 REGOLE DI CONTO (scritte prima dei numeri):
   - le righe '-1.0x' (spread zero, EA r.711) valgono stop/spread INFINITO e NON si scartano; qualunque altro valore negativo = ERRORE (non si indovina);
     le righe 'ATR non valido' (campo 0,0x) entrano nel C3G col loro valore e non contano nella (v); con spread zero stampano -1,0x = INFINITO e contano (E4);
-  - mediana su un numero PARI di valori = media delle due centrali (se una delle due e' INFINITO la mediana e' INFINITO);
+  - mediana su un numero PARI di valori = media delle due centrali (se una delle due e' INFINITO la mediana e' INFINITO), ARROTONDATA a 9 decimali: i valori sono
+    stampati a 1 decimale e la media in virgola mobile di due di essi puo' cadere un ulp SOTTO la soglia (es. (10,2 + 16,4) / 2 = 13,299999999999999 < 13,3),
+    cioe' verso 'ESCLUSA' (strato 2 del cancello, 12/10);
   - deduplica delle righe del giornale con la STESSA chiave del driver (GBA_R0_PASSATE.ps1 r.719-723: ora simulata al secondo + primi 70 caratteri del messaggio,
     si tiene il messaggio piu' lungo): sul giornale scritto dal driver deve togliere ZERO righe; se ne toglie anche una, lo zip e' RIFIUTATO.
   - lo zip e' RIFIUTATO (nessun numero) se: lotto sconosciuto o caricato due volte; file prova assente o con SHA256 diverso da quello pinnato nella riga di lancio;
+    RIEPILOGO_R0.txt assente, o con un pin diverso da quello della riga (cc9bcda0) o con lo SHA256 dell'EA diverso da 1381E3DC; ESITI_R2S_A.txt con un altro pin;
     simbolo/TF/tranche/modello/magic del manifest, dell'ini, della riga AVVIO, della riga FINESTRA o del report diversi da quelli del file prova; input dell'ini diversi
-    dai pin del file prova; giornale assente per una passata lanciata; una riga '[GBA] segnale' che il parser non legge; ora server fuori da 0-23.
+    dai pin del file prova; la stessa cella due volte nel manifest; giornale assente per una passata lanciata; una riga '[GBA] segnale' che il parser non legge;
+    ora server fuori da 0-23 o DIVERSA dall'ora dell'orario simulato della riga; data di una riga segnale fuori dalla tranche.
 NON FA: non legge PF, DD, deal; non stampa la L3 (la stampa il lettore, righe (6)); non valuta il G0 del lettore (precondizione esterna: si legge in leggi_gba_r0.py
 sezione (1)); non valuta l'A3 dell'ancora (doppione con GBA_R0_S0.zip: e' del lettore); non promuove niente; non scrive la parola vietata del certificato.
 
@@ -45,7 +51,7 @@ sys.dont_write_bytecode = True
 
 QD = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(QD, ".."))
-VERSIONE = "leggi_gba_r2s_c3g v1 (D2, bozza)"
+VERSIONE = "leggi_gba_r2s_c3g v2 (D2, strato 2 del 12/10)"
 
 # ---------------------------------------------------------------------------------------------------------------------
 #  DEFINIZIONI COPIATE (l'autotest verifica che siano identiche a quelle del lettore leggi_gba_r0.py, SHA256 9CD02D2A...)
@@ -71,6 +77,8 @@ MOTIVI_EA = ("ok", "posizione gia' aperta", "fuori orario", "perdita giornaliera
 TRANCHE = ("T1", "2026.07.01", "2026.09.30")
 MODELLO = "1"
 MAGIC = "775800"
+PIN_AMMESSI = ("cc9bcda0b64943b1e02ae8f52af68ccff81012d4",)   # pin della riga RIGA_LANCIA_GBA_R2S_A (il driver lo scrive minuscolo nel RIEPILOGO, r.142 e r.877)
+SHA_EA = "1381E3DC9B4B4E44BCDC0319F023CB1990900CE0D1A6B6A3EC1DF5DF99E601B1"   # EA v1.10 (-ShaEA della riga; il driver lo scrive maiuscolo, r.151 e r.878)
 TF_NUM = {"M1": "1", "M5": "5", "M15": "15"}
 LOTTI = {
     "R2SANC": {"prova": "GBA_R2S_ANCORA_2026-10-12.txt", "sha": "42773ac50e3665e8a1b0fca038bdf2da3faf9c24ed42a2184f90f03eeb0d05ae", "simbolo": "XAUUSD",
@@ -133,7 +141,7 @@ def mediana(v):
     a, b = s[n // 2 - 1], s[n // 2]
     if a == INF or b == INF:
         return INF
-    return (a + b) / 2.0
+    return round((a + b) / 2.0, 9)   # niente ulp sotto la soglia: (10.2 + 16.4) / 2 = 13.299999999999999 senza round
 
 
 def percentile(v, p):
@@ -210,6 +218,10 @@ def leggi_giornale(testo, etich="giornale"):
             ora = int(d["ora"])
             if not 0 <= ora <= 23:
                 raise Rifiuto("%s: ora server %d fuori da 0-23" % (etich, ora))
+            # OROLOGIO: il campo 'ora server' e' dt.hour dell'apertura della barra (EA r.695-696, r.726); l'orario della riga e' quello simulato del tester (driver
+            # $reGba r.552), nella stessa barra. Sui giornali dell'oro coincidono su 6973 righe su 6973 (S0_01 e R1A T1): se differiscono, il giornale non si legge.
+            if int(st[11:13]) != ora:
+                raise Rifiuto("%s: ora server %d diversa dall'ora dell'orario simulato della riga (%s): orologio incoerente, non si indovina la fascia" % (etich, ora, st))
             motivo = d["motivo"] or ""
             if d["motivo"] is not None and motivo not in MOTIVI_EA:
                 raise Rifiuto("%s: motivo SALTATO sconosciuto '%s'" % (etich, motivo))
@@ -379,10 +391,24 @@ def leggi_lotto(nome_zip, dati):
     sha = hashlib.sha256(raw_prova).hexdigest()
     if sha != D["sha"]:
         raise Rifiuto("%s: il file prova %s ha SHA256 %s, la riga di lancio ha pinnato %s" % (nome_zip, D["prova"], sha[:12], D["sha"][:12]))
+    # PROVENIENZA: pin della riga e SHA256 dell'EA, dal RIEPILOGO_R0.txt che il driver scrive nello zip (r.875-888). Un zip di un altro giro (altro pin, altro EA)
+    # con lo stesso file prova NON e' questa misura.
+    if "RIEPILOGO_R0.txt" not in N:
+        raise Rifiuto("%s: manca RIEPILOGO_R0.txt: pin e EA della passata non verificabili" % nome_zip)
+    rie = z.read(N["RIEPILOGO_R0.txt"]).decode("ascii", "replace")
+    pins = set(re.findall(r"\bpin: ([0-9a-fA-F]{40})\b", rie))
+    if len(pins) != 1 or next(iter(pins)).lower() not in PIN_AMMESSI:
+        raise Rifiuto("%s: il RIEPILOGO dice pin %s, la riga di lancio e' al pin %s" % (nome_zip, ", ".join(sorted(pins)) or "assente", " / ".join(PIN_AMMESSI)))
+    if ("ABTG_GoldBreakoutATR.mq5 SHA256 " + SHA_EA) not in rie:
+        raise Rifiuto("%s: il RIEPILOGO non dice ABTG_GoldBreakoutATR.mq5 SHA256 %s...: un altro EA" % (nome_zip, SHA_EA[:12]))
     pin = pin_della_prova(raw_prova.decode("ascii", "replace"))
     if pin.get("InpSymbol") != D["simbolo"]:
         raise Rifiuto("%s: il file prova pinna InpSymbol=%s, il lotto %s e' %s" % (nome_zip, pin.get("InpSymbol"), L, D["simbolo"]))
     celle_att = dict(D["celle"])
+    celle_man = [r["cella"] for r in man]
+    doppie = sorted(set(c for c in celle_man if celle_man.count(c) > 1))
+    if doppie:
+        raise Rifiuto("%s: la cella %s compare PIU' volte nel manifest: ogni numero sarebbe doppio" % (nome_zip, ", ".join(doppie)))
     passate = []
     for r in man:
         tag = r["passata"]
@@ -423,6 +449,9 @@ def leggi_lotto(nome_zip, dati):
         if nl not in N:
             raise Rifiuto("%s: giornale %s ASSENTE: il C3G non si legge e non si indovina" % (e, nl))
         G = leggi_giornale(z.read(N[nl]).decode("ascii", "replace"), e)
+        fuori = [x["st"] for x in G["righe"] if not (TRANCHE[1] <= x["st"][:10] <= TRANCHE[2])]
+        if fuori:
+            raise Rifiuto("%s: %d righe segnale fuori dalla tranche %s-%s (prima: %s): giornale di un'altra finestra" % (e, len(fuori), TRANCHE[1], TRANCHE[2], fuori[0]))
         if G["doppioni"]:
             raise Rifiuto("%s: la deduplica con la chiave del driver toglie %d righe: il giornale NON e' quello scritto dal driver" % (e, G["doppioni"]))
         for a in G["avvio"]:
@@ -473,6 +502,10 @@ def carica(percorsi):
                 continue
             aggiungi(p + "!" + n, z.read(N[n]))
         if "ESITI_R2S_A.txt" in N:
+            es = z.read(N["ESITI_R2S_A.txt"]).decode("ascii", "replace")
+            pe = set(re.findall(r"\bpin ([0-9a-fA-F]{40})\b", es))
+            if len(pe) != 1 or next(iter(pe)).lower() not in PIN_AMMESSI:
+                raise Rifiuto("%s: ESITI_R2S_A.txt dice pin %s, la riga di lancio e' al pin %s" % (p, ", ".join(sorted(pe)) or "assente", " / ".join(PIN_AMMESSI)))
             note.append("ESITI_R2S_A.txt: " + " / ".join(x.strip() for x in z.read(N["ESITI_R2S_A.txt"]).decode("ascii", "replace").splitlines() if x.strip()))
     return lotti, note
 
@@ -618,8 +651,10 @@ def eccezione_n0(P):
 
 VARIANTI = {
     # nome: (soglia della (ii), (v) di E4, dicitura di ESCLUSA)
-    "pinnato": (SOGLIA_II_PINNATA, False, "ESCLUSA PER COSTO col numero"),
-    "E1": (SOGLIA_II_E1, False, "ESCLUSA PER COSTO col numero"),
+    # Le due VARIANTI sono descrizione (quanto mordono E1 ed E4): E1-E4 sono ADOTTATI, quindi NON portano mai la dicitura di chiusura 'ESCLUSA PER COSTO'
+    # (E3: a Modello 1 da solo l'esito si scrive 'ESCLUSA (Modello 1)' e la casella resta aperta). Strato 2 del cancello, 12/10.
+    "pinnato": (SOGLIA_II_PINNATA, False, "VARIANTE NON IN VIGORE (solo descrizione, NON un esito, casella 4 NON chiusa): col testo pinnato senza E1-E4 le condizioni varrebbero"),
+    "E1": (SOGLIA_II_E1, False, "VARIANTE NON IN VIGORE (solo descrizione, NON un esito, casella 4 NON chiusa): con E1 senza E4 le condizioni varrebbero"),
     "riferimento": (SOGLIA_II_E1, True, "ESCLUSA (Modello 1)"),   # E1 + E4, dicitura di E3
 }
 
@@ -810,6 +845,10 @@ def stampa(lotti, note, acc_ok, acc_righe, csv_out=None):
             W(" LOTTO %s: NON CARICATO (zip assente o compilazione fallita) -> nessun esito" % L)
             continue
         D = LOTTI[L]
+        mancanti = [c for c, _tf in D["celle"] if c not in [P["cella"] for P in lotti[L]["passate"]]]
+        if mancanti:
+            W("")
+            W(" LOTTO %s: celle dichiarate nel file prova ASSENTI dal manifest: %s -> per quelle nessun esito (C)" % (L, ", ".join(mancanti)))
         for P in lotti[L]["passate"]:
             W("")
             W("-" * 110)
@@ -925,7 +964,7 @@ def _report(simbolo, tf, trades):
     return b"\xff\xfe" + t.encode("utf-16-le")
 
 
-def _zip_lotto(L, celle, prova_bytes=None, togli=(), ini_mod=None, nome_prova=None, rep_sim=None):
+def _zip_lotto(L, celle, prova_bytes=None, togli=(), ini_mod=None, nome_prova=None, rep_sim=None, riepilogo=None):
     """celle = {nome_cella: dict(righe=..., n=..., stato='OK', motivi='', conta=None, avvio_sim=None, fin_sim=None, log=None, ingressi=None)}"""
     D = LOTTI[L]
     b = io.BytesIO()
@@ -956,8 +995,16 @@ def _zip_lotto(L, celle, prova_bytes=None, togli=(), ini_mod=None, nome_prova=No
             z.writestr("log\\GBA_%s.txt" % tag, lg)
         z.writestr("report\\GBA_R0_%s.htm" % tag, spec.get("report") or _report(rep_sim or D["simbolo"], tf, spec["n"]))
     z.writestr("MANIFEST_R0.csv", "\r\n".join(man))
+    if "riepilogo" not in togli:
+        z.writestr("RIEPILOGO_R0.txt", riepilogo if riepilogo is not None else _riepilogo(L))
     z.close()
     return b.getvalue()
+
+
+def _riepilogo(L, pin=None, sha_ea=None):
+    """Testa del RIEPILOGO_R0.txt come la scrive il driver v5 (r.875-878)."""
+    return ("GBA R0 -- lotto %s: ABTG_GoldBreakoutATR v1.10\r\ndata: 2026-10-12 10:00:00   pc: DESKTOP-H4D7CAJ   pin: %s\r\n"
+            "ABTG_GoldBreakoutATR.mq5 SHA256 %s   compilazione: 0 errori, 0 avvisi (-1 = non letto)\r\n") % (L, pin or PIN_AMMESSI[0], sha_ea or SHA_EA)
 
 
 def autotest():
@@ -1078,6 +1125,7 @@ def autotest():
         z.writestr("ini\\gba_R2SANC_01_REPL_T1_m775800.ini", ini_s0)
         z.writestr("log\\GBA_R2SANC_01_REPL_T1_m775800.txt", log_txt)
         z.writestr("report\\GBA_R0_R2SANC_01_REPL_T1_m775800.htm", rep_s0)
+        z.writestr("RIEPILOGO_R0.txt", _riepilogo("R2SANC"))
         z.close()
         return b.getvalue()
     anc = leggi_lotto("GBA_R0_R2SANC.zip", zip_ancora(log_s0))
@@ -1110,8 +1158,9 @@ def autotest():
     # 4a. argento n = 0, eccezione valida -> (B) con la frase n = 0; varianti 'ESCLUSA PER COSTO', riferimento 'ESCLUSA (Modello 1)', casella NON ANCORA MISURATO
     r = esiti_di("R2SXAG", {"REPL": dict(KOZ, righe=sp_xag, n=0)})
     e_p, e_1, e_r, P_xag = r["REPL"]
-    ck("argento n=0 (KO solo ZERO operazioni, tentati 0, scartati 2400): (B) con la frase n=0; testo pinnato -> ESCLUSA PER COSTO",
-       e_p[0] == "B" and "nessuna operazione" in e_p[1] and "ESCLUSA PER COSTO" in e_p[1] and e_p[2], e_p[1][:150])
+    ck("argento n=0 (KO solo ZERO operazioni, tentati 0, scartati 2400): (B) con la frase n=0; variante col testo pinnato -> 'VARIANTE NON IN VIGORE', MAI la dicitura 'ESCLUSA PER COSTO'",
+       e_p[0] == "B" and "nessuna operazione" in e_p[1] and "VARIANTE NON IN VIGORE" in e_p[1] and "ESCLUSA PER COSTO" not in e_p[1] and e_p[2]
+       and "VARIANTE NON IN VIGORE" in e_1[1] and "ESCLUSA PER COSTO" not in e_1[1], e_p[1][:150])
     ck("stessa cella, ESITO DI RIFERIMENTO (E1+E4): 'ESCLUSA (Modello 1)', MAI 'ESCLUSA PER COSTO' a Modello 1 da solo",
        e_r[0] == "B" and e_r[2] and "ESCLUSA (Modello 1)" in e_r[1] and "ESCLUSA PER COSTO" not in e_r[1], e_r[1][-100:])
     c4 = casella4(e_r, P_xag, None, 6.65, True)
@@ -1268,6 +1317,39 @@ def autotest():
     rifiuta("RIFIUTO: riga segnale che il parser non legge", lambda: leggi_giornale("2026.07.01 00:01:00   [GBA] segnale BUY | close 1 canale X"))
     rifiuta("RIFIUTO: stop/spread -2.0x (sentinella sconosciuta)", lambda: leggi_giornale(_riga_seg(0, "BUY", False, sp, 5.0, 3).replace("5.0000x", "-2.0x")))
     rifiuta("RIFIUTO: ora server 24", lambda: leggi_giornale(_riga_seg(0, "BUY", False, sp, 5.0, 3).replace("ora server 3", "ora server 24")))
+    rifiuta("RIFIUTO: RIEPILOGO di un altro pin (zip di un altro giro con lo stesso file prova)",
+            lambda: leggi_lotto("x.zip", _zip_lotto("R2SNAS", {"M5": {"righe": rr, "n": 0}}, riepilogo=_riepilogo("R2SNAS", pin="2f4a2a5b786bdc2dd5eddd883ac9d63bacbef02f"))))
+    rifiuta("RIFIUTO: RIEPILOGO con lo SHA256 di un altro EA", lambda: leggi_lotto("x.zip", _zip_lotto("R2SNAS", {"M5": {"righe": rr, "n": 0}}, riepilogo=_riepilogo("R2SNAS", sha_ea="0" * 64))))
+    rifiuta("RIFIUTO: RIEPILOGO_R0.txt ASSENTE", lambda: leggi_lotto("x.zip", _zip_lotto("R2SNAS", {"M5": {"righe": rr, "n": 0}}, togli=("riepilogo",))))
+    rifiuta("RIFIUTO: OROLOGIO, ora server della riga diversa dall'ora dell'orario simulato",
+            lambda: leggi_giornale(_riga_seg(0, "BUY", False, sp, 5.0, 3).replace("ora server 3", "ora server 4")))
+    lg_old = _log("NASUSD", "M5", rr).replace("2026.07.", "2025.07.")
+    rifiuta("RIFIUTO: righe segnale di un'altra finestra (2025) sotto un manifest T1 2026", lambda: leggi_lotto("x.zip", _zip_lotto("R2SNAS", {"M5": {"righe": None, "log": lg_old, "n": 0}})))
+    zdup = _zip_lotto("R2SNAS", {"M5": {"righe": rr, "n": 0}})
+    bz = io.BytesIO()
+    with zipfile.ZipFile(io.BytesIO(zdup)) as zi, zipfile.ZipFile(bz, "w") as zo:
+        for it in zi.namelist():
+            dati = zi.read(it)
+            if it == "MANIFEST_R0.csv":
+                rr_m = dati.decode("ascii").split("\r\n")
+                dati = "\r\n".join(rr_m + [rr_m[1]]).encode("ascii")
+            zo.writestr(it, dati)
+    rifiuta("RIFIUTO: la stessa cella due volte nel manifest", lambda: leggi_lotto("x.zip", bz.getvalue()))
+    # mediana PARI al bordo, in virgola mobile: 50 righe a 10,2x e 50 a 16,4x -> 13,3 esatto, NON '< 13,3' (senza arrotondamento: 13,299999999999999)
+    vb = [10.2] * 50 + [16.4] * 50
+    ck("mediana pari al bordo: (10,2 + 16,4) / 2 = 13,3 esatto (non un ulp sotto) -> '< S' FALSO", mediana(vb) == 13.3 and not mediana(vb) < 13.3 and (10.2 + 16.4) / 2 < 13.3,
+       repr(mediana(vb)))
+    vb2 = [2.6] * 50 + [10.7] * 50
+    ck("mediana pari al bordo dell'argento: (2,6 + 10,7) / 2 = 6,65 esatto -> '< 6,65' FALSO", mediana(vb2) == 6.65 and not mediana(vb2) < 6.65, repr(mediana(vb2)))
+    rrb = [("BUY", False, sp, 10.2, 3)] * 50 + [("BUY", False, sp, 16.4, 3)] * 50 + [("SELL", False, sp, 10.2, 3)] * 50 + [("SELL", False, sp, 16.4, 3)] * 50
+    cb = condizioni_b(analizza(leggi_giornale(_log("D30EUR", "M5", rrb))["righe"]), 13.3, 30)
+    ck("bordo in un giornale: cella, fascia e lati a 13,3 esatti -> (ii) (iii) (iv) NO, niente ESCLUSA", not cb["ii"] and not cb["iii"] and not cb["iv"] and not cb["tutte"])
+    # fasce al bordo di E1: 29 righe a 45x non entrano nella (ii), 30 si'
+    b29 = [("BUY" if i % 2 else "SELL", False, sp, 8.0, 3) for i in range(400)] + [("BUY" if i % 2 else "SELL", False, sp, 45.0, 15) for i in range(29)]
+    b30 = [("BUY" if i % 2 else "SELL", False, sp, 8.0, 3) for i in range(400)] + [("BUY" if i % 2 else "SELL", False, sp, 45.0, 15) for i in range(30)]
+    ck("bordo E1: fascia di 29 righe a 45x fuori dalla (ii) ((ii) SI), di 30 righe dentro ((ii) NO)",
+       condizioni_b(analizza(leggi_giornale(_log("D30EUR", "M5", b29))["righe"]), 13.3, 30)["ii"]
+       and not condizioni_b(analizza(leggi_giornale(_log("D30EUR", "M5", b30))["righe"]), 13.3, 30)["ii"])
     # --- 6. lancio vero su un file (main) con raccolta annidata: stampa e CSV
     import tempfile
     td = tempfile.mkdtemp(prefix="d2_")
@@ -1278,7 +1360,7 @@ def autotest():
                                                               "M15": {"righe": [("BUY" if i % 2 else "SELL", False, sp, 9.0, i % 24) for i in range(600)], "n": 0, "stato": "KO",
                                                                       "motivi": "ZERO operazioni nel report"}}))
         zr.writestr("GBA_R0_R2SNAS_COMPILAZIONE_FALLITA.zip", b"x")
-        zr.writestr("ESITI_R2S_A.txt", "GBA R2S A -- finto\r\nR2SANC rc 0")
+        zr.writestr("ESITI_R2S_A.txt", "GBA R2S A -- pin %s   pc DESKTOP-H4D7CAJ\r\nR2SANC rc 0" % PIN_AMMESSI[0])
     lotti_m, note_m = carica([raccolta])
     acc2, accr2 = accettazione()
     csvp = os.path.join(td, "d2.csv")
@@ -1294,6 +1376,13 @@ def autotest():
     rows = list(csv.DictReader(open(csvp, encoding="ascii"), delimiter=";"))
     ck("CSV: 1 riga CELLA + 6 FASCIA per ciascuna delle 3 celle", len(rows) == 21 and sum(1 for x in rows if x["livello"] == "CELLA") == 3, str(len(rows)))
     rifiuta("RIFIUTO: lo stesso lotto caricato due volte", lambda: carica([raccolta, raccolta]))
+    ck("stampa della raccolta: la dicitura di chiusura 'ESCLUSA PER COSTO' non compare MAI senza conferma a tick reali (E3), nemmeno nelle varianti e nel CSV",
+       "ESCLUSA PER COSTO" not in testo and "ESCLUSA PER COSTO" not in open(csvp, encoding="ascii").read())
+    raccolta2 = os.path.join(td, "GBA_R2S_A_altro_pin.zip")
+    with zipfile.ZipFile(raccolta2, "w") as zr:
+        zr.writestr("GBA_R0_R2SANC.zip", zip_ancora(log_s0))
+        zr.writestr("ESITI_R2S_A.txt", "GBA R2S A -- pin %s   pc DESKTOP-H4D7CAJ\r\nR2SANC rc 0" % ("2f4a2a5b786bdc2dd5eddd883ac9d63bacbef02f"))
+    rifiuta("RIFIUTO: raccolta con ESITI_R2S_A.txt di un altro pin", lambda: carica([raccolta2]))
     ck("il lettore non e' stato modificato dall'autotest", hashlib.sha256(open(lp, "rb").read()).hexdigest() == LETTORE_SHA256)
     import shutil
     shutil.rmtree(td, ignore_errors=True)
