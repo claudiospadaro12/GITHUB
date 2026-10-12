@@ -15,6 +15,7 @@ backtest_pipeline/prove/GBA_R2S_XAGUSD2_2026-10-12.txt, SHA256 dbe11bc3..., pin 
   - X6: CE1 del lotto R2SXAG2 VERDE solo se l'ancora del 12/10 e' verde (GBA_R0_R2SANC.zip con lo SHA256 dello zip archiviato in
     risultati_archivio/GBA_R2S_A_20261012/GBA_R2S_A.zip, pin cc9bcda0) E CE7 e' VERDE; altrimenti TUTTE E DUE le celle (C), senza appello;
   - CE8 (causa dello stallo): SOLO DESCRIZIONE (t_avvio, ora di 'Test passed' / 'total time' rispetto a t_avvio, riga 'last test passed', durata, n): nessun esito ne dipende;
+    su una passata BLOCCATA (niente report) 'n >= 1' = righe d'ingresso ESEGUITE del giornale, MAI 'ingressi tentati' (strato 2 del cancello sulla v3, classe 1372);
   - il lotto R2SXAG2 si legge col SOLO zip dell'ancora del 12/10 (nessun altro lotto dello stadio A nella stessa lettura: RIFIUTO).
   La lettura dello stadio A (senza R2SXAG2) e' IDENTICA a quella della v2 riga per riga, salvo la riga dell'intestazione con versione e SHA256 di D2.
 REGOLA E3(3), dichiarata e stampata in testa a ogni lettura del lotto R2SXAG2: una conferma a tick reali letta con uno strumento D2 di SHA256 DIVERSO da quello che ha
@@ -948,11 +949,14 @@ def ce8_passata(P):
     r = P["riga"]
     d = {"lanciata": P["stato"] != "NON_LANCIATA" and P["giornale"] is not None, "t_avvio": (r.get("t_avvio") or "").strip(), "durata": (r.get("durata_s") or "").strip(),
          "n": (r.get("trades_report") or "").strip(), "report": P["report"] is not None or (r.get("trades_report") or "").strip().isdigit(),
-         "test_s": None, "last_s": None, "last": False, "balance": None, "tentati": None, "classe": "non lanciata"}
+         "test_s": None, "last_s": None, "last": False, "balance": None, "tentati": None, "eseguiti": None, "classe": "non lanciata"}
     if not d["lanciata"]:
         return d
     G = P["giornale"]
     d["tentati"] = G["conta"]["ing"] if G["conta"] else None
+    # ingressi ESEGUITI = righe d'ingresso del giornale (EA r.669: stampate SOLO dopo l'ordine riuscito, r.661-666); 'tentati' conta i segnali che passano il
+    # filtro PRIMA dell'ordine (EA r.704, classe 1372). Su una passata bloccata (niente report) e' la sola misura di 'n >= 1' (driver r.817: n = ingressi +-1).
+    d["eseguiti"] = len(G["ingressi_eseguiti"])
     m0 = re.search(r"(\d\d):(\d\d):(\d\d)$", d["t_avvio"])
     t0 = int(m0.group(1)) * 3600 + int(m0.group(2)) * 60 + int(m0.group(3)) if m0 else None
 
@@ -993,10 +997,11 @@ def ce8_passata(P):
 def ce8_testo(d):
     if not d["lanciata"]:
         return "passata non lanciata: nessun dato"
-    return "t_avvio %s | fine del test ('Test passed' / 'total time') %s | 'last test passed' %s | durata %s s | n del report %s | final balance %s | tentati (EA) %s -> %s" % (
+    return ("t_avvio %s | fine del test ('Test passed' / 'total time') %s | 'last test passed' %s | durata %s s | n del report %s | final balance %s | tentati (EA) %s | "
+            "eseguiti (righe d'ingresso) %s -> %s") % (
         d["t_avvio"] or "n.d.", "n.d." if d["test_s"] is None else "+%d s" % int(d["test_s"]),
         ("SI (+%d s)" % int(d["last_s"]) if d["last_s"] is not None else "SI") if d["last"] else "ASSENTE", d["durata"] or "n.d.", d["n"] or "n.d.",
-        d["balance"] or "n.d.", "n.d." if d["tentati"] is None else d["tentati"], d["classe"])
+        d["balance"] or "n.d.", "n.d." if d["tentati"] is None else d["tentati"], "n.d." if d["eseguiti"] is None else d["eseguiti"], d["classe"])
 
 
 def ce8_lettura(lotti):
@@ -1027,9 +1032,12 @@ def ce8_lettura(lotti):
         elif bloccata(dm):
             if dm["tentati"] == 0 and dm["balance"] == DEPOSITO:
                 out.append("M15 con n = 0 e bloccata (final balance = deposito, [GBA-CONTA] FINE con ingressi tentati 0) -> coerente con H-ZERO-R (NON la prova)")
+            elif dm["eseguiti"] is not None and dm["eseguiti"] >= 1:
+                out.append("M15 con %d ingressi ESEGUITI (righe d'ingresso del giornale, >= 1) e bloccata -> H-ZERO-R SMENTITA (lo stallo non e' legato alle zero "
+                           "operazioni): resta lo stallo occasionale" % dm["eseguiti"])
             elif dm["tentati"] is not None and dm["tentati"] >= 1:
-                out.append("M15 con ingressi tentati %d (>= 1) e bloccata -> H-ZERO-R SMENTITA (lo stallo non e' legato alle zero operazioni): resta lo stallo "
-                           "occasionale" % dm["tentati"])
+                out.append("M15 bloccata con %d ingressi tentati ma ZERO eseguiti (ordini rifiutati o saltati, non filtrati: classe 1372, CE6) -> nessuno dei casi "
+                           "scritti nel file prova: H-ZERO-R ne' smentita ne' sostenuta da questa passata" % dm["tentati"])
         elif dm["classe"].startswith("test finito TARDI"):
             out.append("M15: test finito TARDI -> la causa e' a monte del test (storia, sincronizzazione), non lo stallo del 12/10")
     if not out:
@@ -1797,8 +1805,14 @@ def _autotest_xag2(ck, rifiuta, td, zip_ancora, log_s0, KOZ):
     m15_rows_ing = m15_righe + [("BUY", True, "", 60.0, 15)]
     m15_blocc1 = dict(m15_blocc, log=tl.replace("1000000.00", "999990.00") + _log("XAGUSD", "M15", m15_rows_ing))
     t, c = leggi(m15=m15_blocc1, nome="m15_stallo1")
-    ck("M15 BLOCCATA con 1 ingresso tentato -> CE8 'H-ZERO-R SMENTITA (lo stallo non e' legato alle zero operazioni)'; M15 (C)",
-       "M15 con ingressi tentati 1 (>= 1) e bloccata -> H-ZERO-R SMENTITA" in t and "(C)" in rif(t, "M15"))
+    ck("M15 BLOCCATA con 1 ingresso ESEGUITO (riga d'ingresso nel giornale) -> CE8 'H-ZERO-R SMENTITA (lo stallo non e' legato alle zero operazioni)'; M15 (C)",
+       "M15 con 1 ingressi ESEGUITI (righe d'ingresso del giornale, >= 1) e bloccata -> H-ZERO-R SMENTITA" in t and "(C)" in rif(t, "M15"))
+    # classe 1372 (cancello, strato 2 sulla v3): 'tentati' conta PRIMA dell'ordine (EA r.704); con l'ordine rifiutato n = 0 e H-ZERO-R NON e' smentita
+    m15_blocc_rif = dict(m15_blocc, log=tl + _log("XAGUSD", "M15", m15_rows_ing, ingressi=0) + "\r\n2026.08.01 10:00:00   [GBA] ERRORE ordine BUY: retcode 10006 (rejected)")
+    t, c = leggi(m15=m15_blocc_rif, nome="m15_stallo_rif")
+    ck("M15 BLOCCATA con 1 ingresso tentato ma ZERO eseguiti (ordine rifiutato) -> CE8 NON scrive 'SMENTITA' (classe 1372: tentati non e' n); M15 (C)",
+       "M15 bloccata con 1 ingressi tentati ma ZERO eseguiti" in t and "H-ZERO-R SMENTITA" not in t.split("CE8 (causa")[1].split("-" * 110)[0].replace(
+           "REPL con n = 0 e report scritto (KO per il SOLO 'ZERO operazioni nel report') -> H-ZERO-R SMENTITA", "") and "(C)" in rif(t, "M15"))
     m15_tardi = dict(m15_blocc, log=tl.replace("10:00:12", "10:05:00") + _log("XAGUSD", "M15", m15_righe))
     t, c = leggi(m15=m15_tardi, nome="m15_tardi")
     ck("M15 col test finito a +300 s -> CE8 'test finito TARDI': causa a monte del test (descrizione)", "M15: test finito TARDI" in t and "test finito TARDI (+300 s" in t)
