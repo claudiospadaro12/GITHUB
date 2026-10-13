@@ -6,8 +6,35 @@ Nessun verdetto di merito, nessun «morto»: il verdetto massimo e' NON ANCORA M
 ## IDENTIFICAZIONE (aggiornamento 13/10, 22:35): l'EA sul grafico XAUUSD M1 si chiama «ARENA NEXUS GRID SMART XAU MT5»
 Fonte: screenshot del grafico XAUUSD M1 del terminale 50503392, mandato da Claudio (pannello dell'EA). **[LETTO sul pannello]**: nome «ARENA NEXUS GRID SMART XAU MT5», stato RUNNING; Symbol XAUUSD; Timeframe M1; **Spread 20,0** (punti: 0,20 USD sull'oro a 2 decimali); Balance 4.882,66 EUR; Equity 4.880,36 EUR; Floating P/L -1,10 EUR; **Buy Orders 1 / Sell Orders 1** (entrambi i lati vivi); **Lot Today (Lot In) 9,05 lot**; **Profit Today 480,71 EUR**; **Risk Mode: Moderate**; Session ACTIVE; pulsanti BUY, SELL, CLOSE ALL, RESET EA (intervento manuale possibile). Titolo del grafico: «XAUUSD, M1: Gold vs US Dollar, 100 oz, Forward contract».
 - **Riconciliazione col report delle 22:26 [DERIVATO]**: lotti aperti il 13/10 dal gruppo `FinlabX/CF/DZR` = **9,02** (pannello 9,05, +0,3%); netto del gruppo chiuso il 13/10 = **487,31** (pannello 480,71, -1,4%: il pannello e' di 9 minuti dopo e la sua definizione di «profitto» non e' nota). I due numeri tornano a pochi punti percentuali: **e' coerente che i tre commenti `FinlabX`, `CF`, `DZR` siano moduli dello stesso EA Arena Nexus Grid**, e il modulo `[R]` e' il suo recupero a griglia. Non e' una prova (il commento non e' scritto nel pannello): resta [INFERITO] ad alta confidenza.
-- **Conferme e novita' dal pannello**: (1) lo **spread live e' 0,20 USD**: coincide con lo 0,21 dell'ancora del tester [LETTO]; sul TP di +1,00 USD pesa il 20% (e' il costo dei moduli `[F]`); (2) il **lotto del giorno e' 9,05 lot su un saldo di ~4.880 EUR** (900 once scambiate in un giorno); (3) **Risk Mode «Moderate»** e' un **input** dell'EA che cambia il comportamento: [NON VISTO] cosa cambi fra le modalita' (serve lo screenshot degli input); (4) i pulsanti BUY/SELL/CLOSE ALL indicano un pannello che permette l'intervento manuale: in prova su un demo non si e' certi che nessuno li abbia premuti (rischio di attribuzione): [NON VISTO].
+- **Conferme e novita' dal pannello**: (1) lo **spread live e' 0,20 USD**: coincide con lo 0,21 dell'ancora del tester [LETTO]; sul TP di +1,00 USD pesa il 20% (e' il costo dei moduli `[F]`); (2) il **lotto del giorno e' 9,05 lot su un saldo di ~4.880 EUR** (900 once scambiate in un giorno); (3) ~~Risk Mode «Moderate» e' un input~~ **CORRETTO (screenshot degli input, 22:38): «Risk Mode» NON e' fra gli input** dell'EA: e' un'etichetta del pannello, interna o derivata; da dove venga e cosa cambi e' [NON VISTO]; (4) i pulsanti BUY/SELL/CLOSE ALL indicano un pannello che permette l'intervento manuale: in prova su un demo non si e' certi che nessuno li abbia premuti (rischio di attribuzione): [NON VISTO].
 - **Il prodotto sul Market NON e' ancora trovato**: la ricerca sul web con il nome esatto non restituisce la pagina («Arena Nexus Grid Smart XAU MT5» non e' fra i risultati: i prodotti simili trovati NON sono questo e non si usano). Servono il **link** della pagina Market (dal Navigatore del terminale 50503392: tasto destro sull'EA -> «Visualizza nel Market» o apri la scheda Market) oppure lo screenshot della sua pagina, e la scheda **Input** (tasto F7 sul grafico).
+
+## GLI INPUT DELL'EA (screenshot 13/10 22:38): «Arena Nexus Grid Smart XAU MT5 1.20 (XAUUSD,M1)»
+**[LETTO sullo screenshot della scheda «Dati in Ingresso»]**: 16 input in tutto.
+| input | valore | nota |
+|---|---|---|
+| `InpS03FundedPrefix` | true | fuori dal gruppo «USER OPTIONS»; significato [NON VISTO] |
+| `InpEntryPhaseSpacingR33` | true | fuori dal gruppo «USER OPTIONS»; significato [NON VISTO] |
+| *(gruppo «ARENA NEXUS GRID SMART XAU MT5 \| USER OPTIONS»)* | | |
+| `InpMagicNumber` | 888 | |
+| `InpBaseLot` | **0,01** | lotto base: coincide col lotto dei moduli `[F]` |
+| `InpTradeMode` | `GOLDPULSE_BOTH_SIDES` | long e short: coincide con i due lati vivi |
+| `InpFridayGapProtection` | **false** | **nessuna protezione dal gap del weekend**: con una serie aperta il venerdi' sera il rischio di gap e' **non cappato** |
+| `InpShowDashboard` | true | il pannello |
+| `InpGoldPulseTheme` | `GOLDPULSE_THEME_MIDNIGHT` | grafica; il prefisso «GOLDPULSE» e' il nome interno del motore [INFERITO] |
+| `InpCounterFlowRail` | true | |
+| `InpCounterFlowTriggerPrice` | **0,2** | distanza di prezzo (USD): pari allo spread |
+| `InpCounterFlowLotMultiplier` | **1,0** | nessun moltiplicatore |
+| `InpCounterFlowMaxLivePositions` | **1** | massimo una posizione viva |
+| `InpCounterFlowRearmDelayMilliseconds` | 0 | |
+| `InpDeadZoneReactionRail` | true | |
+| `InpDeadZoneReactionTriggerPrice` | **0,2** | |
+| `InpDeadZoneReactionRearmDelayMilliseconds` | 0 | |
+
+### Cosa dicono i nomi, e la prova che regge [LETTO + falsificabile]
+- **`CF` = CounterFlow rail** e **`DZR` = DeadZone Reaction rail**: le sigle dei commenti sono le iniziali dei nomi dei due input-gruppo. **Controprova fatta sui dati**: `InpCounterFlowMaxLivePositions = 1` predice che `CF` non abbia mai piu' di una posizione viva per lato. **Misurato: max vive = 1 (buy) e 1 (sell) per `CF`**, e anche per `DZR` e per `FinlabX [F]`; solo `FinlabX [R]` arriva a 11 (buy) e 15 (sell). Se la mappatura fosse sbagliata, questo numero poteva uscire diverso: non e' uscito.
+- **`FinlabX` e' il motore principale** (non ha un input suo: i suoi parametri non sono esposti): il **passo della griglia**, **la scala dei lotti** e il **tetto di profondita'** sono **interni** [NON VISTI]. Quello che si sa viene solo dai dati (ricostruzione: `report/MARKET_MOTORE_FINLABX_RICOSTRUZIONE_2026-10-13.md`: passo mediano 1,46 USD ma variabile, lotti 0,01 -> 0,05-0,08 fino al livello 10).
+- **Conseguenza per noi**: il cuore del profitto (`[R]`, il recupero a griglia) **non ha manopole che si possano guardare o cambiare**. Non e' un motore che si «mette a punto» dagli input: si capisce solo dal comportamento, e il suo tetto di coda e' una scelta del venditore che da qui non si vede.
 
 ## 0. Che cosa c'e' nel conto (633 posizioni chiuse + 12 aperte, tutto il conto)
 | famiglia (commento d'apertura) | n | lati | netto (EUR, comm. e swap inclusi) | provenienza |
