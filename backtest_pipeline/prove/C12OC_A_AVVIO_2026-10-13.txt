@@ -1,0 +1,131 @@
+# ==========================================================================
+#  EA: CLAU12_ORO_CESTO_CAPATO
+#  C12OC_A -- STADIO A: l'AVVIO del cesto conta qualcosa, o il risultato e' solo il payoff della griglia? XAUUSD M1, 13/10/2026. File prova.
+#  Progetto e attese complete: report/PROGETTO_CLAU12_ORO_CESTO_CAPATO_2026-10-13.md (par. 6 attese, par. 8 piano, par. 13 autoverifica).
+#  EA v1.00 (MAI compilato: MetaEditor assente nell'ambiente di scrittura), magic 775600 (blocco 7756xx libero, verificato il 13/10 su tutto origin/lavoro).
+#  BOZZA: NON consegnabile finche' i due strati del cancello (controlla_prova.py / controlla_riga.py + agente controllo-preventivo) non danno PASS.
+#  Gira SOLO sul PC di backtest DESKTOP-H4D7CAJ (terminale C:\Program Files\BCM Markets MT5 Terminal, demo 50503392). MAI sul VPS, MAI su C:\MT5_Backtest (50504400),
+#  MAI su una sedia, MAI sul forward, MAI sul conto reale 10105439. Nessuna taglia di rischio: lotto base 0,01 (quello osservato del venditore), tetto di rischio
+#  per cesto SPENTO (0) nel tester; il rischio per cesto e' un INPUT da decidere con Claudio.
+#
+#  ======================= IL DRIVER: NON ESISTE ANCORA (dichiarato per primo) =======================
+#  (a) walkforward_generico.ps1 (driver dei round) NON va bene: scrive sempre Optimization=1 e legge solo OptResults_<EA>_<simbolo>.csv via FrameAdd/OnTesterDeinit;
+#      CLAU12_ORO_CESTO_CAPATO NON ha OnTester* ne' FrameAdd (scelta: le misure stanno nel GIORNALE, righe [C12OC-AVVIO] / [C12OC-CESTO] / [C12OC-CONTA]).
+#  (b) backtest_pipeline/righe/GBA_R0_PASSATE.ps1 v5 (passate singole Optimization=0, tranche, celle, lotti, report .htm + giornale) e' la forma GIUSTA ma e' CABLATO
+#      sul GBA: $EXPERT='ABTG_GoldBreakoutATR', controllo '#property version "1.10"', $ASSE_ATTESO/$MAGIC_AMMESSI 775800/775850, prefissi '[GBA]' nel conteggio dei KO
+#      ('[GBA] MARGINE INSUFFICIENTE', '[GBA] ERRORE ordine', '[GBA][AUTOTEST]'), blocchi '@GBA-*'.
+#  SERVE UN ADATTAMENTO (non scritto qui): una copia parametrizzata di GBA_R0_PASSATE.ps1 v5 con EXPERT=CLAU12_ORO_CESTO_CAPATO, versione 1.00, asse tecnico
+#  'InpMagic=775600||775600||50||775650||Y', magic ammessi 775600/775650, blocchi '@C12OC-*' (stessa grammatica dei '@GBA-*'), KO su '[C12OC] MARGINE INSUFFICIENTE',
+#  '[C12OC][AUTOTEST] *** FAIL', 'stop out'/'no money', e raccolta delle righe [C12OC-AVVIO]/[C12OC-CESTO]/[C12OC-CONTA]/[C12OC-PAUSA-ATTRAVERSATA]/'[C12OC] SESSIONI'.
+#  E SERVE UN LETTORE NUOVO (non scritto): leggi_c12oc.py, che dalle righe CESTO calcola per cella e tranche n, PF PER CESTO, media per cesto, profondita',
+#  coda (p1, minimo, oltre_rischio), giorno peggiore, lato, costo (dist_sl/spread e target/spread dalle righe AVVIO, commissione dai netti), e il confronto con il NULLO.
+#  Il deposito, il tetto di minuti e il modello si leggono dai blocchi @C12OC-LOTTO come nel driver GBA v5; deposito proposto 10000 EUR (a 0,01 lotto il margine e'
+#  trascurabile; la cifra del GBA, 1000000, serviva al suo lotto 1,00), leva 100, valuta EUR.
+#
+#  ======================= CHE COSA MISURA (e NIENT'ALTRO) =======================
+#  UNA variabile: InpModoAvvio, tre celle sulla STESSA geometria di cesto (4 livelli, passo 1,5 USD, SL 8 USD oltre l'ultimo livello, target media + 1,00 USD,
+#  lotto piatto 0,01, chiusura prima di ogni pausa di sessione):
+#    ROT (1) = rottura del canale delle 20 barre M1 precedenti (momentum)
+#    RIT (2) = close oltre EMA50 +/- 2 x ATR14 su M1, cesto nel verso del RITORNO (mean reversion)
+#    NUL (0) = CONTROLLO NULLO: istante e lato pseudo-casuali, seme 1, p = 0,25 per barra M1. p e' fissata il 13/10 dalla FREQUENZA DEI SEGNALI dei due modi
+#              nel proxy IS (0,127 e 0,378 per barra: media 0,25), MAI da un PF. I semi 2-5 e la direzione casuale sono lo stadio B/C (file successivi).
+#  La domanda: se ROT e RIT non si staccano dal NUL, l'"edge" del meccanismo osservato e' il PAYOFF della griglia (tante vincite piccole, poche perdite grandi),
+#  non un motore. Il confronto si fa PER CESTO (PF per cesto, media netta per cesto): il NUL fa piu' cesti dei modi (proxy: 23.627 contro 19.599 e 12.903 in IS),
+#  quindi il netto TOTALE non e' confrontabile e non si legge.
+#
+#  ======================= LE TRANCHE (tick reali BCM XAUUSD dal 2024.07.10, MISURATO: giornale R268a) =======================
+#  IS  = 2024.07.10 -> 2025.06.30 (I1..I4): oro in tendenza al rialzo (circa 2.400 -> 3.300), volatilita' M1 BASSA (ATR M1 mediana 0,59 nel 2024, 1,12 nel 2025: proxy).
+#  OOS = 2025.07.01 -> 2026.09.30 (O1..O5): volatilita' ALTA, +64,5% nel 2025, 2026 senza direzione con picco 5.597 e ritorno a 4.098 (regimi dichiarati nel file GBA_R0).
+#  NIENTE viene scelto in IS in questo stadio (nessuna griglia di parametri): IS e OOS qui sono DUE REGIMI, non una selezione e una conferma.
+#  Il VECCHIO (2021-2024.07, senza tick reali) giudica solo il RISCHIO, a Modello 1, ed e' uno stadio a parte (par. 8 del progetto). OROLOGIO: BCM UTC+1 fisso;
+#  le chiusure prima delle pause usano le SESSIONI del simbolo (stampate in testa al giornale: righe '[C12OC] SESSIONI') e il tetto del venerdi' alle 22:00 server.
+#
+#  ======================= MODELLO =======================
+#  VERDETTO = Modello 4 (ticks reali): un cesto con passo 1,5 USD e target 1,00 USD su M1 si legge SOLO a tick reali. Modello 1 = solo il lotto S0 (sonda: compila?
+#  AUTOTEST PASS? quante righe? quanti minuti? le sessioni si leggono? le gemelle 775600/775650 coincidono?). ExecutionMode=0 (zero latenza): OTTIMISTICO per
+#  uno scalper a 1 USD; la latenza e' un asse FUTURO [NON MISURATO]. Commissione: il tester BCM la applica o no [NON MISURATO]: il netto delle righe CESTO
+#  contiene DEAL_COMMISSION, il lettore verifica che non sia zero; se e' zero si aggiungono 4,00 EUR/lotto A/R (dato del conto 50503392) a mano e lo si dichiara.
+#
+#  ======================= ATTESE, SCRITTE PRIMA DEI NUMERI DEL TESTER =======================
+#  Fonte: PROXY a barre M1 HistData (NON il feed BCM), percorso dentro la barra O-L-H-C / O-H-L-C, spread costante 0,20, commissione 0,047 USD/oncia A/R,
+#  stessa geometria e stesse regole di pausa (in versione IDEALE: 17:00 New York e tetto 22:00 server il venerdi'). Contro-esempio del proxy fatto: sul RANDOM WALK
+#  (martingala, nessun edge) da' PF 0,61-0,77 e un lordo per unita' di -0,28/-0,32 contro il -0,20 teorico (lo spread): il proxy e' PESSIMISTA di ~0,1 USD per
+#  unita' (sorpasso del livello dentro un passo discreto), UGUALE per i modi e per il nullo. Numeri completi: progetto par. 6.
+#  A1 [n per cella]: proxy IS ROT 19.599 / RIT 12.903 / NUL 23.627 cesti; OOS: vedi progetto par. 6. Banda tester 0,5x-2x. n >= 150 per cella e per finestra: certo.
+#  A2 [PF PER CESTO, IPOTESI NULLA = la mia]: le tre celle in 0,60-0,90 in OGNI finestra, e |PF(ROT o RIT) - PF(NUL)| <= 0,05. Proxy IS: ROT 0,729, RIT 0,738,
+#      NUL 0,713 / 0,729 / 0,731 (semi 1/2/3).
+#  A3 [IPOTESI ALTERNATIVA, col suo numero]: "l'avvio porta edge": PF(ROT o RIT) >= PF(NUL) + 0,10 in IS E in OOS. Il numero che la separa dalla nulla: 0,10 contro 0,05.
+#      Fra 0,05 e 0,10 = ZONA GRIGIA (si legge solo con i semi 2-5 del nullo, stadio B). "Il meccanismo osservato e' un motore": PF per cesto >= 1,00 in IS E OOS.
+#  A4 [forma del payoff, predizione]: win rate per cesto 0,93-0,95, uscite a SL 4-7%, profondita' 4 su ~18% dei cesti, perdita del cesto a SL = rischio pianificato
+#      (41,19 USD a 0,01 lotto con commissione stimata) ~ 35 EUR; righe oltre_rischio=SI: 0-2 per tranche (le pause chiudono i cesti prima dei gap).
+#  A5 [costo, per cesto]: dist_sl/spread = 12,5 / 0,20 = 62x (stop del livello 1); stop dell'ultimo livello 8 / 0,20 = 40x; target/spread = 5x, target/(spread+comm.)
+#      = 1,00 / 0,247 = 4,0x: il TARGET sta SOTTO la frontiera di casa (stop >= 40 x spread): 5x contro 40x = fattore 8 sul solo spread, fattore 10 con la
+#      commissione. Il costo e' il motivo meccanico per cui A2 e' negativa.
+#  SMENTITE: (s1) una cella ROT o RIT con PF >= PF(NUL) + 0,10 in tutte e due le finestre -> A2 cade, si apre lo stadio D (assi 3/4/6 x 1,0/1,5/2,0) sul modo vincente;
+#      (s2) PF per cesto >= 1,00 in una cella e in tutte e due le finestre -> il costo non e' il collo di bottiglia che penso: si cerca PERCHE' prima di ogni altra passata;
+#      (s3) PF del tester fuori da 0,60-0,90 per TUTTE le celle -> il proxy sbaglia in un modo da capire PRIMA di leggere il merito;
+#      (s4) righe [C12OC-PAUSA-ATTRAVERSATA] > 0 o oltre_rischio=SI > 2 per tranche -> la difesa R8 non regge sul feed BCM: difetto dell'EA, non del motore.
+#  CANCELLI DI AFFIDABILITA' (prima di qualunque PF): G0 AUTOTEST 'VERDETTO: PASS' in ogni passata e riga AVVIO v1.00; G1 gemelle 775600/775650 (lotto S0) identiche;
+#  G2 '[C12OC] SESSIONI' con almeno un giorno non 'nessuna' (altrimenti resta solo il tetto del venerdi': dichiararlo); G3 qualita' '100% ticks reali' (Modello 4).
+#  Il lettore STAMPA, non promuove: per le misure si dice NULLO / ZONA GRIGIA / EFFETTO / NON ANCORA MISURATO.
+#
+#  @DAQUANDO-DALLA-RIGA le date arrivano dai blocchi @C12OC-TRANCHE qui sotto (nove tranche trimestrali, IS e OOS = due regimi): il driver adattato le legge dal file
+#  @C12OC-ASSE chiave=InpModoAvvio tranche=9 celle=3 lotti=3
+#  @C12OC-TRANCHE nome=I1 da=2024.07.10 a=2024.09.30
+#  @C12OC-TRANCHE nome=I2 da=2024.10.01 a=2024.12.31
+#  @C12OC-TRANCHE nome=I3 da=2025.01.01 a=2025.03.31
+#  @C12OC-TRANCHE nome=I4 da=2025.04.01 a=2025.06.30
+#  @C12OC-TRANCHE nome=O1 da=2025.07.01 a=2025.09.30
+#  @C12OC-TRANCHE nome=O2 da=2025.10.01 a=2025.12.31
+#  @C12OC-TRANCHE nome=O3 da=2026.01.01 a=2026.03.31
+#  @C12OC-TRANCHE nome=O4 da=2026.04.01 a=2026.06.30
+#  @C12OC-TRANCHE nome=O5 da=2026.07.01 a=2026.09.30
+#  @C12OC-CELLA nome=ROT InpModoAvvio=1
+#  @C12OC-CELLA nome=RIT InpModoAvvio=2
+#  @C12OC-CELLA nome=NUL InpModoAvvio=0
+#  @C12OC-LOTTO nome=S0 modello=1 tetto_min=40 passate=ROT:O5:775600,ROT:O5:775650,RIT:O5,NUL:O5
+#  @C12OC-LOTTO nome=AIS modello=4 tetto_min=180 passate=ROT:I1,ROT:I2,ROT:I3,ROT:I4,RIT:I1,RIT:I2,RIT:I3,RIT:I4,NUL:I1,NUL:I2,NUL:I3,NUL:I4
+#  @C12OC-LOTTO nome=AOOS modello=4 tetto_min=240 passate=ROT:O1,ROT:O2,ROT:O3,ROT:O4,ROT:O5,RIT:O1,RIT:O2,RIT:O3,RIT:O4,RIT:O5,NUL:O1,NUL:O2,NUL:O3,NUL:O4,NUL:O5
+#  COSTO [STIMA, non misurata: nessuna passata di questo EA e' mai girata]: S0 ~10-20 min; AIS 12 passate x 4-10 min = 1-2 h; AOOS 15 x 5-12 min = 1,5-3 h.
+#  Il riferimento e' il GBA (R1A_01: 48 s a trimestre con 128 operazioni): qui le operazioni sono ~10.000-30.000 a trimestre, quindi il tempo lo detta il GIORNALE
+#  (2 righe per cesto con InpVerbose=false) piu' che i tick. S0 lo MISURA prima di AIS.
+#
+#  ======================= PINS: i 33 input dell'EA (default compilati salvo le deviazioni dichiarate) =======================
+#  Deviazioni dal default: InpSymbol=XAUUSD (il default "" = simbolo del grafico: un pin vuoto e' vietato e MT5 lo ignora); InpProbNullo=0.25 (default 0, ammesso
+#  solo nel modo 0: nelle celle ROT e RIT e' INERTE); InpCommStimaLotto=4.0 (serve SOLO al rischio pianificato stampato: il tester applica la sua commissione);
+#  InpVerbose=false (le righe AVVIO/CESTO/CONTA/errori e il VERDETTO dell'autotest si stampano lo stesso: si tolgono solo le righe per livello e i PASS dei singoli
+#  casi, per non gonfiare il giornale con decine di migliaia di righe). InpTFAvvio=1 = PERIOD_M1. Asse tecnico InpMagic (gemelle 775600/775650: cancello G1).
+#
+InpSymbol=XAUUSD
+InpTFAvvio=1
+InpModoAvvio=1
+InpDirezioneCasuale=false
+InpSemeNullo=1
+InpProbNullo=0.25
+InpRotturaBarre=20
+InpRitornoEma=50
+InpRitornoAtr=14
+InpRitornoK=2.0
+InpAllowLong=true
+InpAllowShort=true
+InpDueLatiInsieme=true
+InpLivelliMax=4
+InpPassoUSD=1.5
+InpSLOltreUltimoUSD=8.0
+InpTargetUSD=1.0
+InpLottoBase=0.01
+InpScalaIncremento=0.0
+InpScalaTettoMult=3.0
+InpRischioMaxCesto=0.0
+InpCommStimaLotto=4.0
+InpSpreadMaxUSD=0.40
+InpPausaStopNuoviMin=120
+InpPausaChiudiMin=90
+InpVenerdiFineMax=22
+InpSlippagePoints=30
+InpCheckFreeMargin=true
+InpMagic=775600||775600||50||775650||Y
+InpComment=C12OC
+InpUsaGuardian=true
+InpVerbose=false
+InpAutoTest=true
